@@ -210,16 +210,16 @@ include_directories("."
 
 link_directories(${Boost_LIBRARY_DIRS} ${OGRE_LIB_DIR} ${MYGUI_LIB_DIR})
 
-if(APPLE)
+if (APPLE)
     # List used Ogre plugins
-    SET(USED_OGRE_PLUGINS "RenderSystem_GL"
-                          "Plugin_OctreeSceneManager"
-                          "Plugin_CgProgramManager"
-                          "Plugin_ParticleFX")
-endif(APPLE)
+    SET(USED_OGRE_PLUGINS ${OGRE_RenderSystem_GL_LIBRARY_REL}
+                          ${OGRE_Plugin_OctreeSceneManager_LIBRARY_REL}
+                          ${OGRE_Plugin_CgProgramManager_LIBRARY_REL}
+                          ${OGRE_Plugin_ParticleFX_LIBRARY_REL})
+endif (APPLE)
 
-add_subdirectory( files/)
-add_subdirectory( files/mygui )
+add_subdirectory(files/)
+add_subdirectory(files/mygui)
 
 # Specify build paths
 
@@ -256,34 +256,50 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 endif()
 
 if (APPLE)
+    # prepare plugins
+    if (${CMAKE_BUILD_TYPE} MATCHES "Release")
+        set(OPENMW_RELEASE_BUILD TRUE)
+    endif()
+    if (${CMAKE_BUILD_TYPE} MATCHES "RelWithDebugInfo")
+        set(OPENMW_RELEASE_BUILD TRUE)
+    endif()
+
+    if (${OGRE_PLUGIN_DIR_REL}})
+        set(OGRE_PLUGINS_REL_FOUND TRUE)
+    endif ()
+
+    if (${OGRE_PLUGIN_DIR_DBG})
+        set(OGRE_PLUGINS_DBG_FOUND TRUE)
+    endif ()
+
+    if (${OPENMW_RELEASE_BUILD} AND ${OGRE_PLUGINS_REL_FOUND})
+        set(OGRE_PLUGIN_DIR ${OGRE_PLUGIN_DIR_REL})
+    else ()
+        set(OGRE_PLUGIN_DIR ${OGRE_PLUGIN_DIR_DBG})
+    endif ()
+    
+    if (NOT ${OPENMW_RELEASE_BUILD} AND ${OGRE_PLUGINS_DBG_FOUND})
+        set(OGRE_PLUGIN_DIR ${OGRE_PLUGIN_DIR_DBG})
+    else()
+        set(OGRE_PLUGIN_DIR ${OGRE_PLUGIN_DIR_REL})
+    endif()
+
+    set(OGRE_PLUGIN_DIR "${OGRE_PLUGIN_DIR}/")
+
     configure_file(${OpenMW_SOURCE_DIR}/files/plugins.cfg.mac
         "${OpenMW_BINARY_DIR}/plugins.cfg")
+
+    set(OGRE_PLUGIN_DIR_2 ${OGRE_PLUGIN_DIR})
+    set(OGRE_PLUGIN_DIR "")
+    configure_file(${OpenMW_SOURCE_DIR}/files/plugins.cfg.mac
+        "${OpenMW_BINARY_DIR}/plugins.cfg.install")
+    set(OGRE_PLUGIN_DIR ${OGRE_PLUGIN_DIR_2})
 
     configure_file(${OpenMW_SOURCE_DIR}/files/mac/Info.plist
         "${APP_BUNDLE_DIR}/Contents/Info.plist")
 
     configure_file(${OpenMW_SOURCE_DIR}/files/mac/openmw.icns
         "${APP_BUNDLE_DIR}/Contents/Resources/OpenMW.icns" COPYONLY)
-
-    # prepare plugins
-    if (${CMAKE_BUILD_TYPE} MATCHES "Release")
-        set(OPENMW_RELEASE_BUILD 1)
-    endif()
-    if (${CMAKE_BUILD_TYPE} MATCHES "RelWithDebugInfo")
-        set(OPENMW_RELEASE_BUILD 1)
-    endif()
-
-    if (${OPENMW_RELEASE_BUILD})
-        set(OGRE_PLUGIN_DIR ${OGRE_PLUGIN_DIR_REL})
-    else()
-        set(OGRE_PLUGIN_DIR ${OGRE_PLUGIN_DIR_DBG})
-    endif()
-
-    foreach(plugin ${USED_OGRE_PLUGINS})
-        configure_file("${OGRE_PLUGIN_DIR}/${plugin}.dylib"
-                        "${APP_BUNDLE_DIR}/Contents/Plugins/${plugin}.dylib"
-                        COPYONLY)
-    endforeach()
 endif (APPLE)
 
 
@@ -521,9 +537,11 @@ if (APPLE)
     install(DIRECTORY "${APP_BUNDLE_DIR}" USE_SOURCE_PERMISSIONS DESTINATION "${INSTALL_SUBDIR}" COMPONENT Runtime)
     install(DIRECTORY "${OpenMW_BINARY_DIR}/resources" DESTINATION "${INSTALL_SUBDIR}" COMPONENT Runtime)
     install(FILES "${OpenMW_BINARY_DIR}/openmw.cfg.install" RENAME "openmw.cfg" DESTINATION "${INSTALL_SUBDIR}" COMPONENT Runtime)
-
-    install(FILES "${OpenMW_BINARY_DIR}/plugins.cfg" DESTINATION "${INSTALL_SUBDIR}" COMPONENT Runtime)
+    install(FILES "${OpenMW_BINARY_DIR}/plugins.cfg.install" RENAME "plugins.cfg" DESTINATION "${INSTALL_SUBDIR}" COMPONENT Runtime)
     install(FILES "${OpenMW_BINARY_DIR}/launcher.qss" DESTINATION "${INSTALL_SUBDIR}" COMPONENT Runtime)
+
+    install(FILES "${OpenMW_BINARY_DIR}/settings-default.cfg" DESTINATION "${INSTALL_SUBDIR}" COMPONENT Runtime)
+    install(FILES "${OpenMW_BINARY_DIR}/transparency-overrides.cfg" DESTINATION "${INSTALL_SUBDIR}" COMPONENT Runtime)
 
     set(CPACK_GENERATOR "DragNDrop")
     set(CPACK_PACKAGE_VERSION ${OPENMW_VERSION})
@@ -533,22 +551,25 @@ if (APPLE)
 
     set(APPS "\${CMAKE_INSTALL_PREFIX}/${INSTALL_SUBDIR}/${APP_BUNDLE_NAME}")
     set(PLUGINS "")
+    set(ABSOLUTE_PLUGINS "")
 
-    # Scan Plugins dir for *.dylibs
-    set(PLUGIN_SEARCH_ROOT "${APP_BUNDLE_DIR}/Contents/Plugins")
-    file(GLOB_RECURSE ALL_PLUGINS "${PLUGIN_SEARCH_ROOT}/*.dylib")
+    foreach (PLUGIN ${USED_OGRE_PLUGINS})
+        get_filename_component(PLUGIN_ABS ${PLUGIN} REALPATH)
+        set(ABSOLUTE_PLUGINS ${PLUGIN_ABS} ${ABSOLUTE_PLUGINS})
+    endforeach ()
 
     set(PLUGIN_INSTALL_BASE "\${CMAKE_INSTALL_PREFIX}/${INSTALL_SUBDIR}/${APP_BUNDLE_NAME}/Contents/Plugins")
-    foreach(PLUGIN ${ALL_PLUGINS})
-        string(REPLACE "${PLUGIN_SEARCH_ROOT}/" "" PLUGIN_RELATIVE "${PLUGIN}")
+    install(FILES ${ABSOLUTE_PLUGINS} DESTINATION "${INSTALL_SUBDIR}/${APP_BUNDLE_NAME}/Contents/Plugins" COMPONENT Runtime)
+    foreach (PLUGIN ${ABSOLUTE_PLUGINS})
+        get_filename_component(PLUGIN_RELATIVE ${PLUGIN} NAME)
         set(PLUGINS ${PLUGINS} "${PLUGIN_INSTALL_BASE}/${PLUGIN_RELATIVE}")
-    endforeach()
+    endforeach ()
 
     #For now, search unresolved dependencies only in default system paths, so if you put unresolveable (i.e. with @executable_path in id name) lib or framework somewhere else, it would fail
     set(DIRS "")
 
     # Overriding item resolving during installation, it needed if
-    # some library already has be "fixed up", i.e. its id name contains @executable_path,
+    # some library already has been "fixed up", i.e. its id name contains @executable_path,
     # but library is not embedded in bundle. For example, it's Ogre.framework from Ogre SDK.
     # Current implementation of GetPrerequsities/BundleUtilities doesn't handle that case.
     #
@@ -568,15 +589,20 @@ if (APPLE)
                     get_filename_component(fname \"\${item}\" NAME_WE)
                     find_library(ri NAMES \${fname} PATHS \${exepath} \${dirs} /Library/Frameworks)
                     if (ri)
-                        message(STATUS \"found \${ri} for \${item}\")
                         string(REGEX REPLACE \"^.*/Frameworks/.*\\\\.framework\" \"\" item_part \${item})
                         set(ri \"\${ri}\${item_part}\")
                         set(\${resolved_item_var} \${ri} PARENT_SCOPE)
                         set(\${resolved_var} 1 PARENT_SCOPE)
-                        set(OPENMW_RESOLVED_ITEMS \${_OPENMW_RESOLVED_ITEMS} \${ri})
                     endif()
                 else()
                     # code path for standard (non-framework) libs (ogre & qt pugins)
+                    get_filename_component(fname \"\${item}\" NAME_WE)
+                    string(REGEX REPLACE \"^lib\" \"\" fname \${fname})
+                    find_library(ri NAMES \${fname} PATHS \${exepath} \${dirs} /usr/lib /usr/local/lib)
+                    if (ri)
+                        set(\${resolved_item_var} \${ri} PARENT_SCOPE)
+                        set(\${resolved_var} 1 PARENT_SCOPE)
+                    endif ()
                 endif()
             endif()
         endfunction(gp_resolve_item_override)
@@ -586,10 +612,5 @@ if (APPLE)
         include(BundleUtilities)
         fixup_bundle(\"${APPS}\" \"${PLUGINS}\" \"${DIRS}\")
         " COMPONENT Runtime)
-
-include(CPack)
-
-set(CMAKE_EXE_LINKER_FLAGS "-arch i386")
-set(CMAKE_CXX_FLAGS "-arch i386")
-
+        include(CPack)
 endif (APPLE)
