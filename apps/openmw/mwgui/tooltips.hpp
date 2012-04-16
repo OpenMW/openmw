@@ -9,6 +9,18 @@ namespace MWGui
 {
     class WindowManager;
 
+    // Info about tooltip that is supplied by the MWWorld::Class object
+    // Not used yet, but it will replace the if-else-if blocks in tooltips.cpp
+    struct ToolTipInfo
+    {
+    public:
+        std::string caption;
+        std::string text;
+        std::string image;
+
+        /// \todo enchantments (armor, cloth, weapons), magic effects (potions, ingredients)
+    };
+
     class ToolTips : public OEngine::GUI::Layout
     {
     public:

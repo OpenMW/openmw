@@ -90,7 +90,6 @@ ReviewDialog::ReviewDialog(WindowManager& parWindowManager)
 
     static_cast<MyGUI::WindowPtr>(mMainWidget)->eventWindowChangeCoord += MyGUI::newDelegate(this, &ReviewDialog::onWindowResize);
 
-    // TODO: These buttons should be managed by a Dialog class
     MyGUI::ButtonPtr backButton;
     getWidget(backButton, "BackButton");
     backButton->setCaption(mWindowManager.getGameSettingString("sBack", ""));
@@ -100,6 +99,11 @@ ReviewDialog::ReviewDialog(WindowManager& parWindowManager)
     getWidget(okButton, "OKButton");
     okButton->setCaption(mWindowManager.getGameSettingString("sOK", ""));
     okButton->eventMouseButtonClick += MyGUI::newDelegate(this, &ReviewDialog::onOkClicked);
+
+    int backButtonWidth = backButton->getTextSize().width + 24;
+    int okButtonWidth = okButton->getTextSize().width + 24;
+    okButton->setCoord(502 - okButtonWidth, 372, okButtonWidth, 23);
+    backButton->setCoord(502 - okButtonWidth - backButtonWidth - 6, 372, backButtonWidth, 23);
 }
 
 void ReviewDialog::open()
