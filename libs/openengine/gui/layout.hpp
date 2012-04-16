@@ -115,6 +115,13 @@ namespace GUI
       static_cast<MyGUI::TextBox*>(pt)->setCaption(caption);
     }
 
+    void setState(const std::string& widget, const std::string& state)
+    {
+      MyGUI::Widget* pt;
+      getWidget(pt, widget);
+      pt->_setWidgetState(state);
+    }
+
     void setTextColor(const std::string& name, float r, float g, float b)
     {
       MyGUI::Widget* pt;
@@ -129,6 +136,13 @@ namespace GUI
       MyGUI::ImageBox* pt;
       getWidget(pt, name);
       pt->setImageTexture(imgName);
+    }
+
+    void adjustButtonSize(MyGUI::Button* button)
+    {
+      // adjust size of button to fit its text
+      MyGUI::IntSize size = button->getTextSize();
+      button->setSize(size.width + 24, button->getSize().height);
     }
 
   protected:
