@@ -45,8 +45,8 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, MWWorld::Environment& _env,O
       zero = std::make_pair(blank, blankshape);
 	 chest = std::make_pair(blank, blankshape);
 	 tail = std::make_pair(blank, blankshape);
-	 lBeastFoot = std::make_pair(blank, blankshape);
-	 rBeastFoot = std::make_pair(blank, blankshape);
+	 lFreeFoot = std::make_pair(blank, blankshape);
+	 rFreeFoot = std::make_pair(blank, blankshape);
 	 rhand = std::make_pair(blank, blankshape);
 	 lhand = std::make_pair(blank, blankshape);
 	 skirt = std::make_pair(blank, blankshape);
@@ -82,6 +82,7 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, MWWorld::Environment& _env,O
 		hairModel = "meshes\\" +
             mEnvironment.mWorld->getStore().bodyParts.find(hairID)->model;
 		npcName = ref->base->name;
+        
         //ESMStore::Races r =
         const ESM::Race* race = mEnvironment.mWorld->getStore().races.find(ref->base->race);
 
@@ -242,6 +243,7 @@ void NpcAnimation::updateParts(){
         }
 
         if(apparelChanged){
+           
              if(robe != inv.end())
             {
                 MWWorld::Ptr ptr = *robe;
@@ -308,12 +310,12 @@ void NpcAnimation::updateParts(){
             }
              if(!isBeast && boots != inv.end()){
               
-               if(boots->getTypeName() == "struct ESM::Clothing"){
+               if(boots->getTypeName() == typeid(ESM::Clothing).name()){
                     const ESM::Clothing *clothes = (boots->get<ESM::Clothing>())->base;
                     std::vector<ESM::PartReference> parts = clothes->parts.parts;
                     addPartGroup(MWWorld::InventoryStore::Slot_Boots, 2, parts);
                }
-               else
+               else if(boots->getTypeName() == typeid(ESM::Armor).name())
                {
                    const ESM::Armor *armor = (boots->get<ESM::Armor>())->base;
                     std::vector<ESM::PartReference> parts = armor->parts.parts;
@@ -323,7 +325,7 @@ void NpcAnimation::updateParts(){
             }
              if(leftglove != inv.end()){
               
-               if(leftglove->getTypeName() == "struct ESM::Clothing"){
+               if(leftglove->getTypeName() == typeid(ESM::Clothing).name()){
                     const ESM::Clothing *clothes = (leftglove->get<ESM::Clothing>())->base;
                     std::vector<ESM::PartReference> parts = clothes->parts.parts;
                     addPartGroup(MWWorld::InventoryStore::Slot_LeftGauntlet, 2, parts);
@@ -338,7 +340,7 @@ void NpcAnimation::updateParts(){
             }
              if(rightglove != inv.end()){
               
-               if(rightglove->getTypeName() == "struct ESM::Clothing"){
+               if(rightglove->getTypeName() == typeid(ESM::Clothing).name()){
                     const ESM::Clothing *clothes = (rightglove->get<ESM::Clothing>())->base;
                     std::vector<ESM::PartReference> parts = clothes->parts.parts;
                     addPartGroup(MWWorld::InventoryStore::Slot_RightGauntlet, 2, parts);
@@ -502,6 +504,33 @@ Ogre::Entity* NpcAnimation::insertBoundedPart(const std::string &mesh, std::stri
     base->attachObjectToBone(bonename, part);
     return part;
 }
+void NpcAnimation::insertFootPart(int type, const std::string &mesh){
+    std::string meshAndSuffix = mesh;
+    if(type == ESM::PRT_LFoot)
+        meshAndSuffix += "*|";
+    NIFLoader::load(meshAndSuffix);
+     Ogre::Entity* part = mRend.getScene()->createEntity(meshAndSuffix);
+    std::vector<Nif::NiTriShapeCopy>* shape = ((NIFLoader::getSingletonPtr())->getShapes(meshAndSuffix));
+    if(shape == 0){
+        if(type == ESM::PRT_LFoot){
+            base->attachObjectToBone("Left Foot", part);
+            lfoot = part;
+        }
+        else if (type == ESM::PRT_RFoot){
+            base->attachObjectToBone("Right Foot", part);
+            rfoot = part;
+        }
+    }
+    else{
+        if(type == ESM::PRT_LFoot)
+            lFreeFoot = insertFreePart(mesh, "::");
+        else if (type == ESM::PRT_RFoot)
+            rFreeFoot = insertFreePart(mesh, ":<");
+    }
+
+
+   
+}
 std::pair<Ogre::Entity*, std::vector<Nif::NiTriShapeCopy>*> NpcAnimation::insertFreePart(const std::string &mesh, const std::string suffix){
 	
     std::string meshNumbered = mesh + getUniqueID(mesh + suffix) + suffix;
@@ -559,10 +588,10 @@ void NpcAnimation::runAnimation(float timepassed){
             vecRotPos.clear();
           
 			
-			if(lBeastFoot.first)
-				handleShapes(lBeastFoot.second, lBeastFoot.first, base->getSkeleton());
-			if(rBeastFoot.first)
-				handleShapes(rBeastFoot.second, rBeastFoot.first, base->getSkeleton());
+			if(lFreeFoot.first)
+				handleShapes(lFreeFoot.second, lFreeFoot.first, base->getSkeleton());
+			if(rFreeFoot.first)
+				handleShapes(rFreeFoot.second, rFreeFoot.first, base->getSkeleton());
 			if(chest.first)
 				handleShapes(chest.second, chest.first, base->getSkeleton());
 			if(tail.first)
@@ -646,9 +675,9 @@ void NpcAnimation::removeIndividualPart(int type){
                 base->detachObjectFromBone(rfoot);
                 rfoot = 0;
             }
-            else if(rBeastFoot.first){
-                insert->detachObject(rBeastFoot.first);
-                rBeastFoot = zero;
+            else if(rFreeFoot.first){
+                insert->detachObject(rFreeFoot.first);
+                rFreeFoot = zero;
             }
         }
         else if(type == ESM::PRT_LFoot){                //16
@@ -656,9 +685,9 @@ void NpcAnimation::removeIndividualPart(int type){
                 base->detachObjectFromBone(lfoot);
                 lfoot = 0;
             }
-            else if(lBeastFoot.first){
-                insert->detachObject(lBeastFoot.first);
-                lBeastFoot = zero;
+            else if(lFreeFoot.first){
+                insert->detachObject(lFreeFoot.first);
+                lFreeFoot = zero;
             }
         }
         else if(type == ESM::PRT_RAnkle && rAnkle){    //17
@@ -772,16 +801,10 @@ void NpcAnimation::removeIndividualPart(int type){
                     lupperArm = insertBoundedPart(mesh + "*|", "Left Upper Arm");
                     break;
                 case ESM::PRT_RFoot:                             //15
-                    if(isBeast)   
-                        rBeastFoot = insertFreePart(mesh, ":<");
-                    else
-                        rfoot = insertBoundedPart(mesh, "Right Foot");
+                   insertFootPart(type, mesh);
                     break;
                 case ESM::PRT_LFoot:                             //16
-                    if(isBeast)   
-                        lBeastFoot = insertFreePart(mesh, "::");
-                    else
-                        lfoot = insertBoundedPart(mesh + "*|", "Left Foot");
+                   insertFootPart(type, mesh);
                     break;
 
                  case ESM::PRT_RAnkle:                          //17
@@ -827,13 +850,15 @@ void NpcAnimation::removeIndividualPart(int type){
                     ESM::PartReference part = parts[i];
                     
                         const ESM::BodyPart *bodypart = 0;
+                        
                         if(isFemale)
                             bodypart = mEnvironment.mWorld->getStore().bodyParts.search (part.female);
                         if(!bodypart)
                             bodypart = mEnvironment.mWorld->getStore().bodyParts.search (part.male);
-                        if(bodypart)
+                        if(bodypart){
                             addOrReplaceIndividualPart(part.part, group,priority,"meshes\\" + bodypart->model);
-                        else
+                        }
+                       else
                             reserveIndividualPart(part.part, group, priority);
                     
                 }
