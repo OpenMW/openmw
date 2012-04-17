@@ -9,13 +9,13 @@
 #include <utility>
 
 #include "../mwmechanics/stat.hpp"
-#include "window_base.hpp"
+#include "window_pinnable_base.hpp"
 
 namespace MWGui
 {
     class WindowManager;
 
-    class StatsWindow : public WindowBase
+    class StatsWindow : public WindowPinnableBase
     {
         public:
             typedef std::pair<std::string, int> Faction;
@@ -49,31 +49,34 @@ namespace MWGui
                 CS_Normal,
                 CS_Super
             };
-            void setStyledText(MyGUI::StaticTextPtr widget, ColorStyle style, const std::string &value);
+            void setStyledText(MyGUI::TextBox* widget, ColorStyle style, const std::string &value);
             void addSkills(const SkillList &skills, const std::string &titleId, const std::string &titleDefault, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
             void addSeparator(MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
             void addGroup(const std::string &label, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
-            MyGUI::StaticTextPtr addValueItem(const std::string text, const std::string &value, ColorStyle style, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
+            MyGUI::TextBox* addValueItem(const std::string text, const std::string &value, ColorStyle style, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
             void addItem(const std::string text, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
             void updateScroller();
 
-            void onScrollChangePosition(MyGUI::VScrollPtr scroller, size_t pos);
+            void onScrollChangePosition(MyGUI::ScrollBar* scroller, size_t pos);
             void onWindowResize(MyGUI::Window* window);
 
             static const int lineHeight;
 
             MyGUI::WidgetPtr skillAreaWidget, skillClientWidget;
-            MyGUI::VScrollPtr skillScrollerWidget;
+            MyGUI::ScrollBar* skillScrollerWidget;
             int lastPos, clientHeight;
 
             SkillList majorSkills, minorSkills, miscSkills;
             std::map<int, MWMechanics::Stat<float> > skillValues;
-            std::map<int, MyGUI::StaticTextPtr> skillWidgetMap;
+            std::map<int, MyGUI::TextBox*> skillWidgetMap;
             std::map<std::string, MyGUI::WidgetPtr> factionWidgetMap;
             FactionList factions; ///< Stores a list of factions and the current rank
             std::string birthSignId;
             int reputation, bounty;
             std::vector<MyGUI::WidgetPtr> skillWidgets; //< Skills and other information
+
+        protected:
+            virtual void onPinToggled();
     };
 }
 #endif

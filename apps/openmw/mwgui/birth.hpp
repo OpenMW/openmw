@@ -32,7 +32,7 @@ namespace MWGui
         void open();
 
         // Events
-        typedef delegates::CDelegate0 EventHandle_Void;
+        typedef delegates::CMultiDelegate0 EventHandle_Void;
 
         /** Event : Back button clicked.\n
             signature : void method()\n
@@ -40,7 +40,7 @@ namespace MWGui
         EventHandle_Void eventBack;
 
     protected:
-        void onSelectBirth(MyGUI::List* _sender, size_t _index);
+        void onSelectBirth(MyGUI::ListBox* _sender, size_t _index);
 
         void onOkClicked(MyGUI::Widget* _sender);
         void onBackClicked(MyGUI::Widget* _sender);
@@ -49,9 +49,9 @@ namespace MWGui
         void updateBirths();
         void updateSpells();
 
-        MyGUI::ListPtr    birthList;
+        MyGUI::ListBox*    birthList;
         MyGUI::WidgetPtr  spellArea;
-        MyGUI::StaticImagePtr birthImage;
+        MyGUI::ImageBox* birthImage;
         std::vector<MyGUI::WidgetPtr> spellItems;
 
         std::string currentBirthId;

@@ -25,6 +25,8 @@
 
 #include "ogre_nif_loader.hpp"
 
+#include <components/settings/settings.hpp>
+#include <components/nifoverrides/nifoverrides.hpp>
 
 typedef unsigned char ubyte;
 
@@ -281,15 +283,61 @@ void NIFLoader::createMaterial(const String &name,
             // other values. 237 basically means normal transparencly.
             if (alphaFlags == 237)
             {
-                // Enable transparency
-                pass->setSceneBlending(SBT_TRANSPARENT_ALPHA);
+                NifOverrides::TransparencyResult result = NifOverrides::Overrides::getTransparencyOverride(texName);
+                if (result.first)
+                {
+                    pass->setAlphaRejectFunction(CMPF_GREATER_EQUAL);
+                    pass->setAlphaRejectValue(result.second);
+                }
+                else
+                {
+                    // Enable transparency
+                    pass->setSceneBlending(SBT_TRANSPARENT_ALPHA);
 
-                //pass->setDepthCheckEnabled(false);
-                pass->setDepthWriteEnabled(false);
+                    //pass->setDepthCheckEnabled(false);
+                    pass->setDepthWriteEnabled(false);
+                    //std::cout << "alpha 237; material: " << name << " texName: " << texName << std::endl;
+                }
             }
             else
                 warn("Unhandled alpha setting for texture " + texName);
         }
+        else
+        {
+            material->getTechnique(0)->setShadowCasterMaterial("depth_shadow_caster_noalpha");
+        }
+    }
+
+    if (Settings::Manager::getBool("enabled", "Shadows"))
+    {
+        bool split = Settings::Manager::getBool("split", "Shadows");
+        const int numsplits = 3;
+		for (int i = 0; i < (split ? numsplits : 1); ++i)
+		{
+            TextureUnitState* tu = material->getTechnique(0)->getPass(0)->createTextureUnitState();
+            tu->setName("shadowMap" + StringConverter::toString(i));
+            tu->setContentType(TextureUnitState::CONTENT_SHADOW);
+            tu->setTextureAddressingMode(TextureUnitState::TAM_BORDER);
+            tu->setTextureBorderColour(ColourValue::White);
+		}
+    }
+
+    if (Settings::Manager::getBool("shaders", "Objects"))
+    {
+        material->getTechnique(0)->getPass(0)->setVertexProgram("main_vp");
+        material->getTechnique(0)->getPass(0)->setFragmentProgram("main_fp");
+    }
+
+    // Create a fallback technique without shadows and without mrt
+    Technique* tech2 = material->createTechnique();
+    tech2->setSchemeName("Fallback");
+    Pass* pass2 = tech2->createPass();
+    pass2->createTextureUnitState(texName);
+    pass2->setVertexColourTracking(TVC_DIFFUSE);
+    if (Settings::Manager::getBool("shaders", "Objects"))
+    {
+        pass2->setVertexProgram("main_fallback_vp");
+        pass2->setFragmentProgram("main_fallback_fp");
     }
 
     // Add material bells and whistles
@@ -298,8 +346,6 @@ void NIFLoader::createMaterial(const String &name,
     material->setSpecular(specular.array[0], specular.array[1], specular.array[2], alpha);
     material->setSelfIllumination(emissive.array[0], emissive.array[1], emissive.array[2]);
     material->setShininess(glossiness);
-
-
 }
 
 // Takes a name and adds a unique part to it. This is just used to
@@ -378,7 +424,8 @@ void NIFLoader::createOgreSubMesh(NiTriShape *shape, const String &material, std
 			datamod[index+1] = original.y;
 			datamod[index+2] = original.z;
 		}
-		 vbuf->writeData(0, vbuf->getSizeInBytes(), datamod, false);
+        vbuf->writeData(0, vbuf->getSizeInBytes(), datamod, false);
+        delete [] datamod;
 	}
 	else
 	{
@@ -419,6 +466,7 @@ void NIFLoader::createOgreSubMesh(NiTriShape *shape, const String &material, std
 			    datamod[index+2] = original.z;
 		    }
 			vbuf->writeData(0, vbuf->getSizeInBytes(), datamod, false);
+            delete [] datamod;
 		}
 		else
 		{
@@ -470,6 +518,7 @@ void NIFLoader::createOgreSubMesh(NiTriShape *shape, const String &material, std
 				datamod[i + 1] =y;
 		    }
 			vbuf->writeData(0, vbuf->getSizeInBytes(), datamod, false);
+            delete [] datamod;
 		}
 		else
 			vbuf->writeData(0, vbuf->getSizeInBytes(), data->uvlist.ptr, false);
@@ -513,15 +562,13 @@ void NIFLoader::createOgreSubMesh(NiTriShape *shape, const String &material, std
 				index += 3;
 			}
 
-			 ibuf->writeData(0, ibuf->getSizeInBytes(), datamod, false);
+            ibuf->writeData(0, ibuf->getSizeInBytes(), datamod, false);
+            delete [] datamod;
 
 		}
 		else
-		     ibuf->writeData(0, ibuf->getSizeInBytes(), data->triangles.ptr, false);
+            ibuf->writeData(0, ibuf->getSizeInBytes(), data->triangles.ptr, false);
         sub->indexData->indexBuffer = ibuf;
-
-
-
     }
 
     // Set material if one was given
@@ -1164,6 +1211,7 @@ void NIFLoader::loadResource(Resource *resource)
     char suffix = name.at(name.length() - 2);
     bool addAnim = true;
     bool hasAnim = false;
+	bool linkSkeleton = true;
     //bool baddin = false;
     bNiTri = true;
     if(name == "meshes\\base_anim.nif" || name == "meshes\\base_animkna.nif")
@@ -1187,6 +1235,17 @@ void NIFLoader::loadResource(Resource *resource)
 		else if(suffix == '>')
 		{
             //baddin = true;
+			bNiTri = true;
+			std::string sub = name.substr(name.length() - 6, 4);
+
+			if(sub.compare("0000") != 0)
+			addAnim = false;
+
+		}
+		else if(suffix == ':')
+		{
+            //baddin = true;
+			linkSkeleton = false;
 			bNiTri = true;
 			std::string sub = name.substr(name.length() - 6, 4);
 
@@ -1236,7 +1295,7 @@ void NIFLoader::loadResource(Resource *resource)
 
     if (!vfs->isFile(resourceName))
     {
-        warn("File not found.");
+        warn("File "+resourceName+" not found.");
         return;
     }
 
@@ -1332,7 +1391,7 @@ void NIFLoader::loadResource(Resource *resource)
         }
 		//Don't link on npc parts to eliminate redundant skeletons
 		//Will have to be changed later slightly for robes/skirts
-		if(triname == "")
+		if(linkSkeleton)
 			mesh->_notifySkeleton(mSkel);
     }
 }

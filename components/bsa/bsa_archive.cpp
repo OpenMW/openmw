@@ -41,7 +41,21 @@ struct ciLessBoost : std::binary_function<std::string, std::string, bool>
 {
     bool operator() (const std::string & s1, const std::string & s2) const {
                                                //case insensitive version of is_less
-        return lexicographical_compare(s1, s2, boost::algorithm::is_iless());
+        return boost::ilexicographical_compare(s1, s2);
+    }
+};
+
+struct pathComparer
+{
+private:
+    std::string find;
+
+public:
+    pathComparer(const std::string& toFind) : find(toFind) { }
+
+    bool operator() (const std::string& other)
+    {
+        return boost::iequals(find, other);
     }
 };
 
@@ -55,16 +69,62 @@ class DirArchive: public Ogre::FileSystemArchive
     std::map<std::string, std::vector<std::string>, ciLessBoost> m;
     unsigned int cutoff;
 
-    bool comparePortion(std::string file1, std::string file2, int start, int size) const
+    bool findFile(const String& filename, std::string& copy) const
     {
-        for(int i = start; i < start+size; i++)
         {
-            char one = file1.at(i);
-            char two = file2.at(i);
-            if(tolower(one) != tolower(two) )
-                return false;
+            String passed = filename;
+	        if(filename.at(filename.length() - 1) == '*' || filename.at(filename.length() - 1) == '?' ||  filename.at(filename.length() - 1) == '<'
+		        || filename.at(filename.length() - 1) == '"' || filename.at(filename.length() - 1) == '>' ||  filename.at(filename.length() - 1) == ':'
+		        || filename.at(filename.length() - 1) == '|')
+	        {
+	           passed = filename.substr(0, filename.length() - 2);
+	        }
+	        if(filename.at(filename.length() - 2) == '>' || filename.at(filename.length() - 2) == ':')
+		        passed = filename.substr(0, filename.length() - 6);
+            copy = passed;
         }
-        return true;
+
+        std::replace(copy.begin(), copy.end(), '\\', '/');
+
+        if(copy.at(0) == '/')
+            copy.erase(0, 1);
+
+        if(fsstrict == true)
+            return true;
+
+        std::string folder;
+        int delimiter = 0;
+        size_t lastSlash = copy.rfind('/');
+        if (lastSlash != std::string::npos)
+        {
+            folder = copy.substr(0, lastSlash);
+            delimiter = lastSlash+1;
+        }
+
+        std::vector<std::string> current;
+        {
+            std::map<std::string,std::vector<std::string>,ciLessBoost>::const_iterator found = m.find(folder);
+
+            if (found == m.end())
+            {
+                return false;
+            }
+            else
+                current = found->second;
+        }
+
+        std::vector<std::string>::iterator find = std::lower_bound(current.begin(), current.end(), copy, ciLessBoost());
+        if (find != current.end() && !ciLessBoost()(copy, current.front()))
+        {
+            if (!boost::iequals(copy, *find))
+                if ((find = std::find_if(current.begin(), current.end(), pathComparer(copy))) == current.end()) //\todo Check if this line is actually needed
+                    return false;
+
+            copy = *find;
+            return true;
+        }
+
+        return false;
     }
 
     public:
@@ -83,16 +143,14 @@ class DirArchive: public Ogre::FileSystemArchive
      //need to cut off first
       boost::filesystem::directory_iterator dir_iter(d), dir_end;
       std::vector<std::string> filesind;
-      boost::filesystem::path f;
       for(;dir_iter != dir_end; dir_iter++)
     {
         if(boost::filesystem::is_directory(*dir_iter))
             populateMap(*dir_iter);
         else
         {
-
-            f = *dir_iter;
-            std::string s = f.string();
+            std::string s = dir_iter->path().string();
+            std::replace(s.begin(), s.end(), '\\', '/');
 
             std::string small;
             if(cutoff < s.size())
@@ -103,14 +161,17 @@ class DirArchive: public Ogre::FileSystemArchive
             filesind.push_back(small);
         }
     }
+    std::sort(filesind.begin(), filesind.end(), ciLessBoost());
+
     std::string small;
     std::string original = d.string();
+    std::replace(original.begin(), original.end(), '\\', '/');
     if(cutoff < original.size())
         small = original.substr(cutoff, original.size() - cutoff);
     else
         small = original.substr(cutoff - 1, original.size() - cutoff);
-    m[small] = filesind;
 
+    m[small] = filesind;
   }
 
     bool isCaseSensitive() const { return fsstrict; }
@@ -120,97 +181,21 @@ class DirArchive: public Ogre::FileSystemArchive
     void unload() {}
 
      bool exists(const String& filename) {
-        std::string copy = filename;
+        std::string copy;
 
-
-
-      for (unsigned int i = 0; i < filename.size(); i++)
-      {
-          if(copy.at(i) == '\\' ){
-                copy.replace(i, 1, "/");
-          }
-      }
-
-
-      if(copy.at(0) == '\\' || copy.at(0) == '/')
-        {
-            copy.erase(0, 1);
-        }
-        if(fsstrict == true)
-        {
-            //std::cout << "fsstrict " << copy << "\n";
+        if (findFile(filename, copy))
             return FileSystemArchive::exists(copy);
-        }
-
-
-      int last = copy.size() - 1;
-      int i = last;
-
-      for (;last >= 0; i--)
-      {
-          if(copy.at(i) == '/' || copy.at(i) == '\\')
-                break;
-      }
-
-      std::string folder = copy.substr(0, i);                              //folder with no slash
-
-      std::vector<std::string>& current = m[folder];
-
-       for(std::vector<std::string>::iterator iter = current.begin(); iter != current.end(); iter++)
-       {
-            if(comparePortion(*iter, copy, i + 1, copy.size() - i -1) == true){
-            return FileSystemArchive::exists(*iter);
-            }
-       }
-
 
       return false;
      }
 
     DataStreamPtr open(const String& filename, bool readonly = true) const
   {
-     std::map<std::string, std::vector<std::string>, ciLessBoost> mlocal = m;
-        std::string copy = filename;
+        std::string copy;
 
-
-
-      for (unsigned int i = 0; i < filename.size(); i++)
-      {
-          if(copy.at(i) == '\\' ){
-                copy.replace(i, 1, "/");
-          }
-      }
-
-
-      if(copy.at(0) == '\\' || copy.at(0) == '/')
-        {
-            copy.erase(0, 1);
-        }
-
-        if(fsstrict == true)
-        {
+        if (findFile(filename, copy))
             return FileSystemArchive::open(copy, readonly);
-        }
 
-
-      int last = copy.size() - 1;
-      int i = last;
-
-      for (;last >= 0; i--)
-      {
-          if(copy.at(i) == '/' || copy.at(i) == '\\')
-                break;
-      }
-
-      std::string folder = copy.substr(0, i);                              //folder with no slash
-      std::vector<std::string> current = mlocal[folder];
-
-       for(std::vector<std::string>::iterator iter = current.begin(); iter != current.end(); iter++)
-       {
-            if(comparePortion(*iter, copy, i + 1, copy.size() - i -1) == true){
-            return FileSystemArchive::open(*iter, readonly);
-            }
-       }
         DataStreamPtr p;
       return p;
   }
@@ -247,7 +232,7 @@ public:
 	{
 	   passed = filename.substr(0, filename.length() - 2);
 	}
-	if(filename.at(filename.length() - 2) == '>')
+	if(filename.at(filename.length() - 2) == '>' || filename.at(filename.length() - 2) == ':')
 		passed = filename.substr(0, filename.length() - 6);
     // Open the file
     StreamPtr strm = narc->getFile(passed.c_str());
@@ -256,8 +241,12 @@ public:
     return DataStreamPtr(new Mangle2OgreStream(strm));
   }
 
+bool exists(const String& filename) {
+    return cexists(filename);
+}
+
   // Check if the file exists.
-  bool exists(const String& filename) { 
+  bool cexists(const String& filename) const {
     String passed = filename;
 	if(filename.at(filename.length() - 1) == '*' || filename.at(filename.length() - 1) == '?' ||  filename.at(filename.length() - 1) == '<'
 		|| filename.at(filename.length() - 1) == '"' || filename.at(filename.length() - 1) == '>' ||  filename.at(filename.length() - 1) == ':'
@@ -265,10 +254,10 @@ public:
 	{
 	   passed = filename.substr(0, filename.length() - 2);
 	}
-	if(filename.at(filename.length() - 2) == '>')
+	if(filename.at(filename.length() - 2) == '>' || filename.at(filename.length() - 2) == ':')
 		passed = filename.substr(0, filename.length() - 6);
 
-return arc.exists(passed.c_str()); 
+return arc.exists(passed.c_str());
 }
   time_t getModifiedTime(const String&) { return 0; }
 
@@ -309,13 +298,36 @@ return arc.exists(passed.c_str());
      set up a single-element result list if the file is found.
   */
   FileInfoListPtr findFileInfo(const String& pattern, bool recursive = true,
+                               bool dirs = false) const
+  {
+      FileInfoListPtr ptr = FileInfoListPtr(new FileInfoList());
+
+    // Check if the file exists (only works for single files - wild
+    // cards and recursive search isn't implemented.)
+    if(cexists(pattern))
+      {
+        FileInfo fi;
+        fi.archive = this;
+        fi.filename = pattern;
+        // It apparently doesn't matter that we return bogus
+        // information
+        fi.path = "";
+        fi.compressedSize = fi.uncompressedSize = 0;
+
+        ptr->push_back(fi);
+      }
+
+    return ptr;
+  }
+
+  FileInfoListPtr findFileInfo(const String& pattern, bool recursive = true,
                                bool dirs = false)
   {
     FileInfoListPtr ptr = FileInfoListPtr(new FileInfoList());
 
     // Check if the file exists (only works for single files - wild
     // cards and recursive search isn't implemented.)
-    if(exists(pattern))
+    if(cexists(pattern))
       {
         FileInfo fi;
         fi.archive = this;

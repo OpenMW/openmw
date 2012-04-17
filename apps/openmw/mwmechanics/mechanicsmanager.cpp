@@ -23,7 +23,7 @@ namespace MWMechanics
 
         // reset
         creatureStats.mLevel = player->npdt52.level;
-        creatureStats.mAbilities.clear();
+        creatureStats.mSpells.clear();
         creatureStats.mMagicEffects = MagicEffects();
 
         for (int i=0; i<27; ++i)
@@ -71,7 +71,7 @@ namespace MWMechanics
             for (std::vector<std::string>::const_iterator iter (race->powers.list.begin());
                 iter!=race->powers.list.end(); ++iter)
             {
-                insertSpell (*iter, ptr);
+                creatureStats.mSpells.add (*iter);
             }
         }
 
@@ -85,7 +85,7 @@ namespace MWMechanics
             for (std::vector<std::string>::const_iterator iter (sign->powers.list.begin());
                 iter!=sign->powers.list.end(); ++iter)
             {
-                insertSpell (*iter, ptr);
+                creatureStats.mSpells.add (*iter);
             }
         }
 
@@ -159,59 +159,14 @@ namespace MWMechanics
             creatureStats.mDynamic[i].setCurrent (creatureStats.mDynamic[i].getModified());
     }
 
-    void MechanicsManager::insertSpell (const std::string& id, MWWorld::Ptr& creature)
-    {
-        MWMechanics::CreatureStats& creatureStats =
-            MWWorld::Class::get (creature).getCreatureStats (creature);
-
-        const ESM::Spell *spell = mEnvironment.mWorld->getStore().spells.find (id);
-
-        switch (spell->data.type)
-        {
-            case ESM::Spell::ST_Ability:
-
-                if (creatureStats.mAbilities.find (id)==creatureStats.mAbilities.end())
-                {
-                    creatureStats.mAbilities.insert (id);
-                }
-
-                break;
-
-            // TODO ST_SPELL, ST_Blight, ST_Disease, ST_Curse, ST_Power
-
-            default:
-
-                std::cout
-                    << "adding unsupported spell type (" << spell->data.type
-                    << ") to creature: " << id << std::endl;
-        }
-    }
-
     void MechanicsManager::adjustMagicEffects (MWWorld::Ptr& creature)
     {
         MWMechanics::CreatureStats& creatureStats =
             MWWorld::Class::get (creature).getCreatureStats (creature);
 
-        MagicEffects now;
+        MagicEffects now = creatureStats.mSpells.getMagicEffects (mEnvironment);
 
-        for (std::set<std::string>::const_iterator iter (creatureStats.mAbilities.begin());
-            iter!=creatureStats.mAbilities.end(); ++iter)
-        {
-            const ESM::Spell *spell = mEnvironment.mWorld->getStore().spells.find (*iter);
-
-            for (std::vector<ESM::ENAMstruct>::const_iterator iter = spell->effects.list.begin();
-                iter!=spell->effects.list.end(); ++iter)
-            {
-                if (iter->range==0) // self
-                {
-                    EffectParam param;
-                    param.mMagnitude = iter->magnMax; // TODO calculate magnitude
-                    now.add (EffectKey (*iter), param);
-                }
-            }
-        }
-
-        // TODO add effects from other spell types, active spells and equipment
+        /// \todo add effects from active spells and equipment
 
         MagicEffects diff = MagicEffects::diff (creatureStats.mMagicEffects, now);
 
@@ -222,14 +177,14 @@ namespace MWMechanics
 
     MechanicsManager::MechanicsManager (MWWorld::Environment& environment)
     : mEnvironment (environment), mUpdatePlayer (true), mClassSelected (false),
-      mRaceSelected (false)
+      mRaceSelected (false), mActors (environment)
     {
         buildPlayer();
     }
 
     void MechanicsManager::addActor (const MWWorld::Ptr& ptr)
     {
-        mActors.insert (ptr);
+        mActors.addActor (ptr);
     }
 
     void MechanicsManager::removeActor (const MWWorld::Ptr& ptr)
@@ -237,7 +192,7 @@ namespace MWMechanics
         if (ptr==mWatched)
             mWatched = MWWorld::Ptr();
 
-        mActors.erase (ptr);
+        mActors.removeActor (ptr);
     }
 
     void MechanicsManager::dropActors (const MWWorld::Ptr::CellStore *cellStore)
@@ -245,16 +200,7 @@ namespace MWMechanics
         if (!mWatched.isEmpty() && mWatched.getCell()==cellStore)
             mWatched = MWWorld::Ptr();
 
-        std::set<MWWorld::Ptr>::iterator iter = mActors.begin();
-
-        while (iter!=mActors.end())
-            if (iter->getCell()==cellStore)
-            {
-                //std::cout << "Erasing an actor";
-                mActors.erase (iter++);
-            }
-            else
-                ++iter;
+        mActors.dropActors (cellStore);
     }
 
     void MechanicsManager::watchActor (const MWWorld::Ptr& ptr)
@@ -262,7 +208,8 @@ namespace MWMechanics
         mWatched = ptr;
     }
 
-    void MechanicsManager::update (std::vector<std::pair<std::string, Ogre::Vector3> >& movement)
+    void MechanicsManager::update (std::vector<std::pair<std::string, Ogre::Vector3> >& movement,
+        float duration, bool paused)
     {
         if (!mWatched.isEmpty())
         {
@@ -345,14 +292,7 @@ namespace MWMechanics
             mEnvironment.mWindowManager->configureSkills (majorSkills, minorSkills);
         }
 
-        for (std::set<MWWorld::Ptr>::iterator iter (mActors.begin()); iter!=mActors.end();
-            ++iter)
-        {
-            Ogre::Vector3 vector = MWWorld::Class::get (*iter).getMovementVector (*iter);
-
-            if (vector!=Ogre::Vector3::ZERO)
-                movement.push_back (std::make_pair (iter->getRefData().getHandle(), vector));
-        }
+        mActors.update (movement, duration, paused);
     }
 
     void MechanicsManager::setPlayerName (const std::string& name)

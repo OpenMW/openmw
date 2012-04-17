@@ -18,8 +18,6 @@ void MyGUIManager::setup(Ogre::RenderWindow *wnd, Ogre::SceneManager *mgr, bool 
   // manager before the main gui system itself, otherwise the main
   // object will get the chance to spit out a few messages before we
   // can able to disable it.
-  LogManager::initialise();
-  LogManager::setSTDOutputEnabled(logging);
 
   std::string theLogFile = std::string(MYGUI_PLATFORM_LOG_FILENAME);
   if(!logDir.empty())
@@ -27,11 +25,13 @@ void MyGUIManager::setup(Ogre::RenderWindow *wnd, Ogre::SceneManager *mgr, bool 
 
   // Set up OGRE platform. We might make this more generic later.
   mPlatform = new OgrePlatform();
+  LogManager::getInstance().setSTDOutputEnabled(logging);
   mPlatform->initialise(wnd, mgr, "General", theLogFile);
+
 
   // Create GUI
   mGui = new Gui();
-  mGui->initialise("core.xml", theLogFile);
+  mGui->initialise("core.xml");
 }
 
 void MyGUIManager::shutdown()

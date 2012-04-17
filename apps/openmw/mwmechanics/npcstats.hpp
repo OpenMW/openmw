@@ -2,14 +2,19 @@
 #define GAME_MWMECHANICS_NPCSTATS_H
 
 #include <map>
+#include <set>
 
 #include "stat.hpp"
+#include "drawstate.hpp"
 
 namespace MWMechanics
 {
     /// \brief Additional stats for NPCs
     ///
     /// For non-NPC-specific stats, see the CreatureStats struct.
+    ///
+    /// \note For technical reasons the spell list and the currently selected spell is also handled by
+    /// CreatureStats, even though they are actually NPC stats.
 
     struct NpcStats
     {
@@ -24,9 +29,10 @@ namespace MWMechanics
         bool mRun;
         bool mSneak;
         bool mCombat;
+        DrawState mDrawState;
 
         NpcStats() : mForceRun (false), mForceSneak (false), mRun (false), mSneak (false),
-            mCombat (false) {}
+            mCombat (false) , mDrawState(DrawState_Nothing) {}
     };
 }
 

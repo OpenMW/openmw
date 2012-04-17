@@ -31,7 +31,7 @@ class Animation{
 	
     
    
-    std::vector<std::vector<Nif::NiTriShapeCopy>* > shapeparts;   //All the NiTriShape data that we need for animating an npc
+
 
     float time;
 	float startTime;
@@ -48,7 +48,7 @@ class Animation{
 
 	//Ogre::SkeletonInstance* skel;
      std::vector<Nif::NiTriShapeCopy>* shapes;          //All the NiTriShapeData for a creature
-     std::vector<Ogre::Entity*> entityparts;
+     
 
 
     std::vector<Nif::NiKeyframeData>* transformations;
@@ -60,13 +60,13 @@ class Animation{
     std::string getUniqueID(std::string mesh);
 	
     public:
-     Animation(MWWorld::Environment& _env, OEngine::Render::OgreRenderer& _rend): mRend(_rend), mEnvironment(_env), animate(0){};
-	 virtual void runAnimation(float timepassed) = 0;
-	 void startScript(std::string groupname, int mode, int loops);
-     void stopScript();
-    
-    
-     virtual ~Animation();
+        Animation(MWWorld::Environment& _env, OEngine::Render::OgreRenderer& _rend);
+        virtual void runAnimation(float timepassed) = 0;
+        void startScript(std::string groupname, int mode, int loops);
+        void stopScript();
+
+
+        virtual ~Animation();
  
 };
 }

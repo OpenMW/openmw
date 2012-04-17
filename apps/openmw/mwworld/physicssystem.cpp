@@ -21,11 +21,13 @@ namespace MWWorld
     PhysicsSystem::PhysicsSystem(OEngine::Render::OgreRenderer &_rend) :
         mRender(_rend), mEngine(0), mFreeFly (true)
     {
-		playerphysics = new playerMove;
+		
+        playerphysics = new playerMove;
         // Create physics. shapeLoader is deleted by the physic engine
         NifBullet::ManualBulletShapeLoader* shapeLoader = new NifBullet::ManualBulletShapeLoader();
         mEngine = new OEngine::Physic::PhysicEngine(shapeLoader);
-		playerphysics->mEngine = mEngine;
+        playerphysics->mEngine = mEngine;
+		
     }
 
     PhysicsSystem::~PhysicsSystem()
@@ -52,6 +54,28 @@ namespace MWWorld
         btVector3 to(centerRay.getPoint(500).x,-centerRay.getPoint(500).z,centerRay.getPoint(500).y);
 
         return mEngine->rayTest(from,to);
+    }
+
+    std::vector < std::pair <float, std::string> > PhysicsSystem::getFacedObjects ()
+    {
+        //get a ray pointing to the center of the viewport
+        Ray centerRay = mRender.getCamera()->getCameraToViewportRay(
+        mRender.getViewport()->getWidth()/2,
+        mRender.getViewport()->getHeight()/2);
+        btVector3 from(centerRay.getOrigin().x,-centerRay.getOrigin().z,centerRay.getOrigin().y);
+        btVector3 to(centerRay.getPoint(500).x,-centerRay.getPoint(500).z,centerRay.getPoint(500).y);
+
+        return mEngine->rayTest2(from,to);
+    }
+
+    btVector3 PhysicsSystem::getRayPoint(float extent)
+    {
+        //get a ray pointing to the center of the viewport
+        Ray centerRay = mRender.getCamera()->getCameraToViewportRay(
+        mRender.getViewport()->getWidth()/2,
+        mRender.getViewport()->getHeight()/2);
+        btVector3 result(centerRay.getPoint(500*extent).x,-centerRay.getPoint(500*extent).z,centerRay.getPoint(500*extent).y);
+        return result;
     }
     
     bool PhysicsSystem::castRay(const Vector3& from, const Vector3& to)
@@ -80,10 +104,12 @@ namespace MWWorld
             act->setWalkDirection(btVector3(0,0,0));
         }
 		playerMove::playercmd& pm_ref = playerphysics->cmd;
+
+        pm_ref.rightmove = 0;
+        pm_ref.forwardmove = 0;
+        pm_ref.upmove = 0;
 		
-		pm_ref.rightmove = 0;
-		pm_ref.forwardmove = 0;
-		pm_ref.upmove = 0;
+		
 		//playerphysics->ps.move_type = PM_NOCLIP;
         for (std::vector<std::pair<std::string, Ogre::Vector3> >::const_iterator iter (actors.begin());
             iter!=actors.end(); ++iter)
@@ -104,6 +130,7 @@ namespace MWWorld
 				playerphysics->ps.viewangles.x = 0;
 				playerphysics->ps.viewangles.z = 0;
 			playerphysics->ps.viewangles.y = both.getYaw().valueDegrees() *-1 + 90;
+
 				//playerphysics->ps.viewangles.z = both.getPitch().valueDegrees();
 				
 			
@@ -111,9 +138,11 @@ namespace MWWorld
             {
                 
                 Ogre::Vector3 dir1(iter->second.x,iter->second.z,-iter->second.y);
+
 				pm_ref.rightmove = -dir1.x;
 				pm_ref.forwardmove = dir1.z;
 				pm_ref.upmove = dir1.y;
+
 				
 				
 				//std::cout << "Current angle" << yawQuat.getYaw().valueDegrees() - 90<< "\n";
@@ -135,13 +164,15 @@ namespace MWWorld
 				
                 dir = 0.025*(quat*dir1);
             }
-			Pmove(playerphysics);
+			
 
             //set the walk direction
             act->setWalkDirection(btVector3(dir.x,-dir.z,dir.y));
         }
         mEngine->stepSimulation(duration);
 		Pmove(playerphysics);
+
+		
         std::vector< std::pair<std::string, Ogre::Vector3> > response;
         for(std::map<std::string,OEngine::Physic::PhysicActor*>::iterator it = mEngine->PhysicActorMap.begin(); it != mEngine->PhysicActorMap.end();it++)
         {
@@ -156,6 +187,8 @@ namespace MWWorld
 				//coord = Ogre::Vector3(coord.x, coord.z, coord.y);   //x, z, -y
 				
 			}
+
+			
             response.push_back(std::pair<std::string, Ogre::Vector3>(it->first, coord));
         }
 		

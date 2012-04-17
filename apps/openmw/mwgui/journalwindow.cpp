@@ -89,9 +89,9 @@ MWGui::JournalWindow::JournalWindow (WindowManager& parWindowManager)
     getWidget(mLeftTextWidget, "LeftText");
     getWidget(mRightTextWidget, "RightText");
     getWidget(mPrevBtn, "PrevPageBTN");
-    mPrevBtn->eventMouseButtonClick = MyGUI::newDelegate(this,&MWGui::JournalWindow::notifyPrevPage);
+    mPrevBtn->eventMouseButtonClick += MyGUI::newDelegate(this,&MWGui::JournalWindow::notifyPrevPage);
     getWidget(mNextBtn, "NextPageBTN");
-    mNextBtn->eventMouseButtonClick = MyGUI::newDelegate(this,&MWGui::JournalWindow::notifyNextPage);
+    mNextBtn->eventMouseButtonClick += MyGUI::newDelegate(this,&MWGui::JournalWindow::notifyNextPage);
     //MyGUI::ItemBox* list = new MyGUI::ItemBox();
     //list->addItem("qaq","aqzazaz");
     //mScrollerWidget->addChildItem(list);
@@ -111,7 +111,7 @@ MWGui::JournalWindow::JournalWindow (WindowManager& parWindowManager)
     //displayLeftText(list.front());
 
     MyGUI::WindowPtr t = static_cast<MyGUI::WindowPtr>(mMainWidget);
-    t->eventWindowChangeCoord = MyGUI::newDelegate(this, &JournalWindow::onWindowResize);
+    t->eventWindowChangeCoord += MyGUI::newDelegate(this, &JournalWindow::onWindowResize);
 }
 
 void MWGui::JournalWindow::open()

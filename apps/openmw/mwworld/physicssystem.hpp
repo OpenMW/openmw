@@ -36,7 +36,11 @@ namespace MWWorld
             bool toggleCollisionMode();
             
             std::pair<std::string, float> getFacedHandle (MWWorld::World& world);
-            
+
+            btVector3 getRayPoint(float extent);
+
+            std::vector < std::pair <float, std::string> > getFacedObjects ();
+
             // cast ray, return true if it hit something
             bool castRay(const Ogre::Vector3& from, const Ogre::Vector3& to);
 
@@ -50,7 +54,8 @@ namespace MWWorld
             OEngine::Render::OgreRenderer &mRender;
             OEngine::Physic::PhysicEngine* mEngine;
             bool mFreeFly;
-			playerMove* playerphysics;
+            playerMove* playerphysics;
+
 
             PhysicsSystem (const PhysicsSystem&);
             PhysicsSystem& operator= (const PhysicsSystem&);

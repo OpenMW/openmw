@@ -20,6 +20,8 @@
 #include <components/esm/esm_reader.hpp>
 #include <components/files/fixedpath.hpp>
 #include <components/files/configurationmanager.hpp>
+#include <components/settings/settings.hpp>
+#include <components/nifoverrides/nifoverrides.hpp>
 
 #include <components/nifbullet/bullet_nif_loader.hpp>
 #include <components/nifogre/ogre_nif_loader.hpp>
@@ -27,6 +29,7 @@
 #include "mwinput/inputmanager.hpp"
 
 #include "mwgui/window_manager.hpp"
+#include "mwgui/cursorreplace.hpp"
 
 #include "mwscript/scriptmanager.hpp"
 #include "mwscript/compilercontext.hpp"
@@ -82,12 +85,20 @@ void OMW::Engine::updateFocusReport (float duration)
 
         if (!handle.empty())
         {
-            MWWorld::Ptr ptr = mEnvironment.mWorld->getPtrViaHandle (handle);
+            // the faced handle is not updated immediately, so on a cell change it might
+            // point to an object that doesn't exist anymore
+            // therefore, we are catching the "Unknown Ogre handle" exception that occurs in this case
+            try
+            {
+                MWWorld::Ptr ptr = mEnvironment.mWorld->getPtrViaHandle (handle);
 
-            if (!ptr.isEmpty()){
-                name = MWWorld::Class::get (ptr).getName (ptr);
+                if (!ptr.isEmpty()){
+                    name = MWWorld::Class::get (ptr).getName (ptr);
 
+                }
             }
+            catch (std::runtime_error& e)
+            {}
         }
 
         if (name!=mFocusName)
@@ -115,13 +126,12 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
     {
         mEnvironment.mFrameDuration = evt.timeSinceLastFrame;
 
+        // update input
+        mEnvironment.mInputManager->update();
+
         // sound
         if (mUseSound)
-        {
-            mEnvironment.mSoundManager->playPlaylist();
-
             mEnvironment.mSoundManager->update (evt.timeSinceLastFrame);
-        }
 
         // update GUI
         Ogre::RenderWindow* window = mOgre->getWindow();
@@ -152,7 +162,8 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
 
         // update actors
         std::vector<std::pair<std::string, Ogre::Vector3> > movement;
-        mEnvironment.mMechanicsManager->update (movement);
+        mEnvironment.mMechanicsManager->update (movement, mEnvironment.mFrameDuration,
+            mEnvironment.mWindowManager->getMode()!=MWGui::GM_Game);
 
         if (mEnvironment.mWindowManager->getMode()==MWGui::GM_Game)
             mEnvironment.mWorld->doPhysics (movement, mEnvironment.mFrameDuration);
@@ -208,13 +219,18 @@ OMW::Engine::~Engine()
 void OMW::Engine::loadBSA()
 {
     const Files::MultiDirCollection& bsa = mFileCollections.getCollection (".bsa");
-    std::string dataDirectory;
+    
     for (Files::MultiDirCollection::TIter iter(bsa.begin()); iter!=bsa.end(); ++iter)
     {
         std::cout << "Adding " << iter->second.string() << std::endl;
         Bsa::addBSA(iter->second.string());
+    }
 
-        dataDirectory = iter->second.parent_path().string();
+    const Files::PathContainer& dataDirs = mFileCollections.getPaths();
+    std::string dataDirectory;
+    for (Files::PathContainer::const_iterator iter = dataDirs.begin(); iter != dataDirs.end(); ++iter)
+    {
+        dataDirectory = iter->string();
         std::cout << "Data dir " << dataDirectory << std::endl;
         Bsa::addDir(dataDirectory, mFSStrict);
     }
@@ -312,6 +328,36 @@ void OMW::Engine::go()
     {
         boost::filesystem::create_directories(configPath);
     }
+
+    // Create the settings manager and load default settings file
+    Settings::Manager settings;
+    const std::string localdefault = mCfgMgr.getLocalPath().string() + "/settings-default.cfg";
+    const std::string globaldefault = mCfgMgr.getGlobalPath().string() + "/settings-default.cfg";
+
+    // prefer local
+    if (boost::filesystem::exists(localdefault))
+        settings.loadDefault(localdefault);
+    else if (boost::filesystem::exists(globaldefault))
+        settings.loadDefault(globaldefault);
+
+    // load user settings if they exist, otherwise just load the default settings as user settings
+    const std::string settingspath = mCfgMgr.getUserPath().string() + "/settings.cfg";
+    if (boost::filesystem::exists(settingspath))
+        settings.loadUser(settingspath);
+    else if (boost::filesystem::exists(localdefault))
+        settings.loadUser(localdefault);
+    else if (boost::filesystem::exists(globaldefault))
+        settings.loadUser(globaldefault);
+
+    mFpsLevel = settings.getInt("fps", "HUD");
+
+    // load nif overrides
+    NifOverrides::Overrides nifOverrides;
+    if (boost::filesystem::exists(mCfgMgr.getLocalPath().string() + "/transparency-overrides.cfg"))
+        nifOverrides.loadTransparencyOverrides(mCfgMgr.getLocalPath().string() + "/transparency-overrides.cfg");
+    else if (boost::filesystem::exists(mCfgMgr.getGlobalPath().string() + "/transparency-overrides.cfg"))
+        nifOverrides.loadTransparencyOverrides(mCfgMgr.getGlobalPath().string() + "/transparency-overrides.cfg");
+
     mOgre->configure(!boost::filesystem::is_regular_file(mCfgMgr.getOgreConfigPath()),
         mCfgMgr.getOgreConfigPath().string(),
         mCfgMgr.getLogPath().string(),
@@ -319,16 +365,25 @@ void OMW::Engine::go()
 
     // This has to be added BEFORE MyGUI is initialized, as it needs
     // to find core.xml here.
+
+    //addResourcesDirectory(mResDir);
+
     addResourcesDirectory(mResDir / "mygui");
+    addResourcesDirectory(mResDir / "water");
+    addResourcesDirectory(mResDir / "gbuffer");
+    addResourcesDirectory(mResDir / "shadows");
 
     // Create the window
     mOgre->createWindow("OpenMW");
 
     loadBSA();
 
+    // cursor replacer (converts the cursor from the bsa so they can be used by mygui)
+    MWGui::CursorReplace replacer;
+
     // Create the world
     mEnvironment.mWorld = new MWWorld::World (*mOgre, mFileCollections, mMaster,
-        mResDir, mNewGame, mEnvironment, mEncoding);
+        mResDir, mNewGame, mEnvironment, mEncoding, mFallbackMap);
 
     // Create window manager - this manages all the MW-specific GUI windows
     MWScript::registerExtensions (mExtensions);
@@ -337,10 +392,7 @@ void OMW::Engine::go()
         mExtensions, mFpsLevel, mNewGame, mOgre, mCfgMgr.getLogPath().string() + std::string("/"));
 
     // Create sound system
-    mEnvironment.mSoundManager = new MWSound::SoundManager(mOgre->getRoot(),
-                                                           mOgre->getCamera(),
-                                                           mDataDirs,
-                                                           mUseSound, mFSStrict, mEnvironment);
+    mEnvironment.mSoundManager = new MWSound::SoundManager(mUseSound, mEnvironment);
 
     // Create script system
     mScriptContext = new MWScript::CompilerContext (MWScript::CompilerContext::Type_Full,
@@ -405,6 +457,9 @@ void OMW::Engine::go()
     // Start the main rendering loop
     mOgre->start();
 
+    // Save user settings
+    settings.saveUser(settingspath);
+
     std::cout << "Quitting peacefully.\n";
 }
 
@@ -418,10 +473,21 @@ void OMW::Engine::activate()
     if (handle.empty())
         return;
 
-    MWWorld::Ptr ptr = mEnvironment.mWorld->getPtrViaHandle (handle);
+    // the faced handle is not updated immediately, so on a cell change it might
+    // point to an object that doesn't exist anymore
+    // therefore, we are catching the "Unknown Ogre handle" exception that occurs in this case
+    MWWorld::Ptr ptr;
+    try
+    {
+        ptr = mEnvironment.mWorld->getPtrViaHandle (handle);
 
-    if (ptr.isEmpty())
+        if (ptr.isEmpty())
+            return;
+    }
+    catch (std::runtime_error&)
+    {
         return;
+    }
 
     MWScript::InterpreterContext interpreterContext (mEnvironment,
         &ptr.getRefData().getLocals(), ptr);
@@ -486,4 +552,9 @@ void OMW::Engine::showFPS(int level)
 void OMW::Engine::setEncoding(const std::string& encoding)
 {
     mEncoding = encoding;
+}
+
+void OMW::Engine::setFallbackValues(std::map<std::string,std::string> fallbackMap)
+{
+    mFallbackMap = fallbackMap;
 }

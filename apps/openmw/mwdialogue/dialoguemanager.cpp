@@ -39,6 +39,9 @@
 #include "../mwscript/interpretercontext.hpp"
 #include <components/compiler/scriptparser.hpp>
 
+#include "../mwclass/npc.hpp"
+#include "../mwmechanics/npcstats.hpp"
+
 namespace
 {
     std::string toLower (const std::string& name)
@@ -109,16 +112,15 @@ namespace
         switch (world.getGlobalVariableType (name))
         {
         case 's':
-
-            return selectCompare (comp, value, world.getGlobalVariable (name).mShort);
+            return selectCompare (comp, world.getGlobalVariable (name).mShort, value);
 
         case 'l':
 
-            return selectCompare (comp, value, world.getGlobalVariable (name).mLong);
+            return selectCompare (comp, world.getGlobalVariable (name).mLong, value);
 
         case 'f':
 
-            return selectCompare (comp, value, world.getGlobalVariable (name).mFloat);
+            return selectCompare (comp, world.getGlobalVariable (name).mFloat, value);
 
         case ' ':
 
@@ -145,8 +147,6 @@ namespace MWDialogue
 
     bool DialogueManager::functionFilter(const MWWorld::Ptr& actor, const ESM::DialInfo& info,bool choice)
     {
-        bool isAChoice = false;//is there any choice in the filters?
-        bool isFunction = false;
         for (std::vector<ESM::DialInfo::SelectStruct>::const_iterator iter (info.selects.begin());
             iter != info.selects.end(); ++iter)
         {
@@ -154,7 +154,6 @@ namespace MWDialogue
             char type = select.selectRule[1];
             if(type == '1')
             {
-                isFunction = true;
                 char comp = select.selectRule[4];
                 std::string name = select.selectRule.substr (5);
                 std::string function = select.selectRule.substr(2,2);
@@ -181,7 +180,17 @@ namespace MWDialogue
                     break;
 
                 case 46://Same faction
-                    if(!selectCompare<int,int>(comp,0,select.i)) return false;
+                    {
+                    MWMechanics::NpcStats PCstats = MWWorld::Class::get(mEnvironment.mWorld->getPlayer().getPlayer()).getNpcStats(mEnvironment.mWorld->getPlayer().getPlayer());
+                    MWMechanics::NpcStats NPCstats = MWWorld::Class::get(actor).getNpcStats(actor);
+                    int sameFaction = 0;
+                    if(!NPCstats.mFactionRank.empty())
+                    {
+                        std::string NPCFaction = NPCstats.mFactionRank.begin()->first;
+                        if(PCstats.mFactionRank.find(NPCFaction) != PCstats.mFactionRank.end()) sameFaction = 1;
+                    }
+                    if(!selectCompare<int,int>(comp,sameFaction,select.i)) return false;
+                    }
                     break;
 
                 case 48://Detected
@@ -193,7 +202,6 @@ namespace MWDialogue
                     break;
 
                 case 50://choice
-                    isAChoice = true;
                     if(choice)
                     {
                         if(!selectCompare<int,int>(comp,mChoice,select.i)) return false;
@@ -273,7 +281,7 @@ namespace MWDialogue
             {
             case '1': // function
 
-                return true; // TODO implement functions
+                return true; // Done elsewhere.
 
             case '2': // global
 
@@ -447,9 +455,6 @@ namespace MWDialogue
             if (toLower (info.actor)!=MWWorld::Class::get (actor).getId (actor))
                 return false;
 
-        //PC Faction
-        if(!info.pcFaction.empty()) return false;
-
         //NPC race
         if (!info.race.empty())
         {
@@ -477,26 +482,37 @@ namespace MWDialogue
         //NPC faction
         if (!info.npcFaction.empty())
         {
-            ESMS::LiveCellRef<ESM::NPC, MWWorld::RefData> *cellRef = actor.get<ESM::NPC>();
-
-            if (!cellRef)
-                return false;
-
-            if (toLower (info.npcFaction)!=toLower (cellRef->base->faction))
-                return false;
-
-            //check NPC rank
-            if(cellRef->base->npdt52.gold != -10)
+            //MWWorld::Class npcClass = MWWorld::Class::get(actor);
+            MWMechanics::NpcStats stats = MWWorld::Class::get(actor).getNpcStats(actor);
+            std::map<std::string,int>::iterator it = stats.mFactionRank.find(info.npcFaction);
+            if(it!=stats.mFactionRank.end())
             {
-                if(cellRef->base->npdt52.rank < info.data.rank) return false;
+                //check rank
+                if(it->second < (int)info.data.rank) return false;
             }
             else
             {
-                if(cellRef->base->npdt12.rank < info.data.rank) return false;
+                //not in the faction
+                return false;
             }
         }
 
         // TODO check player faction
+        if(!info.pcFaction.empty())
+        {
+            MWMechanics::NpcStats stats = MWWorld::Class::get(mEnvironment.mWorld->getPlayer().getPlayer()).getNpcStats(mEnvironment.mWorld->getPlayer().getPlayer());
+            std::map<std::string,int>::iterator it = stats.mFactionRank.find(info.pcFaction);
+            if(it!=stats.mFactionRank.end())
+            {
+                //check rank
+                if(it->second < (int)info.data.PCrank) return false;
+            }
+            else
+            {
+                //not in the faction
+                return false;
+            }
+        }
 
         //check gender
         ESMS::LiveCellRef<ESM::NPC, MWWorld::RefData>* npc = actor.get<ESM::NPC>();
@@ -516,7 +532,6 @@ namespace MWDialogue
                 return false;
 
         // TODO check DATAstruct
-
         for (std::vector<ESM::DialInfo::SelectStruct>::const_iterator iter (info.selects.begin());
             iter != info.selects.end(); ++iter)
             if (!isMatching (actor, *iter))
@@ -532,6 +547,13 @@ namespace MWDialogue
         mChoice = -1;
         mIsInChoice = false;
         mCompilerContext.setExtensions (&extensions);
+        mDialogueMap.clear();
+        actorKnownTopics.clear();
+        ESMS::RecListT<ESM::Dialogue>::MapType dialogueList = mEnvironment.mWorld->getStore().dialogs.list;
+        for(ESMS::RecListT<ESM::Dialogue>::MapType::iterator it = dialogueList.begin(); it!=dialogueList.end();it++)
+        {
+            mDialogueMap[it->first] = it->second;
+        }
     }
 
     void DialogueManager::addTopic(std::string topic)
@@ -567,13 +589,7 @@ namespace MWDialogue
 
         mActor = actor;
 
-        mDialogueMap.clear();
         actorKnownTopics.clear();
-        ESMS::RecListT<ESM::Dialogue>::MapType dialogueList = mEnvironment.mWorld->getStore().dialogs.list;
-        for(ESMS::RecListT<ESM::Dialogue>::MapType::iterator it = dialogueList.begin(); it!=dialogueList.end();it++)
-        {
-            mDialogueMap[it->first] = it->second;
-        }
 
         //initialise the GUI
         mEnvironment.mInputManager->setGuiMode(MWGui::GM_Dialogue);
@@ -586,6 +602,7 @@ namespace MWDialogue
         //greeting
         bool greetingFound = false;
         //ESMS::RecListT<ESM::Dialogue>::MapType dialogueList = mEnvironment.mWorld->getStore().dialogs.list;
+        ESMS::RecListT<ESM::Dialogue>::MapType dialogueList = mEnvironment.mWorld->getStore().dialogs.list;
         for(ESMS::RecListT<ESM::Dialogue>::MapType::iterator it = dialogueList.begin(); it!=dialogueList.end();it++)
         {
             ESM::Dialogue ndialogue = it->second;
@@ -660,6 +677,7 @@ namespace MWDialogue
 
     void DialogueManager::executeScript(std::string script)
     {
+        std::cout << script;
         std::vector<Interpreter::Type_Code> code;
         if(compile(script,code))
         {
@@ -680,7 +698,8 @@ namespace MWDialogue
     void DialogueManager::updateTopics()
     {
         std::list<std::string> keywordList;
-
+        int choice = mChoice;
+        mChoice = -1;
         actorKnownTopics.clear();
         MWGui::DialogueWindow* win = mEnvironment.mWindowManager->getDialogueWindow();
         ESMS::RecListT<ESM::Dialogue>::MapType dialogueList = mEnvironment.mWorld->getStore().dialogs.list;
@@ -692,7 +711,7 @@ namespace MWDialogue
                 for (std::vector<ESM::DialInfo>::const_iterator iter (it->second.mInfo.begin());
                     iter!=it->second.mInfo.end(); ++iter)
                 {
-                    if (isMatching (mActor, *iter) && functionFilter(mActor,*iter,false))
+                    if (isMatching (mActor, *iter) && functionFilter(mActor,*iter,true))
                     {
                          actorKnownTopics.push_back(it->first);
                         //does the player know the topic?
@@ -706,6 +725,7 @@ namespace MWDialogue
             }
         }
         win->setKeywords(keywordList);
+        mChoice = choice;
     }
 
     void DialogueManager::keywordSelected(std::string keyword)
@@ -715,10 +735,9 @@ namespace MWDialogue
             if(mDialogueMap.find(keyword) != mDialogueMap.end())
             {
                 ESM::Dialogue ndialogue = mDialogueMap[keyword];
-                std::vector<ESM::DialInfo>::const_iterator iter;
                 if(ndialogue.type == ESM::Dialogue::Topic)
                 {
-                    for (iter  = ndialogue.mInfo.begin();
+                    for (std::vector<ESM::DialInfo>::const_iterator iter  = ndialogue.mInfo.begin();
                         iter!=ndialogue.mInfo.end(); ++iter)
                     {
                         if (isMatching (mActor, *iter) && functionFilter(mActor,*iter,true))
@@ -742,6 +761,7 @@ namespace MWDialogue
                 }
             }
         }
+
         updateTopics();
     }
 
@@ -798,5 +818,20 @@ namespace MWDialogue
         win->askQuestion(question);
         mChoiceMap[question] = choice;
         mIsInChoice = true;
+    }
+
+    std::string DialogueManager::getFaction()
+    {
+        std::string factionID("");
+        MWMechanics::NpcStats stats = MWWorld::Class::get(mActor).getNpcStats(mActor);
+        if(stats.mFactionRank.empty())
+        {
+            std::cout << "No faction for this actor!";
+        }
+        else
+        {
+            factionID = stats.mFactionRank.begin()->first;
+        }
+        return factionID;
     }
 }
