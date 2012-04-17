@@ -29,8 +29,8 @@ private:
 	   std::pair<Ogre::Entity*, std::vector<Nif::NiTriShapeCopy>*> lhand;
 	   std::pair<Ogre::Entity*, std::vector<Nif::NiTriShapeCopy>*> rhand;
 	   std::pair<Ogre::Entity*, std::vector<Nif::NiTriShapeCopy>*> tail;
-	   std::pair<Ogre::Entity*, std::vector<Nif::NiTriShapeCopy>*> lBeastFoot;
-	   std::pair<Ogre::Entity*, std::vector<Nif::NiTriShapeCopy>*> rBeastFoot;
+	   std::pair<Ogre::Entity*, std::vector<Nif::NiTriShapeCopy>*> lFreeFoot;
+	   std::pair<Ogre::Entity*, std::vector<Nif::NiTriShapeCopy>*> rFreeFoot;
 
        int partslots[27];  //Each part slot is taken by clothing, armor, or is empty
        int partpriorities[27];
@@ -86,6 +86,7 @@ private:
      virtual ~NpcAnimation();
     Ogre::Entity* insertBoundedPart(const std::string &mesh, std::string bonename);
      std::pair<Ogre::Entity*, std::vector<Nif::NiTriShapeCopy>*> insertFreePart(const std::string &mesh, const std::string suffix);
+     void insertFootPart(int type, const std::string &mesh);
 	virtual void runAnimation(float timepassed);
 	void updateParts();
     void removeIndividualPart(int type);
