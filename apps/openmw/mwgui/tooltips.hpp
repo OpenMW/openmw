@@ -56,13 +56,7 @@ namespace MWGui
         MyGUI::IntSize getToolTipViaPtr ();
         ///< @return requested tooltip size
 
-        MyGUI::IntSize createImageToolTip(const std::string& caption, const std::string& image, const int imageSize, const std::string& text);
-        ///< @return requested tooltip size
-
-        MyGUI::IntSize createToolTip(const std::string& caption, const std::string& text);
-        ///< @return requested tooltip size
-
-        MyGUI::IntSize createToolTip(const std::string& text);
+        MyGUI::IntSize createToolTip(const std::string& caption, const std::string& image, const int imageSize, const std::string& text);
         ///< @return requested tooltip size
 
         bool mGameMode;

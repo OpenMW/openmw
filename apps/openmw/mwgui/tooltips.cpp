@@ -47,9 +47,6 @@ void ToolTips::onFrame(float frameDuration)
             return;
         }
 
-        // this the maximum width of the tooltip before it starts word-wrapping
-        setCoord(0, 0, 300, 300);
-
         IntSize tooltipSize;
 
         std::string type = focus->getUserString("ToolTipType");
@@ -60,11 +57,11 @@ void ToolTips::onFrame(float frameDuration)
             return;
         }
         else if (type == "Text")
-            tooltipSize = createToolTip(text);
+            tooltipSize = createToolTip(text, "", 0, "");
         else if (type == "CaptionText")
         {
             std::string caption = focus->getUserString("ToolTipCaption");
-            tooltipSize = createToolTip(caption, text);
+            tooltipSize = createToolTip(caption, "", 0, text);
         }
         else if (type == "ImageCaptionText")
         {
@@ -72,23 +69,22 @@ void ToolTips::onFrame(float frameDuration)
             std::string image = focus->getUserString("ToolTipImage");
             std::string sizeString = focus->getUserString("ToolTipImageSize");
             int size = (sizeString != "" ? boost::lexical_cast<int>(sizeString) : 32);
-            tooltipSize = createImageToolTip(caption, image, size, text);
+            tooltipSize = createToolTip(caption, image, size, text);
         }
 
         IntPoint tooltipPosition = InputManager::getInstance().getMousePosition() + IntPoint(0, 24);
 
-        IntSize size = tooltipSize + IntSize(6, 6);
         // make the tooltip stay completely in the viewport
-        if ((tooltipPosition.left + size.width) > viewSize.width)
+        if ((tooltipPosition.left + tooltipSize.width) > viewSize.width)
         {
-            tooltipPosition.left = viewSize.width - size.width;
+            tooltipPosition.left = viewSize.width - tooltipSize.width;
         }
-        if ((tooltipPosition.top + size.height) > viewSize.height)
+        if ((tooltipPosition.top + tooltipSize.height) > viewSize.height)
         {
-            tooltipPosition.top = viewSize.height - size.height;
+            tooltipPosition.top = viewSize.height - tooltipSize.height;
         }
 
-        setCoord(tooltipPosition.left, tooltipPosition.top, size.width, size.height);
+        setCoord(tooltipPosition.left, tooltipPosition.top, tooltipSize.width, tooltipSize.height);
         mDynamicToolTipBox->setVisible(true);
     }
     else
@@ -96,8 +92,6 @@ void ToolTips::onFrame(float frameDuration)
         if (!mFocusObject.isEmpty())
         {
             IntSize tooltipSize = getToolTipViaPtr();
-
-            tooltipSize += IntSize(6,6); // padding, adjust for skin
 
             // adjust tooltip size to fit its content, position it above the crosshair
             /// \todo Slide the tooltip along the bounding box of the focused object (like in Morrowind)
@@ -145,11 +139,11 @@ IntSize ToolTips::getToolTipViaPtr ()
         ToolTipInfo info = object.getToolTipInfo(mFocusObject, mWindowManager->getEnvironment());
         if (info.icon == "")
         {
-            tooltipSize= createToolTip(info.caption, info.text);
+            tooltipSize = createToolTip(info.caption, "", 0, info.text);
         }
         else
         {
-            tooltipSize = createImageToolTip(info.caption, info.icon, 32, info.text);
+            tooltipSize = createToolTip(info.caption, info.icon, 32, info.text);
         }
     }
 
@@ -170,12 +164,20 @@ void ToolTips::findImageExtension(std::string& image)
     }
 }
 
-IntSize ToolTips::createImageToolTip(const std::string& caption, const std::string& image, const int imageSize, const std::string& text)
+IntSize ToolTips::createToolTip(const std::string& caption, const std::string& image, const int imageSize, const std::string& text)
 {
     // remove the first newline (easier this way)
     std::string realText = text;
     if (realText.size() > 0 && realText[0] == '\n')
         realText.erase(0, 1);
+
+    // this the maximum width of the tooltip before it starts word-wrapping
+    setCoord(0, 0, 300, 300);
+
+    const IntPoint padding(8, 8);
+
+    const int imageCaptionHPadding = 8;
+    const int imageCaptionVPadding = 4;
 
     std::string realImage = "icons\\" + image;
     findImageExtension(realImage);
@@ -183,56 +185,42 @@ IntSize ToolTips::createImageToolTip(const std::string& caption, const std::stri
     EditBox* captionWidget = mDynamicToolTipBox->createWidget<EditBox>("NormalText", IntCoord(0, 0, 300, 300), Align::Left | Align::Top, "ToolTipCaption");
     captionWidget->setProperty("Static", "true");
     captionWidget->setCaption(caption);
-    EditBox* textWidget = mDynamicToolTipBox->createWidget<EditBox>("SandText", IntCoord(0, imageSize, 300, 300-imageSize), Align::Stretch, "ToolTipText");
+    IntSize captionSize = captionWidget->getTextSize();
+
+    int captionHeight = std::max(captionSize.height, imageSize);
+
+    EditBox* textWidget = mDynamicToolTipBox->createWidget<EditBox>("SandText", IntCoord(0, captionHeight+imageCaptionVPadding, 300, 300-captionHeight-imageCaptionVPadding), Align::Stretch, "ToolTipText");
     textWidget->setProperty("Static", "true");
     textWidget->setProperty("MultiLine", "true");
     textWidget->setProperty("WordWrap", "true");
     textWidget->setCaption(realText);
-    textWidget->setTextAlign(Align::HCenter);
-
-    IntSize captionSize = captionWidget->getTextSize();
+    textWidget->setTextAlign(Align::HCenter | Align::Top);
     IntSize textSize = textWidget->getTextSize();
 
     captionSize += IntSize(imageSize, 0); // adjust for image
-    IntSize totalSize = IntSize( std::max(textSize.width, captionSize.width), ((realText != "") ? textSize.height : 0) + imageSize );
+    IntSize totalSize = IntSize( std::max(textSize.width, captionSize.width + ((image != "") ? imageCaptionHPadding : 0)),
+        ((realText != "") ? textSize.height + imageCaptionVPadding : 0) + captionHeight );
 
-    ImageBox* imageWidget = mDynamicToolTipBox->createWidget<ImageBox>("ImageBox",
-        IntCoord((totalSize.width - captionSize.width)/2, 0, imageSize, imageSize),
-        Align::Left | Align::Top, "ToolTipImage");
-    imageWidget->setImageTexture(realImage);
+    if (image != "")
+    {
+        ImageBox* imageWidget = mDynamicToolTipBox->createWidget<ImageBox>("ImageBox",
+            IntCoord((totalSize.width - captionSize.width - imageCaptionHPadding)/2, 0, imageSize, imageSize),
+            Align::Left | Align::Top, "ToolTipImage");
+        imageWidget->setImageTexture(realImage);
+        imageWidget->setPosition (imageWidget->getPosition() + padding);
+    }
 
-    captionWidget->setCoord( (totalSize.width - captionSize.width)/2 + imageSize, (imageSize-captionSize.height)/2, captionSize.width-imageSize, captionSize.height);
+    captionWidget->setCoord( (totalSize.width - captionSize.width)/2 + imageSize,
+        (captionHeight-captionSize.height)/2,
+        captionSize.width-imageSize,
+        captionSize.height);
+
+    captionWidget->setPosition (captionWidget->getPosition() + padding);
+    textWidget->setPosition (textWidget->getPosition() + IntPoint(0, padding.top)); // only apply vertical padding, the horizontal works automatically due to Align::HCenter
+
+    totalSize += IntSize(padding.left*2, padding.top*2);
 
     return totalSize;
-}
-
-IntSize ToolTips::createToolTip(const std::string& caption, const std::string& text)
-{
-    // remove the first newline (easier this way)
-    std::string realText = text;
-    if (realText.size() > 0 && realText[0] == '\n')
-        realText.erase(0, 1);
-
-    EditBox* box = mDynamicToolTipBox->createWidget<EditBox>("NormalText", IntCoord(0, 0, 300, 300), Align::Stretch, "ToolTip");
-    box->setTextAlign(Align::HCenter);
-    box->setProperty("Static", "true");
-    box->setProperty("MultiLine", "true");
-    box->setProperty("WordWrap", "true");
-    box->setCaption(caption + (realText != "" ? "\n#BF9959" + realText : ""));
-
-    return box->getTextSize();
-}
-
-IntSize ToolTips::createToolTip(const std::string& text)
-{
-    EditBox* box = mDynamicToolTipBox->createWidget<EditBox>("SandText", IntCoord(0, 0, 300, 300), Align::Stretch, "ToolTip");
-    box->setTextAlign(Align::HCenter);
-    box->setProperty("Static", "true");
-    box->setProperty("MultiLine", "true");
-    box->setProperty("WordWrap", "true");
-    box->setCaption(text);
-
-    return box->getTextSize();
 }
 
 std::string ToolTips::toString(const float value)
