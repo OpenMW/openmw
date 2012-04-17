@@ -164,12 +164,30 @@ namespace MWClass
 
         std::string text;
 
-        /// \todo If destCell is empty, the teleport target is an exterior cell. In that case we 
-        /// need to fetch that cell (via target position) and retrieve the region name.
-        if (ref->ref.teleport && (ref->ref.destCell != ""))
+        if (ref->ref.teleport)
         {
+            std::string dest;
+            if (ref->ref.destCell != "")
+            {
+                // door leads to an interior, use interior name as tooltip
+                dest = ref->ref.destCell;
+            }
+            else
+            {
+                // door leads to exterior, use cell name (if any), otherwise translated region name
+                int x,y;
+                environment.mWorld->positionToIndex (ref->ref.doorDest.pos[0], ref->ref.doorDest.pos[1], x, y);
+                const ESM::Cell* cell = environment.mWorld->getStore().cells.findExt(x,y);
+                if (cell->name != "")
+                    dest = cell->name;
+                else
+                {
+                    const ESM::Region* region = environment.mWorld->getStore().regions.search(cell->region);
+                    dest = region->name;
+                }
+            }
             text += "\n" + environment.mWorld->getStore().gameSettings.search("sTo")->str;
-            text += "\n"+ref->ref.destCell;
+            text += "\n"+dest;
         }
 
         if (ref->ref.lockLevel > 0)
