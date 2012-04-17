@@ -256,9 +256,9 @@ void ShaderHelper::createShader(const bool mrt, const bool shadows, const bool s
         }
 
         outStream <<
-        "   float3 lightingFinal = lightColour.xyz * diffuse.xyz * vertexColour.xyz + ambient.xyz * lightAmbient.xyz + emissive.xyz; \n"
+        "   float3 lightingFinal = lightColour.xyz * diffuse.xyz + ambient.xyz * lightAmbient.xyz + emissive.xyz; \n"
         "   float fogValue = saturate((iDepth - fogParams.y) * fogParams.w); \n"
-        "   oColor.xyz = lerp(lightingFinal * tex.xyz, fogColour.xyz, fogValue); \n"
+        "   oColor.xyz = lerp(lightingFinal * tex.xyz * vertexColour.xyz, fogColour.xyz, fogValue); \n"
         "   oColor.a = tex.a * diffuse.a * vertexColour.a; \n";
 
         if (mrt) outStream <<
