@@ -183,6 +183,16 @@ void DialogueWindow::addText(std::string text)
 
 void DialogueWindow::addTitle(std::string text)
 {
+    // This is called from the dialogue manager, so text is
+    // case-smashed - thus we have to retrieve the correct case
+    // of the text through the topic list.
+    for (size_t i=0; i<topicsList->getItemCount(); ++i)
+    {
+        std::string item = topicsList->getItemNameAt(i);
+        if (lower_string(item) == text)
+            text = item;
+    }
+
     history->addDialogHeading(text);
 }
 

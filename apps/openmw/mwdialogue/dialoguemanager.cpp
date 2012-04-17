@@ -549,10 +549,10 @@ namespace MWDialogue
         mCompilerContext.setExtensions (&extensions);
         mDialogueMap.clear();
         actorKnownTopics.clear();
-        ESMS::RecListT<ESM::Dialogue>::MapType dialogueList = mEnvironment.mWorld->getStore().dialogs.list;
-        for(ESMS::RecListT<ESM::Dialogue>::MapType::iterator it = dialogueList.begin(); it!=dialogueList.end();it++)
+        ESMS::RecListCaseT<ESM::Dialogue>::MapType dialogueList = mEnvironment.mWorld->getStore().dialogs.list;
+        for(ESMS::RecListCaseT<ESM::Dialogue>::MapType::iterator it = dialogueList.begin(); it!=dialogueList.end();it++)
         {
-            mDialogueMap[it->first] = it->second;
+            mDialogueMap[toLower(it->first)] = it->second;
         }
     }
 
@@ -602,8 +602,8 @@ namespace MWDialogue
         //greeting
         bool greetingFound = false;
         //ESMS::RecListT<ESM::Dialogue>::MapType dialogueList = mEnvironment.mWorld->getStore().dialogs.list;
-        ESMS::RecListT<ESM::Dialogue>::MapType dialogueList = mEnvironment.mWorld->getStore().dialogs.list;
-        for(ESMS::RecListT<ESM::Dialogue>::MapType::iterator it = dialogueList.begin(); it!=dialogueList.end();it++)
+        ESMS::RecListCaseT<ESM::Dialogue>::MapType dialogueList = mEnvironment.mWorld->getStore().dialogs.list;
+        for(ESMS::RecListCaseT<ESM::Dialogue>::MapType::iterator it = dialogueList.begin(); it!=dialogueList.end();it++)
         {
             ESM::Dialogue ndialogue = it->second;
             if(ndialogue.type == ESM::Dialogue::Greeting)
@@ -702,8 +702,8 @@ namespace MWDialogue
         mChoice = -1;
         actorKnownTopics.clear();
         MWGui::DialogueWindow* win = mEnvironment.mWindowManager->getDialogueWindow();
-        ESMS::RecListT<ESM::Dialogue>::MapType dialogueList = mEnvironment.mWorld->getStore().dialogs.list;
-        for(ESMS::RecListT<ESM::Dialogue>::MapType::iterator it = dialogueList.begin(); it!=dialogueList.end();it++)
+        ESMS::RecListCaseT<ESM::Dialogue>::MapType dialogueList = mEnvironment.mWorld->getStore().dialogs.list;
+        for(ESMS::RecListCaseT<ESM::Dialogue>::MapType::iterator it = dialogueList.begin(); it!=dialogueList.end();it++)
         {
             ESM::Dialogue ndialogue = it->second;
             if(ndialogue.type == ESM::Dialogue::Topic)
@@ -713,7 +713,7 @@ namespace MWDialogue
                 {
                     if (isMatching (mActor, *iter) && functionFilter(mActor,*iter,true))
                     {
-                         actorKnownTopics.push_back(it->first);
+                        actorKnownTopics.push_back(toLower(it->first));
                         //does the player know the topic?
                         if(knownTopics.find(toLower(it->first)) != knownTopics.end())
                         {
