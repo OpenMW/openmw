@@ -52,6 +52,10 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
     // Load resources
     ResourceGroupManager::getSingleton().initialiseAllResourceGroups();
 
+    // Due to the huge world size of MW, we'll want camera-relative rendering.
+    // This prevents precision artifacts when moving very far from the origin.
+    mRendering.getScene()->setCameraRelativeRendering(true);
+
     // disable unsupported effects
     const RenderSystemCapabilities* caps = Root::getSingleton().getRenderSystem()->getCapabilities();
     if (caps->getNumMultiRenderTargets() < 2 || !Settings::Manager::getBool("shaders", "Objects"))
