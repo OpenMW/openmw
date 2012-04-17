@@ -269,10 +269,59 @@ namespace MWClass
 
         std::string text;
 
-        /// \todo weapon type, damage
+        // weapon type & damage. arrows / bolts don't have his info.
+        if (ref->base->data.type < 12)
+        {
+            text += "\n" + environment.mWorld->getStore().gameSettings.search("sType")->str + " ";
+
+            std::map <int, std::pair <std::string, std::string> > mapping;
+            mapping[ESM::Weapon::ShortBladeOneHand] = std::make_pair("sSkillShortblade", "sOneHanded");
+            mapping[ESM::Weapon::LongBladeOneHand] = std::make_pair("sSkillLongblade", "sOneHanded");
+            mapping[ESM::Weapon::LongBladeTwoHand] = std::make_pair("sSkillLongblade", "sTwoHanded");
+            mapping[ESM::Weapon::BluntOneHand] = std::make_pair("sSkillBluntweapon", "sOneHanded");
+            mapping[ESM::Weapon::BluntTwoClose] = std::make_pair("sSkillBluntweapon", "sTwoHanded");
+            mapping[ESM::Weapon::BluntTwoWide] = std::make_pair("sSkillBluntweapon", "sTwoHanded");
+            mapping[ESM::Weapon::SpearTwoWide] = std::make_pair("sSkillSpear", "sTwoHanded");
+            mapping[ESM::Weapon::AxeOneHand] = std::make_pair("sSkillAxe", "sOneHanded");
+            mapping[ESM::Weapon::AxeTwoHand] = std::make_pair("sSkillAxe", "sTwoHanded");
+            mapping[ESM::Weapon::MarksmanBow] = std::make_pair("sSkillMarksman", "");
+            mapping[ESM::Weapon::MarksmanCrossbow] = std::make_pair("sSkillMarksman", "");
+            mapping[ESM::Weapon::MarksmanThrown] = std::make_pair("sSkillMarksman", "");
+
+            std::string type = mapping[ref->base->data.type].first;
+            std::string oneOrTwoHanded = mapping[ref->base->data.type].second;
+
+            text += environment.mWorld->getStore().gameSettings.search(type)->str +
+                ((oneOrTwoHanded != "") ? ", " + environment.mWorld->getStore().gameSettings.search(oneOrTwoHanded)->str : "");
+
+            // weapon damage
+            if (ref->base->data.type >= 9)
+            {
+                // marksman
+                text += "\n" + environment.mWorld->getStore().gameSettings.search("sAttack")->str + ": "
+                    + MWGui::ToolTips::toString(static_cast<int>(ref->base->data.chop[0]))
+                    + " - " + MWGui::ToolTips::toString(static_cast<int>(ref->base->data.chop[1]));
+            }
+            else
+            {
+                // Chop
+                text += "\n" + environment.mWorld->getStore().gameSettings.search("sChop")->str + ": "
+                    + MWGui::ToolTips::toString(static_cast<int>(ref->base->data.chop[0]))
+                    + " - " + MWGui::ToolTips::toString(static_cast<int>(ref->base->data.chop[1]));
+                // Slash
+                text += "\n" + environment.mWorld->getStore().gameSettings.search("sSlash")->str + ": "
+                    + MWGui::ToolTips::toString(static_cast<int>(ref->base->data.slash[0]))
+                    + " - " + MWGui::ToolTips::toString(static_cast<int>(ref->base->data.slash[1]));
+                // Thrust
+                text += "\n" + environment.mWorld->getStore().gameSettings.search("sThrust")->str + ": "
+                    + MWGui::ToolTips::toString(static_cast<int>(ref->base->data.thrust[0]))
+                    + " - " + MWGui::ToolTips::toString(static_cast<int>(ref->base->data.thrust[1]));
+            }
+        }
 
         /// \todo store the current weapon health somewhere
-        text += "\n" + environment.mWorld->getStore().gameSettings.search("sCondition")->str + ": " + MWGui::ToolTips::toString(ref->base->data.health);
+        if (ref->base->data.type < 11) // thrown weapons and arrows/bolts don't have health, only quantity
+            text += "\n" + environment.mWorld->getStore().gameSettings.search("sCondition")->str + ": " + MWGui::ToolTips::toString(ref->base->data.health);
 
         text += "\n" + environment.mWorld->getStore().gameSettings.search("sWeight")->str + ": " + MWGui::ToolTips::toString(ref->base->data.weight);
         text += MWGui::ToolTips::getValueString(ref->base->data.value, environment.mWorld->getStore().gameSettings.search("sValue")->str);
