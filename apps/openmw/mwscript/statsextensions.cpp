@@ -436,6 +436,53 @@ namespace MWScript
         };
 
         template<class R>
+        class OpGetPCRank : public Interpreter::Opcode1
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime, unsigned int arg0)
+                {
+                    MWWorld::Ptr ptr = R()(runtime);
+
+                    std::string factionID = "";
+                    if(arg0 >0)
+                    {
+                        factionID = runtime.getStringLiteral (runtime[0].mInteger);
+                        runtime.pop();
+                    }
+                    else
+                    {
+                        if(MWWorld::Class::get(ptr).getNpcStats(ptr).mFactionRank.empty())
+                        {
+                            //throw exception?
+                        }
+                        else
+                        {
+                            factionID = MWWorld::Class::get(ptr).getNpcStats(ptr).mFactionRank.begin()->first;
+                        }
+                    }
+                    MWScript::InterpreterContext& context
+                        = static_cast<MWScript::InterpreterContext&> (runtime.getContext());
+                    MWWorld::Ptr player = context.getEnvironment().mWorld->getPlayer().getPlayer();
+                    if(factionID!="")
+                    {
+                        if(MWWorld::Class::get(player).getNpcStats(player).mFactionRank.find(factionID) != MWWorld::Class::get(player).getNpcStats(player).mFactionRank.end())
+                        {
+                            runtime.push(MWWorld::Class::get(player).getNpcStats(player).mFactionRank[factionID]);
+                        }
+                        else
+                        {
+                            runtime.push(-1);
+                        }
+                    }
+                    else
+                    {
+                        runtime.push(-1);
+                    }
+                }
+        };
+        
+        template<class R>
         class OpModDisposition : public Interpreter::Opcode0
         {
             public:
@@ -492,6 +539,8 @@ namespace MWScript
         const int opcodePCRaiseRank = 0x2000b;
         const int opcodePCLowerRank = 0x2000c;
         const int opcodePCJoinFaction = 0x2000d;
+        const int opcodeGetPCRank = 0x2000e;
+        const int opcodeGetPCRankExplicit = 0x2000f;
         const int opcodeModDisposition = 0x200014d;
         const int opcodeModDispositionExplicit = 0x200014e;
 
@@ -576,6 +625,7 @@ namespace MWScript
             extensions.registerInstruction("pcjoinfaction","/S",opcodePCJoinFaction);
             extensions.registerInstruction("moddisposition","l",opcodeModDisposition,
                 opcodeModDispositionExplicit);
+            extensions.registerFunction("getpcrank",'l',"/S",opcodeGetPCRank,opcodeGetPCRankExplicit);
         }
 
         void installOpcodes (Interpreter::Interpreter& interpreter)
@@ -645,6 +695,8 @@ namespace MWScript
             interpreter.installSegment3(opcodePCJoinFaction,new OpPCJoinFaction);
             interpreter.installSegment5(opcodeModDisposition,new OpModDisposition<ImplicitRef>);
             interpreter.installSegment5(opcodeModDispositionExplicit,new OpModDisposition<ExplicitRef>);
+            interpreter.installSegment3(opcodeGetPCRank,new OpGetPCRank<ImplicitRef>);
+            interpreter.installSegment3(opcodeGetPCRankExplicit,new OpGetPCRank<ExplicitRef>);
         }
     }
 }

@@ -72,7 +72,7 @@ void MWWorld::InventoryStore::equip (int slot, const ContainerStoreIterator& ite
     /// \todo restack item previously in this slot (if required)
 
     /// \todo unstack item pointed to by iterator if required)
-
+	
     mSlots[slot] = iterator;
 
     flagAsModified();
