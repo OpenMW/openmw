@@ -89,6 +89,7 @@ void ToolTips::onFrame(float frameDuration)
         }
 
         setCoord(tooltipPosition.left, tooltipPosition.top, size.width, size.height);
+        mDynamicToolTipBox->setVisible(true);
     }
     else
     {
