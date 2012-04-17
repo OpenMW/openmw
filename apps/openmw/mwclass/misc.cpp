@@ -132,6 +132,12 @@ namespace MWClass
         info.caption = ref->base->name;
         info.icon = ref->base->icon;
 
+        if (ref->ref.soul != "")
+        {
+            const ESM::Creature *creature = environment.mWorld->getStore().creatures.search(ref->ref.soul);
+            info.caption += " (" + creature->name + ")";
+        }
+
         std::string text;
 
         if (ref->base->name == environment.mWorld->getStore().gameSettings.search("sGold")->str)
