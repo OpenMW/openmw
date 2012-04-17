@@ -436,14 +436,14 @@ void NpcAnimation::updateParts(){
                 }
                   if(partpriorities[ESM::PRT_RFoot] < 1){
                     const ESM::BodyPart *footPart = mEnvironment.mWorld->getStore().bodyParts.search (bodyRaceID + "foot");
-                    if(isBeast)
+                    if(isBeast && !footPart)
                         footPart = mEnvironment.mWorld->getStore().bodyParts.search (bodyRaceID + "feet");
                     if(footPart)
                         addOrReplaceIndividualPart(ESM::PRT_RFoot, -1,1,"meshes\\" + footPart->model);
                 }
                   if(partpriorities[ESM::PRT_LFoot] < 1){
                     const ESM::BodyPart *footPart = mEnvironment.mWorld->getStore().bodyParts.search (bodyRaceID + "foot");
-                    if(isBeast)
+                    if(isBeast && !footPart)
                         footPart = mEnvironment.mWorld->getStore().bodyParts.search (bodyRaceID + "feet");
                     if(footPart)
                         addOrReplaceIndividualPart(ESM::PRT_LFoot, -1,1,"meshes\\" + footPart->model);
