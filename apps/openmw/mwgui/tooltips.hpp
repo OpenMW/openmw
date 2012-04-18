@@ -13,11 +13,21 @@ namespace MWGui
     struct ToolTipInfo
     {
     public:
+        ToolTipInfo() :
+            enchant(0),
+            effects(0)
+        {
+        };
+
         std::string caption;
         std::string text;
         std::string icon;
 
-        /// \todo enchantments (armor, cloth, weapons), magic effects (potions, ingredients)
+        // enchantment (for cloth, armor, weapons)
+        const ESM::Enchantment* enchant;
+
+        // effects (for potions, ingredients)
+        const ESM::EffectList* effects;
     };
 
     class ToolTips : public OEngine::GUI::Layout
@@ -56,7 +66,7 @@ namespace MWGui
         MyGUI::IntSize getToolTipViaPtr ();
         ///< @return requested tooltip size
 
-        MyGUI::IntSize createToolTip(const std::string& caption, const std::string& image, const int imageSize, const std::string& text);
+        MyGUI::IntSize createToolTip(const ToolTipInfo& info);
         ///< @return requested tooltip size
 
         bool mGameMode;

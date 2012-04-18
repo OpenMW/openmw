@@ -290,6 +290,12 @@ void MWSpellEffect::updateWidgets()
     {
         if (magicEffect)
         {
+            std::string pt =  mWindowManager->getGameSettingString("spoint", "");
+            std::string pts =  mWindowManager->getGameSettingString("spoints", "");
+            std::string to =  " " + mWindowManager->getGameSettingString("sTo", "") + " ";
+            std::string sec =  " " + mWindowManager->getGameSettingString("ssecond", "");
+            std::string secs =  " " + mWindowManager->getGameSettingString("sseconds", "");
+
             // TODO: Get name of effect from GMST
             std::string spellLine = "";
             if (effect.skill >= 0 && effect.skill < ESM::Skill::Length)
@@ -313,22 +319,24 @@ void MWSpellEffect::updateWidgets()
             if (effect.magnMin >= 0 || effect.magnMax >= 0)
             {
                 if (effect.magnMin == effect.magnMax)
-                    spellLine += " " + boost::lexical_cast<std::string>(effect.magnMin) + " pts";
+                    spellLine += " " + boost::lexical_cast<std::string>(effect.magnMin) + " " + ((effect.magnMin == 1) ? pt : pts);
                 else
                 {
-                    spellLine += " " + boost::lexical_cast<std::string>(effect.magnMin) + " to " + boost::lexical_cast<std::string>(effect.magnMin) + " pts";
+                    spellLine += " " + boost::lexical_cast<std::string>(effect.magnMin) + to + boost::lexical_cast<std::string>(effect.magnMin) + " " + pts;
                 }
             }
             if (effect.duration >= 0)
             {
-                spellLine += " for " + boost::lexical_cast<std::string>(effect.duration) + " secs";
+                spellLine += " " + mWindowManager->getGameSettingString("sfor", "") + " " + boost::lexical_cast<std::string>(effect.duration) + ((effect.duration == 1) ? sec : secs);
             }
+
+            std::string on = mWindowManager->getGameSettingString("sonword", "");
             if (effect.range == ESM::RT_Self)
-                spellLine += " on Self";
+                spellLine += " " + on + " " + mWindowManager->getGameSettingString("sRangeSelf", "");
             else if (effect.range == ESM::RT_Touch)
-                spellLine += " on Touch";
+                spellLine += " " + on + " " + mWindowManager->getGameSettingString("sRangeTouch", "");
             else if (effect.range == ESM::RT_Target)
-                spellLine += " on Target";
+                spellLine += " " + on + " " + mWindowManager->getGameSettingString("sRangeTarget", "");
             static_cast<MyGUI::TextBox*>(textWidget)->setCaption(spellLine);
         }
         else

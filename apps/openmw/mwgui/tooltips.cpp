@@ -51,26 +51,35 @@ void ToolTips::onFrame(float frameDuration)
 
         std::string type = focus->getUserString("ToolTipType");
         std::string text = focus->getUserString("ToolTipText");
+
+        ToolTipInfo info;
+
         if (type == "")
         {
             mDynamicToolTipBox->setVisible(false);
             return;
-        }
+        }        
         else if (type == "Text")
-            tooltipSize = createToolTip(text, "", 0, "");
+        {
+            info.caption = text;
+        }
         else if (type == "CaptionText")
         {
             std::string caption = focus->getUserString("ToolTipCaption");
-            tooltipSize = createToolTip(caption, "", 0, text);
+            info.caption = caption;
+            info.text = text;
         }
         else if (type == "ImageCaptionText")
         {
             std::string caption = focus->getUserString("ToolTipCaption");
             std::string image = focus->getUserString("ToolTipImage");
             std::string sizeString = focus->getUserString("ToolTipImageSize");
-            int size = (sizeString != "" ? boost::lexical_cast<int>(sizeString) : 32);
-            tooltipSize = createToolTip(caption, image, size, text);
+
+            info.text = text;
+            info.caption = caption;
+            info.icon = image;
         }
+        tooltipSize = createToolTip(info);
 
         IntPoint tooltipPosition = InputManager::getInstance().getMousePosition() + IntPoint(0, 24);
 
@@ -137,14 +146,7 @@ IntSize ToolTips::getToolTipViaPtr ()
         mDynamicToolTipBox->setVisible(true);
 
         ToolTipInfo info = object.getToolTipInfo(mFocusObject, mWindowManager->getEnvironment());
-        if (info.icon == "")
-        {
-            tooltipSize = createToolTip(info.caption, "", 0, info.text);
-        }
-        else
-        {
-            tooltipSize = createToolTip(info.caption, info.icon, 32, info.text);
-        }
+        tooltipSize = createToolTip(info);
     }
 
     return tooltipSize;
@@ -164,12 +166,16 @@ void ToolTips::findImageExtension(std::string& image)
     }
 }
 
-IntSize ToolTips::createToolTip(const std::string& caption, const std::string& image, const int imageSize, const std::string& text)
+IntSize ToolTips::createToolTip(const ToolTipInfo& info)
 {
+    std::string caption = info.caption;
+    std::string image = info.icon;
+    int imageSize = (image != "") ? 32 : 0;
+    std::string text = info.text;
+
     // remove the first newline (easier this way)
-    std::string realText = text;
-    if (realText.size() > 0 && realText[0] == '\n')
-        realText.erase(0, 1);
+    if (text.size() > 0 && text[0] == '\n')
+        text.erase(0, 1);
 
     // this the maximum width of the tooltip before it starts word-wrapping
     setCoord(0, 0, 300, 300);
@@ -193,13 +199,13 @@ IntSize ToolTips::createToolTip(const std::string& caption, const std::string& i
     textWidget->setProperty("Static", "true");
     textWidget->setProperty("MultiLine", "true");
     textWidget->setProperty("WordWrap", "true");
-    textWidget->setCaption(realText);
+    textWidget->setCaption(text);
     textWidget->setTextAlign(Align::HCenter | Align::Top);
     IntSize textSize = textWidget->getTextSize();
 
     captionSize += IntSize(imageSize, 0); // adjust for image
     IntSize totalSize = IntSize( std::max(textSize.width, captionSize.width + ((image != "") ? imageCaptionHPadding : 0)),
-        ((realText != "") ? textSize.height + imageCaptionVPadding : 0) + captionHeight );
+        ((text != "") ? textSize.height + imageCaptionVPadding : 0) + captionHeight );
 
     if (image != "")
     {
