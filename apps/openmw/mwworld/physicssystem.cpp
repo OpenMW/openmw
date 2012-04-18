@@ -67,6 +67,13 @@ namespace MWWorld
 
         return mEngine->rayTest2(from,to);
     }
+    void PhysicsSystem::setCurrentWater(bool hasWater, int waterHeight){
+        playerphysics->hasWater = hasWater;
+        if(hasWater){
+            playerphysics->waterHeight = waterHeight;
+        }
+        
+    }
 
     btVector3 PhysicsSystem::getRayPoint(float extent)
     {

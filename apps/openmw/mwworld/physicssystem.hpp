@@ -49,6 +49,8 @@ namespace MWWorld
             void insertActorPhysics(const MWWorld::Ptr&, std::string model);
 
             OEngine::Physic::PhysicEngine* getEngine();
+            
+            void setCurrentWater(bool hasWater, int waterHeight);
 
         private:
             OEngine::Render::OgreRenderer &mRender;

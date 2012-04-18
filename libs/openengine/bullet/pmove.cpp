@@ -1715,11 +1715,11 @@ void PM_SetWaterLevel( playerMove* const pm )
 	point[1] = pm->ps->origin[1];
 	point[2] = pm->ps->origin[2] + MINS_Z + 1;	*/
 	point.x = pm->ps.origin.x;
-	point.y = pm->ps.origin.y + MINS_Z + 1;
-	point.z = pm->ps.origin.z;
+	point.y = pm->ps.origin.y;
+	point.z = pm->ps.origin.z + MINS_Z + 1;
 
 	//cont = pm->pointcontents( point, pm->ps->clientNum );
-	bool checkWater = (pml.hasWater && pml.waterHeight > point.y);
+	bool checkWater = (pml.hasWater && pml.waterHeight > point.z);
 	//if ( cont & MASK_WATER ) 
 	if ( checkWater)
 	{
@@ -1729,14 +1729,14 @@ void PM_SetWaterLevel( playerMove* const pm )
 		pm->ps.watertype = CONTENTS_WATER;//cont;
 		pm->ps.waterlevel = WL_ANKLE;
 		//point[2] = pm->ps->origin[2] + MINS_Z + sample1;
-		point.y = pm->ps.origin.y + MINS_Z + sample1;
+		point.z = pm->ps.origin.z + MINS_Z + sample1;
 		//cont = pm->pointcontents (point, pm->ps->clientNum );
 		//if ( cont & MASK_WATER ) 
 		if (checkWater)
 		{
 			pm->ps.waterlevel = WL_WAIST;
 			//point[2] = pm->ps->origin[2] + MINS_Z + sample2;
-			point.y = pm->ps.origin.y + MINS_Z + sample2;
+			point.z = pm->ps.origin.z + MINS_Z + sample2;
 			//cont = pm->pointcontents (point, pm->ps->clientNum );
 			//if ( cont & MASK_WATER )
 			if (checkWater )
