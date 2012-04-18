@@ -264,6 +264,50 @@ MWSpell::~MWSpell()
 {
 }
 
+/* MWEnchantment */
+
+MWEnchantment::MWEnchantment()
+    : mWindowManager(nullptr)
+{
+}
+
+void MWEnchantment::setEnchantmentId(const std::string &enchantId)
+{
+    id = enchantId;
+    updateWidgets();
+}
+
+void MWEnchantment::createEffectWidgets(std::vector<MyGUI::WidgetPtr> &effects, MyGUI::WidgetPtr creator, MyGUI::IntCoord &coord)
+{
+    const ESMS::ESMStore &store = mWindowManager->getStore();
+    const ESM::Enchantment *enchant = store.enchants.search(id);
+    MYGUI_ASSERT(enchant, "enchantment with id '" << id << "' not found");
+
+    MWSpellEffectPtr effect = nullptr;
+    std::vector<ESM::ENAMstruct>::const_iterator end = enchant->effects.list.end();
+    for (std::vector<ESM::ENAMstruct>::const_iterator it = enchant->effects.list.begin(); it != end; ++it)
+    {
+        effect = creator->createWidget<MWSpellEffect>("MW_EffectImage", coord, MyGUI::Align::Default);
+        effect->setWindowManager(mWindowManager);
+        effect->setSpellEffect(*it);
+        effects.push_back(effect);
+        coord.top += effect->getHeight();
+    }
+}
+
+void MWEnchantment::updateWidgets()
+{
+}
+
+void MWEnchantment::initialiseOverride()
+{
+    Base::initialiseOverride();
+}
+
+MWEnchantment::~MWEnchantment()
+{
+}
+
 /* MWSpellEffect */
 
 MWSpellEffect::MWSpellEffect()

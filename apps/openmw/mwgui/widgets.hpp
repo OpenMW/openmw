@@ -126,7 +126,7 @@ namespace MWGui
         protected:
             virtual ~MWSpell();
 
-		virtual void initialiseOverride();
+            virtual void initialiseOverride();
 
         private:
             void updateWidgets();
@@ -136,6 +136,33 @@ namespace MWGui
             MyGUI::TextBox* spellNameWidget;
         };
         typedef MWSpell* MWSpellPtr;
+
+        class MYGUI_EXPORT MWEnchantment : public Widget
+        {
+            MYGUI_RTTI_DERIVED( MWEnchantment );
+        public:
+            MWEnchantment();
+
+            typedef MWMechanics::Stat<int> EnchantmentValue;
+
+            void setWindowManager(WindowManager* parWindowManager) { mWindowManager = parWindowManager; }
+            void setEnchantmentId(const std::string &enchantId);
+            void createEffectWidgets(std::vector<MyGUI::WidgetPtr> &effects, MyGUI::WidgetPtr creator, MyGUI::IntCoord &coord);
+
+            const std::string &getSpellId() const { return id; }
+
+        protected:
+            virtual ~MWEnchantment();
+
+            virtual void initialiseOverride();
+
+        private:
+            void updateWidgets();
+
+            WindowManager* mWindowManager;
+            std::string id;
+        };
+        typedef MWEnchantment* MWEnchantmentPtr;
 
         class MYGUI_EXPORT MWSpellEffect : public Widget
         {
