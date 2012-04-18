@@ -72,47 +72,6 @@ void OMW::Engine::executeLocalScripts()
     localScripts.setIgnore (MWWorld::Ptr());
 }
 
-void OMW::Engine::updateFocusReport (float duration)
-{
-
-    if ((mFocusTDiff += duration)>0.25)
-    {
-        mFocusTDiff = 0;
-
-        std::string name;
-
-        std::string handle = mEnvironment.mWorld->getFacedHandle();
-
-        if (!handle.empty())
-        {
-            // the faced handle is not updated immediately, so on a cell change it might
-            // point to an object that doesn't exist anymore
-            // therefore, we are catching the "Unknown Ogre handle" exception that occurs in this case
-            try
-            {
-                MWWorld::Ptr ptr = mEnvironment.mWorld->getPtrViaHandle (handle);
-
-                if (!ptr.isEmpty()){
-                    name = MWWorld::Class::get (ptr).getName (ptr);
-
-                }
-            }
-            catch (std::runtime_error& e)
-            {}
-        }
-
-        if (name!=mFocusName)
-        {
-            mFocusName = name;
-
-            if (mFocusName.empty())
-                std::cout << "Unfocus" << std::endl;
-            else
-                std::cout << "Focus: " << name << std::endl;
-        }
-    }
-}
-
 void OMW::Engine::setAnimationVerbose(bool animverbose){
     if(animverbose){
         NifOgre::NIFLoader::getSingletonPtr()->setOutputAnimFiles(true);
@@ -170,10 +129,6 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
                                                  window->getBatchCount());
 
         mEnvironment.mWindowManager->onFrame(mEnvironment.mFrameDuration);
-
-        // report focus object (for debugging)
-        if (mReportFocus)
-            updateFocusReport (mEnvironment.mFrameDuration);
     }
     catch (const std::exception& e)
     {
@@ -191,7 +146,6 @@ OMW::Engine::Engine(Files::ConfigurationManager& configurationManager)
   , mNewGame (false)
   , mUseSound (true)
   , mCompileAll (false)
-  , mReportFocus (false)
   , mFocusTDiff (0)
   , mScriptContext (0)
   , mFSStrict (false)
@@ -301,11 +255,6 @@ void OMW::Engine::setScriptsVerbosity(bool scriptsVerbosity)
 void OMW::Engine::setNewGame(bool newGame)
 {
     mNewGame = newGame;
-}
-
-void OMW::Engine::setReportFocus (bool report)
-{
-    mReportFocus = report;
 }
 
 // Initialise and enter main loop.
