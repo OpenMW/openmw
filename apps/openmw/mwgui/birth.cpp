@@ -202,7 +202,7 @@ void BirthDialog::updateSpells()
 
                 MyGUI::IntCoord spellCoord = coord;
                 spellCoord.height = 24; // TODO: This should be fetched from the skin somehow, or perhaps a widget in the layout as a template?
-                spellWidget->createEffectWidgets(spellItems, spellArea, spellCoord);
+                spellWidget->createEffectWidgets(spellItems, spellArea, spellCoord, category);
                 coord.top = spellCoord.top;
 
                 ++i;

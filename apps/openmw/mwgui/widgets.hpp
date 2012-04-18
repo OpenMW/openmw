@@ -119,7 +119,7 @@ namespace MWGui
 
             void setWindowManager(WindowManager* parWindowManager) { mWindowManager = parWindowManager; }
             void setSpellId(const std::string &id);
-            void createEffectWidgets(std::vector<MyGUI::WidgetPtr> &effects, MyGUI::WidgetPtr creator, MyGUI::IntCoord &coord);
+            void createEffectWidgets(std::vector<MyGUI::WidgetPtr> &effects, MyGUI::WidgetPtr creator, MyGUI::IntCoord &coord, const int category);
 
             const std::string &getSpellId() const { return id; }
 
@@ -174,6 +174,9 @@ namespace MWGui
 
             void setWindowManager(WindowManager* parWindowManager) { mWindowManager = parWindowManager; }
             void setSpellEffect(SpellEffectValue value);
+            void setConstant(bool constant) { mIsConstant = constant; }
+
+            std::string effectIDToString(const short effectID);
 
             const SpellEffectValue &getSpellEffect() const { return effect; }
 
@@ -188,6 +191,7 @@ namespace MWGui
 
             WindowManager* mWindowManager;
             SpellEffectValue effect;
+            bool mIsConstant; // constant effect
             MyGUI::ImageBox* imageWidget;
             MyGUI::TextBox* textWidget;
         };
