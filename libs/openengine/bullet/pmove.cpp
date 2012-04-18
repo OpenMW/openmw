@@ -632,6 +632,8 @@ float PM_CmdScale(playerMove::playercmd* const cmd)
 	total = sqrtf( (const float)(cmd->forwardmove * cmd->forwardmove
 		+ cmd->rightmove * cmd->rightmove + cmd->upmove * cmd->upmove) );
 	scale = (float)pm->ps.speed * max / ( 127.0f * total );
+    if(pm->ps.move_type == PM_NOCLIP)
+        scale *= 2;
 
 	return scale;
 }
@@ -1125,7 +1127,7 @@ void AngleVectors( const Ogre::Vector3& angles, Ogre::Vector3* const forward, Og
 	{
 		right->x = (-1 * sr * sp * cy + -1 * cr * -sy);
 		right->y = (-1 * sr * sp * sy + -1 * cr * cy);
-		right->z = 0.0f;//-1 * sp * cp;
+		right->z = 0;
 	}
 	if (up)
 	{
@@ -1713,11 +1715,11 @@ void PM_SetWaterLevel( playerMove* const pm )
 	point[1] = pm->ps->origin[1];
 	point[2] = pm->ps->origin[2] + MINS_Z + 1;	*/
 	point.x = pm->ps.origin.x;
-	point.y = pm->ps.origin.y + MINS_Z + 1;
-	point.z = pm->ps.origin.z;
+	point.y = pm->ps.origin.y;
+	point.z = pm->ps.origin.z + MINS_Z + 1;
 
 	//cont = pm->pointcontents( point, pm->ps->clientNum );
-	bool checkWater = (pml.hasWater && pml.waterHeight > point.y);
+	bool checkWater = (pml.hasWater && pml.waterHeight > point.z);
 	//if ( cont & MASK_WATER ) 
 	if ( checkWater)
 	{
@@ -1727,14 +1729,14 @@ void PM_SetWaterLevel( playerMove* const pm )
 		pm->ps.watertype = CONTENTS_WATER;//cont;
 		pm->ps.waterlevel = WL_ANKLE;
 		//point[2] = pm->ps->origin[2] + MINS_Z + sample1;
-		point.y = pm->ps.origin.y + MINS_Z + sample1;
+		point.z = pm->ps.origin.z + MINS_Z + sample1;
 		//cont = pm->pointcontents (point, pm->ps->clientNum );
 		//if ( cont & MASK_WATER ) 
 		if (checkWater)
 		{
 			pm->ps.waterlevel = WL_WAIST;
 			//point[2] = pm->ps->origin[2] + MINS_Z + sample2;
-			point.y = pm->ps.origin.y + MINS_Z + sample2;
+			point.z = pm->ps.origin.z + MINS_Z + sample2;
 			//cont = pm->pointcontents (point, pm->ps->clientNum );
 			//if ( cont & MASK_WATER )
 			if (checkWater )

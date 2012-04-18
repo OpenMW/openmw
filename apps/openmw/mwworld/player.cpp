@@ -110,4 +110,5 @@ namespace MWWorld
          MWWorld::Ptr ptr = getPlayer();
          return MWWorld::Class::get(ptr).getNpcStats(ptr).mDrawState;
     }
+
 }

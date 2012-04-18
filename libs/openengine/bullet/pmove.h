@@ -55,7 +55,7 @@ static const Ogre::Vector3 halfExtents(14.64f * 2, 14.24f * 2, 33.25f * 2);
 #define	CONTENTS_FOG			64
 static const float	pm_accelerate = 10.0f;
 static const float	pm_stopspeed = 100.0f;
-static const float	pm_friction = 6.0f;
+static const float	pm_friction = 12.0f;
 static const float  pm_flightfriction = 3.0f;
 static const float	pm_waterfriction = 1.0f;
 static const float	pm_airaccelerate = 1.0f;
@@ -90,7 +90,7 @@ struct playerMove
 {
 	struct playerStruct
 	{
-		playerStruct() : gravity(800.0f), speed(320.0f), pmove_framecount(20), groundEntityNum(ENTITYNUM_NONE), commandTime(40), move_type(PM_NOCLIP), pm_time(0)
+		playerStruct() : gravity(800.0f), speed(480.0f), pmove_framecount(20), groundEntityNum(ENTITYNUM_NONE), commandTime(40), move_type(PM_NOCLIP), pm_time(0)
 		{
 			origin = Ogre::Vector3(733.164f,900.0f, 839.432f);
 			velocity = Ogre::Vector3(0.0f, 0.0f, 0.0f);

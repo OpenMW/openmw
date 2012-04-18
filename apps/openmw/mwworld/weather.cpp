@@ -27,6 +27,9 @@ const float WeatherGlobals::mSunriseDuration = 2;
 const float WeatherGlobals::mSunsetDuration = 2;
 const float WeatherGlobals::mWeatherUpdateTime = 20.f;
 
+
+// morrowind sets these per-weather, but since they are only used by 'thunderstorm'
+// weather setting anyway, we can just as well set them globally
 const float WeatherGlobals::mThunderFrequency = .4;
 const float WeatherGlobals::mThunderThreshold = 0.6;
 const float WeatherGlobals::mThunderSoundDelay = 0.25;

@@ -134,6 +134,8 @@ namespace MWWorld
     void Scene::playerCellChange (Ptr::CellStore *cell, const ESM::Position& position,
         bool adjustPlayerPos)
     {
+        bool hasWater = cell->cell->data.flags & cell->cell->HasWater;
+        mPhysics->setCurrentWater(hasWater, cell->cell->water);
         if (adjustPlayerPos)
             mWorld->getPlayer().setPos (position.pos[0], position.pos[1], position.pos[2]);
 

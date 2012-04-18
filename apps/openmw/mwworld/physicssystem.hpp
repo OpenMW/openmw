@@ -55,12 +55,15 @@ namespace MWWorld
             void insertActorPhysics(const MWWorld::Ptr&, std::string model);
 
             OEngine::Physic::PhysicEngine* getEngine();
+            
+            void setCurrentWater(bool hasWater, int waterHeight);
 
         private:
             OEngine::Render::OgreRenderer &mRender;
             OEngine::Physic::PhysicEngine* mEngine;
             bool mFreeFly;
-			playerMove* playerphysics;
+            playerMove* playerphysics;
+
 
             PhysicsSystem (const PhysicsSystem&);
             PhysicsSystem& operator= (const PhysicsSystem&);

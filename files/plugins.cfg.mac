@@ -1,12 +1,12 @@
 # Defines plugins to load
 
 # Define plugin folder
-PluginFolder=
+PluginFolder=${OGRE_PLUGIN_DIR}
 
 # Define plugins
-Plugin=RenderSystem_GL.dylib
-Plugin=Plugin_ParticleFX.dylib
-Plugin=Plugin_OctreeSceneManager.dylib
-Plugin=Plugin_CgProgramManager
+Plugin=RenderSystem_GL.1.8.0
+Plugin=Plugin_ParticleFX.1.8.0
+Plugin=Plugin_OctreeSceneManager.1.8.0
+Plugin=Plugin_CgProgramManager.1.8.0
 
 

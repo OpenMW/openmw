@@ -69,6 +69,8 @@ namespace MWInput
       A_ToggleWeapon,
       A_ToggleSpell,
 
+      A_ToggleFps, // Toggle FPS display (this is temporary)
+
       A_LAST            // Marker for the last item
     };
 
@@ -88,6 +90,11 @@ namespace MWInput
 
 
    /* InputImpl Methods */
+
+    void toggleFps()
+    {
+        windows.toggleFps();
+    }
 
     void toggleSpell()
     {
@@ -236,6 +243,8 @@ namespace MWInput
                       "Draw Weapon");
       disp->funcs.bind(A_ToggleSpell,boost::bind(&InputImpl::toggleSpell,this),
                       "Ready hands");
+      disp->funcs.bind(A_ToggleFps, boost::bind(&InputImpl::toggleFps, this),
+                      "Toggle FPS display");
       // Add the exit listener
       ogre.getRoot()->addFrameListener(&exit);
 
@@ -282,6 +291,7 @@ namespace MWInput
       disp->bind(A_ToggleWalk, KC_C);
       disp->bind(A_ToggleWeapon,KC_F);
       disp->bind(A_ToggleSpell,KC_R);
+      disp->bind(A_ToggleFps, KC_F10);
 
       // Key bindings for polled keys
       // NOTE: These keys are constantly being polled. Only add keys that must be checked each frame.

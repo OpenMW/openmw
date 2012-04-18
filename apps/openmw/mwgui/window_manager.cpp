@@ -15,6 +15,8 @@
 #include "journalwindow.hpp"
 #include "charactercreation.hpp"
 
+#include <components/settings/settings.hpp>
+
 #include <assert.h>
 #include <iostream>
 #include <iterator>
@@ -471,4 +473,12 @@ void WindowManager::toggleFogOfWar()
 {
     map->toggleFogOfWar();
     hud->toggleFogOfWar();
+}
+
+int WindowManager::toggleFps()
+{
+    showFPSLevel = (showFPSLevel+1)%3;
+    hud->setFpsLevel(showFPSLevel);
+    Settings::Manager::setInt("fps", "HUD", showFPSLevel);
+    return showFPSLevel;
 }
