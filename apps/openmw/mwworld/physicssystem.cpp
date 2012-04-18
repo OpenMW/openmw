@@ -127,11 +127,11 @@ namespace MWWorld
                 Ogre::Quaternion pitchQuat = pitchNode->getOrientation();
 				Ogre::Quaternion both = yawQuat * pitchQuat;
 				
-				playerphysics->ps.viewangles.x = 0;
+				playerphysics->ps.viewangles.x = pitchQuat.getPitch().valueDegrees();
 				playerphysics->ps.viewangles.z = 0;
-			playerphysics->ps.viewangles.y = both.getYaw().valueDegrees() *-1 + 90;
+			playerphysics->ps.viewangles.y = yawQuat.getYaw().valueDegrees() *-1 + 90;
 
-				//playerphysics->ps.viewangles.z = both.getPitch().valueDegrees();
+				
 				
 			
             if(mFreeFly)
@@ -259,6 +259,7 @@ namespace MWWorld
     {
 		if(playerphysics->ps.move_type==PM_NOCLIP)
 			playerphysics->ps.move_type=PM_NORMAL;
+
 		else
 			playerphysics->ps.move_type=PM_NOCLIP;
         for(std::map<std::string,OEngine::Physic::PhysicActor*>::iterator it = mEngine->PhysicActorMap.begin(); it != mEngine->PhysicActorMap.end();it++)

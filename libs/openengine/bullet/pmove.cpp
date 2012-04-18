@@ -632,6 +632,8 @@ float PM_CmdScale(playerMove::playercmd* const cmd)
 	total = sqrtf( (const float)(cmd->forwardmove * cmd->forwardmove
 		+ cmd->rightmove * cmd->rightmove + cmd->upmove * cmd->upmove) );
 	scale = (float)pm->ps.speed * max / ( 127.0f * total );
+    if(pm->ps.move_type == PM_NOCLIP)
+        scale *= 2;
 
 	return scale;
 }
@@ -1125,7 +1127,7 @@ void AngleVectors( const Ogre::Vector3& angles, Ogre::Vector3* const forward, Og
 	{
 		right->x = (-1 * sr * sp * cy + -1 * cr * -sy);
 		right->y = (-1 * sr * sp * sy + -1 * cr * cy);
-		right->z = 0.0f;//-1 * sp * cp;
+		right->z = 0;
 	}
 	if (up)
 	{
