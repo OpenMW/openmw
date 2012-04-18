@@ -225,6 +225,8 @@ void RenderingManager::update (float duration){
     mLocalMap->updatePlayer( mRendering.getCamera()->getRealPosition(), mRendering.getCamera()->getRealOrientation() );
 
     checkUnderwater();
+
+    mWater->update();
 }
 void RenderingManager::waterAdded (MWWorld::Ptr::CellStore *store){
     if(store->cell->data.flags & store->cell->HasWater){

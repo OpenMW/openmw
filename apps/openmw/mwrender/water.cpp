@@ -11,7 +11,8 @@ namespace MWRender
 Water::Water (Ogre::Camera *camera, SkyManager* sky, const ESM::Cell* cell) :
     mCamera (camera), mViewport (camera->getViewport()), mSceneManager (camera->getSceneManager()),
     mIsUnderwater(false), mVisibilityFlags(0),
-    mReflectionTarget(0), mActive(1), mToggled(1)
+    mReflectionTarget(0), mActive(1), mToggled(1),
+    mReflectionRenderActive(false)
 {
     mSky = sky;
 
@@ -80,6 +81,8 @@ Water::Water (Ogre::Camera *camera, SkyManager* sky, const ESM::Cell* cell) :
     mWater->setMaterial(mMaterial);
 
     mUnderwaterEffect = Settings::Manager::getBool("underwater effect", "Water");
+
+    mSceneManager->addRenderQueueListener(this);
 
 
     // ----------------------------------------------------------------------------------------------
@@ -161,6 +164,7 @@ void Water::changeCell(const ESM::Cell* cell)
 void Water::setHeight(const float height)
 {
     mTop = height;
+    mWaterPlane = Plane(Vector3::UNIT_Y, height);
     mWaterNode->setPosition(0, height, 0);
 }
 
@@ -220,17 +224,15 @@ void Water::preRenderTargetUpdate(const RenderTargetEvent& evt)
         mReflectionCamera->setFarClipDistance(mCamera->getFarClipDistance());
         mReflectionCamera->setAspectRatio(mCamera->getAspectRatio());
         mReflectionCamera->setFOVy(mCamera->getFOVy());
+        mReflectionRenderActive = true;
 
-        // Some messy code to get the skybox to show up at all
-        // The problem here is that it gets clipped by the water plane
-        // Therefore scale it up a bit
+        /// \todo For some reason this camera is delayed for 1 frame, which causes ugly sky reflection behaviour..
+        /// to circumvent this we just scale the sky up, so it's not that noticable
         Vector3 pos = mCamera->getRealPosition();
         pos.y = mTop*2 - pos.y;
         mSky->setSkyPosition(pos);
-        mSky->scaleSky(mCamera->getFarClipDistance() / 1000.f);
-
-        mReflectionCamera->enableCustomNearClipPlane(Plane(Vector3::UNIT_Y, mTop));
-        mReflectionCamera->enableReflection(Plane(Vector3::UNIT_Y, mTop));
+        mSky->scaleSky(mCamera->getFarClipDistance() / 5000.f);
+        mReflectionCamera->enableReflection(mWaterPlane);
     }
 }
 
@@ -240,8 +242,9 @@ void Water::postRenderTargetUpdate(const RenderTargetEvent& evt)
     {
         mSky->resetSkyPosition();
         mSky->scaleSky(1);
-        mReflectionCamera->disableCustomNearClipPlane();
         mReflectionCamera->disableReflection();
+        mReflectionCamera->disableCustomNearClipPlane();
+        mReflectionRenderActive = false;
     }
 }
 
@@ -288,6 +291,29 @@ void Water::updateVisible()
     mWater->setVisible(mToggled && mActive);
     if (mReflectionTarget)
         mReflectionTarget->setActive(mToggled && mActive && !mIsUnderwater);
+}
+
+void Water::renderQueueStarted (Ogre::uint8 queueGroupId, const Ogre::String &invocation, bool &skipThisInvocation)
+{
+    // We don't want the sky to get clipped by custom near clip plane (the water plane)
+    if (queueGroupId < 20 && mReflectionRenderActive)
+    {
+        mReflectionCamera->disableCustomNearClipPlane();
+        Root::getSingleton().getRenderSystem()->_setProjectionMatrix(mReflectionCamera->getProjectionMatrixRS());
+    }
+}
+
+void Water::renderQueueEnded (Ogre::uint8 queueGroupId, const Ogre::String &invocation, bool &repeatThisInvocation)
+{
+    if (queueGroupId < 20 && mReflectionRenderActive)
+    {
+        mReflectionCamera->enableCustomNearClipPlane(mWaterPlane);
+        Root::getSingleton().getRenderSystem()->_setProjectionMatrix(mReflectionCamera->getProjectionMatrixRS());
+    }
+}
+
+void Water::update()
+{
 }
 
 } // namespace
