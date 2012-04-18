@@ -28,6 +28,10 @@ ContainerWindow::ContainerWindow(WindowManager& parWindowManager,MWWorld::Enviro
     mEnvironment(environment)
 {
     setText("_Main", "Name of Container");
+
+    int w = MyGUI::RenderManager::getInstance().getViewSize().width;
+    int h = MyGUI::RenderManager::getInstance().getViewSize().height;
+    setCoord(w-600,h-300,600,300);
     //center();
     adjustWindowCaption();
 
