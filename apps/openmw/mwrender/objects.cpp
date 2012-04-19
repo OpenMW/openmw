@@ -8,20 +8,15 @@
 
 using namespace MWRender;
 
-bool Objects::lightConst = false;
-float Objects::lightConstValue = 0.0f;
-
-bool Objects::lightLinear = true;
-int Objects::lightLinearMethod = 1;
+// These are the Morrowind.ini defaults
 float Objects::lightLinearValue = 3;
 float Objects::lightLinearRadiusMult = 1;
 
-bool Objects::lightQuadratic = false;
-int Objects::lightQuadraticMethod = 2;
 float Objects::lightQuadraticValue = 16;
 float Objects::lightQuadraticRadiusMult = 1;
 
-bool Objects::lightOutQuadInLin = false;
+bool Objects::lightOutQuadInLin = true;
+bool Objects::lightQuadratic = false;
 
 int Objects::uniqueID = 0;
 
@@ -132,7 +127,7 @@ void Objects::insertMesh (const MWWorld::Ptr& ptr, const std::string& mesh)
         }
     }
 
-    if(!mIsStatic || !Settings::Manager::getBool("use static geometry", "Objects"))
+    if(!mIsStatic || !Settings::Manager::getBool("use static geometry", "Objects") || transparent)
     {
         insert->attachObject(ent);
 
@@ -144,18 +139,7 @@ void Objects::insertMesh (const MWWorld::Ptr& ptr, const std::string& mesh)
     {
         Ogre::StaticGeometry* sg = 0;
 
-/*        if (transparent)
-        {
-            if( mStaticGeometryAlpha.find(ptr.getCell()) == mStaticGeometryAlpha.end())
-            {
-                uniqueID = uniqueID +1;
-                sg = mRenderer.getScene()->createStaticGeometry( "sg" + Ogre::StringConverter::toString(uniqueID));
-                mStaticGeometryAlpha[ptr.getCell()] = sg;
-            }
-            else
-                sg = mStaticGeometryAlpha[ptr.getCell()];
-        }
-        else*/ if (small)
+        if (small)
         {
             if( mStaticGeometrySmall.find(ptr.getCell()) == mStaticGeometrySmall.end())
             {
@@ -207,33 +191,34 @@ void Objects::insertLight (const MWWorld::Ptr& ptr, float r, float g, float b, f
     assert(insert);
     Ogre::Light *light = mRenderer.getScene()->createLight();
     light->setDiffuseColour (r, g, b);
-    mLights.push_back(light->getName());
 
-    float cval=0.0f, lval=0.0f, qval=0.0f;
+    LightInfo info;
+    info.name = light->getName();
+    info.radius = radius;
+    info.colour = Ogre::ColourValue(r, g, b);
+    mLights.push_back(info);
 
-    if(lightConst)
-         cval = lightConstValue;
 
-    if(!lightOutQuadInLin)
+    bool quadratic = false;
+    if (!lightOutQuadInLin)
+        quadratic = lightQuadratic;
+    else
     {
-        if(lightLinear)
-            radius *= lightLinearRadiusMult;
-        if(lightQuadratic)
-            radius *= lightQuadraticRadiusMult;
+        quadratic = !mInterior;
+    }
 
-        if(lightLinear)
-            lval = lightLinearValue / pow(radius, lightLinearMethod);
-        if(lightQuadratic)
-            qval = lightQuadraticValue / pow(radius, lightQuadraticMethod);
+    if (!quadratic)
+    {
+        float r = radius * lightLinearRadiusMult;
+        float attenuation = lightLinearValue / r;
+        light->setAttenuation(r*10, 0, attenuation, 0);
     }
     else
     {
-        // FIXME:
-        // Do quadratic or linear, depending if we're in an exterior or interior
-        // cell, respectively. Ignore lightLinear and lightQuadratic.
+        float r = radius * lightQuadraticRadiusMult;
+        float attenuation = lightQuadraticValue / pow(r, 2);
+        light->setAttenuation(r*10, 0, 0, attenuation);
     }
-
-    light->setAttenuation(10*radius, cval, lval, qval);
 
     insert->attachObject(light);
 }
@@ -290,13 +275,6 @@ void Objects::removeCell(MWWorld::Ptr::CellStore* store)
         mRenderer.getScene()->destroyStaticGeometry (sg);
         sg = 0;
     }
-    /*if(mStaticGeometryAlpha.find(store) != mStaticGeometryAlpha.end())
-    {
-        Ogre::StaticGeometry* sg = mStaticGeometryAlpha[store];
-        mStaticGeometryAlpha.erase(store);
-        mRenderer.getScene()->destroyStaticGeometry (sg);
-        sg = 0;
-    }*/
 
     if(mBounds.find(store) != mBounds.end())
         mBounds.erase(store);
@@ -314,11 +292,6 @@ void Objects::buildStaticGeometry(ESMS::CellStore<MWWorld::RefData>& cell)
         Ogre::StaticGeometry* sg = mStaticGeometrySmall[&cell];
         sg->build();
     }
-    /*if(mStaticGeometryAlpha.find(&cell) != mStaticGeometryAlpha.end())
-    {
-        Ogre::StaticGeometry* sg = mStaticGeometryAlpha[&cell];
-        sg->build();
-    }*/
 }
 
 Ogre::AxisAlignedBox Objects::getDimensions(MWWorld::Ptr::CellStore* cell)
@@ -328,12 +301,12 @@ Ogre::AxisAlignedBox Objects::getDimensions(MWWorld::Ptr::CellStore* cell)
 
 void Objects::enableLights()
 {
-    std::vector<std::string>::iterator it = mLights.begin();
+    std::vector<LightInfo>::iterator it = mLights.begin();
     while (it != mLights.end())
     {
-        if (mMwRoot->getCreator()->hasLight(*it))
+        if (mMwRoot->getCreator()->hasLight(it->name))
         {
-            mMwRoot->getCreator()->getLight(*it)->setVisible(true);
+            mMwRoot->getCreator()->getLight(it->name)->setVisible(true);
             ++it;
         }
         else
@@ -343,12 +316,12 @@ void Objects::enableLights()
 
 void Objects::disableLights()
 {
-    std::vector<std::string>::iterator it = mLights.begin();
+    std::vector<LightInfo>::iterator it = mLights.begin();
     while (it != mLights.end())
     {
-        if (mMwRoot->getCreator()->hasLight(*it))
+        if (mMwRoot->getCreator()->hasLight(it->name))
         {
-            mMwRoot->getCreator()->getLight(*it)->setVisible(false);
+            mMwRoot->getCreator()->getLight(it->name)->setVisible(false);
             ++it;
         }
         else
@@ -356,3 +329,48 @@ void Objects::disableLights()
     }
 }
 
+void Objects::setInterior(const bool interior)
+{
+    mInterior = interior;
+}
+
+void Objects::update(const float dt)
+{
+    // adjust the lights depending if we're in an interior or exterior cell
+    // quadratic means the light intensity falls off quite fast, resulting in a
+    // dark, atmospheric environment (perfect for exteriors)
+    // for interiors, we want more "warm" lights, so use linear attenuation.
+    std::vector<LightInfo>::iterator it = mLights.begin();
+    while (it != mLights.end())
+    {
+        if (mMwRoot->getCreator()->hasLight(it->name))
+        {
+            Ogre::Light* light = mMwRoot->getCreator()->getLight(it->name);
+
+            bool quadratic = false;
+            if (!lightOutQuadInLin)
+                quadratic = lightQuadratic;
+            else
+            {
+                quadratic = !mInterior;
+            }
+
+            if (!quadratic)
+            {
+                float radius = it->radius * lightLinearRadiusMult;
+                float attenuation = lightLinearValue / it->radius;
+                light->setAttenuation(radius*10, 0, attenuation, 0);
+            }
+            else
+            {
+                float radius = it->radius * lightQuadraticRadiusMult;
+                float attenuation = lightQuadraticValue / pow(it->radius, 2);
+                light->setAttenuation(radius*10, 0, 0, attenuation);
+            }
+
+            ++it;
+        }
+        else
+            it = mLights.erase(it);
+    }
+}

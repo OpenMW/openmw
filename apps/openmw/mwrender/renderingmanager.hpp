@@ -117,6 +117,9 @@ class RenderingManager: private RenderingInterface {
 
     Shadows* getShadows();
 
+    void switchToInterior();
+    void switchToExterior();
+
     void setGlare(bool glare);
     void skyEnable ();
     void skyDisable ();

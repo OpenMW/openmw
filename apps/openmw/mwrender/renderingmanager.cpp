@@ -213,6 +213,7 @@ void RenderingManager::moveObjectToCell (const MWWorld::Ptr& ptr, const Ogre::Ve
 void RenderingManager::update (float duration){
 
     mActors.update (duration);
+    mObjects.update (duration);
 
     mOcclusionQuery->update(duration);
 
@@ -506,6 +507,16 @@ const bool RenderingManager::useMRT()
 Shadows* RenderingManager::getShadows()
 {
     return mShadows;
+}
+
+void RenderingManager::switchToInterior()
+{
+    mObjects.setInterior(true);
+}
+
+void RenderingManager::switchToExterior()
+{
+    mObjects.setInterior(false);
 }
 
 } // namespace

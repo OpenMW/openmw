@@ -1149,8 +1149,8 @@ namespace Ogre
 				// simple per-pixel lighting with no normal mapping
                                 for (int i=0; i<prof->getNumberOfLightsSupported(); ++i)
                                 {
-                                        outStream << "	float3 halfAngle"<<i<<" = normalize(lightDir"<<i<<" + eyeDir);\n"
-                                                "	float4 litRes"<<i<<" = lit(dot(normalize(lightDir"<<i<<"), normal), dot(halfAngle"<<i<<", normal), scaleBiasSpecular.z);\n";
+                                        outStream <<
+                                            "	float4 litRes"<<i<<" = lit(dot(normalize(lightDir"<<i<<"), normalize(normal)), 0, scaleBiasSpecular.z);\n";
 
                                     if (i > 0)
                                         outStream <<
