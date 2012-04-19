@@ -1730,6 +1730,7 @@ void PM_SetWaterLevel( playerMove* const pm )
 		pm->ps.waterlevel = WL_ANKLE;
 		//point[2] = pm->ps->origin[2] + MINS_Z + sample1;
 		point.z = pm->ps.origin.z + MINS_Z + sample1;
+        checkWater = (pml.hasWater && pml.waterHeight > point.z);
 		//cont = pm->pointcontents (point, pm->ps->clientNum );
 		//if ( cont & MASK_WATER ) 
 		if (checkWater)
@@ -1739,6 +1740,7 @@ void PM_SetWaterLevel( playerMove* const pm )
 			point.z = pm->ps.origin.z + MINS_Z + sample2;
 			//cont = pm->pointcontents (point, pm->ps->clientNum );
 			//if ( cont & MASK_WATER )
+            checkWater = (pml.hasWater && pml.waterHeight > point.z);
 			if (checkWater )
 				pm->ps.waterlevel = WL_UNDERWATER;
 		}
