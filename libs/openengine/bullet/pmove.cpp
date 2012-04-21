@@ -417,7 +417,7 @@ int PM_StepSlideMove( bool gravity )
 	Ogre::Vector3		up, down;
 	float		stepSize;
 	
-
+    std::cout << "StepSlideMove\n";
 	// start_o = pm->ps->origin
 	//VectorCopy (pm->ps->origin, start_o);
 	start_o = pm->ps.origin;
@@ -516,6 +516,7 @@ int PM_StepSlideMove( bool gravity )
 		delta = pm->ps.origin.z - start_o.z;
 		if ( delta > 2 ) 
 		{
+            pm->ps.counter = 10;
 			if (gravity)
 				printf("g on: %f ", delta);
 			else
@@ -688,6 +689,7 @@ static bool PM_CheckJump(void)
 
 	pm->ps.groundEntityNum = ENTITYNUM_NONE;
 	pm->ps.velocity.z = JUMP_VELOCITY;
+    pm->ps.bSnap = false;
 	//PM_AddEvent( EV_JUMP );
 
 	/*if ( pm->cmd.forwardmove >= 0 ) 
@@ -840,7 +842,7 @@ static void PM_WalkMove( playerMove* const pmove )
 	playerMove::playercmd cmd;
 	float		accelerate;
 	float		vel;
-	
+	//pm->ps.gravity = 4000;
 
 	if ( pm->ps.waterlevel > 2 && //DotProduct( pml.forward, pml.groundTrace.plane.normal ) > 0 ) 
 		pml.forward.dotProduct(pml.groundTrace.planenormal) > 0.0f)
@@ -1142,9 +1144,7 @@ void PM_GroundTraceMissed()
 {
 	traceResults		trace;
 	Ogre::Vector3		point;
-
-	if ( pm->ps.groundEntityNum != ENTITYNUM_NONE ) 
-	{
+    std::cout << "Ground trace missed\n";
 		// we just transitioned into freefall
 		//if ( pm->debugLevel )
 			//Com_Printf("%i:lift\n", c_pmove);
@@ -1154,29 +1154,28 @@ void PM_GroundTraceMissed()
 		//VectorCopy( pm->ps->origin, point );
 		point = pm->ps.origin;
 		//point[2] -= 64;
-		point.z -= 64;
+		point.z -= 32;
 
 		//pm->trace (&trace, pm->ps->origin, pm->mins, pm->maxs, point, pm->ps->clientNum, pm->tracemask);
 		//tracefunc(&trace, *(const D3DXVECTOR3* const)&(pm->ps.origin), *(const D3DXVECTOR3* const)&point, D3DXVECTOR3(0.0f, -64.0f, 0.0f), 0, pml.traceObj);
 		newtrace(&trace, pm->ps.origin, point, halfExtents, Ogre::Math::DegreesToRadians(pm->ps.viewangles.y), pm->isInterior, pm->mEngine);
-		if ( trace.fraction == 1.0 ) 
+		//It hit the ground below
+        if ( trace.fraction < 1.0 && pm->ps.origin.z > trace.endpos.z) 
 		{
-			if ( pm->cmd.forwardmove >= 0 ) 
-			{
-				//PM_ForceLegsAnim( LEGS_JUMP );
-				//pm->ps->pm_flags &= ~PMF_BACKWARDS_JUMP;
-			} 
-			else 
-			{
-				//PM_ForceLegsAnim( LEGS_JUMPB );
-				//pm->ps->pm_flags |= PMF_BACKWARDS_JUMP;
-			}
+			   pm->ps.origin = trace.endpos;
+               pml.walking = true;
+               pml.groundPlane = true;
+                pm->ps.groundEntityNum = trace.entityNum;
+           
 		}
-	}
+        else{
+        pm->ps.groundEntityNum = ENTITYNUM_NONE;
+	    pml.groundPlane = false;
+	    pml.walking = false;
+        pm->ps.bSnap = false;
+	    }
 
-	pm->ps.groundEntityNum = ENTITYNUM_NONE;
-	pml.groundPlane = false;
-	pml.walking = false;
+	
 }
 
 static bool PM_CorrectAllSolid(traceResults* const trace)
@@ -1404,19 +1403,26 @@ static void PM_GroundTrace( void )
 			return;
 		}
 	}
-
-	// if the trace didn't hit anything, we are in free fall
-	if ( trace.fraction == 1.0 ) 
+    // if the trace didn't hit anything, we are in free fall
+	if ( trace.fraction == 1.0) 
 	{
-		PM_GroundTraceMissed();
-		pml.groundPlane = false;
-		pml.walking = false;
+        if(pm->ps.snappingImplemented){
+            if(pm->ps.bSnap && pm->ps.counter <= 0)
+		        PM_GroundTraceMissed();
+        }
+            
+
 		return;
 	}
+    else
+    {
+        //It hit something, so we are on the ground
+        pm->ps.bSnap = true;
 
-	// check if getting thrown off the ground
+    }
+    // check if getting thrown off the ground
 	//if ( pm->ps->velocity[2] > 0 && DotProduct( pm->ps->velocity, trace.plane.normal ) > 10 ) 
-	if (pm->ps.velocity.z > 0 && pm->ps.velocity.dotProduct(trace.planenormal) > 10.0f)
+	if (pm->ps.velocity.z > 0 && pm->ps.velocity.dotProduct(trace.planenormal) > 10.0f )
 	{
 		//if ( pm->debugLevel ) 
 			//Com_Printf("%i:kickoff\n", c_pmove);
@@ -1432,12 +1438,21 @@ static void PM_GroundTrace( void )
 			PM_ForceLegsAnim( LEGS_JUMPB );
 			pm->ps->pm_flags |= PMF_BACKWARDS_JUMP;
 		}*/
-
+        if(!pm->ps.bSnap){
 		pm->ps.groundEntityNum = ENTITYNUM_NONE;
 		pml.groundPlane = false;
 		pml.walking = false;
+        }
+        else
+        {
+            pml.groundPlane = true;
+		    pml.walking = true;
+        }
 		return;
 	}
+	
+
+	
 	
 	// slopes that are too steep will not be considered onground
 	//if ( trace.plane.normal[2] < MIN_WALK_NORMAL ) 
@@ -1500,7 +1515,7 @@ static void PM_AirMove()
 	float		wishspeed;
 	float		scale;
 	playerMove::playercmd	cmd;
-
+    //pm->ps.gravity = 800;
 	PM_Friction();
 
 	fmove = pm->cmd.forwardmove;
@@ -1508,7 +1523,6 @@ static void PM_AirMove()
 
 	cmd = pm->cmd;
 	scale = PM_CmdScale( &cmd );
-
 	// set the movementDir so clients can rotate the legs for strafing
 	//PM_SetMovementDir();
 
@@ -1749,7 +1763,7 @@ void PM_SetWaterLevel( playerMove* const pm )
 
 void PmoveSingle (playerMove* const pmove) 
 {
-	
+    pmove->ps.counter--;
 	//pm = pmove;
 
 	// Aedra doesn't support Q3-style VM traps D:	//while(1);
@@ -1763,6 +1777,10 @@ void PmoveSingle (playerMove* const pmove)
 	pm->ps.watertype = 0;
 	pm->ps.waterlevel = WL_DRYLAND;
 
+    if(pml.walking)
+        std::cout << "Walking\n";
+    else
+        std::cout << "Not Walking\n";
 	//if ( pm->ps->stats[STAT_HEALTH] <= 0 )
 		//pm->tracemask &= ~CONTENTS_BODY;	// corpses can fly through bodies
 		
