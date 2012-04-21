@@ -36,6 +36,7 @@ namespace MWGui
     {
         public:
             ContainerWindow(WindowManager& parWindowManager,MWWorld::Environment& environment);
+            ContainerWindow(WindowManager& parWindowManager,MWWorld::Environment& environment,std::string guiFile);
 
 
             void open(MWWorld::Ptr& container);

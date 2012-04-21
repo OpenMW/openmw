@@ -63,6 +63,7 @@ namespace MWGui
   class JournalWindow;
   class CharacterCreation;
   class ContainerWindow;
+  class InventoryWindow;
   class TextInputDialog;
   class InfoBoxDialog;
   class DialogueWindow;
@@ -204,6 +205,7 @@ namespace MWGui
     JournalWindow* mJournal;
     DialogueWindow *dialogueWindow;
     ContainerWindow *containerWindow;
+    InventoryWindow *mInventoryWindow;
     CharacterCreation* mCharGen;
 
     // Various stats about player as needed by window manager

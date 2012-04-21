@@ -41,6 +41,23 @@ ContainerWindow::ContainerWindow(WindowManager& parWindowManager,MWWorld::Enviro
     setText("TakeButton","Take All");
 }
 
+ContainerWindow::ContainerWindow(WindowManager& parWindowManager,MWWorld::Environment& environment,std::string guiFile)
+    : WindowBase(guiFile, parWindowManager),
+    mEnvironment(environment)
+{
+    setText("_Main", "Name of Container");
+    //center();
+    adjustWindowCaption();
+
+    getWidget(containerWidget, "Items");
+    //getWidget(takeButton, "TakeButton");
+    //getWidget(closeButton, "CloseButton");
+
+    //closeButton->eventMouseButtonClick += MyGUI::newDelegate(this, &ContainerWindow::onByeClicked);
+
+    //setText("CloseButton","Close");
+    //setText("TakeButton","Take All");
+}
 ContainerWindow::~ContainerWindow()
 {
 }
@@ -60,7 +77,7 @@ void ContainerWindow::open(MWWorld::Ptr& container)
     MWWorld::ContainerStore& containerStore = MWWorld::Class::get(container).getContainerStore(container);
 
 
-    MWWorld::ManualRef furRef (mWindowManager.getStore(), "fur_cuirass");
+    /*MWWorld::ManualRef furRef (mWindowManager.getStore(), "fur_cuirass");
     furRef.getPtr().getRefData().setCount (5);
     MWWorld::ManualRef bukkitRef (mWindowManager.getStore(), "misc_com_bucket_01");
     MWWorld::ManualRef broomRef (mWindowManager.getStore(), "misc_com_broom_01");
@@ -89,7 +106,7 @@ void ContainerWindow::open(MWWorld::Ptr& container)
     containerStore.add(bukkitRef.getPtr());
     containerStore.add(bukkitRef.getPtr());
     containerStore.add(bukkitRef.getPtr());
-    containerStore.add(goldRef.getPtr());
+    containerStore.add(goldRef.getPtr());*/
 
 
 

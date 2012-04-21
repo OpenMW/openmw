@@ -8,6 +8,7 @@
 #include "stats_window.hpp"
 #include "messagebox.hpp"
 #include "container.hpp"
+#include "inventorywindow.hpp"
 
 #include "../mwmechanics/mechanicsmanager.hpp"
 #include "../mwinput/inputmanager.hpp"
@@ -82,6 +83,7 @@ WindowManager::WindowManager(MWWorld::Environment& environment,
     mMessageBoxManager = new MessageBoxManager(this);
     dialogueWindow = new DialogueWindow(*this,environment);
     containerWindow = new ContainerWindow(*this,environment);
+    mInventoryWindow = new InventoryWindow(*this,environment);
 
     // The HUD is always on
     hud->setVisible(true);
@@ -121,6 +123,7 @@ WindowManager::~WindowManager()
     delete mJournal;
     delete dialogueWindow;
     delete containerWindow;
+    delete mInventoryWindow;
     delete mCharGen;
 
     cleanupGarbage();
@@ -182,6 +185,7 @@ void WindowManager::updateVisible()
     mJournal->setVisible(false);
     dialogueWindow->setVisible(false);
     containerWindow->setVisible(false);
+    mInventoryWindow->setVisible(false);
 
     // Mouse is visible whenever we're not in game mode
     MyGUI::PointerManager::getInstance().setVisible(isGuiMode());
@@ -217,11 +221,12 @@ void WindowManager::updateVisible()
             // Show the windows we want
             map   -> setVisible( (eff & GW_Map) != 0 );
             stats -> setVisible( (eff & GW_Stats) != 0 );
-
+            mInventoryWindow->setVisible(true);
             break;
         }
         case GM_Container:
             containerWindow->setVisible(true);
+            mInventoryWindow->setVisible(true);
             break;
         case GM_Dialogue:
             dialogueWindow->open();
