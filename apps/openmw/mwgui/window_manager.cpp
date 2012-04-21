@@ -222,11 +222,13 @@ void WindowManager::updateVisible()
             map   -> setVisible( (eff & GW_Map) != 0 );
             stats -> setVisible( (eff & GW_Stats) != 0 );
             mInventoryWindow->setVisible(true);
+            mInventoryWindow->openInventory();
             break;
         }
         case GM_Container:
             containerWindow->setVisible(true);
             mInventoryWindow->setVisible(true);
+            mInventoryWindow->openInventory();
             break;
         case GM_Dialogue:
             dialogueWindow->open();

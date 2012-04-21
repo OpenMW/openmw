@@ -44,8 +44,8 @@ namespace MWGui
             void Update();
 
             virtual ~ContainerWindow();
+
         protected:
-        private:
         MWWorld::Environment& mEnvironment;
         std::vector<MyGUI::WidgetPtr> containerWidgets;
         MyGUI::WidgetPtr containerWidget;

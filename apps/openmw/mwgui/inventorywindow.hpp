@@ -25,6 +25,8 @@ namespace MWGui
     {
         public:
             InventoryWindow(WindowManager& parWindowManager,MWWorld::Environment& environment);
+
+            void openInventory();
     };
 }
 #endif // Inventory_H
