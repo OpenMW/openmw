@@ -677,7 +677,6 @@ namespace MWDialogue
 
     void DialogueManager::executeScript(std::string script)
     {
-        std::cout << script;
         std::vector<Interpreter::Type_Code> code;
         if(compile(script,code))
         {

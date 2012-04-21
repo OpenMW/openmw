@@ -8,8 +8,6 @@
 
 #include "class.hpp"
 
-#include <iostream> /// \todo remove after rendering is implemented
-
 void MWWorld::InventoryStore::copySlots (const InventoryStore& store)
 {
     // some const-trickery, required because of a flaw in the handling of MW-references and the
@@ -72,7 +70,7 @@ void MWWorld::InventoryStore::equip (int slot, const ContainerStoreIterator& ite
     /// \todo restack item previously in this slot (if required)
 
     /// \todo unstack item pointed to by iterator if required)
-	
+
     mSlots[slot] = iterator;
 
     flagAsModified();
@@ -169,13 +167,5 @@ void MWWorld::InventoryStore::autoEquip (const MWMechanics::NpcStats& stats,
     {
         mSlots.swap (slots);
         flagAsModified();
-
-        /// \todo remove the following line after rendering is implemented
-        for (std::size_t i=0; i<mSlots.size(); ++i)
-            if (mSlots[i]!=end())
-            {
-                std::cout<<"NPC is equipping " << MWWorld::Class::get (*mSlots[i]).getName (*mSlots[i])
-                    << " in slot " << i << std::endl;
-            }
     }
 }
