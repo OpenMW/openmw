@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <MyGUI type="Layout">
-    <Widget type="Window" skin="MW_Window" layer="Windows" position="900 500 600 300" name="_Main">
+    <Widget type="Window" skin="MW_Window" layer="Windows" position="0 0 600 300" align="Left Bottom" name="_Main">
 
-        <!-- HEADER 
+        <!-- HEADER -->
         <Widget type="TextBox" skin="HeaderText" position="0 0 588 18" name="ContainerName" align="ALIGN_LEFT ALIGN_TOP">
-            <Property key="Caption" value="Name"/>
+            <Property key="Caption" value=""/>
             <Property key="TextAlign" value="ALIGN_CENTER"/>
-        </Widget>-->
+        </Widget>
 
 
 
