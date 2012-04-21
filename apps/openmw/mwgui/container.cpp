@@ -35,7 +35,7 @@ ContainerWindow::ContainerWindow(WindowManager& parWindowManager,MWWorld::Enviro
     //center();
     adjustWindowCaption();
 
-    getWidget(containerWidget, "Items");
+    getWidget(mContainerWidget, "Items");
     getWidget(takeButton, "TakeButton");
     getWidget(closeButton, "CloseButton");
 
@@ -43,6 +43,7 @@ ContainerWindow::ContainerWindow(WindowManager& parWindowManager,MWWorld::Enviro
 
     setText("CloseButton","Close");
     setText("TakeButton","Take All");
+    mContainerWidget->eventMouseItemActivate += MyGUI::newDelegate(this,&ContainerWindow::onSelectedItem);
 }
 
 ContainerWindow::ContainerWindow(WindowManager& parWindowManager,MWWorld::Environment& environment,std::string guiFile)
@@ -52,8 +53,7 @@ ContainerWindow::ContainerWindow(WindowManager& parWindowManager,MWWorld::Enviro
     setText("_Main", "Name of Container");
     //center();
     adjustWindowCaption();
-
-    getWidget(containerWidget, "Items");
+    getWidget(mContainerWidget, "Items");
     //getWidget(takeButton, "TakeButton");
     //getWidget(closeButton, "CloseButton");
 
@@ -61,6 +61,7 @@ ContainerWindow::ContainerWindow(WindowManager& parWindowManager,MWWorld::Enviro
 
     //setText("CloseButton","Close");
     //setText("TakeButton","Take All");
+    mContainerWidget->eventMouseItemActivate += MyGUI::newDelegate(this,&ContainerWindow::onSelectedItem);
 }
 ContainerWindow::~ContainerWindow()
 {
@@ -126,8 +127,8 @@ void ContainerWindow::open(MWWorld::Ptr& container)
         path+=MWWorld::Class::get(*iter).getInventoryIcon(*iter);
         count++;
 
-        MyGUI::ImageBox* image = containerWidget->createWidget<MyGUI::ImageBox>("ImageBox", MyGUI::IntCoord(x, y, 32, 32), MyGUI::Align::Default);
-        MyGUI::TextBox* text = containerWidget->createWidget<MyGUI::TextBox>("SandBrightText", MyGUI::IntCoord(x, y, 18, 18), MyGUI::Align::Default, std::string("Label"));
+        MyGUI::ImageBox* image = mContainerWidget->createWidget<MyGUI::ImageBox>("ImageBox", MyGUI::IntCoord(x, y, 32, 32), MyGUI::Align::Default);
+        MyGUI::TextBox* text = mContainerWidget->createWidget<MyGUI::TextBox>("SandBrightText", MyGUI::IntCoord(x, y, 18, 18), MyGUI::Align::Default, std::string("Label"));
 
         x += 36;
         if(count % 20 == 0)
@@ -140,7 +141,7 @@ void ContainerWindow::open(MWWorld::Ptr& container)
         if(iter->getRefData().getCount() > 1)
             text->setCaption(boost::lexical_cast<std::string>(iter->getRefData().getCount()));
 
-        containerWidgets.push_back(image);
+        mContainerWidgets.push_back(image);
 
         int pos = path.rfind(".");
         path.erase(pos);
@@ -167,3 +168,7 @@ void ContainerWindow::onByeClicked(MyGUI::Widget* _sender)
     setVisible(false);
 }
 
+void ContainerWindow::onSelectedItem(MyGUI::ItemBox* _sender, size_t _index)
+{
+    std::cout << "selected!";
+}

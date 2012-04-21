@@ -47,15 +47,15 @@ namespace MWGui
 
         protected:
         MWWorld::Environment& mEnvironment;
-        std::vector<MyGUI::WidgetPtr> containerWidgets;
-        MyGUI::WidgetPtr containerWidget;
+        std::vector<MyGUI::WidgetPtr> mContainerWidgets;
+        MyGUI::ItemBoxPtr mContainerWidget;
 
         MyGUI::ButtonPtr takeButton;
         MyGUI::ButtonPtr closeButton;
 
 
         void onByeClicked(MyGUI::Widget* _sender);
-
+        void onSelectedItem(MyGUI::ItemBox* _sender, size_t _index);
 
         //MWWorld::Ptr& mContainer;
     };

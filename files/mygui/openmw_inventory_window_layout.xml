@@ -14,7 +14,7 @@
         </Widget>
 
         <!-- Items in inventory -->
-        <Widget type="Widget" skin="MW_Box" position="228 32 300 166" name="Items"/>
+        <Widget type="ItemBox" skin="MW_Box" position="228 32 300 166" name="Items"/>
 
         <!-- Categories -->
         <Widget type="Widget" position="228 8 300 18" align="ALIGN_TOP ALIGN_LEFT" name="Categories">
