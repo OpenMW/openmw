@@ -1777,10 +1777,6 @@ void PmoveSingle (playerMove* const pmove)
 	pm->ps.watertype = 0;
 	pm->ps.waterlevel = WL_DRYLAND;
 
-    if(pml.walking)
-        std::cout << "Walking\n";
-    else
-        std::cout << "Not Walking\n";
 	//if ( pm->ps->stats[STAT_HEALTH] <= 0 )
 		//pm->tracemask &= ~CONTENTS_BODY;	// corpses can fly through bodies
 		

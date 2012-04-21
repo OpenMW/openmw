@@ -27,7 +27,7 @@ namespace MWWorld
         NifBullet::ManualBulletShapeLoader* shapeLoader = new NifBullet::ManualBulletShapeLoader();
         mEngine = new OEngine::Physic::PhysicEngine(shapeLoader);
         playerphysics->mEngine = mEngine;
-        //playerphysics->ps.snappingImplemented = true;
+      
         
 		
     }
