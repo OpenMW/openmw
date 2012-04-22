@@ -74,7 +74,7 @@ void ContainerWindow::setName(std::string contName)
 
 
 
-void ContainerWindow::open(MWWorld::Ptr& container)
+void ContainerWindow::open(MWWorld::Ptr container)
 {
     setName(MWWorld::Class::get(container).getName(container));
     //MWWorld::ContainerStore* containerStore = container.getContainerStore();

@@ -39,7 +39,7 @@ namespace MWGui
             ContainerWindow(WindowManager& parWindowManager,MWWorld::Environment& environment,std::string guiFile);
 
 
-            void open(MWWorld::Ptr& container);
+            void open(MWWorld::Ptr container);
             void setName(std::string contName);
             void Update();
 
