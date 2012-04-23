@@ -58,6 +58,10 @@ add_openmw_dir (mwmechanics
     mechanicsmanager stat creaturestats magiceffects movement actors drawstate spells
     )
 
+add_openmw_dir (mwbase
+    environment
+    )
+
 # Main executable
 IF(OGRE_STATIC)
 IF(WIN32)
