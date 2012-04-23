@@ -6,7 +6,7 @@
 MWBase::Environment *MWBase::Environment::sThis = 0;
 
 MWBase::Environment::Environment()
-: mWorld (0), mSoundManager (0), mGlobalScripts (0), mScriptManager (0), mWindowManager (0),
+: mWorld (0), mSoundManager (0), mScriptManager (0), mWindowManager (0),
   mMechanicsManager (0),  mDialogueManager (0), mJournal (0), mFrameDuration (0)
 {
     assert (!sThis);
@@ -26,11 +26,6 @@ void MWBase::Environment::setWorld (MWWorld::World *world)
 void MWBase::Environment::setSoundManager (MWSound::SoundManager *soundManager)
 {
     mSoundManager = soundManager;
-}
-
-void MWBase::Environment::setGlobalScripts (MWScript::GlobalScripts *globalScripts)
-{
-    mGlobalScripts = globalScripts;
 }
 
 void MWBase::Environment::setScriptManager (MWScript::ScriptManager *scriptManager)
@@ -73,12 +68,6 @@ MWSound::SoundManager *MWBase::Environment::getSoundManager() const
 {
     assert (mSoundManager);
     return mSoundManager;
-}
-
-MWScript::GlobalScripts *MWBase::Environment::getGlobalScripts() const
-{
-    assert (mGlobalScripts);
-    return mGlobalScripts;
 }
 
 MWScript::ScriptManager *MWBase::Environment::getScriptManager() const

@@ -8,7 +8,6 @@ namespace MWSound
 
 namespace MWScript
 {
-    class GlobalScripts;
     class ScriptManager;
 }
 
@@ -52,7 +51,6 @@ namespace MWBase
 
             MWWorld::World *mWorld;
             MWSound::SoundManager *mSoundManager;
-            MWScript::GlobalScripts *mGlobalScripts;
             MWScript::ScriptManager *mScriptManager;
             MWGui::WindowManager *mWindowManager;
             MWMechanics::MechanicsManager *mMechanicsManager;
@@ -76,8 +74,6 @@ namespace MWBase
 
             void setSoundManager (MWSound::SoundManager *soundManager);
 
-            void setGlobalScripts (MWScript::GlobalScripts *globalScripts);
-
             void setScriptManager (MWScript::ScriptManager *scriptManager);
 
             void setWindowManager (MWGui::WindowManager *windowManager);
@@ -94,8 +90,6 @@ namespace MWBase
             MWWorld::World *getWorld() const;
 
             MWSound::SoundManager *getSoundManager() const;
-
-            MWScript::GlobalScripts *getGlobalScripts() const;
 
             MWScript::ScriptManager *getScriptManager() const;
 

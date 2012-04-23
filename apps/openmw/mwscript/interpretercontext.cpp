@@ -15,6 +15,7 @@
 
 #include "locals.hpp"
 #include "globalscripts.hpp"
+#include "scriptmanager.hpp"
 
 namespace MWScript
 {
@@ -174,17 +175,17 @@ namespace MWScript
 
     bool InterpreterContext::isScriptRunning (const std::string& name) const
     {
-        return mEnvironment.mGlobalScripts->isRunning (name);
+        return mEnvironment.mScriptManager->getGlobalScripts().isRunning (name);
     }
 
     void InterpreterContext::startScript (const std::string& name)
     {
-        mEnvironment.mGlobalScripts->addScript (name);
+        mEnvironment.mScriptManager->getGlobalScripts().addScript (name);
     }
 
     void InterpreterContext::stopScript (const std::string& name)
     {
-        mEnvironment.mGlobalScripts->removeScript (name);
+        mEnvironment.mScriptManager->getGlobalScripts().removeScript (name);
     }
 
     float InterpreterContext::getDistance (const std::string& name, const std::string& id) const

@@ -142,7 +142,7 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
         mEnvironment.mWindowManager->onFrame(mEnvironment.mFrameDuration);
 
         // global scripts
-        mEnvironment.mGlobalScripts->run (mEnvironment);
+        mEnvironment.mScriptManager->getGlobalScripts().run (mEnvironment);
 
         bool changed = mEnvironment.mWorld->hasCellChanged();
 
@@ -205,7 +205,6 @@ OMW::Engine::~Engine()
 {
     delete mEnvironment.mWorld;
     delete mEnvironment.mSoundManager;
-    delete mEnvironment.mGlobalScripts;
     delete mEnvironment.mMechanicsManager;
     delete mEnvironment.mDialogueManager;
     delete mEnvironment.mJournal;
@@ -219,7 +218,7 @@ OMW::Engine::~Engine()
 void OMW::Engine::loadBSA()
 {
     const Files::MultiDirCollection& bsa = mFileCollections.getCollection (".bsa");
-    
+
     for (Files::MultiDirCollection::TIter iter(bsa.begin()); iter!=bsa.end(); ++iter)
     {
         std::cout << "Adding " << iter->second.string() << std::endl;
@@ -401,9 +400,6 @@ void OMW::Engine::go()
 
     mEnvironment.mScriptManager = new MWScript::ScriptManager (mEnvironment.mWorld->getStore(),
         mVerboseScripts, *mScriptContext);
-
-    mEnvironment.mGlobalScripts = new MWScript::GlobalScripts (mEnvironment.mWorld->getStore(),
-        *mEnvironment.mScriptManager);
 
     // Create game mechanics system
     mEnvironment.mMechanicsManager = new MWMechanics::MechanicsManager (mEnvironment);
