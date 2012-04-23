@@ -18,8 +18,6 @@ namespace MWGui
 {
     class DialogueHistory;
 
-    using namespace MyGUI;
-
     class DialogueWindow: public WindowBase
     {
     public:
@@ -28,7 +26,7 @@ namespace MWGui
         void open();
 
         // Events
-        typedef delegates::CMultiDelegate0 EventHandle_Void;
+        typedef MyGUI::delegates::CMultiDelegate0 EventHandle_Void;
 
         /** Event : Dialog finished, OK button clicked.\n
             signature : void method()\n
