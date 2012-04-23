@@ -16,11 +16,6 @@ namespace Ogre
     class Camera;
 }
 
-namespace MWWorld
-{
-    struct Environment;
-}
-
 namespace MWSound
 {
     class Sound_Output;
@@ -52,8 +47,6 @@ namespace MWSound
     {
         Ogre::ResourceGroupManager& mResourceMgr;
 
-        MWWorld::Environment& mEnvironment;
-
         std::auto_ptr<Sound_Output> mOutput;
 
         float mMasterVolume;
@@ -82,7 +75,7 @@ namespace MWSound
         friend class OpenAL_Output;
 
     public:
-        SoundManager(bool useSound, MWWorld::Environment& environment);
+        SoundManager(bool useSound);
         ~SoundManager();
 
         void stopMusic();

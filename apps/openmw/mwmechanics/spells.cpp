@@ -3,7 +3,8 @@
 
 #include <components/esm/loadspel.hpp>
 
-#include "../mwworld/environment.hpp"
+#include "../mwbase/environment.hpp"
+
 #include "../mwworld/world.hpp"
 
 #include "magiceffects.hpp"
@@ -48,13 +49,13 @@ namespace MWMechanics
             mSelectedSpell.clear();
     }
 
-    MagicEffects Spells::getMagicEffects (const MWWorld::Environment& environment) const
+    MagicEffects Spells::getMagicEffects() const
     {
         MagicEffects effects;
 
         for (TIterator iter = mSpells.begin(); iter!=mSpells.end(); ++iter)
         {
-            const ESM::Spell *spell = environment.mWorld->getStore().spells.find (*iter);
+            const ESM::Spell *spell = MWBase::Environment::get().getWorld()->getStore().spells.find (*iter);
 
             if (spell->data.type==ESM::Spell::ST_Ability || spell->data.type==ESM::Spell::ST_Blight ||
                 spell->data.type==ESM::Spell::ST_Disease || spell->data.type==ESM::Spell::ST_Curse)

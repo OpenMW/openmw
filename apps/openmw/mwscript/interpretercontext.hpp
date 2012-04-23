@@ -6,7 +6,6 @@
 #include <components/interpreter/context.hpp>
 
 #include "../mwworld/ptr.hpp"
-#include "../mwworld/environment.hpp"
 #include "../mwworld/world.hpp"
 #include "../mwworld/action.hpp"
 
@@ -26,7 +25,6 @@ namespace MWScript
 
     class InterpreterContext : public Interpreter::Context
     {
-            MWWorld::Environment& mEnvironment;
             Locals *mLocals;
             MWWorld::Ptr mReference;
 
@@ -40,8 +38,7 @@ namespace MWScript
 
         public:
 
-            InterpreterContext (MWWorld::Environment& environment,
-                MWScript::Locals *locals, MWWorld::Ptr reference);
+            InterpreterContext (MWScript::Locals *locals, MWWorld::Ptr reference);
             ///< The ownership of \a locals is not transferred. 0-pointer allowed.
 
             virtual int getLocalShort (int index) const;
@@ -109,18 +106,6 @@ namespace MWScript
             virtual void enable (const std::string& id = "");
 
             virtual void disable (const std::string& id = "");
-
-            MWWorld::Environment& getEnvironment();
-
-            /// \todo remove the following functions (extentions should use getEnvironment instead)
-
-            MWWorld::World& getWorld();
-
-            MWSound::SoundManager& getSoundManager();
-
-            MWGui::WindowManager& getWindowManager();
-
-            MWInput::MWInputManager& getInputManager();
 
             MWWorld::Ptr getReference();
             ///< Reference, that the script is running from (can be empty)

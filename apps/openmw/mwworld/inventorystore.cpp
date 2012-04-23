@@ -72,7 +72,7 @@ void MWWorld::InventoryStore::equip (int slot, const ContainerStoreIterator& ite
     /// \todo restack item previously in this slot (if required)
 
     /// \todo unstack item pointed to by iterator if required)
-	
+
     mSlots[slot] = iterator;
 
     flagAsModified();
@@ -96,8 +96,7 @@ MWWorld::ContainerStoreIterator MWWorld::InventoryStore::getSlot (int slot)
     return mSlots[slot];
 }
 
-void MWWorld::InventoryStore::autoEquip (const MWMechanics::NpcStats& stats,
-    const Environment& environment)
+void MWWorld::InventoryStore::autoEquip (const MWMechanics::NpcStats& stats)
 {
     TSlots slots;
     initSlots (slots);
@@ -105,7 +104,7 @@ void MWWorld::InventoryStore::autoEquip (const MWMechanics::NpcStats& stats,
     for (ContainerStoreIterator iter (begin()); iter!=end(); ++iter)
     {
         Ptr test = *iter;
-        int testSkill = MWWorld::Class::get (test).getEquipmentSkill (test, environment);
+        int testSkill = MWWorld::Class::get (test).getEquipmentSkill (test);
 
         std::pair<std::vector<int>, bool> itemsSlots =
             MWWorld::Class::get (*iter).getEquipmentSlots (*iter);
@@ -125,7 +124,7 @@ void MWWorld::InventoryStore::autoEquip (const MWMechanics::NpcStats& stats,
                 {
                     // check skill
                     int oldSkill =
-                        MWWorld::Class::get (old).getEquipmentSkill (old, environment);
+                        MWWorld::Class::get (old).getEquipmentSkill (old);
 
                     if (testSkill!=-1 || oldSkill!=-1 || testSkill!=oldSkill)
                     {

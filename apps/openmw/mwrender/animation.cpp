@@ -4,10 +4,9 @@
 namespace MWRender{
     std::map<std::string, int> Animation::mUniqueIDs;
 
-    Animation::Animation(MWWorld::Environment& _env, OEngine::Render::OgreRenderer& _rend)
+    Animation::Animation(OEngine::Render::OgreRenderer& _rend)
         : insert(NULL)
         , mRend(_rend)
-        , mEnvironment(_env)
         , vecRotPos()
         , time(0.0f)
         , startTime(0.0f)
@@ -428,7 +427,7 @@ namespace MWRender{
      //base->_updateAnimation();
    //base->_notifyMoved();
 
-  
+
 
 
     std::vector<Nif::NiKeyframeData>::iterator iter;

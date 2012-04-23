@@ -3,7 +3,7 @@
 #include "window_manager.hpp"
 #include "widgets.hpp"
 #include "components/esm_store/store.hpp"
-#include "../mwworld/environment.hpp"
+#include "../mwbase/environment.hpp"
 #include "../mwdialogue/dialoguemanager.hpp"
 
 #include <assert.h>
@@ -36,9 +36,8 @@ std::string::size_type find_str_ci(const std::string& str, const std::string& su
 }
 
 
-DialogueWindow::DialogueWindow(WindowManager& parWindowManager,MWWorld::Environment& environment)
-    : WindowBase("openmw_dialogue_window_layout.xml", parWindowManager),
-    mEnvironment(environment)
+DialogueWindow::DialogueWindow(WindowManager& parWindowManager)
+    : WindowBase("openmw_dialogue_window_layout.xml", parWindowManager)
 {
     // Centre dialog
     center();
@@ -54,7 +53,7 @@ DialogueWindow::DialogueWindow(WindowManager& parWindowManager,MWWorld::Environm
     /// \todo scrolling the dialogue history with the mouse wheel doesn't work using this solution
     getWidget(eventbox, "EventBox");
     eventbox->eventMouseButtonClick += MyGUI::newDelegate(this, &DialogueWindow::onHistoryClicked);
-    
+
     //Topics list
     getWidget(topicsList, "TopicsList");
     topicsList->setScrollVisible(true);
@@ -83,9 +82,9 @@ void DialogueWindow::onHistoryClicked(MyGUI::Widget* _sender)
     if(color != "#B29154")
     {
         UString key = history->getColorTextAt(cursorPosition);
-        if(color == "#686EBA") mEnvironment.mDialogueManager->keywordSelected(lower_string(key));
+        if(color == "#686EBA") MWBase::Environment::get().getDialogueManager()->keywordSelected(lower_string(key));
 
-        if(color == "#572D21") mEnvironment.mDialogueManager->questionAnswered(key);
+        if(color == "#572D21") MWBase::Environment::get().getDialogueManager()->questionAnswered(key);
     }
 }
 
@@ -100,7 +99,7 @@ void DialogueWindow::open()
 
 void DialogueWindow::onByeClicked(MyGUI::Widget* _sender)
 {
-    mEnvironment.mDialogueManager->goodbyeSelected();
+    MWBase::Environment::get().getDialogueManager()->goodbyeSelected();
 }
 
 void DialogueWindow::onSelectTopic(MyGUI::ListBox* _sender, size_t _index)
@@ -108,7 +107,7 @@ void DialogueWindow::onSelectTopic(MyGUI::ListBox* _sender, size_t _index)
     if (_index == MyGUI::ITEM_NONE)
         return;
     std::string topic =  _sender->getItemNameAt(_index);
-    mEnvironment.mDialogueManager->keywordSelected(lower_string(topic));
+    MWBase::Environment::get().getDialogueManager()->keywordSelected(lower_string(topic));
 }
 
 void DialogueWindow::startDialogue(std::string npcName)

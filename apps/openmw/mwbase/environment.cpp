@@ -7,7 +7,7 @@ MWBase::Environment *MWBase::Environment::sThis = 0;
 
 MWBase::Environment::Environment()
 : mWorld (0), mSoundManager (0), mScriptManager (0), mWindowManager (0),
-  mMechanicsManager (0),  mDialogueManager (0), mJournal (0), mFrameDuration (0)
+  mMechanicsManager (0),  mDialogueManager (0), mJournal (0), mInputManager (0), mFrameDuration (0)
 {
     assert (!sThis);
     sThis = this;
@@ -51,6 +51,11 @@ void MWBase::Environment::setDialogueManager (MWDialogue::DialogueManager *dialo
 void MWBase::Environment::setJournal (MWDialogue::Journal *journal)
 {
     mJournal = journal;
+}
+
+void MWBase::Environment::setInputManager (MWInput::MWInputManager *inputManager)
+{
+    mInputManager = inputManager;
 }
 
 void MWBase::Environment::setFrameDuration (float duration)
@@ -98,6 +103,12 @@ MWDialogue::Journal *MWBase::Environment::getJournal() const
 {
     assert (mJournal);
     return mJournal;
+}
+
+MWInput::MWInputManager *MWBase::Environment::getInputManager() const
+{
+    assert (mInputManager);
+    return mInputManager;
 }
 
 float MWBase::Environment::getFrameDuration() const

@@ -5,6 +5,8 @@
 
 #include <components/interpreter/runtime.hpp>
 
+#include "../mwbase/environment.hpp"
+
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/world.hpp"
 
@@ -16,13 +18,10 @@ namespace MWScript
     {
         MWWorld::Ptr operator() (Interpreter::Runtime& runtime) const
         {
-            MWScript::InterpreterContext& context
-                = static_cast<MWScript::InterpreterContext&> (runtime.getContext());
-
             std::string id = runtime.getStringLiteral (runtime[0].mInteger);
             runtime.pop();
 
-            return context.getWorld().getPtr (id, false);
+            return MWBase::Environment::get().getWorld()->getPtr (id, false);
         }
     };
 

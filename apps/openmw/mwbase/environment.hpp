@@ -56,6 +56,7 @@ namespace MWBase
             MWMechanics::MechanicsManager *mMechanicsManager;
             MWDialogue::DialogueManager *mDialogueManager;
             MWDialogue::Journal *mJournal;
+            MWInput::MWInputManager *mInputManager;
             float mFrameDuration;
 
             Environment (const Environment&);
@@ -84,6 +85,8 @@ namespace MWBase
 
             void setJournal (MWDialogue::Journal *journal);
 
+            void setInputManager (MWInput::MWInputManager *inputManager);
+
             void setFrameDuration (float duration);
             ///< Set length of current frame in seconds.
 
@@ -100,6 +103,8 @@ namespace MWBase
             MWDialogue::DialogueManager *getDialogueManager() const;
 
             MWDialogue::Journal *getJournal() const;
+
+            MWInput::MWInputManager *getInputManager() const;
 
             float getFrameDuration() const;
 

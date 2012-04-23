@@ -9,11 +9,6 @@ namespace MWGui
     class WindowManager;
 }
 
-namespace MWWorld
-{
-    class Environment;
-}
-
 /*
   This file contains the dialouge window
   Layout is defined by resources/mygui/openmw_dialogue_window_layout.xml.
@@ -28,7 +23,7 @@ namespace MWGui
     class DialogueWindow: public WindowBase
     {
     public:
-        DialogueWindow(WindowManager& parWindowManager,MWWorld::Environment& environment);
+        DialogueWindow(WindowManager& parWindowManager);
 
         void open();
 
@@ -65,8 +60,6 @@ namespace MWGui
         MyGUI::ProgressPtr pDispositionBar;
         MyGUI::EditPtr pDispositionText;
         std::map<std::string,std::string> pTopicsText;// this map links keyword and "real" text.
-
-        MWWorld::Environment& mEnvironment;
     };
 }
 #endif

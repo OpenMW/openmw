@@ -9,9 +9,9 @@
 
 #include <components/esm_store/store.hpp>
 
+#include "../mwbase/environment.hpp"
 
 #include "../mwworld/class.hpp"
-#include "../mwworld/environment.hpp"
 #include "../mwworld/world.hpp"
 #include "../mwworld/refdata.hpp"
 #include "../mwworld/player.hpp"
@@ -181,7 +181,7 @@ namespace MWDialogue
 
                 case 46://Same faction
                     {
-                    MWMechanics::NpcStats PCstats = MWWorld::Class::get(mEnvironment.mWorld->getPlayer().getPlayer()).getNpcStats(mEnvironment.mWorld->getPlayer().getPlayer());
+                    MWMechanics::NpcStats PCstats = MWWorld::Class::get(MWBase::Environment::get().getWorld()->getPlayer().getPlayer()).getNpcStats(MWBase::Environment::get().getWorld()->getPlayer().getPlayer());
                     MWMechanics::NpcStats NPCstats = MWWorld::Class::get(actor).getNpcStats(actor);
                     int sameFaction = 0;
                     if(!NPCstats.mFactionRank.empty())
@@ -288,12 +288,12 @@ namespace MWDialogue
                 if (select.type==ESM::VT_Short || select.type==ESM::VT_Int ||
                     select.type==ESM::VT_Long)
                 {
-                    if (!checkGlobal (comp, toLower (name), select.i, *mEnvironment.mWorld))
+                    if (!checkGlobal (comp, toLower (name), select.i, *MWBase::Environment::get().getWorld()))
                         return false;
                 }
                 else if (select.type==ESM::VT_Float)
                 {
-                    if (!checkGlobal (comp, toLower (name), select.f, *mEnvironment.mWorld))
+                    if (!checkGlobal (comp, toLower (name), select.f, *MWBase::Environment::get().getWorld()))
                         return false;
                 }
                 else
@@ -308,13 +308,13 @@ namespace MWDialogue
                     select.type==ESM::VT_Long)
                 {
                     if (!checkLocal (comp, toLower (name), select.i, actor,
-                        mEnvironment.mWorld->getStore()))
+                        MWBase::Environment::get().getWorld()->getStore()))
                         return false;
                 }
                 else if (select.type==ESM::VT_Float)
                 {
                     if (!checkLocal (comp, toLower (name), select.f, actor,
-                        mEnvironment.mWorld->getStore()))
+                        MWBase::Environment::get().getWorld()->getStore()))
                         return false;
                 }
                 else
@@ -326,7 +326,7 @@ namespace MWDialogue
             case '4'://journal
                 if(select.type==ESM::VT_Int)
                 {
-                    if(!selectCompare<int,int>(comp,mEnvironment.mJournal->getJournalIndex(toLower(name)),select.i)) return false;
+                    if(!selectCompare<int,int>(comp,MWBase::Environment::get().getJournal()->getJournalIndex(toLower(name)),select.i)) return false;
                 }
                 else
                     throw std::runtime_error (
@@ -336,7 +336,7 @@ namespace MWDialogue
 
             case '5'://item
                 {
-                MWWorld::Ptr player = mEnvironment.mWorld->getPlayer().getPlayer();
+                MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
                 MWWorld::ContainerStore& store = MWWorld::Class::get (player).getContainerStore (player);
 
                 int sum = 0;
@@ -424,13 +424,13 @@ namespace MWDialogue
                     select.type==ESM::VT_Long)
                 {
                     if (checkLocal (comp, toLower (name), select.i, actor,
-                        mEnvironment.mWorld->getStore()))
+                        MWBase::Environment::get().getWorld()->getStore()))
                         return false;
                 }
                 else if (select.type==ESM::VT_Float)
                 {
                     if (checkLocal (comp, toLower (name), select.f, actor,
-                        mEnvironment.mWorld->getStore()))
+                        MWBase::Environment::get().getWorld()->getStore()))
                         return false;
                 }
                 else
@@ -500,7 +500,7 @@ namespace MWDialogue
         // TODO check player faction
         if(!info.pcFaction.empty())
         {
-            MWMechanics::NpcStats stats = MWWorld::Class::get(mEnvironment.mWorld->getPlayer().getPlayer()).getNpcStats(mEnvironment.mWorld->getPlayer().getPlayer());
+            MWMechanics::NpcStats stats = MWWorld::Class::get(MWBase::Environment::get().getWorld()->getPlayer().getPlayer()).getNpcStats(MWBase::Environment::get().getWorld()->getPlayer().getPlayer());
             std::map<std::string,int>::iterator it = stats.mFactionRank.find(info.pcFaction);
             if(it!=stats.mFactionRank.end())
             {
@@ -528,7 +528,7 @@ namespace MWDialogue
 
         // check cell
         if (!info.cell.empty())
-            if (mEnvironment.mWorld->getPlayer().getPlayer().getCell()->cell->name != info.cell)
+            if (MWBase::Environment::get().getWorld()->getPlayer().getPlayer().getCell()->cell->name != info.cell)
                 return false;
 
         // TODO check DATAstruct
@@ -540,8 +540,8 @@ namespace MWDialogue
         return true;
     }
 
-    DialogueManager::DialogueManager (MWWorld::Environment& environment,const Compiler::Extensions& extensions) :
-    mEnvironment (environment),mCompilerContext (MWScript::CompilerContext::Type_Dialgoue, environment),
+    DialogueManager::DialogueManager (const Compiler::Extensions& extensions) :
+      mCompilerContext (MWScript::CompilerContext::Type_Dialgoue),
         mErrorStream(std::cout.rdbuf()),mErrorHandler(mErrorStream)
     {
         mChoice = -1;
@@ -549,7 +549,7 @@ namespace MWDialogue
         mCompilerContext.setExtensions (&extensions);
         mDialogueMap.clear();
         actorKnownTopics.clear();
-        ESMS::RecListCaseT<ESM::Dialogue>::MapType dialogueList = mEnvironment.mWorld->getStore().dialogs.list;
+        ESMS::RecListCaseT<ESM::Dialogue>::MapType dialogueList = MWBase::Environment::get().getWorld()->getStore().dialogs.list;
         for(ESMS::RecListCaseT<ESM::Dialogue>::MapType::iterator it = dialogueList.begin(); it!=dialogueList.end();it++)
         {
             mDialogueMap[toLower(it->first)] = it->second;
@@ -592,8 +592,8 @@ namespace MWDialogue
         actorKnownTopics.clear();
 
         //initialise the GUI
-        mEnvironment.mInputManager->setGuiMode(MWGui::GM_Dialogue);
-        MWGui::DialogueWindow* win = mEnvironment.mWindowManager->getDialogueWindow();
+        MWBase::Environment::get().getInputManager()->setGuiMode(MWGui::GM_Dialogue);
+        MWGui::DialogueWindow* win = MWBase::Environment::get().getWindowManager()->getDialogueWindow();
         win->startDialogue(MWWorld::Class::get (actor).getName (actor));
 
         //setup the list of topics known by the actor. Topics who are also on the knownTopics list will be added to the GUI
@@ -601,8 +601,8 @@ namespace MWDialogue
 
         //greeting
         bool greetingFound = false;
-        //ESMS::RecListT<ESM::Dialogue>::MapType dialogueList = mEnvironment.mWorld->getStore().dialogs.list;
-        ESMS::RecListCaseT<ESM::Dialogue>::MapType dialogueList = mEnvironment.mWorld->getStore().dialogs.list;
+        //ESMS::RecListT<ESM::Dialogue>::MapType dialogueList = MWBase::Environment::get().getWorld()->getStore().dialogs.list;
+        ESMS::RecListCaseT<ESM::Dialogue>::MapType dialogueList = MWBase::Environment::get().getWorld()->getStore().dialogs.list;
         for(ESMS::RecListCaseT<ESM::Dialogue>::MapType::iterator it = dialogueList.begin(); it!=dialogueList.end();it++)
         {
             ESM::Dialogue ndialogue = it->second;
@@ -650,7 +650,7 @@ namespace MWDialogue
             if (!actorScript.empty())
             {
                 // grab local variables from actor's script, if available.
-                locals = mEnvironment.mScriptManager->getLocals (actorScript);
+                locals = MWBase::Environment::get().getScriptManager()->getLocals (actorScript);
             }
 
             Compiler::ScriptParser parser(mErrorHandler,mCompilerContext, locals, false);
@@ -683,7 +683,7 @@ namespace MWDialogue
         {
             try
             {
-                MWScript::InterpreterContext interpreterContext(mEnvironment,&mActor.getRefData().getLocals(),mActor);
+                MWScript::InterpreterContext interpreterContext(&mActor.getRefData().getLocals(),mActor);
                 Interpreter::Interpreter interpreter;
                 MWScript::installOpcodes (interpreter);
                 interpreter.run (&code[0], code.size(), interpreterContext);
@@ -701,8 +701,8 @@ namespace MWDialogue
         int choice = mChoice;
         mChoice = -1;
         actorKnownTopics.clear();
-        MWGui::DialogueWindow* win = mEnvironment.mWindowManager->getDialogueWindow();
-        ESMS::RecListCaseT<ESM::Dialogue>::MapType dialogueList = mEnvironment.mWorld->getStore().dialogs.list;
+        MWGui::DialogueWindow* win = MWBase::Environment::get().getWindowManager()->getDialogueWindow();
+        ESMS::RecListCaseT<ESM::Dialogue>::MapType dialogueList = MWBase::Environment::get().getWorld()->getStore().dialogs.list;
         for(ESMS::RecListCaseT<ESM::Dialogue>::MapType::iterator it = dialogueList.begin(); it!=dialogueList.end();it++)
         {
             ESM::Dialogue ndialogue = it->second;
@@ -747,7 +747,7 @@ namespace MWDialogue
 
                             parseText(text);
 
-                            MWGui::DialogueWindow* win = mEnvironment.mWindowManager->getDialogueWindow();
+                            MWGui::DialogueWindow* win = MWBase::Environment::get().getWindowManager()->getDialogueWindow();
                             win->addTitle(keyword);
                             win->addText(iter->response);
 
@@ -767,7 +767,7 @@ namespace MWDialogue
 
     void DialogueManager::goodbyeSelected()
     {
-        mEnvironment.mInputManager->setGuiMode(MWGui::GM_Game);
+        MWBase::Environment::get().getInputManager()->setGuiMode(MWGui::GM_Game);
     }
 
     void DialogueManager::questionAnswered(std::string answere)
@@ -790,7 +790,7 @@ namespace MWDialogue
                             mChoiceMap.clear();
                             mChoice = -1;
                             mIsInChoice = false;
-                            MWGui::DialogueWindow* win = mEnvironment.mWindowManager->getDialogueWindow();
+                            MWGui::DialogueWindow* win = MWBase::Environment::get().getWindowManager()->getDialogueWindow();
                             std::string text = iter->response;
                             parseText(text);
                             win->addText(text);
@@ -808,13 +808,13 @@ namespace MWDialogue
 
     void DialogueManager::printError(std::string error)
     {
-        MWGui::DialogueWindow* win = mEnvironment.mWindowManager->getDialogueWindow();
+        MWGui::DialogueWindow* win = MWBase::Environment::get().getWindowManager()->getDialogueWindow();
         win->addText(error);
     }
 
     void DialogueManager::askQuestion(std::string question, int choice)
     {
-        MWGui::DialogueWindow* win = mEnvironment.mWindowManager->getDialogueWindow();
+        MWGui::DialogueWindow* win = MWBase::Environment::get().getWindowManager()->getDialogueWindow();
         win->askQuestion(question);
         mChoiceMap[question] = choice;
         mIsInChoice = true;

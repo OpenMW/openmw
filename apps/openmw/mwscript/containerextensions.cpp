@@ -9,6 +9,8 @@
 #include <components/interpreter/runtime.hpp>
 #include <components/interpreter/opcodes.hpp>
 
+#include "../mwbase/environment.hpp"
+
 #include "../mwworld/manualref.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/containerstore.hpp"
@@ -29,9 +31,6 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    MWScript::InterpreterContext& context
-                        = static_cast<MWScript::InterpreterContext&> (runtime.getContext());
-
                     std::string item = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
 
@@ -41,7 +40,7 @@ namespace MWScript
                     if (count<0)
                         throw std::runtime_error ("second argument for AddItem must be non-negative");
 
-                    MWWorld::ManualRef ref (context.getWorld().getStore(), item);
+                    MWWorld::ManualRef ref (MWBase::Environment::get().getWorld()->getStore(), item);
 
                     ref.getPtr().getRefData().setCount (count);
 

@@ -33,7 +33,6 @@ namespace MWMechanics
 namespace MWWorld
 {
     class Ptr;
-    class Environment;
     class ContainerStore;
     class InventoryStore;
 
@@ -65,15 +64,15 @@ namespace MWWorld
             /// (default implementation: throw an exception)
 
             virtual void insertObjectRendering (const Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const;
-            virtual void insertObject(const Ptr& ptr, MWWorld::PhysicsSystem& physics, MWWorld::Environment& environment) const;
+            virtual void insertObject(const Ptr& ptr, MWWorld::PhysicsSystem& physics) const;
             ///< Add reference into a cell for rendering (default implementation: don't render anything).
 
-            virtual void enable (const Ptr& ptr, MWWorld::Environment& environment) const;
+            virtual void enable (const Ptr& ptr) const;
             ///< Enable reference; only does the non-rendering part (default implementation: ignore)
             /// \attention This is not the same as the script instruction with the same name. References
             /// should only be enabled while in an active cell.
 
-            virtual void disable (const Ptr& ptr, MWWorld::Environment& environment) const;
+            virtual void disable (const Ptr& ptr) const;
             ///< Enable reference; only does the non-rendering part (default implementation: ignore)
             /// \attention This is not the same as the script instruction with the same name. References
             /// should only be enabled while in an active cell.
@@ -97,11 +96,10 @@ namespace MWWorld
             ///< Return item max health or throw an exception, if class does not have item health
             /// (default implementation: throw an exceoption)
 
-            virtual boost::shared_ptr<Action> activate (const Ptr& ptr, const Ptr& actor,
-                const Environment& environment) const;
+            virtual boost::shared_ptr<Action> activate (const Ptr& ptr, const Ptr& actor) const;
             ///< Generate action for activation (default implementation: return a null action).
 
-            virtual boost::shared_ptr<Action> use (const Ptr& ptr, const Environment& environment)
+            virtual boost::shared_ptr<Action> use (const Ptr& ptr)
                 const;
             ///< Generate action for using via inventory menu (default implementation: return a
             /// null action).
@@ -149,7 +147,7 @@ namespace MWWorld
             ///
             /// Default implementation: return (empty vector, false).
 
-            virtual int getEquipmentSkill (const Ptr& ptr, const Environment& environment)
+            virtual int getEquipmentSkill (const Ptr& ptr)
                 const;
             /// Return the index of the skill this item corresponds to when equiopped or -1, if there is
             /// no such skill.
@@ -167,11 +165,11 @@ namespace MWWorld
 
             static void registerClass (const std::string& key,  boost::shared_ptr<Class> instance);
 
-            virtual std::string getUpSoundId (const Ptr& ptr, const MWWorld::Environment& environment) const;
+            virtual std::string getUpSoundId (const Ptr& ptr) const;
             ///< Return the up sound ID of \a ptr or throw an exception, if class does not support ID retrieval
             /// (default implementation: throw an exception)
 
-            virtual std::string getDownSoundId (const Ptr& ptr, const MWWorld::Environment& environment) const;
+            virtual std::string getDownSoundId (const Ptr& ptr) const;
             ///< Return the down sound ID of \a ptr or throw an exception, if class does not support ID retrieval
             /// (default implementation: throw an exception)
     };
