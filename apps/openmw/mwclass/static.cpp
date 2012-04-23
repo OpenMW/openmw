@@ -25,7 +25,7 @@ namespace MWClass
         }
     }
 
-    void Static::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics, MWWorld::Environment& environment) const
+    void Static::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics) const
     {
         ESMS::LiveCellRef<ESM::Static, MWWorld::RefData> *ref =
             ptr.get<ESM::Static>();

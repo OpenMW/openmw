@@ -23,7 +23,6 @@ namespace Ogre
 namespace MWWorld
 {
     class World;
-    class Environment;
 }
 
 namespace MWRender
@@ -34,7 +33,6 @@ namespace MWRender
     {
         OEngine::Physic::PhysicEngine* mEngine;
         Ogre::SceneManager *mSceneMgr;
-        MWWorld::Environment& mEnvironment;
 
         // Path grid stuff
         bool mPathgridEnabled;
@@ -68,7 +66,7 @@ namespace MWRender
         Ogre::ManualObject *createPathgridLines(const ESM::Pathgrid *pathgrid);
         Ogre::ManualObject *createPathgridPoints(const ESM::Pathgrid *pathgrid);
     public:
-        Debugging(Ogre::SceneNode* mwRoot, MWWorld::Environment &env, OEngine::Physic::PhysicEngine *engine);
+        Debugging(Ogre::SceneNode* mwRoot, OEngine::Physic::PhysicEngine *engine);
         ~Debugging();
         bool toggleRenderMode (int mode);
 

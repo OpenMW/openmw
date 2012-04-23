@@ -8,11 +8,6 @@
 #include "journalentry.hpp"
 #include "quest.hpp"
 
-namespace MWWorld
-{
-    struct Environment;
-}
-
 namespace MWDialogue
 {
     /// \brief The player's journal
@@ -29,7 +24,6 @@ namespace MWDialogue
 
         private:
 
-            MWWorld::Environment& mEnvironment;
             TEntryContainer mJournal;
             TQuestContainer mQuests;
             TTopicContainer mTopics;
@@ -38,7 +32,7 @@ namespace MWDialogue
 
         public:
 
-            Journal (MWWorld::Environment& environment);
+            Journal();
 
             void addEntry (const std::string& id, int index);
             ///< Add a journal entry.

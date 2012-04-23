@@ -5,11 +5,6 @@
 
 #include <openengine/ogre/renderer.hpp>
 
-namespace MWWorld
-{
-    class Environment;
-}
-
 namespace MWRender
 {
     class RenderingManager;
@@ -20,7 +15,7 @@ namespace MWRender
     class LocalMap
     {
     public:
-        LocalMap(OEngine::Render::OgreRenderer*, MWRender::RenderingManager* rendering, MWWorld::Environment* env);
+        LocalMap(OEngine::Render::OgreRenderer*, MWRender::RenderingManager* rendering);
         ~LocalMap();
 
         /**
@@ -61,7 +56,6 @@ namespace MWRender
     private:
         OEngine::Render::OgreRenderer* mRendering;
         MWRender::RenderingManager* mRenderingManager;
-        MWWorld::Environment* mEnvironment;
 
         // 1024*1024 pixels for a cell
         static const int sMapResolution = 1024;

@@ -13,7 +13,6 @@
 #include "../mwworld/refdata.hpp"
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/actiontalk.hpp"
-#include "../mwworld/environment.hpp"
 #include "npcanimation.hpp"
 #include "creatureanimation.hpp"
 #include <openengine/bullet/physic.hpp>
@@ -23,13 +22,12 @@ namespace MWRender{
         OEngine::Render::OgreRenderer &mRend;
         std::map<MWWorld::Ptr::CellStore *, Ogre::SceneNode *> mCellSceneNodes;
         Ogre::SceneNode* mMwRoot;
-        MWWorld::Environment& mEnvironment;
 		std::map<MWWorld::Ptr, Animation*> mAllActors;
 
 
 
         public:
-        Actors(OEngine::Render::OgreRenderer& _rend, MWWorld::Environment& _env): mRend(_rend), mEnvironment(_env){}
+        Actors(OEngine::Render::OgreRenderer& _rend): mRend(_rend) {}
         ~Actors();
         void setMwRoot(Ogre::SceneNode* root);
         void insertBegin (const MWWorld::Ptr& ptr, bool enabled, bool static_);

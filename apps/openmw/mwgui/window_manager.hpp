@@ -34,7 +34,6 @@ namespace Compiler
 
 namespace MWWorld
 {
-    class Environment;
     class World;
 }
 
@@ -83,7 +82,7 @@ namespace MWGui
     typedef std::vector<Faction> FactionList;
     typedef std::vector<int> SkillList;
 
-    WindowManager(MWWorld::Environment& environment, const Compiler::Extensions& extensions, int fpsLevel, bool newGame, OEngine::Render::OgreRenderer *mOgre, const std::string logpath);
+    WindowManager(const Compiler::Extensions& extensions, int fpsLevel, bool newGame, OEngine::Render::OgreRenderer *mOgre, const std::string logpath);
     virtual ~WindowManager();
 
     void setGuiMode(GuiMode newMode);
@@ -94,8 +93,6 @@ namespace MWGui
      * new dialogs.
      */
     void update();
-
-    MWWorld::Environment& getEnvironment();
 
     void setMode(GuiMode newMode)
     {
@@ -192,7 +189,6 @@ namespace MWGui
 
   private:
     OEngine::GUI::MyGUIManager *mGuiManager;
-    MWWorld::Environment& environment;
     HUD *hud;
     MapWindow *map;
     MainMenu *menu;

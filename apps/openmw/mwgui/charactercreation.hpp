@@ -30,7 +30,7 @@ namespace MWGui
     public:
     typedef std::vector<int> SkillList;
 
-    CharacterCreation(WindowManager* _wm, MWWorld::Environment* _environment);
+    CharacterCreation(WindowManager* _wm);
     ~CharacterCreation();
 
     //Show a dialog
@@ -56,7 +56,6 @@ namespace MWGui
     ReviewDialog* mReviewDialog;
 
     WindowManager* mWM;
-    MWWorld::Environment* mEnvironment;
 
     //Player data
     std::string mPlayerName;

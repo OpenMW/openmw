@@ -6,9 +6,10 @@
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/mechanicsmanager.hpp"
 
+#include "../mwbase/environment.hpp"
+
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/actiontalk.hpp"
-#include "../mwworld/environment.hpp"
 #include "../mwworld/customdata.hpp"
 #include "../mwworld/containerstore.hpp"
 
@@ -74,7 +75,7 @@ namespace MWClass
         actors.insertCreature(ptr);
     }
 
-    void Creature::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics, MWWorld::Environment& environment) const
+    void Creature::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics) const
     {
         ESMS::LiveCellRef<ESM::Creature, MWWorld::RefData> *ref =
             ptr.get<ESM::Creature>();
@@ -87,14 +88,14 @@ namespace MWClass
         }
     }
 
-    void Creature::enable (const MWWorld::Ptr& ptr, MWWorld::Environment& environment) const
+    void Creature::enable (const MWWorld::Ptr& ptr) const
     {
-        environment.mMechanicsManager->addActor (ptr);
+        MWBase::Environment::get().getMechanicsManager()->addActor (ptr);
     }
 
-    void Creature::disable (const MWWorld::Ptr& ptr, MWWorld::Environment& environment) const
+    void Creature::disable (const MWWorld::Ptr& ptr) const
     {
-        environment.mMechanicsManager->removeActor (ptr);
+        MWBase::Environment::get().getMechanicsManager()->removeActor (ptr);
     }
 
     std::string Creature::getName (const MWWorld::Ptr& ptr) const
@@ -113,7 +114,7 @@ namespace MWClass
     }
 
     boost::shared_ptr<MWWorld::Action> Creature::activate (const MWWorld::Ptr& ptr,
-        const MWWorld::Ptr& actor, const MWWorld::Environment& environment) const
+        const MWWorld::Ptr& actor) const
     {
         return boost::shared_ptr<MWWorld::Action> (new MWWorld::ActionTalk (ptr));
     }

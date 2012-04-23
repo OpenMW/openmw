@@ -40,9 +40,9 @@ namespace ESMS
     RecListT<Clothing>          clothes;
     RecListT<LoadCNTC>          contChange;
     RecListT<Container>         containers;
-    RecListWithIDT<Creature>          creatures;
+    RecListWithIDT<Creature>    creatures;
     RecListT<LoadCREC>          creaChange;
-    RecListT<Dialogue>          dialogs;
+    RecListCaseT<Dialogue>      dialogs;
     RecListT<Door>              doors;
     RecListT<Enchantment>       enchants;
     RecListT<Faction>           factions;
@@ -53,7 +53,7 @@ namespace ESMS
     RecListT<Light>             lights;
     RecListT<Tool>              lockpicks;
     RecListT<Miscellaneous>     miscItems;
-    RecListWithIDT<NPC>               npcs;
+    RecListWithIDT<NPC>         npcs;
     RecListT<LoadNPCC>          npcChange;
     RecListT<Probe>             probes;
     RecListT<Race>              races;

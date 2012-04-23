@@ -1,6 +1,7 @@
 #include "scene.hpp"
 #include "world.hpp"
 
+#include "../mwbase/environment.hpp"
 
 #include "../mwmechanics/mechanicsmanager.hpp"
 
@@ -9,7 +10,6 @@
 #include "../mwgui/window_manager.hpp"
 
 #include "ptr.hpp"
-#include "environment.hpp"
 #include "player.hpp"
 #include "class.hpp"
 
@@ -18,7 +18,7 @@
 namespace {
 
 template<typename T>
-void insertCellRefList(MWRender::RenderingManager& rendering, MWWorld::Environment& environment,
+void insertCellRefList(MWRender::RenderingManager& rendering,
     T& cellRefList, ESMS::CellStore<MWWorld::RefData> &cell, MWWorld::PhysicsSystem& physics)
 {
     if (!cellRefList.list.empty())
@@ -36,8 +36,8 @@ void insertCellRefList(MWRender::RenderingManager& rendering, MWWorld::Environme
                 try
                 {
                     rendering.addObject(ptr);
-                    class_.insertObject(ptr, physics, environment);
-                    class_.enable (ptr, environment);
+                    class_.insertObject(ptr, physics);
+                    class_.enable (ptr);
                 }
                 catch (const std::exception& e)
                 {
@@ -86,12 +86,12 @@ namespace MWWorld
 		//mPhysics->removeObject("Unnamed_43");
 
         mWorld->getLocalScripts().clearCell (*iter);
-        mEnvironment.mMechanicsManager->dropActors (*iter);
-        mEnvironment.mSoundManager->stopSound (*iter);
+        MWBase::Environment::get().getMechanicsManager()->dropActors (*iter);
+        MWBase::Environment::get().getSoundManager()->stopSound (*iter);
 		mActiveCells.erase(*iter);
-        
 
-        
+
+
     }
 
     void Scene::loadCell (Ptr::CellStore *cell)
@@ -104,7 +104,7 @@ namespace MWWorld
         std::pair<CellStoreCollection::iterator, bool> result =
             mActiveCells.insert(cell);
        if(result.second){
-              insertCell(*cell, mEnvironment);
+              insertCell(*cell);
               mRendering.cellAdded(cell);
                mRendering.configureAmbient(*cell);
                mRendering.requestMap(cell);
@@ -122,10 +122,10 @@ namespace MWWorld
 
         mWorld->getPlayer().setCell (cell);
         // TODO orientation
-        mEnvironment.mMechanicsManager->addActor (mWorld->getPlayer().getPlayer());
-        mEnvironment.mMechanicsManager->watchActor (mWorld->getPlayer().getPlayer());
+        MWBase::Environment::get().getMechanicsManager()->addActor (mWorld->getPlayer().getPlayer());
+        MWBase::Environment::get().getMechanicsManager()->watchActor (mWorld->getPlayer().getPlayer());
 
-        mEnvironment.mWindowManager->changeCell( mCurrentCell );
+        MWBase::Environment::get().getWindowManager()->changeCell( mCurrentCell );
     }
 
     void Scene::changeCell (int X, int Y, const ESM::Position& position, bool adjustPlayerPos)
@@ -133,7 +133,7 @@ namespace MWWorld
         mRendering.preCellChange(mCurrentCell);
 
         // remove active
-        mEnvironment.mMechanicsManager->removeActor (mWorld->getPlayer().getPlayer());
+        MWBase::Environment::get().getMechanicsManager()->removeActor (mWorld->getPlayer().getPlayer());
 
         CellStoreCollection::iterator active = mActiveCells.begin();
 
@@ -209,8 +209,8 @@ namespace MWWorld
     }
 
     //We need the ogre renderer and a scene node.
-    Scene::Scene (Environment& environment, World *world, MWRender::RenderingManager& rendering, PhysicsSystem *physics)
-    : mCurrentCell (0), mCellChanged (false), mEnvironment (environment), mWorld(world),
+    Scene::Scene (World *world, MWRender::RenderingManager& rendering, PhysicsSystem *physics)
+    : mCurrentCell (0), mCellChanged (false), mWorld(world),
       mPhysics(physics), mRendering(rendering)
     {
     }
@@ -245,7 +245,7 @@ namespace MWWorld
         Ptr::CellStore *cell = mWorld->getInterior(cellName);
 
         loadCell (cell);
-        
+
 
         // adjust player
         mCurrentCell = cell;
@@ -281,30 +281,29 @@ namespace MWWorld
         mCellChanged = false;
     }
 
-void Scene::insertCell(ESMS::CellStore<MWWorld::RefData> &cell,
-    MWWorld::Environment& environment)
+void Scene::insertCell(ESMS::CellStore<MWWorld::RefData> &cell)
 {
   // Loop through all references in the cell
-  insertCellRefList(mRendering, environment, cell.activators, cell, *mPhysics);
-  insertCellRefList(mRendering, environment, cell.potions, cell, *mPhysics);
-  insertCellRefList(mRendering, environment, cell.appas, cell, *mPhysics);
-  insertCellRefList(mRendering, environment, cell.armors, cell, *mPhysics);
-  insertCellRefList(mRendering, environment, cell.books, cell, *mPhysics);
-  insertCellRefList(mRendering, environment, cell.clothes, cell, *mPhysics);
-  insertCellRefList(mRendering, environment, cell.containers, cell, *mPhysics);
-  insertCellRefList(mRendering, environment, cell.creatures, cell, *mPhysics);
-  insertCellRefList(mRendering, environment, cell.doors, cell, *mPhysics);
-  insertCellRefList(mRendering, environment, cell.ingreds, cell, *mPhysics);
-  insertCellRefList(mRendering, environment, cell.creatureLists, cell, *mPhysics);
-  insertCellRefList(mRendering, environment, cell.itemLists, cell, *mPhysics);
-  insertCellRefList(mRendering, environment, cell.lights, cell, *mPhysics);
-  insertCellRefList(mRendering, environment, cell.lockpicks, cell, *mPhysics);
-  insertCellRefList(mRendering, environment, cell.miscItems, cell, *mPhysics);
-  insertCellRefList(mRendering, environment, cell.npcs, cell, *mPhysics);
-  insertCellRefList(mRendering, environment, cell.probes, cell, *mPhysics);
-  insertCellRefList(mRendering, environment, cell.repairs, cell, *mPhysics);
-  insertCellRefList(mRendering, environment, cell.statics, cell, *mPhysics);
-  insertCellRefList(mRendering, environment, cell.weapons, cell, *mPhysics);
+  insertCellRefList(mRendering, cell.activators, cell, *mPhysics);
+  insertCellRefList(mRendering, cell.potions, cell, *mPhysics);
+  insertCellRefList(mRendering, cell.appas, cell, *mPhysics);
+  insertCellRefList(mRendering, cell.armors, cell, *mPhysics);
+  insertCellRefList(mRendering, cell.books, cell, *mPhysics);
+  insertCellRefList(mRendering, cell.clothes, cell, *mPhysics);
+  insertCellRefList(mRendering, cell.containers, cell, *mPhysics);
+  insertCellRefList(mRendering, cell.creatures, cell, *mPhysics);
+  insertCellRefList(mRendering, cell.doors, cell, *mPhysics);
+  insertCellRefList(mRendering, cell.ingreds, cell, *mPhysics);
+  insertCellRefList(mRendering, cell.creatureLists, cell, *mPhysics);
+  insertCellRefList(mRendering, cell.itemLists, cell, *mPhysics);
+  insertCellRefList(mRendering, cell.lights, cell, *mPhysics);
+  insertCellRefList(mRendering, cell.lockpicks, cell, *mPhysics);
+  insertCellRefList(mRendering, cell.miscItems, cell, *mPhysics);
+  insertCellRefList(mRendering, cell.npcs, cell, *mPhysics);
+  insertCellRefList(mRendering, cell.probes, cell, *mPhysics);
+  insertCellRefList(mRendering, cell.repairs, cell, *mPhysics);
+  insertCellRefList(mRendering, cell.statics, cell, *mPhysics);
+  insertCellRefList(mRendering, cell.weapons, cell, *mPhysics);
 }
 
 

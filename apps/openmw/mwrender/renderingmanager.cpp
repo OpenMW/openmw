@@ -24,8 +24,8 @@ using namespace Ogre;
 
 namespace MWRender {
 
-RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const boost::filesystem::path& resDir, OEngine::Physic::PhysicEngine* engine, MWWorld::Environment& environment)
-    :mRendering(_rend), mObjects(mRendering), mActors(mRendering, environment), mAmbientMode(0), mSunEnabled(0)
+RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const boost::filesystem::path& resDir, OEngine::Physic::PhysicEngine* engine)
+    :mRendering(_rend), mObjects(mRendering), mActors(mRendering), mAmbientMode(0), mSunEnabled(0)
 {
     mRendering.createScene("PlayerCam", Settings::Manager::getFloat("field of view", "General"), 5);
 
@@ -98,19 +98,18 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
     mShadows = new Shadows(&mRendering);
     mShaderHelper = new ShaderHelper(this);
 
-    mTerrainManager = new TerrainManager(mRendering.getScene(), this,
-                                         environment);
+    mTerrainManager = new TerrainManager(mRendering.getScene(), this);
 
     //mSkyManager = 0;
-    mSkyManager = new SkyManager(mMwRoot, mRendering.getCamera(), &environment);
+    mSkyManager = new SkyManager(mMwRoot, mRendering.getCamera());
 
     mOcclusionQuery = new OcclusionQuery(&mRendering, mSkyManager->getSunNode());
 
     mPlayer = new MWRender::Player (mRendering.getCamera(), playerNode);
     mSun = 0;
 
-    mDebugging = new Debugging(mMwRoot, environment, engine);
-    mLocalMap = new MWRender::LocalMap(&mRendering, this, &environment);
+    mDebugging = new Debugging(mMwRoot, engine);
+    mLocalMap = new MWRender::LocalMap(&mRendering, this);
 }
 
 RenderingManager::~RenderingManager ()

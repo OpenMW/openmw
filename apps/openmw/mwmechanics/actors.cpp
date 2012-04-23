@@ -19,10 +19,10 @@ namespace MWMechanics
     {
         if (!paused && ptr.getRefData().getHandle()!="player")
             MWWorld::Class::get (ptr).getInventoryStore (ptr).autoEquip (
-                MWWorld::Class::get (ptr).getNpcStats (ptr), mEnvironment);
+                MWWorld::Class::get (ptr).getNpcStats (ptr));
     }
 
-    Actors::Actors (MWWorld::Environment& environment) : mEnvironment (environment), mDuration (0) {}
+    Actors::Actors() : mDuration (0) {}
 
     void Actors::addActor (const MWWorld::Ptr& ptr)
     {
