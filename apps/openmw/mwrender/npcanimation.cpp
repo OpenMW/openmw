@@ -159,7 +159,6 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, OEngine::Render::OgreRendere
             insert->scale(race->data.height.female, race->data.height.female, race->data.height.female);
         else
             insert->scale(race->data.height.male, race->data.height.male, race->data.height.male);
-		std::cout << "Inv" << inv.getStateId() << "\n";
         updateParts();
 
 }
