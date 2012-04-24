@@ -5,9 +5,10 @@
 
 #include <components/esm_store/cell_store.hpp>
 
+#include "../mwbase/environment.hpp"
+
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/actiontake.hpp"
-#include "../mwworld/environment.hpp"
 #include "../mwworld/world.hpp"
 #include "../mwgui/window_manager.hpp"
 #include "../mwgui/tooltips.hpp"
@@ -34,7 +35,7 @@ namespace MWClass
         }
     }
 
-    void Repair::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics, MWWorld::Environment& environment) const
+    void Repair::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics) const
     {
         ESMS::LiveCellRef<ESM::Repair, MWWorld::RefData> *ref =
             ptr.get<ESM::Repair>();
@@ -57,9 +58,9 @@ namespace MWClass
     }
 
     boost::shared_ptr<MWWorld::Action> Repair::activate (const MWWorld::Ptr& ptr,
-        const MWWorld::Ptr& actor, const MWWorld::Environment& environment) const
+        const MWWorld::Ptr& actor) const
     {
-        environment.mSoundManager->playSound3D (ptr, getUpSoundId(ptr, environment), 1.0, 1.0, MWSound::Play_NoTrack);
+        MWBase::Environment::get().getSoundManager()->playSound3D (ptr, getUpSoundId(ptr), 1.0, 1.0, MWSound::Play_NoTrack);
 
         return boost::shared_ptr<MWWorld::Action> (
             new MWWorld::ActionTake (ptr));
@@ -88,12 +89,12 @@ namespace MWClass
         registerClass (typeid (ESM::Repair).name(), instance);
     }
 
-    std::string Repair::getUpSoundId (const MWWorld::Ptr& ptr, const MWWorld::Environment& environment) const
+    std::string Repair::getUpSoundId (const MWWorld::Ptr& ptr) const
     {
         return std::string("Item Repair Up");
     }
 
-    std::string Repair::getDownSoundId (const MWWorld::Ptr& ptr, const MWWorld::Environment& environment) const
+    std::string Repair::getDownSoundId (const MWWorld::Ptr& ptr) const
     {
         return std::string("Item Repair Down");
     }
@@ -106,7 +107,7 @@ namespace MWClass
         return (ref->base->name != "");
     }
 
-    MWGui::ToolTipInfo Repair::getToolTipInfo (const MWWorld::Ptr& ptr, MWWorld::Environment& environment) const
+    MWGui::ToolTipInfo Repair::getToolTipInfo (const MWWorld::Ptr& ptr) const
     {
         ESMS::LiveCellRef<ESM::Repair, MWWorld::RefData> *ref =
             ptr.get<ESM::Repair>();
@@ -119,12 +120,13 @@ namespace MWClass
 
         /// \todo store remaining uses somewhere
 
-        text += "\n" + environment.mWorld->getStore().gameSettings.search("sUses")->str + ": " + MWGui::ToolTips::toString(ref->base->data.uses);
-        text += "\n" + environment.mWorld->getStore().gameSettings.search("sQuality")->str + ": " + MWGui::ToolTips::toString(ref->base->data.quality);
-        text += "\n" + environment.mWorld->getStore().gameSettings.search("sWeight")->str + ": " + MWGui::ToolTips::toString(ref->base->data.weight);
-        text += MWGui::ToolTips::getValueString(ref->base->data.value, environment.mWorld->getStore().gameSettings.search("sValue")->str);
+        const ESMS::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
+        text += "\n" + store.gameSettings.search("sUses")->str + ": " + MWGui::ToolTips::toString(ref->base->data.uses);
+        text += "\n" + store.gameSettings.search("sQuality")->str + ": " + MWGui::ToolTips::toString(ref->base->data.quality);
+        text += "\n" + store.gameSettings.search("sWeight")->str + ": " + MWGui::ToolTips::toString(ref->base->data.weight);
+        text += MWGui::ToolTips::getValueString(ref->base->data.value, store.gameSettings.search("sValue")->str);
 
-        if (environment.mWindowManager->getFullHelp()) {
+        if (MWBase::Environment::get().getWindowManager()->getFullHelp()) {
             text += MWGui::ToolTips::getMiscString(ref->ref.owner, "Owner");
             text += MWGui::ToolTips::getMiscString(ref->base->script, "Script");
         }

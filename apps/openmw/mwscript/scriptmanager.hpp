@@ -11,6 +11,8 @@
 #include <components/interpreter/interpreter.hpp>
 #include <components/interpreter/types.hpp>
 
+#include "globalscripts.hpp"
+
 namespace ESMS
 {
     struct ESMStore;
@@ -42,8 +44,8 @@ namespace MWScript
             typedef std::pair<std::vector<Interpreter::Type_Code>, Compiler::Locals> CompiledScript;
             typedef std::map<std::string, CompiledScript> ScriptCollection;
 
-
             ScriptCollection mScripts;
+            GlobalScripts mGlobalScripts;
 
         public:
 
@@ -63,6 +65,8 @@ namespace MWScript
 
             Compiler::Locals& getLocals (const std::string& name);
             ///< Return locals for script \a name.
+
+            GlobalScripts& getGlobalScripts();
     };
 };
 

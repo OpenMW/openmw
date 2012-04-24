@@ -50,10 +50,12 @@
 
 #include "mwmechanics/mechanicsmanager.hpp"
 
+#include "mwbase/environment.hpp"
+
 
 void OMW::Engine::executeLocalScripts()
 {
-    MWWorld::LocalScripts& localScripts = mEnvironment.mWorld->getLocalScripts();
+    MWWorld::LocalScripts& localScripts = MWBase::Environment::get().getWorld()->getLocalScripts();
 
     localScripts.startIteration();
 
@@ -61,11 +63,11 @@ void OMW::Engine::executeLocalScripts()
     {
         std::pair<std::string, MWWorld::Ptr> script = localScripts.getNext();
 
-        MWScript::InterpreterContext interpreterContext (mEnvironment,
+        MWScript::InterpreterContext interpreterContext (
             &script.second.getRefData().getLocals(), script.second);
-        mEnvironment.mScriptManager->run (script.first, interpreterContext);
+        MWBase::Environment::get().getScriptManager()->run (script.first, interpreterContext);
 
-        if (mEnvironment.mWorld->hasCellChanged())
+        if (MWBase::Environment::get().getWorld()->hasCellChanged())
             break;
     }
 
@@ -83,19 +85,19 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
 {
     try
     {
-        mEnvironment.mFrameDuration = evt.timeSinceLastFrame;
+        mEnvironment.setFrameDuration (evt.timeSinceLastFrame);
 
         // update input
-        mEnvironment.mInputManager->update();
+        MWBase::Environment::get().getInputManager()->update();
 
         // sound
         if (mUseSound)
-            mEnvironment.mSoundManager->update (evt.timeSinceLastFrame);
+            MWBase::Environment::get().getSoundManager()->update (evt.timeSinceLastFrame);
 
         // global scripts
-        mEnvironment.mGlobalScripts->run (mEnvironment);
+        MWBase::Environment::get().getScriptManager()->getGlobalScripts().run();
 
-        bool changed = mEnvironment.mWorld->hasCellChanged();
+        bool changed = MWBase::Environment::get().getWorld()->hasCellChanged();
 
         // local scripts
         executeLocalScripts(); // This does not handle the case where a global script causes a cell
@@ -103,32 +105,32 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
                                // frame.
 
         // passing of time
-        if (mEnvironment.mWindowManager->getMode()==MWGui::GM_Game)
-            mEnvironment.mWorld->advanceTime (
-                mEnvironment.mFrameDuration*mEnvironment.mWorld->getTimeScaleFactor()/3600);
+        if (MWBase::Environment::get().getWindowManager()->getMode()==MWGui::GM_Game)
+            MWBase::Environment::get().getWorld()->advanceTime (
+                mEnvironment.getFrameDuration()*MWBase::Environment::get().getWorld()->getTimeScaleFactor()/3600);
 
 
         if (changed) // keep change flag for another frame, if cell changed happend in local script
-            mEnvironment.mWorld->markCellAsUnchanged();
+            MWBase::Environment::get().getWorld()->markCellAsUnchanged();
 
         // update actors
         std::vector<std::pair<std::string, Ogre::Vector3> > movement;
-        mEnvironment.mMechanicsManager->update (movement, mEnvironment.mFrameDuration,
-            mEnvironment.mWindowManager->getMode()!=MWGui::GM_Game);
+        MWBase::Environment::get().getMechanicsManager()->update (movement, mEnvironment.getFrameDuration(),
+            MWBase::Environment::get().getWindowManager()->getMode()!=MWGui::GM_Game);
 
-        if (mEnvironment.mWindowManager->getMode()==MWGui::GM_Game)
-            mEnvironment.mWorld->doPhysics (movement, mEnvironment.mFrameDuration);
+        if (MWBase::Environment::get().getWindowManager()->getMode()==MWGui::GM_Game)
+            MWBase::Environment::get().getWorld()->doPhysics (movement, mEnvironment.getFrameDuration());
 
         // update world
-        mEnvironment.mWorld->update (evt.timeSinceLastFrame);
+        MWBase::Environment::get().getWorld()->update (evt.timeSinceLastFrame);
 
         // update GUI
         Ogre::RenderWindow* window = mOgre->getWindow();
-        mEnvironment.mWindowManager->wmUpdateFps(window->getLastFPS(),
+        MWBase::Environment::get().getWindowManager()->wmUpdateFps(window->getLastFPS(),
                                                  window->getTriangleCount(),
                                                  window->getBatchCount());
 
-        mEnvironment.mWindowManager->onFrame(mEnvironment.mFrameDuration);
+        MWBase::Environment::get().getWindowManager()->onFrame(evt.timeSinceLastFrame);
     }
     catch (const std::exception& e)
     {
@@ -157,13 +159,13 @@ OMW::Engine::Engine(Files::ConfigurationManager& configurationManager)
 
 OMW::Engine::~Engine()
 {
-    delete mEnvironment.mWorld;
-    delete mEnvironment.mSoundManager;
-    delete mEnvironment.mGlobalScripts;
-    delete mEnvironment.mMechanicsManager;
-    delete mEnvironment.mDialogueManager;
-    delete mEnvironment.mJournal;
-    delete mEnvironment.mScriptManager;
+    delete MWBase::Environment::get().getInputManager();
+    delete MWBase::Environment::get().getSoundManager();
+    delete MWBase::Environment::get().getMechanicsManager();
+    delete MWBase::Environment::get().getDialogueManager();
+    delete MWBase::Environment::get().getJournal();
+    delete MWBase::Environment::get().getScriptManager();
+    delete MWBase::Environment::get().getWorld();
     delete mScriptContext;
     delete mOgre;
 }
@@ -173,7 +175,7 @@ OMW::Engine::~Engine()
 void OMW::Engine::loadBSA()
 {
     const Files::MultiDirCollection& bsa = mFileCollections.getCollection (".bsa");
-    
+
     for (Files::MultiDirCollection::TIter iter(bsa.begin()); iter!=bsa.end(); ++iter)
     {
         std::cout << "Adding " << iter->second.string() << std::endl;
@@ -262,7 +264,6 @@ void OMW::Engine::setNewGame(bool newGame)
 void OMW::Engine::go()
 {
     mFocusTDiff = 0;
-    assert (!mEnvironment.mWorld);
     assert (!mCellName.empty());
     assert (!mMaster.empty());
     assert (!mOgre);
@@ -331,69 +332,66 @@ void OMW::Engine::go()
     MWGui::CursorReplace replacer;
 
     // Create the world
-    mEnvironment.mWorld = new MWWorld::World (*mOgre, mFileCollections, mMaster,
-        mResDir, mNewGame, mEnvironment, mEncoding, mFallbackMap);
+    mEnvironment.setWorld (new MWWorld::World (*mOgre, mFileCollections, mMaster,
+        mResDir, mNewGame, mEncoding, mFallbackMap));
 
     // Create window manager - this manages all the MW-specific GUI windows
     MWScript::registerExtensions (mExtensions);
 
-    mEnvironment.mWindowManager = new MWGui::WindowManager(mEnvironment,
-        mExtensions, mFpsLevel, mNewGame, mOgre, mCfgMgr.getLogPath().string() + std::string("/"));
+    mEnvironment.setWindowManager (new MWGui::WindowManager(
+        mExtensions, mFpsLevel, mNewGame, mOgre, mCfgMgr.getLogPath().string() + std::string("/")));
 
     // Create sound system
-    mEnvironment.mSoundManager = new MWSound::SoundManager(mUseSound, mEnvironment);
+    mEnvironment.setSoundManager (new MWSound::SoundManager(mUseSound));
 
     // Create script system
-    mScriptContext = new MWScript::CompilerContext (MWScript::CompilerContext::Type_Full,
-        mEnvironment);
+    mScriptContext = new MWScript::CompilerContext (MWScript::CompilerContext::Type_Full);
     mScriptContext->setExtensions (&mExtensions);
 
-    mEnvironment.mScriptManager = new MWScript::ScriptManager (mEnvironment.mWorld->getStore(),
-        mVerboseScripts, *mScriptContext);
-
-    mEnvironment.mGlobalScripts = new MWScript::GlobalScripts (mEnvironment.mWorld->getStore(),
-        *mEnvironment.mScriptManager);
+    mEnvironment.setScriptManager (new MWScript::ScriptManager (MWBase::Environment::get().getWorld()->getStore(),
+        mVerboseScripts, *mScriptContext));
 
     // Create game mechanics system
-    mEnvironment.mMechanicsManager = new MWMechanics::MechanicsManager (mEnvironment);
+    mEnvironment.setMechanicsManager (new MWMechanics::MechanicsManager);
 
     // Create dialog system
-    mEnvironment.mJournal = new MWDialogue::Journal (mEnvironment);
-    mEnvironment.mDialogueManager = new MWDialogue::DialogueManager (mEnvironment,mExtensions);
+    mEnvironment.setJournal (new MWDialogue::Journal);
+    mEnvironment.setDialogueManager (new MWDialogue::DialogueManager (mExtensions));
 
     // load cell
     ESM::Position pos;
     pos.rot[0] = pos.rot[1] = pos.rot[2] = 0;
     pos.pos[2] = 0;
 
-    if (const ESM::Cell *exterior = mEnvironment.mWorld->getExterior (mCellName))
+    if (const ESM::Cell *exterior = MWBase::Environment::get().getWorld()->getExterior (mCellName))
     {
-        mEnvironment.mWorld->indexToPosition (exterior->data.gridX, exterior->data.gridY,
+        MWBase::Environment::get().getWorld()->indexToPosition (exterior->data.gridX, exterior->data.gridY,
             pos.pos[0], pos.pos[1], true);
-        mEnvironment.mWorld->changeToExteriorCell (pos);
+        MWBase::Environment::get().getWorld()->changeToExteriorCell (pos);
     }
     else
     {
         pos.pos[0] = pos.pos[1] = 0;
-        mEnvironment.mWorld->changeToInteriorCell (mCellName, pos);
+        MWBase::Environment::get().getWorld()->changeToInteriorCell (mCellName, pos);
     }
 
     // Sets up the input system
-    MWInput::MWInputManager input(*mOgre, mEnvironment.mWorld->getPlayer(),
-                                  *mEnvironment.mWindowManager, mDebug, *this);
-    mEnvironment.mInputManager = &input;
+
+    mEnvironment.setInputManager (new MWInput::MWInputManager (*mOgre,
+        MWBase::Environment::get().getWorld()->getPlayer(),
+        *MWBase::Environment::get().getWindowManager(), mDebug, *this));
 
     std::cout << "\nPress Q/ESC or close window to exit.\n";
 
     mOgre->getRoot()->addFrameListener (this);
 
     // Play some good 'ol tunes
-    mEnvironment.mSoundManager->playPlaylist(std::string("Explore"));
+    MWBase::Environment::get().getSoundManager()->playPlaylist(std::string("Explore"));
 
     // scripts
     if (mCompileAll)
     {
-        std::pair<int, int> result = mEnvironment.mScriptManager->compileAll();
+        std::pair<int, int> result = MWBase::Environment::get().getScriptManager()->compileAll();
 
         if (result.first)
             std::cout
@@ -414,10 +412,10 @@ void OMW::Engine::go()
 
 void OMW::Engine::activate()
 {
-    if (mEnvironment.mWindowManager->getMode()!=MWGui::GM_Game)
+    if (MWBase::Environment::get().getWindowManager()->getMode()!=MWGui::GM_Game)
         return;
 
-    std::string handle = mEnvironment.mWorld->getFacedHandle();
+    std::string handle = MWBase::Environment::get().getWorld()->getFacedHandle();
 
     if (handle.empty())
         return;
@@ -428,7 +426,7 @@ void OMW::Engine::activate()
     MWWorld::Ptr ptr;
     try
     {
-        ptr = mEnvironment.mWorld->getPtrViaHandle (handle);
+        ptr = MWBase::Environment::get().getWorld()->getPtrViaHandle (handle);
 
         if (ptr.isEmpty())
             return;
@@ -438,12 +436,10 @@ void OMW::Engine::activate()
         return;
     }
 
-    MWScript::InterpreterContext interpreterContext (mEnvironment,
-        &ptr.getRefData().getLocals(), ptr);
+    MWScript::InterpreterContext interpreterContext (&ptr.getRefData().getLocals(), ptr);
 
     boost::shared_ptr<MWWorld::Action> action =
-        MWWorld::Class::get (ptr).activate (ptr, mEnvironment.mWorld->getPlayer().getPlayer(),
-        mEnvironment);
+        MWWorld::Class::get (ptr).activate (ptr, MWBase::Environment::get().getWorld()->getPlayer().getPlayer());
 
     interpreterContext.activate (ptr, action);
 
@@ -451,8 +447,8 @@ void OMW::Engine::activate()
 
     if (!script.empty())
     {
-        mEnvironment.mWorld->getLocalScripts().setIgnore (ptr);
-        mEnvironment.mScriptManager->run (script, interpreterContext);
+        MWBase::Environment::get().getWorld()->getLocalScripts().setIgnore (ptr);
+        MWBase::Environment::get().getScriptManager()->run (script, interpreterContext);
     }
 
     if (!interpreterContext.hasActivationBeenHandled())

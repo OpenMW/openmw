@@ -27,10 +27,7 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    InterpreterContext& context =
-                        static_cast<InterpreterContext&> (runtime.getContext());
-
-                    context.getWorld().skipAnimation (ptr);
+                    MWBase::Environment::get().getWorld()->skipAnimation (ptr);
                }
         };
 
@@ -42,9 +39,6 @@ namespace MWScript
                 virtual void execute (Interpreter::Runtime& runtime, unsigned int arg0)
                 {
                     MWWorld::Ptr ptr = R()(runtime);
-
-                    InterpreterContext& context =
-                        static_cast<InterpreterContext&> (runtime.getContext());
 
                     std::string group = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
@@ -60,7 +54,7 @@ namespace MWScript
                             throw std::runtime_error ("animation mode out of range");
                     }
 
-                    context.getWorld().playAnimationGroup (ptr, group, mode, 1);
+                    MWBase::Environment::get().getWorld()->playAnimationGroup (ptr, group, mode, 1);
                }
         };
 
@@ -72,9 +66,6 @@ namespace MWScript
                 virtual void execute (Interpreter::Runtime& runtime, unsigned int arg0)
                 {
                     MWWorld::Ptr ptr = R()(runtime);
-
-                    InterpreterContext& context =
-                        static_cast<InterpreterContext&> (runtime.getContext());
 
                     std::string group = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
@@ -96,7 +87,7 @@ namespace MWScript
                             throw std::runtime_error ("animation mode out of range");
                     }
 
-                    context.getWorld().playAnimationGroup (ptr, group, mode, loops);
+                    MWBase::Environment::get().getWorld()->playAnimationGroup (ptr, group, mode, loops);
                }
         };
 

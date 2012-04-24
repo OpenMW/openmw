@@ -57,7 +57,7 @@ class RenderingManager: private RenderingInterface {
     virtual MWRender::Actors& getActors();
 
   public:
-    RenderingManager(OEngine::Render::OgreRenderer& _rend, const boost::filesystem::path& resDir, OEngine::Physic::PhysicEngine* engine, MWWorld::Environment& environment);
+    RenderingManager(OEngine::Render::OgreRenderer& _rend, const boost::filesystem::path& resDir, OEngine::Physic::PhysicEngine* engine);
     virtual ~RenderingManager();
 
 

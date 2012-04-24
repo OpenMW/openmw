@@ -145,7 +145,7 @@ IntSize ToolTips::getToolTipViaPtr ()
     {
         mDynamicToolTipBox->setVisible(true);
 
-        ToolTipInfo info = object.getToolTipInfo(mFocusObject, mWindowManager->getEnvironment());
+        ToolTipInfo info = object.getToolTipInfo(mFocusObject);
         tooltipSize = createToolTip(info);
     }
 

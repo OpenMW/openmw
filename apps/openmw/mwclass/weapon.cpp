@@ -5,9 +5,10 @@
 
 #include <components/esm_store/cell_store.hpp>
 
+#include "../mwbase/environment.hpp"
+
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/actiontake.hpp"
-#include "../mwworld/environment.hpp"
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/world.hpp"
 
@@ -36,7 +37,7 @@ namespace MWClass
         }
     }
 
-    void Weapon::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics, MWWorld::Environment& environment) const
+    void Weapon::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics) const
     {
         ESMS::LiveCellRef<ESM::Weapon, MWWorld::RefData> *ref =
             ptr.get<ESM::Weapon>();
@@ -59,9 +60,9 @@ namespace MWClass
     }
 
     boost::shared_ptr<MWWorld::Action> Weapon::activate (const MWWorld::Ptr& ptr,
-        const MWWorld::Ptr& actor, const MWWorld::Environment& environment) const
+        const MWWorld::Ptr& actor) const
     {
-        environment.mSoundManager->playSound3D (ptr, getUpSoundId(ptr, environment), 1.0, 1.0, MWSound::Play_NoTrack);
+        MWBase::Environment::get().getSoundManager()->playSound3D (ptr, getUpSoundId(ptr), 1.0, 1.0, MWSound::Play_NoTrack);
 
         return boost::shared_ptr<MWWorld::Action> (
             new MWWorld::ActionTake (ptr));
@@ -112,8 +113,7 @@ namespace MWClass
         return std::make_pair (slots, stack);
     }
 
-    int Weapon::getEquipmentSkill (const MWWorld::Ptr& ptr,
-        const MWWorld::Environment& environment) const
+    int Weapon::getEquipmentSkill (const MWWorld::Ptr& ptr) const
     {
         ESMS::LiveCellRef<ESM::Weapon, MWWorld::RefData> *ref =
             ptr.get<ESM::Weapon>();
@@ -158,7 +158,7 @@ namespace MWClass
         registerClass (typeid (ESM::Weapon).name(), instance);
     }
 
-    std::string Weapon::getUpSoundId (const MWWorld::Ptr& ptr, const MWWorld::Environment& environment) const
+    std::string Weapon::getUpSoundId (const MWWorld::Ptr& ptr) const
     {
         ESMS::LiveCellRef<ESM::Weapon, MWWorld::RefData> *ref =
             ptr.get<ESM::Weapon>();
@@ -204,7 +204,7 @@ namespace MWClass
         return std::string("Item Misc Up");
     }
 
-    std::string Weapon::getDownSoundId (const MWWorld::Ptr& ptr, const MWWorld::Environment& environment) const
+    std::string Weapon::getDownSoundId (const MWWorld::Ptr& ptr) const
     {
         ESMS::LiveCellRef<ESM::Weapon, MWWorld::RefData> *ref =
             ptr.get<ESM::Weapon>();
@@ -258,7 +258,7 @@ namespace MWClass
         return (ref->base->name != "");
     }
 
-    MWGui::ToolTipInfo Weapon::getToolTipInfo (const MWWorld::Ptr& ptr, MWWorld::Environment& environment) const
+    MWGui::ToolTipInfo Weapon::getToolTipInfo (const MWWorld::Ptr& ptr) const
     {
         ESMS::LiveCellRef<ESM::Weapon, MWWorld::RefData> *ref =
             ptr.get<ESM::Weapon>();
@@ -267,12 +267,14 @@ namespace MWClass
         info.caption = ref->base->name;
         info.icon = ref->base->icon;
 
+        const ESMS::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
+
         std::string text;
 
         // weapon type & damage. arrows / bolts don't have his info.
         if (ref->base->data.type < 12)
         {
-            text += "\n" + environment.mWorld->getStore().gameSettings.search("sType")->str + " ";
+            text += "\n" + store.gameSettings.search("sType")->str + " ";
 
             std::map <int, std::pair <std::string, std::string> > mapping;
             mapping[ESM::Weapon::ShortBladeOneHand] = std::make_pair("sSkillShortblade", "sOneHanded");
@@ -291,29 +293,29 @@ namespace MWClass
             std::string type = mapping[ref->base->data.type].first;
             std::string oneOrTwoHanded = mapping[ref->base->data.type].second;
 
-            text += environment.mWorld->getStore().gameSettings.search(type)->str +
-                ((oneOrTwoHanded != "") ? ", " + environment.mWorld->getStore().gameSettings.search(oneOrTwoHanded)->str : "");
+            text += store.gameSettings.search(type)->str +
+                ((oneOrTwoHanded != "") ? ", " + store.gameSettings.search(oneOrTwoHanded)->str : "");
 
             // weapon damage
             if (ref->base->data.type >= 9)
             {
                 // marksman
-                text += "\n" + environment.mWorld->getStore().gameSettings.search("sAttack")->str + ": "
+                text += "\n" + store.gameSettings.search("sAttack")->str + ": "
                     + MWGui::ToolTips::toString(static_cast<int>(ref->base->data.chop[0]))
                     + " - " + MWGui::ToolTips::toString(static_cast<int>(ref->base->data.chop[1]));
             }
             else
             {
                 // Chop
-                text += "\n" + environment.mWorld->getStore().gameSettings.search("sChop")->str + ": "
+                text += "\n" + store.gameSettings.search("sChop")->str + ": "
                     + MWGui::ToolTips::toString(static_cast<int>(ref->base->data.chop[0]))
                     + " - " + MWGui::ToolTips::toString(static_cast<int>(ref->base->data.chop[1]));
                 // Slash
-                text += "\n" + environment.mWorld->getStore().gameSettings.search("sSlash")->str + ": "
+                text += "\n" + store.gameSettings.search("sSlash")->str + ": "
                     + MWGui::ToolTips::toString(static_cast<int>(ref->base->data.slash[0]))
                     + " - " + MWGui::ToolTips::toString(static_cast<int>(ref->base->data.slash[1]));
                 // Thrust
-                text += "\n" + environment.mWorld->getStore().gameSettings.search("sThrust")->str + ": "
+                text += "\n" + store.gameSettings.search("sThrust")->str + ": "
                     + MWGui::ToolTips::toString(static_cast<int>(ref->base->data.thrust[0]))
                     + " - " + MWGui::ToolTips::toString(static_cast<int>(ref->base->data.thrust[1]));
             }
@@ -321,10 +323,10 @@ namespace MWClass
 
         /// \todo store the current weapon health somewhere
         if (ref->base->data.type < 11) // thrown weapons and arrows/bolts don't have health, only quantity
-            text += "\n" + environment.mWorld->getStore().gameSettings.search("sCondition")->str + ": " + MWGui::ToolTips::toString(ref->base->data.health);
+            text += "\n" + store.gameSettings.search("sCondition")->str + ": " + MWGui::ToolTips::toString(ref->base->data.health);
 
-        text += "\n" + environment.mWorld->getStore().gameSettings.search("sWeight")->str + ": " + MWGui::ToolTips::toString(ref->base->data.weight);
-        text += MWGui::ToolTips::getValueString(ref->base->data.value, environment.mWorld->getStore().gameSettings.search("sValue")->str);
+        text += "\n" + store.gameSettings.search("sWeight")->str + ": " + MWGui::ToolTips::toString(ref->base->data.weight);
+        text += MWGui::ToolTips::getValueString(ref->base->data.value, store.gameSettings.search("sValue")->str);
 
         // this should be going into a custom mygui widget MWEnchantment
         /*
@@ -352,11 +354,11 @@ namespace MWClass
         */
         if (ref->base->enchant != "")
         {
-            const ESM::Enchantment* enchant = environment.mWorld->getStore().enchants.search(ref->base->enchant);
+            const ESM::Enchantment* enchant = store.enchants.search(ref->base->enchant);
             info.enchant = enchant;
         }
 
-        if (environment.mWindowManager->getFullHelp()) {
+        if (MWBase::Environment::get().getWindowManager()->getFullHelp()) {
             text += MWGui::ToolTips::getMiscString(ref->ref.owner, "Owner");
             text += MWGui::ToolTips::getMiscString(ref->base->script, "Script");
         }

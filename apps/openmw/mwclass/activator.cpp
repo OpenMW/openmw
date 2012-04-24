@@ -1,13 +1,13 @@
 
 #include "activator.hpp"
-#include "../mwrender/objects.hpp"
 
 #include <components/esm/loadacti.hpp>
 
 #include <components/esm_store/cell_store.hpp>
 
 #include "../mwworld/ptr.hpp"
-#include "../mwworld/environment.hpp"
+#include "../mwrender/objects.hpp"
+#include "../mwbase/environment.hpp"
 #include "../mwgui/window_manager.hpp"
 
 namespace MWClass
@@ -19,7 +19,7 @@ namespace MWClass
 
         assert (ref->base != NULL);
         const std::string &model = ref->base->model;
-        
+
         if (!model.empty())
         {
             MWRender::Objects& objects = renderingInterface.getObjects();
@@ -28,7 +28,7 @@ namespace MWClass
         }
     }
 
-    void Activator::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics, MWWorld::Environment& environment) const
+    void Activator::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics) const
     {
         ESMS::LiveCellRef<ESM::Activator, MWWorld::RefData> *ref =
             ptr.get<ESM::Activator>();
@@ -73,7 +73,7 @@ namespace MWClass
         return (ref->base->name != "");
     }
 
-    MWGui::ToolTipInfo Activator::getToolTipInfo (const MWWorld::Ptr& ptr, MWWorld::Environment& environment) const
+    MWGui::ToolTipInfo Activator::getToolTipInfo (const MWWorld::Ptr& ptr) const
     {
         ESMS::LiveCellRef<ESM::Activator, MWWorld::RefData> *ref =
             ptr.get<ESM::Activator>();
@@ -82,7 +82,7 @@ namespace MWClass
         info.caption = ref->base->name;
 
         std::string text;
-        if (environment.mWindowManager->getFullHelp())
+        if (MWBase::Environment::get().getWindowManager()->getFullHelp())
             text += MWGui::ToolTips::getMiscString(ref->base->script, "Script");
         info.text = text;
 

@@ -8,6 +8,8 @@
 #include "dialogue.hpp"
 #include "mode.hpp"
 
+#include "../mwbase/environment.hpp"
+
 namespace
 {
     struct Step
@@ -93,7 +95,7 @@ namespace
 
 using namespace MWGui;
 
-CharacterCreation::CharacterCreation(WindowManager* _wm, MWWorld::Environment* _environment)
+CharacterCreation::CharacterCreation(WindowManager* _wm)
     : mNameDialog(0)
     , mRaceDialog(0)
     , mDialogueWindow(0)
@@ -105,7 +107,6 @@ CharacterCreation::CharacterCreation(WindowManager* _wm, MWWorld::Environment* _
     , mBirthSignDialog(0)
     , mReviewDialog(0)
     , mWM(_wm)
-    , mEnvironment(_environment)
 {
     mCreationStage = CSE_NotStarted;
 }
@@ -279,8 +280,8 @@ void CharacterCreation::onPickClassDialogDone(WindowBase* parWindow)
     {
         const std::string &classId = mPickClassDialog->getClassId();
         if (!classId.empty())
-            mEnvironment->mMechanicsManager->setPlayerClass(classId);
-        const ESM::Class *klass = mEnvironment->mWorld->getStore().classes.find(classId);
+            MWBase::Environment::get().getMechanicsManager()->setPlayerClass(classId);
+        const ESM::Class *klass = MWBase::Environment::get().getWorld()->getStore().classes.find(classId);
         if (klass)
         {
             mPlayerClass = *klass;
@@ -307,7 +308,7 @@ void CharacterCreation::onPickClassDialogBack()
     {
         const std::string classId = mPickClassDialog->getClassId();
         if (!classId.empty())
-            mEnvironment->mMechanicsManager->setPlayerClass(classId);
+            MWBase::Environment::get().getMechanicsManager()->setPlayerClass(classId);
         mWM->removeDialog(mPickClassDialog);
     }
 
@@ -345,7 +346,7 @@ void CharacterCreation::onNameDialogDone(WindowBase* parWindow)
     {
         mPlayerName = mNameDialog->getTextInput();
         mWM->setValue("name", mPlayerName);
-        mEnvironment->mMechanicsManager->setPlayerName(mPlayerName);
+        MWBase::Environment::get().getMechanicsManager()->setPlayerName(mPlayerName);
         mWM->removeDialog(mNameDialog);
     }
 
@@ -366,7 +367,7 @@ void CharacterCreation::onRaceDialogBack()
     {
         mPlayerRaceId = mRaceDialog->getRaceId();
         if (!mPlayerRaceId.empty())
-            mEnvironment->mMechanicsManager->setPlayerRace(mPlayerRaceId, mRaceDialog->getGender() == RaceDialog::GM_Male);
+            MWBase::Environment::get().getMechanicsManager()->setPlayerRace(mPlayerRaceId, mRaceDialog->getGender() == RaceDialog::GM_Male);
         mWM->removeDialog(mRaceDialog);
     }
 
@@ -380,7 +381,7 @@ void CharacterCreation::onRaceDialogDone(WindowBase* parWindow)
         mPlayerRaceId = mRaceDialog->getRaceId();
         mWM->setValue("race", mPlayerRaceId);
         if (!mPlayerRaceId.empty())
-            mEnvironment->mMechanicsManager->setPlayerRace(mPlayerRaceId, mRaceDialog->getGender() == RaceDialog::GM_Male);
+            MWBase::Environment::get().getMechanicsManager()->setPlayerRace(mPlayerRaceId, mRaceDialog->getGender() == RaceDialog::GM_Male);
         mWM->removeDialog(mRaceDialog);
     }
 
@@ -402,7 +403,7 @@ void CharacterCreation::onBirthSignDialogDone(WindowBase* parWindow)
         mPlayerBirthSignId = mBirthSignDialog->getBirthId();
         mWM->setBirthSign(mPlayerBirthSignId);
         if (!mPlayerBirthSignId.empty())
-            mEnvironment->mMechanicsManager->setPlayerBirthsign(mPlayerBirthSignId);
+            MWBase::Environment::get().getMechanicsManager()->setPlayerBirthsign(mPlayerBirthSignId);
         mWM->removeDialog(mBirthSignDialog);
     }
 
@@ -419,7 +420,7 @@ void CharacterCreation::onBirthSignDialogBack()
 {
     if (mBirthSignDialog)
     {
-        mEnvironment->mMechanicsManager->setPlayerBirthsign(mBirthSignDialog->getBirthId());
+        MWBase::Environment::get().getMechanicsManager()->setPlayerBirthsign(mBirthSignDialog->getBirthId());
         mWM->removeDialog(mBirthSignDialog);
     }
 
@@ -450,7 +451,7 @@ void CharacterCreation::onCreateClassDialogDone(WindowBase* parWindow)
             klass.data.skills[i][1] = majorSkills[i];
             klass.data.skills[i][0] = minorSkills[i];
         }
-        mEnvironment->mMechanicsManager->setPlayerClass(klass);
+        MWBase::Environment::get().getMechanicsManager()->setPlayerClass(klass);
         mPlayerClass = klass;
         mWM->setPlayerClass(klass);
 
@@ -592,7 +593,7 @@ void CharacterCreation::onGenerateClassBack()
 
     if (mGenerateClassResultDialog)
         mWM->removeDialog(mGenerateClassResultDialog);
-    mEnvironment->mMechanicsManager->setPlayerClass(mGenerateClass);
+    MWBase::Environment::get().getMechanicsManager()->setPlayerClass(mGenerateClass);
 
     mWM->setGuiMode(GM_Class);
 }
@@ -601,7 +602,7 @@ void CharacterCreation::onGenerateClassDone(WindowBase* parWindow)
 {
     if (mGenerateClassResultDialog)
         mWM->removeDialog(mGenerateClassResultDialog);
-    mEnvironment->mMechanicsManager->setPlayerClass(mGenerateClass);
+    MWBase::Environment::get().getMechanicsManager()->setPlayerClass(mGenerateClass);
 
     if (mCreationStage == CSE_ReviewNext)
         mWM->setGuiMode(GM_Review);

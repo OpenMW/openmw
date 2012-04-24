@@ -7,6 +7,8 @@
 #include <components/interpreter/runtime.hpp>
 #include <components/interpreter/opcodes.hpp>
 
+#include "../mwbase/environment.hpp"
+
 #include "../mwworld/world.hpp"
 #include "../mwworld/player.hpp"
 
@@ -22,10 +24,7 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
-                    InterpreterContext& context
-                        = static_cast<InterpreterContext&> (runtime.getContext());
-
-                    runtime.push (context.getWorld().hasCellChanged() ? 1 : 0);
+                    runtime.push (MWBase::Environment::get().getWorld()->hasCellChanged() ? 1 : 0);
                 }
         };
 
@@ -35,9 +34,6 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
-                    InterpreterContext& context
-                        = static_cast<InterpreterContext&> (runtime.getContext());
-
                     std::string cell = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
 
@@ -45,16 +41,16 @@ namespace MWScript
                     pos.rot[0] = pos.rot[1] = pos.rot[2] = 0;
                     pos.pos[2] = 0;
 
-                    if (const ESM::Cell *exterior = context.getWorld().getExterior (cell))
+                    if (const ESM::Cell *exterior = MWBase::Environment::get().getWorld()->getExterior (cell))
                     {
-                        context.getWorld().indexToPosition (exterior->data.gridX, exterior->data.gridY,
+                        MWBase::Environment::get().getWorld()->indexToPosition (exterior->data.gridX, exterior->data.gridY,
                             pos.pos[0], pos.pos[1], true);
-                        context.getWorld().changeToExteriorCell (pos);
+                        MWBase::Environment::get().getWorld()->changeToExteriorCell (pos);
                     }
                     else
                     {
                         pos.pos[0] = pos.pos[1] = 0;
-                        context.getWorld().changeToInteriorCell (cell, pos);
+                        MWBase::Environment::get().getWorld()->changeToInteriorCell (cell, pos);
                     }
                 }
         };
@@ -65,9 +61,6 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
-                    InterpreterContext& context
-                        = static_cast<InterpreterContext&> (runtime.getContext());
-
                     Interpreter::Type_Integer x = runtime[0].mInteger;
                     runtime.pop();
 
@@ -76,12 +69,12 @@ namespace MWScript
 
                     ESM::Position pos;
 
-                    context.getWorld().indexToPosition (x, y, pos.pos[0], pos.pos[1], true);
+                    MWBase::Environment::get().getWorld()->indexToPosition (x, y, pos.pos[0], pos.pos[1], true);
                     pos.pos[2] = 0;
 
                     pos.rot[0] = pos.rot[1] = pos.rot[2] = 0;
 
-                    context.getWorld().changeToExteriorCell (pos);
+                    MWBase::Environment::get().getWorld()->changeToExteriorCell (pos);
                 }
         };
 
@@ -91,11 +84,8 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
-                    InterpreterContext& context
-                        = static_cast<InterpreterContext&> (runtime.getContext());
-
                     bool interior =
-                        context.getWorld().getPlayer().getPlayer().getCell()->cell->data.flags &
+                        MWBase::Environment::get().getWorld()->getPlayer().getPlayer().getCell()->cell->data.flags &
                             ESM::Cell::Interior;
 
                     runtime.push (interior ? 1 : 0);
@@ -108,20 +98,17 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
-                    InterpreterContext& context
-                        = static_cast<InterpreterContext&> (runtime.getContext());
-
                     std::string name = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
 
-                    const ESM::Cell *cell = context.getWorld().getPlayer().getPlayer().getCell()->cell;
+                    const ESM::Cell *cell = MWBase::Environment::get().getWorld()->getPlayer().getPlayer().getCell()->cell;
 
                     std::string current = cell->name;
 
                     if (!(cell->data.flags & ESM::Cell::Interior) && current.empty())
                     {
                         const ESM::Region *region =
-                            context.getWorld().getStore().regions.find (cell->region);
+                            MWBase::Environment::get().getWorld()->getStore().regions.find (cell->region);
 
                         current = region->name;
                     }
@@ -139,10 +126,7 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
-                    InterpreterContext& context
-                        = static_cast<InterpreterContext&> (runtime.getContext());
-
-                    MWWorld::Ptr::CellStore *cell = context.getWorld().getPlayer().getPlayer().getCell();
+                    MWWorld::Ptr::CellStore *cell = MWBase::Environment::get().getWorld()->getPlayer().getPlayer().getCell();
                     runtime.push (cell->mWaterLevel);
                 }
         };
@@ -153,18 +137,15 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
-                    InterpreterContext& context
-                        = static_cast<InterpreterContext&> (runtime.getContext());
-
                     Interpreter::Type_Float level = runtime[0].mFloat;
 
-                    MWWorld::Ptr::CellStore *cell = context.getWorld().getPlayer().getPlayer().getCell();
+                    MWWorld::Ptr::CellStore *cell = MWBase::Environment::get().getWorld()->getPlayer().getPlayer().getCell();
 
                     if (!(cell->cell->data.flags & ESM::Cell::Interior))
                         throw std::runtime_error("Can't set water level in exterior cell");
 
                     cell->mWaterLevel = level;
-                    context.getEnvironment().mWorld->setWaterHeight(cell->mWaterLevel);
+                    MWBase::Environment::get().getWorld()->setWaterHeight(cell->mWaterLevel);
                 }
         };
 
@@ -174,18 +155,15 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
-                    InterpreterContext& context
-                        = static_cast<InterpreterContext&> (runtime.getContext());
-
                     Interpreter::Type_Float level = runtime[0].mFloat;
 
-                    MWWorld::Ptr::CellStore *cell = context.getWorld().getPlayer().getPlayer().getCell();
+                    MWWorld::Ptr::CellStore *cell = MWBase::Environment::get().getWorld()->getPlayer().getPlayer().getCell();
 
                     if (!(cell->cell->data.flags & ESM::Cell::Interior))
                         throw std::runtime_error("Can't set water level in exterior cell");
-                    
+
                     cell->mWaterLevel +=level;
-                    context.getEnvironment().mWorld->setWaterHeight(cell->mWaterLevel);
+                    MWBase::Environment::get().getWorld()->setWaterHeight(cell->mWaterLevel);
                 }
         };
 

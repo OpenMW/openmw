@@ -27,17 +27,17 @@ namespace MWWorld
 
     }
 
-    void Class::insertObject(const Ptr& ptr, MWWorld::PhysicsSystem& physics, MWWorld::Environment& environment) const
+    void Class::insertObject(const Ptr& ptr, MWWorld::PhysicsSystem& physics) const
     {
 
     }
 
-    void Class::enable (const Ptr& ptr, MWWorld::Environment& environment) const
+    void Class::enable (const Ptr& ptr) const
     {
 
     }
 
-    void Class::disable (const Ptr& ptr, MWWorld::Environment& environment) const
+    void Class::disable (const Ptr& ptr) const
     {
 
     }
@@ -62,14 +62,12 @@ namespace MWWorld
         throw std::runtime_error ("class does not have item health");
     }
 
-    boost::shared_ptr<Action> Class::activate (const Ptr& ptr, const Ptr& actor,
-        const Environment& environment) const
+    boost::shared_ptr<Action> Class::activate (const Ptr& ptr, const Ptr& actor) const
     {
         return boost::shared_ptr<Action> (new NullAction);
     }
 
-    boost::shared_ptr<Action> Class::use (const Ptr& ptr,
-        const Environment& environment) const
+    boost::shared_ptr<Action> Class::use (const Ptr& ptr) const
     {
         return boost::shared_ptr<Action> (new NullAction);
     }
@@ -134,7 +132,7 @@ namespace MWWorld
         return std::make_pair (std::vector<int>(), false);
     }
 
-    int Class::getEquipmentSkill (const Ptr& ptr, const Environment& environment) const
+    int Class::getEquipmentSkill (const Ptr& ptr) const
     {
         return -1;
     }
@@ -164,17 +162,17 @@ namespace MWWorld
         sClasses.insert (std::make_pair (key, instance));
     }
 
-    std::string Class::getUpSoundId (const Ptr& ptr, const MWWorld::Environment& environment) const
+    std::string Class::getUpSoundId (const Ptr& ptr) const
     {
         throw std::runtime_error ("class does not have an up sound");
     }
 
-    std::string Class::getDownSoundId (const Ptr& ptr, const MWWorld::Environment& environment) const
+    std::string Class::getDownSoundId (const Ptr& ptr) const
     {
         throw std::runtime_error ("class does not have an down sound");
     }
 
-    MWGui::ToolTipInfo Class::getToolTipInfo (const Ptr& ptr, MWWorld::Environment& environment) const
+    MWGui::ToolTipInfo Class::getToolTipInfo (const Ptr& ptr) const
     {
         throw std::runtime_error ("class does not have a tool tip");
     }
