@@ -14,7 +14,7 @@ namespace MWWorld
 
             ActionTake (const MWWorld::Ptr& object);
 
-            virtual void execute (Environment& environment);
+            virtual void execute();
     };
 }
 

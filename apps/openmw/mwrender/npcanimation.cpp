@@ -2,7 +2,7 @@
 #include "../mwworld/world.hpp"
 #include "renderconst.hpp"
 
-
+#include "../mwbase/environment.hpp"
 
 using namespace Ogre;
 using namespace NifOgre;
@@ -12,7 +12,7 @@ NpcAnimation::~NpcAnimation(){
 }
 
 
-NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, MWWorld::Environment& _env,OEngine::Render::OgreRenderer& _rend, MWWorld::InventoryStore& _inv): Animation(_env,_rend), mStateID(-1), inv(_inv), timeToChange(0),
+NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, OEngine::Render::OgreRenderer& _rend, MWWorld::InventoryStore& _inv): Animation(_rend), mStateID(-1), inv(_inv), timeToChange(0),
     robe(inv.end()), helmet(inv.end()), shirt(inv.end()),
     cuirass(inv.end()), greaves(inv.end()),
     leftpauldron(inv.end()), rightpauldron(inv.end()),
@@ -77,14 +77,14 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, MWWorld::Environment& _env,O
 		std::string hairID = ref->base->hair;
         std::string headID = ref->base->head;
         headModel = "meshes\\" +
-            mEnvironment.mWorld->getStore().bodyParts.find(headID)->model;
+            MWBase::Environment::get().getWorld()->getStore().bodyParts.find(headID)->model;
 
 		hairModel = "meshes\\" +
-            mEnvironment.mWorld->getStore().bodyParts.find(hairID)->model;
+            MWBase::Environment::get().getWorld()->getStore().bodyParts.find(hairID)->model;
 		npcName = ref->base->name;
 
         //ESMStore::Races r =
-        const ESM::Race* race = mEnvironment.mWorld->getStore().races.find(ref->base->race);
+        const ESM::Race* race = MWBase::Environment::get().getWorld()->getStore().races.find(ref->base->race);
 
 
          bodyRaceID = headID.substr(0, headID.find_last_of("head_") - 4);
@@ -159,7 +159,6 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, MWWorld::Environment& _env,O
             insert->scale(race->data.height.female, race->data.height.female, race->data.height.female);
         else
             insert->scale(race->data.height.male, race->data.height.male, race->data.height.male);
-		std::cout << "Inv" << inv.getStateId() << "\n";
         updateParts();
 
 }
@@ -370,116 +369,116 @@ void NpcAnimation::updateParts(){
                         addOrReplaceIndividualPart(ESM::PRT_Hair, -1,1,hairModel);
                 }
                  if(partpriorities[ESM::PRT_Neck] < 1){
-                    const ESM::BodyPart *neckPart = mEnvironment.mWorld->getStore().bodyParts.search (bodyRaceID + "neck");
+                    const ESM::BodyPart *neckPart = MWBase::Environment::get().getWorld()->getStore().bodyParts.search (bodyRaceID + "neck");
                     if(neckPart)
                         addOrReplaceIndividualPart(ESM::PRT_Neck, -1,1,"meshes\\" + neckPart->model);
                 }
                 if(partpriorities[ESM::PRT_Cuirass] < 1){
-                    const ESM::BodyPart *chestPart = mEnvironment.mWorld->getStore().bodyParts.search (bodyRaceID + "chest");
+                    const ESM::BodyPart *chestPart = MWBase::Environment::get().getWorld()->getStore().bodyParts.search (bodyRaceID + "chest");
                     if(chestPart)
                         addOrReplaceIndividualPart(ESM::PRT_Cuirass, -1,1,"meshes\\" + chestPart->model);
                 }
 
                  if(partpriorities[ESM::PRT_Groin] < 1){
-                    const ESM::BodyPart *groinPart = mEnvironment.mWorld->getStore().bodyParts.search (bodyRaceID + "groin");
+                    const ESM::BodyPart *groinPart = MWBase::Environment::get().getWorld()->getStore().bodyParts.search (bodyRaceID + "groin");
                     if(groinPart)
                         addOrReplaceIndividualPart(ESM::PRT_Groin, -1,1,"meshes\\" + groinPart->model);
                 }
                 if(partpriorities[ESM::PRT_RHand] < 1){
-                    const ESM::BodyPart *handPart = mEnvironment.mWorld->getStore().bodyParts.search (bodyRaceID + "hand");
+                    const ESM::BodyPart *handPart = MWBase::Environment::get().getWorld()->getStore().bodyParts.search (bodyRaceID + "hand");
                     if(!handPart)
-                        handPart = mEnvironment.mWorld->getStore().bodyParts.search (bodyRaceID + "hands");
+                        handPart = MWBase::Environment::get().getWorld()->getStore().bodyParts.search (bodyRaceID + "hands");
                     if(handPart)
                         addOrReplaceIndividualPart(ESM::PRT_RHand, -1,1,"meshes\\" + handPart->model);
                 }
                 if(partpriorities[ESM::PRT_LHand] < 1){
-                    const ESM::BodyPart *handPart = mEnvironment.mWorld->getStore().bodyParts.search (bodyRaceID + "hand");
+                    const ESM::BodyPart *handPart = MWBase::Environment::get().getWorld()->getStore().bodyParts.search (bodyRaceID + "hand");
                     if(!handPart)
-                        handPart = mEnvironment.mWorld->getStore().bodyParts.search (bodyRaceID + "hands");
+                        handPart = MWBase::Environment::get().getWorld()->getStore().bodyParts.search (bodyRaceID + "hands");
                     if(handPart)
                         addOrReplaceIndividualPart(ESM::PRT_LHand, -1,1,"meshes\\" + handPart->model);
                 }
 
                 if(partpriorities[ESM::PRT_RWrist] < 1){
-                    const ESM::BodyPart *wristPart = mEnvironment.mWorld->getStore().bodyParts.search (bodyRaceID + "wrist");
+                    const ESM::BodyPart *wristPart = MWBase::Environment::get().getWorld()->getStore().bodyParts.search (bodyRaceID + "wrist");
                     if(wristPart)
                         addOrReplaceIndividualPart(ESM::PRT_RWrist, -1,1,"meshes\\" + wristPart->model);
                 }
                  if(partpriorities[ESM::PRT_LWrist] < 1){
-                    const ESM::BodyPart *wristPart = mEnvironment.mWorld->getStore().bodyParts.search (bodyRaceID + "wrist");
+                    const ESM::BodyPart *wristPart = MWBase::Environment::get().getWorld()->getStore().bodyParts.search (bodyRaceID + "wrist");
                     if(wristPart)
                         addOrReplaceIndividualPart(ESM::PRT_LWrist, -1,1,"meshes\\" + wristPart->model);
                 }
                   if(partpriorities[ESM::PRT_RForearm] < 1){
-                    const ESM::BodyPart *forearmPart = mEnvironment.mWorld->getStore().bodyParts.search (bodyRaceID + "forearm");
+                    const ESM::BodyPart *forearmPart = MWBase::Environment::get().getWorld()->getStore().bodyParts.search (bodyRaceID + "forearm");
                     if(bodyRaceID == "b_n_argonian_f_")
-                        forearmPart = mEnvironment.mWorld->getStore().bodyParts.search ("b_n_argonian_m_forearm");
+                        forearmPart = MWBase::Environment::get().getWorld()->getStore().bodyParts.search ("b_n_argonian_m_forearm");
                     if(forearmPart)
                         addOrReplaceIndividualPart(ESM::PRT_RForearm, -1,1,"meshes\\" + forearmPart->model);
                 }
                  if(partpriorities[ESM::PRT_LForearm] < 1){
-                    const ESM::BodyPart *forearmPart = mEnvironment.mWorld->getStore().bodyParts.search (bodyRaceID + "forearm");
+                    const ESM::BodyPart *forearmPart = MWBase::Environment::get().getWorld()->getStore().bodyParts.search (bodyRaceID + "forearm");
                     if(bodyRaceID == "b_n_argonian_f_")
-                        forearmPart = mEnvironment.mWorld->getStore().bodyParts.search ("b_n_argonian_m_forearm");
+                        forearmPart = MWBase::Environment::get().getWorld()->getStore().bodyParts.search ("b_n_argonian_m_forearm");
                     if(forearmPart)
                         addOrReplaceIndividualPart(ESM::PRT_LForearm, -1,1,"meshes\\" + forearmPart->model);
                 }
                   if(partpriorities[ESM::PRT_RUpperarm] < 1){
-                    const ESM::BodyPart *armPart = mEnvironment.mWorld->getStore().bodyParts.search (bodyRaceID + "upper arm");
+                    const ESM::BodyPart *armPart = MWBase::Environment::get().getWorld()->getStore().bodyParts.search (bodyRaceID + "upper arm");
                     if(armPart)
                         addOrReplaceIndividualPart(ESM::PRT_RUpperarm, -1,1,"meshes\\" + armPart->model);
                 }
                  if(partpriorities[ESM::PRT_LUpperarm] < 1){
-                    const ESM::BodyPart *armPart = mEnvironment.mWorld->getStore().bodyParts.search (bodyRaceID + "upper arm");
+                    const ESM::BodyPart *armPart = MWBase::Environment::get().getWorld()->getStore().bodyParts.search (bodyRaceID + "upper arm");
                     if(armPart)
                         addOrReplaceIndividualPart(ESM::PRT_LUpperarm, -1,1,"meshes\\" + armPart->model);
                 }
                   if(partpriorities[ESM::PRT_RFoot] < 1){
-                    const ESM::BodyPart *footPart = mEnvironment.mWorld->getStore().bodyParts.search (bodyRaceID + "foot");
+                    const ESM::BodyPart *footPart = MWBase::Environment::get().getWorld()->getStore().bodyParts.search (bodyRaceID + "foot");
                     if(isBeast && !footPart)
-                        footPart = mEnvironment.mWorld->getStore().bodyParts.search (bodyRaceID + "feet");
+                        footPart = MWBase::Environment::get().getWorld()->getStore().bodyParts.search (bodyRaceID + "feet");
                     if(footPart)
                         addOrReplaceIndividualPart(ESM::PRT_RFoot, -1,1,"meshes\\" + footPart->model);
                 }
                   if(partpriorities[ESM::PRT_LFoot] < 1){
-                    const ESM::BodyPart *footPart = mEnvironment.mWorld->getStore().bodyParts.search (bodyRaceID + "foot");
+                    const ESM::BodyPart *footPart = MWBase::Environment::get().getWorld()->getStore().bodyParts.search (bodyRaceID + "foot");
                     if(isBeast && !footPart)
-                        footPart = mEnvironment.mWorld->getStore().bodyParts.search (bodyRaceID + "feet");
+                        footPart = MWBase::Environment::get().getWorld()->getStore().bodyParts.search (bodyRaceID + "feet");
                     if(footPart)
                         addOrReplaceIndividualPart(ESM::PRT_LFoot, -1,1,"meshes\\" + footPart->model);
                 }
                  if(partpriorities[ESM::PRT_RAnkle] < 1){
-                    const ESM::BodyPart *anklePart = mEnvironment.mWorld->getStore().bodyParts.search (bodyRaceID + "ankle");
+                    const ESM::BodyPart *anklePart = MWBase::Environment::get().getWorld()->getStore().bodyParts.search (bodyRaceID + "ankle");
                     if(anklePart)
                         addOrReplaceIndividualPart(ESM::PRT_RAnkle, -1,1,"meshes\\" + anklePart->model);
                 }
                  if(partpriorities[ESM::PRT_LAnkle] < 1){
-                    const ESM::BodyPart *anklePart = mEnvironment.mWorld->getStore().bodyParts.search (bodyRaceID + "ankle");
+                    const ESM::BodyPart *anklePart = MWBase::Environment::get().getWorld()->getStore().bodyParts.search (bodyRaceID + "ankle");
                     if(anklePart)
                         addOrReplaceIndividualPart(ESM::PRT_LAnkle, -1,1,"meshes\\" + anklePart->model);
                 }
                      if(partpriorities[ESM::PRT_RKnee] < 1){
-                    const ESM::BodyPart *kneePart = mEnvironment.mWorld->getStore().bodyParts.search (bodyRaceID + "knee");
+                    const ESM::BodyPart *kneePart = MWBase::Environment::get().getWorld()->getStore().bodyParts.search (bodyRaceID + "knee");
                     if(kneePart)
                         addOrReplaceIndividualPart(ESM::PRT_RKnee, -1,1,"meshes\\" + kneePart->model);
                 }
                  if(partpriorities[ESM::PRT_LKnee] < 1){
-                    const ESM::BodyPart *kneePart = mEnvironment.mWorld->getStore().bodyParts.search (bodyRaceID + "knee");
+                    const ESM::BodyPart *kneePart = MWBase::Environment::get().getWorld()->getStore().bodyParts.search (bodyRaceID + "knee");
                     if(kneePart)
                         addOrReplaceIndividualPart(ESM::PRT_LKnee, -1,1,"meshes\\" + kneePart->model);
                 }
                    if(partpriorities[ESM::PRT_RLeg] < 1){
-                    const ESM::BodyPart *legPart = mEnvironment.mWorld->getStore().bodyParts.search (bodyRaceID + "upper leg");
+                    const ESM::BodyPart *legPart = MWBase::Environment::get().getWorld()->getStore().bodyParts.search (bodyRaceID + "upper leg");
                     if(legPart)
                         addOrReplaceIndividualPart(ESM::PRT_RLeg, -1,1,"meshes\\" + legPart->model);
                 }
                  if(partpriorities[ESM::PRT_LLeg] < 1){
-                    const ESM::BodyPart *legPart = mEnvironment.mWorld->getStore().bodyParts.search (bodyRaceID + "upper leg");
+                    const ESM::BodyPart *legPart = MWBase::Environment::get().getWorld()->getStore().bodyParts.search (bodyRaceID + "upper leg");
                     if(legPart)
                         addOrReplaceIndividualPart(ESM::PRT_LLeg, -1,1,"meshes\\" + legPart->model);
                 }
                  if(partpriorities[ESM::PRT_Tail] < 1){
-                    const ESM::BodyPart *tailPart = mEnvironment.mWorld->getStore().bodyParts.search (bodyRaceID + "tail");
+                    const ESM::BodyPart *tailPart = MWBase::Environment::get().getWorld()->getStore().bodyParts.search (bodyRaceID + "tail");
                     if(tailPart)
                         addOrReplaceIndividualPart(ESM::PRT_Tail, -1,1,"meshes\\" + tailPart->model);
                 }
@@ -848,9 +847,9 @@ void NpcAnimation::removeIndividualPart(int type){
                         const ESM::BodyPart *bodypart = 0;
 
                         if(isFemale)
-                            bodypart = mEnvironment.mWorld->getStore().bodyParts.search (part.female);
+                            bodypart = MWBase::Environment::get().getWorld()->getStore().bodyParts.search (part.female);
                         if(!bodypart)
-                            bodypart = mEnvironment.mWorld->getStore().bodyParts.search (part.male);
+                            bodypart = MWBase::Environment::get().getWorld()->getStore().bodyParts.search (part.male);
                         if(bodypart){
                             addOrReplaceIndividualPart(part.part, group,priority,"meshes\\" + bodypart->model);
                         }

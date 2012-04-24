@@ -10,7 +10,7 @@
 
 #include <components/nifogre/ogre_nif_loader.hpp>
 
-#include "../mwworld/environment.hpp"
+#include "../mwbase/environment.hpp"
 #include "../mwworld/world.hpp"
 #include "renderconst.hpp"
 #include "renderingmanager.hpp"
@@ -271,10 +271,10 @@ void Moon::setPhase(const Moon::Phase& phase)
 {
     // Colour texture
     Ogre::String textureName = "textures\\tx_";
-    
+
     if (mType == Moon::Type_Secunda) textureName += "secunda_";
     else textureName += "masser_";
-    
+
     if      (phase == Moon::Phase_New)              textureName += "new";
     else if (phase == Moon::Phase_WaxingCrescent)   textureName += "one_wax";
     else if (phase == Moon::Phase_WaxingHalf)       textureName += "half_wax";
@@ -283,9 +283,9 @@ void Moon::setPhase(const Moon::Phase& phase)
     else if (phase == Moon::Phase_WaningHalf)       textureName += "half_wan";
     else if (phase == Moon::Phase_WaningGibbous)    textureName += "three_wan";
     else if (phase == Moon::Phase_Full)             textureName += "full";
-    
+
     textureName += ".dds";
-    
+
     mMaterial->getTechnique(0)->getPass(0)->getTextureUnitState(0)->setTextureName(textureName);
 
     mPhase = phase;
@@ -365,9 +365,8 @@ void SkyManager::ModVertexAlpha(Entity* ent, unsigned int meshType)
     ent->getMesh()->getSubMesh(0)->vertexData->vertexBufferBinding->getBuffer(ves_diffuse->getSource())->unlock();
 }
 
-SkyManager::SkyManager (SceneNode* pMwRoot, Camera* pCamera, MWWorld::Environment* env)
-    : mEnvironment(env)
-    , mHour(0.0f)
+SkyManager::SkyManager (SceneNode* pMwRoot, Camera* pCamera)
+    : mHour(0.0f)
     , mDay(0)
     , mMonth(0)
     , mSun(NULL)
@@ -713,7 +712,7 @@ void SkyManager::update(float duration)
     if (!mEnabled) return;
 
     // UV Scroll the clouds
-    mCloudMaterial->getTechnique(0)->getPass(0)->getFragmentProgramParameters()->setNamedConstantFromTime("time", mEnvironment->mWorld->getTimeScaleFactor()/30.f);
+    mCloudMaterial->getTechnique(0)->getPass(0)->getFragmentProgramParameters()->setNamedConstantFromTime("time", MWBase::Environment::get().getWorld()->getTimeScaleFactor()/30.f);
 
     /// \todo improve this
     mMasser->setPhase( static_cast<Moon::Phase>( (int) ((mDay % 32)/4.f)) );
@@ -752,7 +751,7 @@ void SkyManager::update(float duration)
     mSecunda->setVisible(mSecundaEnabled);
 
     // rotate the stars by 360 degrees every 4 days
-    mAtmosphereNight->roll(Degree(mEnvironment->mWorld->getTimeScaleFactor()*duration*360 / (3600*96.f)));
+    mAtmosphereNight->roll(Degree(MWBase::Environment::get().getWorld()->getTimeScaleFactor()*duration*360 / (3600*96.f)));
 }
 
 void SkyManager::enable()

@@ -51,7 +51,6 @@ namespace MWRender
 namespace MWWorld
 {
     class WeatherManager;
-    class Environment;
     class Player;
 
     /// \brief The game world and its visual representation
@@ -81,7 +80,6 @@ namespace MWWorld
             MWWorld::Globals *mGlobalVariables;
             MWWorld::PhysicsSystem *mPhysics;
             bool mSky;
-            Environment& mEnvironment;
             int mNextDynamicRecord;
 
             Cells mCells;
@@ -111,7 +109,7 @@ namespace MWWorld
            World (OEngine::Render::OgreRenderer& renderer,
                 const Files::Collections& fileCollections,
                 const std::string& master, const boost::filesystem::path& resDir, bool newGame,
-                Environment& environment, const std::string& encoding, std::map<std::string,std::string> fallbackMap);
+                const std::string& encoding, std::map<std::string,std::string> fallbackMap);
 
             ~World();
 

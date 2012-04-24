@@ -5,9 +5,10 @@
 
 #include <components/esm_store/cell_store.hpp>
 
+#include "../mwbase/environment.hpp"
+
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/actiontake.hpp"
-#include "../mwworld/environment.hpp"
 
 #include "../mwrender/objects.hpp"
 
@@ -31,7 +32,7 @@ namespace MWClass
         }
     }
 
-    void Book::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics, MWWorld::Environment& environment) const
+    void Book::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics) const
     {
         ESMS::LiveCellRef<ESM::Book, MWWorld::RefData> *ref =
             ptr.get<ESM::Book>();
@@ -54,11 +55,11 @@ namespace MWClass
     }
 
     boost::shared_ptr<MWWorld::Action> Book::activate (const MWWorld::Ptr& ptr,
-        const MWWorld::Ptr& actor, const MWWorld::Environment& environment) const
+        const MWWorld::Ptr& actor) const
     {
         // TODO implement reading
 
-        environment.mSoundManager->playSound3D (ptr, getUpSoundId(ptr, environment), 1.0, 1.0, MWSound::Play_NoTrack);
+        MWBase::Environment::get().getSoundManager()->playSound3D (ptr, getUpSoundId(ptr), 1.0, 1.0, MWSound::Play_NoTrack);
 
         return boost::shared_ptr<MWWorld::Action> (
             new MWWorld::ActionTake (ptr));
@@ -87,12 +88,12 @@ namespace MWClass
         registerClass (typeid (ESM::Book).name(), instance);
     }
 
-    std::string Book::getUpSoundId (const MWWorld::Ptr& ptr, const MWWorld::Environment& environment) const
+    std::string Book::getUpSoundId (const MWWorld::Ptr& ptr) const
     {
         return std::string("Item Book Up");
     }
 
-    std::string Book::getDownSoundId (const MWWorld::Ptr& ptr, const MWWorld::Environment& environment) const
+    std::string Book::getDownSoundId (const MWWorld::Ptr& ptr) const
     {
         return std::string("Item Book Down");
     }

@@ -23,16 +23,13 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
-                    MWScript::InterpreterContext& context
-                        = static_cast<MWScript::InterpreterContext&> (runtime.getContext());
-
                     std::string quest = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
 
                     Interpreter::Type_Integer index = runtime[0].mInteger;
                     runtime.pop();
 
-                    context.getEnvironment().mJournal->addEntry (quest, index);
+                    MWBase::Environment::get().getJournal()->addEntry (quest, index);
                 }
         };
 
@@ -42,16 +39,13 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
-                    MWScript::InterpreterContext& context
-                        = static_cast<MWScript::InterpreterContext&> (runtime.getContext());
-
                     std::string quest = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
 
                     Interpreter::Type_Integer index = runtime[0].mInteger;
                     runtime.pop();
 
-                    context.getEnvironment().mJournal->setJournalIndex (quest, index);
+                    MWBase::Environment::get().getJournal()->setJournalIndex (quest, index);
                 }
         };
 
@@ -61,13 +55,10 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
-                    MWScript::InterpreterContext& context
-                        = static_cast<MWScript::InterpreterContext&> (runtime.getContext());
-
                     std::string quest = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
 
-                    int index = context.getEnvironment().mJournal->getJournalIndex (quest);
+                    int index = MWBase::Environment::get().getJournal()->getJournalIndex (quest);
 
                     runtime.push (index);
 
@@ -80,13 +71,10 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
-                    MWScript::InterpreterContext& context
-                        = static_cast<MWScript::InterpreterContext&> (runtime.getContext());
-
                     std::string topic = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
 
-                    context.getEnvironment().mDialogueManager->addTopic(topic);
+                    MWBase::Environment::get().getDialogueManager()->addTopic(topic);
                 }
         };
 
@@ -96,9 +84,7 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime, unsigned int arg0)
                 {
-                    MWScript::InterpreterContext& context
-                        = static_cast<MWScript::InterpreterContext&> (runtime.getContext());
-                    MWDialogue::DialogueManager* dialogue = context.getEnvironment().mDialogueManager;
+                    MWDialogue::DialogueManager* dialogue = MWBase::Environment::get().getDialogueManager();
                     while(arg0>0)
                     {
                         std::string question = runtime.getStringLiteral (runtime[0].mInteger);
@@ -124,9 +110,8 @@ namespace MWScript
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
                     MWWorld::Ptr ptr = R()(runtime);
-                    MWScript::InterpreterContext& context
-                        = static_cast<MWScript::InterpreterContext&> (runtime.getContext());
-                    context.getEnvironment().mDialogueManager->startDialogue (ptr);
+
+                    MWBase::Environment::get().getDialogueManager()->startDialogue (ptr);
                 }
         };
 

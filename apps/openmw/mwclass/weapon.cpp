@@ -5,9 +5,10 @@
 
 #include <components/esm_store/cell_store.hpp>
 
+#include "../mwbase/environment.hpp"
+
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/actiontake.hpp"
-#include "../mwworld/environment.hpp"
 #include "../mwworld/inventorystore.hpp"
 
 #include "../mwrender/objects.hpp"
@@ -32,7 +33,7 @@ namespace MWClass
         }
     }
 
-    void Weapon::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics, MWWorld::Environment& environment) const
+    void Weapon::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics) const
     {
         ESMS::LiveCellRef<ESM::Weapon, MWWorld::RefData> *ref =
             ptr.get<ESM::Weapon>();
@@ -55,9 +56,9 @@ namespace MWClass
     }
 
     boost::shared_ptr<MWWorld::Action> Weapon::activate (const MWWorld::Ptr& ptr,
-        const MWWorld::Ptr& actor, const MWWorld::Environment& environment) const
+        const MWWorld::Ptr& actor) const
     {
-        environment.mSoundManager->playSound3D (ptr, getUpSoundId(ptr, environment), 1.0, 1.0, MWSound::Play_NoTrack);
+        MWBase::Environment::get().getSoundManager()->playSound3D (ptr, getUpSoundId(ptr), 1.0, 1.0, MWSound::Play_NoTrack);
 
         return boost::shared_ptr<MWWorld::Action> (
             new MWWorld::ActionTake (ptr));
@@ -108,8 +109,7 @@ namespace MWClass
         return std::make_pair (slots, stack);
     }
 
-    int Weapon::getEquipmentSkill (const MWWorld::Ptr& ptr,
-        const MWWorld::Environment& environment) const
+    int Weapon::getEquipmentSkill (const MWWorld::Ptr& ptr) const
     {
         ESMS::LiveCellRef<ESM::Weapon, MWWorld::RefData> *ref =
             ptr.get<ESM::Weapon>();
@@ -154,7 +154,7 @@ namespace MWClass
         registerClass (typeid (ESM::Weapon).name(), instance);
     }
 
-    std::string Weapon::getUpSoundId (const MWWorld::Ptr& ptr, const MWWorld::Environment& environment) const
+    std::string Weapon::getUpSoundId (const MWWorld::Ptr& ptr) const
     {
         ESMS::LiveCellRef<ESM::Weapon, MWWorld::RefData> *ref =
             ptr.get<ESM::Weapon>();
@@ -200,7 +200,7 @@ namespace MWClass
         return std::string("Item Misc Up");
     }
 
-    std::string Weapon::getDownSoundId (const MWWorld::Ptr& ptr, const MWWorld::Environment& environment) const
+    std::string Weapon::getDownSoundId (const MWWorld::Ptr& ptr) const
     {
         ESMS::LiveCellRef<ESM::Weapon, MWWorld::RefData> *ref =
             ptr.get<ESM::Weapon>();

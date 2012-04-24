@@ -5,11 +5,12 @@
 
 #include <components/esm_store/cell_store.hpp>
 
+#include "../mwbase/environment.hpp"
+
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/nullaction.hpp"
 #include "../mwworld/containerstore.hpp"
 #include "../mwworld/customdata.hpp"
-#include "../mwworld/environment.hpp"
 
 #include "../mwrender/objects.hpp"
 
@@ -61,7 +62,7 @@ namespace MWClass
         }
     }
 
-    void Container::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics, MWWorld::Environment& environment) const
+    void Container::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics) const
     {
         ESMS::LiveCellRef<ESM::Container, MWWorld::RefData> *ref =
             ptr.get<ESM::Container>();
@@ -76,7 +77,7 @@ namespace MWClass
     }
 
     boost::shared_ptr<MWWorld::Action> Container::activate (const MWWorld::Ptr& ptr,
-        const MWWorld::Ptr& actor, const MWWorld::Environment& environment) const
+        const MWWorld::Ptr& actor) const
     {
         const std::string lockedSound = "LockedChest";
         const std::string trapActivationSound = "Disarm Trap Fail";
@@ -85,7 +86,7 @@ namespace MWClass
         {
             // TODO check for key
             std::cout << "Locked container" << std::endl;
-            environment.mSoundManager->playSound3D (ptr, lockedSound, 1.0, 1.0);
+            MWBase::Environment::get().getSoundManager()->playSound3D (ptr, lockedSound, 1.0, 1.0);
             return boost::shared_ptr<MWWorld::Action> (new MWWorld::NullAction);
         }
         else
@@ -100,7 +101,7 @@ namespace MWClass
             {
                 // Trap activation goes here
                 std::cout << "Activated trap: " << ptr.getCellRef().trap << std::endl;
-                environment.mSoundManager->playSound3D (ptr, trapActivationSound, 1.0, 1.0);
+                MWBase::Environment::get().getSoundManager()->playSound3D (ptr, trapActivationSound, 1.0, 1.0);
                 ptr.getCellRef().trap = "";
                 return boost::shared_ptr<MWWorld::Action> (new MWWorld::NullAction);
             }

@@ -359,12 +359,17 @@ if(DPKG_PROGRAM)
 endif(DPKG_PROGRAM)
 
 if(WIN32)
-    FILE(GLOB files "${OpenMW_BINARY_DIR}/Release/*.*")
-    INSTALL(FILES ${files} DESTINATION ".")
+    FILE(GLOB dll_files "${OpenMW_BINARY_DIR}/Release/*.dll")
+    INSTALL(FILES ${dll_files} DESTINATION ".")
     INSTALL(FILES "${OpenMW_BINARY_DIR}/openmw.cfg.install" DESTINATION "." RENAME "openmw.cfg")
     INSTALL(FILES
+        "${OpenMW_BINARY_DIR}/plugins.cfg"
         "${OpenMW_SOURCE_DIR}/readme.txt"
+        "${OpenMW_BINARY_DIR}/launcher.qss"
         "${OpenMW_BINARY_DIR}/settings-default.cfg"
+        "${OpenMW_BINARY_DIR}/transparency-overrides.cfg"
+        "${OpenMW_BINARY_DIR}/Release/omwlauncher.exe"
+        "${OpenMW_BINARY_DIR}/Release/openmw.exe"
         DESTINATION ".")
     INSTALL(DIRECTORY "${OpenMW_BINARY_DIR}/resources" DESTINATION ".")
 
@@ -390,7 +395,7 @@ if(WIN32)
     SET(CPACK_NSIS_INSTALLED_ICON_NAME "omwlauncher.exe")
     SET(CPACK_NSIS_MUI_ICON "${OpenMW_SOURCE_DIR}/apps/launcher/resources/images/openmw.ico")
     SET(CPACK_NSIS_MUI_UNIICON "${OpenMW_SOURCE_DIR}/apps/launcher/resources/images/openmw.ico")
-    # SET(CPACK_PACKAGE_ICON "${OpenMW_SOURCE_DIR}\\\\files\\\\openmw.bmp")
+    SET(CPACK_PACKAGE_ICON "${OpenMW_SOURCE_DIR}\\\\files\\\\openmw.bmp")
 
     SET(VCREDIST32 "${OpenMW_BINARY_DIR}/vcredist_x86.exe")
     if(EXISTS ${VCREDIST32})

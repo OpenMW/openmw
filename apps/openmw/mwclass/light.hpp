@@ -12,9 +12,9 @@ namespace MWClass
              virtual void insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const;
             ///< Add reference into a cell for rendering
 
-            virtual void insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics, MWWorld::Environment& environment) const;
+            virtual void insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics) const;
 
-            virtual void enable (const MWWorld::Ptr& ptr, MWWorld::Environment& environment) const;
+            virtual void enable (const MWWorld::Ptr& ptr) const;
             ///< Enable reference; only does the non-rendering part
             /// \attention This is not the same as the script instruction with the same name. References
             /// should only be enabled while in an active cell.
@@ -24,7 +24,7 @@ namespace MWClass
             /// can return an empty string.
 
             virtual boost::shared_ptr<MWWorld::Action> activate (const MWWorld::Ptr& ptr,
-                const MWWorld::Ptr& actor, const MWWorld::Environment& environment) const;
+                const MWWorld::Ptr& actor) const;
             ///< Generate action for activation
 
             virtual std::string getScript (const MWWorld::Ptr& ptr) const;
@@ -39,10 +39,10 @@ namespace MWClass
 
             static void registerSelf();
 
-            virtual std::string getUpSoundId (const MWWorld::Ptr& ptr, const MWWorld::Environment& environment) const;
+            virtual std::string getUpSoundId (const MWWorld::Ptr& ptr) const;
             ///< Return the pick up sound Id
 
-            virtual std::string getDownSoundId (const MWWorld::Ptr& ptr, const MWWorld::Environment& environment) const;
+            virtual std::string getDownSoundId (const MWWorld::Ptr& ptr) const;
             ///< Return the put down sound Id
     };
 }

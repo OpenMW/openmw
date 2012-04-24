@@ -10,7 +10,8 @@
 #include <components/compiler/extensions.hpp>
 #include <components/files/collections.hpp>
 
-#include "mwworld/environment.hpp"
+#include "mwbase/environment.hpp"
+
 #include "mwworld/ptr.hpp"
 
 namespace Compiler
@@ -78,7 +79,7 @@ namespace OMW
             std::string mFocusName;
             std::map<std::string,std::string> mFallbackMap;
 
-            MWWorld::Environment mEnvironment;
+            MWBase::Environment mEnvironment;
             Compiler::Extensions mExtensions;
             Compiler::Context *mScriptContext;
 

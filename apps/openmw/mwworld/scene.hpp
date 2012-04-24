@@ -46,7 +46,6 @@ namespace MWRender
 
 namespace MWWorld
 {
-    class Environment;
     class Player;
 
     class Scene
@@ -62,7 +61,6 @@ namespace MWWorld
             Ptr::CellStore* mCurrentCell; // the cell, the player is in
             CellStoreCollection mActiveCells;
             bool mCellChanged;
-            Environment& mEnvironment;
             World *mWorld;
             PhysicsSystem *mPhysics;
             MWRender::RenderingManager& mRendering;
@@ -73,7 +71,7 @@ namespace MWWorld
 
         public:
 
-            Scene (Environment& environment, World *world, MWRender::RenderingManager& rendering, PhysicsSystem *physics);
+            Scene (World *world, MWRender::RenderingManager& rendering, PhysicsSystem *physics);
 
             ~Scene();
 
@@ -100,7 +98,7 @@ namespace MWWorld
 
             void markCellAsUnchanged();
 
-            void insertCell(ESMS::CellStore<MWWorld::RefData> &cell, MWWorld::Environment& environment);
+            void insertCell(ESMS::CellStore<MWWorld::RefData> &cell);
 
             void update (float duration);
     };
