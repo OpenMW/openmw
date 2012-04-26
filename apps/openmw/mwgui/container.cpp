@@ -43,7 +43,7 @@ ContainerWindow::ContainerWindow(WindowManager& parWindowManager,MWWorld::Enviro
 
     setText("CloseButton","Close");
     setText("TakeButton","Take All");
-    mContainerWidget->eventMouseItemActivate += MyGUI::newDelegate(this,&ContainerWindow::onSelectedItem);
+    //mContainerWidget->eventMouseItemActivate += MyGUI::newDelegate(this,&ContainerWindow::onSelectedItem);
 }
 
 ContainerWindow::ContainerWindow(WindowManager& parWindowManager,MWWorld::Environment& environment,std::string guiFile)
@@ -61,7 +61,7 @@ ContainerWindow::ContainerWindow(WindowManager& parWindowManager,MWWorld::Enviro
 
     //setText("CloseButton","Close");
     //setText("TakeButton","Take All");
-    mContainerWidget->eventMouseItemActivate += MyGUI::newDelegate(this,&ContainerWindow::onSelectedItem);
+    //mContainerWidget->eventMouseItemActivate += MyGUI::newDelegate(this,&ContainerWindow::onSelectedItem);
 }
 ContainerWindow::~ContainerWindow()
 {
@@ -128,8 +128,9 @@ void ContainerWindow::open(MWWorld::Ptr& container)
         count++;
 
         MyGUI::ImageBox* image = mContainerWidget->createWidget<MyGUI::ImageBox>("ImageBox", MyGUI::IntCoord(x, y, 32, 32), MyGUI::Align::Default);
-        MyGUI::TextBox* text = mContainerWidget->createWidget<MyGUI::TextBox>("SandBrightText", MyGUI::IntCoord(x, y, 18, 18), MyGUI::Align::Default, std::string("Label"));
-
+        MyGUI::TextBox* text = image->createWidget<MyGUI::TextBox>("SandBrightText", MyGUI::IntCoord(x, y, 18, 18), MyGUI::Align::Default, std::string("Label"));
+        image->eventMouseButtonClick += MyGUI::newDelegate(this,&ContainerWindow::onSelectedItem);
+        image->eventMouseMove += MyGUI::newDelegate(this,&ContainerWindow::onMouseMove);
         x += 36;
         if(count % 20 == 0)
         {
@@ -141,7 +142,7 @@ void ContainerWindow::open(MWWorld::Ptr& container)
         if(iter->getRefData().getCount() > 1)
             text->setCaption(boost::lexical_cast<std::string>(iter->getRefData().getCount()));
 
-        mContainerWidgets.push_back(image);
+        //mContainerWidgets.push_back(image);
 
         int pos = path.rfind(".");
         path.erase(pos);
@@ -168,7 +169,19 @@ void ContainerWindow::onByeClicked(MyGUI::Widget* _sender)
     setVisible(false);
 }
 
-void ContainerWindow::onSelectedItem(MyGUI::ItemBox* _sender, size_t _index)
+void ContainerWindow::onSelectedItem(MyGUI::Widget* _sender)
 {
+    _sender->detachFromWidget();
+    _sender->attachToWidget(mContainerWidget->getParent()->getParent());
+    std::cout << mContainerWidget->getParent()->getParent()->getName();
+    _sender->setUserString("drag","on");
     std::cout << "selected!";
+}
+
+void ContainerWindow::onMouseMove(MyGUI::Widget* _sender, int _left, int _top)
+{
+    if(_sender->getUserString("drag") == "on")
+    {
+        _sender->setPosition(_left,_top);
+    }
 }
