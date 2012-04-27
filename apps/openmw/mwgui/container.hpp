@@ -35,8 +35,9 @@ namespace MWGui
     class ContainerWindow : public WindowBase
     {
         public:
-            ContainerWindow(WindowManager& parWindowManager,MWWorld::Environment& environment);
-            ContainerWindow(WindowManager& parWindowManager,MWWorld::Environment& environment,std::string guiFile);
+            ContainerWindow(WindowManager& parWindowManager,MWWorld::Environment& environment,MyGUI::Widget* dragAndDropWidget);
+            ContainerWindow(WindowManager& parWindowManager,MWWorld::Environment& environment,MyGUI::Widget* dragAndDropWidget,
+                std::string guiFile);
 
 
             void open(MWWorld::Ptr& container);
@@ -52,7 +53,9 @@ namespace MWGui
 
         MyGUI::ButtonPtr takeButton;
         MyGUI::ButtonPtr closeButton;
-
+        MyGUI::Widget* mDragAndDropWidget;
+        bool mIsOnDragAndDrop;
+        MyGUI::Widget* mDraggedWidget;
 
         void onByeClicked(MyGUI::Widget* _sender);
         void onSelectedItem(MyGUI::Widget* _sender);

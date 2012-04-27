@@ -24,7 +24,7 @@ namespace MWGui
     class InventoryWindow : public MWGui::ContainerWindow
     {
         public:
-            InventoryWindow(WindowManager& parWindowManager,MWWorld::Environment& environment);
+            InventoryWindow(WindowManager& parWindowManager,MWWorld::Environment& environment,MyGUI::Widget* dragAndDropWidget);
 
             void openInventory();
     };

@@ -65,7 +65,7 @@ WindowManager::WindowManager(MWWorld::Environment& environment,
     // Set up the GUI system
     mGuiManager = new OEngine::GUI::MyGUIManager(mOgre->getWindow(), mOgre->getScene(), false, logpath);
     gui = mGuiManager->getGui();
-
+    
     //Register own widgets with MyGUI
     MyGUI::FactoryManager::getInstance().registerFactory<DialogueHistory>("Widget");
 
@@ -73,6 +73,9 @@ WindowManager::WindowManager(MWWorld::Environment& environment,
     assert(gui);
     int w = MyGUI::RenderManager::getInstance().getViewSize().width;
     int h = MyGUI::RenderManager::getInstance().getViewSize().height;
+
+    MyGUI::Widget* dragAndDropWidget = gui->createWidgetT("Widget","",0,0,w,h,MyGUI::Align::Default,"DragAndDrop","DragAndDropWidget");
+    dragAndDropWidget->setVisible(false);
 
     hud = new HUD(w,h, showFPSLevel);
     menu = new MainMenu(w,h);
@@ -82,8 +85,8 @@ WindowManager::WindowManager(MWWorld::Environment& environment,
     mJournal = new JournalWindow(*this);
     mMessageBoxManager = new MessageBoxManager(this);
     dialogueWindow = new DialogueWindow(*this,environment);
-    containerWindow = new ContainerWindow(*this,environment);
-    mInventoryWindow = new InventoryWindow(*this,environment);
+    containerWindow = new ContainerWindow(*this,environment,dragAndDropWidget);
+    mInventoryWindow = new InventoryWindow(*this,environment,dragAndDropWidget);
 
     // The HUD is always on
     hud->setVisible(true);
@@ -422,6 +425,8 @@ void WindowManager::onDialogueWindowBye()
 void WindowManager::onFrame (float frameDuration)
 {
     mMessageBoxManager->onFrame(frameDuration);
+    mInventoryWindow->Update();
+    containerWindow->Update();
 }
 
 const ESMS::ESMStore& WindowManager::getStore() const

@@ -17,15 +17,17 @@
 #include "../mwworld/containerstore.hpp"
 #include <boost/lexical_cast.hpp>
 #include "../mwworld/class.hpp"
+#include "../mwinput/inputmanager.hpp"
 
 
 using namespace MWGui;
 using namespace Widgets;
 
 
-ContainerWindow::ContainerWindow(WindowManager& parWindowManager,MWWorld::Environment& environment)
+ContainerWindow::ContainerWindow(WindowManager& parWindowManager,MWWorld::Environment& environment,MyGUI::Widget* dragAndDropWidget)
     : WindowBase("openmw_container_window_layout.xml", parWindowManager),
-    mEnvironment(environment)
+    mEnvironment(environment),
+    mDragAndDropWidget(dragAndDropWidget)
 {
     setText("_Main", "Name of Container");
 
@@ -43,17 +45,24 @@ ContainerWindow::ContainerWindow(WindowManager& parWindowManager,MWWorld::Enviro
 
     setText("CloseButton","Close");
     setText("TakeButton","Take All");
+
+    mIsOnDragAndDrop = false;
+    mDraggedWidget = 0;
     //mContainerWidget->eventMouseItemActivate += MyGUI::newDelegate(this,&ContainerWindow::onSelectedItem);
 }
 
-ContainerWindow::ContainerWindow(WindowManager& parWindowManager,MWWorld::Environment& environment,std::string guiFile)
+ContainerWindow::ContainerWindow(WindowManager& parWindowManager,MWWorld::Environment& environment,MyGUI::Widget* dragAndDropWidget,std::string guiFile)
     : WindowBase(guiFile, parWindowManager),
-    mEnvironment(environment)
+    mEnvironment(environment),
+    mDragAndDropWidget(dragAndDropWidget)
 {
     setText("_Main", "Name of Container");
     //center();
     adjustWindowCaption();
     getWidget(mContainerWidget, "Items");
+
+    mIsOnDragAndDrop = false;
+    mDraggedWidget = 0;
     //getWidget(takeButton, "TakeButton");
     //getWidget(closeButton, "CloseButton");
 
@@ -130,7 +139,7 @@ void ContainerWindow::open(MWWorld::Ptr& container)
         MyGUI::ImageBox* image = mContainerWidget->createWidget<MyGUI::ImageBox>("ImageBox", MyGUI::IntCoord(x, y, 32, 32), MyGUI::Align::Default);
         MyGUI::TextBox* text = image->createWidget<MyGUI::TextBox>("SandBrightText", MyGUI::IntCoord(x, y, 18, 18), MyGUI::Align::Default, std::string("Label"));
         image->eventMouseButtonClick += MyGUI::newDelegate(this,&ContainerWindow::onSelectedItem);
-        image->eventMouseMove += MyGUI::newDelegate(this,&ContainerWindow::onMouseMove);
+        //image->eventMouseMove += MyGUI::newDelegate(this,&ContainerWindow::onMouseMove);
         x += 36;
         if(count % 20 == 0)
         {
@@ -159,7 +168,12 @@ void ContainerWindow::open(MWWorld::Ptr& container)
 
 void ContainerWindow::Update()
 {
-
+    if(mIsOnDragAndDrop)
+    {
+        if(mDraggedWidget)
+        mDraggedWidget->setPosition(MyGUI::InputManager::getInstance().getMousePosition());
+        else mIsOnDragAndDrop = false; //If this happens, there is a bug.
+    }
 }
 
 void ContainerWindow::onByeClicked(MyGUI::Widget* _sender)
@@ -171,17 +185,20 @@ void ContainerWindow::onByeClicked(MyGUI::Widget* _sender)
 
 void ContainerWindow::onSelectedItem(MyGUI::Widget* _sender)
 {
+    mIsOnDragAndDrop = true;
     _sender->detachFromWidget();
-    _sender->attachToWidget(mContainerWidget->getParent()->getParent());
-    std::cout << mContainerWidget->getParent()->getParent()->getName();
+    _sender->attachToWidget(mDragAndDropWidget);
+    //std::cout << mContainerWidget->getParent()->getParent()->getName();
     _sender->setUserString("drag","on");
+    mDraggedWidget = _sender;
     std::cout << "selected!";
 }
 
 void ContainerWindow::onMouseMove(MyGUI::Widget* _sender, int _left, int _top)
 {
-    if(_sender->getUserString("drag") == "on")
+    /*if(_sender->getUserString("drag") == "on")
     {
         _sender->setPosition(_left,_top);
-    }
+        
+    }*/
 }
