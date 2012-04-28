@@ -510,13 +510,11 @@ Shadows* RenderingManager::getShadows()
 
 void RenderingManager::switchToInterior()
 {
-    mObjects.setInterior(true);
     mRendering.getScene()->setCameraRelativeRendering(false);
 }
 
 void RenderingManager::switchToExterior()
 {
-    mObjects.setInterior(false);
     mRendering.getScene()->setCameraRelativeRendering(true);
 }
 
