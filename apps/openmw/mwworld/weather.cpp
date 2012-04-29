@@ -522,7 +522,6 @@ void WeatherManager::update(float duration)
                 // re-scale to 100 percent
                 const float total = clear+cloudy+foggy+overcast+rain+thunder+ash+blight;//+snow+blizzard;
 
-                srand(time(NULL));
                 float random = ((rand()%100)/100.f) * total;
 
                 //if (random >= snow+blight+ash+thunder+rain+overcast+foggy+cloudy+clear)

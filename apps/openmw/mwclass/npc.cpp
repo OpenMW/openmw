@@ -299,7 +299,6 @@ namespace MWClass
     void Npc::registerSelf()
     {
         boost::shared_ptr<Class> instance (new Npc);
-        std::cout << "class npc:" << typeid (ESM::NPC).name();
         registerClass (typeid (ESM::NPC).name(), instance);
     }
 

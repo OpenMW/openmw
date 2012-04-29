@@ -140,8 +140,7 @@ namespace MWClass
             case ESM::Armor::Boots: typeGmst = "iBootsWeight"; break;
             case ESM::Armor::LGauntlet:
             case ESM::Armor::RGauntlet: typeGmst = "iGauntletWeight"; break;
-/// \todo how to determine if shield light, medium or heavy?
-//            case ESM::Armor::Shield:
+            case ESM::Armor::Shield: typeGmst = "iShieldWeight"; break;
             case ESM::Armor::LBracer:
             case ESM::Armor::RBracer: typeGmst = "iGauntletWeight"; break;
         }

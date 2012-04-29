@@ -17,7 +17,7 @@ struct Light
     {
         Dynamic = 0x001,
         Carry = 0x002, // Can be carried
-        Negative = 0x004, // Negative light?
+        Negative = 0x004, // Negative light - i.e. darkness
         Flicker = 0x008,
         Fire = 0x010,
         OffDefault = 0x020, // Off by default
