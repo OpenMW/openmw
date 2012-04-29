@@ -222,7 +222,7 @@ void MWSpell::setSpellId(const std::string &spellId)
     updateWidgets();
 }
 
-void MWSpell::createEffectWidgets(std::vector<MyGUI::WidgetPtr> &effects, MyGUI::WidgetPtr creator, MyGUI::IntCoord &coord, const int category)
+void MWSpell::createEffectWidgets(std::vector<MyGUI::WidgetPtr> &effects, MyGUI::WidgetPtr creator, MyGUI::IntCoord &coord, int flags)
 {
     const ESMS::ESMStore &store = mWindowManager->getStore();
     const ESM::Spell *spell = store.spells.search(id);
@@ -234,7 +234,7 @@ void MWSpell::createEffectWidgets(std::vector<MyGUI::WidgetPtr> &effects, MyGUI:
     {
         effect = creator->createWidget<MWSpellEffect>("MW_EffectImage", coord, MyGUI::Align::Default);
         effect->setWindowManager(mWindowManager);
-        effect->setConstant(category == 0);
+        effect->setFlags(flags);
         effect->setSpellEffect(*it);
         effects.push_back(effect);
         coord.top += effect->getHeight();
@@ -270,32 +270,29 @@ MWSpell::~MWSpell()
 
 MWEffectList::MWEffectList()
     : mWindowManager(nullptr)
+    , mEffectList(0)
 {
 }
 
-void MWEffectList::setEnchantmentId(const std::string &enchantId)
+void MWEffectList::setEffectList(const ESM::EffectList* list)
 {
-    id = enchantId;
+    mEffectList = list;
     updateWidgets();
 }
 
-void MWEffectList::createEffectWidgets(std::vector<MyGUI::WidgetPtr> &effects, MyGUI::WidgetPtr creator, MyGUI::IntCoord &coord, bool center, bool constant)
+void MWEffectList::createEffectWidgets(std::vector<MyGUI::WidgetPtr> &effects, MyGUI::WidgetPtr creator, MyGUI::IntCoord &coord, bool center, int flags)
 {
-    const ESMS::ESMStore &store = mWindowManager->getStore();
-    const ESM::Enchantment *enchant = store.enchants.search(id);
-    MYGUI_ASSERT(enchant, "enchantment with id '" << id << "' not found");
-
     // We don't know the width of all the elements beforehand, so we do it in
     // 2 steps: first, create all widgets and check their width
     MWSpellEffectPtr effect = nullptr;
-    std::vector<ESM::ENAMstruct>::const_iterator end = enchant->effects.list.end();
+    std::vector<ESM::ENAMstruct>::const_iterator end = mEffectList->list.end();
     int maxwidth = coord.width;
-    for (std::vector<ESM::ENAMstruct>::const_iterator it = enchant->effects.list.begin(); it != end; ++it)
+    for (std::vector<ESM::ENAMstruct>::const_iterator it = mEffectList->list.begin(); it != end; ++it)
     {
         effect = creator->createWidget<MWSpellEffect>("MW_EffectImage", coord, MyGUI::Align::Default);
         effect->setWindowManager(mWindowManager);
+        effect->setFlags(flags);
         effect->setSpellEffect(*it);
-        effect->setConstant(constant);
         effects.push_back(effect);
 
         if (effect->getRequestedWidth() > maxwidth)
@@ -344,7 +341,7 @@ MWSpellEffect::MWSpellEffect()
     , imageWidget(nullptr)
     , textWidget(nullptr)
     , mRequestedWidth(0)
-    , mIsConstant(0)
+    , mFlags(0)
 {
 }
 
@@ -359,6 +356,18 @@ void MWSpellEffect::updateWidgets()
     if (!mWindowManager)
         return;
 
+    // lists effects that have no magnitude (e.g. invisiblity)
+    /// \todo this list is probably incomplete
+    std::vector<std::string> effectsWithoutMagnitude;
+    effectsWithoutMagnitude.push_back("sEffectInvisibility");
+    effectsWithoutMagnitude.push_back("sEffectStuntedMagicka");
+    effectsWithoutMagnitude.push_back("sEffectParalyze");
+
+    // lists effects that have no duration (e.g. open lock)
+    /// \todo this list is probably incomplete
+    std::vector<std::string> effectsWithoutDuration;
+    effectsWithoutDuration.push_back("sEffectOpen");
+
     const ESMS::ESMStore &store = mWindowManager->getStore();
     const ESM::MagicEffect *magicEffect = store.magicEffects.search(effect.effectID);
     if (textWidget)
@@ -371,7 +380,8 @@ void MWSpellEffect::updateWidgets()
             std::string sec =  " " + mWindowManager->getGameSettingString("ssecond", "");
             std::string secs =  " " + mWindowManager->getGameSettingString("sseconds", "");
 
-            std::string spellLine = effectIDToString(effect.effectID);
+            std::string effectIDStr = effectIDToString(effect.effectID);
+            std::string spellLine = mWindowManager->getGameSettingString(effectIDStr, "");
             if (effect.skill >= 0 && effect.skill < ESM::Skill::Length)
             {
                 spellLine += " " + mWindowManager->getGameSettingString(ESM::Skill::sSkillNameIds[effect.skill], "");
@@ -390,7 +400,9 @@ void MWSpellEffect::updateWidgets()
                 };
                 spellLine += " " + mWindowManager->getGameSettingString(attributes[effect.attribute], "");
             }
-            if (effect.magnMin >= 0 || effect.magnMax >= 0)
+
+            bool hasMagnitude = (std::find(effectsWithoutMagnitude.begin(), effectsWithoutMagnitude.end(), effectIDStr) == effectsWithoutMagnitude.end());
+            if ((effect.magnMin >= 0 || effect.magnMax >= 0) && hasMagnitude)
             {
                 if (effect.magnMin == effect.magnMax)
                     spellLine += " " + boost::lexical_cast<std::string>(effect.magnMin) + " " + ((effect.magnMin == 1) ? pt : pts);
@@ -401,20 +413,25 @@ void MWSpellEffect::updateWidgets()
             }
 
             // constant effects have no duration and no target
-            if (!mIsConstant)
+            if (!(mFlags & MWEffectList::EF_Constant))
             {
-                if (effect.duration >= 0)
+                bool hasDuration = (std::find(effectsWithoutDuration.begin(), effectsWithoutDuration.end(), effectIDStr) == effectsWithoutDuration.end());
+                if (effect.duration >= 0 && hasDuration)
                 {
                     spellLine += " " + mWindowManager->getGameSettingString("sfor", "") + " " + boost::lexical_cast<std::string>(effect.duration) + ((effect.duration == 1) ? sec : secs);
                 }
 
-                std::string on = mWindowManager->getGameSettingString("sonword", "");
-                if (effect.range == ESM::RT_Self)
-                    spellLine += " " + on + " " + mWindowManager->getGameSettingString("sRangeSelf", "");
-                else if (effect.range == ESM::RT_Touch)
-                    spellLine += " " + on + " " + mWindowManager->getGameSettingString("sRangeTouch", "");
-                else if (effect.range == ESM::RT_Target)
-                    spellLine += " " + on + " " + mWindowManager->getGameSettingString("sRangeTarget", "");
+                // potions have no target
+                if (!(mFlags & MWEffectList::EF_Potion))
+                {
+                    std::string on = mWindowManager->getGameSettingString("sonword", "");
+                    if (effect.range == ESM::RT_Self)
+                        spellLine += " " + on + " " + mWindowManager->getGameSettingString("sRangeSelf", "");
+                    else if (effect.range == ESM::RT_Touch)
+                        spellLine += " " + on + " " + mWindowManager->getGameSettingString("sRangeTouch", "");
+                    else if (effect.range == ESM::RT_Target)
+                        spellLine += " " + on + " " + mWindowManager->getGameSettingString("sRangeTarget", "");
+                }
             }
 
             static_cast<MyGUI::TextBox*>(textWidget)->setCaption(spellLine);
@@ -574,11 +591,8 @@ std::string MWSpellEffect::effectIDToString(const short effectID)
     names[30] ="sEffectWeaknesstoShock";
 
     assert(names.find(effectID) != names.end() && "Unimplemented effect type");
-    std::string res = mWindowManager->getGameSettingString(names[effectID], "");
-    if (res == "")
-        std::cout << "Warning: Unknown effect name " << names[effectID] << std::endl;
 
-    return res;
+    return names[effectID];
 }
 
 MWSpellEffect::~MWSpellEffect()

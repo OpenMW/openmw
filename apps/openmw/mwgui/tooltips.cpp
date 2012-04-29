@@ -225,6 +225,31 @@ IntSize ToolTips::createToolTip(const ToolTipInfo& info)
     IntSize totalSize = IntSize( std::max(textSize.width, captionSize.width + ((image != "") ? imageCaptionHPadding : 0)),
         ((text != "") ? textSize.height + imageCaptionVPadding : 0) + captionHeight );
 
+    if (info.effects != 0)
+    {
+        Widget* effectArea = mDynamicToolTipBox->createWidget<Widget>("",
+            IntCoord(0, totalSize.height, 300, 300-totalSize.height),
+            Align::Stretch, "ToolTipEffectArea");
+
+        IntCoord coord(0, 6, totalSize.width, 24);
+
+        /**
+         * \todo
+         * the various potion effects should appear in the tooltip depending if the player 
+         * has enough skill in alchemy to know about the effects of this potion.
+         */
+
+        Widgets::MWEffectListPtr effectsWidget = effectArea->createWidget<Widgets::MWEffectList>
+            ("MW_StatName", coord, Align::Default, "ToolTipEffectsWidget");
+        effectsWidget->setWindowManager(mWindowManager);
+        effectsWidget->setEffectList(info.effects);
+
+        std::vector<MyGUI::WidgetPtr> effectItems;
+        effectsWidget->createEffectWidgets(effectItems, effectArea, coord, true, Widgets::MWEffectList::EF_Potion);
+        totalSize.height += coord.top-6;
+        totalSize.width = std::max(totalSize.width, coord.width);
+    }
+
     if (info.enchant != "")
     {
         Widget* enchantArea = mDynamicToolTipBox->createWidget<Widget>("",
@@ -236,10 +261,11 @@ IntSize ToolTips::createToolTip(const ToolTipInfo& info)
         Widgets::MWEffectListPtr enchantWidget = enchantArea->createWidget<Widgets::MWEffectList>
             ("MW_StatName", coord, Align::Default, "ToolTipEnchantWidget");
         enchantWidget->setWindowManager(mWindowManager);
-        enchantWidget->setEnchantmentId(info.enchant);
+        enchantWidget->setEffectList(&enchant->effects);
 
         std::vector<MyGUI::WidgetPtr> enchantEffectItems;
-        enchantWidget->createEffectWidgets(enchantEffectItems, enchantArea, coord, true, (enchant->data.type == ESM::Enchantment::ConstantEffect));
+        int flag = (enchant->data.type == ESM::Enchantment::ConstantEffect) ? Widgets::MWEffectList::EF_Constant : 0;
+        enchantWidget->createEffectWidgets(enchantEffectItems, enchantArea, coord, true, flag);
         totalSize.height += coord.top-6;
         totalSize.width = std::max(totalSize.width, coord.width);
 

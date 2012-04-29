@@ -153,19 +153,23 @@ namespace MWGui
 
             typedef MWMechanics::Stat<int> EnchantmentValue;
 
+            enum EffectFlags
+            {
+                EF_Potion = 0x01, // potions have no target (target is always the player) 
+                EF_Constant = 0x02 // constant effect means that duration will not be displayed
+            };
+
             void setWindowManager(WindowManager* parWindowManager) { mWindowManager = parWindowManager; }
-            void setEnchantmentId(const std::string &enchantId);
+            void setEffectList(const ESM::EffectList* list);
 
             /**
              * @param vector to store the created effect widgets
              * @param parent widget
              * @param coordinates to use, will be expanded if more space is needed
              * @param center the effect widgets horizontally
-             * @param are the effects of this enchantment constant?
+             * @param various flags, see MWEffectList::EffectFlags
              */
-            void createEffectWidgets(std::vector<MyGUI::WidgetPtr> &effects, MyGUI::WidgetPtr creator, MyGUI::IntCoord &coord, bool center, bool constant);
-
-            const std::string &getSpellId() const { return id; }
+            void createEffectWidgets(std::vector<MyGUI::WidgetPtr> &effects, MyGUI::WidgetPtr creator, MyGUI::IntCoord &coord, bool center, int flags);
 
         protected:
             virtual ~MWEffectList();
@@ -176,7 +180,7 @@ namespace MWGui
             void updateWidgets();
 
             WindowManager* mWindowManager;
-            std::string id;
+            const ESM::EffectList* mEffectList;
         };
         typedef MWEffectList* MWEffectListPtr;
 
@@ -190,7 +194,7 @@ namespace MWGui
 
             void setWindowManager(WindowManager* parWindowManager) { mWindowManager = parWindowManager; }
             void setSpellEffect(SpellEffectValue value);
-            void setConstant(bool constant) { mIsConstant = constant; }
+            void setFlags(int flags) { mFlags = flags; }
 
             std::string effectIDToString(const short effectID);
 
@@ -209,7 +213,7 @@ namespace MWGui
 
             WindowManager* mWindowManager;
             SpellEffectValue effect;
-            bool mIsConstant; // constant effect
+            int mFlags;
             MyGUI::ImageBox* imageWidget;
             MyGUI::TextBox* textWidget;
             int mRequestedWidth;
