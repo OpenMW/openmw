@@ -50,9 +50,9 @@ DialogueWindow::DialogueWindow(WindowManager& parWindowManager)
 
     //An EditBox cannot receive mouse click events, so we use an
     //invisible widget on top of the editbox to receive them
-    /// \todo scrolling the dialogue history with the mouse wheel doesn't work using this solution
     getWidget(eventbox, "EventBox");
     eventbox->eventMouseButtonClick += MyGUI::newDelegate(this, &DialogueWindow::onHistoryClicked);
+    eventbox->eventMouseWheel += MyGUI::newDelegate(this, &DialogueWindow::onMouseWheel);
 
     //Topics list
     getWidget(topicsList, "TopicsList");
@@ -86,6 +86,14 @@ void DialogueWindow::onHistoryClicked(MyGUI::Widget* _sender)
 
         if(color == "#572D21") MWBase::Environment::get().getDialogueManager()->questionAnswered(key);
     }
+}
+
+void DialogueWindow::onMouseWheel(MyGUI::Widget* _sender, int _rel)
+{
+    if (history->getVScrollPosition() - _rel*0.3 < 0)
+        history->setVScrollPosition(0);
+    else
+        history->setVScrollPosition(history->getVScrollPosition() - _rel*0.3);
 }
 
 void DialogueWindow::open()

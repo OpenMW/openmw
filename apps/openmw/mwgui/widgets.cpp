@@ -238,6 +238,7 @@ void MWSpell::createEffectWidgets(std::vector<MyGUI::WidgetPtr> &effects, MyGUI:
         effect->setSpellEffect(*it);
         effects.push_back(effect);
         coord.top += effect->getHeight();
+        coord.width = std::max(coord.width, effect->getRequestedWidth());
     }
 }
 
@@ -278,22 +279,49 @@ void MWEnchantment::setEnchantmentId(const std::string &enchantId)
     updateWidgets();
 }
 
-void MWEnchantment::createEffectWidgets(std::vector<MyGUI::WidgetPtr> &effects, MyGUI::WidgetPtr creator, MyGUI::IntCoord &coord)
+void MWEnchantment::createEffectWidgets(std::vector<MyGUI::WidgetPtr> &effects, MyGUI::WidgetPtr creator, MyGUI::IntCoord &coord, bool center, bool constant)
 {
     const ESMS::ESMStore &store = mWindowManager->getStore();
     const ESM::Enchantment *enchant = store.enchants.search(id);
     MYGUI_ASSERT(enchant, "enchantment with id '" << id << "' not found");
 
+    // We don't know the width of all the elements beforehand, so we do it in
+    // 2 steps: first, create all widgets and check their width
     MWSpellEffectPtr effect = nullptr;
     std::vector<ESM::ENAMstruct>::const_iterator end = enchant->effects.list.end();
+    int maxwidth = coord.width;
     for (std::vector<ESM::ENAMstruct>::const_iterator it = enchant->effects.list.begin(); it != end; ++it)
     {
         effect = creator->createWidget<MWSpellEffect>("MW_EffectImage", coord, MyGUI::Align::Default);
         effect->setWindowManager(mWindowManager);
         effect->setSpellEffect(*it);
+        effect->setConstant(constant);
         effects.push_back(effect);
+
+        if (effect->getRequestedWidth() > maxwidth)
+            maxwidth = effect->getRequestedWidth();
+
         coord.top += effect->getHeight();
     }
+
+    // then adjust the size for all widgets
+    for (std::vector<MyGUI::WidgetPtr>::iterator it = effects.begin(); it != effects.end(); ++it)
+    {
+        effect = static_cast<MWSpellEffectPtr>(*it);
+        bool needcenter = center && (maxwidth > effect->getRequestedWidth());
+        int diff = maxwidth - effect->getRequestedWidth();
+        if (needcenter)
+        {
+            effect->setCoord(diff/2, effect->getCoord().top, effect->getRequestedWidth(), effect->getCoord().height);
+        }
+        else
+        {
+            effect->setCoord(0, effect->getCoord().top, effect->getRequestedWidth(), effect->getCoord().height);
+        }
+    }
+
+    // inform the parent about width
+    coord.width = maxwidth;
 }
 
 void MWEnchantment::updateWidgets()
@@ -315,6 +343,8 @@ MWSpellEffect::MWSpellEffect()
     : mWindowManager(nullptr)
     , imageWidget(nullptr)
     , textWidget(nullptr)
+    , mRequestedWidth(0)
+    , mIsConstant(0)
 {
 }
 
@@ -366,7 +396,7 @@ void MWSpellEffect::updateWidgets()
                     spellLine += " " + boost::lexical_cast<std::string>(effect.magnMin) + " " + ((effect.magnMin == 1) ? pt : pts);
                 else
                 {
-                    spellLine += " " + boost::lexical_cast<std::string>(effect.magnMin) + to + boost::lexical_cast<std::string>(effect.magnMin) + " " + pts;
+                    spellLine += " " + boost::lexical_cast<std::string>(effect.magnMin) + to + boost::lexical_cast<std::string>(effect.magnMax) + " " + pts;
                 }
             }
 
@@ -388,6 +418,7 @@ void MWSpellEffect::updateWidgets()
             }
 
             static_cast<MyGUI::TextBox*>(textWidget)->setCaption(spellLine);
+            mRequestedWidth = textWidget->getTextSize().width + 24;
         }
         else
             static_cast<MyGUI::TextBox*>(textWidget)->setCaption("");

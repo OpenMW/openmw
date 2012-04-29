@@ -14,7 +14,6 @@ namespace MWGui
     {
     public:
         ToolTipInfo() :
-            enchant(0),
             effects(0)
         {
         };
@@ -24,7 +23,7 @@ namespace MWGui
         std::string icon;
 
         // enchantment (for cloth, armor, weapons)
-        const ESM::Enchantment* enchant;
+        std::string enchant;
 
         // effects (for potions, ingredients)
         const ESM::EffectList* effects;

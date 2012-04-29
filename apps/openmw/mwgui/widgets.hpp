@@ -119,6 +119,14 @@ namespace MWGui
 
             void setWindowManager(WindowManager* parWindowManager) { mWindowManager = parWindowManager; }
             void setSpellId(const std::string &id);
+
+            /**
+             * @param vector to store the created effect widgets
+             * @param parent widget
+             * @param coordinates to use, will be expanded if more space is needed
+             * @param spell category, if this is 0, this means the spell effects are permanent and won't display e.g. duration
+             * @param center the effect widgets horizontally
+             */
             void createEffectWidgets(std::vector<MyGUI::WidgetPtr> &effects, MyGUI::WidgetPtr creator, MyGUI::IntCoord &coord, const int category);
 
             const std::string &getSpellId() const { return id; }
@@ -147,7 +155,15 @@ namespace MWGui
 
             void setWindowManager(WindowManager* parWindowManager) { mWindowManager = parWindowManager; }
             void setEnchantmentId(const std::string &enchantId);
-            void createEffectWidgets(std::vector<MyGUI::WidgetPtr> &effects, MyGUI::WidgetPtr creator, MyGUI::IntCoord &coord);
+
+            /**
+             * @param vector to store the created effect widgets
+             * @param parent widget
+             * @param coordinates to use, will be expanded if more space is needed
+             * @param center the effect widgets horizontally
+             * @param are the effects of this enchantment constant?
+             */
+            void createEffectWidgets(std::vector<MyGUI::WidgetPtr> &effects, MyGUI::WidgetPtr creator, MyGUI::IntCoord &coord, bool center, bool constant);
 
             const std::string &getSpellId() const { return id; }
 
@@ -180,6 +196,8 @@ namespace MWGui
 
             const SpellEffectValue &getSpellEffect() const { return effect; }
 
+            int getRequestedWidth() const { return mRequestedWidth; }
+
         protected:
             virtual ~MWSpellEffect();
 
@@ -194,6 +212,7 @@ namespace MWGui
             bool mIsConstant; // constant effect
             MyGUI::ImageBox* imageWidget;
             MyGUI::TextBox* textWidget;
+            int mRequestedWidth;
         };
         typedef MWSpellEffect* MWSpellEffectPtr;
 

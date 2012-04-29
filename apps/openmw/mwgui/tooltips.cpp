@@ -1,7 +1,10 @@
 #include "tooltips.hpp"
-#include "window_manager.hpp"
 
+#include "window_manager.hpp"
+#include "widgets.hpp"
 #include "../mwworld/class.hpp"
+#include "../mwworld/world.hpp"
+#include "../mwbase/environment.hpp"
 
 #include <boost/lexical_cast.hpp>
 
@@ -177,6 +180,21 @@ IntSize ToolTips::createToolTip(const ToolTipInfo& info)
     if (text.size() > 0 && text[0] == '\n')
         text.erase(0, 1);
 
+    const ESM::Enchantment* enchant;
+    const ESMS::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
+    if (info.enchant != "")
+    {
+        enchant = store.enchants.search(info.enchant);
+        if (enchant->data.type == ESM::Enchantment::CastOnce)
+            text += "\n" + store.gameSettings.search("sItemCastOnce")->str;
+        else if (enchant->data.type == ESM::Enchantment::WhenStrikes)
+            text += "\n" + store.gameSettings.search("sItemCastWhenStrikes")->str;
+        else if (enchant->data.type == ESM::Enchantment::WhenUsed)
+            text += "\n" + store.gameSettings.search("sItemCastWhenUsed")->str;
+        else if (enchant->data.type == ESM::Enchantment::ConstantEffect)
+            text += "\n" + store.gameSettings.search("sItemCastConstant")->str;
+    }
+
     // this the maximum width of the tooltip before it starts word-wrapping
     setCoord(0, 0, 300, 300);
 
@@ -207,13 +225,55 @@ IntSize ToolTips::createToolTip(const ToolTipInfo& info)
     IntSize totalSize = IntSize( std::max(textSize.width, captionSize.width + ((image != "") ? imageCaptionHPadding : 0)),
         ((text != "") ? textSize.height + imageCaptionVPadding : 0) + captionHeight );
 
-    if (image != "")
+    if (info.enchant != "")
     {
-        ImageBox* imageWidget = mDynamicToolTipBox->createWidget<ImageBox>("ImageBox",
-            IntCoord((totalSize.width - captionSize.width - imageCaptionHPadding)/2, 0, imageSize, imageSize),
-            Align::Left | Align::Top, "ToolTipImage");
-        imageWidget->setImageTexture(realImage);
-        imageWidget->setPosition (imageWidget->getPosition() + padding);
+        Widget* enchantArea = mDynamicToolTipBox->createWidget<Widget>("",
+            IntCoord(0, totalSize.height, 300, 300-totalSize.height),
+            Align::Stretch, "ToolTipEnchantArea");
+
+        IntCoord coord(0, 6, totalSize.width, 24);
+
+        Widgets::MWEnchantmentPtr enchantWidget = enchantArea->createWidget<Widgets::MWEnchantment>
+            ("MW_StatName", coord, Align::Default, "ToolTipEnchantWidget");
+        enchantWidget->setWindowManager(mWindowManager);
+        enchantWidget->setEnchantmentId(info.enchant);
+
+        std::vector<MyGUI::WidgetPtr> enchantEffectItems;
+        enchantWidget->createEffectWidgets(enchantEffectItems, enchantArea, coord, true, (enchant->data.type == ESM::Enchantment::ConstantEffect));
+        totalSize.height += coord.top-6;
+        totalSize.width = std::max(totalSize.width, coord.width);
+
+        if (enchant->data.type == ESM::Enchantment::WhenStrikes
+            || enchant->data.type == ESM::Enchantment::WhenUsed)
+        {
+            /// \todo store the current enchantment charge somewhere
+            int charge = enchant->data.charge;
+
+            const int chargeWidth = 204;
+
+            TextBox* chargeText = enchantArea->createWidget<TextBox>("SandText", IntCoord(0, 0, 10, 18), Align::Default, "ToolTipEnchantChargeText");
+            chargeText->setCaption(store.gameSettings.search("sCharges")->str);
+            chargeText->setProperty("Static", "true");
+            const int chargeTextWidth = chargeText->getTextSize().width + 5;
+
+            const int chargeAndTextWidth = chargeWidth + chargeTextWidth;
+            chargeText->setCoord((totalSize.width - chargeAndTextWidth)/2, coord.top+6, chargeTextWidth, 18);
+
+            IntCoord chargeCoord;
+            if (totalSize.width < chargeWidth)
+            {
+                totalSize.width = chargeWidth;
+                chargeCoord = IntCoord(0, coord.top+6, chargeWidth, 18);
+            }
+            else
+            {
+                chargeCoord = IntCoord((totalSize.width - chargeAndTextWidth)/2 + chargeTextWidth, coord.top+6, chargeWidth, 18);
+            }
+            Widgets::MWDynamicStatPtr chargeWidget = enchantArea->createWidget<Widgets::MWDynamicStat>
+                ("MW_ChargeBar", chargeCoord, Align::Default, "ToolTipEnchantCharge");
+            chargeWidget->setValue(charge, charge);
+            totalSize.height += 24;
+        }
     }
 
     captionWidget->setCoord( (totalSize.width - captionSize.width)/2 + imageSize,
@@ -223,6 +283,15 @@ IntSize ToolTips::createToolTip(const ToolTipInfo& info)
 
     captionWidget->setPosition (captionWidget->getPosition() + padding);
     textWidget->setPosition (textWidget->getPosition() + IntPoint(0, padding.top)); // only apply vertical padding, the horizontal works automatically due to Align::HCenter
+
+    if (image != "")
+    {
+        ImageBox* imageWidget = mDynamicToolTipBox->createWidget<ImageBox>("ImageBox",
+            IntCoord((totalSize.width - captionSize.width - imageCaptionHPadding)/2, 0, imageSize, imageSize),
+            Align::Left | Align::Top, "ToolTipImage");
+        imageWidget->setImageTexture(realImage);
+        imageWidget->setPosition (imageWidget->getPosition() + padding);
+    }
 
     totalSize += IntSize(padding.left*2, padding.top*2);
 

@@ -328,35 +328,7 @@ namespace MWClass
         text += "\n" + store.gameSettings.search("sWeight")->str + ": " + MWGui::ToolTips::toString(ref->base->data.weight);
         text += MWGui::ToolTips::getValueString(ref->base->data.value, store.gameSettings.search("sValue")->str);
 
-        // this should be going into a custom mygui widget MWEnchantment
-        /*
-        // enchantments
-        if (ref->base->enchant != "")
-        {
-            const ESM::Enchantment* enchant = environment.mWorld->getStore().enchants.search(ref->base->enchant);
-            if (enchant->data.type == ESM::Enchantment::CastOnce)
-                text += "\n" + environment.mWorld->getStore().gameSettings.search("sItemCastOnce")->str;
-            else if (enchant->data.type == ESM::Enchantment::WhenStrikes)
-                text += "\n" + environment.mWorld->getStore().gameSettings.search("sItemCastWhenStrikes")->str;
-            else if (enchant->data.type == ESM::Enchantment::WhenUsed)
-                text += "\n" + environment.mWorld->getStore().gameSettings.search("sItemCastWhenUsed")->str;
-            else if (enchant->data.type == ESM::Enchantment::ConstantEffect)
-                text += "\n" + environment.mWorld->getStore().gameSettings.search("sItemCastConstant")->str;
-
-            if (enchant->data.type == ESM::Enchantment::WhenStrikes
-                || enchant->data.type == ESM::Enchantment::WhenUsed)
-            {
-                /// \todo store the current enchantment charge somewhere
-               // info.currentCharge = enchant->data.charge;
-                //info.totalCharge = enchant->data.charge;
-            }
-        }
-        */
-        if (ref->base->enchant != "")
-        {
-            const ESM::Enchantment* enchant = store.enchants.search(ref->base->enchant);
-            info.enchant = enchant;
-        }
+        info.enchant = ref->base->enchant;
 
         if (MWBase::Environment::get().getWindowManager()->getFullHelp()) {
             text += MWGui::ToolTips::getMiscString(ref->ref.owner, "Owner");

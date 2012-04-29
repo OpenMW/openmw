@@ -242,6 +242,8 @@ namespace MWClass
             text += MWGui::ToolTips::getMiscString(ref->base->script, "Script");
         }
 
+        info.enchant = ref->base->enchant;
+
         info.text = text;
 
         return info;

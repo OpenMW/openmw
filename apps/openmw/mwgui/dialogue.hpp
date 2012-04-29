@@ -45,6 +45,7 @@ namespace MWGui
         void onSelectTopic(MyGUI::ListBox* _sender, size_t _index);
         void onByeClicked(MyGUI::Widget* _sender);
         void onHistoryClicked(MyGUI::Widget* _sender);
+        void onMouseWheel(MyGUI::Widget* _sender, int _rel);
 
     private:
         void updateOptions();
