@@ -194,6 +194,22 @@ namespace MWScript
                 }
         };
 
+        class OpToggleCompositors : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    InterpreterContext& context =
+                        static_cast<InterpreterContext&> (runtime.getContext());
+
+                    bool enabled = MWBase::Environment::get().getWorld()->toggleRenderMode(MWWorld::World::Render_Compositors);
+
+                    context.report (enabled ?
+                        "Compositors -> On" : "Compositors -> Off");
+                }
+        };
+
         const int opcodeXBox = 0x200000c;
         const int opcodeOnActivate = 0x200000d;
         const int opcodeActivate = 0x2000075;
@@ -208,6 +224,7 @@ namespace MWScript
         const int opcodeFadeTo = 0x200013e;
         const int opcodeToggleWater = 0x2000144;
         const int opcodeTogglePathgrid = 0x2000146;
+        const int opcodeToggleCompositors = 0x2000152;
 
         void registerExtensions (Compiler::Extensions& extensions)
         {
@@ -229,6 +246,7 @@ namespace MWScript
             extensions.registerInstruction ("twa", "", opcodeToggleWater);
             extensions.registerInstruction ("togglepathgrid", "", opcodeTogglePathgrid);
             extensions.registerInstruction ("tpg", "", opcodeTogglePathgrid);
+            extensions.registerInstruction ("togglecompositors", "", opcodeToggleCompositors);
         }
 
         void installOpcodes (Interpreter::Interpreter& interpreter)
@@ -247,6 +265,7 @@ namespace MWScript
             interpreter.installSegment5 (opcodeFadeTo, new OpFadeTo);
             interpreter.installSegment5 (opcodeTogglePathgrid, new OpTogglePathgrid);
             interpreter.installSegment5 (opcodeToggleWater, new OpToggleWater);
+            interpreter.installSegment5 (opcodeToggleCompositors, new OpToggleCompositors);
         }
     }
 }

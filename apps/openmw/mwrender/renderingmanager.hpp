@@ -47,6 +47,7 @@ namespace MWRender
     class ShaderHelper;
     class LocalMap;
     class Water;
+    class Compositors;
 
 class RenderingManager: private RenderingInterface {
 
@@ -67,6 +68,7 @@ class RenderingManager: private RenderingInterface {
                                             /// to internal details of the rendering system anymore
 
     SkyManager* getSkyManager();
+    Compositors* getCompositors();
 
     void toggleLight();
     bool toggleRenderMode(int mode);
@@ -157,6 +159,8 @@ class RenderingManager: private RenderingInterface {
 
     bool mSunEnabled;
 
+    bool mCompositorsEnabled;
+
     SkyManager* mSkyManager;
 
     OcclusionQuery* mOcclusionQuery;
@@ -192,6 +196,8 @@ class RenderingManager: private RenderingInterface {
     MWRender::Shadows* mShadows;
 
     MWRender::ShaderHelper* mShaderHelper;
+
+    MWRender::Compositors* mCompositors;
 };
 
 }

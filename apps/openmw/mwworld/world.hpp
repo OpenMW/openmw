@@ -63,7 +63,8 @@ namespace MWWorld
             {
                 Render_CollisionDebug,
                 Render_Wireframe,
-                Render_Pathgrid
+                Render_Pathgrid,
+                Render_Compositors
             };
 
         private:
