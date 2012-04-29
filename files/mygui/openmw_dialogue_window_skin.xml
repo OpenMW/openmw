@@ -8,12 +8,12 @@
     </Skin>
 
     <Skin name="MW_DispositionEdit" size="0 0 50 50">
-        <Property key="FontName" value = "MonoFont" />
-        <Property key="TextAlign" value = "Left Top" />
+        <Property key="FontName" value = "Default" />
+        <Property key="TextAlign" value = "Center" />
         <Property key="Colour" value = "0000FF" />
         <Property key="Static" value="1" />
         <Property key="WordWrap" value = "true" />
-        <Child type="TextBox" skin="MW_DispEdit" offset="0 0 35 10" align = "ALIGN_STRETCH" name = "Client"/>
+        <Child type="TextBox" skin="MW_DispEdit" offset="0 0 0 -4" align = "ALIGN_STRETCH" name = "Client"/>
     </Skin>
     
 </MyGUI>
