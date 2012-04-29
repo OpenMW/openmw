@@ -84,7 +84,7 @@ void DialogueWindow::onHistoryClicked(MyGUI::Widget* _sender)
         UString key = history->getColorTextAt(cursorPosition);
         if(color == "#686EBA") MWBase::Environment::get().getDialogueManager()->keywordSelected(lower_string(key));
 
-        if(color == "#572D21") MWBase::Environment::get().getDialogueManager()->questionAnswered(key);
+        if(color == "#572D21") MWBase::Environment::get().getDialogueManager()->questionAnswered(lower_string(key));
     }
 }
 
