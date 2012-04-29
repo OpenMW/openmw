@@ -159,8 +159,6 @@ class RenderingManager: private RenderingInterface {
 
     bool mSunEnabled;
 
-    bool mCompositorsEnabled;
-
     SkyManager* mSkyManager;
 
     OcclusionQuery* mOcclusionQuery;
