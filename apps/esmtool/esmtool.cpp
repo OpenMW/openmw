@@ -41,6 +41,8 @@ struct Arguments
     string outname;
   
     ESMData data;
+    ESMReader reader;
+    ESMWriter writer;
 };
 
 bool parseOptions (int argc, char** argv, Arguments &info)
@@ -230,7 +232,7 @@ void printRaw(ESMReader &esm)
 
 int load(Arguments& info)
 {
-    ESMReader esm;
+    ESMReader& esm = info.reader;
     esm.setEncoding(info.encoding);
 
     string filename = info.filename;
@@ -806,7 +808,7 @@ int clone(Arguments& info)
 
     cout << endl << "Saving records to: " << info.outname << "..." << endl;
 
-    ESMWriter esm;
+    ESMWriter& esm = info.writer;
     esm.setEncoding(info.encoding);
     esm.setAuthor(info.data.author);
     esm.setDescription(info.data.description);

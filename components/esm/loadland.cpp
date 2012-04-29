@@ -91,13 +91,17 @@ void Land::save(ESMWriter &esm)
 
     esm.writeHNT("DATA", flags);
 
-    /* TODO: Land!
-    if (hasData && !dataLoaded)
+    // TODO: Land!
+    bool wasLoaded = dataLoaded;
+    if (hasData)
         loadData(); // I think it might be a good idea to have 
                     // the data loaded before trying to save it
-                    */
+                    
     if (dataLoaded)
         landData->save(esm);
+
+    if (!wasLoaded)
+        unloadData();
 }
 
 void Land::loadData()
