@@ -1,9 +1,10 @@
 #include "localmap.hpp"
 #include "renderingmanager.hpp"
 
-#include "../mwworld/environment.hpp"
+#include "../mwbase/environment.hpp"
 #include "../mwworld/world.hpp"
 #include "../mwgui/window_manager.hpp"
+#include "renderconst.hpp"
 
 #include <OgreOverlayManager.h>
 #include <OgreMaterialManager.h>
@@ -11,12 +12,11 @@
 using namespace MWRender;
 using namespace Ogre;
 
-LocalMap::LocalMap(OEngine::Render::OgreRenderer* rend, MWRender::RenderingManager* rendering, MWWorld::Environment* env) :
+LocalMap::LocalMap(OEngine::Render::OgreRenderer* rend, MWRender::RenderingManager* rendering) :
     mInterior(false), mCellX(0), mCellY(0)
 {
     mRendering = rend;
     mRenderingManager = rendering;
-    mEnvironment = env;
 
     mCameraPosNode = mRendering->getScene()->getRootSceneNode()->createChildSceneNode();
     mCameraRotNode = mCameraPosNode->createChildSceneNode();
@@ -53,12 +53,12 @@ void LocalMap::saveTexture(const std::string& texname, const std::string& filena
     if (tex.isNull()) return;
     HardwarePixelBufferSharedPtr readbuffer = tex->getBuffer();
     readbuffer->lock(HardwareBuffer::HBL_NORMAL );
-    const PixelBox &readrefpb = readbuffer->getCurrentLock();    
-    uchar *readrefdata = static_cast<uchar*>(readrefpb.data);        
+    const PixelBox &readrefpb = readbuffer->getCurrentLock();
+    uchar *readrefdata = static_cast<uchar*>(readrefpb.data);
 
     Image img;
     img = img.loadDynamicImage (readrefdata, tex->getWidth(),
-        tex->getHeight(), tex->getFormat());    
+        tex->getHeight(), tex->getFormat());
     img.save("./" + filename);
 
     readbuffer->unlock();
@@ -81,7 +81,7 @@ void LocalMap::saveFogOfWar(MWWorld::Ptr::CellStore* cell)
         Vector2 min(mBounds.getMinimum().x, mBounds.getMinimum().z);
         Vector2 max(mBounds.getMaximum().x, mBounds.getMaximum().z);
         Vector2 length = max-min;
-        
+
         // divide into segments
         const int segsX = std::ceil( length.x / sSize );
         const int segsY = std::ceil( length.y / sSize );
@@ -122,7 +122,7 @@ void LocalMap::requestMap(MWWorld::Ptr::CellStore* cell,
 
     Vector2 z(mBounds.getMaximum().y, mBounds.getMinimum().y);
 
-    const Vector2& north = mEnvironment->mWorld->getNorthVector(cell);
+    const Vector2& north = MWBase::Environment::get().getWorld()->getNorthVector(cell);
     Radian angle(std::atan2(-north.x, -north.y));
     mAngle = angle.valueRadians();
     mCameraRotNode->setOrientation(Quaternion(Math::Cos(angle/2.f), 0, Math::Sin(angle/2.f), 0));
@@ -212,7 +212,7 @@ void LocalMap::render(const float x, const float y,
                             texture,
                             ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
                             TEX_TYPE_2D,
-                            xw*sMapResolution/sSize, yw*sMapResolution/sSize, 
+                            xw*sMapResolution/sSize, yw*sMapResolution/sSize,
                             0,
                             PF_R8G8B8,
                             TU_RENDERTARGET);
@@ -223,7 +223,10 @@ void LocalMap::render(const float x, const float y,
             vp->setOverlaysEnabled(false);
             vp->setShadowsEnabled(false);
             vp->setBackgroundColour(ColourValue(0, 0, 0));
-            //vp->setVisibilityMask( ... );
+            vp->setVisibilityMask(RV_Map);
+
+            // use fallback techniques without shadows and without mrt
+            vp->setMaterialScheme("Fallback");
 
             rtt->update();
 
@@ -232,7 +235,7 @@ void LocalMap::render(const float x, const float y,
                             texture + "_fog",
                             ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
                             TEX_TYPE_2D,
-                            xw*sFogOfWarResolution/sSize, yw*sFogOfWarResolution/sSize, 
+                            xw*sFogOfWarResolution/sSize, yw*sFogOfWarResolution/sSize,
                             0,
                             PF_A8R8G8B8,
                             TU_DYNAMIC_WRITE_ONLY_DISCARDABLE);
@@ -272,7 +275,7 @@ void LocalMap::updatePlayer (const Ogre::Vector3& position, const Ogre::Quaterni
             return;
     }
 
-    // retrieve the x,y grid coordinates the player is in 
+    // retrieve the x,y grid coordinates the player is in
     int x,y;
     Vector3 _pos(position.x, 0, position.z);
     Vector2 pos(_pos.x, _pos.z);
@@ -299,7 +302,7 @@ void LocalMap::updatePlayer (const Ogre::Vector3& position, const Ogre::Quaterni
         x = std::ceil((pos.x - min.x)/sSize)-1;
         y = std::ceil((pos.y - min.y)/sSize)-1;
 
-        mEnvironment->mWindowManager->setInteriorMapTexture(x,y);
+        MWBase::Environment::get().getWindowManager()->setInteriorMapTexture(x,y);
     }
 
     // convert from world coordinates to texture UV coordinates
@@ -319,8 +322,8 @@ void LocalMap::updatePlayer (const Ogre::Vector3& position, const Ogre::Quaterni
         texName = mInteriorName + "_" + coordStr(x,y);
     }
 
-    mEnvironment->mWindowManager->setPlayerPos(u, v);
-    mEnvironment->mWindowManager->setPlayerDir(playerdirection.x, -playerdirection.z);
+    MWBase::Environment::get().getWindowManager()->setPlayerPos(u, v);
+    MWBase::Environment::get().getWindowManager()->setPlayerDir(playerdirection.x, -playerdirection.z);
 
     // explore radius (squared)
     const float sqrExploreRadius = 0.01 * sFogOfWarResolution*sFogOfWarResolution;

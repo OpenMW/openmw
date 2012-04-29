@@ -34,7 +34,6 @@ namespace Compiler
 
 namespace MWWorld
 {
-    class Environment;
     class World;
 }
 
@@ -83,7 +82,7 @@ namespace MWGui
     typedef std::vector<Faction> FactionList;
     typedef std::vector<int> SkillList;
 
-    WindowManager(MWWorld::Environment& environment, const Compiler::Extensions& extensions, int fpsLevel, bool newGame, OEngine::Render::OgreRenderer *mOgre, const std::string logpath);
+    WindowManager(const Compiler::Extensions& extensions, int fpsLevel, bool newGame, OEngine::Render::OgreRenderer *mOgre, const std::string logpath);
     virtual ~WindowManager();
 
     void setGuiMode(GuiMode newMode);
@@ -94,8 +93,6 @@ namespace MWGui
      * new dialogs.
      */
     void update();
-
-    MWWorld::Environment& getEnvironment();
 
     void setMode(GuiMode newMode)
     {
@@ -158,9 +155,17 @@ namespace MWGui
     void setPlayerDir(const float x, const float y); ///< set player view direction in map space
 
     void toggleFogOfWar();
-    
+
+    int toggleFps();
+    ///< toggle fps display @return resulting fps level
+
     void setInteriorMapTexture(const int x, const int y);
     ///< set the index of the map texture that should be used (for interiors)
+
+    // sets the visibility of the hud health/magicka/stamina bars
+    void setHMSVisibility(bool visible);
+    // sets the visibility of the hud minimap
+    void setMinimapVisibility(bool visible);
 
     template<typename T>
     void removeDialog(T*& dialog); ///< Casts to OEngine::GUI::Layout and calls removeDialog, then resets pointer to nullptr.
@@ -184,7 +189,6 @@ namespace MWGui
 
   private:
     OEngine::GUI::MyGUIManager *mGuiManager;
-    MWWorld::Environment& environment;
     HUD *hud;
     MapWindow *map;
     MainMenu *menu;

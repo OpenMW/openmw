@@ -4,6 +4,8 @@
 #include <iterator>
 #include <algorithm>
 
+#include "../mwmechanics/npcstats.hpp"
+
 #include "class.hpp"
 
 void MWWorld::InventoryStore::copySlots (const InventoryStore& store)
@@ -24,10 +26,15 @@ void MWWorld::InventoryStore::copySlots (const InventoryStore& store)
     }
 }
 
-MWWorld::InventoryStore::InventoryStore()
+void MWWorld::InventoryStore::initSlots (TSlots& slots)
 {
     for (int i=0; i<Slots; ++i)
-        mSlots.push_back (end());
+        slots.push_back (end());
+}
+
+MWWorld::InventoryStore::InventoryStore()
+{
+    initSlots (mSlots);
 }
 
 MWWorld::InventoryStore::InventoryStore (const InventoryStore& store)
@@ -85,4 +92,79 @@ MWWorld::ContainerStoreIterator MWWorld::InventoryStore::getSlot (int slot)
     }
 
     return mSlots[slot];
+}
+
+void MWWorld::InventoryStore::autoEquip (const MWMechanics::NpcStats& stats)
+{
+    TSlots slots;
+    initSlots (slots);
+
+    for (ContainerStoreIterator iter (begin()); iter!=end(); ++iter)
+    {
+        Ptr test = *iter;
+        int testSkill = MWWorld::Class::get (test).getEquipmentSkill (test);
+
+        std::pair<std::vector<int>, bool> itemsSlots =
+            MWWorld::Class::get (*iter).getEquipmentSlots (*iter);
+
+        for (std::vector<int>::const_iterator iter2 (itemsSlots.first.begin());
+            iter2!=itemsSlots.first.end(); ++iter2)
+        {
+            bool use = false;
+
+            if (slots.at (*iter2)==end())
+                use = true; // slot was empty before -> skill all further checks
+            else
+            {
+                Ptr old = *slots.at (*iter2);
+
+                if (!use)
+                {
+                    // check skill
+                    int oldSkill =
+                        MWWorld::Class::get (old).getEquipmentSkill (old);
+
+                    if (testSkill!=-1 || oldSkill!=-1 || testSkill!=oldSkill)
+                    {
+                        if (stats.mSkill[oldSkill].getModified()>stats.mSkill[testSkill].getModified())
+                            continue; // rejected, because old item better matched the NPC's skills.
+
+                        if (stats.mSkill[oldSkill].getModified()<stats.mSkill[testSkill].getModified())
+                            use = true;
+                    }
+                }
+
+                if (!use)
+                {
+                    // check value
+                    if (MWWorld::Class::get (old).getValue (old)>=
+                        MWWorld::Class::get (test).getValue (test))
+                    {
+                        continue;
+                    }
+
+                    use = true;
+                }
+            }
+
+            /// \todo unstack, if reqquired (itemsSlots.second)
+
+            slots[*iter2] = iter;
+            break;
+        }
+    }
+
+    bool changed = false;
+
+    for (std::size_t i=0; i<slots.size(); ++i)
+        if (slots[i]!=mSlots[i])
+        {
+            changed = true;
+        }
+
+    if (changed)
+    {
+        mSlots.swap (slots);
+        flagAsModified();
+    }
 }

@@ -103,7 +103,7 @@ namespace GUI
       ));
     }
 
-    void setVisible(bool b)
+    virtual void setVisible(bool b)
     {
       mMainWidget->setVisible(b);
     }

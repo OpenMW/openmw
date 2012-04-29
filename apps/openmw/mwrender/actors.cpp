@@ -20,12 +20,12 @@ Actors::~Actors(){
 void Actors::setMwRoot(Ogre::SceneNode* root){
     mMwRoot = root;
 }
-void Actors::insertNPC(const MWWorld::Ptr& ptr){
+void Actors::insertNPC(const MWWorld::Ptr& ptr, MWWorld::InventoryStore& inv){
 
-        insertBegin(ptr, true, true);
-         NpcAnimation* anim = new MWRender::NpcAnimation(ptr, mEnvironment, mRend);
+    insertBegin(ptr, true, true);
+    NpcAnimation* anim = new MWRender::NpcAnimation(ptr, mRend, inv);
 
-        mAllActors[ptr] = anim;
+    mAllActors[ptr] = anim;
 }
 void Actors::insertBegin (const MWWorld::Ptr& ptr, bool enabled, bool static_){
     Ogre::SceneNode* cellnode;
@@ -68,7 +68,7 @@ void Actors::insertBegin (const MWWorld::Ptr& ptr, bool enabled, bool static_){
 void Actors::insertCreature (const MWWorld::Ptr& ptr){
 
     insertBegin(ptr, true, true);
-   CreatureAnimation* anim = new MWRender::CreatureAnimation(ptr, mEnvironment, mRend);
+    CreatureAnimation* anim = new MWRender::CreatureAnimation(ptr, mRend);
     //mAllActors.insert(std::pair<MWWorld::Ptr, Animation*>(ptr,anim));
     delete mAllActors[ptr];
     mAllActors[ptr] = anim;

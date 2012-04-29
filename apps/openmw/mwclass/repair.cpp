@@ -5,9 +5,10 @@
 
 #include <components/esm_store/cell_store.hpp>
 
+#include "../mwbase/environment.hpp"
+
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/actiontake.hpp"
-#include "../mwworld/environment.hpp"
 
 #include "../mwrender/objects.hpp"
 
@@ -31,7 +32,7 @@ namespace MWClass
         }
     }
 
-    void Repair::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics, MWWorld::Environment& environment) const
+    void Repair::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics) const
     {
         ESMS::LiveCellRef<ESM::Repair, MWWorld::RefData> *ref =
             ptr.get<ESM::Repair>();
@@ -54,9 +55,9 @@ namespace MWClass
     }
 
     boost::shared_ptr<MWWorld::Action> Repair::activate (const MWWorld::Ptr& ptr,
-        const MWWorld::Ptr& actor, const MWWorld::Environment& environment) const
+        const MWWorld::Ptr& actor) const
     {
-        environment.mSoundManager->playSound3D (ptr, getUpSoundId(ptr, environment), 1.0, 1.0, MWSound::Play_NoTrack);
+        MWBase::Environment::get().getSoundManager()->playSound3D (ptr, getUpSoundId(ptr), 1.0, 1.0, MWSound::Play_NoTrack);
 
         return boost::shared_ptr<MWWorld::Action> (
             new MWWorld::ActionTake (ptr));
@@ -70,6 +71,14 @@ namespace MWClass
         return ref->base->script;
     }
 
+    int Repair::getValue (const MWWorld::Ptr& ptr) const
+    {
+        ESMS::LiveCellRef<ESM::Repair, MWWorld::RefData> *ref =
+            ptr.get<ESM::Repair>();
+
+        return ref->base->data.value;
+    }
+
     void Repair::registerSelf()
     {
         boost::shared_ptr<Class> instance (new Repair);
@@ -77,12 +86,12 @@ namespace MWClass
         registerClass (typeid (ESM::Repair).name(), instance);
     }
 
-    std::string Repair::getUpSoundId (const MWWorld::Ptr& ptr, const MWWorld::Environment& environment) const
+    std::string Repair::getUpSoundId (const MWWorld::Ptr& ptr) const
     {
         return std::string("Item Repair Up");
     }
 
-    std::string Repair::getDownSoundId (const MWWorld::Ptr& ptr, const MWWorld::Environment& environment) const
+    std::string Repair::getDownSoundId (const MWWorld::Ptr& ptr) const
     {
         return std::string("Item Repair Down");
     }

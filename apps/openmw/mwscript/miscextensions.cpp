@@ -7,6 +7,8 @@
 #include <components/interpreter/runtime.hpp>
 #include <components/interpreter/opcodes.hpp>
 
+#include "../mwbase/environment.hpp"
+
 #include "../mwworld/class.hpp"
 
 #include "interpretercontext.hpp"
@@ -100,7 +102,7 @@ namespace MWScript
                         static_cast<InterpreterContext&> (runtime.getContext());
 
                     bool enabled =
-                        context.getWorld().toggleRenderMode (MWWorld::World::Render_CollisionDebug);
+                        MWBase::Environment::get().getWorld()->toggleRenderMode (MWWorld::World::Render_CollisionDebug);
 
                     context.report (enabled ?
                         "Collision Mesh Rendering -> On" : "Collision Mesh Rendering -> Off");
@@ -117,7 +119,7 @@ namespace MWScript
                         static_cast<InterpreterContext&> (runtime.getContext());
 
                     bool enabled =
-                        context.getWorld().toggleRenderMode (MWWorld::World::Render_Wireframe);
+                        MWBase::Environment::get().getWorld()->toggleRenderMode (MWWorld::World::Render_Wireframe);
 
                     context.report (enabled ?
                         "Wireframe Rendering -> On" : "Wireframe Rendering -> Off");
@@ -133,7 +135,7 @@ namespace MWScript
                     static_cast<InterpreterContext&> (runtime.getContext());
 
                 bool enabled =
-                    context.getWorld().toggleRenderMode (MWWorld::World::Render_Pathgrid);
+                    MWBase::Environment::get().getWorld()->toggleRenderMode (MWWorld::World::Render_Pathgrid);
 
                 context.report (enabled ?
                     "Path Grid rendering -> On" : "Path Grid Rendering -> Off");
@@ -146,13 +148,10 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
-                    InterpreterContext& context =
-                        static_cast<InterpreterContext&> (runtime.getContext());
-
                     Interpreter::Type_Float time = runtime[0].mFloat;
                     runtime.pop();
 
-                    context.getWorld().getFader()->fadeIn(time);
+                    MWBase::Environment::get().getWorld()->getFader()->fadeIn(time);
                 }
         };
 
@@ -162,13 +161,10 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
-                    InterpreterContext& context =
-                        static_cast<InterpreterContext&> (runtime.getContext());
-
                     Interpreter::Type_Float time = runtime[0].mFloat;
                     runtime.pop();
 
-                    context.getWorld().getFader()->fadeOut(time);
+                    MWBase::Environment::get().getWorld()->getFader()->fadeOut(time);
                 }
         };
 
@@ -178,16 +174,13 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
-                    InterpreterContext& context =
-                        static_cast<InterpreterContext&> (runtime.getContext());
-
                     Interpreter::Type_Float alpha = runtime[0].mFloat;
                     runtime.pop();
 
                     Interpreter::Type_Float time = runtime[0].mFloat;
                     runtime.pop();
 
-                    context.getWorld().getFader()->fadeTo(alpha, time);
+                    MWBase::Environment::get().getWorld()->getFader()->fadeTo(alpha, time);
                 }
         };
 
@@ -197,10 +190,7 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
-                    InterpreterContext& context =
-                        static_cast<InterpreterContext&> (runtime.getContext());
-
-                    context.getWorld().toggleWater();
+                    MWBase::Environment::get().getWorld()->toggleWater();
                 }
         };
 

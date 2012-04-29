@@ -15,7 +15,7 @@ include (OpenMWMacros)
 # Version
 
 set (OPENMW_VERSION_MAJOR 0)
-set (OPENMW_VERSION_MINOR 13)
+set (OPENMW_VERSION_MINOR 14)
 set (OPENMW_VERSION_RELEASE 0)
 
 set (OPENMW_VERSION "${OPENMW_VERSION_MAJOR}.${OPENMW_VERSION_MINOR}.${OPENMW_VERSION_RELEASE}")
@@ -26,6 +26,11 @@ configure_file ("${OpenMW_SOURCE_DIR}/Docs/mainpage.hpp.cmake" "${OpenMW_SOURCE_
 
 option(MYGUI_STATIC "Link static build of Mygui into the binaries" FALSE)
 option(OGRE_STATIC "Link static build of Ogre and Ogre Plugins into the binaries" FALSE)
+
+# Apps and tools
+option(BUILD_ESMTOOL "build ESM inspector" ON)
+option(BUILD_LAUNCHER "build Launcher" ON)
+option(BUILD_MWINIIMPORTER "build MWiniImporter" ON)
 
 # Sound source selection
 option(USE_FFMPEG "use ffmpeg for sound" OFF)
@@ -97,6 +102,7 @@ set(OENGINE_OGRE
   ${LIBDIR}/openengine/ogre/renderer.cpp
   ${LIBDIR}/openengine/ogre/mouselook.cpp
   ${LIBDIR}/openengine/ogre/fader.cpp
+  ${LIBDIR}/openengine/ogre/imagerotate.cpp
 )
 set(OENGINE_GUI
   ${LIBDIR}/openengine/gui/events.cpp
@@ -116,6 +122,7 @@ set(OENGINE_BULLET
     ${LIBDIR}/openengine/bullet/physic.hpp
     ${LIBDIR}/openengine/bullet/BulletShapeLoader.cpp
     ${LIBDIR}/openengine/bullet/BulletShapeLoader.h
+
 )
 
 set(OENGINE_ALL ${OENGINE_OGRE} ${OENGINE_GUI} ${OENGINE_BULLET})
@@ -203,16 +210,16 @@ include_directories("."
 
 link_directories(${Boost_LIBRARY_DIRS} ${OGRE_LIB_DIR} ${MYGUI_LIB_DIR})
 
-if(APPLE)
+if (APPLE)
     # List used Ogre plugins
-    SET(USED_OGRE_PLUGINS "RenderSystem_GL"
-                          "Plugin_OctreeSceneManager"
-                          "Plugin_CgProgramManager"
-                          "Plugin_ParticleFX")
-endif(APPLE)
+    SET(USED_OGRE_PLUGINS ${OGRE_RenderSystem_GL_LIBRARY_REL}
+                          ${OGRE_Plugin_OctreeSceneManager_LIBRARY_REL}
+                          ${OGRE_Plugin_CgProgramManager_LIBRARY_REL}
+                          ${OGRE_Plugin_ParticleFX_LIBRARY_REL})
+endif (APPLE)
 
-add_subdirectory( files/)
-add_subdirectory( files/mygui )
+add_subdirectory(files/)
+add_subdirectory(files/mygui)
 
 # Specify build paths
 
@@ -227,6 +234,9 @@ endif (APPLE)
 configure_file(${OpenMW_SOURCE_DIR}/files/settings-default.cfg
     "${OpenMW_BINARY_DIR}/settings-default.cfg")
 
+configure_file(${OpenMW_SOURCE_DIR}/files/transparency-overrides.cfg
+    "${OpenMW_BINARY_DIR}/transparency-overrides.cfg")
+
 configure_file(${OpenMW_SOURCE_DIR}/files/openmw.cfg.local
     "${OpenMW_BINARY_DIR}/openmw.cfg")
 configure_file(${OpenMW_SOURCE_DIR}/files/openmw.cfg
@@ -240,37 +250,42 @@ endif (WIN32)
 if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
     configure_file(${OpenMW_SOURCE_DIR}/files/plugins.cfg.linux
         "${OpenMW_BINARY_DIR}/plugins.cfg")
+
+    configure_file(${OpenMW_SOURCE_DIR}/files/openmw.desktop
+        "${OpenMW_BINARY_DIR}/openmw.desktop")
 endif()
 
 if (APPLE)
+    if (${OGRE_PLUGIN_DIR_REL}})
+        set(OGRE_PLUGINS_REL_FOUND TRUE)
+    endif ()
+
+    if (${OGRE_PLUGIN_DIR_DBG})
+        set(OGRE_PLUGINS_DBG_FOUND TRUE)
+    endif ()
+
+    if (${OGRE_PLUGINS_REL_FOUND})
+        set(OGRE_PLUGIN_DIR ${OGRE_PLUGIN_DIR_REL})
+    else ()
+        set(OGRE_PLUGIN_DIR ${OGRE_PLUGIN_DIR_DBG})
+    endif ()
+
+    set(OGRE_PLUGIN_DIR "${OGRE_PLUGIN_DIR}/")
+
     configure_file(${OpenMW_SOURCE_DIR}/files/plugins.cfg.mac
         "${OpenMW_BINARY_DIR}/plugins.cfg")
+
+    set(OGRE_PLUGIN_DIR_2 ${OGRE_PLUGIN_DIR})
+    set(OGRE_PLUGIN_DIR "")
+    configure_file(${OpenMW_SOURCE_DIR}/files/plugins.cfg.mac
+        "${OpenMW_BINARY_DIR}/plugins.cfg.install")
+    set(OGRE_PLUGIN_DIR ${OGRE_PLUGIN_DIR_2})
 
     configure_file(${OpenMW_SOURCE_DIR}/files/mac/Info.plist
         "${APP_BUNDLE_DIR}/Contents/Info.plist")
 
     configure_file(${OpenMW_SOURCE_DIR}/files/mac/openmw.icns
         "${APP_BUNDLE_DIR}/Contents/Resources/OpenMW.icns" COPYONLY)
-
-    # prepare plugins
-    if (${CMAKE_BUILD_TYPE} MATCHES "Release")
-        set(OPENMW_RELEASE_BUILD 1)
-    endif()
-    if (${CMAKE_BUILD_TYPE} MATCHES "RelWithDebugInfo")
-        set(OPENMW_RELEASE_BUILD 1)
-    endif()
-
-    if (${OPENMW_RELEASE_BUILD})
-        set(OGRE_PLUGIN_DIR ${OGRE_PLUGIN_DIR_REL})
-    else()
-        set(OGRE_PLUGIN_DIR ${OGRE_PLUGIN_DIR_DBG})
-    endif()
-
-    foreach(plugin ${USED_OGRE_PLUGINS})
-        configure_file("${OGRE_PLUGIN_DIR}/${plugin}.dylib"
-                        "${APP_BUNDLE_DIR}/Contents/Plugins/${plugin}.dylib"
-                        COPYONLY)
-    endforeach()
 endif (APPLE)
 
 
@@ -303,11 +318,12 @@ if(DPKG_PROGRAM)
     endif()
 
     #Install icon and desktop file
-    INSTALL(FILES "${OpenMW_SOURCE_DIR}/files/openmw.desktop" DESTINATION "share/applications/" PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ COMPONENT "openmw")
+    INSTALL(FILES "${OpenMW_BINARY_DIR}/openmw.desktop" DESTINATION "share/applications/" PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ COMPONENT "openmw")
     INSTALL(FILES "${OpenMW_SOURCE_DIR}/apps/launcher/resources/images/openmw.png" DESTINATION "share/pixmaps/" PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ COMPONENT "openmw")
 
     #Install global configuration files
     INSTALL(FILES "${OpenMW_BINARY_DIR}/settings-default.cfg" DESTINATION "../etc/openmw/" PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ COMPONENT "openmw")
+    INSTALL(FILES "${OpenMW_BINARY_DIR}/transparency-overrides.cfg" DESTINATION "../etc/openmw/" PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ COMPONENT "openmw")
     INSTALL(FILES "${OpenMW_BINARY_DIR}/openmw.cfg.install" DESTINATION "../etc/openmw/" RENAME "openmw.cfg" PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ COMPONENT "openmw")
     INSTALL(FILES "${OpenMW_BINARY_DIR}/plugins.cfg" DESTINATION "../etc/openmw/" PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ COMPONENT "openmw")
 
@@ -343,10 +359,18 @@ if(DPKG_PROGRAM)
 endif(DPKG_PROGRAM)
 
 if(WIN32)
-    FILE(GLOB files "${OpenMW_BINARY_DIR}/Release/*.*")
-    INSTALL(FILES ${files} DESTINATION ".")
+    FILE(GLOB dll_files "${OpenMW_BINARY_DIR}/Release/*.dll")
+    INSTALL(FILES ${dll_files} DESTINATION ".")
     INSTALL(FILES "${OpenMW_BINARY_DIR}/openmw.cfg.install" DESTINATION "." RENAME "openmw.cfg")
-    INSTALL(FILES "${OpenMW_SOURCE_DIR}/readme.txt" DESTINATION ".")
+    INSTALL(FILES
+        "${OpenMW_BINARY_DIR}/plugins.cfg"
+        "${OpenMW_SOURCE_DIR}/readme.txt"
+        "${OpenMW_BINARY_DIR}/launcher.qss"
+        "${OpenMW_BINARY_DIR}/settings-default.cfg"
+        "${OpenMW_BINARY_DIR}/transparency-overrides.cfg"
+        "${OpenMW_BINARY_DIR}/Release/omwlauncher.exe"
+        "${OpenMW_BINARY_DIR}/Release/openmw.exe"
+        DESTINATION ".")
     INSTALL(DIRECTORY "${OpenMW_BINARY_DIR}/resources" DESTINATION ".")
 
     SET(CPACK_GENERATOR "NSIS")
@@ -356,8 +380,12 @@ if(WIN32)
     SET(CPACK_PACKAGE_VERSION_MAJOR ${OPENMW_VERSION_MAJOR})
     SET(CPACK_PACKAGE_VERSION_MINOR ${OPENMW_VERSION_MINO})
     SET(CPACK_PACKAGE_VERSION_PATCH ${OPENMW_VERSION_RELEASE})
-    SET(CPACK_PACKAGE_EXECUTABLES "openmw;OpenMW;esmtool;Esmtool;omwlauncher;OpenMW Launcher")
-    set(CPACK_NSIS_CREATE_ICONS_EXTRA "CreateShortCut '\$SMPROGRAMS\\\\$STARTMENU_FOLDER\\\\Readme.lnk' '\$INSTDIR\\\\readme.txt'")
+    SET(CPACK_PACKAGE_EXECUTABLES "openmw;OpenMW;omwlauncher;OpenMW Launcher")
+    SET(CPACK_NSIS_CREATE_ICONS_EXTRA "CreateShortCut '\$SMPROGRAMS\\\\$STARTMENU_FOLDER\\\\Readme.lnk' '\$INSTDIR\\\\readme.txt'")
+    SET(CPACK_NSIS_DELETE_ICONS_EXTRA "
+        !insertmacro MUI_STARTMENU_GETFOLDER Application $MUI_TEMP
+        Delete \\\"$SMPROGRAMS\\\\$MUI_TEMP\\\\Readme.lnk\\\"
+        ")
     SET(CPACK_PACKAGE_DESCRIPTION_FILE "${OpenMW_SOURCE_DIR}/readme.txt")
     SET(CPACK_RESOURCE_FILE_LICENSE "${OpenMW_SOURCE_DIR}/GPL3.txt")
     SET(CPACK_NSIS_EXECUTABLES_DIRECTORY ".")
@@ -367,7 +395,7 @@ if(WIN32)
     SET(CPACK_NSIS_INSTALLED_ICON_NAME "omwlauncher.exe")
     SET(CPACK_NSIS_MUI_ICON "${OpenMW_SOURCE_DIR}/apps/launcher/resources/images/openmw.ico")
     SET(CPACK_NSIS_MUI_UNIICON "${OpenMW_SOURCE_DIR}/apps/launcher/resources/images/openmw.ico")
-    # SET(CPACK_PACKAGE_ICON "${OpenMW_SOURCE_DIR}\\\\files\\\\openmw.bmp")
+    SET(CPACK_PACKAGE_ICON "${OpenMW_SOURCE_DIR}\\\\files\\\\openmw.bmp")
 
     SET(VCREDIST32 "${OpenMW_BINARY_DIR}/vcredist_x86.exe")
     if(EXISTS ${VCREDIST32})
@@ -401,17 +429,14 @@ add_subdirectory (components)
 # Apps and tools
 add_subdirectory( apps/openmw )
 
-option(BUILD_ESMTOOL "build ESM inspector" ON)
 if (BUILD_ESMTOOL)
   add_subdirectory( apps/esmtool )
 endif()
 
-option(BUILD_LAUNCHER "build Launcher inspector" ON)
 if (BUILD_LAUNCHER)
    add_subdirectory( apps/launcher )
 endif()
 
-option(BUILD_MWINIIMPORTER "build MWiniImporter inspector" ON)
 if (BUILD_MWINIIMPORTER)
    add_subdirectory( apps/mwiniimporter )
 endif()
@@ -503,9 +528,11 @@ if (APPLE)
     install(DIRECTORY "${APP_BUNDLE_DIR}" USE_SOURCE_PERMISSIONS DESTINATION "${INSTALL_SUBDIR}" COMPONENT Runtime)
     install(DIRECTORY "${OpenMW_BINARY_DIR}/resources" DESTINATION "${INSTALL_SUBDIR}" COMPONENT Runtime)
     install(FILES "${OpenMW_BINARY_DIR}/openmw.cfg.install" RENAME "openmw.cfg" DESTINATION "${INSTALL_SUBDIR}" COMPONENT Runtime)
-
-    install(FILES "${OpenMW_BINARY_DIR}/plugins.cfg" DESTINATION "${INSTALL_SUBDIR}" COMPONENT Runtime)
+    install(FILES "${OpenMW_BINARY_DIR}/plugins.cfg.install" RENAME "plugins.cfg" DESTINATION "${INSTALL_SUBDIR}" COMPONENT Runtime)
     install(FILES "${OpenMW_BINARY_DIR}/launcher.qss" DESTINATION "${INSTALL_SUBDIR}" COMPONENT Runtime)
+
+    install(FILES "${OpenMW_BINARY_DIR}/settings-default.cfg" DESTINATION "${INSTALL_SUBDIR}" COMPONENT Runtime)
+    install(FILES "${OpenMW_BINARY_DIR}/transparency-overrides.cfg" DESTINATION "${INSTALL_SUBDIR}" COMPONENT Runtime)
 
     set(CPACK_GENERATOR "DragNDrop")
     set(CPACK_PACKAGE_VERSION ${OPENMW_VERSION})
@@ -515,22 +542,25 @@ if (APPLE)
 
     set(APPS "\${CMAKE_INSTALL_PREFIX}/${INSTALL_SUBDIR}/${APP_BUNDLE_NAME}")
     set(PLUGINS "")
+    set(ABSOLUTE_PLUGINS "")
 
-    # Scan Plugins dir for *.dylibs
-    set(PLUGIN_SEARCH_ROOT "${APP_BUNDLE_DIR}/Contents/Plugins")
-    file(GLOB_RECURSE ALL_PLUGINS "${PLUGIN_SEARCH_ROOT}/*.dylib")
+    foreach (PLUGIN ${USED_OGRE_PLUGINS})
+        get_filename_component(PLUGIN_ABS ${PLUGIN} REALPATH)
+        set(ABSOLUTE_PLUGINS ${PLUGIN_ABS} ${ABSOLUTE_PLUGINS})
+    endforeach ()
 
     set(PLUGIN_INSTALL_BASE "\${CMAKE_INSTALL_PREFIX}/${INSTALL_SUBDIR}/${APP_BUNDLE_NAME}/Contents/Plugins")
-    foreach(PLUGIN ${ALL_PLUGINS})
-        string(REPLACE "${PLUGIN_SEARCH_ROOT}/" "" PLUGIN_RELATIVE "${PLUGIN}")
+    install(FILES ${ABSOLUTE_PLUGINS} DESTINATION "${INSTALL_SUBDIR}/${APP_BUNDLE_NAME}/Contents/Plugins" COMPONENT Runtime)
+    foreach (PLUGIN ${ABSOLUTE_PLUGINS})
+        get_filename_component(PLUGIN_RELATIVE ${PLUGIN} NAME)
         set(PLUGINS ${PLUGINS} "${PLUGIN_INSTALL_BASE}/${PLUGIN_RELATIVE}")
-    endforeach()
+    endforeach ()
 
     #For now, search unresolved dependencies only in default system paths, so if you put unresolveable (i.e. with @executable_path in id name) lib or framework somewhere else, it would fail
     set(DIRS "")
 
     # Overriding item resolving during installation, it needed if
-    # some library already has be "fixed up", i.e. its id name contains @executable_path,
+    # some library already has been "fixed up", i.e. its id name contains @executable_path,
     # but library is not embedded in bundle. For example, it's Ogre.framework from Ogre SDK.
     # Current implementation of GetPrerequsities/BundleUtilities doesn't handle that case.
     #
@@ -548,17 +578,22 @@ if (APPLE)
                 if (item MATCHES \"Frameworks\") # if it is a framework
                     # get last segment of path
                     get_filename_component(fname \"\${item}\" NAME_WE)
-                    find_library(ri NAMES \${fname} PATHS \${exepath} \${dirs} /Library/Frameworks)
+                    find_library(ri NAMES \${fname} PATHS \${exepath} \${dirs} \${CMAKE_SYSTEM_FRAMEWORK_PATH})
                     if (ri)
-                        message(STATUS \"found \${ri} for \${item}\")
                         string(REGEX REPLACE \"^.*/Frameworks/.*\\\\.framework\" \"\" item_part \${item})
                         set(ri \"\${ri}\${item_part}\")
                         set(\${resolved_item_var} \${ri} PARENT_SCOPE)
                         set(\${resolved_var} 1 PARENT_SCOPE)
-                        set(OPENMW_RESOLVED_ITEMS \${_OPENMW_RESOLVED_ITEMS} \${ri})
                     endif()
                 else()
                     # code path for standard (non-framework) libs (ogre & qt pugins)
+                    get_filename_component(fname \"\${item}\" NAME_WE)
+                    string(REGEX REPLACE \"^lib\" \"\" fname \${fname})
+                    find_library(ri NAMES \${fname} PATHS \${exepath} \${dirs} /usr/lib /usr/local/lib)
+                    if (ri)
+                        set(\${resolved_item_var} \${ri} PARENT_SCOPE)
+                        set(\${resolved_var} 1 PARENT_SCOPE)
+                    endif ()
                 endif()
             endif()
         endfunction(gp_resolve_item_override)
@@ -568,10 +603,5 @@ if (APPLE)
         include(BundleUtilities)
         fixup_bundle(\"${APPS}\" \"${PLUGINS}\" \"${DIRS}\")
         " COMPONENT Runtime)
-
-include(CPack)
-
-set(CMAKE_EXE_LINKER_FLAGS "-arch i386")
-set(CMAKE_CXX_FLAGS "-arch i386")
-
+        include(CPack)
 endif (APPLE)

@@ -11,6 +11,7 @@
 #include "../mwdialogue/dialoguemanager.hpp"
 
 #include "interpretercontext.hpp"
+#include "ref.hpp"
 
 namespace MWScript
 {
@@ -22,16 +23,13 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
-                    MWScript::InterpreterContext& context
-                        = static_cast<MWScript::InterpreterContext&> (runtime.getContext());
-
                     std::string quest = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
 
                     Interpreter::Type_Integer index = runtime[0].mInteger;
                     runtime.pop();
 
-                    context.getEnvironment().mJournal->addEntry (quest, index);
+                    MWBase::Environment::get().getJournal()->addEntry (quest, index);
                 }
         };
 
@@ -41,16 +39,13 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
-                    MWScript::InterpreterContext& context
-                        = static_cast<MWScript::InterpreterContext&> (runtime.getContext());
-
                     std::string quest = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
 
                     Interpreter::Type_Integer index = runtime[0].mInteger;
                     runtime.pop();
 
-                    context.getEnvironment().mJournal->setJournalIndex (quest, index);
+                    MWBase::Environment::get().getJournal()->setJournalIndex (quest, index);
                 }
         };
 
@@ -60,13 +55,10 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
-                    MWScript::InterpreterContext& context
-                        = static_cast<MWScript::InterpreterContext&> (runtime.getContext());
-
                     std::string quest = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
 
-                    int index = context.getEnvironment().mJournal->getJournalIndex (quest);
+                    int index = MWBase::Environment::get().getJournal()->getJournalIndex (quest);
 
                     runtime.push (index);
 
@@ -79,13 +71,10 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
-                    MWScript::InterpreterContext& context
-                        = static_cast<MWScript::InterpreterContext&> (runtime.getContext());
-
                     std::string topic = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
 
-                    context.getEnvironment().mDialogueManager->addTopic(topic);
+                    MWBase::Environment::get().getDialogueManager()->addTopic(topic);
                 }
         };
 
@@ -95,9 +84,7 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime, unsigned int arg0)
                 {
-                    MWScript::InterpreterContext& context
-                        = static_cast<MWScript::InterpreterContext&> (runtime.getContext());
-                    MWDialogue::DialogueManager* dialogue = context.getEnvironment().mDialogueManager;
+                    MWDialogue::DialogueManager* dialogue = MWBase::Environment::get().getDialogueManager();
                     while(arg0>0)
                     {
                         std::string question = runtime.getStringLiteral (runtime[0].mInteger);
@@ -115,12 +102,26 @@ namespace MWScript
                 }
         };
 
+        template<class R>
+        class OpForceGreeting : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWWorld::Ptr ptr = R()(runtime);
+
+                    MWBase::Environment::get().getDialogueManager()->startDialogue (ptr);
+                }
+        };
 
         const int opcodeJournal = 0x2000133;
         const int opcodeSetJournalIndex = 0x2000134;
         const int opcodeGetJournalIndex = 0x2000135;
         const int opcodeAddTopic = 0x200013a;
         const int opcodeChoice = 0x2000a;
+        const int opcodeForceGreeting = 0x200014f;
+        const int opcodeForceGreetingExplicit = 0x2000150;
 
         void registerExtensions (Compiler::Extensions& extensions)
         {
@@ -129,6 +130,9 @@ namespace MWScript
             extensions.registerFunction ("getjournalindex", 'l', "c", opcodeGetJournalIndex);
             extensions.registerInstruction ("addtopic", "S" , opcodeAddTopic);
             extensions.registerInstruction ("choice", "/SlSlSlSlSlSlSlSlSlSlSlSlSlSlSlSl", opcodeChoice);
+            extensions.registerInstruction("forcegreeting","",opcodeForceGreeting);
+            extensions.registerInstruction("forcegreeting","",opcodeForceGreeting,
+                opcodeForceGreetingExplicit);
         }
 
         void installOpcodes (Interpreter::Interpreter& interpreter)
@@ -138,6 +142,8 @@ namespace MWScript
             interpreter.installSegment5 (opcodeGetJournalIndex, new OpGetJournalIndex);
             interpreter.installSegment5 (opcodeAddTopic, new OpAddTopic);
             interpreter.installSegment3 (opcodeChoice,new OpChoice);
+            interpreter.installSegment5 (opcodeForceGreeting, new OpForceGreeting<ImplicitRef>);
+            interpreter.installSegment5 (opcodeForceGreetingExplicit, new OpForceGreeting<ExplicitRef>);
         }
     }
 

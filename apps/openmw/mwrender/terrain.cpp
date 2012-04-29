@@ -4,9 +4,13 @@
 
 #include "../mwworld/world.hpp"
 
+#include "../mwbase/environment.hpp"
+
 #include "terrainmaterial.hpp"
 #include "terrain.hpp"
-
+#include "renderconst.hpp"
+#include "shadows.hpp"
+#include <components/settings/settings.hpp>
 
 using namespace Ogre;
 
@@ -15,8 +19,8 @@ namespace MWRender
 
     //----------------------------------------------------------------------------------------------
 
-    TerrainManager::TerrainManager(Ogre::SceneManager* mgr, const MWWorld::Environment& evn) :
-        mEnvironment(evn), mTerrainGroup(TerrainGroup(mgr, Terrain::ALIGN_X_Z, mLandSize, mWorldSize))
+    TerrainManager::TerrainManager(Ogre::SceneManager* mgr, RenderingManager* rend) :
+         mTerrainGroup(TerrainGroup(mgr, Terrain::ALIGN_X_Z, mLandSize, mWorldSize)), mRendering(rend)
     {
 
         TerrainMaterialGeneratorPtr matGen;
@@ -47,9 +51,19 @@ namespace MWRender
         mActiveProfile->setLayerSpecularMappingEnabled(false);
         mActiveProfile->setLayerNormalMappingEnabled(false);
         mActiveProfile->setLayerParallaxMappingEnabled(false);
-        mActiveProfile->setReceiveDynamicShadowsEnabled(false);
 
-        //composite maps lead to a drastic reduction in loading time so are
+        bool shadows = Settings::Manager::getBool("enabled", "Shadows");
+        mActiveProfile->setReceiveDynamicShadowsEnabled(shadows);
+        mActiveProfile->setReceiveDynamicShadowsDepth(shadows);
+        if (Settings::Manager::getBool("split", "Shadows"))
+            mActiveProfile->setReceiveDynamicShadowsPSSM(mRendering->getShadows()->getPSSMSetup());
+        else
+            mActiveProfile->setReceiveDynamicShadowsPSSM(0);
+
+        mActiveProfile->setShadowFar(mRendering->getShadows()->getShadowFar());
+        mActiveProfile->setShadowFadeStart(mRendering->getShadows()->getFadeStart());
+
+        //composite maps lead to a drastic increase in loading time so are
         //disabled
         mActiveProfile->setCompositeMapEnabled(false);
 
@@ -95,7 +109,7 @@ namespace MWRender
         const int cellX = store->cell->getGridX();
         const int cellY = store->cell->getGridY();
 
-        ESM::Land* land = mEnvironment.mWorld->getStore().lands.search(cellX, cellY);
+        ESM::Land* land = MWBase::Environment::get().getWorld()->getStore().lands.search(cellX, cellY);
         if ( land != NULL )
         {
             if (!land->dataLoaded)
@@ -162,6 +176,8 @@ namespace MWRender
                                          x * numTextures, y * numTextures,
                                          numTextures,
                                          indexes);
+                    terrain->setVisibilityFlags(RV_Terrain);
+                    terrain->setRenderQueueGroup(RQG_Main);
 
                     if ( land && land->landData->usingColours )
                     {
@@ -254,7 +270,7 @@ namespace MWRender
             {
                 //NB: All vtex ids are +1 compared to the ltex ids
 
-                assert( (int)mEnvironment.mWorld->getStore().landTexts.getSize() >= (int)ltexIndex - 1 &&
+                assert( (int)MWBase::Environment::get().getWorld()->getStore().landTexts.getSize() >= (int)ltexIndex - 1 &&
                        "LAND.VTEX must be within the bounds of the LTEX array");
 
                 std::string texture;
@@ -264,7 +280,7 @@ namespace MWRender
                 }
                 else
                 {
-                    texture = mEnvironment.mWorld->getStore().landTexts.search(ltexIndex-1)->texture;
+                    texture = MWBase::Environment::get().getWorld()->getStore().landTexts.search(ltexIndex-1)->texture;
                     //TODO this is needed due to MWs messed up texture handling
                     texture = texture.substr(0, texture.rfind(".")) + ".dds";
                 }
@@ -420,7 +436,7 @@ namespace MWRender
         }
 
 
-        ESM::Land* land = mEnvironment.mWorld->getStore().lands.search(cellX, cellY);
+        ESM::Land* land = MWBase::Environment::get().getWorld()->getStore().lands.search(cellX, cellY);
         if ( land != NULL )
         {
             if (!land->dataLoaded)

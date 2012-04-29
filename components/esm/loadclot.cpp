@@ -13,6 +13,7 @@ void Clothing::load(ESMReader &esm)
     icon = esm.getHNOString("ITEX");
 
     parts.load(esm);
+    
 
     enchant = esm.getHNOString("ENAM");
 }

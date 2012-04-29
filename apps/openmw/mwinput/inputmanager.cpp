@@ -65,6 +65,10 @@ namespace MWInput
       A_QuickLoad,
       A_QuickMenu,
       A_GameMenu,
+      A_ToggleWeapon,
+      A_ToggleSpell,
+
+      A_ToggleFps, // Toggle FPS display (this is temporary)
 
       A_LAST            // Marker for the last item
     };
@@ -85,6 +89,45 @@ namespace MWInput
 
 
    /* InputImpl Methods */
+
+    void toggleFps()
+    {
+        windows.toggleFps();
+    }
+
+    void toggleSpell()
+    {
+        if (windows.isGuiMode()) return;
+
+        DrawState state = player.getDrawState();
+        if (state == DrawState_Weapon || state == DrawState_Nothing)
+        {
+            player.setDrawState(DrawState_Spell);
+            std::cout << "Player has now readied his hands for spellcasting!\n";
+        }
+        else
+        {
+            player.setDrawState(DrawState_Nothing);
+            std::cout << "Player does not have any kind of attack ready now.\n";
+        }
+    }
+
+    void toggleWeapon()
+    {
+        if (windows.isGuiMode()) return;
+
+        DrawState state = player.getDrawState();
+        if (state == DrawState_Spell || state == DrawState_Nothing)
+        {
+            player.setDrawState(DrawState_Weapon);
+            std::cout << "Player is now drawing his weapon.\n";
+        }
+        else
+        {
+            player.setDrawState(DrawState_Nothing);
+            std::cout << "Player does not have any kind of attack ready now.\n";
+        }
+    }
 
     void screenshot()
     {
@@ -143,11 +186,13 @@ namespace MWInput
 
     void toggleAutoMove()
     {
+        if (windows.isGuiMode()) return;
         player.setAutoMove (!player.getAutoMove());
     }
 
     void toggleWalking()
     {
+        if (windows.isGuiMode()) return;
         player.toggleRunning();
     }
 
@@ -197,7 +242,12 @@ namespace MWInput
                       "Auto Move");
       disp->funcs.bind(A_ToggleWalk, boost::bind(&InputImpl::toggleWalking, this),
                       "Toggle Walk/Run");
-
+      disp->funcs.bind(A_ToggleWeapon,boost::bind(&InputImpl::toggleWeapon,this),
+                      "Draw Weapon");
+      disp->funcs.bind(A_ToggleSpell,boost::bind(&InputImpl::toggleSpell,this),
+                      "Ready hands");
+      disp->funcs.bind(A_ToggleFps, boost::bind(&InputImpl::toggleFps, this),
+                      "Toggle FPS display");
       // Add the exit listener
       ogre.getRoot()->addFrameListener(&exit);
 
@@ -242,6 +292,9 @@ namespace MWInput
       disp->bind(A_AutoMove, KC_Z);
       disp->bind(A_ToggleSneak, KC_X);
       disp->bind(A_ToggleWalk, KC_C);
+      disp->bind(A_ToggleWeapon,KC_F);
+      disp->bind(A_ToggleSpell,KC_R);
+      disp->bind(A_ToggleFps, KC_F10);
 
       // Key bindings for polled keys
       // NOTE: These keys are constantly being polled. Only add keys that must be checked each frame.

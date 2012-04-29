@@ -7,6 +7,8 @@
 
 #include "../mwscript/extensions.hpp"
 
+#include "../mwbase/environment.hpp"
+
 namespace MWGui
 {
     class ConsoleInterpreterContext : public MWScript::InterpreterContext
@@ -15,15 +17,14 @@ namespace MWGui
 
         public:
 
-            ConsoleInterpreterContext (Console& console, MWWorld::Environment& environment,
-                MWWorld::Ptr reference);
+            ConsoleInterpreterContext (Console& console, MWWorld::Ptr reference);
 
             virtual void report (const std::string& message);
     };
 
     ConsoleInterpreterContext::ConsoleInterpreterContext (Console& console,
-        MWWorld::Environment& environment, MWWorld::Ptr reference)
-    : MWScript::InterpreterContext (environment,
+        MWWorld::Ptr reference)
+    : MWScript::InterpreterContext (
         reference.isEmpty() ? 0 : &reference.getRefData().getLocals(), reference),
       mConsole (console)
     {}
@@ -88,7 +89,7 @@ namespace MWGui
             scanner.listKeywords (mNames);
 
             // identifier
-            const ESMS::ESMStore& store = mEnvironment.mWorld->getStore();
+            const ESMS::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
 
             for (ESMS::RecListList::const_iterator iter (store.recLists.begin());
                 iter!=store.recLists.end(); ++iter)
@@ -101,11 +102,9 @@ namespace MWGui
         }
     }
 
-    Console::Console(int w, int h, MWWorld::Environment& environment,
-        const Compiler::Extensions& extensions)
+    Console::Console(int w, int h, const Compiler::Extensions& extensions)
       : Layout("openmw_console_layout.xml"),
-        mCompilerContext (MWScript::CompilerContext::Type_Console, environment),
-        mEnvironment (environment)
+        mCompilerContext (MWScript::CompilerContext::Type_Console)
     {
         setCoord(10,10, w-10, h/2);
 
@@ -139,7 +138,7 @@ namespace MWGui
     void Console::disable()
     {
         setVisible(false);
-        // Remove keyboard focus from the console input whenever the 
+        // Remove keyboard focus from the console input whenever the
         // console is turned off
         MyGUI::InputManager::getInstance().setKeyFocusWidget(NULL);
     }
@@ -241,7 +240,7 @@ namespace MWGui
         {
             try
             {
-                ConsoleInterpreterContext interpreterContext (*this, mEnvironment, MWWorld::Ptr());
+                ConsoleInterpreterContext interpreterContext (*this, MWWorld::Ptr());
                 Interpreter::Interpreter interpreter;
                 MWScript::installOpcodes (interpreter);
                 std::vector<Interpreter::Type_Code> code;

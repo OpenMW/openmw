@@ -26,6 +26,7 @@
 #include "ogre_nif_loader.hpp"
 
 #include <components/settings/settings.hpp>
+#include <components/nifoverrides/nifoverrides.hpp>
 
 typedef unsigned char ubyte;
 
@@ -282,15 +283,61 @@ void NIFLoader::createMaterial(const String &name,
             // other values. 237 basically means normal transparencly.
             if (alphaFlags == 237)
             {
-                // Enable transparency
-                pass->setSceneBlending(SBT_TRANSPARENT_ALPHA);
+                NifOverrides::TransparencyResult result = NifOverrides::Overrides::getTransparencyOverride(texName);
+                if (result.first)
+                {
+                    pass->setAlphaRejectFunction(CMPF_GREATER_EQUAL);
+                    pass->setAlphaRejectValue(result.second);
+                }
+                else
+                {
+                    // Enable transparency
+                    pass->setSceneBlending(SBT_TRANSPARENT_ALPHA);
 
-                //pass->setDepthCheckEnabled(false);
-                pass->setDepthWriteEnabled(false);
+                    //pass->setDepthCheckEnabled(false);
+                    pass->setDepthWriteEnabled(false);
+                    //std::cout << "alpha 237; material: " << name << " texName: " << texName << std::endl;
+                }
             }
             else
                 warn("Unhandled alpha setting for texture " + texName);
         }
+        else
+        {
+            material->getTechnique(0)->setShadowCasterMaterial("depth_shadow_caster_noalpha");
+        }
+    }
+
+    if (Settings::Manager::getBool("enabled", "Shadows"))
+    {
+        bool split = Settings::Manager::getBool("split", "Shadows");
+        const int numsplits = 3;
+		for (int i = 0; i < (split ? numsplits : 1); ++i)
+		{
+            TextureUnitState* tu = material->getTechnique(0)->getPass(0)->createTextureUnitState();
+            tu->setName("shadowMap" + StringConverter::toString(i));
+            tu->setContentType(TextureUnitState::CONTENT_SHADOW);
+            tu->setTextureAddressingMode(TextureUnitState::TAM_BORDER);
+            tu->setTextureBorderColour(ColourValue::White);
+		}
+    }
+
+    if (Settings::Manager::getBool("shaders", "Objects"))
+    {
+        material->getTechnique(0)->getPass(0)->setVertexProgram("main_vp");
+        material->getTechnique(0)->getPass(0)->setFragmentProgram("main_fp");
+    }
+
+    // Create a fallback technique without shadows and without mrt
+    Technique* tech2 = material->createTechnique();
+    tech2->setSchemeName("Fallback");
+    Pass* pass2 = tech2->createPass();
+    pass2->createTextureUnitState(texName);
+    pass2->setVertexColourTracking(TVC_DIFFUSE);
+    if (Settings::Manager::getBool("shaders", "Objects"))
+    {
+        pass2->setVertexProgram("main_fallback_vp");
+        pass2->setFragmentProgram("main_fallback_fp");
     }
 
     // Add material bells and whistles
@@ -299,137 +346,6 @@ void NIFLoader::createMaterial(const String &name,
     material->setSpecular(specular.array[0], specular.array[1], specular.array[2], alpha);
     material->setSelfIllumination(emissive.array[0], emissive.array[1], emissive.array[2]);
     material->setShininess(glossiness);
-
-    if (Settings::Manager::getBool("shaders", "Objects"))
-    {
-        // Create shader for the material
-        // vertex
-        HighLevelGpuProgramManager& mgr = HighLevelGpuProgramManager::getSingleton();
-
-        HighLevelGpuProgramPtr vertex;
-        if (mgr.getByName("main_vp").isNull())
-        {
-            vertex = mgr.createProgram("main_vp", ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
-                "cg", GPT_VERTEX_PROGRAM);
-            vertex->setParameter("profiles", "vs_4_0 vs_2_x vp40 arbvp1");
-            vertex->setParameter("entry_point", "main_vp");
-            StringUtil::StrStreamType outStream;
-            outStream <<
-            "void main_vp(	\n"
-            "	float4 position : POSITION,	\n"
-            "   float4 normal : NORMAL, \n"
-            "   float4 colour : COLOR, \n"
-            "   in float2 uv : TEXCOORD0, \n"
-            "   out float2 oUV : TEXCOORD0, \n"
-            "	out float4 oPosition : POSITION,	\n"
-            "   out float4 oPositionObjSpace : TEXCOORD1, \n"
-            "   out float4 oNormal : TEXCOORD2, \n"
-            "   out float oFogValue : TEXCOORD3, \n"
-            "   out float4 oVertexColour : TEXCOORD4, \n"
-            "   uniform float4 fogParams, \n"
-            "	uniform float4x4 worldViewProj	\n"
-            ")	\n"
-            "{	\n"
-            "   oVertexColour = colour; \n"
-            "   oUV = uv; \n"
-            "   oNormal = normal; \n"
-            "	oPosition = mul( worldViewProj, position );  \n"
-            "   oFogValue = saturate((oPosition.z - fogParams.y) * fogParams.w); \n"
-            "   oPositionObjSpace = position; \n"
-            "}";
-            vertex->setSource(outStream.str());
-            vertex->load();
-            vertex->getDefaultParameters()->setNamedAutoConstant("worldViewProj", GpuProgramParameters::ACT_WORLDVIEWPROJ_MATRIX);
-            vertex->getDefaultParameters()->setNamedAutoConstant("fogParams", GpuProgramParameters::ACT_FOG_PARAMS);
-        }
-        else
-            vertex = mgr.getByName("main_vp");
-        material->getTechnique(0)->getPass(0)->setVertexProgram(vertex->getName());
-
-        // the number of lights to support.
-        // when rendering an object, OGRE automatically picks the lights that are
-        // closest to the object being rendered. unfortunately this mechanism does
-        // not work perfectly for objects batched together (they will all use the same
-        // lights). to work around this, we are simply pushing the maximum number
-        // of lights here in order to minimize disappearing lights.
-        int num_lights = Settings::Manager::getInt("num lights", "Objects");
-
-        // fragment
-        HighLevelGpuProgramPtr fragment;
-        if (mgr.getByName("main_fp").isNull())
-        {
-            fragment = mgr.createProgram("main_fp", ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
-                "cg", GPT_FRAGMENT_PROGRAM);
-            fragment->setParameter("profiles", "ps_4_0 ps_2_x fp40 arbfp1");
-            fragment->setParameter("entry_point", "main_fp");
-            StringUtil::StrStreamType outStream;
-            outStream <<
-            "void main_fp(	\n"
-            "   in float2 uv : TEXCOORD0, \n"
-            "	out float4 oColor    : COLOR, \n"
-            "   uniform sampler2D texture : TEXUNIT0, \n"
-            "   float4 positionObjSpace : TEXCOORD1, \n"
-            "   float4 normal : TEXCOORD2, \n"
-            "   float fogValue : TEXCOORD3, \n"
-            "   float4 vertexColour : TEXCOORD4, \n"
-            "   uniform float4 fogColour, \n";
-
-            for (int i=0; i<num_lights; ++i)
-            {
-                outStream <<
-                "   uniform float4 lightDiffuse"<<i<<", \n"
-                "   uniform float4 lightPositionObjSpace"<<i<<", \n"
-                "   uniform float4 lightAttenuation"<<i<<", \n";
-            }
-            outStream <<
-            "   uniform float4 lightAmbient, \n"
-            "   uniform float4 ambient, \n"
-            "   uniform float4 diffuse, \n"
-            "   uniform float4 emissive \n"
-            ")	\n"
-            "{	\n"
-            "   float4 tex =  tex2D(texture, uv); \n"
-            "   float d; \n"
-            "   float attn; \n"
-            "   float3 lightColour = float3(0, 0, 0); \n";
-            
-            for (int i=0; i<num_lights; ++i)
-            {
-                outStream <<
-                "   float3 lightDir"<<i<<" = lightPositionObjSpace"<<i<<".xyz - (positionObjSpace.xyz * lightPositionObjSpace"<<i<<".w); \n"
-
-                // pre-multiply light color with attenuation factor
-                "   d = length( lightDir"<<i<<" ); \n"
-                "   attn = ( 1.0 / (( lightAttenuation"<<i<<".y ) + ( lightAttenuation"<<i<<".z * d ) + ( lightAttenuation"<<i<<".w * d * d ))); \n"
-                "   lightDiffuse"<<i<<" *= attn; \n"
-
-                "	lightColour.xyz += lit(dot(normalize(lightDir"<<i<<"), normalize(normal)), 0, 0).y * lightDiffuse"<<i<<".xyz;\n";
-            }
-            
-            outStream <<
-            "   float3 lightingFinal = lightColour.xyz * diffuse.xyz * vertexColour.xyz + ambient.xyz * lightAmbient.xyz + emissive.xyz; \n"
-            "   oColor.xyz = lerp(lightingFinal * tex.xyz, fogColour, fogValue); \n"
-            "   oColor.a = tex.a * diffuse.a * vertexColour.a; \n"
-            "}";
-            fragment->setSource(outStream.str());
-            fragment->load();
-
-            for (int i=0; i<num_lights; ++i)
-            {
-                fragment->getDefaultParameters()->setNamedAutoConstant("lightPositionObjSpace"+StringConverter::toString(i), GpuProgramParameters::ACT_LIGHT_POSITION_OBJECT_SPACE, i);
-                fragment->getDefaultParameters()->setNamedAutoConstant("lightDiffuse"+StringConverter::toString(i), GpuProgramParameters::ACT_LIGHT_DIFFUSE_COLOUR, i);
-                fragment->getDefaultParameters()->setNamedAutoConstant("lightAttenuation"+StringConverter::toString(i), GpuProgramParameters::ACT_LIGHT_ATTENUATION, i);
-            }
-            fragment->getDefaultParameters()->setNamedAutoConstant("emissive", GpuProgramParameters::ACT_SURFACE_EMISSIVE_COLOUR);
-            fragment->getDefaultParameters()->setNamedAutoConstant("diffuse", GpuProgramParameters::ACT_SURFACE_DIFFUSE_COLOUR);
-            fragment->getDefaultParameters()->setNamedAutoConstant("ambient", GpuProgramParameters::ACT_SURFACE_AMBIENT_COLOUR);
-            fragment->getDefaultParameters()->setNamedAutoConstant("lightAmbient", GpuProgramParameters::ACT_AMBIENT_LIGHT_COLOUR);
-            fragment->getDefaultParameters()->setNamedAutoConstant("fogColour", GpuProgramParameters::ACT_FOG_COLOUR);
-        }
-        else
-            fragment = mgr.getByName("main_fp");
-        material->getTechnique(0)->getPass(0)->setFragmentProgram(fragment->getName());
-    }
 }
 
 // Takes a name and adds a unique part to it. This is just used to
@@ -1295,6 +1211,7 @@ void NIFLoader::loadResource(Resource *resource)
     char suffix = name.at(name.length() - 2);
     bool addAnim = true;
     bool hasAnim = false;
+	bool linkSkeleton = true;
     //bool baddin = false;
     bNiTri = true;
     if(name == "meshes\\base_anim.nif" || name == "meshes\\base_animkna.nif")
@@ -1318,6 +1235,17 @@ void NIFLoader::loadResource(Resource *resource)
 		else if(suffix == '>')
 		{
             //baddin = true;
+			bNiTri = true;
+			std::string sub = name.substr(name.length() - 6, 4);
+
+			if(sub.compare("0000") != 0)
+			addAnim = false;
+
+		}
+		else if(suffix == ':')
+		{
+            //baddin = true;
+			linkSkeleton = false;
 			bNiTri = true;
 			std::string sub = name.substr(name.length() - 6, 4);
 
@@ -1463,7 +1391,7 @@ void NIFLoader::loadResource(Resource *resource)
         }
 		//Don't link on npc parts to eliminate redundant skeletons
 		//Will have to be changed later slightly for robes/skirts
-		if(triname == "")
+		if(linkSkeleton)
 			mesh->_notifySkeleton(mSkel);
     }
 }

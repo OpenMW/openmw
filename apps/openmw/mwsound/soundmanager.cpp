@@ -7,8 +7,10 @@
 #include <OgreRoot.h>
 
 #include <components/esm_store/store.hpp>
+#include <components/settings/settings.hpp>
 
-#include "../mwworld/environment.hpp"
+#include "../mwbase/environment.hpp"
+
 #include "../mwworld/world.hpp"
 #include "../mwworld/player.hpp"
 
@@ -45,14 +47,22 @@
 
 namespace MWSound
 {
-    SoundManager::SoundManager(bool useSound, MWWorld::Environment& environment)
+    SoundManager::SoundManager(bool useSound)
         : mResourceMgr(Ogre::ResourceGroupManager::getSingleton())
-        , mEnvironment(environment)
         , mOutput(new DEFAULT_OUTPUT(*this))
-
+        , mMasterVolume(1.0f)
+        , mSFXVolume(1.0f)
+        , mMusicVolume(1.0f)
     {
         if(!useSound)
             return;
+
+        mMasterVolume = Settings::Manager::getFloat("master volume", "Sound");
+        mMasterVolume = std::min(std::max(mMasterVolume, 0.0f), 1.0f);
+        mSFXVolume = Settings::Manager::getFloat("sfx volume", "Sound");
+        mSFXVolume = std::min(std::max(mSFXVolume, 0.0f), 1.0f);
+        mMusicVolume = Settings::Manager::getFloat("music volume", "Sound");
+        mMusicVolume = std::min(std::max(mMusicVolume, 0.0f), 1.0f);
 
         std::cout << "Sound output: " << SOUND_OUT << std::endl;
         std::cout << "Sound decoder: " << SOUND_IN << std::endl;
@@ -64,7 +74,19 @@ namespace MWSound
             for(size_t i = 0;i < names.size();i++)
                 std::cout <<"  "<<names[i]<< std::endl;
 
-            mOutput->init();
+            std::string devname = Settings::Manager::getString("device", "Sound");
+            try
+            {
+                mOutput->init(devname);
+            }
+            catch(std::exception &e)
+            {
+                if(devname.empty())
+                    throw;
+                std::cout <<"Failed to open device \""<<devname<<"\", trying default"<< std::endl;
+                mOutput->init();
+                Settings::Manager::setString("device", "Sound", "");
+            }
         }
         catch(std::exception &e)
         {
@@ -91,7 +113,7 @@ namespace MWSound
     std::string SoundManager::lookup(const std::string &soundId,
                        float &volume, float &min, float &max)
     {
-        const ESM::Sound *snd = mEnvironment.mWorld->getStore().sounds.search(soundId);
+        const ESM::Sound *snd = MWBase::Environment::get().getWorld()->getStore().sounds.search(soundId);
         if(snd == NULL)
             throw std::runtime_error(std::string("Failed to lookup sound ")+soundId);
 
@@ -136,12 +158,15 @@ namespace MWSound
 
     void SoundManager::streamMusicFull(const std::string& filename)
     {
+        if(!mOutput->isInitialized())
+            return;
         std::cout <<"Playing "<<filename<< std::endl;
         try
         {
+            float basevol = mMasterVolume * mMusicVolume;
             stopMusic();
-            mMusic = mOutput->streamSound(filename, 0.4f, 1.0f, Play_NoEnv);
-            mMusic->mBaseVolume = 0.4f;
+            mMusic = mOutput->streamSound(filename, basevol, 1.0f, Play_NoEnv);
+            mMusic->mBaseVolume = basevol;
             mMusic->mFlags = Play_NoEnv;
         }
         catch(std::exception &e)
@@ -180,10 +205,12 @@ namespace MWSound
 
     void SoundManager::say(MWWorld::Ptr ptr, const std::string& filename)
     {
+        if(!mOutput->isInitialized())
+            return;
         try
         {
             // The range values are not tested
-            float basevol = 1.0f; /* TODO: volume settings */
+            float basevol = mMasterVolume * mSFXVolume;
             std::string filePath = "Sound/"+filename;
             const ESM::Position &pos = ptr.getCellRef().pos;
             const Ogre::Vector3 objpos(pos.pos[0], pos.pos[1], pos.pos[2]);
@@ -210,9 +237,11 @@ namespace MWSound
     SoundPtr SoundManager::playSound(const std::string& soundId, float volume, float pitch, int mode)
     {
         SoundPtr sound;
+        if(!mOutput->isInitialized())
+            return sound;
         try
         {
-            float basevol = 1.0f; /* TODO: volume settings */
+            float basevol = mMasterVolume * mSFXVolume;
             float min, max;
             std::string file = lookup(soundId, basevol, min, max);
 
@@ -237,10 +266,12 @@ namespace MWSound
                                        float volume, float pitch, int mode)
     {
         SoundPtr sound;
+        if(!mOutput->isInitialized())
+            return sound;
         try
         {
             // Look up the sound in the ESM data
-            float basevol = 1.0f; /* TODO: volume settings */
+            float basevol = mMasterVolume * mSFXVolume;
             float min, max;
             std::string file = lookup(soundId, basevol, min, max);
             const ESM::Position &pos = ptr.getCellRef().pos;
@@ -349,7 +380,7 @@ namespace MWSound
 
     void SoundManager::updateRegionSound(float duration)
     {
-        MWWorld::Ptr::CellStore *current = mEnvironment.mWorld->getPlayer().getPlayer().getCell();
+        MWWorld::Ptr::CellStore *current = MWBase::Environment::get().getWorld()->getPlayer().getPlayer().getCell();
         static int total = 0;
         static std::string regionName = "";
         static float timePassed = 0.0;
@@ -366,7 +397,7 @@ namespace MWSound
             total = 0;
         }
 
-        const ESM::Region *regn = mEnvironment.mWorld->getStore().regions.find(regionName);
+        const ESM::Region *regn = MWBase::Environment::get().getWorld()->getStore().regions.find(regionName);
         std::vector<ESM::Region::SoundRef>::const_iterator soundIter;
         if(total == 0)
         {
@@ -414,8 +445,8 @@ namespace MWSound
         if(!isMusicPlaying())
             startRandomTitle();
 
-        const ESM::Cell *cell = mEnvironment.mWorld->getPlayer().getPlayer().getCell()->cell;
-        Ogre::Camera *cam = mEnvironment.mWorld->getPlayer().getRenderer()->getCamera();
+        const ESM::Cell *cell = MWBase::Environment::get().getWorld()->getPlayer().getPlayer().getCell()->cell;
+        Ogre::Camera *cam = MWBase::Environment::get().getWorld()->getPlayer().getRenderer()->getCamera();
         Ogre::Vector3 nPos, nDir, nUp;
         nPos = cam->getRealPosition();
         nDir = cam->getRealDirection();
@@ -450,6 +481,8 @@ namespace MWSound
 
     void SoundManager::update(float duration)
     {
+        if(!mOutput->isInitialized())
+            return;
         updateSounds(duration);
         updateRegionSound(duration);
     }

@@ -4,15 +4,20 @@
 #include "review.hpp"
 #include "dialogue.hpp"
 #include "dialogue_history.hpp"
+#include "map_window.hpp"
 #include "stats_window.hpp"
 #include "messagebox.hpp"
 
 #include "../mwmechanics/mechanicsmanager.hpp"
 #include "../mwinput/inputmanager.hpp"
 
+#include "../mwbase/environment.hpp"
+
 #include "console.hpp"
 #include "journalwindow.hpp"
 #include "charactercreation.hpp"
+
+#include <components/settings/settings.hpp>
 
 #include <assert.h>
 #include <iostream>
@@ -20,10 +25,9 @@
 
 using namespace MWGui;
 
-WindowManager::WindowManager(MWWorld::Environment& environment,
+WindowManager::WindowManager(
     const Compiler::Extensions& extensions, int fpsLevel, bool newGame, OEngine::Render::OgreRenderer *mOgre, const std::string logpath)
   : mGuiManager(NULL)
-  , environment(environment)
   , hud(NULL)
   , map(NULL)
   , menu(NULL)
@@ -71,17 +75,17 @@ WindowManager::WindowManager(MWWorld::Environment& environment,
 
     hud = new HUD(w,h, showFPSLevel);
     menu = new MainMenu(w,h);
-    map = new MapWindow();
+    map = new MapWindow(*this);
     stats = new StatsWindow(*this);
-    console = new Console(w,h, environment, extensions);
+    console = new Console(w,h, extensions);
     mJournal = new JournalWindow(*this);
     mMessageBoxManager = new MessageBoxManager(this);
-    dialogueWindow = new DialogueWindow(*this,environment);
+    dialogueWindow = new DialogueWindow(*this);
 
     // The HUD is always on
     hud->setVisible(true);
 
-    mCharGen = new CharacterCreation(this, &environment);
+    mCharGen = new CharacterCreation(this);
 
     // Setup player stats
     for (int i = 0; i < ESM::Attribute::Length; ++i)
@@ -140,7 +144,7 @@ void WindowManager::update()
     if (needModeChange)
     {
         needModeChange = false;
-        environment.mInputManager->setGuiMode(nextMode);
+        MWBase::Environment::get().getInputManager()->setGuiMode(nextMode);
         nextMode = GM_Game;
     }
     if (showFPSLevel > 0)
@@ -151,11 +155,6 @@ void WindowManager::update()
     }
 }
 
-MWWorld::Environment& WindowManager::getEnvironment()
-{
-    return environment;
-}
-
 void WindowManager::setNextMode(GuiMode newMode)
 {
     nextMode = newMode;
@@ -164,7 +163,7 @@ void WindowManager::setNextMode(GuiMode newMode)
 
 void WindowManager::setGuiMode(GuiMode newMode)
 {
-    environment.mInputManager->setGuiMode(newMode);
+    MWBase::Environment::get().getInputManager()->setGuiMode(newMode);
 }
 
 void WindowManager::updateVisible()
@@ -385,7 +384,7 @@ int WindowManager::readPressedButton ()
 
 const std::string &WindowManager::getGameSettingString(const std::string &id, const std::string &default_)
 {
-    const ESM::GameSetting *setting = environment.mWorld->getStore().gameSettings.search(id);
+    const ESM::GameSetting *setting = MWBase::Environment::get().getWorld()->getStore().gameSettings.search(id);
     if (setting && setting->type == ESM::VT_String)
         return setting->str;
     return default_;
@@ -409,7 +408,7 @@ void WindowManager::onFrame (float frameDuration)
 
 const ESMS::ESMStore& WindowManager::getStore() const
 {
-    return environment.mWorld->getStore();
+    return MWBase::Environment::get().getWorld()->getStore();
 }
 
 void WindowManager::changeCell(MWWorld::Ptr::CellStore* cell)
@@ -456,8 +455,26 @@ void WindowManager::setPlayerDir(const float x, const float y)
     hud->setPlayerDir(x,y);
 }
 
+void WindowManager::setHMSVisibility(bool visible)
+{
+    hud->setBottomLeftVisibility(visible, hud->weapBox->getVisible(), hud->spellBox->getVisible());
+}
+
+void WindowManager::setMinimapVisibility(bool visible)
+{
+    hud->setBottomRightVisibility(hud->effectBox->getVisible(), visible);
+}
+
 void WindowManager::toggleFogOfWar()
 {
     map->toggleFogOfWar();
     hud->toggleFogOfWar();
+}
+
+int WindowManager::toggleFps()
+{
+    showFPSLevel = (showFPSLevel+1)%3;
+    hud->setFpsLevel(showFPSLevel);
+    Settings::Manager::setInt("fps", "HUD", showFPSLevel);
+    return showFPSLevel;
 }

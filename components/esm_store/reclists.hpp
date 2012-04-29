@@ -90,6 +90,75 @@ namespace ESMS
     }
   };
 
+  // Same as RecListT, but does not case-smash the IDs
+  // Note that lookups (search or find) are still case insensitive
+  template <typename X>
+  struct RecListCaseT : RecList
+  {
+    virtual ~RecListCaseT() {}
+
+    typedef std::map<std::string,X> MapType;
+
+    MapType list;
+
+    // Load one object of this type
+    void load(ESMReader &esm, const std::string &id)
+    {
+        //std::string id2 = toLower (id);
+
+        list[id].load(esm);
+    }
+
+    // Find the given object ID, or return NULL if not found.
+    const X* search(const std::string &id) const
+    {
+        std::string id2 = toLower (id);
+
+        for (typename MapType::const_iterator iter = list.begin();
+            iter != list.end(); ++iter)
+        {
+            if (toLower(iter->first) == id2)
+                return &iter->second;
+        }
+
+        return NULL;
+    }
+
+    // non-const version
+    X* search(const std::string &id)
+    {
+        std::string id2 = toLower (id);
+
+        for (typename MapType::iterator iter = list.begin();
+            iter != list.end(); ++iter)
+        {
+            if (toLower(iter->first) == id2)
+                return &iter->second;
+        }
+
+        return NULL;
+    }
+
+    // Find the given object ID (throws an exception if not found)
+    const X* find(const std::string &id) const
+    {
+        const X *object = search (id);
+
+        if (!object)
+            throw std::runtime_error ("object " + id + " not found");
+
+        return object;
+    }
+
+    int getSize() { return list.size(); }
+
+    virtual void listIdentifier (std::vector<std::string>& identifier) const
+    {
+        for (typename MapType::const_iterator iter (list.begin()); iter!=list.end(); ++iter)
+            identifier.push_back (iter->first);
+    }
+  };
+
     /// Modified version of RecListT for records, that need to store their own ID
   template <typename X>
   struct RecListWithIDT : RecList

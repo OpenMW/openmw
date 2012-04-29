@@ -1,7 +1,6 @@
 #ifndef GAME_MWMECHANICS_MECHANICSMANAGER_H
 #define GAME_MWMECHANICS_MECHANICSMANAGER_H
 
-#include <set>
 #include <vector>
 #include <string>
 
@@ -9,41 +8,34 @@
 
 #include "creaturestats.hpp"
 #include "npcstats.hpp"
+#include "actors.hpp"
 
 namespace Ogre
 {
     class Vector3;
 }
 
-namespace MWWorld
-{
-    class Environment;
-}
-
 namespace MWMechanics
 {
     class MechanicsManager
     {
-            MWWorld::Environment& mEnvironment;
-            std::set<MWWorld::Ptr> mActors;
             MWWorld::Ptr mWatched;
             CreatureStats mWatchedCreature;
             NpcStats mWatchedNpc;
             bool mUpdatePlayer;
             bool mClassSelected;
             bool mRaceSelected;
+            Actors mActors;
 
             void buildPlayer();
             ///< build player according to stored class/race/birthsign information. Will
             /// default to the values of the ESM::NPC object, if no explicit information is given.
 
-            void insertSpell (const std::string& id, MWWorld::Ptr& creature);
-
             void adjustMagicEffects (MWWorld::Ptr& creature);
 
         public:
 
-            MechanicsManager (MWWorld::Environment& environment);
+            MechanicsManager ();
 
             void configureGUI();
 
@@ -60,8 +52,12 @@ namespace MWMechanics
             ///< On each update look for changes in a previously registered actor and update the
             /// GUI accordingly.
 
-            void update (std::vector<std::pair<std::string, Ogre::Vector3> >& movement);
+            void update (std::vector<std::pair<std::string, Ogre::Vector3> >& movement, float duration,
+                bool paused);
             ///< Update actor stats and store desired velocity vectors in \a movement
+            ///
+            /// \param paused In game type does not currently advance (this usually means some GUI
+            /// component is up).
 
             void setPlayerName (const std::string& name);
             ///< Set player name.

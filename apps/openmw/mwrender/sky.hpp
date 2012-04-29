@@ -36,30 +36,31 @@ namespace MWRender
         BillboardObject();
 
         virtual ~BillboardObject() {}
-        
+
         void setColour(const Ogre::ColourValue& pColour);
         void setPosition(const Ogre::Vector3& pPosition);
         void setVisible(const bool visible);
         void setRenderQueue(unsigned int id);
+        void setVisibilityFlags(int flags);
         void setSize(const float size);
         Ogre::Vector3 getPosition() const;
-        
+
         void setVisibility(const float visibility);
-        
+
         Ogre::SceneNode* getNode();
-        
+
     protected:
         virtual void init(const Ogre::String& textureName,
                         const float size,
                         const Ogre::Vector3& position,
                         Ogre::SceneNode* rootNode);
-    
+
         Ogre::SceneNode* mNode;
         Ogre::MaterialPtr mMaterial;
         Ogre::BillboardSet* mBBSet;
     };
-    
-    
+
+
     /*
      * The moons need a seperate class because of their shader (which allows them to be partially transparent)
      */
@@ -71,9 +72,9 @@ namespace MWRender
                         const Ogre::Vector3& position,
                         Ogre::SceneNode* rootNode
                     );
-        
+
         virtual ~Moon() {}
-                        
+
         enum Phase
         {
             Phase_New = 0,
@@ -85,29 +86,29 @@ namespace MWRender
             Phase_WaningHalf,
             Phase_WaningCrescent
         };
-        
+
         enum Type
         {
             Type_Masser = 0,
             Type_Secunda
         };
-        
+
         void setPhase(const Phase& phase);
         void setType(const Type& type);
         void setSkyColour(const Ogre::ColourValue& colour);
-        
+
         Phase getPhase() const;
         unsigned int getPhaseInt() const;
-    
+
     private:
         Type mType;
         Phase mPhase;
     };
-        
+
     class SkyManager
     {
     public:
-        SkyManager(Ogre::SceneNode* pMwRoot, Ogre::Camera* pCamera, MWWorld::Environment* env);
+        SkyManager(Ogre::SceneNode* pMwRoot, Ogre::Camera* pCamera);
         ~SkyManager();
 
         void update(float duration);
@@ -168,10 +169,13 @@ namespace MWRender
         void setGlare(const float glare);
         Ogre::Vector3 getRealSunPos();
 
+        void setSkyPosition(const Ogre::Vector3& position);
+        void resetSkyPosition();
+        void scaleSky(float scale);
+
     private:
         bool mCreated;
 
-        MWWorld::Environment* mEnvironment;
         float mHour;
         int mDay;
         int mMonth;
@@ -180,21 +184,21 @@ namespace MWRender
         BillboardObject* mSunGlare;
         Moon* mMasser;
         Moon* mSecunda;
-    
+
         Ogre::Viewport* mViewport;
         Ogre::SceneNode* mRootNode;
         Ogre::SceneManager* mSceneMgr;
-        
+
         Ogre::SceneNode* mAtmosphereDay;
         Ogre::SceneNode* mAtmosphereNight;
-        
+
         Ogre::MaterialPtr mCloudMaterial;
         Ogre::MaterialPtr mAtmosphereMaterial;
-        
+
         Ogre::MaterialPtr mStarsMaterials[7];
-        
+
         Ogre::HighLevelGpuProgramPtr mCloudFragmentShader;
-        
+
         // remember some settings so we don't have to apply them again if they didnt change
         Ogre::String mClouds;
         Ogre::String mNextClouds;
@@ -204,17 +208,17 @@ namespace MWRender
         float mStarsOpacity;
         Ogre::ColourValue mCloudColour;
         Ogre::ColourValue mSkyColour;
-        
+
         Ogre::Overlay* mThunderOverlay;
         Ogre::TextureUnitState* mThunderTextureUnit;
-                
+
         float mRemainingTransitionTime;
-        
+
         float mGlare; // target
         float mGlareFade; // actual
-        
+
         void ModVertexAlpha(Ogre::Entity* ent, unsigned int meshType);
-        
+
         bool mEnabled;
         bool mSunEnabled;
         bool mMasserEnabled;

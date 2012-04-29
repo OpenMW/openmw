@@ -1,4 +1,5 @@
 #include "creatureanimation.hpp"
+#include "renderconst.hpp"
 
 #include "../mwworld/world.hpp"
 
@@ -9,7 +10,7 @@ namespace MWRender{
 CreatureAnimation::~CreatureAnimation(){
 
 }
-CreatureAnimation::CreatureAnimation(const MWWorld::Ptr& ptr, MWWorld::Environment& _env,OEngine::Render::OgreRenderer& _rend): Animation(_env,_rend){
+CreatureAnimation::CreatureAnimation(const MWWorld::Ptr& ptr, OEngine::Render::OgreRenderer& _rend): Animation(_rend){
     insert = ptr.getRefData().getBaseNode();
     ESMS::LiveCellRef<ESM::Creature, MWWorld::RefData> *ref =
             ptr.get<ESM::Creature>();
@@ -20,6 +21,28 @@ CreatureAnimation::CreatureAnimation(const MWWorld::Ptr& ptr, MWWorld::Environme
         std::string meshNumbered = mesh + getUniqueID(mesh) + ">|";
         NifOgre::NIFLoader::load(meshNumbered);
         base = mRend.getScene()->createEntity(meshNumbered);
+        base->setVisibilityFlags(RV_Actors);
+
+        bool transparent = false;
+        for (unsigned int i=0; i<base->getNumSubEntities(); ++i)
+        {
+            Ogre::MaterialPtr mat = base->getSubEntity(i)->getMaterial();
+            Ogre::Material::TechniqueIterator techIt = mat->getTechniqueIterator();
+            while (techIt.hasMoreElements())
+            {
+                Ogre::Technique* tech = techIt.getNext();
+                Ogre::Technique::PassIterator passIt = tech->getPassIterator();
+                while (passIt.hasMoreElements())
+                {
+                    Ogre::Pass* pass = passIt.getNext();
+
+                    if (pass->getDepthWriteEnabled() == false)
+                        transparent = true;
+                }
+            }
+        }
+        base->setRenderQueueGroup(transparent ? RQG_Alpha : RQG_Main);
+
         std::string meshZero = mesh + "0000>|";
 
         if((transformations = (NIFLoader::getSingletonPtr())->getAnim(meshZero))){

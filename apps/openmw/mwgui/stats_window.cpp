@@ -12,7 +12,7 @@ using namespace MWGui;
 const int StatsWindow::lineHeight = 18;
 
 StatsWindow::StatsWindow (WindowManager& parWindowManager)
-  : WindowBase("openmw_stats_window_layout.xml", parWindowManager)
+  : WindowPinnableBase("openmw_stats_window_layout.xml", parWindowManager)
   , skillAreaWidget(NULL)
   , skillClientWidget(NULL)
   , skillScrollerWidget(NULL)
@@ -380,4 +380,9 @@ void StatsWindow::updateScroller()
 {
     skillScrollerWidget->setScrollRange(std::max(clientHeight - skillClientWidget->getHeight(), 0));
     skillScrollerWidget->setScrollPage(std::max(skillClientWidget->getHeight() - lineHeight, 0));
+}
+
+void StatsWindow::onPinToggled()
+{
+    mWindowManager.setHMSVisibility(!mPinned);
 }

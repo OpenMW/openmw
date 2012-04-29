@@ -20,12 +20,12 @@ namespace MWClass
              virtual void insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const;
             ///< Add reference into a cell for rendering
 
-            virtual void insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics, MWWorld::Environment& environment) const;
+            virtual void insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics) const;
 
-            virtual void enable (const MWWorld::Ptr& ptr, MWWorld::Environment& environment) const;
+            virtual void enable (const MWWorld::Ptr& ptr) const;
             ///< Enable reference; only does the non-rendering part
 
-            virtual void disable (const MWWorld::Ptr& ptr, MWWorld::Environment& environment) const;
+            virtual void disable (const MWWorld::Ptr& ptr) const;
             ///< Enable reference; only does the non-rendering part
 
             virtual std::string getName (const MWWorld::Ptr& ptr) const;
@@ -36,7 +36,7 @@ namespace MWClass
             ///< Return creature stats
 
             virtual boost::shared_ptr<MWWorld::Action> activate (const MWWorld::Ptr& ptr,
-                const MWWorld::Ptr& actor, const MWWorld::Environment& environment) const;
+                const MWWorld::Ptr& actor) const;
             ///< Generate action for activation
 
             virtual MWWorld::ContainerStore& getContainerStore (

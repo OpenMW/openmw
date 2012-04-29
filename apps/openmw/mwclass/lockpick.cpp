@@ -5,9 +5,10 @@
 
 #include <components/esm_store/cell_store.hpp>
 
+#include "../mwbase/environment.hpp"
+
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/actiontake.hpp"
-#include "../mwworld/environment.hpp"
 #include "../mwworld/inventorystore.hpp"
 
 #include "../mwrender/objects.hpp"
@@ -32,7 +33,7 @@ namespace MWClass
         }
     }
 
-    void Lockpick::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics, MWWorld::Environment& environment) const
+    void Lockpick::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics) const
     {
         ESMS::LiveCellRef<ESM::Tool, MWWorld::RefData> *ref =
             ptr.get<ESM::Tool>();
@@ -56,9 +57,9 @@ namespace MWClass
     }
 
     boost::shared_ptr<MWWorld::Action> Lockpick::activate (const MWWorld::Ptr& ptr,
-        const MWWorld::Ptr& actor, const MWWorld::Environment& environment) const
+        const MWWorld::Ptr& actor) const
     {
-        environment.mSoundManager->playSound3D (ptr, getUpSoundId(ptr, environment), 1.0, 1.0, MWSound::Play_NoTrack);
+        MWBase::Environment::get().getSoundManager()->playSound3D (ptr, getUpSoundId(ptr), 1.0, 1.0, MWSound::Play_NoTrack);
 
         return boost::shared_ptr<MWWorld::Action> (
             new MWWorld::ActionTake (ptr));
@@ -81,6 +82,14 @@ namespace MWClass
         return std::make_pair (slots, false);
     }
 
+    int Lockpick::getValue (const MWWorld::Ptr& ptr) const
+    {
+        ESMS::LiveCellRef<ESM::Tool, MWWorld::RefData> *ref =
+            ptr.get<ESM::Tool>();
+
+        return ref->base->data.value;
+    }
+
     void Lockpick::registerSelf()
     {
         boost::shared_ptr<Class> instance (new Lockpick);
@@ -88,12 +97,12 @@ namespace MWClass
         registerClass (typeid (ESM::Tool).name(), instance);
     }
 
-    std::string Lockpick::getUpSoundId (const MWWorld::Ptr& ptr, const MWWorld::Environment& environment) const
+    std::string Lockpick::getUpSoundId (const MWWorld::Ptr& ptr) const
     {
         return std::string("Item Lockpick Up");
     }
 
-    std::string Lockpick::getDownSoundId (const MWWorld::Ptr& ptr, const MWWorld::Environment& environment) const
+    std::string Lockpick::getDownSoundId (const MWWorld::Ptr& ptr) const
     {
         return std::string("Item Lockpick Down");
     }
