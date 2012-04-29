@@ -233,7 +233,7 @@ IntSize ToolTips::createToolTip(const ToolTipInfo& info)
 
         IntCoord coord(0, 6, totalSize.width, 24);
 
-        Widgets::MWEnchantmentPtr enchantWidget = enchantArea->createWidget<Widgets::MWEnchantment>
+        Widgets::MWEffectListPtr enchantWidget = enchantArea->createWidget<Widgets::MWEffectList>
             ("MW_StatName", coord, Align::Default, "ToolTipEnchantWidget");
         enchantWidget->setWindowManager(mWindowManager);
         enchantWidget->setEnchantmentId(info.enchant);

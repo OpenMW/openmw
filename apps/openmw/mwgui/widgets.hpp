@@ -145,11 +145,11 @@ namespace MWGui
         };
         typedef MWSpell* MWSpellPtr;
 
-        class MYGUI_EXPORT MWEnchantment : public Widget
+        class MYGUI_EXPORT MWEffectList : public Widget
         {
-            MYGUI_RTTI_DERIVED( MWEnchantment );
+            MYGUI_RTTI_DERIVED( MWEffectList );
         public:
-            MWEnchantment();
+            MWEffectList();
 
             typedef MWMechanics::Stat<int> EnchantmentValue;
 
@@ -168,7 +168,7 @@ namespace MWGui
             const std::string &getSpellId() const { return id; }
 
         protected:
-            virtual ~MWEnchantment();
+            virtual ~MWEffectList();
 
             virtual void initialiseOverride();
 
@@ -178,7 +178,7 @@ namespace MWGui
             WindowManager* mWindowManager;
             std::string id;
         };
-        typedef MWEnchantment* MWEnchantmentPtr;
+        typedef MWEffectList* MWEffectListPtr;
 
         class MYGUI_EXPORT MWSpellEffect : public Widget
         {

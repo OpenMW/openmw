@@ -266,20 +266,20 @@ MWSpell::~MWSpell()
 {
 }
 
-/* MWEnchantment */
+/* MWEffectList */
 
-MWEnchantment::MWEnchantment()
+MWEffectList::MWEffectList()
     : mWindowManager(nullptr)
 {
 }
 
-void MWEnchantment::setEnchantmentId(const std::string &enchantId)
+void MWEffectList::setEnchantmentId(const std::string &enchantId)
 {
     id = enchantId;
     updateWidgets();
 }
 
-void MWEnchantment::createEffectWidgets(std::vector<MyGUI::WidgetPtr> &effects, MyGUI::WidgetPtr creator, MyGUI::IntCoord &coord, bool center, bool constant)
+void MWEffectList::createEffectWidgets(std::vector<MyGUI::WidgetPtr> &effects, MyGUI::WidgetPtr creator, MyGUI::IntCoord &coord, bool center, bool constant)
 {
     const ESMS::ESMStore &store = mWindowManager->getStore();
     const ESM::Enchantment *enchant = store.enchants.search(id);
@@ -324,16 +324,16 @@ void MWEnchantment::createEffectWidgets(std::vector<MyGUI::WidgetPtr> &effects, 
     coord.width = maxwidth;
 }
 
-void MWEnchantment::updateWidgets()
+void MWEffectList::updateWidgets()
 {
 }
 
-void MWEnchantment::initialiseOverride()
+void MWEffectList::initialiseOverride()
 {
     Base::initialiseOverride();
 }
 
-MWEnchantment::~MWEnchantment()
+MWEffectList::~MWEffectList()
 {
 }
 
