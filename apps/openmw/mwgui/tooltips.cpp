@@ -53,7 +53,6 @@ void ToolTips::onFrame(float frameDuration)
         std::string text = focus->getUserString("ToolTipText");
 
         ToolTipInfo info;
-
         if (type == "")
         {
             mDynamicToolTipBox->setVisible(false);
@@ -61,7 +60,7 @@ void ToolTips::onFrame(float frameDuration)
         }        
         else if (type == "Text")
         {
-            info.caption = text;
+            info.text = text;
         }
         else if (type == "CaptionText")
         {
@@ -197,8 +196,8 @@ IntSize ToolTips::createToolTip(const ToolTipInfo& info)
 
     const IntPoint padding(8, 8);
 
-    const int imageCaptionHPadding = 8;
-    const int imageCaptionVPadding = 4;
+    const int imageCaptionHPadding = (caption != "" ? 8 : 0);
+    const int imageCaptionVPadding = (caption != "" ? 4 : 0);
 
     std::string realImage = "icons\\" + image;
     findImageExtension(realImage);
@@ -208,7 +207,7 @@ IntSize ToolTips::createToolTip(const ToolTipInfo& info)
     captionWidget->setCaption(caption);
     IntSize captionSize = captionWidget->getTextSize();
 
-    int captionHeight = std::max(captionSize.height, imageSize);
+    int captionHeight = std::max(caption != "" ? captionSize.height : 0, imageSize);
 
     EditBox* textWidget = mDynamicToolTipBox->createWidget<EditBox>("SandText", IntCoord(0, captionHeight+imageCaptionVPadding, 300, 300-captionHeight-imageCaptionVPadding), Align::Stretch, "ToolTipText");
     textWidget->setProperty("Static", "true");
