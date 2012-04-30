@@ -125,9 +125,9 @@ namespace MWGui
              * @param parent widget
              * @param coordinates to use, will be expanded if more space is needed
              * @param spell category, if this is 0, this means the spell effects are permanent and won't display e.g. duration
-             * @param center the effect widgets horizontally
+             * @param various flags, see MWEffectList::EffectFlags
              */
-            void createEffectWidgets(std::vector<MyGUI::WidgetPtr> &effects, MyGUI::WidgetPtr creator, MyGUI::IntCoord &coord, const int category);
+            void createEffectWidgets(std::vector<MyGUI::WidgetPtr> &effects, MyGUI::WidgetPtr creator, MyGUI::IntCoord &coord, int flags);
 
             const std::string &getSpellId() const { return id; }
 
