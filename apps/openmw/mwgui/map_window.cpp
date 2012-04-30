@@ -29,6 +29,9 @@ MapWindow::MapWindow(WindowManager& parWindowManager) :
 
     getWidget(mButton, "WorldButton");
     mButton->eventMouseButtonClick += MyGUI::newDelegate(this, &MapWindow::onWorldButtonClicked);
+    mButton->setCaption(mWindowManager.getGameSettingString("sWorld", ""));
+    int width = mButton->getTextSize().width + 24;
+    mButton->setCoord(mMainWidget->getSize().width - width - 22, mMainWidget->getSize().height - 64, width, 22);
 
     MyGUI::Button* eventbox;
     getWidget(eventbox, "EventBox");
@@ -97,7 +100,10 @@ void MapWindow::onWorldButtonClicked(MyGUI::Widget* _sender)
     mGlobalMap->setVisible(mGlobal);
     mLocalMap->setVisible(!mGlobal);
 
-    mButton->setCaption( mGlobal ? "Local" : "World" );
+    mButton->setCaption( mGlobal ? mWindowManager.getGameSettingString("sWorld", "") :
+            mWindowManager.getGameSettingString("sLocal", ""));
+    int width = mButton->getTextSize().width + 24;
+    mButton->setCoord(mMainWidget->getSize().width - width - 22, mMainWidget->getSize().height - 64, width, 22);
 }
 
 void MapWindow::onPinToggled()

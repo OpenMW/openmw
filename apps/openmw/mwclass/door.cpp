@@ -13,6 +13,9 @@
 #include "../mwworld/actionteleport.hpp"
 #include "../mwworld/world.hpp"
 
+#include "../mwgui/window_manager.hpp"
+#include "../mwgui/tooltips.hpp"
+
 #include "../mwrender/objects.hpp"
 
 #include "../mwsound/soundmanager.hpp"
@@ -142,5 +145,64 @@ namespace MWClass
         boost::shared_ptr<Class> instance (new Door);
 
         registerClass (typeid (ESM::Door).name(), instance);
+    }
+
+    bool Door::hasToolTip (const MWWorld::Ptr& ptr) const
+    {
+        ESMS::LiveCellRef<ESM::Door, MWWorld::RefData> *ref =
+            ptr.get<ESM::Door>();
+
+        return (ref->base->name != "");
+    }
+
+    MWGui::ToolTipInfo Door::getToolTipInfo (const MWWorld::Ptr& ptr) const
+    {
+        ESMS::LiveCellRef<ESM::Door, MWWorld::RefData> *ref =
+            ptr.get<ESM::Door>();
+
+        MWGui::ToolTipInfo info;
+        info.caption = ref->base->name;
+
+        std::string text;
+
+        const ESMS::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
+
+        if (ref->ref.teleport)
+        {
+            std::string dest;
+            if (ref->ref.destCell != "")
+            {
+                // door leads to an interior, use interior name as tooltip
+                dest = ref->ref.destCell;
+            }
+            else
+            {
+                // door leads to exterior, use cell name (if any), otherwise translated region name
+                int x,y;
+                MWBase::Environment::get().getWorld()->positionToIndex (ref->ref.doorDest.pos[0], ref->ref.doorDest.pos[1], x, y);
+                const ESM::Cell* cell = store.cells.findExt(x,y);
+                if (cell->name != "")
+                    dest = cell->name;
+                else
+                {
+                    const ESM::Region* region = store.regions.search(cell->region);
+                    dest = region->name;
+                }
+            }
+            text += "\n" + store.gameSettings.search("sTo")->str;
+            text += "\n"+dest;
+        }
+
+        if (ref->ref.lockLevel > 0)
+            text += "\n" + store.gameSettings.search("sLockLevel")->str + ": " + MWGui::ToolTips::toString(ref->ref.lockLevel);
+        if (ref->ref.trap != "")
+            text += "\n" + store.gameSettings.search("sTrapped")->str;
+
+        if (MWBase::Environment::get().getWindowManager()->getFullHelp())
+            text += MWGui::ToolTips::getMiscString(ref->base->script, "Script");
+
+        info.text = text;
+
+        return info;
     }
 }

@@ -72,6 +72,8 @@ StatsWindow::StatsWindow (WindowManager& parWindowManager)
 
     MyGUI::WindowPtr t = static_cast<MyGUI::WindowPtr>(mMainWidget);
     t->eventWindowChangeCoord += MyGUI::newDelegate(this, &StatsWindow::onWindowResize);
+
+    setupToolTips();
 }
 
 void StatsWindow::onScrollChangePosition(MyGUI::ScrollBar* scroller, size_t pos)
@@ -109,17 +111,7 @@ void StatsWindow::setBar(const std::string& name, const std::string& tname, int 
 void StatsWindow::setPlayerName(const std::string& playerName)
 {
     static_cast<MyGUI::Window*>(mMainWidget)->setCaption(playerName);
-}
-
-void StatsWindow::setStyledText(MyGUI::TextBox* widget, ColorStyle style, const std::string &value)
-{
-    widget->setCaption(value);
-    if (style == CS_Super)
-        widget->setTextColour(MyGUI::Colour(0, 1, 0));
-    else if (style == CS_Sub)
-        widget->setTextColour(MyGUI::Colour(1, 0, 0));
-    else
-        widget->setTextColour(MyGUI::Colour(1, 1, 1));
+    adjustWindowCaption();
 }
 
 void StatsWindow::setValue (const std::string& id, const MWMechanics::Stat<int>& value)
@@ -138,12 +130,15 @@ void StatsWindow::setValue (const std::string& id, const MWMechanics::Stat<int>&
             valueString << value.getModified();
             setText (id, valueString.str());
 
+            MyGUI::TextBox* box;
+            getWidget(box, id);
+
             if (value.getModified()>value.getBase())
-                setTextColor (id, 0, 1, 0);
+                box->_setWidgetState("increased");
             else if (value.getModified()<value.getBase())
-                setTextColor (id, 1, 0, 0);
+                box->_setWidgetState("decreased");
             else
-                setTextColor (id, 1, 1, 1);
+                box->_setWidgetState("normal");
 
             break;
         }
@@ -193,13 +188,14 @@ void StatsWindow::setValue(const ESM::Skill::SkillEnum parSkill, const MWMechani
     {
         float modified = value.getModified(), base = value.getBase();
         std::string text = boost::lexical_cast<std::string>(std::floor(modified));
-        ColorStyle style = CS_Normal;
+        std::string state = "normal";
         if (modified > base)
-            style = CS_Super;
+            state = "increased";
         else if (modified < base)
-            style = CS_Sub;
+            state = "decreased";
 
-        setStyledText(widget, style, text);
+        widget->setCaption(text);
+        widget->_setWidgetState(state);
     }
 }
 
@@ -251,15 +247,20 @@ void StatsWindow::addGroup(const std::string &label, MyGUI::IntCoord &coord1, My
     coord2.top += lineHeight;
 }
 
-MyGUI::TextBox* StatsWindow::addValueItem(const std::string text, const std::string &value, ColorStyle style, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2)
+MyGUI::TextBox* StatsWindow::addValueItem(const std::string& text, const std::string& tooltip, const std::string &value, const std::string& state, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2)
 {
     MyGUI::TextBox *skillNameWidget, *skillValueWidget;
 
     skillNameWidget = skillClientWidget->createWidget<MyGUI::TextBox>("SandText", coord1, MyGUI::Align::Default);
     skillNameWidget->setCaption(text);
+    skillNameWidget->setUserString("ToolTipType", "Text");
+    skillNameWidget->setUserString("ToolTipText", tooltip);
 
     skillValueWidget = skillClientWidget->createWidget<MyGUI::TextBox>("SandTextRight", coord2, MyGUI::Align::Default);
-    setStyledText(skillValueWidget, style, value);
+    skillValueWidget->setUserString("ToolTipType", "Text");
+    skillValueWidget->setUserString("ToolTipText", tooltip);
+    skillValueWidget->setCaption(value);
+    skillValueWidget->_setWidgetState(state);
 
     skillWidgets.push_back(skillNameWidget);
     skillWidgets.push_back(skillValueWidget);
@@ -305,12 +306,13 @@ void StatsWindow::addSkills(const SkillList &skills, const std::string &titleId,
         float base = stat.getBase();
         float modified = stat.getModified();
 
-        ColorStyle style = CS_Normal;
+        std::string state = "normal";
         if (modified > base)
-            style = CS_Super;
+            state = "increased";
         else if (modified < base)
-            style = CS_Sub;
-        MyGUI::TextBox* widget = addValueItem(mWindowManager.getGameSettingString(skillNameId, skillNameId), boost::lexical_cast<std::string>(static_cast<int>(modified)), style, coord1, coord2);
+            state = "decreased";
+        MyGUI::TextBox* widget = addValueItem(mWindowManager.getGameSettingString(skillNameId, skillNameId), "",
+            boost::lexical_cast<std::string>(static_cast<int>(modified)), state, coord1, coord2);
         skillWidgetMap[skillId] = widget;
     }
 }
@@ -369,8 +371,12 @@ void StatsWindow::updateSkillArea()
     if (!skillWidgets.empty())
         addSeparator(coord1, coord2);
 
-    addValueItem(mWindowManager.getGameSettingString("sReputation", "Reputation"), boost::lexical_cast<std::string>(static_cast<int>(reputation)), CS_Normal, coord1, coord2);
-    addValueItem(mWindowManager.getGameSettingString("sBounty", "Bounty"), boost::lexical_cast<std::string>(static_cast<int>(bounty)), CS_Normal, coord1, coord2);
+    addValueItem(mWindowManager.getGameSettingString("sReputation", "Reputation"),
+                mWindowManager.getGameSettingString("sSkillsMenuReputationHelp", ""),
+                boost::lexical_cast<std::string>(static_cast<int>(reputation)), "normal", coord1, coord2);
+    addValueItem(mWindowManager.getGameSettingString("sBounty", "Bounty"),
+                mWindowManager.getGameSettingString("sCrimeHelp", ""),
+                boost::lexical_cast<std::string>(static_cast<int>(bounty)), "normal", coord1, coord2);
 
     clientHeight = coord1.top;
     updateScroller();
@@ -385,4 +391,99 @@ void StatsWindow::updateScroller()
 void StatsWindow::onPinToggled()
 {
     mWindowManager.setHMSVisibility(!mPinned);
+}
+
+void StatsWindow::setupToolTips()
+{
+
+    const ESMS::ESMStore &store = mWindowManager.getStore();
+    MyGUI::Widget* widget;
+
+    getWidget(widget, "Attrib1");
+    widget->setUserString("ToolTipType", "ImageCaptionText");
+    widget->setUserString("ToolTipCaption", store.gameSettings.find ("sAttributeStrength")->str);
+    widget->setUserString("ToolTipText", store.gameSettings.find ("sStrDesc")->str);
+    widget->setUserString("ToolTipImage", "k\\attribute_strength.dds");
+    getWidget(widget, "AttribVal1");
+    widget->setUserString("ToolTipType", "ImageCaptionText");
+    widget->setUserString("ToolTipCaption", store.gameSettings.find ("sAttributeStrength")->str);
+    widget->setUserString("ToolTipText", store.gameSettings.find ("sStrDesc")->str);
+    widget->setUserString("ToolTipImage", "k\\attribute_strength.dds");
+
+    getWidget(widget, "Attrib2");
+    widget->setUserString("ToolTipType", "ImageCaptionText");
+    widget->setUserString("ToolTipCaption", store.gameSettings.find ("sAttributeIntelligence")->str);
+    widget->setUserString("ToolTipText", store.gameSettings.find ("sIntDesc")->str);
+    widget->setUserString("ToolTipImage", "k\\attribute_int.dds");
+    getWidget(widget, "AttribVal2");
+    widget->setUserString("ToolTipType", "ImageCaptionText");
+    widget->setUserString("ToolTipCaption", store.gameSettings.find ("sAttributeIntelligence")->str);
+    widget->setUserString("ToolTipText", store.gameSettings.find ("sIntDesc")->str);
+    widget->setUserString("ToolTipImage", "k\\attribute_int.dds");
+
+    getWidget(widget, "Attrib3");
+    widget->setUserString("ToolTipType", "ImageCaptionText");
+    widget->setUserString("ToolTipCaption", store.gameSettings.find ("sAttributeWillpower")->str);
+    widget->setUserString("ToolTipText", store.gameSettings.find ("sWilDesc")->str);
+    widget->setUserString("ToolTipImage", "k\\attribute_wilpower.dds");
+    getWidget(widget, "AttribVal3");
+    widget->setUserString("ToolTipType", "ImageCaptionText");
+    widget->setUserString("ToolTipCaption", store.gameSettings.find ("sAttributeWillpower")->str);
+    widget->setUserString("ToolTipText", store.gameSettings.find ("sWilDesc")->str);
+    widget->setUserString("ToolTipImage", "k\\attribute_wilpower.dds");
+
+    getWidget(widget, "Attrib4");
+    widget->setUserString("ToolTipType", "ImageCaptionText");
+    widget->setUserString("ToolTipCaption", store.gameSettings.find ("sAttributeAgility")->str);
+    widget->setUserString("ToolTipText", store.gameSettings.find ("sAgiDesc")->str);
+    widget->setUserString("ToolTipImage", "k\\attribute_agility.dds");
+    getWidget(widget, "AttribVal4");
+    widget->setUserString("ToolTipType", "ImageCaptionText");
+    widget->setUserString("ToolTipCaption", store.gameSettings.find ("sAttributeAgility")->str);
+    widget->setUserString("ToolTipText", store.gameSettings.find ("sAgiDesc")->str);
+    widget->setUserString("ToolTipImage", "k\\attribute_agility.dds");
+
+    getWidget(widget, "Attrib5");
+    widget->setUserString("ToolTipType", "ImageCaptionText");
+    widget->setUserString("ToolTipCaption", store.gameSettings.find ("sAttributeSpeed")->str);
+    widget->setUserString("ToolTipText", store.gameSettings.find ("sSpdDesc")->str);
+    widget->setUserString("ToolTipImage", "k\\attribute_speed.dds");
+    getWidget(widget, "AttribVal5");
+    widget->setUserString("ToolTipType", "ImageCaptionText");
+    widget->setUserString("ToolTipCaption", store.gameSettings.find ("sAttributeSpeed")->str);
+    widget->setUserString("ToolTipText", store.gameSettings.find ("sSpdDesc")->str);
+    widget->setUserString("ToolTipImage", "k\\attribute_speed.dds");
+
+    getWidget(widget, "Attrib6");
+    widget->setUserString("ToolTipType", "ImageCaptionText");
+    widget->setUserString("ToolTipCaption", store.gameSettings.find ("sAttributeEndurance")->str);
+    widget->setUserString("ToolTipText", store.gameSettings.find ("sEndDesc")->str);
+    widget->setUserString("ToolTipImage", "k\\attribute_endurance.dds");
+    getWidget(widget, "AttribVal6");
+    widget->setUserString("ToolTipType", "ImageCaptionText");
+    widget->setUserString("ToolTipCaption", store.gameSettings.find ("sAttributeEndurance")->str);
+    widget->setUserString("ToolTipText", store.gameSettings.find ("sEndDesc")->str);
+    widget->setUserString("ToolTipImage", "k\\attribute_endurance.dds");
+
+    getWidget(widget, "Attrib7");
+    widget->setUserString("ToolTipType", "ImageCaptionText");
+    widget->setUserString("ToolTipCaption", store.gameSettings.find ("sAttributePersonality")->str);
+    widget->setUserString("ToolTipText", store.gameSettings.find ("sPerDesc")->str);
+    widget->setUserString("ToolTipImage", "k\\attribute_personality.dds");
+    getWidget(widget, "AttribVal7");
+    widget->setUserString("ToolTipType", "ImageCaptionText");
+    widget->setUserString("ToolTipCaption", store.gameSettings.find ("sAttributePersonality")->str);
+    widget->setUserString("ToolTipText", store.gameSettings.find ("sPerDesc")->str);
+    widget->setUserString("ToolTipImage", "k\\attribute_personality.dds");
+
+    getWidget(widget, "Attrib8");
+    widget->setUserString("ToolTipType", "ImageCaptionText");
+    widget->setUserString("ToolTipCaption", store.gameSettings.find ("sAttributeLuck")->str);
+    widget->setUserString("ToolTipText", store.gameSettings.find ("sLucDesc")->str);
+    widget->setUserString("ToolTipImage", "k\\attribute_luck.dds");
+    getWidget(widget, "AttribVal8");
+    widget->setUserString("ToolTipType", "ImageCaptionText");
+    widget->setUserString("ToolTipCaption", store.gameSettings.find ("sAttributeLuck")->str);
+    widget->setUserString("ToolTipText", store.gameSettings.find ("sLucDesc")->str);
+    widget->setUserString("ToolTipImage", "k\\attribute_luck.dds");
 }

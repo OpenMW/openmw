@@ -365,7 +365,7 @@ void Objects::update(const float dt)
 
             // Light animation (pulse & flicker)
             it->time += dt;
-            const float phase = std::fmod(it->time, (32 * 2 * M_PI)) * 20;
+            const float phase = std::fmod(static_cast<double> (it->time), (32 * 2 * M_PI)) * 20;
             float pulseConstant;
 
             // These formulas are just guesswork, but they work pretty well

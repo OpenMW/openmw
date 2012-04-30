@@ -7,6 +7,7 @@
 #include "map_window.hpp"
 #include "stats_window.hpp"
 #include "messagebox.hpp"
+#include "tooltips.hpp"
 
 #include "../mwmechanics/mechanicsmanager.hpp"
 #include "../mwinput/inputmanager.hpp"
@@ -32,6 +33,7 @@ WindowManager::WindowManager(
   , map(NULL)
   , menu(NULL)
   , stats(NULL)
+  , mToolTips(NULL)
   , mMessageBoxManager(NULL)
   , console(NULL)
   , mJournal(NULL)
@@ -81,6 +83,7 @@ WindowManager::WindowManager(
     mJournal = new JournalWindow(*this);
     mMessageBoxManager = new MessageBoxManager(this);
     dialogueWindow = new DialogueWindow(*this);
+    mToolTips = new ToolTips(this);
 
     // The HUD is always on
     hud->setVisible(true);
@@ -101,6 +104,7 @@ WindowManager::WindowManager(
     MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWSkill>("Widget");
     MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWAttribute>("Widget");
     MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWSpell>("Widget");
+    MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWEffectList>("Widget");
     MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWSpellEffect>("Widget");
     MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWDynamicStat>("Widget");
 
@@ -119,6 +123,7 @@ WindowManager::~WindowManager()
     delete stats;
     delete mJournal;
     delete dialogueWindow;
+    delete mToolTips;
 
     delete mCharGen;
 
@@ -178,6 +183,11 @@ void WindowManager::updateVisible()
 
     // Mouse is visible whenever we're not in game mode
     MyGUI::PointerManager::getInstance().setVisible(isGuiMode());
+
+    if (mode == GM_Game)
+        mToolTips->enterGameMode();
+    else
+        mToolTips->enterGuiMode();
 
     switch(mode) {
         case GM_Game:
@@ -404,6 +414,7 @@ void WindowManager::onDialogueWindowBye()
 void WindowManager::onFrame (float frameDuration)
 {
     mMessageBoxManager->onFrame(frameDuration);
+    mToolTips->onFrame(frameDuration);
 }
 
 const ESMS::ESMStore& WindowManager::getStore() const
@@ -419,7 +430,10 @@ void WindowManager::changeCell(MWWorld::Ptr::CellStore* cell)
         if (cell->cell->name != "")
             name = cell->cell->name;
         else
-            name = cell->cell->region;
+        {
+            const ESM::Region* region = MWBase::Environment::get().getWorld()->getStore().regions.search(cell->cell->region);
+            name = region->name;
+        }
 
         map->setCellName( name );
 
@@ -477,4 +491,19 @@ int WindowManager::toggleFps()
     hud->setFpsLevel(showFPSLevel);
     Settings::Manager::setInt("fps", "HUD", showFPSLevel);
     return showFPSLevel;
+}
+
+void WindowManager::setFocusObject(const MWWorld::Ptr& focus)
+{
+    mToolTips->setFocusObject(focus);
+}
+
+void WindowManager::toggleFullHelp()
+{
+    mToolTips->toggleFullHelp();
+}
+
+bool WindowManager::getFullHelp() const
+{
+    return mToolTips->getFullHelp();
 }

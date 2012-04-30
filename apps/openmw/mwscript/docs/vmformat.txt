@@ -144,5 +144,6 @@ op 0x200014d: ModDisposition
 op 0x200014e: ModDisposition, explicit reference
 op 0x200014f: ForceGreeting
 op 0x2000150: ForceGreeting, explicit reference
+op 0x2000151: ToggleFullHelp
 op 0x2000152: ToggleCompositors
 opcodes 0x2000153-0x3ffffff unused
