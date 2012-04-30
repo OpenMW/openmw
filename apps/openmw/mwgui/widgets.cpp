@@ -576,7 +576,15 @@ std::string MWSpellEffect::effectIDToString(const short effectID)
     names[35] ="sEffectWeaknesstoPoison";
     names[30] ="sEffectWeaknesstoShock";
 
-    /// \todo bloodmoon and tribunal spells - can't find the IDs anywhere?
+    // bloodmoon
+    names[138] ="sEffectSummonCreature01";
+    names[139] ="sEffectSummonCreature02";
+    names[140] ="sEffectSummonCreature03";
+    names[141] ="sEffectSummonCreature04";
+    names[142] ="sEffectSummonCreature05";
+
+    // tribunal
+    names[137] ="sEffectSummonFabricant";
 
     assert(names.find(effectID) != names.end() && "Unimplemented effect type");
 
@@ -659,6 +667,12 @@ bool MWSpellEffect::effectHasMagnitude(const std::string& effect)
     effectsWithoutMagnitude.push_back("sEffectCurePoison");
     effectsWithoutMagnitude.push_back("sEffectCureParalyzation");
     effectsWithoutMagnitude.push_back("sEffectRemoveCurse");
+    effectsWithoutMagnitude.push_back("sEffectSummonCreature01");
+    effectsWithoutMagnitude.push_back("sEffectSummonCreature02");
+    effectsWithoutMagnitude.push_back("sEffectSummonCreature03");
+    effectsWithoutMagnitude.push_back("sEffectSummonCreature04");
+    effectsWithoutMagnitude.push_back("sEffectSummonCreature05");
+    effectsWithoutMagnitude.push_back("sEffectSummonFabricant");
 
     return (std::find(effectsWithoutMagnitude.begin(), effectsWithoutMagnitude.end(), effect) == effectsWithoutMagnitude.end());
 }
