@@ -16,6 +16,8 @@
 
 #include "../mwrender/objects.hpp"
 
+#include "../mwgui/window_manager.hpp"
+
 #include "../mwsound/soundmanager.hpp"
 
 namespace MWClass
@@ -194,5 +196,56 @@ namespace MWClass
             return std::string("Item Armor Medium Down");
         else
             return std::string("Item Armor Heavy Down");
+    }
+
+    bool Armor::hasToolTip (const MWWorld::Ptr& ptr) const
+    {
+        ESMS::LiveCellRef<ESM::Armor, MWWorld::RefData> *ref =
+            ptr.get<ESM::Armor>();
+
+        return (ref->base->name != "");
+    }
+
+    MWGui::ToolTipInfo Armor::getToolTipInfo (const MWWorld::Ptr& ptr) const
+    {
+        ESMS::LiveCellRef<ESM::Armor, MWWorld::RefData> *ref =
+            ptr.get<ESM::Armor>();
+
+        MWGui::ToolTipInfo info;
+        info.caption = ref->base->name;
+        info.icon = ref->base->icon;
+
+        std::string text;
+
+        const ESMS::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
+
+        // get armor type string (light/medium/heavy)
+        int armorType = getEquipmentSkill(ptr);
+        std::string typeText;
+        if (armorType == ESM::Skill::LightArmor)
+            typeText = store.gameSettings.search("sLight")->str;
+        else if (armorType == ESM::Skill::MediumArmor)
+            typeText = store.gameSettings.search("sMedium")->str;
+        else
+            typeText = store.gameSettings.search("sHeavy")->str;
+
+        text += "\n" + store.gameSettings.search("sArmorRating")->str + ": " + MWGui::ToolTips::toString(ref->base->data.armor);
+
+        /// \todo store the current armor health somewhere
+        text += "\n" + store.gameSettings.search("sCondition")->str + ": " + MWGui::ToolTips::toString(ref->base->data.health);
+
+        text += "\n" + store.gameSettings.search("sWeight")->str + ": " + MWGui::ToolTips::toString(ref->base->data.weight) + " (" + typeText + ")";
+        text += MWGui::ToolTips::getValueString(ref->base->data.value, store.gameSettings.search("sValue")->str);
+
+        if (MWBase::Environment::get().getWindowManager()->getFullHelp()) {
+            text += MWGui::ToolTips::getMiscString(ref->ref.owner, "Owner");
+            text += MWGui::ToolTips::getMiscString(ref->base->script, "Script");
+        }
+
+        info.enchant = ref->base->enchant;
+
+        info.text = text;
+
+        return info;
     }
 }

@@ -28,21 +28,25 @@ ReviewDialog::ReviewDialog(WindowManager& parWindowManager)
     getWidget(nameWidget, "NameText");
     getWidget(button, "NameButton");
     button->setCaption(mWindowManager.getGameSettingString("sName", ""));
+    adjustButtonSize(button);
     button->eventMouseButtonClick += MyGUI::newDelegate(this, &ReviewDialog::onNameClicked);;
 
     getWidget(raceWidget, "RaceText");
     getWidget(button, "RaceButton");
     button->setCaption(mWindowManager.getGameSettingString("sRace", ""));
+    adjustButtonSize(button);
     button->eventMouseButtonClick += MyGUI::newDelegate(this, &ReviewDialog::onRaceClicked);;
 
     getWidget(classWidget, "ClassText");
     getWidget(button, "ClassButton");
     button->setCaption(mWindowManager.getGameSettingString("sClass", ""));
+    adjustButtonSize(button);
     button->eventMouseButtonClick += MyGUI::newDelegate(this, &ReviewDialog::onClassClicked);;
 
     getWidget(birthSignWidget, "SignText");
     getWidget(button, "SignButton");
     button->setCaption(mWindowManager.getGameSettingString("sBirthSign", ""));
+    adjustButtonSize(button);
     button->eventMouseButtonClick += MyGUI::newDelegate(this, &ReviewDialog::onBirthSignClicked);;
 
     // Setup dynamic stats
@@ -86,14 +90,20 @@ ReviewDialog::ReviewDialog(WindowManager& parWindowManager)
 
     static_cast<MyGUI::WindowPtr>(mMainWidget)->eventWindowChangeCoord += MyGUI::newDelegate(this, &ReviewDialog::onWindowResize);
 
-    // TODO: These buttons should be managed by a Dialog class
     MyGUI::ButtonPtr backButton;
     getWidget(backButton, "BackButton");
+    backButton->setCaption(mWindowManager.getGameSettingString("sBack", ""));
     backButton->eventMouseButtonClick += MyGUI::newDelegate(this, &ReviewDialog::onBackClicked);
 
     MyGUI::ButtonPtr okButton;
     getWidget(okButton, "OKButton");
+    okButton->setCaption(mWindowManager.getGameSettingString("sOK", ""));
     okButton->eventMouseButtonClick += MyGUI::newDelegate(this, &ReviewDialog::onOkClicked);
+
+    int backButtonWidth = backButton->getTextSize().width + 24;
+    int okButtonWidth = okButton->getTextSize().width + 24;
+    okButton->setCoord(502 - okButtonWidth, 372, okButtonWidth, 23);
+    backButton->setCoord(502 - okButtonWidth - backButtonWidth - 6, 372, backButtonWidth, 23);
 }
 
 void ReviewDialog::open()
@@ -181,13 +191,14 @@ void ReviewDialog::setSkillValue(ESM::Skill::SkillEnum skillId, const MWMechanic
     {
         float modified = value.getModified(), base = value.getBase();
         std::string text = boost::lexical_cast<std::string>(std::floor(modified));
-        ColorStyle style = CS_Normal;
+        std::string state = "normal";
         if (modified > base)
-            style = CS_Super;
+            state = "increased";
         else if (modified < base)
-            style = CS_Sub;
+            state = "decreased";
 
-        setStyledText(widget, style, text);
+        widget->setCaption(text);
+        widget->_setWidgetState(state);
     }
 }
 
@@ -210,17 +221,6 @@ void ReviewDialog::configureSkills(const std::vector<int>& major, const std::vec
     }
 }
 
-void ReviewDialog::setStyledText(MyGUI::TextBox* widget, ColorStyle style, const std::string &value)
-{
-    widget->setCaption(value);
-    if (style == CS_Super)
-        widget->setTextColour(MyGUI::Colour(0, 1, 0));
-    else if (style == CS_Sub)
-        widget->setTextColour(MyGUI::Colour(1, 0, 0));
-    else
-        widget->setTextColour(MyGUI::Colour(1, 1, 1));
-}
-
 void ReviewDialog::addSeparator(MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2)
 {
     MyGUI::ImageBox* separator = skillClientWidget->createWidget<MyGUI::ImageBox>("MW_HLine", MyGUI::IntCoord(10, coord1.top, coord1.width + coord2.width - 4, 18), MyGUI::Align::Default);
@@ -240,7 +240,7 @@ void ReviewDialog::addGroup(const std::string &label, MyGUI::IntCoord &coord1, M
     coord2.top += lineHeight;
 }
 
-MyGUI::TextBox* ReviewDialog::addValueItem(const std::string text, const std::string &value, ColorStyle style, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2)
+MyGUI::TextBox* ReviewDialog::addValueItem(const std::string text, const std::string &value, const std::string& state, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2)
 {
     MyGUI::TextBox* skillNameWidget;
     MyGUI::TextBox* skillValueWidget;
@@ -249,7 +249,8 @@ MyGUI::TextBox* ReviewDialog::addValueItem(const std::string text, const std::st
     skillNameWidget->setCaption(text);
 
     skillValueWidget = skillClientWidget->createWidget<MyGUI::TextBox>("SandTextRight", coord2, MyGUI::Align::Default);
-    setStyledText(skillValueWidget, style, value);
+    skillValueWidget->setCaption(value);
+    skillValueWidget->_setWidgetState(state);
 
     skillWidgets.push_back(skillNameWidget);
     skillWidgets.push_back(skillValueWidget);
@@ -295,12 +296,12 @@ void ReviewDialog::addSkills(const SkillList &skills, const std::string &titleId
         float base = stat.getBase();
         float modified = stat.getModified();
 
-        ColorStyle style = CS_Normal;
+        std::string state = "normal";
         if (modified > base)
-            style = CS_Super;
+            state = "increased";
         else if (modified < base)
-            style = CS_Sub;
-        MyGUI::TextBox* widget = addValueItem(mWindowManager.getGameSettingString(skillNameId, skillNameId), boost::lexical_cast<std::string>(static_cast<int>(modified)), style, coord1, coord2);
+            state = "decreased";
+        MyGUI::TextBox* widget = addValueItem(mWindowManager.getGameSettingString(skillNameId, skillNameId), boost::lexical_cast<std::string>(static_cast<int>(modified)), state, coord1, coord2);
         skillWidgetMap[skillId] = widget;
     }
 }

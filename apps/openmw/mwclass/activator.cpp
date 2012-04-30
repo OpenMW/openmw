@@ -1,13 +1,14 @@
 
 #include "activator.hpp"
-#include "../mwrender/objects.hpp"
 
 #include <components/esm/loadacti.hpp>
 
 #include <components/esm_store/cell_store.hpp>
 
 #include "../mwworld/ptr.hpp"
-
+#include "../mwrender/objects.hpp"
+#include "../mwbase/environment.hpp"
+#include "../mwgui/window_manager.hpp"
 
 namespace MWClass
 {
@@ -62,5 +63,29 @@ namespace MWClass
         boost::shared_ptr<Class> instance (new Activator);
 
         registerClass (typeid (ESM::Activator).name(), instance);
+    }
+
+    bool Activator::hasToolTip (const MWWorld::Ptr& ptr) const
+    {
+        ESMS::LiveCellRef<ESM::Activator, MWWorld::RefData> *ref =
+            ptr.get<ESM::Activator>();
+
+        return (ref->base->name != "");
+    }
+
+    MWGui::ToolTipInfo Activator::getToolTipInfo (const MWWorld::Ptr& ptr) const
+    {
+        ESMS::LiveCellRef<ESM::Activator, MWWorld::RefData> *ref =
+            ptr.get<ESM::Activator>();
+
+        MWGui::ToolTipInfo info;
+        info.caption = ref->base->name;
+
+        std::string text;
+        if (MWBase::Environment::get().getWindowManager()->getFullHelp())
+            text += MWGui::ToolTips::getMiscString(ref->base->script, "Script");
+        info.text = text;
+
+        return info;
     }
 }
