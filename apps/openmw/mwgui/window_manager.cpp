@@ -36,7 +36,7 @@ WindowManager::WindowManager(MWWorld::Environment& environment,
   , mMessageBoxManager(NULL)
   , console(NULL)
   , mJournal(NULL)
-  , dialogueWindow(nullptr)
+  , mDialogueWindow(nullptr)
   , mCharGen(NULL)
   , playerClass()
   , playerName()
@@ -77,6 +77,12 @@ WindowManager::WindowManager(MWWorld::Environment& environment,
     MyGUI::Widget* dragAndDropWidget = gui->createWidgetT("Widget","",0,0,w,h,MyGUI::Align::Default,"DragAndDrop","DragAndDropWidget");
     dragAndDropWidget->setVisible(false);
 
+    DragAndDrop* mDragAndDrop = new DragAndDrop();
+    mDragAndDrop->mIsOnDragAndDrop = false;
+    mDragAndDrop->mDraggedWidget = 0;
+    mDragAndDrop->mDragAndDropWidget = dragAndDropWidget;
+    mDragAndDrop->mContainerWindow = 0;
+
     hud = new HUD(w,h, showFPSLevel);
     menu = new MainMenu(w,h);
     map = new MapWindow(*this);
@@ -84,9 +90,9 @@ WindowManager::WindowManager(MWWorld::Environment& environment,
     console = new Console(w,h, environment, extensions);
     mJournal = new JournalWindow(*this);
     mMessageBoxManager = new MessageBoxManager(this);
-    dialogueWindow = new DialogueWindow(*this,environment);
-    containerWindow = new ContainerWindow(*this,environment,dragAndDropWidget);
-    mInventoryWindow = new InventoryWindow(*this,environment,dragAndDropWidget);
+    mDialogueWindow = new DialogueWindow(*this,environment);
+    mContainerWindow = new ContainerWindow(*this,environment,mDragAndDrop);
+    mInventoryWindow = new InventoryWindow(*this,environment,mDragAndDrop);
 
     // The HUD is always on
     hud->setVisible(true);
@@ -124,10 +130,11 @@ WindowManager::~WindowManager()
     delete menu;
     delete stats;
     delete mJournal;
-    delete dialogueWindow;
-    delete containerWindow;
+    delete mDialogueWindow;
+    delete mContainerWindow;
     delete mInventoryWindow;
     delete mCharGen;
+    delete mDragAndDrop;
 
     cleanupGarbage();
 }
@@ -186,8 +193,8 @@ void WindowManager::updateVisible()
     stats->setVisible(false);
     console->disable();
     mJournal->setVisible(false);
-    dialogueWindow->setVisible(false);
-    containerWindow->setVisible(false);
+    mDialogueWindow->setVisible(false);
+    mContainerWindow->setVisible(false);
     mInventoryWindow->setVisible(false);
 
     // Mouse is visible whenever we're not in game mode
@@ -229,12 +236,12 @@ void WindowManager::updateVisible()
             break;
         }
         case GM_Container:
-            containerWindow->setVisible(true);
+            mContainerWindow->setVisible(true);
             mInventoryWindow->setVisible(true);
             mInventoryWindow->openInventory();
             break;
         case GM_Dialogue:
-            dialogueWindow->open();
+            mDialogueWindow->open();
             break;
         case GM_InterMessageBox:
             if(!mMessageBoxManager->isInteractiveMessageBox()) {
@@ -413,11 +420,11 @@ const std::string &WindowManager::getGameSettingString(const std::string &id, co
 
 void WindowManager::onDialogueWindowBye()
 {
-    if (dialogueWindow)
+    if (mDialogueWindow)
     {
         //FIXME set some state and stuff?
         //removeDialog(dialogueWindow);
-        dialogueWindow->setVisible(false);
+        mDialogueWindow->setVisible(false);
     }
     setGuiMode(GM_Game);
 }
@@ -426,7 +433,7 @@ void WindowManager::onFrame (float frameDuration)
 {
     mMessageBoxManager->onFrame(frameDuration);
     mInventoryWindow->Update();
-    containerWindow->Update();
+    mContainerWindow->Update();
 }
 
 const ESMS::ESMStore& WindowManager::getStore() const

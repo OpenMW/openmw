@@ -18,47 +18,54 @@ namespace MWWorld
 
 namespace MyGUI
 {
-  class Gui;
-  class Widget;
+    class Gui;
+    class Widget;
 }
 
 namespace MWGui
 {
     class WindowManager;
+    class ContainerWindow;
 }
 
 
 namespace MWGui
 {
-
+    class DragAndDrop
+    {
+    public:
+        bool mIsOnDragAndDrop;
+        ContainerWindow* mContainerWindow;
+        MyGUI::Widget* mDraggedWidget;
+        MyGUI::Widget* mDragAndDropWidget;
+    };
 
     class ContainerWindow : public WindowBase
     {
-        public:
-            ContainerWindow(WindowManager& parWindowManager,MWWorld::Environment& environment,MyGUI::Widget* dragAndDropWidget);
-            ContainerWindow(WindowManager& parWindowManager,MWWorld::Environment& environment,MyGUI::Widget* dragAndDropWidget,
-                std::string guiFile);
+    public:
+        ContainerWindow(WindowManager& parWindowManager,MWWorld::Environment& environment,DragAndDrop* dragAndDrop);
+        ContainerWindow(WindowManager& parWindowManager,MWWorld::Environment& environment,DragAndDrop* dragAndDrop,
+            std::string guiFile);
 
 
-            void open(MWWorld::Ptr& container);
-            void setName(std::string contName);
-            void Update();
+        void open(MWWorld::Ptr& container);
+        void setName(std::string contName);
+        void Update();
 
-            virtual ~ContainerWindow();
+        virtual ~ContainerWindow();
 
-        protected:
+    protected:
         MWWorld::Environment& mEnvironment;
         std::vector<MyGUI::WidgetPtr> mContainerWidgets;
         MyGUI::ItemBoxPtr mContainerWidget;
 
         MyGUI::ButtonPtr takeButton;
         MyGUI::ButtonPtr closeButton;
-        MyGUI::Widget* mDragAndDropWidget;
-        bool mIsOnDragAndDrop;
-        MyGUI::Widget* mDraggedWidget;
+        DragAndDrop* mDragAndDrop;
 
         void onByeClicked(MyGUI::Widget* _sender);
         void onSelectedItem(MyGUI::Widget* _sender);
+        void onContainerClicked(MyGUI::Widget* _sender);
         void onMouseMove(MyGUI::Widget* _sender, int _left, int _top);
 
         //MWWorld::Ptr& mContainer;

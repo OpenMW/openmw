@@ -21,8 +21,8 @@
 namespace MWGui
 {
 
-    InventoryWindow::InventoryWindow(WindowManager& parWindowManager,MWWorld::Environment& environment,MyGUI::Widget* dragAndDropWidget)
-        :ContainerWindow(parWindowManager,environment,dragAndDropWidget,"openmw_inventory_window_layout.xml")
+    InventoryWindow::InventoryWindow(WindowManager& parWindowManager,MWWorld::Environment& environment,DragAndDrop* dragAndDrop)
+        :ContainerWindow(parWindowManager,environment,dragAndDrop,"openmw_inventory_window_layout.xml")
     {
     }
 

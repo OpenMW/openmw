@@ -63,6 +63,7 @@ namespace MWGui
   class JournalWindow;
   class CharacterCreation;
   class ContainerWindow;
+  class DragAndDrop;
   class InventoryWindow;
   class TextInputDialog;
   class InfoBoxDialog;
@@ -126,9 +127,9 @@ namespace MWGui
       updateVisible();
     }
 
-    MWGui::DialogueWindow* getDialogueWindow() {return dialogueWindow;}
+    MWGui::DialogueWindow* getDialogueWindow() {return mDialogueWindow;}
 
-    MWGui::ContainerWindow* getContainerWindow() {return containerWindow;}
+    MWGui::ContainerWindow* getContainerWindow() {return mContainerWindow;}
 
     MyGUI::Gui* getGui() const { return gui; }
 
@@ -203,8 +204,9 @@ namespace MWGui
     MessageBoxManager *mMessageBoxManager;
     Console *console;
     JournalWindow* mJournal;
-    DialogueWindow *dialogueWindow;
-    ContainerWindow *containerWindow;
+    DialogueWindow *mDialogueWindow;
+    ContainerWindow *mContainerWindow;
+    DragAndDrop* mDragAndDrop;
     InventoryWindow *mInventoryWindow;
     CharacterCreation* mCharGen;
 
