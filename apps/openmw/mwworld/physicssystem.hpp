@@ -16,8 +16,11 @@ namespace MWWorld
             PhysicsSystem (OEngine::Render::OgreRenderer &_rend);
             ~PhysicsSystem ();
 
-            std::vector< std::pair<std::string, Ogre::Vector3> > doPhysics (float duration,
-                const std::vector<std::pair<std::string, Ogre::Vector3> >& actors);
+            void doPhysics(float duration, const std::vector<std::pair<std::string, Ogre::Vector3> >& actors);
+            ///< do physics with dt - Usage: first call doPhysics with frame dt, then call doPhysicsFixed as often as time steps have passed
+
+            std::vector< std::pair<std::string, Ogre::Vector3> > doPhysicsFixed (const std::vector<std::pair<std::string, Ogre::Vector3> >& actors);
+            ///< do physics with fixed timestep - Usage: first call doPhysics with frame dt, then call doPhysicsFixed as often as time steps have passed
 
             void addObject (const std::string& handle, const std::string& mesh,
                 const Ogre::Quaternion& rotation, float scale, const Ogre::Vector3& position);
@@ -55,7 +58,7 @@ namespace MWWorld
             void insertActorPhysics(const MWWorld::Ptr&, std::string model);
 
             OEngine::Physic::PhysicEngine* getEngine();
-            
+
             void setCurrentWater(bool hasWater, int waterHeight);
 
         private:
@@ -63,7 +66,6 @@ namespace MWWorld
             OEngine::Physic::PhysicEngine* mEngine;
             bool mFreeFly;
             playerMove* playerphysics;
-
 
             PhysicsSystem (const PhysicsSystem&);
             PhysicsSystem& operator= (const PhysicsSystem&);

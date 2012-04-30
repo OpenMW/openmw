@@ -215,6 +215,7 @@ namespace MWWorld
 
         setFallbackValues(fallbackMap);
 
+        lastTick = mTimer.getMilliseconds();
     }
 
 
@@ -559,8 +560,9 @@ namespace MWWorld
         }
     }
 
-    void World::moveObjectImp (Ptr ptr, float x, float y, float z)
+    bool World::moveObjectImp (Ptr ptr, float x, float y, float z)
     {
+        bool ret = false;
         ptr.getRefData().getPosition().pos[0] = x;
         ptr.getRefData().getPosition().pos[1] = y;
         ptr.getRefData().getPosition().pos[2] = z;
@@ -582,6 +584,7 @@ namespace MWWorld
                     if (currentCell->cell->data.gridX!=cellX || currentCell->cell->data.gridY!=cellY)
                     {
                         mWorldScene->changeCell (cellX, cellY, mPlayer->getPlayer().getRefData().getPosition(), false);
+                        ret = true;
                     }
 
                 }
@@ -591,6 +594,8 @@ namespace MWWorld
         /// \todo cell change for non-player ref
 
         mRendering->moveObject (ptr, Ogre::Vector3 (x, y, z));
+
+        return ret;
     }
 
     void World::moveObject (Ptr ptr, float x, float y, float z)
@@ -632,29 +637,45 @@ namespace MWWorld
     void World::doPhysics (const std::vector<std::pair<std::string, Ogre::Vector3> >& actors,
         float duration)
     {
-        std::vector< std::pair<std::string, Ogre::Vector3> > vectors = mPhysics->doPhysics (duration, actors);
+        mPhysics->doPhysics(duration, actors);
 
-        std::vector< std::pair<std::string, Ogre::Vector3> >::iterator player = vectors.end();
+        const int tick = 16; // 16 ms ^= 60 Hz
 
-        for (std::vector< std::pair<std::string, Ogre::Vector3> >::iterator it = vectors.begin();
-            it!= vectors.end(); ++it)
+        // Game clock part of the loop, contains everything that has to be executed in a fixed timestep
+        long long dt = mTimer.getMilliseconds() - lastTick;
+        if (dt >= 100) dt = 100; 	//  throw away wall clock time if necessary to keep the framerate above the minimum of 10 fps
+        while (dt >= tick)
         {
-            if (it->first=="player")
+            dt -= tick;
+            lastTick += tick;
+
+            std::vector< std::pair<std::string, Ogre::Vector3> > vectors = mPhysics->doPhysicsFixed (actors);
+
+            std::vector< std::pair<std::string, Ogre::Vector3> >::iterator player = vectors.end();
+
+            for (std::vector< std::pair<std::string, Ogre::Vector3> >::iterator it = vectors.begin();
+                it!= vectors.end(); ++it)
             {
-                player = it;
+                if (it->first=="player")
+                {
+                    player = it;
+                }
+                else
+                {
+                    MWWorld::Ptr ptr = getPtrViaHandle (it->first);
+                    moveObjectImp (ptr, it->second.x, it->second.y, it->second.z);
+                }
             }
-            else
+
+            // Make sure player is moved last (otherwise the cell might change in the middle of an update
+            // loop)
+            if (player!=vectors.end())
             {
-                MWWorld::Ptr ptr = getPtrViaHandle (it->first);
-                moveObjectImp (ptr, it->second.x, it->second.y, it->second.z);
+                if (moveObjectImp (getPtrViaHandle (player->first),
+                    player->second.x, player->second.y, player->second.z) == true)
+                    return; // abort the current loop if the cell has changed
             }
         }
-
-        // Make sure player is moved last (otherwise the cell might change in the middle of an update
-        // loop)
-        if (player!=vectors.end())
-            moveObjectImp (getPtrViaHandle (player->first),
-                player->second.x, player->second.y, player->second.z);
     }
 
     bool World::toggleCollisionMode()
