@@ -1,7 +1,8 @@
 
 #include "actionteleport.hpp"
 
-#include "environment.hpp"
+#include "../mwbase/environment.hpp"
+
 #include "world.hpp"
 
 namespace MWWorld
@@ -11,11 +12,11 @@ namespace MWWorld
     : mCellName (cellName), mPosition (position)
     {}
 
-    void ActionTeleportPlayer::execute (Environment& environment)
+    void ActionTeleportPlayer::execute()
     {
         if (mCellName.empty())
-            environment.mWorld->changeToExteriorCell (mPosition);
+            MWBase::Environment::get().getWorld()->changeToExteriorCell (mPosition);
         else
-            environment.mWorld->changeToInteriorCell (mCellName, mPosition);
+            MWBase::Environment::get().getWorld()->changeToInteriorCell (mCellName, mPosition);
     }
 }

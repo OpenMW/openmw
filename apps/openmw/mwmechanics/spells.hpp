@@ -9,11 +9,6 @@ namespace ESM
     struct Spell;
 }
 
-namespace MWWorld
-{
-    struct Environment;
-}
-
 namespace MWMechanics
 {
     class MagicEffects;
@@ -49,7 +44,7 @@ namespace MWMechanics
             ///< If the spell to be removed is the selected spell, the selected spell will be changed to
             /// no spell (empty string).
 
-            MagicEffects getMagicEffects (const MWWorld::Environment& environment) const;
+            MagicEffects getMagicEffects() const;
             ///< Return sum of magic effects resulting from abilities, blights, deseases and curses.
 
             void clear();

@@ -2022,7 +2022,9 @@ void Ext_UpdateViewAngles(playerMove* const pm)
 
 void Pmove (playerMove* const pmove) 
 {
-	int fmove = pmove->cmd.forwardmove;
+    // warning: unused variable ‘fmove’
+	//int fmove = pmove->cmd.forwardmove;
+
 	pm = pmove;
 
 	int			finalTime;
@@ -2047,12 +2049,16 @@ void Pmove (playerMove* const pmove)
 
 		msec = finalTime - pmove->ps.commandTime;
 
-		if ( pmove->pmove_fixed ) 
+		if ( pmove->pmove_fixed )
+        {
 			if ( msec > pmove->pmove_msec ) 
 				msec = pmove->pmove_msec;
-		else 
+        }
+		else
+        {
 			if ( msec > 66 ) 
 				msec = 66;
+        }
 
 		pmove->cmd.serverTime = pmove->ps.commandTime + msec;
 

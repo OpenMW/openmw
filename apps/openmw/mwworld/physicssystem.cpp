@@ -134,7 +134,9 @@ namespace MWWorld
             Ogre::Node* pitchNode = yawNode->getChildIterator().getNext();
 			Ogre::Quaternion yawQuat = yawNode->getOrientation();
                 Ogre::Quaternion pitchQuat = pitchNode->getOrientation();
-				Ogre::Quaternion both = yawQuat * pitchQuat;
+
+                // unused
+				//Ogre::Quaternion both = yawQuat * pitchQuat;
 				
 				playerphysics->ps.viewangles.x = pitchQuat.getPitch().valueDegrees();
 				playerphysics->ps.viewangles.z = 0;
@@ -316,7 +318,9 @@ namespace MWWorld
      void PhysicsSystem::insertObjectPhysics(const MWWorld::Ptr& ptr, const std::string model){
 		 
            Ogre::SceneNode* node = ptr.getRefData().getBaseNode();
-		   Ogre::Vector3 objPos = node->getPosition();
+
+           // unused
+		   //Ogre::Vector3 objPos = node->getPosition();
 
          addObject (node->getName(), model, node->getOrientation(),
             node->getScale().x, node->getPosition());

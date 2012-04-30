@@ -10,7 +10,6 @@
 
 #include "../mwworld/refdata.hpp"
 #include "../mwworld/ptr.hpp"
-#include "../mwworld/environment.hpp"
 #include "components/nifogre/ogre_nif_loader.hpp"
 #include "../mwworld/inventorystore.hpp"
 #include "../mwclass/npc.hpp"
@@ -36,8 +35,8 @@ private:
        int partpriorities[27];
        std::pair<Ogre::Entity*, std::vector<Nif::NiTriShapeCopy>*> zero;
 
-	
-	
+
+
 	//Bounded Parts
 	Ogre::Entity* lclavicle;
 	Ogre::Entity* rclavicle;
@@ -59,7 +58,7 @@ private:
 	Ogre::Entity* rfoot;
 	Ogre::Entity* hair;
 	Ogre::Entity* head;
-    
+
 	Ogre::SceneNode* insert;
     bool isBeast;
     bool isFemale;
@@ -80,9 +79,9 @@ private:
     MWWorld::ContainerStoreIterator leftglove;
     MWWorld::ContainerStoreIterator rightglove;
     MWWorld::ContainerStoreIterator skirtiter;
-    
+
     public:
-     NpcAnimation(const MWWorld::Ptr& ptr, MWWorld::Environment& _env, OEngine::Render::OgreRenderer& _rend, MWWorld::InventoryStore& _inv);
+     NpcAnimation(const MWWorld::Ptr& ptr, OEngine::Render::OgreRenderer& _rend, MWWorld::InventoryStore& _inv);
      virtual ~NpcAnimation();
     Ogre::Entity* insertBoundedPart(const std::string &mesh, std::string bonename);
      std::pair<Ogre::Entity*, std::vector<Nif::NiTriShapeCopy>*> insertFreePart(const std::string &mesh, const std::string suffix);
@@ -91,12 +90,12 @@ private:
 	void updateParts();
     void removeIndividualPart(int type);
     void reserveIndividualPart(int type, int group, int priority);
-   
+
     bool addOrReplaceIndividualPart(int type, int group, int priority, const std::string &mesh);
      void removePartGroup(int group);
     void addPartGroup(int group, int priority, std::vector<ESM::PartReference>& parts);
 
-	
+
 };
 }
 #endif

@@ -18,7 +18,7 @@ enum traceWorldType
 	bothWorldTrace = collisionWorldTrace | pickWorldTrace
 };
 
-enum collaborativePhysicsType : unsigned
+enum collaborativePhysicsType
 {
 	No_Physics = 0, // Both are empty (example: statics you can walk through, like tall grass)
 	Only_Collision = 1, // This object only has collision physics but no pickup physics (example: statics)

@@ -393,7 +393,7 @@ namespace Physic
 
     void PhysicEngine::stepSimulation(double deltaT)
     {
-        dynamicsWorld->stepSimulation(deltaT,1,1/50.);
+        dynamicsWorld->stepSimulation(deltaT,10);
         if(isDebugCreated)
         {
             mDebugDrawer->step();

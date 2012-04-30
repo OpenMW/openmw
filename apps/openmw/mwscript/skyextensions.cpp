@@ -7,6 +7,8 @@
 #include <components/interpreter/runtime.hpp>
 #include <components/interpreter/opcodes.hpp>
 
+#include "../mwbase/environment.hpp"
+
 #include "interpretercontext.hpp"
 
 namespace MWScript
@@ -19,10 +21,10 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
+                    bool enabled = MWBase::Environment::get().getWorld()->toggleSky();
+
                     InterpreterContext& context =
                         static_cast<InterpreterContext&> (runtime.getContext());
-
-                    bool enabled = context.getWorld().toggleSky();
 
                     context.report (enabled ? "Sky -> On" : "Sky -> Off");
                 }
@@ -34,10 +36,7 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
-                    InterpreterContext& context =
-                        static_cast<InterpreterContext&> (runtime.getContext());
-
-                    context.getWorld().setMoonColour (false);
+                    MWBase::Environment::get().getWorld()->setMoonColour (false);
                 }
         };
 
@@ -47,10 +46,7 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
-                    InterpreterContext& context =
-                        static_cast<InterpreterContext&> (runtime.getContext());
-
-                    context.getWorld().setMoonColour (true);
+                    MWBase::Environment::get().getWorld()->setMoonColour (true);
                 }
         };
 
@@ -60,10 +56,7 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
-                    InterpreterContext& context =
-                        static_cast<InterpreterContext&> (runtime.getContext());
-
-                    runtime.push (context.getWorld().getMasserPhase());
+                    runtime.push (MWBase::Environment::get().getWorld()->getMasserPhase());
                 }
         };
 
@@ -73,42 +66,33 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
-                    InterpreterContext& context =
-                        static_cast<InterpreterContext&> (runtime.getContext());
-
-                    runtime.push (context.getWorld().getSecundaPhase());
+                    runtime.push (MWBase::Environment::get().getWorld()->getSecundaPhase());
                 }
         };
-        
+
         class OpGetCurrentWeather : public Interpreter::Opcode0
         {
             public:
-                
+
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
-                    InterpreterContext& context =
-                        static_cast<InterpreterContext&> (runtime.getContext());
-                    
-                    runtime.push (context.getWorld().getCurrentWeather());
+                    runtime.push (MWBase::Environment::get().getWorld()->getCurrentWeather());
                 }
         };
-        
+
         class OpChangeWeather : public Interpreter::Opcode0
         {
             public:
-            
+
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
-                    InterpreterContext& context =
-                        static_cast<InterpreterContext&> (runtime.getContext());
-                    
                     std::string region = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
-                    
+
                     Interpreter::Type_Integer id = runtime[0].mInteger;
                     runtime.pop();
-                    
-                    context.getWorld().changeWeather(region, id);
+
+                    MWBase::Environment::get().getWorld()->changeWeather(region, id);
                 }
         };
 

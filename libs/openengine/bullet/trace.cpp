@@ -103,13 +103,17 @@ const bool NewPhysicsTrace(NewPhysTraceResults* const out, const Ogre::Vector3& 
 
 	const btBoxShape newshape(btVector3(BBHalfExtents.x, BBHalfExtents.y, BBHalfExtents.z));
 	const btTransform from(btrot, btstart);
-	const btTransform to(btrot, btend);	
+	const btTransform to(btrot, btend);
+
+    // warning: unused variable ...
+    /*
 	float x = from.getOrigin().getX();
 	float y = from.getOrigin().getY();
 	float z = from.getOrigin().getZ();
 	float x2 = to.getOrigin().getX();
 	float y2 = to.getOrigin().getY();
 	float z2 = to.getOrigin().getZ();
+    */
 	
 	//std::cout << "BtFrom: " << x << "," << y << "," << z << "\n";
 	//std::cout << "BtTo: " << x2 << "," << y2 << "," << z2 << "\n";

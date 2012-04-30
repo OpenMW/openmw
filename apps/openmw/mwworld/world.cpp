@@ -6,6 +6,8 @@
 #include <components/bsa/bsa_archive.hpp>
 #include <components/files/collections.hpp>
 
+#include "../mwbase/environment.hpp"
+
 #include "../mwrender/sky.hpp"
 #include "../mwrender/player.hpp"
 
@@ -13,9 +15,9 @@
 
 #include "../mwsound/soundmanager.hpp"
 
+#include "../mwgui/window_manager.hpp"
 
 #include "ptr.hpp"
-#include "environment.hpp"
 #include "class.hpp"
 #include "player.hpp"
 #include "weather.hpp"
@@ -174,18 +176,18 @@ namespace MWWorld
 
     World::World (OEngine::Render::OgreRenderer& renderer,
         const Files::Collections& fileCollections,
-        const std::string& master, const boost::filesystem::path& resDir,
-        bool newGame, Environment& environment, const std::string& encoding, std::map<std::string,std::string> fallbackMap)
+        const std::string& master, const boost::filesystem::path& resDir, bool newGame,
+        const std::string& encoding, std::map<std::string,std::string> fallbackMap)
     : mPlayer (0), mLocalScripts (mStore), mGlobalVariables (0),
-      mSky (true), mEnvironment (environment), mNextDynamicRecord (0), mCells (mStore, mEsm, *this),
+      mSky (true), mNextDynamicRecord (0), mCells (mStore, mEsm, *this),
       mNumFacing(0)
     {
         mPhysics = new PhysicsSystem(renderer);
         mPhysEngine = mPhysics->getEngine();
 
-        mRendering = new MWRender::RenderingManager(renderer, resDir, mPhysEngine, environment);
+        mRendering = new MWRender::RenderingManager(renderer, resDir, mPhysEngine);
 
-        mWeatherManager = new MWWorld::WeatherManager(mRendering, &environment);
+        mWeatherManager = new MWWorld::WeatherManager(mRendering);
 
         boost::filesystem::path masterPath (fileCollections.getCollection (".esm").getPath (master));
 
@@ -209,7 +211,7 @@ namespace MWWorld
             mGlobalVariables->setInt ("chargenstate", 1);
         }
 
-        mWorldScene = new Scene(environment, this, *mRendering, mPhysics);
+        mWorldScene = new Scene(this, *mRendering, mPhysics);
 
         setFallbackValues(fallbackMap);
 
@@ -357,7 +359,7 @@ namespace MWWorld
 
                 //render->enable (reference.getRefData().getHandle());
             if(mWorldScene->getActiveCells().find (reference.getCell()) != mWorldScene->getActiveCells().end())
-                 Class::get (reference).enable (reference, mEnvironment);
+                 Class::get (reference).enable (reference);
 
 
         }
@@ -372,8 +374,8 @@ namespace MWWorld
 
                 //render->disable (reference.getRefData().getHandle());
             if(mWorldScene->getActiveCells().find (reference.getCell())!=mWorldScene->getActiveCells().end()){
-                  Class::get (reference).disable (reference, mEnvironment);
-                  mEnvironment.mSoundManager->stopSound3D (reference);
+                  Class::get (reference).disable (reference);
+                  MWBase::Environment::get().getSoundManager()->stopSound3D (reference);
             }
 
 
@@ -547,7 +549,7 @@ namespace MWWorld
 
                 if (mWorldScene->getActiveCells().find (ptr.getCell())!=mWorldScene->getActiveCells().end()){
 //                           Class::get (ptr).disable (ptr, mEnvironment); /// \todo this line needs to be removed
-                            mEnvironment.mSoundManager->stopSound3D (ptr);
+                            MWBase::Environment::get().getSoundManager()->stopSound3D (ptr);
 
                             mPhysics->removeObject (ptr.getRefData().getHandle());
                             mRendering->removeObject(ptr);
@@ -736,6 +738,17 @@ namespace MWWorld
         mWorldScene->update (duration);
 
         mWeatherManager->update (duration);
+
+        // inform the GUI about focused object
+        try
+        {
+            MWBase::Environment::get().getWindowManager()->setFocusObject(getPtrViaHandle(mFacedHandle));
+        }
+        catch (std::runtime_error&)
+        {
+            MWWorld::Ptr null;
+            MWBase::Environment::get().getWindowManager()->setFocusObject(null);
+        }
 
         if (!mRendering->occlusionQuerySupported())
         {

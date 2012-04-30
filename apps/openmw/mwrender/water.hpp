@@ -11,7 +11,7 @@ namespace MWRender {
     class SkyManager;
 
     /// Water rendering 	
-    class Water : public Ogre::RenderTargetListener
+    class Water : public Ogre::RenderTargetListener, public Ogre::RenderQueueListener
     {
         static const int CELL_SIZE = 8192;
         Ogre::Camera *mCamera;
@@ -27,11 +27,17 @@ namespace MWRender {
         bool mToggled;
         int mTop;
 
+        bool mReflectionRenderActive;
+
         Ogre::Vector3 getSceneNodeCoordinates(int gridX, int gridY);
 
     protected:
         void preRenderTargetUpdate(const Ogre::RenderTargetEvent& evt);
         void postRenderTargetUpdate(const Ogre::RenderTargetEvent& evt);
+
+        void renderQueueStarted (Ogre::uint8 queueGroupId, const Ogre::String &invocation, bool &skipThisInvocation);
+        void renderQueueEnded (Ogre::uint8 queueGroupId, const Ogre::String &invocation, bool &repeatThisInvocation);
+
         void updateVisible();
 
         SkyManager* mSky;
@@ -55,6 +61,7 @@ namespace MWRender {
         void setActive(bool active);
 
         void toggle();
+        void update();
 
         void setViewportBackground(const Ogre::ColourValue& bg);
 

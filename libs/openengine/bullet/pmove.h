@@ -64,7 +64,7 @@ static const float	pm_duckScale = 0.25f;
 static const float  pm_flyaccelerate = 8.0f;
 static const float	pm_wateraccelerate = 4.0f;
 
-enum pmtype_t : unsigned char
+enum pmtype_t
 {
 	PM_NORMAL,		// can accelerate and turn
 	PM_NOCLIP,		// noclip movement
@@ -75,7 +75,7 @@ enum pmtype_t : unsigned char
 	PM_SPINTERMISSION	// no movement or status bar
 };
 
-enum waterlevel_t : unsigned char
+enum waterlevel_t
 {
 	WL_DRYLAND = 0,
 	WL_ANKLE,

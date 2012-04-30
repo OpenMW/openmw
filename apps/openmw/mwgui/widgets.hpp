@@ -119,14 +119,22 @@ namespace MWGui
 
             void setWindowManager(WindowManager* parWindowManager) { mWindowManager = parWindowManager; }
             void setSpellId(const std::string &id);
-            void createEffectWidgets(std::vector<MyGUI::WidgetPtr> &effects, MyGUI::WidgetPtr creator, MyGUI::IntCoord &coord);
+
+            /**
+             * @param vector to store the created effect widgets
+             * @param parent widget
+             * @param coordinates to use, will be expanded if more space is needed
+             * @param spell category, if this is 0, this means the spell effects are permanent and won't display e.g. duration
+             * @param various flags, see MWEffectList::EffectFlags
+             */
+            void createEffectWidgets(std::vector<MyGUI::WidgetPtr> &effects, MyGUI::WidgetPtr creator, MyGUI::IntCoord &coord, int flags);
 
             const std::string &getSpellId() const { return id; }
 
         protected:
             virtual ~MWSpell();
 
-		virtual void initialiseOverride();
+            virtual void initialiseOverride();
 
         private:
             void updateWidgets();
@@ -136,6 +144,45 @@ namespace MWGui
             MyGUI::TextBox* spellNameWidget;
         };
         typedef MWSpell* MWSpellPtr;
+
+        class MYGUI_EXPORT MWEffectList : public Widget
+        {
+            MYGUI_RTTI_DERIVED( MWEffectList );
+        public:
+            MWEffectList();
+
+            typedef MWMechanics::Stat<int> EnchantmentValue;
+
+            enum EffectFlags
+            {
+                EF_Potion = 0x01, // potions have no target (target is always the player) 
+                EF_Constant = 0x02 // constant effect means that duration will not be displayed
+            };
+
+            void setWindowManager(WindowManager* parWindowManager) { mWindowManager = parWindowManager; }
+            void setEffectList(const ESM::EffectList* list);
+
+            /**
+             * @param vector to store the created effect widgets
+             * @param parent widget
+             * @param coordinates to use, will be expanded if more space is needed
+             * @param center the effect widgets horizontally
+             * @param various flags, see MWEffectList::EffectFlags
+             */
+            void createEffectWidgets(std::vector<MyGUI::WidgetPtr> &effects, MyGUI::WidgetPtr creator, MyGUI::IntCoord &coord, bool center, int flags);
+
+        protected:
+            virtual ~MWEffectList();
+
+            virtual void initialiseOverride();
+
+        private:
+            void updateWidgets();
+
+            WindowManager* mWindowManager;
+            const ESM::EffectList* mEffectList;
+        };
+        typedef MWEffectList* MWEffectListPtr;
 
         class MYGUI_EXPORT MWSpellEffect : public Widget
         {
@@ -147,8 +194,13 @@ namespace MWGui
 
             void setWindowManager(WindowManager* parWindowManager) { mWindowManager = parWindowManager; }
             void setSpellEffect(SpellEffectValue value);
+            void setFlags(int flags) { mFlags = flags; }
+
+            std::string effectIDToString(const short effectID);
 
             const SpellEffectValue &getSpellEffect() const { return effect; }
+
+            int getRequestedWidth() const { return mRequestedWidth; }
 
         protected:
             virtual ~MWSpellEffect();
@@ -161,8 +213,10 @@ namespace MWGui
 
             WindowManager* mWindowManager;
             SpellEffectValue effect;
+            int mFlags;
             MyGUI::ImageBox* imageWidget;
             MyGUI::TextBox* textWidget;
+            int mRequestedWidth;
         };
         typedef MWSpellEffect* MWSpellEffectPtr;
 

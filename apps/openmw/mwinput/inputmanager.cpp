@@ -98,34 +98,36 @@ namespace MWInput
 
     void toggleSpell()
     {
-         DrawState state = player.getDrawState();
-         if(state == DrawState_Weapon || state == DrawState_Nothing)
-         {
-             player.setDrawState(DrawState_Spell);
-             std::cout << "Player has now readied his hands for spellcasting!\n";
-         }
-         else
-         {
-             player.setDrawState(DrawState_Nothing);
-             std::cout << "Player does not have any kind of attack ready now.\n";
-         }
+        if (windows.isGuiMode()) return;
 
+        DrawState state = player.getDrawState();
+        if (state == DrawState_Weapon || state == DrawState_Nothing)
+        {
+            player.setDrawState(DrawState_Spell);
+            std::cout << "Player has now readied his hands for spellcasting!\n";
+        }
+        else
+        {
+            player.setDrawState(DrawState_Nothing);
+            std::cout << "Player does not have any kind of attack ready now.\n";
+        }
     }
 
     void toggleWeapon()
     {
-         DrawState state = player.getDrawState();
-         if(state == DrawState_Spell || state == DrawState_Nothing)
-         {
-             player.setDrawState(DrawState_Weapon);
-             std::cout << "Player is now drawing his weapon.\n";
-         }
-         else
-         {
-             player.setDrawState(DrawState_Nothing);
-             std::cout << "Player does not have any kind of attack ready now.\n";
-         }
+        if (windows.isGuiMode()) return;
 
+        DrawState state = player.getDrawState();
+        if (state == DrawState_Spell || state == DrawState_Nothing)
+        {
+            player.setDrawState(DrawState_Weapon);
+            std::cout << "Player is now drawing his weapon.\n";
+        }
+        else
+        {
+            player.setDrawState(DrawState_Nothing);
+            std::cout << "Player does not have any kind of attack ready now.\n";
+        }
     }
 
     void screenshot()
@@ -185,11 +187,13 @@ namespace MWInput
 
     void toggleAutoMove()
     {
+        if (windows.isGuiMode()) return;
         player.setAutoMove (!player.getAutoMove());
     }
 
     void toggleWalking()
     {
+        if (windows.isGuiMode()) return;
         player.toggleRunning();
     }
 

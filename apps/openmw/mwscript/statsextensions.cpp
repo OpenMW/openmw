@@ -7,8 +7,9 @@
 #include <components/interpreter/runtime.hpp>
 #include <components/interpreter/opcodes.hpp>
 
+#include "../mwbase/environment.hpp"
+
 #include "../mwworld/class.hpp"
-#include "../mwworld/environment.hpp"
 #include "../mwworld/player.hpp"
 
 #include "../mwmechanics/creaturestats.hpp"
@@ -351,11 +352,10 @@ namespace MWScript
                 virtual void execute (Interpreter::Runtime& runtime, unsigned int arg0)
                 {
                     std::string factionID = "";
-                    MWScript::InterpreterContext& context
-                        = static_cast<MWScript::InterpreterContext&> (runtime.getContext());
+
                     if(arg0==0)
                     {
-                        factionID = context.getEnvironment().mDialogueManager->getFaction();
+                        factionID = MWBase::Environment::get().getDialogueManager()->getFaction();
                     }
                     else
                     {
@@ -364,7 +364,7 @@ namespace MWScript
                     }
                     if(factionID != "")
                     {
-                        MWWorld::Ptr player = context.getEnvironment().mWorld->getPlayer().getPlayer();
+                        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
                         if(MWWorld::Class::get(player).getNpcStats(player).mFactionRank.find(factionID) == MWWorld::Class::get(player).getNpcStats(player).mFactionRank.end())
                         {
                             MWWorld::Class::get(player).getNpcStats(player).mFactionRank[factionID] = 0;
@@ -380,11 +380,10 @@ namespace MWScript
                 virtual void execute (Interpreter::Runtime& runtime, unsigned int arg0)
                 {
                     std::string factionID = "";
-                    MWScript::InterpreterContext& context
-                        = static_cast<MWScript::InterpreterContext&> (runtime.getContext());
+
                     if(arg0==0)
                     {
-                        factionID = context.getEnvironment().mDialogueManager->getFaction();
+                        factionID = MWBase::Environment::get().getDialogueManager()->getFaction();
                     }
                     else
                     {
@@ -393,7 +392,7 @@ namespace MWScript
                     }
                     if(factionID != "")
                     {
-                        MWWorld::Ptr player = context.getEnvironment().mWorld->getPlayer().getPlayer();
+                        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
                         if(MWWorld::Class::get(player).getNpcStats(player).mFactionRank.find(factionID) == MWWorld::Class::get(player).getNpcStats(player).mFactionRank.end())
                         {
                             MWWorld::Class::get(player).getNpcStats(player).mFactionRank[factionID] = 0;
@@ -413,11 +412,10 @@ namespace MWScript
                 virtual void execute (Interpreter::Runtime& runtime, unsigned int arg0)
                 {
                     std::string factionID = "";
-                    MWScript::InterpreterContext& context
-                        = static_cast<MWScript::InterpreterContext&> (runtime.getContext());
+
                     if(arg0==0)
                     {
-                        factionID = context.getEnvironment().mDialogueManager->getFaction();
+                        factionID = MWBase::Environment::get().getDialogueManager()->getFaction();
                     }
                     else
                     {
@@ -426,7 +424,7 @@ namespace MWScript
                     }
                     if(factionID != "")
                     {
-                        MWWorld::Ptr player = context.getEnvironment().mWorld->getPlayer().getPlayer();
+                        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
                         if(MWWorld::Class::get(player).getNpcStats(player).mFactionRank.find(factionID) != MWWorld::Class::get(player).getNpcStats(player).mFactionRank.end())
                         {
                             MWWorld::Class::get(player).getNpcStats(player).mFactionRank[factionID] = MWWorld::Class::get(player).getNpcStats(player).mFactionRank[factionID] -1;
@@ -461,9 +459,7 @@ namespace MWScript
                             factionID = MWWorld::Class::get(ptr).getNpcStats(ptr).mFactionRank.begin()->first;
                         }
                     }
-                    MWScript::InterpreterContext& context
-                        = static_cast<MWScript::InterpreterContext&> (runtime.getContext());
-                    MWWorld::Ptr player = context.getEnvironment().mWorld->getPlayer().getPlayer();
+                    MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
                     if(factionID!="")
                     {
                         if(MWWorld::Class::get(player).getNpcStats(player).mFactionRank.find(factionID) != MWWorld::Class::get(player).getNpcStats(player).mFactionRank.end())
@@ -481,7 +477,7 @@ namespace MWScript
                     }
                 }
         };
-        
+
         template<class R>
         class OpModDisposition : public Interpreter::Opcode0
         {

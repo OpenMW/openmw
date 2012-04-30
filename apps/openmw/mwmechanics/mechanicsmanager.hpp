@@ -15,16 +15,10 @@ namespace Ogre
     class Vector3;
 }
 
-namespace MWWorld
-{
-    class Environment;
-}
-
 namespace MWMechanics
 {
     class MechanicsManager
     {
-            MWWorld::Environment& mEnvironment;
             MWWorld::Ptr mWatched;
             CreatureStats mWatchedCreature;
             NpcStats mWatchedNpc;
@@ -41,7 +35,7 @@ namespace MWMechanics
 
         public:
 
-            MechanicsManager (MWWorld::Environment& environment);
+            MechanicsManager ();
 
             void configureGUI();
 
