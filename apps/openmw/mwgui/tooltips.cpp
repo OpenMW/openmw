@@ -31,13 +31,10 @@ void ToolTips::onFrame(float frameDuration)
 {
     /// \todo Store a MWWorld::Ptr in the widget user data, retrieve it here and construct a tooltip dynamically
 
-    /// \todo we are destroying/creating the tooltip widgets every frame here,
-    /// because the tooltip might change (e.g. when trap is activated)
-    /// is there maybe a better way (listener when the object changes)?
-    for (size_t i=0; i<mDynamicToolTipBox->getChildCount(); ++i)
-    {
-        mDynamicToolTipBox->_destroyChildWidget(mDynamicToolTipBox->getChildAt(i));
-    }
+    MyGUI::Gui::getInstance().destroyWidget(mDynamicToolTipBox);
+    mDynamicToolTipBox = mMainWidget->createWidget<Widget>("HUD_Box",
+        IntCoord(0, 0, mMainWidget->getCoord().width, mMainWidget->getCoord().height),
+        Align::Stretch, "DynamicToolTipBox");
 
     const IntSize &viewSize = RenderManager::getInstance().getViewSize();
 
