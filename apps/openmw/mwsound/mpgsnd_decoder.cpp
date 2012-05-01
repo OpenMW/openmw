@@ -189,7 +189,7 @@ void MpgSnd_Decoder::readAll(std::vector<char> &output)
     {
         size_t pos = output.size();
         output.resize(pos + mSndInfo.frames*mSndInfo.channels*2);
-        sf_readf_short(mSndFile, (short*)(output.data()+pos), mSndInfo.frames);
+        sf_readf_short(mSndFile, (short*)(&output[0]+pos), mSndInfo.frames);
         return;
     }
     // Fallback in case we don't know the total already
