@@ -643,7 +643,12 @@ namespace MWWorld
 
         // Game clock part of the loop, contains everything that has to be executed in a fixed timestep
         long long dt = mTimer.getMilliseconds() - lastTick;
-        if (dt >= 100) dt = 100; 	//  throw away wall clock time if necessary to keep the framerate above the minimum of 10 fps
+        if (dt >= 100)
+        {
+            //  throw away wall clock time if necessary to keep the framerate above the minimum of 10 fps
+            lastTick += (dt - 100);
+            dt = 100;
+        }
         while (dt >= tick)
         {
             dt -= tick;
