@@ -372,7 +372,7 @@ bool	PM_SlideMove( bool gravity )
 
 					// stop dead at a tripple plane interaction
 					//VectorClear( pm->ps->velocity );
-					printf("Stop dead at a triple plane interaction\n");
+					//printf("Stop dead at a triple plane interaction\n");
 					pm->ps.velocity = Ogre::Vector3(0,0,0);
 					return true;
 				}
@@ -417,7 +417,7 @@ int PM_StepSlideMove( bool gravity )
 	Ogre::Vector3		up, down;
 	float		stepSize;
 	
-    std::cout << "StepSlideMove\n";
+    //std::cout << "StepSlideMove\n";
 	// start_o = pm->ps->origin
 	//VectorCopy (pm->ps->origin, start_o);
 	start_o = pm->ps.origin;
@@ -517,6 +517,8 @@ int PM_StepSlideMove( bool gravity )
 		if ( delta > 2 ) 
 		{
             pm->ps.counter = 10;
+
+            /*
 			if (gravity)
 				printf("g on: %f ", delta);
 			else
@@ -534,7 +536,7 @@ int PM_StepSlideMove( bool gravity )
 			else 
 				printf("stepped 15+\n");
 				//PM_AddEvent( EV_STEP_16 );
-				
+            */
 		}
 		/*if ( pm->debugLevel )
 			Com_Printf("%i:stepped\n", c_pmove);*/
@@ -863,7 +865,7 @@ static void PM_WalkMove( playerMove* const pmove )
 			PM_WaterMove(pmove);
 		else
 			PM_AirMove();
-		printf("Jumped away\n");
+		//printf("Jumped away\n");
 		return;
 	}
 
@@ -1146,7 +1148,7 @@ void PM_GroundTraceMissed()
 {
 	traceResults		trace;
 	Ogre::Vector3		point;
-    std::cout << "Ground trace missed\n";
+    //std::cout << "Ground trace missed\n";
 		// we just transitioned into freefall
 		//if ( pm->debugLevel )
 			//Com_Printf("%i:lift\n", c_pmove);
@@ -1292,14 +1294,14 @@ static void PM_CrashLand( void )
 
 	if ( delta < 1 ) 
 		return;
-
+/*
 	if (delta > 60)
 		printf("Far crashland: %f\n", delta);
 	else if (delta > 40)
 		printf("Medium crashland: %f\n", delta);
 	else if (delta > 4)
 		printf("Short crashland: %f\n", delta);
-
+*/
 	if (delta > 60)
 	{
 		/*

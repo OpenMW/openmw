@@ -105,13 +105,13 @@ struct playerMove
 
 		inline void SpeedUp(void)
 		{
-			printf("speed up to: %f\n", speed);
+			//printf("speed up to: %f\n", speed);
 			speed *= 1.25f;
 		}
 
 		inline void SpeedDown(void)
 		{
-			printf("speed down to %f\n", speed);
+			//printf("speed down to %f\n", speed);
 			speed /= 1.25f;
 		}
 
