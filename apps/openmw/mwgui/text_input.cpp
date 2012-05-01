@@ -12,7 +12,6 @@ TextInputDialog::TextInputDialog(WindowManager& parWindowManager)
     getWidget(textEdit, "TextEdit");
     textEdit->eventEditSelectAccept += newDelegate(this, &TextInputDialog::onTextAccepted);
 
-    // TODO: These buttons should be managed by a Dialog class
     MyGUI::ButtonPtr okButton;
     getWidget(okButton, "OKButton");
     okButton->eventMouseButtonClick += MyGUI::newDelegate(this, &TextInputDialog::onOkClicked);
@@ -25,16 +24,15 @@ void TextInputDialog::setNextButtonShow(bool shown)
 {
     MyGUI::ButtonPtr okButton;
     getWidget(okButton, "OKButton");
+
     if (shown)
-    {
-        okButton->setCaption("Next");
-        okButton->setCoord(MyGUI::IntCoord(264 - 18, 60, 42 + 18, 23));
-    }
+        okButton->setCaption(mWindowManager.getGameSettingString("sNext", ""));
     else
-    {
-        okButton->setCaption("OK");
-        okButton->setCoord(MyGUI::IntCoord(264, 60, 42, 23));
-    }
+        okButton->setCaption(mWindowManager.getGameSettingString("sOK", ""));
+
+    int okButtonWidth = okButton->getTextSize().width + 24;
+
+    okButton->setCoord(306 - okButtonWidth, 60, okButtonWidth, 23);
 }
 
 void TextInputDialog::setTextLabel(const std::string &label)

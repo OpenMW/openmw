@@ -87,7 +87,6 @@ Allowed options:
 
                                    win1252 - Western European (Latin) alphabet,
                                    used by default
-  --report-focus [=arg(=1)] (=0)   write name of focussed object to cout
   --fallback arg                   fallback values
 
 

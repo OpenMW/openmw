@@ -203,6 +203,8 @@ namespace MWWorld
         // Sky system
         mWorld->adjustSky();
 
+        mRendering.switchToExterior();
+
         mCellChanged = true;
     }
 
@@ -250,6 +252,7 @@ namespace MWWorld
         playerCellChange (cell, position);
 
         // adjust fog
+        mRendering.switchToInterior();
         mRendering.configureFog(*cell);
 
         // Sky system

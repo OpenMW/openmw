@@ -69,13 +69,14 @@ RaceDialog::RaceDialog(WindowManager& parWindowManager)
     setText("SpellPowerT", mWindowManager.getGameSettingString("sRaceMenu7", "Specials"));
     getWidget(spellPowerList, "SpellPowerList");
 
-    // TODO: These buttons should be managed by a Dialog class
     MyGUI::ButtonPtr backButton;
     getWidget(backButton, "BackButton");
+    backButton->setCaption(mWindowManager.getGameSettingString("sBack", ""));
     backButton->eventMouseButtonClick += MyGUI::newDelegate(this, &RaceDialog::onBackClicked);
 
     MyGUI::ButtonPtr okButton;
     getWidget(okButton, "OKButton");
+    okButton->setCaption(mWindowManager.getGameSettingString("sOK", ""));
     okButton->eventMouseButtonClick += MyGUI::newDelegate(this, &RaceDialog::onOkClicked);
 
     updateRaces();
@@ -91,21 +92,16 @@ void RaceDialog::setNextButtonShow(bool shown)
     MyGUI::ButtonPtr okButton;
     getWidget(okButton, "OKButton");
 
-    // TODO: All hardcoded coords for buttons are temporary, will be replaced with a dynamic system.
     if (shown)
-    {
-        okButton->setCaption("Next");
-
-        // Adjust back button when next is shown
-        backButton->setCoord(MyGUI::IntCoord(471 - 18, 397, 53, 23));
-        okButton->setCoord(MyGUI::IntCoord(532 - 18, 397, 42 + 18, 23));
-    }
+        okButton->setCaption(mWindowManager.getGameSettingString("sNext", ""));
     else
-    {
-        okButton->setCaption("OK");
-        backButton->setCoord(MyGUI::IntCoord(471, 397, 53, 23));
-        okButton->setCoord(MyGUI::IntCoord(532, 397, 42, 23));
-    }
+        okButton->setCaption(mWindowManager.getGameSettingString("sOK", ""));
+
+    int okButtonWidth = okButton->getTextSize().width + 24;
+    int backButtonWidth = backButton->getTextSize().width + 24;
+
+    okButton->setCoord(574 - okButtonWidth, 397, okButtonWidth, 23);
+    backButton->setCoord(574 - okButtonWidth - backButtonWidth - 6, 397, backButtonWidth, 23);
 }
 
 void RaceDialog::open()

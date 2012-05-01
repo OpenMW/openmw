@@ -65,6 +65,7 @@ OcclusionQuery::OcclusionQuery(OEngine::Render::OgreRenderer* renderer, SceneNod
     mBBQueryTotal->createBillboard(Vector3::ZERO);
     mBBQueryTotal->setMaterialName("QueryTotalPixels");
     mBBQueryTotal->setRenderQueueGroup(RQG_OcclusionQuery+1);
+    mBBQueryTotal->setVisibilityFlags(RV_OcclusionQuery);
     mBBNodeReal->attachObject(mBBQueryTotal);
 
     mBBQueryVisible = mRendering->getScene()->createBillboardSet(1);
@@ -73,6 +74,7 @@ OcclusionQuery::OcclusionQuery(OEngine::Render::OgreRenderer* renderer, SceneNod
     mBBQueryVisible->createBillboard(Vector3::ZERO);
     mBBQueryVisible->setMaterialName("QueryVisiblePixels");
     mBBQueryVisible->setRenderQueueGroup(RQG_OcclusionQuery+1);
+    mBBQueryVisible->setVisibilityFlags(RV_OcclusionQuery);
     mBBNodeReal->attachObject(mBBQueryVisible);
 
     mBBQuerySingleObject = mRendering->getScene()->createBillboardSet(1);
@@ -82,6 +84,7 @@ OcclusionQuery::OcclusionQuery(OEngine::Render::OgreRenderer* renderer, SceneNod
     mBBQuerySingleObject->createBillboard(Vector3::ZERO);
     mBBQuerySingleObject->setMaterialName("QueryVisiblePixels");
     mBBQuerySingleObject->setRenderQueueGroup(RQG_OcclusionQuery);
+    mBBQuerySingleObject->setVisibilityFlags(RV_OcclusionQuery);
     mObjectNode->attachObject(mBBQuerySingleObject);
 
     mRendering->getScene()->addRenderObjectListener(this);

@@ -54,6 +54,20 @@ namespace
         return lowerCase;
     }
 
+    bool stringCompareNoCase (std::string first, std::string second)
+    {
+        unsigned int i=0;
+        while ( (i<first.length()) && (i<second.length()) )
+        {
+            if (tolower(first[i])<tolower(second[i])) return true;
+            else if (tolower(first[i])>tolower(second[i])) return false;
+            ++i;
+        }
+        if (first.length()<second.length())
+            return true;
+        else
+            return false;
+    }
 
     template<typename T1, typename T2>
     bool selectCompare (char comp, T1 value1, T2 value2)
@@ -723,7 +737,11 @@ namespace MWDialogue
                 }
             }
         }
+
+        // sort again, because the previous sort was case-sensitive
+        keywordList.sort(stringCompareNoCase);
         win->setKeywords(keywordList);
+
         mChoice = choice;
     }
 
@@ -815,7 +833,7 @@ namespace MWDialogue
     {
         MWGui::DialogueWindow* win = MWBase::Environment::get().getWindowManager()->getDialogueWindow();
         win->askQuestion(question);
-        mChoiceMap[question] = choice;
+        mChoiceMap[toLower(question)] = choice;
         mIsInChoice = true;
     }
 
