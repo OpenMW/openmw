@@ -636,7 +636,7 @@ float PM_CmdScale(playerMove::playercmd* const cmd)
 		+ cmd->rightmove * cmd->rightmove + cmd->upmove * cmd->upmove) );
 	scale = (float)pm->ps.speed * max / ( 127.0f * total );
     if(pm->ps.move_type == PM_NOCLIP)
-        scale *= 2;
+        scale *= 10;
 
 	return scale;
 }
