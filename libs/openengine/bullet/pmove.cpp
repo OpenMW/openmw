@@ -717,6 +717,8 @@ static void PM_WaterMove( playerMove* const pm )
 	float	scale;
 	float	vel;
 
+    pm->ps.bSnap = false;
+
 	/*if ( PM_CheckWaterJump() ) 
 	{
 		PM_WaterJumpMove();
