@@ -171,6 +171,7 @@ void CharacterCreation::spawnDialog(const char id)
             if (mCreateClassDialog)
                 mWM->removeDialog(mCreateClassDialog);
             mCreateClassDialog = new CreateClassDialog(*mWM);
+            mCreateClassDialog->setNextButtonShow(mCreationStage >= CSE_ClassChosen);
             mCreateClassDialog->eventDone += MyGUI::newDelegate(this, &CharacterCreation::onCreateClassDialogDone);
             mCreateClassDialog->eventBack += MyGUI::newDelegate(this, &CharacterCreation::onCreateClassDialogBack);
             mCreateClassDialog->open();
