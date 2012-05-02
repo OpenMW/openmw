@@ -401,18 +401,6 @@ namespace MWSound
         return isPlaying(ptr, soundId);
     }
 
-    void SoundManager::updateObject(MWWorld::Ptr ptr)
-    {
-        const ESM::Position &pos = ptr.getCellRef().pos;
-        const Ogre::Vector3 objpos(pos.pos[0], pos.pos[1], pos.pos[2]);
-        SoundMap::iterator snditer = mActiveSounds.begin();
-        while(snditer != mActiveSounds.end())
-        {
-            if(snditer->second.first == ptr)
-                snditer->first->setPosition(objpos);
-            snditer++;
-        }
-    }
 
     void SoundManager::updateRegionSound(float duration)
     {

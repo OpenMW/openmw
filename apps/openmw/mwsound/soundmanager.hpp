@@ -131,9 +131,6 @@ namespace MWSound
         bool getSoundPlaying(MWWorld::Ptr reference, const std::string& soundId) const;
         ///< Is the given sound currently playing on the given object?
 
-        void updateObject(MWWorld::Ptr reference);
-        ///< Update the position of all sounds connected to the given object.
-
         void update(float duration);
     };
 }
