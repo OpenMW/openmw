@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<MyGUI type="Layout">
+
+<Widget type="Window" skin="" layer="Windows" align="Left|Top" position="0 0 512 256" name="_Main">
+
+    <Widget type="ImageBox" skin="ImageBox" position_real="0 0 1 1" align="Top|Right" name="BookImage">     
+        <Property key="ImageTexture" value="textures\tx_menubook.dds"/>
+
+        <Widget type="Button" skin="Next_btn" position="251 220 128 32" name="NextPageBTN"/>
+        <Widget type="Button" skin="Prev_btn" position="165 220 128 32" name="PrevPageBTN"/>
+        <Widget type="Button" skin="Take_btn" position="75 220 128 32" name="TakeButton"/>
+        <Widget type="Button" skin="Close_btn" position="360 220 128 32" name="CloseButton"/>
+
+        <Widget type="EditBox" skin="MW_BookPage" position_real="0.15 0.1 0.3 0.8" name = "LeftText"/>
+        <Widget type="EditBox" skin="MW_BookPage" position_real="0.55 0.1 0.3 0.8" name = "RightText"/>
+    </Widget>
+</Widget>
+
+</MyGUI>

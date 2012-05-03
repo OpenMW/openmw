@@ -62,6 +62,8 @@ namespace MWGui
   class JournalWindow;
   class CharacterCreation;
   class ToolTips;
+  class ScrollWindow;
+  class BookWindow;
 
   class TextInputDialog;
   class InfoBoxDialog;
@@ -203,6 +205,8 @@ namespace MWGui
     Console *console;
     JournalWindow* mJournal;
     DialogueWindow *dialogueWindow;
+    ScrollWindow* mScrollWindow;
+    BookWindow* mBookWindow;
 
     CharacterCreation* mCharGen;
 

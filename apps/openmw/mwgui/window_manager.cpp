@@ -8,6 +8,8 @@
 #include "stats_window.hpp"
 #include "messagebox.hpp"
 #include "tooltips.hpp"
+#include "scrollwindow.hpp"
+#include "bookwindow.hpp"
 
 #include "../mwmechanics/mechanicsmanager.hpp"
 #include "../mwinput/inputmanager.hpp"
@@ -37,6 +39,8 @@ WindowManager::WindowManager(
   , mMessageBoxManager(NULL)
   , console(NULL)
   , mJournal(NULL)
+  , mBookWindow(NULL)
+  , mScrollWindow(NULL)
   , dialogueWindow(nullptr)
   , mCharGen(NULL)
   , playerClass()
@@ -84,6 +88,8 @@ WindowManager::WindowManager(
     mMessageBoxManager = new MessageBoxManager(this);
     dialogueWindow = new DialogueWindow(*this);
     mToolTips = new ToolTips(this);
+    mScrollWindow = new ScrollWindow(*this);
+    mBookWindow = new BookWindow(*this);
 
     // The HUD is always on
     hud->setVisible(true);

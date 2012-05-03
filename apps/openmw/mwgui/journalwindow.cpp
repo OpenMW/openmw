@@ -109,9 +109,6 @@ MWGui::JournalWindow::JournalWindow (WindowManager& parWindowManager)
     //std::list<std::string> list = formatText("OpenMW rgh dsfg sqef srg ZT  uzql n ZLIEHRF LQSJH GLOIjf qjfmj hslkdgn jlkdjhg qlr isgli shli uhs fiuh qksf cg ksjnf lkqsnbf ksbf sbfkl zbf kuyzflkj sbgdfkj zlfh ozhjfmo hzmfh lizuf rty qzt ezy tkyEZT RYYJ DG fgh  is an open-source implementation of the game engine found in the game Morrowind. This is a dumb test text msodjbg smojg smoig  fiiinnn");
     //std::list<std::string> list = formatText();
     //displayLeftText(list.front());
-
-    MyGUI::WindowPtr t = static_cast<MyGUI::WindowPtr>(mMainWidget);
-    t->eventWindowChangeCoord += MyGUI::newDelegate(this, &JournalWindow::onWindowResize);
 }
 
 void MWGui::JournalWindow::open()
@@ -157,10 +154,6 @@ void MWGui::JournalWindow::open()
     {
         //std::cout << MWBase::Environment::get().getJournal()->begin()->getText(MWBase::Environment::get().getWorld()->getStore());
     }
-}
-
-void MWGui::JournalWindow::onWindowResize(MyGUI::Window* window)
-{
 }
 
 void MWGui::JournalWindow::displayLeftText(std::string text)

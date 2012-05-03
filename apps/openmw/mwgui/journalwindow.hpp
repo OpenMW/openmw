@@ -19,15 +19,6 @@ namespace MWGui
             void open();
 
         private:
-            enum ColorStyle
-            {
-                CS_Sub,
-                CS_Normal,
-                CS_Super
-            };
-
-            void onWindowResize(MyGUI::Window* window);
-
             void displayLeftText(std::string text);
             void displayRightText(std::string text);
 

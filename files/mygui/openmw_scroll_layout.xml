@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<MyGUI type="Layout">
+
+<Widget type="Window" skin="" layer="Windows" position="0 0 512 512" name="_Main">
+
+    <Widget type="ImageBox" skin="ImageBox" position_real="0 0 1 1" name="ScrollImage">     
+        <Property key="ImageTexture" value="textures\scroll.dds"/>
+
+        <Widget type="Button" skin="Take_btn" position="12 18 128 32" name="TakeButton"/>
+
+        <Widget type="Button" skin="Close_btn" position="418 24 128 32" name="CloseButton"/>
+    </Widget>
+</Widget>
+
+</MyGUI>

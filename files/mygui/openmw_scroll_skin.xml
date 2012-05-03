@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<MyGUI type="Skin">
+        <Skin name="Take_btn" size="128 32" texture="textures\tx_menubook_take_idle.dds">
+                <BasisSkin type="MainSkin" offset="0 0 128 32" align="ALIGN_VSTRETCH">
+                        <State name="normal" offset="0 0 128 32"/>
+                </BasisSkin>
+        </Skin>
+
+        <Skin name="Close_btn" size="128 32" texture="textures\tx_menubook_close_idle.dds">
+                <BasisSkin type="MainSkin" offset="0 0 128 32" align="ALIGN_VSTRETCH">
+                        <State name="normal" offset="0 0 128 32"/>
+                </BasisSkin>
+        </Skin>
+</MyGUI>
