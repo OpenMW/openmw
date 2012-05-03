@@ -74,7 +74,6 @@ namespace OMW
             bool mNewGame;
             bool mUseSound;
             bool mCompileAll;
-            float mFocusTDiff;
             std::string mFocusName;
             std::map<std::string,std::string> mFallbackMap;
 
