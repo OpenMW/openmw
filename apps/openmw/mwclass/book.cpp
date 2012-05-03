@@ -8,7 +8,7 @@
 #include "../mwbase/environment.hpp"
 
 #include "../mwworld/ptr.hpp"
-#include "../mwworld/actiontake.hpp"
+#include "../mwworld/actionread.hpp"
 #include "../mwworld/world.hpp"
 
 #include "../mwrender/objects.hpp"
@@ -60,12 +60,8 @@ namespace MWClass
     boost::shared_ptr<MWWorld::Action> Book::activate (const MWWorld::Ptr& ptr,
         const MWWorld::Ptr& actor) const
     {
-        // TODO implement reading
-
-        MWBase::Environment::get().getSoundManager()->playSound3D (ptr, getUpSoundId(ptr), 1.0, 1.0, MWSound::Play_NoTrack);
-
         return boost::shared_ptr<MWWorld::Action> (
-            new MWWorld::ActionTake (ptr));
+            new MWWorld::ActionRead (ptr));
     }
 
     std::string Book::getScript (const MWWorld::Ptr& ptr) const

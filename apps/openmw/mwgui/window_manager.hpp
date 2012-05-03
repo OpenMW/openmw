@@ -127,6 +127,9 @@ namespace MWGui
 
     MWGui::DialogueWindow* getDialogueWindow() {return dialogueWindow;}
 
+    MWGui::BookWindow* getBookWindow() {return mBookWindow;}
+    MWGui::ScrollWindow* getScrollWindow() {return mScrollWindow;}
+
     MyGUI::Gui* getGui() const { return gui; }
 
     void wmUpdateFps(float fps, size_t triangleCount, size_t batchCount)

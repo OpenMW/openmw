@@ -185,6 +185,8 @@ void WindowManager::updateVisible()
     stats->setVisible(false);
     console->disable();
     mJournal->setVisible(false);
+    mScrollWindow->setVisible(false);
+    mBookWindow->setVisible(false);
     dialogueWindow->setVisible(false);
 
     // Mouse is visible whenever we're not in game mode
@@ -204,6 +206,12 @@ void WindowManager::updateVisible()
             break;
         case GM_Console:
             console->enable();
+            break;
+        case GM_Scroll:
+            mScrollWindow->setVisible(true);
+            break;
+        case GM_Book:
+            mBookWindow->setVisible(true);
             break;
         case GM_Name:
         case GM_Race:
