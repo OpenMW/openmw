@@ -161,6 +161,8 @@ namespace MWDialogue
 
     bool DialogueManager::functionFilter(const MWWorld::Ptr& actor, const ESM::DialInfo& info,bool choice)
     {
+        bool isCreature = (actor.getTypeName() != typeid(ESM::NPC).name());
+
         for (std::vector<ESM::DialInfo::SelectStruct>::const_iterator iter (info.selects.begin());
             iter != info.selects.end(); ++iter)
         {
@@ -195,6 +197,9 @@ namespace MWDialogue
 
                 case 46://Same faction
                     {
+                    if (isCreature)
+                        return false;
+
                     MWMechanics::NpcStats PCstats = MWWorld::Class::get(MWBase::Environment::get().getWorld()->getPlayer().getPlayer()).getNpcStats(MWBase::Environment::get().getWorld()->getPlayer().getPlayer());
                     MWMechanics::NpcStats NPCstats = MWWorld::Class::get(actor).getNpcStats(actor);
                     int sameFaction = 0;
@@ -283,6 +288,8 @@ namespace MWDialogue
     bool DialogueManager::isMatching (const MWWorld::Ptr& actor,
         const ESM::DialInfo::SelectStruct& select) const
     {
+        bool isCreature = (actor.getTypeName() != typeid(ESM::NPC).name());
+
         char type = select.selectRule[1];
 
         if (type!='0')
@@ -380,6 +387,9 @@ namespace MWDialogue
                 return true;
 
             case '8':// not faction
+                if (isCreature)
+                    return false;
+
                 if(select.type==ESM::VT_Int)
                 {
                     ESMS::LiveCellRef<ESM::NPC, MWWorld::RefData>* npc = actor.get<ESM::NPC>();
@@ -394,6 +404,9 @@ namespace MWDialogue
                 return true;
 
             case '9':// not class
+                if (isCreature)
+                    return false;
+
                 if(select.type==ESM::VT_Int)
                 {
                     ESMS::LiveCellRef<ESM::NPC, MWWorld::RefData>* npc = actor.get<ESM::NPC>();
@@ -408,6 +421,9 @@ namespace MWDialogue
                 return true;
 
             case 'A'://not Race
+                if (isCreature)
+                    return false;
+
                 if(select.type==ESM::VT_Int)
                 {
                     ESMS::LiveCellRef<ESM::NPC, MWWorld::RefData>* npc = actor.get<ESM::NPC>();
@@ -464,6 +480,8 @@ namespace MWDialogue
 
     bool DialogueManager::isMatching (const MWWorld::Ptr& actor, const ESM::DialInfo& info) const
     {
+        bool isCreature = (actor.getTypeName() != typeid(ESM::NPC).name());
+
         // actor id
         if (!info.actor.empty())
             if (toLower (info.actor)!=MWWorld::Class::get (actor).getId (actor))
@@ -472,6 +490,9 @@ namespace MWDialogue
         //NPC race
         if (!info.race.empty())
         {
+            if (isCreature)
+                return false;
+
             ESMS::LiveCellRef<ESM::NPC, MWWorld::RefData> *cellRef = actor.get<ESM::NPC>();
 
             if (!cellRef)
@@ -484,6 +505,9 @@ namespace MWDialogue
         //NPC class
         if (!info.clas.empty())
         {
+            if (isCreature)
+                return false;
+
             ESMS::LiveCellRef<ESM::NPC, MWWorld::RefData> *cellRef = actor.get<ESM::NPC>();
 
             if (!cellRef)
@@ -496,6 +520,9 @@ namespace MWDialogue
         //NPC faction
         if (!info.npcFaction.empty())
         {
+            if (isCreature)
+                return false;
+
             //MWWorld::Class npcClass = MWWorld::Class::get(actor);
             MWMechanics::NpcStats stats = MWWorld::Class::get(actor).getNpcStats(actor);
             std::map<std::string,int>::iterator it = stats.mFactionRank.find(info.npcFaction);
@@ -529,16 +556,18 @@ namespace MWDialogue
         }
 
         //check gender
-        ESMS::LiveCellRef<ESM::NPC, MWWorld::RefData>* npc = actor.get<ESM::NPC>();
-        if(npc->base->flags&npc->base->Female)
+        if (!isCreature)
         {
-            if(static_cast<int> (info.data.gender)==0)  return false;
+            ESMS::LiveCellRef<ESM::NPC, MWWorld::RefData>* npc = actor.get<ESM::NPC>();
+            if(npc->base->flags&npc->base->Female)
+            {
+                if(static_cast<int> (info.data.gender)==0)  return false;
+            }
+            else
+            {
+                if(static_cast<int> (info.data.gender)==1)  return false;
+            }
         }
-        else
-        {
-            if(static_cast<int> (info.data.gender)==1)  return false;
-        }
-
 
         // check cell
         if (!info.cell.empty())
@@ -839,6 +868,9 @@ namespace MWDialogue
 
     std::string DialogueManager::getFaction()
     {
+        if (mActor.getTypeName() != typeid(ESM::NPC).name())
+            return "";
+
         std::string factionID("");
         MWMechanics::NpcStats stats = MWWorld::Class::get(mActor).getNpcStats(mActor);
         if(stats.mFactionRank.empty())
