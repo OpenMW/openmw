@@ -256,7 +256,7 @@ MyGUI::TextBox* StatsWindow::addValueItem(const std::string& text, const std::st
     skillNameWidget->setUserString("ToolTipType", "Text");
     skillNameWidget->setUserString("ToolTipText", tooltip);
 
-    skillValueWidget = skillClientWidget->createWidget<MyGUI::TextBox>("SandTextRight", coord2, MyGUI::Align::Default);
+    skillValueWidget = skillClientWidget->createWidget<MyGUI::TextBox>("SandTextRight", coord2, MyGUI::Align::Right | MyGUI::Align::Top);
     skillValueWidget->setUserString("ToolTipType", "Text");
     skillValueWidget->setUserString("ToolTipText", tooltip);
     skillValueWidget->setCaption(value);

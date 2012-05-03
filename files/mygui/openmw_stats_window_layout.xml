@@ -26,34 +26,34 @@
             <Widget type="TextBox" skin="SandTextRight" position="104 40 104 18" name="ClassText"/>
         </Widget>
 
-        <Widget type="Widget" skin="MW_Box" position="8 148 212 152">
-            <Widget type="TextBox" skin="SandText" position="4 4 100 18" name="Attrib1"/>
-            <Widget type="TextBox" skin="SandTextRight" position="104 4 104 18" name="AttribVal1"/>
+        <Widget type="Widget" skin="MW_Box" position="8 148 212 152" align="ALIGN_LEFT ALIGN_TOP ALIGN_VSTRETCH">
+            <Widget type="TextBox" skin="SandText" position="4 4 160 18" name="Attrib1"/>
+            <Widget type="TextBox" skin="SandTextRight" position="164 4 44 18" name="AttribVal1"/>
 
-            <Widget type="TextBox" skin="SandText" position="4 22 100 18" name="Attrib2"/>
-            <Widget type="TextBox" skin="SandTextRight" position="104 22 104 18" name="AttribVal2"/>
+            <Widget type="TextBox" skin="SandText" position="4 22 160 18" name="Attrib2"/>
+            <Widget type="TextBox" skin="SandTextRight" position="164 22 44 18" name="AttribVal2"/>
 
-            <Widget type="TextBox" skin="SandText" position="4 40 100 18" name="Attrib3"/>
-            <Widget type="TextBox" skin="SandTextRight" position="104 40 104 18" name="AttribVal3"/>
+            <Widget type="TextBox" skin="SandText" position="4 40 160 18" name="Attrib3"/>
+            <Widget type="TextBox" skin="SandTextRight" position="164 40 44 18" name="AttribVal3"/>
 
-            <Widget type="TextBox" skin="SandText" position="4 58 100 18" name="Attrib4"/>
-            <Widget type="TextBox" skin="SandTextRight" position="104 58 104 18" name="AttribVal4"/>
+            <Widget type="TextBox" skin="SandText" position="4 58 160 18" name="Attrib4"/>
+            <Widget type="TextBox" skin="SandTextRight" position="164 58 44 18" name="AttribVal4"/>
 
-            <Widget type="TextBox" skin="SandText" position="4 76 100 18" name="Attrib5"/>
-            <Widget type="TextBox" skin="SandTextRight" position="104 76 104 18" name="AttribVal5"/>
+            <Widget type="TextBox" skin="SandText" position="4 76 160 18" name="Attrib5"/>
+            <Widget type="TextBox" skin="SandTextRight" position="164 76 44 18" name="AttribVal5"/>
 
-            <Widget type="TextBox" skin="SandText" position="4 94 100 18" name="Attrib6"/>
-            <Widget type="TextBox" skin="SandTextRight" position="104 94 104 18" name="AttribVal6"/>
+            <Widget type="TextBox" skin="SandText" position="4 94 160 18" name="Attrib6"/>
+            <Widget type="TextBox" skin="SandTextRight" position="164 94 44 18" name="AttribVal6"/>
 
-            <Widget type="TextBox" skin="SandText" position="4 112 100 18" name="Attrib7"/>
-            <Widget type="TextBox" skin="SandTextRight" position="104 112 104 18" name="AttribVal7"/>
+            <Widget type="TextBox" skin="SandText" position="4 112 160 18" name="Attrib7"/>
+            <Widget type="TextBox" skin="SandTextRight" position="164 112 44 18" name="AttribVal7"/>
 
-            <Widget type="TextBox" skin="SandText" position="4 130 100 18" name="Attrib8"/>
-            <Widget type="TextBox" skin="SandTextRight" position="104 130 104 18" name="AttribVal8"/>
+            <Widget type="TextBox" skin="SandText" position="4 130 160 18" name="Attrib8"/>
+            <Widget type="TextBox" skin="SandTextRight" position="164 130 44 18" name="AttribVal8"/>
         </Widget>
 
         <!-- Player skills, factions, birthsign and reputation -->
-        <Widget type="Widget" skin="MW_Box" position="228 8 248 292" align="ALIGN_LEFT ALIGN_VSTRETCH" name="Skills">
+        <Widget type="Widget" skin="MW_Box" position="228 8 248 292" align="ALIGN_LEFT ALIGN_STRETCH" name="Skills">
             <Widget type="Widget" skin="" position="4 4 222 284" align="ALIGN_STRETCH" name="SkillClient" />
             <Widget type="ScrollBar" skin="MW_VScroll" position="230 4 14 284" align="ALIGN_RIGHT ALIGN_VSTRETCH" name="SkillScroller" />
         </Widget>
