@@ -97,10 +97,17 @@ namespace MWSound
 
         void say(MWWorld::Ptr reference, const std::string& filename);
         ///< Make an actor say some text.
-        /// \param filename name of a sound file in "Sound/Vo/" in the data directory.
+        /// \param filename name of a sound file in "Sound/" in the data directory.
 
-        bool sayDone(MWWorld::Ptr reference) const;
+        void say(const std::string& filename);
+        ///< Say some text, without an actor ref
+        /// \param filename name of a sound file in "Sound/" in the data directory.
+
+        bool sayDone(MWWorld::Ptr reference=MWWorld::Ptr()) const;
         ///< Is actor not speaking?
+
+        void stopSay(MWWorld::Ptr reference=MWWorld::Ptr());
+        ///< Stop an actor speaking
 
         SoundPtr playSound(const std::string& soundId, float volume, float pitch, int mode=Play_Normal);
         ///< Play a sound, independently of 3D-position

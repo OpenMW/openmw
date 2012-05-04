@@ -22,6 +22,8 @@
 #include <openengine/bullet/physic.hpp>
 #include <openengine/ogre/fader.hpp>
 
+#include <OgreTimer.h>
+
 namespace Ogre
 {
     class Vector3;
@@ -101,9 +103,13 @@ namespace MWWorld
             int mNumFacing;
             std::map<std::string,std::string> mFallback;
 
+            unsigned long lastTick;
+            Ogre::Timer mTimer;
+
             int getDaysPerMonth (int month) const;
 
-            void moveObjectImp (Ptr ptr, float x, float y, float z);
+            bool moveObjectImp (Ptr ptr, float x, float y, float z);
+            ///< @return true if the active cell (cell player is in) changed
 
         public:
 

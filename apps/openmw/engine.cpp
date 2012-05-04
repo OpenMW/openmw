@@ -148,7 +148,6 @@ OMW::Engine::Engine(Files::ConfigurationManager& configurationManager)
   , mNewGame (false)
   , mUseSound (true)
   , mCompileAll (false)
-  , mFocusTDiff (0)
   , mScriptContext (0)
   , mFSStrict (false)
   , mCfgMgr(configurationManager)
@@ -263,7 +262,6 @@ void OMW::Engine::setNewGame(bool newGame)
 
 void OMW::Engine::go()
 {
-    mFocusTDiff = 0;
     assert (!mCellName.empty());
     assert (!mMaster.empty());
     assert (!mOgre);

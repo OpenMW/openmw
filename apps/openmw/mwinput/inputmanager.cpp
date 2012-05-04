@@ -60,6 +60,7 @@ namespace MWInput
       A_CycleWeaponRight,
       A_ToggleSneak,    //Toggles Sneak, add Push-Sneak later
       A_ToggleWalk, //Toggle Walking/Running
+	  A_Crouch,
 
       A_QuickSave,
       A_QuickLoad,
@@ -310,6 +311,9 @@ namespace MWInput
       poller.bind(A_MoveRight, KC_D);
       poller.bind(A_MoveForward, KC_W);
       poller.bind(A_MoveBackward, KC_S);
+	  
+	  poller.bind(A_Jump, KC_E);
+	  poller.bind(A_Crouch, KC_LCONTROL);
     }
 
     //NOTE: Used to check for movement keys
@@ -356,6 +360,13 @@ namespace MWInput
         }
         else
             player.setForwardBackward (0);
+
+		if (poller.isDown(A_Jump))
+            player.setUpDown (1);
+        else if (poller.isDown(A_Crouch))
+            player.setUpDown (-1);
+        else
+            player.setUpDown (0);
     }
 
     // Switch between gui modes. Besides controlling the Gui windows
