@@ -15,6 +15,19 @@
             <Property key="ImageResource" value="MenuBook_Close"/>
         </Widget>
 
+        <Widget type="ScrollView" skin="MW_ScrollView" position="60 130 410 300" name="TextView">
+            <Property key="CanvasSize" value="410 900"/>
+            <Widget type="EditBox" skin="NormalText" position="0 0 380 900">
+                <Property key="Caption" value="fisdj fjidifj dij fdijf idj fjidi jfdij fidj fidj ifjdi fj idjfisdj fjidifj dij fdijf idj fjidi jfdij fidj fidj ifjdi fj idjfisdj fjidifj dij fdijf idj fjidi jfdij fidj fidj ifjdi fj idjfisdj fjidifj dij fdijf idj fjidi jfdij fidj fidj ifjdi fj idjfisdj fjidifj dij fdijf idj fjidi jfdij fidj fidj ifjdi fj idjfisdj fjidifj dij fdijf idj fjidi jfdij fidj fidj ifjdi fj idjfisdj fjidifj dij fdijf idj fjidi jfdij fidj fidj ifjdi fj idjfisdj fjidifj dij fdijf idj fjidi jfdij fidj fidj ifjdi fj idjfisdj fjidifj dij fdijf idj fjidi jfdij fidj fidj ifjdi fj idjfisdj fjidifj dij fdijf idj fjidi jfdij fidj fidj ifjdi fj idj"/>
+                <Property key="WordWrap" value="true"/>
+                <Property key="TextColour" value="0 0 0"/>
+                <Property key="TextAlign" value="ALIGN_LEFT ALIGN_TOP"/>
+                <Property key="Static" value="true"/>
+                <Property key="VisibleVScroll" value="1"/>
+                <Property key="NeedMouse" value="0"/>
+            </Widget>
+        </Widget>
+
     </Widget>
 </Widget>
 

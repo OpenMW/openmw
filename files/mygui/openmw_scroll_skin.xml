@@ -2,4 +2,10 @@
 
 <MyGUI type="Skin">
 
+    <Skin name="MW_ScrollView" size="516 516" texture="mwgui.png">
+        <Child type="Widget" skin="" offset="0 0 516 516" align="Stretch" name="Client"/>
+
+        <Child type="ScrollBar" skin="MW_VScroll" offset="498 3 14 509" align="ALIGN_RIGHT ALIGN_VSTRETCH" name="VScroll"/>
+    </Skin>
+
 </MyGUI>

@@ -212,6 +212,20 @@
         <Child type="Widget" skin="IB_BR" offset="514 514 2 2" align="ALIGN_BOTTOM ALIGN_RIGHT"/>
     </Skin>
 
+    <Skin name = "MW_SimpleList" size = "516 516" align = "ALIGN_LEFT ALIGN_TOP" texture="mwgui.png">
+        <Child type="Widget" skin="" offset = "3 3 510 510" align = "ALIGN_STRETCH" name = "Client">
+        </Child>
+
+        <Child type="Widget" skin="IB_T" offset="2 0 512 2" align="ALIGN_TOP ALIGN_HSTRETCH"/>
+        <Child type="Widget" skin="IB_B" offset="2 514 512 2" align="ALIGN_BOTTOM ALIGN_HSTRETCH"/>
+        <Child type="Widget" skin="IB_L" offset="0 2 2 512" align="ALIGN_LEFT ALIGN_VSTRETCH"/>
+        <Child type="Widget" skin="IB_R" offset="514 2 2 512" align="ALIGN_RIGHT ALIGN_VSTRETCH"/>
+        <Child type="Widget" skin="IB_TL" offset="0 0 2 2" align="ALIGN_TOP ALIGN_LEFT"/>
+        <Child type="Widget" skin="IB_TR" offset="514 0 2 2" align="ALIGN_TOP ALIGN_RIGHT"/>
+        <Child type="Widget" skin="IB_BL" offset="0 514 2 2" align="ALIGN_BOTTOM ALIGN_LEFT"/>
+        <Child type="Widget" skin="IB_BR" offset="514 514 2 2" align="ALIGN_BOTTOM ALIGN_RIGHT"/>
+    </Skin>
+
     <Skin name = "MW_MultiSubList" size = "516 516" align = "ALIGN_LEFT ALIGN_TOP">
         <Property key="NeedKey" value = "true" />
         <Property key="SkinLine" value = "MW_ListLine" />

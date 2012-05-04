@@ -2,6 +2,7 @@
 #include "dialogue_history.hpp"
 #include "window_manager.hpp"
 #include "widgets.hpp"
+#include "list.hpp"
 #include "components/esm_store/store.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwdialogue/dialoguemanager.hpp"
@@ -56,9 +57,8 @@ DialogueWindow::DialogueWindow(WindowManager& parWindowManager)
 
     //Topics list
     getWidget(topicsList, "TopicsList");
-    topicsList->setScrollVisible(true);
     //topicsList->eventListSelectAccept      += MyGUI::newDelegate(this, &DialogueWindow::onSelectTopic);
-    topicsList->eventListMouseItemActivate += MyGUI::newDelegate(this, &DialogueWindow::onSelectTopic);
+    topicsList->eventItemSelected += MyGUI::newDelegate(this, &DialogueWindow::onSelectTopic);
     //topicsList->eventListChangePosition    += MyGUI::newDelegate(this, &DialogueWindow::onSelectTopic);
 
     MyGUI::ButtonPtr byeButton;
@@ -98,7 +98,7 @@ void DialogueWindow::onMouseWheel(MyGUI::Widget* _sender, int _rel)
 
 void DialogueWindow::open()
 {
-    topicsList->removeAllItems();
+    topicsList->clear();
     pTopicsText.clear();
     history->eraseText(0,history->getTextLength());
     updateOptions();
@@ -110,11 +110,8 @@ void DialogueWindow::onByeClicked(MyGUI::Widget* _sender)
     MWBase::Environment::get().getDialogueManager()->goodbyeSelected();
 }
 
-void DialogueWindow::onSelectTopic(MyGUI::ListBox* _sender, size_t _index)
+void DialogueWindow::onSelectTopic(std::string topic)
 {
-    if (_index == MyGUI::ITEM_NONE)
-        return;
-    std::string topic =  _sender->getItemNameAt(_index);
     MWBase::Environment::get().getDialogueManager()->keywordSelected(lower_string(topic));
 }
 
@@ -126,7 +123,7 @@ void DialogueWindow::startDialogue(std::string npcName)
 
 void DialogueWindow::setKeywords(std::list<std::string> keyWords)
 {
-    topicsList->removeAllItems();
+    topicsList->clear();
     for(std::list<std::string>::iterator it = keyWords.begin(); it != keyWords.end(); it++)
     {
         topicsList->addItem(*it);
@@ -135,9 +132,9 @@ void DialogueWindow::setKeywords(std::list<std::string> keyWords)
 
 void DialogueWindow::removeKeyword(std::string keyWord)
 {
-    if(topicsList->findItemIndexWith(keyWord) != MyGUI::ITEM_NONE)
+    if(topicsList->hasItem(keyWord))
     {
-        topicsList->removeItemAt(topicsList->findItemIndexWith(keyWord));
+        topicsList->removeItem(keyWord);
         pTopicsText.erase(keyWord);
     }
 }
@@ -211,7 +208,7 @@ void DialogueWindow::askQuestion(std::string question)
 void DialogueWindow::updateOptions()
 {
     //Clear the list of topics
-    topicsList->removeAllItems();
+    topicsList->clear();
     pTopicsText.clear();
     history->eraseText(0,history->getTextLength());
 
