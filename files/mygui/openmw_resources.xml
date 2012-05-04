@@ -38,7 +38,7 @@
     </Resource>
 
     <Resource type="ResourceImageSet" name="MenuBook_Close">
-        <Group name="States" texture="mwgui1" size="128 32">
+        <Group name="States" texture="mwgui1" size="96 24">
             <Index name="disabled">
                 <Frame point="0 0"/>
             </Index>
@@ -55,7 +55,7 @@
     </Resource>
 
     <Resource type="ResourceImageSet" name="MenuBook_Take">
-        <Group name="States" texture="mwgui1" size="128 32">
+        <Group name="States" texture="mwgui1" size="96 24">
             <Index name="disabled">
                 <Frame point="384 0"/>
             </Index>
@@ -71,9 +71,43 @@
         </Group>
     </Resource>
 
+    <Resource type="ResourceImageSet" name="MenuBook_Next">
+        <Group name="States" texture="mwgui1" size="96 24">
+            <Index name="disabled">
+                <Frame point="256 32"/>
+            </Index>
+            <Index name="normal">
+                <Frame point="256 32"/>
+            </Index>
+            <Index name="highlighted">
+                <Frame point="384 32"/>
+            </Index>
+            <Index name="pushed">
+                <Frame point="0 64"/>
+            </Index>
+        </Group>
+    </Resource>
+
+    <Resource type="ResourceImageSet" name="MenuBook_Prev">
+        <Group name="States" texture="mwgui1" size="96 24">
+            <Index name="disabled">
+                <Frame point="128 64"/>
+            </Index>
+            <Index name="normal">
+                <Frame point="128 64"/>
+            </Index>
+            <Index name="highlighted">
+                <Frame point="256 64"/>
+            </Index>
+            <Index name="pushed">
+                <Frame point="384 64"/>
+            </Index>
+        </Group>
+    </Resource>
+
 
     <Resource type="ResourceLayout" name="ButtonImage" version="3.2.0">
-        <Widget type="Widget" skin="ButtonEmptySkin" position="20 20 16 16" name="Root">
+        <Widget type="Widget" skin="Default" position="20 20 16 16" name="Root">
             <Property key="TextAlign" value="Center"/>
             <Property key="FontName" value="Default"/>
             <Property key="ModeImage" value="true"/>

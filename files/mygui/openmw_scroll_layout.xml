@@ -7,11 +7,11 @@
     <Widget type="ImageBox" skin="ImageBox" position_real="0 0 1 1" name="ScrollImage">     
         <Property key="ImageTexture" value="textures\scroll.dds"/>
 
-        <Widget type="Button" skin="ButtonImage" position="12 18 128 32" name="TakeButton">
+        <Widget type="Button" skin="ButtonImage" position="12 18 96 24" name="TakeButton">
             <Property key="ImageResource" value="MenuBook_Take"/>
         </Widget>
 
-        <Widget type="Button" skin="ButtonImage" position="418 24 128 32" name="CloseButton">
+        <Widget type="Button" skin="ButtonImage" position="418 24 96 24" name="CloseButton">
             <Property key="ImageResource" value="MenuBook_Close"/>
         </Widget>
 
