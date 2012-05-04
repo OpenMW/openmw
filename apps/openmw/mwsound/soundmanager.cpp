@@ -228,10 +228,46 @@ namespace MWSound
         }
     }
 
+    void SoundManager::say(const std::string& filename)
+    {
+        if(!mOutput->isInitialized())
+            return;
+        try
+        {
+            float basevol = mMasterVolume * mSFXVolume;
+            std::string filePath = "Sound/"+filename;
+
+            SoundPtr sound = mOutput->playSound(filePath, basevol, 1.0f, Play_Normal);
+            sound->mBaseVolume = basevol;
+
+            mActiveSounds[sound] = std::make_pair(MWWorld::Ptr(), std::string("_say_sound"));
+        }
+        catch(std::exception &e)
+        {
+            std::cout <<"Sound Error: "<<e.what()<< std::endl;
+        }
+    }
+
     bool SoundManager::sayDone(MWWorld::Ptr ptr) const
     {
         return !isPlaying(ptr, "_say_sound");
     }
+
+    void SoundManager::stopSay(MWWorld::Ptr ptr)
+    {
+        SoundMap::iterator snditer = mActiveSounds.begin();
+        while(snditer != mActiveSounds.end())
+        {
+            if(snditer->second.first == ptr && snditer->second.second == "_say_sound")
+            {
+                snditer->first->stop();
+                mActiveSounds.erase(snditer++);
+            }
+            else
+                snditer++;
+        }
+    }
+
 
 
     SoundPtr SoundManager::playSound(const std::string& soundId, float volume, float pitch, int mode)

@@ -18,7 +18,7 @@ enum traceWorldType
 	bothWorldTrace = collisionWorldTrace | pickWorldTrace
 };
 
-enum collaborativePhysicsType : unsigned
+enum collaborativePhysicsType
 {
 	No_Physics = 0, // Both are empty (example: statics you can walk through, like tall grass)
 	Only_Collision = 1, // This object only has collision physics but no pickup physics (example: statics)
@@ -53,8 +53,8 @@ struct traceResults
 
 template <const traceWorldType traceType>
 const bool NewPhysicsTrace(NewPhysTraceResults* const out, const Ogre::Vector3& start, const Ogre::Vector3& end, const Ogre::Vector3& BBExtents, const Ogre::Vector3& rotation, bool isInterior, OEngine::Physic::PhysicEngine* enginePass);
-template const bool NewPhysicsTrace<collisionWorldTrace>(NewPhysTraceResults* const out, const Ogre::Vector3& start, const Ogre::Vector3& end, const Ogre::Vector3& BBExtents, const Ogre::Vector3& rotation, bool isInterior, OEngine::Physic::PhysicEngine* enginePass);
-template const bool NewPhysicsTrace<pickWorldTrace>(NewPhysTraceResults* const out, const Ogre::Vector3& start, const Ogre::Vector3& end, const Ogre::Vector3& BBExtents, const Ogre::Vector3& rotation, bool isInterior, OEngine::Physic::PhysicEngine* enginePass);
+//template const bool NewPhysicsTrace<collisionWorldTrace>(NewPhysTraceResults* const out, const Ogre::Vector3& start, const Ogre::Vector3& end, const Ogre::Vector3& BBExtents, const Ogre::Vector3& rotation, bool isInterior, OEngine::Physic::PhysicEngine* enginePass);
+//template const bool NewPhysicsTrace<pickWorldTrace>(NewPhysTraceResults* const out, const Ogre::Vector3& start, const Ogre::Vector3& end, const Ogre::Vector3& BBExtents, const Ogre::Vector3& rotation, bool isInterior, OEngine::Physic::PhysicEngine* enginePass);
 
 void newtrace(traceResults* const results, const Ogre::Vector3& start, const Ogre::Vector3& end, const Ogre::Vector3& BBExtents, const float rotation, bool isInterior, OEngine::Physic::PhysicEngine* enginePass);
 
