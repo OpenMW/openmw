@@ -9,8 +9,12 @@
 
         <Widget type="Button" skin="Next_btn" position="251 220 128 32" name="NextPageBTN"/>
         <Widget type="Button" skin="Prev_btn" position="165 220 128 32" name="PrevPageBTN"/>
-        <Widget type="Button" skin="Take_btn" position="75 220 128 32" name="TakeButton"/>
-        <Widget type="Button" skin="Close_btn" position="360 220 128 32" name="CloseButton"/>
+        <Widget type="Button" skin="ButtonImage" position="75 220 128 32" name="TakeButton">
+            <Property key="ImageResource" value="MenuBook_Take"/>
+        </Widget>
+        <Widget type="Button" skin="ButtonImage" position="360 220 128 32" name="CloseButton">
+            <Property key="ImageResource" value="MenuBook_Close"/>
+        </Widget>
 
         <Widget type="EditBox" skin="MW_BookPage" position_real="0.15 0.1 0.3 0.8" name = "LeftText"/>
         <Widget type="EditBox" skin="MW_BookPage" position_real="0.55 0.1 0.3 0.8" name = "RightText"/>

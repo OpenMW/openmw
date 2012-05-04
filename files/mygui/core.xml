@@ -2,7 +2,7 @@
 <MyGUI>
     <MyGUI type="List">
         <List file="core.skin" />
-        <List file="openmw_images.xml" />
+        <List file="openmw_resources.xml" />
         <List file="openmw_layers.xml" />
         <List file="openmw.pointer.xml" />
         <List file="openmw.font.xml" />
