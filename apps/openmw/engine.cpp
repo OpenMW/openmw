@@ -158,13 +158,7 @@ OMW::Engine::Engine(Files::ConfigurationManager& configurationManager)
 
 OMW::Engine::~Engine()
 {
-    delete MWBase::Environment::get().getInputManager();
-    delete MWBase::Environment::get().getSoundManager();
-    delete MWBase::Environment::get().getMechanicsManager();
-    delete MWBase::Environment::get().getDialogueManager();
-    delete MWBase::Environment::get().getJournal();
-    delete MWBase::Environment::get().getScriptManager();
-    delete MWBase::Environment::get().getWorld();
+    mEnvironment.cleanup();
     delete mScriptContext;
     delete mOgre;
 }

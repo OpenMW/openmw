@@ -43,7 +43,7 @@ namespace MWBase
     ///
     /// This class allows each mw-subsystem to access any others subsystem's top-level manager class.
     ///
-    /// \attention Environment does not take ownership of the manager class instances it is handed over in
+    /// \attention Environment takes ownership of the manager class instances it is handed over in
     /// the set* functions.
     class Environment
     {
@@ -107,6 +107,9 @@ namespace MWBase
             MWInput::MWInputManager *getInputManager() const;
 
             float getFrameDuration() const;
+
+            void cleanup();
+            ///< Delete all mw*-subsystems.
 
             static const Environment& get();
             ///< Return instance of this class.
