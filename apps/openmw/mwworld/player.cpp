@@ -85,6 +85,14 @@ namespace MWWorld
 
         MWWorld::Class::get (ptr).getMovementSettings (ptr).mForwardBackward = value;
     }
+	void Player::setUpDown(int value)
+	{
+		MWWorld::Ptr ptr = getPlayer();
+
+        
+
+        MWWorld::Class::get (ptr).getMovementSettings (ptr).mUpDown = value;
+	}
 
     void Player::toggleRunning()
     {
@@ -100,4 +108,5 @@ namespace MWWorld
          MWWorld::Ptr ptr = getPlayer();
          return MWWorld::Class::get(ptr).getNpcStats(ptr).mDrawState;
     }
+
 }

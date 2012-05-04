@@ -75,11 +75,14 @@ namespace MWWorld
 
 
             // silence annoying g++ warning
-            for (std::vector<Ogre::SceneNode*>::const_iterator iter (functor.mHandles.begin());
-                iter!=functor.mHandles.end(); ++iter){
-                 Ogre::SceneNode* node = *iter;
+            for (std::vector<Ogre::SceneNode*>::const_iterator iter2 (functor.mHandles.begin());
+                iter2!=functor.mHandles.end(); ++iter2){
+                 Ogre::SceneNode* node = *iter2;
                 mPhysics->removeObject (node->getName());
             }
+
+            if (!((*iter)->cell->data.flags & ESM::Cell::Interior))
+                mPhysics->removeHeightField( (*iter)->cell->data.gridX, (*iter)->cell->data.gridY );
         }
 
 		mRendering.removeCell(*iter);
@@ -103,20 +106,36 @@ namespace MWWorld
 
         std::pair<CellStoreCollection::iterator, bool> result =
             mActiveCells.insert(cell);
-       if(result.second){
-              insertCell(*cell);
-              mRendering.cellAdded(cell);
-               mRendering.configureAmbient(*cell);
-               mRendering.requestMap(cell);
-               mRendering.configureAmbient(*cell);
-        }
 
+        if(result.second)
+        {
+            insertCell(*cell);
+            mRendering.cellAdded (cell);
+
+            float verts = ESM::Land::LAND_SIZE;
+            float worldsize = ESM::Land::REAL_SIZE;
+
+            if (!(cell->cell->data.flags & ESM::Cell::Interior))
+            {
+                ESM::Land* land = mWorld->getStore().lands.search(cell->cell->data.gridX,cell->cell->data.gridY);
+                mPhysics->addHeightField (land->landData->heights,
+                    cell->cell->data.gridX, cell->cell->data.gridY,
+                    0, ( worldsize/(verts-1) ), verts);
+            }
+
+            mRendering.configureAmbient(*cell);
+            mRendering.requestMap(cell);
+            mRendering.configureAmbient(*cell);
+
+        }
 
     }
 
     void Scene::playerCellChange (Ptr::CellStore *cell, const ESM::Position& position,
         bool adjustPlayerPos)
     {
+        bool hasWater = cell->cell->data.flags & cell->cell->HasWater;
+        mPhysics->setCurrentWater(hasWater, cell->cell->water);
         if (adjustPlayerPos)
             mWorld->getPlayer().setPos (position.pos[0], position.pos[1], position.pos[2]);
 

@@ -122,6 +122,10 @@ set(OENGINE_BULLET
     ${LIBDIR}/openengine/bullet/physic.hpp
     ${LIBDIR}/openengine/bullet/BulletShapeLoader.cpp
     ${LIBDIR}/openengine/bullet/BulletShapeLoader.h
+    ${LIBDIR}/openengine/bullet/pmove.cpp
+    ${LIBDIR}/openengine/bullet/pmove.h
+    ${LIBDIR}/openengine/bullet/trace.cpp
+    ${LIBDIR}/openengine/bullet/trace.h
 
 )
 
