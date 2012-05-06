@@ -10,6 +10,7 @@
 #include "window_base.hpp"
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/containerstore.hpp"
+#include <vector>
 
 namespace MWWorld
 {
@@ -38,6 +39,8 @@ namespace MWGui
         ContainerWindow* mContainerWindow;
         MyGUI::Widget* mDraggedWidget;
         MyGUI::Widget* mDragAndDropWidget;
+
+        MWWorld::Ptr mItem;
     };
 
     class ContainerWindow : public WindowBase
@@ -62,6 +65,11 @@ namespace MWGui
         MyGUI::ButtonPtr takeButton;
         MyGUI::ButtonPtr closeButton;
         DragAndDrop* mDragAndDrop;
+
+        MWWorld::Ptr mContainer;
+        bool mIsValid;//is in the right GUI Mode
+
+        void drawItems();
 
         void onByeClicked(MyGUI::Widget* _sender);
         void onSelectedItem(MyGUI::Widget* _sender);
