@@ -1,5 +1,7 @@
 #include "scrollwindow.hpp"
 
+#include "formatting.hpp"
+
 #include "../mwbase/environment.hpp"
 #include "../mwinput/inputmanager.hpp"
 #include "../mwworld/actiontake.hpp"
@@ -10,6 +12,8 @@ using namespace MWGui;
 ScrollWindow::ScrollWindow (WindowManager& parWindowManager) :
     WindowBase("openmw_scroll_layout.xml", parWindowManager)
 {
+    getWidget(mTextView, "TextView");
+
     getWidget(mCloseButton, "CloseButton");
     mCloseButton->eventMouseButtonClick += MyGUI::newDelegate(this, &ScrollWindow::onCloseButtonClicked);
 
@@ -24,6 +28,19 @@ void ScrollWindow::open (MWWorld::Ptr scroll)
     MWBase::Environment::get().getSoundManager()->playSound3D (scroll, "scroll", 1.0, 1.0);
 
     mScroll = scroll;
+
+    ESMS::LiveCellRef<ESM::Book, MWWorld::RefData> *ref =
+        mScroll.get<ESM::Book>();
+
+    BookTextParser parser;
+    MyGUI::IntSize size = parser.parse(ref->base->text, mTextView, 390);
+
+    if (size.height > mTextView->getSize().height)
+        mTextView->setCanvasSize(size);
+    else
+        mTextView->setCanvasSize(390, mTextView->getSize().height);
+
+    mTextView->setViewOffset(MyGUI::IntPoint(0,0));
 }
 
 void ScrollWindow::onCloseButtonClicked (MyGUI::Widget* _sender)

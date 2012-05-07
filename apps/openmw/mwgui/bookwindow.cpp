@@ -1,5 +1,7 @@
 #include "bookwindow.hpp"
 
+#include "formatting.hpp"
+
 #include "../mwbase/environment.hpp"
 #include "../mwinput/inputmanager.hpp"
 #include "../mwsound/soundmanager.hpp"
@@ -30,6 +32,12 @@ void BookWindow::open (MWWorld::Ptr book)
     MWBase::Environment::get().getSoundManager()->playSound3D (book, "book open", 1.0, 1.0);
 
     mBook = book;
+
+    ESMS::LiveCellRef<ESM::Book, MWWorld::RefData> *ref =
+        mBook.get<ESM::Book>();
+
+    //BookTextParser parser;
+    //parser.parse(ref->base->text, 0, 0);
 }
 
 void BookWindow::onCloseButtonClicked (MyGUI::Widget* _sender)

@@ -20,6 +20,7 @@ namespace MWGui
         private:
             MyGUI::Button* mCloseButton;
             MyGUI::Button* mTakeButton;
+            MyGUI::ScrollView* mTextView;
 
             MWWorld::Ptr mScroll;
     };
