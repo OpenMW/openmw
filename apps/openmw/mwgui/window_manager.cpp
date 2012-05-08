@@ -9,6 +9,7 @@
 #include "messagebox.hpp"
 #include "container.hpp"
 #include "inventorywindow.hpp"
+#include "itemwidget.hpp"
 
 #include "../mwmechanics/mechanicsmanager.hpp"
 #include "../mwinput/inputmanager.hpp"
@@ -68,6 +69,7 @@ WindowManager::WindowManager(MWWorld::Environment& environment,
     
     //Register own widgets with MyGUI
     MyGUI::FactoryManager::getInstance().registerFactory<DialogueHistory>("Widget");
+    MyGUI::FactoryManager::getInstance().registerFactory<ItemWidget>("Widget");
 
     // Get size info from the Gui object
     assert(gui);

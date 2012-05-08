@@ -18,26 +18,11 @@
 #include <boost/lexical_cast.hpp>
 #include "../mwworld/class.hpp"
 #include "../mwinput/inputmanager.hpp"
+#include "itemwidget.hpp"
 
 
 using namespace MWGui;
 using namespace Widgets;
-class ItemWidget: public MyGUI::ImageBox
-{
-public:
-    ItemWidget()
-        :ImageBox()
-    {
-    }
-    virtual ~ItemWidget()
-    {
-    }
-
-    void setPtr(MWWorld::Ptr &ptr,int pos){mPtr = ptr;mPos = pos;}
-
-    MWWorld::Ptr mPtr;
-    int mPos;
-};
 
 
 ContainerWindow::ContainerWindow(WindowManager& parWindowManager,MWWorld::Environment& environment,DragAndDrop* dragAndDrop)
@@ -149,39 +134,36 @@ void ContainerWindow::drawItems()
     int x = 4;
     int y = 4;
     int count = 0;
-
+    int index = 0;
 
     for (MWWorld::ContainerStoreIterator iter (containerStore.begin()); iter!=containerStore.end(); ++iter)
     {
-        count++;
+        index++;
         if(iter->getRefData().getCount() > 0)
         {
+            count++;
             std::string path = std::string("icons\\");
             path+=MWWorld::Class::get(*iter).getInventoryIcon(*iter);
             ItemWidget* image = mContainerWidget->createWidget<ItemWidget>("ImageBox", MyGUI::IntCoord(x, y, 32, 32), MyGUI::Align::Default);
             MyGUI::TextBox* text = image->createWidget<MyGUI::TextBox>("SandBrightText", MyGUI::IntCoord(x, y, 18, 18), MyGUI::Align::Default, std::string("Label"));
             image->eventMouseButtonClick += MyGUI::newDelegate(this,&ContainerWindow::onSelectedItem);
-            //image->setPtr(*iter,count);
-            image->mPos = count;
-            
-            //image->mPtr = *iter;
+            image->mPos = index;
+            image->mPtr = *iter;
             //image->eventMouseMove += MyGUI::newDelegate(this,&ContainerWindow::onMouseMove);
-            /*x += 36;
+            x += 36;
             if(count % 20 == 0)
             {
             y += 36;
             x = 4;
             count = 0;
-            }*/
+            }
 
             if(iter->getRefData().getCount() > 1)
                 text->setCaption(boost::lexical_cast<std::string>(iter->getRefData().getCount()));
-            //mContainerWidgets
 
             int pos = path.rfind(".");
             path.erase(pos);
             path.append(".dds");
-            //std::cout << path << std::endl;
             image->setImageTexture(path);
         }
     } 
@@ -251,7 +233,13 @@ void ContainerWindow::onContainerClicked(MyGUI::Widget* _sender)
     std::cout << "container clicked";
     if(mDragAndDrop->mIsOnDragAndDrop) //drop widget here
     {
-        //mContainer.getContainerStore()->add(mDragAndDrop->mDraggedWidget->
+        ItemWidget* item = static_cast<ItemWidget*>(mDragAndDrop->mDraggedWidget);
+        std::cout << item->mPos << item->mPtr.getTypeName();
+        if(item->mPtr.getContainerStore() == 0) std::cout << "nocontainer!";
+        std::cout << item->mPtr.getContainerStore()->getType(item->mPtr);
+        MWWorld::Ptr ptr = item->mPtr;
+        //MWWorld::World
+        //mContainer.getContainerStore()->add(item->mPtr);
         mDragAndDrop->mIsOnDragAndDrop = false;
         mDragAndDrop->mDraggedWidget->detachFromWidget();
         mDragAndDrop->mDraggedWidget->attachToWidget(mContainerWidget);
