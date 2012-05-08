@@ -36,9 +36,9 @@ void ScrollWindow::open (MWWorld::Ptr scroll)
     MyGUI::IntSize size = parser.parse(ref->base->text, mTextView, 390);
 
     if (size.height > mTextView->getSize().height)
-        mTextView->setCanvasSize(size);
+        mTextView->setCanvasSize(MyGUI::IntSize(410, size.height));
     else
-        mTextView->setCanvasSize(390, mTextView->getSize().height);
+        mTextView->setCanvasSize(410, mTextView->getSize().height);
 
     mTextView->setViewOffset(MyGUI::IntPoint(0,0));
 }
@@ -56,6 +56,8 @@ void ScrollWindow::onTakeButtonClicked (MyGUI::Widget* _sender)
 
     MWWorld::ActionTake take(mScroll);
     take.execute();
+
+    /// \todo what about scripts?
 
     MWBase::Environment::get().getInputManager()->setGuiMode (GM_Game);
 }

@@ -10,6 +10,7 @@ MyGUI::IntSize BookTextParser::parse(std::string text, MyGUI::Widget* parent, co
 {
     mParent = parent;
     mWidth = width;
+    mHeight = 0;
 
     assert(mParent);
     while (mParent->getChildCount())
@@ -29,16 +30,58 @@ MyGUI::IntSize BookTextParser::parse(std::string text, MyGUI::Widget* parent, co
     while (text[text.size()-1] == '\n')
         text.erase(text.size()-1);
 
-    return parseSubText(text, -1, MyGUI::Align::Left | MyGUI::Align::Top);
+    parseSubText(text);
+    return MyGUI::IntSize(mWidth, mHeight);
 }
 
-MyGUI::IntSize BookTextParser::parseSubText(std::string text, int textSize, MyGUI::Align textAlign)
+void BookTextParser::parseImage(std::string tag)
 {
-    MyGUI::IntSize size(mWidth,0);
+    int src_start = tag.find("SRC=")+5;
+    std::string image = tag.substr(src_start, tag.find('"', src_start)-src_start);
+
+    // fix texture extension to .dds
+    if (image.size() > 4)
+    {
+        image[image.size()-3] = 'd';
+        image[image.size()-2] = 'd';
+        image[image.size()-1] = 's';
+    }
+
+    int width_start = tag.find("WIDTH=")+7;
+    int width = boost::lexical_cast<int>(tag.substr(width_start, tag.find('"', width_start)-width_start));
+
+    int height_start = tag.find("HEIGHT=")+8;
+    int height = boost::lexical_cast<int>(tag.substr(height_start, tag.find('"', height_start)-height_start));
+
+    MyGUI::ImageBox* box = mParent->createWidget<MyGUI::ImageBox> ("ImageBox",
+        MyGUI::IntCoord(0, mHeight, width, height), MyGUI::Align::Left | MyGUI::Align::Top,
+        mParent->getName() + boost::lexical_cast<std::string>(mParent->getChildCount()));
+    box->setImageTexture("bookart\\" + image);
+    box->setProperty("NeedMouse", "false");
+
+    mWidth = std::max(mWidth, width);
+    mHeight += height;
+}
+
+void BookTextParser::parseSubText(std::string text)
+{
+    if (text[0] == '<')
+    {
+        if (text.find('>') == std::string::npos)
+            throw std::runtime_error("BookTextParser Error: Tag is not terminated");
+
+        if (text.size() > 4 && text.substr(0, 4) == "<IMG")
+        {
+            parseImage(text.substr(0, text.find('>')));
+        }
+
+        text.erase(0, text.find('>')+1);
+    }
 
     bool tagFound = false;
     std::string realText; // real text, without tags
-    for (unsigned int i=0; i<text.size(); ++i)
+    unsigned int i=0;
+    for (; i<text.size(); ++i)
     {
         char c = text[i];
         if (c == '<')
@@ -57,16 +100,6 @@ MyGUI::IntSize BookTextParser::parseSubText(std::string text, int textSize, MyGU
             else
             {
                 tagFound = true;
-                while (c != '>')
-                {
-                    if (i >= text.size())
-                        throw std::runtime_error("BookTextParser Error: Tag is not terminated");
-
-                    c = text[++i];
-                }
-                ++i;
-                /// \todo parse tags
-                size += parseSubText(text.substr(i, text.size()), textSize, textAlign);
                 break;
             }
         }
@@ -74,22 +107,23 @@ MyGUI::IntSize BookTextParser::parseSubText(std::string text, int textSize, MyGU
             realText += c;
     }
 
-    if (!tagFound)
-    {
-        MyGUI::EditBox* box = mParent->createWidget<MyGUI::EditBox>("NormalText",
-            MyGUI::IntCoord(0, size.height, mWidth, 24), MyGUI::Align::Left | MyGUI::Align::Top,
-            mParent->getName() + boost::lexical_cast<std::string>(mParent->getChildCount()));
-        box->setProperty("Static", "true");
-        box->setProperty("MultiLine", "true");
-        box->setProperty("WordWrap", "true");
-        box->setProperty("NeedMouse", "false");
-        box->setMaxTextLength(realText.size());
-        box->setTextAlign(textAlign);
-        box->setTextColour(MyGUI::Colour(0,0,0));
-        box->setCaption(realText);
-        box->setSize(box->getSize().width, box->getTextSize().height);
-        size += MyGUI::IntSize(0, box->getTextSize().height);
-    }
+    MyGUI::EditBox* box = mParent->createWidget<MyGUI::EditBox>("NormalText",
+        MyGUI::IntCoord(0, mHeight, mWidth, 24), MyGUI::Align::Left | MyGUI::Align::Top,
+        mParent->getName() + boost::lexical_cast<std::string>(mParent->getChildCount()));
+    box->setProperty("Static", "true");
+    box->setProperty("MultiLine", "true");
+    box->setProperty("WordWrap", "true");
+    box->setProperty("NeedMouse", "false");
+    box->setMaxTextLength(realText.size());
+    box->setTextAlign(mTextStyle.mTextAlign);
+    box->setTextColour(mTextStyle.mColour);
+    box->setFontName(mTextStyle.mFont);
+    box->setCaption(realText);
+    box->setSize(box->getSize().width, box->getTextSize().height);
+    mHeight += box->getTextSize().height;
 
-    return size;
+    if (tagFound)
+    {
+        parseSubText(text.substr(i, text.size()));
+    }
 }

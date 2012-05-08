@@ -54,6 +54,8 @@ void BookWindow::onTakeButtonClicked (MyGUI::Widget* _sender)
     MWWorld::ActionTake take(mBook);
     take.execute();
 
+    /// \todo what about scripts?
+
     MWBase::Environment::get().getInputManager()->setGuiMode (GM_Game);
 }
 

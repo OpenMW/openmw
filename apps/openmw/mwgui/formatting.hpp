@@ -7,6 +7,22 @@
 
 namespace MWGui
 {
+    struct TextStyle
+    {
+        TextStyle() :
+            mColour(0,0,0)
+            , mFont("Default")
+            , mTextSize(16)
+            , mTextAlign(MyGUI::Align::Left | MyGUI::Align::Top)
+        {
+        }
+
+        MyGUI::Colour mColour;
+        std::string mFont;
+        int mTextSize;
+        MyGUI::Align mTextAlign;
+    };
+
     /// \brief utilities for parsing book/scroll text as mygui widgets
     class BookTextParser
     {
@@ -21,17 +37,15 @@ namespace MWGui
             MyGUI::IntSize parse(std::string text, MyGUI::Widget* parent, const int width);
 
         protected:
-            /**
-             * @param text to parse
-             * @param text size (-1 means default)
-             * @param text align
-             * @return size of the created widgets
-             */
-            MyGUI::IntSize parseSubText(std::string text, int textSize, MyGUI::Align textAlign);
+            void parseSubText(std::string text);
+
+            void parseImage(std::string tag);
 
         private:
             MyGUI::Widget* mParent;
-            int mWidth;
+            int mWidth; // maximum width
+            int mHeight; // current height
+            TextStyle mTextStyle;
     };
 }
 
