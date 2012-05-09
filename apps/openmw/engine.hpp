@@ -91,8 +91,10 @@ namespace OMW
 
             /// add resources directory
             /// \note This function works recursively.
-
             void addResourcesDirectory (const boost::filesystem::path& path);
+
+            /// add a .zip resource
+            void addZipResource (const boost::filesystem::path& path);
 
             /// Load all BSA files in data directory.
             void loadBSA();

@@ -20,8 +20,8 @@
     </Resource>
 
     <Resource type="ResourceTrueTypeFont" name="Daedric">
-        <!--<Property key="Source" value="Oblivion Worn.ttf"/>-->
-        <Property key="Source" value="Oblivion.ttf"/>
+        <!--<Property key="Source" value="Oblivion/Oblivion Worn.ttf"/>-->
+        <Property key="Source" value="Oblivion/Oblivion.ttf"/>
         <Property key="Size" value="24"/>
         <Property key="Resolution" value="72"/>
         <Property key="Antialias" value="false"/>
