@@ -40,7 +40,8 @@ namespace MWGui
             void parseSubText(std::string text);
 
             void parseImage(std::string tag);
-
+            void parseDiv(std::string tag);
+            void parseFont(std::string tag);
         private:
             MyGUI::Widget* mParent;
             int mWidth; // maximum width

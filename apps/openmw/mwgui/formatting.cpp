@@ -6,6 +6,65 @@
 
 using namespace MWGui;
 
+namespace
+{
+    int convertFromHex(std::string hex)
+    {
+        int value = 0;
+        
+        int a = 0;
+        int b = hex.length() - 1;
+        for (; b >= 0; a++, b--)
+        {
+            if (hex[b] >= '0' && hex[b] <= '9')
+            {
+                value += (hex[b] - '0') * (1 << (a * 4));
+            }
+            else
+            {
+                switch (hex[b])
+                {
+                    case 'A':
+                    case 'a':
+                        value += 10 * (1 << (a * 4));
+                        break;
+                        
+                    case 'B':
+                    case 'b':
+                        value += 11 * (1 << (a * 4));
+                        break;
+                        
+                    case 'C':
+                    case 'c':
+                        value += 12 * (1 << (a * 4));
+                        break;
+                        
+                    case 'D':
+                    case 'd':
+                        value += 13 * (1 << (a * 4));
+                        break;
+                        
+                    case 'E':
+                    case 'e':
+                        value += 14 * (1 << (a * 4));
+                        break;
+                        
+                    case 'F':
+                    case 'f':
+                        value += 15 * (1 << (a * 4));
+                        break;
+                        
+                    default:
+                        throw std::runtime_error("invalid character in hex number");
+                        break;
+                }
+            }
+        }
+        
+        return value;
+    }
+}
+
 MyGUI::IntSize BookTextParser::parse(std::string text, MyGUI::Widget* parent, const int width)
 {
     mParent = parent;
@@ -19,15 +78,14 @@ MyGUI::IntSize BookTextParser::parse(std::string text, MyGUI::Widget* parent, co
     }
 
     boost::algorithm::replace_all(text, "<BR>", "\n");
+    boost::algorithm::replace_all(text, "<P>", "\n\n");
 
     // remove leading newlines
     //while (text[0] == '\n')
     //    text.erase(0);
 
-    // remove trailing " and newlines
+    // remove trailing "
     if (text[text.size()-1] == '\"')
-        text.erase(text.size()-1);
-    while (text[text.size()-1] == '\n')
         text.erase(text.size()-1);
 
     parseSubText(text);
@@ -63,6 +121,45 @@ void BookTextParser::parseImage(std::string tag)
     mHeight += height;
 }
 
+void BookTextParser::parseDiv(std::string tag)
+{
+    if (tag.find("ALIGN=") == std::string::npos)
+        return;
+
+    int align_start = tag.find("ALIGN=")+7;
+    std::string align = tag.substr(align_start, tag.find('"', align_start)-align_start);
+    if (align == "CENTER")
+        mTextStyle.mTextAlign = MyGUI::Align::HCenter;
+    else if (align == "LEFT")
+        mTextStyle.mTextAlign = MyGUI::Align::Left;
+}
+
+void BookTextParser::parseFont(std::string tag)
+{
+    if (tag.find("COLOR=") != std::string::npos)
+    {
+        int color_start = tag.find("COLOR=")+7;
+        std::string color = tag.substr(color_start, tag.find('"', color_start)-color_start);
+
+        mTextStyle.mColour = MyGUI::Colour(
+            convertFromHex(color.substr(0, 2))/255.0,
+            convertFromHex(color.substr(2, 2))/255.0,
+            convertFromHex(color.substr(4, 2))/255.0);
+    }
+    if (tag.find("FACE=") != std::string::npos)
+    {
+        int face_start = tag.find("FACE=")+6;
+        std::string face = tag.substr(face_start, tag.find('"', face_start)-face_start);
+
+        if (face != "Magic Cards")
+            mTextStyle.mFont = face;
+    }
+    if (tag.find("SIZE=") != std::string::npos)
+    {
+        /// \todo
+    }
+}
+
 void BookTextParser::parseSubText(std::string text)
 {
     if (text[0] == '<')
@@ -71,9 +168,11 @@ void BookTextParser::parseSubText(std::string text)
             throw std::runtime_error("BookTextParser Error: Tag is not terminated");
 
         if (text.size() > 4 && text.substr(0, 4) == "<IMG")
-        {
             parseImage(text.substr(0, text.find('>')));
-        }
+        else if (text.size() > 5 && text.substr(0, 5) == "<FONT")
+            parseFont(text.substr(0, text.find('>')));
+        else if (text.size() > 4 && text.substr(0, 4) == "<DIV")
+            parseDiv(text.substr(0, text.find('>')));
 
         text.erase(0, text.find('>')+1);
     }
