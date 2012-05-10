@@ -13,8 +13,8 @@
         <Widget type="Button" skin="ButtonImage" position="80 220 96 24" name="PrevPageBTN">
             <Property key="ImageResource" value="MenuBook_Prev"/>
         </Widget>
-        <Widget type="EditBox" skin="MW_BookPage" position_real="0.15 0.1 0.3 0.8" name = "LeftText"/>
-        <Widget type="EditBox" skin="MW_BookPage" position_real="0.55 0.1 0.3 0.8" name = "RightText"/>
+        <Widget type="EditBox" skin="MW_BookPage" position_real="0.15 0.1 0.3 0.75" name = "LeftText"/>
+        <Widget type="EditBox" skin="MW_BookPage" position_real="0.55 0.1 0.3 0.75" name = "RightText"/>
     </Widget>
 </Widget>
 

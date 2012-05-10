@@ -19,11 +19,21 @@ namespace MWGui
             void onCloseButtonClicked (MyGUI::Widget* _sender);
             void onTakeButtonClicked (MyGUI::Widget* _sender);
 
+            void updatePages();
+            void clearPages();
+
         private:
             MyGUI::Button* mCloseButton;
             MyGUI::Button* mTakeButton;
             MyGUI::Button* mNextPageButton;
             MyGUI::Button* mPrevPageButton;
+            MyGUI::TextBox* mLeftPageNumber;
+            MyGUI::TextBox* mRightPageNumber;
+            MyGUI::Widget* mLeftPage;
+            MyGUI::Widget* mRightPage;
+
+            unsigned int mCurrentPage; // 0 is first page
+            std::vector<MyGUI::Widget*> mPages;
 
             MWWorld::Ptr mBook;
     };

@@ -36,10 +36,15 @@ namespace MWGui
              */
             MyGUI::IntSize parse(std::string text, MyGUI::Widget* parent, const int width);
 
+            /**
+             * Split the specified text into pieces that fit in the area specified by width and height parameters
+             */
+            std::vector<std::string> split(std::string text, const int width, const int height);
+
         protected:
             void parseSubText(std::string text);
 
-            void parseImage(std::string tag);
+            void parseImage(std::string tag, bool createWidget=true);
             void parseDiv(std::string tag);
             void parseFont(std::string tag);
         private:

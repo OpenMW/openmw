@@ -57,7 +57,5 @@ void ScrollWindow::onTakeButtonClicked (MyGUI::Widget* _sender)
     MWWorld::ActionTake take(mScroll);
     take.execute();
 
-    /// \todo what about scripts?
-
     MWBase::Environment::get().getInputManager()->setGuiMode (GM_Game);
 }
