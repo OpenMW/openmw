@@ -51,6 +51,7 @@ namespace MWGui
         void onByeClicked(MyGUI::Widget* _sender);
         void onHistoryClicked(MyGUI::Widget* _sender);
         void onMouseWheel(MyGUI::Widget* _sender, int _rel);
+        void onWindowResize(MyGUI::Window* _sender);
 
     private:
         void updateOptions();

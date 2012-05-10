@@ -32,6 +32,11 @@ void MWList::addItem(const std::string& name)
     redraw();
 }
 
+void MWList::adjustSize()
+{
+    redraw();
+}
+
 void MWList::redraw(bool scrollbarShown)
 {
     const int _scrollBarWidth = 24; // fetch this from skin?

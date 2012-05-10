@@ -67,6 +67,8 @@ DialogueWindow::DialogueWindow(WindowManager& parWindowManager)
 
     getWidget(pDispositionBar, "Disposition");
     getWidget(pDispositionText,"DispositionText");
+
+    static_cast<MyGUI::Window*>(mMainWidget)->eventWindowChangeCoord += MyGUI::newDelegate(this, &DialogueWindow::onWindowResize);
 }
 
 void DialogueWindow::onHistoryClicked(MyGUI::Widget* _sender)
@@ -86,6 +88,11 @@ void DialogueWindow::onHistoryClicked(MyGUI::Widget* _sender)
 
         if(color == "#572D21") MWBase::Environment::get().getDialogueManager()->questionAnswered(lower_string(key));
     }
+}
+
+void DialogueWindow::onWindowResize(MyGUI::Window* _sender)
+{
+    topicsList->adjustSize();
 }
 
 void DialogueWindow::onMouseWheel(MyGUI::Widget* _sender, int _rel)

@@ -9,7 +9,7 @@ namespace MWGui
     {
         /**
          * \brief a very simple list widget that supports word-wrapping entries
-         * \note does not handle changing the width of the list at runtime
+         * \note if the width or height of the list changes, you must call adjustSize() method
          */
         class MWList : public MyGUI::Widget
         {
@@ -24,6 +24,11 @@ namespace MWGui
              * signature: void method(std::string itemName)
              */
             EventHandle_String eventItemSelected;
+
+            /**
+             * Call after the size of the list changed
+             */
+            void adjustSize();
 
             void addItem(const std::string& name);
             void removeItem(const std::string& name);
