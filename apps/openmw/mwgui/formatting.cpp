@@ -2,7 +2,6 @@
 
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/lexical_cast.hpp>
-#include <boost/property_tree/xml_parser.hpp>
 
 using namespace MWGui;
 
