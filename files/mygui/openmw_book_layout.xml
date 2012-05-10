@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<MyGUI type="Layout">
+
+<Widget type="Window" skin="" layer="Windows" align="Left|Top" position="0 0 512 256" name="_Main">
+
+    <Widget type="ImageBox" skin="ImageBox" position_real="0 0 1 1" align="Top|Right" name="BookImage">     
+        <Property key="ImageTexture" value="textures\tx_menubook.dds"/>
+
+        <Widget type="Button" skin="ButtonImage" position="251 220 96 24" name="NextPageBTN">
+            <Property key="ImageResource" value="MenuBook_Next"/>
+        </Widget>
+        <Widget type="Button" skin="ButtonImage" position="165 220 96 24" name="PrevPageBTN">
+            <Property key="ImageResource" value="MenuBook_Prev"/>
+        </Widget>
+        <Widget type="Button" skin="ButtonImage" position="75 220 96 24" name="TakeButton">
+            <Property key="ImageResource" value="MenuBook_Take"/>
+        </Widget>
+        <Widget type="Button" skin="ButtonImage" position="360 220 96 24" name="CloseButton">
+            <Property key="ImageResource" value="MenuBook_Close"/>
+        </Widget>
+
+        <Widget type="TextBox" skin="NormalText" position="155 215 24 24" name="LeftPageNumber">
+            <Property key="TextColour" value="0 0 0"/>
+        </Widget>
+        <Widget type="TextBox" skin="NormalText" position="325 215 24 24" name="RightPageNumber">
+            <Property key="TextColour" value="0 0 0"/>
+        </Widget>
+
+        <Widget type="Widget" skin="" position_real="0.15 0.1 0.3 0.75" name = "LeftPage"/>
+        <Widget type="Widget" skin="" position_real="0.55 0.1 0.3 0.75" name = "RightPage"/>
+    </Widget>
+</Widget>
+
+</MyGUI>
