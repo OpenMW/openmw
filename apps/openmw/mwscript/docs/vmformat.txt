@@ -145,4 +145,5 @@ op 0x200014e: ModDisposition, explicit reference
 op 0x200014f: ForceGreeting
 op 0x2000150: ForceGreeting, explicit reference
 op 0x2000151: ToggleFullHelp
-opcodes 0x2000152-0x3ffffff unused
+op 0x2000152: Goodbye
+opcodes 0x2000153-0x3ffffff unused
