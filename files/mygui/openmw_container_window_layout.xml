@@ -3,22 +3,12 @@
 <MyGUI type="Layout">
     <Widget type="Window" skin="MW_Window" layer="Windows" position="900 500 600 300" name="_Main">
 
-        <!-- HEADER 
-        <Widget type="TextBox" skin="HeaderText" position="0 0 588 18" name="ContainerName" align="ALIGN_LEFT ALIGN_TOP">
-            <Property key="Caption" value="Name"/>
-            <Property key="TextAlign" value="ALIGN_CENTER"/>
-        </Widget>-->
-
-
-
-
         <!-- Items in inventory -->
         <Widget type="ItemBox" skin="MW_Box" position="5 10 570 220" name="Items"/>
 
-        <Widget type="Widget" position="300 235 300 24" align="ALIGN_TOP ALIGN_LEFT" name="Buttons">
-            <Widget type="Button" skin="MW_Button" position="100 0 75 24" name="TakeButton"/>
-            <Widget type="Button" skin="MW_Button" position="180 0 60 24" name="CloseButton"/>
-        </Widget>
+        <!-- buttons position adjusted at runtime to fit text -->
+        <Widget type="Button" skin="MW_Button" position="0 235 75 24" name="TakeButton" align="Right Bottom"/>
+        <Widget type="Button" skin="MW_Button" position="0 235 60 24" name="CloseButton" align="Right Bottom"/>
 
     </Widget>
 </MyGUI>

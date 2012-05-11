@@ -70,6 +70,7 @@ namespace MWGui
         void drawItems();
 
         void onCloseButtonClicked(MyGUI::Widget* _sender);
+        void onTakeAllButtonClicked(MyGUI::Widget* _sender);
         void onSelectedItem(MyGUI::Widget* _sender);
         void onContainerClicked(MyGUI::Widget* _sender);
         void onMouseMove(MyGUI::Widget* _sender, int _left, int _top);

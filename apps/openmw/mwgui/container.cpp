@@ -1,24 +1,24 @@
 #include "container.hpp"
 
-#include <iterator>
-#include <algorithm>
 #include "window_manager.hpp"
 #include "widgets.hpp"
+#include "itemwidget.hpp"
 
 #include "../mwbase/environment.hpp"
 #include "../mwworld/manualref.hpp"
+#include "../mwworld/world.hpp"
+#include "../mwworld/containerstore.hpp"
+#include "../mwworld/class.hpp"
+#include "../mwclass/container.hpp"
+#include "../mwinput/inputmanager.hpp"
+
 #include <cmath>
 #include <algorithm>
 #include <iterator>
-
 #include <assert.h>
 #include <iostream>
-#include "../mwclass/container.hpp"
-#include "../mwworld/containerstore.hpp"
+
 #include <boost/lexical_cast.hpp>
-#include "../mwworld/class.hpp"
-#include "../mwinput/inputmanager.hpp"
-#include "itemwidget.hpp"
 
 
 using namespace MWGui;
@@ -32,22 +32,26 @@ ContainerWindow::ContainerWindow(WindowManager& parWindowManager,DragAndDrop* dr
 {
     setText("_Main", "Name of Container");
 
-    int w = MyGUI::RenderManager::getInstance().getViewSize().width;
-    int h = MyGUI::RenderManager::getInstance().getViewSize().height;
-    setCoord(w-600,h-300,600,300);
-    //center();
-    adjustWindowCaption();
-
     getWidget(mContainerWidget, "Items");
     getWidget(mTakeButton, "TakeButton");
     getWidget(mCloseButton, "CloseButton");
 
     mCloseButton->eventMouseButtonClick += MyGUI::newDelegate(this, &ContainerWindow::onCloseButtonClicked);
+    mTakeButton->eventMouseButtonClick += MyGUI::newDelegate(this, &ContainerWindow::onTakeAllButtonClicked);
     mContainerWidget->eventMouseButtonClick += MyGUI::newDelegate(this, &ContainerWindow::onContainerClicked);
-    setText("CloseButton","Close");
-    setText("TakeButton","Take All");
 
-    //mContainerWidget->eventMouseItemActivate += MyGUI::newDelegate(this,&ContainerWindow::onSelectedItem);
+    setText("CloseButton", MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sClose")->str);
+    setText("TakeButton", MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sTakeAll")->str);
+
+    // adjust buttons size to fit text
+    int closeButtonWidth = mCloseButton->getTextSize().width+24;
+    int takeButtonWidth = mTakeButton->getTextSize().width+24;
+    mCloseButton->setCoord(600-20-closeButtonWidth, mCloseButton->getCoord().top, closeButtonWidth, mCloseButton->getCoord().height);
+    mTakeButton->setCoord(600-20-closeButtonWidth-takeButtonWidth-8, mTakeButton->getCoord().top, takeButtonWidth, mTakeButton->getCoord().height);
+
+    int w = MyGUI::RenderManager::getInstance().getViewSize().width;
+    int h = MyGUI::RenderManager::getInstance().getViewSize().height;
+    setCoord(w-600,h-300,600,300);
 }
 
 ContainerWindow::ContainerWindow(WindowManager& parWindowManager,DragAndDrop* dragAndDrop,std::string guiFile)
@@ -56,18 +60,9 @@ ContainerWindow::ContainerWindow(WindowManager& parWindowManager,DragAndDrop* dr
     mContainer()
 {
     setText("_Main", "Name of Container");
-    //center();
     adjustWindowCaption();
     getWidget(mContainerWidget, "Items");
     mContainerWidget->eventMouseButtonClick += MyGUI::newDelegate(this, &ContainerWindow::onContainerClicked);
-    //getWidget(takeButton, "TakeButton");
-    //getWidget(closeButton, "CloseButton");
-
-    //closeButton->eventMouseButtonClick += MyGUI::newDelegate(this, &ContainerWindow::onByeClicked);
-
-    //setText("CloseButton","Close");
-    //setText("TakeButton","Take All");
-    //mContainerWidget->eventMouseItemActivate += MyGUI::newDelegate(this,&ContainerWindow::onSelectedItem);
 }
 ContainerWindow::~ContainerWindow()
 {
@@ -76,6 +71,7 @@ ContainerWindow::~ContainerWindow()
 void ContainerWindow::setName(std::string contName)
 {
     setText("_Main", contName);
+    adjustWindowCaption();
 }
 
 
@@ -184,6 +180,16 @@ void ContainerWindow::onCloseButtonClicked(MyGUI::Widget* _sender)
 {
     if(!mDragAndDrop->mIsOnDragAndDrop)
     {
+        MWBase::Environment::get().getWindowManager()->setGuiMode(GM_Game);
+        setVisible(false);
+    }
+}
+
+void ContainerWindow::onTakeAllButtonClicked(MyGUI::Widget* _sender)
+{
+    if(!mDragAndDrop->mIsOnDragAndDrop)
+    {
+        /// \todo
         MWBase::Environment::get().getWindowManager()->setGuiMode(GM_Game);
         setVisible(false);
     }
