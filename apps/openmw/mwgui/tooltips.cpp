@@ -165,7 +165,7 @@ void ToolTips::findImageExtension(std::string& image)
     }
 }
 
-IntSize ToolTips::createToolTip(const ToolTipInfo& info)
+IntSize ToolTips::createToolTip(const MWGui::ToolTipInfo& info)
 {
     std::string caption = info.caption;
     std::string image = info.icon;

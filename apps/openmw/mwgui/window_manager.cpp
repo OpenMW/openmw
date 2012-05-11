@@ -95,9 +95,9 @@ WindowManager::WindowManager(
     console = new Console(w,h, extensions);
     mJournal = new JournalWindow(*this);
     mMessageBoxManager = new MessageBoxManager(this);
-    mDialogueWindow = new DialogueWindow(*this,environment);
-    mContainerWindow = new ContainerWindow(*this,environment,mDragAndDrop);
-    mInventoryWindow = new InventoryWindow(*this,environment,mDragAndDrop);
+    mDialogueWindow = new DialogueWindow(*this);
+    mContainerWindow = new ContainerWindow(*this,mDragAndDrop);
+    mInventoryWindow = new InventoryWindow(*this,mDragAndDrop);
     mToolTips = new ToolTips(this);
 
     // The HUD is always on

@@ -5,7 +5,7 @@
 #include "window_manager.hpp"
 #include "widgets.hpp"
 
-#include "../mwworld/environment.hpp"
+#include "../mwbase/environment.hpp"
 #include "../mwworld/manualref.hpp"
 #include <cmath>
 #include <algorithm>
@@ -25,9 +25,8 @@ using namespace MWGui;
 using namespace Widgets;
 
 
-ContainerWindow::ContainerWindow(WindowManager& parWindowManager,MWWorld::Environment& environment,DragAndDrop* dragAndDrop)
+ContainerWindow::ContainerWindow(WindowManager& parWindowManager,DragAndDrop* dragAndDrop)
     : WindowBase("openmw_container_window_layout.xml", parWindowManager),
-    mEnvironment(environment),
     mDragAndDrop(dragAndDrop),
     mContainer()
 {
@@ -51,9 +50,8 @@ ContainerWindow::ContainerWindow(WindowManager& parWindowManager,MWWorld::Enviro
     //mContainerWidget->eventMouseItemActivate += MyGUI::newDelegate(this,&ContainerWindow::onSelectedItem);
 }
 
-ContainerWindow::ContainerWindow(WindowManager& parWindowManager,MWWorld::Environment& environment,DragAndDrop* dragAndDrop,std::string guiFile)
+ContainerWindow::ContainerWindow(WindowManager& parWindowManager,DragAndDrop* dragAndDrop,std::string guiFile)
     : WindowBase(guiFile, parWindowManager),
-    mEnvironment(environment),
     mDragAndDrop(dragAndDrop),
     mContainer()
 {
@@ -183,7 +181,7 @@ void ContainerWindow::onByeClicked(MyGUI::Widget* _sender)
 {
     if(!mDragAndDrop->mIsOnDragAndDrop)
     {
-        mEnvironment.mWindowManager->setGuiMode(GM_Game);
+        MWBase::Environment::get().getWindowManager()->setGuiMode(GM_Game);
         setVisible(false);
     }
 }

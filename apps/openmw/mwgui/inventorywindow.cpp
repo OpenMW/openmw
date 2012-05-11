@@ -4,7 +4,7 @@
 #include "window_manager.hpp"
 #include "widgets.hpp"
 
-#include "../mwworld/environment.hpp"
+#include "../mwbase/environment.hpp"
 #include "../mwworld/manualref.hpp"
 #include <cmath>
 #include <algorithm>
@@ -21,14 +21,14 @@
 namespace MWGui
 {
 
-    InventoryWindow::InventoryWindow(WindowManager& parWindowManager,MWWorld::Environment& environment,DragAndDrop* dragAndDrop)
-        :ContainerWindow(parWindowManager,environment,dragAndDrop,"openmw_inventory_window_layout.xml")
+    InventoryWindow::InventoryWindow(WindowManager& parWindowManager,DragAndDrop* dragAndDrop)
+        :ContainerWindow(parWindowManager,dragAndDrop,"openmw_inventory_window_layout.xml")
     {
     }
 
     void InventoryWindow::openInventory()
     {
-        open(mEnvironment.mWorld->getPlayer().getPlayer());
+        open(MWBase::Environment::get().getWorld()->getPlayer().getPlayer());
     }
 
 }

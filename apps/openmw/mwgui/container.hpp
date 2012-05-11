@@ -46,8 +46,8 @@ namespace MWGui
     class ContainerWindow : public WindowBase
     {
     public:
-        ContainerWindow(WindowManager& parWindowManager,MWWorld::Environment& environment,DragAndDrop* dragAndDrop);
-        ContainerWindow(WindowManager& parWindowManager,MWWorld::Environment& environment,DragAndDrop* dragAndDrop,
+        ContainerWindow(WindowManager& parWindowManager,DragAndDrop* dragAndDrop);
+        ContainerWindow(WindowManager& parWindowManager,DragAndDrop* dragAndDrop,
             std::string guiFile);
 
 
@@ -58,7 +58,6 @@ namespace MWGui
         virtual ~ContainerWindow();
 
     protected:
-        MWWorld::Environment& mEnvironment;
         std::vector<MyGUI::WidgetPtr> mContainerWidgets;
         MyGUI::ItemBoxPtr mContainerWidget;
 
