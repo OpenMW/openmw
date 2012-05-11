@@ -57,6 +57,9 @@ namespace MWGui
 
             static const int lineHeight;
 
+            MyGUI::Widget* mLeftPane;
+            MyGUI::Widget* mRightPane;
+
             MyGUI::WidgetPtr skillAreaWidget, skillClientWidget;
             MyGUI::ScrollBar* skillScrollerWidget;
             int lastPos, clientHeight;

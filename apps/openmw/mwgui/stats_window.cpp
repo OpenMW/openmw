@@ -60,6 +60,8 @@ StatsWindow::StatsWindow (WindowManager& parWindowManager)
     getWidget(skillAreaWidget, "Skills");
     getWidget(skillClientWidget, "SkillClient");
     getWidget(skillScrollerWidget, "SkillScroller");
+    getWidget(mLeftPane, "LeftPane");
+    getWidget(mRightPane, "RightPane");
 
     skillScrollerWidget->eventScrollChangePosition += MyGUI::newDelegate(this, &StatsWindow::onScrollChangePosition);
     updateScroller();
@@ -93,6 +95,8 @@ void StatsWindow::onScrollChangePosition(MyGUI::ScrollBar* scroller, size_t pos)
 
 void StatsWindow::onWindowResize(MyGUI::Window* window)
 {
+    mLeftPane->setCoord( MyGUI::IntCoord(0, 0, 0.44*window->getSize().width, window->getSize().height) );
+    mRightPane->setCoord( MyGUI::IntCoord(0.44*window->getSize().width, 0, 0.56*window->getSize().width, window->getSize().height) );
     updateScroller();
 }
 
