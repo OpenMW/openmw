@@ -203,6 +203,7 @@ void ContainerWindow::onSelectedItem(MyGUI::Widget* _sender)
             count++;
             if(count == item->mPos)
             {
+                mDragAndDrop->mStore.add(*iter);
                 iter->getRefData().setCount(0);
                 break;
             }
@@ -232,16 +233,16 @@ void ContainerWindow::onContainerClicked(MyGUI::Widget* _sender)
     if(mDragAndDrop->mIsOnDragAndDrop) //drop widget here
     {
         ItemWidget* item = static_cast<ItemWidget*>(mDragAndDrop->mDraggedWidget);
-        std::cout << item->mPos << item->mPtr.getTypeName();
+        std::cout << item->mPos << (*mDragAndDrop->mStore.begin()).getTypeName();
         if(item->mPtr.getContainerStore() == 0) std::cout << "nocontainer!";
-        std::cout << item->mPtr.getContainerStore()->getType(item->mPtr);
-        MWWorld::Ptr ptr = item->mPtr;
-        //MWWorld::World
-        //mContainer.getContainerStore()->add(item->mPtr);
+        MWWorld::ContainerStore& containerStore = MWWorld::Class::get(mContainer).getContainerStore(mContainer);
+        containerStore.add(*mDragAndDrop->mStore.begin());
+        mDragAndDrop->mStore.clear();
         mDragAndDrop->mIsOnDragAndDrop = false;
         mDragAndDrop->mDraggedWidget->detachFromWidget();
         mDragAndDrop->mDraggedWidget->attachToWidget(mContainerWidget);
         mDragAndDrop->mDraggedWidget = 0;
         mDragAndDrop->mContainerWindow = 0;
+        drawItems();
     }
 }
