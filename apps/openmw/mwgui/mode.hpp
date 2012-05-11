@@ -13,12 +13,12 @@ namespace MWGui
       GM_Console,       // Console mode
       GM_Journal,       // Journal mode
 
-      // None of the following are implemented yet
+      GM_Scroll,        // Read scroll
+      GM_Book,          // Read book
 
       GM_Dialogue,      // NPC interaction
       GM_Barter,
       GM_Rest,
-      // .. more here ..
 
       // Startup character creation dialogs
       GM_Name,

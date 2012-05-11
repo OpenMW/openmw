@@ -65,6 +65,8 @@ namespace MWGui
   class DragAndDrop;
   class InventoryWindow;
   class ToolTips;
+  class ScrollWindow;
+  class BookWindow;
   class TextInputDialog;
   class InfoBoxDialog;
   class DialogueWindow;
@@ -128,6 +130,9 @@ namespace MWGui
     MWGui::DialogueWindow* getDialogueWindow() {return mDialogueWindow;}
 
     MWGui::ContainerWindow* getContainerWindow() {return mContainerWindow;}
+
+    MWGui::BookWindow* getBookWindow() {return mBookWindow;}
+    MWGui::ScrollWindow* getScrollWindow() {return mScrollWindow;}
 
     MyGUI::Gui* getGui() const { return gui; }
 
@@ -210,6 +215,9 @@ namespace MWGui
     ContainerWindow *mContainerWindow;
     DragAndDrop* mDragAndDrop;
     InventoryWindow *mInventoryWindow;
+    ScrollWindow* mScrollWindow;
+    BookWindow* mBookWindow;
+
     CharacterCreation* mCharGen;
 
     // Various stats about player as needed by window manager

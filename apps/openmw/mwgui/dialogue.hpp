@@ -7,6 +7,11 @@
 namespace MWGui
 {
     class WindowManager;
+
+    namespace Widgets
+    {
+        class MWList;
+    }
 }
 
 /*
@@ -42,10 +47,11 @@ namespace MWGui
         void askQuestion(std::string question);
 
     protected:
-        void onSelectTopic(MyGUI::ListBox* _sender, size_t _index);
+        void onSelectTopic(std::string topic);
         void onByeClicked(MyGUI::Widget* _sender);
         void onHistoryClicked(MyGUI::Widget* _sender);
         void onMouseWheel(MyGUI::Widget* _sender, int _rel);
+        void onWindowResize(MyGUI::Window* _sender);
 
     private:
         void updateOptions();
@@ -55,7 +61,7 @@ namespace MWGui
         std::string parseText(std::string text);
 
         DialogueHistory*     history;
-        MyGUI::ListBox*      topicsList;
+        Widgets::MWList*      topicsList;
         MyGUI::ProgressPtr pDispositionBar;
         MyGUI::EditPtr pDispositionText;
         std::map<std::string,std::string> pTopicsText;// this map links keyword and "real" text.

@@ -194,6 +194,12 @@ void OMW::Engine::addResourcesDirectory (const boost::filesystem::path& path)
         Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, true);
 }
 
+void OMW::Engine::addZipResource (const boost::filesystem::path& path)
+{
+    mOgre->getRoot()->addResourceLocation (path.string(), "Zip",
+        Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, false);
+}
+
 void OMW::Engine::enableFSStrict(bool fsStrict)
 {
     mFSStrict = fsStrict;
@@ -316,6 +322,7 @@ void OMW::Engine::go()
     addResourcesDirectory(mResDir / "water");
     addResourcesDirectory(mResDir / "gbuffer");
     addResourcesDirectory(mResDir / "shadows");
+    addZipResource(mResDir / "mygui" / "Obliviontt.zip");
 
     // Create the window
     mOgre->createWindow("OpenMW");

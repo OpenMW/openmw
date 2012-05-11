@@ -248,7 +248,7 @@ MyGUI::TextBox* ReviewDialog::addValueItem(const std::string text, const std::st
     skillNameWidget = skillClientWidget->createWidget<MyGUI::TextBox>("SandText", coord1, MyGUI::Align::Default);
     skillNameWidget->setCaption(text);
 
-    skillValueWidget = skillClientWidget->createWidget<MyGUI::TextBox>("SandTextRight", coord2, MyGUI::Align::Default);
+    skillValueWidget = skillClientWidget->createWidget<MyGUI::TextBox>("SandTextRight", coord2, MyGUI::Align::Top | MyGUI::Align::Right);
     skillValueWidget->setCaption(value);
     skillValueWidget->_setWidgetState(state);
 

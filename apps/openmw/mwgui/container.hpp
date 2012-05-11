@@ -60,8 +60,8 @@ namespace MWGui
         std::vector<MyGUI::WidgetPtr> mContainerWidgets;
         MyGUI::ItemBoxPtr mContainerWidget;
 
-        MyGUI::ButtonPtr takeButton;
-        MyGUI::ButtonPtr closeButton;
+        MyGUI::ButtonPtr mTakeButton;
+        MyGUI::ButtonPtr mCloseButton;
         DragAndDrop* mDragAndDrop;
 
         MWWorld::Ptr mContainer;

@@ -133,6 +133,9 @@ namespace MWInput
     void screenshot()
     {
         mEngine.screenshot();
+
+        std::vector<std::string> empty;
+        windows.messageBox ("Screenshot saved", empty);
     }
 
     /* toggleInventory() is called when the user presses the button to toggle the inventory screen. */

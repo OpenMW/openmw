@@ -39,10 +39,10 @@ ContainerWindow::ContainerWindow(WindowManager& parWindowManager,DragAndDrop* dr
     adjustWindowCaption();
 
     getWidget(mContainerWidget, "Items");
-    getWidget(takeButton, "TakeButton");
-    getWidget(closeButton, "CloseButton");
+    getWidget(mTakeButton, "TakeButton");
+    getWidget(mCloseButton, "CloseButton");
 
-    closeButton->eventMouseButtonClick += MyGUI::newDelegate(this, &ContainerWindow::onByeClicked);
+    mCloseButton->eventMouseButtonClick += MyGUI::newDelegate(this, &ContainerWindow::onCloseButtonClicked);
     mContainerWidget->eventMouseButtonClick += MyGUI::newDelegate(this, &ContainerWindow::onContainerClicked);
     setText("CloseButton","Close");
     setText("TakeButton","Take All");

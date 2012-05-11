@@ -24,8 +24,9 @@ add_openmw_dir (mwinput
 
 add_openmw_dir (mwgui
     layouts text_input widgets race class birth review window_manager console dialogue
-    dialogue_history window_base stats_window messagebox journalwindow charactercreation container
-    map_window window_pinnable_base cursorreplace inventorywindow tooltips itemwidget
+    dialogue_history window_base stats_window messagebox journalwindow charactercreation
+    map_window window_pinnable_base cursorreplace tooltips scrollwindow bookwindow list
+    formatting itemwidget inventorywindow container
     )
 
 add_openmw_dir (mwdialogue
@@ -46,7 +47,7 @@ add_openmw_dir (mwsound
 add_openmw_dir (mwworld
     refdata world physicssystem scene globals class action nullaction actionteleport
     containerstore actiontalk actiontake manualref player cellfunctors
-    cells localscripts customdata weather inventorystore ptr actionopen
+    cells localscripts customdata weather inventorystore ptr actionopen actionread
     )
 
 add_openmw_dir (mwclass

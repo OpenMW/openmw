@@ -103,8 +103,8 @@ void ToolTips::onFrame(float frameDuration)
 
             // adjust tooltip size to fit its content, position it above the crosshair
             /// \todo Slide the tooltip along the bounding box of the focused object (like in Morrowind)
-            setCoord(viewSize.width/2 - (tooltipSize.width)/2.f,
-                    viewSize.height/2 - (tooltipSize.height) - 32,
+            setCoord(std::max(0, viewSize.width/2 - (tooltipSize.width)/2),
+                    std::max(0, viewSize.height/2 - (tooltipSize.height) - 32),
                     tooltipSize.width,
                     tooltipSize.height);
         }

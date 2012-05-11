@@ -2,7 +2,7 @@
 <MyGUI>
     <MyGUI type="List">
         <List file="core.skin" />
-        <List file="openmw_images.xml" />
+        <List file="openmw_resources.xml" />
         <List file="openmw_layers.xml" />
         <List file="openmw.pointer.xml" />
         <List file="openmw.font.xml" />
@@ -20,7 +20,7 @@
         <List file="openmw_journal_skin.xml" />
         <List file="openmw_map_window_skin.xml" />
         <List file="openmw_dialogue_window_skin.xml" />
-		<List file="openmw_container_window_layout.xml" />
+        <List file="openmw_scroll_skin.xml" />
         <List file="openmw_settings.xml" />
     </MyGUI>
 </MyGUI>
