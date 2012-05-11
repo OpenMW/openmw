@@ -414,7 +414,7 @@ void StatsWindow::updateScroller()
     skillScrollerWidget->setScrollRange(std::max(clientHeight - skillClientWidget->getHeight(), 0));
     skillScrollerWidget->setScrollPage(std::max(skillClientWidget->getHeight() - lineHeight, 0));
     if (clientHeight != 0)
-        skillScrollerWidget->setTrackSize( (skillAreaWidget->getHeight() / float(clientHeight)) * skillAreaWidget->getHeight() );
+        skillScrollerWidget->setTrackSize( (skillAreaWidget->getHeight() / float(clientHeight)) * skillScrollerWidget->getLineSize() );
 }
 
 void StatsWindow::onPinToggled()
