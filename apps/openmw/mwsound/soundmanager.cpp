@@ -9,7 +9,8 @@
 #include <components/esm_store/store.hpp>
 #include <components/settings/settings.hpp>
 
-#include "../mwworld/environment.hpp"
+#include "../mwbase/environment.hpp"
+
 #include "../mwworld/world.hpp"
 #include "../mwworld/player.hpp"
 
@@ -46,9 +47,8 @@
 
 namespace MWSound
 {
-    SoundManager::SoundManager(bool useSound, MWWorld::Environment& environment)
+    SoundManager::SoundManager(bool useSound)
         : mResourceMgr(Ogre::ResourceGroupManager::getSingleton())
-        , mEnvironment(environment)
         , mOutput(new DEFAULT_OUTPUT(*this))
         , mMasterVolume(1.0f)
         , mSFXVolume(1.0f)
@@ -113,7 +113,7 @@ namespace MWSound
     std::string SoundManager::lookup(const std::string &soundId,
                        float &volume, float &min, float &max)
     {
-        const ESM::Sound *snd = mEnvironment.mWorld->getStore().sounds.search(soundId);
+        const ESM::Sound *snd = MWBase::Environment::get().getWorld()->getStore().sounds.search(soundId);
         if(snd == NULL)
             throw std::runtime_error(std::string("Failed to lookup sound ")+soundId);
 
@@ -228,10 +228,46 @@ namespace MWSound
         }
     }
 
+    void SoundManager::say(const std::string& filename)
+    {
+        if(!mOutput->isInitialized())
+            return;
+        try
+        {
+            float basevol = mMasterVolume * mSFXVolume;
+            std::string filePath = "Sound/"+filename;
+
+            SoundPtr sound = mOutput->playSound(filePath, basevol, 1.0f, Play_Normal);
+            sound->mBaseVolume = basevol;
+
+            mActiveSounds[sound] = std::make_pair(MWWorld::Ptr(), std::string("_say_sound"));
+        }
+        catch(std::exception &e)
+        {
+            std::cout <<"Sound Error: "<<e.what()<< std::endl;
+        }
+    }
+
     bool SoundManager::sayDone(MWWorld::Ptr ptr) const
     {
         return !isPlaying(ptr, "_say_sound");
     }
+
+    void SoundManager::stopSay(MWWorld::Ptr ptr)
+    {
+        SoundMap::iterator snditer = mActiveSounds.begin();
+        while(snditer != mActiveSounds.end())
+        {
+            if(snditer->second.first == ptr && snditer->second.second == "_say_sound")
+            {
+                snditer->first->stop();
+                mActiveSounds.erase(snditer++);
+            }
+            else
+                snditer++;
+        }
+    }
+
 
 
     SoundPtr SoundManager::playSound(const std::string& soundId, float volume, float pitch, int mode)
@@ -380,7 +416,7 @@ namespace MWSound
 
     void SoundManager::updateRegionSound(float duration)
     {
-        MWWorld::Ptr::CellStore *current = mEnvironment.mWorld->getPlayer().getPlayer().getCell();
+        MWWorld::Ptr::CellStore *current = MWBase::Environment::get().getWorld()->getPlayer().getPlayer().getCell();
         static int total = 0;
         static std::string regionName = "";
         static float timePassed = 0.0;
@@ -397,7 +433,7 @@ namespace MWSound
             total = 0;
         }
 
-        const ESM::Region *regn = mEnvironment.mWorld->getStore().regions.find(regionName);
+        const ESM::Region *regn = MWBase::Environment::get().getWorld()->getStore().regions.find(regionName);
         std::vector<ESM::Region::SoundRef>::const_iterator soundIter;
         if(total == 0)
         {
@@ -445,8 +481,8 @@ namespace MWSound
         if(!isMusicPlaying())
             startRandomTitle();
 
-        const ESM::Cell *cell = mEnvironment.mWorld->getPlayer().getPlayer().getCell()->cell;
-        Ogre::Camera *cam = mEnvironment.mWorld->getPlayer().getRenderer()->getCamera();
+        const ESM::Cell *cell = MWBase::Environment::get().getWorld()->getPlayer().getPlayer().getCell()->cell;
+        Ogre::Camera *cam = MWBase::Environment::get().getWorld()->getPlayer().getRenderer()->getCamera();
         Ogre::Vector3 nPos, nDir, nUp;
         nPos = cam->getRealPosition();
         nDir = cam->getRealDirection();

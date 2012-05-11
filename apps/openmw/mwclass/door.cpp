@@ -5,12 +5,16 @@
 
 #include <components/esm_store/cell_store.hpp>
 
+#include "../mwbase/environment.hpp"
+
 #include "../mwworld/player.hpp"
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/nullaction.hpp"
 #include "../mwworld/actionteleport.hpp"
-#include "../mwworld/environment.hpp"
 #include "../mwworld/world.hpp"
+
+#include "../mwgui/window_manager.hpp"
+#include "../mwgui/tooltips.hpp"
 
 #include "../mwrender/objects.hpp"
 
@@ -34,7 +38,7 @@ namespace MWClass
         }
     }
 
-    void Door::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics, MWWorld::Environment& environment) const
+    void Door::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics) const
     {
          ESMS::LiveCellRef<ESM::Door, MWWorld::RefData> *ref =
             ptr.get<ESM::Door>();
@@ -58,7 +62,7 @@ namespace MWClass
     }
 
     boost::shared_ptr<MWWorld::Action> Door::activate (const MWWorld::Ptr& ptr,
-        const MWWorld::Ptr& actor, const MWWorld::Environment& environment) const
+        const MWWorld::Ptr& actor) const
     {
         ESMS::LiveCellRef<ESM::Door, MWWorld::RefData> *ref =
             ptr.get<ESM::Door>();
@@ -73,7 +77,7 @@ namespace MWClass
             // TODO check for key
             // TODO report failure to player (message, sound?). Look up behaviour of original MW.
             std::cout << "Locked!" << std::endl;
-            environment.mSoundManager->playSound3D (ptr, lockedSound, 1.0, 1.0);
+            MWBase::Environment::get().getSoundManager()->playSound3D (ptr, lockedSound, 1.0, 1.0);
             return boost::shared_ptr<MWWorld::Action> (new MWWorld::NullAction);
         }
 
@@ -81,7 +85,7 @@ namespace MWClass
         {
             // Trap activation
             std::cout << "Activated trap: " << ptr.getCellRef().trap << std::endl;
-            environment.mSoundManager->playSound3D(ptr, trapActivationSound, 1.0, 1.0);
+            MWBase::Environment::get().getSoundManager()->playSound3D(ptr, trapActivationSound, 1.0, 1.0);
             ptr.getCellRef().trap = "";
             return boost::shared_ptr<MWWorld::Action> (new MWWorld::NullAction);
         }
@@ -89,11 +93,11 @@ namespace MWClass
         if (ref->ref.teleport)
         {
             // teleport door
-            if (environment.mWorld->getPlayer().getPlayer()==actor)
+            if (MWBase::Environment::get().getWorld()->getPlayer().getPlayer()==actor)
             {
                 // the player is using the door
                 // The reason this is not 3D is that it would get interrupted when you teleport
-                environment.mSoundManager->playSound(openSound, 1.0, 1.0);
+                MWBase::Environment::get().getSoundManager()->playSound(openSound, 1.0, 1.0);
                 return boost::shared_ptr<MWWorld::Action> (
                     new MWWorld::ActionTeleportPlayer (ref->ref.destCell, ref->ref.doorDest));
             }
@@ -110,7 +114,7 @@ namespace MWClass
             // TODO return action for rotating the door
 
             // This is a little pointless, but helps with testing
-            environment.mSoundManager->playSound3D (ptr, openSound, 1.0, 1.0);
+            MWBase::Environment::get().getSoundManager()->playSound3D (ptr, openSound, 1.0, 1.0);
             return boost::shared_ptr<MWWorld::Action> (new MWWorld::NullAction);
         }
     }
@@ -141,5 +145,64 @@ namespace MWClass
         boost::shared_ptr<Class> instance (new Door);
 
         registerClass (typeid (ESM::Door).name(), instance);
+    }
+
+    bool Door::hasToolTip (const MWWorld::Ptr& ptr) const
+    {
+        ESMS::LiveCellRef<ESM::Door, MWWorld::RefData> *ref =
+            ptr.get<ESM::Door>();
+
+        return (ref->base->name != "");
+    }
+
+    MWGui::ToolTipInfo Door::getToolTipInfo (const MWWorld::Ptr& ptr) const
+    {
+        ESMS::LiveCellRef<ESM::Door, MWWorld::RefData> *ref =
+            ptr.get<ESM::Door>();
+
+        MWGui::ToolTipInfo info;
+        info.caption = ref->base->name;
+
+        std::string text;
+
+        const ESMS::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
+
+        if (ref->ref.teleport)
+        {
+            std::string dest;
+            if (ref->ref.destCell != "")
+            {
+                // door leads to an interior, use interior name as tooltip
+                dest = ref->ref.destCell;
+            }
+            else
+            {
+                // door leads to exterior, use cell name (if any), otherwise translated region name
+                int x,y;
+                MWBase::Environment::get().getWorld()->positionToIndex (ref->ref.doorDest.pos[0], ref->ref.doorDest.pos[1], x, y);
+                const ESM::Cell* cell = store.cells.findExt(x,y);
+                if (cell->name != "")
+                    dest = cell->name;
+                else
+                {
+                    const ESM::Region* region = store.regions.search(cell->region);
+                    dest = region->name;
+                }
+            }
+            text += "\n" + store.gameSettings.search("sTo")->str;
+            text += "\n"+dest;
+        }
+
+        if (ref->ref.lockLevel > 0)
+            text += "\n" + store.gameSettings.search("sLockLevel")->str + ": " + MWGui::ToolTips::toString(ref->ref.lockLevel);
+        if (ref->ref.trap != "")
+            text += "\n" + store.gameSettings.search("sTrapped")->str;
+
+        if (MWBase::Environment::get().getWindowManager()->getFullHelp())
+            text += MWGui::ToolTips::getMiscString(ref->base->script, "Script");
+
+        info.text = text;
+
+        return info;
     }
 }

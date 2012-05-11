@@ -9,11 +9,6 @@ namespace MWGui
     class WindowManager;
 }
 
-namespace MWWorld
-{
-    class Environment;
-}
-
 /*
   This file contains the dialouge window
   Layout is defined by resources/mygui/openmw_dialogue_window_layout.xml.
@@ -23,17 +18,15 @@ namespace MWGui
 {
     class DialogueHistory;
 
-    using namespace MyGUI;
-
     class DialogueWindow: public WindowBase
     {
     public:
-        DialogueWindow(WindowManager& parWindowManager,MWWorld::Environment& environment);
+        DialogueWindow(WindowManager& parWindowManager);
 
         void open();
 
         // Events
-        typedef delegates::CMultiDelegate0 EventHandle_Void;
+        typedef MyGUI::delegates::CMultiDelegate0 EventHandle_Void;
 
         /** Event : Dialog finished, OK button clicked.\n
             signature : void method()\n
@@ -52,6 +45,7 @@ namespace MWGui
         void onSelectTopic(MyGUI::ListBox* _sender, size_t _index);
         void onByeClicked(MyGUI::Widget* _sender);
         void onHistoryClicked(MyGUI::Widget* _sender);
+        void onMouseWheel(MyGUI::Widget* _sender, int _rel);
 
     private:
         void updateOptions();
@@ -65,8 +59,6 @@ namespace MWGui
         MyGUI::ProgressPtr pDispositionBar;
         MyGUI::EditPtr pDispositionText;
         std::map<std::string,std::string> pTopicsText;// this map links keyword and "real" text.
-
-        MWWorld::Environment& mEnvironment;
     };
 }
 #endif

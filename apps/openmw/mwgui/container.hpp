@@ -10,6 +10,7 @@
 #include "window_base.hpp"
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/containerstore.hpp"
+#include <vector>
 
 namespace MWWorld
 {
@@ -18,44 +19,60 @@ namespace MWWorld
 
 namespace MyGUI
 {
-  class Gui;
-  class Widget;
+    class Gui;
+    class Widget;
 }
 
 namespace MWGui
 {
     class WindowManager;
+    class ContainerWindow;
 }
 
 
 namespace MWGui
 {
-
+    class DragAndDrop
+    {
+    public:
+        bool mIsOnDragAndDrop;
+        ContainerWindow* mContainerWindow;
+        MyGUI::Widget* mDraggedWidget;
+        MyGUI::Widget* mDragAndDropWidget;
+        MWWorld::ContainerStore mStore;
+        MWWorld::Ptr mItem;
+    };
 
     class ContainerWindow : public WindowBase
     {
-        public:
-            ContainerWindow(WindowManager& parWindowManager,MWWorld::Environment& environment);
-            ContainerWindow(WindowManager& parWindowManager,MWWorld::Environment& environment,std::string guiFile);
+    public:
+        ContainerWindow(WindowManager& parWindowManager,DragAndDrop* dragAndDrop);
+        ContainerWindow(WindowManager& parWindowManager,DragAndDrop* dragAndDrop,
+            std::string guiFile);
 
+        void open(MWWorld::Ptr container);
+        void setName(std::string contName);
+        void Update();
 
-            void open(MWWorld::Ptr container);
-            void setName(std::string contName);
-            void Update();
+        virtual ~ContainerWindow();
 
-            virtual ~ContainerWindow();
-
-        protected:
-        MWWorld::Environment& mEnvironment;
+    protected:
         std::vector<MyGUI::WidgetPtr> mContainerWidgets;
         MyGUI::ItemBoxPtr mContainerWidget;
 
         MyGUI::ButtonPtr takeButton;
         MyGUI::ButtonPtr closeButton;
+        DragAndDrop* mDragAndDrop;
 
+        MWWorld::Ptr mContainer;
+        bool mIsValid;//is in the right GUI Mode
+
+        void drawItems();
 
         void onByeClicked(MyGUI::Widget* _sender);
-        void onSelectedItem(MyGUI::ItemBox* _sender, size_t _index);
+        void onSelectedItem(MyGUI::Widget* _sender);
+        void onContainerClicked(MyGUI::Widget* _sender);
+        void onMouseMove(MyGUI::Widget* _sender, int _left, int _top);
 
         //MWWorld::Ptr& mContainer;
     };

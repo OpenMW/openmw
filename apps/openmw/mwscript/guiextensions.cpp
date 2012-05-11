@@ -7,6 +7,8 @@
 #include <components/interpreter/runtime.hpp>
 #include <components/interpreter/opcodes.hpp>
 
+#include "../mwbase/environment.hpp"
+
 #include "../mwgui/window_manager.hpp"
 #include "../mwinput/inputmanager.hpp"
 
@@ -26,10 +28,7 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
-                    InterpreterContext& context =
-                        static_cast<InterpreterContext&> (runtime.getContext());
-
-                    context.getWindowManager().allow (mWindow);
+                    MWBase::Environment::get().getWindowManager()->allow (mWindow);
                 }
         };
 
@@ -45,10 +44,7 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
-                    InterpreterContext& context =
-                        static_cast<InterpreterContext&> (runtime.getContext());
-
-                    context.getInputManager().setGuiMode(mDialogue);
+                    MWBase::Environment::get().getInputManager()->setGuiMode(mDialogue);
                 }
         };
 
@@ -63,7 +59,7 @@ namespace MWScript
 
                     MWWorld::Ptr ptr = context.getReference();
 
-                    runtime.push (context.getWindowManager().readPressedButton());
+                    runtime.push (MWBase::Environment::get().getWindowManager()->readPressedButton());
                 }
         };
 
@@ -73,10 +69,17 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
-                    InterpreterContext& context =
-                        static_cast<InterpreterContext&> (runtime.getContext());
-                    
-                    context.getEnvironment().mWindowManager->toggleFogOfWar();
+                    MWBase::Environment::get().getWindowManager()->toggleFogOfWar();
+                }
+        };
+
+        class OpToggleFullHelp : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWBase::Environment::get().getWindowManager()->toggleFullHelp();
                 }
         };
 
@@ -93,6 +96,7 @@ namespace MWScript
         const int opcodeShowRestMenu = 0x2000018;
         const int opcodeGetButtonPressed = 0x2000137;
         const int opcodeToggleFogOfWar = 0x2000145;
+        const int opcodeToggleFullHelp = 0x2000151;
 
         void registerExtensions (Compiler::Extensions& extensions)
         {
@@ -101,7 +105,7 @@ namespace MWScript
             extensions.registerInstruction ("enablenamemenu", "", opcodeEnableNameMenu);
             extensions.registerInstruction ("enableracemenu", "", opcodeEnableRaceMenu);
             extensions.registerInstruction ("enablestatsreviewmenu", "",
-                opcodeEnableStatsReviewMenu);
+opcodeEnableStatsReviewMenu);
 
             extensions.registerInstruction ("enableinventorymenu", "", opcodeEnableInventoryMenu);
             extensions.registerInstruction ("enablemagicmenu", "", opcodeEnableMagicMenu);
@@ -117,6 +121,9 @@ namespace MWScript
 
             extensions.registerInstruction ("togglefogofwar", "", opcodeToggleFogOfWar);
             extensions.registerInstruction ("tfow", "", opcodeToggleFogOfWar);
+
+            extensions.registerInstruction ("togglefullhelp", "", opcodeToggleFullHelp);
+            extensions.registerInstruction ("tfh", "", opcodeToggleFullHelp);
         }
 
         void installOpcodes (Interpreter::Interpreter& interpreter)
@@ -154,6 +161,8 @@ namespace MWScript
             interpreter.installSegment5 (opcodeGetButtonPressed, new OpGetButtonPressed);
 
             interpreter.installSegment5 (opcodeToggleFogOfWar, new OpToggleFogOfWar);
+
+            interpreter.installSegment5 (opcodeToggleFullHelp, new OpToggleFullHelp);
         }
     }
 }

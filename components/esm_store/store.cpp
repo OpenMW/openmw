@@ -71,15 +71,13 @@ void ESMStore::load(ESMReader &esm)
 
             if (n.val==ESM::REC_DIAL)
             {
-                RecListT<Dialogue>& recList = static_cast<RecListT<Dialogue>& > (*it->second);
+                RecListCaseT<Dialogue>& recList = static_cast<RecListCaseT<Dialogue>& > (*it->second);
 
-                id = recList.toLower (id);
+                ESM::Dialogue* d = recList.search (id);
 
-                RecListT<Dialogue>::MapType::iterator iter = recList.list.find (id);
+                assert (d != NULL);
 
-                assert (iter!=recList.list.end());
-
-                dialogue = &iter->second;
+                dialogue = d;
             }
             else
                 dialogue = 0;

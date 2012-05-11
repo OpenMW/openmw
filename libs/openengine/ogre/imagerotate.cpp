@@ -54,7 +54,7 @@ void ImageRotate::rotate(const std::string& sourceImage, const std::string& dest
                     TEX_TYPE_2D,
                     width, height,
                     0,
-                    PF_A8R8G8B8,
+                    PF_FLOAT16_RGBA,
                     TU_RENDERTARGET);
 
     RenderTarget* rtt = destTexture->getBuffer()->getRenderTarget();
@@ -63,7 +63,6 @@ void ImageRotate::rotate(const std::string& sourceImage, const std::string& dest
     vp->setOverlaysEnabled(false);
     vp->setShadowsEnabled(false);
     vp->setBackgroundColour(ColourValue(0,0,0,0));
-    vp->setClearEveryFrame(true, FBT_DEPTH);
 
     rtt->update();
 

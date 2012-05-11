@@ -11,6 +11,7 @@ void PartReferenceList::load(ESMReader &esm)
         esm.getHT(pr.part); // The INDX byte
         pr.male = esm.getHNOString("BNAM");
         pr.female = esm.getHNOString("CNAM");
+        parts.push_back(pr);
     }
 }
 

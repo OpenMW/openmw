@@ -23,7 +23,6 @@ namespace MWGui
     private:
 
         MWScript::CompilerContext mCompilerContext;
-        MWWorld::Environment& mEnvironment;
         std::vector<std::string> mNames;
 
         bool compile (const std::string& cmd, Compiler::Output& output);
@@ -51,7 +50,7 @@ namespace MWGui
     StringList::iterator current;
     std::string editString;
 
-    Console(int w, int h, MWWorld::Environment& environment, const Compiler::Extensions& extensions);
+    Console(int w, int h, const Compiler::Extensions& extensions);
 
     void enable();
 

@@ -12,16 +12,10 @@ namespace Ogre
     class Vector3;
 }
 
-namespace MWWorld
-{
-    class Environment;
-}
-
 namespace MWMechanics
 {
     class Actors
     {
-            MWWorld::Environment& mEnvironment;
             std::set<MWWorld::Ptr> mActors;
             float mDuration;
 
@@ -31,7 +25,7 @@ namespace MWMechanics
 
         public:
 
-            Actors (MWWorld::Environment& environment);
+            Actors();
 
             void addActor (const MWWorld::Ptr& ptr);
             ///< Register an actor for stats management

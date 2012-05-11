@@ -6,6 +6,8 @@
 #include <components/bsa/bsa_archive.hpp>
 #include <components/files/collections.hpp>
 
+#include "../mwbase/environment.hpp"
+
 #include "../mwrender/sky.hpp"
 #include "../mwrender/player.hpp"
 
@@ -13,9 +15,9 @@
 
 #include "../mwsound/soundmanager.hpp"
 
+#include "../mwgui/window_manager.hpp"
 
 #include "ptr.hpp"
-#include "environment.hpp"
 #include "class.hpp"
 #include "player.hpp"
 #include "weather.hpp"
@@ -174,18 +176,18 @@ namespace MWWorld
 
     World::World (OEngine::Render::OgreRenderer& renderer,
         const Files::Collections& fileCollections,
-        const std::string& master, const boost::filesystem::path& resDir,
-        bool newGame, Environment& environment, const std::string& encoding, std::map<std::string,std::string> fallbackMap)
+        const std::string& master, const boost::filesystem::path& resDir, bool newGame,
+        const std::string& encoding, std::map<std::string,std::string> fallbackMap)
     : mPlayer (0), mLocalScripts (mStore), mGlobalVariables (0),
-      mSky (true), mEnvironment (environment), mNextDynamicRecord (0), mCells (mStore, mEsm, *this),
+      mSky (true), mNextDynamicRecord (0), mCells (mStore, mEsm, *this),
       mNumFacing(0)
     {
         mPhysics = new PhysicsSystem(renderer);
         mPhysEngine = mPhysics->getEngine();
 
-        mRendering = new MWRender::RenderingManager(renderer, resDir, mPhysEngine, environment);
+        mRendering = new MWRender::RenderingManager(renderer, resDir, mPhysEngine);
 
-        mWeatherManager = new MWWorld::WeatherManager(mRendering, &environment);
+        mWeatherManager = new MWWorld::WeatherManager(mRendering);
 
         boost::filesystem::path masterPath (fileCollections.getCollection (".esm").getPath (master));
 
@@ -209,10 +211,11 @@ namespace MWWorld
             mGlobalVariables->setInt ("chargenstate", 1);
         }
 
-        mWorldScene = new Scene(environment, this, *mRendering, mPhysics);
+        mWorldScene = new Scene(this, *mRendering, mPhysics);
 
         setFallbackValues(fallbackMap);
 
+        lastTick = mTimer.getMilliseconds();
     }
 
 
@@ -357,7 +360,7 @@ namespace MWWorld
 
                 //render->enable (reference.getRefData().getHandle());
             if(mWorldScene->getActiveCells().find (reference.getCell()) != mWorldScene->getActiveCells().end())
-                 Class::get (reference).enable (reference, mEnvironment);
+                 Class::get (reference).enable (reference);
 
 
         }
@@ -372,8 +375,8 @@ namespace MWWorld
 
                 //render->disable (reference.getRefData().getHandle());
             if(mWorldScene->getActiveCells().find (reference.getCell())!=mWorldScene->getActiveCells().end()){
-                  Class::get (reference).disable (reference, mEnvironment);
-                  mEnvironment.mSoundManager->stopSound3D (reference);
+                  Class::get (reference).disable (reference);
+                  MWBase::Environment::get().getSoundManager()->stopSound3D (reference);
             }
 
 
@@ -547,7 +550,7 @@ namespace MWWorld
 
                 if (mWorldScene->getActiveCells().find (ptr.getCell())!=mWorldScene->getActiveCells().end()){
 //                           Class::get (ptr).disable (ptr, mEnvironment); /// \todo this line needs to be removed
-                            mEnvironment.mSoundManager->stopSound3D (ptr);
+                            MWBase::Environment::get().getSoundManager()->stopSound3D (ptr);
 
                             mPhysics->removeObject (ptr.getRefData().getHandle());
                             mRendering->removeObject(ptr);
@@ -557,8 +560,9 @@ namespace MWWorld
         }
     }
 
-    void World::moveObjectImp (Ptr ptr, float x, float y, float z)
+    bool World::moveObjectImp (Ptr ptr, float x, float y, float z)
     {
+        bool ret = false;
         ptr.getRefData().getPosition().pos[0] = x;
         ptr.getRefData().getPosition().pos[1] = y;
         ptr.getRefData().getPosition().pos[2] = z;
@@ -580,6 +584,7 @@ namespace MWWorld
                     if (currentCell->cell->data.gridX!=cellX || currentCell->cell->data.gridY!=cellY)
                     {
                         mWorldScene->changeCell (cellX, cellY, mPlayer->getPlayer().getRefData().getPosition(), false);
+                        ret = true;
                     }
 
                 }
@@ -589,6 +594,8 @@ namespace MWWorld
         /// \todo cell change for non-player ref
 
         mRendering->moveObject (ptr, Ogre::Vector3 (x, y, z));
+
+        return ret;
     }
 
     void World::moveObject (Ptr ptr, float x, float y, float z)
@@ -630,29 +637,50 @@ namespace MWWorld
     void World::doPhysics (const std::vector<std::pair<std::string, Ogre::Vector3> >& actors,
         float duration)
     {
-        std::vector< std::pair<std::string, Ogre::Vector3> > vectors = mPhysics->doPhysics (duration, actors);
+        mPhysics->doPhysics(duration, actors);
 
-        std::vector< std::pair<std::string, Ogre::Vector3> >::iterator player = vectors.end();
+        const int tick = 16; // 16 ms ^= 60 Hz
 
-        for (std::vector< std::pair<std::string, Ogre::Vector3> >::iterator it = vectors.begin();
-            it!= vectors.end(); ++it)
+        // Game clock part of the loop, contains everything that has to be executed in a fixed timestep
+        long long dt = mTimer.getMilliseconds() - lastTick;
+        if (dt >= 100)
         {
-            if (it->first=="player")
+            //  throw away wall clock time if necessary to keep the framerate above the minimum of 10 fps
+            lastTick += (dt - 100);
+            dt = 100;
+        }
+        while (dt >= tick)
+        {
+            dt -= tick;
+            lastTick += tick;
+
+            std::vector< std::pair<std::string, Ogre::Vector3> > vectors = mPhysics->doPhysicsFixed (actors);
+
+            std::vector< std::pair<std::string, Ogre::Vector3> >::iterator player = vectors.end();
+
+            for (std::vector< std::pair<std::string, Ogre::Vector3> >::iterator it = vectors.begin();
+                it!= vectors.end(); ++it)
             {
-                player = it;
+                if (it->first=="player")
+                {
+                    player = it;
+                }
+                else
+                {
+                    MWWorld::Ptr ptr = getPtrViaHandle (it->first);
+                    moveObjectImp (ptr, it->second.x, it->second.y, it->second.z);
+                }
             }
-            else
+
+            // Make sure player is moved last (otherwise the cell might change in the middle of an update
+            // loop)
+            if (player!=vectors.end())
             {
-                MWWorld::Ptr ptr = getPtrViaHandle (it->first);
-                moveObjectImp (ptr, it->second.x, it->second.y, it->second.z);
+                if (moveObjectImp (getPtrViaHandle (player->first),
+                    player->second.x, player->second.y, player->second.z) == true)
+                    return; // abort the current loop if the cell has changed
             }
         }
-
-        // Make sure player is moved last (otherwise the cell might change in the middle of an update
-        // loop)
-        if (player!=vectors.end())
-            moveObjectImp (getPtrViaHandle (player->first),
-                player->second.x, player->second.y, player->second.z);
     }
 
     bool World::toggleCollisionMode()
@@ -737,6 +765,17 @@ namespace MWWorld
 
         mWeatherManager->update (duration);
 
+        // inform the GUI about focused object
+        try
+        {
+            MWBase::Environment::get().getWindowManager()->setFocusObject(getPtrViaHandle(mFacedHandle));
+        }
+        catch (std::runtime_error&)
+        {
+            MWWorld::Ptr null;
+            MWBase::Environment::get().getWindowManager()->setFocusObject(null);
+        }
+
         if (!mRendering->occlusionQuerySupported())
         {
             // cast a ray from player to sun to detect if the sun is visible
@@ -776,7 +815,8 @@ namespace MWWorld
                 std::vector < std::pair < float, std::string > >::iterator it = results.begin();
                 while (it != results.end())
                 {
-                    if ( getPtrViaHandle((*it).second) == mPlayer->getPlayer() )
+                    if ( (*it).second.find("HeightField") != std::string::npos // not interested in terrain
+                    || getPtrViaHandle((*it).second) == mPlayer->getPlayer() ) // not interested in player (unless you want to talk to yourself)
                     {
                         it = results.erase(it);
                     }

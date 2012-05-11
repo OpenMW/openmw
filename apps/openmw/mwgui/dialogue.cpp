@@ -3,7 +3,7 @@
 #include "window_manager.hpp"
 #include "widgets.hpp"
 #include "components/esm_store/store.hpp"
-#include "../mwworld/environment.hpp"
+#include "../mwbase/environment.hpp"
 #include "../mwdialogue/dialoguemanager.hpp"
 
 #include <assert.h>
@@ -36,9 +36,8 @@ std::string::size_type find_str_ci(const std::string& str, const std::string& su
 }
 
 
-DialogueWindow::DialogueWindow(WindowManager& parWindowManager,MWWorld::Environment& environment)
-    : WindowBase("openmw_dialogue_window_layout.xml", parWindowManager),
-    mEnvironment(environment)
+DialogueWindow::DialogueWindow(WindowManager& parWindowManager)
+    : WindowBase("openmw_dialogue_window_layout.xml", parWindowManager)
 {
     // Centre dialog
     center();
@@ -51,10 +50,10 @@ DialogueWindow::DialogueWindow(WindowManager& parWindowManager,MWWorld::Environm
 
     //An EditBox cannot receive mouse click events, so we use an
     //invisible widget on top of the editbox to receive them
-    /// \todo scrolling the dialogue history with the mouse wheel doesn't work using this solution
     getWidget(eventbox, "EventBox");
     eventbox->eventMouseButtonClick += MyGUI::newDelegate(this, &DialogueWindow::onHistoryClicked);
-    
+    eventbox->eventMouseWheel += MyGUI::newDelegate(this, &DialogueWindow::onMouseWheel);
+
     //Topics list
     getWidget(topicsList, "TopicsList");
     topicsList->setScrollVisible(true);
@@ -83,10 +82,18 @@ void DialogueWindow::onHistoryClicked(MyGUI::Widget* _sender)
     if(color != "#B29154")
     {
         UString key = history->getColorTextAt(cursorPosition);
-        if(color == "#686EBA") mEnvironment.mDialogueManager->keywordSelected(lower_string(key));
+        if(color == "#686EBA") MWBase::Environment::get().getDialogueManager()->keywordSelected(lower_string(key));
 
-        if(color == "#572D21") mEnvironment.mDialogueManager->questionAnswered(key);
+        if(color == "#572D21") MWBase::Environment::get().getDialogueManager()->questionAnswered(lower_string(key));
     }
+}
+
+void DialogueWindow::onMouseWheel(MyGUI::Widget* _sender, int _rel)
+{
+    if (history->getVScrollPosition() - _rel*0.3 < 0)
+        history->setVScrollPosition(0);
+    else
+        history->setVScrollPosition(history->getVScrollPosition() - _rel*0.3);
 }
 
 void DialogueWindow::open()
@@ -100,7 +107,7 @@ void DialogueWindow::open()
 
 void DialogueWindow::onByeClicked(MyGUI::Widget* _sender)
 {
-    mEnvironment.mDialogueManager->goodbyeSelected();
+    MWBase::Environment::get().getDialogueManager()->goodbyeSelected();
 }
 
 void DialogueWindow::onSelectTopic(MyGUI::ListBox* _sender, size_t _index)
@@ -108,7 +115,7 @@ void DialogueWindow::onSelectTopic(MyGUI::ListBox* _sender, size_t _index)
     if (_index == MyGUI::ITEM_NONE)
         return;
     std::string topic =  _sender->getItemNameAt(_index);
-    mEnvironment.mDialogueManager->keywordSelected(lower_string(topic));
+    MWBase::Environment::get().getDialogueManager()->keywordSelected(lower_string(topic));
 }
 
 void DialogueWindow::startDialogue(std::string npcName)
@@ -183,6 +190,16 @@ void DialogueWindow::addText(std::string text)
 
 void DialogueWindow::addTitle(std::string text)
 {
+    // This is called from the dialogue manager, so text is
+    // case-smashed - thus we have to retrieve the correct case
+    // of the text through the topic list.
+    for (size_t i=0; i<topicsList->getItemCount(); ++i)
+    {
+        std::string item = topicsList->getItemNameAt(i);
+        if (lower_string(item) == text)
+            text = item;
+    }
+
     history->addDialogHeading(text);
 }
 

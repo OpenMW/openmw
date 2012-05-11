@@ -15,7 +15,7 @@ namespace MWWorld
         public:
             ActionOpen (const Ptr& container);
             ///< \param The Container the Player has activated.
-            virtual void execute (Environment& environment);
+            virtual void execute ();
     };
 }
 

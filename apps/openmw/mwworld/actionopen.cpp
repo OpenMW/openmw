@@ -1,6 +1,6 @@
 #include "actionopen.hpp"
 
-#include "environment.hpp"
+#include "../mwbase/environment.hpp"
 #include "class.hpp"
 #include "world.hpp"
 #include "containerstore.hpp"
@@ -14,9 +14,9 @@ namespace MWWorld
         mContainer = container;
     }
 
-    void ActionOpen::execute (Environment& environment)
+    void ActionOpen::execute ()
     {
-        environment.mWindowManager->setGuiMode(MWGui::GM_Container);
-        environment.mWindowManager->getContainerWindow()->open(mContainer);
+        MWBase::Environment::get().getWindowManager()->setGuiMode(MWGui::GM_Container);
+        MWBase::Environment::get().getWindowManager()->getContainerWindow()->open(mContainer);
     }
 }

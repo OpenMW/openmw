@@ -7,6 +7,8 @@
 #include <components/interpreter/runtime.hpp>
 #include <components/interpreter/opcodes.hpp>
 
+#include "../mwbase/environment.hpp"
+
 #include "../mwworld/player.hpp"
 
 #include "interpretercontext.hpp"
@@ -46,7 +48,7 @@ namespace MWScript
                     InterpreterContext& context
                         = static_cast<InterpreterContext&> (runtime.getContext());
 
-                    bool enabled = context.getWorld().toggleCollisionMode();
+                    bool enabled = MWBase::Environment::get().getWorld()->toggleCollisionMode();
 
                     context.report (enabled ? "Collision -> On" : "Collision -> Off");
                 }

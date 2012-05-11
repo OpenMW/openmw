@@ -9,9 +9,13 @@
 #include "messagebox.hpp"
 #include "container.hpp"
 #include "inventorywindow.hpp"
+#include "itemwidget.hpp"
+#include "tooltips.hpp"
 
 #include "../mwmechanics/mechanicsmanager.hpp"
 #include "../mwinput/inputmanager.hpp"
+
+#include "../mwbase/environment.hpp"
 
 #include "console.hpp"
 #include "journalwindow.hpp"
@@ -25,18 +29,18 @@
 
 using namespace MWGui;
 
-WindowManager::WindowManager(MWWorld::Environment& environment,
+WindowManager::WindowManager(
     const Compiler::Extensions& extensions, int fpsLevel, bool newGame, OEngine::Render::OgreRenderer *mOgre, const std::string logpath)
   : mGuiManager(NULL)
-  , environment(environment)
   , hud(NULL)
   , map(NULL)
   , menu(NULL)
   , stats(NULL)
+  , mToolTips(NULL)
   , mMessageBoxManager(NULL)
   , console(NULL)
   , mJournal(NULL)
-  , dialogueWindow(nullptr)
+  , mDialogueWindow(nullptr)
   , mCharGen(NULL)
   , playerClass()
   , playerName()
@@ -65,30 +69,41 @@ WindowManager::WindowManager(MWWorld::Environment& environment,
     // Set up the GUI system
     mGuiManager = new OEngine::GUI::MyGUIManager(mOgre->getWindow(), mOgre->getScene(), false, logpath);
     gui = mGuiManager->getGui();
-
+    
     //Register own widgets with MyGUI
     MyGUI::FactoryManager::getInstance().registerFactory<DialogueHistory>("Widget");
+    MyGUI::FactoryManager::getInstance().registerFactory<ItemWidget>("Widget");
 
     // Get size info from the Gui object
     assert(gui);
     int w = MyGUI::RenderManager::getInstance().getViewSize().width;
     int h = MyGUI::RenderManager::getInstance().getViewSize().height;
 
+    MyGUI::Widget* dragAndDropWidget = gui->createWidgetT("Widget","",0,0,w,h,MyGUI::Align::Default,"DragAndDrop","DragAndDropWidget");
+    dragAndDropWidget->setVisible(false);
+
+    DragAndDrop* mDragAndDrop = new DragAndDrop();
+    mDragAndDrop->mIsOnDragAndDrop = false;
+    mDragAndDrop->mDraggedWidget = 0;
+    mDragAndDrop->mDragAndDropWidget = dragAndDropWidget;
+    mDragAndDrop->mContainerWindow = 0;
+
     hud = new HUD(w,h, showFPSLevel);
     menu = new MainMenu(w,h);
     map = new MapWindow(*this);
     stats = new StatsWindow(*this);
-    console = new Console(w,h, environment, extensions);
+    console = new Console(w,h, extensions);
     mJournal = new JournalWindow(*this);
     mMessageBoxManager = new MessageBoxManager(this);
-    dialogueWindow = new DialogueWindow(*this,environment);
-    containerWindow = new ContainerWindow(*this,environment);
-    mInventoryWindow = new InventoryWindow(*this,environment);
+    mDialogueWindow = new DialogueWindow(*this);
+    mContainerWindow = new ContainerWindow(*this,mDragAndDrop);
+    mInventoryWindow = new InventoryWindow(*this,mDragAndDrop);
+    mToolTips = new ToolTips(this);
 
     // The HUD is always on
     hud->setVisible(true);
 
-    mCharGen = new CharacterCreation(this, &environment);
+    mCharGen = new CharacterCreation(this);
 
     // Setup player stats
     for (int i = 0; i < ESM::Attribute::Length; ++i)
@@ -104,6 +119,7 @@ WindowManager::WindowManager(MWWorld::Environment& environment,
     MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWSkill>("Widget");
     MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWAttribute>("Widget");
     MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWSpell>("Widget");
+    MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWEffectList>("Widget");
     MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWSpellEffect>("Widget");
     MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWDynamicStat>("Widget");
 
@@ -121,10 +137,12 @@ WindowManager::~WindowManager()
     delete menu;
     delete stats;
     delete mJournal;
-    delete dialogueWindow;
-    delete containerWindow;
+    delete mDialogueWindow;
+    delete mContainerWindow;
     delete mInventoryWindow;
+    delete mToolTips;
     delete mCharGen;
+    delete mDragAndDrop;
 
     cleanupGarbage();
 }
@@ -148,7 +166,7 @@ void WindowManager::update()
     if (needModeChange)
     {
         needModeChange = false;
-        environment.mInputManager->setGuiMode(nextMode);
+        MWBase::Environment::get().getInputManager()->setGuiMode(nextMode);
         nextMode = GM_Game;
     }
     if (showFPSLevel > 0)
@@ -159,11 +177,6 @@ void WindowManager::update()
     }
 }
 
-MWWorld::Environment& WindowManager::getEnvironment()
-{
-    return environment;
-}
-
 void WindowManager::setNextMode(GuiMode newMode)
 {
     nextMode = newMode;
@@ -172,7 +185,7 @@ void WindowManager::setNextMode(GuiMode newMode)
 
 void WindowManager::setGuiMode(GuiMode newMode)
 {
-    environment.mInputManager->setGuiMode(newMode);
+    MWBase::Environment::get().getInputManager()->setGuiMode(newMode);
 }
 
 void WindowManager::updateVisible()
@@ -183,12 +196,17 @@ void WindowManager::updateVisible()
     stats->setVisible(false);
     console->disable();
     mJournal->setVisible(false);
-    dialogueWindow->setVisible(false);
-    containerWindow->setVisible(false);
+    mDialogueWindow->setVisible(false);
+    mContainerWindow->setVisible(false);
     mInventoryWindow->setVisible(false);
 
     // Mouse is visible whenever we're not in game mode
     MyGUI::PointerManager::getInstance().setVisible(isGuiMode());
+
+    if (mode == GM_Game)
+        mToolTips->enterGameMode();
+    else
+        mToolTips->enterGuiMode();
 
     switch(mode) {
         case GM_Game:
@@ -226,12 +244,12 @@ void WindowManager::updateVisible()
             break;
         }
         case GM_Container:
-            containerWindow->setVisible(true);
+            mContainerWindow->setVisible(true);
             mInventoryWindow->setVisible(true);
             mInventoryWindow->openInventory();
             break;
         case GM_Dialogue:
-            dialogueWindow->open();
+            mDialogueWindow->open();
             break;
         case GM_InterMessageBox:
             if(!mMessageBoxManager->isInteractiveMessageBox()) {
@@ -402,7 +420,7 @@ int WindowManager::readPressedButton ()
 
 const std::string &WindowManager::getGameSettingString(const std::string &id, const std::string &default_)
 {
-    const ESM::GameSetting *setting = environment.mWorld->getStore().gameSettings.search(id);
+    const ESM::GameSetting *setting = MWBase::Environment::get().getWorld()->getStore().gameSettings.search(id);
     if (setting && setting->type == ESM::VT_String)
         return setting->str;
     return default_;
@@ -410,11 +428,11 @@ const std::string &WindowManager::getGameSettingString(const std::string &id, co
 
 void WindowManager::onDialogueWindowBye()
 {
-    if (dialogueWindow)
+    if (mDialogueWindow)
     {
         //FIXME set some state and stuff?
         //removeDialog(dialogueWindow);
-        dialogueWindow->setVisible(false);
+        mDialogueWindow->setVisible(false);
     }
     setGuiMode(GM_Game);
 }
@@ -422,11 +440,14 @@ void WindowManager::onDialogueWindowBye()
 void WindowManager::onFrame (float frameDuration)
 {
     mMessageBoxManager->onFrame(frameDuration);
+    mInventoryWindow->Update();
+    mContainerWindow->Update();
+    mToolTips->onFrame(frameDuration);
 }
 
 const ESMS::ESMStore& WindowManager::getStore() const
 {
-    return environment.mWorld->getStore();
+    return MWBase::Environment::get().getWorld()->getStore();
 }
 
 void WindowManager::changeCell(MWWorld::Ptr::CellStore* cell)
@@ -437,7 +458,10 @@ void WindowManager::changeCell(MWWorld::Ptr::CellStore* cell)
         if (cell->cell->name != "")
             name = cell->cell->name;
         else
-            name = cell->cell->region;
+        {
+            const ESM::Region* region = MWBase::Environment::get().getWorld()->getStore().regions.search(cell->cell->region);
+            name = region->name;
+        }
 
         map->setCellName( name );
 
@@ -495,4 +519,19 @@ int WindowManager::toggleFps()
     hud->setFpsLevel(showFPSLevel);
     Settings::Manager::setInt("fps", "HUD", showFPSLevel);
     return showFPSLevel;
+}
+
+void WindowManager::setFocusObject(const MWWorld::Ptr& focus)
+{
+    mToolTips->setFocusObject(focus);
+}
+
+void WindowManager::toggleFullHelp()
+{
+    mToolTips->toggleFullHelp();
+}
+
+bool WindowManager::getFullHelp() const
+{
+    return mToolTips->getFullHelp();
 }

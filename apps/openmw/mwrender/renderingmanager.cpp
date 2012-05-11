@@ -24,8 +24,8 @@ using namespace Ogre;
 
 namespace MWRender {
 
-RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const boost::filesystem::path& resDir, OEngine::Physic::PhysicEngine* engine, MWWorld::Environment& environment)
-    :mRendering(_rend), mObjects(mRendering), mActors(mRendering, environment), mAmbientMode(0), mSunEnabled(0)
+RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const boost::filesystem::path& resDir, OEngine::Physic::PhysicEngine* engine)
+    :mRendering(_rend), mObjects(mRendering), mActors(mRendering), mAmbientMode(0), mSunEnabled(0)
 {
     mRendering.createScene("PlayerCam", Settings::Manager::getFloat("field of view", "General"), 5);
 
@@ -52,11 +52,16 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
     // Load resources
     ResourceGroupManager::getSingleton().initialiseAllResourceGroups();
 
+    // Due to the huge world size of MW, we'll want camera-relative rendering.
+    // This prevents precision artifacts when moving very far from the origin.
+    mRendering.getScene()->setCameraRelativeRendering(true);
+
     // disable unsupported effects
     const RenderSystemCapabilities* caps = Root::getSingleton().getRenderSystem()->getCapabilities();
-    if (caps->getNumMultiRenderTargets() < 2)
+    if (caps->getNumMultiRenderTargets() < 2 || !Settings::Manager::getBool("shaders", "Objects"))
         Settings::Manager::setBool("shader", "Water", false);
-    if (!caps->isShaderProfileSupported("fp40") && !caps->isShaderProfileSupported("ps_4_0"))
+    if ( !(caps->isShaderProfileSupported("fp40") || caps->isShaderProfileSupported("ps_4_0"))
+        || !Settings::Manager::getBool("shaders", "Objects"))
         Settings::Manager::setBool("enabled", "Shadows", false);
 
     // note that the order is important here
@@ -93,19 +98,18 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
     mShadows = new Shadows(&mRendering);
     mShaderHelper = new ShaderHelper(this);
 
-    mTerrainManager = new TerrainManager(mRendering.getScene(), this,
-                                         environment);
+    mTerrainManager = new TerrainManager(mRendering.getScene(), this);
 
     //mSkyManager = 0;
-    mSkyManager = new SkyManager(mMwRoot, mRendering.getCamera(), &environment);
+    mSkyManager = new SkyManager(mMwRoot, mRendering.getCamera());
 
     mOcclusionQuery = new OcclusionQuery(&mRendering, mSkyManager->getSunNode());
 
     mPlayer = new MWRender::Player (mRendering.getCamera(), playerNode);
     mSun = 0;
 
-    mDebugging = new Debugging(mMwRoot, environment, engine);
-    mLocalMap = new MWRender::LocalMap(&mRendering, this, &environment);
+    mDebugging = new Debugging(mMwRoot, engine);
+    mLocalMap = new MWRender::LocalMap(&mRendering, this);
 }
 
 RenderingManager::~RenderingManager ()
@@ -208,6 +212,7 @@ void RenderingManager::moveObjectToCell (const MWWorld::Ptr& ptr, const Ogre::Ve
 void RenderingManager::update (float duration){
 
     mActors.update (duration);
+    mObjects.update (duration);
 
     mOcclusionQuery->update(duration);
 
@@ -220,6 +225,8 @@ void RenderingManager::update (float duration){
     mLocalMap->updatePlayer( mRendering.getCamera()->getRealPosition(), mRendering.getCamera()->getRealOrientation() );
 
     checkUnderwater();
+
+    mWater->update();
 }
 void RenderingManager::waterAdded (MWWorld::Ptr::CellStore *store){
     if(store->cell->data.flags & store->cell->HasWater){
@@ -499,6 +506,16 @@ const bool RenderingManager::useMRT()
 Shadows* RenderingManager::getShadows()
 {
     return mShadows;
+}
+
+void RenderingManager::switchToInterior()
+{
+    mRendering.getScene()->setCameraRelativeRendering(false);
+}
+
+void RenderingManager::switchToExterior()
+{
+    mRendering.getScene()->setCameraRelativeRendering(true);
 }
 
 } // namespace

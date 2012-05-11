@@ -141,6 +141,18 @@ namespace Physic
         RigidBody* createRigidBody(std::string mesh,std::string name,float scale);
 
         /**
+         * Add a HeightField to the simulation
+         */
+        void addHeightField(float* heights,
+                int x, int y, float yoffset,
+                float triSize, float sqrtVerts);
+
+        /**
+         * Remove a HeightField from the simulation
+         */
+        void removeHeightField(int x, int y);
+
+        /**
          * Add a RigidBody to the simulation
          */
         void addRigidBody(RigidBody* body);

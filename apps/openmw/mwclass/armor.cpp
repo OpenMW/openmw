@@ -9,12 +9,14 @@
 
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/actiontake.hpp"
-
 #include "../mwworld/inventorystore.hpp"
-#include "../mwworld/environment.hpp"
 #include "../mwworld/world.hpp"
 
+#include "../mwbase/environment.hpp"
+
 #include "../mwrender/objects.hpp"
+
+#include "../mwgui/window_manager.hpp"
 
 #include "../mwsound/soundmanager.hpp"
 
@@ -36,7 +38,7 @@ namespace MWClass
         }
     }
 
-    void Armor::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics, MWWorld::Environment& environment) const
+    void Armor::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics) const
     {
         ESMS::LiveCellRef<ESM::Armor, MWWorld::RefData> *ref =
             ptr.get<ESM::Armor>();
@@ -58,9 +60,9 @@ namespace MWClass
     }
 
     boost::shared_ptr<MWWorld::Action> Armor::activate (const MWWorld::Ptr& ptr,
-        const MWWorld::Ptr& actor, const MWWorld::Environment& environment) const
+        const MWWorld::Ptr& actor) const
     {
-        environment.mSoundManager->playSound3D (ptr, getUpSoundId(ptr, environment), 1.0, 1.0, MWSound::Play_NoTrack);
+        MWBase::Environment::get().getSoundManager()->playSound3D (ptr, getUpSoundId(ptr), 1.0, 1.0, MWSound::Play_NoTrack);
 
         return boost::shared_ptr<MWWorld::Action> (
             new MWWorld::ActionTake (ptr));
@@ -121,7 +123,7 @@ namespace MWClass
         return std::make_pair (slots, false);
     }
 
-    int Armor::getEquipmentSkill (const MWWorld::Ptr& ptr, const MWWorld::Environment& environment) const
+    int Armor::getEquipmentSkill (const MWWorld::Ptr& ptr) const
     {
         ESMS::LiveCellRef<ESM::Armor, MWWorld::RefData> *ref =
             ptr.get<ESM::Armor>();
@@ -138,8 +140,7 @@ namespace MWClass
             case ESM::Armor::Boots: typeGmst = "iBootsWeight"; break;
             case ESM::Armor::LGauntlet:
             case ESM::Armor::RGauntlet: typeGmst = "iGauntletWeight"; break;
-/// \todo how to determine if shield light, medium or heavy?
-//            case ESM::Armor::Shield:
+            case ESM::Armor::Shield: typeGmst = "iShieldWeight"; break;
             case ESM::Armor::LBracer:
             case ESM::Armor::RBracer: typeGmst = "iGauntletWeight"; break;
         }
@@ -147,13 +148,13 @@ namespace MWClass
         if (typeGmst.empty())
             return -1;
 
-        float iWeight = environment.mWorld->getStore().gameSettings.find (typeGmst)->i;
+        float iWeight = MWBase::Environment::get().getWorld()->getStore().gameSettings.find (typeGmst)->i;
 
-        if (iWeight * environment.mWorld->getStore().gameSettings.find ("fLightMaxMod")->f>=
+        if (iWeight * MWBase::Environment::get().getWorld()->getStore().gameSettings.find ("fLightMaxMod")->f>=
             ref->base->data.weight)
             return ESM::Skill::LightArmor;
 
-        if (iWeight * environment.mWorld->getStore().gameSettings.find ("fMedMaxMod")->f>=
+        if (iWeight * MWBase::Environment::get().getWorld()->getStore().gameSettings.find ("fMedMaxMod")->f>=
             ref->base->data.weight)
             return ESM::Skill::MediumArmor;
 
@@ -175,9 +176,9 @@ namespace MWClass
         registerClass (typeid (ESM::Armor).name(), instance);
     }
 
-    std::string Armor::getUpSoundId (const MWWorld::Ptr& ptr, const MWWorld::Environment& environment) const
+    std::string Armor::getUpSoundId (const MWWorld::Ptr& ptr) const
     {
-        int es = getEquipmentSkill(ptr, environment);
+        int es = getEquipmentSkill(ptr);
         if (es == ESM::Skill::LightArmor)
             return std::string("Item Armor Light Up");
         else if (es == ESM::Skill::MediumArmor)
@@ -186,9 +187,9 @@ namespace MWClass
             return std::string("Item Armor Heavy Up");
     }
 
-    std::string Armor::getDownSoundId (const MWWorld::Ptr& ptr, const MWWorld::Environment& environment) const
+    std::string Armor::getDownSoundId (const MWWorld::Ptr& ptr) const
     {
-        int es = getEquipmentSkill(ptr, environment);
+        int es = getEquipmentSkill(ptr);
         if (es == ESM::Skill::LightArmor)
             return std::string("Item Armor Light Down");
         else if (es == ESM::Skill::MediumArmor)
@@ -197,11 +198,62 @@ namespace MWClass
             return std::string("Item Armor Heavy Down");
     }
 
-        std::string Armor::getInventoryIcon (const MWWorld::Ptr& ptr) const
+    std::string Armor::getInventoryIcon (const MWWorld::Ptr& ptr) const
     {
           ESMS::LiveCellRef<ESM::Armor, MWWorld::RefData> *ref =
             ptr.get<ESM::Armor>();
 
         return ref->base->icon;
+    }
+
+    bool Armor::hasToolTip (const MWWorld::Ptr& ptr) const
+    {
+        ESMS::LiveCellRef<ESM::Armor, MWWorld::RefData> *ref =
+            ptr.get<ESM::Armor>();
+
+        return (ref->base->name != "");
+    }
+
+    MWGui::ToolTipInfo Armor::getToolTipInfo (const MWWorld::Ptr& ptr) const
+    {
+        ESMS::LiveCellRef<ESM::Armor, MWWorld::RefData> *ref =
+            ptr.get<ESM::Armor>();
+
+        MWGui::ToolTipInfo info;
+        info.caption = ref->base->name;
+        info.icon = ref->base->icon;
+
+        std::string text;
+
+        const ESMS::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
+
+        // get armor type string (light/medium/heavy)
+        int armorType = getEquipmentSkill(ptr);
+        std::string typeText;
+        if (armorType == ESM::Skill::LightArmor)
+            typeText = store.gameSettings.search("sLight")->str;
+        else if (armorType == ESM::Skill::MediumArmor)
+            typeText = store.gameSettings.search("sMedium")->str;
+        else
+            typeText = store.gameSettings.search("sHeavy")->str;
+
+        text += "\n" + store.gameSettings.search("sArmorRating")->str + ": " + MWGui::ToolTips::toString(ref->base->data.armor);
+
+        /// \todo store the current armor health somewhere
+        text += "\n" + store.gameSettings.search("sCondition")->str + ": " + MWGui::ToolTips::toString(ref->base->data.health);
+
+        text += "\n" + store.gameSettings.search("sWeight")->str + ": " + MWGui::ToolTips::toString(ref->base->data.weight) + " (" + typeText + ")";
+        text += MWGui::ToolTips::getValueString(ref->base->data.value, store.gameSettings.search("sValue")->str);
+
+        if (MWBase::Environment::get().getWindowManager()->getFullHelp()) {
+            text += MWGui::ToolTips::getMiscString(ref->ref.owner, "Owner");
+            text += MWGui::ToolTips::getMiscString(ref->base->script, "Script");
+        }
+
+        info.enchant = ref->base->enchant;
+
+        info.text = text;
+
+        return info;
     }
 }
