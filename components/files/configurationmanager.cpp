@@ -28,10 +28,10 @@ ConfigurationManager::ConfigurationManager()
 {
     setupTokensMapping();
 
-    mPluginsCfgPath = mFixedPath.getGlobalPath() / pluginsCfgFile;
+    mPluginsCfgPath = mFixedPath.getLocalPath() / pluginsCfgFile;
     if (!boost::filesystem::is_regular_file(mPluginsCfgPath))
     {
-        mPluginsCfgPath = mFixedPath.getLocalPath() / pluginsCfgFile;
+        mPluginsCfgPath = mFixedPath.getGlobalPath() / pluginsCfgFile;
         if (!boost::filesystem::is_regular_file(mPluginsCfgPath))
         {
             std::cerr << "Failed to find " << pluginsCfgFile << " file!" << std::endl;
