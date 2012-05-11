@@ -6,6 +6,8 @@
 #include "../mwgui/window_manager.hpp"
 #include "../mwgui/messagebox.hpp"
 
+#include "../mwworld/world.hpp"
+
 namespace MWDialogue
 {
     Quest& Journal::getQuest (const std::string& id)
@@ -38,7 +40,7 @@ namespace MWDialogue
         quest.addEntry (entry, *MWBase::Environment::get().getWorld()); // we are doing slicing on purpose here
 
         std::vector<std::string> empty;
-        std::string notification = "Your Journal has been updated.";
+        std::string notification = MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sJournalEntry")->str;
         MWBase::Environment::get().getWindowManager()->messageBox (notification, empty);
     }
 

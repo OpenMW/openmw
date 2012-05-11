@@ -3,6 +3,19 @@
 
 #include <cassert>
 
+#include "../mwinput/inputmanager.hpp"
+
+#include "../mwscript/scriptmanager.hpp"
+
+#include "../mwsound/soundmanager.hpp"
+
+#include "../mwworld/world.hpp"
+
+#include "../mwdialogue/dialoguemanager.hpp"
+#include "../mwdialogue/journal.hpp"
+
+#include "../mwmechanics/mechanicsmanager.hpp"
+
 MWBase::Environment *MWBase::Environment::sThis = 0;
 
 MWBase::Environment::Environment()
@@ -15,6 +28,7 @@ MWBase::Environment::Environment()
 
 MWBase::Environment::~Environment()
 {
+    cleanup();
     sThis = 0;
 }
 
@@ -114,6 +128,30 @@ MWInput::MWInputManager *MWBase::Environment::getInputManager() const
 float MWBase::Environment::getFrameDuration() const
 {
     return mFrameDuration;
+}
+
+void MWBase::Environment::cleanup()
+{
+    delete mInputManager;
+    mInputManager = 0;
+
+    delete mSoundManager;
+    mSoundManager = 0;
+
+    delete mMechanicsManager;
+    mMechanicsManager = 0;
+
+    delete mDialogueManager;
+    mDialogueManager = 0;
+
+    delete mJournal;
+    mJournal = 0;
+
+    delete mScriptManager;
+    mScriptManager = 0;
+
+    delete mWorld;
+    mWorld = 0;
 }
 
 const MWBase::Environment& MWBase::Environment::get()

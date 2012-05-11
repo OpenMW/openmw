@@ -197,6 +197,8 @@ namespace MWGui
             void setFlags(int flags) { mFlags = flags; }
 
             std::string effectIDToString(const short effectID);
+            bool effectHasMagnitude (const std::string& effect);
+            bool effectHasDuration (const std::string& effect);
 
             const SpellEffectValue &getSpellEffect() const { return effect; }
 

@@ -230,7 +230,9 @@ void StatsWindow::setBirthSign (const std::string& signId)
 
 void StatsWindow::addSeparator(MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2)
 {
-    MyGUI::ImageBox* separator = skillClientWidget->createWidget<MyGUI::ImageBox>("MW_HLine", MyGUI::IntCoord(10, coord1.top, coord1.width + coord2.width - 4, 18), MyGUI::Align::Default);
+    MyGUI::ImageBox* separator = skillClientWidget->createWidget<MyGUI::ImageBox>("MW_HLine",
+        MyGUI::IntCoord(10, coord1.top, coord1.width + coord2.width - 4, 18),
+        MyGUI::Align::Left | MyGUI::Align::Top | MyGUI::Align::HStretch);
     skillWidgets.push_back(separator);
 
     coord1.top += separator->getHeight();
@@ -239,7 +241,9 @@ void StatsWindow::addSeparator(MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2)
 
 void StatsWindow::addGroup(const std::string &label, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2)
 {
-    MyGUI::TextBox* groupWidget = skillClientWidget->createWidget<MyGUI::TextBox>("SandBrightText", MyGUI::IntCoord(0, coord1.top, coord1.width + coord2.width, coord1.height), MyGUI::Align::Default);
+    MyGUI::TextBox* groupWidget = skillClientWidget->createWidget<MyGUI::TextBox>("SandBrightText",
+        MyGUI::IntCoord(0, coord1.top, coord1.width + coord2.width, coord1.height),
+        MyGUI::Align::Left | MyGUI::Align::Top | MyGUI::Align::HStretch);
     groupWidget->setCaption(label);
     skillWidgets.push_back(groupWidget);
 
@@ -251,12 +255,12 @@ MyGUI::TextBox* StatsWindow::addValueItem(const std::string& text, const std::st
 {
     MyGUI::TextBox *skillNameWidget, *skillValueWidget;
 
-    skillNameWidget = skillClientWidget->createWidget<MyGUI::TextBox>("SandText", coord1, MyGUI::Align::Default);
+    skillNameWidget = skillClientWidget->createWidget<MyGUI::TextBox>("SandText", coord1, MyGUI::Align::Left | MyGUI::Align::Top | MyGUI::Align::HStretch);
     skillNameWidget->setCaption(text);
     skillNameWidget->setUserString("ToolTipType", "Text");
     skillNameWidget->setUserString("ToolTipText", tooltip);
 
-    skillValueWidget = skillClientWidget->createWidget<MyGUI::TextBox>("SandTextRight", coord2, MyGUI::Align::Default);
+    skillValueWidget = skillClientWidget->createWidget<MyGUI::TextBox>("SandTextRight", coord2, MyGUI::Align::Right | MyGUI::Align::Top);
     skillValueWidget->setUserString("ToolTipType", "Text");
     skillValueWidget->setUserString("ToolTipText", tooltip);
     skillValueWidget->setCaption(value);

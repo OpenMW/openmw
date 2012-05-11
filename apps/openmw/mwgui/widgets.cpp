@@ -356,18 +356,6 @@ void MWSpellEffect::updateWidgets()
     if (!mWindowManager)
         return;
 
-    // lists effects that have no magnitude (e.g. invisiblity)
-    /// \todo this list is probably incomplete
-    std::vector<std::string> effectsWithoutMagnitude;
-    effectsWithoutMagnitude.push_back("sEffectInvisibility");
-    effectsWithoutMagnitude.push_back("sEffectStuntedMagicka");
-    effectsWithoutMagnitude.push_back("sEffectParalyze");
-
-    // lists effects that have no duration (e.g. open lock)
-    /// \todo this list is probably incomplete
-    std::vector<std::string> effectsWithoutDuration;
-    effectsWithoutDuration.push_back("sEffectOpen");
-
     const ESMS::ESMStore &store = mWindowManager->getStore();
     const ESM::MagicEffect *magicEffect = store.magicEffects.search(effect.effectID);
     if (textWidget)
@@ -401,8 +389,7 @@ void MWSpellEffect::updateWidgets()
                 spellLine += " " + mWindowManager->getGameSettingString(attributes[effect.attribute], "");
             }
 
-            bool hasMagnitude = (std::find(effectsWithoutMagnitude.begin(), effectsWithoutMagnitude.end(), effectIDStr) == effectsWithoutMagnitude.end());
-            if ((effect.magnMin >= 0 || effect.magnMax >= 0) && hasMagnitude)
+            if ((effect.magnMin >= 0 || effect.magnMax >= 0) && effectHasMagnitude(effectIDStr))
             {
                 if (effect.magnMin == effect.magnMax)
                     spellLine += " " + boost::lexical_cast<std::string>(effect.magnMin) + " " + ((effect.magnMin == 1) ? pt : pts);
@@ -415,8 +402,7 @@ void MWSpellEffect::updateWidgets()
             // constant effects have no duration and no target
             if (!(mFlags & MWEffectList::EF_Constant))
             {
-                bool hasDuration = (std::find(effectsWithoutDuration.begin(), effectsWithoutDuration.end(), effectIDStr) == effectsWithoutDuration.end());
-                if (effect.duration >= 0 && hasDuration)
+                if (effect.duration >= 0 && effectHasDuration(effectIDStr))
                 {
                     spellLine += " " + mWindowManager->getGameSettingString("sfor", "") + " " + boost::lexical_cast<std::string>(effect.duration) + ((effect.duration == 1) ? sec : secs);
                 }
@@ -590,9 +576,105 @@ std::string MWSpellEffect::effectIDToString(const short effectID)
     names[35] ="sEffectWeaknesstoPoison";
     names[30] ="sEffectWeaknesstoShock";
 
+    // bloodmoon
+    names[138] ="sEffectSummonCreature01";
+    names[139] ="sEffectSummonCreature02";
+    names[140] ="sEffectSummonCreature03";
+    names[141] ="sEffectSummonCreature04";
+    names[142] ="sEffectSummonCreature05";
+
+    // tribunal
+    names[137] ="sEffectSummonFabricant";
+
     assert(names.find(effectID) != names.end() && "Unimplemented effect type");
 
     return names[effectID];
+}
+
+bool MWSpellEffect::effectHasDuration(const std::string& effect)
+{
+    // lists effects that have no duration (e.g. open lock)
+    std::vector<std::string> effectsWithoutDuration;
+    effectsWithoutDuration.push_back("sEffectOpen");
+    effectsWithoutDuration.push_back("sEffectLock");
+    effectsWithoutDuration.push_back("sEffectDispel");
+    effectsWithoutDuration.push_back("sEffectSunDamage");
+    effectsWithoutDuration.push_back("sEffectCorpus");
+    effectsWithoutDuration.push_back("sEffectVampirism");
+    effectsWithoutDuration.push_back("sEffectMark");
+    effectsWithoutDuration.push_back("sEffectRecall");
+    effectsWithoutDuration.push_back("sEffectDivineIntervention");
+    effectsWithoutDuration.push_back("sEffectAlmsiviIntervention");
+    effectsWithoutDuration.push_back("sEffectCureCommonDisease");
+    effectsWithoutDuration.push_back("sEffectCureBlightDisease");
+    effectsWithoutDuration.push_back("sEffectCureCorprusDisease");
+    effectsWithoutDuration.push_back("sEffectCurePoison");
+    effectsWithoutDuration.push_back("sEffectCureParalyzation");
+    effectsWithoutDuration.push_back("sEffectRemoveCurse");
+    effectsWithoutDuration.push_back("sEffectRestoreAttribute");
+
+    return (std::find(effectsWithoutDuration.begin(), effectsWithoutDuration.end(), effect) == effectsWithoutDuration.end());
+}
+
+bool MWSpellEffect::effectHasMagnitude(const std::string& effect)
+{
+    // lists effects that have no magnitude (e.g. invisiblity)
+    std::vector<std::string> effectsWithoutMagnitude;
+    effectsWithoutMagnitude.push_back("sEffectInvisibility");
+    effectsWithoutMagnitude.push_back("sEffectStuntedMagicka");
+    effectsWithoutMagnitude.push_back("sEffectParalyze");
+    effectsWithoutMagnitude.push_back("sEffectSoultrap");
+    effectsWithoutMagnitude.push_back("sEffectSilence");
+    effectsWithoutMagnitude.push_back("sEffectParalyze");
+    effectsWithoutMagnitude.push_back("sEffectInvisibility");
+    effectsWithoutMagnitude.push_back("sEffectWaterWalking");
+    effectsWithoutMagnitude.push_back("sEffectWaterBreathing");
+    effectsWithoutMagnitude.push_back("sEffectSummonScamp");
+    effectsWithoutMagnitude.push_back("sEffectSummonClannfear");
+    effectsWithoutMagnitude.push_back("sEffectSummonDaedroth");
+    effectsWithoutMagnitude.push_back("sEffectSummonDremora");
+    effectsWithoutMagnitude.push_back("sEffectSummonAncestralGhost");
+    effectsWithoutMagnitude.push_back("sEffectSummonSkeletalMinion");
+    effectsWithoutMagnitude.push_back("sEffectSummonBonewalker");
+    effectsWithoutMagnitude.push_back("sEffectSummonGreaterBonewalker");
+    effectsWithoutMagnitude.push_back("sEffectSummonBonelord");
+    effectsWithoutMagnitude.push_back("sEffectSummonWingedTwilight");
+    effectsWithoutMagnitude.push_back("sEffectSummonHunger");
+    effectsWithoutMagnitude.push_back("sEffectSummonGoldenSaint");
+    effectsWithoutMagnitude.push_back("sEffectSummonFlameAtronach");
+    effectsWithoutMagnitude.push_back("sEffectSummonFrostAtronach");
+    effectsWithoutMagnitude.push_back("sEffectSummonStormAtronach");
+    effectsWithoutMagnitude.push_back("sEffectSummonCenturionSphere");
+    effectsWithoutMagnitude.push_back("sEffectBoundDagger");
+    effectsWithoutMagnitude.push_back("sEffectBoundLongsword");
+    effectsWithoutMagnitude.push_back("sEffectBoundMace");
+    effectsWithoutMagnitude.push_back("sEffectBoundBattleAxe");
+    effectsWithoutMagnitude.push_back("sEffectBoundSpear");
+    effectsWithoutMagnitude.push_back("sEffectBoundLongbow");
+    effectsWithoutMagnitude.push_back("sEffectBoundCuirass");
+    effectsWithoutMagnitude.push_back("sEffectBoundHelm");
+    effectsWithoutMagnitude.push_back("sEffectBoundBoots");
+    effectsWithoutMagnitude.push_back("sEffectBoundShield");
+    effectsWithoutMagnitude.push_back("sEffectBoundGloves");
+    effectsWithoutMagnitude.push_back("sEffectStuntedMagicka");
+    effectsWithoutMagnitude.push_back("sEffectMark");
+    effectsWithoutMagnitude.push_back("sEffectRecall");
+    effectsWithoutMagnitude.push_back("sEffectDivineIntervention");
+    effectsWithoutMagnitude.push_back("sEffectAlmsiviIntervention");
+    effectsWithoutMagnitude.push_back("sEffectCureCommonDisease");
+    effectsWithoutMagnitude.push_back("sEffectCureBlightDisease");
+    effectsWithoutMagnitude.push_back("sEffectCureCorprusDisease");
+    effectsWithoutMagnitude.push_back("sEffectCurePoison");
+    effectsWithoutMagnitude.push_back("sEffectCureParalyzation");
+    effectsWithoutMagnitude.push_back("sEffectRemoveCurse");
+    effectsWithoutMagnitude.push_back("sEffectSummonCreature01");
+    effectsWithoutMagnitude.push_back("sEffectSummonCreature02");
+    effectsWithoutMagnitude.push_back("sEffectSummonCreature03");
+    effectsWithoutMagnitude.push_back("sEffectSummonCreature04");
+    effectsWithoutMagnitude.push_back("sEffectSummonCreature05");
+    effectsWithoutMagnitude.push_back("sEffectSummonFabricant");
+
+    return (std::find(effectsWithoutMagnitude.begin(), effectsWithoutMagnitude.end(), effect) == effectsWithoutMagnitude.end());
 }
 
 MWSpellEffect::~MWSpellEffect()
