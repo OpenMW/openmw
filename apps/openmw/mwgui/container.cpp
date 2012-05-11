@@ -180,7 +180,7 @@ void ContainerWindow::Update()
     }
 }
 
-void ContainerWindow::onByeClicked(MyGUI::Widget* _sender)
+void ContainerWindow::onCloseButtonClicked(MyGUI::Widget* _sender)
 {
     if(!mDragAndDrop->mIsOnDragAndDrop)
     {

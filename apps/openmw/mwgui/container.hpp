@@ -69,12 +69,10 @@ namespace MWGui
 
         void drawItems();
 
-        void onByeClicked(MyGUI::Widget* _sender);
+        void onCloseButtonClicked(MyGUI::Widget* _sender);
         void onSelectedItem(MyGUI::Widget* _sender);
         void onContainerClicked(MyGUI::Widget* _sender);
         void onMouseMove(MyGUI::Widget* _sender, int _left, int _top);
-
-        //MWWorld::Ptr& mContainer;
     };
 }
 #endif // CONTAINER_H
