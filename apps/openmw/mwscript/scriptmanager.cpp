@@ -20,7 +20,7 @@ namespace MWScript
         Compiler::Context& compilerContext)
     : mErrorHandler (std::cerr), mStore (store), mVerbose (verbose),
       mCompilerContext (compilerContext), mParser (mErrorHandler, mCompilerContext),
-      mOpcodesInstalled (false)
+      mOpcodesInstalled (false), mGlobalScripts (store, *this)
     {}
 
     bool ScriptManager::compile (const std::string& name)
@@ -150,5 +150,10 @@ namespace MWScript
         }
 
         return iter->second.second;
+    }
+
+    GlobalScripts& ScriptManager::getGlobalScripts()
+    {
+        return mGlobalScripts;
     }
 }

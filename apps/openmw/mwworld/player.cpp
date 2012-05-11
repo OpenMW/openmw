@@ -24,8 +24,6 @@ namespace MWWorld
         float* playerPos = mPlayer.mData.getPosition().pos;
         playerPos[0] = playerPos[1] = playerPos[2] = 0;
 
-        std::cout << renderer->getHandle();
-
         mPlayer.mData.setBaseNode(renderer->getNode());
         /// \todo Do not make a copy of classes defined in esm/p records.
         mClass = new ESM::Class (*world.getStore().classes.find (player->cls));
@@ -87,6 +85,14 @@ namespace MWWorld
 
         MWWorld::Class::get (ptr).getMovementSettings (ptr).mForwardBackward = value;
     }
+	void Player::setUpDown(int value)
+	{
+		MWWorld::Ptr ptr = getPlayer();
+
+        
+
+        MWWorld::Class::get (ptr).getMovementSettings (ptr).mUpDown = value;
+	}
 
     void Player::toggleRunning()
     {
@@ -102,4 +108,5 @@ namespace MWWorld
          MWWorld::Ptr ptr = getPlayer();
          return MWWorld::Class::get(ptr).getNpcStats(ptr).mDrawState;
     }
+
 }

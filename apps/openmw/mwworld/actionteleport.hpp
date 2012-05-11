@@ -19,7 +19,7 @@ namespace MWWorld
             ActionTeleportPlayer (const std::string& cellName, const ESM::Position& position);
             ///< If cellName is empty, an exterior cell is asumed.
 
-            virtual void execute (Environment& environment);
+            virtual void execute();
     };
 }
 

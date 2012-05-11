@@ -11,8 +11,6 @@ namespace MWRender
 
 namespace MWWorld
 {
-    class Environment;
-    
     /// Global weather manager properties (according to INI)
     struct WeatherGlobals
     {
@@ -67,8 +65,8 @@ namespace MWWorld
         Snow Gravity Scale=0.1
         Snow High Kill=700
         Snow Low Kill=150
-        
-        
+
+
         [Moons]
         Masser Size=94
         Masser Fade In Start=14
@@ -94,14 +92,14 @@ namespace MWWorld
         Secunda Moon Shadow Early Fade Angle=0.5
         Script Color=255,20,20
         */
-        
+
         static const float mSunriseTime;
         static const float mSunsetTime;
         static const float mSunriseDuration;
         static const float mSunsetDuration;
-        
+
         static const float mWeatherUpdateTime;
-        
+
         // morrowind sets these per-weather, but since they are only used by 'thunderstorm'
         // weather setting anyway, we can just as well set them globally
         static const float mThunderFrequency;
@@ -119,154 +117,153 @@ namespace MWWorld
         Ogre::String mCloudTexture;
         Ogre::String mNextCloudTexture;
         float mCloudBlendFactor;
-        
+
         Ogre::ColourValue mFogColor;
-        
+
         Ogre::ColourValue mAmbientColor;
-        
+
         Ogre::ColourValue mSkyColor;
-        
+
         Ogre::ColourValue mSunColor;
-        
+
         Ogre::ColourValue mSunDiscColor;
-        
+
         float mFogDepth;
-        
+
         float mWindSpeed;
-        
+
         float mCloudSpeed;
-        
+
         float mCloudOpacity;
-        
+
         float mGlareView;
-        
+
         bool mNight; // use night skybox
         float mNightFade; // fading factor for night skybox
-        
+
         Ogre::String mAmbientLoopSoundID;
     };
-    
-    
+
+
     /// Defines a single weather setting (according to INI)
     struct Weather
     {
         Ogre::String mCloudTexture;
-        
-        // Sky (atmosphere) colors 
+
+        // Sky (atmosphere) colors
         Ogre::ColourValue   mSkySunriseColor,
                             mSkyDayColor,
                             mSkySunsetColor,
                             mSkyNightColor;
-        
+
         // Fog colors
         Ogre::ColourValue   mFogSunriseColor,
                             mFogDayColor,
                             mFogSunsetColor,
                             mFogNightColor;
-        
+
         // Ambient lighting colors
         Ogre::ColourValue   mAmbientSunriseColor,
                             mAmbientDayColor,
                             mAmbientSunsetColor,
                             mAmbientNightColor;
-        
+
         // Sun (directional) lighting colors
         Ogre::ColourValue   mSunSunriseColor,
                             mSunDayColor,
                             mSunSunsetColor,
                             mSunNightColor;
-        
+
         // Fog depth/density
         float   mLandFogDayDepth,
                 mLandFogNightDepth;
-        
+
         // Color modulation for the sun itself during sunset (not completely sure)
         Ogre::ColourValue mSunDiscSunsetColor;
-        
+
         // Duration of weather transition (in days)
         float mTransitionDelta;
-        
+
         // No idea what this one is used for?
         float mWindSpeed;
-        
+
         // Cloud animation speed multiplier
         float mCloudSpeed;
-        
+
         // Multiplier for clouds transparency
         float mCloudsMaximumPercent;
-        
+
         // Value between 0 and 1, defines the strength of the sun glare effect
         float mGlareView;
-        
+
         // Sound effect
         // This is used for Blight, Ashstorm and Blizzard (Bloodmoon)
         Ogre::String mAmbientLoopSoundID;
-        
+
         // Rain sound effect
         Ogre::String mRainLoopSoundID;
-        
+
         /// \todo disease chance
     };
-    
+
     ///
     /// Interface for weather settings
     ///
     class WeatherManager
     {
     public:
-        WeatherManager(MWRender::RenderingManager*, MWWorld::Environment*);
-        
+        WeatherManager(MWRender::RenderingManager*);
+
         /**
          * Change the weather in the specified region
          * @param region that should be changed
          * @param ID of the weather setting to shift to
          */
         void changeWeather(const std::string& region, const unsigned int id);
-        
+
         /**
          * Per-frame update
          * @param duration
          */
         void update(float duration);
-        
+
         void setHour(const float hour);
-        
+
         void setDate(const int day, const int month);
-        
+
         unsigned int getWeatherID() const;
-        
+
     private:
         float mHour;
         int mDay, mMonth;
-        
+
         MWRender::RenderingManager* mRendering;
-        MWWorld::Environment* mEnvironment;
-        
+
         std::map<Ogre::String, Weather> mWeatherSettings;
 
         std::map<std::string, std::string> mRegionOverrides;
 
         std::vector<std::string> mSoundsPlaying;
-        
+
         Ogre::String mCurrentWeather;
         Ogre::String mNextWeather;
-        
+
         std::string mCurrentRegion;
-        
+
         bool mFirstUpdate;
-        
+
         float mWeatherUpdateTime;
-        
+
         float mRemainingTransitionTime;
-        
+
         float mThunderFlash;
         float mThunderChance;
         float mThunderChanceNeeded;
         float mThunderSoundDelay;
-        
+
         WeatherResult transition(const float factor);
         WeatherResult getResult(const Ogre::String& weather);
-        
+
         void setWeather(const Ogre::String& weather, bool instant=false);
     };
 }

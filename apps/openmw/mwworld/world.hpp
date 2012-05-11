@@ -22,6 +22,8 @@
 #include <openengine/bullet/physic.hpp>
 #include <openengine/ogre/fader.hpp>
 
+#include <OgreTimer.h>
+
 namespace Ogre
 {
     class Vector3;
@@ -51,7 +53,6 @@ namespace MWRender
 namespace MWWorld
 {
     class WeatherManager;
-    class Environment;
     class Player;
 
     /// \brief The game world and its visual representation
@@ -81,7 +82,6 @@ namespace MWWorld
             MWWorld::Globals *mGlobalVariables;
             MWWorld::PhysicsSystem *mPhysics;
             bool mSky;
-            Environment& mEnvironment;
             int mNextDynamicRecord;
 
             Cells mCells;
@@ -102,16 +102,20 @@ namespace MWWorld
             int mNumFacing;
             std::map<std::string,std::string> mFallback;
 
+            unsigned long lastTick;
+            Ogre::Timer mTimer;
+
             int getDaysPerMonth (int month) const;
 
-            void moveObjectImp (Ptr ptr, float x, float y, float z);
+            bool moveObjectImp (Ptr ptr, float x, float y, float z);
+            ///< @return true if the active cell (cell player is in) changed
 
         public:
 
            World (OEngine::Render::OgreRenderer& renderer,
                 const Files::Collections& fileCollections,
                 const std::string& master, const boost::filesystem::path& resDir, bool newGame,
-                Environment& environment, const std::string& encoding, std::map<std::string,std::string> fallbackMap);
+                const std::string& encoding, std::map<std::string,std::string> fallbackMap);
 
             ~World();
 

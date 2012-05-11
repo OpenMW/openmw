@@ -222,8 +222,8 @@ void OpenAL_SoundStream::play()
     for(ALuint i = 0;i < sNumBuffers;i++)
     {
         size_t got;
-        got = mDecoder->read(data.data(), data.size());
-        alBufferData(mBuffers[i], mFormat, data.data(), got, mSampleRate);
+        got = mDecoder->read(&data[0], data.size());
+        alBufferData(mBuffers[i], mFormat, &data[0], got, mSampleRate);
     }
     throwALerror();
 
@@ -299,11 +299,11 @@ bool OpenAL_SoundStream::process()
             if(finished)
                 continue;
 
-            got = mDecoder->read(data.data(), data.size());
+            got = mDecoder->read(&data[0], data.size());
             finished = (got < data.size());
             if(got > 0)
             {
-                alBufferData(bufid, mFormat, data.data(), got, mSampleRate);
+                alBufferData(bufid, mFormat, &data[0], got, mSampleRate);
                 alSourceQueueBuffers(mSource, 1, &bufid);
             }
         } while(processed > 0);
@@ -595,7 +595,7 @@ ALuint OpenAL_Output::getBuffer(const std::string &fname)
     alGenBuffers(1, &buf);
     throwALerror();
 
-    alBufferData(buf, format, data.data(), data.size(), srate);
+    alBufferData(buf, format, &data[0], data.size(), srate);
     mBufferCache[fname] = buf;
     mBufferRefs[buf] = 1;
 

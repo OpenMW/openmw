@@ -5,6 +5,7 @@
 #include <openengine/ogre/renderer.hpp>
 #include <openengine/bullet/physic.hpp>
 #include "ptr.hpp"
+#include <openengine/bullet/pmove.h>
 
 namespace MWWorld
 {
@@ -15,14 +16,23 @@ namespace MWWorld
             PhysicsSystem (OEngine::Render::OgreRenderer &_rend);
             ~PhysicsSystem ();
 
-            std::vector< std::pair<std::string, Ogre::Vector3> > doPhysics (float duration,
-                const std::vector<std::pair<std::string, Ogre::Vector3> >& actors);
+            void doPhysics(float duration, const std::vector<std::pair<std::string, Ogre::Vector3> >& actors);
+            ///< do physics with dt - Usage: first call doPhysics with frame dt, then call doPhysicsFixed as often as time steps have passed
+
+            std::vector< std::pair<std::string, Ogre::Vector3> > doPhysicsFixed (const std::vector<std::pair<std::string, Ogre::Vector3> >& actors);
+            ///< do physics with fixed timestep - Usage: first call doPhysics with frame dt, then call doPhysicsFixed as often as time steps have passed
 
             void addObject (const std::string& handle, const std::string& mesh,
                 const Ogre::Quaternion& rotation, float scale, const Ogre::Vector3& position);
 
             void addActor (const std::string& handle, const std::string& mesh,
                 const Ogre::Vector3& position);
+
+            void addHeightField (float* heights,
+                int x, int y, float yoffset,
+                float triSize, float sqrtVerts);
+
+            void removeHeightField (int x, int y);
 
             void removeObject (const std::string& handle);
 
@@ -49,10 +59,13 @@ namespace MWWorld
 
             OEngine::Physic::PhysicEngine* getEngine();
 
+            void setCurrentWater(bool hasWater, int waterHeight);
+
         private:
             OEngine::Render::OgreRenderer &mRender;
             OEngine::Physic::PhysicEngine* mEngine;
             bool mFreeFly;
+            playerMove* playerphysics;
 
             PhysicsSystem (const PhysicsSystem&);
             PhysicsSystem& operator= (const PhysicsSystem&);

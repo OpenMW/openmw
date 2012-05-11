@@ -10,7 +10,7 @@ namespace MWWorld
     {
         public:
 
-            virtual void execute (Environment& environment) {}
+            virtual void execute() {}
     };
 }
 

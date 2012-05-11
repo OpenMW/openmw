@@ -59,8 +59,8 @@ namespace MWRender
         Ogre::MaterialPtr mMaterial;
         Ogre::BillboardSet* mBBSet;
     };
-    
-    
+
+
     /*
      * The moons need a seperate class because of their shader (which allows them to be partially transparent)
      */
@@ -104,11 +104,11 @@ namespace MWRender
         Type mType;
         Phase mPhase;
     };
-        
+
     class SkyManager
     {
     public:
-        SkyManager(Ogre::SceneNode* pMwRoot, Ogre::Camera* pCamera, MWWorld::Environment* env);
+        SkyManager(Ogre::SceneNode* pMwRoot, Ogre::Camera* pCamera);
         ~SkyManager();
 
         void update(float duration);
@@ -176,7 +176,6 @@ namespace MWRender
     private:
         bool mCreated;
 
-        MWWorld::Environment* mEnvironment;
         float mHour;
         int mDay;
         int mMonth;

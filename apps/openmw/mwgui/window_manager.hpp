@@ -34,7 +34,6 @@ namespace Compiler
 
 namespace MWWorld
 {
-    class Environment;
     class World;
 }
 
@@ -65,6 +64,7 @@ namespace MWGui
   class ContainerWindow;
   class DragAndDrop;
   class InventoryWindow;
+  class ToolTips;
   class TextInputDialog;
   class InfoBoxDialog;
   class DialogueWindow;
@@ -85,7 +85,7 @@ namespace MWGui
     typedef std::vector<Faction> FactionList;
     typedef std::vector<int> SkillList;
 
-    WindowManager(MWWorld::Environment& environment, const Compiler::Extensions& extensions, int fpsLevel, bool newGame, OEngine::Render::OgreRenderer *mOgre, const std::string logpath);
+    WindowManager(const Compiler::Extensions& extensions, int fpsLevel, bool newGame, OEngine::Render::OgreRenderer *mOgre, const std::string logpath);
     virtual ~WindowManager();
 
     void setGuiMode(GuiMode newMode);
@@ -96,8 +96,6 @@ namespace MWGui
      * new dialogs.
      */
     void update();
-
-    MWWorld::Environment& getEnvironment();
 
     void setMode(GuiMode newMode)
     {
@@ -161,7 +159,11 @@ namespace MWGui
     void setPlayerPos(const float x, const float y); ///< set player position in map space
     void setPlayerDir(const float x, const float y); ///< set player view direction in map space
 
+    void setFocusObject(const MWWorld::Ptr& focus);
+
     void toggleFogOfWar();
+    void toggleFullHelp(); ///< show extra info in item tooltips (owner, script)
+    bool getFullHelp() const;
 
     int toggleFps();
     ///< toggle fps display @return resulting fps level
@@ -196,10 +198,10 @@ namespace MWGui
 
   private:
     OEngine::GUI::MyGUIManager *mGuiManager;
-    MWWorld::Environment& environment;
     HUD *hud;
     MapWindow *map;
     MainMenu *menu;
+    ToolTips *mToolTips;
     StatsWindow *stats;
     MessageBoxManager *mMessageBoxManager;
     Console *console;

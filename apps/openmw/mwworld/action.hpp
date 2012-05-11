@@ -3,8 +3,6 @@
 
 namespace MWWorld
 {
-    class Environment;
-
     /// \brief Abstract base for actions
     class Action
     {
@@ -18,7 +16,7 @@ namespace MWWorld
 
             virtual ~Action() {}
 
-            virtual void execute (Environment& environment) = 0;
+            virtual void execute() = 0;
     };
 }
 

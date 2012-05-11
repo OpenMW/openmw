@@ -10,7 +10,8 @@
 #include <components/compiler/extensions.hpp>
 #include <components/files/collections.hpp>
 
-#include "mwworld/environment.hpp"
+#include "mwbase/environment.hpp"
+
 #include "mwworld/ptr.hpp"
 
 namespace Compiler
@@ -61,6 +62,7 @@ namespace OMW
     /// \brief Main engine class, that brings together all the components of OpenMW
     class Engine : private Ogre::FrameListener
     {
+            MWBase::Environment mEnvironment;
             std::string mEncoding;
             Files::PathContainer mDataDirs;
             boost::filesystem::path mResDir;
@@ -73,12 +75,9 @@ namespace OMW
             bool mNewGame;
             bool mUseSound;
             bool mCompileAll;
-            bool mReportFocus;
-            float mFocusTDiff;
             std::string mFocusName;
             std::map<std::string,std::string> mFallbackMap;
 
-            MWWorld::Environment mEnvironment;
             Compiler::Extensions mExtensions;
             Compiler::Context *mScriptContext;
 
@@ -99,8 +98,6 @@ namespace OMW
             void loadBSA();
 
             void executeLocalScripts();
-
-            void updateFocusReport (float duration);
 
             virtual bool frameRenderingQueued (const Ogre::FrameEvent& evt);
 
@@ -143,9 +140,6 @@ namespace OMW
 
             /// Start as a new game.
             void setNewGame(bool newGame);
-
-            /// Write name of focussed object to cout
-            void setReportFocus (bool report);
 
             /// Initialise and enter main loop.
             void go();

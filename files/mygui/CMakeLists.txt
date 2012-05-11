@@ -51,6 +51,7 @@ configure_file("${SDIR}/openmw_messagebox_layout.xml" "${DDIR}/openmw_messagebox
 configure_file("${SDIR}/openmw_interactive_messagebox_layout.xml" "${DDIR}/openmw_interactive_messagebox_layout.xml" COPYONLY)
 configure_file("${SDIR}/openmw_journal_layout.xml" "${DDIR}/openmw_journal_layout.xml" COPYONLY)
 configure_file("${SDIR}/openmw_journal_skin.xml" "${DDIR}/openmw_journal_skin.xml" COPYONLY)
+configure_file("${SDIR}/openmw_tooltips.xml" "${DDIR}/openmw_tooltips.xml" COPYONLY)
 configure_file("${SDIR}/smallbars.png" "${DDIR}/smallbars.png" COPYONLY)
 configure_file("${SDIR}/transparent.png" "${DDIR}/transparent.png" COPYONLY)
 configure_file("${SDIR}/EBGaramond-Regular.ttf" "${DDIR}/EBGaramond-Regular.ttf" COPYONLY)
