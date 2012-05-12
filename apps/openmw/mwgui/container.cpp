@@ -29,6 +29,7 @@ using namespace Widgets;
 ContainerBase::ContainerBase(WindowManager& parWindowManager,DragAndDrop* dragAndDrop,std::string guiFile)
     : WindowBase(guiFile, parWindowManager),
     mDragAndDrop(dragAndDrop),
+    mFilter(MWWorld::ContainerStore::Type_All),
     mContainer()
 {
     getWidget(mContainerWidget, "Items");
@@ -95,6 +96,12 @@ void ContainerBase::setName(std::string contName)
     adjustWindowCaption();
 }
 
+void ContainerBase::setFilter(int filter)
+{
+    mFilter = filter;
+    drawItems();
+}
+
 void ContainerBase::open(MWWorld::Ptr container)
 {
     mContainer = container;
@@ -117,7 +124,7 @@ void ContainerBase::drawItems()
 
     int index = 0;
 
-    for (MWWorld::ContainerStoreIterator iter (containerStore.begin()); iter!=containerStore.end(); ++iter)
+    for (MWWorld::ContainerStoreIterator iter (containerStore.begin(mFilter)); iter!=containerStore.end(); ++iter)
     {
         index++;
         if(iter->getRefData().getCount() > 0)

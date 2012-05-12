@@ -52,6 +52,7 @@ namespace MWGui
 
         void open(MWWorld::Ptr container);
         void setName(std::string contName);
+        void setFilter(int filter); ///< set category filter
         void Update();
 
     protected:
@@ -60,6 +61,8 @@ namespace MWGui
 
         DragAndDrop* mDragAndDrop;
         MWWorld::Ptr mContainer;
+
+        int mFilter;
 
         void onSelectedItem(MyGUI::Widget* _sender);
         void onContainerClicked(MyGUI::Widget* _sender);
