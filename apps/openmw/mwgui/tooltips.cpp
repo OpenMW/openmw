@@ -61,12 +61,14 @@ void ToolTips::onFrame(float frameDuration)
         else if (type == "Text")
         {
             info.text = text;
+            tooltipSize = createToolTip(info);
         }
         else if (type == "CaptionText")
         {
             std::string caption = focus->getUserString("ToolTipCaption");
             info.caption = caption;
             info.text = text;
+            tooltipSize = createToolTip(info);
         }
         else if (type == "ImageCaptionText")
         {
@@ -77,8 +79,13 @@ void ToolTips::onFrame(float frameDuration)
             info.text = text;
             info.caption = caption;
             info.icon = image;
+            tooltipSize = createToolTip(info);
         }
-        tooltipSize = createToolTip(info);
+        else if (type == "ItemPtr")
+        {
+            mFocusObject = *focus->getUserData<MWWorld::Ptr>();
+            tooltipSize = getToolTipViaPtr();
+        }
 
         IntPoint tooltipPosition = InputManager::getInstance().getMousePosition() + IntPoint(0, 24);
 

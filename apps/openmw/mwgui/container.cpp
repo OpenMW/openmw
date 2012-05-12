@@ -80,7 +80,7 @@ void ContainerBase::onContainerClicked(MyGUI::Widget* _sender)
     {
         ItemWidget* item = static_cast<ItemWidget*>(mDragAndDrop->mDraggedWidget);
         std::cout << item->mPos << (*mDragAndDrop->mStore.begin()).getTypeName();
-        if(item->mPtr.getContainerStore() == 0) std::cout << "nocontainer!";
+        if((*item->getUserData<MWWorld::Ptr>()).getContainerStore() == 0) std::cout << "nocontainer!";
         MWWorld::ContainerStore& containerStore = MWWorld::Class::get(mContainer).getContainerStore(mContainer);
         containerStore.add(*mDragAndDrop->mStore.begin());
         mDragAndDrop->mStore.clear();
@@ -135,8 +135,9 @@ void ContainerBase::drawItems()
             ItemWidget* image = mContainerWidget->createWidget<ItemWidget>("ImageBox", MyGUI::IntCoord(x, y, 32, 32), MyGUI::Align::Default);
             MyGUI::TextBox* text = image->createWidget<MyGUI::TextBox>("SandBrightText", MyGUI::IntCoord(x, y, 18, 18), MyGUI::Align::Default, std::string("Label"));
             image->eventMouseButtonClick += MyGUI::newDelegate(this,&ContainerBase::onSelectedItem);
+            image->setUserString("ToolTipType", "ItemPtr");
+            image->setUserData(*iter);
             image->mPos = index;
-            image->mPtr = *iter;
             x += 36;
             if(count % 20 == 0)
             {

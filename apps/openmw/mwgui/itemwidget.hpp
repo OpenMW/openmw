@@ -10,7 +10,6 @@ namespace MWGui
         MYGUI_RTTI_DERIVED( ItemWidget )
     public:
 
-        MWWorld::Ptr mPtr;
         int mPos;
     };
 }
