@@ -147,10 +147,10 @@ void ContainerBase::drawItems()
             text->setTextAlign(MyGUI::Align::Right);
             text->setNeedMouseFocus(false);
 
-            y += 36;
+            y += 42;
             if (y > maxHeight)
             {
-                x += 36;
+                x += 42;
                 y = 0;
             }
 
@@ -159,7 +159,7 @@ void ContainerBase::drawItems()
         }
     }
 
-    MyGUI::IntSize size = MyGUI::IntSize(std::max(mItemView->getSize().width, x), mItemView->getSize().height);
+    MyGUI::IntSize size = MyGUI::IntSize(std::max(mItemView->getSize().width, x+42), mItemView->getSize().height);
     mItemView->setCanvasSize(size);
     mContainerWidget->setSize(size);
 }
