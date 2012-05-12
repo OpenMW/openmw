@@ -3,8 +3,13 @@
 <MyGUI type="Layout">
     <Widget type="Window" skin="MW_Window" layer="Windows" position="900 500 600 300" name="_Main">
 
-        <!-- Items in inventory -->
-        <Widget type="ItemBox" skin="MW_Box" position="5 10 570 220" name="Items"/>
+        <!-- Items -->
+        <Widget type="Widget" skin="MW_Box" position="5 10 570 220" name="box" align="Left Top Stretch">
+            <Widget type="ScrollView" skin="MW_ScrollView" position="4 4 566 216" name="ItemView" align="Left Top Stretch">
+                <Property key="CanvasSize" value="1024 1024"/>
+                <Widget type="Button" skin="" name="Items" position="0 0 566 216" name="Items" align="Left Top Stretch"/>
+            </Widget>
+        </Widget>
 
         <!-- buttons position adjusted at runtime to fit text -->
         <Widget type="Button" skin="MW_Button" position="0 235 75 24" name="TakeButton" align="Right Bottom"/>

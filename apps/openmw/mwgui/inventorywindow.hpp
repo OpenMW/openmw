@@ -21,7 +21,7 @@ namespace MWGui
 
 namespace MWGui
 {
-    class InventoryWindow : public MWGui::ContainerWindow
+    class InventoryWindow : public MWGui::ContainerBase
     {
         public:
             InventoryWindow(WindowManager& parWindowManager,DragAndDrop* dragAndDrop);

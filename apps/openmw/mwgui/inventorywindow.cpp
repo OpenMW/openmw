@@ -22,7 +22,7 @@ namespace MWGui
 {
 
     InventoryWindow::InventoryWindow(WindowManager& parWindowManager,DragAndDrop* dragAndDrop)
-        :ContainerWindow(parWindowManager,dragAndDrop,"openmw_inventory_window_layout.xml")
+        : ContainerBase(parWindowManager,dragAndDrop,"openmw_inventory_window_layout.xml")
     {
     }
 

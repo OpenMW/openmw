@@ -25,177 +25,23 @@ using namespace MWGui;
 using namespace Widgets;
 
 
-ContainerWindow::ContainerWindow(WindowManager& parWindowManager,DragAndDrop* dragAndDrop)
-    : WindowBase("openmw_container_window_layout.xml", parWindowManager),
-    mDragAndDrop(dragAndDrop),
-    mContainer()
-{
-    setText("_Main", "Name of Container");
-
-    getWidget(mContainerWidget, "Items");
-    getWidget(mTakeButton, "TakeButton");
-    getWidget(mCloseButton, "CloseButton");
-
-    mCloseButton->eventMouseButtonClick += MyGUI::newDelegate(this, &ContainerWindow::onCloseButtonClicked);
-    mTakeButton->eventMouseButtonClick += MyGUI::newDelegate(this, &ContainerWindow::onTakeAllButtonClicked);
-    mContainerWidget->eventMouseButtonClick += MyGUI::newDelegate(this, &ContainerWindow::onContainerClicked);
-
-    setText("CloseButton", MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sClose")->str);
-    setText("TakeButton", MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sTakeAll")->str);
-
-    // adjust buttons size to fit text
-    int closeButtonWidth = mCloseButton->getTextSize().width+24;
-    int takeButtonWidth = mTakeButton->getTextSize().width+24;
-    mCloseButton->setCoord(600-20-closeButtonWidth, mCloseButton->getCoord().top, closeButtonWidth, mCloseButton->getCoord().height);
-    mTakeButton->setCoord(600-20-closeButtonWidth-takeButtonWidth-8, mTakeButton->getCoord().top, takeButtonWidth, mTakeButton->getCoord().height);
-
-    int w = MyGUI::RenderManager::getInstance().getViewSize().width;
-    int h = MyGUI::RenderManager::getInstance().getViewSize().height;
-    setCoord(w-600,h-300,600,300);
-}
-
-ContainerWindow::ContainerWindow(WindowManager& parWindowManager,DragAndDrop* dragAndDrop,std::string guiFile)
+ContainerBase::ContainerBase(WindowManager& parWindowManager,DragAndDrop* dragAndDrop,std::string guiFile)
     : WindowBase(guiFile, parWindowManager),
     mDragAndDrop(dragAndDrop),
     mContainer()
 {
-    setText("_Main", "Name of Container");
-    adjustWindowCaption();
     getWidget(mContainerWidget, "Items");
-    mContainerWidget->eventMouseButtonClick += MyGUI::newDelegate(this, &ContainerWindow::onContainerClicked);
+    getWidget(mItemView, "ItemView");
+
+    mContainerWidget->eventMouseButtonClick += MyGUI::newDelegate(this, &ContainerBase::onContainerClicked);
+    static_cast<MyGUI::Window*>(mMainWidget)->eventWindowChangeCoord += MyGUI::newDelegate(this, &ContainerBase::onWindowResize);
 }
-ContainerWindow::~ContainerWindow()
+
+ContainerBase::~ContainerBase()
 {
 }
 
-void ContainerWindow::setName(std::string contName)
-{
-    setText("_Main", contName);
-    adjustWindowCaption();
-}
-
-
-
-void ContainerWindow::open(MWWorld::Ptr container)
-{
-    mContainer = container;
-    setName(MWWorld::Class::get(container).getName(container));
-    //MWWorld::ContainerStore* containerStore = container.getContainerStore();
-    drawItems();
-    setVisible(true);
-}
-
-void ContainerWindow::drawItems()
-{
-    while (mContainerWidget->getChildCount())
-    {
-        MyGUI::Gui::getInstance().destroyWidget(mContainerWidget->getChildAt(0));
-    }
-    MWWorld::ContainerStore& containerStore = MWWorld::Class::get(mContainer).getContainerStore(mContainer);
-    //mContainerWidget->
-
-    /*MWWorld::ManualRef furRef (mWindowManager.getStore(), "fur_cuirass");
-    furRef.getPtr().getRefData().setCount (5);
-    MWWorld::ManualRef bukkitRef (mWindowManager.getStore(), "misc_com_bucket_01");
-    MWWorld::ManualRef broomRef (mWindowManager.getStore(), "misc_com_broom_01");
-    MWWorld::ManualRef goldRef (mWindowManager.getStore(), "gold_100");
-
-    containerStore.add(furRef.getPtr());
-    containerStore.add(furRef.getPtr());
-    containerStore.add(furRef.getPtr());
-    containerStore.add(broomRef.getPtr());
-    containerStore.add(broomRef.getPtr());
-    containerStore.add(broomRef.getPtr());
-    containerStore.add(broomRef.getPtr());
-    containerStore.add(broomRef.getPtr());
-    containerStore.add(broomRef.getPtr());
-    containerStore.add(broomRef.getPtr());
-    containerStore.add(broomRef.getPtr());
-    containerStore.add(broomRef.getPtr());
-    containerStore.add(broomRef.getPtr());
-    containerStore.add(bukkitRef.getPtr());
-    containerStore.add(bukkitRef.getPtr());
-    containerStore.add(bukkitRef.getPtr());
-    containerStore.add(bukkitRef.getPtr());
-    containerStore.add(bukkitRef.getPtr());
-    containerStore.add(bukkitRef.getPtr());
-    containerStore.add(bukkitRef.getPtr());
-    containerStore.add(bukkitRef.getPtr());
-    containerStore.add(bukkitRef.getPtr());
-    containerStore.add(bukkitRef.getPtr());
-    containerStore.add(goldRef.getPtr());*/
-
-
-    // ESMS::LiveCellRef<ESM::Armor, MWWorld::RefData> *ref = iter->get<ESM::Armor>();
-
-    int x = 4;
-    int y = 4;
-    int count = 0;
-    int index = 0;
-
-    for (MWWorld::ContainerStoreIterator iter (containerStore.begin()); iter!=containerStore.end(); ++iter)
-    {
-        index++;
-        if(iter->getRefData().getCount() > 0)
-        {
-            count++;
-            std::string path = std::string("icons\\");
-            path+=MWWorld::Class::get(*iter).getInventoryIcon(*iter);
-            ItemWidget* image = mContainerWidget->createWidget<ItemWidget>("ImageBox", MyGUI::IntCoord(x, y, 32, 32), MyGUI::Align::Default);
-            MyGUI::TextBox* text = image->createWidget<MyGUI::TextBox>("SandBrightText", MyGUI::IntCoord(x, y, 18, 18), MyGUI::Align::Default, std::string("Label"));
-            image->eventMouseButtonClick += MyGUI::newDelegate(this,&ContainerWindow::onSelectedItem);
-            image->mPos = index;
-            image->mPtr = *iter;
-            //image->eventMouseMove += MyGUI::newDelegate(this,&ContainerWindow::onMouseMove);
-            x += 36;
-            if(count % 20 == 0)
-            {
-            y += 36;
-            x = 4;
-            count = 0;
-            }
-
-            if(iter->getRefData().getCount() > 1)
-                text->setCaption(boost::lexical_cast<std::string>(iter->getRefData().getCount()));
-
-            int pos = path.rfind(".");
-            path.erase(pos);
-            path.append(".dds");
-            image->setImageTexture(path);
-        }
-    } 
-}
-
-void ContainerWindow::Update()
-{
-    if(mDragAndDrop->mIsOnDragAndDrop)
-    {
-        if(mDragAndDrop->mDraggedWidget)
-            mDragAndDrop->mDraggedWidget->setPosition(MyGUI::InputManager::getInstance().getMousePosition());
-        else mDragAndDrop->mIsOnDragAndDrop = false; //If this happens, there is a bug.
-    }
-}
-
-void ContainerWindow::onCloseButtonClicked(MyGUI::Widget* _sender)
-{
-    if(!mDragAndDrop->mIsOnDragAndDrop)
-    {
-        MWBase::Environment::get().getWindowManager()->setGuiMode(GM_Game);
-        setVisible(false);
-    }
-}
-
-void ContainerWindow::onTakeAllButtonClicked(MyGUI::Widget* _sender)
-{
-    if(!mDragAndDrop->mIsOnDragAndDrop)
-    {
-        /// \todo
-        MWBase::Environment::get().getWindowManager()->setGuiMode(GM_Game);
-        setVisible(false);
-    }
-}
-
-void ContainerWindow::onSelectedItem(MyGUI::Widget* _sender)
+void ContainerBase::onSelectedItem(MyGUI::Widget* _sender)
 {
     if(!mDragAndDrop->mIsOnDragAndDrop)
     {
@@ -221,22 +67,13 @@ void ContainerWindow::onSelectedItem(MyGUI::Widget* _sender)
         //std::cout << mContainerWidget->getParent()->getParent()->getName();
         _sender->setUserString("drag","on");
         mDragAndDrop->mDraggedWidget = _sender;
-        mDragAndDrop->mContainerWindow = const_cast<MWGui::ContainerWindow*>(this);
+        mDragAndDrop->mContainerWindow = const_cast<MWGui::ContainerBase*>(this);
         drawItems();
         std::cout << "selected!";
     }
 }
 
-void ContainerWindow::onMouseMove(MyGUI::Widget* _sender, int _left, int _top)
-{
-    /*if(_sender->getUserString("drag") == "on")
-    {
-    _sender->setPosition(_left,_top);
-
-    }*/
-}
-
-void ContainerWindow::onContainerClicked(MyGUI::Widget* _sender)
+void ContainerBase::onContainerClicked(MyGUI::Widget* _sender)
 {
     std::cout << "container clicked";
     if(mDragAndDrop->mIsOnDragAndDrop) //drop widget here
@@ -253,5 +90,126 @@ void ContainerWindow::onContainerClicked(MyGUI::Widget* _sender)
         mDragAndDrop->mDraggedWidget = 0;
         mDragAndDrop->mContainerWindow = 0;
         drawItems();
+    }
+}
+
+void ContainerBase::onWindowResize(MyGUI::Window* window)
+{
+}
+
+void ContainerBase::setName(std::string contName)
+{
+    setText("_Main", contName);
+    adjustWindowCaption();
+}
+
+void ContainerBase::open(MWWorld::Ptr container)
+{
+    mContainer = container;
+    setName(MWWorld::Class::get(container).getName(container));
+    drawItems();
+    setVisible(true);
+}
+
+void ContainerBase::drawItems()
+{
+    while (mContainerWidget->getChildCount())
+    {
+        MyGUI::Gui::getInstance().destroyWidget(mContainerWidget->getChildAt(0));
+    }
+    MWWorld::ContainerStore& containerStore = MWWorld::Class::get(mContainer).getContainerStore(mContainer);
+
+    int x = 4;
+    int y = 4;
+    int count = 0;
+    int index = 0;
+
+    for (MWWorld::ContainerStoreIterator iter (containerStore.begin()); iter!=containerStore.end(); ++iter)
+    {
+        index++;
+        if(iter->getRefData().getCount() > 0)
+        {
+            count++;
+            std::string path = std::string("icons\\");
+            path+=MWWorld::Class::get(*iter).getInventoryIcon(*iter);
+            ItemWidget* image = mContainerWidget->createWidget<ItemWidget>("ImageBox", MyGUI::IntCoord(x, y, 32, 32), MyGUI::Align::Default);
+            MyGUI::TextBox* text = image->createWidget<MyGUI::TextBox>("SandBrightText", MyGUI::IntCoord(x, y, 18, 18), MyGUI::Align::Default, std::string("Label"));
+            image->eventMouseButtonClick += MyGUI::newDelegate(this,&ContainerBase::onSelectedItem);
+            image->mPos = index;
+            image->mPtr = *iter;
+            x += 36;
+            if(count % 20 == 0)
+            {
+            y += 36;
+            x = 4;
+            count = 0;
+            }
+
+            if(iter->getRefData().getCount() > 1)
+                text->setCaption(boost::lexical_cast<std::string>(iter->getRefData().getCount()));
+
+            int pos = path.rfind(".");
+            path.erase(pos);
+            path.append(".dds");
+            image->setImageTexture(path);
+        }
+    } 
+}
+
+void ContainerBase::Update()
+{
+    if(mDragAndDrop->mIsOnDragAndDrop)
+    {
+        if(mDragAndDrop->mDraggedWidget)
+            mDragAndDrop->mDraggedWidget->setPosition(MyGUI::InputManager::getInstance().getMousePosition());
+        else mDragAndDrop->mIsOnDragAndDrop = false; //If this happens, there is a bug.
+    }
+}
+
+// ------------------------------------------------------------------------------------------------
+
+ContainerWindow::ContainerWindow(WindowManager& parWindowManager,DragAndDrop* dragAndDrop)
+    : ContainerBase(parWindowManager, dragAndDrop, "openmw_container_window_layout.xml")
+{
+    getWidget(mTakeButton, "TakeButton");
+    getWidget(mCloseButton, "CloseButton");
+
+    mCloseButton->eventMouseButtonClick += MyGUI::newDelegate(this, &ContainerWindow::onCloseButtonClicked);
+    mTakeButton->eventMouseButtonClick += MyGUI::newDelegate(this, &ContainerWindow::onTakeAllButtonClicked);
+
+    setText("CloseButton", MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sClose")->str);
+    setText("TakeButton", MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sTakeAll")->str);
+
+    // adjust buttons size to fit text
+    int closeButtonWidth = mCloseButton->getTextSize().width+24;
+    int takeButtonWidth = mTakeButton->getTextSize().width+24;
+    mCloseButton->setCoord(600-20-closeButtonWidth, mCloseButton->getCoord().top, closeButtonWidth, mCloseButton->getCoord().height);
+    mTakeButton->setCoord(600-20-closeButtonWidth-takeButtonWidth-8, mTakeButton->getCoord().top, takeButtonWidth, mTakeButton->getCoord().height);
+
+    int w = MyGUI::RenderManager::getInstance().getViewSize().width;
+    int h = MyGUI::RenderManager::getInstance().getViewSize().height;
+    setCoord(w-600,h-300,600,300);
+}
+
+ContainerWindow::~ContainerWindow()
+{
+}
+
+void ContainerWindow::onCloseButtonClicked(MyGUI::Widget* _sender)
+{
+    if(!mDragAndDrop->mIsOnDragAndDrop)
+    {
+        MWBase::Environment::get().getWindowManager()->setGuiMode(GM_Game);
+        setVisible(false);
+    }
+}
+
+void ContainerWindow::onTakeAllButtonClicked(MyGUI::Widget* _sender)
+{
+    if(!mDragAndDrop->mIsOnDragAndDrop)
+    {
+        /// \todo
+        MWBase::Environment::get().getWindowManager()->setGuiMode(GM_Game);
+        setVisible(false);
     }
 }
