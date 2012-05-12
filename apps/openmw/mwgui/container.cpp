@@ -161,7 +161,7 @@ void ContainerBase::drawItems()
         }
     }
 
-    MyGUI::IntSize size = MyGUI::IntSize(std::max(mItemView->getSize().width, x), 2048);
+    MyGUI::IntSize size = MyGUI::IntSize(std::max(mItemView->getSize().width, x), mItemView->getSize().height);
     mItemView->setCanvasSize(size);
     mContainerWidget->setSize(size);
 }
