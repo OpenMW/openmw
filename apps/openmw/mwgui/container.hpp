@@ -50,9 +50,18 @@ namespace MWGui
         ContainerBase(WindowManager& parWindowManager, DragAndDrop* dragAndDrop, std::string guiFile);
         virtual ~ContainerBase();
 
+        enum Filter
+        {
+            Filter_All = 0x01,
+            Filter_Weapon = 0x02,
+            Filter_Apparel = 0x03,
+            Filter_Magic = 0x04,
+            Filter_Misc = 0x05
+        };
+
         void open(MWWorld::Ptr container);
         void setName(std::string contName);
-        void setFilter(int filter); ///< set category filter
+        void setFilter(Filter filter); ///< set category filter
         void Update();
 
     protected:
@@ -62,7 +71,7 @@ namespace MWGui
         DragAndDrop* mDragAndDrop;
         MWWorld::Ptr mContainer;
 
-        int mFilter;
+        Filter mFilter;
 
         void onSelectedItem(MyGUI::Widget* _sender);
         void onContainerClicked(MyGUI::Widget* _sender);

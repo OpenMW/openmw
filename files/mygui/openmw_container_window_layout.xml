@@ -5,9 +5,9 @@
 
         <!-- Items -->
         <Widget type="Widget" skin="MW_Box" position="5 5 575 225" name="box" align="Left Top Stretch">
-            <Widget type="ScrollView" skin="MW_ScrollViewH" position="4 4 571 221" name="ItemView" align="Left Top Stretch">
+            <Widget type="ScrollView" skin="MW_ScrollViewH" position="4 4 567 221" name="ItemView" align="Left Top Stretch">
                 <Property key="CanvasSize" value="1024 1024"/>
-                <Widget type="Button" skin="" name="Items" position="0 0 571 221" name="Items" align="Left Top Stretch"/>
+                <Widget type="Button" skin="" name="Items" position="0 0 567 221" name="Items" align="Left Top Stretch"/>
             </Widget>
         </Widget>
 

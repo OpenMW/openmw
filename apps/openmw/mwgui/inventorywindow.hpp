@@ -29,6 +29,17 @@ namespace MWGui
             void openInventory();
 
         protected:
+            MyGUI::Widget* mAvatar;
+            MyGUI::TextBox* mArmorRating;
+            MyGUI::ProgressBar* mEncumbranceBar;
+            MyGUI::TextBox* mEncumbranceText;
+
+            MyGUI::Button* mFilterAll;
+            MyGUI::Button* mFilterWeapon;
+            MyGUI::Button* mFilterApparel;
+            MyGUI::Button* mFilterMagic;
+            MyGUI::Button* mFilterMisc;
+
             void onWindowResize(MyGUI::Window* _sender);
     };
 }

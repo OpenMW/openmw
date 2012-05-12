@@ -4,30 +4,36 @@
     <Widget type="Window" skin="MW_Window" layer="Windows" position="0 0 600 300" name="_Main">
 
         <!-- Player encumbrance -->
-        <Widget type="ProgressBar" skin="MW_Progress_Blue" position="8 8 212 18" name="EncumbranceBar">
-            <Widget type="TextBox" skin="ProgressText" position="0 0 212 18" align="Center" name="EncumbranceBarT"/>
+        <Widget type="ProgressBar" skin="MW_Progress_Blue" position="8 8 212 24" name="EncumbranceBar">
+            <Property key="Range" value="100"/>
+            <Property key="RangePosition" value="50"/>
+            <Widget type="TextBox" skin="ProgressText" position="0 0 212 24" align="Center" name="EncumbranceBarT">
+                <Property key="Caption" value="Encumbrance bar"/>
+            </Widget>
         </Widget>
 
         <!-- Avatar -->
-        <Widget type="Widget" skin="MW_Box" position="8 32 212 166" name="Avatar">
-            <Widget type="TextBox" skin="ProgressText" position="0 -8 212 18" align="HCenter Bottom" name="ArmorRating"/>
+        <Widget type="Widget" skin="MW_Box" position="8 38 212 219" name="Avatar" align="Left Top VStretch">
+            <Widget type="TextBox" skin="ProgressText" position="0 180 212 24" align="HCenter Bottom" name="ArmorRating">
+                <Property key="Caption" value="Armor Rating goes here"/>
+            </Widget>
         </Widget>
 
         <!-- Items in inventory -->
-        <Widget type="Widget" skin="MW_Box" position="228 32 300 215" name="box" align="Left Top Stretch">
-            <Widget type="ScrollView" skin="MW_ScrollViewH" position="4 4 296 211" align="Left Top Stretch" name="ItemView">
+        <Widget type="Widget" skin="MW_Box" position="228 38 300 219" name="box" align="Left Top Stretch">
+            <Widget type="ScrollView" skin="MW_ScrollViewH" position="4 4 292 215" align="Left Top Stretch" name="ItemView">
                 <Property key="CanvasSize" value="1024 1024"/>
-                <Widget type="Button" skin="" name="Items" position="0 0 296 211" name="Items" align="Left Top Stretch"/>
+                <Widget type="Button" skin="" name="Items" position="0 0 292 215" name="Items" align="Left Top Stretch"/>
             </Widget>
         </Widget>
 
         <!-- Categories -->
-        <Widget type="Widget" position="228 8 300 18" align="ALIGN_TOP ALIGN_LEFT" name="Categories">
-            <Widget type="Button" skin="MW_Button" position="0 0 30 18" name="AllButton"/>
-            <Widget type="Button" skin="MW_Button" position="134 0 60 18" name="WeaponButton"/>
-            <Widget type="Button" skin="MW_Button" position="98 0 60 18" name="ApparelButton"/>
-            <Widget type="Button" skin="MW_Button" position="160 0 50 18" name="MagicButton"/>
-            <Widget type="Button" skin="MW_Button" position="214 0 45 18" name="MiscButton"/>
+        <Widget type="Widget" position="228 8 300 24" align="ALIGN_TOP ALIGN_LEFT" name="Categories">
+            <Widget type="Button" skin="MW_Button" position="0 0 60 24" name="AllButton"/>
+            <Widget type="Button" skin="MW_Button" position="0 0 60 24" name="WeaponButton"/>
+            <Widget type="Button" skin="MW_Button" position="0 0 60 24" name="ApparelButton"/>
+            <Widget type="Button" skin="MW_Button" position="0 0 60 24" name="MagicButton"/>
+            <Widget type="Button" skin="MW_Button" position="0 0 60 24" name="MiscButton"/>
         </Widget>
 
     </Widget>

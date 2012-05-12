@@ -25,11 +25,22 @@ namespace MWGui
         : ContainerBase(parWindowManager,dragAndDrop,"openmw_inventory_window_layout.xml")
     {
         static_cast<MyGUI::Window*>(mMainWidget)->eventWindowChangeCoord += MyGUI::newDelegate(this, &InventoryWindow::onWindowResize);
+
+        getWidget(mAvatar, "Avatar");
+        getWidget(mEncumbranceBar, "EncumbranceBar");
+        getWidget(mEncumbranceText, "EncumbranceBarT");
+        getWidget(mFilterAll, "AllButton");
+        getWidget(mFilterWeapon, "WeaponButton");
+        getWidget(mFilterApparel, "ApparelButton");
+        getWidget(mFilterMagic, "MagicButton");
+        getWidget(mFilterMisc, "MiscButton");
     }
 
     void InventoryWindow::openInventory()
     {
         open(MWBase::Environment::get().getWorld()->getPlayer().getPlayer());
+
+        onWindowResize(static_cast<MyGUI::Window*>(mMainWidget));
     }
 
     void InventoryWindow::onWindowResize(MyGUI::Window* _sender)

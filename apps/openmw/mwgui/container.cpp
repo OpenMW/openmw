@@ -29,7 +29,7 @@ using namespace Widgets;
 ContainerBase::ContainerBase(WindowManager& parWindowManager,DragAndDrop* dragAndDrop,std::string guiFile)
     : WindowBase(guiFile, parWindowManager),
     mDragAndDrop(dragAndDrop),
-    mFilter(MWWorld::ContainerStore::Type_All),
+    mFilter(ContainerBase::Filter_All),
     mContainer()
 {
     getWidget(mContainerWidget, "Items");
@@ -96,7 +96,7 @@ void ContainerBase::setName(std::string contName)
     adjustWindowCaption();
 }
 
-void ContainerBase::setFilter(int filter)
+void ContainerBase::setFilter(ContainerBase::Filter filter)
 {
     mFilter = filter;
     drawItems();
@@ -124,10 +124,32 @@ void ContainerBase::drawItems()
 
     int index = 0;
 
-    for (MWWorld::ContainerStoreIterator iter (containerStore.begin(mFilter)); iter!=containerStore.end(); ++iter)
+
+    bool onlyMagic = false;
+    int categories;
+    if (mFilter == Filter_All)
+        categories = MWWorld::ContainerStore::Type_All;
+    else if (mFilter == Filter_Weapon)
+        categories = MWWorld::ContainerStore::Type_Weapon;
+    else if (mFilter == Filter_Apparel)
+        categories = MWWorld::ContainerStore::Type_Clothing + MWWorld::ContainerStore::Type_Armor;
+    else if (mFilter == Filter_Magic)
+    {
+        categories = MWWorld::ContainerStore::Type_Clothing + MWWorld::ContainerStore::Type_Armor
+                    + MWWorld::ContainerStore::Type_Weapon + MWWorld::ContainerStore::Type_Book
+                    + MWWorld::ContainerStore::Type_Potion;
+        onlyMagic = true;
+    }
+    else if (mFilter == Filter_Misc)
+    {
+        categories = MWWorld::ContainerStore::Type_Miscellaneous + MWWorld::ContainerStore::Type_Book
+                    + MWWorld::ContainerStore::Type_Ingredient;
+    }
+
+    for (MWWorld::ContainerStoreIterator iter (containerStore.begin(categories)); iter!=containerStore.end(); ++iter)
     {
         index++;
-        if(iter->getRefData().getCount() > 0)
+        if(iter->getRefData().getCount() > 0 && !(onlyMagic && MWWorld::Class::get(*iter).getEnchantment(*iter) == "" && iter->getTypeName() != typeid(ESM::Potion).name()))
         {
             std::string path = std::string("icons\\");
             path+=MWWorld::Class::get(*iter).getInventoryIcon(*iter);
