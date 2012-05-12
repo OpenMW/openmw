@@ -2,6 +2,8 @@
 #define MGUI_Inventory_H
 
 #include "container.hpp"
+#include "window_pinnable_base.hpp"
+
 namespace MWWorld
 {
     class Environment;
@@ -21,7 +23,7 @@ namespace MWGui
 
 namespace MWGui
 {
-    class InventoryWindow : public MWGui::ContainerBase
+    class InventoryWindow : public ContainerBase, public WindowPinnableBase
     {
         public:
             InventoryWindow(WindowManager& parWindowManager,DragAndDrop* dragAndDrop);
@@ -42,6 +44,7 @@ namespace MWGui
 
             void onWindowResize(MyGUI::Window* _sender);
             void onFilterChanged(MyGUI::Widget* _sender);
+            void onPinToggled();
     };
 }
 #endif // Inventory_H

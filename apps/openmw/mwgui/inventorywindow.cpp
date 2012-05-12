@@ -22,7 +22,8 @@ namespace MWGui
 {
 
     InventoryWindow::InventoryWindow(WindowManager& parWindowManager,DragAndDrop* dragAndDrop)
-        : ContainerBase(parWindowManager,dragAndDrop,"openmw_inventory_window_layout.xml")
+        : ContainerBase(dragAndDrop)
+        , WindowPinnableBase("openmw_inventory_window_layout.xml", parWindowManager)
     {
         static_cast<MyGUI::Window*>(mMainWidget)->eventWindowChangeCoord += MyGUI::newDelegate(this, &InventoryWindow::onWindowResize);
 
@@ -34,6 +35,12 @@ namespace MWGui
         getWidget(mFilterApparel, "ApparelButton");
         getWidget(mFilterMagic, "MagicButton");
         getWidget(mFilterMisc, "MiscButton");
+
+        MyGUI::ScrollView* itemView;
+        MyGUI::Widget* containerWidget;
+        getWidget(containerWidget, "Items");
+        getWidget(itemView, "ItemView");
+        setWidgets(containerWidget, itemView);
 
         mFilterAll->setCaption (MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sAllTab")->str);
         mFilterWeapon->setCaption (MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sWeaponTab")->str);
@@ -72,7 +79,7 @@ namespace MWGui
 
     void InventoryWindow::openInventory()
     {
-        open(MWBase::Environment::get().getWorld()->getPlayer().getPlayer());
+        openContainer(MWBase::Environment::get().getWorld()->getPlayer().getPlayer());
 
         onWindowResize(static_cast<MyGUI::Window*>(mMainWidget));
     }
@@ -102,6 +109,11 @@ namespace MWGui
         mFilterMisc->setStateSelected(false);
 
         static_cast<MyGUI::Button*>(_sender)->setStateSelected(true);
+    }
+
+    void InventoryWindow::onPinToggled()
+    {
+        mWindowManager.setWeaponVisibility(!mPinned);
     }
 
 }

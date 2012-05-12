@@ -548,3 +548,13 @@ bool WindowManager::getFullHelp() const
 {
     return mToolTips->getFullHelp();
 }
+
+void WindowManager::setWeaponVisibility(bool visible)
+{
+    hud->weapBox->setVisible(visible);
+}
+
+void WindowManager::setSpellVisibility(bool visible)
+{
+    hud->spellBox->setVisible(visible);
+}

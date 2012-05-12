@@ -44,10 +44,10 @@ namespace MWGui
         MWWorld::Ptr mItem;
     };
 
-    class ContainerBase : public WindowBase
+    class ContainerBase
     {
     public:
-        ContainerBase(WindowManager& parWindowManager, DragAndDrop* dragAndDrop, std::string guiFile);
+        ContainerBase(DragAndDrop* dragAndDrop);
         virtual ~ContainerBase();
 
         enum Filter
@@ -59,8 +59,9 @@ namespace MWGui
             Filter_Misc = 0x05
         };
 
-        void open(MWWorld::Ptr container);
-        void setName(std::string contName);
+        void setWidgets(MyGUI::Widget* containerWidget, MyGUI::ScrollView* itemView); ///< only call once
+
+        void openContainer(MWWorld::Ptr container);
         void setFilter(Filter filter); ///< set category filter
         void Update();
 
@@ -79,12 +80,14 @@ namespace MWGui
         void drawItems();
     };
 
-    class ContainerWindow : public ContainerBase
+    class ContainerWindow : public ContainerBase, public WindowBase
     {
     public:
         ContainerWindow(WindowManager& parWindowManager,DragAndDrop* dragAndDrop);
 
         virtual ~ContainerWindow();
+
+        void open(MWWorld::Ptr container);
 
     protected:
         std::vector<MyGUI::WidgetPtr> mContainerWidgets;

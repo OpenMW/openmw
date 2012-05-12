@@ -26,14 +26,16 @@ using namespace MWGui;
 using namespace Widgets;
 
 
-ContainerBase::ContainerBase(WindowManager& parWindowManager,DragAndDrop* dragAndDrop,std::string guiFile)
-    : WindowBase(guiFile, parWindowManager),
+ContainerBase::ContainerBase(DragAndDrop* dragAndDrop) :
     mDragAndDrop(dragAndDrop),
-    mFilter(ContainerBase::Filter_All),
-    mContainer()
+    mFilter(ContainerBase::Filter_All)
 {
-    getWidget(mContainerWidget, "Items");
-    getWidget(mItemView, "ItemView");
+}
+
+void ContainerBase::setWidgets(Widget* containerWidget, ScrollView* itemView)
+{
+    mContainerWidget = containerWidget;
+    mItemView = itemView;
 
     mContainerWidget->eventMouseButtonClick += MyGUI::newDelegate(this, &ContainerBase::onContainerClicked);
 }
@@ -90,24 +92,16 @@ void ContainerBase::onContainerClicked(MyGUI::Widget* _sender)
     }
 }
 
-void ContainerBase::setName(std::string contName)
-{
-    setText("_Main", contName);
-    adjustWindowCaption();
-}
-
 void ContainerBase::setFilter(ContainerBase::Filter filter)
 {
     mFilter = filter;
     drawItems();
 }
 
-void ContainerBase::open(MWWorld::Ptr container)
+void ContainerBase::openContainer(MWWorld::Ptr container)
 {
     mContainer = container;
-    setName(MWWorld::Class::get(container).getName(container));
     drawItems();
-    setVisible(true);
 }
 
 void ContainerBase::drawItems()
@@ -206,10 +200,17 @@ void ContainerBase::Update()
 // ------------------------------------------------------------------------------------------------
 
 ContainerWindow::ContainerWindow(WindowManager& parWindowManager,DragAndDrop* dragAndDrop)
-    : ContainerBase(parWindowManager, dragAndDrop, "openmw_container_window_layout.xml")
+    : ContainerBase(dragAndDrop)
+    , WindowBase("openmw_container_window_layout.xml", parWindowManager)
 {
     getWidget(mTakeButton, "TakeButton");
     getWidget(mCloseButton, "CloseButton");
+
+    MyGUI::ScrollView* itemView;
+    MyGUI::Widget* containerWidget;
+    getWidget(containerWidget, "Items");
+    getWidget(itemView, "ItemView");
+    setWidgets(containerWidget, itemView);
 
     mCloseButton->eventMouseButtonClick += MyGUI::newDelegate(this, &ContainerWindow::onCloseButtonClicked);
     mTakeButton->eventMouseButtonClick += MyGUI::newDelegate(this, &ContainerWindow::onTakeAllButtonClicked);
@@ -237,6 +238,12 @@ ContainerWindow::~ContainerWindow()
 void ContainerWindow::onWindowResize(MyGUI::Window* window)
 {
     drawItems();
+}
+
+void ContainerWindow::open(MWWorld::Ptr container)
+{
+    openContainer(container);
+    setTitle(MWWorld::Class::get(container).getName(container));
 }
 
 void ContainerWindow::onCloseButtonClicked(MyGUI::Widget* _sender)

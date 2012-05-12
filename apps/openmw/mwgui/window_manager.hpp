@@ -180,6 +180,8 @@ namespace MWGui
     void setHMSVisibility(bool visible);
     // sets the visibility of the hud minimap
     void setMinimapVisibility(bool visible);
+    void setWeaponVisibility(bool visible);
+    void setSpellVisibility(bool visible);
 
     template<typename T>
     void removeDialog(T*& dialog); ///< Casts to OEngine::GUI::Layout and calls removeDialog, then resets pointer to nullptr.
