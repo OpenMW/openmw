@@ -9,6 +9,7 @@
 #include "../mwworld/world.hpp"
 #include "../mwworld/containerstore.hpp"
 #include "../mwworld/class.hpp"
+#include "../mwworld/player.hpp"
 #include "../mwclass/container.hpp"
 #include "../mwinput/inputmanager.hpp"
 
@@ -210,7 +211,22 @@ void ContainerWindow::onTakeAllButtonClicked(MyGUI::Widget* _sender)
 {
     if(!mDragAndDrop->mIsOnDragAndDrop)
     {
-        /// \todo
+        // transfer everything into the player's inventory
+        MWWorld::ContainerStore& containerStore = MWWorld::Class::get(mContainer).getContainerStore(mContainer);
+
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+        MWWorld::ContainerStore& playerStore = MWWorld::Class::get(player).getContainerStore(player);
+
+        for (MWWorld::ContainerStoreIterator iter (containerStore.begin()); iter!=containerStore.end(); ++iter)
+        {
+            if(iter->getRefData().getCount() > 0)
+            {
+                playerStore.add(*iter);
+            }
+        }
+
+        containerStore.clear();
+
         MWBase::Environment::get().getWindowManager()->setGuiMode(GM_Game);
         setVisible(false);
     }
