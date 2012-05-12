@@ -34,7 +34,6 @@ ContainerBase::ContainerBase(WindowManager& parWindowManager,DragAndDrop* dragAn
     getWidget(mItemView, "ItemView");
 
     mContainerWidget->eventMouseButtonClick += MyGUI::newDelegate(this, &ContainerBase::onContainerClicked);
-    static_cast<MyGUI::Window*>(mMainWidget)->eventWindowChangeCoord += MyGUI::newDelegate(this, &ContainerBase::onWindowResize);
 }
 
 ContainerBase::~ContainerBase()
@@ -91,10 +90,6 @@ void ContainerBase::onContainerClicked(MyGUI::Widget* _sender)
         mDragAndDrop->mContainerWindow = 0;
         drawItems();
     }
-}
-
-void ContainerBase::onWindowResize(MyGUI::Window* window)
-{
 }
 
 void ContainerBase::setName(std::string contName)
@@ -190,9 +185,15 @@ ContainerWindow::ContainerWindow(WindowManager& parWindowManager,DragAndDrop* dr
     int w = MyGUI::RenderManager::getInstance().getViewSize().width;
     int h = MyGUI::RenderManager::getInstance().getViewSize().height;
     setCoord(w-600,h-300,600,300);
+
+    static_cast<MyGUI::Window*>(mMainWidget)->eventWindowChangeCoord += MyGUI::newDelegate(this, &ContainerWindow::onWindowResize);
 }
 
 ContainerWindow::~ContainerWindow()
+{
+}
+
+void ContainerWindow::onWindowResize(MyGUI::Window* window)
 {
 }
 

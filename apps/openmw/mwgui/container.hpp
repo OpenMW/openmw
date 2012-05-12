@@ -63,7 +63,6 @@ namespace MWGui
 
         void onSelectedItem(MyGUI::Widget* _sender);
         void onContainerClicked(MyGUI::Widget* _sender);
-        void onWindowResize(MyGUI::Window* window);
 
         void drawItems();
     };
@@ -83,7 +82,7 @@ namespace MWGui
 
         bool mIsValid;//is in the right GUI Mode
 
-
+        void onWindowResize(MyGUI::Window* window);
         void onCloseButtonClicked(MyGUI::Widget* _sender);
         void onTakeAllButtonClicked(MyGUI::Widget* _sender);
     };

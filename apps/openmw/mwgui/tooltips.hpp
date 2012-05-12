@@ -53,6 +53,9 @@ namespace MWGui
         static std::string toString(const float value);
         static std::string toString(const int value);
 
+        static std::string getCountString(const int value);
+        ///< @return blank string if count is 1, or else " (value)"
+
     private:
         MyGUI::Widget* mDynamicToolTipBox;
 

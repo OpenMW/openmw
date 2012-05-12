@@ -119,7 +119,7 @@ namespace MWClass
             ptr.get<ESM::Book>();
 
         MWGui::ToolTipInfo info;
-        info.caption = ref->base->name;
+        info.caption = ref->base->name + MWGui::ToolTips::getCountString(ptr.getRefData().getCount());
         info.icon = ref->base->icon;
 
         const ESMS::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();

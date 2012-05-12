@@ -79,7 +79,7 @@ namespace MWClass
             ptr.get<ESM::Activator>();
 
         MWGui::ToolTipInfo info;
-        info.caption = ref->base->name;
+        info.caption = ref->base->name + MWGui::ToolTips::getCountString(ptr.getRefData().getCount());
 
         std::string text;
         if (MWBase::Environment::get().getWindowManager()->getFullHelp())

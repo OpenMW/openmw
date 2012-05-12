@@ -220,7 +220,7 @@ namespace MWClass
             ptr.get<ESM::Armor>();
 
         MWGui::ToolTipInfo info;
-        info.caption = ref->base->name;
+        info.caption = ref->base->name + MWGui::ToolTips::getCountString(ptr.getRefData().getCount());
         info.icon = ref->base->icon;
 
         std::string text;

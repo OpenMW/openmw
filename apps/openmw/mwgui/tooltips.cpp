@@ -357,6 +357,14 @@ std::string ToolTips::getMiscString(const std::string& text, const std::string& 
         return "\n" + prefix + ": " + text;
 }
 
+std::string ToolTips::getCountString(const int value)
+{
+    if (value == 1)
+        return "";
+    else
+        return " (" + boost::lexical_cast<std::string>(value) + ")";
+}
+
 void ToolTips::toggleFullHelp()
 {
     mFullHelp = !mFullHelp;
