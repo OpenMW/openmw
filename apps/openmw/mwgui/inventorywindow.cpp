@@ -24,11 +24,17 @@ namespace MWGui
     InventoryWindow::InventoryWindow(WindowManager& parWindowManager,DragAndDrop* dragAndDrop)
         : ContainerBase(parWindowManager,dragAndDrop,"openmw_inventory_window_layout.xml")
     {
+        static_cast<MyGUI::Window*>(mMainWidget)->eventWindowChangeCoord += MyGUI::newDelegate(this, &InventoryWindow::onWindowResize);
     }
 
     void InventoryWindow::openInventory()
     {
         open(MWBase::Environment::get().getWorld()->getPlayer().getPlayer());
+    }
+
+    void InventoryWindow::onWindowResize(MyGUI::Window* _sender)
+    {
+        drawItems();
     }
 
 }

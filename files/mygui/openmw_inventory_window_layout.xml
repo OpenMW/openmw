@@ -15,7 +15,7 @@
 
         <!-- Items in inventory -->
         <Widget type="Widget" skin="MW_Box" position="228 32 300 215" name="box" align="Left Top Stretch">
-            <Widget type="ScrollView" skin="MW_ScrollView" position="4 4 296 211" align="Left Top Stretch" name="ItemView">
+            <Widget type="ScrollView" skin="MW_ScrollViewH" position="4 4 296 211" align="Left Top Stretch" name="ItemView">
                 <Property key="CanvasSize" value="1024 1024"/>
                 <Widget type="Button" skin="" name="Items" position="0 0 296 211" name="Items" align="Left Top Stretch"/>
             </Widget>

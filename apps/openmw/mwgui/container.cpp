@@ -125,7 +125,8 @@ void ContainerBase::drawItems()
 
     int x = 4;
     int y = 4;
-    int count = 0;
+    int maxHeight = mItemView->getSize().height - 48;
+
     int index = 0;
 
     for (MWWorld::ContainerStoreIterator iter (containerStore.begin()); iter!=containerStore.end(); ++iter)
@@ -133,21 +134,21 @@ void ContainerBase::drawItems()
         index++;
         if(iter->getRefData().getCount() > 0)
         {
-            count++;
             std::string path = std::string("icons\\");
             path+=MWWorld::Class::get(*iter).getInventoryIcon(*iter);
             ItemWidget* image = mContainerWidget->createWidget<ItemWidget>("ImageBox", MyGUI::IntCoord(x, y, 32, 32), MyGUI::Align::Default);
-            MyGUI::TextBox* text = image->createWidget<MyGUI::TextBox>("SandBrightText", MyGUI::IntCoord(x, y, 18, 18), MyGUI::Align::Default, std::string("Label"));
+            MyGUI::TextBox* text = image->createWidget<MyGUI::TextBox>("SandBrightText", MyGUI::IntCoord(14, 14, 18, 18), MyGUI::Align::Default, std::string("Label"));
+            text->setTextAlign(MyGUI::Align::Right);
+            text->setNeedMouseFocus(false);
             image->eventMouseButtonClick += MyGUI::newDelegate(this,&ContainerBase::onSelectedItem);
             image->setUserString("ToolTipType", "ItemPtr");
             image->setUserData(*iter);
             image->mPos = index;
-            x += 36;
-            if(count % 20 == 0)
-            {
             y += 36;
-            x = 4;
-            count = 0;
+            if (y > maxHeight)
+            {
+                x += 36;
+                y = 4;
             }
 
             if(iter->getRefData().getCount() > 1)
@@ -158,7 +159,11 @@ void ContainerBase::drawItems()
             path.append(".dds");
             image->setImageTexture(path);
         }
-    } 
+    }
+
+    MyGUI::IntSize size = MyGUI::IntSize(std::max(mItemView->getSize().width, x), 2048);
+    mItemView->setCanvasSize(size);
+    mContainerWidget->setSize(size);
 }
 
 void ContainerBase::Update()
@@ -204,6 +209,7 @@ ContainerWindow::~ContainerWindow()
 
 void ContainerWindow::onWindowResize(MyGUI::Window* window)
 {
+    drawItems();
 }
 
 void ContainerWindow::onCloseButtonClicked(MyGUI::Widget* _sender)

@@ -4,10 +4,10 @@
     <Widget type="Window" skin="MW_Window" layer="Windows" position="900 500 600 300" name="_Main">
 
         <!-- Items -->
-        <Widget type="Widget" skin="MW_Box" position="5 10 570 220" name="box" align="Left Top Stretch">
-            <Widget type="ScrollView" skin="MW_ScrollView" position="4 4 566 216" name="ItemView" align="Left Top Stretch">
+        <Widget type="Widget" skin="MW_Box" position="5 5 575 225" name="box" align="Left Top Stretch">
+            <Widget type="ScrollView" skin="MW_ScrollViewH" position="4 4 571 221" name="ItemView" align="Left Top Stretch">
                 <Property key="CanvasSize" value="1024 1024"/>
-                <Widget type="Button" skin="" name="Items" position="0 0 566 216" name="Items" align="Left Top Stretch"/>
+                <Widget type="Button" skin="" name="Items" position="0 0 571 221" name="Items" align="Left Top Stretch"/>
             </Widget>
         </Widget>
 

@@ -27,6 +27,9 @@ namespace MWGui
             InventoryWindow(WindowManager& parWindowManager,DragAndDrop* dragAndDrop);
 
             void openInventory();
+
+        protected:
+            void onWindowResize(MyGUI::Window* _sender);
     };
 }
 #endif // Inventory_H
