@@ -63,6 +63,8 @@ void ContainerBase::onSelectedItem(MyGUI::Widget* _sender)
         _sender->getChildAt(0)->getChildAt(0)->setVisible(false);
         drawItems();
     }
+    else
+        onContainerClicked(mContainerWidget);
 }
 
 void ContainerBase::onContainerClicked(MyGUI::Widget* _sender)

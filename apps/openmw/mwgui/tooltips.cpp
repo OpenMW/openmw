@@ -29,8 +29,6 @@ ToolTips::ToolTips(WindowManager* windowManager) :
 
 void ToolTips::onFrame(float frameDuration)
 {
-    /// \todo Store a MWWorld::Ptr in the widget user data, retrieve it here and construct a tooltip dynamically
-
     MyGUI::Gui::getInstance().destroyWidget(mDynamicToolTipBox);
     mDynamicToolTipBox = mMainWidget->createWidget<Widget>("HUD_Box",
         IntCoord(0, 0, mMainWidget->getCoord().width, mMainWidget->getCoord().height),
@@ -110,6 +108,7 @@ void ToolTips::onFrame(float frameDuration)
 
             // adjust tooltip size to fit its content, position it above the crosshair
             /// \todo Slide the tooltip along the bounding box of the focused object (like in Morrowind)
+            /// relevant link: http://www.ogre3d.org/tikiwiki/ObjectTextDisplay
             setCoord(std::max(0, viewSize.width/2 - (tooltipSize.width)/2),
                     std::max(0, viewSize.height/2 - (tooltipSize.height) - 32),
                     tooltipSize.width,
