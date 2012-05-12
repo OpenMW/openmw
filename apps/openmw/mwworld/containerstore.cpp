@@ -9,6 +9,7 @@
 
 #include "manualref.hpp"
 #include "refdata.hpp"
+#include "class.hpp"
 
 namespace
 {
@@ -46,7 +47,22 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::end()
 
 void MWWorld::ContainerStore::add (const Ptr& ptr)
 {
-    /// \todo implement item stacking
+    // determine whether to stack or not
+    // item stacking depends on owner, script, enchantment and name
+    for (MWWorld::ContainerStoreIterator iter (begin(getType(ptr))); iter!=end(); ++iter)
+    {
+        if (   iter->mCellRef->refID == ptr.mCellRef->refID
+            && MWWorld::Class::get(*iter).getScript(*iter) == MWWorld::Class::get(ptr).getScript(ptr)
+            && MWWorld::Class::get(*iter).getEnchantment(*iter) == MWWorld::Class::get(ptr).getEnchantment(ptr)
+            && iter->mCellRef->owner == ptr.mCellRef->owner)
+        {
+            // stack
+            iter->getRefData().setCount( iter->getRefData().getCount() + ptr.getRefData().getCount() );
+
+            flagAsModified();
+            return;
+        }
+    }
 
     switch (getType (ptr))
     {
