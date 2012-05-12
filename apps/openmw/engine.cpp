@@ -158,13 +158,7 @@ OMW::Engine::Engine(Files::ConfigurationManager& configurationManager)
 
 OMW::Engine::~Engine()
 {
-    delete MWBase::Environment::get().getInputManager();
-    delete MWBase::Environment::get().getSoundManager();
-    delete MWBase::Environment::get().getMechanicsManager();
-    delete MWBase::Environment::get().getDialogueManager();
-    delete MWBase::Environment::get().getJournal();
-    delete MWBase::Environment::get().getScriptManager();
-    delete MWBase::Environment::get().getWorld();
+    mEnvironment.cleanup();
     delete mScriptContext;
     delete mOgre;
 }
@@ -198,6 +192,12 @@ void OMW::Engine::addResourcesDirectory (const boost::filesystem::path& path)
 {
     mOgre->getRoot()->addResourceLocation (path.string(), "FileSystem",
         Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, true);
+}
+
+void OMW::Engine::addZipResource (const boost::filesystem::path& path)
+{
+    mOgre->getRoot()->addResourceLocation (path.string(), "Zip",
+        Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, false);
 }
 
 void OMW::Engine::enableFSStrict(bool fsStrict)
@@ -287,6 +287,8 @@ void OMW::Engine::go()
         settings.loadDefault(localdefault);
     else if (boost::filesystem::exists(globaldefault))
         settings.loadDefault(globaldefault);
+    else
+        throw std::runtime_error ("No default settings file found! Make sure the file \"settings-default.cfg\" was properly installed.");
 
     // load user settings if they exist, otherwise just load the default settings as user settings
     const std::string settingspath = mCfgMgr.getUserPath().string() + "/settings.cfg";
@@ -320,6 +322,7 @@ void OMW::Engine::go()
     addResourcesDirectory(mResDir / "water");
     addResourcesDirectory(mResDir / "gbuffer");
     addResourcesDirectory(mResDir / "shadows");
+    addZipResource(mResDir / "mygui" / "Obliviontt.zip");
 
     // Create the window
     mOgre->createWindow("OpenMW");

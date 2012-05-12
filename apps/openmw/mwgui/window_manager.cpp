@@ -8,6 +8,9 @@
 #include "stats_window.hpp"
 #include "messagebox.hpp"
 #include "tooltips.hpp"
+#include "scrollwindow.hpp"
+#include "bookwindow.hpp"
+#include "list.hpp"
 
 #include "../mwmechanics/mechanicsmanager.hpp"
 #include "../mwinput/inputmanager.hpp"
@@ -37,6 +40,8 @@ WindowManager::WindowManager(
   , mMessageBoxManager(NULL)
   , console(NULL)
   , mJournal(NULL)
+  , mBookWindow(NULL)
+  , mScrollWindow(NULL)
   , dialogueWindow(nullptr)
   , mCharGen(NULL)
   , playerClass()
@@ -69,6 +74,13 @@ WindowManager::WindowManager(
 
     //Register own widgets with MyGUI
     MyGUI::FactoryManager::getInstance().registerFactory<DialogueHistory>("Widget");
+    MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWSkill>("Widget");
+    MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWAttribute>("Widget");
+    MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWSpell>("Widget");
+    MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWEffectList>("Widget");
+    MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWSpellEffect>("Widget");
+    MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWDynamicStat>("Widget");
+    MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWList>("Widget");
 
     // Get size info from the Gui object
     assert(gui);
@@ -84,6 +96,8 @@ WindowManager::WindowManager(
     mMessageBoxManager = new MessageBoxManager(this);
     dialogueWindow = new DialogueWindow(*this);
     mToolTips = new ToolTips(this);
+    mScrollWindow = new ScrollWindow(*this);
+    mBookWindow = new BookWindow(*this);
 
     // The HUD is always on
     hud->setVisible(true);
@@ -100,13 +114,6 @@ WindowManager::WindowManager(
     {
         playerSkillValues.insert(std::make_pair(ESM::Skill::skillIds[i], MWMechanics::Stat<float>()));
     }
-
-    MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWSkill>("Widget");
-    MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWAttribute>("Widget");
-    MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWSpell>("Widget");
-    MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWEffectList>("Widget");
-    MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWSpellEffect>("Widget");
-    MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWDynamicStat>("Widget");
 
     // Set up visibility
     updateVisible();
@@ -179,6 +186,8 @@ void WindowManager::updateVisible()
     stats->setVisible(false);
     console->disable();
     mJournal->setVisible(false);
+    mScrollWindow->setVisible(false);
+    mBookWindow->setVisible(false);
     dialogueWindow->setVisible(false);
 
     // Mouse is visible whenever we're not in game mode
@@ -198,6 +207,12 @@ void WindowManager::updateVisible()
             break;
         case GM_Console:
             console->enable();
+            break;
+        case GM_Scroll:
+            mScrollWindow->setVisible(true);
+            break;
+        case GM_Book:
+            mBookWindow->setVisible(true);
             break;
         case GM_Name:
         case GM_Race:

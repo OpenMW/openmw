@@ -31,13 +31,10 @@ void ToolTips::onFrame(float frameDuration)
 {
     /// \todo Store a MWWorld::Ptr in the widget user data, retrieve it here and construct a tooltip dynamically
 
-    /// \todo we are destroying/creating the tooltip widgets every frame here,
-    /// because the tooltip might change (e.g. when trap is activated)
-    /// is there maybe a better way (listener when the object changes)?
-    for (size_t i=0; i<mDynamicToolTipBox->getChildCount(); ++i)
-    {
-        mDynamicToolTipBox->_destroyChildWidget(mDynamicToolTipBox->getChildAt(i));
-    }
+    MyGUI::Gui::getInstance().destroyWidget(mDynamicToolTipBox);
+    mDynamicToolTipBox = mMainWidget->createWidget<Widget>("HUD_Box",
+        IntCoord(0, 0, mMainWidget->getCoord().width, mMainWidget->getCoord().height),
+        Align::Stretch, "DynamicToolTipBox");
 
     const IntSize &viewSize = RenderManager::getInstance().getViewSize();
 
@@ -56,7 +53,6 @@ void ToolTips::onFrame(float frameDuration)
         std::string text = focus->getUserString("ToolTipText");
 
         ToolTipInfo info;
-
         if (type == "")
         {
             mDynamicToolTipBox->setVisible(false);
@@ -64,7 +60,7 @@ void ToolTips::onFrame(float frameDuration)
         }        
         else if (type == "Text")
         {
-            info.caption = text;
+            info.text = text;
         }
         else if (type == "CaptionText")
         {
@@ -107,8 +103,8 @@ void ToolTips::onFrame(float frameDuration)
 
             // adjust tooltip size to fit its content, position it above the crosshair
             /// \todo Slide the tooltip along the bounding box of the focused object (like in Morrowind)
-            setCoord(viewSize.width/2 - (tooltipSize.width)/2.f,
-                    viewSize.height/2 - (tooltipSize.height) - 32,
+            setCoord(std::max(0, viewSize.width/2 - (tooltipSize.width)/2),
+                    std::max(0, viewSize.height/2 - (tooltipSize.height) - 32),
                     tooltipSize.width,
                     tooltipSize.height);
         }
@@ -200,8 +196,8 @@ IntSize ToolTips::createToolTip(const ToolTipInfo& info)
 
     const IntPoint padding(8, 8);
 
-    const int imageCaptionHPadding = 8;
-    const int imageCaptionVPadding = 4;
+    const int imageCaptionHPadding = (caption != "" ? 8 : 0);
+    const int imageCaptionVPadding = (caption != "" ? 4 : 0);
 
     std::string realImage = "icons\\" + image;
     findImageExtension(realImage);
@@ -211,7 +207,7 @@ IntSize ToolTips::createToolTip(const ToolTipInfo& info)
     captionWidget->setCaption(caption);
     IntSize captionSize = captionWidget->getTextSize();
 
-    int captionHeight = std::max(captionSize.height, imageSize);
+    int captionHeight = std::max(caption != "" ? captionSize.height : 0, imageSize);
 
     EditBox* textWidget = mDynamicToolTipBox->createWidget<EditBox>("SandText", IntCoord(0, captionHeight+imageCaptionVPadding, 300, 300-captionHeight-imageCaptionVPadding), Align::Stretch, "ToolTipText");
     textWidget->setProperty("Static", "true");

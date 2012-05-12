@@ -62,6 +62,8 @@ namespace MWGui
   class JournalWindow;
   class CharacterCreation;
   class ToolTips;
+  class ScrollWindow;
+  class BookWindow;
 
   class TextInputDialog;
   class InfoBoxDialog;
@@ -124,6 +126,9 @@ namespace MWGui
     }
 
     MWGui::DialogueWindow* getDialogueWindow() {return dialogueWindow;}
+
+    MWGui::BookWindow* getBookWindow() {return mBookWindow;}
+    MWGui::ScrollWindow* getScrollWindow() {return mScrollWindow;}
 
     MyGUI::Gui* getGui() const { return gui; }
 
@@ -203,6 +208,8 @@ namespace MWGui
     Console *console;
     JournalWindow* mJournal;
     DialogueWindow *dialogueWindow;
+    ScrollWindow* mScrollWindow;
+    BookWindow* mBookWindow;
 
     CharacterCreation* mCharGen;
 
