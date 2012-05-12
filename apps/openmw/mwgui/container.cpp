@@ -236,11 +236,21 @@ void ContainerWindow::onTakeAllButtonClicked(MyGUI::Widget* _sender)
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
         MWWorld::ContainerStore& playerStore = MWWorld::Class::get(player).getContainerStore(player);
 
+        int i=0;
         for (MWWorld::ContainerStoreIterator iter (containerStore.begin()); iter!=containerStore.end(); ++iter)
         {
             if(iter->getRefData().getCount() > 0)
             {
                 playerStore.add(*iter);
+
+                if (i==0)
+                {
+                    // play the sound of the first object
+                    std::string sound = MWWorld::Class::get(*iter).getUpSoundId(*iter);
+                    MWBase::Environment::get().getSoundManager()->playSound (sound, 1.0, 1.0);
+                }
+
+                ++i;
             }
         }
 
