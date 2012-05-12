@@ -59,6 +59,8 @@ void ContainerBase::onSelectedItem(MyGUI::Widget* _sender)
         _sender->setUserString("drag","on");
         mDragAndDrop->mDraggedWidget = _sender;
         mDragAndDrop->mContainerWindow = const_cast<MWGui::ContainerBase*>(this);
+        // hide the count text
+        _sender->getChildAt(0)->getChildAt(0)->setVisible(false);
         drawItems();
     }
 }
@@ -123,9 +125,11 @@ void ContainerBase::drawItems()
 
             // background widget (for the "equipped" frame and magic item background image)
             bool isMagic = (MWWorld::Class::get(*iter).getEnchantment(*iter) != "");
-            MyGUI::Widget* backgroundWidget = mContainerWidget->createWidget<Widget>(isMagic ? "ItemBackgroundMagic" : "ItemBackground", MyGUI::IntCoord(x, y, 42, 42), MyGUI::Align::Default);
+            MyGUI::ImageBox* backgroundWidget = mContainerWidget->createWidget<ImageBox>("ImageBox", MyGUI::IntCoord(x, y, 42, 42), MyGUI::Align::Default);
             backgroundWidget->setUserString("ToolTipType", "ItemPtr");
             backgroundWidget->setUserData(*iter);
+            backgroundWidget->setImageTexture( isMagic ? "textures\\menu_icon_magic.dds" : "");
+            backgroundWidget->setProperty("ImageCoord", "0 0 42 42");
             backgroundWidget->eventMouseButtonClick += MyGUI::newDelegate(this,&ContainerBase::onSelectedItem);
 
             // image
@@ -137,7 +141,7 @@ void ContainerBase::drawItems()
             image->setNeedMouseFocus(false);
 
             // text widget that shows item count
-            MyGUI::TextBox* text = image->createWidget<MyGUI::TextBox>("SandBrightText", MyGUI::IntCoord(14, 14, 18, 18), MyGUI::Align::Default, std::string("Label"));
+            MyGUI::TextBox* text = image->createWidget<MyGUI::TextBox>("SandBrightText", MyGUI::IntCoord(0, 14, 32, 18), MyGUI::Align::Default, std::string("Label"));
             text->setTextAlign(MyGUI::Align::Right);
             text->setNeedMouseFocus(false);
 
