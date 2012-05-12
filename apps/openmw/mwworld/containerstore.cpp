@@ -47,9 +47,11 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::end()
 
 void MWWorld::ContainerStore::add (const Ptr& ptr)
 {
+    int type = getType(ptr);
+
     // determine whether to stack or not
     // item stacking depends on owner, script, enchantment and name
-    for (MWWorld::ContainerStoreIterator iter (begin(getType(ptr))); iter!=end(); ++iter)
+    for (MWWorld::ContainerStoreIterator iter (begin(type)); iter!=end(); ++iter)
     {
         if (   iter->mCellRef->refID == ptr.mCellRef->refID
             && MWWorld::Class::get(*iter).getScript(*iter) == MWWorld::Class::get(ptr).getScript(ptr)
@@ -64,7 +66,7 @@ void MWWorld::ContainerStore::add (const Ptr& ptr)
         }
     }
 
-    switch (getType (ptr))
+    switch (type)
     {
         case Type_Potion: potions.list.push_back (*ptr.get<ESM::Potion>());  break;
         case Type_Apparatus: appas.list.push_back (*ptr.get<ESM::Apparatus>());  break;
