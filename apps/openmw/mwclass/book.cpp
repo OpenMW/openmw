@@ -140,4 +140,12 @@ namespace MWClass
 
         return info;
     }
+
+    std::string Book::getEnchantment (const MWWorld::Ptr& ptr) const
+    {
+        ESMS::LiveCellRef<ESM::Book, MWWorld::RefData> *ref =
+            ptr.get<ESM::Book>();
+
+        return ref->base->enchant;
+    }
 }

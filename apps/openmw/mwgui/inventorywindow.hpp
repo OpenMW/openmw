@@ -41,6 +41,7 @@ namespace MWGui
             MyGUI::Button* mFilterMisc;
 
             void onWindowResize(MyGUI::Window* _sender);
+            void onFilterChanged(MyGUI::Widget* _sender);
     };
 }
 #endif // Inventory_H
