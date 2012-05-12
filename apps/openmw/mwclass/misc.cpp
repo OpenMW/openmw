@@ -138,10 +138,17 @@ namespace MWClass
             ptr.get<ESM::Miscellaneous>();
 
         MWGui::ToolTipInfo info;
-        info.caption = ref->base->name + MWGui::ToolTips::getCountString(ptr.getRefData().getCount());
-        info.icon = ref->base->icon;
 
         const ESMS::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
+
+        int count = ptr.getRefData().getCount();
+        // gold has count both as reference count and as value, multiply them together to get real count
+        bool isGold = (ref->base->name == store.gameSettings.search("sGold")->str);
+        if (isGold)
+            count *= ref->base->data.value;
+
+        info.caption = ref->base->name + MWGui::ToolTips::getCountString(count);
+        info.icon = ref->base->icon;
 
         if (ref->ref.soul != "")
         {
@@ -151,9 +158,7 @@ namespace MWClass
 
         std::string text;
 
-        if (ref->base->name == store.gameSettings.search("sGold")->str)
-            info.caption += " (" + boost::lexical_cast<std::string>(ref->base->data.value) + ")";
-        else
+        if (!isGold)
         {
             text += "\n" + store.gameSettings.search("sWeight")->str + ": " + MWGui::ToolTips::toString(ref->base->data.weight);
             text += MWGui::ToolTips::getValueString(ref->base->data.value, store.gameSettings.search("sValue")->str);

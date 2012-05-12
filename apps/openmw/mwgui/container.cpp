@@ -12,6 +12,7 @@
 #include "../mwworld/player.hpp"
 #include "../mwclass/container.hpp"
 #include "../mwinput/inputmanager.hpp"
+#include "../mwsound/soundmanager.hpp"
 
 #include <cmath>
 #include <algorithm>
@@ -53,34 +54,41 @@ void ContainerBase::onSelectedItem(MyGUI::Widget* _sender)
 
         int count = 0;
         MWWorld::ContainerStore& containerStore = MWWorld::Class::get(mContainer).getContainerStore(mContainer);
+        MWWorld::Ptr object;
         for (MWWorld::ContainerStoreIterator iter (containerStore.begin()); iter!=containerStore.end(); ++iter)
         {
             count++;
             if(count == item->mPos)
             {
                 mDragAndDrop->mStore.add(*iter);
+                object = *iter;
                 iter->getRefData().setCount(0);
                 break;
             }
         }
-        //containerStore.
-        //std::cout << mContainerWidget->getParent()->getParent()->getName();
+
+        std::string sound = MWWorld::Class::get(object).getUpSoundId(object);
+        MWBase::Environment::get().getSoundManager()->playSound (sound, 1.0, 1.0);
+
         _sender->setUserString("drag","on");
         mDragAndDrop->mDraggedWidget = _sender;
         mDragAndDrop->mContainerWindow = const_cast<MWGui::ContainerBase*>(this);
         drawItems();
-        std::cout << "selected!";
     }
 }
 
 void ContainerBase::onContainerClicked(MyGUI::Widget* _sender)
 {
-    std::cout << "container clicked";
     if(mDragAndDrop->mIsOnDragAndDrop) //drop widget here
     {
         ItemWidget* item = static_cast<ItemWidget*>(mDragAndDrop->mDraggedWidget);
-        std::cout << item->mPos << (*mDragAndDrop->mStore.begin()).getTypeName();
-        if((*item->getUserData<MWWorld::Ptr>()).getContainerStore() == 0) std::cout << "nocontainer!";
+
+        MWWorld::Ptr object = *item->getUserData<MWWorld::Ptr>();
+        assert(object.getContainerStore() && "Item is not in a container!");
+
+        std::string sound = MWWorld::Class::get(object).getDownSoundId(object);
+        MWBase::Environment::get().getSoundManager()->playSound (sound, 1.0, 1.0);
+
         MWWorld::ContainerStore& containerStore = MWWorld::Class::get(mContainer).getContainerStore(mContainer);
         containerStore.add(*mDragAndDrop->mStore.begin());
         mDragAndDrop->mStore.clear();
