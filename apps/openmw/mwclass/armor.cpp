@@ -256,4 +256,12 @@ namespace MWClass
 
         return info;
     }
+
+    std::string Armor::getEnchantment (const MWWorld::Ptr& ptr) const
+    {
+        ESMS::LiveCellRef<ESM::Armor, MWWorld::RefData> *ref =
+            ptr.get<ESM::Armor>();
+
+        return ref->base->enchant;
+    }
 }

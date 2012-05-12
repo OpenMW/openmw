@@ -52,6 +52,9 @@ namespace MWClass
 
             virtual std::string getInventoryIcon (const MWWorld::Ptr& ptr) const;
             ///< Return name of inventory icon.
+
+            virtual std::string getEnchantment (const MWWorld::Ptr& ptr) const;
+            ///< @return the enchantment ID if the object is enchanted, otherwise an empty string
     };
 }
 
