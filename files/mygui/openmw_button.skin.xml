@@ -62,6 +62,10 @@
             <State name="normal" colour="0.75 0.6 0.35" shift="0"/>
             <State name="highlighted" colour="0.85 0.76 0.60" shift="0"/>
             <State name="pushed" colour="1 1 1" shift="0"/>
+            <State name="disabled_checked" colour="0.33 0.38 0.67" shift="0"/>
+            <State name="normal_checked" colour="0.33 0.38 0.67" shift="0"/>
+            <State name="highlighted_checked" colour="0.33 0.38 0.67" shift="0"/>
+            <State name="pushed_checked" colour="0.33 0.38 0.67" shift="0"/>
         </BasisSkin>
    </Skin>
 </MyGUI>

@@ -66,6 +66,8 @@ namespace MWGui
         mFilterApparel->eventMouseButtonClick += MyGUI::newDelegate(this, &InventoryWindow::onFilterChanged);
         mFilterMagic->eventMouseButtonClick += MyGUI::newDelegate(this, &InventoryWindow::onFilterChanged);
         mFilterMisc->eventMouseButtonClick += MyGUI::newDelegate(this, &InventoryWindow::onFilterChanged);
+
+        mFilterAll->setStateSelected(true);
     }
 
     void InventoryWindow::openInventory()
@@ -92,6 +94,14 @@ namespace MWGui
             setFilter(ContainerBase::Filter_Magic);
         else if (_sender == mFilterMisc)
             setFilter(ContainerBase::Filter_Misc);
+
+        mFilterAll->setStateSelected(false);
+        mFilterWeapon->setStateSelected(false);
+        mFilterApparel->setStateSelected(false);
+        mFilterMagic->setStateSelected(false);
+        mFilterMisc->setStateSelected(false);
+
+        static_cast<MyGUI::Button*>(_sender)->setStateSelected(true);
     }
 
 }
