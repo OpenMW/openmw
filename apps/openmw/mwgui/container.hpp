@@ -76,6 +76,7 @@ namespace MWGui
 
         void onSelectedItem(MyGUI::Widget* _sender);
         void onContainerClicked(MyGUI::Widget* _sender);
+        void onMouseWheel(MyGUI::Widget* _sender, int _rel);
 
         void drawItems();
     };

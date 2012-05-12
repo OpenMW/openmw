@@ -38,6 +38,7 @@ void ContainerBase::setWidgets(Widget* containerWidget, ScrollView* itemView)
     mItemView = itemView;
 
     mContainerWidget->eventMouseButtonClick += MyGUI::newDelegate(this, &ContainerBase::onContainerClicked);
+    mContainerWidget->eventMouseWheel += MyGUI::newDelegate(this, &ContainerWindow::onMouseWheel);
 }
 
 ContainerBase::~ContainerBase()
@@ -90,6 +91,14 @@ void ContainerBase::onContainerClicked(MyGUI::Widget* _sender)
         mDragAndDrop->mContainerWindow = 0;
         drawItems();
     }
+}
+
+void ContainerBase::onMouseWheel(MyGUI::Widget* _sender, int _rel)
+{
+    if (mItemView->getViewOffset().left + _rel*0.3 > 0)
+        mItemView->setViewOffset(MyGUI::IntPoint(0, 0));
+    else
+        mItemView->setViewOffset(MyGUI::IntPoint(mItemView->getViewOffset().left + _rel*0.3, 0));
 }
 
 void ContainerBase::setFilter(ContainerBase::Filter filter)
@@ -155,7 +164,8 @@ void ContainerBase::drawItems()
             backgroundWidget->setUserData(*iter);
             backgroundWidget->setImageTexture( isMagic ? "textures\\menu_icon_magic.dds" : "");
             backgroundWidget->setProperty("ImageCoord", "0 0 42 42");
-            backgroundWidget->eventMouseButtonClick += MyGUI::newDelegate(this,&ContainerBase::onSelectedItem);
+            backgroundWidget->eventMouseButtonClick += MyGUI::newDelegate(this, &ContainerBase::onSelectedItem);
+            backgroundWidget->eventMouseWheel += MyGUI::newDelegate(this, &ContainerBase::onMouseWheel);
 
             // image
             ImageBox* image = backgroundWidget->createWidget<ImageBox>("ImageBox", MyGUI::IntCoord(5, 5, 32, 32), MyGUI::Align::Default);
