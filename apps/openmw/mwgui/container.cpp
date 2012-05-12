@@ -2,7 +2,6 @@
 
 #include "window_manager.hpp"
 #include "widgets.hpp"
-#include "itemwidget.hpp"
 
 #include "../mwbase/environment.hpp"
 #include "../mwworld/manualref.hpp"
@@ -50,22 +49,9 @@ void ContainerBase::onSelectedItem(MyGUI::Widget* _sender)
         _sender->detachFromWidget();
         _sender->attachToWidget(mDragAndDrop->mDragAndDropWidget);
 
-        ItemWidget* item = static_cast<ItemWidget*>(_sender);
-
-        int count = 0;
-        MWWorld::ContainerStore& containerStore = MWWorld::Class::get(mContainer).getContainerStore(mContainer);
-        MWWorld::Ptr object;
-        for (MWWorld::ContainerStoreIterator iter (containerStore.begin()); iter!=containerStore.end(); ++iter)
-        {
-            count++;
-            if(count == item->mPos)
-            {
-                mDragAndDrop->mStore.add(*iter);
-                object = *iter;
-                iter->getRefData().setCount(0);
-                break;
-            }
-        }
+        MWWorld::Ptr object = *_sender->getUserData<MWWorld::Ptr>();
+        mDragAndDrop->mStore.add(object);
+        object.getRefData().setCount(0);
 
         std::string sound = MWWorld::Class::get(object).getUpSoundId(object);
         MWBase::Environment::get().getSoundManager()->playSound (sound, 1.0, 1.0);
@@ -81,9 +67,7 @@ void ContainerBase::onContainerClicked(MyGUI::Widget* _sender)
 {
     if(mDragAndDrop->mIsOnDragAndDrop) //drop widget here
     {
-        ItemWidget* item = static_cast<ItemWidget*>(mDragAndDrop->mDraggedWidget);
-
-        MWWorld::Ptr object = *item->getUserData<MWWorld::Ptr>();
+        MWWorld::Ptr object = *mDragAndDrop->mDraggedWidget->getUserData<MWWorld::Ptr>();
         assert(object.getContainerStore() && "Item is not in a container!");
 
         std::string sound = MWWorld::Class::get(object).getDownSoundId(object);
@@ -123,8 +107,8 @@ void ContainerBase::drawItems()
     }
     MWWorld::ContainerStore& containerStore = MWWorld::Class::get(mContainer).getContainerStore(mContainer);
 
-    int x = 4;
-    int y = 4;
+    int x = 0;
+    int y = 0;
     int maxHeight = mItemView->getSize().height - 48;
 
     int index = 0;
@@ -136,28 +120,36 @@ void ContainerBase::drawItems()
         {
             std::string path = std::string("icons\\");
             path+=MWWorld::Class::get(*iter).getInventoryIcon(*iter);
-            ItemWidget* image = mContainerWidget->createWidget<ItemWidget>("ImageBox", MyGUI::IntCoord(x, y, 32, 32), MyGUI::Align::Default);
-            MyGUI::TextBox* text = image->createWidget<MyGUI::TextBox>("SandBrightText", MyGUI::IntCoord(14, 14, 18, 18), MyGUI::Align::Default, std::string("Label"));
-            text->setTextAlign(MyGUI::Align::Right);
-            text->setNeedMouseFocus(false);
-            image->eventMouseButtonClick += MyGUI::newDelegate(this,&ContainerBase::onSelectedItem);
-            image->setUserString("ToolTipType", "ItemPtr");
-            image->setUserData(*iter);
-            image->mPos = index;
-            y += 36;
-            if (y > maxHeight)
-            {
-                x += 36;
-                y = 4;
-            }
 
-            if(iter->getRefData().getCount() > 1)
-                text->setCaption(boost::lexical_cast<std::string>(iter->getRefData().getCount()));
+            // background widget (for the "equipped" frame and magic item background image)
+            bool isMagic = (MWWorld::Class::get(*iter).getEnchantment(*iter) != "");
+            MyGUI::Widget* backgroundWidget = mContainerWidget->createWidget<Widget>(isMagic ? "ItemBackgroundMagic" : "ItemBackground", MyGUI::IntCoord(x, y, 42, 42), MyGUI::Align::Default);
+            backgroundWidget->setUserString("ToolTipType", "ItemPtr");
+            backgroundWidget->setUserData(*iter);
+            backgroundWidget->eventMouseButtonClick += MyGUI::newDelegate(this,&ContainerBase::onSelectedItem);
 
+            // image
+            ImageBox* image = backgroundWidget->createWidget<ImageBox>("ImageBox", MyGUI::IntCoord(5, 5, 32, 32), MyGUI::Align::Default);
             int pos = path.rfind(".");
             path.erase(pos);
             path.append(".dds");
             image->setImageTexture(path);
+            image->setNeedMouseFocus(false);
+
+            // text widget that shows item count
+            MyGUI::TextBox* text = image->createWidget<MyGUI::TextBox>("SandBrightText", MyGUI::IntCoord(14, 14, 18, 18), MyGUI::Align::Default, std::string("Label"));
+            text->setTextAlign(MyGUI::Align::Right);
+            text->setNeedMouseFocus(false);
+
+            y += 36;
+            if (y > maxHeight)
+            {
+                x += 36;
+                y = 0;
+            }
+
+            if(iter->getRefData().getCount() > 1)
+                text->setCaption(boost::lexical_cast<std::string>(iter->getRefData().getCount()));
         }
     }
 

@@ -9,7 +9,6 @@
 #include "messagebox.hpp"
 #include "container.hpp"
 #include "inventorywindow.hpp"
-#include "itemwidget.hpp"
 #include "tooltips.hpp"
 #include "scrollwindow.hpp"
 #include "bookwindow.hpp"
@@ -77,7 +76,6 @@ WindowManager::WindowManager(
     
     //Register own widgets with MyGUI
     MyGUI::FactoryManager::getInstance().registerFactory<DialogueHistory>("Widget");
-    MyGUI::FactoryManager::getInstance().registerFactory<ItemWidget>("Widget");
     MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWSkill>("Widget");
     MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWAttribute>("Widget");
     MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWSpell>("Widget");
