@@ -65,7 +65,7 @@ namespace MWGui
 
         void findImageExtension(std::string& image);
 
-        MyGUI::IntSize getToolTipViaPtr ();
+        MyGUI::IntSize getToolTipViaPtr (bool image=true);
         ///< @return requested tooltip size
 
         MyGUI::IntSize createToolTip(const ToolTipInfo& info);

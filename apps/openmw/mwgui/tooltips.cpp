@@ -82,7 +82,7 @@ void ToolTips::onFrame(float frameDuration)
         else if (type == "ItemPtr")
         {
             mFocusObject = *focus->getUserData<MWWorld::Ptr>();
-            tooltipSize = getToolTipViaPtr();
+            tooltipSize = getToolTipViaPtr(false);
         }
 
         IntPoint tooltipPosition = InputManager::getInstance().getMousePosition() + IntPoint(0, 24);
@@ -134,7 +134,7 @@ void ToolTips::setFocusObject(const MWWorld::Ptr& focus)
     mFocusObject = focus;
 }
 
-IntSize ToolTips::getToolTipViaPtr ()
+IntSize ToolTips::getToolTipViaPtr (bool image)
 {
     // this the maximum width of the tooltip before it starts word-wrapping
     setCoord(0, 0, 300, 300);
@@ -151,6 +151,8 @@ IntSize ToolTips::getToolTipViaPtr ()
         mDynamicToolTipBox->setVisible(true);
 
         ToolTipInfo info = object.getToolTipInfo(mFocusObject);
+        if (!image)
+            info.icon = "";
         tooltipSize = createToolTip(info);
     }
 
