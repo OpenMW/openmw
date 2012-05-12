@@ -66,6 +66,9 @@ namespace MWWorld
 
             ContainerStoreIterator end();
 
+            bool stacks (const Ptr& ptr1, const Ptr& ptr2) const;
+            ///< @return true if the two specified objects can stack with each other
+
             void add (const Ptr& ptr);
             ///< Add the item pointed to by \a ptr to this container.
             ///

@@ -67,9 +67,25 @@ void MWWorld::InventoryStore::equip (int slot, const ContainerStoreIterator& ite
             throw std::runtime_error ("invalid slot");
     }
 
-    /// \todo restack item previously in this slot (if required)
+    // restack item previously in this slot (if required)
+    if (mSlots[slot] != end())
+    {
+        for (MWWorld::ContainerStoreIterator iter (begin()); iter!=end(); ++iter)
+        {
+            if (stacks(*iter, *mSlots[slot]))
+            {
+                iter->getRefData().setCount( iter->getRefData().getCount() + mSlots[slot]->getRefData().getCount() );
+                mSlots[slot]->getRefData().setCount(0);
+                break;
+            }
+        }
+    }
 
-    /// \todo unstack item pointed to by iterator if required)
+    // unstack item pointed to by iterator if required
+    if (iterator->getRefData().getCount() > 1)
+    {
+        /// \ŧodo ???
+    }
 
     mSlots[slot] = iterator;
 
