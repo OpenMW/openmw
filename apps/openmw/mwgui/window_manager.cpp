@@ -1,5 +1,4 @@
 #include "window_manager.hpp"
-#include "layouts.hpp"
 #include "text_input.hpp"
 #include "review.hpp"
 #include "dialogue.hpp"
@@ -13,6 +12,8 @@
 #include "scrollwindow.hpp"
 #include "bookwindow.hpp"
 #include "list.hpp"
+#include "hud.hpp"
+#include "mainmenu.hpp"
 
 #include "../mwmechanics/mechanicsmanager.hpp"
 #include "../mwinput/inputmanager.hpp"
