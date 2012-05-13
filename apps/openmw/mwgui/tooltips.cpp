@@ -16,6 +16,7 @@ ToolTips::ToolTips(WindowManager* windowManager) :
     , mGameMode(true)
     , mWindowManager(windowManager)
     , mFullHelp(false)
+    , mEnabled(true)
 {
     getWidget(mDynamicToolTipBox, "DynamicToolTipBox");
 
@@ -27,6 +28,11 @@ ToolTips::ToolTips(WindowManager* windowManager) :
     mMainWidget->setNeedMouseFocus(false);
 }
 
+void ToolTips::setEnabled(bool enabled)
+{
+    mEnabled = enabled;
+}
+
 void ToolTips::onFrame(float frameDuration)
 {
     MyGUI::Gui::getInstance().destroyWidget(mDynamicToolTipBox);
@@ -35,6 +41,12 @@ void ToolTips::onFrame(float frameDuration)
         Align::Stretch, "DynamicToolTipBox");
 
     const IntSize &viewSize = RenderManager::getInstance().getViewSize();
+
+    if (!mEnabled)
+    {
+        mDynamicToolTipBox->setVisible(false);
+        return;
+    }
 
     if (!mGameMode)
     {

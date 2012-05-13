@@ -3,37 +3,44 @@
 <MyGUI type="Layout">
     <Widget type="Window" skin="MW_Window_Pinnable" layer="Windows" position="0 0 600 300" name="_Main">
 
-        <!-- Player encumbrance -->
-        <Widget type="ProgressBar" skin="MW_Progress_Blue" position="8 8 212 24" name="EncumbranceBar">
-            <Property key="Range" value="100"/>
-            <Property key="RangePosition" value="50"/>
-            <Widget type="TextBox" skin="ProgressText" position="0 0 212 24" align="Center" name="EncumbranceBarT">
-                <Property key="Caption" value="Encumbrance bar"/>
+        <Widget type="Widget" skin="" position="0 0 224 223" align="Left Top" name="LeftPane">
+
+            <!-- Player encumbrance -->
+            <Widget type="ProgressBar" skin="MW_Progress_Blue" position="8 8 212 24" name="EncumbranceBar" align="Left Top HStretch">
+                <Property key="Range" value="100"/>
+                <Property key="RangePosition" value="50"/>
+                <Widget type="TextBox" skin="ProgressText" position="0 0 212 24" align="Center Stretch" name="EncumbranceBarT">
+                    <Property key="Caption" value="Encumbrance bar"/>
+                </Widget>
             </Widget>
+
+            <!-- Avatar -->
+            <Widget type="Widget" skin="MW_Box" position="8 38 212 185" name="Avatar" align="Left Top Stretch">
+                <Widget type="TextBox" skin="ProgressText" position="0 150 212 24" align="HCenter Bottom" name="ArmorRating">
+                    <Property key="Caption" value="Armor Rating"/>
+                </Widget>
+            </Widget>
+
         </Widget>
 
-        <!-- Avatar -->
-        <Widget type="Widget" skin="MW_Box" position="8 38 212 219" name="Avatar" align="Left Top VStretch">
-            <Widget type="TextBox" skin="ProgressText" position="0 180 212 24" align="HCenter Bottom" name="ArmorRating">
-                <Property key="Caption" value="Armor Rating goes here"/>
-            </Widget>
-        </Widget>
+        <Widget type="Widget" skin="" position="228 0 350 223" align="Left Top" name="RightPane">
 
-        <!-- Items in inventory -->
-        <Widget type="Widget" skin="MW_Box" position="228 38 300 219" name="box" align="Left Top Stretch">
-            <Widget type="ScrollView" skin="MW_ScrollViewH" position="4 4 292 215" align="Left Top Stretch" name="ItemView">
-                <Property key="CanvasSize" value="1024 1024"/>
-                <Widget type="Button" skin="" name="Items" position="0 0 292 215" name="Items" align="Left Top Stretch"/>
+            <!-- Items in inventory -->
+            <Widget type="Widget" skin="MW_Box" position="0 38 350 185" name="box" align="Left Top Stretch">
+                <Widget type="ScrollView" skin="MW_ScrollViewH" position="4 4 342 181" align="Left Top Stretch" name="ItemView">
+                    <Widget type="Button" skin="" name="Items" position="0 0 342 181" name="Items" align="Left Top Stretch"/>
+                </Widget>
             </Widget>
-        </Widget>
 
-        <!-- Categories -->
-        <Widget type="Widget" position="228 8 300 24" align="ALIGN_TOP ALIGN_LEFT" name="Categories">
-            <Widget type="Button" skin="MW_Button" position="0 0 60 24" name="AllButton"/>
-            <Widget type="Button" skin="MW_Button" position="0 0 60 24" name="WeaponButton"/>
-            <Widget type="Button" skin="MW_Button" position="0 0 60 24" name="ApparelButton"/>
-            <Widget type="Button" skin="MW_Button" position="0 0 60 24" name="MagicButton"/>
-            <Widget type="Button" skin="MW_Button" position="0 0 60 24" name="MiscButton"/>
+            <!-- Categories -->
+            <Widget type="Widget" position="0 8 350 24" align="Left Top HStretch" name="Categories">
+                <Widget type="Button" skin="MW_Button" position="0 0 60 24" name="AllButton"/>
+                <Widget type="Button" skin="MW_Button" position="0 0 60 24" name="WeaponButton"/>
+                <Widget type="Button" skin="MW_Button" position="0 0 60 24" name="ApparelButton"/>
+                <Widget type="Button" skin="MW_Button" position="0 0 60 24" name="MagicButton"/>
+                <Widget type="Button" skin="MW_Button" position="0 0 60 24" name="MiscButton"/>
+            </Widget>
+
         </Widget>
 
     </Widget>

@@ -39,6 +39,8 @@ namespace MWGui
         void enterGameMode();
         void enterGuiMode();
 
+        void setEnabled(bool enabled);
+
         void toggleFullHelp(); ///< show extra info in item tooltips (owner, script)
         bool getFullHelp() const;
 
@@ -72,6 +74,8 @@ namespace MWGui
         ///< @return requested tooltip size
 
         bool mGameMode;
+
+        bool mEnabled;
 
         bool mFullHelp;
     };

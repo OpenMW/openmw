@@ -35,6 +35,8 @@ namespace MWGui
         getWidget(mFilterApparel, "ApparelButton");
         getWidget(mFilterMagic, "MagicButton");
         getWidget(mFilterMisc, "MiscButton");
+        getWidget(mLeftPane, "LeftPane");
+        getWidget(mRightPane, "RightPane");
 
         MyGUI::ScrollView* itemView;
         MyGUI::Widget* containerWidget;
@@ -86,6 +88,12 @@ namespace MWGui
 
     void InventoryWindow::onWindowResize(MyGUI::Window* _sender)
     {
+        const float aspect = 0.5; // fixed aspect ratio for the left pane
+        mLeftPane->setSize( (_sender->getSize().height-44) * aspect, _sender->getSize().height-44 );
+        mRightPane->setCoord( mLeftPane->getPosition().left + (_sender->getSize().height-44) * aspect + 4,
+                              mRightPane->getPosition().top,
+                              _sender->getSize().width - 12 - (_sender->getSize().height-44) * aspect - 15,
+                              _sender->getSize().height-44 );
         drawItems();
     }
 

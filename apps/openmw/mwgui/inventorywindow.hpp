@@ -36,6 +36,9 @@ namespace MWGui
             MyGUI::ProgressBar* mEncumbranceBar;
             MyGUI::TextBox* mEncumbranceText;
 
+            MyGUI::Widget* mLeftPane;
+            MyGUI::Widget* mRightPane;
+
             MyGUI::Button* mFilterAll;
             MyGUI::Button* mFilterWeapon;
             MyGUI::Button* mFilterApparel;

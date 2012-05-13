@@ -563,3 +563,10 @@ void WindowManager::setMouseVisible(bool visible)
 {
     MyGUI::PointerManager::getInstance().setVisible(visible);
 }
+
+void WindowManager::setDragDrop(bool dragDrop)
+{
+    mToolTips->setEnabled(!dragDrop);
+    MWBase::Environment::get().getInputManager()->setDragDrop(dragDrop);
+    setMouseVisible(!dragDrop);
+}

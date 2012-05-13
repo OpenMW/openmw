@@ -66,8 +66,7 @@ void ContainerBase::onSelectedItem(MyGUI::Widget* _sender)
         _sender->getChildAt(0)->getChildAt(0)->setVisible(false);
         drawItems();
 
-        MWBase::Environment::get().getInputManager()->setDragDrop(true);
-        MWBase::Environment::get().getWindowManager()->setMouseVisible(false);
+        MWBase::Environment::get().getWindowManager()->setDragDrop(true);
     }
     else
         onContainerClicked(mContainerWidget);
@@ -93,8 +92,7 @@ void ContainerBase::onContainerClicked(MyGUI::Widget* _sender)
         mDragAndDrop->mContainerWindow = 0;
         drawItems();
 
-        MWBase::Environment::get().getInputManager()->setDragDrop(false);
-        MWBase::Environment::get().getWindowManager()->setMouseVisible(true);
+        MWBase::Environment::get().getWindowManager()->setDragDrop(false);
     }
 }
 
@@ -128,7 +126,7 @@ void ContainerBase::drawItems()
 
     int x = 0;
     int y = 0;
-    int maxHeight = mItemView->getSize().height - 48;
+    int maxHeight = mItemView->getSize().height - 58;
 
     int index = 0;
 
@@ -195,7 +193,12 @@ void ContainerBase::drawItems()
             }
 
             if(iter->getRefData().getCount() > 1)
-                text->setCaption(boost::lexical_cast<std::string>(iter->getRefData().getCount()));
+            {
+                if (iter->getRefData().getCount() > 9999)
+                    text->setCaption(boost::lexical_cast<std::string>(iter->getRefData().getCount()/1000.f) + "k");
+                else
+                    text->setCaption(boost::lexical_cast<std::string>(iter->getRefData().getCount()));
+            }
         }
     }
 
@@ -209,7 +212,7 @@ void ContainerBase::Update()
     if(mDragAndDrop->mIsOnDragAndDrop)
     {
         if(mDragAndDrop->mDraggedWidget)
-            mDragAndDrop->mDraggedWidget->setPosition(MyGUI::InputManager::getInstance().getMousePosition());
+            mDragAndDrop->mDraggedWidget->setPosition(MyGUI::InputManager::getInstance().getMousePosition() - MyGUI::IntPoint(21, 21));
         else mDragAndDrop->mIsOnDragAndDrop = false; //If this happens, there is a bug.
     }
 }
