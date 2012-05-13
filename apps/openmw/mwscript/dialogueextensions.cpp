@@ -115,6 +115,16 @@ namespace MWScript
                 }
         };
 
+        class OpGoodbye : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute(Interpreter::Runtime& runtime)
+                {
+                    MWBase::Environment::get().getDialogueManager()->goodbye();
+                }
+        };
+
         const int opcodeJournal = 0x2000133;
         const int opcodeSetJournalIndex = 0x2000134;
         const int opcodeGetJournalIndex = 0x2000135;
@@ -122,6 +132,7 @@ namespace MWScript
         const int opcodeChoice = 0x2000a;
         const int opcodeForceGreeting = 0x200014f;
         const int opcodeForceGreetingExplicit = 0x2000150;
+        const int opcodeGoodbye = 0x2000152;
 
         void registerExtensions (Compiler::Extensions& extensions)
         {
@@ -133,6 +144,7 @@ namespace MWScript
             extensions.registerInstruction("forcegreeting","",opcodeForceGreeting);
             extensions.registerInstruction("forcegreeting","",opcodeForceGreeting,
                 opcodeForceGreetingExplicit);
+            extensions.registerInstruction("goodbye", "", opcodeGoodbye);
         }
 
         void installOpcodes (Interpreter::Interpreter& interpreter)
@@ -144,6 +156,7 @@ namespace MWScript
             interpreter.installSegment3 (opcodeChoice,new OpChoice);
             interpreter.installSegment5 (opcodeForceGreeting, new OpForceGreeting<ImplicitRef>);
             interpreter.installSegment5 (opcodeForceGreetingExplicit, new OpForceGreeting<ExplicitRef>);
+            interpreter.installSegment5 (opcodeGoodbye, new OpGoodbye);
         }
     }
 
