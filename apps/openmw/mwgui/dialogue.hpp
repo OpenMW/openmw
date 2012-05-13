@@ -45,6 +45,7 @@ namespace MWGui
         void addText(std::string text);
         void addTitle(std::string text);
         void askQuestion(std::string question);
+        void goodbye();
 
     protected:
         void onSelectTopic(std::string topic);
@@ -59,6 +60,8 @@ namespace MWGui
         *Helper function that add topic keyword in blue in a text.
         */
         std::string parseText(std::string text);
+
+        bool mEnabled;
 
         DialogueHistory*     history;
         Widgets::MWList*      topicsList;
