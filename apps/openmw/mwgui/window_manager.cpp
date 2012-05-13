@@ -558,3 +558,8 @@ void WindowManager::setSpellVisibility(bool visible)
 {
     hud->spellBox->setVisible(visible);
 }
+
+void WindowManager::setMouseVisible(bool visible)
+{
+    MyGUI::PointerManager::getInstance().setVisible(visible);
+}

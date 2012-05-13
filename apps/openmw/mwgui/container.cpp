@@ -60,12 +60,14 @@ void ContainerBase::onSelectedItem(MyGUI::Widget* _sender)
         std::string sound = MWWorld::Class::get(object).getUpSoundId(object);
         MWBase::Environment::get().getSoundManager()->playSound (sound, 1.0, 1.0);
 
-        _sender->setUserString("drag","on");
         mDragAndDrop->mDraggedWidget = _sender;
         mDragAndDrop->mContainerWindow = const_cast<MWGui::ContainerBase*>(this);
         // hide the count text
         _sender->getChildAt(0)->getChildAt(0)->setVisible(false);
         drawItems();
+
+        MWBase::Environment::get().getInputManager()->setDragDrop(true);
+        MWBase::Environment::get().getWindowManager()->setMouseVisible(false);
     }
     else
         onContainerClicked(mContainerWidget);
@@ -90,6 +92,9 @@ void ContainerBase::onContainerClicked(MyGUI::Widget* _sender)
         mDragAndDrop->mDraggedWidget = 0;
         mDragAndDrop->mContainerWindow = 0;
         drawItems();
+
+        MWBase::Environment::get().getInputManager()->setDragDrop(false);
+        MWBase::Environment::get().getWindowManager()->setMouseVisible(true);
     }
 }
 
@@ -146,7 +151,9 @@ void ContainerBase::drawItems()
     else if (mFilter == Filter_Misc)
     {
         categories = MWWorld::ContainerStore::Type_Miscellaneous + MWWorld::ContainerStore::Type_Book
-                    + MWWorld::ContainerStore::Type_Ingredient;
+                    + MWWorld::ContainerStore::Type_Ingredient + MWWorld::ContainerStore::Type_Repair
+                    + MWWorld::ContainerStore::Type_Lockpick + MWWorld::ContainerStore::Type_Light
+                    + MWWorld::ContainerStore::Type_Apparatus;
     }
 
     for (MWWorld::ContainerStoreIterator iter (containerStore.begin(categories)); iter!=containerStore.end(); ++iter)

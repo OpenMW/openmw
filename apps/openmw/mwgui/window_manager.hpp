@@ -166,6 +166,8 @@ namespace MWGui
 
     void setFocusObject(const MWWorld::Ptr& focus);
 
+    void setMouseVisible(bool visible); 
+
     void toggleFogOfWar();
     void toggleFullHelp(); ///< show extra info in item tooltips (owner, script)
     bool getFullHelp() const;
