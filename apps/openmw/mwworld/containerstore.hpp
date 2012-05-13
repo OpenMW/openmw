@@ -78,7 +78,7 @@ namespace MWWorld
             void addImpl (const Ptr& ptr);
             ///< Add the item to this container (no stacking)
 
-            virtual bool stacks (const Ptr& ptr1, const Ptr& ptr2) const;
+            virtual bool stacks (const Ptr& ptr1, const Ptr& ptr2);
             ///< @return true if the two specified objects can stack with each other
             /// @note ptr1 is the item that is already in this container
 
