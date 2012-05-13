@@ -1,67 +1,73 @@
 vertex_program depth_shadow_caster_vs cg
 {
-	source depthshadowcaster.cg
-	profiles vs_1_1 arbvp1
-	entry_point main_vp
+    source depthshadowcaster.cg
+    profiles vs_1_1 arbvp1
+    entry_point main_vp
 
-	default_params
-	{
-		param_named_auto wvpMat worldviewproj_matrix
-	}
+    default_params
+    {
+        param_named_auto wvpMat worldviewproj_matrix
+    }
 }
 
 fragment_program depth_shadow_caster_ps cg
 {
-	source depthshadowcaster.cg
-	profiles ps_2_0 arbfp1
-	entry_point main_fp
+    source depthshadowcaster.cg
+    profiles ps_2_0 arbfp1
+    entry_point main_fp
 
-	default_params
-	{
-	}
+    default_params
+    {
+    }
 }
 
 fragment_program depth_shadow_caster_ps_noalpha cg
 {
-	source depthshadowcaster.cg
-	profiles ps_2_0 arbfp1
-	entry_point main_fp_noalpha
+    source depthshadowcaster.cg
+    profiles ps_2_0 arbfp1
+    entry_point main_fp_noalpha
 
-	default_params
-	{
-	}
+    default_params
+    {
+    }
 }
 
 material depth_shadow_caster
 {
-	technique
-	{
-		pass
-		{
-			vertex_program_ref depth_shadow_caster_vs
-			{
-			}
+    technique
+    {
+        pass
+        {
+            // force-disable fog (relevant for DirectX profiles below SM3 that always apply fixed function fog)
+            fog_override true
 
-			fragment_program_ref depth_shadow_caster_ps
-			{
-			}
-		}
-	}
+            vertex_program_ref depth_shadow_caster_vs
+            {
+            }
+
+            fragment_program_ref depth_shadow_caster_ps
+            {
+            }
+        }
+    }
 }
 
 material depth_shadow_caster_noalpha
 {
-	technique
-	{
-		pass
-		{
-			vertex_program_ref depth_shadow_caster_vs
-			{
-			}
+    technique
+    {
+        pass
+        {
+            // force-disable fog (relevant for DirectX profiles below SM3 that always apply fixed function fog)
+            fog_override true
 
-			fragment_program_ref depth_shadow_caster_ps_noalpha
-			{
-			}
-		}
-	}
+            vertex_program_ref depth_shadow_caster_vs
+            {
+            }
+
+            fragment_program_ref depth_shadow_caster_ps_noalpha
+            {
+            }
+        }
+    }
 }
