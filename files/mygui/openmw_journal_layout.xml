@@ -7,7 +7,7 @@
     <Widget type="ImageBox" skin="ImageBox" position_real="0 0 1 1" align="Top|Right" name="JImage">     
         <Property key="ImageTexture" value="textures\tx_menubook.dds"/>
 
-        <Widget type="Button" skin="ButtonImage" position="370 220 96 24" name="NextPageBTN">
+        <Widget type="Button" skin="ButtonImage" position="370 220 57 24" name="NextPageBTN">
             <Property key="ImageResource" value="MenuBook_Next"/>
         </Widget>
         <Widget type="Button" skin="ButtonImage" position="80 220 96 24" name="PrevPageBTN">
