@@ -77,6 +77,8 @@ namespace MWGui
         mFilterMisc->eventMouseButtonClick += MyGUI::newDelegate(this, &InventoryWindow::onFilterChanged);
 
         mFilterAll->setStateSelected(true);
+
+        setCoord(0, 342, 600, 258);
     }
 
     void InventoryWindow::openInventory()

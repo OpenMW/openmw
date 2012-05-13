@@ -245,10 +245,11 @@ ContainerWindow::ContainerWindow(WindowManager& parWindowManager,DragAndDrop* dr
     mTakeButton->setCoord(600-20-closeButtonWidth-takeButtonWidth-8, mTakeButton->getCoord().top, takeButtonWidth, mTakeButton->getCoord().height);
 
     int w = MyGUI::RenderManager::getInstance().getViewSize().width;
-    int h = MyGUI::RenderManager::getInstance().getViewSize().height;
-    setCoord(w-600,h-300,600,300);
+    //int h = MyGUI::RenderManager::getInstance().getViewSize().height;
 
     static_cast<MyGUI::Window*>(mMainWidget)->eventWindowChangeCoord += MyGUI::newDelegate(this, &ContainerWindow::onWindowResize);
+
+    setCoord(w-600,0,600,300);
 }
 
 ContainerWindow::~ContainerWindow()
