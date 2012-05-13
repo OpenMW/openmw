@@ -45,18 +45,27 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::end()
     return ContainerStoreIterator (this);
 }
 
+bool MWWorld::ContainerStore::stacks(const Ptr& ptr1, const Ptr& ptr2) const
+{
+    /// \todo add current weapon/armor health, remaining lockpick/repair uses, current enchantment charge here as soon as they are implemented
+    if (  ptr1.mCellRef->refID == ptr2.mCellRef->refID
+        && MWWorld::Class::get(ptr1).getScript(ptr1) == "" // item with a script never stacks
+        && ptr1.mCellRef->owner == ptr2.mCellRef->owner
+        && ptr1.mCellRef->soul == ptr2.mCellRef->soul
+        && ptr1.mCellRef->charge == ptr2.mCellRef->charge)
+        return true;
+
+    return false;
+}
+
 void MWWorld::ContainerStore::add (const Ptr& ptr)
 {
     int type = getType(ptr);
 
     // determine whether to stack or not
-    // item stacking depends on owner, script, enchantment and name
     for (MWWorld::ContainerStoreIterator iter (begin(type)); iter!=end(); ++iter)
     {
-        if (   iter->mCellRef->refID == ptr.mCellRef->refID
-            && MWWorld::Class::get(*iter).getScript(*iter) == MWWorld::Class::get(ptr).getScript(ptr)
-            && MWWorld::Class::get(*iter).getEnchantment(*iter) == MWWorld::Class::get(ptr).getEnchantment(ptr)
-            && iter->mCellRef->owner == ptr.mCellRef->owner)
+        if (stacks(*iter, ptr))
         {
             // stack
             iter->getRefData().setCount( iter->getRefData().getCount() + ptr.getRefData().getCount() );
@@ -66,7 +75,13 @@ void MWWorld::ContainerStore::add (const Ptr& ptr)
         }
     }
 
-    switch (type)
+    // if we got here, this means no stacking
+    addImpl(ptr);
+}
+
+void MWWorld::ContainerStore::addImpl (const Ptr& ptr)
+{
+    switch (getType(ptr))
     {
         case Type_Potion: potions.list.push_back (*ptr.get<ESM::Potion>());  break;
         case Type_Apparatus: appas.list.push_back (*ptr.get<ESM::Apparatus>());  break;

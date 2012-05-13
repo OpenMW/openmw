@@ -39,6 +39,7 @@ std::string::size_type find_str_ci(const std::string& str, const std::string& su
 
 DialogueWindow::DialogueWindow(WindowManager& parWindowManager)
     : WindowBase("openmw_dialogue_window_layout.xml", parWindowManager)
+    , mEnabled(true)
 {
     // Centre dialog
     center();
@@ -64,6 +65,7 @@ DialogueWindow::DialogueWindow(WindowManager& parWindowManager)
     MyGUI::ButtonPtr byeButton;
     getWidget(byeButton, "ByeButton");
     byeButton->eventMouseButtonClick += MyGUI::newDelegate(this, &DialogueWindow::onByeClicked);
+    byeButton->setCaption(MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sGoodbye")->str);
 
     getWidget(pDispositionBar, "Disposition");
     getWidget(pDispositionText,"DispositionText");
@@ -81,6 +83,10 @@ void DialogueWindow::onHistoryClicked(MyGUI::Widget* _sender)
 
     size_t cursorPosition = t->getCursorPosition(lastPressed);
     MyGUI::UString color = history->getColorAtPos(cursorPosition);
+
+    if (!mEnabled && color == "#572D21")
+        MWBase::Environment::get().getDialogueManager()->goodbyeSelected();
+
     if(color != "#B29154")
     {
         UString key = history->getColorTextAt(cursorPosition);
@@ -119,11 +125,15 @@ void DialogueWindow::onByeClicked(MyGUI::Widget* _sender)
 
 void DialogueWindow::onSelectTopic(std::string topic)
 {
+    if (!mEnabled) return;
+
     MWBase::Environment::get().getDialogueManager()->keywordSelected(lower_string(topic));
 }
 
 void DialogueWindow::startDialogue(std::string npcName)
 {
+    mEnabled = true;
+    topicsList->setEnabled(true);
     static_cast<MyGUI::Window*>(mMainWidget)->setCaption(npcName);
     adjustWindowCaption();
 }
@@ -223,4 +233,11 @@ void DialogueWindow::updateOptions()
     pDispositionBar->setProgressPosition(40);
     pDispositionText->eraseText(0,pDispositionText->getTextLength());
     pDispositionText->addText("#B29154"+std::string("40/100")+"#B29154");
+}
+
+void DialogueWindow::goodbye()
+{
+    history->addDialogText("\n#572D21" + MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sGoodbye")->str);
+    topicsList->setEnabled(false);
+    mEnabled = false;
 }

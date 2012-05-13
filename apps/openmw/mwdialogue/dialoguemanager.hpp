@@ -56,6 +56,8 @@ namespace MWDialogue
 
             void askQuestion(std::string question,int choice);
 
+            void goodbye();
+
             ///get the faction of the actor you are talking with
             std::string getFaction();
 
