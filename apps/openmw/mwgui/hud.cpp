@@ -6,10 +6,14 @@
 
 #include <boost/lexical_cast.hpp>
 
+#include "../mwbase/environment.hpp"
+
+#include "window_manager.hpp"
+#include "container.hpp"
 
 using namespace MWGui;
 
-HUD::HUD(int width, int height, int fpsLevel)
+HUD::HUD(int width, int height, int fpsLevel, DragAndDrop* dragAndDrop)
     : Layout("openmw_hud_layout.xml")
     , health(NULL)
     , magicka(NULL)
@@ -32,6 +36,7 @@ HUD::HUD(int width, int height, int fpsLevel)
     , spellBoxBaseLeft(0)
     , effectBoxBaseRight(0)
     , minimapBoxBaseRight(0)
+    , mDragAndDrop(dragAndDrop)
 {
     setCoord(0,0, width, height);
 
@@ -80,6 +85,8 @@ HUD::HUD(int width, int height, int fpsLevel)
     setEffect("icons\\s\\tx_s_chameleon.dds");
 
     LocalMapBase::init(minimap, this);
+
+    mMainWidget->eventMouseButtonClick += MyGUI::newDelegate(this, &HUD::onWorldClicked);
 }
 
 void HUD::setFpsLevel(int level)
@@ -241,5 +248,22 @@ void HUD::setBottomRightVisibility(bool effectBoxVisible, bool minimapBoxVisible
     minimapBox->setVisible(minimapBoxVisible);
     effectBox->setPosition(effectBoxBaseRight - effectBox->getWidth() + effectsDx, effectBox->getTop());
     effectBox->setVisible(effectBoxVisible);
+}
+
+void HUD::onWorldClicked(MyGUI::Widget* _sender)
+{
+    if (mDragAndDrop->mIsOnDragAndDrop)
+    {
+        // drop item into the gameworld
+
+
+        mDragAndDrop->mStore.clear();
+        mDragAndDrop->mIsOnDragAndDrop = false;
+        MyGUI::Gui::getInstance().destroyWidget(mDragAndDrop->mDraggedWidget);
+        mDragAndDrop->mDraggedWidget = 0;
+        mDragAndDrop->mContainerWindow = 0;
+
+        MWBase::Environment::get().getWindowManager()->setDragDrop(false);
+    }
 }
 

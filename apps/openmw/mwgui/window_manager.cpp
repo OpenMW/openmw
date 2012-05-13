@@ -99,7 +99,6 @@ WindowManager::WindowManager(
     mDragAndDrop->mDragAndDropWidget = dragAndDropWidget;
     mDragAndDrop->mContainerWindow = 0;
 
-    hud = new HUD(w,h, showFPSLevel);
     menu = new MainMenu(w,h);
     map = new MapWindow(*this);
     stats = new StatsWindow(*this);
@@ -109,6 +108,7 @@ WindowManager::WindowManager(
     mDialogueWindow = new DialogueWindow(*this);
     mContainerWindow = new ContainerWindow(*this,mDragAndDrop);
     mInventoryWindow = new InventoryWindow(*this,mDragAndDrop);
+    hud = new HUD(w,h, showFPSLevel, mDragAndDrop);
     mToolTips = new ToolTips(this);
     mScrollWindow = new ScrollWindow(*this);
     mBookWindow = new BookWindow(*this);
