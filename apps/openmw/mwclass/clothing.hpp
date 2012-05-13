@@ -49,6 +49,9 @@ namespace MWClass
 
             virtual std::string getDownSoundId (const MWWorld::Ptr& ptr) const;
             ///< Return the put down sound Id
+
+            virtual std::string getEnchantment (const MWWorld::Ptr& ptr) const;
+            ///< @return the enchantment ID if the object is enchanted, otherwise an empty string
     };
 }
 

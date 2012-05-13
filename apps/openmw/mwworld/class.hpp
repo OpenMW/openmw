@@ -136,7 +136,7 @@ namespace MWWorld
             ///< Set or unset a stance.
 
             virtual bool getStance (const Ptr& ptr, Stance stance, bool ignoreForce = false) const;
-            ////< Check if a stance is active or not.
+            ///< Check if a stance is active or not.
 
             virtual float getSpeed (const Ptr& ptr) const;
             ///< Return movement speed.
@@ -179,6 +179,10 @@ namespace MWWorld
             virtual std::string getDownSoundId (const Ptr& ptr) const;
             ///< Return the down sound ID of \a ptr or throw an exception, if class does not support ID retrieval
             /// (default implementation: throw an exception)
+
+            virtual std::string getEnchantment (const MWWorld::Ptr& ptr) const;
+            ///< @return the enchantment ID if the object is enchanted, otherwise an empty string
+            /// (default implementation: return empty string)
     };
 }
 
