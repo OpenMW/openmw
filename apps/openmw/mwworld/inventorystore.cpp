@@ -59,9 +59,10 @@ void MWWorld::InventoryStore::equip (int slot, const ContainerStoreIterator& ite
     if (iterator.getContainerStore()!=this)
         throw std::runtime_error ("attempt to equip an item that is not in the inventory");
 
+    std::pair<std::vector<int>, bool> slots;
     if (iterator!=end())
     {
-        std::pair<std::vector<int>, bool> slots = Class::get (*iterator).getEquipmentSlots (*iterator);
+        slots = Class::get (*iterator).getEquipmentSlots (*iterator);
 
         if (std::find (slots.first.begin(), slots.first.end(), slot)==slots.first.end())
             throw std::runtime_error ("invalid slot");
@@ -82,7 +83,7 @@ void MWWorld::InventoryStore::equip (int slot, const ContainerStoreIterator& ite
     }
 
     // unstack item pointed to by iterator if required
-    if (iterator->getRefData().getCount() > 1)
+    if (iterator!=end() && !slots.second && iterator->getRefData().getCount() > 1) // if slots.second is true, item can stay stacked when equipped
     {
         // add the item again with a count of count-1, then set the count of the original (that will be equipped) to 1
         int count = iterator->getRefData().getCount();
@@ -198,4 +199,21 @@ void MWWorld::InventoryStore::autoEquip (const MWMechanics::NpcStats& stats)
         mSlots.swap (slots);
         flagAsModified();
     }
+}
+
+bool MWWorld::InventoryStore::stacks(const Ptr& ptr1, const Ptr& ptr2) const
+{
+    bool canStack = MWWorld::ContainerStore::stacks(ptr1, ptr2);
+    if (!canStack)
+        return false;
+
+    // don't stack if the item being checked against is currently equipped.
+    for (TSlots::const_iterator iter (mSlots.begin());
+        iter!=mSlots.end(); ++iter)
+    {
+        if (ptr1 == **iter)
+            return false;
+    }
+
+    return true;
 }
