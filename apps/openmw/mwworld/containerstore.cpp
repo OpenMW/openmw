@@ -75,7 +75,13 @@ void MWWorld::ContainerStore::add (const Ptr& ptr)
         }
     }
 
-    switch (type)
+    // if we got here, this means no stacking
+    addImpl(ptr);
+}
+
+void MWWorld::ContainerStore::addImpl (const Ptr& ptr)
+{
+    switch (getType(ptr))
     {
         case Type_Potion: potions.list.push_back (*ptr.get<ESM::Potion>());  break;
         case Type_Apparatus: appas.list.push_back (*ptr.get<ESM::Apparatus>());  break;

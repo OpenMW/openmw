@@ -84,7 +84,11 @@ void MWWorld::InventoryStore::equip (int slot, const ContainerStoreIterator& ite
     // unstack item pointed to by iterator if required
     if (iterator->getRefData().getCount() > 1)
     {
-        /// \ŧodo ???
+        // add the item again with a count of count-1, then set the count of the original (that will be equipped) to 1
+        int count = iterator->getRefData().getCount();
+        iterator->getRefData().setCount(count-1);
+        addImpl(*iterator);
+        iterator->getRefData().setCount(1);
     }
 
     mSlots[slot] = iterator;
@@ -163,7 +167,18 @@ void MWWorld::InventoryStore::autoEquip (const MWMechanics::NpcStats& stats)
                 }
             }
 
-            /// \todo unstack, if reqquired (itemsSlots.second)
+            if (!itemsSlots.second) // if itemsSlots.second is true, item can stay stacked when equipped
+            {
+                // unstack item pointed to by iterator if required
+                if (iter->getRefData().getCount() > 1)
+                {
+                    // add the item again with a count of count-1, then set the count of the original (that will be equipped) to 1
+                    int count = iter->getRefData().getCount();
+                    iter->getRefData().setCount(count-1);
+                    addImpl(*iter);
+                    iter->getRefData().setCount(1);
+                }
+            }
 
             slots[*iter2] = iter;
             break;
