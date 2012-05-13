@@ -201,7 +201,7 @@ void MWWorld::InventoryStore::autoEquip (const MWMechanics::NpcStats& stats)
     }
 }
 
-bool MWWorld::InventoryStore::stacks(const Ptr& ptr1, const Ptr& ptr2) const
+bool MWWorld::InventoryStore::stacks(const Ptr& ptr1, const Ptr& ptr2)
 {
     bool canStack = MWWorld::ContainerStore::stacks(ptr1, ptr2);
     if (!canStack)
@@ -211,7 +211,7 @@ bool MWWorld::InventoryStore::stacks(const Ptr& ptr1, const Ptr& ptr2) const
     for (TSlots::const_iterator iter (mSlots.begin());
         iter!=mSlots.end(); ++iter)
     {
-        if (ptr1 == **iter)
+        if (*iter != end() && ptr1 == **iter)
             return false;
     }
 
