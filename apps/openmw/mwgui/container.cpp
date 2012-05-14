@@ -184,6 +184,8 @@ void ContainerBase::drawItems()
             MyGUI::TextBox* text = image->createWidget<MyGUI::TextBox>("SandBrightText", MyGUI::IntCoord(0, 14, 32, 18), MyGUI::Align::Default, std::string("Label"));
             text->setTextAlign(MyGUI::Align::Right);
             text->setNeedMouseFocus(false);
+            text->setTextShadow(true);
+            text->setTextShadowColour(MyGUI::Colour(0,0,0));
 
             y += 42;
             if (y > maxHeight)

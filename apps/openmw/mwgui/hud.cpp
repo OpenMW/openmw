@@ -7,6 +7,10 @@
 #include <boost/lexical_cast.hpp>
 
 #include "../mwbase/environment.hpp"
+#include "../mwsound/soundmanager.hpp"
+#include "../mwworld/class.hpp"
+#include "../mwworld/world.hpp"
+#include "../mwworld/player.hpp"
 
 #include "window_manager.hpp"
 #include "container.hpp"
@@ -255,7 +259,21 @@ void HUD::onWorldClicked(MyGUI::Widget* _sender)
     if (mDragAndDrop->mIsOnDragAndDrop)
     {
         // drop item into the gameworld
+        MWWorld::Ptr object = *mDragAndDrop->mStore.begin();
 
+        float* playerPos;
+        playerPos = MWBase::Environment::get().getWorld()->getPlayer().getPlayer().getRefData().getPosition().pos;
+        MWWorld::Ptr::CellStore* cell = MWBase::Environment::get().getWorld()->getPlayer().getPlayer().getCell(); /// \todo this might be a different cell
+
+        ESM::Position& pos = object.getRefData().getPosition();
+        pos.pos[0] = playerPos[0];
+        pos.pos[1] = playerPos[1];
+        pos.pos[2] = playerPos[2];
+
+        MWBase::Environment::get().getWorld()->insertObject(object, cell);
+
+        std::string sound = MWWorld::Class::get(object).getDownSoundId(object);
+        MWBase::Environment::get().getSoundManager()->playSound (sound, 1.0, 1.0);
 
         mDragAndDrop->mStore.clear();
         mDragAndDrop->mIsOnDragAndDrop = false;

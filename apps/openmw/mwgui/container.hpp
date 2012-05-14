@@ -41,7 +41,6 @@ namespace MWGui
         MyGUI::Widget* mDraggedWidget;
         MyGUI::Widget* mDragAndDropWidget;
         MWWorld::ContainerStore mStore;
-        MWWorld::Ptr mItem;
     };
 
     class ContainerBase

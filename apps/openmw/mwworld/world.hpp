@@ -263,6 +263,9 @@ namespace MWWorld
 
             void update (float duration);
 
+            void insertObject (MWWorld::Ptr ptr, Ptr::CellStore* cell);
+            ///< insert object in a given cell
+            /// \note this method is only meant for dropping items into the gameworld from a container
     };
 }
 

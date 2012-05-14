@@ -948,4 +948,9 @@ namespace MWWorld
         mRendering->toggleWater();
     }
 
+    void World::insertObject(MWWorld::Ptr ptr, Ptr::CellStore* cell)
+    {
+        mWorldScene->insertObject(ptr, cell);
+    }
+
 }

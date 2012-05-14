@@ -15,39 +15,40 @@
 
 #include "cellfunctors.hpp"
 
-namespace {
-
-template<typename T>
-void insertCellRefList(MWRender::RenderingManager& rendering,
-    T& cellRefList, ESMS::CellStore<MWWorld::RefData> &cell, MWWorld::PhysicsSystem& physics)
+namespace
 {
-    if (!cellRefList.list.empty())
+
+    template<typename T>
+    void insertCellRefList(MWRender::RenderingManager& rendering,
+        T& cellRefList, ESMS::CellStore<MWWorld::RefData> &cell, MWWorld::PhysicsSystem& physics)
     {
-        const MWWorld::Class& class_ =
-            MWWorld::Class::get (MWWorld::Ptr (&*cellRefList.list.begin(), &cell));
-
-        for (typename T::List::iterator it = cellRefList.list.begin();
-            it != cellRefList.list.end(); it++)
+        if (!cellRefList.list.empty())
         {
-            if (it->mData.getCount() || it->mData.isEnabled())
-            {
-                MWWorld::Ptr ptr (&*it, &cell);
+            const MWWorld::Class& class_ =
+                MWWorld::Class::get (MWWorld::Ptr (&*cellRefList.list.begin(), &cell));
 
-                try
+            for (typename T::List::iterator it = cellRefList.list.begin();
+                it != cellRefList.list.end(); it++)
+            {
+                if (it->mData.getCount() || it->mData.isEnabled())
                 {
-                    rendering.addObject(ptr);
-                    class_.insertObject(ptr, physics);
-                    class_.enable (ptr);
-                }
-                catch (const std::exception& e)
-                {
-                    std::string error ("error during rendering: ");
-                    std::cerr << error + e.what() << std::endl;
+                    MWWorld::Ptr ptr (&*it, &cell);
+
+                    try
+                    {
+                        rendering.addObject(ptr);
+                        class_.insertObject(ptr, physics);
+                        class_.enable (ptr);
+                    }
+                    catch (const std::exception& e)
+                    {
+                        std::string error ("error during rendering: ");
+                        std::cerr << error + e.what() << std::endl;
+                    }
                 }
             }
         }
     }
-}
 
 }
 
@@ -300,30 +301,68 @@ namespace MWWorld
         mCellChanged = false;
     }
 
-void Scene::insertCell(ESMS::CellStore<MWWorld::RefData> &cell)
-{
-  // Loop through all references in the cell
-  insertCellRefList(mRendering, cell.activators, cell, *mPhysics);
-  insertCellRefList(mRendering, cell.potions, cell, *mPhysics);
-  insertCellRefList(mRendering, cell.appas, cell, *mPhysics);
-  insertCellRefList(mRendering, cell.armors, cell, *mPhysics);
-  insertCellRefList(mRendering, cell.books, cell, *mPhysics);
-  insertCellRefList(mRendering, cell.clothes, cell, *mPhysics);
-  insertCellRefList(mRendering, cell.containers, cell, *mPhysics);
-  insertCellRefList(mRendering, cell.creatures, cell, *mPhysics);
-  insertCellRefList(mRendering, cell.doors, cell, *mPhysics);
-  insertCellRefList(mRendering, cell.ingreds, cell, *mPhysics);
-  insertCellRefList(mRendering, cell.creatureLists, cell, *mPhysics);
-  insertCellRefList(mRendering, cell.itemLists, cell, *mPhysics);
-  insertCellRefList(mRendering, cell.lights, cell, *mPhysics);
-  insertCellRefList(mRendering, cell.lockpicks, cell, *mPhysics);
-  insertCellRefList(mRendering, cell.miscItems, cell, *mPhysics);
-  insertCellRefList(mRendering, cell.npcs, cell, *mPhysics);
-  insertCellRefList(mRendering, cell.probes, cell, *mPhysics);
-  insertCellRefList(mRendering, cell.repairs, cell, *mPhysics);
-  insertCellRefList(mRendering, cell.statics, cell, *mPhysics);
-  insertCellRefList(mRendering, cell.weapons, cell, *mPhysics);
-}
+    void Scene::insertCell(ESMS::CellStore<MWWorld::RefData> &cell)
+    {
+        // Loop through all references in the cell
+        insertCellRefList(mRendering, cell.activators, cell, *mPhysics);
+        insertCellRefList(mRendering, cell.potions, cell, *mPhysics);
+        insertCellRefList(mRendering, cell.appas, cell, *mPhysics);
+        insertCellRefList(mRendering, cell.armors, cell, *mPhysics);
+        insertCellRefList(mRendering, cell.books, cell, *mPhysics);
+        insertCellRefList(mRendering, cell.clothes, cell, *mPhysics);
+        insertCellRefList(mRendering, cell.containers, cell, *mPhysics);
+        insertCellRefList(mRendering, cell.creatures, cell, *mPhysics);
+        insertCellRefList(mRendering, cell.doors, cell, *mPhysics);
+        insertCellRefList(mRendering, cell.ingreds, cell, *mPhysics);
+        insertCellRefList(mRendering, cell.creatureLists, cell, *mPhysics);
+        insertCellRefList(mRendering, cell.itemLists, cell, *mPhysics);
+        insertCellRefList(mRendering, cell.lights, cell, *mPhysics);
+        insertCellRefList(mRendering, cell.lockpicks, cell, *mPhysics);
+        insertCellRefList(mRendering, cell.miscItems, cell, *mPhysics);
+        insertCellRefList(mRendering, cell.npcs, cell, *mPhysics);
+        insertCellRefList(mRendering, cell.probes, cell, *mPhysics);
+        insertCellRefList(mRendering, cell.repairs, cell, *mPhysics);
+        insertCellRefList(mRendering, cell.statics, cell, *mPhysics);
+        insertCellRefList(mRendering, cell.weapons, cell, *mPhysics);
+    }
 
+    void Scene::insertObject(MWWorld::Ptr ptr, Ptr::CellStore* cell)
+    {
+        ptr.mCell = cell;
+
+        mRendering.addObject(ptr);
+        MWWorld::Class::get(ptr).insertObject(ptr, *mPhysics);
+        MWWorld::Class::get(ptr).enable(ptr);
+
+        std::string type = ptr.getTypeName();
+
+        // insert into the correct CellRefList
+        if      (type == typeid(ESM::Potion).name())
+            cell->potions.list.push_back( *ptr.get<ESM::Potion>() );
+        else if (type == typeid(ESM::Apparatus).name())
+            cell->appas.list.push_back( *ptr.get<ESM::Apparatus>() );
+        else if (type == typeid(ESM::Armor).name())
+            cell->armors.list.push_back( *ptr.get<ESM::Armor>() );
+        else if (type == typeid(ESM::Book).name())
+            cell->books.list.push_back( *ptr.get<ESM::Book>() );
+        else if (type == typeid(ESM::Clothing).name())
+            cell->clothes.list.push_back( *ptr.get<ESM::Clothing>() );
+        else if (type == typeid(ESM::Ingredient).name())
+            cell->ingreds.list.push_back( *ptr.get<ESM::Ingredient>() );
+        else if (type == typeid(ESM::Light).name())
+            cell->lights.list.push_back( *ptr.get<ESM::Light>() );
+        else if (type == typeid(ESM::Tool).name())
+            cell->lockpicks.list.push_back( *ptr.get<ESM::Tool>() );
+        else if (type == typeid(ESM::Repair).name())
+            cell->repairs.list.push_back( *ptr.get<ESM::Repair>() );
+        else if (type == typeid(ESM::Probe).name())
+            cell->probes.list.push_back( *ptr.get<ESM::Probe>() );
+        else if (type == typeid(ESM::Weapon).name())
+            cell->weapons.list.push_back( *ptr.get<ESM::Weapon>() );
+        else if (type == typeid(ESM::Miscellaneous).name())
+            cell->miscItems.list.push_back( *ptr.get<ESM::Miscellaneous>() );
+        else
+            throw std::runtime_error("Trying to insert object of unhandled type");
+    }
 
 }
