@@ -17,6 +17,8 @@ ToolTips::ToolTips(WindowManager* windowManager) :
     , mWindowManager(windowManager)
     , mFullHelp(false)
     , mEnabled(true)
+    , mFocusToolTipX(0.0)
+    , mFocusToolTipY(0.0)
 {
     getWidget(mDynamicToolTipBox, "DynamicToolTipBox");
 
@@ -118,11 +120,8 @@ void ToolTips::onFrame(float frameDuration)
         {
             IntSize tooltipSize = getToolTipViaPtr();
 
-            // adjust tooltip size to fit its content, position it above the crosshair
-            /// \todo Slide the tooltip along the bounding box of the focused object (like in Morrowind)
-            /// relevant link: http://www.ogre3d.org/tikiwiki/ObjectTextDisplay
-            setCoord(std::max(0, viewSize.width/2 - (tooltipSize.width)/2),
-                    std::max(0, viewSize.height/2 - (tooltipSize.height) - 32),
+            setCoord(viewSize.width/2 - tooltipSize.width/2,
+                    std::max(0, int(mFocusToolTipY*viewSize.height - tooltipSize.height)),
                     tooltipSize.width,
                     tooltipSize.height);
         }
@@ -386,4 +385,10 @@ void ToolTips::toggleFullHelp()
 bool ToolTips::getFullHelp() const
 {
     return mFullHelp;
+}
+
+void ToolTips::setFocusObjectScreenCoords(float min_x, float min_y, float max_x, float max_y)
+{
+    mFocusToolTipX = (min_x + max_x) / 2;
+    mFocusToolTipY = min_y;
 }

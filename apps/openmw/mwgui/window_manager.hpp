@@ -165,6 +165,7 @@ namespace MWGui
     void setPlayerDir(const float x, const float y); ///< set player view direction in map space
 
     void setFocusObject(const MWWorld::Ptr& focus);
+    void setFocusObjectScreenCoords(float min_x, float min_y, float max_x, float max_y);
 
     void setMouseVisible(bool visible);
     void setDragDrop(bool dragDrop);

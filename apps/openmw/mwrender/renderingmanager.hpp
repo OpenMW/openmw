@@ -151,6 +151,10 @@ class RenderingManager: private RenderingInterface {
     ///< Skip the animation for the given MW-reference for one frame. Calls to this function for
     /// references that are currently not in the rendered scene should be ignored.
 
+    Ogre::Vector4 boundingBoxToScreen(Ogre::AxisAlignedBox bounds);
+    ///< transform the specified bounding box (in world coordinates) into screen coordinates.
+    /// @return packed vector4 (min_x, min_y, max_x, max_y)
+
   private:
 
     void setAmbientMode();

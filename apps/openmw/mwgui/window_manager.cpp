@@ -540,6 +540,11 @@ void WindowManager::setFocusObject(const MWWorld::Ptr& focus)
     mToolTips->setFocusObject(focus);
 }
 
+void WindowManager::setFocusObjectScreenCoords(float min_x, float min_y, float max_x, float max_y)
+{
+    mToolTips->setFocusObjectScreenCoords(min_x, min_y, max_x, max_y);
+}
+
 void WindowManager::toggleFullHelp()
 {
     mToolTips->toggleFullHelp();

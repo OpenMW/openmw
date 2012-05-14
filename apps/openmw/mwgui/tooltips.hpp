@@ -45,6 +45,8 @@ namespace MWGui
         bool getFullHelp() const;
 
         void setFocusObject(const MWWorld::Ptr& focus);
+        void setFocusObjectScreenCoords(float min_x, float min_y, float max_x, float max_y);
+        ///< set the screen-space position of the tooltip for focused object 
 
         static std::string getValueString(const int value, const std::string& prefix);
         ///< @return "prefix: value" or "" if value is 0
@@ -72,6 +74,9 @@ namespace MWGui
 
         MyGUI::IntSize createToolTip(const ToolTipInfo& info);
         ///< @return requested tooltip size
+
+        float mFocusToolTipX;
+        float mFocusToolTipY;
 
         bool mGameMode;
 

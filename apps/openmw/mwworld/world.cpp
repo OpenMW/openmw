@@ -768,7 +768,24 @@ namespace MWWorld
         // inform the GUI about focused object
         try
         {
-            MWBase::Environment::get().getWindowManager()->setFocusObject(getPtrViaHandle(mFacedHandle));
+            MWWorld::Ptr object = getPtrViaHandle(mFacedHandle);
+            MWBase::Environment::get().getWindowManager()->setFocusObject(object);
+
+            // retrieve object dimensions so we know where to place the floating label
+            Ogre::SceneNode* node = object.getRefData().getBaseNode();
+            Ogre::AxisAlignedBox bounds;
+            int i;
+            for (i=0; i<node->numAttachedObjects(); ++i)
+            {
+                Ogre::MovableObject* ob = node->getAttachedObject(i);
+                bounds.merge(ob->getWorldBoundingBox());
+            }
+            if (bounds.isFinite())
+            {
+                Vector4 screenCoords = mRendering->boundingBoxToScreen(bounds);
+                MWBase::Environment::get().getWindowManager()->setFocusObjectScreenCoords(
+                    screenCoords[0], screenCoords[1], screenCoords[2], screenCoords[3]);
+            }
         }
         catch (std::runtime_error&)
         {
