@@ -142,6 +142,11 @@ namespace MWWorld
         throw std::logic_error ("value not supported by this class");
     }
 
+    float Class::getCapactiy (const MWWorld::Ptr& ptr) const
+    {
+        throw std::runtime_error ("capacity not supported by class");
+    }
+
     const Class& Class::get (const std::string& key)
     {
         std::map<std::string, boost::shared_ptr<Class> >::const_iterator iter = sClasses.find (key);

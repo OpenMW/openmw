@@ -74,6 +74,10 @@ namespace MWClass
             ///< Return desired movement vector (determined based on movement settings,
             /// stance and stats).
 
+            virtual float getCapactiy (const MWWorld::Ptr& ptr) const;
+            ///< Return total weight that fits into the object (including modifications from magic
+            /// effects). Throws an exception, if the object can't hold other objects.
+
             static void registerSelf();
     };
 }
