@@ -30,6 +30,8 @@ namespace MWGui
 
             void openInventory();
 
+            virtual void notifyContentChanged();
+
         protected:
             MyGUI::Widget* mAvatar;
             MyGUI::TextBox* mArmorRating;
@@ -49,6 +51,8 @@ namespace MWGui
             void onFilterChanged(MyGUI::Widget* _sender);
             void onAvatarClicked(MyGUI::Widget* _sender);
             void onPinToggled();
+
+            void updateEncumbranceBar();
 
             virtual bool isInventory() { return true; }
             virtual std::vector<MWWorld::Ptr> getEquippedItems();

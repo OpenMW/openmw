@@ -80,6 +80,7 @@ namespace MWGui
         void Update();
         void drawItems();
 
+        virtual void notifyContentChanged() { }
 
     protected:
         MyGUI::ScrollView* mItemView;

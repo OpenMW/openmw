@@ -281,6 +281,7 @@ void HUD::onWorldClicked(MyGUI::Widget* _sender)
 
         // remove object from the container it was coming from
         object.getRefData().setCount(0);
+        mDragAndDrop->mDraggedFrom->notifyContentChanged();
 
         mDragAndDrop->mIsOnDragAndDrop = false;
         MyGUI::Gui::getInstance().destroyWidget(mDragAndDrop->mDraggedWidget);

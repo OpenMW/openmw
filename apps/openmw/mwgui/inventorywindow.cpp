@@ -95,9 +95,12 @@ namespace MWGui
 
     void InventoryWindow::openInventory()
     {
-        openContainer(MWBase::Environment::get().getWorld()->getPlayer().getPlayer());
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+        openContainer(player);
 
         onWindowResize(static_cast<MyGUI::Window*>(mMainWidget));
+
+        updateEncumbranceBar();
     }
 
     void InventoryWindow::onWindowResize(MyGUI::Window* _sender)
@@ -235,5 +238,21 @@ namespace MWGui
                 return;
             }
         }
+    }
+
+    void InventoryWindow::updateEncumbranceBar()
+    {
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+
+        float capacity = MWWorld::Class::get(player).getCapacity(player);
+        float encumbrance = MWWorld::Class::get(player).getEncumbrance(player);
+        mEncumbranceBar->setProgressRange(capacity);
+        mEncumbranceBar->setProgressPosition(encumbrance);
+        mEncumbranceText->setCaption( boost::lexical_cast<std::string>(int(encumbrance)) + "/" + boost::lexical_cast<std::string>(int(capacity)) );
+    }
+
+    void InventoryWindow::notifyContentChanged()
+    {
+        updateEncumbranceBar();
     }
 }
