@@ -142,7 +142,7 @@ namespace MWWorld
         throw std::logic_error ("value not supported by this class");
     }
 
-    float Class::getCapactiy (const MWWorld::Ptr& ptr) const
+    float Class::getCapacity (const MWWorld::Ptr& ptr) const
     {
         throw std::runtime_error ("capacity not supported by this class");
     }

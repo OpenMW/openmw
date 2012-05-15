@@ -164,7 +164,7 @@ namespace MWWorld
             ///< Return trade value of the object. Throws an exception, if the object can't be traded.
             /// (default implementation: throws an exception)
 
-            virtual float getCapactiy (const MWWorld::Ptr& ptr) const;
+            virtual float getCapacity (const MWWorld::Ptr& ptr) const;
             ///< Return total weight that fits into the object. Throws an exception, if the object can't
             /// hold other objects.
             /// (default implementation: throws an exception)

@@ -324,7 +324,7 @@ namespace MWClass
         return info;
     }
 
-    float Npc::getCapactiy (const MWWorld::Ptr& ptr) const
+    float Npc::getCapacity (const MWWorld::Ptr& ptr) const
     {
         const MWMechanics::CreatureStats& stats = getCreatureStats (ptr);
         return stats.mAttributes[0].getModified()*5;

@@ -180,7 +180,7 @@ namespace MWClass
         return info;
     }
 
-    float Container::getCapactiy (const MWWorld::Ptr& ptr) const
+    float Container::getCapacity (const MWWorld::Ptr& ptr) const
     {
         ESMS::LiveCellRef<ESM::Container, MWWorld::RefData> *ref =
             ptr.get<ESM::Container>();
