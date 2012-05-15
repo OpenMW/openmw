@@ -172,20 +172,47 @@ namespace MWGui
             {
                 MWWorld::InventoryStore& invStore = static_cast<MWWorld::InventoryStore&>(MWWorld::Class::get(mContainer).getContainerStore(mContainer));
 
-                // retrieve iterator to the item
                 MWWorld::ContainerStoreIterator it = invStore.begin();
-                for (; it != invStore.end(); ++it)
+
+                if (mDragAndDrop->mDraggedFrom != this)
                 {
-                    if (*it == ptr)
+                    // add item to the player's inventory
+                    int origCount = ptr.getRefData().getCount();
+                    ptr.getRefData().setCount(origCount - mDragAndDrop->mDraggedCount);
+                    it = invStore.add(ptr);
+                    (*it).getRefData().setCount(mDragAndDrop->mDraggedCount);
+                }
+                else
+                {
+                    // retrieve iterator to the item
+                    for (; it != invStore.end(); ++it)
                     {
-                        break;
+                        if (*it == ptr)
+                        {
+                            break;
+                        }
                     }
                 }
 
                 assert(it != invStore.end());
 
-                // equip the item in the first available slot
-                invStore.equip(slots.first.front(), it);
+                // equip the item in the first free slot
+                for (std::vector<int>::const_iterator slot=slots.first.begin();
+                    slot!=slots.first.end(); ++slot)
+                {
+                    // if all slots are occupied, replace the last slot
+                    if (slot == --slots.first.end())
+                    {
+                        invStore.equip(*slot, it);
+                        break;
+                    }
+
+                    if (invStore.getSlot(*slot) == invStore.end())
+                    {
+                        invStore.equip(*slot, it);
+                        break;
+                    }
+                }
             }
 
             mDragAndDrop->mIsOnDragAndDrop = false;
