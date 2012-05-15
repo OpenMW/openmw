@@ -107,26 +107,45 @@ void ContainerBase::onContainerClicked(MyGUI::Widget* _sender)
     if(mDragAndDrop->mIsOnDragAndDrop) //drop widget here
     {
         MWWorld::Ptr object = *mDragAndDrop->mDraggedWidget->getUserData<MWWorld::Ptr>();
+        MWWorld::ContainerStore& containerStore = MWWorld::Class::get(mContainer).getContainerStore(mContainer);
 
         if (mDragAndDrop->mDraggedFrom != this)
         {
             assert(object.getContainerStore() && "Item is not in a container!");
 
-            MWWorld::ContainerStore& containerStore = MWWorld::Class::get(mContainer).getContainerStore(mContainer);
-            int origCount = object.getRefData().getCount();
-            object.getRefData().setCount (mDragAndDrop->mDraggedCount);
-            containerStore.add(object);
-            object.getRefData().setCount (origCount - mDragAndDrop->mDraggedCount);
-        }
-        else
-        {
+
             // check that we don't exceed the allowed weight (only for containers, not for inventory)
-            if (isInventory())
+            if (!isInventory())
             {
-                float curWeight = MWWorld::Class::get(mContainer).getEncumbrance(mContainer);
                 float capacity = MWWorld::Class::get(mContainer).getCapacity(mContainer);
 
-                
+                // try adding the item, and if weight is exceeded, just remove it again.
+                int origCount = object.getRefData().getCount();
+                object.getRefData().setCount(mDragAndDrop->mDraggedCount);
+                MWWorld::ContainerStoreIterator it = containerStore.add(object);
+
+                float curWeight = MWWorld::Class::get(mContainer).getEncumbrance(mContainer);
+                if (curWeight > capacity)
+                {
+                    it->getRefData().setCount(0);
+                    object.getRefData().setCount(origCount);
+                    // user notification
+                    MWBase::Environment::get().getWindowManager()->
+                        messageBox(MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sContentsMessage3")->str, std::vector<std::string>());
+                    return;
+                }
+                else
+                {
+                    object.getRefData().setCount(origCount - mDragAndDrop->mDraggedCount);
+                }
+                std::cout << "container weight " << curWeight << "/" << capacity << std::endl;
+            }
+            else
+            {
+                int origCount = object.getRefData().getCount();
+                object.getRefData().setCount (mDragAndDrop->mDraggedCount);
+                containerStore.add(object);
+                object.getRefData().setCount (origCount - mDragAndDrop->mDraggedCount);
             }
         }
 
