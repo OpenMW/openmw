@@ -57,8 +57,6 @@ namespace MWClass
 
             data->mCreatureStats.mLevel = ref->base->data.level;
 
-            // \todo add initial container content
-
             // store
             ptr.getRefData().setCustomData (data.release());
         }

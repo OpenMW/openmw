@@ -88,10 +88,8 @@ namespace MWClass
             }
             else
             {
-                //TODO: do something with npdt12 maybe:p
+                /// \todo do something with npdt12 maybe:p
             }
-
-            // \todo add initial container content
 
             // store
             ptr.getRefData().setCustomData (data.release());
