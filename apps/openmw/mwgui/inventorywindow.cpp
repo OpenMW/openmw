@@ -144,24 +144,49 @@ namespace MWGui
         {
             MWWorld::Ptr ptr = *mDragAndDrop->mStore.begin();
 
-            boost::shared_ptr<MWWorld::Action> action = MWWorld::Class::get(ptr).use(ptr);
-
-            // execute action and script
-            MWBase::Environment::get().getWorld()->executeActionScript(ptr, action);
-
-            // this is necessary for books/scrolls: if they are already in the player's inventory,
-            // the "Take" button should not be visible.
-            // NOTE: the take button is "reset" when the window opens, so we can safely do the following
-            // without screwing up future book windows
-            if (mDragAndDrop->mWasInInventory)
+            // can the object be equipped?
+            std::pair<std::vector<int>, bool> slots = MWWorld::Class::get(ptr).getEquipmentSlots(ptr);
+            if (slots.first.empty())
             {
-                mWindowManager.getBookWindow()->setTakeButtonShow(false);
-                mWindowManager.getScrollWindow()->setTakeButtonShow(false);
+                // can't be equipped, try to use instead
+                boost::shared_ptr<MWWorld::Action> action = MWWorld::Class::get(ptr).use(ptr);
+
+                // execute action and script
+                MWBase::Environment::get().getWorld()->executeActionScript(ptr, action);
+
+                // this is necessary for books/scrolls: if they are already in the player's inventory,
+                // the "Take" button should not be visible.
+                // NOTE: the take button is "reset" when the window opens, so we can safely do the following
+                // without screwing up future book windows
+                if (mDragAndDrop->mWasInInventory)
+                {
+                    mWindowManager.getBookWindow()->setTakeButtonShow(false);
+                    mWindowManager.getScrollWindow()->setTakeButtonShow(false);
+                }
+
+                // put back in inventory
+                MWWorld::ContainerStore& containerStore = MWWorld::Class::get(mContainer).getContainerStore(mContainer);
+                containerStore.add(ptr);
+            }
+            else
+            {
+                // put back in inventory
+                MWWorld::InventoryStore& invStore = static_cast<MWWorld::InventoryStore&>(MWWorld::Class::get(mContainer).getContainerStore(mContainer));
+                invStore.add(ptr);
+
+                // get a ContainerStoreIterator to the item we just re-added into the inventory
+                MWWorld::ContainerStoreIterator it = invStore.begin();
+                MWWorld::ContainerStoreIterator nextIt = ++it;
+                while (nextIt != invStore.end())
+                {
+                    ++it;
+                    ++nextIt;
+                }
+
+                // equip the item in the first available slot
+                invStore.equip(slots.first.front(), it);
             }
 
-            // put back in inventory
-            MWWorld::ContainerStore& containerStore = MWWorld::Class::get(mContainer).getContainerStore(mContainer);
-            containerStore.add(ptr);
             drawItems();
 
             mDragAndDrop->mStore.clear();
