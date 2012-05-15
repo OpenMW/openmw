@@ -965,9 +965,57 @@ namespace MWWorld
         mRendering->toggleWater();
     }
 
-    void World::insertObject(MWWorld::Ptr ptr, Ptr::CellStore* cell)
+    bool World::placeObject(MWWorld::Ptr object, float cursorX, float cursorY)
     {
-        mWorldScene->insertObject(ptr, cell);
+        std::pair<bool, Ogre::Vector3> result = mPhysics->castRay(cursorX, cursorY);
+
+        if (!result.first)
+            return false;
+
+        MWWorld::Ptr::CellStore* cell;
+        if (isCellExterior())
+        {
+            int cellX, cellY;
+            positionToIndex(result.second[0], -result.second[2], cellX, cellY);
+            cell = mCells.getExterior(cellX, cellY);
+        }
+        else
+            cell = getPlayer().getPlayer().getCell();
+
+        ESM::Position& pos = object.getRefData().getPosition();
+        pos.pos[0] = result.second[0];
+        pos.pos[1] = -result.second[2];
+        pos.pos[2] = result.second[1];
+
+        mWorldScene->insertObject(object, cell);
+
+        /// \todo retrieve the bounds of the object and translate it accordingly
+
+        return true;
     }
 
+    bool World::canPlaceObject(float cursorX, float cursorY)
+    {
+        std::pair<bool, Ogre::Vector3> result = mPhysics->castRay(cursorX, cursorY);
+
+        /// \todo also check if the wanted position is on a flat surface, and not e.g. against a vertical wall!
+
+        if (!result.first)
+            return false;
+        return true;
+    }
+
+    void World::dropObjectOnGround(MWWorld::Ptr object)
+    {
+        MWWorld::Ptr::CellStore* cell = getPlayer().getPlayer().getCell();
+
+        float* playerPos = getPlayer().getPlayer().getRefData().getPosition().pos;
+
+        ESM::Position& pos = object.getRefData().getPosition();
+        pos.pos[0] = playerPos[0];
+        pos.pos[1] = playerPos[1];
+        pos.pos[2] = playerPos[2];
+
+        mWorldScene->insertObject(object, cell);
+    }
 }

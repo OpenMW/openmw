@@ -91,6 +91,7 @@ HUD::HUD(int width, int height, int fpsLevel, DragAndDrop* dragAndDrop)
     LocalMapBase::init(minimap, this);
 
     mMainWidget->eventMouseButtonClick += MyGUI::newDelegate(this, &HUD::onWorldClicked);
+    mMainWidget->eventMouseMove += MyGUI::newDelegate(this, &HUD::onWorldMouseOver);
 }
 
 void HUD::setFpsLevel(int level)
@@ -261,16 +262,19 @@ void HUD::onWorldClicked(MyGUI::Widget* _sender)
         // drop item into the gameworld
         MWWorld::Ptr object = *mDragAndDrop->mStore.begin();
 
-        float* playerPos;
-        playerPos = MWBase::Environment::get().getWorld()->getPlayer().getPlayer().getRefData().getPosition().pos;
-        MWWorld::Ptr::CellStore* cell = MWBase::Environment::get().getWorld()->getPlayer().getPlayer().getCell(); /// \todo this might be a different cell
+        MWWorld::World* world = MWBase::Environment::get().getWorld();
 
-        ESM::Position& pos = object.getRefData().getPosition();
-        pos.pos[0] = playerPos[0];
-        pos.pos[1] = playerPos[1];
-        pos.pos[2] = playerPos[2];
+        MyGUI::IntSize viewSize = MyGUI::RenderManager::getInstance().getViewSize();
+        MyGUI::IntPoint cursorPosition = MyGUI::InputManager::getInstance().getMousePosition();
+        float mouseX = cursorPosition.left / float(viewSize.width);
+        float mouseY = cursorPosition.top / float(viewSize.height);
 
-        MWBase::Environment::get().getWorld()->insertObject(object, cell);
+        if (world->canPlaceObject(mouseX, mouseY))
+            world->placeObject(object, mouseX, mouseY);
+        else
+            world->dropObjectOnGround(object);
+
+        MyGUI::PointerManager::getInstance().setPointer("arrow");
 
         std::string sound = MWWorld::Class::get(object).getDownSoundId(object);
         MWBase::Environment::get().getSoundManager()->playSound (sound, 1.0, 1.0);
@@ -281,6 +285,33 @@ void HUD::onWorldClicked(MyGUI::Widget* _sender)
         mDragAndDrop->mDraggedWidget = 0;
 
         MWBase::Environment::get().getWindowManager()->setDragDrop(false);
+    }
+}
+
+void HUD::onWorldMouseOver(MyGUI::Widget* _sender, int x, int y)
+{
+    if (mDragAndDrop->mIsOnDragAndDrop)
+    {
+        MyGUI::IntSize viewSize = MyGUI::RenderManager::getInstance().getViewSize();
+        MyGUI::IntPoint cursorPosition = MyGUI::InputManager::getInstance().getMousePosition();
+        float mouseX = cursorPosition.left / float(viewSize.width);
+        float mouseY = cursorPosition.top / float(viewSize.height);
+
+        MWWorld::World* world = MWBase::Environment::get().getWorld();
+
+        // if we can't drop the object at the wanted position, show the "drop on ground" cursor.
+        bool canDrop = world->canPlaceObject(mouseX, mouseY);
+
+        if (!canDrop)
+            MyGUI::PointerManager::getInstance().setPointer("drop_ground");
+        else
+            MyGUI::PointerManager::getInstance().setPointer("arrow");
+
+    }
+    else
+    {
+        MyGUI::PointerManager::getInstance().setPointer("arrow");
+        /// \todo make it possible to pick up objects with the mouse, if inventory or container window is open
     }
 }
 

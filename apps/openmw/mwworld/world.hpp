@@ -263,9 +263,17 @@ namespace MWWorld
 
             void update (float duration);
 
-            void insertObject (MWWorld::Ptr ptr, Ptr::CellStore* cell);
-            ///< insert object in a given cell
-            /// \note this method is only meant for dropping items into the gameworld from a container
+            bool placeObject(MWWorld::Ptr object, float cursorX, float cursorY);
+            ///< place an object into the gameworld at the specified cursor position
+            /// @param object
+            /// @param cursor X (relative 0-1)
+            /// @param cursor Y (relative 0-1)
+            /// @return true if the object was placed, or false if it was rejected because the position is too far away
+
+            void dropObjectOnGround(MWWorld::Ptr object);
+
+            bool canPlaceObject(float cursorX, float cursorY);
+            ///< @return true if it is possible to place on object at specified cursor location
     };
 }
 

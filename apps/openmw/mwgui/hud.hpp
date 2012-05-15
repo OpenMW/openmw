@@ -52,5 +52,6 @@ namespace MWGui
         DragAndDrop* mDragAndDrop;
 
         void onWorldClicked(MyGUI::Widget* _sender);
+        void onWorldMouseOver(MyGUI::Widget* _sender, int x, int y);
     };
 }

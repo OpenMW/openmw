@@ -244,7 +244,7 @@ void ContainerBase::Update()
     if(mDragAndDrop->mIsOnDragAndDrop)
     {
         if(mDragAndDrop->mDraggedWidget)
-            mDragAndDrop->mDraggedWidget->setPosition(MyGUI::InputManager::getInstance().getMousePosition() - MyGUI::IntPoint(21, 21));
+            mDragAndDrop->mDraggedWidget->setPosition(MyGUI::InputManager::getInstance().getMousePosition());
         else mDragAndDrop->mIsOnDragAndDrop = false; //If this happens, there is a bug.
     }
 }

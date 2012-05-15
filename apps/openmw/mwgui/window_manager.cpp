@@ -576,5 +576,4 @@ void WindowManager::setDragDrop(bool dragDrop)
 {
     mToolTips->setEnabled(!dragDrop);
     MWBase::Environment::get().getInputManager()->setDragDrop(dragDrop);
-    setMouseVisible(!dragDrop);
 }
