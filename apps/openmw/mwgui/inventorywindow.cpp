@@ -153,8 +153,9 @@ namespace MWGui
 
                 std::cout << "Item can't be equipped" << std::endl;
 
-                // execute action and script
-                MWBase::Environment::get().getWorld()->executeActionScript(ptr, action);
+                action->execute();
+
+                /// \todo scripts
 
                 // this is necessary for books/scrolls: if they are already in the player's inventory,
                 // the "Take" button should not be visible.

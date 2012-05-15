@@ -274,9 +274,6 @@ namespace MWWorld
 
             bool canPlaceObject(float cursorX, float cursorY);
             ///< @return true if it is possible to place on object at specified cursor location
-
-            void executeActionScript(MWWorld::Ptr ptr, boost::shared_ptr<Action> action);
-            ///< execute the activation script of an object (when activating the object with space, or when activating it via the inventory)
     };
 }
 
