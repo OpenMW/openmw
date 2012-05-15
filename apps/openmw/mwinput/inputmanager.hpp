@@ -50,6 +50,9 @@ namespace MWInput
 
     void update();
 
+    bool getShiftDown();
+    bool getCtrlDown();
+
     void setDragDrop(bool dragDrop);
 
     void setGuiMode(MWGui::GuiMode mode);

@@ -74,8 +74,11 @@ namespace MWGui
         Filter mFilter;
 
         void onSelectedItem(MyGUI::Widget* _sender);
+        void onSelectedItemImpl(MyGUI::Widget* _sender, int count);
         void onContainerClicked(MyGUI::Widget* _sender);
         void onMouseWheel(MyGUI::Widget* _sender, int _rel);
+
+        std::string getCountString(const int count);
 
         void drawItems();
     };
@@ -90,12 +93,8 @@ namespace MWGui
         void open(MWWorld::Ptr container);
 
     protected:
-        std::vector<MyGUI::WidgetPtr> mContainerWidgets;
-
         MyGUI::Button* mTakeButton;
         MyGUI::Button* mCloseButton;
-
-        bool mIsValid;//is in the right GUI Mode
 
         void onWindowResize(MyGUI::Window* window);
         void onCloseButtonClicked(MyGUI::Widget* _sender);

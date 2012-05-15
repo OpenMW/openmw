@@ -49,27 +49,47 @@ void ContainerBase::onSelectedItem(MyGUI::Widget* _sender)
 {
     if(!mDragAndDrop->mIsOnDragAndDrop)
     {
-        mDragAndDrop->mIsOnDragAndDrop = true;
-        _sender->detachFromWidget();
-        _sender->attachToWidget(mDragAndDrop->mDragAndDropWidget);
+        int count = (*_sender->getUserData<MWWorld::Ptr>()).getRefData().getCount();
 
-        MWWorld::Ptr object = *_sender->getUserData<MWWorld::Ptr>();
-        mDragAndDrop->mStore.add(object);
-        object.getRefData().setCount(0);
-
-        std::string sound = MWWorld::Class::get(object).getUpSoundId(object);
-        MWBase::Environment::get().getSoundManager()->playSound (sound, 1.0, 1.0);
-
-        mDragAndDrop->mDraggedWidget = _sender;
-        mDragAndDrop->mContainerWindow = const_cast<MWGui::ContainerBase*>(this);
-        // hide the count text
-        _sender->getChildAt(0)->getChildAt(0)->setVisible(false);
-        drawItems();
-
-        MWBase::Environment::get().getWindowManager()->setDragDrop(true);
+        if (MWBase::Environment::get().getInputManager()->getShiftDown() || count == 1)
+        {
+            onSelectedItemImpl(_sender, count);
+        }
+        else if (MWBase::Environment::get().getInputManager()->getCtrlDown())
+        {
+            onSelectedItemImpl(_sender, 1);
+        }
+        else
+        {
+            /// \todo count selection window
+            onSelectedItemImpl(_sender, count);
+        }
     }
     else
         onContainerClicked(mContainerWidget);
+}
+
+void ContainerBase::onSelectedItemImpl(MyGUI::Widget* _sender, int count)
+{
+    mDragAndDrop->mIsOnDragAndDrop = true;
+    _sender->detachFromWidget();
+    _sender->attachToWidget(mDragAndDrop->mDragAndDropWidget);
+
+    MWWorld::Ptr object = *_sender->getUserData<MWWorld::Ptr>();
+    int originalCount = object.getRefData().getCount();
+    object.getRefData().setCount(count);
+    mDragAndDrop->mStore.add(object);
+    object.getRefData().setCount(originalCount - count);
+
+    std::string sound = MWWorld::Class::get(object).getUpSoundId(object);
+    MWBase::Environment::get().getSoundManager()->playSound (sound, 1.0, 1.0);
+
+    mDragAndDrop->mDraggedWidget = _sender;
+    mDragAndDrop->mContainerWindow = const_cast<MWGui::ContainerBase*>(this);
+    static_cast<MyGUI::TextBox*>(_sender->getChildAt(0)->getChildAt(0))->setCaption(getCountString((*mDragAndDrop->mStore.begin()).getRefData().getCount()));
+    drawItems();
+
+    MWBase::Environment::get().getWindowManager()->setDragDrop(true);
 }
 
 void ContainerBase::onContainerClicked(MyGUI::Widget* _sender)
@@ -154,6 +174,8 @@ void ContainerBase::drawItems()
                     + MWWorld::ContainerStore::Type_Apparatus;
     }
 
+    /// \todo performance improvement: don't create/destroy all the widgets everytime the container window changes size, only reposition them
+
     for (MWWorld::ContainerStoreIterator iter (containerStore.begin(categories)); iter!=containerStore.end(); ++iter)
     {
         index++;
@@ -194,19 +216,23 @@ void ContainerBase::drawItems()
                 y = 0;
             }
 
-            if(iter->getRefData().getCount() > 1)
-            {
-                if (iter->getRefData().getCount() > 9999)
-                    text->setCaption(boost::lexical_cast<std::string>(iter->getRefData().getCount()/1000.f) + "k");
-                else
-                    text->setCaption(boost::lexical_cast<std::string>(iter->getRefData().getCount()));
-            }
+            text->setCaption(getCountString(iter->getRefData().getCount()));
         }
     }
 
     MyGUI::IntSize size = MyGUI::IntSize(std::max(mItemView->getSize().width, x+42), mItemView->getSize().height);
     mItemView->setCanvasSize(size);
     mContainerWidget->setSize(size);
+}
+
+std::string ContainerBase::getCountString(const int count)
+{
+    if (count == 1)
+        return "";
+    if (count > 9999)
+        return boost::lexical_cast<std::string>(count/1000.f) + "k";
+    else
+        return boost::lexical_cast<std::string>(count);
 }
 
 void ContainerBase::Update()
