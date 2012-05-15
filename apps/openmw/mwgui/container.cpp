@@ -92,6 +92,9 @@ void ContainerBase::onSelectedItemImpl(MyGUI::Widget* _sender, int count)
     mDragAndDrop->mDraggedWidget = mSelectedItem;
     static_cast<MyGUI::TextBox*>(mSelectedItem->getChildAt(0)->getChildAt(0))->setCaption(
         getCountString((*mDragAndDrop->mStore.begin()).getRefData().getCount()));
+
+    mDragAndDrop->mWasInInventory = isInventory();
+
     drawItems();
 
     MWBase::Environment::get().getWindowManager()->setDragDrop(true);
@@ -111,9 +114,7 @@ void ContainerBase::onContainerClicked(MyGUI::Widget* _sender)
         containerStore.add(*mDragAndDrop->mStore.begin());
         mDragAndDrop->mStore.clear();
         mDragAndDrop->mIsOnDragAndDrop = false;
-        mDragAndDrop->mDraggedWidget->detachFromWidget();
-        mDragAndDrop->mDraggedWidget->attachToWidget(mContainerWidget);
-        mDragAndDrop->mDraggedWidget = 0;
+        MyGUI::Gui::getInstance().destroyWidget(mDragAndDrop->mDraggedWidget);
         drawItems();
 
         MWBase::Environment::get().getWindowManager()->setDragDrop(false);

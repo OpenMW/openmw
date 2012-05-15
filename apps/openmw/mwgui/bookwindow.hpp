@@ -11,7 +11,9 @@ namespace MWGui
     {
         public:
             BookWindow(WindowManager& parWindowManager);
+
             void open(MWWorld::Ptr book);
+            void setTakeButtonShow(bool show);
 
         protected:
             void onNextPageButtonClicked (MyGUI::Widget* _sender);

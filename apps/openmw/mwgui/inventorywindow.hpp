@@ -47,7 +47,10 @@ namespace MWGui
 
             void onWindowResize(MyGUI::Window* _sender);
             void onFilterChanged(MyGUI::Widget* _sender);
+            void onAvatarClicked(MyGUI::Widget* _sender);
             void onPinToggled();
+
+            virtual bool isInventory() { return true; }
     };
 }
 #endif // Inventory_H

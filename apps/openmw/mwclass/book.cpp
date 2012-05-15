@@ -148,4 +148,10 @@ namespace MWClass
 
         return ref->base->enchant;
     }
+
+    boost::shared_ptr<MWWorld::Action> Book::use (const MWWorld::Ptr& ptr) const
+    {
+        return boost::shared_ptr<MWWorld::Action>(new MWWorld::ActionRead(ptr));
+    }
+
 }

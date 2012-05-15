@@ -1,23 +1,33 @@
 #include "inventorywindow.hpp"
-#include <iterator>
-#include <algorithm>
-#include "window_manager.hpp"
-#include "widgets.hpp"
 
-#include "../mwbase/environment.hpp"
-#include "../mwworld/manualref.hpp"
 #include <cmath>
 #include <algorithm>
 #include <iterator>
-
 #include <assert.h>
 #include <iostream>
+
+#include <boost/lexical_cast.hpp>
+
 #include "../mwclass/container.hpp"
 #include "../mwworld/containerstore.hpp"
-#include <boost/lexical_cast.hpp>
 #include "../mwworld/class.hpp"
 #include "../mwworld/world.hpp"
 #include "../mwworld/player.hpp"
+#include "../mwbase/environment.hpp"
+#include "../mwworld/manualref.hpp"
+
+#include "../mwscript/scriptmanager.hpp"
+#include "../mwscript/compilercontext.hpp"
+#include "../mwscript/interpretercontext.hpp"
+#include "../mwscript/extensions.hpp"
+#include "../mwscript/globalscripts.hpp"
+
+
+#include "window_manager.hpp"
+#include "widgets.hpp"
+#include "bookwindow.hpp"
+#include "scrollwindow.hpp"
+
 namespace MWGui
 {
 
@@ -37,6 +47,8 @@ namespace MWGui
         getWidget(mFilterMisc, "MiscButton");
         getWidget(mLeftPane, "LeftPane");
         getWidget(mRightPane, "RightPane");
+
+        mAvatar->eventMouseButtonClick += MyGUI::newDelegate(this, &InventoryWindow::onAvatarClicked);
 
         MyGUI::ScrollView* itemView;
         MyGUI::Widget* containerWidget;
@@ -124,6 +136,40 @@ namespace MWGui
     void InventoryWindow::onPinToggled()
     {
         mWindowManager.setWeaponVisibility(!mPinned);
+    }
+
+    void InventoryWindow::onAvatarClicked(MyGUI::Widget* _sender)
+    {
+        if (mDragAndDrop->mIsOnDragAndDrop)
+        {
+            MWWorld::Ptr ptr = *mDragAndDrop->mStore.begin();
+
+            boost::shared_ptr<MWWorld::Action> action = MWWorld::Class::get(ptr).use(ptr);
+
+            // execute action and script
+            MWBase::Environment::get().getWorld()->executeActionScript(ptr, action);
+
+            // this is necessary for books/scrolls: if they are already in the player's inventory,
+            // the "Take" button should not be visible.
+            // NOTE: the take button is "reset" when the window opens, so we can safely do the following
+            // without screwing up future book windows
+            if (mDragAndDrop->mWasInInventory)
+            {
+                mWindowManager.getBookWindow()->setTakeButtonShow(false);
+                mWindowManager.getScrollWindow()->setTakeButtonShow(false);
+            }
+
+            // put back in inventory
+            MWWorld::ContainerStore& containerStore = MWWorld::Class::get(mContainer).getContainerStore(mContainer);
+            containerStore.add(ptr);
+            drawItems();
+
+            mDragAndDrop->mStore.clear();
+            mDragAndDrop->mIsOnDragAndDrop = false;
+            MyGUI::Gui::getInstance().destroyWidget(mDragAndDrop->mDraggedWidget);
+
+            mWindowManager.setDragDrop(false);
+        }
     }
 
 }

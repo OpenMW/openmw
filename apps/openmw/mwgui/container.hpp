@@ -36,10 +36,16 @@ namespace MWGui
     class DragAndDrop
     {
     public:
+        DragAndDrop() :
+            mWasInInventory(false)
+        {
+        }
+
         bool mIsOnDragAndDrop;
         MyGUI::Widget* mDraggedWidget;
         MyGUI::Widget* mDragAndDropWidget;
         MWWorld::ContainerStore mStore;
+        bool mWasInInventory; // was the item in inventory before it was dragged
     };
 
     class ContainerBase
@@ -80,6 +86,8 @@ namespace MWGui
         void onMouseWheel(MyGUI::Widget* _sender, int _rel);
 
         std::string getCountString(const int count);
+
+        virtual bool isInventory() { return false; }
 
         void drawItems();
     };

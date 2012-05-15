@@ -437,25 +437,11 @@ void OMW::Engine::activate()
         return;
     }
 
-    MWScript::InterpreterContext interpreterContext (&ptr.getRefData().getLocals(), ptr);
-
     boost::shared_ptr<MWWorld::Action> action =
         MWWorld::Class::get (ptr).activate (ptr, MWBase::Environment::get().getWorld()->getPlayer().getPlayer());
 
-    interpreterContext.activate (ptr, action);
-
-    std::string script = MWWorld::Class::get (ptr).getScript (ptr);
-
-    if (!script.empty())
-    {
-        MWBase::Environment::get().getWorld()->getLocalScripts().setIgnore (ptr);
-        MWBase::Environment::get().getScriptManager()->run (script, interpreterContext);
-    }
-
-    if (!interpreterContext.hasActivationBeenHandled())
-    {
-        interpreterContext.executeActivation();
-    }
+    // execute action and script
+    MWBase::Environment::get().getWorld()->executeActionScript(ptr, action);
 }
 
 void OMW::Engine::screenshot()

@@ -11,7 +11,9 @@ namespace MWGui
     {
         public:
             ScrollWindow (WindowManager& parWindowManager);
+
             void open (MWWorld::Ptr scroll);
+            void setTakeButtonShow(bool show);
 
         protected:
             void onCloseButtonClicked (MyGUI::Widget* _sender);

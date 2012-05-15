@@ -17,6 +17,13 @@
 
 #include "../mwgui/window_manager.hpp"
 
+#include "../mwscript/scriptmanager.hpp"
+#include "../mwscript/compilercontext.hpp"
+#include "../mwscript/interpretercontext.hpp"
+#include "../mwscript/extensions.hpp"
+#include "../mwscript/globalscripts.hpp"
+
+
 #include "ptr.hpp"
 #include "class.hpp"
 #include "player.hpp"
@@ -1017,5 +1024,25 @@ namespace MWWorld
         pos.pos[2] = playerPos[2];
 
         mWorldScene->insertObject(object, cell);
+    }
+
+    void World::executeActionScript(MWWorld::Ptr ptr, boost::shared_ptr<Action> action)
+    {
+        MWScript::InterpreterContext interpreterContext (&ptr.getRefData().getLocals(), ptr);
+
+        action->execute();
+
+        // execute script
+        interpreterContext.activate (ptr, action);
+        std::string script = MWWorld::Class::get (ptr).getScript (ptr);
+        if (!script.empty())
+        {
+            getLocalScripts().setIgnore (ptr);
+            MWBase::Environment::get().getScriptManager()->run (script, interpreterContext);
+        }
+        if (!interpreterContext.hasActivationBeenHandled())
+        {
+            interpreterContext.executeActivation();
+        }
     }
 }

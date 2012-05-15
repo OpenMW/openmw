@@ -18,7 +18,8 @@ namespace MWWorld
 
         MWWorld::Class::get (player).getContainerStore (player).add (mObject);
 
-        // remove from world
-        MWBase::Environment::get().getWorld()->deleteObject (mObject);
+        // remove from world, if the item is currently in the world (it could also be in a container)
+        if (mObject.isInCell())
+            MWBase::Environment::get().getWorld()->deleteObject (mObject);
     }
 }

@@ -25,7 +25,8 @@ ScrollWindow::ScrollWindow (WindowManager& parWindowManager) :
 
 void ScrollWindow::open (MWWorld::Ptr scroll)
 {
-    MWBase::Environment::get().getSoundManager()->playSound3D (scroll, "scroll", 1.0, 1.0);
+    // no 3d sounds because the object could be in a container.
+    MWBase::Environment::get().getSoundManager()->playSound ("scroll", 1.0, 1.0);
 
     mScroll = scroll;
 
@@ -41,18 +42,25 @@ void ScrollWindow::open (MWWorld::Ptr scroll)
         mTextView->setCanvasSize(410, mTextView->getSize().height);
 
     mTextView->setViewOffset(MyGUI::IntPoint(0,0));
+
+    setTakeButtonShow(true);
+}
+
+void ScrollWindow::setTakeButtonShow(bool show)
+{
+    mTakeButton->setVisible(show);
 }
 
 void ScrollWindow::onCloseButtonClicked (MyGUI::Widget* _sender)
 {
-    MWBase::Environment::get().getSoundManager()->playSound3D (mScroll, "scroll", 1.0, 1.0);
+    MWBase::Environment::get().getSoundManager()->playSound ("scroll", 1.0, 1.0);
 
     MWBase::Environment::get().getInputManager()->setGuiMode (GM_Game);
 }
 
 void ScrollWindow::onTakeButtonClicked (MyGUI::Widget* _sender)
 {
-    MWBase::Environment::get().getSoundManager()->playSound3D (mScroll, "Item Book Up", 1.0, 1.0, MWSound::Play_NoTrack);
+    MWBase::Environment::get().getSoundManager()->playSound ("Item Book Up", 1.0, 1.0, MWSound::Play_NoTrack);
 
     MWWorld::ActionTake take(mScroll);
     take.execute();
