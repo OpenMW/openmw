@@ -44,7 +44,8 @@ namespace MWGui
         bool mIsOnDragAndDrop;
         MyGUI::Widget* mDraggedWidget;
         MyGUI::Widget* mDragAndDropWidget;
-        MWWorld::ContainerStore mStore;
+        ContainerBase* mDraggedFrom;
+        int mDraggedCount;
         bool mWasInInventory; // was the item in inventory before it was dragged
     };
 
@@ -77,6 +78,8 @@ namespace MWGui
         void openContainer(MWWorld::Ptr container);
         void setFilter(Filter filter); ///< set category filter
         void Update();
+        void drawItems();
+
 
     protected:
         MyGUI::ScrollView* mItemView;
@@ -100,8 +103,6 @@ namespace MWGui
         virtual bool isInventory() { return false; }
         virtual std::vector<MWWorld::Ptr> getEquippedItems() { return std::vector<MWWorld::Ptr>(); }
         virtual void _unequipItem(MWWorld::Ptr item) { ; }
-
-        void drawItems();
     };
 
     class ContainerWindow : public ContainerBase, public WindowBase

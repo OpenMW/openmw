@@ -142,7 +142,7 @@ namespace MWGui
     {
         if (mDragAndDrop->mIsOnDragAndDrop)
         {
-            MWWorld::Ptr ptr = *mDragAndDrop->mStore.begin();
+            MWWorld::Ptr ptr = *mDragAndDrop->mDraggedWidget->getUserData<MWWorld::Ptr>();
 
             // can the object be equipped?
             std::pair<std::vector<int>, bool> slots = MWWorld::Class::get(ptr).getEquipmentSlots(ptr);
@@ -166,35 +166,22 @@ namespace MWGui
                     mWindowManager.getBookWindow()->setTakeButtonShow(false);
                     mWindowManager.getScrollWindow()->setTakeButtonShow(false);
                 }
-
-                // put back in inventory
-                MWWorld::ContainerStore& containerStore = MWWorld::Class::get(mContainer).getContainerStore(mContainer);
-                containerStore.add(ptr);
             }
             else
             {
-                // put back in inventory
                 MWWorld::InventoryStore& invStore = static_cast<MWWorld::InventoryStore&>(MWWorld::Class::get(mContainer).getContainerStore(mContainer));
 
-                MWWorld::ContainerStoreIterator it = invStore.add(ptr);
-
-                // retrieve iterator to the item we just re-added (if stacking didn't happen).
-                // if stacking happened, the iterator was already returned by the add() call
-                /// \todo this does not work!
-                if (it == invStore.end())
+                // retrieve iterator to the item
+                MWWorld::ContainerStoreIterator it = invStore.begin();
+                for (; it != invStore.end(); ++it)
                 {
-                    std::cout << "stacking didn't happen" << std::endl;
-                    for (MWWorld::ContainerStoreIterator it2 = invStore.begin();
-                        it2 != invStore.end(); ++it2)
+                    if (*it == ptr)
                     {
-                        if (*it2 == ptr)
-                        {
-                            std::cout << "found iterator" << std::endl;
-                            it = it2;
-                            return;
-                        }
+                        break;
                     }
                 }
+
+                assert(it != invStore.end());
 
                 // equip the item in the first available slot
                 invStore.equip(slots.first.front(), it);
@@ -202,13 +189,12 @@ namespace MWGui
                 std::cout << "Equipped item in slot " << slots.first.front() << std::endl;
             }
 
-            drawItems();
-
-            mDragAndDrop->mStore.clear();
             mDragAndDrop->mIsOnDragAndDrop = false;
             MyGUI::Gui::getInstance().destroyWidget(mDragAndDrop->mDraggedWidget);
 
             mWindowManager.setDragDrop(false);
+
+            drawItems();
         }
     }
 

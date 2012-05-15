@@ -260,7 +260,7 @@ void HUD::onWorldClicked(MyGUI::Widget* _sender)
     if (mDragAndDrop->mIsOnDragAndDrop)
     {
         // drop item into the gameworld
-        MWWorld::Ptr object = *mDragAndDrop->mStore.begin();
+        MWWorld::Ptr object = *mDragAndDrop->mDraggedWidget->getUserData<MWWorld::Ptr>();
 
         MWWorld::World* world = MWBase::Environment::get().getWorld();
 
@@ -279,7 +279,9 @@ void HUD::onWorldClicked(MyGUI::Widget* _sender)
         std::string sound = MWWorld::Class::get(object).getDownSoundId(object);
         MWBase::Environment::get().getSoundManager()->playSound (sound, 1.0, 1.0);
 
-        mDragAndDrop->mStore.clear();
+        // remove object from the container it was coming from
+        object.getRefData().setCount(0);
+
         mDragAndDrop->mIsOnDragAndDrop = false;
         MyGUI::Gui::getInstance().destroyWidget(mDragAndDrop->mDraggedWidget);
         mDragAndDrop->mDraggedWidget = 0;

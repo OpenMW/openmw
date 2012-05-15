@@ -83,10 +83,9 @@ void ContainerBase::onSelectedItemImpl(MyGUI::Widget* _sender, int count)
     MWWorld::Ptr object = *mSelectedItem->getUserData<MWWorld::Ptr>();
     _unequipItem(object);
 
-    int originalCount = object.getRefData().getCount();
-    object.getRefData().setCount(count);
-    mDragAndDrop->mStore.add(object);
-    object.getRefData().setCount(originalCount - count);
+    mDragAndDrop->mDraggedCount = count;
+
+    mDragAndDrop->mDraggedFrom = this;
 
     std::string sound = MWWorld::Class::get(object).getUpSoundId(object);
     MWBase::Environment::get().getSoundManager()->playSound (sound, 1.0, 1.0);
@@ -94,7 +93,7 @@ void ContainerBase::onSelectedItemImpl(MyGUI::Widget* _sender, int count)
     mDragAndDrop->mDraggedWidget = mSelectedItem;
     static_cast<MyGUI::ImageBox*>(mSelectedItem)->setImageTexture(""); // remove the background texture (not visible during drag)
     static_cast<MyGUI::TextBox*>(mSelectedItem->getChildAt(0)->getChildAt(0))->setCaption(
-        getCountString((*mDragAndDrop->mStore.begin()).getRefData().getCount()));
+        getCountString(mDragAndDrop->mDraggedCount));
 
     mDragAndDrop->mWasInInventory = isInventory();
 
@@ -108,19 +107,27 @@ void ContainerBase::onContainerClicked(MyGUI::Widget* _sender)
     if(mDragAndDrop->mIsOnDragAndDrop) //drop widget here
     {
         MWWorld::Ptr object = *mDragAndDrop->mDraggedWidget->getUserData<MWWorld::Ptr>();
-        assert(object.getContainerStore() && "Item is not in a container!");
 
-        std::string sound = MWWorld::Class::get(object).getDownSoundId(object);
-        MWBase::Environment::get().getSoundManager()->playSound (sound, 1.0, 1.0);
+        if (mDragAndDrop->mDraggedFrom != this)
+        {
+            assert(object.getContainerStore() && "Item is not in a container!");
 
-        MWWorld::ContainerStore& containerStore = MWWorld::Class::get(mContainer).getContainerStore(mContainer);
-        containerStore.add(*mDragAndDrop->mStore.begin());
-        mDragAndDrop->mStore.clear();
+            MWWorld::ContainerStore& containerStore = MWWorld::Class::get(mContainer).getContainerStore(mContainer);
+            int origCount = object.getRefData().getCount();
+            object.getRefData().setCount (mDragAndDrop->mDraggedCount);
+            containerStore.add(object);
+            object.getRefData().setCount (origCount - mDragAndDrop->mDraggedCount);
+        }
+
         mDragAndDrop->mIsOnDragAndDrop = false;
         MyGUI::Gui::getInstance().destroyWidget(mDragAndDrop->mDraggedWidget);
         drawItems();
+        mDragAndDrop->mDraggedFrom->drawItems();
 
         MWBase::Environment::get().getWindowManager()->setDragDrop(false);
+
+        std::string sound = MWWorld::Class::get(object).getDownSoundId(object);
+        MWBase::Environment::get().getSoundManager()->playSound (sound, 1.0, 1.0);
     }
 }
 
@@ -224,7 +231,14 @@ void ContainerBase::drawItems()
     {
         index++;
         const MWWorld::Ptr* iter = &((*it).first);
-        if(iter->getRefData().getCount() > 0 && !(onlyMagic && MWWorld::Class::get(*iter).getEnchantment(*iter) == "" && iter->getTypeName() != typeid(ESM::Potion).name()))
+
+        int displayCount = iter->getRefData().getCount();
+        if (mDragAndDrop->mIsOnDragAndDrop && *iter == *mDragAndDrop->mDraggedWidget->getUserData<MWWorld::Ptr>())
+        {
+            std::cout << "beep" << std::endl;
+            displayCount -= mDragAndDrop->mDraggedCount;
+}
+        if(displayCount > 0 && !(onlyMagic && MWWorld::Class::get(*iter).getEnchantment(*iter) == "" && iter->getTypeName() != typeid(ESM::Potion).name()))
         {
             std::string path = std::string("icons\\");
             path+=MWWorld::Class::get(*iter).getInventoryIcon(*iter);
@@ -276,7 +290,7 @@ void ContainerBase::drawItems()
                 y = 0;
             }
 
-            text->setCaption(getCountString(iter->getRefData().getCount()));
+            text->setCaption(getCountString(displayCount));
         }
     }
 
