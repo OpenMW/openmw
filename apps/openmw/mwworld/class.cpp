@@ -144,7 +144,12 @@ namespace MWWorld
 
     float Class::getCapactiy (const MWWorld::Ptr& ptr) const
     {
-        throw std::runtime_error ("capacity not supported by class");
+        throw std::runtime_error ("capacity not supported by this class");
+    }
+
+    float Class::getEncumbrance (const MWWorld::Ptr& ptr) const
+    {
+        throw std::runtime_error ("encumbrance not supported by class");
     }
 
     const Class& Class::get (const std::string& key)

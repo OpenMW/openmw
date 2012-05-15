@@ -184,4 +184,9 @@ namespace MWClass
 
         return ref->base->weight;
     }
+
+    float Container::getEncumbrance (const MWWorld::Ptr& ptr) const
+    {
+        return getContainerStore (ptr).getWeight();
+    }
 }

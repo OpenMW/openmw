@@ -5,6 +5,7 @@
 
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/mechanicsmanager.hpp"
+#include "../mwmechanics/magiceffects.hpp"
 
 #include "../mwbase/environment.hpp"
 
@@ -171,5 +172,21 @@ namespace MWClass
     {
         const MWMechanics::CreatureStats& stats = getCreatureStats (ptr);
         return stats.mAttributes[0].getModified()*5;
+    }
+
+    float Creature::getEncumbrance (const MWWorld::Ptr& ptr) const
+    {
+        float weight = getContainerStore (ptr).getWeight();
+
+        const MWMechanics::CreatureStats& stats = getCreatureStats (ptr);
+
+        weight -= stats.mMagicEffects.get (MWMechanics::EffectKey (8)).mMagnitude; // feather
+
+        weight += stats.mMagicEffects.get (MWMechanics::EffectKey (7)).mMagnitude; // burden
+
+        if (weight<0)
+            weight = 0;
+
+        return weight;
     }
 }
