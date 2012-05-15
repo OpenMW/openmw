@@ -280,7 +280,7 @@ void HUD::onWorldClicked(MyGUI::Widget* _sender)
         MWBase::Environment::get().getSoundManager()->playSound (sound, 1.0, 1.0);
 
         // remove object from the container it was coming from
-        object.getRefData().setCount(0);
+        object.getRefData().setCount(object.getRefData().getCount() - mDragAndDrop->mDraggedCount);
         mDragAndDrop->mDraggedFrom->notifyContentChanged();
 
         mDragAndDrop->mIsOnDragAndDrop = false;
