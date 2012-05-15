@@ -1,7 +1,12 @@
 #include "container.hpp"
 
-#include "window_manager.hpp"
-#include "widgets.hpp"
+#include <cmath>
+#include <algorithm>
+#include <iterator>
+#include <assert.h>
+#include <iostream>
+
+#include <boost/lexical_cast.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwworld/manualref.hpp"
@@ -13,14 +18,9 @@
 #include "../mwinput/inputmanager.hpp"
 #include "../mwsound/soundmanager.hpp"
 
-#include <cmath>
-#include <algorithm>
-#include <iterator>
-#include <assert.h>
-#include <iostream>
-
-#include <boost/lexical_cast.hpp>
-
+#include "window_manager.hpp"
+#include "widgets.hpp"
+#include "countdialog.hpp"
 
 using namespace MWGui;
 using namespace Widgets;
@@ -49,7 +49,10 @@ void ContainerBase::onSelectedItem(MyGUI::Widget* _sender)
 {
     if(!mDragAndDrop->mIsOnDragAndDrop)
     {
-        int count = (*_sender->getUserData<MWWorld::Ptr>()).getRefData().getCount();
+        mSelectedItem = _sender;
+
+        MWWorld::Ptr object = (*_sender->getUserData<MWWorld::Ptr>());
+        int count = object.getRefData().getCount();
 
         if (MWBase::Environment::get().getInputManager()->getShiftDown() || count == 1)
         {
@@ -61,8 +64,10 @@ void ContainerBase::onSelectedItem(MyGUI::Widget* _sender)
         }
         else
         {
-            /// \todo count selection window
-            onSelectedItemImpl(_sender, count);
+            CountDialog* dialog = MWBase::Environment::get().getWindowManager()->getCountDialog();
+            dialog->open(MWWorld::Class::get(object).getName(object), count);
+            dialog->eventOkClicked.clear();
+            dialog->eventOkClicked += MyGUI::newDelegate(this, &ContainerBase::onSelectedItemImpl);
         }
     }
     else
@@ -72,10 +77,10 @@ void ContainerBase::onSelectedItem(MyGUI::Widget* _sender)
 void ContainerBase::onSelectedItemImpl(MyGUI::Widget* _sender, int count)
 {
     mDragAndDrop->mIsOnDragAndDrop = true;
-    _sender->detachFromWidget();
-    _sender->attachToWidget(mDragAndDrop->mDragAndDropWidget);
+    mSelectedItem->detachFromWidget();
+    mSelectedItem->attachToWidget(mDragAndDrop->mDragAndDropWidget);
 
-    MWWorld::Ptr object = *_sender->getUserData<MWWorld::Ptr>();
+    MWWorld::Ptr object = *mSelectedItem->getUserData<MWWorld::Ptr>();
     int originalCount = object.getRefData().getCount();
     object.getRefData().setCount(count);
     mDragAndDrop->mStore.add(object);
@@ -84,9 +89,10 @@ void ContainerBase::onSelectedItemImpl(MyGUI::Widget* _sender, int count)
     std::string sound = MWWorld::Class::get(object).getUpSoundId(object);
     MWBase::Environment::get().getSoundManager()->playSound (sound, 1.0, 1.0);
 
-    mDragAndDrop->mDraggedWidget = _sender;
+    mDragAndDrop->mDraggedWidget = mSelectedItem;
     mDragAndDrop->mContainerWindow = const_cast<MWGui::ContainerBase*>(this);
-    static_cast<MyGUI::TextBox*>(_sender->getChildAt(0)->getChildAt(0))->setCaption(getCountString((*mDragAndDrop->mStore.begin()).getRefData().getCount()));
+    static_cast<MyGUI::TextBox*>(mSelectedItem->getChildAt(0)->getChildAt(0))->setCaption(
+        getCountString((*mDragAndDrop->mStore.begin()).getRefData().getCount()));
     drawItems();
 
     MWBase::Environment::get().getWindowManager()->setDragDrop(true);

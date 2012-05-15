@@ -55,6 +55,7 @@ configure_file("${SDIR}/openmw_tooltips.xml" "${DDIR}/openmw_tooltips.xml" COPYO
 configure_file("${SDIR}/openmw_scroll_layout.xml" "${DDIR}/openmw_scroll_layout.xml" COPYONLY)
 configure_file("${SDIR}/openmw_scroll_skin.xml" "${DDIR}/openmw_scroll_skin.xml" COPYONLY)
 configure_file("${SDIR}/openmw_book_layout.xml" "${DDIR}/openmw_book_layout.xml" COPYONLY)
+configure_file("${SDIR}/openmw_count_window_layout.xml" "${DDIR}/openmw_count_window_layout.xml" COPYONLY)
 configure_file("${SDIR}/atlas1.cfg" "${DDIR}/atlas1.cfg" COPYONLY)
 configure_file("${SDIR}/smallbars.png" "${DDIR}/smallbars.png" COPYONLY)
 configure_file("${SDIR}/transparent.png" "${DDIR}/transparent.png" COPYONLY)

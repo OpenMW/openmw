@@ -14,6 +14,7 @@
 #include "list.hpp"
 #include "hud.hpp"
 #include "mainmenu.hpp"
+#include "countdialog.hpp"
 
 #include "../mwmechanics/mechanicsmanager.hpp"
 #include "../mwinput/inputmanager.hpp"
@@ -46,6 +47,7 @@ WindowManager::WindowManager(
   , mDialogueWindow(nullptr)
   , mBookWindow(NULL)
   , mScrollWindow(NULL)
+  , mCountDialog(NULL)
   , mCharGen(NULL)
   , playerClass()
   , playerName()
@@ -112,6 +114,7 @@ WindowManager::WindowManager(
     mToolTips = new ToolTips(this);
     mScrollWindow = new ScrollWindow(*this);
     mBookWindow = new BookWindow(*this);
+    mCountDialog = new CountDialog(*this);
 
     // The HUD is always on
     hud->setVisible(true);

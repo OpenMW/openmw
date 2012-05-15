@@ -68,6 +68,8 @@ namespace MWGui
         MyGUI::ScrollView* mItemView;
         MyGUI::Widget* mContainerWidget;
 
+        MyGUI::Widget* mSelectedItem;
+
         DragAndDrop* mDragAndDrop;
         MWWorld::Ptr mContainer;
 

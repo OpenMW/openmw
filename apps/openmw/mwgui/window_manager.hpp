@@ -71,6 +71,7 @@ namespace MWGui
   class InfoBoxDialog;
   class DialogueWindow;
   class MessageBoxManager;
+  class CountDialog;
 
   struct ClassPoint
   {
@@ -133,6 +134,7 @@ namespace MWGui
 
     MWGui::BookWindow* getBookWindow() {return mBookWindow;}
     MWGui::ScrollWindow* getScrollWindow() {return mScrollWindow;}
+    MWGui::CountDialog* getCountDialog() {return mCountDialog;}
 
     MyGUI::Gui* getGui() const { return gui; }
 
@@ -223,6 +225,7 @@ namespace MWGui
     InventoryWindow *mInventoryWindow;
     ScrollWindow* mScrollWindow;
     BookWindow* mBookWindow;
+    CountDialog* mCountDialog;
 
     CharacterCreation* mCharGen;
 
