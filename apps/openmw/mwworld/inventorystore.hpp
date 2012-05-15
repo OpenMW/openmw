@@ -60,9 +60,6 @@ namespace MWWorld
             void equip (int slot, const ContainerStoreIterator& iterator);
             ///< \note \a iteartor can be an end-iterator
 
-            void _freeSlot(int slot);
-            ///< this method is dangerous, as it doesn't do re-stacking items - you probably want to use equip()
-
             ContainerStoreIterator getSlot (int slot);
 
             void autoEquip (const MWMechanics::NpcStats& stats);

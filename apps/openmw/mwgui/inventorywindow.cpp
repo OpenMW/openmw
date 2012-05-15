@@ -231,7 +231,7 @@ namespace MWGui
             MWWorld::ContainerStoreIterator it = invStore.getSlot(slot);
             if (it != invStore.end() && *it == item)
             {
-                invStore._freeSlot(slot);
+                invStore.equip(slot, invStore.end());
                 return;
             }
         }
