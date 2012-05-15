@@ -54,11 +54,11 @@ void ContainerBase::onSelectedItem(MyGUI::Widget* _sender)
         MWWorld::Ptr object = (*_sender->getUserData<MWWorld::Ptr>());
         int count = object.getRefData().getCount();
 
-        if (MWBase::Environment::get().getInputManager()->getShiftDown() || count == 1)
+        if (MyGUI::InputManager::getInstance().isShiftPressed() || count == 1)
         {
             onSelectedItemImpl(_sender, count);
         }
-        else if (MWBase::Environment::get().getInputManager()->getCtrlDown())
+        else if (MyGUI::InputManager::getInstance().isControlPressed())
         {
             onSelectedItemImpl(_sender, 1);
         }
@@ -90,7 +90,6 @@ void ContainerBase::onSelectedItemImpl(MyGUI::Widget* _sender, int count)
     MWBase::Environment::get().getSoundManager()->playSound (sound, 1.0, 1.0);
 
     mDragAndDrop->mDraggedWidget = mSelectedItem;
-    mDragAndDrop->mContainerWindow = const_cast<MWGui::ContainerBase*>(this);
     static_cast<MyGUI::TextBox*>(mSelectedItem->getChildAt(0)->getChildAt(0))->setCaption(
         getCountString((*mDragAndDrop->mStore.begin()).getRefData().getCount()));
     drawItems();
@@ -115,7 +114,6 @@ void ContainerBase::onContainerClicked(MyGUI::Widget* _sender)
         mDragAndDrop->mDraggedWidget->detachFromWidget();
         mDragAndDrop->mDraggedWidget->attachToWidget(mContainerWidget);
         mDragAndDrop->mDraggedWidget = 0;
-        mDragAndDrop->mContainerWindow = 0;
         drawItems();
 
         MWBase::Environment::get().getWindowManager()->setDragDrop(false);

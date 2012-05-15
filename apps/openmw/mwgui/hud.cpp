@@ -279,7 +279,6 @@ void HUD::onWorldClicked(MyGUI::Widget* _sender)
         mDragAndDrop->mIsOnDragAndDrop = false;
         MyGUI::Gui::getInstance().destroyWidget(mDragAndDrop->mDraggedWidget);
         mDragAndDrop->mDraggedWidget = 0;
-        mDragAndDrop->mContainerWindow = 0;
 
         MWBase::Environment::get().getWindowManager()->setDragDrop(false);
     }

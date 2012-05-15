@@ -69,8 +69,6 @@ namespace MWInput
       A_ToggleWeapon,
       A_ToggleSpell,
 
-      A_Shift,
-
       A_ToggleFps, // Toggle FPS display (this is temporary)
 
       A_LAST            // Marker for the last item
@@ -92,14 +90,6 @@ namespace MWInput
 
     bool mDragDrop;
 
-    bool mShiftDown;
-    bool mCtrlDown;
-
-public:
-    bool getShiftDown() { return mShiftDown; }
-    bool getCtrlDown() { return mCtrlDown; }
-
-private:
 
    /* InputImpl Methods */
 
@@ -238,9 +228,7 @@ private:
         player(_player),
         windows(_windows),
         mEngine (engine),
-        mDragDrop(false),
-        mShiftDown(false),
-        mCtrlDown(false)
+        mDragDrop(false)
     {
       using namespace OEngine::Input;
       using namespace OEngine::Render;
@@ -338,8 +326,6 @@ private:
       
       poller.bind(A_Jump, KC_E);
       poller.bind(A_Crouch, KC_LCONTROL);
-
-      poller.bind(A_Shift, KC_LSHIFT);
     }
 
     void setDragDrop(bool dragDrop)
@@ -360,9 +346,6 @@ private:
         // avoiding that window/gui changes does not happen in
         // event callbacks (which may crash)
         windows.update();
-
-        mShiftDown = poller.isDown(A_Shift);
-        mCtrlDown = poller.isDown(A_Crouch);
 
         // Disable movement in Gui mode
         if (windows.isGuiMode()) return;
@@ -461,15 +444,5 @@ private:
   void MWInputManager::setDragDrop(bool dragDrop)
   {
       impl->setDragDrop(dragDrop);
-  }
-
-  bool MWInputManager::getShiftDown()
-  {
-      return impl->getShiftDown();
-  }
-
-  bool MWInputManager::getCtrlDown()
-  {
-      return impl->getCtrlDown();
   }
 }

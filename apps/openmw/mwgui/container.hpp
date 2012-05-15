@@ -37,7 +37,6 @@ namespace MWGui
     {
     public:
         bool mIsOnDragAndDrop;
-        ContainerBase* mContainerWindow;
         MyGUI::Widget* mDraggedWidget;
         MyGUI::Widget* mDragAndDropWidget;
         MWWorld::ContainerStore mStore;

@@ -99,7 +99,6 @@ WindowManager::WindowManager(
     mDragAndDrop->mIsOnDragAndDrop = false;
     mDragAndDrop->mDraggedWidget = 0;
     mDragAndDrop->mDragAndDropWidget = dragAndDropWidget;
-    mDragAndDrop->mContainerWindow = 0;
 
     menu = new MainMenu(w,h);
     map = new MapWindow(*this);
