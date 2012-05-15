@@ -154,8 +154,6 @@ namespace MWGui
                 // can't be equipped, try to use instead
                 boost::shared_ptr<MWWorld::Action> action = MWWorld::Class::get(ptr).use(ptr);
 
-                std::cout << "Item can't be equipped" << std::endl;
-
                 action->execute();
 
                 /// \todo scripts
@@ -188,8 +186,6 @@ namespace MWGui
 
                 // equip the item in the first available slot
                 invStore.equip(slots.first.front(), it);
-
-                std::cout << "Equipped item in slot " << slots.first.front() << std::endl;
             }
 
             mDragAndDrop->mIsOnDragAndDrop = false;
@@ -212,14 +208,8 @@ namespace MWGui
             MWWorld::ContainerStoreIterator it = invStore.getSlot(slot);
             if (it != invStore.end())
             {
-                std::cout << "slot " << slot << " is equipped" << std::endl;
                 items.push_back(*it);
             }
-            else
-            {
-                std::cout << "slot " << slot << " is empty " << std::endl;
-            }
-            
         }
 
         return items;

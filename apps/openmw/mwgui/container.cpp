@@ -235,7 +235,6 @@ void ContainerBase::drawItems()
         int displayCount = iter->getRefData().getCount();
         if (mDragAndDrop->mIsOnDragAndDrop && *iter == *mDragAndDrop->mDraggedWidget->getUserData<MWWorld::Ptr>())
         {
-            std::cout << "beep" << std::endl;
             displayCount -= mDragAndDrop->mDraggedCount;
 }
         if(displayCount > 0 && !(onlyMagic && MWWorld::Class::get(*iter).getEnchantment(*iter) == "" && iter->getTypeName() != typeid(ESM::Potion).name()))
