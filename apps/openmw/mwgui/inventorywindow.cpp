@@ -151,6 +151,8 @@ namespace MWGui
                 // can't be equipped, try to use instead
                 boost::shared_ptr<MWWorld::Action> action = MWWorld::Class::get(ptr).use(ptr);
 
+                std::cout << "Item can't be equipped" << std::endl;
+
                 // execute action and script
                 MWBase::Environment::get().getWorld()->executeActionScript(ptr, action);
 
@@ -172,19 +174,31 @@ namespace MWGui
             {
                 // put back in inventory
                 MWWorld::InventoryStore& invStore = static_cast<MWWorld::InventoryStore&>(MWWorld::Class::get(mContainer).getContainerStore(mContainer));
-                invStore.add(ptr);
 
-                // get a ContainerStoreIterator to the item we just re-added into the inventory
-                MWWorld::ContainerStoreIterator it = invStore.begin();
-                MWWorld::ContainerStoreIterator nextIt = ++it;
-                while (nextIt != invStore.end())
+                MWWorld::ContainerStoreIterator it = invStore.add(ptr);
+
+                // retrieve iterator to the item we just re-added (if stacking didn't happen).
+                // if stacking happened, the iterator was already returned by the add() call
+                /// \todo this does not work!
+                if (it == invStore.end())
                 {
-                    ++it;
-                    ++nextIt;
+                    std::cout << "stacking didn't happen" << std::endl;
+                    for (MWWorld::ContainerStoreIterator it2 = invStore.begin();
+                        it2 != invStore.end(); ++it2)
+                    {
+                        if (*it2 == ptr)
+                        {
+                            std::cout << "found iterator" << std::endl;
+                            it = it2;
+                            return;
+                        }
+                    }
                 }
 
                 // equip the item in the first available slot
                 invStore.equip(slots.first.front(), it);
+
+                std::cout << "Equipped item in slot " << slots.first.front() << std::endl;
             }
 
             drawItems();
@@ -197,4 +211,42 @@ namespace MWGui
         }
     }
 
+    std::vector<MWWorld::Ptr> InventoryWindow::getEquippedItems()
+    {
+        MWWorld::InventoryStore& invStore = static_cast<MWWorld::InventoryStore&>(MWWorld::Class::get(mContainer).getContainerStore(mContainer));
+
+        std::vector<MWWorld::Ptr> items;
+
+        for (int slot=0; slot < MWWorld::InventoryStore::Slots; ++slot)
+        {
+            MWWorld::ContainerStoreIterator it = invStore.getSlot(slot);
+            if (it != invStore.end())
+            {
+                std::cout << "slot " << slot << " is equipped" << std::endl;
+                items.push_back(*it);
+            }
+            else
+            {
+                std::cout << "slot " << slot << " is empty " << std::endl;
+            }
+            
+        }
+
+        return items;
+    }
+
+    void InventoryWindow::_unequipItem(MWWorld::Ptr item)
+    {
+        MWWorld::InventoryStore& invStore = static_cast<MWWorld::InventoryStore&>(MWWorld::Class::get(mContainer).getContainerStore(mContainer));
+
+        for (int slot=0; slot < MWWorld::InventoryStore::Slots; ++slot)
+        {
+            MWWorld::ContainerStoreIterator it = invStore.getSlot(slot);
+            if (it != invStore.end() && *it == item)
+            {
+                invStore._freeSlot(slot);
+                return;
+            }
+        }
+    }
 }

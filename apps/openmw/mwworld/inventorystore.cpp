@@ -97,6 +97,13 @@ void MWWorld::InventoryStore::equip (int slot, const ContainerStoreIterator& ite
     flagAsModified();
 }
 
+void MWWorld::InventoryStore::_freeSlot(int slot)
+{
+    mSlots[slot] = end();
+
+    flagAsModified();
+}
+
 MWWorld::ContainerStoreIterator MWWorld::InventoryStore::getSlot (int slot)
 {
     if (slot<0 || slot>=static_cast<int> (mSlots.size()))

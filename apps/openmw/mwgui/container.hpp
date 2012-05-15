@@ -63,6 +63,15 @@ namespace MWGui
             Filter_Misc = 0x05
         };
 
+        enum ItemState
+        {
+            ItemState_Normal = 0x01,
+            ItemState_Equipped = 0x02,
+
+            // unimplemented
+            ItemState_Barter = 0x03
+        };
+
         void setWidgets(MyGUI::Widget* containerWidget, MyGUI::ScrollView* itemView); ///< only call once
 
         void openContainer(MWWorld::Ptr container);
@@ -87,7 +96,10 @@ namespace MWGui
 
         std::string getCountString(const int count);
 
+        // to be reimplemented by InventoryWindow
         virtual bool isInventory() { return false; }
+        virtual std::vector<MWWorld::Ptr> getEquippedItems() { return std::vector<MWWorld::Ptr>(); }
+        virtual void _unequipItem(MWWorld::Ptr item) { ; }
 
         void drawItems();
     };

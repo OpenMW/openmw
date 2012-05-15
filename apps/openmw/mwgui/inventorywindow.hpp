@@ -51,6 +51,8 @@ namespace MWGui
             void onPinToggled();
 
             virtual bool isInventory() { return true; }
+            virtual std::vector<MWWorld::Ptr> getEquippedItems();
+            virtual void _unequipItem(MWWorld::Ptr item);
     };
 }
 #endif // Inventory_H

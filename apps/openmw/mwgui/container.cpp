@@ -81,6 +81,8 @@ void ContainerBase::onSelectedItemImpl(MyGUI::Widget* _sender, int count)
     mSelectedItem->attachToWidget(mDragAndDrop->mDragAndDropWidget);
 
     MWWorld::Ptr object = *mSelectedItem->getUserData<MWWorld::Ptr>();
+    _unequipItem(object);
+
     int originalCount = object.getRefData().getCount();
     object.getRefData().setCount(count);
     mDragAndDrop->mStore.add(object);
@@ -90,6 +92,7 @@ void ContainerBase::onSelectedItemImpl(MyGUI::Widget* _sender, int count)
     MWBase::Environment::get().getSoundManager()->playSound (sound, 1.0, 1.0);
 
     mDragAndDrop->mDraggedWidget = mSelectedItem;
+    static_cast<MyGUI::ImageBox*>(mSelectedItem)->setImageTexture(""); // remove the background texture (not visible during drag)
     static_cast<MyGUI::TextBox*>(mSelectedItem->getChildAt(0)->getChildAt(0))->setCaption(
         getCountString((*mDragAndDrop->mStore.begin()).getRefData().getCount()));
 
@@ -181,9 +184,46 @@ void ContainerBase::drawItems()
 
     /// \todo performance improvement: don't create/destroy all the widgets everytime the container window changes size, only reposition them
 
+    std::vector< std::pair<MWWorld::Ptr, ItemState> > items;
+
+    std::vector<MWWorld::Ptr> equippedItems = getEquippedItems();
+
+    // filter out the equipped items of categories we don't want
+    std::vector<MWWorld::Ptr> unwantedItems = equippedItems;
     for (MWWorld::ContainerStoreIterator iter (containerStore.begin(categories)); iter!=containerStore.end(); ++iter)
     {
+        std::vector<MWWorld::Ptr>::iterator found = std::find(unwantedItems.begin(), unwantedItems.end(), *iter);
+        if (found != unwantedItems.end())
+        {
+            unwantedItems.erase(found);
+        }
+    }
+    // now erase everything that's still in unwantedItems.
+    for (std::vector<MWWorld::Ptr>::iterator it=unwantedItems.begin();
+        it != unwantedItems.end(); ++it)
+    {
+        equippedItems.erase(std::find(unwantedItems.begin(), unwantedItems.end(), *it));
+    }
+    // and add the items that are left (= have the correct category)
+    for (std::vector<MWWorld::Ptr>::const_iterator it=equippedItems.begin();
+        it != equippedItems.end(); ++it)
+    {
+        items.push_back( std::make_pair(*it, ItemState_Equipped) );
+    }
+
+    // now add the regular items
+    for (MWWorld::ContainerStoreIterator iter (containerStore.begin(categories)); iter!=containerStore.end(); ++iter)
+    {
+        /// \todo sorting
+        if (std::find(equippedItems.begin(), equippedItems.end(), *iter) == equippedItems.end())
+            items.push_back( std::make_pair(*iter, ItemState_Normal) );
+    }
+
+    for (std::vector< std::pair<MWWorld::Ptr, ItemState> >::const_iterator it=items.begin();
+        it != items.end(); ++it)
+    {
         index++;
+        const MWWorld::Ptr* iter = &((*it).first);
         if(iter->getRefData().getCount() > 0 && !(onlyMagic && MWWorld::Class::get(*iter).getEnchantment(*iter) == "" && iter->getTypeName() != typeid(ESM::Potion).name()))
         {
             std::string path = std::string("icons\\");
@@ -194,7 +234,22 @@ void ContainerBase::drawItems()
             MyGUI::ImageBox* backgroundWidget = mContainerWidget->createWidget<ImageBox>("ImageBox", MyGUI::IntCoord(x, y, 42, 42), MyGUI::Align::Default);
             backgroundWidget->setUserString("ToolTipType", "ItemPtr");
             backgroundWidget->setUserData(*iter);
-            backgroundWidget->setImageTexture( isMagic ? "textures\\menu_icon_magic.dds" : "");
+
+            std::string backgroundTex = "textures\\menu_icon";
+            if (isMagic)
+                backgroundTex += "_magic";
+            if (it->second == ItemState_Normal)
+            {
+                if (!isMagic)
+                    backgroundTex = "";
+            }
+            else if (it->second == ItemState_Equipped)
+            {
+                backgroundTex += "_equip";
+            }
+            backgroundTex += ".dds";
+
+            backgroundWidget->setImageTexture(backgroundTex);
             backgroundWidget->setProperty("ImageCoord", "0 0 42 42");
             backgroundWidget->eventMouseButtonClick += MyGUI::newDelegate(this, &ContainerBase::onSelectedItem);
             backgroundWidget->eventMouseWheel += MyGUI::newDelegate(this, &ContainerBase::onMouseWheel);

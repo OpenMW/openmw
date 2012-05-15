@@ -66,13 +66,15 @@ namespace MWWorld
 
             ContainerStoreIterator end();
 
-            void add (const Ptr& ptr);
+            ContainerStoreIterator add (const Ptr& ptr);
             ///< Add the item pointed to by \a ptr to this container. (Stacks automatically if needed)
             ///
             /// \note The item pointed to is not required to exist beyond this function call.
             ///
             /// \attention Do not add items to an existing stack by increasing the count instead of
             /// calling this function!
+            ///
+            /// @return if stacking happened, return iterator to the item that was stacked against, otherwise end() iterator
 
         protected:
             void addImpl (const Ptr& ptr);

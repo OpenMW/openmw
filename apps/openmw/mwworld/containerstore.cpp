@@ -58,7 +58,7 @@ bool MWWorld::ContainerStore::stacks(const Ptr& ptr1, const Ptr& ptr2)
     return false;
 }
 
-void MWWorld::ContainerStore::add (const Ptr& ptr)
+MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add (const Ptr& ptr)
 {
     int type = getType(ptr);
 
@@ -71,12 +71,13 @@ void MWWorld::ContainerStore::add (const Ptr& ptr)
             iter->getRefData().setCount( iter->getRefData().getCount() + ptr.getRefData().getCount() );
 
             flagAsModified();
-            return;
+            return iter;
         }
     }
 
     // if we got here, this means no stacking
     addImpl(ptr);
+    return end();
 }
 
 void MWWorld::ContainerStore::addImpl (const Ptr& ptr)
