@@ -269,6 +269,9 @@ void HUD::onWorldClicked(MyGUI::Widget* _sender)
         float mouseX = cursorPosition.left / float(viewSize.width);
         float mouseY = cursorPosition.top / float(viewSize.height);
 
+        int origCount = object.getRefData().getCount();
+        object.getRefData().setCount(mDragAndDrop->mDraggedCount);
+
         if (world->canPlaceObject(mouseX, mouseY))
             world->placeObject(object, mouseX, mouseY);
         else
@@ -280,7 +283,7 @@ void HUD::onWorldClicked(MyGUI::Widget* _sender)
         MWBase::Environment::get().getSoundManager()->playSound (sound, 1.0, 1.0);
 
         // remove object from the container it was coming from
-        object.getRefData().setCount(object.getRefData().getCount() - mDragAndDrop->mDraggedCount);
+        object.getRefData().setCount(origCount - mDragAndDrop->mDraggedCount);
         mDragAndDrop->mDraggedFrom->notifyContentChanged();
 
         mDragAndDrop->mIsOnDragAndDrop = false;

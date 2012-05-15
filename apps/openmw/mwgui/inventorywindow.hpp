@@ -30,6 +30,7 @@ namespace MWGui
 
             void openInventory();
 
+            virtual void Update();
             virtual void notifyContentChanged();
 
         protected:

@@ -118,6 +118,17 @@ void ContainerBase::onContainerClicked(MyGUI::Widget* _sender)
             containerStore.add(object);
             object.getRefData().setCount (origCount - mDragAndDrop->mDraggedCount);
         }
+        else
+        {
+            // check that we don't exceed the allowed weight (only for containers, not for inventory)
+            if (isInventory())
+            {
+                float curWeight = MWWorld::Class::get(mContainer).getEncumbrance(mContainer);
+                float capacity = MWWorld::Class::get(mContainer).getCapacity(mContainer);
+
+                
+            }
+        }
 
         mDragAndDrop->mIsOnDragAndDrop = false;
         MyGUI::Gui::getInstance().destroyWidget(mDragAndDrop->mDraggedWidget);

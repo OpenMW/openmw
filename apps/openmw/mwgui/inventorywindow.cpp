@@ -243,6 +243,12 @@ namespace MWGui
 
     void InventoryWindow::notifyContentChanged()
     {
+    }
+
+    void InventoryWindow::Update()
+    {
         updateEncumbranceBar();
+
+        ContainerBase::Update();
     }
 }
