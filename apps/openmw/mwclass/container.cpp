@@ -179,4 +179,17 @@ namespace MWClass
 
         return info;
     }
+
+    float Container::getCapactiy (const MWWorld::Ptr& ptr) const
+    {
+        ESMS::LiveCellRef<ESM::Container, MWWorld::RefData> *ref =
+            ptr.get<ESM::Container>();
+
+        return ref->base->weight;
+    }
+
+    float Container::getEncumbrance (const MWWorld::Ptr& ptr) const
+    {
+        return getContainerStore (ptr).getWeight();
+    }
 }

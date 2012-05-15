@@ -88,10 +88,8 @@ namespace MWClass
             }
             else
             {
-                //TODO: do something with npdt12 maybe:p
+                /// \todo do something with npdt12 maybe:p
             }
-
-            // \todo add initial container content
 
             // store
             ptr.getRefData().setCustomData (data.release());
@@ -324,5 +322,27 @@ namespace MWClass
         info.text = text;
 
         return info;
+    }
+
+    float Npc::getCapactiy (const MWWorld::Ptr& ptr) const
+    {
+        const MWMechanics::CreatureStats& stats = getCreatureStats (ptr);
+        return stats.mAttributes[0].getModified()*5;
+    }
+
+    float Npc::getEncumbrance (const MWWorld::Ptr& ptr) const
+    {
+        float weight = getContainerStore (ptr).getWeight();
+
+        const MWMechanics::CreatureStats& stats = getCreatureStats (ptr);
+
+        weight -= stats.mMagicEffects.get (MWMechanics::EffectKey (8)).mMagnitude; // feather
+
+        weight += stats.mMagicEffects.get (MWMechanics::EffectKey (7)).mMagnitude; // burden
+
+        if (weight<0)
+            weight = 0;
+
+        return weight;
     }
 }

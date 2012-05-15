@@ -164,6 +164,16 @@ namespace MWWorld
             ///< Return trade value of the object. Throws an exception, if the object can't be traded.
             /// (default implementation: throws an exception)
 
+            virtual float getCapactiy (const MWWorld::Ptr& ptr) const;
+            ///< Return total weight that fits into the object. Throws an exception, if the object can't
+            /// hold other objects.
+            /// (default implementation: throws an exception)
+
+            virtual float getEncumbrance (const MWWorld::Ptr& ptr) const;
+            ///< Returns total weight of objects inside this object (including modifications from magic
+            /// effects). Throws an exception, if the object can't hold other objects.
+            /// (default implementation: throws an exception)
+
             static const Class& get (const std::string& key);
             ///< If there is no class for this \a key, an exception is thrown.
 
