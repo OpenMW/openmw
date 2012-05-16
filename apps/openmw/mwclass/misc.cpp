@@ -1,6 +1,8 @@
 
 #include "misc.hpp"
 
+#include <boost/lexical_cast.hpp>
+
 #include <components/esm/loadmisc.hpp>
 
 #include <components/esm_store/cell_store.hpp>
@@ -142,12 +144,18 @@ namespace MWClass
         const ESMS::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
 
         int count = ptr.getRefData().getCount();
-        // gold has count both as reference count and as value, multiply them together to get real count
-        bool isGold = (ref->base->name == store.gameSettings.search("sGold")->str);
-        if (isGold)
-            count *= ref->base->data.value;
 
-        info.caption = ref->base->name + MWGui::ToolTips::getCountString(count);
+        bool isGold = (ref->base->name == store.gameSettings.search("sGold")->str);
+        if (isGold && count == 1)
+            count = ref->base->data.value;
+
+        std::string countString;
+        if (!isGold)
+            countString = MWGui::ToolTips::getCountString(count);
+        else // gold displays its count also if it's 1.
+            countString = " (" + boost::lexical_cast<std::string>(count) + ")";
+
+        info.caption = ref->base->name + countString;
         info.icon = ref->base->icon;
 
         if (ref->ref.soul != "")

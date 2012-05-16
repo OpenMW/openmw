@@ -7,6 +7,9 @@
 
 #include <components/esm/loadcont.hpp>
 
+#include "../mwbase/environment.hpp"
+#include "../mwworld/world.hpp"
+
 #include "manualref.hpp"
 #include "refdata.hpp"
 #include "class.hpp"
@@ -61,6 +64,32 @@ bool MWWorld::ContainerStore::stacks(const Ptr& ptr1, const Ptr& ptr2)
 MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add (const Ptr& ptr)
 {
     int type = getType(ptr);
+
+    // gold needs special treatment because it uses several different meshes
+    if (MWWorld::Class::get(ptr).getName(ptr) == MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sGold")->str)
+    {
+        ESMS::LiveCellRef<ESM::Miscellaneous, MWWorld::RefData> *gold =
+            ptr.get<ESM::Miscellaneous>();
+
+        int goldValue = (ptr.getRefData().getCount() == 1) ? gold->base->data.value : ptr.getRefData().getCount();
+
+        for (MWWorld::ContainerStoreIterator iter (begin(type)); iter!=end(); ++iter)
+        {
+            if (MWWorld::Class::get(*iter).getName(*iter) == MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sGold")->str)
+            {
+                ESMS::LiveCellRef<ESM::Miscellaneous, MWWorld::RefData> *ref =
+                    iter->get<ESM::Miscellaneous>();
+
+                if (iter->getRefData().getCount() == 1)
+                    iter->getRefData().setCount(ref->base->data.value + goldValue);
+                else
+                    iter->getRefData().setCount(iter->getRefData().getCount() + goldValue);
+
+                flagAsModified();
+                return iter;
+            }
+        }
+    }
 
     // determine whether to stack or not
     for (MWWorld::ContainerStoreIterator iter (begin(type)); iter!=end(); ++iter)
