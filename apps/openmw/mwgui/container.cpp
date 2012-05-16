@@ -239,7 +239,9 @@ void ContainerBase::drawItems()
     for (std::vector<MWWorld::Ptr>::iterator it=unwantedItems.begin();
         it != unwantedItems.end(); ++it)
     {
-        equippedItems.erase(std::find(unwantedItems.begin(), unwantedItems.end(), *it));
+        std::vector<MWWorld::Ptr>::iterator found = std::find(unwantedItems.begin(), unwantedItems.end(), *it);
+        assert(found != unwantedItems.end());
+        equippedItems.erase(found);
     }
     // and add the items that are left (= have the correct category)
     for (std::vector<MWWorld::Ptr>::const_iterator it=equippedItems.begin();
@@ -266,7 +268,7 @@ void ContainerBase::drawItems()
         if (mDragAndDrop->mIsOnDragAndDrop && *iter == *mDragAndDrop->mDraggedWidget->getUserData<MWWorld::Ptr>())
         {
             displayCount -= mDragAndDrop->mDraggedCount;
-}
+        }
         if(displayCount > 0 && !(onlyMagic && MWWorld::Class::get(*iter).getEnchantment(*iter) == "" && iter->getTypeName() != typeid(ESM::Potion).name()))
         {
             std::string path = std::string("icons\\");

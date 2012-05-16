@@ -209,6 +209,7 @@ namespace MWGui
 
                     if (invStore.getSlot(*slot) == invStore.end())
                     {
+                        // slot is not occupied
                         invStore.equip(*slot, it);
                         break;
                     }

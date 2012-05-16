@@ -151,6 +151,8 @@ WindowManager::~WindowManager()
     delete mToolTips;
     delete mCharGen;
     delete mDragAndDrop;
+    delete mBookWindow;
+    delete mScrollWindow;
 
     cleanupGarbage();
 }

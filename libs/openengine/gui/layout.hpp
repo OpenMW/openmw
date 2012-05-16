@@ -71,7 +71,7 @@ namespace GUI
 
     void shutdown()
     {
-      MyGUI::LayoutManager::getInstance().unloadLayout(mListWindowRoot);
+      MyGUI::Gui::getInstance().destroyWidget(mMainWidget);
       mListWindowRoot.clear();
     }
 
