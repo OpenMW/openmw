@@ -75,7 +75,8 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add (const Ptr& ptr)
 
         for (MWWorld::ContainerStoreIterator iter (begin(type)); iter!=end(); ++iter)
         {
-            if (MWWorld::Class::get(*iter).getName(*iter) == MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sGold")->str)
+            if (MWWorld::Class::get(*iter).getName(*iter) == MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sGold")->str
+                && MWWorld::Class::get(*iter).getScript(*iter) == "" && MWWorld::Class::get(ptr).getScript(ptr) == "")
             {
                 ESMS::LiveCellRef<ESM::Miscellaneous, MWWorld::RefData> *ref =
                     iter->get<ESM::Miscellaneous>();
@@ -89,6 +90,10 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add (const Ptr& ptr)
                 return iter;
             }
         }
+
+        // if we get here, no already existing gold was found in the container
+        // we still need special handling because gold in a container should always have the real gold value as reference count.
+        ptr.getRefData().setCount(goldValue);
     }
 
     // determine whether to stack or not
