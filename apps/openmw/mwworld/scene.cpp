@@ -9,6 +9,9 @@
 
 #include "../mwgui/window_manager.hpp"
 
+#include "../mwworld/world.hpp" /// FIXME
+#include "../mwworld/manualref.hpp" /// FIXME
+
 #include "ptr.hpp"
 #include "player.hpp"
 #include "class.hpp"
@@ -326,6 +329,8 @@ namespace MWWorld
         insertCellRefList(mRendering, cell.weapons, cell, *mPhysics);
     }
 
+
+    /// \todo this whole code needs major clean up, and doesn't belong in this class.
     void Scene::insertObject(MWWorld::Ptr ptr, Ptr::CellStore* cell)
     {
         std::string type = ptr.getTypeName();
@@ -401,9 +406,41 @@ namespace MWWorld
         }
         else if (type == typeid(ESM::Miscellaneous).name())
         {
-            ESMS::LiveCellRef<ESM::Miscellaneous, MWWorld::RefData>* ref = ptr.get<ESM::Miscellaneous>();
-            cell->miscItems.list.push_back( *ref );
-            newPtr = MWWorld::Ptr(&cell->miscItems.list.back(), cell);
+
+            // if this is gold, we need to fetch the correct mesh depending on the amount of gold.
+            if (MWWorld::Class::get(ptr).getName(ptr) == MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sGold")->str)
+            {
+                int goldAmount = ptr.getRefData().getCount();
+
+                std::string base = "Gold_001";
+                if (goldAmount >= 100)
+                    base = "Gold_100";
+                else if (goldAmount >= 25)
+                    base = "Gold_025";
+                else if (goldAmount >= 10)
+                    base = "Gold_010";
+                else if (goldAmount >= 5)
+                    base = "Gold_005";
+
+                MWWorld::ManualRef newRef (MWBase::Environment::get().getWorld()->getStore(), base);
+
+                ESMS::LiveCellRef<ESM::Miscellaneous, MWWorld::RefData>* ref = newRef.getPtr().get<ESM::Miscellaneous>();
+
+                cell->miscItems.list.push_back( *ref );
+                newPtr = MWWorld::Ptr(&cell->miscItems.list.back(), cell);
+
+                ESM::Position& p = newPtr.getRefData().getPosition();
+                p.pos[0] = ptr.getRefData().getPosition().pos[0];
+                p.pos[1] = ptr.getRefData().getPosition().pos[1];
+                p.pos[2] = ptr.getRefData().getPosition().pos[2];
+            }
+            else
+            {
+                ESMS::LiveCellRef<ESM::Miscellaneous, MWWorld::RefData>* ref = ptr.get<ESM::Miscellaneous>();
+
+                cell->miscItems.list.push_back( *ref );
+                newPtr = MWWorld::Ptr(&cell->miscItems.list.back(), cell);
+            }
         }
         else
             throw std::runtime_error("Trying to insert object of unhandled type");

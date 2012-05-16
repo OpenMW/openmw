@@ -982,27 +982,6 @@ namespace MWWorld
         else
             cell = getPlayer().getPlayer().getCell();
 
-        // if this is gold, we need to fetch the correct mesh depending on the amount of gold.
-        if (MWWorld::Class::get(object).getName(object) == getStore().gameSettings.search("sGold")->str)
-        {
-            int goldAmount = object.getRefData().getCount();
-
-            std::string base = "Gold_001";
-            if (goldAmount >= 100)
-                base = "Gold_100";
-            else if (goldAmount >= 25)
-                base = "Gold_025";
-            else if (goldAmount >= 10)
-                base = "Gold_010";
-            else if (goldAmount >= 5)
-                base = "Gold_005";
-
-            std::cout << "using " << base << std::endl;
-            MWWorld::ManualRef newRef (getStore(), base);
-            object = newRef.getPtr();
-            object.getRefData().setCount(goldAmount);
-        }
-
         ESM::Position& pos = object.getRefData().getPosition();
         pos.pos[0] = result.second[0];
         pos.pos[1] = -result.second[2];
