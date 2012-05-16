@@ -147,73 +147,32 @@ namespace MWGui
         {
             MWWorld::Ptr ptr = *mDragAndDrop->mDraggedWidget->getUserData<MWWorld::Ptr>();
 
-            // can the object be equipped?
-            std::pair<std::vector<int>, bool> slots = MWWorld::Class::get(ptr).getEquipmentSlots(ptr);
-            if (slots.first.empty())
+            if (mDragAndDrop->mDraggedFrom != this)
             {
-                // can't be equipped, try to use instead
-                boost::shared_ptr<MWWorld::Action> action = MWWorld::Class::get(ptr).use(ptr);
-
-                action->execute();
-
-                /// \todo scripts
-
-                // this is necessary for books/scrolls: if they are already in the player's inventory,
-                // the "Take" button should not be visible.
-                // NOTE: the take button is "reset" when the window opens, so we can safely do the following
-                // without screwing up future book windows
-                if (mDragAndDrop->mWasInInventory)
-                {
-                    mWindowManager.getBookWindow()->setTakeButtonShow(false);
-                    mWindowManager.getScrollWindow()->setTakeButtonShow(false);
-                }
-            }
-            else
-            {
+                // add item to the player's inventory
                 MWWorld::InventoryStore& invStore = static_cast<MWWorld::InventoryStore&>(MWWorld::Class::get(mContainer).getContainerStore(mContainer));
-
                 MWWorld::ContainerStoreIterator it = invStore.begin();
 
-                if (mDragAndDrop->mDraggedFrom != this)
-                {
-                    // add item to the player's inventory
-                    int origCount = ptr.getRefData().getCount();
-                    ptr.getRefData().setCount(origCount - mDragAndDrop->mDraggedCount);
-                    it = invStore.add(ptr);
-                    (*it).getRefData().setCount(mDragAndDrop->mDraggedCount);
-                }
-                else
-                {
-                    // retrieve iterator to the item
-                    for (; it != invStore.end(); ++it)
-                    {
-                        if (*it == ptr)
-                        {
-                            break;
-                        }
-                    }
-                }
+                int origCount = ptr.getRefData().getCount();
+                ptr.getRefData().setCount(origCount - mDragAndDrop->mDraggedCount);
+                it = invStore.add(ptr);
+                (*it).getRefData().setCount(mDragAndDrop->mDraggedCount);
+            }
 
-                assert(it != invStore.end());
+            /// \todo scripts
 
-                // equip the item in the first free slot
-                for (std::vector<int>::const_iterator slot=slots.first.begin();
-                    slot!=slots.first.end(); ++slot)
-                {
-                    // if all slots are occupied, replace the last slot
-                    if (slot == --slots.first.end())
-                    {
-                        invStore.equip(*slot, it);
-                        break;
-                    }
+            boost::shared_ptr<MWWorld::Action> action = MWWorld::Class::get(ptr).use(ptr);
+            
+            action->execute();
 
-                    if (invStore.getSlot(*slot) == invStore.end())
-                    {
-                        // slot is not occupied
-                        invStore.equip(*slot, it);
-                        break;
-                    }
-                }
+            // this is necessary for books/scrolls: if they are already in the player's inventory,
+            // the "Take" button should not be visible.
+            // NOTE: the take button is "reset" when the window opens, so we can safely do the following
+            // without screwing up future book windows
+            if (mDragAndDrop->mWasInInventory)
+            {
+                mWindowManager.getBookWindow()->setTakeButtonShow(false);
+                mWindowManager.getScrollWindow()->setTakeButtonShow(false);
             }
 
             mDragAndDrop->mIsOnDragAndDrop = false;
