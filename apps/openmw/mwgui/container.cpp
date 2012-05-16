@@ -26,6 +26,47 @@ using namespace MWGui;
 using namespace Widgets;
 
 
+namespace
+{
+    bool compareType(std::string type1, std::string type2)
+    {
+        // this defines the sorting order of types. types that are first in the vector, appear before other types.
+        std::vector<std::string> mapping;
+        mapping.push_back( typeid(ESM::Weapon).name() );
+        mapping.push_back( typeid(ESM::Armor).name() );
+        mapping.push_back( typeid(ESM::Clothing).name() );
+        mapping.push_back( typeid(ESM::Potion).name() );
+        mapping.push_back( typeid(ESM::Ingredient).name() );
+        mapping.push_back( typeid(ESM::Apparatus).name() );
+        mapping.push_back( typeid(ESM::Book).name() );
+        mapping.push_back( typeid(ESM::Light).name() );
+        mapping.push_back( typeid(ESM::Miscellaneous).name() );
+        mapping.push_back( typeid(ESM::Tool).name() );
+        mapping.push_back( typeid(ESM::Repair).name() );
+        mapping.push_back( typeid(ESM::Probe).name() );
+
+        assert( std::find(mapping.begin(), mapping.end(), type1) != mapping.end() );
+        assert( std::find(mapping.begin(), mapping.end(), type2) != mapping.end() );
+
+        return std::find(mapping.begin(), mapping.end(), type1) < std::find(mapping.begin(), mapping.end(), type2);
+    }
+
+    bool sortItems(MWWorld::Ptr left, MWWorld::Ptr right)
+    {
+        if (left.getTypeName() == right.getTypeName())
+        {
+            int cmp = MWWorld::Class::get(left).getName(left).compare(
+                        MWWorld::Class::get(right).getName(right));
+            return cmp < 0;
+        }
+        else
+        {
+            return compareType(left.getTypeName(), right.getTypeName());
+        }
+    }
+}
+
+
 ContainerBase::ContainerBase(DragAndDrop* dragAndDrop) :
     mDragAndDrop(dragAndDrop),
     mFilter(ContainerBase::Filter_All)
@@ -251,11 +292,18 @@ void ContainerBase::drawItems()
     }
 
     // now add the regular items
+    std::vector<MWWorld::Ptr> regularItems;
     for (MWWorld::ContainerStoreIterator iter (containerStore.begin(categories)); iter!=containerStore.end(); ++iter)
     {
-        /// \todo sorting
         if (std::find(equippedItems.begin(), equippedItems.end(), *iter) == equippedItems.end())
-            items.push_back( std::make_pair(*iter, ItemState_Normal) );
+            regularItems.push_back(*iter);
+    }
+
+    // sort them and add
+    std::sort(regularItems.begin(), regularItems.end(), sortItems);
+    for (std::vector<MWWorld::Ptr>::const_iterator it=regularItems.begin(); it!=regularItems.end(); ++it)
+    {
+        items.push_back( std::make_pair(*it, ItemState_Normal) );
     }
 
     for (std::vector< std::pair<MWWorld::Ptr, ItemState> >::const_iterator it=items.begin();
