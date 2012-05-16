@@ -239,8 +239,8 @@ void ContainerBase::drawItems()
     for (std::vector<MWWorld::Ptr>::iterator it=unwantedItems.begin();
         it != unwantedItems.end(); ++it)
     {
-        std::vector<MWWorld::Ptr>::iterator found = std::find(unwantedItems.begin(), unwantedItems.end(), *it);
-        assert(found != unwantedItems.end());
+        std::vector<MWWorld::Ptr>::iterator found = std::find(equippedItems.begin(), equippedItems.end(), *it);
+        assert(found != equippedItems.end());
         equippedItems.erase(found);
     }
     // and add the items that are left (= have the correct category)
