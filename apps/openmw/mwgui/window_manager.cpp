@@ -447,7 +447,8 @@ void WindowManager::changeCell(MWWorld::Ptr::CellStore* cell)
         else
         {
             const ESM::Region* region = MWBase::Environment::get().getWorld()->getStore().regions.search(cell->cell->region);
-            name = region->name;
+            if (region)
+                name = region->name;
         }
 
         map->setCellName( name );
