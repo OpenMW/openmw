@@ -37,8 +37,23 @@ namespace MWGui
             MyGUI::Button* mFilterMagic;
             MyGUI::Button* mFilterMisc;
 
+            MyGUI::Button* mIncreaseButton;
+            MyGUI::Button* mDecreaseButton;
+            MyGUI::TextBox* mTotalBalanceLabel;
+            MyGUI::TextBox* mTotalBalance;
+
+            MyGUI::Widget* mBottomPane;
+
+            MyGUI::Button* mMaxSaleButton;
+            MyGUI::Button* mCancelButton;
+            MyGUI::Button* mOfferButton;
+            MyGUI::TextBox* mPlayerGold;
+            MyGUI::TextBox* mMerchantGold;
+
             void onWindowResize(MyGUI::Window* _sender);
             void onFilterChanged(MyGUI::Widget* _sender);
+            void onOfferButtonClicked(MyGUI::Widget* _sender);
+            void onCancelButtonClicked(MyGUI::Widget* _sender);
     };
 }
 

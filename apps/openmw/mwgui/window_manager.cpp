@@ -215,6 +215,7 @@ void WindowManager::updateVisible()
     mInventoryWindow->setVisible(false);
     mScrollWindow->setVisible(false);
     mBookWindow->setVisible(false);
+    mTradeWindow->setVisible(false);
 
     // Mouse is visible whenever we're not in game mode
     MyGUI::PointerManager::getInstance().setVisible(isGuiMode());
@@ -272,6 +273,11 @@ void WindowManager::updateVisible()
             break;
         case GM_Dialogue:
             mDialogueWindow->open();
+            break;
+        case GM_Barter:
+            mInventoryWindow->setVisible(true);
+            mInventoryWindow->openInventory();
+            mTradeWindow->setVisible(true);
             break;
         case GM_InterMessageBox:
             if(!mMessageBoxManager->isInteractiveMessageBox()) {

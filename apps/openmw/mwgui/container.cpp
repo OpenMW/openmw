@@ -470,7 +470,6 @@ void ContainerWindow::onCloseButtonClicked(MyGUI::Widget* _sender)
     if(mDragAndDrop == NULL || !mDragAndDrop->mIsOnDragAndDrop)
     {
         MWBase::Environment::get().getWindowManager()->setGuiMode(GM_Game);
-        setVisible(false);
     }
 }
 
@@ -502,6 +501,5 @@ void ContainerWindow::onTakeAllButtonClicked(MyGUI::Widget* _sender)
         containerStore.clear();
 
         MWBase::Environment::get().getWindowManager()->setGuiMode(GM_Game);
-        setVisible(false);
     }
 }

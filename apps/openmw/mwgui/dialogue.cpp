@@ -17,6 +17,7 @@
 #include "widgets.hpp"
 #include "list.hpp"
 #include "tradewindow.hpp"
+#include "inventorywindow.hpp"
 
 using namespace MWGui;
 using namespace Widgets;
@@ -137,6 +138,7 @@ void DialogueWindow::onSelectTopic(std::string topic)
     {
         /// \todo check if the player is allowed to trade with this actor (e.g. faction rank high enough)?
         mWindowManager.getTradeWindow()->startTrade(mActor);
+        mWindowManager.setGuiMode(GM_Barter);
     }
 
     else

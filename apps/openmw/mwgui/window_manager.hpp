@@ -130,9 +130,8 @@ namespace MWGui
     }
 
     MWGui::DialogueWindow* getDialogueWindow() {return mDialogueWindow;}
-
     MWGui::ContainerWindow* getContainerWindow() {return mContainerWindow;}
-
+    MWGui::InventoryWindow* getInventoryWindow() {return mInventoryWindow;}
     MWGui::BookWindow* getBookWindow() {return mBookWindow;}
     MWGui::ScrollWindow* getScrollWindow() {return mScrollWindow;}
     MWGui::CountDialog* getCountDialog() {return mCountDialog;}
