@@ -150,7 +150,7 @@ void MWWorld::ContainerStore::fill (const ESM::InventoryList& items, const ESMS:
             continue;
         }
 
-        ref.getPtr().getRefData().setCount (iter->count);
+        ref.getPtr().getRefData().setCount (std::abs(iter->count)); /// \todo implement item restocking (indicated by negative count)
         add (ref.getPtr());
     }
 
