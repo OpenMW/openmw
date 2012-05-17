@@ -157,6 +157,7 @@ namespace MWGui
                 ptr.getRefData().setCount(origCount - mDragAndDrop->mDraggedCount);
                 it = invStore.add(ptr);
                 (*it).getRefData().setCount(mDragAndDrop->mDraggedCount);
+                ptr = *it;
             }
 
             /// \todo scripts
@@ -169,7 +170,7 @@ namespace MWGui
             // the "Take" button should not be visible.
             // NOTE: the take button is "reset" when the window opens, so we can safely do the following
             // without screwing up future book windows
-            if (mDragAndDrop->mWasInInventory)
+            if (mDragAndDrop->mDraggedFrom == this)
             {
                 mWindowManager.getBookWindow()->setTakeButtonShow(false);
                 mWindowManager.getScrollWindow()->setTakeButtonShow(false);

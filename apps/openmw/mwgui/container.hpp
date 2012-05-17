@@ -36,17 +36,11 @@ namespace MWGui
     class DragAndDrop
     {
     public:
-        DragAndDrop() :
-            mWasInInventory(false)
-        {
-        }
-
         bool mIsOnDragAndDrop;
         MyGUI::Widget* mDraggedWidget;
         MyGUI::Widget* mDragAndDropWidget;
         ContainerBase* mDraggedFrom;
         int mDraggedCount;
-        bool mWasInInventory; // was the item in inventory before it was dragged
     };
 
     class ContainerBase

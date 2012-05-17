@@ -136,8 +136,6 @@ void ContainerBase::onSelectedItemImpl(MyGUI::Widget* _sender, int count)
     static_cast<MyGUI::TextBox*>(mSelectedItem->getChildAt(0)->getChildAt(0))->setCaption(
         getCountString(mDragAndDrop->mDraggedCount));
 
-    mDragAndDrop->mWasInInventory = isInventory();
-
     drawItems();
 
     MWBase::Environment::get().getWindowManager()->setDragDrop(true);
