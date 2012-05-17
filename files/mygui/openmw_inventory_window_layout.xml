@@ -27,8 +27,9 @@
 
             <!-- Items in inventory -->
             <Widget type="Widget" skin="MW_Box" position="0 38 350 185" name="box" align="Left Top Stretch">
-                <Widget type="ScrollView" skin="MW_ScrollViewH" position="4 4 342 181" align="Left Top Stretch" name="ItemView">
-                    <Widget type="Button" skin="" name="Items" position="0 0 342 181" name="Items" align="Left Top Stretch"/>
+                <Widget type="ScrollView" skin="MW_ScrollViewH" position="4 4 342 177" align="Left Top Stretch" name="ItemView">
+                    <Property key="CanvasAlign" value="Left Top"/>
+                    <Widget type="Button" skin="" name="Items" position="0 0 342 177" name="Items" align="Left Top Stretch"/>
                 </Widget>
             </Widget>
 
