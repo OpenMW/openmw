@@ -28,8 +28,6 @@ void MWList::initialiseOverride()
 void MWList::addItem(const std::string& name)
 {
     mItems.push_back(name);
-
-    redraw();
 }
 
 void MWList::adjustSize()
@@ -67,7 +65,6 @@ void MWList::redraw(bool scrollbarShown)
         mItemHeight += height + spacing;
     }
     mScrollView->setCanvasSize(mClient->getSize().width + (_scrollBarWidth-scrollBarWidth), std::max(mItemHeight, mClient->getSize().height));
-    mScrollView->setViewOffset(MyGUI::IntPoint(0,0));
 
     if (!scrollbarShown && mItemHeight > mClient->getSize().height)
         redraw(true);
@@ -93,15 +90,11 @@ void MWList::removeItem(const std::string& name)
 {
     assert( std::find(mItems.begin(), mItems.end(), name) != mItems.end() );
     mItems.erase( std::find(mItems.begin(), mItems.end(), name) );
-
-    redraw();
 }
 
 void MWList::clear()
 {
     mItems.clear();
-
-    redraw();
 }
 
 void MWList::onMouseWheel(MyGUI::Widget* _sender, int _rel)

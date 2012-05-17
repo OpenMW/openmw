@@ -26,7 +26,7 @@ namespace MWGui
             EventHandle_String eventItemSelected;
 
             /**
-             * Call after the size of the list changed
+             * Call after the size of the list changed, or items were inserted/removed
              */
             void adjustSize();
 

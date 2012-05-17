@@ -145,6 +145,7 @@ void DialogueWindow::setKeywords(std::list<std::string> keyWords)
     {
         topicsList->addItem(*it);
     }
+    topicsList->adjustSize();
 }
 
 void DialogueWindow::removeKeyword(std::string keyWord)
@@ -154,6 +155,7 @@ void DialogueWindow::removeKeyword(std::string keyWord)
         topicsList->removeItem(keyWord);
         pTopicsText.erase(keyWord);
     }
+    topicsList->adjustSize();
 }
 
 void addColorInString(std::string& str, const std::string& keyword,std::string color1, std::string color2)
