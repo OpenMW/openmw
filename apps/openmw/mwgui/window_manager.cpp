@@ -449,6 +449,8 @@ void WindowManager::changeCell(MWWorld::Ptr::CellStore* cell)
             const ESM::Region* region = MWBase::Environment::get().getWorld()->getStore().regions.search(cell->cell->region);
             if (region)
                 name = region->name;
+            else
+                name = getGameSettingString("sDefaultCellname", "Wilderness");
         }
 
         map->setCellName( name );
