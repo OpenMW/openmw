@@ -43,7 +43,7 @@ namespace MWGui
         mMaxSaleButton->setCaption(mWindowManager.getGameSettingString("sMaxSale", "Max. Sale"));
 
         mCancelButton->setCaption(MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sCancel")->str);
-        mOfferButton->setCaption(MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sOffer")->str);
+        mOfferButton->setCaption(MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sBarterDialog8")->str);
 
         mFilterAll->setCaption (MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sAllTab")->str);
         mFilterWeapon->setCaption (MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sWeaponTab")->str);
