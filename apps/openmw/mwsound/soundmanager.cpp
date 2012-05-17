@@ -433,7 +433,10 @@ namespace MWSound
             total = 0;
         }
 
-        const ESM::Region *regn = MWBase::Environment::get().getWorld()->getStore().regions.find(regionName);
+        const ESM::Region *regn = MWBase::Environment::get().getWorld()->getStore().regions.search(regionName);
+        if (regn == NULL)
+            return;
+
         std::vector<ESM::Region::SoundRef>::const_iterator soundIter;
         if(total == 0)
         {

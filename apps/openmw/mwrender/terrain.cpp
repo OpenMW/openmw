@@ -110,12 +110,12 @@ namespace MWRender
         const int cellY = store->cell->getGridY();
 
         ESM::Land* land = MWBase::Environment::get().getWorld()->getStore().lands.search(cellX, cellY);
-        if ( land != NULL )
+        if (land == NULL) // no land data means we're not going to create any terrain.
+            return;
+
+        if (!land->dataLoaded)
         {
-            if (!land->dataLoaded)
-            {
-                land->loadData();
-            }
+            land->loadData();
         }
 
         //split the cell terrain into four segments
@@ -138,25 +138,18 @@ namespace MWRender
                                                       mLandSize*mLandSize,
                                                       MEMCATEGORY_GEOMETRY);
 
-                if ( land != NULL )
+                //copy the height data row by row
+                for ( int terrainCopyY = 0; terrainCopyY < mLandSize; terrainCopyY++ )
                 {
-                    //copy the height data row by row
-                    for ( int terrainCopyY = 0; terrainCopyY < mLandSize; terrainCopyY++ )
-                    {
-                                               //the offset of the current segment
-                        const size_t yOffset = y * (mLandSize-1) * ESM::Land::LAND_SIZE +
-                                               //offset of the row
-                                               terrainCopyY * ESM::Land::LAND_SIZE;
-                        const size_t xOffset = x * (mLandSize-1);
+                                           //the offset of the current segment
+                    const size_t yOffset = y * (mLandSize-1) * ESM::Land::LAND_SIZE +
+                                           //offset of the row
+                                           terrainCopyY * ESM::Land::LAND_SIZE;
+                    const size_t xOffset = x * (mLandSize-1);
 
-                        memcpy(&terrainData.inputFloat[terrainCopyY*mLandSize],
-                               &land->landData->heights[yOffset + xOffset],
-                               mLandSize*sizeof(float));
-                    }
-                }
-                else
-                {
-                    memset(terrainData.inputFloat, 0, mLandSize*mLandSize*sizeof(float));
+                    memcpy(&terrainData.inputFloat[terrainCopyY*mLandSize],
+                           &land->landData->heights[yOffset + xOffset],
+                           mLandSize*sizeof(float));
                 }
 
                 std::map<uint16_t, int> indexes;
@@ -179,7 +172,7 @@ namespace MWRender
                     terrain->setVisibilityFlags(RV_Terrain);
                     terrain->setRenderQueueGroup(RQG_Main);
 
-                    if ( land && land->landData->usingColours )
+                    if ( land->landData->usingColours )
                     {
                         // disable or enable global colour map (depends on available vertex colours)
                         mActiveProfile->setGlobalColourMapEnabled(true);
@@ -196,10 +189,6 @@ namespace MWRender
                         //mat = terrain->_getCompositeMapMaterial();
                         //mat->getTechnique(0)->getPass(0)->getTextureUnitState(1)->setTextureName( vertex->getName() );
                     }
-                    else
-                    {
-                        mActiveProfile->setGlobalColourMapEnabled(false);
-                    }
                 }
             }
         }
@@ -215,8 +204,10 @@ namespace MWRender
         {
             for ( int y = 0; y < 2; y++ )
             {
-                mTerrainGroup.unloadTerrain(store->cell->getGridX() * 2 + x,
-                                            store->cell->getGridY() * 2 + y);
+                int terrainX = store->cell->getGridX() * 2 + x;
+                int terrainY = store->cell->getGridY() * 2 + y;
+                if (mTerrainGroup.getTerrain(terrainX, terrainY) != NULL)
+                    mTerrainGroup.unloadTerrain(terrainX, terrainY);
             }
         }
     }
