@@ -23,6 +23,8 @@ namespace MWMechanics
 
             void updateNpc (const MWWorld::Ptr& ptr, float duration, bool paused);
 
+            void adjustMagicEffects (const MWWorld::Ptr& creature);
+
         public:
 
             Actors();

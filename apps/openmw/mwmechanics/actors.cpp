@@ -14,7 +14,10 @@ namespace MWMechanics
 {
     void Actors::updateActor (const MWWorld::Ptr& ptr, float duration)
     {
-        MWMechanics::CreatureStats& creatureStats = MWWorld::Class::get (ptr).getCreatureStats (ptr);
+        // magic effects
+        adjustMagicEffects (ptr);
+
+        CreatureStats& creatureStats = MWWorld::Class::get (ptr).getCreatureStats (ptr);
 
         // calculate dynamic stats
         int strength = creatureStats.mAttributes[0].getBase();
@@ -39,6 +42,21 @@ namespace MWMechanics
         if (!paused && ptr.getRefData().getHandle()!="player")
             MWWorld::Class::get (ptr).getInventoryStore (ptr).autoEquip (
                 MWWorld::Class::get (ptr).getNpcStats (ptr));
+    }
+
+    void Actors::adjustMagicEffects (const MWWorld::Ptr& creature)
+    {
+        CreatureStats& creatureStats =  MWWorld::Class::get (creature).getCreatureStats (creature);
+
+        MagicEffects now = creatureStats.mSpells.getMagicEffects();
+
+        /// \todo add effects from active spells and equipment
+
+        MagicEffects diff = MagicEffects::diff (creatureStats.mMagicEffects, now);
+
+        creatureStats.mMagicEffects = now;
+
+        // TODO apply diff to other stats
     }
 
     Actors::Actors() : mDuration (0) {}

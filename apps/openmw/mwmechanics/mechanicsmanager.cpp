@@ -138,26 +138,8 @@ namespace MWMechanics
                 }
             }
         }
-
-        // magic effects
-        adjustMagicEffects (ptr);
     }
 
-    void MechanicsManager::adjustMagicEffects (MWWorld::Ptr& creature)
-    {
-        MWMechanics::CreatureStats& creatureStats =
-            MWWorld::Class::get (creature).getCreatureStats (creature);
-
-        MagicEffects now = creatureStats.mSpells.getMagicEffects();
-
-        /// \todo add effects from active spells and equipment
-
-        MagicEffects diff = MagicEffects::diff (creatureStats.mMagicEffects, now);
-
-        creatureStats.mMagicEffects = now;
-
-        // TODO apply diff to other stats
-    }
 
     MechanicsManager::MechanicsManager()
     : mUpdatePlayer (true), mClassSelected (false),
