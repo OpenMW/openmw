@@ -637,7 +637,7 @@ namespace MWDialogue
         //initialise the GUI
         MWBase::Environment::get().getInputManager()->setGuiMode(MWGui::GM_Dialogue);
         MWGui::DialogueWindow* win = MWBase::Environment::get().getWindowManager()->getDialogueWindow();
-        win->startDialogue(MWWorld::Class::get (actor).getName (actor));
+        win->startDialogue(actor, MWWorld::Class::get (actor).getName (actor));
 
         //setup the list of topics known by the actor. Topics who are also on the knownTopics list will be added to the GUI
         updateTopics();

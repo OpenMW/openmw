@@ -7,4 +7,9 @@ namespace MWGui
         ContainerBase(NULL) // no drag&drop
     {
     }
+
+    void TradeWindow::startTrade(MWWorld::Ptr actor)
+    {
+        ContainerBase::openContainer(actor);
+    }
 }

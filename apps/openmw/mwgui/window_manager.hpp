@@ -136,6 +136,7 @@ namespace MWGui
     MWGui::BookWindow* getBookWindow() {return mBookWindow;}
     MWGui::ScrollWindow* getScrollWindow() {return mScrollWindow;}
     MWGui::CountDialog* getCountDialog() {return mCountDialog;}
+    MWGui::TradeWindow* getTradeWindow() {return mTradeWindow;}
 
     MyGUI::Gui* getGui() const { return gui; }
 

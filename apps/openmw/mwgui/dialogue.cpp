@@ -1,11 +1,4 @@
 #include "dialogue.hpp"
-#include "dialogue_history.hpp"
-#include "window_manager.hpp"
-#include "widgets.hpp"
-#include "list.hpp"
-#include "components/esm_store/store.hpp"
-#include "../mwbase/environment.hpp"
-#include "../mwdialogue/dialoguemanager.hpp"
 
 #include <assert.h>
 #include <iostream>
@@ -13,6 +6,17 @@
 
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
+
+#include <components/esm_store/store.hpp>
+
+#include "../mwbase/environment.hpp"
+#include "../mwdialogue/dialoguemanager.hpp"
+
+#include "dialogue_history.hpp"
+#include "window_manager.hpp"
+#include "widgets.hpp"
+#include "list.hpp"
+#include "tradewindow.hpp"
 
 using namespace MWGui;
 using namespace Widgets;
@@ -59,9 +63,7 @@ DialogueWindow::DialogueWindow(WindowManager& parWindowManager)
 
     //Topics list
     getWidget(topicsList, "TopicsList");
-    //topicsList->eventListSelectAccept      += MyGUI::newDelegate(this, &DialogueWindow::onSelectTopic);
     topicsList->eventItemSelected += MyGUI::newDelegate(this, &DialogueWindow::onSelectTopic);
-    //topicsList->eventListChangePosition    += MyGUI::newDelegate(this, &DialogueWindow::onSelectTopic);
 
     MyGUI::ButtonPtr byeButton;
     getWidget(byeButton, "ByeButton");
@@ -117,6 +119,9 @@ void DialogueWindow::open()
     history->eraseText(0,history->getTextLength());
     updateOptions();
     setVisible(true);
+
+    // hide all sub-dialogues of the dialog window (trade window, persuasion, etc)
+    mWindowManager.getTradeWindow()->setVisible(false);
 }
 
 void DialogueWindow::onByeClicked(MyGUI::Widget* _sender)
@@ -128,12 +133,20 @@ void DialogueWindow::onSelectTopic(std::string topic)
 {
     if (!mEnabled) return;
 
-    MWBase::Environment::get().getDialogueManager()->keywordSelected(lower_string(topic));
+    if (topic == MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sBarter")->str)
+    {
+        /// \todo check if the player is allowed to trade with this actor (e.g. faction rank high enough)?
+        mWindowManager.getTradeWindow()->startTrade(mActor);
+    }
+
+    else
+        MWBase::Environment::get().getDialogueManager()->keywordSelected(lower_string(topic));
 }
 
-void DialogueWindow::startDialogue(std::string npcName)
+void DialogueWindow::startDialogue(MWWorld::Ptr actor, std::string npcName)
 {
     mEnabled = true;
+    mActor = actor;
     topicsList->setEnabled(true);
     static_cast<MyGUI::Window*>(mMainWidget)->setCaption(npcName);
     adjustWindowCaption();

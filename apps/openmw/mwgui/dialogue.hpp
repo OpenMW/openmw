@@ -4,6 +4,8 @@
 #include "window_base.hpp"
 #include <boost/array.hpp>
 
+#include "../mwworld/ptr.hpp"
+
 namespace MWGui
 {
     class WindowManager;
@@ -38,7 +40,7 @@ namespace MWGui
         */
         EventHandle_Void eventBye;
 
-        void startDialogue(std::string npcName);
+        void startDialogue(MWWorld::Ptr actor, std::string npcName);
         void stopDialogue();
         void setKeywords(std::list<std::string> keyWord);
         void removeKeyword(std::string keyWord);
@@ -69,6 +71,8 @@ namespace MWGui
         bool mShowTrade;
 
         bool mEnabled;
+
+        MWWorld::Ptr mActor; // actor being talked to
 
         DialogueHistory*     history;
         Widgets::MWList*      topicsList;

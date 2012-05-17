@@ -4,6 +4,8 @@
 #include "container.hpp"
 #include "window_base.hpp"
 
+#include "../mwworld/ptr.hpp"
+
 namespace MyGUI
 {
   class Gui;
@@ -22,6 +24,8 @@ namespace MWGui
     {
         public:
             TradeWindow(WindowManager& parWindowManager);
+
+            void startTrade(MWWorld::Ptr actor);
 
             //virtual void Update();
             //virtual void notifyContentChanged();
