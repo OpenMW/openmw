@@ -44,10 +44,7 @@ namespace MWGui
 
         mCancelButton->setCaption(MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sCancel")->str);
         mOfferButton->setCaption(MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sOffer")->str);
-/*
-        mMerchantGold->setCaption(MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sSellerGold")->str);
 
-*/
         mFilterAll->setCaption (MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sAllTab")->str);
         mFilterWeapon->setCaption (MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sWeaponTab")->str);
         mFilterApparel->setCaption (MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sApparelTab")->str);
@@ -167,14 +164,50 @@ namespace MWGui
             mTotalBalanceLabel->setCaption(MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sTotalCost")->str);
             mTotalBalance->setCaption(boost::lexical_cast<std::string>(-mCurrentBalance));
         }
-    }
 
+        // retrieve merchant gold
+        int gold = 0;
+        MWWorld::InventoryStore& invStore = static_cast<MWWorld::InventoryStore&>(MWWorld::Class::get(mContainer).getContainerStore(mContainer));
+        for (MWWorld::ContainerStoreIterator it = invStore.begin();
+                it != invStore.end(); ++it)
+        {
+            if (MWWorld::Class::get(*it).getName(*it) == MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sGold")->str)
+                gold = it->getRefData().getCount();
+        }
+
+        int merchantgold;
+        if (mContainer.getTypeName() == typeid(ESM::NPC).name())
+        {
+            ESMS::LiveCellRef<ESM::NPC, MWWorld::RefData>* ref = mContainer.get<ESM::NPC>();
+            if (ref->base->npdt52.gold == -10)
+                merchantgold = ref->base->npdt12.gold;
+            else
+                merchantgold = ref->base->npdt52.gold;
+        }
+        else // ESM::Creature
+        {
+            ESMS::LiveCellRef<ESM::Creature, MWWorld::RefData>* ref = mContainer.get<ESM::Creature>();
+            merchantgold = ref->base->data.gold;
+        }
+        gold += merchantgold;
+
+        mMerchantGold->setCaption(MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sSellerGold")->str
+            + " " + boost::lexical_cast<std::string>(gold));
+    }
 
     std::vector<MWWorld::Ptr> TradeWindow::getEquippedItems()
     {
-        MWWorld::InventoryStore& invStore = static_cast<MWWorld::InventoryStore&>(MWWorld::Class::get(mContainer).getContainerStore(mContainer));
+        
 
         std::vector<MWWorld::Ptr> items;
+
+        if (mContainer.getTypeName() == typeid(ESM::Creature).name())
+        {
+            // creatures don't have equipment slots.
+            return items;
+        }
+
+        MWWorld::InventoryStore& invStore = static_cast<MWWorld::InventoryStore&>(MWWorld::Class::get(mContainer).getContainerStore(mContainer));
 
         for (int slot=0; slot < MWWorld::InventoryStore::Slots; ++slot)
         {
