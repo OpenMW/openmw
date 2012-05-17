@@ -22,10 +22,10 @@
         </Widget>
 
         <Widget type="Widget" skin="" position="8 231 566 92" name="BottomPane" align="Left Bottom HStretch">
-            <Widget type="TextBox" skin="SandText" position="292 0 274 24" name="PlayerGold" align="Left Top HStretch">
+            <Widget type="TextBox" skin="SandText" position="192 0 374 24" name="PlayerGold" align="Left Top HStretch">
                 <Property key="TextAlign" value="Right"/>
             </Widget>
-            <Widget type="TextBox" skin="SandText" position="292 28 274 24" name="MerchantGold" align="Left Top HStretch">
+            <Widget type="TextBox" skin="SandText" position="192 28 374 24" name="MerchantGold" align="Left Top HStretch">
                 <Property key="TextAlign" value="Right"/>
             </Widget>
 

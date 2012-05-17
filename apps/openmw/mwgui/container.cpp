@@ -300,10 +300,13 @@ void ContainerBase::drawItems()
         equippedItems.erase(found);
     }
     // and add the items that are left (= have the correct category)
-    for (std::vector<MWWorld::Ptr>::const_iterator it=equippedItems.begin();
-        it != equippedItems.end(); ++it)
+    if (!ignoreEquippedItems())
     {
-        items.push_back( std::make_pair(*it, ItemState_Equipped) );
+        for (std::vector<MWWorld::Ptr>::const_iterator it=equippedItems.begin();
+            it != equippedItems.end(); ++it)
+        {
+            items.push_back( std::make_pair(*it, ItemState_Equipped) );
+        }
     }
 
     // now add the regular items

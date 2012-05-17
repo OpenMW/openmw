@@ -84,13 +84,13 @@ namespace MWGui
         mFilterAll->setStateSelected(true);
 
         setCoord(0, 342, 600, 258);
+
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+        openContainer(player);
     }
 
     void InventoryWindow::openInventory()
     {
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
-        openContainer(player);
-
         onWindowResize(static_cast<MyGUI::Window*>(mMainWidget));
 
         updateEncumbranceBar();
@@ -231,5 +231,18 @@ namespace MWGui
         updateEncumbranceBar();
 
         ContainerBase::Update();
+    }
+
+    int InventoryWindow::getPlayerGold()
+    {
+        MWWorld::InventoryStore& invStore = static_cast<MWWorld::InventoryStore&>(MWWorld::Class::get(mContainer).getContainerStore(mContainer));
+
+        for (MWWorld::ContainerStoreIterator it = invStore.begin();
+                it != invStore.end(); ++it)
+        {
+            if (MWWorld::Class::get(*it).getName(*it) == MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sGold")->str)
+                return it->getRefData().getCount();
+        }
+        return 0;
     }
 }

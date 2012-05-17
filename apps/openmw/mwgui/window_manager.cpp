@@ -108,10 +108,10 @@ WindowManager::WindowManager(
     console = new Console(w,h, extensions);
     mJournal = new JournalWindow(*this);
     mMessageBoxManager = new MessageBoxManager(this);
+    mInventoryWindow = new InventoryWindow(*this,mDragAndDrop);
     mTradeWindow = new TradeWindow(*this);
     mDialogueWindow = new DialogueWindow(*this);
     mContainerWindow = new ContainerWindow(*this,mDragAndDrop);
-    mInventoryWindow = new InventoryWindow(*this,mDragAndDrop);
     hud = new HUD(w,h, showFPSLevel, mDragAndDrop);
     mToolTips = new ToolTips(this);
     mScrollWindow = new ScrollWindow(*this);

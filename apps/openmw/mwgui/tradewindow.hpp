@@ -50,10 +50,18 @@ namespace MWGui
             MyGUI::TextBox* mPlayerGold;
             MyGUI::TextBox* mMerchantGold;
 
+            int mCurrentBalance;
+
             void onWindowResize(MyGUI::Window* _sender);
             void onFilterChanged(MyGUI::Widget* _sender);
             void onOfferButtonClicked(MyGUI::Widget* _sender);
             void onCancelButtonClicked(MyGUI::Widget* _sender);
+
+            // don't show items that the NPC has equipped in his trade-window.
+            virtual bool ignoreEquippedItems() { return true; }
+            virtual std::vector<MWWorld::Ptr> getEquippedItems();
+
+            void updateLabels();
     };
 }
 

@@ -1,15 +1,20 @@
 #include "tradewindow.hpp"
 
+#include <boost/lexical_cast.hpp>
+
 #include "../mwbase/environment.hpp"
 #include "../mwworld/world.hpp"
+#include "../mwworld/inventorystore.hpp"
 
 #include "window_manager.hpp"
+#include "inventorywindow.hpp"
 
 namespace MWGui
 {
     TradeWindow::TradeWindow(WindowManager& parWindowManager) :
-        WindowBase("openmw_trade_window_layout.xml", parWindowManager),
-        ContainerBase(NULL) // no drag&drop
+        WindowBase("openmw_trade_window_layout.xml", parWindowManager)
+        , ContainerBase(NULL) // no drag&drop
+        , mCurrentBalance(0)
     {
         MyGUI::ScrollView* itemView;
         MyGUI::Widget* containerWidget;
@@ -40,9 +45,6 @@ namespace MWGui
         mCancelButton->setCaption(MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sCancel")->str);
         mOfferButton->setCaption(MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sOffer")->str);
 /*
-        mTotalBalanceLabel->setCaption(MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sTotalCost")->str);
-        mTotalBalanceLabel->setCaption(MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sTotalSold")->str);
-        mPlayerGold->setCaption(MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sYourGold")->str);
         mMerchantGold->setCaption(MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sSellerGold")->str);
 
 */
@@ -108,6 +110,10 @@ namespace MWGui
 
         setTitle(MWWorld::Class::get(actor).getName(actor));
         adjustWindowCaption();
+
+        mCurrentBalance = 0;
+
+        updateLabels();
     }
 
     void TradeWindow::onFilterChanged(MyGUI::Widget* _sender)
@@ -144,5 +150,41 @@ namespace MWGui
     void TradeWindow::onCancelButtonClicked(MyGUI::Widget* _sender)
     {
         mWindowManager.setGuiMode(GM_Game);
+    }
+
+    void TradeWindow::updateLabels()
+    {
+        mPlayerGold->setCaption(MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sYourGold")->str
+            + " " + boost::lexical_cast<std::string>(mWindowManager.getInventoryWindow()->getPlayerGold()));
+
+        if (mCurrentBalance > 0)
+        {
+            mTotalBalanceLabel->setCaption(MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sTotalSold")->str);
+            mTotalBalance->setCaption(boost::lexical_cast<std::string>(mCurrentBalance));
+        }
+        else
+        {
+            mTotalBalanceLabel->setCaption(MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sTotalCost")->str);
+            mTotalBalance->setCaption(boost::lexical_cast<std::string>(-mCurrentBalance));
+        }
+    }
+
+
+    std::vector<MWWorld::Ptr> TradeWindow::getEquippedItems()
+    {
+        MWWorld::InventoryStore& invStore = static_cast<MWWorld::InventoryStore&>(MWWorld::Class::get(mContainer).getContainerStore(mContainer));
+
+        std::vector<MWWorld::Ptr> items;
+
+        for (int slot=0; slot < MWWorld::InventoryStore::Slots; ++slot)
+        {
+            MWWorld::ContainerStoreIterator it = invStore.getSlot(slot);
+            if (it != invStore.end())
+            {
+                items.push_back(*it);
+            }
+        }
+
+        return items;
     }
 }

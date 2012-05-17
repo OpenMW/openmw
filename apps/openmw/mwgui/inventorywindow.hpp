@@ -16,6 +16,8 @@ namespace MWGui
             virtual void Update();
             virtual void notifyContentChanged();
 
+            int getPlayerGold();
+
         protected:
             MyGUI::Widget* mAvatar;
             MyGUI::TextBox* mArmorRating;

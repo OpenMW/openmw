@@ -98,6 +98,9 @@ namespace MWGui
         virtual bool isInventory() { return false; }
         virtual std::vector<MWWorld::Ptr> getEquippedItems() { return std::vector<MWWorld::Ptr>(); }
         virtual void _unequipItem(MWWorld::Ptr item) { ; }
+
+        // to be reimplemented by TradeWindow
+        virtual bool ignoreEquippedItems() { return false; }
     };
 
     class ContainerWindow : public ContainerBase, public WindowBase
