@@ -82,7 +82,11 @@ namespace MWWorld
             }
 
             if (!((*iter)->cell->data.flags & ESM::Cell::Interior))
-                mPhysics->removeHeightField( (*iter)->cell->data.gridX, (*iter)->cell->data.gridY );
+            {
+                ESM::Land* land = mWorld->getStore().lands.search((*iter)->cell->data.gridX,(*iter)->cell->data.gridY);
+                if (land)
+                    mPhysics->removeHeightField( (*iter)->cell->data.gridX, (*iter)->cell->data.gridY );
+            }
         }
 
 		mRendering.removeCell(*iter);
@@ -118,9 +122,10 @@ namespace MWWorld
             if (!(cell->cell->data.flags & ESM::Cell::Interior))
             {
                 ESM::Land* land = mWorld->getStore().lands.search(cell->cell->data.gridX,cell->cell->data.gridY);
-                mPhysics->addHeightField (land->landData->heights,
-                    cell->cell->data.gridX, cell->cell->data.gridY,
-                    0, ( worldsize/(verts-1) ), verts);
+                if (land)
+                    mPhysics->addHeightField (land->landData->heights,
+                        cell->cell->data.gridX, cell->cell->data.gridY,
+                        0, ( worldsize/(verts-1) ), verts);
             }
 
             mRendering.configureAmbient(*cell);
