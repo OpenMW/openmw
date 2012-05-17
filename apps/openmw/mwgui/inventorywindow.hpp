@@ -4,23 +4,6 @@
 #include "container.hpp"
 #include "window_pinnable_base.hpp"
 
-namespace MWWorld
-{
-    class Environment;
-}
-
-namespace MyGUI
-{
-  class Gui;
-  class Widget;
-}
-
-namespace MWGui
-{
-    class WindowManager;
-}
-
-
 namespace MWGui
 {
     class InventoryWindow : public ContainerBase, public WindowPinnableBase
@@ -60,4 +43,5 @@ namespace MWGui
             virtual void _unequipItem(MWWorld::Ptr item);
     };
 }
+
 #endif // Inventory_H
