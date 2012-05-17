@@ -499,51 +499,54 @@ void WeatherManager::update(float duration)
             mCurrentRegion = regionstr;
             mWeatherUpdateTime = WeatherGlobals::mWeatherUpdateTime*3600;
 
-            std::string weather;
+            std::string weather = "clear";
 
             if (mRegionOverrides.find(regionstr) != mRegionOverrides.end())
                 weather = mRegionOverrides[regionstr];
             else
             {
                 // get weather probabilities for the current region
-                const ESM::Region *region = MWBase::Environment::get().getWorld()->getStore().regions.find (regionstr);
+                const ESM::Region *region = MWBase::Environment::get().getWorld()->getStore().regions.search (regionstr);
 
-                float clear = region->data.clear/255.f;
-                float cloudy = region->data.cloudy/255.f;
-                float foggy = region->data.foggy/255.f;
-                float overcast = region->data.overcast/255.f;
-                float rain = region->data.rain/255.f;
-                float thunder = region->data.thunder/255.f;
-                float ash = region->data.ash/255.f;
-                float blight = region->data.blight/255.f;
-                //float snow = region->data.a/255.f;
-                //float blizzard = region->data.b/255.f;
+                if (region != 0)
+                {
+                    float clear = region->data.clear/255.f;
+                    float cloudy = region->data.cloudy/255.f;
+                    float foggy = region->data.foggy/255.f;
+                    float overcast = region->data.overcast/255.f;
+                    float rain = region->data.rain/255.f;
+                    float thunder = region->data.thunder/255.f;
+                    float ash = region->data.ash/255.f;
+                    float blight = region->data.blight/255.f;
+                    //float snow = region->data.a/255.f;
+                    //float blizzard = region->data.b/255.f;
 
-                // re-scale to 100 percent
-                const float total = clear+cloudy+foggy+overcast+rain+thunder+ash+blight;//+snow+blizzard;
+                    // re-scale to 100 percent
+                    const float total = clear+cloudy+foggy+overcast+rain+thunder+ash+blight;//+snow+blizzard;
 
-                float random = ((rand()%100)/100.f) * total;
+                    float random = ((rand()%100)/100.f) * total;
 
-                //if (random >= snow+blight+ash+thunder+rain+overcast+foggy+cloudy+clear)
-                //    weather = "blizzard";
-                //else if (random >= blight+ash+thunder+rain+overcast+foggy+cloudy+clear)
-                //    weather = "snow";
-                /*else*/ if (random >= ash+thunder+rain+overcast+foggy+cloudy+clear)
-                    weather = "blight";
-                else if (random >= thunder+rain+overcast+foggy+cloudy+clear)
-                    weather = "ashstorm";
-                else if (random >= rain+overcast+foggy+cloudy+clear)
-                    weather = "thunderstorm";
-                else if (random >= overcast+foggy+cloudy+clear)
-                    weather = "rain";
-                else if (random >= foggy+cloudy+clear)
-                    weather = "overcast";
-                else if (random >= cloudy+clear)
-                    weather = "foggy";
-                else if (random >= clear)
-                    weather = "cloudy";
-                else
-                    weather = "clear";
+                    //if (random >= snow+blight+ash+thunder+rain+overcast+foggy+cloudy+clear)
+                    //    weather = "blizzard";
+                    //else if (random >= blight+ash+thunder+rain+overcast+foggy+cloudy+clear)
+                    //    weather = "snow";
+                    /*else*/ if (random >= ash+thunder+rain+overcast+foggy+cloudy+clear)
+                        weather = "blight";
+                    else if (random >= thunder+rain+overcast+foggy+cloudy+clear)
+                        weather = "ashstorm";
+                    else if (random >= rain+overcast+foggy+cloudy+clear)
+                        weather = "thunderstorm";
+                    else if (random >= overcast+foggy+cloudy+clear)
+                        weather = "rain";
+                    else if (random >= foggy+cloudy+clear)
+                        weather = "overcast";
+                    else if (random >= cloudy+clear)
+                        weather = "foggy";
+                    else if (random >= clear)
+                        weather = "cloudy";
+                    else
+                        weather = "clear";
+                }
             }
 
             setWeather(weather, false);
