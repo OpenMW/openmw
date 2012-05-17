@@ -767,6 +767,36 @@ namespace MWDialogue
             }
         }
 
+        // check the available services of this actor
+        int services = 0;
+        if (mActor.getTypeName() == typeid(ESM::NPC).name())
+        {
+            ESMS::LiveCellRef<ESM::NPC, MWWorld::RefData>* ref = mActor.get<ESM::NPC>();
+            if (ref->base->hasAI)
+                services = ref->base->AI.services;
+        }
+        else if (mActor.getTypeName() == typeid(ESM::Creature).name())
+        {
+            ESMS::LiveCellRef<ESM::Creature, MWWorld::RefData>* ref = mActor.get<ESM::Creature>();
+            if (ref->base->hasAI)
+                services = ref->base->AI.services;
+        }
+
+        if (services & ESM::NPC::Weapon
+            || services & ESM::NPC::Armor
+            || services & ESM::NPC::Clothing
+            || services & ESM::NPC::Books
+            || services & ESM::NPC::Ingredients
+            || services & ESM::NPC::Picks
+            || services & ESM::NPC::Probes
+            || services & ESM::NPC::Lights
+            || services & ESM::NPC::Apparatus
+            || services & ESM::NPC::RepairItem
+            || services & ESM::NPC::Misc)
+            win->setShowTrade(true);
+        else
+            win->setShowTrade(false);
+
         // sort again, because the previous sort was case-sensitive
         keywordList.sort(stringCompareNoCase);
         win->setKeywords(keywordList);

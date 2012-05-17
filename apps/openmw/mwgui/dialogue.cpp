@@ -40,6 +40,7 @@ std::string::size_type find_str_ci(const std::string& str, const std::string& su
 DialogueWindow::DialogueWindow(WindowManager& parWindowManager)
     : WindowBase("openmw_dialogue_window_layout.xml", parWindowManager)
     , mEnabled(true)
+    , mShowTrade(false)
 {
     // Centre dialog
     center();
@@ -141,6 +142,15 @@ void DialogueWindow::startDialogue(std::string npcName)
 void DialogueWindow::setKeywords(std::list<std::string> keyWords)
 {
     topicsList->clear();
+
+    bool anyService = mShowTrade;
+
+    if (mShowTrade)
+        topicsList->addItem(MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sBarter")->str);
+
+    if (anyService)
+        topicsList->addSeparator();
+
     for(std::list<std::string>::iterator it = keyWords.begin(); it != keyWords.end(); it++)
     {
         topicsList->addItem(*it);
@@ -194,7 +204,8 @@ std::string DialogueWindow::parseText(std::string text)
     for(unsigned int i = 0;i<topicsList->getItemCount();i++)
     {
         std::string keyWord = topicsList->getItemNameAt(i);
-        addColorInString(text,keyWord,"#686EBA","#B29154");
+        if (keyWord != "")
+            addColorInString(text,keyWord,"#686EBA","#B29154");
     }
     return text;
 }

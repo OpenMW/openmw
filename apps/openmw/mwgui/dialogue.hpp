@@ -47,6 +47,10 @@ namespace MWGui
         void askQuestion(std::string question);
         void goodbye();
 
+        // various service button visibilities, depending if the npc/creature talked to has these services
+        // make sure to call these before setKeywords()
+        void setShowTrade(bool show) { mShowTrade = show; }
+
     protected:
         void onSelectTopic(std::string topic);
         void onByeClicked(MyGUI::Widget* _sender);
@@ -60,6 +64,9 @@ namespace MWGui
         *Helper function that add topic keyword in blue in a text.
         */
         std::string parseText(std::string text);
+
+        // various service button visibilities, depending if the npc/creature talked to has these services
+        bool mShowTrade;
 
         bool mEnabled;
 
