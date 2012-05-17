@@ -251,6 +251,9 @@ namespace MWWorld
     void Scene::changeToInteriorCell (const std::string& cellName, const ESM::Position& position)
     {
         std::cout << "Changing to interior\n";
+
+        Ptr::CellStore *cell = mWorld->getInterior(cellName);
+
         // remove active
         CellStoreCollection::iterator active = mActiveCells.begin();
 
@@ -261,10 +264,8 @@ namespace MWWorld
 
         // Load cell.
         std::cout << "cellName:" << cellName << std::endl;
-        Ptr::CellStore *cell = mWorld->getInterior(cellName);
 
         loadCell (cell);
-
 
         // adjust player
         mCurrentCell = cell;
