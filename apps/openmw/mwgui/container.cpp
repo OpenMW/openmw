@@ -143,7 +143,7 @@ void ContainerBase::onSelectedItemImpl(MyGUI::Widget* _sender, int count)
 
 void ContainerBase::onContainerClicked(MyGUI::Widget* _sender)
 {
-    if(mDragAndDrop->mIsOnDragAndDrop) //drop widget here
+    if(mDragAndDrop->mIsOnDragAndDrop) //drop item here
     {
         MWWorld::Ptr object = *mDragAndDrop->mDraggedWidget->getUserData<MWWorld::Ptr>();
         MWWorld::ContainerStore& containerStore = MWWorld::Class::get(mContainer).getContainerStore(mContainer);
@@ -152,6 +152,20 @@ void ContainerBase::onContainerClicked(MyGUI::Widget* _sender)
         {
             assert(object.getContainerStore() && "Item is not in a container!");
 
+            // check the container's Organic flag (if this is a container). container with Organic flag doesn't allow putting items inside
+            if (mContainer.getTypeName() == typeid(ESM::Container).name())
+            {
+                ESMS::LiveCellRef<ESM::Container, MWWorld::RefData>* ref = mContainer.get<ESM::Container>();
+                if (ref->base->flags & ESM::Container::Organic)
+                {
+                    // user notification
+                    MWBase::Environment::get().getWindowManager()->
+                        messageBox(MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sContentsMessage2")->str, std::vector<std::string>());
+                    return;
+                }
+            }
+
+            int origCount = object.getRefData().getCount();
 
             // check that we don't exceed the allowed weight (only for containers, not for inventory)
             if (!isInventory())
@@ -159,7 +173,6 @@ void ContainerBase::onContainerClicked(MyGUI::Widget* _sender)
                 float capacity = MWWorld::Class::get(mContainer).getCapacity(mContainer);
 
                 // try adding the item, and if weight is exceeded, just remove it again.
-                int origCount = object.getRefData().getCount();
                 object.getRefData().setCount(mDragAndDrop->mDraggedCount);
                 MWWorld::ContainerStoreIterator it = containerStore.add(object);
 
@@ -181,7 +194,6 @@ void ContainerBase::onContainerClicked(MyGUI::Widget* _sender)
             }
             else
             {
-                int origCount = object.getRefData().getCount();
                 object.getRefData().setCount (mDragAndDrop->mDraggedCount);
                 containerStore.add(object);
                 object.getRefData().setCount (origCount - mDragAndDrop->mDraggedCount);

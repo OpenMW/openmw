@@ -92,6 +92,7 @@ HUD::HUD(int width, int height, int fpsLevel, DragAndDrop* dragAndDrop)
 
     mMainWidget->eventMouseButtonClick += MyGUI::newDelegate(this, &HUD::onWorldClicked);
     mMainWidget->eventMouseMove += MyGUI::newDelegate(this, &HUD::onWorldMouseOver);
+    mMainWidget->eventMouseLostFocus += MyGUI::newDelegate(this, &HUD::onWorldMouseLostFocus);
 }
 
 void HUD::setFpsLevel(int level)
@@ -321,3 +322,7 @@ void HUD::onWorldMouseOver(MyGUI::Widget* _sender, int x, int y)
     }
 }
 
+void HUD::onWorldMouseLostFocus(MyGUI::Widget* _sender, MyGUI::Widget* _new)
+{
+    MyGUI::PointerManager::getInstance().setPointer("arrow");
+}
