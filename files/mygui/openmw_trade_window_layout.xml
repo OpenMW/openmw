@@ -2,21 +2,26 @@
 
 <MyGUI type="Layout">
     <Widget type="Window" skin="MW_Window" layer="Windows" position="0 0 600 300" name="_Main">
-
-        <!-- Items in inventory -->
-        <Widget type="Widget" skin="MW_Box" position="0 38 350 185" name="box" align="Left Top Stretch">
-            <Widget type="ScrollView" skin="MW_ScrollViewH" position="4 4 342 181" align="Left Top Stretch" name="ItemView">
-                <Widget type="Button" skin="" name="Items" position="0 0 342 181" name="Items" align="Left Top Stretch"/>
-            </Widget>
-        </Widget>
+        <Property key="Visible" value="false"/>
 
         <!-- Categories -->
-        <Widget type="Widget" position="0 8 350 24" align="Left Top HStretch" name="Categories">
+        <Widget type="Widget" position="8 8 584 24" align="Left Top HStretch" name="Categories">
             <Widget type="Button" skin="MW_Button" position="0 0 60 24" name="AllButton"/>
             <Widget type="Button" skin="MW_Button" position="0 0 60 24" name="WeaponButton"/>
             <Widget type="Button" skin="MW_Button" position="0 0 60 24" name="ApparelButton"/>
             <Widget type="Button" skin="MW_Button" position="0 0 60 24" name="MagicButton"/>
             <Widget type="Button" skin="MW_Button" position="0 0 60 24" name="MiscButton"/>
+        </Widget>
+
+        <!-- Items -->
+        <Widget type="Widget" skin="MW_Box" position="8 38 584 185" name="box" align="Left Top Stretch">
+            <Widget type="ScrollView" skin="MW_ScrollViewH" position="4 4 576 181" align="Left Top Stretch" name="ItemView">
+                <Widget type="Button" skin="" name="Items" position="0 0 576 181" name="Items" align="Left Top Stretch"/>
+            </Widget>
+        </Widget>
+
+        <Widget type="Widget" skin="" position="8 201 584 91" name="BottomPanel" align="Left Bottom HStretch">
+            <Widget type="TextBox" skin="SandText" position="292 0 292 91" name="PlayerGold" align="Left Top HStretch"/>
         </Widget>
 
     </Widget>

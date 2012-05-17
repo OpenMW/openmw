@@ -108,6 +108,7 @@ WindowManager::WindowManager(
     console = new Console(w,h, extensions);
     mJournal = new JournalWindow(*this);
     mMessageBoxManager = new MessageBoxManager(this);
+    mTradeWindow = new TradeWindow(*this);
     mDialogueWindow = new DialogueWindow(*this);
     mContainerWindow = new ContainerWindow(*this,mDragAndDrop);
     mInventoryWindow = new InventoryWindow(*this,mDragAndDrop);
@@ -116,7 +117,6 @@ WindowManager::WindowManager(
     mScrollWindow = new ScrollWindow(*this);
     mBookWindow = new BookWindow(*this);
     mCountDialog = new CountDialog(*this);
-    mTradeWindow = new TradeWindow(*this);
 
     // The HUD is always on
     hud->setVisible(true);

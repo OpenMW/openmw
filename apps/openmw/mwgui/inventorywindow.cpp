@@ -16,13 +16,6 @@
 #include "../mwbase/environment.hpp"
 #include "../mwworld/manualref.hpp"
 
-#include "../mwscript/scriptmanager.hpp"
-#include "../mwscript/compilercontext.hpp"
-#include "../mwscript/interpretercontext.hpp"
-#include "../mwscript/extensions.hpp"
-#include "../mwscript/globalscripts.hpp"
-
-
 #include "window_manager.hpp"
 #include "widgets.hpp"
 #include "bookwindow.hpp"

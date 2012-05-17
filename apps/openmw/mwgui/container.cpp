@@ -88,31 +88,34 @@ ContainerBase::~ContainerBase()
 
 void ContainerBase::onSelectedItem(MyGUI::Widget* _sender)
 {
-    if(!mDragAndDrop->mIsOnDragAndDrop)
+    if (mDragAndDrop)
     {
-        mSelectedItem = _sender;
-
-        MWWorld::Ptr object = (*_sender->getUserData<MWWorld::Ptr>());
-        int count = object.getRefData().getCount();
-
-        if (MyGUI::InputManager::getInstance().isShiftPressed() || count == 1)
+        if(!mDragAndDrop->mIsOnDragAndDrop)
         {
-            onSelectedItemImpl(_sender, count);
-        }
-        else if (MyGUI::InputManager::getInstance().isControlPressed())
-        {
-            onSelectedItemImpl(_sender, 1);
+            mSelectedItem = _sender;
+
+            MWWorld::Ptr object = (*_sender->getUserData<MWWorld::Ptr>());
+            int count = object.getRefData().getCount();
+
+            if (MyGUI::InputManager::getInstance().isShiftPressed() || count == 1)
+            {
+                onSelectedItemImpl(_sender, count);
+            }
+            else if (MyGUI::InputManager::getInstance().isControlPressed())
+            {
+                onSelectedItemImpl(_sender, 1);
+            }
+            else
+            {
+                CountDialog* dialog = MWBase::Environment::get().getWindowManager()->getCountDialog();
+                dialog->open(MWWorld::Class::get(object).getName(object), count);
+                dialog->eventOkClicked.clear();
+                dialog->eventOkClicked += MyGUI::newDelegate(this, &ContainerBase::onSelectedItemImpl);
+            }
         }
         else
-        {
-            CountDialog* dialog = MWBase::Environment::get().getWindowManager()->getCountDialog();
-            dialog->open(MWWorld::Class::get(object).getName(object), count);
-            dialog->eventOkClicked.clear();
-            dialog->eventOkClicked += MyGUI::newDelegate(this, &ContainerBase::onSelectedItemImpl);
-        }
+            onContainerClicked(mContainerWidget);
     }
-    else
-        onContainerClicked(mContainerWidget);
 }
 
 void ContainerBase::onSelectedItemImpl(MyGUI::Widget* _sender, int count)
@@ -143,6 +146,8 @@ void ContainerBase::onSelectedItemImpl(MyGUI::Widget* _sender, int count)
 
 void ContainerBase::onContainerClicked(MyGUI::Widget* _sender)
 {
+    if (mDragAndDrop == NULL) return;
+
     if(mDragAndDrop->mIsOnDragAndDrop) //drop item here
     {
         MWWorld::Ptr object = *mDragAndDrop->mDraggedWidget->getUserData<MWWorld::Ptr>();
@@ -323,7 +328,7 @@ void ContainerBase::drawItems()
         const MWWorld::Ptr* iter = &((*it).first);
 
         int displayCount = iter->getRefData().getCount();
-        if (mDragAndDrop->mIsOnDragAndDrop && *iter == *mDragAndDrop->mDraggedWidget->getUserData<MWWorld::Ptr>())
+        if (mDragAndDrop != NULL && mDragAndDrop->mIsOnDragAndDrop && *iter == *mDragAndDrop->mDraggedWidget->getUserData<MWWorld::Ptr>())
         {
             displayCount -= mDragAndDrop->mDraggedCount;
         }
@@ -402,7 +407,7 @@ std::string ContainerBase::getCountString(const int count)
 
 void ContainerBase::Update()
 {
-    if(mDragAndDrop->mIsOnDragAndDrop)
+    if(mDragAndDrop != NULL && mDragAndDrop->mIsOnDragAndDrop)
     {
         if(mDragAndDrop->mDraggedWidget)
             mDragAndDrop->mDraggedWidget->setPosition(MyGUI::InputManager::getInstance().getMousePosition());
@@ -462,7 +467,7 @@ void ContainerWindow::open(MWWorld::Ptr container)
 
 void ContainerWindow::onCloseButtonClicked(MyGUI::Widget* _sender)
 {
-    if(!mDragAndDrop->mIsOnDragAndDrop)
+    if(mDragAndDrop == NULL || !mDragAndDrop->mIsOnDragAndDrop)
     {
         MWBase::Environment::get().getWindowManager()->setGuiMode(GM_Game);
         setVisible(false);
@@ -471,7 +476,7 @@ void ContainerWindow::onCloseButtonClicked(MyGUI::Widget* _sender)
 
 void ContainerWindow::onTakeAllButtonClicked(MyGUI::Widget* _sender)
 {
-    if(!mDragAndDrop->mIsOnDragAndDrop)
+    if(mDragAndDrop == NULL || !mDragAndDrop->mIsOnDragAndDrop)
     {
         // transfer everything into the player's inventory
         MWWorld::ContainerStore& containerStore = MWWorld::Class::get(mContainer).getContainerStore(mContainer);
