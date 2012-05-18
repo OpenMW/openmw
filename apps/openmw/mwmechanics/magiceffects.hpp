@@ -6,6 +6,7 @@
 namespace ESM
 {
     struct ENAMstruct;
+    struct EffectList;
 }
 
 namespace MWMechanics
@@ -65,6 +66,8 @@ namespace MWMechanics
             Collection::const_iterator End() const { return mCollection.end(); }
 
             void add (const EffectKey& key, const EffectParam& param);
+
+            void add (const ESM::EffectList& list);
 
             EffectParam get (const EffectKey& key) const;
             ///< This function can safely be used for keys that are not present.

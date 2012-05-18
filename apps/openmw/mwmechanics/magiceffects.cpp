@@ -1,6 +1,8 @@
 
 #include "magiceffects.hpp"
 
+#include <cstdlib>
+
 #include <stdexcept>
 
 #include <components/esm/defs.hpp>
@@ -63,6 +65,23 @@ namespace MWMechanics
         else
         {
             iter->second += param;
+        }
+    }
+
+    void MagicEffects::add (const ESM::EffectList& list)
+    {
+        for (std::vector<ESM::ENAMstruct>::const_iterator iter (list.list.begin()); iter!=list.list.end();
+            ++iter)
+        {
+            EffectParam param;
+
+            if (iter->magnMin>=iter->magnMax)
+                param.mMagnitude = iter->magnMin;
+            else
+                param.mMagnitude = static_cast<int> (
+                    (iter->magnMax-iter->magnMin+1)*(std::rand() / RAND_MAX) + iter->magnMin);
+
+            add (*iter, param);
         }
     }
 
