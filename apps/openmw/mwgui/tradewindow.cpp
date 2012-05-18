@@ -5,6 +5,7 @@
 #include "../mwbase/environment.hpp"
 #include "../mwworld/world.hpp"
 #include "../mwworld/inventorystore.hpp"
+#include "../mwworld/manualref.hpp"
 
 #include "window_manager.hpp"
 #include "inventorywindow.hpp"
@@ -205,6 +206,31 @@ namespace MWGui
         // success! make the item transfer.
         transferBoughtItems();
         mWindowManager.getInventoryWindow()->transferBoughtItems();
+
+        // add or remove gold from the player.
+        bool goldFound = false;
+        MWWorld::Ptr gold;
+        MWWorld::ContainerStore& playerStore = mWindowManager.getInventoryWindow()->getContainerStore();
+        for (MWWorld::ContainerStoreIterator it = playerStore.begin();
+                it != playerStore.end(); ++it)
+        {
+            if (MWWorld::Class::get(*it).getName(*it) == MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sGold")->str)
+            {
+                goldFound = true;
+                gold = *it;
+            }
+        }
+        if (goldFound)
+        {
+            gold.getRefData().setCount(gold.getRefData().getCount() + mCurrentBalance);
+        }
+        else
+        {
+            assert(mCurrentBalance > 0);
+            MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), "Gold_001");
+            ref.getPtr().getRefData().setCount(mCurrentBalance);
+            playerStore.add(ref.getPtr());
+        }
 
         mWindowManager.setGuiMode(GM_Game);
     }
