@@ -5,6 +5,8 @@
 #include <typeinfo>
 #include <stdexcept>
 
+#include <boost/algorithm/string.hpp>    
+
 #include <components/esm/loadcont.hpp>
 
 #include "../mwbase/environment.hpp"
@@ -31,6 +33,12 @@ namespace
         }
 
         return sum;
+    }
+
+    bool compare_string_ci(std::string str1, std::string str2)
+    {
+        boost::algorithm::to_lower(str1);
+        return str1 == str2;
     }
 }
 
@@ -65,35 +73,35 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add (const Ptr& ptr)
 {
     int type = getType(ptr);
 
-    // gold needs special treatment because it uses several different meshes
+    // gold needs special handling: when it is inserted into a container, the base object automatically becomes Gold_001
+    // this ensures that gold piles of different sizes stack with each other (also, several scripts rely on Gold_001 for detecting player gold)
     if (MWWorld::Class::get(ptr).getName(ptr) == MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sGold")->str)
     {
         ESMS::LiveCellRef<ESM::Miscellaneous, MWWorld::RefData> *gold =
             ptr.get<ESM::Miscellaneous>();
 
-        int goldValue = (ptr.getRefData().getCount() == 1) ? gold->base->data.value : ptr.getRefData().getCount();
-
-        for (MWWorld::ContainerStoreIterator iter (begin(type)); iter!=end(); ++iter)
+        if (compare_string_ci(gold->ref.refID, "gold_001")
+            || compare_string_ci(gold->ref.refID, "gold_005")
+            || compare_string_ci(gold->ref.refID, "gold_010")
+            || compare_string_ci(gold->ref.refID, "gold_025")
+            || compare_string_ci(gold->ref.refID, "gold_100"))
         {
-            if (MWWorld::Class::get(*iter).getName(*iter) == MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sGold")->str
-                && MWWorld::Class::get(*iter).getScript(*iter) == "" && MWWorld::Class::get(ptr).getScript(ptr) == "")
+            MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), "Gold_001");
+
+            int count = (ptr.getRefData().getCount() == 1) ? gold->base->data.value : ptr.getRefData().getCount();
+            ref.getPtr().getRefData().setCount(count);
+            for (MWWorld::ContainerStoreIterator iter (begin(type)); iter!=end(); ++iter)
             {
-                ESMS::LiveCellRef<ESM::Miscellaneous, MWWorld::RefData> *ref =
-                    iter->get<ESM::Miscellaneous>();
-
-                if (iter->getRefData().getCount() == 1)
-                    iter->getRefData().setCount(ref->base->data.value + goldValue);
-                else
-                    iter->getRefData().setCount(iter->getRefData().getCount() + goldValue);
-
-                flagAsModified();
-                return iter;
+                if (compare_string_ci((*iter).get<ESM::Miscellaneous>()->ref.refID, "gold_001"))
+                {
+                    (*iter).getRefData().setCount( (*iter).getRefData().getCount() + count);
+                    flagAsModified();
+                    return iter;
+                }
             }
-        }
 
-        // if we get here, no already existing gold was found in the container
-        // we still need special handling because gold in a container should always have the real gold value as reference count.
-        ptr.getRefData().setCount(goldValue);
+            return addImpl(ref.getPtr());
+        }
     }
 
     // determine whether to stack or not
