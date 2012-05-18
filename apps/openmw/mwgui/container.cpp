@@ -186,11 +186,13 @@ void ContainerBase::sellAlreadyBoughtItem(MyGUI::Widget* _sender, int count)
     if (isInventory())
     {
         MWBase::Environment::get().getWindowManager()->getTradeWindow()->addItem(object, count);
+        MWBase::Environment::get().getWindowManager()->getTradeWindow()->buyFromNpc(object, count);
         MWBase::Environment::get().getWindowManager()->getTradeWindow()->drawItems();
     }
     else
     {
         MWBase::Environment::get().getWindowManager()->getInventoryWindow()->addItem(object, count);
+        MWBase::Environment::get().getWindowManager()->getTradeWindow()->sellToNpc(object, count);
         MWBase::Environment::get().getWindowManager()->getInventoryWindow()->drawItems();
     }
 
@@ -199,14 +201,18 @@ void ContainerBase::sellAlreadyBoughtItem(MyGUI::Widget* _sender, int count)
 
 void ContainerBase::sellItem(MyGUI::Widget* _sender, int count)
 {
+    MWWorld::Ptr object = *mSelectedItem->getUserData<MWWorld::Ptr>();
+
     if (isInventory())
     {
-        MWBase::Environment::get().getWindowManager()->getTradeWindow()->addBarteredItem(*mSelectedItem->getUserData<MWWorld::Ptr>(), count);
+        MWBase::Environment::get().getWindowManager()->getTradeWindow()->addBarteredItem(object, count);
+        MWBase::Environment::get().getWindowManager()->getTradeWindow()->buyFromNpc(object, count);
         MWBase::Environment::get().getWindowManager()->getTradeWindow()->drawItems();
     }
     else
     {
-        MWBase::Environment::get().getWindowManager()->getInventoryWindow()->addBarteredItem(*mSelectedItem->getUserData<MWWorld::Ptr>(), count);
+        MWBase::Environment::get().getWindowManager()->getInventoryWindow()->addBarteredItem(object, count);
+        MWBase::Environment::get().getWindowManager()->getTradeWindow()->sellToNpc(object, count);
         MWBase::Environment::get().getWindowManager()->getInventoryWindow()->drawItems();
     }
 

@@ -74,6 +74,7 @@ namespace MWGui
         void returnBoughtItems(MWWorld::ContainerStore& store); ///< return bought items into the specified ContainerStore
 
         MWWorld::ContainerStore& getContainerStore();
+        MWWorld::ContainerStore& getBoughtItems() { return mBoughtItems; }
 
         void openContainer(MWWorld::Ptr container);
         void setFilter(Filter filter); ///< set category filter

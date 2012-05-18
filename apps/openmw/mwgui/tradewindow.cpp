@@ -145,6 +145,64 @@ namespace MWGui
 
     void TradeWindow::onOfferButtonClicked(MyGUI::Widget* _sender)
     {
+        // were there any items traded at all?
+        MWWorld::ContainerStore& playerBought = mWindowManager.getInventoryWindow()->getBoughtItems();
+        MWWorld::ContainerStore& merchantBought = getBoughtItems();
+
+        bool traded=false;
+        for (MWWorld::ContainerStoreIterator it = playerBought.begin();
+                it != playerBought.end(); ++it)
+        {
+            if (it->getRefData().getCount() > 0)
+                traded = true;
+        }
+        for (MWWorld::ContainerStoreIterator it = merchantBought.begin();
+                it != merchantBought.end(); ++it)
+        {
+            if (it->getRefData().getCount() > 0)
+                traded = true;
+        }
+        if (!traded)
+        {
+            // user notification
+            MWBase::Environment::get().getWindowManager()->
+                messageBox(MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sBarterDialog11")->str, std::vector<std::string>());
+            return;
+        }
+
+        // check if the player can afford this
+        if (mCurrentBalance < 0 && mWindowManager.getInventoryWindow()->getPlayerGold() < std::abs(mCurrentBalance))
+        {
+            // user notification
+            MWBase::Environment::get().getWindowManager()->
+                messageBox(MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sBarterDialog1")->str, std::vector<std::string>());
+            return;
+        }
+
+        // check if the merchant can afford this
+        int merchantgold;
+        if (mContainer.getTypeName() == typeid(ESM::NPC).name())
+        {
+            ESMS::LiveCellRef<ESM::NPC, MWWorld::RefData>* ref = mContainer.get<ESM::NPC>();
+            if (ref->base->npdt52.gold == -10)
+                merchantgold = ref->base->npdt12.gold;
+            else
+                merchantgold = ref->base->npdt52.gold;
+        }
+        else // ESM::Creature
+        {
+            ESMS::LiveCellRef<ESM::Creature, MWWorld::RefData>* ref = mContainer.get<ESM::Creature>();
+            merchantgold = ref->base->data.gold;
+        }
+        if (mCurrentBalance > 0 && merchantgold < mCurrentBalance)
+        {
+            // user notification
+            MWBase::Environment::get().getWindowManager()->
+                messageBox(MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sBarterDialog2")->str, std::vector<std::string>());
+            return;
+        }
+
+        // success! make the item transfer.
         transferBoughtItems();
         mWindowManager.getInventoryWindow()->transferBoughtItems();
 
@@ -275,5 +333,23 @@ namespace MWGui
         }
 
         return items;
+    }
+
+    void TradeWindow::sellToNpc(MWWorld::Ptr item, int count)
+    {
+        /// \todo price adjustment depending on merchantile skill
+
+        mCurrentBalance -= MWWorld::Class::get(item).getValue(item) * count;
+
+        updateLabels();
+    }
+
+    void TradeWindow::buyFromNpc(MWWorld::Ptr item, int count)
+    {
+        /// \todo price adjustment depending on merchantile skill
+
+        mCurrentBalance += MWWorld::Class::get(item).getValue(item) * count;
+
+        updateLabels();
     }
 }

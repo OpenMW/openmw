@@ -27,6 +27,9 @@ namespace MWGui
 
             void startTrade(MWWorld::Ptr actor);
 
+            void sellToNpc(MWWorld::Ptr item, int count); ///< only used for adjusting the gold balance
+            void buyFromNpc(MWWorld::Ptr item, int count); ///< only used for adjusting the gold balance
+
             bool npcAcceptsItem(MWWorld::Ptr item);
 
         protected:

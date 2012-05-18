@@ -74,7 +74,7 @@ namespace MWWorld
             /// \attention Do not add items to an existing stack by increasing the count instead of
             /// calling this function!
             ///
-            /// @return if stacking happened, return iterator to the item that was stacked against, otherwise end() iterator
+            /// @return if stacking happened, return iterator to the item that was stacked against, otherwise iterator to the newly inserted item.
 
         protected:
             ContainerStoreIterator addImpl (const Ptr& ptr);
