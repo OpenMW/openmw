@@ -6,6 +6,7 @@
 #include "../mwworld/world.hpp"
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/manualref.hpp"
+#include "../mwsound/soundmanager.hpp"
 
 #include "window_manager.hpp"
 #include "inventorywindow.hpp"
@@ -231,6 +232,9 @@ namespace MWGui
             ref.getPtr().getRefData().setCount(mCurrentBalance);
             playerStore.add(ref.getPtr());
         }
+
+        std::string sound = "Item Gold Up";
+        MWBase::Environment::get().getSoundManager()->playSound (sound, 1.0, 1.0);
 
         mWindowManager.setGuiMode(GM_Game);
     }

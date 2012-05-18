@@ -196,6 +196,9 @@ void ContainerBase::sellAlreadyBoughtItem(MyGUI::Widget* _sender, int count)
         MWBase::Environment::get().getWindowManager()->getInventoryWindow()->drawItems();
     }
 
+    std::string sound = MWWorld::Class::get(object).getUpSoundId(object);
+    MWBase::Environment::get().getSoundManager()->playSound (sound, 1.0, 1.0);
+
     drawItems();
 }
 
@@ -215,6 +218,9 @@ void ContainerBase::sellItem(MyGUI::Widget* _sender, int count)
         MWBase::Environment::get().getWindowManager()->getTradeWindow()->sellToNpc(object, count);
         MWBase::Environment::get().getWindowManager()->getInventoryWindow()->drawItems();
     }
+
+    std::string sound = MWWorld::Class::get(object).getUpSoundId(object);
+    MWBase::Environment::get().getSoundManager()->playSound (sound, 1.0, 1.0);
 
     drawItems();
 }
