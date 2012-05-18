@@ -120,9 +120,6 @@ void DialogueWindow::open()
     history->eraseText(0,history->getTextLength());
     updateOptions();
     setVisible(true);
-
-    // hide all sub-dialogues of the dialog window (trade window, persuasion, etc)
-    mWindowManager.getTradeWindow()->setVisible(false);
 }
 
 void DialogueWindow::onByeClicked(MyGUI::Widget* _sender)
@@ -137,8 +134,8 @@ void DialogueWindow::onSelectTopic(std::string topic)
     if (topic == MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sBarter")->str)
     {
         /// \todo check if the player is allowed to trade with this actor (e.g. faction rank high enough)?
-        mWindowManager.getTradeWindow()->startTrade(mActor);
         mWindowManager.setGuiMode(GM_Barter);
+        mWindowManager.getTradeWindow()->startTrade(mActor);
     }
 
     else
@@ -150,8 +147,7 @@ void DialogueWindow::startDialogue(MWWorld::Ptr actor, std::string npcName)
     mEnabled = true;
     mActor = actor;
     topicsList->setEnabled(true);
-    static_cast<MyGUI::Window*>(mMainWidget)->setCaption(npcName);
-    adjustWindowCaption();
+    setTitle(npcName);
 }
 
 void DialogueWindow::setKeywords(std::list<std::string> keyWords)

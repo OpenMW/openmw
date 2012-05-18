@@ -27,6 +27,7 @@ namespace MWGui
     InventoryWindow::InventoryWindow(WindowManager& parWindowManager,DragAndDrop* dragAndDrop)
         : ContainerBase(dragAndDrop)
         , WindowPinnableBase("openmw_inventory_window_layout.xml", parWindowManager)
+        , mTrading(false)
     {
         static_cast<MyGUI::Window*>(mMainWidget)->eventWindowChangeCoord += MyGUI::newDelegate(this, &InventoryWindow::onWindowResize);
 
@@ -94,6 +95,8 @@ namespace MWGui
         onWindowResize(static_cast<MyGUI::Window*>(mMainWidget));
 
         updateEncumbranceBar();
+
+        mTrading = false;
     }
 
     void InventoryWindow::onWindowResize(MyGUI::Window* _sender)
@@ -244,5 +247,12 @@ namespace MWGui
                 return it->getRefData().getCount();
         }
         return 0;
+    }
+
+    void InventoryWindow::startTrade()
+    {
+        mTrading = true;
+        mBoughtItems.clear();
+        mSoldItems.clear();
     }
 }

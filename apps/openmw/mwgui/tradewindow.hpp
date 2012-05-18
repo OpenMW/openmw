@@ -63,6 +63,9 @@ namespace MWGui
             virtual bool ignoreEquippedItems() { return true; }
             virtual std::vector<MWWorld::Ptr> getEquippedItems();
 
+            virtual bool isTrading() { return true; }
+            virtual bool isTradeWindow() { return true; }
+
             virtual std::vector<MWWorld::Ptr> itemsToIgnore();
 
             void updateLabels();

@@ -21,6 +21,8 @@
 #include "window_manager.hpp"
 #include "widgets.hpp"
 #include "countdialog.hpp"
+#include "tradewindow.hpp"
+#include "inventorywindow.hpp"
 
 using namespace MWGui;
 using namespace Widgets;
@@ -88,37 +90,120 @@ ContainerBase::~ContainerBase()
 
 void ContainerBase::onSelectedItem(MyGUI::Widget* _sender)
 {
-    if (mDragAndDrop)
+    mSelectedItem = _sender;
+
+    if (mDragAndDrop && !isTrading())
     {
         if(!mDragAndDrop->mIsOnDragAndDrop)
         {
-            mSelectedItem = _sender;
-
             MWWorld::Ptr object = (*_sender->getUserData<MWWorld::Ptr>());
             int count = object.getRefData().getCount();
 
             if (MyGUI::InputManager::getInstance().isShiftPressed() || count == 1)
             {
-                onSelectedItemImpl(_sender, count);
+                startDragItem(_sender, count);
             }
             else if (MyGUI::InputManager::getInstance().isControlPressed())
             {
-                onSelectedItemImpl(_sender, 1);
+                startDragItem(_sender, 1);
             }
             else
             {
                 CountDialog* dialog = MWBase::Environment::get().getWindowManager()->getCountDialog();
                 dialog->open(MWWorld::Class::get(object).getName(object), count);
                 dialog->eventOkClicked.clear();
-                dialog->eventOkClicked += MyGUI::newDelegate(this, &ContainerBase::onSelectedItemImpl);
+                dialog->eventOkClicked += MyGUI::newDelegate(this, &ContainerBase::startDragItem);
             }
         }
         else
             onContainerClicked(mContainerWidget);
     }
+    else
+    {
+        MWWorld::Ptr object = (*_sender->getUserData<MWWorld::Ptr>());
+        int count = object.getRefData().getCount();
+
+        if (std::find(mBoughtItems.begin(), mBoughtItems.end(), object) != mBoughtItems.end())
+        {
+            if (MyGUI::InputManager::getInstance().isShiftPressed() || count == 1)
+            {
+                sellAlreadyBoughtItem(NULL, count);
+            }
+            else if (MyGUI::InputManager::getInstance().isControlPressed())
+            {
+                sellAlreadyBoughtItem(NULL, 1);
+            }
+            else
+            {
+                CountDialog* dialog = MWBase::Environment::get().getWindowManager()->getCountDialog();
+                dialog->open(MWWorld::Class::get(object).getName(object), count);
+                dialog->eventOkClicked.clear();
+                dialog->eventOkClicked += MyGUI::newDelegate(this, &ContainerBase::sellAlreadyBoughtItem);
+            }
+        }
+        else
+        {
+            if (MyGUI::InputManager::getInstance().isShiftPressed() || count == 1)
+            {
+                sellItem(NULL, count);
+            }
+            else if (MyGUI::InputManager::getInstance().isControlPressed())
+            {
+                sellItem(NULL, 1);
+            }
+            else
+            {
+                CountDialog* dialog = MWBase::Environment::get().getWindowManager()->getCountDialog();
+                dialog->open(MWWorld::Class::get(object).getName(object), count);
+                dialog->eventOkClicked.clear();
+                dialog->eventOkClicked += MyGUI::newDelegate(this, &ContainerBase::sellItem);
+            }
+        }
+    }
 }
 
-void ContainerBase::onSelectedItemImpl(MyGUI::Widget* _sender, int count)
+void ContainerBase::sellAlreadyBoughtItem(MyGUI::Widget* _sender, int count)
+{
+    MWWorld::Ptr object = *mSelectedItem->getUserData<MWWorld::Ptr>();
+    assert( std::find(mBoughtItems.begin(), mBoughtItems.end(), object) != mBoughtItems.end() );
+
+    if (count == object.getRefData().getCount())
+        mBoughtItems.erase( std::find(mBoughtItems.begin(), mBoughtItems.end(), object) );
+
+    if (isInventory())
+    {
+        MWBase::Environment::get().getWindowManager()->getTradeWindow()->readdBarteredItem(*mSelectedItem->getUserData<MWWorld::Ptr>(), count);
+        MWBase::Environment::get().getWindowManager()->getTradeWindow()->drawItems();
+    }
+    else
+    {
+        MWBase::Environment::get().getWindowManager()->getInventoryWindow()->readdBarteredItem(*mSelectedItem->getUserData<MWWorld::Ptr>(), count);
+        MWBase::Environment::get().getWindowManager()->getInventoryWindow()->drawItems();
+    }
+
+    drawItems();
+}
+
+void ContainerBase::sellItem(MyGUI::Widget* _sender, int count)
+{
+    MWWorld::Ptr newPtr;
+    if (isInventory())
+    {
+        newPtr = MWBase::Environment::get().getWindowManager()->getTradeWindow()->addBarteredItem(*mSelectedItem->getUserData<MWWorld::Ptr>(), count);
+        mSoldItems.push_back(newPtr);
+        MWBase::Environment::get().getWindowManager()->getTradeWindow()->drawItems();
+    }
+    else
+    {
+        newPtr = MWBase::Environment::get().getWindowManager()->getInventoryWindow()->addBarteredItem(*mSelectedItem->getUserData<MWWorld::Ptr>(), count);
+        mSoldItems.push_back(newPtr);
+        MWBase::Environment::get().getWindowManager()->getInventoryWindow()->drawItems();
+    }
+
+    drawItems();
+}
+
+void ContainerBase::startDragItem(MyGUI::Widget* _sender, int count)
 {
     mDragAndDrop->mIsOnDragAndDrop = true;
     mSelectedItem->detachFromWidget();
@@ -281,6 +366,14 @@ void ContainerBase::drawItems()
 
     std::vector<MWWorld::Ptr> equippedItems = getEquippedItems();
 
+    // add bartered items (always at the beginning)
+    std::sort(mBoughtItems.begin(), mBoughtItems.end(), sortItems);
+    for (std::vector<MWWorld::Ptr>::iterator it=mBoughtItems.begin();
+        it != mBoughtItems.end(); ++it)
+    {
+        items.push_back( std::make_pair(*it, ItemState_Barter) );
+    }
+
     // filter out the equipped items of categories we don't want
     std::vector<MWWorld::Ptr> unwantedItems = equippedItems;
     for (MWWorld::ContainerStoreIterator iter (containerStore.begin(categories)); iter!=containerStore.end(); ++iter)
@@ -316,7 +409,8 @@ void ContainerBase::drawItems()
     for (MWWorld::ContainerStoreIterator iter (containerStore.begin(categories)); iter!=containerStore.end(); ++iter)
     {
         if (std::find(equippedItems.begin(), equippedItems.end(), *iter) == equippedItems.end()
-            && std::find(ignoreItems.begin(), ignoreItems.end(), *iter) == ignoreItems.end())
+            && std::find(ignoreItems.begin(), ignoreItems.end(), *iter) == ignoreItems.end()
+            && std::find(mBoughtItems.begin(), mBoughtItems.end(), *iter) == mBoughtItems.end())
             regularItems.push_back(*iter);
     }
 
@@ -338,7 +432,7 @@ void ContainerBase::drawItems()
         {
             displayCount -= mDragAndDrop->mDraggedCount;
         }
-        if(displayCount > 0 && !(onlyMagic && MWWorld::Class::get(*iter).getEnchantment(*iter) == "" && iter->getTypeName() != typeid(ESM::Potion).name()))
+        if(displayCount > 0 && !(onlyMagic && it->second != ItemState_Barter && MWWorld::Class::get(*iter).getEnchantment(*iter) == "" && iter->getTypeName() != typeid(ESM::Potion).name()))
         {
             std::string path = std::string("icons\\");
             path+=MWWorld::Class::get(*iter).getInventoryIcon(*iter);
@@ -361,10 +455,17 @@ void ContainerBase::drawItems()
             {
                 backgroundTex += "_equip";
             }
+            else if (it->second == ItemState_Barter)
+            {
+                backgroundTex += "_barter";
+            }
             backgroundTex += ".dds";
 
             backgroundWidget->setImageTexture(backgroundTex);
-            backgroundWidget->setProperty("ImageCoord", "0 0 42 42");
+            if (it->second == ItemState_Barter && !isMagic)
+                backgroundWidget->setProperty("ImageCoord", "2 2 42 42");
+            else
+                backgroundWidget->setProperty("ImageCoord", "0 0 42 42");
             backgroundWidget->eventMouseButtonClick += MyGUI::newDelegate(this, &ContainerBase::onSelectedItem);
             backgroundWidget->eventMouseWheel += MyGUI::newDelegate(this, &ContainerBase::onMouseWheel);
 
@@ -418,6 +519,47 @@ void ContainerBase::Update()
         if(mDragAndDrop->mDraggedWidget)
             mDragAndDrop->mDraggedWidget->setPosition(MyGUI::InputManager::getInstance().getMousePosition());
         else mDragAndDrop->mIsOnDragAndDrop = false; //If this happens, there is a bug.
+    }
+}
+
+MWWorld::Ptr ContainerBase::readdBarteredItem(MWWorld::Ptr item, int count)
+{
+    MWWorld::ContainerStore& containerStore = MWWorld::Class::get(mContainer).getContainerStore(mContainer);
+
+    int origCount = item.getRefData().getCount();
+    item.getRefData().setCount(count);
+    MWWorld::ContainerStoreIterator it = containerStore.add(item);
+    item.getRefData().setCount(origCount - count);
+
+    if (origCount - count == 0)
+        mSoldItems.erase( std::find(mSoldItems.begin(), mSoldItems.end(), item) );
+
+    return *it;
+}
+
+MWWorld::Ptr ContainerBase::addBarteredItem(MWWorld::Ptr item, int count)
+{
+    MWWorld::ContainerStore& containerStore = MWWorld::Class::get(mContainer).getContainerStore(mContainer);
+
+    int origCount = item.getRefData().getCount();
+    item.getRefData().setCount(count);
+    MWWorld::ContainerStoreIterator it = containerStore.add(item);
+    item.getRefData().setCount(origCount - count);
+
+    mBoughtItems.push_back(*it);
+    return *it;
+}
+
+void ContainerBase::removeBarteredItem(MWWorld::Ptr item, int count)
+{
+    MWWorld::ContainerStore& containerStore = MWWorld::Class::get(mContainer).getContainerStore(mContainer);
+
+    for (MWWorld::ContainerStoreIterator it(containerStore.begin()); it != containerStore.end(); ++it)
+    {
+        if (*it == item)
+        {
+            item.getRefData().setCount(item.getRefData().getCount() - count);
+        }
     }
 }
 

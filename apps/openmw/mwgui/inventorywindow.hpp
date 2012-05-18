@@ -13,6 +13,9 @@ namespace MWGui
 
             void openInventory();
 
+            /// start trading, disables item drag&drop
+            void startTrade();
+
             virtual void Update();
             virtual void notifyContentChanged();
 
@@ -33,6 +36,8 @@ namespace MWGui
             MyGUI::Button* mFilterMagic;
             MyGUI::Button* mFilterMisc;
 
+            bool mTrading;
+
             void onWindowResize(MyGUI::Window* _sender);
             void onFilterChanged(MyGUI::Widget* _sender);
             void onAvatarClicked(MyGUI::Widget* _sender);
@@ -40,6 +45,7 @@ namespace MWGui
 
             void updateEncumbranceBar();
 
+            virtual bool isTrading() { return mTrading; }
             virtual bool isInventory() { return true; }
             virtual std::vector<MWWorld::Ptr> getEquippedItems();
             virtual void _unequipItem(MWWorld::Ptr item);

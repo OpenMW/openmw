@@ -103,12 +103,16 @@ namespace MWGui
 
     void TradeWindow::startTrade(MWWorld::Ptr actor)
     {
-        ContainerBase::openContainer(actor);
-
         setTitle(MWWorld::Class::get(actor).getName(actor));
-        adjustWindowCaption();
 
         mCurrentBalance = 0;
+
+        mWindowManager.getInventoryWindow()->startTrade();
+
+        mBoughtItems.clear();
+        mSoldItems.clear();
+
+        ContainerBase::openContainer(actor);
 
         updateLabels();
     }

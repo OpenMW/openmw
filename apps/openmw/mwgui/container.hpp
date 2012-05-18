@@ -62,12 +62,14 @@ namespace MWGui
         {
             ItemState_Normal = 0x01,
             ItemState_Equipped = 0x02,
-
-            // unimplemented
             ItemState_Barter = 0x03
         };
 
         void setWidgets(MyGUI::Widget* containerWidget, MyGUI::ScrollView* itemView); ///< only call once
+
+        MWWorld::Ptr addBarteredItem(MWWorld::Ptr item, int count);
+        MWWorld::Ptr readdBarteredItem(MWWorld::Ptr item, int count);
+        void removeBarteredItem(MWWorld::Ptr item, int count);
 
         void openContainer(MWWorld::Ptr container);
         void setFilter(Filter filter); ///< set category filter
@@ -87,16 +89,30 @@ namespace MWGui
 
         Filter mFilter;
 
+        std::vector<MWWorld::Ptr> mBoughtItems;
+        std::vector<MWWorld::Ptr> mSoldItems;
+
         void onSelectedItem(MyGUI::Widget* _sender);
-        void onSelectedItemImpl(MyGUI::Widget* _sender, int count);
         void onContainerClicked(MyGUI::Widget* _sender);
         void onMouseWheel(MyGUI::Widget* _sender, int _rel);
 
+        /// start dragging an item (drag & drop)
+        void startDragItem(MyGUI::Widget* _sender, int count);
+
+        /// sell an item from this container
+        void sellItem(MyGUI::Widget* _sender, int count);
+
+        /// sell an item from this container, that was previously just bought
+        void sellAlreadyBoughtItem(MyGUI::Widget* _sender, int count);
+
         std::string getCountString(const int count);
 
+        virtual bool isTradeWindow() { return false; }
         virtual bool isInventory() { return false; }
         virtual std::vector<MWWorld::Ptr> getEquippedItems() { return std::vector<MWWorld::Ptr>(); }
         virtual void _unequipItem(MWWorld::Ptr item) { ; }
+
+        virtual bool isTrading() { return false; }
 
         virtual bool ignoreEquippedItems() { return false; }
         virtual std::vector<MWWorld::Ptr> itemsToIgnore() { return std::vector<MWWorld::Ptr>(); }

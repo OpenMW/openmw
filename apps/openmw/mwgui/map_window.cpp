@@ -121,8 +121,7 @@ MapWindow::MapWindow(WindowManager& parWindowManager) :
 
 void MapWindow::setCellName(const std::string& cellName)
 {
-    static_cast<MyGUI::Window*>(mMainWidget)->setCaption(cellName);
-    adjustWindowCaption();
+    setTitle(cellName);
 }
 
 void MapWindow::setPlayerPos(const float x, const float y)
