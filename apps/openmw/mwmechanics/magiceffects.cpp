@@ -85,6 +85,30 @@ namespace MWMechanics
         }
     }
 
+    MagicEffects& MagicEffects::operator+= (const MagicEffects& effects)
+    {
+        if (this==&effects)
+        {
+            MagicEffects temp (effects);
+            *this += temp;
+            return *this;
+        }
+
+        for (Collection::const_iterator iter (effects.Begin()); iter!=effects.End(); ++iter)
+        {
+            Collection::iterator result = mCollection.find (iter->first);
+
+            if (result!=mCollection.end())
+            {
+                result->second.mMagnitude += iter->second.mMagnitude;
+            }
+            else
+                mCollection.insert (*iter);
+        }
+
+        return *this;
+    }
+
     EffectParam MagicEffects::get (const EffectKey& key) const
     {
         Collection::const_iterator iter = mCollection.find (key);

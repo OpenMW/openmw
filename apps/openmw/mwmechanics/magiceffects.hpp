@@ -69,6 +69,8 @@ namespace MWMechanics
 
             void add (const ESM::EffectList& list);
 
+            MagicEffects& operator+= (const MagicEffects& effects);
+
             EffectParam get (const EffectKey& key) const;
             ///< This function can safely be used for keys that are not present.
 
