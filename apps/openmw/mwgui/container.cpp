@@ -127,7 +127,9 @@ void ContainerBase::onSelectedItem(MyGUI::Widget* _sender)
         if (isInventory())
         {
             // the player is trying to sell an item, check if the merchant accepts it
-            if (!MWBase::Environment::get().getWindowManager()->getTradeWindow()->npcAcceptsItem(object))
+            // also, don't allow selling gold (let's be better than Morrowind at this, can we?)
+            if (!MWBase::Environment::get().getWindowManager()->getTradeWindow()->npcAcceptsItem(object)
+                || MWWorld::Class::get(object).getName(object) == MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sGold")->str)
             {
                 // user notification "i don't buy this item"
                 MWBase::Environment::get().getWindowManager()->
@@ -533,7 +535,7 @@ std::string ContainerBase::getCountString(const int count)
     if (count == 1)
         return "";
     if (count > 9999)
-        return boost::lexical_cast<std::string>(count/1000.f) + "k";
+        return boost::lexical_cast<std::string>(int(count/1000.f)) + "k";
     else
         return boost::lexical_cast<std::string>(count);
 }
