@@ -138,6 +138,12 @@ namespace MWMechanics
                 }
             }
         }
+
+        // forced update and current value adjustments
+        mActors.updateActor (ptr, 0);
+
+        for (int i=0; i<3; ++i)
+            creatureStats.mDynamic[i].setCurrent (creatureStats.mDynamic[i].getModified());
     }
 
 

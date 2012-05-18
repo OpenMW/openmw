@@ -19,8 +19,6 @@ namespace MWMechanics
             std::set<MWWorld::Ptr> mActors;
             float mDuration;
 
-            void updateActor (const MWWorld::Ptr& ptr, float duration);
-
             void updateNpc (const MWWorld::Ptr& ptr, float duration, bool paused);
 
             void adjustMagicEffects (const MWWorld::Ptr& creature);
@@ -41,6 +39,11 @@ namespace MWMechanics
             void update (std::vector<std::pair<std::string, Ogre::Vector3> >& movement,
                 float duration, bool paused);
             ///< Update actor stats and store desired velocity vectors in \a movement
+
+            void updateActor (const MWWorld::Ptr& ptr, float duration);
+            ///< This function is normally called automatically during the update process, but it can
+            /// also be called explicitly at any time to force an update.
+
     };
 }
 

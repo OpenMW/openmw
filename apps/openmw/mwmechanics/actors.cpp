@@ -32,9 +32,6 @@ namespace MWMechanics
         creatureStats.mDynamic[1].setBase (static_cast<int> (intelligence +
             magickaFactor * intelligence));
         creatureStats.mDynamic[2].setBase (strength+willpower+agility+endurance);
-
-        for (int i=0; i<3; ++i)
-            creatureStats.mDynamic[i].setCurrent (creatureStats.mDynamic[i].getModified());
     }
 
     void Actors::updateNpc (const MWWorld::Ptr& ptr, float duration, bool paused)
