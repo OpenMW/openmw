@@ -309,11 +309,14 @@ void ContainerBase::drawItems()
         }
     }
 
+    std::vector<MWWorld::Ptr> ignoreItems = itemsToIgnore();
+
     // now add the regular items
     std::vector<MWWorld::Ptr> regularItems;
     for (MWWorld::ContainerStoreIterator iter (containerStore.begin(categories)); iter!=containerStore.end(); ++iter)
     {
-        if (std::find(equippedItems.begin(), equippedItems.end(), *iter) == equippedItems.end())
+        if (std::find(equippedItems.begin(), equippedItems.end(), *iter) == equippedItems.end()
+            && std::find(ignoreItems.begin(), ignoreItems.end(), *iter) == ignoreItems.end())
             regularItems.push_back(*iter);
     }
 

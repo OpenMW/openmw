@@ -30,6 +30,8 @@ namespace MWGui
             //virtual void Update();
             //virtual void notifyContentChanged();
 
+            bool npcAcceptsItem(MWWorld::Ptr item);
+
         protected:
             MyGUI::Button* mFilterAll;
             MyGUI::Button* mFilterWeapon;
@@ -60,6 +62,8 @@ namespace MWGui
             // don't show items that the NPC has equipped in his trade-window.
             virtual bool ignoreEquippedItems() { return true; }
             virtual std::vector<MWWorld::Ptr> getEquippedItems();
+
+            virtual std::vector<MWWorld::Ptr> itemsToIgnore();
 
             void updateLabels();
     };

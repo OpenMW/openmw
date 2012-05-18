@@ -197,8 +197,6 @@ namespace MWGui
 
     std::vector<MWWorld::Ptr> TradeWindow::getEquippedItems()
     {
-        
-
         std::vector<MWWorld::Ptr> items;
 
         if (mContainer.getTypeName() == typeid(ESM::Creature).name())
@@ -216,6 +214,63 @@ namespace MWGui
             {
                 items.push_back(*it);
             }
+        }
+
+        return items;
+    }
+
+    bool TradeWindow::npcAcceptsItem(MWWorld::Ptr item)
+    {
+        int services = 0;
+        if (mContainer.getTypeName() == typeid(ESM::NPC).name())
+        {
+            ESMS::LiveCellRef<ESM::NPC, MWWorld::RefData>* ref = mContainer.get<ESM::NPC>();
+            if (ref->base->hasAI)
+                services = ref->base->AI.services;
+        }
+        else if (mContainer.getTypeName() == typeid(ESM::Creature).name())
+        {
+            ESMS::LiveCellRef<ESM::Creature, MWWorld::RefData>* ref = mContainer.get<ESM::Creature>();
+            if (ref->base->hasAI)
+                services = ref->base->AI.services;
+        }
+
+        if      (item.getTypeName() == typeid(ESM::Weapon).name())
+            return services & ESM::NPC::Weapon;
+        else if (item.getTypeName() == typeid(ESM::Armor).name())
+            return services & ESM::NPC::Armor;
+        else if (item.getTypeName() == typeid(ESM::Clothing).name())
+            return services & ESM::NPC::Clothing;
+        else if (item.getTypeName() == typeid(ESM::Book).name())
+            return services & ESM::NPC::Books;
+        else if (item.getTypeName() == typeid(ESM::Ingredient).name())
+            return services & ESM::NPC::Ingredients;
+        else if (item.getTypeName() == typeid(ESM::Tool).name())
+            return services & ESM::NPC::Picks;
+        else if (item.getTypeName() == typeid(ESM::Probe).name())
+            return services & ESM::NPC::Probes;
+        else if (item.getTypeName() == typeid(ESM::Light).name())
+            return services & ESM::NPC::Lights;
+        else if (item.getTypeName() == typeid(ESM::Apparatus).name())
+            return services & ESM::NPC::Apparatus;
+        else if (item.getTypeName() == typeid(ESM::Repair).name())
+            return services & ESM::NPC::RepairItem;
+        else if (item.getTypeName() == typeid(ESM::Miscellaneous).name())
+            return services & ESM::NPC::Misc;
+
+        return false;
+    }
+
+    std::vector<MWWorld::Ptr> TradeWindow::itemsToIgnore()
+    {
+        std::vector<MWWorld::Ptr> items;
+        MWWorld::InventoryStore& invStore = static_cast<MWWorld::InventoryStore&>(MWWorld::Class::get(mContainer).getContainerStore(mContainer));
+
+        for (MWWorld::ContainerStoreIterator it = invStore.begin();
+                it != invStore.end(); ++it)
+        {
+            if (!npcAcceptsItem(*it))
+                items.push_back(*it);
         }
 
         return items;
