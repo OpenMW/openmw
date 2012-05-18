@@ -265,6 +265,11 @@ MWWorld::ContainerStoreIterator::ContainerStoreIterator (int mask, ContainerStor
 : mType (0), mMask (mask), mContainer (container)
 {
     nextType();
+
+    if (mType==-1 || (**this).getRefData().getCount())
+        return;
+
+    ++*this;
 }
 
 MWWorld::ContainerStoreIterator::ContainerStoreIterator (ContainerStore *container, ESMS::CellRefList<ESM::Potion, RefData>::List::iterator iterator)
@@ -311,7 +316,7 @@ void MWWorld::ContainerStoreIterator::nextType()
     {
         incType();
 
-        if (mType & mMask)
+        if ((mType & mMask) && mType>0)
             if (resetIterator())
                 break;
     }
