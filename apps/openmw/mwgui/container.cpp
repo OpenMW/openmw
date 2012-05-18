@@ -123,6 +123,18 @@ void ContainerBase::onSelectedItem(MyGUI::Widget* _sender)
         MWWorld::Ptr object = (*_sender->getUserData<MWWorld::Ptr>());
         int count = object.getRefData().getCount();
 
+        if (isInventory())
+        {
+            // the player is trying to sell an item, check if the merchant accepts it
+            if (!MWBase::Environment::get().getWindowManager()->getTradeWindow()->npcAcceptsItem(object))
+            {
+                // user notification "i don't buy this item"
+                MWBase::Environment::get().getWindowManager()->
+                    messageBox(MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sBarterDialog4")->str, std::vector<std::string>());
+                return;
+            }
+        }
+
         if (std::find(mBoughtItems.begin(), mBoughtItems.end(), object) != mBoughtItems.end())
         {
             if (MyGUI::InputManager::getInstance().isShiftPressed() || count == 1)

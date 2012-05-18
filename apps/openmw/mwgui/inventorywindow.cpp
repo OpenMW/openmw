@@ -92,11 +92,14 @@ namespace MWGui
 
     void InventoryWindow::openInventory()
     {
-        onWindowResize(static_cast<MyGUI::Window*>(mMainWidget));
-
         updateEncumbranceBar();
 
         mTrading = false;
+
+        mBoughtItems.clear();
+        mSoldItems.clear();
+
+        onWindowResize(static_cast<MyGUI::Window*>(mMainWidget));
     }
 
     void InventoryWindow::onWindowResize(MyGUI::Window* _sender)
@@ -252,7 +255,5 @@ namespace MWGui
     void InventoryWindow::startTrade()
     {
         mTrading = true;
-        mBoughtItems.clear();
-        mSoldItems.clear();
     }
 }
