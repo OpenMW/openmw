@@ -94,7 +94,7 @@ namespace MWMechanics
             return *this;
         }
 
-        for (Collection::const_iterator iter (effects.Begin()); iter!=effects.End(); ++iter)
+        for (Collection::const_iterator iter (effects.begin()); iter!=effects.end(); ++iter)
         {
             Collection::iterator result = mCollection.find (iter->first);
 
@@ -128,11 +128,11 @@ namespace MWMechanics
         MagicEffects result;
 
         // adding/changing
-        for (Collection::const_iterator iter (now.Begin()); iter!=now.End(); ++iter)
+        for (Collection::const_iterator iter (now.begin()); iter!=now.end(); ++iter)
         {
             Collection::const_iterator other = prev.mCollection.find (iter->first);
 
-            if (other==prev.End())
+            if (other==prev.end())
             {
                 // adding
                 result.add (iter->first, iter->second);
@@ -145,17 +145,16 @@ namespace MWMechanics
         }
 
         // removing
-        for (Collection::const_iterator iter (prev.Begin()); iter!=prev.End(); ++iter)
+        for (Collection::const_iterator iter (prev.begin()); iter!=prev.end(); ++iter)
         {
             Collection::const_iterator other = now.mCollection.find (iter->first);
 
-            if (other==prev.End())
+            if (other==prev.end())
             {
                 result.add (iter->first, EffectParam() - iter->second);
             }
         }
 
         return result;
-
     }
 }

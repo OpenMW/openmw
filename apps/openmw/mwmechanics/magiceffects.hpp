@@ -61,9 +61,9 @@ namespace MWMechanics
 
         public:
 
-            Collection::const_iterator Begin() const { return mCollection.begin(); }
+            Collection::const_iterator begin() const { return mCollection.begin(); }
 
-            Collection::const_iterator End() const { return mCollection.end(); }
+            Collection::const_iterator end() const { return mCollection.end(); }
 
             void add (const EffectKey& key, const EffectParam& param);
 
