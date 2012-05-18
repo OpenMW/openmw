@@ -109,8 +109,9 @@ void ContainerBase::onSelectedItem(MyGUI::Widget* _sender)
             }
             else
             {
+                std::string message = MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sTake")->str;
                 CountDialog* dialog = MWBase::Environment::get().getWindowManager()->getCountDialog();
-                dialog->open(MWWorld::Class::get(object).getName(object), count);
+                dialog->open(MWWorld::Class::get(object).getName(object), message, count);
                 dialog->eventOkClicked.clear();
                 dialog->eventOkClicked += MyGUI::newDelegate(this, &ContainerBase::startDragItem);
             }
@@ -135,6 +136,10 @@ void ContainerBase::onSelectedItem(MyGUI::Widget* _sender)
             }
         }
 
+        bool buying = isTradeWindow(); // buying or selling?
+        std::string message = buying ? MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sQuanityMenuMessage02")->str
+                :  MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sQuanityMenuMessage01")->str;
+
         if (std::find(mBoughtItems.begin(), mBoughtItems.end(), object) != mBoughtItems.end())
         {
             if (MyGUI::InputManager::getInstance().isShiftPressed() || count == 1)
@@ -148,7 +153,7 @@ void ContainerBase::onSelectedItem(MyGUI::Widget* _sender)
             else
             {
                 CountDialog* dialog = MWBase::Environment::get().getWindowManager()->getCountDialog();
-                dialog->open(MWWorld::Class::get(object).getName(object), count);
+                dialog->open(MWWorld::Class::get(object).getName(object), message, count);
                 dialog->eventOkClicked.clear();
                 dialog->eventOkClicked += MyGUI::newDelegate(this, &ContainerBase::sellAlreadyBoughtItem);
             }
@@ -166,7 +171,7 @@ void ContainerBase::onSelectedItem(MyGUI::Widget* _sender)
             else
             {
                 CountDialog* dialog = MWBase::Environment::get().getWindowManager()->getCountDialog();
-                dialog->open(MWWorld::Class::get(object).getName(object), count);
+                dialog->open(MWWorld::Class::get(object).getName(object), message, count);
                 dialog->eventOkClicked.clear();
                 dialog->eventOkClicked += MyGUI::newDelegate(this, &ContainerBase::sellItem);
             }
@@ -202,13 +207,15 @@ void ContainerBase::sellItem(MyGUI::Widget* _sender, int count)
     if (isInventory())
     {
         newPtr = MWBase::Environment::get().getWindowManager()->getTradeWindow()->addBarteredItem(*mSelectedItem->getUserData<MWWorld::Ptr>(), count);
-        mSoldItems.push_back(newPtr);
+        if (std::find(mSoldItems.begin(), mSoldItems.end(), newPtr) == mSoldItems.end())
+            mSoldItems.push_back(newPtr);
         MWBase::Environment::get().getWindowManager()->getTradeWindow()->drawItems();
     }
     else
     {
         newPtr = MWBase::Environment::get().getWindowManager()->getInventoryWindow()->addBarteredItem(*mSelectedItem->getUserData<MWWorld::Ptr>(), count);
-        mSoldItems.push_back(newPtr);
+        if (std::find(mSoldItems.begin(), mSoldItems.end(), newPtr) == mSoldItems.end())
+            mSoldItems.push_back(newPtr);
         MWBase::Environment::get().getWindowManager()->getInventoryWindow()->drawItems();
     }
 
@@ -510,8 +517,6 @@ void ContainerBase::drawItems()
     MyGUI::IntSize size = MyGUI::IntSize(std::max(mItemView->getSize().width, x+42), mItemView->getSize().height);
     mItemView->setCanvasSize(size);
     mContainerWidget->setSize(size);
-
-    notifyContentChanged();
 }
 
 std::string ContainerBase::getCountString(const int count)
@@ -522,16 +527,6 @@ std::string ContainerBase::getCountString(const int count)
         return boost::lexical_cast<std::string>(count/1000.f) + "k";
     else
         return boost::lexical_cast<std::string>(count);
-}
-
-void ContainerBase::Update()
-{
-    if(mDragAndDrop != NULL && mDragAndDrop->mIsOnDragAndDrop)
-    {
-        if(mDragAndDrop->mDraggedWidget)
-            mDragAndDrop->mDraggedWidget->setPosition(MyGUI::InputManager::getInstance().getMousePosition());
-        else mDragAndDrop->mIsOnDragAndDrop = false; //If this happens, there is a bug.
-    }
 }
 
 MWWorld::Ptr ContainerBase::readdBarteredItem(MWWorld::Ptr item, int count)
@@ -558,7 +553,9 @@ MWWorld::Ptr ContainerBase::addBarteredItem(MWWorld::Ptr item, int count)
     MWWorld::ContainerStoreIterator it = containerStore.add(item);
     item.getRefData().setCount(origCount - count);
 
-    mBoughtItems.push_back(*it);
+    if (std::find(mBoughtItems.begin(), mBoughtItems.end(), *it) == mBoughtItems.end())
+        mBoughtItems.push_back(*it);
+
     return *it;
 }
 

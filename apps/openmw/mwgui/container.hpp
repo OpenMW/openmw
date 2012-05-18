@@ -73,10 +73,7 @@ namespace MWGui
 
         void openContainer(MWWorld::Ptr container);
         void setFilter(Filter filter); ///< set category filter
-        virtual void Update();
         void drawItems();
-
-        virtual void notifyContentChanged() { }
 
     protected:
         MyGUI::ScrollView* mItemView;

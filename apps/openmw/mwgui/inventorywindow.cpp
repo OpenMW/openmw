@@ -228,15 +228,9 @@ namespace MWGui
         mEncumbranceText->setCaption( boost::lexical_cast<std::string>(int(encumbrance)) + "/" + boost::lexical_cast<std::string>(int(capacity)) );
     }
 
-    void InventoryWindow::notifyContentChanged()
-    {
-    }
-
-    void InventoryWindow::Update()
+    void InventoryWindow::update()
     {
         updateEncumbranceBar();
-
-        ContainerBase::Update();
     }
 
     int InventoryWindow::getPlayerGold()

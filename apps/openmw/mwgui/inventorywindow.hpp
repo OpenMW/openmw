@@ -16,8 +16,7 @@ namespace MWGui
             /// start trading, disables item drag&drop
             void startTrade();
 
-            virtual void Update();
-            virtual void notifyContentChanged();
+            void update();
 
             int getPlayerGold();
 

@@ -19,7 +19,6 @@ namespace MWGui
 
         mOkButton->setCaption(MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sOk")->str);
         mCancelButton->setCaption(MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sCancel")->str);
-        mLabelText->setCaption(MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sTake")->str);
 
         mCancelButton->eventMouseButtonClick += MyGUI::newDelegate(this, &CountDialog::onCancelButtonClicked);
         mOkButton->eventMouseButtonClick += MyGUI::newDelegate(this, &CountDialog::onOkButtonClicked);
@@ -27,9 +26,11 @@ namespace MWGui
         mSlider->eventScrollChangePosition += MyGUI::newDelegate(this, &CountDialog::onSliderMoved);
     }
 
-    void CountDialog::open(const std::string& item, const int maxCount)
+    void CountDialog::open(const std::string& item, const std::string& message, const int maxCount)
     {
         setVisible(true);
+
+        mLabelText->setCaption(message);
 
         MyGUI::IntSize viewSize = MyGUI::RenderManager::getInstance().getViewSize();
 

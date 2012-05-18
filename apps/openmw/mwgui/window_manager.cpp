@@ -97,7 +97,7 @@ WindowManager::WindowManager(
     MyGUI::Widget* dragAndDropWidget = gui->createWidgetT("Widget","",0,0,w,h,MyGUI::Align::Default,"DragAndDrop","DragAndDropWidget");
     dragAndDropWidget->setVisible(false);
 
-    DragAndDrop* mDragAndDrop = new DragAndDrop();
+    mDragAndDrop = new DragAndDrop();
     mDragAndDrop->mIsOnDragAndDrop = false;
     mDragAndDrop->mDraggedWidget = 0;
     mDragAndDrop->mDragAndDropWidget = dragAndDropWidget;
@@ -468,9 +468,15 @@ void WindowManager::onDialogueWindowBye()
 void WindowManager::onFrame (float frameDuration)
 {
     mMessageBoxManager->onFrame(frameDuration);
-    mInventoryWindow->Update();
-    mContainerWindow->Update();
     mToolTips->onFrame(frameDuration);
+
+    if (mDragAndDrop->mIsOnDragAndDrop)
+    {
+        assert(mDragAndDrop->mDraggedWidget);
+        mDragAndDrop->mDraggedWidget->setPosition(MyGUI::InputManager::getInstance().getMousePosition());
+    }
+
+    mInventoryWindow->update();
 }
 
 const ESMS::ESMStore& WindowManager::getStore() const

@@ -27,9 +27,6 @@ namespace MWGui
 
             void startTrade(MWWorld::Ptr actor);
 
-            //virtual void Update();
-            //virtual void notifyContentChanged();
-
             bool npcAcceptsItem(MWWorld::Ptr item);
 
         protected:
