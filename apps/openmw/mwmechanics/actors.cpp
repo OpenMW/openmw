@@ -47,7 +47,13 @@ namespace MWMechanics
 
         MagicEffects now = creatureStats.mSpells.getMagicEffects();
 
-        /// \todo add effects from active spells and equipment
+        if (creature.getTypeName()==typeid (ESM::NPC).name())
+        {
+            MWWorld::InventoryStore& store = MWWorld::Class::get (creature).getInventoryStore (creature);
+            now += store.getMagicEffects();
+        }
+
+        /// \todo add effects from active spells
 
         MagicEffects diff = MagicEffects::diff (creatureStats.mMagicEffects, now);
 

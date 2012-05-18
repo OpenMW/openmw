@@ -3,6 +3,8 @@
 
 #include "containerstore.hpp"
 
+#include "../mwmechanics/magiceffects.hpp"
+
 namespace MWMechanics
 {
     struct NpcStats;
@@ -41,6 +43,9 @@ namespace MWWorld
 
         private:
 
+            mutable MWMechanics::MagicEffects mMagicEffects;
+            mutable bool mMagicEffectsUpToDate;
+
             typedef std::vector<ContainerStoreIterator> TSlots;
 
             mutable TSlots mSlots;
@@ -64,6 +69,15 @@ namespace MWWorld
 
             void autoEquip (const MWMechanics::NpcStats& stats);
             ///< Auto equip items according to stats and item value.
+
+            const MWMechanics::MagicEffects& getMagicEffects();
+            ///< Return magic effects from worn items.
+            ///
+            /// \todo make this const again, after the constness of Ptrs and iterators has been addressed.
+
+            virtual void flagAsModified();
+            ///< \attention This function is internal to the world model and should not be called from
+            /// outside.
 
         protected:
 
