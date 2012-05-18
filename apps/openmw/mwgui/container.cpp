@@ -182,19 +182,15 @@ void ContainerBase::onSelectedItem(MyGUI::Widget* _sender)
 void ContainerBase::sellAlreadyBoughtItem(MyGUI::Widget* _sender, int count)
 {
     MWWorld::Ptr object = *mSelectedItem->getUserData<MWWorld::Ptr>();
-    assert( std::find(mBoughtItems.begin(), mBoughtItems.end(), object) != mBoughtItems.end() );
-
-    if (count == object.getRefData().getCount())
-        mBoughtItems.erase( std::find(mBoughtItems.begin(), mBoughtItems.end(), object) );
 
     if (isInventory())
     {
-        MWBase::Environment::get().getWindowManager()->getTradeWindow()->readdBarteredItem(*mSelectedItem->getUserData<MWWorld::Ptr>(), count);
+        MWBase::Environment::get().getWindowManager()->getTradeWindow()->addItem(object, count);
         MWBase::Environment::get().getWindowManager()->getTradeWindow()->drawItems();
     }
     else
     {
-        MWBase::Environment::get().getWindowManager()->getInventoryWindow()->readdBarteredItem(*mSelectedItem->getUserData<MWWorld::Ptr>(), count);
+        MWBase::Environment::get().getWindowManager()->getInventoryWindow()->addItem(object, count);
         MWBase::Environment::get().getWindowManager()->getInventoryWindow()->drawItems();
     }
 
@@ -203,19 +199,14 @@ void ContainerBase::sellAlreadyBoughtItem(MyGUI::Widget* _sender, int count)
 
 void ContainerBase::sellItem(MyGUI::Widget* _sender, int count)
 {
-    MWWorld::Ptr newPtr;
     if (isInventory())
     {
-        newPtr = MWBase::Environment::get().getWindowManager()->getTradeWindow()->addBarteredItem(*mSelectedItem->getUserData<MWWorld::Ptr>(), count);
-        if (std::find(mSoldItems.begin(), mSoldItems.end(), newPtr) == mSoldItems.end())
-            mSoldItems.push_back(newPtr);
+        MWBase::Environment::get().getWindowManager()->getTradeWindow()->addBarteredItem(*mSelectedItem->getUserData<MWWorld::Ptr>(), count);
         MWBase::Environment::get().getWindowManager()->getTradeWindow()->drawItems();
     }
     else
     {
-        newPtr = MWBase::Environment::get().getWindowManager()->getInventoryWindow()->addBarteredItem(*mSelectedItem->getUserData<MWWorld::Ptr>(), count);
-        if (std::find(mSoldItems.begin(), mSoldItems.end(), newPtr) == mSoldItems.end())
-            mSoldItems.push_back(newPtr);
+        MWBase::Environment::get().getWindowManager()->getInventoryWindow()->addBarteredItem(*mSelectedItem->getUserData<MWWorld::Ptr>(), count);
         MWBase::Environment::get().getWindowManager()->getInventoryWindow()->drawItems();
     }
 
@@ -385,10 +376,16 @@ void ContainerBase::drawItems()
 
     std::vector<MWWorld::Ptr> equippedItems = getEquippedItems();
 
-    // add bartered items (always at the beginning)
-    std::sort(mBoughtItems.begin(), mBoughtItems.end(), sortItems);
-    for (std::vector<MWWorld::Ptr>::iterator it=mBoughtItems.begin();
-        it != mBoughtItems.end(); ++it)
+    // add bought items (always at the beginning)
+    std::vector<MWWorld::Ptr> boughtItems;
+    for (MWWorld::ContainerStoreIterator it (mBoughtItems.begin()); it!=mBoughtItems.end(); ++it)
+    {
+        boughtItems.push_back(*it);
+    }
+    std::sort(boughtItems.begin(), boughtItems.end(), sortItems);
+
+    for (std::vector<MWWorld::Ptr>::iterator it=boughtItems.begin();
+        it != boughtItems.end(); ++it)
     {
         items.push_back( std::make_pair(*it, ItemState_Barter) );
     }
@@ -529,47 +526,48 @@ std::string ContainerBase::getCountString(const int count)
         return boost::lexical_cast<std::string>(count);
 }
 
-MWWorld::Ptr ContainerBase::readdBarteredItem(MWWorld::Ptr item, int count)
+void ContainerBase::addBarteredItem(MWWorld::Ptr item, int count)
 {
-    MWWorld::ContainerStore& containerStore = MWWorld::Class::get(mContainer).getContainerStore(mContainer);
-
     int origCount = item.getRefData().getCount();
     item.getRefData().setCount(count);
-    MWWorld::ContainerStoreIterator it = containerStore.add(item);
+    MWWorld::ContainerStoreIterator it = mBoughtItems.add(item);
     item.getRefData().setCount(origCount - count);
-
-    if (origCount - count == 0)
-        mSoldItems.erase( std::find(mSoldItems.begin(), mSoldItems.end(), item) );
-
-    return *it;
 }
 
-MWWorld::Ptr ContainerBase::addBarteredItem(MWWorld::Ptr item, int count)
+void ContainerBase::addItem(MWWorld::Ptr item, int count)
 {
     MWWorld::ContainerStore& containerStore = MWWorld::Class::get(mContainer).getContainerStore(mContainer);
 
-    int origCount = item.getRefData().getCount();
+    int origCount = item.getRefData().getCount();    
+
     item.getRefData().setCount(count);
     MWWorld::ContainerStoreIterator it = containerStore.add(item);
+
     item.getRefData().setCount(origCount - count);
-
-    if (std::find(mBoughtItems.begin(), mBoughtItems.end(), *it) == mBoughtItems.end())
-        mBoughtItems.push_back(*it);
-
-    return *it;
 }
 
-void ContainerBase::removeBarteredItem(MWWorld::Ptr item, int count)
+void ContainerBase::transferBoughtItems()
 {
     MWWorld::ContainerStore& containerStore = MWWorld::Class::get(mContainer).getContainerStore(mContainer);
 
-    for (MWWorld::ContainerStoreIterator it(containerStore.begin()); it != containerStore.end(); ++it)
+    for (MWWorld::ContainerStoreIterator it(mBoughtItems.begin()); it != mBoughtItems.end(); ++it)
     {
-        if (*it == item)
-        {
-            item.getRefData().setCount(item.getRefData().getCount() - count);
-        }
+        containerStore.add(*it);
     }
+}
+
+void ContainerBase::returnBoughtItems(MWWorld::ContainerStore& store)
+{
+    for (MWWorld::ContainerStoreIterator it(mBoughtItems.begin()); it != mBoughtItems.end(); ++it)
+    {
+        store.add(*it);
+    }
+}
+
+MWWorld::ContainerStore& ContainerBase::getContainerStore()
+{
+    MWWorld::ContainerStore& store = MWWorld::Class::get(mContainer).getContainerStore(mContainer);
+    return store;
 }
 
 // ------------------------------------------------------------------------------------------------

@@ -67,9 +67,13 @@ namespace MWGui
 
         void setWidgets(MyGUI::Widget* containerWidget, MyGUI::ScrollView* itemView); ///< only call once
 
-        MWWorld::Ptr addBarteredItem(MWWorld::Ptr item, int count);
-        MWWorld::Ptr readdBarteredItem(MWWorld::Ptr item, int count);
-        void removeBarteredItem(MWWorld::Ptr item, int count);
+        void addBarteredItem(MWWorld::Ptr item, int count);
+        void addItem(MWWorld::Ptr item, int count);
+
+        void transferBoughtItems(); ///< transfer bought items into the inventory
+        void returnBoughtItems(MWWorld::ContainerStore& store); ///< return bought items into the specified ContainerStore
+
+        MWWorld::ContainerStore& getContainerStore();
 
         void openContainer(MWWorld::Ptr container);
         void setFilter(Filter filter); ///< set category filter
@@ -86,8 +90,8 @@ namespace MWGui
 
         Filter mFilter;
 
-        std::vector<MWWorld::Ptr> mBoughtItems;
-        std::vector<MWWorld::Ptr> mSoldItems;
+        // bought items are put in a separate ContainerStore so that they don't stack with other (not bought) items.
+        MWWorld::ContainerStore mBoughtItems;
 
         void onSelectedItem(MyGUI::Widget* _sender);
         void onContainerClicked(MyGUI::Widget* _sender);

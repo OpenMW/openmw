@@ -97,7 +97,6 @@ namespace MWGui
         mTrading = false;
 
         mBoughtItems.clear();
-        mSoldItems.clear();
 
         onWindowResize(static_cast<MyGUI::Window*>(mMainWidget));
     }

@@ -110,7 +110,6 @@ namespace MWGui
         mWindowManager.getInventoryWindow()->startTrade();
 
         mBoughtItems.clear();
-        mSoldItems.clear();
 
         ContainerBase::openContainer(actor);
 
@@ -146,10 +145,19 @@ namespace MWGui
 
     void TradeWindow::onOfferButtonClicked(MyGUI::Widget* _sender)
     {
+        transferBoughtItems();
+        mWindowManager.getInventoryWindow()->transferBoughtItems();
+
+        mWindowManager.setGuiMode(GM_Game);
     }
 
     void TradeWindow::onCancelButtonClicked(MyGUI::Widget* _sender)
     {
+        // i give you back your stuff!
+        returnBoughtItems(mWindowManager.getInventoryWindow()->getContainerStore());
+        // now gimme back my stuff!
+        mWindowManager.getInventoryWindow()->returnBoughtItems(MWWorld::Class::get(mContainer).getContainerStore(mContainer));
+
         mWindowManager.setGuiMode(GM_Game);
     }
 
@@ -169,16 +177,6 @@ namespace MWGui
             mTotalBalance->setCaption(boost::lexical_cast<std::string>(-mCurrentBalance));
         }
 
-        // retrieve merchant gold
-        int gold = 0;
-        MWWorld::InventoryStore& invStore = static_cast<MWWorld::InventoryStore&>(MWWorld::Class::get(mContainer).getContainerStore(mContainer));
-        for (MWWorld::ContainerStoreIterator it = invStore.begin();
-                it != invStore.end(); ++it)
-        {
-            if (MWWorld::Class::get(*it).getName(*it) == MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sGold")->str)
-                gold = it->getRefData().getCount();
-        }
-
         int merchantgold;
         if (mContainer.getTypeName() == typeid(ESM::NPC).name())
         {
@@ -193,10 +191,9 @@ namespace MWGui
             ESMS::LiveCellRef<ESM::Creature, MWWorld::RefData>* ref = mContainer.get<ESM::Creature>();
             merchantgold = ref->base->data.gold;
         }
-        gold += merchantgold;
 
         mMerchantGold->setCaption(MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sSellerGold")->str
-            + " " + boost::lexical_cast<std::string>(gold));
+            + " " + boost::lexical_cast<std::string>(merchantgold));
     }
 
     std::vector<MWWorld::Ptr> TradeWindow::getEquippedItems()
