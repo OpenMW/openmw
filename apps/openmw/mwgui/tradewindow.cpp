@@ -150,21 +150,7 @@ namespace MWGui
         // were there any items traded at all?
         MWWorld::ContainerStore& playerBought = mWindowManager.getInventoryWindow()->getBoughtItems();
         MWWorld::ContainerStore& merchantBought = getBoughtItems();
-
-        bool traded=false;
-        for (MWWorld::ContainerStoreIterator it = playerBought.begin();
-                it != playerBought.end(); ++it)
-        {
-            if (it->getRefData().getCount() > 0)
-                traded = true;
-        }
-        for (MWWorld::ContainerStoreIterator it = merchantBought.begin();
-                it != merchantBought.end(); ++it)
-        {
-            if (it->getRefData().getCount() > 0)
-                traded = true;
-        }
-        if (!traded)
+        if (playerBought.begin() == playerBought.end() && merchantBought.begin() == merchantBought.end())
         {
             // user notification
             MWBase::Environment::get().getWindowManager()->
