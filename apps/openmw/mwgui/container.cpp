@@ -489,7 +489,8 @@ void ContainerBase::drawItems()
             {
                 backgroundTex += "_barter";
             }
-            backgroundTex += ".dds";
+            if (backgroundTex != "")
+                backgroundTex += ".dds";
 
             backgroundWidget->setImageTexture(backgroundTex);
             if (it->second == ItemState_Barter && !isMagic)
