@@ -99,9 +99,7 @@ namespace MWMechanics
             Collection::iterator result = mCollection.find (iter->first);
 
             if (result!=mCollection.end())
-            {
-                result->second.mMagnitude += iter->second.mMagnitude;
-            }
+                result->second += iter->second;
             else
                 mCollection.insert (*iter);
         }
