@@ -77,9 +77,6 @@ HUD::HUD(int width, int height, int fpsLevel, DragAndDrop* dragAndDrop)
     getWidget(trianglecounter, "TriangleCounter");
     getWidget(batchcounter, "BatchCounter");
 
-    compass->setImageTexture("textures\\compass.dds");
-    crosshair->setImageTexture("textures\\target.dds");
-
     // These are just demo values, you should replace these with
     // real calls from outside the class later.
     setWeapIcon("icons\\w\\tx_knife_iron.dds");

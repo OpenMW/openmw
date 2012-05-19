@@ -603,9 +603,6 @@ ContainerWindow::ContainerWindow(WindowManager& parWindowManager,DragAndDrop* dr
     mCloseButton->eventMouseButtonClick += MyGUI::newDelegate(this, &ContainerWindow::onCloseButtonClicked);
     mTakeButton->eventMouseButtonClick += MyGUI::newDelegate(this, &ContainerWindow::onTakeAllButtonClicked);
 
-    setText("CloseButton", MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sClose")->str);
-    setText("TakeButton", MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sTakeAll")->str);
-
     // adjust buttons size to fit text
     int closeButtonWidth = mCloseButton->getTextSize().width+24;
     int takeButtonWidth = mTakeButton->getTextSize().width+24;

@@ -95,11 +95,6 @@ MapWindow::MapWindow(WindowManager& parWindowManager) :
     mGlobal(false)
 {
     setCoord(500,0,320,300);
-    setText("WorldButton", "World");
-    setImage("Compass", "textures\\compass.dds");
-
-    // Obviously you should override this later on
-    setCellName("No Cell Loaded");
 
     getWidget(mLocalMap, "LocalMap");
     getWidget(mGlobalMap, "GlobalMap");

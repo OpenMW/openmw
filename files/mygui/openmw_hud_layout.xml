@@ -62,7 +62,10 @@
 
                 <Widget type="ImageBox" skin="ImageBox" position="512 512 512 512" align="ALIGN_TOP ALIGN_LEFT" name="Map_1_1">
                     <Widget type="ImageBox" skin="ImageBox" position="0 0 512 512" align="ALIGN_TOP ALIGN_LEFT" name="Map_1_1_fog">
-                        <Widget type="ImageBox" skin="RotatingSkin" position="0 0 32 32" align="Left Bottom" name="Compass"/>
+                        <!-- Player arrow -->
+                        <Widget type="ImageBox" skin="RotatingSkin" position="0 0 32 32" align="ALIGN_BOTTOM ALIGN_LEFT" name="Compass">
+                            <Property key="ImageTexture" value="textures\compass.dds"/>
+                        </Widget>
                     </Widget>
                 </Widget>
 
@@ -85,9 +88,9 @@
         </Widget>
 
         <!-- Crosshair -->
-
-        <Widget type="ImageBox" skin="ImageBox" position="0 0 32
-            32" align="Center Center" name="Crosshair"/>
+        <Widget type="ImageBox" skin="ImageBox" position="0 0 32 32" align="Center Center" name="Crosshair">
+            <Property key="ImageTexture" value="textures\target.dds"/>
+        </Widget>
 
         <!-- Basic FPSCounter box -->
         <Widget type="Widget" skin="HUD_Box" position="12 12 28 21" align="Left Top"

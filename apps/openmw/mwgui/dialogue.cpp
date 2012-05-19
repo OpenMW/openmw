@@ -69,7 +69,6 @@ DialogueWindow::DialogueWindow(WindowManager& parWindowManager)
     MyGUI::ButtonPtr byeButton;
     getWidget(byeButton, "ByeButton");
     byeButton->eventMouseButtonClick += MyGUI::newDelegate(this, &DialogueWindow::onByeClicked);
-    byeButton->setCaption(MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sGoodbye")->str);
 
     getWidget(pDispositionBar, "Disposition");
     getWidget(pDispositionText,"DispositionText");
