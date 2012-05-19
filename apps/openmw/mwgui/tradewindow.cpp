@@ -268,7 +268,7 @@ namespace MWGui
             return items;
         }
 
-        MWWorld::InventoryStore& invStore = static_cast<MWWorld::InventoryStore&>(MWWorld::Class::get(mContainer).getContainerStore(mContainer));
+        MWWorld::InventoryStore& invStore = MWWorld::Class::get(mContainer).getInventoryStore(mContainer);
 
         for (int slot=0; slot < MWWorld::InventoryStore::Slots; ++slot)
         {
@@ -327,7 +327,7 @@ namespace MWGui
     std::vector<MWWorld::Ptr> TradeWindow::itemsToIgnore()
     {
         std::vector<MWWorld::Ptr> items;
-        MWWorld::InventoryStore& invStore = static_cast<MWWorld::InventoryStore&>(MWWorld::Class::get(mContainer).getContainerStore(mContainer));
+        MWWorld::ContainerStore& invStore = MWWorld::Class::get(mContainer).getContainerStore(mContainer);
 
         for (MWWorld::ContainerStoreIterator it = invStore.begin();
                 it != invStore.end(); ++it)
