@@ -41,12 +41,6 @@ namespace MWGui
         getWidget(mTotalBalanceLabel, "TotalBalanceLabel");
         getWidget(mBottomPane, "BottomPane");
 
-        // this GMST doesn't seem to get retrieved - even though i can clearly see it in the CS !??!?
-        mMaxSaleButton->setCaption(mWindowManager.getGameSettingString("sMaxSale", "Max. Sale"));
-
-        mCancelButton->setCaption(MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sCancel")->str);
-        mOfferButton->setCaption(MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sBarterDialog8")->str);
-
         // adjust size of buttons to fit text
         int curX = 0;
         mFilterAll->setSize( mFilterAll->getTextSize().width + 24, mFilterAll->getSize().height );

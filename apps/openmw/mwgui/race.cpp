@@ -71,7 +71,6 @@ RaceDialog::RaceDialog(WindowManager& parWindowManager)
 
     MyGUI::ButtonPtr backButton;
     getWidget(backButton, "BackButton");
-    backButton->setCaption(mWindowManager.getGameSettingString("sBack", ""));
     backButton->eventMouseButtonClick += MyGUI::newDelegate(this, &RaceDialog::onBackClicked);
 
     MyGUI::ButtonPtr okButton;

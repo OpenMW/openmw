@@ -7,11 +7,7 @@
 
             <!-- Player encumbrance -->
             <Widget type="ProgressBar" skin="MW_Progress_Blue" position="8 8 212 24" name="EncumbranceBar" align="Left Top HStretch">
-                <Property key="Range" value="100"/>
-                <Property key="RangePosition" value="50"/>
-                <Widget type="TextBox" skin="ProgressText" position="0 0 212 24" align="Center Stretch" name="EncumbranceBarT">
-                    <Property key="Caption" value="Encumbrance bar"/>
-                </Widget>
+                <Widget type="TextBox" skin="ProgressText" position="0 0 212 24" align="Center Stretch" name="EncumbranceBarT"/>
             </Widget>
 
             <!-- Avatar -->

@@ -49,12 +49,6 @@ StatsWindow::StatsWindow (WindowManager& parWindowManager)
         { "Attrib6", "sAttributeEndurance" },
         { "Attrib7", "sAttributePersonality" },
         { "Attrib8", "sAttributeLuck" },
-        { "Health_str", "sHealth" },
-        { "Magicka_str", "sMagic" },
-        { "Fatigue_str", "sFatigue" },
-        { "Level_str", "sLevel" },
-        { "Race_str", "sRace" },
-        { "Class_str", "sClass" },
         { 0, 0 }
     };
 
