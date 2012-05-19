@@ -53,7 +53,7 @@ namespace MWMechanics
             now += store.getMagicEffects();
         }
 
-        /// \todo add effects from active spells
+        now += creatureStats.mActiveSpells.getMagicEffects();
 
         MagicEffects diff = MagicEffects::diff (creatureStats.mMagicEffects, now);
 

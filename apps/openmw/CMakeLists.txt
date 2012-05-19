@@ -58,6 +58,7 @@ add_openmw_dir (mwclass
 
 add_openmw_dir (mwmechanics
     mechanicsmanager stat creaturestats magiceffects movement actors drawstate spells
+    activespells
     )
 
 add_openmw_dir (mwbase
