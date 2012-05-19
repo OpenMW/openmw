@@ -471,6 +471,12 @@ namespace MWWorld
         mRendering->skySetDate (mGlobalVariables->getInt ("day"), month);
     }
 
+    TimeStamp World::getTimeStamp() const
+    {
+        return TimeStamp (mGlobalVariables->getFloat ("gamehour"),
+            mGlobalVariables->getInt ("dayspassed"));
+    }
+
     bool World::toggleSky()
     {
         if (mSky)

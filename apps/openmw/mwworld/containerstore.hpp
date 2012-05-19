@@ -90,7 +90,7 @@ namespace MWWorld
             void clear();
             ///< Empty container.
 
-            void flagAsModified();
+            virtual void flagAsModified();
             ///< \attention This function is internal to the world model and should not be called from
             /// outside.
 

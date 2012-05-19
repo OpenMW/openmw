@@ -4,6 +4,12 @@
 #include <iterator>
 #include <algorithm>
 
+#include <components/esm/loadench.hpp>
+
+#include "../mwbase/environment.hpp"
+
+#include "../mwworld/world.hpp"
+
 #include "../mwmechanics/npcstats.hpp"
 
 #include "class.hpp"
@@ -32,7 +38,7 @@ void MWWorld::InventoryStore::initSlots (TSlots& slots)
         slots.push_back (end());
 }
 
-MWWorld::InventoryStore::InventoryStore()
+MWWorld::InventoryStore::InventoryStore() : mMagicEffectsUpToDate (false)
 {
     initSlots (mSlots);
 }
@@ -40,11 +46,15 @@ MWWorld::InventoryStore::InventoryStore()
 MWWorld::InventoryStore::InventoryStore (const InventoryStore& store)
 : ContainerStore (store)
 {
+    mMagicEffects = store.mMagicEffects;
+    mMagicEffectsUpToDate = store.mMagicEffectsUpToDate;
     copySlots (store);
 }
 
 MWWorld::InventoryStore& MWWorld::InventoryStore::operator= (const InventoryStore& store)
 {
+    mMagicEffects = store.mMagicEffects;
+    mMagicEffectsUpToDate = store.mMagicEffectsUpToDate;
     ContainerStore::operator= (store);
     mSlots.clear();
     copySlots (store);
@@ -199,6 +209,39 @@ void MWWorld::InventoryStore::autoEquip (const MWMechanics::NpcStats& stats)
         mSlots.swap (slots);
         flagAsModified();
     }
+}
+
+const MWMechanics::MagicEffects& MWWorld::InventoryStore::getMagicEffects()
+{
+    if (!mMagicEffectsUpToDate)
+    {
+        mMagicEffects = MWMechanics::MagicEffects();
+
+        for (TSlots::const_iterator iter (mSlots.begin()); iter!=mSlots.end(); ++iter)
+            if (*iter!=end())
+            {
+                std::string enchantmentId = MWWorld::Class::get (**iter).getEnchantment (**iter);
+
+                if (!enchantmentId.empty())
+                {
+                    const ESM::Enchantment& enchantment =
+                        *MWBase::Environment::get().getWorld()->getStore().enchants.find (enchantmentId);
+
+                    if (enchantment.data.type==ESM::Enchantment::ConstantEffect)
+                        mMagicEffects.add (enchantment.effects);
+                }
+            }
+
+        mMagicEffectsUpToDate = true;
+    }
+
+    return mMagicEffects;
+}
+
+void MWWorld::InventoryStore::flagAsModified()
+{
+    ContainerStore::flagAsModified();
+    mMagicEffectsUpToDate = false;
 }
 
 bool MWWorld::InventoryStore::stacks(const Ptr& ptr1, const Ptr& ptr2)

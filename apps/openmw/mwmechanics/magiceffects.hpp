@@ -6,6 +6,7 @@
 namespace ESM
 {
     struct ENAMstruct;
+    struct EffectList;
 }
 
 namespace MWMechanics
@@ -60,11 +61,15 @@ namespace MWMechanics
 
         public:
 
-            Collection::const_iterator Begin() const { return mCollection.begin(); }
+            Collection::const_iterator begin() const { return mCollection.begin(); }
 
-            Collection::const_iterator End() const { return mCollection.end(); }
+            Collection::const_iterator end() const { return mCollection.end(); }
 
             void add (const EffectKey& key, const EffectParam& param);
+
+            void add (const ESM::EffectList& list);
+
+            MagicEffects& operator+= (const MagicEffects& effects);
 
             EffectParam get (const EffectKey& key) const;
             ///< This function can safely be used for keys that are not present.

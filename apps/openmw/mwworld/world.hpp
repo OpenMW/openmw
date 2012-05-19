@@ -18,6 +18,7 @@
 #include "physicssystem.hpp"
 #include "cells.hpp"
 #include "localscripts.hpp"
+#include "timestamp.hpp"
 
 #include <openengine/bullet/physic.hpp>
 #include <openengine/ogre/fader.hpp>
@@ -184,6 +185,9 @@ namespace MWWorld
 
             void setDay (int day);
             ///< Set in-game time day.
+
+            TimeStamp getTimeStamp() const;
+            ///< Return current in-game time stamp.
 
             bool toggleSky();
             ///< \return Resulting mode
