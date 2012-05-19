@@ -44,13 +44,17 @@ MWWorld::InventoryStore::InventoryStore() : mMagicEffectsUpToDate (false)
 }
 
 MWWorld::InventoryStore::InventoryStore (const InventoryStore& store)
-: ContainerStore (store), mMagicEffectsUpToDate (false)
+: ContainerStore (store)
 {
+    mMagicEffects = store.mMagicEffects;
+    mMagicEffectsUpToDate = store.mMagicEffectsUpToDate;
     copySlots (store);
 }
 
 MWWorld::InventoryStore& MWWorld::InventoryStore::operator= (const InventoryStore& store)
 {
+    mMagicEffects = store.mMagicEffects;
+    mMagicEffectsUpToDate = store.mMagicEffectsUpToDate;
     ContainerStore::operator= (store);
     mSlots.clear();
     copySlots (store);
@@ -236,6 +240,7 @@ const MWMechanics::MagicEffects& MWWorld::InventoryStore::getMagicEffects()
 
 void MWWorld::InventoryStore::flagAsModified()
 {
+    ContainerStore::flagAsModified();
     mMagicEffectsUpToDate = false;
 }
 
