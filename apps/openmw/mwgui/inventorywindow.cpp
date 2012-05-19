@@ -50,12 +50,6 @@ namespace MWGui
         getWidget(itemView, "ItemView");
         setWidgets(containerWidget, itemView);
 
-        mFilterAll->setCaption (MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sAllTab")->str);
-        mFilterWeapon->setCaption (MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sWeaponTab")->str);
-        mFilterApparel->setCaption (MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sApparelTab")->str);
-        mFilterMagic->setCaption (MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sMagicTab")->str);
-        mFilterMisc->setCaption (MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sMiscTab")->str);
-
         // adjust size of buttons to fit text
         int curX = 0;
         mFilterAll->setSize( mFilterAll->getTextSize().width + 24, mFilterAll->getSize().height );
@@ -227,8 +221,11 @@ namespace MWGui
         mEncumbranceText->setCaption( boost::lexical_cast<std::string>(int(encumbrance)) + "/" + boost::lexical_cast<std::string>(int(capacity)) );
     }
 
-    void InventoryWindow::update()
+    void InventoryWindow::onFrame()
     {
+        if (!mMainWidget->getVisible())
+            return;
+
         updateEncumbranceBar();
     }
 

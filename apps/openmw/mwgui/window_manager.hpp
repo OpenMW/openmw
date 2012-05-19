@@ -161,7 +161,6 @@ namespace MWGui
 
     void setPlayerClass (const ESM::Class &class_);                        ///< set current class of player
     void configureSkills (const SkillList& major, const SkillList& minor); ///< configure skill groups, each set contains the skill ID for that group.
-    void setBirthSign (const std::string &signId);                         ///< set birth sign to display on stat window, use an empty string to disable.
     void setReputation (int reputation);                                   ///< set the current reputation value
     void setBounty (int bounty);                                           ///< set the current bounty value
     void updateSkillArea();                                                ///< update display of skills, factions, birth sign, reputation and bounty
@@ -238,7 +237,6 @@ namespace MWGui
     ESM::Class playerClass;
     std::string playerName;
     std::string playerRaceId;
-    std::string playerBirthSignId;
     std::map<ESM::Attribute::AttributeID, MWMechanics::Stat<int> > playerAttributes;
     SkillList playerMajorSkills, playerMinorSkills;
     std::map<ESM::Skill::SkillEnum, MWMechanics::Stat<float> > playerSkillValues;

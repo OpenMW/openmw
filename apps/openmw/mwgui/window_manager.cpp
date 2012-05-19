@@ -54,7 +54,6 @@ WindowManager::WindowManager(
   , playerClass()
   , playerName()
   , playerRaceId()
-  , playerBirthSignId()
   , playerAttributes()
   , playerMajorSkills()
   , playerMinorSkills()
@@ -395,12 +394,6 @@ void WindowManager::configureSkills (const SkillList& major, const SkillList& mi
     playerMinorSkills = minor;
 }
 
-void WindowManager::setBirthSign (const std::string &signId)
-{
-    mStatsWindow->setBirthSign (signId);
-    playerBirthSignId = signId;
-}
-
 void WindowManager::setReputation (int reputation)
 {
     mStatsWindow->setReputation (reputation);
@@ -473,7 +466,7 @@ void WindowManager::onFrame (float frameDuration)
         mDragAndDrop->mDraggedWidget->setPosition(MyGUI::InputManager::getInstance().getMousePosition());
     }
 
-    mInventoryWindow->update();
+    mInventoryWindow->onFrame();
 
     mStatsWindow->onFrame();
 }

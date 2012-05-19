@@ -38,8 +38,6 @@ namespace MWGui
             void setValue(const ESM::Skill::SkillEnum parSkill, const MWMechanics::Stat<float>& value);
 
             void configureSkills (const SkillList& major, const SkillList& minor);
-            void setFactions (const FactionList& factions);
-            void setBirthSign (const std::string &signId);
             void setReputation (int reputation) { this->reputation = reputation; }
             void setBounty (int bounty) { this->bounty = bounty; }
             void updateSkillArea();
@@ -53,6 +51,9 @@ namespace MWGui
             void updateScroller();
 
             void setupToolTips();
+
+            void setFactions (const FactionList& factions);
+            void setBirthSign (const std::string &signId);
 
             void onScrollChangePosition(MyGUI::ScrollBar* scroller, size_t pos);
             void onWindowResize(MyGUI::Window* window);

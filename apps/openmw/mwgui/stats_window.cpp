@@ -245,10 +245,15 @@ void StatsWindow::configureSkills (const std::vector<int>& major, const std::vec
 
 void StatsWindow::onFrame ()
 {
+    if (mMainWidget->getVisible())
+        return;
+
     MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
     MWMechanics::NpcStats PCstats = MWWorld::Class::get(player).getNpcStats(player);
 
     setFactions(PCstats.mFactionRank);
+
+    setBirthSign(MWBase::Environment::get().getWorld()->getPlayer().getBirthsign());
 
     if (mChanged)
         updateSkillArea();
@@ -265,7 +270,11 @@ void StatsWindow::setFactions (const FactionList& factions)
 
 void StatsWindow::setBirthSign (const std::string& signId)
 {
-    birthSignId = signId;
+    if (signId != birthSignId)
+    {
+        birthSignId = signId;
+        mChanged = true;
+    }
 }
 
 void StatsWindow::addSeparator(MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2)
@@ -375,6 +384,10 @@ void StatsWindow::updateSkillArea()
         MyGUI::Gui::getInstance().destroyWidget(*it);
     }
     skillWidgets.clear();
+
+    skillScrollerWidget->setScrollPosition(0);
+    onScrollChangePosition(skillScrollerWidget, 0);
+    clientHeight = 0;
 
     const int valueSize = 40;
     MyGUI::IntCoord coord1(10, 0, skillClientWidget->getWidth() - (10 + valueSize), 18);
