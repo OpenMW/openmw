@@ -21,6 +21,19 @@
 #include "bookwindow.hpp"
 #include "scrollwindow.hpp"
 
+namespace
+{
+    std::string toLower (const std::string& name)
+    {
+        std::string lowerCase;
+
+        std::transform (name.begin(), name.end(), std::back_inserter (lowerCase),
+            (int(*)(int)) std::tolower);
+
+        return lowerCase;
+    }
+}
+
 namespace MWGui
 {
 
@@ -236,7 +249,7 @@ namespace MWGui
         for (MWWorld::ContainerStoreIterator it = invStore.begin();
                 it != invStore.end(); ++it)
         {
-            if (MWWorld::Class::get(*it).getName(*it) == MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sGold")->str)
+            if (toLower(it->getCellRef().refID) == "gold_001")
                 return it->getRefData().getCount();
         }
         return 0;
