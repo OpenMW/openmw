@@ -363,7 +363,7 @@ namespace MWDialogue
                 int sum = 0;
 
                 for (MWWorld::ContainerStoreIterator iter (store.begin()); iter!=store.end(); ++iter)
-                    if (iter->getCellRef().refID==name)
+                    if (toLower(iter->getCellRef().refID) == toLower(name))
                         sum += iter->getRefData().getCount();
                 if(!selectCompare<int,int>(comp,sum,select.i)) return false;
                 }
