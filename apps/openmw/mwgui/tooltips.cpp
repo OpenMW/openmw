@@ -298,6 +298,9 @@ IntSize ToolTips::createToolTip(const MWGui::ToolTipInfo& info)
             const int chargeTextWidth = chargeText->getTextSize().width + 5;
 
             const int chargeAndTextWidth = chargeWidth + chargeTextWidth;
+
+            totalSize.width = std::max(totalSize.width, chargeAndTextWidth);
+
             chargeText->setCoord((totalSize.width - chargeAndTextWidth)/2, coord.top+6, chargeTextWidth, 18);
 
             IntCoord chargeCoord;
