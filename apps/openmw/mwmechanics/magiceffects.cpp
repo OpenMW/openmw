@@ -79,7 +79,8 @@ namespace MWMechanics
                 param.mMagnitude = iter->magnMin;
             else
                 param.mMagnitude = static_cast<int> (
-                    (iter->magnMax-iter->magnMin+1)*(std::rand() / RAND_MAX) + iter->magnMin);
+                    (iter->magnMax-iter->magnMin+1)*
+                    (static_cast<float> (std::rand()) / RAND_MAX) + iter->magnMin);
 
             add (*iter, param);
         }
