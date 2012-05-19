@@ -18,12 +18,14 @@ namespace MWGui
     class StatsWindow : public WindowPinnableBase
     {
         public:
-            typedef std::pair<std::string, int> Faction;
-            typedef std::vector<Faction> FactionList;
+            typedef std::map<std::string, int> FactionList;
 
             typedef std::vector<int> SkillList;
 
             StatsWindow(WindowManager& parWindowManager);
+
+            /// automatically updates all the data in the stats window, but only if it has changed.
+            void onFrame();
 
             void setBar(const std::string& name, const std::string& tname, int val, int max);
             void setPlayerName(const std::string& playerName);
@@ -36,7 +38,7 @@ namespace MWGui
             void setValue(const ESM::Skill::SkillEnum parSkill, const MWMechanics::Stat<float>& value);
 
             void configureSkills (const SkillList& major, const SkillList& minor);
-            void setFactions (const std::vector<Faction>& factions);
+            void setFactions (const FactionList& factions);
             void setBirthSign (const std::string &signId);
             void setReputation (int reputation) { this->reputation = reputation; }
             void setBounty (int bounty) { this->bounty = bounty; }
@@ -69,10 +71,12 @@ namespace MWGui
             std::map<int, MWMechanics::Stat<float> > skillValues;
             std::map<int, MyGUI::TextBox*> skillWidgetMap;
             std::map<std::string, MyGUI::WidgetPtr> factionWidgetMap;
-            FactionList factions; ///< Stores a list of factions and the current rank
+            FactionList mFactions; ///< Stores a list of factions and the current rank
             std::string birthSignId;
             int reputation, bounty;
             std::vector<MyGUI::WidgetPtr> skillWidgets; //< Skills and other information
+
+            bool mChanged;
 
         protected:
             virtual void onPinToggled();

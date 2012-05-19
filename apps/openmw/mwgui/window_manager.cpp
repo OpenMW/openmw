@@ -40,7 +40,7 @@ WindowManager::WindowManager(
   , hud(NULL)
   , map(NULL)
   , menu(NULL)
-  , stats(NULL)
+  , mStatsWindow(NULL)
   , mToolTips(NULL)
   , mMessageBoxManager(NULL)
   , console(NULL)
@@ -89,6 +89,8 @@ WindowManager::WindowManager(
     MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWDynamicStat>("Widget");
     MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWList>("Widget");
 
+    MyGUI::LanguageManager::getInstance().eventRequestTag = MyGUI::newDelegate(this, &WindowManager::onRetrieveTag);
+
     // Get size info from the Gui object
     assert(gui);
     int w = MyGUI::RenderManager::getInstance().getViewSize().width;
@@ -104,7 +106,7 @@ WindowManager::WindowManager(
 
     menu = new MainMenu(w,h);
     map = new MapWindow(*this);
-    stats = new StatsWindow(*this);
+    mStatsWindow = new StatsWindow(*this);
     console = new Console(w,h, extensions);
     mJournal = new JournalWindow(*this);
     mMessageBoxManager = new MessageBoxManager(this);
@@ -146,7 +148,7 @@ WindowManager::~WindowManager()
     delete hud;
     delete map;
     delete menu;
-    delete stats;
+    delete mStatsWindow;
     delete mJournal;
     delete mDialogueWindow;
     delete mContainerWindow;
@@ -207,7 +209,7 @@ void WindowManager::updateVisible()
     // Start out by hiding everything except the HUD
     map->setVisible(false);
     menu->setVisible(false);
-    stats->setVisible(false);
+    mStatsWindow->setVisible(false);
     console->disable();
     mJournal->setVisible(false);
     mDialogueWindow->setVisible(false);
@@ -261,7 +263,7 @@ void WindowManager::updateVisible()
 
             // Show the windows we want
             map   -> setVisible( (eff & GW_Map) != 0 );
-            stats -> setVisible( (eff & GW_Stats) != 0 );
+            mStatsWindow -> setVisible( (eff & GW_Stats) != 0 );
             mInventoryWindow->setVisible(true);
             mInventoryWindow->openInventory();
             break;
@@ -299,7 +301,7 @@ void WindowManager::updateVisible()
 
 void WindowManager::setValue (const std::string& id, const MWMechanics::Stat<int>& value)
 {
-    stats->setValue (id, value);
+    mStatsWindow->setValue (id, value);
 
     static const char *ids[] =
     {
@@ -329,13 +331,13 @@ void WindowManager::setValue (const std::string& id, const MWMechanics::Stat<int
 
 void WindowManager::setValue(const ESM::Skill::SkillEnum parSkill, const MWMechanics::Stat<float>& value)
 {
-    stats->setValue(parSkill, value);
+    mStatsWindow->setValue(parSkill, value);
     playerSkillValues[parSkill] = value;
 }
 
 void WindowManager::setValue (const std::string& id, const MWMechanics::DynamicStat<int>& value)
 {
-    stats->setValue (id, value);
+    mStatsWindow->setValue (id, value);
     hud->setValue (id, value);
     if (id == "HBar")
     {
@@ -368,7 +370,7 @@ MWMechanics::DynamicStat<int> WindowManager::getValue(const std::string& id)
 
 void WindowManager::setValue (const std::string& id, const std::string& value)
 {
-    stats->setValue (id, value);
+    mStatsWindow->setValue (id, value);
     if (id=="name")
         playerName = value;
     else if (id=="race")
@@ -377,46 +379,41 @@ void WindowManager::setValue (const std::string& id, const std::string& value)
 
 void WindowManager::setValue (const std::string& id, int value)
 {
-    stats->setValue (id, value);
+    mStatsWindow->setValue (id, value);
 }
 
 void WindowManager::setPlayerClass (const ESM::Class &class_)
 {
     playerClass = class_;
-    stats->setValue("class", playerClass.name);
+    mStatsWindow->setValue("class", playerClass.name);
 }
 
 void WindowManager::configureSkills (const SkillList& major, const SkillList& minor)
 {
-    stats->configureSkills (major, minor);
+    mStatsWindow->configureSkills (major, minor);
     playerMajorSkills = major;
     playerMinorSkills = minor;
 }
 
-void WindowManager::setFactions (const FactionList& factions)
-{
-    stats->setFactions (factions);
-}
-
 void WindowManager::setBirthSign (const std::string &signId)
 {
-    stats->setBirthSign (signId);
+    mStatsWindow->setBirthSign (signId);
     playerBirthSignId = signId;
 }
 
 void WindowManager::setReputation (int reputation)
 {
-    stats->setReputation (reputation);
+    mStatsWindow->setReputation (reputation);
 }
 
 void WindowManager::setBounty (int bounty)
 {
-    stats->setBounty (bounty);
+    mStatsWindow->setBounty (bounty);
 }
 
 void WindowManager::updateSkillArea()
 {
-    stats->updateSkillArea();
+    mStatsWindow->updateSkillArea();
 }
 
 void WindowManager::removeDialog(OEngine::GUI::Layout*dialog)
@@ -477,6 +474,8 @@ void WindowManager::onFrame (float frameDuration)
     }
 
     mInventoryWindow->update();
+
+    mStatsWindow->onFrame();
 }
 
 const ESMS::ESMStore& WindowManager::getStore() const
@@ -597,4 +596,11 @@ void WindowManager::setDragDrop(bool dragDrop)
 {
     mToolTips->setEnabled(!dragDrop);
     MWBase::Environment::get().getInputManager()->setDragDrop(dragDrop);
+}
+
+void WindowManager::onRetrieveTag(const MyGUI::UString& _tag, MyGUI::UString& _result)
+{
+    const ESM::GameSetting *setting = MWBase::Environment::get().getWorld()->getStore().gameSettings.search(_tag);
+    if (setting && setting->type == ESM::VT_String)
+        _result = setting->str;
 }

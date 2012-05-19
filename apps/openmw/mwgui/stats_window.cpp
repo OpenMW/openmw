@@ -1,12 +1,18 @@
 #include "stats_window.hpp"
 
-#include "../mwmechanics/mechanicsmanager.hpp"
-#include "window_manager.hpp"
-
 #include <cmath>
 #include <algorithm>
 #include <iterator>
+
 #include <boost/lexical_cast.hpp>
+
+#include "../mwmechanics/mechanicsmanager.hpp"
+#include "../mwworld/world.hpp"
+#include "../mwworld/player.hpp"
+#include "../mwbase/environment.hpp"
+
+#include "window_manager.hpp"
+
 
 using namespace MWGui;
 const int StatsWindow::lineHeight = 18;
@@ -24,11 +30,12 @@ StatsWindow::StatsWindow (WindowManager& parWindowManager)
   , skillValues()
   , skillWidgetMap()
   , factionWidgetMap()
-  , factions()
+  , mFactions()
   , birthSignId()
   , reputation(0)
   , bounty(0)
   , skillWidgets()
+  , mChanged(true)
 {
     setCoord(0,0,498, 342);
 
@@ -128,7 +135,8 @@ void StatsWindow::setBar(const std::string& name, const std::string& tname, int 
 
 void StatsWindow::setPlayerName(const std::string& playerName)
 {
-    setTitle(playerName);
+    static_cast<MyGUI::Window*>(mMainWidget)->setCaption(playerName);
+    adjustWindowCaption();
 }
 
 void StatsWindow::setValue (const std::string& id, const MWMechanics::Stat<int>& value)
@@ -235,9 +243,24 @@ void StatsWindow::configureSkills (const std::vector<int>& major, const std::vec
     }
 }
 
-void StatsWindow::setFactions (const std::vector<Faction>& factions)
+void StatsWindow::onFrame ()
 {
-    this->factions = factions;
+    MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+    MWMechanics::NpcStats PCstats = MWWorld::Class::get(player).getNpcStats(player);
+
+    setFactions(PCstats.mFactionRank);
+
+    if (mChanged)
+        updateSkillArea();
+}
+
+void StatsWindow::setFactions (const FactionList& factions)
+{
+    if (mFactions != factions)
+    {
+        mFactions = factions;
+        mChanged = true;
+    }
 }
 
 void StatsWindow::setBirthSign (const std::string& signId)
@@ -345,6 +368,8 @@ void StatsWindow::addSkills(const SkillList &skills, const std::string &titleId,
 
 void StatsWindow::updateSkillArea()
 {
+    mChanged = false;
+
     for (std::vector<MyGUI::WidgetPtr>::iterator it = skillWidgets.begin(); it != skillWidgets.end(); ++it)
     {
         MyGUI::Gui::getInstance().destroyWidget(*it);
@@ -366,15 +391,15 @@ void StatsWindow::updateSkillArea()
 
     const ESMS::ESMStore &store = mWindowManager.getStore();
 
-    if (!factions.empty())
+    if (!mFactions.empty())
     {
         // Add a line separator if there are items above
         if (!skillWidgets.empty())
             addSeparator(coord1, coord2);
 
         addGroup(mWindowManager.getGameSettingString("sFaction", "Faction"), coord1, coord2);
-        FactionList::const_iterator end = factions.end();
-        for (FactionList::const_iterator it = factions.begin(); it != end; ++it)
+        FactionList::const_iterator end = mFactions.end();
+        for (FactionList::const_iterator it = mFactions.begin(); it != end; ++it)
         {
             const ESM::Faction *faction = store.factions.find(it->first);
             addItem(faction->name, coord1, coord2);
