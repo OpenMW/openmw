@@ -322,7 +322,7 @@ MyGUI::TextBox* StatsWindow::addValueItem(const std::string& text, const std::st
     return skillValueWidget;
 }
 
-void StatsWindow::addItem(const std::string text, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2)
+MyGUI::Widget* StatsWindow::addItem(const std::string text, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2)
 {
     MyGUI::TextBox* skillNameWidget;
 
@@ -334,6 +334,8 @@ void StatsWindow::addItem(const std::string text, MyGUI::IntCoord &coord1, MyGUI
 
     coord1.top += lineHeight;
     coord2.top += lineHeight;
+
+    return skillNameWidget;
 }
 
 void StatsWindow::addSkills(const SkillList &skills, const std::string &titleId, const std::string &titleDefault, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2)
@@ -422,7 +424,62 @@ void StatsWindow::updateSkillArea()
 
         addGroup(mWindowManager.getGameSettingString("sBirthSign", "Sign"), coord1, coord2);
         const ESM::BirthSign *sign = store.birthSigns.find(birthSignId);
-        addItem(sign->name, coord1, coord2);
+        MyGUI::Widget* w = addItem(sign->name, coord1, coord2);
+        w->setUserString("ToolTipType", "Layout");
+        w->setUserString("ToolTipLayout", "BirthSignToolTip");
+        std::string image = sign->texture;
+        image.replace(image.size()-3, 3, "dds");
+        w->setUserString("ImageTexture_BirthSignImage", "textures\\" + image);
+        std::string text;
+
+        text += sign->name;
+        text += "\n#BF9959" + sign->description;
+
+        std::vector<std::string> abilities, powers, spells;
+
+        std::vector<std::string>::const_iterator it = sign->powers.list.begin();
+        std::vector<std::string>::const_iterator end = sign->powers.list.end();
+        for (; it != end; ++it)
+        {
+            const std::string &spellId = *it;
+            const ESM::Spell *spell = store.spells.search(spellId);
+            if (!spell)
+                continue; // Skip spells which cannot be found
+            ESM::Spell::SpellType type = static_cast<ESM::Spell::SpellType>(spell->data.type);
+            if (type != ESM::Spell::ST_Spell && type != ESM::Spell::ST_Ability && type != ESM::Spell::ST_Power)
+                continue; // We only want spell, ability and powers.
+
+            if (type == ESM::Spell::ST_Ability)
+                abilities.push_back(spellId);
+            else if (type == ESM::Spell::ST_Power)
+                powers.push_back(spellId);
+            else if (type == ESM::Spell::ST_Spell)
+                spells.push_back(spellId);
+        }
+
+        struct{ const std::vector<std::string> &spells; std::string label; } categories[3] = {
+            {abilities, "sBirthsignmenu1"},
+            {powers,    "sPowers"},
+            {spells,    "sBirthsignmenu2"}
+        };
+
+        for (int category = 0; category < 3; ++category)
+        {
+            for (std::vector<std::string>::const_iterator it = categories[category].spells.begin(); it != categories[category].spells.end(); ++it)
+            {
+                if (it == categories[category].spells.begin())
+                {
+                    text += std::string("\n#DDC79E") + std::string("#{") + categories[category].label + "}";
+                }
+
+                const std::string &spellId = *it;
+
+                const ESM::Spell *spell = store.spells.search(spellId);
+                text += "\n#BF9959" + spell->name;
+            }
+        }
+
+        w->setUserString("Caption_BirthSignText", text);
     }
 
     // Add a line separator if there are items above

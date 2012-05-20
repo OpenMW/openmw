@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <MyGUI type="Skin">
+
+    <!-- HTML colour: #DDC79E -->
     <Skin name = "NormalText" size = "16 16">
         <Property key="FontName" value = "Default" />
         <Property key="TextAlign" value = "ALIGN_LEFT ALIGN_BOTTOM" />
@@ -15,6 +17,7 @@
         <BasisSkin type="SimpleText" offset = "0 0 16 16" align = "ALIGN_STRETCH"/>
     </Skin>
 
+    <!-- HTML colour: #BF9959 -->
     <Skin name = "SandText" size = "16 16">
         <Property key="FontName" value = "Default" />
         <Property key="TextAlign" value = "ALIGN_LEFT ALIGN_BOTTOM" />

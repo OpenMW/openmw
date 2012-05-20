@@ -28,6 +28,24 @@
             </Widget>
         </Widget>
 
+        <!-- Birthsign tooltip -->
+        <Widget type="Widget" skin="HUD_Box" position="0 0 300 300" align="Stretch" name="BirthSignToolTip">
+            <Property key="Visible" value="false"/>
+
+            <!-- Birthsign image -->
+            <Widget type="Widget" skin="MW_Box" position="18 13 263 137" align="Top HCenter">
+                <Widget type="ImageBox" skin="ImageBox" position="2 2 259 133" name="BirthSignImage" align="ALIGN_LEFT ALIGN_TOP" />
+            </Widget>
+
+            <Widget type="TextBox" skin="NormalText" position="8 154 284 138" align="Top Stretch" name="BirthSignText">
+                <Property key="MultiLine" value="true"/>
+                <Property key="WordWrap" value="true"/>
+                <Property key="TextAlign" value="Top HCenter"/>
+                <UserString key="AutoResizeHorizontal" value="true"/>
+                <UserString key="AutoResizeVertical" value="true"/>
+            </Widget>
+        </Widget>
+
     </Widget>
 </MyGUI>
 

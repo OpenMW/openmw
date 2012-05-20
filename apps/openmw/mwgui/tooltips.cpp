@@ -139,12 +139,16 @@ void ToolTips::onFrame(float frameDuration)
                     MyGUI::TextBox* text = w->castType<MyGUI::TextBox>();
                     tooltipSize.width = std::max(tooltipSize.width, w->getLeft() + text->getTextSize().width + 8);
                 }
+                else
+                    tooltipSize.width = std::max(tooltipSize.width, w->getLeft() + w->getWidth() + 8);
 
                 if (w->isUserString("AutoResizeVertical"))
                 {
                     MyGUI::TextBox* text = w->castType<MyGUI::TextBox>();
                     tooltipSize.height = std::max(tooltipSize.height, w->getTop() + text->getTextSize().height + 8);
                 }
+                else
+                    tooltipSize.height = std::max(tooltipSize.height, w->getTop() + w->getHeight() + 8);
             }
 
             tooltip->setCoord(0, 0, tooltipSize.width, tooltipSize.height);
