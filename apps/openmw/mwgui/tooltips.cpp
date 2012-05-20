@@ -42,11 +42,16 @@ void ToolTips::onFrame(float frameDuration)
         IntCoord(0, 0, mMainWidget->getCoord().width, mMainWidget->getCoord().height),
         Align::Stretch, "DynamicToolTipBox");
 
+    // start by hiding everything
+    for (unsigned int i=0; i < mMainWidget->getChildCount(); ++i)
+    {
+        mMainWidget->getChildAt(i)->setVisible(false);
+    }
+
     const IntSize &viewSize = RenderManager::getInstance().getViewSize();
 
     if (!mEnabled)
     {
-        mDynamicToolTipBox->setVisible(false);
         return;
     }
 
@@ -55,7 +60,6 @@ void ToolTips::onFrame(float frameDuration)
         Widget* focus = InputManager::getInstance().getMouseFocusWidget();
         if (focus == 0)
         {
-            mDynamicToolTipBox->setVisible(false);
             return;
         }
 
@@ -67,7 +71,6 @@ void ToolTips::onFrame(float frameDuration)
         ToolTipInfo info;
         if (type == "")
         {
-            mDynamicToolTipBox->setVisible(false);
             return;
         }        
         else if (type == "Text")
@@ -98,6 +101,54 @@ void ToolTips::onFrame(float frameDuration)
             mFocusObject = *focus->getUserData<MWWorld::Ptr>();
             tooltipSize = getToolTipViaPtr(false);
         }
+        else if (type == "Layout")
+        {
+            // tooltip defined in the layout
+            MyGUI::Widget* tooltip;
+            getWidget(tooltip, focus->getUserString("ToolTipLayout"));
+
+            tooltip->setVisible(true);
+            tooltip->setCoord(0, 0, 300, 300);
+
+            tooltipSize = MyGUI::IntSize(0,0);
+
+            std::map<std::string, std::string> userStrings = focus->getUserStrings();
+            for (std::map<std::string, std::string>::iterator it = userStrings.begin();
+                it != userStrings.end(); ++it)
+            {
+                if (it->first == "ToolTipType"
+                    || it->first == "ToolTipLayout")
+                    continue;
+
+
+                size_t underscorePos = it->first.find("_");
+                std::string propertyKey = it->first.substr(0, underscorePos);
+                std::string widgetName = it->first.substr(underscorePos+1, it->first.size()-(underscorePos+1));
+
+                MyGUI::Widget* w;
+                getWidget(w, widgetName);
+                w->setProperty(propertyKey, it->second);
+            }
+
+            for (unsigned int i=0; i<tooltip->getChildCount(); ++i)
+            {
+                MyGUI::Widget* w = tooltip->getChildAt(i);
+
+                if (w->isUserString("AutoResizeHorizontal"))
+                {
+                    MyGUI::TextBox* text = w->castType<MyGUI::TextBox>();
+                    tooltipSize.width = std::max(tooltipSize.width, w->getLeft() + text->getTextSize().width + 8);
+                }
+
+                if (w->isUserString("AutoResizeVertical"))
+                {
+                    MyGUI::TextBox* text = w->castType<MyGUI::TextBox>();
+                    tooltipSize.height = std::max(tooltipSize.height, w->getTop() + text->getTextSize().height + 8);
+                }
+            }
+
+            tooltip->setCoord(0, 0, tooltipSize.width, tooltipSize.height);
+        }
 
         IntPoint tooltipPosition = InputManager::getInstance().getMousePosition() + IntPoint(0, 24);
 
@@ -112,7 +163,6 @@ void ToolTips::onFrame(float frameDuration)
         }
 
         setCoord(tooltipPosition.left, tooltipPosition.top, tooltipSize.width, tooltipSize.height);
-        mDynamicToolTipBox->setVisible(true);
     }
     else
     {
@@ -124,9 +174,9 @@ void ToolTips::onFrame(float frameDuration)
                     std::max(0, int(mFocusToolTipY*viewSize.height - tooltipSize.height)),
                     tooltipSize.width,
                     tooltipSize.height);
+
+            mDynamicToolTipBox->setVisible(true);
         }
-        else
-            mDynamicToolTipBox->setVisible(false);
     }
 }
 
@@ -186,6 +236,8 @@ void ToolTips::findImageExtension(std::string& image)
 
 IntSize ToolTips::createToolTip(const MWGui::ToolTipInfo& info)
 {
+    mDynamicToolTipBox->setVisible(true);
+
     std::string caption = info.caption;
     std::string image = info.icon;
     int imageSize = (image != "") ? 32 : 0;
