@@ -302,13 +302,15 @@ MyGUI::TextBox* StatsWindow::addValueItem(const std::string& text, const std::st
 
     skillNameWidget = skillClientWidget->createWidget<MyGUI::TextBox>("SandText", coord1, MyGUI::Align::Left | MyGUI::Align::Top | MyGUI::Align::HStretch);
     skillNameWidget->setCaption(text);
-    skillNameWidget->setUserString("ToolTipType", "Text");
-    skillNameWidget->setUserString("ToolTipText", tooltip);
+    skillNameWidget->setUserString("ToolTipType", "Layout");
+    skillNameWidget->setUserString("ToolTipLayout", "TextToolTip");
+    skillNameWidget->setUserString("Caption_Text", tooltip);
     skillNameWidget->eventMouseWheel += MyGUI::newDelegate(this, &StatsWindow::onMouseWheel);
 
     skillValueWidget = skillClientWidget->createWidget<MyGUI::TextBox>("SandTextRight", coord2, MyGUI::Align::Right | MyGUI::Align::Top);
-    skillValueWidget->setUserString("ToolTipType", "Text");
-    skillValueWidget->setUserString("ToolTipText", tooltip);
+    skillNameWidget->setUserString("ToolTipType", "Layout");
+    skillNameWidget->setUserString("ToolTipLayout", "TextToolTip");
+    skillNameWidget->setUserString("Caption_Text", tooltip);
     skillValueWidget->setCaption(value);
     skillValueWidget->_setWidgetState(state);
     skillValueWidget->eventMouseWheel += MyGUI::newDelegate(this, &StatsWindow::onMouseWheel);

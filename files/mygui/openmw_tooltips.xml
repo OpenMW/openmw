@@ -8,6 +8,19 @@
             <Property key="Visible" value="false"/>
         </Widget>
 
+        <!-- Text tooltip -->
+        <Widget type="Widget" skin="HUD_Box" position="0 0 300 300" align="Stretch" name="TextToolTip">
+            <Property key="Visible" value="false"/>
+
+            <Widget type="EditBox" skin="SandText" position="8 8 284 284" align="Left Top Stretch" name="Text">
+                <Property key="MultiLine" value="true"/>
+                <Property key="WordWrap" value="true"/>
+                <Property key="TextAlign" value="Left Top"/>
+                <UserString key="AutoResizeHorizontal" value="true"/>
+                <UserString key="AutoResizeVertical" value="true"/>
+            </Widget>
+        </Widget>
+
         <!-- Attribute tooltip -->
         <Widget type="Widget" skin="HUD_Box" position="0 0 300 300" align="Stretch" name="AttributeToolTip">
             <Property key="Visible" value="false"/>

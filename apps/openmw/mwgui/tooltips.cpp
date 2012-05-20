@@ -72,29 +72,6 @@ void ToolTips::onFrame(float frameDuration)
         if (type == "")
         {
             return;
-        }        
-        else if (type == "Text")
-        {
-            info.text = text;
-            tooltipSize = createToolTip(info);
-        }
-        else if (type == "CaptionText")
-        {
-            std::string caption = focus->getUserString("ToolTipCaption");
-            info.caption = caption;
-            info.text = text;
-            tooltipSize = createToolTip(info);
-        }
-        else if (type == "ImageCaptionText")
-        {
-            std::string caption = focus->getUserString("ToolTipCaption");
-            std::string image = focus->getUserString("ToolTipImage");
-            std::string sizeString = focus->getUserString("ToolTipImageSize");
-
-            info.text = text;
-            info.caption = caption;
-            info.icon = image;
-            tooltipSize = createToolTip(info);
         }
         else if (type == "ItemPtr")
         {
@@ -153,6 +130,8 @@ void ToolTips::onFrame(float frameDuration)
 
             tooltip->setCoord(0, 0, tooltipSize.width, tooltipSize.height);
         }
+        else
+            throw std::runtime_error ("unknown tooltip type");
 
         IntPoint tooltipPosition = InputManager::getInstance().getMousePosition() + IntPoint(0, 24);
 
