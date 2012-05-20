@@ -41,6 +41,43 @@
             </Widget>
         </Widget>
 
+        <!-- Skill tooltip -->
+        <Widget type="Widget" skin="HUD_Box" position="0 0 300 98" align="Stretch" name="SkillToolTip">
+            <Property key="Visible" value="false"/>
+
+            <Widget type="ImageBox" skin="ImageBox" position="8 8 32 32" align="Left Top" name="SkillImage"/>
+
+            <Widget type="TextBox" skin="NormalText" position="44 8 252 16" align="Left Top HStretch" name="SkillName">
+                <Property key="TextAlign" value="Left"/>
+                <UserString key="AutoResizeHorizontal" value="true"/>
+            </Widget>
+
+            <Widget type="TextBox" skin="SandText" position="44 24 252 16" align="Left Top HStretch" name="SkillAttribute">
+                <Property key="TextAlign" value="Left"/>
+                <UserString key="AutoResizeHorizontal" value="true"/>
+            </Widget>
+
+            <Widget type="EditBox" skin="SandText" position="8 44 284 0" align="Left Top Stretch" name="SkillDescription">
+                <Property key="MultiLine" value="true"/>
+                <Property key="WordWrap" value="true"/>
+                <Property key="TextAlign" value="Left Top"/>
+                <UserString key="AutoResizeHorizontal" value="true"/>
+                <UserString key="AutoResizeVertical" value="true"/>
+            </Widget>
+
+            <Widget type="TextBox" skin="NormalText" position="8 48 284 18" align="Left Bottom HStretch">
+                <UserString key="AutoResizeHorizontal" value="true"/>
+                <Property key="Caption" value="#{sSkillProgress}"/>
+                <Property key="TextAlign" value="Center"/>
+            </Widget>
+
+            <Widget type="ProgressBar" skin="MW_Progress_Red" position="50 70 200 20" align="HCenter Bottom" name="SkillProgress">
+                <Widget type="TextBox" skin="ProgressText" position="0 0 200 20" align="Stretch" name="SkillProgressText">
+                    <Property key="TextAlign" value="Center"/>
+                </Widget>
+            </Widget>
+        </Widget>
+
         <!-- Birthsign tooltip -->
         <Widget type="Widget" skin="HUD_Box" position="0 0 300 300" align="Stretch" name="BirthSignToolTip">
             <Property key="Visible" value="false"/>

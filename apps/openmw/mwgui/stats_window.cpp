@@ -296,21 +296,15 @@ void StatsWindow::addGroup(const std::string &label, MyGUI::IntCoord &coord1, My
     coord2.top += lineHeight;
 }
 
-MyGUI::TextBox* StatsWindow::addValueItem(const std::string& text, const std::string& tooltip, const std::string &value, const std::string& state, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2)
+MyGUI::TextBox* StatsWindow::addValueItem(const std::string& text, const std::string &value, const std::string& state, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2)
 {
     MyGUI::TextBox *skillNameWidget, *skillValueWidget;
 
     skillNameWidget = skillClientWidget->createWidget<MyGUI::TextBox>("SandText", coord1, MyGUI::Align::Left | MyGUI::Align::Top | MyGUI::Align::HStretch);
     skillNameWidget->setCaption(text);
-    skillNameWidget->setUserString("ToolTipType", "Layout");
-    skillNameWidget->setUserString("ToolTipLayout", "TextToolTip");
-    skillNameWidget->setUserString("Caption_Text", tooltip);
     skillNameWidget->eventMouseWheel += MyGUI::newDelegate(this, &StatsWindow::onMouseWheel);
 
     skillValueWidget = skillClientWidget->createWidget<MyGUI::TextBox>("SandTextRight", coord2, MyGUI::Align::Right | MyGUI::Align::Top);
-    skillNameWidget->setUserString("ToolTipType", "Layout");
-    skillNameWidget->setUserString("ToolTipLayout", "TextToolTip");
-    skillNameWidget->setUserString("Caption_Text", tooltip);
     skillValueWidget->setCaption(value);
     skillValueWidget->_setWidgetState(state);
     skillValueWidget->eventMouseWheel += MyGUI::newDelegate(this, &StatsWindow::onMouseWheel);
@@ -362,13 +356,34 @@ void StatsWindow::addSkills(const SkillList &skills, const std::string &titleId,
         float base = stat.getBase();
         float modified = stat.getModified();
 
+        const ESM::Skill* skill = mWindowManager.getStore().skills.search(skillId);
+        assert(skill);
+
+        std::string icon = "icons\\k\\" + ESM::Skill::sIconNames[skillId];
+
+        const ESM::Attribute* attr = mWindowManager.getStore().attributes.search(skill->data.attribute);
+        assert(attr);
+
         std::string state = "normal";
         if (modified > base)
             state = "increased";
         else if (modified < base)
             state = "decreased";
-        MyGUI::TextBox* widget = addValueItem(mWindowManager.getGameSettingString(skillNameId, skillNameId), "",
+        MyGUI::TextBox* widget = addValueItem(mWindowManager.getGameSettingString(skillNameId, skillNameId),
             boost::lexical_cast<std::string>(static_cast<int>(modified)), state, coord1, coord2);
+
+        for (int i=0; i<2; ++i)
+        {
+            skillWidgets[skillWidgets.size()-1-i]->setUserString("ToolTipType", "Layout");
+            skillWidgets[skillWidgets.size()-1-i]->setUserString("ToolTipLayout", "SkillToolTip");
+            skillWidgets[skillWidgets.size()-1-i]->setUserString("Caption_SkillName", "#{"+skillNameId+"}");
+            skillWidgets[skillWidgets.size()-1-i]->setUserString("Caption_SkillDescription", skill->description);
+            skillWidgets[skillWidgets.size()-1-i]->setUserString("Caption_SkillAttribute", "#{sGoverningAttribute}: #{" + attr->name + "}");
+            skillWidgets[skillWidgets.size()-1-i]->setUserString("ImageTexture_SkillImage", icon);
+            skillWidgets[skillWidgets.size()-1-i]->setUserString("Caption_SkillProgressText", "0/100");
+            skillWidgets[skillWidgets.size()-1-i]->setUserString("Range_SkillProgress", "100");
+        }
+
         skillWidgetMap[skillId] = widget;
     }
 }
@@ -489,11 +504,24 @@ void StatsWindow::updateSkillArea()
         addSeparator(coord1, coord2);
 
     addValueItem(mWindowManager.getGameSettingString("sReputation", "Reputation"),
-                mWindowManager.getGameSettingString("sSkillsMenuReputationHelp", ""),
                 boost::lexical_cast<std::string>(static_cast<int>(reputation)), "normal", coord1, coord2);
+
+    for (int i=0; i<2; ++i)
+    {
+        skillWidgets[skillWidgets.size()-1-i]->setUserString("ToolTipType", "Layout");
+        skillWidgets[skillWidgets.size()-1-i]->setUserString("ToolTipLayout", "TextToolTip");
+        skillWidgets[skillWidgets.size()-1-i]->setUserString("Caption_Text", "#{sSkillsMenuReputationHelp}");
+    }
+    
     addValueItem(mWindowManager.getGameSettingString("sBounty", "Bounty"),
-                mWindowManager.getGameSettingString("sCrimeHelp", ""),
                 boost::lexical_cast<std::string>(static_cast<int>(bounty)), "normal", coord1, coord2);
+
+    for (int i=0; i<2; ++i)
+    {
+        skillWidgets[skillWidgets.size()-1-i]->setUserString("ToolTipType", "Layout");
+        skillWidgets[skillWidgets.size()-1-i]->setUserString("ToolTipLayout", "TextToolTip");
+        skillWidgets[skillWidgets.size()-1-i]->setUserString("Caption_Text", "#{sCrimeHelp}");
+    }
 
     clientHeight = coord1.top;
     updateScroller();
