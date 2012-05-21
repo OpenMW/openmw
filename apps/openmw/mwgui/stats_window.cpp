@@ -428,8 +428,48 @@ void StatsWindow::updateSkillArea()
         for (FactionList::const_iterator it = mFactions.begin(); it != end; ++it)
         {
             const ESM::Faction *faction = store.factions.find(it->first);
-            addItem(faction->name, coord1, coord2);
-            // TODO: Faction rank should be placed in tooltip
+            MyGUI::Widget* w = addItem(faction->name, coord1, coord2);
+
+            std::string text;
+
+            text += std::string("#DDC79E") + faction->name;
+            text += std::string("\n#BF9959") + faction->ranks[it->second];
+
+            if (it->second < 10)
+            {
+                // player doesn't have max rank yet
+                text += std::string("\n\n#DDC79E#{sNextRank} ") + faction->ranks[it->second+1];
+
+                ESM::RankData rankData = faction->data.rankData[it->second+1];
+                const ESM::Attribute* attr1 = mWindowManager.getStore().attributes.search(faction->data.attribute1);
+                const ESM::Attribute* attr2 = mWindowManager.getStore().attributes.search(faction->data.attribute2);
+                assert(attr1 && attr2);
+
+                text += "\n#BF9959#{" + attr1->name + "}: " + boost::lexical_cast<std::string>(rankData.attribute1)
+                        + ", #{" + attr2->name + "}: " + boost::lexical_cast<std::string>(rankData.attribute2);
+
+                text += "\n\n#DDC79E#{sFavoriteSkills}";
+                text += "\n#BF9959";
+                for (int i=0; i<6; ++i)
+                {
+                    const ESM::Skill* skill = mWindowManager.getStore().skills.search(faction->data.skillID[i]);
+                    assert(skill);
+                    text += "#{"+ESM::Skill::sSkillNameIds[faction->data.skillID[i]]+"}";
+                    if (i<5)
+                        text += ", ";
+                }
+
+                text += "\n";
+
+                if (rankData.skill1 > 0)
+                    text += "\n#{sNeedOneSkill} " + boost::lexical_cast<std::string>(rankData.skill1);
+                if (rankData.skill2 > 0)
+                    text += "\n#{sNeedTwoSkills} " + boost::lexical_cast<std::string>(rankData.skill2);
+            }
+
+            w->setUserString("ToolTipType", "Layout");
+            w->setUserString("ToolTipLayout", "TextToolTip");
+            w->setUserString("Caption_Text", text);
         }
     }
 
