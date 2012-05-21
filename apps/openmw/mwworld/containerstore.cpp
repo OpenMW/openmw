@@ -45,7 +45,7 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::end()
     return ContainerStoreIterator (this);
 }
 
-bool MWWorld::ContainerStore::stacks(const Ptr& ptr1, const Ptr& ptr2) const
+bool MWWorld::ContainerStore::stacks(const Ptr& ptr1, const Ptr& ptr2)
 {
     /// \todo add current weapon/armor health, remaining lockpick/repair uses, current enchantment charge here as soon as they are implemented
     if (  ptr1.mCellRef->refID == ptr2.mCellRef->refID

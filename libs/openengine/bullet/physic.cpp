@@ -22,7 +22,8 @@ namespace Physic
         COL_NOTHING = 0, //<Collide with nothing
         COL_WORLD = BIT(0), //<Collide with world objects
         COL_ACTOR_INTERNAL = BIT(1), //<Collide internal capsule
-        COL_ACTOR_EXTERNAL = BIT(2) //<collide with external capsule
+        COL_ACTOR_EXTERNAL = BIT(2), //<collide with external capsule
+        COL_RAYCASTING = BIT(3)
     };
 
     PhysicActor::PhysicActor(std::string name)
@@ -328,27 +329,31 @@ namespace Physic
         RigidBody* body = new RigidBody(CI,name);
         body->collide = shape->collide;
         return body;
+
     }
 
     void PhysicEngine::addRigidBody(RigidBody* body)
     {
-        if(body->collide)
+        if(body)
         {
-            dynamicsWorld->addRigidBody(body,COL_WORLD,COL_WORLD|COL_ACTOR_INTERNAL|COL_ACTOR_EXTERNAL);
-        }
-        else
-        {
-            dynamicsWorld->addRigidBody(body,COL_WORLD,COL_NOTHING);
-        }
-        body->setActivationState(DISABLE_DEACTIVATION);
-        RigidBody* oldBody = RigidBodyMap[body->mName];
-        if (oldBody != NULL)
-        {
-            dynamicsWorld->removeRigidBody(oldBody);
-            delete oldBody;
-        }
+            if(body->collide)
+            {
+                dynamicsWorld->addRigidBody(body,COL_WORLD,COL_WORLD|COL_ACTOR_INTERNAL|COL_ACTOR_EXTERNAL);
+            }
+            else
+            {
+                dynamicsWorld->addRigidBody(body,COL_RAYCASTING,COL_RAYCASTING|COL_WORLD);
+            }
+            body->setActivationState(DISABLE_DEACTIVATION);
+            RigidBody* oldBody = RigidBodyMap[body->mName];
+            if (oldBody != NULL)
+            {
+                dynamicsWorld->removeRigidBody(oldBody);
+                delete oldBody;
+            }
 
-        RigidBodyMap[body->mName] = body;
+            RigidBodyMap[body->mName] = body;
+        }
     }
 
     void PhysicEngine::removeRigidBody(std::string name)
@@ -460,7 +465,7 @@ namespace Physic
 
         float d1 = 10000.;
         btCollisionWorld::ClosestRayResultCallback resultCallback1(from, to);
-        resultCallback1.m_collisionFilterMask = COL_WORLD;
+        resultCallback1.m_collisionFilterMask = COL_WORLD|COL_RAYCASTING;
         dynamicsWorld->rayTest(from, to, resultCallback1);
         if (resultCallback1.hasHit())
         {
@@ -489,7 +494,7 @@ namespace Physic
     std::vector< std::pair<float, std::string> > PhysicEngine::rayTest2(btVector3& from, btVector3& to)
     {
         MyRayResultCallback resultCallback1;
-        resultCallback1.m_collisionFilterMask = COL_WORLD;
+        resultCallback1.m_collisionFilterMask = COL_WORLD|COL_RAYCASTING;
         dynamicsWorld->rayTest(from, to, resultCallback1);
         std::vector< std::pair<float, btCollisionObject*> > results = resultCallback1.results;
 

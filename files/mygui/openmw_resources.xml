@@ -72,7 +72,7 @@
     </Resource>
 
     <Resource type="ResourceImageSet" name="MenuBook_Next">
-        <Group name="States" texture="mwgui1" size="96 24">
+        <Group name="States" texture="mwgui1" size="57 24">
             <Index name="disabled">
                 <Frame point="256 32"/>
             </Index>

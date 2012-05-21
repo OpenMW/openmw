@@ -54,8 +54,12 @@ namespace MWGui
 
             void onScrollChangePosition(MyGUI::ScrollBar* scroller, size_t pos);
             void onWindowResize(MyGUI::Window* window);
+            void onMouseWheel(MyGUI::Widget* _sender, int _rel);
 
             static const int lineHeight;
+
+            MyGUI::Widget* mLeftPane;
+            MyGUI::Widget* mRightPane;
 
             MyGUI::WidgetPtr skillAreaWidget, skillClientWidget;
             MyGUI::ScrollBar* skillScrollerWidget;

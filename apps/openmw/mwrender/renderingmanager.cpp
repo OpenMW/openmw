@@ -11,6 +11,7 @@
 
 #include "../mwworld/world.hpp" // these includes can be removed once the static-hack is gone
 #include "../mwworld/ptr.hpp"
+#include "../mwbase/environment.hpp"
 #include <components/esm/loadstat.hpp>
 #include <components/settings/settings.hpp>
 
@@ -233,7 +234,10 @@ void RenderingManager::update (float duration){
     mWater->update();
 }
 void RenderingManager::waterAdded (MWWorld::Ptr::CellStore *store){
-    if(store->cell->data.flags & store->cell->HasWater){
+    if(store->cell->data.flags & store->cell->HasWater
+        || ((!(store->cell->data.flags & ESM::Cell::Interior))
+            && !MWBase::Environment::get().getWorld()->getStore().lands.search(store->cell->data.gridX,store->cell->data.gridY) )) // always use water, if the cell does not have land.
+    {
         if(mWater == 0)
             mWater = new MWRender::Water(mRendering.getCamera(), this, store->cell);
         else
@@ -242,7 +246,6 @@ void RenderingManager::waterAdded (MWWorld::Ptr::CellStore *store){
     }
     else
         removeWater();
-
 }
 
 void RenderingManager::setWaterHeight(const float height)
