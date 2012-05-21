@@ -16,6 +16,9 @@ ToolTips::ToolTips(WindowManager* windowManager) :
     , mGameMode(true)
     , mWindowManager(windowManager)
     , mFullHelp(false)
+    , mEnabled(true)
+    , mFocusToolTipX(0.0)
+    , mFocusToolTipY(0.0)
 {
     getWidget(mDynamicToolTipBox, "DynamicToolTipBox");
 
@@ -27,23 +30,36 @@ ToolTips::ToolTips(WindowManager* windowManager) :
     mMainWidget->setNeedMouseFocus(false);
 }
 
+void ToolTips::setEnabled(bool enabled)
+{
+    mEnabled = enabled;
+}
+
 void ToolTips::onFrame(float frameDuration)
 {
-    /// \todo Store a MWWorld::Ptr in the widget user data, retrieve it here and construct a tooltip dynamically
-
     MyGUI::Gui::getInstance().destroyWidget(mDynamicToolTipBox);
     mDynamicToolTipBox = mMainWidget->createWidget<Widget>("HUD_Box",
         IntCoord(0, 0, mMainWidget->getCoord().width, mMainWidget->getCoord().height),
         Align::Stretch, "DynamicToolTipBox");
 
+    // start by hiding everything
+    for (unsigned int i=0; i < mMainWidget->getChildCount(); ++i)
+    {
+        mMainWidget->getChildAt(i)->setVisible(false);
+    }
+
     const IntSize &viewSize = RenderManager::getInstance().getViewSize();
+
+    if (!mEnabled)
+    {
+        return;
+    }
 
     if (!mGameMode)
     {
         Widget* focus = InputManager::getInstance().getMouseFocusWidget();
         if (focus == 0)
         {
-            mDynamicToolTipBox->setVisible(false);
             return;
         }
 
@@ -55,30 +71,77 @@ void ToolTips::onFrame(float frameDuration)
         ToolTipInfo info;
         if (type == "")
         {
-            mDynamicToolTipBox->setVisible(false);
             return;
-        }        
-        else if (type == "Text")
-        {
-            info.text = text;
         }
-        else if (type == "CaptionText")
+        else if (type == "ItemPtr")
         {
-            std::string caption = focus->getUserString("ToolTipCaption");
-            info.caption = caption;
-            info.text = text;
+            mFocusObject = *focus->getUserData<MWWorld::Ptr>();
+            tooltipSize = getToolTipViaPtr(false);
         }
-        else if (type == "ImageCaptionText")
+        else if (type == "Layout")
         {
-            std::string caption = focus->getUserString("ToolTipCaption");
-            std::string image = focus->getUserString("ToolTipImage");
-            std::string sizeString = focus->getUserString("ToolTipImageSize");
+            // tooltip defined in the layout
+            MyGUI::Widget* tooltip;
+            getWidget(tooltip, focus->getUserString("ToolTipLayout"));
 
-            info.text = text;
-            info.caption = caption;
-            info.icon = image;
+            tooltip->setVisible(true);
+            if (!tooltip->isUserString("DontResize"))
+            {
+                tooltip->setCoord(0, 0, 450, 300); // this is the maximum width of the tooltip before it starts word-wrapping
+
+                tooltipSize = MyGUI::IntSize(0, tooltip->getSize().height);
+            }
+            else
+                tooltipSize = tooltip->getSize();
+
+            std::map<std::string, std::string> userStrings = focus->getUserStrings();
+            for (std::map<std::string, std::string>::iterator it = userStrings.begin();
+                it != userStrings.end(); ++it)
+            {
+                if (it->first == "ToolTipType"
+                    || it->first == "ToolTipLayout")
+                    continue;
+
+
+                size_t underscorePos = it->first.find("_");
+                std::string propertyKey = it->first.substr(0, underscorePos);
+                std::string widgetName = it->first.substr(underscorePos+1, it->first.size()-(underscorePos+1));
+
+                MyGUI::Widget* w;
+                getWidget(w, widgetName);
+                w->setProperty(propertyKey, it->second);
+            }
+
+            for (unsigned int i=0; i<tooltip->getChildCount(); ++i)
+            {
+                MyGUI::Widget* w = tooltip->getChildAt(i);
+
+                if (w->isUserString("AutoResizeHorizontal"))
+                {
+                    MyGUI::TextBox* text = w->castType<MyGUI::TextBox>();
+                    tooltipSize.width = std::max(tooltipSize.width, w->getLeft() + text->getTextSize().width + 8);
+                }
+                else if (!tooltip->isUserString("DontResize"))
+                    tooltipSize.width = std::max(tooltipSize.width, w->getLeft() + w->getWidth() + 8);
+
+                if (w->isUserString("AutoResizeVertical"))
+                {
+                    MyGUI::TextBox* text = w->castType<MyGUI::TextBox>();
+                    int height = text->getTextSize().height;
+                    if (height > w->getHeight())
+                    {
+                        tooltipSize += MyGUI::IntSize(0, height - w->getHeight());
+                    }
+                    if (height < w->getHeight())
+                    {
+                        tooltipSize -= MyGUI::IntSize(0, w->getHeight() - height);
+                    }
+                }
+            }
+            tooltip->setCoord(0, 0, tooltipSize.width, tooltipSize.height);
         }
-        tooltipSize = createToolTip(info);
+        else
+            throw std::runtime_error ("unknown tooltip type");
 
         IntPoint tooltipPosition = InputManager::getInstance().getMousePosition() + IntPoint(0, 24);
 
@@ -93,7 +156,6 @@ void ToolTips::onFrame(float frameDuration)
         }
 
         setCoord(tooltipPosition.left, tooltipPosition.top, tooltipSize.width, tooltipSize.height);
-        mDynamicToolTipBox->setVisible(true);
     }
     else
     {
@@ -101,15 +163,13 @@ void ToolTips::onFrame(float frameDuration)
         {
             IntSize tooltipSize = getToolTipViaPtr();
 
-            // adjust tooltip size to fit its content, position it above the crosshair
-            /// \todo Slide the tooltip along the bounding box of the focused object (like in Morrowind)
-            setCoord(std::max(0, viewSize.width/2 - (tooltipSize.width)/2),
-                    std::max(0, viewSize.height/2 - (tooltipSize.height) - 32),
+            setCoord(viewSize.width/2 - tooltipSize.width/2,
+                    std::max(0, int(mFocusToolTipY*viewSize.height - tooltipSize.height)),
                     tooltipSize.width,
                     tooltipSize.height);
+
+            mDynamicToolTipBox->setVisible(true);
         }
-        else
-            mDynamicToolTipBox->setVisible(false);
     }
 }
 
@@ -128,7 +188,7 @@ void ToolTips::setFocusObject(const MWWorld::Ptr& focus)
     mFocusObject = focus;
 }
 
-IntSize ToolTips::getToolTipViaPtr ()
+IntSize ToolTips::getToolTipViaPtr (bool image)
 {
     // this the maximum width of the tooltip before it starts word-wrapping
     setCoord(0, 0, 300, 300);
@@ -145,6 +205,8 @@ IntSize ToolTips::getToolTipViaPtr ()
         mDynamicToolTipBox->setVisible(true);
 
         ToolTipInfo info = object.getToolTipInfo(mFocusObject);
+        if (!image)
+            info.icon = "";
         tooltipSize = createToolTip(info);
     }
 
@@ -165,8 +227,10 @@ void ToolTips::findImageExtension(std::string& image)
     }
 }
 
-IntSize ToolTips::createToolTip(const ToolTipInfo& info)
+IntSize ToolTips::createToolTip(const MWGui::ToolTipInfo& info)
 {
+    mDynamicToolTipBox->setVisible(true);
+
     std::string caption = info.caption;
     std::string image = info.icon;
     int imageSize = (image != "") ? 32 : 0;
@@ -279,6 +343,9 @@ IntSize ToolTips::createToolTip(const ToolTipInfo& info)
             const int chargeTextWidth = chargeText->getTextSize().width + 5;
 
             const int chargeAndTextWidth = chargeWidth + chargeTextWidth;
+
+            totalSize.width = std::max(totalSize.width, chargeAndTextWidth);
+
             chargeText->setCoord((totalSize.width - chargeAndTextWidth)/2, coord.top+6, chargeTextWidth, 18);
 
             IntCoord chargeCoord;
@@ -350,6 +417,14 @@ std::string ToolTips::getMiscString(const std::string& text, const std::string& 
         return "\n" + prefix + ": " + text;
 }
 
+std::string ToolTips::getCountString(const int value)
+{
+    if (value == 1)
+        return "";
+    else
+        return " (" + boost::lexical_cast<std::string>(value) + ")";
+}
+
 void ToolTips::toggleFullHelp()
 {
     mFullHelp = !mFullHelp;
@@ -358,4 +433,10 @@ void ToolTips::toggleFullHelp()
 bool ToolTips::getFullHelp() const
 {
     return mFullHelp;
+}
+
+void ToolTips::setFocusObjectScreenCoords(float min_x, float min_y, float max_x, float max_y)
+{
+    mFocusToolTipX = (min_x + max_x) / 2;
+    mFocusToolTipY = min_y;
 }

@@ -142,7 +142,7 @@ namespace MWWorld
         throw std::logic_error ("value not supported by this class");
     }
 
-    float Class::getCapactiy (const MWWorld::Ptr& ptr) const
+    float Class::getCapacity (const MWWorld::Ptr& ptr) const
     {
         throw std::runtime_error ("capacity not supported by this class");
     }
@@ -180,6 +180,12 @@ namespace MWWorld
     std::string Class::getDownSoundId (const Ptr& ptr) const
     {
         throw std::runtime_error ("class does not have an down sound");
+    }
+
+
+    std::string Class::getInventoryIcon (const MWWorld::Ptr& ptr) const
+    {
+        throw std::runtime_error ("class does not have any inventory icon");
     }
 
     MWGui::ToolTipInfo Class::getToolTipInfo (const Ptr& ptr) const

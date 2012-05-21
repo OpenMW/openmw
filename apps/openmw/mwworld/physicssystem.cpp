@@ -80,7 +80,7 @@ namespace MWWorld
         Ray centerRay = mRender.getCamera()->getCameraToViewportRay(
         mRender.getViewport()->getWidth()/2,
         mRender.getViewport()->getHeight()/2);
-        btVector3 result(centerRay.getPoint(500*extent).x,-centerRay.getPoint(500*extent).z,centerRay.getPoint(500*extent).y);
+        btVector3 result(centerRay.getPoint(500*extent).x,-centerRay.getPoint(500*extent).z,centerRay.getPoint(500*extent).y); /// \todo make this distance (ray length) configurable
         return result;
     }
 
@@ -93,6 +93,29 @@ namespace MWWorld
         std::pair<std::string, float> result = mEngine->rayTest(_from, _to);
 
         return !(result.first == "");
+    }
+
+    std::pair<bool, Ogre::Vector3> PhysicsSystem::castRay(float mouseX, float mouseY)
+    {
+        Ogre::Ray ray = mRender.getCamera()->getCameraToViewportRay(
+            mouseX,
+            mouseY);
+        Ogre::Vector3 from = ray.getOrigin();
+        Ogre::Vector3 to = ray.getPoint(200); /// \todo make this distance (ray length) configurable
+
+        btVector3 _from, _to;
+        // OGRE to MW coordinates
+        _from = btVector3(from.x, -from.z, from.y);
+        _to = btVector3(to.x, -to.z, to.y);
+
+        std::pair<std::string, float> result = mEngine->rayTest(_from, _to);
+
+        if (result.first == "")
+            return std::make_pair(false, Ogre::Vector3());
+        else
+        {
+            return std::make_pair(true, ray.getPoint(200*result.second));  /// \todo make this distance (ray length) configurable
+        }
     }
 
     void PhysicsSystem::doPhysics(float dt, const std::vector<std::pair<std::string, Ogre::Vector3> >& actors)

@@ -39,10 +39,14 @@ namespace MWGui
         void enterGameMode();
         void enterGuiMode();
 
+        void setEnabled(bool enabled);
+
         void toggleFullHelp(); ///< show extra info in item tooltips (owner, script)
         bool getFullHelp() const;
 
         void setFocusObject(const MWWorld::Ptr& focus);
+        void setFocusObjectScreenCoords(float min_x, float min_y, float max_x, float max_y);
+        ///< set the screen-space position of the tooltip for focused object 
 
         static std::string getValueString(const int value, const std::string& prefix);
         ///< @return "prefix: value" or "" if value is 0
@@ -53,6 +57,9 @@ namespace MWGui
         static std::string toString(const float value);
         static std::string toString(const int value);
 
+        static std::string getCountString(const int value);
+        ///< @return blank string if count is 1, or else " (value)"
+
     private:
         MyGUI::Widget* mDynamicToolTipBox;
 
@@ -62,13 +69,18 @@ namespace MWGui
 
         void findImageExtension(std::string& image);
 
-        MyGUI::IntSize getToolTipViaPtr ();
+        MyGUI::IntSize getToolTipViaPtr (bool image=true);
         ///< @return requested tooltip size
 
         MyGUI::IntSize createToolTip(const ToolTipInfo& info);
         ///< @return requested tooltip size
 
+        float mFocusToolTipX;
+        float mFocusToolTipY;
+
         bool mGameMode;
+
+        bool mEnabled;
 
         bool mFullHelp;
     };

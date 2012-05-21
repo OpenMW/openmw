@@ -164,7 +164,7 @@ namespace MWWorld
             ///< Return trade value of the object. Throws an exception, if the object can't be traded.
             /// (default implementation: throws an exception)
 
-            virtual float getCapactiy (const MWWorld::Ptr& ptr) const;
+            virtual float getCapacity (const MWWorld::Ptr& ptr) const;
             ///< Return total weight that fits into the object. Throws an exception, if the object can't
             /// hold other objects.
             /// (default implementation: throws an exception)
@@ -189,6 +189,9 @@ namespace MWWorld
             virtual std::string getDownSoundId (const Ptr& ptr) const;
             ///< Return the down sound ID of \a ptr or throw an exception, if class does not support ID retrieval
             /// (default implementation: throw an exception)
+
+            virtual std::string getInventoryIcon (const MWWorld::Ptr& ptr) const;
+            ///< Return name of inventory icon.
 
             virtual std::string getEnchantment (const MWWorld::Ptr& ptr) const;
             ///< @return the enchantment ID if the object is enchanted, otherwise an empty string

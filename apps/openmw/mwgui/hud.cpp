@@ -1,19 +1,23 @@
-#include "layouts.hpp"
-
-#include "../mwmechanics/mechanicsmanager.hpp"
-#include "window_manager.hpp"
+#include "hud.hpp"
 
 #include <cmath>
-#include <algorithm>
-#include <iterator>
 
-#undef min
-#undef max
+#include <MyGUI.h>
+
+#include <boost/lexical_cast.hpp>
+
+#include "../mwbase/environment.hpp"
+#include "../mwsound/soundmanager.hpp"
+#include "../mwworld/class.hpp"
+#include "../mwworld/world.hpp"
+#include "../mwworld/player.hpp"
+
+#include "window_manager.hpp"
+#include "container.hpp"
 
 using namespace MWGui;
 
-
-HUD::HUD(int width, int height, int fpsLevel)
+HUD::HUD(int width, int height, int fpsLevel, DragAndDrop* dragAndDrop)
     : Layout("openmw_hud_layout.xml")
     , health(NULL)
     , magicka(NULL)
@@ -36,6 +40,7 @@ HUD::HUD(int width, int height, int fpsLevel)
     , spellBoxBaseLeft(0)
     , effectBoxBaseRight(0)
     , minimapBoxBaseRight(0)
+    , mDragAndDrop(dragAndDrop)
 {
     setCoord(0,0, width, height);
 
@@ -72,9 +77,6 @@ HUD::HUD(int width, int height, int fpsLevel)
     getWidget(trianglecounter, "TriangleCounter");
     getWidget(batchcounter, "BatchCounter");
 
-    compass->setImageTexture("textures\\compass.dds");
-    crosshair->setImageTexture("textures\\target.dds");
-
     // These are just demo values, you should replace these with
     // real calls from outside the class later.
     setWeapIcon("icons\\w\\tx_knife_iron.dds");
@@ -84,6 +86,10 @@ HUD::HUD(int width, int height, int fpsLevel)
     setEffect("icons\\s\\tx_s_chameleon.dds");
 
     LocalMapBase::init(minimap, this);
+
+    mMainWidget->eventMouseButtonClick += MyGUI::newDelegate(this, &HUD::onWorldClicked);
+    mMainWidget->eventMouseMove += MyGUI::newDelegate(this, &HUD::onWorldMouseOver);
+    mMainWidget->eventMouseLostFocus += MyGUI::newDelegate(this, &HUD::onWorldMouseLostFocus);
 }
 
 void HUD::setFpsLevel(int level)
@@ -123,16 +129,6 @@ void HUD::setBatchCount(size_t count)
     batchcounter->setCaption(boost::lexical_cast<std::string>(count));
 }
 
-void HUD::setStats(int h, int hmax, int m, int mmax, int s, int smax)
-{
-    health->setProgressRange(hmax);
-    health->setProgressPosition(h);
-    magicka->setProgressRange(mmax);
-    magicka->setProgressPosition(m);
-    stamina->setProgressRange(smax);
-    stamina->setProgressPosition(s);
-}
-
 void HUD::setWeapIcon(const char *str)
 {
     weapImage->setImageTexture(str);
@@ -170,19 +166,27 @@ void HUD::setValue(const std::string& id, const MWMechanics::DynamicStat<int>& v
     for (int i=0; ids[i]; ++i)
         if (ids[i]==id)
         {
+            MyGUI::Widget* w;
+            std::string valStr = boost::lexical_cast<std::string>(value.getCurrent()) + "/" + boost::lexical_cast<std::string>(value.getModified());
             switch (i)
             {
                 case 0:
                     health->setProgressRange (value.getModified());
                     health->setProgressPosition (value.getCurrent());
+                    getWidget(w, "HealthFrame");
+                    w->setUserString("Caption_HealthDescription", "#{sHealthDesc}\n" + valStr);
                     break;
                 case 1:
                     magicka->setProgressRange (value.getModified());
                     magicka->setProgressPosition (value.getCurrent());
+                    getWidget(w, "MagickaFrame");
+                    w->setUserString("Caption_HealthDescription", "#{sIntDesc}\n" + valStr);
                     break;
                 case 2:
                     stamina->setProgressRange (value.getModified());
                     stamina->setProgressPosition (value.getCurrent());
+                    getWidget(w, "FatigueFrame");
+                    w->setUserString("Caption_HealthDescription", "#{sFatDesc}\n" + valStr);
                     break;
             }
         }
@@ -247,86 +251,72 @@ void HUD::setBottomRightVisibility(bool effectBoxVisible, bool minimapBoxVisible
     effectBox->setVisible(effectBoxVisible);
 }
 
-LocalMapBase::LocalMapBase()
-    : mCurX(0)
-    , mCurY(0)
-    , mInterior(false)
-    , mFogOfWar(true)
-    , mLocalMap(NULL)
-    , mPrefix()
-    , mChanged(true)
-    , mLayout(NULL)
-    , mLastPositionX(0.0f)
-    , mLastPositionY(0.0f)
-    , mLastDirectionX(0.0f)
-    , mLastDirectionY(0.0f)
+void HUD::onWorldClicked(MyGUI::Widget* _sender)
 {
-}
-
-void LocalMapBase::init(MyGUI::ScrollView* widget, OEngine::GUI::Layout* layout)
-{
-    mLocalMap = widget;
-    mLayout = layout;
-}
-
-void LocalMapBase::setCellPrefix(const std::string& prefix)
-{
-    mPrefix = prefix;
-    mChanged = true;
-}
-
-void LocalMapBase::toggleFogOfWar()
-{
-    mFogOfWar = !mFogOfWar;
-    applyFogOfWar();
-}
-
-void LocalMapBase::applyFogOfWar()
-{
-    for (int mx=0; mx<3; ++mx)
+    if (mDragAndDrop->mIsOnDragAndDrop)
     {
-        for (int my=0; my<3; ++my)
-        {
-            std::string name = "Map_" + boost::lexical_cast<std::string>(mx) + "_"
-                    + boost::lexical_cast<std::string>(my);
-            std::string image = mPrefix+"_"+ boost::lexical_cast<std::string>(mCurX + (mx-1)) + "_"
-                    + boost::lexical_cast<std::string>(mCurY + (mInterior ? (my-1) : -1*(my-1)));
-            MyGUI::ImageBox* fog;
-            mLayout->getWidget(fog, name+"_fog");
-            fog->setImageTexture(mFogOfWar ?
-                ((MyGUI::RenderManager::getInstance().getTexture(image+"_fog") != 0) ? image+"_fog"
-                : "black.png" )
-               : "");
-        }
+        // drop item into the gameworld
+        MWWorld::Ptr object = *mDragAndDrop->mDraggedWidget->getUserData<MWWorld::Ptr>();
+
+        MWWorld::World* world = MWBase::Environment::get().getWorld();
+
+        MyGUI::IntSize viewSize = MyGUI::RenderManager::getInstance().getViewSize();
+        MyGUI::IntPoint cursorPosition = MyGUI::InputManager::getInstance().getMousePosition();
+        float mouseX = cursorPosition.left / float(viewSize.width);
+        float mouseY = cursorPosition.top / float(viewSize.height);
+
+        int origCount = object.getRefData().getCount();
+        object.getRefData().setCount(mDragAndDrop->mDraggedCount);
+
+        if (world->canPlaceObject(mouseX, mouseY))
+            world->placeObject(object, mouseX, mouseY);
+        else
+            world->dropObjectOnGround(object);
+
+        MyGUI::PointerManager::getInstance().setPointer("arrow");
+
+        std::string sound = MWWorld::Class::get(object).getDownSoundId(object);
+        MWBase::Environment::get().getSoundManager()->playSound (sound, 1.0, 1.0);
+
+        // remove object from the container it was coming from
+        object.getRefData().setCount(origCount - mDragAndDrop->mDraggedCount);
+
+        mDragAndDrop->mIsOnDragAndDrop = false;
+        MyGUI::Gui::getInstance().destroyWidget(mDragAndDrop->mDraggedWidget);
+        mDragAndDrop->mDraggedWidget = 0;
+
+        MWBase::Environment::get().getWindowManager()->setDragDrop(false);
     }
 }
 
-void LocalMapBase::setActiveCell(const int x, const int y, bool interior)
+void HUD::onWorldMouseOver(MyGUI::Widget* _sender, int x, int y)
 {
-    if (x==mCurX && y==mCurY && mInterior==interior && !mChanged) return; // don't do anything if we're still in the same cell
-    for (int mx=0; mx<3; ++mx)
+    if (mDragAndDrop->mIsOnDragAndDrop)
     {
-        for (int my=0; my<3; ++my)
-        {
-            std::string name = "Map_" + boost::lexical_cast<std::string>(mx) + "_"
-                    + boost::lexical_cast<std::string>(my);
+        MyGUI::IntSize viewSize = MyGUI::RenderManager::getInstance().getViewSize();
+        MyGUI::IntPoint cursorPosition = MyGUI::InputManager::getInstance().getMousePosition();
+        float mouseX = cursorPosition.left / float(viewSize.width);
+        float mouseY = cursorPosition.top / float(viewSize.height);
 
-            std::string image = mPrefix+"_"+ boost::lexical_cast<std::string>(x + (mx-1)) + "_"
-                    + boost::lexical_cast<std::string>(y + (interior ? (my-1) : -1*(my-1)));
+        MWWorld::World* world = MWBase::Environment::get().getWorld();
 
-            MyGUI::ImageBox* box;
-            mLayout->getWidget(box, name);
+        // if we can't drop the object at the wanted position, show the "drop on ground" cursor.
+        bool canDrop = world->canPlaceObject(mouseX, mouseY);
 
-            if (MyGUI::RenderManager::getInstance().getTexture(image) != 0)
-                box->setImageTexture(image);
-            else
-                box->setImageTexture("black.png");
-        }
+        if (!canDrop)
+            MyGUI::PointerManager::getInstance().setPointer("drop_ground");
+        else
+            MyGUI::PointerManager::getInstance().setPointer("arrow");
+
     }
-    mInterior = interior;
-    mCurX = x;
-    mCurY = y;
-    mChanged = false;
-    applyFogOfWar();
+    else
+    {
+        MyGUI::PointerManager::getInstance().setPointer("arrow");
+        /// \todo make it possible to pick up objects with the mouse, if inventory or container window is open
+    }
 }
 
+void HUD::onWorldMouseLostFocus(MyGUI::Widget* _sender, MyGUI::Widget* _new)
+{
+    MyGUI::PointerManager::getInstance().setPointer("arrow");
+}

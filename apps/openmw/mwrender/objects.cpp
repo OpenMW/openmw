@@ -219,7 +219,7 @@ void Objects::insertLight (const MWWorld::Ptr& ptr, float r, float g, float b, f
         info.type = LT_Normal;
 
     // random starting phase for the animation
-    info.time = Ogre::Math::RangeRandom(0, 2 * M_PI);
+    info.time = Ogre::Math::RangeRandom(0, 2 * Ogre::Math::PI);
 
     // adjust the lights depending if we're in an interior or exterior cell
     // quadratic means the light intensity falls off quite fast, resulting in a
@@ -367,7 +367,7 @@ void Objects::update(const float dt)
 
             // Light animation (pulse & flicker)
             it->time += dt;
-            const float phase = std::fmod(static_cast<double> (it->time), (32 * 2 * M_PI)) * 20;
+            const float phase = std::fmod(static_cast<double> (it->time), static_cast<double>(32 * 2 * Ogre::Math::PI)) * 20;
             float pulseConstant;
 
             // These formulas are just guesswork, but they work pretty well

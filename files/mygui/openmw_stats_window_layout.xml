@@ -7,25 +7,95 @@
 
             <!-- Player health stats -->
             <Widget type="Widget" skin="MW_Box" position="8 8 212 62" align="Left Top HStretch">
-                <Widget type="TextBox" skin="NormalText" position="4 4 70 18" name="Health_str" align="Left Top HStretch"/>
-                <Widget type="TextBox" skin="NormalText" position="4 22 70 18" name="Magicka_str" align="Left Top HStretch"/>
-                <Widget type="TextBox" skin="NormalText" position="4 40 70 18" name="Fatigue_str" align="Left Top HStretch"/>
-                <Widget type="ProgressBar" skin="MW_Progress_Red" position="78 4 130 18" name="HBar" align="Right Top"/>
-                <Widget type="ProgressBar" skin="MW_Progress_Blue" position="78 22 130 18" name="MBar" align="Right Top"/>
-                <Widget type="ProgressBar" skin="MW_Progress_Green" position="78 40 130 18" name="FBar" align="Right Top"/>
-                <Widget type="TextBox" skin="ProgressText" position="78 4 130 18" name="HBarT" align="Right Top"/>
-                <Widget type="TextBox" skin="ProgressText" position="78 22 130 18" name="MBarT" align="Right Top"/>
-                <Widget type="TextBox" skin="ProgressText" position="78 40 130 18" name="FBarT" align="Right Top"/>
+                <!-- Health -->
+                <Widget type="Widget" skin="" position="4 4 204 18" name="Health" align="Left Top HStretch">
+                    <Property key="NeedMouse" value="true"/>
+                    <UserString key="ToolTipType" value="Layout"/>
+                    <UserString key="ToolTipLayout" value="HealthToolTip"/>
+                    <UserString key="ImageTexture_HealthImage" value="icons\k\health.dds"/>
+                    <Widget type="TextBox" skin="NormalText" position="0 0 70 18" name="Health_str" align="Left Top HStretch">
+                        <Property key="NeedMouse" value="false"/>
+                        <Property key="Caption" value="#{sHealth}"/>
+                    </Widget>
+                    <Widget type="ProgressBar" skin="MW_Progress_Red" position="74 0 130 18" name="HBar" align="Right Top">
+                        <Property key="NeedMouse" value="false"/>
+                    </Widget>
+                    <Widget type="TextBox" skin="ProgressText" position="74 0 130 18" name="HBarT" align="Right Top">
+                        <Property key="NeedMouse" value="false"/>
+                    </Widget>
+                </Widget>
+
+                <!-- Magicka -->
+                <Widget type="Widget" skin="" position="4 22 204 18" name="Magicka" align="Left Top HStretch">
+                    <Property key="NeedMouse" value="true"/>
+                    <UserString key="ToolTipType" value="Layout"/>
+                    <UserString key="ToolTipLayout" value="HealthToolTip"/>
+                    <UserString key="ImageTexture_HealthImage" value="icons\k\magicka.dds"/>
+
+                    <Widget type="TextBox" skin="NormalText" position="0 0 70 18" name="Magicka_str" align="Left Top HStretch">
+                        <Property key="Caption" value="#{sMagic}"/>
+                        <Property key="NeedMouse" value="false"/>
+                    </Widget>
+
+                    <Widget type="ProgressBar" skin="MW_Progress_Blue" position="74 0 130 18" name="MBar" align="Right Top">
+                        <Property key="NeedMouse" value="false"/>
+                    </Widget>
+
+                    <Widget type="TextBox" skin="ProgressText" position="74 0 130 18" name="MBarT" align="Right Top">
+                        <Property key="NeedMouse" value="false"/>
+                    </Widget>
+                </Widget>
+
+                <!-- Fatigue -->
+                <Widget type="Widget" skin="" position="4 40 204 18" name="Fatigue" align="Left Top HStretch">
+                    <Property key="NeedMouse" value="true"/>
+                    <UserString key="ToolTipType" value="Layout"/>
+                    <UserString key="ToolTipLayout" value="HealthToolTip"/>
+                    <UserString key="ImageTexture_HealthImage" value="icons\k\fatigue.dds"/>
+
+                    <Widget type="TextBox" skin="NormalText" position="0 0 70 18" name="Fatigue_str" align="Left Top HStretch">
+                        <Property key="Caption" value="#{sFatigue}"/>
+                        <Property key="NeedMouse" value="false"/>
+                    </Widget>
+
+                    <Widget type="ProgressBar" skin="MW_Progress_Green" position="74 0 130 18" name="FBar" align="Right Top">
+                        <Property key="NeedMouse" value="false"/>
+                    </Widget>
+                    <Widget type="TextBox" skin="ProgressText" position="74 0 130 18" name="FBarT" align="Right Top">
+                        <Property key="NeedMouse" value="false"/>
+                    </Widget>
+                </Widget>
             </Widget>
 
             <!-- Player level, race and class -->
             <Widget type="Widget" skin="MW_Box" position="8 78 212 62" align="Left Top HStretch">
-                <Widget type="TextBox" skin="NormalText" position="4 4 100 18" name="Level_str" align="Left Top HStretch"/>
-                <Widget type="TextBox" skin="NormalText" position="4 22 100 18" name="Race_str" align="Left Top HStretch"/>
-                <Widget type="TextBox" skin="NormalText" position="4 40 100 18" name="Class_str" align="Left Top HStretch"/>
-                <Widget type="TextBox" skin="SandTextRight" position="104 4 104 18" name="LevelText" align="Right Top"/>
-                <Widget type="TextBox" skin="SandTextRight" position="104 22 104 18" name="RaceText" align="Right Top"/>
-                <Widget type="TextBox" skin="SandTextRight" position="104 40 104 18" name="ClassText" align="Right Top"/>
+                <Widget type="TextBox" skin="NormalText" position="4 4 100 18" name="Level_str" align="Left Top HStretch">
+                    <Property key="Caption" value="#{sLevel}"/>
+                    <UserString key="ToolTipType" value="Layout"/>
+                    <UserString key="ToolTipLayout" value="LevelToolTip"/>
+                </Widget>
+                <Widget type="TextBox" skin="NormalText" position="4 22 100 18" name="Race_str" align="Left Top HStretch">
+                    <Property key="Caption" value="#{sRace}"/>
+                    <UserString key="ToolTipType" value="Layout"/>
+                    <UserString key="ToolTipLayout" value="TextWithCenteredCaptionToolTip"/>
+                </Widget>
+                <Widget type="TextBox" skin="NormalText" position="4 40 100 18" name="Class_str" align="Left Top HStretch">
+                    <Property key="Caption" value="#{sClass}"/>
+                    <UserString key="ToolTipType" value="Layout"/>
+                    <UserString key="ToolTipLayout" value="ClassToolTip"/>
+                </Widget>
+                <Widget type="TextBox" skin="SandTextRight" position="104 4 104 18" name="LevelText" align="Right Top">
+                    <UserString key="ToolTipType" value="Layout"/>
+                    <UserString key="ToolTipLayout" value="LevelToolTip"/>
+                </Widget>
+                <Widget type="TextBox" skin="SandTextRight" position="104 22 104 18" name="RaceText" align="Right Top">
+                    <UserString key="ToolTipType" value="Layout"/>
+                    <UserString key="ToolTipLayout" value="TextWithCenteredCaptionToolTip"/>
+                </Widget>
+                <Widget type="TextBox" skin="SandTextRight" position="104 40 104 18" name="ClassText" align="Right Top">
+                    <UserString key="ToolTipType" value="Layout"/>
+                    <UserString key="ToolTipLayout" value="ClassToolTip"/>
+                </Widget>
             </Widget>
 
             <Widget type="Widget" skin="MW_Box" position="8 148 212 152" align="Left Top Stretch">

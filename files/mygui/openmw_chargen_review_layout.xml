@@ -5,10 +5,18 @@
 
         <!-- Player name, race, class and birth sign-->
         <Widget type="Widget" skin="MW_Box" position="8 12 244 126">
-            <Widget type="Button" skin="MW_Button" position="8 8 64 23" name="NameButton"/>
-            <Widget type="Button" skin="MW_Button" position="8 37 56 23" name="RaceButton"/>
-            <Widget type="Button" skin="MW_Button" position="8 66 56 23" name="ClassButton"/>
-            <Widget type="Button" skin="MW_Button" position="8 95 54 23" name="SignButton"/>
+            <Widget type="Button" skin="MW_Button" position="8 8 64 23" name="NameButton">
+                <Property key="Caption" value="#{sName}"/>
+            </Widget>
+            <Widget type="Button" skin="MW_Button" position="8 37 56 23" name="RaceButton">
+                <Property key="Caption" value="#{sRace}"/>
+            </Widget>
+            <Widget type="Button" skin="MW_Button" position="8 66 56 23" name="ClassButton">
+                <Property key="Caption" value="#{sClass}"/>
+            </Widget>
+            <Widget type="Button" skin="MW_Button" position="8 95 54 23" name="SignButton">
+                <Property key="Caption" value="#{sBirthSign}"/>
+            </Widget>
             <Widget type="TextBox" skin="SandTextRight" position="100 10 140 18" name="NameText"/>
             <Widget type="TextBox" skin="SandTextRight" position="100 39 140 18" name="RaceText"/>
             <Widget type="TextBox" skin="SandTextRight" position="100 68 140 18" name="ClassText"/>
@@ -17,9 +25,15 @@
 
         <!-- Player health, magicka and fatigue -->
         <Widget type="Widget" skin="MW_Box" position="8 144 244 64">
-            <Widget type="MWDynamicStat" skin="MW_DynamicStat_Red" position="4 4 236 18" name="Health"/>
-            <Widget type="MWDynamicStat" skin="MW_DynamicStat_Blue" position="4 22 236 18" name="Magicka"/>
-            <Widget type="MWDynamicStat" skin="MW_DynamicStat_Green" position="4 40 236 18" name="Fatigue"/>
+            <Widget type="MWDynamicStat" skin="MW_DynamicStat_Red" position="4 4 236 18" name="Health">
+                <Property key="Caption" value="#{sHealth}"/>
+            </Widget>
+            <Widget type="MWDynamicStat" skin="MW_DynamicStat_Blue" position="4 22 236 18" name="Magicka">
+                <Property key="Caption" value="#{sMagic}"/>
+            </Widget>
+            <Widget type="MWDynamicStat" skin="MW_DynamicStat_Green" position="4 40 236 18" name="Fatigue">
+                <Property key="Caption" value="#{sFatigue}"/>
+            </Widget>
         </Widget>
 
         <!-- Player attributes -->
@@ -42,7 +56,7 @@
 
         <!-- Dialog buttons -->
         <Widget type="Button" skin="MW_Button" position="400 372 53 23" name="BackButton">
-            <Property key="Caption" value="Back"/>
+            <Property key="Caption" value="#{sBack}"/>
         </Widget>
         <Widget type="Button" skin="MW_Button" position="460 372 42 23" name="OKButton">
             <Property key="Caption" value="OK"/>

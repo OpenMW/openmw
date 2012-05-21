@@ -56,7 +56,7 @@
             <Property key="Caption" value="Class Description"/>
         </Widget>
         <Widget type="Button" skin="MW_Button" position="356 158 53 23" name="BackButton">
-            <Property key="Caption" value="Back"/>
+            <Property key="Caption" value="#{sBack}"/>
         </Widget>
         <Widget type="Button" skin="MW_Button" position="417 158 42 23" name="OKButton">
             <Property key="Caption" value="OK"/>

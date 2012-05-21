@@ -24,7 +24,7 @@
 
         <!-- The Goodbye button -->
         <Widget type="Button" skin="MW_Button" position="432 366 132 23" name="ByeButton" align="Right Bottom">
-            <Property key="Caption" value="Goodbye"/>
+            <Property key="Caption" value="#{sGoodbye}"/>
         </Widget>
     </Widget>
 </MyGUI>

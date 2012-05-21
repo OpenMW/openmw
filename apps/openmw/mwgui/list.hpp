@@ -26,15 +26,16 @@ namespace MWGui
             EventHandle_String eventItemSelected;
 
             /**
-             * Call after the size of the list changed
+             * Call after the size of the list changed, or items were inserted/removed
              */
             void adjustSize();
 
             void addItem(const std::string& name);
+            void addSeparator(); ///< add a seperator between the current and the next item.
             void removeItem(const std::string& name);
             bool hasItem(const std::string& name);
             unsigned int getItemCount();
-            std::string getItemNameAt(unsigned int at);
+            std::string getItemNameAt(unsigned int at); ///< \attention if there are separators, this method will return "" at the place where the separator is
             void clear();
 
         protected:

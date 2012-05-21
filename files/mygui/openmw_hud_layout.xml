@@ -3,12 +3,30 @@
 <MyGUI type="Layout">
     <Widget type="Widget" layer="HUD" position="0 0 300 200" name="_Main">
         <!-- Energy bars -->
-        <Widget type="ProgressBar" skin="MW_EnergyBar_Red" position="13 146 65 12"
-            align="Left Bottom" name="Health"/>
-        <Widget type="ProgressBar" skin="MW_EnergyBar_Blue" position="13 161 65 12"
-            align="Left Bottom" name="Magicka"/>
-        <Widget type="ProgressBar" skin="MW_EnergyBar_Green" position="13 176 65 12"
-            align="Left Bottom" name="Stamina"/>
+        <Widget type="Button" skin="" position="13 146 65 12" align="Left Bottom" name="HealthFrame">
+            <UserString key="ToolTipType" value="Layout"/>
+            <UserString key="ToolTipLayout" value="HealthToolTip"/>
+            <UserString key="ImageTexture_HealthImage" value="icons\k\health.dds"/>
+            <Widget type="ProgressBar" skin="MW_EnergyBar_Red" position="0 0 65 12" align="Left Bottom" name="Health">
+                <Property key="NeedMouse" value="false"/>
+            </Widget>
+        </Widget>
+        <Widget type="Button" skin="" position="13 161 65 12" align="Left Bottom" name="MagickaFrame">
+            <UserString key="ToolTipType" value="Layout"/>
+            <UserString key="ToolTipLayout" value="HealthToolTip"/>
+            <UserString key="ImageTexture_HealthImage" value="icons\k\magicka.dds"/>
+            <Widget type="ProgressBar" skin="MW_EnergyBar_Blue" position="0 0 65 12" align="Left Bottom" name="Magicka">
+                <Property key="NeedMouse" value="false"/>
+            </Widget>
+        </Widget>
+        <Widget type="Button" skin="" position="13 176 65 12" align="Left Bottom" name="FatigueFrame">
+            <UserString key="ToolTipType" value="Layout"/>
+            <UserString key="ToolTipLayout" value="HealthToolTip"/>
+            <UserString key="ImageTexture_HealthImage" value="icons\k\fatigue.dds"/>
+            <Widget type="ProgressBar" skin="MW_EnergyBar_Green" position="0 0 65 12" align="Left Bottom" name="Stamina">
+                <Property key="NeedMouse" value="false"/>
+            </Widget>
+        </Widget>
 
         <!-- Equipped weapon box -->
         <Widget type="Widget" position="82 146 36 41" align="Left Bottom" name="WeapBox">
@@ -62,7 +80,10 @@
 
                 <Widget type="ImageBox" skin="ImageBox" position="512 512 512 512" align="ALIGN_TOP ALIGN_LEFT" name="Map_1_1">
                     <Widget type="ImageBox" skin="ImageBox" position="0 0 512 512" align="ALIGN_TOP ALIGN_LEFT" name="Map_1_1_fog">
-                        <Widget type="ImageBox" skin="RotatingSkin" position="0 0 32 32" align="Left Bottom" name="Compass"/>
+                        <!-- Player arrow -->
+                        <Widget type="ImageBox" skin="RotatingSkin" position="0 0 32 32" align="ALIGN_BOTTOM ALIGN_LEFT" name="Compass">
+                            <Property key="ImageTexture" value="textures\compass.dds"/>
+                        </Widget>
                     </Widget>
                 </Widget>
 
@@ -85,9 +106,9 @@
         </Widget>
 
         <!-- Crosshair -->
-
-        <Widget type="ImageBox" skin="ImageBox" position="0 0 32
-            32" align="Center Center" name="Crosshair"/>
+        <Widget type="ImageBox" skin="ImageBox" position="0 0 32 32" align="Center Center" name="Crosshair">
+            <Property key="ImageTexture" value="textures\target.dds"/>
+        </Widget>
 
         <!-- Basic FPSCounter box -->
         <Widget type="Widget" skin="HUD_Box" position="12 12 28 21" align="Left Top"

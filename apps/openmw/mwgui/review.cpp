@@ -27,25 +27,21 @@ ReviewDialog::ReviewDialog(WindowManager& parWindowManager)
     ButtonPtr button;
     getWidget(nameWidget, "NameText");
     getWidget(button, "NameButton");
-    button->setCaption(mWindowManager.getGameSettingString("sName", ""));
     adjustButtonSize(button);
     button->eventMouseButtonClick += MyGUI::newDelegate(this, &ReviewDialog::onNameClicked);;
 
     getWidget(raceWidget, "RaceText");
     getWidget(button, "RaceButton");
-    button->setCaption(mWindowManager.getGameSettingString("sRace", ""));
     adjustButtonSize(button);
     button->eventMouseButtonClick += MyGUI::newDelegate(this, &ReviewDialog::onRaceClicked);;
 
     getWidget(classWidget, "ClassText");
     getWidget(button, "ClassButton");
-    button->setCaption(mWindowManager.getGameSettingString("sClass", ""));
     adjustButtonSize(button);
     button->eventMouseButtonClick += MyGUI::newDelegate(this, &ReviewDialog::onClassClicked);;
 
     getWidget(birthSignWidget, "SignText");
     getWidget(button, "SignButton");
-    button->setCaption(mWindowManager.getGameSettingString("sBirthSign", ""));
     adjustButtonSize(button);
     button->eventMouseButtonClick += MyGUI::newDelegate(this, &ReviewDialog::onBirthSignClicked);;
 
@@ -92,7 +88,6 @@ ReviewDialog::ReviewDialog(WindowManager& parWindowManager)
 
     MyGUI::ButtonPtr backButton;
     getWidget(backButton, "BackButton");
-    backButton->setCaption(mWindowManager.getGameSettingString("sBack", ""));
     backButton->eventMouseButtonClick += MyGUI::newDelegate(this, &ReviewDialog::onBackClicked);
 
     MyGUI::ButtonPtr okButton;

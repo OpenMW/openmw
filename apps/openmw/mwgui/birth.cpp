@@ -27,7 +27,6 @@ BirthDialog::BirthDialog(WindowManager& parWindowManager)
 
     MyGUI::ButtonPtr backButton;
     getWidget(backButton, "BackButton");
-    backButton->setCaption(mWindowManager.getGameSettingString("sBack", ""));
     backButton->eventMouseButtonClick += MyGUI::newDelegate(this, &BirthDialog::onBackClicked);
 
     MyGUI::ButtonPtr okButton;

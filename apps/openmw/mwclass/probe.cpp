@@ -109,6 +109,14 @@ namespace MWClass
         return std::string("Item Probe Down");
     }
 
+    std::string Probe::getInventoryIcon (const MWWorld::Ptr& ptr) const
+    {
+          ESMS::LiveCellRef<ESM::Probe, MWWorld::RefData> *ref =
+            ptr.get<ESM::Probe>();
+
+        return ref->base->icon;
+    }
+
     bool Probe::hasToolTip (const MWWorld::Ptr& ptr) const
     {
         ESMS::LiveCellRef<ESM::Probe, MWWorld::RefData> *ref =
@@ -123,7 +131,7 @@ namespace MWClass
             ptr.get<ESM::Probe>();
 
         MWGui::ToolTipInfo info;
-        info.caption = ref->base->name;
+        info.caption = ref->base->name + MWGui::ToolTips::getCountString(ptr.getRefData().getCount());
         info.icon = ref->base->icon;
 
         const ESMS::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();

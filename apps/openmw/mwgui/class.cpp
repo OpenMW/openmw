@@ -28,7 +28,6 @@ GenerateClassResultDialog::GenerateClassResultDialog(WindowManager& parWindowMan
 
     MyGUI::ButtonPtr backButton;
     getWidget(backButton, "BackButton");
-    backButton->setCaption(mWindowManager.getGameSettingString("sBack", ""));
     backButton->eventMouseButtonClick += MyGUI::newDelegate(this, &GenerateClassResultDialog::onBackClicked);
 
     MyGUI::ButtonPtr okButton;
@@ -111,7 +110,6 @@ PickClassDialog::PickClassDialog(WindowManager& parWindowManager)
     MyGUI::ButtonPtr backButton;
     getWidget(backButton, "BackButton");
     backButton->eventMouseButtonClick += MyGUI::newDelegate(this, &PickClassDialog::onBackClicked);
-    backButton->setCaption(mWindowManager.getGameSettingString("sBack", ""));
 
     MyGUI::ButtonPtr okButton;
     getWidget(okButton, "OKButton");
@@ -432,7 +430,6 @@ CreateClassDialog::CreateClassDialog(WindowManager& parWindowManager)
     MyGUI::ButtonPtr backButton;
     getWidget(backButton, "BackButton");
     backButton->eventMouseButtonClick += MyGUI::newDelegate(this, &CreateClassDialog::onBackClicked);
-    backButton->setCaption(mWindowManager.getGameSettingString("sBack", ""));
 
     MyGUI::ButtonPtr okButton;
     getWidget(okButton, "OKButton");

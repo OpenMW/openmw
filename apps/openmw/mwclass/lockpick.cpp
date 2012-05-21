@@ -110,6 +110,14 @@ namespace MWClass
         return std::string("Item Lockpick Down");
     }
 
+    std::string Lockpick::getInventoryIcon (const MWWorld::Ptr& ptr) const
+    {
+          ESMS::LiveCellRef<ESM::Tool, MWWorld::RefData> *ref =
+            ptr.get<ESM::Tool>();
+
+        return ref->base->icon;
+    }
+
     bool Lockpick::hasToolTip (const MWWorld::Ptr& ptr) const
     {
         ESMS::LiveCellRef<ESM::Tool, MWWorld::RefData> *ref =
@@ -124,7 +132,7 @@ namespace MWClass
             ptr.get<ESM::Tool>();
 
         MWGui::ToolTipInfo info;
-        info.caption = ref->base->name;
+        info.caption = ref->base->name + MWGui::ToolTips::getCountString(ptr.getRefData().getCount());
         info.icon = ref->base->icon;
 
         const ESMS::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();

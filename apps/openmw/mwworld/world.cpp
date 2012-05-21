@@ -21,7 +21,7 @@
 #include "class.hpp"
 #include "player.hpp"
 #include "weather.hpp"
-
+#include "manualref.hpp"
 #include "refdata.hpp"
 #include "globals.hpp"
 #include "cellfunctors.hpp"
@@ -779,7 +779,24 @@ namespace MWWorld
         // inform the GUI about focused object
         try
         {
-            MWBase::Environment::get().getWindowManager()->setFocusObject(getPtrViaHandle(mFacedHandle));
+            MWWorld::Ptr object = getPtrViaHandle(mFacedHandle);
+            MWBase::Environment::get().getWindowManager()->setFocusObject(object);
+
+            // retrieve object dimensions so we know where to place the floating label
+            Ogre::SceneNode* node = object.getRefData().getBaseNode();
+            Ogre::AxisAlignedBox bounds;
+            int i;
+            for (i=0; i<node->numAttachedObjects(); ++i)
+            {
+                Ogre::MovableObject* ob = node->getAttachedObject(i);
+                bounds.merge(ob->getWorldBoundingBox());
+            }
+            if (bounds.isFinite())
+            {
+                Vector4 screenCoords = mRendering->boundingBoxToScreen(bounds);
+                MWBase::Environment::get().getWindowManager()->setFocusObjectScreenCoords(
+                    screenCoords[0], screenCoords[1], screenCoords[2], screenCoords[3]);
+            }
         }
         catch (std::runtime_error&)
         {
@@ -959,4 +976,57 @@ namespace MWWorld
         mRendering->toggleWater();
     }
 
+    bool World::placeObject(MWWorld::Ptr object, float cursorX, float cursorY)
+    {
+        std::pair<bool, Ogre::Vector3> result = mPhysics->castRay(cursorX, cursorY);
+
+        if (!result.first)
+            return false;
+
+        MWWorld::Ptr::CellStore* cell;
+        if (isCellExterior())
+        {
+            int cellX, cellY;
+            positionToIndex(result.second[0], -result.second[2], cellX, cellY);
+            cell = mCells.getExterior(cellX, cellY);
+        }
+        else
+            cell = getPlayer().getPlayer().getCell();
+
+        ESM::Position& pos = object.getRefData().getPosition();
+        pos.pos[0] = result.second[0];
+        pos.pos[1] = -result.second[2];
+        pos.pos[2] = result.second[1];
+
+        mWorldScene->insertObject(object, cell);
+
+        /// \todo retrieve the bounds of the object and translate it accordingly
+
+        return true;
+    }
+
+    bool World::canPlaceObject(float cursorX, float cursorY)
+    {
+        std::pair<bool, Ogre::Vector3> result = mPhysics->castRay(cursorX, cursorY);
+
+        /// \todo also check if the wanted position is on a flat surface, and not e.g. against a vertical wall!
+
+        if (!result.first)
+            return false;
+        return true;
+    }
+
+    void World::dropObjectOnGround(MWWorld::Ptr object)
+    {
+        MWWorld::Ptr::CellStore* cell = getPlayer().getPlayer().getCell();
+
+        float* playerPos = getPlayer().getPlayer().getRefData().getPosition().pos;
+
+        ESM::Position& pos = object.getRefData().getPosition();
+        pos.pos[0] = playerPos[0];
+        pos.pos[1] = playerPos[1];
+        pos.pos[2] = playerPos[2];
+
+        mWorldScene->insertObject(object, cell);
+    }
 }

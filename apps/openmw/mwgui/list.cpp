@@ -28,8 +28,11 @@ void MWList::initialiseOverride()
 void MWList::addItem(const std::string& name)
 {
     mItems.push_back(name);
+}
 
-    redraw();
+void MWList::addSeparator()
+{
+    mItems.push_back("");
 }
 
 void MWList::adjustSize()
@@ -52,22 +55,33 @@ void MWList::redraw(bool scrollbarShown)
     for (std::vector<std::string>::const_iterator it=mItems.begin();
         it!=mItems.end(); ++it)
     {
-        MyGUI::Button* button = mScrollView->createWidget<MyGUI::Button>(
-            "MW_ListLine", MyGUI::IntCoord(0, mItemHeight, mScrollView->getSize().width - scrollBarWidth - 2, 24),
-            MyGUI::Align::Left | MyGUI::Align::Top, getName() + "_item_" + (*it));
-        button->setCaption((*it));
-        button->getSubWidgetText()->setWordWrap(true);
-        button->getSubWidgetText()->setTextAlign(MyGUI::Align::Left);
-        button->eventMouseWheel += MyGUI::newDelegate(this, &MWList::onMouseWheel);
-        button->eventMouseButtonClick += MyGUI::newDelegate(this, &MWList::onItemSelected);
+        if (*it != "")
+        {
+            MyGUI::Button* button = mScrollView->createWidget<MyGUI::Button>(
+                "MW_ListLine", MyGUI::IntCoord(0, mItemHeight, mScrollView->getSize().width - scrollBarWidth - 2, 24),
+                MyGUI::Align::Left | MyGUI::Align::Top, getName() + "_item_" + (*it));
+            button->setCaption((*it));
+            button->getSubWidgetText()->setWordWrap(true);
+            button->getSubWidgetText()->setTextAlign(MyGUI::Align::Left);
+            button->eventMouseWheel += MyGUI::newDelegate(this, &MWList::onMouseWheel);
+            button->eventMouseButtonClick += MyGUI::newDelegate(this, &MWList::onItemSelected);
 
-        int height = button->getTextSize().height;
-        button->setSize(MyGUI::IntSize(button->getSize().width, height));
+            int height = button->getTextSize().height;
+            button->setSize(MyGUI::IntSize(button->getSize().width, height));
 
-        mItemHeight += height + spacing;
+            mItemHeight += height + spacing;
+        }
+        else
+        {
+            MyGUI::ImageBox* separator = mScrollView->createWidget<MyGUI::ImageBox>("MW_HLine",
+                MyGUI::IntCoord(2, mItemHeight, mScrollView->getWidth()-4, 18),
+                MyGUI::Align::Left | MyGUI::Align::Top | MyGUI::Align::HStretch);
+            separator->setNeedMouseFocus(false);
+
+            mItemHeight += 18 + spacing;
+        }
     }
     mScrollView->setCanvasSize(mClient->getSize().width + (_scrollBarWidth-scrollBarWidth), std::max(mItemHeight, mClient->getSize().height));
-    mScrollView->setViewOffset(MyGUI::IntPoint(0,0));
 
     if (!scrollbarShown && mItemHeight > mClient->getSize().height)
         redraw(true);
@@ -93,15 +107,11 @@ void MWList::removeItem(const std::string& name)
 {
     assert( std::find(mItems.begin(), mItems.end(), name) != mItems.end() );
     mItems.erase( std::find(mItems.begin(), mItems.end(), name) );
-
-    redraw();
 }
 
 void MWList::clear()
 {
     mItems.clear();
-
-    redraw();
 }
 
 void MWList::onMouseWheel(MyGUI::Widget* _sender, int _rel)

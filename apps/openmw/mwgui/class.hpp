@@ -34,7 +34,7 @@ namespace MWGui
         typedef delegates::CMultiDelegate1<int> EventHandle_Int;
 
         /** Event : Button was clicked.\n
-            signature : void method(MyGUI::WidgetPtr widget, int index)\n
+            signature : void method(int index)\n
         */
         EventHandle_Int eventButtonSelected;
 

@@ -14,11 +14,15 @@
 #include <vector>
 #include <set>
 
+#include "MyGUI_UString.h"
+
 #include <components/esm_store/store.hpp>
 #include <openengine/ogre/renderer.hpp>
 #include <openengine/gui/manager.hpp>
+
 #include "../mwmechanics/stat.hpp"
 #include "../mwworld/ptr.hpp"
+
 #include "mode.hpp"
 
 namespace MyGUI
@@ -61,14 +65,18 @@ namespace MWGui
   class Console;
   class JournalWindow;
   class CharacterCreation;
+  class ContainerWindow;
+  class DragAndDrop;
+  class InventoryWindow;
   class ToolTips;
   class ScrollWindow;
   class BookWindow;
-
   class TextInputDialog;
   class InfoBoxDialog;
   class DialogueWindow;
   class MessageBoxManager;
+  class CountDialog;
+  class TradeWindow;
 
   struct ClassPoint
   {
@@ -125,10 +133,13 @@ namespace MWGui
       updateVisible();
     }
 
-    MWGui::DialogueWindow* getDialogueWindow() {return dialogueWindow;}
-
+    MWGui::DialogueWindow* getDialogueWindow() {return mDialogueWindow;}
+    MWGui::ContainerWindow* getContainerWindow() {return mContainerWindow;}
+    MWGui::InventoryWindow* getInventoryWindow() {return mInventoryWindow;}
     MWGui::BookWindow* getBookWindow() {return mBookWindow;}
     MWGui::ScrollWindow* getScrollWindow() {return mScrollWindow;}
+    MWGui::CountDialog* getCountDialog() {return mCountDialog;}
+    MWGui::TradeWindow* getTradeWindow() {return mTradeWindow;}
 
     MyGUI::Gui* getGui() const { return gui; }
 
@@ -150,8 +161,6 @@ namespace MWGui
 
     void setPlayerClass (const ESM::Class &class_);                        ///< set current class of player
     void configureSkills (const SkillList& major, const SkillList& minor); ///< configure skill groups, each set contains the skill ID for that group.
-    void setFactions (const FactionList& factions);                        ///< set faction and rank to display on stat window, use an empty vector to disable
-    void setBirthSign (const std::string &signId);                         ///< set birth sign to display on stat window, use an empty string to disable.
     void setReputation (int reputation);                                   ///< set the current reputation value
     void setBounty (int bounty);                                           ///< set the current bounty value
     void updateSkillArea();                                                ///< update display of skills, factions, birth sign, reputation and bounty
@@ -161,6 +170,10 @@ namespace MWGui
     void setPlayerDir(const float x, const float y); ///< set player view direction in map space
 
     void setFocusObject(const MWWorld::Ptr& focus);
+    void setFocusObjectScreenCoords(float min_x, float min_y, float max_x, float max_y);
+
+    void setMouseVisible(bool visible);
+    void setDragDrop(bool dragDrop);
 
     void toggleFogOfWar();
     void toggleFullHelp(); ///< show extra info in item tooltips (owner, script)
@@ -176,6 +189,8 @@ namespace MWGui
     void setHMSVisibility(bool visible);
     // sets the visibility of the hud minimap
     void setMinimapVisibility(bool visible);
+    void setWeaponVisibility(bool visible);
+    void setSpellVisibility(bool visible);
 
     template<typename T>
     void removeDialog(T*& dialog); ///< Casts to OEngine::GUI::Layout and calls removeDialog, then resets pointer to nullptr.
@@ -203,13 +218,18 @@ namespace MWGui
     MapWindow *map;
     MainMenu *menu;
     ToolTips *mToolTips;
-    StatsWindow *stats;
+    StatsWindow *mStatsWindow;
     MessageBoxManager *mMessageBoxManager;
     Console *console;
     JournalWindow* mJournal;
-    DialogueWindow *dialogueWindow;
+    DialogueWindow *mDialogueWindow;
+    ContainerWindow *mContainerWindow;
+    DragAndDrop* mDragAndDrop;
+    InventoryWindow *mInventoryWindow;
     ScrollWindow* mScrollWindow;
     BookWindow* mBookWindow;
+    CountDialog* mCountDialog;
+    TradeWindow* mTradeWindow;
 
     CharacterCreation* mCharGen;
 
@@ -217,7 +237,6 @@ namespace MWGui
     ESM::Class playerClass;
     std::string playerName;
     std::string playerRaceId;
-    std::string playerBirthSignId;
     std::map<ESM::Attribute::AttributeID, MWMechanics::Stat<int> > playerAttributes;
     SkillList playerMajorSkills, playerMinorSkills;
     std::map<ESM::Skill::SkillEnum, MWMechanics::Stat<float> > playerSkillValues;
@@ -252,6 +271,12 @@ namespace MWGui
     size_t mBatchCount;
 
     void onDialogueWindowBye();
+
+    /**
+     * Called when MyGUI tries to retrieve a tag. This usually corresponds to a GMST string,
+     * so this method will retrieve the GMST with the name \a _tag and place the result in \a _result 
+     */
+    void onRetrieveTag(const MyGUI::UString& _tag, MyGUI::UString& _result);
   };
 
   template<typename T>

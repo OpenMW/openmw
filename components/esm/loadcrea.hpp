@@ -51,6 +51,15 @@ struct Creature
         int gold;
     }; // 96 bytes
 
+    struct AIDTstruct
+    {
+        // These are probabilities
+        char hello, u1, fight, flee, alarm, u2, u3, u4;
+        // The last u's might be the skills that this NPC can train you
+        // in?
+        int services; // See the NPC::Services enum
+    }; // 12 bytes
+
     NPDTstruct data;
 
     int flags;
@@ -60,6 +69,9 @@ struct Creature
 
     // Defined in loadcont.hpp
     InventoryList inventory;
+
+    bool hasAI;
+    AIDTstruct AI;
 
     std::string mId;
 
