@@ -196,4 +196,9 @@ namespace MWWorld
     {
         return "";
     }
+
+    void adjustScale(float& x, float& y, float& z)
+    {
+    }
+
 }

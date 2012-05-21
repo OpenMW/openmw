@@ -611,6 +611,11 @@ namespace MWWorld
         mPhysics->moveObject (ptr.getRefData().getHandle(), Ogre::Vector3 (x, y, z));
     }
 
+    void World::scaleObject (Ptr ptr, float x, float y, float z)
+    {
+        MWWorld::Class::get(ptr).adjustScale(x,y,z);
+    }
+
     void World::indexToPosition (int cellX, int cellY, float &x, float &y, bool centre) const
     {
         const int cellSize = 8192;
