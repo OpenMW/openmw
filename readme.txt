@@ -146,6 +146,7 @@ Feature #15: Collision with Terrain
 Feature #17: Inventory-, Container- and Trade-Windows
 Feature #44: Floating Labels above Focussed Objects
 Feature #80: Tooltips
+Feature #83: Barter Dialogue
 Feature #90: Book and Scroll Windows
 Feature #156: Item Stacking in Containers
 Feature #213: Pulsating lights
