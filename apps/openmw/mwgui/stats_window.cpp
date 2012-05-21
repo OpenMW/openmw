@@ -487,7 +487,7 @@ void StatsWindow::updateSkillArea()
             text += std::string("#DDC79E") + faction->name;
             text += std::string("\n#BF9959") + faction->ranks[it->second];
 
-            if (it->second < 10)
+            if (it->second < 9)
             {
                 // player doesn't have max rank yet
                 text += std::string("\n\n#DDC79E#{sNextRank} ") + faction->ranks[it->second+1];
