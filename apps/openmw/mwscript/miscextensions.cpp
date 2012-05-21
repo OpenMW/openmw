@@ -247,7 +247,6 @@ namespace MWScript
             interpreter.installSegment5 (opcodeFadeTo, new OpFadeTo);
             interpreter.installSegment5 (opcodeTogglePathgrid, new OpTogglePathgrid);
             interpreter.installSegment5 (opcodeToggleWater, new OpToggleWater);
-            interpreter.installSegment5 (opcodeToggleCompositors, new OpToggleCompositors);
         }
     }
 }
