@@ -98,6 +98,14 @@ namespace MWClass
         return std::string("Item Ingredient Down");
     }
 
+    std::string Ingredient::getInventoryIcon (const MWWorld::Ptr& ptr) const
+    {
+          ESMS::LiveCellRef<ESM::Ingredient, MWWorld::RefData> *ref =
+            ptr.get<ESM::Ingredient>();
+
+        return ref->base->icon;
+    }
+
     bool Ingredient::hasToolTip (const MWWorld::Ptr& ptr) const
     {
         ESMS::LiveCellRef<ESM::Ingredient, MWWorld::RefData> *ref =
@@ -112,7 +120,7 @@ namespace MWClass
             ptr.get<ESM::Ingredient>();
 
         MWGui::ToolTipInfo info;
-        info.caption = ref->base->name;
+        info.caption = ref->base->name + MWGui::ToolTips::getCountString(ptr.getRefData().getCount());
         info.icon = ref->base->icon;
 
         const ESMS::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();

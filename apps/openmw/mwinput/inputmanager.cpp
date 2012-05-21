@@ -60,7 +60,7 @@ namespace MWInput
       A_CycleWeaponRight,
       A_ToggleSneak,    //Toggles Sneak, add Push-Sneak later
       A_ToggleWalk, //Toggle Walking/Running
-	  A_Crouch,
+      A_Crouch,
 
       A_QuickSave,
       A_QuickLoad,
@@ -87,6 +87,8 @@ namespace MWInput
     MWWorld::Player &player;
     MWGui::WindowManager &windows;
     OMW::Engine& mEngine;
+
+    bool mDragDrop;
 
 
    /* InputImpl Methods */
@@ -143,6 +145,9 @@ namespace MWInput
     {
       using namespace MWGui;
 
+      if (mDragDrop)
+        return;
+
       GuiMode mode = windows.getMode();
 
       // Toggle between game mode and inventory mode
@@ -158,6 +163,9 @@ namespace MWInput
     void toggleConsole()
     {
       using namespace MWGui;
+
+      if (mDragDrop)
+        return;
 
       GuiMode mode = windows.getMode();
 
@@ -219,7 +227,8 @@ namespace MWInput
         poller(input),
         player(_player),
         windows(_windows),
-        mEngine (engine)
+        mEngine (engine),
+        mDragDrop(false)
     {
       using namespace OEngine::Input;
       using namespace OEngine::Render;
@@ -314,9 +323,14 @@ namespace MWInput
       poller.bind(A_MoveRight, KC_D);
       poller.bind(A_MoveForward, KC_W);
       poller.bind(A_MoveBackward, KC_S);
-	  
-	  poller.bind(A_Jump, KC_E);
-	  poller.bind(A_Crouch, KC_LCONTROL);
+      
+      poller.bind(A_Jump, KC_E);
+      poller.bind(A_Crouch, KC_LCONTROL);
+    }
+
+    void setDragDrop(bool dragDrop)
+    {
+        mDragDrop = dragDrop;
     }
 
     //NOTE: Used to check for movement keys
@@ -364,7 +378,7 @@ namespace MWInput
         else
             player.setForwardBackward (0);
 
-		if (poller.isDown(A_Jump))
+        if (poller.isDown(A_Jump))
             player.setUpDown (1);
         else if (poller.isDown(A_Crouch))
             player.setUpDown (-1);
@@ -425,5 +439,10 @@ namespace MWInput
   void MWInputManager::update()
   {
       impl->update();
+  }
+
+  void MWInputManager::setDragDrop(bool dragDrop)
+  {
+      impl->setDragDrop(dragDrop);
   }
 }

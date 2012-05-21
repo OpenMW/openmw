@@ -31,7 +31,9 @@
             <Widget type="ImageBox" skin="ImageBox" position="512 512 512 512" align="ALIGN_TOP ALIGN_LEFT" name="Map_1_1">
                 <Widget type="ImageBox" skin="ImageBox" position="0 0 512 512" align="ALIGN_TOP ALIGN_LEFT" name="Map_1_1_fog">
                     <!-- Player arrow -->
-                    <Widget type="ImageBox" skin="RotatingSkin" position="0 0 32 32" align="ALIGN_TOP ALIGN_LEFT" name="Compass"/>
+                    <Widget type="ImageBox" skin="RotatingSkin" position="0 0 32 32" align="ALIGN_TOP ALIGN_LEFT" name="Compass">
+                        <Property key="ImageTexture" value="textures\compass.dds"/>
+                    </Widget>
                 </Widget>
             </Widget>
 

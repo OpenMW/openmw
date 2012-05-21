@@ -1,5 +1,4 @@
 #include "window_manager.hpp"
-#include "layouts.hpp"
 #include "text_input.hpp"
 #include "review.hpp"
 #include "dialogue.hpp"
@@ -7,10 +6,16 @@
 #include "map_window.hpp"
 #include "stats_window.hpp"
 #include "messagebox.hpp"
+#include "container.hpp"
+#include "inventorywindow.hpp"
 #include "tooltips.hpp"
 #include "scrollwindow.hpp"
 #include "bookwindow.hpp"
 #include "list.hpp"
+#include "hud.hpp"
+#include "mainmenu.hpp"
+#include "countdialog.hpp"
+#include "tradewindow.hpp"
 
 #include "../mwmechanics/mechanicsmanager.hpp"
 #include "../mwinput/inputmanager.hpp"
@@ -35,19 +40,20 @@ WindowManager::WindowManager(
   , hud(NULL)
   , map(NULL)
   , menu(NULL)
-  , stats(NULL)
+  , mStatsWindow(NULL)
   , mToolTips(NULL)
   , mMessageBoxManager(NULL)
   , console(NULL)
   , mJournal(NULL)
+  , mDialogueWindow(nullptr)
   , mBookWindow(NULL)
   , mScrollWindow(NULL)
-  , dialogueWindow(nullptr)
+  , mCountDialog(NULL)
+  , mTradeWindow(NULL)
   , mCharGen(NULL)
   , playerClass()
   , playerName()
   , playerRaceId()
-  , playerBirthSignId()
   , playerAttributes()
   , playerMajorSkills()
   , playerMinorSkills()
@@ -71,7 +77,7 @@ WindowManager::WindowManager(
     // Set up the GUI system
     mGuiManager = new OEngine::GUI::MyGUIManager(mOgre->getWindow(), mOgre->getScene(), false, logpath);
     gui = mGuiManager->getGui();
-
+    
     //Register own widgets with MyGUI
     MyGUI::FactoryManager::getInstance().registerFactory<DialogueHistory>("Widget");
     MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWSkill>("Widget");
@@ -82,22 +88,36 @@ WindowManager::WindowManager(
     MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWDynamicStat>("Widget");
     MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWList>("Widget");
 
+    MyGUI::LanguageManager::getInstance().eventRequestTag = MyGUI::newDelegate(this, &WindowManager::onRetrieveTag);
+
     // Get size info from the Gui object
     assert(gui);
     int w = MyGUI::RenderManager::getInstance().getViewSize().width;
     int h = MyGUI::RenderManager::getInstance().getViewSize().height;
 
-    hud = new HUD(w,h, showFPSLevel);
+    MyGUI::Widget* dragAndDropWidget = gui->createWidgetT("Widget","",0,0,w,h,MyGUI::Align::Default,"DragAndDrop","DragAndDropWidget");
+    dragAndDropWidget->setVisible(false);
+
+    mDragAndDrop = new DragAndDrop();
+    mDragAndDrop->mIsOnDragAndDrop = false;
+    mDragAndDrop->mDraggedWidget = 0;
+    mDragAndDrop->mDragAndDropWidget = dragAndDropWidget;
+
     menu = new MainMenu(w,h);
     map = new MapWindow(*this);
-    stats = new StatsWindow(*this);
+    mStatsWindow = new StatsWindow(*this);
     console = new Console(w,h, extensions);
     mJournal = new JournalWindow(*this);
     mMessageBoxManager = new MessageBoxManager(this);
-    dialogueWindow = new DialogueWindow(*this);
+    mInventoryWindow = new InventoryWindow(*this,mDragAndDrop);
+    mTradeWindow = new TradeWindow(*this);
+    mDialogueWindow = new DialogueWindow(*this);
+    mContainerWindow = new ContainerWindow(*this,mDragAndDrop);
+    hud = new HUD(w,h, showFPSLevel, mDragAndDrop);
     mToolTips = new ToolTips(this);
     mScrollWindow = new ScrollWindow(*this);
     mBookWindow = new BookWindow(*this);
+    mCountDialog = new CountDialog(*this);
 
     // The HUD is always on
     hud->setVisible(true);
@@ -127,12 +147,17 @@ WindowManager::~WindowManager()
     delete hud;
     delete map;
     delete menu;
-    delete stats;
+    delete mStatsWindow;
     delete mJournal;
-    delete dialogueWindow;
+    delete mDialogueWindow;
+    delete mContainerWindow;
+    delete mInventoryWindow;
     delete mToolTips;
-
     delete mCharGen;
+    delete mDragAndDrop;
+    delete mBookWindow;
+    delete mScrollWindow;
+    delete mTradeWindow;
 
     cleanupGarbage();
 }
@@ -183,12 +208,15 @@ void WindowManager::updateVisible()
     // Start out by hiding everything except the HUD
     map->setVisible(false);
     menu->setVisible(false);
-    stats->setVisible(false);
+    mStatsWindow->setVisible(false);
     console->disable();
     mJournal->setVisible(false);
+    mDialogueWindow->setVisible(false);
+    mContainerWindow->setVisible(false);
+    mInventoryWindow->setVisible(false);
     mScrollWindow->setVisible(false);
     mBookWindow->setVisible(false);
-    dialogueWindow->setVisible(false);
+    mTradeWindow->setVisible(false);
 
     // Mouse is visible whenever we're not in game mode
     MyGUI::PointerManager::getInstance().setVisible(isGuiMode());
@@ -234,11 +262,23 @@ void WindowManager::updateVisible()
 
             // Show the windows we want
             map   -> setVisible( (eff & GW_Map) != 0 );
-            stats -> setVisible( (eff & GW_Stats) != 0 );
+            mStatsWindow -> setVisible( (eff & GW_Stats) != 0 );
+            mInventoryWindow->setVisible(true);
+            mInventoryWindow->openInventory();
             break;
         }
+        case GM_Container:
+            mContainerWindow->setVisible(true);
+            mInventoryWindow->setVisible(true);
+            mInventoryWindow->openInventory();
+            break;
         case GM_Dialogue:
-            dialogueWindow->open();
+            mDialogueWindow->open();
+            break;
+        case GM_Barter:
+            mInventoryWindow->setVisible(true);
+            mInventoryWindow->openInventory();
+            mTradeWindow->setVisible(true);
             break;
         case GM_InterMessageBox:
             if(!mMessageBoxManager->isInteractiveMessageBox()) {
@@ -260,7 +300,7 @@ void WindowManager::updateVisible()
 
 void WindowManager::setValue (const std::string& id, const MWMechanics::Stat<int>& value)
 {
-    stats->setValue (id, value);
+    mStatsWindow->setValue (id, value);
 
     static const char *ids[] =
     {
@@ -290,13 +330,13 @@ void WindowManager::setValue (const std::string& id, const MWMechanics::Stat<int
 
 void WindowManager::setValue(const ESM::Skill::SkillEnum parSkill, const MWMechanics::Stat<float>& value)
 {
-    stats->setValue(parSkill, value);
+    mStatsWindow->setValue(parSkill, value);
     playerSkillValues[parSkill] = value;
 }
 
 void WindowManager::setValue (const std::string& id, const MWMechanics::DynamicStat<int>& value)
 {
-    stats->setValue (id, value);
+    mStatsWindow->setValue (id, value);
     hud->setValue (id, value);
     if (id == "HBar")
     {
@@ -329,7 +369,7 @@ MWMechanics::DynamicStat<int> WindowManager::getValue(const std::string& id)
 
 void WindowManager::setValue (const std::string& id, const std::string& value)
 {
-    stats->setValue (id, value);
+    mStatsWindow->setValue (id, value);
     if (id=="name")
         playerName = value;
     else if (id=="race")
@@ -338,46 +378,35 @@ void WindowManager::setValue (const std::string& id, const std::string& value)
 
 void WindowManager::setValue (const std::string& id, int value)
 {
-    stats->setValue (id, value);
+    mStatsWindow->setValue (id, value);
 }
 
 void WindowManager::setPlayerClass (const ESM::Class &class_)
 {
     playerClass = class_;
-    stats->setValue("class", playerClass.name);
+    mStatsWindow->setValue("class", playerClass.name);
 }
 
 void WindowManager::configureSkills (const SkillList& major, const SkillList& minor)
 {
-    stats->configureSkills (major, minor);
+    mStatsWindow->configureSkills (major, minor);
     playerMajorSkills = major;
     playerMinorSkills = minor;
 }
 
-void WindowManager::setFactions (const FactionList& factions)
-{
-    stats->setFactions (factions);
-}
-
-void WindowManager::setBirthSign (const std::string &signId)
-{
-    stats->setBirthSign (signId);
-    playerBirthSignId = signId;
-}
-
 void WindowManager::setReputation (int reputation)
 {
-    stats->setReputation (reputation);
+    mStatsWindow->setReputation (reputation);
 }
 
 void WindowManager::setBounty (int bounty)
 {
-    stats->setBounty (bounty);
+    mStatsWindow->setBounty (bounty);
 }
 
 void WindowManager::updateSkillArea()
 {
-    stats->updateSkillArea();
+    mStatsWindow->updateSkillArea();
 }
 
 void WindowManager::removeDialog(OEngine::GUI::Layout*dialog)
@@ -417,11 +446,11 @@ const std::string &WindowManager::getGameSettingString(const std::string &id, co
 
 void WindowManager::onDialogueWindowBye()
 {
-    if (dialogueWindow)
+    if (mDialogueWindow)
     {
         //FIXME set some state and stuff?
         //removeDialog(dialogueWindow);
-        dialogueWindow->setVisible(false);
+        mDialogueWindow->setVisible(false);
     }
     setGuiMode(GM_Game);
 }
@@ -430,6 +459,16 @@ void WindowManager::onFrame (float frameDuration)
 {
     mMessageBoxManager->onFrame(frameDuration);
     mToolTips->onFrame(frameDuration);
+
+    if (mDragAndDrop->mIsOnDragAndDrop)
+    {
+        assert(mDragAndDrop->mDraggedWidget);
+        mDragAndDrop->mDraggedWidget->setPosition(MyGUI::InputManager::getInstance().getMousePosition());
+    }
+
+    mInventoryWindow->onFrame();
+
+    mStatsWindow->onFrame();
 }
 
 const ESMS::ESMStore& WindowManager::getStore() const
@@ -516,6 +555,11 @@ void WindowManager::setFocusObject(const MWWorld::Ptr& focus)
     mToolTips->setFocusObject(focus);
 }
 
+void WindowManager::setFocusObjectScreenCoords(float min_x, float min_y, float max_x, float max_y)
+{
+    mToolTips->setFocusObjectScreenCoords(min_x, min_y, max_x, max_y);
+}
+
 void WindowManager::toggleFullHelp()
 {
     mToolTips->toggleFullHelp();
@@ -524,4 +568,32 @@ void WindowManager::toggleFullHelp()
 bool WindowManager::getFullHelp() const
 {
     return mToolTips->getFullHelp();
+}
+
+void WindowManager::setWeaponVisibility(bool visible)
+{
+    hud->weapBox->setVisible(visible);
+}
+
+void WindowManager::setSpellVisibility(bool visible)
+{
+    hud->spellBox->setVisible(visible);
+}
+
+void WindowManager::setMouseVisible(bool visible)
+{
+    MyGUI::PointerManager::getInstance().setVisible(visible);
+}
+
+void WindowManager::setDragDrop(bool dragDrop)
+{
+    mToolTips->setEnabled(!dragDrop);
+    MWBase::Environment::get().getInputManager()->setDragDrop(dragDrop);
+}
+
+void WindowManager::onRetrieveTag(const MyGUI::UString& _tag, MyGUI::UString& _result)
+{
+    const ESM::GameSetting *setting = MWBase::Environment::get().getWorld()->getStore().gameSettings.search(_tag);
+    if (setting && setting->type == ESM::VT_String)
+        _result = setting->str;
 }

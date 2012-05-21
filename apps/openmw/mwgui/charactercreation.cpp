@@ -173,7 +173,6 @@ void CharacterCreation::spawnDialog(const char id)
                 mWM->removeDialog(mBirthSignDialog);
             mBirthSignDialog = new BirthDialog(*mWM);
             mBirthSignDialog->setNextButtonShow(mCreationStage >= CSE_BirthSignChosen);
-            mBirthSignDialog->setBirthId(mPlayerBirthSignId);
             mBirthSignDialog->eventDone += MyGUI::newDelegate(this, &CharacterCreation::onBirthSignDialogDone);
             mBirthSignDialog->eventBack += MyGUI::newDelegate(this, &CharacterCreation::onBirthSignDialogBack);
             mBirthSignDialog->open();
@@ -414,7 +413,6 @@ void CharacterCreation::onBirthSignDialogDone(WindowBase* parWindow)
     if (mBirthSignDialog)
     {
         mPlayerBirthSignId = mBirthSignDialog->getBirthId();
-        mWM->setBirthSign(mPlayerBirthSignId);
         if (!mPlayerBirthSignId.empty())
             MWBase::Environment::get().getMechanicsManager()->setPlayerBirthsign(mPlayerBirthSignId);
         mWM->removeDialog(mBirthSignDialog);

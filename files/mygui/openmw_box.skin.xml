@@ -6,23 +6,39 @@ as around the sections of the stats window, or around popup info windows -->
 <MyGUI type="Skin">
     <!-- Box borders -->
     <Skin name="IB_T" size="512 2" texture="textures\menu_thin_border_top.dds">
-        <BasisSkin type="MainSkin" offset = "0 0 512 2">
-            <State name="normal" offset = "0 0 512 2"/>
+        <BasisSkin type="TileRect" offset="0 0 512 2" align="HStretch">
+            <State name="normal" offset="0 0 512 2">
+                <Property key="TileSize" value="512 2"/>
+                <Property key="TileH" value="true"/>
+                <Property key="TileV" value="true"/>
+            </State>
         </BasisSkin>
     </Skin>
     <Skin name="IB_B" size="512 2" texture="textures\menu_thin_border_bottom.dds">
-        <BasisSkin type="MainSkin" offset = "0 0 512 2">
-            <State name="normal" offset = "0 0 512 2"/>
+        <BasisSkin type="TileRect" offset="0 0 512 2" align="HStretch">
+            <State name="normal" offset="0 0 512 2">
+                <Property key="TileSize" value="512 2"/>
+                <Property key="TileH" value="true"/>
+                <Property key="TileV" value="true"/>
+            </State>
         </BasisSkin>
     </Skin>
     <Skin name="IB_L" size="2 512" texture="textures\menu_thin_border_left.dds">
-        <BasisSkin type="MainSkin" offset = "0 0 2 512">
-            <State name="normal" offset = "0 0 2 512"/>
+        <BasisSkin type="TileRect" offset="0 0 2 512" align="VStretch">
+            <State name="normal" offset="0 0 2 512">
+                <Property key="TileSize" value="2 512"/>
+                <Property key="TileH" value="true"/>
+                <Property key="TileV" value="true"/>
+            </State>
         </BasisSkin>
     </Skin>
     <Skin name="IB_R" size="2 512" texture="textures\menu_thin_border_right.dds">
-        <BasisSkin type="MainSkin" offset = "0 0 2 512">
-            <State name="normal" offset = "0 0 2 512"/>
+        <BasisSkin type="TileRect" offset="0 0 2 512" align="VStretch">
+            <State name="normal" offset="0 0 2 512">
+                <Property key="TileSize" value="2 512"/>
+                <Property key="TileH" value="true"/>
+                <Property key="TileV" value="true"/>
+            </State>
         </BasisSkin>
     </Skin>
     <Skin name="IB_TL" size="2 2" texture="textures\menu_thin_border_top_left_corner.dds">

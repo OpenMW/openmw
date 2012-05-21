@@ -13,6 +13,7 @@
             <Code range="1025 1105"/>
             <Code range="8470"/>
             <Code range="8216 8217"/> <!-- Single quotes -->
+            <Code range="8220 8221"/> <!-- Right and Left Double Quotation mark -->
             <Code hide="128"/>
             <Code hide="1026 1039"/>
             <Code hide="1104"/>

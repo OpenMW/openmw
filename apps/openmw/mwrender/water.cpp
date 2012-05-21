@@ -155,10 +155,10 @@ void Water::changeCell(const ESM::Cell* cell)
 {
     mTop = cell->water;
 
+    setHeight(mTop);
+
     if(!(cell->data.flags & cell->Interior))
         mWaterNode->setPosition(getSceneNodeCoordinates(cell->data.gridX, cell->data.gridY));
-    else
-        setHeight(mTop);
 }
 
 void Water::setHeight(const float height)

@@ -3,6 +3,8 @@
 
 #include <memory>
 
+#include <boost/algorithm/string.hpp>
+
 #include <OgreSceneNode.h>
 
 #include <components/esm/loadnpc.hpp>
@@ -56,13 +58,15 @@ namespace MWClass
             // NPC stats
             if (!ref->base->faction.empty())
             {
+                std::string faction = ref->base->faction;
+                boost::algorithm::to_lower(faction);
                 if(ref->base->npdt52.gold != -10)
                 {
-                    data->mNpcStats.mFactionRank[ref->base->faction] = (int)ref->base->npdt52.rank;
+                    data->mNpcStats.mFactionRank[faction] = (int)ref->base->npdt52.rank;
                 }
                 else
                 {
-                    data->mNpcStats.mFactionRank[ref->base->faction] = (int)ref->base->npdt12.rank;
+                    data->mNpcStats.mFactionRank[faction] = (int)ref->base->npdt12.rank;
                 }
             }
 
@@ -324,7 +328,7 @@ namespace MWClass
         return info;
     }
 
-    float Npc::getCapactiy (const MWWorld::Ptr& ptr) const
+    float Npc::getCapacity (const MWWorld::Ptr& ptr) const
     {
         const MWMechanics::CreatureStats& stats = getCreatureStats (ptr);
         return stats.mAttributes[0].getModified()*5;

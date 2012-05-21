@@ -97,6 +97,14 @@ namespace MWClass
         return std::string("Item Book Down");
     }
 
+    std::string Book::getInventoryIcon (const MWWorld::Ptr& ptr) const
+    {
+          ESMS::LiveCellRef<ESM::Book, MWWorld::RefData> *ref =
+            ptr.get<ESM::Book>();
+
+        return ref->base->icon;
+    }
+
     bool Book::hasToolTip (const MWWorld::Ptr& ptr) const
     {
         ESMS::LiveCellRef<ESM::Book, MWWorld::RefData> *ref =
@@ -111,7 +119,7 @@ namespace MWClass
             ptr.get<ESM::Book>();
 
         MWGui::ToolTipInfo info;
-        info.caption = ref->base->name;
+        info.caption = ref->base->name + MWGui::ToolTips::getCountString(ptr.getRefData().getCount());
         info.icon = ref->base->icon;
 
         const ESMS::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
@@ -132,4 +140,18 @@ namespace MWClass
 
         return info;
     }
+
+    std::string Book::getEnchantment (const MWWorld::Ptr& ptr) const
+    {
+        ESMS::LiveCellRef<ESM::Book, MWWorld::RefData> *ref =
+            ptr.get<ESM::Book>();
+
+        return ref->base->enchant;
+    }
+
+    boost::shared_ptr<MWWorld::Action> Book::use (const MWWorld::Ptr& ptr) const
+    {
+        return boost::shared_ptr<MWWorld::Action>(new MWWorld::ActionRead(ptr));
+    }
+
 }

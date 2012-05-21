@@ -7,6 +7,7 @@ namespace MWGui
     {
       GM_Game,          // Game mode, only HUD
       GM_Inventory,     // Inventory mode
+      GM_Container,
       GM_MainMenu,      // Main menu mode
 
       GM_Console,       // Console mode

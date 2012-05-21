@@ -206,7 +206,7 @@ namespace MWDialogue
                     if(!NPCstats.mFactionRank.empty())
                     {
                         std::string NPCFaction = NPCstats.mFactionRank.begin()->first;
-                        if(PCstats.mFactionRank.find(NPCFaction) != PCstats.mFactionRank.end()) sameFaction = 1;
+                        if(PCstats.mFactionRank.find(toLower(NPCFaction)) != PCstats.mFactionRank.end()) sameFaction = 1;
                     }
                     if(!selectCompare<int,int>(comp,sameFaction,select.i)) return false;
                     }
@@ -525,7 +525,7 @@ namespace MWDialogue
 
             //MWWorld::Class npcClass = MWWorld::Class::get(actor);
             MWMechanics::NpcStats stats = MWWorld::Class::get(actor).getNpcStats(actor);
-            std::map<std::string,int>::iterator it = stats.mFactionRank.find(info.npcFaction);
+            std::map<std::string,int>::iterator it = stats.mFactionRank.find(toLower(info.npcFaction));
             if(it!=stats.mFactionRank.end())
             {
                 //check rank
@@ -542,7 +542,7 @@ namespace MWDialogue
         if(!info.pcFaction.empty())
         {
             MWMechanics::NpcStats stats = MWWorld::Class::get(MWBase::Environment::get().getWorld()->getPlayer().getPlayer()).getNpcStats(MWBase::Environment::get().getWorld()->getPlayer().getPlayer());
-            std::map<std::string,int>::iterator it = stats.mFactionRank.find(info.pcFaction);
+            std::map<std::string,int>::iterator it = stats.mFactionRank.find(toLower(info.pcFaction));
             if(it!=stats.mFactionRank.end())
             {
                 //check rank
@@ -637,7 +637,7 @@ namespace MWDialogue
         //initialise the GUI
         MWBase::Environment::get().getInputManager()->setGuiMode(MWGui::GM_Dialogue);
         MWGui::DialogueWindow* win = MWBase::Environment::get().getWindowManager()->getDialogueWindow();
-        win->startDialogue(MWWorld::Class::get (actor).getName (actor));
+        win->startDialogue(actor, MWWorld::Class::get (actor).getName (actor));
 
         //setup the list of topics known by the actor. Topics who are also on the knownTopics list will be added to the GUI
         updateTopics();
@@ -766,6 +766,36 @@ namespace MWDialogue
                 }
             }
         }
+
+        // check the available services of this actor
+        int services = 0;
+        if (mActor.getTypeName() == typeid(ESM::NPC).name())
+        {
+            ESMS::LiveCellRef<ESM::NPC, MWWorld::RefData>* ref = mActor.get<ESM::NPC>();
+            if (ref->base->hasAI)
+                services = ref->base->AI.services;
+        }
+        else if (mActor.getTypeName() == typeid(ESM::Creature).name())
+        {
+            ESMS::LiveCellRef<ESM::Creature, MWWorld::RefData>* ref = mActor.get<ESM::Creature>();
+            if (ref->base->hasAI)
+                services = ref->base->AI.services;
+        }
+
+        if (services & ESM::NPC::Weapon
+            || services & ESM::NPC::Armor
+            || services & ESM::NPC::Clothing
+            || services & ESM::NPC::Books
+            || services & ESM::NPC::Ingredients
+            || services & ESM::NPC::Picks
+            || services & ESM::NPC::Probes
+            || services & ESM::NPC::Lights
+            || services & ESM::NPC::Apparatus
+            || services & ESM::NPC::RepairItem
+            || services & ESM::NPC::Misc)
+            win->setShowTrade(true);
+        else
+            win->setShowTrade(false);
 
         // sort again, because the previous sort was case-sensitive
         keywordList.sort(stringCompareNoCase);

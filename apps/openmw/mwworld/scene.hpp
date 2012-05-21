@@ -100,6 +100,10 @@ namespace MWWorld
 
             void insertCell(ESMS::CellStore<MWWorld::RefData> &cell);
 
+            /// this method is only meant for dropping objects into the gameworld from a container
+            /// and thus only handles object types that can be placed in a container
+            void insertObject(MWWorld::Ptr object, Ptr::CellStore* cell);
+
             void update (float duration);
     };
 }

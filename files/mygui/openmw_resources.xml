@@ -36,6 +36,13 @@
             </Index>
         </Group>
     </Resource>
+    <Resource type="ResourceImageSet" name="DropGroundPointerImage">
+        <Group name="Pointer" texture="textures\cursor_drop_ground.dds" size="32 32">
+            <Index name="Pointer" >
+                <Frame point="0 0"/>
+            </Index>
+        </Group>
+    </Resource>
 
     <Resource type="ResourceImageSet" name="MenuBook_Close">
         <Group name="States" texture="mwgui1" size="96 24">

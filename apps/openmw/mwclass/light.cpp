@@ -140,6 +140,15 @@ namespace MWClass
         return std::string("Item Misc Down");
     }
 
+
+    std::string Light::getInventoryIcon (const MWWorld::Ptr& ptr) const
+    {
+          ESMS::LiveCellRef<ESM::Light, MWWorld::RefData> *ref =
+            ptr.get<ESM::Light>();
+
+        return ref->base->icon;
+    }
+
     bool Light::hasToolTip (const MWWorld::Ptr& ptr) const
     {
         ESMS::LiveCellRef<ESM::Light, MWWorld::RefData> *ref =
@@ -154,7 +163,7 @@ namespace MWClass
             ptr.get<ESM::Light>();
 
         MWGui::ToolTipInfo info;
-        info.caption = ref->base->name;
+        info.caption = ref->base->name + MWGui::ToolTips::getCountString(ptr.getRefData().getCount());
         info.icon = ref->base->icon;
 
         const ESMS::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
