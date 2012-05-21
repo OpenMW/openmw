@@ -3,23 +3,39 @@
 <MyGUI type="Skin">
     <!-- Button graphics -->
     <Skin name="BTN_Top" size="128 4" texture="textures\menu_button_frame_top.dds">
-        <BasisSkin type="MainSkin" offset = "0 0 128 4">
-            <State name="normal" offset = "0 0 128 4"/>
+        <BasisSkin type="TileRect" offset="0 0 128 4" align="ALIGN_HSTRETCH">
+            <State name="normal" offset="0 0 128 4">
+                <Property key="TileSize" value="128 4"/>
+                <Property key="TileH" value="true"/>
+                <Property key="TileV" value="true"/>
+            </State>
         </BasisSkin>
     </Skin>
     <Skin name="BTN_Bottom" size="128 4" texture="textures\menu_button_frame_bottom.dds">
-        <BasisSkin type="MainSkin" offset = "0 0 128 4">
-            <State name="normal" offset = "0 0 128 4"/>
+        <BasisSkin type="TileRect" offset="0 0 128 4" align="ALIGN_HSTRETCH">
+            <State name="normal" offset="0 0 128 4">
+                <Property key="TileSize" value="128 4"/>
+                <Property key="TileH" value="true"/>
+                <Property key="TileV" value="true"/>
+            </State>
         </BasisSkin>
     </Skin>
     <Skin name="BTN_Left" size="4 16" texture="textures\menu_button_frame_left.dds">
-        <BasisSkin type="MainSkin" offset = "0 0 4 16">
-            <State name="normal" offset = "0 0 4 16"/>
+        <BasisSkin type="TileRect" offset="0 0 4 16" align="ALIGN_VSTRETCH">
+            <State name="normal" offset="0 0 4 16">
+                <Property key="TileSize" value="4 16"/>
+                <Property key="TileH" value="true"/>
+                <Property key="TileV" value="true"/>
+            </State>
         </BasisSkin>
     </Skin>
     <Skin name="BTN_Right" size="4 16" texture="textures\menu_button_frame_right.dds">
-        <BasisSkin type="MainSkin" offset = "0 0 4 16">
-            <State name="normal" offset = "0 0 4 16"/>
+        <BasisSkin type="TileRect" offset="0 0 4 16" align="ALIGN_VSTRETCH">
+            <State name="normal" offset="0 0 4 16">
+                <Property key="TileSize" value="4 16"/>
+                <Property key="TileH" value="true"/>
+                <Property key="TileV" value="true"/>
+            </State>
         </BasisSkin>
     </Skin>
     <Skin name="BTN_TopLeft" size="4 4" texture="textures\menu_button_frame_top_left_corner.dds">
