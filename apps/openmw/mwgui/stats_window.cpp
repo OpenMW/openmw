@@ -376,6 +376,7 @@ void StatsWindow::addSkills(const SkillList &skills, const std::string &titleId,
         const MWMechanics::Stat<float> &stat = skillValues.find(skillId)->second;
         float base = stat.getBase();
         float modified = stat.getModified();
+        int progressPercent = (modified - float(static_cast<int>(modified))) * 100;
 
         const ESM::Skill* skill = mWindowManager.getStore().skills.search(skillId);
         assert(skill);
@@ -401,8 +402,9 @@ void StatsWindow::addSkills(const SkillList &skills, const std::string &titleId,
             skillWidgets[skillWidgets.size()-1-i]->setUserString("Caption_SkillDescription", skill->description);
             skillWidgets[skillWidgets.size()-1-i]->setUserString("Caption_SkillAttribute", "#{sGoverningAttribute}: #{" + attr->name + "}");
             skillWidgets[skillWidgets.size()-1-i]->setUserString("ImageTexture_SkillImage", icon);
-            skillWidgets[skillWidgets.size()-1-i]->setUserString("Caption_SkillProgressText", "0/100");
+            skillWidgets[skillWidgets.size()-1-i]->setUserString("Caption_SkillProgressText", boost::lexical_cast<std::string>(progressPercent)+"/100");
             skillWidgets[skillWidgets.size()-1-i]->setUserString("Range_SkillProgress", "100");
+            skillWidgets[skillWidgets.size()-1-i]->setUserString("RangePosition_SkillProgress", boost::lexical_cast<std::string>(progressPercent));
         }
 
         skillWidgetMap[skillId] = widget;
