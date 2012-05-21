@@ -206,7 +206,7 @@ namespace MWDialogue
                     if(!NPCstats.mFactionRank.empty())
                     {
                         std::string NPCFaction = NPCstats.mFactionRank.begin()->first;
-                        if(PCstats.mFactionRank.find(NPCFaction) != PCstats.mFactionRank.end()) sameFaction = 1;
+                        if(PCstats.mFactionRank.find(toLower(NPCFaction)) != PCstats.mFactionRank.end()) sameFaction = 1;
                     }
                     if(!selectCompare<int,int>(comp,sameFaction,select.i)) return false;
                     }
@@ -525,7 +525,7 @@ namespace MWDialogue
 
             //MWWorld::Class npcClass = MWWorld::Class::get(actor);
             MWMechanics::NpcStats stats = MWWorld::Class::get(actor).getNpcStats(actor);
-            std::map<std::string,int>::iterator it = stats.mFactionRank.find(info.npcFaction);
+            std::map<std::string,int>::iterator it = stats.mFactionRank.find(toLower(info.npcFaction));
             if(it!=stats.mFactionRank.end())
             {
                 //check rank
@@ -542,7 +542,7 @@ namespace MWDialogue
         if(!info.pcFaction.empty())
         {
             MWMechanics::NpcStats stats = MWWorld::Class::get(MWBase::Environment::get().getWorld()->getPlayer().getPlayer()).getNpcStats(MWBase::Environment::get().getWorld()->getPlayer().getPlayer());
-            std::map<std::string,int>::iterator it = stats.mFactionRank.find(info.pcFaction);
+            std::map<std::string,int>::iterator it = stats.mFactionRank.find(toLower(info.pcFaction));
             if(it!=stats.mFactionRank.end())
             {
                 //check rank
