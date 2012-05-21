@@ -129,16 +129,6 @@ void HUD::setBatchCount(size_t count)
     batchcounter->setCaption(boost::lexical_cast<std::string>(count));
 }
 
-void HUD::setStats(int h, int hmax, int m, int mmax, int s, int smax)
-{
-    health->setProgressRange(hmax);
-    health->setProgressPosition(h);
-    magicka->setProgressRange(mmax);
-    magicka->setProgressPosition(m);
-    stamina->setProgressRange(smax);
-    stamina->setProgressPosition(s);
-}
-
 void HUD::setWeapIcon(const char *str)
 {
     weapImage->setImageTexture(str);
@@ -176,19 +166,27 @@ void HUD::setValue(const std::string& id, const MWMechanics::DynamicStat<int>& v
     for (int i=0; ids[i]; ++i)
         if (ids[i]==id)
         {
+            MyGUI::Widget* w;
+            std::string valStr = boost::lexical_cast<std::string>(value.getCurrent()) + "/" + boost::lexical_cast<std::string>(value.getModified());
             switch (i)
             {
                 case 0:
                     health->setProgressRange (value.getModified());
                     health->setProgressPosition (value.getCurrent());
+                    getWidget(w, "HealthFrame");
+                    w->setUserString("Caption_HealthDescription", "#{sHealthDesc}\n" + valStr);
                     break;
                 case 1:
                     magicka->setProgressRange (value.getModified());
                     magicka->setProgressPosition (value.getCurrent());
+                    getWidget(w, "MagickaFrame");
+                    w->setUserString("Caption_HealthDescription", "#{sIntDesc}\n" + valStr);
                     break;
                 case 2:
                     stamina->setProgressRange (value.getModified());
                     stamina->setProgressPosition (value.getCurrent());
+                    getWidget(w, "FatigueFrame");
+                    w->setUserString("Caption_HealthDescription", "#{sFatDesc}\n" + valStr);
                     break;
             }
         }

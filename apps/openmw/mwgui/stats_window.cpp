@@ -172,11 +172,32 @@ void StatsWindow::setValue (const std::string& id, const MWMechanics::DynamicSta
     };
 
     for (int i=0; ids[i]; ++i)
+    {
         if (ids[i]==id)
         {
             std::string id (ids[i]);
             setBar (id, id + "T", value.getCurrent(), value.getModified());
+
+            // health, magicka, fatigue tooltip
+            MyGUI::Widget* w;
+            std::string valStr =  boost::lexical_cast<std::string>(value.getCurrent()) + "/" + boost::lexical_cast<std::string>(value.getModified());
+            if (i==0)
+            {
+                getWidget(w, "Health");
+                w->setUserString("Caption_HealthDescription", "#{sHealthDesc}\n" + valStr);
+            }
+            else if (i==1)
+            {
+                getWidget(w, "Magicka");
+                w->setUserString("Caption_HealthDescription", "#{sIntDesc}\n" + valStr);
+            }
+            else if (i==2)
+            {
+                getWidget(w, "Fatigue");
+                w->setUserString("Caption_HealthDescription", "#{sFatDesc}\n" + valStr);
+            }
         }
+    }
 }
 
 void StatsWindow::setValue (const std::string& id, const std::string& value)
@@ -416,6 +437,37 @@ void StatsWindow::updateSkillArea()
         addSkills(miscSkills, "sSkillClassMisc", "Misc Skills", coord1, coord2);
 
     const ESMS::ESMStore &store = mWindowManager.getStore();
+
+    // race tooltip
+    const ESM::Race* playerRace =  store.races.find (MWBase::Environment::get().getWorld()->getPlayer().getRace());
+    MyGUI::Widget* raceWidget;
+    getWidget(raceWidget, "RaceText");
+    raceWidget->setUserString("Caption_CenteredCaption", playerRace->name);
+    raceWidget->setUserString("Caption_CenteredCaptionText", playerRace->description);
+    getWidget(raceWidget, "Race_str");
+    raceWidget->setUserString("Caption_CenteredCaption", playerRace->name);
+    raceWidget->setUserString("Caption_CenteredCaptionText", playerRace->description);
+
+    // class tooltip
+    MyGUI::Widget* classWidget;
+    const ESM::Class& playerClass = MWBase::Environment::get().getWorld()->getPlayer().getClass();
+    int spec = playerClass.data.specialization;
+    std::string specStr;
+    if (spec == 0)
+        specStr = "#{sSpecializationCombat}";
+    else if (spec == 1)
+        specStr = "#{sSpecializationMagic}";
+    else if (spec == 2)
+        specStr = "#{sSpecializationStealth}";
+
+    getWidget(classWidget, "ClassText");
+    classWidget->setUserString("Caption_ClassName", playerClass.name);
+    classWidget->setUserString("Caption_ClassDescription", playerClass.description);
+    classWidget->setUserString("Caption_ClassSpecialisation", "#{sSpecialization}: " + specStr);
+    getWidget(classWidget, "Class_str");
+    classWidget->setUserString("Caption_ClassName", playerClass.name);
+    classWidget->setUserString("Caption_ClassDescription", playerClass.description);
+    classWidget->setUserString("Caption_ClassSpecialisation", "#{sSpecialization}: " + specStr);
 
     if (!mFactions.empty())
     {

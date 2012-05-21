@@ -85,9 +85,14 @@ void ToolTips::onFrame(float frameDuration)
             getWidget(tooltip, focus->getUserString("ToolTipLayout"));
 
             tooltip->setVisible(true);
-            tooltip->setCoord(0, 0, 300, 300);
+            if (!tooltip->isUserString("DontResize"))
+            {
+                tooltip->setCoord(0, 0, 450, 300); // this is the maximum width of the tooltip before it starts word-wrapping
 
-            tooltipSize = MyGUI::IntSize(0, tooltip->getSize().height);
+                tooltipSize = MyGUI::IntSize(0, tooltip->getSize().height);
+            }
+            else
+                tooltipSize = tooltip->getSize();
 
             std::map<std::string, std::string> userStrings = focus->getUserStrings();
             for (std::map<std::string, std::string>::iterator it = userStrings.begin();
@@ -116,7 +121,7 @@ void ToolTips::onFrame(float frameDuration)
                     MyGUI::TextBox* text = w->castType<MyGUI::TextBox>();
                     tooltipSize.width = std::max(tooltipSize.width, w->getLeft() + text->getTextSize().width + 8);
                 }
-                else
+                else if (!tooltip->isUserString("DontResize"))
                     tooltipSize.width = std::max(tooltipSize.width, w->getLeft() + w->getWidth() + 8);
 
                 if (w->isUserString("AutoResizeVertical"))
@@ -133,7 +138,6 @@ void ToolTips::onFrame(float frameDuration)
                     }
                 }
             }
-
             tooltip->setCoord(0, 0, tooltipSize.width, tooltipSize.height);
         }
         else

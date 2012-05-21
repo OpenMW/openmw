@@ -12,7 +12,6 @@ namespace MWGui
     {
     public:
         HUD(int width, int height, int fpsLevel, DragAndDrop* dragAndDrop);
-        void setStats(int h, int hmax, int m, int mmax, int s, int smax);
         void setWeapIcon(const char *str);
         void setSpellIcon(const char *str);
         void setWeapStatus(int s, int smax);
