@@ -9,6 +9,7 @@
 namespace MWRender {
 
     class SkyManager;
+    class RenderingManager;
 
     /// Water rendering 	
     class Water : public Ogre::RenderTargetListener, public Ogre::RenderQueueListener
@@ -40,6 +41,7 @@ namespace MWRender {
 
         void updateVisible();
 
+        RenderingManager* mRendering;
         SkyManager* mSky;
 
         std::string mCompositorName;
@@ -55,7 +57,7 @@ namespace MWRender {
         int mVisibilityFlags;
 
     public:
-        Water (Ogre::Camera *camera, SkyManager* sky, const ESM::Cell* cell);
+        Water (Ogre::Camera *camera, RenderingManager* rend, const ESM::Cell* cell);
         ~Water();
 
         void setActive(bool active);

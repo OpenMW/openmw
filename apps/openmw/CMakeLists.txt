@@ -16,6 +16,7 @@ source_group(game FILES ${GAME} ${GAME_HEADER})
 add_openmw_dir (mwrender
     renderingmanager debugging sky player animation npcanimation creatureanimation actors objects
     renderinginterface localmap occlusionquery terrain terrainmaterial water shadows shaderhelper
+    compositors
     )
 
 add_openmw_dir (mwinput

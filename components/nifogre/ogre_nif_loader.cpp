@@ -326,6 +326,8 @@ void NIFLoader::createMaterial(const String &name,
     {
         material->getTechnique(0)->getPass(0)->setVertexProgram("main_vp");
         material->getTechnique(0)->getPass(0)->setFragmentProgram("main_fp");
+
+        material->getTechnique(0)->getPass(0)->setFog(true); // force-disable fixed function fog, it is calculated in shader
     }
 
     // Create a fallback technique without shadows and without mrt
@@ -338,6 +340,7 @@ void NIFLoader::createMaterial(const String &name,
     {
         pass2->setVertexProgram("main_fallback_vp");
         pass2->setFragmentProgram("main_fallback_fp");
+        pass2->setFog(true); // force-disable fixed function fog, it is calculated in shader
     }
 
     // Add material bells and whistles

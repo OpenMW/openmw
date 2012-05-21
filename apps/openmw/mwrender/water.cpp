@@ -2,24 +2,20 @@
 #include <components/settings/settings.hpp>
 #include "sky.hpp"
 #include "renderingmanager.hpp"
+#include "compositors.hpp"
 
 using namespace Ogre;
 
 namespace MWRender
 {
 
-Water::Water (Ogre::Camera *camera, SkyManager* sky, const ESM::Cell* cell) :
+Water::Water (Ogre::Camera *camera, RenderingManager* rend, const ESM::Cell* cell) :
     mCamera (camera), mViewport (camera->getViewport()), mSceneManager (camera->getSceneManager()),
     mIsUnderwater(false), mVisibilityFlags(0),
     mReflectionTarget(0), mActive(1), mToggled(1),
-    mReflectionRenderActive(false)
+    mReflectionRenderActive(false), mRendering(rend)
 {
-    mSky = sky;
-
-    try
-    {
-        CompositorManager::getSingleton().setCompositorEnabled(mViewport, "Water", false);
-    } catch(...) {}
+    mSky = rend->getSkyManager();
 
     mTop = cell->water;
 
@@ -147,8 +143,6 @@ Water::~Water()
     mWaterNode->detachObject(mWater);
     mSceneManager->destroyEntity(mWater);
     mSceneManager->destroySceneNode(mWaterNode);
-
-    CompositorManager::getSingleton().removeCompositorChain(mViewport);
 }
 
 void Water::changeCell(const ESM::Cell* cell)
@@ -178,13 +172,13 @@ void Water::checkUnderwater(float y)
 {
     if (!mActive)
     {
-        CompositorManager::getSingleton().setCompositorEnabled(mViewport, mCompositorName, false);
+        mRendering->getCompositors()->setCompositorEnabled(mCompositorName, false);
         return;
     }
 
     if ((mIsUnderwater && y > mTop) || !mWater->isVisible() || mCamera->getPolygonMode() != Ogre::PM_SOLID)
     {
-        CompositorManager::getSingleton().setCompositorEnabled(mViewport, mCompositorName, false);
+        mRendering->getCompositors()->setCompositorEnabled(mCompositorName, false);
 
         // tell the shader we are not underwater
         Ogre::Pass* pass = mMaterial->getTechnique(0)->getPass(0);
@@ -199,7 +193,7 @@ void Water::checkUnderwater(float y)
     if (!mIsUnderwater && y < mTop && mWater->isVisible() && mCamera->getPolygonMode() == Ogre::PM_SOLID)
     {
         if (mUnderwaterEffect)
-            CompositorManager::getSingleton().setCompositorEnabled(mViewport, mCompositorName, true);
+            mRendering->getCompositors()->setCompositorEnabled(mCompositorName, true);
 
         // tell the shader we are underwater
         Ogre::Pass* pass = mMaterial->getTechnique(0)->getPass(0);

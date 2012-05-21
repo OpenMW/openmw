@@ -113,6 +113,7 @@ void BillboardObject::init(const String& textureName,
     p->setSelfIllumination(1.0,1.0,1.0);
     p->setDiffuse(0.0,0.0,0.0,1.0);
     p->setAmbient(0.0,0.0,0.0);
+    p->setPolygonModeOverrideable(false);
     p->createTextureUnitState(textureName);
     mBBSet->setMaterialName("BillboardMaterial"+StringConverter::toString(bodyCount));
 
@@ -520,6 +521,7 @@ void SkyManager::create()
         mp->getTechnique(0)->getPass(0)->setSceneBlending(SBT_TRANSPARENT_ALPHA);
         mp->getTechnique(0)->getPass(0)->setVertexProgram(stars_vp->getName());
         mp->getTechnique(0)->getPass(0)->setFragmentProgram(stars_fp->getName());
+        mp->getTechnique(0)->getPass(0)->setPolygonModeOverrideable(false);
         mStarsMaterials[i] = mp;
     }
 
@@ -535,6 +537,7 @@ void SkyManager::create()
     mAtmosphereDay = mRootNode->createChildSceneNode();
     mAtmosphereDay->attachObject(atmosphere_ent);
     mAtmosphereMaterial = atmosphere_ent->getSubEntity(0)->getMaterial();
+    mAtmosphereMaterial->getTechnique(0)->getPass(0)->setPolygonModeOverrideable(false);
 
     // Atmosphere shader
     HighLevelGpuProgramPtr vshader = mgr.createProgram("Atmosphere_VP", ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
@@ -598,6 +601,7 @@ void SkyManager::create()
     SceneNode* clouds_node = mRootNode->createChildSceneNode();
     clouds_node->attachObject(clouds_ent);
     mCloudMaterial = clouds_ent->getSubEntity(0)->getMaterial();
+    mCloudMaterial->getTechnique(0)->getPass(0)->setPolygonModeOverrideable(false);
     clouds_ent->setCastShadows(false);
 
     // Clouds vertex shader
