@@ -49,33 +49,15 @@ private:
 
     QComboBox *mRendererComboBox;
 
-    QStackedWidget *mRendererStackedWidget;
     QStackedWidget *mDisplayStackedWidget;
 
-    // OpenGL
-    QComboBox *mOGLRTTComboBox;
-    QComboBox *mOGLAntiAliasingComboBox;
-    QComboBox *mOGLResolutionComboBox;
-    QComboBox *mOGLFrequencyComboBox;
-
-    QCheckBox *mOGLVSyncCheckBox;
-    QCheckBox *mOGLFullScreenCheckBox;
-
-    // Direct3D
-    QComboBox *mD3DRenderDeviceComboBox;
-    QComboBox *mD3DAntiAliasingComboBox;
-    QComboBox *mD3DFloatingPointComboBox;
-    QComboBox *mD3DResolutionComboBox;
-
-    QCheckBox *mD3DNvPerfCheckBox;
-    QCheckBox *mD3DVSyncCheckBox;
-    QCheckBox *mD3DFullScreenCheckBox;
-
-    QSettings *mOgreConfig;
+    QComboBox *mAntiAliasingComboBox;
+    QComboBox *mResolutionComboBox;
+    QCheckBox *mVSyncCheckBox;
+    QCheckBox *mFullScreenCheckBox;
 
     Files::ConfigurationManager &mCfgMgr;
 
-    QString getConfigValue(const QString &key, Ogre::RenderSystem *renderer);
     QStringList getAvailableOptions(const QString &key, Ogre::RenderSystem *renderer);
 
     void createPages();
