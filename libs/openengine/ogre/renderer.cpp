@@ -13,17 +13,17 @@ using namespace OEngine::Render;
 
 void OgreRenderer::cleanup()
 {
-  if (mFader)
-    delete mFader;
-  
-  if(mRoot)
-    delete mRoot;
-  mRoot = NULL;
+    if (mFader)
+        delete mFader;
+
+    if(mRoot)
+        delete mRoot;
+    mRoot = NULL;
 }
 
 void OgreRenderer::start()
 {
-  mRoot->startRendering();
+    mRoot->startRendering();
 }
 
 bool OgreRenderer::loadPlugins()
@@ -53,96 +53,79 @@ bool OgreRenderer::loadPlugins()
 
 void OgreRenderer::update(float dt)
 {
-  mFader->update(dt);
+    mFader->update(dt);
 }
 
 void OgreRenderer::screenshot(const std::string &file)
 {
-  mWindow->writeContentsToFile(file);
+    mWindow->writeContentsToFile(file);
 }
 
 float OgreRenderer::getFPS()
 {
-  return mWindow->getLastFPS();
+    return mWindow->getLastFPS();
 }
 
-bool OgreRenderer::configure(bool showConfig,
-                             const std::string &cfgPath,
-                             const std::string &logPath,
-                             const std::string &pluginCfg,
-                             bool _logging)
+void OgreRenderer::configure(const std::string &logPath,
+                            const std::string &pluginCfg,
+                            const std::string& renderSystem,
+                            bool _logging)
 {
-  // Set up logging first
-  new LogManager;
-  Log *log = LogManager::getSingleton().createLog(logPath + std::string("Ogre.log"));
-  logging = _logging;
+    // Set up logging first
+    new LogManager;
+    Log *log = LogManager::getSingleton().createLog(logPath + std::string("Ogre.log"));
+    logging = _logging;
 
-  if(logging)
-    // Full log detail
-    log->setLogDetail(LL_BOREME);
-  else
-    // Disable logging
-    log->setDebugOutputEnabled(false);
+    if(logging)
+        // Full log detail
+        log->setLogDetail(LL_BOREME);
+    else
+        // Disable logging
+        log->setDebugOutputEnabled(false);
 
-#if defined(ENABLE_PLUGIN_GL) || defined(ENABLE_PLUGIN_Direct3D9) || defined(ENABLE_PLUGIN_CgProgramManager) || defined(ENABLE_PLUGIN_OctreeSceneManager) || defined(ENABLE_PLUGIN_ParticleFX)
-  mRoot = new Root("", cfgPath, "");
-  loadPlugins();
-#else
-  mRoot = new Root(pluginCfg, cfgPath, "");
-#endif
+    #if defined(ENABLE_PLUGIN_GL) || defined(ENABLE_PLUGIN_Direct3D9) || defined(ENABLE_PLUGIN_CgProgramManager) || defined(ENABLE_PLUGIN_OctreeSceneManager) || defined(ENABLE_PLUGIN_ParticleFX)
+    mRoot = new Root("", "", "");
+    loadPlugins();
+    #else
+    mRoot = new Root(pluginCfg, "", "");
+    #endif
 
-  // Show the configuration dialog and initialise the system, if the
-  // showConfig parameter is specified. The settings are stored in
-  // ogre.cfg. If showConfig is false, the settings are assumed to
-  // already exist in ogre.cfg.
-  int result;
-  if(showConfig)
-    result = mRoot->showConfigDialog();
-  else
-    result = mRoot->restoreConfig();
-
-  return !result;
+    RenderSystem* rs = mRoot->getRenderSystemByName(renderSystem);
+    if (rs == 0)
+        throw std::runtime_error ("RenderSystem with name " + renderSystem + " not found, make sure the plugins are loaded");
+    mRoot->setRenderSystem(rs);
 }
 
-bool OgreRenderer::configure(bool showConfig,
-                             const std::string &cfgPath,
-                             const std::string &pluginCfg,
-                             bool _logging)
+void OgreRenderer::createWindow(const std::string &title, const WindowSettings& settings)
 {
-    return configure(showConfig, cfgPath, cfgPath, pluginCfg, _logging);
-}
+    assert(mRoot);
+    mRoot->initialise(false);
 
-bool OgreRenderer::configure(bool showConfig,
-                             const std::string &pluginCfg,
-                             bool _logging)
-{
-    return configure(showConfig, "", pluginCfg, _logging);
-}
+    NameValuePairList params;
+    params.insert(std::make_pair("title", title));
+    params.insert(std::make_pair("FSAA", settings.fsaa));
+    params.insert(std::make_pair("vsync", settings.vsync ? "true" : "false"));
 
-void OgreRenderer::createWindow(const std::string &title)
-{
-  assert(mRoot);
-  // Initialize OGRE window
-  mWindow = mRoot->initialise(true, title, "");
+    mWindow = mRoot->createRenderWindow(title, settings.window_x, settings.window_y, settings.fullscreen, &params);
 }
 
 void OgreRenderer::createScene(const std::string camName, float fov, float nearClip)
 {
-  assert(mRoot);
-  assert(mWindow);
-  // Get the SceneManager, in this case a generic one
-  mScene = mRoot->createSceneManager(ST_GENERIC);
+    assert(mRoot);
+    assert(mWindow);
+    // Get the SceneManager, in this case a generic one
+    mScene = mRoot->createSceneManager(ST_GENERIC);
 
-  // Create the camera
-  mCamera = mScene->createCamera(camName);
-  mCamera->setNearClipDistance(nearClip);
-  mCamera->setFOVy(Degree(fov));
+    // Create the camera
+    mCamera = mScene->createCamera(camName);
+    mCamera->setNearClipDistance(nearClip);
+    mCamera->setFOVy(Degree(fov));
 
-  // Create one viewport, entire window
-  mView = mWindow->addViewport(mCamera);
+    // Create one viewport, entire window
+    mView = mWindow->addViewport(mCamera);
 
-  // Alter the camera aspect ratio to match the viewport
-  mCamera->setAspectRatio(Real(mView->getActualWidth()) / Real(mView->getActualHeight()));
-  
-  mFader = new Fader();
+    // Alter the camera aspect ratio to match the viewport
+    mCamera->setAspectRatio(Real(mView->getActualWidth()) / Real(mView->getActualHeight()));
+
+    mFader = new Fader();
 }

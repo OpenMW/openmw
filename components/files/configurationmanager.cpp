@@ -15,7 +15,6 @@ namespace Files
 {
 
 static const char* const openmwCfgFile = "openmw.cfg";
-static const char* const ogreCfgFile = "ogre.cfg";
 static const char* const pluginsCfgFile = "plugins.cfg";
 
 const char* const mwToken = "?mw?";
@@ -39,7 +38,6 @@ ConfigurationManager::ConfigurationManager()
         }
     }
 
-    mOgreCfgPath = mFixedPath.getUserPath() / ogreCfgFile;
     mLogPath = mFixedPath.getUserPath();
 }
 
@@ -162,11 +160,6 @@ const boost::filesystem::path& ConfigurationManager::getGlobalDataPath() const
 const boost::filesystem::path& ConfigurationManager::getInstallPath() const
 {
     return mFixedPath.getInstallPath();
-}
-
-const boost::filesystem::path& ConfigurationManager::getOgreConfigPath() const
-{
-    return mOgreCfgPath;
 }
 
 const boost::filesystem::path& ConfigurationManager::getPluginsConfigPath() const
