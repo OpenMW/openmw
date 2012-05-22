@@ -222,14 +222,17 @@ QStringList GraphicsPage::getAvailableOptions(const QString &key, Ogre::RenderSy
         Ogre::StringVector::iterator opt_it;
         uint idx = 0;
         for (opt_it = i->second.possibleValues.begin ();
-             opt_it != i->second.possibleValues.end (); opt_it++, idx++)
-             {
+        opt_it != i->second.possibleValues.end (); opt_it++, idx++)
+        {
 
-                 if (strcmp (key.toStdString().c_str(), i->first.c_str()) == 0)
-                 {
-                     result << ((key == "FSAA") ? QString("MSAA ") : QString("")) + QString::fromStdString((*opt_it).c_str()).simplified();
-                 }
-             }
+            if (strcmp (key.toStdString().c_str(), i->first.c_str()) == 0)
+            {
+                if (key == "FSAA" && *opt_it == "0")
+                    result << QString("none");
+                else
+                    result << ((key == "FSAA") ? QString("MSAA ") : QString("")) + QString::fromStdString((*opt_it).c_str()).simplified();
+            }
+        }
 
     }
 
