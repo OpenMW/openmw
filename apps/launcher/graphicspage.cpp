@@ -150,9 +150,6 @@ void GraphicsPage::createPages()
 
 void GraphicsPage::setupConfig()
 {
-    QString ogreCfg = mCfgMgr.getOgreConfigPath().string().c_str();
-    QFile file(ogreCfg);
-    mOgreConfig = new QSettings(ogreCfg, QSettings::IniFormat);
 }
 
 void GraphicsPage::setupOgre()
@@ -164,32 +161,12 @@ void GraphicsPage::setupOgre()
     Ogre::LogManager* logMgr = OGRE_NEW Ogre::LogManager;
     logMgr->createLog((mCfgMgr.getLogPath().string() + "/launcherOgre.log"), true, false, false);
 
-    QString ogreCfg = QString::fromStdString(mCfgMgr.getOgreConfigPath().string());
-    file.setFileName(ogreCfg);
-
-    //we need to check that the path to the configuration file exists before we
-    //try and create an instance of Ogre::Root otherwise Ogre raises an exception
-    QDir configDir = QFileInfo(file).dir();
-    if ( !configDir.exists() && !configDir.mkpath(configDir.path()) )
-    {
-        QMessageBox msgBox;
-        msgBox.setWindowTitle("Error creating config file");
-        msgBox.setIcon(QMessageBox::Critical);
-        msgBox.setStandardButtons(QMessageBox::Ok);
-        msgBox.setText(QString(tr("<br><b>Failed to create the configuration file</b><br><br> \
-        Make sure you have write access to<br>%1<br><br>")).arg(configDir.path()));
-        msgBox.exec();
-
-        qApp->exit(1);
-        return;
-    }
-
     try
     {
     #if defined(ENABLE_PLUGIN_GL) || defined(ENABLE_PLUGIN_Direct3D9)
-        mOgre = new Ogre::Root("", file.fileName().toStdString(), "./launcherOgre.log");
+        mOgre = new Ogre::Root("", "", "./launcherOgre.log");
     #else
-        mOgre = new Ogre::Root(pluginCfg.toStdString(), file.fileName().toStdString(), "./launcherOgre.log");
+        mOgre = new Ogre::Root(pluginCfg.toStdString(), "", "./launcherOgre.log");
     #endif
     }
     catch(Ogre::Exception &ex)
@@ -227,13 +204,13 @@ void GraphicsPage::setupOgre()
         mSelectedRenderSystem = *r;
         mRendererComboBox->addItem((*r)->getName().c_str());
     }
-
+/*
     int index = mRendererComboBox->findText(mOgreConfig->value("Render System").toString());
 
     if ( index != -1) {
         mRendererComboBox->setCurrentIndex(index);
     }
-
+*/
     // Create separate rendersystems
     QString openGLName = mRendererComboBox->itemText(mRendererComboBox->findText(QString("OpenGL"), Qt::MatchStartsWith));
     QString direct3DName = mRendererComboBox->itemText(mRendererComboBox->findText(QString("Direct3D"), Qt::MatchStartsWith));
@@ -460,11 +437,11 @@ void GraphicsPage::writeConfig()
 QString GraphicsPage::getConfigValue(const QString &key, Ogre::RenderSystem *renderer)
 {
     QString result;
-
+/*
     mOgreConfig->beginGroup(renderer->getName().c_str());
     result = mOgreConfig->value(key).toString();
     mOgreConfig->endGroup();
-
+*/
     return result;
 }
 
