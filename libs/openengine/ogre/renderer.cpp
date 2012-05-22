@@ -5,6 +5,9 @@
 #include "OgreRenderWindow.h"
 #include "OgreLogManager.h"
 #include "OgreLog.h"
+#include "OgreTextureManager.h"
+#include "OgreTexture.h"
+#include "OgreHardwarePixelBuffer.h"
 
 #include <assert.h>
 
@@ -107,6 +110,18 @@ void OgreRenderer::createWindow(const std::string &title, const WindowSettings& 
     params.insert(std::make_pair("vsync", settings.vsync ? "true" : "false"));
 
     mWindow = mRoot->createRenderWindow(title, settings.window_x, settings.window_y, settings.fullscreen, &params);
+
+    // create the semi-transparent black background texture used by the GUI.
+    // has to be created in code with TU_DYNAMIC_WRITE_ONLY_DISCARDABLE param
+    // so that it can be modified at runtime. 
+    mTransparentBGTexture = Ogre::TextureManager::getSingleton().createManual(
+                    "transparent.png",
+                    Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
+                    Ogre::TEX_TYPE_2D,
+                    1, 1,
+                    0,
+                    Ogre::PF_A8R8G8B8,
+                    Ogre::TU_DYNAMIC_WRITE_ONLY_DISCARDABLE);
 }
 
 void OgreRenderer::createScene(const std::string camName, float fov, float nearClip)

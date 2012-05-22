@@ -17,8 +17,12 @@ namespace MWGui
 
         protected:
             MyGUI::Button* mOkButton;
+            MyGUI::ListBox* mResolutionList;
+            MyGUI::ScrollBar* mMenuTransparencySlider;
+            MyGUI::ScrollBar* mViewDistanceSlider;
 
             void onOkButtonClicked(MyGUI::Widget* _sender);
+            void onSliderChangePosition(MyGUI::ScrollBar* scroller, size_t pos);
     };
 }
 

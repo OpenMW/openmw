@@ -6,17 +6,52 @@
         <Widget type="TabControl" skin="TabControl" position="8 8 368 340" align="Left Top" name="SettingsTab">
             <Property key="ButtonAutoWidth" value="true"/>
 
-            <Widget type="TabItem" skin="" position="2 24 300 300">
+            <Widget type="TabItem" skin="" position="4 28 360 312">
                 <Property key="Caption" value="  #{sPrefs}  "/>
+
+                <Widget type="TextBox" skin="NormalText" position="4 10 352 18" align="Left Top">
+                    <Property key="Caption" value="#{sTransparency_Menu}"/>
+                </Widget>
+                <Widget type="ScrollBar" skin="MW_HSlider" position="4 34 352 18" align="Left Top" name="MenuTransparencySlider">
+                    <Property key="Range" value="1000000"/>
+                </Widget>
+                <Widget type="TextBox" skin="SandText" position="4 58 352 18" align="Left Top">
+                    <Property key="Caption" value="#{sFull}"/>
+                    <Property key="TextAlign" value="Left"/>
+                </Widget>
+                <Widget type="TextBox" skin="SandText" position="4 58 352 18" align="Left Top">
+                    <Property key="Caption" value="#{sNone}"/>
+                    <Property key="TextAlign" value="Right"/>
+                </Widget>
             </Widget>
-            <Widget type="TabItem" skin="" position="2 24 300 300">
+            <Widget type="TabItem" skin="" position="4 28 360 312">
                 <Property key="Caption" value="  #{sAudio}  "/>
             </Widget>
-            <Widget type="TabItem" skin="" position="2 24 300 300">
+            <Widget type="TabItem" skin="" position="4 28 360 312">
                 <Property key="Caption" value="  #{sControls}  "/>
             </Widget>
-            <Widget type="TabItem" skin="" position="2 24 300 300">
+            <Widget type="TabItem" skin="" position="4 28 360 312">
                 <Property key="Caption" value="  #{sVideo}  "/>
+
+                <Widget type="ListBox" skin="MW_List" position="4 4 200 110" align="Left Top" name="ResolutionList"/>
+                <Widget type="Button" skin="MW_Button" position="212 4 120 24" align="Left Top" name="ApplyResolutionButton">
+                    <Property key="Caption" value="Apply"/>
+                </Widget>
+
+                <Widget type="TextBox" skin="NormalText" position="4 130 352 18" align="Left Top">
+                    <Property key="Caption" value="#{sRender_Distance}"/>
+                </Widget>
+                <Widget type="ScrollBar" skin="MW_HSlider" position="4 154 352 18" align="Left Top" name="ViewDistanceSlider">
+                    <Property key="Range" value="1000000"/>
+                </Widget>
+                <Widget type="TextBox" skin="SandText" position="4 178 352 18" align="Left Top">
+                    <Property key="Caption" value="#{sNear}"/>
+                    <Property key="TextAlign" value="Left"/>
+                </Widget>
+                <Widget type="TextBox" skin="SandText" position="4 178 352 18" align="Left Top">
+                    <Property key="Caption" value="#{sFar}"/>
+                    <Property key="TextAlign" value="Right"/>
+                </Widget>
             </Widget>
         </Widget>
 

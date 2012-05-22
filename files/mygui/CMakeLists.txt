@@ -60,7 +60,6 @@ configure_file("${SDIR}/openmw_trade_window_layout.xml" "${DDIR}/openmw_trade_wi
 configure_file("${SDIR}/openmw_settings_window_layout.xml" "${DDIR}/openmw_settings_window_layout.xml" COPYONLY)
 configure_file("${SDIR}/atlas1.cfg" "${DDIR}/atlas1.cfg" COPYONLY)
 configure_file("${SDIR}/smallbars.png" "${DDIR}/smallbars.png" COPYONLY)
-configure_file("${SDIR}/transparent.png" "${DDIR}/transparent.png" COPYONLY)
 configure_file("${SDIR}/EBGaramond-Regular.ttf" "${DDIR}/EBGaramond-Regular.ttf" COPYONLY)
 configure_file("${SDIR}/Obliviontt.zip" "${DDIR}/Obliviontt.zip" COPYONLY)
 configure_file("${SDIR}/VeraMono.ttf" "${DDIR}/VeraMono.ttf" COPYONLY)

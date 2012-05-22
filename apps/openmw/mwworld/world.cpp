@@ -1024,4 +1024,9 @@ namespace MWWorld
 
         mWorldScene->insertObject(object, cell);
     }
+
+    void World::processChangedSettings(const Settings::CategorySettingVector& settings)
+    {
+        mRendering->processChangedSettings(settings);
+    }
 }

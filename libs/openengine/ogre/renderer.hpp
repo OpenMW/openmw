@@ -24,6 +24,8 @@
 # include "OgreD3D9Plugin.h"
 #endif
 
+#include "OgreTexture.h"
+
 namespace Ogre
 {
     class Root;
@@ -70,6 +72,8 @@ namespace OEngine
             #endif
             Fader* mFader;
             bool logging;
+
+            Ogre::TexturePtr mTransparentBGTexture;
 
         public:
             OgreRenderer()

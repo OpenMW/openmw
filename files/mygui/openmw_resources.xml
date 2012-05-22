@@ -130,7 +130,7 @@
         <Widget type="Widget" skin="" position="5 5 89 60" name="Root">
             <UserString key="ButtonSkin" value="MW_Button"/>
             <Widget type="Widget" skin="MW_Box" position="0 24 89 36" align="Left Top Stretch">
-                <Widget type="Widget" skin="PanelEmpty" position="4 4 81 28" align="Left Top Stretch" name="TabItem"/>
+                <Widget type="Widget" skin="" position="4 4 81 28" align="Left Top Stretch" name="TabItem"/>
             </Widget>
             <Widget type="Widget" skin="" position="0 0 89 23" align="HStretch Top" name="HeaderPlace">
                 <Widget type="Widget" skin="" position="52 0 37 23" name="Controls">

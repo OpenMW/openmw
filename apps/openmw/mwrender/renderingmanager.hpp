@@ -13,6 +13,8 @@
 #include <openengine/ogre/fader.hpp>
 #include <openengine/bullet/physic.hpp>
 
+#include <components/settings/settings.hpp>
+
 #include <vector>
 #include <string>
 
@@ -157,9 +159,13 @@ class RenderingManager: private RenderingInterface {
     ///< transform the specified bounding box (in world coordinates) into screen coordinates.
     /// @return packed vector4 (min_x, min_y, max_x, max_y)
 
+    void processChangedSettings(const Settings::CategorySettingVector& settings);
+
   private:
 
     void setAmbientMode();
+
+    void setMenuTransparency(float val);
 
     bool mSunEnabled;
 

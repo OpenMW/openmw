@@ -114,6 +114,8 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
 
     mDebugging = new Debugging(mMwRoot, engine);
     mLocalMap = new MWRender::LocalMap(&mRendering, this);
+
+    setMenuTransparency(Settings::Manager::getFloat("menu transparency", "GUI"));
 }
 
 RenderingManager::~RenderingManager ()
@@ -561,6 +563,28 @@ Ogre::Vector4 RenderingManager::boundingBoxToScreen(Ogre::AxisAlignedBox bounds)
 Compositors* RenderingManager::getCompositors()
 {
     return mCompositors;
+}
+
+void RenderingManager::processChangedSettings(const Settings::CategorySettingVector& settings)
+{
+    for (Settings::CategorySettingVector::const_iterator it=settings.begin();
+            it != settings.end(); ++it)
+    {
+        if (it->second == "menu transparency" && it->first == "GUI")
+        {
+            setMenuTransparency(Settings::Manager::getFloat("menu transparency", "GUI"));
+        }
+    }
+}
+
+void RenderingManager::setMenuTransparency(float val)
+{
+    Ogre::TexturePtr tex = Ogre::TextureManager::getSingleton().getByName("transparent.png");
+    std::vector<Ogre::uint32> buffer;
+    buffer.resize(1);
+    buffer[0] = (int(255*val) << 24);
+    memcpy(tex->getBuffer()->lock(Ogre::HardwareBuffer::HBL_DISCARD), &buffer[0], 1*4);
+    tex->getBuffer()->unlock();
 }
 
 } // namespace
