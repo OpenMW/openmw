@@ -77,6 +77,7 @@ namespace MWGui
   class MessageBoxManager;
   class CountDialog;
   class TradeWindow;
+  class SettingsWindow;
 
   struct ClassPoint
   {
@@ -230,6 +231,7 @@ namespace MWGui
     BookWindow* mBookWindow;
     CountDialog* mCountDialog;
     TradeWindow* mTradeWindow;
+    SettingsWindow* mSettingsWindow;
 
     CharacterCreation* mCharGen;
 

@@ -71,6 +71,8 @@ namespace MWInput
 
       A_ToggleFps, // Toggle FPS display (this is temporary)
 
+      A_Settings, // Temporary hotkey
+
       A_LAST            // Marker for the last item
     };
 
@@ -138,6 +140,16 @@ namespace MWInput
 
         std::vector<std::string> empty;
         windows.messageBox ("Screenshot saved", empty);
+    }
+
+    void showSettings()
+    {
+        if (mDragDrop)
+            return;
+
+        MWGui::GuiMode mode = windows.getMode();
+        if (mode != MWGui::GM_Settings)
+            setGuiMode(MWGui::GM_Settings);
     }
 
     /* toggleInventory() is called when the user presses the button to toggle the inventory screen. */
@@ -261,6 +273,8 @@ namespace MWInput
                       "Ready hands");
       disp->funcs.bind(A_ToggleFps, boost::bind(&InputImpl::toggleFps, this),
                       "Toggle FPS display");
+      disp->funcs.bind(A_Settings, boost::bind(&InputImpl::showSettings, this),
+                      "Show settings window");
       // Add the exit listener
       ogre.getRoot()->addFrameListener(&exit);
 
@@ -308,6 +322,7 @@ namespace MWInput
       disp->bind(A_ToggleWeapon,KC_F);
       disp->bind(A_ToggleSpell,KC_R);
       disp->bind(A_ToggleFps, KC_F10);
+      disp->bind(A_Settings, KC_F2);
 
       // Key bindings for polled keys
       // NOTE: These keys are constantly being polled. Only add keys that must be checked each frame.

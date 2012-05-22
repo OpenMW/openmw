@@ -16,6 +16,7 @@
 #include "mainmenu.hpp"
 #include "countdialog.hpp"
 #include "tradewindow.hpp"
+#include "settingswindow.hpp"
 
 #include "../mwmechanics/mechanicsmanager.hpp"
 #include "../mwinput/inputmanager.hpp"
@@ -45,11 +46,12 @@ WindowManager::WindowManager(
   , mMessageBoxManager(NULL)
   , console(NULL)
   , mJournal(NULL)
-  , mDialogueWindow(nullptr)
+  , mDialogueWindow(NULL)
   , mBookWindow(NULL)
   , mScrollWindow(NULL)
   , mCountDialog(NULL)
   , mTradeWindow(NULL)
+  , mSettingsWindow(NULL)
   , mCharGen(NULL)
   , playerClass()
   , playerName()
@@ -118,6 +120,7 @@ WindowManager::WindowManager(
     mScrollWindow = new ScrollWindow(*this);
     mBookWindow = new BookWindow(*this);
     mCountDialog = new CountDialog(*this);
+    mSettingsWindow = new SettingsWindow(*this);
 
     // The HUD is always on
     hud->setVisible(true);
@@ -217,6 +220,7 @@ void WindowManager::updateVisible()
     mScrollWindow->setVisible(false);
     mBookWindow->setVisible(false);
     mTradeWindow->setVisible(false);
+    mSettingsWindow->setVisible(false);
 
     // Mouse is visible whenever we're not in game mode
     MyGUI::PointerManager::getInstance().setVisible(isGuiMode());
@@ -232,6 +236,9 @@ void WindowManager::updateVisible()
             break;
         case GM_MainMenu:
             menu->setVisible(true);
+            break;
+        case GM_Settings:
+            mSettingsWindow->setVisible(true);
             break;
         case GM_Console:
             console->enable();

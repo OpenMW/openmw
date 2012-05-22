@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<MyGUI type="Layout">
+    <Widget type="Window" skin="MW_Dialog" layer="Windows" position="0 0 390 390" name="_Main">
+
+        <Widget type="Widget" skin="MW_Box" position="8 8 368 340" align="Left Top">
+        </Widget>
+
+        <Widget type="Button" skin="MW_Button" position="0 351 60 24" name="OkButton" align="Right Bottom">
+            <Property key="Caption" value="#{sOk}"/>
+        </Widget>
+
+    </Widget>
+</MyGUI>

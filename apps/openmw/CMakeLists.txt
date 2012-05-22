@@ -27,7 +27,7 @@ add_openmw_dir (mwgui
     text_input widgets race class birth review window_manager console dialogue
     dialogue_history window_base stats_window messagebox journalwindow charactercreation
     map_window window_pinnable_base cursorreplace tooltips scrollwindow bookwindow list
-    formatting itemwidget inventorywindow container hud countdialog tradewindow
+    formatting itemwidget inventorywindow container hud countdialog tradewindow settingswindow
     )
 
 add_openmw_dir (mwdialogue

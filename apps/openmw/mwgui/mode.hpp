@@ -6,6 +6,7 @@ namespace MWGui
   enum GuiMode
     {
       GM_Game,          // Game mode, only HUD
+      GM_Settings,      // Settings window
       GM_Inventory,     // Inventory mode
       GM_Container,
       GM_MainMenu,      // Main menu mode
