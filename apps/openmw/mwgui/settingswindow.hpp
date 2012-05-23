@@ -18,11 +18,15 @@ namespace MWGui
         protected:
             MyGUI::Button* mOkButton;
             MyGUI::ListBox* mResolutionList;
+            MyGUI::Button* mFullscreenButton;
             MyGUI::ScrollBar* mMenuTransparencySlider;
             MyGUI::ScrollBar* mViewDistanceSlider;
 
             void onOkButtonClicked(MyGUI::Widget* _sender);
             void onSliderChangePosition(MyGUI::ScrollBar* scroller, size_t pos);
+            void onButtonToggled(MyGUI::Widget* _sender);
+            void onResolutionSelected(MyGUI::ListBox* _sender, size_t index);
+            void onResolutionAccept();
     };
 }
 

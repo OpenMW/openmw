@@ -78,6 +78,7 @@ namespace MWGui
   class CountDialog;
   class TradeWindow;
   class SettingsWindow;
+  class ConfirmationDialog;
 
   struct ClassPoint
   {
@@ -140,6 +141,7 @@ namespace MWGui
     MWGui::BookWindow* getBookWindow() {return mBookWindow;}
     MWGui::ScrollWindow* getScrollWindow() {return mScrollWindow;}
     MWGui::CountDialog* getCountDialog() {return mCountDialog;}
+    MWGui::ConfirmationDialog* getConfirmationDialog() {return mConfirmationDialog;}
     MWGui::TradeWindow* getTradeWindow() {return mTradeWindow;}
 
     MyGUI::Gui* getGui() const { return gui; }
@@ -232,6 +234,7 @@ namespace MWGui
     CountDialog* mCountDialog;
     TradeWindow* mTradeWindow;
     SettingsWindow* mSettingsWindow;
+    ConfirmationDialog* mConfirmationDialog;
 
     CharacterCreation* mCharGen;
 

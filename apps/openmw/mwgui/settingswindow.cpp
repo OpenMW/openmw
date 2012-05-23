@@ -2,6 +2,9 @@
 
 #include <OgreRoot.h>
 #include <OgreRenderSystem.h>
+#include <OgreString.h>
+
+#include <boost/lexical_cast.hpp>
 
 #include <components/settings/settings.hpp>
 
@@ -9,6 +12,7 @@
 #include "../mwworld/world.hpp"
 
 #include "window_manager.hpp"
+#include "confirmationdialog.hpp"
 
 namespace MWGui
 {
@@ -19,10 +23,13 @@ namespace MWGui
         getWidget(mResolutionList, "ResolutionList");
         getWidget(mMenuTransparencySlider, "MenuTransparencySlider");
         getWidget(mViewDistanceSlider, "ViewDistanceSlider");
+        getWidget(mFullscreenButton, "FullscreenButton");
 
         mOkButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onOkButtonClicked);
+        mFullscreenButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onButtonToggled);
         mMenuTransparencySlider->eventScrollChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onSliderChangePosition);
         mViewDistanceSlider->eventScrollChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onSliderChangePosition);
+        mResolutionList->eventListChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onResolutionSelected);
 
         center();
 
@@ -42,12 +49,68 @@ namespace MWGui
         // read settings
         int menu_transparency = (mMenuTransparencySlider->getScrollRange()-1) * Settings::Manager::getFloat("menu transparency", "GUI");
         mMenuTransparencySlider->setScrollPosition(menu_transparency);
-        onSliderChangePosition(mMenuTransparencySlider, menu_transparency);
+
+        float val = (Settings::Manager::getFloat("max viewing distance", "Viewing distance")-2000)/(5600-2000);
+        int viewdist = (mViewDistanceSlider->getScrollRange()-1) * val;
+        mViewDistanceSlider->setScrollPosition(viewdist);
+
+        std::string on = mWindowManager.getGameSettingString("sOn", "On");
+        std::string off = mWindowManager.getGameSettingString("sOff", "On");
+
+        mFullscreenButton->setCaption(Settings::Manager::getBool("fullscreen", "Video") ? on : off);
     }
 
     void SettingsWindow::onOkButtonClicked(MyGUI::Widget* _sender)
     {
         mWindowManager.setGuiMode(GM_Game);
+    }
+
+    void SettingsWindow::onResolutionSelected(MyGUI::ListBox* _sender, size_t index)
+    {
+        if (index == MyGUI::ITEM_NONE)
+            return;
+
+        ConfirmationDialog* dialog = mWindowManager.getConfirmationDialog();
+        dialog->open("#{sNotifyMessage67}");
+        dialog->eventOkClicked.clear();
+        dialog->eventOkClicked += MyGUI::newDelegate(this, &SettingsWindow::onResolutionAccept);
+    }
+
+    void SettingsWindow::onResolutionAccept()
+    {
+        std::string resStr = mResolutionList->getItemNameAt(mResolutionList->getIndexSelected());
+        size_t xPos = resStr.find("x");
+        std::string resXStr = resStr.substr(0, xPos-1);
+        Ogre::StringUtil::trim(resXStr);
+        std::string resYStr = resStr.substr(xPos+2, resStr.size()-(xPos+2));
+        Ogre::StringUtil::trim(resYStr);
+        int resX = boost::lexical_cast<int>(resXStr);
+        int resY = boost::lexical_cast<int>(resYStr);
+
+        Settings::Manager::setInt("resolution x", "Video", resX);
+        Settings::Manager::setInt("resolution y", "Video", resY);
+
+        MWBase::Environment::get().getWorld()->processChangedSettings(Settings::Manager::apply());
+    }
+
+    void SettingsWindow::onButtonToggled(MyGUI::Widget* _sender)
+    {
+        std::string on = mWindowManager.getGameSettingString("sOn", "On");
+        std::string off = mWindowManager.getGameSettingString("sOff", "On");
+        bool newState;
+        if (_sender->castType<MyGUI::Button>()->getCaption() == on)
+        {
+            _sender->castType<MyGUI::Button>()->setCaption(off);
+            newState = false;
+        }
+        else
+        {
+            _sender->castType<MyGUI::Button>()->setCaption(on);
+            newState = true;
+        }
+
+        if (_sender == mFullscreenButton)
+            Settings::Manager::setBool("fullscreen", "Video", newState);
     }
 
     void SettingsWindow::onSliderChangePosition(MyGUI::ScrollBar* scroller, size_t pos)
@@ -56,6 +119,10 @@ namespace MWGui
         if (scroller == mMenuTransparencySlider)
         {
             Settings::Manager::setFloat("menu transparency", "GUI", val);
+        }
+        else if (scroller == mViewDistanceSlider)
+        {
+            Settings::Manager::setFloat("max viewing distance", "Viewing distance", (1-val) * 2000 + val * 5600); 
         }
 
         MWBase::Environment::get().getWorld()->processChangedSettings(Settings::Manager::apply());

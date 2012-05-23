@@ -17,6 +17,7 @@
 #include "countdialog.hpp"
 #include "tradewindow.hpp"
 #include "settingswindow.hpp"
+#include "confirmationdialog.hpp"
 
 #include "../mwmechanics/mechanicsmanager.hpp"
 #include "../mwinput/inputmanager.hpp"
@@ -52,6 +53,7 @@ WindowManager::WindowManager(
   , mCountDialog(NULL)
   , mTradeWindow(NULL)
   , mSettingsWindow(NULL)
+  , mConfirmationDialog(NULL)
   , mCharGen(NULL)
   , playerClass()
   , playerName()
@@ -121,6 +123,7 @@ WindowManager::WindowManager(
     mBookWindow = new BookWindow(*this);
     mCountDialog = new CountDialog(*this);
     mSettingsWindow = new SettingsWindow(*this);
+    mConfirmationDialog = new ConfirmationDialog(*this);
 
     // The HUD is always on
     hud->setVisible(true);
@@ -161,6 +164,8 @@ WindowManager::~WindowManager()
     delete mBookWindow;
     delete mScrollWindow;
     delete mTradeWindow;
+    delete mSettingsWindow;
+    delete mConfirmationDialog;
 
     cleanupGarbage();
 }

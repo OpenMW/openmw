@@ -34,9 +34,10 @@
                 <Property key="Caption" value="  #{sVideo}  "/>
 
                 <Widget type="ListBox" skin="MW_List" position="4 4 200 110" align="Left Top" name="ResolutionList"/>
-                <Widget type="Button" skin="MW_Button" position="212 4 120 24" align="Left Top" name="ApplyResolutionButton">
-                    <Property key="Caption" value="Apply"/>
+                <Widget type="TextBox" skin="SandText" position="252 4 120 24" align="Left Top">
+                    <Property key="Caption" value="Fullscreen"/>
                 </Widget>
+                <Widget type="Button" skin="MW_Button" position="212 4 34 24" align="Left Top" name="FullscreenButton"/>
 
                 <Widget type="TextBox" skin="NormalText" position="4 130 352 18" align="Left Top">
                     <Property key="Caption" value="#{sRender_Distance}"/>
