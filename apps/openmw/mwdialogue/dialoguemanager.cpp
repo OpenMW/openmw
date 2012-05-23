@@ -635,7 +635,7 @@ namespace MWDialogue
         actorKnownTopics.clear();
 
         //initialise the GUI
-        MWBase::Environment::get().getInputManager()->setGuiMode(MWGui::GM_Dialogue);
+        MWBase::Environment::get().getWindowManager()->pushGuiMode(MWGui::GM_Dialogue);
         MWGui::DialogueWindow* win = MWBase::Environment::get().getWindowManager()->getDialogueWindow();
         win->startDialogue(actor, MWWorld::Class::get (actor).getName (actor));
 
@@ -843,7 +843,7 @@ namespace MWDialogue
 
     void DialogueManager::goodbyeSelected()
     {
-        MWBase::Environment::get().getInputManager()->setGuiMode(MWGui::GM_Game);
+        MWBase::Environment::get().getWindowManager()->popGuiMode();
     }
 
     void DialogueManager::questionAnswered(std::string answere)
