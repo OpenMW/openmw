@@ -7,6 +7,8 @@
 
 #include <OgreResourceGroupManager.h>
 
+#include <components/settings/settings.hpp>
+
 #include "../mwworld/ptr.hpp"
 
 
@@ -52,6 +54,10 @@ namespace MWSound
         float mMasterVolume;
         float mSFXVolume;
         float mMusicVolume;
+        float mVoiceVolume;
+
+        // not implemented
+        float mFootstepsVolume;
 
         boost::shared_ptr<Sound> mMusic;
         std::string mCurrentPlaylist;
@@ -77,6 +83,8 @@ namespace MWSound
     public:
         SoundManager(bool useSound);
         ~SoundManager();
+
+        void processChangedSettings(const Settings::CategorySettingVector& settings);
 
         void stopMusic();
         ///< Stops music if it's playing

@@ -24,12 +24,23 @@ namespace MWGui
         getWidget(mMenuTransparencySlider, "MenuTransparencySlider");
         getWidget(mViewDistanceSlider, "ViewDistanceSlider");
         getWidget(mFullscreenButton, "FullscreenButton");
+        getWidget(mMasterVolumeSlider, "MasterVolume");
+        getWidget(mVoiceVolumeSlider, "VoiceVolume");
+        getWidget(mEffectsVolumeSlider, "EffectsVolume");
+        getWidget(mFootstepsVolumeSlider, "FootstepsVolume");
+        getWidget(mMusicVolumeSlider, "MusicVolume");
 
         mOkButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onOkButtonClicked);
         mFullscreenButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onButtonToggled);
         mMenuTransparencySlider->eventScrollChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onSliderChangePosition);
         mViewDistanceSlider->eventScrollChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onSliderChangePosition);
         mResolutionList->eventListChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onResolutionSelected);
+
+        mMasterVolumeSlider->eventScrollChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onSliderChangePosition);
+        mVoiceVolumeSlider->eventScrollChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onSliderChangePosition);
+        mEffectsVolumeSlider->eventScrollChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onSliderChangePosition);
+        mFootstepsVolumeSlider->eventScrollChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onSliderChangePosition);
+        mMusicVolumeSlider->eventScrollChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onSliderChangePosition);
 
         center();
 
@@ -53,6 +64,12 @@ namespace MWGui
         float val = (Settings::Manager::getFloat("max viewing distance", "Viewing distance")-2000)/(5600-2000);
         int viewdist = (mViewDistanceSlider->getScrollRange()-1) * val;
         mViewDistanceSlider->setScrollPosition(viewdist);
+
+        mMasterVolumeSlider->setScrollPosition(Settings::Manager::getFloat("master volume", "Sound") * (mMasterVolumeSlider->getScrollRange()-1));
+        mMusicVolumeSlider->setScrollPosition(Settings::Manager::getFloat("music volume", "Sound") * (mMusicVolumeSlider->getScrollRange()-1));
+        mEffectsVolumeSlider->setScrollPosition(Settings::Manager::getFloat("sfx volume", "Sound") * (mEffectsVolumeSlider->getScrollRange()-1));
+        mFootstepsVolumeSlider->setScrollPosition(Settings::Manager::getFloat("footsteps volume", "Sound") * (mFootstepsVolumeSlider->getScrollRange()-1));
+        mVoiceVolumeSlider->setScrollPosition(Settings::Manager::getFloat("voice volume", "Sound") * (mVoiceVolumeSlider->getScrollRange()-1));
 
         std::string on = mWindowManager.getGameSettingString("sOn", "On");
         std::string off = mWindowManager.getGameSettingString("sOff", "On");
@@ -90,7 +107,7 @@ namespace MWGui
         Settings::Manager::setInt("resolution x", "Video", resX);
         Settings::Manager::setInt("resolution y", "Video", resY);
 
-        MWBase::Environment::get().getWorld()->processChangedSettings(Settings::Manager::apply());
+        apply();
     }
 
     void SettingsWindow::onButtonToggled(MyGUI::Widget* _sender)
@@ -117,14 +134,27 @@ namespace MWGui
     {
         float val = pos / float(scroller->getScrollRange()-1);
         if (scroller == mMenuTransparencySlider)
-        {
             Settings::Manager::setFloat("menu transparency", "GUI", val);
-        }
         else if (scroller == mViewDistanceSlider)
-        {
-            Settings::Manager::setFloat("max viewing distance", "Viewing distance", (1-val) * 2000 + val * 5600); 
-        }
+            Settings::Manager::setFloat("max viewing distance", "Viewing distance", (1-val) * 2000 + val * 5600);
+        else if (scroller == mMasterVolumeSlider)
+            Settings::Manager::setFloat("master volume", "Sound", val);
+        else if (scroller == mVoiceVolumeSlider)
+            Settings::Manager::setFloat("voice volume", "Sound", val);
+        else if (scroller == mEffectsVolumeSlider)
+            Settings::Manager::setFloat("sfx volume", "Sound", val);
+        else if (scroller == mFootstepsVolumeSlider)
+            Settings::Manager::setFloat("footsteps volume", "Sound", val);
+        else if (scroller == mMusicVolumeSlider)
+            Settings::Manager::setFloat("music volume", "Sound", val);
 
-        MWBase::Environment::get().getWorld()->processChangedSettings(Settings::Manager::apply());
+        apply();
+    }
+
+    void SettingsWindow::apply()
+    {
+        const Settings::CategorySettingVector changed = Settings::Manager::apply();
+        MWBase::Environment::get().getWorld()->processChangedSettings(changed);
+        MWBase::Environment::get().getWorld()->processChangedSettings(changed);
     }
 }

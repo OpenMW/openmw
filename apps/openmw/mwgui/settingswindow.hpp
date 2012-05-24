@@ -22,11 +22,20 @@ namespace MWGui
             MyGUI::ScrollBar* mMenuTransparencySlider;
             MyGUI::ScrollBar* mViewDistanceSlider;
 
+            // audio
+            MyGUI::ScrollBar* mMasterVolumeSlider;
+            MyGUI::ScrollBar* mVoiceVolumeSlider;
+            MyGUI::ScrollBar* mEffectsVolumeSlider;
+            MyGUI::ScrollBar* mFootstepsVolumeSlider;
+            MyGUI::ScrollBar* mMusicVolumeSlider;
+
             void onOkButtonClicked(MyGUI::Widget* _sender);
             void onSliderChangePosition(MyGUI::ScrollBar* scroller, size_t pos);
             void onButtonToggled(MyGUI::Widget* _sender);
             void onResolutionSelected(MyGUI::ListBox* _sender, size_t index);
             void onResolutionAccept();
+
+            void apply();
     };
 }
 

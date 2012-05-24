@@ -7,7 +7,6 @@
 #include <OgreRoot.h>
 
 #include <components/esm_store/store.hpp>
-#include <components/settings/settings.hpp>
 
 #include "../mwbase/environment.hpp"
 
@@ -53,6 +52,8 @@ namespace MWSound
         , mMasterVolume(1.0f)
         , mSFXVolume(1.0f)
         , mMusicVolume(1.0f)
+        , mFootstepsVolume(1.0f)
+        , mVoiceVolume(1.0f)
     {
         if(!useSound)
             return;
@@ -210,7 +211,7 @@ namespace MWSound
         try
         {
             // The range values are not tested
-            float basevol = mMasterVolume * mSFXVolume;
+            float basevol = mMasterVolume * mVoiceVolume;
             std::string filePath = "Sound/"+filename;
             const ESM::Position &pos = ptr.getCellRef().pos;
             const Ogre::Vector3 objpos(pos.pos[0], pos.pos[1], pos.pos[2]);
@@ -234,7 +235,7 @@ namespace MWSound
             return;
         try
         {
-            float basevol = mMasterVolume * mSFXVolume;
+            float basevol = mMasterVolume * mVoiceVolume;
             std::string filePath = "Sound/"+filename;
 
             SoundPtr sound = mOutput->playSound(filePath, basevol, 1.0f, Play_Normal);
@@ -526,6 +527,15 @@ namespace MWSound
         updateRegionSound(duration);
     }
 
+
+    void SoundManager::processChangedSettings(const Settings::CategorySettingVector& settings)
+    {
+        mMasterVolume = Settings::Manager::getFloat("master volume", "Sound");
+        mMusicVolume = Settings::Manager::getFloat("music volume", "Sound");
+        mSFXVolume = Settings::Manager::getFloat("sfx volume", "Sound");
+        mFootstepsVolume = Settings::Manager::getFloat("footsteps volume", "Sound");
+        mVoiceVolume = Settings::Manager::getFloat("voice volume", "Sound");
+    }
 
     // Default readAll implementation, for decoders that can't do anything
     // better
