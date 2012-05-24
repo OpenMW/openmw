@@ -1,13 +1,14 @@
 #include "bookwindow.hpp"
 
-#include "formatting.hpp"
+#include <boost/lexical_cast.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwinput/inputmanager.hpp"
 #include "../mwsound/soundmanager.hpp"
 #include "../mwworld/actiontake.hpp"
 
-#include <boost/lexical_cast.hpp>
+#include "formatting.hpp"
+#include "window_manager.hpp"
 
 using namespace MWGui;
 
@@ -91,7 +92,7 @@ void BookWindow::onCloseButtonClicked (MyGUI::Widget* _sender)
     // no 3d sounds because the object could be in a container.
     MWBase::Environment::get().getSoundManager()->playSound ("book close", 1.0, 1.0);
 
-    MWBase::Environment::get().getInputManager()->setGuiMode(MWGui::GM_Game);
+    mWindowManager.popGuiMode();
 }
 
 void BookWindow::onTakeButtonClicked (MyGUI::Widget* _sender)
@@ -101,7 +102,7 @@ void BookWindow::onTakeButtonClicked (MyGUI::Widget* _sender)
     MWWorld::ActionTake take(mBook);
     take.execute();
 
-    MWBase::Environment::get().getInputManager()->setGuiMode (GM_Game);
+    mWindowManager.popGuiMode();
 }
 
 void BookWindow::onNextPageButtonClicked (MyGUI::Widget* _sender)

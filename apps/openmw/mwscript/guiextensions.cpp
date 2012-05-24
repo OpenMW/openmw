@@ -44,7 +44,7 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
-                    MWBase::Environment::get().getInputManager()->setGuiMode(mDialogue);
+                    MWBase::Environment::get().getWindowManager()->pushGuiMode(mDialogue);
                 }
         };
 

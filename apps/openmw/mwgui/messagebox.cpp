@@ -58,7 +58,7 @@ void MessageBoxManager::onFrame (float frameDuration)
     if(mInterMessageBoxe != NULL && mInterMessageBoxe->mMarkedToDelete) {
         delete mInterMessageBoxe;
         mInterMessageBoxe = NULL;
-        mWindowManager->setNextMode(GM_Game);
+        mWindowManager->popGuiMode();
     }
 }
 
