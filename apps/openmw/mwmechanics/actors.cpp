@@ -71,7 +71,10 @@ namespace MWMechanics
 
     void Actors::removeActor (const MWWorld::Ptr& ptr)
     {
-        mActors.erase (ptr);
+        std::set<MWWorld::Ptr>::iterator iter = mActors.find (ptr);
+
+        if (iter!=mActors.end())
+            mActors.erase (iter);
     }
 
     void Actors::dropActors (const MWWorld::Ptr::CellStore *cellStore)
