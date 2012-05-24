@@ -553,16 +553,17 @@ namespace MWWorld
         {
             ptr.getRefData().setCount (0);
 
+            if (mWorldScene->getActiveCells().find (ptr.getCell())!=mWorldScene->getActiveCells().end())
+            {
+                MWBase::Environment::get().getMechanicsManager()->removeActor (ptr);
 
-                if (mWorldScene->getActiveCells().find (ptr.getCell())!=mWorldScene->getActiveCells().end()){
-//                           Class::get (ptr).disable (ptr, mEnvironment); /// \todo this line needs to be removed
-                            MWBase::Environment::get().getSoundManager()->stopSound3D (ptr);
+                MWBase::Environment::get().getSoundManager()->stopSound3D (ptr);
 
-                            mPhysics->removeObject (ptr.getRefData().getHandle());
-                            mRendering->removeObject(ptr);
+                mPhysics->removeObject (ptr.getRefData().getHandle());
+                mRendering->removeObject(ptr);
 
-                            mLocalScripts.remove (ptr);
-                }
+                mLocalScripts.remove (ptr);
+            }
         }
     }
 
