@@ -64,6 +64,10 @@ namespace MWSound
         mSFXVolume = std::min(std::max(mSFXVolume, 0.0f), 1.0f);
         mMusicVolume = Settings::Manager::getFloat("music volume", "Sound");
         mMusicVolume = std::min(std::max(mMusicVolume, 0.0f), 1.0f);
+        mVoiceVolume = Settings::Manager::getFloat("voice volume", "Sound");
+        mVoiceVolume = std::min(std::max(mMusicVolume, 0.0f), 1.0f);
+        mFootstepsVolume = Settings::Manager::getFloat("footsteps volume", "Sound");
+        mFootstepsVolume = std::min(std::max(mMusicVolume, 0.0f), 1.0f);
 
         std::cout << "Sound output: " << SOUND_OUT << std::endl;
         std::cout << "Sound decoder: " << SOUND_IN << std::endl;
