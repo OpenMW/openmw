@@ -4,12 +4,12 @@
     <Widget type="Widget" layer="Popup" position="0 0 300 300" name="_Main">
 
         <!-- Dynamically constructed tooltip goes here -->
-        <Widget type="Widget" skin="HUD_Box" position="0 0 300 300" align="Stretch" name="DynamicToolTipBox">
+        <Widget type="Widget" skin="HUD_Box_NoTransp" position="0 0 300 300" align="Stretch" name="DynamicToolTipBox">
             <Property key="Visible" value="false"/>
         </Widget>
 
         <!-- Text tooltip -->
-        <Widget type="Widget" skin="HUD_Box" position="0 0 300 300" align="Stretch" name="TextToolTip">
+        <Widget type="Widget" skin="HUD_Box_NoTransp" position="0 0 300 300" align="Stretch" name="TextToolTip">
             <Property key="Visible" value="false"/>
 
             <Widget type="EditBox" skin="SandText" position="8 8 284 284" align="Left Top Stretch" name="Text">
@@ -22,7 +22,7 @@
         </Widget>
 
         <!-- Text with centered caption tooltip -->
-        <Widget type="Widget" skin="HUD_Box" position="0 0 300 56" align="Stretch" name="TextWithCenteredCaptionToolTip">
+        <Widget type="Widget" skin="HUD_Box_NoTransp" position="0 0 300 56" align="Stretch" name="TextWithCenteredCaptionToolTip">
             <Property key="Visible" value="false"/>
 
             <Widget type="TextBox" skin="NormalText" position="8 8 284 18" align="Left Top HStretch" name="CenteredCaption">
@@ -40,7 +40,7 @@
         </Widget>
 
         <!-- Class tooltip -->
-        <Widget type="Widget" skin="HUD_Box" position="0 0 300 78" align="Stretch" name="ClassToolTip">
+        <Widget type="Widget" skin="HUD_Box_NoTransp" position="0 0 300 78" align="Stretch" name="ClassToolTip">
             <Property key="Visible" value="false"/>
 
             <Widget type="TextBox" skin="NormalText" position="8 8 284 18" align="Left Top HStretch" name="ClassName">
@@ -63,7 +63,7 @@
         </Widget>
 
         <!-- Health tooltip -->
-        <Widget type="Widget" skin="HUD_Box" position="0 0 300 300" align="Stretch" name="HealthToolTip">
+        <Widget type="Widget" skin="HUD_Box_NoTransp" position="0 0 300 300" align="Stretch" name="HealthToolTip">
             <Property key="Visible" value="false"/>
 
             <Widget type="ImageBox" skin="ImageBox" position="8 8 32 32" align="Left Top" name="HealthImage"/>
@@ -78,7 +78,7 @@
         </Widget>
 
         <!-- Attribute tooltip -->
-        <Widget type="Widget" skin="HUD_Box" position="0 0 300 300" align="Stretch" name="AttributeToolTip">
+        <Widget type="Widget" skin="HUD_Box_NoTransp" position="0 0 300 300" align="Stretch" name="AttributeToolTip">
             <Property key="Visible" value="false"/>
 
             <Widget type="ImageBox" skin="ImageBox" position="8 8 32 32" align="Left Top" name="AttributeImage"/>
@@ -98,7 +98,7 @@
         </Widget>
 
         <!-- Skill tooltip -->
-        <Widget type="Widget" skin="HUD_Box" position="0 0 300 98" align="Stretch" name="SkillToolTip">
+        <Widget type="Widget" skin="HUD_Box_NoTransp" position="0 0 300 98" align="Stretch" name="SkillToolTip">
             <Property key="Visible" value="false"/>
 
             <Widget type="ImageBox" skin="ImageBox" position="8 8 32 32" align="Left Top" name="SkillImage"/>
@@ -135,7 +135,7 @@
         </Widget>
 
         <!-- Level tooltip -->
-        <Widget type="Widget" skin="HUD_Box" position="0 0 300 58" align="Left Top" name="LevelToolTip">
+        <Widget type="Widget" skin="HUD_Box_NoTransp" position="0 0 300 58" align="Left Top" name="LevelToolTip">
             <Property key="Visible" value="false"/>
             <UserString key="DontResize" value="true"/>
 
@@ -156,7 +156,7 @@
         </Widget>
 
         <!-- Birthsign tooltip -->
-        <Widget type="Widget" skin="HUD_Box" position="0 0 300 300" align="Stretch" name="BirthSignToolTip">
+        <Widget type="Widget" skin="HUD_Box_NoTransp" position="0 0 300 300" align="Stretch" name="BirthSignToolTip">
             <Property key="Visible" value="false"/>
 
             <!-- Birthsign image -->

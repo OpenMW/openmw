@@ -37,10 +37,10 @@ void ToolTips::setEnabled(bool enabled)
 
 void ToolTips::onFrame(float frameDuration)
 {
-    MyGUI::Gui::getInstance().destroyWidget(mDynamicToolTipBox);
-    mDynamicToolTipBox = mMainWidget->createWidget<Widget>("HUD_Box",
-        IntCoord(0, 0, mMainWidget->getCoord().width, mMainWidget->getCoord().height),
-        Align::Stretch, "DynamicToolTipBox");
+    while (mDynamicToolTipBox->getChildCount())
+    {
+        MyGUI::Gui::getInstance().destroyWidget(mDynamicToolTipBox->getChildAt(0));
+    }
 
     // start by hiding everything
     for (unsigned int i=0; i < mMainWidget->getChildCount(); ++i)
