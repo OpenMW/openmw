@@ -96,7 +96,7 @@ namespace MWGui
 
     void SettingsWindow::onOkButtonClicked(MyGUI::Widget* _sender)
     {
-        mWindowManager.setGuiMode(GM_Game);
+        mWindowManager.popGuiMode();
     }
 
     void SettingsWindow::onResolutionSelected(MyGUI::ListBox* _sender, size_t index)

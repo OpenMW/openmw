@@ -18,12 +18,12 @@ namespace MWWorld
 
         if (ref->base->data.isScroll)
         {
-            MWBase::Environment::get().getWindowManager()->setGuiMode(MWGui::GM_Scroll);
+            MWBase::Environment::get().getWindowManager()->pushGuiMode(MWGui::GM_Scroll);
             MWBase::Environment::get().getWindowManager()->getScrollWindow()->open(mObject);
         }
         else
         {
-            MWBase::Environment::get().getWindowManager()->setGuiMode(MWGui::GM_Book);
+            MWBase::Environment::get().getWindowManager()->pushGuiMode(MWGui::GM_Book);
             MWBase::Environment::get().getWindowManager()->getBookWindow()->open(mObject);
         }
     }

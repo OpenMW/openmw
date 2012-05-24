@@ -18,6 +18,7 @@
 #include "tradewindow.hpp"
 #include "settingswindow.hpp"
 #include "confirmationdialog.hpp"
+#include "alchemywindow.hpp"
 
 #include "../mwmechanics/mechanicsmanager.hpp"
 #include "../mwinput/inputmanager.hpp"
@@ -54,6 +55,7 @@ WindowManager::WindowManager(
   , mTradeWindow(NULL)
   , mSettingsWindow(NULL)
   , mConfirmationDialog(NULL)
+  , mAlchemyWindow(NULL)
   , mCharGen(NULL)
   , playerClass()
   , playerName()
@@ -66,9 +68,6 @@ WindowManager::WindowManager(
   , playerMagicka()
   , playerFatigue()
   , gui(NULL)
-  , mode(GM_Game)
-  , nextMode(GM_Game)
-  , needModeChange(false)
   , garbageDialogs()
   , shown(GW_ALL)
   , allowed(newGame ? GW_None : GW_ALL)
@@ -124,6 +123,7 @@ WindowManager::WindowManager(
     mCountDialog = new CountDialog(*this);
     mSettingsWindow = new SettingsWindow(*this);
     mConfirmationDialog = new ConfirmationDialog(*this);
+    mAlchemyWindow = new AlchemyWindow(*this);
 
     // The HUD is always on
     hud->setVisible(true);
@@ -166,6 +166,7 @@ WindowManager::~WindowManager()
     delete mTradeWindow;
     delete mSettingsWindow;
     delete mConfirmationDialog;
+    delete mAlchemyWindow;
 
     cleanupGarbage();
 }
@@ -186,29 +187,12 @@ void WindowManager::cleanupGarbage()
 void WindowManager::update()
 {
     cleanupGarbage();
-    if (needModeChange)
-    {
-        needModeChange = false;
-        MWBase::Environment::get().getInputManager()->setGuiMode(nextMode);
-        nextMode = GM_Game;
-    }
     if (showFPSLevel > 0)
     {
         hud->setFPS(mFPS);
         hud->setTriangleCount(mTriangleCount);
         hud->setBatchCount(mBatchCount);
     }
-}
-
-void WindowManager::setNextMode(GuiMode newMode)
-{
-    nextMode = newMode;
-    needModeChange = true;
-}
-
-void WindowManager::setGuiMode(GuiMode newMode)
-{
-    MWBase::Environment::get().getInputManager()->setGuiMode(newMode);
 }
 
 void WindowManager::updateVisible()
@@ -226,19 +210,25 @@ void WindowManager::updateVisible()
     mBookWindow->setVisible(false);
     mTradeWindow->setVisible(false);
     mSettingsWindow->setVisible(false);
+    mAlchemyWindow->setVisible(false);
 
     // Mouse is visible whenever we're not in game mode
     MyGUI::PointerManager::getInstance().setVisible(isGuiMode());
 
-    if (mode == GM_Game)
+    bool gameMode = !isGuiMode();
+
+    if (gameMode)
         mToolTips->enterGameMode();
     else
         mToolTips->enterGuiMode();
 
+    // If in game mode, don't show anything.
+    if (gameMode)
+        return;
+
+    GuiMode mode = mGuiModes.back();
+
     switch(mode) {
-        case GM_Game:
-            // If in game mode, don't show anything.
-            break;
         case GM_MainMenu:
             menu->setVisible(true);
             break;
@@ -253,6 +243,9 @@ void WindowManager::updateVisible()
             break;
         case GM_Book:
             mBookWindow->setVisible(true);
+            break;
+        case GM_Alchemy:
+            mAlchemyWindow->setVisible(true);
             break;
         case GM_Name:
         case GM_Race:
@@ -285,7 +278,7 @@ void WindowManager::updateVisible()
             mInventoryWindow->openInventory();
             break;
         case GM_Dialogue:
-            mDialogueWindow->open();
+            mDialogueWindow->setVisible(true);
             break;
         case GM_Barter:
             mInventoryWindow->setVisible(true);
@@ -293,9 +286,6 @@ void WindowManager::updateVisible()
             mTradeWindow->setVisible(true);
             break;
         case GM_InterMessageBox:
-            if(!mMessageBoxManager->isInteractiveMessageBox()) {
-                setGuiMode(GM_Game);
-            }
             break;
         case GM_Journal:
             mJournal->setVisible(true);
@@ -303,9 +293,6 @@ void WindowManager::updateVisible()
             break;
         default:
             // Unsupported mode, switch back to game
-            // Note: The call will eventually end up this method again but
-            // will stop at the check if mode is GM_Game.
-            setGuiMode(GM_Game);
             break;
     }
 }
@@ -439,7 +426,7 @@ void WindowManager::messageBox (const std::string& message, const std::vector<st
     else
     {
         mMessageBoxManager->createInteractiveMessageBox(message, buttons);
-        setGuiMode(GM_InterMessageBox);
+        pushGuiMode(GM_InterMessageBox);
     }
 }
 
@@ -464,7 +451,7 @@ void WindowManager::onDialogueWindowBye()
         //removeDialog(dialogueWindow);
         mDialogueWindow->setVisible(false);
     }
-    setGuiMode(GM_Game);
+    popGuiMode();
 }
 
 void WindowManager::onFrame (float frameDuration)
@@ -607,4 +594,28 @@ void WindowManager::onRetrieveTag(const MyGUI::UString& _tag, MyGUI::UString& _r
 void WindowManager::processChangedSettings(const Settings::CategorySettingVector& changed)
 {
     hud->setFpsLevel(Settings::Manager::getInt("fps", "HUD"));
+}
+
+void WindowManager::pushGuiMode(GuiMode mode)
+{
+    if (mode==GM_Inventory && allowed==GW_None)
+        return;
+
+    mGuiModes.push_back(mode);
+
+    bool gameMode = !isGuiMode();
+    MWBase::Environment::get().getInputManager()->changeInputMode(!gameMode);
+
+    updateVisible();
+}
+
+void WindowManager::popGuiMode()
+{
+    if (mGuiModes.size())
+        mGuiModes.pop_back();
+
+    bool gameMode = !isGuiMode();
+    MWBase::Environment::get().getInputManager()->changeInputMode(!gameMode);
+
+    updateVisible();
 }

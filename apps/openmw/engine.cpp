@@ -105,7 +105,7 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
                                // frame.
 
         // passing of time
-        if (MWBase::Environment::get().getWindowManager()->getMode()==MWGui::GM_Game)
+        if (!MWBase::Environment::get().getWindowManager()->isGuiMode())
             MWBase::Environment::get().getWorld()->advanceTime (
                 mEnvironment.getFrameDuration()*MWBase::Environment::get().getWorld()->getTimeScaleFactor()/3600);
 
@@ -116,9 +116,9 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
         // update actors
         std::vector<std::pair<std::string, Ogre::Vector3> > movement;
         MWBase::Environment::get().getMechanicsManager()->update (movement, mEnvironment.getFrameDuration(),
-            MWBase::Environment::get().getWindowManager()->getMode()!=MWGui::GM_Game);
+            MWBase::Environment::get().getWindowManager()->isGuiMode());
 
-        if (MWBase::Environment::get().getWindowManager()->getMode()==MWGui::GM_Game)
+        if (!MWBase::Environment::get().getWindowManager()->isGuiMode())
             MWBase::Environment::get().getWorld()->doPhysics (movement, mEnvironment.getFrameDuration());
 
         // update world
@@ -421,7 +421,7 @@ void OMW::Engine::go()
 
 void OMW::Engine::activate()
 {
-    if (MWBase::Environment::get().getWindowManager()->getMode()!=MWGui::GM_Game)
+    if (MWBase::Environment::get().getWindowManager()->isGuiMode())
         return;
 
     std::string handle = MWBase::Environment::get().getWorld()->getFacedHandle();

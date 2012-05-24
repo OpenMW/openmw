@@ -80,6 +80,7 @@ namespace MWGui
   class TradeWindow;
   class SettingsWindow;
   class ConfirmationDialog;
+  class AlchemyWindow;
 
   struct ClassPoint
   {
@@ -99,8 +100,6 @@ namespace MWGui
     WindowManager(const Compiler::Extensions& extensions, int fpsLevel, bool newGame, OEngine::Render::OgreRenderer *mOgre, const std::string logpath);
     virtual ~WindowManager();
 
-    void setGuiMode(GuiMode newMode);
-
     /**
      * Should be called each frame to update windows/gui elements.
      * This could mean updating sizes of gui elements or opening
@@ -108,19 +107,17 @@ namespace MWGui
      */
     void update();
 
-    void setMode(GuiMode newMode)
+    void pushGuiMode(GuiMode mode);
+    void popGuiMode();
+
+    GuiMode getMode() const
     {
-      if (newMode==GM_Inventory && allowed==GW_None)
-        return;
-
-      mode = newMode;
-      updateVisible();
+        if (mGuiModes.empty())
+            throw std::runtime_error ("getMode() called, but there is no active mode");
+        return mGuiModes.back();
     }
-    void setNextMode(GuiMode newMode);
 
-    GuiMode getMode() const { return mode; }
-
-    bool isGuiMode() const { return getMode() != GM_Game; } // Everything that is not game mode is considered "gui mode"
+    bool isGuiMode() const { return !mGuiModes.empty(); }
 
     // Disallow all inventory mode windows
     void disallowAll()
@@ -235,6 +232,7 @@ namespace MWGui
     TradeWindow* mTradeWindow;
     SettingsWindow* mSettingsWindow;
     ConfirmationDialog* mConfirmationDialog;
+    AlchemyWindow* mAlchemyWindow;
 
     CharacterCreation* mCharGen;
 
@@ -249,9 +247,7 @@ namespace MWGui
 
 
     MyGUI::Gui *gui; // Gui
-    GuiMode mode; // Current gui mode
-    GuiMode nextMode; // Next mode to activate in update()
-    bool needModeChange; //Whether a mode change is needed in update() [will use nextMode]
+    std::vector<GuiMode> mGuiModes;
 
     std::vector<OEngine::GUI::Layout*> garbageDialogs;
     void cleanupGarbage();

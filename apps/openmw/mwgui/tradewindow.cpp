@@ -210,7 +210,7 @@ namespace MWGui
         std::string sound = "Item Gold Up";
         MWBase::Environment::get().getSoundManager()->playSound (sound, 1.0, 1.0);
 
-        mWindowManager.setGuiMode(GM_Game);
+        mWindowManager.popGuiMode();
     }
 
     void TradeWindow::onCancelButtonClicked(MyGUI::Widget* _sender)
@@ -220,7 +220,7 @@ namespace MWGui
         // now gimme back my stuff!
         mWindowManager.getInventoryWindow()->returnBoughtItems(MWWorld::Class::get(mContainer).getContainerStore(mContainer));
 
-        mWindowManager.setGuiMode(GM_Game);
+        mWindowManager.popGuiMode();
     }
 
     void TradeWindow::updateLabels()
