@@ -10,9 +10,23 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwworld/world.hpp"
+#include "../mwsound/soundmanager.hpp"
 
 #include "window_manager.hpp"
 #include "confirmationdialog.hpp"
+
+namespace
+{
+    std::string fpsLevelToStr(int level)
+    {
+        if (level == 0)
+            return "#{sOff}";
+        else if (level == 1)
+            return "Basic";
+        else
+            return "Detailed";
+    }
+}
 
 namespace MWGui
 {
@@ -24,6 +38,8 @@ namespace MWGui
         getWidget(mMenuTransparencySlider, "MenuTransparencySlider");
         getWidget(mViewDistanceSlider, "ViewDistanceSlider");
         getWidget(mFullscreenButton, "FullscreenButton");
+        getWidget(mVSyncButton, "VSyncButton");
+        getWidget(mFPSButton, "FPSButton");
         getWidget(mMasterVolumeSlider, "MasterVolume");
         getWidget(mVoiceVolumeSlider, "VoiceVolume");
         getWidget(mEffectsVolumeSlider, "EffectsVolume");
@@ -32,6 +48,8 @@ namespace MWGui
 
         mOkButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onOkButtonClicked);
         mFullscreenButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onButtonToggled);
+        mVSyncButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onButtonToggled);
+        mFPSButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onFpsToggled);
         mMenuTransparencySlider->eventScrollChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onSliderChangePosition);
         mViewDistanceSlider->eventScrollChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onSliderChangePosition);
         mResolutionList->eventListChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onResolutionSelected);
@@ -71,10 +89,9 @@ namespace MWGui
         mFootstepsVolumeSlider->setScrollPosition(Settings::Manager::getFloat("footsteps volume", "Sound") * (mFootstepsVolumeSlider->getScrollRange()-1));
         mVoiceVolumeSlider->setScrollPosition(Settings::Manager::getFloat("voice volume", "Sound") * (mVoiceVolumeSlider->getScrollRange()-1));
 
-        std::string on = mWindowManager.getGameSettingString("sOn", "On");
-        std::string off = mWindowManager.getGameSettingString("sOff", "On");
-
-        mFullscreenButton->setCaption(Settings::Manager::getBool("fullscreen", "Video") ? on : off);
+        mFullscreenButton->setCaptionWithReplacing(Settings::Manager::getBool("fullscreen", "Video") ? "#{sOn}" : "#{sOff}");
+        mVSyncButton->setCaptionWithReplacing(Settings::Manager::getBool("vsync", "Video") ? "#{sOn}": "#{sOff}");
+        mFPSButton->setCaptionWithReplacing(fpsLevelToStr(Settings::Manager::getInt("fps", "HUD")));
     }
 
     void SettingsWindow::onOkButtonClicked(MyGUI::Widget* _sender)
@@ -128,6 +145,20 @@ namespace MWGui
 
         if (_sender == mFullscreenButton)
             Settings::Manager::setBool("fullscreen", "Video", newState);
+        else if (_sender == mVSyncButton)
+        {
+            Settings::Manager::setBool("vsync", "Video", newState);
+            MWBase::Environment::get().getWindowManager()->
+                messageBox("VSync will be applied after a restart", std::vector<std::string>());
+        }
+    }
+
+    void SettingsWindow::onFpsToggled(MyGUI::Widget* _sender)
+    {
+        int newLevel = (Settings::Manager::getInt("fps", "HUD") + 1) % 3;
+        Settings::Manager::setInt("fps", "HUD", newLevel);
+        mFPSButton->setCaptionWithReplacing(fpsLevelToStr(newLevel));
+        apply();
     }
 
     void SettingsWindow::onSliderChangePosition(MyGUI::ScrollBar* scroller, size_t pos)
@@ -155,6 +186,7 @@ namespace MWGui
     {
         const Settings::CategorySettingVector changed = Settings::Manager::apply();
         MWBase::Environment::get().getWorld()->processChangedSettings(changed);
-        MWBase::Environment::get().getWorld()->processChangedSettings(changed);
+        MWBase::Environment::get().getSoundManager()->processChangedSettings(changed);
+        MWBase::Environment::get().getWindowManager()->processChangedSettings(changed);
     }
 }

@@ -554,14 +554,6 @@ void WindowManager::toggleFogOfWar()
     hud->toggleFogOfWar();
 }
 
-int WindowManager::toggleFps()
-{
-    showFPSLevel = (showFPSLevel+1)%3;
-    hud->setFpsLevel(showFPSLevel);
-    Settings::Manager::setInt("fps", "HUD", showFPSLevel);
-    return showFPSLevel;
-}
-
 void WindowManager::setFocusObject(const MWWorld::Ptr& focus)
 {
     mToolTips->setFocusObject(focus);
@@ -610,4 +602,9 @@ void WindowManager::onRetrieveTag(const MyGUI::UString& _tag, MyGUI::UString& _r
         _result = setting->str;
     else
         _result = _tag;
+}
+
+void WindowManager::processChangedSettings(const Settings::CategorySettingVector& changed)
+{
+    hud->setFpsLevel(Settings::Manager::getInt("fps", "HUD"));
 }

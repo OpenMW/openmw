@@ -17,6 +17,7 @@
 #include "MyGUI_UString.h"
 
 #include <components/esm_store/store.hpp>
+#include <components/settings/settings.hpp>
 #include <openengine/ogre/renderer.hpp>
 #include <openengine/gui/manager.hpp>
 
@@ -182,9 +183,6 @@ namespace MWGui
     void toggleFullHelp(); ///< show extra info in item tooltips (owner, script)
     bool getFullHelp() const;
 
-    int toggleFps();
-    ///< toggle fps display @return resulting fps level
-
     void setInteriorMapTexture(const int x, const int y);
     ///< set the index of the map texture that should be used (for interiors)
 
@@ -214,6 +212,8 @@ namespace MWGui
     const std::string &getGameSettingString(const std::string &id, const std::string &default_);
 
     const ESMS::ESMStore& getStore() const;
+
+    void processChangedSettings(const Settings::CategorySettingVector& changed);
 
   private:
     OEngine::GUI::MyGUIManager *mGuiManager;

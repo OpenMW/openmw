@@ -69,8 +69,6 @@ namespace MWInput
       A_ToggleWeapon,
       A_ToggleSpell,
 
-      A_ToggleFps, // Toggle FPS display (this is temporary)
-
       A_Settings, // Temporary hotkey
 
       A_LAST            // Marker for the last item
@@ -94,11 +92,6 @@ namespace MWInput
 
 
    /* InputImpl Methods */
-
-    void toggleFps()
-    {
-        windows.toggleFps();
-    }
 
     void toggleSpell()
     {
@@ -271,8 +264,6 @@ namespace MWInput
                       "Draw Weapon");
       disp->funcs.bind(A_ToggleSpell,boost::bind(&InputImpl::toggleSpell,this),
                       "Ready hands");
-      disp->funcs.bind(A_ToggleFps, boost::bind(&InputImpl::toggleFps, this),
-                      "Toggle FPS display");
       disp->funcs.bind(A_Settings, boost::bind(&InputImpl::showSettings, this),
                       "Show settings window");
       // Add the exit listener
@@ -321,7 +312,6 @@ namespace MWInput
       disp->bind(A_ToggleWalk, KC_C);
       disp->bind(A_ToggleWeapon,KC_F);
       disp->bind(A_ToggleSpell,KC_R);
-      disp->bind(A_ToggleFps, KC_F10);
       disp->bind(A_Settings, KC_F2);
 
       // Key bindings for polled keys

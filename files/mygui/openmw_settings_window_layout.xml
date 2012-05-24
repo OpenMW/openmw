@@ -68,25 +68,47 @@
             <Widget type="TabItem" skin="" position="4 28 360 312">
                 <Property key="Caption" value="  #{sVideo}  "/>
 
-                <Widget type="ListBox" skin="MW_List" position="4 4 200 110" align="Left Top" name="ResolutionList"/>
-                <Widget type="TextBox" skin="SandText" position="252 4 120 24" align="Left Top">
-                    <Property key="Caption" value="Fullscreen"/>
-                </Widget>
-                <Widget type="Button" skin="MW_Button" position="212 4 34 24" align="Left Top" name="FullscreenButton"/>
+                <Widget type="TabControl" skin="TabControl" position="4 4 352 304" align="Left Top">
+                    <Property key="ButtonAutoWidth" value="true"/>
 
-                <Widget type="TextBox" skin="NormalText" position="4 130 352 18" align="Left Top">
-                    <Property key="Caption" value="#{sRender_Distance}"/>
-                </Widget>
-                <Widget type="ScrollBar" skin="MW_HSlider" position="4 154 352 18" align="Left Top" name="ViewDistanceSlider">
-                    <Property key="Range" value="1000000"/>
-                </Widget>
-                <Widget type="TextBox" skin="SandText" position="4 178 352 18" align="Left Top">
-                    <Property key="Caption" value="#{sNear}"/>
-                    <Property key="TextAlign" value="Left"/>
-                </Widget>
-                <Widget type="TextBox" skin="SandText" position="4 178 352 18" align="Left Top">
-                    <Property key="Caption" value="#{sFar}"/>
-                    <Property key="TextAlign" value="Right"/>
+                    <Widget type="TabItem" skin="" position="4 28 344 272">
+                        <Property key="Caption" value="  Video  "/>
+
+                        <Widget type="ListBox" skin="MW_List" position="4 4 200 150" align="Left Top" name="ResolutionList"/>
+                        <Widget type="TextBox" skin="SandText" position="252 4 120 24" align="Left Top">
+                            <Property key="Caption" value="Fullscreen"/>
+                        </Widget>
+
+                        <Widget type="Button" skin="MW_Button" position="212 4 34 24" align="Left Top" name="FullscreenButton"/>
+                        <Widget type="TextBox" skin="SandText" position="252 34 120 24" align="Left Top">
+                            <Property key="Caption" value="VSync"/>
+                        </Widget>
+                        <Widget type="Button" skin="MW_Button" position="212 34 34 24" align="Left Top" name="VSyncButton"/>
+
+                        <Widget type="TextBox" skin="SandText" position="74 170 250 24" align="Left Top">
+                            <Property key="Caption" value="Show frames per second"/>
+                        </Widget>
+                        <Widget type="Button" skin="MW_Button" position="4 170 64 24" align="Left Top" name="FPSButton"/>
+                    </Widget>
+
+                    <Widget type="TabItem" skin="" position="4 28 344 272">
+                        <Property key="Caption" value="  Detail  "/>
+
+                        <Widget type="TextBox" skin="NormalText" position="4 130 322 18" align="Left Top">
+                            <Property key="Caption" value="#{sRender_Distance}"/>
+                        </Widget>
+                        <Widget type="ScrollBar" skin="MW_HSlider" position="4 154 322 18" align="Left Top" name="ViewDistanceSlider">
+                            <Property key="Range" value="1000000"/>
+                        </Widget>
+                        <Widget type="TextBox" skin="SandText" position="4 178 332 18" align="Left Top">
+                            <Property key="Caption" value="#{sNear}"/>
+                            <Property key="TextAlign" value="Left"/>
+                        </Widget>
+                        <Widget type="TextBox" skin="SandText" position="4 178 332 18" align="Left Top">
+                            <Property key="Caption" value="#{sFar}"/>
+                            <Property key="TextAlign" value="Right"/>
+                        </Widget>
+                    </Widget>
                 </Widget>
             </Widget>
         </Widget>

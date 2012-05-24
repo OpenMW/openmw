@@ -17,9 +17,14 @@ namespace MWGui
 
         protected:
             MyGUI::Button* mOkButton;
+
+            MyGUI::ScrollBar* mMenuTransparencySlider;
+
+            // graphics
             MyGUI::ListBox* mResolutionList;
             MyGUI::Button* mFullscreenButton;
-            MyGUI::ScrollBar* mMenuTransparencySlider;
+            MyGUI::Button* mVSyncButton;
+            MyGUI::Button* mFPSButton;
             MyGUI::ScrollBar* mViewDistanceSlider;
 
             // audio
@@ -30,6 +35,7 @@ namespace MWGui
             MyGUI::ScrollBar* mMusicVolumeSlider;
 
             void onOkButtonClicked(MyGUI::Widget* _sender);
+            void onFpsToggled(MyGUI::Widget* _sender);
             void onSliderChangePosition(MyGUI::ScrollBar* scroller, size_t pos);
             void onButtonToggled(MyGUI::Widget* _sender);
             void onResolutionSelected(MyGUI::ListBox* _sender, size_t index);
