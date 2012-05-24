@@ -539,6 +539,30 @@ namespace MWSound
         mSFXVolume = Settings::Manager::getFloat("sfx volume", "Sound");
         mFootstepsVolume = Settings::Manager::getFloat("footsteps volume", "Sound");
         mVoiceVolume = Settings::Manager::getFloat("voice volume", "Sound");
+
+        SoundMap::iterator snditer = mActiveSounds.begin();
+        while(snditer != mActiveSounds.end())
+        {
+            if(snditer->second.second != "_say_sound")
+            {
+                float basevol = mMasterVolume * mSFXVolume;
+                float min, max;
+                lookup(snditer->second.second, basevol, min, max);
+                snditer->first->mBaseVolume = basevol;
+            }
+            else
+            {
+                float basevol = mMasterVolume * mVoiceVolume;
+                snditer->first->mBaseVolume = basevol;
+            }
+            snditer->first->update();
+            snditer++;
+        }
+        if(mMusic)
+        {
+            mMusic->mBaseVolume = mMasterVolume * mMusicVolume;
+            mMusic->update();
+        }
     }
 
     // Default readAll implementation, for decoders that can't do anything
