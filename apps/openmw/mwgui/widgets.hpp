@@ -23,6 +23,18 @@ namespace MWGui
     {
         void fixTexturePath(std::string &path);
 
+        struct SpellEffectParams
+        {
+            bool mHasTarget; // potion effects for example have no target (target is always the player)
+            bool mIsConstant; // constant effect means that duration will not be displayed
+            std::string effectID;
+
+            // note that the ESM::MagicEffect (retrieved through effectID) might already store skill and attribute,
+            // in that case the ESM::MagicEffect skill/attribute is preferred. this is just here for ingredients which
+            // have them defined elsewhere.
+            signed char skill, attribute;
+        };
+
         class MYGUI_EXPORT MWSkill : public Widget
         {
             MYGUI_RTTI_DERIVED( MWSkill );
