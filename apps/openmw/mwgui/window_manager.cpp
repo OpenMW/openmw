@@ -608,4 +608,6 @@ void WindowManager::onRetrieveTag(const MyGUI::UString& _tag, MyGUI::UString& _r
     const ESM::GameSetting *setting = MWBase::Environment::get().getWorld()->getStore().gameSettings.search(_tag);
     if (setting && setting->type == ESM::VT_String)
         _result = setting->str;
+    else
+        _result = _tag;
 }
