@@ -41,7 +41,6 @@ namespace
                     {
                         rendering.addObject(ptr);
                         class_.insertObject(ptr, physics);
-                        class_.enable (ptr);
                     }
                     catch (const std::exception& e)
                     {
@@ -459,8 +458,20 @@ namespace MWWorld
 
         mRendering.addObject(newPtr);
         MWWorld::Class::get(newPtr).insertObject(newPtr, *mPhysics);
-        MWWorld::Class::get(newPtr).enable(newPtr);
 
     }
 
+    void Scene::addObjectToScene (const Ptr& ptr)
+    {
+        mRendering.addObject (ptr);
+        MWWorld::Class::get (ptr).insertObject (ptr, *mPhysics);
+    }
+
+    void Scene::removeObjectFromScene (const Ptr& ptr)
+    {
+        MWBase::Environment::get().getMechanicsManager()->removeActor (ptr);
+        MWBase::Environment::get().getSoundManager()->stopSound3D (ptr);
+        mPhysics->removeObject (ptr.getRefData().getHandle());
+        mRendering.removeObject (ptr);
+    }
 }
