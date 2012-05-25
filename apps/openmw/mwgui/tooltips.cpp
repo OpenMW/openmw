@@ -285,7 +285,7 @@ IntSize ToolTips::createToolTip(const MWGui::ToolTipInfo& info)
     IntSize totalSize = IntSize( std::max(textSize.width, captionSize.width + ((image != "") ? imageCaptionHPadding : 0)),
         ((text != "") ? textSize.height + imageCaptionVPadding : 0) + captionHeight );
 
-    if (info.effects != 0)
+    if (!info.effects.empty())
     {
         Widget* effectArea = mDynamicToolTipBox->createWidget<Widget>("",
             IntCoord(0, totalSize.height, 300, 300-totalSize.height),
@@ -305,7 +305,7 @@ IntSize ToolTips::createToolTip(const MWGui::ToolTipInfo& info)
         effectsWidget->setEffectList(info.effects);
 
         std::vector<MyGUI::WidgetPtr> effectItems;
-        effectsWidget->createEffectWidgets(effectItems, effectArea, coord, true, Widgets::MWEffectList::EF_Potion);
+        effectsWidget->createEffectWidgets(effectItems, effectArea, coord, true, Widgets::MWEffectList::EF_NoTarget);
         totalSize.height += coord.top-6;
         totalSize.width = std::max(totalSize.width, coord.width);
     }
@@ -321,7 +321,7 @@ IntSize ToolTips::createToolTip(const MWGui::ToolTipInfo& info)
         Widgets::MWEffectListPtr enchantWidget = enchantArea->createWidget<Widgets::MWEffectList>
             ("MW_StatName", coord, Align::Default, "ToolTipEnchantWidget");
         enchantWidget->setWindowManager(mWindowManager);
-        enchantWidget->setEffectList(&enchant->effects);
+        enchantWidget->setEffectList(Widgets::MWEffectList::effectListFromESM(&enchant->effects));
 
         std::vector<MyGUI::WidgetPtr> enchantEffectItems;
         int flag = (enchant->data.type == ESM::Enchantment::ConstantEffect) ? Widgets::MWEffectList::EF_Constant : 0;

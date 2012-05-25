@@ -5,6 +5,8 @@
 #include <openengine/gui/layout.hpp>
 #include "../mwworld/ptr.hpp"
 
+#include "widgets.hpp"
+
 namespace MWGui
 {
     class WindowManager;
@@ -13,11 +15,6 @@ namespace MWGui
     struct ToolTipInfo
     {
     public:
-        ToolTipInfo() :
-            effects(0)
-        {
-        };
-
         std::string caption;
         std::string text;
         std::string icon;
@@ -26,7 +23,7 @@ namespace MWGui
         std::string enchant;
 
         // effects (for potions, ingredients)
-        const ESM::EffectList* effects;
+        Widgets::SpellEffectList effects;
     };
 
     class ToolTips : public OEngine::GUI::Layout

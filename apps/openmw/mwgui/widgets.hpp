@@ -21,7 +21,39 @@ namespace MWGui
 
     namespace Widgets
     {
+        class MWEffectList;
+
         void fixTexturePath(std::string &path);
+
+        struct SpellEffectParams
+        {
+            SpellEffectParams()
+                : mMagnMin(-1)
+                , mMagnMax(-1)
+                , mRange(-1)
+                , mDuration(-1)
+                , mSkill(-1)
+                , mAttribute(-1)
+                , mEffectID(-1)
+                , mNoTarget(false)
+                , mIsConstant(false)
+            {
+            }
+
+            bool mNoTarget; // potion effects for example have no target (target is always the player)
+            bool mIsConstant; // constant effect means that duration will not be displayed
+
+            // value of -1 here means the effect is unknown to the player
+            short mEffectID;
+
+            // value of -1 here means there is no skill/attribute
+            signed char mSkill, mAttribute;
+
+            // value of -1 here means the value is unavailable
+            int mMagnMin, mMagnMax, mRange, mDuration;
+        };
+
+        typedef std::vector<SpellEffectParams> SpellEffectList;
 
         class MYGUI_EXPORT MWSkill : public Widget
         {
@@ -108,6 +140,9 @@ namespace MWGui
         };
         typedef MWAttribute* MWAttributePtr;
 
+        /**
+         * @todo remove this class and use MWEffectList instead
+         */
         class MWSpellEffect;
         class MYGUI_EXPORT MWSpell : public Widget
         {
@@ -155,12 +190,14 @@ namespace MWGui
 
             enum EffectFlags
             {
-                EF_Potion = 0x01, // potions have no target (target is always the player) 
+                EF_NoTarget = 0x01, // potions have no target (target is always the player)
                 EF_Constant = 0x02 // constant effect means that duration will not be displayed
             };
 
             void setWindowManager(WindowManager* parWindowManager) { mWindowManager = parWindowManager; }
-            void setEffectList(const ESM::EffectList* list);
+            void setEffectList(const SpellEffectList& list);
+
+            static SpellEffectList effectListFromESM(const ESM::EffectList* effects);
 
             /**
              * @param vector to store the created effect widgets
@@ -180,7 +217,7 @@ namespace MWGui
             void updateWidgets();
 
             WindowManager* mWindowManager;
-            const ESM::EffectList* mEffectList;
+            SpellEffectList mEffectList;
         };
         typedef MWEffectList* MWEffectListPtr;
 
@@ -193,14 +230,13 @@ namespace MWGui
             typedef ESM::ENAMstruct SpellEffectValue;
 
             void setWindowManager(WindowManager* parWindowManager) { mWindowManager = parWindowManager; }
-            void setSpellEffect(SpellEffectValue value);
-            void setFlags(int flags) { mFlags = flags; }
+            void setSpellEffect(const SpellEffectParams& params);
 
             std::string effectIDToString(const short effectID);
             bool effectHasMagnitude (const std::string& effect);
             bool effectHasDuration (const std::string& effect);
-
-            const SpellEffectValue &getSpellEffect() const { return effect; }
+            bool effectInvolvesAttribute (const std::string& effect);
+            bool effectInvolvesSkill (const std::string& effect);
 
             int getRequestedWidth() const { return mRequestedWidth; }
 
@@ -214,8 +250,7 @@ namespace MWGui
             void updateWidgets();
 
             WindowManager* mWindowManager;
-            SpellEffectValue effect;
-            int mFlags;
+            SpellEffectParams mEffectParams;
             MyGUI::ImageBox* imageWidget;
             MyGUI::TextBox* textWidget;
             int mRequestedWidth;
@@ -247,7 +282,6 @@ namespace MWGui
             MyGUI::TextBox* barTextWidget;
         };
         typedef MWDynamicStat* MWDynamicStatPtr;
-
     }
 }
 
