@@ -97,7 +97,7 @@ namespace MWGui
         openContainer(player);
     }
 
-    void InventoryWindow::openInventory()
+    void InventoryWindow::open()
     {
         updateEncumbranceBar();
 

@@ -119,7 +119,7 @@ void ContainerBase::onSelectedItem(MyGUI::Widget* _sender)
         else
             onContainerClicked(mContainerWidget);
     }
-    else
+    else if (isTrading())
     {
         MWWorld::Ptr object = (*_sender->getUserData<MWWorld::Ptr>());
         int count = object.getRefData().getCount();
@@ -178,6 +178,10 @@ void ContainerBase::onSelectedItem(MyGUI::Widget* _sender)
                 dialog->eventOkClicked += MyGUI::newDelegate(this, &ContainerBase::sellItem);
             }
         }
+    }
+    else
+    {
+        onSelectedItemImpl(*_sender->getUserData<MWWorld::Ptr>());
     }
 }
 
@@ -383,6 +387,8 @@ void ContainerBase::drawItems()
                     + MWWorld::ContainerStore::Type_Lockpick + MWWorld::ContainerStore::Type_Light
                     + MWWorld::ContainerStore::Type_Apparatus;
     }
+    else if (mFilter == Filter_Ingredients)
+        categories = MWWorld::ContainerStore::Type_Ingredient;
 
     /// \todo performance improvement: don't create/destroy all the widgets everytime the container window changes size, only reposition them
 
@@ -514,6 +520,7 @@ void ContainerBase::drawItems()
             text->setNeedMouseFocus(false);
             text->setTextShadow(true);
             text->setTextShadowColour(MyGUI::Colour(0,0,0));
+            text->setCaption(getCountString(displayCount));
 
             y += 42;
             if (y > maxHeight)
@@ -522,7 +529,6 @@ void ContainerBase::drawItems()
                 y = 0;
             }
 
-            text->setCaption(getCountString(displayCount));
         }
     }
 

@@ -11,7 +11,7 @@ namespace MWGui
         public:
             InventoryWindow(WindowManager& parWindowManager,DragAndDrop* dragAndDrop);
 
-            void openInventory();
+            virtual void open();
 
             /// start trading, disables item drag&drop
             void startTrade();

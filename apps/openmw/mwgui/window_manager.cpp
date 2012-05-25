@@ -269,20 +269,17 @@ void WindowManager::updateVisible()
             map   -> setVisible( (eff & GW_Map) != 0 );
             mStatsWindow -> setVisible( (eff & GW_Stats) != 0 );
             mInventoryWindow->setVisible(true);
-            mInventoryWindow->openInventory();
             break;
         }
         case GM_Container:
             mContainerWindow->setVisible(true);
             mInventoryWindow->setVisible(true);
-            mInventoryWindow->openInventory();
             break;
         case GM_Dialogue:
             mDialogueWindow->setVisible(true);
             break;
         case GM_Barter:
             mInventoryWindow->setVisible(true);
-            mInventoryWindow->openInventory();
             mTradeWindow->setVisible(true);
             break;
         case GM_InterMessageBox:

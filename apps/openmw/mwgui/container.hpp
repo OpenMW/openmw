@@ -55,7 +55,9 @@ namespace MWGui
             Filter_Weapon = 0x02,
             Filter_Apparel = 0x03,
             Filter_Magic = 0x04,
-            Filter_Misc = 0x05
+            Filter_Misc = 0x05,
+
+            Filter_Ingredients = 0x06
         };
 
         enum ItemState
@@ -115,6 +117,8 @@ namespace MWGui
         virtual void _unequipItem(MWWorld::Ptr item) { ; }
 
         virtual bool isTrading() { return false; }
+
+        virtual void onSelectedItemImpl(MWWorld::Ptr item) { ; }
 
         virtual bool ignoreEquippedItems() { return false; }
         virtual std::vector<MWWorld::Ptr> itemsToIgnore() { return std::vector<MWWorld::Ptr>(); }
