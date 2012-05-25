@@ -357,12 +357,8 @@ namespace MWWorld
         {
             reference.getRefData().enable();
 
-
-                //render->enable (reference.getRefData().getHandle());
-            if(mWorldScene->getActiveCells().find (reference.getCell()) != mWorldScene->getActiveCells().end())
-                 Class::get (reference).enable (reference);
-
-
+            if(mWorldScene->getActiveCells().find (reference.getCell()) != mWorldScene->getActiveCells().end() && reference.getRefData().getCount())
+                mWorldScene->addObjectToScene (reference);
         }
     }
 
@@ -372,14 +368,8 @@ namespace MWWorld
         {
             reference.getRefData().disable();
 
-
-                //render->disable (reference.getRefData().getHandle());
-            if(mWorldScene->getActiveCells().find (reference.getCell())!=mWorldScene->getActiveCells().end()){
-                  Class::get (reference).disable (reference);
-                  MWBase::Environment::get().getSoundManager()->stopSound3D (reference);
-            }
-
-
+            if(mWorldScene->getActiveCells().find (reference.getCell())!=mWorldScene->getActiveCells().end() && reference.getRefData().getCount())
+                mWorldScene->removeObjectFromScene (reference);
         }
     }
 
@@ -553,16 +543,12 @@ namespace MWWorld
         {
             ptr.getRefData().setCount (0);
 
-
-                if (mWorldScene->getActiveCells().find (ptr.getCell())!=mWorldScene->getActiveCells().end()){
-//                           Class::get (ptr).disable (ptr, mEnvironment); /// \todo this line needs to be removed
-                            MWBase::Environment::get().getSoundManager()->stopSound3D (ptr);
-
-                            mPhysics->removeObject (ptr.getRefData().getHandle());
-                            mRendering->removeObject(ptr);
-
-                            mLocalScripts.remove (ptr);
-                }
+            if (mWorldScene->getActiveCells().find (ptr.getCell())!=mWorldScene->getActiveCells().end() &&
+                ptr.getRefData().isEnabled())
+            {
+                mWorldScene->removeObjectFromScene (ptr);
+                mLocalScripts.remove (ptr);
+            }
         }
     }
 

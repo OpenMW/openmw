@@ -105,6 +105,12 @@ namespace MWWorld
             void insertObject(MWWorld::Ptr object, Ptr::CellStore* cell);
 
             void update (float duration);
+
+            void addObjectToScene (const Ptr& ptr);
+            ///< Add an object that already exists in the world model to the scene.
+
+            void removeObjectFromScene (const Ptr& ptr);
+            ///< Remove an object from the scene, but not from the world model.
     };
 }
 
