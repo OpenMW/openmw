@@ -1,8 +1,11 @@
 #include "alchemywindow.hpp"
 
+#include <boost/algorithm/string.hpp>
+
 #include "../mwbase/environment.hpp"
 #include "../mwworld/world.hpp"
 #include "../mwworld/player.hpp"
+#include "../mwworld/manualref.hpp"
 #include "../mwworld/containerstore.hpp"
 #include "../mwsound/soundmanager.hpp"
 
@@ -38,6 +41,7 @@ namespace MWGui
         getWidget(mApparatus3, "Apparatus3");
         getWidget(mApparatus4, "Apparatus4");
         getWidget(mEffectsBox, "CreatedEffects");
+        getWidget(mNameEdit, "NameEdit");
 
         mIngredient1->eventMouseButtonClick += MyGUI::newDelegate(this, &AlchemyWindow::onIngredientSelected);
         mIngredient2->eventMouseButtonClick += MyGUI::newDelegate(this, &AlchemyWindow::onIngredientSelected);
@@ -72,6 +76,145 @@ namespace MWGui
 
     void AlchemyWindow::onCreateButtonClicked(MyGUI::Widget* _sender)
     {
+        // check if mortar & pestle is available (always needed)
+        /// \todo check albemic, calcinator, retort (sometimes needed)
+        if (!mApparatus1->isUserString("ToolTipType"))
+        {
+            mWindowManager.messageBox("#{sNotifyMessage45}", std::vector<std::string>());
+            return;
+        }
+
+        // make sure 2 or more ingredients were selected
+        int numIngreds = 0;
+        if (mIngredient1->isUserString("ToolTipType"))
+            ++numIngreds;
+        if (mIngredient2->isUserString("ToolTipType"))
+            ++numIngreds;
+        if (mIngredient3->isUserString("ToolTipType"))
+            ++numIngreds;
+        if (mIngredient4->isUserString("ToolTipType"))
+            ++numIngreds;
+        if (numIngreds < 2)
+        {
+            mWindowManager.messageBox("#{sNotifyMessage6a}", std::vector<std::string>());
+            return;
+        }
+
+        // make sure a name was entered
+        std::string name = mNameEdit->getCaption();
+        boost::algorithm::trim(name);
+        if (name == "")
+        {
+            mWindowManager.messageBox("#{sNotifyMessage37}", std::vector<std::string>());
+            return;
+        }
+
+        // if there are no created effects, the potion will always fail (but the ingredients won't be destroyed)
+        if (mEffects.empty())
+        {
+            mWindowManager.messageBox("#{sNotifyMessage8}", std::vector<std::string>());
+            MWBase::Environment::get().getSoundManager()->playSound("potion fail", 1.f, 1.f);
+            return;
+        }
+
+        if (rand() % 2 == 0) /// \todo
+        {
+            ESM::Potion newPotion;
+            newPotion.name = mNameEdit->getCaption();
+            ESM::EffectList effects;
+            for (unsigned int i=0; i<4; ++i)
+            {
+                if (mEffects.size() >= i+1)
+                {
+                    ESM::ENAMstruct effect;
+                    effect.effectID = mEffects[i].mEffectID;
+                    effect.range = ESM::RT_Self;
+                    effect.skill = mEffects[i].mSkill;
+                    effect.attribute = mEffects[i].mAttribute;
+                    effect.magnMin = 1; /// \todo
+                    effect.magnMax = 10; /// \todo
+                    effect.duration = 60; /// \todo
+                    effects.list.push_back(effect);
+                }
+            }
+
+            // UESP Wiki / Morrowind:Alchemy
+            // "The weight of a potion is an average of the weight of the ingredients, rounded down."
+            // note by scrawl: not rounding down here, I can't imagine a created potion to
+            // have 0 weight when using ingredients with 0.1 weight respectively
+            float weight = 0;
+            if (mIngredient1->isUserString("ToolTipType"))
+                weight += mIngredient1->getUserData<MWWorld::Ptr>()->get<ESM::Ingredient>()->base->data.weight;
+            if (mIngredient2->isUserString("ToolTipType"))
+                weight += mIngredient2->getUserData<MWWorld::Ptr>()->get<ESM::Ingredient>()->base->data.weight;
+            if (mIngredient3->isUserString("ToolTipType"))
+                weight += mIngredient3->getUserData<MWWorld::Ptr>()->get<ESM::Ingredient>()->base->data.weight;
+            if (mIngredient4->isUserString("ToolTipType"))
+                weight += mIngredient4->getUserData<MWWorld::Ptr>()->get<ESM::Ingredient>()->base->data.weight;
+            newPotion.data.weight = weight / float(numIngreds);
+
+            newPotion.data.value = 100; /// \todo
+            newPotion.effects = effects;
+            // pick a random mesh and icon
+            std::vector<std::string> names;
+            /// \todo is the mesh/icon dependent on alchemy skill?
+            names.push_back("standard");
+            names.push_back("bargain");
+            names.push_back("cheap");
+            names.push_back("fresh");
+            names.push_back("exclusive");
+            names.push_back("quality");
+            int random = rand() % names.size();
+            newPotion.model = "m\\misc_potion_" + names[random ] + "_01.nif";
+            newPotion.icon = "m\\tx_potion_" + names[random ] + "_01.dds";
+            std::pair<std::string, const ESM::Potion*> result = MWBase::Environment::get().getWorld()->createRecord(newPotion);
+
+            // create a reference and add it to player inventory
+            MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), result.first);
+            MWWorld::ContainerStore& store = MWWorld::Class::get(mContainer).getContainerStore(mContainer);
+            ref.getPtr().getRefData().setCount(1);
+            store.add(ref.getPtr());
+
+            mWindowManager.messageBox("#{sPotionSuccess}", std::vector<std::string>());
+            MWBase::Environment::get().getSoundManager()->playSound("potion success", 1.f, 1.f);
+        }
+        else
+        {
+            // potion failed
+            mWindowManager.messageBox("#{sNotifyMessage8}", std::vector<std::string>());
+            MWBase::Environment::get().getSoundManager()->playSound("potion fail", 1.f, 1.f);
+        }
+
+        // reduce count of the ingredients
+        if (mIngredient1->isUserString("ToolTipType"))
+        {
+            MWWorld::Ptr ingred = *mIngredient1->getUserData<MWWorld::Ptr>();
+            ingred.getRefData().setCount(ingred.getRefData().getCount()-1);
+            if (ingred.getRefData().getCount() == 0)
+                removeIngredient(mIngredient1);
+        }
+        if (mIngredient2->isUserString("ToolTipType"))
+        {
+            MWWorld::Ptr ingred = *mIngredient2->getUserData<MWWorld::Ptr>();
+            ingred.getRefData().setCount(ingred.getRefData().getCount()-1);
+            if (ingred.getRefData().getCount() == 0)
+                removeIngredient(mIngredient2);
+        }
+        if (mIngredient3->isUserString("ToolTipType"))
+        {
+            MWWorld::Ptr ingred = *mIngredient3->getUserData<MWWorld::Ptr>();
+            ingred.getRefData().setCount(ingred.getRefData().getCount()-1);
+            if (ingred.getRefData().getCount() == 0)
+                removeIngredient(mIngredient3);
+        }
+        if (mIngredient4->isUserString("ToolTipType"))
+        {
+            MWWorld::Ptr ingred = *mIngredient4->getUserData<MWWorld::Ptr>();
+            ingred.getRefData().setCount(ingred.getRefData().getCount()-1);
+            if (ingred.getRefData().getCount() == 0)
+                removeIngredient(mIngredient4);
+        }
+        update();
     }
 
     void AlchemyWindow::open()
@@ -133,10 +276,7 @@ namespace MWGui
 
     void AlchemyWindow::onIngredientSelected(MyGUI::Widget* _sender)
     {
-        _sender->clearUserStrings();
-        static_cast<MyGUI::ImageBox*>(_sender)->setImageTexture("");
-        if (_sender->getChildCount())
-            MyGUI::Gui::getInstance().destroyWidget(_sender->getChildAt(0));
+        removeIngredient(_sender);
         drawItems();
         update();
     }
@@ -292,7 +432,10 @@ namespace MWGui
             for (Widgets::SpellEffectList::iterator it2 = effects.begin();
                 it2 != effects.end(); ++it2)
             {
-                if (*it2 == *it)
+                // MW considers all "foritfy attribute" effects as the same effect. See the
+                // "Can't create multi-state boost potions" discussion on http://www.uesp.net/wiki/Morrowind_talk:Alchemy
+                // thus, we are only checking effectID here and not attribute or skill
+                if (it2->mEffectID == it->mEffectID)
                     found = true;
             }
             if (!found && i<4)
@@ -315,5 +458,13 @@ namespace MWGui
         std::vector<MyGUI::WidgetPtr> effectItems;
         effectsWidget->createEffectWidgets(effectItems, mEffectsBox, coord, false, 0);
         effectsWidget->setCoord(coord);
+    }
+
+    void AlchemyWindow::removeIngredient(MyGUI::Widget* ingredient)
+    {
+        ingredient->clearUserStrings();
+        static_cast<MyGUI::ImageBox*>(ingredient)->setImageTexture("");
+        if (ingredient->getChildCount())
+            MyGUI::Gui::getInstance().destroyWidget(ingredient->getChildAt(0));
     }
 }

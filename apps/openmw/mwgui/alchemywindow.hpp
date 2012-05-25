@@ -29,6 +29,8 @@ namespace MWGui
 
         MyGUI::Widget* mEffectsBox;
 
+        MyGUI::EditBox* mNameEdit;
+
         Widgets::SpellEffectList mEffects; // effects of created potion
 
         void onCancelButtonClicked(MyGUI::Widget* _sender);
@@ -37,6 +39,8 @@ namespace MWGui
 
         virtual void onSelectedItemImpl(MWWorld::Ptr item);
         virtual std::vector<MWWorld::Ptr> itemsToIgnore();
+
+        void removeIngredient(MyGUI::Widget* ingredient);
 
         void update();
     };
