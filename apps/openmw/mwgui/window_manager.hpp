@@ -133,6 +133,11 @@ namespace MWGui
       updateVisible();
     }
 
+    bool isAllowed(GuiWindow wnd)
+    {
+        return allowed & wnd;
+    }
+
     MWGui::DialogueWindow* getDialogueWindow() {return mDialogueWindow;}
     MWGui::ContainerWindow* getContainerWindow() {return mContainerWindow;}
     MWGui::InventoryWindow* getInventoryWindow() {return mInventoryWindow;}
