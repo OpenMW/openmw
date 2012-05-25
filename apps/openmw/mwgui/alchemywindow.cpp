@@ -281,9 +281,10 @@ namespace MWGui
                 ++it;
         }
 
-        // now remove duplicates
+        // now remove duplicates, and don't allow more than 4 effects
         Widgets::SpellEffectList old = effects;
         effects.clear();
+        int i=0;
         for (Widgets::SpellEffectList::iterator it = old.begin();
             it != old.end(); ++it)
         {
@@ -294,8 +295,11 @@ namespace MWGui
                 if (*it2 == *it)
                     found = true;
             }
-            if (!found)
+            if (!found && i<4)
+            {
+                ++i;
                 effects.push_back(*it);
+            }
         }
         mEffects = effects;
 
