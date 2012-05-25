@@ -46,7 +46,6 @@ namespace MWGui
     //Dialogs
     TextInputDialog* mNameDialog;
     RaceDialog* mRaceDialog;
-    DialogueWindow* mDialogueWindow;
     ClassChoiceDialog* mClassChoiceDialog;
     InfoBoxDialog* mGenerateClassQuestionDialog;
     GenerateClassResultDialog* mGenerateClassResultDialog;

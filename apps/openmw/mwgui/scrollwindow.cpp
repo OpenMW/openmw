@@ -1,11 +1,12 @@
 #include "scrollwindow.hpp"
 
-#include "formatting.hpp"
-
 #include "../mwbase/environment.hpp"
 #include "../mwinput/inputmanager.hpp"
 #include "../mwworld/actiontake.hpp"
 #include "../mwsound/soundmanager.hpp"
+
+#include "formatting.hpp"
+#include "window_manager.hpp"
 
 using namespace MWGui;
 
@@ -55,7 +56,7 @@ void ScrollWindow::onCloseButtonClicked (MyGUI::Widget* _sender)
 {
     MWBase::Environment::get().getSoundManager()->playSound ("scroll", 1.0, 1.0);
 
-    MWBase::Environment::get().getInputManager()->setGuiMode (GM_Game);
+    mWindowManager.popGuiMode();
 }
 
 void ScrollWindow::onTakeButtonClicked (MyGUI::Widget* _sender)
@@ -65,5 +66,5 @@ void ScrollWindow::onTakeButtonClicked (MyGUI::Widget* _sender)
     MWWorld::ActionTake take(mScroll);
     take.execute();
 
-    MWBase::Environment::get().getInputManager()->setGuiMode (GM_Game);
+    mWindowManager.popGuiMode();
 }

@@ -30,8 +30,6 @@ namespace MWGui
     public:
         DialogueWindow(WindowManager& parWindowManager);
 
-        void open();
-
         // Events
         typedef MyGUI::delegates::CMultiDelegate0 EventHandle_Void;
 
