@@ -611,9 +611,21 @@ namespace MWWorld
         mPhysics->moveObject (ptr.getRefData().getHandle(), Ogre::Vector3 (x, y, z));
     }
 
-    void World::scaleObject (Ptr ptr, float x, float y, float z)
+    void World::scaleObject (Ptr ptr, float scale)
     {
-        MWWorld::Class::get(ptr).adjustScale(x,y,z);
+        MWWorld::Class::get(ptr).adjustScale(ptr,scale);
+
+        ptr.getCellRef().scale = scale;
+        scale = scale/ptr.getRefData().getBaseNode()->getScale().x;
+        ptr.getRefData().getBaseNode()->setScale(scale,scale,scale);
+        mPhysics->scaleObject( Class::get(ptr).getId(ptr), scale );
+        /// \todo cell change for non-player ref
+
+        //mRendering->moveObject (ptr, Ogre::Vector3 (x, y, z));
+    }
+
+    void World::rotateObject (Ptr ptr,float x,float y,float z)
+    {
     }
 
     void World::indexToPosition (int cellX, int cellY, float &x, float &y, bool centre) const

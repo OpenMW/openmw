@@ -222,7 +222,9 @@ namespace MWWorld
 
             void moveObject (Ptr ptr, float x, float y, float z);
 
-            void scaleObject (Ptr ptr, float x, float y, float z);
+            void scaleObject (Ptr ptr, float scale);
+
+            void rotateObject (Ptr ptr,float x,float y,float z);
 
             void indexToPosition (int cellX, int cellY, float &x, float &y, bool centre = false) const;
             ///< Convert cell numbers to position.
