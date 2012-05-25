@@ -4,6 +4,7 @@
 #include "../mwworld/world.hpp"
 #include "../mwworld/player.hpp"
 #include "../mwworld/containerstore.hpp"
+#include "../mwsound/soundmanager.hpp"
 
 #include "window_manager.hpp"
 
@@ -36,6 +37,7 @@ namespace MWGui
         getWidget(mApparatus2, "Apparatus2");
         getWidget(mApparatus3, "Apparatus3");
         getWidget(mApparatus4, "Apparatus4");
+        getWidget(mEffectsBox, "CreatedEffects");
 
         mIngredient1->eventMouseButtonClick += MyGUI::newDelegate(this, &AlchemyWindow::onIngredientSelected);
         mIngredient2->eventMouseButtonClick += MyGUI::newDelegate(this, &AlchemyWindow::onIngredientSelected);
@@ -143,6 +145,41 @@ namespace MWGui
     {
         MyGUI::ImageBox* add = NULL;
 
+        // don't allow to add an ingredient that is already added
+        // (which could happen if two similiar ingredients don't stack because of script / owner)
+        bool alreadyAdded = false;
+        std::string name = MWWorld::Class::get(item).getName(item);
+        if (mIngredient1->isUserString("ToolTipType"))
+        {
+            MWWorld::Ptr item2 = *mIngredient1->getUserData<MWWorld::Ptr>();
+            std::string name2 = MWWorld::Class::get(item2).getName(item2);
+            if (name == name2)
+                alreadyAdded = true;
+        }
+        if (mIngredient2->isUserString("ToolTipType"))
+        {
+            MWWorld::Ptr item2 = *mIngredient2->getUserData<MWWorld::Ptr>();
+            std::string name2 = MWWorld::Class::get(item2).getName(item2);
+            if (name == name2)
+                alreadyAdded = true;
+        }
+        if (mIngredient3->isUserString("ToolTipType"))
+        {
+            MWWorld::Ptr item2 = *mIngredient3->getUserData<MWWorld::Ptr>();
+            std::string name2 = MWWorld::Class::get(item2).getName(item2);
+            if (name == name2)
+                alreadyAdded = true;
+        }
+        if (mIngredient4->isUserString("ToolTipType"))
+        {
+            MWWorld::Ptr item2 = *mIngredient4->getUserData<MWWorld::Ptr>();
+            std::string name2 = MWWorld::Class::get(item2).getName(item2);
+            if (name == name2)
+                alreadyAdded = true;
+        }
+        if (alreadyAdded)
+            return;
+
         if (!mIngredient1->isUserString("ToolTipType"))
             add = mIngredient1;
         if (add == NULL  && !mIngredient2->isUserString("ToolTipType"))
@@ -159,6 +196,9 @@ namespace MWGui
             add->setImageTexture(getIconPath(item));
             drawItems();
             update();
+
+            std::string sound = MWWorld::Class::get(item).getUpSoundId(item);
+            MWBase::Environment::get().getSoundManager()->playSound (sound, 1.0, 1.0);
         }
     }
 
@@ -180,7 +220,8 @@ namespace MWGui
 
     void AlchemyWindow::update()
     {
-        // update ingredient count labels
+        Widgets::SpellEffectList effects;
+
         for (int i=0; i<4; ++i)
         {
             MyGUI::ImageBox* ingredient;
@@ -196,6 +237,20 @@ namespace MWGui
             if (!ingredient->isUserString("ToolTipType"))
                 continue;
 
+            // add the effects of this ingredient to list of effects
+            ESMS::LiveCellRef<ESM::Ingredient, MWWorld::RefData>* ref = ingredient->getUserData<MWWorld::Ptr>()->get<ESM::Ingredient>();
+            for (int i=0; i<4; ++i)
+            {
+                if (ref->base->data.effectID[i] < 0)
+                    continue;
+                MWGui::Widgets::SpellEffectParams params;
+                params.mEffectID = ref->base->data.effectID[i];
+                params.mAttribute = ref->base->data.attributes[i];
+                params.mSkill = ref->base->data.skills[i];
+                effects.push_back(params);
+            }
+
+            // update ingredient count labels
             if (ingredient->getChildCount())
                 MyGUI::Gui::getInstance().destroyWidget(ingredient->getChildAt(0));
 
@@ -206,5 +261,55 @@ namespace MWGui
             text->setTextShadowColour(MyGUI::Colour(0,0,0));
             text->setCaption(getCountString(ingredient->getUserData<MWWorld::Ptr>()->getRefData().getCount()));
         }
+
+        // now remove effects that are only present once
+        Widgets::SpellEffectList::iterator it = effects.begin();
+        while (it != effects.end())
+        {
+            Widgets::SpellEffectList::iterator next = it;
+            ++next;
+            bool found = false;
+            for (; next != effects.end(); ++next)
+            {
+                if (*next == *it)
+                    found = true;
+            }
+
+            if (!found)
+                it = effects.erase(it);
+            else
+                ++it;
+        }
+
+        // now remove duplicates
+        Widgets::SpellEffectList old = effects;
+        effects.clear();
+        for (Widgets::SpellEffectList::iterator it = old.begin();
+            it != old.end(); ++it)
+        {
+            bool found = false;
+            for (Widgets::SpellEffectList::iterator it2 = effects.begin();
+                it2 != effects.end(); ++it2)
+            {
+                if (*it2 == *it)
+                    found = true;
+            }
+            if (!found)
+                effects.push_back(*it);
+        }
+        mEffects = effects;
+
+        while (mEffectsBox->getChildCount())
+            MyGUI::Gui::getInstance().destroyWidget(mEffectsBox->getChildAt(0));
+
+        MyGUI::IntCoord coord(0, 0, mEffectsBox->getWidth(), 24);
+        Widgets::MWEffectListPtr effectsWidget = mEffectsBox->createWidget<Widgets::MWEffectList>
+            ("MW_StatName", coord, Align::Left | Align::Top);
+        effectsWidget->setWindowManager(&mWindowManager);
+        effectsWidget->setEffectList(effects);
+
+        std::vector<MyGUI::WidgetPtr> effectItems;
+        effectsWidget->createEffectWidgets(effectItems, mEffectsBox, coord, false, 0);
+        effectsWidget->setCoord(coord);
     }
 }

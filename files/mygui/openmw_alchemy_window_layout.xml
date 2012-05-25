@@ -72,7 +72,7 @@
             <Property key="TextAlign" value="Left"/>
         </Widget>
         <Widget type="Widget" skin="MW_Box" position="314 64 270 200">
-            <Widget type="Widget" skin="" position="4 4 142 232" name="CreatedEffects"/>
+            <Widget type="Widget" skin="" position="4 4 262 192" name="CreatedEffects"/>
         </Widget>
 
         <!-- Buttons -->

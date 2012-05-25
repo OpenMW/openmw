@@ -27,6 +27,10 @@ namespace MWGui
         MyGUI::ImageBox* mApparatus3;
         MyGUI::ImageBox* mApparatus4;
 
+        MyGUI::Widget* mEffectsBox;
+
+        Widgets::SpellEffectList mEffects; // effects of created potion
+
         void onCancelButtonClicked(MyGUI::Widget* _sender);
         void onCreateButtonClicked(MyGUI::Widget* _sender);
         void onIngredientSelected(MyGUI::Widget* _sender);

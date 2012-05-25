@@ -51,6 +51,13 @@ namespace MWGui
 
             // value of -1 here means the value is unavailable
             int mMagnMin, mMagnMax, mRange, mDuration;
+
+            bool operator==(const SpellEffectParams& other) const
+            {
+                return (other.mEffectID == mEffectID
+                        && other.mSkill == mSkill
+                        && other.mAttribute == mAttribute);
+            }
         };
 
         typedef std::vector<SpellEffectParams> SpellEffectList;
