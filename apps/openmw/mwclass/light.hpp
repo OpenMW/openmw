@@ -14,11 +14,6 @@ namespace MWClass
 
             virtual void insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics) const;
 
-            virtual void enable (const MWWorld::Ptr& ptr) const;
-            ///< Enable reference; only does the non-rendering part
-            /// \attention This is not the same as the script instruction with the same name. References
-            /// should only be enabled while in an active cell.
-
             virtual std::string getName (const MWWorld::Ptr& ptr) const;
             ///< \return name (the one that is to be presented to the user; not the internal one);
             /// can return an empty string.
