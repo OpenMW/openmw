@@ -157,9 +157,9 @@ namespace MWGui
 
         // check if the merchant can afford this
         int merchantgold;
-        if (mContainer.getTypeName() == typeid(ESM::NPC).name())
+        if (mPtr.getTypeName() == typeid(ESM::NPC).name())
         {
-            ESMS::LiveCellRef<ESM::NPC, MWWorld::RefData>* ref = mContainer.get<ESM::NPC>();
+            ESMS::LiveCellRef<ESM::NPC, MWWorld::RefData>* ref = mPtr.get<ESM::NPC>();
             if (ref->base->npdt52.gold == -10)
                 merchantgold = ref->base->npdt12.gold;
             else
@@ -167,7 +167,7 @@ namespace MWGui
         }
         else // ESM::Creature
         {
-            ESMS::LiveCellRef<ESM::Creature, MWWorld::RefData>* ref = mContainer.get<ESM::Creature>();
+            ESMS::LiveCellRef<ESM::Creature, MWWorld::RefData>* ref = mPtr.get<ESM::Creature>();
             merchantgold = ref->base->data.gold;
         }
         if (mCurrentBalance > 0 && merchantgold < mCurrentBalance)
@@ -218,7 +218,7 @@ namespace MWGui
         // i give you back your stuff!
         returnBoughtItems(mWindowManager.getInventoryWindow()->getContainerStore());
         // now gimme back my stuff!
-        mWindowManager.getInventoryWindow()->returnBoughtItems(MWWorld::Class::get(mContainer).getContainerStore(mContainer));
+        mWindowManager.getInventoryWindow()->returnBoughtItems(MWWorld::Class::get(mPtr).getContainerStore(mPtr));
 
         mWindowManager.popGuiMode();
     }
@@ -240,9 +240,9 @@ namespace MWGui
         }
 
         int merchantgold;
-        if (mContainer.getTypeName() == typeid(ESM::NPC).name())
+        if (mPtr.getTypeName() == typeid(ESM::NPC).name())
         {
-            ESMS::LiveCellRef<ESM::NPC, MWWorld::RefData>* ref = mContainer.get<ESM::NPC>();
+            ESMS::LiveCellRef<ESM::NPC, MWWorld::RefData>* ref = mPtr.get<ESM::NPC>();
             if (ref->base->npdt52.gold == -10)
                 merchantgold = ref->base->npdt12.gold;
             else
@@ -250,7 +250,7 @@ namespace MWGui
         }
         else // ESM::Creature
         {
-            ESMS::LiveCellRef<ESM::Creature, MWWorld::RefData>* ref = mContainer.get<ESM::Creature>();
+            ESMS::LiveCellRef<ESM::Creature, MWWorld::RefData>* ref = mPtr.get<ESM::Creature>();
             merchantgold = ref->base->data.gold;
         }
 
@@ -262,13 +262,13 @@ namespace MWGui
     {
         std::vector<MWWorld::Ptr> items;
 
-        if (mContainer.getTypeName() == typeid(ESM::Creature).name())
+        if (mPtr.getTypeName() == typeid(ESM::Creature).name())
         {
             // creatures don't have equipment slots.
             return items;
         }
 
-        MWWorld::InventoryStore& invStore = MWWorld::Class::get(mContainer).getInventoryStore(mContainer);
+        MWWorld::InventoryStore& invStore = MWWorld::Class::get(mPtr).getInventoryStore(mPtr);
 
         for (int slot=0; slot < MWWorld::InventoryStore::Slots; ++slot)
         {
@@ -285,15 +285,15 @@ namespace MWGui
     bool TradeWindow::npcAcceptsItem(MWWorld::Ptr item)
     {
         int services = 0;
-        if (mContainer.getTypeName() == typeid(ESM::NPC).name())
+        if (mPtr.getTypeName() == typeid(ESM::NPC).name())
         {
-            ESMS::LiveCellRef<ESM::NPC, MWWorld::RefData>* ref = mContainer.get<ESM::NPC>();
+            ESMS::LiveCellRef<ESM::NPC, MWWorld::RefData>* ref = mPtr.get<ESM::NPC>();
             if (ref->base->hasAI)
                 services = ref->base->AI.services;
         }
-        else if (mContainer.getTypeName() == typeid(ESM::Creature).name())
+        else if (mPtr.getTypeName() == typeid(ESM::Creature).name())
         {
-            ESMS::LiveCellRef<ESM::Creature, MWWorld::RefData>* ref = mContainer.get<ESM::Creature>();
+            ESMS::LiveCellRef<ESM::Creature, MWWorld::RefData>* ref = mPtr.get<ESM::Creature>();
             if (ref->base->hasAI)
                 services = ref->base->AI.services;
         }
@@ -327,7 +327,7 @@ namespace MWGui
     std::vector<MWWorld::Ptr> TradeWindow::itemsToIgnore()
     {
         std::vector<MWWorld::Ptr> items;
-        MWWorld::ContainerStore& invStore = MWWorld::Class::get(mContainer).getContainerStore(mContainer);
+        MWWorld::ContainerStore& invStore = MWWorld::Class::get(mPtr).getContainerStore(mPtr);
 
         for (MWWorld::ContainerStoreIterator it = invStore.begin();
                 it != invStore.end(); ++it)
@@ -355,5 +355,12 @@ namespace MWGui
         mCurrentBalance += MWWorld::Class::get(item).getValue(item) * count;
 
         updateLabels();
+    }
+
+    void TradeWindow::onReferenceUnavailable()
+    {
+        // remove both Trade and Dialogue (since you always trade with the NPC/creature that you have previously talked to)
+        mWindowManager.removeGuiMode(GM_Barter);
+        mWindowManager.removeGuiMode(GM_Dialogue);
     }
 }

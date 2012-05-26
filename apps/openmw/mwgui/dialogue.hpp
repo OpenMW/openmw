@@ -2,6 +2,7 @@
 #define MWGUI_DIALOGE_H
 
 #include "window_base.hpp"
+#include "referenceinterface.hpp"
 #include <boost/array.hpp>
 
 #include "../mwworld/ptr.hpp"
@@ -25,7 +26,7 @@ namespace MWGui
 {
     class DialogueHistory;
 
-    class DialogueWindow: public WindowBase
+    class DialogueWindow: public WindowBase, public ReferenceInterface
     {
     public:
         DialogueWindow(WindowManager& parWindowManager);
@@ -58,6 +59,8 @@ namespace MWGui
         void onMouseWheel(MyGUI::Widget* _sender, int _rel);
         void onWindowResize(MyGUI::Window* _sender);
 
+        virtual void onReferenceUnavailable();
+
     private:
         void updateOptions();
         /**
@@ -69,8 +72,6 @@ namespace MWGui
         bool mShowTrade;
 
         bool mEnabled;
-
-        MWWorld::Ptr mActor; // actor being talked to
 
         DialogueHistory*     history;
         Widgets::MWList*      topicsList;

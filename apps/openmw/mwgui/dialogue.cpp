@@ -125,7 +125,7 @@ void DialogueWindow::onSelectTopic(std::string topic)
     {
         /// \todo check if the player is allowed to trade with this actor (e.g. faction rank high enough)?
         mWindowManager.pushGuiMode(GM_Barter);
-        mWindowManager.getTradeWindow()->startTrade(mActor);
+        mWindowManager.getTradeWindow()->startTrade(mPtr);
     }
 
     else
@@ -135,7 +135,7 @@ void DialogueWindow::onSelectTopic(std::string topic)
 void DialogueWindow::startDialogue(MWWorld::Ptr actor, std::string npcName)
 {
     mEnabled = true;
-    mActor = actor;
+    mPtr = actor;
     topicsList->setEnabled(true);
     setTitle(npcName);
 
@@ -259,4 +259,9 @@ void DialogueWindow::goodbye()
     history->addDialogText("\n#572D21" + MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sGoodbye")->str);
     topicsList->setEnabled(false);
     mEnabled = false;
+}
+
+void DialogueWindow::onReferenceUnavailable()
+{
+    mWindowManager.removeGuiMode(GM_Dialogue);
 }

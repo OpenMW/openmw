@@ -155,7 +155,7 @@ namespace MWGui
             if (mDragAndDrop->mDraggedFrom != this)
             {
                 // add item to the player's inventory
-                MWWorld::ContainerStore& invStore = MWWorld::Class::get(mContainer).getContainerStore(mContainer);
+                MWWorld::ContainerStore& invStore = MWWorld::Class::get(mPtr).getContainerStore(mPtr);
                 MWWorld::ContainerStoreIterator it = invStore.begin();
 
                 int origCount = ptr.getRefData().getCount();
@@ -192,7 +192,7 @@ namespace MWGui
 
     std::vector<MWWorld::Ptr> InventoryWindow::getEquippedItems()
     {
-        MWWorld::InventoryStore& invStore = MWWorld::Class::get(mContainer).getInventoryStore(mContainer);
+        MWWorld::InventoryStore& invStore = MWWorld::Class::get(mPtr).getInventoryStore(mPtr);
 
         std::vector<MWWorld::Ptr> items;
 
@@ -210,7 +210,7 @@ namespace MWGui
 
     void InventoryWindow::_unequipItem(MWWorld::Ptr item)
     {
-        MWWorld::InventoryStore& invStore = MWWorld::Class::get(mContainer).getInventoryStore(mContainer);
+        MWWorld::InventoryStore& invStore = MWWorld::Class::get(mPtr).getInventoryStore(mPtr);
 
         for (int slot=0; slot < MWWorld::InventoryStore::Slots; ++slot)
         {
@@ -244,7 +244,7 @@ namespace MWGui
 
     int InventoryWindow::getPlayerGold()
     {
-        MWWorld::InventoryStore& invStore = MWWorld::Class::get(mContainer).getInventoryStore(mContainer);
+        MWWorld::InventoryStore& invStore = MWWorld::Class::get(mPtr).getInventoryStore(mPtr);
 
         for (MWWorld::ContainerStoreIterator it = invStore.begin();
                 it != invStore.end(); ++it)

@@ -42,6 +42,8 @@ namespace MWGui
 
         void removeIngredient(MyGUI::Widget* ingredient);
 
+        virtual void onReferenceUnavailable() { ; }
+
         void update();
     };
 }

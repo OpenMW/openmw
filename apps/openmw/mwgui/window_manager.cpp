@@ -472,6 +472,10 @@ void WindowManager::onFrame (float frameDuration)
     mStatsWindow->onFrame();
 
     hud->onFrame(frameDuration);
+
+    mDialogueWindow->checkReferenceAvailable();
+    mTradeWindow->checkReferenceAvailable();
+    mContainerWindow->checkReferenceAvailable();
 }
 
 const ESMS::ESMStore& WindowManager::getStore() const
@@ -623,6 +627,20 @@ void WindowManager::popGuiMode()
 
     bool gameMode = !isGuiMode();
     MWBase::Environment::get().getInputManager()->changeInputMode(!gameMode);
+
+    updateVisible();
+}
+
+void WindowManager::removeGuiMode(GuiMode mode)
+{
+    std::vector<GuiMode>::iterator it = mGuiModes.begin();
+    while (it != mGuiModes.end())
+    {
+        if (*it == mode)
+            it = mGuiModes.erase(it);
+        else
+            ++it;
+    }
 
     updateVisible();
 }

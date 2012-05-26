@@ -264,16 +264,16 @@ void ContainerBase::onContainerClicked(MyGUI::Widget* _sender)
     if(mDragAndDrop->mIsOnDragAndDrop) //drop item here
     {
         MWWorld::Ptr object = *mDragAndDrop->mDraggedWidget->getUserData<MWWorld::Ptr>();
-        MWWorld::ContainerStore& containerStore = MWWorld::Class::get(mContainer).getContainerStore(mContainer);
+        MWWorld::ContainerStore& containerStore = MWWorld::Class::get(mPtr).getContainerStore(mPtr);
 
         if (mDragAndDrop->mDraggedFrom != this)
         {
             assert(object.getContainerStore() && "Item is not in a container!");
 
             // check the container's Organic flag (if this is a container). container with Organic flag doesn't allow putting items inside
-            if (mContainer.getTypeName() == typeid(ESM::Container).name())
+            if (mPtr.getTypeName() == typeid(ESM::Container).name())
             {
-                ESMS::LiveCellRef<ESM::Container, MWWorld::RefData>* ref = mContainer.get<ESM::Container>();
+                ESMS::LiveCellRef<ESM::Container, MWWorld::RefData>* ref = mPtr.get<ESM::Container>();
                 if (ref->base->flags & ESM::Container::Organic)
                 {
                     // user notification
@@ -288,13 +288,13 @@ void ContainerBase::onContainerClicked(MyGUI::Widget* _sender)
             // check that we don't exceed the allowed weight (only for containers, not for inventory)
             if (!isInventory())
             {
-                float capacity = MWWorld::Class::get(mContainer).getCapacity(mContainer);
+                float capacity = MWWorld::Class::get(mPtr).getCapacity(mPtr);
 
                 // try adding the item, and if weight is exceeded, just remove it again.
                 object.getRefData().setCount(mDragAndDrop->mDraggedCount);
                 MWWorld::ContainerStoreIterator it = containerStore.add(object);
 
-                float curWeight = MWWorld::Class::get(mContainer).getEncumbrance(mContainer);
+                float curWeight = MWWorld::Class::get(mPtr).getEncumbrance(mPtr);
                 if (curWeight > capacity)
                 {
                     it->getRefData().setCount(0);
@@ -346,7 +346,7 @@ void ContainerBase::setFilter(ContainerBase::Filter filter)
 
 void ContainerBase::openContainer(MWWorld::Ptr container)
 {
-    mContainer = container;
+    mPtr = container;
     drawItems();
 }
 
@@ -356,7 +356,7 @@ void ContainerBase::drawItems()
     {
         MyGUI::Gui::getInstance().destroyWidget(mContainerWidget->getChildAt(0));
     }
-    MWWorld::ContainerStore& containerStore = MWWorld::Class::get(mContainer).getContainerStore(mContainer);
+    MWWorld::ContainerStore& containerStore = MWWorld::Class::get(mPtr).getContainerStore(mPtr);
 
     int x = 0;
     int y = 0;
@@ -557,7 +557,7 @@ void ContainerBase::addBarteredItem(MWWorld::Ptr item, int count)
 
 void ContainerBase::addItem(MWWorld::Ptr item, int count)
 {
-    MWWorld::ContainerStore& containerStore = MWWorld::Class::get(mContainer).getContainerStore(mContainer);
+    MWWorld::ContainerStore& containerStore = MWWorld::Class::get(mPtr).getContainerStore(mPtr);
 
     int origCount = item.getRefData().getCount();    
 
@@ -569,7 +569,7 @@ void ContainerBase::addItem(MWWorld::Ptr item, int count)
 
 void ContainerBase::transferBoughtItems()
 {
-    MWWorld::ContainerStore& containerStore = MWWorld::Class::get(mContainer).getContainerStore(mContainer);
+    MWWorld::ContainerStore& containerStore = MWWorld::Class::get(mPtr).getContainerStore(mPtr);
 
     for (MWWorld::ContainerStoreIterator it(mBoughtItems.begin()); it != mBoughtItems.end(); ++it)
     {
@@ -587,7 +587,7 @@ void ContainerBase::returnBoughtItems(MWWorld::ContainerStore& store)
 
 MWWorld::ContainerStore& ContainerBase::getContainerStore()
 {
-    MWWorld::ContainerStore& store = MWWorld::Class::get(mContainer).getContainerStore(mContainer);
+    MWWorld::ContainerStore& store = MWWorld::Class::get(mPtr).getContainerStore(mPtr);
     return store;
 }
 
@@ -651,7 +651,7 @@ void ContainerWindow::onTakeAllButtonClicked(MyGUI::Widget* _sender)
     if(mDragAndDrop == NULL || !mDragAndDrop->mIsOnDragAndDrop)
     {
         // transfer everything into the player's inventory
-        MWWorld::ContainerStore& containerStore = MWWorld::Class::get(mContainer).getContainerStore(mContainer);
+        MWWorld::ContainerStore& containerStore = MWWorld::Class::get(mPtr).getContainerStore(mPtr);
 
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
         MWWorld::ContainerStore& playerStore = MWWorld::Class::get(player).getContainerStore(player);
@@ -675,4 +675,9 @@ void ContainerWindow::onTakeAllButtonClicked(MyGUI::Widget* _sender)
 
         MWBase::Environment::get().getWindowManager()->popGuiMode();
     }
+}
+
+void ContainerWindow::onReferenceUnavailable()
+{
+    MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Container);
 }

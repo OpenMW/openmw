@@ -2,15 +2,14 @@
 #define MGUI_CONTAINER_H
 
 #include <components/esm_store/store.hpp>
-#include "../mwclass/container.hpp"
-#include <sstream>
-#include <set>
-#include <string>
-#include <utility>
+
 #include "window_base.hpp"
+#include "referenceinterface.hpp"
+
+#include "../mwclass/container.hpp"
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/containerstore.hpp"
-#include <vector>
+
 
 namespace MWWorld
 {
@@ -43,7 +42,7 @@ namespace MWGui
         int mDraggedCount;
     };
 
-    class ContainerBase
+    class ContainerBase : public ReferenceInterface
     {
     public:
         ContainerBase(DragAndDrop* dragAndDrop);
@@ -89,7 +88,6 @@ namespace MWGui
         MyGUI::Widget* mSelectedItem;
 
         DragAndDrop* mDragAndDrop;
-        MWWorld::Ptr mContainer;
 
         Filter mFilter;
 
@@ -140,6 +138,8 @@ namespace MWGui
         void onWindowResize(MyGUI::Window* window);
         void onCloseButtonClicked(MyGUI::Widget* _sender);
         void onTakeAllButtonClicked(MyGUI::Widget* _sender);
+
+        virtual void onReferenceUnavailable();
     };
 }
 #endif // CONTAINER_H

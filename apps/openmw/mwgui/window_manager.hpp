@@ -109,6 +109,7 @@ namespace MWGui
 
     void pushGuiMode(GuiMode mode);
     void popGuiMode();
+    void removeGuiMode(GuiMode mode); ///< can be anywhere in the stack
 
     GuiMode getMode() const
     {

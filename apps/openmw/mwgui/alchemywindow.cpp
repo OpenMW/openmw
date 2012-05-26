@@ -171,7 +171,7 @@ namespace MWGui
 
             // create a reference and add it to player inventory
             MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), result.first);
-            MWWorld::ContainerStore& store = MWWorld::Class::get(mContainer).getContainerStore(mContainer);
+            MWWorld::ContainerStore& store = MWWorld::Class::get(mPtr).getContainerStore(mPtr);
             ref.getPtr().getRefData().setCount(1);
             store.add(ref.getPtr());
 
@@ -223,7 +223,7 @@ namespace MWGui
         setFilter(ContainerBase::Filter_Ingredients);
 
         // pick the best available apparatus
-        MWWorld::ContainerStore& store = MWWorld::Class::get(mContainer).getContainerStore(mContainer);
+        MWWorld::ContainerStore& store = MWWorld::Class::get(mPtr).getContainerStore(mPtr);
 
         MWWorld::Ptr bestAlbemic;
         MWWorld::Ptr bestMortarPestle;
