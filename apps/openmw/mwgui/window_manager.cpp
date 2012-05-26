@@ -222,6 +222,11 @@ void WindowManager::updateVisible()
     else
         mToolTips->enterGuiMode();
 
+    setMinimapVisibility((allowed & GW_Map) && !map->pinned());
+    setWeaponVisibility((allowed & GW_Inventory) && !mInventoryWindow->pinned());
+    setSpellVisibility((allowed & GW_Magic)); /// \todo add pin state when spells window is implemented
+    setHMSVisibility((allowed & GW_Stats) && !mStatsWindow->pinned());
+
     // If in game mode, don't show anything.
     if (gameMode)
         return;
@@ -560,12 +565,13 @@ bool WindowManager::getFullHelp() const
 
 void WindowManager::setWeaponVisibility(bool visible)
 {
-    hud->weapBox->setVisible(visible);
+    hud->setBottomLeftVisibility(hud->health->getVisible(), visible, hud->spellBox->getVisible());
 }
 
 void WindowManager::setSpellVisibility(bool visible)
 {
-    hud->spellBox->setVisible(visible);
+    hud->setBottomLeftVisibility(hud->health->getVisible(), hud->weapBox->getVisible(), visible);
+    hud->setBottomRightVisibility(visible, hud->minimapBox->getVisible());
 }
 
 void WindowManager::setMouseVisible(bool visible)

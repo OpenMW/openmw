@@ -263,9 +263,6 @@ namespace MWGui
        the start of the game, when windows are enabled one by one
        through script commands. You can manipulate this through using
        allow() and disableAll().
-
-       The setting should also affect visibility of certain HUD
-       elements, but this is not done yet.
      */
     GuiWindow allowed;
 
