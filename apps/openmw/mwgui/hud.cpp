@@ -41,6 +41,8 @@ HUD::HUD(int width, int height, int fpsLevel, DragAndDrop* dragAndDrop)
     , effectBoxBaseRight(0)
     , minimapBoxBaseRight(0)
     , mDragAndDrop(dragAndDrop)
+    , mCellNameTimer(0.0f)
+    , mCellNameBox(NULL)
 {
     setCoord(0,0, width, height);
 
@@ -82,6 +84,8 @@ HUD::HUD(int width, int height, int fpsLevel, DragAndDrop* dragAndDrop)
     minimapBox->eventMouseButtonClick += MyGUI::newDelegate(this, &HUD::onMapClicked);
     getWidget(minimap, "MiniMap");
     getWidget(compass, "Compass");
+
+    getWidget(mCellNameBox, "CellName");
 
     getWidget(crosshair, "Crosshair");
 
@@ -323,4 +327,23 @@ void HUD::onWeaponClicked(MyGUI::Widget* _sender)
 void HUD::onMagicClicked(MyGUI::Widget* _sender)
 {
     MWBase::Environment::get().getWindowManager()->toggleVisible(GW_Magic);
+}
+
+void HUD::setCellName(const std::string& cellName)
+{
+    if (mCellName != cellName)
+    {
+        mCellNameTimer = 5.0f;
+        mCellName = cellName;
+
+        mCellNameBox->setCaption(mCellName);
+        mCellNameBox->setVisible(true);
+    }
+}
+
+void HUD::onFrame(float dt)
+{
+    mCellNameTimer -= dt;
+    if (mCellNameTimer < 0)
+        mCellNameBox->setVisible(false);
 }

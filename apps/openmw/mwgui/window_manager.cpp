@@ -470,6 +470,8 @@ void WindowManager::onFrame (float frameDuration)
     mInventoryWindow->onFrame();
 
     mStatsWindow->onFrame();
+
+    hud->onFrame(frameDuration);
 }
 
 const ESMS::ESMStore& WindowManager::getStore() const
@@ -494,6 +496,7 @@ void WindowManager::changeCell(MWWorld::Ptr::CellStore* cell)
         }
 
         map->setCellName( name );
+        hud->setCellName( name );
 
         map->setCellPrefix("Cell");
         hud->setCellPrefix("Cell");
@@ -503,6 +506,7 @@ void WindowManager::changeCell(MWWorld::Ptr::CellStore* cell)
     else
     {
         map->setCellName( cell->cell->name );
+        hud->setCellName( cell->cell->name );
         map->setCellPrefix( cell->cell->name );
         hud->setCellPrefix( cell->cell->name );
     }

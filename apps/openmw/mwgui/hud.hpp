@@ -25,6 +25,10 @@ namespace MWGui
         void setBottomRightVisibility(bool effectBoxVisible, bool minimapVisible);
         void setFpsLevel(const int level);
 
+        void onFrame(float dt);
+
+        void setCellName(const std::string& cellName);
+
         MyGUI::ProgressPtr health, magicka, stamina;
         MyGUI::Widget *weapBox, *spellBox;
         MyGUI::ImageBox *weapImage, *spellImage;
@@ -34,6 +38,7 @@ namespace MWGui
         MyGUI::ScrollView* minimap;
         MyGUI::ImageBox* compass;
         MyGUI::ImageBox* crosshair;
+        MyGUI::TextBox* mCellNameBox;
 
         MyGUI::WidgetPtr fpsbox;
         MyGUI::TextBox* fpscounter;
@@ -47,6 +52,9 @@ namespace MWGui
         int minimapBoxBaseRight, effectBoxBaseRight;
 
         DragAndDrop* mDragAndDrop;
+
+        std::string mCellName;
+        float mCellNameTimer;
 
         void onWorldClicked(MyGUI::Widget* _sender);
         void onWorldMouseOver(MyGUI::Widget* _sender, int x, int y);

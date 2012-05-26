@@ -59,6 +59,14 @@
                 name="Effect1"/>
         </Widget>
 
+        <!-- Cell name display when cell changes -->
+        <Widget type="TextBox" skin="SandText" position="0 89 288 24" name="CellName" align="Left Bottom HStretch">
+            <Property key="Visible" value="false"/>
+            <Property key="TextAlign" value="Right"/>
+            <Property key="TextShadow" value="true"/>
+            <Property key="TextShadowColour" value="0 0 0"/>
+        </Widget>
+
         <!-- Map box -->
         <Widget type="Button" skin="" position="223 123 65 65" name="MiniMapBox" align="Right Bottom">
             <Widget type="Widget" skin="HUD_Box" position="0 0 65 65" align="Center">
