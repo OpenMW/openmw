@@ -119,6 +119,12 @@ namespace MWGui
 
     bool isGuiMode() const { return !mGuiModes.empty(); }
 
+    void toggleVisible(GuiWindow wnd)
+    {
+        shown = (shown & wnd) ? (GuiWindow) (shown & ~wnd) : (GuiWindow) (shown | wnd);
+        updateVisible();
+    }
+
     // Disallow all inventory mode windows
     void disallowAll()
     {

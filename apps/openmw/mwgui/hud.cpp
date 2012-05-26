@@ -48,25 +48,38 @@ HUD::HUD(int width, int height, int fpsLevel, DragAndDrop* dragAndDrop)
     getWidget(health, "Health");
     getWidget(magicka, "Magicka");
     getWidget(stamina, "Stamina");
+
     hmsBaseLeft = health->getLeft();
+
+    MyGUI::Widget *healthFrame, *magickaFrame, *fatigueFrame;
+    getWidget(healthFrame, "HealthFrame");
+    getWidget(magickaFrame, "MagickaFrame");
+    getWidget(fatigueFrame, "FatigueFrame");
+    healthFrame->eventMouseButtonClick += MyGUI::newDelegate(this, &HUD::onHMSClicked);
+    magickaFrame->eventMouseButtonClick += MyGUI::newDelegate(this, &HUD::onHMSClicked);
+    fatigueFrame->eventMouseButtonClick += MyGUI::newDelegate(this, &HUD::onHMSClicked);
 
     // Item and spell images and status bars
     getWidget(weapBox, "WeapBox");
     getWidget(weapImage, "WeapImage");
     getWidget(weapStatus, "WeapStatus");
     weapBoxBaseLeft = weapBox->getLeft();
+    weapBox->eventMouseButtonClick += MyGUI::newDelegate(this, &HUD::onWeaponClicked);
 
     getWidget(spellBox, "SpellBox");
     getWidget(spellImage, "SpellImage");
     getWidget(spellStatus, "SpellStatus");
     spellBoxBaseLeft = spellBox->getLeft();
+    spellBox->eventMouseButtonClick += MyGUI::newDelegate(this, &HUD::onMagicClicked);
 
     getWidget(effectBox, "EffectBox");
     getWidget(effect1, "Effect1");
     effectBoxBaseRight = effectBox->getRight();
+    effectBox->eventMouseButtonClick += MyGUI::newDelegate(this, &HUD::onMagicClicked);
 
     getWidget(minimapBox, "MiniMapBox");
     minimapBoxBaseRight = minimapBox->getRight();
+    minimapBox->eventMouseButtonClick += MyGUI::newDelegate(this, &HUD::onMapClicked);
     getWidget(minimap, "MiniMap");
     getWidget(compass, "Compass");
 
@@ -85,7 +98,7 @@ HUD::HUD(int width, int height, int fpsLevel, DragAndDrop* dragAndDrop)
     setSpellStatus(65, 100);
     setEffect("icons\\s\\tx_s_chameleon.dds");
 
-    LocalMapBase::init(minimap, this);
+    LocalMapBase::init(minimap, compass, this);
 
     mMainWidget->eventMouseButtonClick += MyGUI::newDelegate(this, &HUD::onWorldClicked);
     mMainWidget->eventMouseMove += MyGUI::newDelegate(this, &HUD::onWorldMouseOver);
@@ -192,35 +205,6 @@ void HUD::setValue(const std::string& id, const MWMechanics::DynamicStat<int>& v
         }
 }
 
-void HUD::setPlayerDir(const float x, const float y)
-{
-    if (!minimapBox->getVisible() || (x == mLastPositionX && y == mLastPositionY)) return;
-
-    MyGUI::ISubWidget* main = compass->getSubWidgetMain();
-    MyGUI::RotatingSkin* rotatingSubskin = main->castType<MyGUI::RotatingSkin>();
-    rotatingSubskin->setCenter(MyGUI::IntPoint(16,16));
-    float angle = std::atan2(x,y);
-    rotatingSubskin->setAngle(angle);
-    mLastPositionX = x;
-    mLastPositionY = y;
-}
-
-void HUD::setPlayerPos(const float x, const float y)
-{
-    if (!minimapBox->getVisible() || (x == mLastDirectionX && y == mLastDirectionY)) return;
-
-    MyGUI::IntSize size = minimap->getCanvasSize();
-    MyGUI::IntPoint middle = MyGUI::IntPoint((1/3.f + x/3.f)*size.width,(1/3.f + y/3.f)*size.height);
-    MyGUI::IntCoord viewsize = minimap->getCoord();
-    MyGUI::IntPoint pos(0.5*viewsize.width - middle.left, 0.5*viewsize.height - middle.top);
-
-    minimap->setViewOffset(pos);
-    compass->setPosition(MyGUI::IntPoint(x*512-16, y*512-16));
-
-    mLastDirectionX = x;
-    mLastDirectionY = y;
-}
-
 void HUD::setBottomLeftVisibility(bool hmsVisible, bool weapVisible, bool spellVisible)
 {
     int weapDx = 0, spellDx = 0;
@@ -319,4 +303,24 @@ void HUD::onWorldMouseOver(MyGUI::Widget* _sender, int x, int y)
 void HUD::onWorldMouseLostFocus(MyGUI::Widget* _sender, MyGUI::Widget* _new)
 {
     MyGUI::PointerManager::getInstance().setPointer("arrow");
+}
+
+void HUD::onHMSClicked(MyGUI::Widget* _sender)
+{
+    MWBase::Environment::get().getWindowManager()->toggleVisible(GW_Stats);
+}
+
+void HUD::onMapClicked(MyGUI::Widget* _sender)
+{
+    MWBase::Environment::get().getWindowManager()->toggleVisible(GW_Map);
+}
+
+void HUD::onWeaponClicked(MyGUI::Widget* _sender)
+{
+    MWBase::Environment::get().getWindowManager()->toggleVisible(GW_Inventory);
+}
+
+void HUD::onMagicClicked(MyGUI::Widget* _sender)
+{
+    MWBase::Environment::get().getWindowManager()->toggleVisible(GW_Magic);
 }

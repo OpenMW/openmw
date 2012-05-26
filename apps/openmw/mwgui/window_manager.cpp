@@ -271,9 +271,9 @@ void WindowManager::updateVisible()
             int eff = shown & allowed;
 
             // Show the windows we want
-            map   -> setVisible( (eff & GW_Map) != 0 );
-            mStatsWindow -> setVisible( (eff & GW_Stats) != 0 );
-            mInventoryWindow->setVisible(true);
+            map   -> setVisible( (eff & GW_Map) );
+            mStatsWindow -> setVisible( (eff & GW_Stats) );
+            mInventoryWindow->setVisible( (eff & GW_Inventory));
             break;
         }
         case GM_Container:

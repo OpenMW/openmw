@@ -21,8 +21,6 @@ namespace MWGui
         void setFPS(float fps);
         void setTriangleCount(size_t count);
         void setBatchCount(size_t count);
-        void setPlayerDir(const float x, const float y);
-        void setPlayerPos(const float x, const float y);
         void setBottomLeftVisibility(bool hmsVisible, bool weapVisible, bool spellVisible);
         void setBottomRightVisibility(bool effectBoxVisible, bool minimapVisible);
         void setFpsLevel(const int level);
@@ -53,5 +51,9 @@ namespace MWGui
         void onWorldClicked(MyGUI::Widget* _sender);
         void onWorldMouseOver(MyGUI::Widget* _sender, int x, int y);
         void onWorldMouseLostFocus(MyGUI::Widget* _sender, MyGUI::Widget* _new);
+        void onHMSClicked(MyGUI::Widget* _sender);
+        void onWeaponClicked(MyGUI::Widget* _sender);
+        void onMagicClicked(MyGUI::Widget* _sender);
+        void onMapClicked(MyGUI::Widget* _sender);
     };
 }

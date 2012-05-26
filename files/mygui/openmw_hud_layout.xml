@@ -29,78 +29,48 @@
         </Widget>
 
         <!-- Equipped weapon box -->
-        <Widget type="Widget" position="82 146 36 41" align="Left Bottom" name="WeapBox">
+        <Widget type="Button" skin="" position="82 146 36 41" align="Left Bottom" name="WeapBox">
             <Widget type="Widget" skin="HUD_Box" position="0 0 36 36">
-                <Widget type="ImageBox" skin="ImageBox" position="2 2 32 32" align="Left Top"
-                    name="WeapImage"/>
+                <Property key="NeedMouse" value="false"/>
+                <Widget type="ImageBox" skin="ImageBox" position="2 2 32 32" align="Left Top" name="WeapImage">
+                    <Property key="NeedMouse" value="false"/>
+                </Widget>
             </Widget>
-            <Widget type="ProgressBar" skin="MW_EnergyBar_Red" position="0 36 36 6"
-                align="Left Bottom" name="WeapStatus"/>
+            <Widget type="ProgressBar" skin="MW_EnergyBar_Red" position="0 36 36 6" align="Left Bottom" name="WeapStatus">
+                <Property key="NeedMouse" value="false"/>
+            </Widget>
         </Widget>
 
         <!-- Selected spell box -->
-        <Widget type="Widget" position="122 146 36 41" align="Left Bottom" name="SpellBox">
+        <Widget type="Button" position="122 146 36 41" align="Left Bottom" name="SpellBox">
             <Widget type="Widget" skin="HUD_Box" position="0 0 36 36">
-                <Widget type="ImageBox" skin="ImageBox" position="2 2 32 32" align="Left Top"
-                    name="SpellImage"/>
+                <Widget type="ImageBox" skin="ImageBox" position="2 2 32 32" align="Left Top" name="SpellImage"/>
+                <Property key="NeedMouse" value="false"/>
             </Widget>
-            <Widget type="ProgressBar" skin="MW_EnergyBar_Red" position="0 36 36 6"
-                align="Left Bottom" name="SpellStatus"/>
+            <Widget type="ProgressBar" skin="MW_EnergyBar_Red" position="0 36 36 6" align="Left Bottom" name="SpellStatus">
+                <Property key="NeedMouse" value="false"/>
+            </Widget>
         </Widget>
 
         <!-- Spell effects box -->
-        <Widget type="Widget" skin="HUD_Box" position="199 168 20 20"
+        <Widget type="Button" skin="HUD_Box" position="199 168 20 20"
             align="Right Bottom" name="EffectBox">
             <Widget type="ImageBox" skin="ImageBox" position="2 2 16 16" align="Left Bottom"
                 name="Effect1"/>
         </Widget>
 
         <!-- Map box -->
-        <Widget type="Widget" skin="HUD_Box" position="223 123 65 65" name="MiniMapBox"
-            align="Right Bottom">
+        <Widget type="Button" skin="" position="223 123 65 65" name="MiniMapBox" align="Right Bottom">
+            <Widget type="Widget" skin="HUD_Box" position="0 0 65 65" align="Center">
+                <Property key="NeedMouse" value="false"/>
 
-            <Widget type="ScrollView" skin="MW_MapView" position="2 2 61 61" align="Left Bottom" name="MiniMap">
-                <Property key="CanvasSize" value="1536 1536"/>
-               <!-- 3x3 maps, 1024x1024 each, but we will downsample to 512 to antialias them -->
-                <Widget type="ImageBox" skin="ImageBox" position="0 0 512 512" align="ALIGN_TOP ALIGN_LEFT" name="Map_0_0">
-                    <Widget type="ImageBox" skin="ImageBox" position="0 0 512 512" align="ALIGN_TOP ALIGN_LEFT" name="Map_0_0_fog"/>
-                </Widget>
+                <Widget type="ScrollView" skin="MW_MapView" position="2 2 61 61" align="Left Bottom" name="MiniMap">
+                    <Property key="NeedMouse" value="false"/>
+                    <Property key="CanvasSize" value="1536 1536"/>
 
-                <Widget type="ImageBox" skin="ImageBox" position="512 0 512 512" align="ALIGN_TOP ALIGN_LEFT" name="Map_1_0">
-                    <Widget type="ImageBox" skin="ImageBox" position="0 0 512 512" align="ALIGN_TOP ALIGN_LEFT" name="Map_1_0_fog"/>
-                </Widget>
-
-                <Widget type="ImageBox" skin="ImageBox" position="1024 0 512 512" align="ALIGN_TOP ALIGN_LEFT" name="Map_2_0">
-                    <Widget type="ImageBox" skin="ImageBox" position="0 0 512 512" align="ALIGN_TOP ALIGN_LEFT" name="Map_2_0_fog"/>
-                </Widget>
-
-                <Widget type="ImageBox" skin="ImageBox" position="0 512 512 512" align="ALIGN_TOP ALIGN_LEFT" name="Map_0_1">
-                    <Widget type="ImageBox" skin="ImageBox" position="0 0 512 512" align="ALIGN_TOP ALIGN_LEFT" name="Map_0_1_fog"/>
-                </Widget>
-
-                <Widget type="ImageBox" skin="ImageBox" position="512 512 512 512" align="ALIGN_TOP ALIGN_LEFT" name="Map_1_1">
-                    <Widget type="ImageBox" skin="ImageBox" position="0 0 512 512" align="ALIGN_TOP ALIGN_LEFT" name="Map_1_1_fog">
-                        <!-- Player arrow -->
-                        <Widget type="ImageBox" skin="RotatingSkin" position="0 0 32 32" align="ALIGN_BOTTOM ALIGN_LEFT" name="Compass">
-                            <Property key="ImageTexture" value="textures\compass.dds"/>
-                        </Widget>
+                    <Widget type="ImageBox" skin="RotatingSkin" position="0 0 32 32" align="ALIGN_BOTTOM ALIGN_LEFT" name="Compass">
+                        <Property key="ImageTexture" value="textures\compass.dds"/>
                     </Widget>
-                </Widget>
-
-                <Widget type="ImageBox" skin="ImageBox" position="1024 512 512 512" align="ALIGN_TOP ALIGN_LEFT" name="Map_2_1">
-                    <Widget type="ImageBox" skin="ImageBox" position="0 0 512 512" align="ALIGN_TOP ALIGN_LEFT" name="Map_2_1_fog"/>
-                </Widget>
-
-                <Widget type="ImageBox" skin="ImageBox" position="0 1024 512 512" align="ALIGN_TOP ALIGN_LEFT" name="Map_0_2">
-                    <Widget type="ImageBox" skin="ImageBox" position="0 0 512 512" align="ALIGN_TOP ALIGN_LEFT" name="Map_0_2_fog"/>
-                </Widget>
-
-                <Widget type="ImageBox" skin="ImageBox" position="512 1024 512 512" align="ALIGN_TOP ALIGN_LEFT" name="Map_1_2">
-                    <Widget type="ImageBox" skin="ImageBox" position="0 0 512 512" align="ALIGN_TOP ALIGN_LEFT" name="Map_1_2_fog"/>
-                </Widget>
-
-                <Widget type="ImageBox" skin="ImageBox" position="1024 1024 512 512" align="ALIGN_TOP ALIGN_LEFT" name="Map_2_2">
-                    <Widget type="ImageBox" skin="ImageBox" position="0 0 512 512" align="ALIGN_TOP ALIGN_LEFT" name="Map_2_2_fog"/>
                 </Widget>
             </Widget>
         </Widget>
