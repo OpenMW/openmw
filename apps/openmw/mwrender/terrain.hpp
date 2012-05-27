@@ -33,7 +33,7 @@ namespace MWRender{
         void cellAdded(MWWorld::Ptr::CellStore* store);
         void cellRemoved(MWWorld::Ptr::CellStore* store);
     private:
-        Ogre::TerrainGlobalOptions mTerrainGlobals;
+        Ogre::TerrainGlobalOptions* mTerrainGlobals;
         Ogre::TerrainGroup mTerrainGroup;
 
         RenderingManager* mRendering;

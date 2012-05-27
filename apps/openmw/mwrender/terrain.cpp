@@ -22,30 +22,30 @@ namespace MWRender
     TerrainManager::TerrainManager(Ogre::SceneManager* mgr, RenderingManager* rend) :
          mTerrainGroup(TerrainGroup(mgr, Terrain::ALIGN_X_Z, mLandSize, mWorldSize)), mRendering(rend)
     {
-
+        mTerrainGlobals = OGRE_NEW TerrainGlobalOptions();
         TerrainMaterialGeneratorPtr matGen;
         TerrainMaterialGeneratorB* matGenP = new TerrainMaterialGeneratorB();
         matGen.bind(matGenP);
-        mTerrainGlobals.setDefaultMaterialGenerator(matGen);
+        mTerrainGlobals->setDefaultMaterialGenerator(matGen);
 
         TerrainMaterialGenerator::Profile* const activeProfile =
-            mTerrainGlobals.getDefaultMaterialGenerator()
+            mTerrainGlobals->getDefaultMaterialGenerator()
                            ->getActiveProfile();
         mActiveProfile = static_cast<TerrainMaterialGeneratorB::SM2Profile*>(activeProfile);
 
         //The pixel error should be as high as possible without it being noticed
         //as it governs how fast mesh quality decreases.
-        mTerrainGlobals.setMaxPixelError(8);
+        mTerrainGlobals->setMaxPixelError(8);
 
-        mTerrainGlobals.setLayerBlendMapSize(32);
-        mTerrainGlobals.setDefaultGlobalColourMapSize(65);
+        mTerrainGlobals->setLayerBlendMapSize(32);
+        mTerrainGlobals->setDefaultGlobalColourMapSize(65);
 
         //10 (default) didn't seem to be quite enough
-        mTerrainGlobals.setSkirtSize(128);
+        mTerrainGlobals->setSkirtSize(128);
 
         //due to the sudden flick between composite and non composite textures,
         //this seemed the distance where it wasn't too noticeable
-        mTerrainGlobals.setCompositeMapDistance(mWorldSize*2);
+        mTerrainGlobals->setCompositeMapDistance(mWorldSize*2);
 
         mActiveProfile->setLightmapEnabled(false);
         mActiveProfile->setLayerSpecularMappingEnabled(false);
@@ -92,14 +92,14 @@ namespace MWRender
 
     void TerrainManager::setDiffuse(const ColourValue& diffuse)
     {
-        mTerrainGlobals.setCompositeMapDiffuse(diffuse);
+        mTerrainGlobals->setCompositeMapDiffuse(diffuse);
     }
 
     //----------------------------------------------------------------------------------------------
 
     void TerrainManager::setAmbient(const ColourValue& ambient)
     {
-        mTerrainGlobals.setCompositeMapAmbient(ambient);
+        mTerrainGlobals->setCompositeMapAmbient(ambient);
     }
 
     //----------------------------------------------------------------------------------------------
