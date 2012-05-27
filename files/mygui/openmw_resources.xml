@@ -139,4 +139,33 @@
         </Widget>
     </Resource>
 
+    <Resource type="ResourceLayout" name="MW_StatNameValue" version="3.2.0">
+        <Widget type="Widget" skin="" position="0 0 200 18" name="Root">
+            <Property key="NeedMouse" value="true"/>
+            <Widget type="TextBox" skin="SandText" position = "0 0 160 18" align = "ALIGN_LEFT ALIGN_HSTRETCH" name = "StatName">
+                <Property key="NeedMouse" value="false"/>
+            </Widget>
+            <Widget type="TextBox" skin="SandTextRight" position = "160 0 40 18" align = "ALIGN_RIGHT ALIGN_TOP" name = "StatValue">
+                <Property key="NeedMouse" value="false"/>
+            </Widget>
+        </Widget>
+    </Resource>
+
+    <Resource type="ResourceLayout" name="MW_StatName" version="3.2.0">
+        <Widget type="Widget" skin="" position="0 0 200 18" name="Root">
+            <Property key="NeedMouse" value="true"/>
+            <Widget type="TextBox" skin="SandText" position="0 0 200 18" align="ALIGN_LEFT ALIGN_HSTRETCH" name="StatName">
+                <Property key="NeedMouse" value="false"/>
+            </Widget>
+        </Widget>
+    </Resource>
+
+    <Resource type="ResourceLayout" name="MW_StatNameButton" version="3.2.0">
+        <Widget type="Widget" skin="" position="0 0 200 18" name="Root">
+            <Widget type="Button" skin="SandTextButton" position = "0 0 200 18" align = "ALIGN_LEFT ALIGN_HSTRETCH" name = "StatNameButton">
+                <Property key="NeedMouse" value="true"/>
+            </Widget>
+        </Widget>
+    </Resource>
+
 </MyGUI>

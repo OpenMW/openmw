@@ -301,8 +301,8 @@ void MWEffectList::createEffectWidgets(std::vector<MyGUI::WidgetPtr> &effects, M
     {
         effect = creator->createWidget<MWSpellEffect>("MW_EffectImage", coord, MyGUI::Align::Default);
         effect->setWindowManager(mWindowManager);
-        it->mIsConstant = (flags & EF_Constant);
-        it->mNoTarget = (flags & EF_NoTarget);
+        it->mIsConstant = (flags & EF_Constant) || it->mIsConstant;
+        it->mNoTarget = (flags & EF_NoTarget) || it->mNoTarget;
         effect->setSpellEffect(*it);
         effects.push_back(effect);
         if (effect->getRequestedWidth() > maxwidth)

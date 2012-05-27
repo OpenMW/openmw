@@ -57,6 +57,15 @@ namespace MWGui
         static std::string getCountString(const int value);
         ///< @return blank string if count is 1, or else " (value)"
 
+        // these do not create an actual tooltip, but they fill in the data that is required so the tooltip
+        // system knows what to show in case this widget is hovered
+        static void createSkillToolTip(MyGUI::Widget* widget, int skillId);
+        static void createAttributeToolTip(MyGUI::Widget* widget, int attributeId);
+        static void createSpecializationToolTip(MyGUI::Widget* widget, const std::string& name, int specId);
+        static void createBirthsignToolTip(MyGUI::Widget* widget, const std::string& birthsignId);
+        static void createRaceToolTip(MyGUI::Widget* widget, const ESM::Race* playerRace);
+        static void createClassToolTip(MyGUI::Widget* widget, const ESM::Class& playerClass);
+
     private:
         MyGUI::Widget* mDynamicToolTipBox;
 

@@ -34,3 +34,14 @@ const std::string Attribute::gmstAttributeDescIds[Attribute::Length] = {
     "sPerDesc",
     "sLucDesc"
 };
+
+const std::string Attribute::attributeIcons[Attribute::Length] = {
+    "icons\\k\\attribute_strength.dds",
+    "icons\\k\\attribute_int.dds",
+    "icons\\k\\attribute_wilpower.dds",
+    "icons\\k\\attribute_agility.dds",
+    "icons\\k\\attribute_speed.dds",
+    "icons\\k\\attribute_endurance.dds",
+    "icons\\k\\attribute_personality.dds",
+    "icons\\k\\attribute_luck.dds"
+};

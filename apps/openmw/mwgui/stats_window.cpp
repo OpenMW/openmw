@@ -12,6 +12,7 @@
 #include "../mwbase/environment.hpp"
 
 #include "window_manager.hpp"
+#include "tooltips.hpp"
 
 
 using namespace MWGui;
@@ -442,32 +443,17 @@ void StatsWindow::updateSkillArea()
     const ESM::Race* playerRace =  store.races.find (MWBase::Environment::get().getWorld()->getPlayer().getRace());
     MyGUI::Widget* raceWidget;
     getWidget(raceWidget, "RaceText");
-    raceWidget->setUserString("Caption_CenteredCaption", playerRace->name);
-    raceWidget->setUserString("Caption_CenteredCaptionText", playerRace->description);
+    ToolTips::createRaceToolTip(raceWidget, playerRace);
     getWidget(raceWidget, "Race_str");
-    raceWidget->setUserString("Caption_CenteredCaption", playerRace->name);
-    raceWidget->setUserString("Caption_CenteredCaptionText", playerRace->description);
+    ToolTips::createRaceToolTip(raceWidget, playerRace);
 
     // class tooltip
     MyGUI::Widget* classWidget;
     const ESM::Class& playerClass = MWBase::Environment::get().getWorld()->getPlayer().getClass();
-    int spec = playerClass.data.specialization;
-    std::string specStr;
-    if (spec == 0)
-        specStr = "#{sSpecializationCombat}";
-    else if (spec == 1)
-        specStr = "#{sSpecializationMagic}";
-    else if (spec == 2)
-        specStr = "#{sSpecializationStealth}";
-
     getWidget(classWidget, "ClassText");
-    classWidget->setUserString("Caption_ClassName", playerClass.name);
-    classWidget->setUserString("Caption_ClassDescription", playerClass.description);
-    classWidget->setUserString("Caption_ClassSpecialisation", "#{sSpecialization}: " + specStr);
+    ToolTips::createClassToolTip(classWidget, playerClass);
     getWidget(classWidget, "Class_str");
-    classWidget->setUserString("Caption_ClassName", playerClass.name);
-    classWidget->setUserString("Caption_ClassDescription", playerClass.description);
-    classWidget->setUserString("Caption_ClassSpecialisation", "#{sSpecialization}: " + specStr);
+    ToolTips::createClassToolTip(classWidget, playerClass);
 
     if (!mFactions.empty())
     {
@@ -534,61 +520,8 @@ void StatsWindow::updateSkillArea()
         addGroup(mWindowManager.getGameSettingString("sBirthSign", "Sign"), coord1, coord2);
         const ESM::BirthSign *sign = store.birthSigns.find(birthSignId);
         MyGUI::Widget* w = addItem(sign->name, coord1, coord2);
-        w->setUserString("ToolTipType", "Layout");
-        w->setUserString("ToolTipLayout", "BirthSignToolTip");
-        std::string image = sign->texture;
-        image.replace(image.size()-3, 3, "dds");
-        w->setUserString("ImageTexture_BirthSignImage", "textures\\" + image);
-        std::string text;
 
-        text += sign->name;
-        text += "\n#BF9959" + sign->description;
-
-        std::vector<std::string> abilities, powers, spells;
-
-        std::vector<std::string>::const_iterator it = sign->powers.list.begin();
-        std::vector<std::string>::const_iterator end = sign->powers.list.end();
-        for (; it != end; ++it)
-        {
-            const std::string &spellId = *it;
-            const ESM::Spell *spell = store.spells.search(spellId);
-            if (!spell)
-                continue; // Skip spells which cannot be found
-            ESM::Spell::SpellType type = static_cast<ESM::Spell::SpellType>(spell->data.type);
-            if (type != ESM::Spell::ST_Spell && type != ESM::Spell::ST_Ability && type != ESM::Spell::ST_Power)
-                continue; // We only want spell, ability and powers.
-
-            if (type == ESM::Spell::ST_Ability)
-                abilities.push_back(spellId);
-            else if (type == ESM::Spell::ST_Power)
-                powers.push_back(spellId);
-            else if (type == ESM::Spell::ST_Spell)
-                spells.push_back(spellId);
-        }
-
-        struct{ const std::vector<std::string> &spells; std::string label; } categories[3] = {
-            {abilities, "sBirthsignmenu1"},
-            {powers,    "sPowers"},
-            {spells,    "sBirthsignmenu2"}
-        };
-
-        for (int category = 0; category < 3; ++category)
-        {
-            for (std::vector<std::string>::const_iterator it = categories[category].spells.begin(); it != categories[category].spells.end(); ++it)
-            {
-                if (it == categories[category].spells.begin())
-                {
-                    text += std::string("\n#DDC79E") + std::string("#{") + categories[category].label + "}";
-                }
-
-                const std::string &spellId = *it;
-
-                const ESM::Spell *spell = store.spells.search(spellId);
-                text += "\n#BF9959" + spell->name;
-            }
-        }
-
-        w->setUserString("Caption_BirthSignText", text);
+        ToolTips::createBirthsignToolTip(w, birthSignId);
     }
 
     // Add a line separator if there are items above
