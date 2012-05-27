@@ -25,6 +25,11 @@ namespace MWRender
          */
         void setEnabled (const bool enabled);
 
+        void setViewport(Ogre::Viewport* vp) { mViewport = vp; }
+
+        /// recreate compositors (call this after viewport size changes)
+        void recreate();
+
         bool toggle() { setEnabled(!mEnabled); return mEnabled; }
 
         /**

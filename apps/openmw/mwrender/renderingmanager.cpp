@@ -11,6 +11,7 @@
 
 #include "../mwworld/world.hpp" // these includes can be removed once the static-hack is gone
 #include "../mwworld/ptr.hpp"
+#include "../mwworld/player.hpp"
 #include "../mwbase/environment.hpp"
 #include <components/esm/loadstat.hpp>
 #include <components/settings/settings.hpp>
@@ -30,6 +31,7 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
     :mRendering(_rend), mObjects(mRendering), mActors(mRendering), mAmbientMode(0), mSunEnabled(0)
 {
     mRendering.createScene("PlayerCam", Settings::Manager::getFloat("field of view", "General"), 5);
+    mRendering.setWindowEventListener(this);
 
     mCompositors = new Compositors(mRendering.getViewport());
 
@@ -567,6 +569,7 @@ Compositors* RenderingManager::getCompositors()
 
 void RenderingManager::processChangedSettings(const Settings::CategorySettingVector& settings)
 {
+    bool changeRes = false;
     for (Settings::CategorySettingVector::const_iterator it=settings.begin();
             it != settings.end(); ++it)
     {
@@ -574,6 +577,24 @@ void RenderingManager::processChangedSettings(const Settings::CategorySettingVec
         {
             setMenuTransparency(Settings::Manager::getFloat("menu transparency", "GUI"));
         }
+        else if (it->second == "max viewing distance" && it->first == "Viewing distance")
+        {
+            if (!MWBase::Environment::get().getWorld()->isCellExterior() && !MWBase::Environment::get().getWorld()->isCellQuasiExterior())
+                configureFog(*MWBase::Environment::get().getWorld()->getPlayer().getPlayer().getCell());
+        }
+        else if (it->first == "Video" && (
+                it->second == "resolution x"
+                || it->second == "resolution y"
+                || it->second == "fullscreen"))
+            changeRes = true;
+    }
+
+    if (changeRes)
+    {
+        int x = Settings::Manager::getInt("resolution x", "Video");
+        int y = Settings::Manager::getInt("resolution y", "Video");
+        mRendering.getWindow()->resize(x, y);
+        mRendering.getWindow()->setFullscreen(Settings::Manager::getBool("fullscreen", "Video"), x, y);
     }
 }
 
@@ -585,6 +606,17 @@ void RenderingManager::setMenuTransparency(float val)
     buffer[0] = (int(255*val) << 24);
     memcpy(tex->getBuffer()->lock(Ogre::HardwareBuffer::HBL_DISCARD), &buffer[0], 1*4);
     tex->getBuffer()->unlock();
+}
+
+void RenderingManager::windowResized(Ogre::RenderWindow* rw)
+{
+    mCompositors->setViewport(mRendering.recreateViewport());
+    mCompositors->recreate();
+    mWater->assignTextures();
+}
+
+void RenderingManager::windowClosed(Ogre::RenderWindow* rw)
+{
 }
 
 } // namespace

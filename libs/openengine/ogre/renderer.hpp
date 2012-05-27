@@ -25,6 +25,7 @@
 #endif
 
 #include "OgreTexture.h"
+#include <OgreWindowEventUtilities.h>
 
 namespace Ogre
 {
@@ -104,6 +105,8 @@ namespace OEngine
 
             ~OgreRenderer() { cleanup(); }
 
+            void setWindowEventListener(Ogre::WindowEventListener* listener);
+
             /** Configure the renderer. This will load configuration files and
             set up the Root and logging classes. */
             void configure(
@@ -153,6 +156,8 @@ namespace OEngine
 
             /// Viewport
             Ogre::Viewport *getViewport() { return mView; }
+
+            Ogre::Viewport* recreateViewport();
         };
     }
 }

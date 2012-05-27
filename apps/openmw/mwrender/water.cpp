@@ -10,7 +10,7 @@ namespace MWRender
 {
 
 Water::Water (Ogre::Camera *camera, RenderingManager* rend, const ESM::Cell* cell) :
-    mCamera (camera), mViewport (camera->getViewport()), mSceneManager (camera->getSceneManager()),
+    mCamera (camera), mSceneManager (camera->getSceneManager()),
     mIsUnderwater(false), mVisibilityFlags(0),
     mReflectionTarget(0), mActive(1), mToggled(1),
     mReflectionRenderActive(false), mRendering(rend)
@@ -79,6 +79,8 @@ Water::Water (Ogre::Camera *camera, RenderingManager* rend, const ESM::Cell* cel
     mUnderwaterEffect = Settings::Manager::getBool("underwater effect", "Water");
 
     mSceneManager->addRenderQueueListener(this);
+
+    assignTextures();
 
 
     // ----------------------------------------------------------------------------------------------
@@ -262,10 +264,13 @@ void Water::createMaterial()
     // use technique without shaders if reflection is disabled
     if (mReflectionTarget == 0)
         mMaterial->removeTechnique(0);
+}
 
+void Water::assignTextures()
+{
     if (Settings::Manager::getBool("shader", "Water"))
     {
-        CompositorInstance* compositor = CompositorManager::getSingleton().getCompositorChain(mViewport)->getCompositor("gbuffer");
+        CompositorInstance* compositor = CompositorManager::getSingleton().getCompositorChain(mRendering->getViewport())->getCompositor("gbuffer");
 
         TexturePtr colorTexture = compositor->getTextureInstance("mrt_output", 0);
         TextureUnitState* tus = mMaterial->getTechnique(0)->getPass(0)->getTextureUnitState("refractionMap");

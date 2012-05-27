@@ -8,6 +8,8 @@
 
 #include "../mwworld/class.hpp"
 
+#include <OgreWindowEventUtilities.h>
+
 #include <utility>
 #include <openengine/ogre/renderer.hpp>
 #include <openengine/ogre/fader.hpp>
@@ -51,7 +53,7 @@ namespace MWRender
     class Water;
     class Compositors;
 
-class RenderingManager: private RenderingInterface {
+class RenderingManager: private RenderingInterface, public Ogre::WindowEventListener {
 
   private:
 
@@ -160,6 +162,12 @@ class RenderingManager: private RenderingInterface {
     /// @return packed vector4 (min_x, min_y, max_x, max_y)
 
     void processChangedSettings(const Settings::CategorySettingVector& settings);
+
+    Ogre::Viewport* getViewport() { return mRendering.getViewport(); }
+
+  protected:
+	virtual void windowResized(Ogre::RenderWindow* rw);
+    virtual void windowClosed(Ogre::RenderWindow* rw);
 
   private:
 

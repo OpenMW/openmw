@@ -374,7 +374,7 @@ SkyManager::SkyManager (SceneNode* pMwRoot, Camera* pCamera)
     , mSunGlare(NULL)
     , mMasser(NULL)
     , mSecunda(NULL)
-    , mViewport(NULL)
+    , mCamera(pCamera)
     , mRootNode(NULL)
     , mSceneMgr(NULL)
     , mAtmosphereDay(NULL)
@@ -399,9 +399,8 @@ SkyManager::SkyManager (SceneNode* pMwRoot, Camera* pCamera)
     , mSecundaEnabled(true)
     , mCreated(false)
 {
-    mViewport = pCamera->getViewport();
     mSceneMgr = pMwRoot->getCreator();
-    mRootNode = pCamera->getParentSceneNode()->createChildSceneNode();
+    mRootNode = mCamera->getParentSceneNode()->createChildSceneNode();
     mRootNode->pitch(Degree(-90)); // convert MW to ogre coordinates
     mRootNode->setInheritOrientation(false);
 }
@@ -741,7 +740,7 @@ void SkyManager::update(float duration)
         // on how directly the player is looking at the sun
         Vector3 sun = mSunGlare->getPosition();
         sun = Vector3(sun.x, sun.z, -sun.y);
-        Vector3 cam = mViewport->getCamera()->getRealDirection();
+        Vector3 cam = mCamera->getRealDirection();
         const Degree angle = sun.angleBetween( cam );
         float val = 1- (angle.valueDegrees() / 180.f);
         val = (val*val*val*val)*2;

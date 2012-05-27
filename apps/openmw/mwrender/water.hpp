@@ -17,7 +17,6 @@ namespace MWRender {
         static const int CELL_SIZE = 8192;
         Ogre::Camera *mCamera;
         Ogre::SceneManager *mSceneManager;
-        Ogre::Viewport *mViewport;
 
         Ogre::Plane mWaterPlane;
         Ogre::SceneNode *mWaterNode;
@@ -64,6 +63,8 @@ namespace MWRender {
 
         void toggle();
         void update();
+
+        void assignTextures();
 
         void setViewportBackground(const Ogre::ColourValue& bg);
 

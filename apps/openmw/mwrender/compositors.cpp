@@ -26,6 +26,21 @@ void Compositors::setEnabled (const bool enabled)
     mEnabled = enabled;
 }
 
+void Compositors::recreate()
+{
+    Ogre::CompositorManager::getSingleton().removeCompositorChain(mViewport);
+
+    CompositorMap temp = mCompositors;
+    mCompositors.clear();
+
+    for (CompositorMap::iterator it=temp.begin();
+        it != temp.end(); ++it)
+    {
+        addCompositor(it->first, it->second.second);
+        setCompositorEnabled(it->first, mEnabled && it->second.first);
+    }
+}
+
 void Compositors::addCompositor (const std::string& name, const int priority)
 {
     int id = 0;
