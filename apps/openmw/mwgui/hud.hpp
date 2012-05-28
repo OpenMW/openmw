@@ -57,6 +57,8 @@ namespace MWGui
         std::string mCellName;
         float mCellNameTimer;
 
+        bool mMapVisible;
+
         void onWorldClicked(MyGUI::Widget* _sender);
         void onWorldMouseOver(MyGUI::Widget* _sender, int x, int y);
         void onWorldMouseLostFocus(MyGUI::Widget* _sender, MyGUI::Widget* _new);

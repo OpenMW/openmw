@@ -43,6 +43,7 @@ HUD::HUD(int width, int height, int fpsLevel, DragAndDrop* dragAndDrop)
     , mDragAndDrop(dragAndDrop)
     , mCellNameTimer(0.0f)
     , mCellNameBox(NULL)
+    , mMapVisible(true)
 {
     setCoord(0,0, width, height);
 
@@ -234,6 +235,7 @@ void HUD::setBottomRightVisibility(bool effectBoxVisible, bool minimapBoxVisible
     if (!minimapBoxVisible)
         effectsDx = minimapBoxBaseRight - effectBoxBaseRight;
 
+    mMapVisible = minimapBoxVisible;
     minimapBox->setVisible(minimapBoxVisible);
     effectBox->setPosition(effectBoxBaseRight - effectBox->getWidth() + effectsDx, effectBox->getTop());
     effectBox->setVisible(effectBoxVisible);
@@ -337,7 +339,7 @@ void HUD::setCellName(const std::string& cellName)
         mCellName = cellName;
 
         mCellNameBox->setCaption(mCellName);
-        mCellNameBox->setVisible(true);
+        mCellNameBox->setVisible(mMapVisible);
     }
 }
 

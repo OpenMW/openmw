@@ -113,6 +113,8 @@ namespace MWGui
         dialog->open("#{sNotifyMessage67}");
         dialog->eventOkClicked.clear();
         dialog->eventOkClicked += MyGUI::newDelegate(this, &SettingsWindow::onResolutionAccept);
+        dialog->eventCancelClicked.clear();
+        dialog->eventCancelClicked += MyGUI::newDelegate(this, &SettingsWindow::onResolutionAccept);
     }
 
     void SettingsWindow::onResolutionAccept()
@@ -130,6 +132,12 @@ namespace MWGui
         Settings::Manager::setInt("resolution y", "Video", resY);
 
         apply();
+        mResolutionList->setIndexSelected(MyGUI::ITEM_NONE);
+    }
+
+    void SettingsWindow::onResolutionCancel()
+    {
+        mResolutionList->setIndexSelected(MyGUI::ITEM_NONE);
     }
 
     void SettingsWindow::onButtonToggled(MyGUI::Widget* _sender)
@@ -150,8 +158,36 @@ namespace MWGui
 
         if (_sender == mFullscreenButton)
         {
-            Settings::Manager::setBool("fullscreen", "Video", newState);
-            apply();
+            // check if this resolution is supported in fullscreen
+            bool supported = false;
+            for (unsigned int i=0; i<mResolutionList->getItemCount(); ++i)
+            {
+                std::string resStr = mResolutionList->getItemNameAt(i);
+                size_t xPos = resStr.find("x");
+                std::string resXStr = resStr.substr(0, xPos-1);
+                Ogre::StringUtil::trim(resXStr);
+                std::string resYStr = resStr.substr(xPos+2, resStr.size()-(xPos+2));
+                Ogre::StringUtil::trim(resYStr);
+                int resX = boost::lexical_cast<int>(resXStr);
+                int resY = boost::lexical_cast<int>(resYStr);
+
+                if (resX == Settings::Manager::getInt("resolution x", "Video")
+                    && resY  == Settings::Manager::getInt("resolution y", "Video"))
+                    supported = true;
+            }
+
+            if (!supported)
+            {
+                std::string msg = "This resolution is not supported in Fullscreen mode. Please select a resolution from the list.";
+                MWBase::Environment::get().getWindowManager()->
+                    messageBox(msg, std::vector<std::string>());
+                _sender->castType<MyGUI::Button>()->setCaption(off);
+            }
+            else
+            {
+                Settings::Manager::setBool("fullscreen", "Video", newState);
+                apply();
+            }
         }
         else if (_sender == mVSyncButton)
         {

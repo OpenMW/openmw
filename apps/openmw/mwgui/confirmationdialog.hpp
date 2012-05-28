@@ -17,6 +17,7 @@ namespace MWGui
                 signature : void method()\n
             */
             EventHandle_Void eventOkClicked;
+            EventHandle_Void eventCancelClicked;
 
         private:
             MyGUI::EditBox* mMessage;

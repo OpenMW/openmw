@@ -41,6 +41,7 @@ namespace MWGui
             void onButtonToggled(MyGUI::Widget* _sender);
             void onResolutionSelected(MyGUI::ListBox* _sender, size_t index);
             void onResolutionAccept();
+            void onResolutionCancel();
 
             void apply();
     };

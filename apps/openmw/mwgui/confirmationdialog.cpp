@@ -50,6 +50,8 @@ namespace MWGui
 
     void ConfirmationDialog::onCancelButtonClicked(MyGUI::Widget* _sender)
     {
+        eventCancelClicked();
+
         close();
     }
 
