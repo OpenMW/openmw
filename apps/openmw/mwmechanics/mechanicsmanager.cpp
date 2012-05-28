@@ -30,6 +30,15 @@ namespace MWMechanics
         for (int i=0; i<27; ++i)
             npcStats.mSkill[i].setBase (player->npdt52.skills[i]);
 
+        creatureStats.mAttributes[0].setBase (player->npdt52.strength);
+        creatureStats.mAttributes[1].setBase (player->npdt52.intelligence);
+        creatureStats.mAttributes[2].setBase (player->npdt52.willpower);
+        creatureStats.mAttributes[3].setBase (player->npdt52.agility);
+        creatureStats.mAttributes[4].setBase (player->npdt52.speed);
+        creatureStats.mAttributes[5].setBase (player->npdt52.endurance);
+        creatureStats.mAttributes[6].setBase (player->npdt52.personality);
+        creatureStats.mAttributes[7].setBase (player->npdt52.luck);
+
         // race
         if (mRaceSelected)
         {
