@@ -326,8 +326,8 @@ void LocalMap::updatePlayer (const Ogre::Vector3& position, const Ogre::Quaterni
     MWBase::Environment::get().getWindowManager()->setPlayerDir(playerdirection.x, -playerdirection.z);
 
     // explore radius (squared)
-    const float sqrExploreRadius = 0.01 * sFogOfWarResolution*sFogOfWarResolution;
-    const float exploreRadius = 0.1 * sFogOfWarResolution; // explore radius from 0 to sFogOfWarResolution
+    const float sqrExploreRadius = (mInterior ? 0.01 : 0.09) * sFogOfWarResolution*sFogOfWarResolution;
+    const float exploreRadius = (mInterior ? 0.1 : 0.3) * sFogOfWarResolution; // explore radius from 0 to sFogOfWarResolution
     const float exploreRadiusUV = exploreRadius / sFogOfWarResolution; // explore radius from 0 to 1 (UV space)
 
     int intExtMult = mInterior ? 1 : -1; // interior and exterior have reversed Y coordinates (interior: top to bottom)
@@ -364,7 +364,11 @@ void LocalMap::updatePlayer (const Ogre::Vector3& position, const Ogre::Quaterni
                 {
                     for (int texU = 0; texU<sFogOfWarResolution; ++texU)
                     {
-                        float sqrDist = Math::Sqr((texU + mx*sFogOfWarResolution) - u*sFogOfWarResolution) + Math::Sqr((texV + my*sFogOfWarResolution) - v*sFogOfWarResolution);
+                        // fix into range of 0 ... sFogOfWarResolution
+                        int _texU = texU * (float(sFogOfWarResolution+1) / float(sFogOfWarResolution));
+                        int _texV = texV * (float(sFogOfWarResolution+1) / float(sFogOfWarResolution));
+
+                        float sqrDist = Math::Sqr((_texU + mx*sFogOfWarResolution) - u*sFogOfWarResolution) + Math::Sqr((_texV + my*sFogOfWarResolution) - v*sFogOfWarResolution);
                         uint32 clr = mBuffers[texName][i];
                         uint8 alpha = (clr >> 24);
                         alpha = std::min( alpha, (uint8) (std::max(0.f, std::min(1.f, (sqrDist/sqrExploreRadius)))*255) );
