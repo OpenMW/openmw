@@ -11,6 +11,7 @@
 #include "../mwbase/environment.hpp"
 #include "../mwworld/world.hpp"
 #include "../mwsound/soundmanager.hpp"
+#include "../mwinput/inputmanager.hpp"
 
 #include "window_manager.hpp"
 #include "confirmationdialog.hpp"
@@ -144,7 +145,10 @@ namespace MWGui
         }
 
         if (_sender == mFullscreenButton)
+        {
             Settings::Manager::setBool("fullscreen", "Video", newState);
+            apply();
+        }
         else if (_sender == mVSyncButton)
         {
             Settings::Manager::setBool("vsync", "Video", newState);
@@ -188,5 +192,6 @@ namespace MWGui
         MWBase::Environment::get().getWorld()->processChangedSettings(changed);
         MWBase::Environment::get().getSoundManager()->processChangedSettings(changed);
         MWBase::Environment::get().getWindowManager()->processChangedSettings(changed);
+        MWBase::Environment::get().getInputManager()->processChangedSettings(changed);
     }
 }

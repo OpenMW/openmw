@@ -92,7 +92,12 @@ namespace MWInput
 
 
    /* InputImpl Methods */
-
+public:
+    void adjustMouseRegion(int width, int height)
+    {
+        input.adjustMouseClippingSize(width, height);
+    }
+private:
     void toggleSpell()
     {
         if (windows.isGuiMode()) return;
@@ -449,5 +454,21 @@ namespace MWInput
   void MWInputManager::changeInputMode(bool guiMode)
   {
       impl->changeInputMode(guiMode);
+  }
+
+  void MWInputManager::processChangedSettings(const Settings::CategorySettingVector& changed)
+  {
+      bool changeRes = false;
+      for (Settings::CategorySettingVector::const_iterator it = changed.begin();
+        it != changed.end(); ++it)
+      {
+          if (it->first == "Video" && (
+            it->second == "resolution x"
+            || it->second == "resolution y"))
+                changeRes = true;
+      }
+
+      if (changeRes)
+          impl->adjustMouseRegion(Settings::Manager::getInt("resolution x", "Video"), Settings::Manager::getInt("resolution y", "Video"));
   }
 }

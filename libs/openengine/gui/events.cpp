@@ -8,18 +8,9 @@ using namespace OIS;
 using namespace OEngine::GUI;
 
 EventInjector::EventInjector(MyGUI::Gui *g)
-  : gui(g), mouseX(0), mouseY(0), enabled(true)
+  : gui(g), enabled(true)
 {
   assert(gui);
-  maxX = MyGUI::RenderManager::getInstance().getViewSize().width;
-  maxY = MyGUI::RenderManager::getInstance().getViewSize().height;
-}
-
-template <typename X>
-void setRange(X &x, X min, X max)
-{
-  if(x < min) x = min;
-  else if(x > max) x = max;
 }
 
 void EventInjector::event(Type type, int index, const void *p)
@@ -64,11 +55,8 @@ void EventInjector::event(Type type, int index, const void *p)
       MyGUI::MouseButton id = MyGUI::MouseButton::Enum(index);
 
       // Update mouse position
-      mouseX += mouse->state.X.rel;
-      mouseY += mouse->state.Y.rel;
-
-      setRange(mouseX,0,maxX);
-      setRange(mouseY,0,maxY);
+      int mouseX = mouse->state.X.abs;
+      int mouseY = mouse->state.Y.abs;
 
       if(type == EV_MouseDown)
         MyGUI::InputManager::getInstance().injectMousePress(mouseX, mouseY, id);

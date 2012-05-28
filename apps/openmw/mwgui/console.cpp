@@ -370,4 +370,9 @@ namespace MWGui
         /* All keywords match with the shortest. Append it to the output string and return it. */
         return output.append(matches.front());
     }
+
+    void Console::onResChange(int width, int height)
+    {
+        setCoord(10,10, width-10, height/2);
+    }
 }

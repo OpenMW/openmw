@@ -16,8 +16,6 @@ namespace GUI
   class EventInjector : public Mangle::Input::Event
   {
     MyGUI::Gui *gui;
-    int mouseX, mouseY;
-    int maxX, maxY;
 
   public:
     bool enabled;

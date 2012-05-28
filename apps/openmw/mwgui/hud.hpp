@@ -26,6 +26,7 @@ namespace MWGui
         void setFpsLevel(const int level);
 
         void onFrame(float dt);
+        void onResChange(int width, int height);
 
         void setCellName(const std::string& cellName);
 

@@ -157,7 +157,7 @@ namespace OEngine
             /// Viewport
             Ogre::Viewport *getViewport() { return mView; }
 
-            Ogre::Viewport* recreateViewport();
+            void adjustViewport();
         };
     }
 }

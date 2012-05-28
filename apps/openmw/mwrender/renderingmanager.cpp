@@ -22,6 +22,9 @@
 #include "water.hpp"
 #include "compositors.hpp"
 
+#include "../mwgui/window_manager.hpp" // FIXME
+#include "../mwinput/inputmanager.hpp" // FIXME
+
 using namespace MWRender;
 using namespace Ogre;
 
@@ -591,9 +594,13 @@ void RenderingManager::processChangedSettings(const Settings::CategorySettingVec
 
     if (changeRes)
     {
-        int x = Settings::Manager::getInt("resolution x", "Video");
-        int y = Settings::Manager::getInt("resolution y", "Video");
-        mRendering.getWindow()->resize(x, y);
+        unsigned int x = Settings::Manager::getInt("resolution x", "Video");
+        unsigned int y = Settings::Manager::getInt("resolution y", "Video");
+
+        if (x != mRendering.getWindow()->getWidth() || y != mRendering.getWindow()->getHeight())
+        {
+            mRendering.getWindow()->resize(x, y);
+        }
         mRendering.getWindow()->setFullscreen(Settings::Manager::getBool("fullscreen", "Video"), x, y);
     }
 }
@@ -610,9 +617,17 @@ void RenderingManager::setMenuTransparency(float val)
 
 void RenderingManager::windowResized(Ogre::RenderWindow* rw)
 {
-    mCompositors->setViewport(mRendering.recreateViewport());
+    Settings::Manager::setInt("resolution x", "Video", rw->getWidth());
+    Settings::Manager::setInt("resolution y", "Video", rw->getHeight());
+
+
+    mRendering.adjustViewport();
     mCompositors->recreate();
     mWater->assignTextures();
+
+    const Settings::CategorySettingVector& changed = Settings::Manager::apply();
+    MWBase::Environment::get().getInputManager()->processChangedSettings(changed); //FIXME
+    MWBase::Environment::get().getWindowManager()->processChangedSettings(changed); // FIXME
 }
 
 void RenderingManager::windowClosed(Ogre::RenderWindow* rw)

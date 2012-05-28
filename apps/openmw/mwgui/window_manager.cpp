@@ -605,6 +605,27 @@ void WindowManager::onRetrieveTag(const MyGUI::UString& _tag, MyGUI::UString& _r
 void WindowManager::processChangedSettings(const Settings::CategorySettingVector& changed)
 {
     hud->setFpsLevel(Settings::Manager::getInt("fps", "HUD"));
+
+    bool changeRes = false;
+    for (Settings::CategorySettingVector::const_iterator it = changed.begin();
+        it != changed.end(); ++it)
+    {
+        if (it->first == "Video" &&  (
+            it->second == "resolution x"
+            || it->second == "resolution y"))
+        {
+            changeRes = true;
+        }
+    }
+
+    if (changeRes)
+    {
+        int x = Settings::Manager::getInt("resolution x", "Video");
+        int y = Settings::Manager::getInt("resolution y", "Video");
+        hud->onResChange(x, y);
+        console->onResChange(x, y);
+        mSettingsWindow->center();
+    }
 }
 
 void WindowManager::pushGuiMode(GuiMode mode)

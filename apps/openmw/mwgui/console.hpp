@@ -58,6 +58,8 @@ namespace MWGui
 
     void setFont(const std::string &fntName);
 
+    void onResChange(int width, int height);
+
     void clearHistory();
 
     // Print a message to the console. Messages may contain color

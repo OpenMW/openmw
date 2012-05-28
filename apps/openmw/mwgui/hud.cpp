@@ -347,3 +347,8 @@ void HUD::onFrame(float dt)
     if (mCellNameTimer < 0)
         mCellNameBox->setVisible(false);
 }
+
+void HUD::onResChange(int width, int height)
+{
+    setCoord(0, 0, width, height);
+}
