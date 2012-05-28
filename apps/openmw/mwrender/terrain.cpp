@@ -86,6 +86,7 @@ namespace MWRender
 
     TerrainManager::~TerrainManager()
     {
+        OGRE_DELETE mTerrainGlobals;
     }
 
     //----------------------------------------------------------------------------------------------
