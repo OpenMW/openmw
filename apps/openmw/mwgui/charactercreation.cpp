@@ -471,14 +471,14 @@ void CharacterCreation::onRaceDialogDone(WindowBase* parWindow)
         mWM->popGuiMode();
         mWM->pushGuiMode(GM_Review);
     }
-    else if (mCreationStage >= CSE_NameChosen)
+    else if (mCreationStage >= CSE_RaceChosen)
     {
         mWM->popGuiMode();
         mWM->pushGuiMode(GM_Class);
     }
     else
     {
-        mCreationStage = CSE_NameChosen;
+        mCreationStage = CSE_RaceChosen;
         mWM->popGuiMode();
     }
 }
