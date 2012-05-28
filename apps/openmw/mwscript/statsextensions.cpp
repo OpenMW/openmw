@@ -500,6 +500,22 @@ namespace MWScript
                 }
         };
 
+        template<class R>
+        class OpSetScale : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWWorld::Ptr ptr = R()(runtime);
+
+                    Interpreter::Type_Float scale = runtime[0].mInteger;
+                    runtime.pop();
+
+                    MWBase::Environment::get().getWorld()->scaleObject(ptr,scale);
+                }
+        };
+
         const int numberOfAttributes = 8;
 
         const int opcodeGetAttribute = 0x2000027;
