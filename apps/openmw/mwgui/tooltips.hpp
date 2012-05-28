@@ -41,6 +41,8 @@ namespace MWGui
         void toggleFullHelp(); ///< show extra info in item tooltips (owner, script)
         bool getFullHelp() const;
 
+        void setDelay(float delay);
+
         void setFocusObject(const MWWorld::Ptr& focus);
         void setFocusObjectScreenCoords(float min_x, float min_y, float max_x, float max_y);
         ///< set the screen-space position of the tooltip for focused object 
@@ -83,6 +85,12 @@ namespace MWGui
 
         float mFocusToolTipX;
         float mFocusToolTipY;
+
+        float mDelay;
+        float mRemainingDelay; // remaining time until tooltip will show
+
+        int mLastMouseX;
+        int mLastMouseY;
 
         bool mGameMode;
 

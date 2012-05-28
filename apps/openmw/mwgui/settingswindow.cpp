@@ -37,6 +37,7 @@ namespace MWGui
         getWidget(mOkButton, "OkButton");
         getWidget(mResolutionList, "ResolutionList");
         getWidget(mMenuTransparencySlider, "MenuTransparencySlider");
+        getWidget(mToolTipDelaySlider, "ToolTipDelaySlider");
         getWidget(mViewDistanceSlider, "ViewDistanceSlider");
         getWidget(mFullscreenButton, "FullscreenButton");
         getWidget(mVSyncButton, "VSyncButton");
@@ -52,6 +53,7 @@ namespace MWGui
         mVSyncButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onButtonToggled);
         mFPSButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onFpsToggled);
         mMenuTransparencySlider->eventScrollChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onSliderChangePosition);
+        mToolTipDelaySlider->eventScrollChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onSliderChangePosition);
         mViewDistanceSlider->eventScrollChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onSliderChangePosition);
         mResolutionList->eventListChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onResolutionSelected);
 
@@ -79,6 +81,8 @@ namespace MWGui
         // read settings
         int menu_transparency = (mMenuTransparencySlider->getScrollRange()-1) * Settings::Manager::getFloat("menu transparency", "GUI");
         mMenuTransparencySlider->setScrollPosition(menu_transparency);
+        int tooltip_delay = (mToolTipDelaySlider->getScrollRange()-1) * Settings::Manager::getFloat("tooltip delay", "GUI");
+        mToolTipDelaySlider->setScrollPosition(tooltip_delay);
 
         float val = (Settings::Manager::getFloat("max viewing distance", "Viewing distance")-2000)/(5600-2000);
         int viewdist = (mViewDistanceSlider->getScrollRange()-1) * val;
@@ -170,6 +174,8 @@ namespace MWGui
         float val = pos / float(scroller->getScrollRange()-1);
         if (scroller == mMenuTransparencySlider)
             Settings::Manager::setFloat("menu transparency", "GUI", val);
+        else if (scroller == mToolTipDelaySlider)
+            Settings::Manager::setFloat("tooltip delay", "GUI", val);
         else if (scroller == mViewDistanceSlider)
             Settings::Manager::setFloat("max viewing distance", "Viewing distance", (1-val) * 2000 + val * 5600);
         else if (scroller == mMasterVolumeSlider)

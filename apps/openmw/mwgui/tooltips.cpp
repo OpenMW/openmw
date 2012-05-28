@@ -8,6 +8,8 @@
 
 #include <boost/lexical_cast.hpp>
 
+#include <components/settings/settings.hpp>
+
 using namespace MWGui;
 using namespace MyGUI;
 
@@ -19,6 +21,10 @@ ToolTips::ToolTips(WindowManager* windowManager) :
     , mEnabled(true)
     , mFocusToolTipX(0.0)
     , mFocusToolTipY(0.0)
+    , mDelay(0.0)
+    , mRemainingDelay(0.0)
+    , mLastMouseX(0)
+    , mLastMouseY(0)
 {
     getWidget(mDynamicToolTipBox, "DynamicToolTipBox");
 
@@ -28,6 +34,9 @@ ToolTips::ToolTips(WindowManager* windowManager) :
     // even if the mouse is over the tooltip
     mDynamicToolTipBox->setNeedMouseFocus(false);
     mMainWidget->setNeedMouseFocus(false);
+
+    mDelay = Settings::Manager::getFloat("tooltip delay", "GUI");
+    mRemainingDelay = mDelay;
 }
 
 void ToolTips::setEnabled(bool enabled)
@@ -57,6 +66,21 @@ void ToolTips::onFrame(float frameDuration)
 
     if (!mGameMode)
     {
+        const MyGUI::IntPoint& mousePos = InputManager::getInstance().getMousePosition();
+        if (mousePos.left == mLastMouseX && mousePos.top == mLastMouseY)
+        {
+            mRemainingDelay -= frameDuration;
+        }
+        else
+        {
+            mRemainingDelay = mDelay;
+        }
+        mLastMouseX = mousePos.left;
+        mLastMouseY = mousePos.top;
+
+        if (mRemainingDelay > 0)
+            return;
+
         Widget* focus = InputManager::getInstance().getMouseFocusWidget();
         if (focus == 0)
         {
@@ -620,4 +644,10 @@ void ToolTips::createClassToolTip(MyGUI::Widget* widget, const ESM::Class& playe
     widget->setUserString("Caption_ClassSpecialisation", "#{sSpecialization}: " + specStr);
     widget->setUserString("ToolTipType", "Layout");
     widget->setUserString("ToolTipLayout", "ClassToolTip");
+}
+
+void ToolTips::setDelay(float delay)
+{
+    mDelay = delay;
+    mRemainingDelay = mDelay;
 }

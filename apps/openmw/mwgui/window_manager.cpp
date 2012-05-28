@@ -605,6 +605,7 @@ void WindowManager::onRetrieveTag(const MyGUI::UString& _tag, MyGUI::UString& _r
 void WindowManager::processChangedSettings(const Settings::CategorySettingVector& changed)
 {
     hud->setFpsLevel(Settings::Manager::getInt("fps", "HUD"));
+    mToolTips->setDelay(Settings::Manager::getFloat("tooltip delay", "GUI"));
 
     bool changeRes = false;
     for (Settings::CategorySettingVector::const_iterator it = changed.begin();

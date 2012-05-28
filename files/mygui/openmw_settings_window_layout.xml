@@ -23,6 +23,21 @@
                     <Property key="Caption" value="#{sNone}"/>
                     <Property key="TextAlign" value="Right"/>
                 </Widget>
+
+                <Widget type="TextBox" skin="NormalText" position="4 78 352 18" align="Left Top">
+                    <Property key="Caption" value="#{sMenu_Help_Delay}"/>
+                </Widget>
+                <Widget type="ScrollBar" skin="MW_HSlider" position="4 102 352 18" align="Left Top" name="ToolTipDelaySlider">
+                    <Property key="Range" value="1000000"/>
+                </Widget>
+                <Widget type="TextBox" skin="SandText" position="4 126 352 18" align="Left Top">
+                    <Property key="Caption" value="#{sFast}"/>
+                    <Property key="TextAlign" value="Left"/>
+                </Widget>
+                <Widget type="TextBox" skin="SandText" position="4 126 352 18" align="Left Top">
+                    <Property key="Caption" value="#{sSlow}"/>
+                    <Property key="TextAlign" value="Right"/>
+                </Widget>
             </Widget>
             <Widget type="TabItem" skin="" position="4 28 360 312">
                 <Property key="Caption" value="  #{sAudio}  "/>

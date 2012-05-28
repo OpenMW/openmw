@@ -19,6 +19,7 @@ namespace MWGui
             MyGUI::Button* mOkButton;
 
             MyGUI::ScrollBar* mMenuTransparencySlider;
+            MyGUI::ScrollBar* mToolTipDelaySlider;
 
             // graphics
             MyGUI::ListBox* mResolutionList;
