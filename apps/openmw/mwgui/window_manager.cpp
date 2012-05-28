@@ -302,6 +302,7 @@ void WindowManager::updateVisible()
 void WindowManager::setValue (const std::string& id, const MWMechanics::Stat<int>& value)
 {
     mStatsWindow->setValue (id, value);
+    mCharGen->setValue(id, value);
 
     static const char *ids[] =
     {
@@ -332,6 +333,7 @@ void WindowManager::setValue (const std::string& id, const MWMechanics::Stat<int
 void WindowManager::setValue(const ESM::Skill::SkillEnum parSkill, const MWMechanics::Stat<float>& value)
 {
     mStatsWindow->setValue(parSkill, value);
+    mCharGen->setValue(parSkill, value);
     playerSkillValues[parSkill] = value;
 }
 
@@ -339,6 +341,7 @@ void WindowManager::setValue (const std::string& id, const MWMechanics::DynamicS
 {
     mStatsWindow->setValue (id, value);
     hud->setValue (id, value);
+    mCharGen->setValue(id, value);
     if (id == "HBar")
     {
         playerHealth = value;
@@ -391,6 +394,7 @@ void WindowManager::setPlayerClass (const ESM::Class &class_)
 void WindowManager::configureSkills (const SkillList& major, const SkillList& minor)
 {
     mStatsWindow->configureSkills (major, minor);
+    mCharGen->configureSkills(major, minor);
     playerMajorSkills = major;
     playerMinorSkills = minor;
 }

@@ -122,6 +122,56 @@ CharacterCreation::CharacterCreation(WindowManager* _wm)
     mCreationStage = CSE_NotStarted;
 }
 
+void CharacterCreation::setValue (const std::string& id, const MWMechanics::Stat<int>& value)
+{
+    if (mReviewDialog)
+    {
+       static const char *ids[] =
+        {
+            "AttribVal1", "AttribVal2", "AttribVal3", "AttribVal4", "AttribVal5",
+            "AttribVal6", "AttribVal7", "AttribVal8",
+            0
+        };
+
+        for (int i=0; ids[i]; ++i)
+        {
+            if (ids[i]==id)
+                mReviewDialog->setAttribute(ESM::Attribute::AttributeID(i), value);
+        }
+    }
+}
+
+void CharacterCreation::setValue (const std::string& id, const MWMechanics::DynamicStat<int>& value)
+{
+    if (mReviewDialog)
+    {
+        if (id == "HBar")
+        {
+            mReviewDialog->setHealth (value);
+        }
+        else if (id == "MBar")
+        {
+            mReviewDialog->setMagicka (value);
+        }
+        else if (id == "FBar")
+        {
+            mReviewDialog->setFatigue (value);
+        }
+    }
+}
+
+void CharacterCreation::setValue(const ESM::Skill::SkillEnum parSkill, const MWMechanics::Stat<float>& value)
+{
+    if (mReviewDialog)
+        mReviewDialog->setSkillValue(parSkill, value);
+}
+
+void CharacterCreation::configureSkills (const SkillList& major, const SkillList& minor)
+{
+    if (mReviewDialog)
+        mReviewDialog->configureSkills(major, minor);
+}
+
 void CharacterCreation::spawnDialog(const char id)
 {
     switch (id)
@@ -208,20 +258,22 @@ void CharacterCreation::spawnDialog(const char id)
             mReviewDialog->setFatigue(mPlayerFatigue);
 
             {
-                std::map<ESM::Attribute::AttributeID, MWMechanics::Stat<int> >::iterator end = mPlayerAttributes.end();
-                for (std::map<ESM::Attribute::AttributeID, MWMechanics::Stat<int> >::iterator it = mPlayerAttributes.begin(); it != end; ++it)
+                std::map<ESM::Attribute::AttributeID, MWMechanics::Stat<int> > attributes = mWM->getPlayerAttributeValues();
+                for (std::map<ESM::Attribute::AttributeID, MWMechanics::Stat<int> >::iterator it = attributes.begin();
+                    it != attributes.end(); ++it)
                 {
                     mReviewDialog->setAttribute(it->first, it->second);
                 }
             }
 
             {
-                std::map<ESM::Skill::SkillEnum, MWMechanics::Stat<float> >::iterator end = mPlayerSkillValues.end();
-                for (std::map<ESM::Skill::SkillEnum, MWMechanics::Stat<float> >::iterator it = mPlayerSkillValues.begin(); it != end; ++it)
+                std::map<ESM::Skill::SkillEnum, MWMechanics::Stat<float> > skills = mWM->getPlayerSkillValues();
+                for (std::map<ESM::Skill::SkillEnum, MWMechanics::Stat<float> >::iterator it = skills.begin();
+                    it != skills.end(); ++it)
                 {
                     mReviewDialog->setSkillValue(it->first, it->second);
                 }
-                mReviewDialog->configureSkills(mPlayerMajorSkills, mPlayerMinorSkills);
+                mReviewDialog->configureSkills(mWM->getPlayerMajorSkills(), mWM->getPlayerMinorSkills());
             }
 
             mReviewDialog->eventDone += MyGUI::newDelegate(this, &CharacterCreation::onReviewDialogDone);

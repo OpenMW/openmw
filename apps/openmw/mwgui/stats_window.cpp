@@ -255,6 +255,8 @@ void StatsWindow::configureSkills (const std::vector<int>& major, const std::vec
         if (skillSet.find(skill) == skillSet.end())
             miscSkills.push_back(skill);
     }
+
+    updateSkillArea();
 }
 
 void StatsWindow::onFrame ()

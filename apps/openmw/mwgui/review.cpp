@@ -211,6 +211,7 @@ void ReviewDialog::setSkillValue(ESM::Skill::SkillEnum skillId, const MWMechanic
         widget->setCaption(text);
         widget->_setWidgetState(state);
     }
+
 }
 
 void ReviewDialog::configureSkills(const std::vector<int>& major, const std::vector<int>& minor)
@@ -230,6 +231,8 @@ void ReviewDialog::configureSkills(const std::vector<int>& major, const std::vec
         if (skillSet.find(skill) == skillSet.end())
             miscSkills.push_back(skill);
     }
+
+    updateSkillArea();
 }
 
 void ReviewDialog::addSeparator(MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2)

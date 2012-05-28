@@ -241,10 +241,10 @@ void PickClassDialog::updateStats()
 
     for (int i = 0; i < 5; ++i)
     {
-        majorSkill[i]->setSkillNumber(klass->data.skills[i][0]);
-        minorSkill[i]->setSkillNumber(klass->data.skills[i][1]);
-        ToolTips::createSkillToolTip(majorSkill[i], klass->data.skills[i][0]);
-        ToolTips::createSkillToolTip(minorSkill[i], klass->data.skills[i][1]);
+        minorSkill[i]->setSkillNumber(klass->data.skills[i][0]);
+        majorSkill[i]->setSkillNumber(klass->data.skills[i][1]);
+        ToolTips::createSkillToolTip(minorSkill[i], klass->data.skills[i][0]);
+        ToolTips::createSkillToolTip(majorSkill[i], klass->data.skills[i][1]);
     }
 
     classImage->setImageTexture(std::string("textures\\levelup\\") + currentClassId + ".dds");
@@ -518,7 +518,7 @@ std::vector<ESM::Skill::SkillEnum> CreateClassDialog::getMinorSkills() const
     std::vector<ESM::Skill::SkillEnum> v;
     for(int i=0; i < 5; i++)
     {
-        v.push_back(majorSkill[i]->getSkillId());
+        v.push_back(minorSkill[i]->getSkillId());
     }
     return v;
 }

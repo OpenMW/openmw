@@ -211,6 +211,11 @@ namespace MWGui
 
     void onFrame (float frameDuration);
 
+    std::map<ESM::Skill::SkillEnum, MWMechanics::Stat<float> > getPlayerSkillValues() { return playerSkillValues; }
+    std::map<ESM::Attribute::AttributeID, MWMechanics::Stat<int> > getPlayerAttributeValues() { return playerAttributes; }
+    SkillList getPlayerMinorSkills() { return playerMinorSkills; }
+    SkillList getPlayerMajorSkills() { return playerMajorSkills; }
+
     /**
      * Fetches a GMST string from the store, if there is no setting with the given
      * ID or it is not a string the default string is returned.
