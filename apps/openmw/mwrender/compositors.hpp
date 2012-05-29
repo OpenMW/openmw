@@ -44,6 +44,8 @@ namespace MWRender
          */
         void addCompositor (const std::string& name, const int priority);
 
+        void removeAll ();
+
     protected:
         /// maps compositor name to its "enabled" state
         CompositorMap mCompositors;

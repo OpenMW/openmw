@@ -1,5 +1,5 @@
 #include "water.hpp"
-#include <components/settings/settings.hpp>
+
 #include "sky.hpp"
 #include "renderingmanager.hpp"
 #include "compositors.hpp"
@@ -30,13 +30,6 @@ Water::Water (Ogre::Camera *camera, RenderingManager* rend, const ESM::Cell* cel
     mWater->setRenderQueueGroup(RQG_Water);
     mWater->setCastShadows(false);
 
-    mVisibilityFlags = RV_Terrain * Settings::Manager::getBool("reflect terrain", "Water")
-                        + RV_Statics * Settings::Manager::getBool("reflect statics", "Water")
-                        + RV_StaticsSmall * Settings::Manager::getBool("reflect small statics", "Water")
-                        + RV_Actors * Settings::Manager::getBool("reflect actors", "Water")
-                        + RV_Misc * Settings::Manager::getBool("reflect misc", "Water")
-                        + RV_Sky;
-
     mWaterNode = mSceneManager->getRootSceneNode()->createChildSceneNode();
     mWaterNode->setPosition(0, mTop, 0);
 
@@ -48,30 +41,9 @@ Water::Water (Ogre::Camera *camera, RenderingManager* rend, const ESM::Cell* cel
     }
     mWaterNode->attachObject(mWater);
 
-    // Create rendertarget for reflection
-    int rttsize = Settings::Manager::getInt("rtt size", "Water");
+    applyRTT();
+    applyVisibilityMask();
 
-    TexturePtr tex;
-    if (Settings::Manager::getBool("shader", "Water"))
-    {
-        tex = TextureManager::getSingleton().createManual("WaterReflection",
-            ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, TEX_TYPE_2D, rttsize, rttsize, 0, PF_FLOAT16_RGBA, TU_RENDERTARGET);
-
-        RenderTarget* rtt = tex->getBuffer()->getRenderTarget();
-        Viewport* vp = rtt->addViewport(mReflectionCamera);
-        vp->setOverlaysEnabled(false);
-        vp->setBackgroundColour(ColourValue(0.8f, 0.9f, 1.0f));
-        vp->setShadowsEnabled(false);
-        vp->setVisibilityMask( mVisibilityFlags );
-        // use fallback techniques without shadows and without mrt (currently not implemented for sky and terrain)
-        //vp->setMaterialScheme("Fallback");
-        rtt->addListener(this);
-        rtt->setActive(true);
-
-        mReflectionTarget = rtt;
-    }
-
-    mCompositorName = RenderingManager::useMRT() ? "Underwater" : "UnderwaterNoMRT";
 
     createMaterial();
     mWater->setMaterial(mMaterial);
@@ -251,7 +223,15 @@ void Water::postRenderTargetUpdate(const RenderTargetEvent& evt)
 
 void Water::createMaterial()
 {
-    mMaterial = MaterialManager::getSingleton().getByName("Water");
+    if (mReflectionTarget == 0)
+    {
+        mMaterial = MaterialManager::getSingleton().getByName("Water_Fallback");
+    }
+    else
+    {
+        mMaterial = MaterialManager::getSingleton().getByName("Water");
+        mMaterial->getTechnique(0)->getPass(0)->getTextureUnitState(0)->setTexture(mReflectionTexture);
+    }
 
     // these have to be set in code
     std::string textureNames[32];
@@ -259,11 +239,13 @@ void Water::createMaterial()
     {
         textureNames[i] = "textures\\water\\water" + StringConverter::toString(i, 2, '0') + ".dds";
     }
-    mMaterial->getTechnique(1)->getPass(0)->getTextureUnitState(0)->setAnimatedTextureName(textureNames, 32, 2);
-
-    // use technique without shaders if reflection is disabled
+    Ogre::Technique* tech;
     if (mReflectionTarget == 0)
-        mMaterial->removeTechnique(0);
+        tech = mMaterial->getTechnique(0);
+    else
+        tech = mMaterial->getTechnique(1);
+
+    tech->getPass(0)->getTextureUnitState(0)->setAnimatedTextureName(textureNames, 32, 2);
 }
 
 void Water::assignTextures()
@@ -318,6 +300,86 @@ void Water::renderQueueEnded (Ogre::uint8 queueGroupId, const Ogre::String &invo
 
 void Water::update()
 {
+}
+
+void Water::applyRTT()
+{
+    if (mReflectionTarget)
+    {
+        TextureManager::getSingleton().remove("WaterReflection");
+        mReflectionTarget = 0;
+    }
+
+    // Create rendertarget for reflection
+    int rttsize = Settings::Manager::getInt("rtt size", "Water");
+
+    if (Settings::Manager::getBool("shader", "Water"))
+    {
+        mReflectionTexture = TextureManager::getSingleton().createManual("WaterReflection",
+            ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, TEX_TYPE_2D, rttsize, rttsize, 0, PF_FLOAT16_RGBA, TU_RENDERTARGET);
+
+        RenderTarget* rtt = mReflectionTexture->getBuffer()->getRenderTarget();
+        Viewport* vp = rtt->addViewport(mReflectionCamera);
+        vp->setOverlaysEnabled(false);
+        vp->setBackgroundColour(ColourValue(0.8f, 0.9f, 1.0f));
+        vp->setShadowsEnabled(false);
+        // use fallback techniques without shadows and without mrt (currently not implemented for sky and terrain)
+        //vp->setMaterialScheme("Fallback");
+        rtt->addListener(this);
+        rtt->setActive(true);
+
+        mReflectionTarget = rtt;
+    }
+
+    mCompositorName = RenderingManager::useMRT() ? "Underwater" : "UnderwaterNoMRT";
+}
+
+void Water::applyVisibilityMask()
+{
+    mVisibilityFlags = RV_Terrain * Settings::Manager::getBool("reflect terrain", "Water")
+                        + RV_Statics * Settings::Manager::getBool("reflect statics", "Water")
+                        + RV_StaticsSmall * Settings::Manager::getBool("reflect small statics", "Water")
+                        + RV_Actors * Settings::Manager::getBool("reflect actors", "Water")
+                        + RV_Misc * Settings::Manager::getBool("reflect misc", "Water")
+                        + RV_Sky;
+
+    if (mReflectionTarget)
+    {
+        mReflectionTexture->getBuffer()->getRenderTarget()->getViewport(0)->setVisibilityMask(mVisibilityFlags);
+    }
+}
+
+void Water::processChangedSettings(const Settings::CategorySettingVector& settings)
+{
+    bool applyRT = false;
+    bool applyVisMask = false;
+    for (Settings::CategorySettingVector::const_iterator it=settings.begin();
+            it != settings.end(); ++it)
+    {
+        if ( it->first == "Water" && (
+               it->second == "shader"
+            || it->second == "rtt size"))
+            applyRT = true;
+
+        if ( it->first == "Water" && (
+               it->second == "reflect actors"
+            || it->second == "reflect terrain"
+            || it->second == "reflect misc"
+            || it->second == "reflect small statics"
+            || it->second == "reflect statics"))
+            applyVisMask = true;
+    }
+
+    if(applyRT)
+    {
+        applyRTT();
+        applyVisibilityMask();
+        createMaterial();
+        mWater->setMaterial(mMaterial);
+        assignTextures();
+    }
+    if (applyVisMask)
+        applyVisibilityMask();
 }
 
 } // namespace

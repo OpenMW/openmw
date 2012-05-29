@@ -62,3 +62,10 @@ void Compositors::setCompositorEnabled (const std::string& name, const bool enab
     mCompositors[name].first = enabled;
     Ogre::CompositorManager::getSingleton().setCompositorEnabled (mViewport, name, enabled && mEnabled);
 }
+
+void Compositors::removeAll()
+{
+    Ogre::CompositorManager::getSingleton().removeCompositorChain(mViewport);
+
+    mCompositors.clear();
+}

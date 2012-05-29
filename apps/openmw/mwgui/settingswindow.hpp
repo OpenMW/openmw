@@ -38,6 +38,10 @@ namespace MWGui
             MyGUI::Button* mTextureFilteringButton;
             MyGUI::TextBox* mAnisotropyLabel;
             MyGUI::Widget* mAnisotropyBox;
+            MyGUI::Button* mWaterShaderButton;
+            MyGUI::Button* mReflectObjectsButton;
+            MyGUI::Button* mReflectActorsButton;
+            MyGUI::Button* mReflectTerrainButton;
 
             // audio
             MyGUI::ScrollBar* mMasterVolumeSlider;

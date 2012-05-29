@@ -3,8 +3,10 @@
 
 #include <Ogre.h>
 #include <components/esm/loadcell.hpp>
+#include <components/settings/settings.hpp>
 
 #include "renderconst.hpp"
+
 
 namespace MWRender {
 
@@ -38,6 +40,9 @@ namespace MWRender {
         void renderQueueStarted (Ogre::uint8 queueGroupId, const Ogre::String &invocation, bool &skipThisInvocation);
         void renderQueueEnded (Ogre::uint8 queueGroupId, const Ogre::String &invocation, bool &repeatThisInvocation);
 
+        void applyRTT();
+        void applyVisibilityMask();
+
         void updateVisible();
 
         RenderingManager* mRendering;
@@ -50,6 +55,7 @@ namespace MWRender {
 
         Ogre::Camera* mReflectionCamera;
 
+        Ogre::TexturePtr mReflectionTexture;
         Ogre::RenderTarget* mReflectionTarget;
 
         bool mUnderwaterEffect;
@@ -67,6 +73,8 @@ namespace MWRender {
         void assignTextures();
 
         void setViewportBackground(const Ogre::ColourValue& bg);
+
+        void processChangedSettings(const Settings::CategorySettingVector& settings);
 
         void checkUnderwater(float y);
         void changeCell(const ESM::Cell* cell);

@@ -67,25 +67,13 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
 
     // disable unsupported effects
     const RenderSystemCapabilities* caps = Root::getSingleton().getRenderSystem()->getCapabilities();
-    if (caps->getNumMultiRenderTargets() < 2 || !Settings::Manager::getBool("shaders", "Objects"))
+    if (!waterShaderSupported())
         Settings::Manager::setBool("shader", "Water", false);
     if ( !(caps->isShaderProfileSupported("fp40") || caps->isShaderProfileSupported("ps_4_0"))
         || !Settings::Manager::getBool("shaders", "Objects"))
         Settings::Manager::setBool("enabled", "Shadows", false);
 
-    // note that the order is important here
-    if (useMRT())
-    {
-        mCompositors->addCompositor("gbuffer", 0);
-        mCompositors->setCompositorEnabled("gbuffer", true);
-        mCompositors->addCompositor("Underwater", 1);
-        mCompositors->addCompositor("gbufferFinalizer", 2);
-        mCompositors->setCompositorEnabled("gbufferFinalizer", true);
-    }
-    else
-    {
-        mCompositors->addCompositor("UnderwaterNoMRT", 0);
-    }
+    applyCompositors();
 
     // Turn the entire scene (represented by the 'root' node) -90
     // degrees around the x axis. This makes Z go upwards, and Y go into
@@ -605,6 +593,11 @@ void RenderingManager::processChangedSettings(const Settings::CategorySettingVec
             MaterialManager::getSingleton().setDefaultTextureFiltering(tfo);
             MaterialManager::getSingleton().setDefaultAnisotropy( (filter == "anisotropic") ? Settings::Manager::getInt("anisotropy", "General") : 1 );
         }
+        else if (it->second == "shader" && it->first == "Water")
+        {
+            applyCompositors();
+            mShaderHelper->applyShaders();
+        }
     }
 
     if (changeRes)
@@ -618,6 +611,9 @@ void RenderingManager::processChangedSettings(const Settings::CategorySettingVec
         }
         mRendering.getWindow()->setFullscreen(Settings::Manager::getBool("fullscreen", "Video"), x, y);
     }
+
+    if (mWater)
+        mWater->processChangedSettings(settings);
 }
 
 void RenderingManager::setMenuTransparency(float val)
@@ -647,6 +643,34 @@ void RenderingManager::windowResized(Ogre::RenderWindow* rw)
 
 void RenderingManager::windowClosed(Ogre::RenderWindow* rw)
 {
+}
+
+bool RenderingManager::waterShaderSupported()
+{
+    const RenderSystemCapabilities* caps = Root::getSingleton().getRenderSystem()->getCapabilities();
+    if (caps->getNumMultiRenderTargets() < 2 || !Settings::Manager::getBool("shaders", "Objects"))
+        return false;
+    return true;
+}
+
+void RenderingManager::applyCompositors()
+{
+    mCompositors->removeAll();
+    if (useMRT())
+    {
+        mCompositors->addCompositor("gbuffer", 0);
+        mCompositors->setCompositorEnabled("gbuffer", true);
+        mCompositors->addCompositor("Underwater", 1);
+        mCompositors->addCompositor("gbufferFinalizer", 2);
+        mCompositors->setCompositorEnabled("gbufferFinalizer", true);
+    }
+    else
+    {
+        mCompositors->addCompositor("UnderwaterNoMRT", 0);
+    }
+
+    if (mWater)
+        mWater->assignTextures();
 }
 
 } // namespace

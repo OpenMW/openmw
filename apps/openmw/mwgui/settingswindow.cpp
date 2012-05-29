@@ -64,9 +64,17 @@ namespace MWGui
         getWidget(mTextureFilteringButton, "TextureFilteringButton");
         getWidget(mAnisotropyLabel, "AnisotropyLabel");
         getWidget(mAnisotropyBox, "AnisotropyBox");
+        getWidget(mWaterShaderButton, "WaterShaderButton");
+        getWidget(mReflectObjectsButton, "ReflectObjectsButton");
+        getWidget(mReflectActorsButton, "ReflectActorsButton");
+        getWidget(mReflectTerrainButton, "ReflectTerrainButton");
 
         mOkButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onOkButtonClicked);
         mFullscreenButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onButtonToggled);
+        mWaterShaderButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onButtonToggled);
+        mReflectObjectsButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onButtonToggled);
+        mReflectTerrainButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onButtonToggled);
+        mReflectActorsButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onButtonToggled);
         mTextureFilteringButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onTextureFilteringToggled);
         mVSyncButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onButtonToggled);
         mFPSButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onFpsToggled);
@@ -126,6 +134,19 @@ namespace MWGui
         mEffectsVolumeSlider->setScrollPosition(Settings::Manager::getFloat("sfx volume", "Sound") * (mEffectsVolumeSlider->getScrollRange()-1));
         mFootstepsVolumeSlider->setScrollPosition(Settings::Manager::getFloat("footsteps volume", "Sound") * (mFootstepsVolumeSlider->getScrollRange()-1));
         mVoiceVolumeSlider->setScrollPosition(Settings::Manager::getFloat("voice volume", "Sound") * (mVoiceVolumeSlider->getScrollRange()-1));
+
+        mWaterShaderButton->setCaptionWithReplacing(Settings::Manager::getBool("shader", "Water") ? "#{sOn}" : "#{sOff}");
+        mReflectObjectsButton->setCaptionWithReplacing(Settings::Manager::getBool("reflect objects", "Water") ? "#{sOn}" : "#{sOff}");
+        mReflectActorsButton->setCaptionWithReplacing(Settings::Manager::getBool("reflect actors", "Water") ? "#{sOn}" : "#{sOff}");
+        mReflectTerrainButton->setCaptionWithReplacing(Settings::Manager::getBool("reflect terrain", "Water") ? "#{sOn}" : "#{sOff}");
+
+        if (!MWRender::RenderingManager::waterShaderSupported())
+        {
+            mWaterShaderButton->setEnabled(false);
+            mReflectObjectsButton->setEnabled(false);
+            mReflectActorsButton->setEnabled(false);
+            mReflectTerrainButton->setEnabled(false);
+        }
 
         mFullscreenButton->setCaptionWithReplacing(Settings::Manager::getBool("fullscreen", "Video") ? "#{sOn}" : "#{sOff}");
         mVSyncButton->setCaptionWithReplacing(Settings::Manager::getBool("vsync", "Video") ? "#{sOn}": "#{sOff}");
@@ -227,6 +248,23 @@ namespace MWGui
             Settings::Manager::setBool("vsync", "Video", newState);
             MWBase::Environment::get().getWindowManager()->
                 messageBox("VSync will be applied after a restart", std::vector<std::string>());
+        }
+        else
+        {
+            if (_sender == mWaterShaderButton)
+                Settings::Manager::setBool("shader", "Water", newState);
+            else if (_sender == mReflectObjectsButton)
+            {
+                Settings::Manager::setBool("reflect misc", "Water", newState);
+                Settings::Manager::setBool("reflect statics", "Water", newState);
+                Settings::Manager::setBool("reflect statics small", "Water", newState);
+            }
+            else if (_sender == mReflectActorsButton)
+                Settings::Manager::setBool("reflect actors", "Water", newState);
+            else if (_sender == mReflectTerrainButton)
+                Settings::Manager::setBool("reflect terrain", "Water", newState);
+
+            apply();
         }
     }
 

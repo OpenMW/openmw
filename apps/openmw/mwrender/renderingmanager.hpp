@@ -165,6 +165,8 @@ class RenderingManager: private RenderingInterface, public Ogre::WindowEventList
 
     Ogre::Viewport* getViewport() { return mRendering.getViewport(); }
 
+    static bool waterShaderSupported();
+
   protected:
 	virtual void windowResized(Ogre::RenderWindow* rw);
     virtual void windowClosed(Ogre::RenderWindow* rw);
@@ -174,6 +176,8 @@ class RenderingManager: private RenderingInterface, public Ogre::WindowEventList
     void setAmbientMode();
 
     void setMenuTransparency(float val);
+
+    void applyCompositors();
 
     bool mSunEnabled;
 
