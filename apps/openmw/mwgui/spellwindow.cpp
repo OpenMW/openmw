@@ -2,6 +2,7 @@
 
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
+#include <boost/format.hpp>
 
 #include "../mwworld/world.hpp"
 #include "../mwworld/player.hpp"
@@ -9,10 +10,12 @@
 #include "../mwbase/environment.hpp"
 #include "../mwmechanics/spells.hpp"
 #include "../mwmechanics/creaturestats.hpp"
+#include "../mwmechanics/spellsuccess.hpp"
 #include "../mwsound/soundmanager.hpp"
 
 #include "window_manager.hpp"
 #include "inventorywindow.hpp"
+#include "confirmationdialog.hpp"
 
 namespace
 {
@@ -175,6 +178,7 @@ namespace MWGui
             t->setTextAlign(MyGUI::Align::Left);
             t->setUserString("ToolTipType", "Spell");
             t->setUserString("Spell", *it);
+            t->eventMouseWheel += MyGUI::newDelegate(this, &SpellWindow::onMouseWheel);
             t->eventMouseButtonClick += MyGUI::newDelegate(this, &SpellWindow::onSpellSelected);
 
             if (*it == selectedSpell)
@@ -194,18 +198,19 @@ namespace MWGui
             t->setTextAlign(MyGUI::Align::Left);
             t->setUserString("ToolTipType", "Spell");
             t->setUserString("Spell", *it);
+            t->eventMouseWheel += MyGUI::newDelegate(this, &SpellWindow::onMouseWheel);
             t->eventMouseButtonClick += MyGUI::newDelegate(this, &SpellWindow::onSpellSelected);
-
-            if (*it == selectedSpell)
-                t->setStateSelected(true);
+            t->setStateSelected(*it == selectedSpell);
 
             // cost / success chance
-            MyGUI::TextBox* costChance = mSpellView->createWidget<MyGUI::TextBox>("SpellText",
+            MyGUI::Button* costChance = mSpellView->createWidget<MyGUI::Button>("SpellText",
                 MyGUI::IntCoord(4, mHeight, mWidth-8, spellHeight), MyGUI::Align::Left | MyGUI::Align::Top);
             std::string cost = boost::lexical_cast<std::string>(spell->data.cost);
-            costChance->setCaption(cost + "/" + "100"); /// \todo
+            std::string chance = boost::lexical_cast<std::string>(int(MWMechanics::getSpellSuccessChance(*it, player)));
+            costChance->setCaption(cost + "/" + chance);
             costChance->setTextAlign(MyGUI::Align::Right);
             costChance->setNeedMouseFocus(false);
+            costChance->setStateSelected(*it == selectedSpell);
 
 
             mHeight += spellHeight;
@@ -218,6 +223,8 @@ namespace MWGui
         for (std::vector<MWWorld::Ptr>::const_iterator it = items.begin(); it != items.end(); ++it)
         {
             MWWorld::Ptr item = *it;
+
+            const ESM::Enchantment* enchant = MWBase::Environment::get().getWorld()->getStore().enchants.find(MWWorld::Class::get(item).getEnchantment(item));
 
             // check if the item is currently equipped (will display in a different color)
             bool equipped = false;
@@ -238,18 +245,26 @@ namespace MWGui
             t->setUserString("ToolTipType", "ItemPtr");
             t->setUserString("Equipped", equipped ? "true" : "false");
             t->eventMouseButtonClick += MyGUI::newDelegate(this, &SpellWindow::onEnchantedItemSelected);
+            t->eventMouseWheel += MyGUI::newDelegate(this, &SpellWindow::onMouseWheel);
             t->setStateSelected(item == selectedItem);
 
             // cost / charge
-            MyGUI::TextBox* costCharge = mSpellView->createWidget<MyGUI::TextBox>(equipped ? "SpellText" : "SpellTextUnequipped",
+            MyGUI::Button* costCharge = mSpellView->createWidget<MyGUI::Button>(equipped ? "SpellText" : "SpellTextUnequipped",
                 MyGUI::IntCoord(4, mHeight, mWidth-8, spellHeight), MyGUI::Align::Left | MyGUI::Align::Top);
 
-            const ESM::Enchantment* enchant = MWBase::Environment::get().getWorld()->getStore().enchants.find(MWWorld::Class::get(item).getEnchantment(item));
             std::string cost = boost::lexical_cast<std::string>(enchant->data.cost);
             std::string charge = boost::lexical_cast<std::string>(enchant->data.charge); /// \todo track current charge
+            if (enchant->data.type != ESM::Enchantment::CastOnce)
+            {
+                // this is Morrowind behaviour
+                cost = "100";
+                charge = "100";
+            }
+
             costCharge->setCaption(cost + "/" + charge);
             costCharge->setTextAlign(MyGUI::Align::Right);
             costCharge->setNeedMouseFocus(false);
+            costCharge->setStateSelected(item == selectedItem);
 
             mHeight += spellHeight;
         }
@@ -312,8 +327,9 @@ namespace MWGui
         }
         assert(it != store.end());
 
-        // equip, if it is not already equipped
-        if (_sender->getUserString("Equipped") == "false")
+        // equip, if it can be equipped and is not already equipped
+        if (_sender->getUserString("Equipped") == "false"
+            && !MWWorld::Class::get(item).getEquipmentSlots(item).first.empty())
         {
             // sound
             MWBase::Environment::get().getSoundManager()->playSound(MWWorld::Class::get(item).getUpSoundId(item), 1.0, 1.0);
@@ -323,7 +339,6 @@ namespace MWGui
             /// \todo the following code is pretty much copy&paste from ActionEquip, put it in a function?
             // slots that this item can be equipped in
             std::pair<std::vector<int>, bool> slots = MWWorld::Class::get(item).getEquipmentSlots(item);
-
 
             // equip the item in the first free slot
             for (std::vector<int>::const_iterator slot=slots.first.begin();
@@ -362,8 +377,33 @@ namespace MWGui
         MWWorld::InventoryStore& store = MWWorld::Class::get(player).getInventoryStore(player);
         MWMechanics::Spells& spells = stats.mSpells;
 
-        spells.setSelectedSpell(_sender->getUserString("Spell"));
-        store.setSelectedEnchantItem(store.end());
+        if (MyGUI::InputManager::getInstance().isShiftPressed())
+        {
+            // delete spell, if allowed
+            const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().spells.find(_sender->getUserString("Spell"));
+            if (spell->data.flags & ESM::Spell::F_Always
+                || spell->data.type == ESM::Spell::ST_Power)
+            {
+                mWindowManager.messageBox("#{sDeleteSpellError}", std::vector<std::string>());
+            }
+            else
+            {
+                // ask for confirmation
+                mSpellToDelete = _sender->getUserString("Spell");
+                ConfirmationDialog* dialog = mWindowManager.getConfirmationDialog();
+                std::string question = mWindowManager.getGameSettingString("sQuestionDeleteSpell", "Delete %s?");
+                question = boost::str(boost::format(question) % spell->name);
+                dialog->open(question);
+                dialog->eventOkClicked.clear();
+                dialog->eventOkClicked += MyGUI::newDelegate(this, &SpellWindow::onDeleteSpellAccept);
+                dialog->eventCancelClicked.clear();
+            }
+        }
+        else
+        {
+            spells.setSelectedSpell(_sender->getUserString("Spell"));
+            store.setSelectedEnchantItem(store.end());
+        }
 
         updateSpells();
     }
@@ -374,5 +414,24 @@ namespace MWGui
         height += 24 * 3 + 18 * 2; // group headings
         height += numSpells * 18;
         return height;
+    }
+
+    void SpellWindow::onMouseWheel(MyGUI::Widget* _sender, int _rel)
+    {
+        if (mSpellView->getViewOffset().top + _rel*0.3 > 0)
+            mSpellView->setViewOffset(MyGUI::IntPoint(0, 0));
+        else
+            mSpellView->setViewOffset(MyGUI::IntPoint(0, mSpellView->getViewOffset().top + _rel*0.3));
+    }
+
+    void SpellWindow::onDeleteSpellAccept()
+    {
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+        MWMechanics::CreatureStats& stats = MWWorld::Class::get(player).getCreatureStats(player);
+        MWMechanics::Spells& spells = stats.mSpells;
+
+        spells.remove(mSpellToDelete);
+
+        updateSpells();
     }
 }
