@@ -128,6 +128,7 @@ namespace MWGui
                 {
                     ESM::ENAMstruct effect;
                     effect.effectID = mEffects[i].mEffectID;
+                    effect.area = 0;
                     effect.range = ESM::RT_Self;
                     effect.skill = mEffects[i].mSkill;
                     effect.attribute = mEffects[i].mAttribute;
@@ -167,10 +168,51 @@ namespace MWGui
             int random = rand() % names.size();
             newPotion.model = "m\\misc_potion_" + names[random ] + "_01.nif";
             newPotion.icon = "m\\tx_potion_" + names[random ] + "_01.dds";
-            std::pair<std::string, const ESM::Potion*> result = MWBase::Environment::get().getWorld()->createRecord(newPotion);
+
+            // check if a similiar potion record exists already
+            bool found = false;
+            std::string objectId;
+            typedef std::map<std::string, ESM::Potion> PotionMap;
+            PotionMap potions = MWBase::Environment::get().getWorld()->getStore().potions.list;
+            for (PotionMap::const_iterator it = potions.begin(); it != potions.end(); ++it)
+            {
+                if (found) break;
+
+                if (it->second.data.value == newPotion.data.value
+                    && it->second.data.weight == newPotion.data.weight
+                    && it->second.name == newPotion.name
+                    && it->second.effects.list.size() == newPotion.effects.list.size())
+                {
+                    // check effects
+                    for (unsigned int i=0; i < it->second.effects.list.size(); ++i)
+                    {
+                        const ESM::ENAMstruct& a = it->second.effects.list[i];
+                        const ESM::ENAMstruct& b = newPotion.effects.list[i];
+                        if (a.effectID == b.effectID
+                            && a.area == b.area
+                            && a.range == b.range
+                            && a.skill == b.skill
+                            && a.attribute == b.attribute
+                            && a.magnMin == b.magnMin
+                            && a.magnMax == b.magnMax
+                            && a.duration == b.duration)
+                        {
+                            found = true;
+                            objectId = it->first;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if (!found)
+            {
+                std::pair<std::string, const ESM::Potion*> result = MWBase::Environment::get().getWorld()->createRecord(newPotion);
+                objectId = result.first;
+            }
 
             // create a reference and add it to player inventory
-            MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), result.first);
+            MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), objectId);
             MWWorld::ContainerStore& store = MWWorld::Class::get(mPtr).getContainerStore(mPtr);
             ref.getPtr().getRefData().setCount(1);
             store.add(ref.getPtr());

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <MyGUI type="Layout">
-    <Widget type="Window" skin="MW_Dialog" layer="Windows" position="0 0 600 500" name="_Main">
+    <Widget type="Window" skin="MW_Dialog" layer="Windows" position="0 0 560 410" name="_Main">
 
         <Widget type="TextBox" skin="SandText" position="8 8 60 24">
             <Property key="Caption" value="#{sName}"/>
@@ -10,73 +10,73 @@
 
         <Widget type="EditBox" skin="MW_TextEdit" position="76 8 250 24" name="NameEdit"/>
 
-        <Widget type="TextBox" skin="SandText" position="8 40 140 24">
+        <Widget type="TextBox" skin="SandText" position="270 40 140 24">
             <Property key="Caption" value="#{sApparatus}"/>
             <Property key="TextAlign" value="Left"/>
         </Widget>
 
         <!-- Apparatus bar -->
-        <Widget type="Widget" skin="" position="8 66 230 50">
+        <Widget type="Widget" skin="" position="270 66 230 50">
             <Widget type="Widget" skin="MW_Box" position="0 0 50 50">
-                <Widget type="ImageBox" skin="ImageBox" position="4 4 42 42" name="Apparatus1"/>
+                <Widget type="ImageBox" skin="ImageBox" position="9 9 32 32" name="Apparatus1"/>
             </Widget>
 
             <Widget type="Widget" skin="MW_Box" position="60 0 50 50">
-                <Widget type="ImageBox" skin="ImageBox" position="4 4 42 42" name="Apparatus2"/>
+                <Widget type="ImageBox" skin="ImageBox" position="9 9 32 32" name="Apparatus2"/>
             </Widget>
 
             <Widget type="Widget" skin="MW_Box" position="120 0 50 50">
-                <Widget type="ImageBox" skin="ImageBox" position="4 4 42 42" name="Apparatus3"/>
+                <Widget type="ImageBox" skin="ImageBox" position="9 9 32 32" name="Apparatus3"/>
             </Widget>
 
             <Widget type="Widget" skin="MW_Box" position="180 0 50 50">
-                <Widget type="ImageBox" skin="ImageBox" position="4 4 42 42" name="Apparatus4"/>
+                <Widget type="ImageBox" skin="ImageBox" position="9 9 32 32" name="Apparatus4"/>
             </Widget>
         </Widget>
 
-        <Widget type="TextBox" skin="SandText" position="8 124 140 24">
+        <Widget type="TextBox" skin="SandText" position="8 40 140 24">
             <Property key="Caption" value="#{sIngredients}"/>
             <Property key="TextAlign" value="Left"/>
         </Widget>
 
         <!-- Used ingredients bar -->
-        <Widget type="Widget" skin="" position="8 150 230 50">
+        <Widget type="Widget" skin="" position="8 66 230 50">
             <Widget type="Widget" skin="MW_Box" position="0 0 50 50">
-                <Widget type="ImageBox" skin="ImageBox" position="4 4 42 42" name="Ingredient1"/>
+                <Widget type="ImageBox" skin="ImageBox" position="9 9 32 32" name="Ingredient1"/>
             </Widget>
 
             <Widget type="Widget" skin="MW_Box" position="60 0 50 50">
-                <Widget type="ImageBox" skin="ImageBox" position="4 4 42 42" name="Ingredient2"/>
+                <Widget type="ImageBox" skin="ImageBox" position="9 9 32 32" name="Ingredient2"/>
             </Widget>
 
             <Widget type="Widget" skin="MW_Box" position="120 0 50 50">
-                <Widget type="ImageBox" skin="ImageBox" position="4 4 42 42" name="Ingredient3"/>
+                <Widget type="ImageBox" skin="ImageBox" position="9 9 32 32" name="Ingredient3"/>
             </Widget>
 
             <Widget type="Widget" skin="MW_Box" position="180 0 50 50">
-                <Widget type="ImageBox" skin="ImageBox" position="4 4 42 42" name="Ingredient4"/>
+                <Widget type="ImageBox" skin="ImageBox" position="9 9 32 32" name="Ingredient4"/>
             </Widget>
         </Widget>
 
         <!-- Available ingredients -->
-        <Widget type="Widget" skin="MW_Box" position="8 206 300 218" name="box" align="Left Top Stretch">
-            <Widget type="ScrollView" skin="MW_ScrollViewH" position="4 4 292 210" name="ItemView" align="Left Top Stretch">
+        <Widget type="Widget" skin="MW_Box" position="8 126 247 238" name="box" align="Left Top Stretch">
+            <Widget type="ScrollView" skin="MW_ScrollViewH" position="4 4 239 220" name="ItemView" align="Left Top Stretch">
                 <Property key="CanvasAlign" value="Left Top"/>
-                <Widget type="Button" skin="" name="Items" position="0 0 292 210" name="Items" align="Left Top Stretch"/>
+                <Widget type="Button" skin="" name="Items" position="0 0 239 220" name="Items" align="Left Top Stretch"/>
             </Widget>
         </Widget>
 
         <!-- Created effects -->
-        <Widget type="TextBox" skin="SandText" position="314 38 200 24">
+        <Widget type="TextBox" skin="SandText" position="270 123 200 24">
             <Property key="Caption" value="#{sCreatedEffects}"/>
             <Property key="TextAlign" value="Left"/>
         </Widget>
-        <Widget type="Widget" skin="MW_Box" position="314 64 270 200">
-            <Widget type="Widget" skin="" position="4 4 262 192" name="CreatedEffects"/>
+        <Widget type="Widget" skin="MW_Box" position="270 149 270 214">
+            <Widget type="Widget" skin="" position="4 4 262 204" name="CreatedEffects"/>
         </Widget>
 
         <!-- Buttons -->
-        <Widget type="Widget" skin="" position="314 270 200 24">
+        <Widget type="Widget" skin="" position="270 370 270 24">
             <Widget type="Button" skin="MW_Button" position="0 0 60 24" name="CreateButton">
                 <Property key="Caption" value="#{sCreate}"/>
             </Widget>
