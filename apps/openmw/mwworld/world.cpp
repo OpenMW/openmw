@@ -625,9 +625,6 @@ namespace MWWorld
     {
         MWWorld::Class::get(ptr).adjustRotation(ptr,x,y,z);
 
-        /*ptr.getRefData().getPosition().rot[0] = x;
-        ptr.getRefData().getPosition().rot[0] = y;
-        ptr.getRefData().getPosition().rot[0] = z;*/
         if(WorldAxis)
         {
             ptr.getRefData().getBaseNode()->rotate(Ogre::Vector3::UNIT_X,Ogre::Degree(x));
@@ -652,11 +649,13 @@ namespace MWWorld
         ptr.getRefData().getPosition().rot[0] = rx.valueRadians();
         ptr.getRefData().getPosition().rot[0] = ry.valueRadians();
         ptr.getRefData().getPosition().rot[0] = rz.valueRadians();
+
+        mPhysics->rotateObject(Class::get(ptr).getId(ptr),ptr.getRefData().getBaseNode()->getOrientation());
         //ptr.getRefData().getBaseNode()->rotate(ptr.getRefData().getBaseNode()->get
         //mPhysics->scaleObject( Class::get(ptr).getId(ptr), scale );
     }
 
-    void setObjectRotation (Ptr ptr,float x,float y,float z)
+    void World::setObjectRotation (Ptr ptr,float x,float y,float z)
     {
         MWWorld::Class::get(ptr).adjustRotation(ptr,x,y,z);
 
@@ -668,6 +667,7 @@ namespace MWWorld
         Ogre::Quaternion roty(Ogre::Degree(y),Ogre::Vector3::UNIT_Y);
         Ogre::Quaternion rotz(Ogre::Degree(z),Ogre::Vector3::UNIT_Z);
         ptr.getRefData().getBaseNode()->setOrientation(rotx*roty*rotz);
+        mPhysics->rotateObject(Class::get(ptr).getId(ptr),ptr.getRefData().getBaseNode()->getOrientation());
     }
 
     void World::indexToPosition (int cellX, int cellY, float &x, float &y, bool centre) const
