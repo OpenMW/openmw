@@ -19,6 +19,7 @@
 #include "settingswindow.hpp"
 #include "confirmationdialog.hpp"
 #include "alchemywindow.hpp"
+#include "spellwindow.hpp"
 
 #include "../mwmechanics/mechanicsmanager.hpp"
 #include "../mwinput/inputmanager.hpp"
@@ -56,6 +57,7 @@ WindowManager::WindowManager(
   , mSettingsWindow(NULL)
   , mConfirmationDialog(NULL)
   , mAlchemyWindow(NULL)
+  , mSpellWindow(NULL)
   , mCharGen(NULL)
   , playerClass()
   , playerName()
@@ -124,6 +126,7 @@ WindowManager::WindowManager(
     mSettingsWindow = new SettingsWindow(*this);
     mConfirmationDialog = new ConfirmationDialog(*this);
     mAlchemyWindow = new AlchemyWindow(*this);
+    mSpellWindow = new SpellWindow(*this);
 
     // The HUD is always on
     hud->setVisible(true);
@@ -167,6 +170,7 @@ WindowManager::~WindowManager()
     delete mSettingsWindow;
     delete mConfirmationDialog;
     delete mAlchemyWindow;
+    delete mSpellWindow;
 
     cleanupGarbage();
 }
@@ -211,6 +215,7 @@ void WindowManager::updateVisible()
     mTradeWindow->setVisible(false);
     mSettingsWindow->setVisible(false);
     mAlchemyWindow->setVisible(false);
+    mSpellWindow->setVisible(false);
 
     // Mouse is visible whenever we're not in game mode
     MyGUI::PointerManager::getInstance().setVisible(isGuiMode());
@@ -224,7 +229,7 @@ void WindowManager::updateVisible()
 
     setMinimapVisibility((allowed & GW_Map) && !map->pinned());
     setWeaponVisibility((allowed & GW_Inventory) && !mInventoryWindow->pinned());
-    setSpellVisibility((allowed & GW_Magic)); /// \todo add pin state when spells window is implemented
+    setSpellVisibility((allowed & GW_Magic) && !mSpellWindow->pinned());
     setHMSVisibility((allowed & GW_Stats) && !mStatsWindow->pinned());
 
     // If in game mode, don't show anything.
@@ -271,9 +276,10 @@ void WindowManager::updateVisible()
             int eff = shown & allowed;
 
             // Show the windows we want
-            map   -> setVisible( (eff & GW_Map) );
-            mStatsWindow -> setVisible( (eff & GW_Stats) );
-            mInventoryWindow->setVisible( (eff & GW_Inventory));
+            map   -> setVisible(eff & GW_Map);
+            mStatsWindow -> setVisible(eff & GW_Stats);
+            mInventoryWindow->setVisible(eff & GW_Inventory);
+            mSpellWindow->setVisible(eff & GW_Magic);
             break;
         }
         case GM_Container:

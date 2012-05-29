@@ -81,6 +81,7 @@ namespace MWGui
   class SettingsWindow;
   class ConfirmationDialog;
   class AlchemyWindow;
+  class SpellWindow;
 
   struct ClassPoint
   {
@@ -250,6 +251,7 @@ namespace MWGui
     SettingsWindow* mSettingsWindow;
     ConfirmationDialog* mConfirmationDialog;
     AlchemyWindow* mAlchemyWindow;
+    SpellWindow* mSpellWindow;
 
     CharacterCreation* mCharGen;
 

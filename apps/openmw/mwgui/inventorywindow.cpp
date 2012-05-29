@@ -91,7 +91,7 @@ namespace MWGui
 
         mFilterAll->setStateSelected(true);
 
-        setCoord(0, 342, 600, 258);
+        setCoord(0, 342, 498, 258);
 
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
         openContainer(player);
