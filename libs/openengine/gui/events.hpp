@@ -17,6 +17,9 @@ namespace GUI
   {
     MyGUI::Gui *gui;
 
+    int mMouseX;
+    int mMouseY;
+
   public:
     bool enabled;
 

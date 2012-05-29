@@ -590,6 +590,21 @@ void RenderingManager::processChangedSettings(const Settings::CategorySettingVec
                 || it->second == "resolution y"
                 || it->second == "fullscreen"))
             changeRes = true;
+        else if (it->second == "field of view" && it->first == "General")
+            mRendering.setFov(Settings::Manager::getFloat("field of view", "General"));
+        else if ((it->second == "texture filtering" && it->first == "General")
+            || (it->second == "anisotropy" && it->first == "General"))
+        {
+            TextureFilterOptions tfo;
+            std::string filter = Settings::Manager::getString("texture filtering", "General");
+            if (filter == "anisotropic") tfo = TFO_ANISOTROPIC;
+            else if (filter == "trilinear") tfo = TFO_TRILINEAR;
+            else if (filter == "bilinear") tfo = TFO_BILINEAR;
+            else if (filter == "none") tfo = TFO_NONE;
+
+            MaterialManager::getSingleton().setDefaultTextureFiltering(tfo);
+            MaterialManager::getSingleton().setDefaultAnisotropy( (filter == "anisotropic") ? Settings::Manager::getInt("anisotropy", "General") : 1 );
+        }
     }
 
     if (changeRes)

@@ -27,6 +27,18 @@ namespace
         else
             return "Detailed";
     }
+
+    std::string textureFilteringToStr(const std::string& val)
+    {
+        if (val == "none")
+            return "None";
+        else if (val == "anisotropic")
+            return "Anisotropic";
+        else if (val == "bilinear")
+            return "Bilinear";
+        else
+            return "Trilinear";
+    }
 }
 
 namespace MWGui
@@ -42,20 +54,28 @@ namespace MWGui
         getWidget(mFullscreenButton, "FullscreenButton");
         getWidget(mVSyncButton, "VSyncButton");
         getWidget(mFPSButton, "FPSButton");
+        getWidget(mFOVSlider, "FOVSlider");
         getWidget(mMasterVolumeSlider, "MasterVolume");
         getWidget(mVoiceVolumeSlider, "VoiceVolume");
         getWidget(mEffectsVolumeSlider, "EffectsVolume");
         getWidget(mFootstepsVolumeSlider, "FootstepsVolume");
         getWidget(mMusicVolumeSlider, "MusicVolume");
+        getWidget(mAnisotropySlider, "AnisotropySlider");
+        getWidget(mTextureFilteringButton, "TextureFilteringButton");
+        getWidget(mAnisotropyLabel, "AnisotropyLabel");
+        getWidget(mAnisotropyBox, "AnisotropyBox");
 
         mOkButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onOkButtonClicked);
         mFullscreenButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onButtonToggled);
+        mTextureFilteringButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onTextureFilteringToggled);
         mVSyncButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onButtonToggled);
         mFPSButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onFpsToggled);
         mMenuTransparencySlider->eventScrollChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onSliderChangePosition);
+        mFOVSlider->eventScrollChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onSliderChangePosition);
         mToolTipDelaySlider->eventScrollChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onSliderChangePosition);
         mViewDistanceSlider->eventScrollChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onSliderChangePosition);
         mResolutionList->eventListChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onResolutionSelected);
+        mAnisotropySlider->eventScrollChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onSliderChangePosition);
 
         mMasterVolumeSlider->eventScrollChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onSliderChangePosition);
         mVoiceVolumeSlider->eventScrollChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onSliderChangePosition);
@@ -84,7 +104,20 @@ namespace MWGui
         int tooltip_delay = (mToolTipDelaySlider->getScrollRange()-1) * Settings::Manager::getFloat("tooltip delay", "GUI");
         mToolTipDelaySlider->setScrollPosition(tooltip_delay);
 
-        float val = (Settings::Manager::getFloat("max viewing distance", "Viewing distance")-2000)/(5600-2000);
+        float fovVal = (Settings::Manager::getFloat("field of view", "General")-sFovMin)/(sFovMax-sFovMin);
+        mFOVSlider->setScrollPosition(fovVal * (mFOVSlider->getScrollRange()-1));
+        MyGUI::TextBox* fovText;
+        getWidget(fovText, "FovText");
+        fovText->setCaption("Field of View (" + boost::lexical_cast<std::string>(int(Settings::Manager::getFloat("field of view", "General"))) + ")");
+
+        float anisotropyVal = Settings::Manager::getInt("anisotropy", "General") / 16.0;
+        mAnisotropySlider->setScrollPosition(anisotropyVal * (mAnisotropySlider->getScrollRange()-1));
+        std::string tf = Settings::Manager::getString("texture filtering", "General");
+        mTextureFilteringButton->setCaption(textureFilteringToStr(tf));
+        mAnisotropyLabel->setCaption("Anisotropy (" + boost::lexical_cast<std::string>(Settings::Manager::getInt("anisotropy", "General")) + ")");
+        mAnisotropyBox->setVisible(tf == "anisotropic");
+
+        float val = (Settings::Manager::getFloat("max viewing distance", "Viewing distance")-sViewDistMin)/(sViewDistMax-sViewDistMin);
         int viewdist = (mViewDistanceSlider->getScrollRange()-1) * val;
         mViewDistanceSlider->setScrollPosition(viewdist);
 
@@ -205,6 +238,26 @@ namespace MWGui
         apply();
     }
 
+    void SettingsWindow::onTextureFilteringToggled(MyGUI::Widget* _sender)
+    {
+        std::string current = Settings::Manager::getString("texture filtering", "General");
+        std::string next;
+        if (current == "none")
+            next = "bilinear";
+        else if (current == "bilinear")
+            next = "trilinear";
+        else if (current == "trilinear")
+            next = "anisotropic";
+        else
+            next = "none";
+
+        mTextureFilteringButton->setCaption(textureFilteringToStr(next));
+        mAnisotropyBox->setVisible(next == "anisotropic");
+
+        Settings::Manager::setString("texture filtering", "General", next);
+        apply();
+    }
+
     void SettingsWindow::onSliderChangePosition(MyGUI::ScrollBar* scroller, size_t pos)
     {
         float val = pos / float(scroller->getScrollRange()-1);
@@ -213,7 +266,19 @@ namespace MWGui
         else if (scroller == mToolTipDelaySlider)
             Settings::Manager::setFloat("tooltip delay", "GUI", val);
         else if (scroller == mViewDistanceSlider)
-            Settings::Manager::setFloat("max viewing distance", "Viewing distance", (1-val) * 2000 + val * 5600);
+            Settings::Manager::setFloat("max viewing distance", "Viewing distance", (1-val) * sViewDistMin + val * sViewDistMax);
+        else if (scroller == mFOVSlider)
+        {
+            MyGUI::TextBox* fovText;
+            getWidget(fovText, "FovText");
+            fovText->setCaption("Field of View (" + boost::lexical_cast<std::string>(int((1-val) * sFovMin + val * sFovMax)) + ")");
+            Settings::Manager::setFloat("field of view", "General", (1-val) * sFovMin + val * sFovMax);
+        }
+        else if (scroller == mAnisotropySlider)
+        {
+            mAnisotropyLabel->setCaption("Anisotropy (" + boost::lexical_cast<std::string>(int(val*16)) + ")");
+            Settings::Manager::setInt("anisotropy", "General", val * 16);
+        }
         else if (scroller == mMasterVolumeSlider)
             Settings::Manager::setFloat("master volume", "Sound", val);
         else if (scroller == mVoiceVolumeSlider)

@@ -100,14 +100,43 @@
                         </Widget>
                         <Widget type="Button" skin="MW_Button" position="212 34 34 24" align="Left Top" name="VSyncButton"/>
 
-                        <Widget type="TextBox" skin="SandText" position="74 170 250 24" align="Left Top">
+                        <Widget type="TextBox" skin="SandText" position="74 163 250 24" align="Left Top">
                             <Property key="Caption" value="Show frames per second"/>
                         </Widget>
-                        <Widget type="Button" skin="MW_Button" position="4 170 64 24" align="Left Top" name="FPSButton"/>
+                        <Widget type="Button" skin="MW_Button" position="4 163 64 24" align="Left Top" name="FPSButton"/>
+
+                        <Widget type="TextBox" skin="NormalText" position="4 198 329 18" align="Left Top" name="FovText">
+                            <Property key="Caption" value="Field of View"/>
+                        </Widget>
+                        <Widget type="ScrollBar" skin="MW_HSlider" position="4 222 329 18" align="Left Top" name="FOVSlider">
+                            <Property key="Range" value="1000000"/>
+                        </Widget>
+                        <Widget type="TextBox" skin="SandText" position="4 246 329 18" align="Left Top">
+                            <Property key="Caption" value="Low"/>
+                            <Property key="TextAlign" value="Left"/>
+                        </Widget>
+                        <Widget type="TextBox" skin="SandText" position="4 246 329 18" align="Left Top">
+                            <Property key="Caption" value="High"/>
+                            <Property key="TextAlign" value="Right"/>
+                        </Widget>
                     </Widget>
 
                     <Widget type="TabItem" skin="" position="4 28 344 272">
                         <Property key="Caption" value="  Detail  "/>
+
+                        <Widget type="TextBox" skin="NormalText" position="4 4 300 24" align="Left Top">
+                            <Property key="Caption" value="Texture filtering"/>
+                        </Widget>
+                        <Widget type="Button" skin="MW_Button" position="18 28 140 24" align="Left Top" name="TextureFilteringButton"/>
+
+                        <Widget type="Widget" skin="" position="184 4 300 50" align="Left Top" name="AnisotropyBox">
+                            <Widget type="TextBox" skin="SandText" position="0 0 300 24" align="Left Top" name="AnisotropyLabel">
+                                <Property key="Caption" value="Anisotropy"/>
+                            </Widget>
+                            <Widget type="ScrollBar" skin="MW_HSlider" position="0 28 150 18" align="Left Top" name="AnisotropySlider">
+                                <Property key="Range" value="1000000"/>
+                            </Widget>
+                        </Widget>
 
                         <Widget type="TextBox" skin="NormalText" position="4 130 322 18" align="Left Top">
                             <Property key="Caption" value="#{sRender_Distance}"/>

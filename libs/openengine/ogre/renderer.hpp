@@ -124,6 +124,8 @@ namespace OEngine
                 float nearClip=5                   // Near clip distance
             );
 
+            void setFov(float fov);
+
             /// Kill the renderer.
             void cleanup();
 

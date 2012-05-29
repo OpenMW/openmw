@@ -60,9 +60,9 @@
 
         <!-- Available ingredients -->
         <Widget type="Widget" skin="MW_Box" position="8 126 247 238" name="box" align="Left Top Stretch">
-            <Widget type="ScrollView" skin="MW_ScrollViewH" position="4 4 239 220" name="ItemView" align="Left Top Stretch">
+            <Widget type="ScrollView" skin="MW_ScrollViewH" position="4 4 239 230" name="ItemView" align="Left Top Stretch">
                 <Property key="CanvasAlign" value="Left Top"/>
-                <Widget type="Button" skin="" name="Items" position="0 0 239 220" name="Items" align="Left Top Stretch"/>
+                <Widget type="Button" skin="" name="Items" position="0 0 239 230" name="Items" align="Left Top Stretch"/>
             </Widget>
         </Widget>
 

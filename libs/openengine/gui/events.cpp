@@ -9,8 +9,13 @@ using namespace OEngine::GUI;
 
 EventInjector::EventInjector(MyGUI::Gui *g)
   : gui(g), enabled(true)
+  , mMouseX(0)
+  , mMouseY(0)
 {
   assert(gui);
+  const MyGUI::IntSize& viewSize = MyGUI::RenderManager::getInstance().getViewSize();
+  mMouseX = viewSize.width/2;
+  mMouseY = viewSize.height/2;
 }
 
 void EventInjector::event(Type type, int index, const void *p)
@@ -54,15 +59,19 @@ void EventInjector::event(Type type, int index, const void *p)
       MouseEvent *mouse = (MouseEvent*)p;
       MyGUI::MouseButton id = MyGUI::MouseButton::Enum(index);
 
+      const MyGUI::IntSize& viewSize = MyGUI::RenderManager::getInstance().getViewSize();
+
       // Update mouse position
-      int mouseX = mouse->state.X.abs;
-      int mouseY = mouse->state.Y.abs;
+      mMouseX += mouse->state.X.rel;
+      mMouseY += mouse->state.Y.rel;
+      mMouseX = std::max(0, std::min(mMouseX, viewSize.width));
+      mMouseY = std::max(0, std::min(mMouseY, viewSize.height));
 
       if(type == EV_MouseDown)
-        MyGUI::InputManager::getInstance().injectMousePress(mouseX, mouseY, id);
+        MyGUI::InputManager::getInstance().injectMousePress(mMouseX, mMouseY, id);
       else if(type == EV_MouseUp)
-        MyGUI::InputManager::getInstance().injectMouseRelease(mouseX, mouseY, id);
+        MyGUI::InputManager::getInstance().injectMouseRelease(mMouseX, mMouseY, id);
       else
-        MyGUI::InputManager::getInstance().injectMouseMove(mouseX, mouseY, mouse->state.Z.abs);
+        MyGUI::InputManager::getInstance().injectMouseMove(mMouseX, mMouseY, mouse->state.Z.abs);
     }
 }
