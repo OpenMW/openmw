@@ -44,6 +44,8 @@ HUD::HUD(int width, int height, int fpsLevel, DragAndDrop* dragAndDrop)
     , mCellNameTimer(0.0f)
     , mCellNameBox(NULL)
     , mMapVisible(true)
+    , mWeaponVisible(true)
+    , mSpellVisible(true)
 {
     setCoord(0,0, width, height);
 
@@ -100,9 +102,6 @@ HUD::HUD(int width, int height, int fpsLevel, DragAndDrop* dragAndDrop)
     getWidget(batchcounter, "BatchCounter");
 
     setEffect("icons\\s\\tx_s_chameleon.dds");
-
-    unsetSelectedSpell();
-    unsetSelectedWeapon();
 
     LocalMapBase::init(minimap, compass, this);
 
@@ -200,6 +199,11 @@ void HUD::setBottomLeftVisibility(bool hmsVisible, bool weapVisible, bool spellV
 
     if (!weapVisible)
         spellDx += spellBoxBaseLeft - weapBoxBaseLeft;
+
+    mWeaponVisible = weapVisible;
+    mSpellVisible = spellVisible;
+    if (!mWeaponVisible && !mSpellVisible)
+        mWeaponSpellBox->setVisible(false);
 
     health->setVisible(hmsVisible);
     stamina->setVisible(hmsVisible);
@@ -346,7 +350,7 @@ void HUD::setSelectedSpell(const std::string& spellId, int successChancePercent)
 {
     const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().spells.find(spellId);
     std::string spellName = spell->name;
-    if (spellName != mSpellName)
+    if (spellName != mSpellName && mSpellVisible)
     {
         mWeaponSpellTimer = 5.0f;
         mSpellName = spellName;
@@ -376,7 +380,7 @@ void HUD::setSelectedSpell(const std::string& spellId, int successChancePercent)
 void HUD::setSelectedEnchantItem(const MWWorld::Ptr& item, int chargePercent)
 {
     std::string itemName = MWWorld::Class::get(item).getName(item);
-    if (itemName != mSpellName)
+    if (itemName != mSpellName && mSpellVisible)
     {
         mWeaponSpellTimer = 5.0f;
         mSpellName = itemName;
@@ -407,7 +411,7 @@ void HUD::setSelectedEnchantItem(const MWWorld::Ptr& item, int chargePercent)
 void HUD::setSelectedWeapon(const MWWorld::Ptr& item, int durabilityPercent)
 {
     std::string itemName = MWWorld::Class::get(item).getName(item);
-    if (itemName != mWeaponName)
+    if (itemName != mWeaponName && mWeaponVisible)
     {
         mWeaponSpellTimer = 5.0f;
         mWeaponName = itemName;
@@ -443,7 +447,7 @@ void HUD::setSelectedWeapon(const MWWorld::Ptr& item, int durabilityPercent)
 void HUD::unsetSelectedSpell()
 {
     std::string spellName = "#{sNone}";
-    if (spellName != mSpellName)
+    if (spellName != mSpellName && mSpellVisible)
     {
         mWeaponSpellTimer = 5.0f;
         mSpellName = spellName;
@@ -462,7 +466,7 @@ void HUD::unsetSelectedSpell()
 void HUD::unsetSelectedWeapon()
 {
     std::string itemName = "#{sSkillHandtohand}";
-    if (itemName != mWeaponName)
+    if (itemName != mWeaponName && mWeaponVisible)
     {
         mWeaponSpellTimer = 5.0f;
         mWeaponName = itemName;

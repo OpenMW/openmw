@@ -144,6 +144,9 @@ WindowManager::WindowManager(
         playerSkillValues.insert(std::make_pair(ESM::Skill::skillIds[i], MWMechanics::Stat<float>()));
     }
 
+    unsetSelectedSpell();
+    unsetSelectedWeapon();
+
     // Set up visibility
     updateVisible();
 }
@@ -678,24 +681,30 @@ void WindowManager::removeGuiMode(GuiMode mode)
 void WindowManager::setSelectedSpell(const std::string& spellId, int successChancePercent)
 {
     hud->setSelectedSpell(spellId, successChancePercent);
+    const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().spells.find(spellId);
+    mSpellWindow->setTitle(spell->name);
 }
 
 void WindowManager::setSelectedEnchantItem(const MWWorld::Ptr& item, int chargePercent)
 {
     hud->setSelectedEnchantItem(item, chargePercent);
+    mSpellWindow->setTitle(MWWorld::Class::get(item).getName(item));
 }
 
 void WindowManager::setSelectedWeapon(const MWWorld::Ptr& item, int durabilityPercent)
 {
     hud->setSelectedWeapon(item, durabilityPercent);
+    mInventoryWindow->setTitle(MWWorld::Class::get(item).getName(item));
 }
 
 void WindowManager::unsetSelectedSpell()
 {
     hud->unsetSelectedSpell();
+    mSpellWindow->setTitle("#{sNone}");
 }
 
 void WindowManager::unsetSelectedWeapon()
 {
     hud->unsetSelectedWeapon();
+    mInventoryWindow->setTitle("#{sSkillHandtohand}");
 }
