@@ -31,6 +31,7 @@ namespace MWGui
         void setCellName(const std::string& cellName);
 
         MyGUI::ProgressPtr health, magicka, stamina;
+        MyGUI::Widget* mHealthFrame;
         MyGUI::Widget *weapBox, *spellBox;
         MyGUI::ImageBox *weapImage, *spellImage;
         MyGUI::ProgressPtr weapStatus, spellStatus;

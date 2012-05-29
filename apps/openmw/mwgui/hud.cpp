@@ -48,11 +48,12 @@ HUD::HUD(int width, int height, int fpsLevel, DragAndDrop* dragAndDrop)
     setCoord(0,0, width, height);
 
     // Energy bars
+    getWidget(mHealthFrame, "HealthFrame");
     getWidget(health, "Health");
     getWidget(magicka, "Magicka");
     getWidget(stamina, "Stamina");
 
-    hmsBaseLeft = health->getLeft();
+    hmsBaseLeft = mHealthFrame->getLeft();
 
     MyGUI::Widget *healthFrame, *magickaFrame, *fatigueFrame;
     getWidget(healthFrame, "HealthFrame");
@@ -61,6 +62,8 @@ HUD::HUD(int width, int height, int fpsLevel, DragAndDrop* dragAndDrop)
     healthFrame->eventMouseButtonClick += MyGUI::newDelegate(this, &HUD::onHMSClicked);
     magickaFrame->eventMouseButtonClick += MyGUI::newDelegate(this, &HUD::onHMSClicked);
     fatigueFrame->eventMouseButtonClick += MyGUI::newDelegate(this, &HUD::onHMSClicked);
+
+    const MyGUI::IntSize& viewSize = MyGUI::RenderManager::getInstance().getViewSize();
 
     // Item and spell images and status bars
     getWidget(weapBox, "WeapBox");
@@ -77,11 +80,11 @@ HUD::HUD(int width, int height, int fpsLevel, DragAndDrop* dragAndDrop)
 
     getWidget(effectBox, "EffectBox");
     getWidget(effect1, "Effect1");
-    effectBoxBaseRight = effectBox->getRight();
+    effectBoxBaseRight = viewSize.width - effectBox->getRight();
     effectBox->eventMouseButtonClick += MyGUI::newDelegate(this, &HUD::onMagicClicked);
 
     getWidget(minimapBox, "MiniMapBox");
-    minimapBoxBaseRight = minimapBox->getRight();
+    minimapBoxBaseRight = viewSize.width - minimapBox->getRight();
     minimapBox->eventMouseButtonClick += MyGUI::newDelegate(this, &HUD::onMapClicked);
     getWidget(minimap, "MiniMap");
     getWidget(compass, "Compass");
@@ -220,7 +223,7 @@ void HUD::setBottomLeftVisibility(bool hmsVisible, bool weapVisible, bool spellV
         spellDx = weapDx = weapBoxBaseLeft - hmsBaseLeft;
 
     if (!weapVisible)
-        spellDx -= spellBoxBaseLeft - weapBoxBaseLeft;
+        spellDx += spellBoxBaseLeft - weapBoxBaseLeft;
 
     health->setVisible(hmsVisible);
     stamina->setVisible(hmsVisible);
@@ -233,14 +236,16 @@ void HUD::setBottomLeftVisibility(bool hmsVisible, bool weapVisible, bool spellV
 
 void HUD::setBottomRightVisibility(bool effectBoxVisible, bool minimapBoxVisible)
 {
+    const MyGUI::IntSize& viewSize = MyGUI::RenderManager::getInstance().getViewSize();
+
     // effect box can have variable width -> variable left coordinate
     int effectsDx = 0;
     if (!minimapBoxVisible)
-        effectsDx = minimapBoxBaseRight - effectBoxBaseRight;
+        effectsDx = (viewSize.width - minimapBoxBaseRight) - (viewSize.width - effectBoxBaseRight);
 
     mMapVisible = minimapBoxVisible;
     minimapBox->setVisible(minimapBoxVisible);
-    effectBox->setPosition(effectBoxBaseRight - effectBox->getWidth() + effectsDx, effectBox->getTop());
+    effectBox->setPosition((viewSize.width - effectBoxBaseRight) - effectBox->getWidth() + effectsDx, effectBox->getTop());
     effectBox->setVisible(effectBoxVisible);
 }
 
