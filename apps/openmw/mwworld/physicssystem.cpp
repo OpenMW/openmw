@@ -290,8 +290,6 @@ namespace MWWorld
     {
         if (OEngine::Physic::PhysicActor* act = mEngine->getCharacter(handle))
         {
-            // TODO very dirty hack to avoid crash during setup -> needs cleaning up to allow
-            // start positions others than 0, 0, 0
             act->setRotation(btQuaternion(rotation.x, rotation.y, rotation.z, rotation.w));
         }
         if (OEngine::Physic::RigidBody* body = mEngine->getRigidBody(handle))
@@ -304,8 +302,6 @@ namespace MWWorld
     {
         if (OEngine::Physic::RigidBody* body = mEngine->getRigidBody(handle))
         {
-            // TODO very dirty hack to avoid crash during setup -> needs cleaning up to allow
-            // start positions others than 0, 0, 0
             //body->setWorldTransform(btTransform().se
         }
     }

@@ -592,7 +592,9 @@ namespace MWScript
         const int opcodeModDispositionExplicit = 0x200014e;
 
         const int opcodeSetScale = 0x2000153;
-        const int opcodeSetAngle = 0x2000154;
+        const int opcodeSetScaleExplicit = 0x2000154;
+        const int opcodeSetAngle = 0x2000155;
+        const int opcodeSetAngleExplicit = 0x2000156;
 
         void registerExtensions (Compiler::Extensions& extensions)
         {
@@ -677,8 +679,8 @@ namespace MWScript
                 opcodeModDispositionExplicit);
             extensions.registerFunction("getpcrank",'l',"/S",opcodeGetPCRank,opcodeGetPCRankExplicit);
 
-            extensions.registerInstruction("setscale","/l",opcodeSetScale);
-            extensions.registerInstruction("setangle","/Sl",opcodeSetAngle);
+            extensions.registerInstruction("setscale","l",opcodeSetScale,opcodeSetScaleExplicit);
+            extensions.registerInstruction("setangle","Sl",opcodeSetAngle,opcodeSetAngleExplicit);
         }
 
         void installOpcodes (Interpreter::Interpreter& interpreter)
@@ -752,7 +754,9 @@ namespace MWScript
             interpreter.installSegment3(opcodeGetPCRankExplicit,new OpGetPCRank<ExplicitRef>);
 
             interpreter.installSegment5(opcodeSetScale,new OpSetScale<ImplicitRef>);
+            interpreter.installSegment5(opcodeSetScaleExplicit,new OpSetScale<ExplicitRef>);
             interpreter.installSegment5(opcodeSetAngle,new OpSetAngle<ImplicitRef>);
+            interpreter.installSegment5(opcodeSetAngleExplicit,new OpSetAngle<ExplicitRef>);
         }
     }
 }

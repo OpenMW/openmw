@@ -392,8 +392,16 @@ namespace Physic
 
     RigidBody* PhysicEngine::getRigidBody(std::string name)
     {
-        RigidBody* body = RigidBodyMap[name];
-        return body;
+        RigidBodyContainer::iterator it = RigidBodyMap.find(name);
+        if (it != RigidBodyMap.end() )
+        {
+            RigidBody* body = RigidBodyMap[name];
+            return body;
+        }
+        else
+        {
+            return 0;
+        }
     }
 
     void PhysicEngine::stepSimulation(double deltaT)
@@ -450,8 +458,16 @@ namespace Physic
 
     PhysicActor* PhysicEngine::getCharacter(std::string name)
     {
-        PhysicActor* act = PhysicActorMap[name];
-        return act;
+        PhysicActorContainer::iterator it = PhysicActorMap.find(name);
+        if (it != PhysicActorMap.end() )
+        {
+            PhysicActor* act = PhysicActorMap[name];
+            return act;
+        }
+        else
+        {
+            return 0;
+        }
     }
 
     void PhysicEngine::emptyEventLists(void)

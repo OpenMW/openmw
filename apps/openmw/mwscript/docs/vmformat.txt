@@ -147,5 +147,7 @@ op 0x2000150: ForceGreeting, explicit reference
 op 0x2000151: ToggleFullHelp
 op 0x2000152: Goodbye
 op 0x2000153: SetScale
-op 0x2000154: SetAngle
+op 0x2000154: SetScale, explicit reference
+op 0x2000155: SetAngle
+op 0x2000156: SetAngle, explicit reference
 opcodes 0x2000155-0x3ffffff unused

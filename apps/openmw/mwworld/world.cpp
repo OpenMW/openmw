@@ -668,6 +668,7 @@ namespace MWWorld
         Ogre::Quaternion rotz(Ogre::Degree(z),Ogre::Vector3::UNIT_Z);
         ptr.getRefData().getBaseNode()->setOrientation(rotx*roty*rotz);
         mPhysics->rotateObject(Class::get(ptr).getId(ptr),ptr.getRefData().getBaseNode()->getOrientation());
+        std::cout << Class::get(ptr).getId(ptr);
     }
 
     void World::indexToPosition (int cellX, int cellY, float &x, float &y, bool centre) const
