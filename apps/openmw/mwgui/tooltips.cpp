@@ -67,6 +67,11 @@ void ToolTips::onFrame(float frameDuration)
     if (!mGameMode)
     {
         const MyGUI::IntPoint& mousePos = InputManager::getInstance().getMousePosition();
+        const MyGUI::IntPoint& lastPressed = InputManager::getInstance().getLastPressedPosition(MyGUI::MouseButton::Left);
+
+        if (mousePos == lastPressed) // mouseclick makes tooltip disappear
+            return;
+
         if (mousePos.left == mLastMouseX && mousePos.top == mLastMouseY)
         {
             mRemainingDelay -= frameDuration;

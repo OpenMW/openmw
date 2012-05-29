@@ -20,6 +20,7 @@
 #include "widgets.hpp"
 #include "bookwindow.hpp"
 #include "scrollwindow.hpp"
+#include "spellwindow.hpp"
 
 namespace
 {
@@ -258,5 +259,12 @@ namespace MWGui
     void InventoryWindow::startTrade()
     {
         mTrading = true;
+    }
+
+    void InventoryWindow::notifyContentChanged()
+    {
+        // update the spell window just in case new enchanted items were added to inventory
+        if (mWindowManager.getSpellWindow())
+            mWindowManager.getSpellWindow()->updateSpells();
     }
 }

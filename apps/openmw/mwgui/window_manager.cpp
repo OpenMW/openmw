@@ -191,12 +191,10 @@ void WindowManager::cleanupGarbage()
 void WindowManager::update()
 {
     cleanupGarbage();
-    if (showFPSLevel > 0)
-    {
-        hud->setFPS(mFPS);
-        hud->setTriangleCount(mTriangleCount);
-        hud->setBatchCount(mBatchCount);
-    }
+
+    hud->setFPS(mFPS);
+    hud->setTriangleCount(mTriangleCount);
+    hud->setBatchCount(mBatchCount);
 }
 
 void WindowManager::updateVisible()

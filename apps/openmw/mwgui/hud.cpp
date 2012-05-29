@@ -112,6 +112,8 @@ HUD::HUD(int width, int height, int fpsLevel, DragAndDrop* dragAndDrop)
 
 void HUD::setFpsLevel(int level)
 {
+    fpscounter = 0;
+
     MyGUI::Widget* fps;
     getWidget(fps, "FPSBoxAdv");
     fps->setVisible(false);
@@ -134,7 +136,8 @@ void HUD::setFpsLevel(int level)
 
 void HUD::setFPS(float fps)
 {
-    fpscounter->setCaption(boost::lexical_cast<std::string>((int)fps));
+    if (fpscounter)
+        fpscounter->setCaption(boost::lexical_cast<std::string>((int)fps));
 }
 
 void HUD::setTriangleCount(size_t count)

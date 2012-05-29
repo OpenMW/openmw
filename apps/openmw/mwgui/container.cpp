@@ -535,6 +535,8 @@ void ContainerBase::drawItems()
     MyGUI::IntSize size = MyGUI::IntSize(std::max(mItemView->getSize().width, x+42), mItemView->getSize().height);
     mItemView->setCanvasSize(size);
     mContainerWidget->setSize(size);
+
+    notifyContentChanged();
 }
 
 std::string ContainerBase::getCountString(const int count)

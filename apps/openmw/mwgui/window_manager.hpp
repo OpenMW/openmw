@@ -154,6 +154,7 @@ namespace MWGui
     MWGui::CountDialog* getCountDialog() {return mCountDialog;}
     MWGui::ConfirmationDialog* getConfirmationDialog() {return mConfirmationDialog;}
     MWGui::TradeWindow* getTradeWindow() {return mTradeWindow;}
+    MWGui::SpellWindow* getSpellWindow() {return mSpellWindow;}
 
     MyGUI::Gui* getGui() const { return gui; }
 

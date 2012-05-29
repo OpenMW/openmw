@@ -120,6 +120,8 @@ namespace MWGui
 
         virtual bool ignoreEquippedItems() { return false; }
         virtual std::vector<MWWorld::Ptr> itemsToIgnore() { return std::vector<MWWorld::Ptr>(); }
+
+        virtual void notifyContentChanged() { ; }
     };
 
     class ContainerWindow : public ContainerBase, public WindowBase

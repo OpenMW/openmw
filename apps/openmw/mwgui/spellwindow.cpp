@@ -1,20 +1,378 @@
 #include "spellwindow.hpp"
 
+#include <boost/algorithm/string.hpp>
+#include <boost/lexical_cast.hpp>
+
+#include "../mwworld/world.hpp"
+#include "../mwworld/player.hpp"
+#include "../mwworld/inventorystore.hpp"
+#include "../mwbase/environment.hpp"
+#include "../mwmechanics/spells.hpp"
+#include "../mwmechanics/creaturestats.hpp"
+#include "../mwsound/soundmanager.hpp"
+
 #include "window_manager.hpp"
+#include "inventorywindow.hpp"
+
+namespace
+{
+    bool sortSpells(const std::string& left, const std::string& right)
+    {
+        const ESM::Spell* a = MWBase::Environment::get().getWorld()->getStore().spells.find(left);
+        const ESM::Spell* b = MWBase::Environment::get().getWorld()->getStore().spells.find(right);
+
+        int cmp = a->name.compare(b->name);
+        return cmp < 0;
+    }
+
+    bool sortItems(const MWWorld::Ptr& left, const MWWorld::Ptr& right)
+    {
+        int cmp = MWWorld::Class::get(left).getName(left).compare(
+                    MWWorld::Class::get(right).getName(right));
+        return cmp < 0;
+    }
+}
 
 namespace MWGui
 {
     SpellWindow::SpellWindow(WindowManager& parWindowManager)
         : WindowPinnableBase("openmw_spell_window_layout.xml", parWindowManager)
+        , mHeight(0)
+        , mWidth(0)
     {
         getWidget(mSpellView, "SpellView");
         getWidget(mEffectBox, "EffectsBox");
 
         setCoord(498, 300, 302, 300);
+        updateSpells();
+
+        mMainWidget->castType<MyGUI::Window>()->eventWindowChangeCoord += MyGUI::newDelegate(this, &SpellWindow::onWindowResize);
     }
 
     void SpellWindow::onPinToggled()
     {
         mWindowManager.setSpellVisibility(!mPinned);
+    }
+
+    void SpellWindow::open()
+    {
+        updateSpells();
+    }
+
+    void SpellWindow::updateSpells()
+    {
+        const int spellHeight = 18;
+
+        mHeight = 0;
+        while (mSpellView->getChildCount())
+            MyGUI::Gui::getInstance().destroyWidget(mSpellView->getChildAt(0));
+
+        // retrieve all player spells, divide them into Powers and Spells and sort them
+        std::vector<std::string> spellList;
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+        MWWorld::InventoryStore& store = MWWorld::Class::get(player).getInventoryStore(player);
+        MWMechanics::CreatureStats& stats = MWWorld::Class::get(player).getCreatureStats(player);
+        MWMechanics::Spells& spells = stats.mSpells;
+
+        // the following code switches between selected enchanted item and selected spell (only one of these
+        // can be active at a time)
+        std::string selectedSpell = spells.getSelectedSpell();
+        MWWorld::Ptr selectedItem;
+        if (store.getSelectedEnchantItem() != store.end())
+        {
+            selectedSpell = "";
+            selectedItem = *store.getSelectedEnchantItem();
+
+            bool allowSelectedItem = true;
+
+            // if the selected item can be equipped, make sure that it actually is equipped
+            std::pair<std::vector<int>, bool> slots;
+            slots = MWWorld::Class::get(selectedItem).getEquipmentSlots(selectedItem);
+            if (!slots.first.empty())
+            {
+                bool equipped = false;
+                for (int i=0; i < MWWorld::InventoryStore::Slots; ++i)
+                {
+                    if (store.getSlot(i) != store.end() && *store.getSlot(i) == selectedItem)
+                    {
+                        equipped = true;
+                        break;
+                    }
+                }
+
+                if (!equipped)
+                    allowSelectedItem = false;
+            }
+
+            if (!allowSelectedItem)
+            {
+                store.setSelectedEnchantItem(store.end());
+                selectedItem = MWWorld::Ptr();
+            }
+        }
+
+
+
+        for (MWMechanics::Spells::TIterator it = spells.begin(); it != spells.end(); ++it)
+        {
+            spellList.push_back(*it);
+        }
+
+        std::vector<std::string> powers;
+        std::vector<std::string>::iterator it = spellList.begin();
+        while (it != spellList.end())
+        {
+            const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().spells.find(*it);
+            if (spell->data.type == ESM::Spell::ST_Power)
+            {
+                powers.push_back(*it);
+                it = spellList.erase(it);
+            }
+            else if (spell->data.type == ESM::Spell::ST_Ability)
+            {
+                // abilities are always active and don't show in the spell window.
+                it = spellList.erase(it);
+            }
+            else
+                ++it;
+        }
+        std::sort(powers.begin(), powers.end(), sortSpells);
+        std::sort(spellList.begin(), spellList.end(), sortSpells);
+
+        // retrieve player's enchanted items
+        std::vector<MWWorld::Ptr> items;
+        for (MWWorld::ContainerStoreIterator it(store.begin()); it != store.end(); ++it)
+        {
+            std::string enchantId = MWWorld::Class::get(*it).getEnchantment(*it);
+            if (enchantId != "")
+            {
+                // only add items with "Cast once" or "Cast on use"
+                const ESM::Enchantment* enchant = MWBase::Environment::get().getWorld()->getStore().enchants.find(enchantId);
+                int type = enchant->data.type;
+                if (type != ESM::Enchantment::CastOnce
+                    && type != ESM::Enchantment::WhenUsed)
+                    continue;
+
+                items.push_back(*it);
+            }
+        }
+        std::sort(items.begin(), items.end(), sortItems);
+
+
+        int height = estimateHeight(items.size() + powers.size() + spellList.size());
+        bool scrollVisible = height > mSpellView->getHeight();
+        mWidth = mSpellView->getWidth() - (scrollVisible ? 18 : 0);
+
+        // powers
+        addGroup("#{sPowers}", "");
+
+        for (std::vector<std::string>::const_iterator it = powers.begin(); it != powers.end(); ++it)
+        {
+            const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().spells.find(*it);
+            MyGUI::Button* t = mSpellView->createWidget<MyGUI::Button>("SpellText",
+                MyGUI::IntCoord(4, mHeight, mWidth-8, spellHeight), MyGUI::Align::Left | MyGUI::Align::Top);
+            t->setCaption(spell->name);
+            t->setTextAlign(MyGUI::Align::Left);
+            t->setUserString("ToolTipType", "Spell");
+            t->setUserString("Spell", *it);
+            t->eventMouseButtonClick += MyGUI::newDelegate(this, &SpellWindow::onSpellSelected);
+
+            if (*it == selectedSpell)
+                t->setStateSelected(true);
+
+            mHeight += spellHeight;
+        }
+
+        // other spells
+        addGroup("#{sSpells}", "#{sCostChance}");
+        for (std::vector<std::string>::const_iterator it = spellList.begin(); it != spellList.end(); ++it)
+        {
+            const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().spells.find(*it);
+            MyGUI::Button* t = mSpellView->createWidget<MyGUI::Button>("SpellText",
+                MyGUI::IntCoord(4, mHeight, mWidth-8, spellHeight), MyGUI::Align::Left | MyGUI::Align::Top);
+            t->setCaption(spell->name);
+            t->setTextAlign(MyGUI::Align::Left);
+            t->setUserString("ToolTipType", "Spell");
+            t->setUserString("Spell", *it);
+            t->eventMouseButtonClick += MyGUI::newDelegate(this, &SpellWindow::onSpellSelected);
+
+            if (*it == selectedSpell)
+                t->setStateSelected(true);
+
+            // cost / success chance
+            MyGUI::TextBox* costChance = mSpellView->createWidget<MyGUI::TextBox>("SpellText",
+                MyGUI::IntCoord(4, mHeight, mWidth-8, spellHeight), MyGUI::Align::Left | MyGUI::Align::Top);
+            std::string cost = boost::lexical_cast<std::string>(spell->data.cost);
+            costChance->setCaption(cost + "/" + "100"); /// \todo
+            costChance->setTextAlign(MyGUI::Align::Right);
+            costChance->setNeedMouseFocus(false);
+
+
+            mHeight += spellHeight;
+        }
+
+
+        // enchanted items
+        addGroup("#{sMagicItem}", "#{sCostCharge}");
+
+        for (std::vector<MWWorld::Ptr>::const_iterator it = items.begin(); it != items.end(); ++it)
+        {
+            MWWorld::Ptr item = *it;
+
+            // check if the item is currently equipped (will display in a different color)
+            bool equipped = false;
+            for (int i=0; i < MWWorld::InventoryStore::Slots; ++i)
+            {
+                if (store.getSlot(i) != store.end() && *store.getSlot(i) == item)
+                {
+                    equipped = true;
+                    break;
+                }
+            }
+
+            MyGUI::Button* t = mSpellView->createWidget<MyGUI::Button>(equipped ? "SpellText" : "SpellTextUnequipped",
+                MyGUI::IntCoord(4, mHeight, mWidth-8, spellHeight), MyGUI::Align::Left | MyGUI::Align::Top);
+            t->setCaption(MWWorld::Class::get(item).getName(item));
+            t->setTextAlign(MyGUI::Align::Left);
+            t->setUserData(item);
+            t->setUserString("ToolTipType", "ItemPtr");
+            t->setUserString("Equipped", equipped ? "true" : "false");
+            t->eventMouseButtonClick += MyGUI::newDelegate(this, &SpellWindow::onEnchantedItemSelected);
+            t->setStateSelected(item == selectedItem);
+
+            // cost / charge
+            MyGUI::TextBox* costCharge = mSpellView->createWidget<MyGUI::TextBox>(equipped ? "SpellText" : "SpellTextUnequipped",
+                MyGUI::IntCoord(4, mHeight, mWidth-8, spellHeight), MyGUI::Align::Left | MyGUI::Align::Top);
+
+            const ESM::Enchantment* enchant = MWBase::Environment::get().getWorld()->getStore().enchants.find(MWWorld::Class::get(item).getEnchantment(item));
+            std::string cost = boost::lexical_cast<std::string>(enchant->data.cost);
+            std::string charge = boost::lexical_cast<std::string>(enchant->data.charge); /// \todo track current charge
+            costCharge->setCaption(cost + "/" + charge);
+            costCharge->setTextAlign(MyGUI::Align::Right);
+            costCharge->setNeedMouseFocus(false);
+
+            mHeight += spellHeight;
+        }
+
+        mSpellView->setCanvasSize(mSpellView->getWidth(), std::max(mSpellView->getHeight(), mHeight));
+    }
+
+    void SpellWindow::addGroup(const std::string &label, const std::string& label2)
+    {
+        if (mSpellView->getChildCount() > 0)
+        {
+            MyGUI::ImageBox* separator = mSpellView->createWidget<MyGUI::ImageBox>("MW_HLine",
+                MyGUI::IntCoord(4, mHeight, mWidth-8, 18),
+                MyGUI::Align::Left | MyGUI::Align::Top);
+            separator->setNeedMouseFocus(false);
+            mHeight += 18;
+        }
+
+        MyGUI::TextBox* groupWidget = mSpellView->createWidget<MyGUI::TextBox>("SandBrightText",
+            MyGUI::IntCoord(0, mHeight, mWidth, 24),
+            MyGUI::Align::Left | MyGUI::Align::Top | MyGUI::Align::HStretch);
+        groupWidget->setCaptionWithReplacing(label);
+        groupWidget->setTextAlign(MyGUI::Align::Left);
+        groupWidget->setNeedMouseFocus(false);
+
+        if (label2 != "")
+        {
+            MyGUI::TextBox* groupWidget2 = mSpellView->createWidget<MyGUI::TextBox>("SandBrightText",
+                MyGUI::IntCoord(0, mHeight, mWidth-4, 24),
+                MyGUI::Align::Left | MyGUI::Align::Top);
+            groupWidget2->setCaptionWithReplacing(label2);
+            groupWidget2->setTextAlign(MyGUI::Align::Right);
+            groupWidget2->setNeedMouseFocus(false);
+        }
+
+        mHeight += 24;
+    }
+
+    void SpellWindow::onWindowResize(MyGUI::Window* _sender)
+    {
+        updateSpells();
+    }
+
+    void SpellWindow::onEnchantedItemSelected(MyGUI::Widget* _sender)
+    {
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+        MWMechanics::CreatureStats& stats = MWWorld::Class::get(player).getCreatureStats(player);
+        MWWorld::InventoryStore& store = MWWorld::Class::get(player).getInventoryStore(player);
+        MWMechanics::Spells& spells = stats.mSpells;
+        MWWorld::Ptr item = *_sender->getUserData<MWWorld::Ptr>();
+
+        // retrieve ContainerStoreIterator to the item
+        MWWorld::ContainerStoreIterator it = store.begin();
+        for (; it != store.end(); ++it)
+        {
+            if (*it == item)
+            {
+                break;
+            }
+        }
+        assert(it != store.end());
+
+        // equip, if it is not already equipped
+        if (_sender->getUserString("Equipped") == "false")
+        {
+            // sound
+            MWBase::Environment::get().getSoundManager()->playSound(MWWorld::Class::get(item).getUpSoundId(item), 1.0, 1.0);
+
+            // Note: can't use Class::use here because enchanted scrolls for example would then open the scroll window instead of equipping
+
+            /// \todo the following code is pretty much copy&paste from ActionEquip, put it in a function?
+            // slots that this item can be equipped in
+            std::pair<std::vector<int>, bool> slots = MWWorld::Class::get(item).getEquipmentSlots(item);
+
+
+            // equip the item in the first free slot
+            for (std::vector<int>::const_iterator slot=slots.first.begin();
+                slot!=slots.first.end(); ++slot)
+            {
+                // if all slots are occupied, replace the last slot
+                if (slot == --slots.first.end())
+                {
+                    store.equip(*slot, it);
+                    break;
+                }
+
+                if (store.getSlot(*slot) == store.end())
+                {
+                    // slot is not occupied
+                    store.equip(*slot, it);
+                    break;
+                }
+            }
+            /// \todo scripts?
+
+            // since we changed equipping status, update the inventory window
+            mWindowManager.getInventoryWindow()->drawItems();
+        }
+
+        store.setSelectedEnchantItem(it);
+        spells.setSelectedSpell("");
+
+        updateSpells();
+    }
+
+    void SpellWindow::onSpellSelected(MyGUI::Widget* _sender)
+    {
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+        MWMechanics::CreatureStats& stats = MWWorld::Class::get(player).getCreatureStats(player);
+        MWWorld::InventoryStore& store = MWWorld::Class::get(player).getInventoryStore(player);
+        MWMechanics::Spells& spells = stats.mSpells;
+
+        spells.setSelectedSpell(_sender->getUserString("Spell"));
+        store.setSelectedEnchantItem(store.end());
+
+        updateSpells();
+    }
+
+    int SpellWindow::estimateHeight(int numSpells) const
+    {
+        int height = 0;
+        height += 24 * 3 + 18 * 2; // group headings
+        height += numSpells * 18;
+        return height;
     }
 }
