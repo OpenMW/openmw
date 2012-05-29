@@ -402,7 +402,6 @@ IntSize ToolTips::createToolTip(const MWGui::ToolTipInfo& info)
 
             TextBox* chargeText = enchantArea->createWidget<TextBox>("SandText", IntCoord(0, 0, 10, 18), Align::Default, "ToolTipEnchantChargeText");
             chargeText->setCaption(store.gameSettings.search("sCharges")->str);
-            chargeText->setProperty("Static", "true");
             const int chargeTextWidth = chargeText->getTextSize().width + 5;
 
             const int chargeAndTextWidth = chargeWidth + chargeTextWidth;

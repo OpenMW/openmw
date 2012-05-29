@@ -674,3 +674,28 @@ void WindowManager::removeGuiMode(GuiMode mode)
 
     updateVisible();
 }
+
+void WindowManager::setSelectedSpell(const std::string& spellId, int successChancePercent)
+{
+    hud->setSelectedSpell(spellId, successChancePercent);
+}
+
+void WindowManager::setSelectedEnchantItem(const MWWorld::Ptr& item, int chargePercent)
+{
+    hud->setSelectedEnchantItem(item, chargePercent);
+}
+
+void WindowManager::setSelectedWeapon(const MWWorld::Ptr& item, int durabilityPercent)
+{
+    hud->setSelectedWeapon(item, durabilityPercent);
+}
+
+void WindowManager::unsetSelectedSpell()
+{
+    hud->unsetSelectedSpell();
+}
+
+void WindowManager::unsetSelectedWeapon()
+{
+    hud->unsetSelectedWeapon();
+}

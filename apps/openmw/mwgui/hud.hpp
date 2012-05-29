@@ -3,6 +3,7 @@
 #include <openengine/gui/layout.hpp>
 
 #include "../mwmechanics/stat.hpp"
+#include "../mwworld/ptr.hpp"
 
 namespace MWGui
 {
@@ -12,10 +13,6 @@ namespace MWGui
     {
     public:
         HUD(int width, int height, int fpsLevel, DragAndDrop* dragAndDrop);
-        void setWeapIcon(const char *str);
-        void setSpellIcon(const char *str);
-        void setWeapStatus(int s, int smax);
-        void setSpellStatus(int s, int smax);
         void setEffect(const char *img);
         void setValue (const std::string& id, const MWMechanics::DynamicStat<int>& value);
         void setFPS(float fps);
@@ -24,6 +21,12 @@ namespace MWGui
         void setBottomLeftVisibility(bool hmsVisible, bool weapVisible, bool spellVisible);
         void setBottomRightVisibility(bool effectBoxVisible, bool minimapVisible);
         void setFpsLevel(const int level);
+
+        void setSelectedSpell(const std::string& spellId, int successChancePercent);
+        void setSelectedEnchantItem(const MWWorld::Ptr& item, int chargePercent);
+        void setSelectedWeapon(const MWWorld::Ptr& item, int durabilityPercent);
+        void unsetSelectedSpell();
+        void unsetSelectedWeapon();
 
         void onFrame(float dt);
         void onResChange(int width, int height);
@@ -41,6 +44,7 @@ namespace MWGui
         MyGUI::ImageBox* compass;
         MyGUI::ImageBox* crosshair;
         MyGUI::TextBox* mCellNameBox;
+        MyGUI::TextBox* mWeaponSpellBox;
 
         MyGUI::WidgetPtr fpsbox;
         MyGUI::TextBox* fpscounter;
@@ -57,6 +61,10 @@ namespace MWGui
 
         std::string mCellName;
         float mCellNameTimer;
+
+        std::string mWeaponName;
+        std::string mSpellName;
+        float mWeaponSpellTimer;
 
         bool mMapVisible;
 

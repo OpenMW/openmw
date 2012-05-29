@@ -204,6 +204,12 @@ namespace MWGui
     void setWeaponVisibility(bool visible);
     void setSpellVisibility(bool visible);
 
+    void setSelectedSpell(const std::string& spellId, int successChancePercent);
+    void setSelectedEnchantItem(const MWWorld::Ptr& item, int chargePercent);
+    void setSelectedWeapon(const MWWorld::Ptr& item, int durabilityPercent);
+    void unsetSelectedSpell();
+    void unsetSelectedWeapon();
+
     template<typename T>
     void removeDialog(T*& dialog); ///< Casts to OEngine::GUI::Layout and calls removeDialog, then resets pointer to nullptr.
     void removeDialog(OEngine::GUI::Layout* dialog); ///< Hides dialog and schedules dialog to be deleted.

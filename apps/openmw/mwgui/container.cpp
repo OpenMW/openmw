@@ -347,7 +347,6 @@ void ContainerBase::setFilter(ContainerBase::Filter filter)
 void ContainerBase::openContainer(MWWorld::Ptr container)
 {
     mPtr = container;
-    drawItems();
 }
 
 void ContainerBase::drawItems()
@@ -638,6 +637,7 @@ void ContainerWindow::open(MWWorld::Ptr container)
 {
     openContainer(container);
     setTitle(MWWorld::Class::get(container).getName(container));
+    drawItems();
 }
 
 void ContainerWindow::onCloseButtonClicked(MyGUI::Widget* _sender)

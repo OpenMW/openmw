@@ -110,6 +110,8 @@ namespace MWGui
             if (!allowSelectedItem)
             {
                 store.setSelectedEnchantItem(store.end());
+                spells.setSelectedSpell("");
+                mWindowManager.unsetSelectedSpell();
                 selectedItem = MWWorld::Ptr();
             }
         }
@@ -366,12 +368,14 @@ namespace MWGui
 
         store.setSelectedEnchantItem(it);
         spells.setSelectedSpell("");
+        mWindowManager.setSelectedEnchantItem(item, 100); /// \todo track charge %
 
         updateSpells();
     }
 
     void SpellWindow::onSpellSelected(MyGUI::Widget* _sender)
     {
+        std::string spellId = _sender->getUserString("Spell");
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
         MWMechanics::CreatureStats& stats = MWWorld::Class::get(player).getCreatureStats(player);
         MWWorld::InventoryStore& store = MWWorld::Class::get(player).getInventoryStore(player);
@@ -380,7 +384,7 @@ namespace MWGui
         if (MyGUI::InputManager::getInstance().isShiftPressed())
         {
             // delete spell, if allowed
-            const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().spells.find(_sender->getUserString("Spell"));
+            const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().spells.find(spellId);
             if (spell->data.flags & ESM::Spell::F_Always
                 || spell->data.type == ESM::Spell::ST_Power)
             {
@@ -389,7 +393,7 @@ namespace MWGui
             else
             {
                 // ask for confirmation
-                mSpellToDelete = _sender->getUserString("Spell");
+                mSpellToDelete = spellId;
                 ConfirmationDialog* dialog = mWindowManager.getConfirmationDialog();
                 std::string question = mWindowManager.getGameSettingString("sQuestionDeleteSpell", "Delete %s?");
                 question = boost::str(boost::format(question) % spell->name);
@@ -401,8 +405,9 @@ namespace MWGui
         }
         else
         {
-            spells.setSelectedSpell(_sender->getUserString("Spell"));
+            spells.setSelectedSpell(spellId);
             store.setSelectedEnchantItem(store.end());
+            mWindowManager.setSelectedSpell(spellId, int(MWMechanics::getSpellSuccessChance(spellId, player)));
         }
 
         updateSpells();
@@ -429,6 +434,12 @@ namespace MWGui
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
         MWMechanics::CreatureStats& stats = MWWorld::Class::get(player).getCreatureStats(player);
         MWMechanics::Spells& spells = stats.mSpells;
+
+        if (spells.getSelectedSpell() == mSpellToDelete)
+        {
+            spells.setSelectedSpell("");
+            mWindowManager.unsetSelectedSpell();
+        }
 
         spells.remove(mSpellToDelete);
 

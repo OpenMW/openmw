@@ -90,6 +90,7 @@ HUD::HUD(int width, int height, int fpsLevel, DragAndDrop* dragAndDrop)
     getWidget(compass, "Compass");
 
     getWidget(mCellNameBox, "CellName");
+    getWidget(mWeaponSpellBox, "WeaponSpellName");
 
     getWidget(crosshair, "Crosshair");
 
@@ -98,13 +99,10 @@ HUD::HUD(int width, int height, int fpsLevel, DragAndDrop* dragAndDrop)
     getWidget(trianglecounter, "TriangleCounter");
     getWidget(batchcounter, "BatchCounter");
 
-    // These are just demo values, you should replace these with
-    // real calls from outside the class later.
-    setWeapIcon("icons\\w\\tx_knife_iron.dds");
-    setWeapStatus(90, 100);
-    setSpellIcon("icons\\s\\b_tx_s_rstor_health.dds");
-    setSpellStatus(65, 100);
     setEffect("icons\\s\\tx_s_chameleon.dds");
+
+    unsetSelectedSpell();
+    unsetSelectedWeapon();
 
     LocalMapBase::init(minimap, compass, this);
 
@@ -151,28 +149,6 @@ void HUD::setTriangleCount(size_t count)
 void HUD::setBatchCount(size_t count)
 {
     batchcounter->setCaption(boost::lexical_cast<std::string>(count));
-}
-
-void HUD::setWeapIcon(const char *str)
-{
-    weapImage->setImageTexture(str);
-}
-
-void HUD::setSpellIcon(const char *str)
-{
-    spellImage->setImageTexture(str);
-}
-
-void HUD::setWeapStatus(int s, int smax)
-{
-    weapStatus->setProgressRange(smax);
-    weapStatus->setProgressPosition(s);
-}
-
-void HUD::setSpellStatus(int s, int smax)
-{
-    spellStatus->setProgressRange(smax);
-    spellStatus->setProgressPosition(s);
 }
 
 void HUD::setEffect(const char *img)
@@ -354,11 +330,150 @@ void HUD::setCellName(const std::string& cellName)
 void HUD::onFrame(float dt)
 {
     mCellNameTimer -= dt;
+    mWeaponSpellTimer -= dt;
     if (mCellNameTimer < 0)
         mCellNameBox->setVisible(false);
+    if (mWeaponSpellTimer < 0)
+        mWeaponSpellBox->setVisible(false);
 }
 
 void HUD::onResChange(int width, int height)
 {
     setCoord(0, 0, width, height);
+}
+
+void HUD::setSelectedSpell(const std::string& spellId, int successChancePercent)
+{
+    const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().spells.find(spellId);
+    std::string spellName = spell->name;
+    if (spellName != mSpellName)
+    {
+        mWeaponSpellTimer = 5.0f;
+        mSpellName = spellName;
+        mWeaponSpellBox->setCaption(mSpellName);
+        mWeaponSpellBox->setVisible(true);
+    }
+
+    spellStatus->setProgressRange(100);
+    spellStatus->setProgressPosition(successChancePercent);
+
+    if (spellImage->getChildCount())
+        MyGUI::Gui::getInstance().destroyWidget(spellImage->getChildAt(0));
+
+    spellBox->setUserString("ToolTipType", "Spell");
+    spellBox->setUserString("Spell", spellId);
+
+    // use the icon of the first effect
+    const ESM::MagicEffect* effect = MWBase::Environment::get().getWorld()->getStore().magicEffects.find(spell->effects.list.front().effectID);
+    std::string icon = effect->icon;
+    int slashPos = icon.find("\\");
+    icon.insert(slashPos+1, "b_");
+    icon = std::string("icons\\") + icon;
+    Widgets::fixTexturePath(icon);
+    spellImage->setImageTexture(icon);
+}
+
+void HUD::setSelectedEnchantItem(const MWWorld::Ptr& item, int chargePercent)
+{
+    std::string itemName = MWWorld::Class::get(item).getName(item);
+    if (itemName != mSpellName)
+    {
+        mWeaponSpellTimer = 5.0f;
+        mSpellName = itemName;
+        mWeaponSpellBox->setCaption(mSpellName);
+        mWeaponSpellBox->setVisible(true);
+    }
+
+    spellStatus->setProgressRange(100);
+    spellStatus->setProgressPosition(chargePercent);
+
+    if (spellImage->getChildCount())
+        MyGUI::Gui::getInstance().destroyWidget(spellImage->getChildAt(0));
+
+    spellBox->setUserString("ToolTipType", "ItemPtr");
+    spellBox->setUserData(item);
+
+    spellImage->setImageTexture("textures\\menu_icon_magic_mini.dds");
+    MyGUI::ImageBox* itemBox = spellImage->createWidgetReal<MyGUI::ImageBox>("ImageBox", MyGUI::FloatCoord(0,0,1,1)
+        , MyGUI::Align::Stretch);
+
+    std::string path = std::string("icons\\");
+    path+=MWWorld::Class::get(item).getInventoryIcon(item);
+    Widgets::fixTexturePath(path);
+    itemBox->setImageTexture(path);
+    itemBox->setNeedMouseFocus(false);
+}
+
+void HUD::setSelectedWeapon(const MWWorld::Ptr& item, int durabilityPercent)
+{
+    std::string itemName = MWWorld::Class::get(item).getName(item);
+    if (itemName != mWeaponName)
+    {
+        mWeaponSpellTimer = 5.0f;
+        mWeaponName = itemName;
+        mWeaponSpellBox->setCaption(mWeaponName);
+        mWeaponSpellBox->setVisible(true);
+    }
+
+    weapBox->setUserString("ToolTipType", "ItemPtr");
+    weapBox->setUserData(item);
+
+    weapStatus->setProgressRange(100);
+    weapStatus->setProgressPosition(durabilityPercent);
+
+    if (weapImage->getChildCount())
+        MyGUI::Gui::getInstance().destroyWidget(weapImage->getChildAt(0));
+
+    std::string path = std::string("icons\\");
+    path+=MWWorld::Class::get(item).getInventoryIcon(item);
+    Widgets::fixTexturePath(path);
+
+    if (MWWorld::Class::get(item).getEnchantment(item) != "")
+    {
+        weapImage->setImageTexture("textures\\menu_icon_magic_mini.dds");
+        MyGUI::ImageBox* itemBox = weapImage->createWidgetReal<MyGUI::ImageBox>("ImageBox", MyGUI::FloatCoord(0,0,1,1)
+            , MyGUI::Align::Stretch);
+        itemBox->setImageTexture(path);
+        itemBox->setNeedMouseFocus(false);
+    }
+    else
+        weapImage->setImageTexture(path);
+}
+
+void HUD::unsetSelectedSpell()
+{
+    std::string spellName = "#{sNone}";
+    if (spellName != mSpellName)
+    {
+        mWeaponSpellTimer = 5.0f;
+        mSpellName = spellName;
+        mWeaponSpellBox->setCaptionWithReplacing(mSpellName);
+        mWeaponSpellBox->setVisible(true);
+    }
+
+    if (spellImage->getChildCount())
+        MyGUI::Gui::getInstance().destroyWidget(spellImage->getChildAt(0));
+    spellStatus->setProgressRange(100);
+    spellStatus->setProgressPosition(0);
+    spellImage->setImageTexture("");
+    spellBox->clearUserStrings();
+}
+
+void HUD::unsetSelectedWeapon()
+{
+    std::string itemName = "#{sSkillHandtohand}";
+    if (itemName != mWeaponName)
+    {
+        mWeaponSpellTimer = 5.0f;
+        mWeaponName = itemName;
+        mWeaponSpellBox->setCaptionWithReplacing(mWeaponName);
+        mWeaponSpellBox->setVisible(true);
+    }
+
+    if (weapImage->getChildCount())
+        MyGUI::Gui::getInstance().destroyWidget(weapImage->getChildAt(0));
+    weapStatus->setProgressRange(100);
+    weapStatus->setProgressPosition(0);
+    weapImage->setImageTexture("icons\\k\\stealth_handtohand.dds");
+    weapBox->clearUserStrings();
 }

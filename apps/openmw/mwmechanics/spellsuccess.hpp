@@ -4,30 +4,14 @@
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/world.hpp"
 #include "../mwbase/environment.hpp"
+#include "../mwmechanics/creaturestats.hpp"
 
 #include "npcstats.hpp"
 
 namespace MWMechanics
 {
-    // UESP wiki / Morrowind/Spells:
-    // Chance of success is (Spell's skill * 2 + Willpower / 5 + Luck / 10 - Spell cost - Sound magnitude) * (Current fatigue + Maximum Fatigue * 1.5) / Maximum fatigue * 2
-
-    /**
-     * @param spellId ID of spell
-     * @param actor calculate spell success chance for this actor (depends on actor's skills)
-     * @attention actor has to be an NPC and not a creature!
-     * @return success chance from 0 to 100 (in percent)
-     */
-    float getSpellSuccessChance (const std::string& spellId, const MWWorld::Ptr& actor)
+    inline int spellSchoolToSkill(int school)
     {
-        const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().spells.find(spellId);
-
-        if (spell->data.flags & ESM::Spell::F_Always) // spells with this flag always succeed (usually birthsign spells)
-            return 100.0;
-
-        NpcStats& stats = MWWorld::Class::get(actor).getNpcStats(actor);
-        CreatureStats& creatureStats = MWWorld::Class::get(actor).getCreatureStats(actor);
-
         std::map<int, int> schoolSkillMap; // maps spell school to skill id
         schoolSkillMap[0] = 11; // alteration
         schoolSkillMap[1] = 13; // conjuration
@@ -35,32 +19,64 @@ namespace MWMechanics
         schoolSkillMap[2] = 10; // destruction
         schoolSkillMap[4] = 14; // mysticism
         schoolSkillMap[5] = 15; // restoration
+        assert(schoolSkillMap.find(school) != schoolSkillMap.end());
+        return schoolSkillMap[school];
+    }
+
+    inline int getSpellSchool(const std::string& spellId, const MWWorld::Ptr& actor)
+    {
+        const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().spells.find(spellId);
+        NpcStats& stats = MWWorld::Class::get(actor).getNpcStats(actor);
 
         // determine the spell's school
         // this is always the school where the player's respective skill is the least advanced
         // out of all the magic effects' schools
         const std::vector<ESM::ENAMstruct>& effects = spell->effects.list;
-        int skill = -1;
+        int school = -1;
         int skillLevel = -1;
         for (std::vector<ESM::ENAMstruct>::const_iterator it = effects.begin();
             it != effects.end(); ++it)
         {
             const ESM::MagicEffect* effect = MWBase::Environment::get().getWorld()->getStore().magicEffects.find(it->effectID);
-            int school = effect->data.school;
-            assert(schoolSkillMap.find(school) != schoolSkillMap.end());
-            int _skillLevel = stats.mSkill[schoolSkillMap[school]].getModified();
+            int _school = effect->data.school;
+            int _skillLevel = stats.mSkill[spellSchoolToSkill(_school)].getModified();
 
-            if (skill == -1)
+            if (school == -1)
             {
-                skill = schoolSkillMap[school];
+                school = _school;
                 skillLevel = _skillLevel;
             }
             else if (_skillLevel < skillLevel)
             {
-                skill = schoolSkillMap[school];
+                school = _school;
                 skillLevel = _skillLevel;
             }
         }
+
+        return school;
+    }
+
+
+    // UESP wiki / Morrowind/Spells:
+    // Chance of success is (Spell's skill * 2 + Willpower / 5 + Luck / 10 - Spell cost - Sound magnitude) * (Current fatigue + Maximum Fatigue * 1.5) / Maximum fatigue * 2
+    /**
+     * @param spellId ID of spell
+     * @param actor calculate spell success chance for this actor (depends on actor's skills)
+     * @attention actor has to be an NPC and not a creature!
+     * @return success chance from 0 to 100 (in percent)
+     */
+    inline float getSpellSuccessChance (const std::string& spellId, const MWWorld::Ptr& actor)
+    {
+        const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().spells.find(spellId);
+
+        if (spell->data.flags & ESM::Spell::F_Always // spells with this flag always succeed (usually birthsign spells)
+            || spell->data.type == ESM::Spell::ST_Power) // powers always succeed, but can be cast only once per day
+            return 100.0;
+
+        NpcStats& stats = MWWorld::Class::get(actor).getNpcStats(actor);
+        CreatureStats& creatureStats = MWWorld::Class::get(actor).getCreatureStats(actor);
+
+        int skillLevel = stats.mSkill[getSpellSchool(spellId, actor)].getModified();
 
         // Sound magic effect (reduces spell casting chance)
         int soundMagnitude = creatureStats.mMagicEffects.get (MWMechanics::EffectKey (48)).mMagnitude;

@@ -188,6 +188,15 @@ namespace MWGui
             mWindowManager.setDragDrop(false);
 
             drawItems();
+
+            // update selected weapon icon
+            MWWorld::InventoryStore& invStore = MWWorld::Class::get(mPtr).getInventoryStore(mPtr);
+            MWWorld::ContainerStoreIterator weaponSlot = invStore.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
+            if (weaponSlot == invStore.end())
+                mWindowManager.unsetSelectedWeapon();
+            else
+                mWindowManager.setSelectedWeapon(*weaponSlot, 100); /// \todo track weapon durability
+
         }
     }
 
@@ -266,5 +275,14 @@ namespace MWGui
         // update the spell window just in case new enchanted items were added to inventory
         if (mWindowManager.getSpellWindow())
             mWindowManager.getSpellWindow()->updateSpells();
+
+            // update selected weapon icon
+            MWWorld::InventoryStore& invStore = MWWorld::Class::get(mPtr).getInventoryStore(mPtr);
+            MWWorld::ContainerStoreIterator weaponSlot = invStore.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
+            if (weaponSlot == invStore.end())
+                mWindowManager.unsetSelectedWeapon();
+            else
+                mWindowManager.setSelectedWeapon(*weaponSlot, 100); /// \todo track weapon durability
+
     }
 }
