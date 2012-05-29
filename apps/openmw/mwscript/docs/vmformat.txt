@@ -146,4 +146,6 @@ op 0x200014f: ForceGreeting
 op 0x2000150: ForceGreeting, explicit reference
 op 0x2000151: ToggleFullHelp
 op 0x2000152: Goodbye
-opcodes 0x2000153-0x3ffffff unused
+op 0x2000153: SetScale
+op 0x2000154: SetAngle
+opcodes 0x2000155-0x3ffffff unused
