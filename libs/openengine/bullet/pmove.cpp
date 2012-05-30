@@ -232,7 +232,7 @@ bool	PM_SlideMove( bool gravity )
 		end = pm->ps.origin + pm->ps.velocity * time_left;
 
 		// see if we can make it there
-		//pm->trace ( &trace, pm->ps->origin, pm->mins, pm->maxs, end, pm->ps->clientNum, pm->tracemask);
+		//pm->trace ( &trace, pm->ps->origin, pm->mins, pm->maxs, end, pm->ps->clientNum, pm->tracemaskg);
 		//tracefunc(&trace, *(const D3DXVECTOR3* const)&(pm->ps.origin), *(const D3DXVECTOR3* const)&(end), *(const D3DXVECTOR3* const)&(pm->ps.velocity), 0, pml.traceObj);
 		newtrace(&trace, pm->ps.origin, end, halfExtents, Ogre::Math::DegreesToRadians (pm->ps.viewangles.y), pm->isInterior, pm->mEngine);
 
@@ -277,7 +277,7 @@ bool	PM_SlideMove( bool gravity )
 			{
 				// pm->ps->velocity += (trace.plane.normal + pm->ps->velocity)
 				//VectorAdd( trace.plane.normal, pm->ps->velocity, pm->ps->velocity );
-				pm->ps.velocity = (trace.planenormal + pm->ps.velocity);
+				pm->ps.velocity =  trace.planenormal + pm->ps.velocity;
 				break;
 			}
 		}
@@ -330,7 +330,7 @@ bool	PM_SlideMove( bool gravity )
 				if (clipVelocity.dotProduct(planes[i]) >= 0)
 				//if ( DotProduct( clipVelocity, planes[i] ) >= 0 )
 					continue;
-
+                
 
 				// slide the original velocity along the crease
 				//dProduct (planes[i], planes[j], dir);
@@ -363,6 +363,7 @@ bool	PM_SlideMove( bool gravity )
 				// see if there is a third plane the the new move enters
 				for ( k = 0 ; k < numplanes ; k++ ) 
 				{
+                    
 					if ( k == i || k == j )
 						continue;
 
@@ -1460,6 +1461,7 @@ static void PM_GroundTrace( void )
 	
 	// slopes that are too steep will not be considered onground
 	//if ( trace.plane.normal[2] < MIN_WALK_NORMAL ) 
+    //std::cout << "MinWalkNormal" << trace.planenormal.z;
 	if (trace.planenormal.z < MIN_WALK_NORMAL)
 	{
 		//if ( pm->debugLevel )
