@@ -257,7 +257,7 @@ namespace MWGui
 
             std::string cost = boost::lexical_cast<std::string>(enchant->data.cost);
             std::string charge = boost::lexical_cast<std::string>(enchant->data.charge); /// \todo track current charge
-            if (enchant->data.type != ESM::Enchantment::CastOnce)
+            if (enchant->data.type == ESM::Enchantment::CastOnce)
             {
                 // this is Morrowind behaviour
                 cost = "100";
