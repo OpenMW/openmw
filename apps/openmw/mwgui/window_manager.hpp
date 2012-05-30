@@ -81,6 +81,7 @@ namespace MWGui
   class SettingsWindow;
   class ConfirmationDialog;
   class AlchemyWindow;
+  class SpellWindow;
 
   struct ClassPoint
   {
@@ -153,6 +154,7 @@ namespace MWGui
     MWGui::CountDialog* getCountDialog() {return mCountDialog;}
     MWGui::ConfirmationDialog* getConfirmationDialog() {return mConfirmationDialog;}
     MWGui::TradeWindow* getTradeWindow() {return mTradeWindow;}
+    MWGui::SpellWindow* getSpellWindow() {return mSpellWindow;}
 
     MyGUI::Gui* getGui() const { return gui; }
 
@@ -202,6 +204,12 @@ namespace MWGui
     void setWeaponVisibility(bool visible);
     void setSpellVisibility(bool visible);
 
+    void setSelectedSpell(const std::string& spellId, int successChancePercent);
+    void setSelectedEnchantItem(const MWWorld::Ptr& item, int chargePercent);
+    void setSelectedWeapon(const MWWorld::Ptr& item, int durabilityPercent);
+    void unsetSelectedSpell();
+    void unsetSelectedWeapon();
+
     template<typename T>
     void removeDialog(T*& dialog); ///< Casts to OEngine::GUI::Layout and calls removeDialog, then resets pointer to nullptr.
     void removeDialog(OEngine::GUI::Layout* dialog); ///< Hides dialog and schedules dialog to be deleted.
@@ -250,6 +258,7 @@ namespace MWGui
     SettingsWindow* mSettingsWindow;
     ConfirmationDialog* mConfirmationDialog;
     AlchemyWindow* mAlchemyWindow;
+    SpellWindow* mSpellWindow;
 
     CharacterCreation* mCharGen;
 

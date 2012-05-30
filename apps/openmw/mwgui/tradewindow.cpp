@@ -104,6 +104,8 @@ namespace MWGui
         ContainerBase::openContainer(actor);
 
         updateLabels();
+
+        drawItems();
     }
 
     void TradeWindow::onFilterChanged(MyGUI::Widget* _sender)

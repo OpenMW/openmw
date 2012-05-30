@@ -19,6 +19,7 @@
 #include "settingswindow.hpp"
 #include "confirmationdialog.hpp"
 #include "alchemywindow.hpp"
+#include "spellwindow.hpp"
 
 #include "../mwmechanics/mechanicsmanager.hpp"
 #include "../mwinput/inputmanager.hpp"
@@ -56,6 +57,7 @@ WindowManager::WindowManager(
   , mSettingsWindow(NULL)
   , mConfirmationDialog(NULL)
   , mAlchemyWindow(NULL)
+  , mSpellWindow(NULL)
   , mCharGen(NULL)
   , playerClass()
   , playerName()
@@ -124,6 +126,7 @@ WindowManager::WindowManager(
     mSettingsWindow = new SettingsWindow(*this);
     mConfirmationDialog = new ConfirmationDialog(*this);
     mAlchemyWindow = new AlchemyWindow(*this);
+    mSpellWindow = new SpellWindow(*this);
 
     // The HUD is always on
     hud->setVisible(true);
@@ -140,6 +143,9 @@ WindowManager::WindowManager(
     {
         playerSkillValues.insert(std::make_pair(ESM::Skill::skillIds[i], MWMechanics::Stat<float>()));
     }
+
+    unsetSelectedSpell();
+    unsetSelectedWeapon();
 
     // Set up visibility
     updateVisible();
@@ -167,6 +173,7 @@ WindowManager::~WindowManager()
     delete mSettingsWindow;
     delete mConfirmationDialog;
     delete mAlchemyWindow;
+    delete mSpellWindow;
 
     cleanupGarbage();
 }
@@ -187,12 +194,10 @@ void WindowManager::cleanupGarbage()
 void WindowManager::update()
 {
     cleanupGarbage();
-    if (showFPSLevel > 0)
-    {
-        hud->setFPS(mFPS);
-        hud->setTriangleCount(mTriangleCount);
-        hud->setBatchCount(mBatchCount);
-    }
+
+    hud->setFPS(mFPS);
+    hud->setTriangleCount(mTriangleCount);
+    hud->setBatchCount(mBatchCount);
 }
 
 void WindowManager::updateVisible()
@@ -211,6 +216,7 @@ void WindowManager::updateVisible()
     mTradeWindow->setVisible(false);
     mSettingsWindow->setVisible(false);
     mAlchemyWindow->setVisible(false);
+    mSpellWindow->setVisible(false);
 
     // Mouse is visible whenever we're not in game mode
     MyGUI::PointerManager::getInstance().setVisible(isGuiMode());
@@ -224,7 +230,7 @@ void WindowManager::updateVisible()
 
     setMinimapVisibility((allowed & GW_Map) && !map->pinned());
     setWeaponVisibility((allowed & GW_Inventory) && !mInventoryWindow->pinned());
-    setSpellVisibility((allowed & GW_Magic)); /// \todo add pin state when spells window is implemented
+    setSpellVisibility((allowed & GW_Magic) && !mSpellWindow->pinned());
     setHMSVisibility((allowed & GW_Stats) && !mStatsWindow->pinned());
 
     // If in game mode, don't show anything.
@@ -271,9 +277,10 @@ void WindowManager::updateVisible()
             int eff = shown & allowed;
 
             // Show the windows we want
-            map   -> setVisible( (eff & GW_Map) );
-            mStatsWindow -> setVisible( (eff & GW_Stats) );
-            mInventoryWindow->setVisible( (eff & GW_Inventory));
+            map   -> setVisible(eff & GW_Map);
+            mStatsWindow -> setVisible(eff & GW_Stats);
+            mInventoryWindow->setVisible(eff & GW_Inventory);
+            mSpellWindow->setVisible(eff & GW_Magic);
             break;
         }
         case GM_Container:
@@ -669,4 +676,35 @@ void WindowManager::removeGuiMode(GuiMode mode)
     }
 
     updateVisible();
+}
+
+void WindowManager::setSelectedSpell(const std::string& spellId, int successChancePercent)
+{
+    hud->setSelectedSpell(spellId, successChancePercent);
+    const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().spells.find(spellId);
+    mSpellWindow->setTitle(spell->name);
+}
+
+void WindowManager::setSelectedEnchantItem(const MWWorld::Ptr& item, int chargePercent)
+{
+    hud->setSelectedEnchantItem(item, chargePercent);
+    mSpellWindow->setTitle(MWWorld::Class::get(item).getName(item));
+}
+
+void WindowManager::setSelectedWeapon(const MWWorld::Ptr& item, int durabilityPercent)
+{
+    hud->setSelectedWeapon(item, durabilityPercent);
+    mInventoryWindow->setTitle(MWWorld::Class::get(item).getName(item));
+}
+
+void WindowManager::unsetSelectedSpell()
+{
+    hud->unsetSelectedSpell();
+    mSpellWindow->setTitle("#{sNone}");
+}
+
+void WindowManager::unsetSelectedWeapon()
+{
+    hud->unsetSelectedWeapon();
+    mInventoryWindow->setTitle("#{sSkillHandtohand}");
 }

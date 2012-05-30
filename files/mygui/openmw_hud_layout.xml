@@ -28,6 +28,14 @@
             </Widget>
         </Widget>
 
+        <!-- Equipped weapon/selected spell name display for a few seconds after it changes -->
+        <Widget type="TextBox" skin="SandText" position="13 118 270 24" name="WeaponSpellName" align="Left Bottom HStretch">
+            <Property key="Visible" value="false"/>
+            <Property key="TextAlign" value="Left"/>
+            <Property key="TextShadow" value="true"/>
+            <Property key="TextShadowColour" value="0 0 0"/>
+        </Widget>
+
         <!-- Equipped weapon box -->
         <Widget type="Button" skin="" position="82 146 36 41" align="Left Bottom" name="WeapBox">
             <Widget type="Widget" skin="HUD_Box" position="0 0 36 36">

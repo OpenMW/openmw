@@ -20,6 +20,7 @@
 #include "widgets.hpp"
 #include "bookwindow.hpp"
 #include "scrollwindow.hpp"
+#include "spellwindow.hpp"
 
 namespace
 {
@@ -91,7 +92,7 @@ namespace MWGui
 
         mFilterAll->setStateSelected(true);
 
-        setCoord(0, 342, 600, 258);
+        setCoord(0, 342, 498, 258);
 
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
         openContainer(player);
@@ -187,6 +188,15 @@ namespace MWGui
             mWindowManager.setDragDrop(false);
 
             drawItems();
+
+            // update selected weapon icon
+            MWWorld::InventoryStore& invStore = MWWorld::Class::get(mPtr).getInventoryStore(mPtr);
+            MWWorld::ContainerStoreIterator weaponSlot = invStore.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
+            if (weaponSlot == invStore.end())
+                mWindowManager.unsetSelectedWeapon();
+            else
+                mWindowManager.setSelectedWeapon(*weaponSlot, 100); /// \todo track weapon durability
+
         }
     }
 
@@ -258,5 +268,21 @@ namespace MWGui
     void InventoryWindow::startTrade()
     {
         mTrading = true;
+    }
+
+    void InventoryWindow::notifyContentChanged()
+    {
+        // update the spell window just in case new enchanted items were added to inventory
+        if (mWindowManager.getSpellWindow())
+            mWindowManager.getSpellWindow()->updateSpells();
+
+            // update selected weapon icon
+            MWWorld::InventoryStore& invStore = MWWorld::Class::get(mPtr).getInventoryStore(mPtr);
+            MWWorld::ContainerStoreIterator weaponSlot = invStore.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
+            if (weaponSlot == invStore.end())
+                mWindowManager.unsetSelectedWeapon();
+            else
+                mWindowManager.setSelectedWeapon(*weaponSlot, 100); /// \todo track weapon durability
+
     }
 }

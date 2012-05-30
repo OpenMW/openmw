@@ -347,7 +347,6 @@ void ContainerBase::setFilter(ContainerBase::Filter filter)
 void ContainerBase::openContainer(MWWorld::Ptr container)
 {
     mPtr = container;
-    drawItems();
 }
 
 void ContainerBase::drawItems()
@@ -535,6 +534,8 @@ void ContainerBase::drawItems()
     MyGUI::IntSize size = MyGUI::IntSize(std::max(mItemView->getSize().width, x+42), mItemView->getSize().height);
     mItemView->setCanvasSize(size);
     mContainerWidget->setSize(size);
+
+    notifyContentChanged();
 }
 
 std::string ContainerBase::getCountString(const int count)
@@ -636,6 +637,7 @@ void ContainerWindow::open(MWWorld::Ptr container)
 {
     openContainer(container);
     setTitle(MWWorld::Class::get(container).getName(container));
+    drawItems();
 }
 
 void ContainerWindow::onCloseButtonClicked(MyGUI::Widget* _sender)

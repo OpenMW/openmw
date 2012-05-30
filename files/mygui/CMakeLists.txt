@@ -60,6 +60,7 @@ configure_file("${SDIR}/openmw_trade_window_layout.xml" "${DDIR}/openmw_trade_wi
 configure_file("${SDIR}/openmw_settings_window_layout.xml" "${DDIR}/openmw_settings_window_layout.xml" COPYONLY)
 configure_file("${SDIR}/openmw_confirmation_dialog_layout.xml" "${DDIR}/openmw_confirmation_dialog_layout.xml" COPYONLY)
 configure_file("${SDIR}/openmw_alchemy_window_layout.xml" "${DDIR}/openmw_alchemy_window_layout.xml" COPYONLY)
+configure_file("${SDIR}/openmw_spell_window_layout.xml" "${DDIR}/openmw_spell_window_layout.xml" COPYONLY)
 configure_file("${SDIR}/atlas1.cfg" "${DDIR}/atlas1.cfg" COPYONLY)
 configure_file("${SDIR}/smallbars.png" "${DDIR}/smallbars.png" COPYONLY)
 configure_file("${SDIR}/EBGaramond-Regular.ttf" "${DDIR}/EBGaramond-Regular.ttf" COPYONLY)

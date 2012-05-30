@@ -50,6 +50,8 @@ namespace MWGui
             virtual void _unequipItem(MWWorld::Ptr item);
 
             virtual void onReferenceUnavailable() { ; }
+
+            virtual void notifyContentChanged();
     };
 }
 
