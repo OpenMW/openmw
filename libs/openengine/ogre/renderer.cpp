@@ -10,6 +10,7 @@
 #include "OgreHardwarePixelBuffer.h"
 
 #include <assert.h>
+#include <stdexcept>
 
 using namespace Ogre;
 using namespace OEngine::Render;
