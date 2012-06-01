@@ -301,6 +301,12 @@ bool	PM_SlideMove( bool gravity )
 			if ( into >= 0.1 )
 				continue;		// move doesn't interact with the plane
 
+            std::cout << "Second plane" << planes[i] << "\n";
+            if(planes[i].x >= .70)
+            {
+                pm->ps.velocity = Ogre::Vector3(0,0,0);
+				return true;
+            }
 			// see how hard we are hitting things
 			if ( -into > pml.impactSpeed )
 				pml.impactSpeed = -into;
@@ -321,6 +327,13 @@ bool	PM_SlideMove( bool gravity )
 				if (clipVelocity.dotProduct(planes[j]) >= 0.1)
 				//if ( DotProduct( clipVelocity, planes[j] ) >= 0.1 )
 					continue;		// move doesn't interact with the plane
+                
+                
+              
+               
+               //pm->ps.velocity = Ogre::Vector3(0,0,0);
+				//return true;
+                
 
 				// try clipping the move to the plane
 				PM_ClipVelocity( clipVelocity, planes[j], clipVelocity, OVERCLIP );
@@ -330,8 +343,8 @@ bool	PM_SlideMove( bool gravity )
 				if (clipVelocity.dotProduct(planes[i]) >= 0)
 				//if ( DotProduct( clipVelocity, planes[i] ) >= 0 )
 					continue;
+            
                 
-
 				// slide the original velocity along the crease
 				//dProduct (planes[i], planes[j], dir);
 				dir = planes[i].crossProduct(planes[j]) ;
