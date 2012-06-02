@@ -638,6 +638,7 @@ void WindowManager::processChangedSettings(const Settings::CategorySettingVector
         hud->onResChange(x, y);
         console->onResChange(x, y);
         mSettingsWindow->center();
+        mDragAndDrop->mDragAndDropWidget->setSize(MyGUI::IntSize(x, y));
     }
 }
 

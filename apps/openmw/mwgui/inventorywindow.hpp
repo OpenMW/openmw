@@ -18,6 +18,8 @@ namespace MWGui
 
             void onFrame();
 
+            void pickUpObject (MWWorld::Ptr object);
+
             int getPlayerGold();
 
         protected:

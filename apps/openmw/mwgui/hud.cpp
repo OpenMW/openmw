@@ -12,6 +12,7 @@
 #include "../mwworld/world.hpp"
 #include "../mwworld/player.hpp"
 
+#include "inventorywindow.hpp"
 #include "window_manager.hpp"
 #include "container.hpp"
 #include "console.hpp"
@@ -266,6 +267,7 @@ void HUD::onWorldClicked(MyGUI::Widget* _sender)
         mDragAndDrop->mDraggedWidget = 0;
 
         MWBase::Environment::get().getWindowManager()->setDragDrop(false);
+        MWBase::Environment::get().getWindowManager()->getInventoryWindow()->drawItems();
     }
     else
     {
@@ -287,9 +289,10 @@ void HUD::onWorldClicked(MyGUI::Widget* _sender)
 
         if (mode == GM_Console)
             MWBase::Environment::get().getWindowManager()->getConsole()->setSelectedObject(object);
-        else if (mode == GM_Console || GM_Inventory)
+        else if ((mode == GM_Container) || (mode == GM_Inventory))
         {
             // pick up object
+            MWBase::Environment::get().getWindowManager()->getInventoryWindow()->pickUpObject(object);
         }
     }
 }
