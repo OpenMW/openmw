@@ -379,10 +379,12 @@ namespace MWGui
     void Console::setSelectedObject(const MWWorld::Ptr& object)
     {
         mPtr = object;
+        setTitle("#{sConsoleTitle} (" + mPtr.getCellRef().refID + ")");
     }
 
     void Console::onReferenceUnavailable()
     {
         mPtr = MWWorld::Ptr();
+        setTitle("#{sConsoleTitle}");
     }
 }
