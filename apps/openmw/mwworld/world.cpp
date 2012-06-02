@@ -818,7 +818,15 @@ namespace MWWorld
 
                 // send new query
                 // figure out which object we want to test against
-                std::vector < std::pair < float, std::string > > results = mPhysics->getFacedObjects();
+                std::vector < std::pair < float, std::string > > results;
+                if (MWBase::Environment::get().getWindowManager()->isGuiMode())
+                {
+                    float x, y;
+                    MWBase::Environment::get().getWindowManager()->getMousePosition(x, y);
+                    results = mPhysics->getFacedObjects(x, y);
+                }
+                else
+                    results = mPhysics->getFacedObjects();
 
                 // ignore the player and other things we're not interested in
                 std::vector < std::pair < float, std::string > >::iterator it = results.begin();
@@ -843,7 +851,15 @@ namespace MWWorld
                     mFaced1Name = results.front().second;
                     mNumFacing = 1;
 
-                    btVector3 p = mPhysics->getRayPoint(results.front().first);
+                    btVector3 p;
+                    if (MWBase::Environment::get().getWindowManager()->isGuiMode())
+                    {
+                        float x, y;
+                        MWBase::Environment::get().getWindowManager()->getMousePosition(x, y);
+                        p = mPhysics->getRayPoint(results.front().first, x, y);
+                    }
+                    else
+                        p = mPhysics->getRayPoint(results.front().first);
                     Ogre::Vector3 pos(p.x(), p.z(), -p.y());
                     Ogre::SceneNode* node = mFaced1.getRefData().getBaseNode();
 
@@ -860,7 +876,15 @@ namespace MWWorld
                     mFaced2 = getPtrViaHandle(results[1].second);
                     mNumFacing = 2;
 
-                    btVector3 p = mPhysics->getRayPoint(results[1].first);
+                    btVector3 p;
+                    if (MWBase::Environment::get().getWindowManager()->isGuiMode())
+                    {
+                        float x, y;
+                        MWBase::Environment::get().getWindowManager()->getMousePosition(x, y);
+                        p = mPhysics->getRayPoint(results[1].first, x, y);
+                    }
+                    else
+                        p = mPhysics->getRayPoint(results[1].first);
                     Ogre::Vector3 pos(p.x(), p.z(), -p.y());
                     Ogre::SceneNode* node1 = mFaced1.getRefData().getBaseNode();
                     Ogre::SceneNode* node2 = mFaced2.getRefData().getBaseNode();

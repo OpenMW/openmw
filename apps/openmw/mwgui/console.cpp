@@ -240,7 +240,7 @@ namespace MWGui
         {
             try
             {
-                ConsoleInterpreterContext interpreterContext (*this, MWWorld::Ptr());
+                ConsoleInterpreterContext interpreterContext (*this, mPtr);
                 Interpreter::Interpreter interpreter;
                 MWScript::installOpcodes (interpreter);
                 std::vector<Interpreter::Type_Code> code;
@@ -374,5 +374,15 @@ namespace MWGui
     void Console::onResChange(int width, int height)
     {
         setCoord(10,10, width-10, height/2);
+    }
+
+    void Console::setSelectedObject(const MWWorld::Ptr& object)
+    {
+        mPtr = object;
+    }
+
+    void Console::onReferenceUnavailable()
+    {
+        mPtr = MWWorld::Ptr();
     }
 }
