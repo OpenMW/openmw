@@ -470,7 +470,7 @@ void ContainerBase::drawItems()
         if(displayCount > 0 && !(onlyMagic && it->second != ItemState_Barter && MWWorld::Class::get(*iter).getEnchantment(*iter) == "" && iter->getTypeName() != typeid(ESM::Potion).name()))
         {
             std::string path = std::string("icons\\");
-            path+=MWWorld::Class::get(*iter).getInventoryIcon(*iter);
+            path += MWWorld::Class::get(*iter).getInventoryIcon(*iter);
 
             // background widget (for the "equipped" frame and magic item background image)
             bool isMagic = (MWWorld::Class::get(*iter).getEnchantment(*iter) != "");

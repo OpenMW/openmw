@@ -33,6 +33,8 @@ namespace MWGui
 
         void setCellName(const std::string& cellName);
 
+        bool getWorldMouseOver() { return mWorldMouseOver; }
+
         MyGUI::ProgressPtr health, magicka, stamina;
         MyGUI::Widget* mHealthFrame;
         MyGUI::Widget *weapBox, *spellBox;
@@ -69,6 +71,8 @@ namespace MWGui
         bool mMapVisible;
         bool mWeaponVisible;
         bool mSpellVisible;
+
+        bool mWorldMouseOver;
 
         void onWorldClicked(MyGUI::Widget* _sender);
         void onWorldMouseOver(MyGUI::Widget* _sender, int x, int y);

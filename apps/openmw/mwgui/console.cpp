@@ -138,6 +138,7 @@ namespace MWGui
     void Console::disable()
     {
         setVisible(false);
+        setSelectedObject(MWWorld::Ptr());
         // Remove keyboard focus from the console input whenever the
         // console is turned off
         MyGUI::InputManager::getInstance().setKeyFocusWidget(NULL);
@@ -240,7 +241,7 @@ namespace MWGui
         {
             try
             {
-                ConsoleInterpreterContext interpreterContext (*this, MWWorld::Ptr());
+                ConsoleInterpreterContext interpreterContext (*this, mPtr);
                 Interpreter::Interpreter interpreter;
                 MWScript::installOpcodes (interpreter);
                 std::vector<Interpreter::Type_Code> code;
@@ -374,5 +375,19 @@ namespace MWGui
     void Console::onResChange(int width, int height)
     {
         setCoord(10,10, width-10, height/2);
+    }
+
+    void Console::setSelectedObject(const MWWorld::Ptr& object)
+    {
+        mPtr = object;
+        if (!mPtr.isEmpty())
+            setTitle("#{sConsoleTitle} (" + mPtr.getCellRef().refID + ")");
+        else
+            setTitle("#{sConsoleTitle}");
+    }
+
+    void Console::onReferenceUnavailable()
+    {
+        setSelectedObject(MWWorld::Ptr());
     }
 }

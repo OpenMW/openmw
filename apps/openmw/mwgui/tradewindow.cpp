@@ -300,6 +300,8 @@ namespace MWGui
                 services = ref->base->AI.services;
         }
 
+        /// \todo what about potions, there doesn't seem to be a flag for them??
+
         if      (item.getTypeName() == typeid(ESM::Weapon).name())
             return services & ESM::NPC::Weapon;
         else if (item.getTypeName() == typeid(ESM::Armor).name())

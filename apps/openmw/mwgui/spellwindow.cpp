@@ -89,6 +89,16 @@ namespace MWGui
 
             bool allowSelectedItem = true;
 
+            // make sure that the item is still in the player inventory, otherwise it can't be selected
+            bool found = false;
+            for (MWWorld::ContainerStoreIterator it(store.begin()); it != store.end(); ++it)
+            {
+                if (*it == selectedItem)
+                    found = true;
+            }
+            if (!found)
+                allowSelectedItem = false;
+
             // if the selected item can be equipped, make sure that it actually is equipped
             std::pair<std::vector<int>, bool> slots;
             slots = MWWorld::Class::get(selectedItem).getEquipmentSlots(selectedItem);

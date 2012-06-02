@@ -487,6 +487,7 @@ void WindowManager::onFrame (float frameDuration)
     mDialogueWindow->checkReferenceAvailable();
     mTradeWindow->checkReferenceAvailable();
     mContainerWindow->checkReferenceAvailable();
+    console->checkReferenceAvailable();
 }
 
 const ESMS::ESMStore& WindowManager::getStore() const
@@ -637,6 +638,7 @@ void WindowManager::processChangedSettings(const Settings::CategorySettingVector
         hud->onResChange(x, y);
         console->onResChange(x, y);
         mSettingsWindow->center();
+        mDragAndDrop->mDragAndDropWidget->setSize(MyGUI::IntSize(x, y));
     }
 }
 
@@ -707,4 +709,26 @@ void WindowManager::unsetSelectedWeapon()
 {
     hud->unsetSelectedWeapon();
     mInventoryWindow->setTitle("#{sSkillHandtohand}");
+}
+
+void WindowManager::getMousePosition(int &x, int &y)
+{
+    const MyGUI::IntPoint& pos = MyGUI::InputManager::getInstance().getMousePosition();
+    x = pos.left;
+    y = pos.top;
+}
+
+void WindowManager::getMousePosition(float &x, float &y)
+{
+    const MyGUI::IntPoint& pos = MyGUI::InputManager::getInstance().getMousePosition();
+    x = pos.left;
+    y = pos.top;
+    const MyGUI::IntSize& viewSize = MyGUI::RenderManager::getInstance().getViewSize();
+    x /= viewSize.width;
+    y /= viewSize.height;
+}
+
+bool WindowManager::getWorldMouseOver()
+{
+    return hud->getWorldMouseOver();
 }

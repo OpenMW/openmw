@@ -12,8 +12,10 @@
 #include "../mwworld/world.hpp"
 #include "../mwworld/player.hpp"
 
+#include "inventorywindow.hpp"
 #include "window_manager.hpp"
 #include "container.hpp"
+#include "console.hpp"
 
 using namespace MWGui;
 
@@ -46,6 +48,7 @@ HUD::HUD(int width, int height, int fpsLevel, DragAndDrop* dragAndDrop)
     , mMapVisible(true)
     , mWeaponVisible(true)
     , mSpellVisible(true)
+    , mWorldMouseOver(false)
 {
     setCoord(0,0, width, height);
 
@@ -264,6 +267,33 @@ void HUD::onWorldClicked(MyGUI::Widget* _sender)
         mDragAndDrop->mDraggedWidget = 0;
 
         MWBase::Environment::get().getWindowManager()->setDragDrop(false);
+        MWBase::Environment::get().getWindowManager()->getInventoryWindow()->drawItems();
+    }
+    else
+    {
+        GuiMode mode = MWBase::Environment::get().getWindowManager()->getMode();
+
+        if ( (mode != GM_Console) && (mode != GM_Container) && (mode != GM_Inventory) )
+            return;
+
+        std::string handle = MWBase::Environment::get().getWorld()->getFacedHandle();
+        MWWorld::Ptr object;
+        try
+        {
+            object = MWBase::Environment::get().getWorld()->getPtrViaHandle(handle);
+        }
+        catch (std::exception& e)
+        {
+            return;
+        }
+
+        if (mode == GM_Console)
+            MWBase::Environment::get().getWindowManager()->getConsole()->setSelectedObject(object);
+        else if ((mode == GM_Container) || (mode == GM_Inventory))
+        {
+            // pick up object
+            MWBase::Environment::get().getWindowManager()->getInventoryWindow()->pickUpObject(object);
+        }
     }
 }
 
@@ -271,6 +301,8 @@ void HUD::onWorldMouseOver(MyGUI::Widget* _sender, int x, int y)
 {
     if (mDragAndDrop->mIsOnDragAndDrop)
     {
+        mWorldMouseOver = false;
+
         MyGUI::IntSize viewSize = MyGUI::RenderManager::getInstance().getViewSize();
         MyGUI::IntPoint cursorPosition = MyGUI::InputManager::getInstance().getMousePosition();
         float mouseX = cursorPosition.left / float(viewSize.width);
@@ -290,13 +322,14 @@ void HUD::onWorldMouseOver(MyGUI::Widget* _sender, int x, int y)
     else
     {
         MyGUI::PointerManager::getInstance().setPointer("arrow");
-        /// \todo make it possible to pick up objects with the mouse, if inventory or container window is open
+        mWorldMouseOver = true;
     }
 }
 
 void HUD::onWorldMouseLostFocus(MyGUI::Widget* _sender, MyGUI::Widget* _new)
 {
     MyGUI::PointerManager::getInstance().setPointer("arrow");
+    mWorldMouseOver = false;
 }
 
 void HUD::onHMSClicked(MyGUI::Widget* _sender)
