@@ -77,7 +77,6 @@ namespace MWGui
         Widgets::MWList*      topicsList;
         MyGUI::ProgressPtr pDispositionBar;
         MyGUI::EditPtr pDispositionText;
-        std::map<std::string,std::string> pTopicsText;// this map links keyword and "real" text.
     };
 }
 #endif

@@ -140,7 +140,6 @@ void DialogueWindow::startDialogue(MWWorld::Ptr actor, std::string npcName)
     setTitle(npcName);
 
     topicsList->clear();
-    pTopicsText.clear();
     history->eraseText(0,history->getTextLength());
     updateOptions();
 }
@@ -169,7 +168,6 @@ void DialogueWindow::removeKeyword(std::string keyWord)
     if(topicsList->hasItem(keyWord))
     {
         topicsList->removeItem(keyWord);
-        pTopicsText.erase(keyWord);
     }
     topicsList->adjustSize();
 }
@@ -245,7 +243,6 @@ void DialogueWindow::updateOptions()
 {
     //Clear the list of topics
     topicsList->clear();
-    pTopicsText.clear();
     history->eraseText(0,history->getTextLength());
 
     pDispositionBar->setProgressRange(100);
