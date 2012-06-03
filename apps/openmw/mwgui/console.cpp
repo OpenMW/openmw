@@ -384,6 +384,7 @@ namespace MWGui
             setTitle("#{sConsoleTitle} (" + mPtr.getCellRef().refID + ")");
         else
             setTitle("#{sConsoleTitle}");
+        MyGUI::InputManager::getInstance().setKeyFocusWidget(command);
     }
 
     void Console::onReferenceUnavailable()
