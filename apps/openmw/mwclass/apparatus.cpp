@@ -9,6 +9,7 @@
 
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/actiontake.hpp"
+#include "../mwworld/actionalchemy.hpp"
 #include "../mwworld/world.hpp"
 
 #include "../mwrender/objects.hpp"
@@ -139,5 +140,11 @@ namespace MWClass
         info.text = text;
 
         return info;
+    }
+
+
+    boost::shared_ptr<MWWorld::Action> Apparatus::use (const MWWorld::Ptr& ptr) const
+    {
+        return boost::shared_ptr<MWWorld::Action>(new MWWorld::ActionAlchemy());
     }
 }

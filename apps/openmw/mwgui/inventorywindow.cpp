@@ -15,11 +15,14 @@
 #include "../mwworld/player.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwworld/manualref.hpp"
+#include "../mwworld/actiontake.hpp"
+#include "../mwsound/soundmanager.hpp"
 
 #include "window_manager.hpp"
 #include "widgets.hpp"
 #include "bookwindow.hpp"
 #include "scrollwindow.hpp"
+#include "spellwindow.hpp"
 
 namespace
 {
@@ -91,13 +94,13 @@ namespace MWGui
 
         mFilterAll->setStateSelected(true);
 
-        setCoord(0, 342, 600, 258);
+        setCoord(0, 342, 498, 258);
 
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
         openContainer(player);
     }
 
-    void InventoryWindow::openInventory()
+    void InventoryWindow::open()
     {
         updateEncumbranceBar();
 
@@ -155,7 +158,7 @@ namespace MWGui
             if (mDragAndDrop->mDraggedFrom != this)
             {
                 // add item to the player's inventory
-                MWWorld::ContainerStore& invStore = MWWorld::Class::get(mContainer).getContainerStore(mContainer);
+                MWWorld::ContainerStore& invStore = MWWorld::Class::get(mPtr).getContainerStore(mPtr);
                 MWWorld::ContainerStoreIterator it = invStore.begin();
 
                 int origCount = ptr.getRefData().getCount();
@@ -187,12 +190,21 @@ namespace MWGui
             mWindowManager.setDragDrop(false);
 
             drawItems();
+
+            // update selected weapon icon
+            MWWorld::InventoryStore& invStore = MWWorld::Class::get(mPtr).getInventoryStore(mPtr);
+            MWWorld::ContainerStoreIterator weaponSlot = invStore.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
+            if (weaponSlot == invStore.end())
+                mWindowManager.unsetSelectedWeapon();
+            else
+                mWindowManager.setSelectedWeapon(*weaponSlot, 100); /// \todo track weapon durability
+
         }
     }
 
     std::vector<MWWorld::Ptr> InventoryWindow::getEquippedItems()
     {
-        MWWorld::InventoryStore& invStore = MWWorld::Class::get(mContainer).getInventoryStore(mContainer);
+        MWWorld::InventoryStore& invStore = MWWorld::Class::get(mPtr).getInventoryStore(mPtr);
 
         std::vector<MWWorld::Ptr> items;
 
@@ -210,7 +222,7 @@ namespace MWGui
 
     void InventoryWindow::_unequipItem(MWWorld::Ptr item)
     {
-        MWWorld::InventoryStore& invStore = MWWorld::Class::get(mContainer).getInventoryStore(mContainer);
+        MWWorld::InventoryStore& invStore = MWWorld::Class::get(mPtr).getInventoryStore(mPtr);
 
         for (int slot=0; slot < MWWorld::InventoryStore::Slots; ++slot)
         {
@@ -244,7 +256,7 @@ namespace MWGui
 
     int InventoryWindow::getPlayerGold()
     {
-        MWWorld::InventoryStore& invStore = MWWorld::Class::get(mContainer).getInventoryStore(mContainer);
+        MWWorld::InventoryStore& invStore = MWWorld::Class::get(mPtr).getInventoryStore(mPtr);
 
         for (MWWorld::ContainerStoreIterator it = invStore.begin();
                 it != invStore.end(); ++it)
@@ -258,5 +270,73 @@ namespace MWGui
     void InventoryWindow::startTrade()
     {
         mTrading = true;
+    }
+
+    void InventoryWindow::notifyContentChanged()
+    {
+        // update the spell window just in case new enchanted items were added to inventory
+        if (mWindowManager.getSpellWindow())
+            mWindowManager.getSpellWindow()->updateSpells();
+
+        // update selected weapon icon
+        MWWorld::InventoryStore& invStore = MWWorld::Class::get(mPtr).getInventoryStore(mPtr);
+        MWWorld::ContainerStoreIterator weaponSlot = invStore.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
+        if (weaponSlot == invStore.end())
+            mWindowManager.unsetSelectedWeapon();
+        else
+            mWindowManager.setSelectedWeapon(*weaponSlot, 100); /// \todo track weapon durability
+    }
+
+    void InventoryWindow::pickUpObject (MWWorld::Ptr object)
+    {
+        /// \todo scripts
+
+        // make sure the object is of a type that can be picked up
+        std::string type = object.getTypeName();
+        if ( (type != typeid(ESM::Apparatus).name())
+            && (type != typeid(ESM::Armor).name())
+            && (type != typeid(ESM::Book).name())
+            && (type != typeid(ESM::Clothing).name())
+            && (type != typeid(ESM::Ingredient).name())
+            && (type != typeid(ESM::Light).name())
+            && (type != typeid(ESM::Miscellaneous).name())
+            && (type != typeid(ESM::Tool).name())
+            && (type != typeid(ESM::Probe).name())
+            && (type != typeid(ESM::Repair).name())
+            && (type != typeid(ESM::Potion).name()))
+            return;
+
+        // sound
+        std::string sound = MWWorld::Class::get(object).getUpSoundId(object);
+        MWBase::Environment::get().getSoundManager()->playSound(sound, 1, 1);
+
+        int count = object.getRefData().getCount();
+        MWWorld::ActionTake action(object);
+        action.execute();
+        mDragAndDrop->mIsOnDragAndDrop = true;
+        mDragAndDrop->mDraggedCount = count;
+
+        std::string path = std::string("icons\\");
+        path += MWWorld::Class::get(object).getInventoryIcon(object);
+        MyGUI::ImageBox* baseWidget = mContainerWidget->createWidget<ImageBox>("ImageBox", MyGUI::IntCoord(0, 0, 42, 42), MyGUI::Align::Default);
+        baseWidget->detachFromWidget();
+        baseWidget->attachToWidget(mDragAndDrop->mDragAndDropWidget);
+        baseWidget->setUserData(object);
+        mDragAndDrop->mDraggedWidget = baseWidget;
+        ImageBox* image = baseWidget->createWidget<ImageBox>("ImageBox", MyGUI::IntCoord(5, 5, 32, 32), MyGUI::Align::Default);
+        int pos = path.rfind(".");
+        path.erase(pos);
+        path.append(".dds");
+        image->setImageTexture(path);
+        image->setNeedMouseFocus(false);
+
+        // text widget that shows item count
+        MyGUI::TextBox* text = image->createWidget<MyGUI::TextBox>("SandBrightText", MyGUI::IntCoord(0, 14, 32, 18), MyGUI::Align::Default, std::string("Label"));
+        text->setTextAlign(MyGUI::Align::Right);
+        text->setNeedMouseFocus(false);
+        text->setTextShadow(true);
+        text->setTextShadowColour(MyGUI::Colour(0,0,0));
+        text->setCaption(getCountString(count));
+        mDragAndDrop->mDraggedFrom = this;
     }
 }

@@ -39,15 +39,18 @@ void MWWorld::InventoryStore::initSlots (TSlots& slots)
 }
 
 MWWorld::InventoryStore::InventoryStore() : mMagicEffectsUpToDate (false)
+ , mSelectedEnchantItem(end())
 {
     initSlots (mSlots);
 }
 
 MWWorld::InventoryStore::InventoryStore (const InventoryStore& store)
 : ContainerStore (store)
+ , mSelectedEnchantItem(end())
 {
     mMagicEffects = store.mMagicEffects;
     mMagicEffectsUpToDate = store.mMagicEffectsUpToDate;
+    mSelectedEnchantItem = store.mSelectedEnchantItem;
     copySlots (store);
 }
 
@@ -259,4 +262,14 @@ bool MWWorld::InventoryStore::stacks(const Ptr& ptr1, const Ptr& ptr2)
     }
 
     return true;
+}
+
+void MWWorld::InventoryStore::setSelectedEnchantItem(const ContainerStoreIterator& iterator)
+{
+    mSelectedEnchantItem = iterator;
+}
+
+MWWorld::ContainerStoreIterator MWWorld::InventoryStore::getSelectedEnchantItem()
+{
+    return mSelectedEnchantItem;
 }

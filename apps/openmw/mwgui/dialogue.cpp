@@ -112,15 +112,6 @@ void DialogueWindow::onMouseWheel(MyGUI::Widget* _sender, int _rel)
         history->setVScrollPosition(history->getVScrollPosition() - _rel*0.3);
 }
 
-void DialogueWindow::open()
-{
-    topicsList->clear();
-    pTopicsText.clear();
-    history->eraseText(0,history->getTextLength());
-    updateOptions();
-    setVisible(true);
-}
-
 void DialogueWindow::onByeClicked(MyGUI::Widget* _sender)
 {
     MWBase::Environment::get().getDialogueManager()->goodbyeSelected();
@@ -133,8 +124,8 @@ void DialogueWindow::onSelectTopic(std::string topic)
     if (topic == MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sBarter")->str)
     {
         /// \todo check if the player is allowed to trade with this actor (e.g. faction rank high enough)?
-        mWindowManager.setGuiMode(GM_Barter);
-        mWindowManager.getTradeWindow()->startTrade(mActor);
+        mWindowManager.pushGuiMode(GM_Barter);
+        mWindowManager.getTradeWindow()->startTrade(mPtr);
     }
 
     else
@@ -144,9 +135,14 @@ void DialogueWindow::onSelectTopic(std::string topic)
 void DialogueWindow::startDialogue(MWWorld::Ptr actor, std::string npcName)
 {
     mEnabled = true;
-    mActor = actor;
+    mPtr = actor;
     topicsList->setEnabled(true);
     setTitle(npcName);
+
+    topicsList->clear();
+    pTopicsText.clear();
+    history->eraseText(0,history->getTextLength());
+    updateOptions();
 }
 
 void DialogueWindow::setKeywords(std::list<std::string> keyWords)
@@ -263,4 +259,9 @@ void DialogueWindow::goodbye()
     history->addDialogText("\n#572D21" + MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sGoodbye")->str);
     topicsList->setEnabled(false);
     mEnabled = false;
+}
+
+void DialogueWindow::onReferenceUnavailable()
+{
+    mWindowManager.removeGuiMode(GM_Dialogue);
 }

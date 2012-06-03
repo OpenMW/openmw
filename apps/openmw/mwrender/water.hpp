@@ -3,12 +3,15 @@
 
 #include <Ogre.h>
 #include <components/esm/loadcell.hpp>
+#include <components/settings/settings.hpp>
 
 #include "renderconst.hpp"
+
 
 namespace MWRender {
 
     class SkyManager;
+    class RenderingManager;
 
     /// Water rendering 	
     class Water : public Ogre::RenderTargetListener, public Ogre::RenderQueueListener
@@ -16,7 +19,6 @@ namespace MWRender {
         static const int CELL_SIZE = 8192;
         Ogre::Camera *mCamera;
         Ogre::SceneManager *mSceneManager;
-        Ogre::Viewport *mViewport;
 
         Ogre::Plane mWaterPlane;
         Ogre::SceneNode *mWaterNode;
@@ -38,8 +40,12 @@ namespace MWRender {
         void renderQueueStarted (Ogre::uint8 queueGroupId, const Ogre::String &invocation, bool &skipThisInvocation);
         void renderQueueEnded (Ogre::uint8 queueGroupId, const Ogre::String &invocation, bool &repeatThisInvocation);
 
+        void applyRTT();
+        void applyVisibilityMask();
+
         void updateVisible();
 
+        RenderingManager* mRendering;
         SkyManager* mSky;
 
         std::string mCompositorName;
@@ -49,13 +55,14 @@ namespace MWRender {
 
         Ogre::Camera* mReflectionCamera;
 
+        Ogre::TexturePtr mReflectionTexture;
         Ogre::RenderTarget* mReflectionTarget;
 
         bool mUnderwaterEffect;
         int mVisibilityFlags;
 
     public:
-        Water (Ogre::Camera *camera, SkyManager* sky, const ESM::Cell* cell);
+        Water (Ogre::Camera *camera, RenderingManager* rend, const ESM::Cell* cell);
         ~Water();
 
         void setActive(bool active);
@@ -63,7 +70,11 @@ namespace MWRender {
         void toggle();
         void update();
 
+        void assignTextures();
+
         void setViewportBackground(const Ogre::ColourValue& bg);
+
+        void processChangedSettings(const Settings::CategorySettingVector& settings);
 
         void checkUnderwater(float y);
         void changeCell(const ESM::Cell* cell);

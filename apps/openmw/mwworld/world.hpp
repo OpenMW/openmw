@@ -7,6 +7,7 @@
 #include <boost/filesystem.hpp>
 
 #include <components/esm_store/cell_store.hpp>
+#include <components/settings/settings.hpp>
 
 #include "../mwrender/debugging.hpp"
 #include "../mwrender/renderingmanager.hpp"
@@ -66,7 +67,8 @@ namespace MWWorld
             {
                 Render_CollisionDebug,
                 Render_Wireframe,
-                Render_Pathgrid
+                Render_Pathgrid,
+                Render_Compositors
             };
 
         private:
@@ -284,6 +286,8 @@ namespace MWWorld
 
             bool canPlaceObject(float cursorX, float cursorY);
             ///< @return true if it is possible to place on object at specified cursor location
+
+            void processChangedSettings(const Settings::CategorySettingVector& settings);
     };
 }
 

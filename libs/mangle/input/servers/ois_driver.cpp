@@ -146,3 +146,10 @@ bool OISDriver::isDown(int index)
   // TODO: Extend to mouse buttons as well
   return keyboard->isKeyDown((OIS::KeyCode)index);
 }
+
+void OISDriver::adjustMouseClippingSize(int width, int height)
+{
+    const OIS::MouseState &ms = mouse->getMouseState();
+    ms.width = width;
+    ms.height = height;
+}

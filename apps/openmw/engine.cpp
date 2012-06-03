@@ -105,7 +105,7 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
                                // frame.
 
         // passing of time
-        if (MWBase::Environment::get().getWindowManager()->getMode()==MWGui::GM_Game)
+        if (!MWBase::Environment::get().getWindowManager()->isGuiMode())
             MWBase::Environment::get().getWorld()->advanceTime (
                 mEnvironment.getFrameDuration()*MWBase::Environment::get().getWorld()->getTimeScaleFactor()/3600);
 
@@ -116,9 +116,9 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
         // update actors
         std::vector<std::pair<std::string, Ogre::Vector3> > movement;
         MWBase::Environment::get().getMechanicsManager()->update (movement, mEnvironment.getFrameDuration(),
-            MWBase::Environment::get().getWindowManager()->getMode()!=MWGui::GM_Game);
+            MWBase::Environment::get().getWindowManager()->isGuiMode());
 
-        if (MWBase::Environment::get().getWindowManager()->getMode()==MWGui::GM_Game)
+        if (!MWBase::Environment::get().getWindowManager()->isGuiMode())
             MWBase::Environment::get().getWorld()->doPhysics (movement, mEnvironment.getFrameDuration());
 
         // update world
@@ -268,15 +268,6 @@ void OMW::Engine::go()
 
     mOgre = new OEngine::Render::OgreRenderer;
 
-    //we need to ensure the path to the configuration exists before creating an
-    //instance of ogre root so that Ogre doesn't raise an exception when trying to
-    //access it
-    const boost::filesystem::path configPath = mCfgMgr.getOgreConfigPath().parent_path();
-    if ( !boost::filesystem::exists(configPath) )
-    {
-        boost::filesystem::create_directories(configPath);
-    }
-
     // Create the settings manager and load default settings file
     Settings::Manager settings;
     const std::string localdefault = mCfgMgr.getLocalPath().string() + "/settings-default.cfg";
@@ -308,10 +299,20 @@ void OMW::Engine::go()
     else if (boost::filesystem::exists(mCfgMgr.getGlobalPath().string() + "/transparency-overrides.cfg"))
         nifOverrides.loadTransparencyOverrides(mCfgMgr.getGlobalPath().string() + "/transparency-overrides.cfg");
 
-    mOgre->configure(!boost::filesystem::is_regular_file(mCfgMgr.getOgreConfigPath()),
-        mCfgMgr.getOgreConfigPath().string(),
+    std::string renderSystem = settings.getString("render system", "Video");
+    if (renderSystem == "")
+    {
+#if OGRE_PLATFORM == OGRE_PLATFORM_WIN32
+        renderSystem = "Direct3D9 Rendering Subsystem";
+#else
+        renderSystem = "OpenGL Rendering Subsystem";
+#endif
+    }
+    mOgre->configure(
         mCfgMgr.getLogPath().string(),
-        mCfgMgr.getPluginsConfigPath().string(), false);
+        mCfgMgr.getPluginsConfigPath().string(),
+        renderSystem,
+        false);
 
     // This has to be added BEFORE MyGUI is initialized, as it needs
     // to find core.xml here.
@@ -325,7 +326,14 @@ void OMW::Engine::go()
     addZipResource(mResDir / "mygui" / "Obliviontt.zip");
 
     // Create the window
-    mOgre->createWindow("OpenMW");
+    OEngine::Render::WindowSettings windowSettings;
+    windowSettings.fullscreen = settings.getBool("fullscreen", "Video");
+    windowSettings.window_x = settings.getInt("resolution x", "Video");
+    windowSettings.window_y = settings.getInt("resolution y", "Video");
+    windowSettings.vsync = settings.getBool("vsync", "Video");
+    std::string aa = settings.getString("antialiasing", "Video");
+    windowSettings.fsaa = (aa.substr(0, 4) == "MSAA") ? aa.substr(5, aa.size()-5) : "0";
+    mOgre->createWindow("OpenMW", windowSettings);
 
     loadBSA();
 
@@ -413,7 +421,7 @@ void OMW::Engine::go()
 
 void OMW::Engine::activate()
 {
-    if (MWBase::Environment::get().getWindowManager()->getMode()!=MWGui::GM_Game)
+    if (MWBase::Environment::get().getWindowManager()->isGuiMode())
         return;
 
     std::string handle = MWBase::Environment::get().getWorld()->getFacedHandle();

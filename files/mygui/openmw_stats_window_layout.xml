@@ -99,29 +99,117 @@
             </Widget>
 
             <Widget type="Widget" skin="MW_Box" position="8 148 212 152" align="Left Top Stretch">
-                <Widget type="TextBox" skin="SandText" position="4 4 160 18" name="Attrib1" align="Left Top HStretch"/>
-                <Widget type="TextBox" skin="SandTextRight" position="164 4 44 18" name="AttribVal1" align="Right Top"/>
+                <Widget type="Button" skin="" position="4 4 204 18" name="Attrib1Box" align="Left Top HStretch">
+                    <UserString key="ToolTipType" value="Layout"/>
+                    <UserString key="ToolTipLayout" value="AttributeToolTip"/>
+                    <UserString key="Caption_AttributeName" value="#{sAttributeStrength}"/>
+                    <UserString key="Caption_AttributeDescription" value="#{sStrDesc}"/>
+                    <UserString key="ImageTexture_AttributeImage" value="icons\k\attribute_strength.dds"/>
+                    <Widget type="TextBox" skin="SandText" position="0 0 160 18" name="Attrib1" align="Left Top HStretch">
+                        <Property key="NeedMouse" value="false"/>
+                    </Widget>
+                    <Widget type="TextBox" skin="SandTextRight" position="160 0 44 18" name="AttribVal1" align="Right Top">
+                        <Property key="NeedMouse" value="false"/>
+                    </Widget>
+                </Widget>
 
-                <Widget type="TextBox" skin="SandText" position="4 22 160 18" name="Attrib2" align="Left Top HStretch"/>
-                <Widget type="TextBox" skin="SandTextRight" position="164 22 44 18" name="AttribVal2" align="Right Top"/>
+                <Widget type="Button" skin="" position="4 22 204 18" name="Attrib2Box" align="Left Top HStretch">
+                    <UserString key="ToolTipType" value="Layout"/>
+                    <UserString key="ToolTipLayout" value="AttributeToolTip"/>
+                    <UserString key="Caption_AttributeName" value="#{sAttributeIntelligence}"/>
+                    <UserString key="Caption_AttributeDescription" value="#{sIntDesc}"/>
+                    <UserString key="ImageTexture_AttributeImage" value="icons\k\attribute_int.dds"/>
+                    <Widget type="TextBox" skin="SandText" position="0 0 160 18" name="Attrib2" align="Left Top HStretch">
+                        <Property key="NeedMouse" value="false"/>
+                    </Widget>
+                    <Widget type="TextBox" skin="SandTextRight" position="160 0 44 18" name="AttribVal2" align="Right Top">
+                        <Property key="NeedMouse" value="false"/>
+                    </Widget>
+                </Widget>
 
-                <Widget type="TextBox" skin="SandText" position="4 40 160 18" name="Attrib3" align="Left Top HStretch"/>
-                <Widget type="TextBox" skin="SandTextRight" position="164 40 44 18" name="AttribVal3" align="Right Top"/>
+                <Widget type="Button" skin="" position="4 40 204 18" name="Attrib3Box" align="Left Top HStretch">
+                    <UserString key="ToolTipType" value="Layout"/>
+                    <UserString key="ToolTipLayout" value="AttributeToolTip"/>
+                    <UserString key="Caption_AttributeName" value="#{sAttributeWillpower}"/>
+                    <UserString key="Caption_AttributeDescription" value="#{sWilDesc}"/>
+                    <UserString key="ImageTexture_AttributeImage" value="icons\k\attribute_wilpower.dds"/>
+                    <Widget type="TextBox" skin="SandText" position="0 0 160 18" name="Attrib3" align="Left Top HStretch">
+                        <Property key="NeedMouse" value="false"/>
+                    </Widget>
+                    <Widget type="TextBox" skin="SandTextRight" position="160 0 44 18" name="AttribVal3" align="Right Top">
+                        <Property key="NeedMouse" value="false"/>
+                    </Widget>
+                </Widget>
 
-                <Widget type="TextBox" skin="SandText" position="4 58 160 18" name="Attrib4" align="Left Top HStretch"/>
-                <Widget type="TextBox" skin="SandTextRight" position="164 58 44 18" name="AttribVal4" align="Right Top"/>
+                <Widget type="Button" skin="" position="4 58 204 18" name="Attrib4Box" align="Left Top HStretch">
+                    <UserString key="ToolTipType" value="Layout"/>
+                    <UserString key="ToolTipLayout" value="AttributeToolTip"/>
+                    <UserString key="Caption_AttributeName" value="#{sAttributeAgility}"/>
+                    <UserString key="Caption_AttributeDescription" value="#{sAgiDesc}"/>
+                    <UserString key="ImageTexture_AttributeImage" value="icons\k\attribute_agility.dds"/>
+                    <Widget type="TextBox" skin="SandText" position="0 0 160 18" name="Attrib4" align="Left Top HStretch">
+                        <Property key="NeedMouse" value="false"/>
+                    </Widget>
+                    <Widget type="TextBox" skin="SandTextRight" position="160 0 44 18" name="AttribVal4" align="Right Top">
+                        <Property key="NeedMouse" value="false"/>
+                    </Widget>
+                </Widget>
 
-                <Widget type="TextBox" skin="SandText" position="4 76 160 18" name="Attrib5" align="Left Top HStretch"/>
-                <Widget type="TextBox" skin="SandTextRight" position="164 76 44 18" name="AttribVal5" align="Right Top"/>
+                <Widget type="Button" skin="" position="4 76 204 18" name="Attrib5Box" align="Left Top HStretch">
+                    <UserString key="ToolTipType" value="Layout"/>
+                    <UserString key="ToolTipLayout" value="AttributeToolTip"/>
+                    <UserString key="Caption_AttributeName" value="#{sAttributeSpeed}"/>
+                    <UserString key="Caption_AttributeDescription" value="#{sSpdDesc}"/>
+                    <UserString key="ImageTexture_AttributeImage" value="icons\k\attribute_speed.dds"/>
+                    <Widget type="TextBox" skin="SandText" position="0 0 160 18" name="Attrib5" align="Left Top HStretch">
+                        <Property key="NeedMouse" value="false"/>
+                    </Widget>
+                    <Widget type="TextBox" skin="SandTextRight" position="160 0 44 18" name="AttribVal5" align="Right Top">
+                        <Property key="NeedMouse" value="false"/>
+                    </Widget>
+                </Widget>
 
-                <Widget type="TextBox" skin="SandText" position="4 94 160 18" name="Attrib6" align="Left Top HStretch"/>
-                <Widget type="TextBox" skin="SandTextRight" position="164 94 44 18" name="AttribVal6" align="Right Top"/>
+                <Widget type="Button" skin="" position="4 94 204 18" name="Attrib6Box" align="Left Top HStretch">
+                    <UserString key="ToolTipType" value="Layout"/>
+                    <UserString key="ToolTipLayout" value="AttributeToolTip"/>
+                    <UserString key="Caption_AttributeName" value="#{sAttributeEndurance}"/>
+                    <UserString key="Caption_AttributeDescription" value="#{sEndDesc}"/>
+                    <UserString key="ImageTexture_AttributeImage" value="icons\k\attribute_endurance.dds"/>
+                    <Widget type="TextBox" skin="SandText" position="0 0 160 18" name="Attrib6" align="Left Top HStretch">
+                        <Property key="NeedMouse" value="false"/>
+                    </Widget>
+                    <Widget type="TextBox" skin="SandTextRight" position="160 0 44 18" name="AttribVal6" align="Right Top">
+                        <Property key="NeedMouse" value="false"/>
+                    </Widget>
+                </Widget>
 
-                <Widget type="TextBox" skin="SandText" position="4 112 160 18" name="Attrib7" align="Left Top HStretch"/>
-                <Widget type="TextBox" skin="SandTextRight" position="164 112 44 18" name="AttribVal7" align="Right Top"/>
+                <Widget type="Button" skin="" position="4 112 204 18" name="Attrib7Box" align="Left Top HStretch">
+                    <UserString key="ToolTipType" value="Layout"/>
+                    <UserString key="ToolTipLayout" value="AttributeToolTip"/>
+                    <UserString key="Caption_AttributeName" value="#{sAttributePersonality}"/>
+                    <UserString key="Caption_AttributeDescription" value="#{sPerDesc}"/>
+                    <UserString key="ImageTexture_AttributeImage" value="icons\k\attribute_personality.dds"/>
+                    <Widget type="TextBox" skin="SandText" position="0 0 160 18" name="Attrib7" align="Left Top HStretch">
+                        <Property key="NeedMouse" value="false"/>
+                    </Widget>
+                    <Widget type="TextBox" skin="SandTextRight" position="160 0 44 18" name="AttribVal7" align="Right Top">
+                        <Property key="NeedMouse" value="false"/>
+                    </Widget>
+                </Widget>
 
-                <Widget type="TextBox" skin="SandText" position="4 130 160 18" name="Attrib8" align="Left Top HStretch"/>
-                <Widget type="TextBox" skin="SandTextRight" position="164 130 44 18" name="AttribVal8" align="Right Top"/>
+                <Widget type="Button" skin="" position="4 130 204 18" name="Attrib8Box" align="Left Top HStretch">
+                    <UserString key="ToolTipType" value="Layout"/>
+                    <UserString key="ToolTipLayout" value="AttributeToolTip"/>
+                    <UserString key="Caption_AttributeName" value="#{sAttributeLuck}"/>
+                    <UserString key="Caption_AttributeDescription" value="#{sLucDesc}"/>
+                    <UserString key="ImageTexture_AttributeImage" value="icons\k\attribute_luck.dds"/>
+                    <Widget type="TextBox" skin="SandText" position="0 0 160 18" name="Attrib8" align="Left Top HStretch">
+                        <Property key="NeedMouse" value="false"/>
+                    </Widget>
+                    <Widget type="TextBox" skin="SandTextRight" position="160 0 44 18" name="AttribVal8" align="Right Top">
+                        <Property key="NeedMouse" value="false"/>
+                    </Widget>
+                </Widget>
             </Widget>
 
         </Widget>

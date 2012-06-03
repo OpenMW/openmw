@@ -38,4 +38,41 @@
         <!-- The interior of the box -->
         <Child type="Widget" skin="BlackBG" offset="2 2 36 36" align="ALIGN_STRETCH" name="Client"/>
     </Skin>
+
+    <Skin name="HUD_Box_NoTransp" size="40 40" texture="textures\menu_icon_equip.dds">
+        <BasisSkin type="TileRect" offset="0 0 40 2" align="ALIGN_TOP ALIGN_HSTRETCH">
+            <State name="normal" offset="2 2 40 2">
+                <Property key="TileSize" value="40 2"/>
+                <Property key="TileH" value="true"/>
+                <Property key="TileV" value="true"/>
+            </State>
+        </BasisSkin>
+
+        <BasisSkin type="TileRect" offset="0 38 40 2" align="ALIGN_BOTTOM ALIGN_HSTRETCH">
+            <State name="normal" offset="2 40 40 2">
+                <Property key="TileSize" value="40 2"/>
+                <Property key="TileH" value="true"/>
+                <Property key="TileV" value="true"/>
+            </State>
+        </BasisSkin>
+
+        <BasisSkin type="TileRect" offset="0 2 2 36" align="ALIGN_LEFT ALIGN_VSTRETCH">
+            <State name="normal" offset="2 4 2 36">
+                <Property key="TileSize" value="2 36"/>
+                <Property key="TileH" value="true"/>
+                <Property key="TileV" value="true"/>
+            </State>
+        </BasisSkin>
+
+        <BasisSkin type="TileRect" offset="38 2 2 36" align="ALIGN_RIGHT ALIGN_VSTRETCH">
+            <State name="normal" offset="40 4 2 36">
+                <Property key="TileSize" value="2 36"/>
+                <Property key="TileH" value="true"/>
+                <Property key="TileV" value="true"/>
+            </State>
+        </BasisSkin>
+
+        <!-- The interior of the box -->
+        <Child type="Widget" skin="DialogBG" offset="2 2 36 36" align="ALIGN_STRETCH" name="Client"/>
+    </Skin>
 </MyGUI>

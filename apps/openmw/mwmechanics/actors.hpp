@@ -32,6 +32,8 @@ namespace MWMechanics
 
             void removeActor (const MWWorld::Ptr& ptr);
             ///< Deregister an actor for stats management
+            ///
+            /// \note Ignored, if \a ptr is not a registered actor.
 
             void dropActors (const MWWorld::Ptr::CellStore *cellStore);
             ///< Deregister all actors in the given cell.

@@ -41,7 +41,6 @@ namespace
                     {
                         rendering.addObject(ptr);
                         class_.insertObject(ptr, physics);
-                        class_.enable (ptr);
                     }
                     catch (const std::exception& e)
                     {
@@ -146,10 +145,13 @@ namespace MWWorld
         bool hasWater = cell->cell->data.flags & cell->cell->HasWater;
         mPhysics->setCurrentWater(hasWater, cell->cell->water);
         if (adjustPlayerPos)
+        {
             mWorld->getPlayer().setPos (position.pos[0], position.pos[1], position.pos[2]);
+            mWorld->getPlayer().setRot (position.rot[0], position.rot[1], position.rot[2]);
+        }
 
         mWorld->getPlayer().setCell (cell);
-        // TODO orientation
+
         MWBase::Environment::get().getMechanicsManager()->addActor (mWorld->getPlayer().getPlayer());
         MWBase::Environment::get().getMechanicsManager()->watchActor (mWorld->getPlayer().getPlayer());
 
@@ -459,8 +461,20 @@ namespace MWWorld
 
         mRendering.addObject(newPtr);
         MWWorld::Class::get(newPtr).insertObject(newPtr, *mPhysics);
-        MWWorld::Class::get(newPtr).enable(newPtr);
 
     }
 
+    void Scene::addObjectToScene (const Ptr& ptr)
+    {
+        mRendering.addObject (ptr);
+        MWWorld::Class::get (ptr).insertObject (ptr, *mPhysics);
+    }
+
+    void Scene::removeObjectFromScene (const Ptr& ptr)
+    {
+        MWBase::Environment::get().getMechanicsManager()->removeActor (ptr);
+        MWBase::Environment::get().getSoundManager()->stopSound3D (ptr);
+        mPhysics->removeObject (ptr.getRefData().getHandle());
+        mRendering.removeObject (ptr);
+    }
 }

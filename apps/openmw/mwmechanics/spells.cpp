@@ -28,7 +28,7 @@ namespace MWMechanics
 
     void Spells::add (const std::string& spellId)
     {
-        if (std::find (mSpells.begin(), mSpells.end(), spellId)!=mSpells.end())
+        if (std::find (mSpells.begin(), mSpells.end(), spellId)==mSpells.end())
             mSpells.push_back (spellId);
     }
 

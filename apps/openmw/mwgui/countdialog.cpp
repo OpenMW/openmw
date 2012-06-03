@@ -17,9 +17,6 @@ namespace MWGui
         getWidget(mOkButton, "OkButton");
         getWidget(mCancelButton, "CancelButton");
 
-        mOkButton->setCaption(MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sOk")->str);
-        mCancelButton->setCaption(MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sCancel")->str);
-
         mCancelButton->eventMouseButtonClick += MyGUI::newDelegate(this, &CountDialog::onCancelButtonClicked);
         mOkButton->eventMouseButtonClick += MyGUI::newDelegate(this, &CountDialog::onOkButtonClicked);
         mItemEdit->eventEditTextChange += MyGUI::newDelegate(this, &CountDialog::onEditTextChange);

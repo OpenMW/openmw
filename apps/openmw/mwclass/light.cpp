@@ -55,12 +55,6 @@ namespace MWClass
         if(!model.empty()){
             physics.insertObjectPhysics(ptr, "meshes\\" + model);
         }
-    }
-
-    void Light::enable (const MWWorld::Ptr& ptr) const
-    {
-        ESMS::LiveCellRef<ESM::Light, MWWorld::RefData> *ref =
-            ptr.get<ESM::Light>();
 
         if (!ref->base->sound.empty())
         {

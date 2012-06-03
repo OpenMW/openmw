@@ -258,7 +258,7 @@ void ShaderHelper::createShader(const bool mrt, const bool shadows, const bool s
         outStream <<
         "   float3 lightingFinal = lightColour.xyz * diffuse.xyz + ambient.xyz * lightAmbient.xyz + emissive.xyz; \n"
         "   float fogValue = saturate((iDepth - fogParams.y) * fogParams.w); \n"
-        "   oColor.xyz = lerp(lightingFinal * tex.xyz * vertexColour.xyz, fogColour.xyz, fogValue); \n"
+        "   oColor.xyz = saturate(lerp(lightingFinal * tex.xyz * vertexColour.xyz, fogColour.xyz, fogValue)); \n" // saturate output to prevent negative output colors - TODO: replace this once there is HDR-rendering
         "   oColor.a = tex.a * diffuse.a * vertexColour.a; \n";
 
         if (mrt) outStream <<

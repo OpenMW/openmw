@@ -135,6 +135,19 @@ namespace MWClass
             text += MWGui::ToolTips::getMiscString(ref->base->script, "Script");
         }
 
+        MWGui::Widgets::SpellEffectList list;
+        for (int i=0; i<4; ++i)
+        {
+            if (ref->base->data.effectID[i] < 0)
+                continue;
+            MWGui::Widgets::SpellEffectParams params;
+            params.mEffectID = ref->base->data.effectID[i];
+            params.mAttribute = ref->base->data.attributes[i];
+            params.mSkill = ref->base->data.skills[i];
+            list.push_back(params);
+        }
+        info.effects = list;
+
         info.text = text;
 
         return info;

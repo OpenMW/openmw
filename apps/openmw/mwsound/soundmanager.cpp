@@ -7,7 +7,6 @@
 #include <OgreRoot.h>
 
 #include <components/esm_store/store.hpp>
-#include <components/settings/settings.hpp>
 
 #include "../mwbase/environment.hpp"
 
@@ -53,6 +52,8 @@ namespace MWSound
         , mMasterVolume(1.0f)
         , mSFXVolume(1.0f)
         , mMusicVolume(1.0f)
+        , mFootstepsVolume(1.0f)
+        , mVoiceVolume(1.0f)
     {
         if(!useSound)
             return;
@@ -63,6 +64,10 @@ namespace MWSound
         mSFXVolume = std::min(std::max(mSFXVolume, 0.0f), 1.0f);
         mMusicVolume = Settings::Manager::getFloat("music volume", "Sound");
         mMusicVolume = std::min(std::max(mMusicVolume, 0.0f), 1.0f);
+        mVoiceVolume = Settings::Manager::getFloat("voice volume", "Sound");
+        mVoiceVolume = std::min(std::max(mVoiceVolume, 0.0f), 1.0f);
+        mFootstepsVolume = Settings::Manager::getFloat("footsteps volume", "Sound");
+        mFootstepsVolume = std::min(std::max(mFootstepsVolume, 0.0f), 1.0f);
 
         std::cout << "Sound output: " << SOUND_OUT << std::endl;
         std::cout << "Sound decoder: " << SOUND_IN << std::endl;
@@ -210,7 +215,7 @@ namespace MWSound
         try
         {
             // The range values are not tested
-            float basevol = mMasterVolume * mSFXVolume;
+            float basevol = mMasterVolume * mVoiceVolume;
             std::string filePath = "Sound/"+filename;
             const ESM::Position &pos = ptr.getCellRef().pos;
             const Ogre::Vector3 objpos(pos.pos[0], pos.pos[1], pos.pos[2]);
@@ -234,7 +239,7 @@ namespace MWSound
             return;
         try
         {
-            float basevol = mMasterVolume * mSFXVolume;
+            float basevol = mMasterVolume * mVoiceVolume;
             std::string filePath = "Sound/"+filename;
 
             SoundPtr sound = mOutput->playSound(filePath, basevol, 1.0f, Play_Normal);
@@ -526,6 +531,39 @@ namespace MWSound
         updateRegionSound(duration);
     }
 
+
+    void SoundManager::processChangedSettings(const Settings::CategorySettingVector& settings)
+    {
+        mMasterVolume = Settings::Manager::getFloat("master volume", "Sound");
+        mMusicVolume = Settings::Manager::getFloat("music volume", "Sound");
+        mSFXVolume = Settings::Manager::getFloat("sfx volume", "Sound");
+        mFootstepsVolume = Settings::Manager::getFloat("footsteps volume", "Sound");
+        mVoiceVolume = Settings::Manager::getFloat("voice volume", "Sound");
+
+        SoundMap::iterator snditer = mActiveSounds.begin();
+        while(snditer != mActiveSounds.end())
+        {
+            if(snditer->second.second != "_say_sound")
+            {
+                float basevol = mMasterVolume * mSFXVolume;
+                float min, max;
+                lookup(snditer->second.second, basevol, min, max);
+                snditer->first->mBaseVolume = basevol;
+            }
+            else
+            {
+                float basevol = mMasterVolume * mVoiceVolume;
+                snditer->first->mBaseVolume = basevol;
+            }
+            snditer->first->update();
+            snditer++;
+        }
+        if(mMusic)
+        {
+            mMusic->mBaseVolume = mMasterVolume * mMusicVolume;
+            mMusic->update();
+        }
+    }
 
     // Default readAll implementation, for decoders that can't do anything
     // better

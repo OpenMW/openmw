@@ -68,16 +68,6 @@ namespace MWWorld
             virtual void insertObject(const Ptr& ptr, MWWorld::PhysicsSystem& physics) const;
             ///< Add reference into a cell for rendering (default implementation: don't render anything).
 
-            virtual void enable (const Ptr& ptr) const;
-            ///< Enable reference; only does the non-rendering part (default implementation: ignore)
-            /// \attention This is not the same as the script instruction with the same name. References
-            /// should only be enabled while in an active cell.
-
-            virtual void disable (const Ptr& ptr) const;
-            ///< Enable reference; only does the non-rendering part (default implementation: ignore)
-            /// \attention This is not the same as the script instruction with the same name. References
-            /// should only be enabled while in an active cell.
-
             virtual std::string getName (const Ptr& ptr) const = 0;
             ///< \return name (the one that is to be presented to the user; not the internal one);
             /// can return an empty string.

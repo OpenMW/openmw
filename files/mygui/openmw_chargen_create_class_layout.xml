@@ -12,17 +12,23 @@
 
             <!-- Specialization -->
             <Widget type="TextBox" skin="HeaderText" position="0 0 156 18" name="SpecializationT" align="ALIGN_LEFT ALIGN_TOP">
-                <Property key="Caption" value="Specialization:"/>
+                <Property key="Caption" value="#{sChooseClassMenu1}"/>
                 <Property key="TextAlign" value="ALIGN_LEFT ALIGN_TOP"/>
+                <UserString key="ToolTipType" value="Layout"/>
+                <UserString key="ToolTipLayout" value="TextToolTip"/>
+                <UserString key="Caption_Text" value="#{sCreateClassMenuHelp1}"/>
             </Widget>
-            <Widget type="TextBox" skin="SandText" position="0 18 156 18" name="SpecializationName" align="ALIGN_LEFT ALIGN_TOP">
+            <Widget type="Button" skin="SandTextButton" position="0 18 156 18" name="SpecializationName" align="ALIGN_LEFT ALIGN_TOP">
                 <Property key="TextAlign" value="ALIGN_LEFT ALIGN_TOP"/>
             </Widget>
 
             <!-- Favorite Attributes -->
             <Widget type="TextBox" skin="HeaderText" position="0 41 156 18" name="FavoriteAttributesT" align="ALIGN_LEFT ALIGN_TOP">
-                <Property key="Caption" value="Favorite Attributes:"/>
+                <Property key="Caption" value="#{sChooseClassMenu2}"/>
                 <Property key="TextAlign" value="ALIGN_LEFT ALIGN_TOP"/>
+                <UserString key="ToolTipType" value="Layout"/>
+                <UserString key="ToolTipLayout" value="TextToolTip"/>
+                <UserString key="Caption_Text" value="#{sCreateClassMenuHelp2}"/>
             </Widget>
             <Widget type="MWAttribute" skin="MW_StatNameButton" position="0 59 156 18" name="FavoriteAttribute0" align="ALIGN_LEFT ALIGN_TOP" />
             <Widget type="MWAttribute" skin="MW_StatNameButton" position="0 77 156 18" name="FavoriteAttribute1" align="ALIGN_LEFT ALIGN_TOP" />
@@ -59,7 +65,7 @@
             <Property key="Caption" value="#{sBack}"/>
         </Widget>
         <Widget type="Button" skin="MW_Button" position="417 158 42 23" name="OKButton">
-            <Property key="Caption" value="OK"/>
+            <Property key="Caption" value="#{sOK}"/>
         </Widget>
     </Widget>
 </MyGUI>

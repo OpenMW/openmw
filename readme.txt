@@ -3,7 +3,7 @@ OpenMW: A reimplementation of The Elder Scrolls III: Morrowind
 OpenMW is an attempt at recreating the engine for the popular role-playing game
 Morrowind by Bethesda Softworks. You need to own and install the original game for OpenMW to work.
 
-Version: 0.14.0
+Version: 0.15.0
 License: GPL (see GPL3.txt for more information)
 Website: http://www.openmw.org
 
@@ -131,6 +131,32 @@ Thanks to Kevin Ryan for kindly providing us with the icon used for the Data Fil
 
 
 CHANGELOG
+
+0.15.0
+
+Bug #5: Physics reimplementation (fixes various issues)
+Bug #258: Resizing arrow's background is not transparent
+Bug #268: Widening the stats window in X direction causes layout problems
+Bug #269: Topic pane in dialgoue window is too small for some longer topics
+Bug #271: Dialog choices are sorted incorrectly
+Bug #281: The single quote character is not rendered on dialog windows
+Bug #285: Terrain not handled properly in cells that are not predefined
+Bug #289: Dialogue filter isn't doing case smashing/folding for item IDs
+Feature #15: Collision with Terrain
+Feature #17: Inventory-, Container- and Trade-Windows
+Feature #44: Floating Labels above Focussed Objects
+Feature #80: Tooltips
+Feature #83: Barter Dialogue
+Feature #90: Book and Scroll Windows
+Feature #156: Item Stacking in Containers
+Feature #213: Pulsating lights
+Feature #218: Feather & Burden
+Feature #256: Implement magic effect bookkeeping
+Feature #259: Add missing information to Stats window
+Feature #260: Correct case for dialogue topics
+Feature #280: GUI texture atlasing
+Feature #291: Ability to use GMST strings from GUI layout files
+Task #255: Make MWWorld::Environment into a singleton
 
 0.14.0
 

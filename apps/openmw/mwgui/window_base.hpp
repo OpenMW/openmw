@@ -16,6 +16,7 @@ namespace MWGui
         typedef MyGUI::delegates::CMultiDelegate1<WindowBase*> EventHandle_WindowBase;
 
         virtual void open();
+        virtual void setVisible(bool visible); // calls open() if visible is true and was false before
         void center();
 
         /** Event : Dialog finished, OK button clicked.\n

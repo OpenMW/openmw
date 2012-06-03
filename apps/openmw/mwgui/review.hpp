@@ -68,6 +68,8 @@ namespace MWGui
         void onClassClicked(MyGUI::Widget* _sender);
         void onBirthSignClicked(MyGUI::Widget* _sender);
 
+        void onMouseWheel(MyGUI::Widget* _sender, int _rel);
+
     private:
         void addSkills(const SkillList &skills, const std::string &titleId, const std::string &titleDefault, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
         void addSeparator(MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);

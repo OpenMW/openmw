@@ -32,16 +32,6 @@ namespace MWWorld
 
     }
 
-    void Class::enable (const Ptr& ptr) const
-    {
-
-    }
-
-    void Class::disable (const Ptr& ptr) const
-    {
-
-    }
-
     MWMechanics::CreatureStats& Class::getCreatureStats (const Ptr& ptr) const
     {
         throw std::runtime_error ("class does not have creature stats");

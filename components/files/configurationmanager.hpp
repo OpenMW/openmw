@@ -41,7 +41,6 @@ struct ConfigurationManager
     const boost::filesystem::path& getLocalDataPath() const;
     const boost::filesystem::path& getInstallPath() const;
 
-    const boost::filesystem::path& getOgreConfigPath() const;
     const boost::filesystem::path& getPluginsConfigPath() const;
     const boost::filesystem::path& getLogPath() const;
 
@@ -59,7 +58,6 @@ struct ConfigurationManager
 
         FixedPathType mFixedPath;
 
-        boost::filesystem::path mOgreCfgPath;
         boost::filesystem::path mPluginsCfgPath;
         boost::filesystem::path mLogPath;
 

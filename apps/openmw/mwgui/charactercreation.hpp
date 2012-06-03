@@ -42,11 +42,15 @@ namespace MWGui
 
     void setPlayerFatigue (const MWMechanics::DynamicStat<int>& value);
 
+    void setValue (const std::string& id, const MWMechanics::Stat<int>& value);
+    void setValue (const std::string& id, const MWMechanics::DynamicStat<int>& value);
+    void setValue(const ESM::Skill::SkillEnum parSkill, const MWMechanics::Stat<float>& value);
+    void configureSkills (const SkillList& major, const SkillList& minor);
+
     private:
     //Dialogs
     TextInputDialog* mNameDialog;
     RaceDialog* mRaceDialog;
-    DialogueWindow* mDialogueWindow;
     ClassChoiceDialog* mClassChoiceDialog;
     InfoBoxDialog* mGenerateClassQuestionDialog;
     GenerateClassResultDialog* mGenerateClassResultDialog;
@@ -62,9 +66,6 @@ namespace MWGui
     std::string mPlayerRaceId;
     std::string mPlayerBirthSignId;
     ESM::Class mPlayerClass;
-    std::map<ESM::Attribute::AttributeID, MWMechanics::Stat<int> > mPlayerAttributes;
-    SkillList mPlayerMajorSkills, mPlayerMinorSkills;
-    std::map<ESM::Skill::SkillEnum, MWMechanics::Stat<float> > mPlayerSkillValues;
     MWMechanics::DynamicStat<int> mPlayerHealth;
     MWMechanics::DynamicStat<int> mPlayerMagicka;
     MWMechanics::DynamicStat<int> mPlayerFatigue;
