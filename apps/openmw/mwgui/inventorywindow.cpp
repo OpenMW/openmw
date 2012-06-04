@@ -311,17 +311,23 @@ namespace MWGui
         MWBase::Environment::get().getSoundManager()->playSound(sound, 1, 1);
 
         int count = object.getRefData().getCount();
-        MWWorld::ActionTake action(object);
-        action.execute();
+
+        // add to player inventory
+        // can't use ActionTake here because we need an MWWorld::Ptr to the newly inserted object
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+        MWWorld::Ptr newObject = *MWWorld::Class::get (player).getContainerStore (player).add (object);
+        // remove from world
+        MWBase::Environment::get().getWorld()->deleteObject (object);
+
         mDragAndDrop->mIsOnDragAndDrop = true;
         mDragAndDrop->mDraggedCount = count;
 
         std::string path = std::string("icons\\");
-        path += MWWorld::Class::get(object).getInventoryIcon(object);
+        path += MWWorld::Class::get(newObject).getInventoryIcon(newObject);
         MyGUI::ImageBox* baseWidget = mContainerWidget->createWidget<ImageBox>("ImageBox", MyGUI::IntCoord(0, 0, 42, 42), MyGUI::Align::Default);
         baseWidget->detachFromWidget();
         baseWidget->attachToWidget(mDragAndDrop->mDragAndDropWidget);
-        baseWidget->setUserData(object);
+        baseWidget->setUserData(newObject);
         mDragAndDrop->mDraggedWidget = baseWidget;
         ImageBox* image = baseWidget->createWidget<ImageBox>("ImageBox", MyGUI::IntCoord(5, 5, 32, 32), MyGUI::Align::Default);
         int pos = path.rfind(".");
