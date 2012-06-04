@@ -303,6 +303,7 @@ namespace MWGui
             && (type != typeid(ESM::Tool).name())
             && (type != typeid(ESM::Probe).name())
             && (type != typeid(ESM::Repair).name())
+            && (type != typeid(ESM::Weapon).name())
             && (type != typeid(ESM::Potion).name()))
             return;
 

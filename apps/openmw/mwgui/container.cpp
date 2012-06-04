@@ -384,7 +384,7 @@ void ContainerBase::drawItems()
         categories = MWWorld::ContainerStore::Type_Miscellaneous + MWWorld::ContainerStore::Type_Book
                     + MWWorld::ContainerStore::Type_Ingredient + MWWorld::ContainerStore::Type_Repair
                     + MWWorld::ContainerStore::Type_Lockpick + MWWorld::ContainerStore::Type_Light
-                    + MWWorld::ContainerStore::Type_Apparatus;
+                    + MWWorld::ContainerStore::Type_Apparatus + MWWorld::ContainerStore::Type_Probe;
     }
     else if (mFilter == Filter_Ingredients)
         categories = MWWorld::ContainerStore::Type_Ingredient;
