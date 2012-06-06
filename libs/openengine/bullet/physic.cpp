@@ -300,7 +300,13 @@ namespace Physic
         body->collide = true;
         body->getWorldTransform().setOrigin(btVector3( (x+0.5)*triSize*(sqrtVerts-1), (y+0.5)*triSize*(sqrtVerts-1), (maxh+minh)/2.f));
 
-        addRigidBody(body);
+        HeightField hf;
+        hf.mBody = body;
+        hf.mShape = hfShape;
+
+        mHeightFieldMap [name] = hf;
+
+        dynamicsWorld->addRigidBody(body,COL_WORLD,COL_WORLD|COL_ACTOR_INTERNAL|COL_ACTOR_EXTERNAL);
     }
 
     void PhysicEngine::removeHeightField(int x, int y)
@@ -309,8 +315,11 @@ namespace Physic
             + boost::lexical_cast<std::string>(x) + "_"
             + boost::lexical_cast<std::string>(y);
 
-        removeRigidBody(name);
-        deleteRigidBody(name);
+        HeightField hf = mHeightFieldMap [name];
+
+        dynamicsWorld->removeRigidBody(hf.mBody);
+        delete hf.mShape;
+        delete hf.mBody;
     }
 
     RigidBody* PhysicEngine::createRigidBody(std::string mesh,std::string name,float scale)
