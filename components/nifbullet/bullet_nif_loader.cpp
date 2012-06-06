@@ -1,4 +1,4 @@
-/*
+ /*
 OpenMW - The completely unofficial reimplementation of Morrowind
 Copyright (C) 2008-2010  Nicolay Korslund
 Email: < korslund@gmail.com >
@@ -51,19 +51,64 @@ using namespace Mangle::VFS;
 
 using namespace NifBullet;
 
+// Helper math functions. Reinventing linear algebra for the win!
+
+// Computes B = AxB (matrix*matrix)
+static void matrixMul(const Matrix &A, Matrix &B)
+{
+    for (int i=0;i<3;i++)
+    {
+        float a = B.v[0].array[i];
+        float b = B.v[1].array[i];
+        float c = B.v[2].array[i];
+
+        B.v[0].array[i] = a*A.v[0].array[0] + b*A.v[0].array[1] + c*A.v[0].array[2];
+        B.v[1].array[i] = a*A.v[1].array[0] + b*A.v[1].array[1] + c*A.v[1].array[2];
+        B.v[2].array[i] = a*A.v[2].array[0] + b*A.v[2].array[1] + c*A.v[2].array[2];
+    }
+}
+
+// Computes C = B + AxC*scale
+static void vectorMulAdd(const Matrix &A, const Vector &B, float *C, float scale)
+{
+    // Keep the original values
+    float a = C[0];
+    float b = C[1];
+    float c = C[2];
+
+    // Perform matrix multiplication, scaling and addition
+    for (int i=0;i<3;i++)
+        C[i] = B.array[i] + (a*A.v[i].array[0] + b*A.v[i].array[1] + c*A.v[i].array[2])*scale;
+}
+
+// Computes B = AxB (matrix*vector)
+static void vectorMul(const Matrix &A, float *C)
+{
+    // Keep the original values
+    float a = C[0];
+    float b = C[1];
+    float c = C[2];
+
+    // Perform matrix multiplication, scaling and addition
+    for (int i=0;i<3;i++)
+        C[i] = a*A.v[i].array[0] + b*A.v[i].array[1] + c*A.v[i].array[2];
+}
+
+
 ManualBulletShapeLoader::~ManualBulletShapeLoader()
 {
     delete vfs;
 }
 
-Ogre::Matrix3 ManualBulletShapeLoader::getMatrix(Nif::Transformation* tr)
+
+Ogre::Matrix3 ManualBulletShapeLoader::getMatrix(const Nif::Transformation* tr)
 {
     Ogre::Matrix3 rot(tr->rotation.v[0].array[0],tr->rotation.v[0].array[1],tr->rotation.v[0].array[2],
             tr->rotation.v[1].array[0],tr->rotation.v[1].array[1],tr->rotation.v[1].array[2],
             tr->rotation.v[2].array[0],tr->rotation.v[2].array[1],tr->rotation.v[2].array[2]);
     return rot;
 }
-Ogre::Vector3 ManualBulletShapeLoader::getVector(Nif::Transformation* tr)
+Ogre::Vector3 ManualBulletShapeLoader::getVector(const Nif::Transformation* tr)
 {
     Ogre::Vector3 vect3(tr->pos.array[0],tr->pos.array[1],tr->pos.array[2]);
     return vect3;
@@ -88,6 +133,7 @@ btVector3 ManualBulletShapeLoader::getbtVector(Nif::Vector v)
 
 void ManualBulletShapeLoader::loadResource(Ogre::Resource *resource)
 {
+    std::cout << "Beginning physics\n";
     cShape = static_cast<BulletShape *>(resource);
     resourceName = cShape->getName();
     cShape->collide = false;
@@ -131,12 +177,12 @@ void ManualBulletShapeLoader::loadResource(Ogre::Resource *resource)
     bool hasCollisionNode = hasRootCollisionNode(node);
 
     //do a first pass
-    handleNode(node,0,Ogre::Matrix3::IDENTITY,Ogre::Vector3::ZERO,1,hasCollisionNode,false,false);
+    handleNode(node,0,NULL,hasCollisionNode,false,false);
 
     //if collide = false, then it does a second pass which create a shape for raycasting.
     if(cShape->collide == false)
     {
-        handleNode(node,0,Ogre::Matrix3::IDENTITY,Ogre::Vector3::ZERO,1,hasCollisionNode,false,true);
+        handleNode(node,0,NULL,hasCollisionNode,false,true);
     }
 
     cShape->collide = hasCollisionNode&&cShape->collide;
@@ -157,6 +203,7 @@ void ManualBulletShapeLoader::loadResource(Ogre::Resource *resource)
 
     currentShape = new TriangleMeshShape(mTriMesh,true);
     cShape->Shape = currentShape;
+    std::cout << "End bullet physics\n";
 }
 
 bool ManualBulletShapeLoader::hasRootCollisionNode(Nif::Node* node)
@@ -186,8 +233,9 @@ bool ManualBulletShapeLoader::hasRootCollisionNode(Nif::Node* node)
 }
 
 void ManualBulletShapeLoader::handleNode(Nif::Node *node, int flags,
-    Ogre::Matrix3 parentRot,Ogre::Vector3 parentPos,float parentScale,bool hasCollisionNode,bool isCollisionNode,bool raycastingOnly)
+   const Nif::Transformation *trafo,bool hasCollisionNode,bool isCollisionNode,bool raycastingOnly)
 {
+    std::cout << "Handle Node\n";
     // Accumulate the flags from all the child nodes. This works for all
     // the flags we currently use, at least.
     flags |= node->flags;
@@ -221,19 +269,30 @@ void ManualBulletShapeLoader::handleNode(Nif::Node *node, int flags,
         }
     }
 
-    //transfo of parents node + curent node
-    Ogre::Matrix3 finalRot;
-    Ogre::Vector3 finalPos;
-    float finalScale;
+    
+    
+    if (trafo)
+    {
+        std::cout << "Before trafo\n";
+        // Get a non-const reference to the node's data, since we're
+        // overwriting it. TODO: Is this necessary?
+        Transformation &final = *((Transformation*)node->trafo);
 
-    Nif::Transformation &final = *((Nif::Transformation*)node->trafo);
-    Ogre::Vector3 nodePos = getVector(&final);
-    Ogre::Matrix3 nodeRot = getMatrix(&final);
+        // For both position and rotation we have that:
+        // final_vector = old_vector + old_rotation*new_vector*old_scale
+        vectorMulAdd(trafo->rotation, trafo->pos, final.pos.array, trafo->scale);
+        vectorMulAdd(trafo->rotation, trafo->velocity, final.velocity.array, trafo->scale);
 
-    finalPos = nodePos + parentPos;
-    finalRot = parentRot*nodeRot;
-    finalScale = final.scale*parentScale;
+        // Merge the rotations together
+        matrixMul(trafo->rotation, final.rotation);
 
+        // Scalar values are so nice to deal with. Why can't everything
+        // just be scalar?
+        final.scale *= trafo->scale;
+        std::cout << "After Trafo\n";
+    }
+    
+    std::cout << "After Trafo2\n";
 
     // For NiNodes, loop through children
     if (node->recType == Nif::RC_NiNode)
@@ -244,14 +303,14 @@ void ManualBulletShapeLoader::handleNode(Nif::Node *node, int flags,
         {
             if (list.has(i))
             {
-                handleNode(&list[i], flags,finalRot,finalPos,finalScale,hasCollisionNode,isCollisionNode,raycastingOnly);
+                handleNode(&list[i], flags,node->trafo,hasCollisionNode,isCollisionNode,raycastingOnly);
             }
         }
     }
     else if (node->recType == Nif::RC_NiTriShape && (isCollisionNode || !hasCollisionNode)) 
     {
         cShape->collide = true;
-        handleNiTriShape(dynamic_cast<Nif::NiTriShape*>(node), flags,finalRot,finalPos,parentScale,raycastingOnly);
+        handleNiTriShape(dynamic_cast<Nif::NiTriShape*>(node), flags,getMatrix(node->trafo),getVector(node->trafo),node->trafo->scale,raycastingOnly);
     }
     else if(node->recType == Nif::RC_RootCollisionNode)
     {
@@ -260,7 +319,7 @@ void ManualBulletShapeLoader::handleNode(Nif::Node *node, int flags,
         for (int i=0; i<n; i++)
         {
             if (list.has(i))
-                handleNode(&list[i], flags,finalRot,finalPos,finalScale,hasCollisionNode,true,raycastingOnly);
+                handleNode(&list[i], flags,node->trafo, hasCollisionNode,true,raycastingOnly);
         }
     }
 }
