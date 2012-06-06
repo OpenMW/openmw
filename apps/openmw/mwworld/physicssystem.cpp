@@ -32,6 +32,7 @@ namespace MWWorld
     PhysicsSystem::~PhysicsSystem()
     {
         delete mEngine;
+        delete playerphysics;
 
     }
     OEngine::Physic::PhysicEngine* PhysicsSystem::getEngine()

@@ -84,7 +84,7 @@ private:
      NpcAnimation(const MWWorld::Ptr& ptr, OEngine::Render::OgreRenderer& _rend, MWWorld::InventoryStore& _inv);
      virtual ~NpcAnimation();
     Ogre::Entity* insertBoundedPart(const std::string &mesh, std::string bonename);
-     std::pair<Ogre::Entity*, std::vector<Nif::NiTriShapeCopy>*> insertFreePart(const std::string &mesh, const std::string suffix);
+     std::pair<Ogre::Entity*, std::vector<Nif::NiTriShapeCopy>*> insertFreePart(const std::string &mesh, const std::string& suffix);
      void insertFootPart(int type, const std::string &mesh);
 	virtual void runAnimation(float timepassed);
 	void updateParts();

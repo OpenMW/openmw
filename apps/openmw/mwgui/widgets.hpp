@@ -282,7 +282,7 @@ namespace MWGui
             MWDynamicStat();
 
             void setValue(int value, int max);
-            void setTitle(const std::string text);
+            void setTitle(const std::string& text);
 
             int getValue() const { return value; }
             int getMax() const { return max; }

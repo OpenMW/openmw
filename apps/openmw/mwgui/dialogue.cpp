@@ -156,7 +156,7 @@ void DialogueWindow::setKeywords(std::list<std::string> keyWords)
     if (anyService)
         topicsList->addSeparator();
 
-    for(std::list<std::string>::iterator it = keyWords.begin(); it != keyWords.end(); it++)
+    for(std::list<std::string>::iterator it = keyWords.begin(); it != keyWords.end(); ++it)
     {
         topicsList->addItem(*it);
     }

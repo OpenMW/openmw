@@ -607,7 +607,7 @@ namespace MWDialogue
     void DialogueManager::parseText(std::string text)
     {
         std::list<std::string>::iterator it;
-        for(it = actorKnownTopics.begin();it != actorKnownTopics.end();it++)
+        for(it = actorKnownTopics.begin();it != actorKnownTopics.end();++it)
         {
             size_t pos = find_str_ci(text,*it,0);
             if(pos !=std::string::npos)

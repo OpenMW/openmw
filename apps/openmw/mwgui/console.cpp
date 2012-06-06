@@ -268,7 +268,7 @@ namespace MWGui
         /* Are there quotation marks? */
         if( tmp.find('"') != string::npos ) {
             int numquotes=0;
-            for(string::iterator it=tmp.begin(); it < tmp.end(); it++) {
+            for(string::iterator it=tmp.begin(); it < tmp.end(); ++it) {
                 if( *it == '"' )
                     numquotes++;
             }
@@ -311,7 +311,7 @@ namespace MWGui
         }
 
         /* Iterate through the vector. */
-        for(vector<string>::iterator it=mNames.begin(); it < mNames.end();it++) {
+        for(vector<string>::iterator it=mNames.begin(); it < mNames.end();++it) {
             bool string_different=false;
 
             /* Is the string shorter than the input string? If yes skip it. */
@@ -359,7 +359,7 @@ namespace MWGui
         int i = tmp.length();
 
         for(string::iterator iter=matches.front().begin()+tmp.length(); iter < matches.front().end(); iter++, i++) {
-            for(vector<string>::iterator it=matches.begin(); it < matches.end();it++) {
+            for(vector<string>::iterator it=matches.begin(); it < matches.end();++it) {
                 if( tolower((*it)[i]) != tolower(*iter) ) {
                     /* Append the longest match to the end of the output string*/
                     output.append(matches.front().substr( 0, i));

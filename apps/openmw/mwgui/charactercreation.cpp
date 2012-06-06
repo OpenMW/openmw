@@ -117,6 +117,7 @@ CharacterCreation::CharacterCreation(WindowManager* _wm)
     , mCreateClassDialog(0)
     , mBirthSignDialog(0)
     , mReviewDialog(0)
+    , mGenerateClassStep(0)
     , mWM(_wm)
 {
     mCreationStage = CSE_NotStarted;

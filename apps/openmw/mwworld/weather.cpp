@@ -38,7 +38,8 @@ const float WeatherGlobals::mThunderSoundDelay = 0.25;
 
 WeatherManager::WeatherManager(MWRender::RenderingManager* rendering) :
      mHour(14), mCurrentWeather("clear"), mFirstUpdate(true), mWeatherUpdateTime(0),
-     mThunderFlash(0), mThunderChance(0), mThunderChanceNeeded(50), mThunderSoundDelay(0)
+     mThunderFlash(0), mThunderChance(0), mThunderChanceNeeded(50), mThunderSoundDelay(0),
+     mRemainingTransitionTime(0), mMonth(0), mDay(0)
 {
     mRendering = rendering;
 

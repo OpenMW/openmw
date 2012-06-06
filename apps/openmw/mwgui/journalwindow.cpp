@@ -131,7 +131,7 @@ void MWGui::JournalWindow::open()
         book journal;
         journal.endLine = 0;
 
-        for(std::deque<MWDialogue::StampedJournalEntry>::const_iterator it = MWBase::Environment::get().getJournal()->begin();it!=MWBase::Environment::get().getJournal()->end();it++)
+        for(std::deque<MWDialogue::StampedJournalEntry>::const_iterator it = MWBase::Environment::get().getJournal()->begin();it!=MWBase::Environment::get().getJournal()->end();++it)
         {
             std::string a = it->getText(MWBase::Environment::get().getWorld()->getStore());
             journal = formatText(a,journal,10,17);
@@ -141,7 +141,7 @@ void MWGui::JournalWindow::open()
         //std::string a = MWBase::Environment::get().getJournal()->begin()->getText(MWBase::Environment::get().getWorld()->getStore());
         //std::list<std::string> journal = formatText(a,10,20,1);
         bool left = true;
-        for(std::list<std::string>::iterator it = journal.pages.begin(); it != journal.pages.end();it++)
+        for(std::list<std::string>::iterator it = journal.pages.begin(); it != journal.pages.end();++it)
         {
             if(left)
             {

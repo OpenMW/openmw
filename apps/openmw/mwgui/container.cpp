@@ -361,9 +361,6 @@ void ContainerBase::drawItems()
     int y = 0;
     int maxHeight = mItemView->getSize().height - 58;
 
-    int index = 0;
-
-
     bool onlyMagic = false;
     int categories;
     if (mFilter == Filter_All)
@@ -459,7 +456,6 @@ void ContainerBase::drawItems()
     for (std::vector< std::pair<MWWorld::Ptr, ItemState> >::const_iterator it=items.begin();
         it != items.end(); ++it)
     {
-        index++;
         const MWWorld::Ptr* iter = &((*it).first);
 
         int displayCount = iter->getRefData().getCount();
