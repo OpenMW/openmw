@@ -146,4 +146,5 @@ op 0x200014f: ForceGreeting
 op 0x2000150: ForceGreeting, explicit reference
 op 0x2000151: ToggleFullHelp
 op 0x2000152: Goodbye
+op 0x2000153: DontSaveObject (left unimplemented)
 opcodes 0x2000154-0x3ffffff unused
