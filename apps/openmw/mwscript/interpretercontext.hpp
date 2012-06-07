@@ -107,6 +107,18 @@ namespace MWScript
 
             virtual void disable (const std::string& id = "");
 
+            virtual int getMemberShort (const std::string& id, const std::string& name) const;
+
+            virtual int getMemberLong (const std::string& id, const std::string& name) const;
+
+            virtual float getMemberFloat (const std::string& id, const std::string& name) const;
+
+            virtual void setMemberShort (const std::string& id, const std::string& name, int value);
+
+            virtual void setMemberLong (const std::string& id, const std::string& name, int value);
+
+            virtual void setMemberFloat (const std::string& id, const std::string& name, float value);
+
             MWWorld::Ptr getReference();
             ///< Reference, that the script is running from (can be empty)
     };

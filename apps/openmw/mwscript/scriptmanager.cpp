@@ -156,4 +156,43 @@ namespace MWScript
     {
         return mGlobalScripts;
     }
+
+    int ScriptManager::getLocalIndex (const std::string& scriptId, const std::string& variable,
+        char type)
+    {
+        const ESM::Script *script = mStore.scripts.find (scriptId);
+
+        int offset = 0;
+        int size = 0;
+
+        switch (type)
+        {
+            case 's':
+
+                offset = 0;
+                size = script->data.numShorts;
+                break;
+
+            case 'l':
+
+                offset = script->data.numShorts;
+                size = script->data.numLongs;
+                break;
+
+            case 'f':
+
+                offset = script->data.numShorts+script->data.numLongs;
+                size = script->data.numFloats;
+
+            default:
+
+                throw std::runtime_error ("invalid variable type");
+        }
+
+        for (int i=0; i<size; ++i)
+            if (script->varNames.at (i+offset)==variable)
+                return i;
+
+        throw std::runtime_error ("unable to access local variable " + variable + " of " + scriptId);
+    }
 }
