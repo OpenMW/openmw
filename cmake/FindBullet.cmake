@@ -19,6 +19,8 @@
 # BSD license.
 # For details see the accompanying COPYING-CMAKE-SCRIPTS file.
 
+set(BULLET_ROOT $ENV{BULLET_ROOT})
+
 macro(_FIND_BULLET_LIBRARY _var)
   find_library(${_var}
      NAMES
