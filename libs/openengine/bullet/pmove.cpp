@@ -1833,13 +1833,13 @@ void PmoveSingle (playerMove* const pmove)
 	pml.hasWater = pmove->hasWater;
 	pml.isInterior = pmove->isInterior;
 	pml.waterHeight = pmove->waterHeight;
-#ifdef _DEBUG
-	if (!pml.traceObj)
-		__debugbreak();
-
-	if (!pml.traceObj->incellptr)
-		__debugbreak();
-#endif
+//#ifdef _DEBUG
+	//if (!pml.traceObj)
+	//	__debugbreak();
+	//
+	//if (!pml.traceObj->incellptr)
+	//	__debugbreak();
+//#endif
 
 	// determine the time
 	pml.msec = pmove->cmd.serverTime - pm->ps.commandTime;
