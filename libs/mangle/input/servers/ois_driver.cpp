@@ -121,8 +121,7 @@ OISDriver::OISDriver(Ogre::RenderWindow *window, bool exclusive)
 OISDriver::~OISDriver()
 {
   // Delete the listener object
-  if(listener)
-    delete listener;
+  delete listener;
 
   if(inputMgr == NULL) return;
 

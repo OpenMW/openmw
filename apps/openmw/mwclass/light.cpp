@@ -9,6 +9,7 @@
 
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/actiontake.hpp"
+#include "../mwworld/actionequip.hpp"
 #include "../mwworld/nullaction.hpp"
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/world.hpp"
@@ -175,5 +176,12 @@ namespace MWClass
         info.text = text;
 
         return info;
+    }
+
+    boost::shared_ptr<MWWorld::Action> Light::use (const MWWorld::Ptr& ptr) const
+    {
+        MWBase::Environment::get().getSoundManager()->playSound (getUpSoundId(ptr), 1.0, 1.0);
+
+        return boost::shared_ptr<MWWorld::Action>(new MWWorld::ActionEquip(ptr));
     }
 }

@@ -340,7 +340,7 @@ MyGUI::TextBox* StatsWindow::addValueItem(const std::string& text, const std::st
     return skillValueWidget;
 }
 
-MyGUI::Widget* StatsWindow::addItem(const std::string text, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2)
+MyGUI::Widget* StatsWindow::addItem(const std::string& text, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2)
 {
     MyGUI::TextBox* skillNameWidget;
 

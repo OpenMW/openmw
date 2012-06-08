@@ -152,15 +152,15 @@ public:
    *
    *************************************************************************/
 
-  int getVer() { return mCtx.header.version; }
+  int getVer() const { return mCtx.header.version; }
   float getFVer() { if(mCtx.header.version == VER_12) return 1.2; else return 1.3; }
-  int getSpecial() { return mSpf; }
+  int getSpecial() const { return mSpf; }
   const std::string getAuthor() { return mCtx.header.author.toString(); }
   const std::string getDesc() { return mCtx.header.desc.toString(); }
-  const SaveData &getSaveData() { return mSaveData; }
+  const SaveData &getSaveData() const { return mSaveData; }
   const MasterList &getMasters() { return mMasters; }
   const NAME &retSubName() { return mCtx.subName; }
-  uint32_t getSubSize() { return mCtx.leftSub; }
+  uint32_t getSubSize() const { return mCtx.leftSub; }
 
   /*************************************************************************
    *
@@ -323,8 +323,8 @@ public:
   void getRecHeader() { uint32_t u; getRecHeader(u); }
   void getRecHeader(uint32_t &flags);
 
-  bool hasMoreRecs() { return mCtx.leftFile > 0; }
-  bool hasMoreSubs() { return mCtx.leftRec > 0; }
+  bool hasMoreRecs() const { return mCtx.leftFile > 0; }
+  bool hasMoreSubs() const { return mCtx.leftRec > 0; }
 
 
   /*************************************************************************

@@ -684,11 +684,11 @@ void NIFLoader::handleNiTriShape(NiTriShape *shape, int flags, BoundsFinder &bou
             Property *pr = &list[i];
 
             if (pr->recType == RC_NiTexturingProperty)
-                t = (NiTexturingProperty*)pr;
+                t = static_cast<NiTexturingProperty*>(pr);
             else if (pr->recType == RC_NiMaterialProperty)
-                m = (NiMaterialProperty*)pr;
+                m = static_cast<NiMaterialProperty*>(pr);
             else if (pr->recType == RC_NiAlphaProperty)
-                a = (NiAlphaProperty*)pr;
+                a = static_cast<NiAlphaProperty*>(pr);
         }
 
         // Texture

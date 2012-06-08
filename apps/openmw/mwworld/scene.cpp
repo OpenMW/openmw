@@ -145,10 +145,13 @@ namespace MWWorld
         bool hasWater = cell->cell->data.flags & cell->cell->HasWater;
         mPhysics->setCurrentWater(hasWater, cell->cell->water);
         if (adjustPlayerPos)
+        {
             mWorld->getPlayer().setPos (position.pos[0], position.pos[1], position.pos[2]);
+            mWorld->getPlayer().setRot (position.rot[0], position.rot[1], position.rot[2]);
+        }
 
         mWorld->getPlayer().setCell (cell);
-        // TODO orientation
+
         MWBase::Environment::get().getMechanicsManager()->addActor (mWorld->getPlayer().getPlayer());
         MWBase::Environment::get().getMechanicsManager()->watchActor (mWorld->getPlayer().getPlayer());
 

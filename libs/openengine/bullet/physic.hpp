@@ -15,6 +15,7 @@ class btSequentialImpulseConstraintSolver;
 class btCollisionDispatcher;
 class btDiscreteDynamicsWorld;
 class btKinematicCharacterController;
+class btHeightfieldTerrainShape;
 
 namespace BtOgre
 {
@@ -113,6 +114,12 @@ namespace Physic
 
         //is this body used for raycasting only?
         bool collide;
+    };
+
+    struct HeightField
+    {
+        btHeightfieldTerrainShape* mShape;
+        RigidBody* mBody;
     };
 
     /**
@@ -239,6 +246,9 @@ namespace Physic
 
         //the NIF file loader.
         BulletShapeLoader* mShapeLoader;
+
+        typedef std::map<std::string, HeightField> HeightFieldContainer;
+        HeightFieldContainer mHeightFieldMap;
 
         typedef std::map<std::string,RigidBody*> RigidBodyContainer;
         RigidBodyContainer RigidBodyMap;

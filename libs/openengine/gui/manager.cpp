@@ -36,7 +36,7 @@ void MyGUIManager::setup(Ogre::RenderWindow *wnd, Ogre::SceneManager *mgr, bool 
 
 void MyGUIManager::shutdown()
 {
-  if(mGui) delete mGui;
+  delete mGui;
   if(mPlatform)
     {
       mPlatform->shutdown();

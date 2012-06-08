@@ -32,6 +32,7 @@ namespace MWWorld
     PhysicsSystem::~PhysicsSystem()
     {
         delete mEngine;
+        delete playerphysics;
 
     }
     OEngine::Physic::PhysicEngine* PhysicsSystem::getEngine()
@@ -66,7 +67,23 @@ namespace MWWorld
 
         return mEngine->rayTest2(from,to);
     }
-    void PhysicsSystem::setCurrentWater(bool hasWater, int waterHeight){
+
+    std::vector < std::pair <float, std::string> > PhysicsSystem::getFacedObjects (float mouseX, float mouseY)
+    {
+        Ray ray = mRender.getCamera()->getCameraToViewportRay(mouseX, mouseY);
+        Ogre::Vector3 from = ray.getOrigin();
+        Ogre::Vector3 to = ray.getPoint(500); /// \todo make this distance (ray length) configurable
+
+        btVector3 _from, _to;
+        // OGRE to MW coordinates
+        _from = btVector3(from.x, -from.z, from.y);
+        _to = btVector3(to.x, -to.z, to.y);
+
+        return mEngine->rayTest2(_from,_to);
+    }
+
+    void PhysicsSystem::setCurrentWater(bool hasWater, int waterHeight)
+    {
         playerphysics->hasWater = hasWater;
         if(hasWater){
             playerphysics->waterHeight = waterHeight;
@@ -80,6 +97,14 @@ namespace MWWorld
         Ray centerRay = mRender.getCamera()->getCameraToViewportRay(
         mRender.getViewport()->getWidth()/2,
         mRender.getViewport()->getHeight()/2);
+        btVector3 result(centerRay.getPoint(500*extent).x,-centerRay.getPoint(500*extent).z,centerRay.getPoint(500*extent).y); /// \todo make this distance (ray length) configurable
+        return result;
+    }
+
+    btVector3 PhysicsSystem::getRayPoint(float extent, float mouseX, float mouseY)
+    {
+        //get a ray pointing to the center of the viewport
+        Ray centerRay = mRender.getCamera()->getCameraToViewportRay(mouseX, mouseY);
         btVector3 result(centerRay.getPoint(500*extent).x,-centerRay.getPoint(500*extent).z,centerRay.getPoint(500*extent).y); /// \todo make this distance (ray length) configurable
         return result;
     }

@@ -257,7 +257,7 @@ void ReviewDialog::addGroup(const std::string &label, MyGUI::IntCoord &coord1, M
     coord2.top += lineHeight;
 }
 
-MyGUI::TextBox* ReviewDialog::addValueItem(const std::string text, const std::string &value, const std::string& state, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2)
+MyGUI::TextBox* ReviewDialog::addValueItem(const std::string& text, const std::string &value, const std::string& state, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2)
 {
     MyGUI::TextBox* skillNameWidget;
     MyGUI::TextBox* skillValueWidget;
@@ -280,7 +280,7 @@ MyGUI::TextBox* ReviewDialog::addValueItem(const std::string text, const std::st
     return skillValueWidget;
 }
 
-void ReviewDialog::addItem(const std::string text, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2)
+void ReviewDialog::addItem(const std::string& text, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2)
 {
     MyGUI::TextBox* skillNameWidget;
 

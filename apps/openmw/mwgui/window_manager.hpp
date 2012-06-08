@@ -98,7 +98,7 @@ namespace MWGui
     typedef std::vector<Faction> FactionList;
     typedef std::vector<int> SkillList;
 
-    WindowManager(const Compiler::Extensions& extensions, int fpsLevel, bool newGame, OEngine::Render::OgreRenderer *mOgre, const std::string logpath);
+    WindowManager(const Compiler::Extensions& extensions, int fpsLevel, bool newGame, OEngine::Render::OgreRenderer *mOgre, const std::string& logpath);
     virtual ~WindowManager();
 
     /**
@@ -141,7 +141,7 @@ namespace MWGui
       updateVisible();
     }
 
-    bool isAllowed(GuiWindow wnd)
+    bool isAllowed(GuiWindow wnd) const
     {
         return allowed & wnd;
     }
@@ -155,6 +155,7 @@ namespace MWGui
     MWGui::ConfirmationDialog* getConfirmationDialog() {return mConfirmationDialog;}
     MWGui::TradeWindow* getTradeWindow() {return mTradeWindow;}
     MWGui::SpellWindow* getSpellWindow() {return mSpellWindow;}
+    MWGui::Console* getConsole() {return console;}
 
     MyGUI::Gui* getGui() const { return gui; }
 
@@ -188,7 +189,10 @@ namespace MWGui
     void setFocusObjectScreenCoords(float min_x, float min_y, float max_x, float max_y);
 
     void setMouseVisible(bool visible);
+    void getMousePosition(int &x, int &y);
+    void getMousePosition(float &x, float &y);
     void setDragDrop(bool dragDrop);
+    bool getWorldMouseOver();
 
     void toggleFogOfWar();
     void toggleFullHelp(); ///< show extra info in item tooltips (owner, script)

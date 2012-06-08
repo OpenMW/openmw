@@ -39,7 +39,7 @@
 using namespace MWGui;
 
 WindowManager::WindowManager(
-    const Compiler::Extensions& extensions, int fpsLevel, bool newGame, OEngine::Render::OgreRenderer *mOgre, const std::string logpath)
+    const Compiler::Extensions& extensions, int fpsLevel, bool newGame, OEngine::Render::OgreRenderer *mOgre, const std::string& logpath)
   : mGuiManager(NULL)
   , hud(NULL)
   , map(NULL)
@@ -487,6 +487,7 @@ void WindowManager::onFrame (float frameDuration)
     mDialogueWindow->checkReferenceAvailable();
     mTradeWindow->checkReferenceAvailable();
     mContainerWindow->checkReferenceAvailable();
+    console->checkReferenceAvailable();
 }
 
 const ESMS::ESMStore& WindowManager::getStore() const
@@ -637,6 +638,7 @@ void WindowManager::processChangedSettings(const Settings::CategorySettingVector
         hud->onResChange(x, y);
         console->onResChange(x, y);
         mSettingsWindow->center();
+        mDragAndDrop->mDragAndDropWidget->setSize(MyGUI::IntSize(x, y));
     }
 }
 
@@ -655,7 +657,7 @@ void WindowManager::pushGuiMode(GuiMode mode)
 
 void WindowManager::popGuiMode()
 {
-    if (mGuiModes.size())
+    if (!mGuiModes.empty())
         mGuiModes.pop_back();
 
     bool gameMode = !isGuiMode();
@@ -707,4 +709,26 @@ void WindowManager::unsetSelectedWeapon()
 {
     hud->unsetSelectedWeapon();
     mInventoryWindow->setTitle("#{sSkillHandtohand}");
+}
+
+void WindowManager::getMousePosition(int &x, int &y)
+{
+    const MyGUI::IntPoint& pos = MyGUI::InputManager::getInstance().getMousePosition();
+    x = pos.left;
+    y = pos.top;
+}
+
+void WindowManager::getMousePosition(float &x, float &y)
+{
+    const MyGUI::IntPoint& pos = MyGUI::InputManager::getInstance().getMousePosition();
+    x = pos.left;
+    y = pos.top;
+    const MyGUI::IntSize& viewSize = MyGUI::RenderManager::getInstance().getViewSize();
+    x /= viewSize.width;
+    y /= viewSize.height;
+}
+
+bool WindowManager::getWorldMouseOver()
+{
+    return hud->getWorldMouseOver();
 }

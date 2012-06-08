@@ -54,9 +54,20 @@ namespace MWGui
 
             bool operator==(const SpellEffectParams& other) const
             {
-                return (other.mEffectID == mEffectID
-                        && other.mSkill == mSkill
-                        && other.mAttribute == mAttribute);
+                if (mEffectID !=  other.mEffectID)
+                    return false;
+
+                bool involvesAttribute = (mEffectID == 74 // restore attribute
+                                        || mEffectID == 85 // absorb attribute
+                                        || mEffectID == 17 // drain attribute
+                                        || mEffectID == 79 // fortify attribute
+                                        || mEffectID == 22); // damage attribute
+                bool involvesSkill = (mEffectID == 78 // restore skill
+                                        || mEffectID == 89 // absorb skill
+                                        || mEffectID == 21 // drain skill
+                                        || mEffectID == 83 // fortify skill
+                                        || mEffectID == 26); // damage skill
+                return ((other.mSkill == mSkill) || !involvesSkill) && ((other.mAttribute == mAttribute) && !involvesAttribute);
             }
         };
 
@@ -271,7 +282,7 @@ namespace MWGui
             MWDynamicStat();
 
             void setValue(int value, int max);
-            void setTitle(const std::string text);
+            void setTitle(const std::string& text);
 
             int getValue() const { return value; }
             int getMax() const { return max; }

@@ -361,9 +361,6 @@ void ContainerBase::drawItems()
     int y = 0;
     int maxHeight = mItemView->getSize().height - 58;
 
-    int index = 0;
-
-
     bool onlyMagic = false;
     int categories;
     if (mFilter == Filter_All)
@@ -384,7 +381,7 @@ void ContainerBase::drawItems()
         categories = MWWorld::ContainerStore::Type_Miscellaneous + MWWorld::ContainerStore::Type_Book
                     + MWWorld::ContainerStore::Type_Ingredient + MWWorld::ContainerStore::Type_Repair
                     + MWWorld::ContainerStore::Type_Lockpick + MWWorld::ContainerStore::Type_Light
-                    + MWWorld::ContainerStore::Type_Apparatus;
+                    + MWWorld::ContainerStore::Type_Apparatus + MWWorld::ContainerStore::Type_Probe;
     }
     else if (mFilter == Filter_Ingredients)
         categories = MWWorld::ContainerStore::Type_Ingredient;
@@ -459,7 +456,6 @@ void ContainerBase::drawItems()
     for (std::vector< std::pair<MWWorld::Ptr, ItemState> >::const_iterator it=items.begin();
         it != items.end(); ++it)
     {
-        index++;
         const MWWorld::Ptr* iter = &((*it).first);
 
         int displayCount = iter->getRefData().getCount();
@@ -470,7 +466,7 @@ void ContainerBase::drawItems()
         if(displayCount > 0 && !(onlyMagic && it->second != ItemState_Barter && MWWorld::Class::get(*iter).getEnchantment(*iter) == "" && iter->getTypeName() != typeid(ESM::Potion).name()))
         {
             std::string path = std::string("icons\\");
-            path+=MWWorld::Class::get(*iter).getInventoryIcon(*iter);
+            path += MWWorld::Class::get(*iter).getInventoryIcon(*iter);
 
             // background widget (for the "equipped" frame and magic item background image)
             bool isMagic = (MWWorld::Class::get(*iter).getEnchantment(*iter) != "");
