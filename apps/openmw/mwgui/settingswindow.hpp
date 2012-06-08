@@ -16,10 +16,10 @@ namespace MWGui
             SettingsWindow(WindowManager& parWindowManager);
 
         private:
-            static const float sFovMin = 30;
-            static const float sFovMax = 140;
-            static const float sViewDistMin = 2000;
-            static const float sViewDistMax = 5600;
+            static int const sFovMin = 30;
+            static int const sFovMax = 140;
+            static int const sViewDistMin = 2000;
+            static int const sViewDistMax = 5600;
 
         protected:
             MyGUI::Button* mOkButton;
