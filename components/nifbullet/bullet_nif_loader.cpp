@@ -185,7 +185,7 @@ void ManualBulletShapeLoader::loadResource(Ogre::Resource *resource)
         handleNode(node,0,NULL,hasCollisionNode,false,true);
     }
 
-    cShape->collide = hasCollisionNode&&cShape->collide;
+    //cShape->collide = hasCollisionNode&&cShape->collide;
 
     struct TriangleMeshShape : public btBvhTriangleMeshShape
     {
@@ -353,15 +353,17 @@ void ManualBulletShapeLoader::handleNiTriShape(Nif::NiTriShape *shape, int flags
 
     float* vertices = (float*)data->vertices.ptr;
     unsigned short* triangles = (unsigned short*)data->triangles.ptr;
-
+    const Matrix &rot = shape->trafo->rotation;
+    const Vector &pos = shape->trafo->pos;
+    float scale = shape->trafo->scale;
     for(unsigned int i=0; i < data->triangles.length; i = i+3)
     {
         Ogre::Vector3 b1(vertices[triangles[i+0]*3]*parentScale,vertices[triangles[i+0]*3+1]*parentScale,vertices[triangles[i+0]*3+2]*parentScale);
         Ogre::Vector3 b2(vertices[triangles[i+1]*3]*parentScale,vertices[triangles[i+1]*3+1]*parentScale,vertices[triangles[i+1]*3+2]*parentScale);
         Ogre::Vector3 b3(vertices[triangles[i+2]*3]*parentScale,vertices[triangles[i+2]*3+1]*parentScale,vertices[triangles[i+2]*3+2]*parentScale);
-        b1 = parentRot * b1 + parentPos;
-        b2 = parentRot * b2 + parentPos;
-        b3 = parentRot * b3 + parentPos;
+        vectorMulAdd(rot, pos, b1.ptr(), scale);
+        vectorMulAdd(rot, pos, b2.ptr(), scale);
+        vectorMulAdd(rot, pos, b3.ptr(), scale);
         mTriMesh->addTriangle(btVector3(b1.x,b1.y,b1.z),btVector3(b2.x,b2.y,b2.z),btVector3(b3.x,b3.y,b3.z));
     }
 }
