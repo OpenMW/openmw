@@ -114,6 +114,9 @@ Water::~Water()
 {
     MeshManager::getSingleton().remove("water");
 
+    if (mReflectionTarget)
+        mReflectionTexture->getBuffer()->getRenderTarget()->removeListener(this);
+
     mWaterNode->detachObject(mWater);
     mSceneManager->destroyEntity(mWater);
     mSceneManager->destroySceneNode(mWaterNode);

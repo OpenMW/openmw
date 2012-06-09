@@ -156,6 +156,11 @@ void OgreRenderer::setWindowEventListener(Ogre::WindowEventListener* listener)
 	Ogre::WindowEventUtilities::addWindowEventListener(mWindow, listener);
 }
 
+void OgreRenderer::removeWindowEventListener(Ogre::WindowEventListener* listener)
+{
+	Ogre::WindowEventUtilities::removeWindowEventListener(mWindow, listener);
+}
+
 void OgreRenderer::setFov(float fov)
 {
     mCamera->setFOVy(Degree(fov));

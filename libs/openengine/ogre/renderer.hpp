@@ -106,6 +106,7 @@ namespace OEngine
             ~OgreRenderer() { cleanup(); }
 
             void setWindowEventListener(Ogre::WindowEventListener* listener);
+            void removeWindowEventListener(Ogre::WindowEventListener* listener);
 
             /** Configure the renderer. This will load configuration files and
             set up the Root and logging classes. */
