@@ -67,6 +67,13 @@ void ESMStore::load(ESMReader &esm)
         {
             // Load it
             std::string id = esm.getHNOString("NAME");
+            // ... unless it got deleted!
+            if (esm.isNextSub("DELE")) {
+              esm.skipRecord();
+              all.erase(id);
+              it->second->remove(id);
+              continue;
+            }
             it->second->load(esm, id);
 
             if (n.val==ESM::REC_DIAL)

@@ -68,7 +68,8 @@ namespace OMW
             boost::filesystem::path mResDir;
             OEngine::Render::OgreRenderer *mOgre;
             std::string mCellName;
-            std::string mMaster;
+            std::vector<std::string> mMaster;
+            std::vector<std::string> mPlugins;
             int mFpsLevel;
             bool mDebug;
             bool mVerboseScripts;
@@ -124,8 +125,11 @@ namespace OMW
 
             /// Set master file (esm)
             /// - If the given name does not have an extension, ".esm" is added automatically
-            /// - Currently OpenMW only supports one master at the same time.
             void addMaster(const std::string& master);
+
+            /// Same as "addMaster", but for plugin files (esp)
+            /// - If the given name does not have an extension, ".esp" is added automatically
+            void addPlugin(const std::string& plugin);
 
             /// Enable fps counter
             void showFPS(int level);

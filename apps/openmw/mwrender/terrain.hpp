@@ -63,11 +63,14 @@ namespace MWRender{
          * @param size the size (number of splats) to get
          * @param indexes a mapping of ltex index to the terrain texture layer that
          *          can be used by initTerrainBlendMaps
+         * @param plugin the index of the plugin providing the texture list for this
+		 *          cell data; required because MW uses texture data on a per-plugin base
          */
         void initTerrainTextures(Ogre::Terrain::ImportData* terrainData,
                                  int cellX, int cellY,
                                  int fromX, int fromY, int size,
-                                 std::map<uint16_t, int>& indexes);
+                                 std::map<uint16_t, int>& indexes,
+								 size_t plugin = 0);
 
         /**
          * Creates the blend (splatting maps) for the given terrain from the ltex data.
