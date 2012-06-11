@@ -7,11 +7,18 @@ void Land::LandData::save(ESMWriter &esm)
 {
     // TODO: Make this actually work.
 
-    //esm.writeHNT("VNML", normals, sizeof(VNML));
+    esm.writeHNT("VNML", normals, sizeof(VNML));
     esm.writeHNT("VHGT", heights, sizeof(VHGT));
-    esm.writeHNT("WNAM", 0, 81);
-    esm.writeHNT("VCLR", colours, 3*LAND_NUM_VERTS);
-    esm.writeHNT("VTEX", textures, 512);
+    //esm.writeHNT("WNAM", 0, 81);
+    esm.startSubRecord("WNAM");
+    for (int i = 0; i < 81; i++)
+        esm.writeT((char)0x80, 1);
+    esm.endRecord("WNAM");
+    
+    if (dataTypes & Land::DATA_VCLR)
+        esm.writeHNT("VCLR", colours, 3*LAND_NUM_VERTS);
+    if (dataTypes & Land::DATA_VTEX)
+        esm.writeHNT("VTEX", textures, 512);
 }
 
 Land::Land()
@@ -19,7 +26,8 @@ Land::Land()
     , X(0)
     , Y(0)
     , mEsm(NULL)
-    , hasData(false)
+//    , hasData(false)
+    , dataTypes(0)
     , dataLoaded(false)
     , landData(NULL)
 {
@@ -29,7 +37,6 @@ Land::~Land()
 {
     delete landData;
 }
-
 
 void Land::load(ESMReader &esm)
 {
@@ -47,36 +54,37 @@ void Land::load(ESMReader &esm)
     context = esm.getContext();
 
     hasData = false;
-    int cnt = 0;
 
     // Skip these here. Load the actual data when the cell is loaded.
     if (esm.isNextSub("VNML"))
     {
         esm.skipHSubSize(12675);
-        cnt++;
+        dataTypes |= DATA_VNML;
     }
     if (esm.isNextSub("VHGT"))
     {
         esm.skipHSubSize(4232);
-        cnt++;
+        dataTypes |= DATA_VHGT;
     }
     if (esm.isNextSub("WNAM"))
     {
         esm.skipHSubSize(81);
+        dataTypes |= DATA_WNAM;
     }
     if (esm.isNextSub("VCLR"))
     {
         esm.skipHSubSize(12675);
+        dataTypes |= DATA_VCLR;
     }
     if (esm.isNextSub("VTEX"))
     {
         esm.skipHSubSize(512);
-        cnt++;
+        dataTypes |= DATA_VTEX;
     }
 
     // We need all three of VNML, VHGT and VTEX in order to use the
-    // landscape.
-    hasData = (cnt == 3);
+    // landscape. (Though Morrowind seems to accept terrain without VTEX/VCLR entries)
+    hasData = dataTypes & (DATA_VNML|DATA_VHGT|DATA_WNAM);
 
     dataLoaded = false;
     landData = NULL;
@@ -101,7 +109,7 @@ void Land::save(ESMWriter &esm)
         landData->save(esm);
 
     if (!wasLoaded)
-        unloadData();
+        unloadData(); // Don't need to keep the data loaded if it wasn't already
 }
 
 void Land::loadData()
@@ -117,6 +125,8 @@ void Land::loadData()
     {
         mEsm->restoreContext(context);
 
+        memset(landData->normals, 0, LAND_NUM_VERTS * 3);
+        
         //esm.getHNExact(landData->normals, sizeof(VNML), "VNML");
         if (mEsm->isNextSub("VNML"))
         {
@@ -151,16 +161,19 @@ void Land::loadData()
         }else{
             landData->usingColours = false;
         }
-        //TODO fix magic numbers
-        uint16_t vtex[512];
-        mEsm->getHNExact(&vtex, 512, "VTEX");
+        if (mEsm->isNextSub("VTEX"))
+        {
+            //TODO fix magic numbers
+            uint16_t vtex[512];
+            mEsm->getHExact(&vtex, 512);
 
-        int readPos = 0; //bit ugly, but it works
-        for ( int y1 = 0; y1 < 4; y1++ )
-            for ( int x1 = 0; x1 < 4; x1++ )
-                for ( int y2 = 0; y2 < 4; y2++)
-                    for ( int x2 = 0; x2 < 4; x2++ )
-                        landData->textures[(y1*4+y2)*16+(x1*4+x2)] = vtex[readPos++];
+            int readPos = 0; //bit ugly, but it works
+            for ( int y1 = 0; y1 < 4; y1++ )
+                for ( int x1 = 0; x1 < 4; x1++ )
+                    for ( int y2 = 0; y2 < 4; y2++)
+                        for ( int x2 = 0; x2 < 4; x2++ )
+                            landData->textures[(y1*4+y2)*16+(x1*4+x2)] = vtex[readPos++];
+        }
     }
     else
     {
@@ -172,6 +185,7 @@ void Land::loadData()
         }
     }
 
+    landData->dataTypes = dataTypes;
     dataLoaded = true;
 }
 

@@ -120,6 +120,7 @@ struct Cell : public Record
   AMBIstruct ambi;
   float water; // Water level
   int mapColor;
+  int NAM0;
 
   void load(ESMReader &esm);
   void save(ESMWriter &esm);

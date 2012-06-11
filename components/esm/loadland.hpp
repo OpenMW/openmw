@@ -26,8 +26,17 @@ struct Land : public Record
     ESM_Context context;
 
     bool hasData;
-
+    int dataTypes;
     bool dataLoaded;
+
+    enum
+    {
+        DATA_VNML = 1,
+        DATA_VHGT = 2,
+        DATA_WNAM = 4,
+        DATA_VCLR = 8,
+        DATA_VTEX = 16
+    };
 
     // number of vertices per side
     static const int LAND_SIZE = 65;
@@ -62,11 +71,12 @@ struct Land : public Record
     {
         float heightOffset;
         float heights[LAND_NUM_VERTS];
-        //float normals[LAND_NUM_VERTS * 3];
+        VNML normals;
         uint16_t textures[LAND_NUM_TEXTURES];
 
         bool usingColours;
         char colours[3 * LAND_NUM_VERTS];
+        int dataTypes;
 
         void save(ESMWriter &esm);
     };

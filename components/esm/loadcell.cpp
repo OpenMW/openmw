@@ -9,7 +9,7 @@ namespace ESM
 void CellRef::save(ESMWriter &esm)
 {
     esm.writeHNT("FRMR", refnum);
-    esm.writeHNString("NAME", refID);
+    esm.writeHNCString("NAME", refID);
 
     if (scale != 1.0)
         esm.writeHNT("XSCL", scale);
@@ -33,7 +33,7 @@ void CellRef::save(ESMWriter &esm)
     if (teleport)
     {
         esm.writeHNT("DODT", doorDest);
-        esm.writeHNOString("DNAM", destCell);
+        esm.writeHNOCString("DNAM", destCell);
     }
 
     if (lockLevel != 0)
@@ -60,6 +60,7 @@ void Cell::load(ESMReader &esm)
 
     // Water level
     water = 0;
+    NAM0 = 0;
 
     if (data.flags & Interior)
     {
@@ -87,6 +88,8 @@ void Cell::load(ESMReader &esm)
         region = esm.getHNOString("RGNN");
         esm.getHNOT(mapColor, "NAM5");
     }
+    if (esm.isNextSub("NAM0"))
+        esm.getHT(NAM0);
 
     // Save position of the cell references and move on
     context = esm.getContext();
@@ -112,6 +115,9 @@ void Cell::save(ESMWriter &esm)
         if (mapColor != 0)
             esm.writeHNT("NAM5", mapColor);
     }
+    
+    if (NAM0 != 0)
+        esm.writeHNT("NAM0", NAM0);
 }
 
 void Cell::restore(ESMReader &esm) const
@@ -141,9 +147,10 @@ bool Cell::getNextRef(ESMReader &esm, CellRef &ref)
     // Number of references in the cell? Maximum once in each cell,
     // but not always at the beginning, and not always right. In other
     // words, completely useless.
+    if (esm.isNextSub("NAM0"))
     {
-        int i;
-        esm.getHNOT(i, "NAM0");
+        esm.skipHSubSize(4);
+        //esm.getHNOT(NAM0, "NAM0");
     }
 
     esm.getHNT(ref.refnum, "FRMR");
