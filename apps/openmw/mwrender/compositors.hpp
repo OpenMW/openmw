@@ -25,6 +25,11 @@ namespace MWRender
          */
         void setEnabled (const bool enabled);
 
+        void setViewport(Ogre::Viewport* vp) { mViewport = vp; }
+
+        /// recreate compositors (call this after viewport size changes)
+        void recreate();
+
         bool toggle() { setEnabled(!mEnabled); return mEnabled; }
 
         /**
@@ -38,6 +43,8 @@ namespace MWRender
          * @param priority, lower number will be first in the chain
          */
         void addCompositor (const std::string& name, const int priority);
+
+        void removeAll ();
 
     protected:
         /// maps compositor name to its "enabled" state

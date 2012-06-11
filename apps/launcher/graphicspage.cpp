@@ -1,7 +1,11 @@
+#include "graphicspage.hpp"
+
 #include <QtGui>
 
-#include "graphicspage.hpp"
+#include <boost/lexical_cast.hpp>
+
 #include <components/files/configurationmanager.hpp>
+#include <components/settings/settings.hpp>
 
 GraphicsPage::GraphicsPage(Files::ConfigurationManager &cfg, QWidget *parent)
     : QWidget(parent)
@@ -17,12 +21,9 @@ GraphicsPage::GraphicsPage(Files::ConfigurationManager &cfg, QWidget *parent)
     renderSystemLayout->addWidget(rendererLabel, 0, 0, 1, 1);
     renderSystemLayout->addWidget(mRendererComboBox, 0, 1, 1, 1);
 
-    mRendererStackedWidget = new QStackedWidget(rendererGroup);
-
     QVBoxLayout *rendererGroupLayout = new QVBoxLayout(rendererGroup);
 
     rendererGroupLayout->addLayout(renderSystemLayout);
-    rendererGroupLayout->addWidget(mRendererStackedWidget);
 
     // Display
     QGroupBox *displayGroup = new QGroupBox(tr("Display"), this);
@@ -52,107 +53,33 @@ GraphicsPage::GraphicsPage(Files::ConfigurationManager &cfg, QWidget *parent)
 
 void GraphicsPage::createPages()
 {
-    // OpenGL rendering settings
-    QWidget *mOGLRendererPage = new QWidget();
+    QWidget *main = new QWidget();
+    QGridLayout *grid = new QGridLayout(main);
 
-    QLabel *OGLRTTLabel = new QLabel(tr("Preferred RTT Mode:"), mOGLRendererPage);
-    mOGLRTTComboBox = new QComboBox(mOGLRendererPage);
+    mVSyncCheckBox = new QCheckBox(tr("Vertical Sync"), main);
+    grid->addWidget(mVSyncCheckBox, 0, 0, 1, 1);
 
-    QLabel *OGLAntiAliasingLabel = new QLabel(tr("Antialiasing:"), mOGLRendererPage);
-    mOGLAntiAliasingComboBox = new QComboBox(mOGLRendererPage);
+    mFullScreenCheckBox = new QCheckBox(tr("Full Screen"), main);
+    grid->addWidget(mFullScreenCheckBox, 1, 0, 1, 1);
 
-    QGridLayout *OGLRendererLayout = new QGridLayout(mOGLRendererPage);
+    QLabel *antiAliasingLabel = new QLabel(tr("Antialiasing:"), main);
+    mAntiAliasingComboBox = new QComboBox(main);
+    grid->addWidget(antiAliasingLabel, 2, 0, 1, 1);
+    grid->addWidget(mAntiAliasingComboBox, 2, 1, 1, 1);
+
+    QLabel *resolutionLabel = new QLabel(tr("Resolution:"), main);
+    mResolutionComboBox = new QComboBox(main);
+    grid->addWidget(resolutionLabel, 3, 0, 1, 1);
+    grid->addWidget(mResolutionComboBox, 3, 1, 1, 1);
+
     QSpacerItem *vSpacer1 = new QSpacerItem(20, 10, QSizePolicy::Minimum, QSizePolicy::Expanding);
+    grid->addItem(vSpacer1, 4, 0, 1, 1);
 
-    OGLRendererLayout->addWidget(OGLRTTLabel, 0, 0, 1, 1);
-    OGLRendererLayout->addWidget(mOGLRTTComboBox, 0, 1, 1, 1);
-    OGLRendererLayout->addWidget(OGLAntiAliasingLabel, 1, 0, 1, 1);
-    OGLRendererLayout->addWidget(mOGLAntiAliasingComboBox, 1, 1, 1, 1);
-    OGLRendererLayout->addItem(vSpacer1, 2, 1, 1, 1);
-
-    // OpenGL display settings
-    QWidget *mOGLDisplayPage = new QWidget();
-
-    QLabel *OGLResolutionLabel = new QLabel(tr("Resolution:"), mOGLDisplayPage);
-    mOGLResolutionComboBox = new QComboBox(mOGLDisplayPage);
-
-    QLabel *OGLFrequencyLabel = new QLabel(tr("Display Frequency:"), mOGLDisplayPage);
-    mOGLFrequencyComboBox = new QComboBox(mOGLDisplayPage);
-
-    mOGLVSyncCheckBox = new QCheckBox(tr("Vertical Sync"), mOGLDisplayPage);
-    mOGLFullScreenCheckBox = new QCheckBox(tr("Full Screen"), mOGLDisplayPage);
-
-    QGridLayout *OGLDisplayLayout = new QGridLayout(mOGLDisplayPage);
-    QSpacerItem *vSpacer2 = new QSpacerItem(20, 10, QSizePolicy::Minimum, QSizePolicy::Minimum);
-
-    OGLDisplayLayout->addWidget(OGLResolutionLabel, 0, 0, 1, 1);
-    OGLDisplayLayout->addWidget(mOGLResolutionComboBox, 0, 1, 1, 1);
-    OGLDisplayLayout->addWidget(OGLFrequencyLabel, 1, 0, 1, 1);
-    OGLDisplayLayout->addWidget(mOGLFrequencyComboBox, 1, 1, 1, 1);
-
-    OGLDisplayLayout->addItem(vSpacer2, 2, 1, 1, 1);
-    OGLDisplayLayout->addWidget(mOGLVSyncCheckBox, 3, 0, 1, 1);
-    OGLDisplayLayout->addWidget(mOGLFullScreenCheckBox, 6, 0, 1, 1);
-
-    // Direct3D rendering settings
-    QWidget *mD3DRendererPage = new QWidget();
-
-    QLabel *D3DRenderDeviceLabel = new QLabel(tr("Rendering Device:"), mD3DRendererPage);
-    mD3DRenderDeviceComboBox = new QComboBox(mD3DRendererPage);
-
-    QLabel *D3DAntiAliasingLabel = new QLabel(tr("Antialiasing:"), mD3DRendererPage);
-    mD3DAntiAliasingComboBox = new QComboBox(mD3DRendererPage);
-
-    QLabel *D3DFloatingPointLabel = new QLabel(tr("Floating-point Mode:"), mD3DRendererPage);
-    mD3DFloatingPointComboBox = new QComboBox(mD3DRendererPage);
-
-    mD3DNvPerfCheckBox = new QCheckBox(tr("Allow NVPerfHUD"), mD3DRendererPage);
-
-    QGridLayout *D3DRendererLayout = new QGridLayout(mD3DRendererPage);
-    QSpacerItem *vSpacer3 = new QSpacerItem(20, 10, QSizePolicy::Minimum, QSizePolicy::Minimum);
-    QSpacerItem *vSpacer4 = new QSpacerItem(20, 10, QSizePolicy::Minimum, QSizePolicy::Expanding);
-
-    D3DRendererLayout->addWidget(D3DRenderDeviceLabel, 0, 0, 1, 1);
-    D3DRendererLayout->addWidget(mD3DRenderDeviceComboBox, 0, 1, 1, 1);
-    D3DRendererLayout->addWidget(D3DAntiAliasingLabel, 1, 0, 1, 1);
-    D3DRendererLayout->addWidget(mD3DAntiAliasingComboBox, 1, 1, 1, 1);
-    D3DRendererLayout->addWidget(D3DFloatingPointLabel, 2, 0, 1, 1);
-    D3DRendererLayout->addWidget(mD3DFloatingPointComboBox, 2, 1, 1, 1);
-    D3DRendererLayout->addItem(vSpacer3, 3, 1, 1, 1);
-    D3DRendererLayout->addWidget(mD3DNvPerfCheckBox, 4, 0, 1, 1);
-    D3DRendererLayout->addItem(vSpacer4, 5, 1, 1, 1);
-
-    // Direct3D display settings
-    QWidget *mD3DDisplayPage = new QWidget();
-
-    QLabel *D3DResolutionLabel = new QLabel(tr("Resolution:"), mD3DDisplayPage);
-    mD3DResolutionComboBox = new QComboBox(mD3DDisplayPage);
-
-    mD3DVSyncCheckBox = new QCheckBox(tr("Vertical Sync"), mD3DDisplayPage);
-    mD3DFullScreenCheckBox = new QCheckBox(tr("Full Screen"), mD3DDisplayPage);
-
-    QGridLayout *mD3DDisplayLayout = new QGridLayout(mD3DDisplayPage);
-    QSpacerItem *vSpacer5 = new QSpacerItem(20, 10, QSizePolicy::Minimum, QSizePolicy::Minimum);
-
-    mD3DDisplayLayout->addWidget(D3DResolutionLabel, 0, 0, 1, 1);
-    mD3DDisplayLayout->addWidget(mD3DResolutionComboBox, 0, 1, 1, 1);
-    mD3DDisplayLayout->addItem(vSpacer5, 1, 1, 1, 1);
-    mD3DDisplayLayout->addWidget(mD3DVSyncCheckBox, 2, 0, 1, 1);
-    mD3DDisplayLayout->addWidget(mD3DFullScreenCheckBox, 5, 0, 1, 1);
-
-    // Add the created pages
-    mRendererStackedWidget->addWidget(mOGLRendererPage);
-    mRendererStackedWidget->addWidget(mD3DRendererPage);
-
-    mDisplayStackedWidget->addWidget(mOGLDisplayPage);
-    mDisplayStackedWidget->addWidget(mD3DDisplayPage);
+    mDisplayStackedWidget->addWidget(main);
 }
 
 void GraphicsPage::setupConfig()
 {
-    QString ogreCfg = mCfgMgr.getOgreConfigPath().string().c_str();
-    QFile file(ogreCfg);
-    mOgreConfig = new QSettings(ogreCfg, QSettings::IniFormat);
 }
 
 void GraphicsPage::setupOgre()
@@ -164,32 +91,12 @@ void GraphicsPage::setupOgre()
     Ogre::LogManager* logMgr = OGRE_NEW Ogre::LogManager;
     logMgr->createLog((mCfgMgr.getLogPath().string() + "/launcherOgre.log"), true, false, false);
 
-    QString ogreCfg = QString::fromStdString(mCfgMgr.getOgreConfigPath().string());
-    file.setFileName(ogreCfg);
-
-    //we need to check that the path to the configuration file exists before we
-    //try and create an instance of Ogre::Root otherwise Ogre raises an exception
-    QDir configDir = QFileInfo(file).dir();
-    if ( !configDir.exists() && !configDir.mkpath(configDir.path()) )
-    {
-        QMessageBox msgBox;
-        msgBox.setWindowTitle("Error creating config file");
-        msgBox.setIcon(QMessageBox::Critical);
-        msgBox.setStandardButtons(QMessageBox::Ok);
-        msgBox.setText(QString(tr("<br><b>Failed to create the configuration file</b><br><br> \
-        Make sure you have write access to<br>%1<br><br>")).arg(configDir.path()));
-        msgBox.exec();
-
-        qApp->exit(1);
-        return;
-    }
-
     try
     {
     #if defined(ENABLE_PLUGIN_GL) || defined(ENABLE_PLUGIN_Direct3D9)
-        mOgre = new Ogre::Root("", file.fileName().toStdString(), "./launcherOgre.log");
+        mOgre = new Ogre::Root("", "", "./launcherOgre.log");
     #else
-        mOgre = new Ogre::Root(pluginCfg.toStdString(), file.fileName().toStdString(), "./launcherOgre.log");
+        mOgre = new Ogre::Root(pluginCfg.toStdString(), "", "./launcherOgre.log");
     #endif
     }
     catch(Ogre::Exception &ex)
@@ -228,10 +135,18 @@ void GraphicsPage::setupOgre()
         mRendererComboBox->addItem((*r)->getName().c_str());
     }
 
-    int index = mRendererComboBox->findText(mOgreConfig->value("Render System").toString());
+    int index = mRendererComboBox->findText(QString::fromStdString(Settings::Manager::getString("render system", "Video")));
 
     if ( index != -1) {
         mRendererComboBox->setCurrentIndex(index);
+    }
+    else
+    {
+#if OGRE_PLATFORM == OGRE_PLATFORM_WIN32
+        mRendererComboBox->setCurrentIndex(mRendererComboBox->findText("Direct3D9 Rendering Subsystem"));
+#else
+        mRendererComboBox->setCurrentIndex(mRendererComboBox->findText("OpenGL Rendering Subsystem"));
+#endif
     }
 
     // Create separate rendersystems
@@ -255,217 +170,44 @@ void GraphicsPage::setupOgre()
     }
 
     // Now fill the GUI elements
-    // OpenGL
-    if (mOpenGLRenderSystem) {
-        mOGLRTTComboBox->addItems(getAvailableOptions(QString("RTT Preferred Mode"), mOpenGLRenderSystem));
-        mOGLAntiAliasingComboBox->addItems(getAvailableOptions(QString("FSAA"), mOpenGLRenderSystem));
-        mOGLResolutionComboBox->addItems(getAvailableOptions(QString("Video Mode"), mOpenGLRenderSystem));
-        mOGLFrequencyComboBox->addItems(getAvailableOptions(QString("Display Frequency"), mOpenGLRenderSystem));
-    }
-
-    // Direct3D
-    if (mDirect3DRenderSystem) {
-        mD3DRenderDeviceComboBox->addItems(getAvailableOptions(QString("Rendering Device"), mDirect3DRenderSystem));
-        mD3DAntiAliasingComboBox->addItems(getAvailableOptions(QString("FSAA"), mDirect3DRenderSystem));
-        mD3DFloatingPointComboBox->addItems(getAvailableOptions(QString("Floating-point mode"), mDirect3DRenderSystem));
-        mD3DResolutionComboBox->addItems(getAvailableOptions(QString("Video Mode"), mDirect3DRenderSystem));
-    }
+    mAntiAliasingComboBox->clear();
+    mResolutionComboBox->clear();
+    mAntiAliasingComboBox->addItems(getAvailableOptions(QString("FSAA"), mSelectedRenderSystem));
+    mResolutionComboBox->addItems(getAvailableOptions(QString("Video Mode"), mSelectedRenderSystem));
 }
 
 void GraphicsPage::readConfig()
 {
-    // Read the config file settings
-    if (mOpenGLRenderSystem) {
+    if (Settings::Manager::getBool("vsync", "Video"))
+        mVSyncCheckBox->setCheckState(Qt::Checked);
 
-        int index = mOGLRTTComboBox->findText(getConfigValue("RTT Preferred Mode", mOpenGLRenderSystem));
-        if ( index != -1) {
-            mOGLRTTComboBox->setCurrentIndex(index);
-        }
+    if (Settings::Manager::getBool("fullscreen", "Video"))
+        mFullScreenCheckBox->setCheckState(Qt::Checked);
 
-        index = mOGLAntiAliasingComboBox->findText(getConfigValue("FSAA", mOpenGLRenderSystem));
-        if ( index != -1){
-            mOGLAntiAliasingComboBox->setCurrentIndex(index);
-        }
+    int aaIndex = mAntiAliasingComboBox->findText(QString::fromStdString(Settings::Manager::getString("antialiasing", "Video")));
+    if (aaIndex != -1)
+        mAntiAliasingComboBox->setCurrentIndex(aaIndex);
 
-        index = mOGLResolutionComboBox->findText(getConfigValue("Video Mode", mOpenGLRenderSystem));
-        if ( index != -1) {
-            mOGLResolutionComboBox->setCurrentIndex(index);
-        }
-
-        index = mOGLFrequencyComboBox->findText(getConfigValue("Display Frequency", mOpenGLRenderSystem));
-        if ( index != -1) {
-            mOGLFrequencyComboBox->setCurrentIndex(index);
-        }
-
-        // Now we do the same for the checkboxes
-        if (getConfigValue("VSync", mOpenGLRenderSystem) == QLatin1String("Yes")) {
-            mOGLVSyncCheckBox->setCheckState(Qt::Checked);
-        }
-
-        if (getConfigValue("Full Screen", mOpenGLRenderSystem) == QLatin1String("Yes")) {
-            mOGLFullScreenCheckBox->setCheckState(Qt::Checked);
-        }
-    }
-
-    if (mDirect3DRenderSystem) {
-
-        int index = mD3DRenderDeviceComboBox->findText(getConfigValue("Rendering Device", mDirect3DRenderSystem));
-        if ( index != -1) {
-            mD3DRenderDeviceComboBox->setCurrentIndex(index);
-        }
-
-        index = mD3DAntiAliasingComboBox->findText(getConfigValue("FSAA", mDirect3DRenderSystem));
-        if ( index != -1) {
-            mD3DAntiAliasingComboBox->setCurrentIndex(index);
-        }
-
-        index = mD3DFloatingPointComboBox->findText(getConfigValue("Floating-point mode", mDirect3DRenderSystem));
-        if ( index != -1) {
-            mD3DFloatingPointComboBox->setCurrentIndex(index);
-        }
-
-        index = mD3DResolutionComboBox->findText(getConfigValue("Video Mode", mDirect3DRenderSystem));
-        if ( index != -1) {
-            mD3DResolutionComboBox->setCurrentIndex(index);
-        }
-
-        if (getConfigValue("Allow NVPerfHUD", mDirect3DRenderSystem) == QLatin1String("Yes")) {
-                mD3DNvPerfCheckBox->setCheckState(Qt::Checked);
-        }
-
-        if (getConfigValue("VSync", mDirect3DRenderSystem) == QLatin1String("Yes")) {
-                mD3DVSyncCheckBox->setCheckState(Qt::Checked);
-        }
-
-        if (getConfigValue("Full Screen", mDirect3DRenderSystem) == QLatin1String("Yes")) {
-                mD3DFullScreenCheckBox->setCheckState(Qt::Checked);
-        }
-    }
+    std::string resolution = boost::lexical_cast<std::string>(Settings::Manager::getInt("resolution x", "Video"))
+        + " x " + boost::lexical_cast<std::string>(Settings::Manager::getInt("resolution y", "Video"));
+    int resIndex = mResolutionComboBox->findText(QString::fromStdString(resolution));
+    if (resIndex != -1)
+        mResolutionComboBox->setCurrentIndex(resIndex);
 }
 
 void GraphicsPage::writeConfig()
 {
-    mOgre->setRenderSystem(mSelectedRenderSystem);
+    Settings::Manager::setBool("vsync", "Video", mVSyncCheckBox->checkState());
+    Settings::Manager::setBool("fullscreen", "Video", mFullScreenCheckBox->checkState());
+    Settings::Manager::setString("antialiasing", "Video", mAntiAliasingComboBox->currentText().toStdString());
 
-    if (mDirect3DRenderSystem) {
-        // Nvidia Performance HUD
-        if (mD3DNvPerfCheckBox->checkState() == Qt::Checked) {
-            mDirect3DRenderSystem->setConfigOption("Allow NVPerfHUD", "Yes");
-        } else {
-            mDirect3DRenderSystem->setConfigOption("Allow NVPerfHUD", "No");
-        }
-
-        // Antialiasing
-        mDirect3DRenderSystem->setConfigOption("FSAA", mD3DAntiAliasingComboBox->currentText().toStdString());
-
-        // Full screen
-        if (mD3DFullScreenCheckBox->checkState() == Qt::Checked) {
-            mDirect3DRenderSystem->setConfigOption("Full Screen", "Yes");
-        } else {
-            mDirect3DRenderSystem->setConfigOption("Full Screen", "No");
-        }
-
-        // Rendering device
-        mDirect3DRenderSystem->setConfigOption("Rendering Device", mD3DRenderDeviceComboBox->currentText().toStdString());
-
-        // VSync
-        if (mD3DVSyncCheckBox->checkState() == Qt::Checked) {
-            mDirect3DRenderSystem->setConfigOption("VSync", "Yes");
-        } else {
-            mDirect3DRenderSystem->setConfigOption("VSync", "No");
-        }
-
-        // Resolution
-        mDirect3DRenderSystem->setConfigOption("Video Mode", mD3DResolutionComboBox->currentText().toStdString());
-    }
-
-    if (mOpenGLRenderSystem) {
-        // Display Frequency
-        mOpenGLRenderSystem->setConfigOption("Display Frequency", mOGLFrequencyComboBox->currentText().toStdString());
-
-        // Antialiasing
-        mOpenGLRenderSystem->setConfigOption("FSAA", mOGLAntiAliasingComboBox->currentText().toStdString());
-
-        // Full screen
-        if (mOGLFullScreenCheckBox->checkState() == Qt::Checked) {
-            mOpenGLRenderSystem->setConfigOption("Full Screen", "Yes");
-        } else {
-            mOpenGLRenderSystem->setConfigOption("Full Screen", "No");
-        }
-
-        // RTT mode
-        mOpenGLRenderSystem->setConfigOption("RTT Preferred Mode", mOGLRTTComboBox->currentText().toStdString());
-
-        // VSync
-        if (mOGLVSyncCheckBox->checkState() == Qt::Checked) {
-            mOpenGLRenderSystem->setConfigOption("VSync", "Yes");
-        } else {
-            mOpenGLRenderSystem->setConfigOption("VSync", "No");
-        }
-
-        // Resolution
-        mOpenGLRenderSystem->setConfigOption("Video Mode", mOGLResolutionComboBox->currentText().toStdString());
-    }
-
-    // Now we validate the options
-    QString ogreError = QString::fromStdString(mSelectedRenderSystem->validateConfigOptions());
-
-    if (!ogreError.isEmpty()) {
-        QMessageBox msgBox;
-        msgBox.setWindowTitle("Error validating Ogre configuration");
-        msgBox.setIcon(QMessageBox::Critical);
-        msgBox.setStandardButtons(QMessageBox::Ok);
-        msgBox.setText(tr("<br><b>A problem occured while validating the graphics options</b><br><br> \
-        The graphics options could not be saved.<br><br> \
-        Press \"Show Details...\" for more information.<br>"));
-        msgBox.setDetailedText(ogreError);
-        msgBox.exec();
-
-        Ogre::LogManager::getSingletonPtr()->logMessage( "Caught exception in validateConfigOptions");
-
-        qCritical("Error validating configuration");
-
-        qApp->exit(1);
-        return;
-    }
-
-    // Write the settings to the config file
-
-
-    try
-    {
-        mOgre->saveConfig();
-    }
-    catch(Ogre::Exception &ex)
-    {
-        QString ogreError = QString::fromStdString(ex.getFullDescription().c_str());
-        QMessageBox msgBox;
-        msgBox.setWindowTitle("Error writing Ogre configuration file");
-        msgBox.setIcon(QMessageBox::Critical);
-        msgBox.setStandardButtons(QMessageBox::Ok);
-        msgBox.setText(tr("<br><b>Could not write the graphics configuration</b><br><br> \
-        Please make sure you have the right permissions and try again.<br><br> \
-        Press \"Show Details...\" for more information.<br>"));
-        msgBox.setDetailedText(ogreError);
-        msgBox.exec();
-
-        qCritical("Error saving Ogre configuration, the error reported was:\n %s", qPrintable(ogreError));
-
-        qApp->exit(1);
-        return;
-    }
-
-}
-
-QString GraphicsPage::getConfigValue(const QString &key, Ogre::RenderSystem *renderer)
-{
-    QString result;
-
-    mOgreConfig->beginGroup(renderer->getName().c_str());
-    result = mOgreConfig->value(key).toString();
-    mOgreConfig->endGroup();
-
-    return result;
+    std::string resolution = mResolutionComboBox->currentText().toStdString();
+    // parse resolution x and y from a string like "800 x 600"
+    size_t xPos = resolution.find("x");
+    int resX = boost::lexical_cast<int>(resolution.substr(0, xPos-1));
+    int resY = boost::lexical_cast<int>(resolution.substr(xPos+2, resolution.size()-(xPos+2)));
+    Settings::Manager::setInt("resolution x", "Video", resX);
+    Settings::Manager::setInt("resolution y", "Video", resY);
 }
 
 QStringList GraphicsPage::getAvailableOptions(const QString &key, Ogre::RenderSystem *renderer)
@@ -480,12 +222,17 @@ QStringList GraphicsPage::getAvailableOptions(const QString &key, Ogre::RenderSy
         Ogre::StringVector::iterator opt_it;
         uint idx = 0;
         for (opt_it = i->second.possibleValues.begin ();
-             opt_it != i->second.possibleValues.end (); opt_it++, idx++)
-             {
+        opt_it != i->second.possibleValues.end (); opt_it++, idx++)
+        {
 
-                 if (strcmp (key.toStdString().c_str(), i->first.c_str()) == 0)
-                     result << QString::fromStdString((*opt_it).c_str()).simplified();
-             }
+            if (strcmp (key.toStdString().c_str(), i->first.c_str()) == 0)
+            {
+                if (key == "FSAA" && *opt_it == "0")
+                    result << QString("none");
+                else
+                    result << ((key == "FSAA") ? QString("MSAA ") : QString("")) + QString::fromStdString((*opt_it).c_str()).simplified();
+            }
+        }
 
     }
 
@@ -494,15 +241,11 @@ QStringList GraphicsPage::getAvailableOptions(const QString &key, Ogre::RenderSy
 
 void GraphicsPage::rendererChanged(const QString &renderer)
 {
-    if (renderer.contains("Direct3D")) {
-        mRendererStackedWidget->setCurrentIndex(1);
-        mDisplayStackedWidget->setCurrentIndex(1);
-    }
-
-    if (renderer.contains("OpenGL")) {
-        mRendererStackedWidget->setCurrentIndex(0);
-        mDisplayStackedWidget->setCurrentIndex(0);
-    }
-
     mSelectedRenderSystem = mOgre->getRenderSystemByName(renderer.toStdString());
+
+    mAntiAliasingComboBox->clear();
+    mResolutionComboBox->clear();
+
+    mAntiAliasingComboBox->addItems(getAvailableOptions(QString("FSAA"), mSelectedRenderSystem));
+    mResolutionComboBox->addItems(getAvailableOptions(QString("Video Mode"), mSelectedRenderSystem));
 }

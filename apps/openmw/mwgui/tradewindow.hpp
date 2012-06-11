@@ -69,6 +69,8 @@ namespace MWGui
             virtual std::vector<MWWorld::Ptr> itemsToIgnore();
 
             void updateLabels();
+
+            virtual void onReferenceUnavailable();
     };
 }
 

@@ -61,6 +61,7 @@ bool MWWorld::ContainerStore::stacks(const Ptr& ptr1, const Ptr& ptr2)
     /// \todo add current weapon/armor health, remaining lockpick/repair uses, current enchantment charge here as soon as they are implemented
     if (  ptr1.mCellRef->refID == ptr2.mCellRef->refID
         && MWWorld::Class::get(ptr1).getScript(ptr1) == "" // item with a script never stacks
+        && MWWorld::Class::get(ptr1).getEnchantment(ptr1) == "" // item with enchantment never stacks (we could revisit this later, but for now it makes selecting items in the spell window much easier)
         && ptr1.mCellRef->owner == ptr2.mCellRef->owner
         && ptr1.mCellRef->soul == ptr2.mCellRef->soul
         && ptr1.mCellRef->charge == ptr2.mCellRef->charge)

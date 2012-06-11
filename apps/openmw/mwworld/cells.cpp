@@ -78,8 +78,6 @@ MWWorld::Ptr::CellStore *MWWorld::Cells::getExterior (int x, int y)
     std::map<std::pair<int, int>, Ptr::CellStore>::iterator result =
         mExteriors.find (std::make_pair (x, y));
 
-    bool fill = false;
-
     if (result==mExteriors.end())
     {
         const ESM::Cell *cell = mStore.cells.searchExt (x, y);
@@ -100,15 +98,13 @@ MWWorld::Ptr::CellStore *MWWorld::Cells::getExterior (int x, int y)
 
         result = mExteriors.insert (std::make_pair (
             std::make_pair (x, y), Ptr::CellStore (cell))).first;
-
-        fill = true;
     }
 
     if (result->second.mState!=Ptr::CellStore::State_Loaded)
+    {
         result->second.load (mStore, mReader);
-
-    if (fill)
         fillContainers (result->second);
+    }
 
     return &result->second;
 }
@@ -117,22 +113,18 @@ MWWorld::Ptr::CellStore *MWWorld::Cells::getInterior (const std::string& name)
 {
     std::map<std::string, Ptr::CellStore>::iterator result = mInteriors.find (name);
 
-    bool fill = false;
-
     if (result==mInteriors.end())
     {
         const ESM::Cell *cell = mStore.cells.findInt (name);
 
         result = mInteriors.insert (std::make_pair (name, Ptr::CellStore (cell))).first;
-
-        fill = true;
     }
 
     if (result->second.mState!=Ptr::CellStore::State_Loaded)
+    {
         result->second.load (mStore, mReader);
-
-    if (fill)
         fillContainers (result->second);
+    }
 
     return &result->second;
 }

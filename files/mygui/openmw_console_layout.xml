@@ -1,17 +1,17 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <MyGUI type="Layout">
-  <Widget type="Window" skin="MW_ConsoleWindow" position="0 0 400 400" layer="Console" name="_Main">
-    <Property key="Caption" value="Console"/>
+  <Widget type="Window" skin="MW_Window" position="0 0 400 400" layer="Console" name="_Main">
+    <Property key="Caption" value="#{sConsoleTitle}"/>
     <Property key="MinSize" value="200 100"/>
     <Property key="MaxSize" value="2000 2000"/>
 
     <!-- Log window -->
-    <Widget type="EditBox" skin="MW_ConsoleLog" position="5 5 390 360" align="Stretch" name="list_History">
+    <Widget type="EditBox" skin="MW_ConsoleLog" position="5 5 380 330" align="Stretch" name="list_History">
         <Property key="MultiLine" value="1"/>
     </Widget>
 
     <!-- Command line -->
-    <Widget type="EditBox" skin="MW_ConsoleCommand" position="0 365 392 28" align="HStretch Bottom" name="edit_Command"/>
+    <Widget type="EditBox" skin="MW_ConsoleCommand" position="0 335 382 28" align="HStretch Bottom" name="edit_Command"/>
 
   </Widget>
 </MyGUI>

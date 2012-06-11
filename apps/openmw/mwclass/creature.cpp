@@ -81,22 +81,13 @@ namespace MWClass
         ESMS::LiveCellRef<ESM::Creature, MWWorld::RefData> *ref =
             ptr.get<ESM::Creature>();
 
-
         const std::string &model = ref->base->model;
         assert (ref->base != NULL);
         if(!model.empty()){
             physics.insertObjectPhysics(ptr, "meshes\\" + model);
         }
-    }
 
-    void Creature::enable (const MWWorld::Ptr& ptr) const
-    {
         MWBase::Environment::get().getMechanicsManager()->addActor (ptr);
-    }
-
-    void Creature::disable (const MWWorld::Ptr& ptr) const
-    {
-        MWBase::Environment::get().getMechanicsManager()->removeActor (ptr);
     }
 
     std::string Creature::getName (const MWWorld::Ptr& ptr) const

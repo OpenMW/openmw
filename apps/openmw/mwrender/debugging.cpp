@@ -68,7 +68,7 @@ ManualObject *Debugging::createPathgridLines(const ESM::Pathgrid *pathgrid)
     result->begin(PATHGRID_LINE_MATERIAL, RenderOperation::OT_LINE_LIST);
     for(ESM::Pathgrid::EdgeList::const_iterator it = pathgrid->edges.begin();
         it != pathgrid->edges.end();
-        it++)
+        ++it)
     {
         const ESM::Pathgrid::Edge &edge = *it;
         const ESM::Pathgrid::Point &p1 = pathgrid->points[edge.v0], &p2 = pathgrid->points[edge.v1];
@@ -197,7 +197,7 @@ void Debugging::togglePathgrid()
 
         // add path grid meshes to already loaded cells
         mPathGridRoot = mMwRoot->createChildSceneNode();
-        for(CellList::iterator it = mActiveCells.begin(); it != mActiveCells.end(); it++)
+        for(CellList::iterator it = mActiveCells.begin(); it != mActiveCells.end(); ++it)
         {
             enableCellPathgrid(*it);
         }
@@ -205,7 +205,7 @@ void Debugging::togglePathgrid()
     else
     {
         // remove path grid meshes from already loaded cells
-        for(CellList::iterator it = mActiveCells.begin(); it != mActiveCells.end(); it++)
+        for(CellList::iterator it = mActiveCells.begin(); it != mActiveCells.end(); ++it)
         {
             disableCellPathgrid(*it);
         }

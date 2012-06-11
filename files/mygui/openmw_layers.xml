@@ -7,6 +7,7 @@
     <Layer name="Books" overlapped="false" peek="false"/>
     <Layer name="MainMenu" overlapped="false" peek="false"/>
     <Layer name="Console" overlapped="false" peek="true"/>
+    <Layer name="Notification" overlapped="false" peek="false"/>
     <Layer name="Popup" overlapped="true" peek="true"/>
     <Layer name="DragAndDrop" overlapped="false" peek="true"/>
     <Layer name="Pointer" overlapped="false" peek="false"/>

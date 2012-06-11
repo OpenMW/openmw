@@ -4,6 +4,7 @@
 #include <QDialog>
 
 #include <components/files/configurationmanager.hpp>
+#include <components/settings/settings.hpp>
 
 class QListWidget;
 class QListWidgetItem;
@@ -41,6 +42,7 @@ private:
     DataFilesPage *mDataFilesPage;
 
     Files::ConfigurationManager mCfgMgr;
+    Settings::Manager mSettings;
 };
 
 #endif

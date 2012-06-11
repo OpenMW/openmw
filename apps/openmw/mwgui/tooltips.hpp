@@ -5,6 +5,8 @@
 #include <openengine/gui/layout.hpp>
 #include "../mwworld/ptr.hpp"
 
+#include "widgets.hpp"
+
 namespace MWGui
 {
     class WindowManager;
@@ -13,11 +15,6 @@ namespace MWGui
     struct ToolTipInfo
     {
     public:
-        ToolTipInfo() :
-            effects(0)
-        {
-        };
-
         std::string caption;
         std::string text;
         std::string icon;
@@ -26,7 +23,7 @@ namespace MWGui
         std::string enchant;
 
         // effects (for potions, ingredients)
-        const ESM::EffectList* effects;
+        Widgets::SpellEffectList effects;
     };
 
     class ToolTips : public OEngine::GUI::Layout
@@ -44,6 +41,8 @@ namespace MWGui
         void toggleFullHelp(); ///< show extra info in item tooltips (owner, script)
         bool getFullHelp() const;
 
+        void setDelay(float delay);
+
         void setFocusObject(const MWWorld::Ptr& focus);
         void setFocusObjectScreenCoords(float min_x, float min_y, float max_x, float max_y);
         ///< set the screen-space position of the tooltip for focused object 
@@ -59,6 +58,15 @@ namespace MWGui
 
         static std::string getCountString(const int value);
         ///< @return blank string if count is 1, or else " (value)"
+
+        // these do not create an actual tooltip, but they fill in the data that is required so the tooltip
+        // system knows what to show in case this widget is hovered
+        static void createSkillToolTip(MyGUI::Widget* widget, int skillId);
+        static void createAttributeToolTip(MyGUI::Widget* widget, int attributeId);
+        static void createSpecializationToolTip(MyGUI::Widget* widget, const std::string& name, int specId);
+        static void createBirthsignToolTip(MyGUI::Widget* widget, const std::string& birthsignId);
+        static void createRaceToolTip(MyGUI::Widget* widget, const ESM::Race* playerRace);
+        static void createClassToolTip(MyGUI::Widget* widget, const ESM::Class& playerClass);
 
     private:
         MyGUI::Widget* mDynamicToolTipBox;
@@ -77,6 +85,12 @@ namespace MWGui
 
         float mFocusToolTipX;
         float mFocusToolTipY;
+
+        float mDelay;
+        float mRemainingDelay; // remaining time until tooltip will show
+
+        int mLastMouseX;
+        int mLastMouseY;
 
         bool mGameMode;
 

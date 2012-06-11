@@ -8,10 +8,14 @@
 
 #include "../mwworld/class.hpp"
 
+#include <OgreWindowEventUtilities.h>
+
 #include <utility>
 #include <openengine/ogre/renderer.hpp>
 #include <openengine/ogre/fader.hpp>
 #include <openengine/bullet/physic.hpp>
+
+#include <components/settings/settings.hpp>
 
 #include <vector>
 #include <string>
@@ -49,7 +53,7 @@ namespace MWRender
     class Water;
     class Compositors;
 
-class RenderingManager: private RenderingInterface {
+class RenderingManager: private RenderingInterface, public Ogre::WindowEventListener {
 
   private:
 
@@ -157,9 +161,23 @@ class RenderingManager: private RenderingInterface {
     ///< transform the specified bounding box (in world coordinates) into screen coordinates.
     /// @return packed vector4 (min_x, min_y, max_x, max_y)
 
+    void processChangedSettings(const Settings::CategorySettingVector& settings);
+
+    Ogre::Viewport* getViewport() { return mRendering.getViewport(); }
+
+    static bool waterShaderSupported();
+
+  protected:
+	virtual void windowResized(Ogre::RenderWindow* rw);
+    virtual void windowClosed(Ogre::RenderWindow* rw);
+
   private:
 
     void setAmbientMode();
+
+    void setMenuTransparency(float val);
+
+    void applyCompositors();
 
     bool mSunEnabled;
 

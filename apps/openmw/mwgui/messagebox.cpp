@@ -58,7 +58,7 @@ void MessageBoxManager::onFrame (float frameDuration)
     if(mInterMessageBoxe != NULL && mInterMessageBoxe->mMarkedToDelete) {
         delete mInterMessageBoxe;
         mInterMessageBoxe = NULL;
-        mWindowManager->setNextMode(GM_Game);
+        mWindowManager->popGuiMode();
     }
 }
 
@@ -161,7 +161,7 @@ MessageBox::MessageBox(MessageBoxManager& parMessageBoxManager, const std::strin
     getWidget(mMessageWidget, "message");
 
     mMessageWidget->setOverflowToTheLeft(true);
-    mMessageWidget->addText(cMessage);
+    mMessageWidget->setCaptionWithReplacing(cMessage);
 
     MyGUI::IntSize size;
     size.width = mFixedWidth;

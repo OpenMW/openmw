@@ -11,6 +11,7 @@
 
 #include "../mwworld/world.hpp" // these includes can be removed once the static-hack is gone
 #include "../mwworld/ptr.hpp"
+#include "../mwworld/player.hpp"
 #include "../mwbase/environment.hpp"
 #include <components/esm/loadstat.hpp>
 #include <components/settings/settings.hpp>
@@ -21,6 +22,9 @@
 #include "water.hpp"
 #include "compositors.hpp"
 
+#include "../mwgui/window_manager.hpp" // FIXME
+#include "../mwinput/inputmanager.hpp" // FIXME
+
 using namespace MWRender;
 using namespace Ogre;
 
@@ -30,6 +34,7 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
     :mRendering(_rend), mObjects(mRendering), mActors(mRendering), mAmbientMode(0), mSunEnabled(0)
 {
     mRendering.createScene("PlayerCam", Settings::Manager::getFloat("field of view", "General"), 5);
+    mRendering.setWindowEventListener(this);
 
     mCompositors = new Compositors(mRendering.getViewport());
 
@@ -62,25 +67,13 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
 
     // disable unsupported effects
     const RenderSystemCapabilities* caps = Root::getSingleton().getRenderSystem()->getCapabilities();
-    if (caps->getNumMultiRenderTargets() < 2 || !Settings::Manager::getBool("shaders", "Objects"))
+    if (!waterShaderSupported())
         Settings::Manager::setBool("shader", "Water", false);
     if ( !(caps->isShaderProfileSupported("fp40") || caps->isShaderProfileSupported("ps_4_0"))
         || !Settings::Manager::getBool("shaders", "Objects"))
         Settings::Manager::setBool("enabled", "Shadows", false);
 
-    // note that the order is important here
-    if (useMRT())
-    {
-        mCompositors->addCompositor("gbuffer", 0);
-        mCompositors->setCompositorEnabled("gbuffer", true);
-        mCompositors->addCompositor("Underwater", 1);
-        mCompositors->addCompositor("gbufferFinalizer", 2);
-        mCompositors->setCompositorEnabled("gbufferFinalizer", true);
-    }
-    else
-    {
-        mCompositors->addCompositor("UnderwaterNoMRT", 0);
-    }
+    applyCompositors();
 
     // Turn the entire scene (represented by the 'root' node) -90
     // degrees around the x axis. This makes Z go upwards, and Y go into
@@ -104,7 +97,6 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
 
     mTerrainManager = new TerrainManager(mRendering.getScene(), this);
 
-    //mSkyManager = 0;
     mSkyManager = new SkyManager(mMwRoot, mRendering.getCamera());
 
     mOcclusionQuery = new OcclusionQuery(&mRendering, mSkyManager->getSunNode());
@@ -114,17 +106,24 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
 
     mDebugging = new Debugging(mMwRoot, engine);
     mLocalMap = new MWRender::LocalMap(&mRendering, this);
+
+    setMenuTransparency(Settings::Manager::getFloat("menu transparency", "GUI"));
 }
 
 RenderingManager::~RenderingManager ()
 {
+    mRendering.removeWindowEventListener(this);
+
     delete mPlayer;
     delete mSkyManager;
     delete mDebugging;
+    delete mShaderHelper;
+    delete mShadows;
     delete mTerrainManager;
     delete mLocalMap;
     delete mOcclusionQuery;
     delete mCompositors;
+    delete mWater;
 }
 
 MWRender::SkyManager* RenderingManager::getSkyManager()
@@ -561,6 +560,121 @@ Ogre::Vector4 RenderingManager::boundingBoxToScreen(Ogre::AxisAlignedBox bounds)
 Compositors* RenderingManager::getCompositors()
 {
     return mCompositors;
+}
+
+void RenderingManager::processChangedSettings(const Settings::CategorySettingVector& settings)
+{
+    bool changeRes = false;
+    for (Settings::CategorySettingVector::const_iterator it=settings.begin();
+            it != settings.end(); ++it)
+    {
+        if (it->second == "menu transparency" && it->first == "GUI")
+        {
+            setMenuTransparency(Settings::Manager::getFloat("menu transparency", "GUI"));
+        }
+        else if (it->second == "max viewing distance" && it->first == "Viewing distance")
+        {
+            if (!MWBase::Environment::get().getWorld()->isCellExterior() && !MWBase::Environment::get().getWorld()->isCellQuasiExterior())
+                configureFog(*MWBase::Environment::get().getWorld()->getPlayer().getPlayer().getCell());
+        }
+        else if (it->first == "Video" && (
+                it->second == "resolution x"
+                || it->second == "resolution y"
+                || it->second == "fullscreen"))
+            changeRes = true;
+        else if (it->second == "field of view" && it->first == "General")
+            mRendering.setFov(Settings::Manager::getFloat("field of view", "General"));
+        else if ((it->second == "texture filtering" && it->first == "General")
+            || (it->second == "anisotropy" && it->first == "General"))
+        {
+            TextureFilterOptions tfo;
+            std::string filter = Settings::Manager::getString("texture filtering", "General");
+            if (filter == "anisotropic") tfo = TFO_ANISOTROPIC;
+            else if (filter == "trilinear") tfo = TFO_TRILINEAR;
+            else if (filter == "bilinear") tfo = TFO_BILINEAR;
+            else if (filter == "none") tfo = TFO_NONE;
+
+            MaterialManager::getSingleton().setDefaultTextureFiltering(tfo);
+            MaterialManager::getSingleton().setDefaultAnisotropy( (filter == "anisotropic") ? Settings::Manager::getInt("anisotropy", "General") : 1 );
+        }
+        else if (it->second == "shader" && it->first == "Water")
+        {
+            applyCompositors();
+            mShaderHelper->applyShaders();
+        }
+    }
+
+    if (changeRes)
+    {
+        unsigned int x = Settings::Manager::getInt("resolution x", "Video");
+        unsigned int y = Settings::Manager::getInt("resolution y", "Video");
+
+        if (x != mRendering.getWindow()->getWidth() || y != mRendering.getWindow()->getHeight())
+        {
+            mRendering.getWindow()->resize(x, y);
+        }
+        mRendering.getWindow()->setFullscreen(Settings::Manager::getBool("fullscreen", "Video"), x, y);
+    }
+
+    if (mWater)
+        mWater->processChangedSettings(settings);
+}
+
+void RenderingManager::setMenuTransparency(float val)
+{
+    Ogre::TexturePtr tex = Ogre::TextureManager::getSingleton().getByName("transparent.png");
+    std::vector<Ogre::uint32> buffer;
+    buffer.resize(1);
+    buffer[0] = (int(255*val) << 24);
+    memcpy(tex->getBuffer()->lock(Ogre::HardwareBuffer::HBL_DISCARD), &buffer[0], 1*4);
+    tex->getBuffer()->unlock();
+}
+
+void RenderingManager::windowResized(Ogre::RenderWindow* rw)
+{
+    Settings::Manager::setInt("resolution x", "Video", rw->getWidth());
+    Settings::Manager::setInt("resolution y", "Video", rw->getHeight());
+
+
+    mRendering.adjustViewport();
+    mCompositors->recreate();
+    mWater->assignTextures();
+
+    const Settings::CategorySettingVector& changed = Settings::Manager::apply();
+    MWBase::Environment::get().getInputManager()->processChangedSettings(changed); //FIXME
+    MWBase::Environment::get().getWindowManager()->processChangedSettings(changed); // FIXME
+}
+
+void RenderingManager::windowClosed(Ogre::RenderWindow* rw)
+{
+}
+
+bool RenderingManager::waterShaderSupported()
+{
+    const RenderSystemCapabilities* caps = Root::getSingleton().getRenderSystem()->getCapabilities();
+    if (caps->getNumMultiRenderTargets() < 2 || !Settings::Manager::getBool("shaders", "Objects"))
+        return false;
+    return true;
+}
+
+void RenderingManager::applyCompositors()
+{
+    mCompositors->removeAll();
+    if (useMRT())
+    {
+        mCompositors->addCompositor("gbuffer", 0);
+        mCompositors->setCompositorEnabled("gbuffer", true);
+        mCompositors->addCompositor("Underwater", 1);
+        mCompositors->addCompositor("gbufferFinalizer", 2);
+        mCompositors->setCompositorEnabled("gbufferFinalizer", true);
+    }
+    else
+    {
+        mCompositors->addCompositor("UnderwaterNoMRT", 0);
+    }
+
+    if (mWater)
+        mWater->assignTextures();
 }
 
 } // namespace

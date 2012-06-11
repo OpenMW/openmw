@@ -11,13 +11,13 @@
             </Widget>
 
             <!-- Specialization list -->
-            <Widget type="TextBox" skin="SandText" position="0 28 216 18" name="Specialization0" align="ALIGN_LEFT ALIGN_TOP">
+            <Widget type="Button" skin="SandTextButton" position="0 28 216 18" name="Specialization0" align="ALIGN_LEFT ALIGN_TOP">
                 <Property key="TextAlign" value="ALIGN_TOP ALIGN_HCENTRE"/>
             </Widget>
-            <Widget type="TextBox" skin="SandText" position="0 46 216 18" name="Specialization1" align="ALIGN_LEFT ALIGN_TOP">
+            <Widget type="Button" skin="SandTextButton" position="0 46 216 18" name="Specialization1" align="ALIGN_LEFT ALIGN_TOP">
                 <Property key="TextAlign" value="ALIGN_TOP ALIGN_HCENTRE"/>
             </Widget>
-            <Widget type="TextBox" skin="SandText" position="0 64 216 18" name="Specialization2" align="ALIGN_LEFT ALIGN_TOP">
+            <Widget type="Button" skin="SandTextButton" position="0 64 216 18" name="Specialization2" align="ALIGN_LEFT ALIGN_TOP">
                 <Property key="TextAlign" value="ALIGN_TOP ALIGN_HCENTRE"/>
             </Widget>
 

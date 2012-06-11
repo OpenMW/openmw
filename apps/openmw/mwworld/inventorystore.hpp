@@ -50,6 +50,9 @@ namespace MWWorld
 
             mutable TSlots mSlots;
 
+            // selected magic item (for using enchantments of type "Cast once" or "Cast when used")
+            ContainerStoreIterator mSelectedEnchantItem;
+
             void copySlots (const InventoryStore& store);
 
             void initSlots (TSlots& slots);
@@ -63,7 +66,15 @@ namespace MWWorld
             InventoryStore& operator= (const InventoryStore& store);
 
             void equip (int slot, const ContainerStoreIterator& iterator);
-            ///< \note \a iteartor can be an end-iterator
+            ///< \note \a iterator can be an end-iterator
+
+            void setSelectedEnchantItem(const ContainerStoreIterator& iterator);
+            ///< set the selected magic item (for using enchantments of type "Cast once" or "Cast when used")
+            /// \note to unset the selected item, call this method with end() iterator
+
+            ContainerStoreIterator getSelectedEnchantItem();
+            ///< @return selected magic item (for using enchantments of type "Cast once" or "Cast when used")
+            /// \note if no item selected, return end() iterator
 
             ContainerStoreIterator getSlot (int slot);
 

@@ -2,15 +2,14 @@
 #define MGUI_CONTAINER_H
 
 #include <components/esm_store/store.hpp>
-#include "../mwclass/container.hpp"
-#include <sstream>
-#include <set>
-#include <string>
-#include <utility>
+
 #include "window_base.hpp"
+#include "referenceinterface.hpp"
+
+#include "../mwclass/container.hpp"
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/containerstore.hpp"
-#include <vector>
+
 
 namespace MWWorld
 {
@@ -43,7 +42,7 @@ namespace MWGui
         int mDraggedCount;
     };
 
-    class ContainerBase
+    class ContainerBase : public ReferenceInterface
     {
     public:
         ContainerBase(DragAndDrop* dragAndDrop);
@@ -55,7 +54,9 @@ namespace MWGui
             Filter_Weapon = 0x02,
             Filter_Apparel = 0x03,
             Filter_Magic = 0x04,
-            Filter_Misc = 0x05
+            Filter_Misc = 0x05,
+
+            Filter_Ingredients = 0x06
         };
 
         enum ItemState
@@ -87,7 +88,6 @@ namespace MWGui
         MyGUI::Widget* mSelectedItem;
 
         DragAndDrop* mDragAndDrop;
-        MWWorld::Ptr mContainer;
 
         Filter mFilter;
 
@@ -116,8 +116,12 @@ namespace MWGui
 
         virtual bool isTrading() { return false; }
 
+        virtual void onSelectedItemImpl(MWWorld::Ptr item) { ; }
+
         virtual bool ignoreEquippedItems() { return false; }
         virtual std::vector<MWWorld::Ptr> itemsToIgnore() { return std::vector<MWWorld::Ptr>(); }
+
+        virtual void notifyContentChanged() { ; }
     };
 
     class ContainerWindow : public ContainerBase, public WindowBase
@@ -136,6 +140,8 @@ namespace MWGui
         void onWindowResize(MyGUI::Window* window);
         void onCloseButtonClicked(MyGUI::Widget* _sender);
         void onTakeAllButtonClicked(MyGUI::Widget* _sender);
+
+        virtual void onReferenceUnavailable();
     };
 }
 #endif // CONTAINER_H

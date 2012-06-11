@@ -118,7 +118,7 @@ namespace GUI
     void setTitle(const std::string& title)
     {
       // NOTE: this assume that mMainWidget is of type Window.
-      static_cast<MyGUI::Window*>(mMainWidget)->setCaption(title);
+      static_cast<MyGUI::Window*>(mMainWidget)->setCaptionWithReplacing(title);
       adjustWindowCaption();
     }
 

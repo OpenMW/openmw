@@ -2,6 +2,7 @@
 #define MWGUI_DIALOGE_H
 
 #include "window_base.hpp"
+#include "referenceinterface.hpp"
 #include <boost/array.hpp>
 
 #include "../mwworld/ptr.hpp"
@@ -25,12 +26,10 @@ namespace MWGui
 {
     class DialogueHistory;
 
-    class DialogueWindow: public WindowBase
+    class DialogueWindow: public WindowBase, public ReferenceInterface
     {
     public:
         DialogueWindow(WindowManager& parWindowManager);
-
-        void open();
 
         // Events
         typedef MyGUI::delegates::CMultiDelegate0 EventHandle_Void;
@@ -60,6 +59,8 @@ namespace MWGui
         void onMouseWheel(MyGUI::Widget* _sender, int _rel);
         void onWindowResize(MyGUI::Window* _sender);
 
+        virtual void onReferenceUnavailable();
+
     private:
         void updateOptions();
         /**
@@ -72,13 +73,10 @@ namespace MWGui
 
         bool mEnabled;
 
-        MWWorld::Ptr mActor; // actor being talked to
-
         DialogueHistory*     history;
         Widgets::MWList*      topicsList;
         MyGUI::ProgressPtr pDispositionBar;
         MyGUI::EditPtr pDispositionText;
-        std::map<std::string,std::string> pTopicsText;// this map links keyword and "real" text.
     };
 }
 #endif

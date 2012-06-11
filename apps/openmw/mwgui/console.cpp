@@ -138,6 +138,7 @@ namespace MWGui
     void Console::disable()
     {
         setVisible(false);
+        setSelectedObject(MWWorld::Ptr());
         // Remove keyboard focus from the console input whenever the
         // console is turned off
         MyGUI::InputManager::getInstance().setKeyFocusWidget(NULL);
@@ -240,7 +241,7 @@ namespace MWGui
         {
             try
             {
-                ConsoleInterpreterContext interpreterContext (*this, MWWorld::Ptr());
+                ConsoleInterpreterContext interpreterContext (*this, mPtr);
                 Interpreter::Interpreter interpreter;
                 MWScript::installOpcodes (interpreter);
                 std::vector<Interpreter::Type_Code> code;
@@ -267,7 +268,7 @@ namespace MWGui
         /* Are there quotation marks? */
         if( tmp.find('"') != string::npos ) {
             int numquotes=0;
-            for(string::iterator it=tmp.begin(); it < tmp.end(); it++) {
+            for(string::iterator it=tmp.begin(); it < tmp.end(); ++it) {
                 if( *it == '"' )
                     numquotes++;
             }
@@ -310,7 +311,7 @@ namespace MWGui
         }
 
         /* Iterate through the vector. */
-        for(vector<string>::iterator it=mNames.begin(); it < mNames.end();it++) {
+        for(vector<string>::iterator it=mNames.begin(); it < mNames.end();++it) {
             bool string_different=false;
 
             /* Is the string shorter than the input string? If yes skip it. */
@@ -358,7 +359,7 @@ namespace MWGui
         int i = tmp.length();
 
         for(string::iterator iter=matches.front().begin()+tmp.length(); iter < matches.front().end(); iter++, i++) {
-            for(vector<string>::iterator it=matches.begin(); it < matches.end();it++) {
+            for(vector<string>::iterator it=matches.begin(); it < matches.end();++it) {
                 if( tolower((*it)[i]) != tolower(*iter) ) {
                     /* Append the longest match to the end of the output string*/
                     output.append(matches.front().substr( 0, i));
@@ -369,5 +370,25 @@ namespace MWGui
 
         /* All keywords match with the shortest. Append it to the output string and return it. */
         return output.append(matches.front());
+    }
+
+    void Console::onResChange(int width, int height)
+    {
+        setCoord(10,10, width-10, height/2);
+    }
+
+    void Console::setSelectedObject(const MWWorld::Ptr& object)
+    {
+        mPtr = object;
+        if (!mPtr.isEmpty())
+            setTitle("#{sConsoleTitle} (" + mPtr.getCellRef().refID + ")");
+        else
+            setTitle("#{sConsoleTitle}");
+        MyGUI::InputManager::getInstance().setKeyFocusWidget(command);
+    }
+
+    void Console::onReferenceUnavailable()
+    {
+        setSelectedObject(MWWorld::Ptr());
     }
 }

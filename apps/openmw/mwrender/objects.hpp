@@ -39,7 +39,8 @@ struct LightInfo
 
     LightInfo() :
         flickerVariation(0), resetTime(0.5),
-        flickerSlowVariation(0), time(0), interior(true)
+        flickerSlowVariation(0), time(0), interior(true),
+        type(LT_Normal), radius(1.0)
     {
     }
 };
@@ -68,7 +69,7 @@ class Objects{
     ///< Remove all movable objects from \a node.
 
 public:
-    Objects(OEngine::Render::OgreRenderer& renderer): mRenderer (renderer) {}
+    Objects(OEngine::Render::OgreRenderer& renderer): mRenderer (renderer), mIsStatic(false) {}
     ~Objects(){}
     void insertBegin (const MWWorld::Ptr& ptr, bool enabled, bool static_);
     void insertMesh (const MWWorld::Ptr& ptr, const std::string& mesh);

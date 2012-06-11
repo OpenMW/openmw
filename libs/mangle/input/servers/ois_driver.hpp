@@ -31,6 +31,8 @@ namespace Mangle
       OISDriver(Ogre::RenderWindow *window, bool exclusive=true);
       ~OISDriver();
 
+      void adjustMouseClippingSize(int width, int height);
+
       void capture();
       bool isDown(int index);
       /// Not currently supported.

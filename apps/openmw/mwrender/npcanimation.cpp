@@ -528,7 +528,7 @@ void NpcAnimation::insertFootPart(int type, const std::string &mesh){
 
 
 }
-std::pair<Ogre::Entity*, std::vector<Nif::NiTriShapeCopy>*> NpcAnimation::insertFreePart(const std::string &mesh, const std::string suffix){
+std::pair<Ogre::Entity*, std::vector<Nif::NiTriShapeCopy>*> NpcAnimation::insertFreePart(const std::string &mesh, const std::string& suffix){
 
     std::string meshNumbered = mesh + getUniqueID(mesh + suffix) + suffix;
     NIFLoader::load(meshNumbered);

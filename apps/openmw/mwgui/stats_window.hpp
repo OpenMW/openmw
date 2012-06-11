@@ -47,10 +47,8 @@ namespace MWGui
             void addSeparator(MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
             void addGroup(const std::string &label, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
             MyGUI::TextBox* addValueItem(const std::string& text, const std::string &value, const std::string& state, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
-            MyGUI::Widget* addItem(const std::string text, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
+            MyGUI::Widget* addItem(const std::string& text, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
             void updateScroller();
-
-            void setupToolTips();
 
             void setFactions (const FactionList& factions);
             void setBirthSign (const std::string &signId);

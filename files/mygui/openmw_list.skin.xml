@@ -151,6 +151,28 @@
         <Property key="TrackRangeMargins" value = "14 14" />
         <Property key="MinTrackSize" value = "14" />
         <Property key="VerticalAlignment" value="false"/>
+        <Property key="MoveToClick" value="true"/>
+
+        <!-- Background widget trick that must go first to be placed behind Track and FirstPart/SecondPart widgets, provides the bar texture -->
+        <Child type="Button" skin="MW_HScrollBackground" offset = "14 0 62 14" align = "ALIGN_STRETCH" name = "Background"/>
+
+        <Child type="Button" skin="MW_ScrollLeft" offset = "0 0 14 14" align = "ALIGN_LEFT ALIGN_VSTRETCH" name = "Start"/>
+        <Child type="Button" skin="MW_ScrollRight" offset = "76 0 14 14" align = "ALIGN_RIGHT ALIGN_VSTRETCH" name = "End"/>
+
+        <!-- These are only provided to get mouse input, they should have no skin and be transparent -->
+        <Child type="Button" skin="MW_ScrollEmptyPart" offset = "14 0 24 14" align = "ALIGN_TOP ALIGN_HSTRETCH" name = "FirstPart"/>
+        <Child type="Button" skin="MW_ScrollEmptyPart" offset = "52 0 24 14" align = "ALIGN_TOP ALIGN_HSTRETCH" name = "SecondPart"/>
+
+        <!-- Tracker must be last to be on top and receive mouse events -->
+        <Child type="Button" skin="MW_ScrollTrackH" offset = "38 0 14 14" align = "ALIGN_LEFT ALIGN_VSTRETCH" name = "Track"/>
+    </Skin>
+
+    <!-- Morrowind has a 1 pixel gap between the left arrow and the inner bar, this skin does not replicate that -->
+    <Skin name = "MW_HSlider" size = "90 14">
+        <Property key="TrackRangeMargins" value = "14 14" />
+        <Property key="MinTrackSize" value = "14" />
+        <Property key="VerticalAlignment" value="false"/>
+        <Property key="MoveToClick" value="true"/>
 
         <!-- Background widget trick that must go first to be placed behind Track and FirstPart/SecondPart widgets, provides the bar texture -->
         <Child type="Button" skin="MW_HScrollBackground" offset = "14 0 62 14" align = "ALIGN_STRETCH" name = "Background"/>
@@ -170,6 +192,7 @@
     <Skin name = "MW_VScroll" size = "14 90">
         <Property key="TrackRangeMargins" value = "14 14" />
         <Property key="MinTrackSize" value = "14" />
+        <Property key="MoveToClick" value="true"/>
 
         <!-- Background widget trick that must go first to be placed behind Track and FirstPart/SecondPart widgets, provides the bar texture -->
         <Child type="Button" skin="MW_VScrollBackground" offset = "0 14 14 62" align = "ALIGN_STRETCH" name = "Background"/>
