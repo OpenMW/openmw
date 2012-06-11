@@ -14,11 +14,16 @@
 #include <vector>
 #include <set>
 
+#include "MyGUI_UString.h"
+
 #include <components/esm_store/store.hpp>
+#include <components/settings/settings.hpp>
 #include <openengine/ogre/renderer.hpp>
 #include <openengine/gui/manager.hpp>
+
 #include "../mwmechanics/stat.hpp"
 #include "../mwworld/ptr.hpp"
+
 #include "mode.hpp"
 
 namespace MyGUI
@@ -61,11 +66,22 @@ namespace MWGui
   class Console;
   class JournalWindow;
   class CharacterCreation;
-
+  class ContainerWindow;
+  class DragAndDrop;
+  class InventoryWindow;
+  class ToolTips;
+  class ScrollWindow;
+  class BookWindow;
   class TextInputDialog;
   class InfoBoxDialog;
   class DialogueWindow;
   class MessageBoxManager;
+  class CountDialog;
+  class TradeWindow;
+  class SettingsWindow;
+  class ConfirmationDialog;
+  class AlchemyWindow;
+  class SpellWindow;
 
   struct ClassPoint
   {
@@ -82,10 +98,8 @@ namespace MWGui
     typedef std::vector<Faction> FactionList;
     typedef std::vector<int> SkillList;
 
-    WindowManager(const Compiler::Extensions& extensions, int fpsLevel, bool newGame, OEngine::Render::OgreRenderer *mOgre, const std::string logpath);
+    WindowManager(const Compiler::Extensions& extensions, int fpsLevel, bool newGame, OEngine::Render::OgreRenderer *mOgre, const std::string& logpath);
     virtual ~WindowManager();
-
-    void setGuiMode(GuiMode newMode);
 
     /**
      * Should be called each frame to update windows/gui elements.
@@ -94,19 +108,24 @@ namespace MWGui
      */
     void update();
 
-    void setMode(GuiMode newMode)
+    void pushGuiMode(GuiMode mode);
+    void popGuiMode();
+    void removeGuiMode(GuiMode mode); ///< can be anywhere in the stack
+
+    GuiMode getMode() const
     {
-      if (newMode==GM_Inventory && allowed==GW_None)
-        return;
-
-      mode = newMode;
-      updateVisible();
+        if (mGuiModes.empty())
+            throw std::runtime_error ("getMode() called, but there is no active mode");
+        return mGuiModes.back();
     }
-    void setNextMode(GuiMode newMode);
 
-    GuiMode getMode() const { return mode; }
+    bool isGuiMode() const { return !mGuiModes.empty(); }
 
-    bool isGuiMode() const { return getMode() != GM_Game; } // Everything that is not game mode is considered "gui mode"
+    void toggleVisible(GuiWindow wnd)
+    {
+        shown = (shown & wnd) ? (GuiWindow) (shown & ~wnd) : (GuiWindow) (shown | wnd);
+        updateVisible();
+    }
 
     // Disallow all inventory mode windows
     void disallowAll()
@@ -122,7 +141,21 @@ namespace MWGui
       updateVisible();
     }
 
-    MWGui::DialogueWindow* getDialogueWindow() {return dialogueWindow;}
+    bool isAllowed(GuiWindow wnd) const
+    {
+        return allowed & wnd;
+    }
+
+    MWGui::DialogueWindow* getDialogueWindow() {return mDialogueWindow;}
+    MWGui::ContainerWindow* getContainerWindow() {return mContainerWindow;}
+    MWGui::InventoryWindow* getInventoryWindow() {return mInventoryWindow;}
+    MWGui::BookWindow* getBookWindow() {return mBookWindow;}
+    MWGui::ScrollWindow* getScrollWindow() {return mScrollWindow;}
+    MWGui::CountDialog* getCountDialog() {return mCountDialog;}
+    MWGui::ConfirmationDialog* getConfirmationDialog() {return mConfirmationDialog;}
+    MWGui::TradeWindow* getTradeWindow() {return mTradeWindow;}
+    MWGui::SpellWindow* getSpellWindow() {return mSpellWindow;}
+    MWGui::Console* getConsole() {return console;}
 
     MyGUI::Gui* getGui() const { return gui; }
 
@@ -144,8 +177,6 @@ namespace MWGui
 
     void setPlayerClass (const ESM::Class &class_);                        ///< set current class of player
     void configureSkills (const SkillList& major, const SkillList& minor); ///< configure skill groups, each set contains the skill ID for that group.
-    void setFactions (const FactionList& factions);                        ///< set faction and rank to display on stat window, use an empty vector to disable
-    void setBirthSign (const std::string &signId);                         ///< set birth sign to display on stat window, use an empty string to disable.
     void setReputation (int reputation);                                   ///< set the current reputation value
     void setBounty (int bounty);                                           ///< set the current bounty value
     void updateSkillArea();                                                ///< update display of skills, factions, birth sign, reputation and bounty
@@ -154,10 +185,18 @@ namespace MWGui
     void setPlayerPos(const float x, const float y); ///< set player position in map space
     void setPlayerDir(const float x, const float y); ///< set player view direction in map space
 
-    void toggleFogOfWar();
+    void setFocusObject(const MWWorld::Ptr& focus);
+    void setFocusObjectScreenCoords(float min_x, float min_y, float max_x, float max_y);
 
-    int toggleFps();
-    ///< toggle fps display @return resulting fps level
+    void setMouseVisible(bool visible);
+    void getMousePosition(int &x, int &y);
+    void getMousePosition(float &x, float &y);
+    void setDragDrop(bool dragDrop);
+    bool getWorldMouseOver();
+
+    void toggleFogOfWar();
+    void toggleFullHelp(); ///< show extra info in item tooltips (owner, script)
+    bool getFullHelp() const;
 
     void setInteriorMapTexture(const int x, const int y);
     ///< set the index of the map texture that should be used (for interiors)
@@ -166,6 +205,14 @@ namespace MWGui
     void setHMSVisibility(bool visible);
     // sets the visibility of the hud minimap
     void setMinimapVisibility(bool visible);
+    void setWeaponVisibility(bool visible);
+    void setSpellVisibility(bool visible);
+
+    void setSelectedSpell(const std::string& spellId, int successChancePercent);
+    void setSelectedEnchantItem(const MWWorld::Ptr& item, int chargePercent);
+    void setSelectedWeapon(const MWWorld::Ptr& item, int durabilityPercent);
+    void unsetSelectedSpell();
+    void unsetSelectedWeapon();
 
     template<typename T>
     void removeDialog(T*& dialog); ///< Casts to OEngine::GUI::Layout and calls removeDialog, then resets pointer to nullptr.
@@ -175,6 +222,11 @@ namespace MWGui
     int readPressedButton (); ///< returns the index of the pressed button or -1 if no button was pressed (->MessageBoxmanager->InteractiveMessageBox)
 
     void onFrame (float frameDuration);
+
+    std::map<ESM::Skill::SkillEnum, MWMechanics::Stat<float> > getPlayerSkillValues() { return playerSkillValues; }
+    std::map<ESM::Attribute::AttributeID, MWMechanics::Stat<int> > getPlayerAttributeValues() { return playerAttributes; }
+    SkillList getPlayerMinorSkills() { return playerMinorSkills; }
+    SkillList getPlayerMajorSkills() { return playerMajorSkills; }
 
     /**
      * Fetches a GMST string from the store, if there is no setting with the given
@@ -187,16 +239,30 @@ namespace MWGui
 
     const ESMS::ESMStore& getStore() const;
 
+    void processChangedSettings(const Settings::CategorySettingVector& changed);
+
   private:
     OEngine::GUI::MyGUIManager *mGuiManager;
     HUD *hud;
     MapWindow *map;
     MainMenu *menu;
-    StatsWindow *stats;
+    ToolTips *mToolTips;
+    StatsWindow *mStatsWindow;
     MessageBoxManager *mMessageBoxManager;
     Console *console;
     JournalWindow* mJournal;
-    DialogueWindow *dialogueWindow;
+    DialogueWindow *mDialogueWindow;
+    ContainerWindow *mContainerWindow;
+    DragAndDrop* mDragAndDrop;
+    InventoryWindow *mInventoryWindow;
+    ScrollWindow* mScrollWindow;
+    BookWindow* mBookWindow;
+    CountDialog* mCountDialog;
+    TradeWindow* mTradeWindow;
+    SettingsWindow* mSettingsWindow;
+    ConfirmationDialog* mConfirmationDialog;
+    AlchemyWindow* mAlchemyWindow;
+    SpellWindow* mSpellWindow;
 
     CharacterCreation* mCharGen;
 
@@ -204,7 +270,6 @@ namespace MWGui
     ESM::Class playerClass;
     std::string playerName;
     std::string playerRaceId;
-    std::string playerBirthSignId;
     std::map<ESM::Attribute::AttributeID, MWMechanics::Stat<int> > playerAttributes;
     SkillList playerMajorSkills, playerMinorSkills;
     std::map<ESM::Skill::SkillEnum, MWMechanics::Stat<float> > playerSkillValues;
@@ -212,9 +277,7 @@ namespace MWGui
 
 
     MyGUI::Gui *gui; // Gui
-    GuiMode mode; // Current gui mode
-    GuiMode nextMode; // Next mode to activate in update()
-    bool needModeChange; //Whether a mode change is needed in update() [will use nextMode]
+    std::vector<GuiMode> mGuiModes;
 
     std::vector<OEngine::GUI::Layout*> garbageDialogs;
     void cleanupGarbage();
@@ -225,9 +288,6 @@ namespace MWGui
        the start of the game, when windows are enabled one by one
        through script commands. You can manipulate this through using
        allow() and disableAll().
-
-       The setting should also affect visibility of certain HUD
-       elements, but this is not done yet.
      */
     GuiWindow allowed;
 
@@ -239,6 +299,12 @@ namespace MWGui
     size_t mBatchCount;
 
     void onDialogueWindowBye();
+
+    /**
+     * Called when MyGUI tries to retrieve a tag. This usually corresponds to a GMST string,
+     * so this method will retrieve the GMST with the name \a _tag and place the result in \a _result 
+     */
+    void onRetrieveTag(const MyGUI::UString& _tag, MyGUI::UString& _result);
   };
 
   template<typename T>

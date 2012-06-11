@@ -15,7 +15,7 @@ include (OpenMWMacros)
 # Version
 
 set (OPENMW_VERSION_MAJOR 0)
-set (OPENMW_VERSION_MINOR 14)
+set (OPENMW_VERSION_MINOR 15)
 set (OPENMW_VERSION_RELEASE 0)
 
 set (OPENMW_VERSION "${OPENMW_VERSION_MAJOR}.${OPENMW_VERSION_MINOR}.${OPENMW_VERSION_RELEASE}")
@@ -103,6 +103,7 @@ set(OENGINE_OGRE
   ${LIBDIR}/openengine/ogre/mouselook.cpp
   ${LIBDIR}/openengine/ogre/fader.cpp
   ${LIBDIR}/openengine/ogre/imagerotate.cpp
+  ${LIBDIR}/openengine/ogre/atlas.cpp
 )
 set(OENGINE_GUI
   ${LIBDIR}/openengine/gui/events.cpp
@@ -122,6 +123,10 @@ set(OENGINE_BULLET
     ${LIBDIR}/openengine/bullet/physic.hpp
     ${LIBDIR}/openengine/bullet/BulletShapeLoader.cpp
     ${LIBDIR}/openengine/bullet/BulletShapeLoader.h
+    ${LIBDIR}/openengine/bullet/pmove.cpp
+    ${LIBDIR}/openengine/bullet/pmove.h
+    ${LIBDIR}/openengine/bullet/trace.cpp
+    ${LIBDIR}/openengine/bullet/trace.h
 
 )
 

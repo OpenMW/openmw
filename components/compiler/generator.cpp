@@ -727,7 +727,7 @@ namespace Compiler
             opStopScript (code);
         }
 
-        void getDistance (CodeContainer& code, Literals& literals, const std::string id)
+        void getDistance (CodeContainer& code, Literals& literals, const std::string& id)
         {
             if (id.empty())
             {
@@ -746,7 +746,7 @@ namespace Compiler
             opGetSecondsPassed (code);
         }
 
-        void getDisabled (CodeContainer& code, Literals& literals, const std::string id)
+        void getDisabled (CodeContainer& code, Literals& literals, const std::string& id)
         {
             if (id.empty())
             {
@@ -760,7 +760,7 @@ namespace Compiler
             }
         }
 
-        void enable (CodeContainer& code, Literals& literals, const std::string id)
+        void enable (CodeContainer& code, Literals& literals, const std::string& id)
         {
             if (id.empty())
             {
@@ -774,7 +774,7 @@ namespace Compiler
             }
         }
 
-        void disable (CodeContainer& code, Literals& literals, const std::string id)
+        void disable (CodeContainer& code, Literals& literals, const std::string& id)
         {
             if (id.empty())
             {

@@ -7,6 +7,7 @@
 #include <boost/filesystem.hpp>
 
 #include <components/esm_store/cell_store.hpp>
+#include <components/settings/settings.hpp>
 
 #include "../mwrender/debugging.hpp"
 #include "../mwrender/renderingmanager.hpp"
@@ -18,9 +19,12 @@
 #include "physicssystem.hpp"
 #include "cells.hpp"
 #include "localscripts.hpp"
+#include "timestamp.hpp"
 
 #include <openengine/bullet/physic.hpp>
 #include <openengine/ogre/fader.hpp>
+
+#include <OgreTimer.h>
 
 namespace Ogre
 {
@@ -63,7 +67,8 @@ namespace MWWorld
             {
                 Render_CollisionDebug,
                 Render_Wireframe,
-                Render_Pathgrid
+                Render_Pathgrid,
+                Render_Compositors
             };
 
         private:
@@ -100,9 +105,13 @@ namespace MWWorld
             int mNumFacing;
             std::map<std::string,std::string> mFallback;
 
+            unsigned long lastTick;
+            Ogre::Timer mTimer;
+
             int getDaysPerMonth (int month) const;
 
-            void moveObjectImp (Ptr ptr, float x, float y, float z);
+            bool moveObjectImp (Ptr ptr, float x, float y, float z);
+            ///< @return true if the active cell (cell player is in) changed
 
         public:
 
@@ -178,6 +187,9 @@ namespace MWWorld
 
             void setDay (int day);
             ///< Set in-game time day.
+
+            TimeStamp getTimeStamp() const;
+            ///< Return current in-game time stamp.
 
             bool toggleSky();
             ///< \return Resulting mode
@@ -257,6 +269,19 @@ namespace MWWorld
 
             void update (float duration);
 
+            bool placeObject(MWWorld::Ptr object, float cursorX, float cursorY);
+            ///< place an object into the gameworld at the specified cursor position
+            /// @param object
+            /// @param cursor X (relative 0-1)
+            /// @param cursor Y (relative 0-1)
+            /// @return true if the object was placed, or false if it was rejected because the position is too far away
+
+            void dropObjectOnGround(MWWorld::Ptr object);
+
+            bool canPlaceObject(float cursorX, float cursorY);
+            ///< @return true if it is possible to place on object at specified cursor location
+
+            void processChangedSettings(const Settings::CategorySettingVector& settings);
     };
 }
 

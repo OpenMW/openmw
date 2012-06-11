@@ -9,7 +9,11 @@
 
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/actiontake.hpp"
+#include "../mwworld/actionequip.hpp"
 #include "../mwworld/inventorystore.hpp"
+#include "../mwworld/world.hpp"
+#include "../mwgui/window_manager.hpp"
+#include "../mwgui/tooltips.hpp"
 
 #include "../mwrender/objects.hpp"
 
@@ -104,5 +108,58 @@ namespace MWClass
     std::string Probe::getDownSoundId (const MWWorld::Ptr& ptr) const
     {
         return std::string("Item Probe Down");
+    }
+
+    std::string Probe::getInventoryIcon (const MWWorld::Ptr& ptr) const
+    {
+          ESMS::LiveCellRef<ESM::Probe, MWWorld::RefData> *ref =
+            ptr.get<ESM::Probe>();
+
+        return ref->base->icon;
+    }
+
+    bool Probe::hasToolTip (const MWWorld::Ptr& ptr) const
+    {
+        ESMS::LiveCellRef<ESM::Probe, MWWorld::RefData> *ref =
+            ptr.get<ESM::Probe>();
+
+        return (ref->base->name != "");
+    }
+
+    MWGui::ToolTipInfo Probe::getToolTipInfo (const MWWorld::Ptr& ptr) const
+    {
+        ESMS::LiveCellRef<ESM::Probe, MWWorld::RefData> *ref =
+            ptr.get<ESM::Probe>();
+
+        MWGui::ToolTipInfo info;
+        info.caption = ref->base->name + MWGui::ToolTips::getCountString(ptr.getRefData().getCount());
+        info.icon = ref->base->icon;
+
+        const ESMS::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
+
+        std::string text;
+
+        /// \todo store remaining uses somewhere
+
+        text += "\n" + store.gameSettings.search("sUses")->str + ": " + MWGui::ToolTips::toString(ref->base->data.uses);
+        text += "\n" + store.gameSettings.search("sQuality")->str + ": " + MWGui::ToolTips::toString(ref->base->data.quality);
+        text += "\n" + store.gameSettings.search("sWeight")->str + ": " + MWGui::ToolTips::toString(ref->base->data.weight);
+        text += MWGui::ToolTips::getValueString(ref->base->data.value, store.gameSettings.search("sValue")->str);
+
+        if (MWBase::Environment::get().getWindowManager()->getFullHelp()) {
+            text += MWGui::ToolTips::getMiscString(ref->ref.owner, "Owner");
+            text += MWGui::ToolTips::getMiscString(ref->base->script, "Script");
+        }
+
+        info.text = text;
+
+        return info;
+    }
+
+    boost::shared_ptr<MWWorld::Action> Probe::use (const MWWorld::Ptr& ptr) const
+    {
+        MWBase::Environment::get().getSoundManager()->playSound (getUpSoundId(ptr), 1.0, 1.0);
+
+        return boost::shared_ptr<MWWorld::Action>(new MWWorld::ActionEquip(ptr));
     }
 }

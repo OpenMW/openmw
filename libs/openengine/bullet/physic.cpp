@@ -1,6 +1,7 @@
 #include "physic.hpp"
 #include <btBulletDynamicsCommon.h>
 #include <btBulletCollisionCommon.h>
+#include <BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h>
 #include <components/nifbullet/bullet_nif_loader.hpp>
 //#include <apps\openmw\mwworld\world.hpp>
 #include "CMotionState.h"
@@ -9,6 +10,8 @@
 #include "BtOgrePG.h"
 #include "BtOgreGP.h"
 #include "BtOgreExtras.h"
+
+#include <boost/lexical_cast.hpp>
 
 #define BIT(x) (1<<(x))
 
@@ -19,7 +22,8 @@ namespace Physic
         COL_NOTHING = 0, //<Collide with nothing
         COL_WORLD = BIT(0), //<Collide with world objects
         COL_ACTOR_INTERNAL = BIT(1), //<Collide internal capsule
-        COL_ACTOR_EXTERNAL = BIT(2) //<collide with external capsule
+        COL_ACTOR_EXTERNAL = BIT(2), //<collide with external capsule
+        COL_RAYCASTING = BIT(3)
     };
 
     PhysicActor::PhysicActor(std::string name)
@@ -161,10 +165,12 @@ namespace Physic
         // The actual physics solver
         solver = new btSequentialImpulseConstraintSolver;
 
+        //btOverlappingPairCache* pairCache = new btSortedOverlappingPairCache();
         pairCache = new btSortedOverlappingPairCache();
+
         //pairCache->setInternalGhostPairCallback( new btGhostPairCallback() );
 
-        broadphase = new btDbvtBroadphase(pairCache);
+        broadphase = new btDbvtBroadphase();
 
         // The world.
         dynamicsWorld = new btDiscreteDynamicsWorld(dispatcher,broadphase,solver,collisionConfiguration);
@@ -253,6 +259,69 @@ namespace Physic
         delete mShapeLoader;
     }
 
+    void PhysicEngine::addHeightField(float* heights,
+        int x, int y, float yoffset,
+        float triSize, float sqrtVerts)
+    {
+        const std::string name = "HeightField_"
+            + boost::lexical_cast<std::string>(x) + "_"
+            + boost::lexical_cast<std::string>(y);
+
+        // find the minimum and maximum heights (needed for bullet)
+        float minh;
+        float maxh;
+        for (int i=0; i<sqrtVerts*sqrtVerts; ++i)
+        {
+            float h = heights[i];
+            if (i==0)
+            {
+                minh = h;
+                maxh = h;
+            }
+            
+            if (h>maxh) maxh = h;
+            if (h<minh) minh = h;
+        }
+
+        btHeightfieldTerrainShape* hfShape = new btHeightfieldTerrainShape(
+            sqrtVerts, sqrtVerts, heights, 1,
+            minh, maxh, 2,
+            PHY_FLOAT,true);
+
+        hfShape->setUseDiamondSubdivision(true);
+
+        btVector3 scl(triSize, triSize, 1);
+        hfShape->setLocalScaling(scl);
+
+        CMotionState* newMotionState = new CMotionState(this,name);
+
+        btRigidBody::btRigidBodyConstructionInfo CI = btRigidBody::btRigidBodyConstructionInfo(0,newMotionState,hfShape);
+        RigidBody* body = new RigidBody(CI,name);
+        body->collide = true;
+        body->getWorldTransform().setOrigin(btVector3( (x+0.5)*triSize*(sqrtVerts-1), (y+0.5)*triSize*(sqrtVerts-1), (maxh+minh)/2.f));
+
+        HeightField hf;
+        hf.mBody = body;
+        hf.mShape = hfShape;
+
+        mHeightFieldMap [name] = hf;
+
+        dynamicsWorld->addRigidBody(body,COL_WORLD,COL_WORLD|COL_ACTOR_INTERNAL|COL_ACTOR_EXTERNAL);
+    }
+
+    void PhysicEngine::removeHeightField(int x, int y)
+    {
+        const std::string name = "HeightField_"
+            + boost::lexical_cast<std::string>(x) + "_"
+            + boost::lexical_cast<std::string>(y);
+
+        HeightField hf = mHeightFieldMap [name];
+
+        dynamicsWorld->removeRigidBody(hf.mBody);
+        delete hf.mShape;
+        delete hf.mBody;
+    }
+
     RigidBody* PhysicEngine::createRigidBody(std::string mesh,std::string name,float scale)
     {
         //get the shape from the .nif
@@ -269,27 +338,31 @@ namespace Physic
         RigidBody* body = new RigidBody(CI,name);
         body->collide = shape->collide;
         return body;
+
     }
 
     void PhysicEngine::addRigidBody(RigidBody* body)
     {
-        if(body->collide)
+        if(body)
         {
-            dynamicsWorld->addRigidBody(body,COL_WORLD,COL_WORLD|COL_ACTOR_INTERNAL|COL_ACTOR_EXTERNAL);
-        }
-        else
-        {
-            dynamicsWorld->addRigidBody(body,COL_WORLD,COL_NOTHING);
-        }
-        body->setActivationState(DISABLE_DEACTIVATION);
-        RigidBody* oldBody = RigidBodyMap[body->mName];
-        if (oldBody != NULL)
-        {
-            dynamicsWorld->removeRigidBody(oldBody);
-            delete oldBody;
-        }
+            if(body->collide)
+            {
+                dynamicsWorld->addRigidBody(body,COL_WORLD,COL_WORLD|COL_ACTOR_INTERNAL|COL_ACTOR_EXTERNAL);
+            }
+            else
+            {
+                dynamicsWorld->addRigidBody(body,COL_RAYCASTING,COL_RAYCASTING|COL_WORLD);
+            }
+            body->setActivationState(DISABLE_DEACTIVATION);
+            RigidBody* oldBody = RigidBodyMap[body->mName];
+            if (oldBody != NULL)
+            {
+                dynamicsWorld->removeRigidBody(oldBody);
+                delete oldBody;
+            }
 
-        RigidBodyMap[body->mName] = body;
+            RigidBodyMap[body->mName] = body;
+        }
     }
 
     void PhysicEngine::removeRigidBody(std::string name)
@@ -334,7 +407,7 @@ namespace Physic
 
     void PhysicEngine::stepSimulation(double deltaT)
     {
-        dynamicsWorld->stepSimulation(deltaT,1,1/50.);
+        dynamicsWorld->stepSimulation(deltaT,10, 1/60.0);
         if(isDebugCreated)
         {
             mDebugDrawer->step();
@@ -401,7 +474,7 @@ namespace Physic
 
         float d1 = 10000.;
         btCollisionWorld::ClosestRayResultCallback resultCallback1(from, to);
-        resultCallback1.m_collisionFilterMask = COL_WORLD;
+        resultCallback1.m_collisionFilterMask = COL_WORLD|COL_RAYCASTING;
         dynamicsWorld->rayTest(from, to, resultCallback1);
         if (resultCallback1.hasHit())
         {
@@ -430,7 +503,7 @@ namespace Physic
     std::vector< std::pair<float, std::string> > PhysicEngine::rayTest2(btVector3& from, btVector3& to)
     {
         MyRayResultCallback resultCallback1;
-        resultCallback1.m_collisionFilterMask = COL_WORLD;
+        resultCallback1.m_collisionFilterMask = COL_WORLD|COL_RAYCASTING;
         dynamicsWorld->rayTest(from, to, resultCallback1);
         std::vector< std::pair<float, btCollisionObject*> > results = resultCallback1.results;
 

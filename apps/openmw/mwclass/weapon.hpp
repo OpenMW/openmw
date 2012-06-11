@@ -22,6 +22,12 @@ namespace MWClass
                 const MWWorld::Ptr& actor) const;
             ///< Generate action for activation
 
+            virtual bool hasToolTip (const MWWorld::Ptr& ptr) const;
+            ///< @return true if this object has a tooltip when focused (default implementation: false)
+
+            virtual MWGui::ToolTipInfo getToolTipInfo (const MWWorld::Ptr& ptr) const;
+            ///< @return the content of the tool tip to be displayed. raises exception if the object has no tooltip.
+
             virtual bool hasItemHealth (const MWWorld::Ptr& ptr) const;
             ///< \return Item health data available?
 
@@ -49,6 +55,17 @@ namespace MWClass
 
             virtual std::string getDownSoundId (const MWWorld::Ptr& ptr) const;
             ///< Return the put down sound Id
+
+            virtual std::string getInventoryIcon (const MWWorld::Ptr& ptr) const;
+            ///< Return name of inventory icon.
+
+            virtual std::string getEnchantment (const MWWorld::Ptr& ptr) const;
+            ///< @return the enchantment ID if the object is enchanted, otherwise an empty string
+
+            virtual boost::shared_ptr<MWWorld::Action> use (const MWWorld::Ptr& ptr)
+                const;
+            ///< Generate action for using via inventory menu
+
     };
 }
 

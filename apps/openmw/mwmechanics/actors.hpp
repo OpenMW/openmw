@@ -19,9 +19,9 @@ namespace MWMechanics
             std::set<MWWorld::Ptr> mActors;
             float mDuration;
 
-            void updateActor (const MWWorld::Ptr& ptr, float duration);
-
             void updateNpc (const MWWorld::Ptr& ptr, float duration, bool paused);
+
+            void adjustMagicEffects (const MWWorld::Ptr& creature);
 
         public:
 
@@ -32,6 +32,8 @@ namespace MWMechanics
 
             void removeActor (const MWWorld::Ptr& ptr);
             ///< Deregister an actor for stats management
+            ///
+            /// \note Ignored, if \a ptr is not a registered actor.
 
             void dropActors (const MWWorld::Ptr::CellStore *cellStore);
             ///< Deregister all actors in the given cell.
@@ -39,6 +41,11 @@ namespace MWMechanics
             void update (std::vector<std::pair<std::string, Ogre::Vector3> >& movement,
                 float duration, bool paused);
             ///< Update actor stats and store desired velocity vectors in \a movement
+
+            void updateActor (const MWWorld::Ptr& ptr, float duration);
+            ///< This function is normally called automatically during the update process, but it can
+            /// also be called explicitly at any time to force an update.
+
     };
 }
 

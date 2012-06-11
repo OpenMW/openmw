@@ -4,11 +4,11 @@
     <!--Widget type="Window" skin="MW_Dialog" layer="Windows" position="0 0 0 0" name="_Main">
         <Widget type="TextBox" skin="TextBox" position="4 4 4 4" name="message" />
     </Widget-->
-    <Widget type="Window" skin="MW_Dialog" layer="Windows" position="0 0 0 0" name="_Main">
+    <Widget type="Window" skin="MW_Dialog" layer="Notification" position="0 0 0 0" name="_Main">
         <Widget type="EditBox" skin="MW_TextEditClient" position="5 -5 0 0" name="message"  align="ALIGN_LEFT ALIGN_TOP STRETCH">
             <Property key="FontName" value = "Default" />
             <Property key="TextAlign" value="ALIGN_CENTER" />
-            <Property key="TextColour" value = "0.7 0.7 0.7" />
+            <Property key="TextColour" value = "0.75 0.6 0.35" />
             <Property key="Static" value="true"/>
             <Property key="WordWrap" value="true"/>
             <Property key="MultiLine" value="1" />

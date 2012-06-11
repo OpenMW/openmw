@@ -66,6 +66,7 @@ struct Skill : public Record
         Length
     };
   static const std::string sSkillNameIds[Length];
+  static const std::string sIconNames[Length];
   static const boost::array<SkillEnum, Length> skillIds;
 
   void load(ESMReader &esm);

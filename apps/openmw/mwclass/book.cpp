@@ -8,9 +8,12 @@
 #include "../mwbase/environment.hpp"
 
 #include "../mwworld/ptr.hpp"
-#include "../mwworld/actiontake.hpp"
+#include "../mwworld/actionread.hpp"
+#include "../mwworld/world.hpp"
 
 #include "../mwrender/objects.hpp"
+
+#include "../mwgui/window_manager.hpp"
 
 #include "../mwsound/soundmanager.hpp"
 
@@ -57,12 +60,8 @@ namespace MWClass
     boost::shared_ptr<MWWorld::Action> Book::activate (const MWWorld::Ptr& ptr,
         const MWWorld::Ptr& actor) const
     {
-        // TODO implement reading
-
-        MWBase::Environment::get().getSoundManager()->playSound3D (ptr, getUpSoundId(ptr), 1.0, 1.0, MWSound::Play_NoTrack);
-
         return boost::shared_ptr<MWWorld::Action> (
-            new MWWorld::ActionTake (ptr));
+            new MWWorld::ActionRead (ptr));
     }
 
     std::string Book::getScript (const MWWorld::Ptr& ptr) const
@@ -97,4 +96,62 @@ namespace MWClass
     {
         return std::string("Item Book Down");
     }
+
+    std::string Book::getInventoryIcon (const MWWorld::Ptr& ptr) const
+    {
+          ESMS::LiveCellRef<ESM::Book, MWWorld::RefData> *ref =
+            ptr.get<ESM::Book>();
+
+        return ref->base->icon;
+    }
+
+    bool Book::hasToolTip (const MWWorld::Ptr& ptr) const
+    {
+        ESMS::LiveCellRef<ESM::Book, MWWorld::RefData> *ref =
+            ptr.get<ESM::Book>();
+
+        return (ref->base->name != "");
+    }
+
+    MWGui::ToolTipInfo Book::getToolTipInfo (const MWWorld::Ptr& ptr) const
+    {
+        ESMS::LiveCellRef<ESM::Book, MWWorld::RefData> *ref =
+            ptr.get<ESM::Book>();
+
+        MWGui::ToolTipInfo info;
+        info.caption = ref->base->name + MWGui::ToolTips::getCountString(ptr.getRefData().getCount());
+        info.icon = ref->base->icon;
+
+        const ESMS::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
+
+        std::string text;
+
+        text += "\n" + store.gameSettings.search("sWeight")->str + ": " + MWGui::ToolTips::toString(ref->base->data.weight);
+        text += MWGui::ToolTips::getValueString(ref->base->data.value, store.gameSettings.search("sValue")->str);
+
+        if (MWBase::Environment::get().getWindowManager()->getFullHelp()) {
+            text += MWGui::ToolTips::getMiscString(ref->ref.owner, "Owner");
+            text += MWGui::ToolTips::getMiscString(ref->base->script, "Script");
+        }
+
+        info.enchant = ref->base->enchant;
+
+        info.text = text;
+
+        return info;
+    }
+
+    std::string Book::getEnchantment (const MWWorld::Ptr& ptr) const
+    {
+        ESMS::LiveCellRef<ESM::Book, MWWorld::RefData> *ref =
+            ptr.get<ESM::Book>();
+
+        return ref->base->enchant;
+    }
+
+    boost::shared_ptr<MWWorld::Action> Book::use (const MWWorld::Ptr& ptr) const
+    {
+        return boost::shared_ptr<MWWorld::Action>(new MWWorld::ActionRead(ptr));
+    }
+
 }

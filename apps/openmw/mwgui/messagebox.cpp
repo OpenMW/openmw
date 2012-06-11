@@ -15,6 +15,13 @@ void MessageBoxManager::onFrame (float frameDuration)
     std::vector<MessageBoxManagerTimer>::iterator it;
     for(it = mTimers.begin(); it != mTimers.end();)
     {
+        // if this messagebox is already deleted, remove the timer and move on
+        if (std::find(mMessageBoxes.begin(), mMessageBoxes.end(), it->messageBox) == mMessageBoxes.end())
+        {
+            it = mTimers.erase(it);
+            continue;
+        }
+
         it->current += frameDuration;
         if(it->current >= it->max)
         {
@@ -51,7 +58,7 @@ void MessageBoxManager::onFrame (float frameDuration)
     if(mInterMessageBoxe != NULL && mInterMessageBoxe->mMarkedToDelete) {
         delete mInterMessageBoxe;
         mInterMessageBoxe = NULL;
-        mWindowManager->setNextMode(GM_Game);
+        mWindowManager->popGuiMode();
     }
 }
 
@@ -154,7 +161,7 @@ MessageBox::MessageBox(MessageBoxManager& parMessageBoxManager, const std::strin
     getWidget(mMessageWidget, "message");
 
     mMessageWidget->setOverflowToTheLeft(true);
-    mMessageWidget->addText(cMessage);
+    mMessageWidget->setCaptionWithReplacing(cMessage);
 
     MyGUI::IntSize size;
     size.width = mFixedWidth;

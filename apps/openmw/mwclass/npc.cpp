@@ -3,6 +3,8 @@
 
 #include <memory>
 
+#include <boost/algorithm/string.hpp>
+
 #include <OgreSceneNode.h>
 
 #include <components/esm/loadnpc.hpp>
@@ -17,6 +19,8 @@
 #include "../mwworld/world.hpp"
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/customdata.hpp"
+
+#include "../mwgui/window_manager.hpp"
 
 #include "../mwbase/environment.hpp"
 
@@ -54,13 +58,15 @@ namespace MWClass
             // NPC stats
             if (!ref->base->faction.empty())
             {
+                std::string faction = ref->base->faction;
+                boost::algorithm::to_lower(faction);
                 if(ref->base->npdt52.gold != -10)
                 {
-                    data->mNpcStats.mFactionRank[ref->base->faction] = (int)ref->base->npdt52.rank;
+                    data->mNpcStats.mFactionRank[faction] = (int)ref->base->npdt52.rank;
                 }
                 else
                 {
-                    data->mNpcStats.mFactionRank[ref->base->faction] = (int)ref->base->npdt12.rank;
+                    data->mNpcStats.mFactionRank[faction] = (int)ref->base->npdt12.rank;
                 }
             }
 
@@ -86,10 +92,8 @@ namespace MWClass
             }
             else
             {
-                //TODO: do something with npdt12 maybe:p
+                /// \todo do something with npdt12 maybe:p
             }
-
-            // \todo add initial container content
 
             // store
             ptr.getRefData().setCustomData (data.release());
@@ -106,42 +110,25 @@ namespace MWClass
 
     void Npc::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const
     {
-
-
         renderingInterface.getActors().insertNPC(ptr, getInventoryStore(ptr));
-
     }
 
     void Npc::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics) const
     {
-
-
         ESMS::LiveCellRef<ESM::NPC, MWWorld::RefData> *ref =
             ptr.get<ESM::NPC>();
 
-
         assert (ref->base != NULL);
-		 std::string headID = ref->base->head;
-		 std::string bodyRaceID = headID.substr(0, headID.find_last_of("head_") - 4);
-		 bool beast = bodyRaceID == "b_n_khajiit_m_" || bodyRaceID == "b_n_khajiit_f_" || bodyRaceID == "b_n_argonian_m_" || bodyRaceID == "b_n_argonian_f_";
-
+        std::string headID = ref->base->head;
+        std::string bodyRaceID = headID.substr(0, headID.find_last_of("head_") - 4);
+        bool beast = bodyRaceID == "b_n_khajiit_m_" || bodyRaceID == "b_n_khajiit_f_" || bodyRaceID == "b_n_argonian_m_" || bodyRaceID == "b_n_argonian_f_";
 
         std::string smodel = "meshes\\base_anim.nif";
-		if(beast)
-			smodel = "meshes\\base_animkna.nif";
-		physics.insertActorPhysics(ptr, smodel);
+        if(beast)
+            smodel = "meshes\\base_animkna.nif";
+        physics.insertActorPhysics(ptr, smodel);
 
-
-    }
-
-    void Npc::enable (const MWWorld::Ptr& ptr) const
-    {
         MWBase::Environment::get().getMechanicsManager()->addActor (ptr);
-    }
-
-    void Npc::disable (const MWWorld::Ptr& ptr) const
-    {
-        MWBase::Environment::get().getMechanicsManager()->removeActor (ptr);
     }
 
     std::string Npc::getName (const MWWorld::Ptr& ptr) const
@@ -285,11 +272,12 @@ namespace MWClass
     {
         Ogre::Vector3 vector (0, 0, 0);
 
-        vector.x = - getMovementSettings (ptr).mLeftRight * 200;
-        vector.y = getMovementSettings (ptr).mForwardBackward * 200;
+        vector.x = - getMovementSettings (ptr).mLeftRight * 127;
+        vector.y = getMovementSettings (ptr).mForwardBackward * 127;
+		vector.z = getMovementSettings(ptr).mUpDown * 127;
 
-        if (getStance (ptr, Run, false))
-            vector *= 2;
+        //if (getStance (ptr, Run, false))
+        //    vector *= 2;
 
         return vector;
     }
@@ -298,5 +286,50 @@ namespace MWClass
     {
         boost::shared_ptr<Class> instance (new Npc);
         registerClass (typeid (ESM::NPC).name(), instance);
+    }
+
+    bool Npc::hasToolTip (const MWWorld::Ptr& ptr) const
+    {
+        /// \todo We don't want tooltips for NPCs in combat mode.
+
+        return true;
+    }
+
+    MWGui::ToolTipInfo Npc::getToolTipInfo (const MWWorld::Ptr& ptr) const
+    {
+        ESMS::LiveCellRef<ESM::NPC, MWWorld::RefData> *ref =
+            ptr.get<ESM::NPC>();
+
+        MWGui::ToolTipInfo info;
+        info.caption = ref->base->name;
+
+        std::string text;
+        if (MWBase::Environment::get().getWindowManager()->getFullHelp())
+            text += MWGui::ToolTips::getMiscString(ref->base->script, "Script");
+        info.text = text;
+
+        return info;
+    }
+
+    float Npc::getCapacity (const MWWorld::Ptr& ptr) const
+    {
+        const MWMechanics::CreatureStats& stats = getCreatureStats (ptr);
+        return stats.mAttributes[0].getModified()*5;
+    }
+
+    float Npc::getEncumbrance (const MWWorld::Ptr& ptr) const
+    {
+        float weight = getContainerStore (ptr).getWeight();
+
+        const MWMechanics::CreatureStats& stats = getCreatureStats (ptr);
+
+        weight -= stats.mMagicEffects.get (MWMechanics::EffectKey (8)).mMagnitude; // feather
+
+        weight += stats.mMagicEffects.get (MWMechanics::EffectKey (7)).mMagnitude; // burden
+
+        if (weight<0)
+            weight = 0;
+
+        return weight;
     }
 }

@@ -68,19 +68,14 @@ namespace MWGui
         void onClassClicked(MyGUI::Widget* _sender);
         void onBirthSignClicked(MyGUI::Widget* _sender);
 
+        void onMouseWheel(MyGUI::Widget* _sender, int _rel);
+
     private:
-        enum ColorStyle
-        {
-            CS_Sub,
-            CS_Normal,
-            CS_Super
-        };
-        void setStyledText(MyGUI::TextBox* widget, ColorStyle style, const std::string &value);
         void addSkills(const SkillList &skills, const std::string &titleId, const std::string &titleDefault, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
         void addSeparator(MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
         void addGroup(const std::string &label, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
-        MyGUI::TextBox* addValueItem(const std::string text, const std::string &value, ColorStyle style, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
-        void addItem(const std::string text, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
+        MyGUI::TextBox* addValueItem(const std::string& text, const std::string &value, const std::string& state, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
+        void addItem(const std::string& text, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
         void updateScroller();
         void updateSkillArea();
 

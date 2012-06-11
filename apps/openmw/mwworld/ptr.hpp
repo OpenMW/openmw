@@ -77,6 +77,11 @@ namespace MWWorld
                 return mCell;
             }
 
+            bool isInCell() const
+            {
+                return (mCell != 0);
+            }
+
             void setContainerStore (ContainerStore *store);
             ///< Must not be called on references that are in a cell.
 

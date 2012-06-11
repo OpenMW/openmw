@@ -17,14 +17,22 @@
 
     <!-- These define the dialog borders -->
     <Skin name="DB_B" size="512 4" texture="textures\menu_thick_border_bottom.dds">
-        <BasisSkin type="MainSkin" offset = "0 0 512 4">
-            <State name="normal" offset = "0 0 512 4"/>
+        <BasisSkin type="TileRect" offset="0 0 512 4" align="Stretch">
+            <State name="normal" offset="0 0 512 4">
+                <Property key="TileSize" value="512 4"/>
+                <Property key="TileH" value="true"/>
+                <Property key="TileV" value="true"/>
+            </State>
         </BasisSkin>
     </Skin>
 
     <Skin name="DB_R" size="4 512" texture="textures\menu_thick_border_right.dds">
-        <BasisSkin type="MainSkin" offset = "0 0 4 512">
-            <State name="normal" offset = "0 0 4 512"/>
+        <BasisSkin type="TileRect" offset="0 0 4 512" align="Stretch">
+            <State name="normal" offset="0 0 4 512">
+                <Property key="TileSize" value="4 512"/>
+                <Property key="TileH" value="true"/>
+                <Property key="TileV" value="true"/>
+            </State>
         </BasisSkin>
     </Skin>
 
@@ -66,29 +74,45 @@
     <!-- These define the window borders -->
     <Skin name="TB_B" size="512 4" texture="textures\menu_thick_border_bottom.dds">
         <Property key="Pointer" value = "vresize" />
-        <BasisSkin type="MainSkin" offset = "0 0 512 4">
-            <State name="normal" offset = "0 0 512 4"/>
+        <BasisSkin type="TileRect" offset="0 0 512 4" align="Stretch">
+            <State name="normal" offset="0 0 512 4">
+                <Property key="TileSize" value="512 4"/>
+                <Property key="TileH" value="true"/>
+                <Property key="TileV" value="true"/>
+            </State>
         </BasisSkin>
     </Skin>
 
     <Skin name="TB_R" size="4 512" texture="textures\menu_thick_border_right.dds">
         <Property key="Pointer" value = "hresize" />
-        <BasisSkin type="MainSkin" offset = "0 0 4 512">
-            <State name="normal" offset = "0 0 4 512"/>
+        <BasisSkin type="TileRect" offset="0 0 4 512" align="Stretch">
+            <State name="normal" offset="0 0 4 512">
+                <Property key="TileSize" value="4 512"/>
+                <Property key="TileH" value="true"/>
+                <Property key="TileV" value="true"/>
+            </State>
         </BasisSkin>
     </Skin>
 
     <Skin name="TB_T" size="512 4" texture="textures\menu_thick_border_top.dds">
         <Property key="Pointer" value = "vresize" />
-        <BasisSkin type="MainSkin" offset = "0 0 512 4">
-            <State name="normal" offset = "0 0 512 4"/>
+        <BasisSkin type="TileRect" offset="0 0 512 4" align="Stretch">
+            <State name="normal" offset="0 0 512 4">
+                <Property key="TileSize" value="512 4"/>
+                <Property key="TileH" value="true"/>
+                <Property key="TileV" value="true"/>
+            </State>
         </BasisSkin>
     </Skin>
 
     <Skin name="TB_L" size="4 512" texture="textures\menu_thick_border_left.dds">
         <Property key="Pointer" value = "hresize" />
-        <BasisSkin type="MainSkin" offset = "0 0 4 512">
-            <State name="normal" offset = "0 0 4 512"/>
+        <BasisSkin type="TileRect" offset="0 0 4 512" align="Stretch">
+            <State name="normal" offset="0 0 4 512">
+                <Property key="TileSize" value="4 512"/>
+                <Property key="TileH" value="true"/>
+                <Property key="TileV" value="true"/>
+            </State>
         </BasisSkin>
     </Skin>
 
@@ -120,20 +144,32 @@
 
     <!-- These parts defines the 'blocks' to the left and right of the caption -->
     <Skin name="HB_MID" size="256 16" texture="textures\menu_head_block_middle.dds">
-        <BasisSkin type="MainSkin" offset = "0 0 256 16">
-            <State name="normal" offset = "0 0 256 16"/>
+        <BasisSkin type="TileRect" offset="0 0 256 16" align="Stretch">
+            <State name="normal" offset="0 0 256 16">
+                <Property key="TileSize" value="256 16"/>
+                <Property key="TileH" value="true"/>
+                <Property key="TileV" value="true"/>
+            </State>
         </BasisSkin>
     </Skin>
 
     <Skin name="HB_TOP" size="256 2" texture="textures\menu_head_block_top.dds">
-        <BasisSkin type="MainSkin" offset = "0 0 256 2">
-            <State name="normal" offset = "0 0 256 2"/>
+        <BasisSkin type="TileRect" offset="0 0 256 2" align="Stretch">
+            <State name="normal" offset="0 0 256 2">
+                <Property key="TileSize" value="256 2"/>
+                <Property key="TileH" value="true"/>
+                <Property key="TileV" value="true"/>
+            </State>
         </BasisSkin>
     </Skin>
 
     <Skin name="HB_BOTTOM" size="256 2" texture="textures\menu_head_block_bottom.dds">
-        <BasisSkin type="MainSkin" offset = "0 0 256 2">
-            <State name="normal" offset = "0 0 256 2"/>
+        <BasisSkin type="TileRect" offset="0 0 256 2" align="Stretch">
+            <State name="normal" offset="0 0 256 2">
+                <Property key="TileSize" value="256 2"/>
+                <Property key="TileH" value="true"/>
+                <Property key="TileV" value="true"/>
+            </State>
         </BasisSkin>
     </Skin>
 
@@ -171,12 +207,8 @@
     </Skin>
 
     <Skin name="HB_ALL" size="260 20">
-        <Child type="Widget" skin="HB_MID" offset="2 2 256 16" align="ALIGN_TOP ALIGN_LEFT"/>
-        <Child type="Widget" skin="HB_MID" offset="258 2 256 16" align="ALIGN_TOP ALIGN_LEFT"/>
-        <Child type="Widget" skin="HB_MID" offset="514 2 256 16" align="ALIGN_TOP ALIGN_LEFT"/>
-        <Child type="Widget" skin="HB_MID" offset="770 2 256 16" align="ALIGN_TOP ALIGN_LEFT"/>
-        <Child type="Widget" skin="HB_MID" offset="1026 2 256 16" align="ALIGN_TOP ALIGN_LEFT"/>
-        <Child type="Widget" skin="HB_TOP" offset="2 0 256 2" align="ALIGN_TOP ALIGN_HSTRETCH"/>
+        <Child type="Widget" skin="HB_MID" offset="2 2 256 16" align="ALIGN_TOP ALIGN_LEFT ALIGN_HSTRETCH"/>
+        <Child type="Widget" skin="HB_TOP" offset="2 0 256 2" align="ALIGN_TOP ALIGN_HSTRETCH ALIGN_HSTRETCH"/>
         <Child type="Widget" skin="HB_BOTTOM" offset="2 18 256 2" align="ALIGN_BOTTOM ALIGN_HSTRETCH"/>
         <Child type="Widget" skin="HB_LEFT" offset="0 2 2 16" align="ALIGN_TOP ALIGN_LEFT"/>
         <Child type="Widget" skin="HB_RIGHT" offset="258 2 2 16" align="ALIGN_TOP ALIGN_RIGHT"/>
@@ -218,6 +250,7 @@
         <Property key="TextAlign" value = "ALIGN_CENTER" />
         <Property key="TextColour" value = "0.8 0.8 0.8" />
         <Property key="Snap" value = "true" />
+        <Property key="MinSize" value="64 64"/>
 
         <Child type="Widget" skin="BlackBG" offset = "8 28 240 18" align = "ALIGN_STRETCH" name = "Client"/>
 
@@ -294,6 +327,7 @@
         <Property key="TextAlign" value = "ALIGN_CENTER" />
         <Property key="TextColour" value = "0.8 0.8 0.8" />
         <Property key="Snap" value = "true" />
+        <Property key="MinSize" value="64 64"/>
 
         <Child type="Widget" skin="BlackBG" offset = "8 28 240 18" align = "ALIGN_STRETCH" name = "Client"/>
 

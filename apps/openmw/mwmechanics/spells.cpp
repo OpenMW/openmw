@@ -13,13 +13,7 @@ namespace MWMechanics
 {
     void Spells::addSpell (const ESM::Spell *spell, MagicEffects& effects) const
     {
-        for (std::vector<ESM::ENAMstruct>::const_iterator iter = spell->effects.list.begin();
-            iter!=spell->effects.list.end(); ++iter)
-        {
-            EffectParam param;
-            param.mMagnitude = iter->magnMax; /// \todo calculate magnitude
-            effects.add (EffectKey (*iter), param);
-        }
+        effects.add (spell->effects);
     }
 
     Spells::TIterator Spells::begin() const
@@ -34,7 +28,7 @@ namespace MWMechanics
 
     void Spells::add (const std::string& spellId)
     {
-        if (std::find (mSpells.begin(), mSpells.end(), spellId)!=mSpells.end())
+        if (std::find (mSpells.begin(), mSpells.end(), spellId)==mSpells.end())
             mSpells.push_back (spellId);
     }
 

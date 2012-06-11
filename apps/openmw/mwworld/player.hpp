@@ -42,6 +42,9 @@ namespace MWWorld
         /// Set the player position. Uses Morrowind coordinates.
         void setPos(float x, float y, float z);
 
+        /// Set where the player is looking at. Uses Morrowind (euler) angles
+        void setRot(float x, float y, float z);
+
         void setCell (MWWorld::Ptr::CellStore *cellStore)
         {
             mCellStore = cellStore;
@@ -104,7 +107,7 @@ namespace MWWorld
             return *mClass;
         }
 
-        bool getAutoMove()
+        bool getAutoMove() const
         {
             return mAutoMove;
         }
@@ -116,6 +119,7 @@ namespace MWWorld
         void setLeftRight (int value);
 
         void setForwardBackward (int value);
+		void setUpDown(int value);
 
         void toggleRunning();
     };

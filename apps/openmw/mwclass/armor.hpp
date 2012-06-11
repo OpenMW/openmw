@@ -39,6 +39,12 @@ namespace MWClass
             /// Return the index of the skill this item corresponds to when equiopped or -1, if there is
             /// no such skill.
 
+            virtual bool hasToolTip (const MWWorld::Ptr& ptr) const;
+            ///< @return true if this object has a tooltip when focused (default implementation: false)
+
+            virtual MWGui::ToolTipInfo getToolTipInfo (const MWWorld::Ptr& ptr) const;
+            ///< @return the content of the tool tip to be displayed. raises exception if the object has no tooltip.
+
             virtual int getValue (const MWWorld::Ptr& ptr) const;
             ///< Return trade value of the object. Throws an exception, if the object can't be traded.
 
@@ -49,6 +55,17 @@ namespace MWClass
 
             virtual std::string getDownSoundId (const MWWorld::Ptr& ptr) const;
             ///< Return the put down sound Id
+
+            virtual std::string getInventoryIcon (const MWWorld::Ptr& ptr) const;
+            ///< Return name of inventory icon.
+
+            virtual std::string getEnchantment (const MWWorld::Ptr& ptr) const;
+            ///< @return the enchantment ID if the object is enchanted, otherwise an empty string
+
+            virtual boost::shared_ptr<MWWorld::Action> use (const MWWorld::Ptr& ptr)
+                const;
+            ///< Generate action for using via inventory menu
+
     };
 }
 

@@ -54,6 +54,15 @@ struct Creature : public Record
         int gold;
     }; // 96 bytes
 
+    struct AIDTstruct
+    {
+        // These are probabilities
+        char hello, u1, fight, flee, alarm, u2, u3, u4;
+        // The last u's might be the skills that this NPC can train you
+        // in?
+        int services; // See the NPC::Services enum
+    }; // 12 bytes
+
     NPDTstruct data;
     AIData aiData;
 
@@ -66,8 +75,14 @@ struct Creature : public Record
     InventoryList inventory;
     SpellList spells;
 
+
     void load(ESMReader &esm);
     void save(ESMWriter &esm);
+
+    bool hasAI;
+    AIDTstruct AI;
+
+    std::string mId;
 
     int getName() { return REC_CREA; }
 };

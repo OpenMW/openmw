@@ -34,7 +34,7 @@ namespace MWGui
         typedef delegates::CMultiDelegate1<int> EventHandle_Int;
 
         /** Event : Button was clicked.\n
-            signature : void method(MyGUI::WidgetPtr widget, int index)\n
+            signature : void method(int index)\n
         */
         EventHandle_Int eventButtonSelected;
 
@@ -139,6 +139,7 @@ namespace MWGui
     {
     public:
         SelectSpecializationDialog(WindowManager& parWindowManager);
+        ~SelectSpecializationDialog();
 
         ESM::Class::Specialization getSpecializationId() const { return specializationId; }
 
@@ -169,6 +170,7 @@ namespace MWGui
     {
     public:
         SelectAttributeDialog(WindowManager& parWindowManager);
+        ~SelectAttributeDialog();
 
         ESM::Attribute::AttributeID getAttributeId() const { return attributeId; }
         Widgets::MWAttributePtr getAffectedWidget() const { return affectedWidget; }
@@ -201,6 +203,7 @@ namespace MWGui
     {
     public:
         SelectSkillDialog(WindowManager& parWindowManager);
+        ~SelectSkillDialog();
 
         ESM::Skill::SkillEnum getSkillId() const { return skillId; }
         Widgets::MWSkillPtr getAffectedWidget() const { return affectedWidget; }
@@ -236,6 +239,7 @@ namespace MWGui
     {
     public:
         DescriptionDialog(WindowManager& parWindowManager);
+        ~DescriptionDialog();
 
         std::string getTextInput() const { return textEdit ? textEdit->getOnlyText() : ""; }
         void setTextInput(const std::string &text) { if (textEdit) textEdit->setOnlyText(text); }
@@ -284,6 +288,10 @@ namespace MWGui
         void onDescriptionClicked(MyGUI::Widget* _sender);
         void onDescriptionEntered(WindowBase* parWindow);
         void onDialogCancel();
+
+        void setSpecialization(int id);
+
+        void update();
 
     private:
         MyGUI::EditPtr          editName;

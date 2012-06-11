@@ -62,6 +62,7 @@ namespace OMW
     /// \brief Main engine class, that brings together all the components of OpenMW
     class Engine : private Ogre::FrameListener
     {
+            MWBase::Environment mEnvironment;
             std::string mEncoding;
             Files::PathContainer mDataDirs;
             boost::filesystem::path mResDir;
@@ -74,12 +75,9 @@ namespace OMW
             bool mNewGame;
             bool mUseSound;
             bool mCompileAll;
-            bool mReportFocus;
-            float mFocusTDiff;
             std::string mFocusName;
             std::map<std::string,std::string> mFallbackMap;
 
-            MWBase::Environment mEnvironment;
             Compiler::Extensions mExtensions;
             Compiler::Context *mScriptContext;
 
@@ -93,15 +91,15 @@ namespace OMW
 
             /// add resources directory
             /// \note This function works recursively.
-
             void addResourcesDirectory (const boost::filesystem::path& path);
+
+            /// add a .zip resource
+            void addZipResource (const boost::filesystem::path& path);
 
             /// Load all BSA files in data directory.
             void loadBSA();
 
             void executeLocalScripts();
-
-            void updateFocusReport (float duration);
 
             virtual bool frameRenderingQueued (const Ogre::FrameEvent& evt);
 
@@ -144,9 +142,6 @@ namespace OMW
 
             /// Start as a new game.
             void setNewGame(bool newGame);
-
-            /// Write name of focussed object to cout
-            void setReportFocus (bool report);
 
             /// Initialise and enter main loop.
             void go();

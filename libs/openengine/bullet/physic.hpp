@@ -15,6 +15,7 @@ class btSequentialImpulseConstraintSolver;
 class btCollisionDispatcher;
 class btDiscreteDynamicsWorld;
 class btKinematicCharacterController;
+class btHeightfieldTerrainShape;
 
 namespace BtOgre
 {
@@ -115,6 +116,12 @@ namespace Physic
         bool collide;
     };
 
+    struct HeightField
+    {
+        btHeightfieldTerrainShape* mShape;
+        RigidBody* mBody;
+    };
+
     /**
      * The PhysicEngine class contain everything which is needed for Physic.
      * It's needed that Ogre Resources are set up before the PhysicEngine is created.
@@ -139,6 +146,18 @@ namespace Physic
          * so you can get it with the getRigidBody function.
          */
         RigidBody* createRigidBody(std::string mesh,std::string name,float scale);
+
+        /**
+         * Add a HeightField to the simulation
+         */
+        void addHeightField(float* heights,
+                int x, int y, float yoffset,
+                float triSize, float sqrtVerts);
+
+        /**
+         * Remove a HeightField from the simulation
+         */
+        void removeHeightField(int x, int y);
 
         /**
          * Add a RigidBody to the simulation
@@ -227,6 +246,9 @@ namespace Physic
 
         //the NIF file loader.
         BulletShapeLoader* mShapeLoader;
+
+        typedef std::map<std::string, HeightField> HeightFieldContainer;
+        HeightFieldContainer mHeightFieldMap;
 
         typedef std::map<std::string,RigidBody*> RigidBodyContainer;
         RigidBodyContainer RigidBodyMap;

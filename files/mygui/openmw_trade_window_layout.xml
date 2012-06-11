@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<MyGUI type="Layout">
+    <Widget type="Window" skin="MW_Window" layer="Windows" position="0 0 600 360" name="_Main">
+        <Property key="Visible" value="false"/>
+
+        <!-- Categories -->
+        <Widget type="Widget" position="8 8 566 24" align="Left Top HStretch" name="Categories">
+            <Widget type="Button" skin="MW_Button" position="0 0 60 24" name="AllButton">
+                <Property key="Caption" value="#{sAllTab}"/>
+            </Widget>
+            <Widget type="Button" skin="MW_Button" position="0 0 60 24" name="WeaponButton">
+                <Property key="Caption" value="#{sWeaponTab}"/>
+            </Widget>
+            <Widget type="Button" skin="MW_Button" position="0 0 60 24" name="ApparelButton">
+                <Property key="Caption" value="#{sApparelTab}"/>
+            </Widget>
+            <Widget type="Button" skin="MW_Button" position="0 0 60 24" name="MagicButton">
+                <Property key="Caption" value="#{sMagicTab}"/>
+            </Widget>
+            <Widget type="Button" skin="MW_Button" position="0 0 60 24" name="MiscButton">
+                <Property key="Caption" value="#{sMiscTab}"/>
+            </Widget>
+        </Widget>
+
+        <!-- Items -->
+        <Widget type="Widget" skin="MW_Box" position="8 38 566 185" name="box" align="Left Top Stretch">
+            <Widget type="ScrollView" skin="MW_ScrollViewH" position="4 4 558 181" align="Left Top Stretch" name="ItemView">
+                <Property key="CanvasAlign" value="Left Top"/>
+                <Widget type="Button" skin="" name="Items" position="0 0 558 181" name="Items" align="Left Top Stretch"/>
+            </Widget>
+        </Widget>
+
+        <Widget type="Widget" skin="" position="8 231 566 92" name="BottomPane" align="Left Bottom HStretch">
+            <Widget type="TextBox" skin="SandText" position="192 0 374 24" name="PlayerGold" align="Left Top HStretch">
+                <Property key="TextAlign" value="Right"/>
+            </Widget>
+            <Widget type="TextBox" skin="SandText" position="192 28 374 24" name="MerchantGold" align="Left Top HStretch">
+                <Property key="TextAlign" value="Right"/>
+            </Widget>
+
+            <Widget type="Button" skin="MW_Button" position="0 0 40 24" name="IncreaseButton" align="Left Top">
+                <Property key="Caption" value="+"/>
+            </Widget>
+            <Widget type="Button" skin="MW_Button" position="0 28 40 24" name="DecreaseButton" align="Left Top">
+                <Property key="Caption" value="-"/>
+            </Widget>
+
+            <Widget type="TextBox" skin="SandText" position="48 0 140 24" name="TotalBalanceLabel" align="Left Top "/>
+            <Widget type="TextBox" skin="SandText" position="48 28 140 24" name="TotalBalance" align="Left Top">
+                <Property key="TextAlign" value="Center"/>
+            </Widget>
+
+            <Widget type="Button" skin="MW_Button" position="0 60 60 24" name="MaxSaleButton" align="Left Top">
+                <Property key="Caption" value="Max. Sale"/> <!-- GMST sMaxSale doesn't work -->
+            </Widget>
+            <Widget type="Button" skin="MW_Button" position="0 60 60 24" name="CancelButton" align="Right Top">
+                <Property key="Caption" value="#{sCancel}"/>
+            </Widget>
+            <Widget type="Button" skin="MW_Button" position="0 60 60 24" name="OfferButton" align="Right Top">
+                <Property key="Caption" value="#{sBarterDialog8}"/>
+            </Widget>
+        </Widget>
+
+    </Widget>
+
+</MyGUI>

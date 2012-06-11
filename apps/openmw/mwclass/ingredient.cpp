@@ -9,6 +9,10 @@
 
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/actiontake.hpp"
+#include "../mwworld/world.hpp"
+
+#include "../mwgui/window_manager.hpp"
+#include "../mwgui/tooltips.hpp"
 
 #include "../mwrender/objects.hpp"
 
@@ -92,5 +96,60 @@ namespace MWClass
     std::string Ingredient::getDownSoundId (const MWWorld::Ptr& ptr) const
     {
         return std::string("Item Ingredient Down");
+    }
+
+    std::string Ingredient::getInventoryIcon (const MWWorld::Ptr& ptr) const
+    {
+          ESMS::LiveCellRef<ESM::Ingredient, MWWorld::RefData> *ref =
+            ptr.get<ESM::Ingredient>();
+
+        return ref->base->icon;
+    }
+
+    bool Ingredient::hasToolTip (const MWWorld::Ptr& ptr) const
+    {
+        ESMS::LiveCellRef<ESM::Ingredient, MWWorld::RefData> *ref =
+            ptr.get<ESM::Ingredient>();
+
+        return (ref->base->name != "");
+    }
+
+    MWGui::ToolTipInfo Ingredient::getToolTipInfo (const MWWorld::Ptr& ptr) const
+    {
+        ESMS::LiveCellRef<ESM::Ingredient, MWWorld::RefData> *ref =
+            ptr.get<ESM::Ingredient>();
+
+        MWGui::ToolTipInfo info;
+        info.caption = ref->base->name + MWGui::ToolTips::getCountString(ptr.getRefData().getCount());
+        info.icon = ref->base->icon;
+
+        const ESMS::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
+
+        std::string text;
+
+        text += "\n" + store.gameSettings.search("sWeight")->str + ": " + MWGui::ToolTips::toString(ref->base->data.weight);
+        text += MWGui::ToolTips::getValueString(ref->base->data.value, store.gameSettings.search("sValue")->str);
+
+        if (MWBase::Environment::get().getWindowManager()->getFullHelp()) {
+            text += MWGui::ToolTips::getMiscString(ref->ref.owner, "Owner");
+            text += MWGui::ToolTips::getMiscString(ref->base->script, "Script");
+        }
+
+        MWGui::Widgets::SpellEffectList list;
+        for (int i=0; i<4; ++i)
+        {
+            if (ref->base->data.effectID[i] < 0)
+                continue;
+            MWGui::Widgets::SpellEffectParams params;
+            params.mEffectID = ref->base->data.effectID[i];
+            params.mAttribute = ref->base->data.attributes[i];
+            params.mSkill = ref->base->data.skills[i];
+            list.push_back(params);
+        }
+        info.effects = list;
+
+        info.text = text;
+
+        return info;
     }
 }

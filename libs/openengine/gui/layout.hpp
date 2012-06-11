@@ -71,7 +71,7 @@ namespace GUI
 
     void shutdown()
     {
-      MyGUI::LayoutManager::getInstance().unloadLayout(mListWindowRoot);
+      MyGUI::Gui::getInstance().destroyWidget(mMainWidget);
       mListWindowRoot.clear();
     }
 
@@ -85,7 +85,7 @@ namespace GUI
       // adjust the size of the window caption so that all text is visible
       // NOTE: this assumes that mMainWidget is of type Window.
       MyGUI::TextBox* box = static_cast<MyGUI::Window*>(mMainWidget)->getCaptionWidget();
-      box->setSize(box->getTextSize().width + 48, box->getSize().height);
+      box->setSize(box->getTextSize().width + 24, box->getSize().height);
 
       // in order to trigger alignment updates, we need to update the parent
       // mygui doesn't provide a proper way of doing this, so we are just changing size
@@ -115,6 +115,20 @@ namespace GUI
       static_cast<MyGUI::TextBox*>(pt)->setCaption(caption);
     }
 
+    void setTitle(const std::string& title)
+    {
+      // NOTE: this assume that mMainWidget is of type Window.
+      static_cast<MyGUI::Window*>(mMainWidget)->setCaptionWithReplacing(title);
+      adjustWindowCaption();
+    }
+
+    void setState(const std::string& widget, const std::string& state)
+    {
+      MyGUI::Widget* pt;
+      getWidget(pt, widget);
+      pt->_setWidgetState(state);
+    }
+
     void setTextColor(const std::string& name, float r, float g, float b)
     {
       MyGUI::Widget* pt;
@@ -129,6 +143,13 @@ namespace GUI
       MyGUI::ImageBox* pt;
       getWidget(pt, name);
       pt->setImageTexture(imgName);
+    }
+
+    void adjustButtonSize(MyGUI::Button* button)
+    {
+      // adjust size of button to fit its text
+      MyGUI::IntSize size = button->getTextSize();
+      button->setSize(size.width + 24, button->getSize().height);
     }
 
   protected:

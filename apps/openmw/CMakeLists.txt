@@ -16,6 +16,7 @@ source_group(game FILES ${GAME} ${GAME_HEADER})
 add_openmw_dir (mwrender
     renderingmanager debugging sky player animation npcanimation creatureanimation actors objects
     renderinginterface localmap occlusionquery terrain terrainmaterial water shadows shaderhelper
+    compositors
     )
 
 add_openmw_dir (mwinput
@@ -23,9 +24,11 @@ add_openmw_dir (mwinput
     )
 
 add_openmw_dir (mwgui
-    layouts text_input widgets race class birth review window_manager console dialogue
+    text_input widgets race class birth review window_manager console dialogue
     dialogue_history window_base stats_window messagebox journalwindow charactercreation
-    map_window window_pinnable_base cursorreplace
+    map_window window_pinnable_base cursorreplace tooltips scrollwindow bookwindow list
+    formatting inventorywindow container hud countdialog tradewindow settingswindow
+    confirmationdialog alchemywindow referenceinterface spellwindow
     )
 
 add_openmw_dir (mwdialogue
@@ -46,7 +49,8 @@ add_openmw_dir (mwsound
 add_openmw_dir (mwworld
     refdata world physicssystem scene globals class action nullaction actionteleport
     containerstore actiontalk actiontake manualref player cellfunctors
-    cells localscripts customdata weather inventorystore ptr
+    cells localscripts customdata weather inventorystore ptr actionopen actionread
+    actionequip timestamp actionalchemy
     )
 
 add_openmw_dir (mwclass
@@ -56,6 +60,7 @@ add_openmw_dir (mwclass
 
 add_openmw_dir (mwmechanics
     mechanicsmanager stat creaturestats magiceffects movement actors drawstate spells
+    activespells
     )
 
 add_openmw_dir (mwbase

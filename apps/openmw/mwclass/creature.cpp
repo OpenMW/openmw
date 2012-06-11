@@ -5,6 +5,7 @@
 
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/mechanicsmanager.hpp"
+#include "../mwmechanics/magiceffects.hpp"
 
 #include "../mwbase/environment.hpp"
 
@@ -12,6 +13,8 @@
 #include "../mwworld/actiontalk.hpp"
 #include "../mwworld/customdata.hpp"
 #include "../mwworld/containerstore.hpp"
+
+#include "../mwgui/window_manager.hpp"
 
 namespace
 {
@@ -54,8 +57,6 @@ namespace MWClass
 
             data->mCreatureStats.mLevel = ref->base->data.level;
 
-            // \todo add initial container content
-
             // store
             ptr.getRefData().setCustomData (data.release());
         }
@@ -80,22 +81,13 @@ namespace MWClass
         ESMS::LiveCellRef<ESM::Creature, MWWorld::RefData> *ref =
             ptr.get<ESM::Creature>();
 
-
         const std::string &model = ref->base->model;
         assert (ref->base != NULL);
         if(!model.empty()){
             physics.insertActorPhysics(ptr, "meshes\\" + model);
         }
-    }
 
-    void Creature::enable (const MWWorld::Ptr& ptr) const
-    {
         MWBase::Environment::get().getMechanicsManager()->addActor (ptr);
-    }
-
-    void Creature::disable (const MWWorld::Ptr& ptr) const
-    {
-        MWBase::Environment::get().getMechanicsManager()->removeActor (ptr);
     }
 
     std::string Creature::getName (const MWWorld::Ptr& ptr) const
@@ -140,5 +132,50 @@ namespace MWClass
         boost::shared_ptr<Class> instance (new Creature);
 
         registerClass (typeid (ESM::Creature).name(), instance);
+    }
+
+    bool Creature::hasToolTip (const MWWorld::Ptr& ptr) const
+    {
+        /// \todo We don't want tooltips for Creatures in combat mode.
+
+        return true;
+    }
+
+    MWGui::ToolTipInfo Creature::getToolTipInfo (const MWWorld::Ptr& ptr) const
+    {
+        ESMS::LiveCellRef<ESM::Creature, MWWorld::RefData> *ref =
+            ptr.get<ESM::Creature>();
+
+        MWGui::ToolTipInfo info;
+        info.caption = ref->base->name;
+
+        std::string text;
+        if (MWBase::Environment::get().getWindowManager()->getFullHelp())
+            text += MWGui::ToolTips::getMiscString(ref->base->script, "Script");
+        info.text = text;
+
+        return info;
+    }
+
+    float Creature::getCapacity (const MWWorld::Ptr& ptr) const
+    {
+        const MWMechanics::CreatureStats& stats = getCreatureStats (ptr);
+        return stats.mAttributes[0].getModified()*5;
+    }
+
+    float Creature::getEncumbrance (const MWWorld::Ptr& ptr) const
+    {
+        float weight = getContainerStore (ptr).getWeight();
+
+        const MWMechanics::CreatureStats& stats = getCreatureStats (ptr);
+
+        weight -= stats.mMagicEffects.get (MWMechanics::EffectKey (8)).mMagnitude; // feather
+
+        weight += stats.mMagicEffects.get (MWMechanics::EffectKey (7)).mMagnitude; // burden
+
+        if (weight<0)
+            weight = 0;
+
+        return weight;
     }
 }

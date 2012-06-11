@@ -40,6 +40,11 @@ namespace MWWorld
         mWorld.moveObject (getPlayer(), x, y, z);
     }
 
+    void Player::setRot(float x, float y, float z)
+    {
+        mRenderer->setRot(x, y, z);
+    }
+
     void Player::setClass (const ESM::Class& class_)
     {
         ESM::Class *new_class = new ESM::Class (class_);
@@ -85,6 +90,14 @@ namespace MWWorld
 
         MWWorld::Class::get (ptr).getMovementSettings (ptr).mForwardBackward = value;
     }
+	void Player::setUpDown(int value)
+	{
+		MWWorld::Ptr ptr = getPlayer();
+
+        
+
+        MWWorld::Class::get (ptr).getMovementSettings (ptr).mUpDown = value;
+	}
 
     void Player::toggleRunning()
     {
@@ -100,4 +113,5 @@ namespace MWWorld
          MWWorld::Ptr ptr = getPlayer();
          return MWWorld::Class::get(ptr).getNpcStats(ptr).mDrawState;
     }
+
 }

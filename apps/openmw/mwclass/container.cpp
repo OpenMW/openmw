@@ -11,8 +11,13 @@
 #include "../mwworld/nullaction.hpp"
 #include "../mwworld/containerstore.hpp"
 #include "../mwworld/customdata.hpp"
+#include "../mwworld/world.hpp"
+
+#include "../mwgui/window_manager.hpp"
+#include "../mwgui/tooltips.hpp"
 
 #include "../mwrender/objects.hpp"
+#include "../mwworld/actionopen.hpp"
 
 #include "../mwsound/soundmanager.hpp"
 
@@ -82,6 +87,7 @@ namespace MWClass
         const std::string lockedSound = "LockedChest";
         const std::string trapActivationSound = "Disarm Trap Fail";
 
+
         if (ptr.getCellRef().lockLevel>0)
         {
             // TODO check for key
@@ -95,7 +101,8 @@ namespace MWClass
             if(ptr.getCellRef().trap.empty())
             {
                 // Not trapped, Inventory GUI goes here
-                return boost::shared_ptr<MWWorld::Action> (new MWWorld::NullAction);
+                //return boost::shared_ptr<MWWorld::Action> (new MWWorld::NullAction);
+                return boost::shared_ptr<MWWorld::Action> (new MWWorld::ActionOpen(ptr));
             }
             else
             {
@@ -137,5 +144,52 @@ namespace MWClass
         boost::shared_ptr<Class> instance (new Container);
 
         registerClass (typeid (ESM::Container).name(), instance);
+    }
+
+    bool Container::hasToolTip (const MWWorld::Ptr& ptr) const
+    {
+        ESMS::LiveCellRef<ESM::Container, MWWorld::RefData> *ref =
+            ptr.get<ESM::Container>();
+
+        return (ref->base->name != "");
+    }
+
+    MWGui::ToolTipInfo Container::getToolTipInfo (const MWWorld::Ptr& ptr) const
+    {
+        ESMS::LiveCellRef<ESM::Container, MWWorld::RefData> *ref =
+            ptr.get<ESM::Container>();
+
+        MWGui::ToolTipInfo info;
+        info.caption = ref->base->name;
+
+        const ESMS::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
+
+        std::string text;
+        if (ref->ref.lockLevel > 0)
+            text += "\n" + store.gameSettings.search("sLockLevel")->str + ": " + MWGui::ToolTips::toString(ref->ref.lockLevel);
+        if (ref->ref.trap != "")
+            text += "\n" + store.gameSettings.search("sTrapped")->str;
+
+        if (MWBase::Environment::get().getWindowManager()->getFullHelp()) {
+            text += MWGui::ToolTips::getMiscString(ref->ref.owner, "Owner");
+            text += MWGui::ToolTips::getMiscString(ref->base->script, "Script");
+        }
+
+        info.text = text;
+
+        return info;
+    }
+
+    float Container::getCapacity (const MWWorld::Ptr& ptr) const
+    {
+        ESMS::LiveCellRef<ESM::Container, MWWorld::RefData> *ref =
+            ptr.get<ESM::Container>();
+
+        return ref->base->weight;
+    }
+
+    float Container::getEncumbrance (const MWWorld::Ptr& ptr) const
+    {
+        return getContainerStore (ptr).getWeight();
     }
 }

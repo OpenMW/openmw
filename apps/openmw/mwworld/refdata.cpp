@@ -123,7 +123,7 @@ namespace MWWorld
 
     void RefData::disable()
     {
-        mEnabled = true;
+        mEnabled = false;
     }
 
     ESM::Position& RefData::getPosition()

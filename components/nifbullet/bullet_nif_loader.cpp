@@ -139,6 +139,8 @@ void ManualBulletShapeLoader::loadResource(Ogre::Resource *resource)
         handleNode(node,0,Ogre::Matrix3::IDENTITY,Ogre::Vector3::ZERO,1,hasCollisionNode,false,true);
     }
 
+    cShape->collide = hasCollisionNode&&cShape->collide;
+
     struct TriangleMeshShape : public btBvhTriangleMeshShape
     {
         TriangleMeshShape(btStridingMeshInterface* meshInterface, bool useQuantizedAabbCompression)

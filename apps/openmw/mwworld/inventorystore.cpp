@@ -4,6 +4,12 @@
 #include <iterator>
 #include <algorithm>
 
+#include <components/esm/loadench.hpp>
+
+#include "../mwbase/environment.hpp"
+
+#include "../mwworld/world.hpp"
+
 #include "../mwmechanics/npcstats.hpp"
 
 #include "class.hpp"
@@ -32,19 +38,26 @@ void MWWorld::InventoryStore::initSlots (TSlots& slots)
         slots.push_back (end());
 }
 
-MWWorld::InventoryStore::InventoryStore()
+MWWorld::InventoryStore::InventoryStore() : mMagicEffectsUpToDate (false)
+ , mSelectedEnchantItem(end())
 {
     initSlots (mSlots);
 }
 
 MWWorld::InventoryStore::InventoryStore (const InventoryStore& store)
 : ContainerStore (store)
+ , mSelectedEnchantItem(end())
 {
+    mMagicEffects = store.mMagicEffects;
+    mMagicEffectsUpToDate = store.mMagicEffectsUpToDate;
+    mSelectedEnchantItem = store.mSelectedEnchantItem;
     copySlots (store);
 }
 
 MWWorld::InventoryStore& MWWorld::InventoryStore::operator= (const InventoryStore& store)
 {
+    mMagicEffects = store.mMagicEffects;
+    mMagicEffectsUpToDate = store.mMagicEffectsUpToDate;
     ContainerStore::operator= (store);
     mSlots.clear();
     copySlots (store);
@@ -59,17 +72,38 @@ void MWWorld::InventoryStore::equip (int slot, const ContainerStoreIterator& ite
     if (iterator.getContainerStore()!=this)
         throw std::runtime_error ("attempt to equip an item that is not in the inventory");
 
+    std::pair<std::vector<int>, bool> slots;
     if (iterator!=end())
     {
-        std::pair<std::vector<int>, bool> slots = Class::get (*iterator).getEquipmentSlots (*iterator);
+        slots = Class::get (*iterator).getEquipmentSlots (*iterator);
 
         if (std::find (slots.first.begin(), slots.first.end(), slot)==slots.first.end())
             throw std::runtime_error ("invalid slot");
     }
 
-    /// \todo restack item previously in this slot (if required)
+    // restack item previously in this slot (if required)
+    if (mSlots[slot] != end())
+    {
+        for (MWWorld::ContainerStoreIterator iter (begin()); iter!=end(); ++iter)
+        {
+            if (stacks(*iter, *mSlots[slot]))
+            {
+                iter->getRefData().setCount( iter->getRefData().getCount() + mSlots[slot]->getRefData().getCount() );
+                mSlots[slot]->getRefData().setCount(0);
+                break;
+            }
+        }
+    }
 
-    /// \todo unstack item pointed to by iterator if required)
+    // unstack item pointed to by iterator if required
+    if (iterator!=end() && !slots.second && iterator->getRefData().getCount() > 1) // if slots.second is true, item can stay stacked when equipped
+    {
+        // add the item again with a count of count-1, then set the count of the original (that will be equipped) to 1
+        int count = iterator->getRefData().getCount();
+        iterator->getRefData().setCount(count-1);
+        addImpl(*iterator);
+        iterator->getRefData().setCount(1);
+    }
 
     mSlots[slot] = iterator;
 
@@ -147,7 +181,18 @@ void MWWorld::InventoryStore::autoEquip (const MWMechanics::NpcStats& stats)
                 }
             }
 
-            /// \todo unstack, if reqquired (itemsSlots.second)
+            if (!itemsSlots.second) // if itemsSlots.second is true, item can stay stacked when equipped
+            {
+                // unstack item pointed to by iterator if required
+                if (iter->getRefData().getCount() > 1)
+                {
+                    // add the item again with a count of count-1, then set the count of the original (that will be equipped) to 1
+                    int count = iter->getRefData().getCount();
+                    iter->getRefData().setCount(count-1);
+                    addImpl(*iter);
+                    iter->getRefData().setCount(1);
+                }
+            }
 
             slots[*iter2] = iter;
             break;
@@ -167,4 +212,64 @@ void MWWorld::InventoryStore::autoEquip (const MWMechanics::NpcStats& stats)
         mSlots.swap (slots);
         flagAsModified();
     }
+}
+
+const MWMechanics::MagicEffects& MWWorld::InventoryStore::getMagicEffects()
+{
+    if (!mMagicEffectsUpToDate)
+    {
+        mMagicEffects = MWMechanics::MagicEffects();
+
+        for (TSlots::const_iterator iter (mSlots.begin()); iter!=mSlots.end(); ++iter)
+            if (*iter!=end())
+            {
+                std::string enchantmentId = MWWorld::Class::get (**iter).getEnchantment (**iter);
+
+                if (!enchantmentId.empty())
+                {
+                    const ESM::Enchantment& enchantment =
+                        *MWBase::Environment::get().getWorld()->getStore().enchants.find (enchantmentId);
+
+                    if (enchantment.data.type==ESM::Enchantment::ConstantEffect)
+                        mMagicEffects.add (enchantment.effects);
+                }
+            }
+
+        mMagicEffectsUpToDate = true;
+    }
+
+    return mMagicEffects;
+}
+
+void MWWorld::InventoryStore::flagAsModified()
+{
+    ContainerStore::flagAsModified();
+    mMagicEffectsUpToDate = false;
+}
+
+bool MWWorld::InventoryStore::stacks(const Ptr& ptr1, const Ptr& ptr2)
+{
+    bool canStack = MWWorld::ContainerStore::stacks(ptr1, ptr2);
+    if (!canStack)
+        return false;
+
+    // don't stack if the item being checked against is currently equipped.
+    for (TSlots::const_iterator iter (mSlots.begin());
+        iter!=mSlots.end(); ++iter)
+    {
+        if (*iter != end() && ptr1 == **iter)
+            return false;
+    }
+
+    return true;
+}
+
+void MWWorld::InventoryStore::setSelectedEnchantItem(const ContainerStoreIterator& iterator)
+{
+    mSelectedEnchantItem = iterator;
+}
+
+MWWorld::ContainerStoreIterator MWWorld::InventoryStore::getSelectedEnchantItem()
+{
+    return mSelectedEnchantItem;
 }

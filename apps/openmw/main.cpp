@@ -155,9 +155,6 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
             "\n\twin1251 - Cyrillic alphabet such as Russian, Bulgarian, Serbian Cyrillic and other languages\n"
             "\n\twin1252 - Western European (Latin) alphabet, used by default")
 
-        ("report-focus", bpo::value<bool>()->implicit_value(true)
-            ->default_value(false), "write name of focussed object to cout")
-
         ("fallback", bpo::value<FallbackMap>()->default_value(FallbackMap(), "")
             ->multitoken()->composing(), "fallback values")
 
@@ -265,7 +262,6 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
     engine.setSoundUsage(!variables["nosound"].as<bool>());
     engine.setScriptsVerbosity(variables["script-verbose"].as<bool>());
     engine.setCompileAll(variables["script-all"].as<bool>());
-    engine.setReportFocus(variables["report-focus"].as<bool>());
     engine.setAnimationVerbose(variables["anim-verbose"].as<bool>());
     engine.setFallbackValues(variables["fallback"].as<FallbackMap>().mMap);
 

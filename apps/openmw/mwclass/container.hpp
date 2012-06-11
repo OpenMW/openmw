@@ -24,11 +24,25 @@ namespace MWClass
                 const MWWorld::Ptr& actor) const;
             ///< Generate action for activation
 
+            virtual bool hasToolTip (const MWWorld::Ptr& ptr) const;
+            ///< @return true if this object has a tooltip when focused (default implementation: false)
+
+            virtual MWGui::ToolTipInfo getToolTipInfo (const MWWorld::Ptr& ptr) const;
+            ///< @return the content of the tool tip to be displayed. raises exception if the object has no tooltip.
+
             virtual MWWorld::ContainerStore& getContainerStore (const MWWorld::Ptr& ptr) const;
             ///< Return container store
 
             virtual std::string getScript (const MWWorld::Ptr& ptr) const;
             ///< Return name of the script attached to ptr
+
+            virtual float getCapacity (const MWWorld::Ptr& ptr) const;
+            ///< Return total weight that fits into the object. Throws an exception, if the object can't
+            /// hold other objects.
+
+            virtual float getEncumbrance (const MWWorld::Ptr& ptr) const;
+            ///< Returns total weight of objects inside this object (including modifications from magic
+            /// effects). Throws an exception, if the object can't hold other objects.
 
             static void registerSelf();
     };

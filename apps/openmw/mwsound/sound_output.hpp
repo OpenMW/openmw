@@ -46,7 +46,7 @@ namespace MWSound
     public:
         virtual ~Sound_Output() { }
 
-        bool isInitialized() { return mInitialized; }
+        bool isInitialized() const { return mInitialized; }
 
         friend class OpenAL_Output;
         friend class SoundManager;

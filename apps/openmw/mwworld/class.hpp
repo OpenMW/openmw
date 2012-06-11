@@ -12,6 +12,7 @@
 #include "physicssystem.hpp"
 
 #include "../mwrender/renderinginterface.hpp"
+#include "../mwgui/tooltips.hpp"
 
 namespace Ogre
 {
@@ -67,16 +68,6 @@ namespace MWWorld
             virtual void insertObject(const Ptr& ptr, MWWorld::PhysicsSystem& physics) const;
             ///< Add reference into a cell for rendering (default implementation: don't render anything).
 
-            virtual void enable (const Ptr& ptr) const;
-            ///< Enable reference; only does the non-rendering part (default implementation: ignore)
-            /// \attention This is not the same as the script instruction with the same name. References
-            /// should only be enabled while in an active cell.
-
-            virtual void disable (const Ptr& ptr) const;
-            ///< Enable reference; only does the non-rendering part (default implementation: ignore)
-            /// \attention This is not the same as the script instruction with the same name. References
-            /// should only be enabled while in an active cell.
-
             virtual std::string getName (const Ptr& ptr) const = 0;
             ///< \return name (the one that is to be presented to the user; not the internal one);
             /// can return an empty string.
@@ -84,6 +75,12 @@ namespace MWWorld
             virtual MWMechanics::CreatureStats& getCreatureStats (const Ptr& ptr) const;
             ///< Return creature stats or throw an exception, if class does not have creature stats
             /// (default implementation: throw an exceoption)
+
+            virtual bool hasToolTip (const Ptr& ptr) const;
+            ///< @return true if this object has a tooltip when focused (default implementation: false)
+
+            virtual MWGui::ToolTipInfo getToolTipInfo (const Ptr& ptr) const;
+            ///< @return the content of the tool tip to be displayed. raises exception if the object has no tooltip.
 
             virtual MWMechanics::NpcStats& getNpcStats (const Ptr& ptr) const;
             ///< Return NPC stats or throw an exception, if class does not have NPC stats
@@ -129,7 +126,7 @@ namespace MWWorld
             ///< Set or unset a stance.
 
             virtual bool getStance (const Ptr& ptr, Stance stance, bool ignoreForce = false) const;
-            ////< Check if a stance is active or not.
+            ///< Check if a stance is active or not.
 
             virtual float getSpeed (const Ptr& ptr) const;
             ///< Return movement speed.
@@ -157,6 +154,16 @@ namespace MWWorld
             ///< Return trade value of the object. Throws an exception, if the object can't be traded.
             /// (default implementation: throws an exception)
 
+            virtual float getCapacity (const MWWorld::Ptr& ptr) const;
+            ///< Return total weight that fits into the object. Throws an exception, if the object can't
+            /// hold other objects.
+            /// (default implementation: throws an exception)
+
+            virtual float getEncumbrance (const MWWorld::Ptr& ptr) const;
+            ///< Returns total weight of objects inside this object (including modifications from magic
+            /// effects). Throws an exception, if the object can't hold other objects.
+            /// (default implementation: throws an exception)
+
             static const Class& get (const std::string& key);
             ///< If there is no class for this \a key, an exception is thrown.
 
@@ -172,6 +179,13 @@ namespace MWWorld
             virtual std::string getDownSoundId (const Ptr& ptr) const;
             ///< Return the down sound ID of \a ptr or throw an exception, if class does not support ID retrieval
             /// (default implementation: throw an exception)
+
+            virtual std::string getInventoryIcon (const MWWorld::Ptr& ptr) const;
+            ///< Return name of inventory icon.
+
+            virtual std::string getEnchantment (const MWWorld::Ptr& ptr) const;
+            ///< @return the enchantment ID if the object is enchanted, otherwise an empty string
+            /// (default implementation: return empty string)
     };
 }
 

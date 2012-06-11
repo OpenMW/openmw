@@ -18,12 +18,14 @@ namespace MWGui
     class StatsWindow : public WindowPinnableBase
     {
         public:
-            typedef std::pair<std::string, int> Faction;
-            typedef std::vector<Faction> FactionList;
+            typedef std::map<std::string, int> FactionList;
 
             typedef std::vector<int> SkillList;
 
             StatsWindow(WindowManager& parWindowManager);
+
+            /// automatically updates all the data in the stats window, but only if it has changed.
+            void onFrame();
 
             void setBar(const std::string& name, const std::string& tname, int val, int max);
             void setPlayerName(const std::string& playerName);
@@ -36,31 +38,29 @@ namespace MWGui
             void setValue(const ESM::Skill::SkillEnum parSkill, const MWMechanics::Stat<float>& value);
 
             void configureSkills (const SkillList& major, const SkillList& minor);
-            void setFactions (const std::vector<Faction>& factions);
-            void setBirthSign (const std::string &signId);
             void setReputation (int reputation) { this->reputation = reputation; }
             void setBounty (int bounty) { this->bounty = bounty; }
             void updateSkillArea();
 
         private:
-            enum ColorStyle
-            {
-                CS_Sub,
-                CS_Normal,
-                CS_Super
-            };
-            void setStyledText(MyGUI::TextBox* widget, ColorStyle style, const std::string &value);
             void addSkills(const SkillList &skills, const std::string &titleId, const std::string &titleDefault, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
             void addSeparator(MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
             void addGroup(const std::string &label, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
-            MyGUI::TextBox* addValueItem(const std::string text, const std::string &value, ColorStyle style, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
-            void addItem(const std::string text, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
+            MyGUI::TextBox* addValueItem(const std::string& text, const std::string &value, const std::string& state, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
+            MyGUI::Widget* addItem(const std::string& text, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
             void updateScroller();
+
+            void setFactions (const FactionList& factions);
+            void setBirthSign (const std::string &signId);
 
             void onScrollChangePosition(MyGUI::ScrollBar* scroller, size_t pos);
             void onWindowResize(MyGUI::Window* window);
+            void onMouseWheel(MyGUI::Widget* _sender, int _rel);
 
             static const int lineHeight;
+
+            MyGUI::Widget* mLeftPane;
+            MyGUI::Widget* mRightPane;
 
             MyGUI::WidgetPtr skillAreaWidget, skillClientWidget;
             MyGUI::ScrollBar* skillScrollerWidget;
@@ -70,10 +70,12 @@ namespace MWGui
             std::map<int, MWMechanics::Stat<float> > skillValues;
             std::map<int, MyGUI::TextBox*> skillWidgetMap;
             std::map<std::string, MyGUI::WidgetPtr> factionWidgetMap;
-            FactionList factions; ///< Stores a list of factions and the current rank
+            FactionList mFactions; ///< Stores a list of factions and the current rank
             std::string birthSignId;
             int reputation, bounty;
             std::vector<MyGUI::WidgetPtr> skillWidgets; //< Skills and other information
+
+            bool mChanged;
 
         protected:
             virtual void onPinToggled();

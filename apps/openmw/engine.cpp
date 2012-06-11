@@ -74,47 +74,6 @@ void OMW::Engine::executeLocalScripts()
     localScripts.setIgnore (MWWorld::Ptr());
 }
 
-void OMW::Engine::updateFocusReport (float duration)
-{
-
-    if ((mFocusTDiff += duration)>0.25)
-    {
-        mFocusTDiff = 0;
-
-        std::string name;
-
-        std::string handle = MWBase::Environment::get().getWorld()->getFacedHandle();
-
-        if (!handle.empty())
-        {
-            // the faced handle is not updated immediately, so on a cell change it might
-            // point to an object that doesn't exist anymore
-            // therefore, we are catching the "Unknown Ogre handle" exception that occurs in this case
-            try
-            {
-                MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->getPtrViaHandle (handle);
-
-                if (!ptr.isEmpty()){
-                    name = MWWorld::Class::get (ptr).getName (ptr);
-
-                }
-            }
-            catch (std::runtime_error& e)
-            {}
-        }
-
-        if (name!=mFocusName)
-        {
-            mFocusName = name;
-
-            if (mFocusName.empty())
-                std::cout << "Unfocus" << std::endl;
-            else
-                std::cout << "Focus: " << name << std::endl;
-        }
-    }
-}
-
 void OMW::Engine::setAnimationVerbose(bool animverbose){
     if(animverbose){
         NifOgre::NIFLoader::getSingletonPtr()->setOutputAnimFiles(true);
@@ -135,14 +94,6 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
         if (mUseSound)
             MWBase::Environment::get().getSoundManager()->update (evt.timeSinceLastFrame);
 
-        // update GUI
-        Ogre::RenderWindow* window = mOgre->getWindow();
-        MWBase::Environment::get().getWindowManager()->wmUpdateFps(window->getLastFPS(),
-                                                 window->getTriangleCount(),
-                                                 window->getBatchCount());
-
-        MWBase::Environment::get().getWindowManager()->onFrame(mEnvironment.getFrameDuration());
-
         // global scripts
         MWBase::Environment::get().getScriptManager()->getGlobalScripts().run();
 
@@ -154,7 +105,7 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
                                // frame.
 
         // passing of time
-        if (MWBase::Environment::get().getWindowManager()->getMode()==MWGui::GM_Game)
+        if (!MWBase::Environment::get().getWindowManager()->isGuiMode())
             MWBase::Environment::get().getWorld()->advanceTime (
                 mEnvironment.getFrameDuration()*MWBase::Environment::get().getWorld()->getTimeScaleFactor()/3600);
 
@@ -165,17 +116,21 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
         // update actors
         std::vector<std::pair<std::string, Ogre::Vector3> > movement;
         MWBase::Environment::get().getMechanicsManager()->update (movement, mEnvironment.getFrameDuration(),
-            MWBase::Environment::get().getWindowManager()->getMode()!=MWGui::GM_Game);
+            MWBase::Environment::get().getWindowManager()->isGuiMode());
 
-        if (MWBase::Environment::get().getWindowManager()->getMode()==MWGui::GM_Game)
+        if (!MWBase::Environment::get().getWindowManager()->isGuiMode())
             MWBase::Environment::get().getWorld()->doPhysics (movement, mEnvironment.getFrameDuration());
 
         // update world
         MWBase::Environment::get().getWorld()->update (evt.timeSinceLastFrame);
 
-        // report focus object (for debugging)
-        if (mReportFocus)
-            updateFocusReport (mEnvironment.getFrameDuration());
+        // update GUI
+        Ogre::RenderWindow* window = mOgre->getWindow();
+        MWBase::Environment::get().getWindowManager()->wmUpdateFps(window->getLastFPS(),
+                                                 window->getTriangleCount(),
+                                                 window->getBatchCount());
+
+        MWBase::Environment::get().getWindowManager()->onFrame(evt.timeSinceLastFrame);
     }
     catch (const std::exception& e)
     {
@@ -193,8 +148,6 @@ OMW::Engine::Engine(Files::ConfigurationManager& configurationManager)
   , mNewGame (false)
   , mUseSound (true)
   , mCompileAll (false)
-  , mReportFocus (false)
-  , mFocusTDiff (0)
   , mScriptContext (0)
   , mFSStrict (false)
   , mCfgMgr(configurationManager)
@@ -205,13 +158,7 @@ OMW::Engine::Engine(Files::ConfigurationManager& configurationManager)
 
 OMW::Engine::~Engine()
 {
-    delete MWBase::Environment::get().getInputManager();
-    delete MWBase::Environment::get().getSoundManager();
-    delete MWBase::Environment::get().getMechanicsManager();
-    delete MWBase::Environment::get().getDialogueManager();
-    delete MWBase::Environment::get().getJournal();
-    delete MWBase::Environment::get().getScriptManager();
-    delete MWBase::Environment::get().getWorld();
+    mEnvironment.cleanup();
     delete mScriptContext;
     delete mOgre;
 }
@@ -245,6 +192,12 @@ void OMW::Engine::addResourcesDirectory (const boost::filesystem::path& path)
 {
     mOgre->getRoot()->addResourceLocation (path.string(), "FileSystem",
         Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, true);
+}
+
+void OMW::Engine::addZipResource (const boost::filesystem::path& path)
+{
+    mOgre->getRoot()->addResourceLocation (path.string(), "Zip",
+        Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, false);
 }
 
 void OMW::Engine::enableFSStrict(bool fsStrict)
@@ -305,30 +258,15 @@ void OMW::Engine::setNewGame(bool newGame)
     mNewGame = newGame;
 }
 
-void OMW::Engine::setReportFocus (bool report)
-{
-    mReportFocus = report;
-}
-
 // Initialise and enter main loop.
 
 void OMW::Engine::go()
 {
-    mFocusTDiff = 0;
     assert (!mCellName.empty());
     assert (!mMaster.empty());
     assert (!mOgre);
 
     mOgre = new OEngine::Render::OgreRenderer;
-
-    //we need to ensure the path to the configuration exists before creating an
-    //instance of ogre root so that Ogre doesn't raise an exception when trying to
-    //access it
-    const boost::filesystem::path configPath = mCfgMgr.getOgreConfigPath().parent_path();
-    if ( !boost::filesystem::exists(configPath) )
-    {
-        boost::filesystem::create_directories(configPath);
-    }
 
     // Create the settings manager and load default settings file
     Settings::Manager settings;
@@ -340,6 +278,8 @@ void OMW::Engine::go()
         settings.loadDefault(localdefault);
     else if (boost::filesystem::exists(globaldefault))
         settings.loadDefault(globaldefault);
+    else
+        throw std::runtime_error ("No default settings file found! Make sure the file \"settings-default.cfg\" was properly installed.");
 
     // load user settings if they exist, otherwise just load the default settings as user settings
     const std::string settingspath = mCfgMgr.getUserPath().string() + "/settings.cfg";
@@ -359,10 +299,20 @@ void OMW::Engine::go()
     else if (boost::filesystem::exists(mCfgMgr.getGlobalPath().string() + "/transparency-overrides.cfg"))
         nifOverrides.loadTransparencyOverrides(mCfgMgr.getGlobalPath().string() + "/transparency-overrides.cfg");
 
-    mOgre->configure(!boost::filesystem::is_regular_file(mCfgMgr.getOgreConfigPath()),
-        mCfgMgr.getOgreConfigPath().string(),
+    std::string renderSystem = settings.getString("render system", "Video");
+    if (renderSystem == "")
+    {
+#if OGRE_PLATFORM == OGRE_PLATFORM_WIN32
+        renderSystem = "Direct3D9 Rendering Subsystem";
+#else
+        renderSystem = "OpenGL Rendering Subsystem";
+#endif
+    }
+    mOgre->configure(
         mCfgMgr.getLogPath().string(),
-        mCfgMgr.getPluginsConfigPath().string(), false);
+        mCfgMgr.getPluginsConfigPath().string(),
+        renderSystem,
+        false);
 
     // This has to be added BEFORE MyGUI is initialized, as it needs
     // to find core.xml here.
@@ -373,9 +323,17 @@ void OMW::Engine::go()
     addResourcesDirectory(mResDir / "water");
     addResourcesDirectory(mResDir / "gbuffer");
     addResourcesDirectory(mResDir / "shadows");
+    addZipResource(mResDir / "mygui" / "Obliviontt.zip");
 
     // Create the window
-    mOgre->createWindow("OpenMW");
+    OEngine::Render::WindowSettings windowSettings;
+    windowSettings.fullscreen = settings.getBool("fullscreen", "Video");
+    windowSettings.window_x = settings.getInt("resolution x", "Video");
+    windowSettings.window_y = settings.getInt("resolution y", "Video");
+    windowSettings.vsync = settings.getBool("vsync", "Video");
+    std::string aa = settings.getString("antialiasing", "Video");
+    windowSettings.fsaa = (aa.substr(0, 4) == "MSAA") ? aa.substr(5, aa.size()-5) : "0";
+    mOgre->createWindow("OpenMW", windowSettings);
 
     loadBSA();
 
@@ -463,7 +421,7 @@ void OMW::Engine::go()
 
 void OMW::Engine::activate()
 {
-    if (MWBase::Environment::get().getWindowManager()->getMode()!=MWGui::GM_Game)
+    if (MWBase::Environment::get().getWindowManager()->isGuiMode())
         return;
 
     std::string handle = MWBase::Environment::get().getWorld()->getFacedHandle();

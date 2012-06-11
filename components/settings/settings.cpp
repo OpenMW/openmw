@@ -131,7 +131,11 @@ void Manager::setString (const std::string& setting, const std::string& category
             }
         }
         else
+        {
+            if (mDefaultFile.getSetting(setting, category) != value)
+                mChangedSettings.push_back(std::make_pair(category, setting));
             mNewSettings[s] = value;
+        }
     }
 }
 

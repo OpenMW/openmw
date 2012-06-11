@@ -7,14 +7,14 @@
     <Widget type="ImageBox" skin="ImageBox" position_real="0 0 1 1" align="Top|Right" name="JImage">     
         <Property key="ImageTexture" value="textures\tx_menubook.dds"/>
 
-        <Widget type="Button" skin="Next_btn" position="370 220 64 32" name="NextPageBTN">
+        <Widget type="Button" skin="ButtonImage" position="370 220 57 24" name="NextPageBTN">
+            <Property key="ImageResource" value="MenuBook_Next"/>
         </Widget>
-
-        <Widget type="Button" skin="Prev_btn" position="80 220 128 32" name="PrevPageBTN">
+        <Widget type="Button" skin="ButtonImage" position="80 220 96 24" name="PrevPageBTN">
+            <Property key="ImageResource" value="MenuBook_Prev"/>
         </Widget>
-
-        <Widget type="EditBox" skin="MW_BookPage" position_real="0.15 0.1 0.3 0.8" name = "LeftText"/>
-        <Widget type="EditBox" skin="MW_BookPage" position_real="0.55 0.1 0.3 0.8" name = "RightText"/>
+        <Widget type="EditBox" skin="MW_BookPage" position_real="0.15 0.1 0.3 0.75" name = "LeftText"/>
+        <Widget type="EditBox" skin="MW_BookPage" position_real="0.55 0.1 0.3 0.75" name = "RightText"/>
     </Widget>
 </Widget>
 

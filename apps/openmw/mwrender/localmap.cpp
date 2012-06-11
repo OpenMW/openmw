@@ -307,50 +307,81 @@ void LocalMap::updatePlayer (const Ogre::Vector3& position, const Ogre::Quaterni
 
     // convert from world coordinates to texture UV coordinates
     float u,v;
-    std::string texName;
+    std::string texBaseName;
     if (!mInterior)
     {
         u = std::abs((pos.x - (sSize*x))/sSize);
         v = 1-std::abs((pos.y + (sSize*y))/sSize);
-        texName = "Cell_"+coordStr(x,y);
+        texBaseName = "Cell_";
     }
     else
     {
         u = (pos.x - min.x - sSize*x)/sSize;
         v = (pos.y - min.y - sSize*y)/sSize;
 
-        texName = mInteriorName + "_" + coordStr(x,y);
+        texBaseName = mInteriorName + "_";
     }
 
     MWBase::Environment::get().getWindowManager()->setPlayerPos(u, v);
     MWBase::Environment::get().getWindowManager()->setPlayerDir(playerdirection.x, -playerdirection.z);
 
     // explore radius (squared)
-    const float sqrExploreRadius = 0.01 * sFogOfWarResolution*sFogOfWarResolution;
+    const float sqrExploreRadius = (mInterior ? 0.01 : 0.09) * sFogOfWarResolution*sFogOfWarResolution;
+    const float exploreRadius = (mInterior ? 0.1 : 0.3) * sFogOfWarResolution; // explore radius from 0 to sFogOfWarResolution
+    const float exploreRadiusUV = exploreRadius / sFogOfWarResolution; // explore radius from 0 to 1 (UV space)
 
-    // get the appropriate fog of war texture
-    TexturePtr tex = TextureManager::getSingleton().getByName(texName+"_fog");
-    if (!tex.isNull())
+    int intExtMult = mInterior ? 1 : -1; // interior and exterior have reversed Y coordinates (interior: top to bottom)
+
+    // change the affected fog of war textures (in a 3x3 grid around the player)
+    for (int mx = -1; mx<2; ++mx)
     {
-        // get its buffer
-        if (mBuffers.find(texName) == mBuffers.end()) return;
-        int i=0;
-        for (int texV = 0; texV<sFogOfWarResolution; ++texV)
+        for (int my = -1; my<2; ++my)
         {
-            for (int texU = 0; texU<sFogOfWarResolution; ++texU)
-            {
-                float sqrDist = Math::Sqr(texU - u*sFogOfWarResolution) + Math::Sqr(texV - v*sFogOfWarResolution);
-                uint32 clr = mBuffers[texName][i];
-                uint8 alpha = (clr >> 24);
-                alpha = std::min( alpha, (uint8) (std::max(0.f, std::min(1.f, (sqrDist/sqrExploreRadius)))*255) );
-                mBuffers[texName][i] = (uint32) (alpha << 24);
 
-                ++i;
+            // is this texture affected at all?
+            bool affected = false;
+            if (mx == 0 && my == 0) // the player is always in the center of the 3x3 grid
+                affected = true;
+            else
+            {
+                bool affectsX = (mx > 0)? (u + exploreRadiusUV > 1) : (u - exploreRadiusUV < 0);
+                bool affectsY = (my > 0)? (v + exploreRadiusUV > 1) : (v - exploreRadiusUV < 0);
+                affected = (affectsX && (my == 0)) || (affectsY && mx == 0) || (affectsX && affectsY);
+            }
+
+            if (!affected)
+                continue;
+
+            std::string texName = texBaseName + coordStr(x+mx,y+my*intExtMult);
+
+            TexturePtr tex = TextureManager::getSingleton().getByName(texName+"_fog");
+            if (!tex.isNull())
+            {
+                // get its buffer
+                if (mBuffers.find(texName) == mBuffers.end()) return;
+                int i=0;
+                for (int texV = 0; texV<sFogOfWarResolution; ++texV)
+                {
+                    for (int texU = 0; texU<sFogOfWarResolution; ++texU)
+                    {
+                        // fix into range of 0 ... sFogOfWarResolution
+                        int _texU = texU * (float(sFogOfWarResolution+1) / float(sFogOfWarResolution));
+                        int _texV = texV * (float(sFogOfWarResolution+1) / float(sFogOfWarResolution));
+
+                        float sqrDist = Math::Sqr((_texU + mx*sFogOfWarResolution) - u*sFogOfWarResolution) + Math::Sqr((_texV + my*sFogOfWarResolution) - v*sFogOfWarResolution);
+                        uint32 clr = mBuffers[texName][i];
+                        uint8 alpha = (clr >> 24);
+                        alpha = std::min( alpha, (uint8) (std::max(0.f, std::min(1.f, (sqrDist/sqrExploreRadius)))*255) );
+                        mBuffers[texName][i] = (uint32) (alpha << 24);
+
+                        ++i;
+                    }
+                }
+
+                // copy to the texture
+                memcpy(tex->getBuffer()->lock(HardwareBuffer::HBL_DISCARD), &mBuffers[texName][0], sFogOfWarResolution*sFogOfWarResolution*4);
+                tex->getBuffer()->unlock();
             }
         }
-
-        // copy to the texture
-        memcpy(tex->getBuffer()->lock(HardwareBuffer::HBL_DISCARD), &mBuffers[texName][0], sFogOfWarResolution*sFogOfWarResolution*4);
-        tex->getBuffer()->unlock();
     }
 }

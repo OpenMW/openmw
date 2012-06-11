@@ -19,9 +19,15 @@ void Creature::load(ESMReader &esm)
     spells.load(esm);
     aiData.load(esm);
 
-    // More subrecords:
+    if (esm.isNextSub("AIDT"))
+    {
+        esm.getHExact(&AI, sizeof(AI));
+        hasAI = true;
+    }
+    else
+        hasAI = false;
 
-    // AIDT - data (12 bytes, unknown)
+    // More subrecords:
     // AI_W - wander (14 bytes, i don't understand it)
     //    short distance
     //    byte duration
@@ -33,8 +39,8 @@ void Creature::load(ESMReader &esm)
     // AI_F - follow?
     // AI_E - escort?
     // AI_A - activate?
-
     esm.skipRecord();
+
 }
 
 void Creature::save(ESMWriter &esm)

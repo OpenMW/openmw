@@ -1,19 +1,53 @@
 #ifndef MWGUI_MAPWINDOW_H
 #define MWGUI_MAPWINDOW_H
 
-#include "layouts.hpp"
 #include "window_pinnable_base.hpp"
 
 namespace MWGui
 {
+    class LocalMapBase
+    {
+    public:
+        LocalMapBase();
+        void init(MyGUI::ScrollView* widget, MyGUI::ImageBox* compass, OEngine::GUI::Layout* layout, bool mapDragAndDrop=false);
+
+        void setCellPrefix(const std::string& prefix);
+        void setActiveCell(const int x, const int y, bool interior=false);
+        void setPlayerDir(const float x, const float y);
+        void setPlayerPos(const float x, const float y);
+
+        void toggleFogOfWar();
+
+    protected:
+        int mCurX, mCurY;
+        bool mInterior;
+        MyGUI::ScrollView* mLocalMap;
+        MyGUI::ImageBox* mCompass;
+        std::string mPrefix;
+        bool mChanged;
+        bool mFogOfWar;
+
+        std::vector<MyGUI::ImageBox*> mMapWidgets;
+        std::vector<MyGUI::ImageBox*> mFogWidgets;
+
+        void applyFogOfWar();
+
+        OEngine::GUI::Layout* mLayout;
+
+        bool mMapDragAndDrop;
+
+        float mLastPositionX;
+        float mLastPositionY;
+        float mLastDirectionX;
+        float mLastDirectionY;
+    };
+
     class MapWindow : public MWGui::WindowPinnableBase, public LocalMapBase
     {
     public:
         MapWindow(WindowManager& parWindowManager);
         virtual ~MapWindow(){}
 
-        void setPlayerPos(const float x, const float y);
-        void setPlayerDir(const float x, const float y);
         void setCellName(const std::string& cellName);
   
     private:
