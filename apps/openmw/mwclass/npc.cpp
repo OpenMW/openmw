@@ -133,7 +133,7 @@ namespace MWClass
         std::string smodel = "meshes\\base_anim.nif";
 		if(beast)
 			smodel = "meshes\\base_animkna.nif";
-		physics.insertActorPhysics(ptr, smodel);
+		//physics.insertObjectPhysics(ptr, smodel);
 
 
     }

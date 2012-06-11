@@ -133,7 +133,6 @@ btVector3 ManualBulletShapeLoader::getbtVector(Nif::Vector v)
 
 void ManualBulletShapeLoader::loadResource(Ogre::Resource *resource)
 {
-    std::cout << "Beginning physics\n";
     cShape = static_cast<BulletShape *>(resource);
     resourceName = cShape->getName();
     cShape->collide = false;
@@ -203,7 +202,6 @@ void ManualBulletShapeLoader::loadResource(Ogre::Resource *resource)
 
     currentShape = new TriangleMeshShape(mTriMesh,true);
     cShape->Shape = currentShape;
-    std::cout << "End bullet physics\n";
 }
 
 bool ManualBulletShapeLoader::hasRootCollisionNode(Nif::Node* node)
@@ -235,7 +233,7 @@ bool ManualBulletShapeLoader::hasRootCollisionNode(Nif::Node* node)
 void ManualBulletShapeLoader::handleNode(Nif::Node *node, int flags,
    const Nif::Transformation *trafo,bool hasCollisionNode,bool isCollisionNode,bool raycastingOnly)
 {
-    std::cout << "Handle Node\n";
+    
     // Accumulate the flags from all the child nodes. This works for all
     // the flags we currently use, at least.
     flags |= node->flags;
@@ -273,7 +271,7 @@ void ManualBulletShapeLoader::handleNode(Nif::Node *node, int flags,
     
     if (trafo)
     {
-        std::cout << "Before trafo\n";
+       
         // Get a non-const reference to the node's data, since we're
         // overwriting it. TODO: Is this necessary?
         Transformation &final = *((Transformation*)node->trafo);
@@ -289,10 +287,9 @@ void ManualBulletShapeLoader::handleNode(Nif::Node *node, int flags,
         // Scalar values are so nice to deal with. Why can't everything
         // just be scalar?
         final.scale *= trafo->scale;
-        std::cout << "After Trafo\n";
+        
     }
     
-    std::cout << "After Trafo2\n";
 
     // For NiNodes, loop through children
     if (node->recType == Nif::RC_NiNode)

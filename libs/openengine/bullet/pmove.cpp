@@ -301,7 +301,7 @@ bool	PM_SlideMove( bool gravity )
 			if ( into >= 0.1 )
 				continue;		// move doesn't interact with the plane
 
-            std::cout << "Second plane" << planes[i] << "\n";
+            
             if(planes[i].x >= .70)
             {
                 pm->ps.velocity = Ogre::Vector3(0,0,0);
