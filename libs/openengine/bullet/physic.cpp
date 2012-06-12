@@ -328,12 +328,11 @@ namespace Physic
         sprintf( uniqueID, "%1.2f", scale );
         std::string sid = uniqueID;
         std::string outputstring = mesh + sid + ">|";
-        std::cout << outputstring << "\n";
 
         //get the shape from the .nif
-        mShapeLoader->load(mesh,"General");
-        BulletShapeManager::getSingletonPtr()->load(mesh,"General");
-        BulletShapePtr shape = BulletShapeManager::getSingleton().getByName(mesh,"General");
+        mShapeLoader->load(outputstring,"General");
+        BulletShapeManager::getSingletonPtr()->load(outputstring,"General");
+        BulletShapePtr shape = BulletShapeManager::getSingleton().getByName(outputstring,"General");
         shape->Shape->setLocalScaling(btVector3(scale,scale,scale));
         
 

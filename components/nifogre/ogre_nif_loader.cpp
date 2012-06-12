@@ -1294,7 +1294,7 @@ void NIFLoader::loadResource(Resource *resource)
 
     // Look it up
     resourceName = mesh->getName();
-    //std::cout << resourceName << "\n";
+    
 
     if (!vfs->isFile(resourceName))
     {
