@@ -84,7 +84,7 @@ namespace MWClass
         const std::string &model = ref->base->model;
         assert (ref->base != NULL);
         if(!model.empty()){
-            physics.insertObjectPhysics(ptr, "meshes\\" + model);
+            physics.insertActorPhysics(ptr, "meshes\\" + model);
         }
 
         MWBase::Environment::get().getMechanicsManager()->addActor (ptr);
