@@ -112,6 +112,8 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
 
 RenderingManager::~RenderingManager ()
 {
+    mRendering.removeWindowEventListener(this);
+
     delete mPlayer;
     delete mSkyManager;
     delete mDebugging;
