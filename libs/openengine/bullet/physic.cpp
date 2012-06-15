@@ -328,6 +328,8 @@ namespace Physic
         dynamicsWorld->removeRigidBody(hf.mBody);
         delete hf.mShape;
         delete hf.mBody;
+
+        mHeightFieldMap.erase(name);
     }
 
     RigidBody* PhysicEngine::createRigidBody(std::string mesh,std::string name,float scale)
