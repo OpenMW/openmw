@@ -144,9 +144,11 @@ namespace MWGui
                 powers.push_back(*it);
                 it = spellList.erase(it);
             }
-            else if (spell->data.type == ESM::Spell::ST_Ability)
+            else if (spell->data.type == ESM::Spell::ST_Ability
+                || spell->data.type == ESM::Spell::ST_Blight
+                || spell->data.type == ESM::Spell::ST_Curse
+                || spell->data.type == ESM::Spell::ST_Disease)
             {
-                // abilities are always active and don't show in the spell window.
                 it = spellList.erase(it);
             }
             else
