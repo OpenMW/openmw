@@ -97,7 +97,6 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
 
     mTerrainManager = new TerrainManager(mRendering.getScene(), this);
 
-    //mSkyManager = 0;
     mSkyManager = new SkyManager(mMwRoot, mRendering.getCamera());
 
     mOcclusionQuery = new OcclusionQuery(&mRendering, mSkyManager->getSunNode());
@@ -113,13 +112,18 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
 
 RenderingManager::~RenderingManager ()
 {
+    mRendering.removeWindowEventListener(this);
+
     delete mPlayer;
     delete mSkyManager;
     delete mDebugging;
+    delete mShaderHelper;
+    delete mShadows;
     delete mTerrainManager;
     delete mLocalMap;
     delete mOcclusionQuery;
     delete mCompositors;
+    delete mWater;
 }
 
 MWRender::SkyManager* RenderingManager::getSkyManager()

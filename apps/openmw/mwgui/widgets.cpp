@@ -767,7 +767,7 @@ void MWDynamicStat::setValue(int cur, int max_)
             static_cast<MyGUI::TextBox*>(barTextWidget)->setCaption("");
     }
 }
-void MWDynamicStat::setTitle(const std::string text)
+void MWDynamicStat::setTitle(const std::string& text)
 {
     if (textWidget)
         static_cast<MyGUI::TextBox*>(textWidget)->setCaption(text);

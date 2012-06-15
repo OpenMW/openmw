@@ -17,11 +17,10 @@ using namespace OEngine::Render;
 
 void OgreRenderer::cleanup()
 {
-    if (mFader)
-        delete mFader;
+    delete mFader;
+    mFader = NULL;
 
-    if(mRoot)
-        delete mRoot;
+    OGRE_DELETE mRoot;
     mRoot = NULL;
 }
 
@@ -30,7 +29,7 @@ void OgreRenderer::start()
     mRoot->startRendering();
 }
 
-bool OgreRenderer::loadPlugins()
+bool OgreRenderer::loadPlugins() const
 {
     #ifdef ENABLE_PLUGIN_GL
     mGLPlugin = new Ogre::GLPlugin();
@@ -125,7 +124,7 @@ void OgreRenderer::createWindow(const std::string &title, const WindowSettings& 
                     Ogre::TU_DYNAMIC_WRITE_ONLY_DISCARDABLE);
 }
 
-void OgreRenderer::createScene(const std::string camName, float fov, float nearClip)
+void OgreRenderer::createScene(const std::string& camName, float fov, float nearClip)
 {
     assert(mRoot);
     assert(mWindow);
@@ -155,6 +154,11 @@ void OgreRenderer::adjustViewport()
 void OgreRenderer::setWindowEventListener(Ogre::WindowEventListener* listener)
 {
 	Ogre::WindowEventUtilities::addWindowEventListener(mWindow, listener);
+}
+
+void OgreRenderer::removeWindowEventListener(Ogre::WindowEventListener* listener)
+{
+	Ogre::WindowEventUtilities::removeWindowEventListener(mWindow, listener);
 }
 
 void OgreRenderer::setFov(float fov)

@@ -581,8 +581,7 @@ void CreateClassDialog::onDialogCancel()
 
 void CreateClassDialog::onSpecializationClicked(MyGUI::WidgetPtr _sender)
 {
-    if (specDialog)
-        delete specDialog;
+    delete specDialog;
     specDialog = new SelectSpecializationDialog(mWindowManager);
     specDialog->eventCancel += MyGUI::newDelegate(this, &CreateClassDialog::onDialogCancel);
     specDialog->eventItemSelected += MyGUI::newDelegate(this, &CreateClassDialog::onSpecializationSelected);
@@ -613,8 +612,7 @@ void CreateClassDialog::setSpecialization(int id)
 
 void CreateClassDialog::onAttributeClicked(Widgets::MWAttributePtr _sender)
 {
-    if (attribDialog)
-        delete attribDialog;
+    delete attribDialog;
     attribDialog = new SelectAttributeDialog(mWindowManager);
     attribDialog->setAffectedWidget(_sender);
     attribDialog->eventCancel += MyGUI::newDelegate(this, &CreateClassDialog::onDialogCancel);
@@ -645,8 +643,7 @@ void CreateClassDialog::onAttributeSelected()
 
 void CreateClassDialog::onSkillClicked(Widgets::MWSkillPtr _sender)
 {
-    if (skillDialog)
-        delete skillDialog;
+    delete skillDialog;
     skillDialog = new SelectSkillDialog(mWindowManager);
     skillDialog->setAffectedWidget(_sender);
     skillDialog->eventCancel += MyGUI::newDelegate(this, &CreateClassDialog::onDialogCancel);

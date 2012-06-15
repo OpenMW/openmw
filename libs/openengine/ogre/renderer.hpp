@@ -106,6 +106,7 @@ namespace OEngine
             ~OgreRenderer() { cleanup(); }
 
             void setWindowEventListener(Ogre::WindowEventListener* listener);
+            void removeWindowEventListener(Ogre::WindowEventListener* listener);
 
             /** Configure the renderer. This will load configuration files and
             set up the Root and logging classes. */
@@ -119,7 +120,7 @@ namespace OEngine
             void createWindow(const std::string &title, const WindowSettings& settings);
 
             /// Set up the scene manager, camera and viewport
-            void createScene(const std::string camName="Camera",// Camera name
+            void createScene(const std::string& camName="Camera",// Camera name
                 float fov=55,                      // Field of view angle
                 float nearClip=5                   // Near clip distance
             );
@@ -132,7 +133,7 @@ namespace OEngine
             /// Start the main rendering loop
             void start();
 
-            bool loadPlugins();
+            bool loadPlugins() const;
 
             void update(float dt);
 

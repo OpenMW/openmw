@@ -142,7 +142,6 @@ void ToolTips::onFrame(float frameDuration)
             std::string type = focus->getUserString("ToolTipType");
             std::string text = focus->getUserString("ToolTipText");
 
-            ToolTipInfo info;
             if (type == "")
             {
                 return;

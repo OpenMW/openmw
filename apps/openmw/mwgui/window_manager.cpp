@@ -39,7 +39,7 @@
 using namespace MWGui;
 
 WindowManager::WindowManager(
-    const Compiler::Extensions& extensions, int fpsLevel, bool newGame, OEngine::Render::OgreRenderer *mOgre, const std::string logpath)
+    const Compiler::Extensions& extensions, int fpsLevel, bool newGame, OEngine::Render::OgreRenderer *mOgre, const std::string& logpath)
   : mGuiManager(NULL)
   , hud(NULL)
   , map(NULL)
@@ -657,7 +657,7 @@ void WindowManager::pushGuiMode(GuiMode mode)
 
 void WindowManager::popGuiMode()
 {
-    if (mGuiModes.size())
+    if (!mGuiModes.empty())
         mGuiModes.pop_back();
 
     bool gameMode = !isGuiMode();

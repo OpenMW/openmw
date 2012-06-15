@@ -107,7 +107,7 @@ namespace MWWorld
             return *mClass;
         }
 
-        bool getAutoMove()
+        bool getAutoMove() const
         {
             return mAutoMove;
         }
