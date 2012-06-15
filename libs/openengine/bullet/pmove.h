@@ -190,7 +190,6 @@ struct playerMove
 	int waterHeight;
 	bool hasWater;
 	bool isInterior;
-	//Object* traceObj;
 	OEngine::Physic::PhysicEngine* mEngine;
 };
 

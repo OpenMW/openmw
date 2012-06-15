@@ -41,8 +41,8 @@ class OgreFile : public audiere::File
     }
 
     size_t refs;
-    virtual void ref() { ++refs; }
-    virtual void unref()
+    ADR_METHOD(void) ref() { ++refs; }
+    ADR_METHOD(void) unref()
     {
         if(--refs == 0)
             delete this;
