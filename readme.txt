@@ -110,6 +110,7 @@ Nikolay “corristo” Kasyanov
 Pieter “pvdk” van der Kloet
 Roman "Kromgart" Melnik
 Sebastian “swick” Wick
+Sylvain "Garvek" T.
 
 Retired Developers:
 Ardekantur
