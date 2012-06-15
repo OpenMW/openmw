@@ -222,6 +222,14 @@ namespace Physic
     PhysicEngine::~PhysicEngine()
     {
 
+        HeightFieldContainer::iterator hf_it = mHeightFieldMap.begin();
+        for (; hf_it != mHeightFieldMap.end(); ++hf_it)
+        {
+            dynamicsWorld->removeRigidBody(hf_it->second.mBody);
+            delete hf_it->second.mShape;
+            delete hf_it->second.mBody;
+        }
+
         RigidBodyContainer::iterator rb_it = RigidBodyMap.begin();
         for (; rb_it != RigidBodyMap.end(); ++rb_it)
         {
@@ -320,6 +328,8 @@ namespace Physic
         dynamicsWorld->removeRigidBody(hf.mBody);
         delete hf.mShape;
         delete hf.mBody;
+
+        mHeightFieldMap.erase(name);
     }
 
     RigidBody* PhysicEngine::createRigidBody(std::string mesh,std::string name,float scale)
