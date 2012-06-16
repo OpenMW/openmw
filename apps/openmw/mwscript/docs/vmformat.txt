@@ -147,4 +147,12 @@ op 0x2000150: ForceGreeting, explicit reference
 op 0x2000151: ToggleFullHelp
 op 0x2000152: Goodbye
 op 0x2000153: DontSaveObject (left unimplemented)
-opcodes 0x2000154-0x3ffffff unused
+op 0x2000154: ClearForceRun
+op 0x2000155: ClearForceRun, explicit reference
+op 0x2000156: ForceRun
+op 0x2000156: ForceRun, explicit reference
+op 0x2000157: ClearForceSneak
+op 0x2000158: ClearForceSneak, explicit reference
+op 0x2000159: ForceSneak
+op 0x200015a: ForceSneak, explicit reference
+opcodes 0x200015b-0x3ffffff unused
