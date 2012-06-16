@@ -260,6 +260,36 @@ namespace
         code.push_back (Compiler::Generator::segment5 (44));
     }
 
+    void opStoreMemberShort (Compiler::Generator::CodeContainer& code)
+    {
+        code.push_back (Compiler::Generator::segment5 (59));
+    }
+
+    void opStoreMemberLong (Compiler::Generator::CodeContainer& code)
+    {
+        code.push_back (Compiler::Generator::segment5 (60));
+    }
+
+    void opStoreMemberFloat (Compiler::Generator::CodeContainer& code)
+    {
+        code.push_back (Compiler::Generator::segment5 (61));
+    }
+
+    void opFetchMemberShort (Compiler::Generator::CodeContainer& code)
+    {
+        code.push_back (Compiler::Generator::segment5 (62));
+    }
+
+    void opFetchMemberLong (Compiler::Generator::CodeContainer& code)
+    {
+        code.push_back (Compiler::Generator::segment5 (63));
+    }
+
+    void opFetchMemberFloat (Compiler::Generator::CodeContainer& code)
+    {
+        code.push_back (Compiler::Generator::segment5 (64));
+    }
+
     void opRandom (Compiler::Generator::CodeContainer& code)
     {
         code.push_back (Compiler::Generator::segment5 (45));
@@ -644,7 +674,7 @@ namespace Compiler
 
             if (localType!=valueType)
             {
-                if (localType=='f' && valueType=='l')
+                if (localType=='f' && (valueType=='l' || valueType=='s'))
                 {
                     opIntToFloat (code);
                 }
@@ -699,6 +729,86 @@ namespace Compiler
                 case 'l':
 
                     opFetchGlobalLong (code);
+                    break;
+
+                default:
+
+                    assert (0);
+            }
+        }
+
+        void assignToMember (CodeContainer& code, Literals& literals, char localType,
+            const std::string& name, const std::string& id, const CodeContainer& value, char valueType)
+        {
+            int index = literals.addString (name);
+
+            opPushInt (code, index);
+
+            index = literals.addString (id);
+
+            opPushInt (code, index);
+
+            std::copy (value.begin(), value.end(), std::back_inserter (code));
+
+            if (localType!=valueType)
+            {
+                if (localType=='f' && (valueType=='l' || valueType=='s'))
+                {
+                    opIntToFloat (code);
+                }
+                else if ((localType=='l' || localType=='s') && valueType=='f')
+                {
+                    opFloatToInt (code);
+                }
+            }
+
+            switch (localType)
+            {
+                case 'f':
+
+                    opStoreMemberFloat (code);
+                    break;
+
+                case 's':
+
+                    opStoreMemberShort (code);
+                    break;
+
+                case 'l':
+
+                    opStoreMemberLong (code);
+                    break;
+
+                default:
+
+                    assert (0);
+            }
+        }
+
+        void fetchMember (CodeContainer& code, Literals& literals, char localType,
+            const std::string& name, const std::string& id)
+        {
+            int index = literals.addString (name);
+
+            opPushInt (code, index);
+
+            index = literals.addString (id);
+
+            switch (localType)
+            {
+                case 'f':
+
+                    opFetchMemberFloat (code);
+                    break;
+
+                case 's':
+
+                    opFetchMemberShort (code);
+                    break;
+
+                case 'l':
+
+                    opFetchMemberLong (code);
                     break;
 
                 default:
