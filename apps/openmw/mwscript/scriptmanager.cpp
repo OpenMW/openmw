@@ -50,6 +50,7 @@ namespace MWScript
             catch (const Compiler::SourceException&)
             {
                 // error has already been reported via error handler
+                Success = false;
             }
             catch (const std::exception& error)
             {
@@ -146,6 +147,9 @@ namespace MWScript
         {
             if (!compile (name))
             {
+                /// \todo Handle case of cyclic member variable access. Currently this could look up
+                /// the whole application in an endless recursion.
+
                 // failed -> ignore script from now on.
                 std::vector<Interpreter::Type_Code> empty;
                 mScripts.insert (std::make_pair (name, std::make_pair (empty, Compiler::Locals())));
