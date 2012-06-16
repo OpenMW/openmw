@@ -11,6 +11,7 @@
 
 #include <components/compiler/scanner.hpp>
 #include <components/compiler/context.hpp>
+#include <components/compiler/exception.hpp>
 
 #include "extensions.hpp"
 
@@ -46,8 +47,13 @@ namespace MWScript
                 if (!mErrorHandler.isGood())
                     Success = false;
             }
-            catch (...)
+            catch (const Compiler::SourceException&)
             {
+                // error has already been reported via error handler
+            }
+            catch (const std::exception& error)
+            {
+                std::cerr << "An exception has been thrown: " << error.what() << std::endl;
                 Success = false;
             }
 
