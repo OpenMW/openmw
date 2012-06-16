@@ -65,7 +65,8 @@ namespace Compiler
                 S_cmpEQ, S_cmpNE, S_cmpLT, S_cmpLE, S_cmpGT, S_cmpGE,
                 S_plus, S_minus, S_mult, S_div,
                 S_comma,
-                S_ref
+                S_ref,
+                S_member
             };
 
         private:
