@@ -252,9 +252,9 @@ namespace Interpreter
 
             virtual void execute (Runtime& runtime)
             {
-                Type_Integer index = runtime[0].mInteger;
+                Type_Float data = runtime[0].mFloat;
+                Type_Integer index = runtime[1].mInteger;
                 std::string id = runtime.getStringLiteral (index);
-                Type_Float data = runtime[1].mFloat;
                 index = runtime[2].mInteger;
                 std::string variable = runtime.getStringLiteral (index);
 

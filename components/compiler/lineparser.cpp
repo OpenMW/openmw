@@ -113,12 +113,13 @@ namespace Compiler
         if (mState==SetState)
         {
             std::string name2 = toLower (name);
+            mName = name2;
 
             // local variable?
             char type = mLocals.getType (name2);
             if (type!=' ')
             {
-                mName = name2;
+                mType = type;
                 mState = SetLocalVarState;
                 return true;
             }
@@ -126,9 +127,24 @@ namespace Compiler
             type = getContext().getGlobalType (name2);
             if (type!=' ')
             {
-                mName = name2;
                 mType = type;
                 mState = SetGlobalVarState;
+                return true;
+            }
+
+            mState = SetPotentialMemberVarState;
+            return true;
+        }
+
+        if (mState==SetMemberVarState)
+        {
+            mMemberName = toLower (name);
+            char type = getContext().getMemberType (mMemberName, mName);
+
+            if (type!=' ')
+            {
+                mState = SetMemberVarState2;
+                mType = type;
                 return true;
             }
 
@@ -338,6 +354,19 @@ namespace Compiler
             mState = EndState;
             return true;
         }
+        else if (mState==SetMemberVarState2 && keyword==Scanner::K_to)
+        {
+            mExprParser.reset();
+            scanner.scan (mExprParser);
+
+            std::vector<Interpreter::Type_Code> code;
+            char type = mExprParser.append (code);
+
+            Generator::assignToMember (mCode, mLiterals, mType, mMemberName, mName, code, type);
+
+            mState = EndState;
+            return true;
+        }
 
         if (mAllowExpression)
         {
@@ -389,6 +418,12 @@ namespace Compiler
         if (code==Scanner::S_comma && mState==MessageButtonState)
         {
             mState = MessageButtonCommaState;
+            return true;
+        }
+
+        if (code==Scanner::S_member && mState==SetPotentialMemberVarState)
+        {
+            mState = SetMemberVarState;
             return true;
         }
 
