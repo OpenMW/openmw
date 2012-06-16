@@ -18,7 +18,10 @@ namespace Compiler
         if (!mExplicit.empty())
         {
             mExprParser.parseName (mExplicit, loc, scanner);
-            mExprParser.parseSpecial (Scanner::S_ref, loc, scanner);
+            if (mState==MemberState)
+                mExprParser.parseSpecial (Scanner::S_member, loc, scanner);
+            else
+                mExprParser.parseSpecial (Scanner::S_ref, loc, scanner);
         }
 
         scanner.scan (mExprParser);
@@ -256,6 +259,7 @@ namespace Compiler
                 {
                     scanner.putbackKeyword (keyword, loc);
                     parseExpression (scanner, loc);
+                    mState = EndState;
                     return true;
                 }
 
@@ -269,6 +273,7 @@ namespace Compiler
                     {
                         scanner.putbackKeyword (keyword, loc);
                         parseExpression (scanner, loc);
+                        mState = EndState;
                         return true;
                     }
                 }
@@ -342,6 +347,7 @@ namespace Compiler
             {
                 scanner.putbackKeyword (keyword, loc);
                 parseExpression (scanner, loc);
+                mState = EndState;
                 return true;
             }
         }
@@ -366,6 +372,14 @@ namespace Compiler
             return true;
         }
 
+        if (code==Scanner::S_member && mState==PotentialExplicitState)
+        {
+            mState = MemberState;
+            parseExpression (scanner, loc);
+            mState = EndState;
+            return true;
+        }
+
         if (code==Scanner::S_newline && mState==MessageButtonState)
         {
             Generator::message (mCode, mLiterals, mName, mButtons);
@@ -383,6 +397,7 @@ namespace Compiler
         {
             scanner.putbackSpecial (code, loc);
             parseExpression (scanner, loc);
+            mState = EndState;
             return true;
         }
 
