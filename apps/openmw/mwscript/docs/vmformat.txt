@@ -157,4 +157,12 @@ op 0x2000158: ClearForceSneak
 op 0x2000159: ClearForceSneak, explicit reference
 op 0x200015a: ForceSneak
 op 0x200015b: ForceSneak, explicit reference
-opcodes 0x200015b-0x3ffffff unused
+op 0x200015c: SetHello
+op 0x200015d: SetHello, explicit reference
+op 0x200015e: SetFight
+op 0x200015f: SetFight, explicit reference
+op 0x2000160: SetFlee
+op 0x2000161: SetFlee, explicit reference
+op 0x2000162: SetAlarm
+op 0x2000163: SetAlarm, explicit reference
+opcodes 0x2000164-0x3ffffff unused

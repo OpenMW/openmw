@@ -7,6 +7,8 @@
 #include <components/interpreter/runtime.hpp>
 #include <components/interpreter/opcodes.hpp>
 
+#include "../mwmechanics/creaturestats.hpp"
+
 #include "interpretercontext.hpp"
 #include "ref.hpp"
 
@@ -114,6 +116,71 @@ namespace MWScript
                 }
         };
 
+        template<class R>
+        class OpSetHello : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWWorld::Ptr ptr = R()(runtime);
+
+                    Interpreter::Type_Integer value = runtime[0].mInteger;
+                    runtime.pop();
+
+                    MWWorld::Class::get (ptr).getCreatureStats (ptr).mHello = value;
+                }
+        };
+
+        template<class R>
+        class OpSetFight : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWWorld::Ptr ptr = R()(runtime);
+
+                    Interpreter::Type_Integer value = runtime[0].mInteger;
+                    runtime.pop();
+
+                    MWWorld::Class::get (ptr).getCreatureStats (ptr).mFight = value;
+                }
+        };
+
+        template<class R>
+        class OpSetFlee : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWWorld::Ptr ptr = R()(runtime);
+
+                    Interpreter::Type_Integer value = runtime[0].mInteger;
+                    runtime.pop();
+
+                    MWWorld::Class::get (ptr).getCreatureStats (ptr).mFlee = value;
+                }
+        };
+
+        template<class R>
+        class OpSetAlarm : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWWorld::Ptr ptr = R()(runtime);
+
+                    Interpreter::Type_Integer value = runtime[0].mInteger;
+                    runtime.pop();
+
+                    MWWorld::Class::get (ptr).getCreatureStats (ptr).mAlarm = value;
+                }
+        };
+
+
         const int opcodeAiTravel = 0x20000;
         const int opcodeAiTravelExplicit = 0x20001;
         const int opcodeAiEscort = 0x20002;
@@ -122,6 +189,14 @@ namespace MWScript
         const int opcodeGetAiPackageDoneExplicit = 0x200007d;
         const int opcodeAiWander = 0x20010;
         const int opcodeAiWanderExplicit = 0x20011;
+        const int opcodeSetHello = 0x200015e;
+        const int opcodeSetHelloExplicit = 0x200015d;
+        const int opcodeSetFight = 0x200015e;
+        const int opcodeSetFightExplicit = 0x200015f;
+        const int opcodeSetFlee = 0x2000160;
+        const int opcodeSetFleeExplicit = 0x2000161;
+        const int opcodeSetAlarm = 0x2000162;
+        const int opcodeSetAlarmExplicit = 0x2000163;
 
         void registerExtensions (Compiler::Extensions& extensions)
         {
@@ -134,6 +209,11 @@ namespace MWScript
 
             extensions.registerFunction ("getaipackagedone", 'l', "", opcodeGetAiPackageDone,
                 opcodeGetAiPackageDoneExplicit);
+
+            extensions.registerInstruction ("sethello", "l", opcodeSetHello, opcodeSetHelloExplicit);
+            extensions.registerInstruction ("setfight", "l", opcodeSetFight, opcodeSetFightExplicit);
+            extensions.registerInstruction ("setflee", "l", opcodeSetFlee, opcodeSetFleeExplicit);
+            extensions.registerInstruction ("setalarm", "l", opcodeSetAlarm, opcodeSetAlarmExplicit);
         }
 
         void installOpcodes (Interpreter::Interpreter& interpreter)
@@ -147,6 +227,14 @@ namespace MWScript
             interpreter.installSegment5 (opcodeGetAiPackageDone, new OpGetAiPackageDone<ImplicitRef>);
             interpreter.installSegment5 (opcodeGetAiPackageDoneExplicit,
                 new OpGetAiPackageDone<ExplicitRef>);
+            interpreter.installSegment5 (opcodeSetHello, new OpSetHello<ImplicitRef>);
+            interpreter.installSegment5 (opcodeSetHelloExplicit, new OpSetHello<ExplicitRef>);
+            interpreter.installSegment5 (opcodeSetFight, new OpSetFight<ImplicitRef>);
+            interpreter.installSegment5 (opcodeSetFightExplicit, new OpSetFight<ExplicitRef>);
+            interpreter.installSegment5 (opcodeSetFlee, new OpSetFlee<ImplicitRef>);
+            interpreter.installSegment5 (opcodeSetFleeExplicit, new OpSetFlee<ExplicitRef>);
+            interpreter.installSegment5 (opcodeSetAlarm, new OpSetAlarm<ImplicitRef>);
+            interpreter.installSegment5 (opcodeSetAlarmExplicit, new OpSetAlarm<ExplicitRef>);
         }
     }
 }
