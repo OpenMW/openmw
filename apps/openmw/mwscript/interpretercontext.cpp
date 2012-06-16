@@ -278,6 +278,8 @@ namespace MWScript
 
         int index = MWBase::Environment::get().getScriptManager()->getLocalIndex (scriptId, name, 's');
 
+        ptr.getRefData().setLocals (
+            *MWBase::Environment::get().getWorld()->getStore().scripts.find (scriptId));
         return ptr.getRefData().getLocals().mShorts[index];
     }
 
@@ -289,6 +291,8 @@ namespace MWScript
 
         int index = MWBase::Environment::get().getScriptManager()->getLocalIndex (scriptId, name, 'l');
 
+        ptr.getRefData().setLocals (
+            *MWBase::Environment::get().getWorld()->getStore().scripts.find (scriptId));
         return ptr.getRefData().getLocals().mLongs[index];
     }
 
@@ -300,6 +304,8 @@ namespace MWScript
 
         int index = MWBase::Environment::get().getScriptManager()->getLocalIndex (scriptId, name, 'f');
 
+        ptr.getRefData().setLocals (
+            *MWBase::Environment::get().getWorld()->getStore().scripts.find (scriptId));
         return ptr.getRefData().getLocals().mFloats[index];
     }
 
@@ -311,6 +317,8 @@ namespace MWScript
 
         int index = MWBase::Environment::get().getScriptManager()->getLocalIndex (scriptId, name, 's');
 
+        ptr.getRefData().setLocals (
+            *MWBase::Environment::get().getWorld()->getStore().scripts.find (scriptId));
         ptr.getRefData().getLocals().mShorts[index] = value;
     }
 
@@ -322,6 +330,8 @@ namespace MWScript
 
         int index = MWBase::Environment::get().getScriptManager()->getLocalIndex (scriptId, name, 'l');
 
+        ptr.getRefData().setLocals (
+            *MWBase::Environment::get().getWorld()->getStore().scripts.find (scriptId));
         ptr.getRefData().getLocals().mLongs[index] = value;
     }
 
@@ -333,6 +343,8 @@ namespace MWScript
 
         int index = MWBase::Environment::get().getScriptManager()->getLocalIndex (scriptId, name, 'f');
 
+        ptr.getRefData().setLocals (
+            *MWBase::Environment::get().getWorld()->getStore().scripts.find (scriptId));
         ptr.getRefData().getLocals().mFloats[index] = value;
     }
 

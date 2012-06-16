@@ -794,6 +794,8 @@ namespace Compiler
 
             index = literals.addString (id);
 
+            opPushInt (code, index);
+
             switch (localType)
             {
                 case 'f':

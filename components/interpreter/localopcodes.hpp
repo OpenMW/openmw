@@ -278,7 +278,6 @@ namespace Interpreter
                 std::string variable = runtime.getStringLiteral (index);
                 runtime.pop();
 
-                index = runtime[0].mInteger;
                 int value = runtime.getContext().getMemberShort (id, variable);
                 runtime[0].mInteger = value;
             }
@@ -296,7 +295,6 @@ namespace Interpreter
                 std::string variable = runtime.getStringLiteral (index);
                 runtime.pop();
 
-                index = runtime[0].mInteger;
                 int value = runtime.getContext().getMemberLong (id, variable);
                 runtime[0].mInteger = value;
             }
@@ -314,7 +312,6 @@ namespace Interpreter
                 std::string variable = runtime.getStringLiteral (index);
                 runtime.pop();
 
-                index = runtime[0].mInteger;
                 float value = runtime.getContext().getMemberFloat (id, variable);
                 runtime[0].mFloat = value;
             }
