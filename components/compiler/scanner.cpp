@@ -360,6 +360,8 @@ namespace Compiler
             special = S_open;
         else if (c==')')
             special = S_close;
+        else if (c=='.')
+            special = S_member;
         else if (c=='=')
         {
             if (get (c))

@@ -121,5 +121,11 @@ op  58: report string literal index in stack[0];
          additional arguments (if any) in stack[n]..stack[1];
          n is determined according to the message string
          all arguments are removed from stack
-opcodes 59-33554431 unused
+op 59: store stack[0] in member short stack[2] of object with ID stack[1]
+op 60: store stack[0] in member long stack[2] of object with ID stack[1]
+op 61: store stack[0] in member float stack[2] of object with ID stack[1]
+op 62: replace stack[0] with member short stack[1] of object with ID stack[0]
+op 63: replace stack[0] with member short stack[1] of object with ID stack[0]
+op 64: replace stack[0] with member short stack[1] of object with ID stack[0]
+opcodes 65-33554431 unused
 opcodes 33554432-67108863 reserved for extensions

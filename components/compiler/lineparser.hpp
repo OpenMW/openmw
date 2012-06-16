@@ -21,10 +21,11 @@ namespace Compiler
             {
                 BeginState,
                 ShortState, LongState, FloatState,
-                SetState, SetLocalVarState, SetGlobalVarState,
+                SetState, SetLocalVarState, SetGlobalVarState, SetPotentialMemberVarState,
+                SetMemberVarState, SetMemberVarState2,
                 MessageState, MessageCommaState, MessageButtonState, MessageButtonCommaState,
                 EndState,
-                PotentialExplicitState, ExplicitState
+                PotentialExplicitState, ExplicitState, MemberState
             };
 
             Locals& mLocals;
@@ -32,6 +33,7 @@ namespace Compiler
             std::vector<Interpreter::Type_Code>& mCode;
             State mState;
             std::string mName;
+            std::string mMemberName;
             int mButtons;
             std::string mExplicit;
             char mType;
