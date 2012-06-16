@@ -324,11 +324,18 @@ namespace Physic
 
     RigidBody* PhysicEngine::createRigidBody(std::string mesh,std::string name,float scale)
     {
+        char uniqueID[8];
+        sprintf( uniqueID, "%07.3f", scale );
+        std::string sid = uniqueID;
+        std::string outputstring = mesh + uniqueID + "\"|";
+        //std::cout << "The string" << outputstring << "\n";
+
         //get the shape from the .nif
-        mShapeLoader->load(mesh,"General");
-        BulletShapeManager::getSingletonPtr()->load(mesh,"General");
-        BulletShapePtr shape = BulletShapeManager::getSingleton().getByName(mesh,"General");
+        mShapeLoader->load(outputstring,"General");
+        BulletShapeManager::getSingletonPtr()->load(outputstring,"General");
+        BulletShapePtr shape = BulletShapeManager::getSingleton().getByName(outputstring,"General");
         shape->Shape->setLocalScaling(btVector3(scale,scale,scale));
+        
 
         //create the motionState
         CMotionState* newMotionState = new CMotionState(this,name);
