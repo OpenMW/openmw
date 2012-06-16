@@ -88,7 +88,31 @@ namespace MWScript
                 }
         };
 
+        template<class R>
+        class OpAiWander : public Interpreter::Opcode1
+        {
+            public:
 
+                virtual void execute (Interpreter::Runtime& runtime, unsigned int arg0)
+                {
+                    MWWorld::Ptr ptr = R()(runtime);
+
+//                    Interpreter::Type_Float range = runtime[0].mFloat;
+                    runtime.pop();
+
+//                    Interpreter::Type_Float duration = runtime[0].mFloat;
+                    runtime.pop();
+
+//                    Interpreter::Type_Float time = runtime[0].mFloat;
+                    runtime.pop();
+
+                    // discard additional idle arguments for now
+                    // discard additional arguments (reset), because we have no idea what they mean.
+                    for (unsigned int i=0; i<arg0; ++i) runtime.pop();
+
+                    std::cout << "AiWanter" << std::endl;
+                }
+        };
 
         const int opcodeAiTravel = 0x20000;
         const int opcodeAiTravelExplicit = 0x20001;
@@ -96,6 +120,8 @@ namespace MWScript
         const int opcodeAiEscortExplicit = 0x20003;
         const int opcodeGetAiPackageDone = 0x200007c;
         const int opcodeGetAiPackageDoneExplicit = 0x200007d;
+        const int opcodeAiWander = 0x20010;
+        const int opcodeAiWanderExplicit = 0x20011;
 
         void registerExtensions (Compiler::Extensions& extensions)
         {
@@ -103,6 +129,8 @@ namespace MWScript
                 opcodeAiTravelExplicit);
             extensions.registerInstruction ("aiescort", "cffff/l", opcodeAiEscort,
                 opcodeAiEscortExplicit);
+            extensions.registerInstruction ("aiwander", "fff/llllllllll", opcodeAiWander,
+                opcodeAiWanderExplicit);
 
             extensions.registerFunction ("getaipackagedone", 'l', "", opcodeGetAiPackageDone,
                 opcodeGetAiPackageDoneExplicit);
@@ -114,6 +142,8 @@ namespace MWScript
             interpreter.installSegment3 (opcodeAiTravelExplicit, new OpAiTravel<ExplicitRef>);
             interpreter.installSegment3 (opcodeAiEscort, new OpAiEscort<ImplicitRef>);
             interpreter.installSegment3 (opcodeAiEscortExplicit, new OpAiEscort<ExplicitRef>);
+            interpreter.installSegment3 (opcodeAiWander, new OpAiWander<ImplicitRef>);
+            interpreter.installSegment3 (opcodeAiWanderExplicit, new OpAiWander<ExplicitRef>);
             interpreter.installSegment5 (opcodeGetAiPackageDone, new OpGetAiPackageDone<ImplicitRef>);
             interpreter.installSegment5 (opcodeGetAiPackageDoneExplicit,
                 new OpGetAiPackageDone<ExplicitRef>);

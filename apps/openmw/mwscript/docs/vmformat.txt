@@ -29,7 +29,9 @@ op 0x2000c: PCLowerRank
 op 0x2000d: PCJoinFaction
 op 0x2000e: PCGetRank implicit
 op 0x2000f: PCGetRank explicit
-opcodes 0x20010-0x3ffff unused
+op 0x20010: AiWander
+op 0x20011: AiWander, explicit reference
+opcodes 0x20012-0x3ffff unused
 
 Segment 4:
 (not implemented yet)
