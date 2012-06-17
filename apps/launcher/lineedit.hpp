@@ -28,7 +28,7 @@ private slots:
     void updateCloseButton(const QString &text);
 
 private:
-    QToolButton *clearButton;
+    QToolButton *mClearButton;
 };
 
 #endif // LIENEDIT_H
