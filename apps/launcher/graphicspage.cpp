@@ -200,6 +200,7 @@ void GraphicsPage::writeConfig()
     Settings::Manager::setBool("vsync", "Video", mVSyncCheckBox->checkState());
     Settings::Manager::setBool("fullscreen", "Video", mFullScreenCheckBox->checkState());
     Settings::Manager::setString("antialiasing", "Video", mAntiAliasingComboBox->currentText().toStdString());
+    Settings::Manager::setString("render system", "Video", mRendererComboBox->currentText().toStdString());
 
     std::string resolution = mResolutionComboBox->currentText().toStdString();
     // parse resolution x and y from a string like "800 x 600"
