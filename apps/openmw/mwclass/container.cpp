@@ -192,4 +192,17 @@ namespace MWClass
     {
         return getContainerStore (ptr).getWeight();
     }
+
+    void Container::lock (const MWWorld::Ptr& ptr, int lockLevel) const
+    {
+        if (lockLevel<0)
+            lockLevel = 0;
+
+        ptr.getCellRef().lockLevel = lockLevel;
+    }
+
+    void Container::unlock (const MWWorld::Ptr& ptr) const
+    {
+        ptr.getCellRef().lockLevel = 0;
+    }
 }
