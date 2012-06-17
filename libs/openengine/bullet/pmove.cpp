@@ -530,7 +530,7 @@ int PM_StepSlideMove( bool gravity )
 		delta = pm->ps.origin.z - start_o.z;
 		if ( delta > 2 ) 
 		{
-            pm->ps.counter = 10;
+            pm->ps.counter = 5;
 
             /*
 			if (gravity)
@@ -1167,8 +1167,7 @@ void PM_GroundTraceMissed()
     //We should not have significant upwards velocity when in the air, unless we jumped.
     //This code protects against flying into the air when moving at high speeds.
     //Z velocity is set to 50, instead of 0, to help move up certain steps.
-    if(pm->ps.velocity.z > 50.0f)
-       pm->ps.velocity.z = 50.0f;
+    
     //std::cout << "Ground trace missed\n";
 		// we just transitioned into freefall
 		//if ( pm->debugLevel )
@@ -1431,10 +1430,13 @@ static void PM_GroundTrace( void )
     // if the trace didn't hit anything, we are in free fall
 	if ( trace.fraction == 1.0) 
 	{
+        if(pm->ps.velocity.z > 50.0f && pm->ps.bSnap)
+            pm->ps.velocity.z = 50.0f;
         if(pm->ps.snappingImplemented){
             if(pm->ps.bSnap && pm->ps.counter <= 0)
 		        PM_GroundTraceMissed();
         }
+        
             
 
 		return;
