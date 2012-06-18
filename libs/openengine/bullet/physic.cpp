@@ -398,9 +398,15 @@ namespace Physic
         if (it != RigidBodyMap.end() )
         {
             RigidBody* body = it->second;
+            btScaledBvhTriangleMeshShape* scaled = dynamic_cast<btScaledBvhTriangleMeshShape*> (body->getCollisionShape());
+            
             if(body != NULL)
             {
                 delete body;
+            }
+            if(scaled != NULL)
+            {
+                delete scaled;
             }
             RigidBodyMap.erase(it);
         }

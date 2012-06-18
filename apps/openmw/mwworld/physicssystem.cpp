@@ -300,7 +300,15 @@ namespace MWWorld
 
     void PhysicsSystem::scaleObject (const std::string& handle, float scale)
     {
-
+        if(handleToMesh.find(handle) != handleToMesh.end())
+        {
+            btTransform transform = mEngine->getRigidBody(handle)->getWorldTransform();
+            removeObject(handle);
+            
+            Ogre::Quaternion quat = Ogre::Quaternion(transform.getRotation().getW(), transform.getRotation().getX(), transform.getRotation().getY(), transform.getRotation().getZ());
+            Ogre::Vector3 vec = Ogre::Vector3(transform.getOrigin().getX(), transform.getOrigin().getY(), transform.getOrigin().getZ());
+            addObject(handle, handleToMesh[handle], quat, scale, vec);
+        }
     }
 
     bool PhysicsSystem::toggleCollisionMode()
