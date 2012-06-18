@@ -7,6 +7,7 @@
 #include <list>
 #include <map>
 #include "BulletShapeLoader.h"
+#include "BulletCollision/CollisionShapes/btScaledBvhTriangleMeshShape.h"
 
 class btRigidBody;
 class btBroadphaseInterface;

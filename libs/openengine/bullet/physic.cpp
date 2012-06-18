@@ -324,24 +324,24 @@ namespace Physic
 
     RigidBody* PhysicEngine::createRigidBody(std::string mesh,std::string name,float scale)
     {
-        char uniqueID[8];
+        /*char uniqueID[8];
         sprintf( uniqueID, "%07.3f", scale );
         std::string sid = uniqueID;
-        std::string outputstring = mesh + uniqueID + "\"|";
+        std::string outputstring = mesh + uniqueID + "\"|";*/
         //std::cout << "The string" << outputstring << "\n";
 
         //get the shape from the .nif
-        mShapeLoader->load(outputstring,"General");
-        BulletShapeManager::getSingletonPtr()->load(outputstring,"General");
-        BulletShapePtr shape = BulletShapeManager::getSingleton().getByName(outputstring,"General");
-        shape->Shape->setLocalScaling(btVector3(scale,scale,scale));
-        
+        mShapeLoader->load(mesh,"General");
+        BulletShapeManager::getSingletonPtr()->load(mesh,"General");
+        BulletShapePtr shape = BulletShapeManager::getSingleton().getByName(mesh,"General");
+        //shape->Shape->setLocalScaling();
+        btScaledBvhTriangleMeshShape* scaled = new btScaledBvhTriangleMeshShape(dynamic_cast<btBvhTriangleMeshShape*> (shape->Shape), btVector3(scale,scale,scale));
 
         //create the motionState
         CMotionState* newMotionState = new CMotionState(this,name);
 
         //create the real body
-        btRigidBody::btRigidBodyConstructionInfo CI = btRigidBody::btRigidBodyConstructionInfo(0,newMotionState,shape->Shape);
+        btRigidBody::btRigidBodyConstructionInfo CI = btRigidBody::btRigidBodyConstructionInfo(0,newMotionState,scaled);
         RigidBody* body = new RigidBody(CI,name);
         body->collide = shape->collide;
         return body;
