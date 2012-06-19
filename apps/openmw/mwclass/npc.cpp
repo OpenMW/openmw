@@ -70,12 +70,12 @@ namespace MWClass
                 }
             }
 
+            // creature stats
             if(ref->base->npdt52.gold != -10)
             {
                 for (int i=0; i<27; ++i)
                     data->mNpcStats.mSkill[i].setBase (ref->base->npdt52.skills[i]);
 
-                // creature stats
                 data->mCreatureStats.mAttributes[0].set (ref->base->npdt52.strength);
                 data->mCreatureStats.mAttributes[1].set (ref->base->npdt52.intelligence);
                 data->mCreatureStats.mAttributes[2].set (ref->base->npdt52.willpower);
@@ -94,6 +94,11 @@ namespace MWClass
             {
                 /// \todo do something with npdt12 maybe:p
             }
+
+            data->mCreatureStats.mHello = ref->base->AI.hello;
+            data->mCreatureStats.mFight = ref->base->AI.fight;
+            data->mCreatureStats.mFlee = ref->base->AI.flee;
+            data->mCreatureStats.mAlarm = ref->base->AI.alarm;
 
             // store
             ptr.getRefData().setCustomData (data.release());
