@@ -205,11 +205,14 @@ void addColorInString(std::string& str, const std::string& keyword,std::string c
 
 std::string DialogueWindow::parseText(std::string text)
 {
+    bool separatorReached = false; // only parse topics that are below the separator (this prevents actions like "Barter" that are not topics from getting blue-colored)
     for(unsigned int i = 0;i<topicsList->getItemCount();i++)
     {
         std::string keyWord = topicsList->getItemNameAt(i);
-        if (keyWord != "")
+        if (separatorReached && keyWord != "")
             addColorInString(text,keyWord,"#686EBA","#B29154");
+        else
+            separatorReached = true;
     }
     return text;
 }
