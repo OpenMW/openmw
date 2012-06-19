@@ -264,7 +264,10 @@ QStringList GraphicsPage::getAvailableResolutions(Ogre::RenderSystem *renderer)
             assert (tokens.size() >= 3);
             QString resolutionStr = tokens.at(0) + QString(" x ") + tokens.at(2);
             {
-                  result << resolutionStr;
+
+                // do not add duplicate resolutions
+                if (!result.contains(resolutionStr))
+                    result << resolutionStr;
             }
         }
 
