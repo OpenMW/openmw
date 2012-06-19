@@ -309,7 +309,7 @@ namespace Compiler
 
             if (mExplicit.empty() && getContext().isId (name2))
             {
-                mExplicit = name;
+                mExplicit = name2;
                 return true;
             }
         }
