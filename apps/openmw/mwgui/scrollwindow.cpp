@@ -56,7 +56,7 @@ void ScrollWindow::onCloseButtonClicked (MyGUI::Widget* _sender)
 {
     MWBase::Environment::get().getSoundManager()->playSound ("scroll", 1.0, 1.0);
 
-    mWindowManager.popGuiMode();
+    mWindowManager.removeGuiMode(GM_Scroll);
 }
 
 void ScrollWindow::onTakeButtonClicked (MyGUI::Widget* _sender)
@@ -66,5 +66,5 @@ void ScrollWindow::onTakeButtonClicked (MyGUI::Widget* _sender)
     MWWorld::ActionTake take(mScroll);
     take.execute();
 
-    mWindowManager.popGuiMode();
+    mWindowManager.removeGuiMode(GM_Scroll);
 }
