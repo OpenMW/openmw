@@ -464,7 +464,7 @@ void WindowManager::onDialogueWindowBye()
         //removeDialog(dialogueWindow);
         mDialogueWindow->setVisible(false);
     }
-    popGuiMode();
+    removeGuiMode(GM_Dialogue);
 }
 
 void WindowManager::onFrame (float frameDuration)
@@ -676,6 +676,9 @@ void WindowManager::removeGuiMode(GuiMode mode)
         else
             ++it;
     }
+
+    bool gameMode = !isGuiMode();
+    MWBase::Environment::get().getInputManager()->changeInputMode(!gameMode);
 
     updateVisible();
 }

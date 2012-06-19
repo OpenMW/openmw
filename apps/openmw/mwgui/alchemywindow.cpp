@@ -70,8 +70,8 @@ namespace MWGui
 
     void AlchemyWindow::onCancelButtonClicked(MyGUI::Widget* _sender)
     {
-        mWindowManager.popGuiMode();
-        mWindowManager.popGuiMode();
+        mWindowManager.removeGuiMode(GM_Alchemy);
+        mWindowManager.removeGuiMode(GM_Inventory);
     }
 
     void AlchemyWindow::onCreateButtonClicked(MyGUI::Widget* _sender)
