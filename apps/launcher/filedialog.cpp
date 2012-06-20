@@ -28,13 +28,13 @@ QString FileDialog::getExistingDirectory(QWidget *parent,
     // create a non-native file dialog
     FileDialog dialog;
     dialog.setFileMode(DirectoryOnly);
-    dialog.setOptions(options & (DontUseNativeDialog | ShowDirsOnly));
+    dialog.setOptions(options |= QFileDialog::DontUseNativeDialog | QFileDialog::ShowDirsOnly | QFileDialog::ReadOnly);
 
     if (!caption.isEmpty())
         dialog.setWindowTitle(caption);
 
     if (!dir.isEmpty())
-    dialog.setDirectory(dir);
+        dialog.setDirectory(dir);
 
     if (dialog.exec() == QDialog::Accepted) {
         return dialog.selectedFiles().value(0);

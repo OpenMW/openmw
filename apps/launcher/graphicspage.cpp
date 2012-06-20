@@ -45,10 +45,6 @@ GraphicsPage::GraphicsPage(Files::ConfigurationManager &cfg, QWidget *parent)
     connect(mRendererComboBox, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(rendererChanged(const QString&)));
 
     createPages();
-    setupConfig();
-    setupOgre();
-
-    readConfig();
 }
 
 void GraphicsPage::createPages()
@@ -78,11 +74,7 @@ void GraphicsPage::createPages()
     mDisplayStackedWidget->addWidget(main);
 }
 
-void GraphicsPage::setupConfig()
-{
-}
-
-void GraphicsPage::setupOgre()
+bool GraphicsPage::setupOgre()
 {
     QString pluginCfg = mCfgMgr.getPluginsConfigPath().string().c_str();
     QFile file(pluginCfg);
@@ -113,9 +105,7 @@ void GraphicsPage::setupOgre()
         msgBox.exec();
 
         qCritical("Error creating Ogre::Root, the error reported was:\n %s", qPrintable(ogreError));
-
-        qApp->exit(1);
-        return;
+        return false;
     }
 
 	#ifdef ENABLE_PLUGIN_GL
@@ -165,8 +155,7 @@ void GraphicsPage::setupOgre()
         Please make sure the plugins.cfg file exists and contains a valid rendering plugin.<br>"));
         msgBox.exec();
 
-        qApp->exit(1);
-        return;
+        return false;
     }
 
     // Now fill the GUI elements
@@ -174,6 +163,9 @@ void GraphicsPage::setupOgre()
     mResolutionComboBox->clear();
     mAntiAliasingComboBox->addItems(getAvailableOptions(QString("FSAA"), mSelectedRenderSystem));
     mResolutionComboBox->addItems(getAvailableOptions(QString("Video Mode"), mSelectedRenderSystem));
+
+    readConfig();
+    return true;
 }
 
 void GraphicsPage::readConfig()

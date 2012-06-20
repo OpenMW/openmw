@@ -1,7 +1,6 @@
 #include <QApplication>
 #include <QDir>
 #include <QFile>
-#include <QtDebug>
 
 #include "maindialog.hpp"
 
@@ -32,9 +31,13 @@ int main(int argc, char *argv[])
     QDir::setCurrent(dir.absolutePath());
 
     MainDialog mainWin;
-    mainWin.show();
 
-    return app.exec();
+    if (mainWin.setup()) {
 
+        mainWin.show();
+        return app.exec();
+    }
+
+    return 0;
 }
 
