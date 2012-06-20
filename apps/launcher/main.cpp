@@ -31,8 +31,10 @@ int main(int argc, char *argv[])
 
     QDir::setCurrent(dir.absolutePath());
 
-    MainDialog dialog;
-    return dialog.exec();
+    MainDialog mainWin;
+    mainWin.show();
+
+    return app.exec();
 
 }
 
