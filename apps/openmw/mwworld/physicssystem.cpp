@@ -213,8 +213,6 @@ namespace MWWorld
             if(it->first == "player"){
 
                 coord = playerphysics->ps.origin;
-                //playerphysics->ps.speed = 480.0f;
-                //std::cout << "Position" << coord << "\n";
             }
 
 
@@ -302,7 +300,6 @@ namespace MWWorld
 
     void PhysicsSystem::scaleObject (const std::string& handle, float scale)
     {
-        /*
         if(handleToMesh.find(handle) != handleToMesh.end())
         {
             btTransform transform = mEngine->getRigidBody(handle)->getWorldTransform();
@@ -311,7 +308,7 @@ namespace MWWorld
             Ogre::Quaternion quat = Ogre::Quaternion(transform.getRotation().getW(), transform.getRotation().getX(), transform.getRotation().getY(), transform.getRotation().getZ());
             Ogre::Vector3 vec = Ogre::Vector3(transform.getOrigin().getX(), transform.getOrigin().getY(), transform.getOrigin().getZ());
             addObject(handle, handleToMesh[handle], quat, scale, vec);
-        }*/
+        }
     }
 
     bool PhysicsSystem::toggleCollisionMode()
