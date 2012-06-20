@@ -1063,8 +1063,24 @@ void DataFilesPage::writeConfig(QString profile)
         return;
     }
 
+    QString pathStr = QString::fromStdString(mCfgMgr.getUserPath().string());
+    QDir userPath(pathStr);
+
+    if (!userPath.exists()) {
+        if (!userPath.mkpath(pathStr)) {
+            QMessageBox msgBox;
+            msgBox.setWindowTitle("Error creating OpenMW configuration directory");
+            msgBox.setIcon(QMessageBox::Critical);
+            msgBox.setStandardButtons(QMessageBox::Ok);
+            msgBox.setText(tr("<br><b>Could not create %0</b><br><br> \Please make sure you have the right permissions and try again.<br>").arg(pathStr));
+            msgBox.exec();
+
+            qApp->exit(1);
+            return;
+        }
+    }
     // Open the OpenMW config as a QFile
-    QFile file(QString::fromStdString((mCfgMgr.getUserPath() / "openmw.cfg").string()));
+    QFile file(pathStr.append("openmw.cfg"));
 
     if (!file.open(QIODevice::ReadWrite | QIODevice::Text)) {
         // File cannot be opened or created

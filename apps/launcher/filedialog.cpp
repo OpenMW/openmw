@@ -17,7 +17,7 @@ FileDialog::FileDialog(QWidget *parent)
     box->addButton(mChooseButton, QDialogButtonBox::AcceptRole);
 
     connect(this, SIGNAL(directoryEntered(const QString&)), this, SLOT(updateChooseButton(const QString&)));
-    emit directoryEntered(directory().absolutePath());
+    emit directoryEntered(QDir::currentPath());
 }
 
 QString FileDialog::getExistingDirectory(QWidget *parent,
