@@ -28,7 +28,7 @@ QString FileDialog::getExistingDirectory(QWidget *parent,
     // create a non-native file dialog
     FileDialog dialog;
     dialog.setFileMode(DirectoryOnly);
-    dialog.setOptions(options & DontUseNativeDialog | ShowDirsOnly);
+    dialog.setOptions(options & (DontUseNativeDialog | ShowDirsOnly));
 
     if (!caption.isEmpty())
         dialog.setWindowTitle(caption);

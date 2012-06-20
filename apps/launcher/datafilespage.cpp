@@ -1072,7 +1072,8 @@ void DataFilesPage::writeConfig(QString profile)
             msgBox.setWindowTitle("Error creating OpenMW configuration directory");
             msgBox.setIcon(QMessageBox::Critical);
             msgBox.setStandardButtons(QMessageBox::Ok);
-            msgBox.setText(tr("<br><b>Could not create %0</b><br><br> \Please make sure you have the right permissions and try again.<br>").arg(pathStr));
+            msgBox.setText(tr("<br><b>Could not create %0</b><br><br> \
+                              Please make sure you have the right permissions and try again.<br>").arg(pathStr));
             msgBox.exec();
 
             qApp->exit(1);
@@ -1089,7 +1090,7 @@ void DataFilesPage::writeConfig(QString profile)
         msgBox.setIcon(QMessageBox::Critical);
         msgBox.setStandardButtons(QMessageBox::Ok);
         msgBox.setText(tr("<br><b>Could not open or create %0</b><br><br> \
-        Please make sure you have the right permissions and try again.<br>").arg(file.fileName()));
+                          Please make sure you have the right permissions and try again.<br>").arg(file.fileName()));
         msgBox.exec();
 
         qApp->exit(1);
@@ -1120,7 +1121,7 @@ void DataFilesPage::writeConfig(QString profile)
         msgBox.setIcon(QMessageBox::Critical);
         msgBox.setStandardButtons(QMessageBox::Ok);
         msgBox.setText(tr("<br><b>Could not write to %0</b><br><br> \
-        Please make sure you have the right permissions and try again.<br>").arg(file.fileName()));
+                          Please make sure you have the right permissions and try again.<br>").arg(file.fileName()));
         msgBox.exec();
 
         qApp->exit(1);
