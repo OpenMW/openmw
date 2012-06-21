@@ -843,7 +843,7 @@ namespace MWDialogue
 
     void DialogueManager::goodbyeSelected()
     {
-        MWBase::Environment::get().getWindowManager()->popGuiMode();
+        MWBase::Environment::get().getWindowManager()->removeGuiMode(MWGui::GM_Dialogue);
     }
 
     void DialogueManager::questionAnswered(std::string answere)

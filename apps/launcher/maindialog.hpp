@@ -1,7 +1,7 @@
 #ifndef MAINDIALOG_H
 #define MAINDIALOG_H
 
-#include <QDialog>
+#include <QMainWindow>
 
 #include <components/files/configurationmanager.hpp>
 #include <components/settings/settings.hpp>
@@ -17,7 +17,7 @@ class PlayPage;
 class GraphicsPage;
 class DataFilesPage;
 
-class MainDialog : public QDialog
+class MainDialog : public QMainWindow
 {
     Q_OBJECT
 

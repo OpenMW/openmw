@@ -19,6 +19,10 @@ namespace MWMechanics
         Spells mSpells;
         ActiveSpells mActiveSpells;
         MagicEffects mMagicEffects;
+        int mHello;
+        int mFight;
+        int mFlee;
+        int mAlarm;
     };
 }
 

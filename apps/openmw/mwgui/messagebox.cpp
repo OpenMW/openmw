@@ -58,7 +58,7 @@ void MessageBoxManager::onFrame (float frameDuration)
     if(mInterMessageBoxe != NULL && mInterMessageBoxe->mMarkedToDelete) {
         delete mInterMessageBoxe;
         mInterMessageBoxe = NULL;
-        mWindowManager->popGuiMode();
+        mWindowManager->removeGuiMode(GM_InterMessageBox);
     }
 }
 
@@ -86,13 +86,12 @@ void MessageBoxManager::createMessageBox (const std::string& message)
 
 bool MessageBoxManager::createInteractiveMessageBox (const std::string& message, const std::vector<std::string>& buttons)
 {
+    /// \todo Don't write this kind of error message to cout. Either discard the old message box
+    /// silently or throw an exception.
     if(mInterMessageBoxe != NULL) {
         std::cout << "there is a MessageBox already" << std::endl;
         return false;
     }
-    std::cout << "interactive MessageBox: " << message << " - ";
-    std::copy (buttons.begin(), buttons.end(), std::ostream_iterator<std::string> (std::cout, ", "));
-    std::cout << std::endl;
 
     mInterMessageBoxe = new InteractiveMessageBox(*this, message, buttons);
 

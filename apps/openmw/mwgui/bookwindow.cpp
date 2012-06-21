@@ -92,7 +92,7 @@ void BookWindow::onCloseButtonClicked (MyGUI::Widget* _sender)
     // no 3d sounds because the object could be in a container.
     MWBase::Environment::get().getSoundManager()->playSound ("book close", 1.0, 1.0);
 
-    mWindowManager.popGuiMode();
+    mWindowManager.removeGuiMode(GM_Book);
 }
 
 void BookWindow::onTakeButtonClicked (MyGUI::Widget* _sender)
@@ -102,7 +102,7 @@ void BookWindow::onTakeButtonClicked (MyGUI::Widget* _sender)
     MWWorld::ActionTake take(mBook);
     take.execute();
 
-    mWindowManager.popGuiMode();
+    mWindowManager.removeGuiMode(GM_Book);
 }
 
 void BookWindow::onNextPageButtonClicked (MyGUI::Widget* _sender)

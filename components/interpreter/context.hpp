@@ -65,6 +65,19 @@ namespace Interpreter
             virtual void enable (const std::string& id = "") = 0;
 
             virtual void disable (const std::string& id = "") = 0;
+
+            virtual int getMemberShort (const std::string& id, const std::string& name) const = 0;
+
+            virtual int getMemberLong (const std::string& id, const std::string& name) const = 0;
+
+            virtual float getMemberFloat (const std::string& id, const std::string& name) const = 0;
+
+            virtual void setMemberShort (const std::string& id, const std::string& name, int value) = 0;
+
+            virtual void setMemberLong (const std::string& id, const std::string& name, int value) = 0;
+
+            virtual void setMemberFloat (const std::string& id, const std::string& name, float value)
+                = 0;
     };
 }
 

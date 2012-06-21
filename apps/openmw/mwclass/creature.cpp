@@ -57,6 +57,11 @@ namespace MWClass
 
             data->mCreatureStats.mLevel = ref->base->data.level;
 
+            data->mCreatureStats.mHello = ref->base->AI.hello;
+            data->mCreatureStats.mFight = ref->base->AI.fight;
+            data->mCreatureStats.mFlee = ref->base->AI.flee;
+            data->mCreatureStats.mAlarm = ref->base->AI.alarm;
+
             // store
             ptr.getRefData().setCustomData (data.release());
         }

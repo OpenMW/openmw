@@ -640,7 +640,7 @@ void ContainerWindow::onCloseButtonClicked(MyGUI::Widget* _sender)
 {
     if(mDragAndDrop == NULL || !mDragAndDrop->mIsOnDragAndDrop)
     {
-        MWBase::Environment::get().getWindowManager()->popGuiMode();
+        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Container);
     }
 }
 
@@ -671,7 +671,7 @@ void ContainerWindow::onTakeAllButtonClicked(MyGUI::Widget* _sender)
 
         containerStore.clear();
 
-        MWBase::Environment::get().getWindowManager()->popGuiMode();
+        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Container);
     }
 }
 

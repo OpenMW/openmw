@@ -370,6 +370,10 @@ if(WIN32)
     INSTALL(FILES
         "${OpenMW_BINARY_DIR}/plugins.cfg"
         "${OpenMW_SOURCE_DIR}/readme.txt"
+        "${OpenMW_SOURCE_DIR}/GPL3.txt"
+        "${OpenMW_SOURCE_DIR}/OFL.txt"
+        "${OpenMW_SOURCE_DIR}/Bitstream Vera License.txt"
+        "${OpenMW_SOURCE_DIR}/Daedric Font License.txt"
         "${OpenMW_BINARY_DIR}/launcher.qss"
         "${OpenMW_BINARY_DIR}/settings-default.cfg"
         "${OpenMW_BINARY_DIR}/transparency-overrides.cfg"
@@ -391,8 +395,8 @@ if(WIN32)
         !insertmacro MUI_STARTMENU_GETFOLDER Application $MUI_TEMP
         Delete \\\"$SMPROGRAMS\\\\$MUI_TEMP\\\\Readme.lnk\\\"
         ")
+    SET(CPACK_RESOURCE_FILE_README "${OpenMW_SOURCE_DIR}/readme.txt")
     SET(CPACK_PACKAGE_DESCRIPTION_FILE "${OpenMW_SOURCE_DIR}/readme.txt")
-    SET(CPACK_RESOURCE_FILE_LICENSE "${OpenMW_SOURCE_DIR}/GPL3.txt")
     SET(CPACK_NSIS_EXECUTABLES_DIRECTORY ".")
     SET(CPACK_NSIS_DISPLAY_NAME "OpenMW")
     SET(CPACK_NSIS_HELP_LINK "http:\\\\\\\\www.openmw.org")

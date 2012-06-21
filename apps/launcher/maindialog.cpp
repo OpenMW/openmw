@@ -29,7 +29,10 @@ MainDialog::MainDialog()
         mSettings.loadUser(globaldefault);
 
 
-    mIconWidget = new QListWidget;
+    QWidget *centralWidget = new QWidget(this);
+    setCentralWidget(centralWidget);
+
+    mIconWidget = new QListWidget(centralWidget);
     mIconWidget->setObjectName("IconWidget");
     mIconWidget->setViewMode(QListView::IconMode);
     mIconWidget->setWrapping(false);
@@ -43,7 +46,7 @@ MainDialog::MainDialog()
     mIconWidget->setCurrentRow(0);
     mIconWidget->setFlow(QListView::LeftToRight);
 
-    QGroupBox *groupBox = new QGroupBox(this);
+    QGroupBox *groupBox = new QGroupBox(centralWidget);
     QVBoxLayout *groupLayout = new QVBoxLayout(groupBox);
 
     mPagesWidget = new QStackedWidget(groupBox);
@@ -51,15 +54,14 @@ MainDialog::MainDialog()
 
     QPushButton *playButton = new QPushButton(tr("Play"));
 
-    QDialogButtonBox *buttonBox = new QDialogButtonBox(this);
+    QDialogButtonBox *buttonBox = new QDialogButtonBox(centralWidget);
     buttonBox->setStandardButtons(QDialogButtonBox::Close);
     buttonBox->addButton(playButton, QDialogButtonBox::AcceptRole);
 
-    QVBoxLayout *dialogLayout = new QVBoxLayout(this);
+    QVBoxLayout *dialogLayout = new QVBoxLayout(centralWidget);
     dialogLayout->addWidget(mIconWidget);
     dialogLayout->addWidget(groupBox);
     dialogLayout->addWidget(buttonBox);
-
 
     setWindowTitle(tr("OpenMW Launcher"));
     setWindowIcon(QIcon(":/images/openmw.png"));

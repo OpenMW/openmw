@@ -200,12 +200,13 @@ void GraphicsPage::writeConfig()
     Settings::Manager::setBool("vsync", "Video", mVSyncCheckBox->checkState());
     Settings::Manager::setBool("fullscreen", "Video", mFullScreenCheckBox->checkState());
     Settings::Manager::setString("antialiasing", "Video", mAntiAliasingComboBox->currentText().toStdString());
+    Settings::Manager::setString("render system", "Video", mRendererComboBox->currentText().toStdString());
 
-    std::string resolution = mResolutionComboBox->currentText().toStdString();
     // parse resolution x and y from a string like "800 x 600"
-    size_t xPos = resolution.find("x");
-    int resX = boost::lexical_cast<int>(resolution.substr(0, xPos-1));
-    int resY = boost::lexical_cast<int>(resolution.substr(xPos+2, resolution.size()-(xPos+2)));
+    QString resolution = mResolutionComboBox->currentText();
+    QStringList tokens = resolution.split(" ", QString::SkipEmptyParts);
+    int resX = boost::lexical_cast<int>(tokens.at(0).toStdString());
+    int resY = boost::lexical_cast<int>(tokens.at(2).toStdString());
     Settings::Manager::setInt("resolution x", "Video", resX);
     Settings::Manager::setInt("resolution y", "Video", resY);
 }
@@ -239,6 +240,42 @@ QStringList GraphicsPage::getAvailableOptions(const QString &key, Ogre::RenderSy
     return result;
 }
 
+QStringList GraphicsPage::getAvailableResolutions(Ogre::RenderSystem *renderer)
+{
+    QString key ("Video Mode");
+    QStringList result;
+
+    uint row = 0;
+    Ogre::ConfigOptionMap options = renderer->getConfigOptions();
+
+    for (Ogre::ConfigOptionMap::iterator i = options.begin (); i != options.end (); i++, row++)
+    {
+        if (key.toStdString() != i->first)
+            continue;
+
+        Ogre::StringVector::iterator opt_it;
+        uint idx = 0;
+        for (opt_it = i->second.possibleValues.begin ();
+        opt_it != i->second.possibleValues.end (); opt_it++, idx++)
+        {
+            QString qval = QString::fromStdString(*opt_it).simplified();
+            // remove extra tokens after the resolution (for example bpp, can be there or not depending on rendersystem)
+            QStringList tokens = qval.split(" ", QString::SkipEmptyParts);
+            assert (tokens.size() >= 3);
+            QString resolutionStr = tokens.at(0) + QString(" x ") + tokens.at(2);
+            {
+
+                // do not add duplicate resolutions
+                if (!result.contains(resolutionStr))
+                    result << resolutionStr;
+            }
+        }
+
+    }
+
+    return result;
+}
+
 void GraphicsPage::rendererChanged(const QString &renderer)
 {
     mSelectedRenderSystem = mOgre->getRenderSystemByName(renderer.toStdString());
@@ -247,5 +284,5 @@ void GraphicsPage::rendererChanged(const QString &renderer)
     mResolutionComboBox->clear();
 
     mAntiAliasingComboBox->addItems(getAvailableOptions(QString("FSAA"), mSelectedRenderSystem));
-    mResolutionComboBox->addItems(getAvailableOptions(QString("Video Mode"), mSelectedRenderSystem));
+    mResolutionComboBox->addItems(getAvailableResolutions(mSelectedRenderSystem));
 }

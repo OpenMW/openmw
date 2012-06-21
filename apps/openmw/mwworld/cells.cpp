@@ -142,7 +142,10 @@ MWWorld::Ptr MWWorld::Cells::getPtr (const std::string& name, Ptr::CellStore& ce
             (int(*)(int)) std::tolower);
 
         if (std::binary_search (cell.mIds.begin(), cell.mIds.end(), lowerCase))
+        {
             cell.load (mStore, mReader);
+            fillContainers (cell);
+        }
         else
             return Ptr();
     }

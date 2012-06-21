@@ -5,6 +5,7 @@
 
 #include "datafilespage.hpp"
 #include "lineedit.hpp"
+#include "filedialog.hpp"
 #include "naturalsort.hpp"
 #include "pluginsmodel.hpp"
 #include "pluginsview.hpp"
@@ -203,8 +204,7 @@ void DataFilesPage::setupDataFiles()
     mCfgMgr.readConfiguration(variables, desc);
 
     // Put the paths in a boost::filesystem vector to use with Files::Collections
-    Files::PathContainer dataDirs(variables["data"].as<Files::PathContainer>());
-    mDataDirs = dataDirs;
+    mDataDirs = Files::PathContainer(variables["data"].as<Files::PathContainer>());
 
 //     std::string local = variables["data-local"].as<std::string>();
 //     if (!local.empty()) {
@@ -212,36 +212,42 @@ void DataFilesPage::setupDataFiles()
 //         dataDirs.push_back(Files::PathContainer::value_type(local));
 //     }
 
-    if (dataDirs.size()>1)
-        dataDirs.resize (1);
+    if (mDataDirs.size()>1)
+        mDataDirs.resize (1);
 
-    mCfgMgr.processPaths(dataDirs);
+    mCfgMgr.processPaths(mDataDirs);
 
-    while (dataDirs.empty()) {
-        // No valid data files directory found
-
+    while (mDataDirs.empty()) {
         QMessageBox msgBox;
         msgBox.setWindowTitle("Error detecting Morrowind installation");
         msgBox.setIcon(QMessageBox::Warning);
         msgBox.setStandardButtons(QMessageBox::Cancel);
         msgBox.setText(tr("<br><b>Could not find the Data Files location</b><br><br> \
-        The directory containing the data files was not found.<br><br> \
-        Press \"Browse...\" to specify the location manually.<br>"));
+                          The directory containing the data files was not found.<br><br> \
+                          Press \"Browse...\" to specify the location manually.<br>"));
 
         QAbstractButton *dirSelectButton =
-        msgBox.addButton(tr("B&rowse..."), QMessageBox::ActionRole);
+                msgBox.addButton(tr("B&rowse..."), QMessageBox::ActionRole);
 
         msgBox.exec();
 
         if (msgBox.clickedButton() == dirSelectButton) {
 
-            QString dataDir = QFileDialog::getExistingDirectory(
-                this, tr("Select Data Files Directory"),
-                "/home",
-                QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+            // Show a custom dir selection dialog which only accepts valid dirs
+            QString selectedDir = FileDialog::getExistingDirectory(
+                        this, tr("Select Data Files Directory"),
+                        QDir::currentPath(),
+                        QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
 
-            dataDirs.push_back(Files::PathContainer::value_type(dataDir.toStdString()));
-            mDataDirs.push_back(Files::PathContainer::value_type(dataDir.toStdString()));
+            // Add the user selected data directory
+            if (!selectedDir.isEmpty()) {
+                mDataDirs.push_back(Files::PathContainer::value_type(selectedDir.toStdString()));
+                mCfgMgr.processPaths(mDataDirs);
+            } else {
+                // Cancel from within the dir selection dialog
+                break;
+            }
+
         } else {
             // Cancel
             break;
@@ -249,13 +255,13 @@ void DataFilesPage::setupDataFiles()
     }
 
     // Check if cancel was clicked because we can't exit from while loop
-    if (dataDirs.empty()) {
+    if (mDataDirs.empty()) {
         QApplication::exit(1);
         return;
     }
 
-    // Create a file collection for the dataDirs
-    Files::Collections fileCollections(dataDirs, !variables["fs-strict"].as<bool>());
+    // Create a file collection for the data dirs
+    Files::Collections fileCollections(mDataDirs, !variables["fs-strict"].as<bool>());
 
      // First we add all the master files
     const Files::MultiDirCollection &esm = fileCollections.getCollection(".esm");
@@ -1057,8 +1063,25 @@ void DataFilesPage::writeConfig(QString profile)
         return;
     }
 
+    QString pathStr = QString::fromStdString(mCfgMgr.getUserPath().string());
+    QDir userPath(pathStr);
+
+    if (!userPath.exists()) {
+        if (!userPath.mkpath(pathStr)) {
+            QMessageBox msgBox;
+            msgBox.setWindowTitle("Error creating OpenMW configuration directory");
+            msgBox.setIcon(QMessageBox::Critical);
+            msgBox.setStandardButtons(QMessageBox::Ok);
+            msgBox.setText(tr("<br><b>Could not create %0</b><br><br> \
+                              Please make sure you have the right permissions and try again.<br>").arg(pathStr));
+            msgBox.exec();
+
+            qApp->exit(1);
+            return;
+        }
+    }
     // Open the OpenMW config as a QFile
-    QFile file(QString::fromStdString((mCfgMgr.getUserPath() / "openmw.cfg").string()));
+    QFile file(pathStr.append("openmw.cfg"));
 
     if (!file.open(QIODevice::ReadWrite | QIODevice::Text)) {
         // File cannot be opened or created
@@ -1067,7 +1090,7 @@ void DataFilesPage::writeConfig(QString profile)
         msgBox.setIcon(QMessageBox::Critical);
         msgBox.setStandardButtons(QMessageBox::Ok);
         msgBox.setText(tr("<br><b>Could not open or create %0</b><br><br> \
-        Please make sure you have the right permissions and try again.<br>").arg(file.fileName()));
+                          Please make sure you have the right permissions and try again.<br>").arg(file.fileName()));
         msgBox.exec();
 
         qApp->exit(1);
@@ -1098,7 +1121,7 @@ void DataFilesPage::writeConfig(QString profile)
         msgBox.setIcon(QMessageBox::Critical);
         msgBox.setStandardButtons(QMessageBox::Ok);
         msgBox.setText(tr("<br><b>Could not write to %0</b><br><br> \
-        Please make sure you have the right permissions and try again.<br>").arg(file.fileName()));
+                          Please make sure you have the right permissions and try again.<br>").arg(file.fileName()));
         msgBox.exec();
 
         qApp->exit(1);

@@ -59,6 +59,7 @@ private:
     Files::ConfigurationManager &mCfgMgr;
 
     QStringList getAvailableOptions(const QString &key, Ogre::RenderSystem *renderer);
+    QStringList getAvailableResolutions(Ogre::RenderSystem *renderer);
 
     void createPages();
     void setupConfig();

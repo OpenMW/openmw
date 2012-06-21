@@ -270,6 +270,84 @@ namespace MWScript
         MWBase::Environment::get().getWorld()->disable (ref);
     }
 
+    int InterpreterContext::getMemberShort (const std::string& id, const std::string& name) const
+    {
+        const MWWorld::Ptr ptr = getReference (id, false);
+
+        std::string scriptId = MWWorld::Class::get (ptr).getScript (ptr);
+
+        int index = MWBase::Environment::get().getScriptManager()->getLocalIndex (scriptId, name, 's');
+
+        ptr.getRefData().setLocals (
+            *MWBase::Environment::get().getWorld()->getStore().scripts.find (scriptId));
+        return ptr.getRefData().getLocals().mShorts[index];
+    }
+
+    int InterpreterContext::getMemberLong (const std::string& id, const std::string& name) const
+    {
+        const MWWorld::Ptr ptr = getReference (id, false);
+
+        std::string scriptId = MWWorld::Class::get (ptr).getScript (ptr);
+
+        int index = MWBase::Environment::get().getScriptManager()->getLocalIndex (scriptId, name, 'l');
+
+        ptr.getRefData().setLocals (
+            *MWBase::Environment::get().getWorld()->getStore().scripts.find (scriptId));
+        return ptr.getRefData().getLocals().mLongs[index];
+    }
+
+    float InterpreterContext::getMemberFloat (const std::string& id, const std::string& name) const
+    {
+        const MWWorld::Ptr ptr = getReference (id, false);
+
+        std::string scriptId = MWWorld::Class::get (ptr).getScript (ptr);
+
+        int index = MWBase::Environment::get().getScriptManager()->getLocalIndex (scriptId, name, 'f');
+
+        ptr.getRefData().setLocals (
+            *MWBase::Environment::get().getWorld()->getStore().scripts.find (scriptId));
+        return ptr.getRefData().getLocals().mFloats[index];
+    }
+
+    void InterpreterContext::setMemberShort (const std::string& id, const std::string& name, int value)
+    {
+        const MWWorld::Ptr ptr = getReference (id, false);
+
+        std::string scriptId = MWWorld::Class::get (ptr).getScript (ptr);
+
+        int index = MWBase::Environment::get().getScriptManager()->getLocalIndex (scriptId, name, 's');
+
+        ptr.getRefData().setLocals (
+            *MWBase::Environment::get().getWorld()->getStore().scripts.find (scriptId));
+        ptr.getRefData().getLocals().mShorts[index] = value;
+    }
+
+    void InterpreterContext::setMemberLong (const std::string& id, const std::string& name, int value)
+    {
+        const MWWorld::Ptr ptr = getReference (id, false);
+
+        std::string scriptId = MWWorld::Class::get (ptr).getScript (ptr);
+
+        int index = MWBase::Environment::get().getScriptManager()->getLocalIndex (scriptId, name, 'l');
+
+        ptr.getRefData().setLocals (
+            *MWBase::Environment::get().getWorld()->getStore().scripts.find (scriptId));
+        ptr.getRefData().getLocals().mLongs[index] = value;
+    }
+
+    void InterpreterContext::setMemberFloat (const std::string& id, const std::string& name, float value)
+    {
+        const MWWorld::Ptr ptr = getReference (id, false);
+
+        std::string scriptId = MWWorld::Class::get (ptr).getScript (ptr);
+
+        int index = MWBase::Environment::get().getScriptManager()->getLocalIndex (scriptId, name, 'f');
+
+        ptr.getRefData().setLocals (
+            *MWBase::Environment::get().getWorld()->getStore().scripts.find (scriptId));
+        ptr.getRefData().getLocals().mFloats[index] = value;
+    }
+
     MWWorld::Ptr InterpreterContext::getReference()
     {
         return getReference ("", true);
