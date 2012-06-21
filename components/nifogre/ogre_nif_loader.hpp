@@ -181,7 +181,7 @@ class NIFLoader : Ogre::ManualResourceLoader
         Ogre::SkeletonPtr mSkel;
         Ogre::Vector3 vector;
         std::vector<Nif::NiTriShapeCopy> shapes;
-        std::string name;
+        std::string resourcename;
         std::string triname;
         std::vector<Nif::NiKeyframeData> allanim;
 

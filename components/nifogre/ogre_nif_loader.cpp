@@ -1067,11 +1067,11 @@ void NIFLoader::handleNode(Nif::Node *node, int flags,
 
             if(mOutputAnimFiles){
                 std::string cut = "";
-                for(unsigned int i = 0; i < name.length();  i++)
+                for(unsigned int i = 0; i < resourcename.length();  i++)
                 {
-                    if(!(name.at(i) == '\\' || name.at(i) == '/' || name.at(i) == '>' || name.at(i) == '<' || name.at(i) == '?' || name.at(i) == '*' || name.at(i) == '|' || name.at(i) == ':' || name.at(i) == '"'))
+                    if(!(resourcename.at(i) == '\\' || resourcename.at(i) == '/' || resourcename.at(i) == '>' || resourcename.at(i) == '<' || resourcename.at(i) == '?' || resourcename.at(i) == '*' || resourcename.at(i) == '|' || resourcename.at(i) == ':' || resourcename.at(i) == '"'))
                     {
-                        cut += name.at(i);
+                        cut += resourcename.at(i);
                     }
                 }
 
@@ -1210,14 +1210,14 @@ void NIFLoader::loadResource(Resource *resource)
     mesh = 0;
     mSkel.setNull();
     flip = false;
-    name = resource->getName();
-    char suffix = name.at(name.length() - 2);
+    resourcename = resource->getName();
+    char suffix = resourcename.at(resourcename.length() - 2);
     bool addAnim = true;
     bool hasAnim = false;
 	bool linkSkeleton = true;
     //bool baddin = false;
     bNiTri = true;
-    if(name == "meshes\\base_anim.nif" || name == "meshes\\base_animkna.nif")
+    if(resourcename == "meshes\\base_anim.nif" || resourcename == "meshes\\base_animkna.nif")
     {
         bNiTri = false;
     }
@@ -1239,7 +1239,7 @@ void NIFLoader::loadResource(Resource *resource)
 		{
             //baddin = true;
 			bNiTri = true;
-			std::string sub = name.substr(name.length() - 6, 4);
+			std::string sub = resourcename.substr(resourcename.length() - 6, 4);
 
 			if(sub.compare("0000") != 0)
 			addAnim = false;
@@ -1250,14 +1250,14 @@ void NIFLoader::loadResource(Resource *resource)
             //baddin = true;
 			linkSkeleton = false;
 			bNiTri = true;
-			std::string sub = name.substr(name.length() - 6, 4);
+			std::string sub = resourcename.substr(resourcename.length() - 6, 4);
 
 			if(sub.compare("0000") != 0)
 			addAnim = false;
 
 		}
 
-       switch(name.at(name.length() - 1))
+       switch(resourcename.at(resourcename.length() - 1))
 	{
 	    case '"':
 			triname = "tri chest";
@@ -1366,12 +1366,12 @@ void NIFLoader::loadResource(Resource *resource)
         mesh->_setBoundingSphereRadius(bounds.getRadius());
     }
     if(hasAnim && addAnim){
-        allanimmap[name] = allanim;
-        alltextmappings[name] = textmappings;
+        allanimmap[resourcename] = allanim;
+        alltextmappings[resourcename] = textmappings;
     }
     if(!mSkel.isNull() && shapes.size() > 0 && addAnim)
     {
-        allshapesmap[name] = shapes;
+        allshapesmap[resourcename] = shapes;
 
     }
 
@@ -1421,11 +1421,6 @@ MeshPtr NIFLoader::load(const std::string &name,
     return themesh;
 }
 
-/*
-This function shares much of the same code handleShapes() in MWRender::Animation
-This function also creates new position and normal buffers for submeshes.
-This function points to existing texture and IndexData buffers
-*/
 
 std::vector<Nif::NiKeyframeData>* NIFLoader::getAnim(std::string lowername){
 
