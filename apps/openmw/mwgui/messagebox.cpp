@@ -265,11 +265,8 @@ InteractiveMessageBox::InteractiveMessageBox(MessageBoxManager& parMessageBoxMan
     if(buttonsWidth < fixedWidth)
     {
         // on one line
-        std::cout << "on one line" << std::endl;
-
         if(textSize.width + 2*textPadding < buttonsWidth)
         {
-            std::cout << "width = buttonsWidth" << std::endl;
             mainWidgetSize.width = buttonsWidth;
         }
         else
@@ -282,12 +279,8 @@ InteractiveMessageBox::InteractiveMessageBox(MessageBoxManager& parMessageBoxMan
         absCoord.left = (gameWindowSize.width - mainWidgetSize.width)/2;
         absCoord.top = (gameWindowSize.height - mainWidgetSize.height)/2;
 
-        std::cout << "width " << mainWidgetSize.width << " height " << mainWidgetSize.height << std::endl;
-        std::cout << "left " << absCoord.left << " top " << absCoord.top << std::endl;
-
         mMainWidget->setCoord(absCoord);
         mMainWidget->setSize(mainWidgetSize);
-
 
         MyGUI::IntCoord messageWidgetCoord;
         messageWidgetCoord.left = (mainWidgetSize.width - textSize.width)/2;
@@ -318,7 +311,6 @@ InteractiveMessageBox::InteractiveMessageBox(MessageBoxManager& parMessageBoxMan
     else
     {
         // among each other
-
         if(biggestButtonWidth > textSize.width) {
             mainWidgetSize.width = biggestButtonWidth + buttonTopPadding;
         }
@@ -327,8 +319,6 @@ InteractiveMessageBox::InteractiveMessageBox(MessageBoxManager& parMessageBoxMan
         }
         mainWidgetSize.height = textSize.height + 2*textPadding + textButtonPadding + buttonHeight * buttons.size() + buttonMainPadding;
 
-        std::cout << "biggestButtonWidth " << biggestButtonWidth << " textSize.width " << textSize.width << std::endl;
-        std::cout << "width " << mainWidgetSize.width << " height " << mainWidgetSize.height << std::endl;
         mMainWidget->setSize(mainWidgetSize);
 
         MyGUI::IntCoord absCoord;
@@ -383,7 +373,6 @@ void InteractiveMessageBox::mousePressed (MyGUI::Widget* pressed)
         }
         index++;
     }
-    std::cout << "Cant be possible :/" << std::endl;
 }
 
 int InteractiveMessageBox::readPressedButton ()
