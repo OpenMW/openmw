@@ -70,8 +70,26 @@ void MWWorld::Cells::fillContainers (Ptr::CellStore& cellStore)
     }
 }
 
+MWWorld::Ptr MWWorld::Cells::getPtrAndCache (const std::string& name, Ptr::CellStore& cellStore)
+{
+    Ptr ptr = getPtr (name, cellStore);
+
+    if (!ptr.isEmpty())
+    {
+        mIdCache[mIdCacheIndex].first = name;
+        mIdCache[mIdCacheIndex].second = &cellStore;
+        if (++mIdCacheIndex>=mIdCache.size())
+            mIdCacheIndex = 0;
+    }
+
+    return ptr;
+}
+
 MWWorld::Cells::Cells (const ESMS::ESMStore& store, ESM::ESMReader& reader, MWWorld::World& world)
-: mStore (store), mReader (reader), mWorld (world) {}
+: mStore (store), mReader (reader), mWorld (world),
+  mIdCache (20, std::pair<std::string, Ptr::CellStore *> ("", 0)), /// \todo make cache size configurable
+  mIdCacheIndex (0)
+{}
 
 MWWorld::Ptr::CellStore *MWWorld::Cells::getExterior (int x, int y)
 {
@@ -215,19 +233,29 @@ MWWorld::Ptr MWWorld::Cells::getPtr (const std::string& name, Ptr::CellStore& ce
 
 MWWorld::Ptr MWWorld::Cells::getPtr (const std::string& name)
 {
-    // First check cells that are already listed
+    // First check the cache
+    for (std::vector<std::pair<std::string, Ptr::CellStore *> >::iterator iter (mIdCache.begin());
+        iter!=mIdCache.end(); ++iter)
+        if (iter->first==name && iter->second)
+        {
+            Ptr ptr = getPtr (name, *iter->second);
+            if (!ptr.isEmpty())
+                return ptr;
+        }
+
+    // Then check cells that are already listed
     for (std::map<std::string, Ptr::CellStore>::iterator iter = mInteriors.begin();
         iter!=mInteriors.end(); ++iter)
     {
-        Ptr ptr = getPtr (name, iter->second);
+        Ptr ptr = getPtrAndCache (name, iter->second);
         if (!ptr.isEmpty())
-            return ptr;
+             return ptr;
     }
 
     for (std::map<std::pair<int, int>, Ptr::CellStore>::iterator iter = mExteriors.begin();
         iter!=mExteriors.end(); ++iter)
     {
-        Ptr ptr = getPtr (name, iter->second);
+        Ptr ptr = getPtrAndCache (name, iter->second);
         if (!ptr.isEmpty())
             return ptr;
     }
@@ -238,7 +266,7 @@ MWWorld::Ptr MWWorld::Cells::getPtr (const std::string& name)
     {
         Ptr::CellStore *cellStore = getCellStore (iter->second);
 
-        Ptr ptr = getPtr (name, *cellStore);
+        Ptr ptr = getPtrAndCache (name, *cellStore);
 
         if (!ptr.isEmpty())
             return ptr;
@@ -249,7 +277,7 @@ MWWorld::Ptr MWWorld::Cells::getPtr (const std::string& name)
     {
         Ptr::CellStore *cellStore = getCellStore (iter->second);
 
-        Ptr ptr = getPtr (name, *cellStore);
+        Ptr ptr = getPtrAndCache (name, *cellStore);
 
         if (!ptr.isEmpty())
             return ptr;
