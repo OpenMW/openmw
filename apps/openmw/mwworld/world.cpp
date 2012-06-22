@@ -1039,4 +1039,9 @@ namespace MWWorld
     {
         mRendering->processChangedSettings(settings);
     }
+
+    void World::getTriangleBatchCount(unsigned int &triangles, unsigned int &batches)
+    {
+        mRendering->getTriangleBatchCount(triangles, batches);
+    }
 }

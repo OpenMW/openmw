@@ -677,4 +677,17 @@ void RenderingManager::applyCompositors()
         mWater->assignTextures();
 }
 
+void RenderingManager::getTriangleBatchCount(unsigned int &triangles, unsigned int &batches)
+{
+    if (mCompositors->anyCompositorEnabled())
+    {
+        mCompositors->countTrianglesBatches(triangles, batches);
+    }
+    else
+    {
+        triangles = mRendering.getWindow()->getTriangleCount();
+        batches = mRendering.getWindow()->getBatchCount();
+    }
+}
+
 } // namespace

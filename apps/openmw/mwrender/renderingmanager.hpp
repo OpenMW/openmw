@@ -118,13 +118,15 @@ class RenderingManager: private RenderingInterface, public Ogre::WindowEventList
     void disableLights();
     void enableLights();
 
-    bool occlusionQuerySupported() { return mOcclusionQuery->supported(); };
-    OcclusionQuery* getOcclusionQuery() { return mOcclusionQuery; };
+    bool occlusionQuerySupported() { return mOcclusionQuery->supported(); }
+    OcclusionQuery* getOcclusionQuery() { return mOcclusionQuery; }
 
     Shadows* getShadows();
 
     void switchToInterior();
     void switchToExterior();
+
+    void getTriangleBatchCount(unsigned int &triangles, unsigned int &batches);
 
     void setGlare(bool glare);
     void skyEnable ();
