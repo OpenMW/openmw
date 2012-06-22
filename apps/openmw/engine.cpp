@@ -126,9 +126,9 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
 
         // update GUI
         Ogre::RenderWindow* window = mOgre->getWindow();
-        MWBase::Environment::get().getWindowManager()->wmUpdateFps(window->getLastFPS(),
-                                                 window->getTriangleCount(),
-                                                 window->getBatchCount());
+        unsigned int tri, batch;
+        MWBase::Environment::get().getWorld()->getTriangleBatchCount(tri, batch);
+        MWBase::Environment::get().getWindowManager()->wmUpdateFps(window->getLastFPS(), tri, batch);
 
         MWBase::Environment::get().getWindowManager()->onFrame(evt.timeSinceLastFrame);
     }

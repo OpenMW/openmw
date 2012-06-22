@@ -159,7 +159,7 @@ namespace MWGui
 
     MyGUI::Gui* getGui() const { return gui; }
 
-    void wmUpdateFps(float fps, size_t triangleCount, size_t batchCount)
+    void wmUpdateFps(float fps, unsigned int triangleCount, unsigned int batchCount)
     {
         mFPS = fps;
         mTriangleCount = triangleCount;
@@ -295,8 +295,8 @@ namespace MWGui
 
     int showFPSLevel;
     float mFPS;
-    size_t mTriangleCount;
-    size_t mBatchCount;
+    unsigned int mTriangleCount;
+    unsigned int mBatchCount;
 
     void onDialogueWindowBye();
 

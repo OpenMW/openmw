@@ -143,12 +143,12 @@ void HUD::setFPS(float fps)
         fpscounter->setCaption(boost::lexical_cast<std::string>((int)fps));
 }
 
-void HUD::setTriangleCount(size_t count)
+void HUD::setTriangleCount(unsigned int count)
 {
     trianglecounter->setCaption(boost::lexical_cast<std::string>(count));
 }
 
-void HUD::setBatchCount(size_t count)
+void HUD::setBatchCount(unsigned int count)
 {
     batchcounter->setCaption(boost::lexical_cast<std::string>(count));
 }

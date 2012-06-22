@@ -133,6 +133,8 @@ namespace MWWorld
 
             void adjustSky();
 
+            void getTriangleBatchCount(unsigned int &triangles, unsigned int &batches);
+
             void setFallbackValues(std::map<std::string,std::string> fallbackMap);
 
             std::string getFallback(std::string key);
