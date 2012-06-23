@@ -5,6 +5,7 @@
 #include <OgreString.h>
 
 #include <boost/lexical_cast.hpp>
+#include <boost/algorithm/string.hpp>
 
 #include <components/settings/settings.hpp>
 
@@ -38,6 +39,17 @@ namespace
             return "Bilinear";
         else
             return "Trilinear";
+    }
+
+    void parseResolution (int &x, int &y, const std::string& str)
+    {
+        std::vector<std::string> split;
+        boost::algorithm::split (split, str, boost::is_any_of("x"));
+        assert (split.size() >= 2);
+        boost::trim(split[0]);
+        boost::trim(split[1]);
+        x = boost::lexical_cast<int> (split[0]);
+        y = boost::lexical_cast<int> (split[1]);
     }
 }
 
@@ -103,7 +115,12 @@ namespace MWGui
         for (Ogre::StringVector::const_iterator it=videoModes.begin();
             it!=videoModes.end(); ++it)
         {
-            mResolutionList->addItem(*it);
+            int resX, resY;
+            parseResolution (resX, resY, *it);
+            std::string str = boost::lexical_cast<std::string>(resX) + " x " + boost::lexical_cast<std::string>(resY);
+
+            if (mResolutionList->findItemIndexWith(str) == MyGUI::ITEM_NONE)
+                mResolutionList->addItem(str);
         }
 
         // read settings
@@ -174,13 +191,8 @@ namespace MWGui
     void SettingsWindow::onResolutionAccept()
     {
         std::string resStr = mResolutionList->getItemNameAt(mResolutionList->getIndexSelected());
-        size_t xPos = resStr.find("x");
-        std::string resXStr = resStr.substr(0, xPos-1);
-        Ogre::StringUtil::trim(resXStr);
-        std::string resYStr = resStr.substr(xPos+2, resStr.size()-(xPos+2));
-        Ogre::StringUtil::trim(resYStr);
-        int resX = boost::lexical_cast<int>(resXStr);
-        int resY = boost::lexical_cast<int>(resYStr);
+        int resX, resY;
+        parseResolution (resX, resY, resStr);
 
         Settings::Manager::setInt("resolution x", "Video", resX);
         Settings::Manager::setInt("resolution y", "Video", resY);
@@ -217,13 +229,8 @@ namespace MWGui
             for (unsigned int i=0; i<mResolutionList->getItemCount(); ++i)
             {
                 std::string resStr = mResolutionList->getItemNameAt(i);
-                size_t xPos = resStr.find("x");
-                std::string resXStr = resStr.substr(0, xPos-1);
-                Ogre::StringUtil::trim(resXStr);
-                std::string resYStr = resStr.substr(xPos+2, resStr.size()-(xPos+2));
-                Ogre::StringUtil::trim(resYStr);
-                int resX = boost::lexical_cast<int>(resXStr);
-                int resY = boost::lexical_cast<int>(resYStr);
+                int resX, resY;
+                parseResolution (resX, resY, resStr);
 
                 if (resX == Settings::Manager::getInt("resolution x", "Video")
                     && resY  == Settings::Manager::getInt("resolution y", "Video"))
