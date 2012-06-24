@@ -89,7 +89,7 @@ namespace MWMechanics
     : mSpellsChanged (false), mLastUpdate (MWBase::Environment::get().getWorld()->getTimeStamp())
     {}
 
-    void ActiveSpells::addSpell (const std::string& id)
+    bool ActiveSpells::addSpell (const std::string& id)
     {
         const ESM::EffectList& effects = getEffectList (id);
 
@@ -106,7 +106,7 @@ namespace MWMechanics
         }
 
         if (!found)
-            return;
+            return false;
 
         TContainer::iterator iter = mSpells.find (id);
 
@@ -119,6 +119,8 @@ namespace MWMechanics
             iter->second = std::make_pair (MWBase::Environment::get().getWorld()->getTimeStamp(), random);
 
         mSpellsChanged = true;
+
+        return true;
     }
 
     void ActiveSpells::removeSpell (const std::string& id)

@@ -43,9 +43,11 @@ namespace MWMechanics
 
             ActiveSpells();
 
-            void addSpell (const std::string& id);
+            bool addSpell (const std::string& id);
             ///< Overwrites an existing spell with the same ID. If the spell does not have any
             /// non-instant effects, it is ignored.
+            ///
+            /// \return Has the spell been added?
 
             void removeSpell (const std::string& id);
 

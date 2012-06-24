@@ -164,6 +164,12 @@ namespace MWWorld
             /// effects). Throws an exception, if the object can't hold other objects.
             /// (default implementation: throws an exception)
 
+            virtual bool apply (const MWWorld::Ptr& ptr, const std::string& id) const;
+            ///< Apply \a id on \a ptr.
+            /// \return Any effect?
+            ///
+            /// (default implementation: ignore and return false)
+
             static const Class& get (const std::string& key);
             ///< If there is no class for this \a key, an exception is thrown.
 

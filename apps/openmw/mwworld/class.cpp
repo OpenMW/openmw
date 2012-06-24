@@ -32,6 +32,11 @@ namespace MWWorld
 
     }
 
+    bool Class::apply (const MWWorld::Ptr& ptr, const std::string& id) const
+    {
+        return false;
+    }
+
     MWMechanics::CreatureStats& Class::getCreatureStats (const Ptr& ptr) const
     {
         throw std::runtime_error ("class does not have creature stats");
