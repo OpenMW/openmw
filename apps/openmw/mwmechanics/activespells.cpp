@@ -3,6 +3,9 @@
 
 #include <cstdlib>
 
+#include <components/esm/loadalch.hpp>
+#include <components/esm/loadspel.hpp>
+
 #include "../mwbase/environment.hpp"
 
 #include "../mwworld/world.hpp"
@@ -42,14 +45,13 @@ namespace MWMechanics
 
             for (TIterator iter (begin()); iter!=end(); ++iter)
             {
-                const ESM::Spell& spell =
-                    *MWBase::Environment::get().getWorld()->getStore().spells.find (iter->first);
+                const ESM::EffectList& effects = getEffectList (iter->first);
 
                 const MWWorld::TimeStamp& start = iter->second.first;
                 float magnitude = iter->second.second;
 
-                for (std::vector<ESM::ENAMstruct>::const_iterator iter (spell.effects.list.begin());
-                    iter!=spell.effects.list.end(); ++iter)
+                for (std::vector<ESM::ENAMstruct>::const_iterator iter (effects.list.begin());
+                    iter!=effects.list.end(); ++iter)
                 {
                     if (iter->duration)
                     {
@@ -70,18 +72,31 @@ namespace MWMechanics
         }
     }
 
+    const ESM::EffectList& ActiveSpells::getEffectList (const std::string& id) const
+    {
+        if (const ESM::Spell *spell =
+            MWBase::Environment::get().getWorld()->getStore().spells.search (id))
+            return spell->effects;
+
+        if (const ESM::Potion *potion =
+            MWBase::Environment::get().getWorld()->getStore().potions.search (id))
+            return potion->effects;
+
+        throw std::runtime_error ("ID " + id + " can not produce lasting effects");
+    }
+
     ActiveSpells::ActiveSpells()
     : mSpellsChanged (false), mLastUpdate (MWBase::Environment::get().getWorld()->getTimeStamp())
     {}
 
     void ActiveSpells::addSpell (const std::string& id)
     {
-        const ESM::Spell& spell = *MWBase::Environment::get().getWorld()->getStore().spells.find (id);
+        const ESM::EffectList& effects = getEffectList (id);
 
         bool found = false;
 
-        for (std::vector<ESM::ENAMstruct>::const_iterator iter (spell.effects.list.begin());
-            iter!=spell.effects.list.end(); ++iter)
+        for (std::vector<ESM::ENAMstruct>::const_iterator iter (effects.list.begin());
+            iter!=effects.list.end(); ++iter)
         {
             if (iter->duration)
             {
@@ -137,13 +152,12 @@ namespace MWMechanics
 
     double ActiveSpells::timeToExpire (const TIterator& iterator) const
     {
-        const ESM::Spell& spell =
-            *MWBase::Environment::get().getWorld()->getStore().spells.find (iterator->first);
+        const ESM::EffectList& effects = getEffectList (iterator->first);
 
         int duration = 0;
 
-        for (std::vector<ESM::ENAMstruct>::const_iterator iter (spell.effects.list.begin());
-            iter!=spell.effects.list.end(); ++iter)
+        for (std::vector<ESM::ENAMstruct>::const_iterator iter (effects.list.begin());
+            iter!=effects.list.end(); ++iter)
         {
             if (iter->duration>duration)
                 duration = iter->duration;

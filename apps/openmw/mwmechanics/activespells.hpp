@@ -12,11 +12,15 @@
 namespace ESM
 {
     struct Spell;
+    struct EffectList;
 }
 
 namespace MWMechanics
 {
     /// \brief Lasting spell effects
+    ///
+    /// \note The name of this class is slightly misleading, since it also handels lasting potion
+    /// effects.
     class ActiveSpells
     {
         public:
@@ -32,6 +36,8 @@ namespace MWMechanics
             mutable MWWorld::TimeStamp mLastUpdate;
 
             void update() const;
+
+            const ESM::EffectList& getEffectList (const std::string& id) const;
 
         public:
 
