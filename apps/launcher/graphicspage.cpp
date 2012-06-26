@@ -32,57 +32,38 @@ GraphicsPage::GraphicsPage(Files::ConfigurationManager &cfg, QWidget *parent)
     renderSystemLayout->addWidget(rendererLabel, 0, 0, 1, 1);
     renderSystemLayout->addWidget(mRendererComboBox, 0, 1, 1, 1);
 
-    QVBoxLayout *rendererGroupLayout = new QVBoxLayout(rendererGroup);
-
-    rendererGroupLayout->addLayout(renderSystemLayout);
-
     // Display
     QGroupBox *displayGroup = new QGroupBox(tr("Display"), this);
 
-    mDisplayStackedWidget = new QStackedWidget(displayGroup);
+    mVSyncCheckBox = new QCheckBox(tr("Vertical Sync"), displayGroup);
+    mFullScreenCheckBox = new QCheckBox(tr("Full Screen"), displayGroup);
 
-    QVBoxLayout *displayGroupLayout = new QVBoxLayout(displayGroup);
-    QSpacerItem *vSpacer3 = new QSpacerItem(20, 10, QSizePolicy::Minimum, QSizePolicy::Expanding);
+    QLabel *antiAliasingLabel = new QLabel(tr("Antialiasing:"), displayGroup);
+    QLabel *resolutionLabel = new QLabel(tr("Resolution:"), displayGroup);
 
-    displayGroupLayout->addWidget(mDisplayStackedWidget);
-    displayGroupLayout->addItem(vSpacer3);
+    mResolutionComboBox = new QComboBox(displayGroup);
+    mAntiAliasingComboBox = new QComboBox(displayGroup);
+
+    QVBoxLayout *rendererGroupLayout = new QVBoxLayout(rendererGroup);
+    rendererGroupLayout->addLayout(renderSystemLayout);
+
+    QGridLayout *displayGroupLayout = new QGridLayout(displayGroup);
+    displayGroupLayout->addWidget(mVSyncCheckBox, 0, 0, 1, 1);
+    displayGroupLayout->addWidget(mFullScreenCheckBox, 1, 0, 1, 1);
+    displayGroupLayout->addWidget(antiAliasingLabel, 2, 0, 1, 1);
+    displayGroupLayout->addWidget(mAntiAliasingComboBox, 2, 1, 1, 1);
+    displayGroupLayout->addWidget(resolutionLabel, 3, 0, 1, 1);
+    displayGroupLayout->addWidget(mResolutionComboBox, 3, 1, 1, 1);
 
     // Layout for the whole page
     QVBoxLayout *pageLayout = new QVBoxLayout(this);
+    QSpacerItem *vSpacer1 = new QSpacerItem(20, 10, QSizePolicy::Minimum, QSizePolicy::Expanding);
 
     pageLayout->addWidget(rendererGroup);
     pageLayout->addWidget(displayGroup);
+    pageLayout->addItem(vSpacer1);
 
     connect(mRendererComboBox, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(rendererChanged(const QString&)));
-
-    createPages();
-}
-
-void GraphicsPage::createPages()
-{
-    QWidget *main = new QWidget();
-    QGridLayout *grid = new QGridLayout(main);
-
-    mVSyncCheckBox = new QCheckBox(tr("Vertical Sync"), main);
-    grid->addWidget(mVSyncCheckBox, 0, 0, 1, 1);
-
-    mFullScreenCheckBox = new QCheckBox(tr("Full Screen"), main);
-    grid->addWidget(mFullScreenCheckBox, 1, 0, 1, 1);
-
-    QLabel *antiAliasingLabel = new QLabel(tr("Antialiasing:"), main);
-    mAntiAliasingComboBox = new QComboBox(main);
-    grid->addWidget(antiAliasingLabel, 2, 0, 1, 1);
-    grid->addWidget(mAntiAliasingComboBox, 2, 1, 1, 1);
-
-    QLabel *resolutionLabel = new QLabel(tr("Resolution:"), main);
-    mResolutionComboBox = new QComboBox(main);
-    grid->addWidget(resolutionLabel, 3, 0, 1, 1);
-    grid->addWidget(mResolutionComboBox, 3, 1, 1, 1);
-
-    QSpacerItem *vSpacer1 = new QSpacerItem(20, 10, QSizePolicy::Minimum, QSizePolicy::Expanding);
-    grid->addItem(vSpacer1, 4, 0, 1, 1);
-
-    mDisplayStackedWidget->addWidget(main);
 }
 
 bool GraphicsPage::setupOgre()
