@@ -7,6 +7,17 @@
 #include <components/files/configurationmanager.hpp>
 #include <components/settings/settings.hpp>
 
+//sort resolutions descending
+bool resolutionLessThan(const QString &str1, const QString &str2)
+{
+    // Get the first parts of the resolution strings
+    int width1 = str1.left(str1.indexOf(" ")).toInt();
+    int width2 = str2.left(str2.indexOf(" ")).toInt();
+
+    return (width1 > width2);
+}
+
+
 GraphicsPage::GraphicsPage(Files::ConfigurationManager &cfg, QWidget *parent)
     : QWidget(parent)
     , mCfgMgr(cfg)
@@ -162,7 +173,7 @@ bool GraphicsPage::setupOgre()
     mAntiAliasingComboBox->clear();
     mResolutionComboBox->clear();
     mAntiAliasingComboBox->addItems(getAvailableOptions(QString("FSAA"), mSelectedRenderSystem));
-    mResolutionComboBox->addItems(getAvailableOptions(QString("Video Mode"), mSelectedRenderSystem));
+    mResolutionComboBox->addItems(getAvailableResolutions(mSelectedRenderSystem));
 
     readConfig();
     return true;
@@ -229,6 +240,8 @@ QStringList GraphicsPage::getAvailableOptions(const QString &key, Ogre::RenderSy
 
     }
 
+    // Sort ascending
+    result.sort();
     return result;
 }
 
@@ -265,6 +278,8 @@ QStringList GraphicsPage::getAvailableResolutions(Ogre::RenderSystem *renderer)
 
     }
 
+    // Sort the resolutions in descending order
+    qSort(result.begin(), result.end(), resolutionLessThan);
     return result;
 }
 
