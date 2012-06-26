@@ -74,8 +74,6 @@ namespace OEngine
             Fader* mFader;
             bool logging;
 
-            Ogre::TexturePtr mTransparentBGTexture;
-
         public:
             OgreRenderer()
             : mRoot(NULL)
