@@ -110,7 +110,6 @@ using namespace MWGui;
 CharacterCreation::CharacterCreation(WindowManager* _wm)
     : mNameDialog(0)
     , mRaceDialog(0)
-    , mDialogueWindow(0)
     , mClassChoiceDialog(0)
     , mGenerateClassQuestionDialog(0)
     , mGenerateClassResultDialog(0)
@@ -118,9 +117,60 @@ CharacterCreation::CharacterCreation(WindowManager* _wm)
     , mCreateClassDialog(0)
     , mBirthSignDialog(0)
     , mReviewDialog(0)
+    , mGenerateClassStep(0)
     , mWM(_wm)
 {
     mCreationStage = CSE_NotStarted;
+}
+
+void CharacterCreation::setValue (const std::string& id, const MWMechanics::Stat<int>& value)
+{
+    if (mReviewDialog)
+    {
+       static const char *ids[] =
+        {
+            "AttribVal1", "AttribVal2", "AttribVal3", "AttribVal4", "AttribVal5",
+            "AttribVal6", "AttribVal7", "AttribVal8",
+            0
+        };
+
+        for (int i=0; ids[i]; ++i)
+        {
+            if (ids[i]==id)
+                mReviewDialog->setAttribute(ESM::Attribute::AttributeID(i), value);
+        }
+    }
+}
+
+void CharacterCreation::setValue (const std::string& id, const MWMechanics::DynamicStat<int>& value)
+{
+    if (mReviewDialog)
+    {
+        if (id == "HBar")
+        {
+            mReviewDialog->setHealth (value);
+        }
+        else if (id == "MBar")
+        {
+            mReviewDialog->setMagicka (value);
+        }
+        else if (id == "FBar")
+        {
+            mReviewDialog->setFatigue (value);
+        }
+    }
+}
+
+void CharacterCreation::setValue(const ESM::Skill::SkillEnum parSkill, const MWMechanics::Stat<float>& value)
+{
+    if (mReviewDialog)
+        mReviewDialog->setSkillValue(parSkill, value);
+}
+
+void CharacterCreation::configureSkills (const SkillList& major, const SkillList& minor)
+{
+    if (mReviewDialog)
+        mReviewDialog->configureSkills(major, minor);
 }
 
 void CharacterCreation::spawnDialog(const char id)
@@ -173,7 +223,6 @@ void CharacterCreation::spawnDialog(const char id)
                 mWM->removeDialog(mBirthSignDialog);
             mBirthSignDialog = new BirthDialog(*mWM);
             mBirthSignDialog->setNextButtonShow(mCreationStage >= CSE_BirthSignChosen);
-            mBirthSignDialog->setBirthId(mPlayerBirthSignId);
             mBirthSignDialog->eventDone += MyGUI::newDelegate(this, &CharacterCreation::onBirthSignDialogDone);
             mBirthSignDialog->eventBack += MyGUI::newDelegate(this, &CharacterCreation::onBirthSignDialogBack);
             mBirthSignDialog->open();
@@ -210,20 +259,22 @@ void CharacterCreation::spawnDialog(const char id)
             mReviewDialog->setFatigue(mPlayerFatigue);
 
             {
-                std::map<ESM::Attribute::AttributeID, MWMechanics::Stat<int> >::iterator end = mPlayerAttributes.end();
-                for (std::map<ESM::Attribute::AttributeID, MWMechanics::Stat<int> >::iterator it = mPlayerAttributes.begin(); it != end; ++it)
+                std::map<ESM::Attribute::AttributeID, MWMechanics::Stat<int> > attributes = mWM->getPlayerAttributeValues();
+                for (std::map<ESM::Attribute::AttributeID, MWMechanics::Stat<int> >::iterator it = attributes.begin();
+                    it != attributes.end(); ++it)
                 {
                     mReviewDialog->setAttribute(it->first, it->second);
                 }
             }
 
             {
-                std::map<ESM::Skill::SkillEnum, MWMechanics::Stat<float> >::iterator end = mPlayerSkillValues.end();
-                for (std::map<ESM::Skill::SkillEnum, MWMechanics::Stat<float> >::iterator it = mPlayerSkillValues.begin(); it != end; ++it)
+                std::map<ESM::Skill::SkillEnum, MWMechanics::Stat<float> > skills = mWM->getPlayerSkillValues();
+                for (std::map<ESM::Skill::SkillEnum, MWMechanics::Stat<float> >::iterator it = skills.begin();
+                    it != skills.end(); ++it)
                 {
                     mReviewDialog->setSkillValue(it->first, it->second);
                 }
-                mReviewDialog->configureSkills(mPlayerMajorSkills, mPlayerMinorSkills);
+                mReviewDialog->configureSkills(mWM->getPlayerMajorSkills(), mWM->getPlayerMinorSkills());
             }
 
             mReviewDialog->eventDone += MyGUI::newDelegate(this, &CharacterCreation::onReviewDialogDone);
@@ -254,7 +305,7 @@ void CharacterCreation::onReviewDialogDone(WindowBase* parWindow)
     if (mReviewDialog)
         mWM->removeDialog(mReviewDialog);
 
-    mWM->setGuiMode(GM_Game);
+    mWM->popGuiMode();
 }
 
 void CharacterCreation::onReviewDialogBack()
@@ -262,7 +313,7 @@ void CharacterCreation::onReviewDialogBack()
     if (mReviewDialog)
         mWM->removeDialog(mReviewDialog);
 
-    mWM->setGuiMode(GM_Birth);
+    mWM->pushGuiMode(GM_Birth);
 }
 
 void CharacterCreation::onReviewActivateDialog(int parDialog)
@@ -271,19 +322,21 @@ void CharacterCreation::onReviewActivateDialog(int parDialog)
         mWM->removeDialog(mReviewDialog);
     mCreationStage = CSE_ReviewNext;
 
+    mWM->popGuiMode();
+
     switch(parDialog)
     {
         case ReviewDialog::NAME_DIALOG:
-            mWM->setGuiMode(GM_Name);
+            mWM->pushGuiMode(GM_Name);
             break;
         case ReviewDialog::RACE_DIALOG:
-            mWM->setGuiMode(GM_Race);
+            mWM->pushGuiMode(GM_Race);
             break;
         case ReviewDialog::CLASS_DIALOG:
-            mWM->setGuiMode(GM_Class);
+            mWM->pushGuiMode(GM_Class);
             break;
         case ReviewDialog::BIRTHSIGN_DIALOG:
-            mWM->setGuiMode(GM_Birth);
+            mWM->pushGuiMode(GM_Birth);
     };
 }
 
@@ -305,13 +358,19 @@ void CharacterCreation::onPickClassDialogDone(WindowBase* parWindow)
 
     //TODO This bit gets repeated a few times; wrap it in a function
     if (mCreationStage == CSE_ReviewNext)
-        mWM->setGuiMode(GM_Review);
+    {
+        mWM->popGuiMode();
+        mWM->pushGuiMode(GM_Review);
+    }
     else if (mCreationStage >= CSE_ClassChosen)
-        mWM->setGuiMode(GM_Birth);
+    {
+        mWM->popGuiMode();
+        mWM->pushGuiMode(GM_Birth);
+    }
     else
     {
         mCreationStage = CSE_ClassChosen;
-        mWM->setGuiMode(GM_Game);
+        mWM->popGuiMode();
     }
 }
 
@@ -325,7 +384,8 @@ void CharacterCreation::onPickClassDialogBack()
         mWM->removeDialog(mPickClassDialog);
     }
 
-    mWM->setGuiMode(GM_Class);
+    mWM->popGuiMode();
+    mWM->pushGuiMode(GM_Class);
 }
 
 void CharacterCreation::onClassChoice(int _index)
@@ -335,19 +395,21 @@ void CharacterCreation::onClassChoice(int _index)
         mWM->removeDialog(mClassChoiceDialog);
     }
 
+    mWM->popGuiMode();
+
     switch(_index)
     {
         case ClassChoiceDialog::Class_Generate:
-            mWM->setGuiMode(GM_ClassGenerate);
+            mWM->pushGuiMode(GM_ClassGenerate);
             break;
         case ClassChoiceDialog::Class_Pick:
-            mWM->setGuiMode(GM_ClassPick);
+            mWM->pushGuiMode(GM_ClassPick);
             break;
         case ClassChoiceDialog::Class_Create:
-            mWM->setGuiMode(GM_ClassCreate);
+            mWM->pushGuiMode(GM_ClassCreate);
             break;
         case ClassChoiceDialog::Class_Back:
-            mWM->setGuiMode(GM_Race);
+            mWM->pushGuiMode(GM_Race);
             break;
 
     };
@@ -364,13 +426,19 @@ void CharacterCreation::onNameDialogDone(WindowBase* parWindow)
     }
 
     if (mCreationStage == CSE_ReviewNext)
-        mWM->setGuiMode(GM_Review);
+    {
+        mWM->popGuiMode();
+        mWM->pushGuiMode(GM_Review);
+    }
     else if (mCreationStage >= CSE_NameChosen)
-        mWM->setGuiMode(GM_Race);
+    {
+        mWM->popGuiMode();
+        mWM->pushGuiMode(GM_Race);
+    }
     else
     {
         mCreationStage = CSE_NameChosen;
-        mWM->setGuiMode(GM_Game);
+        mWM->popGuiMode();
     }
 }
 
@@ -384,7 +452,8 @@ void CharacterCreation::onRaceDialogBack()
         mWM->removeDialog(mRaceDialog);
     }
 
-    mWM->setGuiMode(GM_Name);
+    mWM->popGuiMode();
+    mWM->pushGuiMode(GM_Name);
 }
 
 void CharacterCreation::onRaceDialogDone(WindowBase* parWindow)
@@ -399,13 +468,19 @@ void CharacterCreation::onRaceDialogDone(WindowBase* parWindow)
     }
 
     if (mCreationStage == CSE_ReviewNext)
-        mWM->setGuiMode(GM_Review);
-    else if(mCreationStage >= CSE_RaceChosen)
-        mWM->setGuiMode(GM_Class);
+    {
+        mWM->popGuiMode();
+        mWM->pushGuiMode(GM_Review);
+    }
+    else if (mCreationStage >= CSE_RaceChosen)
+    {
+        mWM->popGuiMode();
+        mWM->pushGuiMode(GM_Class);
+    }
     else
     {
         mCreationStage = CSE_RaceChosen;
-        mWM->setGuiMode(GM_Game);
+        mWM->popGuiMode();
     }
 }
 
@@ -414,18 +489,20 @@ void CharacterCreation::onBirthSignDialogDone(WindowBase* parWindow)
     if (mBirthSignDialog)
     {
         mPlayerBirthSignId = mBirthSignDialog->getBirthId();
-        mWM->setBirthSign(mPlayerBirthSignId);
         if (!mPlayerBirthSignId.empty())
             MWBase::Environment::get().getMechanicsManager()->setPlayerBirthsign(mPlayerBirthSignId);
         mWM->removeDialog(mBirthSignDialog);
     }
 
     if (mCreationStage >= CSE_BirthSignChosen)
-        mWM->setGuiMode(GM_Review);
+    {
+        mWM->popGuiMode();
+        mWM->pushGuiMode(GM_Review);
+    }
     else
     {
         mCreationStage = CSE_BirthSignChosen;
-        mWM->setGuiMode(GM_Game);
+        mWM->popGuiMode();
     }
 }
 
@@ -437,7 +514,8 @@ void CharacterCreation::onBirthSignDialogBack()
         mWM->removeDialog(mBirthSignDialog);
     }
 
-    mWM->setGuiMode(GM_Class);
+    mWM->popGuiMode();
+    mWM->pushGuiMode(GM_Class);
 }
 
 void CharacterCreation::onCreateClassDialogDone(WindowBase* parWindow)
@@ -472,13 +550,19 @@ void CharacterCreation::onCreateClassDialogDone(WindowBase* parWindow)
     }
 
     if (mCreationStage == CSE_ReviewNext)
-        mWM->setGuiMode(GM_Review);
+    {
+        mWM->popGuiMode();
+        mWM->pushGuiMode(GM_Review);
+    }
     else if (mCreationStage >= CSE_ClassChosen)
-        mWM->setGuiMode(GM_Birth);
+    {
+        mWM->popGuiMode();
+        mWM->pushGuiMode(GM_Birth);
+    }
     else
     {
         mCreationStage = CSE_ClassChosen;
-        mWM->setGuiMode(GM_Game);
+        mWM->popGuiMode();
     }
 }
 
@@ -487,7 +571,8 @@ void CharacterCreation::onCreateClassDialogBack()
     if (mCreateClassDialog)
         mWM->removeDialog(mCreateClassDialog);
 
-    mWM->setGuiMode(GM_Class);
+    mWM->popGuiMode();
+    mWM->pushGuiMode(GM_Class);
 }
 
 void CharacterCreation::onClassQuestionChosen(int _index)
@@ -498,7 +583,8 @@ void CharacterCreation::onClassQuestionChosen(int _index)
         mWM->removeDialog(mGenerateClassQuestionDialog);
     if (_index < 0 || _index >= 3)
     {
-        mWM->setGuiMode(GM_Class);
+        mWM->popGuiMode();
+        mWM->pushGuiMode(GM_Class);
         return;
     }
 
@@ -583,7 +669,8 @@ void CharacterCreation::showClassQuestionDialog()
 
     if (mGenerateClassStep > sGenerateClassSteps.size())
     {
-        mWM->setGuiMode(GM_Class);
+        mWM->popGuiMode();
+        mWM->pushGuiMode(GM_Class);
         return;
     }
 
@@ -612,7 +699,8 @@ void CharacterCreation::onGenerateClassBack()
         mWM->removeDialog(mGenerateClassResultDialog);
     MWBase::Environment::get().getMechanicsManager()->setPlayerClass(mGenerateClass);
 
-    mWM->setGuiMode(GM_Class);
+    mWM->popGuiMode();
+    mWM->pushGuiMode(GM_Class);
 }
 
 void CharacterCreation::onGenerateClassDone(WindowBase* parWindow)
@@ -620,15 +708,24 @@ void CharacterCreation::onGenerateClassDone(WindowBase* parWindow)
     if (mGenerateClassResultDialog)
         mWM->removeDialog(mGenerateClassResultDialog);
     MWBase::Environment::get().getMechanicsManager()->setPlayerClass(mGenerateClass);
+    const ESM::Class *klass = MWBase::Environment::get().getWorld()->getStore().classes.find(mGenerateClass);
+    mPlayerClass = *klass;
+    mWM->setPlayerClass(mPlayerClass);
 
     if (mCreationStage == CSE_ReviewNext)
-        mWM->setGuiMode(GM_Review);
+    {
+        mWM->popGuiMode();
+        mWM->pushGuiMode(GM_Review);
+    }
     else if (mCreationStage >= CSE_ClassChosen)
-        mWM->setGuiMode(GM_Birth);
+    {
+        mWM->popGuiMode();
+        mWM->pushGuiMode(GM_Birth);
+    }
     else
     {
         mCreationStage = CSE_ClassChosen;
-        mWM->setGuiMode(GM_Game);
+        mWM->popGuiMode();
     }
 }
 
@@ -636,7 +733,6 @@ CharacterCreation::~CharacterCreation()
 {
     delete mNameDialog;
     delete mRaceDialog;
-    delete mDialogueWindow;
     delete mClassChoiceDialog;
     delete mGenerateClassQuestionDialog;
     delete mGenerateClassResultDialog;

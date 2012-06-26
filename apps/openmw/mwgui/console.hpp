@@ -16,9 +16,11 @@
 #include "../mwscript/compilercontext.hpp"
 #include "../mwscript/interpretercontext.hpp"
 
+#include "referenceinterface.hpp"
+
 namespace MWGui
 {
-  class Console : private OEngine::GUI::Layout, private Compiler::ErrorHandler
+  class Console : private OEngine::GUI::Layout, private Compiler::ErrorHandler, public ReferenceInterface
   {
     private:
 
@@ -39,7 +41,17 @@ namespace MWGui
         /// \note The list may contain duplicates (if a name is a keyword and an identifier at the same
         /// time).
 
-  public:
+    public:
+
+        void setSelectedObject(const MWWorld::Ptr& object);
+        ///< Set the implicit object for script execution
+
+    protected:
+
+        virtual void onReferenceUnavailable();
+
+
+    public:
     MyGUI::EditPtr command;
     MyGUI::EditPtr history;
 
@@ -57,6 +69,8 @@ namespace MWGui
     void disable();
 
     void setFont(const std::string &fntName);
+
+    void onResChange(int width, int height);
 
     void clearHistory();
 

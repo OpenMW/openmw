@@ -28,6 +28,8 @@ namespace MWWorld
             std::map<std::string, Ptr::CellStore> mInteriors;
             std::map<std::pair<int, int>, Ptr::CellStore> mExteriors;
             MWWorld::World& mWorld;
+            std::vector<std::pair<std::string, Ptr::CellStore *> > mIdCache;
+            std::size_t mIdCacheIndex;
 
             Cells (const Cells&);
             Cells& operator= (const Cells&);
@@ -35,6 +37,8 @@ namespace MWWorld
             Ptr::CellStore *getCellStore (const ESM::Cell *cell);
 
             void fillContainers (Ptr::CellStore& cellStore);
+
+            Ptr getPtrAndCache (const std::string& name, Ptr::CellStore& cellStore);
 
         public:
 

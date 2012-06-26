@@ -1,6 +1,8 @@
 
 #include "misc.hpp"
 
+#include <boost/lexical_cast.hpp>
+
 #include <components/esm/loadmisc.hpp>
 
 #include <components/esm_store/cell_store.hpp>
@@ -116,6 +118,14 @@ namespace MWClass
         return std::string("Item Misc Down");
     }
 
+    std::string Miscellaneous::getInventoryIcon (const MWWorld::Ptr& ptr) const
+    {
+          ESMS::LiveCellRef<ESM::Miscellaneous, MWWorld::RefData> *ref =
+            ptr.get<ESM::Miscellaneous>();
+
+        return ref->base->icon;
+    }
+
     bool Miscellaneous::hasToolTip (const MWWorld::Ptr& ptr) const
     {
         ESMS::LiveCellRef<ESM::Miscellaneous, MWWorld::RefData> *ref =
@@ -130,10 +140,23 @@ namespace MWClass
             ptr.get<ESM::Miscellaneous>();
 
         MWGui::ToolTipInfo info;
-        info.caption = ref->base->name;
-        info.icon = ref->base->icon;
 
         const ESMS::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
+
+        int count = ptr.getRefData().getCount();
+
+        bool isGold = (ref->base->name == store.gameSettings.search("sGold")->str);
+        if (isGold && count == 1)
+            count = ref->base->data.value;
+
+        std::string countString;
+        if (!isGold)
+            countString = MWGui::ToolTips::getCountString(count);
+        else // gold displays its count also if it's 1.
+            countString = " (" + boost::lexical_cast<std::string>(count) + ")";
+
+        info.caption = ref->base->name + countString;
+        info.icon = ref->base->icon;
 
         if (ref->ref.soul != "")
         {
@@ -143,9 +166,7 @@ namespace MWClass
 
         std::string text;
 
-        if (ref->base->name == store.gameSettings.search("sGold")->str)
-            info.caption += " (" + boost::lexical_cast<std::string>(ref->base->data.value) + ")";
-        else
+        if (!isGold)
         {
             text += "\n" + store.gameSettings.search("sWeight")->str + ": " + MWGui::ToolTips::toString(ref->base->data.weight);
             text += MWGui::ToolTips::getValueString(ref->base->data.value, store.gameSettings.search("sValue")->str);

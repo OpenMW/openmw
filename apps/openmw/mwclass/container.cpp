@@ -17,6 +17,7 @@
 #include "../mwgui/tooltips.hpp"
 
 #include "../mwrender/objects.hpp"
+#include "../mwworld/actionopen.hpp"
 
 #include "../mwsound/soundmanager.hpp"
 
@@ -86,6 +87,7 @@ namespace MWClass
         const std::string lockedSound = "LockedChest";
         const std::string trapActivationSound = "Disarm Trap Fail";
 
+
         if (ptr.getCellRef().lockLevel>0)
         {
             // TODO check for key
@@ -99,7 +101,8 @@ namespace MWClass
             if(ptr.getCellRef().trap.empty())
             {
                 // Not trapped, Inventory GUI goes here
-                return boost::shared_ptr<MWWorld::Action> (new MWWorld::NullAction);
+                //return boost::shared_ptr<MWWorld::Action> (new MWWorld::NullAction);
+                return boost::shared_ptr<MWWorld::Action> (new MWWorld::ActionOpen(ptr));
             }
             else
             {
@@ -175,5 +178,31 @@ namespace MWClass
         info.text = text;
 
         return info;
+    }
+
+    float Container::getCapacity (const MWWorld::Ptr& ptr) const
+    {
+        ESMS::LiveCellRef<ESM::Container, MWWorld::RefData> *ref =
+            ptr.get<ESM::Container>();
+
+        return ref->base->weight;
+    }
+
+    float Container::getEncumbrance (const MWWorld::Ptr& ptr) const
+    {
+        return getContainerStore (ptr).getWeight();
+    }
+
+    void Container::lock (const MWWorld::Ptr& ptr, int lockLevel) const
+    {
+        if (lockLevel<0)
+            lockLevel = 0;
+
+        ptr.getCellRef().lockLevel = lockLevel;
+    }
+
+    void Container::unlock (const MWWorld::Ptr& ptr) const
+    {
+        ptr.getCellRef().lockLevel = 0;
     }
 }

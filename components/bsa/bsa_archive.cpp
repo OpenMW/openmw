@@ -93,12 +93,12 @@ class DirArchive: public Ogre::FileSystemArchive
             return true;
 
         std::string folder;
-        int delimiter = 0;
+        //int delimiter = 0;
         size_t lastSlash = copy.rfind('/');
         if (lastSlash != std::string::npos)
         {
             folder = copy.substr(0, lastSlash);
-            delimiter = lastSlash+1;
+            //delimiter = lastSlash+1;
         }
 
         std::vector<std::string> current;

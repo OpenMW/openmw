@@ -36,6 +36,13 @@
             </Index>
         </Group>
     </Resource>
+    <Resource type="ResourceImageSet" name="DropGroundPointerImage">
+        <Group name="Pointer" texture="textures\cursor_drop_ground.dds" size="32 32">
+            <Index name="Pointer" >
+                <Frame point="0 0"/>
+            </Index>
+        </Group>
+    </Resource>
 
     <Resource type="ResourceImageSet" name="MenuBook_Close">
         <Group name="States" texture="mwgui1" size="96 24">
@@ -72,7 +79,7 @@
     </Resource>
 
     <Resource type="ResourceImageSet" name="MenuBook_Next">
-        <Group name="States" texture="mwgui1" size="96 24">
+        <Group name="States" texture="mwgui1" size="57 24">
             <Index name="disabled">
                 <Frame point="256 32"/>
             </Index>
@@ -106,6 +113,8 @@
     </Resource>
 
 
+    <!-- Skins -->
+
     <Resource type="ResourceLayout" name="ButtonImage" version="3.2.0">
         <Widget type="Widget" skin="Default" position="20 20 16 16" name="Root">
             <Property key="TextAlign" value="Center"/>
@@ -113,6 +122,48 @@
             <Property key="ModeImage" value="true"/>
             <Widget type="ImageBox" skin="ImageBox" position="0 0 16 16" align="Stretch" name="Image">
                 <Property key="NeedMouse" value="false"/>
+            </Widget>
+        </Widget>
+    </Resource>
+
+    <Resource type="ResourceLayout" name="TabControl" version="3.2.0">
+        <Widget type="Widget" skin="" position="5 5 89 60" name="Root">
+            <UserString key="ButtonSkin" value="MW_Button"/>
+            <Widget type="Widget" skin="MW_Box" position="0 24 89 36" align="Left Top Stretch">
+                <Widget type="Widget" skin="" position="4 4 81 28" align="Left Top Stretch" name="TabItem"/>
+            </Widget>
+            <Widget type="Widget" skin="" position="0 0 89 23" align="HStretch Top" name="HeaderPlace">
+                <Widget type="Widget" skin="" position="52 0 37 23" name="Controls">
+                </Widget>
+            </Widget>
+        </Widget>
+    </Resource>
+
+    <Resource type="ResourceLayout" name="MW_StatNameValue" version="3.2.0">
+        <Widget type="Widget" skin="" position="0 0 200 18" name="Root">
+            <Property key="NeedMouse" value="true"/>
+            <Widget type="TextBox" skin="SandText" position = "0 0 160 18" align = "ALIGN_LEFT ALIGN_HSTRETCH" name = "StatName">
+                <Property key="NeedMouse" value="false"/>
+            </Widget>
+            <Widget type="TextBox" skin="SandTextRight" position = "160 0 40 18" align = "ALIGN_RIGHT ALIGN_TOP" name = "StatValue">
+                <Property key="NeedMouse" value="false"/>
+            </Widget>
+        </Widget>
+    </Resource>
+
+    <Resource type="ResourceLayout" name="MW_StatName" version="3.2.0">
+        <Widget type="Widget" skin="" position="0 0 200 18" name="Root">
+            <Property key="NeedMouse" value="true"/>
+            <Widget type="TextBox" skin="SandText" position="0 0 200 18" align="ALIGN_LEFT ALIGN_HSTRETCH" name="StatName">
+                <Property key="NeedMouse" value="false"/>
+            </Widget>
+        </Widget>
+    </Resource>
+
+    <Resource type="ResourceLayout" name="MW_StatNameButton" version="3.2.0">
+        <Widget type="Widget" skin="" position="0 0 200 18" name="Root">
+            <Widget type="Button" skin="SandTextButton" position = "0 0 200 18" align = "ALIGN_LEFT ALIGN_HSTRETCH" name = "StatNameButton">
+                <Property key="NeedMouse" value="true"/>
             </Widget>
         </Widget>
     </Resource>

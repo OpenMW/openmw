@@ -15,6 +15,13 @@ void MessageBoxManager::onFrame (float frameDuration)
     std::vector<MessageBoxManagerTimer>::iterator it;
     for(it = mTimers.begin(); it != mTimers.end();)
     {
+        // if this messagebox is already deleted, remove the timer and move on
+        if (std::find(mMessageBoxes.begin(), mMessageBoxes.end(), it->messageBox) == mMessageBoxes.end())
+        {
+            it = mTimers.erase(it);
+            continue;
+        }
+
         it->current += frameDuration;
         if(it->current >= it->max)
         {
@@ -51,7 +58,7 @@ void MessageBoxManager::onFrame (float frameDuration)
     if(mInterMessageBoxe != NULL && mInterMessageBoxe->mMarkedToDelete) {
         delete mInterMessageBoxe;
         mInterMessageBoxe = NULL;
-        mWindowManager->setNextMode(GM_Game);
+        mWindowManager->removeGuiMode(GM_InterMessageBox);
     }
 }
 
@@ -79,13 +86,12 @@ void MessageBoxManager::createMessageBox (const std::string& message)
 
 bool MessageBoxManager::createInteractiveMessageBox (const std::string& message, const std::vector<std::string>& buttons)
 {
+    /// \todo Don't write this kind of error message to cout. Either discard the old message box
+    /// silently or throw an exception.
     if(mInterMessageBoxe != NULL) {
         std::cout << "there is a MessageBox already" << std::endl;
         return false;
     }
-    std::cout << "interactive MessageBox: " << message << " - ";
-    std::copy (buttons.begin(), buttons.end(), std::ostream_iterator<std::string> (std::cout, ", "));
-    std::cout << std::endl;
 
     mInterMessageBoxe = new InteractiveMessageBox(*this, message, buttons);
 
@@ -154,7 +160,7 @@ MessageBox::MessageBox(MessageBoxManager& parMessageBoxManager, const std::strin
     getWidget(mMessageWidget, "message");
 
     mMessageWidget->setOverflowToTheLeft(true);
-    mMessageWidget->addText(cMessage);
+    mMessageWidget->setCaptionWithReplacing(cMessage);
 
     MyGUI::IntSize size;
     size.width = mFixedWidth;
@@ -259,11 +265,8 @@ InteractiveMessageBox::InteractiveMessageBox(MessageBoxManager& parMessageBoxMan
     if(buttonsWidth < fixedWidth)
     {
         // on one line
-        std::cout << "on one line" << std::endl;
-
         if(textSize.width + 2*textPadding < buttonsWidth)
         {
-            std::cout << "width = buttonsWidth" << std::endl;
             mainWidgetSize.width = buttonsWidth;
         }
         else
@@ -276,12 +279,8 @@ InteractiveMessageBox::InteractiveMessageBox(MessageBoxManager& parMessageBoxMan
         absCoord.left = (gameWindowSize.width - mainWidgetSize.width)/2;
         absCoord.top = (gameWindowSize.height - mainWidgetSize.height)/2;
 
-        std::cout << "width " << mainWidgetSize.width << " height " << mainWidgetSize.height << std::endl;
-        std::cout << "left " << absCoord.left << " top " << absCoord.top << std::endl;
-
         mMainWidget->setCoord(absCoord);
         mMainWidget->setSize(mainWidgetSize);
-
 
         MyGUI::IntCoord messageWidgetCoord;
         messageWidgetCoord.left = (mainWidgetSize.width - textSize.width)/2;
@@ -312,7 +311,6 @@ InteractiveMessageBox::InteractiveMessageBox(MessageBoxManager& parMessageBoxMan
     else
     {
         // among each other
-
         if(biggestButtonWidth > textSize.width) {
             mainWidgetSize.width = biggestButtonWidth + buttonTopPadding;
         }
@@ -321,8 +319,6 @@ InteractiveMessageBox::InteractiveMessageBox(MessageBoxManager& parMessageBoxMan
         }
         mainWidgetSize.height = textSize.height + 2*textPadding + textButtonPadding + buttonHeight * buttons.size() + buttonMainPadding;
 
-        std::cout << "biggestButtonWidth " << biggestButtonWidth << " textSize.width " << textSize.width << std::endl;
-        std::cout << "width " << mainWidgetSize.width << " height " << mainWidgetSize.height << std::endl;
         mMainWidget->setSize(mainWidgetSize);
 
         MyGUI::IntCoord absCoord;
@@ -377,7 +373,6 @@ void InteractiveMessageBox::mousePressed (MyGUI::Widget* pressed)
         }
         index++;
     }
-    std::cout << "Cant be possible :/" << std::endl;
 }
 
 int InteractiveMessageBox::readPressedButton ()

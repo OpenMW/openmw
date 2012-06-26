@@ -22,7 +22,8 @@ namespace Physic
         COL_NOTHING = 0, //<Collide with nothing
         COL_WORLD = BIT(0), //<Collide with world objects
         COL_ACTOR_INTERNAL = BIT(1), //<Collide internal capsule
-        COL_ACTOR_EXTERNAL = BIT(2) //<collide with external capsule
+        COL_ACTOR_EXTERNAL = BIT(2), //<collide with external capsule
+        COL_RAYCASTING = BIT(3)
     };
 
     PhysicActor::PhysicActor(std::string name)
@@ -221,6 +222,14 @@ namespace Physic
     PhysicEngine::~PhysicEngine()
     {
 
+        HeightFieldContainer::iterator hf_it = mHeightFieldMap.begin();
+        for (; hf_it != mHeightFieldMap.end(); ++hf_it)
+        {
+            dynamicsWorld->removeRigidBody(hf_it->second.mBody);
+            delete hf_it->second.mShape;
+            delete hf_it->second.mBody;
+        }
+
         RigidBodyContainer::iterator rb_it = RigidBodyMap.begin();
         for (; rb_it != RigidBodyMap.end(); ++rb_it)
         {
@@ -299,7 +308,13 @@ namespace Physic
         body->collide = true;
         body->getWorldTransform().setOrigin(btVector3( (x+0.5)*triSize*(sqrtVerts-1), (y+0.5)*triSize*(sqrtVerts-1), (maxh+minh)/2.f));
 
-        addRigidBody(body);
+        HeightField hf;
+        hf.mBody = body;
+        hf.mShape = hfShape;
+
+        mHeightFieldMap [name] = hf;
+
+        dynamicsWorld->addRigidBody(body,COL_WORLD,COL_WORLD|COL_ACTOR_INTERNAL|COL_ACTOR_EXTERNAL);
     }
 
     void PhysicEngine::removeHeightField(int x, int y)
@@ -308,8 +323,13 @@ namespace Physic
             + boost::lexical_cast<std::string>(x) + "_"
             + boost::lexical_cast<std::string>(y);
 
-        removeRigidBody(name);
-        deleteRigidBody(name);
+        HeightField hf = mHeightFieldMap [name];
+
+        dynamicsWorld->removeRigidBody(hf.mBody);
+        delete hf.mShape;
+        delete hf.mBody;
+
+        mHeightFieldMap.erase(name);
     }
 
     RigidBody* PhysicEngine::createRigidBody(std::string mesh,std::string name,float scale)
@@ -328,27 +348,31 @@ namespace Physic
         RigidBody* body = new RigidBody(CI,name);
         body->collide = shape->collide;
         return body;
+
     }
 
     void PhysicEngine::addRigidBody(RigidBody* body)
     {
-        if(body->collide)
+        if(body)
         {
-            dynamicsWorld->addRigidBody(body,COL_WORLD,COL_WORLD|COL_ACTOR_INTERNAL|COL_ACTOR_EXTERNAL);
-        }
-        else
-        {
-            dynamicsWorld->addRigidBody(body,COL_WORLD,COL_NOTHING);
-        }
-        body->setActivationState(DISABLE_DEACTIVATION);
-        RigidBody* oldBody = RigidBodyMap[body->mName];
-        if (oldBody != NULL)
-        {
-            dynamicsWorld->removeRigidBody(oldBody);
-            delete oldBody;
-        }
+            if(body->collide)
+            {
+                dynamicsWorld->addRigidBody(body,COL_WORLD,COL_WORLD|COL_ACTOR_INTERNAL|COL_ACTOR_EXTERNAL);
+            }
+            else
+            {
+                dynamicsWorld->addRigidBody(body,COL_RAYCASTING,COL_RAYCASTING|COL_WORLD);
+            }
+            body->setActivationState(DISABLE_DEACTIVATION);
+            RigidBody* oldBody = RigidBodyMap[body->mName];
+            if (oldBody != NULL)
+            {
+                dynamicsWorld->removeRigidBody(oldBody);
+                delete oldBody;
+            }
 
-        RigidBodyMap[body->mName] = body;
+            RigidBodyMap[body->mName] = body;
+        }
     }
 
     void PhysicEngine::removeRigidBody(std::string name)
@@ -460,11 +484,11 @@ namespace Physic
 
         float d1 = 10000.;
         btCollisionWorld::ClosestRayResultCallback resultCallback1(from, to);
-        resultCallback1.m_collisionFilterMask = COL_WORLD;
+        resultCallback1.m_collisionFilterMask = COL_WORLD|COL_RAYCASTING;
         dynamicsWorld->rayTest(from, to, resultCallback1);
         if (resultCallback1.hasHit())
         {
-            name = static_cast<RigidBody&>(*resultCallback1.m_collisionObject).mName;
+            name = static_cast<const RigidBody&>(*resultCallback1.m_collisionObject).mName;
             d1 = resultCallback1.m_closestHitFraction;
             d = d1;
         }
@@ -478,7 +502,7 @@ namespace Physic
             d2 = resultCallback1.m_closestHitFraction;
             if(d2<=d1)
             {
-                name = static_cast<PairCachingGhostObject&>(*resultCallback2.m_collisionObject).mName;
+                name = static_cast<const PairCachingGhostObject&>(*resultCallback2.m_collisionObject).mName;
                 d = d2;
             }
         }
@@ -489,27 +513,27 @@ namespace Physic
     std::vector< std::pair<float, std::string> > PhysicEngine::rayTest2(btVector3& from, btVector3& to)
     {
         MyRayResultCallback resultCallback1;
-        resultCallback1.m_collisionFilterMask = COL_WORLD;
+        resultCallback1.m_collisionFilterMask = COL_WORLD|COL_RAYCASTING;
         dynamicsWorld->rayTest(from, to, resultCallback1);
-        std::vector< std::pair<float, btCollisionObject*> > results = resultCallback1.results;
+        std::vector< std::pair<float, const btCollisionObject*> > results = resultCallback1.results;
 
         MyRayResultCallback resultCallback2;
         resultCallback2.m_collisionFilterMask = COL_ACTOR_INTERNAL|COL_ACTOR_EXTERNAL;
         dynamicsWorld->rayTest(from, to, resultCallback2);
-        std::vector< std::pair<float, btCollisionObject*> > actorResults = resultCallback2.results;
+        std::vector< std::pair<float, const btCollisionObject*> > actorResults = resultCallback2.results;
 
         std::vector< std::pair<float, std::string> > results2;
 
-        for (std::vector< std::pair<float, btCollisionObject*> >::iterator it=results.begin();
+        for (std::vector< std::pair<float, const btCollisionObject*> >::iterator it=results.begin();
             it != results.end(); ++it)
         {
-            results2.push_back( std::make_pair( (*it).first, static_cast<RigidBody&>(*(*it).second).mName ) );
+            results2.push_back( std::make_pair( (*it).first, static_cast<const RigidBody&>(*(*it).second).mName ) );
         }
 
-        for (std::vector< std::pair<float, btCollisionObject*> >::iterator it=actorResults.begin();
+        for (std::vector< std::pair<float, const btCollisionObject*> >::iterator it=actorResults.begin();
             it != actorResults.end(); ++it)
         {
-            results2.push_back( std::make_pair( (*it).first, static_cast<PairCachingGhostObject&>(*(*it).second).mName ) );
+            results2.push_back( std::make_pair( (*it).first, static_cast<const PairCachingGhostObject&>(*(*it).second).mName ) );
         }
 
         std::sort(results2.begin(), results2.end(), MyRayResultCallback::cmp);

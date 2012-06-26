@@ -21,7 +21,7 @@
 #include "class.hpp"
 #include "player.hpp"
 #include "weather.hpp"
-
+#include "manualref.hpp"
 #include "refdata.hpp"
 #include "globals.hpp"
 #include "cellfunctors.hpp"
@@ -357,12 +357,8 @@ namespace MWWorld
         {
             reference.getRefData().enable();
 
-
-                //render->enable (reference.getRefData().getHandle());
-            if(mWorldScene->getActiveCells().find (reference.getCell()) != mWorldScene->getActiveCells().end())
-                 Class::get (reference).enable (reference);
-
-
+            if(mWorldScene->getActiveCells().find (reference.getCell()) != mWorldScene->getActiveCells().end() && reference.getRefData().getCount())
+                mWorldScene->addObjectToScene (reference);
         }
     }
 
@@ -372,14 +368,8 @@ namespace MWWorld
         {
             reference.getRefData().disable();
 
-
-                //render->disable (reference.getRefData().getHandle());
-            if(mWorldScene->getActiveCells().find (reference.getCell())!=mWorldScene->getActiveCells().end()){
-                  Class::get (reference).disable (reference);
-                  MWBase::Environment::get().getSoundManager()->stopSound3D (reference);
-            }
-
-
+            if(mWorldScene->getActiveCells().find (reference.getCell())!=mWorldScene->getActiveCells().end() && reference.getRefData().getCount())
+                mWorldScene->removeObjectFromScene (reference);
         }
     }
 
@@ -471,6 +461,12 @@ namespace MWWorld
         mRendering->skySetDate (mGlobalVariables->getInt ("day"), month);
     }
 
+    TimeStamp World::getTimeStamp() const
+    {
+        return TimeStamp (mGlobalVariables->getFloat ("gamehour"),
+            mGlobalVariables->getInt ("dayspassed"));
+    }
+
     bool World::toggleSky()
     {
         if (mSky)
@@ -547,16 +543,12 @@ namespace MWWorld
         {
             ptr.getRefData().setCount (0);
 
-
-                if (mWorldScene->getActiveCells().find (ptr.getCell())!=mWorldScene->getActiveCells().end()){
-//                           Class::get (ptr).disable (ptr, mEnvironment); /// \todo this line needs to be removed
-                            MWBase::Environment::get().getSoundManager()->stopSound3D (ptr);
-
-                            mPhysics->removeObject (ptr.getRefData().getHandle());
-                            mRendering->removeObject(ptr);
-
-                            mLocalScripts.remove (ptr);
-                }
+            if (mWorldScene->getActiveCells().find (ptr.getCell())!=mWorldScene->getActiveCells().end() &&
+                ptr.getRefData().isEnabled())
+            {
+                mWorldScene->removeObjectFromScene (ptr);
+                mLocalScripts.remove (ptr);
+            }
         }
     }
 
@@ -768,7 +760,24 @@ namespace MWWorld
         // inform the GUI about focused object
         try
         {
-            MWBase::Environment::get().getWindowManager()->setFocusObject(getPtrViaHandle(mFacedHandle));
+            MWWorld::Ptr object = getPtrViaHandle(mFacedHandle);
+            MWBase::Environment::get().getWindowManager()->setFocusObject(object);
+
+            // retrieve object dimensions so we know where to place the floating label
+            Ogre::SceneNode* node = object.getRefData().getBaseNode();
+            Ogre::AxisAlignedBox bounds;
+            int i;
+            for (i=0; i<node->numAttachedObjects(); ++i)
+            {
+                Ogre::MovableObject* ob = node->getAttachedObject(i);
+                bounds.merge(ob->getWorldBoundingBox());
+            }
+            if (bounds.isFinite())
+            {
+                Vector4 screenCoords = mRendering->boundingBoxToScreen(bounds);
+                MWBase::Environment::get().getWindowManager()->setFocusObjectScreenCoords(
+                    screenCoords[0], screenCoords[1], screenCoords[2], screenCoords[3]);
+            }
         }
         catch (std::runtime_error&)
         {
@@ -809,7 +818,15 @@ namespace MWWorld
 
                 // send new query
                 // figure out which object we want to test against
-                std::vector < std::pair < float, std::string > > results = mPhysics->getFacedObjects();
+                std::vector < std::pair < float, std::string > > results;
+                if (MWBase::Environment::get().getWindowManager()->isGuiMode())
+                {
+                    float x, y;
+                    MWBase::Environment::get().getWindowManager()->getMousePosition(x, y);
+                    results = mPhysics->getFacedObjects(x, y);
+                }
+                else
+                    results = mPhysics->getFacedObjects();
 
                 // ignore the player and other things we're not interested in
                 std::vector < std::pair < float, std::string > >::iterator it = results.begin();
@@ -834,7 +851,15 @@ namespace MWWorld
                     mFaced1Name = results.front().second;
                     mNumFacing = 1;
 
-                    btVector3 p = mPhysics->getRayPoint(results.front().first);
+                    btVector3 p;
+                    if (MWBase::Environment::get().getWindowManager()->isGuiMode())
+                    {
+                        float x, y;
+                        MWBase::Environment::get().getWindowManager()->getMousePosition(x, y);
+                        p = mPhysics->getRayPoint(results.front().first, x, y);
+                    }
+                    else
+                        p = mPhysics->getRayPoint(results.front().first);
                     Ogre::Vector3 pos(p.x(), p.z(), -p.y());
                     Ogre::SceneNode* node = mFaced1.getRefData().getBaseNode();
 
@@ -851,7 +876,15 @@ namespace MWWorld
                     mFaced2 = getPtrViaHandle(results[1].second);
                     mNumFacing = 2;
 
-                    btVector3 p = mPhysics->getRayPoint(results[1].first);
+                    btVector3 p;
+                    if (MWBase::Environment::get().getWindowManager()->isGuiMode())
+                    {
+                        float x, y;
+                        MWBase::Environment::get().getWindowManager()->getMousePosition(x, y);
+                        p = mPhysics->getRayPoint(results[1].first, x, y);
+                    }
+                    else
+                        p = mPhysics->getRayPoint(results[1].first);
                     Ogre::Vector3 pos(p.x(), p.z(), -p.y());
                     Ogre::SceneNode* node1 = mFaced1.getRefData().getBaseNode();
                     Ogre::SceneNode* node2 = mFaced2.getRefData().getBaseNode();
@@ -948,4 +981,67 @@ namespace MWWorld
         mRendering->toggleWater();
     }
 
+    bool World::placeObject(MWWorld::Ptr object, float cursorX, float cursorY)
+    {
+        std::pair<bool, Ogre::Vector3> result = mPhysics->castRay(cursorX, cursorY);
+
+        if (!result.first)
+            return false;
+
+        MWWorld::Ptr::CellStore* cell;
+        if (isCellExterior())
+        {
+            int cellX, cellY;
+            positionToIndex(result.second[0], -result.second[2], cellX, cellY);
+            cell = mCells.getExterior(cellX, cellY);
+        }
+        else
+            cell = getPlayer().getPlayer().getCell();
+
+        ESM::Position& pos = object.getRefData().getPosition();
+        pos.pos[0] = result.second[0];
+        pos.pos[1] = -result.second[2];
+        pos.pos[2] = result.second[1];
+
+        mWorldScene->insertObject(object, cell);
+
+        /// \todo retrieve the bounds of the object and translate it accordingly
+
+        return true;
+    }
+
+    bool World::canPlaceObject(float cursorX, float cursorY)
+    {
+        std::pair<bool, Ogre::Vector3> result = mPhysics->castRay(cursorX, cursorY);
+
+        /// \todo also check if the wanted position is on a flat surface, and not e.g. against a vertical wall!
+
+        if (!result.first)
+            return false;
+        return true;
+    }
+
+    void World::dropObjectOnGround(MWWorld::Ptr object)
+    {
+        MWWorld::Ptr::CellStore* cell = getPlayer().getPlayer().getCell();
+
+        float* playerPos = getPlayer().getPlayer().getRefData().getPosition().pos;
+
+        ESM::Position& pos = object.getRefData().getPosition();
+        pos.pos[0] = playerPos[0];
+        pos.pos[1] = playerPos[1];
+        pos.pos[2] = playerPos[2];
+
+        mWorldScene->insertObject(object, cell);
+    }
+
+    void World::processChangedSettings(const Settings::CategorySettingVector& settings)
+    {
+        mRendering->processChangedSettings(settings);
+    }
+
+    void World::getTriangleBatchCount(unsigned int &triangles, unsigned int &batches)
+    {
+        mRendering->getTriangleBatchCount(triangles, batches);
+    }
 }

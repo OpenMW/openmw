@@ -67,6 +67,10 @@ namespace MWScript
             ///< Return locals for script \a name.
 
             GlobalScripts& getGlobalScripts();
+
+            int getLocalIndex (const std::string& scriptId, const std::string& variable, char type);
+            ///< Return index of the variable of the given name and type in the given script. Will
+            /// throw an exception, if there is no such script or variable or the type does not match.
     };
 };
 

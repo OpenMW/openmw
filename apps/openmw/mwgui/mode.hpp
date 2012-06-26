@@ -5,8 +5,9 @@ namespace MWGui
 {
   enum GuiMode
     {
-      GM_Game,          // Game mode, only HUD
+      GM_Settings,      // Settings window
       GM_Inventory,     // Inventory mode
+      GM_Container,
       GM_MainMenu,      // Main menu mode
 
       GM_Console,       // Console mode
@@ -14,6 +15,7 @@ namespace MWGui
 
       GM_Scroll,        // Read scroll
       GM_Book,          // Read book
+      GM_Alchemy,       // Make potions
 
       GM_Dialogue,      // NPC interaction
       GM_Barter,

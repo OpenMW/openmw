@@ -2,7 +2,10 @@
 #define MWGUI_DIALOGE_H
 
 #include "window_base.hpp"
+#include "referenceinterface.hpp"
 #include <boost/array.hpp>
+
+#include "../mwworld/ptr.hpp"
 
 namespace MWGui
 {
@@ -23,12 +26,10 @@ namespace MWGui
 {
     class DialogueHistory;
 
-    class DialogueWindow: public WindowBase
+    class DialogueWindow: public WindowBase, public ReferenceInterface
     {
     public:
         DialogueWindow(WindowManager& parWindowManager);
-
-        void open();
 
         // Events
         typedef MyGUI::delegates::CMultiDelegate0 EventHandle_Void;
@@ -38,7 +39,7 @@ namespace MWGui
         */
         EventHandle_Void eventBye;
 
-        void startDialogue(std::string npcName);
+        void startDialogue(MWWorld::Ptr actor, std::string npcName);
         void stopDialogue();
         void setKeywords(std::list<std::string> keyWord);
         void removeKeyword(std::string keyWord);
@@ -47,12 +48,18 @@ namespace MWGui
         void askQuestion(std::string question);
         void goodbye();
 
+        // various service button visibilities, depending if the npc/creature talked to has these services
+        // make sure to call these before setKeywords()
+        void setShowTrade(bool show) { mShowTrade = show; }
+
     protected:
         void onSelectTopic(std::string topic);
         void onByeClicked(MyGUI::Widget* _sender);
         void onHistoryClicked(MyGUI::Widget* _sender);
         void onMouseWheel(MyGUI::Widget* _sender, int _rel);
         void onWindowResize(MyGUI::Window* _sender);
+
+        virtual void onReferenceUnavailable();
 
     private:
         void updateOptions();
@@ -61,13 +68,15 @@ namespace MWGui
         */
         std::string parseText(std::string text);
 
+        // various service button visibilities, depending if the npc/creature talked to has these services
+        bool mShowTrade;
+
         bool mEnabled;
 
         DialogueHistory*     history;
         Widgets::MWList*      topicsList;
         MyGUI::ProgressPtr pDispositionBar;
         MyGUI::EditPtr pDispositionText;
-        std::map<std::string,std::string> pTopicsText;// this map links keyword and "real" text.
     };
 }
 #endif

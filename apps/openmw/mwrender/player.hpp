@@ -23,6 +23,9 @@ namespace MWRender
 
                 Ogre::Camera *getCamera() { return mCamera; }
 
+                /// Set where the player is looking at. Uses Morrowind (euler) angles
+                void setRot(float x, float y, float z);
+
                 std::string getHandle() const { return mNode->getName(); }
                 Ogre::SceneNode* getNode() {return mNode;}
     };

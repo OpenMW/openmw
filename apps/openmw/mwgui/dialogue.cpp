@@ -1,11 +1,4 @@
 #include "dialogue.hpp"
-#include "dialogue_history.hpp"
-#include "window_manager.hpp"
-#include "widgets.hpp"
-#include "list.hpp"
-#include "components/esm_store/store.hpp"
-#include "../mwbase/environment.hpp"
-#include "../mwdialogue/dialoguemanager.hpp"
 
 #include <assert.h>
 #include <iostream>
@@ -13,6 +6,18 @@
 
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
+
+#include <components/esm_store/store.hpp>
+
+#include "../mwbase/environment.hpp"
+#include "../mwdialogue/dialoguemanager.hpp"
+
+#include "dialogue_history.hpp"
+#include "window_manager.hpp"
+#include "widgets.hpp"
+#include "list.hpp"
+#include "tradewindow.hpp"
+#include "inventorywindow.hpp"
 
 using namespace MWGui;
 using namespace Widgets;
@@ -40,6 +45,7 @@ std::string::size_type find_str_ci(const std::string& str, const std::string& su
 DialogueWindow::DialogueWindow(WindowManager& parWindowManager)
     : WindowBase("openmw_dialogue_window_layout.xml", parWindowManager)
     , mEnabled(true)
+    , mShowTrade(false)
 {
     // Centre dialog
     center();
@@ -58,14 +64,11 @@ DialogueWindow::DialogueWindow(WindowManager& parWindowManager)
 
     //Topics list
     getWidget(topicsList, "TopicsList");
-    //topicsList->eventListSelectAccept      += MyGUI::newDelegate(this, &DialogueWindow::onSelectTopic);
     topicsList->eventItemSelected += MyGUI::newDelegate(this, &DialogueWindow::onSelectTopic);
-    //topicsList->eventListChangePosition    += MyGUI::newDelegate(this, &DialogueWindow::onSelectTopic);
 
     MyGUI::ButtonPtr byeButton;
     getWidget(byeButton, "ByeButton");
     byeButton->eventMouseButtonClick += MyGUI::newDelegate(this, &DialogueWindow::onByeClicked);
-    byeButton->setCaption(MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sGoodbye")->str);
 
     getWidget(pDispositionBar, "Disposition");
     getWidget(pDispositionText,"DispositionText");
@@ -109,15 +112,6 @@ void DialogueWindow::onMouseWheel(MyGUI::Widget* _sender, int _rel)
         history->setVScrollPosition(history->getVScrollPosition() - _rel*0.3);
 }
 
-void DialogueWindow::open()
-{
-    topicsList->clear();
-    pTopicsText.clear();
-    history->eraseText(0,history->getTextLength());
-    updateOptions();
-    setVisible(true);
-}
-
 void DialogueWindow::onByeClicked(MyGUI::Widget* _sender)
 {
     MWBase::Environment::get().getDialogueManager()->goodbyeSelected();
@@ -127,24 +121,46 @@ void DialogueWindow::onSelectTopic(std::string topic)
 {
     if (!mEnabled) return;
 
-    MWBase::Environment::get().getDialogueManager()->keywordSelected(lower_string(topic));
+    if (topic == MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sBarter")->str)
+    {
+        /// \todo check if the player is allowed to trade with this actor (e.g. faction rank high enough)?
+        mWindowManager.pushGuiMode(GM_Barter);
+        mWindowManager.getTradeWindow()->startTrade(mPtr);
+    }
+
+    else
+        MWBase::Environment::get().getDialogueManager()->keywordSelected(lower_string(topic));
 }
 
-void DialogueWindow::startDialogue(std::string npcName)
+void DialogueWindow::startDialogue(MWWorld::Ptr actor, std::string npcName)
 {
     mEnabled = true;
+    mPtr = actor;
     topicsList->setEnabled(true);
-    static_cast<MyGUI::Window*>(mMainWidget)->setCaption(npcName);
-    adjustWindowCaption();
+    setTitle(npcName);
+
+    topicsList->clear();
+    history->eraseText(0,history->getTextLength());
+    updateOptions();
 }
 
 void DialogueWindow::setKeywords(std::list<std::string> keyWords)
 {
     topicsList->clear();
-    for(std::list<std::string>::iterator it = keyWords.begin(); it != keyWords.end(); it++)
+
+    bool anyService = mShowTrade;
+
+    if (mShowTrade)
+        topicsList->addItem(MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sBarter")->str);
+
+    if (anyService)
+        topicsList->addSeparator();
+
+    for(std::list<std::string>::iterator it = keyWords.begin(); it != keyWords.end(); ++it)
     {
         topicsList->addItem(*it);
     }
+    topicsList->adjustSize();
 }
 
 void DialogueWindow::removeKeyword(std::string keyWord)
@@ -152,8 +168,8 @@ void DialogueWindow::removeKeyword(std::string keyWord)
     if(topicsList->hasItem(keyWord))
     {
         topicsList->removeItem(keyWord);
-        pTopicsText.erase(keyWord);
     }
+    topicsList->adjustSize();
 }
 
 void addColorInString(std::string& str, const std::string& keyword,std::string color1, std::string color2)
@@ -189,10 +205,14 @@ void addColorInString(std::string& str, const std::string& keyword,std::string c
 
 std::string DialogueWindow::parseText(std::string text)
 {
+    bool separatorReached = false; // only parse topics that are below the separator (this prevents actions like "Barter" that are not topics from getting blue-colored)
     for(unsigned int i = 0;i<topicsList->getItemCount();i++)
     {
         std::string keyWord = topicsList->getItemNameAt(i);
-        addColorInString(text,keyWord,"#686EBA","#B29154");
+        if (separatorReached && keyWord != "")
+            addColorInString(text,keyWord,"#686EBA","#B29154");
+        else
+            separatorReached = true;
     }
     return text;
 }
@@ -226,7 +246,6 @@ void DialogueWindow::updateOptions()
 {
     //Clear the list of topics
     topicsList->clear();
-    pTopicsText.clear();
     history->eraseText(0,history->getTextLength());
 
     pDispositionBar->setProgressRange(100);
@@ -240,4 +259,9 @@ void DialogueWindow::goodbye()
     history->addDialogText("\n#572D21" + MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sGoodbye")->str);
     topicsList->setEnabled(false);
     mEnabled = false;
+}
+
+void DialogueWindow::onReferenceUnavailable()
+{
+    mWindowManager.removeGuiMode(GM_Dialogue);
 }

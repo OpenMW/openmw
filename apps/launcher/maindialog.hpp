@@ -1,9 +1,10 @@
 #ifndef MAINDIALOG_H
 #define MAINDIALOG_H
 
-#include <QDialog>
+#include <QMainWindow>
 
 #include <components/files/configurationmanager.hpp>
+#include <components/settings/settings.hpp>
 
 class QListWidget;
 class QListWidgetItem;
@@ -16,7 +17,7 @@ class PlayPage;
 class GraphicsPage;
 class DataFilesPage;
 
-class MainDialog : public QDialog
+class MainDialog : public QMainWindow
 {
     Q_OBJECT
 
@@ -27,6 +28,7 @@ public slots:
     void changePage(QListWidgetItem *current, QListWidgetItem *previous);
     void play();
     void profileChanged(int index);
+    bool setup();
 
 private:
     void createIcons();
@@ -41,6 +43,7 @@ private:
     DataFilesPage *mDataFilesPage;
 
     Files::ConfigurationManager mCfgMgr;
+    Settings::Manager mSettings;
 };
 
 #endif

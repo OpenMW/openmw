@@ -8,10 +8,14 @@
 
 #include "../mwworld/class.hpp"
 
+#include <OgreWindowEventUtilities.h>
+
 #include <utility>
 #include <openengine/ogre/renderer.hpp>
 #include <openengine/ogre/fader.hpp>
 #include <openengine/bullet/physic.hpp>
+
+#include <components/settings/settings.hpp>
 
 #include <vector>
 #include <string>
@@ -47,8 +51,9 @@ namespace MWRender
     class ShaderHelper;
     class LocalMap;
     class Water;
+    class Compositors;
 
-class RenderingManager: private RenderingInterface {
+class RenderingManager: private RenderingInterface, public Ogre::WindowEventListener {
 
   private:
 
@@ -67,6 +72,7 @@ class RenderingManager: private RenderingInterface {
                                             /// to internal details of the rendering system anymore
 
     SkyManager* getSkyManager();
+    Compositors* getCompositors();
 
     void toggleLight();
     bool toggleRenderMode(int mode);
@@ -112,13 +118,15 @@ class RenderingManager: private RenderingInterface {
     void disableLights();
     void enableLights();
 
-    bool occlusionQuerySupported() { return mOcclusionQuery->supported(); };
-    OcclusionQuery* getOcclusionQuery() { return mOcclusionQuery; };
+    bool occlusionQuerySupported() { return mOcclusionQuery->supported(); }
+    OcclusionQuery* getOcclusionQuery() { return mOcclusionQuery; }
 
     Shadows* getShadows();
 
     void switchToInterior();
     void switchToExterior();
+
+    void getTriangleBatchCount(unsigned int &triangles, unsigned int &batches);
 
     void setGlare(bool glare);
     void skyEnable ();
@@ -151,9 +159,27 @@ class RenderingManager: private RenderingInterface {
     ///< Skip the animation for the given MW-reference for one frame. Calls to this function for
     /// references that are currently not in the rendered scene should be ignored.
 
+    Ogre::Vector4 boundingBoxToScreen(Ogre::AxisAlignedBox bounds);
+    ///< transform the specified bounding box (in world coordinates) into screen coordinates.
+    /// @return packed vector4 (min_x, min_y, max_x, max_y)
+
+    void processChangedSettings(const Settings::CategorySettingVector& settings);
+
+    Ogre::Viewport* getViewport() { return mRendering.getViewport(); }
+
+    static bool waterShaderSupported();
+
+  protected:
+	virtual void windowResized(Ogre::RenderWindow* rw);
+    virtual void windowClosed(Ogre::RenderWindow* rw);
+
   private:
 
     void setAmbientMode();
+
+    void setMenuTransparency(float val);
+
+    void applyCompositors();
 
     bool mSunEnabled;
 
@@ -192,6 +218,8 @@ class RenderingManager: private RenderingInterface {
     MWRender::Shadows* mShadows;
 
     MWRender::ShaderHelper* mShaderHelper;
+
+    MWRender::Compositors* mCompositors;
 };
 
 }

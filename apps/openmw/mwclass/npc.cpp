@@ -3,6 +3,8 @@
 
 #include <memory>
 
+#include <boost/algorithm/string.hpp>
+
 #include <OgreSceneNode.h>
 
 #include <components/esm/loadnpc.hpp>
@@ -56,22 +58,24 @@ namespace MWClass
             // NPC stats
             if (!ref->base->faction.empty())
             {
+                std::string faction = ref->base->faction;
+                boost::algorithm::to_lower(faction);
                 if(ref->base->npdt52.gold != -10)
                 {
-                    data->mNpcStats.mFactionRank[ref->base->faction] = (int)ref->base->npdt52.rank;
+                    data->mNpcStats.mFactionRank[faction] = (int)ref->base->npdt52.rank;
                 }
                 else
                 {
-                    data->mNpcStats.mFactionRank[ref->base->faction] = (int)ref->base->npdt12.rank;
+                    data->mNpcStats.mFactionRank[faction] = (int)ref->base->npdt12.rank;
                 }
             }
 
+            // creature stats
             if(ref->base->npdt52.gold != -10)
             {
                 for (int i=0; i<27; ++i)
                     data->mNpcStats.mSkill[i].setBase (ref->base->npdt52.skills[i]);
 
-                // creature stats
                 data->mCreatureStats.mAttributes[0].set (ref->base->npdt52.strength);
                 data->mCreatureStats.mAttributes[1].set (ref->base->npdt52.intelligence);
                 data->mCreatureStats.mAttributes[2].set (ref->base->npdt52.willpower);
@@ -88,10 +92,13 @@ namespace MWClass
             }
             else
             {
-                //TODO: do something with npdt12 maybe:p
+                /// \todo do something with npdt12 maybe:p
             }
 
-            // \todo add initial container content
+            data->mCreatureStats.mHello = ref->base->AI.hello;
+            data->mCreatureStats.mFight = ref->base->AI.fight;
+            data->mCreatureStats.mFlee = ref->base->AI.flee;
+            data->mCreatureStats.mAlarm = ref->base->AI.alarm;
 
             // store
             ptr.getRefData().setCustomData (data.release());
@@ -108,42 +115,25 @@ namespace MWClass
 
     void Npc::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const
     {
-
-
         renderingInterface.getActors().insertNPC(ptr, getInventoryStore(ptr));
-
     }
 
     void Npc::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics) const
     {
-
-
         ESMS::LiveCellRef<ESM::NPC, MWWorld::RefData> *ref =
             ptr.get<ESM::NPC>();
 
-
         assert (ref->base != NULL);
-		 std::string headID = ref->base->head;
-		 std::string bodyRaceID = headID.substr(0, headID.find_last_of("head_") - 4);
-		 bool beast = bodyRaceID == "b_n_khajiit_m_" || bodyRaceID == "b_n_khajiit_f_" || bodyRaceID == "b_n_argonian_m_" || bodyRaceID == "b_n_argonian_f_";
-
+        std::string headID = ref->base->head;
+        std::string bodyRaceID = headID.substr(0, headID.find_last_of("head_") - 4);
+        bool beast = bodyRaceID == "b_n_khajiit_m_" || bodyRaceID == "b_n_khajiit_f_" || bodyRaceID == "b_n_argonian_m_" || bodyRaceID == "b_n_argonian_f_";
 
         std::string smodel = "meshes\\base_anim.nif";
-		if(beast)
-			smodel = "meshes\\base_animkna.nif";
-		physics.insertActorPhysics(ptr, smodel);
+        if(beast)
+            smodel = "meshes\\base_animkna.nif";
+        physics.insertActorPhysics(ptr, smodel);
 
-
-    }
-
-    void Npc::enable (const MWWorld::Ptr& ptr) const
-    {
         MWBase::Environment::get().getMechanicsManager()->addActor (ptr);
-    }
-
-    void Npc::disable (const MWWorld::Ptr& ptr) const
-    {
-        MWBase::Environment::get().getMechanicsManager()->removeActor (ptr);
     }
 
     std::string Npc::getName (const MWWorld::Ptr& ptr) const
@@ -324,5 +314,27 @@ namespace MWClass
         info.text = text;
 
         return info;
+    }
+
+    float Npc::getCapacity (const MWWorld::Ptr& ptr) const
+    {
+        const MWMechanics::CreatureStats& stats = getCreatureStats (ptr);
+        return stats.mAttributes[0].getModified()*5;
+    }
+
+    float Npc::getEncumbrance (const MWWorld::Ptr& ptr) const
+    {
+        float weight = getContainerStore (ptr).getWeight();
+
+        const MWMechanics::CreatureStats& stats = getCreatureStats (ptr);
+
+        weight -= stats.mMagicEffects.get (MWMechanics::EffectKey (8)).mMagnitude; // feather
+
+        weight += stats.mMagicEffects.get (MWMechanics::EffectKey (7)).mMagnitude; // burden
+
+        if (weight<0)
+            weight = 0;
+
+        return weight;
     }
 }

@@ -360,6 +360,8 @@ namespace Compiler
             special = S_open;
         else if (c==')')
             special = S_close;
+        else if (c=='.')
+            special = S_member;
         else if (c=='=')
         {
             if (get (c))
@@ -368,8 +370,10 @@ namespace Compiler
                     special = S_cmpEQ;
                 else
                 {
+                    special = S_cmpEQ;
                     putback (c);
-                    return false;
+//                    return false;
+// Allow = as synonym for ==. \todo optionally disable for post-1.0 scripting improvements.
                 }
             }
             else

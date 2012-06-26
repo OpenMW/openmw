@@ -40,6 +40,11 @@ namespace MWWorld
         mWorld.moveObject (getPlayer(), x, y, z);
     }
 
+    void Player::setRot(float x, float y, float z)
+    {
+        mRenderer->setRot(x, y, z);
+    }
+
     void Player::setClass (const ESM::Class& class_)
     {
         ESM::Class *new_class = new ESM::Class (class_);

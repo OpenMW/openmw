@@ -22,30 +22,30 @@ namespace MWRender
     TerrainManager::TerrainManager(Ogre::SceneManager* mgr, RenderingManager* rend) :
          mTerrainGroup(TerrainGroup(mgr, Terrain::ALIGN_X_Z, mLandSize, mWorldSize)), mRendering(rend)
     {
-
+        mTerrainGlobals = OGRE_NEW TerrainGlobalOptions();
         TerrainMaterialGeneratorPtr matGen;
         TerrainMaterialGeneratorB* matGenP = new TerrainMaterialGeneratorB();
         matGen.bind(matGenP);
-        mTerrainGlobals.setDefaultMaterialGenerator(matGen);
+        mTerrainGlobals->setDefaultMaterialGenerator(matGen);
 
         TerrainMaterialGenerator::Profile* const activeProfile =
-            mTerrainGlobals.getDefaultMaterialGenerator()
+            mTerrainGlobals->getDefaultMaterialGenerator()
                            ->getActiveProfile();
         mActiveProfile = static_cast<TerrainMaterialGeneratorB::SM2Profile*>(activeProfile);
 
         //The pixel error should be as high as possible without it being noticed
         //as it governs how fast mesh quality decreases.
-        mTerrainGlobals.setMaxPixelError(8);
+        mTerrainGlobals->setMaxPixelError(8);
 
-        mTerrainGlobals.setLayerBlendMapSize(32);
-        mTerrainGlobals.setDefaultGlobalColourMapSize(65);
+        mTerrainGlobals->setLayerBlendMapSize(32);
+        mTerrainGlobals->setDefaultGlobalColourMapSize(65);
 
         //10 (default) didn't seem to be quite enough
-        mTerrainGlobals.setSkirtSize(128);
+        mTerrainGlobals->setSkirtSize(128);
 
         //due to the sudden flick between composite and non composite textures,
         //this seemed the distance where it wasn't too noticeable
-        mTerrainGlobals.setCompositeMapDistance(mWorldSize*2);
+        mTerrainGlobals->setCompositeMapDistance(mWorldSize*2);
 
         mActiveProfile->setLightmapEnabled(false);
         mActiveProfile->setLayerSpecularMappingEnabled(false);
@@ -86,20 +86,21 @@ namespace MWRender
 
     TerrainManager::~TerrainManager()
     {
+        OGRE_DELETE mTerrainGlobals;
     }
 
     //----------------------------------------------------------------------------------------------
 
     void TerrainManager::setDiffuse(const ColourValue& diffuse)
     {
-        mTerrainGlobals.setCompositeMapDiffuse(diffuse);
+        mTerrainGlobals->setCompositeMapDiffuse(diffuse);
     }
 
     //----------------------------------------------------------------------------------------------
 
     void TerrainManager::setAmbient(const ColourValue& ambient)
     {
-        mTerrainGlobals.setCompositeMapAmbient(ambient);
+        mTerrainGlobals->setCompositeMapAmbient(ambient);
     }
 
     //----------------------------------------------------------------------------------------------
@@ -110,12 +111,12 @@ namespace MWRender
         const int cellY = store->cell->getGridY();
 
         ESM::Land* land = MWBase::Environment::get().getWorld()->getStore().lands.search(cellX, cellY);
-        if ( land != NULL )
+        if (land == NULL) // no land data means we're not going to create any terrain.
+            return;
+
+        if (!land->dataLoaded)
         {
-            if (!land->dataLoaded)
-            {
-                land->loadData();
-            }
+            land->loadData();
         }
 
         //split the cell terrain into four segments
@@ -138,25 +139,18 @@ namespace MWRender
                                                       mLandSize*mLandSize,
                                                       MEMCATEGORY_GEOMETRY);
 
-                if ( land != NULL )
+                //copy the height data row by row
+                for ( int terrainCopyY = 0; terrainCopyY < mLandSize; terrainCopyY++ )
                 {
-                    //copy the height data row by row
-                    for ( int terrainCopyY = 0; terrainCopyY < mLandSize; terrainCopyY++ )
-                    {
-                                               //the offset of the current segment
-                        const size_t yOffset = y * (mLandSize-1) * ESM::Land::LAND_SIZE +
-                                               //offset of the row
-                                               terrainCopyY * ESM::Land::LAND_SIZE;
-                        const size_t xOffset = x * (mLandSize-1);
+                                           //the offset of the current segment
+                    const size_t yOffset = y * (mLandSize-1) * ESM::Land::LAND_SIZE +
+                                           //offset of the row
+                                           terrainCopyY * ESM::Land::LAND_SIZE;
+                    const size_t xOffset = x * (mLandSize-1);
 
-                        memcpy(&terrainData.inputFloat[terrainCopyY*mLandSize],
-                               &land->landData->heights[yOffset + xOffset],
-                               mLandSize*sizeof(float));
-                    }
-                }
-                else
-                {
-                    memset(terrainData.inputFloat, 0, mLandSize*mLandSize*sizeof(float));
+                    memcpy(&terrainData.inputFloat[terrainCopyY*mLandSize],
+                           &land->landData->heights[yOffset + xOffset],
+                           mLandSize*sizeof(float));
                 }
 
                 std::map<uint16_t, int> indexes;
@@ -179,7 +173,7 @@ namespace MWRender
                     terrain->setVisibilityFlags(RV_Terrain);
                     terrain->setRenderQueueGroup(RQG_Main);
 
-                    if ( land && land->landData->usingColours )
+                    if ( land->landData->usingColours )
                     {
                         // disable or enable global colour map (depends on available vertex colours)
                         mActiveProfile->setGlobalColourMapEnabled(true);
@@ -196,10 +190,6 @@ namespace MWRender
                         //mat = terrain->_getCompositeMapMaterial();
                         //mat->getTechnique(0)->getPass(0)->getTextureUnitState(1)->setTextureName( vertex->getName() );
                     }
-                    else
-                    {
-                        mActiveProfile->setGlobalColourMapEnabled(false);
-                    }
                 }
             }
         }
@@ -215,8 +205,10 @@ namespace MWRender
         {
             for ( int y = 0; y < 2; y++ )
             {
-                mTerrainGroup.unloadTerrain(store->cell->getGridX() * 2 + x,
-                                            store->cell->getGridY() * 2 + y);
+                int terrainX = store->cell->getGridX() * 2 + x;
+                int terrainY = store->cell->getGridY() * 2 + y;
+                if (mTerrainGroup.getTerrain(terrainX, terrainY) != NULL)
+                    mTerrainGroup.unloadTerrain(terrainX, terrainY);
             }
         }
     }

@@ -34,6 +34,7 @@ public:
     ComboBox *mProfilesComboBox;
 
     void writeConfig(QString profile = QString());
+    bool setupDataFiles();
 
 public slots:
     void masterSelectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
@@ -92,7 +93,6 @@ private:
     void removePlugins(const QModelIndex &index);
     void uncheckPlugins();
     void createActions();
-    void setupDataFiles();
     void setupConfig();
     void readConfig();
     void scrollToSelection();

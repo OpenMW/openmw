@@ -5,6 +5,7 @@
 
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/mechanicsmanager.hpp"
+#include "../mwmechanics/magiceffects.hpp"
 
 #include "../mwbase/environment.hpp"
 
@@ -56,7 +57,10 @@ namespace MWClass
 
             data->mCreatureStats.mLevel = ref->base->data.level;
 
-            // \todo add initial container content
+            data->mCreatureStats.mHello = ref->base->AI.hello;
+            data->mCreatureStats.mFight = ref->base->AI.fight;
+            data->mCreatureStats.mFlee = ref->base->AI.flee;
+            data->mCreatureStats.mAlarm = ref->base->AI.alarm;
 
             // store
             ptr.getRefData().setCustomData (data.release());
@@ -82,22 +86,13 @@ namespace MWClass
         ESMS::LiveCellRef<ESM::Creature, MWWorld::RefData> *ref =
             ptr.get<ESM::Creature>();
 
-
         const std::string &model = ref->base->model;
         assert (ref->base != NULL);
         if(!model.empty()){
             physics.insertActorPhysics(ptr, "meshes\\" + model);
         }
-    }
 
-    void Creature::enable (const MWWorld::Ptr& ptr) const
-    {
         MWBase::Environment::get().getMechanicsManager()->addActor (ptr);
-    }
-
-    void Creature::disable (const MWWorld::Ptr& ptr) const
-    {
-        MWBase::Environment::get().getMechanicsManager()->removeActor (ptr);
     }
 
     std::string Creature::getName (const MWWorld::Ptr& ptr) const
@@ -165,5 +160,27 @@ namespace MWClass
         info.text = text;
 
         return info;
+    }
+
+    float Creature::getCapacity (const MWWorld::Ptr& ptr) const
+    {
+        const MWMechanics::CreatureStats& stats = getCreatureStats (ptr);
+        return stats.mAttributes[0].getModified()*5;
+    }
+
+    float Creature::getEncumbrance (const MWWorld::Ptr& ptr) const
+    {
+        float weight = getContainerStore (ptr).getWeight();
+
+        const MWMechanics::CreatureStats& stats = getCreatureStats (ptr);
+
+        weight -= stats.mMagicEffects.get (MWMechanics::EffectKey (8)).mMagnitude; // feather
+
+        weight += stats.mMagicEffects.get (MWMechanics::EffectKey (7)).mMagnitude; // burden
+
+        if (weight<0)
+            weight = 0;
+
+        return weight;
     }
 }

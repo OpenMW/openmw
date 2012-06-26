@@ -66,6 +66,8 @@ void Manager::saveUser(const std::string& file)
         }
         fout << it->first.second << " = " << it->second << '\n';
     }
+
+    fout.close();
 }
 
 const std::string Manager::getString (const std::string& setting, const std::string& category)
@@ -131,7 +133,11 @@ void Manager::setString (const std::string& setting, const std::string& category
             }
         }
         else
+        {
+            if (mDefaultFile.getSetting(setting, category) != value)
+                mChangedSettings.push_back(std::make_pair(category, setting));
             mNewSettings[s] = value;
+        }
     }
 }
 

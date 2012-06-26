@@ -1,13 +1,14 @@
 #include "bookwindow.hpp"
 
-#include "formatting.hpp"
+#include <boost/lexical_cast.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwinput/inputmanager.hpp"
 #include "../mwsound/soundmanager.hpp"
 #include "../mwworld/actiontake.hpp"
 
-#include <boost/lexical_cast.hpp>
+#include "formatting.hpp"
+#include "window_manager.hpp"
 
 using namespace MWGui;
 
@@ -52,7 +53,7 @@ void BookWindow::open (MWWorld::Ptr book)
     clearPages();
     mCurrentPage = 0;
 
-    MWBase::Environment::get().getSoundManager()->playSound3D (book, "book open", 1.0, 1.0);
+    MWBase::Environment::get().getSoundManager()->playSound ("book open", 1.0, 1.0);
 
     ESMS::LiveCellRef<ESM::Book, MWWorld::RefData> *ref =
         mBook.get<ESM::Book>();
@@ -77,23 +78,31 @@ void BookWindow::open (MWWorld::Ptr book)
     }
 
     updatePages();
+
+    setTakeButtonShow(true);
+}
+
+void BookWindow::setTakeButtonShow(bool show)
+{
+    mTakeButton->setVisible(show);
 }
 
 void BookWindow::onCloseButtonClicked (MyGUI::Widget* _sender)
 {
-    MWBase::Environment::get().getSoundManager()->playSound3D (mBook, "book close", 1.0, 1.0);
+    // no 3d sounds because the object could be in a container.
+    MWBase::Environment::get().getSoundManager()->playSound ("book close", 1.0, 1.0);
 
-    MWBase::Environment::get().getInputManager()->setGuiMode(MWGui::GM_Game);
+    mWindowManager.removeGuiMode(GM_Book);
 }
 
 void BookWindow::onTakeButtonClicked (MyGUI::Widget* _sender)
 {
-    MWBase::Environment::get().getSoundManager()->playSound3D (mBook, "Item Book Up", 1.0, 1.0, MWSound::Play_NoTrack);
+    MWBase::Environment::get().getSoundManager()->playSound ("Item Book Up", 1.0, 1.0, MWSound::Play_NoTrack);
 
     MWWorld::ActionTake take(mBook);
     take.execute();
 
-    MWBase::Environment::get().getInputManager()->setGuiMode (GM_Game);
+    mWindowManager.removeGuiMode(GM_Book);
 }
 
 void BookWindow::onNextPageButtonClicked (MyGUI::Widget* _sender)

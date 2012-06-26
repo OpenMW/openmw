@@ -90,6 +90,31 @@ material Water
             }
         }
     }
+
+    technique
+    {
+        scheme Fallback
+        pass
+        {
+            cull_hardware none
+            scene_blend alpha_blend
+            depth_write off
+            diffuse 0 0 0 1
+            emissive 0.6 0.7 1.0
+            ambient 0 0 0
+            texture_unit
+            {
+                // texture names set via code
+                scale 0.1 0.1
+                alpha_op_ex source1 src_manual src_current 0.7
+            }
+        }
+    }
+
+}
+
+material Water_Fallback
+{
     technique
     {
         scheme Fallback
@@ -126,7 +151,6 @@ material Water/CompositorNoMRT
 
             fragment_program_ref UnderwaterEffectFP_NoMRT
             {
-                param_named tintColour float4 0 0.35 0.35 1
             }
 
             texture_unit RT
@@ -169,7 +193,6 @@ material Water/Compositor
 
             fragment_program_ref UnderwaterEffectFP
             {
-                param_named tintColour float4 0 0.35 0.35 1
                 param_named_auto far far_clip_distance
             }
 

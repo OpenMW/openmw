@@ -100,6 +100,14 @@ namespace MWClass
         return std::string("Item Potion Down");
     }
 
+    std::string Potion::getInventoryIcon (const MWWorld::Ptr& ptr) const
+    {
+          ESMS::LiveCellRef<ESM::Potion, MWWorld::RefData> *ref =
+            ptr.get<ESM::Potion>();
+
+        return ref->base->icon;
+    }
+
     bool Potion::hasToolTip (const MWWorld::Ptr& ptr) const
     {
         ESMS::LiveCellRef<ESM::Potion, MWWorld::RefData> *ref =
@@ -114,7 +122,7 @@ namespace MWClass
             ptr.get<ESM::Potion>();
 
         MWGui::ToolTipInfo info;
-        info.caption = ref->base->name;
+        info.caption = ref->base->name + MWGui::ToolTips::getCountString(ptr.getRefData().getCount());
         info.icon = ref->base->icon;
 
         const ESMS::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
@@ -124,7 +132,7 @@ namespace MWClass
         text += "\n" + store.gameSettings.search("sWeight")->str + ": " + MWGui::ToolTips::toString(ref->base->data.weight);
         text += MWGui::ToolTips::getValueString(ref->base->data.value, store.gameSettings.search("sValue")->str);
 
-        info.effects = &ref->base->effects;
+        info.effects = MWGui::Widgets::MWEffectList::effectListFromESM(&ref->base->effects);
 
         if (MWBase::Environment::get().getWindowManager()->getFullHelp()) {
             text += MWGui::ToolTips::getMiscString(ref->ref.owner, "Owner");

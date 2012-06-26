@@ -18,6 +18,19 @@
 #include "interpretercontext.hpp"
 #include "ref.hpp"
 
+namespace
+{
+    std::string toLower (const std::string& name)
+    {
+        std::string lowerCase;
+
+        std::transform (name.begin(), name.end(), std::back_inserter (lowerCase),
+            (int(*)(int)) std::tolower);
+
+        return lowerCase;
+    }
+}
+
 namespace MWScript
 {
     namespace Container
@@ -65,7 +78,7 @@ namespace MWScript
                     Interpreter::Type_Integer sum = 0;
 
                     for (MWWorld::ContainerStoreIterator iter (store.begin()); iter!=store.end(); ++iter)
-                        if (iter->getCellRef().refID==item)
+                        if (toLower(iter->getCellRef().refID) == toLower(item))
                             sum += iter->getRefData().getCount();
 
                     runtime.push (sum);
@@ -95,7 +108,7 @@ namespace MWScript
                     for (MWWorld::ContainerStoreIterator iter (store.begin()); iter!=store.end() && count;
                         ++iter)
                     {
-                        if (iter->getCellRef().refID==item)
+                        if (toLower(iter->getCellRef().refID) == toLower(item))
                         {
                             if (iter->getRefData().getCount()<=count)
                             {

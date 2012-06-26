@@ -32,16 +32,6 @@ namespace MWWorld
 
     }
 
-    void Class::enable (const Ptr& ptr) const
-    {
-
-    }
-
-    void Class::disable (const Ptr& ptr) const
-    {
-
-    }
-
     MWMechanics::CreatureStats& Class::getCreatureStats (const Ptr& ptr) const
     {
         throw std::runtime_error ("class does not have creature stats");
@@ -142,6 +132,16 @@ namespace MWWorld
         throw std::logic_error ("value not supported by this class");
     }
 
+    float Class::getCapacity (const MWWorld::Ptr& ptr) const
+    {
+        throw std::runtime_error ("capacity not supported by this class");
+    }
+
+    float Class::getEncumbrance (const MWWorld::Ptr& ptr) const
+    {
+        throw std::runtime_error ("encumbrance not supported by class");
+    }
+
     const Class& Class::get (const std::string& key)
     {
         std::map<std::string, boost::shared_ptr<Class> >::const_iterator iter = sClasses.find (key);
@@ -172,6 +172,12 @@ namespace MWWorld
         throw std::runtime_error ("class does not have an down sound");
     }
 
+
+    std::string Class::getInventoryIcon (const MWWorld::Ptr& ptr) const
+    {
+        throw std::runtime_error ("class does not have any inventory icon");
+    }
+
     MWGui::ToolTipInfo Class::getToolTipInfo (const Ptr& ptr) const
     {
         throw std::runtime_error ("class does not have a tool tip");
@@ -180,5 +186,10 @@ namespace MWWorld
     bool Class::hasToolTip (const Ptr& ptr) const
     {
         return false;
+    }
+
+    std::string Class::getEnchantment (const Ptr& ptr) const
+    {
+        return "";
     }
 }

@@ -15,7 +15,7 @@
 
         <!-- Dialog buttons -->
         <Widget type="Button" skin="MW_Button" position="375 340 53 23" name="BackButton">
-            <Property key="Caption" value="Back"/>
+            <Property key="Caption" value="#{sBack}"/>
         </Widget>
         <Widget type="Button" skin="MW_Button" position="431 340 42 23" name="OKButton">
             <Property key="Caption" value="OK"/>

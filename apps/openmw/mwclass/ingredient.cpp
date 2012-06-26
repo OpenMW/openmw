@@ -98,6 +98,14 @@ namespace MWClass
         return std::string("Item Ingredient Down");
     }
 
+    std::string Ingredient::getInventoryIcon (const MWWorld::Ptr& ptr) const
+    {
+          ESMS::LiveCellRef<ESM::Ingredient, MWWorld::RefData> *ref =
+            ptr.get<ESM::Ingredient>();
+
+        return ref->base->icon;
+    }
+
     bool Ingredient::hasToolTip (const MWWorld::Ptr& ptr) const
     {
         ESMS::LiveCellRef<ESM::Ingredient, MWWorld::RefData> *ref =
@@ -112,7 +120,7 @@ namespace MWClass
             ptr.get<ESM::Ingredient>();
 
         MWGui::ToolTipInfo info;
-        info.caption = ref->base->name;
+        info.caption = ref->base->name + MWGui::ToolTips::getCountString(ptr.getRefData().getCount());
         info.icon = ref->base->icon;
 
         const ESMS::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
@@ -126,6 +134,19 @@ namespace MWClass
             text += MWGui::ToolTips::getMiscString(ref->ref.owner, "Owner");
             text += MWGui::ToolTips::getMiscString(ref->base->script, "Script");
         }
+
+        MWGui::Widgets::SpellEffectList list;
+        for (int i=0; i<4; ++i)
+        {
+            if (ref->base->data.effectID[i] < 0)
+                continue;
+            MWGui::Widgets::SpellEffectParams params;
+            params.mEffectID = ref->base->data.effectID[i];
+            params.mAttribute = ref->base->data.attributes[i];
+            params.mSkill = ref->base->data.skills[i];
+            list.push_back(params);
+        }
+        info.effects = list;
 
         info.text = text;
 

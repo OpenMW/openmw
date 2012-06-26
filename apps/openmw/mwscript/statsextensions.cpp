@@ -1,6 +1,8 @@
 
 #include "statsextensions.hpp"
 
+#include <boost/algorithm/string.hpp>
+
 #include <components/compiler/extensions.hpp>
 
 #include <components/interpreter/interpreter.hpp>
@@ -362,6 +364,7 @@ namespace MWScript
                         factionID = runtime.getStringLiteral (runtime[0].mInteger);
                         runtime.pop();
                     }
+                    boost::algorithm::to_lower(factionID);
                     if(factionID != "")
                     {
                         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
@@ -390,6 +393,7 @@ namespace MWScript
                         factionID = runtime.getStringLiteral (runtime[0].mInteger);
                         runtime.pop();
                     }
+                    boost::algorithm::to_lower(factionID);
                     if(factionID != "")
                     {
                         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
@@ -422,6 +426,7 @@ namespace MWScript
                         factionID = runtime.getStringLiteral (runtime[0].mInteger);
                         runtime.pop();
                     }
+                    boost::algorithm::to_lower(factionID);
                     if(factionID != "")
                     {
                         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
@@ -459,6 +464,7 @@ namespace MWScript
                             factionID = MWWorld::Class::get(ptr).getNpcStats(ptr).mFactionRank.begin()->first;
                         }
                     }
+                    boost::algorithm::to_lower(factionID);
                     MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
                     if(factionID!="")
                     {

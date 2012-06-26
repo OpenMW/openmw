@@ -44,7 +44,7 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
-                    MWBase::Environment::get().getInputManager()->setGuiMode(mDialogue);
+                    MWBase::Environment::get().getWindowManager()->pushGuiMode(mDialogue);
                 }
         };
 
@@ -104,7 +104,7 @@ namespace MWScript
             extensions.registerInstruction ("enableclassmenu", "", opcodeEnableClassMenu);
             extensions.registerInstruction ("enablenamemenu", "", opcodeEnableNameMenu);
             extensions.registerInstruction ("enableracemenu", "", opcodeEnableRaceMenu);
-            extensions.registerInstruction ("enablestatsreviewmenu", "",
+            extensions.registerInstruction ("enablestatreviewmenu", "",
 opcodeEnableStatsReviewMenu);
 
             extensions.registerInstruction ("enableinventorymenu", "", opcodeEnableInventoryMenu);

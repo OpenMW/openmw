@@ -8,6 +8,7 @@ set(LAUNCHER
     playpage.cpp
     pluginsmodel.cpp
     pluginsview.cpp
+    filedialog.cpp
 
     launcher.rc
 )
@@ -22,6 +23,7 @@ set(LAUNCHER_HEADER
     playpage.hpp
     pluginsmodel.hpp
     pluginsview.hpp
+    filedialog.hpp
 )
 
 # Headers that must be pre-processed
@@ -34,6 +36,7 @@ set(LAUNCHER_HEADER_MOC
     playpage.hpp
     pluginsmodel.hpp
     pluginsview.hpp
+    filedialog.hpp
 )
 
 source_group(launcher FILES ${LAUNCHER} ${LAUNCHER_HEADER} ${LAUNCHER_HEADER_MOC})

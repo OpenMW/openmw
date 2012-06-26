@@ -9,6 +9,7 @@
 
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/actiontake.hpp"
+#include "../mwworld/actionalchemy.hpp"
 #include "../mwworld/world.hpp"
 
 #include "../mwrender/objects.hpp"
@@ -100,6 +101,14 @@ namespace MWClass
         return std::string("Item Apparatus Down");
     }
 
+    std::string Apparatus::getInventoryIcon (const MWWorld::Ptr& ptr) const
+    {
+          ESMS::LiveCellRef<ESM::Apparatus, MWWorld::RefData> *ref =
+            ptr.get<ESM::Apparatus>();
+
+        return ref->base->icon;
+    }
+
     bool Apparatus::hasToolTip (const MWWorld::Ptr& ptr) const
     {
         ESMS::LiveCellRef<ESM::Apparatus, MWWorld::RefData> *ref =
@@ -114,7 +123,7 @@ namespace MWClass
             ptr.get<ESM::Apparatus>();
 
         MWGui::ToolTipInfo info;
-        info.caption = ref->base->name;
+        info.caption = ref->base->name + MWGui::ToolTips::getCountString(ptr.getRefData().getCount());
         info.icon = ref->base->icon;
 
         const ESMS::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
@@ -131,5 +140,11 @@ namespace MWClass
         info.text = text;
 
         return info;
+    }
+
+
+    boost::shared_ptr<MWWorld::Action> Apparatus::use (const MWWorld::Ptr& ptr) const
+    {
+        return boost::shared_ptr<MWWorld::Action>(new MWWorld::ActionAlchemy());
     }
 }

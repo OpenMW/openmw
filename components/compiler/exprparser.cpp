@@ -195,10 +195,31 @@ namespace Compiler
         return parseArguments (arguments, scanner, mCode);
     }
 
+    bool ExprParser::handleMemberAccess (const std::string& name)
+    {
+        mMemberOp = false;
+
+        std::string name2 = toLower (name);
+        std::string id = toLower (mExplicit);
+
+        char type = getContext().getMemberType (name2, id);
+
+        if (type!=' ')
+        {
+            Generator::fetchMember (mCode, mLiterals, type, name2, id);
+            mNextOperand = false;
+            mExplicit.clear();
+            mOperands.push_back (type=='f' ? 'f' : 'l');
+            return true;
+        }
+
+        return false;
+    }
+
     ExprParser::ExprParser (ErrorHandler& errorHandler, Context& context, Locals& locals,
         Literals& literals, bool argument)
     : Parser (errorHandler, context), mLocals (locals), mLiterals (literals),
-      mNextOperand (true), mFirst (true), mArgument (argument)
+      mNextOperand (true), mFirst (true), mArgument (argument), mRefOp (false), mMemberOp (false)
     {}
 
     bool ExprParser::parseInt (int value, const TokenLoc& loc, Scanner& scanner)
@@ -251,7 +272,12 @@ namespace Compiler
         Scanner& scanner)
     {
         if (!mExplicit.empty())
+        {
+            if (mMemberOp && handleMemberAccess (name))
+                return true;
+
             return Parser::parseName (name, loc, scanner);
+        }
 
         mFirst = false;
 
@@ -281,9 +307,9 @@ namespace Compiler
                 return true;
             }
 
-            if (mExplicit.empty() && getContext().isId (name))
+            if (mExplicit.empty() && getContext().isId (name2))
             {
-                mExplicit = name;
+                mExplicit = name2;
                 return true;
             }
         }
@@ -497,6 +523,12 @@ namespace Compiler
                 return true;
             }
 
+            if (!mMemberOp && code==Scanner::S_member)
+            {
+                mMemberOp = true;
+                return true;
+            }
+
             return Parser::parseSpecial (code, loc, scanner);
         }
 
@@ -609,6 +641,7 @@ namespace Compiler
         mFirst = true;
         mExplicit.clear();
         mRefOp = false;
+        mMemberOp = false;
         Parser::reset();
     }
 

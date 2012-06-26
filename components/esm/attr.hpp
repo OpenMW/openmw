@@ -30,6 +30,7 @@ struct Attribute
     static const AttributeID attributeIds[Length];
     static const std::string gmstAttributeIds[Length];
     static const std::string gmstAttributeDescIds[Length];
+    static const std::string attributeIcons[Length];
 
     Attribute(AttributeID id, const std::string &name, const std::string &description)
         : id(id)

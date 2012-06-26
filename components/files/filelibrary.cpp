@@ -11,7 +11,7 @@ namespace Files
     bool containsVectorString(const StringVector& list, const std::string& str)
     {
         for (StringVector::const_iterator iter = list.begin();
-             iter != list.end(); iter++)
+             iter != list.end(); ++iter)
         {
             if (*iter == str)
                 return true;
@@ -112,7 +112,7 @@ namespace Files
     void FileLibrary::printSections()
     {
         for(StringPathContMap::const_iterator mapIter = mMap.begin();
-             mapIter != mMap.end(); mapIter++)
+             mapIter != mMap.end(); ++mapIter)
         {
             std::cout << mapIter->first <<std::endl;
         }

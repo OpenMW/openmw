@@ -3,7 +3,7 @@ OpenMW: A reimplementation of The Elder Scrolls III: Morrowind
 OpenMW is an attempt at recreating the engine for the popular role-playing game
 Morrowind by Bethesda Softworks. You need to own and install the original game for OpenMW to work.
 
-Version: 0.14.0
+Version: 0.16.0
 License: GPL (see GPL3.txt for more information)
 Website: http://www.openmw.org
 
@@ -110,6 +110,7 @@ Nikolay “corristo” Kasyanov
 Pieter “pvdk” van der Kloet
 Roman "Kromgart" Melnik
 Sebastian “swick” Wick
+Sylvain "Garvek" T.
 
 Retired Developers:
 Ardekantur
@@ -131,6 +132,59 @@ Thanks to Kevin Ryan for kindly providing us with the icon used for the Data Fil
 
 
 CHANGELOG
+
+0.16.0
+
+Bug #250: OpenMW launcher erratic behaviour
+Bug #270: Crash because of underwater effect on OS X
+Bug #277: Auto-equipping in some cells not working
+Bug #294: Container GUI ignores disabled inventory menu
+Bug #297: Stats review dialog shows all skills and attribute values as 0
+Bug #298: MechanicsManager::buildPlayer does not remove previous bonuses
+Bug #299: Crash in World::disable
+Bug #306: Non-existent ~/.config/openmw "crash" the launcher.
+Bug #307: False "Data Files" location make the launcher "crash"
+Feature #81: Spell Window
+Feature #85: Alchemy Window
+Feature #181: Support for x.y script syntax
+Feature #242: Weapon and Spell icons
+Feature #254: Ingame settings window
+Feature #293: Allow "stacking" game modes
+Feature #295: Class creation dialog tooltips
+Feature #296: Clicking on the HUD elements should show/hide the respective window
+Feature #301: Direction after using a Teleport Door
+Feature #303: Allow object selection in the console
+Feature #305: Allow the use of = as a synonym for ==
+Feature #312: Compensation for slow object access in poorly written Morrowind.esm scripts
+Task #176: Restructure enabling/disabling of MW-references
+Task #283: Integrate ogre.cfg file in settings file
+Task #290: Auto-Close MW-reference related GUI windows
+
+0.15.0
+
+Bug #5: Physics reimplementation (fixes various issues)
+Bug #258: Resizing arrow's background is not transparent
+Bug #268: Widening the stats window in X direction causes layout problems
+Bug #269: Topic pane in dialgoue window is too small for some longer topics
+Bug #271: Dialog choices are sorted incorrectly
+Bug #281: The single quote character is not rendered on dialog windows
+Bug #285: Terrain not handled properly in cells that are not predefined
+Bug #289: Dialogue filter isn't doing case smashing/folding for item IDs
+Feature #15: Collision with Terrain
+Feature #17: Inventory-, Container- and Trade-Windows
+Feature #44: Floating Labels above Focussed Objects
+Feature #80: Tooltips
+Feature #83: Barter Dialogue
+Feature #90: Book and Scroll Windows
+Feature #156: Item Stacking in Containers
+Feature #213: Pulsating lights
+Feature #218: Feather & Burden
+Feature #256: Implement magic effect bookkeeping
+Feature #259: Add missing information to Stats window
+Feature #260: Correct case for dialogue topics
+Feature #280: GUI texture atlasing
+Feature #291: Ability to use GMST strings from GUI layout files
+Task #255: Make MWWorld::Environment into a singleton
 
 0.14.0
 

@@ -1,6 +1,8 @@
 
 #include "magiceffects.hpp"
 
+#include <cstdlib>
+
 #include <stdexcept>
 
 #include <components/esm/defs.hpp>
@@ -66,6 +68,46 @@ namespace MWMechanics
         }
     }
 
+    void MagicEffects::add (const ESM::EffectList& list)
+    {
+        for (std::vector<ESM::ENAMstruct>::const_iterator iter (list.list.begin()); iter!=list.list.end();
+            ++iter)
+        {
+            EffectParam param;
+
+            if (iter->magnMin>=iter->magnMax)
+                param.mMagnitude = iter->magnMin;
+            else
+                param.mMagnitude = static_cast<int> (
+                    (iter->magnMax-iter->magnMin+1)*
+                    (static_cast<float> (std::rand()) / RAND_MAX) + iter->magnMin);
+
+            add (*iter, param);
+        }
+    }
+
+    MagicEffects& MagicEffects::operator+= (const MagicEffects& effects)
+    {
+        if (this==&effects)
+        {
+            MagicEffects temp (effects);
+            *this += temp;
+            return *this;
+        }
+
+        for (Collection::const_iterator iter (effects.begin()); iter!=effects.end(); ++iter)
+        {
+            Collection::iterator result = mCollection.find (iter->first);
+
+            if (result!=mCollection.end())
+                result->second += iter->second;
+            else
+                mCollection.insert (*iter);
+        }
+
+        return *this;
+    }
+
     EffectParam MagicEffects::get (const EffectKey& key) const
     {
         Collection::const_iterator iter = mCollection.find (key);
@@ -85,11 +127,11 @@ namespace MWMechanics
         MagicEffects result;
 
         // adding/changing
-        for (Collection::const_iterator iter (now.Begin()); iter!=now.End(); ++iter)
+        for (Collection::const_iterator iter (now.begin()); iter!=now.end(); ++iter)
         {
             Collection::const_iterator other = prev.mCollection.find (iter->first);
 
-            if (other==prev.End())
+            if (other==prev.end())
             {
                 // adding
                 result.add (iter->first, iter->second);
@@ -102,17 +144,16 @@ namespace MWMechanics
         }
 
         // removing
-        for (Collection::const_iterator iter (prev.Begin()); iter!=prev.End(); ++iter)
+        for (Collection::const_iterator iter (prev.begin()); iter!=prev.end(); ++iter)
         {
             Collection::const_iterator other = now.mCollection.find (iter->first);
 
-            if (other==prev.End())
+            if (other==prev.end())
             {
                 result.add (iter->first, EffectParam() - iter->second);
             }
         }
 
         return result;
-
     }
 }

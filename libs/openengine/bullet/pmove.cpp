@@ -15,8 +15,6 @@ Quake 3 Arena is copyright (C) 1999-2005 Id Software, Inc.
 
 //#include "GameTime.h"
 
-//#include "Object.h"
-
 //#include "Sound.h"
 
 //#include "..\..\ESMParser\ESMParser\SNDG.h"
@@ -68,7 +66,6 @@ static struct playermoveLocal
 	int waterHeight;
 	bool hasWater;
 	bool isInterior;
-	//Object* traceObj;
 
 } pml;
 
@@ -1833,13 +1830,6 @@ void PmoveSingle (playerMove* const pmove)
 	pml.hasWater = pmove->hasWater;
 	pml.isInterior = pmove->isInterior;
 	pml.waterHeight = pmove->waterHeight;
-#ifdef _DEBUG
-	if (!pml.traceObj)
-		__debugbreak();
-
-	if (!pml.traceObj->incellptr)
-		__debugbreak();
-#endif
 
 	// determine the time
 	pml.msec = pmove->cmd.serverTime - pm->ps.commandTime;

@@ -5,6 +5,8 @@
 
 #include "../mwworld/world.hpp"
 
+#include "scriptmanager.hpp"
+
 namespace MWScript
 {
     CompilerContext::CompilerContext (Type type)
@@ -19,6 +21,18 @@ namespace MWScript
     char CompilerContext::getGlobalType (const std::string& name) const
     {
         return MWBase::Environment::get().getWorld()->getGlobalVariableType (name);
+    }
+
+    char CompilerContext::getMemberType (const std::string& name, const std::string& id) const
+    {
+        MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->getPtr (id, false);
+
+        std::string script = MWWorld::Class::get (ptr).getScript (ptr);
+
+        if (script.empty())
+            return ' ';
+
+        return MWBase::Environment::get().getScriptManager()->getLocals (script).getType (name);
     }
 
     bool CompilerContext::isId (const std::string& name) const

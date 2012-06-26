@@ -7,7 +7,10 @@
 
 MainDialog::MainDialog()
 {
-    mIconWidget = new QListWidget;
+    QWidget *centralWidget = new QWidget(this);
+    setCentralWidget(centralWidget);
+
+    mIconWidget = new QListWidget(centralWidget);
     mIconWidget->setObjectName("IconWidget");
     mIconWidget->setViewMode(QListView::IconMode);
     mIconWidget->setWrapping(false);
@@ -21,7 +24,7 @@ MainDialog::MainDialog()
     mIconWidget->setCurrentRow(0);
     mIconWidget->setFlow(QListView::LeftToRight);
 
-    QGroupBox *groupBox = new QGroupBox(this);
+    QGroupBox *groupBox = new QGroupBox(centralWidget);
     QVBoxLayout *groupLayout = new QVBoxLayout(groupBox);
 
     mPagesWidget = new QStackedWidget(groupBox);
@@ -29,15 +32,14 @@ MainDialog::MainDialog()
 
     QPushButton *playButton = new QPushButton(tr("Play"));
 
-    QDialogButtonBox *buttonBox = new QDialogButtonBox(this);
+    QDialogButtonBox *buttonBox = new QDialogButtonBox(centralWidget);
     buttonBox->setStandardButtons(QDialogButtonBox::Close);
     buttonBox->addButton(playButton, QDialogButtonBox::AcceptRole);
 
-    QVBoxLayout *dialogLayout = new QVBoxLayout(this);
+    QVBoxLayout *dialogLayout = new QVBoxLayout(centralWidget);
     dialogLayout->addWidget(mIconWidget);
     dialogLayout->addWidget(groupBox);
     dialogLayout->addWidget(buttonBox);
-
 
     setWindowTitle(tr("OpenMW Launcher"));
     setWindowIcon(QIcon(":/images/openmw.png"));
@@ -48,22 +50,22 @@ MainDialog::MainDialog()
     // Install the stylesheet font
     QFile file;
     QFontDatabase fontDatabase;
-    
+
     const QStringList fonts = fontDatabase.families();
-    
+
     // Check if the font is installed
     if (!fonts.contains("EB Garamond")) {
-      
+
       QString font = QString::fromStdString((mCfgMgr.getGlobalDataPath() / "resources/mygui/EBGaramond-Regular.ttf").string());
       file.setFileName(font);
-      
+
       if (!file.exists()) {
-	  font = QString::fromStdString((mCfgMgr.getLocalPath() / "resources/mygui/EBGaramond-Regular.ttf").string());
+      font = QString::fromStdString((mCfgMgr.getLocalPath() / "resources/mygui/EBGaramond-Regular.ttf").string());
       }
-      
+
       fontDatabase.addApplicationFont(font);
     }
-    
+
     // Load the stylesheet
     QString config = QString::fromStdString((mCfgMgr.getGlobalDataPath() / "resources/launcher.qss").string());
     file.setFileName(config);
@@ -76,7 +78,6 @@ MainDialog::MainDialog()
     QString styleSheet = QLatin1String(file.readAll());
     qApp->setStyleSheet(styleSheet);
     file.close();
-
 
     connect(buttonBox, SIGNAL(rejected()), this, SLOT(close()));
     connect(buttonBox, SIGNAL(accepted()), this, SLOT(play()));
@@ -148,6 +149,53 @@ void MainDialog::createPages()
 
 }
 
+
+bool MainDialog::setup()
+{
+    // Create the settings manager and load default settings file
+    const std::string localdefault = (mCfgMgr.getLocalPath() / "settings-default.cfg").string();
+    const std::string globaldefault = (mCfgMgr.getGlobalPath() / "settings-default.cfg").string();
+
+    // prefer local
+    if (boost::filesystem::exists(localdefault)) {
+        mSettings.loadDefault(localdefault);
+    } else if (boost::filesystem::exists(globaldefault)) {
+        mSettings.loadDefault(globaldefault);
+    } else {
+        QMessageBox msgBox;
+        msgBox.setWindowTitle("Error reading OpenMW configuration file");
+        msgBox.setIcon(QMessageBox::Critical);
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.setText(tr("<br><b>Could not find %0</b><br><br> \
+                          The problem may be due to an incomplete installation of OpenMW.<br> \
+                          Reinstalling OpenMW may resolve the problem.").arg(QString::fromStdString(globaldefault)));
+        msgBox.exec();
+        return false;
+    }
+
+    // load user settings if they exist, otherwise just load the default settings as user settings
+    const std::string settingspath = (mCfgMgr.getUserPath() / "settings.cfg").string();
+
+    if (boost::filesystem::exists(settingspath))
+        mSettings.loadUser(settingspath);
+    else if (boost::filesystem::exists(localdefault))
+        mSettings.loadUser(localdefault);
+    else if (boost::filesystem::exists(globaldefault))
+        mSettings.loadUser(globaldefault);
+
+    // Setup the Graphics page
+    if (!mGraphicsPage->setupOgre()) {
+        return false;
+    }
+
+    // Setup the Data Files page
+    if (!mDataFilesPage->setupDataFiles()) {
+        return false;
+    }
+
+    return true;
+}
+
 void MainDialog::profileChanged(int index)
 {
     // Just to be sure, should always have a selection
@@ -178,6 +226,12 @@ void MainDialog::closeEvent(QCloseEvent *event)
     // Now write all config files
     mDataFilesPage->writeConfig();
     mGraphicsPage->writeConfig();
+
+    // Save user settings
+    const std::string settingspath = (mCfgMgr.getUserPath() / "settings.cfg").string();
+    qDebug() << QString::fromStdString(settingspath);
+    mSettings.saveUser(settingspath);
+
     event->accept();
 }
 
@@ -219,7 +273,7 @@ void MainDialog::play()
     if (!info.isExecutable()) {
         QMessageBox msgBox;
         msgBox.setWindowTitle("Error starting OpenMW");
-        msgBox.setIcon(QMessageBox::Critical);
+        msgBox.setIcon(QMessageBox::Warning);
         msgBox.setStandardButtons(QMessageBox::Ok);
         msgBox.setText(tr("<br><b>Could not start OpenMW</b><br><br> \
                         The OpenMW application is not executable.<br> \
@@ -243,6 +297,7 @@ void MainDialog::play()
 
         return;
     } else {
-        close();
+        qApp->quit();
     }
 }
+

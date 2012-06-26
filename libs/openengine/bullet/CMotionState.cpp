@@ -11,6 +11,8 @@ namespace Physic
 {
 
     CMotionState::CMotionState(PhysicEngine* eng,std::string name)
+        : isPC(false)
+        , isNPC(true)
     {
         pEng = eng;
         tr.setIdentity();

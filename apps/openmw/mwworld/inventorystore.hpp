@@ -3,6 +3,8 @@
 
 #include "containerstore.hpp"
 
+#include "../mwmechanics/magiceffects.hpp"
+
 namespace MWMechanics
 {
     struct NpcStats;
@@ -41,9 +43,15 @@ namespace MWWorld
 
         private:
 
+            mutable MWMechanics::MagicEffects mMagicEffects;
+            mutable bool mMagicEffectsUpToDate;
+
             typedef std::vector<ContainerStoreIterator> TSlots;
 
             mutable TSlots mSlots;
+
+            // selected magic item (for using enchantments of type "Cast once" or "Cast when used")
+            ContainerStoreIterator mSelectedEnchantItem;
 
             void copySlots (const InventoryStore& store);
 
@@ -58,12 +66,36 @@ namespace MWWorld
             InventoryStore& operator= (const InventoryStore& store);
 
             void equip (int slot, const ContainerStoreIterator& iterator);
-            ///< \note \a iteartor can be an end-iterator
+            ///< \note \a iterator can be an end-iterator
+
+            void setSelectedEnchantItem(const ContainerStoreIterator& iterator);
+            ///< set the selected magic item (for using enchantments of type "Cast once" or "Cast when used")
+            /// \note to unset the selected item, call this method with end() iterator
+
+            ContainerStoreIterator getSelectedEnchantItem();
+            ///< @return selected magic item (for using enchantments of type "Cast once" or "Cast when used")
+            /// \note if no item selected, return end() iterator
 
             ContainerStoreIterator getSlot (int slot);
 
             void autoEquip (const MWMechanics::NpcStats& stats);
             ///< Auto equip items according to stats and item value.
+
+            const MWMechanics::MagicEffects& getMagicEffects();
+            ///< Return magic effects from worn items.
+            ///
+            /// \todo make this const again, after the constness of Ptrs and iterators has been addressed.
+
+            virtual void flagAsModified();
+            ///< \attention This function is internal to the world model and should not be called from
+            /// outside.
+
+        protected:
+
+            virtual bool stacks (const Ptr& ptr1, const Ptr& ptr2);
+            ///< @return true if the two specified objects can stack with each other
+            /// @note ptr1 is the item that is already in this container
+
     };
 }
 

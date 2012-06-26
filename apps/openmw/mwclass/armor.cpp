@@ -9,6 +9,7 @@
 
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/actiontake.hpp"
+#include "../mwworld/actionequip.hpp"
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/world.hpp"
 
@@ -198,6 +199,14 @@ namespace MWClass
             return std::string("Item Armor Heavy Down");
     }
 
+    std::string Armor::getInventoryIcon (const MWWorld::Ptr& ptr) const
+    {
+          ESMS::LiveCellRef<ESM::Armor, MWWorld::RefData> *ref =
+            ptr.get<ESM::Armor>();
+
+        return ref->base->icon;
+    }
+
     bool Armor::hasToolTip (const MWWorld::Ptr& ptr) const
     {
         ESMS::LiveCellRef<ESM::Armor, MWWorld::RefData> *ref =
@@ -212,7 +221,7 @@ namespace MWClass
             ptr.get<ESM::Armor>();
 
         MWGui::ToolTipInfo info;
-        info.caption = ref->base->name;
+        info.caption = ref->base->name + MWGui::ToolTips::getCountString(ptr.getRefData().getCount());
         info.icon = ref->base->icon;
 
         std::string text;
@@ -247,5 +256,20 @@ namespace MWClass
         info.text = text;
 
         return info;
+    }
+
+    std::string Armor::getEnchantment (const MWWorld::Ptr& ptr) const
+    {
+        ESMS::LiveCellRef<ESM::Armor, MWWorld::RefData> *ref =
+            ptr.get<ESM::Armor>();
+
+        return ref->base->enchant;
+    }
+
+    boost::shared_ptr<MWWorld::Action> Armor::use (const MWWorld::Ptr& ptr) const
+    {
+        MWBase::Environment::get().getSoundManager()->playSound (getUpSoundId(ptr), 1.0, 1.0);
+
+        return boost::shared_ptr<MWWorld::Action>(new MWWorld::ActionEquip(ptr));
     }
 }

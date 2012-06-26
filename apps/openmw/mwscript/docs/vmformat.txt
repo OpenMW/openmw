@@ -29,7 +29,9 @@ op 0x2000c: PCLowerRank
 op 0x2000d: PCJoinFaction
 op 0x2000e: PCGetRank implicit
 op 0x2000f: PCGetRank explicit
-opcodes 0x20010-0x3ffff unused
+op 0x20010: AiWander
+op 0x20011: AiWander, explicit reference
+opcodes 0x20012-0x3ffff unused
 
 Segment 4:
 (not implemented yet)
@@ -146,4 +148,21 @@ op 0x200014f: ForceGreeting
 op 0x2000150: ForceGreeting, explicit reference
 op 0x2000151: ToggleFullHelp
 op 0x2000152: Goodbye
-opcodes 0x2000153-0x3ffffff unused
+op 0x2000153: DontSaveObject (left unimplemented)
+op 0x2000154: ClearForceRun
+op 0x2000155: ClearForceRun, explicit reference
+op 0x2000156: ForceRun
+op 0x2000157: ForceRun, explicit reference
+op 0x2000158: ClearForceSneak
+op 0x2000159: ClearForceSneak, explicit reference
+op 0x200015a: ForceSneak
+op 0x200015b: ForceSneak, explicit reference
+op 0x200015c: SetHello
+op 0x200015d: SetHello, explicit reference
+op 0x200015e: SetFight
+op 0x200015f: SetFight, explicit reference
+op 0x2000160: SetFlee
+op 0x2000161: SetFlee, explicit reference
+op 0x2000162: SetAlarm
+op 0x2000163: SetAlarm, explicit reference
+opcodes 0x2000164-0x3ffffff unused

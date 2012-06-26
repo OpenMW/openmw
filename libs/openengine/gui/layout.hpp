@@ -71,7 +71,7 @@ namespace GUI
 
     void shutdown()
     {
-      MyGUI::LayoutManager::getInstance().unloadLayout(mListWindowRoot);
+      MyGUI::Gui::getInstance().destroyWidget(mMainWidget);
       mListWindowRoot.clear();
     }
 
@@ -113,6 +113,13 @@ namespace GUI
       MyGUI::Widget* pt;
       getWidget(pt, name);
       static_cast<MyGUI::TextBox*>(pt)->setCaption(caption);
+    }
+
+    void setTitle(const std::string& title)
+    {
+      // NOTE: this assume that mMainWidget is of type Window.
+      static_cast<MyGUI::Window*>(mMainWidget)->setCaptionWithReplacing(title);
+      adjustWindowCaption();
     }
 
     void setState(const std::string& widget, const std::string& state)

@@ -99,6 +99,14 @@ namespace MWClass
         return std::string("Item Repair Down");
     }
 
+    std::string Repair::getInventoryIcon (const MWWorld::Ptr& ptr) const
+    {
+          ESMS::LiveCellRef<ESM::Repair, MWWorld::RefData> *ref =
+            ptr.get<ESM::Repair>();
+
+        return ref->base->icon;
+    }
+
     bool Repair::hasToolTip (const MWWorld::Ptr& ptr) const
     {
         ESMS::LiveCellRef<ESM::Repair, MWWorld::RefData> *ref =
@@ -113,7 +121,7 @@ namespace MWClass
             ptr.get<ESM::Repair>();
 
         MWGui::ToolTipInfo info;
-        info.caption = ref->base->name;
+        info.caption = ref->base->name + MWGui::ToolTips::getCountString(ptr.getRefData().getCount());
         info.icon = ref->base->icon;
 
         std::string text;

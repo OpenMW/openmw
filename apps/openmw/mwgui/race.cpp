@@ -1,7 +1,4 @@
 #include "race.hpp"
-#include "window_manager.hpp"
-#include "widgets.hpp"
-#include "components/esm_store/store.hpp"
 
 #include <assert.h>
 #include <iostream>
@@ -9,6 +6,12 @@
 
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
+
+#include <components/esm_store/store.hpp>
+
+#include "window_manager.hpp"
+#include "widgets.hpp"
+#include "tooltips.hpp"
 
 using namespace MWGui;
 using namespace Widgets;
@@ -51,7 +54,7 @@ RaceDialog::RaceDialog(WindowManager& parWindowManager)
     prevButton->eventMouseButtonClick += MyGUI::newDelegate(this, &RaceDialog::onSelectPreviousFace);
     nextButton->eventMouseButtonClick += MyGUI::newDelegate(this, &RaceDialog::onSelectNextFace);
 
-    setText("HairChoiceT", mWindowManager.getGameSettingString("sRaceMenu3", "Change Hair"));
+    setText("HairChoiceT", mWindowManager.getGameSettingString("sRaceMenu4", "Change Hair"));
     getWidget(prevButton, "PrevHairButton");
     getWidget(nextButton, "NextHairButton");
     prevButton->eventMouseButtonClick += MyGUI::newDelegate(this, &RaceDialog::onSelectPreviousHair);
@@ -71,7 +74,6 @@ RaceDialog::RaceDialog(WindowManager& parWindowManager)
 
     MyGUI::ButtonPtr backButton;
     getWidget(backButton, "BackButton");
-    backButton->setCaption(mWindowManager.getGameSettingString("sBack", ""));
     backButton->eventMouseButtonClick += MyGUI::newDelegate(this, &RaceDialog::onBackClicked);
 
     MyGUI::ButtonPtr okButton;
@@ -256,6 +258,8 @@ void RaceDialog::updateSkills()
         skillWidget->setWindowManager(&mWindowManager);
         skillWidget->setSkillNumber(skillId);
         skillWidget->setSkillValue(MWSkill::SkillValue(race->data.bonus[i].bonus));
+        ToolTips::createSkillToolTip(skillWidget, skillId);
+
 
         skillItems.push_back(skillWidget);
 
@@ -289,6 +293,8 @@ void RaceDialog::updateSpellPowers()
         spellPowerWidget = spellPowerList->createWidget<MWSpell>("MW_StatName", coord, MyGUI::Align::Default, std::string("SpellPower") + boost::lexical_cast<std::string>(i));
         spellPowerWidget->setWindowManager(&mWindowManager);
         spellPowerWidget->setSpellId(spellpower);
+        spellPowerWidget->setUserString("ToolTipType", "Spell");
+        spellPowerWidget->setUserString("Spell", spellpower);
 
         spellPowerItems.push_back(spellPowerWidget);
 

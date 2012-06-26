@@ -30,6 +30,15 @@ namespace MWMechanics
         for (int i=0; i<27; ++i)
             npcStats.mSkill[i].setBase (player->npdt52.skills[i]);
 
+        creatureStats.mAttributes[0].setBase (player->npdt52.strength);
+        creatureStats.mAttributes[1].setBase (player->npdt52.intelligence);
+        creatureStats.mAttributes[2].setBase (player->npdt52.willpower);
+        creatureStats.mAttributes[3].setBase (player->npdt52.agility);
+        creatureStats.mAttributes[4].setBase (player->npdt52.speed);
+        creatureStats.mAttributes[5].setBase (player->npdt52.endurance);
+        creatureStats.mAttributes[6].setBase (player->npdt52.personality);
+        creatureStats.mAttributes[7].setBase (player->npdt52.luck);
+
         // race
         if (mRaceSelected)
         {
@@ -139,42 +148,13 @@ namespace MWMechanics
             }
         }
 
-        // magic effects
-        adjustMagicEffects (ptr);
-
-        // calculate dynamic stats
-        int strength = creatureStats.mAttributes[0].getBase();
-        int intelligence = creatureStats.mAttributes[1].getBase();
-        int willpower = creatureStats.mAttributes[2].getBase();
-        int agility = creatureStats.mAttributes[3].getBase();
-        int endurance = creatureStats.mAttributes[5].getBase();
-
-        double magickaFactor = creatureStats.mMagicEffects.get (EffectKey (84)).mMagnitude*0.1 + 0.5;
-
-        creatureStats.mDynamic[0].setBase (static_cast<int> (0.5 * (strength + endurance)));
-        creatureStats.mDynamic[1].setBase (static_cast<int> (intelligence +
-            magickaFactor * intelligence));
-        creatureStats.mDynamic[2].setBase (strength+willpower+agility+endurance);
+        // forced update and current value adjustments
+        mActors.updateActor (ptr, 0);
 
         for (int i=0; i<3; ++i)
             creatureStats.mDynamic[i].setCurrent (creatureStats.mDynamic[i].getModified());
     }
 
-    void MechanicsManager::adjustMagicEffects (MWWorld::Ptr& creature)
-    {
-        MWMechanics::CreatureStats& creatureStats =
-            MWWorld::Class::get (creature).getCreatureStats (creature);
-
-        MagicEffects now = creatureStats.mSpells.getMagicEffects();
-
-        /// \todo add effects from active spells and equipment
-
-        MagicEffects diff = MagicEffects::diff (creatureStats.mMagicEffects, now);
-
-        creatureStats.mMagicEffects = now;
-
-        // TODO apply diff to other stats
-    }
 
     MechanicsManager::MechanicsManager()
     : mUpdatePlayer (true), mClassSelected (false),
