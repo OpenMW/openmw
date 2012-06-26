@@ -229,7 +229,6 @@ void MainDialog::closeEvent(QCloseEvent *event)
 
     // Save user settings
     const std::string settingspath = (mCfgMgr.getUserPath() / "settings.cfg").string();
-    qDebug() << QString::fromStdString(settingspath);
     mSettings.saveUser(settingspath);
 
     event->accept();
