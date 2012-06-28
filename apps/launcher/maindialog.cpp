@@ -229,7 +229,6 @@ void MainDialog::closeEvent(QCloseEvent *event)
 
     // Save user settings
     const std::string settingspath = (mCfgMgr.getUserPath() / "settings.cfg").string();
-    qDebug() << QString::fromStdString(settingspath);
     mSettings.saveUser(settingspath);
 
     event->accept();
@@ -240,6 +239,10 @@ void MainDialog::play()
     // First do a write of all the configs, just to be sure
     mDataFilesPage->writeConfig();
     mGraphicsPage->writeConfig();
+
+    // Save user settings
+    const std::string settingspath = (mCfgMgr.getUserPath() / "settings.cfg").string();
+    mSettings.saveUser(settingspath);
 
 #ifdef Q_WS_WIN
     QString game = "./openmw.exe";
