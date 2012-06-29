@@ -1,24 +1,10 @@
 #include <QtGui>
 
-#include <boost/math/common_factor.hpp>
-
 #include <components/files/configurationmanager.hpp>
 #include <components/settings/settings.hpp>
 
 #include "graphicspage.hpp"
 #include "naturalsort.hpp"
-
-QString getAspect(int x, int y)
-{
-    int gcd = boost::math::gcd (x, y);
-    int xaspect = x / gcd;
-    int yaspect = y / gcd;
-    // special case: 8 : 5 is usually referred to as 16:10
-    if (xaspect == 8 && yaspect == 5)
-        return QString("16:10");
-
-    return QString(QString::number(xaspect) + ":" + QString::number(yaspect));
-}
 
 GraphicsPage::GraphicsPage(Files::ConfigurationManager &cfg, QWidget *parent)
     : QWidget(parent)
@@ -257,21 +243,12 @@ QStringList GraphicsPage::getAvailableResolutions(Ogre::RenderSystem *renderer)
             QStringList tokens = qval.split(" ", QString::SkipEmptyParts);
             assert (tokens.size() >= 3);
             QString resolutionStr = tokens.at(0) + QString(" x ") + tokens.at(2);
+            {
 
-            // do not add duplicate resolutions
-            if (!result.contains(resolutionStr)) {
-                // Add the aspect ratio
-                QString aspect = getAspect(tokens.at(0).toInt(),tokens.at(2).toInt());
-
-                if (aspect == QLatin1String("16:9") || aspect == QLatin1String("16:10")) {
-                    resolutionStr.append(tr("\t(Widescreen ") + aspect + ")");
-
-                } else if (aspect == QLatin1String("4:3")) {
-                    resolutionStr.append(tr("\t(Standard 4:3)"));
-                }
-
-                result << resolutionStr;
-              }
+                // do not add duplicate resolutions
+                if (!result.contains(resolutionStr))
+                    result << resolutionStr;
+            }
         }
 
     }
