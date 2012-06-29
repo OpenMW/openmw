@@ -1,17 +1,9 @@
-#ifndef _GAME_CELL_STORE_H
-#define _GAME_CELL_STORE_H
+#ifndef GAME_MWWORLD_CELLSTORE_H
+#define GAME_MWWORLD_CELLSTORE_H
 
-/*
-  Cell storage.
+#include <components/esm/records.hpp>
 
-  Used to load, look up and store all references in a single cell.
-
-  Depends on esm/loadcell.hpp (loading from ESM) and esm_store.hpp
-  (looking up references.) Neither of these modules depend on us.
- */
-
-#include "store.hpp"
-#include "components/esm/records.hpp"
+#include <components/esm_store/store.hpp>
 
 #include <list>
 #include <string>
@@ -20,10 +12,8 @@
 #include <stdexcept>
 #include <algorithm>
 
-namespace ESMS
+namespace MWWorld
 {
-  using namespace ESM;
-
   /// A reference to one object (of any type) in a cell.
   ///
   /// Constructing this with a CellRef instance in the constructor means that
@@ -33,7 +23,7 @@ namespace ESMS
   template <typename X, typename D>
   struct LiveCellRef
   {
-    LiveCellRef(const CellRef& cref, const X* b = NULL) : base(b), ref(cref),
+    LiveCellRef(const ESM::CellRef& cref, const X* b = NULL) : base(b), ref(cref),
                                                           mData(ref) {}
 
 
@@ -45,7 +35,7 @@ namespace ESMS
     /* Information about this instance, such as 3D location and
        rotation and individual type-dependent data.
     */
-    CellRef ref;
+    ESM::CellRef ref;
 
     /// runtime-data
     D mData;
@@ -63,7 +53,7 @@ namespace ESMS
     // ESMStore. Insert the reference into the list if a match is
     // found. If not, throw an exception.
     template <typename Y>
-    void find(CellRef &ref, const Y& recList)
+    void find(ESM::CellRef &ref, const Y& recList)
     {
       const X* obj = recList.find(ref.refID);
       if(obj == NULL)
@@ -107,28 +97,28 @@ namespace ESMS
     float mWaterLevel;
 
     // Lists for each individual object type
-    CellRefList<Activator, D>         activators;
-    CellRefList<Potion, D>            potions;
-    CellRefList<Apparatus, D>         appas;
-    CellRefList<Armor, D>             armors;
-    CellRefList<Book, D>              books;
-    CellRefList<Clothing, D>          clothes;
-    CellRefList<Container, D>         containers;
-    CellRefList<Creature, D>          creatures;
-    CellRefList<Door, D>              doors;
-    CellRefList<Ingredient, D>        ingreds;
-    CellRefList<CreatureLevList, D>   creatureLists;
-    CellRefList<ItemLevList, D>       itemLists;
+    CellRefList<ESM::Activator, D>         activators;
+    CellRefList<ESM::Potion, D>            potions;
+    CellRefList<ESM::Apparatus, D>         appas;
+    CellRefList<ESM::Armor, D>             armors;
+    CellRefList<ESM::Book, D>              books;
+    CellRefList<ESM::Clothing, D>          clothes;
+    CellRefList<ESM::Container, D>         containers;
+    CellRefList<ESM::Creature, D>          creatures;
+    CellRefList<ESM::Door, D>              doors;
+    CellRefList<ESM::Ingredient, D>        ingreds;
+    CellRefList<ESM::CreatureLevList, D>   creatureLists;
+    CellRefList<ESM::ItemLevList, D>       itemLists;
     CellRefList<ESM::Light, D>        lights;
-    CellRefList<Tool, D>              lockpicks;
-    CellRefList<Miscellaneous, D>              miscItems;
-    CellRefList<NPC, D>               npcs;
-    CellRefList<Probe, D>             probes;
-    CellRefList<Repair, D>            repairs;
-    CellRefList<Static, D>            statics;
-    CellRefList<Weapon, D>            weapons;
+    CellRefList<ESM::Tool, D>              lockpicks;
+    CellRefList<ESM::Miscellaneous, D>              miscItems;
+    CellRefList<ESM::NPC, D>               npcs;
+    CellRefList<ESM::Probe, D>             probes;
+    CellRefList<ESM::Repair, D>            repairs;
+    CellRefList<ESM::Static, D>            statics;
+    CellRefList<ESM::Weapon, D>            weapons;
 
-    void load (const ESMStore &store, ESMReader &esm)
+    void load (const ESMS::ESMStore &store, ESM::ESMReader &esm)
     {
         if (mState!=State_Loaded)
         {
@@ -143,7 +133,7 @@ namespace ESMS
         }
     }
 
-    void preload (const ESMStore &store, ESMReader &esm)
+    void preload (const ESMS::ESMStore &store, ESM::ESMReader &esm)
     {
         if (mState==State_Unloaded)
         {
@@ -196,7 +186,7 @@ namespace ESMS
     }
 
     /// Run through references and store IDs
-    void listRefs(const ESMStore &store, ESMReader &esm)
+    void listRefs(const ESMS::ESMStore &store, ESM::ESMReader &esm)
     {
         assert (cell);
 
@@ -206,7 +196,7 @@ namespace ESMS
         // Reopen the ESM reader and seek to the right position.
         cell->restore (esm);
 
-        CellRef ref;
+        ESM::CellRef ref;
 
         // Get each reference in turn
         while (cell->getNextRef (esm, ref))
@@ -222,7 +212,7 @@ namespace ESMS
         std::sort (mIds.begin(), mIds.end());
     }
 
-    void loadRefs(const ESMStore &store, ESMReader &esm)
+    void loadRefs(const ESMS::ESMStore &store, ESM::ESMReader &esm)
     {
       assert (cell);
 
@@ -232,7 +222,7 @@ namespace ESMS
       // Reopen the ESM reader and seek to the right position.
       cell->restore(esm);
 
-      CellRef ref;
+      ESM::CellRef ref;
 
       // Get each reference in turn
       while(cell->getNextRef(esm, ref))
@@ -253,26 +243,26 @@ namespace ESMS
            */
           switch(rec)
             {
-            case REC_ACTI: activators.find(ref, store.activators); break;
-            case REC_ALCH: potions.find(ref, store.potions); break;
-            case REC_APPA: appas.find(ref, store.appas); break;
-            case REC_ARMO: armors.find(ref, store.armors); break;
-            case REC_BOOK: books.find(ref, store.books); break;
-            case REC_CLOT: clothes.find(ref, store.clothes); break;
-            case REC_CONT: containers.find(ref, store.containers); break;
-            case REC_CREA: creatures.find(ref, store.creatures); break;
-            case REC_DOOR: doors.find(ref, store.doors); break;
-            case REC_INGR: ingreds.find(ref, store.ingreds); break;
-            case REC_LEVC: creatureLists.find(ref, store.creatureLists); break;
-            case REC_LEVI: itemLists.find(ref, store.itemLists); break;
-            case REC_LIGH: lights.find(ref, store.lights); break;
-            case REC_LOCK: lockpicks.find(ref, store.lockpicks); break;
-            case REC_MISC: miscItems.find(ref, store.miscItems); break;
-            case REC_NPC_: npcs.find(ref, store.npcs); break;
-            case REC_PROB: probes.find(ref, store.probes); break;
-            case REC_REPA: repairs.find(ref, store.repairs); break;
-            case REC_STAT: statics.find(ref, store.statics); break;
-            case REC_WEAP: weapons.find(ref, store.weapons); break;
+            case ESM::REC_ACTI: activators.find(ref, store.activators); break;
+            case ESM::REC_ALCH: potions.find(ref, store.potions); break;
+            case ESM::REC_APPA: appas.find(ref, store.appas); break;
+            case ESM::REC_ARMO: armors.find(ref, store.armors); break;
+            case ESM::REC_BOOK: books.find(ref, store.books); break;
+            case ESM::REC_CLOT: clothes.find(ref, store.clothes); break;
+            case ESM::REC_CONT: containers.find(ref, store.containers); break;
+            case ESM::REC_CREA: creatures.find(ref, store.creatures); break;
+            case ESM::REC_DOOR: doors.find(ref, store.doors); break;
+            case ESM::REC_INGR: ingreds.find(ref, store.ingreds); break;
+            case ESM::REC_LEVC: creatureLists.find(ref, store.creatureLists); break;
+            case ESM::REC_LEVI: itemLists.find(ref, store.itemLists); break;
+            case ESM::REC_LIGH: lights.find(ref, store.lights); break;
+            case ESM::REC_LOCK: lockpicks.find(ref, store.lockpicks); break;
+            case ESM::REC_MISC: miscItems.find(ref, store.miscItems); break;
+            case ESM::REC_NPC_: npcs.find(ref, store.npcs); break;
+            case ESM::REC_PROB: probes.find(ref, store.probes); break;
+            case ESM::REC_REPA: repairs.find(ref, store.repairs); break;
+            case ESM::REC_STAT: statics.find(ref, store.statics); break;
+            case ESM::REC_WEAP: weapons.find(ref, store.weapons); break;
 
             case 0: std::cout << "Cell reference " + ref.refID + " not found!\n"; break;
             default:

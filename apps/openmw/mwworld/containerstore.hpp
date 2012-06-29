@@ -3,8 +3,7 @@
 
 #include <iterator>
 
-#include <components/esm_store/cell_store.hpp>
-
+#include "cellstore.hpp"
 #include "refdata.hpp"
 #include "ptr.hpp"
 
@@ -40,18 +39,18 @@ namespace MWWorld
 
         private:
 
-            ESMS::CellRefList<ESM::Potion, RefData>            potions;
-            ESMS::CellRefList<ESM::Apparatus, RefData>         appas;
-            ESMS::CellRefList<ESM::Armor, RefData>             armors;
-            ESMS::CellRefList<ESM::Book, RefData>              books;
-            ESMS::CellRefList<ESM::Clothing, RefData>          clothes;
-            ESMS::CellRefList<ESM::Ingredient, RefData>        ingreds;
-            ESMS::CellRefList<ESM::Light, RefData>             lights;
-            ESMS::CellRefList<ESM::Tool, RefData>              lockpicks;
-            ESMS::CellRefList<ESM::Miscellaneous, RefData>     miscItems;
-            ESMS::CellRefList<ESM::Probe, RefData>             probes;
-            ESMS::CellRefList<ESM::Repair, RefData>            repairs;
-            ESMS::CellRefList<ESM::Weapon, RefData>            weapons;
+            MWWorld::CellRefList<ESM::Potion, RefData>            potions;
+            MWWorld::CellRefList<ESM::Apparatus, RefData>         appas;
+            MWWorld::CellRefList<ESM::Armor, RefData>             armors;
+            MWWorld::CellRefList<ESM::Book, RefData>              books;
+            MWWorld::CellRefList<ESM::Clothing, RefData>          clothes;
+            MWWorld::CellRefList<ESM::Ingredient, RefData>        ingreds;
+            MWWorld::CellRefList<ESM::Light, RefData>             lights;
+            MWWorld::CellRefList<ESM::Tool, RefData>              lockpicks;
+            MWWorld::CellRefList<ESM::Miscellaneous, RefData>     miscItems;
+            MWWorld::CellRefList<ESM::Probe, RefData>             probes;
+            MWWorld::CellRefList<ESM::Repair, RefData>            repairs;
+            MWWorld::CellRefList<ESM::Weapon, RefData>            weapons;
             int mStateId;
             mutable float mCachedWeight;
             mutable bool mWeightUpToDate;
@@ -122,18 +121,18 @@ namespace MWWorld
             ContainerStore *mContainer;
             mutable Ptr mPtr;
 
-            ESMS::CellRefList<ESM::Potion, RefData>::List::iterator mPotion;
-            ESMS::CellRefList<ESM::Apparatus, RefData>::List::iterator mApparatus;
-            ESMS::CellRefList<ESM::Armor, RefData>::List::iterator mArmor;
-            ESMS::CellRefList<ESM::Book, RefData>::List::iterator mBook;
-            ESMS::CellRefList<ESM::Clothing, RefData>::List::iterator mClothing;
-            ESMS::CellRefList<ESM::Ingredient, RefData>::List::iterator mIngredient;
-            ESMS::CellRefList<ESM::Light, RefData>::List::iterator mLight;
-            ESMS::CellRefList<ESM::Tool, RefData>::List::iterator mLockpick;
-            ESMS::CellRefList<ESM::Miscellaneous, RefData>::List::iterator mMiscellaneous;
-            ESMS::CellRefList<ESM::Probe, RefData>::List::iterator mProbe;
-            ESMS::CellRefList<ESM::Repair, RefData>::List::iterator mRepair;
-            ESMS::CellRefList<ESM::Weapon, RefData>::List::iterator mWeapon;
+            MWWorld::CellRefList<ESM::Potion, RefData>::List::iterator mPotion;
+            MWWorld::CellRefList<ESM::Apparatus, RefData>::List::iterator mApparatus;
+            MWWorld::CellRefList<ESM::Armor, RefData>::List::iterator mArmor;
+            MWWorld::CellRefList<ESM::Book, RefData>::List::iterator mBook;
+            MWWorld::CellRefList<ESM::Clothing, RefData>::List::iterator mClothing;
+            MWWorld::CellRefList<ESM::Ingredient, RefData>::List::iterator mIngredient;
+            MWWorld::CellRefList<ESM::Light, RefData>::List::iterator mLight;
+            MWWorld::CellRefList<ESM::Tool, RefData>::List::iterator mLockpick;
+            MWWorld::CellRefList<ESM::Miscellaneous, RefData>::List::iterator mMiscellaneous;
+            MWWorld::CellRefList<ESM::Probe, RefData>::List::iterator mProbe;
+            MWWorld::CellRefList<ESM::Repair, RefData>::List::iterator mRepair;
+            MWWorld::CellRefList<ESM::Weapon, RefData>::List::iterator mWeapon;
 
         private:
 
@@ -144,18 +143,18 @@ namespace MWWorld
             ///< Begin-iterator
 
             // construct iterator using a CellRefList iterator
-            ContainerStoreIterator (ContainerStore *container, ESMS::CellRefList<ESM::Potion, RefData>::List::iterator);
-            ContainerStoreIterator (ContainerStore *container, ESMS::CellRefList<ESM::Apparatus, RefData>::List::iterator);
-            ContainerStoreIterator (ContainerStore *container, ESMS::CellRefList<ESM::Armor, RefData>::List::iterator);
-            ContainerStoreIterator (ContainerStore *container, ESMS::CellRefList<ESM::Book, RefData>::List::iterator);
-            ContainerStoreIterator (ContainerStore *container, ESMS::CellRefList<ESM::Clothing, RefData>::List::iterator);
-            ContainerStoreIterator (ContainerStore *container, ESMS::CellRefList<ESM::Ingredient, RefData>::List::iterator);
-            ContainerStoreIterator (ContainerStore *container, ESMS::CellRefList<ESM::Light, RefData>::List::iterator);
-            ContainerStoreIterator (ContainerStore *container, ESMS::CellRefList<ESM::Tool, RefData>::List::iterator);
-            ContainerStoreIterator (ContainerStore *container, ESMS::CellRefList<ESM::Miscellaneous, RefData>::List::iterator);
-            ContainerStoreIterator (ContainerStore *container, ESMS::CellRefList<ESM::Probe, RefData>::List::iterator);
-            ContainerStoreIterator (ContainerStore *container, ESMS::CellRefList<ESM::Repair, RefData>::List::iterator);
-            ContainerStoreIterator (ContainerStore *container, ESMS::CellRefList<ESM::Weapon, RefData>::List::iterator);
+            ContainerStoreIterator (ContainerStore *container, MWWorld::CellRefList<ESM::Potion, RefData>::List::iterator);
+            ContainerStoreIterator (ContainerStore *container, MWWorld::CellRefList<ESM::Apparatus, RefData>::List::iterator);
+            ContainerStoreIterator (ContainerStore *container, MWWorld::CellRefList<ESM::Armor, RefData>::List::iterator);
+            ContainerStoreIterator (ContainerStore *container, MWWorld::CellRefList<ESM::Book, RefData>::List::iterator);
+            ContainerStoreIterator (ContainerStore *container, MWWorld::CellRefList<ESM::Clothing, RefData>::List::iterator);
+            ContainerStoreIterator (ContainerStore *container, MWWorld::CellRefList<ESM::Ingredient, RefData>::List::iterator);
+            ContainerStoreIterator (ContainerStore *container, MWWorld::CellRefList<ESM::Light, RefData>::List::iterator);
+            ContainerStoreIterator (ContainerStore *container, MWWorld::CellRefList<ESM::Tool, RefData>::List::iterator);
+            ContainerStoreIterator (ContainerStore *container, MWWorld::CellRefList<ESM::Miscellaneous, RefData>::List::iterator);
+            ContainerStoreIterator (ContainerStore *container, MWWorld::CellRefList<ESM::Probe, RefData>::List::iterator);
+            ContainerStoreIterator (ContainerStore *container, MWWorld::CellRefList<ESM::Repair, RefData>::List::iterator);
+            ContainerStoreIterator (ContainerStore *container, MWWorld::CellRefList<ESM::Weapon, RefData>::List::iterator);
 
             void incType();
 

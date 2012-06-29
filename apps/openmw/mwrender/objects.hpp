@@ -3,8 +3,6 @@
 
 #include <openengine/ogre/renderer.hpp>
 
-#include <components/esm_store/cell_store.hpp>
-
 #include "../mwworld/refdata.hpp"
 #include "../mwworld/ptr.hpp"
 
@@ -88,7 +86,7 @@ public:
     ///< \return found?
 
     void removeCell(MWWorld::Ptr::CellStore* store);
-    void buildStaticGeometry(ESMS::CellStore<MWWorld::RefData> &cell);
+    void buildStaticGeometry(MWWorld::Ptr::CellStore &cell);
     void setMwRoot(Ogre::SceneNode* root);
 };
 }

@@ -136,13 +136,13 @@ class RenderingManager: private RenderingInterface, public Ogre::WindowEventList
     int skyGetMasserPhase() const;
     int skyGetSecundaPhase() const;
     void skySetMoonColour (bool red);
-    void configureAmbient(ESMS::CellStore<MWWorld::RefData> &mCell);
+    void configureAmbient(MWWorld::Ptr::CellStore &mCell);
 
     void requestMap (MWWorld::Ptr::CellStore* cell);
     ///< request the local map for a cell
 
     /// configure fog according to cell
-    void configureFog(ESMS::CellStore<MWWorld::RefData> &mCell);
+    void configureFog(MWWorld::Ptr::CellStore &mCell);
 
     /// configure fog manually
     void configureFog(const float density, const Ogre::ColourValue& colour);

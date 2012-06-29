@@ -5,7 +5,7 @@
 #include <typeinfo>
 #include <stdexcept>
 
-#include <boost/algorithm/string.hpp>    
+#include <boost/algorithm/string.hpp>
 
 #include <components/esm/loadcont.hpp>
 
@@ -19,11 +19,11 @@
 namespace
 {
     template<typename T>
-    float getTotalWeight (const ESMS::CellRefList<T, MWWorld::RefData>& cellRefList)
+    float getTotalWeight (const MWWorld::CellRefList<T, MWWorld::RefData>& cellRefList)
     {
         float sum = 0;
 
-        for (typename ESMS::CellRefList<T, MWWorld::RefData>::List::const_iterator iter (
+        for (typename MWWorld::CellRefList<T, MWWorld::RefData>::List::const_iterator iter (
             cellRefList.list.begin());
             iter!=cellRefList.list.end();
             ++iter)
@@ -78,7 +78,7 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add (const Ptr& ptr)
     // this ensures that gold piles of different sizes stack with each other (also, several scripts rely on Gold_001 for detecting player gold)
     if (MWWorld::Class::get(ptr).getName(ptr) == MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sGold")->str)
     {
-        ESMS::LiveCellRef<ESM::Miscellaneous, MWWorld::RefData> *gold =
+        MWWorld::LiveCellRef<ESM::Miscellaneous, MWWorld::RefData> *gold =
             ptr.get<ESM::Miscellaneous>();
 
         if (compare_string_ci(gold->ref.refID, "gold_001")
@@ -281,29 +281,29 @@ MWWorld::ContainerStoreIterator::ContainerStoreIterator (int mask, ContainerStor
     ++*this;
 }
 
-MWWorld::ContainerStoreIterator::ContainerStoreIterator (ContainerStore *container, ESMS::CellRefList<ESM::Potion, RefData>::List::iterator iterator)
+MWWorld::ContainerStoreIterator::ContainerStoreIterator (ContainerStore *container, MWWorld::CellRefList<ESM::Potion, RefData>::List::iterator iterator)
     : mType(MWWorld::ContainerStore::Type_Potion), mMask(MWWorld::ContainerStore::Type_All), mContainer(container), mPotion(iterator){}
-MWWorld::ContainerStoreIterator::ContainerStoreIterator (ContainerStore *container, ESMS::CellRefList<ESM::Apparatus, RefData>::List::iterator iterator)
+MWWorld::ContainerStoreIterator::ContainerStoreIterator (ContainerStore *container, MWWorld::CellRefList<ESM::Apparatus, RefData>::List::iterator iterator)
     : mType(MWWorld::ContainerStore::Type_Apparatus), mMask(MWWorld::ContainerStore::Type_All), mContainer(container), mApparatus(iterator){}
-MWWorld::ContainerStoreIterator::ContainerStoreIterator (ContainerStore *container, ESMS::CellRefList<ESM::Armor, RefData>::List::iterator iterator)
+MWWorld::ContainerStoreIterator::ContainerStoreIterator (ContainerStore *container, MWWorld::CellRefList<ESM::Armor, RefData>::List::iterator iterator)
     : mType(MWWorld::ContainerStore::Type_Armor), mMask(MWWorld::ContainerStore::Type_All), mContainer(container), mArmor(iterator){}
-MWWorld::ContainerStoreIterator::ContainerStoreIterator (ContainerStore *container, ESMS::CellRefList<ESM::Book, RefData>::List::iterator iterator)
+MWWorld::ContainerStoreIterator::ContainerStoreIterator (ContainerStore *container, MWWorld::CellRefList<ESM::Book, RefData>::List::iterator iterator)
     : mType(MWWorld::ContainerStore::Type_Book), mMask(MWWorld::ContainerStore::Type_All), mContainer(container), mBook(iterator){}
-MWWorld::ContainerStoreIterator::ContainerStoreIterator (ContainerStore *container, ESMS::CellRefList<ESM::Clothing, RefData>::List::iterator iterator)
+MWWorld::ContainerStoreIterator::ContainerStoreIterator (ContainerStore *container, MWWorld::CellRefList<ESM::Clothing, RefData>::List::iterator iterator)
     : mType(MWWorld::ContainerStore::Type_Clothing), mMask(MWWorld::ContainerStore::Type_All), mContainer(container), mClothing(iterator){}
-MWWorld::ContainerStoreIterator::ContainerStoreIterator (ContainerStore *container, ESMS::CellRefList<ESM::Ingredient, RefData>::List::iterator iterator)
+MWWorld::ContainerStoreIterator::ContainerStoreIterator (ContainerStore *container, MWWorld::CellRefList<ESM::Ingredient, RefData>::List::iterator iterator)
     : mType(MWWorld::ContainerStore::Type_Ingredient), mMask(MWWorld::ContainerStore::Type_All), mContainer(container), mIngredient(iterator){}
-MWWorld::ContainerStoreIterator::ContainerStoreIterator (ContainerStore *container, ESMS::CellRefList<ESM::Light, RefData>::List::iterator iterator)
+MWWorld::ContainerStoreIterator::ContainerStoreIterator (ContainerStore *container, MWWorld::CellRefList<ESM::Light, RefData>::List::iterator iterator)
     : mType(MWWorld::ContainerStore::Type_Light), mMask(MWWorld::ContainerStore::Type_All), mContainer(container), mLight(iterator){}
-MWWorld::ContainerStoreIterator::ContainerStoreIterator (ContainerStore *container, ESMS::CellRefList<ESM::Tool, RefData>::List::iterator iterator)
+MWWorld::ContainerStoreIterator::ContainerStoreIterator (ContainerStore *container, MWWorld::CellRefList<ESM::Tool, RefData>::List::iterator iterator)
     : mType(MWWorld::ContainerStore::Type_Lockpick), mMask(MWWorld::ContainerStore::Type_All), mContainer(container), mLockpick(iterator){}
-MWWorld::ContainerStoreIterator::ContainerStoreIterator (ContainerStore *container, ESMS::CellRefList<ESM::Miscellaneous, RefData>::List::iterator iterator)
+MWWorld::ContainerStoreIterator::ContainerStoreIterator (ContainerStore *container, MWWorld::CellRefList<ESM::Miscellaneous, RefData>::List::iterator iterator)
     : mType(MWWorld::ContainerStore::Type_Miscellaneous), mMask(MWWorld::ContainerStore::Type_All), mContainer(container), mMiscellaneous(iterator){}
-MWWorld::ContainerStoreIterator::ContainerStoreIterator (ContainerStore *container, ESMS::CellRefList<ESM::Probe, RefData>::List::iterator iterator)
+MWWorld::ContainerStoreIterator::ContainerStoreIterator (ContainerStore *container, MWWorld::CellRefList<ESM::Probe, RefData>::List::iterator iterator)
     : mType(MWWorld::ContainerStore::Type_Probe), mMask(MWWorld::ContainerStore::Type_All), mContainer(container), mProbe(iterator){}
-MWWorld::ContainerStoreIterator::ContainerStoreIterator (ContainerStore *container, ESMS::CellRefList<ESM::Repair, RefData>::List::iterator iterator)
+MWWorld::ContainerStoreIterator::ContainerStoreIterator (ContainerStore *container, MWWorld::CellRefList<ESM::Repair, RefData>::List::iterator iterator)
     : mType(MWWorld::ContainerStore::Type_Repair), mMask(MWWorld::ContainerStore::Type_All), mContainer(container), mRepair(iterator){}
-MWWorld::ContainerStoreIterator::ContainerStoreIterator (ContainerStore *container, ESMS::CellRefList<ESM::Weapon, RefData>::List::iterator iterator)
+MWWorld::ContainerStoreIterator::ContainerStoreIterator (ContainerStore *container, MWWorld::CellRefList<ESM::Weapon, RefData>::List::iterator iterator)
     : mType(MWWorld::ContainerStore::Type_Weapon), mMask(MWWorld::ContainerStore::Type_All), mContainer(container), mWeapon(iterator){}
 
 void MWWorld::ContainerStoreIterator::incType()

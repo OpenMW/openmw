@@ -33,10 +33,10 @@ namespace
 {
     template<typename T>
     void listCellScripts (const ESMS::ESMStore& store,
-        ESMS::CellRefList<T, MWWorld::RefData>& cellRefList, MWWorld::LocalScripts& localScripts,
+        MWWorld::CellRefList<T, MWWorld::RefData>& cellRefList, MWWorld::LocalScripts& localScripts,
         MWWorld::Ptr::CellStore *cell)
     {
-        for (typename ESMS::CellRefList<T, MWWorld::RefData>::List::iterator iter (
+        for (typename MWWorld::CellRefList<T, MWWorld::RefData>::List::iterator iter (
             cellRefList.list.begin());
             iter!=cellRefList.list.end(); ++iter)
         {
@@ -53,10 +53,10 @@ namespace
     }
 
     template<typename T>
-    ESMS::LiveCellRef<T, MWWorld::RefData> *searchViaHandle (const std::string& handle,
-        ESMS::CellRefList<T, MWWorld::RefData>& refList)
+    MWWorld::LiveCellRef<T, MWWorld::RefData> *searchViaHandle (const std::string& handle,
+        MWWorld::CellRefList<T, MWWorld::RefData>& refList)
     {
-        typedef typename ESMS::CellRefList<T, MWWorld::RefData>::List::iterator iterator;
+        typedef typename MWWorld::CellRefList<T, MWWorld::RefData>::List::iterator iterator;
 
         for (iterator iter (refList.list.begin()); iter!=refList.list.end(); ++iter)
         {
@@ -75,45 +75,45 @@ namespace MWWorld
 {
     Ptr World::getPtrViaHandle (const std::string& handle, Ptr::CellStore& cell)
     {
-        if (ESMS::LiveCellRef<ESM::Activator, RefData> *ref =
+        if (MWWorld::LiveCellRef<ESM::Activator, RefData> *ref =
             searchViaHandle (handle, cell.activators))
             return Ptr (ref, &cell);
-        if (ESMS::LiveCellRef<ESM::Potion, RefData> *ref = searchViaHandle (handle, cell.potions))
+        if (MWWorld::LiveCellRef<ESM::Potion, RefData> *ref = searchViaHandle (handle, cell.potions))
             return Ptr (ref, &cell);
-        if (ESMS::LiveCellRef<ESM::Apparatus, RefData> *ref = searchViaHandle (handle, cell.appas))
+        if (MWWorld::LiveCellRef<ESM::Apparatus, RefData> *ref = searchViaHandle (handle, cell.appas))
             return Ptr (ref, &cell);
-        if (ESMS::LiveCellRef<ESM::Armor, RefData> *ref = searchViaHandle (handle, cell.armors))
+        if (MWWorld::LiveCellRef<ESM::Armor, RefData> *ref = searchViaHandle (handle, cell.armors))
             return Ptr (ref, &cell);
-        if (ESMS::LiveCellRef<ESM::Book, RefData> *ref = searchViaHandle (handle, cell.books))
+        if (MWWorld::LiveCellRef<ESM::Book, RefData> *ref = searchViaHandle (handle, cell.books))
             return Ptr (ref, &cell);
-        if (ESMS::LiveCellRef<ESM::Clothing, RefData> *ref = searchViaHandle (handle, cell.clothes))
+        if (MWWorld::LiveCellRef<ESM::Clothing, RefData> *ref = searchViaHandle (handle, cell.clothes))
             return Ptr (ref, &cell);
-        if (ESMS::LiveCellRef<ESM::Container, RefData> *ref =
+        if (MWWorld::LiveCellRef<ESM::Container, RefData> *ref =
             searchViaHandle (handle, cell.containers))
             return Ptr (ref, &cell);
-        if (ESMS::LiveCellRef<ESM::Creature, RefData> *ref =
+        if (MWWorld::LiveCellRef<ESM::Creature, RefData> *ref =
             searchViaHandle (handle, cell.creatures))
             return Ptr (ref, &cell);
-        if (ESMS::LiveCellRef<ESM::Door, RefData> *ref = searchViaHandle (handle, cell.doors))
+        if (MWWorld::LiveCellRef<ESM::Door, RefData> *ref = searchViaHandle (handle, cell.doors))
             return Ptr (ref, &cell);
-        if (ESMS::LiveCellRef<ESM::Ingredient, RefData> *ref =
+        if (MWWorld::LiveCellRef<ESM::Ingredient, RefData> *ref =
             searchViaHandle (handle, cell.ingreds))
             return Ptr (ref, &cell);
-        if (ESMS::LiveCellRef<ESM::Light, RefData> *ref = searchViaHandle (handle, cell.lights))
+        if (MWWorld::LiveCellRef<ESM::Light, RefData> *ref = searchViaHandle (handle, cell.lights))
             return Ptr (ref, &cell);
-        if (ESMS::LiveCellRef<ESM::Tool, RefData> *ref = searchViaHandle (handle, cell.lockpicks))
+        if (MWWorld::LiveCellRef<ESM::Tool, RefData> *ref = searchViaHandle (handle, cell.lockpicks))
             return Ptr (ref, &cell);
-        if (ESMS::LiveCellRef<ESM::Miscellaneous, RefData> *ref = searchViaHandle (handle, cell.miscItems))
+        if (MWWorld::LiveCellRef<ESM::Miscellaneous, RefData> *ref = searchViaHandle (handle, cell.miscItems))
             return Ptr (ref, &cell);
-        if (ESMS::LiveCellRef<ESM::NPC, RefData> *ref = searchViaHandle (handle, cell.npcs))
+        if (MWWorld::LiveCellRef<ESM::NPC, RefData> *ref = searchViaHandle (handle, cell.npcs))
             return Ptr (ref, &cell);
-        if (ESMS::LiveCellRef<ESM::Probe, RefData> *ref = searchViaHandle (handle, cell.probes))
+        if (MWWorld::LiveCellRef<ESM::Probe, RefData> *ref = searchViaHandle (handle, cell.probes))
             return Ptr (ref, &cell);
-        if (ESMS::LiveCellRef<ESM::Repair, RefData> *ref = searchViaHandle (handle, cell.repairs))
+        if (MWWorld::LiveCellRef<ESM::Repair, RefData> *ref = searchViaHandle (handle, cell.repairs))
             return Ptr (ref, &cell);
-        if (ESMS::LiveCellRef<ESM::Static, RefData> *ref = searchViaHandle (handle, cell.statics))
+        if (MWWorld::LiveCellRef<ESM::Static, RefData> *ref = searchViaHandle (handle, cell.statics))
             return Ptr (ref, &cell);
-        if (ESMS::LiveCellRef<ESM::Weapon, RefData> *ref = searchViaHandle (handle, cell.weapons))
+        if (MWWorld::LiveCellRef<ESM::Weapon, RefData> *ref = searchViaHandle (handle, cell.weapons))
             return Ptr (ref, &cell);
         return Ptr();
     }
@@ -961,8 +961,8 @@ namespace MWWorld
 
     Ogre::Vector2 World::getNorthVector(Ptr::CellStore* cell)
     {
-        ESMS::CellRefList<ESM::Static, MWWorld::RefData> statics = cell->statics;
-        ESMS::LiveCellRef<ESM::Static, MWWorld::RefData>* ref = statics.find("northmarker");
+        MWWorld::CellRefList<ESM::Static, MWWorld::RefData> statics = cell->statics;
+        MWWorld::LiveCellRef<ESM::Static, MWWorld::RefData>* ref = statics.find("northmarker");
         if (!ref)
             return Vector2(0, 1);
         Ogre::SceneNode* node = ref->mData.getBaseNode();

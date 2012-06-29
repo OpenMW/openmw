@@ -1,9 +1,8 @@
 
 #include "refdata.hpp"
 
-#include <components/esm_store/cell_store.hpp>
-
 #include "customdata.hpp"
+#include "cellstore.hpp"
 
 namespace MWWorld
 {

@@ -3,8 +3,7 @@
 
 #include "OgreCamera.h"
 
-#include <components/esm_store/cell_store.hpp>
-
+#include "../mwworld/cellstore.hpp"
 #include "../mwworld/refdata.hpp"
 #include "../mwworld/ptr.hpp"
 
@@ -20,9 +19,9 @@ namespace MWWorld
     class World;
 
     /// \brief NPC object representing the player and additional player data
-    class Player 
+    class Player
     {
-        ESMS::LiveCellRef<ESM::NPC, MWWorld::RefData> mPlayer;
+        LiveCellRef<ESM::NPC, MWWorld::RefData> mPlayer;
         MWWorld::Ptr::CellStore *mCellStore;
         MWRender::Player *mRenderer;
         MWWorld::World& mWorld;

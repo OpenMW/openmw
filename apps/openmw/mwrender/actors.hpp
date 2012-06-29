@@ -1,11 +1,8 @@
 #ifndef _GAME_RENDER_ACTORS_H
 #define _GAME_RENDER_ACTORS_H
 
-#include "components/esm_store/cell_store.hpp"
 #include <map>
 #include <list>
-
-
 
 #include <openengine/ogre/renderer.hpp>
 #include "components/nifogre/ogre_nif_loader.hpp"

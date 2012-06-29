@@ -5,13 +5,12 @@
 
 #include <components/esm/loadmisc.hpp>
 
-#include <components/esm_store/cell_store.hpp>
-
 #include "../mwbase/environment.hpp"
 
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/actiontake.hpp"
 #include "../mwworld/world.hpp"
+#include "../mwworld/cellstore.hpp"
 
 #include "../mwgui/window_manager.hpp"
 #include "../mwgui/tooltips.hpp"
@@ -26,7 +25,7 @@ namespace MWClass
 {
     void Miscellaneous::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const
     {
-        ESMS::LiveCellRef<ESM::Miscellaneous, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Miscellaneous, MWWorld::RefData> *ref =
             ptr.get<ESM::Miscellaneous>();
 
         assert (ref->base != NULL);
@@ -42,7 +41,7 @@ namespace MWClass
 
     void Miscellaneous::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics) const
     {
-        ESMS::LiveCellRef<ESM::Miscellaneous, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Miscellaneous, MWWorld::RefData> *ref =
             ptr.get<ESM::Miscellaneous>();
 
 
@@ -56,7 +55,7 @@ namespace MWClass
 
     std::string Miscellaneous::getName (const MWWorld::Ptr& ptr) const
     {
-        ESMS::LiveCellRef<ESM::Miscellaneous, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Miscellaneous, MWWorld::RefData> *ref =
             ptr.get<ESM::Miscellaneous>();
 
         return ref->base->name;
@@ -73,7 +72,7 @@ namespace MWClass
 
     std::string Miscellaneous::getScript (const MWWorld::Ptr& ptr) const
     {
-        ESMS::LiveCellRef<ESM::Miscellaneous, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Miscellaneous, MWWorld::RefData> *ref =
             ptr.get<ESM::Miscellaneous>();
 
         return ref->base->script;
@@ -81,7 +80,7 @@ namespace MWClass
 
     int Miscellaneous::getValue (const MWWorld::Ptr& ptr) const
     {
-        ESMS::LiveCellRef<ESM::Miscellaneous, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Miscellaneous, MWWorld::RefData> *ref =
             ptr.get<ESM::Miscellaneous>();
 
         return ref->base->data.value;
@@ -96,7 +95,7 @@ namespace MWClass
 
     std::string Miscellaneous::getUpSoundId (const MWWorld::Ptr& ptr) const
     {
-        ESMS::LiveCellRef<ESM::Miscellaneous, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Miscellaneous, MWWorld::RefData> *ref =
             ptr.get<ESM::Miscellaneous>();
 
         if (ref->base->name == MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sGold")->str)
@@ -108,7 +107,7 @@ namespace MWClass
 
     std::string Miscellaneous::getDownSoundId (const MWWorld::Ptr& ptr) const
     {
-        ESMS::LiveCellRef<ESM::Miscellaneous, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Miscellaneous, MWWorld::RefData> *ref =
             ptr.get<ESM::Miscellaneous>();
 
         if (ref->base->name == MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sGold")->str)
@@ -120,7 +119,7 @@ namespace MWClass
 
     std::string Miscellaneous::getInventoryIcon (const MWWorld::Ptr& ptr) const
     {
-          ESMS::LiveCellRef<ESM::Miscellaneous, MWWorld::RefData> *ref =
+          MWWorld::LiveCellRef<ESM::Miscellaneous, MWWorld::RefData> *ref =
             ptr.get<ESM::Miscellaneous>();
 
         return ref->base->icon;
@@ -128,7 +127,7 @@ namespace MWClass
 
     bool Miscellaneous::hasToolTip (const MWWorld::Ptr& ptr) const
     {
-        ESMS::LiveCellRef<ESM::Miscellaneous, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Miscellaneous, MWWorld::RefData> *ref =
             ptr.get<ESM::Miscellaneous>();
 
         return (ref->base->name != "");
@@ -136,7 +135,7 @@ namespace MWClass
 
     MWGui::ToolTipInfo Miscellaneous::getToolTipInfo (const MWWorld::Ptr& ptr) const
     {
-        ESMS::LiveCellRef<ESM::Miscellaneous, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Miscellaneous, MWWorld::RefData> *ref =
             ptr.get<ESM::Miscellaneous>();
 
         MWGui::ToolTipInfo info;

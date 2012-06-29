@@ -86,7 +86,7 @@ namespace MWGui
                                 offerButtonWidth,
                                 mOfferButton->getHeight());
 
-        setCoord(400, 0, 400, 300); 
+        setCoord(400, 0, 400, 300);
 
         static_cast<MyGUI::Window*>(mMainWidget)->eventWindowChangeCoord += MyGUI::newDelegate(this, &TradeWindow::onWindowResize);
     }
@@ -161,7 +161,7 @@ namespace MWGui
         int merchantgold;
         if (mPtr.getTypeName() == typeid(ESM::NPC).name())
         {
-            ESMS::LiveCellRef<ESM::NPC, MWWorld::RefData>* ref = mPtr.get<ESM::NPC>();
+            MWWorld::LiveCellRef<ESM::NPC, MWWorld::RefData>* ref = mPtr.get<ESM::NPC>();
             if (ref->base->npdt52.gold == -10)
                 merchantgold = ref->base->npdt12.gold;
             else
@@ -169,7 +169,7 @@ namespace MWGui
         }
         else // ESM::Creature
         {
-            ESMS::LiveCellRef<ESM::Creature, MWWorld::RefData>* ref = mPtr.get<ESM::Creature>();
+            MWWorld::LiveCellRef<ESM::Creature, MWWorld::RefData>* ref = mPtr.get<ESM::Creature>();
             merchantgold = ref->base->data.gold;
         }
         if (mCurrentBalance > 0 && merchantgold < mCurrentBalance)
@@ -244,7 +244,7 @@ namespace MWGui
         int merchantgold;
         if (mPtr.getTypeName() == typeid(ESM::NPC).name())
         {
-            ESMS::LiveCellRef<ESM::NPC, MWWorld::RefData>* ref = mPtr.get<ESM::NPC>();
+            MWWorld::LiveCellRef<ESM::NPC, MWWorld::RefData>* ref = mPtr.get<ESM::NPC>();
             if (ref->base->npdt52.gold == -10)
                 merchantgold = ref->base->npdt12.gold;
             else
@@ -252,7 +252,7 @@ namespace MWGui
         }
         else // ESM::Creature
         {
-            ESMS::LiveCellRef<ESM::Creature, MWWorld::RefData>* ref = mPtr.get<ESM::Creature>();
+            MWWorld::LiveCellRef<ESM::Creature, MWWorld::RefData>* ref = mPtr.get<ESM::Creature>();
             merchantgold = ref->base->data.gold;
         }
 
@@ -289,13 +289,13 @@ namespace MWGui
         int services = 0;
         if (mPtr.getTypeName() == typeid(ESM::NPC).name())
         {
-            ESMS::LiveCellRef<ESM::NPC, MWWorld::RefData>* ref = mPtr.get<ESM::NPC>();
+            MWWorld::LiveCellRef<ESM::NPC, MWWorld::RefData>* ref = mPtr.get<ESM::NPC>();
             if (ref->base->hasAI)
                 services = ref->base->AI.services;
         }
         else if (mPtr.getTypeName() == typeid(ESM::Creature).name())
         {
-            ESMS::LiveCellRef<ESM::Creature, MWWorld::RefData>* ref = mPtr.get<ESM::Creature>();
+            MWWorld::LiveCellRef<ESM::Creature, MWWorld::RefData>* ref = mPtr.get<ESM::Creature>();
             if (ref->base->hasAI)
                 services = ref->base->AI.services;
         }

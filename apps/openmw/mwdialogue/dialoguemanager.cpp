@@ -392,7 +392,7 @@ namespace MWDialogue
 
                 if(select.type==ESM::VT_Int)
                 {
-                    ESMS::LiveCellRef<ESM::NPC, MWWorld::RefData>* npc = actor.get<ESM::NPC>();
+                    MWWorld::LiveCellRef<ESM::NPC, MWWorld::RefData>* npc = actor.get<ESM::NPC>();
                     int isFaction = int(toLower(npc->base->faction) == toLower(name));
                     if(selectCompare<int,int>(comp,!isFaction,select.i))
                         return false;
@@ -409,7 +409,7 @@ namespace MWDialogue
 
                 if(select.type==ESM::VT_Int)
                 {
-                    ESMS::LiveCellRef<ESM::NPC, MWWorld::RefData>* npc = actor.get<ESM::NPC>();
+                    MWWorld::LiveCellRef<ESM::NPC, MWWorld::RefData>* npc = actor.get<ESM::NPC>();
                     int isClass = int(toLower(npc->base->cls) == toLower(name));
                     if(selectCompare<int,int>(comp,!isClass,select.i))
                         return false;
@@ -426,7 +426,7 @@ namespace MWDialogue
 
                 if(select.type==ESM::VT_Int)
                 {
-                    ESMS::LiveCellRef<ESM::NPC, MWWorld::RefData>* npc = actor.get<ESM::NPC>();
+                    MWWorld::LiveCellRef<ESM::NPC, MWWorld::RefData>* npc = actor.get<ESM::NPC>();
                     int isRace = int(toLower(npc->base->race) == toLower(name));
                     if(selectCompare<int,int>(comp,!isRace,select.i))
                         return false;
@@ -493,7 +493,7 @@ namespace MWDialogue
             if (isCreature)
                 return false;
 
-            ESMS::LiveCellRef<ESM::NPC, MWWorld::RefData> *cellRef = actor.get<ESM::NPC>();
+            MWWorld::LiveCellRef<ESM::NPC, MWWorld::RefData> *cellRef = actor.get<ESM::NPC>();
 
             if (!cellRef)
                 return false;
@@ -508,7 +508,7 @@ namespace MWDialogue
             if (isCreature)
                 return false;
 
-            ESMS::LiveCellRef<ESM::NPC, MWWorld::RefData> *cellRef = actor.get<ESM::NPC>();
+            MWWorld::LiveCellRef<ESM::NPC, MWWorld::RefData> *cellRef = actor.get<ESM::NPC>();
 
             if (!cellRef)
                 return false;
@@ -558,7 +558,7 @@ namespace MWDialogue
         //check gender
         if (!isCreature)
         {
-            ESMS::LiveCellRef<ESM::NPC, MWWorld::RefData>* npc = actor.get<ESM::NPC>();
+            MWWorld::LiveCellRef<ESM::NPC, MWWorld::RefData>* npc = actor.get<ESM::NPC>();
             if(npc->base->flags&npc->base->Female)
             {
                 if(static_cast<int> (info.data.gender)==0)  return false;
@@ -771,13 +771,13 @@ namespace MWDialogue
         int services = 0;
         if (mActor.getTypeName() == typeid(ESM::NPC).name())
         {
-            ESMS::LiveCellRef<ESM::NPC, MWWorld::RefData>* ref = mActor.get<ESM::NPC>();
+            MWWorld::LiveCellRef<ESM::NPC, MWWorld::RefData>* ref = mActor.get<ESM::NPC>();
             if (ref->base->hasAI)
                 services = ref->base->AI.services;
         }
         else if (mActor.getTypeName() == typeid(ESM::Creature).name())
         {
-            ESMS::LiveCellRef<ESM::Creature, MWWorld::RefData>* ref = mActor.get<ESM::Creature>();
+            MWWorld::LiveCellRef<ESM::Creature, MWWorld::RefData>* ref = mActor.get<ESM::Creature>();
             if (ref->base->hasAI)
                 services = ref->base->AI.services;
         }

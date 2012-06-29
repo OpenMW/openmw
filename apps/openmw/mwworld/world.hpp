@@ -6,7 +6,6 @@
 
 #include <boost/filesystem.hpp>
 
-#include <components/esm_store/cell_store.hpp>
 #include <components/settings/settings.hpp>
 
 #include "../mwrender/debugging.hpp"

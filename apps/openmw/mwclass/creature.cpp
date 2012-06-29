@@ -40,7 +40,7 @@ namespace MWClass
         {
             std::auto_ptr<CustomData> data (new CustomData);
 
-            ESMS::LiveCellRef<ESM::Creature, MWWorld::RefData> *ref = ptr.get<ESM::Creature>();
+            MWWorld::LiveCellRef<ESM::Creature, MWWorld::RefData> *ref = ptr.get<ESM::Creature>();
 
             // creature stats
             data->mCreatureStats.mAttributes[0].set (ref->base->data.strength);
@@ -69,7 +69,7 @@ namespace MWClass
 
     std::string Creature::getId (const MWWorld::Ptr& ptr) const
     {
-        ESMS::LiveCellRef<ESM::Creature, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Creature, MWWorld::RefData> *ref =
             ptr.get<ESM::Creature>();
 
         return ref->base->mId;
@@ -83,7 +83,7 @@ namespace MWClass
 
     void Creature::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics) const
     {
-        ESMS::LiveCellRef<ESM::Creature, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Creature, MWWorld::RefData> *ref =
             ptr.get<ESM::Creature>();
 
         const std::string &model = ref->base->model;
@@ -97,7 +97,7 @@ namespace MWClass
 
     std::string Creature::getName (const MWWorld::Ptr& ptr) const
     {
-        ESMS::LiveCellRef<ESM::Creature, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Creature, MWWorld::RefData> *ref =
             ptr.get<ESM::Creature>();
 
         return ref->base->name;
@@ -126,7 +126,7 @@ namespace MWClass
 
     std::string Creature::getScript (const MWWorld::Ptr& ptr) const
     {
-        ESMS::LiveCellRef<ESM::Creature, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Creature, MWWorld::RefData> *ref =
             ptr.get<ESM::Creature>();
 
         return ref->base->script;
@@ -148,7 +148,7 @@ namespace MWClass
 
     MWGui::ToolTipInfo Creature::getToolTipInfo (const MWWorld::Ptr& ptr) const
     {
-        ESMS::LiveCellRef<ESM::Creature, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Creature, MWWorld::RefData> *ref =
             ptr.get<ESM::Creature>();
 
         MWGui::ToolTipInfo info;

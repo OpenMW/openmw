@@ -275,7 +275,7 @@ namespace MWGui
         for (MWWorld::ContainerStoreIterator it(store.begin(MWWorld::ContainerStore::Type_Apparatus));
             it != store.end(); ++it)
         {
-            ESMS::LiveCellRef<ESM::Apparatus, MWWorld::RefData>* ref = it->get<ESM::Apparatus>();
+            MWWorld::LiveCellRef<ESM::Apparatus, MWWorld::RefData>* ref = it->get<ESM::Apparatus>();
             if (ref->base->data.type == ESM::Apparatus::Albemic
             && (bestAlbemic.isEmpty() || ref->base->data.quality > bestAlbemic.get<ESM::Apparatus>()->base->data.quality))
                 bestAlbemic = *it;
@@ -420,7 +420,7 @@ namespace MWGui
                 continue;
 
             // add the effects of this ingredient to list of effects
-            ESMS::LiveCellRef<ESM::Ingredient, MWWorld::RefData>* ref = ingredient->getUserData<MWWorld::Ptr>()->get<ESM::Ingredient>();
+            MWWorld::LiveCellRef<ESM::Ingredient, MWWorld::RefData>* ref = ingredient->getUserData<MWWorld::Ptr>()->get<ESM::Ingredient>();
             for (int i=0; i<4; ++i)
             {
                 if (ref->base->data.effectID[i] < 0)

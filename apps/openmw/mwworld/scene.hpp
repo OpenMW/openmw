@@ -8,8 +8,6 @@
 
 #include <openengine/bullet/physic.hpp>
 
-#include <components/esm_store/cell_store.hpp>
-
 #include "../mwrender/renderingmanager.hpp"
 #include "../mwrender/renderinginterface.hpp"
 
@@ -98,7 +96,7 @@ namespace MWWorld
 
             void markCellAsUnchanged();
 
-            void insertCell(ESMS::CellStore<MWWorld::RefData> &cell);
+            void insertCell (Ptr::CellStore &cell);
 
             /// this method is only meant for dropping objects into the gameworld from a container
             /// and thus only handles object types that can be placed in a container

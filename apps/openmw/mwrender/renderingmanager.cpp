@@ -323,7 +323,7 @@ bool RenderingManager::toggleRenderMode(int mode)
     }
 }
 
-void RenderingManager::configureFog(ESMS::CellStore<MWWorld::RefData> &mCell)
+void RenderingManager::configureFog(MWWorld::Ptr::CellStore &mCell)
 {
     Ogre::ColourValue color;
     color.setAsABGR (mCell.cell->ambi.fog);
@@ -372,7 +372,7 @@ void RenderingManager::setAmbientMode()
   }
 }
 
-void RenderingManager::configureAmbient(ESMS::CellStore<MWWorld::RefData> &mCell)
+void RenderingManager::configureAmbient(MWWorld::Ptr::CellStore &mCell)
 {
     mAmbientColor.setAsABGR (mCell.cell->ambi.ambient);
     setAmbientMode();

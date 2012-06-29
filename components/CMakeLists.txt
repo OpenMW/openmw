@@ -35,7 +35,7 @@ add_component_dir (file_finder
     )
 
 add_component_dir (esm_store
-    cell_store reclists store
+    reclists store
     )
 
 add_component_dir (esm
@@ -74,4 +74,3 @@ target_link_libraries(components ${Boost_LIBRARIES} ${OGRE_LIBRARIES})
 
 # Make the variable accessible for other subdirectories
 set(COMPONENT_FILES ${COMPONENT_FILES} PARENT_SCOPE)
-

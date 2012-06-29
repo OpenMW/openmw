@@ -3,14 +3,13 @@
 
 #include <components/esm/loadappa.hpp>
 
-#include <components/esm_store/cell_store.hpp>
-
 #include "../mwbase/environment.hpp"
 
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/actiontake.hpp"
 #include "../mwworld/actionalchemy.hpp"
 #include "../mwworld/world.hpp"
+#include "../mwworld/cellstore.hpp"
 
 #include "../mwrender/objects.hpp"
 
@@ -23,7 +22,7 @@ namespace MWClass
 {
    void Apparatus::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const
     {
-        ESMS::LiveCellRef<ESM::Apparatus, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Apparatus, MWWorld::RefData> *ref =
             ptr.get<ESM::Apparatus>();
 
         assert (ref->base != NULL);
@@ -39,7 +38,7 @@ namespace MWClass
 
     void Apparatus::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics) const
     {
-        ESMS::LiveCellRef<ESM::Apparatus, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Apparatus, MWWorld::RefData> *ref =
             ptr.get<ESM::Apparatus>();
 
 
@@ -53,7 +52,7 @@ namespace MWClass
 
     std::string Apparatus::getName (const MWWorld::Ptr& ptr) const
     {
-        ESMS::LiveCellRef<ESM::Apparatus, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Apparatus, MWWorld::RefData> *ref =
             ptr.get<ESM::Apparatus>();
 
         return ref->base->name;
@@ -70,7 +69,7 @@ namespace MWClass
 
     std::string Apparatus::getScript (const MWWorld::Ptr& ptr) const
     {
-        ESMS::LiveCellRef<ESM::Apparatus, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Apparatus, MWWorld::RefData> *ref =
             ptr.get<ESM::Apparatus>();
 
         return ref->base->script;
@@ -78,7 +77,7 @@ namespace MWClass
 
     int Apparatus::getValue (const MWWorld::Ptr& ptr) const
     {
-        ESMS::LiveCellRef<ESM::Apparatus, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Apparatus, MWWorld::RefData> *ref =
             ptr.get<ESM::Apparatus>();
 
         return ref->base->data.value;
@@ -103,7 +102,7 @@ namespace MWClass
 
     std::string Apparatus::getInventoryIcon (const MWWorld::Ptr& ptr) const
     {
-          ESMS::LiveCellRef<ESM::Apparatus, MWWorld::RefData> *ref =
+          MWWorld::LiveCellRef<ESM::Apparatus, MWWorld::RefData> *ref =
             ptr.get<ESM::Apparatus>();
 
         return ref->base->icon;
@@ -111,7 +110,7 @@ namespace MWClass
 
     bool Apparatus::hasToolTip (const MWWorld::Ptr& ptr) const
     {
-        ESMS::LiveCellRef<ESM::Apparatus, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Apparatus, MWWorld::RefData> *ref =
             ptr.get<ESM::Apparatus>();
 
         return (ref->base->name != "");
@@ -119,7 +118,7 @@ namespace MWClass
 
     MWGui::ToolTipInfo Apparatus::getToolTipInfo (const MWWorld::Ptr& ptr) const
     {
-        ESMS::LiveCellRef<ESM::Apparatus, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Apparatus, MWWorld::RefData> *ref =
             ptr.get<ESM::Apparatus>();
 
         MWGui::ToolTipInfo info;

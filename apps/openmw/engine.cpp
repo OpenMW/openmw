@@ -15,7 +15,6 @@
 #include <openengine/gui/manager.hpp>
 
 #include <components/esm/records.hpp>
-#include <components/esm_store/cell_store.hpp>
 #include <components/bsa/bsa_archive.hpp>
 #include <components/esm/esm_reader.hpp>
 #include <components/files/fixedpath.hpp>
@@ -42,6 +41,7 @@
 #include "mwworld/world.hpp"
 #include "mwworld/class.hpp"
 #include "mwworld/player.hpp"
+#include "mwworld/cellstore.hpp"
 
 #include "mwclass/classes.hpp"
 
