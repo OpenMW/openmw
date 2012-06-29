@@ -23,7 +23,7 @@ namespace MWClass
 {
     void Probe::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const
     {
-        MWWorld::LiveCellRef<ESM::Probe, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Probe> *ref =
             ptr.get<ESM::Probe>();
 
         assert (ref->base != NULL);
@@ -39,7 +39,7 @@ namespace MWClass
 
     void Probe::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics) const
     {
-        MWWorld::LiveCellRef<ESM::Probe, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Probe> *ref =
             ptr.get<ESM::Probe>();
 
 
@@ -54,7 +54,7 @@ namespace MWClass
 
     std::string Probe::getName (const MWWorld::Ptr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Probe, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Probe> *ref =
             ptr.get<ESM::Probe>();
 
         return ref->base->name;
@@ -70,7 +70,7 @@ namespace MWClass
 
     std::string Probe::getScript (const MWWorld::Ptr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Probe, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Probe> *ref =
             ptr.get<ESM::Probe>();
 
         return ref->base->script;
@@ -87,7 +87,7 @@ namespace MWClass
 
     int Probe::getValue (const MWWorld::Ptr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Probe, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Probe> *ref =
             ptr.get<ESM::Probe>();
 
         return ref->base->data.value;
@@ -112,7 +112,7 @@ namespace MWClass
 
     std::string Probe::getInventoryIcon (const MWWorld::Ptr& ptr) const
     {
-          MWWorld::LiveCellRef<ESM::Probe, MWWorld::RefData> *ref =
+          MWWorld::LiveCellRef<ESM::Probe> *ref =
             ptr.get<ESM::Probe>();
 
         return ref->base->icon;
@@ -120,7 +120,7 @@ namespace MWClass
 
     bool Probe::hasToolTip (const MWWorld::Ptr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Probe, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Probe> *ref =
             ptr.get<ESM::Probe>();
 
         return (ref->base->name != "");
@@ -128,7 +128,7 @@ namespace MWClass
 
     MWGui::ToolTipInfo Probe::getToolTipInfo (const MWWorld::Ptr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Probe, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Probe> *ref =
             ptr.get<ESM::Probe>();
 
         MWGui::ToolTipInfo info;

@@ -23,7 +23,7 @@ namespace MWClass
 {
     void Weapon::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const
     {
-        MWWorld::LiveCellRef<ESM::Weapon, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Weapon> *ref =
             ptr.get<ESM::Weapon>();
 
         assert (ref->base != NULL);
@@ -39,7 +39,7 @@ namespace MWClass
 
     void Weapon::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics) const
     {
-        MWWorld::LiveCellRef<ESM::Weapon, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Weapon> *ref =
             ptr.get<ESM::Weapon>();
 
 
@@ -53,7 +53,7 @@ namespace MWClass
 
     std::string Weapon::getName (const MWWorld::Ptr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Weapon, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Weapon> *ref =
             ptr.get<ESM::Weapon>();
 
         return ref->base->name;
@@ -75,7 +75,7 @@ namespace MWClass
 
     int Weapon::getItemMaxHealth (const MWWorld::Ptr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Weapon, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Weapon> *ref =
             ptr.get<ESM::Weapon>();
 
         return ref->base->data.health;
@@ -83,7 +83,7 @@ namespace MWClass
 
     std::string Weapon::getScript (const MWWorld::Ptr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Weapon, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Weapon> *ref =
             ptr.get<ESM::Weapon>();
 
         return ref->base->script;
@@ -91,7 +91,7 @@ namespace MWClass
 
     std::pair<std::vector<int>, bool> Weapon::getEquipmentSlots (const MWWorld::Ptr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Weapon, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Weapon> *ref =
             ptr.get<ESM::Weapon>();
 
         std::vector<int> slots;
@@ -115,7 +115,7 @@ namespace MWClass
 
     int Weapon::getEquipmentSkill (const MWWorld::Ptr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Weapon, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Weapon> *ref =
             ptr.get<ESM::Weapon>();
 
         const int size = 12;
@@ -145,7 +145,7 @@ namespace MWClass
 
     int Weapon::getValue (const MWWorld::Ptr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Weapon, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Weapon> *ref =
             ptr.get<ESM::Weapon>();
 
         return ref->base->data.value;
@@ -160,7 +160,7 @@ namespace MWClass
 
     std::string Weapon::getUpSoundId (const MWWorld::Ptr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Weapon, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Weapon> *ref =
             ptr.get<ESM::Weapon>();
 
         int type = ref->base->data.type;
@@ -206,7 +206,7 @@ namespace MWClass
 
     std::string Weapon::getDownSoundId (const MWWorld::Ptr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Weapon, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Weapon> *ref =
             ptr.get<ESM::Weapon>();
 
         int type = ref->base->data.type;
@@ -252,7 +252,7 @@ namespace MWClass
 
     std::string Weapon::getInventoryIcon (const MWWorld::Ptr& ptr) const
     {
-          MWWorld::LiveCellRef<ESM::Weapon, MWWorld::RefData> *ref =
+          MWWorld::LiveCellRef<ESM::Weapon> *ref =
             ptr.get<ESM::Weapon>();
 
         return ref->base->icon;
@@ -260,7 +260,7 @@ namespace MWClass
 
     bool Weapon::hasToolTip (const MWWorld::Ptr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Weapon, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Weapon> *ref =
             ptr.get<ESM::Weapon>();
 
         return (ref->base->name != "");
@@ -268,7 +268,7 @@ namespace MWClass
 
     MWGui::ToolTipInfo Weapon::getToolTipInfo (const MWWorld::Ptr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Weapon, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Weapon> *ref =
             ptr.get<ESM::Weapon>();
 
         MWGui::ToolTipInfo info;
@@ -350,7 +350,7 @@ namespace MWClass
 
     std::string Weapon::getEnchantment (const MWWorld::Ptr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Weapon, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Weapon> *ref =
             ptr.get<ESM::Weapon>();
 
         return ref->base->enchant;

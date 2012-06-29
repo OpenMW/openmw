@@ -194,8 +194,7 @@ void Objects::insertLight (const MWWorld::Ptr& ptr, float r, float g, float b, f
     Ogre::Light *light = mRenderer.getScene()->createLight();
     light->setDiffuseColour (r, g, b);
 
-    MWWorld::LiveCellRef<ESM::Light, MWWorld::RefData> *ref =
-        ptr.get<ESM::Light>();
+    MWWorld::LiveCellRef<ESM::Light> *ref = ptr.get<ESM::Light>();
 
     LightInfo info;
     info.name = light->getName();

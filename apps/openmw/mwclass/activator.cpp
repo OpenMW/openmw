@@ -16,7 +16,7 @@ namespace MWClass
 {
    void Activator::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const
     {
-        MWWorld::LiveCellRef<ESM::Activator, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Activator> *ref =
             ptr.get<ESM::Activator>();
 
         assert (ref->base != NULL);
@@ -32,7 +32,7 @@ namespace MWClass
 
     void Activator::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics) const
     {
-        MWWorld::LiveCellRef<ESM::Activator, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Activator> *ref =
             ptr.get<ESM::Activator>();
 
 
@@ -46,7 +46,7 @@ namespace MWClass
 
     std::string Activator::getName (const MWWorld::Ptr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Activator, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Activator> *ref =
             ptr.get<ESM::Activator>();
 
         return ref->base->name;
@@ -54,7 +54,7 @@ namespace MWClass
 
     std::string Activator::getScript (const MWWorld::Ptr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Activator, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Activator> *ref =
             ptr.get<ESM::Activator>();
 
         return ref->base->script;
@@ -69,7 +69,7 @@ namespace MWClass
 
     bool Activator::hasToolTip (const MWWorld::Ptr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Activator, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Activator> *ref =
             ptr.get<ESM::Activator>();
 
         return (ref->base->name != "");
@@ -77,7 +77,7 @@ namespace MWClass
 
     MWGui::ToolTipInfo Activator::getToolTipInfo (const MWWorld::Ptr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Activator, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Activator> *ref =
             ptr.get<ESM::Activator>();
 
         MWGui::ToolTipInfo info;

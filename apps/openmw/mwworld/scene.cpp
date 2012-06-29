@@ -23,7 +23,7 @@ namespace
 
     template<typename T>
     void insertCellRefList(MWRender::RenderingManager& rendering,
-        T& cellRefList, MWWorld::CellStore<MWWorld::RefData> &cell, MWWorld::PhysicsSystem& physics)
+        T& cellRefList, MWWorld::CellStore &cell, MWWorld::PhysicsSystem& physics)
     {
         if (!cellRefList.list.empty())
         {
@@ -348,67 +348,67 @@ namespace MWWorld
         // insert into the correct CellRefList
         if      (type == typeid(ESM::Potion).name())
         {
-            MWWorld::LiveCellRef<ESM::Potion, MWWorld::RefData>* ref = ptr.get<ESM::Potion>();
+            MWWorld::LiveCellRef<ESM::Potion>* ref = ptr.get<ESM::Potion>();
             cell->potions.list.push_back( *ref );
             newPtr = MWWorld::Ptr(&cell->potions.list.back(), cell);
         }
         else if (type == typeid(ESM::Apparatus).name())
         {
-            MWWorld::LiveCellRef<ESM::Apparatus, MWWorld::RefData>* ref = ptr.get<ESM::Apparatus>();
+            MWWorld::LiveCellRef<ESM::Apparatus>* ref = ptr.get<ESM::Apparatus>();
             cell->appas.list.push_back( *ref );
             newPtr = MWWorld::Ptr(&cell->appas.list.back(), cell);
         }
         else if (type == typeid(ESM::Armor).name())
         {
-            MWWorld::LiveCellRef<ESM::Armor, MWWorld::RefData>* ref = ptr.get<ESM::Armor>();
+            MWWorld::LiveCellRef<ESM::Armor>* ref = ptr.get<ESM::Armor>();
             cell->armors.list.push_back( *ref );
             newPtr = MWWorld::Ptr(&cell->armors.list.back(), cell);
         }
         else if (type == typeid(ESM::Book).name())
         {
-            MWWorld::LiveCellRef<ESM::Book, MWWorld::RefData>* ref = ptr.get<ESM::Book>();
+            MWWorld::LiveCellRef<ESM::Book>* ref = ptr.get<ESM::Book>();
             cell->books.list.push_back( *ref );
             newPtr = MWWorld::Ptr(&cell->books.list.back(), cell);
         }
         else if (type == typeid(ESM::Clothing).name())
         {
-            MWWorld::LiveCellRef<ESM::Clothing, MWWorld::RefData>* ref = ptr.get<ESM::Clothing>();
+            MWWorld::LiveCellRef<ESM::Clothing>* ref = ptr.get<ESM::Clothing>();
             cell->clothes.list.push_back( *ref );
             newPtr = MWWorld::Ptr(&cell->clothes.list.back(), cell);
         }
         else if (type == typeid(ESM::Ingredient).name())
         {
-            MWWorld::LiveCellRef<ESM::Ingredient, MWWorld::RefData>* ref = ptr.get<ESM::Ingredient>();
+            MWWorld::LiveCellRef<ESM::Ingredient>* ref = ptr.get<ESM::Ingredient>();
             cell->ingreds.list.push_back( *ref );
             newPtr = MWWorld::Ptr(&cell->ingreds.list.back(), cell);
         }
         else if (type == typeid(ESM::Light).name())
         {
-            MWWorld::LiveCellRef<ESM::Light, MWWorld::RefData>* ref = ptr.get<ESM::Light>();
+            MWWorld::LiveCellRef<ESM::Light>* ref = ptr.get<ESM::Light>();
             cell->lights.list.push_back( *ref );
             newPtr = MWWorld::Ptr(&cell->lights.list.back(), cell);
         }
         else if (type == typeid(ESM::Tool).name())
         {
-            MWWorld::LiveCellRef<ESM::Tool, MWWorld::RefData>* ref = ptr.get<ESM::Tool>();
+            MWWorld::LiveCellRef<ESM::Tool>* ref = ptr.get<ESM::Tool>();
             cell->lockpicks.list.push_back( *ref );
             newPtr = MWWorld::Ptr(&cell->lockpicks.list.back(), cell);
         }
         else if (type == typeid(ESM::Repair).name())
         {
-            MWWorld::LiveCellRef<ESM::Repair, MWWorld::RefData>* ref = ptr.get<ESM::Repair>();
+            MWWorld::LiveCellRef<ESM::Repair>* ref = ptr.get<ESM::Repair>();
             cell->repairs.list.push_back( *ref );
             newPtr = MWWorld::Ptr(&cell->repairs.list.back(), cell);
         }
         else if (type == typeid(ESM::Probe).name())
         {
-            MWWorld::LiveCellRef<ESM::Probe, MWWorld::RefData>* ref = ptr.get<ESM::Probe>();
+            MWWorld::LiveCellRef<ESM::Probe>* ref = ptr.get<ESM::Probe>();
             cell->probes.list.push_back( *ref );
             newPtr = MWWorld::Ptr(&cell->probes.list.back(), cell);
         }
         else if (type == typeid(ESM::Weapon).name())
         {
-            MWWorld::LiveCellRef<ESM::Weapon, MWWorld::RefData>* ref = ptr.get<ESM::Weapon>();
+            MWWorld::LiveCellRef<ESM::Weapon>* ref = ptr.get<ESM::Weapon>();
             cell->weapons.list.push_back( *ref );
             newPtr = MWWorld::Ptr(&cell->weapons.list.back(), cell);
         }
@@ -432,7 +432,7 @@ namespace MWWorld
 
                 MWWorld::ManualRef newRef (MWBase::Environment::get().getWorld()->getStore(), base);
 
-                MWWorld::LiveCellRef<ESM::Miscellaneous, MWWorld::RefData>* ref = newRef.getPtr().get<ESM::Miscellaneous>();
+                MWWorld::LiveCellRef<ESM::Miscellaneous>* ref = newRef.getPtr().get<ESM::Miscellaneous>();
 
                 cell->miscItems.list.push_back( *ref );
                 newPtr = MWWorld::Ptr(&cell->miscItems.list.back(), cell);
@@ -444,7 +444,7 @@ namespace MWWorld
             }
             else
             {
-                MWWorld::LiveCellRef<ESM::Miscellaneous, MWWorld::RefData>* ref = ptr.get<ESM::Miscellaneous>();
+                MWWorld::LiveCellRef<ESM::Miscellaneous>* ref = ptr.get<ESM::Miscellaneous>();
 
                 cell->miscItems.list.push_back( *ref );
                 newPtr = MWWorld::Ptr(&cell->miscItems.list.back(), cell);

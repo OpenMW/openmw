@@ -24,7 +24,7 @@ namespace MWClass
 {
     void Light::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const
     {
-        MWWorld::LiveCellRef<ESM::Light, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Light> *ref =
             ptr.get<ESM::Light>();
 
         assert (ref->base != NULL);
@@ -46,7 +46,7 @@ namespace MWClass
 
     void Light::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics) const
     {
-        MWWorld::LiveCellRef<ESM::Light, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Light> *ref =
             ptr.get<ESM::Light>();
 
         assert (ref->base != NULL);
@@ -64,7 +64,7 @@ namespace MWClass
 
     std::string Light::getName (const MWWorld::Ptr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Light, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Light> *ref =
             ptr.get<ESM::Light>();
 
         if (ref->base->model.empty())
@@ -76,7 +76,7 @@ namespace MWClass
     boost::shared_ptr<MWWorld::Action> Light::activate (const MWWorld::Ptr& ptr,
         const MWWorld::Ptr& actor) const
     {
-        MWWorld::LiveCellRef<ESM::Light, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Light> *ref =
             ptr.get<ESM::Light>();
 
         if (!(ref->base->data.flags & ESM::Light::Carry))
@@ -90,7 +90,7 @@ namespace MWClass
 
     std::string Light::getScript (const MWWorld::Ptr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Light, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Light> *ref =
             ptr.get<ESM::Light>();
 
         return ref->base->script;
@@ -98,7 +98,7 @@ namespace MWClass
 
     std::pair<std::vector<int>, bool> Light::getEquipmentSlots (const MWWorld::Ptr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Light, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Light> *ref =
             ptr.get<ESM::Light>();
 
         std::vector<int> slots;
@@ -111,7 +111,7 @@ namespace MWClass
 
     int Light::getValue (const MWWorld::Ptr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Light, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Light> *ref =
             ptr.get<ESM::Light>();
 
         return ref->base->data.value;
@@ -137,7 +137,7 @@ namespace MWClass
 
     std::string Light::getInventoryIcon (const MWWorld::Ptr& ptr) const
     {
-          MWWorld::LiveCellRef<ESM::Light, MWWorld::RefData> *ref =
+          MWWorld::LiveCellRef<ESM::Light> *ref =
             ptr.get<ESM::Light>();
 
         return ref->base->icon;
@@ -145,7 +145,7 @@ namespace MWClass
 
     bool Light::hasToolTip (const MWWorld::Ptr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Light, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Light> *ref =
             ptr.get<ESM::Light>();
 
         return (ref->base->name != "");
@@ -153,7 +153,7 @@ namespace MWClass
 
     MWGui::ToolTipInfo Light::getToolTipInfo (const MWWorld::Ptr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Light, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Light> *ref =
             ptr.get<ESM::Light>();
 
         MWGui::ToolTipInfo info;

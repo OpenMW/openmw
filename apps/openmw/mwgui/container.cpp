@@ -273,7 +273,7 @@ void ContainerBase::onContainerClicked(MyGUI::Widget* _sender)
             // check the container's Organic flag (if this is a container). container with Organic flag doesn't allow putting items inside
             if (mPtr.getTypeName() == typeid(ESM::Container).name())
             {
-                MWWorld::LiveCellRef<ESM::Container, MWWorld::RefData>* ref = mPtr.get<ESM::Container>();
+                MWWorld::LiveCellRef<ESM::Container>* ref = mPtr.get<ESM::Container>();
                 if (ref->base->flags & ESM::Container::Organic)
                 {
                     // user notification

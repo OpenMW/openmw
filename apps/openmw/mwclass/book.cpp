@@ -20,7 +20,7 @@ namespace MWClass
 {
     void Book::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const
     {
-        MWWorld::LiveCellRef<ESM::Book, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Book> *ref =
             ptr.get<ESM::Book>();
 
         assert (ref->base != NULL);
@@ -36,7 +36,7 @@ namespace MWClass
 
     void Book::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics) const
     {
-        MWWorld::LiveCellRef<ESM::Book, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Book> *ref =
             ptr.get<ESM::Book>();
 
 
@@ -50,7 +50,7 @@ namespace MWClass
 
     std::string Book::getName (const MWWorld::Ptr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Book, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Book> *ref =
             ptr.get<ESM::Book>();
 
         return ref->base->name;
@@ -65,7 +65,7 @@ namespace MWClass
 
     std::string Book::getScript (const MWWorld::Ptr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Book, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Book> *ref =
             ptr.get<ESM::Book>();
 
         return ref->base->script;
@@ -73,7 +73,7 @@ namespace MWClass
 
     int Book::getValue (const MWWorld::Ptr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Book, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Book> *ref =
             ptr.get<ESM::Book>();
 
         return ref->base->data.value;
@@ -98,7 +98,7 @@ namespace MWClass
 
     std::string Book::getInventoryIcon (const MWWorld::Ptr& ptr) const
     {
-          MWWorld::LiveCellRef<ESM::Book, MWWorld::RefData> *ref =
+          MWWorld::LiveCellRef<ESM::Book> *ref =
             ptr.get<ESM::Book>();
 
         return ref->base->icon;
@@ -106,7 +106,7 @@ namespace MWClass
 
     bool Book::hasToolTip (const MWWorld::Ptr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Book, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Book> *ref =
             ptr.get<ESM::Book>();
 
         return (ref->base->name != "");
@@ -114,7 +114,7 @@ namespace MWClass
 
     MWGui::ToolTipInfo Book::getToolTipInfo (const MWWorld::Ptr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Book, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Book> *ref =
             ptr.get<ESM::Book>();
 
         MWGui::ToolTipInfo info;
@@ -142,7 +142,7 @@ namespace MWClass
 
     std::string Book::getEnchantment (const MWWorld::Ptr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Book, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Book> *ref =
             ptr.get<ESM::Book>();
 
         return ref->base->enchant;

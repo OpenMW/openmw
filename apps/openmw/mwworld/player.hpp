@@ -21,7 +21,7 @@ namespace MWWorld
     /// \brief NPC object representing the player and additional player data
     class Player
     {
-        LiveCellRef<ESM::NPC, MWWorld::RefData> mPlayer;
+        LiveCellRef<ESM::NPC> mPlayer;
         MWWorld::Ptr::CellStore *mCellStore;
         MWRender::Player *mRenderer;
         MWWorld::World& mWorld;
@@ -118,7 +118,7 @@ namespace MWWorld
         void setLeftRight (int value);
 
         void setForwardBackward (int value);
-		void setUpDown(int value);
+        void setUpDown(int value);
 
         void toggleRunning();
     };

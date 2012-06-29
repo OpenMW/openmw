@@ -11,7 +11,7 @@ namespace MWClass
 {
     void Static::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const
     {
-        MWWorld::LiveCellRef<ESM::Static, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Static> *ref =
             ptr.get<ESM::Static>();
 
         assert (ref->base != NULL);
@@ -27,7 +27,7 @@ namespace MWClass
 
     void Static::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics) const
     {
-        MWWorld::LiveCellRef<ESM::Static, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Static> *ref =
             ptr.get<ESM::Static>();
 
         assert (ref->base != NULL);

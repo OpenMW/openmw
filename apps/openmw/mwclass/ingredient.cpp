@@ -21,7 +21,7 @@ namespace MWClass
 {
     void Ingredient::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const
     {
-        MWWorld::LiveCellRef<ESM::Ingredient, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Ingredient> *ref =
             ptr.get<ESM::Ingredient>();
 
         assert (ref->base != NULL);
@@ -37,7 +37,7 @@ namespace MWClass
 
     void Ingredient::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics) const
     {
-        MWWorld::LiveCellRef<ESM::Ingredient, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Ingredient> *ref =
             ptr.get<ESM::Ingredient>();
 
         const std::string &model = ref->base->model;
@@ -49,7 +49,7 @@ namespace MWClass
 
     std::string Ingredient::getName (const MWWorld::Ptr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Ingredient, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Ingredient> *ref =
             ptr.get<ESM::Ingredient>();
 
         return ref->base->name;
@@ -66,7 +66,7 @@ namespace MWClass
 
     std::string Ingredient::getScript (const MWWorld::Ptr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Ingredient, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Ingredient> *ref =
             ptr.get<ESM::Ingredient>();
 
         return ref->base->script;
@@ -74,7 +74,7 @@ namespace MWClass
 
     int Ingredient::getValue (const MWWorld::Ptr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Ingredient, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Ingredient> *ref =
             ptr.get<ESM::Ingredient>();
 
         return ref->base->data.value;
@@ -99,7 +99,7 @@ namespace MWClass
 
     std::string Ingredient::getInventoryIcon (const MWWorld::Ptr& ptr) const
     {
-          MWWorld::LiveCellRef<ESM::Ingredient, MWWorld::RefData> *ref =
+          MWWorld::LiveCellRef<ESM::Ingredient> *ref =
             ptr.get<ESM::Ingredient>();
 
         return ref->base->icon;
@@ -107,7 +107,7 @@ namespace MWClass
 
     bool Ingredient::hasToolTip (const MWWorld::Ptr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Ingredient, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Ingredient> *ref =
             ptr.get<ESM::Ingredient>();
 
         return (ref->base->name != "");
@@ -115,7 +115,7 @@ namespace MWClass
 
     MWGui::ToolTipInfo Ingredient::getToolTipInfo (const MWWorld::Ptr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Ingredient, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Ingredient> *ref =
             ptr.get<ESM::Ingredient>();
 
         MWGui::ToolTipInfo info;

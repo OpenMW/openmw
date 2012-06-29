@@ -38,7 +38,7 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, OEngine::Render::OgreRendere
 	lfoot(0),
 	rfoot(0)
     {
-     MWWorld::LiveCellRef<ESM::NPC, MWWorld::RefData> *ref =
+     MWWorld::LiveCellRef<ESM::NPC> *ref =
             ptr.get<ESM::NPC>();
 	 Ogre::Entity* blank = 0;
 	  std::vector<Nif::NiTriShapeCopy>* blankshape = 0;

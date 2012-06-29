@@ -8,7 +8,6 @@
 #include <components/esm/loadcell.hpp>
 
 #include "cellstore.hpp"
-#include "refdata.hpp"
 
 namespace MWWorld
 {
@@ -20,7 +19,8 @@ namespace MWWorld
     {
         public:
 
-            typedef MWWorld::CellStore<RefData> CellStore;
+            typedef MWWorld::CellStore CellStore;
+            ///< \deprecated
 
             boost::any mPtr;
             ESM::CellRef *mCellRef;
@@ -50,7 +50,7 @@ namespace MWWorld
             }
 
             template<typename T>
-            Ptr (MWWorld::LiveCellRef<T, RefData> *liveCellRef, CellStore *cell)
+            Ptr (MWWorld::LiveCellRef<T> *liveCellRef, CellStore *cell)
             : mContainerStore (0)
             {
                 mPtr = liveCellRef;
@@ -61,9 +61,9 @@ namespace MWWorld
             }
 
             template<typename T>
-            MWWorld::LiveCellRef<T, RefData> *get() const
+            MWWorld::LiveCellRef<T> *get() const
             {
-                return boost::any_cast<MWWorld::LiveCellRef<T, RefData>*> (mPtr);
+                return boost::any_cast<MWWorld::LiveCellRef<T>*> (mPtr);
             }
 
             ESM::CellRef& getCellRef() const;

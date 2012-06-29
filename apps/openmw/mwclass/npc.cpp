@@ -53,7 +53,7 @@ namespace MWClass
         {
             std::auto_ptr<CustomData> data (new CustomData);
 
-            MWWorld::LiveCellRef<ESM::NPC, MWWorld::RefData> *ref = ptr.get<ESM::NPC>();
+            MWWorld::LiveCellRef<ESM::NPC> *ref = ptr.get<ESM::NPC>();
 
             // NPC stats
             if (!ref->base->faction.empty())
@@ -107,7 +107,7 @@ namespace MWClass
 
     std::string Npc::getId (const MWWorld::Ptr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::NPC, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::NPC> *ref =
             ptr.get<ESM::NPC>();
 
         return ref->base->mId;
@@ -120,7 +120,7 @@ namespace MWClass
 
     void Npc::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics) const
     {
-        MWWorld::LiveCellRef<ESM::NPC, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::NPC> *ref =
             ptr.get<ESM::NPC>();
 
         assert (ref->base != NULL);
@@ -138,7 +138,7 @@ namespace MWClass
 
     std::string Npc::getName (const MWWorld::Ptr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::NPC, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::NPC> *ref =
             ptr.get<ESM::NPC>();
 
         return ref->base->name;
@@ -182,7 +182,7 @@ namespace MWClass
 
     std::string Npc::getScript (const MWWorld::Ptr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::NPC, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::NPC> *ref =
             ptr.get<ESM::NPC>();
 
         return ref->base->script;
@@ -302,7 +302,7 @@ namespace MWClass
 
     MWGui::ToolTipInfo Npc::getToolTipInfo (const MWWorld::Ptr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::NPC, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::NPC> *ref =
             ptr.get<ESM::NPC>();
 
         MWGui::ToolTipInfo info;

@@ -52,7 +52,7 @@ namespace MWClass
 
     void Container::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const
     {
-        MWWorld::LiveCellRef<ESM::Container, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Container> *ref =
             ptr.get<ESM::Container>();
 
         assert (ref->base != NULL);
@@ -68,7 +68,7 @@ namespace MWClass
 
     void Container::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics) const
     {
-        MWWorld::LiveCellRef<ESM::Container, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Container> *ref =
             ptr.get<ESM::Container>();
 
 
@@ -116,7 +116,7 @@ namespace MWClass
 
     std::string Container::getName (const MWWorld::Ptr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Container, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Container> *ref =
             ptr.get<ESM::Container>();
 
         return ref->base->name;
@@ -132,7 +132,7 @@ namespace MWClass
 
     std::string Container::getScript (const MWWorld::Ptr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Container, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Container> *ref =
             ptr.get<ESM::Container>();
 
         return ref->base->script;
@@ -147,7 +147,7 @@ namespace MWClass
 
     bool Container::hasToolTip (const MWWorld::Ptr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Container, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Container> *ref =
             ptr.get<ESM::Container>();
 
         return (ref->base->name != "");
@@ -155,7 +155,7 @@ namespace MWClass
 
     MWGui::ToolTipInfo Container::getToolTipInfo (const MWWorld::Ptr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Container, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Container> *ref =
             ptr.get<ESM::Container>();
 
         MWGui::ToolTipInfo info;
@@ -181,7 +181,7 @@ namespace MWClass
 
     float Container::getCapacity (const MWWorld::Ptr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Container, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Container> *ref =
             ptr.get<ESM::Container>();
 
         return ref->base->weight;
