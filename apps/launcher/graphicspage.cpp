@@ -1,10 +1,24 @@
 #include <QtGui>
 
+#include <boost/math/common_factor.hpp>
+
 #include <components/files/configurationmanager.hpp>
 #include <components/settings/settings.hpp>
 
 #include "graphicspage.hpp"
 #include "naturalsort.hpp"
+
+QString getAspect(int x, int y)
+{
+    int gcd = boost::math::gcd (x, y);
+    int xaspect = x / gcd;
+    int yaspect = y / gcd;
+    // special case: 8 : 5 is usually referred to as 16:10
+    if (xaspect == 8 && yaspect == 5)
+        return QString("16:10");
+
+    return QString(QString::number(xaspect) + ":" + QString::number(yaspect));
+}
 
 GraphicsPage::GraphicsPage(Files::ConfigurationManager &cfg, QWidget *parent)
     : QWidget(parent)
@@ -163,7 +177,7 @@ void GraphicsPage::readConfig()
     QString resolution = QString::number(Settings::Manager::getInt("resolution x", "Video"));
     resolution.append(" x " + QString::number(Settings::Manager::getInt("resolution y", "Video")));
 
-    int resIndex = mResolutionComboBox->findText(resolution);
+    int resIndex = mResolutionComboBox->findText(resolution, Qt::MatchStartsWith);
     if (resIndex != -1)
         mResolutionComboBox->setCurrentIndex(resIndex);
 }
@@ -175,8 +189,8 @@ void GraphicsPage::writeConfig()
     Settings::Manager::setString("antialiasing", "Video", mAntiAliasingComboBox->currentText().toStdString());
     Settings::Manager::setString("render system", "Video", mRendererComboBox->currentText().toStdString());
 
-    // parse resolution x and y from a string like "800 x 600"
-    QString resolution = mResolutionComboBox->currentText();
+    // Get the current resolution, but with the tabs replaced with a single space
+    QString resolution = mResolutionComboBox->currentText().simplified();
     QStringList tokens = resolution.split(" ", QString::SkipEmptyParts);
 
     int resX = tokens.at(0).toInt();
@@ -235,22 +249,31 @@ QStringList GraphicsPage::getAvailableResolutions(Ogre::RenderSystem *renderer)
 
         Ogre::StringVector::iterator opt_it;
         uint idx = 0;
+
         for (opt_it = i->second.possibleValues.begin ();
-        opt_it != i->second.possibleValues.end (); opt_it++, idx++)
+             opt_it != i->second.possibleValues.end (); opt_it++, idx++)
         {
             QString qval = QString::fromStdString(*opt_it).simplified();
             // remove extra tokens after the resolution (for example bpp, can be there or not depending on rendersystem)
             QStringList tokens = qval.split(" ", QString::SkipEmptyParts);
             assert (tokens.size() >= 3);
             QString resolutionStr = tokens.at(0) + QString(" x ") + tokens.at(2);
-            {
 
-                // do not add duplicate resolutions
-                if (!result.contains(resolutionStr))
-                    result << resolutionStr;
+            // do not add duplicate resolutions
+            if (!result.contains(resolutionStr)) {
+
+                QString aspect = getAspect(tokens.at(0).toInt(),tokens.at(2).toInt());
+
+                if (aspect == QLatin1String("16:9") || aspect == QLatin1String("16:10")) {
+                    resolutionStr.append(tr("\t(Widescreen ") + aspect + ")");
+
+                } else if (aspect == QLatin1String("4:3")) {
+                    resolutionStr.append(tr("\t(Standard 4:3)"));
+                }
+
+                result << resolutionStr;
             }
         }
-
     }
 
     // Sort the resolutions in descending order
