@@ -64,7 +64,7 @@ add_openmw_dir (mwmechanics
     )
 
 add_openmw_dir (mwbase
-    environment
+    environment world
     )
 
 # Main executable

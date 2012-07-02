@@ -154,19 +154,19 @@ namespace MWWorld
             mRendering->skyDisable();
     }
 
-    void World::setFallbackValues(std::map<std::string,std::string> fallbackMap)
+    void World::setFallbackValues (const std::map<std::string,std::string>& fallbackMap)
     {
         mFallback = fallbackMap;
     }
 
-    std::string World::getFallback(std::string key)
+    std::string World::getFallback (const std::string& key) const
     {
         return getFallback(key, "");
     }
 
-    std::string World::getFallback(std::string key, std::string def)
+    std::string World::getFallback (const std::string& key, const std::string& def) const
     {
-        std::map<std::string,std::string>::iterator it;
+        std::map<std::string,std::string>::const_iterator it;
         if((it = mFallback.find(key)) == mFallback.end())
         {
             return def;
@@ -351,7 +351,7 @@ namespace MWWorld
         throw std::runtime_error ("unknown Ogre handle: " + handle);
     }
 
-    void World::enable (Ptr reference)
+    void World::enable (const Ptr& reference)
     {
         if (!reference.getRefData().isEnabled())
         {
@@ -362,7 +362,7 @@ namespace MWWorld
         }
     }
 
-    void World::disable (Ptr reference)
+    void World::disable (const Ptr& reference)
     {
         if (reference.getRefData().isEnabled())
         {
@@ -537,7 +537,7 @@ namespace MWWorld
         }
     }
 
-    void World::deleteObject (Ptr ptr)
+    void World::deleteObject (const Ptr& ptr)
     {
         if (ptr.getRefData().getCount()>0)
         {
@@ -552,7 +552,7 @@ namespace MWWorld
         }
     }
 
-    bool World::moveObjectImp (Ptr ptr, float x, float y, float z)
+    bool World::moveObjectImp (const Ptr& ptr, float x, float y, float z)
     {
         bool ret = false;
         ptr.getRefData().getPosition().pos[0] = x;
@@ -590,7 +590,7 @@ namespace MWWorld
         return ret;
     }
 
-    void World::moveObject (Ptr ptr, float x, float y, float z)
+    void World::moveObject (const Ptr& ptr, float x, float y, float z)
     {
         moveObjectImp(ptr, x, y, z);
 
@@ -753,6 +753,8 @@ namespace MWWorld
 
     void World::update (float duration)
     {
+        /// \todo split this function up into subfunctions
+
         mWorldScene->update (duration);
 
         mWeatherManager->update (duration);
@@ -959,7 +961,7 @@ namespace MWWorld
         return mRendering->getFader();
     }
 
-    Ogre::Vector2 World::getNorthVector(Ptr::CellStore* cell)
+    Ogre::Vector2 World::getNorthVector (CellStore* cell)
     {
         MWWorld::CellRefList<ESM::Static> statics = cell->statics;
         MWWorld::LiveCellRef<ESM::Static>* ref = statics.find("northmarker");
@@ -981,14 +983,14 @@ namespace MWWorld
         mRendering->toggleWater();
     }
 
-    bool World::placeObject(MWWorld::Ptr object, float cursorX, float cursorY)
+    bool World::placeObject (const Ptr& object, float cursorX, float cursorY)
     {
         std::pair<bool, Ogre::Vector3> result = mPhysics->castRay(cursorX, cursorY);
 
         if (!result.first)
             return false;
 
-        MWWorld::Ptr::CellStore* cell;
+        CellStore* cell;
         if (isCellExterior())
         {
             int cellX, cellY;
@@ -1021,7 +1023,7 @@ namespace MWWorld
         return true;
     }
 
-    void World::dropObjectOnGround(MWWorld::Ptr object)
+    void World::dropObjectOnGround (const Ptr& object)
     {
         MWWorld::Ptr::CellStore* cell = getPlayer().getPlayer().getCell();
 
