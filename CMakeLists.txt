@@ -432,6 +432,9 @@ if(WIN32)
     include(CPack)
 endif(WIN32)
 
+# Extern
+add_subdirectory (extern/shiny)
+
 # Components
 add_subdirectory (components)
 
