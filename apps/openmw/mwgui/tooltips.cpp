@@ -14,7 +14,7 @@ using namespace MWGui;
 using namespace MyGUI;
 
 ToolTips::ToolTips(WindowManager* windowManager) :
-    Layout("openmw_tooltips.xml")
+    Layout("openmw_tooltips.layout")
     , mGameMode(true)
     , mWindowManager(windowManager)
     , mFullHelp(false)
@@ -564,8 +564,6 @@ void ToolTips::createAttributeToolTip(MyGUI::Widget* widget, int attributeId)
     if (attributeId == -1)
         return;
 
-    const ESM::Attribute* attr = MWBase::Environment::get().getWorld()->getStore().attributes.search(attributeId);
-    assert(attr);
     std::string icon = ESM::Attribute::attributeIcons[attributeId];
     std::string name = ESM::Attribute::gmstAttributeIds[attributeId];
     std::string desc = ESM::Attribute::gmstAttributeDescIds[attributeId];

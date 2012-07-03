@@ -20,7 +20,7 @@
 using namespace MWGui;
 
 HUD::HUD(int width, int height, int fpsLevel, DragAndDrop* dragAndDrop)
-    : Layout("openmw_hud_layout.xml")
+    : Layout("openmw_hud.layout")
     , health(NULL)
     , magicka(NULL)
     , stamina(NULL)

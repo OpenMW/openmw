@@ -20,7 +20,7 @@ using namespace Widgets;
 const int ReviewDialog::lineHeight = 18;
 
 ReviewDialog::ReviewDialog(WindowManager& parWindowManager)
-    : WindowBase("openmw_chargen_review_layout.xml", parWindowManager)
+    : WindowBase("openmw_chargen_review.layout", parWindowManager)
     , lastPos(0)
 {
     // Centre dialog

@@ -14,7 +14,7 @@
 namespace MWGui
 {
     TradeWindow::TradeWindow(WindowManager& parWindowManager) :
-        WindowBase("openmw_trade_window_layout.xml", parWindowManager)
+        WindowBase("openmw_trade_window.layout", parWindowManager)
         , ContainerBase(NULL) // no drag&drop
         , mCurrentBalance(0)
     {

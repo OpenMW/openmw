@@ -592,7 +592,7 @@ MWWorld::ContainerStore& ContainerBase::getContainerStore()
 
 ContainerWindow::ContainerWindow(WindowManager& parWindowManager,DragAndDrop* dragAndDrop)
     : ContainerBase(dragAndDrop)
-    , WindowBase("openmw_container_window_layout.xml", parWindowManager)
+    , WindowBase("openmw_container_window.layout", parWindowManager)
 {
     getWidget(mTakeButton, "TakeButton");
     getWidget(mCloseButton, "CloseButton");

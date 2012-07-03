@@ -75,7 +75,7 @@ namespace
 namespace MWGui
 {
     SettingsWindow::SettingsWindow(WindowManager& parWindowManager) :
-        WindowBase("openmw_settings_window_layout.xml", parWindowManager)
+        WindowBase("openmw_settings_window.layout", parWindowManager)
     {
         getWidget(mOkButton, "OkButton");
         getWidget(mResolutionList, "ResolutionList");

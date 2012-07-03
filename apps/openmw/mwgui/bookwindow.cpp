@@ -13,7 +13,7 @@
 using namespace MWGui;
 
 BookWindow::BookWindow (WindowManager& parWindowManager) :
-    WindowBase("openmw_book_layout.xml", parWindowManager)
+    WindowBase("openmw_book.layout", parWindowManager)
 {
     getWidget(mCloseButton, "CloseButton");
     mCloseButton->eventMouseButtonClick += MyGUI::newDelegate(this, &BookWindow::onCloseButtonClicked);

@@ -8,7 +8,7 @@
 namespace MWGui
 {
     ConfirmationDialog::ConfirmationDialog(WindowManager& parWindowManager) :
-        WindowBase("openmw_confirmation_dialog_layout.xml", parWindowManager)
+        WindowBase("openmw_confirmation_dialog.layout", parWindowManager)
     {
         getWidget(mMessage, "Message");
         getWidget(mOkButton, "OkButton");

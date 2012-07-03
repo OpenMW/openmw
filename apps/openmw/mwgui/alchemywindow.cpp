@@ -27,7 +27,7 @@ namespace
 namespace MWGui
 {
     AlchemyWindow::AlchemyWindow(WindowManager& parWindowManager)
-        : WindowBase("openmw_alchemy_window_layout.xml", parWindowManager)
+        : WindowBase("openmw_alchemy_window.layout", parWindowManager)
         , ContainerBase(0)
     {
         getWidget(mCreateButton, "CreateButton");

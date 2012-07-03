@@ -11,7 +11,7 @@
 using namespace MWGui;
 
 ScrollWindow::ScrollWindow (WindowManager& parWindowManager) :
-    WindowBase("openmw_scroll_layout.xml", parWindowManager)
+    WindowBase("openmw_scroll.layout", parWindowManager)
 {
     getWidget(mTextView, "TextView");
 

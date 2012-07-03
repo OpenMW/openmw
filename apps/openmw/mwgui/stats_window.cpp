@@ -19,7 +19,7 @@ using namespace MWGui;
 const int StatsWindow::lineHeight = 18;
 
 StatsWindow::StatsWindow (WindowManager& parWindowManager)
-  : WindowPinnableBase("openmw_stats_window_layout.xml", parWindowManager)
+  : WindowPinnableBase("openmw_stats_window.layout", parWindowManager)
   , skillAreaWidget(NULL)
   , skillClientWidget(NULL)
   , skillScrollerWidget(NULL)

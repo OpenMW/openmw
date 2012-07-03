@@ -42,7 +42,7 @@ namespace MWGui
 
     InventoryWindow::InventoryWindow(WindowManager& parWindowManager,DragAndDrop* dragAndDrop)
         : ContainerBase(dragAndDrop)
-        , WindowPinnableBase("openmw_inventory_window_layout.xml", parWindowManager)
+        , WindowPinnableBase("openmw_inventory_window.layout", parWindowManager)
         , mTrading(false)
     {
         static_cast<MyGUI::Window*>(mMainWidget)->eventWindowChangeCoord += MyGUI::newDelegate(this, &InventoryWindow::onWindowResize);

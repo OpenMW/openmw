@@ -39,7 +39,7 @@ namespace
 namespace MWGui
 {
     SpellWindow::SpellWindow(WindowManager& parWindowManager)
-        : WindowPinnableBase("openmw_spell_window_layout.xml", parWindowManager)
+        : WindowPinnableBase("openmw_spell_window.layout", parWindowManager)
         , mHeight(0)
         , mWidth(0)
     {

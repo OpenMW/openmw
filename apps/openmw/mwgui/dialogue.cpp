@@ -43,7 +43,7 @@ std::string::size_type find_str_ci(const std::string& str, const std::string& su
 
 
 DialogueWindow::DialogueWindow(WindowManager& parWindowManager)
-    : WindowBase("openmw_dialogue_window_layout.xml", parWindowManager)
+    : WindowBase("openmw_dialogue_window.layout", parWindowManager)
     , mEnabled(true)
     , mShowTrade(false)
 {
