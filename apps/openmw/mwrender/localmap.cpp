@@ -2,6 +2,7 @@
 
 #include <OgreOverlayManager.h>
 #include <OgreMaterialManager.h>
+#include <OgreHardwarePixelBuffer.h>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"

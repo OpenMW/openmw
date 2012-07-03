@@ -1,5 +1,14 @@
 #include "water.hpp"
 
+#include <OgreRenderTarget.h>
+#include <OgreEntity.h>
+#include <OgreMeshManager.h>
+#include <OgreHardwarePixelBuffer.h>
+#include <OgreCompositorManager.h>
+#include <OgreCompositorInstance.h>
+#include <OgreCompositorChain.h>
+#include <OgreRoot.h>
+
 #include "sky.hpp"
 #include "renderingmanager.hpp"
 #include "compositors.hpp"

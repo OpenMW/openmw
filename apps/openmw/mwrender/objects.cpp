@@ -1,6 +1,11 @@
 #include "objects.hpp"
 
 #include <OgreSceneNode.h>
+#include <OgreSceneManager.h>
+#include <OgreEntity.h>
+#include <OgreLight.h>
+#include <OgreSubEntity.h>
+#include <OgreStaticGeometry.h>
 
 #include <components/nifogre/ogre_nif_loader.hpp>
 #include <components/settings/settings.hpp>

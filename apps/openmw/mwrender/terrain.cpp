@@ -2,6 +2,7 @@
 
 #include <OgreTerrain.h>
 #include <OgreTerrainGroup.h>
+#include <OgreHardwarePixelBuffer.h>
 
 #include <components/esm_store/store.hpp>
 

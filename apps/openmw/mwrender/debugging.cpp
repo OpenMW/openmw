@@ -6,6 +6,7 @@
 #include <OgreSceneManager.h>
 #include <OgreMaterial.h>
 #include <OgreMaterialManager.h>
+#include <OgreManualObject.h>
 
 #include <components/esm/loadstat.hpp>
 #include <components/esm/loadpgrd.hpp>

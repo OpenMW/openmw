@@ -3,11 +3,14 @@
 
 #include <string>
 
-#include <Ogre.h>
-
 #include <components/esm/defs.hpp>
 
 #include "../mwscript/locals.hpp"
+
+namespace Ogre
+{
+    class SceneNode;
+}
 
 namespace ESM
 {

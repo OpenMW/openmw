@@ -1,5 +1,9 @@
 #include "npcanimation.hpp"
 
+#include <OgreSceneManager.h>
+#include <OgreEntity.h>
+#include <OgreSubEntity.h>
+
 #include <components/esm_store/store.hpp>
 
 #include "../mwbase/environment.hpp"

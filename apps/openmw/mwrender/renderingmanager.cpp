@@ -2,12 +2,17 @@
 
 #include <cassert>
 
-#include "OgreRoot.h"
-#include "OgreRenderWindow.h"
-#include "OgreSceneManager.h"
-#include "OgreViewport.h"
-#include "OgreCamera.h"
-#include "OgreTextureManager.h"
+#include <OgreRoot.h>
+#include <OgreRenderWindow.h>
+#include <OgreSceneManager.h>
+#include <OgreViewport.h>
+#include <OgreCamera.h>
+#include <OgreTextureManager.h>
+#include <OgreCompositorManager.h>
+#include <OgreCompositorChain.h>
+#include <OgreCompositionTargetPass.h>
+#include <OgreCompositionPass.h>
+#include <OgreHardwarePixelBuffer.h>
 
 #include <components/esm/loadstat.hpp>
 #include <components/settings/settings.hpp>

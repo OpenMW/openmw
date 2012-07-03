@@ -2,6 +2,8 @@
 
 #include <boost/lexical_cast.hpp>
 
+#include <OgreResourceGroupManager.h>
+
 #include <components/settings/settings.hpp>
 
 #include "../mwbase/world.hpp"

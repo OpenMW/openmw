@@ -1,4 +1,9 @@
 #include "creatureanimation.hpp"
+
+#include <OgreEntity.h>
+#include <OgreSceneManager.h>
+#include <OgreSubEntity.h>
+
 #include "renderconst.hpp"
 
 #include "../mwbase/world.hpp"

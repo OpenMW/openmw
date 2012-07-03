@@ -26,12 +26,10 @@
 
 #include <OgreResource.h>
 #include <OgreMesh.h>
-#include <assert.h>
+
+#include <cassert>
 #include <string>
-#include    <boost/algorithm/string.hpp>
-#include <Ogre.h>
-#include <stdio.h>
-#include <iostream>
+#include <boost/algorithm/string.hpp>
 
 #include <libs/mangle/vfs/servers/ogre_vfs.hpp>
 #include "../nif/nif_file.hpp"
@@ -45,7 +43,6 @@
 #include <vector>
 #include <list>
 // For warning messages
-#include <iostream>
 #include <limits>
 using namespace boost::algorithm;
 
@@ -193,7 +190,7 @@ class NIFLoader : Ogre::ManualResourceLoader
 		std::vector<Nif::NiTriShapeCopy> mS;
         std::vector<Ogre::SubMesh*> needBoneAssignments;
         bool inTheSkeletonTree;
-        
+
 
 };
 

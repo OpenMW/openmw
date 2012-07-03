@@ -1,6 +1,8 @@
 
 #include "refdata.hpp"
 
+#include <OgreSceneNode.h>
+
 #include "customdata.hpp"
 #include "cellstore.hpp"
 
