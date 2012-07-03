@@ -11,8 +11,12 @@
 #include <components/settings/settings.hpp>
 
 #include "../mwbase/environment.hpp"
-#include "../mwworld/world.hpp"
+#include "../mwbase/world.hpp"
+
+#include "../mwrender/renderingmanager.hpp"
+
 #include "../mwsound/soundmanager.hpp"
+
 #include "../mwinput/inputmanager.hpp"
 
 #include "window_manager.hpp"

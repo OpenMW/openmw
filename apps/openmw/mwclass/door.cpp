@@ -3,20 +3,21 @@
 
 #include <components/esm/loaddoor.hpp>
 
-#include <components/esm_store/cell_store.hpp>
-
 #include "../mwbase/environment.hpp"
+#include "../mwbase/world.hpp"
 
 #include "../mwworld/player.hpp"
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/nullaction.hpp"
 #include "../mwworld/actionteleport.hpp"
-#include "../mwworld/world.hpp"
+#include "../mwworld/cellstore.hpp"
+#include "../mwworld/physicssystem.hpp"
 
 #include "../mwgui/window_manager.hpp"
 #include "../mwgui/tooltips.hpp"
 
 #include "../mwrender/objects.hpp"
+#include "../mwrender/renderinginterface.hpp"
 
 #include "../mwsound/soundmanager.hpp"
 
@@ -24,7 +25,7 @@ namespace MWClass
 {
     void Door::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const
     {
-         ESMS::LiveCellRef<ESM::Door, MWWorld::RefData> *ref =
+         MWWorld::LiveCellRef<ESM::Door> *ref =
             ptr.get<ESM::Door>();
 
         assert (ref->base != NULL);
@@ -40,7 +41,7 @@ namespace MWClass
 
     void Door::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics) const
     {
-         ESMS::LiveCellRef<ESM::Door, MWWorld::RefData> *ref =
+         MWWorld::LiveCellRef<ESM::Door> *ref =
             ptr.get<ESM::Door>();
 
         const std::string &model = ref->base->model;
@@ -52,7 +53,7 @@ namespace MWClass
 
     std::string Door::getName (const MWWorld::Ptr& ptr) const
     {
-        ESMS::LiveCellRef<ESM::Door, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Door> *ref =
             ptr.get<ESM::Door>();
 
         if (ref->ref.teleport && !ref->ref.destCell.empty()) // TODO doors that lead to exteriors
@@ -64,7 +65,7 @@ namespace MWClass
     boost::shared_ptr<MWWorld::Action> Door::activate (const MWWorld::Ptr& ptr,
         const MWWorld::Ptr& actor) const
     {
-        ESMS::LiveCellRef<ESM::Door, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Door> *ref =
             ptr.get<ESM::Door>();
 
         const std::string &openSound = ref->base->openSound;
@@ -134,7 +135,7 @@ namespace MWClass
 
     std::string Door::getScript (const MWWorld::Ptr& ptr) const
     {
-        ESMS::LiveCellRef<ESM::Door, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Door> *ref =
             ptr.get<ESM::Door>();
 
         return ref->base->script;
@@ -149,7 +150,7 @@ namespace MWClass
 
     bool Door::hasToolTip (const MWWorld::Ptr& ptr) const
     {
-        ESMS::LiveCellRef<ESM::Door, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Door> *ref =
             ptr.get<ESM::Door>();
 
         return (ref->base->name != "");
@@ -157,7 +158,7 @@ namespace MWClass
 
     MWGui::ToolTipInfo Door::getToolTipInfo (const MWWorld::Ptr& ptr) const
     {
-        ESMS::LiveCellRef<ESM::Door, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Door> *ref =
             ptr.get<ESM::Door>();
 
         MWGui::ToolTipInfo info;

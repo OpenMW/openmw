@@ -5,8 +5,9 @@
 
 #include <components/interpreter/context.hpp>
 
+#include "../mwbase/world.hpp"
+
 #include "../mwworld/ptr.hpp"
-#include "../mwworld/world.hpp"
 #include "../mwworld/action.hpp"
 
 namespace MWSound

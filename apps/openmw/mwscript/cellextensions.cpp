@@ -1,6 +1,8 @@
 
 #include "cellextensions.hpp"
 
+#include <components/esm_store/store.hpp>
+
 #include <components/compiler/extensions.hpp>
 
 #include <components/interpreter/interpreter.hpp>
@@ -8,8 +10,8 @@
 #include <components/interpreter/opcodes.hpp>
 
 #include "../mwbase/environment.hpp"
+#include "../mwbase/world.hpp"
 
-#include "../mwworld/world.hpp"
 #include "../mwworld/player.hpp"
 
 #include "interpretercontext.hpp"

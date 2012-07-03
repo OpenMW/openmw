@@ -3,7 +3,6 @@
 #include <btBulletCollisionCommon.h>
 #include <BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h>
 #include <components/nifbullet/bullet_nif_loader.hpp>
-//#include <apps\openmw\mwworld\world.hpp>
 #include "CMotionState.h"
 #include "OgreRoot.h"
 #include "btKinematicCharacterController.h"
@@ -286,7 +285,7 @@ namespace Physic
                 minh = h;
                 maxh = h;
             }
-            
+
             if (h>maxh) maxh = h;
             if (h<minh) minh = h;
         }

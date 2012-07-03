@@ -1,6 +1,8 @@
 
 #include "player.hpp"
 
+#include <OgreSceneNode.h>
+
 namespace MWRender
 {
     Player::Player (Ogre::Camera *camera, Ogre::SceneNode* node)
@@ -23,5 +25,10 @@ namespace MWRender
 
             pitchNode->setOrientation(xr);
             yawNode->setOrientation(yr);
+    }
+
+    std::string Player::getHandle() const
+    {
+        return mNode->getName();
     }
 }

@@ -15,6 +15,11 @@ namespace Ogre
     class Vector3;
 }
 
+namespace MWWorld
+{
+    class CellStore;
+}
+
 namespace MWMechanics
 {
     class MechanicsManager
@@ -43,7 +48,7 @@ namespace MWMechanics
             void removeActor (const MWWorld::Ptr& ptr);
             ///< Deregister an actor for stats management
 
-            void dropActors (const MWWorld::Ptr::CellStore *cellStore);
+            void dropActors (const MWWorld::CellStore *cellStore);
             ///< Deregister all actors in the given cell.
 
             void watchActor (const MWWorld::Ptr& ptr);

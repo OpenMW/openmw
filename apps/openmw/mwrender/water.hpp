@@ -1,19 +1,34 @@
 #ifndef GAME_MWRENDER_WATER_H
 #define GAME_MWRENDER_WATER_H
 
-#include <Ogre.h>
+#include <OgrePlane.h>
+#include <OgreRenderQueue.h>
+#include <OgreRenderQueueListener.h>
+#include <OgreRenderTargetListener.h>
+#include <OgreMaterial.h>
+#include <OgreTexture.h>
+
 #include <components/esm/loadcell.hpp>
 #include <components/settings/settings.hpp>
 
 #include "renderconst.hpp"
 
+namespace Ogre
+{
+    class Camera;
+    class SceneManager;
+    class SceneNode;
+    class Entity;
+    class Vector3;
+    struct RenderTargetEvent;
+};
 
 namespace MWRender {
 
     class SkyManager;
     class RenderingManager;
 
-    /// Water rendering 	
+    /// Water rendering
     class Water : public Ogre::RenderTargetListener, public Ogre::RenderQueueListener
     {
         static const int CELL_SIZE = 8192;

@@ -6,10 +6,13 @@
 
 #include <boost/lexical_cast.hpp>
 
-#include "../mwmechanics/mechanicsmanager.hpp"
-#include "../mwworld/world.hpp"
-#include "../mwworld/player.hpp"
 #include "../mwbase/environment.hpp"
+#include "../mwbase/world.hpp"
+
+#include "../mwworld/player.hpp"
+#include "../mwworld/class.hpp"
+
+#include "../mwmechanics/mechanicsmanager.hpp"
 
 #include "window_manager.hpp"
 #include "tooltips.hpp"
@@ -539,7 +542,7 @@ void StatsWindow::updateSkillArea()
         skillWidgets[skillWidgets.size()-1-i]->setUserString("ToolTipLayout", "TextToolTip");
         skillWidgets[skillWidgets.size()-1-i]->setUserString("Caption_Text", "#{sSkillsMenuReputationHelp}");
     }
-    
+
     addValueItem(mWindowManager.getGameSettingString("sBounty", "Bounty"),
                 boost::lexical_cast<std::string>(static_cast<int>(bounty)), "normal", coord1, coord2);
 

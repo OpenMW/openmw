@@ -1,9 +1,11 @@
 #ifndef MWMECHANICS_SPELLSUCCESS_H
 #define MWMECHANICS_SPELLSUCCESS_H
 
-#include "../mwworld/ptr.hpp"
-#include "../mwworld/world.hpp"
+#include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
+
+#include "../mwworld/ptr.hpp"
+#include "../mwworld/class.hpp"
 #include "../mwmechanics/creaturestats.hpp"
 
 #include "npcstats.hpp"

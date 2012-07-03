@@ -31,8 +31,7 @@ void ScrollWindow::open (MWWorld::Ptr scroll)
 
     mScroll = scroll;
 
-    ESMS::LiveCellRef<ESM::Book, MWWorld::RefData> *ref =
-        mScroll.get<ESM::Book>();
+    MWWorld::LiveCellRef<ESM::Book> *ref = mScroll.get<ESM::Book>();
 
     BookTextParser parser;
     MyGUI::IntSize size = parser.parse(ref->base->text, mTextView, 390);

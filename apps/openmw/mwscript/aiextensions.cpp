@@ -7,6 +7,8 @@
 #include <components/interpreter/runtime.hpp>
 #include <components/interpreter/opcodes.hpp>
 
+#include "../mwworld/class.hpp"
+
 #include "../mwmechanics/creaturestats.hpp"
 
 #include "interpretercontext.hpp"

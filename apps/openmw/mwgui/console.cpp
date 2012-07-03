@@ -3,6 +3,9 @@
 
 #include <algorithm>
 
+#include <components/esm_store/reclists.hpp>
+#include <components/esm_store/store.hpp>
+
 #include <components/compiler/exception.hpp>
 
 #include "../mwscript/extensions.hpp"

@@ -55,8 +55,7 @@ void BookWindow::open (MWWorld::Ptr book)
 
     MWBase::Environment::get().getSoundManager()->playSound ("book open", 1.0, 1.0);
 
-    ESMS::LiveCellRef<ESM::Book, MWWorld::RefData> *ref =
-        mBook.get<ESM::Book>();
+    MWWorld::LiveCellRef<ESM::Book> *ref = mBook.get<ESM::Book>();
 
     BookTextParser parser;
     std::vector<std::string> results = parser.split(ref->base->text, mLeftPage->getSize().width, mLeftPage->getSize().height);

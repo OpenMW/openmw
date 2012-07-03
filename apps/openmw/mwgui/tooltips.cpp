@@ -1,14 +1,18 @@
 #include "tooltips.hpp"
 
-#include "window_manager.hpp"
-#include "widgets.hpp"
-#include "../mwworld/class.hpp"
-#include "../mwworld/world.hpp"
-#include "../mwbase/environment.hpp"
-
 #include <boost/lexical_cast.hpp>
 
+#include <OgreResourceGroupManager.h>
+
 #include <components/settings/settings.hpp>
+
+#include "../mwbase/world.hpp"
+#include "../mwbase/environment.hpp"
+
+#include "../mwworld/class.hpp"
+
+#include "window_manager.hpp"
+#include "widgets.hpp"
 
 using namespace MWGui;
 using namespace MyGUI;
@@ -392,7 +396,7 @@ IntSize ToolTips::createToolTip(const MWGui::ToolTipInfo& info)
 
         /**
          * \todo
-         * the various potion effects should appear in the tooltip depending if the player 
+         * the various potion effects should appear in the tooltip depending if the player
          * has enough skill in alchemy to know about the effects of this potion.
          */
 

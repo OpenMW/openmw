@@ -130,7 +130,7 @@ namespace MWSound
         void stopSound3D(MWWorld::Ptr reference);
         ///< Stop the given object from playing all sounds.
 
-        void stopSound(const MWWorld::Ptr::CellStore *cell);
+        void stopSound(const MWWorld::CellStore *cell);
         ///< Stop all sounds for the given cell.
 
         void stopSound(const std::string& soundId);
