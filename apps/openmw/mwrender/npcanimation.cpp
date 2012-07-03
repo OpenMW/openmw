@@ -1,8 +1,9 @@
 #include "npcanimation.hpp"
-#include "../mwworld/world.hpp"
-#include "renderconst.hpp"
 
 #include "../mwbase/environment.hpp"
+#include "../mwbase/world.hpp"
+
+#include "renderconst.hpp"
 
 using namespace Ogre;
 using namespace NifOgre;

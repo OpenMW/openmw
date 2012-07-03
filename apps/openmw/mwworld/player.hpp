@@ -9,6 +9,11 @@
 
 #include "../mwmechanics/drawstate.hpp"
 
+namespace MWBase
+{
+    class World;
+}
+
 namespace MWRender
 {
     class Player;
@@ -16,15 +21,12 @@ namespace MWRender
 
 namespace MWWorld
 {
-    class World;
-
     /// \brief NPC object representing the player and additional player data
     class Player
     {
         LiveCellRef<ESM::NPC> mPlayer;
         MWWorld::Ptr::CellStore *mCellStore;
         MWRender::Player *mRenderer;
-        MWWorld::World& mWorld;
         std::string mName;
         bool mMale;
         std::string mRace;
@@ -34,7 +36,7 @@ namespace MWWorld
         int mForwardBackward;
     public:
 
-        Player(MWRender::Player *renderer, const ESM::NPC *player, MWWorld::World& world);
+        Player(MWRender::Player *renderer, const ESM::NPC *player, const MWBase::World& world);
 
         ~Player();
 

@@ -1,7 +1,7 @@
 #include "scene.hpp"
-#include "world.hpp"
 
 #include "../mwbase/environment.hpp"
+#include "../mwbase/world.hpp" /// FIXME
 
 #include "../mwmechanics/mechanicsmanager.hpp"
 
@@ -9,12 +9,12 @@
 
 #include "../mwgui/window_manager.hpp"
 
-#include "../mwworld/world.hpp" /// FIXME
 #include "../mwworld/manualref.hpp" /// FIXME
 
 #include "ptr.hpp"
 #include "player.hpp"
 #include "class.hpp"
+#include "localscripts.hpp"
 
 #include "cellfunctors.hpp"
 
@@ -86,7 +86,7 @@ namespace MWWorld
 
             if (!((*iter)->cell->data.flags & ESM::Cell::Interior))
             {
-                ESM::Land* land = mWorld->getStore().lands.search((*iter)->cell->data.gridX,(*iter)->cell->data.gridY);
+                ESM::Land* land = MWBase::Environment::get().getWorld()->getStore().lands.search((*iter)->cell->data.gridX,(*iter)->cell->data.gridY);
                 if (land)
                     mPhysics->removeHeightField( (*iter)->cell->data.gridX, (*iter)->cell->data.gridY );
             }
@@ -95,7 +95,7 @@ namespace MWWorld
 		mRendering.removeCell(*iter);
 		//mPhysics->removeObject("Unnamed_43");
 
-        mWorld->getLocalScripts().clearCell (*iter);
+        MWBase::Environment::get().getWorld()->getLocalScripts().clearCell (*iter);
         MWBase::Environment::get().getMechanicsManager()->dropActors (*iter);
         MWBase::Environment::get().getSoundManager()->stopSound (*iter);
 		mActiveCells.erase(*iter);
@@ -107,7 +107,7 @@ namespace MWWorld
     void Scene::loadCell (Ptr::CellStore *cell)
     {
         // register local scripts
-        mWorld->getLocalScripts().addCell (cell);
+        MWBase::Environment::get().getWorld()->getLocalScripts().addCell (cell);
 
 
 
@@ -124,7 +124,7 @@ namespace MWWorld
 
             if (!(cell->cell->data.flags & ESM::Cell::Interior))
             {
-                ESM::Land* land = mWorld->getStore().lands.search(cell->cell->data.gridX,cell->cell->data.gridY);
+                ESM::Land* land = MWBase::Environment::get().getWorld()->getStore().lands.search(cell->cell->data.gridX,cell->cell->data.gridY);
                 if (land)
                     mPhysics->addHeightField (land->landData->heights,
                         cell->cell->data.gridX, cell->cell->data.gridY,
@@ -146,14 +146,14 @@ namespace MWWorld
         mPhysics->setCurrentWater(hasWater, cell->cell->water);
         if (adjustPlayerPos)
         {
-            mWorld->getPlayer().setPos (position.pos[0], position.pos[1], position.pos[2]);
-            mWorld->getPlayer().setRot (position.rot[0], position.rot[1], position.rot[2]);
+            MWBase::Environment::get().getWorld()->getPlayer().setPos (position.pos[0], position.pos[1], position.pos[2]);
+            MWBase::Environment::get().getWorld()->getPlayer().setRot (position.rot[0], position.rot[1], position.rot[2]);
         }
 
-        mWorld->getPlayer().setCell (cell);
+        MWBase::Environment::get().getWorld()->getPlayer().setCell (cell);
 
-        MWBase::Environment::get().getMechanicsManager()->addActor (mWorld->getPlayer().getPlayer());
-        MWBase::Environment::get().getMechanicsManager()->watchActor (mWorld->getPlayer().getPlayer());
+        MWBase::Environment::get().getMechanicsManager()->addActor (MWBase::Environment::get().getWorld()->getPlayer().getPlayer());
+        MWBase::Environment::get().getMechanicsManager()->watchActor (MWBase::Environment::get().getWorld()->getPlayer().getPlayer());
 
         MWBase::Environment::get().getWindowManager()->changeCell( mCurrentCell );
     }
@@ -163,7 +163,7 @@ namespace MWWorld
         mRendering.preCellChange(mCurrentCell);
 
         // remove active
-        MWBase::Environment::get().getMechanicsManager()->removeActor (mWorld->getPlayer().getPlayer());
+        MWBase::Environment::get().getMechanicsManager()->removeActor (MWBase::Environment::get().getWorld()->getPlayer().getPlayer());
 
         CellStoreCollection::iterator active = mActiveCells.begin();
 
@@ -202,7 +202,7 @@ namespace MWWorld
 
                 if (iter==mActiveCells.end())
                 {
-                    Ptr::CellStore *cell = mWorld->getExterior(x, y);
+                    CellStore *cell = MWBase::Environment::get().getWorld()->getExterior(x, y);
 
                     loadCell (cell);
                 }
@@ -228,10 +228,10 @@ namespace MWWorld
 
 
         // adjust player
-        playerCellChange (mWorld->getExterior(X, Y), position, adjustPlayerPos);
+        playerCellChange (MWBase::Environment::get().getWorld()->getExterior(X, Y), position, adjustPlayerPos);
 
         // Sky system
-        mWorld->adjustSky();
+        MWBase::Environment::get().getWorld()->adjustSky();
 
         mRendering.switchToExterior();
 
@@ -239,9 +239,8 @@ namespace MWWorld
     }
 
     //We need the ogre renderer and a scene node.
-    Scene::Scene (World *world, MWRender::RenderingManager& rendering, PhysicsSystem *physics)
-    : mCurrentCell (0), mCellChanged (false), mWorld(world),
-      mPhysics(physics), mRendering(rendering)
+    Scene::Scene (MWRender::RenderingManager& rendering, PhysicsSystem *physics)
+    : mCurrentCell (0), mCellChanged (false), mPhysics(physics), mRendering(rendering)
     {
     }
 
@@ -263,7 +262,7 @@ namespace MWWorld
     {
         std::cout << "Changing to interior\n";
 
-        Ptr::CellStore *cell = mWorld->getInterior(cellName);
+        CellStore *cell = MWBase::Environment::get().getWorld()->getInterior(cellName);
 
         // remove active
         CellStoreCollection::iterator active = mActiveCells.begin();
@@ -287,7 +286,7 @@ namespace MWWorld
         mRendering.configureFog(*cell);
 
         // Sky system
-        mWorld->adjustSky();
+        MWBase::Environment::get().getWorld()->adjustSky();
 
         mCellChanged = true;
     }
@@ -297,7 +296,7 @@ namespace MWWorld
         int x = 0;
         int y = 0;
 
-        mWorld->positionToIndex (position.pos[0], position.pos[1], x, y);
+        MWBase::Environment::get().getWorld()->positionToIndex (position.pos[0], position.pos[1], x, y);
 
         changeCell (x, y, position, true);
     }

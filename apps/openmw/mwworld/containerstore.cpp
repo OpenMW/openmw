@@ -10,7 +10,7 @@
 #include <components/esm/loadcont.hpp>
 
 #include "../mwbase/environment.hpp"
-#include "../mwworld/world.hpp"
+#include "../mwbase/world.hpp"
 
 #include "manualref.hpp"
 #include "refdata.hpp"

@@ -10,9 +10,9 @@
 #include <components/esm_store/store.hpp>
 
 #include "../mwbase/environment.hpp"
+#include "../mwbase/world.hpp"
 
 #include "../mwworld/class.hpp"
-#include "../mwworld/world.hpp"
 #include "../mwworld/refdata.hpp"
 #include "../mwworld/player.hpp"
 #include "../mwworld/containerstore.hpp"
@@ -121,24 +121,24 @@ namespace
     }
 
     template<typename T>
-    bool checkGlobal (char comp, const std::string& name, T value, MWWorld::World& world)
+    bool checkGlobal (char comp, const std::string& name, T value)
     {
-        switch (world.getGlobalVariableType (name))
+        switch (MWBase::Environment::get().getWorld()->getGlobalVariableType (name))
         {
         case 's':
-            return selectCompare (comp, world.getGlobalVariable (name).mShort, value);
+            return selectCompare (comp, MWBase::Environment::get().getWorld()->getGlobalVariable (name).mShort, value);
 
         case 'l':
 
-            return selectCompare (comp, world.getGlobalVariable (name).mLong, value);
+            return selectCompare (comp, MWBase::Environment::get().getWorld()->getGlobalVariable (name).mLong, value);
 
         case 'f':
 
-            return selectCompare (comp, world.getGlobalVariable (name).mFloat, value);
+            return selectCompare (comp, MWBase::Environment::get().getWorld()->getGlobalVariable (name).mFloat, value);
 
         case ' ':
 
-            world.getGlobalVariable (name); // trigger exception
+            MWBase::Environment::get().getWorld()->getGlobalVariable (name); // trigger exception
             break;
 
         default:
@@ -309,12 +309,12 @@ namespace MWDialogue
                 if (select.type==ESM::VT_Short || select.type==ESM::VT_Int ||
                     select.type==ESM::VT_Long)
                 {
-                    if (!checkGlobal (comp, toLower (name), select.i, *MWBase::Environment::get().getWorld()))
+                    if (!checkGlobal (comp, toLower (name), select.i))
                         return false;
                 }
                 else if (select.type==ESM::VT_Float)
                 {
-                    if (!checkGlobal (comp, toLower (name), select.f, *MWBase::Environment::get().getWorld()))
+                    if (!checkGlobal (comp, toLower (name), select.f))
                         return false;
                 }
                 else

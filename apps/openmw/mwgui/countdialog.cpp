@@ -3,7 +3,7 @@
 #include <boost/lexical_cast.hpp>
 
 #include "../mwbase/environment.hpp"
-#include "../mwworld/world.hpp"
+#include "../mwbase/world.hpp"
 
 namespace MWGui
 {
@@ -77,7 +77,7 @@ namespace MWGui
     {
         if (_sender->getCaption() == "")
             return;
-    
+
         unsigned int count;
         try
         {

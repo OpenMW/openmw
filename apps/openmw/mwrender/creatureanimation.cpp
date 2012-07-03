@@ -1,7 +1,7 @@
 #include "creatureanimation.hpp"
 #include "renderconst.hpp"
 
-#include "../mwworld/world.hpp"
+#include "../mwbase/world.hpp"
 
 using namespace Ogre;
 using namespace NifOgre;

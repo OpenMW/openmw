@@ -9,6 +9,9 @@
 
 #include <components/esm/loadnpc.hpp>
 
+#include "../mwbase/environment.hpp"
+#include "../mwbase/world.hpp"
+
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/npcstats.hpp"
 #include "../mwmechanics/movement.hpp"
@@ -16,13 +19,12 @@
 
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/actiontalk.hpp"
-#include "../mwworld/world.hpp"
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/customdata.hpp"
 
-#include "../mwgui/window_manager.hpp"
+#include "../mwrender/actors.hpp"
 
-#include "../mwbase/environment.hpp"
+#include "../mwgui/window_manager.hpp"
 
 namespace
 {

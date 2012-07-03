@@ -1,12 +1,13 @@
 #include "actionopen.hpp"
 
 #include "../mwbase/environment.hpp"
-#include "class.hpp"
-#include "world.hpp"
-#include "containerstore.hpp"
+
 #include "../mwclass/container.hpp"
 #include "../mwgui/window_manager.hpp"
 #include "../mwgui/container.hpp"
+
+#include "class.hpp"
+#include "containerstore.hpp"
 
 namespace MWWorld
 {

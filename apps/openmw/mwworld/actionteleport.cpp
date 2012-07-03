@@ -2,8 +2,7 @@
 #include "actionteleport.hpp"
 
 #include "../mwbase/environment.hpp"
-
-#include "world.hpp"
+#include "../mwbase/world.hpp"
 
 namespace MWWorld
 {

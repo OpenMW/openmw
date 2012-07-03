@@ -11,7 +11,8 @@
 #include <components/nifogre/ogre_nif_loader.hpp>
 
 #include "../mwbase/environment.hpp"
-#include "../mwworld/world.hpp"
+#include "../mwbase/world.hpp"
+
 #include "renderconst.hpp"
 #include "renderingmanager.hpp"
 

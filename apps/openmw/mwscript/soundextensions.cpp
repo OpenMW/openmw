@@ -8,8 +8,7 @@
 #include <components/interpreter/opcodes.hpp>
 
 #include "../mwbase/environment.hpp"
-
-#include "../mwworld/world.hpp"
+#include "../mwbase/world.hpp"
 
 #include "../mwsound/soundmanager.hpp"
 

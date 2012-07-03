@@ -1,9 +1,4 @@
 #include "weather.hpp"
-#include "world.hpp"
-#include "player.hpp"
-
-#include "../mwrender/renderingmanager.hpp"
-#include "../mwsound/soundmanager.hpp"
 
 #include <ctime>
 #include <cstdlib>
@@ -12,6 +7,13 @@
 #include <boost/algorithm/string.hpp>
 
 #include "../mwbase/environment.hpp"
+#include "../mwbase/world.hpp"
+
+#include "../mwrender/renderingmanager.hpp"
+
+#include "../mwsound/soundmanager.hpp"
+
+#include "player.hpp"
 
 using namespace Ogre;
 using namespace MWWorld;

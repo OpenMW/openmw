@@ -1,10 +1,13 @@
 #include "journalwindow.hpp"
-#include "window_manager.hpp"
-#include "../mwdialogue/journal.hpp"
+
 #include "../mwbase/environment.hpp"
-#include "../mwworld/world.hpp"
+#include "../mwbase/world.hpp"
+
+#include "../mwdialogue/journal.hpp"
 
 #include "../mwsound/soundmanager.hpp"
+
+#include "window_manager.hpp"
 
 namespace
 {

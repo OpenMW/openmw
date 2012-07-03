@@ -4,13 +4,13 @@
 #include <components/esm/loadligh.hpp>
 
 #include "../mwbase/environment.hpp"
+#include "../mwbase/world.hpp"
 
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/actiontake.hpp"
 #include "../mwworld/actionequip.hpp"
 #include "../mwworld/nullaction.hpp"
 #include "../mwworld/inventorystore.hpp"
-#include "../mwworld/world.hpp"
 #include "../mwworld/cellstore.hpp"
 
 #include "../mwgui/window_manager.hpp"

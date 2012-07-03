@@ -1,6 +1,8 @@
 
 #include "miscextensions.hpp"
 
+#include <libs/openengine/ogre/fader.hpp>
+
 #include <components/compiler/extensions.hpp>
 
 #include <components/interpreter/interpreter.hpp>
@@ -102,7 +104,7 @@ namespace MWScript
                         static_cast<InterpreterContext&> (runtime.getContext());
 
                     bool enabled =
-                        MWBase::Environment::get().getWorld()->toggleRenderMode (MWWorld::World::Render_CollisionDebug);
+                        MWBase::Environment::get().getWorld()->toggleRenderMode (MWBase::World::Render_CollisionDebug);
 
                     context.report (enabled ?
                         "Collision Mesh Rendering -> On" : "Collision Mesh Rendering -> Off");
@@ -119,7 +121,7 @@ namespace MWScript
                         static_cast<InterpreterContext&> (runtime.getContext());
 
                     bool enabled =
-                        MWBase::Environment::get().getWorld()->toggleRenderMode (MWWorld::World::Render_Wireframe);
+                        MWBase::Environment::get().getWorld()->toggleRenderMode (MWBase::World::Render_Wireframe);
 
                     context.report (enabled ?
                         "Wireframe Rendering -> On" : "Wireframe Rendering -> Off");
@@ -135,7 +137,7 @@ namespace MWScript
                     static_cast<InterpreterContext&> (runtime.getContext());
 
                 bool enabled =
-                    MWBase::Environment::get().getWorld()->toggleRenderMode (MWWorld::World::Render_Pathgrid);
+                    MWBase::Environment::get().getWorld()->toggleRenderMode (MWBase::World::Render_Pathgrid);
 
                 context.report (enabled ?
                     "Path Grid rendering -> On" : "Path Grid Rendering -> Off");

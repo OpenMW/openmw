@@ -4,12 +4,12 @@
 #include <components/esm/loadcont.hpp>
 
 #include "../mwbase/environment.hpp"
+#include "../mwbase/world.hpp"
 
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/nullaction.hpp"
 #include "../mwworld/containerstore.hpp"
 #include "../mwworld/customdata.hpp"
-#include "../mwworld/world.hpp"
 #include "../mwworld/cellstore.hpp"
 
 #include "../mwgui/window_manager.hpp"

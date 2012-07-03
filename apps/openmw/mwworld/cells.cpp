@@ -4,7 +4,9 @@
 
 #include <algorithm>
 
-#include "world.hpp"
+#include "../mwbase/environment.hpp"
+#include "../mwbase/world.hpp"
+
 #include "class.hpp"
 #include "containerstore.hpp"
 
@@ -85,8 +87,8 @@ MWWorld::Ptr MWWorld::Cells::getPtrAndCache (const std::string& name, Ptr::CellS
     return ptr;
 }
 
-MWWorld::Cells::Cells (const ESMS::ESMStore& store, ESM::ESMReader& reader, MWWorld::World& world)
-: mStore (store), mReader (reader), mWorld (world),
+MWWorld::Cells::Cells (const ESMS::ESMStore& store, ESM::ESMReader& reader)
+: mStore (store), mReader (reader),
   mIdCache (20, std::pair<std::string, Ptr::CellStore *> ("", 0)), /// \todo make cache size configurable
   mIdCacheIndex (0)
 {}
@@ -111,11 +113,11 @@ MWWorld::Ptr::CellStore *MWWorld::Cells::getExterior (int x, int y)
             record.water = 0;
             record.mapColor = 0;
 
-            cell = mWorld.createRecord (record);
+            cell = MWBase::Environment::get().getWorld()->createRecord (record);
         }
 
         result = mExteriors.insert (std::make_pair (
-            std::make_pair (x, y), Ptr::CellStore (cell))).first;
+            std::make_pair (x, y), CellStore (cell))).first;
     }
 
     if (result->second.mState!=Ptr::CellStore::State_Loaded)

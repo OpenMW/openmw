@@ -3,13 +3,13 @@
 
 #include <cmath>
 #include <stdexcept>
-#include <iostream>
 
 #include <components/interpreter/types.hpp>
 
 #include "../mwbase/environment.hpp"
+#include "../mwbase/world.hpp"
 
-#include "../mwworld/world.hpp"
+#include "../mwworld/class.hpp"
 
 #include "../mwgui/window_manager.hpp"
 

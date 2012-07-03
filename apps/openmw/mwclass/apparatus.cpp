@@ -4,11 +4,11 @@
 #include <components/esm/loadappa.hpp>
 
 #include "../mwbase/environment.hpp"
+#include "../mwbase/world.hpp"
 
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/actiontake.hpp"
 #include "../mwworld/actionalchemy.hpp"
-#include "../mwworld/world.hpp"
 #include "../mwworld/cellstore.hpp"
 
 #include "../mwrender/objects.hpp"

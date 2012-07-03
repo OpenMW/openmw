@@ -4,12 +4,12 @@
 #include <components/esm/loaddoor.hpp>
 
 #include "../mwbase/environment.hpp"
+#include "../mwbase/world.hpp"
 
 #include "../mwworld/player.hpp"
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/nullaction.hpp"
 #include "../mwworld/actionteleport.hpp"
-#include "../mwworld/world.hpp"
 #include "../mwworld/cellstore.hpp"
 
 #include "../mwgui/window_manager.hpp"

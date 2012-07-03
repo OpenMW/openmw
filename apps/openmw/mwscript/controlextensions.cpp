@@ -10,6 +10,7 @@
 #include "../mwbase/environment.hpp"
 
 #include "../mwworld/player.hpp"
+#include "../mwworld/class.hpp"
 
 #include "../mwmechanics/npcstats.hpp"
 

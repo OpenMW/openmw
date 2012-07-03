@@ -1,8 +1,9 @@
 #include "referenceinterface.hpp"
 
-#include "../mwworld/player.hpp"
-#include "../mwworld/world.hpp"
+#include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
+
+#include "../mwworld/player.hpp"
 
 namespace MWGui
 {

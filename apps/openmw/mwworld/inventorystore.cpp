@@ -7,8 +7,7 @@
 #include <components/esm/loadench.hpp>
 
 #include "../mwbase/environment.hpp"
-
-#include "../mwworld/world.hpp"
+#include "../mwbase/world.hpp"
 
 #include "../mwmechanics/npcstats.hpp"
 

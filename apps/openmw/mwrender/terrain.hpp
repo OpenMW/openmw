@@ -16,6 +16,8 @@ namespace Ogre{
 
 namespace MWRender{
 
+    class RenderingManager;
+
     /**
      * Implements the Morrowind terrain using the Ogre Terrain Component
      *

@@ -3,19 +3,23 @@
 #include <cmath>
 #include <algorithm>
 #include <iterator>
-#include <assert.h>
+#include <cassert>
 #include <iostream>
 
 #include <boost/lexical_cast.hpp>
 
 #include "../mwbase/environment.hpp"
+#include "../mwbase/world.hpp"
+
 #include "../mwworld/manualref.hpp"
-#include "../mwworld/world.hpp"
 #include "../mwworld/containerstore.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/player.hpp"
+
 #include "../mwclass/container.hpp"
+
 #include "../mwinput/inputmanager.hpp"
+
 #include "../mwsound/soundmanager.hpp"
 
 #include "window_manager.hpp"

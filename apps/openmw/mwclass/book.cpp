@@ -4,10 +4,10 @@
 #include <components/esm/loadbook.hpp>
 
 #include "../mwbase/environment.hpp"
+#include "../mwbase/world.hpp"
 
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/actionread.hpp"
-#include "../mwworld/world.hpp"
 #include "../mwworld/cellstore.hpp"
 
 #include "../mwrender/objects.hpp"

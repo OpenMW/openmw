@@ -5,12 +5,11 @@
 #include <btBulletDynamicsCommon.h>
 #include <btBulletCollisionCommon.h>
 #include <components/nifbullet/bullet_nif_loader.hpp>
-//#include <apps\openmw\mwworld\world.hpp>
 #include <openengine/bullet/pmove.h>
 #include <openengine/bullet/physic.hpp>
 
 
- 
+
 enum traceWorldType
 {
 	collisionWorldTrace = 1,
@@ -33,7 +32,7 @@ struct NewPhysTraceResults
 	float fraction;
 	bool startSolid;
 	//const Object* hitObj;
-}; 
+};
 struct traceResults
 {
 	Ogre::Vector3 endpos;

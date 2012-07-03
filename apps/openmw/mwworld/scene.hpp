@@ -59,7 +59,6 @@ namespace MWWorld
             Ptr::CellStore* mCurrentCell; // the cell, the player is in
             CellStoreCollection mActiveCells;
             bool mCellChanged;
-            World *mWorld;
             PhysicsSystem *mPhysics;
             MWRender::RenderingManager& mRendering;
 
@@ -69,7 +68,7 @@ namespace MWWorld
 
         public:
 
-            Scene (World *world, MWRender::RenderingManager& rendering, PhysicsSystem *physics);
+            Scene (MWRender::RenderingManager& rendering, PhysicsSystem *physics);
 
             ~Scene();
 

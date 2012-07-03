@@ -1,5 +1,5 @@
-#ifndef GAME_MWWORLD_WORLD_H
-#define GAME_MWWORLD_WORLD_H
+#ifndef GAME_MWWORLD_WORLDIMP_H
+#define GAME_MWWORLD_WORLDIMP_H
 
 #include <vector>
 #include <map>

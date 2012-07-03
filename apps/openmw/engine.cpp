@@ -38,10 +38,10 @@
 
 #include "mwsound/soundmanager.hpp"
 
-#include "mwworld/world.hpp"
 #include "mwworld/class.hpp"
 #include "mwworld/player.hpp"
 #include "mwworld/cellstore.hpp"
+#include "mwworld/worldimp.hpp"
 
 #include "mwclass/classes.hpp"
 
@@ -51,6 +51,7 @@
 #include "mwmechanics/mechanicsmanager.hpp"
 
 #include "mwbase/environment.hpp"
+#include "mwbase/world.hpp"
 
 
 void OMW::Engine::executeLocalScripts()

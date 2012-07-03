@@ -1,4 +1,4 @@
-#include "world.hpp"
+#include "worldimp.hpp"
 
 #include <cmath>
 #include <iostream>
@@ -179,7 +179,7 @@ namespace MWWorld
         const std::string& master, const boost::filesystem::path& resDir, bool newGame,
         const std::string& encoding, std::map<std::string,std::string> fallbackMap)
     : mPlayer (0), mLocalScripts (mStore), mGlobalVariables (0),
-      mSky (true), mNextDynamicRecord (0), mCells (mStore, mEsm, *this),
+      mSky (true), mNextDynamicRecord (0), mCells (mStore, mEsm),
       mNumFacing(0)
     {
         mPhysics = new PhysicsSystem(renderer);
@@ -211,7 +211,7 @@ namespace MWWorld
             mGlobalVariables->setInt ("chargenstate", 1);
         }
 
-        mWorldScene = new Scene(this, *mRendering, mPhysics);
+        mWorldScene = new Scene(*mRendering, mPhysics);
 
         setFallbackValues(fallbackMap);
 
