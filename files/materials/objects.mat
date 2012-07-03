@@ -1,0 +1,29 @@
+material openmw_objects_base
+{
+    diffuse 1.0 1.0 1.0 1.0
+    specular 0.4 0.4 0.4 32
+    ambient 1.0 1.0 1.0
+    emissive 0.0 0.0 0.0
+    has_vertex_colour false
+    diffuseMap black.png
+
+    pass
+    {
+        vertex_program openmw_objects_vertex
+        fragment_program openmw_objects_fragment
+
+        diffuse $diffuse
+        specular $specular
+        ambient $ambient
+        emissive $emissive
+
+        ffp_vertex_colour_ambient $has_vertex_colour
+        has_vertex_colour $has_vertex_colour
+
+        texture_unit diffuseMap
+        {
+            texture $diffuseMap
+            create_in_ffp true
+        }
+    }
+}

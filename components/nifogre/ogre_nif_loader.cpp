@@ -33,6 +33,8 @@
 #include <OgreSubMesh.h>
 #include <OgreRoot.h>
 
+#include <extern/shiny/Main/Factory.hpp>
+
 #include <components/settings/settings.hpp>
 #include <components/nifoverrides/nifoverrides.hpp>
 
@@ -226,35 +228,32 @@ void NIFLoader::createMaterial(const String &name,
                            int alphaFlags, float alphaTest,
                            const String &texName)
 {
-    MaterialPtr material = MaterialManager::getSingleton().create(name, resourceGroup);
+    sh::MaterialInstance* instance = sh::Factory::getInstance ().createMaterialInstance (name, "openmw_objects_base");
+    instance->setProperty ("ambient", sh::makeProperty<sh::Vector3> (
+        new sh::Vector3(ambient.array[0], ambient.array[1], ambient.array[2])));
+
+    instance->setProperty ("diffuse", sh::makeProperty<sh::Vector4> (
+        new sh::Vector4(diffuse.array[0], diffuse.array[1], diffuse.array[2], alpha)));
+
+    instance->setProperty ("specular", sh::makeProperty<sh::Vector4> (
+        new sh::Vector4(specular.array[0], specular.array[1], specular.array[2], glossiness)));
+
+    instance->setProperty ("emissive", sh::makeProperty<sh::Vector3> (
+        new sh::Vector3(emissive.array[0], emissive.array[1], emissive.array[2])));
+
+    instance->setProperty ("diffuseMap", sh::makeProperty(texName));
 
 
-    //Hardware Skinning code, textures may be the wrong color if enabled
-
-    /* if(!mSkel.isNull()){
-    material->removeAllTechniques();
-
-        Ogre::Technique* tech = material->createTechnique();
-        //tech->setSchemeName("blahblah");
-        Pass* pass = tech->createPass();
-        pass->setVertexProgram("Ogre/BasicVertexPrograms/AmbientOneTexture");*/
-
-
-    // This assigns the texture to this material. If the texture name is
-    // a file name, and this file exists (in a resource directory), it
-    // will automatically be loaded when needed. If not (such as for
-    // internal NIF textures that we might support later), we should
-    // already have inserted a manual loader for the texture.
-
-
+/*
     if (!texName.empty())
     {
         Pass *pass = material->getTechnique(0)->getPass(0);
         /*TextureUnitState *txt =*/
+    /*
         pass->createTextureUnitState(texName);
 
         pass->setVertexColourTracking(TVC_DIFFUSE);
-
+*/
         // As of yet UNTESTED code from Chris:
         /*pass->setTextureFiltering(Ogre::TFO_ANISOTROPIC);
         pass->setDepthFunction(Ogre::CMPF_LESS_EQUAL);
@@ -282,7 +281,7 @@ void NIFLoader::createMaterial(const String &name,
         else
             pass->setDepthWriteEnabled(true); */
 
-
+/*
         // Add transparency if NiAlphaProperty was present
         if (alphaFlags != -1)
         {
@@ -315,48 +314,8 @@ void NIFLoader::createMaterial(const String &name,
             material->getTechnique(0)->setShadowCasterMaterial("depth_shadow_caster_noalpha");
         }
     }
+        */
 
-    if (Settings::Manager::getBool("enabled", "Shadows"))
-    {
-        bool split = Settings::Manager::getBool("split", "Shadows");
-        const int numsplits = 3;
-		for (int i = 0; i < (split ? numsplits : 1); ++i)
-		{
-            TextureUnitState* tu = material->getTechnique(0)->getPass(0)->createTextureUnitState();
-            tu->setName("shadowMap" + StringConverter::toString(i));
-            tu->setContentType(TextureUnitState::CONTENT_SHADOW);
-            tu->setTextureAddressingMode(TextureUnitState::TAM_BORDER);
-            tu->setTextureBorderColour(ColourValue::White);
-		}
-    }
-
-    if (Settings::Manager::getBool("shaders", "Objects"))
-    {
-        material->getTechnique(0)->getPass(0)->setVertexProgram("main_vp");
-        material->getTechnique(0)->getPass(0)->setFragmentProgram("main_fp");
-
-        material->getTechnique(0)->getPass(0)->setFog(true); // force-disable fixed function fog, it is calculated in shader
-    }
-
-    // Create a fallback technique without shadows and without mrt
-    Technique* tech2 = material->createTechnique();
-    tech2->setSchemeName("Fallback");
-    Pass* pass2 = tech2->createPass();
-    pass2->createTextureUnitState(texName);
-    pass2->setVertexColourTracking(TVC_DIFFUSE);
-    if (Settings::Manager::getBool("shaders", "Objects"))
-    {
-        pass2->setVertexProgram("main_fallback_vp");
-        pass2->setFragmentProgram("main_fallback_fp");
-        pass2->setFog(true); // force-disable fixed function fog, it is calculated in shader
-    }
-
-    // Add material bells and whistles
-    material->setAmbient(ambient.array[0], ambient.array[1], ambient.array[2]);
-    material->setDiffuse(diffuse.array[0], diffuse.array[1], diffuse.array[2], alpha);
-    material->setSpecular(specular.array[0], specular.array[1], specular.array[2], alpha);
-    material->setSelfIllumination(emissive.array[0], emissive.array[1], emissive.array[2]);
-    material->setShininess(glossiness);
 }
 
 // Takes a name and adds a unique part to it. This is just used to

@@ -51,7 +51,7 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
     mWater = 0;
 
     // material system
-    sh::OgrePlatform* platform = new sh::OgrePlatform("General", "./");
+    sh::OgrePlatform* platform = new sh::OgrePlatform("General", (resDir / "materials").string());
     platform->setCacheFolder ("./");
     mFactory = new sh::Factory(platform);
 
@@ -270,10 +270,12 @@ void RenderingManager::setWaterHeight(const float height)
 
 void RenderingManager::skyEnable ()
 {
+    /*
     if(mSkyManager)
     mSkyManager->enable();
 
     mOcclusionQuery->setSunNode(mSkyManager->getSunNode());
+    */
 }
 
 void RenderingManager::skyDisable ()

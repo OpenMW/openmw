@@ -416,7 +416,7 @@ SkyManager::SkyManager (SceneNode* pMwRoot, Camera* pCamera)
 void SkyManager::create()
 {
     /// \todo preload all the textures and meshes that are used for sky rendering
-
+/*
     // Create overlay used for thunderstorm
     MaterialPtr material = MaterialManager::getSingleton().create( "ThunderMaterial", ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME );
     Pass* pass = material->getTechnique(0)->getPass(0);
@@ -696,6 +696,7 @@ void SkyManager::create()
     mCloudMaterial->getTechnique(0)->getPass(0)->createTextureUnitState("");
 
     mCreated = true;
+    */
 }
 
 SkyManager::~SkyManager()
