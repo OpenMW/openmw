@@ -31,6 +31,8 @@
 namespace Nif
 {
 
+class NiNode;
+
 /** A Node is an object that's part of the main NIF tree. It has
     parent node (unless it's the root), and transformation (location
     and rotation) relative to it's parent.
@@ -66,6 +68,8 @@ public:
             boundXYZ = nif->getVector();
         }
 
+        parent = NULL;
+
         boneTrafo = NULL;
         boneIndex = -1;
     }
@@ -75,6 +79,10 @@ public:
         Named::post(nif);
         props.post(nif);
     }
+
+    // Parent node, or NULL for the root node. As far as I'm aware, only
+    // NiNodes (or types derived from NiNodes) can be parents.
+    NiNode *parent;
 
     // Bone transformation. If set, node is a part of a skeleton.
     const NiSkinData::BoneTrafo *boneTrafo;
@@ -139,6 +147,9 @@ struct NiNode : Node
         Node::post(nif);
         children.post(nif);
         effects.post(nif);
+
+        for(size_t i = 0;i < children.length();i++)
+            children[i].parent = this;
     }
 };
 
