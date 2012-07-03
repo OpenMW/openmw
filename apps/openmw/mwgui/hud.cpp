@@ -14,6 +14,8 @@
 
 #include "../mwsound/soundmanager.hpp"
 
+#include "../mwgui/widgets.hpp"
+
 #include "inventorywindow.hpp"
 #include "window_manager.hpp"
 #include "container.hpp"

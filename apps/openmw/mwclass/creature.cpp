@@ -13,8 +13,12 @@
 #include "../mwworld/actiontalk.hpp"
 #include "../mwworld/customdata.hpp"
 #include "../mwworld/containerstore.hpp"
+#include "../mwworld/physicssystem.hpp"
+
+#include "../mwrender/renderinginterface.hpp"
 
 #include "../mwgui/window_manager.hpp"
+#include "../mwgui/tooltips.hpp"
 
 namespace
 {

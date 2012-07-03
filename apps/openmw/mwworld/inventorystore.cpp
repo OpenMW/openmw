@@ -6,6 +6,8 @@
 
 #include <components/esm/loadench.hpp>
 
+#include <components/esm_store/store.hpp>
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 

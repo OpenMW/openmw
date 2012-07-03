@@ -21,10 +21,13 @@
 #include "../mwworld/actiontalk.hpp"
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/customdata.hpp"
+#include "../mwworld/physicssystem.hpp"
 
 #include "../mwrender/actors.hpp"
+#include "../mwrender/renderinginterface.hpp"
 
 #include "../mwgui/window_manager.hpp"
+#include "../mwgui/tooltips.hpp"
 
 namespace
 {

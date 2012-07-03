@@ -4,8 +4,10 @@
 #include <components/esm/loadstat.hpp>
 
 #include "../mwworld/ptr.hpp"
+#include "../mwworld/physicssystem.hpp"
 
 #include "../mwrender/objects.hpp"
+#include "../mwrender/renderinginterface.hpp"
 
 namespace MWClass
 {

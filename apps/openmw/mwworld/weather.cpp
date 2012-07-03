@@ -2,9 +2,10 @@
 
 #include <ctime>
 #include <cstdlib>
-#include <iostream>
 
 #include <boost/algorithm/string.hpp>
+
+#include <components/esm_store/store.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"

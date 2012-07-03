@@ -6,6 +6,8 @@
 
 #include <boost/filesystem.hpp>
 
+#include <components/esm_store/store.hpp>
+
 #include <components/settings/settings.hpp>
 
 #include "../mwrender/debugging.hpp"
