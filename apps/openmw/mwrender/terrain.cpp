@@ -3,6 +3,8 @@
 #include <OgreTerrain.h>
 #include <OgreTerrainGroup.h>
 
+#include <components/esm_store/store.hpp>
+
 #include <components/settings/settings.hpp>
 
 #include "../mwbase/environment.hpp"

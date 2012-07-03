@@ -1,10 +1,15 @@
 #ifndef _GAME_RENDER_OBJECTS_H
 #define _GAME_RENDER_OBJECTS_H
 
+#include <OgreColourValue.h>
+
 #include <openengine/ogre/renderer.hpp>
 
-#include "../mwworld/refdata.hpp"
-#include "../mwworld/ptr.hpp"
+namespace MWWorld
+{
+    class Ptr;
+    class CellStore;
+}
 
 namespace MWRender{
 
@@ -45,10 +50,10 @@ struct LightInfo
 
 class Objects{
     OEngine::Render::OgreRenderer &mRenderer;
-    std::map<MWWorld::Ptr::CellStore *, Ogre::SceneNode *> mCellSceneNodes;
-    std::map<MWWorld::Ptr::CellStore *, Ogre::StaticGeometry*> mStaticGeometry;
-    std::map<MWWorld::Ptr::CellStore *, Ogre::StaticGeometry*> mStaticGeometrySmall;
-    std::map<MWWorld::Ptr::CellStore *, Ogre::AxisAlignedBox> mBounds;
+    std::map<MWWorld::CellStore *, Ogre::SceneNode *> mCellSceneNodes;
+    std::map<MWWorld::CellStore *, Ogre::StaticGeometry*> mStaticGeometry;
+    std::map<MWWorld::CellStore *, Ogre::StaticGeometry*> mStaticGeometrySmall;
+    std::map<MWWorld::CellStore *, Ogre::AxisAlignedBox> mBounds;
     std::vector<LightInfo> mLights;
     Ogre::SceneNode* mMwRoot;
     bool mIsStatic;
@@ -79,14 +84,14 @@ public:
     void update (const float dt);
     ///< per-frame update
 
-    Ogre::AxisAlignedBox getDimensions(MWWorld::Ptr::CellStore*);
+    Ogre::AxisAlignedBox getDimensions(MWWorld::CellStore*);
     ///< get a bounding box that encloses all objects in the specified cell
 
     bool deleteObject (const MWWorld::Ptr& ptr);
     ///< \return found?
 
-    void removeCell(MWWorld::Ptr::CellStore* store);
-    void buildStaticGeometry(MWWorld::Ptr::CellStore &cell);
+    void removeCell(MWWorld::CellStore* store);
+    void buildStaticGeometry(MWWorld::CellStore &cell);
     void setMwRoot(Ogre::SceneNode* root);
 };
 }

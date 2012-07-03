@@ -338,7 +338,7 @@ namespace MWWorld
 
 
     /// \todo this whole code needs major clean up, and doesn't belong in this class.
-    void Scene::insertObject(MWWorld::Ptr ptr, Ptr::CellStore* cell)
+    void Scene::insertObject (const Ptr& ptr, CellStore* cell)
     {
         std::string type = ptr.getTypeName();
 

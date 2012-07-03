@@ -12,8 +12,6 @@
 #include "../mwrender/renderinginterface.hpp"
 
 #include "physicssystem.hpp"
-#include "refdata.hpp"
-#include "ptr.hpp"
 #include "globals.hpp"
 
 namespace Ogre
@@ -45,24 +43,25 @@ namespace MWRender
 namespace MWWorld
 {
     class Player;
+    class CellStore;
+    class Ptr;
 
     class Scene
     {
-
         public:
 
-            typedef std::set<Ptr::CellStore *> CellStoreCollection;
+            typedef std::set<CellStore *> CellStoreCollection;
 
         private:
 
             //OEngine::Render::OgreRenderer& mRenderer;
-            Ptr::CellStore* mCurrentCell; // the cell, the player is in
+            CellStore* mCurrentCell; // the cell, the player is in
             CellStoreCollection mActiveCells;
             bool mCellChanged;
             PhysicsSystem *mPhysics;
             MWRender::RenderingManager& mRendering;
 
-            void playerCellChange (Ptr::CellStore *cell, const ESM::Position& position,
+            void playerCellChange (CellStore *cell, const ESM::Position& position,
                 bool adjustPlayerPos = true);
 
 
@@ -74,13 +73,13 @@ namespace MWWorld
 
             void unloadCell (CellStoreCollection::iterator iter);
 
-            void loadCell (Ptr::CellStore *cell);
+            void loadCell (CellStore *cell);
 
             void changeCell (int X, int Y, const ESM::Position& position, bool adjustPlayerPos);
             ///< Move from exterior to interior or from interior cell to a different
             /// interior cell.
 
-            Ptr::CellStore* getCurrentCell ();
+            CellStore* getCurrentCell ();
 
             const CellStoreCollection& getActiveCells () const;
 
@@ -99,7 +98,7 @@ namespace MWWorld
 
             /// this method is only meant for dropping objects into the gameworld from a container
             /// and thus only handles object types that can be placed in a container
-            void insertObject(MWWorld::Ptr object, Ptr::CellStore* cell);
+            void insertObject (const Ptr& object, CellStore* cell);
 
             void update (float duration);
 

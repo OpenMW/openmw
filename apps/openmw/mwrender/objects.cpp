@@ -4,6 +4,9 @@
 
 #include <components/nifogre/ogre_nif_loader.hpp>
 #include <components/settings/settings.hpp>
+
+#include "../mwworld/ptr.hpp"
+
 #include "renderconst.hpp"
 
 using namespace MWRender;

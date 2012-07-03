@@ -26,14 +26,16 @@
 
 #include "../mwbase/environment.hpp"
 
+#include "../mwworld/ptr.hpp"
+#include "../mwworld/cellstore.hpp"
+
 #include "console.hpp"
 #include "journalwindow.hpp"
 #include "charactercreation.hpp"
 
 #include <components/settings/settings.hpp>
 
-#include <assert.h>
-#include <iostream>
+#include <cassert>
 #include <iterator>
 
 using namespace MWGui;
@@ -82,7 +84,7 @@ WindowManager::WindowManager(
     // Set up the GUI system
     mGuiManager = new OEngine::GUI::MyGUIManager(mOgre->getWindow(), mOgre->getScene(), false, logpath);
     gui = mGuiManager->getGui();
-    
+
     //Register own widgets with MyGUI
     MyGUI::FactoryManager::getInstance().registerFactory<DialogueHistory>("Widget");
     MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWSkill>("Widget");
