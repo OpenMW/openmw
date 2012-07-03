@@ -3,6 +3,8 @@
 
 #include <boost/algorithm/string.hpp>
 
+#include <components/esm_store/store.hpp>
+
 #include <components/compiler/extensions.hpp>
 
 #include <components/interpreter/interpreter.hpp>
