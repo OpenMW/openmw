@@ -1,7 +1,12 @@
 #include "creatureanimation.hpp"
+
+#include <OgreEntity.h>
+#include <OgreSceneManager.h>
+#include <OgreSubEntity.h>
+
 #include "renderconst.hpp"
 
-#include "../mwworld/world.hpp"
+#include "../mwbase/world.hpp"
 
 using namespace Ogre;
 using namespace NifOgre;
@@ -12,7 +17,7 @@ CreatureAnimation::~CreatureAnimation(){
 }
 CreatureAnimation::CreatureAnimation(const MWWorld::Ptr& ptr, OEngine::Render::OgreRenderer& _rend): Animation(_rend){
     insert = ptr.getRefData().getBaseNode();
-    ESMS::LiveCellRef<ESM::Creature, MWWorld::RefData> *ref =
+    MWWorld::LiveCellRef<ESM::Creature> *ref =
             ptr.get<ESM::Creature>();
 
     assert (ref->base != NULL);

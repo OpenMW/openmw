@@ -147,7 +147,7 @@ int MessageBoxManager::readPressedButton ()
 
 
 MessageBox::MessageBox(MessageBoxManager& parMessageBoxManager, const std::string& message)
-  : Layout("openmw_messagebox_layout.xml")
+  : Layout("openmw_messagebox.layout")
   , mMessageBoxManager(parMessageBoxManager)
   , cMessage(message)
 {
@@ -177,7 +177,7 @@ MessageBox::MessageBox(MessageBoxManager& parMessageBoxManager, const std::strin
     size.height = mHeight = textSize.height + 20; // this is the padding between the text and the box
 
     mMainWidget->setSize(size);
-    size.width -= 15; // this is to center the text (see messagebox_layout.xml, Widget type="Edit" position="-2 -3 0 0")
+    size.width -= 15; // this is to center the text (see messagebox.layout, Widget type="Edit" position="-2 -3 0 0")
     mMessageWidget->setSize(size);
 }
 
@@ -205,7 +205,7 @@ int MessageBox::getHeight ()
 
 
 InteractiveMessageBox::InteractiveMessageBox(MessageBoxManager& parMessageBoxManager, const std::string& message, const std::vector<std::string>& buttons)
-  : Layout("openmw_interactive_messagebox_layout.xml")
+  : Layout("openmw_interactive_messagebox.layout")
   , mMessageBoxManager(parMessageBoxManager)
   , mButtonPressed(-1)
 {

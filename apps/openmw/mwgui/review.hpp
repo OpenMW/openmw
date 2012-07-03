@@ -12,7 +12,7 @@ namespace MWGui
 
 /*
 This file contains the dialog for reviewing the generated character.
-Layout is defined by resources/mygui/openmw_chargen_review_layout.xml.
+Layout is defined by resources/mygui/openmw_chargen_review.layout.
 */
 
 namespace MWGui

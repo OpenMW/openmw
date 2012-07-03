@@ -1,4 +1,4 @@
-#include "world.hpp"
+#include "worldimp.hpp"
 
 #include <cmath>
 #include <iostream>
@@ -33,10 +33,10 @@ namespace
 {
     template<typename T>
     void listCellScripts (const ESMS::ESMStore& store,
-        ESMS::CellRefList<T, MWWorld::RefData>& cellRefList, MWWorld::LocalScripts& localScripts,
+        MWWorld::CellRefList<T>& cellRefList, MWWorld::LocalScripts& localScripts,
         MWWorld::Ptr::CellStore *cell)
     {
-        for (typename ESMS::CellRefList<T, MWWorld::RefData>::List::iterator iter (
+        for (typename MWWorld::CellRefList<T>::List::iterator iter (
             cellRefList.list.begin());
             iter!=cellRefList.list.end(); ++iter)
         {
@@ -53,10 +53,10 @@ namespace
     }
 
     template<typename T>
-    ESMS::LiveCellRef<T, MWWorld::RefData> *searchViaHandle (const std::string& handle,
-        ESMS::CellRefList<T, MWWorld::RefData>& refList)
+    MWWorld::LiveCellRef<T> *searchViaHandle (const std::string& handle,
+        MWWorld::CellRefList<T>& refList)
     {
-        typedef typename ESMS::CellRefList<T, MWWorld::RefData>::List::iterator iterator;
+        typedef typename MWWorld::CellRefList<T>::List::iterator iterator;
 
         for (iterator iter (refList.list.begin()); iter!=refList.list.end(); ++iter)
         {
@@ -75,45 +75,45 @@ namespace MWWorld
 {
     Ptr World::getPtrViaHandle (const std::string& handle, Ptr::CellStore& cell)
     {
-        if (ESMS::LiveCellRef<ESM::Activator, RefData> *ref =
+        if (MWWorld::LiveCellRef<ESM::Activator> *ref =
             searchViaHandle (handle, cell.activators))
             return Ptr (ref, &cell);
-        if (ESMS::LiveCellRef<ESM::Potion, RefData> *ref = searchViaHandle (handle, cell.potions))
+        if (MWWorld::LiveCellRef<ESM::Potion> *ref = searchViaHandle (handle, cell.potions))
             return Ptr (ref, &cell);
-        if (ESMS::LiveCellRef<ESM::Apparatus, RefData> *ref = searchViaHandle (handle, cell.appas))
+        if (MWWorld::LiveCellRef<ESM::Apparatus> *ref = searchViaHandle (handle, cell.appas))
             return Ptr (ref, &cell);
-        if (ESMS::LiveCellRef<ESM::Armor, RefData> *ref = searchViaHandle (handle, cell.armors))
+        if (MWWorld::LiveCellRef<ESM::Armor> *ref = searchViaHandle (handle, cell.armors))
             return Ptr (ref, &cell);
-        if (ESMS::LiveCellRef<ESM::Book, RefData> *ref = searchViaHandle (handle, cell.books))
+        if (MWWorld::LiveCellRef<ESM::Book> *ref = searchViaHandle (handle, cell.books))
             return Ptr (ref, &cell);
-        if (ESMS::LiveCellRef<ESM::Clothing, RefData> *ref = searchViaHandle (handle, cell.clothes))
+        if (MWWorld::LiveCellRef<ESM::Clothing> *ref = searchViaHandle (handle, cell.clothes))
             return Ptr (ref, &cell);
-        if (ESMS::LiveCellRef<ESM::Container, RefData> *ref =
+        if (MWWorld::LiveCellRef<ESM::Container> *ref =
             searchViaHandle (handle, cell.containers))
             return Ptr (ref, &cell);
-        if (ESMS::LiveCellRef<ESM::Creature, RefData> *ref =
+        if (MWWorld::LiveCellRef<ESM::Creature> *ref =
             searchViaHandle (handle, cell.creatures))
             return Ptr (ref, &cell);
-        if (ESMS::LiveCellRef<ESM::Door, RefData> *ref = searchViaHandle (handle, cell.doors))
+        if (MWWorld::LiveCellRef<ESM::Door> *ref = searchViaHandle (handle, cell.doors))
             return Ptr (ref, &cell);
-        if (ESMS::LiveCellRef<ESM::Ingredient, RefData> *ref =
+        if (MWWorld::LiveCellRef<ESM::Ingredient> *ref =
             searchViaHandle (handle, cell.ingreds))
             return Ptr (ref, &cell);
-        if (ESMS::LiveCellRef<ESM::Light, RefData> *ref = searchViaHandle (handle, cell.lights))
+        if (MWWorld::LiveCellRef<ESM::Light> *ref = searchViaHandle (handle, cell.lights))
             return Ptr (ref, &cell);
-        if (ESMS::LiveCellRef<ESM::Tool, RefData> *ref = searchViaHandle (handle, cell.lockpicks))
+        if (MWWorld::LiveCellRef<ESM::Tool> *ref = searchViaHandle (handle, cell.lockpicks))
             return Ptr (ref, &cell);
-        if (ESMS::LiveCellRef<ESM::Miscellaneous, RefData> *ref = searchViaHandle (handle, cell.miscItems))
+        if (MWWorld::LiveCellRef<ESM::Miscellaneous> *ref = searchViaHandle (handle, cell.miscItems))
             return Ptr (ref, &cell);
-        if (ESMS::LiveCellRef<ESM::NPC, RefData> *ref = searchViaHandle (handle, cell.npcs))
+        if (MWWorld::LiveCellRef<ESM::NPC> *ref = searchViaHandle (handle, cell.npcs))
             return Ptr (ref, &cell);
-        if (ESMS::LiveCellRef<ESM::Probe, RefData> *ref = searchViaHandle (handle, cell.probes))
+        if (MWWorld::LiveCellRef<ESM::Probe> *ref = searchViaHandle (handle, cell.probes))
             return Ptr (ref, &cell);
-        if (ESMS::LiveCellRef<ESM::Repair, RefData> *ref = searchViaHandle (handle, cell.repairs))
+        if (MWWorld::LiveCellRef<ESM::Repair> *ref = searchViaHandle (handle, cell.repairs))
             return Ptr (ref, &cell);
-        if (ESMS::LiveCellRef<ESM::Static, RefData> *ref = searchViaHandle (handle, cell.statics))
+        if (MWWorld::LiveCellRef<ESM::Static> *ref = searchViaHandle (handle, cell.statics))
             return Ptr (ref, &cell);
-        if (ESMS::LiveCellRef<ESM::Weapon, RefData> *ref = searchViaHandle (handle, cell.weapons))
+        if (MWWorld::LiveCellRef<ESM::Weapon> *ref = searchViaHandle (handle, cell.weapons))
             return Ptr (ref, &cell);
         return Ptr();
     }
@@ -154,19 +154,19 @@ namespace MWWorld
             mRendering->skyDisable();
     }
 
-    void World::setFallbackValues(std::map<std::string,std::string> fallbackMap)
+    void World::setFallbackValues (const std::map<std::string,std::string>& fallbackMap)
     {
         mFallback = fallbackMap;
     }
 
-    std::string World::getFallback(std::string key)
+    std::string World::getFallback (const std::string& key) const
     {
         return getFallback(key, "");
     }
 
-    std::string World::getFallback(std::string key, std::string def)
+    std::string World::getFallback (const std::string& key, const std::string& def) const
     {
-        std::map<std::string,std::string>::iterator it;
+        std::map<std::string,std::string>::const_iterator it;
         if((it = mFallback.find(key)) == mFallback.end())
         {
             return def;
@@ -179,7 +179,7 @@ namespace MWWorld
         const std::string& master, const boost::filesystem::path& resDir, bool newGame,
         const std::string& encoding, std::map<std::string,std::string> fallbackMap)
     : mPlayer (0), mLocalScripts (mStore), mGlobalVariables (0),
-      mSky (true), mNextDynamicRecord (0), mCells (mStore, mEsm, *this),
+      mSky (true), mNextDynamicRecord (0), mCells (mStore, mEsm),
       mNumFacing(0)
     {
         mPhysics = new PhysicsSystem(renderer);
@@ -211,7 +211,7 @@ namespace MWWorld
             mGlobalVariables->setInt ("chargenstate", 1);
         }
 
-        mWorldScene = new Scene(this, *mRendering, mPhysics);
+        mWorldScene = new Scene(*mRendering, mPhysics);
 
         setFallbackValues(fallbackMap);
 
@@ -351,7 +351,7 @@ namespace MWWorld
         throw std::runtime_error ("unknown Ogre handle: " + handle);
     }
 
-    void World::enable (Ptr reference)
+    void World::enable (const Ptr& reference)
     {
         if (!reference.getRefData().isEnabled())
         {
@@ -362,7 +362,7 @@ namespace MWWorld
         }
     }
 
-    void World::disable (Ptr reference)
+    void World::disable (const Ptr& reference)
     {
         if (reference.getRefData().isEnabled())
         {
@@ -537,7 +537,7 @@ namespace MWWorld
         }
     }
 
-    void World::deleteObject (Ptr ptr)
+    void World::deleteObject (const Ptr& ptr)
     {
         if (ptr.getRefData().getCount()>0)
         {
@@ -552,7 +552,7 @@ namespace MWWorld
         }
     }
 
-    bool World::moveObjectImp (Ptr ptr, float x, float y, float z)
+    bool World::moveObjectImp (const Ptr& ptr, float x, float y, float z)
     {
         bool ret = false;
         ptr.getRefData().getPosition().pos[0] = x;
@@ -590,7 +590,7 @@ namespace MWWorld
         return ret;
     }
 
-    void World::moveObject (Ptr ptr, float x, float y, float z)
+    void World::moveObject (const Ptr& ptr, float x, float y, float z)
     {
         moveObjectImp(ptr, x, y, z);
 
@@ -753,6 +753,8 @@ namespace MWWorld
 
     void World::update (float duration)
     {
+        /// \todo split this function up into subfunctions
+
         mWorldScene->update (duration);
 
         mWeatherManager->update (duration);
@@ -959,10 +961,10 @@ namespace MWWorld
         return mRendering->getFader();
     }
 
-    Ogre::Vector2 World::getNorthVector(Ptr::CellStore* cell)
+    Ogre::Vector2 World::getNorthVector (CellStore* cell)
     {
-        ESMS::CellRefList<ESM::Static, MWWorld::RefData> statics = cell->statics;
-        ESMS::LiveCellRef<ESM::Static, MWWorld::RefData>* ref = statics.find("northmarker");
+        MWWorld::CellRefList<ESM::Static> statics = cell->statics;
+        MWWorld::LiveCellRef<ESM::Static>* ref = statics.find("northmarker");
         if (!ref)
             return Vector2(0, 1);
         Ogre::SceneNode* node = ref->mData.getBaseNode();
@@ -981,14 +983,14 @@ namespace MWWorld
         mRendering->toggleWater();
     }
 
-    bool World::placeObject(MWWorld::Ptr object, float cursorX, float cursorY)
+    bool World::placeObject (const Ptr& object, float cursorX, float cursorY)
     {
         std::pair<bool, Ogre::Vector3> result = mPhysics->castRay(cursorX, cursorY);
 
         if (!result.first)
             return false;
 
-        MWWorld::Ptr::CellStore* cell;
+        CellStore* cell;
         if (isCellExterior())
         {
             int cellX, cellY;
@@ -1021,7 +1023,7 @@ namespace MWWorld
         return true;
     }
 
-    void World::dropObjectOnGround(MWWorld::Ptr object)
+    void World::dropObjectOnGround (const Ptr& object)
     {
         MWWorld::Ptr::CellStore* cell = getPlayer().getPlayer().getCell();
 

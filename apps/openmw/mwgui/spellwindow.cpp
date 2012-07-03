@@ -4,13 +4,18 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/format.hpp>
 
-#include "../mwworld/world.hpp"
+#include <components/esm_store/store.hpp>
+
+#include "../mwbase/world.hpp"
+#include "../mwbase/environment.hpp"
+
 #include "../mwworld/player.hpp"
 #include "../mwworld/inventorystore.hpp"
-#include "../mwbase/environment.hpp"
+
 #include "../mwmechanics/spells.hpp"
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/spellsuccess.hpp"
+
 #include "../mwsound/soundmanager.hpp"
 
 #include "window_manager.hpp"
@@ -39,7 +44,7 @@ namespace
 namespace MWGui
 {
     SpellWindow::SpellWindow(WindowManager& parWindowManager)
-        : WindowPinnableBase("openmw_spell_window_layout.xml", parWindowManager)
+        : WindowPinnableBase("openmw_spell_window.layout", parWindowManager)
         , mHeight(0)
         , mWidth(0)
     {

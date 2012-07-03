@@ -1,9 +1,14 @@
 #ifndef _GAME_RENDER_LOCALMAP_H
 #define _GAME_RENDER_LOCALMAP_H
 
-#include "../mwworld/ptr.hpp"
-
 #include <openengine/ogre/renderer.hpp>
+
+#include <OgreAxisAlignedBox.h>
+
+namespace MWWorld
+{
+    class CellStore;
+}
 
 namespace MWRender
 {
@@ -24,7 +29,7 @@ namespace MWRender
          * or rendered if it is not already cached.
          * @param exterior cell
          */
-        void requestMap (MWWorld::Ptr::CellStore* cell);
+        void requestMap (MWWorld::CellStore* cell);
 
         /**
          * Request the local map for an interior cell.
@@ -33,7 +38,7 @@ namespace MWRender
          * @param interior cell
          * @param bounding box of the cell
          */
-        void requestMap (MWWorld::Ptr::CellStore* cell,
+        void requestMap (MWWorld::CellStore* cell,
                         Ogre::AxisAlignedBox bounds);
 
         /**
@@ -51,7 +56,7 @@ namespace MWRender
          * new cell, as well as when the game is quit.
          * @param current cell
          */
-        void saveFogOfWar(MWWorld::Ptr::CellStore* cell);
+        void saveFogOfWar(MWWorld::CellStore* cell);
 
     private:
         OEngine::Render::OgreRenderer* mRendering;

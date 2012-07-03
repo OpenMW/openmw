@@ -11,8 +11,12 @@
 #include <components/settings/settings.hpp>
 
 #include "../mwbase/environment.hpp"
-#include "../mwworld/world.hpp"
+#include "../mwbase/world.hpp"
+
+#include "../mwrender/renderingmanager.hpp"
+
 #include "../mwsound/soundmanager.hpp"
+
 #include "../mwinput/inputmanager.hpp"
 
 #include "window_manager.hpp"
@@ -45,7 +49,7 @@ namespace
     void parseResolution (int &x, int &y, const std::string& str)
     {
         std::vector<std::string> split;
-        boost::algorithm::split (split, str, boost::is_any_of("x@"));
+        boost::algorithm::split (split, str, boost::is_any_of("@(x"));
         assert (split.size() >= 2);
         boost::trim(split[0]);
         boost::trim(split[1]);
@@ -75,7 +79,7 @@ namespace
 namespace MWGui
 {
     SettingsWindow::SettingsWindow(WindowManager& parWindowManager) :
-        WindowBase("openmw_settings_window_layout.xml", parWindowManager)
+        WindowBase("openmw_settings_window.layout", parWindowManager)
     {
         getWidget(mOkButton, "OkButton");
         getWidget(mResolutionList, "ResolutionList");

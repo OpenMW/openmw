@@ -3,20 +3,23 @@
 #include <cmath>
 #include <algorithm>
 #include <iterator>
-#include <assert.h>
-#include <iostream>
+#include <cassert>
 
 #include <boost/lexical_cast.hpp>
 
-#include "../mwclass/container.hpp"
+#include "../mwbase/world.hpp"
+#include "../mwbase/environment.hpp"
+
 #include "../mwworld/containerstore.hpp"
 #include "../mwworld/class.hpp"
-#include "../mwworld/world.hpp"
 #include "../mwworld/player.hpp"
-#include "../mwbase/environment.hpp"
 #include "../mwworld/manualref.hpp"
 #include "../mwworld/actiontake.hpp"
+#include "../mwworld/inventorystore.hpp"
+
 #include "../mwsound/soundmanager.hpp"
+
+#include "../mwclass/container.hpp"
 
 #include "window_manager.hpp"
 #include "widgets.hpp"
@@ -42,7 +45,7 @@ namespace MWGui
 
     InventoryWindow::InventoryWindow(WindowManager& parWindowManager,DragAndDrop* dragAndDrop)
         : ContainerBase(dragAndDrop)
-        , WindowPinnableBase("openmw_inventory_window_layout.xml", parWindowManager)
+        , WindowPinnableBase("openmw_inventory_window.layout", parWindowManager)
         , mTrading(false)
     {
         static_cast<MyGUI::Window*>(mMainWidget)->eventWindowChangeCoord += MyGUI::newDelegate(this, &InventoryWindow::onWindowResize);
@@ -171,7 +174,7 @@ namespace MWGui
             /// \todo scripts
 
             boost::shared_ptr<MWWorld::Action> action = MWWorld::Class::get(ptr).use(ptr);
-            
+
             action->execute();
 
             // this is necessary for books/scrolls: if they are already in the player's inventory,

@@ -25,8 +25,9 @@
 #define _NIF_DATA_H_
 
 #include "controlled.hpp"
-#include <iostream>
-#include <Ogre.h>
+
+#include <OgreQuaternion.h>
+#include <OgreVector3.h>
 
 namespace Nif
 {
@@ -557,7 +558,7 @@ public:
 
 
         translist1 = c.getTranslist1();
-        translist2 =	c.getTranslist2();
+        translist2 = c.getTranslist2();
         translist3 = c.getTranslist3();
 
         transtime = c.gettTime();

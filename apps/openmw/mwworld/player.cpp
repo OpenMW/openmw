@@ -1,18 +1,22 @@
 
 #include "player.hpp"
 
+#include <components/esm_store/store.hpp>
+
+#include "../mwbase/environment.hpp"
+#include "../mwbase/world.hpp"
+
 #include "../mwrender/player.hpp"
 
 #include "../mwmechanics/movement.hpp"
 #include "../mwmechanics/npcstats.hpp"
 
-#include "world.hpp"
 #include "class.hpp"
 
 namespace MWWorld
 {
-    Player::Player (MWRender::Player *renderer, const ESM::NPC *player, MWWorld::World& world) :
-      mCellStore (0), mRenderer (renderer), mWorld (world), mClass (0),
+    Player::Player (MWRender::Player *renderer, const ESM::NPC *player, const MWBase::World& world) :
+      mCellStore (0), mRenderer (renderer), mClass (0),
       mAutoMove (false), mForwardBackward (0)
     {
         mPlayer.base = player;
@@ -36,8 +40,8 @@ namespace MWWorld
 
     void Player::setPos(float x, float y, float z)
     {
-      /// \todo This fcuntion should be removed during the mwrender-refactoring.
-        mWorld.moveObject (getPlayer(), x, y, z);
+        /// \todo This fcuntion should be removed during the mwrender-refactoring.
+        MWBase::Environment::get().getWorld()->moveObject (getPlayer(), x, y, z);
     }
 
     void Player::setRot(float x, float y, float z)
@@ -90,14 +94,13 @@ namespace MWWorld
 
         MWWorld::Class::get (ptr).getMovementSettings (ptr).mForwardBackward = value;
     }
-	void Player::setUpDown(int value)
-	{
-		MWWorld::Ptr ptr = getPlayer();
 
-        
+    void Player::setUpDown(int value)
+    {
+        MWWorld::Ptr ptr = getPlayer();
 
         MWWorld::Class::get (ptr).getMovementSettings (ptr).mUpDown = value;
-	}
+    }
 
     void Player::toggleRunning()
     {

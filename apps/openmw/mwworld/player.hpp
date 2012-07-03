@@ -3,12 +3,16 @@
 
 #include "OgreCamera.h"
 
-#include <components/esm_store/cell_store.hpp>
-
+#include "../mwworld/cellstore.hpp"
 #include "../mwworld/refdata.hpp"
 #include "../mwworld/ptr.hpp"
 
 #include "../mwmechanics/drawstate.hpp"
+
+namespace MWBase
+{
+    class World;
+}
 
 namespace MWRender
 {
@@ -17,15 +21,14 @@ namespace MWRender
 
 namespace MWWorld
 {
-    class World;
+    class CellStore;
 
     /// \brief NPC object representing the player and additional player data
-    class Player 
+    class Player
     {
-        ESMS::LiveCellRef<ESM::NPC, MWWorld::RefData> mPlayer;
-        MWWorld::Ptr::CellStore *mCellStore;
+        LiveCellRef<ESM::NPC> mPlayer;
+        MWWorld::CellStore *mCellStore;
         MWRender::Player *mRenderer;
-        MWWorld::World& mWorld;
         std::string mName;
         bool mMale;
         std::string mRace;
@@ -35,7 +38,7 @@ namespace MWWorld
         int mForwardBackward;
     public:
 
-        Player(MWRender::Player *renderer, const ESM::NPC *player, MWWorld::World& world);
+        Player(MWRender::Player *renderer, const ESM::NPC *player, const MWBase::World& world);
 
         ~Player();
 
@@ -45,7 +48,7 @@ namespace MWWorld
         /// Set where the player is looking at. Uses Morrowind (euler) angles
         void setRot(float x, float y, float z);
 
-        void setCell (MWWorld::Ptr::CellStore *cellStore)
+        void setCell (MWWorld::CellStore *cellStore)
         {
             mCellStore = cellStore;
         }
@@ -119,7 +122,7 @@ namespace MWWorld
         void setLeftRight (int value);
 
         void setForwardBackward (int value);
-		void setUpDown(int value);
+        void setUpDown(int value);
 
         void toggleRunning();
     };

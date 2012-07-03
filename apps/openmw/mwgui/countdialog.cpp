@@ -3,12 +3,12 @@
 #include <boost/lexical_cast.hpp>
 
 #include "../mwbase/environment.hpp"
-#include "../mwworld/world.hpp"
+#include "../mwbase/world.hpp"
 
 namespace MWGui
 {
     CountDialog::CountDialog(WindowManager& parWindowManager) :
-        WindowBase("openmw_count_window_layout.xml", parWindowManager)
+        WindowBase("openmw_count_window.layout", parWindowManager)
     {
         getWidget(mSlider, "CountSlider");
         getWidget(mItemEdit, "ItemEdit");
@@ -77,7 +77,7 @@ namespace MWGui
     {
         if (_sender->getCaption() == "")
             return;
-    
+
         unsigned int count;
         try
         {

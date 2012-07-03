@@ -22,7 +22,7 @@ namespace MWGui
         MWWorld::Ptr mPtr;
 
     private:
-        MWWorld::Ptr::CellStore* mCurrentPlayerCell;
+        MWWorld::CellStore* mCurrentPlayerCell;
     };
 }
 

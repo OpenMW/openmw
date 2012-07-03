@@ -9,7 +9,7 @@
 #include <components/interpreter/runtime.hpp>
 #include <components/interpreter/opcodes.hpp>
 
-#include "../mwworld/world.hpp"
+#include "../mwbase/world.hpp"
 
 #include "interpretercontext.hpp"
 #include "ref.hpp"

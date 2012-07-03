@@ -1,16 +1,21 @@
-#include <OgreTerrain.h>
-#include <OgreTerrainGroup.h>
 #include <boost/lexical_cast.hpp>
 
-#include "../mwworld/world.hpp"
+#include <OgreTerrain.h>
+#include <OgreTerrainGroup.h>
+#include <OgreHardwarePixelBuffer.h>
+
+#include <components/esm_store/store.hpp>
+
+#include <components/settings/settings.hpp>
 
 #include "../mwbase/environment.hpp"
+#include "../mwbase/world.hpp"
 
 #include "terrainmaterial.hpp"
 #include "terrain.hpp"
 #include "renderconst.hpp"
 #include "shadows.hpp"
-#include <components/settings/settings.hpp>
+#include "renderingmanager.hpp"
 
 using namespace Ogre;
 

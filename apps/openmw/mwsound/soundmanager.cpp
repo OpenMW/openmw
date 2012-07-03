@@ -9,9 +9,11 @@
 #include <components/esm_store/store.hpp>
 
 #include "../mwbase/environment.hpp"
+#include "../mwbase/world.hpp"
 
-#include "../mwworld/world.hpp"
 #include "../mwworld/player.hpp"
+
+#include "../mwrender/player.hpp"
 
 #include "sound_output.hpp"
 #include "sound_decoder.hpp"

@@ -3,6 +3,9 @@
 
 #include <algorithm>
 
+#include <components/esm_store/reclists.hpp>
+#include <components/esm_store/store.hpp>
+
 #include <components/compiler/exception.hpp>
 
 #include "../mwscript/extensions.hpp"
@@ -103,7 +106,7 @@ namespace MWGui
     }
 
     Console::Console(int w, int h, const Compiler::Extensions& extensions)
-      : Layout("openmw_console_layout.xml"),
+      : Layout("openmw_console.layout"),
         mCompilerContext (MWScript::CompilerContext::Type_Console)
     {
         setCoord(10,10, w-10, h/2);

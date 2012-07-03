@@ -17,7 +17,7 @@ using namespace MWGui;
 using namespace Widgets;
 
 RaceDialog::RaceDialog(WindowManager& parWindowManager)
-  : WindowBase("openmw_chargen_race_layout.xml", parWindowManager)
+  : WindowBase("openmw_chargen_race.layout", parWindowManager)
   , genderIndex(0)
   , faceIndex(0)
   , hairIndex(0)

@@ -9,12 +9,12 @@
 
 #include "../mwsound/soundmanager.hpp"
 
-#include "../mwworld/world.hpp"
-
 #include "../mwdialogue/dialoguemanager.hpp"
 #include "../mwdialogue/journal.hpp"
 
 #include "../mwmechanics/mechanicsmanager.hpp"
+
+#include "world.hpp"
 
 MWBase::Environment *MWBase::Environment::sThis = 0;
 
@@ -32,7 +32,7 @@ MWBase::Environment::~Environment()
     sThis = 0;
 }
 
-void MWBase::Environment::setWorld (MWWorld::World *world)
+void MWBase::Environment::setWorld (World *world)
 {
     mWorld = world;
 }
@@ -77,7 +77,7 @@ void MWBase::Environment::setFrameDuration (float duration)
     mFrameDuration = duration;
 }
 
-MWWorld::World *MWBase::Environment::getWorld() const
+MWBase::World *MWBase::Environment::getWorld() const
 {
     assert (mWorld);
     return mWorld;
