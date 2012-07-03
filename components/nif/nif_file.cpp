@@ -190,17 +190,23 @@ void NIFFile::parse()
 
 void NiSkinInstance::post(NIFFile *nif)
 {
-  int bnum = bones.length();
-  if(bnum != static_cast<int> (data->bones.size()))
-    nif->fail("Mismatch in NiSkinData bone count");
+    data.post(nif);
+    root.post(nif);
+    bones.post(nif);
 
-  root->makeRootBone(data->trafo);
+    if(data.empty() || root.empty())
+        nif->fail("NiSkinInstance missing root or data");
 
-  for(int i=0; i<bnum; i++)
+    size_t bnum = bones.length();
+    if(bnum != data->bones.size())
+        nif->fail("Mismatch in NiSkinData bone count");
+
+    root->makeRootBone(data->trafo);
+
+    for(int i=0; i<bnum; i++)
     {
-      if(!bones.has(i))
-        nif->fail("Oops: Missing bone! Don't know how to handle this.");
-
-      bones[i].makeBone(i, data->bones[i]);
+        if(!bones.has(i))
+            nif->fail("Oops: Missing bone! Don't know how to handle this.");
+        bones[i].makeBone(i, data->bones[i]);
     }
 }

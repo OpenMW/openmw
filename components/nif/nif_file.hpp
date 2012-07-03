@@ -43,113 +43,107 @@ namespace Nif
 
 class NIFFile
 {
-  enum NIFVersion
-    {
-      VER_MW    = 0x04000002    // Morrowind NIFs
+    enum NIFVersion {
+        VER_MW    = 0x04000002    // Morrowind NIFs
     };
 
-  /// Nif file version
-  int ver;
+    /// Nif file version
+    int ver;
 
-  /// Input stream
-  StreamPtr inp;
+    /// Input stream
+    StreamPtr inp;
 
-  /// File name, used for error messages
-  std::string filename;
+    /// File name, used for error messages
+    std::string filename;
 
-  /// Record list
-  std::vector<Record*> records;
+    /// Record list
+    std::vector<Record*> records;
 
-  /// Parse the file
-  void parse();
+    /// Parse the file
+    void parse();
 
- public:
-  /// Used for error handling
-  void fail(const std::string &msg)
+public:
+    /// Used for error handling
+    void fail(const std::string &msg)
     {
-      std::string err = "NIFFile Error: " + msg;
-      err += "\nFile: " + filename;
-      throw std::runtime_error(err);
+        std::string err = "NIFFile Error: " + msg;
+        err += "\nFile: " + filename;
+        throw std::runtime_error(err);
     }
 
-  /// Open a NIF stream. The name is used for error messages.
-  NIFFile(StreamPtr nif, const std::string &name)
-    : filename(name)
+    /// Open a NIF stream. The name is used for error messages.
+    NIFFile(StreamPtr nif, const std::string &name)
+      : filename(name)
     {
-      /* Load the entire file into memory. This allows us to use
-         direct pointers to the data arrays in the NIF, instead of
-         individually allocating and copying each one.
+        /* Load the entire file into memory. This allows us to use
+           direct pointers to the data arrays in the NIF, instead of
+           individually allocating and copying each one.
 
-         The NIF data is only stored temporarily in memory, since once
-         the mesh data is loaded it is siphoned into OGRE and
-         deleted. For that reason, we might improve this further and
-         use a shared region/pool based allocation scheme in the
-         future, especially since only one NIFFile will ever be loaded
-         at any given time.
-      */
-      inp = StreamPtr(new BufferStream(nif));
+           The NIF data is only stored temporarily in memory, since once
+           the mesh data is loaded it is siphoned into OGRE and
+           deleted. For that reason, we might improve this further and
+           use a shared region/pool based allocation scheme in the
+           future, especially since only one NIFFile will ever be loaded
+           at any given time.
+        */
+        inp = StreamPtr(new BufferStream(nif));
 
-      parse();
+        parse();
     }
 
-  ~NIFFile()
+    ~NIFFile()
     {
-      for(std::size_t i=0; i<records.size(); i++)
-        {
-          delete records[i];
-        }
+        for(std::size_t i=0; i<records.size(); i++)
+            delete records[i];
     }
 
-  /// Get a given record
-  Record *getRecord(int index)
-  {
-    assert(index >= 0 && index < static_cast<int> (records.size()));
-    Record *res = records[index];
-    assert(res != NULL);
-    return res;
-  }
+    /// Get a given record
+    Record *getRecord(size_t index)
+    {
+        Record *res = records.at(index);
+        assert(res != NULL);
+        return res;
+    }
 
-  /// Number of records
-  int numRecords() { return records.size(); }
+    /// Number of records
+    int numRecords() { return records.size(); }
 
-  /* ************************************************
-
+    /*************************************************
                Parser functions
+    ****************************************************/
 
-  ****************************************************/
+    void skip(size_t size) { inp->getPtr(size); }
 
-  void skip(size_t size) { inp->getPtr(size); }
+    template<class X> const X* getPtr() { return (const X*)inp->getPtr(sizeof(X)); }
+    template<class X> X getType() { return *getPtr<X>(); }
+    unsigned short getShort() { return getType<unsigned short>(); }
+    int getInt() { return getType<int>(); }
+    float getFloat() { return getType<float>(); }
+    char getByte() { return getType<char>(); }
 
-  template<class X> const X* getPtr() { return (const X*)inp->getPtr(sizeof(X)); }
-  template<class X> X getType() { return *getPtr<X>(); }
-  unsigned short getShort() { return getType<unsigned short>(); }
-  int getInt() { return getType<int>(); }
-  float getFloat() { return getType<float>(); }
-  char getByte() { return getType<char>(); }
-
-  template<class X>
-  Misc::SliceArray<X> getArrayLen(int num)
+    template<class X>
+    Misc::SliceArray<X> getArrayLen(int num)
     { return Misc::SliceArray<X>((const X*)inp->getPtr(num*sizeof(X)),num); }
 
-  template<class X>
-  Misc::SliceArray<X> getArray()
+    template<class X>
+    Misc::SliceArray<X> getArray()
     {
-      int len = getInt();
-      return getArrayLen<X>(len);
+        int len = getInt();
+        return getArrayLen<X>(len);
     }
 
-  Misc::SString getString() { return getArray<char>(); }
+    Misc::SString getString() { return getArray<char>(); }
 
-  const Vector *getVector() { return getPtr<Vector>(); }
-  const Matrix *getMatrix() { return getPtr<Matrix>(); }
-  const Transformation *getTrafo() { return getPtr<Transformation>(); }
-  const Vector4 *getVector4() { return getPtr<Vector4>(); }
+    const Vector *getVector() { return getPtr<Vector>(); }
+    const Matrix *getMatrix() { return getPtr<Matrix>(); }
+    const Transformation *getTrafo() { return getPtr<Transformation>(); }
+    const Vector4 *getVector4() { return getPtr<Vector4>(); }
 
-  Misc::FloatArray getFloatLen(int num)
+    Misc::FloatArray getFloatLen(int num)
     { return getArrayLen<float>(num); }
 
-  // For fixed-size strings where you already know the size
-  const char *getString(int size)
+    // For fixed-size strings where you already know the size
+    const char *getString(int size)
     { return (const char*)inp->getPtr(size); }
 };
 
