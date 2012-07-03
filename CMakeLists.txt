@@ -189,7 +189,7 @@ endif()
 
 find_package(OGRE REQUIRED)
 find_package(MyGUI REQUIRED)
-find_package(Boost REQUIRED COMPONENTS system filesystem program_options thread)
+find_package(Boost REQUIRED COMPONENTS system filesystem program_options thread wave)
 find_package(OIS REQUIRED)
 find_package(OpenAL REQUIRED)
 find_package(Bullet REQUIRED)

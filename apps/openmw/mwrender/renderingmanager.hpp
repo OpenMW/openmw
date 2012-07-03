@@ -43,6 +43,11 @@ namespace MWWorld
     class CellStore;
 }
 
+namespace sh
+{
+    class Factory;
+}
+
 namespace MWRender
 {
 
@@ -173,6 +178,8 @@ class RenderingManager: private RenderingInterface, public Ogre::WindowEventList
     virtual void windowClosed(Ogre::RenderWindow* rw);
 
   private:
+
+    sh::Factory* mFactory;
 
     void setAmbientMode();
 

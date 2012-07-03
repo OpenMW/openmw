@@ -14,6 +14,9 @@
 #include <OgreCompositionPass.h>
 #include <OgreHardwarePixelBuffer.h>
 
+#include <extern/shiny/Main/Factory.hpp>
+#include <extern/shiny/Platforms/Ogre/OgrePlatform.hpp>
+
 #include <components/esm/loadstat.hpp>
 #include <components/settings/settings.hpp>
 
@@ -46,6 +49,11 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
     mCompositors = new Compositors(mRendering.getViewport());
 
     mWater = 0;
+
+    // material system
+    sh::OgrePlatform* platform = new sh::OgrePlatform("General", "./");
+    platform->setCacheFolder ("./");
+    mFactory = new sh::Factory(platform);
 
     //The fog type must be set before any terrain objects are created as if the
     //fog type is set to FOG_NONE then the initially created terrain won't have any fog

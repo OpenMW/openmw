@@ -101,7 +101,8 @@ target_link_libraries(openmw
     ${BULLET_LIBRARIES}
     ${MYGUI_LIBRARIES}
     ${MYGUI_PLATFORM_LIBRARIES}
-    components
+    "shiny"
+    "shiny.OgrePlatform"
 )
 
 # Fix for not visible pthreads functions for linker with glibc 2.15
