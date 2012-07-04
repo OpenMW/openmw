@@ -6,6 +6,8 @@ material openmw_objects_base
     emissive 0.0 0.0 0.0
     has_vertex_colour false
     diffuseMap black.png
+    fog true
+    is_transparent false // real transparency, alpha rejection doesn't count here
 
     pass
     {
@@ -16,9 +18,12 @@ material openmw_objects_base
         specular $specular
         ambient $ambient
         emissive $emissive
+        fog $fog
 
         ffp_vertex_colour_ambient $has_vertex_colour
         has_vertex_colour $has_vertex_colour
+        
+        is_transparent $is_transparent
 
         texture_unit diffuseMap
         {

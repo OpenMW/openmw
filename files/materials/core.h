@@ -14,6 +14,8 @@
     #define shInput(type, name) , in type name : TEXCOORD@shCounter(1)
     #define shOutput(type, name) , out type name : TEXCOORD@shCounter(2)
 
+    #define shNormalInput(type) , in type normal : NORMAL
+
     #ifdef SH_VERTEX_SHADER
 
         #define shOutputPosition oPosition
@@ -32,7 +34,9 @@
 
     #ifdef SH_FRAGMENT_SHADER
 
-        #define shOutputColor oColor
+        #define shOutputColor(num) oColor##num
+
+        #define shDeclareMrtOutput(num) , out float4 oColor##num : COLOR##num
 
         #define SH_BEGIN_PROGRAM \
             void main( \
@@ -67,13 +71,14 @@
 
     #define shInputPosition vertex
     #define shOutputPosition gl_Position
-    #define shOutputColor oColor
+    #define shOutputColor(num) oColor##num
 
     #define float4x4 mat4
 
     #define shInput(type, name) in type name;
     #define shOutput(type, name) out type name;
 
+    #define shNormalInput(type) in type normal;
 
     #ifdef SH_VERTEX_SHADER
 
@@ -86,8 +91,10 @@
 
     #ifdef SH_FRAGMENT_SHADER
 
+        #define shDeclareMrtOutput(num) out vec4 oColor##num;
+
         #define SH_BEGIN_PROGRAM \
-            out float4 oColor;
+            out float4 oColor0;
         #define SH_START_PROGRAM \
             void main(void)
 
