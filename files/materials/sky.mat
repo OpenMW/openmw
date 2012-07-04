@@ -1,0 +1,73 @@
+material openmw_moon
+{
+    pass
+    {
+        vertex_program moon_vertex
+        fragment_program moon_fragment
+        
+        texture_unit diffuseMap
+        {
+            texture $diffuseMap
+            create_in_ffp true
+        }
+    }
+}
+
+material openmw_clouds
+{
+    pass
+    {
+        vertex_program clouds_vertex
+        fragment_program clouds_fragment
+
+        // second diffuse map is used for weather transitions
+        texture_unit diffuseMap1
+        {
+            texture $diffuseMap1
+            create_in_ffp true
+        }
+        
+        texture_unit diffuseMap2
+        {
+            texture $diffuseMap2
+        }
+    }
+}
+
+material openmw_atmosphere
+{
+    pass
+    {
+        vertex_program atmosphere_vertex
+        fragment_program atmosphere_fragment
+    }
+}
+
+material openmw_stars
+{
+    pass
+    {
+        vertex_program stars_vertex
+        fragment_program stars_fragment
+
+        texture_unit diffuseMap
+        {
+            diffuseMap $diffuseMap
+        }
+    }
+}
+
+// used for both sun and sun glare
+material openmw_sun
+{
+    pass
+    {
+        vertex_program sun_vertex
+        fragment_program sun_fragment
+        
+        texture unit diffuseMap
+        {
+            diffuseMap $diffuseMap
+        }
+    }
+}

@@ -20,17 +20,17 @@
         shOutput(float2, UV)
         shNormalInput(float4)
         shOutput(float4, normalPassthrough)
-        #ifdef NEED_DEPTH
+#ifdef NEED_DEPTH
         shOutput(float, depthPassthrough)
-        #endif
+#endif
     SH_START_PROGRAM
     {
 	    shOutputPosition = shMatrixMult(wvp, shInputPosition);
 	    UV = uv0;
         normalPassthrough = normal;
-        #ifdef NEED_DEPTH
+#ifdef NEED_DEPTH
         depthPassthrough = shOutputPosition.z;
-        #endif
+#endif
     }
 
 #else
@@ -41,9 +41,9 @@
         shDeclareMrtOutput(1)
         shInput(float4, normalPassthrough)
 
-        #ifdef NEED_DEPTH
+#ifdef NEED_DEPTH
         shInput(float, depthPassthrough)
-        #endif
+#endif
    
         shUniform(float far) @shAutoConstant(far, far_clip_distance)
         

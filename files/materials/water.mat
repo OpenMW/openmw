@@ -1,0 +1,30 @@
+// note: the fixed function water is created manually, not here
+
+material openmw_water
+{
+    pass
+    {
+        vertex_program water_vertex
+        fragment_program water_fragment
+        
+        texture_unit reflectionMap
+        {
+            texture_alias WaterReflection
+        }
+        
+        texture_unit refractionMap
+        {
+            texture_alias WaterRefraction
+        }
+        
+        texture_unit depthMap
+        {
+
+        }
+        
+        texture_unit normalMap
+        {
+            texture 
+        }
+    }
+}

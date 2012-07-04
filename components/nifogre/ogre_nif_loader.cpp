@@ -246,6 +246,33 @@ void NIFLoader::createMaterial(const String &name,
 
     instance->setProperty ("diffuseMap", sh::makeProperty(texName));
 
+    // Add transparency if NiAlphaProperty was present
+    if (alphaFlags != -1)
+    {
+        // The 237 alpha flags are by far the most common. Check
+        // NiAlphaProperty in nif/property.h if you need to decode
+        // other values. 237 basically means normal transparencly.
+        if (alphaFlags == 237)
+        {
+            NifOverrides::TransparencyResult result = NifOverrides::Overrides::getTransparencyOverride(texName);
+            if (result.first)
+            {
+                instance->setProperty("alpha_rejection_func", sh::makeProperty<sh::StringValue>(new sh::StringValue("greater_equal")));
+                instance->setProperty("alpha_rejection_value", sh::makeProperty<sh::IntValue>(new sh::IntValue(result.second)));
+            }
+            else
+            {
+                // Enable transparency
+                instance->setProperty("scene_blend", sh::makeProperty<sh::StringValue>(new sh::StringValue("alpha_blend")));
+                instance->setProperty("depth_write", sh::makeProperty<sh::BooleanValue>(new sh::BooleanValue(false)));
+            }
+        }
+        else
+            warn("Unhandled alpha setting for texture " + texName);
+
+    }
+
+
 /*
     if (!texName.empty())
     {
