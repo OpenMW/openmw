@@ -226,7 +226,7 @@ void NIFLoader::createMaterial(const String &name,
                            const Vector &emissive,
                            float glossiness, float alpha,
                            int alphaFlags, float alphaTest,
-                           const String &texName)
+                           const String &texName, bool vertexColor)
 {
     if (texName.empty())
         return;
@@ -245,6 +245,9 @@ void NIFLoader::createMaterial(const String &name,
         new sh::Vector3(emissive.array[0], emissive.array[1], emissive.array[2])));
 
     instance->setProperty ("diffuseMap", sh::makeProperty(texName));
+
+    if (vertexColor)
+        instance->setProperty ("has_vertex_colour", sh::makeProperty<sh::BooleanValue>(new sh::BooleanValue(true)));
 
     // Add transparency if NiAlphaProperty was present
     if (alphaFlags != -1)
@@ -271,7 +274,6 @@ void NIFLoader::createMaterial(const String &name,
             warn("Unhandled alpha setting for texture " + texName);
 
     }
-
 
 /*
     if (!texName.empty())
@@ -668,6 +670,8 @@ void NIFLoader::handleNiTriShape(NiTriShape *shape, int flags, BoundsFinder &bou
         NiTexturingProperty *t = NULL;
         NiMaterialProperty *m = NULL;
         NiAlphaProperty *a = NULL;
+        // can't make any sense of these values, so ignoring them for now
+        //NiVertexColorProperty *v = NULL;
 
         // Scan the property list for material information
         PropertyList &list = shape->props;
@@ -685,6 +689,8 @@ void NIFLoader::handleNiTriShape(NiTriShape *shape, int flags, BoundsFinder &bou
                 m = static_cast<NiMaterialProperty*>(pr);
             else if (pr->recType == RC_NiAlphaProperty)
                 a = static_cast<NiAlphaProperty*>(pr);
+            //else if (pr->recType == RC_NiVertexColorProperty)
+                //v = static_cast<NiVertexColorProperty*>(pr);
         }
 
         // Texture
@@ -755,7 +761,7 @@ void NIFLoader::handleNiTriShape(NiTriShape *shape, int flags, BoundsFinder &bou
                 {
                     //std::cout << "new";
                     createMaterial(material, d->ambient, d->diffuse, d->specular, d->emissive,
-                                    d->glossiness, d->alpha, alphaFlags, alphaTest, texName);
+                                   d->glossiness, d->alpha, alphaFlags, alphaTest, texName, shape->data->colors.length != 0);
                     MaterialMap.insert(std::make_pair(texName,material));
                 }
             }
@@ -771,7 +777,7 @@ void NIFLoader::handleNiTriShape(NiTriShape *shape, int flags, BoundsFinder &bou
                 }
 
                 createMaterial(material, one, one, zero, zero, 0.0, 1.0,
-                               alphaFlags, alphaTest, texName);
+                               alphaFlags, alphaTest, texName, shape->data->colors.length != 0);
             }
         }
     } // End of material block, if(!hidden) ...

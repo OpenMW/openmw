@@ -15,6 +15,8 @@
     #define shOutput(type, name) , out type name : TEXCOORD@shCounter(2)
 
     #define shNormalInput(type) , in type normal : NORMAL
+    
+    #define shColourInput(type) , in type colour : COLOR
 
     #ifdef SH_VERTEX_SHADER
 
@@ -40,7 +42,7 @@
 
         #define SH_BEGIN_PROGRAM \
             void main( \
-                out float4 oColor : COLOR
+                out float4 oColor0 : COLOR
 
         #define SH_START_PROGRAM \
             ) \
@@ -69,7 +71,9 @@
 
     #define shMatrixMult(m, v) m * v
 
+    // automatically recognized by ogre when the input name equals this
     #define shInputPosition vertex
+
     #define shOutputPosition gl_Position
     #define shOutputColor(num) oColor##num
 
@@ -78,7 +82,9 @@
     #define shInput(type, name) in type name;
     #define shOutput(type, name) out type name;
 
+    // automatically recognized by ogre when the input name equals this
     #define shNormalInput(type) in type normal;
+    #define shColourInput(type) in type colour;
 
     #ifdef SH_VERTEX_SHADER
 

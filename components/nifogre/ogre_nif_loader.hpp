@@ -142,7 +142,8 @@ class NIFLoader : Ogre::ManualResourceLoader
                             const Nif::Vector &emissive,
                             float glossiness, float alpha,
                             int alphaFlags, float alphaTest,
-                            const Ogre::String &texName);
+                            const Ogre::String &texName,
+                            bool vertexColor);
 
         void findRealTexture(Ogre::String &texName);
 
