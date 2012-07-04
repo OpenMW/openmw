@@ -228,6 +228,9 @@ void NIFLoader::createMaterial(const String &name,
                            int alphaFlags, float alphaTest,
                            const String &texName)
 {
+    if (texName.empty())
+        return;
+
     sh::MaterialInstance* instance = sh::Factory::getInstance ().createMaterialInstance (name, "openmw_objects_base");
     instance->setProperty ("ambient", sh::makeProperty<sh::Vector3> (
         new sh::Vector3(ambient.array[0], ambient.array[1], ambient.array[2])));
@@ -242,7 +245,6 @@ void NIFLoader::createMaterial(const String &name,
         new sh::Vector3(emissive.array[0], emissive.array[1], emissive.array[2])));
 
     instance->setProperty ("diffuseMap", sh::makeProperty(texName));
-
 
 /*
     if (!texName.empty())
