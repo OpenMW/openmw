@@ -149,7 +149,11 @@ struct NiNode : Node
         effects.post(nif);
 
         for(size_t i = 0;i < children.length();i++)
-            children[i].parent = this;
+        {
+            // Why would a unique list of children contain empty refs?
+            if(children.has(i))
+                children[i].parent = this;
+        }
     }
 };
 

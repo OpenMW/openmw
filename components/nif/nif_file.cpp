@@ -203,7 +203,7 @@ void NiSkinInstance::post(NIFFile *nif)
 
     root->makeRootBone(data->trafo);
 
-    for(int i=0; i<bnum; i++)
+    for(size_t i=0; i<bnum; i++)
     {
         if(!bones.has(i))
             nif->fail("Oops: Missing bone! Don't know how to handle this.");

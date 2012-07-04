@@ -53,6 +53,7 @@ public:
 
         // Store the index for later
         index = nif->getInt();
+        assert(index >= -1);
     }
 
     /// Resolve index to pointer
@@ -117,11 +118,10 @@ public:
 
     bool has(size_t index)
     {
-        assert(index >= 0 && index < static_cast<int> (list.size()));
         return !list.at(index).empty();
     }
 
-    int length()
+    size_t length()
     { return list.size(); }
 };
 
