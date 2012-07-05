@@ -310,6 +310,9 @@ namespace MWGui
             && (type != typeid(ESM::Potion).name()))
             return;
 
+        if (MWWorld::Class::get(object).getName(object) == "") // objects without name presented to user can never be picked up
+            return;
+
         // sound
         std::string sound = MWWorld::Class::get(object).getUpSoundId(object);
         MWBase::Environment::get().getSoundManager()->playSound(sound, 1, 1);
