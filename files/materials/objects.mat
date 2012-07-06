@@ -7,30 +7,35 @@ material openmw_objects_base
     has_vertex_colour false
     diffuseMap black.png
     fog true
+    mrt_output true
+    lighting true
 
     is_transparent false // real transparency, alpha rejection doesn't count here
     scene_blend default
-    alpha_rejection_value default
-    alpha_rejection_func default
+    alpha_rejection default
 
     pass
     {
         vertex_program openmw_objects_vertex
         fragment_program openmw_objects_fragment
 
+        shader_properties
+        {
+            fog $fog
+            mrt_output $mrt_output
+            lighting $lighting
+            has_vertex_colour $has_vertex_colour
+            is_transparent $is_transparent
+        }
+
         diffuse $diffuse
         specular $specular
         ambient $ambient
         emissive $emissive
-        fog $fog
+        scene_blend $scene_blend
+        alpha_rejection $alpha_rejection
 
         ffp_vertex_colour_ambient $has_vertex_colour
-        has_vertex_colour $has_vertex_colour
-        
-        is_transparent $is_transparent
-        scene_blend $scene_blend
-        alpha_rejection_value $alpha_rejection_value
-        alpha_rejection_func $alpha_rejection_func
 
         texture_unit diffuseMap
         {

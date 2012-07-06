@@ -52,7 +52,7 @@
 #endif
 
 #if SH_GLSL == 1
-    @shGlslVersion(130)
+    @version 130
 
     #define float2 vec2
     #define float3 vec3

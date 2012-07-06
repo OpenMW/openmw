@@ -2,13 +2,10 @@
 
 
 #define FOG @shPropertyBool(fog)
-#define MRT @shPropertyNotBool(is_transparent)
+#define MRT @shPropertyNotBool(is_transparent) && @shPropertyBool(mrt_output)
+#define LIGHTING @shPropertyBool(lighting)
 
-#if MRT
-#define NEED_DEPTH
-#endif
-
-#if FOG
+#if FOG || MRT
 #define NEED_DEPTH
 #endif
 
@@ -48,7 +45,9 @@
     SH_BEGIN_PROGRAM
 		shSampler2D(diffuseMap)
 		shInput(float2, UV)
+#if MRT
         shDeclareMrtOutput(1)
+#endif
         shInput(float4, normalPassthrough)
 
 #ifdef NEED_DEPTH
@@ -79,7 +78,9 @@
         shOutputColor(0).xyz = shLerp (shOutputColor(0).xyz, fogColor, fogValue);
 #endif
 
+#if MRT
         shOutputColor(1) = float4(depthPassthrough / far,1,1,1);
+#endif
     }
 
 #endif

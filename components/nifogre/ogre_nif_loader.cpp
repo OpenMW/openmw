@@ -33,6 +33,8 @@
 #include <OgreSubMesh.h>
 #include <OgreRoot.h>
 
+#include <boost/lexical_cast.hpp>
+
 #include <extern/shiny/Main/Factory.hpp>
 
 #include <components/settings/settings.hpp>
@@ -260,8 +262,8 @@ void NIFLoader::createMaterial(const String &name,
             NifOverrides::TransparencyResult result = NifOverrides::Overrides::getTransparencyOverride(texName);
             if (result.first)
             {
-                instance->setProperty("alpha_rejection_func", sh::makeProperty<sh::StringValue>(new sh::StringValue("greater_equal")));
-                instance->setProperty("alpha_rejection_value", sh::makeProperty<sh::IntValue>(new sh::IntValue(result.second)));
+                instance->setProperty("alpha_rejection",
+                    sh::makeProperty<sh::StringValue>(new sh::StringValue("greater_equal " + boost::lexical_cast<std::string>(result.second))));
             }
             else
             {
@@ -272,81 +274,34 @@ void NIFLoader::createMaterial(const String &name,
         }
         else
             warn("Unhandled alpha setting for texture " + texName);
-
     }
 
-/*
-    if (!texName.empty())
+    // As of yet UNTESTED code from Chris:
+    /*pass->setTextureFiltering(Ogre::TFO_ANISOTROPIC);
+    pass->setDepthFunction(Ogre::CMPF_LESS_EQUAL);
+    pass->setDepthCheckEnabled(true);
+
+    // Add transparency if NiAlphaProperty was present
+    if (alphaFlags != -1)
     {
-        Pass *pass = material->getTechnique(0)->getPass(0);
-        /*TextureUnitState *txt =*/
-    /*
-        pass->createTextureUnitState(texName);
-
-        pass->setVertexColourTracking(TVC_DIFFUSE);
-*/
-        // As of yet UNTESTED code from Chris:
-        /*pass->setTextureFiltering(Ogre::TFO_ANISOTROPIC);
-        pass->setDepthFunction(Ogre::CMPF_LESS_EQUAL);
-        pass->setDepthCheckEnabled(true);
-
-        // Add transparency if NiAlphaProperty was present
-        if (alphaFlags != -1)
+        std::cout << "Alpha flags set!" << endl;
+        if ((alphaFlags&1))
         {
-            std::cout << "Alpha flags set!" << endl;
-            if ((alphaFlags&1))
-            {
-                pass->setDepthWriteEnabled(false);
-                pass->setSceneBlending(getBlendFactor((alphaFlags>>1)&0xf),
-                                       getBlendFactor((alphaFlags>>5)&0xf));
-            }
-            else
-                pass->setDepthWriteEnabled(true);
-
-            if ((alphaFlags>>9)&1)
-                pass->setAlphaRejectSettings(getTestMode((alphaFlags>>10)&0x7),
-                                             alphaTest);
-
-            pass->setTransparentSortingEnabled(!((alphaFlags>>13)&1));
+            pass->setDepthWriteEnabled(false);
+            pass->setSceneBlending(getBlendFactor((alphaFlags>>1)&0xf),
+                                   getBlendFactor((alphaFlags>>5)&0xf));
         }
         else
-            pass->setDepthWriteEnabled(true); */
+            pass->setDepthWriteEnabled(true);
 
-/*
-        // Add transparency if NiAlphaProperty was present
-        if (alphaFlags != -1)
-        {
-            // The 237 alpha flags are by far the most common. Check
-            // NiAlphaProperty in nif/property.h if you need to decode
-            // other values. 237 basically means normal transparencly.
-            if (alphaFlags == 237)
-            {
-                NifOverrides::TransparencyResult result = NifOverrides::Overrides::getTransparencyOverride(texName);
-                if (result.first)
-                {
-                    pass->setAlphaRejectFunction(CMPF_GREATER_EQUAL);
-                    pass->setAlphaRejectValue(result.second);
-                }
-                else
-                {
-                    // Enable transparency
-                    pass->setSceneBlending(SBT_TRANSPARENT_ALPHA);
+        if ((alphaFlags>>9)&1)
+            pass->setAlphaRejectSettings(getTestMode((alphaFlags>>10)&0x7),
+                                         alphaTest);
 
-                    //pass->setDepthCheckEnabled(false);
-                    pass->setDepthWriteEnabled(false);
-                    //std::cout << "alpha 237; material: " << name << " texName: " << texName << std::endl;
-                }
-            }
-            else
-                warn("Unhandled alpha setting for texture " + texName);
-        }
-        else
-        {
-            material->getTechnique(0)->setShadowCasterMaterial("depth_shadow_caster_noalpha");
-        }
+        pass->setTransparentSortingEnabled(!((alphaFlags>>13)&1));
     }
-        */
-
+    else
+        pass->setDepthWriteEnabled(true); */
 }
 
 // Takes a name and adds a unique part to it. This is just used to
