@@ -270,7 +270,7 @@ void NIFLoader::createMaterial(const String &name,
             {
                 // Enable transparency
                 instance->setProperty("scene_blend", sh::makeProperty<sh::StringValue>(new sh::StringValue("alpha_blend")));
-                instance->setProperty("depth_write", sh::makeProperty<sh::BooleanValue>(new sh::BooleanValue(false)));
+                instance->setProperty("depth_write", sh::makeProperty<sh::StringValue>(new sh::StringValue("off")));
             }
         }
         else

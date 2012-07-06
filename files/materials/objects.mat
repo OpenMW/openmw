@@ -12,6 +12,7 @@ material openmw_objects_base
 
     is_transparent false // real transparency, alpha rejection doesn't count here
     scene_blend default
+    depth_write default
     alpha_rejection default
 
     pass
@@ -34,6 +35,7 @@ material openmw_objects_base
         emissive $emissive
         scene_blend $scene_blend
         alpha_rejection $alpha_rejection
+        depth_write $depth_write
 
         ffp_vertex_colour_ambient $has_vertex_colour
 
