@@ -9,6 +9,8 @@
 #define NEED_DEPTH
 #endif
 
+#define NUM_LIGHTS 8
+
 #define HAS_VERTEXCOLOR @shPropertyBool(has_vertex_colour)
 
 #ifdef SH_VERTEX_SHADER
@@ -18,10 +20,15 @@
         shInput(float2, uv0)
         shOutput(float2, UV)
         shNormalInput(float4)
-        shOutput(float4, normalPassthrough)
 #ifdef NEED_DEPTH
         shOutput(float, depthPassthrough)
 #endif
+
+#if LIGHTING
+        shOutput(float3, normalPassthrough)
+        shOutput(float3, objSpacePositionPassthrough)
+#endif
+
 #if HAS_VERTEXCOLOR
         shColourInput(float4)
         shOutput(float4, colorPassthrough)
@@ -30,9 +37,13 @@
     {
 	    shOutputPosition = shMatrixMult(wvp, shInputPosition);
 	    UV = uv0;
-        normalPassthrough = normal;
+        normalPassthrough = normal.xyz;
 #ifdef NEED_DEPTH
         depthPassthrough = shOutputPosition.z;
+#endif
+
+#if LIGHTING
+        objSpacePositionPassthrough = shInputPosition.xyz;
 #endif
 
 #if HAS_VERTEXCOLOR
@@ -48,13 +59,27 @@
 #if MRT
         shDeclareMrtOutput(1)
 #endif
-        shInput(float4, normalPassthrough)
 
 #ifdef NEED_DEPTH
         shInput(float, depthPassthrough)
 #endif
-   
+
         shUniform(float far) @shAutoConstant(far, far_clip_distance)
+
+#if LIGHTING
+        shInput(float3, normalPassthrough)
+        shInput(float3, objSpacePositionPassthrough)
+        shUniform(float4 lightAmbient)                       @shAutoConstant(lightAmbient, ambient_light_colour)
+        shUniform(float passIteration)                       @shAutoConstant(passIteration, pass_iteration_number)
+        shUniform(float4 materialAmbient)                    @shAutoConstant(materialAmbient, surface_ambient_colour)
+        shUniform(float4 materialDiffuse)                    @shAutoConstant(materialDiffuse, surface_diffuse_colour)
+        shUniform(float4 materialEmissive)                   @shAutoConstant(materialEmissive, surface_emissive_colour)
+    @shForeach(NUM_LIGHTS)
+        shUniform(float4 lightPosObjSpace@shIterator)        @shAutoConstant(lightPosObjSpace@shIterator, light_position_object_space, @shIterator)
+        shUniform(float4 lightAttenuation@shIterator)        @shAutoConstant(lightAttenuation@shIterator, light_attenuation, @shIterator)
+        shUniform(float4 lightDiffuse@shIterator)            @shAutoConstant(lightDiffuse@shIterator, light_diffuse_colour, @shIterator)
+    @shEndForeach
+#endif
         
 #if FOG
         shUniform(float3 fogColor) @shAutoConstant(fogColor, fog_colour)
@@ -66,8 +91,28 @@
 #endif
     SH_START_PROGRAM
     {
-        //shOutputColor(0) = float4((normalize(normalPassthrough.xyz)+float3(1.0,1.0,1.0)) / 2.f, 1.0);
         shOutputColor(0) = shSample(diffuseMap, UV);
+
+#if LIGHTING
+        float3 normal = normalize(normalPassthrough);
+        float3 lightDir, diffuse;
+        float d;
+        float3 ambient = materialAmbient.xyz * lightAmbient.xyz;
+    
+    @shForeach(NUM_LIGHTS)
+    
+        lightDir = lightPosObjSpace@shIterator.xyz - (objSpacePositionPassthrough.xyz * lightPosObjSpace@shIterator.w);
+        d = length(lightDir);
+        
+        lightDir = normalize(lightDir);
+
+        diffuse += materialDiffuse.xyz * lightDiffuse@shIterator.xyz * (1.0 / ((lightAttenuation@shIterator.y) + (lightAttenuation@shIterator.z * d) + (lightAttenuation@shIterator.w * d * d))) * max(dot(normal, lightDir), 0);
+    
+    @shEndForeach
+
+        shOutputColor(0).xyz *= (ambient + diffuse + materialEmissive.xyz);
+#endif
+
 
 #if HAS_VERTEXCOLOR
         shOutputColor(0).xyz *= colorPassthrough.xyz;
