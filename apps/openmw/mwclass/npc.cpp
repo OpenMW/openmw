@@ -67,11 +67,11 @@ namespace MWClass
                 boost::algorithm::to_lower(faction);
                 if(ref->base->npdt52.gold != -10)
                 {
-                    data->mNpcStats.mFactionRank[faction] = (int)ref->base->npdt52.rank;
+                    data->mNpcStats.getFactionRanks()[faction] = (int)ref->base->npdt52.rank;
                 }
                 else
                 {
-                    data->mNpcStats.mFactionRank[faction] = (int)ref->base->npdt12.rank;
+                    data->mNpcStats.getFactionRanks()[faction] = (int)ref->base->npdt12.rank;
                 }
             }
 
@@ -79,7 +79,7 @@ namespace MWClass
             if(ref->base->npdt52.gold != -10)
             {
                 for (int i=0; i<27; ++i)
-                    data->mNpcStats.mSkill[i].setBase (ref->base->npdt52.skills[i]);
+                    data->mNpcStats.getSkill (i).setBase (ref->base->npdt52.skills[i]);
 
                 data->mCreatureStats.mAttributes[0].set (ref->base->npdt52.strength);
                 data->mCreatureStats.mAttributes[1].set (ref->base->npdt52.intelligence);
@@ -201,12 +201,12 @@ namespace MWClass
         {
             case Run:
 
-                stats.mForceRun = force;
+                stats.setMovementFlag (MWMechanics::NpcStats::Flag_ForceRun, force);
                 break;
 
             case Sneak:
 
-                stats.mForceSneak = force;
+                stats.setMovementFlag (MWMechanics::NpcStats::Flag_ForceSneak, force);
                 break;
 
             case Combat:
@@ -223,12 +223,12 @@ namespace MWClass
         {
             case Run:
 
-                stats.mRun = set;
+                stats.setMovementFlag (MWMechanics::NpcStats::Flag_Run, set);
                 break;
 
             case Sneak:
 
-                stats.mSneak = set;
+                stats.setMovementFlag (MWMechanics::NpcStats::Flag_Sneak, set);
                 break;
 
             case Combat:
@@ -247,17 +247,17 @@ namespace MWClass
         {
             case Run:
 
-                if (!ignoreForce && stats.mForceRun)
+                if (!ignoreForce && stats.getMovementFlag (MWMechanics::NpcStats::Flag_ForceRun))
                     return true;
 
-                return stats.mRun;
+                return stats.getMovementFlag (MWMechanics::NpcStats::Flag_Run);
 
             case Sneak:
 
-                if (!ignoreForce && stats.mForceSneak)
+                if (!ignoreForce && stats.getMovementFlag (MWMechanics::NpcStats::Flag_ForceSneak))
                     return true;
 
-                return stats.mSneak;
+                return stats.getMovementFlag (MWMechanics::NpcStats::Flag_Sneak);
 
             case Combat:
 

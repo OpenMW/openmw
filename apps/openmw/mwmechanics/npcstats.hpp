@@ -19,27 +19,46 @@ namespace MWMechanics
 
     class NpcStats
     {
-            DrawState mDrawState;
-
         public:
 
-        /// NPCs other than the player can only have one faction. But for the sake of consistency
-        /// we use the same data structure for the PC and the NPCs.
-        /// \note the faction key must be in lowercase
-        std::map<std::string, int> mFactionRank;
+            enum Flag
+            {
+                Flag_ForceRun = 1,
+                Flag_ForceSneak = 2,
+                Flag_Run = 4,
+                Flag_Sneak = 8
+            };
 
-        Stat<float> mSkill[27];
+        private:
 
-        bool mForceRun;
-        bool mForceSneak;
-        bool mRun;
-        bool mSneak;
+            /// NPCs other than the player can only have one faction. But for the sake of consistency
+            /// we use the same data structure for the PC and the NPCs.
+            /// \note the faction key must be in lowercase
+            std::map<std::string, int> mFactionRank;
+
+            DrawState mDrawState;
+            unsigned int mMovementFlags;
+            Stat<float> mSkill[27];
+
+        public:
 
             NpcStats();
 
             DrawState getDrawState() const;
 
             void setDrawState (DrawState state);
+
+            bool getMovementFlag (Flag flag) const;
+
+            void setMovementFlag (Flag flag, bool state);
+
+            const Stat<float>& getSkill (int index) const;
+
+            Stat<float>& getSkill (int index);
+
+            std::map<std::string, int>& getFactionRanks();
+
+            const std::map<std::string, int>& getFactionRanks() const;
     };
 }
 

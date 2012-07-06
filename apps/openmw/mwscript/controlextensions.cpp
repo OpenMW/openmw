@@ -59,54 +59,36 @@ namespace MWScript
         };
 
         template<class R>
-        class OpClearForceRun : public Interpreter::Opcode0
+        class OpClearMovementFlag : public Interpreter::Opcode0
         {
+                MWMechanics::NpcStats::Flag mFlag;
+
             public:
+
+                OpClearMovementFlag (MWMechanics::NpcStats::Flag flag) : mFlag (flag) {}
 
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    MWWorld::Class::get (ptr).getNpcStats (ptr).mForceRun = false;
+                    MWWorld::Class::get (ptr).getNpcStats (ptr).setMovementFlag (mFlag, false);
                 }
         };
 
         template<class R>
-        class OpForceRun : public Interpreter::Opcode0
+        class OpSetMovementFlag : public Interpreter::Opcode0
         {
+                MWMechanics::NpcStats::Flag mFlag;
+
             public:
+
+                OpSetMovementFlag (MWMechanics::NpcStats::Flag flag) : mFlag (flag) {}
 
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    MWWorld::Class::get (ptr).getNpcStats (ptr).mForceRun = true;
-                }
-        };
-
-        template<class R>
-        class OpClearForceSneak : public Interpreter::Opcode0
-        {
-            public:
-
-                virtual void execute (Interpreter::Runtime& runtime)
-                {
-                    MWWorld::Ptr ptr = R()(runtime);
-
-                    MWWorld::Class::get (ptr).getNpcStats (ptr).mForceSneak = false;
-                }
-        };
-
-        template<class R>
-        class OpForceSneak : public Interpreter::Opcode0
-        {
-            public:
-
-                virtual void execute (Interpreter::Runtime& runtime)
-                {
-                    MWWorld::Ptr ptr = R()(runtime);
-
-                    MWWorld::Class::get (ptr).getNpcStats (ptr).mForceSneak = true;
+                    MWWorld::Class::get (ptr).getNpcStats (ptr).setMovementFlag (mFlag, true);
                 }
         };
 
@@ -165,19 +147,23 @@ namespace MWScript
 
             interpreter.installSegment5 (opcodeToggleCollision, new OpToggleCollision);
 
-            interpreter.installSegment5 (opcodeClearForceRun, new OpClearForceRun<ImplicitRef>);
-            interpreter.installSegment5 (opcodeForceRun, new OpForceRun<ImplicitRef>);
-            interpreter.installSegment5 (opcodeClearForceSneak, new OpClearForceSneak<ImplicitRef>);
-            interpreter.installSegment5 (opcodeForceSneak, new OpForceSneak<ImplicitRef>);
+            interpreter.installSegment5 (opcodeClearForceRun,
+                new OpClearMovementFlag<ImplicitRef> (MWMechanics::NpcStats::Flag_ForceRun));
+            interpreter.installSegment5 (opcodeForceRun,
+                new OpSetMovementFlag<ImplicitRef> (MWMechanics::NpcStats::Flag_ForceRun));
+            interpreter.installSegment5 (opcodeClearForceSneak,
+                new OpClearMovementFlag<ImplicitRef> (MWMechanics::NpcStats::Flag_ForceSneak));
+            interpreter.installSegment5 (opcodeForceSneak,
+                new OpSetMovementFlag<ImplicitRef> (MWMechanics::NpcStats::Flag_ForceSneak));
 
             interpreter.installSegment5 (opcodeClearForceRunExplicit,
-                new OpClearForceRun<ExplicitRef>);
+                new OpClearMovementFlag<ExplicitRef> (MWMechanics::NpcStats::Flag_ForceRun));
             interpreter.installSegment5 (opcodeForceRunExplicit,
-                new OpForceRun<ExplicitRef>);
+                new OpSetMovementFlag<ExplicitRef> (MWMechanics::NpcStats::Flag_ForceRun));
             interpreter.installSegment5 (opcodeClearForceSneakExplicit,
-                new OpClearForceSneak<ExplicitRef>);
+                new OpClearMovementFlag<ExplicitRef> (MWMechanics::NpcStats::Flag_ForceSneak));
             interpreter.installSegment5 (opcodeForceSneakExplicit,
-                new OpForceSneak<ExplicitRef>);
+                new OpSetMovementFlag<ExplicitRef> (MWMechanics::NpcStats::Flag_ForceSneak));
         }
     }
 }

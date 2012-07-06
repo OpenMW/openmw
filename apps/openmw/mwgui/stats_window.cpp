@@ -270,7 +270,7 @@ void StatsWindow::onFrame ()
     MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
     MWMechanics::NpcStats PCstats = MWWorld::Class::get(player).getNpcStats(player);
 
-    setFactions(PCstats.mFactionRank);
+    setFactions(PCstats.getFactionRanks());
 
     setBirthSign(MWBase::Environment::get().getWorld()->getPlayer().getBirthsign());
 
