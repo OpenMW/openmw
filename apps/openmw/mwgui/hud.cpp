@@ -286,7 +286,7 @@ void HUD::onWorldClicked(MyGUI::Widget* _sender)
         {
             object = MWBase::Environment::get().getWorld()->getPtrViaHandle(handle);
         }
-        catch (std::exception& e)
+        catch (std::exception& /* e */)
         {
             return;
         }

@@ -13,6 +13,7 @@ namespace MWGui
     {
     public:
         ReferenceInterface();
+        virtual ~ReferenceInterface();
 
         void checkReferenceAvailable(); ///< closes the window, if the MW-reference has become unavailable
 

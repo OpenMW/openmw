@@ -90,7 +90,7 @@ namespace MWSound
             {
                 if(devname.empty())
                     throw;
-                std::cout <<"Failed to open device \""<<devname<<"\", trying default"<< std::endl;
+                std::cout <<"Failed to open device \""<<devname<<"\", trying default."<< std::endl << "The error given was: " << e.what() << std::endl;
                 mOutput->init();
                 Settings::Manager::setString("device", "Sound", "");
             }

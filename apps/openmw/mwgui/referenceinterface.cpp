@@ -12,6 +12,10 @@ namespace MWGui
     {
     }
 
+    ReferenceInterface::~ReferenceInterface()
+    {
+    }
+
     void ReferenceInterface::checkReferenceAvailable()
     {
         if (mPtr.isEmpty())

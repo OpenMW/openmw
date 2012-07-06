@@ -706,7 +706,7 @@ namespace MWDialogue
             }
             return false;
         }
-        catch (const Compiler::SourceException& error)
+        catch (const Compiler::SourceException& /* error */)
         {
             // error has already been reported via error handler
         }
