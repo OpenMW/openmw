@@ -3,11 +3,14 @@
 
 #undef DrawState
 
-enum DrawState 
+namespace MWMechanics
 {
-    DrawState_Weapon = 0,
-    DrawState_Spell = 1,
-    DrawState_Nothing = 2,
-};
+    enum DrawState
+    {
+        DrawState_Weapon = 0,
+        DrawState_Spell = 1,
+        DrawState_Nothing = 2,
+    };
+}
 
 #endif

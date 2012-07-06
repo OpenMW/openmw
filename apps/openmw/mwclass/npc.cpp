@@ -233,7 +233,8 @@ namespace MWClass
 
             case Combat:
 
-                stats.mCombat = set;
+                // Combat stance ignored for now; need to be determined based on draw state instead of
+                // being maunally set.
                 break;
         }
     }
@@ -260,7 +261,7 @@ namespace MWClass
 
             case Combat:
 
-                return stats.mCombat;
+                return false;
         }
 
         return false;

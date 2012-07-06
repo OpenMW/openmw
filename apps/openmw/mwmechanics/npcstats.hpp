@@ -3,6 +3,7 @@
 
 #include <map>
 #include <set>
+#include <string>
 
 #include "stat.hpp"
 #include "drawstate.hpp"
@@ -16,10 +17,14 @@ namespace MWMechanics
     /// \note For technical reasons the spell list and the currently selected spell is also handled by
     /// CreatureStats, even though they are actually NPC stats.
 
-    struct NpcStats
+    class NpcStats
     {
-        // NPCs other than the player can only have one faction. But for the sake of consistency
-        // we use the same data structure for the PC and the NPCs.
+            DrawState mDrawState;
+
+        public:
+
+        /// NPCs other than the player can only have one faction. But for the sake of consistency
+        /// we use the same data structure for the PC and the NPCs.
         /// \note the faction key must be in lowercase
         std::map<std::string, int> mFactionRank;
 
@@ -29,11 +34,12 @@ namespace MWMechanics
         bool mForceSneak;
         bool mRun;
         bool mSneak;
-        bool mCombat;
-        DrawState mDrawState;
 
-        NpcStats() : mForceRun (false), mForceSneak (false), mRun (false), mSneak (false),
-            mCombat (false) , mDrawState(DrawState_Nothing) {}
+            NpcStats();
+
+            DrawState getDrawState() const;
+
+            void setDrawState (DrawState state);
     };
 }
 
