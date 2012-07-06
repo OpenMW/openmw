@@ -34,6 +34,7 @@
 #include <OgreRoot.h>
 
 #include <boost/lexical_cast.hpp>
+#include <boost/algorithm/string.hpp>
 
 #include <extern/shiny/Main/Factory.hpp>
 

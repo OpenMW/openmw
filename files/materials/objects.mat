@@ -39,7 +39,7 @@ material openmw_objects_base
 
         texture_unit diffuseMap
         {
-            texture $diffuseMap
+            direct_texture $diffuseMap
             create_in_ffp true
         }
     }

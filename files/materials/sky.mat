@@ -1,9 +1,17 @@
 material openmw_moon
 {
+    mrt_output true
     pass
     {
         vertex_program moon_vertex
         fragment_program moon_fragment
+        
+        polygon_mode_overrideable off
+        
+        shader_properties
+        {
+            mrt_output $mrt_output
+        }
         
         texture_unit diffuseMap
         {
@@ -15,10 +23,21 @@ material openmw_moon
 
 material openmw_clouds
 {
+    mrt_output true
     pass
     {
         vertex_program clouds_vertex
         fragment_program clouds_fragment
+        
+        polygon_mode_overrideable off
+
+        scene_blend alpha_blend
+        depth_write off
+
+        shader_properties
+        {
+            mrt_output $mrt_output
+        }
 
         // second diffuse map is used for weather transitions
         texture_unit diffuseMap1
@@ -36,19 +55,38 @@ material openmw_clouds
 
 material openmw_atmosphere
 {
+    mrt_output true
     pass
     {
         vertex_program atmosphere_vertex
         fragment_program atmosphere_fragment
+        
+        polygon_mode_overrideable off
+        
+        scene_blend alpha_blend
+        depth_write off
+        
+        shader_properties
+        {
+            mrt_output $mrt_output
+        }
     }
 }
 
 material openmw_stars
 {
+    mrt_output true
     pass
     {
         vertex_program stars_vertex
         fragment_program stars_fragment
+        
+        polygon_mode_overrideable off
+ 
+        shader_properties
+        {
+            mrt_output $mrt_output
+        }
 
         texture_unit diffuseMap
         {
@@ -60,10 +98,18 @@ material openmw_stars
 // used for both sun and sun glare
 material openmw_sun
 {
+    mrt_output true
     pass
     {
         vertex_program sun_vertex
         fragment_program sun_fragment
+
+        polygon_mode_overrideable off
+        
+        shader_properties
+        {
+            mrt_output $mrt_output
+        }
         
         texture unit diffuseMap
         {

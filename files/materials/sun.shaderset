@@ -1,0 +1,15 @@
+shader_set sun_vertex
+{
+    source sun.shader
+    type vertex
+    profiles_cg vs_2_0 arbvp1
+    profiles_hlsl vs_2_0
+}
+
+shader_set sun_fragment
+{
+    source sun.shader
+    type fragment
+    profiles_cg ps_2_x ps_2_0 ps arbfp1
+    profiles_hlsl ps_2_0
+}

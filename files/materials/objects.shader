@@ -64,7 +64,9 @@
         shInput(float, depthPassthrough)
 #endif
 
+#if MRT
         shUniform(float far) @shAutoConstant(far, far_clip_distance)
+#endif
 
 #if LIGHTING
         shInput(float3, normalPassthrough)
@@ -109,12 +111,16 @@
         diffuse += materialDiffuse.xyz * lightDiffuse@shIterator.xyz * (1.0 / ((lightAttenuation@shIterator.y) + (lightAttenuation@shIterator.z * d) + (lightAttenuation@shIterator.w * d * d))) * max(dot(normal, lightDir), 0);
     
     @shEndForeach
+    
+#if HAS_VERTEXCOLOR
+        ambient *= colorPassthrough.xyz;
+#endif
 
         shOutputColor(0).xyz *= (ambient + diffuse + materialEmissive.xyz);
 #endif
 
 
-#if HAS_VERTEXCOLOR
+#if HAS_VERTEXCOLOR && !LIGHTING
         shOutputColor(0).xyz *= colorPassthrough.xyz;
 #endif
 
@@ -122,6 +128,9 @@
         float fogValue = shSaturate((depthPassthrough - fogParams.y) * fogParams.w);
         shOutputColor(0).xyz = shLerp (shOutputColor(0).xyz, fogColor, fogValue);
 #endif
+
+        // prevent negative color output (for example with negative lights)
+        shOutputColor(0).xyz = max(shOutputColor(0).xyz, float3(0,0,0));
 
 #if MRT
         shOutputColor(1) = float4(depthPassthrough / far,1,1,1);
