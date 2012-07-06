@@ -22,7 +22,7 @@ namespace MWRender
 namespace MWMechanics
 {
     struct CreatureStats;
-    struct NpcStats;
+    class NpcStats;
     struct Movement;
 }
 
