@@ -56,7 +56,7 @@ namespace MWWorld
         mClass = new_class;
     }
 
-    void Player::setDrawState (MWMechanics::DrawState state)
+    void Player::setDrawState (MWMechanics::DrawState_ state)
     {
          MWWorld::Ptr ptr = getPlayer();
          MWWorld::Class::get(ptr).getNpcStats(ptr).setDrawState (state);
@@ -111,7 +111,7 @@ namespace MWWorld
         MWWorld::Class::get (ptr).setStance (ptr, MWWorld::Class::Run, !running);
     }
 
-    MWMechanics::DrawState Player::getDrawState()
+    MWMechanics::DrawState_ Player::getDrawState()
     {
          MWWorld::Ptr ptr = getPlayer();
          return MWWorld::Class::get(ptr).getNpcStats(ptr).getDrawState();

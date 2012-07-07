@@ -16,12 +16,12 @@ MWMechanics::NpcStats::NpcStats()
 : mMovementFlags (0), mDrawState (DrawState_Nothing)
 {}
 
-MWMechanics::DrawState MWMechanics::NpcStats::getDrawState() const
+MWMechanics::DrawState_ MWMechanics::NpcStats::getDrawState() const
 {
     return mDrawState;
 }
 
-void MWMechanics::NpcStats::setDrawState (DrawState state)
+void MWMechanics::NpcStats::setDrawState (DrawState_ state)
 {
     mDrawState = state;
 }

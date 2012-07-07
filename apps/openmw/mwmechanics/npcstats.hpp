@@ -41,7 +41,7 @@ namespace MWMechanics
             /// \note the faction key must be in lowercase
             std::map<std::string, int> mFactionRank;
 
-            DrawState mDrawState;
+            DrawState_ mDrawState;
             unsigned int mMovementFlags;
             Stat<float> mSkill[27];
 
@@ -49,9 +49,9 @@ namespace MWMechanics
 
             NpcStats();
 
-            DrawState getDrawState() const;
+            DrawState_ getDrawState() const;
 
-            void setDrawState (DrawState state);
+            void setDrawState (DrawState_ state);
 
             bool getMovementFlag (Flag flag) const;
 

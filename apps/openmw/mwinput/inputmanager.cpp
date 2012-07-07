@@ -102,7 +102,7 @@ private:
     {
         if (windows.isGuiMode()) return;
 
-        MWMechanics::DrawState state = player.getDrawState();
+        MWMechanics::DrawState_ state = player.getDrawState();
         if (state == MWMechanics::DrawState_Weapon || state == MWMechanics::DrawState_Nothing)
         {
             player.setDrawState(MWMechanics::DrawState_Spell);
@@ -119,7 +119,7 @@ private:
     {
         if (windows.isGuiMode()) return;
 
-        MWMechanics::DrawState state = player.getDrawState();
+        MWMechanics::DrawState_ state = player.getDrawState();
         if (state == MWMechanics::DrawState_Spell || state == MWMechanics::DrawState_Nothing)
         {
             player.setDrawState(MWMechanics::DrawState_Weapon);
