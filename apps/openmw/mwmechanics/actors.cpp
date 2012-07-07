@@ -3,6 +3,8 @@
 
 #include <typeinfo>
 
+#include <OgreVector3.h>
+
 #include <components/esm/loadnpc.hpp>
 
 #include "../mwworld/class.hpp"

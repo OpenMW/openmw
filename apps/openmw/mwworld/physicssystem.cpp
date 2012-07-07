@@ -1,18 +1,19 @@
+#include "physicssystem.hpp"
+
 #include <stdexcept>
 
-#include "physicssystem.hpp"
-#include "../mwworld/ptr.hpp"
-#include "../mwworld/world.hpp" // FIXME
+#include <OgreRoot.h>
+#include <OgreRenderWindow.h>
+#include <OgreSceneManager.h>
+#include <OgreViewport.h>
+#include <OgreCamera.h>
+#include <OgreTextureManager.h>
+
 #include <components/nifbullet/bullet_nif_loader.hpp>
 
-#include "OgreRoot.h"
-#include "OgreRenderWindow.h"
-#include "OgreSceneManager.h"
-#include "OgreViewport.h"
-#include "OgreCamera.h"
-#include "OgreTextureManager.h"
+#include "../mwbase/world.hpp" // FIXME
 
-
+#include "ptr.hpp"
 
 using namespace Ogre;
 namespace MWWorld

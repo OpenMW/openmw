@@ -3,10 +3,12 @@
 #include <boost/algorithm/string.hpp>
 
 #include "../mwbase/environment.hpp"
-#include "../mwworld/world.hpp"
+#include "../mwbase/world.hpp"
+
 #include "../mwworld/player.hpp"
 #include "../mwworld/manualref.hpp"
 #include "../mwworld/containerstore.hpp"
+
 #include "../mwsound/soundmanager.hpp"
 
 #include "window_manager.hpp"
@@ -27,7 +29,7 @@ namespace
 namespace MWGui
 {
     AlchemyWindow::AlchemyWindow(WindowManager& parWindowManager)
-        : WindowBase("openmw_alchemy_window_layout.xml", parWindowManager)
+        : WindowBase("openmw_alchemy_window.layout", parWindowManager)
         , ContainerBase(0)
     {
         getWidget(mCreateButton, "CreateButton");
@@ -70,8 +72,8 @@ namespace MWGui
 
     void AlchemyWindow::onCancelButtonClicked(MyGUI::Widget* _sender)
     {
-        mWindowManager.popGuiMode();
-        mWindowManager.popGuiMode();
+        mWindowManager.removeGuiMode(GM_Alchemy);
+        mWindowManager.removeGuiMode(GM_Inventory);
     }
 
     void AlchemyWindow::onCreateButtonClicked(MyGUI::Widget* _sender)
@@ -275,7 +277,7 @@ namespace MWGui
         for (MWWorld::ContainerStoreIterator it(store.begin(MWWorld::ContainerStore::Type_Apparatus));
             it != store.end(); ++it)
         {
-            ESMS::LiveCellRef<ESM::Apparatus, MWWorld::RefData>* ref = it->get<ESM::Apparatus>();
+            MWWorld::LiveCellRef<ESM::Apparatus>* ref = it->get<ESM::Apparatus>();
             if (ref->base->data.type == ESM::Apparatus::Albemic
             && (bestAlbemic.isEmpty() || ref->base->data.quality > bestAlbemic.get<ESM::Apparatus>()->base->data.quality))
                 bestAlbemic = *it;
@@ -420,7 +422,7 @@ namespace MWGui
                 continue;
 
             // add the effects of this ingredient to list of effects
-            ESMS::LiveCellRef<ESM::Ingredient, MWWorld::RefData>* ref = ingredient->getUserData<MWWorld::Ptr>()->get<ESM::Ingredient>();
+            MWWorld::LiveCellRef<ESM::Ingredient>* ref = ingredient->getUserData<MWWorld::Ptr>()->get<ESM::Ingredient>();
             for (int i=0; i<4; ++i)
             {
                 if (ref->base->data.effectID[i] < 0)

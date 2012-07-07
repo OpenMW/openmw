@@ -151,7 +151,6 @@ material Water/CompositorNoMRT
 
             fragment_program_ref UnderwaterEffectFP_NoMRT
             {
-                param_named tintColour float4 0 0.35 0.35 1
             }
 
             texture_unit RT
@@ -194,7 +193,6 @@ material Water/Compositor
 
             fragment_program_ref UnderwaterEffectFP
             {
-                param_named tintColour float4 0 0.35 0.35 1
                 param_named_auto far far_clip_distance
             }
 

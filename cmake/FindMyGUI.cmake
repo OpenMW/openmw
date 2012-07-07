@@ -22,7 +22,7 @@ IF (WIN32) #Windows
 SET(MYGUISDK $ENV{MYGUI_HOME})
     IF (MYGUISDK)
 findpkg_begin ( "MYGUI" )
-        MESSAGE(STATUS "Using MyGUI in OGRE SDK")
+        MESSAGE(STATUS "Using MyGUI in MyGUI SDK")
 STRING(REGEX REPLACE "[\\]" "/" MYGUISDK "${MYGUISDK}" )
 
 find_path ( MYGUI_INCLUDE_DIRS
@@ -35,7 +35,7 @@ MyGUI_OgrePlatform.h
 "${MYGUISDK}/Platforms/Ogre/OgrePlatform/include"
 NO_DEFAULT_PATH )
 
-SET ( MYGUI_LIB_DIR ${MYGUISDK}/*/lib )
+SET ( MYGUI_LIB_DIR ${MYGUISDK}/lib ${MYGUISDK}/*/lib )
 
 find_library ( MYGUI_LIBRARIES_REL NAMES
 MyGUIEngine.lib
@@ -69,7 +69,7 @@ make_library_set ( MYGUI_PLATFORM_LIBRARIES )
 MESSAGE ("${MYGUI_LIBRARIES}")
 MESSAGE ("${MYGUI_PLATFORM_LIBRARIES}")
 
-findpkg_finish ( "MYGUI" )
+#findpkg_finish ( "MYGUI" )
 
     ENDIF (MYGUISDK)
     IF (OGRESOURCE)

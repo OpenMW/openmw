@@ -2,11 +2,10 @@
 #include "journal.hpp"
 
 #include "../mwbase/environment.hpp"
+#include "../mwbase/world.hpp"
 
 #include "../mwgui/window_manager.hpp"
 #include "../mwgui/messagebox.hpp"
-
-#include "../mwworld/world.hpp"
 
 namespace MWDialogue
 {
@@ -30,14 +29,13 @@ namespace MWDialogue
 
     void Journal::addEntry (const std::string& id, int index)
     {
-        StampedJournalEntry entry =
-            StampedJournalEntry::makeFromQuest (id, index, *MWBase::Environment::get().getWorld());
+        StampedJournalEntry entry = StampedJournalEntry::makeFromQuest (id, index);
 
         mJournal.push_back (entry);
 
         Quest& quest = getQuest (id);
 
-        quest.addEntry (entry, *MWBase::Environment::get().getWorld()); // we are doing slicing on purpose here
+        quest.addEntry (entry); // we are doing slicing on purpose here
 
         std::vector<std::string> empty;
         std::string notification = MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sJournalEntry")->str;
@@ -48,7 +46,7 @@ namespace MWDialogue
     {
         Quest& quest = getQuest (id);
 
-        quest.setIndex (index, *MWBase::Environment::get().getWorld());
+        quest.setIndex (index);
     }
 
     void Journal::addTopic (const std::string& topicId, const std::string& infoId)
@@ -63,7 +61,7 @@ namespace MWDialogue
             iter = result.first;
         }
 
-        iter->second.addEntry (JournalEntry (topicId, infoId), *MWBase::Environment::get().getWorld());
+        iter->second.addEntry (JournalEntry (topicId, infoId));
     }
 
     int Journal::getJournalIndex (const std::string& id) const

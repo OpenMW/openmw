@@ -3,17 +3,19 @@
 
 #include <components/esm/loadlocks.hpp>
 
-#include <components/esm_store/cell_store.hpp>
-
 #include "../mwbase/environment.hpp"
+#include "../mwbase/world.hpp"
 
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/actiontake.hpp"
-#include "../mwworld/world.hpp"
+#include "../mwworld/cellstore.hpp"
+#include "../mwworld/physicssystem.hpp"
+
 #include "../mwgui/window_manager.hpp"
 #include "../mwgui/tooltips.hpp"
 
 #include "../mwrender/objects.hpp"
+#include "../mwrender/renderinginterface.hpp"
 
 #include "../mwsound/soundmanager.hpp"
 
@@ -21,7 +23,7 @@ namespace MWClass
 {
     void Repair::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const
     {
-        ESMS::LiveCellRef<ESM::Repair, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Repair> *ref =
             ptr.get<ESM::Repair>();
 
         assert (ref->base != NULL);
@@ -37,7 +39,7 @@ namespace MWClass
 
     void Repair::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics) const
     {
-        ESMS::LiveCellRef<ESM::Repair, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Repair> *ref =
             ptr.get<ESM::Repair>();
 
 
@@ -51,7 +53,7 @@ namespace MWClass
 
     std::string Repair::getName (const MWWorld::Ptr& ptr) const
     {
-        ESMS::LiveCellRef<ESM::Repair, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Repair> *ref =
             ptr.get<ESM::Repair>();
 
         return ref->base->name;
@@ -68,7 +70,7 @@ namespace MWClass
 
     std::string Repair::getScript (const MWWorld::Ptr& ptr) const
     {
-        ESMS::LiveCellRef<ESM::Repair, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Repair> *ref =
             ptr.get<ESM::Repair>();
 
         return ref->base->script;
@@ -76,7 +78,7 @@ namespace MWClass
 
     int Repair::getValue (const MWWorld::Ptr& ptr) const
     {
-        ESMS::LiveCellRef<ESM::Repair, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Repair> *ref =
             ptr.get<ESM::Repair>();
 
         return ref->base->data.value;
@@ -101,7 +103,7 @@ namespace MWClass
 
     std::string Repair::getInventoryIcon (const MWWorld::Ptr& ptr) const
     {
-          ESMS::LiveCellRef<ESM::Repair, MWWorld::RefData> *ref =
+          MWWorld::LiveCellRef<ESM::Repair> *ref =
             ptr.get<ESM::Repair>();
 
         return ref->base->icon;
@@ -109,7 +111,7 @@ namespace MWClass
 
     bool Repair::hasToolTip (const MWWorld::Ptr& ptr) const
     {
-        ESMS::LiveCellRef<ESM::Repair, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Repair> *ref =
             ptr.get<ESM::Repair>();
 
         return (ref->base->name != "");
@@ -117,7 +119,7 @@ namespace MWClass
 
     MWGui::ToolTipInfo Repair::getToolTipInfo (const MWWorld::Ptr& ptr) const
     {
-        ESMS::LiveCellRef<ESM::Repair, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Repair> *ref =
             ptr.get<ESM::Repair>();
 
         MWGui::ToolTipInfo info;

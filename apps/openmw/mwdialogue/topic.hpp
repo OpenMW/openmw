@@ -6,11 +6,6 @@
 
 #include "journalentry.hpp"
 
-namespace MWWorld
-{
-    class World;
-}
-
 namespace MWDialogue
 {
     /// \brief Collection of seen responses for a topic
@@ -34,7 +29,7 @@ namespace MWDialogue
 
             virtual ~Topic();
 
-            virtual void addEntry (const JournalEntry& entry, const MWWorld::World& world);
+            virtual void addEntry (const JournalEntry& entry);
             ///< Add entry
             ///
             /// \note Redundant entries are ignored.

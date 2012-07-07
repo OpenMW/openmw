@@ -2,6 +2,8 @@
 
 #include <OgreViewport.h>
 #include <OgreCompositorManager.h>
+#include <OgreCompositorChain.h>
+#include <OgreCompositionTargetPass.h>
 
 using namespace MWRender;
 
@@ -68,4 +70,39 @@ void Compositors::removeAll()
     Ogre::CompositorManager::getSingleton().removeCompositorChain(mViewport);
 
     mCompositors.clear();
+}
+
+bool Compositors::anyCompositorEnabled()
+{
+    for (CompositorMap::iterator it=mCompositors.begin();
+        it != mCompositors.end(); ++it)
+    {
+        if (it->second.first && mEnabled)
+            return true;
+    }
+    return false;
+}
+
+void Compositors::countTrianglesBatches(unsigned int &triangles, unsigned int &batches)
+{
+    triangles = 0;
+    batches = 0;
+
+    Ogre::CompositorInstance* c = NULL;
+    Ogre::CompositorChain* chain = Ogre::CompositorManager::getSingleton().getCompositorChain (mViewport);
+    // accumulate tris & batches from all compositors with all their render targets
+    for (unsigned int i=0; i < chain->getNumCompositors(); ++i)
+    {
+        if (chain->getCompositor(i)->getEnabled())
+        {
+            c = chain->getCompositor(i);
+            for (unsigned int j = 0; j < c->getTechnique()->getNumTargetPasses(); ++j)
+            {
+                std::string textureName = c->getTechnique()->getTargetPass(j)->getOutputName();
+                Ogre::RenderTarget* rt = c->getRenderTarget(textureName);
+                triangles += rt->getTriangleCount();
+                batches += rt->getBatchCount();
+            }
+        }
+    }
 }

@@ -4,14 +4,16 @@
 #include <components/esm/loadstat.hpp>
 
 #include "../mwworld/ptr.hpp"
+#include "../mwworld/physicssystem.hpp"
 
 #include "../mwrender/objects.hpp"
+#include "../mwrender/renderinginterface.hpp"
 
 namespace MWClass
 {
     void Static::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const
     {
-        ESMS::LiveCellRef<ESM::Static, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Static> *ref =
             ptr.get<ESM::Static>();
 
         assert (ref->base != NULL);
@@ -27,7 +29,7 @@ namespace MWClass
 
     void Static::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics) const
     {
-        ESMS::LiveCellRef<ESM::Static, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Static> *ref =
             ptr.get<ESM::Static>();
 
         assert (ref->base != NULL);

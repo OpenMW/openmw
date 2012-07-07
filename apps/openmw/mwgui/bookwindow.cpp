@@ -13,7 +13,7 @@
 using namespace MWGui;
 
 BookWindow::BookWindow (WindowManager& parWindowManager) :
-    WindowBase("openmw_book_layout.xml", parWindowManager)
+    WindowBase("openmw_book.layout", parWindowManager)
 {
     getWidget(mCloseButton, "CloseButton");
     mCloseButton->eventMouseButtonClick += MyGUI::newDelegate(this, &BookWindow::onCloseButtonClicked);
@@ -55,8 +55,7 @@ void BookWindow::open (MWWorld::Ptr book)
 
     MWBase::Environment::get().getSoundManager()->playSound ("book open", 1.0, 1.0);
 
-    ESMS::LiveCellRef<ESM::Book, MWWorld::RefData> *ref =
-        mBook.get<ESM::Book>();
+    MWWorld::LiveCellRef<ESM::Book> *ref = mBook.get<ESM::Book>();
 
     BookTextParser parser;
     std::vector<std::string> results = parser.split(ref->base->text, mLeftPage->getSize().width, mLeftPage->getSize().height);
@@ -92,7 +91,7 @@ void BookWindow::onCloseButtonClicked (MyGUI::Widget* _sender)
     // no 3d sounds because the object could be in a container.
     MWBase::Environment::get().getSoundManager()->playSound ("book close", 1.0, 1.0);
 
-    mWindowManager.popGuiMode();
+    mWindowManager.removeGuiMode(GM_Book);
 }
 
 void BookWindow::onTakeButtonClicked (MyGUI::Widget* _sender)
@@ -102,7 +101,7 @@ void BookWindow::onTakeButtonClicked (MyGUI::Widget* _sender)
     MWWorld::ActionTake take(mBook);
     take.execute();
 
-    mWindowManager.popGuiMode();
+    mWindowManager.removeGuiMode(GM_Book);
 }
 
 void BookWindow::onNextPageButtonClicked (MyGUI::Widget* _sender)

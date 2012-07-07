@@ -3,6 +3,9 @@
 
 #include <cassert>
 
+#include <components/esm_store/reclists.hpp>
+#include <components/esm_store/store.hpp>
+
 #include "interpretercontext.hpp"
 #include "scriptmanager.hpp"
 

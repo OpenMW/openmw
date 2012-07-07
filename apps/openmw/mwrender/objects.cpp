@@ -1,9 +1,17 @@
 #include "objects.hpp"
 
 #include <OgreSceneNode.h>
+#include <OgreSceneManager.h>
+#include <OgreEntity.h>
+#include <OgreLight.h>
+#include <OgreSubEntity.h>
+#include <OgreStaticGeometry.h>
 
 #include <components/nifogre/ogre_nif_loader.hpp>
 #include <components/settings/settings.hpp>
+
+#include "../mwworld/ptr.hpp"
+
 #include "renderconst.hpp"
 
 using namespace MWRender;
@@ -56,7 +64,7 @@ void Objects::insertBegin (const MWWorld::Ptr& ptr, bool enabled, bool static_)
 
     insert->setPosition(f[0], f[1], f[2]);
     insert->setScale(ptr.getCellRef().scale, ptr.getCellRef().scale, ptr.getCellRef().scale);
-	
+
 
     // Convert MW rotation to a quaternion:
     f = ptr.getCellRef().pos.rot;
@@ -194,8 +202,7 @@ void Objects::insertLight (const MWWorld::Ptr& ptr, float r, float g, float b, f
     Ogre::Light *light = mRenderer.getScene()->createLight();
     light->setDiffuseColour (r, g, b);
 
-    ESMS::LiveCellRef<ESM::Light, MWWorld::RefData> *ref =
-        ptr.get<ESM::Light>();
+    MWWorld::LiveCellRef<ESM::Light> *ref = ptr.get<ESM::Light>();
 
     LightInfo info;
     info.name = light->getName();
@@ -307,7 +314,7 @@ void Objects::removeCell(MWWorld::Ptr::CellStore* store)
         mBounds.erase(store);
 }
 
-void Objects::buildStaticGeometry(ESMS::CellStore<MWWorld::RefData>& cell)
+void Objects::buildStaticGeometry(MWWorld::Ptr::CellStore& cell)
 {
     if(mStaticGeometry.find(&cell) != mStaticGeometry.end())
     {

@@ -6,9 +6,9 @@
 #include <components/interpreter/runtime.hpp>
 
 #include "../mwbase/environment.hpp"
+#include "../mwbase/world.hpp"
 
 #include "../mwworld/ptr.hpp"
-#include "../mwworld/world.hpp"
 
 #include "interpretercontext.hpp"
 

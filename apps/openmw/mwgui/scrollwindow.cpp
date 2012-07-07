@@ -11,7 +11,7 @@
 using namespace MWGui;
 
 ScrollWindow::ScrollWindow (WindowManager& parWindowManager) :
-    WindowBase("openmw_scroll_layout.xml", parWindowManager)
+    WindowBase("openmw_scroll.layout", parWindowManager)
 {
     getWidget(mTextView, "TextView");
 
@@ -31,8 +31,7 @@ void ScrollWindow::open (MWWorld::Ptr scroll)
 
     mScroll = scroll;
 
-    ESMS::LiveCellRef<ESM::Book, MWWorld::RefData> *ref =
-        mScroll.get<ESM::Book>();
+    MWWorld::LiveCellRef<ESM::Book> *ref = mScroll.get<ESM::Book>();
 
     BookTextParser parser;
     MyGUI::IntSize size = parser.parse(ref->base->text, mTextView, 390);
@@ -56,7 +55,7 @@ void ScrollWindow::onCloseButtonClicked (MyGUI::Widget* _sender)
 {
     MWBase::Environment::get().getSoundManager()->playSound ("scroll", 1.0, 1.0);
 
-    mWindowManager.popGuiMode();
+    mWindowManager.removeGuiMode(GM_Scroll);
 }
 
 void ScrollWindow::onTakeButtonClicked (MyGUI::Widget* _sender)
@@ -66,5 +65,5 @@ void ScrollWindow::onTakeButtonClicked (MyGUI::Widget* _sender)
     MWWorld::ActionTake take(mScroll);
     take.execute();
 
-    mWindowManager.popGuiMode();
+    mWindowManager.removeGuiMode(GM_Scroll);
 }

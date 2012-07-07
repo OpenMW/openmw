@@ -3,13 +3,13 @@
 
 #include <components/esm_store/store.hpp>
 
-#include "../mwgui/window_manager.hpp"
-
 #include "../mwbase/environment.hpp"
+#include "../mwbase/world.hpp"
 
 #include "../mwworld/class.hpp"
-#include "../mwworld/world.hpp"
 #include "../mwworld/player.hpp"
+
+#include "../mwgui/window_manager.hpp"
 
 namespace MWMechanics
 {

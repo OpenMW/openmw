@@ -1,13 +1,16 @@
 #include "localmap.hpp"
-#include "renderingmanager.hpp"
-
-#include "../mwbase/environment.hpp"
-#include "../mwworld/world.hpp"
-#include "../mwgui/window_manager.hpp"
-#include "renderconst.hpp"
 
 #include <OgreOverlayManager.h>
 #include <OgreMaterialManager.h>
+#include <OgreHardwarePixelBuffer.h>
+
+#include "../mwbase/environment.hpp"
+#include "../mwbase/world.hpp"
+
+#include "../mwgui/window_manager.hpp"
+
+#include "renderconst.hpp"
+#include "renderingmanager.hpp"
 
 using namespace MWRender;
 using namespace Ogre;

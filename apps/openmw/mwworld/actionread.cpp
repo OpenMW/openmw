@@ -13,8 +13,7 @@ namespace MWWorld
 
     void ActionRead::execute ()
     {
-        ESMS::LiveCellRef<ESM::Book, MWWorld::RefData> *ref =
-            mObject.get<ESM::Book>();
+        LiveCellRef<ESM::Book> *ref = mObject.get<ESM::Book>();
 
         if (ref->base->data.isScroll)
         {
@@ -28,4 +27,3 @@ namespace MWWorld
         }
     }
 }
-

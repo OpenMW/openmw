@@ -1,4 +1,3 @@
-#include <QDebug>
 #include <QSortFilterProxyModel>
 
 #include "pluginsview.hpp"

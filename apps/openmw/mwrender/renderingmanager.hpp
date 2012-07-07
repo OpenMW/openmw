@@ -20,8 +20,6 @@
 #include <vector>
 #include <string>
 
-#include "../mwworld/ptr.hpp"
-
 #include <boost/filesystem.hpp>
 
 #include "renderinginterface.hpp"
@@ -41,7 +39,8 @@ namespace Ogre
 
 namespace MWWorld
 {
-    class World;
+    class Ptr;
+    class CellStore;
 }
 
 namespace MWRender
@@ -79,18 +78,18 @@ class RenderingManager: private RenderingInterface, public Ogre::WindowEventList
 
     OEngine::Render::Fader* getFader();
 
-    void removeCell (MWWorld::Ptr::CellStore *store);
+    void removeCell (MWWorld::CellStore *store);
 
     /// \todo this function should be removed later. Instead the rendering subsystems should track
     /// when rebatching is needed and update automatically at the end of each frame.
-    void cellAdded (MWWorld::Ptr::CellStore *store);
-    void waterAdded(MWWorld::Ptr::CellStore *store);
+    void cellAdded (MWWorld::CellStore *store);
+    void waterAdded(MWWorld::CellStore *store);
 
     void removeWater();
 
     static const bool useMRT();
 
-    void preCellChange (MWWorld::Ptr::CellStore* store);
+    void preCellChange (MWWorld::CellStore* store);
     ///< this event is fired immediately before changing cell
 
     void addObject (const MWWorld::Ptr& ptr);
@@ -105,7 +104,7 @@ class RenderingManager: private RenderingInterface, public Ogre::WindowEventList
     void toggleWater();
 
     /// \param store Cell the object was in previously (\a ptr has already been updated to the new cell).
-    void moveObjectToCell (const MWWorld::Ptr& ptr, const Ogre::Vector3& position, MWWorld::Ptr::CellStore *store);
+    void moveObjectToCell (const MWWorld::Ptr& ptr, const Ogre::Vector3& position, MWWorld::CellStore *store);
 
     void update (float duration);
 
@@ -118,13 +117,15 @@ class RenderingManager: private RenderingInterface, public Ogre::WindowEventList
     void disableLights();
     void enableLights();
 
-    bool occlusionQuerySupported() { return mOcclusionQuery->supported(); };
-    OcclusionQuery* getOcclusionQuery() { return mOcclusionQuery; };
+    bool occlusionQuerySupported() { return mOcclusionQuery->supported(); }
+    OcclusionQuery* getOcclusionQuery() { return mOcclusionQuery; }
 
     Shadows* getShadows();
 
     void switchToInterior();
     void switchToExterior();
+
+    void getTriangleBatchCount(unsigned int &triangles, unsigned int &batches);
 
     void setGlare(bool glare);
     void skyEnable ();
@@ -134,13 +135,13 @@ class RenderingManager: private RenderingInterface, public Ogre::WindowEventList
     int skyGetMasserPhase() const;
     int skyGetSecundaPhase() const;
     void skySetMoonColour (bool red);
-    void configureAmbient(ESMS::CellStore<MWWorld::RefData> &mCell);
+    void configureAmbient(MWWorld::CellStore &mCell);
 
-    void requestMap (MWWorld::Ptr::CellStore* cell);
+    void requestMap (MWWorld::CellStore* cell);
     ///< request the local map for a cell
 
     /// configure fog according to cell
-    void configureFog(ESMS::CellStore<MWWorld::RefData> &mCell);
+    void configureFog(MWWorld::CellStore &mCell);
 
     /// configure fog manually
     void configureFog(const float density, const Ogre::ColourValue& colour);

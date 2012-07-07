@@ -17,6 +17,10 @@
 #include "BtOgreGP.h"
 #include "BtOgreExtras.h"
 
+#include <OgreEntity.h>
+#include <OgreSubMesh.h>
+#include <OgreSubEntity.h>
+
 using namespace Ogre;
 
 namespace BtOgre {

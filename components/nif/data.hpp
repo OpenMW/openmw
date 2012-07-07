@@ -25,8 +25,9 @@
 #define _NIF_DATA_H_
 
 #include "controlled.hpp"
-#include <iostream>
-#include <Ogre.h>
+
+#include <OgreQuaternion.h>
+#include <OgreVector3.h>
 
 namespace Nif
 {
@@ -466,7 +467,7 @@ public:
 	   std::vector<std::vector<Ogre::Vector3> > getAdditionalVertices(){
 			return additionalVertices;
 	  }
-	  
+
 void read(NIFFile *nif)
   {
     int morphCount = nif->getInt();
@@ -481,7 +482,7 @@ void read(NIFFile *nif)
 		float z = nif->getFloat();
 		initialVertices.push_back(Ogre::Vector3(x, y, z));
 	}
-	
+
     for(int i=1; i<morphCount; i++)
     {
         magic = nif->getInt();
@@ -543,8 +544,8 @@ class NiKeyframeData : public Record
 	std::vector<Ogre::Vector3> tbcscale;
 	int stype;
 
-	
-	
+
+
 public:
 	void clone(NiKeyframeData c)
 	{
@@ -559,11 +560,11 @@ public:
 
 
 		translist1 = c.getTranslist1();
-		translist2 =	c.getTranslist2();	
+		translist2 =	c.getTranslist2();
         translist3 = c.getTranslist3();
 
 	    transtime = c.gettTime();
-	   
+
 	    bonename = c.getBonename();
 
 
@@ -611,7 +612,7 @@ public:
 				Ogre::Quaternion quat = Ogre::Quaternion(Ogre::Real(w), Ogre::Real(x), Ogre::Real(y), Ogre::Real(z));
 				quats.push_back(quat);
 				rottime.push_back(time);
-				//if(time == 0.0 || time > 355.5) 
+				//if(time == 0.0 || time > 355.5)
 					// std::cout <<"Time:" << time << "W:" << w <<"X:" << x << "Y:" << y << "Z:" << z << "\n";
 			}
 		}
@@ -632,7 +633,7 @@ public:
 				quats.push_back(quat);
 				rottime.push_back(time);
 				tbc.push_back(vec);
-				//if(time == 0.0 || time > 355.5) 
+				//if(time == 0.0 || time > 355.5)
 					// std::cout <<"Time:" << time << "W:" << w <<"X:" << x << "Y:" << y << "Z:" << z << "\n";
 			}
 
@@ -661,7 +662,7 @@ public:
 
     // Then translation
     count = nif->getInt();
-	
+
     if(count)
       {
        ttype = nif->getInt();
@@ -700,7 +701,7 @@ public:
 				translist2.push_back(trans2);
 				translist3.push_back(trans3);
 			}
-			
+
 			//nif->getFloatLen(count*10); // trans1 + forward + backward
 		}
         else if(ttype == 3){
@@ -729,12 +730,12 @@ public:
       {
         stype = nif->getInt();
 
-		
+
 		for(int i = 0; i < count; i++){
-					
-				
+
+
         //int size = 0;
-        if(stype >= 1 && stype < 4) 
+        if(stype >= 1 && stype < 4)
 			{
 				float time = nif->getFloat();
 				float scale = nif->getFloat();
@@ -759,10 +760,10 @@ public:
 
 			//size = 5; // 1 + tbc
 		}
-        
+
 		}
       }
-	  else 
+	  else
 		  stype = 0;
   }
   	int getRtype(){

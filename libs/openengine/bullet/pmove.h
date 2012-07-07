@@ -6,12 +6,12 @@ which was released under the GNU GPL (v2) in 2005.
 Quake 3 Arena is copyright (C) 1999-2005 Id Software, Inc.
 */
 
-#include <Ogre.h>
 #include <OgreMath.h>
 #include <float.h>
 #include "trace.h"
 #include "physic.hpp"
 
+#include <OgreVector3.h>
 
 //#include "GameMath.h"
 //#include "GameTime.h"
@@ -154,7 +154,7 @@ struct playerMove
 			KEYUP
 		};
 
-		playercmd() : forwardmove(0), rightmove(0), upmove(0), serverTime(50), ducking(false), 
+		playercmd() : forwardmove(0), rightmove(0), upmove(0), serverTime(50), ducking(false),
 			activating(false), lastActivatingState(false), procActivating(NO_CHANGE),
 			dropping(false), lastDroppingState(false), procDropping(NO_CHANGE)
 		{
@@ -190,7 +190,6 @@ struct playerMove
 	int waterHeight;
 	bool hasWater;
 	bool isInterior;
-	//Object* traceObj;
 	OEngine::Physic::PhysicEngine* mEngine;
 };
 

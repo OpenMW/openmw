@@ -13,6 +13,8 @@ namespace ESMS
 
 namespace MWWorld
 {
+    class CellStore;
+
     /// \brief List of active local scripts
     class LocalScripts
     {
@@ -41,13 +43,13 @@ namespace MWWorld
             void add (const std::string& scriptName, const Ptr& ptr);
             ///< Add script to collection of active local scripts.
 
-            void addCell (Ptr::CellStore *cell);
+            void addCell (CellStore *cell);
             ///< Add all local scripts in a cell.
 
             void clear();
             ///< Clear active local scripts collection.
 
-            void clearCell (Ptr::CellStore *cell);
+            void clearCell (CellStore *cell);
             ///< Remove all scripts belonging to \a cell.
 
             void remove (const Ptr& ptr);

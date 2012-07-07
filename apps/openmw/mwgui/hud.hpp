@@ -16,8 +16,8 @@ namespace MWGui
         void setEffect(const char *img);
         void setValue (const std::string& id, const MWMechanics::DynamicStat<int>& value);
         void setFPS(float fps);
-        void setTriangleCount(size_t count);
-        void setBatchCount(size_t count);
+        void setTriangleCount(unsigned int count);
+        void setBatchCount(unsigned int count);
         void setBottomLeftVisibility(bool hmsVisible, bool weapVisible, bool spellVisible);
         void setBottomRightVisibility(bool effectBoxVisible, bool minimapVisible);
         void setFpsLevel(const int level);

@@ -101,6 +101,12 @@ namespace Compiler
         void fetchGlobal (CodeContainer& code, Literals& literals, char localType,
             const std::string& name);
 
+        void assignToMember (CodeContainer& code, Literals& literals, char memberType,
+            const std::string& name, const std::string& id, const CodeContainer& value, char valueType);
+
+        void fetchMember (CodeContainer& code, Literals& literals, char memberType,
+            const std::string& name, const std::string& id);
+
         void random (CodeContainer& code);
 
         void scriptRunning (CodeContainer& code);

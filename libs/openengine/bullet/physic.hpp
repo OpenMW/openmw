@@ -279,7 +279,7 @@ namespace Physic
             return false;
         }
 
-        std::vector < std::pair<float, btCollisionObject*> > results;
+        std::vector < std::pair<float, const btCollisionObject*> > results;
     };
 
 }}

@@ -114,7 +114,7 @@ void OgreRenderer::createWindow(const std::string &title, const WindowSettings& 
     // create the semi-transparent black background texture used by the GUI.
     // has to be created in code with TU_DYNAMIC_WRITE_ONLY_DISCARDABLE param
     // so that it can be modified at runtime. 
-    mTransparentBGTexture = Ogre::TextureManager::getSingleton().createManual(
+    Ogre::TextureManager::getSingleton().createManual(
                     "transparent.png",
                     Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
                     Ogre::TEX_TYPE_2D,

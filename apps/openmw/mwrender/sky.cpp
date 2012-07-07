@@ -4,14 +4,22 @@
 #include <OgreRenderWindow.h>
 #include <OgreSceneNode.h>
 #include <OgreMesh.h>
+#include <OgreSubMesh.h>
 #include <OgreSceneManager.h>
 #include <OgreHardwareVertexBuffer.h>
 #include <OgreHighLevelGpuProgramManager.h>
+#include <OgreBillboardSet.h>
+#include <OgreEntity.h>
+#include <OgreSubEntity.h>
+#include <OgreOverlay.h>
+#include <OgreOverlayManager.h>
+#include <OgreOverlayContainer.h>
 
 #include <components/nifogre/ogre_nif_loader.hpp>
 
 #include "../mwbase/environment.hpp"
-#include "../mwworld/world.hpp"
+#include "../mwbase/world.hpp"
+
 #include "renderconst.hpp"
 #include "renderingmanager.hpp"
 

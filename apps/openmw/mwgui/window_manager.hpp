@@ -22,7 +22,6 @@
 #include <openengine/gui/manager.hpp>
 
 #include "../mwmechanics/stat.hpp"
-#include "../mwworld/ptr.hpp"
 
 #include "mode.hpp"
 
@@ -39,7 +38,8 @@ namespace Compiler
 
 namespace MWWorld
 {
-    class World;
+    class Ptr;
+    class CellStore;
 }
 
 namespace MWMechanics
@@ -159,7 +159,7 @@ namespace MWGui
 
     MyGUI::Gui* getGui() const { return gui; }
 
-    void wmUpdateFps(float fps, size_t triangleCount, size_t batchCount)
+    void wmUpdateFps(float fps, unsigned int triangleCount, unsigned int batchCount)
     {
         mFPS = fps;
         mTriangleCount = triangleCount;
@@ -181,7 +181,7 @@ namespace MWGui
     void setBounty (int bounty);                                           ///< set the current bounty value
     void updateSkillArea();                                                ///< update display of skills, factions, birth sign, reputation and bounty
 
-    void changeCell(MWWorld::Ptr::CellStore* cell); ///< change the active cell
+    void changeCell(MWWorld::CellStore* cell); ///< change the active cell
     void setPlayerPos(const float x, const float y); ///< set player position in map space
     void setPlayerDir(const float x, const float y); ///< set player view direction in map space
 
@@ -295,14 +295,14 @@ namespace MWGui
 
     int showFPSLevel;
     float mFPS;
-    size_t mTriangleCount;
-    size_t mBatchCount;
+    unsigned int mTriangleCount;
+    unsigned int mBatchCount;
 
     void onDialogueWindowBye();
 
     /**
      * Called when MyGUI tries to retrieve a tag. This usually corresponds to a GMST string,
-     * so this method will retrieve the GMST with the name \a _tag and place the result in \a _result 
+     * so this method will retrieve the GMST with the name \a _tag and place the result in \a _result
      */
     void onRetrieveTag(const MyGUI::UString& _tag, MyGUI::UString& _result);
   };
