@@ -9,6 +9,9 @@
 
 #include "../mwmechanics/drawstate.hpp"
 
+#undef DrawState // How did this get defined again?
+                 // Maybe it's defined by default in every file for windows?
+
 namespace MWBase
 {
     class World;

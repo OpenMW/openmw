@@ -81,7 +81,7 @@ void ToolTips::onFrame(float frameDuration)
             {
                 mFocusObject = MWBase::Environment::get().getWorld()->getPtrViaHandle(handle);
             }
-            catch (std::exception& e)
+            catch (std::exception /* & e */)
             {
                 return;
             }
