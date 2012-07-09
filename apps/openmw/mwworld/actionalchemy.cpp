@@ -7,7 +7,6 @@ namespace MWWorld
 {
     void ActionAlchemy::execute()
     {
-        MWBase::Environment::get().getWindowManager()->popGuiMode();
         MWBase::Environment::get().getWindowManager()->pushGuiMode(MWGui::GM_Alchemy);
     }
 }

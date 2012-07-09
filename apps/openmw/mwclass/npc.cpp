@@ -9,6 +9,9 @@
 
 #include <components/esm/loadnpc.hpp>
 
+#include "../mwbase/environment.hpp"
+#include "../mwbase/world.hpp"
+
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/npcstats.hpp"
 #include "../mwmechanics/movement.hpp"
@@ -16,13 +19,15 @@
 
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/actiontalk.hpp"
-#include "../mwworld/world.hpp"
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/customdata.hpp"
+#include "../mwworld/physicssystem.hpp"
+
+#include "../mwrender/actors.hpp"
+#include "../mwrender/renderinginterface.hpp"
 
 #include "../mwgui/window_manager.hpp"
-
-#include "../mwbase/environment.hpp"
+#include "../mwgui/tooltips.hpp"
 
 namespace
 {
@@ -53,7 +58,7 @@ namespace MWClass
         {
             std::auto_ptr<CustomData> data (new CustomData);
 
-            ESMS::LiveCellRef<ESM::NPC, MWWorld::RefData> *ref = ptr.get<ESM::NPC>();
+            MWWorld::LiveCellRef<ESM::NPC> *ref = ptr.get<ESM::NPC>();
 
             // NPC stats
             if (!ref->base->faction.empty())
@@ -70,12 +75,12 @@ namespace MWClass
                 }
             }
 
+            // creature stats
             if(ref->base->npdt52.gold != -10)
             {
                 for (int i=0; i<27; ++i)
                     data->mNpcStats.mSkill[i].setBase (ref->base->npdt52.skills[i]);
 
-                // creature stats
                 data->mCreatureStats.mAttributes[0].set (ref->base->npdt52.strength);
                 data->mCreatureStats.mAttributes[1].set (ref->base->npdt52.intelligence);
                 data->mCreatureStats.mAttributes[2].set (ref->base->npdt52.willpower);
@@ -95,6 +100,11 @@ namespace MWClass
                 /// \todo do something with npdt12 maybe:p
             }
 
+            data->mCreatureStats.mHello = ref->base->AI.hello;
+            data->mCreatureStats.mFight = ref->base->AI.fight;
+            data->mCreatureStats.mFlee = ref->base->AI.flee;
+            data->mCreatureStats.mAlarm = ref->base->AI.alarm;
+
             // store
             ptr.getRefData().setCustomData (data.release());
         }
@@ -102,7 +112,7 @@ namespace MWClass
 
     std::string Npc::getId (const MWWorld::Ptr& ptr) const
     {
-        ESMS::LiveCellRef<ESM::NPC, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::NPC> *ref =
             ptr.get<ESM::NPC>();
 
         return ref->base->mId;
@@ -115,14 +125,10 @@ namespace MWClass
 
     void Npc::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics) const
     {
-
-        ESMS::LiveCellRef<ESM::NPC, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::NPC> *ref =
             ptr.get<ESM::NPC>();
 
         assert (ref->base != NULL);
-
-		 
-
         std::string headID = ref->base->head;
         std::string bodyRaceID = headID.substr(0, headID.find_last_of("head_") - 4);
         bool beast = bodyRaceID == "b_n_khajiit_m_" || bodyRaceID == "b_n_khajiit_f_" || bodyRaceID == "b_n_argonian_m_" || bodyRaceID == "b_n_argonian_f_";
@@ -130,15 +136,14 @@ namespace MWClass
         std::string smodel = "meshes\\base_anim.nif";
         if(beast)
             smodel = "meshes\\base_animkna.nif";
-         physics.insertActorPhysics(ptr, smodel);
-
+        physics.insertActorPhysics(ptr, smodel);
 
         MWBase::Environment::get().getMechanicsManager()->addActor (ptr);
     }
 
     std::string Npc::getName (const MWWorld::Ptr& ptr) const
     {
-        ESMS::LiveCellRef<ESM::NPC, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::NPC> *ref =
             ptr.get<ESM::NPC>();
 
         return ref->base->name;
@@ -182,7 +187,7 @@ namespace MWClass
 
     std::string Npc::getScript (const MWWorld::Ptr& ptr) const
     {
-        ESMS::LiveCellRef<ESM::NPC, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::NPC> *ref =
             ptr.get<ESM::NPC>();
 
         return ref->base->script;
@@ -302,7 +307,7 @@ namespace MWClass
 
     MWGui::ToolTipInfo Npc::getToolTipInfo (const MWWorld::Ptr& ptr) const
     {
-        ESMS::LiveCellRef<ESM::NPC, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::NPC> *ref =
             ptr.get<ESM::NPC>();
 
         MWGui::ToolTipInfo info;

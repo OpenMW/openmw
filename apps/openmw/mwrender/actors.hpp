@@ -1,26 +1,29 @@
 #ifndef _GAME_RENDER_ACTORS_H
 #define _GAME_RENDER_ACTORS_H
 
-#include "components/esm_store/cell_store.hpp"
 #include <map>
 #include <list>
-
-
 
 #include <openengine/ogre/renderer.hpp>
 #include "components/nifogre/ogre_nif_loader.hpp"
 
 #include "../mwworld/refdata.hpp"
-#include "../mwworld/ptr.hpp"
 #include "../mwworld/actiontalk.hpp"
+
 #include "npcanimation.hpp"
 #include "creatureanimation.hpp"
 #include <openengine/bullet/physic.hpp>
 
+namespace MWWorld
+{
+    class Ptr;
+    class CellStore;
+}
+
 namespace MWRender{
     class Actors{
         OEngine::Render::OgreRenderer &mRend;
-        std::map<MWWorld::Ptr::CellStore *, Ogre::SceneNode *> mCellSceneNodes;
+        std::map<MWWorld::CellStore *, Ogre::SceneNode *> mCellSceneNodes;
         Ogre::SceneNode* mMwRoot;
 		std::map<MWWorld::Ptr, Animation*> mAllActors;
 
@@ -36,7 +39,7 @@ namespace MWRender{
          bool deleteObject (const MWWorld::Ptr& ptr);
         ///< \return found?
 
-        void removeCell(MWWorld::Ptr::CellStore* store);
+        void removeCell(MWWorld::CellStore* store);
 
         void playAnimationGroup (const MWWorld::Ptr& ptr, const std::string& groupName, int mode,
         int number = 1);

@@ -3,10 +3,12 @@
 
 #include "window_manager.hpp"
 
+#include <components/esm_store/store.hpp>
+
+#include "../mwbase/world.hpp"
+
 #include "../mwmechanics/mechanicsmanager.hpp"
 #include "../mwmechanics/stat.hpp"
-#include "../mwworld/world.hpp"
-#include <components/esm_store/store.hpp>
 
 namespace MWGui
 {

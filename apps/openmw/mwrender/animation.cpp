@@ -1,5 +1,10 @@
 #include "animation.hpp"
 
+#include <OgreHardwarePixelBuffer.h>
+#include <OgreSkeletonInstance.h>
+#include <OgreEntity.h>
+#include <OgreBone.h>
+#include <OgreSubMesh.h>
 
 namespace MWRender{
     std::map<std::string, int> Animation::mUniqueIDs;

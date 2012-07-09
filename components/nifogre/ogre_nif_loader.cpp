@@ -25,6 +25,14 @@
 
 #include "ogre_nif_loader.hpp"
 
+#include <OgreMaterialManager.h>
+#include <OgreMeshManager.h>
+#include <OgreHardwareBufferManager.h>
+#include <OgreSkeletonManager.h>
+#include <OgreTechnique.h>
+#include <OgreSubMesh.h>
+#include <OgreRoot.h>
+
 #include <components/settings/settings.hpp>
 #include <components/nifoverrides/nifoverrides.hpp>
 
@@ -230,7 +238,7 @@ void NIFLoader::createMaterial(const String &name,
         //tech->setSchemeName("blahblah");
         Pass* pass = tech->createPass();
         pass->setVertexProgram("Ogre/BasicVertexPrograms/AmbientOneTexture");*/
-   
+
 
     // This assigns the texture to this material. If the texture name is
     // a file name, and this file exists (in a resource directory), it
@@ -478,7 +486,7 @@ void NIFLoader::createOgreSubMesh(NiTriShape *shape, const String &material, std
         bind->setBinding(nextBuf++, vbuf);
     }
 
-    
+
     // Vertex colors
     if (data->colors.length)
     {
@@ -795,7 +803,7 @@ void NIFLoader::handleNiTriShape(NiTriShape *shape, int flags, BoundsFinder &bou
     std::list<VertexBoneAssignment> vertexBoneAssignments;
 
     Nif::NiTriShapeCopy copy = shape->clone();
-   
+
 	if(!shape->controller.empty())
 	{
 		Nif::Controller* cont = shape->controller.getPtr();
@@ -984,7 +992,7 @@ void NIFLoader::handleNiTriShape(NiTriShape *shape, int flags, BoundsFinder &bou
         }
 		if(!mSkel.isNull() ){
 			int boneIndex;
-			
+
 				boneIndex = mSkel->getNumBones() - 1;
 			for(int i = 0; i < numVerts; i++){
 		 VertexBoneAssignment vba;
@@ -1388,7 +1396,7 @@ void NIFLoader::loadResource(Resource *resource)
                 vba.boneIndex = boneIndex;
                 vba.vertexIndex = 0;
                 vba.weight = 1;
-				 
+
 
             (*iter)->addBoneAssignment(vba);
         }

@@ -1,12 +1,12 @@
 #ifndef GAME_MWRENDER_PLAYER_H
 #define GAME_MWRENDER_PLAYER_H
 
-#include <iostream>
-#include <Ogre.h>
+#include <string>
 
 namespace Ogre
 {
     class Camera;
+    class SceneNode;
 }
 
 namespace MWRender
@@ -26,7 +26,7 @@ namespace MWRender
                 /// Set where the player is looking at. Uses Morrowind (euler) angles
                 void setRot(float x, float y, float z);
 
-                std::string getHandle() const { return mNode->getName(); }
+                std::string getHandle() const;
                 Ogre::SceneNode* getNode() {return mNode;}
     };
 }

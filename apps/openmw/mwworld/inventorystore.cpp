@@ -6,9 +6,10 @@
 
 #include <components/esm/loadench.hpp>
 
-#include "../mwbase/environment.hpp"
+#include <components/esm_store/store.hpp>
 
-#include "../mwworld/world.hpp"
+#include "../mwbase/environment.hpp"
+#include "../mwbase/world.hpp"
 
 #include "../mwmechanics/npcstats.hpp"
 

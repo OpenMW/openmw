@@ -11,6 +11,7 @@
 
 #include <components/compiler/scanner.hpp>
 #include <components/compiler/context.hpp>
+#include <components/compiler/exception.hpp>
 
 #include "extensions.hpp"
 
@@ -46,8 +47,14 @@ namespace MWScript
                 if (!mErrorHandler.isGood())
                     Success = false;
             }
-            catch (...)
+            catch (const Compiler::SourceException&)
             {
+                // error has already been reported via error handler
+                Success = false;
+            }
+            catch (const std::exception& error)
+            {
+                std::cerr << "An exception has been thrown: " << error.what() << std::endl;
                 Success = false;
             }
 
@@ -140,6 +147,9 @@ namespace MWScript
         {
             if (!compile (name))
             {
+                /// \todo Handle case of cyclic member variable access. Currently this could look up
+                /// the whole application in an endless recursion.
+
                 // failed -> ignore script from now on.
                 std::vector<Interpreter::Type_Code> empty;
                 mScripts.insert (std::make_pair (name, std::make_pair (empty, Compiler::Locals())));
@@ -155,5 +165,44 @@ namespace MWScript
     GlobalScripts& ScriptManager::getGlobalScripts()
     {
         return mGlobalScripts;
+    }
+
+    int ScriptManager::getLocalIndex (const std::string& scriptId, const std::string& variable,
+        char type)
+    {
+        const ESM::Script *script = mStore.scripts.find (scriptId);
+
+        int offset = 0;
+        int size = 0;
+
+        switch (type)
+        {
+            case 's':
+
+                offset = 0;
+                size = script->data.numShorts;
+                break;
+
+            case 'l':
+
+                offset = script->data.numShorts;
+                size = script->data.numLongs;
+                break;
+
+            case 'f':
+
+                offset = script->data.numShorts+script->data.numLongs;
+                size = script->data.numFloats;
+
+            default:
+
+                throw std::runtime_error ("invalid variable type");
+        }
+
+        for (int i=0; i<size; ++i)
+            if (script->varNames.at (i+offset)==variable)
+                return i;
+
+        throw std::runtime_error ("unable to access local variable " + variable + " of " + scriptId);
     }
 }

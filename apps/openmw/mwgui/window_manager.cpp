@@ -26,14 +26,16 @@
 
 #include "../mwbase/environment.hpp"
 
+#include "../mwworld/ptr.hpp"
+#include "../mwworld/cellstore.hpp"
+
 #include "console.hpp"
 #include "journalwindow.hpp"
 #include "charactercreation.hpp"
 
 #include <components/settings/settings.hpp>
 
-#include <assert.h>
-#include <iostream>
+#include <cassert>
 #include <iterator>
 
 using namespace MWGui;
@@ -82,7 +84,7 @@ WindowManager::WindowManager(
     // Set up the GUI system
     mGuiManager = new OEngine::GUI::MyGUIManager(mOgre->getWindow(), mOgre->getScene(), false, logpath);
     gui = mGuiManager->getGui();
-    
+
     //Register own widgets with MyGUI
     MyGUI::FactoryManager::getInstance().registerFactory<DialogueHistory>("Widget");
     MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWSkill>("Widget");
@@ -464,7 +466,7 @@ void WindowManager::onDialogueWindowBye()
         //removeDialog(dialogueWindow);
         mDialogueWindow->setVisible(false);
     }
-    popGuiMode();
+    removeGuiMode(GM_Dialogue);
 }
 
 void WindowManager::onFrame (float frameDuration)
@@ -638,6 +640,9 @@ void WindowManager::processChangedSettings(const Settings::CategorySettingVector
         hud->onResChange(x, y);
         console->onResChange(x, y);
         mSettingsWindow->center();
+        mAlchemyWindow->center();
+        mScrollWindow->center();
+        mBookWindow->center();
         mDragAndDrop->mDragAndDropWidget->setSize(MyGUI::IntSize(x, y));
     }
 }
@@ -676,6 +681,9 @@ void WindowManager::removeGuiMode(GuiMode mode)
         else
             ++it;
     }
+
+    bool gameMode = !isGuiMode();
+    MWBase::Environment::get().getInputManager()->changeInputMode(!gameMode);
 
     updateVisible();
 }

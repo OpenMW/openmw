@@ -3,7 +3,8 @@
 
 #include <components/esm_store/store.hpp>
 
-#include "../mwworld/world.hpp"
+#include "../mwbase/environment.hpp"
+#include "../mwbase/world.hpp"
 
 namespace MWDialogue
 {
@@ -15,9 +16,9 @@ namespace MWDialogue
     : Topic (topic), mIndex (0), mFinished (false)
     {}
 
-    const std::string Quest::getName (const MWWorld::World& world) const
+    const std::string Quest::getName() const
     {
-        const ESM::Dialogue *dialogue = world.getStore().dialogs.find (mTopic);
+        const ESM::Dialogue *dialogue = MWBase::Environment::get().getWorld()->getStore().dialogs.find (mTopic);
 
         for (std::vector<ESM::DialInfo>::const_iterator iter (dialogue->mInfo.begin());
             iter!=dialogue->mInfo.end(); ++iter)
@@ -32,9 +33,9 @@ namespace MWDialogue
         return mIndex;
     }
 
-    void Quest::setIndex (int index, const MWWorld::World& world)
+    void Quest::setIndex (int index)
     {
-        const ESM::Dialogue *dialogue = world.getStore().dialogs.find (mTopic);
+        const ESM::Dialogue *dialogue = MWBase::Environment::get().getWorld()->getStore().dialogs.find (mTopic);
 
         for (std::vector<ESM::DialInfo>::const_iterator iter (dialogue->mInfo.begin());
             iter!=dialogue->mInfo.end(); ++iter)
@@ -58,11 +59,11 @@ namespace MWDialogue
         return mFinished;
     }
 
-    void Quest::addEntry (const JournalEntry& entry, const MWWorld::World& world)
+    void Quest::addEntry (const JournalEntry& entry)
     {
         int index = -1;
 
-        const ESM::Dialogue *dialogue = world.getStore().dialogs.find (entry.mTopic);
+        const ESM::Dialogue *dialogue = MWBase::Environment::get().getWorld()->getStore().dialogs.find (entry.mTopic);
 
         for (std::vector<ESM::DialInfo>::const_iterator iter (dialogue->mInfo.begin());
             iter!=dialogue->mInfo.end(); ++iter)
@@ -75,7 +76,7 @@ namespace MWDialogue
         if (index==-1)
             throw std::runtime_error ("unknown journal entry for topic " + mTopic);
 
-        setIndex (index, world);
+        setIndex (index);
 
         for (TEntryIter iter (mEntries.begin()); iter!=mEntries.end(); ++iter)
             if (*iter==entry.mInfoId)

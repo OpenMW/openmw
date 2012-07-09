@@ -66,6 +66,8 @@ void Manager::saveUser(const std::string& file)
         }
         fout << it->first.second << " = " << it->second << '\n';
     }
+
+    fout.close();
 }
 
 const std::string Manager::getString (const std::string& setting, const std::string& category)

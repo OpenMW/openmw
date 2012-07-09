@@ -2,10 +2,11 @@
 #include "actiontake.hpp"
 
 #include "../mwbase/environment.hpp"
+#include "../mwbase/world.hpp"
+
 #include "../mwgui/window_manager.hpp"
 
 #include "class.hpp"
-#include "world.hpp"
 #include "containerstore.hpp"
 
 namespace MWWorld

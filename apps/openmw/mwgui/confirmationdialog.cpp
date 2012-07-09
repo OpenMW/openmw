@@ -3,12 +3,12 @@
 #include <boost/lexical_cast.hpp>
 
 #include "../mwbase/environment.hpp"
-#include "../mwworld/world.hpp"
+#include "../mwbase/world.hpp"
 
 namespace MWGui
 {
     ConfirmationDialog::ConfirmationDialog(WindowManager& parWindowManager) :
-        WindowBase("openmw_confirmation_dialog_layout.xml", parWindowManager)
+        WindowBase("openmw_confirmation_dialog.layout", parWindowManager)
     {
         getWidget(mMessage, "Message");
         getWidget(mOkButton, "OkButton");

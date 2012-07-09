@@ -3,7 +3,6 @@
 #include <btBulletCollisionCommon.h>
 #include <BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h>
 #include <components/nifbullet/bullet_nif_loader.hpp>
-//#include <apps\openmw\mwworld\world.hpp>
 #include "CMotionState.h"
 #include "OgreRoot.h"
 #include "btKinematicCharacterController.h"
@@ -222,6 +221,14 @@ namespace Physic
     PhysicEngine::~PhysicEngine()
     {
 
+        HeightFieldContainer::iterator hf_it = mHeightFieldMap.begin();
+        for (; hf_it != mHeightFieldMap.end(); ++hf_it)
+        {
+            dynamicsWorld->removeRigidBody(hf_it->second.mBody);
+            delete hf_it->second.mShape;
+            delete hf_it->second.mBody;
+        }
+
         RigidBodyContainer::iterator rb_it = RigidBodyMap.begin();
         for (; rb_it != RigidBodyMap.end(); ++rb_it)
         {
@@ -278,7 +285,7 @@ namespace Physic
                 minh = h;
                 maxh = h;
             }
-            
+
             if (h>maxh) maxh = h;
             if (h<minh) minh = h;
         }
@@ -320,6 +327,8 @@ namespace Physic
         dynamicsWorld->removeRigidBody(hf.mBody);
         delete hf.mShape;
         delete hf.mBody;
+
+        mHeightFieldMap.erase(name);
     }
 
     RigidBody* PhysicEngine::createRigidBody(std::string mesh,std::string name,float scale)
@@ -501,7 +510,7 @@ namespace Physic
         dynamicsWorld->rayTest(from, to, resultCallback1);
         if (resultCallback1.hasHit())
         {
-            name = static_cast<RigidBody&>(*resultCallback1.m_collisionObject).mName;
+            name = static_cast<const RigidBody&>(*resultCallback1.m_collisionObject).mName;
             d1 = resultCallback1.m_closestHitFraction;
             d = d1;
         }
@@ -515,7 +524,7 @@ namespace Physic
             d2 = resultCallback1.m_closestHitFraction;
             if(d2<=d1)
             {
-                name = static_cast<PairCachingGhostObject&>(*resultCallback2.m_collisionObject).mName;
+                name = static_cast<const PairCachingGhostObject&>(*resultCallback2.m_collisionObject).mName;
                 d = d2;
             }
         }
@@ -528,25 +537,25 @@ namespace Physic
         MyRayResultCallback resultCallback1;
         resultCallback1.m_collisionFilterMask = COL_WORLD|COL_RAYCASTING;
         dynamicsWorld->rayTest(from, to, resultCallback1);
-        std::vector< std::pair<float, btCollisionObject*> > results = resultCallback1.results;
+        std::vector< std::pair<float, const btCollisionObject*> > results = resultCallback1.results;
 
         MyRayResultCallback resultCallback2;
         resultCallback2.m_collisionFilterMask = COL_ACTOR_INTERNAL|COL_ACTOR_EXTERNAL;
         dynamicsWorld->rayTest(from, to, resultCallback2);
-        std::vector< std::pair<float, btCollisionObject*> > actorResults = resultCallback2.results;
+        std::vector< std::pair<float, const btCollisionObject*> > actorResults = resultCallback2.results;
 
         std::vector< std::pair<float, std::string> > results2;
 
-        for (std::vector< std::pair<float, btCollisionObject*> >::iterator it=results.begin();
+        for (std::vector< std::pair<float, const btCollisionObject*> >::iterator it=results.begin();
             it != results.end(); ++it)
         {
-            results2.push_back( std::make_pair( (*it).first, static_cast<RigidBody&>(*(*it).second).mName ) );
+            results2.push_back( std::make_pair( (*it).first, static_cast<const RigidBody&>(*(*it).second).mName ) );
         }
 
-        for (std::vector< std::pair<float, btCollisionObject*> >::iterator it=actorResults.begin();
+        for (std::vector< std::pair<float, const btCollisionObject*> >::iterator it=actorResults.begin();
             it != actorResults.end(); ++it)
         {
-            results2.push_back( std::make_pair( (*it).first, static_cast<PairCachingGhostObject&>(*(*it).second).mName ) );
+            results2.push_back( std::make_pair( (*it).first, static_cast<const PairCachingGhostObject&>(*(*it).second).mName ) );
         }
 
         std::sort(results2.begin(), results2.end(), MyRayResultCallback::cmp);

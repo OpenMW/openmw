@@ -1,11 +1,12 @@
 
 #include "spells.hpp"
 
+#include <components/esm_store/store.hpp>
+
 #include <components/esm/loadspel.hpp>
 
 #include "../mwbase/environment.hpp"
-
-#include "../mwworld/world.hpp"
+#include "../mwbase/world.hpp"
 
 #include "magiceffects.hpp"
 

@@ -9,9 +9,11 @@
 #include <components/esm_store/store.hpp>
 
 #include "../mwbase/environment.hpp"
+#include "../mwbase/world.hpp"
 
-#include "../mwworld/world.hpp"
 #include "../mwworld/player.hpp"
+
+#include "../mwrender/player.hpp"
 
 #include "sound_output.hpp"
 #include "sound_decoder.hpp"
@@ -88,7 +90,7 @@ namespace MWSound
             {
                 if(devname.empty())
                     throw;
-                std::cout <<"Failed to open device \""<<devname<<"\", trying default"<< std::endl;
+                std::cout <<"Failed to open device \""<<devname<<"\", trying default."<< std::endl << "The error given was: " << e.what() << std::endl;
                 mOutput->init();
                 Settings::Manager::setString("device", "Sound", "");
             }

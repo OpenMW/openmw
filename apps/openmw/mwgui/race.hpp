@@ -14,7 +14,7 @@ namespace MWGui
 
 /*
   This file contains the dialog for choosing a race.
-  Layout is defined by resources/mygui/openmw_chargen_race_layout.xml.
+  Layout is defined by resources/mygui/openmw_chargen_race.layout.
  */
 
 namespace MWGui

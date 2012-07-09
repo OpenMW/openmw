@@ -15,7 +15,6 @@
 #include <openengine/gui/manager.hpp>
 
 #include <components/esm/records.hpp>
-#include <components/esm_store/cell_store.hpp>
 #include <components/bsa/bsa_archive.hpp>
 #include <components/esm/esm_reader.hpp>
 #include <components/files/fixedpath.hpp>
@@ -39,9 +38,10 @@
 
 #include "mwsound/soundmanager.hpp"
 
-#include "mwworld/world.hpp"
 #include "mwworld/class.hpp"
 #include "mwworld/player.hpp"
+#include "mwworld/cellstore.hpp"
+#include "mwworld/worldimp.hpp"
 
 #include "mwclass/classes.hpp"
 
@@ -51,6 +51,7 @@
 #include "mwmechanics/mechanicsmanager.hpp"
 
 #include "mwbase/environment.hpp"
+#include "mwbase/world.hpp"
 
 
 void OMW::Engine::executeLocalScripts()
@@ -126,9 +127,9 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
 
         // update GUI
         Ogre::RenderWindow* window = mOgre->getWindow();
-        MWBase::Environment::get().getWindowManager()->wmUpdateFps(window->getLastFPS(),
-                                                 window->getTriangleCount(),
-                                                 window->getBatchCount());
+        unsigned int tri, batch;
+        MWBase::Environment::get().getWorld()->getTriangleBatchCount(tri, batch);
+        MWBase::Environment::get().getWindowManager()->wmUpdateFps(window->getLastFPS(), tri, batch);
 
         MWBase::Environment::get().getWindowManager()->onFrame(evt.timeSinceLastFrame);
     }
