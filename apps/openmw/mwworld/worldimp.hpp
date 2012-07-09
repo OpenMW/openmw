@@ -219,11 +219,9 @@ namespace MWWorld
 
             virtual void moveObject (const Ptr& ptr, float x, float y, float z);
 
-            virtual void scaleObject (Ptr& ptr, float scale);
+            virtual void scaleObject (const Ptr& ptr, float scale);
 
-            virtual void rotateObject (Ptr& ptr,float x,float y,float z,bool WorldAxis);
-
-            virtual void setObjectRotation (Ptr& ptr,float x,float y,float z);
+            virtual void rotateObject (const Ptr& ptr,float x,float y,float z);
 
             virtual void indexToPosition (int cellX, int cellY, float &x, float &y, bool centre = false)
                 const;

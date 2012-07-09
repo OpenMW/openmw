@@ -505,50 +505,6 @@ namespace MWScript
                 }
         };
 
-        template<class R>
-        class OpSetScale : public Interpreter::Opcode0
-        {
-            public:
-
-                virtual void execute (Interpreter::Runtime& runtime)
-                {
-                    MWWorld::Ptr ptr = R()(runtime);
-
-                    Interpreter::Type_Float scale = runtime[0].mInteger;
-                    runtime.pop();
-
-                    MWBase::Environment::get().getWorld()->scaleObject(ptr,scale);
-                }
-        };
-
-        template<class R>
-        class OpSetAngle : public Interpreter::Opcode0
-        {
-            public:
-
-                virtual void execute (Interpreter::Runtime& runtime)
-                {
-                    MWWorld::Ptr ptr = R()(runtime);
-
-                    std::string axis = runtime.getStringLiteral (runtime[0].mInteger);
-                    runtime.pop();
-                    Interpreter::Type_Float angle = runtime[0].mInteger;
-                    runtime.pop();
-
-                    if(axis == "X")
-                    {
-                        MWBase::Environment::get().getWorld()->setObjectRotation(ptr,angle,0,0);
-                    }
-                    if(axis == "Y")
-                    {
-                        MWBase::Environment::get().getWorld()->setObjectRotation(ptr,0,angle,0);
-                    }
-                    if(axis == "Z")
-                    {
-                        MWBase::Environment::get().getWorld()->setObjectRotation(ptr,0,0,angle);
-                    }
-                }
-        };
 
         const int numberOfAttributes = 8;
 
@@ -595,11 +551,6 @@ namespace MWScript
         const int opcodeGetPCRankExplicit = 0x2000f;
         const int opcodeModDisposition = 0x200014d;
         const int opcodeModDispositionExplicit = 0x200014e;
-
-        const int opcodeSetScale = 0x2000164;
-        const int opcodeSetScaleExplicit = 0x2000165;
-        const int opcodeSetAngle = 0x2000166;
-        const int opcodeSetAngleExplicit = 0x2000167;
 
         void registerExtensions (Compiler::Extensions& extensions)
         {
@@ -683,9 +634,6 @@ namespace MWScript
             extensions.registerInstruction("moddisposition","l",opcodeModDisposition,
                 opcodeModDispositionExplicit);
             extensions.registerFunction("getpcrank",'l',"/S",opcodeGetPCRank,opcodeGetPCRankExplicit);
-
-            extensions.registerInstruction("setscale","l",opcodeSetScale,opcodeSetScaleExplicit);
-            extensions.registerInstruction("setangle","Sl",opcodeSetAngle,opcodeSetAngleExplicit);
         }
 
         void installOpcodes (Interpreter::Interpreter& interpreter)
@@ -757,11 +705,6 @@ namespace MWScript
             interpreter.installSegment5(opcodeModDispositionExplicit,new OpModDisposition<ExplicitRef>);
             interpreter.installSegment3(opcodeGetPCRank,new OpGetPCRank<ImplicitRef>);
             interpreter.installSegment3(opcodeGetPCRankExplicit,new OpGetPCRank<ExplicitRef>);
-
-            interpreter.installSegment5(opcodeSetScale,new OpSetScale<ImplicitRef>);
-            interpreter.installSegment5(opcodeSetScaleExplicit,new OpSetScale<ExplicitRef>);
-            interpreter.installSegment5(opcodeSetAngle,new OpSetAngle<ImplicitRef>);
-            interpreter.installSegment5(opcodeSetAngleExplicit,new OpSetAngle<ExplicitRef>);
         }
     }
 }

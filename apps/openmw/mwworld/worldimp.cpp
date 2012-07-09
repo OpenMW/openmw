@@ -597,7 +597,7 @@ namespace MWWorld
         mPhysics->moveObject (ptr.getRefData().getHandle(), Ogre::Vector3 (x, y, z));
     }
 
-    void World::scaleObject (Ptr& ptr, float scale)
+    void World::scaleObject (const Ptr& ptr, float scale)
     {
         MWWorld::Class::get(ptr).adjustScale(ptr,scale);
 
@@ -607,41 +607,7 @@ namespace MWWorld
         mPhysics->scaleObject( ptr.getRefData().getHandle(), scale );
     }
 
-    void World::rotateObject (Ptr& ptr,float x,float y,float z,bool WorldAxis)
-    {
-        MWWorld::Class::get(ptr).adjustRotation(ptr,x,y,z);
-
-        if(WorldAxis)
-        {
-            ptr.getRefData().getBaseNode()->rotate(Ogre::Vector3::UNIT_X,Ogre::Degree(x));
-            ptr.getRefData().getBaseNode()->rotate(Ogre::Vector3::UNIT_X,Ogre::Degree(y));
-            ptr.getRefData().getBaseNode()->rotate(Ogre::Vector3::UNIT_X,Ogre::Degree(z));
-        }
-        else
-        {
-            Ogre::Matrix3 axis = ptr.getRefData().getBaseNode()->getLocalAxes();
-            Ogre::Vector3 xAxis = axis.GetColumn(0);
-            Ogre::Vector3 yAxis = axis.GetColumn(1);
-            Ogre::Vector3 zAxis = axis.GetColumn(2);
-            ptr.getRefData().getBaseNode()->rotate(xAxis,Ogre::Degree(x));
-            ptr.getRefData().getBaseNode()->rotate(yAxis,Ogre::Degree(y));
-            ptr.getRefData().getBaseNode()->rotate(zAxis,Ogre::Degree(z));
-        }
-        Ogre::Matrix3 rot;
-        ptr.getRefData().getBaseNode()->getOrientation().ToRotationMatrix(rot);
-        Ogre::Radian rx,ry,rz;
-        rot.ToEulerAnglesXYZ(rx,ry,rz);
-
-        ptr.getRefData().getPosition().rot[0] = rx.valueRadians();
-        ptr.getRefData().getPosition().rot[0] = ry.valueRadians();
-        ptr.getRefData().getPosition().rot[0] = rz.valueRadians();
-
-        mPhysics->rotateObject(ptr.getRefData().getHandle(),ptr.getRefData().getBaseNode()->getOrientation());
-        //ptr.getRefData().getBaseNode()->rotate(ptr.getRefData().getBaseNode()->get
-        //mPhysics->scaleObject( Class::get(ptr).getId(ptr), scale );
-    }
-
-    void World::setObjectRotation (Ptr& ptr,float x,float y,float z)
+    void World::rotateObject (const Ptr& ptr,float x,float y,float z)
     {
         MWWorld::Class::get(ptr).adjustRotation(ptr,x,y,z);
 
@@ -653,8 +619,7 @@ namespace MWWorld
         Ogre::Quaternion roty(Ogre::Degree(y),Ogre::Vector3::UNIT_Y);
         Ogre::Quaternion rotz(Ogre::Degree(z),Ogre::Vector3::UNIT_Z);
         ptr.getRefData().getBaseNode()->setOrientation(rotx*roty*rotz);
-        mPhysics->rotateObject(Class::get(ptr).getId(ptr),ptr.getRefData().getBaseNode()->getOrientation());
-        std::cout << Class::get(ptr).getId(ptr);
+        mPhysics->rotateObject(ptr.getRefData().getHandle(),ptr.getRefData().getBaseNode()->getOrientation());
     }
 
     void World::indexToPosition (int cellX, int cellY, float &x, float &y, bool centre) const
