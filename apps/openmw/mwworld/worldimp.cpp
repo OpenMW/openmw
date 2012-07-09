@@ -612,8 +612,8 @@ namespace MWWorld
         MWWorld::Class::get(ptr).adjustRotation(ptr,x,y,z);
 
         ptr.getRefData().getPosition().rot[0] = Ogre::Degree(x).valueRadians();
-        ptr.getRefData().getPosition().rot[0] = Ogre::Degree(y).valueRadians();
-        ptr.getRefData().getPosition().rot[0] = Ogre::Degree(z).valueRadians();
+        ptr.getRefData().getPosition().rot[1] = Ogre::Degree(y).valueRadians();
+        ptr.getRefData().getPosition().rot[2] = Ogre::Degree(z).valueRadians();
 
         Ogre::Quaternion rotx(Ogre::Degree(x),Ogre::Vector3::UNIT_X);
         Ogre::Quaternion roty(Ogre::Degree(y),Ogre::Vector3::UNIT_Y);
