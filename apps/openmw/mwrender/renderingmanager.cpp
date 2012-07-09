@@ -85,8 +85,7 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
     const RenderSystemCapabilities* caps = Root::getSingleton().getRenderSystem()->getCapabilities();
     if (!waterShaderSupported())
         Settings::Manager::setBool("shader", "Water", false);
-    if ( !(caps->isShaderProfileSupported("fp40") || caps->isShaderProfileSupported("ps_4_0"))
-        || !Settings::Manager::getBool("shaders", "Objects"))
+    if (!Settings::Manager::getBool("shaders", "Objects"))
         Settings::Manager::setBool("enabled", "Shadows", false);
 
     applyCompositors();
