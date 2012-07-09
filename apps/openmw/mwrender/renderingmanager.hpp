@@ -52,7 +52,6 @@ namespace MWRender
 {
 
     class Shadows;
-    class ShaderHelper;
     class LocalMap;
     class Water;
     class Compositors;
@@ -222,8 +221,6 @@ class RenderingManager: private RenderingInterface, public Ogre::WindowEventList
     MWRender::LocalMap* mLocalMap;
 
     MWRender::Shadows* mShadows;
-
-    MWRender::ShaderHelper* mShaderHelper;
 
     MWRender::Compositors* mCompositors;
 };

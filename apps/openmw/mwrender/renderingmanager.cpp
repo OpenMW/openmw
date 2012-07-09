@@ -30,7 +30,6 @@
 #include "../mwinput/inputmanager.hpp" // FIXME
 
 #include "shadows.hpp"
-#include "shaderhelper.hpp"
 #include "localmap.hpp"
 #include "water.hpp"
 #include "compositors.hpp"
@@ -108,7 +107,6 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
     cameraPitchNode->attachObject(mRendering.getCamera());
 
     mShadows = new Shadows(&mRendering);
-    mShaderHelper = new ShaderHelper(this);
 
     mTerrainManager = new TerrainManager(mRendering.getScene(), this);
 
@@ -132,7 +130,6 @@ RenderingManager::~RenderingManager ()
     delete mPlayer;
     delete mSkyManager;
     delete mDebugging;
-    delete mShaderHelper;
     delete mShadows;
     delete mTerrainManager;
     delete mLocalMap;
@@ -617,7 +614,6 @@ void RenderingManager::processChangedSettings(const Settings::CategorySettingVec
         else if (it->second == "shader" && it->first == "Water")
         {
             applyCompositors();
-            mShaderHelper->applyShaders();
         }
     }
 
