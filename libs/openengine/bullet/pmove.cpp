@@ -527,7 +527,7 @@ int PM_StepSlideMove( bool gravity )
 		delta = pm->ps.origin.z - start_o.z;
 		if ( delta > 2 ) 
 		{
-            pm->ps.counter = 5;
+            pm->ps.counter = 10;
 
             /*
 			if (gravity)
