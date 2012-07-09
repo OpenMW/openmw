@@ -1,6 +1,7 @@
 
 #include "npcstats.hpp"
 
+#include <cmath>
 #include <stdexcept>
 
 #include <components/esm/loadskil.hpp>
@@ -122,4 +123,18 @@ float MWMechanics::NpcStats::getSkillGain (int skillIndex, const ESM::Class& cla
     }
 
     return 1.0 / (level +1) * (1.0 / skillFactor) * typeFactor * specialisationFactor;
+}
+
+void MWMechanics::NpcStats::useSkill (int skillIndex, const ESM::Class& class_, int usageType)
+{
+    float base = getSkill (skillIndex).getBase();
+
+    int level = static_cast<int> (base);
+
+    base += getSkillGain (skillIndex, class_, usageType);
+
+    if (static_cast<int> (base)!=level)
+        base = level+1;
+
+    getSkill (skillIndex).setBase (base);
 }

@@ -70,6 +70,9 @@ namespace MWMechanics
             ///< \param usageType: Usage specific factor, specified in the respective skill record;
             /// -1: use a factor of 1.0 instead.
             /// \param level Level to base calculation on; -1: use current level.
+
+            void useSkill (int skillIndex, const ESM::Class& class_, int usageType = -1);
+            ///< Increase skill by usage.
     };
 }
 
