@@ -42,10 +42,30 @@ material openmw_objects_base
 
         ffp_vertex_colour_ambient $has_vertex_colour
 
+
         texture_unit diffuseMap
         {
             direct_texture $diffuseMap
             create_in_ffp true
+        }
+      
+        texture_unit shadowMap0
+        {
+            content_type shadow
+            tex_address_mode clamp
+            filtering none
+        }
+        texture_unit shadowMap1
+        {
+            content_type shadow
+            tex_address_mode clamp
+            filtering none
+        }
+        texture_unit shadowMap2
+        {
+            content_type shadow
+            tex_address_mode clamp
+            filtering none
         }
     }
 }

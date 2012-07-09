@@ -12,6 +12,8 @@
 #include <OgreOverlayContainer.h>
 #include <OgreOverlayManager.h>
 
+#include <extern/shiny/Main/Factory.hpp>
+
 #include "renderconst.hpp"
 
 using namespace Ogre;
@@ -84,6 +86,12 @@ void Shadows::recreate()
                 mSceneMgr->setShadowTextureConfig(i, texsize/4, texsize/4, Ogre::PF_FLOAT32_R);*/
         }
 
+        // Populate from split point 1, not 0, since split 0 isn't useful (usually 0)
+        const PSSMShadowCameraSetup::SplitPointList& splitPointList = getPSSMSetup()->getSplitPoints();
+        sh::Vector4* splitPoints = new sh::Vector4(splitPointList[1], splitPointList[2], splitPointList[3], 1.0);
+
+        sh::Factory::getInstance ().setSharedParameter ("pssmSplitPoints", sh::makeProperty<sh::Vector4>(splitPoints));
+
         shadowCameraSetup = ShadowCameraSetupPtr(mPSSMSetup);
     }
     else
@@ -95,6 +103,9 @@ void Shadows::recreate()
         shadowCameraSetup = ShadowCameraSetupPtr(lispsmSetup);
     }
     mSceneMgr->setShadowCameraSetup(shadowCameraSetup);
+
+    sh::Vector4* shadowFar_fadeStart = new sh::Vector4(mShadowFar, mFadeStart * mShadowFar, 0, 0);
+    sh::Factory::getInstance ().setSharedParameter ("shadowFar_fadeStart", sh::makeProperty<sh::Vector4>(shadowFar_fadeStart));
 
     // Set visibility mask for the shadow render textures
     int visibilityMask = RV_Actors * Settings::Manager::getBool("actor shadows", "Shadows")
@@ -111,7 +122,7 @@ void Shadows::recreate()
     // --------------------------------------------------------------------------------------------------------------------
     // --------------------------- Debug overlays to display the content of shadow maps -----------------------------------
     // --------------------------------------------------------------------------------------------------------------------
-/*
+
 	OverlayManager& mgr = OverlayManager::getSingleton();
 	Overlay* overlay;
 	
@@ -157,7 +168,7 @@ void Shadows::recreate()
 		overlay->add2D(debugPanel);
 		overlay->show();
 	}
-*/
+
 }
 
 PSSMShadowCameraSetup* Shadows::getPSSMSetup()

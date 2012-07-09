@@ -54,6 +54,8 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
     sh::OgrePlatform* platform = new sh::OgrePlatform("General", (resDir / "materials").string());
     platform->setCacheFolder ("./");
     mFactory = new sh::Factory(platform);
+    mFactory->setSharedParameter ("pssmSplitPoints", sh::makeProperty<sh::Vector4>(new sh::Vector4(0,0,0,0)));
+    mFactory->setSharedParameter ("shadowFar_fadeStart", sh::makeProperty<sh::Vector4>(new sh::Vector4(0,0,0,0)));
 
     //The fog type must be set before any terrain objects are created as if the
     //fog type is set to FOG_NONE then the initially created terrain won't have any fog

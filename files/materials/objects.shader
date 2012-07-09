@@ -1,19 +1,27 @@
 #include "core.h"
 
+#include "shadows.h"
+
 
 #define FOG @shPropertyBool(fog)
 #define MRT @shPropertyNotBool(is_transparent) && @shPropertyBool(mrt_output)
 #define LIGHTING @shPropertyBool(lighting)
 
-#if FOG || MRT
+#define SHADOWS LIGHTING && 0
+#define SHADOWS_PSSM LIGHTING
+
+#define SHADOWS 1 && LIGHTING
+#define SHADOWS_PSSM 0 && LIGHTING
+
+#if FOG || MRT || SHADOWS_PSSM
 #define NEED_DEPTH
 #endif
-
-#define NUM_LIGHTS 8
 
 #define HAS_VERTEXCOLOR @shPropertyBool(has_vertex_colour)
 
 #ifdef SH_VERTEX_SHADER
+
+    // ------------------------------------- VERTEX ---------------------------------------
 
     SH_BEGIN_PROGRAM
         shUniform(float4x4 wvp) @shAutoConstant(wvp, worldviewproj_matrix)
@@ -33,11 +41,28 @@
         shColourInput(float4)
         shOutput(float4, colorPassthrough)
 #endif
+
+#if SHADOWS
+        shOutput(float4, lightSpacePos0)
+        shUniform(float4x4 texViewProjMatrix0) @shAutoConstant(texViewProjMatrix0, texture_viewproj_matrix)
+        shUniform(float4x4 worldMatrix) @shAutoConstant(worldMatrix, world_matrix)
+#endif
+
+#if SHADOWS_PSSM
+    @shForeach(3)
+        shOutput(float4, lightSpacePos@shIterator)
+        shUniform(float4x4 texViewProjMatrix@shIterator) @shAutoConstant(texViewProjMatrix@shIterator, texture_viewproj_matrix, @shIterator)
+    @shEndForeach
+        shUniform(float4x4 worldMatrix) @shAutoConstant(worldMatrix, world_matrix)
+#endif
     SH_START_PROGRAM
     {
 	    shOutputPosition = shMatrixMult(wvp, shInputPosition);
 	    UV = uv0;
+#if LIGHTING
         normalPassthrough = normal.xyz;
+#endif
+
 #ifdef NEED_DEPTH
         depthPassthrough = shOutputPosition.z;
 #endif
@@ -49,9 +74,21 @@
 #if HAS_VERTEXCOLOR
         colorPassthrough = colour;
 #endif
+
+#if SHADOWS
+        lightSpacePos0 = shMatrixMult(texViewProjMatrix0, shMatrixMult(worldMatrix, shInputPosition));
+#endif
+#if SHADOWS_PSSM
+        float4 wPos = shMatrixMult(worldMatrix, shInputPosition);
+    @shForeach(3)
+        lightSpacePos@shIterator = shMatrixMult(texViewProjMatrix@shIterator, wPos);
+    @shEndForeach
+#endif
     }
 
 #else
+
+    // ----------------------------------- FRAGMENT ------------------------------------------
 
     SH_BEGIN_PROGRAM
 		shSampler2D(diffuseMap)
@@ -76,7 +113,7 @@
         shUniform(float4 materialAmbient)                    @shAutoConstant(materialAmbient, surface_ambient_colour)
         shUniform(float4 materialDiffuse)                    @shAutoConstant(materialDiffuse, surface_diffuse_colour)
         shUniform(float4 materialEmissive)                   @shAutoConstant(materialEmissive, surface_emissive_colour)
-    @shForeach(NUM_LIGHTS)
+    @shForeach(8)
         shUniform(float4 lightPosObjSpace@shIterator)        @shAutoConstant(lightPosObjSpace@shIterator, light_position_object_space, @shIterator)
         shUniform(float4 lightAttenuation@shIterator)        @shAutoConstant(lightAttenuation@shIterator, light_attenuation, @shIterator)
         shUniform(float4 lightDiffuse@shIterator)            @shAutoConstant(lightDiffuse@shIterator, light_diffuse_colour, @shIterator)
@@ -91,6 +128,24 @@
 #ifdef HAS_VERTEXCOLOR
         shInput(float4, colorPassthrough)
 #endif
+
+#if SHADOWS
+        shInput(float4, lightSpacePos0)
+        shSampler2D(shadowMap0)
+        shUniform(float2 invShadowmapSize0)   @shAutoConstant(invShadowmapSize0, inverse_texture_size, 0)
+#endif
+#if SHADOWS_PSSM
+    @shForeach(3)
+        shInput(float4, lightSpacePos@shIterator)
+        shSampler2D(shadowMap@shIterator)
+        shUniform(float2 invShadowmapSize@shIterator)  @shAutoConstant(invShadowmapSize@shIterator, inverse_texture_size, @shIterator)
+    @shEndForeach
+    shUniform(float4 pssmSplitPoints)  @shSharedParameter(pssmSplitPoints)
+#endif
+
+#if SHADOWS || SHADOWS_PSSM
+        shUniform(float4 shadowFar_fadeStart) @shSharedParameter(shadowFar_fadeStart)
+#endif
     SH_START_PROGRAM
     {
         shOutputColor(0) = shSample(diffuseMap, UV);
@@ -101,15 +156,38 @@
         float d;
         float3 ambient = materialAmbient.xyz * lightAmbient.xyz;
     
-    @shForeach(NUM_LIGHTS)
+    @shForeach(8)
+    
+        // shadows only for the first (directional) light
+#if @shIterator == 0
+    #if SHADOWS
+            float shadow = depthShadowPCF (shadowMap0, lightSpacePos0, invShadowmapSize0);
+    #endif
+    #if SHADOWS_PSSM
+            float shadow = pssmDepthShadow (lightSpacePos0, invShadowmapSize0, shadowMap0, lightSpacePos1, invShadowmapSize1, shadowMap1, lightSpacePos2, invShadowmapSize2, shadowMap2, depthPassthrough, pssmSplitPoints);
+    #endif
+
+    #if SHADOWS || SHADOWS_PSSM
+            float fadeRange = shadowFar_fadeStart.x - shadowFar_fadeStart.y;
+            float fade = 1-((depthPassthrough - shadowFar_fadeStart.y) / fadeRange);
+            shadow = (depthPassthrough > shadowFar_fadeStart.x) ? 1 : ((depthPassthrough > shadowFar_fadeStart.y) ? 1-((1-shadow)*fade) : shadow);
+    #endif
+
+    #if !SHADOWS && !SHADOWS_PSSM
+            float shadow = 1.0;
+    #endif
+#endif
     
         lightDir = lightPosObjSpace@shIterator.xyz - (objSpacePositionPassthrough.xyz * lightPosObjSpace@shIterator.w);
         d = length(lightDir);
         
         lightDir = normalize(lightDir);
 
+#if @shIterator == 0
+        diffuse += materialDiffuse.xyz * lightDiffuse@shIterator.xyz * (1.0 / ((lightAttenuation@shIterator.y) + (lightAttenuation@shIterator.z * d) + (lightAttenuation@shIterator.w * d * d))) * max(dot(normal, lightDir), 0) * shadow;
+#else
         diffuse += materialDiffuse.xyz * lightDiffuse@shIterator.xyz * (1.0 / ((lightAttenuation@shIterator.y) + (lightAttenuation@shIterator.z * d) + (lightAttenuation@shIterator.w * d * d))) * max(dot(normal, lightDir), 0);
-    
+#endif
     @shEndForeach
     
 #if HAS_VERTEXCOLOR
