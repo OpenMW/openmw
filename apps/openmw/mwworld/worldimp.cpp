@@ -604,7 +604,7 @@ namespace MWWorld
         ptr.getCellRef().scale = scale;
         scale = scale/ptr.getRefData().getBaseNode()->getScale().x;
         ptr.getRefData().getBaseNode()->setScale(scale,scale,scale);
-        mPhysics->scaleObject( Class::get(ptr).getId(ptr), scale );
+        mPhysics->scaleObject( ptr.getRefData().getHandle(), scale );
     }
 
     void World::rotateObject (Ptr& ptr,float x,float y,float z,bool WorldAxis)
@@ -636,7 +636,7 @@ namespace MWWorld
         ptr.getRefData().getPosition().rot[0] = ry.valueRadians();
         ptr.getRefData().getPosition().rot[0] = rz.valueRadians();
 
-        mPhysics->rotateObject(Class::get(ptr).getId(ptr),ptr.getRefData().getBaseNode()->getOrientation());
+        mPhysics->rotateObject(ptr.getRefData().getHandle(),ptr.getRefData().getBaseNode()->getOrientation());
         //ptr.getRefData().getBaseNode()->rotate(ptr.getRefData().getBaseNode()->get
         //mPhysics->scaleObject( Class::get(ptr).getId(ptr), scale );
     }
