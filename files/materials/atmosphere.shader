@@ -6,29 +6,28 @@
 
     SH_BEGIN_PROGRAM
         shUniform(float4x4 wvp) @shAutoConstant(wvp, worldviewproj_matrix)
-        shInput(float2, uv0)
-        shOutput(float2, UV)
+
+        shColourInput(float4)
+        shOutput(float4, colourPassthrough)
 
     SH_START_PROGRAM
     {
 	    shOutputPosition = shMatrixMult(wvp, shInputPosition);
-	    UV = uv0;
+	    colourPassthrough = colour;
     }
 
 #else
 
     SH_BEGIN_PROGRAM
-		shSampler2D(diffuseMap)
-		shInput(float2, UV)
+		shInput(float4, colourPassthrough)
 #if MRT
         shDeclareMrtOutput(1)
 #endif
-        shUniform(float4 materialDiffuse)                    @shAutoConstant(materialDiffuse, surface_diffuse_colour)
-        shUniform(float4 materialEmissive)                   @shAutoConstant(materialEmissive, surface_emissive_colour)
+        shUniform(float4 atmosphereColour)                   @shSharedParameter(atmosphereColour)
 
     SH_START_PROGRAM
     {
-        shOutputColor(0) = float4(1,1,1,materialDiffuse.a) * float4(materialEmissive.xyz, 1) * shSample(diffuseMap, UV);
+        shOutputColor(0) = colourPassthrough * atmosphereColour;
 
 #if MRT
         shOutputColor(1) = float4(1,1,1,1);

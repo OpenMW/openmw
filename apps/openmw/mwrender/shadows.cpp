@@ -111,7 +111,7 @@ void Shadows::recreate()
     // --------------------------------------------------------------------------------------------------------------------
     // --------------------------- Debug overlays to display the content of shadow maps -----------------------------------
     // --------------------------------------------------------------------------------------------------------------------
-
+/*
 	OverlayManager& mgr = OverlayManager::getSingleton();
 	Overlay* overlay;
 	
@@ -157,7 +157,7 @@ void Shadows::recreate()
 		overlay->add2D(debugPanel);
 		overlay->show();
 	}
-
+*/
 }
 
 PSSMShadowCameraSetup* Shadows::getPSSMSetup()

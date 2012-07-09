@@ -7,6 +7,8 @@
 #include <OgreColourValue.h>
 #include <OgreHighLevelGpuProgram.h>
 
+#include <extern/shiny/Main/Factory.hpp>
+
 #include "sky.hpp"
 #include "../mwworld/weather.hpp"
 

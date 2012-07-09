@@ -453,7 +453,6 @@ void SkyManager::create()
     HighLevelGpuProgramManager& mgr = HighLevelGpuProgramManager::getSingleton();
 
     // Stars
-    /// \todo sky_night_02.nif (available in Bloodmoon)
     MeshPtr mesh = NifOgre::NIFLoader::load("meshes\\sky_night_01.nif");
     Entity* night1_ent = mSceneMgr->createEntity("meshes\\sky_night_01.nif");
     night1_ent->setRenderQueueGroup(RQG_SkiesEarly+1);
@@ -548,60 +547,9 @@ void SkyManager::create()
     atmosphere_ent->getSubEntity (0)->setMaterialName ("openmw_atmosphere");
     //mAtmosphereMaterial = atmosphere_ent->getSubEntity(0)->getMaterial();
     //mAtmosphereMaterial->getTechnique(0)->getPass(0)->setPolygonModeOverrideable(false);
-
     // Atmosphere shader
-    HighLevelGpuProgramPtr vshader = mgr.createProgram("Atmosphere_VP", ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
-        "cg", GPT_VERTEX_PROGRAM);
-
-    vshader->setParameter("profiles", "vs_2_x arbvp1");
-    vshader->setParameter("entry_point", "main_vp");
-
-    StringUtil::StrStreamType outStream;
-    outStream <<
-    "void main_vp(	\n"
-    "	float4 position : POSITION,	\n"
-    "	in float4 color	: COLOR,	\n"
-    "	out float4 oPosition : POSITION,	\n"
-    "	out float4 oVertexColor    : TEXCOORD0, \n"
-    "	uniform float4x4 worldViewProj	\n"
-    ")	\n"
-    "{	\n"
-    "	oPosition = mul( worldViewProj, position );  \n"
-    "   oVertexColor = color; \n"
-    "}";
-    vshader->setSource(outStream.str());
-    vshader->load();
-
-    vshader->getDefaultParameters()->setNamedAutoConstant("worldViewProj", GpuProgramParameters::ACT_WORLDVIEWPROJ_MATRIX);
-    //mAtmosphereMaterial->getTechnique(0)->getPass(0)->setVertexProgram(vshader->getName());
-
-    HighLevelGpuProgramPtr fshader = mgr.createProgram("Atmosphere_FP", ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
-        "cg", GPT_FRAGMENT_PROGRAM);
-
-    fshader->setParameter("profiles", "ps_2_x arbfp1");
-    fshader->setParameter("entry_point", "main_fp");
-
-    StringUtil::StrStreamType _outStream;
-    _outStream <<
-    "void main_fp(	\n"
-    "	in float4 iVertexColor	: TEXCOORD0,	\n"
-    "	out float4 oColor    : COLOR, \n";
-    if (RenderingManager::useMRT()) _outStream <<
-        "   out float4 oColor1 : COLOR1, \n";
-    _outStream <<
-    "   uniform float4 emissive \n"
-    ")	\n"
-    "{	\n"
-    "   oColor = iVertexColor * emissive; \n";
-    if (RenderingManager::useMRT()) _outStream <<
-        "   oColor1 = float4(1, 0, 0, 1); \n";
-    _outStream <<
-    "}";
-    fshader->setSource(_outStream.str());
-    fshader->load();
-
-    fshader->getDefaultParameters()->setNamedAutoConstant("emissive", GpuProgramParameters::ACT_SURFACE_EMISSIVE_COLOUR);
    // mAtmosphereMaterial->getTechnique(0)->getPass(0)->setFragmentProgram(fshader->getName());
+    atmosphere_ent->getSubEntity (0)->setMaterialName("openmw_atmosphere");
 
     // Clouds
     NifOgre::NIFLoader::load("meshes\\sky_clouds_01.nif");
@@ -838,15 +786,14 @@ void SkyManager::setWeather(const MWWorld::WeatherResult& weather)
         mCloudMaterial->getTechnique(0)->getPass(0)->setSelfIllumination(clr);
         mCloudColour = weather.mSunColor;
     }
-
+*/
     if (mSkyColour != weather.mSkyColor)
     {
-        mAtmosphereMaterial->getTechnique(0)->getPass(0)->setSelfIllumination(weather.mSkyColor);
-        mMasser->setSkyColour(weather.mSkyColor);
-        mSecunda->setSkyColour(weather.mSkyColor);
         mSkyColour = weather.mSkyColor;
+        sh::Factory::getInstance().setSharedParameter ("atmosphereColour", sh::makeProperty<sh::Vector4>(new sh::Vector4(
+            weather.mSkyColor.r, weather.mSkyColor.g, weather.mSkyColor.b, 1.0)));
     }
-
+/*
     if (mCloudSpeed != weather.mCloudSpeed)
     {
         mCloudMaterial->getTechnique(0)->getPass(0)->getFragmentProgramParameters()->setNamedConstant("speed", Real(weather.mCloudSpeed));
