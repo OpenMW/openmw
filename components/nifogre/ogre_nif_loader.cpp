@@ -276,6 +276,8 @@ void NIFLoader::createMaterial(const String &name,
         else
             warn("Unhandled alpha setting for texture " + texName);
     }
+   //else
+        //instance->getMaterial ()->setShadowCasterMaterial ("openmw_shadowcaster_noalpha");
 
     // As of yet UNTESTED code from Chris:
     /*pass->setTextureFiltering(Ogre::TFO_ANISOTROPIC);

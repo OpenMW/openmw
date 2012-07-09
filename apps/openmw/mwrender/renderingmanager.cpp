@@ -76,9 +76,8 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
     // Load resources
     ResourceGroupManager::getSingleton().initialiseAllResourceGroups();
 
-    // Due to the huge world size of MW, we'll want camera-relative rendering.
-    // This prevents precision artifacts when moving very far from the origin.
-    mRendering.getScene()->setCameraRelativeRendering(true);
+    // causes light flicker in opengl when moving..
+    //mRendering.getScene()->setCameraRelativeRendering(true);
 
     // disable unsupported effects
     const RenderSystemCapabilities* caps = Root::getSingleton().getRenderSystem()->getCapabilities();
@@ -525,12 +524,14 @@ Shadows* RenderingManager::getShadows()
 
 void RenderingManager::switchToInterior()
 {
-    mRendering.getScene()->setCameraRelativeRendering(false);
+    // causes light flicker in opengl when moving..
+    //mRendering.getScene()->setCameraRelativeRendering(false);
 }
 
 void RenderingManager::switchToExterior()
 {
-    mRendering.getScene()->setCameraRelativeRendering(true);
+    // causes light flicker in opengl when moving..
+    //mRendering.getScene()->setCameraRelativeRendering(true);
 }
 
 Ogre::Vector4 RenderingManager::boundingBoxToScreen(Ogre::AxisAlignedBox bounds)

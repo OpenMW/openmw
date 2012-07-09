@@ -229,9 +229,9 @@ void LocalMap::render(const float x, const float y,
             vp->setVisibilityMask(RV_Map);
 
             // use fallback techniques without shadows and without mrt
-            vp->setMaterialScheme("simple");
+            //vp->setMaterialScheme("local_map");
 
-            rtt->update();
+            //rtt->update();
 
             // create "fog of war" texture
             TexturePtr tex2 = TextureManager::getSingleton().createManual(

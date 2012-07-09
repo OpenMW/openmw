@@ -72,7 +72,7 @@
         shInput(float3, normalPassthrough)
         shInput(float3, objSpacePositionPassthrough)
         shUniform(float4 lightAmbient)                       @shAutoConstant(lightAmbient, ambient_light_colour)
-        shUniform(float passIteration)                       @shAutoConstant(passIteration, pass_iteration_number)
+        //shUniform(float passIteration)                       @shAutoConstant(passIteration, pass_iteration_number)
         shUniform(float4 materialAmbient)                    @shAutoConstant(materialAmbient, surface_ambient_colour)
         shUniform(float4 materialDiffuse)                    @shAutoConstant(materialDiffuse, surface_diffuse_colour)
         shUniform(float4 materialEmissive)                   @shAutoConstant(materialEmissive, surface_emissive_colour)

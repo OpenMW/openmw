@@ -53,7 +53,7 @@ void Shadows::recreate()
 
     mSceneMgr->setShadowTextureSelfShadow(true);
     mSceneMgr->setShadowCasterRenderBackFaces(true);
-    mSceneMgr->setShadowTextureCasterMaterial("depth_shadow_caster");
+   // mSceneMgr->setShadowTextureCasterMaterial("openmw_shadowcaster_default");
     mSceneMgr->setShadowTexturePixelFormat(PF_FLOAT32_R);
     mSceneMgr->setShadowDirectionalLightExtrusionDistance(1000000);
 
@@ -111,7 +111,7 @@ void Shadows::recreate()
     // --------------------------------------------------------------------------------------------------------------------
     // --------------------------- Debug overlays to display the content of shadow maps -----------------------------------
     // --------------------------------------------------------------------------------------------------------------------
-    /*
+
 	OverlayManager& mgr = OverlayManager::getSingleton();
 	Overlay* overlay;
 	
@@ -157,7 +157,7 @@ void Shadows::recreate()
 		overlay->add2D(debugPanel);
 		overlay->show();
 	}
-    */
+
 }
 
 PSSMShadowCameraSetup* Shadows::getPSSMSetup()
