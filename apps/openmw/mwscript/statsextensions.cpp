@@ -280,6 +280,11 @@ namespace MWScript
 
                     int newLevel = static_cast<int> (value-modifier);
 
+                    if (newLevel<0)
+                        newLevel = 0;
+                    else if (newLevel>100)
+                        newLevel = 100;
+
                     progress = (progress / stats.getSkillGain (mIndex, class_, -1, level))
                         * stats.getSkillGain (mIndex, class_, -1, newLevel);
 
