@@ -28,7 +28,7 @@ static const Ogre::Vector3 halfExtents(14.64f * 2, 14.24f * 2, 33.25f * 2);
 #define	MAX_CLIP_PLANES	5
 #define	OVERCLIP 1.001f
 //#define	STEPSIZE 18 // 18 is way too much
-#define STEPSIZE (18 / 2)
+#define STEPSIZE (9)
 #ifndef M_PI
 	#define M_PI 3.14159265358979323846f
 #endif

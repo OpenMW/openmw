@@ -238,6 +238,7 @@ namespace MWWorld
     void PhysicsSystem::addObject (const std::string& handle, const std::string& mesh,
         const Ogre::Quaternion& rotation, float scale, const Ogre::Vector3& position)
     {
+        handleToMesh[handle] = mesh;
         OEngine::Physic::RigidBody* body = mEngine->createRigidBody(mesh,handle,scale);
         mEngine->addRigidBody(body);
         btTransform tr;
@@ -290,21 +291,24 @@ namespace MWWorld
 
     void PhysicsSystem::rotateObject (const std::string& handle, const Ogre::Quaternion& rotation)
     {
-        if (OEngine::Physic::PhysicActor* act = mEngine->getCharacter(handle))
+         if (OEngine::Physic::PhysicActor* act = mEngine->getCharacter(handle))
         {
+            // TODO very dirty hack to avoid crash during setup -> needs cleaning up to allow
+            // start positions others than 0, 0, 0
             act->setRotation(btQuaternion(rotation.x, rotation.y, rotation.z, rotation.w));
-        }
-        if (OEngine::Physic::RigidBody* body = mEngine->getRigidBody(handle))
-        {
-            body->setWorldTransform(btTransform(btQuaternion(rotation.x, rotation.y, rotation.z, rotation.w),body->getWorldTransform().getOrigin()));
         }
     }
 
     void PhysicsSystem::scaleObject (const std::string& handle, float scale)
     {
-        if (OEngine::Physic::RigidBody* body = mEngine->getRigidBody(handle))
+        if(handleToMesh.find(handle) != handleToMesh.end())
         {
-            //body->setWorldTransform(btTransform().se
+            btTransform transform = mEngine->getRigidBody(handle)->getWorldTransform();
+            removeObject(handle);
+            
+            Ogre::Quaternion quat = Ogre::Quaternion(transform.getRotation().getW(), transform.getRotation().getX(), transform.getRotation().getY(), transform.getRotation().getZ());
+            Ogre::Vector3 vec = Ogre::Vector3(transform.getOrigin().getX(), transform.getOrigin().getY(), transform.getOrigin().getZ());
+            addObject(handle, handleToMesh[handle], quat, scale, vec);
         }
     }
 

@@ -596,10 +596,10 @@ namespace MWScript
         const int opcodeModDisposition = 0x200014d;
         const int opcodeModDispositionExplicit = 0x200014e;
 
-        const int opcodeSetScale = 0x2000154;
-        const int opcodeSetScaleExplicit = 0x2000155;
-        const int opcodeSetAngle = 0x2000156;
-        const int opcodeSetAngleExplicit = 0x2000157;
+        const int opcodeSetScale = 0x2000164;
+        const int opcodeSetScaleExplicit = 0x2000165;
+        const int opcodeSetAngle = 0x2000166;
+        const int opcodeSetAngleExplicit = 0x2000167;
 
         void registerExtensions (Compiler::Extensions& extensions)
         {

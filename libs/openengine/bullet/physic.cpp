@@ -343,8 +343,8 @@ namespace Physic
         mShapeLoader->load(outputstring,"General");
         BulletShapeManager::getSingletonPtr()->load(outputstring,"General");
         BulletShapePtr shape = BulletShapeManager::getSingleton().getByName(outputstring,"General");
-        shape->Shape->setLocalScaling(btVector3(scale,scale,scale));
-        
+        shape->Shape->setLocalScaling( btVector3(scale,scale,scale));
+        //btScaledBvhTriangleMeshShape* scaled = new btScaledBvhTriangleMeshShape(dynamic_cast<btBvhTriangleMeshShape*> (shape->Shape), btVector3(scale,scale,scale));
 
         //create the motionState
         CMotionState* newMotionState = new CMotionState(this,name);
@@ -407,10 +407,16 @@ namespace Physic
         if (it != RigidBodyMap.end() )
         {
             RigidBody* body = it->second;
+            //btScaledBvhTriangleMeshShape* scaled = dynamic_cast<btScaledBvhTriangleMeshShape*> (body->getCollisionShape());
+            
             if(body != NULL)
             {
                 delete body;
             }
+            /*if(scaled != NULL)
+            {
+                delete scaled;
+            }*/
             RigidBodyMap.erase(it);
         }
     }

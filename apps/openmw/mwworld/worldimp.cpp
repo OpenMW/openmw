@@ -597,7 +597,7 @@ namespace MWWorld
         mPhysics->moveObject (ptr.getRefData().getHandle(), Ogre::Vector3 (x, y, z));
     }
 
-    void World::scaleObject (Ptr ptr, float scale)
+    void World::scaleObject (Ptr& ptr, float scale)
     {
         MWWorld::Class::get(ptr).adjustScale(ptr,scale);
 
@@ -607,7 +607,7 @@ namespace MWWorld
         mPhysics->scaleObject( Class::get(ptr).getId(ptr), scale );
     }
 
-    void World::rotateObject (Ptr ptr,float x,float y,float z,bool WorldAxis)
+    void World::rotateObject (Ptr& ptr,float x,float y,float z,bool WorldAxis)
     {
         MWWorld::Class::get(ptr).adjustRotation(ptr,x,y,z);
 
@@ -641,7 +641,7 @@ namespace MWWorld
         //mPhysics->scaleObject( Class::get(ptr).getId(ptr), scale );
     }
 
-    void World::setObjectRotation (Ptr ptr,float x,float y,float z)
+    void World::setObjectRotation (Ptr& ptr,float x,float y,float z)
     {
         MWWorld::Class::get(ptr).adjustRotation(ptr,x,y,z);
 

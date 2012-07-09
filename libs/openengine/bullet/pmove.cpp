@@ -527,7 +527,7 @@ int PM_StepSlideMove( bool gravity )
 		delta = pm->ps.origin.z - start_o.z;
 		if ( delta > 2 ) 
 		{
-            pm->ps.counter = 10;
+            pm->ps.counter = 5;
 
             /*
 			if (gravity)
@@ -858,6 +858,8 @@ static void PM_WalkMove( playerMove* const pmove )
 	float		accelerate;
 	float		vel;
 	//pm->ps.gravity = 4000;
+    
+    //std::cout << "Player is walking\n";
 
 	if ( pm->ps.waterlevel > 2 && //DotProduct( pml.forward, pml.groundTrace.plane.normal ) > 0 ) 
 		pml.forward.dotProduct(pml.groundTrace.planenormal) > 0.0f)
@@ -1159,6 +1161,10 @@ void PM_GroundTraceMissed()
 {
 	traceResults		trace;
 	Ogre::Vector3		point;
+    //We should not have significant upwards velocity when in the air, unless we jumped.
+    //This code protects against flying into the air when moving at high speeds.
+    //Z velocity is set to 50, instead of 0, to help move up certain steps.
+    
     //std::cout << "Ground trace missed\n";
 		// we just transitioned into freefall
 		//if ( pm->debugLevel )
@@ -1421,10 +1427,13 @@ static void PM_GroundTrace( void )
     // if the trace didn't hit anything, we are in free fall
 	if ( trace.fraction == 1.0) 
 	{
+        if(pm->ps.velocity.z > 50.0f && pm->ps.bSnap && pm->ps.speed > 1000.0f)
+            pm->ps.velocity.z = 50.0f;
         if(pm->ps.snappingImplemented){
             if(pm->ps.bSnap && pm->ps.counter <= 0)
 		        PM_GroundTraceMissed();
         }
+        
             
 
 		return;
@@ -1584,8 +1593,11 @@ void PM_AirMove()
 	else
 		PM_SlideMove ( qtrue );
 #endif*/
+    //std::cout << "Moving in the air" << pm->ps.velocity << "\n";
 	
 	/*bprintf("%i ", */PM_StepSlideMove ( true )/* )*/;
+    
+
 }
 
 static void PM_NoclipMove( void ) 
