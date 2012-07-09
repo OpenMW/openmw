@@ -53,7 +53,7 @@ void Shadows::recreate()
 
     mSceneMgr->setShadowTextureSelfShadow(true);
     mSceneMgr->setShadowCasterRenderBackFaces(true);
-   // mSceneMgr->setShadowTextureCasterMaterial("openmw_shadowcaster_default");
+    mSceneMgr->setShadowTextureCasterMaterial("openmw_shadowcaster_default");
     mSceneMgr->setShadowTexturePixelFormat(PF_FLOAT32_R);
     mSceneMgr->setShadowDirectionalLightExtrusionDistance(1000000);
 
