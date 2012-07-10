@@ -110,7 +110,7 @@ public:
         if(nif->getInt())
             nif->getFloats(normals, verts*3);
 
-        center = nif->getVector();
+        center = nif->getVector3();
         radius = nif->getFloat();
 
         if(nif->getInt())
@@ -214,12 +214,12 @@ public:
         for(int i=0; i<count; i++)
         {
             /*float time =*/ nif->getFloat();
-            nif->getVector(); // This isn't really shared between type 1
-                              // and type 2, most likely
+            nif->getVector3(); // This isn't really shared between type 1
+                               // and type 2, most likely
             if(type == 2)
             {
-                nif->getVector();
-                nif->getVector();
+                nif->getVector3();
+                nif->getVector3();
             }
         }
     }
@@ -400,8 +400,8 @@ public:
 
     void read(NIFFile *nif)
     {
-        trafo.rotation = nif->getMatrix();
-        trafo.trans = nif->getVector();
+        trafo.rotation = nif->getMatrix3();
+        trafo.trans = nif->getVector3();
         trafo.scale = nif->getFloat();
 
         int boneNum = nif->getInt();
@@ -412,8 +412,8 @@ public:
         {
             BoneInfo &bi = bones[i];
 
-            bi.trafo.rotation = nif->getMatrix();
-            bi.trafo.trans = nif->getVector();
+            bi.trafo.rotation = nif->getMatrix3();
+            bi.trafo.trans = nif->getVector3();
             bi.trafo.scale = nif->getFloat();
             bi.unknown = nif->getVector4();
 

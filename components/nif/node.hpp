@@ -63,9 +63,9 @@ public:
         if(hasBounds)
         {
             nif->getInt(); // always 1
-            boundPos = nif->getVector();
-            boundRot = nif->getMatrix();
-            boundXYZ = nif->getVector();
+            boundPos = nif->getVector3();
+            boundRot = nif->getMatrix3();
+            boundXYZ = nif->getVector3();
         }
 
         parent = NULL;

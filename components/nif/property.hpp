@@ -172,10 +172,10 @@ struct S_MaterialProperty
 
     void read(NIFFile *nif)
     {
-        ambient = nif->getVector();
-        diffuse = nif->getVector();
-        specular = nif->getVector();
-        emissive = nif->getVector();
+        ambient = nif->getVector3();
+        diffuse = nif->getVector3();
+        specular = nif->getVector3();
+        emissive = nif->getVector3();
         glossiness = nif->getFloat();
         alpha = nif->getFloat();
     }

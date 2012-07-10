@@ -134,7 +134,7 @@ public:
     unsigned short getUShort() { return read_le16(); }
     int getInt() { return read_le32(); }
     float getFloat() { return read_le32f(); }
-    Ogre::Vector3 getVector()
+    Ogre::Vector3 getVector3()
     {
         float a[3];
         for(size_t i = 0;i < 3;i++)
@@ -148,7 +148,7 @@ public:
             a[i] = getFloat();
         return Ogre::Vector4(a);
     }
-    Ogre::Matrix3 getMatrix()
+    Ogre::Matrix3 getMatrix3()
     {
         Ogre::Real a[3][3];
         for(size_t i = 0;i < 3;i++)
@@ -161,10 +161,10 @@ public:
     Transformation getTrafo()
     {
         Transformation t;
-        t.pos = getVector();
-        t.rotation = getMatrix();
+        t.pos = getVector3();
+        t.rotation = getMatrix3();
         t.scale = getFloat();
-        t.velocity = getVector();
+        t.velocity = getVector3();
         return t;
     }
 
