@@ -39,8 +39,8 @@ public:
     // internal (data is inside the nif itself) texture?
     bool external;
 
-    Misc::SString filename;    // In case of external textures
-    NiPixelDataPtr data; // In case of internal textures
+    std::string filename; // In case of external textures
+    NiPixelDataPtr data;  // In case of internal textures
 
     /* Pixel layout
         0 - Palettised
@@ -96,7 +96,7 @@ public:
 class ShapeData : public Record
 {
 public:
-    Misc::FloatArray vertices, normals, colors, uvlist;
+    std::vector<float> vertices, normals, colors, uvlist;
     const Vector *center;
     float radius;
 
@@ -131,7 +131,7 @@ class NiTriShapeData : public ShapeData
 {
 public:
     // Triangles, three vertex indices per triangle
-    Misc::SliceArray<short> triangles;
+    std::vector<short> triangles;
 
     void read(NIFFile *nif)
     {
@@ -390,7 +390,7 @@ public:
     {
         const BoneTrafo *trafo;
         const Vector4 *unknown;
-        Misc::SliceArray<VertWeight> weights;
+        std::vector<VertWeight> weights;
     };
     struct BoneInfoCopy
     {

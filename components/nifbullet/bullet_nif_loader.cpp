@@ -124,7 +124,7 @@ void ManualBulletShapeLoader::loadResource(Ogre::Resource *resource)
     if (node == NULL)
     {
         warn("First record in file was not a node, but a " +
-                r->recName.toString() + ". Skipping file.");
+                r->recName + ". Skipping file.");
         return;
     }
 
@@ -292,10 +292,10 @@ void ManualBulletShapeLoader::handleNiTriShape(Nif::NiTriShape *shape, int flags
 
     Nif::NiTriShapeData *data = shape->data.getPtr();
 
-    float* vertices = (float*)data->vertices.ptr;
-    unsigned short* triangles = (unsigned short*)data->triangles.ptr;
+    float* vertices = (float*)&data->vertices[0];
+    unsigned short* triangles = (unsigned short*)&data->triangles[0];
 
-    for(unsigned int i=0; i < data->triangles.length; i = i+3)
+    for(unsigned int i=0; i < data->triangles.size(); i = i+3)
     {
         Ogre::Vector3 b1(vertices[triangles[i+0]*3]*parentScale,vertices[triangles[i+0]*3+1]*parentScale,vertices[triangles[i+0]*3+2]*parentScale);
         Ogre::Vector3 b2(vertices[triangles[i+1]*3]*parentScale,vertices[triangles[i+1]*3+1]*parentScale,vertices[triangles[i+1]*3+2]*parentScale);

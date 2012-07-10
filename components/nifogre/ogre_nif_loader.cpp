@@ -399,7 +399,7 @@ void NIFLoader::createOgreSubMesh(NiTriShape *shape, const String &material, std
 {
     //  cout << "s:" << shape << "\n";
     NiTriShapeData *data = shape->data.getPtr();
-    SubMesh *sub = mesh->createSubMesh(shape->name.toString());
+    SubMesh *sub = mesh->createSubMesh(shape->name);
 
     int nextBuf = 0;
 
@@ -407,7 +407,7 @@ void NIFLoader::createOgreSubMesh(NiTriShape *shape, const String &material, std
     // great.
 
     // Add vertices
-    int numVerts = data->vertices.length / 3;
+    int numVerts = data->vertices.size() / 3;
     sub->vertexData = new VertexData();
     sub->vertexData->vertexCount = numVerts;
     sub->useSharedVertices = false;
@@ -422,12 +422,12 @@ void NIFLoader::createOgreSubMesh(NiTriShape *shape, const String &material, std
 
     if(flip)
 	{
-		float *datamod = new float[data->vertices.length];
+		float *datamod = new float[data->vertices.size()];
 		//std::cout << "Shape" << shape->name.toString() << "\n";
 		for(int i = 0; i < numVerts; i++)
 		{
 			int index = i * 3;
-			const float *pos = data->vertices.ptr + index;
+			const float *pos = &data->vertices[index];
 		    Ogre::Vector3 original = Ogre::Vector3(*pos  ,*(pos+1), *(pos+2));
 			original = mTransform * original;
 			mBoundingBox.merge(original);
@@ -440,14 +440,14 @@ void NIFLoader::createOgreSubMesh(NiTriShape *shape, const String &material, std
 	}
 	else
 	{
-		vbuf->writeData(0, vbuf->getSizeInBytes(), data->vertices.ptr, false);
+		vbuf->writeData(0, vbuf->getSizeInBytes(), &data->vertices[0], false);
 	}
 
 
     VertexBufferBinding* bind = sub->vertexData->vertexBufferBinding;
     bind->setBinding(nextBuf++, vbuf);
 
-    if (data->normals.length)
+    if (data->normals.size())
     {
         decl->addElement(nextBuf, 0, VET_FLOAT3, VES_NORMAL);
         vbuf = HardwareBufferManager::getSingleton().createVertexBuffer(
@@ -459,11 +459,11 @@ void NIFLoader::createOgreSubMesh(NiTriShape *shape, const String &material, std
 			Quaternion rotation = mTransform.extractQuaternion();
 			rotation.normalise();
 
-			float *datamod = new float[data->normals.length];
+			float *datamod = new float[data->normals.size()];
 			for(int i = 0; i < numVerts; i++)
 		    {
 			    int index = i * 3;
-			    const float *pos = data->normals.ptr + index;
+			    const float *pos = &data->normals[index];
 		        Ogre::Vector3 original = Ogre::Vector3(*pos  ,*(pos+1), *(pos+2));
 				original = rotation * original;
 				if (mNormaliseNormals)
@@ -481,16 +481,16 @@ void NIFLoader::createOgreSubMesh(NiTriShape *shape, const String &material, std
 		}
 		else
 		{
-            vbuf->writeData(0, vbuf->getSizeInBytes(), data->normals.ptr, false);
+            vbuf->writeData(0, vbuf->getSizeInBytes(), &data->normals[0], false);
 		}
         bind->setBinding(nextBuf++, vbuf);
     }
 
 
     // Vertex colors
-    if (data->colors.length)
+    if (data->colors.size())
     {
-        const float *colors = data->colors.ptr;
+        const float *colors = &data->colors[0];
         RenderSystem* rs = Root::getSingleton().getRenderSystem();
         std::vector<RGBA> colorsRGB(numVerts);
         RGBA *pColour = &colorsRGB.front();
@@ -508,7 +508,7 @@ void NIFLoader::createOgreSubMesh(NiTriShape *shape, const String &material, std
         bind->setBinding(nextBuf++, vbuf);
     }
 
-     if (data->uvlist.length)
+    if (data->uvlist.size())
     {
 
         decl->addElement(nextBuf, 0, VET_FLOAT2, VES_TEXTURE_COORDINATES);
@@ -518,12 +518,12 @@ void NIFLoader::createOgreSubMesh(NiTriShape *shape, const String &material, std
 
 		if(flip)
 		{
-		    float *datamod = new float[data->uvlist.length];
+		    float *datamod = new float[data->uvlist.size()];
 
-		    for(unsigned int i = 0; i < data->uvlist.length; i+=2){
-			    float x = *(data->uvlist.ptr + i);
+		    for(unsigned int i = 0; i < data->uvlist.size(); i+=2){
+			    float x = data->uvlist[i];
 
-			    float y = *(data->uvlist.ptr + i + 1);
+			    float y = data->uvlist[i + 1];
 
 			    datamod[i] =x;
 				datamod[i + 1] =y;
@@ -532,13 +532,12 @@ void NIFLoader::createOgreSubMesh(NiTriShape *shape, const String &material, std
             delete [] datamod;
 		}
 		else
-			vbuf->writeData(0, vbuf->getSizeInBytes(), data->uvlist.ptr, false);
+			vbuf->writeData(0, vbuf->getSizeInBytes(), &data->uvlist[0], false);
         bind->setBinding(nextBuf++, vbuf);
     }
 
    // Triangle faces - The total number of triangle points
-    int numFaces = data->triangles.length;
-
+    int numFaces = data->triangles.size();
     if (numFaces)
     {
 
@@ -558,7 +557,7 @@ void NIFLoader::createOgreSubMesh(NiTriShape *shape, const String &material, std
 			for (size_t i = 0; i < sub->indexData->indexCount; i+=3)
 			{
 
-			     const short *pos = data->triangles.ptr + index;
+			     const short *pos = &data->triangles[index];
 				uint16 i0 = (uint16) *(pos+0);
 				uint16 i1 = (uint16) *(pos+1);
 				uint16 i2 = (uint16) *(pos+2);
@@ -578,7 +577,7 @@ void NIFLoader::createOgreSubMesh(NiTriShape *shape, const String &material, std
 
 		}
 		else
-            ibuf->writeData(0, ibuf->getSizeInBytes(), data->triangles.ptr, false);
+            ibuf->writeData(0, ibuf->getSizeInBytes(), &data->triangles[0], false);
         sub->indexData->indexBuffer = ibuf;
     }
 
@@ -706,8 +705,6 @@ void NIFLoader::handleNiTriShape(NiTriShape *shape, int flags, BoundsFinder &bou
             NiSourceTexture *st = t->textures[0].texture.getPtr();
             if (st->external)
             {
-                SString tname = st->filename;
-
                 /* findRealTexture checks if the file actually
                    exists. If it doesn't, and the name ends in .tga, it
                    will try replacing the extension with .dds instead
@@ -721,7 +718,7 @@ void NIFLoader::handleNiTriShape(NiTriShape *shape, int flags, BoundsFinder &bou
                    problem since all the nif data is stored in a local
                    throwaway buffer.
                  */
-                texName = "textures\\" + tname.toString();
+                texName = "textures\\" + st->filename;
                 findRealTexture(texName);
             }
             else warn("Found internal texture, ignoring.");
@@ -795,9 +792,9 @@ void NIFLoader::handleNiTriShape(NiTriShape *shape, int flags, BoundsFinder &bou
        level.
     */
     NiTriShapeData *data = shape->data.getPtr();
-    int numVerts = data->vertices.length / 3;
+    int numVerts = data->vertices.size() / 3;
 
-    float *ptr = (float*)data->vertices.ptr;
+    float *ptr = (float*)&data->vertices[0];
     float *optr = ptr;
 
     std::list<VertexBoneAssignment> vertexBoneAssignments;
@@ -828,7 +825,7 @@ void NIFLoader::handleNiTriShape(NiTriShape *shape, int flags, BoundsFinder &bou
 		std::vector<Ogre::Vector3> vertexPosOriginal(numVerts, Ogre::Vector3::ZERO);
 		std::vector<Ogre::Vector3> vertexNormalOriginal(numVerts, Ogre::Vector3::ZERO);
 
-        float *ptrNormals = (float*)data->normals.ptr;
+        float *ptrNormals = (float*)&data->normals[0];
         //the bone from skin->bones[boneIndex] is linked to skin->data->bones[boneIndex]
         //the first one contains a link to the bone, the second vertex transformation
         //relative to the bone
@@ -849,13 +846,13 @@ void NIFLoader::handleNiTriShape(NiTriShape *shape, int flags, BoundsFinder &bou
         {
             if(mSkel.isNull())
             {
-                std::cout << "No skeleton for :" << shape->skin->bones[boneIndex].name.toString() << std::endl;
+                std::cout << "No skeleton for :" << shape->skin->bones[boneIndex].name << std::endl;
                 break;
             }
             //get the bone from bones array of skindata
-			if(!mSkel->hasBone(shape->skin->bones[boneIndex].name.toString()))
+			if(!mSkel->hasBone(shape->skin->bones[boneIndex].name))
 				std::cout << "We don't have this bone";
-            bonePtr = mSkel->getBone(shape->skin->bones[boneIndex].name.toString());
+            bonePtr = mSkel->getBone(shape->skin->bones[boneIndex].name);
 
             // final_vector = old_vector + old_rotation*new_vector*old_scale
 
@@ -863,19 +860,19 @@ void NIFLoader::handleNiTriShape(NiTriShape *shape, int flags, BoundsFinder &bou
 			Nif::NiSkinData::BoneInfoCopy boneinfocopy;
 			boneinfocopy.trafo.rotation = convertRotation(it->trafo->rotation);
 			boneinfocopy.trafo.trans = convertVector3(it->trafo->trans);
-			boneinfocopy.bonename = shape->skin->bones[boneIndex].name.toString();
+			boneinfocopy.bonename = shape->skin->bones[boneIndex].name;
             boneinfocopy.bonehandle = bonePtr->getHandle();
             copy.boneinfo.push_back(boneinfocopy);
-            for (unsigned int i=0; i<it->weights.length; i++)
+            for (unsigned int i=0; i<it->weights.size(); i++)
             {
 				 vecPos = bonePtr->_getDerivedPosition() +
                 bonePtr->_getDerivedOrientation() * convertVector3(it->trafo->trans);
 
             vecRot = bonePtr->_getDerivedOrientation() * convertRotation(it->trafo->rotation);
-                unsigned int verIndex = (it->weights.ptr + i)->vertex;
+                unsigned int verIndex = it->weights[i].vertex;
 				//boneinfo.weights.push_back(*(it->weights.ptr + i));
                 Nif::NiSkinData::IndividualWeight ind;
-                ind.weight = (it->weights.ptr + i)->weight;
+                ind.weight = it->weights[i].weight;
                 ind.boneinfocopyindex = copy.boneinfo.size() - 1;
                 if(copy.vertsToWeights.find(verIndex) == copy.vertsToWeights.end())
                 {
@@ -893,7 +890,7 @@ void NIFLoader::handleNiTriShape(NiTriShape *shape, int flags, BoundsFinder &bou
                 {
                     //apply transformation to the vertices
                     Vector3 absVertPos = vecPos + vecRot * Vector3(ptr + verIndex *3);
-					absVertPos = absVertPos * (it->weights.ptr + i)->weight;
+					absVertPos = absVertPos * it->weights[i].weight;
 					vertexPosOriginal[verIndex] = Vector3(ptr + verIndex *3);
 
 					mBoundingBox.merge(absVertPos);
@@ -903,10 +900,10 @@ void NIFLoader::handleNiTriShape(NiTriShape *shape, int flags, BoundsFinder &bou
 
                     //apply rotation to the normals (not every vertex has a normal)
                     //FIXME: I guessed that vertex[i] = normal[i], is that true?
-                    if (verIndex < data->normals.length)
+                    if (verIndex < data->normals.size())
                     {
                         Vector3 absNormalsPos = vecRot * Vector3(ptrNormals + verIndex *3);
-						absNormalsPos = absNormalsPos * (it->weights.ptr + i)->weight;
+						absNormalsPos = absNormalsPos * it->weights[i].weight;
 						vertexNormalOriginal[verIndex] = Vector3(ptrNormals + verIndex *3);
 
                         for (int j=0; j<3; j++)
@@ -918,7 +915,7 @@ void NIFLoader::handleNiTriShape(NiTriShape *shape, int flags, BoundsFinder &bou
 				else
 				{
 					Vector3 absVertPos = vecPos + vecRot * vertexPosOriginal[verIndex];
-					absVertPos = absVertPos * (it->weights.ptr + i)->weight;
+					absVertPos = absVertPos * it->weights[i].weight;
 					Vector3 old = Vector3(ptr + verIndex *3);
 					absVertPos = absVertPos + old;
 
@@ -929,10 +926,10 @@ void NIFLoader::handleNiTriShape(NiTriShape *shape, int flags, BoundsFinder &bou
 
                     //apply rotation to the normals (not every vertex has a normal)
                     //FIXME: I guessed that vertex[i] = normal[i], is that true?
-                    if (verIndex < data->normals.length)
+                    if (verIndex < data->normals.size())
                     {
                         Vector3 absNormalsPos = vecRot * vertexNormalOriginal[verIndex];
-						absNormalsPos = absNormalsPos * (it->weights.ptr + i)->weight;
+						absNormalsPos = absNormalsPos * it->weights[i].weight;
 						Vector3 oldNormal = Vector3(ptrNormals + verIndex *3);
 						absNormalsPos = absNormalsPos + oldNormal;
 
@@ -945,7 +942,7 @@ void NIFLoader::handleNiTriShape(NiTriShape *shape, int flags, BoundsFinder &bou
                 VertexBoneAssignment vba;
                 vba.boneIndex = bonePtr->getHandle();
                 vba.vertexIndex = verIndex;
-                vba.weight = (it->weights.ptr + i)->weight;
+                vba.weight = it->weights[i].weight;
 
 
                 vertexBoneAssignments.push_back(vba);
@@ -981,9 +978,9 @@ void NIFLoader::handleNiTriShape(NiTriShape *shape, int flags, BoundsFinder &bou
         }
 
         // Remember to rotate all the vertex normals as well
-        if (data->normals.length)
+        if (data->normals.size())
         {
-            ptr = (float*)data->normals.ptr;
+            ptr = (float*)&data->normals[0];
             for (int i=0; i<numVerts; i++)
             {
                 vectorMul(rot, ptr);
@@ -1090,7 +1087,7 @@ void NIFLoader::handleNode(Nif::Node *node, int flags,
 
             for(std::vector<Nif::NiTextKeyExtraData::TextKey>::iterator textiter = extra->list.begin(); textiter != extra->list.end(); textiter++)
             {
-                std::string text = textiter->text.toString();
+                std::string text = textiter->text;
 
                 replace(text.begin(), text.end(), '\n', '/');
 
@@ -1138,7 +1135,7 @@ void NIFLoader::handleNode(Nif::Node *node, int flags,
 
         if (!mSkel.isNull())     //if there is a skeleton
         {
-            std::string name = node->name.toString();
+            std::string name = node->name;
 
             // Quick-n-dirty workaround for the fact that several
             // bones may have the same name.
@@ -1192,7 +1189,7 @@ void NIFLoader::handleNode(Nif::Node *node, int flags,
     }
     else if (node->recType == RC_NiTriShape && bNiTri)
     {
-         std::string nodename = node->name.toString();
+         std::string nodename = node->name;
 
 			if (triname == "")
             {
@@ -1334,7 +1331,7 @@ void NIFLoader::loadResource(Resource *resource)
     if (node == NULL)
     {
         warn("First record in file was not a node, but a " +
-             r->recName.toString() + ". Skipping file.");
+             r->recName + ". Skipping file.");
         return;
     }
 
@@ -1358,7 +1355,7 @@ void NIFLoader::loadResource(Resource *resource)
 
                 if (f->timeStart >= 10000000000000000.0f)
                     continue;
-                data->setBonename(o->name.toString());
+                data->setBonename(o->name);
                 data->setStartTime(f->timeStart);
                 data->setStopTime(f->timeStop);
 

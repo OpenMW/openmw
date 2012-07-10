@@ -46,8 +46,8 @@ using namespace Misc;
 void NIFFile::parse()
 {
   // Check the header string
-  const char* head = getString(40);
-  if(!begins(head, "NetImmerse File Format"))
+  std::string head = getString(40);
+  if(head.compare(0, 22, "NetImmerse File Format") != 0)
     fail("Invalid NIF header");
 
   // Get BCD version
@@ -70,7 +70,7 @@ void NIFFile::parse()
 
   for(int i=0;i<recNum;i++)
     {
-      SString rec = getString();
+      std::string rec = getString();
       //cout << i << ": " << rec.toString() << endl;
 
       Record *r = NULL;
@@ -155,7 +155,7 @@ void NIFFile::parse()
 
       // Failure
       else
-        fail("Unknown record type " + rec.toString());
+        fail("Unknown record type " + rec);
 
       assert(r != NULL);
       assert(r->recType != RC_MISSING);

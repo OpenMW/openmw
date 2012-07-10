@@ -122,29 +122,41 @@ public:
     char getByte() { return getType<char>(); }
 
     template<class X>
-    Misc::SliceArray<X> getArrayLen(int num)
-    { return Misc::SliceArray<X>((const X*)inp->getPtr(num*sizeof(X)),num); }
+    std::vector<X> getArrayLen(int num)
+    {
+        std::vector<X> v(num);
+        memcpy(&v[0], inp->getPtr(num*sizeof(X)), num*sizeof(X));
+        return v;
+    }
 
     template<class X>
-    Misc::SliceArray<X> getArray()
+    std::vector<X> getArray()
     {
         int len = getInt();
         return getArrayLen<X>(len);
     }
-
-    Misc::SString getString() { return getArray<char>(); }
 
     const Vector *getVector() { return getPtr<Vector>(); }
     const Matrix *getMatrix() { return getPtr<Matrix>(); }
     const Transformation *getTrafo() { return getPtr<Transformation>(); }
     const Vector4 *getVector4() { return getPtr<Vector4>(); }
 
-    Misc::FloatArray getFloatLen(int num)
+    std::vector<float> getFloatLen(int num)
     { return getArrayLen<float>(num); }
 
     // For fixed-size strings where you already know the size
-    const char *getString(int size)
-    { return (const char*)inp->getPtr(size); }
+    std::string getString(size_t size)
+    {
+        std::string str;
+        str.resize(size);
+        memcpy(&str[0], inp->getPtr(size), size);
+        return str.substr(0, str.find('\0'));
+    }
+    std::string getString()
+    {
+        size_t size = getInt();
+        return getString(size);
+    }
 };
 
 } // Namespace

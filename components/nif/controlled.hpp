@@ -53,7 +53,7 @@ public:
 class Named : public Controlled
 {
 public:
-    Misc::SString name;
+    std::string name;
 
     void read(NIFFile *nif)
     {

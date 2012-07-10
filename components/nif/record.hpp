@@ -90,7 +90,7 @@ struct Record
 {
     // Record type and type name
     int recType;
-    Misc::SString recName;
+    std::string recName;
 
     Record() : recType(RC_MISSING) {}
 

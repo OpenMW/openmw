@@ -66,7 +66,7 @@ public:
     struct TextKey
     {
         float time;
-        Misc::SString text;
+        std::string text;
     };
     std::vector<TextKey> list;
 
@@ -93,7 +93,7 @@ public:
        "MRK" - marker, only visible in the editor, not rendered in-game
        "NCO" - no collision
     */
-    Misc::SString string;
+    std::string string;
 
     void read(NIFFile *nif)
     {

@@ -186,10 +186,10 @@ struct NiTriShape : Node
     NiTriShapeCopy clone()
     {
         NiTriShapeCopy copy;
-        copy.sname = name.toString();
-        float *ptr = (float*)data->vertices.ptr;
-        float *ptrNormals = (float*)data->normals.ptr;
-        int numVerts = data->vertices.length / 3;
+        copy.sname = name;
+        float *ptr = (float*)&data->vertices[0];
+        float *ptrNormals = (float*)&data->normals[0];
+        int numVerts = data->vertices.size() / 3;
         for(int i = 0; i < numVerts; i++)
         {
             float *current = (float*) (ptr + i * 3);
