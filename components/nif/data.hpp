@@ -69,12 +69,12 @@ public:
     {
         Named::read(nif);
 
-        external = !!nif->getByte();
+        external = !!nif->getChar();
         if(external)
             filename = nif->getString();
         else
         {
-            nif->getByte(); // always 1
+            nif->getChar(); // always 1
             data.read(nif);
         }
 
@@ -82,7 +82,7 @@ public:
         mipmap = nif->getInt();
         alpha = nif->getInt();
 
-        nif->getByte(); // always 1
+        nif->getChar(); // always 1
     }
 
     void post(NIFFile *nif)
@@ -102,7 +102,7 @@ public:
 
     void read(NIFFile *nif)
     {
-        int verts = nif->getShort();
+        int verts = nif->getUShort();
 
         if(nif->getInt())
             nif->load(vertices, verts*3);
@@ -118,7 +118,7 @@ public:
 
         // Only the first 6 bits are used as a count. I think the rest are
         // flags of some sort.
-        int uvs = nif->getShort();
+        int uvs = nif->getUShort();
         uvs &= 0x3f;
 
         if(nif->getInt())
@@ -136,7 +136,7 @@ public:
     {
         ShapeData::read(nif);
 
-        int tris = nif->getShort();
+        int tris = nif->getUShort();
         if(tris)
         {
             // We have three times as many vertices as triangles, so this
@@ -148,15 +148,12 @@ public:
         // Read the match list, which lists the vertices that are equal to
         // vertices. We don't actually need need this for anything, so
         // just skip it.
-        int verts = nif->getShort();
-        if(verts)
+        int verts = nif->getUShort();
+        for(int i=0;i<verts;i++)
         {
-            for(int i=0;i<verts;i++)
-            {
-                // Number of vertices matching vertex 'i'
-                short num = nif->getShort();
-                nif->skip(num*sizeof(short));
-            }
+            // Number of vertices matching vertex 'i'
+            int num = nif->getUShort();
+            nif->skip(num*sizeof(short));
         }
     }
 };
@@ -171,11 +168,11 @@ public:
         ShapeData::read(nif);
 
         // Should always match the number of vertices
-        activeCount = nif->getShort();
+        activeCount = nif->getUShort();
 
         // Skip all the info, we don't support particles yet
-        nif->getFloat(); // Active radius ?
-        nif->getShort(); // Number of valid entries in the following arrays ?
+        nif->getFloat();  // Active radius ?
+        nif->getUShort(); // Number of valid entries in the following arrays ?
 
         if(nif->getInt())
         {
@@ -421,11 +418,11 @@ public:
             bi.unknown = nif->getVector4();
 
             // Number of vertex weights
-            bi.weights.resize(nif->getShort());
+            bi.weights.resize(nif->getUShort());
             for(size_t j = 0;j < bi.weights.size();j++)
             {
-                nif->load(bi.weights[j].vertex);
-                nif->load(bi.weights[j].weight);
+                bi.weights[j].vertex = nif->getUShort();
+                bi.weights[j].weight = nif->getFloat();
             }
         }
     }
@@ -464,7 +461,7 @@ public:
     {
         int morphCount = nif->getInt();
         int vertCount  = nif->getInt();
-        nif->getByte();
+        nif->getChar();
         int magic = nif->getInt();
         /*int type =*/ nif->getInt();
 

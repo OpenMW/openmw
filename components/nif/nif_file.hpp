@@ -164,8 +164,8 @@ public:
     }
 
 
-    char getByte() { char c; return load(c); }
-    unsigned short getShort() { unsigned short s; return load(s); }
+    char getChar() { char c; return load(c); }
+    unsigned short getUShort() { unsigned short s; return load(s); }
     int getInt() { int i; return load(i); }
     float getFloat() { float f; return load(f); }
     Ogre::Vector3 getVector()
@@ -193,7 +193,7 @@ public:
         Transformation t;
         t.pos = getVector();
         t.rotation = getMatrix();
-        load(t.scale);
+        t.scale = getFloat();
         t.velocity = getVector();
         return t;
     }

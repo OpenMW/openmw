@@ -55,7 +55,7 @@ public:
     {
         Named::read(nif);
 
-        flags = nif->getShort();
+        flags = nif->getUShort();
         trafo = nif->getTrafo();
         props.read(nif);
 

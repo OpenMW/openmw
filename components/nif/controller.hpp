@@ -44,7 +44,7 @@ public:
     {
         next.read(nif);
 
-        flags = nif->getShort();
+        flags = nif->getUShort();
 
         frequency = nif->getFloat();
         phase = nif->getFloat();
@@ -71,7 +71,7 @@ public:
 
         // At the moment, just skip it all
         nif->skip(111);
-        int s = nif->getShort();
+        int s = nif->getUShort();
         nif->skip(15 + s*40);
     }
 };
@@ -133,7 +133,7 @@ public:
     {
         Controller::read(nif);
 
-        nif->getShort(); // always 0
+        nif->getUShort(); // always 0
         data.read(nif);
     }
 
@@ -189,7 +189,7 @@ public:
     {
         Controller::read(nif);
         data.read(nif);
-        nif->getByte(); // always 0
+        nif->getChar(); // always 0
     }
 
     void post(NIFFile *nif)

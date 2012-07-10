@@ -38,7 +38,7 @@ public:
     void read(NIFFile *nif)
     {
         Named::read(nif);
-        flags = nif->getShort();
+        flags = nif->getUShort();
     }
 };
 
@@ -176,8 +176,8 @@ struct S_MaterialProperty
         diffuse = nif->getVector();
         specular = nif->getVector();
         emissive = nif->getVector();
-        nif->load(glossiness);
-        nif->load(alpha);
+        glossiness = nif->getFloat();
+        alpha = nif->getFloat();
     }
 };
 
@@ -196,8 +196,8 @@ struct S_VertexColorProperty
 
     void read(NIFFile *nif)
     {
-        nif->load(vertmode);
-        nif->load(lightmode);
+        vertmode = nif->getInt();
+        lightmode = nif->getInt();
     }
 };
 
@@ -253,7 +253,7 @@ struct S_AlphaProperty
 
     void read(NIFFile *nif)
     {
-        nif->load(threshold);
+        threshold = nif->getChar();
     }
 };
 
