@@ -50,14 +50,6 @@ namespace Nif
     class Matrix;
 }
 
-namespace Mangle
-{
-    namespace VFS
-    {
-        class OgreVFS;
-    }
-}
-
 namespace NifBullet
 {
 
@@ -68,7 +60,7 @@ class ManualBulletShapeLoader : public BulletShapeLoader
 {
 public:
 
-    ManualBulletShapeLoader():resourceGroup("General"){vfs = 0;}
+    ManualBulletShapeLoader():resourceGroup("General"){}
     virtual ~ManualBulletShapeLoader();
 
     void warn(std::string msg)
@@ -118,8 +110,6 @@ private:
     *convert a NiTriShape to a bullet trishape.
     */
     void handleNiTriShape(Nif::NiTriShape *shape, int flags,Ogre::Matrix3 parentRot,Ogre::Vector3 parentPos,float parentScales,bool raycastingOnly);
-
-    Mangle::VFS::OgreVFS *vfs;
 
     std::string resourceName;
     std::string resourceGroup;

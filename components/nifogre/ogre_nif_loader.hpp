@@ -154,13 +154,6 @@ class NIFLoader : Ogre::ManualResourceLoader
             return resourceName + ".skel";
         }
 
-        // This is the interface to the Ogre resource system. It allows us to
-        // load NIFs from BSAs, in the file system and in any other place we
-        // tell Ogre to look (eg. in zip or rar files.) It's also used to
-        // check for the existence of texture files, so we can exchange the
-        // extension from .tga to .dds if the texture is missing.
-        Mangle::VFS::OgreVFS *vfs;
-
         std::string verbosePath;
         std::string resourceName;
         std::string resourceGroup;

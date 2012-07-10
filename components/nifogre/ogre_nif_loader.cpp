@@ -379,16 +379,12 @@ String NIFLoader::getUniqueName(const String &input)
 // is lost in that case.
 void NIFLoader::findRealTexture(String &texName)
 {
-    assert(vfs);
-    if (vfs->isFile(texName)) return;
-
-    int len = texName.size();
-    if (len < 4) return;
+    if(Ogre::ResourceGroupManager::getSingleton().resourceExistsInAnyGroup(texName))
+        return;
 
     // Change texture extension to .dds
-    texName[len-3] = 'd';
-    texName[len-2] = 'd';
-    texName[len-1] = 's';
+    String::size_type pos = texName.rfind('.');
+    texName.replace(pos, texName.length(), ".dds");
 }
 
 //Handle node at top
@@ -1290,9 +1286,6 @@ void NIFLoader::loadResource(Resource *resource)
 	{
 		calculateTransform();
 	}
-    // Set up the VFS if it hasn't been done already
-    if (!vfs) vfs = new OgreVFS(resourceGroup);
-
     // Get the mesh
     mesh = dynamic_cast<Mesh*>(resource);
     assert(mesh);
@@ -1301,12 +1294,6 @@ void NIFLoader::loadResource(Resource *resource)
     resourceName = mesh->getName();
     //std::cout << resourceName << "\n";
 
-    if (!vfs->isFile(resourceName))
-    {
-        warn("File "+resourceName+" not found.");
-        return;
-    }
-
     // Helper that computes bounding boxes for us.
     BoundsFinder bounds;
 
@@ -1314,8 +1301,7 @@ void NIFLoader::loadResource(Resource *resource)
     // of the early stages of development. Right now we WANT to catch
     // every error as early and intrusively as possible, as it's most
     // likely a sign of incomplete code rather than faulty input.
-    NIFFile nif(vfs->open(resourceName), resourceName);
-
+    NIFFile nif(resourceName);
     if (nif.numRecords() < 1)
     {
         warn("Found no records in NIF.");

@@ -25,7 +25,6 @@ http://www.gnu.org/licenses/ .
 #include <Ogre.h>
 #include <stdio.h>
 
-#include <libs/mangle/vfs/servers/ogre_vfs.hpp>
 #include "../nif/nif_file.hpp"
 #include "../nif/node.hpp"
 #include "../nif/data.hpp"
@@ -47,13 +46,11 @@ typedef unsigned char ubyte;
 using namespace std;
 using namespace Ogre;
 using namespace Nif;
-using namespace Mangle::VFS;
 
 using namespace NifBullet;
 
 ManualBulletShapeLoader::~ManualBulletShapeLoader()
 {
-    delete vfs;
 }
 
 Ogre::Matrix3 ManualBulletShapeLoader::getMatrix(Nif::Transformation* tr)
@@ -94,20 +91,11 @@ void ManualBulletShapeLoader::loadResource(Ogre::Resource *resource)
 
     mTriMesh = new btTriangleMesh();
 
-    if (!vfs) vfs = new OgreVFS(resourceGroup);
-
-    if (!vfs->isFile(resourceName))
-    {
-        warn("File not found.");
-        return;
-    }
-
     // Load the NIF. TODO: Wrap this in a try-catch block once we're out
     // of the early stages of development. Right now we WANT to catch
     // every error as early and intrusively as possible, as it's most
     // likely a sign of incomplete code rather than faulty input.
-    Nif::NIFFile nif(vfs->open(resourceName), resourceName);
-
+    Nif::NIFFile nif(resourceName);
     if (nif.numRecords() < 1)
     {
         warn("Found no records in NIF.");

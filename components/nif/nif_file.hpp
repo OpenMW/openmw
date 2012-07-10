@@ -24,9 +24,8 @@
 #ifndef _NIF_FILE_H_
 #define _NIF_FILE_H_
 
-#include <libs/mangle/stream/stream.hpp>
-#include <libs/mangle/stream/filters/buffer_stream.hpp>
-#include <components/misc/slice_array.hpp>
+#include <OgreResourceGroupManager.h>
+#include <OgreDataStream.h>
 
 #include <stdexcept>
 #include <vector>
@@ -35,8 +34,6 @@
 
 #include "record.hpp"
 #include "nif_types.hpp"
-
-using namespace Mangle::Stream;
 
 namespace Nif
 {
@@ -51,7 +48,7 @@ class NIFFile
     int ver;
 
     /// Input stream
-    StreamPtr inp;
+    Ogre::DataStreamPtr inp;
 
     /// File name, used for error messages
     std::string filename;
@@ -72,22 +69,10 @@ public:
     }
 
     /// Open a NIF stream. The name is used for error messages.
-    NIFFile(StreamPtr nif, const std::string &name)
+    NIFFile(const std::string &name)
       : filename(name)
     {
-        /* Load the entire file into memory. This allows us to use
-           direct pointers to the data arrays in the NIF, instead of
-           individually allocating and copying each one.
-
-           The NIF data is only stored temporarily in memory, since once
-           the mesh data is loaded it is siphoned into OGRE and
-           deleted. For that reason, we might improve this further and
-           use a shared region/pool based allocation scheme in the
-           future, especially since only one NIFFile will ever be loaded
-           at any given time.
-        */
-        inp = StreamPtr(new BufferStream(nif));
-
+        inp = Ogre::ResourceGroupManager::getSingleton().openResource(name);
         parse();
     }
 
@@ -112,11 +97,14 @@ public:
                Parser functions
     ****************************************************/
 
-    void skip(size_t size) { inp->getPtr(size); }
+    void skip(size_t size) { inp->skip(size); }
 
     template<class X> X getType()
     {
-        return *(const X*)inp->getPtr(sizeof(X));
+        X obj;
+        if(inp->read(&obj, sizeof(X)) != sizeof(X))
+            fail("Failed to read from NIF");
+        return obj;
     }
     unsigned short getShort() { return getType<unsigned short>(); }
     int getInt() { return getType<int>(); }
@@ -127,7 +115,8 @@ public:
     std::vector<X> getArrayLen(int num)
     {
         std::vector<X> v(num);
-        memcpy(&v[0], inp->getPtr(num*sizeof(X)), num*sizeof(X));
+        if(inp->read(&v[0], num*sizeof(X)) != num*sizeof(X))
+            fail("Failed to read from NIF");
         return v;
     }
 
@@ -151,7 +140,8 @@ public:
     {
         std::string str;
         str.resize(size);
-        memcpy(&str[0], inp->getPtr(size), size);
+        if(inp->read(&str[0], size) != size)
+            fail("Failed to read from NIF");
         return str.substr(0, str.find('\0'));
     }
     std::string getString()
