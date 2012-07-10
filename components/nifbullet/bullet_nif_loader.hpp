@@ -85,10 +85,6 @@ public:
     void load(const std::string &name,const std::string &group);
 
 private:
-    Ogre::Matrix3 getMatrix(Nif::Transformation* tr);
-
-    Ogre::Vector3 getVector(Nif::Transformation* tr);
-
     btQuaternion getbtQuat(Ogre::Matrix3 &m);
 
     btVector3 getbtVector(Ogre::Vector3 &v);
@@ -97,10 +93,10 @@ private:
     *Parse a node.
     */
     void handleNode(Nif::Node *node, int flags,
-        Ogre::Matrix3 parentRot,Ogre::Vector3 parentPos,float parentScale,bool hasCollisionNode,bool isCollisionNode,bool raycastingOnly);
+        const Nif::Transformation *trafo, bool hasCollisionNode,bool isCollisionNode,bool raycastingOnly);
 
     /**
-    *Helpler function
+    *Helper function
     */
     bool hasRootCollisionNode(Nif::Node* node);
 

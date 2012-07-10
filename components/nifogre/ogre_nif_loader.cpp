@@ -1252,7 +1252,7 @@ void NIFLoader::loadResource(Ogre::Resource *resource)
 
     // Look it up
     resourceName = mesh->getName();
-    //std::cout << resourceName << "\n";
+    
 
     // Helper that computes bounding boxes for us.
     BoundsFinder bounds;

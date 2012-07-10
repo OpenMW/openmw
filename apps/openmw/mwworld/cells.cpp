@@ -91,7 +91,7 @@ MWWorld::Ptr MWWorld::Cells::getPtrAndCache (const std::string& name, Ptr::CellS
 
 MWWorld::Cells::Cells (const ESMS::ESMStore& store, ESM::ESMReader& reader)
 : mStore (store), mReader (reader),
-  mIdCache (20, std::pair<std::string, Ptr::CellStore *> ("", 0)), /// \todo make cache size configurable
+  mIdCache (20, std::pair<std::string, Ptr::CellStore *> ("", (Ptr::CellStore*)0)), /// \todo make cache size configurable
   mIdCacheIndex (0)
 {}
 

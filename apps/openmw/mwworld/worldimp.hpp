@@ -188,7 +188,7 @@ namespace MWWorld
             virtual bool toggleSky();
             ///< \return Resulting mode
 
-            virtual void changeWeather (const std::string& region, const unsigned int id);
+            virtual void changeWeather (const std::string& region, unsigned int id);
 
             virtual int getCurrentWeather() const;
 
@@ -218,6 +218,10 @@ namespace MWWorld
             virtual void deleteObject (const Ptr& ptr);
 
             virtual void moveObject (const Ptr& ptr, float x, float y, float z);
+
+            virtual void scaleObject (const Ptr& ptr, float scale);
+
+            virtual void rotateObject (const Ptr& ptr,float x,float y,float z);
 
             virtual void indexToPosition (int cellX, int cellY, float &x, float &y, bool centre = false)
                 const;

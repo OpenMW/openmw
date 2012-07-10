@@ -72,6 +72,7 @@ namespace MWWorld
             OEngine::Physic::PhysicEngine* mEngine;
             bool mFreeFly;
             playerMove* playerphysics;
+            std::map<std::string, std::string> handleToMesh;
 
             PhysicsSystem (const PhysicsSystem&);
             PhysicsSystem& operator= (const PhysicsSystem&);

@@ -1,4 +1,4 @@
-/*
+ /*
 OpenMW - The completely unofficial reimplementation of Morrowind
 Copyright (C) 2008-2010  Nicolay Korslund
 Email: < korslund@gmail.com >
@@ -45,18 +45,11 @@ typedef unsigned char ubyte;
 
 using namespace NifBullet;
 
+
 ManualBulletShapeLoader::~ManualBulletShapeLoader()
 {
 }
 
-Ogre::Matrix3 ManualBulletShapeLoader::getMatrix(Nif::Transformation* tr)
-{
-    return tr->rotation;
-}
-Ogre::Vector3 ManualBulletShapeLoader::getVector(Nif::Transformation* tr)
-{
-    return tr->pos;
-}
 
 btQuaternion ManualBulletShapeLoader::getbtQuat(Ogre::Matrix3 &m)
 {
@@ -109,15 +102,15 @@ void ManualBulletShapeLoader::loadResource(Ogre::Resource *resource)
     bool hasCollisionNode = hasRootCollisionNode(node);
 
     //do a first pass
-    handleNode(node,0,Ogre::Matrix3::IDENTITY,Ogre::Vector3::ZERO,1,hasCollisionNode,false,false);
+    handleNode(node,0,NULL,hasCollisionNode,false,false);
 
     //if collide = false, then it does a second pass which create a shape for raycasting.
     if(cShape->collide == false)
     {
-        handleNode(node,0,Ogre::Matrix3::IDENTITY,Ogre::Vector3::ZERO,1,hasCollisionNode,false,true);
+        handleNode(node,0,NULL,hasCollisionNode,false,true);
     }
 
-    cShape->collide = hasCollisionNode&&cShape->collide;
+    //cShape->collide = hasCollisionNode&&cShape->collide;
 
     struct TriangleMeshShape : public btBvhTriangleMeshShape
     {
@@ -164,8 +157,9 @@ bool ManualBulletShapeLoader::hasRootCollisionNode(Nif::Node* node)
 }
 
 void ManualBulletShapeLoader::handleNode(Nif::Node *node, int flags,
-    Ogre::Matrix3 parentRot,Ogre::Vector3 parentPos,float parentScale,bool hasCollisionNode,bool isCollisionNode,bool raycastingOnly)
+   const Nif::Transformation *trafo,bool hasCollisionNode,bool isCollisionNode,bool raycastingOnly)
 {
+
     // Accumulate the flags from all the child nodes. This works for all
     // the flags we currently use, at least.
     flags |= node->flags;
@@ -199,18 +193,26 @@ void ManualBulletShapeLoader::handleNode(Nif::Node *node, int flags,
         }
     }
 
-    //transfo of parents node + curent node
-    Ogre::Matrix3 finalRot;
-    Ogre::Vector3 finalPos;
-    float finalScale;
 
-    Nif::Transformation &final = node->trafo;
-    Ogre::Vector3 nodePos = getVector(&final);
-    Ogre::Matrix3 nodeRot = getMatrix(&final);
+    if (trafo)
+    {
 
-    finalPos = nodePos + parentPos;
-    finalRot = parentRot*nodeRot;
-    finalScale = final.scale*parentScale;
+        // Get a non-const reference to the node's data, since we're
+        // overwriting it. TODO: Is this necessary?
+        Nif::Transformation &final = node->trafo;
+
+        // For both position and rotation we have that:
+        // final_vector = old_vector + old_rotation*new_vector*old_scale
+        final.pos = trafo->pos + trafo->rotation*final.pos*trafo->scale;
+        final.velocity = trafo->velocity + trafo->rotation*final.velocity*trafo->scale;
+
+        // Merge the rotations together
+        final.rotation = trafo->rotation * final.rotation;
+
+        // Scale
+        final.scale *= trafo->scale;
+
+    }
 
 
     // For NiNodes, loop through children
@@ -222,14 +224,14 @@ void ManualBulletShapeLoader::handleNode(Nif::Node *node, int flags,
         {
             if (list.has(i))
             {
-                handleNode(&list[i], flags,finalRot,finalPos,finalScale,hasCollisionNode,isCollisionNode,raycastingOnly);
+                handleNode(&list[i], flags,&node->trafo,hasCollisionNode,isCollisionNode,raycastingOnly);
             }
         }
     }
-    else if (node->recType == Nif::RC_NiTriShape && (isCollisionNode || !hasCollisionNode)) 
+    else if (node->recType == Nif::RC_NiTriShape && (isCollisionNode || !hasCollisionNode))
     {
         cShape->collide = true;
-        handleNiTriShape(dynamic_cast<Nif::NiTriShape*>(node), flags,finalRot,finalPos,parentScale,raycastingOnly);
+        handleNiTriShape(dynamic_cast<Nif::NiTriShape*>(node), flags,node->trafo.rotation,node->trafo.pos,node->trafo.scale,raycastingOnly);
     }
     else if(node->recType == Nif::RC_RootCollisionNode)
     {
@@ -238,7 +240,7 @@ void ManualBulletShapeLoader::handleNode(Nif::Node *node, int flags,
         for (int i=0; i<n; i++)
         {
             if (list.has(i))
-                handleNode(&list[i], flags,finalRot,finalPos,finalScale,hasCollisionNode,true,raycastingOnly);
+                handleNode(&list[i], flags,&node->trafo, hasCollisionNode,true,raycastingOnly);
         }
     }
 }
@@ -270,17 +272,19 @@ void ManualBulletShapeLoader::handleNiTriShape(Nif::NiTriShape *shape, int flags
 
     Nif::NiTriShapeData *data = shape->data.getPtr();
 
-    float* vertices = (float*)&data->vertices[0];
-    unsigned short* triangles = (unsigned short*)&data->triangles[0];
-
+    float* vertices = &data->vertices[0];
+    short* triangles = &data->triangles[0];
+    const Ogre::Matrix3 &rot = shape->trafo.rotation;
+    const Ogre::Vector3 &pos = shape->trafo.pos;
+    float scale = shape->trafo.scale;
     for(unsigned int i=0; i < data->triangles.size(); i = i+3)
     {
         Ogre::Vector3 b1(vertices[triangles[i+0]*3]*parentScale,vertices[triangles[i+0]*3+1]*parentScale,vertices[triangles[i+0]*3+2]*parentScale);
         Ogre::Vector3 b2(vertices[triangles[i+1]*3]*parentScale,vertices[triangles[i+1]*3+1]*parentScale,vertices[triangles[i+1]*3+2]*parentScale);
         Ogre::Vector3 b3(vertices[triangles[i+2]*3]*parentScale,vertices[triangles[i+2]*3+1]*parentScale,vertices[triangles[i+2]*3+2]*parentScale);
-        b1 = parentRot * b1 + parentPos;
-        b2 = parentRot * b2 + parentPos;
-        b3 = parentRot * b3 + parentPos;
+        b1 = pos + rot*b1*scale;
+        b2 = pos + rot*b2*scale;
+        b3 = pos + rot*b3*scale;
         mTriMesh->addTriangle(btVector3(b1.x,b1.y,b1.z),btVector3(b2.x,b2.y,b2.z),btVector3(b3.x,b3.y,b3.z));
     }
 }
