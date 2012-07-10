@@ -968,7 +968,7 @@ void NIFLoader::handleNiTriShape(NiTriShape *shape, int flags, BoundsFinder &bou
         for (int i=0; i<numVerts; i++)
         {
             vectorMulAdd(rot, pos, ptr, scale);
-			Ogre::Vector3 absVertPos = Ogre::Vector3(*(ptr + 3 * i), *(ptr + 3 * i + 1), *(ptr + 3 * i + 2));
+			Ogre::Vector3 absVertPos = Ogre::Vector3(ptr);
 			mBoundingBox.merge(absVertPos);
             ptr += 3;
         }
