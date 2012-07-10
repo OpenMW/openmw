@@ -348,6 +348,14 @@ namespace MWClass
         return weight;
     }
 
+    void Npc::adjustScale(const MWWorld::Ptr& ptr,float& scale) const
+    {
+        //ptr.
+        //MWWorld::LiveCellRef<ESM::NPC>* npc = ptr.get<ESM::NPC>();
+        //npc->base->race
+        //ESM::Race
+    }
+
     void Npc::adjustRotation(const MWWorld::Ptr& ptr,float& x,float& y,float& z) const
     {
         y = 0;
