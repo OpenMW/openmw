@@ -105,16 +105,16 @@ public:
         int verts = nif->getUShort();
 
         if(nif->getInt())
-            nif->load(vertices, verts*3);
+            nif->getFloats(vertices, verts*3);
 
         if(nif->getInt())
-            nif->load(normals, verts*3);
+            nif->getFloats(normals, verts*3);
 
         center = nif->getVector();
         radius = nif->getFloat();
 
         if(nif->getInt())
-            nif->load(colors, verts*4);
+            nif->getFloats(colors, verts*4);
 
         // Only the first 6 bits are used as a count. I think the rest are
         // flags of some sort.
@@ -122,7 +122,7 @@ public:
         uvs &= 0x3f;
 
         if(nif->getInt())
-            nif->load(uvlist, uvs*verts*2);
+            nif->getFloats(uvlist, uvs*verts*2);
     }
 };
 
@@ -142,7 +142,7 @@ public:
             // We have three times as many vertices as triangles, so this
             // is always equal to tris*3.
             int cnt = nif->getInt();
-            nif->load(triangles, cnt);
+            nif->getShorts(triangles, cnt);
         }
 
         // Read the match list, which lists the vertices that are equal to
@@ -153,7 +153,7 @@ public:
         {
             // Number of vertices matching vertex 'i'
             int num = nif->getUShort();
-            nif->skip(num*sizeof(short));
+            nif->skip(num * sizeof(short));
         }
     }
 };

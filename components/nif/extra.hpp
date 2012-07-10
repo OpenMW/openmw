@@ -47,21 +47,16 @@ public:
 class NiVertWeightsExtraData : public Extra
 {
 public:
-    std::vector<float> weights;
-
     void read(NIFFile *nif)
     {
         Extra::read(nif);
 
-        int i;
-        unsigned short s;
-
         // We should have s*4+2 == i, for some reason. Might simply be the
         // size of the rest of the record, unhelpful as that may be.
-        nif->load(i);
+        /*int i =*/ nif->getInt();
+        int s = nif->getUShort();
 
-        nif->load(s);          // number of vertices
-        nif->load(weights, s); // vertex weights I guess
+        nif->skip(s * sizeof(float)); // vertex weights I guess
     }
 };
 

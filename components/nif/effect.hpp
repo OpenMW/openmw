@@ -44,7 +44,7 @@ struct NiLight : Effect
 
         void read(NIFFile *nif)
         {
-            nif->load(dimmer);
+            dimmer = nif->getFloat();
             ambient = nif->getVector();
             diffuse = nif->getVector();
             specular = nif->getVector();

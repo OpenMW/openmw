@@ -62,6 +62,33 @@ class NIFFile
     /// Parse the file
     void parse();
 
+    uint8_t read_byte()
+    {
+        uint8_t byte;
+        if(inp->read(&byte, 1) != 1) return 0;
+        return byte;
+    }
+    uint16_t read_le16()
+    {
+        uint8_t buffer[2];
+        if(inp->read(buffer, 2) != 2) return 0;
+        return buffer[0] | (buffer[1]<<8);
+    }
+    uint32_t read_le32()
+    {
+        uint8_t buffer[4];
+        if(inp->read(buffer, 4) != 4) return 0;
+        return buffer[0] | (buffer[1]<<8) | (buffer[2]<<16) | (buffer[3]<<24);
+    }
+    float read_le32f()
+    {
+        union {
+            int i;
+            float f;
+        } u = { read_le32() };
+        return u.f;
+    }
+
 public:
     /// Used for error handling
     void fail(const std::string &msg)
@@ -102,91 +129,34 @@ public:
 
     void skip(size_t size) { inp->skip(size); }
 
-    uint32_t read_le32()
-    {
-        uint8_t buffer[4];
-        if(inp->read(buffer, 4) != 4) return 0;
-        return buffer[0] | (buffer[1]<<8) | (buffer[2]<<16) | (buffer[3]<<24);
-    }
-    uint16_t read_le16()
-    {
-        uint8_t buffer[2];
-        if(inp->read(buffer, 2) != 2) return 0;
-        return buffer[0] | (buffer[1]<<8);
-    }
-    uint8_t read_byte()
-    {
-        uint8_t byte;
-        if(inp->read(&byte, 1) != 1) return 0;
-        return byte;
-    }
-    std::string read_string(size_t length)
-    {
-        std::string str;
-        str.resize(length);
-        if(inp->read(&str[0], length) != length)
-            return std::string();
-        return str.substr(0, str.find('\0'));
-    }
-
-
-    char& load(char &c) { c = read_byte(); return c; }
-    unsigned char& load(unsigned char &c) { c = read_byte(); return c; }
-    short& load(short &s) { s = read_le16(); return s; }
-    unsigned short& load(unsigned short &s) { s = read_le16(); return s; }
-    int& load(int &i) { i = read_le32(); return i; }
-    unsigned int& load(unsigned int &i) { i = read_le32(); return i; }
-    float& load(float &f)
-    {
-        union {
-            int i;
-            float f;
-        } u = { read_le32() };
-        f = u.f;
-        return f;
-    }
-
-    template<typename T, size_t N>
-    T* load(T (&a)[N])
-    {
-        for(size_t i = 0;i < N;i++)
-            load(a[i]);
-        return a;
-    }
-
-    template<typename T>
-    std::vector<T>& load(std::vector<T> &v, size_t size)
-    {
-        v.resize(size);
-        for(size_t i = 0;i < size;i++)
-            load(v[i]);
-        return v;
-    }
-
-
-    char getChar() { char c; return load(c); }
-    unsigned short getUShort() { unsigned short s; return load(s); }
-    int getInt() { int i; return load(i); }
-    float getFloat() { float f; return load(f); }
+    char getChar() { return read_byte(); }
+    short getShort() { return read_le16(); }
+    unsigned short getUShort() { return read_le16(); }
+    int getInt() { return read_le32(); }
+    float getFloat() { return read_le32f(); }
     Ogre::Vector3 getVector()
     {
         float a[3];
-        load(a);
+        for(size_t i = 0;i < 3;i++)
+            a[i] = getFloat();
         return Ogre::Vector3(a);
     }
     Ogre::Vector4 getVector4()
     {
         float a[4];
-        load(a);
+        for(size_t i = 0;i < 4;i++)
+            a[i] = getFloat();
         return Ogre::Vector4(a);
     }
     Ogre::Matrix3 getMatrix()
     {
-        float a[3*3];
-        load(a);
-        return Ogre::Matrix3(Ogre::Real(a[0]), Ogre::Real(a[1]), Ogre::Real(a[2]),
-                             Ogre::Real(a[3]), Ogre::Real(a[4]), Ogre::Real(a[5]),
-                             Ogre::Real(a[6]), Ogre::Real(a[7]), Ogre::Real(a[8]));
+        Ogre::Real a[3][3];
+        for(size_t i = 0;i < 3;i++)
+        {
+            for(size_t j = 0;j < 3;j++)
+                a[i][j] = Ogre::Real(getFloat());
+        }
+        return Ogre::Matrix3(a);
     }
     Transformation getTrafo()
     {
@@ -198,11 +168,31 @@ public:
         return t;
     }
 
-
+    std::string getString(size_t length)
+    {
+        std::string str;
+        str.resize(length);
+        if(inp->read(&str[0], length) != length)
+            return std::string();
+        return str.substr(0, str.find('\0'));
+    }
     std::string getString()
     {
         size_t size = read_le32();
-        return read_string(size);
+        return getString(size);
+    }
+
+    void getShorts(std::vector<short> &vec, size_t size)
+    {
+        vec.resize(size);
+        for(size_t i = 0;i < vec.size();i++)
+            vec[i] = getShort();
+    }
+    void getFloats(std::vector<float> &vec, size_t size)
+    {
+        vec.resize(size);
+        for(size_t i = 0;i < vec.size();i++)
+            vec[i] = getFloat();
     }
 };
 

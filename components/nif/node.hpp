@@ -221,19 +221,19 @@ struct NiCamera : Node
 
         void read(NIFFile *nif)
         {
-            nif->load(left);
-            nif->load(right);
-            nif->load(top);
-            nif->load(bottom);
-            nif->load(nearDist);
-            nif->load(farDist);
+            left = nif->getFloat();
+            right = nif->getFloat();
+            top = nif->getFloat();
+            bottom = nif->getFloat();
+            nearDist = nif->getFloat();
+            farDist = nif->getFloat();
 
-            nif->load(vleft);
-            nif->load(vright);
-            nif->load(vtop);
-            nif->load(vbottom);
+            vleft = nif->getFloat();
+            vright = nif->getFloat();
+            vtop = nif->getFloat();
+            vbottom = nif->getFloat();
 
-            nif->load(LOD);
+            LOD = nif->getFloat();
         }
     };
     Camera cam;

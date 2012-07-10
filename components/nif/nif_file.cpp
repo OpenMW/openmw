@@ -46,7 +46,7 @@ using namespace Misc;
 void NIFFile::parse()
 {
   // Check the header string
-  std::string head = read_string(40);
+  std::string head = getString(40);
   if(head.compare(0, 22, "NetImmerse File Format") != 0)
     fail("Invalid NIF header");
 
