@@ -32,6 +32,25 @@ sergoz
 Star-Demon
 Yuri Krupenin
 
+PR team and Translators:
+Julien (jvoisin/ap0) Voisin
+sirherrbatka
+ElderTroll
+spyboot
+corristo
+Okulo
+penguinroad
+Kingpix
+
+Reverser and Research:
+natirips
+Sadler
+fragonard
+Greendogo
+Myckel
+modred11
+HiPhish
+
 OpenMW:
 Thanks to DokterDume for kindly providing us with the Moon and Star logo used as the application icon and project logo.
 
