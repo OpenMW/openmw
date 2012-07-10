@@ -105,16 +105,16 @@ public:
         int verts = nif->getShort();
 
         if(nif->getInt())
-            vertices = nif->getFloatLen(verts*3);
+            vertices = nif->getArrayLen<float>(verts*3);
 
         if(nif->getInt())
-            normals = nif->getFloatLen(verts*3);
+            normals = nif->getArrayLen<float>(verts*3);
 
         center = nif->getVector();
         radius = nif->getFloat();
 
         if(nif->getInt())
-            colors = nif->getFloatLen(verts*4);
+            colors = nif->getArrayLen<float>(verts*4);
 
         int uvs = nif->getShort();
 
@@ -123,7 +123,7 @@ public:
         uvs &= 0x3f;
 
         if(nif->getInt())
-            uvlist = nif->getFloatLen(uvs*verts*2);
+            uvlist = nif->getArrayLen<float>(uvs*verts*2);
     }
 };
 
@@ -181,7 +181,7 @@ public:
         if(nif->getInt())
         {
             // Particle sizes
-            nif->getFloatLen(activeCount);
+            nif->getArrayLen<float>(activeCount);
         }
     }
 };
@@ -414,7 +414,9 @@ public:
         assert(sizeof(BoneTrafo) == 4*(9+3+1));
         assert(sizeof(VertWeight) == 6);
 
-        trafo = nif->getType<BoneTrafo>();
+        trafo.rotation = nif->getMatrix();
+        trafo.trans = nif->getVector();
+        trafo.scale = nif->getFloat();
 
         int boneNum = nif->getInt();
         nif->getInt(); // -1
@@ -424,7 +426,9 @@ public:
         {
             BoneInfo &bi = bones[i];
 
-            bi.trafo = nif->getType<BoneTrafo>();
+            bi.trafo.rotation = nif->getMatrix();
+            bi.trafo.trans = nif->getVector();
+            bi.trafo.scale = nif->getFloat();
             bi.unknown = nif->getVector4();
 
             // Number of vertex weights

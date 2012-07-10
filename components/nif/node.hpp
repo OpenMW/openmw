@@ -218,6 +218,23 @@ struct NiCamera : Node
 
         // Level of detail modifier
         float LOD;
+
+        void read(NIFFile *nif)
+        {
+            nif->load(left);
+            nif->load(right);
+            nif->load(top);
+            nif->load(bottom);
+            nif->load(nearDist);
+            nif->load(farDist);
+
+            nif->load(vleft);
+            nif->load(vright);
+            nif->load(vtop);
+            nif->load(vbottom);
+
+            nif->load(LOD);
+        }
     };
     Camera cam;
 
@@ -225,7 +242,7 @@ struct NiCamera : Node
     {
         Node::read(nif);
 
-        cam = nif->getType<Camera>();
+        cam.read(nif);
 
         nif->getInt(); // -1
         nif->getInt(); // 0

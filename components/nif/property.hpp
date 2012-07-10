@@ -160,7 +160,7 @@ struct StructPropT : Property
     void read(NIFFile *nif)
     {
         Property::read(nif);
-        data = nif->getType<T>();
+        data.read(nif);
     }
 };
 
@@ -169,6 +169,16 @@ struct S_MaterialProperty
     // The vector components are R,G,B
     Vector ambient, diffuse, specular, emissive;
     float glossiness, alpha;
+
+    void read(NIFFile *nif)
+    {
+        ambient = nif->getVector();
+        diffuse = nif->getVector();
+        specular = nif->getVector();
+        emissive = nif->getVector();
+        nif->load(glossiness);
+        nif->load(alpha);
+    }
 };
 
 struct S_VertexColorProperty
@@ -183,6 +193,12 @@ struct S_VertexColorProperty
         1 - lighting emmisive ambient/diffuse
     */
     int vertmode, lightmode;
+
+    void read(NIFFile *nif)
+    {
+        nif->load(vertmode);
+        nif->load(lightmode);
+    }
 };
 
 struct S_AlphaProperty
@@ -234,6 +250,11 @@ struct S_AlphaProperty
 
     // Tested against when certain flags are set (see above.)
     unsigned char threshold;
+
+    void read(NIFFile *nif)
+    {
+        nif->load(threshold);
+    }
 };
 
 typedef StructPropT<S_AlphaProperty> NiAlphaProperty;

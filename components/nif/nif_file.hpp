@@ -99,20 +99,70 @@ public:
 
     void skip(size_t size) { inp->skip(size); }
 
-    template<class X> X getType()
+    uint32_t read_le32()
     {
-        X obj;
-        if(inp->read(&obj, sizeof(X)) != sizeof(X))
-            fail("Failed to read from NIF");
-        return obj;
+        uint8_t buffer[4];
+        if(inp->read(buffer, 4) != 4) return 0;
+        return buffer[0] | (buffer[1]<<8) | (buffer[2]<<16) | (buffer[3]<<24);
     }
-    unsigned short getShort() { return getType<unsigned short>(); }
-    int getInt() { return getType<int>(); }
-    float getFloat() { return getType<float>(); }
-    char getByte() { return getType<char>(); }
+    uint16_t read_le16()
+    {
+        uint8_t buffer[2];
+        if(inp->read(buffer, 2) != 2) return 0;
+        return buffer[0] | (buffer[1]<<8);
+    }
+    uint8_t read_byte()
+    {
+        uint8_t byte;
+        if(inp->read(&byte, 1) != 1) return 0;
+        return byte;
+    }
+    std::string read_string(size_t length)
+    {
+        std::string str;
+        str.resize(length);
+        if(inp->read(&str[0], length) != length)
+            return std::string();
+        return str.substr(0, str.find('\0'));
+    }
 
-    template<class X>
-    std::vector<X> getArrayLen(int num)
+
+    char& load(char &c) { c = read_byte(); return c; }
+    unsigned char& load(unsigned char &c) { c = read_byte(); return c; }
+    short& load(short &s) { s = read_le16(); return s; }
+    unsigned short& load(unsigned short &s) { s = read_le16(); return s; }
+    int& load(int &i) { i = read_le32(); return i; }
+    unsigned int& load(unsigned int &i) { i = read_le32(); return i; }
+    float& load(float &f)
+    {
+        union {
+            int i;
+            float f;
+        } u = { read_le32() };
+        f = u.f;
+        return f;
+    }
+
+    template<typename T, size_t N>
+    T* load(T (&a)[N])
+    {
+        for(size_t i = 0;i < N;i++)
+            load(a[i]);
+        return a;
+    }
+
+    template<typename T>
+    std::vector<T>& load(std::vector<T> &v, size_t size)
+    {
+        v.resize(size);
+        for(size_t i = 0;i < size;i++)
+            load(v[i]);
+        return v;
+    }
+
+
+    template<typename X>
+    std::vector<X> getArrayLen(size_t num)
     {
         std::vector<X> v(num);
         if(inp->read(&v[0], num*sizeof(X)) != num*sizeof(X))
@@ -120,20 +170,47 @@ public:
         return v;
     }
 
-    template<class X>
+    template<typename X>
     std::vector<X> getArray()
     {
-        int len = getInt();
+        size_t len = read_le32();
         return getArrayLen<X>(len);
     }
 
-    Vector getVector() { return getType<Vector>(); }
-    Matrix getMatrix() { return getType<Matrix>(); }
-    Transformation getTrafo() { return getType<Transformation>(); }
-    Vector4 getVector4() { return getType<Vector4>(); }
+    char getByte() { char c; return load(c); }
+    unsigned short getShort() { unsigned short s; return load(s); }
+    int getInt() { int i; return load(i); }
+    float getFloat() { float f; return load(f); }
+    Vector getVector()
+    {
+        Vector v;
+        load(v.array);
+        return v;
+    }
+    Vector4 getVector4()
+    {
+        Vector4 v;
+        load(v.array);
+        return v;
+    }
+    Matrix getMatrix()
+    {
+        Matrix m;
+        m.v[0] = getVector();
+        m.v[1] = getVector();
+        m.v[2] = getVector();
+        return m;
+    }
+    Transformation getTrafo()
+    {
+        Transformation t;
+        t.pos = getVector();
+        t.rotation = getMatrix();
+        load(t.scale);
+        t.velocity = getVector();
+        return t;
+    }
 
-    std::vector<float> getFloatLen(int num)
-    { return getArrayLen<float>(num); }
 
     // For fixed-size strings where you already know the size
     std::string getString(size_t size)
@@ -150,6 +227,15 @@ public:
         return getString(size);
     }
 };
+
+template<>
+inline std::vector<float> NIFFile::getArrayLen<float>(size_t num)
+{
+    std::vector<float> v(num);
+    for(size_t i = 0;i < num;i++)
+        load(v[i]);
+    return v;
+}
 
 } // Namespace
 #endif

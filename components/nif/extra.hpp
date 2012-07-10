@@ -56,7 +56,7 @@ public:
         /*int i =*/ nif->getInt();
         int s = nif->getShort(); // number of vertices
 
-        nif->getFloatLen(s);     // vertex weights I guess
+        nif->getArrayLen<float>(s);     // vertex weights I guess
     }
 };
 
