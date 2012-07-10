@@ -1,18 +1,22 @@
 
 #include "player.hpp"
 
+#include <components/esm_store/store.hpp>
+
+#include "../mwbase/environment.hpp"
+#include "../mwbase/world.hpp"
+
 #include "../mwrender/player.hpp"
 
 #include "../mwmechanics/movement.hpp"
 #include "../mwmechanics/npcstats.hpp"
 
-#include "world.hpp"
 #include "class.hpp"
 
 namespace MWWorld
 {
-    Player::Player (MWRender::Player *renderer, const ESM::NPC *player, MWWorld::World& world) :
-      mCellStore (0), mRenderer (renderer), mWorld (world), mClass (0),
+    Player::Player (MWRender::Player *renderer, const ESM::NPC *player, const MWBase::World& world) :
+      mCellStore (0), mRenderer (renderer), mClass (0),
       mAutoMove (false), mForwardBackward (0)
     {
         mPlayer.base = player;
@@ -36,8 +40,8 @@ namespace MWWorld
 
     void Player::setPos(float x, float y, float z)
     {
-      /// \todo This fcuntion should be removed during the mwrender-refactoring.
-        mWorld.moveObject (getPlayer(), x, y, z);
+        /// \todo This fcuntion should be removed during the mwrender-refactoring.
+        MWBase::Environment::get().getWorld()->moveObject (getPlayer(), x, y, z);
     }
 
     void Player::setRot(float x, float y, float z)
@@ -52,10 +56,10 @@ namespace MWWorld
         mClass = new_class;
     }
 
-    void Player::setDrawState(const DrawState& value)
+    void Player::setDrawState (MWMechanics::DrawState_ state)
     {
          MWWorld::Ptr ptr = getPlayer();
-         MWWorld::Class::get(ptr).getNpcStats(ptr).mDrawState = value;
+         MWWorld::Class::get(ptr).getNpcStats(ptr).setDrawState (state);
     }
 
     void Player::setAutoMove (bool enable)
@@ -90,14 +94,13 @@ namespace MWWorld
 
         MWWorld::Class::get (ptr).getMovementSettings (ptr).mForwardBackward = value;
     }
-	void Player::setUpDown(int value)
-	{
-		MWWorld::Ptr ptr = getPlayer();
 
-        
+    void Player::setUpDown(int value)
+    {
+        MWWorld::Ptr ptr = getPlayer();
 
         MWWorld::Class::get (ptr).getMovementSettings (ptr).mUpDown = value;
-	}
+    }
 
     void Player::toggleRunning()
     {
@@ -108,10 +111,10 @@ namespace MWWorld
         MWWorld::Class::get (ptr).setStance (ptr, MWWorld::Class::Run, !running);
     }
 
-    DrawState Player::getDrawState()
+    MWMechanics::DrawState_ Player::getDrawState()
     {
          MWWorld::Ptr ptr = getPlayer();
-         return MWWorld::Class::get(ptr).getNpcStats(ptr).mDrawState;
+         return MWWorld::Class::get(ptr).getNpcStats(ptr).getDrawState();
     }
 
 }

@@ -3,18 +3,19 @@
 
 #include <components/esm/loadalch.hpp>
 
-#include <components/esm_store/cell_store.hpp>
-
 #include "../mwbase/environment.hpp"
+#include "../mwbase/world.hpp"
 
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/actiontake.hpp"
-#include "../mwworld/world.hpp"
+#include "../mwworld/cellstore.hpp"
+#include "../mwworld/physicssystem.hpp"
 
 #include "../mwgui/window_manager.hpp"
 #include "../mwgui/tooltips.hpp"
 
 #include "../mwrender/objects.hpp"
+#include "../mwrender/renderinginterface.hpp"
 
 #include "../mwsound/soundmanager.hpp"
 
@@ -22,7 +23,7 @@ namespace MWClass
 {
     void Potion::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const
     {
-        ESMS::LiveCellRef<ESM::Potion, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Potion> *ref =
             ptr.get<ESM::Potion>();
 
         assert (ref->base != NULL);
@@ -38,7 +39,7 @@ namespace MWClass
 
     void Potion::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics) const
     {
-        ESMS::LiveCellRef<ESM::Potion, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Potion> *ref =
             ptr.get<ESM::Potion>();
 
 
@@ -52,7 +53,7 @@ namespace MWClass
 
     std::string Potion::getName (const MWWorld::Ptr& ptr) const
     {
-        ESMS::LiveCellRef<ESM::Potion, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Potion> *ref =
             ptr.get<ESM::Potion>();
 
         return ref->base->name;
@@ -69,7 +70,7 @@ namespace MWClass
 
     std::string Potion::getScript (const MWWorld::Ptr& ptr) const
     {
-        ESMS::LiveCellRef<ESM::Potion, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Potion> *ref =
             ptr.get<ESM::Potion>();
 
         return ref->base->script;
@@ -77,7 +78,7 @@ namespace MWClass
 
     int Potion::getValue (const MWWorld::Ptr& ptr) const
     {
-        ESMS::LiveCellRef<ESM::Potion, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Potion> *ref =
             ptr.get<ESM::Potion>();
 
         return ref->base->data.value;
@@ -102,7 +103,7 @@ namespace MWClass
 
     std::string Potion::getInventoryIcon (const MWWorld::Ptr& ptr) const
     {
-          ESMS::LiveCellRef<ESM::Potion, MWWorld::RefData> *ref =
+          MWWorld::LiveCellRef<ESM::Potion> *ref =
             ptr.get<ESM::Potion>();
 
         return ref->base->icon;
@@ -110,7 +111,7 @@ namespace MWClass
 
     bool Potion::hasToolTip (const MWWorld::Ptr& ptr) const
     {
-        ESMS::LiveCellRef<ESM::Potion, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Potion> *ref =
             ptr.get<ESM::Potion>();
 
         return (ref->base->name != "");
@@ -118,7 +119,7 @@ namespace MWClass
 
     MWGui::ToolTipInfo Potion::getToolTipInfo (const MWWorld::Ptr& ptr) const
     {
-        ESMS::LiveCellRef<ESM::Potion, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Potion> *ref =
             ptr.get<ESM::Potion>();
 
         MWGui::ToolTipInfo info;

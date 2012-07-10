@@ -7,7 +7,7 @@ namespace MWGui
     {
     public:
         MainMenu(int w, int h)
-        : Layout("openmw_mainmenu_layout.xml")
+        : Layout("openmw_mainmenu.layout")
         {
             setCoord(0,0,w,h);
         }

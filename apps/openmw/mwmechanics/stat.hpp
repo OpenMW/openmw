@@ -31,6 +31,11 @@ namespace MWMechanics
                 return mModified;
             }
 
+            T getModifier() const
+            {
+                return mModified-mBase;
+            }
+
             /// Set base and modified to \a value.
             void set (const T& value)
             {
@@ -65,10 +70,9 @@ namespace MWMechanics
                 mBase += diff;
             }
 
-            /// Change modified relatively.
-            void modify (const T& diff)
+            void setModifier (const T& modifier)
             {
-                mModified += diff;
+                mModified = mBase + modifier;
             }
     };
 

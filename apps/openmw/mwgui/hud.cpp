@@ -7,10 +7,14 @@
 #include <boost/lexical_cast.hpp>
 
 #include "../mwbase/environment.hpp"
-#include "../mwsound/soundmanager.hpp"
+#include "../mwbase/world.hpp"
+
 #include "../mwworld/class.hpp"
-#include "../mwworld/world.hpp"
 #include "../mwworld/player.hpp"
+
+#include "../mwsound/soundmanager.hpp"
+
+#include "../mwgui/widgets.hpp"
 
 #include "inventorywindow.hpp"
 #include "window_manager.hpp"
@@ -20,7 +24,7 @@
 using namespace MWGui;
 
 HUD::HUD(int width, int height, int fpsLevel, DragAndDrop* dragAndDrop)
-    : Layout("openmw_hud_layout.xml")
+    : Layout("openmw_hud.layout")
     , health(NULL)
     , magicka(NULL)
     , stamina(NULL)
@@ -239,7 +243,7 @@ void HUD::onWorldClicked(MyGUI::Widget* _sender)
         // drop item into the gameworld
         MWWorld::Ptr object = *mDragAndDrop->mDraggedWidget->getUserData<MWWorld::Ptr>();
 
-        MWWorld::World* world = MWBase::Environment::get().getWorld();
+        MWBase::World* world = MWBase::Environment::get().getWorld();
 
         MyGUI::IntSize viewSize = MyGUI::RenderManager::getInstance().getViewSize();
         MyGUI::IntPoint cursorPosition = MyGUI::InputManager::getInstance().getMousePosition();
@@ -282,7 +286,7 @@ void HUD::onWorldClicked(MyGUI::Widget* _sender)
         {
             object = MWBase::Environment::get().getWorld()->getPtrViaHandle(handle);
         }
-        catch (std::exception& e)
+        catch (std::exception& /* e */)
         {
             return;
         }
@@ -308,7 +312,7 @@ void HUD::onWorldMouseOver(MyGUI::Widget* _sender, int x, int y)
         float mouseX = cursorPosition.left / float(viewSize.width);
         float mouseY = cursorPosition.top / float(viewSize.height);
 
-        MWWorld::World* world = MWBase::Environment::get().getWorld();
+        MWBase::World* world = MWBase::Environment::get().getWorld();
 
         // if we can't drop the object at the wanted position, show the "drop on ground" cursor.
         bool canDrop = world->canPlaceObject(mouseX, mouseY);

@@ -4,7 +4,7 @@
 using namespace MWGui;
 
 TextInputDialog::TextInputDialog(WindowManager& parWindowManager)
-  : WindowBase("openmw_text_input_layout.xml", parWindowManager)
+  : WindowBase("openmw_text_input.layout", parWindowManager)
 {
     // Centre dialog
     center();

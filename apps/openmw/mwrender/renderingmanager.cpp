@@ -1,29 +1,36 @@
 #include "renderingmanager.hpp"
 
-#include <assert.h>
+#include <cassert>
 
-#include "OgreRoot.h"
-#include "OgreRenderWindow.h"
-#include "OgreSceneManager.h"
-#include "OgreViewport.h"
-#include "OgreCamera.h"
-#include "OgreTextureManager.h"
+#include <OgreRoot.h>
+#include <OgreRenderWindow.h>
+#include <OgreSceneManager.h>
+#include <OgreViewport.h>
+#include <OgreCamera.h>
+#include <OgreTextureManager.h>
+#include <OgreCompositorManager.h>
+#include <OgreCompositorChain.h>
+#include <OgreCompositionTargetPass.h>
+#include <OgreCompositionPass.h>
+#include <OgreHardwarePixelBuffer.h>
 
-#include "../mwworld/world.hpp" // these includes can be removed once the static-hack is gone
-#include "../mwworld/ptr.hpp"
-#include "../mwworld/player.hpp"
-#include "../mwbase/environment.hpp"
 #include <components/esm/loadstat.hpp>
 #include <components/settings/settings.hpp>
+
+#include "../mwbase/world.hpp" // these includes can be removed once the static-hack is gone
+#include "../mwbase/environment.hpp"
+
+#include "../mwworld/ptr.hpp"
+#include "../mwworld/player.hpp"
+
+#include "../mwgui/window_manager.hpp" // FIXME
+#include "../mwinput/inputmanager.hpp" // FIXME
 
 #include "shadows.hpp"
 #include "shaderhelper.hpp"
 #include "localmap.hpp"
 #include "water.hpp"
 #include "compositors.hpp"
-
-#include "../mwgui/window_manager.hpp" // FIXME
-#include "../mwinput/inputmanager.hpp" // FIXME
 
 using namespace MWRender;
 using namespace Ogre;
@@ -298,9 +305,9 @@ void RenderingManager::skySetMoonColour (bool red){
 
 bool RenderingManager::toggleRenderMode(int mode)
 {
-    if (mode == MWWorld::World::Render_CollisionDebug || mode == MWWorld::World::Render_Pathgrid)
+    if (mode == MWBase::World::Render_CollisionDebug || mode == MWBase::World::Render_Pathgrid)
         return mDebugging->toggleRenderMode(mode);
-    else if (mode == MWWorld::World::Render_Wireframe)
+    else if (mode == MWBase::World::Render_Wireframe)
     {
         if (mRendering.getCamera()->getPolygonMode() == PM_SOLID)
         {
@@ -323,7 +330,7 @@ bool RenderingManager::toggleRenderMode(int mode)
     }
 }
 
-void RenderingManager::configureFog(ESMS::CellStore<MWWorld::RefData> &mCell)
+void RenderingManager::configureFog(MWWorld::Ptr::CellStore &mCell)
 {
     Ogre::ColourValue color;
     color.setAsABGR (mCell.cell->ambi.fog);
@@ -372,7 +379,7 @@ void RenderingManager::setAmbientMode()
   }
 }
 
-void RenderingManager::configureAmbient(ESMS::CellStore<MWWorld::RefData> &mCell)
+void RenderingManager::configureAmbient(MWWorld::Ptr::CellStore &mCell)
 {
     mAmbientColor.setAsABGR (mCell.cell->ambi.ambient);
     setAmbientMode();

@@ -3,8 +3,6 @@
 
 #include <components/esm_store/store.hpp>
 
-#include "../mwworld/world.hpp"
-
 namespace MWDialogue
 {
     Topic::Topic()
@@ -17,7 +15,7 @@ namespace MWDialogue
     Topic::~Topic()
     {}
 
-    void Topic::addEntry (const JournalEntry& entry, const MWWorld::World& world)
+    void Topic::addEntry (const JournalEntry& entry)
     {
         if (entry.mTopic!=mTopic)
             throw std::runtime_error ("topic does not match: " + mTopic);

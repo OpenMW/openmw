@@ -6,9 +6,10 @@
 
 #include <components/esm/loadench.hpp>
 
-#include "../mwbase/environment.hpp"
+#include <components/esm_store/store.hpp>
 
-#include "../mwworld/world.hpp"
+#include "../mwbase/environment.hpp"
+#include "../mwbase/world.hpp"
 
 #include "../mwmechanics/npcstats.hpp"
 
@@ -160,10 +161,10 @@ void MWWorld::InventoryStore::autoEquip (const MWMechanics::NpcStats& stats)
 
                     if (testSkill!=-1 || oldSkill!=-1 || testSkill!=oldSkill)
                     {
-                        if (stats.mSkill[oldSkill].getModified()>stats.mSkill[testSkill].getModified())
+                        if (stats.getSkill (oldSkill).getModified()>stats.getSkill (testSkill).getModified())
                             continue; // rejected, because old item better matched the NPC's skills.
 
-                        if (stats.mSkill[oldSkill].getModified()<stats.mSkill[testSkill].getModified())
+                        if (stats.getSkill (oldSkill).getModified()<stats.getSkill (testSkill).getModified())
                             use = true;
                     }
                 }

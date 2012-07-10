@@ -5,6 +5,7 @@
 #include <OgreHighLevelGpuProgramManager.h>
 #include <OgreHighLevelGpuProgram.h>
 #include <OgreGpuProgramParams.h>
+#include <OgreShadowCameraSetupPSSM.h>
 
 #include <components/settings/settings.hpp>
 

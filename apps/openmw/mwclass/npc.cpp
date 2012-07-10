@@ -9,6 +9,9 @@
 
 #include <components/esm/loadnpc.hpp>
 
+#include "../mwbase/environment.hpp"
+#include "../mwbase/world.hpp"
+
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/npcstats.hpp"
 #include "../mwmechanics/movement.hpp"
@@ -16,13 +19,15 @@
 
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/actiontalk.hpp"
-#include "../mwworld/world.hpp"
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/customdata.hpp"
+#include "../mwworld/physicssystem.hpp"
+
+#include "../mwrender/actors.hpp"
+#include "../mwrender/renderinginterface.hpp"
 
 #include "../mwgui/window_manager.hpp"
-
-#include "../mwbase/environment.hpp"
+#include "../mwgui/tooltips.hpp"
 
 namespace
 {
@@ -53,7 +58,7 @@ namespace MWClass
         {
             std::auto_ptr<CustomData> data (new CustomData);
 
-            ESMS::LiveCellRef<ESM::NPC, MWWorld::RefData> *ref = ptr.get<ESM::NPC>();
+            MWWorld::LiveCellRef<ESM::NPC> *ref = ptr.get<ESM::NPC>();
 
             // NPC stats
             if (!ref->base->faction.empty())
@@ -62,11 +67,11 @@ namespace MWClass
                 boost::algorithm::to_lower(faction);
                 if(ref->base->npdt52.gold != -10)
                 {
-                    data->mNpcStats.mFactionRank[faction] = (int)ref->base->npdt52.rank;
+                    data->mNpcStats.getFactionRanks()[faction] = (int)ref->base->npdt52.rank;
                 }
                 else
                 {
-                    data->mNpcStats.mFactionRank[faction] = (int)ref->base->npdt12.rank;
+                    data->mNpcStats.getFactionRanks()[faction] = (int)ref->base->npdt12.rank;
                 }
             }
 
@@ -74,7 +79,7 @@ namespace MWClass
             if(ref->base->npdt52.gold != -10)
             {
                 for (int i=0; i<27; ++i)
-                    data->mNpcStats.mSkill[i].setBase (ref->base->npdt52.skills[i]);
+                    data->mNpcStats.getSkill (i).setBase (ref->base->npdt52.skills[i]);
 
                 data->mCreatureStats.mAttributes[0].set (ref->base->npdt52.strength);
                 data->mCreatureStats.mAttributes[1].set (ref->base->npdt52.intelligence);
@@ -107,7 +112,7 @@ namespace MWClass
 
     std::string Npc::getId (const MWWorld::Ptr& ptr) const
     {
-        ESMS::LiveCellRef<ESM::NPC, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::NPC> *ref =
             ptr.get<ESM::NPC>();
 
         return ref->base->mId;
@@ -120,7 +125,7 @@ namespace MWClass
 
     void Npc::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics) const
     {
-        ESMS::LiveCellRef<ESM::NPC, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::NPC> *ref =
             ptr.get<ESM::NPC>();
 
         assert (ref->base != NULL);
@@ -138,7 +143,7 @@ namespace MWClass
 
     std::string Npc::getName (const MWWorld::Ptr& ptr) const
     {
-        ESMS::LiveCellRef<ESM::NPC, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::NPC> *ref =
             ptr.get<ESM::NPC>();
 
         return ref->base->name;
@@ -182,7 +187,7 @@ namespace MWClass
 
     std::string Npc::getScript (const MWWorld::Ptr& ptr) const
     {
-        ESMS::LiveCellRef<ESM::NPC, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::NPC> *ref =
             ptr.get<ESM::NPC>();
 
         return ref->base->script;
@@ -196,12 +201,12 @@ namespace MWClass
         {
             case Run:
 
-                stats.mForceRun = force;
+                stats.setMovementFlag (MWMechanics::NpcStats::Flag_ForceRun, force);
                 break;
 
             case Sneak:
 
-                stats.mForceSneak = force;
+                stats.setMovementFlag (MWMechanics::NpcStats::Flag_ForceSneak, force);
                 break;
 
             case Combat:
@@ -218,17 +223,18 @@ namespace MWClass
         {
             case Run:
 
-                stats.mRun = set;
+                stats.setMovementFlag (MWMechanics::NpcStats::Flag_Run, set);
                 break;
 
             case Sneak:
 
-                stats.mSneak = set;
+                stats.setMovementFlag (MWMechanics::NpcStats::Flag_Sneak, set);
                 break;
 
             case Combat:
 
-                stats.mCombat = set;
+                // Combat stance ignored for now; need to be determined based on draw state instead of
+                // being maunally set.
                 break;
         }
     }
@@ -241,21 +247,21 @@ namespace MWClass
         {
             case Run:
 
-                if (!ignoreForce && stats.mForceRun)
+                if (!ignoreForce && stats.getMovementFlag (MWMechanics::NpcStats::Flag_ForceRun))
                     return true;
 
-                return stats.mRun;
+                return stats.getMovementFlag (MWMechanics::NpcStats::Flag_Run);
 
             case Sneak:
 
-                if (!ignoreForce && stats.mForceSneak)
+                if (!ignoreForce && stats.getMovementFlag (MWMechanics::NpcStats::Flag_ForceSneak))
                     return true;
 
-                return stats.mSneak;
+                return stats.getMovementFlag (MWMechanics::NpcStats::Flag_Sneak);
 
             case Combat:
 
-                return stats.mCombat;
+                return false;
         }
 
         return false;
@@ -302,7 +308,7 @@ namespace MWClass
 
     MWGui::ToolTipInfo Npc::getToolTipInfo (const MWWorld::Ptr& ptr) const
     {
-        ESMS::LiveCellRef<ESM::NPC, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::NPC> *ref =
             ptr.get<ESM::NPC>();
 
         MWGui::ToolTipInfo info;

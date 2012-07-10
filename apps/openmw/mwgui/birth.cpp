@@ -10,7 +10,7 @@ using namespace MWGui;
 using namespace Widgets;
 
 BirthDialog::BirthDialog(WindowManager& parWindowManager)
-  : WindowBase("openmw_chargen_birth_layout.xml", parWindowManager)
+  : WindowBase("openmw_chargen_birth.layout", parWindowManager)
 {
     // Centre dialog
     center();

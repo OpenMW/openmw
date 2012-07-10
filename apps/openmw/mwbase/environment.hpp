@@ -32,13 +32,10 @@ namespace MWInput
     struct MWInputManager;
 }
 
-namespace MWWorld
-{
-    class World;
-}
-
 namespace MWBase
 {
+    class World;
+
     /// \brief Central hub for mw-subsystems
     ///
     /// This class allows each mw-subsystem to access any others subsystem's top-level manager class.
@@ -49,7 +46,7 @@ namespace MWBase
     {
             static Environment *sThis;
 
-            MWWorld::World *mWorld;
+            World *mWorld;
             MWSound::SoundManager *mSoundManager;
             MWScript::ScriptManager *mScriptManager;
             MWGui::WindowManager *mWindowManager;
@@ -71,7 +68,7 @@ namespace MWBase
 
             ~Environment();
 
-            void setWorld (MWWorld::World *world);
+            void setWorld (World *world);
 
             void setSoundManager (MWSound::SoundManager *soundManager);
 
@@ -90,7 +87,7 @@ namespace MWBase
             void setFrameDuration (float duration);
             ///< Set length of current frame in seconds.
 
-            MWWorld::World *getWorld() const;
+            World *getWorld() const;
 
             MWSound::SoundManager *getSoundManager() const;
 

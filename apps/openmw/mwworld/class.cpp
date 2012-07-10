@@ -9,6 +9,8 @@
 #include "nullaction.hpp"
 #include "containerstore.hpp"
 
+#include "../mwgui/tooltips.hpp"
+
 namespace MWWorld
 {
     std::map<std::string, boost::shared_ptr<Class> > Class::sClasses;

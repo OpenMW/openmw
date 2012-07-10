@@ -1,7 +1,7 @@
 #include "actors.hpp"
+
 #include <OgreSceneNode.h>
-
-
+#include <OgreSceneManager.h>
 
 
 using namespace Ogre;

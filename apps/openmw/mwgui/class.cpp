@@ -19,7 +19,7 @@ using namespace MWGui;
 /* GenerateClassResultDialog */
 
 GenerateClassResultDialog::GenerateClassResultDialog(WindowManager& parWindowManager)
-  : WindowBase("openmw_chargen_generate_class_result_layout.xml", parWindowManager)
+  : WindowBase("openmw_chargen_generate_class_result.layout", parWindowManager)
 {
     // Centre dialog
     center();
@@ -77,7 +77,7 @@ void GenerateClassResultDialog::onBackClicked(MyGUI::Widget* _sender)
 /* PickClassDialog */
 
 PickClassDialog::PickClassDialog(WindowManager& parWindowManager)
-  : WindowBase("openmw_chargen_class_layout.xml", parWindowManager)
+  : WindowBase("openmw_chargen_class.layout", parWindowManager)
 {
     // Centre dialog
     center();
@@ -283,7 +283,7 @@ void InfoBoxDialog::layoutVertically(MyGUI::WidgetPtr widget, int margin)
 }
 
 InfoBoxDialog::InfoBoxDialog(WindowManager& parWindowManager)
-    : WindowBase("openmw_infobox_layout.xml", parWindowManager)
+    : WindowBase("openmw_infobox.layout", parWindowManager)
     , currentButton(-1)
 {
     getWidget(textBox, "TextBox");
@@ -381,7 +381,7 @@ ClassChoiceDialog::ClassChoiceDialog(WindowManager& parWindowManager)
 /* CreateClassDialog */
 
 CreateClassDialog::CreateClassDialog(WindowManager& parWindowManager)
-  : WindowBase("openmw_chargen_create_class_layout.xml", parWindowManager)
+  : WindowBase("openmw_chargen_create_class.layout", parWindowManager)
   , specDialog(nullptr)
   , attribDialog(nullptr)
   , skillDialog(nullptr)
@@ -703,7 +703,7 @@ void CreateClassDialog::onBackClicked(MyGUI::Widget* _sender)
 /* SelectSpecializationDialog */
 
 SelectSpecializationDialog::SelectSpecializationDialog(WindowManager& parWindowManager)
-  : WindowBase("openmw_chargen_select_specialization_layout.xml", parWindowManager)
+  : WindowBase("openmw_chargen_select_specialization.layout", parWindowManager)
 {
     // Centre dialog
     center();
@@ -768,7 +768,7 @@ void SelectSpecializationDialog::onCancelClicked(MyGUI::Widget* _sender)
 /* SelectAttributeDialog */
 
 SelectAttributeDialog::SelectAttributeDialog(WindowManager& parWindowManager)
-  : WindowBase("openmw_chargen_select_attribute_layout.xml", parWindowManager)
+  : WindowBase("openmw_chargen_select_attribute.layout", parWindowManager)
 {
     // Centre dialog
     center();
@@ -820,7 +820,7 @@ void SelectAttributeDialog::onCancelClicked(MyGUI::Widget* _sender)
 /* SelectSkillDialog */
 
 SelectSkillDialog::SelectSkillDialog(WindowManager& parWindowManager)
-  : WindowBase("openmw_chargen_select_skill_layout.xml", parWindowManager)
+  : WindowBase("openmw_chargen_select_skill.layout", parWindowManager)
 {
     // Centre dialog
     center();
@@ -916,7 +916,7 @@ void SelectSkillDialog::onCancelClicked(MyGUI::Widget* _sender)
 /* DescriptionDialog */
 
 DescriptionDialog::DescriptionDialog(WindowManager& parWindowManager)
-  : WindowBase("openmw_chargen_class_description_layout.xml", parWindowManager)
+  : WindowBase("openmw_chargen_class_description.layout", parWindowManager)
 {
     // Centre dialog
     center();
