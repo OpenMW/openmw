@@ -164,9 +164,6 @@ public:
     }
 
 
-    template<typename X>
-    std::vector<X> getArrayLen(size_t num);
-
     char getByte() { char c; return load(c); }
     unsigned short getShort() { unsigned short s; return load(s); }
     int getInt() { int i; return load(i); }
@@ -202,39 +199,12 @@ public:
     }
 
 
-    // For fixed-size strings where you already know the size
-    std::string getString(size_t size)
-    {
-        std::string str;
-        str.resize(size);
-        if(inp->read(&str[0], size) != size)
-            fail("Failed to read from NIF");
-        return str.substr(0, str.find('\0'));
-    }
     std::string getString()
     {
-        size_t size = getInt();
-        return getString(size);
+        size_t size = read_le32();
+        return read_string(size);
     }
 };
-
-template<>
-inline std::vector<short> NIFFile::getArrayLen<short>(size_t num)
-{
-    std::vector<short> v(num);
-    for(size_t i = 0;i < num;i++)
-        load(v[i]);
-    return v;
-}
-
-template<>
-inline std::vector<float> NIFFile::getArrayLen<float>(size_t num)
-{
-    std::vector<float> v(num);
-    for(size_t i = 0;i < num;i++)
-        load(v[i]);
-    return v;
-}
 
 } // Namespace
 #endif

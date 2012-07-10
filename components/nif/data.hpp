@@ -105,25 +105,24 @@ public:
         int verts = nif->getShort();
 
         if(nif->getInt())
-            vertices = nif->getArrayLen<float>(verts*3);
+            nif->load(vertices, verts*3);
 
         if(nif->getInt())
-            normals = nif->getArrayLen<float>(verts*3);
+            nif->load(normals, verts*3);
 
         center = nif->getVector();
         radius = nif->getFloat();
 
         if(nif->getInt())
-            colors = nif->getArrayLen<float>(verts*4);
-
-        int uvs = nif->getShort();
+            nif->load(colors, verts*4);
 
         // Only the first 6 bits are used as a count. I think the rest are
         // flags of some sort.
+        int uvs = nif->getShort();
         uvs &= 0x3f;
 
         if(nif->getInt())
-            uvlist = nif->getArrayLen<float>(uvs*verts*2);
+            nif->load(uvlist, uvs*verts*2);
     }
 };
 
@@ -143,7 +142,7 @@ public:
             // We have three times as many vertices as triangles, so this
             // is always equal to tris*3.
             int cnt = nif->getInt();
-            triangles = nif->getArrayLen<short>(cnt);
+            nif->load(triangles, cnt);
         }
 
         // Read the match list, which lists the vertices that are equal to
@@ -175,13 +174,13 @@ public:
         activeCount = nif->getShort();
 
         // Skip all the info, we don't support particles yet
-        nif->getFloat();  // Active radius ?
+        nif->getFloat(); // Active radius ?
         nif->getShort(); // Number of valid entries in the following arrays ?
 
         if(nif->getInt())
         {
             // Particle sizes
-            nif->getArrayLen<float>(activeCount);
+            nif->skip(activeCount * sizeof(float));
         }
     }
 };
