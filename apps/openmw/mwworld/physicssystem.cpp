@@ -165,7 +165,6 @@ namespace MWWorld
         for (std::vector<std::pair<std::string, Ogre::Vector3> >::const_iterator iter (actors.begin());
             iter!=actors.end(); ++iter)
         {
-            OEngine::Physic::PhysicActor* act = mEngine->getCharacter(iter->first);
             //dirty stuff to get the camera orientation. Must be changed!
 
             Ogre::SceneNode *sceneNode = mRender.getScene()->getSceneNode (iter->first);
@@ -175,10 +174,10 @@ namespace MWWorld
 			Ogre::Quaternion yawQuat = yawNode->getOrientation();
             Ogre::Quaternion pitchQuat = pitchNode->getOrientation();
 
-           
+
 
             playerphysics->ps.viewangles.x = pitchQuat.getPitch().valueDegrees();
-           
+
 			playerphysics->ps.viewangles.y = yawQuat.getYaw().valueDegrees() *-1 + 90;
 
 
@@ -194,9 +193,9 @@ namespace MWWorld
             }
 
 
-           
-            
-        
+
+
+
         mEngine->stepSimulation(dt);
     }
 
@@ -307,7 +306,7 @@ namespace MWWorld
         {
             btTransform transform = mEngine->getRigidBody(handle)->getWorldTransform();
             removeObject(handle);
-            
+
             Ogre::Quaternion quat = Ogre::Quaternion(transform.getRotation().getW(), transform.getRotation().getX(), transform.getRotation().getY(), transform.getRotation().getZ());
             Ogre::Vector3 vec = Ogre::Vector3(transform.getOrigin().getX(), transform.getOrigin().getY(), transform.getOrigin().getZ());
             addObject(handle, handleToMesh[handle], quat, scale, vec);

@@ -82,17 +82,17 @@ static void vectorMulAdd(const Matrix &A, const Vector &B, float *C, float scale
 }
 
 // Computes B = AxB (matrix*vector)
-static void vectorMul(const Matrix &A, float *C)
-{
-    // Keep the original values
-    float a = C[0];
-    float b = C[1];
-    float c = C[2];
+//static void vectorMul(const Matrix &A, float *C)
+//{
+//    // Keep the original values
+//    float a = C[0];
+//    float b = C[1];
+//    float c = C[2];
 
-    // Perform matrix multiplication, scaling and addition
-    for (int i=0;i<3;i++)
-        C[i] = a*A.v[i].array[0] + b*A.v[i].array[1] + c*A.v[i].array[2];
-}
+//    // Perform matrix multiplication, scaling and addition
+//    for (int i=0;i<3;i++)
+//        C[i] = a*A.v[i].array[0] + b*A.v[i].array[1] + c*A.v[i].array[2];
+//}
 
 
 ManualBulletShapeLoader::~ManualBulletShapeLoader()
@@ -233,7 +233,7 @@ bool ManualBulletShapeLoader::hasRootCollisionNode(Nif::Node* node)
 void ManualBulletShapeLoader::handleNode(Nif::Node *node, int flags,
    const Nif::Transformation *trafo,bool hasCollisionNode,bool isCollisionNode,bool raycastingOnly)
 {
-    
+
     // Accumulate the flags from all the child nodes. This works for all
     // the flags we currently use, at least.
     flags |= node->flags;
@@ -267,11 +267,11 @@ void ManualBulletShapeLoader::handleNode(Nif::Node *node, int flags,
         }
     }
 
-    
-    
+
+
     if (trafo)
     {
-       
+
         // Get a non-const reference to the node's data, since we're
         // overwriting it. TODO: Is this necessary?
         Transformation &final = *((Transformation*)node->trafo);
@@ -287,9 +287,9 @@ void ManualBulletShapeLoader::handleNode(Nif::Node *node, int flags,
         // Scalar values are so nice to deal with. Why can't everything
         // just be scalar?
         final.scale *= trafo->scale;
-        
+
     }
-    
+
 
     // For NiNodes, loop through children
     if (node->recType == Nif::RC_NiNode)
@@ -304,7 +304,7 @@ void ManualBulletShapeLoader::handleNode(Nif::Node *node, int flags,
             }
         }
     }
-    else if (node->recType == Nif::RC_NiTriShape && (isCollisionNode || !hasCollisionNode)) 
+    else if (node->recType == Nif::RC_NiTriShape && (isCollisionNode || !hasCollisionNode))
     {
         cShape->collide = true;
         handleNiTriShape(dynamic_cast<Nif::NiTriShape*>(node), flags,getMatrix(node->trafo),getVector(node->trafo),node->trafo->scale,raycastingOnly);
