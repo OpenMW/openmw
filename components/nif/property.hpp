@@ -155,12 +155,12 @@ typedef Property NiWireframeProperty;
 template <typename T>
 struct StructPropT : Property
 {
-    const T* data;
+    T data;
 
     void read(NIFFile *nif)
     {
         Property::read(nif);
-        data = nif->getPtr<T>();
+        data = nif->getType<T>();
     }
 };
 

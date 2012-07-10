@@ -730,7 +730,7 @@ void NIFLoader::handleNiTriShape(NiTriShape *shape, int flags, BoundsFinder &bou
         if (a)
         {
             alphaFlags = a->flags;
-            alphaTest  = a->data->threshold;
+            alphaTest  = a->data.threshold;
         }
 
         // Material
@@ -745,7 +745,7 @@ void NIFLoader::handleNiTriShape(NiTriShape *shape, int flags, BoundsFinder &bou
             if (m)
             {
                 // Use NiMaterialProperty data to create the data
-                const S_MaterialProperty *d = m->data;
+                const S_MaterialProperty *d = &m->data;
 
                 std::multimap<std::string,std::string>::iterator itr = MaterialMap.find(texName);
                 std::multimap<std::string,std::string>::iterator lastElement;
@@ -858,17 +858,17 @@ void NIFLoader::handleNiTriShape(NiTriShape *shape, int flags, BoundsFinder &bou
 
 
 			Nif::NiSkinData::BoneInfoCopy boneinfocopy;
-			boneinfocopy.trafo.rotation = convertRotation(it->trafo->rotation);
-			boneinfocopy.trafo.trans = convertVector3(it->trafo->trans);
+			boneinfocopy.trafo.rotation = convertRotation(it->trafo.rotation);
+			boneinfocopy.trafo.trans = convertVector3(it->trafo.trans);
 			boneinfocopy.bonename = shape->skin->bones[boneIndex].name;
             boneinfocopy.bonehandle = bonePtr->getHandle();
             copy.boneinfo.push_back(boneinfocopy);
             for (unsigned int i=0; i<it->weights.size(); i++)
             {
 				 vecPos = bonePtr->_getDerivedPosition() +
-                bonePtr->_getDerivedOrientation() * convertVector3(it->trafo->trans);
+                bonePtr->_getDerivedOrientation() * convertVector3(it->trafo.trans);
 
-            vecRot = bonePtr->_getDerivedOrientation() * convertRotation(it->trafo->rotation);
+            vecRot = bonePtr->_getDerivedOrientation() * convertRotation(it->trafo.rotation);
                 unsigned int verIndex = it->weights[i].vertex;
 				//boneinfo.weights.push_back(*(it->weights.ptr + i));
                 Nif::NiSkinData::IndividualWeight ind;
@@ -959,9 +959,9 @@ void NIFLoader::handleNiTriShape(NiTriShape *shape, int flags, BoundsFinder &bou
 
 			copy.boneSequence = boneSequence;
         // Rotate, scale and translate all the vertices,
-        const Matrix &rot = shape->trafo->rotation;
-        const Vector &pos = shape->trafo->pos;
-        float scale = shape->trafo->scale;
+        const Matrix &rot = shape->trafo.rotation;
+        const Vector &pos = shape->trafo.pos;
+        float scale = shape->trafo.scale;
 
 		copy.trafo.trans = convertVector3(original.pos);
 		copy.trafo.rotation = convertRotation(original.rotation);
@@ -1148,19 +1148,19 @@ void NIFLoader::handleNode(Nif::Node *node, int flags,
                   parentBone->addChild(bone);
 
                 bone->setInheritOrientation(true);
-                bone->setPosition(convertVector3(node->trafo->pos));
-                bone->setOrientation(convertRotation(node->trafo->rotation));
+                bone->setPosition(convertVector3(node->trafo.pos));
+                bone->setOrientation(convertRotation(node->trafo.rotation));
             }
         }
     }
-    Transformation original = *(node->trafo);
+    Transformation original = node->trafo;
     // Apply the parent transformation to this node. We overwrite the
     // existing data with the final transformation.
     if (trafo)
     {
         // Get a non-const reference to the node's data, since we're
         // overwriting it. TODO: Is this necessary?
-        Transformation &final = *((Transformation*)node->trafo);
+        Transformation &final = node->trafo;
 
         // For both position and rotation we have that:
         // final_vector = old_vector + old_rotation*new_vector*old_scale
@@ -1184,7 +1184,7 @@ void NIFLoader::handleNode(Nif::Node *node, int flags,
         {
 
             if (list.has(i))
-                handleNode(&list[i], flags, node->trafo, bounds, bone, boneSequence);
+                handleNode(&list[i], flags, &node->trafo, bounds, bone, boneSequence);
         }
     }
     else if (node->recType == RC_NiTriShape && bNiTri)

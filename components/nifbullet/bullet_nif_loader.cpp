@@ -226,7 +226,7 @@ void ManualBulletShapeLoader::handleNode(Nif::Node *node, int flags,
     Ogre::Vector3 finalPos;
     float finalScale;
 
-    Nif::Transformation &final = *((Nif::Transformation*)node->trafo);
+    Nif::Transformation &final = node->trafo;
     Ogre::Vector3 nodePos = getVector(&final);
     Ogre::Matrix3 nodeRot = getMatrix(&final);
 

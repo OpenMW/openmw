@@ -97,7 +97,7 @@ class ShapeData : public Record
 {
 public:
     std::vector<float> vertices, normals, colors, uvlist;
-    const Vector *center;
+    Vector center;
     float radius;
 
     void read(NIFFile *nif)
@@ -388,8 +388,8 @@ public:
 
     struct BoneInfo
     {
-        const BoneTrafo *trafo;
-        const Vector4 *unknown;
+        BoneTrafo trafo;
+        Vector4 unknown;
         std::vector<VertWeight> weights;
     };
     struct BoneInfoCopy
@@ -406,7 +406,7 @@ public:
         unsigned int boneinfocopyindex;
     };
 
-    const BoneTrafo *trafo;
+    BoneTrafo trafo;
     std::vector<BoneInfo> bones;
 
     void read(NIFFile *nif)
@@ -414,7 +414,7 @@ public:
         assert(sizeof(BoneTrafo) == 4*(9+3+1));
         assert(sizeof(VertWeight) == 6);
 
-        trafo = nif->getPtr<BoneTrafo>();
+        trafo = nif->getType<BoneTrafo>();
 
         int boneNum = nif->getInt();
         nif->getInt(); // -1
@@ -424,7 +424,7 @@ public:
         {
             BoneInfo &bi = bones[i];
 
-            bi.trafo = nif->getPtr<BoneTrafo>();
+            bi.trafo = nif->getType<BoneTrafo>();
             bi.unknown = nif->getVector4();
 
             // Number of vertex weights

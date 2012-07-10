@@ -42,14 +42,14 @@ class Node : public Named
 public:
     // Node flags. Interpretation depends somewhat on the type of node.
     int flags;
-    const Transformation *trafo;
+    Transformation trafo;
     PropertyList props;
 
     // Bounding box info
     bool hasBounds;
-    const Vector *boundPos;
-    const Matrix *boundRot;
-    const Vector *boundXYZ; // Box size
+    Vector boundPos;
+    Matrix boundRot;
+    Vector boundXYZ; // Box size
 
     void read(NIFFile *nif)
     {
@@ -103,7 +103,7 @@ public:
     void makeBone(short ind, const NiSkinData::BoneInfo &bi)
     {
         boneInfo = &bi;
-        boneTrafo = bi.trafo;
+        boneTrafo = &bi.trafo;
         boneIndex = ind;
     }
 };
@@ -219,13 +219,13 @@ struct NiCamera : Node
         // Level of detail modifier
         float LOD;
     };
-    const Camera *cam;
+    Camera cam;
 
     void read(NIFFile *nif)
     {
         Node::read(nif);
 
-        nif->getPtr<Camera>();
+        cam = nif->getType<Camera>();
 
         nif->getInt(); // -1
         nif->getInt(); // 0

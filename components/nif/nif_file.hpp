@@ -114,8 +114,10 @@ public:
 
     void skip(size_t size) { inp->getPtr(size); }
 
-    template<class X> const X* getPtr() { return (const X*)inp->getPtr(sizeof(X)); }
-    template<class X> X getType() { return *getPtr<X>(); }
+    template<class X> X getType()
+    {
+        return *(const X*)inp->getPtr(sizeof(X));
+    }
     unsigned short getShort() { return getType<unsigned short>(); }
     int getInt() { return getType<int>(); }
     float getFloat() { return getType<float>(); }
@@ -136,10 +138,10 @@ public:
         return getArrayLen<X>(len);
     }
 
-    const Vector *getVector() { return getPtr<Vector>(); }
-    const Matrix *getMatrix() { return getPtr<Matrix>(); }
-    const Transformation *getTrafo() { return getPtr<Transformation>(); }
-    const Vector4 *getVector4() { return getPtr<Vector4>(); }
+    Vector getVector() { return getType<Vector>(); }
+    Matrix getMatrix() { return getType<Matrix>(); }
+    Transformation getTrafo() { return getType<Transformation>(); }
+    Vector4 getVector4() { return getType<Vector4>(); }
 
     std::vector<float> getFloatLen(int num)
     { return getArrayLen<float>(num); }

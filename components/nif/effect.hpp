@@ -42,7 +42,7 @@ struct NiLight : Effect
         Vector diffuse;
         Vector specular;
     };
-    const SLight *light;
+    SLight light;
 
     void read(NIFFile *nif)
     {
@@ -50,7 +50,7 @@ struct NiLight : Effect
 
         nif->getInt(); // 1
         nif->getInt(); // 1?
-        light = nif->getPtr<SLight>();
+        light = nif->getType<SLight>();
     }
 };
 

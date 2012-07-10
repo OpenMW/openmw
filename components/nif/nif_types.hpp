@@ -60,7 +60,7 @@ struct Transformation
     float scale;
     Vector velocity;
 
-    static const Transformation* getIdentity()
+    static const Transformation& getIdentity()
     {
         static Transformation identity;
         static bool iset = false;
@@ -73,7 +73,7 @@ struct Transformation
             iset = true;
         }
 
-        return &identity;
+        return identity;
     }
 };
 #pragma pack(pop)
