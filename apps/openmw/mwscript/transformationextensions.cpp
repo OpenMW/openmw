@@ -62,17 +62,21 @@ namespace MWScript
                     Interpreter::Type_Float angle = runtime[0].mFloat;
                     runtime.pop();
 
+                    float ax = Ogre::Radian(ptr.getRefData().getPosition().rot[0]).valueDegrees();
+                    float ay = Ogre::Radian(ptr.getRefData().getPosition().rot[1]).valueDegrees();
+                    float az = Ogre::Radian(ptr.getRefData().getPosition().rot[2]).valueDegrees();
+
                     if(axis == "X")
                     {
-                        MWBase::Environment::get().getWorld()->rotateObject(ptr,angle,0,0);
+                        MWBase::Environment::get().getWorld()->rotateObject(ptr,angle,ay,az);
                     }
                     if(axis == "Y")
                     {
-                        MWBase::Environment::get().getWorld()->rotateObject(ptr,0,angle,0);
+                        MWBase::Environment::get().getWorld()->rotateObject(ptr,ax,angle,az);
                     }
                     if(axis == "Z")
                     {
-                        MWBase::Environment::get().getWorld()->rotateObject(ptr,0,0,angle);
+                        MWBase::Environment::get().getWorld()->rotateObject(ptr,ax,ay,angle);
                     }
                 }
         };
@@ -91,15 +95,15 @@ namespace MWScript
 
                     if(axis == "X")
                     {
-                        runtime.push(ptr.getRefData().getPosition().rot[0]);
+                        runtime.push(Ogre::Radian(ptr.getRefData().getPosition().rot[0]).valueDegrees());
                     }
                     if(axis == "Y")
                     {
-                        runtime.push(ptr.getRefData().getPosition().rot[1]);
+                        runtime.push(Ogre::Radian(ptr.getRefData().getPosition().rot[1]).valueDegrees());
                     }
                     if(axis == "Z")
                     {
-                        runtime.push(ptr.getRefData().getPosition().rot[0]);
+                        runtime.push(Ogre::Radian(ptr.getRefData().getPosition().rot[2]).valueDegrees());
                     }
                 }
         };

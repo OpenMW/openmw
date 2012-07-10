@@ -602,7 +602,7 @@ namespace MWWorld
         MWWorld::Class::get(ptr).adjustScale(ptr,scale);
 
         ptr.getCellRef().scale = scale;
-        scale = scale/ptr.getRefData().getBaseNode()->getScale().x;
+        //scale = scale/ptr.getRefData().getBaseNode()->getScale().x;
         ptr.getRefData().getBaseNode()->setScale(scale,scale,scale);
         mPhysics->scaleObject( ptr.getRefData().getHandle(), scale );
     }
@@ -618,7 +618,7 @@ namespace MWWorld
         Ogre::Quaternion rotx(Ogre::Degree(x),Ogre::Vector3::UNIT_X);
         Ogre::Quaternion roty(Ogre::Degree(y),Ogre::Vector3::UNIT_Y);
         Ogre::Quaternion rotz(Ogre::Degree(z),Ogre::Vector3::UNIT_Z);
-        ptr.getRefData().getBaseNode()->setOrientation(rotx*roty*rotz);
+        ptr.getRefData().getBaseNode()->setOrientation(rotz*rotx*roty);
         mPhysics->rotateObject(ptr.getRefData().getHandle(),ptr.getRefData().getBaseNode()->getOrientation());
     }
 
