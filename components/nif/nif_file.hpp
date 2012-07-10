@@ -26,6 +26,9 @@
 
 #include <OgreResourceGroupManager.h>
 #include <OgreDataStream.h>
+#include <OgreVector3.h>
+#include <OgreVector4.h>
+#include <OgreMatrix3.h>
 
 #include <stdexcept>
 #include <vector>
@@ -162,44 +165,31 @@ public:
 
 
     template<typename X>
-    std::vector<X> getArrayLen(size_t num)
-    {
-        std::vector<X> v(num);
-        if(inp->read(&v[0], num*sizeof(X)) != num*sizeof(X))
-            fail("Failed to read from NIF");
-        return v;
-    }
-
-    template<typename X>
-    std::vector<X> getArray()
-    {
-        size_t len = read_le32();
-        return getArrayLen<X>(len);
-    }
+    std::vector<X> getArrayLen(size_t num);
 
     char getByte() { char c; return load(c); }
     unsigned short getShort() { unsigned short s; return load(s); }
     int getInt() { int i; return load(i); }
     float getFloat() { float f; return load(f); }
-    Vector getVector()
+    Ogre::Vector3 getVector()
     {
-        Vector v;
-        load(v.array);
-        return v;
+        float a[3];
+        load(a);
+        return Ogre::Vector3(a);
     }
-    Vector4 getVector4()
+    Ogre::Vector4 getVector4()
     {
-        Vector4 v;
-        load(v.array);
-        return v;
+        float a[4];
+        load(a);
+        return Ogre::Vector4(a);
     }
-    Matrix getMatrix()
+    Ogre::Matrix3 getMatrix()
     {
-        Matrix m;
-        m.v[0] = getVector();
-        m.v[1] = getVector();
-        m.v[2] = getVector();
-        return m;
+        float a[3*3];
+        load(a);
+        return Ogre::Matrix3(Ogre::Real(a[0]), Ogre::Real(a[1]), Ogre::Real(a[2]),
+                             Ogre::Real(a[3]), Ogre::Real(a[4]), Ogre::Real(a[5]),
+                             Ogre::Real(a[6]), Ogre::Real(a[7]), Ogre::Real(a[8]));
     }
     Transformation getTrafo()
     {
@@ -227,6 +217,15 @@ public:
         return getString(size);
     }
 };
+
+template<>
+inline std::vector<short> NIFFile::getArrayLen<short>(size_t num)
+{
+    std::vector<short> v(num);
+    for(size_t i = 0;i < num;i++)
+        load(v[i]);
+    return v;
+}
 
 template<>
 inline std::vector<float> NIFFile::getArrayLen<float>(size_t num)

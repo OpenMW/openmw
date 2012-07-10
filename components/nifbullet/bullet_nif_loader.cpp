@@ -43,10 +43,6 @@ http://www.gnu.org/licenses/ .
 
 typedef unsigned char ubyte;
 
-using namespace std;
-using namespace Ogre;
-using namespace Nif;
-
 using namespace NifBullet;
 
 ManualBulletShapeLoader::~ManualBulletShapeLoader()
@@ -55,18 +51,14 @@ ManualBulletShapeLoader::~ManualBulletShapeLoader()
 
 Ogre::Matrix3 ManualBulletShapeLoader::getMatrix(Nif::Transformation* tr)
 {
-    Ogre::Matrix3 rot(tr->rotation.v[0].array[0],tr->rotation.v[0].array[1],tr->rotation.v[0].array[2],
-            tr->rotation.v[1].array[0],tr->rotation.v[1].array[1],tr->rotation.v[1].array[2],
-            tr->rotation.v[2].array[0],tr->rotation.v[2].array[1],tr->rotation.v[2].array[2]);
-    return rot;
+    return tr->rotation;
 }
 Ogre::Vector3 ManualBulletShapeLoader::getVector(Nif::Transformation* tr)
 {
-    Ogre::Vector3 vect3(tr->pos.array[0],tr->pos.array[1],tr->pos.array[2]);
-    return vect3;
+    return tr->pos;
 }
 
-btQuaternion ManualBulletShapeLoader::getbtQuat(Ogre::Matrix3 m)
+btQuaternion ManualBulletShapeLoader::getbtQuat(Ogre::Matrix3 &m)
 {
     Ogre::Quaternion oquat(m);
     btQuaternion quat;
@@ -77,10 +69,9 @@ btQuaternion ManualBulletShapeLoader::getbtQuat(Ogre::Matrix3 m)
     return quat;
 }
 
-btVector3 ManualBulletShapeLoader::getbtVector(Nif::Vector v)
+btVector3 ManualBulletShapeLoader::getbtVector(Ogre::Vector3 &v)
 {
-    btVector3 a(v.array[0],v.array[1],v.array[2]);
-    return a;
+    return btVector3(v[0], v[1], v[2]);
 }
 
 void ManualBulletShapeLoader::loadResource(Ogre::Resource *resource)
@@ -108,7 +99,6 @@ void ManualBulletShapeLoader::loadResource(Ogre::Resource *resource)
     assert(r != NULL);
 
     Nif::Node *node = dynamic_cast<Nif::Node*>(r);
-
     if (node == NULL)
     {
         warn("First record in file was not a node, but a " +

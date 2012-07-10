@@ -47,9 +47,9 @@ public:
 
     // Bounding box info
     bool hasBounds;
-    Vector boundPos;
-    Matrix boundRot;
-    Vector boundXYZ; // Box size
+    Ogre::Vector3 boundPos;
+    Ogre::Matrix3 boundRot;
+    Ogre::Vector3 boundXYZ; // Box size
 
     void read(NIFFile *nif)
     {

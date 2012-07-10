@@ -62,17 +62,8 @@ namespace Nif
     class Node;
     class Transformation;
     class NiTriShape;
-    class Vector;
-    class Matrix;
 }
 
-namespace Mangle
-{
-    namespace VFS
-    {
-        class OgreVFS;
-    }
-}
 
 namespace NifOgre
 {
@@ -110,9 +101,6 @@ class NIFLoader : Ogre::ManualResourceLoader
         std::map<std::string, float>* getTextIndices(std::string name);
 
 
-        Ogre::Vector3 convertVector3(const Nif::Vector& vec);
-        Ogre::Quaternion convertRotation(const Nif::Matrix& rot);
-
         void setOutputAnimFiles(bool output);
         void setVerbosePath(std::string path);
 
@@ -136,10 +124,10 @@ class NIFLoader : Ogre::ManualResourceLoader
         void createOgreSubMesh(Nif::NiTriShape *shape, const Ogre::String &material, std::list<Ogre::VertexBoneAssignment> &vertexBoneAssignments);
 
         void createMaterial(const Ogre::String &name,
-                            const Nif::Vector &ambient,
-                            const Nif::Vector &diffuse,
-                            const Nif::Vector &specular,
-                            const Nif::Vector &emissive,
+                            const Ogre::Vector3 &ambient,
+                            const Ogre::Vector3 &diffuse,
+                            const Ogre::Vector3 &specular,
+                            const Ogre::Vector3 &emissive,
                             float glossiness, float alpha,
                             int alphaFlags, float alphaTest,
                             const Ogre::String &texName);

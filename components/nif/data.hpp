@@ -97,7 +97,7 @@ class ShapeData : public Record
 {
 public:
     std::vector<float> vertices, normals, colors, uvlist;
-    Vector center;
+    Ogre::Vector3 center;
     float radius;
 
     void read(NIFFile *nif)
@@ -198,7 +198,7 @@ public:
             // Rotation quaternions. I THINK activeCount is correct here,
             // but verts (vertex number) might also be correct, if there is
             // any case where the two don't match.
-            nif->getArrayLen<Vector4>(activeCount);
+            nif->skip(activeCount * 4*sizeof(float));
         }
     }
 };
@@ -244,7 +244,7 @@ public:
             if(count)
             {
                 nif->getInt(); // always 2
-                nif->getArrayLen<Vector4>(count); // Really one time float + one vector
+                nif->skip(count * (sizeof(float) + 3*sizeof(float))); // Really one time float + one vector
             }
         }
         // Always 0
@@ -260,7 +260,7 @@ public:
     {
         int count = nif->getInt();
         nif->getInt(); // always 2
-        nif->getArrayLen<Vector4>(count); // Really one time float + one vector
+        nif->skip(count * (sizeof(float) + 3*sizeof(float))); // Really one time float + one vector
     }
 };
 
@@ -309,7 +309,7 @@ public:
     struct ColorData
     {
         float time;
-        Vector4 rgba;
+        Ogre::Vector4 rgba;
     };
 
     void read(NIFFile *nif)
@@ -318,25 +318,23 @@ public:
         nif->getInt(); // always 1
 
         // Skip the data
-        assert(sizeof(ColorData) == 4*5);
-        nif->skip(sizeof(ColorData) * count);
+        nif->skip(count * 5*sizeof(float));
     }
 };
 
 class NiVisData : public Record
 {
 public:
+    struct VisData {
+        float time;
+        char isSet;
+    };
+
     void read(NIFFile *nif)
     {
         int count = nif->getInt();
-        /*
-           Each VisData consists of:
-            float time;
-            byte isSet;
 
-           If you implement this, make sure you use a packed struct
-           (sizeof==5), or read each element individually.
-        */
+        /* Skip VisData */
         nif->skip(count*5);
     }
 };
@@ -361,16 +359,11 @@ public:
 class NiSkinData : public Record
 {
 public:
-    // This is to make sure the structs are packed, ie. that the
-    // compiler doesn't mess them up with extra alignment bytes.
-#pragma pack(push)
-#pragma pack(1)
-
     struct BoneTrafo
     {
-        Matrix rotation; // Rotation offset from bone?
-        Vector trans;    // Translation
-        float scale;     // Probably scale (always 1)
+        Ogre::Matrix3 rotation; // Rotation offset from bone?
+        Ogre::Vector3 trans;    // Translation
+        float scale;            // Probably scale (always 1)
     };
     struct BoneTrafoCopy
     {
@@ -384,12 +377,12 @@ public:
         short vertex;
         float weight;
     };
-#pragma pack(pop)
+
 
     struct BoneInfo
     {
         BoneTrafo trafo;
-        Vector4 unknown;
+        Ogre::Vector4 unknown;
         std::vector<VertWeight> weights;
     };
     struct BoneInfoCopy
@@ -397,7 +390,7 @@ public:
         std::string bonename;
         unsigned short bonehandle;
         BoneTrafoCopy trafo;
-        Vector4 unknown;
+        Ogre::Vector4 unknown;
         //std::vector<VertWeight> weights;
     };
     struct IndividualWeight
@@ -411,9 +404,6 @@ public:
 
     void read(NIFFile *nif)
     {
-        assert(sizeof(BoneTrafo) == 4*(9+3+1));
-        assert(sizeof(VertWeight) == 6);
-
         trafo.rotation = nif->getMatrix();
         trafo.trans = nif->getVector();
         trafo.scale = nif->getFloat();
@@ -432,8 +422,12 @@ public:
             bi.unknown = nif->getVector4();
 
             // Number of vertex weights
-            int count = nif->getShort();
-            bi.weights = nif->getArrayLen<VertWeight>(count);
+            bi.weights.resize(nif->getShort());
+            for(size_t j = 0;j < bi.weights.size();j++)
+            {
+                nif->load(bi.weights[j].vertex);
+                nif->load(bi.weights[j].weight);
+            }
         }
     }
 };

@@ -167,7 +167,7 @@ struct StructPropT : Property
 struct S_MaterialProperty
 {
     // The vector components are R,G,B
-    Vector ambient, diffuse, specular, emissive;
+    Ogre::Vector3 ambient, diffuse, specular, emissive;
     float glossiness, alpha;
 
     void read(NIFFile *nif)

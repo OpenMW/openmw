@@ -38,9 +38,9 @@ struct NiLight : Effect
     struct SLight
     {
         float dimmer;
-        Vector ambient;
-        Vector diffuse;
-        Vector specular;
+        Ogre::Vector3 ambient;
+        Ogre::Vector3 diffuse;
+        Ogre::Vector3 specular;
 
         void read(NIFFile *nif)
         {

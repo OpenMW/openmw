@@ -46,8 +46,6 @@ namespace Nif
     class Node;
     class Transformation;
     class NiTriShape;
-    class Vector;
-    class Matrix;
 }
 
 namespace NifBullet
@@ -91,9 +89,9 @@ private:
 
     Ogre::Vector3 getVector(Nif::Transformation* tr);
 
-    btQuaternion getbtQuat(Ogre::Matrix3 m);
+    btQuaternion getbtQuat(Ogre::Matrix3 &m);
 
-    btVector3 getbtVector(Nif::Vector v);
+    btVector3 getbtVector(Ogre::Vector3 &v);
 
     /**
     *Parse a node.
