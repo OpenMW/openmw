@@ -618,7 +618,7 @@ namespace MWWorld
         Ogre::Quaternion rotx(Ogre::Degree(x),Ogre::Vector3::UNIT_X);
         Ogre::Quaternion roty(Ogre::Degree(y),Ogre::Vector3::UNIT_Y);
         Ogre::Quaternion rotz(Ogre::Degree(z),Ogre::Vector3::UNIT_Z);
-        ptr.getRefData().getBaseNode()->setOrientation(rotz*rotx*roty);
+        ptr.getRefData().getBaseNode()->setOrientation(rotz*roty*rotx);
         mPhysics->rotateObject(ptr.getRefData().getHandle(),ptr.getRefData().getBaseNode()->getOrientation());
     }
 
