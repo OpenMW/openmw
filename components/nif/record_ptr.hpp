@@ -71,18 +71,21 @@ public:
     }
 
     /// Look up the actual object from the index
-    X* getPtr()
+    X* getPtr() const
     {
         assert(ptr != NULL);
         return ptr;
     }
-    X& get() { return *getPtr(); }
+    X& get() const
+    { return *getPtr(); }
 
     /// Syntactic sugar
-    X* operator->() { return getPtr(); }
+    X* operator->() const
+    { return getPtr(); }
 
     /// Pointers are allowed to be empty
-    bool empty() { return ptr == NULL; }
+    bool empty() const
+    { return ptr == NULL; }
 };
 
 /** A list of references to other records. These are read as a list,
