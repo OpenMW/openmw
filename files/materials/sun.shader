@@ -29,10 +29,10 @@
 
     SH_START_PROGRAM
     {
-        shOutputColor(0) = float4(1,1,1,materialDiffuse.a) * float4(materialEmissive.xyz, 1) * shSample(diffuseMap, UV);
+        shOutputColour(0) = float4(1,1,1,materialDiffuse.a) * float4(materialEmissive.xyz, 1) * shSample(diffuseMap, UV);
 
 #if MRT
-        shOutputColor(1) = float4(1,1,1,1);
+        shOutputColour(1) = float4(1,1,1,1);
 #endif
     }
 

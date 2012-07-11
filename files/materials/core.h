@@ -36,7 +36,7 @@
 
     #ifdef SH_FRAGMENT_SHADER
 
-        #define shOutputColor(num) oColor##num
+        #define shOutputColour(num) oColor##num
 
         #define shDeclareMrtOutput(num) , out float4 oColor##num : COLOR##num
 
@@ -75,7 +75,7 @@
     #define shInputPosition vertex
 
     #define shOutputPosition gl_Position
-    #define shOutputColor(num) oColor##num
+    #define shOutputColour(num) oColor##num
 
     #define float4x4 mat4
 

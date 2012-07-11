@@ -1,6 +1,7 @@
 material openmw_shadowcaster_default
 {
     create_configuration Default
+    allow_fixed_function false
     pass
     {
         fog_override true
@@ -18,6 +19,7 @@ material openmw_shadowcaster_default
 material openmw_shadowcaster_noalpha
 {
     create_configuration Default
+    allow_fixed_function false
     pass
     {
         fog_override true

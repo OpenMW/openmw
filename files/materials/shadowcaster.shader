@@ -50,7 +50,7 @@
             discard;
 #endif
 
-	    shOutputColor(0) = float4(finalDepth, finalDepth, finalDepth, 1);
+	    shOutputColour(0) = float4(finalDepth, finalDepth, finalDepth, 1);
     }
 
 #endif

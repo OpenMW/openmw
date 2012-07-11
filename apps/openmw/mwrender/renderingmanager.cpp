@@ -81,11 +81,13 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
     //mRendering.getScene()->setCameraRelativeRendering(true);
 
     // disable unsupported effects
-    const RenderSystemCapabilities* caps = Root::getSingleton().getRenderSystem()->getCapabilities();
+    //const RenderSystemCapabilities* caps = Root::getSingleton().getRenderSystem()->getCapabilities();
     if (!waterShaderSupported())
         Settings::Manager::setBool("shader", "Water", false);
     if (!Settings::Manager::getBool("shaders", "Objects"))
         Settings::Manager::setBool("enabled", "Shadows", false);
+
+    sh::Factory::getInstance ().setGlobalSetting ("mrt_output", useMRT() ? "true" : "false");
 
     applyCompositors();
 
@@ -614,6 +616,8 @@ void RenderingManager::processChangedSettings(const Settings::CategorySettingVec
         else if (it->second == "shader" && it->first == "Water")
         {
             applyCompositors();
+            sh::Factory::getInstance ().setGlobalSetting ("mrt_output", useMRT() ? "true" : "false");
+            mObjects.rebuildStaticGeometry ();
         }
     }
 

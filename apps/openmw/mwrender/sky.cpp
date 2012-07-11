@@ -631,18 +631,9 @@ void SkyManager::create()
     // Make a unique "modifiable" copy of the materials to be sure
     //mCloudMaterial = mCloudMaterial->clone("Clouds");
     //clouds_ent->getSubEntity(0)->setMaterial(mCloudMaterial);
-    //mAtmosphereMaterial = mAtmosphereMaterial->clone("Atmosphere");
-    //atmosphere_ent->getSubEntity(0)->setMaterial(mAtmosphereMaterial);
-
     /*
-
-    mAtmosphereMaterial->getTechnique(0)->getPass(0)->setSelfIllumination(1.0, 1.0, 1.0);
-    mAtmosphereMaterial->getTechnique(0)->getPass(0)->setDiffuse(0.0, 0.0, 0.0, 0.0);
-    mAtmosphereMaterial->getTechnique(0)->getPass(0)->setAmbient(0.0, 0.0, 0.0);
     mCloudMaterial->getTechnique(0)->getPass(0)->setSelfIllumination(1.0, 1.0, 1.0);
     mCloudMaterial->getTechnique(0)->getPass(0)->setDepthWriteEnabled(false);
-    mAtmosphereMaterial->getTechnique(0)->getPass(0)->setDepthWriteEnabled(false);
-    mAtmosphereMaterial->getTechnique(0)->getPass(0)->setSceneBlending(SBT_TRANSPARENT_ALPHA);
     mCloudMaterial->getTechnique(0)->getPass(0)->setSceneBlending(SBT_TRANSPARENT_ALPHA);
 
     mCloudMaterial->getTechnique(0)->getPass(0)->removeAllTextureUnitStates();

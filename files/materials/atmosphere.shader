@@ -27,10 +27,10 @@
 
     SH_START_PROGRAM
     {
-        shOutputColor(0) = colourPassthrough * atmosphereColour;
+        shOutputColour(0) = colourPassthrough * atmosphereColour;
 
 #if MRT
-        shOutputColor(1) = float4(1,1,1,1);
+        shOutputColour(1) = float4(1,1,1,1);
 #endif
     }
 

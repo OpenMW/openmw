@@ -4,13 +4,13 @@
 
 
 #define FOG @shPropertyBool(fog)
-#define MRT @shPropertyNotBool(is_transparent) && @shPropertyBool(mrt_output)
+#define MRT @shPropertyNotBool(is_transparent) && @shPropertyBool(mrt_output) && @shGlobalSettingBool(mrt_output)
 #define LIGHTING @shPropertyBool(lighting)
 
 #define SHADOWS LIGHTING && 0
 #define SHADOWS_PSSM LIGHTING
 
-#define SHADOWS 1 && LIGHTING
+#define SHADOWS 0 && LIGHTING
 #define SHADOWS_PSSM 0 && LIGHTING
 
 #if FOG || MRT || SHADOWS_PSSM
@@ -132,13 +132,13 @@
 #if SHADOWS
         shInput(float4, lightSpacePos0)
         shSampler2D(shadowMap0)
-        shUniform(float2 invShadowmapSize0)   @shAutoConstant(invShadowmapSize0, inverse_texture_size, 0)
+        shUniform(float2 invShadowmapSize0)   @shAutoConstant(invShadowmapSize0, inverse_texture_size, 1)
 #endif
 #if SHADOWS_PSSM
     @shForeach(3)
         shInput(float4, lightSpacePos@shIterator)
         shSampler2D(shadowMap@shIterator)
-        shUniform(float2 invShadowmapSize@shIterator)  @shAutoConstant(invShadowmapSize@shIterator, inverse_texture_size, @shIterator)
+        shUniform(float2 invShadowmapSize@shIterator)  @shAutoConstant(invShadowmapSize@shIterator, inverse_texture_size, @shIterator(1))
     @shEndForeach
     shUniform(float4 pssmSplitPoints)  @shSharedParameter(pssmSplitPoints)
 #endif
@@ -148,7 +148,7 @@
 #endif
     SH_START_PROGRAM
     {
-        shOutputColor(0) = shSample(diffuseMap, UV);
+        shOutputColour(0) = shSample(diffuseMap, UV);
 
 #if LIGHTING
         float3 normal = normalize(normalPassthrough);
@@ -194,24 +194,24 @@
         ambient *= colorPassthrough.xyz;
 #endif
 
-        shOutputColor(0).xyz *= (ambient + diffuse + materialEmissive.xyz);
+        shOutputColour(0).xyz *= (ambient + diffuse + materialEmissive.xyz);
 #endif
 
 
 #if HAS_VERTEXCOLOR && !LIGHTING
-        shOutputColor(0).xyz *= colorPassthrough.xyz;
+        shOutputColour(0).xyz *= colorPassthrough.xyz;
 #endif
 
 #if FOG
         float fogValue = shSaturate((depthPassthrough - fogParams.y) * fogParams.w);
-        shOutputColor(0).xyz = shLerp (shOutputColor(0).xyz, fogColor, fogValue);
+        shOutputColour(0).xyz = shLerp (shOutputColour(0).xyz, fogColor, fogValue);
 #endif
 
         // prevent negative color output (for example with negative lights)
-        shOutputColor(0).xyz = max(shOutputColor(0).xyz, float3(0,0,0));
+        shOutputColour(0).xyz = max(shOutputColour(0).xyz, float3(0,0,0));
 
 #if MRT
-        shOutputColor(1) = float4(depthPassthrough / far,1,1,1);
+        shOutputColour(1) = float4(depthPassthrough / far,1,1,1);
 #endif
     }
 
