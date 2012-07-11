@@ -41,17 +41,9 @@ struct Transformation
 
     static const Transformation& getIdentity()
     {
-        static Transformation identity;
-        static bool iset = false;
-        if (!iset)
-        {
-            identity.scale = 1.0f;
-            identity.rotation[0][0] = 1.0f;
-            identity.rotation[1][1] = 1.0f;
-            identity.rotation[2][2] = 1.0f;
-            iset = true;
-        }
-
+        static const Transformation identity = {
+            Ogre::Vector3::ZERO, Ogre::Matrix3::IDENTITY, 1.0f, Ogre::Vector3::ZERO
+        };
         return identity;
     }
 };
