@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <MyGUI type="Layout">
-    <Widget type="Window" skin="MW_Dialog" layer="Windows" position="0 0 390 390" name="_Main">
+    <Widget type="Window" skin="MW_Window_NoCaption" layer="Windows" position="0 0 400 414" name="_Main">
+
+        <Property key="MinSize" value="400 414"/>
+        <Property key="MaxSize" value="400 414"/>
 
         <Widget type="TabControl" skin="TabControl" position="8 8 368 340" align="Left Top" name="SettingsTab">
             <Property key="ButtonAutoWidth" value="true"/>
@@ -99,6 +102,12 @@
                             <Property key="Caption" value="VSync"/>
                         </Widget>
                         <Widget type="Button" skin="MW_Button" position="212 34 34 24" align="Left Top" name="VSyncButton"/>
+
+                        <Widget type="TextBox" skin="SandText" position="262 104 120 24" align="Left Top">
+                            <Property key="Caption" value="Shaders"/>
+                        </Widget>
+                        <Widget type="Button" skin="MW_Button" position="212 104 44 24" align="Left Top" name="ShadersButton"/>
+
 
                         <Widget type="TextBox" skin="SandText" position="74 163 250 24" align="Left Top">
                             <Property key="Caption" value="Show frames per second"/>

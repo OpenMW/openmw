@@ -42,6 +42,7 @@ namespace MWGui
             MyGUI::Button* mReflectObjectsButton;
             MyGUI::Button* mReflectActorsButton;
             MyGUI::Button* mReflectTerrainButton;
+            MyGUI::Button* mShadersButton;
 
             // audio
             MyGUI::ScrollBar* mMasterVolumeSlider;
@@ -58,6 +59,8 @@ namespace MWGui
             void onResolutionSelected(MyGUI::ListBox* _sender, size_t index);
             void onResolutionAccept();
             void onResolutionCancel();
+
+            void onShadersToggled(MyGUI::Widget* _sender);
 
             void apply();
     };

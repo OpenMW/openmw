@@ -42,6 +42,15 @@ namespace MWRender {
 RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const boost::filesystem::path& resDir, OEngine::Physic::PhysicEngine* engine)
     :mRendering(_rend), mObjects(mRendering), mActors(mRendering), mAmbientMode(0), mSunEnabled(0)
 {
+    // select best shader mode
+    if (Settings::Manager::getString("shader mode", "General") == "")
+    {
+        if (Ogre::Root::getSingleton ().getRenderSystem ()->getName().find("OpenGL") == std::string::npos)
+            Settings::Manager::setString("shader mode", "General", "hlsl");
+        else
+            Settings::Manager::setString("shader mode", "General", "glsl");
+    }
+
     mRendering.createScene("PlayerCam", Settings::Manager::getFloat("field of view", "General"), 5);
     mRendering.setWindowEventListener(this);
 
@@ -617,6 +626,24 @@ void RenderingManager::processChangedSettings(const Settings::CategorySettingVec
         {
             applyCompositors();
             sh::Factory::getInstance ().setGlobalSetting ("mrt_output", useMRT() ? "true" : "false");
+            mObjects.rebuildStaticGeometry ();
+        }
+        else if (it->second == "shaders" && it->first == "Objects")
+        {
+            sh::Factory::getInstance ().setShadersEnabled (Settings::Manager::getBool("shaders", "Objects"));
+            mObjects.rebuildStaticGeometry ();
+        }
+        else if (it->second == "shader mode" && it->first == "General")
+        {
+            sh::Language lang;
+            std::string l = Settings::Manager::getString("shader mode", "General");
+            if (l == "glsl")
+                lang = sh::Language_GLSL;
+            else if (l == "hlsl")
+                lang = sh::Language_HLSL;
+            else
+                lang = sh::Language_CG;
+            sh::Factory::getInstance ().setCurrentLanguage (lang);
             mObjects.rebuildStaticGeometry ();
         }
     }

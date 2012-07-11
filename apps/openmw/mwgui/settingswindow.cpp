@@ -74,6 +74,14 @@ namespace
             return "16 : 10";
         return boost::lexical_cast<std::string>(xaspect) + " : " + boost::lexical_cast<std::string>(yaspect);
     }
+
+    std::string hlslGlsl ()
+    {
+        if (Ogre::Root::getSingleton ().getRenderSystem ()->getName ().find("OpenGL") == std::string::npos)
+            return "hlsl";
+        else
+            return "glsl";
+    }
 }
 
 namespace MWGui
@@ -103,8 +111,10 @@ namespace MWGui
         getWidget(mReflectObjectsButton, "ReflectObjectsButton");
         getWidget(mReflectActorsButton, "ReflectActorsButton");
         getWidget(mReflectTerrainButton, "ReflectTerrainButton");
+        getWidget(mShadersButton, "ShadersButton");
 
         mOkButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onOkButtonClicked);
+        mShadersButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onShadersToggled);
         mFullscreenButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onButtonToggled);
         mWaterShaderButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onButtonToggled);
         mReflectObjectsButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onButtonToggled);
@@ -188,6 +198,15 @@ namespace MWGui
         mReflectObjectsButton->setCaptionWithReplacing(Settings::Manager::getBool("reflect objects", "Water") ? "#{sOn}" : "#{sOff}");
         mReflectActorsButton->setCaptionWithReplacing(Settings::Manager::getBool("reflect actors", "Water") ? "#{sOn}" : "#{sOff}");
         mReflectTerrainButton->setCaptionWithReplacing(Settings::Manager::getBool("reflect terrain", "Water") ? "#{sOn}" : "#{sOff}");
+
+        std::string shaders;
+        if (!Settings::Manager::getBool("shaders", "Objects"))
+            shaders = "off";
+        else
+        {
+            shaders = Settings::Manager::getString("shader mode", "General");
+        }
+        mShadersButton->setCaption (shaders);
 
         if (!MWRender::RenderingManager::waterShaderSupported())
         {
@@ -281,6 +300,10 @@ namespace MWGui
                 apply();
             }
         }
+        else if (_sender == mShadersButton)
+        {
+
+        }
         else if (_sender == mVSyncButton)
         {
             Settings::Manager::setBool("vsync", "Video", newState);
@@ -304,6 +327,45 @@ namespace MWGui
 
             apply();
         }
+    }
+
+    void SettingsWindow::onShadersToggled(MyGUI::Widget* _sender)
+    {
+        std::string val = static_cast<MyGUI::Button*>(_sender)->getCaption();
+        if (val == "off")
+            val = hlslGlsl();
+        else if (val == hlslGlsl())
+            val = "cg";
+        else
+            val = "off";
+
+        static_cast<MyGUI::Button*>(_sender)->setCaption(val);
+
+        if (val == "off")
+        {
+            Settings::Manager::setBool("shaders", "Objects", false);
+
+            // water shader not supported with object shaders off
+            mWaterShaderButton->setCaptionWithReplacing("#{sOff}");
+            mWaterShaderButton->setEnabled(false);
+            mReflectObjectsButton->setEnabled(false);
+            mReflectActorsButton->setEnabled(false);
+            mReflectTerrainButton->setEnabled(false);
+            Settings::Manager::setBool("shader", "Water", false);
+        }
+        else
+        {
+            // re-enable
+            mWaterShaderButton->setEnabled(true);
+            mReflectObjectsButton->setEnabled(true);
+            mReflectActorsButton->setEnabled(true);
+            mReflectTerrainButton->setEnabled(true);
+
+            Settings::Manager::setBool("shaders", "Objects", true);
+            Settings::Manager::setString("shader mode", "General", val);
+        }
+
+        apply();
     }
 
     void SettingsWindow::onFpsToggled(MyGUI::Widget* _sender)
