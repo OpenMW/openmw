@@ -112,6 +112,13 @@ namespace MWGui
         getWidget(mReflectActorsButton, "ReflectActorsButton");
         getWidget(mReflectTerrainButton, "ReflectTerrainButton");
         getWidget(mShadersButton, "ShadersButton");
+        getWidget(mShadowsEnabledButton, "ShadowsEnabledButton");
+        getWidget(mShadowsLargeDistance, "ShadowsLargeDistance");
+        getWidget(mShadowsTextureSize, "ShadowsTextureSize");
+        getWidget(mActorShadows, "ActorShadows");
+        getWidget(mStaticsShadows, "StaticsShadows");
+        getWidget(mMiscShadows, "MiscShadows");
+        getWidget(mShadowsDebug, "ShadowsDebug");
 
         mOkButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onOkButtonClicked);
         mShadersButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onShadersToggled);
@@ -129,6 +136,14 @@ namespace MWGui
         mViewDistanceSlider->eventScrollChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onSliderChangePosition);
         mResolutionList->eventListChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onResolutionSelected);
         mAnisotropySlider->eventScrollChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onSliderChangePosition);
+
+        mShadowsEnabledButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onButtonToggled);
+        mShadowsLargeDistance->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onButtonToggled);
+        mShadowsTextureSize->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onShadowTextureSize);
+        mActorShadows->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onButtonToggled);
+        mStaticsShadows->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onButtonToggled);
+        mMiscShadows->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onButtonToggled);
+        mShadowsDebug->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onButtonToggled);
 
         mMasterVolumeSlider->eventScrollChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onSliderChangePosition);
         mVoiceVolumeSlider->eventScrollChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onSliderChangePosition);
@@ -182,7 +197,6 @@ namespace MWGui
         std::string tf = Settings::Manager::getString("texture filtering", "General");
         mTextureFilteringButton->setCaption(textureFilteringToStr(tf));
         mAnisotropyLabel->setCaption("Anisotropy (" + boost::lexical_cast<std::string>(Settings::Manager::getInt("anisotropy", "General")) + ")");
-        mAnisotropyBox->setVisible(tf == "anisotropic");
 
         float val = (Settings::Manager::getFloat("max viewing distance", "Viewing distance")-sViewDistMin)/(sViewDistMax-sViewDistMin);
         int viewdist = (mViewDistanceSlider->getScrollRange()-1) * val;
@@ -198,6 +212,14 @@ namespace MWGui
         mReflectObjectsButton->setCaptionWithReplacing(Settings::Manager::getBool("reflect objects", "Water") ? "#{sOn}" : "#{sOff}");
         mReflectActorsButton->setCaptionWithReplacing(Settings::Manager::getBool("reflect actors", "Water") ? "#{sOn}" : "#{sOff}");
         mReflectTerrainButton->setCaptionWithReplacing(Settings::Manager::getBool("reflect terrain", "Water") ? "#{sOn}" : "#{sOff}");
+
+        mShadowsTextureSize->setCaption (Settings::Manager::getString ("texture size", "Shadows"));
+        mShadowsLargeDistance->setCaptionWithReplacing(Settings::Manager::getBool("split", "Shadows") ? "#{sOn}" : "#{sOff}");
+        mShadowsEnabledButton->setCaptionWithReplacing(Settings::Manager::getBool("enabled", "Shadows") ? "#{sOn}" : "#{sOff}");
+        mActorShadows->setCaptionWithReplacing(Settings::Manager::getBool("actor shadows", "Shadows") ? "#{sOn}" : "#{sOff}");
+        mStaticsShadows->setCaptionWithReplacing(Settings::Manager::getBool("statics shadows", "Shadows") ? "#{sOn}" : "#{sOff}");
+        mMiscShadows->setCaptionWithReplacing(Settings::Manager::getBool("misc shadows", "Shadows") ? "#{sOn}" : "#{sOff}");
+        mShadowsDebug->setCaptionWithReplacing(Settings::Manager::getBool("debug", "Shadows") ? "#{sOn}" : "#{sOff}");
 
         std::string shaders;
         if (!Settings::Manager::getBool("shaders", "Objects"))
@@ -256,6 +278,25 @@ namespace MWGui
         mResolutionList->setIndexSelected(MyGUI::ITEM_NONE);
     }
 
+    void SettingsWindow::onShadowTextureSize(MyGUI::Widget* _sender)
+    {
+        std::string size = mShadowsTextureSize->getCaption();
+
+        if (size == "512")
+            size = "1024";
+        else if (size == "1024")
+            size = "2048";
+        else if (size == "2048")
+            size = "4096";
+        else
+            size = "512";
+
+        mShadowsTextureSize->setCaption(size);
+
+        Settings::Manager::setString("texture size", "Shadows", size);
+        apply();
+    }
+
     void SettingsWindow::onButtonToggled(MyGUI::Widget* _sender)
     {
         std::string on = mWindowManager.getGameSettingString("sOn", "On");
@@ -300,10 +341,6 @@ namespace MWGui
                 apply();
             }
         }
-        else if (_sender == mShadersButton)
-        {
-
-        }
         else if (_sender == mVSyncButton)
         {
             Settings::Manager::setBool("vsync", "Video", newState);
@@ -324,6 +361,18 @@ namespace MWGui
                 Settings::Manager::setBool("reflect actors", "Water", newState);
             else if (_sender == mReflectTerrainButton)
                 Settings::Manager::setBool("reflect terrain", "Water", newState);
+            else if (_sender == mShadowsEnabledButton)
+                Settings::Manager::setBool("enabled", "Shadows", newState);
+            else if (_sender == mShadowsLargeDistance)
+                Settings::Manager::setBool("split", "Shadows", newState);
+            else if (_sender == mActorShadows)
+                Settings::Manager::setBool("actor shadows", "Shadows", newState);
+            else if (_sender == mStaticsShadows)
+                Settings::Manager::setBool("statics shadows", "Shadows", newState);
+            else if (_sender == mMiscShadows)
+                Settings::Manager::setBool("misc shadows", "Shadows", newState);
+            else if (_sender == mShadowsDebug)
+                Settings::Manager::setBool("debug", "Shadows", newState);
 
             apply();
         }
@@ -352,6 +401,11 @@ namespace MWGui
             mReflectActorsButton->setEnabled(false);
             mReflectTerrainButton->setEnabled(false);
             Settings::Manager::setBool("shader", "Water", false);
+
+            // shadows not supported
+            mShadowsEnabledButton->setEnabled(false);
+            mShadowsEnabledButton->setCaptionWithReplacing("#{sOff}");
+            Settings::Manager::setBool("enabled", "Shadows", false);
         }
         else
         {
@@ -360,6 +414,7 @@ namespace MWGui
             mReflectObjectsButton->setEnabled(true);
             mReflectActorsButton->setEnabled(true);
             mReflectTerrainButton->setEnabled(true);
+            mShadowsEnabledButton->setEnabled(true);
 
             Settings::Manager::setBool("shaders", "Objects", true);
             Settings::Manager::setString("shader mode", "General", val);
@@ -390,7 +445,6 @@ namespace MWGui
             next = "none";
 
         mTextureFilteringButton->setCaption(textureFilteringToStr(next));
-        mAnisotropyBox->setVisible(next == "anisotropic");
 
         Settings::Manager::setString("texture filtering", "General", next);
         apply();

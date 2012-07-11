@@ -7,11 +7,8 @@
 #define MRT @shPropertyNotBool(is_transparent) && @shPropertyBool(mrt_output) && @shGlobalSettingBool(mrt_output)
 #define LIGHTING @shPropertyBool(lighting)
 
-#define SHADOWS LIGHTING && 0
-#define SHADOWS_PSSM LIGHTING
-
-#define SHADOWS 0 && LIGHTING
-#define SHADOWS_PSSM 0 && LIGHTING
+#define SHADOWS_PSSM LIGHTING && @shGlobalSettingBool(shadows_pssm)
+#define SHADOWS LIGHTING && @shGlobalSettingBool(shadows)
 
 #if FOG || MRT || SHADOWS_PSSM
 #define NEED_DEPTH
@@ -183,7 +180,7 @@
         
         lightDir = normalize(lightDir);
 
-#if @shIterator == 0
+#if @shIterator == 0 && (SHADOWS || SHADOWS_PSSM)
         diffuse += materialDiffuse.xyz * lightDiffuse@shIterator.xyz * (1.0 / ((lightAttenuation@shIterator.y) + (lightAttenuation@shIterator.z * d) + (lightAttenuation@shIterator.w * d * d))) * max(dot(normal, lightDir), 0) * shadow;
 #else
         diffuse += materialDiffuse.xyz * lightDiffuse@shIterator.xyz * (1.0 / ((lightAttenuation@shIterator.y) + (lightAttenuation@shIterator.z * d) + (lightAttenuation@shIterator.w * d * d))) * max(dot(normal, lightDir), 0);

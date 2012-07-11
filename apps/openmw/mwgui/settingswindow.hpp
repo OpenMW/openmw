@@ -44,6 +44,14 @@ namespace MWGui
             MyGUI::Button* mReflectTerrainButton;
             MyGUI::Button* mShadersButton;
 
+            MyGUI::Button* mShadowsEnabledButton;
+            MyGUI::Button* mShadowsLargeDistance;
+            MyGUI::Button* mShadowsTextureSize;
+            MyGUI::Button* mActorShadows;
+            MyGUI::Button* mStaticsShadows;
+            MyGUI::Button* mMiscShadows;
+            MyGUI::Button* mShadowsDebug;
+
             // audio
             MyGUI::ScrollBar* mMasterVolumeSlider;
             MyGUI::ScrollBar* mVoiceVolumeSlider;
@@ -61,6 +69,7 @@ namespace MWGui
             void onResolutionCancel();
 
             void onShadersToggled(MyGUI::Widget* _sender);
+            void onShadowTextureSize(MyGUI::Widget* _sender);
 
             void apply();
     };
