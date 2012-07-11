@@ -1,18 +1,12 @@
 material openmw_moon
 {
     allow_fixed_function false
-    mrt_output true
     pass
     {
         vertex_program moon_vertex
         fragment_program moon_fragment
         
         polygon_mode_overrideable off
-        
-        shader_properties
-        {
-            mrt_output $mrt_output
-        }
         
         texture_unit diffuseMap
         {
@@ -25,7 +19,6 @@ material openmw_moon
 material openmw_clouds
 {
     allow_fixed_function false
-    mrt_output true
     pass
     {
         vertex_program clouds_vertex
@@ -35,11 +28,6 @@ material openmw_clouds
 
         scene_blend alpha_blend
         depth_write off
-
-        shader_properties
-        {
-            mrt_output $mrt_output
-        }
 
         // second diffuse map is used for weather transitions
         texture_unit diffuseMap1
@@ -58,7 +46,6 @@ material openmw_clouds
 material openmw_atmosphere
 {
     allow_fixed_function false
-    mrt_output true
     pass
     {
         vertex_program atmosphere_vertex
@@ -68,33 +55,26 @@ material openmw_atmosphere
         
         scene_blend alpha_blend
         depth_write off
-        
-        shader_properties
-        {
-            mrt_output $mrt_output
-        }
     }
 }
 
 material openmw_stars
 {
     allow_fixed_function false
-    mrt_output true
     pass
     {
         vertex_program stars_vertex
         fragment_program stars_fragment
         
         polygon_mode_overrideable off
- 
-        shader_properties
-        {
-            mrt_output $mrt_output
-        }
+        
+        depth_check off
+        depth_write off
+        scene_blend alpha_blend
 
         texture_unit diffuseMap
         {
-            diffuseMap $diffuseMap
+            direct_texture $texture
         }
     }
 }
@@ -103,7 +83,6 @@ material openmw_stars
 material openmw_sun
 {
     allow_fixed_function false
-    mrt_output true
     pass
     {
         vertex_program sun_vertex
@@ -111,14 +90,9 @@ material openmw_sun
 
         polygon_mode_overrideable off
         
-        shader_properties
+        texture_unit diffuseMap
         {
-            mrt_output $mrt_output
-        }
-        
-        texture unit diffuseMap
-        {
-            diffuseMap $diffuseMap
+            direct_texture $texture
         }
     }
 }

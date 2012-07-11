@@ -21,7 +21,7 @@
     // ------------------------------------- VERTEX ---------------------------------------
 
     SH_BEGIN_PROGRAM
-        shUniform(float4x4 wvp) @shAutoConstant(wvp, worldviewproj_matrix)
+        shUniform(float4x4, wvp) @shAutoConstant(wvp, worldviewproj_matrix)
         shInput(float2, uv0)
         shOutput(float2, UV)
         shNormalInput(float4)
@@ -41,16 +41,16 @@
 
 #if SHADOWS
         shOutput(float4, lightSpacePos0)
-        shUniform(float4x4 texViewProjMatrix0) @shAutoConstant(texViewProjMatrix0, texture_viewproj_matrix)
-        shUniform(float4x4 worldMatrix) @shAutoConstant(worldMatrix, world_matrix)
+        shUniform(float4x4, texViewProjMatrix0) @shAutoConstant(texViewProjMatrix0, texture_viewproj_matrix)
+        shUniform(float4x4, worldMatrix) @shAutoConstant(worldMatrix, world_matrix)
 #endif
 
 #if SHADOWS_PSSM
     @shForeach(3)
         shOutput(float4, lightSpacePos@shIterator)
-        shUniform(float4x4 texViewProjMatrix@shIterator) @shAutoConstant(texViewProjMatrix@shIterator, texture_viewproj_matrix, @shIterator)
+        shUniform(float4x4, texViewProjMatrix@shIterator) @shAutoConstant(texViewProjMatrix@shIterator, texture_viewproj_matrix, @shIterator)
     @shEndForeach
-        shUniform(float4x4 worldMatrix) @shAutoConstant(worldMatrix, world_matrix)
+        shUniform(float4x4, worldMatrix) @shAutoConstant(worldMatrix, world_matrix)
 #endif
     SH_START_PROGRAM
     {
@@ -99,27 +99,27 @@
 #endif
 
 #if MRT
-        shUniform(float far) @shAutoConstant(far, far_clip_distance)
+        shUniform(float, far) @shAutoConstant(far, far_clip_distance)
 #endif
 
 #if LIGHTING
         shInput(float3, normalPassthrough)
         shInput(float3, objSpacePositionPassthrough)
-        shUniform(float4 lightAmbient)                       @shAutoConstant(lightAmbient, ambient_light_colour)
-        //shUniform(float passIteration)                       @shAutoConstant(passIteration, pass_iteration_number)
-        shUniform(float4 materialAmbient)                    @shAutoConstant(materialAmbient, surface_ambient_colour)
-        shUniform(float4 materialDiffuse)                    @shAutoConstant(materialDiffuse, surface_diffuse_colour)
-        shUniform(float4 materialEmissive)                   @shAutoConstant(materialEmissive, surface_emissive_colour)
+        shUniform(float4, lightAmbient)                       @shAutoConstant(lightAmbient, ambient_light_colour)
+        //shUniform(float, passIteration)                       @shAutoConstant(passIteration, pass_iteration_number)
+        shUniform(float4, materialAmbient)                    @shAutoConstant(materialAmbient, surface_ambient_colour)
+        shUniform(float4, materialDiffuse)                    @shAutoConstant(materialDiffuse, surface_diffuse_colour)
+        shUniform(float4, materialEmissive)                   @shAutoConstant(materialEmissive, surface_emissive_colour)
     @shForeach(8)
-        shUniform(float4 lightPosObjSpace@shIterator)        @shAutoConstant(lightPosObjSpace@shIterator, light_position_object_space, @shIterator)
-        shUniform(float4 lightAttenuation@shIterator)        @shAutoConstant(lightAttenuation@shIterator, light_attenuation, @shIterator)
-        shUniform(float4 lightDiffuse@shIterator)            @shAutoConstant(lightDiffuse@shIterator, light_diffuse_colour, @shIterator)
+        shUniform(float4, lightPosObjSpace@shIterator)        @shAutoConstant(lightPosObjSpace@shIterator, light_position_object_space, @shIterator)
+        shUniform(float4, lightAttenuation@shIterator)        @shAutoConstant(lightAttenuation@shIterator, light_attenuation, @shIterator)
+        shUniform(float4, lightDiffuse@shIterator)            @shAutoConstant(lightDiffuse@shIterator, light_diffuse_colour, @shIterator)
     @shEndForeach
 #endif
         
 #if FOG
-        shUniform(float3 fogColor) @shAutoConstant(fogColor, fog_colour)
-        shUniform(float4 fogParams) @shAutoConstant(fogParams, fog_params)
+        shUniform(float3, fogColor) @shAutoConstant(fogColor, fog_colour)
+        shUniform(float4, fogParams) @shAutoConstant(fogParams, fog_params)
 #endif
 
 #ifdef HAS_VERTEXCOLOR
@@ -129,19 +129,19 @@
 #if SHADOWS
         shInput(float4, lightSpacePos0)
         shSampler2D(shadowMap0)
-        shUniform(float2 invShadowmapSize0)   @shAutoConstant(invShadowmapSize0, inverse_texture_size, 1)
+        shUniform(float2, invShadowmapSize0)   @shAutoConstant(invShadowmapSize0, inverse_texture_size, 1)
 #endif
 #if SHADOWS_PSSM
     @shForeach(3)
         shInput(float4, lightSpacePos@shIterator)
         shSampler2D(shadowMap@shIterator)
-        shUniform(float2 invShadowmapSize@shIterator)  @shAutoConstant(invShadowmapSize@shIterator, inverse_texture_size, @shIterator(1))
+        shUniform(float2, invShadowmapSize@shIterator)  @shAutoConstant(invShadowmapSize@shIterator, inverse_texture_size, @shIterator(1))
     @shEndForeach
-    shUniform(float4 pssmSplitPoints)  @shSharedParameter(pssmSplitPoints)
+    shUniform(float3, pssmSplitPoints)  @shSharedParameter(pssmSplitPoints)
 #endif
 
 #if SHADOWS || SHADOWS_PSSM
-        shUniform(float4 shadowFar_fadeStart) @shSharedParameter(shadowFar_fadeStart)
+        shUniform(float4, shadowFar_fadeStart) @shSharedParameter(shadowFar_fadeStart)
 #endif
     SH_START_PROGRAM
     {

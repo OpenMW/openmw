@@ -63,6 +63,16 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
     platform->setCacheFolder ("./");
     mFactory = new sh::Factory(platform);
 
+    sh::Language lang;
+    std::string l = Settings::Manager::getString("shader mode", "General");
+    if (l == "glsl")
+        lang = sh::Language_GLSL;
+    else if (l == "hlsl")
+        lang = sh::Language_HLSL;
+    else
+        lang = sh::Language_CG;
+    mFactory->setCurrentLanguage (lang);
+
     //The fog type must be set before any terrain objects are created as if the
     //fog type is set to FOG_NONE then the initially created terrain won't have any fog
     configureFog(1, ColourValue(1,1,1));

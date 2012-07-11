@@ -15,6 +15,8 @@
 #include <OgreOverlayManager.h>
 #include <OgreOverlayContainer.h>
 
+#include <boost/lexical_cast.hpp>
+
 #include <components/nifogre/ogre_nif_loader.hpp>
 
 #include "../mwbase/environment.hpp"
@@ -50,7 +52,7 @@ void BillboardObject::setSize(const float size)
 
 void BillboardObject::setVisibility(const float visibility)
 {
-    mMaterial->getTechnique(0)->getPass(0)->setDiffuse(0.0, 0.0, 0.0, visibility);
+    //mMaterial->getTechnique(0)->getPass(0)->setDiffuse(0.0, 0.0, 0.0, visibility);
 }
 
 void BillboardObject::setPosition(const Vector3& pPosition)
@@ -76,7 +78,7 @@ void BillboardObject::setVisibilityFlags(int flags)
 
 void BillboardObject::setColour(const ColourValue& pColour)
 {
-    mMaterial->getTechnique(0)->getPass(0)->setSelfIllumination(pColour);
+    //mMaterial->getTechnique(0)->getPass(0)->setSelfIllumination(pColour);
 }
 
 void BillboardObject::setRenderQueue(unsigned int id)
@@ -112,6 +114,12 @@ void BillboardObject::init(const String& textureName,
     mBBSet->createBillboard(0,0,0);
     mBBSet->setCastShadows(false);
 
+    sh::MaterialInstance* m = sh::Factory::getInstance().createMaterialInstance ("BillboardMaterial"+StringConverter::toString(bodyCount), "openmw_sun");
+    m->setProperty("texture", sh::makeProperty<sh::StringValue>(new sh::StringValue(textureName)));
+
+    mBBSet->setMaterialName("BillboardMaterial"+StringConverter::toString(bodyCount));
+
+    /*
     mMaterial = MaterialManager::getSingleton().create("BillboardMaterial"+StringConverter::toString(bodyCount), ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
     mMaterial->removeAllTechniques();
     Pass* p = mMaterial->createTechnique()->createPass();
@@ -123,7 +131,6 @@ void BillboardObject::init(const String& textureName,
     p->setAmbient(0.0,0.0,0.0);
     p->setPolygonModeOverrideable(false);
     p->createTextureUnitState(textureName);
-    mBBSet->setMaterialName("BillboardMaterial"+StringConverter::toString(bodyCount));
 
     HighLevelGpuProgramManager& mgr = HighLevelGpuProgramManager::getSingleton();
     HighLevelGpuProgramPtr vshader;
@@ -183,7 +190,7 @@ void BillboardObject::init(const String& textureName,
     fshader->getDefaultParameters()->setNamedAutoConstant("diffuse", GpuProgramParameters::ACT_SURFACE_DIFFUSE_COLOUR);
     fshader->getDefaultParameters()->setNamedAutoConstant("emissive", GpuProgramParameters::ACT_SURFACE_EMISSIVE_COLOUR);
     mMaterial->getTechnique(0)->getPass(0)->setFragmentProgram(fshader->getName());
-
+*/
     bodyCount++;
 }
 
@@ -194,6 +201,8 @@ Moon::Moon( const String& textureName,
 {
     init(textureName, initialSize, position, rootNode);
 
+
+    /*
     HighLevelGpuProgramManager& mgr = HighLevelGpuProgramManager::getSingleton();
     HighLevelGpuProgramPtr vshader;
     if (mgr.resourceExists("Moon_VP"))
@@ -261,6 +270,8 @@ Moon::Moon( const String& textureName,
     fshader->getDefaultParameters()->setNamedAutoConstant("emissive", GpuProgramParameters::ACT_SURFACE_EMISSIVE_COLOUR);
     mMaterial->getTechnique(0)->getPass(0)->setFragmentProgram(fshader->getName());
 
+    */
+
     setVisibility(1.0);
 
     mPhase = Moon::Phase_Full;
@@ -273,7 +284,7 @@ void Moon::setType(const Moon::Type& type)
 
 void Moon::setSkyColour(const Ogre::ColourValue& colour)
 {
-    mMaterial->getTechnique(0)->getPass(0)->getFragmentProgramParameters()->setNamedConstant("skyColour", colour);
+    //mMaterial->getTechnique(0)->getPass(0)->getFragmentProgramParameters()->setNamedConstant("skyColour", colour);
 }
 
 void Moon::setPhase(const Moon::Phase& phase)
@@ -295,7 +306,7 @@ void Moon::setPhase(const Moon::Phase& phase)
 
     textureName += ".dds";
 
-    mMaterial->getTechnique(0)->getPass(0)->getTextureUnitState(0)->setTextureName(textureName);
+    //mMaterial->getTechnique(0)->getPass(0)->getTextureUnitState(0)->setTextureName(textureName);
 
     mPhase = phase;
 }
@@ -387,8 +398,6 @@ SkyManager::SkyManager (SceneNode* pMwRoot, Camera* pCamera)
     , mSceneMgr(NULL)
     , mAtmosphereDay(NULL)
     , mAtmosphereNight(NULL)
-    , mCloudMaterial()
-    , mAtmosphereMaterial()
     , mCloudFragmentShader()
     , mClouds()
     , mNextClouds()
@@ -406,6 +415,7 @@ SkyManager::SkyManager (SceneNode* pMwRoot, Camera* pCamera)
     , mMasserEnabled(true)
     , mSecundaEnabled(true)
     , mCreated(false)
+    , mCloudAnimationTimer(0.f)
 {
     mSceneMgr = pMwRoot->getCreator();
     mRootNode = mCamera->getParentSceneNode()->createChildSceneNode();
@@ -415,7 +425,19 @@ SkyManager::SkyManager (SceneNode* pMwRoot, Camera* pCamera)
 
 void SkyManager::create()
 {
-    /// \todo preload all the textures and meshes that are used for sky rendering
+    sh::Factory::getInstance().setSharedParameter ("cloudBlendFactor",
+        sh::makeProperty<sh::FloatValue>(new sh::FloatValue(0)));
+    sh::Factory::getInstance().setSharedParameter ("cloudOpacity",
+        sh::makeProperty<sh::FloatValue>(new sh::FloatValue(1)));
+    sh::Factory::getInstance().setSharedParameter ("cloudColour",
+        sh::makeProperty<sh::Vector3>(new sh::Vector3(1,1,1)));
+    sh::Factory::getInstance().setSharedParameter ("cloudAnimationTimer",
+        sh::makeProperty<sh::FloatValue>(new sh::FloatValue(0)));
+    sh::Factory::getInstance().setSharedParameter ("nightFade",
+        sh::makeProperty<sh::FloatValue>(new sh::FloatValue(0)));
+
+    sh::Factory::getInstance().setTextureAlias ("cloud_texture_1", "");
+    sh::Factory::getInstance().setTextureAlias ("cloud_texture_2", "");
 
     // Create overlay used for thunderstorm
     MaterialPtr material = MaterialManager::getSingleton().create( "ThunderMaterial", ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME );
@@ -449,9 +471,6 @@ void SkyManager::create()
     mSunGlare->setRenderQueue(RQG_SkiesLate);
     mSunGlare->setVisibilityFlags(RV_Glare);
 
-
-    HighLevelGpuProgramManager& mgr = HighLevelGpuProgramManager::getSingleton();
-
     // Stars
     MeshPtr mesh = NifOgre::NIFLoader::load("meshes\\sky_night_01.nif");
     Entity* night1_ent = mSceneMgr->createEntity("meshes\\sky_night_01.nif");
@@ -462,76 +481,18 @@ void SkyManager::create()
     mAtmosphereNight = mRootNode->createChildSceneNode();
     mAtmosphereNight->attachObject(night1_ent);
 
-    // Stars vertex shader
-    HighLevelGpuProgramPtr stars_vp = mgr.createProgram("Stars_VP", ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
-        "cg", GPT_VERTEX_PROGRAM);
-    stars_vp->setParameter("profiles", "vs_2_x arbvp1");
-    stars_vp->setParameter("entry_point", "main_vp");
-    StringUtil::StrStreamType outStream4;
-    outStream4 <<
-    "void main_vp(	\n"
-    "	float4 position : POSITION,	\n"
-    "   in float2 uv : TEXCOORD0, \n"
-    "   out float2 oUV : TEXCOORD0, \n"
-    "   out float oFade : TEXCOORD1, \n"
-    "	out float4 oPosition : POSITION,	\n"
-    "	uniform float4x4 worldViewProj	\n"
-    ")	\n"
-    "{	\n"
-    "   oUV = uv; \n"
-    "   oFade = (position.z > 50) ? 1.f : 0.f; \n"
-    "	oPosition = mul( worldViewProj, position );  \n"
-    "}";
-    stars_vp->setSource(outStream4.str());
-    stars_vp->load();
-    stars_vp->getDefaultParameters()->setNamedAutoConstant("worldViewProj", GpuProgramParameters::ACT_WORLDVIEWPROJ_MATRIX);
-
-    // Stars fragment shader
-    HighLevelGpuProgramPtr stars_fp = mgr.createProgram("Stars_FP", ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
-        "cg", GPT_FRAGMENT_PROGRAM);
-    stars_fp->setParameter("profiles", "ps_2_x arbfp1");
-    stars_fp->setParameter("entry_point", "main_fp");
-    StringUtil::StrStreamType outStream5;
-    outStream5 <<
-    "void main_fp(	\n"
-    "   in float2 uv : TEXCOORD0, \n"
-    "	out float4 oColor    : COLOR, \n";
-    if (RenderingManager::useMRT()) outStream5 <<
-        "   out float4 oColor1 : COLOR1, \n";
-    outStream5 <<
-    "   in float fade : TEXCOORD1, \n"
-    "   uniform sampler2D texture : TEXUNIT0, \n"
-    "   uniform float opacity, \n"
-    "   uniform float4 diffuse, \n"
-    "   uniform float4 emissive \n"
-    ")	\n"
-    "{	\n"
-    "   oColor =  tex2D(texture, uv) * float4(emissive.xyz, 1) * float4(1,1,1,fade*diffuse.a); \n";
-    if (RenderingManager::useMRT()) outStream5 <<
-        "   oColor1 = float4(1, 0, 0, 1); \n";
-    outStream5 <<
-    "}";
-    stars_fp->setSource(outStream5.str());
-    stars_fp->load();
-    stars_fp->getDefaultParameters()->setNamedAutoConstant("emissive", GpuProgramParameters::ACT_SURFACE_EMISSIVE_COLOUR);
-    stars_fp->getDefaultParameters()->setNamedAutoConstant("diffuse", GpuProgramParameters::ACT_SURFACE_DIFFUSE_COLOUR);
-
-    /*
     for (unsigned int i=0; i<night1_ent->getNumSubEntities(); ++i)
     {
-        MaterialPtr mp = night1_ent->getSubEntity(i)->getMaterial();
-        mp->getTechnique(0)->getPass(0)->setSelfIllumination(1.0, 1.0, 1.0);
-        mp->getTechnique(0)->getPass(0)->setAmbient(0.0, 0.0, 0.0);
-        mp->getTechnique(0)->getPass(0)->setDiffuse(0.0, 0.0, 0.0, 1.0);
-        mp->getTechnique(0)->getPass(0)->setDepthWriteEnabled(false);
-        mp->getTechnique(0)->getPass(0)->setDepthCheckEnabled(false);
-        mp->getTechnique(0)->getPass(0)->setSceneBlending(SBT_TRANSPARENT_ALPHA);
-        mp->getTechnique(0)->getPass(0)->setVertexProgram(stars_vp->getName());
-        mp->getTechnique(0)->getPass(0)->setFragmentProgram(stars_fp->getName());
-        mp->getTechnique(0)->getPass(0)->setPolygonModeOverrideable(false);
-        mStarsMaterials[i] = mp;
+        std::string matName = "openmw_stars_" + boost::lexical_cast<std::string>(i);
+        sh::MaterialInstance* m = sh::Factory::getInstance ().createMaterialInstance (matName, "openmw_stars");
+
+        std::string textureName = sh::retrieveValue<sh::StringValue>(
+                    sh::Factory::getInstance().getMaterialInstance(night1_ent->getSubEntity (i)->getMaterialName ())->getProperty("diffuseMap"), NULL).get();
+
+        m->setProperty ("texture", sh::makeProperty<sh::StringValue>(new sh::StringValue(textureName)));
+
+        night1_ent->getSubEntity(i)->setMaterialName (matName);
     }
-    */
 
     // Atmosphere (day)
     mesh = NifOgre::NIFLoader::load("meshes\\sky_atmosphere.nif");
@@ -545,11 +506,6 @@ void SkyManager::create()
     mAtmosphereDay = mRootNode->createChildSceneNode();
     mAtmosphereDay->attachObject(atmosphere_ent);
     atmosphere_ent->getSubEntity (0)->setMaterialName ("openmw_atmosphere");
-    //mAtmosphereMaterial = atmosphere_ent->getSubEntity(0)->getMaterial();
-    //mAtmosphereMaterial->getTechnique(0)->getPass(0)->setPolygonModeOverrideable(false);
-    // Atmosphere shader
-   // mAtmosphereMaterial->getTechnique(0)->getPass(0)->setFragmentProgram(fshader->getName());
-    atmosphere_ent->getSubEntity (0)->setMaterialName("openmw_atmosphere");
 
     // Clouds
     NifOgre::NIFLoader::load("meshes\\sky_clouds_01.nif");
@@ -558,88 +514,10 @@ void SkyManager::create()
     clouds_ent->setRenderQueueGroup(RQG_SkiesEarly+5);
     SceneNode* clouds_node = mRootNode->createChildSceneNode();
     clouds_node->attachObject(clouds_ent);
-    //mCloudMaterial = clouds_ent->getSubEntity(0)->getMaterial();
     clouds_ent->getSubEntity(0)->setMaterialName ("openmw_clouds");
-    //mCloudMaterial->getTechnique(0)->getPass(0)->setPolygonModeOverrideable(false);
     clouds_ent->setCastShadows(false);
 
-    // Clouds vertex shader
-    HighLevelGpuProgramPtr vshader2 = mgr.createProgram("Clouds_VP", ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
-        "cg", GPT_VERTEX_PROGRAM);
-    vshader2->setParameter("profiles", "vs_2_x arbvp1");
-    vshader2->setParameter("entry_point", "main_vp");
-    StringUtil::StrStreamType outStream3;
-    outStream3 <<
-    "void main_vp(	\n"
-    "	float4 position : POSITION,	\n"
-    "	in float4 color	: COLOR,	\n"
-    "   out float4 oColor : TEXCOORD1, \n"
-    "   in float2 uv : TEXCOORD0, \n"
-    "   out float2 oUV : TEXCOORD0, \n"
-    "	out float4 oPosition : POSITION,	\n"
-    "	uniform float4x4 worldViewProj	\n"
-    ")	\n"
-    "{	\n"
-    "   oUV = uv; \n"
-    "   oColor = color; \n"
-    "	oPosition = mul( worldViewProj, position );  \n"
-    "}";
-    vshader2->setSource(outStream3.str());
-    vshader2->load();
-    vshader2->getDefaultParameters()->setNamedAutoConstant("worldViewProj", GpuProgramParameters::ACT_WORLDVIEWPROJ_MATRIX);
-    //mCloudMaterial->getTechnique(0)->getPass(0)->setVertexProgram(vshader2->getName());
-
-    // Clouds fragment shader
-    mCloudFragmentShader = mgr.createProgram("Clouds_FP", ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
-        "cg", GPT_FRAGMENT_PROGRAM);
-    mCloudFragmentShader->setParameter("profiles", "ps_2_x arbfp1");
-    mCloudFragmentShader->setParameter("entry_point", "main_fp");
-    StringUtil::StrStreamType outStream2;
-    outStream2 <<
-    "void main_fp(	\n"
-    "   in float2 uv : TEXCOORD0, \n"
-    "   in float4 color : TEXCOORD1, \n"
-    "	out float4 oColor    : COLOR, \n";
-    if (RenderingManager::useMRT()) outStream2 <<
-        "   out float4 oColor1 : COLOR1, \n";
-    outStream2 <<
-    "   uniform sampler2D texture : TEXUNIT0, \n"
-    "   uniform sampler2D secondTexture : TEXUNIT1, \n"
-    "   uniform float transitionFactor, \n"
-    "   uniform float time, \n"
-    "   uniform float speed, \n"
-    "   uniform float opacity, \n"
-    "   uniform float4 emissive \n"
-    ")	\n"
-    "{	\n"
-    "   uv += float2(0,1) * time * speed * 0.003; \n" // Scroll in y direction
-    "   float4 tex = lerp(tex2D(texture, uv), tex2D(secondTexture, uv), transitionFactor); \n"
-    "   oColor = color * float4(emissive.xyz,1) * tex * float4(1,1,1,opacity); \n";
-    if (RenderingManager::useMRT()) outStream2 <<
-        "   oColor1 = float4(1, 0, 0, 1); \n";
-    outStream2 <<
-    "}";
-    mCloudFragmentShader->setSource(outStream2.str());
-    mCloudFragmentShader->load();
-    mCloudFragmentShader->getDefaultParameters()->setNamedAutoConstant("emissive", GpuProgramParameters::ACT_SURFACE_EMISSIVE_COLOUR);
-    //mCloudMaterial->getTechnique(0)->getPass(0)->setFragmentProgram(mCloudFragmentShader->getName());
-    setCloudsOpacity(0.75);
-
     ModVertexAlpha(clouds_ent, 1);
-
-    // I'm not sure if the materials are being used by any other objects
-    // Make a unique "modifiable" copy of the materials to be sure
-    //mCloudMaterial = mCloudMaterial->clone("Clouds");
-    //clouds_ent->getSubEntity(0)->setMaterial(mCloudMaterial);
-    /*
-    mCloudMaterial->getTechnique(0)->getPass(0)->setSelfIllumination(1.0, 1.0, 1.0);
-    mCloudMaterial->getTechnique(0)->getPass(0)->setDepthWriteEnabled(false);
-    mCloudMaterial->getTechnique(0)->getPass(0)->setSceneBlending(SBT_TRANSPARENT_ALPHA);
-
-    mCloudMaterial->getTechnique(0)->getPass(0)->removeAllTextureUnitStates();
-    mCloudMaterial->getTechnique(0)->getPass(0)->createTextureUnitState("textures\\tx_sky_cloudy.dds");
-    mCloudMaterial->getTechnique(0)->getPass(0)->createTextureUnitState("");
-*/
 
     mCreated = true;
 }
@@ -669,7 +547,10 @@ void SkyManager::update(float duration)
     if (!mEnabled) return;
 
     // UV Scroll the clouds
-    //mCloudMaterial->getTechnique(0)->getPass(0)->getFragmentProgramParameters()->setNamedConstantFromTime("time", MWBase::Environment::get().getWorld()->getTimeScaleFactor()/30.f);
+    mCloudAnimationTimer += duration * mCloudSpeed * (MWBase::Environment::get().getWorld()->getTimeScaleFactor()/30.f);
+    sh::Factory::getInstance().setSharedParameter ("cloudAnimationTimer",
+        sh::makeProperty<sh::FloatValue>(new sh::FloatValue(mCloudAnimationTimer)));
+
 
     /// \todo improve this
     mMasser->setPhase( static_cast<Moon::Phase>( (int) ((mDay % 32)/4.f)) );
@@ -678,15 +559,15 @@ void SkyManager::update(float duration)
 
     if (mSunEnabled)
     {
-        // take 1/5 sec for fading the glare effect from invisible to full
+        // take 1/10 sec for fading the glare effect from invisible to full
         if (mGlareFade > mGlare)
         {
-            mGlareFade -= duration*5;
+            mGlareFade -= duration*10;
             if (mGlareFade < mGlare) mGlareFade = mGlare;
         }
         else if (mGlareFade < mGlare)
         {
-            mGlareFade += duration*5;
+            mGlareFade += duration*10;
             if (mGlareFade > mGlare) mGlareFade = mGlare;
         }
 
@@ -733,39 +614,34 @@ void SkyManager::setMoonColour (bool red)
                             : ColourValue(1.0, 1.0, 1.0));
 }
 
-void SkyManager::setCloudsOpacity(float opacity)
-{
-    if (!mCreated) return;
-    //mCloudMaterial->getTechnique(0)->getPass(0)->getFragmentProgramParameters()->setNamedConstant("opacity", Real(opacity));
-}
-
 void SkyManager::setWeather(const MWWorld::WeatherResult& weather)
 {
     if (!mCreated) return;
 
-    /*
     if (mClouds != weather.mCloudTexture)
     {
-        mCloudMaterial->getTechnique(0)->getPass(0)->getTextureUnitState(0)->setTextureName("textures\\"+weather.mCloudTexture);
+        sh::Factory::getInstance().setTextureAlias ("cloud_texture_1", "textures\\"+weather.mCloudTexture);
         mClouds = weather.mCloudTexture;
     }
 
     if (mNextClouds != weather.mNextCloudTexture)
     {
-        mCloudMaterial->getTechnique(0)->getPass(0)->getTextureUnitState(1)->setTextureName("textures\\"+weather.mNextCloudTexture);
+        sh::Factory::getInstance().setTextureAlias ("cloud_texture_2", "textures\\"+weather.mNextCloudTexture);
         mNextClouds = weather.mNextCloudTexture;
     }
 
     if (mCloudBlendFactor != weather.mCloudBlendFactor)
     {
-        mCloudMaterial->getTechnique(0)->getPass(0)->getFragmentProgramParameters()->setNamedConstant("transitionFactor", Real(weather.mCloudBlendFactor));
         mCloudBlendFactor = weather.mCloudBlendFactor;
+        sh::Factory::getInstance().setSharedParameter ("cloudBlendFactor",
+            sh::makeProperty<sh::FloatValue>(new sh::FloatValue(weather.mCloudBlendFactor)));
     }
 
     if (mCloudOpacity != weather.mCloudOpacity)
     {
-        mCloudMaterial->getTechnique(0)->getPass(0)->getFragmentProgramParameters()->setNamedConstant("opacity", Real(weather.mCloudOpacity));
         mCloudOpacity = weather.mCloudOpacity;
+        sh::Factory::getInstance().setSharedParameter ("cloudOpacity",
+            sh::makeProperty<sh::FloatValue>(new sh::FloatValue(weather.mCloudOpacity)));
     }
 
     if (mCloudColour != weather.mSunColor)
@@ -774,22 +650,20 @@ void SkyManager::setWeather(const MWWorld::WeatherResult& weather)
                         weather.mSunColor.g*0.7 + weather.mAmbientColor.g*0.7,
                         weather.mSunColor.b*0.7 + weather.mAmbientColor.b*0.7);
 
-        mCloudMaterial->getTechnique(0)->getPass(0)->setSelfIllumination(clr);
+        sh::Factory::getInstance().setSharedParameter ("cloudColour",
+            sh::makeProperty<sh::Vector3>(new sh::Vector3(clr.r, clr.g, clr.b)));
+
         mCloudColour = weather.mSunColor;
     }
-*/
+
     if (mSkyColour != weather.mSkyColor)
     {
         mSkyColour = weather.mSkyColor;
         sh::Factory::getInstance().setSharedParameter ("atmosphereColour", sh::makeProperty<sh::Vector4>(new sh::Vector4(
-            weather.mSkyColor.r, weather.mSkyColor.g, weather.mSkyColor.b, 1.0)));
+            weather.mSkyColor.r, weather.mSkyColor.g, weather.mSkyColor.b, weather.mSkyColor.a)));
     }
-/*
-    if (mCloudSpeed != weather.mCloudSpeed)
-    {
-        mCloudMaterial->getTechnique(0)->getPass(0)->getFragmentProgramParameters()->setNamedConstant("speed", Real(weather.mCloudSpeed));
-        mCloudSpeed = weather.mCloudSpeed;
-    }
+
+    mCloudSpeed = weather.mCloudSpeed;
 
     if (weather.mNight && mStarsOpacity != weather.mNightFade)
     {
@@ -798,12 +672,14 @@ void SkyManager::setWeather(const MWWorld::WeatherResult& weather)
         else
         {
             mAtmosphereNight->setVisible(true);
-            for (int i=0; i<7; ++i)
-                mStarsMaterials[i]->getTechnique(0)->getPass(0)->setDiffuse(0.0, 0.0, 0.0, weather.mNightFade);
+
+            sh::Factory::getInstance().setSharedParameter ("nightFade",
+                sh::makeProperty<sh::FloatValue>(new sh::FloatValue(weather.mNightFade)));
+
             mStarsOpacity = weather.mNightFade;
         }
     }
-    */
+
 
     float strength;
     float timeofday_angle = std::abs(mSunGlare->getPosition().z/mSunGlare->getPosition().length());

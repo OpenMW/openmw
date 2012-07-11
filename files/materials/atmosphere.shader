@@ -1,11 +1,11 @@
 #include "core.h"
 
-#define MRT @shPropertyBool(mrt_output)
+#define MRT @shGlobalSettingBool(mrt_output)
 
 #ifdef SH_VERTEX_SHADER
 
     SH_BEGIN_PROGRAM
-        shUniform(float4x4 wvp) @shAutoConstant(wvp, worldviewproj_matrix)
+        shUniform(float4x4, wvp) @shAutoConstant(wvp, worldviewproj_matrix)
 
         shColourInput(float4)
         shOutput(float4, colourPassthrough)
@@ -23,7 +23,7 @@
 #if MRT
         shDeclareMrtOutput(1)
 #endif
-        shUniform(float4 atmosphereColour)                   @shSharedParameter(atmosphereColour)
+        shUniform(float4, atmosphereColour)                   @shSharedParameter(atmosphereColour)
 
     SH_START_PROGRAM
     {

@@ -9,7 +9,7 @@
 
     #define shMatrixMult(m, v) mul(m, v)
 
-    #define shUniform(s) , uniform s
+    #define shUniform(type, name) , uniform type name
 
     #define shInput(type, name) , in type name : TEXCOORD@shCounter(1)
     #define shOutput(type, name) , out type name : TEXCOORD@shCounter(2)
@@ -59,13 +59,13 @@
     #define float4 vec4
     #define int2 ivec2
     #define int3 ivec3
-    #define int4 ivec4
+    #define int4 ivec4/
     #define shTexture2D sampler2D
     #define shSample(tex, coord) texture(tex, coord)
     #define shLerp(a, b, t) mix(a, b, t)
     #define shSaturate(a) clamp(a, 0.0, 1.0)
 
-    #define shUniform(s) uniform s;
+    #define shUniform(type, name) uniform type name;
 
     #define shSampler2D(name) uniform sampler2D name; @shUseSampler(name)
 

@@ -139,9 +139,6 @@ namespace MWRender
         void setMoonColour (bool red);
         ///< change Secunda colour to red
 
-        void setCloudsOpacity(float opacity);
-        ///< change opacity of the clouds
-
         void setWeather(const MWWorld::WeatherResult& weather);
 
         Ogre::SceneNode* getSunNode();
@@ -182,6 +179,8 @@ namespace MWRender
         int mDay;
         int mMonth;
 
+        float mCloudAnimationTimer;
+
         BillboardObject* mSun;
         BillboardObject* mSunGlare;
         Moon* mMasser;
@@ -193,11 +192,6 @@ namespace MWRender
 
         Ogre::SceneNode* mAtmosphereDay;
         Ogre::SceneNode* mAtmosphereNight;
-
-        Ogre::MaterialPtr mCloudMaterial;
-        Ogre::MaterialPtr mAtmosphereMaterial;
-
-        Ogre::MaterialPtr mStarsMaterials[7];
 
         Ogre::HighLevelGpuProgramPtr mCloudFragmentShader;
 

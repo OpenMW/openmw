@@ -1,6 +1,4 @@
 
-
-
 float depthShadowPCF (shTexture2D shadowMap, float4 shadowMapPos, float2 offset)
 {
     shadowMapPos /= shadowMapPos.w;
@@ -31,7 +29,7 @@ float pssmDepthShadow (
     shTexture2D shadowMap2,
     
     float depth,
-    float4 pssmSplitPoints)
+    float3 pssmSplitPoints)
 
 {
     float shadow;
