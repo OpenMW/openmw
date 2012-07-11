@@ -114,17 +114,13 @@ public:
             list[i].post(nif);
     }
 
-    X& operator[](size_t index)
-    {
-        return list.at(index).get();
-    }
+    X& operator[](size_t index) const
+    { return list.at(index).get(); }
 
-    bool has(size_t index)
-    {
-        return !list.at(index).empty();
-    }
+    bool has(size_t index) const
+    { return !list.at(index).empty(); }
 
-    size_t length()
+    size_t length() const
     { return list.size(); }
 };
 
