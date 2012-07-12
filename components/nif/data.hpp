@@ -202,61 +202,34 @@ public:
 class NiPosData : public Record
 {
 public:
+    Vector3KeyList mKeyList;
+
     void read(NIFFile *nif)
     {
-        int count = nif->getInt();
-        int type = nif->getInt();
-        if(type != 1 && type != 2)
-            nif->fail("Cannot handle NiPosData type");
-
-        // TODO: Could make structs of these. Seems to be identical to
-        // translation in NiKeyframeData.
-        for(int i=0; i<count; i++)
-        {
-            /*float time =*/ nif->getFloat();
-            nif->getVector3(); // This isn't really shared between type 1
-                               // and type 2, most likely
-            if(type == 2)
-            {
-                nif->getVector3();
-                nif->getVector3();
-            }
-        }
+        mKeyList.read(nif);
     }
 };
 
 class NiUVData : public Record
 {
 public:
+    FloatKeyList mKeyList[4];
+
     void read(NIFFile *nif)
     {
-        // TODO: This is claimed to be a "float animation key", which is
-        // also used in FloatData and KeyframeData. We could probably
-        // reuse and refactor a lot of this if we actually use it at some
-        // point.
-        for(int i=0; i<2; i++)
-        {
-            int count = nif->getInt();
-            if(count)
-            {
-                nif->getInt(); // always 2
-                nif->skip(count * (sizeof(float) + 3*sizeof(float))); // Really one time float + one vector
-            }
-        }
-        // Always 0
-        nif->getInt();
-        nif->getInt();
+        for(int i = 0;i < 4;i++)
+            mKeyList[i].read(nif);
     }
 };
 
 class NiFloatData : public Record
 {
 public:
+    FloatKeyList mKeyList;
+
     void read(NIFFile *nif)
     {
-        int count = nif->getInt();
-        nif->getInt(); // always 2
-        nif->skip(count * (sizeof(float) + 3*sizeof(float))); // Really one time float + one vector
+        mKeyList.read(nif);
     }
 };
 
