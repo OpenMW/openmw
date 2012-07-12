@@ -40,7 +40,6 @@ typedef unsigned char ubyte;
 
 using namespace std;
 using namespace Nif;
-using namespace Misc;
 using namespace NifOgre;
 
 NIFLoader& NIFLoader::getSingleton()
