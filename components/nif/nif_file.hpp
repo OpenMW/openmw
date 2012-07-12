@@ -179,7 +179,6 @@ public:
         t.pos = getVector3();
         t.rotation = getMatrix3();
         t.scale = getFloat();
-        t.velocity = getVector3();
         return t;
     }
 

@@ -43,6 +43,7 @@ public:
     // Node flags. Interpretation depends somewhat on the type of node.
     int flags;
     Transformation trafo;
+    Ogre::Vector3 velocity; // Unused? Might be a run-time game state
     PropertyList props;
 
     // Bounding box info
@@ -57,6 +58,7 @@ public:
 
         flags = nif->getUShort();
         trafo = nif->getTrafo();
+        velocity = nif->getVector3();
         props.read(nif);
 
         hasBounds = !!nif->getInt();

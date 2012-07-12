@@ -37,12 +37,11 @@ struct Transformation
     Ogre::Vector3 pos;
     Ogre::Matrix3 rotation;
     float scale;
-    Ogre::Vector3 velocity;
 
     static const Transformation& getIdentity()
     {
         static const Transformation identity = {
-            Ogre::Vector3::ZERO, Ogre::Matrix3::IDENTITY, 1.0f, Ogre::Vector3::ZERO
+            Ogre::Vector3::ZERO, Ogre::Matrix3::IDENTITY, 1.0f
         };
         return identity;
     }

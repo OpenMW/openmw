@@ -204,7 +204,6 @@ void ManualBulletShapeLoader::handleNode(Nif::Node *node, int flags,
         // For both position and rotation we have that:
         // final_vector = old_vector + old_rotation*new_vector*old_scale
         final.pos = trafo->pos + trafo->rotation*final.pos*trafo->scale;
-        final.velocity = trafo->velocity + trafo->rotation*final.velocity*trafo->scale;
 
         // Merge the rotations together
         final.rotation = trafo->rotation * final.rotation;
