@@ -138,9 +138,9 @@ bool ManualBulletShapeLoader::hasRootCollisionNode(Nif::Node* node)
         int n = list.length();
         for (int i=0; i<n; i++)
         {
-            if (list.has(i))
+            if (!list[i].empty())
             {
-                if(hasRootCollisionNode(&list[i])) return true;;
+                if(hasRootCollisionNode(list[i].getPtr())) return true;;
             }
         }
     }
@@ -222,9 +222,9 @@ void ManualBulletShapeLoader::handleNode(Nif::Node *node, int flags,
         int n = list.length();
         for (int i=0; i<n; i++)
         {
-            if (list.has(i))
+            if (!list[i].empty())
             {
-                handleNode(&list[i], flags,&node->trafo,hasCollisionNode,isCollisionNode,raycastingOnly);
+                handleNode(list[i].getPtr(), flags,&node->trafo,hasCollisionNode,isCollisionNode,raycastingOnly);
             }
         }
     }
@@ -239,8 +239,8 @@ void ManualBulletShapeLoader::handleNode(Nif::Node *node, int flags,
         int n = list.length();
         for (int i=0; i<n; i++)
         {
-            if (list.has(i))
-                handleNode(&list[i], flags,&node->trafo, hasCollisionNode,true,raycastingOnly);
+            if (!list[i].empty())
+                handleNode(list[i].getPtr(), flags,&node->trafo, hasCollisionNode,true,raycastingOnly);
         }
     }
 }

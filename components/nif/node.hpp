@@ -151,8 +151,8 @@ struct NiNode : Node
         for(size_t i = 0;i < children.length();i++)
         {
             // Why would a unique list of children contain empty refs?
-            if(children.has(i))
-                children[i].parent = this;
+            if(!children[i].empty())
+                children[i]->parent = this;
         }
     }
 };

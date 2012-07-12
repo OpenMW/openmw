@@ -649,10 +649,9 @@ void NIFLoader::handleNiTriShape(NiTriShape *shape, int flags, BoundsFinder &bou
         for (int i=0; i<n; i++)
         {
             // Entries may be empty
-            if (!list.has(i)) continue;
+            if (list[i].empty()) continue;
 
-            Property *pr = &list[i];
-
+            Property *pr = list[i].getPtr();
             if (pr->recType == RC_NiTexturingProperty)
                 t = static_cast<NiTexturingProperty*>(pr);
             else if (pr->recType == RC_NiMaterialProperty)
@@ -803,13 +802,13 @@ void NIFLoader::handleNiTriShape(NiTriShape *shape, int flags, BoundsFinder &bou
         {
             if(mSkel.isNull())
             {
-                std::cout << "No skeleton for :" << shape->skin->bones[boneIndex].name << std::endl;
+                std::cout << "No skeleton for :" << shape->skin->bones[boneIndex]->name << std::endl;
                 break;
             }
             //get the bone from bones array of skindata
-			if(!mSkel->hasBone(shape->skin->bones[boneIndex].name))
+			if(!mSkel->hasBone(shape->skin->bones[boneIndex]->name))
 				std::cout << "We don't have this bone";
-            bonePtr = mSkel->getBone(shape->skin->bones[boneIndex].name);
+            bonePtr = mSkel->getBone(shape->skin->bones[boneIndex]->name);
 
             // final_vector = old_vector + old_rotation*new_vector*old_scale
 
@@ -817,7 +816,7 @@ void NIFLoader::handleNiTriShape(NiTriShape *shape, int flags, BoundsFinder &bou
 			Nif::NiSkinData::BoneInfoCopy boneinfocopy;
 			boneinfocopy.trafo.rotation = it->trafo.rotation;
 			boneinfocopy.trafo.trans = it->trafo.trans;
-			boneinfocopy.bonename = shape->skin->bones[boneIndex].name;
+			boneinfocopy.bonename = shape->skin->bones[boneIndex]->name;
             boneinfocopy.bonehandle = bonePtr->getHandle();
             copy.boneinfo.push_back(boneinfocopy);
             for (unsigned int i=0; i<it->weights.size(); i++)
@@ -1138,9 +1137,8 @@ void NIFLoader::handleNode(Nif::Node *node, int flags,
         int n = list.length();
         for (int i = 0; i<n; i++)
         {
-
-            if (list.has(i))
-                handleNode(&list[i], flags, &node->trafo, bounds, bone, boneSequence);
+            if (!list[i].empty())
+                handleNode(list[i].getPtr(), flags, &node->trafo, bounds, bone, boneSequence);
         }
     }
     else if (node->recType == RC_NiTriShape && bNiTri)
