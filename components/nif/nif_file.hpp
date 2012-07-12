@@ -223,6 +223,7 @@ struct KeyT {
 };
 typedef KeyT<float> FloatKey;
 typedef KeyT<Ogre::Vector3> Vector3Key;
+typedef KeyT<Ogre::Vector4> Vector4Key;
 typedef KeyT<Ogre::Quaternion> QuaternionKey;
 
 template<typename T, T (NIFFile::*getValue)()>
@@ -281,6 +282,7 @@ struct KeyListT {
 };
 typedef KeyListT<float,&NIFFile::getFloat> FloatKeyList;
 typedef KeyListT<Ogre::Vector3,&NIFFile::getVector3> Vector3KeyList;
+typedef KeyListT<Ogre::Vector4,&NIFFile::getVector4> Vector4KeyList;
 typedef KeyListT<Ogre::Quaternion,&NIFFile::getQuaternion> QuaternionKeyList;
 
 } // Namespace

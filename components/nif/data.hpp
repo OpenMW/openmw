@@ -275,19 +275,11 @@ public:
 class NiColorData : public Record
 {
 public:
-    struct ColorData
-    {
-        float time;
-        Ogre::Vector4 rgba;
-    };
+    Vector4KeyList mKeyList;
 
     void read(NIFFile *nif)
     {
-        int count = nif->getInt();
-        nif->getInt(); // always 1
-
-        // Skip the data
-        nif->skip(count * 5*sizeof(float));
+        mKeyList.read(nif);
     }
 };
 
