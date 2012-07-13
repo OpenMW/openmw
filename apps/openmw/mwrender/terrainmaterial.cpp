@@ -42,10 +42,12 @@ namespace MWRender
     Ogre::MaterialPtr TerrainMaterial::Profile::generate(const Ogre::Terrain* terrain)
     {
         const Ogre::String& matName = terrain->getMaterialName();
+
+        sh::Factory::getInstance().destroyMaterialInstance (matName);
+
         Ogre::MaterialPtr mat = Ogre::MaterialManager::getSingleton().getByName(matName);
         if (!mat.isNull())
             Ogre::MaterialManager::getSingleton().remove(matName);
-
 
         mMaterial = sh::Factory::getInstance().createMaterialInstance (matName);
 
@@ -54,6 +56,11 @@ namespace MWRender
         createPass();
 
         return Ogre::MaterialManager::getSingleton().getByName(matName);
+
+        /*
+        Ogre::MaterialPtr m = Ogre::MaterialManager::getSingleton().create(matName, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
+        return m;
+        */
     }
 
     int TerrainMaterial::Profile::getLayersPerPass () const
