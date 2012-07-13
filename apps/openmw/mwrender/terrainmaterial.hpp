@@ -33,6 +33,11 @@ THE SOFTWARE.
 #include "OgreTerrainMaterialGenerator.h"
 #include "OgreGpuProgramParams.h"
 
+namespace sh
+{
+    class MaterialInstance;
+}
+
 namespace MWRender
 {
 
@@ -63,6 +68,13 @@ namespace MWRender
             virtual void updateParamsForCompositeMap(const Ogre::MaterialPtr& mat, const Ogre::Terrain* terrain);
 
             virtual void requestOptions(Ogre::Terrain* terrain);
+
+        private:
+            sh::MaterialInstance* mMaterial;
+
+            void createPass (int index=0);
+
+            int getLayersPerPass () const;
 
         };
 

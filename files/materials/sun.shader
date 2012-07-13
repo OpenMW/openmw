@@ -25,13 +25,11 @@
         shDeclareMrtOutput(1)
 #endif
         shUniform(float4, materialDiffuse)                    @shAutoConstant(materialDiffuse, surface_diffuse_colour)
-        shUniform(float4, materialEmissive)                   @shAutoConstant(materialEmissive, surface_emissive_colour)
+        //shUniform(float4, materialEmissive)                   @shAutoConstant(materialEmissive, surface_emissive_colour)
 
     SH_START_PROGRAM
     {
-        shOutputColour(0) = float4(1,1,1,materialDiffuse.a) * float4(materialEmissive.xyz, 1) * shSample(diffuseMap, UV);
-        
-        shOutputColour(0) = shSample(diffuseMap, UV);
+        shOutputColour(0) = float4(1,1,1,materialDiffuse.a) * shSample(diffuseMap, UV);
 
 #if MRT
         shOutputColour(1) = float4(1,1,1,1);

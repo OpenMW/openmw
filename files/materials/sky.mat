@@ -7,11 +7,13 @@ material openmw_moon
         fragment_program moon_fragment
         
         polygon_mode_overrideable off
+        depth_write off
+        depth_check off
+        scene_blend alpha_blend
         
         texture_unit diffuseMap
         {
-            texture $diffuseMap
-            create_in_ffp true
+            texture_alias $texture
         }
     }
 }
@@ -33,7 +35,6 @@ material openmw_clouds
         texture_unit diffuseMap1
         {
             texture_alias cloud_texture_1
-            create_in_ffp true
         }
         
         texture_unit diffuseMap2
@@ -89,6 +90,10 @@ material openmw_sun
         fragment_program sun_fragment
 
         polygon_mode_overrideable off
+        
+        depth_check off
+        depth_write off
+        scene_blend alpha_blend
         
         texture_unit diffuseMap
         {

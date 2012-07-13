@@ -33,7 +33,8 @@ namespace MWRender
         BillboardObject(  const Ogre::String& textureName,
                         const float size,
                         const Ogre::Vector3& position,
-                        Ogre::SceneNode* rootNode
+                        Ogre::SceneNode* rootNode,
+                          const std::string& material
                     );
         BillboardObject();
 
@@ -52,13 +53,9 @@ namespace MWRender
         Ogre::SceneNode* getNode();
 
     protected:
-        virtual void init(const Ogre::String& textureName,
-                        const float size,
-                        const Ogre::Vector3& position,
-                        Ogre::SceneNode* rootNode);
 
         Ogre::SceneNode* mNode;
-        Ogre::MaterialPtr mMaterial;
+        sh::MaterialInstance* mMaterial;
         Ogre::BillboardSet* mBBSet;
     };
 
@@ -72,7 +69,8 @@ namespace MWRender
         Moon(  const Ogre::String& textureName,
                         const float size,
                         const Ogre::Vector3& position,
-                        Ogre::SceneNode* rootNode
+                        Ogre::SceneNode* rootNode,
+               const std::string& material
                     );
 
         virtual ~Moon() {}
@@ -97,7 +95,6 @@ namespace MWRender
 
         void setPhase(const Phase& phase);
         void setType(const Type& type);
-        void setSkyColour(const Ogre::ColourValue& colour);
 
         Phase getPhase() const;
         unsigned int getPhaseInt() const;
@@ -163,7 +160,8 @@ namespace MWRender
         void secundaEnable();
         void secundaDisable();
 
-        void setThunder(const float factor);
+        void setLightningStrength(const float factor);
+        void setLightningDirection(const Ogre::Vector3& dir);
 
         void setGlare(const float glare);
         Ogre::Vector3 getRealSunPos();
@@ -174,6 +172,8 @@ namespace MWRender
 
     private:
         bool mCreated;
+
+        bool mMoonRed;
 
         float mHour;
         int mDay;
@@ -205,8 +205,7 @@ namespace MWRender
         Ogre::ColourValue mCloudColour;
         Ogre::ColourValue mSkyColour;
 
-        Ogre::Overlay* mThunderOverlay;
-        Ogre::TextureUnitState* mThunderTextureUnit;
+        Ogre::Light* mLightning;
 
         float mRemainingTransitionTime;
 

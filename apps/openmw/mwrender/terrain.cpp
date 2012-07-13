@@ -193,7 +193,7 @@ namespace MWRender
 
                         //this is a hack to get around the fact that Ogre seems to
                         //corrupt the global colour map leading to rendering errors
-                        MaterialPtr mat = terrain->getMaterial();
+                        //MaterialPtr mat = terrain->getMaterial();
                         /// \todo
                         //mat->getTechnique(0)->getPass(0)->getTextureUnitState(1)->setTextureName( vertex->getName() );
 

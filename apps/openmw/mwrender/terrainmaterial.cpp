@@ -47,10 +47,28 @@ namespace MWRender
             Ogre::MaterialManager::getSingleton().remove(matName);
 
 
-        sh::MaterialInstance* m = sh::Factory::getInstance().createMaterialInstance (matName);
+        mMaterial = sh::Factory::getInstance().createMaterialInstance (matName);
 
+        mMaterial->setProperty ("allow_fixed_function", sh::makeProperty<sh::BooleanValue>(new sh::BooleanValue(false)));
+
+        createPass();
 
         return Ogre::MaterialManager::getSingleton().getByName(matName);
+    }
+
+    int TerrainMaterial::Profile::getLayersPerPass () const
+    {
+        return 10;
+    }
+
+    void TerrainMaterial::Profile::createPass (int index)
+    {
+        int layerOffset = index * getLayersPerPass();
+
+        sh::MaterialInstancePass* p = mMaterial->createPass ();
+
+        p->setProperty ("vertex_program", sh::makeProperty<sh::StringValue>(new sh::StringValue("terrain_vertex")));
+        p->setProperty ("fragment_program", sh::makeProperty<sh::StringValue>(new sh::StringValue("terrain_fragment")));
     }
 
     Ogre::MaterialPtr TerrainMaterial::Profile::generateForCompositeMap(const Ogre::Terrain* terrain)

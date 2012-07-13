@@ -1,6 +1,6 @@
 #include "core.h"
 
-#define FOG @shPropertyBool(fog)
+#define FOG @shGlobalSettingBool(fog)
 #define MRT @shGlobalSettingBool(mrt_output)
 
 
@@ -47,6 +47,8 @@
     {
 
         float depth = @shPassthroughReceive(depth);
+        
+        shOutputColour(0) = float4(1,0,0,1);
 
 
 #if MRT
