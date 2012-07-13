@@ -4,7 +4,7 @@
 PluginFolder=${OGRE_PLUGIN_DIR_REL}
 
 # Define plugins
-Plugin=RenderSystem_GL${OGRE_RenderSystem_GL_LIBRARIES}
+Plugin=RenderSystem_GL${DEBUG_SUFFIX}
 Plugin=Plugin_ParticleFX${DEBUG_SUFFIX}
 Plugin=Plugin_OctreeSceneManager${DEBUG_SUFFIX}
 Plugin=Plugin_CgProgramManager${DEBUG_SUFFIX}
