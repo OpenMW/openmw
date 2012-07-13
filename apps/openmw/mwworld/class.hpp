@@ -165,8 +165,10 @@ namespace MWWorld
             /// effects). Throws an exception, if the object can't hold other objects.
             /// (default implementation: throws an exception)
 
-            virtual bool apply (const MWWorld::Ptr& ptr, const std::string& id) const;
+            virtual bool apply (const MWWorld::Ptr& ptr, const std::string& id,
+                const MWWorld::Ptr& actor) const;
             ///< Apply \a id on \a ptr.
+            /// \param actor Actor that is resposible for the ID being applied to \a ptr.
             /// \return Any effect?
             ///
             /// (default implementation: ignore and return false)

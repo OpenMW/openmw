@@ -34,7 +34,7 @@ namespace MWWorld
 
     }
 
-    bool Class::apply (const MWWorld::Ptr& ptr, const std::string& id) const
+    bool Class::apply (const MWWorld::Ptr& ptr, const std::string& id,  const MWWorld::Ptr& actor) const
     {
         return false;
     }
