@@ -39,6 +39,11 @@ namespace MWWorld
         return false;
     }
 
+    void Class::skillUsageSucceeded (const MWWorld::Ptr& ptr, int skill, int usageType) const
+    {
+        throw std::runtime_error ("class does not represent an actor");
+    }
+
     MWMechanics::CreatureStats& Class::getCreatureStats (const Ptr& ptr) const
     {
         throw std::runtime_error ("class does not have creature stats");
