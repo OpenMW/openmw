@@ -128,6 +128,8 @@ public:
 };
 
 
+NIFLoader::LoaderMap NIFLoader::sLoaders;
+
 void NIFLoader::warn(const std::string &msg)
 {
     std::cerr << "NIFLoader: Warn:" << msg << "\n";
@@ -331,8 +333,8 @@ Ogre::MeshPtr NIFLoader::load(const std::string &name, const std::string &group)
     Ogre::MeshPtr themesh = meshMgr.getByName(name, group);
     if(themesh.isNull())
     {
-        static NIFLoader loader;
-        themesh = meshMgr.createManual(name, group, &loader);
+        NIFLoader *loader = &sLoaders[name];
+        themesh = meshMgr.createManual(name, group, loader);
     }
     return themesh;
 }

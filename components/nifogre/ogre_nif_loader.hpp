@@ -41,7 +41,7 @@
 #include <libs/platform/strings.h>
 
 #include <vector>
-#include <list>
+#include <map>
 // For warning messages
 #include <limits>
 using namespace boost::algorithm;
@@ -90,11 +90,11 @@ public:
                               const std::string &group="General");
 
 private:
-    NIFLoader() {}
-    NIFLoader(NIFLoader& n) {}
-
     void warn(const std::string &msg);
     void fail(const std::string &msg);
+
+    typedef std::map<std::string,NIFLoader,ciLessBoost> LoaderMap;
+    static LoaderMap sLoaders;
 };
 
 }
