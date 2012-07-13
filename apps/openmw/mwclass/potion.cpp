@@ -11,6 +11,7 @@
 #include "../mwworld/actionapply.hpp"
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/physicssystem.hpp"
+#include "../mwworld/player.hpp"
 
 #include "../mwgui/window_manager.hpp"
 #include "../mwgui/tooltips.hpp"
@@ -153,7 +154,9 @@ namespace MWClass
 
         ptr.getRefData().setCount (ptr.getRefData().getCount()-1);
 
+        MWWorld::Ptr actor = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+
         return boost::shared_ptr<MWWorld::Action> (
-            new MWWorld::ActionApply (ptr, ref->base->mId, ptr));
+            new MWWorld::ActionApply (actor, ref->base->mId, actor));
     }
 }
