@@ -336,7 +336,7 @@ namespace Physic
         char uniqueID[8];
         sprintf( uniqueID, "%07.3f", scale );
         std::string sid = uniqueID;
-        std::string outputstring = mesh + uniqueID + "\"|";
+        std::string outputstring = mesh + uniqueID;
         //std::cout << "The string" << outputstring << "\n";
 
         //get the shape from the .nif

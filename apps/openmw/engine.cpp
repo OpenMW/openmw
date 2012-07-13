@@ -75,11 +75,8 @@ void OMW::Engine::executeLocalScripts()
     localScripts.setIgnore (MWWorld::Ptr());
 }
 
-void OMW::Engine::setAnimationVerbose(bool animverbose){
-    if(animverbose){
-        NifOgre::NIFLoader::getSingletonPtr()->setOutputAnimFiles(true);
-        NifOgre::NIFLoader::getSingletonPtr()->setVerbosePath(mCfgMgr.getLogPath().string());
-    }
+void OMW::Engine::setAnimationVerbose(bool animverbose)
+{
 }
 
 bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)

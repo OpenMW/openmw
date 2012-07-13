@@ -67,12 +67,9 @@ namespace Nif
 
 namespace NifOgre
 {
-
-
 /** Manual resource loader for NIF meshes. This is the main class
     responsible for translating the internal NIF mesh structure into
-    something Ogre can use. Later it will also handle the insertion of
-    collision meshes into Bullet / OgreBullet.
+    something Ogre can use.
 
     You have to insert meshes manually into Ogre like this:
 
@@ -86,93 +83,18 @@ namespace NifOgre
  */
 class NIFLoader : Ogre::ManualResourceLoader
 {
-    public:
-        static int numberOfMeshes;
-        static NIFLoader& getSingleton();
-        static NIFLoader* getSingletonPtr();
+public:
+    virtual void loadResource(Ogre::Resource *resource);
 
-        virtual void loadResource(Ogre::Resource *resource);
+    static Ogre::MeshPtr load(const std::string &name,
+                              const std::string &group="General");
 
-        static Ogre::MeshPtr load(const std::string &name,
-                                    const std::string &group="General");
-        //void insertMeshInsideBase(Ogre::Mesh* mesh);
-        std::vector<Nif::NiKeyframeData>* getAnim(std::string name);
-        std::vector<Nif::NiTriShapeCopy>* getShapes(std::string name);
-        std::map<std::string, float>* getTextIndices(std::string name);
+private:
+    NIFLoader() {}
+    NIFLoader(NIFLoader& n) {}
 
-
-        void setOutputAnimFiles(bool output);
-        void setVerbosePath(std::string path);
-
-    private:
-
-        NIFLoader() : resourceName(""), resourceGroup("General"),  flip(false), mNormaliseNormals(false),
-          mFlipVertexWinding(false), mOutputAnimFiles(false), inTheSkeletonTree(false)  {}
-        NIFLoader(NIFLoader& n) {}
-
-        void calculateTransform();
-
-
-        void warn(std::string msg);
-        void fail(std::string msg);
-
-        void handleNode( Nif::Node *node, int flags,
-                        const Nif::Transformation *trafo, BoundsFinder &bounds, Ogre::Bone *parentBone, std::vector<std::string> boneSequence);
-
-        void handleNiTriShape(Nif::NiTriShape *shape, int flags, BoundsFinder &bounds, Nif::Transformation original, std::vector<std::string> boneSequence);
-
-        void createOgreSubMesh(Nif::NiTriShape *shape, const Ogre::String &material, std::list<Ogre::VertexBoneAssignment> &vertexBoneAssignments);
-
-        void createMaterial(const Ogre::String &name,
-                            const Ogre::Vector3 &ambient,
-                            const Ogre::Vector3 &diffuse,
-                            const Ogre::Vector3 &specular,
-                            const Ogre::Vector3 &emissive,
-                            float glossiness, float alpha,
-                            int alphaFlags, float alphaTest,
-                            const Ogre::String &texName);
-
-        void findRealTexture(Ogre::String &texName);
-
-        Ogre::String getUniqueName(const Ogre::String &input);
-
-        //returns the skeleton name of this mesh
-        std::string getSkeletonName()
-        {
-            return resourceName + ".skel";
-        }
-
-        std::string verbosePath;
-        std::string resourceName;
-        std::string resourceGroup;
-        Ogre::Matrix4 mTransform;
-        Ogre::AxisAlignedBox mBoundingBox;
-        bool flip;
-        bool mNormaliseNormals;
-        bool mFlipVertexWinding;
-        bool bNiTri;
-        bool mOutputAnimFiles;
-        std::multimap<std::string,std::string> MaterialMap;
-
-        // pointer to the ogre mesh which is currently build
-        Ogre::Mesh *mesh;
-        Ogre::SkeletonPtr mSkel;
-        Ogre::Vector3 vector;
-        std::vector<Nif::NiTriShapeCopy> shapes;
-        std::string name;
-        std::string triname;
-        std::vector<Nif::NiKeyframeData> allanim;
-
-		std::map<std::string,float> textmappings;
-		std::map<std::string,std::map<std::string,float>,ciLessBoost> alltextmappings;
-		std::map<std::string,std::vector<Nif::NiKeyframeData>,ciLessBoost> allanimmap;
-		std::map<std::string,std::vector<Nif::NiTriShapeCopy>,ciLessBoost> allshapesmap;
-        std::vector<Nif::NiKeyframeData> mAnim;
-		std::vector<Nif::NiTriShapeCopy> mS;
-        std::vector<Ogre::SubMesh*> needBoneAssignments;
-        bool inTheSkeletonTree;
-
-
+    void warn(const std::string &msg);
+    void fail(const std::string &msg);
 };
 
 }
