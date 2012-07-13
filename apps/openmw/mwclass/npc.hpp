@@ -76,6 +76,15 @@ namespace MWClass
             ///< Returns total weight of objects inside this object (including modifications from magic
             /// effects). Throws an exception, if the object can't hold other objects.
 
+            virtual bool apply (const MWWorld::Ptr& ptr, const std::string& id,
+                const MWWorld::Ptr& actor) const;
+            ///< Apply \a id on \a ptr.
+            /// \param actor Actor that is resposible for the ID being applied to \a ptr.
+            /// \return Any effect?
+
+            virtual void skillUsageSucceeded (const MWWorld::Ptr& ptr, int skill, int usageType) const;
+            ///< Inform actor \a ptr that a skill use has succeeded.
+
             static void registerSelf();
     };
 }

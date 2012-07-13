@@ -343,4 +343,26 @@ namespace MWClass
 
         return weight;
     }
+
+    bool Npc::apply (const MWWorld::Ptr& ptr, const std::string& id,
+        const MWWorld::Ptr& actor) const
+    {
+        MWMechanics::CreatureStats& stats = getCreatureStats (ptr);
+
+        /// \todo consider instant effects
+
+        return stats.mActiveSpells.addSpell (id);
+    }
+
+    void Npc::skillUsageSucceeded (const MWWorld::Ptr& ptr, int skill, int usageType) const
+    {
+        MWMechanics::NpcStats& stats = getNpcStats (ptr);
+
+        MWWorld::LiveCellRef<ESM::NPC> *ref = ptr.get<ESM::NPC>();
+
+        const ESM::Class *class_ = MWBase::Environment::get().getWorld()->getStore().classes.find (
+            ref->base->cls);
+
+        stats.useSkill (skill, *class_, usageType);
+    }
 }
