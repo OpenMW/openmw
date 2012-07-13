@@ -37,14 +37,14 @@ namespace MWGui
 
         MyGUI::ProgressPtr health, magicka, stamina;
         MyGUI::Widget* mHealthFrame;
-        MyGUI::Widget *weapBox, *spellBox;
-        MyGUI::ImageBox *weapImage, *spellImage;
-        MyGUI::ProgressPtr weapStatus, spellStatus;
-        MyGUI::Widget *effectBox, *minimapBox;
-        MyGUI::ImageBox* effect1;
-        MyGUI::ScrollView* minimap;
-        MyGUI::ImageBox* compass;
-        MyGUI::ImageBox* crosshair;
+        MyGUI::Widget *mWeapBox, *mSpellBox;
+        MyGUI::ImageBox *mWeapImage, *mSpellImage;
+        MyGUI::ProgressPtr mWeapStatus, mSpellStatus;
+        MyGUI::Widget *mEffectBox, *mMinimapBox;
+        MyGUI::ImageBox* mEffect1;
+        MyGUI::ScrollView* mMinimap;
+        MyGUI::ImageBox* mCompass;
+        MyGUI::ImageBox* mCrosshair;
         MyGUI::TextBox* mCellNameBox;
         MyGUI::TextBox* mWeaponSpellBox;
 
@@ -55,9 +55,9 @@ namespace MWGui
 
     private:
         // bottom left elements
-        int hmsBaseLeft, weapBoxBaseLeft, spellBoxBaseLeft;
+        int mHealthManaStaminaBaseLeft, mWeapBoxBaseLeft, mSpellBoxBaseLeft;
         // bottom right elements
-        int minimapBoxBaseRight, effectBoxBaseRight;
+        int mMinimapBoxBaseRight, mEffectBoxBaseRight;
 
         DragAndDrop* mDragAndDrop;
 

@@ -149,7 +149,7 @@ int MessageBoxManager::readPressedButton ()
 MessageBox::MessageBox(MessageBoxManager& parMessageBoxManager, const std::string& message)
   : Layout("openmw_messagebox.layout")
   , mMessageBoxManager(parMessageBoxManager)
-  , cMessage(message)
+  , mMessage(message)
 {
     // defines
     mFixedWidth = 300;
@@ -160,7 +160,7 @@ MessageBox::MessageBox(MessageBoxManager& parMessageBoxManager, const std::strin
     getWidget(mMessageWidget, "message");
 
     mMessageWidget->setOverflowToTheLeft(true);
-    mMessageWidget->setCaptionWithReplacing(cMessage);
+    mMessageWidget->setCaptionWithReplacing(mMessage);
 
     MyGUI::IntSize size;
     size.width = mFixedWidth;

@@ -84,7 +84,7 @@ book formatText(std::string text,book mBook,int maxLine, int lineSize)
 
 MWGui::JournalWindow::JournalWindow (WindowManager& parWindowManager)
     : WindowBase("openmw_journal.layout", parWindowManager)
-    , lastPos(0)
+    , mLastPos(0)
     , mVisible(false)
 {
     //setCoord(0,0,498, 342);
@@ -148,19 +148,19 @@ void MWGui::JournalWindow::open()
         {
             if(left)
             {
-                leftPages.push_back(*it);
+                mLeftPages.push_back(*it);
             }
             else
             {
-                rightPages.push_back(*it);
+                mRightPages.push_back(*it);
             }
             left = !left;
         }
-        if(!left) rightPages.push_back("");
+        if(!left) mRightPages.push_back("");
 
-        mPageNumber = leftPages.size()-1;
-        displayLeftText(leftPages[mPageNumber]);
-        displayRightText(rightPages[mPageNumber]);
+        mPageNumber = mLeftPages.size()-1;
+        displayLeftText(mLeftPages[mPageNumber]);
+        displayRightText(mRightPages[mPageNumber]);
 
     }
     else
@@ -184,13 +184,13 @@ void MWGui::JournalWindow::displayRightText(std::string text)
 
 void MWGui::JournalWindow::notifyNextPage(MyGUI::WidgetPtr _sender)
 {
-    if(mPageNumber < int(leftPages.size())-1)
+    if(mPageNumber < int(mLeftPages.size())-1)
     {
         std::string nextSound = "book page2";
         MWBase::Environment::get().getSoundManager()->playSound (nextSound, 1.0, 1.0);
         mPageNumber = mPageNumber + 1;
-        displayLeftText(leftPages[mPageNumber]);
-        displayRightText(rightPages[mPageNumber]);
+        displayLeftText(mLeftPages[mPageNumber]);
+        displayRightText(mRightPages[mPageNumber]);
     }
 }
 
@@ -201,7 +201,7 @@ void MWGui::JournalWindow::notifyPrevPage(MyGUI::WidgetPtr _sender)
         std::string prevSound = "book page";
         MWBase::Environment::get().getSoundManager()->playSound (prevSound, 1.0, 1.0);
         mPageNumber = mPageNumber - 1;
-        displayLeftText(leftPages[mPageNumber]);
-        displayRightText(rightPages[mPageNumber]);
+        displayLeftText(mLeftPages[mPageNumber]);
+        displayRightText(mRightPages[mPageNumber]);
     }
 }

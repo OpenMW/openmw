@@ -15,15 +15,15 @@ BirthDialog::BirthDialog(WindowManager& parWindowManager)
     // Centre dialog
     center();
 
-    getWidget(spellArea, "SpellArea");
+    getWidget(mSpellArea, "SpellArea");
 
-    getWidget(birthImage, "BirthsignImage");
+    getWidget(mBirthImage, "BirthsignImage");
 
-    getWidget(birthList, "BirthsignList");
-    birthList->setScrollVisible(true);
-    birthList->eventListSelectAccept += MyGUI::newDelegate(this, &BirthDialog::onSelectBirth);
-    birthList->eventListMouseItemActivate += MyGUI::newDelegate(this, &BirthDialog::onSelectBirth);
-    birthList->eventListChangePosition += MyGUI::newDelegate(this, &BirthDialog::onSelectBirth);
+    getWidget(mBirthList, "BirthsignList");
+    mBirthList->setScrollVisible(true);
+    mBirthList->eventListSelectAccept += MyGUI::newDelegate(this, &BirthDialog::onSelectBirth);
+    mBirthList->eventListMouseItemActivate += MyGUI::newDelegate(this, &BirthDialog::onSelectBirth);
+    mBirthList->eventListChangePosition += MyGUI::newDelegate(this, &BirthDialog::onSelectBirth);
 
     MyGUI::ButtonPtr backButton;
     getWidget(backButton, "BackButton");
@@ -68,14 +68,14 @@ void BirthDialog::open()
 
 void BirthDialog::setBirthId(const std::string &birthId)
 {
-    currentBirthId = birthId;
-    birthList->setIndexSelected(MyGUI::ITEM_NONE);
-    size_t count = birthList->getItemCount();
+    mCurrentBirthId = birthId;
+    mBirthList->setIndexSelected(MyGUI::ITEM_NONE);
+    size_t count = mBirthList->getItemCount();
     for (size_t i = 0; i < count; ++i)
     {
-        if (boost::iequals(*birthList->getItemDataAt<std::string>(i), birthId))
+        if (boost::iequals(*mBirthList->getItemDataAt<std::string>(i), birthId))
         {
-            birthList->setIndexSelected(i);
+            mBirthList->setIndexSelected(i);
             break;
         }
     }
@@ -100,11 +100,11 @@ void BirthDialog::onSelectBirth(MyGUI::ListBox* _sender, size_t _index)
     if (_index == MyGUI::ITEM_NONE)
         return;
 
-    const std::string *birthId = birthList->getItemDataAt<std::string>(_index);
-    if (boost::iequals(currentBirthId, *birthId))
+    const std::string *birthId = mBirthList->getItemDataAt<std::string>(_index);
+    if (boost::iequals(mCurrentBirthId, *birthId))
         return;
 
-    currentBirthId = *birthId;
+    mCurrentBirthId = *birthId;
     updateSpells();
 }
 
@@ -112,7 +112,7 @@ void BirthDialog::onSelectBirth(MyGUI::ListBox* _sender, size_t _index)
 
 void BirthDialog::updateBirths()
 {
-    birthList->removeAllItems();
+    mBirthList->removeAllItems();
 
     const ESMS::ESMStore &store = mWindowManager.getStore();
 
@@ -122,34 +122,34 @@ void BirthDialog::updateBirths()
     for (; it != end; ++it)
     {
         const ESM::BirthSign &birth = it->second;
-        birthList->addItem(birth.name, it->first);
-        if (boost::iequals(it->first, currentBirthId))
-            birthList->setIndexSelected(index);
+        mBirthList->addItem(birth.name, it->first);
+        if (boost::iequals(it->first, mCurrentBirthId))
+            mBirthList->setIndexSelected(index);
         ++index;
     }
 }
 
 void BirthDialog::updateSpells()
 {
-    for (std::vector<MyGUI::WidgetPtr>::iterator it = spellItems.begin(); it != spellItems.end(); ++it)
+    for (std::vector<MyGUI::WidgetPtr>::iterator it = mSpellItems.begin(); it != mSpellItems.end(); ++it)
     {
         MyGUI::Gui::getInstance().destroyWidget(*it);
     }
-    spellItems.clear();
+    mSpellItems.clear();
 
-    if (currentBirthId.empty())
+    if (mCurrentBirthId.empty())
         return;
 
     MWSpellPtr spellWidget;
     const int lineHeight = 18;
-    MyGUI::IntCoord coord(0, 0, spellArea->getWidth(), 18);
+    MyGUI::IntCoord coord(0, 0, mSpellArea->getWidth(), 18);
 
     const ESMS::ESMStore &store = mWindowManager.getStore();
-    const ESM::BirthSign *birth = store.birthSigns.find(currentBirthId);
+    const ESM::BirthSign *birth = store.birthSigns.find(mCurrentBirthId);
 
     std::string texturePath = std::string("textures\\") + birth->texture;
     fixTexturePath(texturePath);
-    birthImage->setImageTexture(texturePath);
+    mBirthImage->setImageTexture(texturePath);
 
     std::vector<std::string> abilities, powers, spells;
 
@@ -183,25 +183,25 @@ void BirthDialog::updateSpells()
     {
         if (!categories[category].spells.empty())
         {
-            MyGUI::TextBox* label = spellArea->createWidget<MyGUI::TextBox>("SandBrightText", coord, MyGUI::Align::Default, std::string("Label"));
+            MyGUI::TextBox* label = mSpellArea->createWidget<MyGUI::TextBox>("SandBrightText", coord, MyGUI::Align::Default, std::string("Label"));
             label->setCaption(mWindowManager.getGameSettingString(categories[category].label, ""));
-            spellItems.push_back(label);
+            mSpellItems.push_back(label);
             coord.top += lineHeight;
 
             std::vector<std::string>::const_iterator end = categories[category].spells.end();
             for (std::vector<std::string>::const_iterator it = categories[category].spells.begin(); it != end; ++it)
             {
                 const std::string &spellId = *it;
-                spellWidget = spellArea->createWidget<MWSpell>("MW_StatName", coord, MyGUI::Align::Default, std::string("Spell") + boost::lexical_cast<std::string>(i));
+                spellWidget = mSpellArea->createWidget<MWSpell>("MW_StatName", coord, MyGUI::Align::Default, std::string("Spell") + boost::lexical_cast<std::string>(i));
                 spellWidget->setWindowManager(&mWindowManager);
                 spellWidget->setSpellId(spellId);
 
-                spellItems.push_back(spellWidget);
+                mSpellItems.push_back(spellWidget);
                 coord.top += lineHeight;
 
                 MyGUI::IntCoord spellCoord = coord;
                 spellCoord.height = 24; // TODO: This should be fetched from the skin somehow, or perhaps a widget in the layout as a template?
-                spellWidget->createEffectWidgets(spellItems, spellArea, spellCoord, (category == 0) ? MWEffectList::EF_Constant : 0);
+                spellWidget->createEffectWidgets(mSpellItems, mSpellArea, spellCoord, (category == 0) ? MWEffectList::EF_Constant : 0);
                 coord.top = spellCoord.top;
 
                 ++i;

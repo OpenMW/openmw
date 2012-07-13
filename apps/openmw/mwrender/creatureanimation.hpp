@@ -17,8 +17,7 @@ class CreatureAnimation: public Animation{
     public:
     virtual ~CreatureAnimation();
     CreatureAnimation(const MWWorld::Ptr& ptr, OEngine::Render::OgreRenderer& _rend);
-	virtual void runAnimation(float timepassed);
-
+    virtual void runAnimation(float timepassed);
 
 };
 }
