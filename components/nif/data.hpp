@@ -96,7 +96,9 @@ public:
 class ShapeData : public Record
 {
 public:
-    std::vector<float> vertices, normals, colors, uvlist;
+    std::vector<Ogre::Vector3> vertices, normals;
+    std::vector<Ogre::Vector4> colors;
+    std::vector< std::vector<Ogre::Vector2> > uvlist;
     Ogre::Vector3 center;
     float radius;
 
@@ -105,16 +107,16 @@ public:
         int verts = nif->getUShort();
 
         if(nif->getInt())
-            nif->getFloats(vertices, verts*3);
+            nif->getVector3s(vertices, verts);
 
         if(nif->getInt())
-            nif->getFloats(normals, verts*3);
+            nif->getVector3s(normals, verts);
 
         center = nif->getVector3();
         radius = nif->getFloat();
 
         if(nif->getInt())
-            nif->getFloats(colors, verts*4);
+            nif->getVector4s(colors, verts);
 
         // Only the first 6 bits are used as a count. I think the rest are
         // flags of some sort.
@@ -122,7 +124,11 @@ public:
         uvs &= 0x3f;
 
         if(nif->getInt())
-            nif->getFloats(uvlist, uvs*verts*2);
+        {
+            uvlist.resize(uvs);
+            for(int i = 0;i < uvs;i++)
+                nif->getVector2s(uvlist[i], verts);
+        }
     }
 };
 

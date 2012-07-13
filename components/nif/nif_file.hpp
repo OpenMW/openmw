@@ -26,6 +26,7 @@
 
 #include <OgreResourceGroupManager.h>
 #include <OgreDataStream.h>
+#include <OgreVector2.h>
 #include <OgreVector3.h>
 #include <OgreVector4.h>
 #include <OgreMatrix3.h>
@@ -142,6 +143,13 @@ public:
     unsigned short getUShort() { return read_le16(); }
     int getInt() { return read_le32(); }
     float getFloat() { return read_le32f(); }
+    Ogre::Vector2 getVector2()
+    {
+        float a[2];
+        for(size_t i = 0;i < 2;i++)
+            a[i] = getFloat();
+        return Ogre::Vector2(a);
+    }
     Ogre::Vector3 getVector3()
     {
         float a[3];
@@ -207,6 +215,24 @@ public:
         vec.resize(size);
         for(size_t i = 0;i < vec.size();i++)
             vec[i] = getFloat();
+    }
+    void getVector2s(std::vector<Ogre::Vector2> &vec, size_t size)
+    {
+        vec.resize(size);
+        for(size_t i = 0;i < vec.size();i++)
+            vec[i] = getVector2();
+    }
+    void getVector3s(std::vector<Ogre::Vector3> &vec, size_t size)
+    {
+        vec.resize(size);
+        for(size_t i = 0;i < vec.size();i++)
+            vec[i] = getVector3();
+    }
+    void getVector4s(std::vector<Ogre::Vector4> &vec, size_t size)
+    {
+        vec.resize(size);
+        for(size_t i = 0;i < vec.size();i++)
+            vec[i] = getVector4();
     }
 };
 
