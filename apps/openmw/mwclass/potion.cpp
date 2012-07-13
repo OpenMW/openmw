@@ -8,6 +8,7 @@
 
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/actiontake.hpp"
+#include "../mwworld/actionapply.hpp"
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/physicssystem.hpp"
 
@@ -143,5 +144,16 @@ namespace MWClass
         info.text = text;
 
         return info;
+    }
+
+    boost::shared_ptr<MWWorld::Action> Potion::use (const MWWorld::Ptr& ptr) const
+    {
+        MWWorld::LiveCellRef<ESM::Potion> *ref =
+            ptr.get<ESM::Potion>();
+
+        ptr.getRefData().setCount (ptr.getRefData().getCount()-1);
+
+        return boost::shared_ptr<MWWorld::Action> (
+            new MWWorld::ActionApply (ptr, ref->base->mId, ptr));
     }
 }

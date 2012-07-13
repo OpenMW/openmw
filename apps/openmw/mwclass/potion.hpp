@@ -34,6 +34,9 @@ namespace MWClass
             virtual int getValue (const MWWorld::Ptr& ptr) const;
             ///< Return trade value of the object. Throws an exception, if the object can't be traded.
 
+            virtual boost::shared_ptr<MWWorld::Action> use (const MWWorld::Ptr& ptr) const;
+            ///< Generate action for using via inventory menu
+
             static void registerSelf();
 
             virtual std::string getUpSoundId (const MWWorld::Ptr& ptr) const;
