@@ -6,9 +6,6 @@ material openmw_objects_base
     emissive 0.0 0.0 0.0
     has_vertex_colour false
     diffuseMap black.png
-    fog true
-    mrt_output true
-    lighting true
 
     is_transparent false // real transparency, alpha rejection doesn't count here
     scene_blend default
@@ -25,9 +22,6 @@ material openmw_objects_base
 
         shader_properties
         {
-            fog $fog
-            mrt_output $mrt_output
-            lighting $lighting
             has_vertex_colour $has_vertex_colour
             is_transparent $is_transparent
         }

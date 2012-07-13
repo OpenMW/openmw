@@ -105,6 +105,8 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
         Settings::Manager::setBool("enabled", "Shadows", false);
 
     sh::Factory::getInstance ().setGlobalSetting ("mrt_output", useMRT() ? "true" : "false");
+    sh::Factory::getInstance ().setGlobalSetting ("fog", "true");
+    sh::Factory::getInstance ().setGlobalSetting ("lighting", "true");
 
     applyCompositors();
 

@@ -3,9 +3,9 @@
 #include "shadows.h"
 
 
-#define FOG @shPropertyBool(fog)
-#define MRT @shPropertyNotBool(is_transparent) && @shPropertyBool(mrt_output) && @shGlobalSettingBool(mrt_output)
-#define LIGHTING @shPropertyBool(lighting)
+#define FOG @shGlobalSettingBool(fog)
+#define MRT @shPropertyNotBool(is_transparent) && @shGlobalSettingBool(mrt_output)
+#define LIGHTING @shGlobalSettingBool(lighting)
 
 #define SHADOWS_PSSM LIGHTING && @shGlobalSettingBool(shadows_pssm)
 #define SHADOWS LIGHTING && @shGlobalSettingBool(shadows)

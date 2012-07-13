@@ -28,15 +28,16 @@ namespace MWRender
          mTerrainGroup(TerrainGroup(mgr, Terrain::ALIGN_X_Z, mLandSize, mWorldSize)), mRendering(rend)
     {
         mTerrainGlobals = OGRE_NEW TerrainGlobalOptions();
+
         TerrainMaterialGeneratorPtr matGen;
-        TerrainMaterialGeneratorB* matGenP = new TerrainMaterialGeneratorB();
+        TerrainMaterial* matGenP = new TerrainMaterial();
         matGen.bind(matGenP);
         mTerrainGlobals->setDefaultMaterialGenerator(matGen);
 
         TerrainMaterialGenerator::Profile* const activeProfile =
             mTerrainGlobals->getDefaultMaterialGenerator()
                            ->getActiveProfile();
-        mActiveProfile = static_cast<TerrainMaterialGeneratorB::SM2Profile*>(activeProfile);
+        mActiveProfile = static_cast<TerrainMaterial::Profile*>(activeProfile);
 
         //The pixel error should be as high as possible without it being noticed
         //as it governs how fast mesh quality decreases.
@@ -52,6 +53,7 @@ namespace MWRender
         //this seemed the distance where it wasn't too noticeable
         mTerrainGlobals->setCompositeMapDistance(mWorldSize*2);
 
+        /*
         mActiveProfile->setLightmapEnabled(false);
         mActiveProfile->setLayerSpecularMappingEnabled(false);
         mActiveProfile->setLayerNormalMappingEnabled(false);
@@ -71,6 +73,7 @@ namespace MWRender
         //composite maps lead to a drastic increase in loading time so are
         //disabled
         mActiveProfile->setCompositeMapEnabled(false);
+        */
 
         mTerrainGroup.setOrigin(Vector3(mWorldSize/2,
                                          0,
@@ -181,7 +184,7 @@ namespace MWRender
                     if ( land->landData->usingColours )
                     {
                         // disable or enable global colour map (depends on available vertex colours)
-                        mActiveProfile->setGlobalColourMapEnabled(true);
+                        //mActiveProfile->setGlobalColourMapEnabled(true);
                         TexturePtr vertex = getVertexColours(land,
                                                              cellX, cellY,
                                                              x*(mLandSize-1),
@@ -191,7 +194,10 @@ namespace MWRender
                         //this is a hack to get around the fact that Ogre seems to
                         //corrupt the global colour map leading to rendering errors
                         MaterialPtr mat = terrain->getMaterial();
-                        mat->getTechnique(0)->getPass(0)->getTextureUnitState(1)->setTextureName( vertex->getName() );
+                        /// \todo
+                        //mat->getTechnique(0)->getPass(0)->getTextureUnitState(1)->setTextureName( vertex->getName() );
+
+
                         //mat = terrain->_getCompositeMapMaterial();
                         //mat->getTechnique(0)->getPass(0)->getTextureUnitState(1)->setTextureName( vertex->getName() );
                     }

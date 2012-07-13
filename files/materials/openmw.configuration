@@ -1,15 +1,16 @@
 configuration water_reflection
 {
     fog false
-    receives_shadows false
+    shadows false
+    shadows_pssm false
     mrt_output false
 }
 
 configuration local_map
 {
     fog false
-    receives_shadows false
-    simple_water true
     mrt_output false
     lighting false
+    shadows false
+    shadows_pssm false
 }
