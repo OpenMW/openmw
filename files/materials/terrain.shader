@@ -90,18 +90,17 @@
         float4 blendValues@shIterator = shSample(blendMap@shIterator, UV);
 @shEndForeach
 
-        float blendAmount;
         float3 albedo;
 @shForeach(@shPropertyString(num_layers))
 
 
 #if IS_FIRST_PASS == 1 && @shIterator == 0
         // first layer of first pass doesn't need a blend map
-        albedo = shSample(diffuseMap0, UV * 5).rgb;
+        albedo = shSample(diffuseMap0, UV * 10).rgb;
 #else
-        blendAmount = blendValues@shPropertyString(blendmap_index_@shIterator).@shPropertyString(blendmap_component_@shIterator);
+        #define BLEND_AMOUNT blendValues@shPropertyString(blendmap_index_@shIterator).@shPropertyString(blendmap_component_@shIterator)
         
-        albedo += shSample(diffuseMap@shIterator, UV * 5).rgb * blendAmount;
+        albedo = shLerp(albedo, shSample(diffuseMap@shIterator, UV * 10).rgb, BLEND_AMOUNT);
 #endif
 @shEndForeach
         

@@ -87,7 +87,7 @@ namespace MWRender
 
     int TerrainMaterial::Profile::getLayersPerPass () const
     {
-        return 12;
+        return 11;
     }
 
     void TerrainMaterial::Profile::createPass (int index, const Ogre::Terrain* terrain)
