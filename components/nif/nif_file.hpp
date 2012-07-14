@@ -263,10 +263,11 @@ struct KeyListT {
     int mInterpolationType;
     VecType mKeys;
 
-    void read(NIFFile *nif)
+    void read(NIFFile *nif, bool force=false)
     {
         size_t count = nif->getInt();
-        if(count == 0) return;
+        if(count == 0 && !force)
+            return;
 
         mInterpolationType = nif->getInt();
         mKeys.resize(count);
