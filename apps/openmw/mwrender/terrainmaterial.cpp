@@ -4,6 +4,21 @@
 
 #include <extern/shiny/Main/Factory.hpp>
 
+namespace
+{
+    Ogre::String getComponent (int num)
+    {
+        if (num == 0)
+            return "x";
+        else if (num == 1)
+            return "y";
+        else if (num == 2)
+            return "z";
+        else
+            return "w";
+    }
+}
+
 
 namespace MWRender
 {
@@ -54,7 +69,7 @@ namespace MWRender
 
         mMaterial->setProperty ("allow_fixed_function", sh::makeProperty<sh::BooleanValue>(new sh::BooleanValue(false)));
 
-        createPass();
+        createPass(0, terrain);
 
         return Ogre::MaterialManager::getSingleton().getByName(matName);
     }
@@ -72,10 +87,10 @@ namespace MWRender
 
     int TerrainMaterial::Profile::getLayersPerPass () const
     {
-        return 10;
+        return 12;
     }
 
-    void TerrainMaterial::Profile::createPass (int index)
+    void TerrainMaterial::Profile::createPass (int index, const Ogre::Terrain* terrain)
     {
         int layerOffset = index * getLayersPerPass();
 
@@ -86,8 +101,41 @@ namespace MWRender
 
         p->mShaderProperties.setProperty ("colour_map", sh::makeProperty<sh::BooleanValue>(new sh::BooleanValue(mGlobalColourMap)));
 
+        // global colour map
         sh::MaterialInstanceTextureUnit* colourMap = p->createTextureUnit ("colourMap");
-        colourMap->setProperty ("texture_alias", sh::makeProperty(mMaterial->getName() + "_colourMap"));
+        colourMap->setProperty ("texture_alias", sh::makeProperty<sh::StringValue> (new sh::StringValue(mMaterial->getName() + "_colourMap")));
+        colourMap->setProperty ("tex_address_mode", sh::makeProperty<sh::StringValue> (new sh::StringValue("clamp")));
+
+        // global normal map
+        sh::MaterialInstanceTextureUnit* normalMap = p->createTextureUnit ("normalMap");
+        normalMap->setProperty ("direct_texture", sh::makeProperty<sh::StringValue> (new sh::StringValue(terrain->getTerrainNormalMap ()->getName())));
+        normalMap->setProperty ("tex_address_mode", sh::makeProperty<sh::StringValue> (new sh::StringValue("clamp")));
+
+        uint maxLayers = getMaxLayers(terrain);
+        uint numBlendTextures = std::min(terrain->getBlendTextureCount(maxLayers), terrain->getBlendTextureCount());
+        uint numLayers = std::min(maxLayers, static_cast<uint>(terrain->getLayerCount()));
+
+        p->mShaderProperties.setProperty ("num_layers", sh::makeProperty<sh::StringValue>(new sh::StringValue(Ogre::StringConverter::toString(numLayers))));
+        p->mShaderProperties.setProperty ("num_blendmaps", sh::makeProperty<sh::StringValue>(new sh::StringValue(Ogre::StringConverter::toString(numBlendTextures))));
+
+        // blend maps
+        for (uint i = 0; i < numBlendTextures; ++i)
+        {
+            sh::MaterialInstanceTextureUnit* blendTex = p->createTextureUnit ("blendMap" + Ogre::StringConverter::toString(i));
+            blendTex->setProperty ("direct_texture", sh::makeProperty<sh::StringValue> (new sh::StringValue(terrain->getBlendTextureName(i))));
+            blendTex->setProperty ("tex_address_mode", sh::makeProperty<sh::StringValue> (new sh::StringValue("clamp")));
+        }
+
+        // layer maps
+        for (uint i = 0; i < numLayers; ++i)
+        {
+            sh::MaterialInstanceTextureUnit* diffuseTex = p->createTextureUnit ("diffuseMap" + Ogre::StringConverter::toString(i));
+            diffuseTex->setProperty ("direct_texture", sh::makeProperty<sh::StringValue> (new sh::StringValue(terrain->getLayerTextureName(i, 0))));
+            p->mShaderProperties.setProperty ("blendmap_index_" + Ogre::StringConverter::toString(i),
+                sh::makeProperty<sh::StringValue>(new sh::StringValue(Ogre::StringConverter::toString(int((i-1) / 4)))));
+            p->mShaderProperties.setProperty ("blendmap_component_" + Ogre::StringConverter::toString(i),
+                sh::makeProperty<sh::StringValue>(new sh::StringValue(getComponent(int((i-1) % 4)))));
+        }
     }
 
     Ogre::MaterialPtr TerrainMaterial::Profile::generateForCompositeMap(const Ogre::Terrain* terrain)
@@ -111,7 +159,7 @@ namespace MWRender
     void TerrainMaterial::Profile::requestOptions(Ogre::Terrain* terrain)
     {
         terrain->_setMorphRequired(true);
-        terrain->_setNormalMapRequired(false);
+        terrain->_setNormalMapRequired(true); // global normal map
         terrain->_setLightMapRequired(false);
         terrain->_setCompositeMapRequired(false);
     }
