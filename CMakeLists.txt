@@ -20,17 +20,12 @@ set (OPENMW_VERSION_RELEASE 0)
 
 set (OPENMW_VERSION "${OPENMW_VERSION_MAJOR}.${OPENMW_VERSION_MINOR}.${OPENMW_VERSION_RELEASE}")
 
-# Add a sensible build type default and warning because empty means no optimization and no debug info.
-if(NOT CMAKE_BUILD_TYPE)
-    message("WARNING: CMAKE_BUILD_TYPE is not defined!\n         Defaulting to CMAKE_BUILD_TYPE=RelWithDebInfo. Use ccmake to set a proper value.")
-    set(CMAKE_BUILD_TYPE RelWithDebInfo
-    CACHE STRING "Type of build, options are: None Debug Release RelWithDebInfo MinSizeRel." FORCE)
-endif(NOT CMAKE_BUILD_TYPE)
-
 # Debug suffix for plugins
 set(DEBUG_SUFFIX "")
-if (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
-    set(DEBUG_SUFFIX "_d")
+if (DEFINED CMAKE_BUILD_TYPE)
+    if (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
+        set(DEBUG_SUFFIX "_d")
+    endif()
 endif()
 
 # doxygen main page
