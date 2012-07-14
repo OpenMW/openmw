@@ -31,6 +31,7 @@ namespace MWRender
 
     TerrainMaterial::Profile::Profile(Ogre::TerrainMaterialGenerator* parent, const Ogre::String& name, const Ogre::String& desc)
         : Ogre::TerrainMaterialGenerator::Profile(parent, name, desc)
+        , mGlobalColourMap(false)
     {
     }
 
@@ -56,11 +57,17 @@ namespace MWRender
         createPass();
 
         return Ogre::MaterialManager::getSingleton().getByName(matName);
+    }
 
-        /*
-        Ogre::MaterialPtr m = Ogre::MaterialManager::getSingleton().create(matName, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
-        return m;
-        */
+    void TerrainMaterial::Profile::setGlobalColourMapEnabled (bool enabled)
+    {
+        mGlobalColourMap = enabled;
+        mParent->_markChanged();
+    }
+
+    void TerrainMaterial::Profile::setGlobalColourMap (Ogre::Terrain* terrain, const std::string& name)
+    {
+        sh::Factory::getInstance ().setTextureAlias (terrain->getMaterialName () + "_colourMap", name);
     }
 
     int TerrainMaterial::Profile::getLayersPerPass () const
@@ -76,6 +83,11 @@ namespace MWRender
 
         p->setProperty ("vertex_program", sh::makeProperty<sh::StringValue>(new sh::StringValue("terrain_vertex")));
         p->setProperty ("fragment_program", sh::makeProperty<sh::StringValue>(new sh::StringValue("terrain_fragment")));
+
+        p->mShaderProperties.setProperty ("colour_map", sh::makeProperty<sh::BooleanValue>(new sh::BooleanValue(mGlobalColourMap)));
+
+        sh::MaterialInstanceTextureUnit* colourMap = p->createTextureUnit ("colourMap");
+        colourMap->setProperty ("texture_alias", sh::makeProperty(mMaterial->getName() + "_colourMap"));
     }
 
     Ogre::MaterialPtr TerrainMaterial::Profile::generateForCompositeMap(const Ogre::Terrain* terrain)

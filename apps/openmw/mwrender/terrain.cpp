@@ -191,6 +191,9 @@ namespace MWRender
                                                              y*(mLandSize-1),
                                                              mLandSize);
 
+                        mActiveProfile->setGlobalColourMapEnabled(true);
+                        mActiveProfile->setGlobalColourMap (terrain, vertex->getName());
+
                         //this is a hack to get around the fact that Ogre seems to
                         //corrupt the global colour map leading to rendering errors
                         //MaterialPtr mat = terrain->getMaterial();

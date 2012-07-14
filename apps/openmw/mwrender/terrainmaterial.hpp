@@ -47,10 +47,6 @@ namespace MWRender
 
         class Profile : public Ogre::TerrainMaterialGenerator::Profile
         {
-        protected:
-            Ogre::TerrainMaterialGenerator* mParent;
-            Ogre::String mName;
-            Ogre::String mDesc;
         public:
             Profile(Ogre::TerrainMaterialGenerator* parent, const Ogre::String& name, const Ogre::String& desc);
             virtual ~Profile();
@@ -69,8 +65,13 @@ namespace MWRender
 
             virtual void requestOptions(Ogre::Terrain* terrain);
 
+            void setGlobalColourMapEnabled(bool enabled);
+            void setGlobalColourMap (Ogre::Terrain* terrain, const std::string& name);
+
         private:
             sh::MaterialInstance* mMaterial;
+
+            bool mGlobalColourMap;
 
             void createPass (int index=0);
 
