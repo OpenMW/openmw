@@ -212,23 +212,23 @@ void NIFLoader::createMaterial(const Ogre::String &name,
                            const Ogre::Vector3 &emissive,
                            float glossiness, float alpha,
                            int alphaFlags, float alphaTest,
-                           const String &texName, bool vertexColor)
+                           const Ogre::String &texName, bool vertexColor)
 {
     if (texName.empty())
         return;
 
     sh::MaterialInstance* instance = sh::Factory::getInstance ().createMaterialInstance (name, "openmw_objects_base");
     instance->setProperty ("ambient", sh::makeProperty<sh::Vector3> (
-        new sh::Vector3(ambient.array[0], ambient.array[1], ambient.array[2])));
+        new sh::Vector3(ambient.x, ambient.y, ambient.z)));
 
     instance->setProperty ("diffuse", sh::makeProperty<sh::Vector4> (
-        new sh::Vector4(diffuse.array[0], diffuse.array[1], diffuse.array[2], alpha)));
+        new sh::Vector4(diffuse.x, diffuse.y, diffuse.z, alpha)));
 
     instance->setProperty ("specular", sh::makeProperty<sh::Vector4> (
-        new sh::Vector4(specular.array[0], specular.array[1], specular.array[2], glossiness)));
+        new sh::Vector4(specular.x, specular.y, specular.z, glossiness)));
 
     instance->setProperty ("emissive", sh::makeProperty<sh::Vector3> (
-        new sh::Vector3(emissive.array[0], emissive.array[1], emissive.array[2])));
+        new sh::Vector3(emissive.x, emissive.y, emissive.z)));
 
     instance->setProperty ("diffuseMap", sh::makeProperty(texName));
 
@@ -679,7 +679,7 @@ void NIFLoader::handleNiTriShape(NiTriShape *shape, int flags, BoundsFinder &bou
                 {
                     //std::cout << "new";
                     createMaterial(material, d->ambient, d->diffuse, d->specular, d->emissive,
-                                   d->glossiness, d->alpha, alphaFlags, alphaTest, texName, shape->data->colors.length != 0);
+                                   d->glossiness, d->alpha, alphaFlags, alphaTest, texName, shape->data->colors.size() != 0);
                     MaterialMap.insert(std::make_pair(texName,material));
                 }
             }
@@ -689,7 +689,7 @@ void NIFLoader::handleNiTriShape(NiTriShape *shape, int flags, BoundsFinder &bou
                 // material for it.
                 const Ogre::Vector3 zero(0.0f), one(1.0f);
                 createMaterial(material, one, one, zero, zero, 0.0f, 1.0f,
-                               alphaFlags, alphaTest, texName, shape->data->colors.length != 0);
+                               alphaFlags, alphaTest, texName, shape->data->colors.size() != 0);
             }
         }
     } // End of material block, if(!hidden) ...
