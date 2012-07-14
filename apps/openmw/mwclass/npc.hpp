@@ -76,6 +76,8 @@ namespace MWClass
             ///< Returns total weight of objects inside this object (including modifications from magic
             /// effects). Throws an exception, if the object can't hold other objects.
 
+            virtual void adjustRotation(const MWWorld::Ptr& ptr,float& x,float& y,float& z) const;
+
             static void registerSelf();
     };
 }

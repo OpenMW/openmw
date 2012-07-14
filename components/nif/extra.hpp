@@ -38,70 +38,70 @@ namespace Nif
 class Extra : public Record
 {
 public:
-  ExtraPtr extra;
+    ExtraPtr extra;
 
-  void read(NIFFile *nif) { extra.read(nif); }
+    void read(NIFFile *nif) { extra.read(nif); }
+    void post(NIFFile *nif) { extra.post(nif); }
 };
 
 class NiVertWeightsExtraData : public Extra
 {
 public:
-  void read(NIFFile *nif)
-  {
-    Extra::read(nif);
+    void read(NIFFile *nif)
+    {
+        Extra::read(nif);
 
-    // We should have s*4+2 == i, for some reason. Might simply be the
-    // size of the rest of the record, unhelpful as that may be.
-    /*int i =*/ nif->getInt();
-    int s = nif->getShort(); // number of vertices
+        // We should have s*4+2 == i, for some reason. Might simply be the
+        // size of the rest of the record, unhelpful as that may be.
+        /*int i =*/ nif->getInt();
+        int s = nif->getUShort();
 
-    nif->getFloatLen(s);     // vertex weights I guess
-  }
+        nif->skip(s * sizeof(float)); // vertex weights I guess
+    }
 };
 
 class NiTextKeyExtraData : public Extra
 {
 public:
-  struct TextKey
-  {
-    float time;
-    Misc::SString text;
-  };
+    struct TextKey
+    {
+        float time;
+        std::string text;
+    };
+    std::vector<TextKey> list;
 
-  std::vector<TextKey> list;
+    void read(NIFFile *nif)
+    {
+        Extra::read(nif);
 
-  void read(NIFFile *nif)
-  {
-    Extra::read(nif);
+        nif->getInt(); // 0
 
-    nif->getInt(); // 0
-
-    int keynum = nif->getInt();
-    list.resize(keynum);
-    for(int i=0; i<keynum; i++)
-      {
-        list[i].time = nif->getFloat();
-        list[i].text = nif->getString();
-      }
-  }
+        int keynum = nif->getInt();
+        list.resize(keynum);
+        for(int i=0; i<keynum; i++)
+        {
+            list[i].time = nif->getFloat();
+            list[i].text = nif->getString();
+        }
+    }
 };
 
 class NiStringExtraData : public Extra
 {
 public:
-  /* Two known meanings:
-     "MRK" - marker, only visible in the editor, not rendered in-game
-     "NCO" - no collision
-   */
-  Misc::SString string;
+    /* Two known meanings:
+       "MRK" - marker, only visible in the editor, not rendered in-game
+       "NCO" - no collision
+    */
+    std::string string;
 
-  void read(NIFFile *nif)
-  {
-    Extra::read(nif);
+    void read(NIFFile *nif)
+    {
+        Extra::read(nif);
 
-    nif->getInt(); // size of string + 4. Really useful...
-    string = nif->getString();
-  }
+        nif->getInt(); // size of string + 4. Really useful...
+        string = nif->getString();
+    }
 };
 
 } // Namespace

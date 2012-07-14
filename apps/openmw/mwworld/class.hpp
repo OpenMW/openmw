@@ -187,6 +187,10 @@ namespace MWWorld
             virtual std::string getEnchantment (const MWWorld::Ptr& ptr) const;
             ///< @return the enchantment ID if the object is enchanted, otherwise an empty string
             /// (default implementation: return empty string)
+
+            virtual void adjustScale(const MWWorld::Ptr& ptr,float& scale) const;
+
+            virtual void adjustRotation(const MWWorld::Ptr& ptr,float& x,float& y,float& z) const;
     };
 }
 

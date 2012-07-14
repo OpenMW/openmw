@@ -178,6 +178,10 @@ namespace MWBase
 
             virtual void moveObject (const MWWorld::Ptr& ptr, float x, float y, float z) = 0;
 
+            virtual void scaleObject (const MWWorld::Ptr& ptr, float scale) = 0;
+
+            virtual void rotateObject(const MWWorld::Ptr& ptr,float x,float y,float z) = 0;
+
             virtual void indexToPosition (int cellX, int cellY, float &x, float &y, bool centre = false)
                 const = 0;
             ///< Convert cell numbers to position.

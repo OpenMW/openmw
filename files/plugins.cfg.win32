@@ -4,10 +4,10 @@
 PluginFolder=.\
 
 # Define plugins
-Plugin=RenderSystem_Direct3D9
-Plugin=RenderSystem_GL
-Plugin=Plugin_ParticleFX
-Plugin=Plugin_OctreeSceneManager
-Plugin=Plugin_CgProgramManager
+Plugin=RenderSystem_Direct3D9${DEBUG_SUFFIX}
+Plugin=RenderSystem_GL${DEBUG_SUFFIX}
+Plugin=Plugin_ParticleFX${DEBUG_SUFFIX}
+Plugin=Plugin_OctreeSceneManager${DEBUG_SUFFIX}
+Plugin=Plugin_CgProgramManager${DEBUG_SUFFIX}
 
 

@@ -194,4 +194,12 @@ namespace MWWorld
     {
         return "";
     }
+
+    void Class::adjustScale(const MWWorld::Ptr& ptr,float& scale) const
+    {
+    }
+
+    void Class::adjustRotation(const MWWorld::Ptr& ptr,float& x,float& y,float& z) const
+    {
+    }
 }

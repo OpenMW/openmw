@@ -333,11 +333,18 @@ namespace Physic
 
     RigidBody* PhysicEngine::createRigidBody(std::string mesh,std::string name,float scale)
     {
+        char uniqueID[8];
+        sprintf( uniqueID, "%07.3f", scale );
+        std::string sid = uniqueID;
+        std::string outputstring = mesh + uniqueID + "\"|";
+        //std::cout << "The string" << outputstring << "\n";
+
         //get the shape from the .nif
-        mShapeLoader->load(mesh,"General");
-        BulletShapeManager::getSingletonPtr()->load(mesh,"General");
-        BulletShapePtr shape = BulletShapeManager::getSingleton().getByName(mesh,"General");
-        shape->Shape->setLocalScaling(btVector3(scale,scale,scale));
+        mShapeLoader->load(outputstring,"General");
+        BulletShapeManager::getSingletonPtr()->load(outputstring,"General");
+        BulletShapePtr shape = BulletShapeManager::getSingleton().getByName(outputstring,"General");
+        shape->Shape->setLocalScaling( btVector3(scale,scale,scale));
+        //btScaledBvhTriangleMeshShape* scaled = new btScaledBvhTriangleMeshShape(dynamic_cast<btBvhTriangleMeshShape*> (shape->Shape), btVector3(scale,scale,scale));
 
         //create the motionState
         CMotionState* newMotionState = new CMotionState(this,name);
@@ -400,18 +407,32 @@ namespace Physic
         if (it != RigidBodyMap.end() )
         {
             RigidBody* body = it->second;
+            //btScaledBvhTriangleMeshShape* scaled = dynamic_cast<btScaledBvhTriangleMeshShape*> (body->getCollisionShape());
+            
             if(body != NULL)
             {
                 delete body;
             }
+            /*if(scaled != NULL)
+            {
+                delete scaled;
+            }*/
             RigidBodyMap.erase(it);
         }
     }
 
     RigidBody* PhysicEngine::getRigidBody(std::string name)
     {
-        RigidBody* body = RigidBodyMap[name];
-        return body;
+        RigidBodyContainer::iterator it = RigidBodyMap.find(name);
+        if (it != RigidBodyMap.end() )
+        {
+            RigidBody* body = RigidBodyMap[name];
+            return body;
+        }
+        else
+        {
+            return 0;
+        }
     }
 
     void PhysicEngine::stepSimulation(double deltaT)
@@ -468,8 +489,16 @@ namespace Physic
 
     PhysicActor* PhysicEngine::getCharacter(std::string name)
     {
-        PhysicActor* act = PhysicActorMap[name];
-        return act;
+        PhysicActorContainer::iterator it = PhysicActorMap.find(name);
+        if (it != PhysicActorMap.end() )
+        {
+            PhysicActor* act = PhysicActorMap[name];
+            return act;
+        }
+        else
+        {
+            return 0;
+        }
     }
 
     void PhysicEngine::emptyEventLists(void)

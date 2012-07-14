@@ -46,16 +46,6 @@ namespace Nif
     class Node;
     class Transformation;
     class NiTriShape;
-    class Vector;
-    class Matrix;
-}
-
-namespace Mangle
-{
-    namespace VFS
-    {
-        class OgreVFS;
-    }
 }
 
 namespace NifBullet
@@ -68,7 +58,7 @@ class ManualBulletShapeLoader : public BulletShapeLoader
 {
 public:
 
-    ManualBulletShapeLoader():resourceGroup("General"){vfs = 0;}
+    ManualBulletShapeLoader():resourceGroup("General"){}
     virtual ~ManualBulletShapeLoader();
 
     void warn(std::string msg)
@@ -95,22 +85,18 @@ public:
     void load(const std::string &name,const std::string &group);
 
 private:
-    Ogre::Matrix3 getMatrix(Nif::Transformation* tr);
+    btQuaternion getbtQuat(Ogre::Matrix3 &m);
 
-    Ogre::Vector3 getVector(Nif::Transformation* tr);
-
-    btQuaternion getbtQuat(Ogre::Matrix3 m);
-
-    btVector3 getbtVector(Nif::Vector v);
+    btVector3 getbtVector(Ogre::Vector3 &v);
 
     /**
     *Parse a node.
     */
     void handleNode(Nif::Node *node, int flags,
-        Ogre::Matrix3 parentRot,Ogre::Vector3 parentPos,float parentScale,bool hasCollisionNode,bool isCollisionNode,bool raycastingOnly);
+        const Nif::Transformation *trafo, bool hasCollisionNode,bool isCollisionNode,bool raycastingOnly);
 
     /**
-    *Helpler function
+    *Helper function
     */
     bool hasRootCollisionNode(Nif::Node* node);
 
@@ -118,8 +104,6 @@ private:
     *convert a NiTriShape to a bullet trishape.
     */
     void handleNiTriShape(Nif::NiTriShape *shape, int flags,Ogre::Matrix3 parentRot,Ogre::Vector3 parentPos,float parentScales,bool raycastingOnly);
-
-    Mangle::VFS::OgreVFS *vfs;
 
     std::string resourceName;
     std::string resourceGroup;
