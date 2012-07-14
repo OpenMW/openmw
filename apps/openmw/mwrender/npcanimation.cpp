@@ -82,8 +82,10 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, OEngine::Render::OgreRendere
     assert(insert);
 
     std::string smodel = (!isBeast ? "meshes\\base_anim.nif" : "meshes\\base_animkna.nif");
-    NifOgre::NIFLoader::load(smodel);
-    base = mRend.getScene()->createEntity(smodel);
+
+    // FIXME: There can be more than one!
+    NifOgre::MeshPairList meshes = NifOgre::NIFLoader::load(smodel);
+    base = mRend.getScene()->createEntity(meshes[0].first->getName());
 
     base->setVisibilityFlags(RV_Actors);
     bool transparent = false;
@@ -382,9 +384,9 @@ void NpcAnimation::updateParts()
 
 Ogre::Entity* NpcAnimation::insertBoundedPart(const std::string &mesh, const std::string &bonename)
 {
-
-    NIFLoader::load(mesh);
-    Ogre::Entity* part = mRend.getScene()->createEntity(mesh);
+    // FIXME: There can be more than one!
+    NifOgre::MeshPairList meshes = NIFLoader::load(mesh);
+    Ogre::Entity* part = mRend.getScene()->createEntity(meshes[0].first->getName());
     part->setVisibilityFlags(RV_Actors);
 
     base->attachObjectToBone(bonename, part);

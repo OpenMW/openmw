@@ -322,12 +322,16 @@ void NIFLoader::createMaterial(const Ogre::String &name,
 
 void NIFLoader::loadResource(Ogre::Resource *resource)
 {
-    warn("Found no records in NIF.");
+    warn("Found no records in NIF for "+resource->getName());
 }
 
-Ogre::MeshPtr NIFLoader::load(const std::string &name, const std::string &group)
+MeshPairList NIFLoader::load(const std::string &name, Ogre::SkeletonPtr *skel, const std::string &group)
 {
     Ogre::MeshManager &meshMgr = Ogre::MeshManager::getSingleton();
+    MeshPairList ret;
+
+    if(skel != NULL)
+        skel->setNull();
 
     // Check if the resource already exists
     Ogre::MeshPtr themesh = meshMgr.getByName(name, group);
@@ -336,7 +340,9 @@ Ogre::MeshPtr NIFLoader::load(const std::string &name, const std::string &group)
         NIFLoader *loader = &sLoaders[name];
         themesh = meshMgr.createManual(name, group, loader);
     }
-    return themesh;
+    ret.push_back(std::make_pair(themesh, std::string()));
+
+    return ret;
 }
 
 

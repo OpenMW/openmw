@@ -26,6 +26,7 @@
 
 #include <OgreResource.h>
 #include <OgreMesh.h>
+#include <OgreSkeleton.h>
 
 #include <cassert>
 #include <string>
@@ -67,6 +68,12 @@ namespace Nif
 
 namespace NifOgre
 {
+
+/** This holds a list of meshes along with the names of their parent nodes
+ */
+typedef std::vector< std::pair<Ogre::MeshPtr,std::string> > MeshPairList;
+
+
 /** Manual resource loader for NIF meshes. This is the main class
     responsible for translating the internal NIF mesh structure into
     something Ogre can use.
@@ -75,19 +82,18 @@ namespace NifOgre
 
     NIFLoader::load("somemesh.nif");
 
-    Afterwards, you can use the mesh name "somemesh.nif" normally to
-    create entities and so on. The mesh isn't loaded from disk until
-    OGRE needs it for rendering. Thus the above load() command is not
-    very resource intensive, and can safely be done for a large number
-    of meshes at load time.
+    This returns a list of meshes used by the model, as well as the names of
+    their parent nodes (as they pertain to the skeleton, which is optionally
+    returned in the second argument if it exists).
  */
 class NIFLoader : Ogre::ManualResourceLoader
 {
 public:
     virtual void loadResource(Ogre::Resource *resource);
 
-    static Ogre::MeshPtr load(const std::string &name,
-                              const std::string &group="General");
+    static MeshPairList load(const std::string &name,
+                             Ogre::SkeletonPtr *skel=NULL,
+                             const std::string &group="General");
 
 private:
     void warn(const std::string &msg);

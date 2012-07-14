@@ -26,8 +26,9 @@ CreatureAnimation::CreatureAnimation(const MWWorld::Ptr& ptr, OEngine::Render::O
     {
         std::string mesh = "meshes\\" + ref->base->model;
 
-        NifOgre::NIFLoader::load(mesh);
-        base = mRend.getScene()->createEntity(mesh);
+        // FIXME: There can be more than one!
+        NifOgre::MeshPairList meshes = NifOgre::NIFLoader::load(mesh);
+        base = mRend.getScene()->createEntity(meshes[0].first->getName());
         base->setVisibilityFlags(RV_Actors);
 
         bool transparent = false;

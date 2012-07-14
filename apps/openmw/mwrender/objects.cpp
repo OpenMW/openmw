@@ -92,8 +92,9 @@ void Objects::insertMesh (const MWWorld::Ptr& ptr, const std::string& mesh)
     Ogre::SceneNode* insert = ptr.getRefData().getBaseNode();
     assert(insert);
 
-    NifOgre::NIFLoader::load(mesh);
-    Ogre::Entity *ent = mRenderer.getScene()->createEntity(mesh);
+    // FIXME: There can be more than one!
+    NifOgre::MeshPairList meshes = NifOgre::NIFLoader::load(mesh);
+    Ogre::Entity *ent = mRenderer.getScene()->createEntity(meshes[0].first->getName());
 
 
     Ogre::Vector3 extents = ent->getBoundingBox().getSize();

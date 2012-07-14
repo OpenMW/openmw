@@ -1,13 +1,14 @@
 #ifndef _GAME_RENDER_SKY_H
 #define _GAME_RENDER_SKY_H
 
+#include <vector>
+
 #include <OgreVector3.h>
 #include <OgreString.h>
 #include <OgreMaterial.h>
 #include <OgreColourValue.h>
 #include <OgreHighLevelGpuProgram.h>
 
-#include "sky.hpp"
 #include "../mwworld/weather.hpp"
 
 namespace Ogre
@@ -195,7 +196,7 @@ namespace MWRender
         Ogre::MaterialPtr mCloudMaterial;
         Ogre::MaterialPtr mAtmosphereMaterial;
 
-        Ogre::MaterialPtr mStarsMaterials[7];
+        std::vector<Ogre::MaterialPtr> mStarsMaterials;
 
         Ogre::HighLevelGpuProgramPtr mCloudFragmentShader;
 
