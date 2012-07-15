@@ -490,11 +490,182 @@ class NIFMeshLoader : Ogre::ManualResourceLoader
     }
 
 
+    // Convert NiTriShape to Ogre::SubMesh
+    void handleNiTriShape(Ogre::Mesh *mesh, Nif::NiTriShape *shape)
+    {
+        const Nif::NiTriShapeData *data = shape->data.getPtr();
+        const Nif::NiSkinInstance *skin = (shape->skin.empty() ? NULL : shape->skin.getPtr());
+        std::vector<Ogre::Vector3> srcVerts = data->vertices;
+        std::vector<Ogre::Vector3> srcNorms = data->normals;
+        if(skin != NULL)
+        {
+#if 0
+            // Convert vertices and normals back to bone space
+            std::vector<Vector3> newVerts(srcVerts.size(), Vector3(0,0,0));
+            std::vector<Vector3> newNorms(srcNorms.size(), Vector3(0,0,0));
+
+            NiSkinDataRef data = skin->GetSkinData();
+            const std::vector<NiNodeRef> &bones = skin->GetBones();
+            for(size_t b = 0;b < bones.size();b++)
+            {
+                Matrix44 mat = data->GetBoneTransform(b) * bones[b]->GetWorldTransform();
+
+                const std::vector<SkinWeight> &weights = data->GetBoneWeights(b);
+                for(size_t i = 0;i < weights.size();i++)
+                {
+                    size_t index = weights[i].index;
+                    float weight = weights[i].weight;
+
+                    newVerts.at(index) += (mat*srcVerts[index]) * weight;
+                    if(newNorms.size() > index)
+                    {
+                        for(size_t j = 0;j < 3;j++)
+                        {
+                            newNorms[index][j] += mat[0][j]*srcNorms[index][0] * weight;
+                            newNorms[index][j] += mat[1][j]*srcNorms[index][1] * weight;
+                            newNorms[index][j] += mat[2][j]*srcNorms[index][2] * weight;
+                        }
+                    }
+                }
+            }
+
+            srcVerts = newVerts;
+            srcNorms = newNorms;
+#endif
+        }
+
+        // Set the bounding box first
+        BoundsFinder bounds;
+        bounds.add(&srcVerts[0][0], srcVerts.size());
+        mesh->_setBounds(Ogre::AxisAlignedBox(bounds.minX(), bounds.minY(), bounds.minZ(),
+                                                bounds.maxX(), bounds.maxY(), bounds.maxZ()));
+        mesh->_setBoundingSphereRadius(bounds.getRadius());
+
+        // This function is just one long stream of Ogre-barf, but it works
+        // great.
+        Ogre::HardwareBufferManager *hwBufMgr = Ogre::HardwareBufferManager::getSingletonPtr();
+        Ogre::HardwareVertexBufferSharedPtr vbuf;
+        Ogre::HardwareIndexBufferSharedPtr ibuf;
+        Ogre::VertexBufferBinding *bind;
+        Ogre::VertexDeclaration *decl;
+        int nextBuf = 0;
+
+        Ogre::SubMesh *sub = mesh->createSubMesh(shape->name);
+
+        // Add vertices
+        sub->useSharedVertices = false;
+        sub->vertexData = new Ogre::VertexData();
+        sub->vertexData->vertexStart = 0;
+        sub->vertexData->vertexCount = srcVerts.size();
+
+        decl = sub->vertexData->vertexDeclaration;
+        bind = sub->vertexData->vertexBufferBinding;
+        if(srcVerts.size())
+        {
+            vbuf = hwBufMgr->createVertexBuffer(Ogre::VertexElement::getTypeSize(Ogre::VET_FLOAT3),
+                                                srcVerts.size(), Ogre::HardwareBuffer::HBU_DYNAMIC_WRITE_ONLY,
+                                                true);
+            vbuf->writeData(0, vbuf->getSizeInBytes(), &srcVerts[0][0], true);
+
+            decl->addElement(nextBuf, 0, Ogre::VET_FLOAT3, Ogre::VES_POSITION);
+            bind->setBinding(nextBuf++, vbuf);
+        }
+
+        // Vertex normals
+        if(srcNorms.size())
+        {
+            vbuf = hwBufMgr->createVertexBuffer(Ogre::VertexElement::getTypeSize(Ogre::VET_FLOAT3),
+                                                srcNorms.size(), Ogre::HardwareBuffer::HBU_DYNAMIC_WRITE_ONLY,
+                                                true);
+            vbuf->writeData(0, vbuf->getSizeInBytes(), &srcNorms[0][0], true);
+
+            decl->addElement(nextBuf, 0, Ogre::VET_FLOAT3, Ogre::VES_NORMAL);
+            bind->setBinding(nextBuf++, vbuf);
+        }
+
+        // Vertex colors
+        const std::vector<Ogre::Vector4> &colors = data->colors;
+        if(colors.size())
+        {
+            Ogre::RenderSystem* rs = Ogre::Root::getSingleton().getRenderSystem();
+            std::vector<Ogre::RGBA> colorsRGB(colors.size());
+            for(size_t i = 0;i < colorsRGB.size();i++)
+            {
+                Ogre::ColourValue clr(colors[i][0], colors[i][1], colors[i][2], colors[i][3]);
+                rs->convertColourValue(clr, &colorsRGB[i]);
+            }
+            vbuf = hwBufMgr->createVertexBuffer(Ogre::VertexElement::getTypeSize(Ogre::VET_COLOUR),
+                                                colorsRGB.size(), Ogre::HardwareBuffer::HBU_STATIC_WRITE_ONLY,
+                                                true);
+            vbuf->writeData(0, vbuf->getSizeInBytes(), &colorsRGB[0], true);
+            decl->addElement(nextBuf, 0, Ogre::VET_COLOUR, Ogre::VES_DIFFUSE);
+            bind->setBinding(nextBuf++, vbuf);
+        }
+
+        // Texture UV coordinates
+        size_t numUVs = data->uvlist.size();
+        if(numUVs)
+        {
+            size_t elemSize = Ogre::VertexElement::getTypeSize(Ogre::VET_FLOAT2);
+            vbuf = hwBufMgr->createVertexBuffer(elemSize, srcVerts.size()*numUVs,
+                                                Ogre::HardwareBuffer::HBU_STATIC_WRITE_ONLY, true);
+            for(size_t i = 0;i < numUVs;i++)
+            {
+                const std::vector<Ogre::Vector2> &uvlist = data->uvlist[i];
+                vbuf->writeData(i*srcVerts.size()*elemSize, elemSize*srcVerts.size(), &uvlist[0], true);
+                decl->addElement(nextBuf, i*srcVerts.size()*elemSize, Ogre::VET_FLOAT2,
+                                 Ogre::VES_TEXTURE_COORDINATES, i);
+            }
+            bind->setBinding(nextBuf++, vbuf);
+        }
+
+        // Triangle faces
+        const std::vector<short> &srcIdx = data->triangles;
+        if(srcIdx.size())
+        {
+            ibuf = hwBufMgr->createIndexBuffer(Ogre::HardwareIndexBuffer::IT_16BIT, srcIdx.size(),
+                                               Ogre::HardwareBuffer::HBU_STATIC_WRITE_ONLY);
+            ibuf->writeData(0, ibuf->getSizeInBytes(), &srcIdx[0], true);
+            sub->indexData->indexBuffer = ibuf;
+            sub->indexData->indexCount = srcIdx.size();
+            sub->indexData->indexStart = 0;
+        }
+
+        // Assign bone weights for this TriShape
+#if 0
+        if(skin != NULL)
+        {
+            // Get the skeleton resource, so weights can be applied
+            Ogre::SkeletonManager *skelMgr = Ogre::SkeletonManager::getSingletonPtr();
+            Ogre::SkeletonPtr skel = skelMgr->getByName(mesh->getSkeletonName());
+
+            NiSkinDataRef data = skin->GetSkinData();
+            const std::vector<NiNodeRef> &bones = skin->GetBones();
+            for(size_t i = 0;i < bones.size();i++)
+            {
+                Ogre::VertexBoneAssignment boneInf;
+                boneInf.boneIndex = skel->getBone(bones[i]->GetName())->getHandle();
+
+                const std::vector<SkinWeight> &weights = data->GetBoneWeights(i);
+                for(size_t j = 0;j < weights.size();j++)
+                {
+                    boneInf.vertexIndex = weights[j].index;
+                    boneInf.weight = weights[j].weight;
+                    sub->addBoneAssignment(boneInf);
+                }
+            }
+        }
+#endif
+
+        if(mMaterialName.length() > 0)
+            sub->setMaterialName(mMaterialName);
+    }
+
     bool findTriShape(Ogre::Mesh *mesh, Nif::Node *node)
     {
         if(node->recType == Nif::RC_NiTriShape && mShapeName == node->name)
         {
-            warn("Not loading shape \""+mShapeName+"\" in "+mName);
+            handleNiTriShape(mesh, dynamic_cast<Nif::NiTriShape*>(node));
             return true;
         }
 
