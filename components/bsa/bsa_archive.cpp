@@ -28,13 +28,11 @@
 #include <OgreArchiveFactory.h>
 #include <OgreArchiveManager.h>
 #include "bsa_file.hpp"
-#include <libs/mangle/stream/clients/ogre_datastream.hpp>
 
 namespace
 {
 
 using namespace Ogre;
-using namespace Mangle::Stream;
 using namespace Bsa;
 
 struct ciLessBoost : std::binary_function<std::string, std::string, bool>
@@ -239,10 +237,7 @@ public:
 	
 	
     // Open the file
-    StreamPtr strm = narc->getFile(passed.c_str());
-
-    // Wrap it into an Ogre::DataStream.
-    return DataStreamPtr(new Mangle2OgreStream(strm));
+    return narc->getFile(passed.c_str());
   }
 
 bool exists(const String& filename) {
