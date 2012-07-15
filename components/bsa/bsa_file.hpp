@@ -115,9 +115,6 @@ public:
 
     /** Open a file contained in the archive. Throws an exception if the
         file doesn't exist.
-
-        NOTE: All files opened from one archive will share a common file
-        handle. This is NOT thread safe.
     */
     Ogre::DataStreamPtr getFile(const char *file);
 
