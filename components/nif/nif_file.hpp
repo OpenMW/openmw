@@ -86,7 +86,7 @@ class NIFFile
     float read_le32f()
     {
         union {
-            int i;
+            uint32_t i;
             float f;
         } u = { read_le32() };
         return u.f;
