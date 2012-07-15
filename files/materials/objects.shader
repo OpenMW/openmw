@@ -1,7 +1,5 @@
 #include "core.h"
 
-#include "shadows.h"
-
 
 #define FOG @shGlobalSettingBool(fog)
 #define MRT @shPropertyNotBool(is_transparent) && @shGlobalSettingBool(mrt_output)
@@ -9,6 +7,10 @@
 
 #define SHADOWS_PSSM LIGHTING && @shGlobalSettingBool(shadows_pssm)
 #define SHADOWS LIGHTING && @shGlobalSettingBool(shadows)
+
+#if SHADOWS || SHADOWS_PSSM
+#include "shadows.h"
+#endif
 
 #if FOG || MRT || SHADOWS_PSSM
 #define NEED_DEPTH
@@ -110,7 +112,7 @@
         shUniform(float4, materialAmbient)                    @shAutoConstant(materialAmbient, surface_ambient_colour)
         shUniform(float4, materialDiffuse)                    @shAutoConstant(materialDiffuse, surface_diffuse_colour)
         shUniform(float4, materialEmissive)                   @shAutoConstant(materialEmissive, surface_emissive_colour)
-    @shForeach(8)
+    @shForeach(@shGlobalSettingString(num_lights))
         shUniform(float4, lightPosObjSpace@shIterator)        @shAutoConstant(lightPosObjSpace@shIterator, light_position_object_space, @shIterator)
         shUniform(float4, lightAttenuation@shIterator)        @shAutoConstant(lightAttenuation@shIterator, light_attenuation, @shIterator)
         shUniform(float4, lightDiffuse@shIterator)            @shAutoConstant(lightDiffuse@shIterator, light_diffuse_colour, @shIterator)
@@ -149,31 +151,32 @@
 
 #if LIGHTING
         float3 normal = normalize(normalPassthrough);
-        float3 lightDir, diffuse;
+        float3 lightDir;
+        float3 diffuse = float3(0,0,0);
         float d;
         float3 ambient = materialAmbient.xyz * lightAmbient.xyz;
     
-    @shForeach(8)
     
-        // shadows only for the first (directional) light
-#if @shIterator == 0
-    #if SHADOWS
+            // shadows only for the first (directional) light
+#if SHADOWS
             float shadow = depthShadowPCF (shadowMap0, lightSpacePos0, invShadowmapSize0);
-    #endif
-    #if SHADOWS_PSSM
+#endif
+#if SHADOWS_PSSM
             float shadow = pssmDepthShadow (lightSpacePos0, invShadowmapSize0, shadowMap0, lightSpacePos1, invShadowmapSize1, shadowMap1, lightSpacePos2, invShadowmapSize2, shadowMap2, depthPassthrough, pssmSplitPoints);
-    #endif
+#endif
 
-    #if SHADOWS || SHADOWS_PSSM
+#if SHADOWS || SHADOWS_PSSM
             float fadeRange = shadowFar_fadeStart.x - shadowFar_fadeStart.y;
             float fade = 1-((depthPassthrough - shadowFar_fadeStart.y) / fadeRange);
             shadow = (depthPassthrough > shadowFar_fadeStart.x) ? 1 : ((depthPassthrough > shadowFar_fadeStart.y) ? 1-((1-shadow)*fade) : shadow);
-    #endif
-
-    #if !SHADOWS && !SHADOWS_PSSM
-            float shadow = 1.0;
-    #endif
 #endif
+
+#if !SHADOWS && !SHADOWS_PSSM
+            float shadow = 1.0;
+#endif
+    
+    @shForeach(@shGlobalSettingString(num_lights))
+    
     
         lightDir = lightPosObjSpace@shIterator.xyz - (objSpacePositionPassthrough.xyz * lightPosObjSpace@shIterator.w);
         d = length(lightDir);

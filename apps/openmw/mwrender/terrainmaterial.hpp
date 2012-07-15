@@ -73,10 +73,6 @@ namespace MWRender
 
             bool mGlobalColourMap;
 
-            void createPass (int index, const Ogre::Terrain* terrain);
-
-            int getLayersPerPass () const;
-
         };
 
         TerrainMaterial();

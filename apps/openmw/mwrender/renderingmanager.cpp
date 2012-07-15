@@ -107,6 +107,7 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
     sh::Factory::getInstance ().setGlobalSetting ("mrt_output", useMRT() ? "true" : "false");
     sh::Factory::getInstance ().setGlobalSetting ("fog", "true");
     sh::Factory::getInstance ().setGlobalSetting ("lighting", "true");
+    sh::Factory::getInstance ().setGlobalSetting ("num_lights", Settings::Manager::getString ("num lights", "Objects"));
 
     applyCompositors();
 

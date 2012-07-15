@@ -69,31 +69,6 @@ namespace MWRender
 
         mMaterial->setProperty ("allow_fixed_function", sh::makeProperty<sh::BooleanValue>(new sh::BooleanValue(false)));
 
-        createPass(0, terrain);
-
-        return Ogre::MaterialManager::getSingleton().getByName(matName);
-    }
-
-    void TerrainMaterial::Profile::setGlobalColourMapEnabled (bool enabled)
-    {
-        mGlobalColourMap = enabled;
-        mParent->_markChanged();
-    }
-
-    void TerrainMaterial::Profile::setGlobalColourMap (Ogre::Terrain* terrain, const std::string& name)
-    {
-        sh::Factory::getInstance ().setTextureAlias (terrain->getMaterialName () + "_colourMap", name);
-    }
-
-    int TerrainMaterial::Profile::getLayersPerPass () const
-    {
-        return 11;
-    }
-
-    void TerrainMaterial::Profile::createPass (int index, const Ogre::Terrain* terrain)
-    {
-        int layerOffset = index * getLayersPerPass();
-
         sh::MaterialInstancePass* p = mMaterial->createPass ();
 
         p->setProperty ("vertex_program", sh::makeProperty<sh::StringValue>(new sh::StringValue("terrain_vertex")));
@@ -131,11 +106,32 @@ namespace MWRender
         {
             sh::MaterialInstanceTextureUnit* diffuseTex = p->createTextureUnit ("diffuseMap" + Ogre::StringConverter::toString(i));
             diffuseTex->setProperty ("direct_texture", sh::makeProperty<sh::StringValue> (new sh::StringValue(terrain->getLayerTextureName(i, 0))));
-            p->mShaderProperties.setProperty ("blendmap_index_" + Ogre::StringConverter::toString(i),
-                sh::makeProperty<sh::StringValue>(new sh::StringValue(Ogre::StringConverter::toString(int((i-1) / 4)))));
             p->mShaderProperties.setProperty ("blendmap_component_" + Ogre::StringConverter::toString(i),
-                sh::makeProperty<sh::StringValue>(new sh::StringValue(getComponent(int((i-1) % 4)))));
+                sh::makeProperty<sh::StringValue>(new sh::StringValue(Ogre::StringConverter::toString(int((i-1) / 4)) + "." + getComponent(int((i-1) % 4)))));
         }
+
+        // shadow
+        for (uint i = 0; i < 3; ++i)
+        {
+            sh::MaterialInstanceTextureUnit* shadowTex = p->createTextureUnit ("shadowMap" + Ogre::StringConverter::toString(i));
+            shadowTex->setProperty ("content_type", sh::makeProperty<sh::StringValue> (new sh::StringValue("shadow")));
+        }
+
+        p->mShaderProperties.setProperty ("shadowtexture_offset", sh::makeProperty<sh::StringValue>(new sh::StringValue(
+            Ogre::StringConverter::toString(numBlendTextures + numLayers + 2))));
+
+        return Ogre::MaterialManager::getSingleton().getByName(matName);
+    }
+
+    void TerrainMaterial::Profile::setGlobalColourMapEnabled (bool enabled)
+    {
+        mGlobalColourMap = enabled;
+        mParent->_markChanged();
+    }
+
+    void TerrainMaterial::Profile::setGlobalColourMap (Ogre::Terrain* terrain, const std::string& name)
+    {
+        sh::Factory::getInstance ().setTextureAlias (terrain->getMaterialName () + "_colourMap", name);
     }
 
     Ogre::MaterialPtr TerrainMaterial::Profile::generateForCompositeMap(const Ogre::Terrain* terrain)
@@ -145,7 +141,16 @@ namespace MWRender
 
     Ogre::uint8 TerrainMaterial::Profile::getMaxLayers(const Ogre::Terrain* terrain) const
     {
-        return 32;
+        // count the texture units free
+        Ogre::uint8 freeTextureUnits = 16;
+        // normalmap
+        --freeTextureUnits;
+        // colourmap
+        --freeTextureUnits;
+        freeTextureUnits -= 3; // shadow PSSM
+
+        // each layer needs 1.25 units (1xdiffusespec, 0.25xblend)
+        return static_cast<Ogre::uint8>(freeTextureUnits / (1.25f));
     }
 
     void TerrainMaterial::Profile::updateParams(const Ogre::MaterialPtr& mat, const Ogre::Terrain* terrain)
