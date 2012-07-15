@@ -86,28 +86,12 @@ typedef std::vector< std::pair<Ogre::MeshPtr,std::string> > MeshPairList;
     their parent nodes (as they pertain to the skeleton, which is optionally
     returned in the second argument if it exists).
  */
-class NIFLoader : Ogre::ManualResourceLoader
+class NIFLoader
 {
 public:
-    virtual void loadResource(Ogre::Resource *resource);
-
     static MeshPairList load(const std::string &name,
                              Ogre::SkeletonPtr *skel=NULL,
                              const std::string &group="General");
-
-private:
-    std::string mName;
-    std::string mShapeName;
-    bool mHasSkel;
-
-    static void warn(const std::string &msg);
-    static void fail(const std::string &msg);
-
-    static void createMeshes(const std::string &name, const std::string &group, bool hasSkel,
-                             Nif::Node *node, MeshPairList &meshes, int flags=0);
-
-    typedef std::map<std::string,NIFLoader,ciLessBoost> LoaderMap;
-    static LoaderMap sLoaders;
 };
 
 }

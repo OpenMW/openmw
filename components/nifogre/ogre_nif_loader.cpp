@@ -182,20 +182,6 @@ static bool createSkeleton(const std::string &name, const std::string &group, Ni
 };
 
 
-NIFLoader::LoaderMap NIFLoader::sLoaders;
-
-void NIFLoader::warn(const std::string &msg)
-{
-    std::cerr << "NIFLoader: Warn: " << msg << std::endl;
-}
-
-void NIFLoader::fail(const std::string &msg)
-{
-    std::cerr << "NIFLoader: Fail: "<< msg << std::endl;
-    abort();
-}
-
-
 // Conversion of blend / test mode from NIF -> OGRE.
 // Not in use yet, so let's comment it out.
 /*
@@ -374,51 +360,81 @@ void NIFLoader::createMaterial(const Ogre::String &name,
 #endif
 
 
-void NIFLoader::loadResource(Ogre::Resource *resource)
+class NIFMeshLoader : Ogre::ManualResourceLoader
 {
-    warn("Found no records in NIF for "+resource->getName());
-}
+    std::string mName;
+    std::string mGroup;
+    std::string mShapeName;
+    bool mHasSkel;
 
-
-void NIFLoader::createMeshes(const std::string &name, const std::string &group, bool hasSkel, Nif::Node *node, MeshPairList &meshes, int flags)
-{
-    flags |= node->flags;
-
-    // TODO: Check for extra data
-
-    if(node->recType == Nif::RC_NiTriShape)
+    void warn(const std::string &msg)
     {
-        Ogre::MeshManager &meshMgr = Ogre::MeshManager::getSingleton();
-        std::string fullname = name+"@"+node->name;
-
-        Ogre::MeshPtr mesh = meshMgr.getByName(fullname);
-        if(mesh.isNull())
-        {
-            NIFLoader *loader = &sLoaders[fullname];
-            loader->mName = name;
-            loader->mShapeName = node->name;
-            loader->mHasSkel = hasSkel;
-
-            mesh = meshMgr.createManual(fullname, group, loader);
-        }
-
-        meshes.push_back(std::make_pair(mesh, (node->parent ? node->parent->name : std::string())));
+        std::cerr << "NIFMeshLoader: Warn: " << msg << std::endl;
     }
-    else if(node->recType != Nif::RC_NiNode && node->recType != Nif::RC_RootCollisionNode &&
-            node->recType != Nif::RC_NiRotatingParticles)
-        warn("Unhandled mesh node type: "+node->recName);
 
-    Nif::NiNode *ninode = dynamic_cast<Nif::NiNode*>(node);
-    if(ninode)
+    void fail(const std::string &msg)
     {
-        Nif::NodeList &children = ninode->children;
-        for(size_t i = 0;i < children.length();i++)
+        std::cerr << "NIFMeshLoader: Fail: "<< msg << std::endl;
+        abort();
+    }
+
+
+    typedef std::map<std::string,NIFMeshLoader,ciLessBoost> LoaderMap;
+    static LoaderMap sLoaders;
+
+public:
+    NIFMeshLoader()
+      : mHasSkel(false)
+    { }
+    NIFMeshLoader(const std::string &name, const std::string &group, bool hasSkel)
+      : mName(name), mGroup(group), mHasSkel(hasSkel)
+    { }
+
+    virtual void loadResource(Ogre::Resource *resource)
+    {
+        warn("Found no records in NIF for "+resource->getName());
+    }
+
+    void createMeshes(Nif::Node *node, MeshPairList &meshes, int flags=0)
+    {
+        flags |= node->flags;
+
+        // TODO: Check for extra data
+
+        if(node->recType == Nif::RC_NiTriShape)
         {
-            if(!children[i].empty())
-                createMeshes(name, group, hasSkel, children[i].getPtr(), meshes, flags);
+            Ogre::MeshManager &meshMgr = Ogre::MeshManager::getSingleton();
+            std::string fullname = mName+"@"+node->name;
+
+            Ogre::MeshPtr mesh = meshMgr.getByName(fullname);
+            if(mesh.isNull())
+            {
+                NIFMeshLoader *loader = &sLoaders[fullname];
+                *loader = *this;
+                loader->mShapeName = node->name;
+
+                mesh = meshMgr.createManual(fullname, mGroup, loader);
+            }
+
+            meshes.push_back(std::make_pair(mesh, (node->parent ? node->parent->name : std::string())));
+        }
+        else if(node->recType != Nif::RC_NiNode && node->recType != Nif::RC_RootCollisionNode &&
+                node->recType != Nif::RC_NiRotatingParticles)
+            warn("Unhandled mesh node type: "+node->recName);
+
+        Nif::NiNode *ninode = dynamic_cast<Nif::NiNode*>(node);
+        if(ninode)
+        {
+            Nif::NodeList &children = ninode->children;
+            for(size_t i = 0;i < children.length();i++)
+            {
+                if(!children[i].empty())
+                    createMeshes(children[i].getPtr(), meshes, flags);
+            }
         }
     }
-}
+};
+NIFMeshLoader::LoaderMap NIFMeshLoader::sLoaders;
 
 
 MeshPairList NIFLoader::load(const std::string &name, Ogre::SkeletonPtr *skel, const std::string &group)
@@ -448,7 +464,9 @@ MeshPairList NIFLoader::load(const std::string &name, Ogre::SkeletonPtr *skel, c
     }
 
     bool hasSkel = NIFSkeletonLoader::createSkeleton(name, group, node, skel);
-    createMeshes(name, group, hasSkel, node, meshes);
+
+    NIFMeshLoader meshldr(name, group, hasSkel);
+    meshldr.createMeshes(node, meshes);
 
     return meshes;
 }
