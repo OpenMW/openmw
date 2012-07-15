@@ -210,3 +210,17 @@ void NiSkinInstance::post(NIFFile *nif)
         bones[i]->makeBone(i, data->bones[i]);
     }
 }
+
+Ogre::Matrix4 Node::getLocalTransform()
+{
+    Ogre::Matrix4 mat4;
+    mat4.makeTransform(trafo.pos, Ogre::Vector3(trafo.scale), Ogre::Quaternion(trafo.rotation));
+    return mat4;
+}
+
+Ogre::Matrix4 Node::getWorldTransform()
+{
+    if(parent != NULL)
+        return getLocalTransform() * parent->getWorldTransform();
+    return getLocalTransform();
+}

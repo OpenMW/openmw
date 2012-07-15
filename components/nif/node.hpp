@@ -24,6 +24,8 @@
 #ifndef _NIF_NODE_H_
 #define _NIF_NODE_H_
 
+#include <OgreMatrix4.h>
+
 #include "controlled.hpp"
 #include "data.hpp"
 #include "property.hpp"
@@ -108,6 +110,9 @@ public:
         boneTrafo = &bi.trafo;
         boneIndex = ind;
     }
+
+    Ogre::Matrix4 getLocalTransform();
+    Ogre::Matrix4 getWorldTransform();
 };
 
 struct NiNode : Node
