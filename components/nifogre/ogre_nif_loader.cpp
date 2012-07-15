@@ -379,6 +379,31 @@ class NIFMeshLoader : Ogre::ManualResourceLoader
     }
 
 
+    bool findTriShape(Ogre::Mesh *mesh, Nif::Node *node)
+    {
+        if(node->recType == Nif::RC_NiTriShape && mShapeName == node->name)
+        {
+            warn("Not loading shape \""+mShapeName+"\" in "+mName);
+            return true;
+        }
+
+        Nif::NiNode *ninode = dynamic_cast<Nif::NiNode*>(node);
+        if(ninode)
+        {
+            Nif::NodeList &children = ninode->children;
+            for(size_t i = 0;i < children.length();i++)
+            {
+                if(!children[i].empty())
+                {
+                    if(findTriShape(mesh, children[i].getPtr()))
+                        return true;
+                }
+            }
+        }
+        return false;
+    }
+
+
     typedef std::map<std::string,NIFMeshLoader,ciLessBoost> LoaderMap;
     static LoaderMap sLoaders;
 
@@ -392,7 +417,12 @@ public:
 
     virtual void loadResource(Ogre::Resource *resource)
     {
-        warn("Found no records in NIF for "+resource->getName());
+        Ogre::Mesh *mesh = dynamic_cast<Ogre::Mesh*>(resource);
+        assert(mesh && "Attempting to load a mesh into a non-mesh resource!");
+
+        Nif::NIFFile nif(mName);
+        Nif::Node *node = dynamic_cast<Nif::Node*>(nif.getRecord(0));
+        findTriShape(mesh, node);
     }
 
     void createMeshes(Nif::Node *node, MeshPairList &meshes, int flags=0)
