@@ -200,7 +200,7 @@ void BSAFile::readHeader()
     input.read(&stringBuf[0], stringBuf.size());
 
     // Check our position
-    assert(input.tellg() == 12+dirsize);
+    assert(input.tellg() == static_cast<int> (12+dirsize));
 
     // Calculate the offset of the data buffer. All file offsets are
     // relative to this. 12 header bytes + directory + hash table
