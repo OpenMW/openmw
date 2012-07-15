@@ -98,11 +98,13 @@ public:
 private:
     std::string mName;
     std::string mShapeName;
+    bool mHasSkel;
 
     static void warn(const std::string &msg);
     static void fail(const std::string &msg);
 
-    static void createMeshes(const std::string &name, const std::string &group, Nif::Node *node, MeshPairList &meshes, int flags=0);
+    static void createMeshes(const std::string &name, const std::string &group, bool hasSkel,
+                             Nif::Node *node, MeshPairList &meshes, int flags=0);
 
     typedef std::map<std::string,NIFLoader,ciLessBoost> LoaderMap;
     static LoaderMap sLoaders;

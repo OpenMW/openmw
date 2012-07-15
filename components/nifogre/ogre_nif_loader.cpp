@@ -128,6 +128,60 @@ public:
 };
 
 
+struct NIFSkeletonLoader : public Ogre::ManualResourceLoader {
+
+static void warn(const std::string &msg)
+{
+    std::cerr << "NIFSkeletonLoader: Warn: " << msg << std::endl;
+}
+
+static void fail(const std::string &msg)
+{
+    std::cerr << "NIFSkeletonLoader: Fail: "<< msg << std::endl;
+    abort();
+}
+
+void loadResource(Ogre::Resource *resource)
+{
+    warn("Found no records in NIF for "+resource->getName());
+}
+
+static bool createSkeleton(const std::string &name, const std::string &group, Nif::Node *node, Ogre::SkeletonPtr *skel)
+{
+    if(node->boneTrafo != NULL)
+    {
+        Ogre::SkeletonManager &skelMgr = Ogre::SkeletonManager::getSingleton();
+
+        Ogre::SkeletonPtr tmp = skelMgr.getByName(name);
+        if(tmp.isNull())
+        {
+            static NIFSkeletonLoader loader;
+            tmp = skelMgr.create(name, group, true, &loader);
+        }
+
+        if(skel) *skel = tmp;
+        return true;
+    }
+
+    Nif::NiNode *ninode = dynamic_cast<Nif::NiNode*>(node);
+    if(ninode)
+    {
+        Nif::NodeList &children = ninode->children;
+        for(size_t i = 0;i < children.length();i++)
+        {
+            if(!children[i].empty())
+            {
+                if(createSkeleton(name, group, children[i].getPtr(), skel))
+                    return true;
+            }
+        }
+    }
+    return false;
+}
+
+};
+
+
 NIFLoader::LoaderMap NIFLoader::sLoaders;
 
 void NIFLoader::warn(const std::string &msg)
@@ -325,7 +379,8 @@ void NIFLoader::loadResource(Ogre::Resource *resource)
     warn("Found no records in NIF for "+resource->getName());
 }
 
-void NIFLoader::createMeshes(const std::string &name, const std::string &group, Nif::Node *node, MeshPairList &meshes, int flags)
+
+void NIFLoader::createMeshes(const std::string &name, const std::string &group, bool hasSkel, Nif::Node *node, MeshPairList &meshes, int flags)
 {
     flags |= node->flags;
 
@@ -342,6 +397,7 @@ void NIFLoader::createMeshes(const std::string &name, const std::string &group, 
             NIFLoader *loader = &sLoaders[fullname];
             loader->mName = name;
             loader->mShapeName = node->name;
+            loader->mHasSkel = hasSkel;
 
             mesh = meshMgr.createManual(fullname, group, loader);
         }
@@ -359,10 +415,11 @@ void NIFLoader::createMeshes(const std::string &name, const std::string &group, 
         for(size_t i = 0;i < children.length();i++)
         {
             if(!children[i].empty())
-                createMeshes(name, group, children[i].getPtr(), meshes, flags);
+                createMeshes(name, group, hasSkel, children[i].getPtr(), meshes, flags);
         }
     }
 }
+
 
 MeshPairList NIFLoader::load(const std::string &name, Ogre::SkeletonPtr *skel, const std::string &group)
 {
@@ -390,7 +447,8 @@ MeshPairList NIFLoader::load(const std::string &name, Ogre::SkeletonPtr *skel, c
         return meshes;
     }
 
-    createMeshes(name, group, node, meshes);
+    bool hasSkel = NIFSkeletonLoader::createSkeleton(name, group, node, skel);
+    createMeshes(name, group, hasSkel, node, meshes);
 
     return meshes;
 }
