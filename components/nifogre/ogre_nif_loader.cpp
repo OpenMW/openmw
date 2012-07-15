@@ -226,26 +226,131 @@ static CompareFunction getTestMode(int mode)
 }
 */
 
-#if 0
-void NIFLoader::createMaterial(const Ogre::String &name,
-                           const Ogre::Vector3 &ambient,
-                           const Ogre::Vector3 &diffuse,
-                           const Ogre::Vector3 &specular,
-                           const Ogre::Vector3 &emissive,
-                           float glossiness, float alpha,
-                           int alphaFlags, float alphaTest,
-                           const Ogre::String &texName)
-{
-    Ogre::MaterialPtr material = Ogre::MaterialManager::getSingleton().create(name, resourceGroup);
 
+class NIFMaterialLoader {
+
+static std::multimap<std::string,std::string> MaterialMap;
+
+static void warn(const std::string &msg)
+{
+    std::cerr << "NIFMeshLoader: Warn: " << msg << std::endl;
+}
+
+static void fail(const std::string &msg)
+{
+    std::cerr << "NIFMeshLoader: Fail: "<< msg << std::endl;
+    abort();
+}
+
+public:
+static Ogre::String getMaterial(const NiTriShape *shape, const Ogre::String &name, const Ogre::String &group)
+{
+    Ogre::MaterialManager &matMgr = Ogre::MaterialManager::getSingleton();
+    Ogre::MaterialPtr material = matMgr.getByName(name);
+    if(!material.isNull())
+        return name;
+
+    Ogre::Vector3 ambient(1.0f);
+    Ogre::Vector3 diffuse(1.0f);
+    Ogre::Vector3 specular(0.0f);
+    Ogre::Vector3 emissive(0.0f);
+    float glossiness = 0.0f;
+    float alpha = 1.0f;
+    int alphaFlags = -1;
+    ubyte alphaTest = 0;
+    Ogre::String texName;
+
+    // These are set below if present
+    const NiTexturingProperty *t = NULL;
+    const NiMaterialProperty *m = NULL;
+    const NiAlphaProperty *a = NULL;
+
+    // Scan the property list for material information
+    const PropertyList &list = shape->props;
+    for (size_t i = 0;i < list.length();i++)
+    {
+        // Entries may be empty
+        if (list[i].empty()) continue;
+
+        const Property *pr = list[i].getPtr();
+        if (pr->recType == RC_NiTexturingProperty)
+            t = static_cast<const NiTexturingProperty*>(pr);
+        else if (pr->recType == RC_NiMaterialProperty)
+            m = static_cast<const NiMaterialProperty*>(pr);
+        else if (pr->recType == RC_NiAlphaProperty)
+            a = static_cast<const NiAlphaProperty*>(pr);
+        else
+            warn("Skipped property type: "+pr->recName);
+    }
+
+    // Texture
+    if (t && t->textures[0].inUse)
+    {
+        NiSourceTexture *st = t->textures[0].texture.getPtr();
+        if (st->external)
+        {
+            /* Bethesda at some at some point converted all their BSA
+             * textures from tga to dds for increased load speed, but all
+             * texture file name references were kept as .tga.
+             */
+            texName = "textures\\" + st->filename;
+            if(!Ogre::ResourceGroupManager::getSingleton().resourceExistsInAnyGroup(texName))
+            {
+                Ogre::String::size_type pos = texName.rfind('.');
+                texName.replace(pos, texName.length(), ".dds");
+            }
+        }
+        else warn("Found internal texture, ignoring.");
+    }
+
+    // Alpha modifiers
+    if (a)
+    {
+        alphaFlags = a->flags;
+        alphaTest = a->data.threshold;
+    }
+
+    // Material
+    if(m)
+    {
+        ambient = m->data.ambient;
+        diffuse = m->data.diffuse;
+        specular = m->data.specular;
+        emissive = m->data.emissive;
+        glossiness = m->data.glossiness;
+        alpha = m->data.alpha;
+    }
+
+    Ogre::String matname = name;
+    if (m || !texName.empty())
+    {
+        // If we're here, then this mesh has a material. Thus we
+        // need to calculate a snappy material name. It should
+        // contain the mesh name (mesh->getName()) but also has to
+        // be unique. One mesh may use many materials.
+        std::multimap<std::string,std::string>::iterator itr = MaterialMap.find(texName);
+        std::multimap<std::string,std::string>::iterator lastElement;
+        lastElement = MaterialMap.upper_bound(texName);
+        if (itr != MaterialMap.end())
+        {
+            for ( ; itr != lastElement; ++itr)
+            {
+                //std::cout << "OK!";
+                //MaterialPtr mat = MaterialManager::getSingleton().getByName(itr->second,recourceGroup);
+                return itr->second;
+                //if( mat->getA
+            }
+        }
+    }
+
+    // No existing material like this. Create a new one.
+    material = matMgr.create(matname, group, true);
 
     // This assigns the texture to this material. If the texture name is
     // a file name, and this file exists (in a resource directory), it
     // will automatically be loaded when needed. If not (such as for
     // internal NIF textures that we might support later), we should
     // already have inserted a manual loader for the texture.
-
-
     if (!texName.empty())
     {
         Ogre::Pass *pass = material->getTechnique(0)->getPass(0);
@@ -356,8 +461,13 @@ void NIFLoader::createMaterial(const Ogre::String &name,
     material->setSpecular(specular[0], specular[1], specular[2], alpha);
     material->setSelfIllumination(emissive[0], emissive[1], emissive[2]);
     material->setShininess(glossiness);
+
+    MaterialMap.insert(std::make_pair(texName, matname));
+    return matname;
 }
-#endif
+
+};
+std::multimap<std::string,std::string> NIFMaterialLoader::MaterialMap;
 
 
 class NIFMeshLoader : Ogre::ManualResourceLoader
@@ -365,6 +475,7 @@ class NIFMeshLoader : Ogre::ManualResourceLoader
     std::string mName;
     std::string mGroup;
     std::string mShapeName;
+    std::string mMaterialName;
     bool mHasSkel;
 
     void warn(const std::string &msg)
@@ -433,20 +544,23 @@ public:
 
         if(node->recType == Nif::RC_NiTriShape)
         {
+            NiTriShape *shape = dynamic_cast<NiTriShape*>(node);
+
             Ogre::MeshManager &meshMgr = Ogre::MeshManager::getSingleton();
-            std::string fullname = mName+"@"+node->name;
+            std::string fullname = mName+"@"+shape->name;
 
             Ogre::MeshPtr mesh = meshMgr.getByName(fullname);
             if(mesh.isNull())
             {
                 NIFMeshLoader *loader = &sLoaders[fullname];
                 *loader = *this;
-                loader->mShapeName = node->name;
+                loader->mShapeName = shape->name;
+                loader->mMaterialName = NIFMaterialLoader::getMaterial(shape, fullname, mGroup);
 
                 mesh = meshMgr.createManual(fullname, mGroup, loader);
             }
 
-            meshes.push_back(std::make_pair(mesh, (node->parent ? node->parent->name : std::string())));
+            meshes.push_back(std::make_pair(mesh, (shape->parent ? shape->parent->name : std::string())));
         }
         else if(node->recType != Nif::RC_NiNode && node->recType != Nif::RC_RootCollisionNode &&
                 node->recType != Nif::RC_NiRotatingParticles)
