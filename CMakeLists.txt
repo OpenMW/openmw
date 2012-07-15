@@ -101,9 +101,8 @@ ENDIF()
 
 set(LIBDIR ${CMAKE_SOURCE_DIR}/libs)
 
-set(MANGLE_VFS ${LIBDIR}/mangle/vfs/servers/ogre_vfs.cpp)
 set(MANGLE_INPUT ${LIBDIR}/mangle/input/servers/ois_driver.cpp)
-set(MANGLE_ALL ${MANGLE_VFS} ${MANGLE_INPUT})
+set(MANGLE_ALL ${MANGLE_INPUT})
 source_group(libs\\mangle FILES ${MANGLE_ALL})
 
 set(OENGINE_OGRE
