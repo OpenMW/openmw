@@ -132,13 +132,13 @@ NIFLoader::LoaderMap NIFLoader::sLoaders;
 
 void NIFLoader::warn(const std::string &msg)
 {
-    std::cerr << "NIFLoader: Warn:" << msg << "\n";
+    std::cerr << "NIFLoader: Warn: " << msg << std::endl;
 }
 
 void NIFLoader::fail(const std::string &msg)
 {
     std::cerr << "NIFLoader: Fail: "<< msg << std::endl;
-    assert(1);
+    abort();
 }
 
 
@@ -325,24 +325,74 @@ void NIFLoader::loadResource(Ogre::Resource *resource)
     warn("Found no records in NIF for "+resource->getName());
 }
 
+void NIFLoader::createMeshes(const std::string &name, const std::string &group, Nif::Node *node, MeshPairList &meshes, int flags)
+{
+    flags |= node->flags;
+
+    // TODO: Check for extra data
+
+    if(node->recType == Nif::RC_NiTriShape)
+    {
+        Ogre::MeshManager &meshMgr = Ogre::MeshManager::getSingleton();
+        std::string fullname = name+"@"+node->name;
+
+        Ogre::MeshPtr mesh = meshMgr.getByName(fullname);
+        if(mesh.isNull())
+        {
+            NIFLoader *loader = &sLoaders[fullname];
+            loader->mName = name;
+            loader->mShapeName = node->name;
+
+            mesh = meshMgr.createManual(fullname, group, loader);
+        }
+
+        meshes.push_back(std::make_pair(mesh, (node->parent ? node->parent->name : std::string())));
+    }
+    else if(node->recType != Nif::RC_NiNode && node->recType != Nif::RC_RootCollisionNode &&
+            node->recType != Nif::RC_NiRotatingParticles)
+        warn("Unhandled mesh node type: "+node->recName);
+
+    Nif::NiNode *ninode = dynamic_cast<Nif::NiNode*>(node);
+    if(ninode)
+    {
+        Nif::NodeList &children = ninode->children;
+        for(size_t i = 0;i < children.length();i++)
+        {
+            if(!children[i].empty())
+                createMeshes(name, group, children[i].getPtr(), meshes, flags);
+        }
+    }
+}
+
 MeshPairList NIFLoader::load(const std::string &name, Ogre::SkeletonPtr *skel, const std::string &group)
 {
-    Ogre::MeshManager &meshMgr = Ogre::MeshManager::getSingleton();
-    MeshPairList ret;
+    MeshPairList meshes;
 
     if(skel != NULL)
         skel->setNull();
 
-    // Check if the resource already exists
-    Ogre::MeshPtr themesh = meshMgr.getByName(name, group);
-    if(themesh.isNull())
+    Nif::NIFFile nif(name);
+    if (nif.numRecords() < 1)
     {
-        NIFLoader *loader = &sLoaders[name];
-        themesh = meshMgr.createManual(name, group, loader);
+        nif.warn("Found no records in NIF.");
+        return meshes;
     }
-    ret.push_back(std::make_pair(themesh, std::string()));
 
-    return ret;
+    // The first record is assumed to be the root node
+    Nif::Record *r = nif.getRecord(0);
+    assert(r != NULL);
+
+    Nif::Node *node = dynamic_cast<Nif::Node*>(r);
+    if(node == NULL)
+    {
+        nif.warn("First record in file was not a node, but a "+
+                 r->recName+". Skipping file.");
+        return meshes;
+    }
+
+    createMeshes(name, group, node, meshes);
+
+    return meshes;
 }
 
 

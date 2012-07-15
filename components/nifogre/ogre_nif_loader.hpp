@@ -96,8 +96,13 @@ public:
                              const std::string &group="General");
 
 private:
-    void warn(const std::string &msg);
-    void fail(const std::string &msg);
+    std::string mName;
+    std::string mShapeName;
+
+    static void warn(const std::string &msg);
+    static void fail(const std::string &msg);
+
+    static void createMeshes(const std::string &name, const std::string &group, Nif::Node *node, MeshPairList &meshes, int flags=0);
 
     typedef std::map<std::string,NIFLoader,ciLessBoost> LoaderMap;
     static LoaderMap sLoaders;
