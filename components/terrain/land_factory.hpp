@@ -1,8 +1,6 @@
 #ifndef TERRAIN_LAND_FACTORY_H
 #define TERRAIN_LAND_FACTORY_H
 
-#include <mangle/stream/stream.hpp>
-
 namespace Terrain
 {
   enum LandInfoGridType
@@ -32,12 +30,6 @@ namespace Terrain
     float xoffset, yoffset;
   };
 
-  /* We use normal streams for data. This allows us to just pass (for
-     example) a file stream as height map input later, with no extra
-     fuzz.
-   */
-  typedef Mangle::Stream::StreamPtr LandDataPtr;
-
   /*
     Factory class that provides streams to land data cells. Each
     "cell" has a unique integer coordinate in the plane.
@@ -46,10 +38,6 @@ namespace Terrain
   {
     // True if this factory has any data for the given grid cell.
     virtual bool has(int x, int y) = 0;
-
-    // Return stream to data for this cell. Additional data about the
-    // landscape is returned through the LandInfo struct.
-    virtual LandDataPtr get(int x, int y, LandInfo &info) = 0;
   };
 }
 #endif
