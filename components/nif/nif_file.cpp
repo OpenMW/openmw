@@ -221,6 +221,6 @@ Ogre::Matrix4 Node::getLocalTransform()
 Ogre::Matrix4 Node::getWorldTransform()
 {
     if(parent != NULL)
-        return getLocalTransform() * parent->getWorldTransform();
+        return parent->getWorldTransform() * getLocalTransform();
     return getLocalTransform();
 }
