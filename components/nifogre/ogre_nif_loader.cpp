@@ -557,12 +557,9 @@ class NIFMeshLoader : Ogre::ManualResourceLoader
                     newVerts.at(index) += (mat*srcVerts[index]) * weight;
                     if(newNorms.size() > index)
                     {
-                        for(size_t j = 0;j < 3;j++)
-                        {
-                            newNorms[index][j] += mat[j][0]*srcNorms[index][0] * weight;
-                            newNorms[index][j] += mat[j][1]*srcNorms[index][1] * weight;
-                            newNorms[index][j] += mat[j][2]*srcNorms[index][2] * weight;
-                        }
+                        Ogre::Vector4 vec4(srcNorms[index][0], srcNorms[index][1], srcNorms[index][2], 0.0f);
+                        vec4 = mat*vec4 * weight;
+                        newNorms[index] += Ogre::Vector3(&vec4[0]);
                     }
                 }
             }
