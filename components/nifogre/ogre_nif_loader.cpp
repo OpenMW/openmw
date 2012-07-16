@@ -546,7 +546,7 @@ class NIFMeshLoader : Ogre::ManualResourceLoader
                 Ogre::Matrix4 mat(Ogre::Matrix4::IDENTITY);
                 mat.makeTransform(data->bones[b].trafo.trans, Ogre::Vector3(data->bones[b].trafo.scale),
                                   Ogre::Quaternion(data->bones[b].trafo.rotation));
-                mat = mat * bones[b]->getWorldTransform();
+                mat = bones[b]->getWorldTransform() * mat;
 
                 const std::vector<Nif::NiSkinData::VertWeight> &weights = data->bones[b].weights;
                 for(size_t i = 0;i < weights.size();i++)
@@ -559,9 +559,9 @@ class NIFMeshLoader : Ogre::ManualResourceLoader
                     {
                         for(size_t j = 0;j < 3;j++)
                         {
-                            newNorms[index][j] += mat[0][j]*srcNorms[index][0] * weight;
-                            newNorms[index][j] += mat[1][j]*srcNorms[index][1] * weight;
-                            newNorms[index][j] += mat[2][j]*srcNorms[index][2] * weight;
+                            newNorms[index][j] += mat[j][0]*srcNorms[index][0] * weight;
+                            newNorms[index][j] += mat[j][1]*srcNorms[index][1] * weight;
+                            newNorms[index][j] += mat[j][2]*srcNorms[index][2] * weight;
                         }
                     }
                 }
