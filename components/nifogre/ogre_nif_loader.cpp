@@ -755,6 +755,13 @@ public:
         Ogre::Mesh *mesh = dynamic_cast<Ogre::Mesh*>(resource);
         assert(mesh && "Attempting to load a mesh into a non-mesh resource!");
 
+        if(!mShapeName.length())
+        {
+            if(mHasSkel)
+                mesh->setSkeletonName(mName);
+            return;
+        }
+
         Nif::NIFFile nif(mName);
         Nif::Node *node = dynamic_cast<Nif::Node*>(nif.getRecord(0));
         findTriShape(mesh, node);
@@ -778,8 +785,11 @@ public:
             {
                 NIFMeshLoader *loader = &sLoaders[fullname];
                 *loader = *this;
-                loader->mShapeName = shape->name;
-                loader->mMaterialName = NIFMaterialLoader::getMaterial(shape, fullname, mGroup);
+                if(!(flags&0x01)) // Not hidden
+                {
+                    loader->mShapeName = shape->name;
+                    loader->mMaterialName = NIFMaterialLoader::getMaterial(shape, fullname, mGroup);
+                }
 
                 mesh = meshMgr.createManual(fullname, mGroup, loader);
             }
