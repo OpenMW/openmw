@@ -100,6 +100,7 @@ target_link_libraries(openmw
     ${BULLET_LIBRARIES}
     ${MYGUI_LIBRARIES}
     ${MYGUI_PLATFORM_LIBRARIES}
+    ${TBB_LIBRARY}
     components
 )
 

@@ -1,0 +1,14 @@
+# Locate TBB
+# This module defines
+# TBB_LIBRARY
+# TBB_FOUND, if false, do not try to link to TBB 
+# TBB_INCLUDE_DIR, where to find the headers
+
+FIND_PATH(TBB_INCLUDE_DIR tbb/tbb.h)
+
+FIND_LIBRARY(TBB_LIBRARY NAMES tbb)
+
+SET(TBB_FOUND "NO")
+IF(TBB_LIBRARY AND TBB_INCLUDE_DIR)
+  SET(TBB_FOUND "YES")
+ENDIF(TBB_LIBRARY AND TBB_INCLUDE_DIR)
