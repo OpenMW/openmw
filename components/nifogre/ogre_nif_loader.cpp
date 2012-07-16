@@ -533,12 +533,33 @@ class NIFMeshLoader : Ogre::ManualResourceLoader
             srcNorms = newNorms;
 #endif
         }
+        else if(!mHasSkel)
+        {
+            // No skinning and no skeleton, so just transform the vertices and
+            // normals into position.
+            Ogre::Matrix4 mat4 = shape->getWorldTransform();
+            for(size_t i = 0;i < srcVerts.size();i++)
+            {
+                Ogre::Vector4 vec4(srcVerts[i].x, srcVerts[i].y, srcVerts[i].z, 1.0f);
+                vec4 = mat4*vec4;
+                srcVerts[i] = Ogre::Vector3(&vec4[0]);
+            }
+            for(size_t i = 0;i < srcNorms.size();i++)
+            {
+                Ogre::Vector4 vec4(srcNorms[i].x, srcNorms[i].y, srcNorms[i].z, 0.0f);
+                vec4 = mat4*vec4;
+                srcNorms[i] = Ogre::Vector3(&vec4[0]);
+            }
+        }
 
         // Set the bounding box first
         BoundsFinder bounds;
         bounds.add(&srcVerts[0][0], srcVerts.size());
-        mesh->_setBounds(Ogre::AxisAlignedBox(bounds.minX(), bounds.minY(), bounds.minZ(),
-                                                bounds.maxX(), bounds.maxY(), bounds.maxZ()));
+        // No idea why this offset is needed. It works fine without it if the
+        // vertices weren't transformed first, but otherwise it fails later on
+        // when the object is being inserted into the scene.
+        mesh->_setBounds(Ogre::AxisAlignedBox(bounds.minX()-0.5f, bounds.minY()-0.5f, bounds.minZ()-0.5f,
+                                              bounds.maxX()+0.5f, bounds.maxY()+0.5f, bounds.maxZ()+0.5f));
         mesh->_setBoundingSphereRadius(bounds.getRadius());
 
         // This function is just one long stream of Ogre-barf, but it works

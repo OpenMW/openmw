@@ -213,7 +213,7 @@ void NiSkinInstance::post(NIFFile *nif)
 
 Ogre::Matrix4 Node::getLocalTransform()
 {
-    Ogre::Matrix4 mat4;
+    Ogre::Matrix4 mat4(Ogre::Matrix4::IDENTITY);
     mat4.makeTransform(trafo.pos, Ogre::Vector3(trafo.scale), Ogre::Quaternion(trafo.rotation));
     return mat4;
 }
