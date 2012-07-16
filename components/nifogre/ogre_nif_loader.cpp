@@ -141,9 +141,35 @@ static void fail(const std::string &msg)
     abort();
 }
 
+
+void buildBones(Ogre::Skeleton *skel, Nif::NiNode *node, Ogre::Bone *parent=NULL)
+{
+    Ogre::Bone *bone = skel->createBone(node->name);
+    if(parent) parent->addChild(bone);
+
+    bone->setOrientation(node->trafo.rotation);
+    bone->setPosition(node->trafo.pos);
+    bone->setScale(Ogre::Vector3(node->trafo.scale));
+    bone->setBindingPose();
+    bone->setInitialState();
+
+    const Nif::NodeList &children = node->children;
+    for(size_t i = 0;i < children.length();i++)
+    {
+        Nif::NiNode *next;
+        if(!children[i].empty() && (next=dynamic_cast<Nif::NiNode*>(children[i].getPtr())))
+            buildBones(skel, next, bone);
+    }
+}
+
 void loadResource(Ogre::Resource *resource)
 {
-    warn("Found no records in NIF for "+resource->getName());
+    Ogre::Skeleton *skel = dynamic_cast<Ogre::Skeleton*>(resource);
+    OgreAssert(skel, "Attempting to load a skeleton into a non-skeleton resource!");
+
+    Nif::NIFFile nif(skel->getName());
+    Nif::NiNode *node = dynamic_cast<Nif::NiNode*>(nif.getRecord(0));
+    buildBones(skel, node);
 }
 
 static bool createSkeleton(const std::string &name, const std::string &group, Nif::Node *node, Ogre::SkeletonPtr *skel)
@@ -499,21 +525,29 @@ class NIFMeshLoader : Ogre::ManualResourceLoader
         std::vector<Ogre::Vector3> srcNorms = data->normals;
         if(skin != NULL)
         {
-#if 0
-            // Convert vertices and normals back to bone space
-            std::vector<Vector3> newVerts(srcVerts.size(), Vector3(0,0,0));
-            std::vector<Vector3> newNorms(srcNorms.size(), Vector3(0,0,0));
+            // Only set a skeleton when skinning. Unskinned meshes with a skeleton will be
+            // explicitly attached later.
+            mesh->setSkeletonName(mName);
 
-            NiSkinDataRef data = skin->GetSkinData();
-            const std::vector<NiNodeRef> &bones = skin->GetBones();
-            for(size_t b = 0;b < bones.size();b++)
+            // Convert vertices and normals to bone space from bind position. It would be
+            // better to transform the bones into bind position, but there doesn't seem to
+            // be a reliable way to do that.
+            std::vector<Ogre::Vector3> newVerts(srcVerts.size(), Ogre::Vector3(0.0f));
+            std::vector<Ogre::Vector3> newNorms(srcNorms.size(), Ogre::Vector3(1.0f));
+
+            const Nif::NiSkinData *data = skin->data.getPtr();
+            const Nif::NodeList &bones = skin->bones;
+            for(size_t b = 0;b < bones.length();b++)
             {
-                Matrix44 mat = data->GetBoneTransform(b) * bones[b]->GetWorldTransform();
+                Ogre::Matrix4 mat(Ogre::Matrix4::IDENTITY);
+                mat.makeTransform(data->bones[b].trafo.trans, Ogre::Vector3(data->bones[b].trafo.scale),
+                                  Ogre::Quaternion(data->bones[b].trafo.rotation));
+                mat = mat * bones[b]->getWorldTransform();
 
-                const std::vector<SkinWeight> &weights = data->GetBoneWeights(b);
+                const std::vector<Nif::NiSkinData::VertWeight> &weights = data->bones[b].weights;
                 for(size_t i = 0;i < weights.size();i++)
                 {
-                    size_t index = weights[i].index;
+                    size_t index = weights[i].vertex;
                     float weight = weights[i].weight;
 
                     newVerts.at(index) += (mat*srcVerts[index]) * weight;
@@ -531,7 +565,6 @@ class NIFMeshLoader : Ogre::ManualResourceLoader
 
             srcVerts = newVerts;
             srcNorms = newNorms;
-#endif
         }
         else if(!mHasSkel)
         {
@@ -653,30 +686,29 @@ class NIFMeshLoader : Ogre::ManualResourceLoader
         }
 
         // Assign bone weights for this TriShape
-#if 0
         if(skin != NULL)
         {
             // Get the skeleton resource, so weights can be applied
             Ogre::SkeletonManager *skelMgr = Ogre::SkeletonManager::getSingletonPtr();
             Ogre::SkeletonPtr skel = skelMgr->getByName(mesh->getSkeletonName());
+            skel->touch();
 
-            NiSkinDataRef data = skin->GetSkinData();
-            const std::vector<NiNodeRef> &bones = skin->GetBones();
-            for(size_t i = 0;i < bones.size();i++)
+            const Nif::NiSkinData *data = skin->data.getPtr();
+            const Nif::NodeList &bones = skin->bones;
+            for(size_t i = 0;i < bones.length();i++)
             {
                 Ogre::VertexBoneAssignment boneInf;
-                boneInf.boneIndex = skel->getBone(bones[i]->GetName())->getHandle();
+                boneInf.boneIndex = skel->getBone(bones[i]->name)->getHandle();
 
-                const std::vector<SkinWeight> &weights = data->GetBoneWeights(i);
+                const std::vector<Nif::NiSkinData::VertWeight> &weights = data->bones[i].weights;
                 for(size_t j = 0;j < weights.size();j++)
                 {
-                    boneInf.vertexIndex = weights[j].index;
+                    boneInf.vertexIndex = weights[j].vertex;
                     boneInf.weight = weights[j].weight;
                     sub->addBoneAssignment(boneInf);
                 }
             }
         }
-#endif
 
         if(mMaterialName.length() > 0)
             sub->setMaterialName(mMaterialName);
