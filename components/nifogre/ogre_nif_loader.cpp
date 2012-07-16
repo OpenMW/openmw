@@ -144,7 +144,11 @@ static void fail(const std::string &msg)
 
 void buildBones(Ogre::Skeleton *skel, Nif::NiNode *node, Ogre::Bone *parent=NULL)
 {
-    Ogre::Bone *bone = skel->createBone(node->name);
+    Ogre::Bone *bone;
+    if(!skel->hasBone(node->name))
+        bone = skel->createBone(node->name);
+    else
+        bone = skel->createBone();
     if(parent) parent->addChild(bone);
 
     bone->setOrientation(node->trafo.rotation);
