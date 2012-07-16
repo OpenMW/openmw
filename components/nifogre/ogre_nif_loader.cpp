@@ -771,15 +771,33 @@ public:
         findTriShape(mesh, node);
     }
 
-    void createMeshes(Nif::Node *node, MeshPairList &meshes, int flags=0)
+    void createMeshes(const Nif::Node *node, MeshPairList &meshes, int flags=0)
     {
         flags |= node->flags;
 
-        // TODO: Check for extra data
+        Nif::ExtraPtr e = node->extra;
+        while(!e.empty())
+        {
+            Nif::NiStringExtraData *sd = dynamic_cast<Nif::NiStringExtraData*>(e.getPtr());
+            if(sd != NULL)
+            {
+                // String markers may contain important information
+                // affecting the entire subtree of this obj
+                if(sd->string == "MRK")
+                {
+                    // Marker objects. These are only visible in the
+                    // editor.
+                    flags |= 0x01;
+                }
+            }
+            else
+                warn("Unhandled extra data type "+e->recType);
+            e = e->extra;
+        }
 
         if(node->recType == Nif::RC_NiTriShape)
         {
-            NiTriShape *shape = dynamic_cast<NiTriShape*>(node);
+            const NiTriShape *shape = dynamic_cast<const NiTriShape*>(node);
 
             Ogre::MeshManager &meshMgr = Ogre::MeshManager::getSingleton();
             std::string fullname = mName+"@"+shape->name;
@@ -804,10 +822,10 @@ public:
                 node->recType != Nif::RC_NiRotatingParticles)
             warn("Unhandled mesh node type: "+node->recName);
 
-        Nif::NiNode *ninode = dynamic_cast<Nif::NiNode*>(node);
+        const Nif::NiNode *ninode = dynamic_cast<const Nif::NiNode*>(node);
         if(ninode)
         {
-            Nif::NodeList &children = ninode->children;
+            const Nif::NodeList &children = ninode->children;
             for(size_t i = 0;i < children.length();i++)
             {
                 if(!children[i].empty())
