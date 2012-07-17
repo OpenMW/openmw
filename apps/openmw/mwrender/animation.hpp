@@ -3,6 +3,7 @@
 
 #include <vector>
 
+#include <components/nifogre/ogre_nif_loader.hpp>
 #include <openengine/ogre/renderer.hpp>
 #include "../mwworld/actiontalk.hpp"
 #include <components/nif/node.hpp>
@@ -39,7 +40,7 @@ protected:
 
     std::vector<Nif::NiKeyframeData>* mTransformations;
     std::map<std::string,float>* mTextmappings;
-    std::vector<Ogre::Entity*> mBase;
+    NifOgre::EntityList mEntityList;
     void handleAnimationTransforms();
     bool timeIndex( float time, const std::vector<float> & times, int & i, int & j, float & x );
 

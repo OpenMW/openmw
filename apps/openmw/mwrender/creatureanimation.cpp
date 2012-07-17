@@ -26,16 +26,16 @@ CreatureAnimation::CreatureAnimation(const MWWorld::Ptr& ptr, OEngine::Render::O
     {
         std::string mesh = "meshes\\" + ref->base->model;
 
-        NifOgre::EntityList entities = NifOgre::NIFLoader::createEntities(mInsert, mesh);
-        mBase = entities.mEntities;
-        for(size_t i = 0;i < mBase.size();i++)
+        mEntityList = NifOgre::NIFLoader::createEntities(mInsert, mesh);
+        for(size_t i = 0;i < mEntityList.mEntities.size();i++)
         {
-            mBase[i]->setVisibilityFlags(RV_Actors);
+            Ogre::Entity *ent = mEntityList.mEntities[i];
+            ent->setVisibilityFlags(RV_Actors);
 
             bool transparent = false;
-            for (unsigned int j=0;j < mBase[i]->getNumSubEntities() && !transparent; ++j)
+            for (unsigned int j=0;j < ent->getNumSubEntities() && !transparent; ++j)
             {
-                Ogre::MaterialPtr mat = mBase[i]->getSubEntity(j)->getMaterial();
+                Ogre::MaterialPtr mat = ent->getSubEntity(j)->getMaterial();
                 Ogre::Material::TechniqueIterator techIt = mat->getTechniqueIterator();
                 while (techIt.hasMoreElements() && !transparent)
                 {
@@ -50,7 +50,7 @@ CreatureAnimation::CreatureAnimation(const MWWorld::Ptr& ptr, OEngine::Render::O
                     }
                 }
             }
-            mBase[i]->setRenderQueueGroup(transparent ? RQG_Alpha : RQG_Main);
+            ent->setRenderQueueGroup(transparent ? RQG_Alpha : RQG_Main);
         }
     }
 }

@@ -27,8 +27,7 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, OEngine::Render::OgreRendere
     leftpauldron(mInv.end()), rightpauldron(mInv.end()),
     boots(mInv.end()),
     leftglove(mInv.end()), rightglove(mInv.end()), skirtiter(mInv.end()),
-    pants(mInv.end()),
-    mSkelBase(0)
+    pants(mInv.end())
 {
     MWWorld::LiveCellRef<ESM::NPC> *ref = ptr.get<ESM::NPC>();
 
@@ -65,12 +64,10 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, OEngine::Render::OgreRendere
 
     std::string smodel = (!isBeast ? "meshes\\base_anim.nif" : "meshes\\base_animkna.nif");
 
-    NifOgre::EntityList entities = NifOgre::NIFLoader::createEntities(mInsert, smodel);
-    mBase = entities.mEntities;
-    mSkelBase = entities.mSkelBase;
-    for(size_t i = 0;i < mBase.size();i++)
+    mEntityList = NifOgre::NIFLoader::createEntities(mInsert, smodel);
+    for(size_t i = 0;i < mEntityList.mEntities.size();i++)
     {
-        Ogre::Entity *base = mBase[i];
+        Ogre::Entity *base = mEntityList.mEntities[i];
 
         base->setVisibilityFlags(RV_Actors);
         bool transparent = false;
@@ -376,7 +373,7 @@ std::vector<Ogre::Entity*> NpcAnimation::insertBoundedPart(const std::string &me
         Ogre::Entity *part = parts.back();
 
         part->setVisibilityFlags(RV_Actors);
-        mSkelBase->attachObjectToBone(bonename, part);
+        mEntityList.mSkelBase->attachObjectToBone(bonename, part);
     }
     return parts;
 }
@@ -415,7 +412,7 @@ void NpcAnimation::runAnimation(float timepassed)
 void NpcAnimation::removeEntities(std::vector<Ogre::Entity*> &entities)
 {
     for(size_t i = 0;i < entities.size();i++)
-        mSkelBase->detachObjectFromBone(entities[i]);
+        mEntityList.mSkelBase->detachObjectFromBone(entities[i]);
     entities.clear();
 }
 

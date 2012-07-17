@@ -41,7 +41,6 @@ private:
     std::vector<Ogre::Entity*> head;
 
     Ogre::SceneNode* mInsert;
-    Ogre::Entity *mSkelBase; // Entity with the base skeleton (temporary)
     bool isBeast;
     bool isFemale;
     std::string headModel;
