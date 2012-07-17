@@ -65,14 +65,12 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, OEngine::Render::OgreRendere
 
     std::string smodel = (!isBeast ? "meshes\\base_anim.nif" : "meshes\\base_animkna.nif");
 
-    NifOgre::MeshPairList meshes = NifOgre::NIFLoader::load(smodel);
-    for(size_t i = 0;i < meshes.size();i++)
+    NifOgre::EntityList entities = NifOgre::NIFLoader::createEntities(mInsert, smodel);
+    mBase = entities.mEntities;
+    mSkelBase = entities.mSkelBase;
+    for(size_t i = 0;i < mBase.size();i++)
     {
-        mBase.push_back(mRend.getScene()->createEntity(meshes[i].first->getName()));
-        Ogre::Entity *base = mBase.back();
-
-        if(!mSkelBase && base->hasSkeleton())
-            mSkelBase = base;
+        Ogre::Entity *base = mBase[i];
 
         base->setVisibilityFlags(RV_Actors);
         bool transparent = false;
@@ -95,8 +93,6 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, OEngine::Render::OgreRendere
         base->setRenderQueueGroup(transparent ? RQG_Alpha : RQG_Main);
         base->setSkipAnimationStateUpdate(true); //Magical line of code, this makes the bones
                                                  //stay in the same place when we skipanim, or open a gui window
-
-        mInsert->attachObject(base);
     }
 
     if(isFemale)
