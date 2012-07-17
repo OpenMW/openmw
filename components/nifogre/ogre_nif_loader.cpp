@@ -142,7 +142,7 @@ static void fail(const std::string &msg)
 }
 
 
-void buildBones(Ogre::Skeleton *skel, Nif::NiNode *node, Ogre::Bone *parent=NULL)
+void buildBones(Ogre::Skeleton *skel, const Nif::Node *node, Ogre::Bone *parent=NULL)
 {
     Ogre::Bone *bone;
     if(!skel->hasBone(node->name))
@@ -157,12 +157,15 @@ void buildBones(Ogre::Skeleton *skel, Nif::NiNode *node, Ogre::Bone *parent=NULL
     bone->setBindingPose();
     bone->setInitialState();
 
-    const Nif::NodeList &children = node->children;
-    for(size_t i = 0;i < children.length();i++)
+    const Nif::NiNode *ninode = dynamic_cast<const Nif::NiNode*>(node);
+    if(ninode)
     {
-        Nif::NiNode *next;
-        if(!children[i].empty() && (next=dynamic_cast<Nif::NiNode*>(children[i].getPtr())))
-            buildBones(skel, next, bone);
+        const Nif::NodeList &children = ninode->children;
+        for(size_t i = 0;i < children.length();i++)
+        {
+            if(!children[i].empty())
+                buildBones(skel, children[i].getPtr(), bone);
+        }
     }
 }
 
@@ -172,7 +175,7 @@ void loadResource(Ogre::Resource *resource)
     OgreAssert(skel, "Attempting to load a skeleton into a non-skeleton resource!");
 
     Nif::NIFFile nif(skel->getName());
-    Nif::NiNode *node = dynamic_cast<Nif::NiNode*>(nif.getRecord(0));
+    const Nif::Node *node = dynamic_cast<const Nif::Node*>(nif.getRecord(0));
     buildBones(skel, node);
 }
 
