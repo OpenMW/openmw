@@ -13,7 +13,7 @@
 #include "config.h"
 #endif
 
-#include <stdio.h> /* for FILE */
+#include <cstdio> /* for FILE */
 
 #ifdef __cplusplus
 extern "C" {

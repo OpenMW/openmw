@@ -48,7 +48,7 @@ namespace MWClass
             virtual std::string getScript (const MWWorld::Ptr& ptr) const;
             ///< Return name of the script attached to ptr
 
-           virtual void setForceStance (const MWWorld::Ptr& ptr, Stance stance, bool force) const;
+            virtual void setForceStance (const MWWorld::Ptr& ptr, Stance stance, bool force) const;
             ///< Force or unforce a stance.
 
             virtual void setStance (const MWWorld::Ptr& ptr, Stance stance, bool set) const;
@@ -84,6 +84,8 @@ namespace MWClass
 
             virtual void skillUsageSucceeded (const MWWorld::Ptr& ptr, int skill, int usageType) const;
             ///< Inform actor \a ptr that a skill use has succeeded.
+
+            virtual void adjustRotation(const MWWorld::Ptr& ptr,float& x,float& y,float& z) const;
 
             static void registerSelf();
     };

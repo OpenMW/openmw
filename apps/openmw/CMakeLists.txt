@@ -39,7 +39,7 @@ add_openmw_dir (mwscript
     locals scriptmanager compilercontext interpretercontext cellextensions miscextensions
     guiextensions soundextensions skyextensions statsextensions containerextensions
     aiextensions controlextensions extensions globalscripts ref dialogueextensions
-    animationextensions
+    animationextensions transformationextensions
     )
 
 add_openmw_dir (mwsound
@@ -79,7 +79,6 @@ ENDIF(WIN32)
 ENDIF(OGRE_STATIC)
 add_executable(openmw
     ${OPENMW_LIBS} ${OPENMW_LIBS_HEADER}
-    ${COMPONENT_FILES}
     ${OPENMW_FILES}
     ${GAME} ${GAME_HEADER}
     ${APPLE_BUNDLE_RESOURCES}

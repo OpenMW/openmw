@@ -536,6 +536,7 @@ namespace MWScript
                 }
         };
 
+
         const int numberOfAttributes = 8;
 
         const int opcodeGetAttribute = 0x2000027;

@@ -5,7 +5,7 @@
 using namespace std;
 
 #include <iconv.h>
-#include <assert.h>
+#include <cassert>
 
 void tab() { cout << "   "; }
 

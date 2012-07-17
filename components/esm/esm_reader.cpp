@@ -27,7 +27,7 @@ void ESMReader::restoreContext(const ESM_Context &rc)
 
 void ESMReader::close()
 {
-    mEsm.reset();
+    mEsm.setNull();
     mCtx.filename.clear();
     mCtx.leftFile = 0;
     mCtx.leftRec = 0;
@@ -37,7 +37,7 @@ void ESMReader::close()
     mCtx.subName.val = 0;
 }
 
-void ESMReader::openRaw(Mangle::Stream::StreamPtr _esm, const std::string &name)
+void ESMReader::openRaw(Ogre::DataStreamPtr _esm, const std::string &name)
 {
     close();
     mEsm = _esm;
@@ -57,7 +57,7 @@ void ESMReader::openRaw(Mangle::Stream::StreamPtr _esm, const std::string &name)
         mSpf = SF_Other;
 }
 
-void ESMReader::open(Mangle::Stream::StreamPtr _esm, const std::string &name)
+void ESMReader::open(Ogre::DataStreamPtr _esm, const std::string &name)
 {
     openRaw(_esm, name);
 
@@ -107,14 +107,16 @@ void ESMReader::open(Mangle::Stream::StreamPtr _esm, const std::string &name)
 
 void ESMReader::open(const std::string &file)
 {
-    using namespace Mangle::Stream;
-    open(StreamPtr(new FileStream(file)), file);
+    std::ifstream *stream = OGRE_NEW_T(std::ifstream, Ogre::MEMCATEGORY_GENERAL)(file.c_str(), std::ios_base::binary);
+    // Ogre will delete the stream for us
+    open(Ogre::DataStreamPtr(new Ogre::FileStreamDataStream(stream)), file);
 }
 
 void ESMReader::openRaw(const std::string &file)
 {
-    using namespace Mangle::Stream;
-    openRaw(StreamPtr(new FileStream(file)), file);
+    std::ifstream *stream = OGRE_NEW_T(std::ifstream, Ogre::MEMCATEGORY_GENERAL)(file.c_str(), std::ios_base::binary);
+    // Ogre will delete the stream for us
+    openRaw(Ogre::DataStreamPtr(new Ogre::FileStreamDataStream(stream)), file);
 }
 
 int64_t ESMReader::getHNLong(const char *name)
@@ -339,7 +341,7 @@ void ESMReader::fail(const std::string &msg)
     ss << "\n  File: " << mCtx.filename;
     ss << "\n  Record: " << mCtx.recName.toString();
     ss << "\n  Subrecord: " << mCtx.subName.toString();
-    if (mEsm != NULL)
+    if (!mEsm.isNull())
         ss << "\n  Offset: 0x" << hex << mEsm->tell();
     throw std::runtime_error(ss.str());
 }

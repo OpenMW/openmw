@@ -1,9 +1,7 @@
 #ifndef GAME_MWWORLD_PHYSICSSYSTEM_H
 #define GAME_MWWORLD_PHYSICSSYSTEM_H
 
-#include <vector>
 #include <openengine/ogre/renderer.hpp>
-#include <openengine/bullet/physic.hpp>
 #include "ptr.hpp"
 #include <openengine/bullet/pmove.h>
 
@@ -72,6 +70,7 @@ namespace MWWorld
             OEngine::Physic::PhysicEngine* mEngine;
             bool mFreeFly;
             playerMove* playerphysics;
+            std::map<std::string, std::string> handleToMesh;
 
             PhysicsSystem (const PhysicsSystem&);
             PhysicsSystem& operator= (const PhysicsSystem&);

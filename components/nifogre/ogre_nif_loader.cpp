@@ -39,9 +39,7 @@
 typedef unsigned char ubyte;
 
 using namespace std;
-using namespace Ogre;
 using namespace Nif;
-using namespace Mangle::VFS;
 using namespace Misc;
 using namespace NifOgre;
 
@@ -67,21 +65,6 @@ void NIFLoader::fail(string msg)
     assert(1);
 }
 
-Vector3 NIFLoader::convertVector3(const Nif::Vector& vec)
-{
-    return Ogre::Vector3(vec.array);
-}
-
-Quaternion NIFLoader::convertRotation(const Nif::Matrix& rot)
-{
-    Real matrix[3][3];
-
-    for (int i=0; i<3; i++)
-        for (int j=0; j<3; j++)
-            matrix[i][j] = rot.v[i].array[j];
-
-        return Quaternion(Matrix3(matrix));
-}
 
 // Helper class that computes the bounding box and of a mesh
 class BoundsFinder
@@ -217,16 +200,16 @@ void NIFLoader::setOutputAnimFiles(bool output){
 void NIFLoader::setVerbosePath(std::string path){
     verbosePath = path;
 }
-void NIFLoader::createMaterial(const String &name,
-                           const Vector &ambient,
-                           const Vector &diffuse,
-                           const Vector &specular,
-                           const Vector &emissive,
+void NIFLoader::createMaterial(const Ogre::String &name,
+                           const Ogre::Vector3 &ambient,
+                           const Ogre::Vector3 &diffuse,
+                           const Ogre::Vector3 &specular,
+                           const Ogre::Vector3 &emissive,
                            float glossiness, float alpha,
                            int alphaFlags, float alphaTest,
-                           const String &texName)
+                           const Ogre::String &texName)
 {
-    MaterialPtr material = MaterialManager::getSingleton().create(name, resourceGroup);
+    Ogre::MaterialPtr material = Ogre::MaterialManager::getSingleton().create(name, resourceGroup);
 
 
     //Hardware Skinning code, textures may be the wrong color if enabled
@@ -249,11 +232,11 @@ void NIFLoader::createMaterial(const String &name,
 
     if (!texName.empty())
     {
-        Pass *pass = material->getTechnique(0)->getPass(0);
+        Ogre::Pass *pass = material->getTechnique(0)->getPass(0);
         /*TextureUnitState *txt =*/
         pass->createTextureUnitState(texName);
 
-        pass->setVertexColourTracking(TVC_DIFFUSE);
+        pass->setVertexColourTracking(Ogre::TVC_DIFFUSE);
 
         // As of yet UNTESTED code from Chris:
         /*pass->setTextureFiltering(Ogre::TFO_ANISOTROPIC);
@@ -294,13 +277,13 @@ void NIFLoader::createMaterial(const String &name,
                 NifOverrides::TransparencyResult result = NifOverrides::Overrides::getTransparencyOverride(texName);
                 if (result.first)
                 {
-                    pass->setAlphaRejectFunction(CMPF_GREATER_EQUAL);
+                    pass->setAlphaRejectFunction(Ogre::CMPF_GREATER_EQUAL);
                     pass->setAlphaRejectValue(result.second);
                 }
                 else
                 {
                     // Enable transparency
-                    pass->setSceneBlending(SBT_TRANSPARENT_ALPHA);
+                    pass->setSceneBlending(Ogre::SBT_TRANSPARENT_ALPHA);
 
                     //pass->setDepthCheckEnabled(false);
                     pass->setDepthWriteEnabled(false);
@@ -322,11 +305,11 @@ void NIFLoader::createMaterial(const String &name,
         const int numsplits = 3;
 		for (int i = 0; i < (split ? numsplits : 1); ++i)
 		{
-            TextureUnitState* tu = material->getTechnique(0)->getPass(0)->createTextureUnitState();
-            tu->setName("shadowMap" + StringConverter::toString(i));
-            tu->setContentType(TextureUnitState::CONTENT_SHADOW);
-            tu->setTextureAddressingMode(TextureUnitState::TAM_BORDER);
-            tu->setTextureBorderColour(ColourValue::White);
+            Ogre::TextureUnitState* tu = material->getTechnique(0)->getPass(0)->createTextureUnitState();
+            tu->setName("shadowMap" + Ogre::StringConverter::toString(i));
+            tu->setContentType(Ogre::TextureUnitState::CONTENT_SHADOW);
+            tu->setTextureAddressingMode(Ogre::TextureUnitState::TAM_BORDER);
+            tu->setTextureBorderColour(Ogre::ColourValue::White);
 		}
     }
 
@@ -339,11 +322,11 @@ void NIFLoader::createMaterial(const String &name,
     }
 
     // Create a fallback technique without shadows and without mrt
-    Technique* tech2 = material->createTechnique();
+    Ogre::Technique* tech2 = material->createTechnique();
     tech2->setSchemeName("Fallback");
-    Pass* pass2 = tech2->createPass();
+    Ogre::Pass* pass2 = tech2->createPass();
     pass2->createTextureUnitState(texName);
-    pass2->setVertexColourTracking(TVC_DIFFUSE);
+    pass2->setVertexColourTracking(Ogre::TVC_DIFFUSE);
     if (Settings::Manager::getBool("shaders", "Objects"))
     {
         pass2->setVertexProgram("main_fallback_vp");
@@ -352,16 +335,16 @@ void NIFLoader::createMaterial(const String &name,
     }
 
     // Add material bells and whistles
-    material->setAmbient(ambient.array[0], ambient.array[1], ambient.array[2]);
-    material->setDiffuse(diffuse.array[0], diffuse.array[1], diffuse.array[2], alpha);
-    material->setSpecular(specular.array[0], specular.array[1], specular.array[2], alpha);
-    material->setSelfIllumination(emissive.array[0], emissive.array[1], emissive.array[2]);
+    material->setAmbient(ambient[0], ambient[1], ambient[2]);
+    material->setDiffuse(diffuse[0], diffuse[1], diffuse[2], alpha);
+    material->setSpecular(specular[0], specular[1], specular[2], alpha);
+    material->setSelfIllumination(emissive[0], emissive[1], emissive[2]);
     material->setShininess(glossiness);
 }
 
 // Takes a name and adds a unique part to it. This is just used to
 // make sure that all materials are given unique names.
-String NIFLoader::getUniqueName(const String &input)
+Ogre::String NIFLoader::getUniqueName(const Ogre::String &input)
 {
     static int addon = 0;
     static char buf[8];
@@ -377,29 +360,25 @@ String NIFLoader::getUniqueName(const String &input)
 // does not, change the string IN PLACE to say .dds instead and try
 // that. The texture may still not exist, but no information of value
 // is lost in that case.
-void NIFLoader::findRealTexture(String &texName)
+void NIFLoader::findRealTexture(Ogre::String &texName)
 {
-    assert(vfs);
-    if (vfs->isFile(texName)) return;
-
-    int len = texName.size();
-    if (len < 4) return;
+    if(Ogre::ResourceGroupManager::getSingleton().resourceExistsInAnyGroup(texName))
+        return;
 
     // Change texture extension to .dds
-    texName[len-3] = 'd';
-    texName[len-2] = 'd';
-    texName[len-1] = 's';
+    Ogre::String::size_type pos = texName.rfind('.');
+    texName.replace(pos, texName.length(), ".dds");
 }
 
 //Handle node at top
 
 // Convert Nif::NiTriShape to Ogre::SubMesh, attached to the given
 // mesh.
-void NIFLoader::createOgreSubMesh(NiTriShape *shape, const String &material, std::list<VertexBoneAssignment> &vertexBoneAssignments)
+void NIFLoader::createOgreSubMesh(NiTriShape *shape, const Ogre::String &material, std::list<Ogre::VertexBoneAssignment> &vertexBoneAssignments)
 {
     //  cout << "s:" << shape << "\n";
     NiTriShapeData *data = shape->data.getPtr();
-    SubMesh *sub = mesh->createSubMesh(shape->name.toString());
+    Ogre::SubMesh *sub = mesh->createSubMesh(shape->name);
 
     int nextBuf = 0;
 
@@ -407,27 +386,27 @@ void NIFLoader::createOgreSubMesh(NiTriShape *shape, const String &material, std
     // great.
 
     // Add vertices
-    int numVerts = data->vertices.length / 3;
-    sub->vertexData = new VertexData();
+    int numVerts = data->vertices.size() / 3;
+    sub->vertexData = new Ogre::VertexData();
     sub->vertexData->vertexCount = numVerts;
     sub->useSharedVertices = false;
 
-    VertexDeclaration *decl = sub->vertexData->vertexDeclaration;
-    decl->addElement(nextBuf, 0, VET_FLOAT3, VES_POSITION);
+    Ogre::VertexDeclaration *decl = sub->vertexData->vertexDeclaration;
+    decl->addElement(nextBuf, 0, Ogre::VET_FLOAT3, Ogre::VES_POSITION);
 
-    HardwareVertexBufferSharedPtr vbuf =
-        HardwareBufferManager::getSingleton().createVertexBuffer(
-            VertexElement::getTypeSize(VET_FLOAT3),
-            numVerts, HardwareBuffer::HBU_DYNAMIC_WRITE_ONLY, false);
+    Ogre::HardwareVertexBufferSharedPtr vbuf =
+        Ogre::HardwareBufferManager::getSingleton().createVertexBuffer(
+            Ogre::VertexElement::getTypeSize(Ogre::VET_FLOAT3),
+            numVerts, Ogre::HardwareBuffer::HBU_DYNAMIC_WRITE_ONLY, false);
 
     if(flip)
 	{
-		float *datamod = new float[data->vertices.length];
+		float *datamod = new float[data->vertices.size()];
 		//std::cout << "Shape" << shape->name.toString() << "\n";
 		for(int i = 0; i < numVerts; i++)
 		{
 			int index = i * 3;
-			const float *pos = data->vertices.ptr + index;
+			const float *pos = &data->vertices[index];
 		    Ogre::Vector3 original = Ogre::Vector3(*pos  ,*(pos+1), *(pos+2));
 			original = mTransform * original;
 			mBoundingBox.merge(original);
@@ -440,30 +419,30 @@ void NIFLoader::createOgreSubMesh(NiTriShape *shape, const String &material, std
 	}
 	else
 	{
-		vbuf->writeData(0, vbuf->getSizeInBytes(), data->vertices.ptr, false);
+		vbuf->writeData(0, vbuf->getSizeInBytes(), &data->vertices[0], false);
 	}
 
 
-    VertexBufferBinding* bind = sub->vertexData->vertexBufferBinding;
+    Ogre::VertexBufferBinding* bind = sub->vertexData->vertexBufferBinding;
     bind->setBinding(nextBuf++, vbuf);
 
-    if (data->normals.length)
+    if (data->normals.size())
     {
-        decl->addElement(nextBuf, 0, VET_FLOAT3, VES_NORMAL);
-        vbuf = HardwareBufferManager::getSingleton().createVertexBuffer(
-                   VertexElement::getTypeSize(VET_FLOAT3),
-                   numVerts, HardwareBuffer::HBU_STATIC_WRITE_ONLY, false);
+        decl->addElement(nextBuf, 0, Ogre::VET_FLOAT3, Ogre::VES_NORMAL);
+        vbuf = Ogre::HardwareBufferManager::getSingleton().createVertexBuffer(
+                   Ogre::VertexElement::getTypeSize(Ogre::VET_FLOAT3),
+                   numVerts, Ogre::HardwareBuffer::HBU_STATIC_WRITE_ONLY, false);
 
 		if(flip)
 		{
-			Quaternion rotation = mTransform.extractQuaternion();
+			Ogre::Quaternion rotation = mTransform.extractQuaternion();
 			rotation.normalise();
 
-			float *datamod = new float[data->normals.length];
+			float *datamod = new float[data->normals.size()];
 			for(int i = 0; i < numVerts; i++)
 		    {
 			    int index = i * 3;
-			    const float *pos = data->normals.ptr + index;
+			    const float *pos = &data->normals[index];
 		        Ogre::Vector3 original = Ogre::Vector3(*pos  ,*(pos+1), *(pos+2));
 				original = rotation * original;
 				if (mNormaliseNormals)
@@ -481,49 +460,49 @@ void NIFLoader::createOgreSubMesh(NiTriShape *shape, const String &material, std
 		}
 		else
 		{
-            vbuf->writeData(0, vbuf->getSizeInBytes(), data->normals.ptr, false);
+            vbuf->writeData(0, vbuf->getSizeInBytes(), &data->normals[0], false);
 		}
         bind->setBinding(nextBuf++, vbuf);
     }
 
 
     // Vertex colors
-    if (data->colors.length)
+    if (data->colors.size())
     {
-        const float *colors = data->colors.ptr;
-        RenderSystem* rs = Root::getSingleton().getRenderSystem();
-        std::vector<RGBA> colorsRGB(numVerts);
-        RGBA *pColour = &colorsRGB.front();
+        const float *colors = &data->colors[0];
+        Ogre::RenderSystem* rs = Ogre::Root::getSingleton().getRenderSystem();
+        std::vector<Ogre::RGBA> colorsRGB(numVerts);
+        Ogre::RGBA *pColour = &colorsRGB.front();
         for (int i=0; i<numVerts; i++)
         {
-            rs->convertColourValue(ColourValue(colors[0],colors[1],colors[2],
-                                               colors[3]),pColour++);
+            rs->convertColourValue(Ogre::ColourValue(colors[0],colors[1],colors[2],
+                                                     colors[3]),pColour++);
             colors += 4;
         }
-        decl->addElement(nextBuf, 0, VET_COLOUR, VES_DIFFUSE);
-        vbuf = HardwareBufferManager::getSingleton().createVertexBuffer(
-                   VertexElement::getTypeSize(VET_COLOUR),
-                   numVerts, HardwareBuffer::HBU_STATIC_WRITE_ONLY);
+        decl->addElement(nextBuf, 0, Ogre::VET_COLOUR, Ogre::VES_DIFFUSE);
+        vbuf = Ogre::HardwareBufferManager::getSingleton().createVertexBuffer(
+                   Ogre::VertexElement::getTypeSize(Ogre::VET_COLOUR),
+                   numVerts, Ogre::HardwareBuffer::HBU_STATIC_WRITE_ONLY);
         vbuf->writeData(0, vbuf->getSizeInBytes(), &colorsRGB.front(), true);
         bind->setBinding(nextBuf++, vbuf);
     }
 
-     if (data->uvlist.length)
+    if (data->uvlist.size())
     {
 
-        decl->addElement(nextBuf, 0, VET_FLOAT2, VES_TEXTURE_COORDINATES);
-        vbuf = HardwareBufferManager::getSingleton().createVertexBuffer(
-                   VertexElement::getTypeSize(VET_FLOAT2),
-                   numVerts, HardwareBuffer::HBU_STATIC_WRITE_ONLY,false);
+        decl->addElement(nextBuf, 0, Ogre::VET_FLOAT2, Ogre::VES_TEXTURE_COORDINATES);
+        vbuf = Ogre::HardwareBufferManager::getSingleton().createVertexBuffer(
+                   Ogre::VertexElement::getTypeSize(Ogre::VET_FLOAT2),
+                   numVerts, Ogre::HardwareBuffer::HBU_STATIC_WRITE_ONLY,false);
 
 		if(flip)
 		{
-		    float *datamod = new float[data->uvlist.length];
+		    float *datamod = new float[data->uvlist.size()];
 
-		    for(unsigned int i = 0; i < data->uvlist.length; i+=2){
-			    float x = *(data->uvlist.ptr + i);
+		    for(unsigned int i = 0; i < data->uvlist.size(); i+=2){
+			    float x = data->uvlist[i];
 
-			    float y = *(data->uvlist.ptr + i + 1);
+			    float y = data->uvlist[i + 1];
 
 			    datamod[i] =x;
 				datamod[i + 1] =y;
@@ -532,36 +511,34 @@ void NIFLoader::createOgreSubMesh(NiTriShape *shape, const String &material, std
             delete [] datamod;
 		}
 		else
-			vbuf->writeData(0, vbuf->getSizeInBytes(), data->uvlist.ptr, false);
+			vbuf->writeData(0, vbuf->getSizeInBytes(), &data->uvlist[0], false);
         bind->setBinding(nextBuf++, vbuf);
     }
 
    // Triangle faces - The total number of triangle points
-    int numFaces = data->triangles.length;
-
+    int numFaces = data->triangles.size();
     if (numFaces)
     {
 
 		sub->indexData->indexCount = numFaces;
         sub->indexData->indexStart = 0;
-        HardwareIndexBufferSharedPtr ibuf = HardwareBufferManager::getSingleton().
-                                            createIndexBuffer(HardwareIndexBuffer::IT_16BIT,
-                                                              numFaces,
-                                                              HardwareBuffer::HBU_STATIC_WRITE_ONLY, true);
+        Ogre::HardwareIndexBufferSharedPtr ibuf = Ogre::HardwareBufferManager::getSingleton().
+                                                  createIndexBuffer(Ogre::HardwareIndexBuffer::IT_16BIT, numFaces,
+                                                                    Ogre::HardwareBuffer::HBU_STATIC_WRITE_ONLY, true);
 
 		if(flip && mFlipVertexWinding && sub->indexData->indexCount % 3 == 0){
 
 			sub->indexData->indexBuffer = ibuf;
 
-			uint16 *datamod = new uint16[numFaces];
+			uint16_t *datamod = new uint16_t[numFaces];
 			int index = 0;
 			for (size_t i = 0; i < sub->indexData->indexCount; i+=3)
 			{
 
-			     const short *pos = data->triangles.ptr + index;
-				uint16 i0 = (uint16) *(pos+0);
-				uint16 i1 = (uint16) *(pos+1);
-				uint16 i2 = (uint16) *(pos+2);
+			     const short *pos = &data->triangles[index];
+				uint16_t i0 = (uint16_t) *(pos+0);
+				uint16_t i1 = (uint16_t) *(pos+1);
+				uint16_t i2 = (uint16_t) *(pos+2);
 
 				//std::cout << "i0: " << i0 << "i1: " << i1 << "i2: " << i2 << "\n";
 
@@ -578,7 +555,7 @@ void NIFLoader::createOgreSubMesh(NiTriShape *shape, const String &material, std
 
 		}
 		else
-            ibuf->writeData(0, ibuf->getSizeInBytes(), data->triangles.ptr, false);
+            ibuf->writeData(0, ibuf->getSizeInBytes(), &data->triangles[0], false);
         sub->indexData->indexBuffer = ibuf;
     }
 
@@ -587,7 +564,7 @@ void NIFLoader::createOgreSubMesh(NiTriShape *shape, const String &material, std
 
     //add vertex bone assignments
 
-    for (std::list<VertexBoneAssignment>::iterator it = vertexBoneAssignments.begin();
+    for (std::list<Ogre::VertexBoneAssignment>::iterator it = vertexBoneAssignments.begin();
         it != vertexBoneAssignments.end(); it++)
     {
             sub->addBoneAssignment(*it);
@@ -598,23 +575,8 @@ void NIFLoader::createOgreSubMesh(NiTriShape *shape, const String &material, std
 
 // Helper math functions. Reinventing linear algebra for the win!
 
-// Computes B = AxB (matrix*matrix)
-static void matrixMul(const Matrix &A, Matrix &B)
-{
-    for (int i=0;i<3;i++)
-    {
-        float a = B.v[0].array[i];
-        float b = B.v[1].array[i];
-        float c = B.v[2].array[i];
-
-        B.v[0].array[i] = a*A.v[0].array[0] + b*A.v[0].array[1] + c*A.v[0].array[2];
-        B.v[1].array[i] = a*A.v[1].array[0] + b*A.v[1].array[1] + c*A.v[1].array[2];
-        B.v[2].array[i] = a*A.v[2].array[0] + b*A.v[2].array[1] + c*A.v[2].array[2];
-    }
-}
-
 // Computes C = B + AxC*scale
-static void vectorMulAdd(const Matrix &A, const Vector &B, float *C, float scale)
+static void vectorMulAdd(const Ogre::Matrix3 &A, const Ogre::Vector3 &B, float *C, float scale)
 {
     // Keep the original values
     float a = C[0];
@@ -623,11 +585,11 @@ static void vectorMulAdd(const Matrix &A, const Vector &B, float *C, float scale
 
     // Perform matrix multiplication, scaling and addition
     for (int i=0;i<3;i++)
-        C[i] = B.array[i] + (a*A.v[i].array[0] + b*A.v[i].array[1] + c*A.v[i].array[2])*scale;
+        C[i] = B[i] + (a*A[i][0] + b*A[i][1] + c*A[i][2])*scale;
 }
 
 // Computes B = AxB (matrix*vector)
-static void vectorMul(const Matrix &A, float *C)
+static void vectorMul(const Ogre::Matrix3 &A, float *C)
 {
     // Keep the original values
     float a = C[0];
@@ -636,7 +598,7 @@ static void vectorMul(const Matrix &A, float *C)
 
     // Perform matrix multiplication, scaling and addition
     for (int i=0;i<3;i++)
-        C[i] = a*A.v[i].array[0] + b*A.v[i].array[1] + c*A.v[i].array[2];
+        C[i] = a*A[i][0] + b*A[i][1] + c*A[i][2];
 }
 
 
@@ -671,7 +633,7 @@ void NIFLoader::handleNiTriShape(NiTriShape *shape, int flags, BoundsFinder &bou
         return;
 
     // Material name for this submesh, if any
-    String material;
+    Ogre::String material;
 
     // Skip the entire material phase for hidden nodes
     if (!hidden)
@@ -700,14 +662,12 @@ void NIFLoader::handleNiTriShape(NiTriShape *shape, int flags, BoundsFinder &bou
         }
 
         // Texture
-        String texName;
+        Ogre::String texName;
         if (t && t->textures[0].inUse)
         {
             NiSourceTexture *st = t->textures[0].texture.getPtr();
             if (st->external)
             {
-                SString tname = st->filename;
-
                 /* findRealTexture checks if the file actually
                    exists. If it doesn't, and the name ends in .tga, it
                    will try replacing the extension with .dds instead
@@ -721,7 +681,7 @@ void NIFLoader::handleNiTriShape(NiTriShape *shape, int flags, BoundsFinder &bou
                    problem since all the nif data is stored in a local
                    throwaway buffer.
                  */
-                texName = "textures\\" + tname.toString();
+                texName = "textures\\" + st->filename;
                 findRealTexture(texName);
             }
             else warn("Found internal texture, ignoring.");
@@ -733,7 +693,7 @@ void NIFLoader::handleNiTriShape(NiTriShape *shape, int flags, BoundsFinder &bou
         if (a)
         {
             alphaFlags = a->flags;
-            alphaTest  = a->data->threshold;
+            alphaTest  = a->data.threshold;
         }
 
         // Material
@@ -748,7 +708,7 @@ void NIFLoader::handleNiTriShape(NiTriShape *shape, int flags, BoundsFinder &bou
             if (m)
             {
                 // Use NiMaterialProperty data to create the data
-                const S_MaterialProperty *d = m->data;
+                const S_MaterialProperty *d = &m->data;
 
                 std::multimap<std::string,std::string>::iterator itr = MaterialMap.find(texName);
                 std::multimap<std::string,std::string>::iterator lastElement;
@@ -775,14 +735,8 @@ void NIFLoader::handleNiTriShape(NiTriShape *shape, int flags, BoundsFinder &bou
             {
                 // We only have a texture name. Create a default
                 // material for it.
-                Vector zero, one;
-                for (int i=0; i<3;i++)
-                {
-                    zero.array[i] = 0.0;
-                    one.array[i] = 1.0;
-                }
-
-                createMaterial(material, one, one, zero, zero, 0.0, 1.0,
+                const Ogre::Vector3 zero(0.0f), one(1.0f);
+                createMaterial(material, one, one, zero, zero, 0.0f, 1.0f,
                                alphaFlags, alphaTest, texName);
             }
         }
@@ -795,12 +749,12 @@ void NIFLoader::handleNiTriShape(NiTriShape *shape, int flags, BoundsFinder &bou
        level.
     */
     NiTriShapeData *data = shape->data.getPtr();
-    int numVerts = data->vertices.length / 3;
+    int numVerts = data->vertices.size() / 3;
 
-    float *ptr = (float*)data->vertices.ptr;
+    float *ptr = (float*)&data->vertices[0];
     float *optr = ptr;
 
-    std::list<VertexBoneAssignment> vertexBoneAssignments;
+    std::list<Ogre::VertexBoneAssignment> vertexBoneAssignments;
 
     Nif::NiTriShapeCopy copy = shape->clone();
 
@@ -828,14 +782,14 @@ void NIFLoader::handleNiTriShape(NiTriShape *shape, int flags, BoundsFinder &bou
 		std::vector<Ogre::Vector3> vertexPosOriginal(numVerts, Ogre::Vector3::ZERO);
 		std::vector<Ogre::Vector3> vertexNormalOriginal(numVerts, Ogre::Vector3::ZERO);
 
-        float *ptrNormals = (float*)data->normals.ptr;
+        float *ptrNormals = (float*)&data->normals[0];
         //the bone from skin->bones[boneIndex] is linked to skin->data->bones[boneIndex]
         //the first one contains a link to the bone, the second vertex transformation
         //relative to the bone
         int boneIndex = 0;
-        Bone *bonePtr;
-        Vector3 vecPos;
-        Quaternion vecRot;
+        Ogre::Bone *bonePtr;
+        Ogre::Vector3 vecPos;
+        Ogre::Quaternion vecRot;
 
         std::vector<NiSkinData::BoneInfo> boneList = shape->skin->data->bones;
 
@@ -849,33 +803,33 @@ void NIFLoader::handleNiTriShape(NiTriShape *shape, int flags, BoundsFinder &bou
         {
             if(mSkel.isNull())
             {
-                std::cout << "No skeleton for :" << shape->skin->bones[boneIndex].name.toString() << std::endl;
+                std::cout << "No skeleton for :" << shape->skin->bones[boneIndex].name << std::endl;
                 break;
             }
             //get the bone from bones array of skindata
-			if(!mSkel->hasBone(shape->skin->bones[boneIndex].name.toString()))
+			if(!mSkel->hasBone(shape->skin->bones[boneIndex].name))
 				std::cout << "We don't have this bone";
-            bonePtr = mSkel->getBone(shape->skin->bones[boneIndex].name.toString());
+            bonePtr = mSkel->getBone(shape->skin->bones[boneIndex].name);
 
             // final_vector = old_vector + old_rotation*new_vector*old_scale
 
 
 			Nif::NiSkinData::BoneInfoCopy boneinfocopy;
-			boneinfocopy.trafo.rotation = convertRotation(it->trafo->rotation);
-			boneinfocopy.trafo.trans = convertVector3(it->trafo->trans);
-			boneinfocopy.bonename = shape->skin->bones[boneIndex].name.toString();
+			boneinfocopy.trafo.rotation = it->trafo.rotation;
+			boneinfocopy.trafo.trans = it->trafo.trans;
+			boneinfocopy.bonename = shape->skin->bones[boneIndex].name;
             boneinfocopy.bonehandle = bonePtr->getHandle();
             copy.boneinfo.push_back(boneinfocopy);
-            for (unsigned int i=0; i<it->weights.length; i++)
+            for (unsigned int i=0; i<it->weights.size(); i++)
             {
 				 vecPos = bonePtr->_getDerivedPosition() +
-                bonePtr->_getDerivedOrientation() * convertVector3(it->trafo->trans);
+                bonePtr->_getDerivedOrientation() * it->trafo.trans;
 
-            vecRot = bonePtr->_getDerivedOrientation() * convertRotation(it->trafo->rotation);
-                unsigned int verIndex = (it->weights.ptr + i)->vertex;
+            vecRot = bonePtr->_getDerivedOrientation() * it->trafo.rotation;
+                unsigned int verIndex = it->weights[i].vertex;
 				//boneinfo.weights.push_back(*(it->weights.ptr + i));
                 Nif::NiSkinData::IndividualWeight ind;
-                ind.weight = (it->weights.ptr + i)->weight;
+                ind.weight = it->weights[i].weight;
                 ind.boneinfocopyindex = copy.boneinfo.size() - 1;
                 if(copy.vertsToWeights.find(verIndex) == copy.vertsToWeights.end())
                 {
@@ -892,9 +846,9 @@ void NIFLoader::handleNiTriShape(NiTriShape *shape, int flags, BoundsFinder &bou
                 if (vertexPosAbsolut[verIndex] == false)
                 {
                     //apply transformation to the vertices
-                    Vector3 absVertPos = vecPos + vecRot * Vector3(ptr + verIndex *3);
-					absVertPos = absVertPos * (it->weights.ptr + i)->weight;
-					vertexPosOriginal[verIndex] = Vector3(ptr + verIndex *3);
+                    Ogre::Vector3 absVertPos = vecPos + vecRot * Ogre::Vector3(ptr + verIndex *3);
+					absVertPos = absVertPos * it->weights[i].weight;
+					vertexPosOriginal[verIndex] = Ogre::Vector3(ptr + verIndex *3);
 
 					mBoundingBox.merge(absVertPos);
                     //convert it back to float *
@@ -903,11 +857,11 @@ void NIFLoader::handleNiTriShape(NiTriShape *shape, int flags, BoundsFinder &bou
 
                     //apply rotation to the normals (not every vertex has a normal)
                     //FIXME: I guessed that vertex[i] = normal[i], is that true?
-                    if (verIndex < data->normals.length)
+                    if (verIndex < data->normals.size())
                     {
-                        Vector3 absNormalsPos = vecRot * Vector3(ptrNormals + verIndex *3);
-						absNormalsPos = absNormalsPos * (it->weights.ptr + i)->weight;
-						vertexNormalOriginal[verIndex] = Vector3(ptrNormals + verIndex *3);
+                        Ogre::Vector3 absNormalsPos = vecRot * Ogre::Vector3(ptrNormals + verIndex *3);
+						absNormalsPos = absNormalsPos * it->weights[i].weight;
+						vertexNormalOriginal[verIndex] = Ogre::Vector3(ptrNormals + verIndex *3);
 
                         for (int j=0; j<3; j++)
                             (ptrNormals + verIndex*3)[j] = absNormalsPos[j];
@@ -917,9 +871,9 @@ void NIFLoader::handleNiTriShape(NiTriShape *shape, int flags, BoundsFinder &bou
                 }
 				else
 				{
-					Vector3 absVertPos = vecPos + vecRot * vertexPosOriginal[verIndex];
-					absVertPos = absVertPos * (it->weights.ptr + i)->weight;
-					Vector3 old = Vector3(ptr + verIndex *3);
+					Ogre::Vector3 absVertPos = vecPos + vecRot * vertexPosOriginal[verIndex];
+					absVertPos = absVertPos * it->weights[i].weight;
+					Ogre::Vector3 old = Ogre::Vector3(ptr + verIndex *3);
 					absVertPos = absVertPos + old;
 
 					mBoundingBox.merge(absVertPos);
@@ -929,11 +883,11 @@ void NIFLoader::handleNiTriShape(NiTriShape *shape, int flags, BoundsFinder &bou
 
                     //apply rotation to the normals (not every vertex has a normal)
                     //FIXME: I guessed that vertex[i] = normal[i], is that true?
-                    if (verIndex < data->normals.length)
+                    if (verIndex < data->normals.size())
                     {
-                        Vector3 absNormalsPos = vecRot * vertexNormalOriginal[verIndex];
-						absNormalsPos = absNormalsPos * (it->weights.ptr + i)->weight;
-						Vector3 oldNormal = Vector3(ptrNormals + verIndex *3);
+                        Ogre::Vector3 absNormalsPos = vecRot * vertexNormalOriginal[verIndex];
+						absNormalsPos = absNormalsPos * it->weights[i].weight;
+						Ogre::Vector3 oldNormal = Ogre::Vector3(ptrNormals + verIndex *3);
 						absNormalsPos = absNormalsPos + oldNormal;
 
                         for (int j=0; j<3; j++)
@@ -942,10 +896,10 @@ void NIFLoader::handleNiTriShape(NiTriShape *shape, int flags, BoundsFinder &bou
 				}
 
 
-                VertexBoneAssignment vba;
+                Ogre::VertexBoneAssignment vba;
                 vba.boneIndex = bonePtr->getHandle();
                 vba.vertexIndex = verIndex;
-                vba.weight = (it->weights.ptr + i)->weight;
+                vba.weight = it->weights[i].weight;
 
 
                 vertexBoneAssignments.push_back(vba);
@@ -962,12 +916,12 @@ void NIFLoader::handleNiTriShape(NiTriShape *shape, int flags, BoundsFinder &bou
 
 			copy.boneSequence = boneSequence;
         // Rotate, scale and translate all the vertices,
-        const Matrix &rot = shape->trafo->rotation;
-        const Vector &pos = shape->trafo->pos;
-        float scale = shape->trafo->scale;
+        const Ogre::Matrix3 &rot = shape->trafo.rotation;
+        const Ogre::Vector3 &pos = shape->trafo.pos;
+        float scale = shape->trafo.scale;
 
-		copy.trafo.trans = convertVector3(original.pos);
-		copy.trafo.rotation = convertRotation(original.rotation);
+		copy.trafo.trans = original.pos;
+		copy.trafo.rotation = original.rotation;
 		copy.trafo.scale = original.scale;
 		//We don't use velocity for anything yet, so it does not need to be saved
 
@@ -975,15 +929,15 @@ void NIFLoader::handleNiTriShape(NiTriShape *shape, int flags, BoundsFinder &bou
         for (int i=0; i<numVerts; i++)
         {
             vectorMulAdd(rot, pos, ptr, scale);
-			Ogre::Vector3 absVertPos = Ogre::Vector3(*(ptr + 3 * i), *(ptr + 3 * i + 1), *(ptr + 3 * i + 2));
+			Ogre::Vector3 absVertPos = Ogre::Vector3(ptr);
 			mBoundingBox.merge(absVertPos);
             ptr += 3;
         }
 
         // Remember to rotate all the vertex normals as well
-        if (data->normals.length)
+        if (data->normals.size())
         {
-            ptr = (float*)data->normals.ptr;
+            ptr = (float*)&data->normals[0];
             for (int i=0; i<numVerts; i++)
             {
                 vectorMul(rot, ptr);
@@ -995,7 +949,7 @@ void NIFLoader::handleNiTriShape(NiTriShape *shape, int flags, BoundsFinder &bou
 
 				boneIndex = mSkel->getNumBones() - 1;
 			for(int i = 0; i < numVerts; i++){
-		 VertexBoneAssignment vba;
+		 Ogre::VertexBoneAssignment vba;
                 vba.boneIndex = boneIndex;
                 vba.vertexIndex = i;
                 vba.weight = 1;
@@ -1019,15 +973,15 @@ void NIFLoader::handleNiTriShape(NiTriShape *shape, int flags, BoundsFinder &bou
 void NIFLoader::calculateTransform()
 {
         // Calculate transform
-        Matrix4 transform = Matrix4::IDENTITY;
-        transform = Matrix4::getScale(vector) * transform;
+        Ogre::Matrix4 transform = Ogre::Matrix4::IDENTITY;
+        transform = Ogre::Matrix4::getScale(vector) * transform;
 
         // Check whether we have to flip vertex winding.
         // We do have to, if we changed our right hand base.
         // We can test it by using the cross product from X and Y and see, if it is a non-negative
         // projection on Z. Actually it should be exactly Z, as we don't do non-uniform scaling yet,
         // but the test is cheap either way.
-        Matrix3 m3;
+        Ogre::Matrix3 m3;
         transform.extract3x3Matrix(m3);
 
         if (m3.GetColumn(0).crossProduct(m3.GetColumn(1)).dotProduct(m3.GetColumn(2)) < 0)
@@ -1090,7 +1044,7 @@ void NIFLoader::handleNode(Nif::Node *node, int flags,
 
             for(std::vector<Nif::NiTextKeyExtraData::TextKey>::iterator textiter = extra->list.begin(); textiter != extra->list.end(); textiter++)
             {
-                std::string text = textiter->text.toString();
+                std::string text = textiter->text;
 
                 replace(text.begin(), text.end(), '\n', '/');
 
@@ -1121,7 +1075,7 @@ void NIFLoader::handleNode(Nif::Node *node, int flags,
         }
     }
 
-    Bone *bone = 0;
+    Ogre::Bone *bone = 0;
 
     // create skeleton or add bones
     if (node->recType == RC_NiNode)
@@ -1131,14 +1085,14 @@ void NIFLoader::handleNode(Nif::Node *node, int flags,
         {
             inTheSkeletonTree = true;
 
-            mSkel = SkeletonManager::getSingleton().create(getSkeletonName(), resourceGroup, true);
+            mSkel = Ogre::SkeletonManager::getSingleton().create(getSkeletonName(), resourceGroup, true);
         }
         else if (!mSkel.isNull() && !parentBone)
             inTheSkeletonTree = false;
 
         if (!mSkel.isNull())     //if there is a skeleton
         {
-            std::string name = node->name.toString();
+            std::string name = node->name;
 
             // Quick-n-dirty workaround for the fact that several
             // bones may have the same name.
@@ -1151,30 +1105,29 @@ void NIFLoader::handleNode(Nif::Node *node, int flags,
                   parentBone->addChild(bone);
 
                 bone->setInheritOrientation(true);
-                bone->setPosition(convertVector3(node->trafo->pos));
-                bone->setOrientation(convertRotation(node->trafo->rotation));
+                bone->setPosition(node->trafo.pos);
+                bone->setOrientation(node->trafo.rotation);
             }
         }
     }
-    Transformation original = *(node->trafo);
+    Transformation original = node->trafo;
     // Apply the parent transformation to this node. We overwrite the
     // existing data with the final transformation.
     if (trafo)
     {
         // Get a non-const reference to the node's data, since we're
         // overwriting it. TODO: Is this necessary?
-        Transformation &final = *((Transformation*)node->trafo);
+        Transformation &final = node->trafo;
 
         // For both position and rotation we have that:
         // final_vector = old_vector + old_rotation*new_vector*old_scale
-        vectorMulAdd(trafo->rotation, trafo->pos, final.pos.array, trafo->scale);
-        vectorMulAdd(trafo->rotation, trafo->velocity, final.velocity.array, trafo->scale);
+        final.pos = trafo->pos + trafo->rotation*final.pos*trafo->scale;
+        final.velocity = trafo->velocity + trafo->rotation*final.velocity*trafo->scale;
 
         // Merge the rotations together
-        matrixMul(trafo->rotation, final.rotation);
+        final.rotation = trafo->rotation * final.rotation;
 
-        // Scalar values are so nice to deal with. Why can't everything
-        // just be scalar?
+        // Scale
         final.scale *= trafo->scale;
     }
 
@@ -1187,12 +1140,12 @@ void NIFLoader::handleNode(Nif::Node *node, int flags,
         {
 
             if (list.has(i))
-                handleNode(&list[i], flags, node->trafo, bounds, bone, boneSequence);
+                handleNode(&list[i], flags, &node->trafo, bounds, bone, boneSequence);
         }
     }
     else if (node->recType == RC_NiTriShape && bNiTri)
     {
-         std::string nodename = node->name.toString();
+         std::string nodename = node->name;
 
 			if (triname == "")
             {
@@ -1207,7 +1160,7 @@ void NIFLoader::handleNode(Nif::Node *node, int flags,
     }
 }
 
-void NIFLoader::loadResource(Resource *resource)
+void NIFLoader::loadResource(Ogre::Resource *resource)
 {
     inTheSkeletonTree = false;
     	allanim.clear();
@@ -1293,22 +1246,13 @@ void NIFLoader::loadResource(Resource *resource)
 	{
 		calculateTransform();
 	}
-    // Set up the VFS if it hasn't been done already
-    if (!vfs) vfs = new OgreVFS(resourceGroup);
-
     // Get the mesh
-    mesh = dynamic_cast<Mesh*>(resource);
+    mesh = dynamic_cast<Ogre::Mesh*>(resource);
     assert(mesh);
 
     // Look it up
     resourceName = mesh->getName();
-    //std::cout << resourceName << "\n";
-
-    if (!vfs->isFile(resourceName))
-    {
-        warn("File "+resourceName+" not found.");
-        return;
-    }
+    
 
     // Helper that computes bounding boxes for us.
     BoundsFinder bounds;
@@ -1317,8 +1261,7 @@ void NIFLoader::loadResource(Resource *resource)
     // of the early stages of development. Right now we WANT to catch
     // every error as early and intrusively as possible, as it's most
     // likely a sign of incomplete code rather than faulty input.
-    NIFFile nif(vfs->open(resourceName), resourceName);
-
+    NIFFile nif(resourceName);
     if (nif.numRecords() < 1)
     {
         warn("Found no records in NIF.");
@@ -1334,7 +1277,7 @@ void NIFLoader::loadResource(Resource *resource)
     if (node == NULL)
     {
         warn("First record in file was not a node, but a " +
-             r->recName.toString() + ". Skipping file.");
+             r->recName + ". Skipping file.");
         return;
     }
 
@@ -1358,7 +1301,7 @@ void NIFLoader::loadResource(Resource *resource)
 
                 if (f->timeStart >= 10000000000000000.0f)
                     continue;
-                data->setBonename(o->name.toString());
+                data->setBonename(o->name);
                 data->setStartTime(f->timeStart);
                 data->setStopTime(f->timeStop);
 
@@ -1369,8 +1312,8 @@ void NIFLoader::loadResource(Resource *resource)
     // set the bounding value.
     if (bounds.isValid())
     {
-        mesh->_setBounds(AxisAlignedBox(bounds.minX(), bounds.minY(), bounds.minZ(),
-                                        bounds.maxX(), bounds.maxY(), bounds.maxZ()));
+        mesh->_setBounds(Ogre::AxisAlignedBox(bounds.minX(), bounds.minY(), bounds.minZ(),
+                                              bounds.maxX(), bounds.maxY(), bounds.maxZ()));
         mesh->_setBoundingSphereRadius(bounds.getRadius());
     }
     if(hasAnim && addAnim){
@@ -1392,7 +1335,7 @@ void NIFLoader::loadResource(Resource *resource)
         for(std::vector<Ogre::SubMesh*>::iterator iter = needBoneAssignments.begin(); iter != needBoneAssignments.end(); iter++)
         {
             int boneIndex = mSkel->getNumBones() - 1;
-		        VertexBoneAssignment vba;
+		        Ogre::VertexBoneAssignment vba;
                 vba.boneIndex = boneIndex;
                 vba.vertexIndex = 0;
                 vba.weight = 1;
@@ -1411,20 +1354,19 @@ void NIFLoader::loadResource(Resource *resource)
 
 
 
-MeshPtr NIFLoader::load(const std::string &name,
-                         const std::string &group)
+Ogre::MeshPtr NIFLoader::load(const std::string &name, const std::string &group)
 {
 
-    MeshManager *m = MeshManager::getSingletonPtr();
+    Ogre::MeshManager *m = Ogre::MeshManager::getSingletonPtr();
     // Check if the resource already exists
-    ResourcePtr ptr = m->getByName(name, group);
-    MeshPtr themesh;
+    Ogre::ResourcePtr ptr = m->getByName(name, group);
+    Ogre::MeshPtr themesh;
     if (!ptr.isNull()){
-            themesh = MeshPtr(ptr);
+            themesh = Ogre::MeshPtr(ptr);
     }
     else // Nope, create a new one.
     {
-        themesh = MeshManager::getSingleton().createManual(name, group, NIFLoader::getSingletonPtr());
+        themesh = Ogre::MeshManager::getSingleton().createManual(name, group, NIFLoader::getSingletonPtr());
     }
     return themesh;
 }

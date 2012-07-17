@@ -28,13 +28,11 @@
 #include <OgreArchiveFactory.h>
 #include <OgreArchiveManager.h>
 #include "bsa_file.hpp"
-#include <libs/mangle/stream/clients/ogre_datastream.hpp>
 
 namespace
 {
 
 using namespace Ogre;
-using namespace Mangle::Stream;
 using namespace Bsa;
 
 struct ciLessBoost : std::binary_function<std::string, std::string, bool>
@@ -73,14 +71,16 @@ class DirArchive: public Ogre::FileSystemArchive
     {
         {
             String passed = filename;
-	        if(filename.at(filename.length() - 1) == '*' || filename.at(filename.length() - 1) == '?' ||  filename.at(filename.length() - 1) == '<'
+	        if(filename.at(filename.length() - 2) == '>' || filename.at(filename.length() - 2) == ':')
+		          passed = filename.substr(0, filename.length() - 6);
+            else if(filename.at(filename.length() - 2) == '"')
+		        passed = filename.substr(0, filename.length() - 9);
+	        else if(filename.at(filename.length() - 1) == '*' || filename.at(filename.length() - 1) == '?' ||  filename.at(filename.length() - 1) == '<'
 		        || filename.at(filename.length() - 1) == '"' || filename.at(filename.length() - 1) == '>' ||  filename.at(filename.length() - 1) == ':'
 		        || filename.at(filename.length() - 1) == '|')
-	        {
 	           passed = filename.substr(0, filename.length() - 2);
-	        }
-	        if(filename.at(filename.length() - 2) == '>' || filename.at(filename.length() - 2) == ':')
-		        passed = filename.substr(0, filename.length() - 6);
+	        
+	
             copy = passed;
         }
 
@@ -226,19 +226,18 @@ public:
     BSAFile *narc = (BSAFile*)&arc;
 
     String passed = filename;
-	if(filename.at(filename.length() - 1) == '*' || filename.at(filename.length() - 1) == '?' ||  filename.at(filename.length() - 1) == '<'
+    if(filename.at(filename.length() - 2) == '>' || filename.at(filename.length() - 2) == ':')
+		passed = filename.substr(0, filename.length() - 6);
+    else if(filename.at(filename.length() - 2) == '"')
+		passed = filename.substr(0, filename.length() - 9);
+	else if(filename.at(filename.length() - 1) == '*' || filename.at(filename.length() - 1) == '?' ||  filename.at(filename.length() - 1) == '<'
 		|| filename.at(filename.length() - 1) == '"' || filename.at(filename.length() - 1) == '>' ||  filename.at(filename.length() - 1) == ':'
 		|| filename.at(filename.length() - 1) == '|')
-	{
 	   passed = filename.substr(0, filename.length() - 2);
-	}
-	if(filename.at(filename.length() - 2) == '>' || filename.at(filename.length() - 2) == ':')
-		passed = filename.substr(0, filename.length() - 6);
+	
+	
     // Open the file
-    StreamPtr strm = narc->getFile(passed.c_str());
-
-    // Wrap it into an Ogre::DataStream.
-    return DataStreamPtr(new Mangle2OgreStream(strm));
+    return narc->getFile(passed.c_str());
   }
 
 bool exists(const String& filename) {
@@ -248,14 +247,16 @@ bool exists(const String& filename) {
   // Check if the file exists.
   bool cexists(const String& filename) const {
     String passed = filename;
-	if(filename.at(filename.length() - 1) == '*' || filename.at(filename.length() - 1) == '?' ||  filename.at(filename.length() - 1) == '<'
+	  if(filename.at(filename.length() - 2) == '>' || filename.at(filename.length() - 2) == ':')
+		passed = filename.substr(0, filename.length() - 6);
+    else if(filename.at(filename.length() - 2) == '"')
+		passed = filename.substr(0, filename.length() - 9);
+	else if(filename.at(filename.length() - 1) == '*' || filename.at(filename.length() - 1) == '?' ||  filename.at(filename.length() - 1) == '<'
 		|| filename.at(filename.length() - 1) == '"' || filename.at(filename.length() - 1) == '>' ||  filename.at(filename.length() - 1) == ':'
 		|| filename.at(filename.length() - 1) == '|')
-	{
 	   passed = filename.substr(0, filename.length() - 2);
-	}
-	if(filename.at(filename.length() - 2) == '>' || filename.at(filename.length() - 2) == ':')
-		passed = filename.substr(0, filename.length() - 6);
+	
+	
 
 return arc.exists(passed.c_str());
 }

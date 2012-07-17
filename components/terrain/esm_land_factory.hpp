@@ -32,10 +32,6 @@ namespace Terrain
 
     // True if this factory has any data for the given grid cell.
     bool has(int x, int y);
-
-    // Return stream to data for this cell. Additional data about the
-    // landscape is returned through the LandInfo struct.
-    LandDataPtr get(int x, int y, LandInfo &info);
   };
 }
 #endif

@@ -1,7 +1,6 @@
 #ifndef GAME_MWCLASS_CREATURE_H
 #define GAME_MWCLASS_CREATURE_H
 
-#include "../mwworld/class.hpp"
 #include "../mwrender/renderinginterface.hpp"
 #include "../mwrender/actors.hpp"
 

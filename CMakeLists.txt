@@ -20,6 +20,14 @@ set (OPENMW_VERSION_RELEASE 0)
 
 set (OPENMW_VERSION "${OPENMW_VERSION_MAJOR}.${OPENMW_VERSION_MINOR}.${OPENMW_VERSION_RELEASE}")
 
+# Debug suffix for plugins
+set(DEBUG_SUFFIX "")
+if (DEFINED CMAKE_BUILD_TYPE)
+    if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+        set(DEBUG_SUFFIX "_d")
+    endif()
+endif()
+
 # doxygen main page
 
 configure_file ("${OpenMW_SOURCE_DIR}/Docs/mainpage.hpp.cmake" "${OpenMW_SOURCE_DIR}/Docs/mainpage.hpp")
@@ -93,9 +101,8 @@ ENDIF()
 
 set(LIBDIR ${CMAKE_SOURCE_DIR}/libs)
 
-set(MANGLE_VFS ${LIBDIR}/mangle/vfs/servers/ogre_vfs.cpp)
 set(MANGLE_INPUT ${LIBDIR}/mangle/input/servers/ois_driver.cpp)
-set(MANGLE_ALL ${MANGLE_VFS} ${MANGLE_INPUT})
+set(MANGLE_ALL ${MANGLE_INPUT})
 source_group(libs\\mangle FILES ${MANGLE_ALL})
 
 set(OENGINE_OGRE

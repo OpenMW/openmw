@@ -1,18 +1,8 @@
 #ifndef _GAME_RENDER_ACTORS_H
 #define _GAME_RENDER_ACTORS_H
 
-#include <map>
-#include <list>
-
-#include <openengine/ogre/renderer.hpp>
-#include "components/nifogre/ogre_nif_loader.hpp"
-
-#include "../mwworld/refdata.hpp"
-#include "../mwworld/actiontalk.hpp"
-
 #include "npcanimation.hpp"
 #include "creatureanimation.hpp"
-#include <openengine/bullet/physic.hpp>
 
 namespace MWWorld
 {

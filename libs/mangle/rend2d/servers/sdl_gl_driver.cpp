@@ -4,7 +4,7 @@
 #include <SDL_image.h>
 #include <SDL_opengl.h>
 #include <stdexcept>
-#include <assert.h>
+#include <cassert>
 
 using namespace Mangle::Rend2D;
 

@@ -2,7 +2,6 @@
 #define GAME_SCRIPT_SCRIPTMANAGER_H
 
 #include <map>
-#include <vector>
 #include <string>
 
 #include <components/compiler/streamerrorhandler.hpp>

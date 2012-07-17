@@ -3,8 +3,6 @@
 
 #include <iterator>
 
-#include "cellstore.hpp"
-#include "refdata.hpp"
 #include "ptr.hpp"
 
 namespace ESM

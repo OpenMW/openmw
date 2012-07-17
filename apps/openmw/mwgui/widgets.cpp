@@ -27,16 +27,16 @@ void MWGui::Widgets::fixTexturePath(std::string &path)
 /* MWSkill */
 
 MWSkill::MWSkill()
-    : manager(nullptr)
-    , skillId(ESM::Skill::Length)
-    , skillNameWidget(nullptr)
-    , skillValueWidget(nullptr)
+    : mManager(nullptr)
+    , mSkillId(ESM::Skill::Length)
+    , mSkillNameWidget(nullptr)
+    , mSkillValueWidget(nullptr)
 {
 }
 
 void MWSkill::setSkillId(ESM::Skill::SkillEnum skill)
 {
-    skillId = skill;
+    mSkillId = skill;
     updateWidgets();
 }
 
@@ -50,36 +50,36 @@ void MWSkill::setSkillNumber(int skill)
         throw new std::runtime_error("Skill number out of range");
 }
 
-void MWSkill::setSkillValue(const SkillValue& value_)
+void MWSkill::setSkillValue(const SkillValue& value)
 {
-    value = value_;
+    mValue = value;
     updateWidgets();
 }
 
 void MWSkill::updateWidgets()
 {
-    if (skillNameWidget && manager)
+    if (mSkillNameWidget && mManager)
     {
-        if (skillId == ESM::Skill::Length)
+        if (mSkillId == ESM::Skill::Length)
         {
-            static_cast<MyGUI::TextBox*>(skillNameWidget)->setCaption("");
+            static_cast<MyGUI::TextBox*>(mSkillNameWidget)->setCaption("");
         }
         else
         {
-            const std::string &name = manager->getGameSettingString(ESM::Skill::sSkillNameIds[skillId], "");
-            static_cast<MyGUI::TextBox*>(skillNameWidget)->setCaption(name);
+            const std::string &name = mManager->getGameSettingString(ESM::Skill::sSkillNameIds[mSkillId], "");
+            static_cast<MyGUI::TextBox*>(mSkillNameWidget)->setCaption(name);
         }
     }
-    if (skillValueWidget)
+    if (mSkillValueWidget)
     {
-        SkillValue::Type modified = value.getModified(), base = value.getBase();
-        static_cast<MyGUI::TextBox*>(skillValueWidget)->setCaption(boost::lexical_cast<std::string>(modified));
+        SkillValue::Type modified = mValue.getModified(), base = mValue.getBase();
+        static_cast<MyGUI::TextBox*>(mSkillValueWidget)->setCaption(boost::lexical_cast<std::string>(modified));
         if (modified > base)
-            skillValueWidget->_setWidgetState("increased");
+            mSkillValueWidget->_setWidgetState("increased");
         else if (modified < base)
-            skillValueWidget->_setWidgetState("decreased");
+            mSkillValueWidget->_setWidgetState("decreased");
         else
-            skillValueWidget->_setWidgetState("normal");
+            mSkillValueWidget->_setWidgetState("normal");
     }
 }
 
@@ -96,14 +96,14 @@ void MWSkill::initialiseOverride()
 {
     Base::initialiseOverride();
 
-    assignWidget(skillNameWidget, "StatName");
-    assignWidget(skillValueWidget, "StatValue");
+    assignWidget(mSkillNameWidget, "StatName");
+    assignWidget(mSkillValueWidget, "StatValue");
 
     MyGUI::ButtonPtr button;
     assignWidget(button, "StatNameButton");
     if (button)
     {
-        skillNameWidget = button;
+        mSkillNameWidget = button;
         button->eventMouseButtonClick += MyGUI::newDelegate(this, &MWSkill::onClicked);
     }
 
@@ -111,7 +111,7 @@ void MWSkill::initialiseOverride()
     assignWidget(button, "StatValueButton");
     if (button)
     {
-        skillNameWidget = button;
+        mSkillNameWidget = button;
         button->eventMouseButtonClick += MyGUI::newDelegate(this, &MWSkill::onClicked);
     }
 }
@@ -119,22 +119,22 @@ void MWSkill::initialiseOverride()
 /* MWAttribute */
 
 MWAttribute::MWAttribute()
-    : manager(nullptr)
-    , id(-1)
-    , attributeNameWidget(nullptr)
-    , attributeValueWidget(nullptr)
+    : mManager(nullptr)
+    , mId(-1)
+    , mAttributeNameWidget(nullptr)
+    , mAttributeValueWidget(nullptr)
 {
 }
 
 void MWAttribute::setAttributeId(int attributeId)
 {
-    id = attributeId;
+    mId = attributeId;
     updateWidgets();
 }
 
-void MWAttribute::setAttributeValue(const AttributeValue& value_)
+void MWAttribute::setAttributeValue(const AttributeValue& value)
 {
-    value = value_;
+    mValue = value;
     updateWidgets();
 }
 
@@ -145,11 +145,11 @@ void MWAttribute::onClicked(MyGUI::Widget* _sender)
 
 void MWAttribute::updateWidgets()
 {
-    if (attributeNameWidget && manager)
+    if (mAttributeNameWidget && mManager)
     {
-        if (id < 0 || id >= 8)
+        if (mId < 0 || mId >= 8)
         {
-            static_cast<MyGUI::TextBox*>(attributeNameWidget)->setCaption("");
+            static_cast<MyGUI::TextBox*>(mAttributeNameWidget)->setCaption("");
         }
         else
         {
@@ -163,20 +163,20 @@ void MWAttribute::updateWidgets()
                 "sAttributePersonality",
                 "sAttributeLuck"
             };
-            const std::string &name = manager->getGameSettingString(attributes[id], "");
-            static_cast<MyGUI::TextBox*>(attributeNameWidget)->setCaption(name);
+            const std::string &name = mManager->getGameSettingString(attributes[mId], "");
+            static_cast<MyGUI::TextBox*>(mAttributeNameWidget)->setCaption(name);
         }
     }
-    if (attributeValueWidget)
+    if (mAttributeValueWidget)
     {
-        AttributeValue::Type modified = value.getModified(), base = value.getBase();
-        static_cast<MyGUI::TextBox*>(attributeValueWidget)->setCaption(boost::lexical_cast<std::string>(modified));
+        AttributeValue::Type modified = mValue.getModified(), base = mValue.getBase();
+        static_cast<MyGUI::TextBox*>(mAttributeValueWidget)->setCaption(boost::lexical_cast<std::string>(modified));
         if (modified > base)
-            attributeValueWidget->_setWidgetState("increased");
+            mAttributeValueWidget->_setWidgetState("increased");
         else if (modified < base)
-            attributeValueWidget->_setWidgetState("decreased");
+            mAttributeValueWidget->_setWidgetState("decreased");
         else
-            attributeValueWidget->_setWidgetState("normal");
+            mAttributeValueWidget->_setWidgetState("normal");
     }
 }
 
@@ -188,14 +188,14 @@ void MWAttribute::initialiseOverride()
 {
     Base::initialiseOverride();
 
-    assignWidget(attributeNameWidget, "StatName");
-    assignWidget(attributeValueWidget, "StatValue");
+    assignWidget(mAttributeNameWidget, "StatName");
+    assignWidget(mAttributeValueWidget, "StatValue");
     
     MyGUI::ButtonPtr button;
     assignWidget(button, "StatNameButton");
     if (button)
     {
-        attributeNameWidget = button;
+        mAttributeNameWidget = button;
         button->eventMouseButtonClick += MyGUI::newDelegate(this, &MWAttribute::onClicked);
     }
 
@@ -203,7 +203,7 @@ void MWAttribute::initialiseOverride()
     assignWidget(button, "StatValueButton");
     if (button)
     {
-        attributeValueWidget = button;
+        mAttributeValueWidget = button;
         button->eventMouseButtonClick += MyGUI::newDelegate(this, &MWAttribute::onClicked);
     }
 }
@@ -212,21 +212,21 @@ void MWAttribute::initialiseOverride()
 
 MWSpell::MWSpell()
     : mWindowManager(nullptr)
-    , spellNameWidget(nullptr)
+    , mSpellNameWidget(nullptr)
 {
 }
 
 void MWSpell::setSpellId(const std::string &spellId)
 {
-    id = spellId;
+    mId = spellId;
     updateWidgets();
 }
 
 void MWSpell::createEffectWidgets(std::vector<MyGUI::WidgetPtr> &effects, MyGUI::WidgetPtr creator, MyGUI::IntCoord &coord, int flags)
 {
     const ESMS::ESMStore &store = mWindowManager->getStore();
-    const ESM::Spell *spell = store.spells.search(id);
-    MYGUI_ASSERT(spell, "spell with id '" << id << "' not found");
+    const ESM::Spell *spell = store.spells.search(mId);
+    MYGUI_ASSERT(spell, "spell with id '" << mId << "' not found");
 
     MWSpellEffectPtr effect = nullptr;
     std::vector<ESM::ENAMstruct>::const_iterator end = spell->effects.list.end();
@@ -253,14 +253,14 @@ void MWSpell::createEffectWidgets(std::vector<MyGUI::WidgetPtr> &effects, MyGUI:
 
 void MWSpell::updateWidgets()
 {
-    if (spellNameWidget && mWindowManager)
+    if (mSpellNameWidget && mWindowManager)
     {
         const ESMS::ESMStore &store = mWindowManager->getStore();
-        const ESM::Spell *spell = store.spells.search(id);
+        const ESM::Spell *spell = store.spells.search(mId);
         if (spell)
-            static_cast<MyGUI::TextBox*>(spellNameWidget)->setCaption(spell->name);
+            static_cast<MyGUI::TextBox*>(mSpellNameWidget)->setCaption(spell->name);
         else
-            static_cast<MyGUI::TextBox*>(spellNameWidget)->setCaption("");
+            static_cast<MyGUI::TextBox*>(mSpellNameWidget)->setCaption("");
     }
 }
 
@@ -268,7 +268,7 @@ void MWSpell::initialiseOverride()
 {
     Base::initialiseOverride();
 
-    assignWidget(spellNameWidget, "StatName");
+    assignWidget(mSpellNameWidget, "StatName");
 }
 
 MWSpell::~MWSpell()
@@ -367,8 +367,8 @@ SpellEffectList MWEffectList::effectListFromESM(const ESM::EffectList* effects)
 
 MWSpellEffect::MWSpellEffect()
     : mWindowManager(nullptr)
-    , imageWidget(nullptr)
-    , textWidget(nullptr)
+    , mImageWidget(nullptr)
+    , mTextWidget(nullptr)
     , mRequestedWidth(0)
 {
 }
@@ -388,7 +388,7 @@ void MWSpellEffect::updateWidgets()
     const ESM::MagicEffect *magicEffect = store.magicEffects.search(mEffectParams.mEffectID);
     if (!magicEffect)
         return;
-    if (textWidget)
+    if (mTextWidget)
     {
         std::string pt =  mWindowManager->getGameSettingString("spoint", "");
         std::string pts =  mWindowManager->getGameSettingString("spoints", "");
@@ -448,14 +448,14 @@ void MWSpellEffect::updateWidgets()
             }
         }
 
-        static_cast<MyGUI::TextBox*>(textWidget)->setCaption(spellLine);
-        mRequestedWidth = textWidget->getTextSize().width + 24;
+        static_cast<MyGUI::TextBox*>(mTextWidget)->setCaption(spellLine);
+        mRequestedWidth = mTextWidget->getTextSize().width + 24;
     }
-    if (imageWidget)
+    if (mImageWidget)
     {
         std::string path = std::string("icons\\") + magicEffect->icon;
         fixTexturePath(path);
-        imageWidget->setImageTexture(path);
+        mImageWidget->setImageTexture(path);
     }
 }
 
@@ -728,49 +728,49 @@ void MWSpellEffect::initialiseOverride()
 {
     Base::initialiseOverride();
 
-    assignWidget(textWidget, "Text");
-    assignWidget(imageWidget, "Image");
+    assignWidget(mTextWidget, "Text");
+    assignWidget(mImageWidget, "Image");
 }
 
 /* MWDynamicStat */
 
 MWDynamicStat::MWDynamicStat()
-: value(0)
-, max(1)
-, textWidget(nullptr)
-, barWidget(nullptr)
-, barTextWidget(nullptr)
+: mValue(0)
+, mMax(1)
+, mTextWidget(nullptr)
+, mBarWidget(nullptr)
+, mBarTextWidget(nullptr)
 {
 }
 
-void MWDynamicStat::setValue(int cur, int max_)
+void MWDynamicStat::setValue(int cur, int max)
 {
-    value = cur;
-    max = max_;
+    mValue = cur;
+    mMax = max;
 
-    if (barWidget)
+    if (mBarWidget)
     {
-        barWidget->setProgressRange(max);
-        barWidget->setProgressPosition(value);
+        mBarWidget->setProgressRange(mMax);
+        mBarWidget->setProgressPosition(mValue);
     }
 
 
-    if (barTextWidget)
+    if (mBarTextWidget)
     {
-        if (value >= 0 && max > 0)
+        if (mValue >= 0 && mMax > 0)
         {
             std::stringstream out;
-            out << value << "/" << max;
-            static_cast<MyGUI::TextBox*>(barTextWidget)->setCaption(out.str().c_str());
+            out << mValue << "/" << mMax;
+            static_cast<MyGUI::TextBox*>(mBarTextWidget)->setCaption(out.str().c_str());
         }
         else
-            static_cast<MyGUI::TextBox*>(barTextWidget)->setCaption("");
+            static_cast<MyGUI::TextBox*>(mBarTextWidget)->setCaption("");
     }
 }
 void MWDynamicStat::setTitle(const std::string& text)
 {
-    if (textWidget)
-        static_cast<MyGUI::TextBox*>(textWidget)->setCaption(text);
+    if (mTextWidget)
+        static_cast<MyGUI::TextBox*>(mTextWidget)->setCaption(text);
 }
 
 MWDynamicStat::~MWDynamicStat()
@@ -781,7 +781,7 @@ void MWDynamicStat::initialiseOverride()
 {
     Base::initialiseOverride();
 
-    assignWidget(textWidget, "Text");
-    assignWidget(barWidget, "Bar");
-    assignWidget(barTextWidget, "BarText");
+    assignWidget(mTextWidget, "Text");
+    assignWidget(mBarWidget, "Bar");
+    assignWidget(mBarTextWidget, "BarText");
 }
