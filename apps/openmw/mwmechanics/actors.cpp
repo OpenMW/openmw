@@ -19,6 +19,7 @@ namespace MWMechanics
         // magic effects
         adjustMagicEffects (ptr);
         calculateDynamicStats (ptr);
+        calculateCreatureStatModifiers (ptr);
     }
 
     void Actors::updateNpc (const MWWorld::Ptr& ptr, float duration, bool paused)
@@ -65,6 +66,29 @@ namespace MWMechanics
         creatureStats.mDynamic[1].setBase (static_cast<int> (intelligence +
             magickaFactor * intelligence));
         creatureStats.mDynamic[2].setBase (strength+willpower+agility+endurance);
+    }
+
+    void Actors::calculateCreatureStatModifiers (const MWWorld::Ptr& ptr)
+    {
+        CreatureStats& creatureStats = MWWorld::Class::get (ptr).getCreatureStats (ptr);
+
+        // attributes
+        for (int i=0; i<5; ++i)
+        {
+            int modifier = creatureStats.mMagicEffects.get (EffectKey (79, i)).mMagnitude
+                - creatureStats.mMagicEffects.get (EffectKey (17, i)).mMagnitude;
+
+            creatureStats.mAttributes[0].setModifier (modifier);
+        }
+
+        // dynamic stats
+        for (int i=0; i<3; ++i)
+        {
+            int modifier = creatureStats.mMagicEffects.get (EffectKey (80+i)).mMagnitude
+                - creatureStats.mMagicEffects.get (EffectKey (18+i)).mMagnitude;
+
+            creatureStats.mDynamic[0].setModifier (modifier);
+        }
     }
 
     Actors::Actors() : mDuration (0) {}

@@ -147,7 +147,7 @@ namespace MWMechanics
             void modify (const T& diff)
             {
                 mStatic.modify (diff);
-                modifyCurrent (diff);
+                setCurrent (getCurrent()+diff);
             }
 
             void setCurrent (const T& value)
@@ -158,6 +158,13 @@ namespace MWMechanics
                     mCurrent = 0;
                 else if (mCurrent>getModified())
                     mCurrent = getModified();
+            }
+
+            void setModifier (const T& modifier)
+            {
+                T diff =  modifier - mStatic.getModifier();
+                mStatic.setModifier (modifier);
+                setCurrent (getCurrent()+diff);
             }
     };
 
