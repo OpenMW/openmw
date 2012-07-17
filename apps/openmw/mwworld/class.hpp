@@ -22,7 +22,7 @@ namespace MWRender
 namespace MWMechanics
 {
     struct CreatureStats;
-    struct NpcStats;
+    class NpcStats;
     struct Movement;
 }
 
@@ -164,6 +164,19 @@ namespace MWWorld
             ///< Returns total weight of objects inside this object (including modifications from magic
             /// effects). Throws an exception, if the object can't hold other objects.
             /// (default implementation: throws an exception)
+
+            virtual bool apply (const MWWorld::Ptr& ptr, const std::string& id,
+                const MWWorld::Ptr& actor) const;
+            ///< Apply \a id on \a ptr.
+            /// \param actor Actor that is resposible for the ID being applied to \a ptr.
+            /// \return Any effect?
+            ///
+            /// (default implementation: ignore and return false)
+
+            virtual void skillUsageSucceeded (const MWWorld::Ptr& ptr, int skill, int usageType) const;
+            ///< Inform actor \a ptr that a skill use has succeeded.
+            ///
+            /// (default implementations: throws an exception)
 
             static const Class& get (const std::string& key);
             ///< If there is no class for this \a key, an exception is thrown.

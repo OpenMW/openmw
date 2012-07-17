@@ -35,8 +35,7 @@
 
 #include <stdexcept>
 #include <vector>
-#include <string>
-#include <assert.h>
+#include <cassert>
 
 #include "record.hpp"
 #include "nif_types.hpp"

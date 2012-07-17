@@ -1,12 +1,9 @@
 #ifndef _GAME_RENDER_ANIMATION_H
 #define _GAME_RENDER_ANIMATION_H
-#include <components/nif/data.hpp>
+
 #include <openengine/ogre/renderer.hpp>
-#include "../mwworld/refdata.hpp"
-#include "../mwworld/ptr.hpp"
 #include "../mwworld/actiontalk.hpp"
 #include <components/nif/node.hpp>
-#include <map>
 #include <openengine/bullet/physic.hpp>
 
 
@@ -21,26 +18,26 @@ struct PosAndRot {
 
 class Animation {
 protected:
-    Ogre::SceneNode* insert;
+    Ogre::SceneNode* mInsert;
     OEngine::Render::OgreRenderer &mRend;
-    static std::map<std::string, int> mUniqueIDs;
+    static std::map<std::string, int> sUniqueIDs;
 
-    float time;
-    float startTime;
-    float stopTime;
-    int animate;
+    float mTime;
+    float mStartTime;
+    float mStopTime;
+    int mAnimate;
     //Represents a rotation index for each bone
-    std::vector<int>rindexI;
+    std::vector<int>mRindexI;
     //Represents a translation index for each bone
-    std::vector<int>tindexI;
+    std::vector<int>mTindexI;
 
     //Only shapes with morphing data will use a shape number
-    int shapeNumber;
-    std::vector<std::vector<int> > shapeIndexI;
+    int mShapeNumber;
+    std::vector<std::vector<int> > mShapeIndexI;
 
-    std::vector<Nif::NiKeyframeData>* transformations;
-    std::map<std::string,float>* textmappings;
-    Ogre::Entity* base;
+    std::vector<Nif::NiKeyframeData>* mTransformations;
+    std::map<std::string,float>* mTextmappings;
+    Ogre::Entity* mBase;
     void handleAnimationTransforms();
     bool timeIndex( float time, const std::vector<float> & times, int & i, int & j, float & x );
 
@@ -49,7 +46,6 @@ public:
     virtual void runAnimation(float timepassed) = 0;
     void startScript(std::string groupname, int mode, int loops);
     void stopScript();
-
 
     virtual ~Animation();
 };

@@ -8,7 +8,6 @@
 #endif
 
 #include <boost/program_options.hpp>
-#include <boost/filesystem.hpp>
 
 #include <components/files/fixedpath.hpp>
 #include <components/files/collections.hpp>

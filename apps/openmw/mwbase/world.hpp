@@ -1,8 +1,6 @@
 #ifndef GAME_MWBASE_WORLD_H
 #define GAME_MWBASE_WORLD_H
 
-#include <string>
-#include <map>
 #include <vector>
 
 #include <components/settings/settings.hpp>

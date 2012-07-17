@@ -5,6 +5,8 @@
 #include <utility>
 #include <map>
 
+#include <boost/shared_ptr.hpp>
+
 #include <OgreResourceGroupManager.h>
 
 #include <components/settings/settings.hpp>

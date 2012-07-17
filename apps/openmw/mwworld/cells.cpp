@@ -1,9 +1,5 @@
 #include "cells.hpp"
 
-#include <cctype>
-
-#include <algorithm>
-
 #include <components/esm_store/store.hpp>
 
 #include "../mwbase/environment.hpp"

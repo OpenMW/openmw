@@ -6,24 +6,24 @@
 #include <OgreBone.h>
 #include <OgreSubMesh.h>
 
-namespace MWRender {
-
-std::map<std::string, int> Animation::mUniqueIDs;
+namespace MWRender
+{
+std::map<std::string, int> Animation::sUniqueIDs;
 
 Animation::Animation(OEngine::Render::OgreRenderer& _rend)
-    : insert(NULL)
+    : mInsert(NULL)
     , mRend(_rend)
-    , time(0.0f)
-    , startTime(0.0f)
-    , stopTime(0.0f)
-    , animate(0)
-    , rindexI()
-    , tindexI()
-    , shapeNumber(0)
-    , shapeIndexI()
-    , transformations(NULL)
-    , textmappings(NULL)
-    , base(NULL)
+    , mTime(0.0f)
+    , mStartTime(0.0f)
+    , mStopTime(0.0f)
+    , mAnimate(0)
+    , mRindexI()
+    , mTindexI()
+    , mShapeNumber(0)
+    , mShapeIndexI()
+    , mTransformations(NULL)
+    , mTextmappings(NULL)
+    , mBase(NULL)
 {
 }
 
@@ -38,10 +38,10 @@ void Animation::startScript(std::string groupname, int mode, int loops)
     //How many times to loop
     if(groupname == "all")
     {
-        animate = loops;
-        time = startTime;
+        mAnimate = loops;
+        mTime = mStartTime;
     }
-    else if(textmappings)
+    else if(mTextmappings)
     {
         std::string startName = groupname + ": loop start";
         std::string stopName = groupname + ": loop stop";
@@ -53,7 +53,7 @@ void Animation::startScript(std::string groupname, int mode, int loops)
             startName = groupname + ": loop start";
             stopName = groupname + ": loop stop";
 
-            for(std::map<std::string, float>::iterator iter = textmappings->begin(); iter != textmappings->end(); iter++)
+            for(std::map<std::string, float>::iterator iter = mTextmappings->begin(); iter != mTextmappings->end(); iter++)
             {
                 std::string current = iter->first.substr(0, startName.size());
                 std::transform(current.begin(), current.end(), current.begin(), ::tolower);
@@ -62,14 +62,14 @@ void Animation::startScript(std::string groupname, int mode, int loops)
 
                 if(current == startName)
                 {
-                    startTime = iter->second;
-                        animate = loops;
-                        time = startTime;
+                    mStartTime = iter->second;
+                        mAnimate = loops;
+                        mTime = mStartTime;
                         first = true;
                 }
                 if(current2 == stopName)
                 {
-                    stopTime = iter->second;
+                    mStopTime = iter->second;
                     if(first)
                         break;
                 }
@@ -81,7 +81,7 @@ void Animation::startScript(std::string groupname, int mode, int loops)
             startName = groupname + ": start";
             stopName = groupname + ": stop";
 
-            for(std::map<std::string, float>::iterator iter = textmappings->begin(); iter != textmappings->end(); iter++)
+            for(std::map<std::string, float>::iterator iter = mTextmappings->begin(); iter != mTextmappings->end(); iter++)
             {
                 std::string current = iter->first.substr(0, startName.size());
                 std::transform(current.begin(), current.end(), current.begin(), ::tolower);
@@ -90,14 +90,14 @@ void Animation::startScript(std::string groupname, int mode, int loops)
 
                 if(current == startName)
                 {
-                    startTime = iter->second;
-                        animate = loops;
-                        time = startTime;
+                    mStartTime = iter->second;
+                        mAnimate = loops;
+                        mTime = mStartTime;
                         first = true;
                 }
                 if(current2 == stopName)
                 {
-                    stopTime = iter->second;
+                    mStopTime = iter->second;
                     if(first)
                         break;
                 }
@@ -111,7 +111,7 @@ void Animation::startScript(std::string groupname, int mode, int loops)
 
 void Animation::stopScript()
 {
-    animate = 0;
+    mAnimate = 0;
 }
 
 

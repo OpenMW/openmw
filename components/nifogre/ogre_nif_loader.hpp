@@ -28,32 +28,23 @@
 #include <OgreMesh.h>
 #include <OgreSkeleton.h>
 
-#include <cassert>
+#include <vector>
 #include <string>
+#include <cassert>
 #include <boost/algorithm/string.hpp>
 
-#include "../nif/nif_file.hpp"
 #include "../nif/node.hpp"
-#include "../nif/data.hpp"
-#include "../nif/property.hpp"
-#include "../nif/controller.hpp"
-#include "../nif/extra.hpp"
+
 #include <libs/platform/strings.h>
-
-#include <vector>
-#include <map>
-// For warning messages
-#include <limits>
-using namespace boost::algorithm;
-
 
 class BoundsFinder;
 
 struct ciLessBoost : std::binary_function<std::string, std::string, bool>
 {
-    bool operator() (const std::string & s1, const std::string & s2) const {
-                                               //case insensitive version of is_less
-        return lexicographical_compare(s1, s2, is_iless());
+    bool operator() (const std::string & s1, const std::string & s2) const
+    {
+        //case insensitive version of is_less
+        return boost::algorithm::lexicographical_compare(s1, s2, boost::algorithm::is_iless());
     }
 };
 
@@ -63,7 +54,6 @@ namespace Nif
     class Transformation;
     class NiTriShape;
 }
-
 
 namespace NifOgre
 {
@@ -96,3 +86,5 @@ public:
 }
 
 #endif
+
+

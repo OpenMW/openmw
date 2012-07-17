@@ -1,30 +1,22 @@
 #ifndef _GAME_RENDER_NPCANIMATION_H
 #define _GAME_RENDER_NPCANIMATION_H
-#include "animation.hpp"
-#include <components/nif/data.hpp>
-#include <components/nif/node.hpp>
-#include <components/nif/property.hpp>
-#include <components/nif/controller.hpp>
-#include <components/nif/extra.hpp>
-#include <utility>
 
-#include "../mwworld/refdata.hpp"
-#include "../mwworld/ptr.hpp"
+#include "animation.hpp"
+
 #include "components/nifogre/ogre_nif_loader.hpp"
 #include "../mwworld/inventorystore.hpp"
 #include "../mwclass/npc.hpp"
 #include "../mwworld/containerstore.hpp"
-#include "components/esm/loadarmo.hpp"
 
 namespace MWRender{
 
 class NpcAnimation: public Animation{
 private:
-    MWWorld::InventoryStore& inv;
+    MWWorld::InventoryStore& mInv;
     int mStateID;
 
-    int partslots[27];  //Each part slot is taken by clothing, armor, or is empty
-    int partpriorities[27];
+    int mPartslots[27];  //Each part slot is taken by clothing, armor, or is empty
+    int mPartPriorities[27];
 
     //Bounded Parts
     Ogre::Entity* lclavicle;
@@ -48,7 +40,7 @@ private:
     Ogre::Entity* hair;
     Ogre::Entity* head;
 
-    Ogre::SceneNode* insert;
+    Ogre::SceneNode* mInsert;
     bool isBeast;
     bool isFemale;
     std::string headModel;

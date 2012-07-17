@@ -1,7 +1,11 @@
 
 #include "statsextensions.hpp"
 
+#include <cmath>
+
 #include <boost/algorithm/string.hpp>
+
+#include <components/esm/loadnpc.hpp>
 
 #include <components/esm_store/store.hpp>
 
@@ -237,7 +241,7 @@ namespace MWScript
                     MWWorld::Ptr ptr = R()(runtime);
 
                     Interpreter::Type_Integer value =
-                        MWWorld::Class::get (ptr).getNpcStats (ptr).mSkill[mIndex].
+                        MWWorld::Class::get (ptr).getNpcStats (ptr).getSkill (mIndex).
                         getModified();
 
                     runtime.push (value);
@@ -260,8 +264,35 @@ namespace MWScript
                     Interpreter::Type_Integer value = runtime[0].mInteger;
                     runtime.pop();
 
-                    MWWorld::Class::get (ptr).getNpcStats (ptr).mSkill[mIndex].
-                        setModified (value, 0);
+                    MWMechanics::NpcStats& stats = MWWorld::Class::get (ptr).getNpcStats (ptr);
+
+                    MWWorld::LiveCellRef<ESM::NPC> *ref = ptr.get<ESM::NPC>();
+
+                    assert (ref);
+
+                    const ESM::Class& class_ =
+                        *MWBase::Environment::get().getWorld()->getStore().classes.find (ref->base->cls);
+
+                    float level = 0;
+                    float progress = std::modf (stats.getSkill (mIndex).getBase(), &level);
+
+                    float modifier = stats.getSkill (mIndex).getModifier();
+
+                    int newLevel = static_cast<int> (value-modifier);
+
+                    if (newLevel<0)
+                        newLevel = 0;
+                    else if (newLevel>100)
+                        newLevel = 100;
+
+                    progress = (progress / stats.getSkillGain (mIndex, class_, -1, level))
+                        * stats.getSkillGain (mIndex, class_, -1, newLevel);
+
+                    if (progress>=1)
+                        progress = 0.999999999;
+
+                    stats.getSkill (mIndex).set (newLevel + progress);
+                    stats.getSkill (mIndex).setModifier (modifier);
                 }
         };
 
@@ -281,10 +312,10 @@ namespace MWScript
                     Interpreter::Type_Integer value = runtime[0].mInteger;
                     runtime.pop();
 
-                    value += MWWorld::Class::get (ptr).getNpcStats (ptr).mSkill[mIndex].
+                    value += MWWorld::Class::get (ptr).getNpcStats (ptr).getSkill (mIndex).
                         getModified();
 
-                    MWWorld::Class::get (ptr).getNpcStats (ptr).mSkill[mIndex].
+                    MWWorld::Class::get (ptr).getNpcStats (ptr).getSkill (mIndex).
                         setModified (value, 0, 100);
                 }
         };
@@ -373,9 +404,9 @@ namespace MWScript
                     if(factionID != "")
                     {
                         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
-                        if(MWWorld::Class::get(player).getNpcStats(player).mFactionRank.find(factionID) == MWWorld::Class::get(player).getNpcStats(player).mFactionRank.end())
+                        if(MWWorld::Class::get(player).getNpcStats(player).getFactionRanks().find(factionID) == MWWorld::Class::get(player).getNpcStats(player).getFactionRanks().end())
                         {
-                            MWWorld::Class::get(player).getNpcStats(player).mFactionRank[factionID] = 0;
+                            MWWorld::Class::get(player).getNpcStats(player).getFactionRanks()[factionID] = 0;
                         }
                     }
                 }
@@ -402,13 +433,13 @@ namespace MWScript
                     if(factionID != "")
                     {
                         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
-                        if(MWWorld::Class::get(player).getNpcStats(player).mFactionRank.find(factionID) == MWWorld::Class::get(player).getNpcStats(player).mFactionRank.end())
+                        if(MWWorld::Class::get(player).getNpcStats(player).getFactionRanks().find(factionID) == MWWorld::Class::get(player).getNpcStats(player).getFactionRanks().end())
                         {
-                            MWWorld::Class::get(player).getNpcStats(player).mFactionRank[factionID] = 0;
+                            MWWorld::Class::get(player).getNpcStats(player).getFactionRanks()[factionID] = 0;
                         }
                         else
                         {
-                            MWWorld::Class::get(player).getNpcStats(player).mFactionRank[factionID] = MWWorld::Class::get(player).getNpcStats(player).mFactionRank[factionID] +1;
+                            MWWorld::Class::get(player).getNpcStats(player).getFactionRanks()[factionID] = MWWorld::Class::get(player).getNpcStats(player).getFactionRanks()[factionID] +1;
                         }
                     }
                 }
@@ -435,9 +466,9 @@ namespace MWScript
                     if(factionID != "")
                     {
                         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
-                        if(MWWorld::Class::get(player).getNpcStats(player).mFactionRank.find(factionID) != MWWorld::Class::get(player).getNpcStats(player).mFactionRank.end())
+                        if(MWWorld::Class::get(player).getNpcStats(player).getFactionRanks().find(factionID) != MWWorld::Class::get(player).getNpcStats(player).getFactionRanks().end())
                         {
-                            MWWorld::Class::get(player).getNpcStats(player).mFactionRank[factionID] = MWWorld::Class::get(player).getNpcStats(player).mFactionRank[factionID] -1;
+                            MWWorld::Class::get(player).getNpcStats(player).getFactionRanks()[factionID] = MWWorld::Class::get(player).getNpcStats(player).getFactionRanks()[factionID] -1;
                         }
                     }
                 }
@@ -460,22 +491,22 @@ namespace MWScript
                     }
                     else
                     {
-                        if(MWWorld::Class::get(ptr).getNpcStats(ptr).mFactionRank.empty())
+                        if(MWWorld::Class::get(ptr).getNpcStats(ptr).getFactionRanks().empty())
                         {
                             //throw exception?
                         }
                         else
                         {
-                            factionID = MWWorld::Class::get(ptr).getNpcStats(ptr).mFactionRank.begin()->first;
+                            factionID = MWWorld::Class::get(ptr).getNpcStats(ptr).getFactionRanks().begin()->first;
                         }
                     }
                     boost::algorithm::to_lower(factionID);
                     MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
                     if(factionID!="")
                     {
-                        if(MWWorld::Class::get(player).getNpcStats(player).mFactionRank.find(factionID) != MWWorld::Class::get(player).getNpcStats(player).mFactionRank.end())
+                        if(MWWorld::Class::get(player).getNpcStats(player).getFactionRanks().find(factionID) != MWWorld::Class::get(player).getNpcStats(player).getFactionRanks().end())
                         {
-                            runtime.push(MWWorld::Class::get(player).getNpcStats(player).mFactionRank[factionID]);
+                            runtime.push(MWWorld::Class::get(player).getNpcStats(player).getFactionRanks()[factionID]);
                         }
                         else
                         {

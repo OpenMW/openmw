@@ -27,6 +27,10 @@ namespace MWMechanics
 
             void adjustMagicEffects (const MWWorld::Ptr& creature);
 
+            void calculateDynamicStats (const MWWorld::Ptr& ptr);
+
+            void calculateCreatureStatModifiers (const MWWorld::Ptr& ptr);
+
         public:
 
             Actors();

@@ -4,9 +4,6 @@
 #include <components/esm/records.hpp>
 
 #include <list>
-#include <string>
-#include <vector>
-#include <stdexcept>
 #include <algorithm>
 
 #include "refdata.hpp"

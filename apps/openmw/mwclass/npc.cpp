@@ -67,11 +67,11 @@ namespace MWClass
                 boost::algorithm::to_lower(faction);
                 if(ref->base->npdt52.gold != -10)
                 {
-                    data->mNpcStats.mFactionRank[faction] = (int)ref->base->npdt52.rank;
+                    data->mNpcStats.getFactionRanks()[faction] = (int)ref->base->npdt52.rank;
                 }
                 else
                 {
-                    data->mNpcStats.mFactionRank[faction] = (int)ref->base->npdt12.rank;
+                    data->mNpcStats.getFactionRanks()[faction] = (int)ref->base->npdt12.rank;
                 }
             }
 
@@ -79,7 +79,7 @@ namespace MWClass
             if(ref->base->npdt52.gold != -10)
             {
                 for (int i=0; i<27; ++i)
-                    data->mNpcStats.mSkill[i].setBase (ref->base->npdt52.skills[i]);
+                    data->mNpcStats.getSkill (i).setBase (ref->base->npdt52.skills[i]);
 
                 data->mCreatureStats.mAttributes[0].set (ref->base->npdt52.strength);
                 data->mCreatureStats.mAttributes[1].set (ref->base->npdt52.intelligence);
@@ -131,7 +131,7 @@ namespace MWClass
 
         assert (ref->base != NULL);
 
-		 
+
 
         std::string headID = ref->base->head;
         std::string bodyRaceID = headID.substr(0, headID.find_last_of("head_") - 4);
@@ -206,12 +206,12 @@ namespace MWClass
         {
             case Run:
 
-                stats.mForceRun = force;
+                stats.setMovementFlag (MWMechanics::NpcStats::Flag_ForceRun, force);
                 break;
 
             case Sneak:
 
-                stats.mForceSneak = force;
+                stats.setMovementFlag (MWMechanics::NpcStats::Flag_ForceSneak, force);
                 break;
 
             case Combat:
@@ -228,17 +228,18 @@ namespace MWClass
         {
             case Run:
 
-                stats.mRun = set;
+                stats.setMovementFlag (MWMechanics::NpcStats::Flag_Run, set);
                 break;
 
             case Sneak:
 
-                stats.mSneak = set;
+                stats.setMovementFlag (MWMechanics::NpcStats::Flag_Sneak, set);
                 break;
 
             case Combat:
 
-                stats.mCombat = set;
+                // Combat stance ignored for now; need to be determined based on draw state instead of
+                // being maunally set.
                 break;
         }
     }
@@ -251,21 +252,21 @@ namespace MWClass
         {
             case Run:
 
-                if (!ignoreForce && stats.mForceRun)
+                if (!ignoreForce && stats.getMovementFlag (MWMechanics::NpcStats::Flag_ForceRun))
                     return true;
 
-                return stats.mRun;
+                return stats.getMovementFlag (MWMechanics::NpcStats::Flag_Run);
 
             case Sneak:
 
-                if (!ignoreForce && stats.mForceSneak)
+                if (!ignoreForce && stats.getMovementFlag (MWMechanics::NpcStats::Flag_ForceSneak))
                     return true;
 
-                return stats.mSneak;
+                return stats.getMovementFlag (MWMechanics::NpcStats::Flag_Sneak);
 
             case Combat:
 
-                return stats.mCombat;
+                return false;
         }
 
         return false;
@@ -348,10 +349,31 @@ namespace MWClass
         return weight;
     }
 
+    bool Npc::apply (const MWWorld::Ptr& ptr, const std::string& id,
+        const MWWorld::Ptr& actor) const
+    {
+        MWMechanics::CreatureStats& stats = getCreatureStats (ptr);
+
+        /// \todo consider instant effects
+
+        return stats.mActiveSpells.addSpell (id);
+    }
+
+    void Npc::skillUsageSucceeded (const MWWorld::Ptr& ptr, int skill, int usageType) const
+    {
+        MWMechanics::NpcStats& stats = getNpcStats (ptr);
+
+        MWWorld::LiveCellRef<ESM::NPC> *ref = ptr.get<ESM::NPC>();
+
+        const ESM::Class *class_ = MWBase::Environment::get().getWorld()->getStore().classes.find (
+            ref->base->cls);
+
+        stats.useSkill (skill, *class_, usageType);
+    }
+
     void Npc::adjustRotation(const MWWorld::Ptr& ptr,float& x,float& y,float& z) const
     {
         y = 0;
         x = 0;
-        std::cout << "dfdfdfdfnzdofnmqsldgnmqskdhblqkdbv lqksdf";
     }
 }

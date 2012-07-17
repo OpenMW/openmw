@@ -23,7 +23,7 @@ http://www.gnu.org/licenses/ .
 
 #include "bullet_nif_loader.hpp"
 #include <Ogre.h>
-#include <stdio.h>
+#include <cstdio>
 
 #include "../nif/nif_file.hpp"
 #include "../nif/node.hpp"

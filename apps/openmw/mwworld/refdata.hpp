@@ -1,8 +1,6 @@
 #ifndef GAME_MWWORLD_REFDATA_H
 #define GAME_MWWORLD_REFDATA_H
 
-#include <string>
-
 #include <components/esm/defs.hpp>
 
 #include "../mwscript/locals.hpp"

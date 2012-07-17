@@ -18,7 +18,7 @@ CreatureAnimation::~CreatureAnimation()
 
 CreatureAnimation::CreatureAnimation(const MWWorld::Ptr& ptr, OEngine::Render::OgreRenderer& _rend): Animation(_rend)
 {
-    insert = ptr.getRefData().getBaseNode();
+    mInsert = ptr.getRefData().getBaseNode();
     MWWorld::LiveCellRef<ESM::Creature> *ref = ptr.get<ESM::Creature>();
 
     assert (ref->base != NULL);
@@ -28,13 +28,13 @@ CreatureAnimation::CreatureAnimation(const MWWorld::Ptr& ptr, OEngine::Render::O
 
         // FIXME: There can be more than one!
         NifOgre::MeshPairList meshes = NifOgre::NIFLoader::load(mesh);
-        base = mRend.getScene()->createEntity(meshes[0].first->getName());
-        base->setVisibilityFlags(RV_Actors);
+        mBase = mRend.getScene()->createEntity(meshes[0].first->getName());
+        mBase->setVisibilityFlags(RV_Actors);
 
         bool transparent = false;
-        for (unsigned int i=0; i<base->getNumSubEntities(); ++i)
+        for (unsigned int i=0; i < mBase->getNumSubEntities(); ++i)
         {
-            Ogre::MaterialPtr mat = base->getSubEntity(i)->getMaterial();
+            Ogre::MaterialPtr mat = mBase->getSubEntity(i)->getMaterial();
             Ogre::Material::TechniqueIterator techIt = mat->getTechniqueIterator();
             while (techIt.hasMoreElements())
             {
@@ -49,30 +49,30 @@ CreatureAnimation::CreatureAnimation(const MWWorld::Ptr& ptr, OEngine::Render::O
                 }
             }
         }
-        base->setRenderQueueGroup(transparent ? RQG_Alpha : RQG_Main);
+        mBase->setRenderQueueGroup(transparent ? RQG_Alpha : RQG_Main);
 
-        insert->attachObject(base);
+        mInsert->attachObject(mBase);
     }
 }
 
 void CreatureAnimation::runAnimation(float timepassed)
 {
-    if(animate > 0)
+    if(mAnimate > 0)
     {
         //Add the amount of time passed to time
 
         //Handle the animation transforms dependent on time
 
         //Handle the shapes dependent on animation transforms
-        time += timepassed;
-        if(time >= stopTime)
+        mTime += timepassed;
+        if(mTime >= mStopTime)
         {
-            animate--;
+            mAnimate--;
             //std::cout << "Stopping the animation\n";
-            if(animate == 0)
-                time = stopTime;
+            if(mAnimate == 0)
+                mTime = mStopTime;
             else
-                time = startTime + (time - stopTime);
+                mTime = mStartTime + (mTime - mStopTime);
         }
 
         handleAnimationTransforms();
