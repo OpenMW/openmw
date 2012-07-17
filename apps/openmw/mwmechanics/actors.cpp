@@ -18,22 +18,7 @@ namespace MWMechanics
     {
         // magic effects
         adjustMagicEffects (ptr);
-
-        CreatureStats& creatureStats = MWWorld::Class::get (ptr).getCreatureStats (ptr);
-
-        // calculate dynamic stats
-        int strength = creatureStats.mAttributes[0].getBase();
-        int intelligence = creatureStats.mAttributes[1].getBase();
-        int willpower = creatureStats.mAttributes[2].getBase();
-        int agility = creatureStats.mAttributes[3].getBase();
-        int endurance = creatureStats.mAttributes[5].getBase();
-
-        double magickaFactor = creatureStats.mMagicEffects.get (EffectKey (84)).mMagnitude*0.1 + 0.5;
-
-        creatureStats.mDynamic[0].setBase (static_cast<int> (0.5 * (strength + endurance)));
-        creatureStats.mDynamic[1].setBase (static_cast<int> (intelligence +
-            magickaFactor * intelligence));
-        creatureStats.mDynamic[2].setBase (strength+willpower+agility+endurance);
+        calculateDynamicStats (ptr);
     }
 
     void Actors::updateNpc (const MWWorld::Ptr& ptr, float duration, bool paused)
@@ -62,6 +47,24 @@ namespace MWMechanics
         creatureStats.mMagicEffects = now;
 
         // TODO apply diff to other stats
+    }
+
+    void Actors::calculateDynamicStats (const MWWorld::Ptr& ptr)
+    {
+        CreatureStats& creatureStats = MWWorld::Class::get (ptr).getCreatureStats (ptr);
+
+        int strength = creatureStats.mAttributes[0].getBase();
+        int intelligence = creatureStats.mAttributes[1].getBase();
+        int willpower = creatureStats.mAttributes[2].getBase();
+        int agility = creatureStats.mAttributes[3].getBase();
+        int endurance = creatureStats.mAttributes[5].getBase();
+
+        double magickaFactor = creatureStats.mMagicEffects.get (EffectKey (84)).mMagnitude*0.1 + 0.5;
+
+        creatureStats.mDynamic[0].setBase (static_cast<int> (0.5 * (strength + endurance)));
+        creatureStats.mDynamic[1].setBase (static_cast<int> (intelligence +
+            magickaFactor * intelligence));
+        creatureStats.mDynamic[2].setBase (strength+willpower+agility+endurance);
     }
 
     Actors::Actors() : mDuration (0) {}
