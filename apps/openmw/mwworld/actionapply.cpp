@@ -22,7 +22,7 @@ namespace MWWorld
 
     void ActionApplyWithSkill::execute()
     {
-        if (MWWorld::Class::get (mTarget).apply (mTarget, mId, mActor))
+        if (MWWorld::Class::get (mTarget).apply (mTarget, mId, mActor) && mUsageType!=-1)
             MWWorld::Class::get (mTarget).skillUsageSucceeded (mActor, mSkillIndex, mUsageType);
     }
 }

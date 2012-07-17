@@ -18,8 +18,8 @@ namespace MWMechanics
     {
         // magic effects
         adjustMagicEffects (ptr);
-        calculateDynamicStats (ptr);
         calculateCreatureStatModifiers (ptr);
+        calculateDynamicStats (ptr);
     }
 
     void Actors::updateNpc (const MWWorld::Ptr& ptr, float duration, bool paused)
@@ -78,7 +78,7 @@ namespace MWMechanics
             int modifier = creatureStats.mMagicEffects.get (EffectKey (79, i)).mMagnitude
                 - creatureStats.mMagicEffects.get (EffectKey (17, i)).mMagnitude;
 
-            creatureStats.mAttributes[0].setModifier (modifier);
+            creatureStats.mAttributes[i].setModifier (modifier);
         }
 
         // dynamic stats
@@ -87,7 +87,7 @@ namespace MWMechanics
             int modifier = creatureStats.mMagicEffects.get (EffectKey (80+i)).mMagnitude
                 - creatureStats.mMagicEffects.get (EffectKey (18+i)).mMagnitude;
 
-            creatureStats.mDynamic[0].setModifier (modifier);
+            creatureStats.mDynamic[i].setModifier (modifier);
         }
     }
 
