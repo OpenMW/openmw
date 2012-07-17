@@ -58,6 +58,14 @@ namespace Nif
 namespace NifOgre
 {
 
+struct EntityList {
+    std::vector<Ogre::Entity*> mEntities;
+    Ogre::Entity *mSkelBase;
+
+    EntityList() : mSkelBase(0)
+    { }
+};
+
 /** This holds a list of meshes along with the names of their parent nodes
  */
 typedef std::vector< std::pair<Ogre::MeshPtr,std::string> > MeshPairList;
@@ -81,6 +89,10 @@ public:
     static MeshPairList load(const std::string &name,
                              Ogre::SkeletonPtr *skel=NULL,
                              const std::string &group="General");
+
+    static EntityList createEntities(Ogre::SceneNode *parent,
+                                     const std::string &name,
+                                     const std::string &group="General");
 };
 
 }

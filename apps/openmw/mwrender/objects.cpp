@@ -93,13 +93,10 @@ void Objects::insertMesh (const MWWorld::Ptr& ptr, const std::string& mesh)
     assert(insert);
 
     Ogre::AxisAlignedBox bounds = Ogre::AxisAlignedBox::BOX_NULL;
-    NifOgre::MeshPairList meshes = NifOgre::NIFLoader::load(mesh);
-    std::vector<Ogre::Entity*> entities(meshes.size());
-    for(size_t i = 0;i < meshes.size();i++)
+    NifOgre::EntityList entities = NifOgre::NIFLoader::createEntities(insert, mesh);
+    for(size_t i = 0;i < entities.mEntities.size();i++)
     {
-        entities[i] = mRenderer.getScene()->createEntity(meshes[i].first->getName());
-
-        const Ogre::AxisAlignedBox &tmp = entities[i]->getBoundingBox();
+        const Ogre::AxisAlignedBox &tmp = entities.mEntities[i]->getBoundingBox();
         bounds.merge(Ogre::AxisAlignedBox(insert->_getDerivedPosition() + tmp.getMinimum(),
                                           insert->_getDerivedPosition() + tmp.getMaximum())
         );
@@ -119,9 +116,9 @@ void Objects::insertMesh (const MWWorld::Ptr& ptr, const std::string& mesh)
     mBounds[ptr.getCell()].merge(bounds);
 
     bool transparent = false;
-    for(size_t i = 0;i < entities.size();i++)
+    for(size_t i = 0;i < entities.mEntities.size();i++)
     {
-        Ogre::Entity *ent = entities[i];
+        Ogre::Entity *ent = entities.mEntities[i];
         for (unsigned int i=0; i<ent->getNumSubEntities(); ++i)
         {
             Ogre::MaterialPtr mat = ent->getSubEntity(i)->getMaterial();
@@ -143,10 +140,9 @@ void Objects::insertMesh (const MWWorld::Ptr& ptr, const std::string& mesh)
 
     if(!mIsStatic || !Settings::Manager::getBool("use static geometry", "Objects") || transparent)
     {
-        for(size_t i = 0;i < entities.size();i++)
+        for(size_t i = 0;i < entities.mEntities.size();i++)
         {
-            Ogre::Entity *ent = entities[i];
-            insert->attachObject(ent);
+            Ogre::Entity *ent = entities.mEntities[i];
 
             ent->setRenderingDistance(small ? Settings::Manager::getInt("small object distance", "Viewing distance") : 0);
             ent->setVisibilityFlags(mIsStatic ? (small ? RV_StaticsSmall : RV_Statics) : RV_Misc);
@@ -197,9 +193,10 @@ void Objects::insertMesh (const MWWorld::Ptr& ptr, const std::string& mesh)
 
         sg->setRenderQueueGroup(transparent ? RQG_Alpha : RQG_Main);
 
-        for(size_t i = 0;i < entities.size();i++)
+        for(size_t i = 0;i < entities.mEntities.size();i++)
         {
-            Ogre::Entity *ent = entities[i];
+            Ogre::Entity *ent = entities.mEntities[i];
+            insert->detachObject(ent);
             sg->addEntity(ent,insert->_getDerivedPosition(),insert->_getDerivedOrientation(),insert->_getDerivedScale());
 
             mRenderer.getScene()->destroyEntity(ent);

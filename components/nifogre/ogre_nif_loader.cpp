@@ -32,6 +32,7 @@
 #include <OgreTechnique.h>
 #include <OgreSubMesh.h>
 #include <OgreRoot.h>
+#include <OgreEntity.h>
 
 #include <components/settings/settings.hpp>
 #include <components/nifoverrides/nifoverrides.hpp>
@@ -869,6 +870,44 @@ MeshPairList NIFLoader::load(const std::string &name, Ogre::SkeletonPtr *skel, c
     meshldr.createMeshes(node, meshes);
 
     return meshes;
+}
+
+EntityList NIFLoader::createEntities(Ogre::SceneNode *parent, const std::string &name, const std::string &group)
+{
+    EntityList entitylist;
+
+    MeshPairList meshes = load(name, NULL, group);
+    if(meshes.size() == 0)
+        return entitylist;
+
+    Ogre::SceneManager *sceneMgr = parent->getCreator();
+    for(size_t i = 0;i < meshes.size();i++)
+    {
+        entitylist.mEntities.push_back(sceneMgr->createEntity(meshes[i].first->getName()));
+        Ogre::Entity *entity = entitylist.mEntities.back();
+        if(!entitylist.mSkelBase && entity->hasSkeleton())
+            entitylist.mSkelBase = entity;
+    }
+
+    if(entitylist.mSkelBase)
+    {
+        parent->attachObject(entitylist.mSkelBase);
+        for(size_t i = 0;i < entitylist.mEntities.size();i++)
+        {
+            Ogre::Entity *entity = entitylist.mEntities[i];
+            if(entity != entitylist.mSkelBase && entity->hasSkeleton())
+                entity->shareSkeletonInstanceWith(entitylist.mSkelBase);
+            else if(entity != entitylist.mSkelBase)
+                entitylist.mSkelBase->attachObjectToBone(meshes[i].second, entity);
+        }
+    }
+    else
+    {
+        for(size_t i = 0;i < entitylist.mEntities.size();i++)
+            parent->attachObject(entitylist.mEntities[i]);
+    }
+
+    return entitylist;
 }
 
 
