@@ -792,7 +792,7 @@ public:
                 }
             }
             else
-                warn("Unhandled extra data type "+e->recType);
+                warn("Unhandled extra data type "+e->recName);
             e = e->extra;
         }
 
