@@ -9,15 +9,15 @@ TextInputDialog::TextInputDialog(WindowManager& parWindowManager)
     // Centre dialog
     center();
 
-    getWidget(textEdit, "TextEdit");
-    textEdit->eventEditSelectAccept += newDelegate(this, &TextInputDialog::onTextAccepted);
+    getWidget(mTextEdit, "TextEdit");
+    mTextEdit->eventEditSelectAccept += newDelegate(this, &TextInputDialog::onTextAccepted);
 
     MyGUI::ButtonPtr okButton;
     getWidget(okButton, "OKButton");
     okButton->eventMouseButtonClick += MyGUI::newDelegate(this, &TextInputDialog::onOkClicked);
 
     // Make sure the edit box has focus
-    MyGUI::InputManager::getInstance().setKeyFocusWidget(textEdit);
+    MyGUI::InputManager::getInstance().setKeyFocusWidget(mTextEdit);
 }
 
 void TextInputDialog::setNextButtonShow(bool shown)
@@ -43,7 +43,7 @@ void TextInputDialog::setTextLabel(const std::string &label)
 void TextInputDialog::open()
 {
     // Make sure the edit box has focus
-    MyGUI::InputManager::getInstance().setKeyFocusWidget(textEdit);
+    MyGUI::InputManager::getInstance().setKeyFocusWidget(mTextEdit);
     setVisible(true);
 }
 

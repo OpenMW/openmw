@@ -591,7 +591,7 @@ namespace MWDialogue
         mIsInChoice = false;
         mCompilerContext.setExtensions (&extensions);
         mDialogueMap.clear();
-        actorKnownTopics.clear();
+        mActorKnownTopics.clear();
         ESMS::RecListCaseT<ESM::Dialogue>::MapType dialogueList = MWBase::Environment::get().getWorld()->getStore().dialogs.list;
         for(ESMS::RecListCaseT<ESM::Dialogue>::MapType::iterator it = dialogueList.begin(); it!=dialogueList.end();it++)
         {
@@ -601,24 +601,24 @@ namespace MWDialogue
 
     void DialogueManager::addTopic(std::string topic)
     {
-        knownTopics[toLower(topic)] = true;
+        mKnownTopics[toLower(topic)] = true;
     }
 
     void DialogueManager::parseText(std::string text)
     {
         std::list<std::string>::iterator it;
-        for(it = actorKnownTopics.begin();it != actorKnownTopics.end();++it)
+        for(it = mActorKnownTopics.begin();it != mActorKnownTopics.end();++it)
         {
             size_t pos = find_str_ci(text,*it,0);
             if(pos !=std::string::npos)
             {
                 if(pos==0)
                 {
-                    knownTopics[*it] = true;
+                    mKnownTopics[*it] = true;
                 }
                 else if(text.substr(pos -1,1) == " ")
                 {
-                    knownTopics[*it] = true;
+                    mKnownTopics[*it] = true;
                 }
             }
         }
@@ -632,7 +632,7 @@ namespace MWDialogue
 
         mActor = actor;
 
-        actorKnownTopics.clear();
+        mActorKnownTopics.clear();
 
         //initialise the GUI
         MWBase::Environment::get().getWindowManager()->pushGuiMode(MWGui::GM_Dialogue);
@@ -742,7 +742,7 @@ namespace MWDialogue
         std::list<std::string> keywordList;
         int choice = mChoice;
         mChoice = -1;
-        actorKnownTopics.clear();
+        mActorKnownTopics.clear();
         MWGui::DialogueWindow* win = MWBase::Environment::get().getWindowManager()->getDialogueWindow();
         ESMS::RecListCaseT<ESM::Dialogue>::MapType dialogueList = MWBase::Environment::get().getWorld()->getStore().dialogs.list;
         for(ESMS::RecListCaseT<ESM::Dialogue>::MapType::iterator it = dialogueList.begin(); it!=dialogueList.end();it++)
@@ -755,9 +755,9 @@ namespace MWDialogue
                 {
                     if (isMatching (mActor, *iter) && functionFilter(mActor,*iter,true))
                     {
-                        actorKnownTopics.push_back(toLower(it->first));
+                        mActorKnownTopics.push_back(toLower(it->first));
                         //does the player know the topic?
-                        if(knownTopics.find(toLower(it->first)) != knownTopics.end())
+                        if(mKnownTopics.find(toLower(it->first)) != mKnownTopics.end())
                         {
                             keywordList.push_back(it->first);
                             break;
