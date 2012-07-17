@@ -816,7 +816,7 @@ public:
                 mesh = meshMgr.createManual(fullname, mGroup, loader);
             }
 
-            meshes.push_back(std::make_pair(mesh, (shape->parent ? shape->parent->name : std::string())));
+            meshes.push_back(std::make_pair(mesh, shape->name));
         }
         else if(node->recType != Nif::RC_NiNode && node->recType != Nif::RC_RootCollisionNode &&
                 node->recType != Nif::RC_NiRotatingParticles)
