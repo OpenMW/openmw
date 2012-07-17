@@ -13,8 +13,8 @@
 #include "config.h"
 #endif
 
-#include <stdio.h>
-#include <stdlib.h>
+#include <cstdio>
+#include <cstdlib>
 #include <string.h>
 
 #ifndef FIX_UNUSED

@@ -11,7 +11,7 @@
 // For OutputDebugString
 #include <Windows.h>
 // makes __argc and __argv available on windows
-#include <stdlib.h>
+#include <cstdlib>
 
 #endif
 

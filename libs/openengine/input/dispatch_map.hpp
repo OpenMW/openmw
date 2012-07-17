@@ -3,7 +3,7 @@
 
 #include <set>
 #include <map>
-#include <assert.h>
+#include <cassert>
 
 namespace OEngine {
 namespace Input {
