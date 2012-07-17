@@ -19,26 +19,26 @@ private:
     int mPartPriorities[27];
 
     //Bounded Parts
-    Ogre::Entity* lclavicle;
-    Ogre::Entity* rclavicle;
-    Ogre::Entity* rupperArm;
-    Ogre::Entity* lupperArm;
-    Ogre::Entity* rUpperLeg;
-    Ogre::Entity* lUpperLeg;
-    Ogre::Entity* lForearm;
-    Ogre::Entity* rForearm;
-    Ogre::Entity* lWrist;
-    Ogre::Entity* rWrist;
-    Ogre::Entity* rKnee;
-    Ogre::Entity* lKnee;
-    Ogre::Entity* neck;
-    Ogre::Entity* rAnkle;
-    Ogre::Entity* lAnkle;
-    Ogre::Entity* groin;
-    Ogre::Entity* lfoot;
-    Ogre::Entity* rfoot;
-    Ogre::Entity* hair;
-    Ogre::Entity* head;
+    std::vector<Ogre::Entity*> lclavicle;
+    std::vector<Ogre::Entity*> rclavicle;
+    std::vector<Ogre::Entity*> rupperArm;
+    std::vector<Ogre::Entity*> lupperArm;
+    std::vector<Ogre::Entity*> rUpperLeg;
+    std::vector<Ogre::Entity*> lUpperLeg;
+    std::vector<Ogre::Entity*> lForearm;
+    std::vector<Ogre::Entity*> rForearm;
+    std::vector<Ogre::Entity*> lWrist;
+    std::vector<Ogre::Entity*> rWrist;
+    std::vector<Ogre::Entity*> rKnee;
+    std::vector<Ogre::Entity*> lKnee;
+    std::vector<Ogre::Entity*> neck;
+    std::vector<Ogre::Entity*> rAnkle;
+    std::vector<Ogre::Entity*> lAnkle;
+    std::vector<Ogre::Entity*> groin;
+    std::vector<Ogre::Entity*> lfoot;
+    std::vector<Ogre::Entity*> rfoot;
+    std::vector<Ogre::Entity*> hair;
+    std::vector<Ogre::Entity*> head;
 
     Ogre::SceneNode* mInsert;
     Ogre::Entity *mSkelBase; // Entity with the base skeleton (temporary)
@@ -65,9 +65,10 @@ private:
 public:
     NpcAnimation(const MWWorld::Ptr& ptr, OEngine::Render::OgreRenderer& _rend, MWWorld::InventoryStore& _inv);
     virtual ~NpcAnimation();
-    Ogre::Entity* insertBoundedPart(const std::string &mesh, const std::string &bonename);
+    std::vector<Ogre::Entity*> insertBoundedPart(const std::string &mesh, const std::string &bonename);
     virtual void runAnimation(float timepassed);
     void updateParts();
+    void removeEntities(std::vector<Ogre::Entity*> &entities);
     void removeIndividualPart(int type);
     void reserveIndividualPart(int type, int group, int priority);
 

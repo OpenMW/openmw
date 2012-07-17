@@ -28,24 +28,6 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, OEngine::Render::OgreRendere
     boots(mInv.end()),
     leftglove(mInv.end()), rightglove(mInv.end()), skirtiter(mInv.end()),
     pants(mInv.end()),
-    lclavicle(0),
-    rclavicle(0),
-    rupperArm(0),
-    lupperArm(0),
-    rUpperLeg(0),
-    lUpperLeg(0),
-    lForearm(0),
-    rForearm(0),
-    lWrist(0),
-    rWrist(0),
-    rKnee(0),
-    lKnee(0),
-    neck(0),
-    rAnkle(0),
-    lAnkle(0),
-    groin(0),
-    lfoot(0),
-    rfoot(0),
     mSkelBase(0)
 {
     MWWorld::LiveCellRef<ESM::NPC> *ref = ptr.get<ESM::NPC>();
@@ -388,15 +370,19 @@ void NpcAnimation::updateParts()
     }
 }
 
-Ogre::Entity* NpcAnimation::insertBoundedPart(const std::string &mesh, const std::string &bonename)
+std::vector<Ogre::Entity*> NpcAnimation::insertBoundedPart(const std::string &mesh, const std::string &bonename)
 {
-    // FIXME: There can be more than one!
     NifOgre::MeshPairList meshes = NIFLoader::load(mesh);
-    Ogre::Entity* part = mRend.getScene()->createEntity(meshes[0].first->getName());
-    part->setVisibilityFlags(RV_Actors);
+    std::vector<Ogre::Entity*> parts;
+    for(size_t i = 0;i < meshes.size();i++)
+    {
+        parts.push_back(mRend.getScene()->createEntity(meshes[i].first->getName()));
+        Ogre::Entity *part = parts.back();
 
-    mSkelBase->attachObjectToBone(bonename, part);
-    return part;
+        part->setVisibilityFlags(RV_Actors);
+        mSkelBase->attachObjectToBone(bonename, part);
+    }
+    return parts;
 }
 
 void NpcAnimation::runAnimation(float timepassed)
@@ -430,114 +416,61 @@ void NpcAnimation::runAnimation(float timepassed)
     }
 }
 
+void NpcAnimation::removeEntities(std::vector<Ogre::Entity*> &entities)
+{
+    for(size_t i = 0;i < entities.size();i++)
+        mSkelBase->detachObjectFromBone(entities[i]);
+    entities.clear();
+}
+
 void NpcAnimation::removeIndividualPart(int type)
 {
     mPartPriorities[type] = 0;
     mPartslots[type] = -1;
 
-    if(type == ESM::PRT_Head && head)   //0
-    {
-        mSkelBase->detachObjectFromBone(head);
-        head = 0;
-    }
-    else if(type == ESM::PRT_Hair && hair) //1
-    {
-        mSkelBase->detachObjectFromBone(hair);
-        hair = 0;
-    }
-    else if(type == ESM::PRT_Neck && neck) //2
-    {
-        mSkelBase->detachObjectFromBone(neck);
-        neck = 0;
-    }
-    else if(type == ESM::PRT_Groin && groin)//4
-    {
-        mSkelBase->detachObjectFromBone(groin);
-        groin = 0;
-    }
-    else if(type == ESM::PRT_RWrist && rWrist)//8
-    {
-        mSkelBase->detachObjectFromBone(rWrist);
-        rWrist = 0;
-    }
-    else if(type == ESM::PRT_LWrist && lWrist) //9
-    {
-        mSkelBase->detachObjectFromBone(lWrist);
-        lWrist = 0;
-    }
+    if(type == ESM::PRT_Head)   //0
+        removeEntities(head);
+    else if(type == ESM::PRT_Hair) //1
+        removeEntities(hair);
+    else if(type == ESM::PRT_Neck) //2
+        removeEntities(neck);
+    else if(type == ESM::PRT_Groin)//4
+        removeEntities(groin);
+    else if(type == ESM::PRT_RWrist)//8
+        removeEntities(rWrist);
+    else if(type == ESM::PRT_LWrist) //9
+        removeEntities(lWrist);
     else if(type == ESM::PRT_Shield) //10
     {
     }
-    else if(type == ESM::PRT_RForearm && rForearm) //11
-    {
-        mSkelBase->detachObjectFromBone(rForearm);
-        rForearm = 0;
-    }
-    else if(type == ESM::PRT_LForearm && lForearm) //12
-    {
-        mSkelBase->detachObjectFromBone(lForearm);
-        lForearm = 0;
-    }
-    else if(type == ESM::PRT_RUpperarm && rupperArm) //13
-    {
-        mSkelBase->detachObjectFromBone(rupperArm);
-        rupperArm = 0;
-    }
-    else if(type == ESM::PRT_LUpperarm && lupperArm) //14
-    {
-        mSkelBase->detachObjectFromBone(lupperArm);
-        lupperArm = 0;
-    }
-    else if(type == ESM::PRT_RFoot && rfoot)                 //15
-    {
-        mSkelBase->detachObjectFromBone(rfoot);
-        rfoot = 0;
-    }
-    else if(type == ESM::PRT_LFoot && lfoot)                //16
-    {
-        mSkelBase->detachObjectFromBone(lfoot);
-        lfoot = 0;
-    }
-    else if(type == ESM::PRT_RAnkle && rAnkle)    //17
-    {
-        mSkelBase->detachObjectFromBone(rAnkle);
-        rAnkle = 0;
-    }
-    else if(type == ESM::PRT_LAnkle && lAnkle)    //18
-    {
-        mSkelBase->detachObjectFromBone(lAnkle);
-        lAnkle = 0;
-    }
-    else if(type == ESM::PRT_RKnee && rKnee)    //19
-    {
-        mSkelBase->detachObjectFromBone(rKnee);
-        rKnee = 0;
-    }
-    else if(type == ESM::PRT_LKnee && lKnee)    //20
-    {
-        mSkelBase->detachObjectFromBone(lKnee);
-        lKnee = 0;
-    }
-    else if(type == ESM::PRT_RLeg && rUpperLeg)    //21
-    {
-        mSkelBase->detachObjectFromBone(rUpperLeg);
-        rUpperLeg = 0;
-    }
-    else if(type == ESM::PRT_LLeg && lUpperLeg)    //22
-    {
-        mSkelBase->detachObjectFromBone(lUpperLeg);
-        lUpperLeg = 0;
-    }
-    else if(type == ESM::PRT_RPauldron && rclavicle)    //23
-    {
-        mSkelBase->detachObjectFromBone(rclavicle);
-        rclavicle = 0;
-    }
-    else if(type == ESM::PRT_LPauldron && lclavicle)    //24
-    {
-        mSkelBase->detachObjectFromBone(lclavicle);
-        lclavicle = 0;
-    }
+    else if(type == ESM::PRT_RForearm) //11
+        removeEntities(rForearm);
+    else if(type == ESM::PRT_LForearm) //12
+        removeEntities(lForearm);
+    else if(type == ESM::PRT_RUpperarm) //13
+        removeEntities(rupperArm);
+    else if(type == ESM::PRT_LUpperarm) //14
+        removeEntities(lupperArm);
+    else if(type == ESM::PRT_RFoot)                 //15
+        removeEntities(rfoot);
+    else if(type == ESM::PRT_LFoot)                //16
+        removeEntities(lfoot);
+    else if(type == ESM::PRT_RAnkle)    //17
+        removeEntities(rAnkle);
+    else if(type == ESM::PRT_LAnkle)    //18
+        removeEntities(lAnkle);
+    else if(type == ESM::PRT_RKnee)    //19
+        removeEntities(rKnee);
+    else if(type == ESM::PRT_LKnee)    //20
+        removeEntities(lKnee);
+    else if(type == ESM::PRT_RLeg)    //21
+        removeEntities(rUpperLeg);
+    else if(type == ESM::PRT_LLeg)    //22
+        removeEntities(lUpperLeg);
+    else if(type == ESM::PRT_RPauldron)    //23
+        removeEntities(rclavicle);
+    else if(type == ESM::PRT_LPauldron)    //24
+        removeEntities(lclavicle);
     else if(type == ESM::PRT_Weapon)                 //25
     {
     }
