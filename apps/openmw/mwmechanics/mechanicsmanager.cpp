@@ -28,7 +28,7 @@ namespace MWMechanics
         creatureStats.mMagicEffects = MagicEffects();
 
         for (int i=0; i<27; ++i)
-            npcStats.mSkill[i].setBase (player->npdt52.skills[i]);
+            npcStats.getSkill (i).setBase (player->npdt52.skills[i]);
 
         creatureStats.mAttributes[0].setBase (player->npdt52.strength);
         creatureStats.mAttributes[1].setBase (player->npdt52.intelligence);
@@ -73,8 +73,8 @@ namespace MWMechanics
 
                 if (index>=0 && index<27)
                 {
-                    npcStats.mSkill[index].setBase (
-                        npcStats.mSkill[index].getBase() + race->data.bonus[i].bonus);
+                    npcStats.getSkill (index).setBase (
+                        npcStats.getSkill (index).getBase() + race->data.bonus[i].bonus);
                 }
             }
 
@@ -124,8 +124,8 @@ namespace MWMechanics
 
                     if (index>=0 && index<27)
                     {
-                        npcStats.mSkill[index].setBase (
-                            npcStats.mSkill[index].getBase() + bonus);
+                        npcStats.getSkill (index).setBase (
+                            npcStats.getSkill (index).getBase() + bonus);
                     }
                 }
             }
@@ -141,8 +141,8 @@ namespace MWMechanics
 
                     if (index>=0 && index<27)
                     {
-                        npcStats.mSkill[index].setBase (
-                            npcStats.mSkill[index].getBase() + 5);
+                        npcStats.getSkill (index).setBase (
+                            npcStats.getSkill (index).getBase() + 5);
                     }
                 }
             }
@@ -236,11 +236,11 @@ namespace MWMechanics
             //Loop over ESM::Skill::SkillEnum
             for(int i = 0; i < 27; ++i)
             {
-                if(npcStats.mSkill[i] != mWatchedNpc.mSkill[i])
+                if(npcStats.getSkill (i) != mWatchedNpc.getSkill (i))
                 {
                     update = true;
-                    mWatchedNpc.mSkill[i] = npcStats.mSkill[i];
-                    MWBase::Environment::get().getWindowManager()->setValue((ESM::Skill::SkillEnum)i, npcStats.mSkill[i]);
+                    mWatchedNpc.getSkill (i) = npcStats.getSkill (i);
+                    MWBase::Environment::get().getWindowManager()->setValue((ESM::Skill::SkillEnum)i, npcStats.getSkill (i));
                 }
             }
 

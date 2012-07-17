@@ -1,25 +1,13 @@
 #include "engine.hpp"
 #include "components/esm/loadcell.hpp"
 
-#include <cassert>
-
-#include <iostream>
-#include <utility>
-
 #include <OgreRoot.h>
 #include <OgreRenderWindow.h>
 
 #include <MyGUI_WidgetManager.h>
 
-#include <openengine/ogre/renderer.hpp>
-#include <openengine/gui/manager.hpp>
-
-#include <components/esm/records.hpp>
 #include <components/bsa/bsa_archive.hpp>
-#include <components/esm/esm_reader.hpp>
-#include <components/files/fixedpath.hpp>
 #include <components/files/configurationmanager.hpp>
-#include <components/settings/settings.hpp>
 #include <components/nifoverrides/nifoverrides.hpp>
 
 #include <components/nifbullet/bullet_nif_loader.hpp>
@@ -31,16 +19,12 @@
 #include "mwgui/cursorreplace.hpp"
 
 #include "mwscript/scriptmanager.hpp"
-#include "mwscript/compilercontext.hpp"
-#include "mwscript/interpretercontext.hpp"
 #include "mwscript/extensions.hpp"
-#include "mwscript/globalscripts.hpp"
 
 #include "mwsound/soundmanager.hpp"
 
 #include "mwworld/class.hpp"
 #include "mwworld/player.hpp"
-#include "mwworld/cellstore.hpp"
 #include "mwworld/worldimp.hpp"
 
 #include "mwclass/classes.hpp"
@@ -49,9 +33,6 @@
 #include "mwdialogue/journal.hpp"
 
 #include "mwmechanics/mechanicsmanager.hpp"
-
-#include "mwbase/environment.hpp"
-#include "mwbase/world.hpp"
 
 
 void OMW::Engine::executeLocalScripts()

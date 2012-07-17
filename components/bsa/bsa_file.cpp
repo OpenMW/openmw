@@ -24,8 +24,8 @@
 #include "bsa_file.hpp"
 
 #include <stdexcept>
-#include <stdlib.h>
-#include <assert.h>
+#include <cstdlib>
+#include <cassert>
 
 #include <OgreDataStream.h>
 

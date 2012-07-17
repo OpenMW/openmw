@@ -187,7 +187,7 @@ int main(int argc, char**argv)
         case REC_ALCH:
           {
             Potion p;
-            p.load(esm);
+            p.load(esm, id);
             if(quiet) break;
             cout << "  Name: " << p.name << endl;
             break;

@@ -10,10 +10,6 @@
    this class.
 **/
 
-#include <string>
-#include <vector>
-#include <set>
-
 #include "MyGUI_UString.h"
 
 #include <components/esm_store/store.hpp>
@@ -123,27 +119,27 @@ namespace MWGui
 
     void toggleVisible(GuiWindow wnd)
     {
-        shown = (shown & wnd) ? (GuiWindow) (shown & ~wnd) : (GuiWindow) (shown | wnd);
+        mShown = (mShown & wnd) ? (GuiWindow) (mShown & ~wnd) : (GuiWindow) (mShown | wnd);
         updateVisible();
     }
 
     // Disallow all inventory mode windows
     void disallowAll()
     {
-      allowed = GW_None;
+      mAllowed = GW_None;
       updateVisible();
     }
 
     // Allow one or more windows
     void allow(GuiWindow wnd)
     {
-      allowed = (GuiWindow)(allowed | wnd);
+      mAllowed = (GuiWindow)(mAllowed | wnd);
       updateVisible();
     }
 
     bool isAllowed(GuiWindow wnd) const
     {
-        return allowed & wnd;
+        return mAllowed & wnd;
     }
 
     MWGui::DialogueWindow* getDialogueWindow() {return mDialogueWindow;}
@@ -155,9 +151,9 @@ namespace MWGui
     MWGui::ConfirmationDialog* getConfirmationDialog() {return mConfirmationDialog;}
     MWGui::TradeWindow* getTradeWindow() {return mTradeWindow;}
     MWGui::SpellWindow* getSpellWindow() {return mSpellWindow;}
-    MWGui::Console* getConsole() {return console;}
+    MWGui::Console* getConsole() {return mConsole;}
 
-    MyGUI::Gui* getGui() const { return gui; }
+    MyGUI::Gui* getGui() const { return mGui; }
 
     void wmUpdateFps(float fps, unsigned int triangleCount, unsigned int batchCount)
     {
@@ -223,10 +219,10 @@ namespace MWGui
 
     void onFrame (float frameDuration);
 
-    std::map<ESM::Skill::SkillEnum, MWMechanics::Stat<float> > getPlayerSkillValues() { return playerSkillValues; }
-    std::map<ESM::Attribute::AttributeID, MWMechanics::Stat<int> > getPlayerAttributeValues() { return playerAttributes; }
-    SkillList getPlayerMinorSkills() { return playerMinorSkills; }
-    SkillList getPlayerMajorSkills() { return playerMajorSkills; }
+    std::map<ESM::Skill::SkillEnum, MWMechanics::Stat<float> > getPlayerSkillValues() { return mPlayerSkillValues; }
+    std::map<ESM::Attribute::AttributeID, MWMechanics::Stat<int> > getPlayerAttributeValues() { return mPlayerAttributes; }
+    SkillList getPlayerMinorSkills() { return mPlayerMinorSkills; }
+    SkillList getPlayerMajorSkills() { return mPlayerMajorSkills; }
 
     /**
      * Fetches a GMST string from the store, if there is no setting with the given
@@ -243,13 +239,13 @@ namespace MWGui
 
   private:
     OEngine::GUI::MyGUIManager *mGuiManager;
-    HUD *hud;
-    MapWindow *map;
-    MainMenu *menu;
+    HUD *mHud;
+    MapWindow *mMap;
+    MainMenu *mMenu;
     ToolTips *mToolTips;
     StatsWindow *mStatsWindow;
     MessageBoxManager *mMessageBoxManager;
-    Console *console;
+    Console *mConsole;
     JournalWindow* mJournal;
     DialogueWindow *mDialogueWindow;
     ContainerWindow *mContainerWindow;
@@ -267,33 +263,33 @@ namespace MWGui
     CharacterCreation* mCharGen;
 
     // Various stats about player as needed by window manager
-    ESM::Class playerClass;
-    std::string playerName;
-    std::string playerRaceId;
-    std::map<ESM::Attribute::AttributeID, MWMechanics::Stat<int> > playerAttributes;
-    SkillList playerMajorSkills, playerMinorSkills;
-    std::map<ESM::Skill::SkillEnum, MWMechanics::Stat<float> > playerSkillValues;
-    MWMechanics::DynamicStat<int> playerHealth, playerMagicka, playerFatigue;
+    ESM::Class mPlayerClass;
+    std::string mPlayerName;
+    std::string mPlayerRaceId;
+    std::map<ESM::Attribute::AttributeID, MWMechanics::Stat<int> > mPlayerAttributes;
+    SkillList mPlayerMajorSkills, mPlayerMinorSkills;
+    std::map<ESM::Skill::SkillEnum, MWMechanics::Stat<float> > mPlayerSkillValues;
+    MWMechanics::DynamicStat<int> mPlayerHealth, mPlayerMagicka, mPlayerFatigue;
 
 
-    MyGUI::Gui *gui; // Gui
+    MyGUI::Gui *mGui; // Gui
     std::vector<GuiMode> mGuiModes;
 
-    std::vector<OEngine::GUI::Layout*> garbageDialogs;
+    std::vector<OEngine::GUI::Layout*> mGarbageDialogs;
     void cleanupGarbage();
 
-    GuiWindow shown; // Currently shown windows in inventory mode
+    GuiWindow mShown; // Currently shown windows in inventory mode
 
     /* Currently ALLOWED windows in inventory mode. This is used at
        the start of the game, when windows are enabled one by one
        through script commands. You can manipulate this through using
        allow() and disableAll().
      */
-    GuiWindow allowed;
+    GuiWindow mAllowed;
 
     void updateVisible(); // Update visibility of all windows based on mode, shown and allowed settings
 
-    int showFPSLevel;
+    int mShowFPSLevel;
     float mFPS;
     unsigned int mTriangleCount;
     unsigned int mBatchCount;

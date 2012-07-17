@@ -50,7 +50,7 @@ add_openmw_dir (mwworld
     refdata worldimp physicssystem scene globals class action nullaction actionteleport
     containerstore actiontalk actiontake manualref player cellfunctors
     cells localscripts customdata weather inventorystore ptr actionopen actionread
-    actionequip timestamp actionalchemy cellstore
+    actionequip timestamp actionalchemy cellstore actionapply
     )
 
 add_openmw_dir (mwclass
@@ -60,7 +60,7 @@ add_openmw_dir (mwclass
 
 add_openmw_dir (mwmechanics
     mechanicsmanager stat creaturestats magiceffects movement actors drawstate spells
-    activespells
+    activespells npcstats
     )
 
 add_openmw_dir (mwbase

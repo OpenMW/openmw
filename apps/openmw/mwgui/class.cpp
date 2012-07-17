@@ -1,6 +1,5 @@
 #include "class.hpp"
 
-#include <assert.h>
 #include <iterator>
 
 #include <boost/algorithm/string.hpp>
@@ -26,8 +25,8 @@ GenerateClassResultDialog::GenerateClassResultDialog(WindowManager& parWindowMan
 
     setText("ReflectT", mWindowManager.getGameSettingString("sMessageQuestionAnswer1", ""));
 
-    getWidget(classImage, "ClassImage");
-    getWidget(className, "ClassName");
+    getWidget(mClassImage, "ClassImage");
+    getWidget(mClassName, "ClassName");
 
     MyGUI::ButtonPtr backButton;
     getWidget(backButton, "BackButton");
@@ -51,15 +50,15 @@ void GenerateClassResultDialog::open()
 
 std::string GenerateClassResultDialog::getClassId() const
 {
-    return className->getCaption();
+    return mClassName->getCaption();
 }
 
 void GenerateClassResultDialog::setClassId(const std::string &classId)
 {
-    currentClassId = classId;
-    classImage->setImageTexture(std::string("textures\\levelup\\") + currentClassId + ".dds");
+    mCurrentClassId = classId;
+    mClassImage->setImageTexture(std::string("textures\\levelup\\") + mCurrentClassId + ".dds");
     const ESMS::ESMStore &store = mWindowManager.getStore();
-    className->setCaption(store.classes.find(currentClassId)->name);
+    mClassName->setCaption(store.classes.find(mCurrentClassId)->name);
 }
 
 // widget controls
@@ -82,29 +81,29 @@ PickClassDialog::PickClassDialog(WindowManager& parWindowManager)
     // Centre dialog
     center();
 
-    getWidget(specializationName, "SpecializationName");
+    getWidget(mSpecializationName, "SpecializationName");
 
-    getWidget(favoriteAttribute[0], "FavoriteAttribute0");
-    getWidget(favoriteAttribute[1], "FavoriteAttribute1");
-    favoriteAttribute[0]->setWindowManager(&mWindowManager);
-    favoriteAttribute[1]->setWindowManager(&mWindowManager);
+    getWidget(mFavoriteAttribute[0], "FavoriteAttribute0");
+    getWidget(mFavoriteAttribute[1], "FavoriteAttribute1");
+    mFavoriteAttribute[0]->setWindowManager(&mWindowManager);
+    mFavoriteAttribute[1]->setWindowManager(&mWindowManager);
 
     for(int i = 0; i < 5; i++)
     {
         char theIndex = '0'+i;
-        getWidget(majorSkill[i], std::string("MajorSkill").append(1, theIndex));
-        getWidget(minorSkill[i], std::string("MinorSkill").append(1, theIndex));
-        majorSkill[i]->setWindowManager(&mWindowManager);
-        minorSkill[i]->setWindowManager(&mWindowManager);
+        getWidget(mMajorSkill[i], std::string("MajorSkill").append(1, theIndex));
+        getWidget(mMinorSkill[i], std::string("MinorSkill").append(1, theIndex));
+        mMajorSkill[i]->setWindowManager(&mWindowManager);
+        mMinorSkill[i]->setWindowManager(&mWindowManager);
     }
 
-    getWidget(classList, "ClassList");
-    classList->setScrollVisible(true);
-    classList->eventListSelectAccept += MyGUI::newDelegate(this, &PickClassDialog::onSelectClass);
-    classList->eventListMouseItemActivate += MyGUI::newDelegate(this, &PickClassDialog::onSelectClass);
-    classList->eventListChangePosition += MyGUI::newDelegate(this, &PickClassDialog::onSelectClass);
+    getWidget(mClassList, "ClassList");
+    mClassList->setScrollVisible(true);
+    mClassList->eventListSelectAccept += MyGUI::newDelegate(this, &PickClassDialog::onSelectClass);
+    mClassList->eventListMouseItemActivate += MyGUI::newDelegate(this, &PickClassDialog::onSelectClass);
+    mClassList->eventListChangePosition += MyGUI::newDelegate(this, &PickClassDialog::onSelectClass);
 
-    getWidget(classImage, "ClassImage");
+    getWidget(mClassImage, "ClassImage");
 
     MyGUI::ButtonPtr backButton;
     getWidget(backButton, "BackButton");
@@ -148,14 +147,14 @@ void PickClassDialog::open()
 
 void PickClassDialog::setClassId(const std::string &classId)
 {
-    currentClassId = classId;
-    classList->setIndexSelected(MyGUI::ITEM_NONE);
-    size_t count = classList->getItemCount();
+    mCurrentClassId = classId;
+    mClassList->setIndexSelected(MyGUI::ITEM_NONE);
+    size_t count = mClassList->getItemCount();
     for (size_t i = 0; i < count; ++i)
     {
-        if (boost::iequals(*classList->getItemDataAt<std::string>(i), classId))
+        if (boost::iequals(*mClassList->getItemDataAt<std::string>(i), classId))
         {
-            classList->setIndexSelected(i);
+            mClassList->setIndexSelected(i);
             break;
         }
     }
@@ -180,11 +179,11 @@ void PickClassDialog::onSelectClass(MyGUI::ListBox* _sender, size_t _index)
     if (_index == MyGUI::ITEM_NONE)
         return;
 
-    const std::string *classId = classList->getItemDataAt<std::string>(_index);
-    if (boost::iequals(currentClassId, *classId))
+    const std::string *classId = mClassList->getItemDataAt<std::string>(_index);
+    if (boost::iequals(mCurrentClassId, *classId))
         return;
 
-    currentClassId = *classId;
+    mCurrentClassId = *classId;
     updateStats();
 }
 
@@ -192,7 +191,7 @@ void PickClassDialog::onSelectClass(MyGUI::ListBox* _sender, size_t _index)
 
 void PickClassDialog::updateClasses()
 {
-    classList->removeAllItems();
+    mClassList->removeAllItems();
 
     const ESMS::ESMStore &store = mWindowManager.getStore();
 
@@ -207,19 +206,19 @@ void PickClassDialog::updateClasses()
             continue;
 
         const std::string &id = it->first;
-        classList->addItem(klass.name, id);
-        if (boost::iequals(id, currentClassId))
-            classList->setIndexSelected(index);
+        mClassList->addItem(klass.name, id);
+        if (boost::iequals(id, mCurrentClassId))
+            mClassList->setIndexSelected(index);
         ++index;
     }
 }
 
 void PickClassDialog::updateStats()
 {
-    if (currentClassId.empty())
+    if (mCurrentClassId.empty())
         return;
     const ESMS::ESMStore &store = mWindowManager.getStore();
-    const ESM::Class *klass = store.classes.search(currentClassId);
+    const ESM::Class *klass = store.classes.search(mCurrentClassId);
     if (!klass)
         return;
 
@@ -231,23 +230,23 @@ void PickClassDialog::updateStats()
         "sSpecializationStealth"
     };
     std::string specName = mWindowManager.getGameSettingString(specIds[specialization], specIds[specialization]);
-    specializationName->setCaption(specName);
-    ToolTips::createSpecializationToolTip(specializationName, specName, specialization);
+    mSpecializationName->setCaption(specName);
+    ToolTips::createSpecializationToolTip(mSpecializationName, specName, specialization);
 
-    favoriteAttribute[0]->setAttributeId(klass->data.attribute[0]);
-    favoriteAttribute[1]->setAttributeId(klass->data.attribute[1]);
-    ToolTips::createAttributeToolTip(favoriteAttribute[0], favoriteAttribute[0]->getAttributeId());
-    ToolTips::createAttributeToolTip(favoriteAttribute[1], favoriteAttribute[1]->getAttributeId());
+    mFavoriteAttribute[0]->setAttributeId(klass->data.attribute[0]);
+    mFavoriteAttribute[1]->setAttributeId(klass->data.attribute[1]);
+    ToolTips::createAttributeToolTip(mFavoriteAttribute[0], mFavoriteAttribute[0]->getAttributeId());
+    ToolTips::createAttributeToolTip(mFavoriteAttribute[1], mFavoriteAttribute[1]->getAttributeId());
 
     for (int i = 0; i < 5; ++i)
     {
-        minorSkill[i]->setSkillNumber(klass->data.skills[i][0]);
-        majorSkill[i]->setSkillNumber(klass->data.skills[i][1]);
-        ToolTips::createSkillToolTip(minorSkill[i], klass->data.skills[i][0]);
-        ToolTips::createSkillToolTip(majorSkill[i], klass->data.skills[i][1]);
+        mMinorSkill[i]->setSkillNumber(klass->data.skills[i][0]);
+        mMajorSkill[i]->setSkillNumber(klass->data.skills[i][1]);
+        ToolTips::createSkillToolTip(mMinorSkill[i], klass->data.skills[i][0]);
+        ToolTips::createSkillToolTip(mMajorSkill[i], klass->data.skills[i][1]);
     }
 
-    classImage->setImageTexture(std::string("textures\\levelup\\") + currentClassId + ".dds");
+    mClassImage->setImageTexture(std::string("textures\\levelup\\") + mCurrentClassId + ".dds");
 }
 
 /* InfoBoxDialog */
@@ -284,59 +283,59 @@ void InfoBoxDialog::layoutVertically(MyGUI::WidgetPtr widget, int margin)
 
 InfoBoxDialog::InfoBoxDialog(WindowManager& parWindowManager)
     : WindowBase("openmw_infobox.layout", parWindowManager)
-    , currentButton(-1)
+    , mCurrentButton(-1)
 {
-    getWidget(textBox, "TextBox");
-    getWidget(text, "Text");
-    text->getSubWidgetText()->setWordWrap(true);
-    getWidget(buttonBar, "ButtonBar");
+    getWidget(mTextBox, "TextBox");
+    getWidget(mText, "Text");
+    mText->getSubWidgetText()->setWordWrap(true);
+    getWidget(mButtonBar, "ButtonBar");
 
     center();
 }
 
 void InfoBoxDialog::setText(const std::string &str)
 {
-    text->setCaption(str);
-    textBox->setVisible(!str.empty());
-    fitToText(text);
+    mText->setCaption(str);
+    mTextBox->setVisible(!str.empty());
+    fitToText(mText);
 }
 
 std::string InfoBoxDialog::getText() const
 {
-    return text->getCaption();
+    return mText->getCaption();
 }
 
 void InfoBoxDialog::setButtons(ButtonList &buttons)
 {
-    for (std::vector<MyGUI::ButtonPtr>::iterator it = this->buttons.begin(); it != this->buttons.end(); ++it)
+    for (std::vector<MyGUI::ButtonPtr>::iterator it = this->mButtons.begin(); it != this->mButtons.end(); ++it)
     {
         MyGUI::Gui::getInstance().destroyWidget(*it);
     }
-    this->buttons.clear();
-    currentButton = -1;
+    this->mButtons.clear();
+    mCurrentButton = -1;
 
     // TODO: The buttons should be generated from a template in the layout file, ie. cloning an existing widget
     MyGUI::ButtonPtr button;
-    MyGUI::IntCoord coord = MyGUI::IntCoord(0, 0, buttonBar->getWidth(), 10);
+    MyGUI::IntCoord coord = MyGUI::IntCoord(0, 0, mButtonBar->getWidth(), 10);
     ButtonList::const_iterator end = buttons.end();
     for (ButtonList::const_iterator it = buttons.begin(); it != end; ++it)
     {
         const std::string &text = *it;
-        button = buttonBar->createWidget<MyGUI::Button>("MW_Button", coord, MyGUI::Align::Top | MyGUI::Align::HCenter, "");
+        button = mButtonBar->createWidget<MyGUI::Button>("MW_Button", coord, MyGUI::Align::Top | MyGUI::Align::HCenter, "");
         button->getSubWidgetText()->setWordWrap(true);
         button->setCaption(text);
         fitToText(button);
         button->eventMouseButtonClick += MyGUI::newDelegate(this, &InfoBoxDialog::onButtonClicked);
         coord.top += button->getHeight();
-        this->buttons.push_back(button);
+        this->mButtons.push_back(button);
     }
 }
 
 void InfoBoxDialog::open()
 {
     // Fix layout
-    layoutVertically(textBox, 4);
-    layoutVertically(buttonBar, 6);
+    layoutVertically(mTextBox, 4);
+    layoutVertically(mButtonBar, 6);
     layoutVertically(mMainWidget, 4 + 6);
 
     center();
@@ -345,18 +344,18 @@ void InfoBoxDialog::open()
 
 int InfoBoxDialog::getChosenButton() const
 {
-    return currentButton;
+    return mCurrentButton;
 }
 
 void InfoBoxDialog::onButtonClicked(MyGUI::WidgetPtr _sender)
 {
-    std::vector<MyGUI::ButtonPtr>::const_iterator end = buttons.end();
+    std::vector<MyGUI::ButtonPtr>::const_iterator end = mButtons.end();
     int i = 0;
-    for (std::vector<MyGUI::ButtonPtr>::const_iterator it = buttons.begin(); it != end; ++it)
+    for (std::vector<MyGUI::ButtonPtr>::const_iterator it = mButtons.begin(); it != end; ++it)
     {
         if (*it == _sender)
         {
-            currentButton = i;
+            mCurrentButton = i;
             eventButtonSelected(i);
             return;
         }
@@ -382,49 +381,49 @@ ClassChoiceDialog::ClassChoiceDialog(WindowManager& parWindowManager)
 
 CreateClassDialog::CreateClassDialog(WindowManager& parWindowManager)
   : WindowBase("openmw_chargen_create_class.layout", parWindowManager)
-  , specDialog(nullptr)
-  , attribDialog(nullptr)
-  , skillDialog(nullptr)
-  , descDialog(nullptr)
+  , mSpecDialog(nullptr)
+  , mAttribDialog(nullptr)
+  , mSkillDialog(nullptr)
+  , mDescDialog(nullptr)
 {
     // Centre dialog
     center();
 
     setText("SpecializationT", mWindowManager.getGameSettingString("sChooseClassMenu1", "Specialization"));
-    getWidget(specializationName, "SpecializationName");
-    specializationName->eventMouseButtonClick += MyGUI::newDelegate(this, &CreateClassDialog::onSpecializationClicked);
+    getWidget(mSpecializationName, "SpecializationName");
+    mSpecializationName->eventMouseButtonClick += MyGUI::newDelegate(this, &CreateClassDialog::onSpecializationClicked);
 
     setText("FavoriteAttributesT", mWindowManager.getGameSettingString("sChooseClassMenu2", "Favorite Attributes:"));
-    getWidget(favoriteAttribute0, "FavoriteAttribute0");
-    getWidget(favoriteAttribute1, "FavoriteAttribute1");
-    favoriteAttribute0->setWindowManager(&mWindowManager);
-    favoriteAttribute1->setWindowManager(&mWindowManager);
-    favoriteAttribute0->eventClicked += MyGUI::newDelegate(this, &CreateClassDialog::onAttributeClicked);
-    favoriteAttribute1->eventClicked += MyGUI::newDelegate(this, &CreateClassDialog::onAttributeClicked);
+    getWidget(mFavoriteAttribute0, "FavoriteAttribute0");
+    getWidget(mFavoriteAttribute1, "FavoriteAttribute1");
+    mFavoriteAttribute0->setWindowManager(&mWindowManager);
+    mFavoriteAttribute1->setWindowManager(&mWindowManager);
+    mFavoriteAttribute0->eventClicked += MyGUI::newDelegate(this, &CreateClassDialog::onAttributeClicked);
+    mFavoriteAttribute1->eventClicked += MyGUI::newDelegate(this, &CreateClassDialog::onAttributeClicked);
 
     setText("MajorSkillT", mWindowManager.getGameSettingString("sSkillClassMajor", ""));
     setText("MinorSkillT", mWindowManager.getGameSettingString("sSkillClassMinor", ""));
     for(int i = 0; i < 5; i++)
     {
         char theIndex = '0'+i;
-        getWidget(majorSkill[i], std::string("MajorSkill").append(1, theIndex));
-        getWidget(minorSkill[i], std::string("MinorSkill").append(1, theIndex));
-        skills.push_back(majorSkill[i]);
-        skills.push_back(minorSkill[i]);
+        getWidget(mMajorSkill[i], std::string("MajorSkill").append(1, theIndex));
+        getWidget(mMinorSkill[i], std::string("MinorSkill").append(1, theIndex));
+        mSkills.push_back(mMajorSkill[i]);
+        mSkills.push_back(mMinorSkill[i]);
     }
 
-    std::vector<Widgets::MWSkillPtr>::const_iterator end = skills.end();
-    for (std::vector<Widgets::MWSkillPtr>::const_iterator it = skills.begin(); it != end; ++it)
+    std::vector<Widgets::MWSkillPtr>::const_iterator end = mSkills.end();
+    for (std::vector<Widgets::MWSkillPtr>::const_iterator it = mSkills.begin(); it != end; ++it)
     {
         (*it)->setWindowManager(&mWindowManager);
         (*it)->eventClicked += MyGUI::newDelegate(this, &CreateClassDialog::onSkillClicked);
     }
 
     setText("LabelT", mWindowManager.getGameSettingString("sName", ""));
-    getWidget(editName, "EditName");
+    getWidget(mEditName, "EditName");
 
     // Make sure the edit box has focus
-    MyGUI::InputManager::getInstance().setKeyFocusWidget(editName);
+    MyGUI::InputManager::getInstance().setKeyFocusWidget(mEditName);
 
     MyGUI::ButtonPtr descriptionButton;
     getWidget(descriptionButton, "DescriptionButton");
@@ -441,20 +440,20 @@ CreateClassDialog::CreateClassDialog(WindowManager& parWindowManager)
 
     // Set default skills, attributes
 
-    favoriteAttribute0->setAttributeId(ESM::Attribute::Strength);
-    favoriteAttribute1->setAttributeId(ESM::Attribute::Agility);
+    mFavoriteAttribute0->setAttributeId(ESM::Attribute::Strength);
+    mFavoriteAttribute1->setAttributeId(ESM::Attribute::Agility);
 
-    majorSkill[0]->setSkillId(ESM::Skill::Block);
-    majorSkill[1]->setSkillId(ESM::Skill::Armorer);
-    majorSkill[2]->setSkillId(ESM::Skill::MediumArmor);
-    majorSkill[3]->setSkillId(ESM::Skill::HeavyArmor);
-    majorSkill[4]->setSkillId(ESM::Skill::BluntWeapon);
+    mMajorSkill[0]->setSkillId(ESM::Skill::Block);
+    mMajorSkill[1]->setSkillId(ESM::Skill::Armorer);
+    mMajorSkill[2]->setSkillId(ESM::Skill::MediumArmor);
+    mMajorSkill[3]->setSkillId(ESM::Skill::HeavyArmor);
+    mMajorSkill[4]->setSkillId(ESM::Skill::BluntWeapon);
 
-    minorSkill[0]->setSkillId(ESM::Skill::LongBlade);
-    minorSkill[1]->setSkillId(ESM::Skill::Axe);
-    minorSkill[2]->setSkillId(ESM::Skill::Spear);
-    minorSkill[3]->setSkillId(ESM::Skill::Athletics);
-    minorSkill[4]->setSkillId(ESM::Skill::Enchant);
+    mMinorSkill[0]->setSkillId(ESM::Skill::LongBlade);
+    mMinorSkill[1]->setSkillId(ESM::Skill::Axe);
+    mMinorSkill[2]->setSkillId(ESM::Skill::Spear);
+    mMinorSkill[3]->setSkillId(ESM::Skill::Athletics);
+    mMinorSkill[4]->setSkillId(ESM::Skill::Enchant);
 
     setSpecialization(0);
     update();
@@ -462,44 +461,44 @@ CreateClassDialog::CreateClassDialog(WindowManager& parWindowManager)
 
 CreateClassDialog::~CreateClassDialog()
 {
-    delete specDialog;
-    delete attribDialog;
-    delete skillDialog;
-    delete descDialog;
+    delete mSpecDialog;
+    delete mAttribDialog;
+    delete mSkillDialog;
+    delete mDescDialog;
 }
 
 void CreateClassDialog::update()
 {
     for (int i = 0; i < 5; ++i)
     {
-        ToolTips::createSkillToolTip(majorSkill[i], majorSkill[i]->getSkillId());
-        ToolTips::createSkillToolTip(minorSkill[i], minorSkill[i]->getSkillId());
+        ToolTips::createSkillToolTip(mMajorSkill[i], mMajorSkill[i]->getSkillId());
+        ToolTips::createSkillToolTip(mMinorSkill[i], mMinorSkill[i]->getSkillId());
     }
 
-    ToolTips::createAttributeToolTip(favoriteAttribute0, favoriteAttribute0->getAttributeId());
-    ToolTips::createAttributeToolTip(favoriteAttribute1, favoriteAttribute1->getAttributeId());
+    ToolTips::createAttributeToolTip(mFavoriteAttribute0, mFavoriteAttribute0->getAttributeId());
+    ToolTips::createAttributeToolTip(mFavoriteAttribute1, mFavoriteAttribute1->getAttributeId());
 }
 
 std::string CreateClassDialog::getName() const
 {
-    return editName->getOnlyText();
+    return mEditName->getOnlyText();
 }
 
 std::string CreateClassDialog::getDescription() const
 {
-    return description;
+    return mDescription;
 }
 
 ESM::Class::Specialization CreateClassDialog::getSpecializationId() const
 {
-    return specializationId;
+    return mSpecializationId;
 }
 
 std::vector<int> CreateClassDialog::getFavoriteAttributes() const
 {
     std::vector<int> v;
-    v.push_back(favoriteAttribute0->getAttributeId());
-    v.push_back(favoriteAttribute1->getAttributeId());
+    v.push_back(mFavoriteAttribute0->getAttributeId());
+    v.push_back(mFavoriteAttribute1->getAttributeId());
     return v;
 }
 
@@ -508,7 +507,7 @@ std::vector<ESM::Skill::SkillEnum> CreateClassDialog::getMajorSkills() const
     std::vector<ESM::Skill::SkillEnum> v;
     for(int i = 0; i < 5; i++)
     {
-        v.push_back(majorSkill[i]->getSkillId());
+        v.push_back(mMajorSkill[i]->getSkillId());
     }
     return v;
 }
@@ -518,7 +517,7 @@ std::vector<ESM::Skill::SkillEnum> CreateClassDialog::getMinorSkills() const
     std::vector<ESM::Skill::SkillEnum> v;
     for(int i=0; i < 5; i++)
     {
-        v.push_back(minorSkill[i]->getSkillId());
+        v.push_back(mMinorSkill[i]->getSkillId());
     }
     return v;
 }
@@ -557,108 +556,108 @@ void CreateClassDialog::open()
 
 void CreateClassDialog::onDialogCancel()
 {
-    if (specDialog)
+    if (mSpecDialog)
     {
-        mWindowManager.removeDialog(specDialog);
-        specDialog = 0;
+        mWindowManager.removeDialog(mSpecDialog);
+        mSpecDialog = 0;
     }
-    if (attribDialog)
+    if (mAttribDialog)
     {
-        mWindowManager.removeDialog(attribDialog);
-        attribDialog = 0;
+        mWindowManager.removeDialog(mAttribDialog);
+        mAttribDialog = 0;
     }
-    if (skillDialog)
+    if (mSkillDialog)
     {
-        mWindowManager.removeDialog(skillDialog);
-        skillDialog = 0;
+        mWindowManager.removeDialog(mSkillDialog);
+        mSkillDialog = 0;
     }
-    if (descDialog)
+    if (mDescDialog)
     {
-        mWindowManager.removeDialog(descDialog);
-        descDialog = 0;
+        mWindowManager.removeDialog(mDescDialog);
+        mDescDialog = 0;
     }
 }
 
 void CreateClassDialog::onSpecializationClicked(MyGUI::WidgetPtr _sender)
 {
-    delete specDialog;
-    specDialog = new SelectSpecializationDialog(mWindowManager);
-    specDialog->eventCancel += MyGUI::newDelegate(this, &CreateClassDialog::onDialogCancel);
-    specDialog->eventItemSelected += MyGUI::newDelegate(this, &CreateClassDialog::onSpecializationSelected);
-    specDialog->setVisible(true);
+    delete mSpecDialog;
+    mSpecDialog = new SelectSpecializationDialog(mWindowManager);
+    mSpecDialog->eventCancel += MyGUI::newDelegate(this, &CreateClassDialog::onDialogCancel);
+    mSpecDialog->eventItemSelected += MyGUI::newDelegate(this, &CreateClassDialog::onSpecializationSelected);
+    mSpecDialog->setVisible(true);
 }
 
 void CreateClassDialog::onSpecializationSelected()
 {
-    specializationId = specDialog->getSpecializationId();
-    setSpecialization(specializationId);
+    mSpecializationId = mSpecDialog->getSpecializationId();
+    setSpecialization(mSpecializationId);
 
-    mWindowManager.removeDialog(specDialog);
-    specDialog = 0;
+    mWindowManager.removeDialog(mSpecDialog);
+    mSpecDialog = 0;
 }
 
 void CreateClassDialog::setSpecialization(int id)
 {
-    specializationId = (ESM::Class::Specialization) id;
+    mSpecializationId = (ESM::Class::Specialization) id;
     static const char *specIds[3] = {
         "sSpecializationCombat",
         "sSpecializationMagic",
         "sSpecializationStealth"
     };
-    std::string specName = mWindowManager.getGameSettingString(specIds[specializationId], specIds[specializationId]);
-    specializationName->setCaption(specName);
-    ToolTips::createSpecializationToolTip(specializationName, specName, specializationId);
+    std::string specName = mWindowManager.getGameSettingString(specIds[mSpecializationId], specIds[mSpecializationId]);
+    mSpecializationName->setCaption(specName);
+    ToolTips::createSpecializationToolTip(mSpecializationName, specName, mSpecializationId);
 }
 
 void CreateClassDialog::onAttributeClicked(Widgets::MWAttributePtr _sender)
 {
-    delete attribDialog;
-    attribDialog = new SelectAttributeDialog(mWindowManager);
-    attribDialog->setAffectedWidget(_sender);
-    attribDialog->eventCancel += MyGUI::newDelegate(this, &CreateClassDialog::onDialogCancel);
-    attribDialog->eventItemSelected += MyGUI::newDelegate(this, &CreateClassDialog::onAttributeSelected);
-    attribDialog->setVisible(true);
+    delete mAttribDialog;
+    mAttribDialog = new SelectAttributeDialog(mWindowManager);
+    mAttribDialog->setAffectedWidget(_sender);
+    mAttribDialog->eventCancel += MyGUI::newDelegate(this, &CreateClassDialog::onDialogCancel);
+    mAttribDialog->eventItemSelected += MyGUI::newDelegate(this, &CreateClassDialog::onAttributeSelected);
+    mAttribDialog->setVisible(true);
 }
 
 void CreateClassDialog::onAttributeSelected()
 {
-    ESM::Attribute::AttributeID id = attribDialog->getAttributeId();
-    Widgets::MWAttributePtr attribute = attribDialog->getAffectedWidget();
-    if (attribute == favoriteAttribute0)
+    ESM::Attribute::AttributeID id = mAttribDialog->getAttributeId();
+    Widgets::MWAttributePtr attribute = mAttribDialog->getAffectedWidget();
+    if (attribute == mFavoriteAttribute0)
     {
-        if (favoriteAttribute1->getAttributeId() == id)
-            favoriteAttribute1->setAttributeId(favoriteAttribute0->getAttributeId());
+        if (mFavoriteAttribute1->getAttributeId() == id)
+            mFavoriteAttribute1->setAttributeId(mFavoriteAttribute0->getAttributeId());
     }
-    else if (attribute == favoriteAttribute1)
+    else if (attribute == mFavoriteAttribute1)
     {
-        if (favoriteAttribute0->getAttributeId() == id)
-            favoriteAttribute0->setAttributeId(favoriteAttribute1->getAttributeId());
+        if (mFavoriteAttribute0->getAttributeId() == id)
+            mFavoriteAttribute0->setAttributeId(mFavoriteAttribute1->getAttributeId());
     }
     attribute->setAttributeId(id);
-    mWindowManager.removeDialog(attribDialog);
-    attribDialog = 0;
+    mWindowManager.removeDialog(mAttribDialog);
+    mAttribDialog = 0;
 
     update();
 }
 
 void CreateClassDialog::onSkillClicked(Widgets::MWSkillPtr _sender)
 {
-    delete skillDialog;
-    skillDialog = new SelectSkillDialog(mWindowManager);
-    skillDialog->setAffectedWidget(_sender);
-    skillDialog->eventCancel += MyGUI::newDelegate(this, &CreateClassDialog::onDialogCancel);
-    skillDialog->eventItemSelected += MyGUI::newDelegate(this, &CreateClassDialog::onSkillSelected);
-    skillDialog->setVisible(true);
+    delete mSkillDialog;
+    mSkillDialog = new SelectSkillDialog(mWindowManager);
+    mSkillDialog->setAffectedWidget(_sender);
+    mSkillDialog->eventCancel += MyGUI::newDelegate(this, &CreateClassDialog::onDialogCancel);
+    mSkillDialog->eventItemSelected += MyGUI::newDelegate(this, &CreateClassDialog::onSkillSelected);
+    mSkillDialog->setVisible(true);
 }
 
 void CreateClassDialog::onSkillSelected()
 {
-    ESM::Skill::SkillEnum id = skillDialog->getSkillId();
-    Widgets::MWSkillPtr skill = skillDialog->getAffectedWidget();
+    ESM::Skill::SkillEnum id = mSkillDialog->getSkillId();
+    Widgets::MWSkillPtr skill = mSkillDialog->getAffectedWidget();
 
     // Avoid duplicate skills by swapping any skill field that matches the selected one
-    std::vector<Widgets::MWSkillPtr>::const_iterator end = skills.end();
-    for (std::vector<Widgets::MWSkillPtr>::const_iterator it = skills.begin(); it != end; ++it)
+    std::vector<Widgets::MWSkillPtr>::const_iterator end = mSkills.end();
+    for (std::vector<Widgets::MWSkillPtr>::const_iterator it = mSkills.begin(); it != end; ++it)
     {
         if (*it == skill)
             continue;
@@ -669,25 +668,25 @@ void CreateClassDialog::onSkillSelected()
         }
     }
 
-    skill->setSkillId(skillDialog->getSkillId());
-    mWindowManager.removeDialog(skillDialog);
-    skillDialog = 0;
+    skill->setSkillId(mSkillDialog->getSkillId());
+    mWindowManager.removeDialog(mSkillDialog);
+    mSkillDialog = 0;
     update();
 }
 
 void CreateClassDialog::onDescriptionClicked(MyGUI::Widget* _sender)
 {
-    descDialog = new DescriptionDialog(mWindowManager);
-    descDialog->setTextInput(description);
-    descDialog->eventDone += MyGUI::newDelegate(this, &CreateClassDialog::onDescriptionEntered);
-    descDialog->setVisible(true);
+    mDescDialog = new DescriptionDialog(mWindowManager);
+    mDescDialog->setTextInput(mDescription);
+    mDescDialog->eventDone += MyGUI::newDelegate(this, &CreateClassDialog::onDescriptionEntered);
+    mDescDialog->setVisible(true);
 }
 
 void CreateClassDialog::onDescriptionEntered(WindowBase* parWindow)
 {
-    description = descDialog->getTextInput();
-    mWindowManager.removeDialog(descDialog);
-    descDialog = 0;
+    mDescription = mDescDialog->getTextInput();
+    mWindowManager.removeDialog(mDescDialog);
+    mDescDialog = 0;
 }
 
 void CreateClassDialog::onOkClicked(MyGUI::Widget* _sender)
@@ -710,24 +709,24 @@ SelectSpecializationDialog::SelectSpecializationDialog(WindowManager& parWindowM
 
     setText("LabelT", mWindowManager.getGameSettingString("sSpecializationMenu1", ""));
 
-    getWidget(specialization0, "Specialization0");
-    getWidget(specialization1, "Specialization1");
-    getWidget(specialization2, "Specialization2");
+    getWidget(mSpecialization0, "Specialization0");
+    getWidget(mSpecialization1, "Specialization1");
+    getWidget(mSpecialization2, "Specialization2");
     std::string combat = mWindowManager.getGameSettingString(ESM::Class::gmstSpecializationIds[ESM::Class::Combat], "");
     std::string magic = mWindowManager.getGameSettingString(ESM::Class::gmstSpecializationIds[ESM::Class::Magic], "");
     std::string stealth = mWindowManager.getGameSettingString(ESM::Class::gmstSpecializationIds[ESM::Class::Stealth], "");
 
-    specialization0->setCaption(combat);
-    specialization0->eventMouseButtonClick += MyGUI::newDelegate(this, &SelectSpecializationDialog::onSpecializationClicked);
-    specialization1->setCaption(magic);
-    specialization1->eventMouseButtonClick += MyGUI::newDelegate(this, &SelectSpecializationDialog::onSpecializationClicked);
-    specialization2->setCaption(stealth);
-    specialization2->eventMouseButtonClick += MyGUI::newDelegate(this, &SelectSpecializationDialog::onSpecializationClicked);
-    specializationId = ESM::Class::Combat;
+    mSpecialization0->setCaption(combat);
+    mSpecialization0->eventMouseButtonClick += MyGUI::newDelegate(this, &SelectSpecializationDialog::onSpecializationClicked);
+    mSpecialization1->setCaption(magic);
+    mSpecialization1->eventMouseButtonClick += MyGUI::newDelegate(this, &SelectSpecializationDialog::onSpecializationClicked);
+    mSpecialization2->setCaption(stealth);
+    mSpecialization2->eventMouseButtonClick += MyGUI::newDelegate(this, &SelectSpecializationDialog::onSpecializationClicked);
+    mSpecializationId = ESM::Class::Combat;
 
-    ToolTips::createSpecializationToolTip(specialization0, combat, ESM::Class::Combat);
-    ToolTips::createSpecializationToolTip(specialization1, magic, ESM::Class::Magic);
-    ToolTips::createSpecializationToolTip(specialization2, stealth, ESM::Class::Stealth);
+    ToolTips::createSpecializationToolTip(mSpecialization0, combat, ESM::Class::Combat);
+    ToolTips::createSpecializationToolTip(mSpecialization1, magic, ESM::Class::Magic);
+    ToolTips::createSpecializationToolTip(mSpecialization2, stealth, ESM::Class::Stealth);
 
     MyGUI::ButtonPtr cancelButton;
     getWidget(cancelButton, "CancelButton");
@@ -748,12 +747,12 @@ SelectSpecializationDialog::~SelectSpecializationDialog()
 
 void SelectSpecializationDialog::onSpecializationClicked(MyGUI::WidgetPtr _sender)
 {
-    if (_sender == specialization0)
-        specializationId = ESM::Class::Combat;
-    else if (_sender == specialization1)
-        specializationId = ESM::Class::Magic;
-    else if (_sender == specialization2)
-        specializationId = ESM::Class::Stealth;
+    if (_sender == mSpecialization0)
+        mSpecializationId = ESM::Class::Combat;
+    else if (_sender == mSpecialization1)
+        mSpecializationId = ESM::Class::Magic;
+    else if (_sender == mSpecialization2)
+        mSpecializationId = ESM::Class::Stealth;
     else
         return;
 
@@ -807,7 +806,7 @@ SelectAttributeDialog::~SelectAttributeDialog()
 void SelectAttributeDialog::onAttributeClicked(Widgets::MWAttributePtr _sender)
 {
     // TODO: Change MWAttribute to set and get AttributeID enum instead of int
-    attributeId = static_cast<ESM::Attribute::AttributeID>(_sender->getAttributeId());
+    mAttributeId = static_cast<ESM::Attribute::AttributeID>(_sender->getAttributeId());
     eventItemSelected();
 }
 
@@ -833,44 +832,44 @@ SelectSkillDialog::SelectSkillDialog(WindowManager& parWindowManager)
     for(int i = 0; i < 9; i++)
     {
         char theIndex = '0'+i;
-        getWidget(combatSkill[i],  std::string("CombatSkill").append(1, theIndex));
-        getWidget(magicSkill[i],   std::string("MagicSkill").append(1, theIndex));
-        getWidget(stealthSkill[i], std::string("StealthSkill").append(1, theIndex));
+        getWidget(mCombatSkill[i],  std::string("CombatSkill").append(1, theIndex));
+        getWidget(mMagicSkill[i],   std::string("MagicSkill").append(1, theIndex));
+        getWidget(mStealthSkill[i], std::string("StealthSkill").append(1, theIndex));
     }
 
-    struct {Widgets::MWSkillPtr widget; ESM::Skill::SkillEnum skillId;} skills[3][9] = {
+    struct {Widgets::MWSkillPtr widget; ESM::Skill::SkillEnum skillId;} mSkills[3][9] = {
         {
-            {combatSkill[0], ESM::Skill::Block},
-            {combatSkill[1], ESM::Skill::Armorer},
-            {combatSkill[2], ESM::Skill::MediumArmor},
-            {combatSkill[3], ESM::Skill::HeavyArmor},
-            {combatSkill[4], ESM::Skill::BluntWeapon},
-            {combatSkill[5], ESM::Skill::LongBlade},
-            {combatSkill[6], ESM::Skill::Axe},
-            {combatSkill[7], ESM::Skill::Spear},
-            {combatSkill[8], ESM::Skill::Athletics}
+            {mCombatSkill[0], ESM::Skill::Block},
+            {mCombatSkill[1], ESM::Skill::Armorer},
+            {mCombatSkill[2], ESM::Skill::MediumArmor},
+            {mCombatSkill[3], ESM::Skill::HeavyArmor},
+            {mCombatSkill[4], ESM::Skill::BluntWeapon},
+            {mCombatSkill[5], ESM::Skill::LongBlade},
+            {mCombatSkill[6], ESM::Skill::Axe},
+            {mCombatSkill[7], ESM::Skill::Spear},
+            {mCombatSkill[8], ESM::Skill::Athletics}
         },
         {
-            {magicSkill[0], ESM::Skill::Enchant},
-            {magicSkill[1], ESM::Skill::Destruction},
-            {magicSkill[2], ESM::Skill::Alteration},
-            {magicSkill[3], ESM::Skill::Illusion},
-            {magicSkill[4], ESM::Skill::Conjuration},
-            {magicSkill[5], ESM::Skill::Mysticism},
-            {magicSkill[6], ESM::Skill::Restoration},
-            {magicSkill[7], ESM::Skill::Alchemy},
-            {magicSkill[8], ESM::Skill::Unarmored}
+            {mMagicSkill[0], ESM::Skill::Enchant},
+            {mMagicSkill[1], ESM::Skill::Destruction},
+            {mMagicSkill[2], ESM::Skill::Alteration},
+            {mMagicSkill[3], ESM::Skill::Illusion},
+            {mMagicSkill[4], ESM::Skill::Conjuration},
+            {mMagicSkill[5], ESM::Skill::Mysticism},
+            {mMagicSkill[6], ESM::Skill::Restoration},
+            {mMagicSkill[7], ESM::Skill::Alchemy},
+            {mMagicSkill[8], ESM::Skill::Unarmored}
         },
         {
-            {stealthSkill[0], ESM::Skill::Security},
-            {stealthSkill[1], ESM::Skill::Sneak},
-            {stealthSkill[2], ESM::Skill::Acrobatics},
-            {stealthSkill[3], ESM::Skill::LightArmor},
-            {stealthSkill[4], ESM::Skill::ShortBlade},
-            {stealthSkill[5] ,ESM::Skill::Marksman},
-            {stealthSkill[6] ,ESM::Skill::Mercantile},
-            {stealthSkill[7] ,ESM::Skill::Speechcraft},
-            {stealthSkill[8] ,ESM::Skill::HandToHand}
+            {mStealthSkill[0], ESM::Skill::Security},
+            {mStealthSkill[1], ESM::Skill::Sneak},
+            {mStealthSkill[2], ESM::Skill::Acrobatics},
+            {mStealthSkill[3], ESM::Skill::LightArmor},
+            {mStealthSkill[4], ESM::Skill::ShortBlade},
+            {mStealthSkill[5] ,ESM::Skill::Marksman},
+            {mStealthSkill[6] ,ESM::Skill::Mercantile},
+            {mStealthSkill[7] ,ESM::Skill::Speechcraft},
+            {mStealthSkill[8] ,ESM::Skill::HandToHand}
         }
     };
 
@@ -878,10 +877,10 @@ SelectSkillDialog::SelectSkillDialog(WindowManager& parWindowManager)
     {
         for (int i = 0; i < 9; ++i)
         {
-            skills[spec][i].widget->setWindowManager(&mWindowManager);
-            skills[spec][i].widget->setSkillId(skills[spec][i].skillId);
-            skills[spec][i].widget->eventClicked += MyGUI::newDelegate(this, &SelectSkillDialog::onSkillClicked);
-            ToolTips::createSkillToolTip(skills[spec][i].widget, skills[spec][i].widget->getSkillId());
+            mSkills[spec][i].widget->setWindowManager(&mWindowManager);
+            mSkills[spec][i].widget->setSkillId(mSkills[spec][i].skillId);
+            mSkills[spec][i].widget->eventClicked += MyGUI::newDelegate(this, &SelectSkillDialog::onSkillClicked);
+            ToolTips::createSkillToolTip(mSkills[spec][i].widget, mSkills[spec][i].widget->getSkillId());
         }
     }
 
@@ -904,7 +903,7 @@ SelectSkillDialog::~SelectSkillDialog()
 
 void SelectSkillDialog::onSkillClicked(Widgets::MWSkillPtr _sender)
 {
-    skillId = _sender->getSkillId();
+    mSkillId = _sender->getSkillId();
     eventItemSelected();
 }
 
@@ -921,7 +920,7 @@ DescriptionDialog::DescriptionDialog(WindowManager& parWindowManager)
     // Centre dialog
     center();
 
-    getWidget(textEdit, "TextEdit");
+    getWidget(mTextEdit, "TextEdit");
 
     MyGUI::ButtonPtr okButton;
     getWidget(okButton, "OKButton");
@@ -931,7 +930,7 @@ DescriptionDialog::DescriptionDialog(WindowManager& parWindowManager)
     okButton->setCoord(234 - buttonWidth, 214, buttonWidth, 24);
 
     // Make sure the edit box has focus
-    MyGUI::InputManager::getInstance().setKeyFocusWidget(textEdit);
+    MyGUI::InputManager::getInstance().setKeyFocusWidget(mTextEdit);
 
     MyGUI::InputManager::getInstance().addWidgetModal(mMainWidget);
 }

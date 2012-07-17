@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 #include <boost/function.hpp>
-#include <assert.h>
+#include <cassert>
 
 namespace OEngine {
 namespace Input {

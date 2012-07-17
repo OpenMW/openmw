@@ -203,10 +203,10 @@ namespace MWDialogue
                     MWMechanics::NpcStats PCstats = MWWorld::Class::get(MWBase::Environment::get().getWorld()->getPlayer().getPlayer()).getNpcStats(MWBase::Environment::get().getWorld()->getPlayer().getPlayer());
                     MWMechanics::NpcStats NPCstats = MWWorld::Class::get(actor).getNpcStats(actor);
                     int sameFaction = 0;
-                    if(!NPCstats.mFactionRank.empty())
+                    if(!NPCstats.getFactionRanks().empty())
                     {
-                        std::string NPCFaction = NPCstats.mFactionRank.begin()->first;
-                        if(PCstats.mFactionRank.find(toLower(NPCFaction)) != PCstats.mFactionRank.end()) sameFaction = 1;
+                        std::string NPCFaction = NPCstats.getFactionRanks().begin()->first;
+                        if(PCstats.getFactionRanks().find(toLower(NPCFaction)) != PCstats.getFactionRanks().end()) sameFaction = 1;
                     }
                     if(!selectCompare<int,int>(comp,sameFaction,select.i)) return false;
                     }
@@ -525,8 +525,8 @@ namespace MWDialogue
 
             //MWWorld::Class npcClass = MWWorld::Class::get(actor);
             MWMechanics::NpcStats stats = MWWorld::Class::get(actor).getNpcStats(actor);
-            std::map<std::string,int>::iterator it = stats.mFactionRank.find(toLower(info.npcFaction));
-            if(it!=stats.mFactionRank.end())
+            std::map<std::string,int>::iterator it = stats.getFactionRanks().find(toLower(info.npcFaction));
+            if(it!=stats.getFactionRanks().end())
             {
                 //check rank
                 if(it->second < (int)info.data.rank) return false;
@@ -542,8 +542,8 @@ namespace MWDialogue
         if(!info.pcFaction.empty())
         {
             MWMechanics::NpcStats stats = MWWorld::Class::get(MWBase::Environment::get().getWorld()->getPlayer().getPlayer()).getNpcStats(MWBase::Environment::get().getWorld()->getPlayer().getPlayer());
-            std::map<std::string,int>::iterator it = stats.mFactionRank.find(toLower(info.pcFaction));
-            if(it!=stats.mFactionRank.end())
+            std::map<std::string,int>::iterator it = stats.getFactionRanks().find(toLower(info.pcFaction));
+            if(it!=stats.getFactionRanks().end())
             {
                 //check rank
                 if(it->second < (int)info.data.PCrank) return false;
@@ -591,7 +591,7 @@ namespace MWDialogue
         mIsInChoice = false;
         mCompilerContext.setExtensions (&extensions);
         mDialogueMap.clear();
-        actorKnownTopics.clear();
+        mActorKnownTopics.clear();
         ESMS::RecListCaseT<ESM::Dialogue>::MapType dialogueList = MWBase::Environment::get().getWorld()->getStore().dialogs.list;
         for(ESMS::RecListCaseT<ESM::Dialogue>::MapType::iterator it = dialogueList.begin(); it!=dialogueList.end();it++)
         {
@@ -601,24 +601,24 @@ namespace MWDialogue
 
     void DialogueManager::addTopic(std::string topic)
     {
-        knownTopics[toLower(topic)] = true;
+        mKnownTopics[toLower(topic)] = true;
     }
 
     void DialogueManager::parseText(std::string text)
     {
         std::list<std::string>::iterator it;
-        for(it = actorKnownTopics.begin();it != actorKnownTopics.end();++it)
+        for(it = mActorKnownTopics.begin();it != mActorKnownTopics.end();++it)
         {
             size_t pos = find_str_ci(text,*it,0);
             if(pos !=std::string::npos)
             {
                 if(pos==0)
                 {
-                    knownTopics[*it] = true;
+                    mKnownTopics[*it] = true;
                 }
                 else if(text.substr(pos -1,1) == " ")
                 {
-                    knownTopics[*it] = true;
+                    mKnownTopics[*it] = true;
                 }
             }
         }
@@ -632,7 +632,7 @@ namespace MWDialogue
 
         mActor = actor;
 
-        actorKnownTopics.clear();
+        mActorKnownTopics.clear();
 
         //initialise the GUI
         MWBase::Environment::get().getWindowManager()->pushGuiMode(MWGui::GM_Dialogue);
@@ -742,7 +742,7 @@ namespace MWDialogue
         std::list<std::string> keywordList;
         int choice = mChoice;
         mChoice = -1;
-        actorKnownTopics.clear();
+        mActorKnownTopics.clear();
         MWGui::DialogueWindow* win = MWBase::Environment::get().getWindowManager()->getDialogueWindow();
         ESMS::RecListCaseT<ESM::Dialogue>::MapType dialogueList = MWBase::Environment::get().getWorld()->getStore().dialogs.list;
         for(ESMS::RecListCaseT<ESM::Dialogue>::MapType::iterator it = dialogueList.begin(); it!=dialogueList.end();it++)
@@ -755,9 +755,9 @@ namespace MWDialogue
                 {
                     if (isMatching (mActor, *iter) && functionFilter(mActor,*iter,true))
                     {
-                        actorKnownTopics.push_back(toLower(it->first));
+                        mActorKnownTopics.push_back(toLower(it->first));
                         //does the player know the topic?
-                        if(knownTopics.find(toLower(it->first)) != knownTopics.end())
+                        if(mKnownTopics.find(toLower(it->first)) != mKnownTopics.end())
                         {
                             keywordList.push_back(it->first);
                             break;
@@ -903,13 +903,13 @@ namespace MWDialogue
 
         std::string factionID("");
         MWMechanics::NpcStats stats = MWWorld::Class::get(mActor).getNpcStats(mActor);
-        if(stats.mFactionRank.empty())
+        if(stats.getFactionRanks().empty())
         {
             std::cout << "No faction for this actor!";
         }
         else
         {
-            factionID = stats.mFactionRank.begin()->first;
+            factionID = stats.getFactionRanks().begin()->first;
         }
         return factionID;
     }

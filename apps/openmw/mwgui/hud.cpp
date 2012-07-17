@@ -28,24 +28,24 @@ HUD::HUD(int width, int height, int fpsLevel, DragAndDrop* dragAndDrop)
     , health(NULL)
     , magicka(NULL)
     , stamina(NULL)
-    , weapImage(NULL)
-    , spellImage(NULL)
-    , weapStatus(NULL)
-    , spellStatus(NULL)
-    , effectBox(NULL)
-    , effect1(NULL)
-    , minimap(NULL)
-    , compass(NULL)
-    , crosshair(NULL)
+    , mWeapImage(NULL)
+    , mSpellImage(NULL)
+    , mWeapStatus(NULL)
+    , mSpellStatus(NULL)
+    , mEffectBox(NULL)
+    , mEffect1(NULL)
+    , mMinimap(NULL)
+    , mCompass(NULL)
+    , mCrosshair(NULL)
     , fpsbox(NULL)
     , fpscounter(NULL)
     , trianglecounter(NULL)
     , batchcounter(NULL)
-    , hmsBaseLeft(0)
-    , weapBoxBaseLeft(0)
-    , spellBoxBaseLeft(0)
-    , effectBoxBaseRight(0)
-    , minimapBoxBaseRight(0)
+    , mHealthManaStaminaBaseLeft(0)
+    , mWeapBoxBaseLeft(0)
+    , mSpellBoxBaseLeft(0)
+    , mEffectBoxBaseRight(0)
+    , mMinimapBoxBaseRight(0)
     , mDragAndDrop(dragAndDrop)
     , mCellNameTimer(0.0f)
     , mCellNameBox(NULL)
@@ -62,7 +62,7 @@ HUD::HUD(int width, int height, int fpsLevel, DragAndDrop* dragAndDrop)
     getWidget(magicka, "Magicka");
     getWidget(stamina, "Stamina");
 
-    hmsBaseLeft = mHealthFrame->getLeft();
+    mHealthManaStaminaBaseLeft = mHealthFrame->getLeft();
 
     MyGUI::Widget *healthFrame, *magickaFrame, *fatigueFrame;
     getWidget(healthFrame, "HealthFrame");
@@ -75,33 +75,33 @@ HUD::HUD(int width, int height, int fpsLevel, DragAndDrop* dragAndDrop)
     const MyGUI::IntSize& viewSize = MyGUI::RenderManager::getInstance().getViewSize();
 
     // Item and spell images and status bars
-    getWidget(weapBox, "WeapBox");
-    getWidget(weapImage, "WeapImage");
-    getWidget(weapStatus, "WeapStatus");
-    weapBoxBaseLeft = weapBox->getLeft();
-    weapBox->eventMouseButtonClick += MyGUI::newDelegate(this, &HUD::onWeaponClicked);
+    getWidget(mWeapBox, "WeapBox");
+    getWidget(mWeapImage, "WeapImage");
+    getWidget(mWeapStatus, "WeapStatus");
+    mWeapBoxBaseLeft = mWeapBox->getLeft();
+    mWeapBox->eventMouseButtonClick += MyGUI::newDelegate(this, &HUD::onWeaponClicked);
 
-    getWidget(spellBox, "SpellBox");
-    getWidget(spellImage, "SpellImage");
-    getWidget(spellStatus, "SpellStatus");
-    spellBoxBaseLeft = spellBox->getLeft();
-    spellBox->eventMouseButtonClick += MyGUI::newDelegate(this, &HUD::onMagicClicked);
+    getWidget(mSpellBox, "SpellBox");
+    getWidget(mSpellImage, "SpellImage");
+    getWidget(mSpellStatus, "SpellStatus");
+    mSpellBoxBaseLeft = mSpellBox->getLeft();
+    mSpellBox->eventMouseButtonClick += MyGUI::newDelegate(this, &HUD::onMagicClicked);
 
-    getWidget(effectBox, "EffectBox");
-    getWidget(effect1, "Effect1");
-    effectBoxBaseRight = viewSize.width - effectBox->getRight();
-    effectBox->eventMouseButtonClick += MyGUI::newDelegate(this, &HUD::onMagicClicked);
+    getWidget(mEffectBox, "EffectBox");
+    getWidget(mEffect1, "Effect1");
+    mEffectBoxBaseRight = viewSize.width - mEffectBox->getRight();
+    mEffectBox->eventMouseButtonClick += MyGUI::newDelegate(this, &HUD::onMagicClicked);
 
-    getWidget(minimapBox, "MiniMapBox");
-    minimapBoxBaseRight = viewSize.width - minimapBox->getRight();
-    minimapBox->eventMouseButtonClick += MyGUI::newDelegate(this, &HUD::onMapClicked);
-    getWidget(minimap, "MiniMap");
-    getWidget(compass, "Compass");
+    getWidget(mMinimapBox, "MiniMapBox");
+    mMinimapBoxBaseRight = viewSize.width - mMinimapBox->getRight();
+    mMinimapBox->eventMouseButtonClick += MyGUI::newDelegate(this, &HUD::onMapClicked);
+    getWidget(mMinimap, "MiniMap");
+    getWidget(mCompass, "Compass");
 
     getWidget(mCellNameBox, "CellName");
     getWidget(mWeaponSpellBox, "WeaponSpellName");
 
-    getWidget(crosshair, "Crosshair");
+    getWidget(mCrosshair, "Crosshair");
 
     setFpsLevel(fpsLevel);
 
@@ -110,7 +110,7 @@ HUD::HUD(int width, int height, int fpsLevel, DragAndDrop* dragAndDrop)
 
     setEffect("icons\\s\\tx_s_chameleon.dds");
 
-    LocalMapBase::init(minimap, compass, this);
+    LocalMapBase::init(mMinimap, mCompass, this);
 
     mMainWidget->eventMouseButtonClick += MyGUI::newDelegate(this, &HUD::onWorldClicked);
     mMainWidget->eventMouseMove += MyGUI::newDelegate(this, &HUD::onWorldMouseOver);
@@ -159,7 +159,7 @@ void HUD::setBatchCount(unsigned int count)
 
 void HUD::setEffect(const char *img)
 {
-    effect1->setImageTexture(img);
+    mEffect1->setImageTexture(img);
 }
 
 void HUD::setValue(const std::string& id, const MWMechanics::DynamicStat<int>& value)
@@ -202,10 +202,10 @@ void HUD::setBottomLeftVisibility(bool hmsVisible, bool weapVisible, bool spellV
 {
     int weapDx = 0, spellDx = 0;
     if (!hmsVisible)
-        spellDx = weapDx = weapBoxBaseLeft - hmsBaseLeft;
+        spellDx = weapDx = mWeapBoxBaseLeft - mHealthManaStaminaBaseLeft;
 
     if (!weapVisible)
-        spellDx += spellBoxBaseLeft - weapBoxBaseLeft;
+        spellDx += mSpellBoxBaseLeft - mWeapBoxBaseLeft;
 
     mWeaponVisible = weapVisible;
     mSpellVisible = spellVisible;
@@ -215,10 +215,10 @@ void HUD::setBottomLeftVisibility(bool hmsVisible, bool weapVisible, bool spellV
     health->setVisible(hmsVisible);
     stamina->setVisible(hmsVisible);
     magicka->setVisible(hmsVisible);
-    weapBox->setPosition(weapBoxBaseLeft - weapDx, weapBox->getTop());
-    weapBox->setVisible(weapVisible);
-    spellBox->setPosition(spellBoxBaseLeft - spellDx, spellBox->getTop());
-    spellBox->setVisible(spellVisible);
+    mWeapBox->setPosition(mWeapBoxBaseLeft - weapDx, mWeapBox->getTop());
+    mWeapBox->setVisible(weapVisible);
+    mSpellBox->setPosition(mSpellBoxBaseLeft - spellDx, mSpellBox->getTop());
+    mSpellBox->setVisible(spellVisible);
 }
 
 void HUD::setBottomRightVisibility(bool effectBoxVisible, bool minimapBoxVisible)
@@ -228,12 +228,12 @@ void HUD::setBottomRightVisibility(bool effectBoxVisible, bool minimapBoxVisible
     // effect box can have variable width -> variable left coordinate
     int effectsDx = 0;
     if (!minimapBoxVisible)
-        effectsDx = (viewSize.width - minimapBoxBaseRight) - (viewSize.width - effectBoxBaseRight);
+        effectsDx = (viewSize.width - mMinimapBoxBaseRight) - (viewSize.width - mEffectBoxBaseRight);
 
     mMapVisible = minimapBoxVisible;
-    minimapBox->setVisible(minimapBoxVisible);
-    effectBox->setPosition((viewSize.width - effectBoxBaseRight) - effectBox->getWidth() + effectsDx, effectBox->getTop());
-    effectBox->setVisible(effectBoxVisible);
+    mMinimapBox->setVisible(minimapBoxVisible);
+    mEffectBox->setPosition((viewSize.width - mEffectBoxBaseRight) - mEffectBox->getWidth() + effectsDx, mEffectBox->getTop());
+    mEffectBox->setVisible(effectBoxVisible);
 }
 
 void HUD::onWorldClicked(MyGUI::Widget* _sender)
@@ -395,14 +395,14 @@ void HUD::setSelectedSpell(const std::string& spellId, int successChancePercent)
         mWeaponSpellBox->setVisible(true);
     }
 
-    spellStatus->setProgressRange(100);
-    spellStatus->setProgressPosition(successChancePercent);
+    mSpellStatus->setProgressRange(100);
+    mSpellStatus->setProgressPosition(successChancePercent);
 
-    if (spellImage->getChildCount())
-        MyGUI::Gui::getInstance().destroyWidget(spellImage->getChildAt(0));
+    if (mSpellImage->getChildCount())
+        MyGUI::Gui::getInstance().destroyWidget(mSpellImage->getChildAt(0));
 
-    spellBox->setUserString("ToolTipType", "Spell");
-    spellBox->setUserString("Spell", spellId);
+    mSpellBox->setUserString("ToolTipType", "Spell");
+    mSpellBox->setUserString("Spell", spellId);
 
     // use the icon of the first effect
     const ESM::MagicEffect* effect = MWBase::Environment::get().getWorld()->getStore().magicEffects.find(spell->effects.list.front().effectID);
@@ -411,7 +411,7 @@ void HUD::setSelectedSpell(const std::string& spellId, int successChancePercent)
     icon.insert(slashPos+1, "b_");
     icon = std::string("icons\\") + icon;
     Widgets::fixTexturePath(icon);
-    spellImage->setImageTexture(icon);
+    mSpellImage->setImageTexture(icon);
 }
 
 void HUD::setSelectedEnchantItem(const MWWorld::Ptr& item, int chargePercent)
@@ -425,17 +425,17 @@ void HUD::setSelectedEnchantItem(const MWWorld::Ptr& item, int chargePercent)
         mWeaponSpellBox->setVisible(true);
     }
 
-    spellStatus->setProgressRange(100);
-    spellStatus->setProgressPosition(chargePercent);
+    mSpellStatus->setProgressRange(100);
+    mSpellStatus->setProgressPosition(chargePercent);
 
-    if (spellImage->getChildCount())
-        MyGUI::Gui::getInstance().destroyWidget(spellImage->getChildAt(0));
+    if (mSpellImage->getChildCount())
+        MyGUI::Gui::getInstance().destroyWidget(mSpellImage->getChildAt(0));
 
-    spellBox->setUserString("ToolTipType", "ItemPtr");
-    spellBox->setUserData(item);
+    mSpellBox->setUserString("ToolTipType", "ItemPtr");
+    mSpellBox->setUserData(item);
 
-    spellImage->setImageTexture("textures\\menu_icon_magic_mini.dds");
-    MyGUI::ImageBox* itemBox = spellImage->createWidgetReal<MyGUI::ImageBox>("ImageBox", MyGUI::FloatCoord(0,0,1,1)
+    mSpellImage->setImageTexture("textures\\menu_icon_magic_mini.dds");
+    MyGUI::ImageBox* itemBox = mSpellImage->createWidgetReal<MyGUI::ImageBox>("ImageBox", MyGUI::FloatCoord(0,0,1,1)
         , MyGUI::Align::Stretch);
 
     std::string path = std::string("icons\\");
@@ -456,14 +456,14 @@ void HUD::setSelectedWeapon(const MWWorld::Ptr& item, int durabilityPercent)
         mWeaponSpellBox->setVisible(true);
     }
 
-    weapBox->setUserString("ToolTipType", "ItemPtr");
-    weapBox->setUserData(item);
+    mWeapBox->setUserString("ToolTipType", "ItemPtr");
+    mWeapBox->setUserData(item);
 
-    weapStatus->setProgressRange(100);
-    weapStatus->setProgressPosition(durabilityPercent);
+    mWeapStatus->setProgressRange(100);
+    mWeapStatus->setProgressPosition(durabilityPercent);
 
-    if (weapImage->getChildCount())
-        MyGUI::Gui::getInstance().destroyWidget(weapImage->getChildAt(0));
+    if (mWeapImage->getChildCount())
+        MyGUI::Gui::getInstance().destroyWidget(mWeapImage->getChildAt(0));
 
     std::string path = std::string("icons\\");
     path+=MWWorld::Class::get(item).getInventoryIcon(item);
@@ -471,14 +471,14 @@ void HUD::setSelectedWeapon(const MWWorld::Ptr& item, int durabilityPercent)
 
     if (MWWorld::Class::get(item).getEnchantment(item) != "")
     {
-        weapImage->setImageTexture("textures\\menu_icon_magic_mini.dds");
-        MyGUI::ImageBox* itemBox = weapImage->createWidgetReal<MyGUI::ImageBox>("ImageBox", MyGUI::FloatCoord(0,0,1,1)
+        mWeapImage->setImageTexture("textures\\menu_icon_magic_mini.dds");
+        MyGUI::ImageBox* itemBox = mWeapImage->createWidgetReal<MyGUI::ImageBox>("ImageBox", MyGUI::FloatCoord(0,0,1,1)
             , MyGUI::Align::Stretch);
         itemBox->setImageTexture(path);
         itemBox->setNeedMouseFocus(false);
     }
     else
-        weapImage->setImageTexture(path);
+        mWeapImage->setImageTexture(path);
 }
 
 void HUD::unsetSelectedSpell()
@@ -492,12 +492,12 @@ void HUD::unsetSelectedSpell()
         mWeaponSpellBox->setVisible(true);
     }
 
-    if (spellImage->getChildCount())
-        MyGUI::Gui::getInstance().destroyWidget(spellImage->getChildAt(0));
-    spellStatus->setProgressRange(100);
-    spellStatus->setProgressPosition(0);
-    spellImage->setImageTexture("");
-    spellBox->clearUserStrings();
+    if (mSpellImage->getChildCount())
+        MyGUI::Gui::getInstance().destroyWidget(mSpellImage->getChildAt(0));
+    mSpellStatus->setProgressRange(100);
+    mSpellStatus->setProgressPosition(0);
+    mSpellImage->setImageTexture("");
+    mSpellBox->clearUserStrings();
 }
 
 void HUD::unsetSelectedWeapon()
@@ -511,10 +511,10 @@ void HUD::unsetSelectedWeapon()
         mWeaponSpellBox->setVisible(true);
     }
 
-    if (weapImage->getChildCount())
-        MyGUI::Gui::getInstance().destroyWidget(weapImage->getChildAt(0));
-    weapStatus->setProgressRange(100);
-    weapStatus->setProgressPosition(0);
-    weapImage->setImageTexture("icons\\k\\stealth_handtohand.dds");
-    weapBox->clearUserStrings();
+    if (mWeapImage->getChildCount())
+        MyGUI::Gui::getInstance().destroyWidget(mWeapImage->getChildAt(0));
+    mWeapStatus->setProgressRange(100);
+    mWeapStatus->setProgressPosition(0);
+    mWeapImage->setImageTexture("icons\\k\\stealth_handtohand.dds");
+    mWeapBox->clearUserStrings();
 }

@@ -1,7 +1,6 @@
 #ifndef OENGINE_MYGUI_LAYOUT_H
 #define OENGINE_MYGUI_LAYOUT_H
 
-#include <assert.h>
 #include <MyGUI.h>
 
 namespace OEngine {

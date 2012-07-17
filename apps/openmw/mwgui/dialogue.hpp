@@ -73,10 +73,10 @@ namespace MWGui
 
         bool mEnabled;
 
-        DialogueHistory*     history;
-        Widgets::MWList*      topicsList;
-        MyGUI::ProgressPtr pDispositionBar;
-        MyGUI::EditPtr pDispositionText;
+        DialogueHistory*   mHistory;
+        Widgets::MWList*   mTopicsList;
+        MyGUI::ProgressPtr mDispositionBar;
+        MyGUI::EditPtr     mDispositionText;
     };
 }
 #endif
