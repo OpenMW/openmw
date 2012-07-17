@@ -10,10 +10,6 @@
    this class.
 **/
 
-#include <string>
-#include <vector>
-#include <set>
-
 #include "MyGUI_UString.h"
 
 #include <components/esm_store/store.hpp>

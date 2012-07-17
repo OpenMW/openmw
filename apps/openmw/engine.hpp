@@ -1,10 +1,6 @@
 #ifndef ENGINE_H
 #define ENGINE_H
 
-#include <string>
-
-#include <boost/filesystem.hpp>
-
 #include <OgreFrameListener.h>
 
 #include <components/compiler/extensions.hpp>

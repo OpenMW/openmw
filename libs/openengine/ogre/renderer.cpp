@@ -9,7 +9,7 @@
 #include "OgreTexture.h"
 #include "OgreHardwarePixelBuffer.h"
 
-#include <assert.h>
+#include <cassert>
 #include <stdexcept>
 
 using namespace Ogre;

@@ -1,6 +1,5 @@
 #include "dialogue.hpp"
 
-#include <assert.h>
 #include <iostream>
 #include <iterator>
 

@@ -2,11 +2,7 @@
 #define _GAME_RENDER_CREATUREANIMATION_H
 
 #include "animation.hpp"
-#include <components/nif/node.hpp>
 
-
-#include "../mwworld/refdata.hpp"
-#include "../mwworld/ptr.hpp"
 #include "components/nifogre/ogre_nif_loader.hpp"
 
 

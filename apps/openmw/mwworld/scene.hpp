@@ -1,15 +1,7 @@
 #ifndef GAME_MWWORLD_SCENE_H
 #define GAME_MWWORLD_SCENE_H
 
-#include <vector>
-#include <map>
-
-#include <boost/filesystem.hpp>
-
-#include <openengine/bullet/physic.hpp>
-
 #include "../mwrender/renderingmanager.hpp"
-#include "../mwrender/renderinginterface.hpp"
 
 #include "physicssystem.hpp"
 #include "globals.hpp"

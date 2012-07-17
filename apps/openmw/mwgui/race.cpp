@@ -1,6 +1,5 @@
 #include "race.hpp"
 
-#include <assert.h>
 #include <iostream>
 #include <iterator>
 

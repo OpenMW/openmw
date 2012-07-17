@@ -1,7 +1,7 @@
 #include "to_utf8.hpp"
 
 #include <vector>
-#include <assert.h>
+#include <cassert>
 
 /* This file contains the code to translate from WINDOWS-1252 (native
    charset used in English version of Morrowind) to UTF-8. The library

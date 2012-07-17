@@ -8,8 +8,6 @@
 #include <OgreMaterialManager.h>
 #include <OgreResourceGroupManager.h>
 
-#include <assert.h>
-
 #define FADE_OVERLAY_NAME       "FadeInOutOverlay"
 #define FADE_OVERLAY_PANEL_NAME "FadeInOutOverlayPanel"
 #define FADE_MATERIAL_NAME      "FadeInOutMaterial"

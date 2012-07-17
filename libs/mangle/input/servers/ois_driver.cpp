@@ -1,6 +1,6 @@
 #include "ois_driver.hpp"
 
-#include <assert.h>
+#include <cassert>
 #include <sstream>
 #include <OgreRenderWindow.h>
 #include <OIS/OIS.h>

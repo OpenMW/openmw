@@ -1,8 +1,6 @@
 #ifndef COMPONENTS_FILES_COLLECTION_HPP
 #define COMPONENTS_FILES_COLLECTION_HPP
 
-#include <string>
-#include <map>
 #include <boost/filesystem.hpp>
 
 #include "multidircollection.hpp"

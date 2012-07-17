@@ -1,6 +1,6 @@
 #include <MyGUI.h>
 #include <MyGUI_OgrePlatform.h>
-#include <assert.h>
+#include <cassert>
 
 #include "manager.hpp"
 

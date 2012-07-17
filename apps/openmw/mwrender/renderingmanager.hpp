@@ -1,24 +1,13 @@
 #ifndef _GAME_RENDERING_MANAGER_H
 #define _GAME_RENDERING_MANAGER_H
 
-
 #include "sky.hpp"
 #include "terrain.hpp"
 #include "debugging.hpp"
 
-#include "../mwworld/class.hpp"
-
-#include <OgreWindowEventUtilities.h>
-
-#include <utility>
-#include <openengine/ogre/renderer.hpp>
 #include <openengine/ogre/fader.hpp>
-#include <openengine/bullet/physic.hpp>
 
 #include <components/settings/settings.hpp>
-
-#include <vector>
-#include <string>
 
 #include <boost/filesystem.hpp>
 
@@ -45,7 +34,6 @@ namespace MWWorld
 
 namespace MWRender
 {
-
     class Shadows;
     class ShaderHelper;
     class LocalMap;

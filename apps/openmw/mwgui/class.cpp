@@ -1,6 +1,5 @@
 #include "class.hpp"
 
-#include <assert.h>
 #include <iterator>
 
 #include <boost/algorithm/string.hpp>
