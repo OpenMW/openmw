@@ -75,9 +75,8 @@ add_executable(omwlauncher
 target_link_libraries(omwlauncher
     ${Boost_LIBRARIES}
     ${OGRE_LIBRARIES}
-    ${OGRE_STATIC_PLUGINS}
+	${OGRE_STATIC_PLUGINS}
     ${QT_LIBRARIES}
-    ${TBB_LIBRARY}
     components
 )
 

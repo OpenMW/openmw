@@ -10,7 +10,6 @@ add_executable(esmtool
 
 target_link_libraries(esmtool
   ${Boost_LIBRARIES}
-  ${TBB_LIBRARY}
   components
 )
 
