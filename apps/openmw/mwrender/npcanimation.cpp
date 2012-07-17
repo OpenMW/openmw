@@ -45,7 +45,8 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, OEngine::Render::OgreRendere
     lAnkle(0),
     groin(0),
     lfoot(0),
-    rfoot(0)
+    rfoot(0),
+    mSkelBase(0)
 {
     MWWorld::LiveCellRef<ESM::NPC> *ref = ptr.get<ESM::NPC>();
 
@@ -82,33 +83,39 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, OEngine::Render::OgreRendere
 
     std::string smodel = (!isBeast ? "meshes\\base_anim.nif" : "meshes\\base_animkna.nif");
 
-    // FIXME: There can be more than one!
     NifOgre::MeshPairList meshes = NifOgre::NIFLoader::load(smodel);
-    mBase = mRend.getScene()->createEntity(meshes[0].first->getName());
-
-    mBase->setVisibilityFlags(RV_Actors);
-    bool transparent = false;
-    for (unsigned int i=0; i<mBase->getNumSubEntities(); ++i)
+    for(size_t i = 0;i < meshes.size();i++)
     {
-        Ogre::MaterialPtr mat = mBase->getSubEntity(i)->getMaterial();
-        Ogre::Material::TechniqueIterator techIt = mat->getTechniqueIterator();
-        while (techIt.hasMoreElements())
+        mBase.push_back(mRend.getScene()->createEntity(meshes[i].first->getName()));
+        Ogre::Entity *base = mBase.back();
+
+        if(!mSkelBase && base->hasSkeleton())
+            mSkelBase = base;
+
+        base->setVisibilityFlags(RV_Actors);
+        bool transparent = false;
+        for(unsigned int j=0;j < base->getNumSubEntities();++j)
         {
-            Ogre::Technique* tech = techIt.getNext();
-            Ogre::Technique::PassIterator passIt = tech->getPassIterator();
-            while (passIt.hasMoreElements())
+            Ogre::MaterialPtr mat = base->getSubEntity(j)->getMaterial();
+            Ogre::Material::TechniqueIterator techIt = mat->getTechniqueIterator();
+            while (techIt.hasMoreElements())
             {
-                Ogre::Pass* pass = passIt.getNext();
-                if (pass->getDepthWriteEnabled() == false)
-                    transparent = true;
+                Ogre::Technique* tech = techIt.getNext();
+                Ogre::Technique::PassIterator passIt = tech->getPassIterator();
+                while (passIt.hasMoreElements())
+                {
+                    Ogre::Pass* pass = passIt.getNext();
+                    if (pass->getDepthWriteEnabled() == false)
+                        transparent = true;
+                }
             }
         }
-    }
-    mBase->setRenderQueueGroup(transparent ? RQG_Alpha : RQG_Main);
-    mBase->setSkipAnimationStateUpdate(true);   //Magical line of code, this makes the bones
-                                               //stay in the same place when we skipanim, or open a gui window
+        base->setRenderQueueGroup(transparent ? RQG_Alpha : RQG_Main);
+        base->setSkipAnimationStateUpdate(true); //Magical line of code, this makes the bones
+                                                 //stay in the same place when we skipanim, or open a gui window
 
-    mInsert->attachObject(mBase);
+        mInsert->attachObject(base);
+    }
 
     if(isFemale)
         mInsert->scale(race->data.height.female, race->data.height.female, race->data.height.female);
@@ -388,7 +395,7 @@ Ogre::Entity* NpcAnimation::insertBoundedPart(const std::string &mesh, const std
     Ogre::Entity* part = mRend.getScene()->createEntity(meshes[0].first->getName());
     part->setVisibilityFlags(RV_Actors);
 
-    mBase->attachObjectToBone(bonename, part);
+    mSkelBase->attachObjectToBone(bonename, part);
     return part;
 }
 
@@ -430,32 +437,32 @@ void NpcAnimation::removeIndividualPart(int type)
 
     if(type == ESM::PRT_Head && head)   //0
     {
-        mBase->detachObjectFromBone(head);
+        mSkelBase->detachObjectFromBone(head);
         head = 0;
     }
     else if(type == ESM::PRT_Hair && hair) //1
     {
-        mBase->detachObjectFromBone(hair);
+        mSkelBase->detachObjectFromBone(hair);
         hair = 0;
     }
     else if(type == ESM::PRT_Neck && neck) //2
     {
-        mBase->detachObjectFromBone(neck);
+        mSkelBase->detachObjectFromBone(neck);
         neck = 0;
     }
     else if(type == ESM::PRT_Groin && groin)//4
     {
-        mBase->detachObjectFromBone(groin);
+        mSkelBase->detachObjectFromBone(groin);
         groin = 0;
     }
     else if(type == ESM::PRT_RWrist && rWrist)//8
     {
-        mBase->detachObjectFromBone(rWrist);
+        mSkelBase->detachObjectFromBone(rWrist);
         rWrist = 0;
     }
     else if(type == ESM::PRT_LWrist && lWrist) //9
     {
-        mBase->detachObjectFromBone(lWrist);
+        mSkelBase->detachObjectFromBone(lWrist);
         lWrist = 0;
     }
     else if(type == ESM::PRT_Shield) //10
@@ -463,72 +470,72 @@ void NpcAnimation::removeIndividualPart(int type)
     }
     else if(type == ESM::PRT_RForearm && rForearm) //11
     {
-        mBase->detachObjectFromBone(rForearm);
+        mSkelBase->detachObjectFromBone(rForearm);
         rForearm = 0;
     }
     else if(type == ESM::PRT_LForearm && lForearm) //12
     {
-        mBase->detachObjectFromBone(lForearm);
+        mSkelBase->detachObjectFromBone(lForearm);
         lForearm = 0;
     }
     else if(type == ESM::PRT_RUpperarm && rupperArm) //13
     {
-        mBase->detachObjectFromBone(rupperArm);
+        mSkelBase->detachObjectFromBone(rupperArm);
         rupperArm = 0;
     }
     else if(type == ESM::PRT_LUpperarm && lupperArm) //14
     {
-        mBase->detachObjectFromBone(lupperArm);
+        mSkelBase->detachObjectFromBone(lupperArm);
         lupperArm = 0;
     }
     else if(type == ESM::PRT_RFoot && rfoot)                 //15
     {
-        mBase->detachObjectFromBone(rfoot);
+        mSkelBase->detachObjectFromBone(rfoot);
         rfoot = 0;
     }
     else if(type == ESM::PRT_LFoot && lfoot)                //16
     {
-        mBase->detachObjectFromBone(lfoot);
+        mSkelBase->detachObjectFromBone(lfoot);
         lfoot = 0;
     }
     else if(type == ESM::PRT_RAnkle && rAnkle)    //17
     {
-        mBase->detachObjectFromBone(rAnkle);
+        mSkelBase->detachObjectFromBone(rAnkle);
         rAnkle = 0;
     }
     else if(type == ESM::PRT_LAnkle && lAnkle)    //18
     {
-        mBase->detachObjectFromBone(lAnkle);
+        mSkelBase->detachObjectFromBone(lAnkle);
         lAnkle = 0;
     }
     else if(type == ESM::PRT_RKnee && rKnee)    //19
     {
-        mBase->detachObjectFromBone(rKnee);
+        mSkelBase->detachObjectFromBone(rKnee);
         rKnee = 0;
     }
     else if(type == ESM::PRT_LKnee && lKnee)    //20
     {
-        mBase->detachObjectFromBone(lKnee);
+        mSkelBase->detachObjectFromBone(lKnee);
         lKnee = 0;
     }
     else if(type == ESM::PRT_RLeg && rUpperLeg)    //21
     {
-        mBase->detachObjectFromBone(rUpperLeg);
+        mSkelBase->detachObjectFromBone(rUpperLeg);
         rUpperLeg = 0;
     }
     else if(type == ESM::PRT_LLeg && lUpperLeg)    //22
     {
-        mBase->detachObjectFromBone(lUpperLeg);
+        mSkelBase->detachObjectFromBone(lUpperLeg);
         lUpperLeg = 0;
     }
     else if(type == ESM::PRT_RPauldron && rclavicle)    //23
     {
-        mBase->detachObjectFromBone(rclavicle);
+        mSkelBase->detachObjectFromBone(rclavicle);
         rclavicle = 0;
     }
     else if(type == ESM::PRT_LPauldron && lclavicle)    //24
     {
-        mBase->detachObjectFromBone(lclavicle);
+        mSkelBase->detachObjectFromBone(lclavicle);
         lclavicle = 0;
     }
     else if(type == ESM::PRT_Weapon)                 //25
