@@ -126,15 +126,16 @@ namespace MWMechanics
 
         if (mDuration>=0.25)
         {
+            float totalDuration = mDuration;
+            mDuration = 0;
+
             for (std::set<MWWorld::Ptr>::iterator iter (mActors.begin()); iter!=mActors.end(); ++iter)
             {
-                updateActor (*iter, mDuration);
+                updateActor (*iter, totalDuration);
 
                 if (iter->getTypeName()==typeid (ESM::NPC).name())
-                    updateNpc (*iter, mDuration, paused);
+                    updateNpc (*iter, totalDuration, paused);
             }
-
-            mDuration = 0;
         }
 
         for (std::set<MWWorld::Ptr>::iterator iter (mActors.begin()); iter!=mActors.end();
