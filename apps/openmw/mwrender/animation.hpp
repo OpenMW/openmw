@@ -1,6 +1,8 @@
 #ifndef _GAME_RENDER_ANIMATION_H
 #define _GAME_RENDER_ANIMATION_H
 
+#include <vector>
+
 #include <openengine/ogre/renderer.hpp>
 #include "../mwworld/actiontalk.hpp"
 #include <components/nif/node.hpp>
@@ -37,7 +39,7 @@ protected:
 
     std::vector<Nif::NiKeyframeData>* mTransformations;
     std::map<std::string,float>* mTextmappings;
-    Ogre::Entity* mBase;
+    std::vector<Ogre::Entity*> mBase;
     void handleAnimationTransforms();
     bool timeIndex( float time, const std::vector<float> & times, int & i, int & j, float & x );
 

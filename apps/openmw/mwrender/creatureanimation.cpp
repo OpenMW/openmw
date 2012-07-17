@@ -26,32 +26,35 @@ CreatureAnimation::CreatureAnimation(const MWWorld::Ptr& ptr, OEngine::Render::O
     {
         std::string mesh = "meshes\\" + ref->base->model;
 
-        // FIXME: There can be more than one!
         NifOgre::MeshPairList meshes = NifOgre::NIFLoader::load(mesh);
-        mBase = mRend.getScene()->createEntity(meshes[0].first->getName());
-        mBase->setVisibilityFlags(RV_Actors);
-
-        bool transparent = false;
-        for (unsigned int i=0; i < mBase->getNumSubEntities(); ++i)
+        for(size_t i = 0;i < meshes.size();i++)
         {
-            Ogre::MaterialPtr mat = mBase->getSubEntity(i)->getMaterial();
-            Ogre::Material::TechniqueIterator techIt = mat->getTechniqueIterator();
-            while (techIt.hasMoreElements())
-            {
-                Ogre::Technique* tech = techIt.getNext();
-                Ogre::Technique::PassIterator passIt = tech->getPassIterator();
-                while (passIt.hasMoreElements())
-                {
-                    Ogre::Pass* pass = passIt.getNext();
+            mBase.push_back(mRend.getScene()->createEntity(meshes[i].first->getName()));
+            Ogre::Entity *base = mBase.back();
+            base->setVisibilityFlags(RV_Actors);
 
-                    if (pass->getDepthWriteEnabled() == false)
-                        transparent = true;
+            bool transparent = false;
+            for (unsigned int j=0;j < base->getNumSubEntities() && !transparent; ++j)
+            {
+                Ogre::MaterialPtr mat = base->getSubEntity(j)->getMaterial();
+                Ogre::Material::TechniqueIterator techIt = mat->getTechniqueIterator();
+                while (techIt.hasMoreElements() && !transparent)
+                {
+                    Ogre::Technique* tech = techIt.getNext();
+                    Ogre::Technique::PassIterator passIt = tech->getPassIterator();
+                    while (passIt.hasMoreElements() && !transparent)
+                    {
+                        Ogre::Pass* pass = passIt.getNext();
+
+                        if (pass->getDepthWriteEnabled() == false)
+                            transparent = true;
+                    }
                 }
             }
-        }
-        mBase->setRenderQueueGroup(transparent ? RQG_Alpha : RQG_Main);
+            base->setRenderQueueGroup(transparent ? RQG_Alpha : RQG_Main);
 
-        mInsert->attachObject(mBase);
+            mInsert->attachObject(base);
+        }
     }
 }
 

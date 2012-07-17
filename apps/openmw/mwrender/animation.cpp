@@ -23,7 +23,6 @@ Animation::Animation(OEngine::Render::OgreRenderer& _rend)
     , mShapeIndexI()
     , mTransformations(NULL)
     , mTextmappings(NULL)
-    , mBase(NULL)
 {
 }
 

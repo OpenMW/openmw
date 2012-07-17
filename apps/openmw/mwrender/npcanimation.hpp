@@ -41,6 +41,7 @@ private:
     Ogre::Entity* head;
 
     Ogre::SceneNode* mInsert;
+    Ogre::Entity *mBase; // FIXME: Temporary!
     bool isBeast;
     bool isFemale;
     std::string headModel;
