@@ -11,9 +11,7 @@
 
 #include "../mwworld/manualref.hpp" /// FIXME
 
-#include "ptr.hpp"
 #include "player.hpp"
-#include "class.hpp"
 #include "localscripts.hpp"
 
 #include "cellfunctors.hpp"

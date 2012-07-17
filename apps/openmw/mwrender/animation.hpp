@@ -1,14 +1,10 @@
 #ifndef _GAME_RENDER_ANIMATION_H
 #define _GAME_RENDER_ANIMATION_H
-#include <components/nif/data.hpp>
+
 #include <openengine/ogre/renderer.hpp>
-#include "../mwworld/refdata.hpp"
-#include "../mwworld/ptr.hpp"
 #include "../mwworld/actiontalk.hpp"
 #include <components/nif/node.hpp>
-#include <map>
 #include <openengine/bullet/physic.hpp>
-
 
 
 

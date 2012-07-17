@@ -1,8 +1,5 @@
 #include "worldimp.hpp"
 
-#include <cmath>
-#include <iostream>
-
 #include <components/bsa/bsa_archive.hpp>
 #include <components/files/collections.hpp>
 
@@ -17,16 +14,10 @@
 
 #include "../mwgui/window_manager.hpp"
 
-#include "ptr.hpp"
-#include "class.hpp"
 #include "player.hpp"
-#include "weather.hpp"
 #include "manualref.hpp"
-#include "refdata.hpp"
-#include "globals.hpp"
 #include "cellfunctors.hpp"
 
-#include <OgreVector3.h>
 using namespace Ogre;
 
 namespace

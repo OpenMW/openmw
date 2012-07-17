@@ -25,21 +25,15 @@
 #define _BULLET_NIF_LOADER_H_
 
 #include <OgreMesh.h>
-#include <assert.h>
+#include <cassert>
 #include <string>
 #include <BulletCollision/CollisionShapes/btBvhTriangleMeshShape.h>
 #include <BulletCollision/CollisionShapes/btConvexTriangleMeshShape.h>
 #include <btBulletDynamicsCommon.h>
-#include <btBulletCollisionCommon.h>
 #include "openengine/bullet/BulletShapeLoader.h"
 
-#include <vector>
-#include <list>
 // For warning messages
 #include <iostream>
-
-// float infinity
-#include <limits>
 
 namespace Nif
 {

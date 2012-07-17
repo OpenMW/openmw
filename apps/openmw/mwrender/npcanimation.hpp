@@ -1,20 +1,12 @@
 #ifndef _GAME_RENDER_NPCANIMATION_H
 #define _GAME_RENDER_NPCANIMATION_H
-#include "animation.hpp"
-#include <components/nif/data.hpp>
-#include <components/nif/node.hpp>
-#include <components/nif/property.hpp>
-#include <components/nif/controller.hpp>
-#include <components/nif/extra.hpp>
-#include <utility>
 
-#include "../mwworld/refdata.hpp"
-#include "../mwworld/ptr.hpp"
+#include "animation.hpp"
+
 #include "components/nifogre/ogre_nif_loader.hpp"
 #include "../mwworld/inventorystore.hpp"
 #include "../mwclass/npc.hpp"
 #include "../mwworld/containerstore.hpp"
-#include "components/esm/loadarmo.hpp"
 
 namespace MWRender{
 
