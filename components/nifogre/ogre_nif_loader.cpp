@@ -896,7 +896,10 @@ EntityList NIFLoader::createEntities(Ogre::SceneNode *parent, const std::string 
         {
             Ogre::Entity *entity = entitylist.mEntities[i];
             if(entity != entitylist.mSkelBase && entity->hasSkeleton())
+            {
                 entity->shareSkeletonInstanceWith(entitylist.mSkelBase);
+                parent->attachObject(entity);
+            }
             else if(entity != entitylist.mSkelBase)
                 entitylist.mSkelBase->attachObjectToBone(meshes[i].second, entity);
         }
