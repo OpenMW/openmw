@@ -779,8 +779,9 @@ public:
         Nif::ExtraPtr e = node->extra;
         while(!e.empty())
         {
-            Nif::NiStringExtraData *sd = dynamic_cast<Nif::NiStringExtraData*>(e.getPtr());
-            if(sd != NULL)
+            Nif::NiStringExtraData *sd;
+            Nif::NiTextKeyExtraData *td;
+            if((sd=dynamic_cast<Nif::NiStringExtraData*>(e.getPtr())) != NULL)
             {
                 // String markers may contain important information
                 // affecting the entire subtree of this obj
@@ -790,6 +791,10 @@ public:
                     // editor.
                     flags |= 0x01;
                 }
+            }
+            else if((td=dynamic_cast<Nif::NiTextKeyExtraData*>(e.getPtr())) != NULL)
+            {
+                // TODO: Read and store text keys somewhere
             }
             else
                 warn("Unhandled extra data type "+e->recName);
