@@ -123,79 +123,35 @@ void NpcAnimation::updateParts()
 {
     bool apparelChanged = false;
 
-    //mInv.getSlot(MWWorld::InventoryStore::Slot_Robe);
-    if(robe != mInv.getSlot(MWWorld::InventoryStore::Slot_Robe))
+    const struct {
+        MWWorld::ContainerStoreIterator *iter;
+        int slot;
+    } slotlist[] = {
+        { &robe, MWWorld::InventoryStore::Slot_Robe },
+        { &skirtiter, MWWorld::InventoryStore::Slot_Skirt },
+        { &helmet, MWWorld::InventoryStore::Slot_Helmet },
+        { &cuirass, MWWorld::InventoryStore::Slot_Cuirass },
+        { &greaves, MWWorld::InventoryStore::Slot_Greaves },
+        { &leftpauldron, MWWorld::InventoryStore::Slot_LeftPauldron },
+        { &rightpauldron, MWWorld::InventoryStore::Slot_RightPauldron },
+        { &boots, MWWorld::InventoryStore::Slot_Boots }, // !isBeast
+        { &leftglove, MWWorld::InventoryStore::Slot_LeftGauntlet },
+        { &rightglove, MWWorld::InventoryStore::Slot_RightGauntlet },
+        { &shirt, MWWorld::InventoryStore::Slot_Shirt },
+        { &pants, MWWorld::InventoryStore::Slot_Pants },
+    };
+    for(size_t i = 0;i < sizeof(slotlist)/sizeof(slotlist[0]);i++)
     {
-        // A robe was added or removed
-        robe = mInv.getSlot(MWWorld::InventoryStore::Slot_Robe);
-        removePartGroup(MWWorld::InventoryStore::Slot_Robe);
-        apparelChanged = true;
-    }
-    if(skirtiter != mInv.getSlot(MWWorld::InventoryStore::Slot_Skirt))
-    {
-        skirtiter = mInv.getSlot(MWWorld::InventoryStore::Slot_Skirt);
-        removePartGroup(MWWorld::InventoryStore::Slot_Skirt);
-        apparelChanged = true;
-    }
-    if(helmet != mInv.getSlot(MWWorld::InventoryStore::Slot_Helmet))
-    {
-        helmet = mInv.getSlot(MWWorld::InventoryStore::Slot_Helmet);
-        removePartGroup(MWWorld::InventoryStore::Slot_Helmet);
-        apparelChanged = true;
-    }
-    if(cuirass != mInv.getSlot(MWWorld::InventoryStore::Slot_Cuirass))
-    {
-        cuirass = mInv.getSlot(MWWorld::InventoryStore::Slot_Cuirass);
-        removePartGroup(MWWorld::InventoryStore::Slot_Cuirass);
-        apparelChanged = true;
-    }
-    if(greaves != mInv.getSlot(MWWorld::InventoryStore::Slot_Greaves))
-    {
-        greaves = mInv.getSlot(MWWorld::InventoryStore::Slot_Greaves);
-        removePartGroup(MWWorld::InventoryStore::Slot_Greaves);
-        apparelChanged = true;
-    }
-    if(leftpauldron != mInv.getSlot(MWWorld::InventoryStore::Slot_LeftPauldron))
-    {
-        leftpauldron = mInv.getSlot(MWWorld::InventoryStore::Slot_LeftPauldron);
-        removePartGroup(MWWorld::InventoryStore::Slot_LeftPauldron);
-        apparelChanged = true;
-    }
-    if(rightpauldron != mInv.getSlot(MWWorld::InventoryStore::Slot_RightPauldron))
-    {
-        rightpauldron = mInv.getSlot(MWWorld::InventoryStore::Slot_RightPauldron);
-        removePartGroup(MWWorld::InventoryStore::Slot_RightPauldron);
-        apparelChanged = true;
-    }
-    if(!isBeast && boots != mInv.getSlot(MWWorld::InventoryStore::Slot_Boots))
-    {
-        boots = mInv.getSlot(MWWorld::InventoryStore::Slot_Boots);
-        removePartGroup(MWWorld::InventoryStore::Slot_Boots);
-        apparelChanged = true;
-    }
-    if(leftglove != mInv.getSlot(MWWorld::InventoryStore::Slot_LeftGauntlet))
-    {
-        leftglove = mInv.getSlot(MWWorld::InventoryStore::Slot_LeftGauntlet);
-        removePartGroup(MWWorld::InventoryStore::Slot_LeftGauntlet);
-        apparelChanged = true;
-    }
-    if(rightglove != mInv.getSlot(MWWorld::InventoryStore::Slot_RightGauntlet))
-    {
-        rightglove = mInv.getSlot(MWWorld::InventoryStore::Slot_RightGauntlet);
-        removePartGroup(MWWorld::InventoryStore::Slot_RightGauntlet);
-        apparelChanged = true;
-    }
-    if(shirt != mInv.getSlot(MWWorld::InventoryStore::Slot_Shirt))
-    {
-        shirt = mInv.getSlot(MWWorld::InventoryStore::Slot_Shirt);
-        removePartGroup(MWWorld::InventoryStore::Slot_Shirt);
-        apparelChanged = true;
-    }
-    if(pants != mInv.getSlot(MWWorld::InventoryStore::Slot_Pants))
-    {
-        pants = mInv.getSlot(MWWorld::InventoryStore::Slot_Pants);
-        removePartGroup(MWWorld::InventoryStore::Slot_Pants);
-        apparelChanged = true;
+        if(slotlist[i].iter == &boots && isBeast)
+            continue;
+
+        MWWorld::ContainerStoreIterator iter = mInv.getSlot(slotlist[i].slot);
+        if(*slotlist[i].iter != iter)
+        {
+            *slotlist[i].iter = iter;
+            removePartGroup(slotlist[i].slot);
+            apparelChanged = true;
+        }
     }
 
     if(apparelChanged)
