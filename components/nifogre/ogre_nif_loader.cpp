@@ -885,6 +885,7 @@ EntityList NIFLoader::createEntities(Ogre::SceneNode *parent, const std::string 
     if(meshes.size() == 0)
         return entitylist;
 
+    entitylist.mRootNode = parent;
     Ogre::SceneManager *sceneMgr = parent->getCreator();
     for(size_t i = 0;i < meshes.size();i++)
     {

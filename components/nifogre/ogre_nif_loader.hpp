@@ -61,8 +61,9 @@ namespace NifOgre
 struct EntityList {
     std::vector<Ogre::Entity*> mEntities;
     Ogre::Entity *mSkelBase;
+    Ogre::SceneNode *mRootNode;
 
-    EntityList() : mSkelBase(0)
+    EntityList() : mSkelBase(0), mRootNode(0)
     { }
 };
 
