@@ -17,6 +17,26 @@ using namespace NifOgre;
 namespace MWRender{
 NpcAnimation::~NpcAnimation()
 {
+    removeEntities(head);
+    removeEntities(hair);
+    removeEntities(neck);
+    removeEntities(groin);
+    removeEntities(rWrist);
+    removeEntities(lWrist);
+    removeEntities(rForearm);
+    removeEntities(lForearm);
+    removeEntities(rupperArm);
+    removeEntities(lupperArm);
+    removeEntities(rfoot);
+    removeEntities(lfoot);
+    removeEntities(rAnkle);
+    removeEntities(lAnkle);
+    removeEntities(rKnee);
+    removeEntities(lKnee);
+    removeEntities(rUpperLeg);
+    removeEntities(lUpperLeg);
+    removeEntities(rclavicle);
+    removeEntities(lclavicle);
 }
 
 

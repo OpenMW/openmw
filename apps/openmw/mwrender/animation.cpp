@@ -5,6 +5,7 @@
 #include <OgreEntity.h>
 #include <OgreBone.h>
 #include <OgreSubMesh.h>
+#include <OgreSceneManager.h>
 
 namespace MWRender
 {
@@ -28,6 +29,10 @@ Animation::Animation(OEngine::Render::OgreRenderer& _rend)
 
 Animation::~Animation()
 {
+    Ogre::SceneManager *sceneMgr = mInsert->getCreator();
+    for(size_t i = 0;i < mEntityList.mEntities.size();i++)
+        sceneMgr->destroyEntity(mEntityList.mEntities[i]);
+    mEntityList.mEntities.clear();
 }
 
 void Animation::startScript(std::string groupname, int mode, int loops)

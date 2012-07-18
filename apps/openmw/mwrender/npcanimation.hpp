@@ -40,7 +40,6 @@ private:
     std::vector<Ogre::Entity*> hair;
     std::vector<Ogre::Entity*> head;
 
-    Ogre::SceneNode* mInsert;
     bool isBeast;
     bool isFemale;
     std::string headModel;
