@@ -58,6 +58,7 @@ namespace Nif
 namespace NifOgre
 {
 
+// FIXME: This should not be in NifOgre, it works agnostic of what model format is used
 struct EntityList {
     std::vector<Ogre::Entity*> mEntities;
     Ogre::Entity *mSkelBase;
@@ -89,6 +90,11 @@ class NIFLoader
     static MeshPairList load(const std::string &name, const std::string &group);
 
 public:
+    static EntityList createEntities(Ogre::Entity *parent, const std::string &bonename,
+                                     Ogre::SceneManager *sceneMgr,
+                                     const std::string &name,
+                                     const std::string &group="General");
+
     static EntityList createEntities(Ogre::SceneNode *parent,
                                      const std::string &name,
                                      const std::string &group="General");

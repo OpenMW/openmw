@@ -915,6 +915,49 @@ EntityList NIFLoader::createEntities(Ogre::SceneNode *parent, const std::string 
     return entitylist;
 }
 
+EntityList NIFLoader::createEntities(Ogre::Entity *parent, const std::string &bonename,
+                                     Ogre::SceneManager *sceneMgr,
+                                     const std::string &name,
+                                     const std::string &group)
+{
+    EntityList entitylist;
+
+    MeshPairList meshes = load(name, group);
+    if(meshes.size() == 0)
+        return entitylist;
+
+    for(size_t i = 0;i < meshes.size();i++)
+    {
+        entitylist.mEntities.push_back(sceneMgr->createEntity(meshes[i].first->getName()));
+        Ogre::Entity *entity = entitylist.mEntities.back();
+        if(!entitylist.mSkelBase && entity->hasSkeleton())
+            entitylist.mSkelBase = entity;
+    }
+
+    if(entitylist.mSkelBase)
+    {
+        parent->attachObjectToBone(bonename, entitylist.mSkelBase);
+        for(size_t i = 0;i < entitylist.mEntities.size();i++)
+        {
+            Ogre::Entity *entity = entitylist.mEntities[i];
+            if(entity != entitylist.mSkelBase && entity->hasSkeleton())
+            {
+                entity->shareSkeletonInstanceWith(entitylist.mSkelBase);
+                parent->attachObjectToBone(bonename, entity);
+            }
+            else if(entity != entitylist.mSkelBase)
+                entitylist.mSkelBase->attachObjectToBone(meshes[i].second, entity);
+        }
+    }
+    else
+    {
+        for(size_t i = 0;i < entitylist.mEntities.size();i++)
+            parent->attachObjectToBone(bonename, entitylist.mEntities[i]);
+    }
+
+    return entitylist;
+}
+
 
 /* More code currently not in use, from the old D source. This was
    used in the first attempt at loading NIF meshes, where each submesh
