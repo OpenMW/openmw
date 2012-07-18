@@ -365,16 +365,10 @@ void NpcAnimation::updateParts()
 
 std::vector<Ogre::Entity*> NpcAnimation::insertBoundedPart(const std::string &mesh, const std::string &bonename)
 {
-    NifOgre::MeshPairList meshes = NIFLoader::load(mesh);
-    std::vector<Ogre::Entity*> parts;
-    for(size_t i = 0;i < meshes.size();i++)
-    {
-        parts.push_back(mRend.getScene()->createEntity(meshes[i].first->getName()));
-        Ogre::Entity *part = parts.back();
-
-        part->setVisibilityFlags(RV_Actors);
-        mEntityList.mSkelBase->attachObjectToBone(bonename, part);
-    }
+    NifOgre::EntityList entities = NIFLoader::createEntities(mInsert, mesh);
+    std::vector<Ogre::Entity*> &parts = entities.mEntities;
+    for(size_t i = 0;i < parts.size();i++)
+        parts[i]->setVisibilityFlags(RV_Actors);
     return parts;
 }
 

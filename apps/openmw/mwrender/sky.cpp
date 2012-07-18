@@ -509,15 +509,13 @@ void SkyManager::create()
 
     /// \todo sky_night_02.nif (available in Bloodmoon)
     mAtmosphereNight = mRootNode->createChildSceneNode();
-    NifOgre::MeshPairList meshes = NifOgre::NIFLoader::load("meshes\\sky_night_01.nif");
-    for(size_t i = 0;i < meshes.size();i++)
+    NifOgre::EntityList entities = NifOgre::NIFLoader::createEntities(mAtmosphereNight, "meshes\\sky_night_01.nif");
+    for(size_t i = 0;i < entities.mEntities.size();i++)
     {
-        Entity* night1_ent = mSceneMgr->createEntity(meshes[i].first->getName());
+        Entity* night1_ent = entities.mEntities[i];
         night1_ent->setRenderQueueGroup(RQG_SkiesEarly+1);
         night1_ent->setVisibilityFlags(RV_Sky);
         night1_ent->setCastShadows(false);
-
-        mAtmosphereNight->attachObject(night1_ent);
 
         for (unsigned int i=0; i<night1_ent->getNumSubEntities(); ++i)
         {
@@ -589,17 +587,16 @@ void SkyManager::create()
     fshader->getDefaultParameters()->setNamedAutoConstant("emissive", GpuProgramParameters::ACT_SURFACE_EMISSIVE_COLOUR);
 
     mAtmosphereDay = mRootNode->createChildSceneNode();
-    meshes = NifOgre::NIFLoader::load("meshes\\sky_atmosphere.nif");
-    for(size_t i = 0;i < meshes.size();i++)
+    entities = NifOgre::NIFLoader::createEntities(mAtmosphereDay, "meshes\\sky_atmosphere.nif");
+    for(size_t i = 0;i < entities.mEntities.size();i++)
     {
-        Entity* atmosphere_ent = mSceneMgr->createEntity(meshes[i].first->getName());
+        Entity* atmosphere_ent = entities.mEntities[i];
         atmosphere_ent->setCastShadows(false);
 
         ModVertexAlpha(atmosphere_ent, 0);
 
         atmosphere_ent->setRenderQueueGroup(RQG_SkiesEarly);
         atmosphere_ent->setVisibilityFlags(RV_Sky);
-        mAtmosphereDay->attachObject(atmosphere_ent);
 
         mAtmosphereMaterial = atmosphere_ent->getSubEntity(0)->getMaterial();
         mAtmosphereMaterial = mAtmosphereMaterial->clone("Atmosphere");
@@ -677,13 +674,12 @@ void SkyManager::create()
     mCloudFragmentShader->getDefaultParameters()->setNamedAutoConstant("emissive", GpuProgramParameters::ACT_SURFACE_EMISSIVE_COLOUR);
 
     SceneNode* clouds_node = mRootNode->createChildSceneNode();
-    meshes = NifOgre::NIFLoader::load("meshes\\sky_clouds_01.nif");
-    for(size_t i = 0;i < meshes.size();i++)
+    entities = NifOgre::NIFLoader::createEntities(clouds_node, "meshes\\sky_clouds_01.nif");
+    for(size_t i = 0;i < entities.mEntities.size();i++)
     {
-        Entity* clouds_ent = mSceneMgr->createEntity(meshes[i].first->getName());
+        Entity* clouds_ent = entities.mEntities[i];
         clouds_ent->setVisibilityFlags(RV_Sky);
         clouds_ent->setRenderQueueGroup(RQG_SkiesEarly+5);
-        clouds_node->attachObject(clouds_ent);
 
         mCloudMaterial = clouds_ent->getSubEntity(0)->getMaterial();
         mCloudMaterial = mCloudMaterial->clone("Clouds");
