@@ -540,7 +540,7 @@ class NIFMeshLoader : Ogre::ManualResourceLoader
             // better to transform the bones into bind position, but there doesn't seem to
             // be a reliable way to do that.
             std::vector<Ogre::Vector3> newVerts(srcVerts.size(), Ogre::Vector3(0.0f));
-            std::vector<Ogre::Vector3> newNorms(srcNorms.size(), Ogre::Vector3(1.0f));
+            std::vector<Ogre::Vector3> newNorms(srcNorms.size(), Ogre::Vector3(0.0f));
 
             const Nif::NiSkinData *data = skin->data.getPtr();
             const Nif::NodeList &bones = skin->bones;
