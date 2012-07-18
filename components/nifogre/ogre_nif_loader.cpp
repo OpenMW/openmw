@@ -807,6 +807,7 @@ public:
             Ogre::MeshManager &meshMgr = Ogre::MeshManager::getSingleton();
             std::string fullname = mName+"@"+shape->name;
 
+            std::transform(fullname.begin(), fullname.end(), fullname.begin(), ::tolower);
             Ogre::MeshPtr mesh = meshMgr.getByName(fullname);
             if(mesh.isNull())
             {
@@ -842,9 +843,11 @@ public:
 NIFMeshLoader::LoaderMap NIFMeshLoader::sLoaders;
 
 
-MeshPairList NIFLoader::load(const std::string &name, const std::string &group)
+MeshPairList NIFLoader::load(std::string name, const std::string &group)
 {
     MeshPairList meshes;
+
+    std::transform(name.begin(), name.end(), name.begin(), ::tolower);
 
     Nif::NIFFile nif(name);
     if (nif.numRecords() < 1)
