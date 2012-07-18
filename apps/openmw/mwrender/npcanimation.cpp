@@ -339,13 +339,13 @@ void NpcAnimation::updateParts()
     }
 }
 
-std::vector<Ogre::Entity*> NpcAnimation::insertBoundedPart(const std::string &mesh, const std::string &bonename)
+NifOgre::EntityList NpcAnimation::insertBoundedPart(const std::string &mesh, const std::string &bonename)
 {
     NifOgre::EntityList entities = NIFLoader::createEntities(mInsert, mesh);
     std::vector<Ogre::Entity*> &parts = entities.mEntities;
     for(size_t i = 0;i < parts.size();i++)
         parts[i]->setVisibilityFlags(RV_Actors);
-    return parts;
+    return entities;
 }
 
 void NpcAnimation::runAnimation(float timepassed)
@@ -379,15 +379,19 @@ void NpcAnimation::runAnimation(float timepassed)
     }
 }
 
-void NpcAnimation::removeEntities(std::vector<Ogre::Entity*> &entities)
+void NpcAnimation::removeEntities(NifOgre::EntityList &entities)
 {
+    assert(&entities != &mEntityList);
+
     Ogre::SceneManager *sceneMgr = mInsert->getCreator();
-    for(size_t i = 0;i < entities.size();i++)
+    for(size_t i = 0;i < entities.mEntities.size();i++)
     {
-        mEntityList.mSkelBase->detachObjectFromBone(entities[i]);
-        sceneMgr->destroyEntity(entities[i]);
+        mEntityList.mSkelBase->detachObjectFromBone(entities.mEntities[i]);
+        sceneMgr->destroyEntity(entities.mEntities[i]);
     }
-    entities.clear();
+    entities.mEntities.clear();
+    entities.mSkelBase = NULL;
+    entities.mRootNode = NULL;
 }
 
 void NpcAnimation::removeIndividualPart(int type)
