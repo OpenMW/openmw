@@ -180,20 +180,19 @@ void loadResource(Ogre::Resource *resource)
     buildBones(skel, node);
 }
 
-static bool createSkeleton(const std::string &name, const std::string &group, Nif::Node *node, Ogre::SkeletonPtr *skel)
+static bool createSkeleton(const std::string &name, const std::string &group, Nif::Node *node)
 {
     if(node->boneTrafo != NULL)
     {
         Ogre::SkeletonManager &skelMgr = Ogre::SkeletonManager::getSingleton();
 
-        Ogre::SkeletonPtr tmp = skelMgr.getByName(name);
-        if(tmp.isNull())
+        Ogre::SkeletonPtr skel = skelMgr.getByName(name);
+        if(skel.isNull())
         {
             static NIFSkeletonLoader loader;
-            tmp = skelMgr.create(name, group, true, &loader);
+            skel = skelMgr.create(name, group, true, &loader);
         }
 
-        if(skel) *skel = tmp;
         return true;
     }
 
@@ -205,7 +204,7 @@ static bool createSkeleton(const std::string &name, const std::string &group, Ni
         {
             if(!children[i].empty())
             {
-                if(createSkeleton(name, group, children[i].getPtr(), skel))
+                if(createSkeleton(name, group, children[i].getPtr()))
                     return true;
             }
         }
@@ -843,12 +842,9 @@ public:
 NIFMeshLoader::LoaderMap NIFMeshLoader::sLoaders;
 
 
-MeshPairList NIFLoader::load(const std::string &name, Ogre::SkeletonPtr *skel, const std::string &group)
+MeshPairList NIFLoader::load(const std::string &name, const std::string &group)
 {
     MeshPairList meshes;
-
-    if(skel != NULL)
-        skel->setNull();
 
     Nif::NIFFile nif(name);
     if (nif.numRecords() < 1)
@@ -869,7 +865,7 @@ MeshPairList NIFLoader::load(const std::string &name, Ogre::SkeletonPtr *skel, c
         return meshes;
     }
 
-    bool hasSkel = NIFSkeletonLoader::createSkeleton(name, group, node, skel);
+    bool hasSkel = NIFSkeletonLoader::createSkeleton(name, group, node);
 
     NIFMeshLoader meshldr(name, group, hasSkel);
     meshldr.createMeshes(node, meshes);
@@ -881,7 +877,7 @@ EntityList NIFLoader::createEntities(Ogre::SceneNode *parent, const std::string 
 {
     EntityList entitylist;
 
-    MeshPairList meshes = load(name, NULL, group);
+    MeshPairList meshes = load(name, group);
     if(meshes.size() == 0)
         return entitylist;
 
