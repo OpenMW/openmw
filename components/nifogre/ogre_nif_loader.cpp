@@ -926,12 +926,23 @@ EntityList NIFLoader::createEntities(Ogre::Entity *parent, const std::string &bo
     if(meshes.size() == 0)
         return entitylist;
 
+    std::string filter = "Tri "+bonename;
     for(size_t i = 0;i < meshes.size();i++)
     {
-        entitylist.mEntities.push_back(sceneMgr->createEntity(meshes[i].first->getName()));
-        Ogre::Entity *entity = entitylist.mEntities.back();
-        if(!entitylist.mSkelBase && entity->hasSkeleton())
-            entitylist.mSkelBase = entity;
+        Ogre::Entity *ent = sceneMgr->createEntity(meshes[i].first->getName());
+        if(ent->hasSkeleton())
+        {
+            if(meshes[i].second.length() < filter.length() || filter.compare(meshes[i].second) != 0)
+            {
+                sceneMgr->destroyEntity(ent);
+                meshes.erase(meshes.begin()+i);
+                i--;
+                continue;
+            }
+            if(!entitylist.mSkelBase)
+                entitylist.mSkelBase = ent;
+        }
+        entitylist.mEntities.push_back(ent);
     }
 
     if(entitylist.mSkelBase)
@@ -946,7 +957,7 @@ EntityList NIFLoader::createEntities(Ogre::Entity *parent, const std::string &bo
                 parent->attachObjectToBone(bonename, entity);
             }
             else if(entity != entitylist.mSkelBase)
-                entitylist.mSkelBase->attachObjectToBone(meshes[i].second, entity);
+                parent->attachObjectToBone(bonename, entity);
         }
     }
     else
