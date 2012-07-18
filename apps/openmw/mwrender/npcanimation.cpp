@@ -405,8 +405,12 @@ void NpcAnimation::runAnimation(float timepassed)
 
 void NpcAnimation::removeEntities(std::vector<Ogre::Entity*> &entities)
 {
+    Ogre::SceneManager *sceneMgr = mInsert->getCreator();
     for(size_t i = 0;i < entities.size();i++)
+    {
         mEntityList.mSkelBase->detachObjectFromBone(entities[i]);
+        sceneMgr->destroyEntity(entities[i]);
+    }
     entities.clear();
 }
 
