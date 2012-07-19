@@ -33,6 +33,7 @@
 #include <OgreSubMesh.h>
 #include <OgreRoot.h>
 #include <OgreEntity.h>
+#include <OgreTagPoint.h>
 
 #include <components/settings/settings.hpp>
 #include <components/nifoverrides/nifoverrides.hpp>
@@ -956,6 +957,10 @@ EntityList NIFLoader::createEntities(Ogre::Entity *parent, const std::string &bo
         entitylist.mEntities.push_back(ent);
     }
 
+    Ogre::Vector3 scale(1.0f);
+    if(bonename.find("Left") != std::string::npos)
+        scale.x *= -1.0f;
+
     if(entitylist.mSkelBase)
     {
         entitylist.mSkelBase->shareSkeletonInstanceWith(parent);
@@ -969,13 +974,19 @@ EntityList NIFLoader::createEntities(Ogre::Entity *parent, const std::string &bo
                 parentNode->attachObject(entity);
             }
             else if(entity != entitylist.mSkelBase)
-                parent->attachObjectToBone(bonename, entity);
+            {
+                Ogre::TagPoint *tag = parent->attachObjectToBone(bonename, entity);
+                tag->setScale(scale);
+            }
         }
     }
     else
     {
         for(size_t i = 0;i < entitylist.mEntities.size();i++)
-            parent->attachObjectToBone(bonename, entitylist.mEntities[i]);
+        {
+            Ogre::TagPoint *tag = parent->attachObjectToBone(bonename, entitylist.mEntities[i]);
+            tag->setScale(scale);
+        }
     }
 
     return entitylist;
