@@ -882,7 +882,7 @@ MeshPairList NIFLoader::load(std::string name, std::string skelName, const std::
     }
 
     NIFSkeletonLoader skelldr;
-    bool hasSkel = skelldr.createSkeleton(name, group, node);
+    bool hasSkel = skelldr.createSkeleton(skelName, group, node);
 
     NIFMeshLoader meshldr(name, group, (hasSkel ? skelName : std::string()));
     meshldr.createMeshes(node, meshes);
