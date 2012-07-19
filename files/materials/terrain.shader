@@ -147,7 +147,7 @@
 @shEndForeach
     
 #if FOG
-        shUniform(float3, fogColor) @shAutoConstant(fogColor, fog_colour)
+        shUniform(float3, fogColour) @shAutoConstant(fogColour, fog_colour)
         shUniform(float4, fogParams) @shAutoConstant(fogParams, fog_params)
 #endif
     
@@ -221,11 +221,13 @@
         float3 caustics = float3(1,1,1);
 #if UNDERWATER
 
-        float4 worldPos = shMatrixMult(worldMatrix, float4(objSpacePosition,1));
+        float3 worldPos = shMatrixMult(worldMatrix, float4(objSpacePosition,1)).xyz;
+        float3 waterEyePos = float3(1,1,1);
         if (worldPos.y < waterLevel)
         {
             float4 worldNormal = shMatrixMult(worldMatrix, float4(normal.xyz, 0));
-            caustics = getCaustics(causticMap, worldPos.xyz, cameraPos.xyz, worldNormal.xyz, lightDirectionWS0.xyz, waterLevel, waterTimer, windDir_windSpeed);
+            waterEyePos = intercept(worldPos, eyePosWS - worldPos, float3(0,1,0), waterLevel);
+            caustics = getCaustics(causticMap, worldPos, waterEyePos.xyz, worldNormal.xyz, lightDirectionWS0.xyz, waterLevel, waterTimer, windDir_windSpeed);
         }
 
 #endif
@@ -329,7 +331,7 @@
         
 #if FOG
         float fogValue = shSaturate((depth - fogParams.y) * fogParams.w);
-        shOutputColour(0).xyz = shLerp (shOutputColour(0).xyz, fogColor, fogValue);
+        shOutputColour(0).xyz = shLerp (shOutputColour(0).xyz, fogColour, fogValue);
 #endif
 
 

@@ -42,7 +42,7 @@
 
 #if HAS_VERTEXCOLOR
         shColourInput(float4)
-        shOutput(float4, colorPassthrough)
+        shOutput(float4, colourPassthrough)
 #endif
 
 #if SHADOWS
@@ -75,7 +75,7 @@
 #endif
 
 #if HAS_VERTEXCOLOR
-        colorPassthrough = colour;
+        colourPassthrough = colour;
 #endif
 
 #if SHADOWS
@@ -128,12 +128,12 @@
 #endif
         
 #if FOG
-        shUniform(float3, fogColor) @shAutoConstant(fogColor, fog_colour)
+        shUniform(float3, fogColour) @shAutoConstant(fogColour, fog_colour)
         shUniform(float4, fogParams) @shAutoConstant(fogParams, fog_params)
 #endif
 
 #ifdef HAS_VERTEXCOLOR
-        shInput(float4, colorPassthrough)
+        shInput(float4, colourPassthrough)
 #endif
 
 #if SHADOWS
@@ -201,11 +201,13 @@
 
         float3 caustics = float3(1,1,1);
 #if UNDERWATER
-    float4 worldPos = shMatrixMult(worldMatrix, float4(objSpacePositionPassthrough,1));
+    float3 worldPos = shMatrixMult(worldMatrix, float4(objSpacePositionPassthrough,1)).xyz;
+    float3 waterEyePos = float3(1,1,1);
     if (worldPos.y < waterLevel)
     {
         float4 worldNormal = shMatrixMult(worldMatrix, float4(normal.xyz, 0));
-        caustics = getCaustics(causticMap, worldPos.xyz, cameraPos.xyz, worldNormal.xyz, lightDirectionWS0.xyz, waterLevel, waterTimer, windDir_windSpeed);
+        waterEyePos = intercept(worldPos, cameraPos.xyz - worldPos, float3(0,1,0), waterLevel);
+        caustics = getCaustics(causticMap, worldPos, waterEyePos.xyz, worldNormal.xyz, lightDirectionWS0.xyz, waterLevel, waterTimer, windDir_windSpeed);
     }
 #endif
 
@@ -235,7 +237,7 @@
     @shEndForeach
     
 #if HAS_VERTEXCOLOR
-        ambient *= colorPassthrough.xyz;
+        ambient *= colourPassthrough.xyz;
 #endif
 
         shOutputColour(0).xyz *= (ambient + diffuse + materialEmissive.xyz);
@@ -243,16 +245,40 @@
 
 
 #if HAS_VERTEXCOLOR && !LIGHTING
-        shOutputColour(0).xyz *= colorPassthrough.xyz;
+        shOutputColour(0).xyz *= colourPassthrough.xyz;
 #endif
 
 #if FOG
         float fogValue = shSaturate((depthPassthrough - fogParams.y) * fogParams.w);
-        shOutputColour(0).xyz = shLerp (shOutputColour(0).xyz, fogColor, fogValue);
+        
+        #if UNDERWATER
+        // regular fog only if fragment is above water
+        if (worldPos.y > waterLevel)
+        #endif
+        shOutputColour(0).xyz = shLerp (shOutputColour(0).xyz, fogColour, fogValue);
 #endif
 
-        // prevent negative color output (for example with negative lights)
+        // prevent negative colour output (for example with negative lights)
         shOutputColour(0).xyz = max(shOutputColour(0).xyz, float3(0,0,0));
+        
+#if UNDERWATER
+        float fogAmount = (worldPos.y > waterLevel)
+             ? shSaturate(length(waterEyePos-worldPos) / VISIBILITY) 
+             : shSaturate(length(cameraPos.xyz-worldPos)/ VISIBILITY);
+             
+        float3 eyeVec = normalize(cameraPos.xyz-worldPos);
+        float waterSunGradient = dot(eyeVec, -normalize(lightDirectionWS0.xyz));
+        waterSunGradient = clamp(pow(waterSunGradient*0.7+0.3,2.0),0.0,1.0);
+        
+        float waterGradient = dot(eyeVec, vec3(0.0,-1.0,0.0));
+        waterGradient = clamp((waterGradient*0.5+0.5),0.2,1.0);
+        
+        float3 waterSunColour = vec3(0.0,1.0,0.85)*waterSunGradient;
+        waterSunColour = (cameraPos.z < waterLevel) ? waterSunColour*0.5:waterSunColour*0.25;//below or above water?
+        
+        float3 waterColour = (float3(0.0078, 0.5176, 0.700)+waterSunColour)*waterGradient*2.0;
+    shOutputColour(0).xyz = waterColour;
+#endif
 
 #if MRT
         shOutputColour(1) = float4(depthPassthrough / far,1,1,1);
