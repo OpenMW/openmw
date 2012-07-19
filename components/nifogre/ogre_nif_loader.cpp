@@ -130,7 +130,7 @@ public:
 };
 
 
-struct NIFSkeletonLoader : public Ogre::ManualResourceLoader {
+class NIFSkeletonLoader : public Ogre::ManualResourceLoader {
 
 static void warn(const std::string &msg)
 {
@@ -171,6 +171,11 @@ void buildBones(Ogre::Skeleton *skel, const Nif::Node *node, Ogre::Bone *parent=
     }
 }
 
+
+typedef std::map<std::string,NIFSkeletonLoader,ciLessBoost> LoaderMap;
+static LoaderMap sLoaders;
+
+public:
 void loadResource(Ogre::Resource *resource)
 {
     Ogre::Skeleton *skel = dynamic_cast<Ogre::Skeleton*>(resource);
@@ -181,7 +186,7 @@ void loadResource(Ogre::Resource *resource)
     buildBones(skel, node);
 }
 
-static bool createSkeleton(const std::string &name, const std::string &group, Nif::Node *node)
+bool createSkeleton(const std::string &name, const std::string &group, Nif::Node *node)
 {
     if(node->boneTrafo != NULL)
     {
@@ -190,8 +195,8 @@ static bool createSkeleton(const std::string &name, const std::string &group, Ni
         Ogre::SkeletonPtr skel = skelMgr.getByName(name);
         if(skel.isNull())
         {
-            static NIFSkeletonLoader loader;
-            skel = skelMgr.create(name, group, true, &loader);
+            NIFSkeletonLoader *loader = &sLoaders[name];
+            skel = skelMgr.create(name, group, true, loader);
         }
 
         return true;
@@ -214,6 +219,7 @@ static bool createSkeleton(const std::string &name, const std::string &group, Ni
 }
 
 };
+NIFSkeletonLoader::LoaderMap NIFSkeletonLoader::sLoaders;
 
 
 // Conversion of blend / test mode from NIF -> OGRE.
@@ -875,7 +881,8 @@ MeshPairList NIFLoader::load(std::string name, std::string skelName, const std::
         return meshes;
     }
 
-    bool hasSkel = NIFSkeletonLoader::createSkeleton(name, group, node);
+    NIFSkeletonLoader skelldr;
+    bool hasSkel = skelldr.createSkeleton(name, group, node);
 
     NIFMeshLoader meshldr(name, group, (hasSkel ? skelName : std::string()));
     meshldr.createMeshes(node, meshes);
