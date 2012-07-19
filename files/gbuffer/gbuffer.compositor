@@ -29,7 +29,7 @@ compositor gbuffer
 
             pass render_quad
             {
-                material RenderScene
+                material quad
                 input 0 mrt_output 0
             }
         }
@@ -61,7 +61,7 @@ compositor gbufferFinalizer
             }
             pass render_quad
             {
-                material RenderSceneNoDepth
+                material quad_noDepthWrite
                 input 0 previousscene
             }
             pass render_scene
@@ -78,7 +78,7 @@ compositor gbufferFinalizer
             }
             pass render_quad
             {
-                material RenderSceneNoDepth
+                material quad_noDepthWrite
                 input 0 no_mrt_output
             }
         }

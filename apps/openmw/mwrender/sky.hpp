@@ -164,6 +164,7 @@ namespace MWRender
         void setLightningDirection(const Ogre::Vector3& dir);
 
         void setGlare(const float glare);
+        void setGlareEnabled(bool enabled);
         Ogre::Vector3 getRealSunPos();
 
         void setSkyPosition(const Ogre::Vector3& position);

@@ -14,6 +14,8 @@
 
 #define ABBERATION 0.001                    // chromatic abberation amount
 
+#define SUN_EXT float3(0.45, 0.55, 0.68)    //sunlight extinction
+
 float3 intercept(float3 lineP,
                float3 lineN,
                float3 planeN,

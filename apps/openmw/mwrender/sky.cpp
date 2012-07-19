@@ -307,7 +307,7 @@ void SkyManager::create()
     mSun->setRenderQueue(RQG_SkiesEarly+4);
     mSunGlare = new BillboardObject("textures\\tx_sun_flash_grey_05.dds", 3, Vector3(0.4, 0.4, 0.4), mRootNode, "openmw_sun");
     mSunGlare->setRenderQueue(RQG_SkiesLate);
-    mSunGlare->setVisibilityFlags(RV_Glare);
+    mSunGlare->setVisibilityFlags(RV_NoReflection);
 
     // Stars
     MeshPtr mesh = NifOgre::NIFLoader::load("meshes\\sky_night_01.nif");
@@ -388,7 +388,6 @@ void SkyManager::update(float duration)
     mCloudAnimationTimer += duration * mCloudSpeed * (MWBase::Environment::get().getWorld()->getTimeScaleFactor()/30.f);
     sh::Factory::getInstance().setSharedParameter ("cloudAnimationTimer",
         sh::makeProperty<sh::FloatValue>(new sh::FloatValue(mCloudAnimationTimer)));
-
 
     /// \todo improve this
     mMasser->setPhase( static_cast<Moon::Phase>( (int) ((mDay % 32)/4.f)) );
@@ -559,6 +558,10 @@ void SkyManager::setSunDirection(const Vector3& direction)
     if (!mCreated) return;
     mSun->setPosition(direction);
     mSunGlare->setPosition(direction);
+
+    float height = direction.z;
+    float fade = ( height > 0.5) ? 1.0 : height * 2;
+    sh::Factory::getInstance ().setSharedParameter ("waterSunFade_sunHeight", sh::makeProperty<sh::Vector2>(new sh::Vector2(fade, height)));
 }
 
 void SkyManager::setMasserDirection(const Vector3& direction)
@@ -607,6 +610,7 @@ void SkyManager::setLightningStrength(const float factor)
 
 void SkyManager::setLightningDirection(const Ogre::Vector3& dir)
 {
+    if (!mCreated) return;
     mLightning->setDirection (dir);
 }
 
@@ -652,4 +656,11 @@ void SkyManager::resetSkyPosition()
 void SkyManager::scaleSky(float scale)
 {
     mRootNode->setScale(scale, scale, scale);
+}
+
+void SkyManager::setGlareEnabled (bool enabled)
+{
+    if (!mCreated)
+        return;
+    mSunGlare->setVisible (mSunEnabled && enabled);
 }

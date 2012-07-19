@@ -209,7 +209,7 @@ namespace MWGui
         mVoiceVolumeSlider->setScrollPosition(Settings::Manager::getFloat("voice volume", "Sound") * (mVoiceVolumeSlider->getScrollRange()-1));
 
         mWaterShaderButton->setCaptionWithReplacing(Settings::Manager::getBool("shader", "Water") ? "#{sOn}" : "#{sOff}");
-        mReflectObjectsButton->setCaptionWithReplacing(Settings::Manager::getBool("reflect objects", "Water") ? "#{sOn}" : "#{sOff}");
+        mReflectObjectsButton->setCaptionWithReplacing(Settings::Manager::getBool("reflect statics", "Water") ? "#{sOn}" : "#{sOff}");
         mReflectActorsButton->setCaptionWithReplacing(Settings::Manager::getBool("reflect actors", "Water") ? "#{sOn}" : "#{sOff}");
         mReflectTerrainButton->setCaptionWithReplacing(Settings::Manager::getBool("reflect terrain", "Water") ? "#{sOn}" : "#{sOff}");
 

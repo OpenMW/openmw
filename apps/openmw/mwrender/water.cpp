@@ -28,7 +28,7 @@ Water::Water (Ogre::Camera *camera, RenderingManager* rend, const ESM::Cell* cel
     mIsUnderwater(false), mVisibilityFlags(0),
     mReflectionTarget(0), mActive(1), mToggled(1),
     mReflectionRenderActive(false), mRendering(rend),
-    mOldFarClip(0),
+    mOldFarClip(0), mOldFarClip2(0),
     mWaterTimer(0.f)
 {
     mSky = rend->getSkyManager();
@@ -73,8 +73,9 @@ Water::Water (Ogre::Camera *camera, RenderingManager* rend, const ESM::Cell* cel
     underwaterDome->setRenderQueueGroup (RQG_UnderWater);
     mUnderwaterDome = mSceneManager->getRootSceneNode ()->createChildSceneNode ();
     mUnderwaterDome->attachObject (underwaterDome);
-    mUnderwaterDome->setScale(100,100,100);
+    mUnderwaterDome->setScale(10000,10000,10000);
     mUnderwaterDome->setVisible(false);
+    underwaterDome->setMaterialName("Underwater_Dome");
 
     mSceneManager->addRenderQueueListener(this);
 
@@ -162,7 +163,12 @@ void Water::changeCell(const ESM::Cell* cell)
 void Water::setHeight(const float height)
 {
     mTop = height;
+
     mWaterPlane = Plane(Vector3::UNIT_Y, height);
+
+    // small error due to reflection texture size & reflection distortion
+    mErrorPlane = Plane(Vector3::UNIT_Y, height - 5);
+
     mWaterNode->setPosition(0, height, 0);
     sh::Factory::getInstance ().setSharedParameter ("waterLevel", sh::makeProperty<sh::FloatValue>(new sh::FloatValue(height)));
 }
@@ -177,39 +183,16 @@ void Water::checkUnderwater(float y)
 {
     if (!mActive)
     {
-        mRendering->getCompositors()->setCompositorEnabled(mCompositorName, false);
         return;
     }
 
     if ((mIsUnderwater && y > mTop) || !mWater->isVisible() || mCamera->getPolygonMode() != Ogre::PM_SOLID)
     {
-        //mRendering->getCompositors()->setCompositorEnabled(mCompositorName, false);
-
-        // tell the shader we are not underwater
-
-/*
-        Ogre::Pass* pass = mMaterial->getTechnique(0)->getPass(0);
-        if (pass->hasFragmentProgram() && pass->getFragmentProgramParameters()->_findNamedConstantDefinition("isUnderwater", false))
-            pass->getFragmentProgramParameters()->setNamedConstant("isUnderwater", Real(0));
-*/
-        mWater->setRenderQueueGroup(RQG_Water);
-
         mIsUnderwater = false;
     }
 
     if (!mIsUnderwater && y < mTop && mWater->isVisible() && mCamera->getPolygonMode() == Ogre::PM_SOLID)
     {
-        //if (mUnderwaterEffect)
-            //mRendering->getCompositors()->setCompositorEnabled(mCompositorName, true);
-
-        // tell the shader we are underwater
-/*
-        Ogre::Pass* pass = mMaterial->getTechnique(0)->getPass(0);
-        if (pass->hasFragmentProgram() && pass->getFragmentProgramParameters()->_findNamedConstantDefinition("isUnderwater", false))
-            pass->getFragmentProgramParameters()->setNamedConstant("isUnderwater", Real(1));
-*/
-        //mWater->setRenderQueueGroup(RQG_UnderWater);
-
         mIsUnderwater = true;
     }
 
@@ -308,24 +291,36 @@ void Water::updateVisible()
 void Water::renderQueueStarted (Ogre::uint8 queueGroupId, const Ogre::String &invocation, bool &skipThisInvocation)
 {
     // We don't want the sky to get clipped by custom near clip plane (the water plane)
-    if (queueGroupId < 20 && mReflectionRenderActive)
+    if (((queueGroupId < 20) || queueGroupId == RQG_UnderWater) && mReflectionRenderActive)
     {
         mOldFarClip = mReflectionCamera->getFarClipDistance ();
         mReflectionCamera->disableCustomNearClipPlane();
         mReflectionCamera->setFarClipDistance (1000000000);
         Root::getSingleton().getRenderSystem()->_setProjectionMatrix(mReflectionCamera->getProjectionMatrixRS());
     }
+    else if (queueGroupId == RQG_UnderWater)
+    {/*
+        mOldFarClip2 = mCamera->getFarClipDistance ();
+        mCamera->setFarClipDistance (1000000000);
+        Root::getSingleton().getRenderSystem()->_setProjectionMatrix(mCamera->getProjectionMatrixRS());
+    */}
 }
 
 void Water::renderQueueEnded (Ogre::uint8 queueGroupId, const Ogre::String &invocation, bool &repeatThisInvocation)
 {
-    if (queueGroupId < 20 && mReflectionRenderActive)
+    if (((queueGroupId < 20) || queueGroupId == RQG_UnderWater) && mReflectionRenderActive)
     {
         mReflectionCamera->setFarClipDistance (mOldFarClip);
         if (!mIsUnderwater)
-            mReflectionCamera->enableCustomNearClipPlane(mWaterPlane);
+            mReflectionCamera->enableCustomNearClipPlane(mErrorPlane);
         Root::getSingleton().getRenderSystem()->_setProjectionMatrix(mReflectionCamera->getProjectionMatrixRS());
     }
+    if (queueGroupId == RQG_UnderWater)
+    {
+        /*
+        mCamera->setFarClipDistance (mOldFarClip2);
+        Root::getSingleton().getRenderSystem()->_setProjectionMatrix(mCamera->getProjectionMatrixRS());
+    */}
 }
 
 void Water::update(float dt)
@@ -336,6 +331,8 @@ void Water::update(float dt)
 
     mWaterTimer += dt;
     sh::Factory::getInstance ().setSharedParameter ("waterTimer", sh::makeProperty<sh::FloatValue>(new sh::FloatValue(mWaterTimer)));
+
+    mRendering->getSkyManager ()->setGlareEnabled (!mIsUnderwater);
 }
 
 void Water::applyRTT()
@@ -366,8 +363,6 @@ void Water::applyRTT()
 
         mReflectionTarget = rtt;
     }
-
-    mCompositorName = RenderingManager::useMRT() ? "Underwater" : "UnderwaterNoMRT";
 }
 
 void Water::applyVisibilityMask()

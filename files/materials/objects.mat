@@ -11,9 +11,6 @@ material openmw_objects_base
     scene_blend default
     depth_write default
     alpha_rejection default
-    shadow_transparency true // use diffuse alpha as mask for shadow
-    
-    shadow_caster_material openmw_shadowcaster
 
     pass
     {

@@ -261,7 +261,7 @@ int main(int argc, char**argv)
     boost::filesystem::current_path(bundlePath);
 #endif
 
-    //try
+    try
     {
         Files::ConfigurationManager cfgMgr;
         OMW::Engine engine(cfgMgr);
@@ -271,11 +271,11 @@ int main(int argc, char**argv)
             engine.go();
         }
     }
-    /*catch (std::exception &e)
+    catch (std::exception &e)
     {
         std::cout << "\nERROR: " << e.what() << std::endl;
         return 1;
-    }*/
+    }
 
     return 0;
 }

@@ -18,7 +18,7 @@ enum RenderQueueGroups
 
     RQG_OcclusionQuery = Ogre::RENDER_QUEUE_6,
 
-    RQG_UnderWater = Ogre::RENDER_QUEUE_7,
+    RQG_UnderWater = Ogre::RENDER_QUEUE_4,
 
     RQG_Water = Ogre::RENDER_QUEUE_7+1,
 
@@ -49,8 +49,8 @@ enum VisibilityFlags
 
     RV_Sky = 64,
 
-    // Sun glare (not visible in reflection)
-    RV_Glare = 128,
+    // not visible in reflection
+    RV_NoReflection = 128,
 
     RV_OcclusionQuery = 256,
 

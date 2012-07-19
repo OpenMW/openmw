@@ -725,13 +725,8 @@ void RenderingManager::applyCompositors()
     {
         mCompositors->addCompositor("gbuffer", 0);
         mCompositors->setCompositorEnabled("gbuffer", true);
-        mCompositors->addCompositor("Underwater", 1);
         mCompositors->addCompositor("gbufferFinalizer", 2);
         mCompositors->setCompositorEnabled("gbufferFinalizer", true);
-    }
-    else
-    {
-        mCompositors->addCompositor("UnderwaterNoMRT", 0);
     }
 
     if (mWater)

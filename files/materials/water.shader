@@ -43,6 +43,8 @@
 
     // tweakables ----------------------------------------------------
 
+        #define VISIBILITY 1500.0                   // how far you can look through water
+
         #define BIG_WAVES_X 0.3                     // strength of big waves
         #define BIG_WAVES_Y 0.3   
                           
@@ -57,15 +59,15 @@
 
         #define ABBERATION 0.001                    // chromatic abberation amount
         #define BUMP 1.5                            // overall water surface bumpiness
-        #define REFL_BUMP 0.11                      // reflection distortion amount
-        #define REFR_BUMP 0.08                      // refraction distortion amount
+        #define REFL_BUMP 0.08                      // reflection distortion amount
+        #define REFR_BUMP 0.06                      // refraction distortion amount
 
         #define SCATTER_AMOUNT 3.0                  // amount of sunlight scattering
         #define SCATTER_COLOUR float3(0.0,1.0,0.95) // colour of sunlight scattering
         
         #define SUN_EXT float3(0.45, 0.55, 0.68)    //sunlight extinction
         
-        #define SPEC_HARDNESS 256                  // specular highlights hardness
+        #define SPEC_HARDNESS 256                   // specular highlights hardness
         
 
     // ---------------------------------------------------------------
@@ -201,16 +203,6 @@
         
          // brighten up the refraction underwater
         refraction = (cameraPos.y < 0) ? shSaturate(refraction * 1.5) : refraction;
-      
-        float waterSunGradient = dot(-vVec, -lVec);
-        waterSunGradient = shSaturate(pow(waterSunGradient*0.7+0.3,2.0));  
-        float3 waterSunColour = float3(0.0,1.0,0.85)*waterSunGradient * 0.5;
-       
-        float waterGradient = dot(-vVec, float3(0.0,-1.0,0.0));
-        waterGradient = clamp((waterGradient*0.5+0.5),0.2,1.0);
-        float3 watercolour = (float3(0.0078, 0.5176, 0.700)+waterSunColour)*waterGradient*2.0;
-        float3 waterext = float3(0.6, 0.9, 1.0);//water extinction
-        watercolour = mix(watercolour*0.3*waterSunFade_sunHeight.x, watercolour, shSaturate(1.0-exp(-waterSunFade_sunHeight.y*SUN_EXT)));
     
 		// specular
         float specular = pow(max(dot(R, lVec), 0.0),SPEC_HARDNESS);
@@ -221,8 +213,31 @@
         shOutputColour(0).xyz = shLerp(shOutputColour(0).xyz, refraction, (1-shoreFade) * (1-isUnderwater)); 
        
         // fog
-        float fogValue = shSaturate((depthPassthrough - fogParams.y) * fogParams.w);
-        shOutputColour(0).xyz = shLerp (shOutputColour(0).xyz, fogColor, fogValue);
+        if (isUnderwater == 1)
+        {
+            float waterSunGradient = dot(-vVec, -lVec);
+            waterSunGradient = shSaturate(pow(waterSunGradient*0.7+0.3,2.0));  
+            float3 waterSunColour = float3(0.0,1.0,0.85)*waterSunGradient * 0.5;
+           
+            float waterGradient = dot(-vVec, float3(0.0,-1.0,0.0));
+            waterGradient = clamp((waterGradient*0.5+0.5),0.2,1.0);
+            float3 watercolour = (float3(0.0078, 0.5176, 0.700)+waterSunColour)*waterGradient*2.0;
+            float3 waterext = float3(0.6, 0.9, 1.0);//water extinction
+            watercolour = mix(watercolour*0.3*waterSunFade_sunHeight.x, watercolour, shSaturate(1.0-exp(-waterSunFade_sunHeight.y*SUN_EXT)));
+        
+            float darkness = VISIBILITY*2.0;
+            darkness = clamp((cameraPos.y+darkness)/darkness,0.2,1.0);
+    
+        
+            float fog = shSaturate(length(cameraPos.xyz-position.xyz) / VISIBILITY);
+            shOutputColour(0).xyz = shLerp(shOutputColour(0).xyz, watercolour * darkness, shSaturate(fog / waterext));
+        }
+        else
+        {
+            float fogValue = shSaturate((depthPassthrough - fogParams.y) * fogParams.w);
+            shOutputColour(0).xyz = shLerp (shOutputColour(0).xyz, fogColor, fogValue);
+        }
+
     }
 
 #endif

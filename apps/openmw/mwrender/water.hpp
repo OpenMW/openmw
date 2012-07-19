@@ -36,6 +36,8 @@ namespace MWRender {
         Ogre::SceneManager *mSceneManager;
 
         Ogre::Plane mWaterPlane;
+        Ogre::Plane mErrorPlane;
+
         Ogre::SceneNode *mWaterNode;
         Ogre::Entity *mWater;
 
@@ -47,6 +49,7 @@ namespace MWRender {
         int mTop;
 
         int mOldFarClip;
+        int mOldFarClip2;
 
         float mWaterTimer;
 

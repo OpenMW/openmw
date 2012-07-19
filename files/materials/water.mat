@@ -31,3 +31,11 @@ material Water
         }
     }
 }
+
+
+material Underwater_Dome
+{
+    parent openmw_objects_base
+    
+    depth_write off
+}
