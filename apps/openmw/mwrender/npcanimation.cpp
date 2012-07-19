@@ -391,7 +391,7 @@ void NpcAnimation::removeEntities(NifOgre::EntityList &entities)
     Ogre::SceneManager *sceneMgr = mInsert->getCreator();
     for(size_t i = 0;i < entities.mEntities.size();i++)
     {
-        mEntityList.mSkelBase->detachObjectFromBone(entities.mEntities[i]);
+        entities.mEntities[i]->detachFromParent();
         sceneMgr->destroyEntity(entities.mEntities[i]);
     }
     entities.mEntities.clear();
@@ -533,10 +533,10 @@ bool NpcAnimation::addOrReplaceIndividualPart(int type, int group, int priority,
             lupperArm = insertBoundedPart(mesh, "Left Upper Arm");
             break;
         case ESM::PRT_RFoot:                             //15
-            lupperArm = insertBoundedPart(mesh, "Right Foot");
+            rfoot = insertBoundedPart(mesh, "Right Foot");
             break;
         case ESM::PRT_LFoot:                             //16
-            lupperArm = insertBoundedPart(mesh, "Left Foot");
+            lfoot = insertBoundedPart(mesh, "Left Foot");
             break;
         case ESM::PRT_RAnkle:                          //17
             rAnkle = insertBoundedPart(mesh, "Right Ankle");
