@@ -526,6 +526,7 @@ class NIFMeshLoader : Ogre::ManualResourceLoader
     // Convert NiTriShape to Ogre::SubMesh
     void handleNiTriShape(Ogre::Mesh *mesh, Nif::NiTriShape *shape)
     {
+        Ogre::SkeletonPtr skel;
         const Nif::NiTriShapeData *data = shape->data.getPtr();
         const Nif::NiSkinInstance *skin = (shape->skin.empty() ? NULL : shape->skin.getPtr());
         std::vector<Ogre::Vector3> srcVerts = data->vertices;
@@ -535,6 +536,11 @@ class NIFMeshLoader : Ogre::ManualResourceLoader
             // Only set a skeleton when skinning. Unskinned meshes with a skeleton will be
             // explicitly attached later.
             mesh->setSkeletonName(mName);
+
+            // Get the skeleton resource, so vertices can be transformed into the bones' initial state.
+            Ogre::SkeletonManager *skelMgr = Ogre::SkeletonManager::getSingletonPtr();
+            skel = skelMgr->getByName(mName);
+            skel->touch();
 
             // Convert vertices and normals to bone space from bind position. It would be
             // better to transform the bones into bind position, but there doesn't seem to
@@ -546,10 +552,13 @@ class NIFMeshLoader : Ogre::ManualResourceLoader
             const Nif::NodeList &bones = skin->bones;
             for(size_t b = 0;b < bones.length();b++)
             {
-                Ogre::Matrix4 mat(Ogre::Matrix4::IDENTITY);
+                Ogre::Bone *bone = skel->getBone(bones[b]->name);
+                Ogre::Matrix4 mat, mat2;
                 mat.makeTransform(data->bones[b].trafo.trans, Ogre::Vector3(data->bones[b].trafo.scale),
                                   Ogre::Quaternion(data->bones[b].trafo.rotation));
-                mat = bones[b]->getWorldTransform() * mat;
+                mat2.makeTransform(bone->_getDerivedPosition(), bone->_getDerivedScale(),
+                                   bone->_getDerivedOrientation());
+                mat = mat2 * mat;
 
                 const std::vector<Nif::NiSkinData::VertWeight> &weights = data->bones[b].weights;
                 for(size_t i = 0;i < weights.size();i++)
@@ -692,11 +701,6 @@ class NIFMeshLoader : Ogre::ManualResourceLoader
         // Assign bone weights for this TriShape
         if(skin != NULL)
         {
-            // Get the skeleton resource, so weights can be applied
-            Ogre::SkeletonManager *skelMgr = Ogre::SkeletonManager::getSingletonPtr();
-            Ogre::SkeletonPtr skel = skelMgr->getByName(mesh->getSkeletonName());
-            skel->touch();
-
             const Nif::NiSkinData *data = skin->data.getPtr();
             const Nif::NodeList &bones = skin->bones;
             for(size_t i = 0;i < bones.length();i++)
