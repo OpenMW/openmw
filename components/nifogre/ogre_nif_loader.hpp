@@ -87,7 +87,7 @@ typedef std::vector< std::pair<Ogre::MeshPtr,std::string> > MeshPairList;
  */
 class NIFLoader
 {
-    static MeshPairList load(std::string name, const std::string &group);
+    static MeshPairList load(std::string name, std::string skelName, const std::string &group);
 
 public:
     static EntityList createEntities(Ogre::Entity *parent, const std::string &bonename,

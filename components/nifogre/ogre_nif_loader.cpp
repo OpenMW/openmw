@@ -539,7 +539,7 @@ class NIFMeshLoader : Ogre::ManualResourceLoader
 
             // Get the skeleton resource, so vertices can be transformed into the bones' initial state.
             Ogre::SkeletonManager *skelMgr = Ogre::SkeletonManager::getSingletonPtr();
-            skel = skelMgr->getByName(mName);
+            skel = skelMgr->getByName(mSkelName);
             skel->touch();
 
             // Convert vertices and normals to bone space from bind position. It would be
@@ -808,7 +808,9 @@ public:
             const NiTriShape *shape = dynamic_cast<const NiTriShape*>(node);
 
             Ogre::MeshManager &meshMgr = Ogre::MeshManager::getSingleton();
-            std::string fullname = mName+"@"+shape->name;
+            std::string fullname = mName+"@shape="+shape->name;
+            if(mSkelName.length() > 0 && mName != mSkelName)
+                fullname += "@skel="+mSkelName;
 
             std::transform(fullname.begin(), fullname.end(), fullname.begin(), ::tolower);
             Ogre::MeshPtr mesh = meshMgr.getByName(fullname);
@@ -846,11 +848,12 @@ public:
 NIFMeshLoader::LoaderMap NIFMeshLoader::sLoaders;
 
 
-MeshPairList NIFLoader::load(std::string name, const std::string &group)
+MeshPairList NIFLoader::load(std::string name, std::string skelName, const std::string &group)
 {
     MeshPairList meshes;
 
     std::transform(name.begin(), name.end(), name.begin(), ::tolower);
+    std::transform(skelName.begin(), skelName.end(), skelName.begin(), ::tolower);
 
     Nif::NIFFile nif(name);
     if (nif.numRecords() < 1)
@@ -873,7 +876,7 @@ MeshPairList NIFLoader::load(std::string name, const std::string &group)
 
     bool hasSkel = NIFSkeletonLoader::createSkeleton(name, group, node);
 
-    NIFMeshLoader meshldr(name, group, (hasSkel ? name : std::string()));
+    NIFMeshLoader meshldr(name, group, (hasSkel ? skelName : std::string()));
     meshldr.createMeshes(node, meshes);
 
     return meshes;
@@ -883,7 +886,7 @@ EntityList NIFLoader::createEntities(Ogre::SceneNode *parent, const std::string 
 {
     EntityList entitylist;
 
-    MeshPairList meshes = load(name, group);
+    MeshPairList meshes = load(name, name, group);
     if(meshes.size() == 0)
         return entitylist;
 
@@ -928,7 +931,7 @@ EntityList NIFLoader::createEntities(Ogre::Entity *parent, const std::string &bo
 {
     EntityList entitylist;
 
-    MeshPairList meshes = load(name, group);
+    MeshPairList meshes = load(name, parent->getMesh()->getSkeletonName(), group);
     if(meshes.size() == 0)
         return entitylist;
 
@@ -953,13 +956,14 @@ EntityList NIFLoader::createEntities(Ogre::Entity *parent, const std::string &bo
 
     if(entitylist.mSkelBase)
     {
+        entitylist.mSkelBase->shareSkeletonInstanceWith(parent);
         parent->attachObjectToBone(bonename, entitylist.mSkelBase);
         for(size_t i = 0;i < entitylist.mEntities.size();i++)
         {
             Ogre::Entity *entity = entitylist.mEntities[i];
             if(entity != entitylist.mSkelBase && entity->hasSkeleton())
             {
-                entity->shareSkeletonInstanceWith(entitylist.mSkelBase);
+                entity->shareSkeletonInstanceWith(parent);
                 parent->attachObjectToBone(bonename, entity);
             }
             else if(entity != entitylist.mSkelBase)
