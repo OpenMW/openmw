@@ -39,7 +39,6 @@ compositor Underwater
             {
                 material Water/Compositor
                 input 0 rt0
-                input 3 scene 1
             }
         }
     }

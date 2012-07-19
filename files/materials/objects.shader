@@ -9,12 +9,16 @@
 #define SHADOWS LIGHTING && @shGlobalSettingBool(shadows)
 
 #if SHADOWS || SHADOWS_PSSM
-#include "shadows.h"
+    #include "shadows.h"
 #endif
 
 #if FOG || MRT || SHADOWS_PSSM
 #define NEED_DEPTH
 #endif
+
+
+#define UNDERWATER LIGHTING
+
 
 #define HAS_VERTEXCOLOR @shPropertyBool(has_vertex_colour)
 
@@ -89,6 +93,10 @@
 
     // ----------------------------------- FRAGMENT ------------------------------------------
 
+#if UNDERWATER
+    #include "caustics.h"
+#endif
+
     SH_BEGIN_PROGRAM
 		shSampler2D(diffuseMap)
 		shInput(float2, UV)
@@ -145,6 +153,20 @@
 #if SHADOWS || SHADOWS_PSSM
         shUniform(float4, shadowFar_fadeStart) @shSharedParameter(shadowFar_fadeStart)
 #endif
+
+#if UNDERWATER
+        shUniform(float4x4, worldMatrix) @shAutoConstant(worldMatrix, world_matrix)
+        shUniform(float, waterLevel) @shSharedParameter(waterLevel)
+        shUniform(float4, cameraPos) @shAutoConstant(cameraPos, camera_position) 
+        shUniform(float4, lightDirectionWS0) @shAutoConstant(lightDirectionWS0, light_position, 0)
+        
+        shSampler2D(causticMap)
+        
+		shUniform(float, waterTimer) @shSharedParameter(waterTimer)
+        
+		shUniform(float3, windDir_windSpeed) @shSharedParameter(windDir_windSpeed)
+#endif
+
     SH_START_PROGRAM
     {
         shOutputColour(0) = shSample(diffuseMap, UV);
@@ -174,20 +196,42 @@
 #if !SHADOWS && !SHADOWS_PSSM
             float shadow = 1.0;
 #endif
+
+
+
+        float3 caustics = float3(1,1,1);
+#if UNDERWATER
+    float4 worldPos = shMatrixMult(worldMatrix, float4(objSpacePositionPassthrough,1));
+    if (worldPos.y < waterLevel)
+    {
+        float4 worldNormal = shMatrixMult(worldMatrix, float4(normal.xyz, 0));
+        caustics = getCaustics(causticMap, worldPos.xyz, cameraPos.xyz, worldNormal.xyz, lightDirectionWS0.xyz, waterLevel, waterTimer, windDir_windSpeed);
+    }
+#endif
+
     
     @shForeach(@shGlobalSettingString(num_lights))
     
-    
+        /// \todo use the array auto params for lights, and use a real for-loop with auto param "light_count" iterations 
         lightDir = lightPosObjSpace@shIterator.xyz - (objSpacePositionPassthrough.xyz * lightPosObjSpace@shIterator.w);
         d = length(lightDir);
         
         lightDir = normalize(lightDir);
 
-#if @shIterator == 0 && (SHADOWS || SHADOWS_PSSM)
-        diffuse += materialDiffuse.xyz * lightDiffuse@shIterator.xyz * (1.0 / ((lightAttenuation@shIterator.y) + (lightAttenuation@shIterator.z * d) + (lightAttenuation@shIterator.w * d * d))) * max(dot(normal, lightDir), 0) * shadow;
+#if @shIterator == 0
+
+    #if (SHADOWS || SHADOWS_PSSM)
+        diffuse += materialDiffuse.xyz * lightDiffuse@shIterator.xyz * (1.0 / ((lightAttenuation@shIterator.y) + (lightAttenuation@shIterator.z * d) + (lightAttenuation@shIterator.w * d * d))) * max(dot(normal, lightDir), 0) * shadow * caustics;
+        
+    #else
+        diffuse += materialDiffuse.xyz * lightDiffuse@shIterator.xyz * (1.0 / ((lightAttenuation@shIterator.y) + (lightAttenuation@shIterator.z * d) + (lightAttenuation@shIterator.w * d * d))) * max(dot(normal, lightDir), 0) * caustics;
+        
+    #endif
+    
 #else
         diffuse += materialDiffuse.xyz * lightDiffuse@shIterator.xyz * (1.0 / ((lightAttenuation@shIterator.y) + (lightAttenuation@shIterator.z * d) + (lightAttenuation@shIterator.w * d * d))) * max(dot(normal, lightDir), 0);
 #endif
+
     @shEndForeach
     
 #if HAS_VERTEXCOLOR

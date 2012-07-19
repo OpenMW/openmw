@@ -22,6 +22,8 @@
 #define NEED_DEPTH 1
 #endif
 
+#define UNDERWATER LIGHTING
+
 
 #if NEED_DEPTH
 @shAllocatePassthrough(1, depth)
@@ -122,6 +124,10 @@
 
     // ----------------------------------- FRAGMENT ------------------------------------------
 
+#if UNDERWATER
+    #include "caustics.h"
+#endif
+
     SH_BEGIN_PROGRAM
     
     
@@ -180,6 +186,20 @@
 #endif
 
 
+#if UNDERWATER
+        shUniform(float4x4, worldMatrix) @shAutoConstant(worldMatrix, world_matrix)
+        shUniform(float, waterLevel) @shSharedParameter(waterLevel)
+        shUniform(float4, cameraPos) @shAutoConstant(cameraPos, camera_position) 
+        shUniform(float4, lightDirectionWS0) @shAutoConstant(lightDirectionWS0, light_position, 0)
+        
+        shSampler2D(causticMap)
+        
+		shUniform(float, waterTimer) @shSharedParameter(waterTimer)
+        
+		shUniform(float3, windDir_windSpeed) @shSharedParameter(windDir_windSpeed)
+#endif
+
+
     SH_START_PROGRAM
     {
 
@@ -196,6 +216,19 @@
         normal = normalize(normal);
 #endif
         
+        
+        
+        float3 caustics = float3(1,1,1);
+#if UNDERWATER
+
+        float4 worldPos = shMatrixMult(worldMatrix, float4(objSpacePosition,1));
+        if (worldPos.y < waterLevel)
+        {
+            float4 worldNormal = shMatrixMult(worldMatrix, float4(normal.xyz, 0));
+            caustics = getCaustics(causticMap, worldPos.xyz, cameraPos.xyz, worldNormal.xyz, lightDirectionWS0.xyz, waterLevel, waterTimer, windDir_windSpeed);
+        }
+
+#endif
         
         
         // Layer calculations 
@@ -272,11 +305,20 @@
         
         lightDir = normalize(lightDir);
 
-#if @shIterator == 0 && (SHADOWS || SHADOWS_PSSM)
-        diffuse += lightDiffuse@shIterator.xyz * (1.0 / ((lightAttenuation@shIterator.y) + (lightAttenuation@shIterator.z * d) + (lightAttenuation@shIterator.w * d * d))) * max(dot(normal, lightDir), 0) * shadow;
+#if @shIterator == 0
+
+    #if (SHADOWS || SHADOWS_PSSM)
+        diffuse += lightDiffuse@shIterator.xyz * (1.0 / ((lightAttenuation@shIterator.y) + (lightAttenuation@shIterator.z * d) + (lightAttenuation@shIterator.w * d * d))) * max(dot(normal, lightDir), 0) * shadow * caustics;
+        
+    #else
+        diffuse += lightDiffuse@shIterator.xyz * (1.0 / ((lightAttenuation@shIterator.y) + (lightAttenuation@shIterator.z * d) + (lightAttenuation@shIterator.w * d * d))) * max(dot(normal, lightDir), 0) * caustics;
+        
+    #endif
+    
 #else
         diffuse += lightDiffuse@shIterator.xyz * (1.0 / ((lightAttenuation@shIterator.y) + (lightAttenuation@shIterator.z * d) + (lightAttenuation@shIterator.w * d * d))) * max(dot(normal, lightDir), 0);
 #endif
+
     @shEndForeach
     
         shOutputColour(0).xyz *= (lightAmbient.xyz + diffuse);

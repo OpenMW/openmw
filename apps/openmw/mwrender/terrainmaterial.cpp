@@ -117,6 +117,10 @@ namespace MWRender
             shadowTex->setProperty ("content_type", sh::makeProperty<sh::StringValue> (new sh::StringValue("shadow")));
         }
 
+        // caustics
+        sh::MaterialInstanceTextureUnit* caustics = p->createTextureUnit ("causticMap");
+        caustics->setProperty ("direct_texture", sh::makeProperty<sh::StringValue> (new sh::StringValue("water_nm.png")));
+
         p->mShaderProperties.setProperty ("shadowtexture_offset", sh::makeProperty<sh::StringValue>(new sh::StringValue(
             Ogre::StringConverter::toString(numBlendTextures + numLayers + 2))));
 
@@ -148,6 +152,8 @@ namespace MWRender
         // colourmap
         --freeTextureUnits;
         freeTextureUnits -= 3; // shadow PSSM
+
+        --freeTextureUnits; // caustics
 
         // each layer needs 1.25 units (1xdiffusespec, 0.25xblend)
         return static_cast<Ogre::uint8>(freeTextureUnits / (1.25f));

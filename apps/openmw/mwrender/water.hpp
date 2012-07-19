@@ -39,10 +39,16 @@ namespace MWRender {
         Ogre::SceneNode *mWaterNode;
         Ogre::Entity *mWater;
 
+        Ogre::SceneNode* mUnderwaterDome;
+
         bool mIsUnderwater;
         bool mActive;
         bool mToggled;
         int mTop;
+
+        int mOldFarClip;
+
+        float mWaterTimer;
 
         bool mReflectionRenderActive;
 
@@ -83,7 +89,7 @@ namespace MWRender {
         void setActive(bool active);
 
         void toggle();
-        void update();
+        void update(float dt);
 
         void assignTextures();
 

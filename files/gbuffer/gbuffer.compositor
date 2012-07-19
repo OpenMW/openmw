@@ -18,7 +18,7 @@ compositor gbuffer
             {
                 // Renders everything except water
                 first_render_queue 0
-                last_render_queue 70
+                last_render_queue 50
             }
 
         }
@@ -66,7 +66,7 @@ compositor gbufferFinalizer
             }
             pass render_scene
             {
-                first_render_queue 71
+                first_render_queue 51
                 last_render_queue 100
             }
         }

@@ -1,30 +1,33 @@
-// note: the fixed function water is created manually, not here
-
-material openmw_water
+material Water
 {
     pass
     {
         vertex_program water_vertex
         fragment_program water_fragment
         
+        cull_hardware none
+        
         texture_unit reflectionMap
         {
             texture_alias WaterReflection
+            tex_address_mode clamp
         }
         
         texture_unit refractionMap
         {
             texture_alias WaterRefraction
+            tex_address_mode clamp
         }
         
         texture_unit depthMap
         {
-
+            texture_alias SceneDepth
+            tex_address_mode clamp
         }
         
         texture_unit normalMap
         {
-            texture 
+            direct_texture water_nm.png
         }
     }
 }

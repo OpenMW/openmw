@@ -61,5 +61,10 @@ material openmw_objects_base
             tex_address_mode clamp
             filtering none
         }
+        
+        texture_unit causticMap
+        {
+            direct_texture water_nm.png
+        }
     }
 }

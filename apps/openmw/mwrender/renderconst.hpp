@@ -14,13 +14,13 @@ enum RenderQueueGroups
 
     RQG_Main = Ogre::RENDER_QUEUE_MAIN,
 
+    RQG_Alpha = Ogre::RENDER_QUEUE_MAIN+1,
+
+    RQG_OcclusionQuery = Ogre::RENDER_QUEUE_6,
+
+    RQG_UnderWater = Ogre::RENDER_QUEUE_7,
+
     RQG_Water = Ogre::RENDER_QUEUE_7+1,
-
-    RQG_Alpha = Ogre::RENDER_QUEUE_MAIN,
-
-    RQG_UnderWater = Ogre::RENDER_QUEUE_7+1,
-
-    RQG_OcclusionQuery = Ogre::RENDER_QUEUE_8,
 
     // Sky late (sun & sun flare)
     RQG_SkiesLate = Ogre::RENDER_QUEUE_SKIES_LATE
@@ -54,7 +54,7 @@ enum VisibilityFlags
 
     RV_OcclusionQuery = 256,
 
-    RV_Map = RV_Terrain + RV_Statics + RV_StaticsSmall + RV_Misc + RV_Water,
+    RV_Map = RV_Terrain + RV_Statics + RV_StaticsSmall + RV_Misc + RV_Water
 
     /// \todo markers (normally hidden)
 };

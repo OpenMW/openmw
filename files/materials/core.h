@@ -69,7 +69,7 @@
 
     #define shSampler2D(name) uniform sampler2D name; @shUseSampler(name)
 
-    #define shMatrixMult(m, v) m * v
+    #define shMatrixMult(m, v) (m * v)
 
     // automatically recognized by ogre when the input name equals this
     #define shInputPosition vertex

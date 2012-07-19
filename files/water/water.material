@@ -44,7 +44,7 @@ fragment_program Water_FP cg
     profiles ps_2_x arbfp1
 }
 
-material Water
+material __Water
 {
     technique
     {

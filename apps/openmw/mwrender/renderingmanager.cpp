@@ -264,7 +264,7 @@ void RenderingManager::update (float duration){
 
     checkUnderwater();
 
-    mWater->update();
+    mWater->update(duration);
 }
 void RenderingManager::waterAdded (MWWorld::Ptr::CellStore *store){
     if(store->cell->data.flags & store->cell->HasWater
