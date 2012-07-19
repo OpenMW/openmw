@@ -38,7 +38,11 @@ private:
     NifOgre::EntityList lfoot;
     NifOgre::EntityList rfoot;
     NifOgre::EntityList hair;
+    NifOgre::EntityList rHand;
+    NifOgre::EntityList lHand;
     NifOgre::EntityList head;
+    NifOgre::EntityList chest;
+    NifOgre::EntityList tail;
 
     bool isBeast;
     bool isFemale;

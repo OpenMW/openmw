@@ -20,7 +20,10 @@ NpcAnimation::~NpcAnimation()
     removeEntities(head);
     removeEntities(hair);
     removeEntities(neck);
+    removeEntities(chest);
     removeEntities(groin);
+    removeEntities(rHand);
+    removeEntities(lHand);
     removeEntities(rWrist);
     removeEntities(lWrist);
     removeEntities(rForearm);
@@ -37,6 +40,7 @@ NpcAnimation::~NpcAnimation()
     removeEntities(lUpperLeg);
     removeEntities(rclavicle);
     removeEntities(lclavicle);
+    removeEntities(tail);
 }
 
 
@@ -406,8 +410,14 @@ void NpcAnimation::removeIndividualPart(int type)
         removeEntities(hair);
     else if(type == ESM::PRT_Neck) //2
         removeEntities(neck);
+    else if(type == ESM::PRT_Cuirass)//3
+        removeEntities(chest);
     else if(type == ESM::PRT_Groin)//4
         removeEntities(groin);
+    else if(type == ESM::PRT_RHand)//6
+        removeEntities(rHand);
+    else if(type == ESM::PRT_LHand)//7
+        removeEntities(lHand);
     else if(type == ESM::PRT_RWrist)//8
         removeEntities(rWrist);
     else if(type == ESM::PRT_LWrist) //9
@@ -446,6 +456,8 @@ void NpcAnimation::removeIndividualPart(int type)
     else if(type == ESM::PRT_Weapon)                 //25
     {
     }
+    else if(type == ESM::PRT_Tail)    //26
+        removeEntities(tail);
 }
 
 void NpcAnimation::reserveIndividualPart(int type, int group, int priority)
@@ -487,6 +499,7 @@ bool NpcAnimation::addOrReplaceIndividualPart(int type, int group, int priority,
             neck = insertBoundedPart(mesh, "Neck");
             break;
         case ESM::PRT_Cuirass:                          //3
+            chest = insertBoundedPart(mesh, "Chest");
             break;
         case ESM::PRT_Groin:                          //4
             groin = insertBoundedPart(mesh, "Groin");
@@ -494,8 +507,10 @@ bool NpcAnimation::addOrReplaceIndividualPart(int type, int group, int priority,
         case ESM::PRT_Skirt:                          //5
             break;
         case ESM::PRT_RHand:                         //6
+            rHand = insertBoundedPart(mesh, "Right Hand");
             break;
         case ESM::PRT_LHand:                         //7
+            lHand = insertBoundedPart(mesh, "Left Hand");
             break;
         case ESM::PRT_RWrist:                          //8
             rWrist = insertBoundedPart(mesh, "Right Wrist");
@@ -550,6 +565,7 @@ bool NpcAnimation::addOrReplaceIndividualPart(int type, int group, int priority,
         case ESM::PRT_Weapon:                             //25
             break;
         case ESM::PRT_Tail:                              //26
+            tail = insertBoundedPart(mesh, "Tail");
             break;
     }
     return true;
