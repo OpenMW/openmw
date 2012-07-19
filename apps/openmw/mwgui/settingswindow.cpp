@@ -119,8 +119,10 @@ namespace MWGui
         getWidget(mStaticsShadows, "StaticsShadows");
         getWidget(mMiscShadows, "MiscShadows");
         getWidget(mShadowsDebug, "ShadowsDebug");
+        getWidget(mUnderwaterButton, "UnderwaterButton");
 
         mOkButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onOkButtonClicked);
+        mUnderwaterButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onButtonToggled);
         mShadersButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onShadersToggled);
         mFullscreenButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onButtonToggled);
         mWaterShaderButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onButtonToggled);
@@ -212,6 +214,7 @@ namespace MWGui
         mReflectObjectsButton->setCaptionWithReplacing(Settings::Manager::getBool("reflect statics", "Water") ? "#{sOn}" : "#{sOff}");
         mReflectActorsButton->setCaptionWithReplacing(Settings::Manager::getBool("reflect actors", "Water") ? "#{sOn}" : "#{sOff}");
         mReflectTerrainButton->setCaptionWithReplacing(Settings::Manager::getBool("reflect terrain", "Water") ? "#{sOn}" : "#{sOff}");
+        mUnderwaterButton->setCaptionWithReplacing(Settings::Manager::getBool("underwater effect", "Water") ? "#{sOn}" : "#{sOff}");
 
         mShadowsTextureSize->setCaption (Settings::Manager::getString ("texture size", "Shadows"));
         mShadowsLargeDistance->setCaptionWithReplacing(Settings::Manager::getBool("split", "Shadows") ? "#{sOn}" : "#{sOff}");
@@ -351,6 +354,10 @@ namespace MWGui
         {
             if (_sender == mWaterShaderButton)
                 Settings::Manager::setBool("shader", "Water", newState);
+            else if (_sender == mUnderwaterButton)
+            {
+                Settings::Manager::setBool("underwater effect", "Water", newState);
+            }
             else if (_sender == mReflectObjectsButton)
             {
                 Settings::Manager::setBool("reflect misc", "Water", newState);

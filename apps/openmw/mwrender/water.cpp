@@ -18,6 +18,9 @@
 
 #include <extern/shiny/Main/Factory.hpp>
 
+#include "../mwbase/environment.hpp"
+#include "../mwbase/world.hpp"
+
 using namespace Ogre;
 
 namespace MWRender
@@ -66,8 +69,6 @@ Water::Water (Ogre::Camera *camera, RenderingManager* rend, const ESM::Cell* cel
 
     createMaterial();
     mWater->setMaterial(mMaterial);
-
-    mUnderwaterEffect = Settings::Manager::getBool("underwater effect", "Water");
 
     Ogre::Entity* underwaterDome = mSceneManager->createEntity ("underwater_dome.mesh");
     underwaterDome->setRenderQueueGroup (RQG_UnderWater);
@@ -329,7 +330,7 @@ void Water::update(float dt)
     pos.y = -mWaterPlane.d;
     mUnderwaterDome->setPosition (pos);
 
-    mWaterTimer += dt;
+    mWaterTimer += dt / 30.0 * MWBase::Environment::get().getWorld()->getTimeScaleFactor();
     sh::Factory::getInstance ().setSharedParameter ("waterTimer", sh::makeProperty<sh::FloatValue>(new sh::FloatValue(mWaterTimer)));
 
     mRendering->getSkyManager ()->setGlareEnabled (!mIsUnderwater);

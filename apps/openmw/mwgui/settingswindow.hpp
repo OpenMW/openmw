@@ -43,6 +43,7 @@ namespace MWGui
             MyGUI::Button* mReflectActorsButton;
             MyGUI::Button* mReflectTerrainButton;
             MyGUI::Button* mShadersButton;
+            MyGUI::Button* mUnderwaterButton;
 
             MyGUI::Button* mShadowsEnabledButton;
             MyGUI::Button* mShadowsLargeDistance;

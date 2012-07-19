@@ -22,7 +22,7 @@
 #define NEED_DEPTH 1
 #endif
 
-#define UNDERWATER LIGHTING
+#define UNDERWATER @shGlobalSettingBool(underwater_effects) && LIGHTING
 
 
 #if NEED_DEPTH

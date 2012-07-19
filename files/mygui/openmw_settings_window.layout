@@ -188,6 +188,11 @@
                             <Widget type="Button" skin="MW_Button" position="4 56 34 24" align="Left Top" name="ReflectTerrainButton"/>
 
                         </Widget>
+
+                        <Widget type="TextBox" skin="SandText" position="42 200 120 24" align="Left Top">
+                            <Property key="Caption" value="Underwater effects (caustics, fog)"/>
+                        </Widget>
+                        <Widget type="Button" skin="MW_Button" position="4 200 34 24" align="Left Top" name="UnderwaterButton"/>
                     </Widget>
 
                     <Widget type="TabItem" skin="" position="4 28 344 272">

@@ -17,7 +17,7 @@
 #endif
 
 
-#define UNDERWATER LIGHTING
+#define UNDERWATER @shGlobalSettingBool(underwater_effects) && LIGHTING
 
 
 #define HAS_VERTEXCOLOR @shPropertyBool(has_vertex_colour)
