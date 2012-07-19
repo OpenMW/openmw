@@ -509,7 +509,7 @@ class NIFMeshLoader : Ogre::ManualResourceLoader
     std::string mGroup;
     std::string mShapeName;
     std::string mMaterialName;
-    bool mHasSkel;
+    std::string mSkelName;
 
     void warn(const std::string &msg)
     {
@@ -535,7 +535,7 @@ class NIFMeshLoader : Ogre::ManualResourceLoader
         {
             // Only set a skeleton when skinning. Unskinned meshes with a skeleton will be
             // explicitly attached later.
-            mesh->setSkeletonName(mName);
+            mesh->setSkeletonName(mSkelName);
 
             // Get the skeleton resource, so vertices can be transformed into the bones' initial state.
             Ogre::SkeletonManager *skelMgr = Ogre::SkeletonManager::getSingletonPtr();
@@ -579,7 +579,7 @@ class NIFMeshLoader : Ogre::ManualResourceLoader
             srcVerts = newVerts;
             srcNorms = newNorms;
         }
-        else if(!mHasSkel)
+        else if(mSkelName.length() == 0)
         {
             // No skinning and no skeleton, so just transform the vertices and
             // normals into position.
@@ -752,10 +752,9 @@ class NIFMeshLoader : Ogre::ManualResourceLoader
 
 public:
     NIFMeshLoader()
-      : mHasSkel(false)
     { }
-    NIFMeshLoader(const std::string &name, const std::string &group, bool hasSkel)
-      : mName(name), mGroup(group), mHasSkel(hasSkel)
+    NIFMeshLoader(const std::string &name, const std::string &group, const std::string skelName)
+      : mName(name), mGroup(group), mSkelName(skelName)
     { }
 
     virtual void loadResource(Ogre::Resource *resource)
@@ -765,8 +764,8 @@ public:
 
         if(!mShapeName.length())
         {
-            if(mHasSkel)
-                mesh->setSkeletonName(mName);
+            if(mSkelName.length() > 0)
+                mesh->setSkeletonName(mSkelName);
             return;
         }
 
@@ -874,7 +873,7 @@ MeshPairList NIFLoader::load(std::string name, const std::string &group)
 
     bool hasSkel = NIFSkeletonLoader::createSkeleton(name, group, node);
 
-    NIFMeshLoader meshldr(name, group, hasSkel);
+    NIFMeshLoader meshldr(name, group, (hasSkel ? name : std::string()));
     meshldr.createMeshes(node, meshes);
 
     return meshes;
