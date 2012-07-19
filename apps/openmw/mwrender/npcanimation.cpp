@@ -22,6 +22,7 @@ NpcAnimation::~NpcAnimation()
     removeEntities(neck);
     removeEntities(chest);
     removeEntities(groin);
+    removeEntities(skirt);
     removeEntities(rHand);
     removeEntities(lHand);
     removeEntities(rWrist);
@@ -414,6 +415,8 @@ void NpcAnimation::removeIndividualPart(int type)
         removeEntities(chest);
     else if(type == ESM::PRT_Groin)//4
         removeEntities(groin);
+    else if(type == ESM::PRT_Skirt)//5
+        removeEntities(skirt);
     else if(type == ESM::PRT_RHand)//6
         removeEntities(rHand);
     else if(type == ESM::PRT_LHand)//7
@@ -505,6 +508,7 @@ bool NpcAnimation::addOrReplaceIndividualPart(int type, int group, int priority,
             groin = insertBoundedPart(mesh, "Groin");
             break;
         case ESM::PRT_Skirt:                          //5
+            skirt = insertBoundedPart(mesh, "Groin");
             break;
         case ESM::PRT_RHand:                         //6
             rHand = insertBoundedPart(mesh, "Right Hand");

@@ -35,6 +35,7 @@ private:
     NifOgre::EntityList rAnkle;
     NifOgre::EntityList lAnkle;
     NifOgre::EntityList groin;
+    NifOgre::EntityList skirt;
     NifOgre::EntityList lfoot;
     NifOgre::EntityList rfoot;
     NifOgre::EntityList hair;
