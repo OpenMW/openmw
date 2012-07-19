@@ -925,7 +925,7 @@ EntityList NIFLoader::createEntities(Ogre::SceneNode *parent, const std::string 
 }
 
 EntityList NIFLoader::createEntities(Ogre::Entity *parent, const std::string &bonename,
-                                     Ogre::SceneManager *sceneMgr,
+                                     Ogre::SceneNode *parentNode,
                                      const std::string &name,
                                      const std::string &group)
 {
@@ -935,6 +935,7 @@ EntityList NIFLoader::createEntities(Ogre::Entity *parent, const std::string &bo
     if(meshes.size() == 0)
         return entitylist;
 
+    Ogre::SceneManager *sceneMgr = parentNode->getCreator();
     std::string filter = "Tri "+bonename;
     for(size_t i = 0;i < meshes.size();i++)
     {
@@ -957,14 +958,14 @@ EntityList NIFLoader::createEntities(Ogre::Entity *parent, const std::string &bo
     if(entitylist.mSkelBase)
     {
         entitylist.mSkelBase->shareSkeletonInstanceWith(parent);
-        parent->attachObjectToBone(bonename, entitylist.mSkelBase);
+        parentNode->attachObject(entitylist.mSkelBase);
         for(size_t i = 0;i < entitylist.mEntities.size();i++)
         {
             Ogre::Entity *entity = entitylist.mEntities[i];
             if(entity != entitylist.mSkelBase && entity->hasSkeleton())
             {
                 entity->shareSkeletonInstanceWith(parent);
-                parent->attachObjectToBone(bonename, entity);
+                parentNode->attachObject(entity);
             }
             else if(entity != entitylist.mSkelBase)
                 parent->attachObjectToBone(bonename, entity);

@@ -342,7 +342,7 @@ void NpcAnimation::updateParts()
 NifOgre::EntityList NpcAnimation::insertBoundedPart(const std::string &mesh, const std::string &bonename)
 {
     NifOgre::EntityList entities = NIFLoader::createEntities(mEntityList.mSkelBase, bonename,
-                                                             mInsert->getCreator(), mesh);
+                                                             mInsert, mesh);
     std::vector<Ogre::Entity*> &parts = entities.mEntities;
     for(size_t i = 0;i < parts.size();i++)
         parts[i]->setVisibilityFlags(RV_Actors);

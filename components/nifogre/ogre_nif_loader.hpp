@@ -91,7 +91,7 @@ class NIFLoader
 
 public:
     static EntityList createEntities(Ogre::Entity *parent, const std::string &bonename,
-                                     Ogre::SceneManager *sceneMgr,
+                                     Ogre::SceneNode *parentNode,
                                      const std::string &name,
                                      const std::string &group="General");
 
