@@ -74,7 +74,7 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, OEngine::Render::OgreRendere
     isFemale = !!(ref->base->flags&ESM::NPC::Female);
     isBeast = !!(race->data.flags&ESM::Race::Beast);
 
-    bodyRaceID = "b_n_"+race->name;
+    bodyRaceID = "b_n_"+ref->base->race;
     std::transform(bodyRaceID.begin(), bodyRaceID.end(), bodyRaceID.begin(), ::tolower);
 
     /*std::cout << "Race: " << ref->base->race ;
