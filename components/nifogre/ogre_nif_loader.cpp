@@ -944,7 +944,8 @@ EntityList NIFLoader::createEntities(Ogre::Entity *parent, const std::string &bo
         if(ent->hasSkeleton())
         {
             if(meshes[i].second.length() < filter.length() ||
-               meshes[i].second.compare(0, filter.length(), filter) != 0)
+               !boost::algorithm::lexicographical_compare(meshes[i].second.substr(0, filter.length()),
+                                                          filter, boost::algorithm::is_iequal()))
             {
                 sceneMgr->destroyEntity(ent);
                 meshes.erase(meshes.begin()+i);
