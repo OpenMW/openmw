@@ -180,6 +180,15 @@ void buildBones(Ogre::Skeleton *skel, const Nif::Node *node, std::vector<Nif::Ni
 }
 
 
+/* Comparitor to help sort Key<> vectors */
+template<class T>
+struct KeyTimeSort
+{
+    bool operator()(const Nif::KeyT<T> &lhs, const Nif::KeyT<T> &rhs) const
+    { return lhs.mTime < rhs.mTime; }
+};
+
+
 typedef std::map<std::string,NIFSkeletonLoader,ciLessBoost> LoaderMap;
 static LoaderMap sLoaders;
 
@@ -216,6 +225,94 @@ void loadResource(Ogre::Resource *resource)
              Ogre::StringConverter::toString(ctrls.size())+" controllers)");
         return;
     }
+
+    Ogre::Animation *anim = skel->createAnimation("default", maxtime);
+    /* HACK: Pre-create the node tracks by matching the track IDs with the
+     * bone IDs. Otherwise, Ogre animates the wrong bones. */
+    size_t bonecount = skel->getNumBones();
+    for(size_t i = 0;i < bonecount;i++)
+        anim->createNodeTrack(i, skel->getBone(i));
+
+    for(size_t i = 0;i < ctrls.size();i++)
+    {
+        Nif::NiKeyframeController *kfc = ctrls[i];
+        Nif::NiKeyframeData *kf = kfc->data.getPtr();
+
+        /* Get the keyframes and make sure they're sorted first to last */
+        QuaternionKeyList quatkeys = kf->mRotations;
+        Vector3KeyList trankeys = kf->mTranslations;
+        FloatKeyList scalekeys = kf->mScales;
+        std::sort(quatkeys.mKeys.begin(), quatkeys.mKeys.end(), KeyTimeSort<Ogre::Quaternion>());
+        std::sort(trankeys.mKeys.begin(), trankeys.mKeys.end(), KeyTimeSort<Ogre::Vector3>());
+        std::sort(scalekeys.mKeys.begin(), scalekeys.mKeys.end(), KeyTimeSort<float>());
+
+        QuaternionKeyList::VecType::const_iterator quatiter = quatkeys.mKeys.begin();
+        Vector3KeyList::VecType::const_iterator traniter = trankeys.mKeys.begin();
+        FloatKeyList::VecType::const_iterator scaleiter = scalekeys.mKeys.begin();
+
+        Ogre::Bone *bone = skel->getBone(targets[i]);
+        const Ogre::Quaternion startquat = bone->getInitialOrientation();
+        const Ogre::Vector3 starttrans = bone->getInitialPosition();
+        const Ogre::Vector3 startscale = bone->getInitialScale();
+        Ogre::NodeAnimationTrack *nodetrack = anim->getNodeTrack(bone->getHandle());
+
+        Ogre::Quaternion lastquat, curquat;
+        Ogre::Vector3 lasttrans(0.0f), curtrans(0.0f);
+        Ogre::Vector3 lastscale(1.0f), curscale(1.0f);
+        if(quatiter != quatkeys.mKeys.end())
+            lastquat = curquat = startquat.Inverse() * quatiter->mValue;
+        if(traniter != trankeys.mKeys.end())
+            lasttrans = curtrans = traniter->mValue - starttrans;
+        if(scaleiter != scalekeys.mKeys.end())
+            lastscale = curscale = Ogre::Vector3(scaleiter->mValue) / startscale;
+        bool didlast = false;
+        while(!didlast)
+        {
+            float curtime = kfc->timeStop;
+            if(quatiter != quatkeys.mKeys.end())
+                curtime = std::min(curtime, quatiter->mTime);
+            if(traniter != trankeys.mKeys.end())
+                curtime = std::min(curtime, traniter->mTime);
+            if(scaleiter != scalekeys.mKeys.end())
+                curtime = std::min(curtime, scaleiter->mTime);
+
+            curtime = std::max(curtime, kfc->timeStart);
+            if(curtime >= kfc->timeStop)
+            {
+                didlast = true;
+                curtime = kfc->timeStop;
+            }
+
+            // Get the latest quaternion, translation, and scale for the
+            // current time
+            while(quatiter != quatkeys.mKeys.end() && curtime >= quatiter->mTime)
+            {
+                lastquat = curquat;
+                curquat = startquat.Inverse() * quatiter->mValue;
+                quatiter++;
+            }
+            while(traniter != trankeys.mKeys.end() && curtime >= traniter->mTime)
+            {
+                lasttrans = curtrans;
+                curtrans = traniter->mValue - starttrans;
+                traniter++;
+            }
+            while(scaleiter != scalekeys.mKeys.end() && curtime >= scaleiter->mTime)
+            {
+                lastscale = curscale;
+                curscale = Ogre::Vector3(scaleiter->mValue) / startscale;
+                scaleiter++;
+            }
+
+            Ogre::TransformKeyFrame *kframe;
+            kframe = nodetrack->createNodeKeyFrame(curtime);
+            // FIXME: These should be interpolated since they don't all fall on the same time
+            kframe->setRotation(curquat);
+            kframe->setTranslate(curtrans);
+            kframe->setScale(curscale);
+        }
+    }
+    anim->optimise();
 }
 
 bool createSkeleton(const std::string &name, const std::string &group, Nif::Node *node)
