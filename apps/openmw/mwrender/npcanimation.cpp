@@ -117,6 +117,18 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, OEngine::Render::OgreRendere
                                                  //stay in the same place when we skipanim, or open a gui window
     }
 
+    if(mEntityList.mSkelBase)
+    {
+        Ogre::AnimationStateSet *aset = mEntityList.mSkelBase->getAllAnimationStates();
+        Ogre::AnimationStateIterator as = aset->getAnimationStateIterator();
+        while(as.hasMoreElements())
+        {
+            Ogre::AnimationState *state = as.getNext();
+            state->setEnabled(true);
+            state->setLoop(false);
+        }
+    }
+
     if(isFemale)
         mInsert->scale(race->data.height.female, race->data.height.female, race->data.height.female);
     else
@@ -361,24 +373,30 @@ void NpcAnimation::runAnimation(float timepassed)
         timeToChange = 0;
         updateParts();
     }
-
     timeToChange += timepassed;
 
-    //1. Add the amount of time passed to time
-
-    //2. Handle the animation transforms dependent on time
-
-    //3. Handle the shapes dependent on animation transforms
     if(mAnimate > 0)
     {
         mTime += timepassed;
-        if(mTime > mStopTime)
+
+        if(mEntityList.mSkelBase)
         {
-            mAnimate--;
-            if(mAnimate == 0)
-                mTime = mStopTime;
-            else
-                mTime = mStartTime + (mTime - mStopTime);
+            Ogre::AnimationStateSet *aset = mEntityList.mSkelBase->getAllAnimationStates();
+            Ogre::AnimationStateIterator as = aset->getAnimationStateIterator();
+            while(as.hasMoreElements())
+            {
+                Ogre::AnimationState *state = as.getNext();
+                state->setTimePosition(mTime);
+                if(state->getTimePosition() >= state->getLength())
+                {
+                    mAnimate--;
+                    //std::cout << "Stopping the animation\n";
+                    if(mAnimate == 0)
+                        mTime = state->getLength();
+                    else
+                        mTime = mTime - state->getLength();
+                }
+            }
         }
 
         handleAnimationTransforms();

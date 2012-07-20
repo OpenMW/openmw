@@ -52,6 +52,18 @@ CreatureAnimation::CreatureAnimation(const MWWorld::Ptr& ptr, OEngine::Render::O
             }
             ent->setRenderQueueGroup(transparent ? RQG_Alpha : RQG_Main);
         }
+
+        if(mEntityList.mSkelBase)
+        {
+            Ogre::AnimationStateSet *aset = mEntityList.mSkelBase->getAllAnimationStates();
+            Ogre::AnimationStateIterator as = aset->getAnimationStateIterator();
+            while(as.hasMoreElements())
+            {
+                Ogre::AnimationState *state = as.getNext();
+                state->setEnabled(true);
+                state->setLoop(false);
+            }
+        }
     }
 }
 
@@ -59,20 +71,26 @@ void CreatureAnimation::runAnimation(float timepassed)
 {
     if(mAnimate > 0)
     {
-        //Add the amount of time passed to time
-
-        //Handle the animation transforms dependent on time
-
-        //Handle the shapes dependent on animation transforms
         mTime += timepassed;
-        if(mTime >= mStopTime)
+
+        if(mEntityList.mSkelBase)
         {
-            mAnimate--;
-            //std::cout << "Stopping the animation\n";
-            if(mAnimate == 0)
-                mTime = mStopTime;
-            else
-                mTime = mStartTime + (mTime - mStopTime);
+            Ogre::AnimationStateSet *aset = mEntityList.mSkelBase->getAllAnimationStates();
+            Ogre::AnimationStateIterator as = aset->getAnimationStateIterator();
+            while(as.hasMoreElements())
+            {
+                Ogre::AnimationState *state = as.getNext();
+                state->setTimePosition(mTime);
+                if(state->getTimePosition() >= state->getLength())
+                {
+                    mAnimate--;
+                    //std::cout << "Stopping the animation\n";
+                    if(mAnimate == 0)
+                        mTime = state->getLength();
+                    else
+                        mTime = mTime - state->getLength();
+                }
+            }
         }
 
         handleAnimationTransforms();
