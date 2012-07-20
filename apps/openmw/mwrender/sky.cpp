@@ -57,6 +57,8 @@ BillboardObject::BillboardObject( const String& textureName,
     mMaterial = sh::Factory::getInstance().createMaterialInstance ("BillboardMaterial"+StringConverter::toString(bodyCount), material);
     mMaterial->setProperty("texture", sh::makeProperty<sh::StringValue>(new sh::StringValue(textureName)));
 
+    sh::Factory::getInstance().getMaterialInstance ("BillboardMaterial"+StringConverter::toString(bodyCount))->setListener(this);
+
     mBBSet->setMaterialName("BillboardMaterial"+StringConverter::toString(bodyCount));
 
     bodyCount++;
@@ -64,6 +66,16 @@ BillboardObject::BillboardObject( const String& textureName,
 
 BillboardObject::BillboardObject()
 {
+}
+
+void BillboardObject::requestedConfiguration (sh::MaterialInstance* m, const std::string& configuration)
+{
+}
+
+void BillboardObject::createdConfiguration (sh::MaterialInstance* m, const std::string& configuration)
+{
+    setVisibility(mVisibility);
+    setColour(mColour);
 }
 
 void BillboardObject::setVisible(const bool visible)
@@ -78,6 +90,7 @@ void BillboardObject::setSize(const float size)
 
 void BillboardObject::setVisibility(const float visibility)
 {
+    mVisibility = visibility;
     Ogre::MaterialPtr m = static_cast<sh::OgreMaterial*>(mMaterial->getMaterial ())->getOgreMaterial ();
     for (int i=0; i<m->getNumTechniques(); ++i)
     {
@@ -110,6 +123,7 @@ void BillboardObject::setVisibilityFlags(int flags)
 
 void BillboardObject::setColour(const ColourValue& pColour)
 {
+    mColour = pColour;
     Ogre::MaterialPtr m = static_cast<sh::OgreMaterial*>(mMaterial->getMaterial ())->getOgreMaterial ();
     for (int i=0; i<m->getNumTechniques(); ++i)
     {
@@ -117,7 +131,6 @@ void BillboardObject::setColour(const ColourValue& pColour)
         if (t->getNumPasses ())
             t->getPass(0)->setSelfIllumination (pColour);
     }
-    //mMaterial->getTechnique(0)->getPass(0)->setSelfIllumination(pColour);
 }
 
 void BillboardObject::setRenderQueue(unsigned int id)

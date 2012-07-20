@@ -27,7 +27,7 @@ namespace Ogre
 
 namespace MWRender
 {
-    class BillboardObject
+    class BillboardObject : public sh::MaterialInstanceListener
     {
     public:
         BillboardObject(  const Ogre::String& textureName,
@@ -37,6 +37,9 @@ namespace MWRender
                           const std::string& material
                     );
         BillboardObject();
+
+        void requestedConfiguration (sh::MaterialInstance* m, const std::string& configuration);
+        void createdConfiguration (sh::MaterialInstance* m, const std::string& configuration);
 
         virtual ~BillboardObject() {}
 
@@ -53,7 +56,8 @@ namespace MWRender
         Ogre::SceneNode* getNode();
 
     protected:
-
+        float mVisibility;
+        Ogre::ColourValue mColour;
         Ogre::SceneNode* mNode;
         sh::MaterialInstance* mMaterial;
         Ogre::BillboardSet* mBBSet;
