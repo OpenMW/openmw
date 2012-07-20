@@ -111,6 +111,9 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
     sh::Factory::getInstance ().setGlobalSetting ("underwater_effects", Settings::Manager::getString("underwater effect", "Water"));
     sh::Factory::getInstance ().setGlobalSetting ("simple_water", Settings::Manager::getBool("shader", "Water") ? "false" : "true");
 
+    sh::Factory::getInstance ().setSharedParameter ("viewportBackground", sh::makeProperty<sh::Vector3> (new sh::Vector3(0,0,0)));
+    sh::Factory::getInstance ().setSharedParameter ("waterEnabled", sh::makeProperty<sh::FloatValue> (new sh::FloatValue(0.0)));
+
     applyCompositors();
 
     // Turn the entire scene (represented by the 'root' node) -90
@@ -379,11 +382,9 @@ void RenderingManager::configureFog(const float density, const Ogre::ColourValue
     mRendering.getCamera()->setFarClipDistance ( max / density );
     mRendering.getViewport()->setBackgroundColour (colour);
 
-    CompositorInstance* inst = CompositorManager::getSingleton().getCompositorChain(mRendering.getViewport())->getCompositor("gbuffer");
-    if (inst != 0)
-        inst->getCompositor()->getTechnique(0)->getTargetPass(0)->getPass(0)->setClearColour(colour);
-    if (mWater)
-        mWater->setViewportBackground(colour);
+    sh::Factory::getInstance ().setSharedParameter ("viewportBackground",
+        sh::makeProperty<sh::Vector3> (new sh::Vector3(colour.r, colour.g, colour.b)));
+
 }
 
 

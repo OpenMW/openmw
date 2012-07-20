@@ -43,7 +43,7 @@
         float4 albedo = shSample(diffuseMap1, scrolledUV) * (1-cloudBlendFactor) + shSample(diffuseMap2, scrolledUV) * cloudBlendFactor;
         
         shOutputColour(0) = colourPassthrough * float4(cloudColour, 1) * albedo * float4(1,1,1, cloudOpacity);
-
+        shOutputColour(0) = float3(0,0,0,1);
 #if MRT
         shOutputColour(1) = float4(1,1,1,1);
 #endif

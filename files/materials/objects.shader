@@ -164,6 +164,7 @@
         
 		shUniform(float, waterTimer) @shSharedParameter(waterTimer)
         shUniform(float2, waterSunFade_sunHeight) @shSharedParameter(waterSunFade_sunHeight)
+        shUniform(float, waterEnabled) @shSharedParameter(waterEnabled)
         		
 		shUniform(float3, windDir_windSpeed) @shSharedParameter(windDir_windSpeed)
 #endif
@@ -204,7 +205,7 @@
 #if UNDERWATER
     float3 worldPos = shMatrixMult(worldMatrix, float4(objSpacePositionPassthrough,1)).xyz;
     float3 waterEyePos = float3(1,1,1);
-    if (worldPos.y < waterLevel)
+    if (worldPos.y < waterLevel && waterEnabled == 1)
     {
         float4 worldNormal = shMatrixMult(worldMatrix, float4(normal.xyz, 0));
         waterEyePos = intercept(worldPos, cameraPos.xyz - worldPos, float3(0,1,0), waterLevel);
@@ -286,7 +287,7 @@
         watercolour *= darkness;
 
         float isUnderwater = (worldPos.y < waterLevel) ? 1.0 : 0.0;
-        shOutputColour(0).xyz = shLerp (shOutputColour(0).xyz, watercolour, fogAmount * isUnderwater);
+        shOutputColour(0).xyz = shLerp (shOutputColour(0).xyz, watercolour, fogAmount * isUnderwater * waterEnabled);
 #endif
 
 #if MRT

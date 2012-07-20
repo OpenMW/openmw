@@ -116,7 +116,7 @@
         #define SMALL_WAVES_Y 0.1      
         
         #define WAVE_CHOPPYNESS 0.15                // wave choppyness
-        #define WAVE_SCALE 150                      // overall wave scale
+        #define WAVE_SCALE 75                      // overall wave scale
 
         #define ABBERATION 0.001                    // chromatic abberation amount
         #define BUMP 1.5                            // overall water surface bumpiness

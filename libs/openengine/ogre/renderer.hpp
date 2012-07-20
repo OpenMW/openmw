@@ -110,7 +110,6 @@ namespace OEngine
             set up the Root and logging classes. */
             void configure(
                 const std::string &logPath, // Path to directory where to store log files
-                const std::string &pluginCfg, // plugin.cfg file
                 const std::string &renderSystem,
                 bool _logging);      // Enable or disable logging
 

@@ -141,6 +141,8 @@ void Water::setActive(bool active)
 {
     mActive = active;
     updateVisible();
+
+    sh::Factory::getInstance ().setSharedParameter ("waterEnabled", sh::makeProperty<sh::FloatValue> (new sh::FloatValue(active ? 1.0 : 0.0)));
 }
 
 Water::~Water()
@@ -413,6 +415,8 @@ void Water::createdConfiguration (sh::MaterialInstance* m, const std::string& co
         }
 
         Ogre::Technique* t = static_cast<sh::OgreMaterial*>(m->getMaterial())->getOgreTechniqueForConfiguration(configuration);
+        if (t->getPass(0)->getNumTextureUnitStates () == 0)
+            return;
         t->getPass(0)->getTextureUnitState(0)->setAnimatedTextureName(textureNames, 32, 2);
         t->getPass(0)->setDepthWriteEnabled (false);
         t->getPass(0)->setSceneBlending (Ogre::SBT_TRANSPARENT_ALPHA);
