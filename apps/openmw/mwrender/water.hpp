@@ -13,6 +13,8 @@
 
 #include "renderconst.hpp"
 
+#include <extern/shiny/Main/MaterialInstance.hpp>
+
 namespace Ogre
 {
     class Camera;
@@ -29,7 +31,7 @@ namespace MWRender {
     class RenderingManager;
 
     /// Water rendering
-    class Water : public Ogre::RenderTargetListener, public Ogre::RenderQueueListener
+    class Water : public Ogre::RenderTargetListener, public Ogre::RenderQueueListener, public sh::MaterialInstanceListener
     {
         static const int CELL_SIZE = 8192;
         Ogre::Camera *mCamera;
@@ -74,7 +76,6 @@ namespace MWRender {
 
         std::string mCompositorName;
 
-        void createMaterial();
         Ogre::MaterialPtr mMaterial;
 
         Ogre::Camera* mReflectionCamera;
@@ -103,6 +104,9 @@ namespace MWRender {
         void checkUnderwater(float y);
         void changeCell(const ESM::Cell* cell);
         void setHeight(const float height);
+
+        virtual void requestedConfiguration (sh::MaterialInstance* m, const std::string& configuration);
+        virtual void createdConfiguration (sh::MaterialInstance* m, const std::string& configuration);
 
     };
 

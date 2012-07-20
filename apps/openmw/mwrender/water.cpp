@@ -17,6 +17,7 @@
 #include "compositors.hpp"
 
 #include <extern/shiny/Main/Factory.hpp>
+#include <extern/shiny/Platforms/Ogre/OgreMaterial.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -39,6 +40,8 @@ Water::Water (Ogre::Camera *camera, RenderingManager* rend, const ESM::Cell* cel
     sh::Factory::getInstance ().setSharedParameter ("windDir_windSpeed", sh::makeProperty<sh::Vector3>(new sh::Vector3(0.5, -0.8, 0.2)));
     sh::Factory::getInstance ().setSharedParameter ("waterTimer", sh::makeProperty<sh::FloatValue>(new sh::FloatValue(0)));
     sh::Factory::getInstance ().setSharedParameter ("waterSunFade_sunHeight", sh::makeProperty<sh::Vector2>(new sh::Vector2(1, 0.6)));
+
+    mMaterial = MaterialManager::getSingleton().getByName("Water");
 
     mTop = cell->water;
 
@@ -66,8 +69,6 @@ Water::Water (Ogre::Camera *camera, RenderingManager* rend, const ESM::Cell* cel
     applyRTT();
     applyVisibilityMask();
 
-
-    createMaterial();
     mWater->setMaterial(mMaterial);
 
     Ogre::Entity* underwaterDome = mSceneManager->createEntity ("underwater_dome.mesh");
@@ -83,6 +84,9 @@ Water::Water (Ogre::Camera *camera, RenderingManager* rend, const ESM::Cell* cel
     assignTextures();
 
     setHeight(mTop);
+
+    sh::MaterialInstance* m = sh::Factory::getInstance ().getMaterialInstance ("Water");
+    m->setListener (this);
 
 
     // ----------------------------------------------------------------------------------------------
@@ -106,7 +110,7 @@ Water::Water (Ogre::Camera *camera, RenderingManager* rend, const ESM::Cell* cel
             ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
 
         debugMat->getTechnique(0)->getPass(0)->setLightingEnabled(false);
-        TextureUnitState *t = debugMat->getTechnique(0)->getPass(0)->createTextureUnitState(mReflectionTexture->getName());
+        debugMat->getTechnique(0)->getPass(0)->createTextureUnitState(mReflectionTexture->getName());
 
         OverlayContainer* debugPanel;
 
@@ -238,29 +242,6 @@ void Water::postRenderTargetUpdate(const RenderTargetEvent& evt)
     }
 }
 
-void Water::createMaterial()
-{
-    if (mReflectionTarget == 0)
-    {
-        mMaterial = MaterialManager::getSingleton().getByName("Water_Fallback");
-    }
-    else
-    {
-        mMaterial = MaterialManager::getSingleton().getByName("Water");
-        sh::Factory::getInstance ().setTextureAlias ("WaterReflection", mReflectionTexture->getName());
-    }
-
-    // these have to be set in code
-    std::string textureNames[32];
-    for (int i=0; i<32; ++i)
-    {
-        textureNames[i] = "textures\\water\\water" + StringConverter::toString(i, 2, '0') + ".dds";
-    }
-
-    if (mReflectionTarget == 0)
-        mMaterial->getTechnique(0)->getPass(0)->getTextureUnitState(0)->setAnimatedTextureName(textureNames, 32, 2);
-}
-
 void Water::assignTextures()
 {
     if (Settings::Manager::getBool("shader", "Water"))
@@ -292,7 +273,7 @@ void Water::updateVisible()
 void Water::renderQueueStarted (Ogre::uint8 queueGroupId, const Ogre::String &invocation, bool &skipThisInvocation)
 {
     // We don't want the sky to get clipped by custom near clip plane (the water plane)
-    if (((queueGroupId < 20) || queueGroupId == RQG_UnderWater) && mReflectionRenderActive)
+    if (queueGroupId < 20 && mReflectionRenderActive)
     {
         mOldFarClip = mReflectionCamera->getFarClipDistance ();
         mReflectionCamera->disableCustomNearClipPlane();
@@ -309,7 +290,7 @@ void Water::renderQueueStarted (Ogre::uint8 queueGroupId, const Ogre::String &in
 
 void Water::renderQueueEnded (Ogre::uint8 queueGroupId, const Ogre::String &invocation, bool &repeatThisInvocation)
 {
-    if (((queueGroupId < 20) || queueGroupId == RQG_UnderWater) && mReflectionRenderActive)
+    if (queueGroupId < 20 && mReflectionRenderActive)
     {
         mReflectionCamera->setFarClipDistance (mOldFarClip);
         if (!mIsUnderwater)
@@ -363,6 +344,8 @@ void Water::applyRTT()
         rtt->setActive(true);
 
         mReflectionTarget = rtt;
+
+        sh::Factory::getInstance ().setTextureAlias ("WaterReflection", mReflectionTexture->getName());
     }
 }
 
@@ -406,12 +389,34 @@ void Water::processChangedSettings(const Settings::CategorySettingVector& settin
     {
         applyRTT();
         applyVisibilityMask();
-        createMaterial();
         mWater->setMaterial(mMaterial);
         assignTextures();
     }
     if (applyVisMask)
         applyVisibilityMask();
+}
+
+void Water::requestedConfiguration (sh::MaterialInstance* m, const std::string& configuration)
+{
+}
+
+void Water::createdConfiguration (sh::MaterialInstance* m, const std::string& configuration)
+{
+    if (configuration == "local_map" || !Settings::Manager::getBool("shader", "Water"))
+    {
+        // for simple water, set animated texture names
+        // these have to be set in code
+        std::string textureNames[32];
+        for (int i=0; i<32; ++i)
+        {
+            textureNames[i] = "textures\\water\\water" + StringConverter::toString(i, 2, '0') + ".dds";
+        }
+
+        Ogre::Technique* t = static_cast<sh::OgreMaterial*>(m->getMaterial())->getOgreTechniqueForConfiguration(configuration);
+        t->getPass(0)->getTextureUnitState(0)->setAnimatedTextureName(textureNames, 32, 2);
+        t->getPass(0)->setDepthWriteEnabled (false);
+        t->getPass(0)->setSceneBlending (Ogre::SBT_TRANSPARENT_ALPHA);
+    }
 }
 
 } // namespace

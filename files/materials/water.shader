@@ -1,6 +1,67 @@
 #include "core.h"
 
+
+#define SIMPLE_WATER @shGlobalSettingBool(simple_water)
+
+
+#if SIMPLE_WATER
+    // --------------------------------------- SIMPLE WATER ---------------------------------------------------
+    
+   
+   #define MRT @shGlobalSettingBool(mrt_output)
+   
+
+#ifdef SH_VERTEX_SHADER
+
+    SH_BEGIN_PROGRAM
+        shUniform(float4x4, wvp) @shAutoConstant(wvp, worldviewproj_matrix)
+        shInput(float2, uv0)
+        shOutput(float2, UV)
+        shOutput(float, depth)
+
+    SH_START_PROGRAM
+    {
+	    shOutputPosition = shMatrixMult(wvp, shInputPosition);
+	    UV = uv0;
+	    depth = shOutputPosition.z;
+    }
+
+#else
+
+    SH_BEGIN_PROGRAM
+		shSampler2D(animatedTexture)
+		shInput(float2, UV)
+		shInput(float, depth)
+#if MRT
+        shDeclareMrtOutput(1)
+#endif
+
+		shUniform(float3, fogColor) @shAutoConstant(fogColor, fog_colour)
+        shUniform(float4, fogParams) @shAutoConstant(fogParams, fog_params)
+
+
+    SH_START_PROGRAM
+    {
+        shOutputColour(0).xyz = shSample(animatedTexture, UV * 15).xyz * float3(0.6, 0.7, 1.0);
+        shOutputColour(0).w = 0.7;
+        
+        float fogValue = shSaturate((depth - fogParams.y) * fogParams.w);
+        shOutputColour(0).xyz = shLerp (shOutputColour(0).xyz, fogColor, fogValue);
+
+#if MRT
+        shOutputColour(1) = float4(1,1,1,1);
+#endif
+    }
+
+#endif
+
+#else
+
+
+
 // Inspired by Blender GLSL Water by martinsh ( http://devlog-martinsh.blogspot.de/2012/07/waterundewater-shader-wip.html )
+
+
 
 #ifdef SH_VERTEX_SHADER
 
@@ -239,5 +300,8 @@
         }
 
     }
+
+#endif
+
 
 #endif

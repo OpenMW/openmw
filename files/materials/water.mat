@@ -2,6 +2,11 @@ material Water
 {
     pass
     {
+        emissive 0.6 0.7 1.0
+        ambient 0 0 0
+        diffuse 0 0 0 1
+        specular 0 0 0 32
+
         vertex_program water_vertex
         fragment_program water_fragment
         
@@ -28,6 +33,15 @@ material Water
         texture_unit normalMap
         {
             direct_texture water_nm.png
+        }
+        
+        
+        // for simple_water
+        texture_unit animatedTexture
+        {
+            create_in_ffp true
+            scale 0.1 0.1
+            alpha_op_ex source1 src_manual src_current 0.7
         }
     }
 }
