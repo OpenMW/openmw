@@ -226,7 +226,7 @@ void loadResource(Ogre::Resource *resource)
         return;
     }
 
-    Ogre::Animation *anim = skel->createAnimation("default", maxtime);
+    Ogre::Animation *anim = skel->createAnimation(skel->getName(), maxtime);
     /* HACK: Pre-create the node tracks by matching the track IDs with the
      * bone IDs. Otherwise, Ogre animates the wrong bones. */
     size_t bonecount = skel->getNumBones();
