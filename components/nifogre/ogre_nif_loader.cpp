@@ -195,9 +195,27 @@ void loadResource(Ogre::Resource *resource)
     std::vector<Nif::NiKeyframeController*> ctrls;
     buildBones(skel, node, ctrls);
 
+    std::vector<std::string> targets;
     // TODO: If ctrls.size() == 0, check for a .kf file sharing the name of the .nif file
     if(ctrls.size() == 0) // No animations? Then we're done.
         return;
+
+    float maxtime = 0.0f;
+    for(size_t i = 0;i < ctrls.size();i++)
+    {
+        Nif::NiKeyframeController *ctrl = ctrls[i];
+        maxtime = std::max(maxtime, ctrl->timeStop);
+        Nif::Named *target = dynamic_cast<Nif::Named*>(ctrl->target.getPtr());
+        if(target != NULL)
+            targets.push_back(target->name);
+    }
+
+    if(targets.size() != ctrls.size())
+    {
+        warn("Target size mismatch ("+Ogre::StringConverter::toString(targets.size())+" targets, "+
+             Ogre::StringConverter::toString(ctrls.size())+" controllers)");
+        return;
+    }
 }
 
 bool createSkeleton(const std::string &name, const std::string &group, Nif::Node *node)
