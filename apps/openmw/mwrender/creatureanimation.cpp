@@ -92,8 +92,6 @@ void CreatureAnimation::runAnimation(float timepassed)
                 }
             }
         }
-
-        handleAnimationTransforms();
     }
 }
 

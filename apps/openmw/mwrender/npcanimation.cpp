@@ -398,8 +398,6 @@ void NpcAnimation::runAnimation(float timepassed)
                 }
             }
         }
-
-        handleAnimationTransforms();
     }
 }
 

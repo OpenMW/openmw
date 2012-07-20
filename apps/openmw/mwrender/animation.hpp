@@ -26,23 +26,9 @@ protected:
     static std::map<std::string, int> sUniqueIDs;
 
     float mTime;
-    float mStartTime;
-    float mStopTime;
     int mAnimate;
-    //Represents a rotation index for each bone
-    std::vector<int>mRindexI;
-    //Represents a translation index for each bone
-    std::vector<int>mTindexI;
 
-    //Only shapes with morphing data will use a shape number
-    int mShapeNumber;
-    std::vector<std::vector<int> > mShapeIndexI;
-
-    std::vector<Nif::NiKeyframeData>* mTransformations;
-    std::map<std::string,float>* mTextmappings;
     NifOgre::EntityList mEntityList;
-    void handleAnimationTransforms();
-    bool timeIndex( float time, const std::vector<float> & times, int & i, int & j, float & x );
 
 public:
     Animation(OEngine::Render::OgreRenderer& _rend);
