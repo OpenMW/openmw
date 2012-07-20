@@ -144,7 +144,7 @@ static void fail(const std::string &msg)
 }
 
 
-void buildBones(Ogre::Skeleton *skel, const Nif::Node *node, Ogre::Bone *parent=NULL)
+void buildBones(Ogre::Skeleton *skel, const Nif::Node *node, std::vector<Nif::NiKeyframeController*> &ctrls, Ogre::Bone *parent=NULL)
 {
     Ogre::Bone *bone;
     if(!skel->hasBone(node->name))
@@ -159,6 +159,14 @@ void buildBones(Ogre::Skeleton *skel, const Nif::Node *node, Ogre::Bone *parent=
     bone->setBindingPose();
     bone->setInitialState();
 
+    Nif::ControllerPtr ctrl = node->controller;
+    while(!ctrl.empty())
+    {
+        if(ctrl->recType == Nif::RC_NiKeyframeController)
+            ctrls.push_back(static_cast<Nif::NiKeyframeController*>(ctrl.getPtr()));
+        ctrl = ctrl->next;
+    }
+
     const Nif::NiNode *ninode = dynamic_cast<const Nif::NiNode*>(node);
     if(ninode)
     {
@@ -166,7 +174,7 @@ void buildBones(Ogre::Skeleton *skel, const Nif::Node *node, Ogre::Bone *parent=
         for(size_t i = 0;i < children.length();i++)
         {
             if(!children[i].empty())
-                buildBones(skel, children[i].getPtr(), bone);
+                buildBones(skel, children[i].getPtr(), ctrls, bone);
         }
     }
 }
@@ -183,7 +191,13 @@ void loadResource(Ogre::Resource *resource)
 
     Nif::NIFFile nif(skel->getName());
     const Nif::Node *node = dynamic_cast<const Nif::Node*>(nif.getRecord(0));
-    buildBones(skel, node);
+
+    std::vector<Nif::NiKeyframeController*> ctrls;
+    buildBones(skel, node, ctrls);
+
+    // TODO: If ctrls.size() == 0, check for a .kf file sharing the name of the .nif file
+    if(ctrls.size() == 0) // No animations? Then we're done.
+        return;
 }
 
 bool createSkeleton(const std::string &name, const std::string &group, Nif::Node *node)
