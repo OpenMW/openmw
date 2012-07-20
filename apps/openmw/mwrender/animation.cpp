@@ -27,7 +27,7 @@ Animation::~Animation()
     mEntityList.mEntities.clear();
 }
 
-void Animation::startScript(std::string groupname, int mode, int loops)
+void Animation::playGroup(std::string groupname, int mode, int loops)
 {
     if(groupname == "all")
     {
@@ -37,7 +37,7 @@ void Animation::startScript(std::string groupname, int mode, int loops)
 }
 
 
-void Animation::stopScript()
+void Animation::skipAnim()
 {
     mAnimate = 0;
 }

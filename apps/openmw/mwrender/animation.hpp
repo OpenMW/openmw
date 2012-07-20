@@ -32,11 +32,11 @@ protected:
 
 public:
     Animation(OEngine::Render::OgreRenderer& _rend);
-    virtual void runAnimation(float timepassed) = 0;
-    void startScript(std::string groupname, int mode, int loops);
-    void stopScript();
-
     virtual ~Animation();
+
+    void playGroup(std::string groupname, int mode, int loops);
+    void skipAnim();
+    virtual void runAnimation(float timepassed) = 0;
 };
 
 }
