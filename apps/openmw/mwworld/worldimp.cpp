@@ -167,7 +167,8 @@ namespace MWWorld
 
     World::World (OEngine::Render::OgreRenderer& renderer,
         const Files::Collections& fileCollections,
-        const std::string& master, const boost::filesystem::path& resDir, bool newGame,
+        const std::vector<std::string>& master,
+                const std::vector<std::string>& plugins, const boost::filesystem::path& resDir, bool newGame,
         const std::string& encoding, std::map<std::string,std::string> fallbackMap)
     : mPlayer (0), mLocalScripts (mStore), mGlobalVariables (0),
       mSky (true), mNextDynamicRecord (0), mCells (mStore, mEsm),
@@ -180,15 +181,32 @@ namespace MWWorld
 
         mWeatherManager = new MWWorld::WeatherManager(mRendering);
 
-        boost::filesystem::path masterPath (fileCollections.getCollection (".esm").getPath (master));
+        int idx = 0;
+        for (std::vector<std::string>::size_type i = 0; i < master.size(); i++, idx++)
+        {
+            boost::filesystem::path masterPath (fileCollections.getCollection (".esm").getPath (master[i]));
+            
+            std::cout << "Loading ESM " << masterPath.string() << "\n";
 
-        std::cout << "Loading ESM " << masterPath.string() << "\n";
+            // This parses the ESM file and loads a sample cell
+            mEsm.setEncoding(encoding);
+            mEsm.open (masterPath.string());
+            mEsm.setIndex(idx);
+            mStore.load (mEsm);
+        }
 
-        // This parses the ESM file and loads a sample cell
-        mEsm.setEncoding(encoding);
-        mEsm.open (masterPath.string());
-        mStore.load (mEsm);
+        for (std::vector<std::string>::size_type i = 0; i < plugins.size(); i++, idx++)
+        {
+            boost::filesystem::path pluginPath (fileCollections.getCollection (".esp").getPath (plugins[i]));
+            
+            std::cout << "Loading ESP " << pluginPath.string() << "\n";
 
+            // This parses the ESP file and loads a sample cell
+            mEsm.setEncoding(encoding);
+            mEsm.open (pluginPath.string());
+			      mEsm.setIndex(idx);
+            mStore.load (mEsm);
+        }
         MWRender::Player* play = &(mRendering->getPlayer());
         mPlayer = new MWWorld::Player (play, mStore.npcs.find ("player"), *this);
         mPhysics->addActor (mPlayer->getPlayer().getRefData().getHandle(), "", Ogre::Vector3 (0, 0, 0));
