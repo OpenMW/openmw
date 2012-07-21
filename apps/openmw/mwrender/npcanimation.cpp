@@ -373,30 +373,7 @@ void NpcAnimation::runAnimation(float timepassed)
     }
     timeToChange += timepassed;
 
-    if(mAnimate > 0)
-    {
-        mTime += timepassed;
-
-        if(mEntityList.mSkelBase)
-        {
-            Ogre::AnimationStateSet *aset = mEntityList.mSkelBase->getAllAnimationStates();
-            Ogre::AnimationStateIterator as = aset->getAnimationStateIterator();
-            while(as.hasMoreElements())
-            {
-                Ogre::AnimationState *state = as.getNext();
-                state->setTimePosition(mTime);
-                if(state->getTimePosition() >= state->getLength())
-                {
-                    mAnimate--;
-                    //std::cout << "Stopping the animation\n";
-                    if(mAnimate == 0)
-                        mTime = state->getLength();
-                    else
-                        mTime = mTime - state->getLength();
-                }
-            }
-        }
-    }
+    Animation::runAnimation(timepassed);
 }
 
 void NpcAnimation::removeEntities(NifOgre::EntityList &entities)
