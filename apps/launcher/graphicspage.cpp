@@ -79,11 +79,7 @@ bool GraphicsPage::setupOgre()
 
     try
     {
-#if defined(ENABLE_PLUGIN_GL) || defined(ENABLE_PLUGIN_Direct3D9)
         mOgre = new Ogre::Root("", "", "./launcherOgre.log");
-#else
-        mOgre = new Ogre::Root("", "", "./launcherOgre.log");
-#endif
     }
     catch(Ogre::Exception &ex)
     {

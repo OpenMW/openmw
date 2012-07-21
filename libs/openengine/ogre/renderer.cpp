@@ -88,11 +88,10 @@ void OgreRenderer::configure(const std::string &logPath,
         // Disable logging
         log->setDebugOutputEnabled(false);
 
+    mRoot = new Root("", "", "");
+
     #if defined(ENABLE_PLUGIN_GL) || defined(ENABLE_PLUGIN_Direct3D9) || defined(ENABLE_PLUGIN_CgProgramManager) || defined(ENABLE_PLUGIN_OctreeSceneManager) || defined(ENABLE_PLUGIN_ParticleFX)
-    mRoot = new Root("", "", "");
     loadPlugins();
-    #else
-    mRoot = new Root("", "", "");
     #endif
 
     std::string pluginDir;
