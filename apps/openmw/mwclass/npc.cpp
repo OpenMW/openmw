@@ -81,29 +81,29 @@ namespace MWClass
                 for (int i=0; i<27; ++i)
                     data->mNpcStats.getSkill (i).setBase (ref->base->npdt52.skills[i]);
 
-                data->mCreatureStats.mAttributes[0].set (ref->base->npdt52.strength);
-                data->mCreatureStats.mAttributes[1].set (ref->base->npdt52.intelligence);
-                data->mCreatureStats.mAttributes[2].set (ref->base->npdt52.willpower);
-                data->mCreatureStats.mAttributes[3].set (ref->base->npdt52.agility);
-                data->mCreatureStats.mAttributes[4].set (ref->base->npdt52.speed);
-                data->mCreatureStats.mAttributes[5].set (ref->base->npdt52.endurance);
-                data->mCreatureStats.mAttributes[6].set (ref->base->npdt52.personality);
-                data->mCreatureStats.mAttributes[7].set (ref->base->npdt52.luck);
-                data->mCreatureStats.mDynamic[0].set (ref->base->npdt52.health);
-                data->mCreatureStats.mDynamic[1].set (ref->base->npdt52.mana);
-                data->mCreatureStats.mDynamic[2].set (ref->base->npdt52.fatigue);
+                data->mCreatureStats.getAttribute(0).set (ref->base->npdt52.strength);
+                data->mCreatureStats.getAttribute(1).set (ref->base->npdt52.intelligence);
+                data->mCreatureStats.getAttribute(2).set (ref->base->npdt52.willpower);
+                data->mCreatureStats.getAttribute(3).set (ref->base->npdt52.agility);
+                data->mCreatureStats.getAttribute(4).set (ref->base->npdt52.speed);
+                data->mCreatureStats.getAttribute(5).set (ref->base->npdt52.endurance);
+                data->mCreatureStats.getAttribute(6).set (ref->base->npdt52.personality);
+                data->mCreatureStats.getAttribute(7).set (ref->base->npdt52.luck);
+                data->mCreatureStats.getHealth().set (ref->base->npdt52.health);
+                data->mCreatureStats.getMagicka().set (ref->base->npdt52.mana);
+                data->mCreatureStats.getFatigue().set (ref->base->npdt52.fatigue);
 
-                data->mCreatureStats.mLevel = ref->base->npdt52.level;
+                data->mCreatureStats.setLevel(ref->base->npdt52.level);
             }
             else
             {
                 /// \todo do something with npdt12 maybe:p
             }
 
-            data->mCreatureStats.mHello = ref->base->AI.hello;
-            data->mCreatureStats.mFight = ref->base->AI.fight;
-            data->mCreatureStats.mFlee = ref->base->AI.flee;
-            data->mCreatureStats.mAlarm = ref->base->AI.alarm;
+            data->mCreatureStats.setHello(ref->base->AI.hello);
+            data->mCreatureStats.setFight(ref->base->AI.fight);
+            data->mCreatureStats.setFlee(ref->base->AI.flee);
+            data->mCreatureStats.setAlarm(ref->base->AI.alarm);
 
             // store
             ptr.getRefData().setCustomData (data.release());
@@ -330,7 +330,7 @@ namespace MWClass
     float Npc::getCapacity (const MWWorld::Ptr& ptr) const
     {
         const MWMechanics::CreatureStats& stats = getCreatureStats (ptr);
-        return stats.mAttributes[0].getModified()*5;
+        return stats.getAttribute(0).getModified()*5;
     }
 
     float Npc::getEncumbrance (const MWWorld::Ptr& ptr) const
@@ -339,9 +339,9 @@ namespace MWClass
 
         const MWMechanics::CreatureStats& stats = getCreatureStats (ptr);
 
-        weight -= stats.mMagicEffects.get (MWMechanics::EffectKey (8)).mMagnitude; // feather
+        weight -= stats.getMagicEffects().get (MWMechanics::EffectKey (8)).mMagnitude; // feather
 
-        weight += stats.mMagicEffects.get (MWMechanics::EffectKey (7)).mMagnitude; // burden
+        weight += stats.getMagicEffects().get (MWMechanics::EffectKey (7)).mMagnitude; // burden
 
         if (weight<0)
             weight = 0;
@@ -356,7 +356,7 @@ namespace MWClass
 
         /// \todo consider instant effects
 
-        return stats.mActiveSpells.addSpell (id);
+        return stats.getActiveSpells().addSpell (id);
     }
 
     void Npc::skillUsageSucceeded (const MWWorld::Ptr& ptr, int skill, int usageType) const

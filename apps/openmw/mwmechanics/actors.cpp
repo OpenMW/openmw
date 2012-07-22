@@ -33,7 +33,7 @@ namespace MWMechanics
     {
         CreatureStats& creatureStats =  MWWorld::Class::get (creature).getCreatureStats (creature);
 
-        MagicEffects now = creatureStats.mSpells.getMagicEffects();
+        MagicEffects now = creatureStats.getSpells().getMagicEffects();
 
         if (creature.getTypeName()==typeid (ESM::NPC).name())
         {
@@ -41,11 +41,11 @@ namespace MWMechanics
             now += store.getMagicEffects();
         }
 
-        now += creatureStats.mActiveSpells.getMagicEffects();
+        now += creatureStats.getActiveSpells().getMagicEffects();
 
-        MagicEffects diff = MagicEffects::diff (creatureStats.mMagicEffects, now);
+        MagicEffects diff = MagicEffects::diff (creatureStats.getMagicEffects(), now);
 
-        creatureStats.mMagicEffects = now;
+        creatureStats.setMagicEffects(now);
 
         // TODO apply diff to other stats
     }
@@ -54,18 +54,22 @@ namespace MWMechanics
     {
         CreatureStats& creatureStats = MWWorld::Class::get (ptr).getCreatureStats (ptr);
 
-        int strength = creatureStats.mAttributes[0].getBase();
-        int intelligence = creatureStats.mAttributes[1].getBase();
-        int willpower = creatureStats.mAttributes[2].getBase();
-        int agility = creatureStats.mAttributes[3].getBase();
-        int endurance = creatureStats.mAttributes[5].getBase();
+        int strength        = creatureStats.getAttribute(0).getBase();
+        int intelligence    = creatureStats.getAttribute(1).getBase();
+        int willpower       = creatureStats.getAttribute(2).getBase();
+        int agility         = creatureStats.getAttribute(3).getBase();
+        int endurance       = creatureStats.getAttribute(5).getBase();
 
-        double magickaFactor = creatureStats.mMagicEffects.get (EffectKey (84)).mMagnitude*0.1 + 0.5;
+        double magickaFactor =
+            creatureStats.getMagicEffects().get (EffectKey (84)).mMagnitude * 0.1 + 0.5;
 
-        creatureStats.mDynamic[0].setBase (static_cast<int> (0.5 * (strength + endurance)));
-        creatureStats.mDynamic[1].setBase (static_cast<int> (intelligence +
-            magickaFactor * intelligence));
-        creatureStats.mDynamic[2].setBase (strength+willpower+agility+endurance);
+        creatureStats.getHealth().setBase(
+            static_cast<int> (0.5 * (strength + endurance)));
+
+        creatureStats.getMagicka().setBase(
+            static_cast<int> (intelligence + magickaFactor * intelligence));
+
+        creatureStats.getFatigue().setBase(strength+willpower+agility+endurance);
     }
 
     void Actors::calculateCreatureStatModifiers (const MWWorld::Ptr& ptr)
@@ -75,20 +79,24 @@ namespace MWMechanics
         // attributes
         for (int i=0; i<5; ++i)
         {
-            int modifier = creatureStats.mMagicEffects.get (EffectKey (79, i)).mMagnitude
-                - creatureStats.mMagicEffects.get (EffectKey (17, i)).mMagnitude;
+            int modifier =
+                creatureStats.getMagicEffects().get (EffectKey (79, i)).mMagnitude;
 
-            creatureStats.mAttributes[i].setModifier (modifier);
+            modifier -= creatureStats.getMagicEffects().get (EffectKey (17, i)).mMagnitude;
+
+            creatureStats.getAttribute(i).setModifier (modifier);
         }
 
         // dynamic stats
-        for (int i=0; i<3; ++i)
-        {
-            int modifier = creatureStats.mMagicEffects.get (EffectKey (80+i)).mMagnitude
-                - creatureStats.mMagicEffects.get (EffectKey (18+i)).mMagnitude;
+        MagicEffects effects = creatureStats.getMagicEffects();
+        creatureStats.getHealth().setModifier(
+            effects.get(EffectKey(80)).mMagnitude - effects.get(EffectKey(18)).mMagnitude);
 
-            creatureStats.mDynamic[i].setModifier (modifier);
-        }
+        creatureStats.getMagicka().setModifier(
+            effects.get(EffectKey(81)).mMagnitude - effects.get(EffectKey(19)).mMagnitude);
+
+        creatureStats.getFatigue().setModifier(
+            effects.get(EffectKey(82)).mMagnitude - effects.get(EffectKey(20)).mMagnitude);
     }
 
     Actors::Actors() : mDuration (0) {}
