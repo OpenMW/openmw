@@ -306,10 +306,30 @@ void loadResource(Ogre::Resource *resource)
 
             Ogre::TransformKeyFrame *kframe;
             kframe = nodetrack->createNodeKeyFrame(curtime);
-            // FIXME: These should be interpolated since they don't all fall on the same time
-            kframe->setRotation(curquat);
-            kframe->setTranslate(curtrans);
-            kframe->setScale(curscale);
+            if(quatiter == quatkeys.mKeys.end() || quatiter == quatkeys.mKeys.begin())
+                kframe->setRotation(curquat);
+            else
+            {
+                QuaternionKeyList::VecType::const_iterator last = quatiter-1;
+                float diff = (curtime-last->mTime) / (quatiter->mTime-last->mTime);
+                kframe->setRotation(Ogre::Quaternion::nlerp(diff, lastquat, curquat));
+            }
+            if(traniter == trankeys.mKeys.end() || traniter == trankeys.mKeys.begin())
+                kframe->setTranslate(curtrans);
+            else
+            {
+                Vector3KeyList::VecType::const_iterator last = traniter-1;
+                float diff = (curtime-last->mTime) / (traniter->mTime-last->mTime);
+                kframe->setTranslate(lasttrans + ((curtrans-lasttrans)*diff));
+            }
+            if(scaleiter == scalekeys.mKeys.end() || scaleiter == scalekeys.mKeys.begin())
+                kframe->setScale(curscale);
+            else
+            {
+                FloatKeyList::VecType::const_iterator last = scaleiter-1;
+                float diff = (curtime-last->mTime) / (scaleiter->mTime-last->mTime);
+                kframe->setScale(lastscale + ((curscale-lastscale)*diff));
+            }
         }
     }
     anim->optimise();
