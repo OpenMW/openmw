@@ -27,6 +27,8 @@ ConfigurationManager::ConfigurationManager()
 {
     setupTokensMapping();
 
+    boost::filesystem::create_directories(mFixedPath.getUserPath());
+
     mPluginsCfgPath = mFixedPath.getLocalPath() / pluginsCfgFile;
     if (!boost::filesystem::is_regular_file(mPluginsCfgPath))
     {
