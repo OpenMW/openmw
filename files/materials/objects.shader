@@ -132,7 +132,7 @@
         shUniform(float4, fogParams) @shAutoConstant(fogParams, fog_params)
 #endif
 
-#ifdef HAS_VERTEXCOLOR
+#if HAS_VERTEXCOLOR
         shInput(float4, colourPassthrough)
 #endif
 

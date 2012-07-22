@@ -247,10 +247,7 @@
         // first layer of first pass doesn't need a blend map
         albedo = shSample(diffuseMap0, UV * 10).rgb;
 #else
-        #define BLEND_AMOUNT blendValues@shPropertyString(blendmap_component_@shIterator)
-        
-        
-        albedo = shLerp(albedo, shSample(diffuseMap@shIterator, UV * 10).rgb, BLEND_AMOUNT);
+        albedo = shLerp(albedo, shSample(diffuseMap@shIterator, UV * 10).rgb, blendValues@shPropertyString(blendmap_component_@shIterator));
 
 #endif
 @shEndForeach
