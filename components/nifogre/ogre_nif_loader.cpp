@@ -25,6 +25,8 @@
 
 #include "ogre_nif_loader.hpp"
 
+#include <algorithm>
+
 #include <OgreMaterialManager.h>
 #include <OgreMeshManager.h>
 #include <OgreHardwareBufferManager.h>
@@ -1080,6 +1082,11 @@ EntityList NIFLoader::createEntities(Ogre::SceneNode *parent, const std::string 
     return entitylist;
 }
 
+static bool checklow(const char &a, const char &b)
+{
+    return ::tolower(a) == ::tolower(b);
+}
+
 EntityList NIFLoader::createEntities(Ogre::Entity *parent, const std::string &bonename,
                                      Ogre::SceneNode *parentNode,
                                      const std::string &name,
@@ -1099,8 +1106,7 @@ EntityList NIFLoader::createEntities(Ogre::Entity *parent, const std::string &bo
         if(ent->hasSkeleton())
         {
             if(meshes[i].second.length() < filter.length() ||
-               !boost::algorithm::lexicographical_compare(meshes[i].second.substr(0, filter.length()),
-                                                          filter, boost::algorithm::is_iequal()))
+               std::mismatch(filter.begin(), filter.end(), meshes[i].second.begin(), checklow).first != filter.end())
             {
                 sceneMgr->destroyEntity(ent);
                 meshes.erase(meshes.begin()+i);
