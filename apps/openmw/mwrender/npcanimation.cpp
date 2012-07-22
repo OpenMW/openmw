@@ -149,7 +149,7 @@ void NpcAnimation::updateParts()
         { &greaves, MWWorld::InventoryStore::Slot_Greaves },
         { &leftpauldron, MWWorld::InventoryStore::Slot_LeftPauldron },
         { &rightpauldron, MWWorld::InventoryStore::Slot_RightPauldron },
-        { &boots, MWWorld::InventoryStore::Slot_Boots }, // !isBeast
+        { &boots, MWWorld::InventoryStore::Slot_Boots },
         { &leftglove, MWWorld::InventoryStore::Slot_LeftGauntlet },
         { &rightglove, MWWorld::InventoryStore::Slot_RightGauntlet },
         { &shirt, MWWorld::InventoryStore::Slot_Shirt },
@@ -157,9 +157,6 @@ void NpcAnimation::updateParts()
     };
     for(size_t i = 0;i < sizeof(slotlist)/sizeof(slotlist[0]);i++)
     {
-        if(slotlist[i].iter == &boots && isBeast)
-            continue;
-
         MWWorld::ContainerStoreIterator iter = mInv.getSlot(slotlist[i].slot);
         if(*slotlist[i].iter != iter)
         {
@@ -235,7 +232,7 @@ void NpcAnimation::updateParts()
             std::vector<ESM::PartReference> parts = armor->parts.parts;
             addPartGroup(MWWorld::InventoryStore::Slot_RightPauldron, 3, parts);
         }
-        if(!isBeast && boots != mInv.end())
+        if(boots != mInv.end())
         {
             if(boots->getTypeName() == typeid(ESM::Clothing).name())
             {
