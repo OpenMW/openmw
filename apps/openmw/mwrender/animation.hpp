@@ -27,6 +27,7 @@ protected:
 
     float mTime;
     int mAnimate;
+    bool mSkipFrame;
 
     NifOgre::EntityList mEntityList;
 

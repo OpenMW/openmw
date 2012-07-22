@@ -16,6 +16,7 @@ Animation::Animation(OEngine::Render::OgreRenderer& _rend)
     , mRend(_rend)
     , mTime(0.0f)
     , mAnimate(0)
+    , mSkipFrame(false)
 {
 }
 
@@ -39,12 +40,12 @@ void Animation::playGroup(std::string groupname, int mode, int loops)
 
 void Animation::skipAnim()
 {
-    mAnimate = 0;
+    mSkipFrame = true;
 }
 
 void Animation::runAnimation(float timepassed)
 {
-    if(mAnimate != 0)
+    if(mAnimate != 0 && !mSkipFrame)
     {
         mTime += timepassed;
 
@@ -69,6 +70,7 @@ void Animation::runAnimation(float timepassed)
             }
         }
     }
+    mSkipFrame = false;
 }
 
 }
