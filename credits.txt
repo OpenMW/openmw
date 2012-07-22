@@ -3,6 +3,7 @@ CREDITS
 Current Developers:
 Aleksandar Jovanov
 Alexander “Ace” Olofsson
+Artem “greye” Kotsynyak
 athile
 BrotherBrick
 Cris “Mirceam” Mihalache
