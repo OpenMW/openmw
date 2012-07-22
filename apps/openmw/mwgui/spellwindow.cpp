@@ -81,7 +81,7 @@ namespace MWGui
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
         MWWorld::InventoryStore& store = MWWorld::Class::get(player).getInventoryStore(player);
         MWMechanics::CreatureStats& stats = MWWorld::Class::get(player).getCreatureStats(player);
-        MWMechanics::Spells& spells = stats.mSpells;
+        MWMechanics::Spells& spells = stats.getSpells();
 
         // the following code switches between selected enchanted item and selected spell (only one of these
         // can be active at a time)
@@ -333,7 +333,7 @@ namespace MWGui
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
         MWMechanics::CreatureStats& stats = MWWorld::Class::get(player).getCreatureStats(player);
         MWWorld::InventoryStore& store = MWWorld::Class::get(player).getInventoryStore(player);
-        MWMechanics::Spells& spells = stats.mSpells;
+        MWMechanics::Spells& spells = stats.getSpells();
         MWWorld::Ptr item = *_sender->getUserData<MWWorld::Ptr>();
 
         // retrieve ContainerStoreIterator to the item
@@ -397,7 +397,7 @@ namespace MWGui
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
         MWMechanics::CreatureStats& stats = MWWorld::Class::get(player).getCreatureStats(player);
         MWWorld::InventoryStore& store = MWWorld::Class::get(player).getInventoryStore(player);
-        MWMechanics::Spells& spells = stats.mSpells;
+        MWMechanics::Spells& spells = stats.getSpells();
 
         if (MyGUI::InputManager::getInstance().isShiftPressed())
         {
@@ -451,7 +451,7 @@ namespace MWGui
     {
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
         MWMechanics::CreatureStats& stats = MWWorld::Class::get(player).getCreatureStats(player);
-        MWMechanics::Spells& spells = stats.mSpells;
+        MWMechanics::Spells& spells = stats.getSpells();
 
         if (spells.getSelectedSpell() == mSpellToDelete)
         {

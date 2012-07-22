@@ -81,12 +81,12 @@ namespace MWMechanics
         int skillLevel = stats.getSkill (getSpellSchool(spellId, actor)).getModified();
 
         // Sound magic effect (reduces spell casting chance)
-        int soundMagnitude = creatureStats.mMagicEffects.get (MWMechanics::EffectKey (48)).mMagnitude;
+        int soundMagnitude = creatureStats.getMagicEffects().get (MWMechanics::EffectKey (48)).mMagnitude;
 
-        int willpower = creatureStats.mAttributes[ESM::Attribute::Willpower].getModified();
-        int luck = creatureStats.mAttributes[ESM::Attribute::Luck].getModified();
-        int currentFatigue = creatureStats.mDynamic[2].getCurrent();
-        int maxFatigue = creatureStats.mDynamic[2].getModified();
+        int willpower = creatureStats.getAttribute(ESM::Attribute::Willpower).getModified();
+        int luck = creatureStats.getAttribute(ESM::Attribute::Luck).getModified();
+        int currentFatigue = creatureStats.getFatigue().getCurrent();
+        int maxFatigue = creatureStats.getFatigue().getModified();
         int spellCost = spell->data.cost;
 
         // There we go, all needed variables are there, lets go
