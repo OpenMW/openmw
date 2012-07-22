@@ -186,9 +186,20 @@ if (UNIX AND NOT APPLE)
 find_package (Threads)
 endif()
 
+set(BOOST_COMPONENTS system filesystem program_options thread)
+
+if (Boost_VERSION LESS 104900)
+    set(SHINY_USE_WAVE_SYSTEM_INSTALL TRUE)
+    set(BOOST_COMPONENTS ${BOOST_COMPONENTS} wave)
+else()
+    set(SHINY_USE_WAVE_SYSTEM_INSTALL FALSE)
+endif()
+
+MESSAGE(STATUS ${BOOST_COMPONENTS})
+
 find_package(OGRE REQUIRED)
 find_package(MyGUI REQUIRED)
-find_package(Boost REQUIRED COMPONENTS system filesystem program_options thread)
+find_package(Boost REQUIRED COMPONENTS ${BOOST_COMPONENTS})
 find_package(OIS REQUIRED)
 find_package(OpenAL REQUIRED)
 find_package(Bullet REQUIRED)
