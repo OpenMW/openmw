@@ -388,7 +388,6 @@ void NpcAnimation::removeEntities(NifOgre::EntityList &entities)
     }
     entities.mEntities.clear();
     entities.mSkelBase = NULL;
-    entities.mRootNode = NULL;
 }
 
 void NpcAnimation::removeIndividualPart(int type)
