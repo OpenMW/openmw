@@ -15,6 +15,11 @@ material openmw_moon
         {
             texture_alias $texture
         }
+        
+        texture_unit alphaMap
+        {
+            direct_texture textures\tx_secunda_full.dds
+        }
     }
 }
 

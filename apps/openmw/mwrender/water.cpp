@@ -71,6 +71,7 @@ Water::Water (Ogre::Camera *camera, RenderingManager* rend, const ESM::Cell* cel
 
     mWater->setMaterial(mMaterial);
 
+    /*
     Ogre::Entity* underwaterDome = mSceneManager->createEntity ("underwater_dome.mesh");
     underwaterDome->setRenderQueueGroup (RQG_UnderWater);
     mUnderwaterDome = mSceneManager->getRootSceneNode ()->createChildSceneNode ();
@@ -78,6 +79,7 @@ Water::Water (Ogre::Camera *camera, RenderingManager* rend, const ESM::Cell* cel
     mUnderwaterDome->setScale(10000,10000,10000);
     mUnderwaterDome->setVisible(false);
     underwaterDome->setMaterialName("Underwater_Dome");
+    */
 
     mSceneManager->addRenderQueueListener(this);
 
@@ -309,9 +311,11 @@ void Water::renderQueueEnded (Ogre::uint8 queueGroupId, const Ogre::String &invo
 
 void Water::update(float dt)
 {
+    /*
     Ogre::Vector3 pos = mCamera->getDerivedPosition ();
     pos.y = -mWaterPlane.d;
     mUnderwaterDome->setPosition (pos);
+    */
 
     mWaterTimer += dt / 30.0 * MWBase::Environment::get().getWorld()->getTimeScaleFactor();
     sh::Factory::getInstance ().setSharedParameter ("waterTimer", sh::makeProperty<sh::FloatValue>(new sh::FloatValue(mWaterTimer)));
