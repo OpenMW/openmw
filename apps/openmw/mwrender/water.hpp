@@ -43,7 +43,7 @@ namespace MWRender {
         Ogre::SceneNode *mWaterNode;
         Ogre::Entity *mWater;
 
-        Ogre::SceneNode* mUnderwaterDome;
+        //Ogre::SceneNode* mUnderwaterDome;
 
         bool mIsUnderwater;
         bool mActive;
