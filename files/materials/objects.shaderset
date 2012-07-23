@@ -10,6 +10,6 @@ shader_set openmw_objects_fragment
 {
     source objects.shader
     type fragment
-    profiles_cg ps_2_x ps_2_0 ps fp40 arbfp1
+    profiles_cg ps_3_0 ps_2_x ps_2_0 fp40 arbfp1
     profiles_hlsl ps_2_0
 }

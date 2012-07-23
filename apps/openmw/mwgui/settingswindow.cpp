@@ -75,12 +75,9 @@ namespace
         return boost::lexical_cast<std::string>(xaspect) + " : " + boost::lexical_cast<std::string>(yaspect);
     }
 
-    std::string hlslGlsl ()
+    bool hasGLSL ()
     {
-        if (Ogre::Root::getSingleton ().getRenderSystem ()->getName ().find("OpenGL") == std::string::npos)
-            return "hlsl";
-        else
-            return "glsl";
+        return (Ogre::Root::getSingleton ().getRenderSystem ()->getName ().find("OpenGL") != std::string::npos);
     }
 }
 
@@ -389,8 +386,13 @@ namespace MWGui
     {
         std::string val = static_cast<MyGUI::Button*>(_sender)->getCaption();
         if (val == "off")
-            val = hlslGlsl();
-        else if (val == hlslGlsl())
+        {
+            if (hasGLSL ())
+                val = "glsl";
+            else
+                val = "cg";
+        }
+        else if (val == "glsl")
             val = "cg";
         else
             val = "off";

@@ -297,6 +297,7 @@ void SkyManager::create()
         sh::makeProperty<sh::FloatValue>(new sh::FloatValue(0)));
     sh::Factory::getInstance().setSharedParameter ("nightFade",
         sh::makeProperty<sh::FloatValue>(new sh::FloatValue(0)));
+    sh::Factory::getInstance().setSharedParameter ("atmosphereColour", sh::makeProperty<sh::Vector4>(new sh::Vector4(0,0,0,1)));
 
     sh::Factory::getInstance().setTextureAlias ("cloud_texture_1", "");
     sh::Factory::getInstance().setTextureAlias ("cloud_texture_2", "");

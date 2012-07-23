@@ -46,7 +46,7 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
     if (Settings::Manager::getString("shader mode", "General") == "")
     {
         if (Ogre::Root::getSingleton ().getRenderSystem ()->getName().find("OpenGL") == std::string::npos)
-            Settings::Manager::setString("shader mode", "General", "hlsl");
+            Settings::Manager::setString("shader mode", "General", "cg");
         else
             Settings::Manager::setString("shader mode", "General", "glsl");
     }
@@ -113,6 +113,10 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
 
     sh::Factory::getInstance ().setSharedParameter ("viewportBackground", sh::makeProperty<sh::Vector3> (new sh::Vector3(0,0,0)));
     sh::Factory::getInstance ().setSharedParameter ("waterEnabled", sh::makeProperty<sh::FloatValue> (new sh::FloatValue(0.0)));
+    sh::Factory::getInstance ().setSharedParameter ("waterLevel", sh::makeProperty<sh::FloatValue>(new sh::FloatValue(0)));
+    sh::Factory::getInstance ().setSharedParameter ("waterTimer", sh::makeProperty<sh::FloatValue>(new sh::FloatValue(0)));
+    sh::Factory::getInstance ().setSharedParameter ("windDir_windSpeed", sh::makeProperty<sh::Vector3>(new sh::Vector3(0.5, -0.8, 0.2)));
+    sh::Factory::getInstance ().setSharedParameter ("waterSunFade_sunHeight", sh::makeProperty<sh::Vector2>(new sh::Vector2(1, 0.6)));
 
     applyCompositors();
 
@@ -269,7 +273,8 @@ void RenderingManager::update (float duration){
 
     checkUnderwater();
 
-    mWater->update(duration);
+    if (mWater)
+        mWater->update(duration);
 }
 void RenderingManager::waterAdded (MWWorld::Ptr::CellStore *store){
     if(store->cell->data.flags & store->cell->HasWater
