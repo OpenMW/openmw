@@ -1,6 +1,9 @@
 #include <QtGui>
 
+#include <cstdlib>
+
 #include <boost/math/common_factor.hpp>
+#include <boost/filesystem.hpp>
 
 #include <components/files/configurationmanager.hpp>
 #include <components/settings/settings.hpp>
@@ -70,20 +73,13 @@ GraphicsPage::GraphicsPage(Files::ConfigurationManager &cfg, QWidget *parent)
 
 bool GraphicsPage::setupOgre()
 {
-    QString pluginCfg = mCfgMgr.getPluginsConfigPath().string().c_str();
-    QFile file(pluginCfg);
-
     // Create a log manager so we can surpress debug text to stdout/stderr
     Ogre::LogManager* logMgr = OGRE_NEW Ogre::LogManager;
     logMgr->createLog((mCfgMgr.getLogPath().string() + "/launcherOgre.log"), true, false, false);
 
     try
     {
-#if defined(ENABLE_PLUGIN_GL) || defined(ENABLE_PLUGIN_Direct3D9)
         mOgre = new Ogre::Root("", "", "./launcherOgre.log");
-#else
-        mOgre = new Ogre::Root(pluginCfg.toStdString(), "", "./launcherOgre.log");
-#endif
     }
     catch(Ogre::Exception &ex)
     {
@@ -93,7 +89,6 @@ bool GraphicsPage::setupOgre()
         msgBox.setIcon(QMessageBox::Critical);
         msgBox.setStandardButtons(QMessageBox::Ok);
         msgBox.setText(tr("<br><b>Failed to create the Ogre::Root object</b><br><br> \
-        Make sure the plugins.cfg is present and valid.<br><br> \
         Press \"Show Details...\" for more information.<br>"));
         msgBox.setDetailedText(ogreError);
         msgBox.exec();
@@ -101,6 +96,32 @@ bool GraphicsPage::setupOgre()
         qCritical("Error creating Ogre::Root, the error reported was:\n %s", qPrintable(ogreError));
         return false;
     }
+
+
+    std::string pluginDir;
+    const char* pluginEnv = getenv("OPENMW_OGRE_PLUGIN_DIR");
+    if (pluginEnv)
+        pluginDir = pluginEnv;
+    else
+    {
+#if OGRE_PLATFORM == OGRE_PLATFORM_WIN32
+        pluginDir = ".\\";
+#endif
+#if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
+        pluginDir = OGRE_PLUGIN_DIR;
+#endif
+#if OGRE_PLATFORM == OGRE_PLATFORM_LINUX
+        pluginDir = OGRE_PLUGIN_DIR_REL;
+#endif
+    }
+
+    std::string glPlugin = std::string(pluginDir) + "/RenderSystem_GL" + OGRE_PLUGIN_DEBUG_SUFFIX;
+    if (boost::filesystem::exists(glPlugin + ".so") || boost::filesystem::exists(glPlugin + ".dll"))
+        mOgre->loadPlugin (glPlugin);
+
+    std::string dxPlugin = std::string(pluginDir) + "/RenderSystem_Direct3D9" + OGRE_PLUGIN_DEBUG_SUFFIX;
+    if (boost::filesystem::exists(dxPlugin + ".so") || boost::filesystem::exists(dxPlugin + ".dll"))
+        mOgre->loadPlugin (dxPlugin);
 
 #ifdef ENABLE_PLUGIN_GL
     mGLPlugin = new Ogre::GLPlugin();

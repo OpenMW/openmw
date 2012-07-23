@@ -20,14 +20,6 @@ set (OPENMW_VERSION_RELEASE 0)
 
 set (OPENMW_VERSION "${OPENMW_VERSION_MAJOR}.${OPENMW_VERSION_MINOR}.${OPENMW_VERSION_RELEASE}")
 
-# Debug suffix for plugins
-set(DEBUG_SUFFIX "")
-if (DEFINED CMAKE_BUILD_TYPE)
-    if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-        set(DEBUG_SUFFIX "_d")
-    endif()
-endif()
-
 # doxygen main page
 
 configure_file ("${OpenMW_SOURCE_DIR}/Docs/mainpage.hpp.cmake" "${OpenMW_SOURCE_DIR}/Docs/mainpage.hpp")
@@ -194,14 +186,21 @@ if (UNIX AND NOT APPLE)
 find_package (Threads)
 endif()
 
+set(BOOST_COMPONENTS system filesystem program_options thread)
+
+if (Boost_VERSION LESS 104900)
+    set(SHINY_USE_WAVE_SYSTEM_INSTALL "TRUE")
+    set(BOOST_COMPONENTS ${BOOST_COMPONENTS} wave)
+endif()
+
 find_package(OGRE REQUIRED)
 find_package(MyGUI REQUIRED)
-find_package(Boost REQUIRED COMPONENTS system filesystem program_options thread)
+find_package(Boost REQUIRED COMPONENTS ${BOOST_COMPONENTS})
 find_package(OIS REQUIRED)
 find_package(OpenAL REQUIRED)
 find_package(Bullet REQUIRED)
 IF(OGRE_STATIC)
-find_package(Cg REQUIRED)
+find_package(Cg)
 IF(WIN32)
 set(OGRE_PLUGIN_INCLUDE_DIRS ${OGRE_Plugin_CgProgramManager_INCLUDE_DIRS} ${OGRE_Plugin_OctreeSceneManager_INCLUDE_DIRS} ${OGRE_Plugin_ParticleFX_INCLUDE_DIRS} ${OGRE_RenderSystem_Direct3D9_INCLUDE_DIRS} ${OGRE_RenderSystem_GL_INCLUDE_DIRS})
 ELSE(WIN32)
@@ -230,6 +229,22 @@ if (APPLE)
                           ${OGRE_Plugin_ParticleFX_LIBRARY_REL})
 endif (APPLE)
 
+
+# Set up Ogre plugin folder & debug suffix
+set(DEBUG_SUFFIX "")
+if (DEFINED CMAKE_BUILD_TYPE)
+    if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+        set(DEBUG_SUFFIX "_d")
+        add_definitions(-DOGRE_PLUGIN_DEBUG_SUFFIX="_d")
+    else()
+        add_definitions(-DOGRE_PLUGIN_DEBUG_SUFFIX="")
+    endif()
+endif()
+add_definitions(-DOGRE_PLUGIN_DIR_REL="${OGRE_PLUGIN_DIR_REL}")
+add_definitions(-DOGRE_PLUGIN_DIR_DBG="${OGRE_PLUGIN_DIR_DBG}")
+add_definitions(-DOGRE_PLUGIN_DIR="${OGRE_PLUGIN_DIR}")
+
+
 add_subdirectory(files/)
 add_subdirectory(files/mygui)
 
@@ -254,15 +269,8 @@ configure_file(${OpenMW_SOURCE_DIR}/files/openmw.cfg.local
 configure_file(${OpenMW_SOURCE_DIR}/files/openmw.cfg
     "${OpenMW_BINARY_DIR}/openmw.cfg.install")
 
-if (WIN32)
-    configure_file(${OpenMW_SOURCE_DIR}/files/plugins.cfg.win32
-        "${OpenMW_BINARY_DIR}/plugins.cfg" COPYONLY)
-endif (WIN32)
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-    configure_file(${OpenMW_SOURCE_DIR}/files/plugins.cfg.linux
-        "${OpenMW_BINARY_DIR}/plugins.cfg")
-
     configure_file(${OpenMW_SOURCE_DIR}/files/openmw.desktop
         "${OpenMW_BINARY_DIR}/openmw.desktop")
 endif()
@@ -284,13 +292,8 @@ if (APPLE)
 
     set(OGRE_PLUGIN_DIR "${OGRE_PLUGIN_DIR}/")
 
-    configure_file(${OpenMW_SOURCE_DIR}/files/plugins.cfg.mac
-        "${OpenMW_BINARY_DIR}/plugins.cfg")
-
     set(OGRE_PLUGIN_DIR_2 ${OGRE_PLUGIN_DIR})
     set(OGRE_PLUGIN_DIR "")
-    configure_file(${OpenMW_SOURCE_DIR}/files/plugins.cfg.mac
-        "${OpenMW_BINARY_DIR}/plugins.cfg.install")
     set(OGRE_PLUGIN_DIR ${OGRE_PLUGIN_DIR_2})
 
     configure_file(${OpenMW_SOURCE_DIR}/files/mac/Info.plist
@@ -337,7 +340,6 @@ if(DPKG_PROGRAM)
     INSTALL(FILES "${OpenMW_BINARY_DIR}/settings-default.cfg" DESTINATION "../etc/openmw/" PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ COMPONENT "openmw")
     INSTALL(FILES "${OpenMW_BINARY_DIR}/transparency-overrides.cfg" DESTINATION "../etc/openmw/" PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ COMPONENT "openmw")
     INSTALL(FILES "${OpenMW_BINARY_DIR}/openmw.cfg.install" DESTINATION "../etc/openmw/" RENAME "openmw.cfg" PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ COMPONENT "openmw")
-    INSTALL(FILES "${OpenMW_BINARY_DIR}/plugins.cfg" DESTINATION "../etc/openmw/" PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ COMPONENT "openmw")
 
     #Install resources
     INSTALL(DIRECTORY "${OpenMW_BINARY_DIR}/resources" DESTINATION "share/games/openmw/" FILE_PERMISSIONS OWNER_READ GROUP_READ WORLD_READ COMPONENT "Resources")
@@ -354,7 +356,7 @@ if(DPKG_PROGRAM)
     SET(CPACK_DEBIAN_PACKAGE_NAME "openmw")
     SET(CPACK_DEBIAN_PACKAGE_VERSION "${VERSION_STRING}")
     SET(CPACK_PACKAGE_EXECUTABLES "openmw;OpenMW esmtool;Esmtool omwlauncher;OMWLauncher mwiniimporter;MWiniImporter")
-    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "nvidia-cg-toolkit (>= 2.1),  libboost-filesystem1.46.1 (>= 1.46.1), libboost-program-options1.46.1 (>= 1.46.1), libboost-system1.46.1 (>= 1.46.1), libboost-thread1.46.1 (>= 1.46.1), libc6 (>= 2.11.2), libfreetype6 (>= 2.2.1), libgcc1 (>= 1:4.1.1), libmpg123-0 (>= 1.12.1), libois-1.3.0 (>= 1.3.0), libopenal1 (>= 1:1.12.854), libsndfile1 (>= 1.0.23), libstdc++6 (>= 4.4.5), libuuid1 (>= 2.17.2), libqtgui4 (>= 4.7.0)")
+    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libboost-filesystem1.46.1 (>= 1.46.1), libboost-program-options1.46.1 (>= 1.46.1), libboost-system1.46.1 (>= 1.46.1), libboost-thread1.46.1 (>= 1.46.1), libc6 (>= 2.11.2), libfreetype6 (>= 2.2.1), libgcc1 (>= 1:4.1.1), libmpg123-0 (>= 1.12.1), libois-1.3.0 (>= 1.3.0), libopenal1 (>= 1:1.12.854), libsndfile1 (>= 1.0.23), libstdc++6 (>= 4.4.5), libuuid1 (>= 2.17.2), libqtgui4 (>= 4.7.0)")
 
     SET(CPACK_DEBIAN_PACKAGE_SECTION "Games")
 
@@ -375,7 +377,6 @@ if(WIN32)
     INSTALL(FILES ${dll_files} DESTINATION ".")
     INSTALL(FILES "${OpenMW_BINARY_DIR}/openmw.cfg.install" DESTINATION "." RENAME "openmw.cfg")
     INSTALL(FILES
-        "${OpenMW_BINARY_DIR}/plugins.cfg"
         "${OpenMW_SOURCE_DIR}/readme.txt"
         "${OpenMW_SOURCE_DIR}/GPL3.txt"
         "${OpenMW_SOURCE_DIR}/OFL.txt"
@@ -438,6 +439,9 @@ if(WIN32)
 
     include(CPack)
 endif(WIN32)
+
+# Extern
+add_subdirectory (extern/shiny)
 
 # Components
 add_subdirectory (components)
@@ -544,7 +548,6 @@ if (APPLE)
     install(DIRECTORY "${APP_BUNDLE_DIR}" USE_SOURCE_PERMISSIONS DESTINATION "${INSTALL_SUBDIR}" COMPONENT Runtime)
     install(DIRECTORY "${OpenMW_BINARY_DIR}/resources" DESTINATION "${INSTALL_SUBDIR}" COMPONENT Runtime)
     install(FILES "${OpenMW_BINARY_DIR}/openmw.cfg.install" RENAME "openmw.cfg" DESTINATION "${INSTALL_SUBDIR}" COMPONENT Runtime)
-    install(FILES "${OpenMW_BINARY_DIR}/plugins.cfg.install" RENAME "plugins.cfg" DESTINATION "${INSTALL_SUBDIR}" COMPONENT Runtime)
     install(FILES "${OpenMW_BINARY_DIR}/launcher.qss" DESTINATION "${INSTALL_SUBDIR}" COMPONENT Runtime)
 
     install(FILES "${OpenMW_BINARY_DIR}/settings-default.cfg" DESTINATION "${INSTALL_SUBDIR}" COMPONENT Runtime)
