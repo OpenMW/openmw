@@ -419,11 +419,14 @@ namespace MWGui
         else
         {
             // re-enable
-            mWaterShaderButton->setEnabled(true);
-            mReflectObjectsButton->setEnabled(true);
-            mReflectActorsButton->setEnabled(true);
-            mReflectTerrainButton->setEnabled(true);
-            mShadowsEnabledButton->setEnabled(true);
+            if (MWRender::RenderingManager::waterShaderSupported())
+            {
+                mWaterShaderButton->setEnabled(true);
+                mReflectObjectsButton->setEnabled(true);
+                mReflectActorsButton->setEnabled(true);
+                mReflectTerrainButton->setEnabled(true);
+                mShadowsEnabledButton->setEnabled(true);
+            }
 
             Settings::Manager::setBool("shaders", "Objects", true);
             Settings::Manager::setString("shader mode", "General", val);
