@@ -238,6 +238,12 @@ namespace MWGui
             mReflectTerrainButton->setEnabled(false);
         }
 
+        if (shaders == "off")
+        {
+            mUnderwaterButton->setEnabled (false);
+            mShadowsEnabledButton->setEnabled(false);
+        }
+
         mFullscreenButton->setCaptionWithReplacing(Settings::Manager::getBool("fullscreen", "Video") ? "#{sOn}" : "#{sOff}");
         mVSyncButton->setCaptionWithReplacing(Settings::Manager::getBool("vsync", "Video") ? "#{sOn}": "#{sOff}");
         mFPSButton->setCaptionWithReplacing(fpsLevelToStr(Settings::Manager::getInt("fps", "HUD")));
@@ -409,7 +415,9 @@ namespace MWGui
             mReflectObjectsButton->setEnabled(false);
             mReflectActorsButton->setEnabled(false);
             mReflectTerrainButton->setEnabled(false);
+            mUnderwaterButton->setEnabled(false);
             Settings::Manager::setBool("shader", "Water", false);
+            Settings::Manager::setBool("underwater effect", "Water", false);
 
             // shadows not supported
             mShadowsEnabledButton->setEnabled(false);
@@ -418,6 +426,9 @@ namespace MWGui
         }
         else
         {
+            Settings::Manager::setBool("shaders", "Objects", true);
+            Settings::Manager::setString("shader mode", "General", val);
+/
             // re-enable
             if (MWRender::RenderingManager::waterShaderSupported())
             {
@@ -425,11 +436,9 @@ namespace MWGui
                 mReflectObjectsButton->setEnabled(true);
                 mReflectActorsButton->setEnabled(true);
                 mReflectTerrainButton->setEnabled(true);
-                mShadowsEnabledButton->setEnabled(true);
             }
-
-            Settings::Manager::setBool("shaders", "Objects", true);
-            Settings::Manager::setString("shader mode", "General", val);
+            mUnderwaterButton->setEnabled(true);
+            mShadowsEnabledButton->setEnabled(true);
         }
 
         apply();
