@@ -428,7 +428,7 @@ namespace MWGui
         {
             Settings::Manager::setBool("shaders", "Objects", true);
             Settings::Manager::setString("shader mode", "General", val);
-/
+
             // re-enable
             if (MWRender::RenderingManager::waterShaderSupported())
             {
