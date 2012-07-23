@@ -7,7 +7,6 @@
 #include <algorithm>
 
 #include "refdata.hpp"
-#include "ptr.hpp"
 
 namespace ESMS
 {
@@ -62,11 +61,6 @@ namespace MWWorld
         throw std::runtime_error("Error resolving cell reference " + ref.refID);
 
       list.push_back(LiveRef(ref, obj));
-    }
-
-    const LiveRef &insert(LiveRef &item) {
-        list.push_back(item);
-        return list.back();
     }
 
     LiveRef *find (const std::string& name)
