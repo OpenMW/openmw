@@ -368,6 +368,9 @@ void RenderingManager::configureFog(MWWorld::Ptr::CellStore &mCell)
     color.setAsABGR (mCell.cell->ambi.fog);
 
     configureFog(mCell.cell->ambi.fogDensity, color);
+
+    if (mWater)
+        mWater->setViewportBackground (Ogre::ColourValue(0.8f, 0.9f, 1.0f));
 }
 
 void RenderingManager::configureFog(const float density, const Ogre::ColourValue& colour)
@@ -381,6 +384,9 @@ void RenderingManager::configureFog(const float density, const Ogre::ColourValue
 
     mRendering.getCamera()->setFarClipDistance ( max / density );
     mRendering.getViewport()->setBackgroundColour (colour);
+
+    if (mWater)
+        mWater->setViewportBackground (colour);
 
     sh::Factory::getInstance ().setSharedParameter ("viewportBackground",
         sh::makeProperty<sh::Vector3> (new sh::Vector3(colour.r, colour.g, colour.b)));
