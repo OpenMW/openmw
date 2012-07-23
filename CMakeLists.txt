@@ -189,13 +189,9 @@ endif()
 set(BOOST_COMPONENTS system filesystem program_options thread)
 
 if (Boost_VERSION LESS 104900)
-    set(SHINY_USE_WAVE_SYSTEM_INSTALL TRUE)
+    set(SHINY_USE_WAVE_SYSTEM_INSTALL "TRUE")
     set(BOOST_COMPONENTS ${BOOST_COMPONENTS} wave)
-else()
-    set(SHINY_USE_WAVE_SYSTEM_INSTALL FALSE)
 endif()
-
-MESSAGE(STATUS ${BOOST_COMPONENTS})
 
 find_package(OGRE REQUIRED)
 find_package(MyGUI REQUIRED)
