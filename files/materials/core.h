@@ -1,4 +1,8 @@
-#if SH_HLSL == 1 || SH_CG == 1
+#if SH_HLSL == 1
+    #error "HLSL is unsupported"
+#endif
+
+#if SH_CG == 1
 
     #define shTexture2D sampler2D
     #define shSample(tex, coord) tex2D(tex, coord)

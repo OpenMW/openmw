@@ -291,6 +291,18 @@ void SkyManager::create()
 
     sh::Factory::getInstance().setSharedParameter ("cloudBlendFactor",
         sh::makeProperty<sh::FloatValue>(new sh::FloatValue(0)));
+    sh::Factory::getInstance().setSharedParameter ("cloudOpacity",
+        sh::makeProperty<sh::FloatValue>(new sh::FloatValue(1)));
+    sh::Factory::getInstance().setSharedParameter ("cloudColour",
+        sh::makeProperty<sh::Vector3>(new sh::Vector3(1,1,1)));
+    sh::Factory::getInstance().setSharedParameter ("cloudAnimationTimer",
+        sh::makeProperty<sh::FloatValue>(new sh::FloatValue(0)));
+    sh::Factory::getInstance().setSharedParameter ("nightFade",
+        sh::makeProperty<sh::FloatValue>(new sh::FloatValue(0)));
+    sh::Factory::getInstance().setSharedParameter ("atmosphereColour", sh::makeProperty<sh::Vector4>(new sh::Vector4(0,0,0,1)));
+
+    sh::Factory::getInstance().setTextureAlias ("cloud_texture_1", "");
+    sh::Factory::getInstance().setTextureAlias ("cloud_texture_2", "");
 
     // Create light used for thunderstorm
     mLightning = mSceneMgr->createLight();
