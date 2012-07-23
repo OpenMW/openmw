@@ -28,7 +28,7 @@
 
     SH_BEGIN_PROGRAM
         shUniform(float4x4, wvp) @shAutoConstant(wvp, worldviewproj_matrix)
-        shInput(float2, uv0)
+        shVertexInput(float2, uv0)
         shOutput(float2, UV)
         shNormalInput(float4)
 #ifdef NEED_DEPTH
@@ -207,6 +207,7 @@
     float3 waterEyePos = float3(1,1,1);
     if (worldPos.y < waterLevel && waterEnabled == 1)
     {
+        // NOTE: this calculation would be wrong for non-uniform scaling
         float4 worldNormal = shMatrixMult(worldMatrix, float4(normal.xyz, 0));
         waterEyePos = intercept(worldPos, cameraPos.xyz - worldPos, float3(0,1,0), waterLevel);
         caustics = getCaustics(causticMap, worldPos, waterEyePos.xyz, worldNormal.xyz, lightDirectionWS0.xyz, waterLevel, waterTimer, windDir_windSpeed);

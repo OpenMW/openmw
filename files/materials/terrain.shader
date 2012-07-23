@@ -54,8 +54,8 @@
         
         shUniform(float2, lodMorph) @shAutoConstant(lodMorph, custom, 1001)
         
-        shInput(float2, uv0)
-        shInput(float2, delta) // lodDelta, lodThreshold
+        shVertexInput(float2, uv0)
+        shVertexInput(float2, delta) // lodDelta, lodThreshold
         
 #if SHADOWS
         shUniform(float4x4, texViewProjMatrix0) @shAutoConstant(texViewProjMatrix0, texture_viewproj_matrix)
@@ -226,6 +226,7 @@
         float3 waterEyePos = float3(1,1,1);
         if (worldPos.y < waterLevel)
         {
+            // NOTE: this calculation would be wrong for non-uniform scaling
             float4 worldNormal = shMatrixMult(worldMatrix, float4(normal.xyz, 0));
             waterEyePos = intercept(worldPos, cameraPos.xyz - worldPos, float3(0,1,0), waterLevel);
             caustics = getCaustics(causticMap, worldPos, waterEyePos.xyz, worldNormal.xyz, lightDirectionWS0.xyz, waterLevel, waterTimer, windDir_windSpeed);

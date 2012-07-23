@@ -3,7 +3,7 @@
 #ifdef SH_VERTEX_SHADER
 
     SH_BEGIN_PROGRAM
-        shInput(float2, uv0)
+        shVertexInput(float2, uv0)
         shOutput(float2, UV)
         shUniform(float4x4, wvp) @shAutoConstant(wvp, worldviewproj_matrix)
     SH_START_PROGRAM

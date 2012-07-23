@@ -6,7 +6,7 @@
 
     SH_BEGIN_PROGRAM
         shUniform(float4x4, wvp) @shAutoConstant(wvp, worldviewproj_matrix)
-        shInput(float2, uv0)
+        shVertexInput(float2, uv0)
         shOutput(float2, UV)
         shColourInput(float4)
         shOutput(float4, colourPassthrough)

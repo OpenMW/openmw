@@ -6,7 +6,7 @@
 
     SH_BEGIN_PROGRAM
 #if ALPHA
-        shInput(float2, uv0)
+        shVertexInput(float2, uv0)
         shOutput(float2, UV)
 #endif
         shUniform(float4x4, wvp) @shAutoConstant(wvp, worldviewproj_matrix)

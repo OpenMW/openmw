@@ -11,6 +11,7 @@
 
     #define shUniform(type, name) , uniform type name
 
+    #define shVertexInput(type, name) , in type name : TEXCOORD@shCounter(1)
     #define shInput(type, name) , in type name : TEXCOORD@shCounter(1)
     #define shOutput(type, name) , out type name : TEXCOORD@shCounter(2)
 
@@ -52,7 +53,8 @@
 #endif
 
 #if SH_GLSL == 1
-    @version 130
+
+    @version 120
 
     #define float2 vec2
     #define float3 vec3
@@ -61,7 +63,7 @@
     #define int3 ivec3
     #define int4 ivec4/
     #define shTexture2D sampler2D
-    #define shSample(tex, coord) texture(tex, coord)
+    #define shSample(tex, coord) texture2D(tex, coord)
     #define shLerp(a, b, t) mix(a, b, t)
     #define shSaturate(a) clamp(a, 0.0, 1.0)
 
@@ -71,13 +73,19 @@
 
     #define shMatrixMult(m, v) (m * v)
 
+    #define shOutputPosition gl_Position
+
+    #define float4x4 mat4
+    
+    // GLSL 1.3
+    #if 0
+    
     // automatically recognized by ogre when the input name equals this
     #define shInputPosition vertex
 
-    #define shOutputPosition gl_Position
     #define shOutputColour(num) oColor##num
 
-    #define float4x4 mat4
+
 
     #define shInput(type, name) in type name;
     #define shOutput(type, name) out type name;
@@ -105,5 +113,47 @@
             void main(void)
 
 
+    #endif
+    
+    #endif
+    
+    // GLSL 1.2
+    
+    #if 1
+    
+    // automatically recognized by ogre when the input name equals this
+    #define shInputPosition gl_Vertex
+
+    #define shOutputColour(num) gl_FragData[num]
+
+    #define shVertexInput(type, name) attribute type name;
+    #define shInput(type, name) varying type name;
+    #define shOutput(type, name) varying type name;
+
+    // automatically recognized by ogre when the input name equals this
+    #define shNormalInput(type) attribute type normal;
+    #define shColourInput(type) attribute type colour;
+
+    #ifdef SH_VERTEX_SHADER
+
+        #define SH_BEGIN_PROGRAM 
+
+        #define SH_START_PROGRAM \
+            void main(void)
+
+    #endif
+
+    #ifdef SH_FRAGMENT_SHADER
+
+        #define shDeclareMrtOutput(num) 
+
+        #define SH_BEGIN_PROGRAM
+        
+        #define SH_START_PROGRAM \
+            void main(void)
+
+
+    #endif
+    
     #endif
 #endif
