@@ -224,23 +224,19 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
         master.push_back("Morrowind");
     }
 
-    StringsVector plugin = variables["plugin"].as<StringsVector>();
-	  int cnt = master.size() + plugin.size();
-	  if (cnt > 255)
-	  {
-        std::cerr
-            << "Error: Trying to load more than 255 master and plugin files! This will break all combaibility and is not supported!"
-            << std::endl;
-		  return false;
-    }
-    for (std::vector<std::string>::size_type i = 0; i < master.size(); i++)
+    if (master.size() > 1)
     {
-		  engine.addMaster(master[i]);
-	  }
-	  for (std::vector<std::string>::size_type i = 0; i < plugin.size(); i++)
-	  {
-		  engine.addPlugin(plugin[i]);
-	  }
+        std::cout
+            << "Ignoring all but the first master file (multiple master files not yet supported)."
+            << std::endl;
+    }
+    engine.addMaster(master[0]);
+
+    StringsVector plugin = variables["plugin"].as<StringsVector>();
+    if (!plugin.empty())
+    {
+        std::cout << "Ignoring plugin files (plugins not yet supported)." << std::endl;
+    }
 
     // startup-settings
     engine.setCell(variables["start"].as<std::string>());

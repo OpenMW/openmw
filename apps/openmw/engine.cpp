@@ -207,32 +207,18 @@ void OMW::Engine::setCell (const std::string& cellName)
 
 // Set master file (esm)
 // - If the given name does not have an extension, ".esm" is added automatically
+// - Currently OpenMW only supports one master at the same time.
 
 void OMW::Engine::addMaster (const std::string& master)
 {
-    mMaster.push_back(master);
-	std::string &str = mMaster.back();
+    assert (mMaster.empty());
+    mMaster = master;
 
-	// Append .esm if not already there
-    std::string::size_type sep = str.find_last_of (".");
+    // Append .esm if not already there
+    std::string::size_type sep = mMaster.find_last_of (".");
     if (sep == std::string::npos)
     {
-        str += ".esm";
-    }
-}
-
-// Add plugin file (esp)
-
-void OMW::Engine::addPlugin (const std::string& plugin)
-{
-    mPlugins.push_back(plugin);
-	std::string &str = mPlugins.back();
-
-	// Append .esp if not already there
-    std::string::size_type sep = str.find_last_of (".");
-    if (sep == std::string::npos)
-    {
-        str += ".esp";
+        mMaster += ".esm";
     }
 }
 
@@ -333,8 +319,8 @@ void OMW::Engine::go()
     MWGui::CursorReplace replacer;
 
     // Create the world
-    mEnvironment.setWorld( new MWWorld::World (*mOgre, mFileCollections, mMaster, mPlugins,
-        mResDir, mNewGame, mEncoding, mFallbackMap) );
+    mEnvironment.setWorld (new MWWorld::World (*mOgre, mFileCollections, mMaster,
+        mResDir, mNewGame, mEncoding, mFallbackMap));
 
     // Create window manager - this manages all the MW-specific GUI windows
     MWScript::registerExtensions (mExtensions);

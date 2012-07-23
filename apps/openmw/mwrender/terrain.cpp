@@ -141,7 +141,7 @@ namespace MWRender
                 std::map<uint16_t, int> indexes;
                 initTerrainTextures(&terrainData, cellX, cellY,
                                     x * numTextures, y * numTextures,
-                                    numTextures, indexes, land->plugin);
+                                    numTextures, indexes);
 
                 if (mTerrainGroup.getTerrain(terrainX, terrainY) == NULL)
                 {
@@ -200,14 +200,8 @@ namespace MWRender
     void TerrainManager::initTerrainTextures(Terrain::ImportData* terrainData,
                                              int cellX, int cellY,
                                              int fromX, int fromY, int size,
-                                             std::map<uint16_t, int>& indexes,
-											 size_t plugin)
+                                             std::map<uint16_t, int>& indexes)
     {
-        // FIXME: In a multiple esm configuration, we have multiple palettes. Since this code
-        //  crosses cell boundaries, we no longer have a unique terrain palette. Instead, we need
-        //  to adopt the following code for a dynamic palette. And this is evil - the current design
-        //  does not work well for this task...
-
         assert(terrainData != NULL && "Must have valid terrain data");
         assert(fromX >= 0 && fromY >= 0 &&
                "Can't get a terrain texture on terrain outside the current cell");
@@ -220,16 +214,12 @@ namespace MWRender
         //
         //If we don't sort the ltex indexes, the splatting order may differ between
         //cells which may lead to inconsistent results when shading between cells
-        int num = MWBase::Environment::get().getWorld()->getStore().landTexts.getSizePlugin(plugin);
         std::set<uint16_t> ltexIndexes;
         for ( int y = fromY - 1; y < fromY + size + 1; y++ )
         {
             for ( int x = fromX - 1; x < fromX + size + 1; x++ )
             {
-                int idx = getLtexIndexAt(cellX, cellY, x, y);
-                if (idx > num)
-                  idx = 0;
-                ltexIndexes.insert(idx);
+                ltexIndexes.insert(getLtexIndexAt(cellX, cellY, x, y));
             }
         }
 
@@ -241,7 +231,7 @@ namespace MWRender
               iter != ltexIndexes.end();
               ++iter )
         {
-            uint16_t ltexIndex = *iter;
+            const uint16_t ltexIndex = *iter;
             //this is the base texture, so we can ignore this at present
             if ( ltexIndex == baseTexture )
             {
@@ -254,10 +244,8 @@ namespace MWRender
             {
                 //NB: All vtex ids are +1 compared to the ltex ids
 
-              /*
-                assert( (int)mEnvironment.mWorld->getStore().landTexts.getSizePlugin(plugin) >= (int)ltexIndex - 1 &&
+                assert( (int)MWBase::Environment::get().getWorld()->getStore().landTexts.getSize() >= (int)ltexIndex - 1 &&
                        "LAND.VTEX must be within the bounds of the LTEX array");
-                       */
 
                 std::string texture;
                 if ( ltexIndex == 0 )
@@ -266,7 +254,7 @@ namespace MWRender
                 }
                 else
                 {
-                    texture = MWBase::Environment::get().getWorld()->getStore().landTexts.search(ltexIndex-1, plugin)->texture;
+                    texture = MWBase::Environment::get().getWorld()->getStore().landTexts.search(ltexIndex-1)->texture;
                     //TODO this is needed due to MWs messed up texture handling
                     texture = texture.substr(0, texture.rfind(".")) + ".dds";
                 }
