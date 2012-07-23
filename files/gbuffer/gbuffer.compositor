@@ -9,16 +9,21 @@ compositor gbuffer
         target mrt_output
         {
             input none
+            
             pass clear
             {
-                // make sure to set this to the viewport background color from outside
                 colour_value 0 0 0 1
+            }
+            pass render_quad
+            {
+                // this makes sure the depth for background is set to 1
+                material openmw_viewport_init
             }
             pass render_scene
             {
                 // Renders everything except water
                 first_render_queue 0
-                last_render_queue 70
+                last_render_queue 50
             }
 
         }
@@ -29,7 +34,7 @@ compositor gbuffer
 
             pass render_quad
             {
-                material RenderScene
+                material quad
                 input 0 mrt_output 0
             }
         }
@@ -61,12 +66,12 @@ compositor gbufferFinalizer
             }
             pass render_quad
             {
-                material RenderSceneNoDepth
+                material quad_noDepthWrite
                 input 0 previousscene
             }
             pass render_scene
             {
-                first_render_queue 71
+                first_render_queue 51
                 last_render_queue 100
             }
         }
@@ -78,7 +83,7 @@ compositor gbufferFinalizer
             }
             pass render_quad
             {
-                material RenderSceneNoDepth
+                material quad_noDepthWrite
                 input 0 no_mrt_output
             }
         }

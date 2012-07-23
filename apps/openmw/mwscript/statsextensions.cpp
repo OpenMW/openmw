@@ -46,8 +46,10 @@ namespace MWScript
                     MWWorld::Ptr ptr = R()(runtime);
 
                     Interpreter::Type_Integer value =
-                        MWWorld::Class::get (ptr).getCreatureStats (ptr).mAttributes[mIndex].
-                        getModified();
+                        MWWorld::Class::get (ptr)
+                            .getCreatureStats (ptr)
+                            .getAttribute(mIndex)
+                            .getModified();
 
                     runtime.push (value);
                 }
@@ -69,8 +71,10 @@ namespace MWScript
                     Interpreter::Type_Integer value = runtime[0].mInteger;
                     runtime.pop();
 
-                    MWWorld::Class::get (ptr).getCreatureStats (ptr).mAttributes[mIndex].
-                        setModified (value, 0);
+                    MWWorld::Class::get(ptr)
+                        .getCreatureStats(ptr)
+                        .getAttribute(mIndex)
+                        .setModified (value, 0);
                 }
         };
 
@@ -90,11 +94,16 @@ namespace MWScript
                     Interpreter::Type_Integer value = runtime[0].mInteger;
                     runtime.pop();
 
-                    value += MWWorld::Class::get (ptr).getCreatureStats (ptr).mAttributes[mIndex].
-                        getModified();
+                    value +=
+                        MWWorld::Class::get(ptr)
+                            .getCreatureStats(ptr)
+                            .getAttribute(mIndex)
+                            .getModified();
 
-                    MWWorld::Class::get (ptr).getCreatureStats (ptr).mAttributes[mIndex].
-                        setModified (value, 0, 100);
+                    MWWorld::Class::get(ptr)
+                        .getCreatureStats(ptr)
+                        .getAttribute(mIndex)
+                        .setModified (value, 0, 100);
                 }
         };
 
@@ -110,21 +119,19 @@ namespace MWScript
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
                     MWWorld::Ptr ptr = R()(runtime);
+                    Interpreter::Type_Integer value;
 
                     if (mIndex==0 && MWWorld::Class::get (ptr).hasItemHealth (ptr))
                     {
                         // health is a special case
-                        Interpreter::Type_Integer value =
-                            MWWorld::Class::get (ptr).getItemMaxHealth (ptr);
-                        runtime.push (value);
-
-                        return;
+                        value = MWWorld::Class::get (ptr).getItemMaxHealth (ptr);
+                    } else {
+                        value =
+                            MWWorld::Class::get(ptr)
+                                .getCreatureStats(ptr)
+                                .getDynamic(mIndex)
+                                .getCurrent();
                     }
-
-                    Interpreter::Type_Integer value =
-                        MWWorld::Class::get (ptr).getCreatureStats (ptr).mDynamic[mIndex].
-                        getCurrent();
-
                     runtime.push (value);
                 }
         };
@@ -145,8 +152,10 @@ namespace MWScript
                     Interpreter::Type_Integer value = runtime[0].mInteger;
                     runtime.pop();
 
-                    MWWorld::Class::get (ptr).getCreatureStats (ptr).mDynamic[mIndex].
-                        setModified (value, 0);
+                    MWWorld::Class::get(ptr)
+                        .getCreatureStats(ptr)
+                        .getDynamic(mIndex)
+                        .setModified(value, 0);
                 }
         };
 
@@ -168,12 +177,12 @@ namespace MWScript
 
                     MWMechanics::CreatureStats& stats = MWWorld::Class::get (ptr).getCreatureStats (ptr);
 
-                    Interpreter::Type_Integer current = stats.mDynamic[mIndex].getCurrent();
+                    Interpreter::Type_Integer current = stats.getDynamic(mIndex).getCurrent();
 
-                    stats.mDynamic[mIndex].setModified (
-                        diff + stats.mDynamic[mIndex].getModified(), 0);
+                    stats.getDynamic(mIndex).setModified(
+                        diff + stats.getDynamic(mIndex).getModified(), 0);
 
-                    stats.mDynamic[mIndex].setCurrent (diff + current);
+                    stats.getDynamic(mIndex).setCurrent(diff + current);
                 }
         };
 
@@ -195,9 +204,9 @@ namespace MWScript
 
                     MWMechanics::CreatureStats& stats = MWWorld::Class::get (ptr).getCreatureStats (ptr);
 
-                    Interpreter::Type_Integer current = stats.mDynamic[mIndex].getCurrent();
+                    Interpreter::Type_Integer current = stats.getDynamic(mIndex).getCurrent();
 
-                    stats.mDynamic[mIndex].setCurrent (diff + current);
+                    stats.getDynamic(mIndex).setCurrent (diff + current);
                 }
         };
 
@@ -218,10 +227,10 @@ namespace MWScript
 
                     Interpreter::Type_Float value = 0;
 
-                    Interpreter::Type_Float max = stats.mDynamic[mIndex].getModified();
+                    Interpreter::Type_Float max = stats.getDynamic(mIndex).getModified();
 
                     if (max>0)
-                        value = stats.mDynamic[mIndex].getCurrent() / max;
+                        value = stats.getDynamic(mIndex).getCurrent() / max;
 
                     runtime.push (value);
                 }
@@ -335,7 +344,7 @@ namespace MWScript
                     // make sure a spell with this ID actually exists.
                     MWBase::Environment::get().getWorld()->getStore().spells.find (id);
 
-                    MWWorld::Class::get (ptr).getCreatureStats (ptr).mSpells.add (id);
+                    MWWorld::Class::get (ptr).getCreatureStats (ptr).getSpells().add (id);
                 }
         };
 
@@ -351,7 +360,7 @@ namespace MWScript
                     std::string id = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
 
-                    MWWorld::Class::get (ptr).getCreatureStats (ptr).mSpells.remove (id);
+                    MWWorld::Class::get (ptr).getCreatureStats (ptr).getSpells().remove (id);
                 }
         };
 
@@ -371,8 +380,8 @@ namespace MWScript
                     Interpreter::Type_Integer value = 0;
 
                     for (MWMechanics::Spells::TIterator iter (
-                        MWWorld::Class::get (ptr).getCreatureStats (ptr).mSpells.begin());
-                        iter!=MWWorld::Class::get (ptr).getCreatureStats (ptr).mSpells.end(); ++iter)
+                        MWWorld::Class::get (ptr).getCreatureStats (ptr).getSpells().begin());
+                        iter!=MWWorld::Class::get (ptr).getCreatureStats (ptr).getSpells().end(); ++iter)
                         if (*iter==id)
                         {
                             value = 1;

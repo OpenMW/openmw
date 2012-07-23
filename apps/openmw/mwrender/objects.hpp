@@ -93,6 +93,8 @@ public:
     void removeCell(MWWorld::CellStore* store);
     void buildStaticGeometry(MWWorld::CellStore &cell);
     void setMwRoot(Ogre::SceneNode* root);
+
+    void rebuildStaticGeometry();
 };
 }
 #endif

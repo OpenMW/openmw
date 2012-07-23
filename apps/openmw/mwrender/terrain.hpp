@@ -46,7 +46,7 @@ namespace MWRender{
 
         RenderingManager* mRendering;
 
-        Ogre::TerrainMaterialGeneratorB::SM2Profile* mActiveProfile;
+        TerrainMaterial::Profile* mActiveProfile;
 
         /**
          * The length in verticies of a single terrain block.

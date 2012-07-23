@@ -32,10 +32,14 @@ namespace MWWorld
     class CellStore;
 }
 
+namespace sh
+{
+    class Factory;
+}
+
 namespace MWRender
 {
     class Shadows;
-    class ShaderHelper;
     class LocalMap;
     class Water;
     class Compositors;
@@ -162,6 +166,8 @@ class RenderingManager: private RenderingInterface, public Ogre::WindowEventList
 
   private:
 
+    sh::Factory* mFactory;
+
     void setAmbientMode();
 
     void setMenuTransparency(float val);
@@ -203,8 +209,6 @@ class RenderingManager: private RenderingInterface, public Ogre::WindowEventList
     MWRender::LocalMap* mLocalMap;
 
     MWRender::Shadows* mShadows;
-
-    MWRender::ShaderHelper* mShaderHelper;
 
     MWRender::Compositors* mCompositors;
 };

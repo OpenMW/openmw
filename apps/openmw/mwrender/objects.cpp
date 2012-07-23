@@ -459,3 +459,18 @@ void Objects::update(const float dt)
             it = mLights.erase(it);
     }
 }
+
+void Objects::rebuildStaticGeometry()
+{
+    for (std::map<MWWorld::CellStore *, Ogre::StaticGeometry*>::iterator it = mStaticGeometry.begin(); it != mStaticGeometry.end(); ++it)
+    {
+        it->second->destroy();
+        it->second->build();
+    }
+
+    for (std::map<MWWorld::CellStore *, Ogre::StaticGeometry*>::iterator it = mStaticGeometrySmall.begin(); it != mStaticGeometrySmall.end(); ++it)
+    {
+        it->second->destroy();
+        it->second->build();
+    }
+}
