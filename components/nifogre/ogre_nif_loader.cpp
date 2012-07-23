@@ -33,6 +33,11 @@
 #include <OgreSubMesh.h>
 #include <OgreRoot.h>
 
+#include <boost/lexical_cast.hpp>
+#include <boost/algorithm/string.hpp>
+
+#include <extern/shiny/Main/Factory.hpp>
+
 #include <components/settings/settings.hpp>
 #include <components/nifoverrides/nifoverrides.hpp>
 
@@ -207,139 +212,82 @@ void NIFLoader::createMaterial(const Ogre::String &name,
                            const Ogre::Vector3 &emissive,
                            float glossiness, float alpha,
                            int alphaFlags, float alphaTest,
-                           const Ogre::String &texName)
+                           const Ogre::String &texName, bool vertexColor)
 {
-    Ogre::MaterialPtr material = Ogre::MaterialManager::getSingleton().create(name, resourceGroup);
+    if (texName.empty())
+        return;
 
+    sh::MaterialInstance* instance = sh::Factory::getInstance ().createMaterialInstance (name, "openmw_objects_base");
+    instance->setProperty ("ambient", sh::makeProperty<sh::Vector3> (
+        new sh::Vector3(ambient.x, ambient.y, ambient.z)));
 
-    //Hardware Skinning code, textures may be the wrong color if enabled
+    instance->setProperty ("diffuse", sh::makeProperty<sh::Vector4> (
+        new sh::Vector4(diffuse.x, diffuse.y, diffuse.z, alpha)));
 
-    /* if(!mSkel.isNull()){
-    material->removeAllTechniques();
+    instance->setProperty ("specular", sh::makeProperty<sh::Vector4> (
+        new sh::Vector4(specular.x, specular.y, specular.z, glossiness)));
 
-        Ogre::Technique* tech = material->createTechnique();
-        //tech->setSchemeName("blahblah");
-        Pass* pass = tech->createPass();
-        pass->setVertexProgram("Ogre/BasicVertexPrograms/AmbientOneTexture");*/
+    instance->setProperty ("emissive", sh::makeProperty<sh::Vector3> (
+        new sh::Vector3(emissive.x, emissive.y, emissive.z)));
 
+    instance->setProperty ("diffuseMap", sh::makeProperty(texName));
 
-    // This assigns the texture to this material. If the texture name is
-    // a file name, and this file exists (in a resource directory), it
-    // will automatically be loaded when needed. If not (such as for
-    // internal NIF textures that we might support later), we should
-    // already have inserted a manual loader for the texture.
+    if (vertexColor)
+        instance->setProperty ("has_vertex_colour", sh::makeProperty<sh::BooleanValue>(new sh::BooleanValue(true)));
 
-
-    if (!texName.empty())
+    // Add transparency if NiAlphaProperty was present
+    if (alphaFlags != -1)
     {
-        Ogre::Pass *pass = material->getTechnique(0)->getPass(0);
-        /*TextureUnitState *txt =*/
-        pass->createTextureUnitState(texName);
-
-        pass->setVertexColourTracking(Ogre::TVC_DIFFUSE);
-
-        // As of yet UNTESTED code from Chris:
-        /*pass->setTextureFiltering(Ogre::TFO_ANISOTROPIC);
-        pass->setDepthFunction(Ogre::CMPF_LESS_EQUAL);
-        pass->setDepthCheckEnabled(true);
-
-        // Add transparency if NiAlphaProperty was present
-        if (alphaFlags != -1)
+        // The 237 alpha flags are by far the most common. Check
+        // NiAlphaProperty in nif/property.h if you need to decode
+        // other values. 237 basically means normal transparencly.
+        if (alphaFlags == 237)
         {
-            std::cout << "Alpha flags set!" << endl;
-            if ((alphaFlags&1))
+            NifOverrides::TransparencyResult result = NifOverrides::Overrides::getTransparencyOverride(texName);
+            if (result.first)
             {
-                pass->setDepthWriteEnabled(false);
-                pass->setSceneBlending(getBlendFactor((alphaFlags>>1)&0xf),
-                                       getBlendFactor((alphaFlags>>5)&0xf));
+                instance->setProperty("alpha_rejection",
+                    sh::makeProperty<sh::StringValue>(new sh::StringValue("greater_equal " + boost::lexical_cast<std::string>(result.second))));
             }
             else
-                pass->setDepthWriteEnabled(true);
-
-            if ((alphaFlags>>9)&1)
-                pass->setAlphaRejectSettings(getTestMode((alphaFlags>>10)&0x7),
-                                             alphaTest);
-
-            pass->setTransparentSortingEnabled(!((alphaFlags>>13)&1));
-        }
-        else
-            pass->setDepthWriteEnabled(true); */
-
-
-        // Add transparency if NiAlphaProperty was present
-        if (alphaFlags != -1)
-        {
-            // The 237 alpha flags are by far the most common. Check
-            // NiAlphaProperty in nif/property.h if you need to decode
-            // other values. 237 basically means normal transparencly.
-            if (alphaFlags == 237)
             {
-                NifOverrides::TransparencyResult result = NifOverrides::Overrides::getTransparencyOverride(texName);
-                if (result.first)
-                {
-                    pass->setAlphaRejectFunction(Ogre::CMPF_GREATER_EQUAL);
-                    pass->setAlphaRejectValue(result.second);
-                }
-                else
-                {
-                    // Enable transparency
-                    pass->setSceneBlending(Ogre::SBT_TRANSPARENT_ALPHA);
-
-                    //pass->setDepthCheckEnabled(false);
-                    pass->setDepthWriteEnabled(false);
-                    //std::cout << "alpha 237; material: " << name << " texName: " << texName << std::endl;
-                }
+                // Enable transparency
+                instance->setProperty("scene_blend", sh::makeProperty<sh::StringValue>(new sh::StringValue("alpha_blend")));
+                instance->setProperty("depth_write", sh::makeProperty<sh::StringValue>(new sh::StringValue("off")));
             }
-            else
-                warn("Unhandled alpha setting for texture " + texName);
         }
         else
+            warn("Unhandled alpha setting for texture " + texName);
+    }
+    else
+        instance->getMaterial ()->setShadowCasterMaterial ("openmw_shadowcaster_noalpha");
+
+    // As of yet UNTESTED code from Chris:
+    /*pass->setTextureFiltering(Ogre::TFO_ANISOTROPIC);
+    pass->setDepthFunction(Ogre::CMPF_LESS_EQUAL);
+    pass->setDepthCheckEnabled(true);
+
+    // Add transparency if NiAlphaProperty was present
+    if (alphaFlags != -1)
+    {
+        std::cout << "Alpha flags set!" << endl;
+        if ((alphaFlags&1))
         {
-            material->getTechnique(0)->setShadowCasterMaterial("depth_shadow_caster_noalpha");
+            pass->setDepthWriteEnabled(false);
+            pass->setSceneBlending(getBlendFactor((alphaFlags>>1)&0xf),
+                                   getBlendFactor((alphaFlags>>5)&0xf));
         }
+        else
+            pass->setDepthWriteEnabled(true);
+
+        if ((alphaFlags>>9)&1)
+            pass->setAlphaRejectSettings(getTestMode((alphaFlags>>10)&0x7),
+                                         alphaTest);
+
+        pass->setTransparentSortingEnabled(!((alphaFlags>>13)&1));
     }
-
-    if (Settings::Manager::getBool("enabled", "Shadows"))
-    {
-        bool split = Settings::Manager::getBool("split", "Shadows");
-        const int numsplits = 3;
-		for (int i = 0; i < (split ? numsplits : 1); ++i)
-		{
-            Ogre::TextureUnitState* tu = material->getTechnique(0)->getPass(0)->createTextureUnitState();
-            tu->setName("shadowMap" + Ogre::StringConverter::toString(i));
-            tu->setContentType(Ogre::TextureUnitState::CONTENT_SHADOW);
-            tu->setTextureAddressingMode(Ogre::TextureUnitState::TAM_BORDER);
-            tu->setTextureBorderColour(Ogre::ColourValue::White);
-		}
-    }
-
-    if (Settings::Manager::getBool("shaders", "Objects"))
-    {
-        material->getTechnique(0)->getPass(0)->setVertexProgram("main_vp");
-        material->getTechnique(0)->getPass(0)->setFragmentProgram("main_fp");
-
-        material->getTechnique(0)->getPass(0)->setFog(true); // force-disable fixed function fog, it is calculated in shader
-    }
-
-    // Create a fallback technique without shadows and without mrt
-    Ogre::Technique* tech2 = material->createTechnique();
-    tech2->setSchemeName("Fallback");
-    Ogre::Pass* pass2 = tech2->createPass();
-    pass2->createTextureUnitState(texName);
-    pass2->setVertexColourTracking(Ogre::TVC_DIFFUSE);
-    if (Settings::Manager::getBool("shaders", "Objects"))
-    {
-        pass2->setVertexProgram("main_fallback_vp");
-        pass2->setFragmentProgram("main_fallback_fp");
-        pass2->setFog(true); // force-disable fixed function fog, it is calculated in shader
-    }
-
-    // Add material bells and whistles
-    material->setAmbient(ambient[0], ambient[1], ambient[2]);
-    material->setDiffuse(diffuse[0], diffuse[1], diffuse[2], alpha);
-    material->setSpecular(specular[0], specular[1], specular[2], alpha);
-    material->setSelfIllumination(emissive[0], emissive[1], emissive[2]);
-    material->setShininess(glossiness);
+    else
+        pass->setDepthWriteEnabled(true); */
 }
 
 // Takes a name and adds a unique part to it. This is just used to
@@ -642,6 +590,8 @@ void NIFLoader::handleNiTriShape(NiTriShape *shape, int flags, BoundsFinder &bou
         NiTexturingProperty *t = NULL;
         NiMaterialProperty *m = NULL;
         NiAlphaProperty *a = NULL;
+        // can't make any sense of these values, so ignoring them for now
+        //NiVertexColorProperty *v = NULL;
 
         // Scan the property list for material information
         PropertyList &list = shape->props;
@@ -659,6 +609,8 @@ void NIFLoader::handleNiTriShape(NiTriShape *shape, int flags, BoundsFinder &bou
                 m = static_cast<NiMaterialProperty*>(pr);
             else if (pr->recType == RC_NiAlphaProperty)
                 a = static_cast<NiAlphaProperty*>(pr);
+            //else if (pr->recType == RC_NiVertexColorProperty)
+                //v = static_cast<NiVertexColorProperty*>(pr);
         }
 
         // Texture
@@ -727,7 +679,7 @@ void NIFLoader::handleNiTriShape(NiTriShape *shape, int flags, BoundsFinder &bou
                 {
                     //std::cout << "new";
                     createMaterial(material, d->ambient, d->diffuse, d->specular, d->emissive,
-                                    d->glossiness, d->alpha, alphaFlags, alphaTest, texName);
+                                   d->glossiness, d->alpha, alphaFlags, alphaTest, texName, shape->data->colors.size() != 0);
                     MaterialMap.insert(std::make_pair(texName,material));
                 }
             }
@@ -737,7 +689,7 @@ void NIFLoader::handleNiTriShape(NiTriShape *shape, int flags, BoundsFinder &bou
                 // material for it.
                 const Ogre::Vector3 zero(0.0f), one(1.0f);
                 createMaterial(material, one, one, zero, zero, 0.0f, 1.0f,
-                               alphaFlags, alphaTest, texName);
+                               alphaFlags, alphaTest, texName, shape->data->colors.size() != 0);
             }
         }
     } // End of material block, if(!hidden) ...

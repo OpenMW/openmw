@@ -181,16 +181,15 @@ namespace MWWorld
 			playerphysics->ps.viewangles.y = yawQuat.getYaw().valueDegrees() *-1 + 90;
 
 
-                Ogre::Quaternion quat = yawNode->getOrientation();
-                Ogre::Vector3 dir1(iter->second.x,iter->second.z,-iter->second.y);
+            Ogre::Vector3 dir1(iter->second.x,iter->second.z,-iter->second.y);
 
-				pm_ref.rightmove = -iter->second.x;
-				pm_ref.forwardmove = -iter->second.y;
-				pm_ref.upmove = iter->second.z;
-
+            pm_ref.rightmove = -iter->second.x;
+            pm_ref.forwardmove = -iter->second.y;
+            pm_ref.upmove = iter->second.z;
 
 
-            }
+
+        }
 
 
 
