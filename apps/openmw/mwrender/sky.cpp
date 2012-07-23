@@ -316,22 +316,25 @@ void SkyManager::create()
     // Stars
     mAtmosphereNight = mRootNode->createChildSceneNode();
     NifOgre::EntityList entities = NifOgre::NIFLoader::createEntities(mAtmosphereNight, "meshes\\sky_night_01.nif");
-    for(size_t i = 0;i < entities.mEntities.size();i++)
+    for(size_t i = 0, matidx = 0;i < entities.mEntities.size();i++)
     {
         Entity* night1_ent = entities.mEntities[i];
         night1_ent->setRenderQueueGroup(RQG_SkiesEarly+1);
         night1_ent->setVisibilityFlags(RV_Sky);
         night1_ent->setCastShadows(false);
 
-        std::string matName = "openmw_stars_" + boost::lexical_cast<std::string>(i);
-        sh::MaterialInstance* m = sh::Factory::getInstance ().createMaterialInstance (matName, "openmw_stars");
+        for (unsigned int j=0; j<night1_ent->getNumSubEntities(); ++j)
+        {
+            std::string matName = "openmw_stars_" + boost::lexical_cast<std::string>(matidx++);
+            sh::MaterialInstance* m = sh::Factory::getInstance().createMaterialInstance(matName, "openmw_stars");
 
-        std::string textureName = sh::retrieveValue<sh::StringValue>(
-                    sh::Factory::getInstance().getMaterialInstance(night1_ent->getSubEntity (0)->getMaterialName ())->getProperty("diffuseMap"), NULL).get();
+            std::string textureName = sh::retrieveValue<sh::StringValue>(
+                        sh::Factory::getInstance().getMaterialInstance(night1_ent->getSubEntity(j)->getMaterialName())->getProperty("diffuseMap"), NULL).get();
 
-        m->setProperty ("texture", sh::makeProperty<sh::StringValue>(new sh::StringValue(textureName)));
+            m->setProperty("texture", sh::makeProperty<sh::StringValue>(new sh::StringValue(textureName)));
 
-        night1_ent->getSubEntity(0)->setMaterialName (matName);
+            night1_ent->getSubEntity(j)->setMaterialName(matName);
+        }
     }
 
 
