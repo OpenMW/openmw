@@ -75,12 +75,9 @@ namespace
         return boost::lexical_cast<std::string>(xaspect) + " : " + boost::lexical_cast<std::string>(yaspect);
     }
 
-    std::string hlslGlsl ()
+    bool hasGLSL ()
     {
-        if (Ogre::Root::getSingleton ().getRenderSystem ()->getName ().find("OpenGL") == std::string::npos)
-            return "hlsl";
-        else
-            return "glsl";
+        return (Ogre::Root::getSingleton ().getRenderSystem ()->getName ().find("OpenGL") != std::string::npos);
     }
 }
 
@@ -241,6 +238,12 @@ namespace MWGui
             mReflectTerrainButton->setEnabled(false);
         }
 
+        if (shaders == "off")
+        {
+            mUnderwaterButton->setEnabled (false);
+            mShadowsEnabledButton->setEnabled(false);
+        }
+
         mFullscreenButton->setCaptionWithReplacing(Settings::Manager::getBool("fullscreen", "Video") ? "#{sOn}" : "#{sOff}");
         mVSyncButton->setCaptionWithReplacing(Settings::Manager::getBool("vsync", "Video") ? "#{sOn}": "#{sOff}");
         mFPSButton->setCaptionWithReplacing(fpsLevelToStr(Settings::Manager::getInt("fps", "HUD")));
@@ -389,8 +392,13 @@ namespace MWGui
     {
         std::string val = static_cast<MyGUI::Button*>(_sender)->getCaption();
         if (val == "off")
-            val = hlslGlsl();
-        else if (val == hlslGlsl())
+        {
+            if (hasGLSL ())
+                val = "glsl";
+            else
+                val = "cg";
+        }
+        else if (val == "glsl")
             val = "cg";
         else
             val = "off";
@@ -407,7 +415,9 @@ namespace MWGui
             mReflectObjectsButton->setEnabled(false);
             mReflectActorsButton->setEnabled(false);
             mReflectTerrainButton->setEnabled(false);
+            mUnderwaterButton->setEnabled(false);
             Settings::Manager::setBool("shader", "Water", false);
+            Settings::Manager::setBool("underwater effect", "Water", false);
 
             // shadows not supported
             mShadowsEnabledButton->setEnabled(false);
@@ -416,15 +426,19 @@ namespace MWGui
         }
         else
         {
-            // re-enable
-            mWaterShaderButton->setEnabled(true);
-            mReflectObjectsButton->setEnabled(true);
-            mReflectActorsButton->setEnabled(true);
-            mReflectTerrainButton->setEnabled(true);
-            mShadowsEnabledButton->setEnabled(true);
-
             Settings::Manager::setBool("shaders", "Objects", true);
             Settings::Manager::setString("shader mode", "General", val);
+/
+            // re-enable
+            if (MWRender::RenderingManager::waterShaderSupported())
+            {
+                mWaterShaderButton->setEnabled(true);
+                mReflectObjectsButton->setEnabled(true);
+                mReflectActorsButton->setEnabled(true);
+                mReflectTerrainButton->setEnabled(true);
+            }
+            mUnderwaterButton->setEnabled(true);
+            mShadowsEnabledButton->setEnabled(true);
         }
 
         apply();
