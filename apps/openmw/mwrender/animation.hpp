@@ -27,6 +27,7 @@ protected:
 
     float mTime;
     int mAnimate;
+    bool mSkipFrame;
 
     NifOgre::EntityList mEntityList;
 
@@ -36,7 +37,7 @@ public:
 
     void playGroup(std::string groupname, int mode, int loops);
     void skipAnim();
-    virtual void runAnimation(float timepassed) = 0;
+    virtual void runAnimation(float timepassed);
 };
 
 }

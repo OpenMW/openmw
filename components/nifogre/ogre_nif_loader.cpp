@@ -25,6 +25,8 @@
 
 #include "ogre_nif_loader.hpp"
 
+#include <algorithm>
+
 #include <OgreMaterialManager.h>
 #include <OgreMeshManager.h>
 #include <OgreHardwareBufferManager.h>
@@ -306,10 +308,30 @@ void loadResource(Ogre::Resource *resource)
 
             Ogre::TransformKeyFrame *kframe;
             kframe = nodetrack->createNodeKeyFrame(curtime);
-            // FIXME: These should be interpolated since they don't all fall on the same time
-            kframe->setRotation(curquat);
-            kframe->setTranslate(curtrans);
-            kframe->setScale(curscale);
+            if(quatiter == quatkeys.mKeys.end() || quatiter == quatkeys.mKeys.begin())
+                kframe->setRotation(curquat);
+            else
+            {
+                QuaternionKeyList::VecType::const_iterator last = quatiter-1;
+                float diff = (curtime-last->mTime) / (quatiter->mTime-last->mTime);
+                kframe->setRotation(Ogre::Quaternion::nlerp(diff, lastquat, curquat));
+            }
+            if(traniter == trankeys.mKeys.end() || traniter == trankeys.mKeys.begin())
+                kframe->setTranslate(curtrans);
+            else
+            {
+                Vector3KeyList::VecType::const_iterator last = traniter-1;
+                float diff = (curtime-last->mTime) / (traniter->mTime-last->mTime);
+                kframe->setTranslate(lasttrans + ((curtrans-lasttrans)*diff));
+            }
+            if(scaleiter == scalekeys.mKeys.end() || scaleiter == scalekeys.mKeys.begin())
+                kframe->setScale(curscale);
+            else
+            {
+                FloatKeyList::VecType::const_iterator last = scaleiter-1;
+                float diff = (curtime-last->mTime) / (scaleiter->mTime-last->mTime);
+                kframe->setScale(lastscale + ((curscale-lastscale)*diff));
+            }
         }
     }
     anim->optimise();
@@ -1027,7 +1049,6 @@ EntityList NIFLoader::createEntities(Ogre::SceneNode *parent, const std::string 
     if(meshes.size() == 0)
         return entitylist;
 
-    entitylist.mRootNode = parent;
     Ogre::SceneManager *sceneMgr = parent->getCreator();
     for(size_t i = 0;i < meshes.size();i++)
     {
@@ -1061,6 +1082,11 @@ EntityList NIFLoader::createEntities(Ogre::SceneNode *parent, const std::string 
     return entitylist;
 }
 
+static bool checklow(const char &a, const char &b)
+{
+    return ::tolower(a) == ::tolower(b);
+}
+
 EntityList NIFLoader::createEntities(Ogre::Entity *parent, const std::string &bonename,
                                      Ogre::SceneNode *parentNode,
                                      const std::string &name,
@@ -1080,8 +1106,7 @@ EntityList NIFLoader::createEntities(Ogre::Entity *parent, const std::string &bo
         if(ent->hasSkeleton())
         {
             if(meshes[i].second.length() < filter.length() ||
-               !boost::algorithm::lexicographical_compare(meshes[i].second.substr(0, filter.length()),
-                                                          filter, boost::algorithm::is_iequal()))
+               std::mismatch(filter.begin(), filter.end(), meshes[i].second.begin(), checklow).first != filter.end())
             {
                 sceneMgr->destroyEntity(ent);
                 meshes.erase(meshes.begin()+i);

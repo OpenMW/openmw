@@ -16,6 +16,7 @@ Animation::Animation(OEngine::Render::OgreRenderer& _rend)
     , mRend(_rend)
     , mTime(0.0f)
     , mAnimate(0)
+    , mSkipFrame(false)
 {
 }
 
@@ -39,7 +40,37 @@ void Animation::playGroup(std::string groupname, int mode, int loops)
 
 void Animation::skipAnim()
 {
-    mAnimate = 0;
+    mSkipFrame = true;
+}
+
+void Animation::runAnimation(float timepassed)
+{
+    if(mAnimate != 0 && !mSkipFrame)
+    {
+        mTime += timepassed;
+
+        if(mEntityList.mSkelBase)
+        {
+            Ogre::AnimationStateSet *aset = mEntityList.mSkelBase->getAllAnimationStates();
+            Ogre::AnimationStateIterator as = aset->getAnimationStateIterator();
+            while(as.hasMoreElements())
+            {
+                Ogre::AnimationState *state = as.getNext();
+                state->setTimePosition(mTime);
+                if(mTime >= state->getLength())
+                {
+                    if(mAnimate != -1)
+                        mAnimate--;
+                    //std::cout << "Stopping the animation\n";
+                    if(mAnimate == 0)
+                        mTime = state->getLength();
+                    else
+                        mTime = mTime - state->getLength();
+                }
+            }
+        }
+    }
+    mSkipFrame = false;
 }
 
 }

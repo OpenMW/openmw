@@ -69,30 +69,9 @@ CreatureAnimation::CreatureAnimation(const MWWorld::Ptr& ptr, OEngine::Render::O
 
 void CreatureAnimation::runAnimation(float timepassed)
 {
-    if(mAnimate > 0)
-    {
-        mTime += timepassed;
+    // Placeholder
 
-        if(mEntityList.mSkelBase)
-        {
-            Ogre::AnimationStateSet *aset = mEntityList.mSkelBase->getAllAnimationStates();
-            Ogre::AnimationStateIterator as = aset->getAnimationStateIterator();
-            while(as.hasMoreElements())
-            {
-                Ogre::AnimationState *state = as.getNext();
-                state->setTimePosition(mTime);
-                if(state->getTimePosition() >= state->getLength())
-                {
-                    mAnimate--;
-                    //std::cout << "Stopping the animation\n";
-                    if(mAnimate == 0)
-                        mTime = state->getLength();
-                    else
-                        mTime = mTime - state->getLength();
-                }
-            }
-        }
-    }
+    Animation::runAnimation(timepassed);
 }
 
 }

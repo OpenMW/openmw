@@ -149,7 +149,7 @@ void NpcAnimation::updateParts()
         { &greaves, MWWorld::InventoryStore::Slot_Greaves },
         { &leftpauldron, MWWorld::InventoryStore::Slot_LeftPauldron },
         { &rightpauldron, MWWorld::InventoryStore::Slot_RightPauldron },
-        { &boots, MWWorld::InventoryStore::Slot_Boots }, // !isBeast
+        { &boots, MWWorld::InventoryStore::Slot_Boots },
         { &leftglove, MWWorld::InventoryStore::Slot_LeftGauntlet },
         { &rightglove, MWWorld::InventoryStore::Slot_RightGauntlet },
         { &shirt, MWWorld::InventoryStore::Slot_Shirt },
@@ -157,9 +157,6 @@ void NpcAnimation::updateParts()
     };
     for(size_t i = 0;i < sizeof(slotlist)/sizeof(slotlist[0]);i++)
     {
-        if(slotlist[i].iter == &boots && isBeast)
-            continue;
-
         MWWorld::ContainerStoreIterator iter = mInv.getSlot(slotlist[i].slot);
         if(*slotlist[i].iter != iter)
         {
@@ -235,7 +232,7 @@ void NpcAnimation::updateParts()
             std::vector<ESM::PartReference> parts = armor->parts.parts;
             addPartGroup(MWWorld::InventoryStore::Slot_RightPauldron, 3, parts);
         }
-        if(!isBeast && boots != mInv.end())
+        if(boots != mInv.end())
         {
             if(boots->getTypeName() == typeid(ESM::Clothing).name())
             {
@@ -373,30 +370,7 @@ void NpcAnimation::runAnimation(float timepassed)
     }
     timeToChange += timepassed;
 
-    if(mAnimate > 0)
-    {
-        mTime += timepassed;
-
-        if(mEntityList.mSkelBase)
-        {
-            Ogre::AnimationStateSet *aset = mEntityList.mSkelBase->getAllAnimationStates();
-            Ogre::AnimationStateIterator as = aset->getAnimationStateIterator();
-            while(as.hasMoreElements())
-            {
-                Ogre::AnimationState *state = as.getNext();
-                state->setTimePosition(mTime);
-                if(state->getTimePosition() >= state->getLength())
-                {
-                    mAnimate--;
-                    //std::cout << "Stopping the animation\n";
-                    if(mAnimate == 0)
-                        mTime = state->getLength();
-                    else
-                        mTime = mTime - state->getLength();
-                }
-            }
-        }
-    }
+    Animation::runAnimation(timepassed);
 }
 
 void NpcAnimation::removeEntities(NifOgre::EntityList &entities)
@@ -411,7 +385,6 @@ void NpcAnimation::removeEntities(NifOgre::EntityList &entities)
     }
     entities.mEntities.clear();
     entities.mSkelBase = NULL;
-    entities.mRootNode = NULL;
 }
 
 void NpcAnimation::removeIndividualPart(int type)
