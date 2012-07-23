@@ -287,21 +287,12 @@ SkyManager::SkyManager (SceneNode* pMwRoot, Camera* pCamera)
 
 void SkyManager::create()
 {
+    assert(!mCreated);
+
     sh::Factory::getInstance().setSharedParameter ("cloudBlendFactor",
         sh::makeProperty<sh::FloatValue>(new sh::FloatValue(0)));
-    sh::Factory::getInstance().setSharedParameter ("cloudOpacity",
-        sh::makeProperty<sh::FloatValue>(new sh::FloatValue(1)));
-    sh::Factory::getInstance().setSharedParameter ("cloudColour",
-        sh::makeProperty<sh::Vector3>(new sh::Vector3(1,1,1)));
-    sh::Factory::getInstance().setSharedParameter ("cloudAnimationTimer",
-        sh::makeProperty<sh::FloatValue>(new sh::FloatValue(0)));
-    sh::Factory::getInstance().setSharedParameter ("nightFade",
-        sh::makeProperty<sh::FloatValue>(new sh::FloatValue(0)));
 
-    sh::Factory::getInstance().setTextureAlias ("cloud_texture_1", "");
-    sh::Factory::getInstance().setTextureAlias ("cloud_texture_2", "");
-
-    // Create overlay used for thunderstorm
+    // Create light used for thunderstorm
     mLightning = mSceneMgr->createLight();
     mLightning->setType (Ogre::Light::LT_DIRECTIONAL);
     mLightning->setDirection (Ogre::Vector3(0.3, -0.7, 0.3));
@@ -332,19 +323,15 @@ void SkyManager::create()
         night1_ent->setVisibilityFlags(RV_Sky);
         night1_ent->setCastShadows(false);
 
-        for (unsigned int i=0; i<night1_ent->getNumSubEntities(); ++i)
-        {
-            std::string matName = "openmw_stars_" + boost::lexical_cast<std::string>(i);
-            sh::MaterialInstance* m = sh::Factory::getInstance ().createMaterialInstance (matName, "openmw_stars");
+        std::string matName = "openmw_stars_" + boost::lexical_cast<std::string>(i);
+        sh::MaterialInstance* m = sh::Factory::getInstance ().createMaterialInstance (matName, "openmw_stars");
 
-            std::string textureName = sh::retrieveValue<sh::StringValue>(
-                        sh::Factory::getInstance().getMaterialInstance(night1_ent->getSubEntity (i)->getMaterialName ())->getProperty("diffuseMap"), NULL).get();
+        std::string textureName = sh::retrieveValue<sh::StringValue>(
+                    sh::Factory::getInstance().getMaterialInstance(night1_ent->getSubEntity (0)->getMaterialName ())->getProperty("diffuseMap"), NULL).get();
 
-            m->setProperty ("texture", sh::makeProperty<sh::StringValue>(new sh::StringValue(textureName)));
+        m->setProperty ("texture", sh::makeProperty<sh::StringValue>(new sh::StringValue(textureName)));
 
-            night1_ent->getSubEntity(i)->setMaterialName (matName);
-
-        }
+        night1_ent->getSubEntity(0)->setMaterialName (matName);
     }
 
 
@@ -370,7 +357,6 @@ void SkyManager::create()
         Entity* clouds_ent = entities.mEntities[i];
         clouds_ent->setVisibilityFlags(RV_Sky);
         clouds_ent->setRenderQueueGroup(RQG_SkiesEarly+5);
-        clouds_node->attachObject(clouds_ent);
         clouds_ent->getSubEntity(0)->setMaterialName ("openmw_clouds");
         clouds_ent->setCastShadows(false);
 
