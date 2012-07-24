@@ -30,6 +30,7 @@ protected:
     bool mSkipFrame;
 
     NifOgre::EntityList mEntityList;
+    NifOgre::TextKeyMap mTextKeys;
 
 public:
     Animation(OEngine::Render::OgreRenderer& _rend);
