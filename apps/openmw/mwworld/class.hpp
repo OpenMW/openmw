@@ -205,7 +205,7 @@ namespace MWWorld
 
             virtual void adjustRotation(const MWWorld::Ptr& ptr,float& x,float& y,float& z) const;
 
-            virtual std::string getModel() const;
+            virtual std::string getModel(const MWWorld::Ptr &ptr) const;
     };
 }
 

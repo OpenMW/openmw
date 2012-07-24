@@ -19,6 +19,8 @@ namespace MWClass
             /// can return an empty string.
 
             static void registerSelf();
+
+            virtual std::string getModel(const MWWorld::Ptr &ptr) const;
     };
 }
 

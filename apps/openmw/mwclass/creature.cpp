@@ -87,16 +87,24 @@ namespace MWClass
 
     void Creature::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics) const
     {
+        const std::string model = getModel(ptr);
+        if(!model.empty()){
+            physics.insertActorPhysics(ptr, model);
+        }
+        MWBase::Environment::get().getMechanicsManager()->addActor (ptr);
+    }
+
+    std::string Creature::getModel(const MWWorld::Ptr &ptr) const
+    {
         MWWorld::LiveCellRef<ESM::Creature> *ref =
             ptr.get<ESM::Creature>();
+        assert (ref->base != NULL);
 
         const std::string &model = ref->base->model;
-        assert (ref->base != NULL);
-        if(!model.empty()){
-            physics.insertActorPhysics(ptr, "meshes\\" + model);
+        if (!model.empty()) {
+            return "meshes\\" + model;
         }
-
-        MWBase::Environment::get().getMechanicsManager()->addActor (ptr);
+        return "";        
     }
 
     std::string Creature::getName (const MWWorld::Ptr& ptr) const

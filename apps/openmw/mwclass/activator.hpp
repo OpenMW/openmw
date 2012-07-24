@@ -28,6 +28,8 @@ namespace MWClass
             ///< Return name of the script attached to ptr
 
             static void registerSelf();
+
+            virtual std::string getModel(const MWWorld::Ptr &ptr) const;
     };
 }
 

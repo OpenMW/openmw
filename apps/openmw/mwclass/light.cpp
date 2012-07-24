@@ -28,8 +28,8 @@ namespace MWClass
     {
         MWWorld::LiveCellRef<ESM::Light> *ref =
             ptr.get<ESM::Light>();
-
         assert (ref->base != NULL);
+
         const std::string &model = ref->base->model;
 
         MWRender::Objects& objects = renderingInterface.getObjects();
@@ -50,18 +50,29 @@ namespace MWClass
     {
         MWWorld::LiveCellRef<ESM::Light> *ref =
             ptr.get<ESM::Light>();
-
         assert (ref->base != NULL);
+
         const std::string &model = ref->base->model;
 
-        if(!model.empty()){
+        if(!model.empty()) {
             physics.insertObjectPhysics(ptr, "meshes\\" + model);
         }
-
-        if (!ref->base->sound.empty())
-        {
-            MWBase::Environment::get().getSoundManager()->playSound3D (ptr, ref->base->sound, 1.0, 1.0, MWSound::Play_Loop);
+        if (!ref->base->sound.empty()) {
+            MWBase::Environment::get().getSoundManager()->playSound3D(ptr, ref->base->sound, 1.0, 1.0, MWSound::Play_Loop);
         }
+    }
+
+    std::string Light::getModel(const MWWorld::Ptr &ptr) const
+    {
+        MWWorld::LiveCellRef<ESM::Light> *ref =
+            ptr.get<ESM::Light>();
+        assert (ref->base != NULL);
+
+        const std::string &model = ref->base->model;
+        if (!model.empty()) {
+            return "meshes\\" + model;
+        }
+        return "";
     }
 
     std::string Light::getName (const MWWorld::Ptr& ptr) const

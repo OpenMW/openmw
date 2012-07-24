@@ -66,6 +66,7 @@ namespace MWClass
                 const;
             ///< Generate action for using via inventory menu
 
+            virtual std::string getModel(const MWWorld::Ptr &ptr) const;
     };
 }
 

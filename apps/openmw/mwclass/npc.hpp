@@ -88,6 +88,8 @@ namespace MWClass
             virtual void adjustRotation(const MWWorld::Ptr& ptr,float& x,float& y,float& z) const;
 
             static void registerSelf();
+
+            virtual std::string getModel(const MWWorld::Ptr &ptr) const;
     };
 }
 

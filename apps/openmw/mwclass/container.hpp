@@ -51,6 +51,8 @@ namespace MWClass
             ///< Unlock object
 
             static void registerSelf();
+
+            virtual std::string getModel(const MWWorld::Ptr &ptr) const;
     };
 }
 

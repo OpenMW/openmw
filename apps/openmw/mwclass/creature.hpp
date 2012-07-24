@@ -54,6 +54,8 @@ namespace MWClass
             /// effects). Throws an exception, if the object can't hold other objects.
 
             static void registerSelf();
+
+            virtual std::string getModel(const MWWorld::Ptr &ptr) const;
     };
 }
 

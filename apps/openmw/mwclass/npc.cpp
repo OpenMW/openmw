@@ -125,25 +125,29 @@ namespace MWClass
 
     void Npc::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics) const
     {
+        physics.insertActorPhysics(ptr, getModel(ptr));
+        MWBase::Environment::get().getMechanicsManager()->addActor(ptr);
+    }
 
+    std::string Npc::getModel(const MWWorld::Ptr &ptr) const
+    {
         MWWorld::LiveCellRef<ESM::NPC> *ref =
             ptr.get<ESM::NPC>();
-
-        assert (ref->base != NULL);
-
-
+        assert(ref->base != NULL);
 
         std::string headID = ref->base->head;
-        std::string bodyRaceID = headID.substr(0, headID.find_last_of("head_") - 4);
-        bool beast = bodyRaceID == "b_n_khajiit_m_" || bodyRaceID == "b_n_khajiit_f_" || bodyRaceID == "b_n_argonian_m_" || bodyRaceID == "b_n_argonian_f_";
+        int end = headID.find_last_of("head_") - 4;
+        std::string bodyRaceID = headID.substr(0, end);
 
-        std::string smodel = "meshes\\base_anim.nif";
-        if(beast)
-            smodel = "meshes\\base_animkna.nif";
-         physics.insertActorPhysics(ptr, smodel);
-
-
-        MWBase::Environment::get().getMechanicsManager()->addActor (ptr);
+        std::string model = "meshes\\base_anim.nif";
+        if (bodyRaceID == "b_n_khajiit_m_" ||
+            bodyRaceID == "b_n_khajiit_f_" ||
+            bodyRaceID == "b_n_argonian_m_" ||
+            bodyRaceID == "b_n_argonian_f_")
+        {
+            model = "meshes\\base_animkna.nif";
+        }
+        return model;
     }
 
     std::string Npc::getName (const MWWorld::Ptr& ptr) const

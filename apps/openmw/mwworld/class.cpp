@@ -213,7 +213,7 @@ namespace MWWorld
     {
     }
 
-    std::string Class::getModel() const
+    std::string Class::getModel(const MWWorld::Ptr &ptr) const
     {
         return "";
     }

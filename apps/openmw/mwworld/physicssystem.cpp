@@ -367,12 +367,11 @@ namespace MWWorld
      }
 
      float PhysicsSystem::getObjectHeight(const MWWorld::Ptr &ptr) {
-        std::string model = MWWorld::Class::get(ptr).getModel();
+        std::string model = MWWorld::Class::get(ptr).getModel(ptr);
         if (model.empty()) {
             return 0.0;
         }
         float scale = ptr.getRefData().getBaseNode()->getScale().x;
         return mEngine->getObjectHeight(model, scale);
      }
-
 }
