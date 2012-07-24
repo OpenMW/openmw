@@ -1021,7 +1021,8 @@ namespace MWWorld
         pos.pos[1] = -result.second[2];
         pos.pos[2] = result.second[1];
 
-        mWorldScene->insertObject(object, cell);
+        cell->insertObject(object);
+        //TODO mWorldScene->addObjectToScene
 
         /// \todo retrieve the bounds of the object and translate it accordingly
 

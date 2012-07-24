@@ -15,6 +15,8 @@ namespace ESMS
 
 namespace MWWorld
 {
+    class Ptr;
+
   /// A reference to one object (of any type) in a cell.
   ///
   /// Constructing this with a CellRef instance in the constructor means that
@@ -72,6 +74,11 @@ namespace MWWorld
         }
 
         return 0;
+    }
+
+    LiveRef &insert(const LiveRef &item) {
+        list.push_back(item);
+        return list.back();
     }
   };
 
@@ -165,6 +172,8 @@ namespace MWWorld
     void listRefs(const ESMS::ESMStore &store, ESM::ESMReader &esm);
 
     void loadRefs(const ESMS::ESMStore &store, ESM::ESMReader &esm);
+
+    void insertObject(const MWWorld::Ptr &ptr);
   };
 }
 
