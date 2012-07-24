@@ -15,7 +15,6 @@ Animation::Animation(OEngine::Render::OgreRenderer& _rend)
     : mInsert(NULL)
     , mRend(_rend)
     , mTime(0.0f)
-    , mAnimate(0)
     , mSkipFrame(false)
 {
 }
@@ -36,22 +35,17 @@ struct checklow {
     }
 };
 
-bool Animation::findGroupTimes(const std::string &groupname, float *starttime, float *stoptime, float *loopstarttime, float *loopstoptime)
+bool Animation::findGroupTimes(const std::string &groupname, Animation::GroupTimes *times)
 {
     const std::string &start = groupname+": start";
     const std::string &startloop = groupname+": loop start";
     const std::string &stop = groupname+": stop";
     const std::string &stoploop = groupname+": loop stop";
 
-    *starttime = -1.0f;
-    *stoptime  = -1.0f;
-    *loopstarttime = -1.0f;
-    *loopstoptime  = -1.0f;
-
     NifOgre::TextKeyMap::const_iterator iter;
     for(iter = mTextKeys.begin();iter != mTextKeys.end();iter++)
     {
-        if(*starttime >= 0.0f && *stoptime >= 0.0f && *loopstarttime >= 0.0f && *loopstoptime >= 0.0f)
+        if(times->mStart >= 0.0f && times->mLoopStart >= 0.0f && times->mLoopStop >= 0.0f && times->mStop >= 0.0f)
             return true;
 
         std::string::const_iterator strpos = iter->second.begin();
@@ -66,28 +60,28 @@ bool Animation::findGroupTimes(const std::string &groupname, float *starttime, f
                ((striter=std::mismatch(strpos, strend, start.begin(), checklow()).first) == strend ||
                 *striter == '\r' || *striter == '\n'))
             {
-                *starttime = iter->first;
-                *loopstarttime = iter->first;
+                times->mStart = iter->first;
+                times->mLoopStart = iter->first;
             }
             else if(startloop.size() <= strlen &&
                     ((striter=std::mismatch(strpos, strend, startloop.begin(), checklow()).first) == strend ||
                      *striter == '\r' || *striter == '\n'))
             {
-                *loopstarttime = iter->first;
+                times->mLoopStart = iter->first;
             }
             else if(stoploop.size() <= strlen &&
                     ((striter=std::mismatch(strpos, strend, stoploop.begin(), checklow()).first) == strend ||
                      *striter == '\r' || *striter == '\n'))
             {
-                *loopstoptime = iter->first;
+                times->mLoopStop = iter->first;
             }
             else if(stop.size() <= strlen &&
                     ((striter=std::mismatch(strpos, strend, stop.begin(), checklow()).first) == strend ||
                      *striter == '\r' || *striter == '\n'))
             {
-                *stoptime = iter->first;
-                if(*loopstoptime < 0.0f)
-                    *loopstoptime = iter->first;
+                times->mStop = iter->first;
+                if(times->mLoopStop < 0.0f)
+                    times->mLoopStop = iter->first;
                 break;
             }
 
@@ -97,18 +91,19 @@ bool Animation::findGroupTimes(const std::string &groupname, float *starttime, f
         }
     }
 
-    return (*starttime >= 0.0f && *stoptime >= 0.0f && *loopstarttime >= 0.0f && *loopstoptime >= 0.0f);
+    return (times->mStart >= 0.0f && times->mLoopStart >= 0.0f && times->mLoopStop >= 0.0f && times->mStop >= 0.0f);
 }
 
 
 void Animation::playGroup(std::string groupname, int mode, int loops)
 {
-    float start, stop, loopstart, loopstop;
+    GroupTimes times;
+    times.mLoops = loops;
 
     if(groupname == "all")
     {
-        start = loopstart = 0.0f;
-        loopstop = stop = 0.0f;
+        times.mStart = times.mLoopStart = 0.0f;
+        times.mLoopStop = times.mStop = 0.0f;
 
         if(mEntityList.mSkelBase)
         {
@@ -117,25 +112,21 @@ void Animation::playGroup(std::string groupname, int mode, int loops)
             while(as.hasMoreElements())
             {
                 Ogre::AnimationState *state = as.getNext();
-                loopstop = stop = state->getLength();
+                times.mLoopStop = times.mStop = state->getLength();
                 break;
             }
         }
     }
-    else if(!findGroupTimes(groupname, &start, &stop, &loopstart, &loopstop))
+    else if(!findGroupTimes(groupname, &times))
         throw std::runtime_error("Failed to find animation group "+groupname);
 
     // FIXME: mode = 0 not yet supported
     if(mode == 0)
         mode = 1;
 
-    mStartTime = start;
-    mStopTime = stop;
-    mLoopStartTime = loopstart;
-    mLoopStopTime = loopstop;
+    mCurGroup = times;
 
-    mAnimate = loops;
-    mTime = ((mode==1) ? mStartTime : mLoopStartTime);
+    mTime = ((mode==1) ? mCurGroup.mStart : mCurGroup.mLoopStart);
 }
 
 void Animation::skipAnim()
@@ -145,20 +136,20 @@ void Animation::skipAnim()
 
 void Animation::runAnimation(float timepassed)
 {
-    if(mAnimate > 0 && !mSkipFrame)
+    if(mCurGroup.mLoops > 0 && !mSkipFrame)
     {
         mTime += timepassed;
-        if(mTime >= mLoopStopTime)
+        if(mTime >= mCurGroup.mLoopStop)
         {
-            if(mAnimate > 1)
+            if(mCurGroup.mLoops > 1)
             {
-                mAnimate--;
-                mTime = mTime - mLoopStopTime + mLoopStartTime;
+                mCurGroup.mLoops--;
+                mTime = mTime - mCurGroup.mLoopStop + mCurGroup.mLoopStart;
             }
-            else if(mTime >= mStopTime)
+            else if(mTime >= mCurGroup.mStop)
             {
-                mAnimate--;
-                mTime = mStopTime;
+                mCurGroup.mLoops--;
+                mTime = mCurGroup.mStop;
             }
         }
 
