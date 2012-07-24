@@ -107,8 +107,8 @@ void Animation::playGroup(std::string groupname, int mode, int loops)
 
     if(groupname == "all")
     {
-        mLoopStartTime = mStartTime = 0.0f;
-        mLoopStopTime = mStopTime = 0.0f;
+        start = loopstart = 0.0f;
+        loopstop = stop = 0.0f;
 
         if(mEntityList.mSkelBase)
         {
@@ -117,26 +117,25 @@ void Animation::playGroup(std::string groupname, int mode, int loops)
             while(as.hasMoreElements())
             {
                 Ogre::AnimationState *state = as.getNext();
-                mLoopStopTime = mStopTime = state->getLength();
+                loopstop = stop = state->getLength();
                 break;
             }
         }
-
-        mAnimate = loops;
-        mTime = mStartTime;
     }
-    else if(findGroupTimes(groupname, &start, &stop, &loopstart, &loopstop))
-    {
-        mStartTime = start;
-        mStopTime = stop;
-        mLoopStartTime = loopstart;
-        mLoopStopTime = loopstop;
-
-        mAnimate = loops;
-        mTime = mStartTime;
-    }
-    else
+    else if(!findGroupTimes(groupname, &start, &stop, &loopstart, &loopstop))
         throw std::runtime_error("Failed to find animation group "+groupname);
+
+    // FIXME: mode = 0 not yet supported
+    if(mode == 0)
+        mode = 1;
+
+    mStartTime = start;
+    mStopTime = stop;
+    mLoopStartTime = loopstart;
+    mLoopStopTime = loopstop;
+
+    mAnimate = loops;
+    mTime = ((mode==1) ? mStartTime : mLoopStartTime);
 }
 
 void Animation::skipAnim()
