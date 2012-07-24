@@ -10,7 +10,6 @@
 
 namespace MWRender
 {
-std::map<std::string, int> Animation::sUniqueIDs;
 
 Animation::Animation(OEngine::Render::OgreRenderer& _rend)
     : mInsert(NULL)

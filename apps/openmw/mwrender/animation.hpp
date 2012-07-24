@@ -14,16 +14,10 @@
 
 namespace MWRender {
 
-struct PosAndRot {
-    Ogre::Quaternion vecRot;
-    Ogre::Vector3 vecPos;
-};
-
 class Animation {
 protected:
     Ogre::SceneNode* mInsert;
     OEngine::Render::OgreRenderer &mRend;
-    static std::map<std::string, int> sUniqueIDs;
 
     float mTime;
     float mStartTime;
