@@ -120,13 +120,14 @@ void Animation::playGroup(std::string groupname, int mode, int loops)
     else if(!findGroupTimes(groupname, &times))
         throw std::runtime_error("Failed to find animation group "+groupname);
 
-    // FIXME: mode = 0 not yet supported
-    if(mode == 0)
-        mode = 1;
-
-    mCurGroup = times;
-
-    mTime = ((mode==1) ? mCurGroup.mStart : mCurGroup.mLoopStart);
+    if(mode == 0 && mCurGroup.mLoops > 0)
+        mNextGroup = times;
+    else
+    {
+        mCurGroup = times;
+        mNextGroup = GroupTimes();
+        mTime = ((mode==2) ? mCurGroup.mLoopStart : mCurGroup.mStart);
+    }
 }
 
 void Animation::skipAnim()
@@ -148,8 +149,12 @@ void Animation::runAnimation(float timepassed)
             }
             else if(mTime >= mCurGroup.mStop)
             {
-                mCurGroup.mLoops--;
-                mTime = mCurGroup.mStop;
+                if(mNextGroup.mLoops > 0)
+                    mTime = mTime - mCurGroup.mStop + mNextGroup.mStart;
+                else
+                    mTime = mCurGroup.mStop;
+                mCurGroup = mNextGroup;
+                mNextGroup = GroupTimes();
             }
         }
 

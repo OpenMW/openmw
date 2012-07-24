@@ -35,6 +35,7 @@ protected:
 
     float mTime;
     GroupTimes mCurGroup;
+    GroupTimes mNextGroup;
 
     bool mSkipFrame;
 
