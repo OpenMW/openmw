@@ -1057,10 +1057,12 @@ EntityList NIFLoader::createEntities(Ogre::SceneNode *parent, TextKeyMap *textke
     return entitylist;
 }
 
-static bool checklow(const char &a, const char &b)
-{
-    return ::tolower(a) == ::tolower(b);
-}
+struct checklow {
+    bool operator()(const char &a, const char &b) const
+    {
+        return ::tolower(a) == ::tolower(b);
+    }
+};
 
 EntityList NIFLoader::createEntities(Ogre::Entity *parent, const std::string &bonename,
                                      Ogre::SceneNode *parentNode,
@@ -1081,7 +1083,7 @@ EntityList NIFLoader::createEntities(Ogre::Entity *parent, const std::string &bo
         if(ent->hasSkeleton())
         {
             if(meshes[i].second.length() < filter.length() ||
-               std::mismatch(filter.begin(), filter.end(), meshes[i].second.begin(), checklow).first != filter.end())
+               std::mismatch(filter.begin(), filter.end(), meshes[i].second.begin(), checklow()).first != filter.end())
             {
                 sceneMgr->destroyEntity(ent);
                 meshes.erase(meshes.begin()+i);
