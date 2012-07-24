@@ -26,11 +26,19 @@ protected:
     static std::map<std::string, int> sUniqueIDs;
 
     float mTime;
+    float mStartTime;
+    float mStopTime;
+    float mLoopStartTime;
+    float mLoopStopTime;
+
     int mAnimate;
     bool mSkipFrame;
 
     NifOgre::EntityList mEntityList;
     NifOgre::TextKeyMap mTextKeys;
+
+    bool findGroupTimes(const std::string &groupname, float *starttime, float *stoptime,
+                        float *loopstarttime, float *loopstoptime);
 
 public:
     Animation(OEngine::Render::OgreRenderer& _rend);
