@@ -349,29 +349,30 @@ namespace MWWorld
         throw std::logic_error ("can't find player");
     }
 
-     void PhysicsSystem::insertObjectPhysics(const MWWorld::Ptr& ptr, const std::string model){
+    void PhysicsSystem::insertObjectPhysics(const MWWorld::Ptr& ptr, const std::string model){
 
-           Ogre::SceneNode* node = ptr.getRefData().getBaseNode();
+        Ogre::SceneNode* node = ptr.getRefData().getBaseNode();
 
-           // unused
-		   //Ogre::Vector3 objPos = node->getPosition();
+        addObject(
+            node->getName(),
+            model,
+            node->getOrientation(),
+            node->getScale().x,
+            node->getPosition());
+    }
 
-         addObject (node->getName(), model, node->getOrientation(),
-            node->getScale().x, node->getPosition());
-     }
+    void PhysicsSystem::insertActorPhysics(const MWWorld::Ptr& ptr, const std::string model){
+        Ogre::SceneNode* node = ptr.getRefData().getBaseNode();
+        addActor (node->getName(), model, node->getPosition());
+    }
 
-     void PhysicsSystem::insertActorPhysics(const MWWorld::Ptr& ptr, const std::string model){
-           Ogre::SceneNode* node = ptr.getRefData().getBaseNode();
-            // std::cout << "Adding node with name" << node->getName();
-         addActor (node->getName(), model, node->getPosition());
-     }
-
-     float PhysicsSystem::getObjectHeight(const MWWorld::Ptr &ptr) {
+    float PhysicsSystem::getObjectHeight(const MWWorld::Ptr &ptr)
+    {
         std::string model = MWWorld::Class::get(ptr).getModel(ptr);
         if (model.empty()) {
             return 0.0;
         }
         float scale = ptr.getRefData().getBaseNode()->getScale().x;
         return mEngine->getObjectHeight(model, scale);
-     }
+    }
 }

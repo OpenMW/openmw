@@ -335,6 +335,12 @@ namespace MWWorld
     void Scene::addObjectToScene (const Ptr& ptr)
     {
         mRendering.addObject (ptr);
+
+        float *pos = ptr.getRefData().getPosition().pos;
+        pos[2] += mPhysics->getObjectHeight(ptr) / 2;
+
+        ptr.getRefData().getBaseNode()->setPosition(pos[0], pos[1], pos[2]);
+
         MWWorld::Class::get (ptr).insertObject (ptr, *mPhysics);
     }
 

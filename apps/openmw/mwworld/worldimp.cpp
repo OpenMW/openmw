@@ -1024,8 +1024,6 @@ namespace MWWorld
         MWWorld::Ptr dropped = cell->insertObject(object, pos);
         mWorldScene->addObjectToScene(dropped);
 
-        /// \todo retrieve the bounds of the object and translate it accordingly
-
         return true;
     }
 
@@ -1046,6 +1044,8 @@ namespace MWWorld
 
         ESM::Position &pos =
             getPlayer().getPlayer().getRefData().getPosition();
+
+        /// \todo fix item dropping at player object center position
 
         MWWorld::Ptr dropped = cell->insertObject(object, pos);
 
