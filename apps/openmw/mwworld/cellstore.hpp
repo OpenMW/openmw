@@ -155,6 +155,8 @@ namespace MWWorld
             forEachImp (functor, weapons);
     }
 
+    const MWWorld::Ptr insertObject(const MWWorld::Ptr &ptr, const ESM::Position &pos);
+
   private:
 
     template<class Functor, class List>
@@ -172,8 +174,6 @@ namespace MWWorld
     void listRefs(const ESMS::ESMStore &store, ESM::ESMReader &esm);
 
     void loadRefs(const ESMS::ESMStore &store, ESM::ESMReader &esm);
-
-    void insertObject(const MWWorld::Ptr &ptr);
   };
 }
 

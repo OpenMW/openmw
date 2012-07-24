@@ -4,8 +4,12 @@
 
 #include <components/esm_store/store.hpp>
 
+#include "../mwbase/environment.hpp"
+#include "../mwbase/world.hpp"
+
 #include "ptr.hpp"
 #include "manualref.hpp"
+#include "class.hpp"
 
 namespace MWWorld
 {
@@ -125,7 +129,7 @@ namespace MWWorld
     }
 
     /// \todo this whole code needs major clean up
-    void CellStore::insertObject (const Ptr& ptr)
+    const MWWorld::Ptr CellStore::insertObject (const Ptr& ptr, const ESM::Position &pos)
     {
         std::string type = ptr.getTypeName();
 
@@ -213,11 +217,12 @@ namespace MWWorld
                     newRef.getPtr().get<ESM::Miscellaneous>();
 
                 newPtr = MWWorld::Ptr(&miscItems.insert(*ref), this);
-
+            /*
                 ESM::Position& p = newPtr.getRefData().getPosition();
                 p.pos[0] = ptr.getRefData().getPosition().pos[0];
                 p.pos[1] = ptr.getRefData().getPosition().pos[1];
                 p.pos[2] = ptr.getRefData().getPosition().pos[2];
+            */
             }
             else
             {
@@ -230,9 +235,13 @@ namespace MWWorld
         else
             throw std::runtime_error("Trying to insert object of unhandled type");
 
+        newPtr.getRefData().getPosition() = pos;
+
         newPtr.getRefData().setCount(ptr.getRefData().getCount());
         ptr.getRefData().setCount(0);
         newPtr.getRefData().enable();
+
+        return newPtr;
     }
 
 }

@@ -1016,13 +1016,13 @@ namespace MWWorld
         else
             cell = getPlayer().getPlayer().getCell();
 
-        ESM::Position& pos = object.getRefData().getPosition();
+        ESM::Position pos = getPlayer().getPlayer().getRefData().getPosition();
         pos.pos[0] = result.second[0];
         pos.pos[1] = -result.second[2];
         pos.pos[2] = result.second[1];
 
-        cell->insertObject(object);
-        //TODO mWorldScene->addObjectToScene
+        MWWorld::Ptr dropped = cell->insertObject(object, pos);
+        mWorldScene->addObjectToScene(dropped);
 
         /// \todo retrieve the bounds of the object and translate it accordingly
 
@@ -1044,14 +1044,12 @@ namespace MWWorld
     {
         MWWorld::Ptr::CellStore* cell = getPlayer().getPlayer().getCell();
 
-        float* playerPos = getPlayer().getPlayer().getRefData().getPosition().pos;
+        ESM::Position &pos =
+            getPlayer().getPlayer().getRefData().getPosition();
 
-        ESM::Position& pos = object.getRefData().getPosition();
-        pos.pos[0] = playerPos[0];
-        pos.pos[1] = playerPos[1];
-        pos.pos[2] = playerPos[2];
+        MWWorld::Ptr dropped = cell->insertObject(object, pos);
 
-        mWorldScene->insertObject(object, cell);
+        mWorldScene->addObjectToScene(dropped);
     }
 
     void World::processChangedSettings(const Settings::CategorySettingVector& settings)
