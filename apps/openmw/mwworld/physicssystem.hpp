@@ -65,6 +65,8 @@ namespace MWWorld
 
             void setCurrentWater(bool hasWater, int waterHeight);
 
+            float getObjectHeight(const MWWorld::Ptr &ptr);
+
         private:
             OEngine::Render::OgreRenderer &mRender;
             OEngine::Physic::PhysicEngine* mEngine;

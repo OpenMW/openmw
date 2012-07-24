@@ -568,4 +568,25 @@ namespace Physic
 
         return results2;
     }
+
+    float PhysicEngine::getObjectHeight(const std::string &mesh, float scale) {
+        char uniqueID[8];
+        sprintf( uniqueID, "%07.3f", scale );
+        std::string sid = uniqueID;
+        std::string outputstring = mesh + uniqueID + "\"|";
+
+        mShapeLoader->load(outputstring, "General");
+        BulletShapeManager::getSingletonPtr()->load(outputstring, "General");
+        BulletShapePtr shape =
+            BulletShapeManager::getSingleton().getByName(outputstring, "General");
+
+        
+        btTransform trans;
+        btVector3 min, max;
+
+        trans.setIdentity();
+        shape->Shape->getAabb(trans, min, max);
+
+        return max.z() - min.z();
+    }
 }};

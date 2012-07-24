@@ -212,4 +212,9 @@ namespace MWWorld
     void Class::adjustRotation(const MWWorld::Ptr& ptr,float& x,float& y,float& z) const
     {
     }
+
+    std::string Class::getModel() const
+    {
+        return "";
+    }
 }

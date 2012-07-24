@@ -14,6 +14,7 @@
 #include "../mwbase/world.hpp" // FIXME
 
 #include "ptr.hpp"
+#include "class.hpp"
 
 using namespace Ogre;
 namespace MWWorld
@@ -363,6 +364,15 @@ namespace MWWorld
            Ogre::SceneNode* node = ptr.getRefData().getBaseNode();
             // std::cout << "Adding node with name" << node->getName();
          addActor (node->getName(), model, node->getPosition());
+     }
+
+     float PhysicsSystem::getObjectHeight(const MWWorld::Ptr &ptr) {
+        std::string model = MWWorld::Class::get(ptr).getModel();
+        if (model.empty()) {
+            return 0.0;
+        }
+        float scale = ptr.getRefData().getBaseNode()->getScale().x;
+        return mEngine->getObjectHeight(model, scale);
      }
 
 }
