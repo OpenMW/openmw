@@ -89,7 +89,7 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, OEngine::Render::OgreRendere
 
     std::string smodel = (!isBeast ? "meshes\\base_anim.nif" : "meshes\\base_animkna.nif");
 
-    mEntityList = NifOgre::NIFLoader::createEntities(mInsert, smodel);
+    mEntityList = NifOgre::NIFLoader::createEntities(mInsert, NULL, smodel);
     for(size_t i = 0;i < mEntityList.mEntities.size();i++)
     {
         Ogre::Entity *base = mEntityList.mEntities[i];

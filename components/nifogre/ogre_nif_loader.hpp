@@ -58,7 +58,8 @@ namespace Nif
 namespace NifOgre
 {
 
-// FIXME: This should not be in NifOgre, it works agnostic of what model format is used
+// FIXME: These should not be in NifOgre, it works agnostic of what model format is used
+typedef std::map<float,std::string> TextKeyMap;
 struct EntityList {
     std::vector<Ogre::Entity*> mEntities;
     Ogre::Entity *mSkelBase;
@@ -67,10 +68,10 @@ struct EntityList {
     { }
 };
 
+
 /** This holds a list of meshes along with the names of their parent nodes
  */
 typedef std::vector< std::pair<Ogre::MeshPtr,std::string> > MeshPairList;
-
 
 /** Manual resource loader for NIF meshes. This is the main class
     responsible for translating the internal NIF mesh structure into
@@ -86,7 +87,7 @@ typedef std::vector< std::pair<Ogre::MeshPtr,std::string> > MeshPairList;
  */
 class NIFLoader
 {
-    static MeshPairList load(std::string name, std::string skelName, const std::string &group);
+    static MeshPairList load(std::string name, std::string skelName, TextKeyMap *textkeys, const std::string &group);
 
 public:
     static EntityList createEntities(Ogre::Entity *parent, const std::string &bonename,
@@ -95,6 +96,7 @@ public:
                                      const std::string &group="General");
 
     static EntityList createEntities(Ogre::SceneNode *parent,
+                                     TextKeyMap *textkeys,
                                      const std::string &name,
                                      const std::string &group="General");
 };

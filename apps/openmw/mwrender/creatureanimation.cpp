@@ -26,7 +26,7 @@ CreatureAnimation::CreatureAnimation(const MWWorld::Ptr& ptr, OEngine::Render::O
     {
         std::string mesh = "meshes\\" + ref->base->model;
 
-        mEntityList = NifOgre::NIFLoader::createEntities(mInsert, mesh);
+        mEntityList = NifOgre::NIFLoader::createEntities(mInsert, NULL, mesh);
         for(size_t i = 0;i < mEntityList.mEntities.size();i++)
         {
             Ogre::Entity *ent = mEntityList.mEntities[i];

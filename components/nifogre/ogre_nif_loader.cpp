@@ -342,8 +342,23 @@ void loadResource(Ogre::Resource *resource)
     anim->optimise();
 }
 
-bool createSkeleton(const std::string &name, const std::string &group, Nif::Node *node)
+bool createSkeleton(const std::string &name, const std::string &group, TextKeyMap *textkeys, const Nif::Node *node)
 {
+    if(textkeys)
+    {
+        Nif::ExtraPtr e = node->extra;
+        while(!e.empty())
+        {
+            if(e->recType == Nif::RC_NiTextKeyExtraData)
+            {
+                const Nif::NiTextKeyExtraData *tk = static_cast<const Nif::NiTextKeyExtraData*>(e.getPtr());
+                for(size_t i = 0;i < tk->list.size();i++)
+                    (*textkeys)[tk->list[i].time] = tk->list[i].text;
+            }
+            e = e->extra;
+        }
+    }
+
     if(node->boneTrafo != NULL)
     {
         Ogre::SkeletonManager &skelMgr = Ogre::SkeletonManager::getSingleton();
@@ -355,18 +370,19 @@ bool createSkeleton(const std::string &name, const std::string &group, Nif::Node
             skel = skelMgr.create(name, group, true, loader);
         }
 
-        return true;
+        if(!textkeys || textkeys->size() > 0)
+            return true;
     }
 
-    Nif::NiNode *ninode = dynamic_cast<Nif::NiNode*>(node);
+    const Nif::NiNode *ninode = dynamic_cast<const Nif::NiNode*>(node);
     if(ninode)
     {
-        Nif::NodeList &children = ninode->children;
+        const Nif::NodeList &children = ninode->children;
         for(size_t i = 0;i < children.length();i++)
         {
             if(!children[i].empty())
             {
-                if(createSkeleton(name, group, children[i].getPtr()))
+                if(createSkeleton(name, group, textkeys, children[i].getPtr()))
                     return true;
             }
         }
@@ -965,7 +981,7 @@ public:
 NIFMeshLoader::LoaderMap NIFMeshLoader::sLoaders;
 
 
-MeshPairList NIFLoader::load(std::string name, std::string skelName, const std::string &group)
+MeshPairList NIFLoader::load(std::string name, std::string skelName, TextKeyMap *textkeys, const std::string &group)
 {
     MeshPairList meshes;
 
@@ -992,7 +1008,7 @@ MeshPairList NIFLoader::load(std::string name, std::string skelName, const std::
     }
 
     NIFSkeletonLoader skelldr;
-    bool hasSkel = skelldr.createSkeleton(skelName, group, node);
+    bool hasSkel = skelldr.createSkeleton(skelName, group, textkeys, node);
 
     NIFMeshLoader meshldr(name, group, (hasSkel ? skelName : std::string()));
     meshldr.createMeshes(node, meshes);
@@ -1000,11 +1016,11 @@ MeshPairList NIFLoader::load(std::string name, std::string skelName, const std::
     return meshes;
 }
 
-EntityList NIFLoader::createEntities(Ogre::SceneNode *parent, const std::string &name, const std::string &group)
+EntityList NIFLoader::createEntities(Ogre::SceneNode *parent, TextKeyMap *textkeys, const std::string &name, const std::string &group)
 {
     EntityList entitylist;
 
-    MeshPairList meshes = load(name, name, group);
+    MeshPairList meshes = load(name, name, textkeys, group);
     if(meshes.size() == 0)
         return entitylist;
 
@@ -1053,7 +1069,7 @@ EntityList NIFLoader::createEntities(Ogre::Entity *parent, const std::string &bo
 {
     EntityList entitylist;
 
-    MeshPairList meshes = load(name, parent->getMesh()->getSkeletonName(), group);
+    MeshPairList meshes = load(name, parent->getMesh()->getSkeletonName(), NULL, group);
     if(meshes.size() == 0)
         return entitylist;
 
