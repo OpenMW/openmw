@@ -1021,8 +1021,7 @@ namespace MWWorld
         pos.pos[1] = -result.second[2];
         pos.pos[2] = result.second[1];
 
-        MWWorld::Ptr dropped = cell->insertObject(object, pos);
-        mWorldScene->addObjectToScene(dropped);
+        placeObject(object, *cell, pos);
 
         return true;
     }
@@ -1038,6 +1037,20 @@ namespace MWWorld
         return true;
     }
 
+    void
+    World::placeObject(const Ptr &object, CellStore &cell, const ESM::Position &pos)
+    {
+        mLocalScripts.remove(object);
+
+        MWWorld::Ptr dropped = cell.insertObject(object, pos);
+        mWorldScene->addObjectToScene(dropped);
+
+        std::string script = MWWorld::Class::get(dropped).getScript(dropped);
+        if (!script.empty()) {
+            mLocalScripts.add(script, dropped);
+        }
+    }
+
     void World::dropObjectOnGround (const Ptr& object)
     {
         MWWorld::Ptr::CellStore* cell = getPlayer().getPlayer().getCell();
@@ -1046,10 +1059,7 @@ namespace MWWorld
             getPlayer().getPlayer().getRefData().getPosition();
 
         /// \todo fix item dropping at player object center position
-
-        MWWorld::Ptr dropped = cell->insertObject(object, pos);
-
-        mWorldScene->addObjectToScene(dropped);
+        placeObject(object, *cell, pos);
     }
 
     void World::processChangedSettings(const Settings::CategorySettingVector& settings)
