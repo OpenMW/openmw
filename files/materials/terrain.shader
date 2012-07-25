@@ -224,13 +224,14 @@
 
         float3 worldPos = shMatrixMult(worldMatrix, float4(objSpacePosition,1)).xyz;
         float3 waterEyePos = float3(1,1,1);
-        if (worldPos.y < waterLevel)
-        {
-            // NOTE: this calculation would be wrong for non-uniform scaling
-            float4 worldNormal = shMatrixMult(worldMatrix, float4(normal.xyz, 0));
-            waterEyePos = intercept(worldPos, cameraPos.xyz - worldPos, float3(0,1,0), waterLevel);
-            caustics = getCaustics(causticMap, worldPos, waterEyePos.xyz, worldNormal.xyz, lightDirectionWS0.xyz, waterLevel, waterTimer, windDir_windSpeed);
-        }
+        // NOTE: this calculation would be wrong for non-uniform scaling
+        float4 worldNormal = shMatrixMult(worldMatrix, float4(normal.xyz, 0));
+        waterEyePos = intercept(worldPos, cameraPos.xyz - worldPos, float3(0,1,0), waterLevel);
+        caustics = getCaustics(causticMap, worldPos, waterEyePos.xyz, worldNormal.xyz, lightDirectionWS0.xyz, waterLevel, waterTimer, windDir_windSpeed);
+        if (worldPos.y >= waterLevel)
+            caustics = float3(1,1,1);
+        
+
 
 #endif
         
@@ -285,7 +286,7 @@
 #if SHADOWS || SHADOWS_PSSM
             float fadeRange = shadowFar_fadeStart.x - shadowFar_fadeStart.y;
             float fade = 1-((depth - shadowFar_fadeStart.y) / fadeRange);
-            shadow = (depth > shadowFar_fadeStart.x) ? 1 : ((depth > shadowFar_fadeStart.y) ? 1-((1-shadow)*fade) : shadow);
+            shadow = (depth > shadowFar_fadeStart.x) ? 1.0 : ((depth > shadowFar_fadeStart.y) ? 1.0-((1.0-shadow)*fade) : shadow);
 #endif
 
 #if !SHADOWS && !SHADOWS_PSSM
