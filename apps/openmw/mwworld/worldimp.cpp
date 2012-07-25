@@ -1057,8 +1057,19 @@ namespace MWWorld
     {
         MWWorld::Ptr::CellStore* cell = getPlayer().getPlayer().getCell();
 
-        ESM::Position &pos =
+        ESM::Position pos =
             getPlayer().getPlayer().getRefData().getPosition();
+
+        Ogre::Vector3 orig =
+            Ogre::Vector3(pos.pos[0], pos.pos[1], pos.pos[2]);
+        Ogre::Vector3 dir = Ogre::Vector3(0, 0, -1);
+        
+        float len = (pos.pos[2] >= 0) ? pos.pos[2] : -pos.pos[2];
+        len += 100.0;
+
+        std::pair<bool, Ogre::Vector3> hit =
+            mPhysics->castRay(orig, dir, len);
+        pos.pos[2] = hit.second.z;
 
         /// \todo fix item dropping at player object center position
         placeObject(object, *cell, pos);

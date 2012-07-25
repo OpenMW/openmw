@@ -54,6 +54,9 @@ namespace MWWorld
             // cast ray, return true if it hit something
             bool castRay(const Ogre::Vector3& from, const Ogre::Vector3& to);
 
+            std::pair<bool, Ogre::Vector3>
+            castRay(const Ogre::Vector3 &orig, const Ogre::Vector3 &dir, float len);
+
             std::pair<bool, Ogre::Vector3> castRay(float mouseX, float mouseY);
             ///< cast ray from the mouse, return true if it hit something and the first result (in OGRE coordinates)
 

@@ -122,6 +122,22 @@ namespace MWWorld
         return !(result.first == "");
     }
 
+    std::pair<bool, Ogre::Vector3>
+    PhysicsSystem::castRay(const Ogre::Vector3 &orig, const Ogre::Vector3 &dir, float len)
+    {
+        Ogre::Ray ray = Ogre::Ray(orig, dir);
+        Ogre::Vector3 to = ray.getPoint(len);
+
+        btVector3 btFrom = btVector3(orig.x, orig.y, orig.z);
+        btVector3 btTo = btVector3(to.x, to.y, to.z);
+
+        std::pair<std::string, float> test = mEngine->rayTest(btFrom, btTo);
+        if (test.first == "") {
+            return std::make_pair(false, Ogre::Vector3());
+        }
+        return std::make_pair(true, ray.getPoint(len * test.second));
+    }
+
     std::pair<bool, Ogre::Vector3> PhysicsSystem::castRay(float mouseX, float mouseY)
     {
         Ogre::Ray ray = mRender.getCamera()->getCameraToViewportRay(
