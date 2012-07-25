@@ -12,8 +12,6 @@
 
 #include <boost/lexical_cast.hpp>
 
-#include <stdio.h>
-
 #define BIT(x) (1<<(x))
 
 namespace OEngine {
@@ -576,14 +574,13 @@ namespace Physic
         char uniqueID[8];
         sprintf( uniqueID, "%07.3f", scale );
         std::string sid = uniqueID;
-        std::string outputstring = mesh + uniqueID + "\"|";
+        std::string outputstring = mesh + uniqueID;
 
         mShapeLoader->load(outputstring, "General");
         BulletShapeManager::getSingletonPtr()->load(outputstring, "General");
         BulletShapePtr shape =
             BulletShapeManager::getSingleton().getByName(outputstring, "General");
 
-        
         btTransform trans;
         btVector3 btmin, btmax;
 
