@@ -165,4 +165,13 @@ namespace MWClass
 
         return boost::shared_ptr<MWWorld::Action>(new MWWorld::ActionEquip(ptr));
     }
+
+    MWWorld::Ptr
+    Lockpick::moveToCellImpl(const MWWorld::Ptr &ptr, MWWorld::CellStore &cell) const
+    {
+        MWWorld::LiveCellRef<ESM::Tool> *ref =
+            ptr.get<ESM::Tool>();
+
+        return MWWorld::Ptr(&cell.lockpicks.insert(*ref), &cell);
+    }
 }

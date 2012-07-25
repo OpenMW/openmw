@@ -195,4 +195,13 @@ namespace MWClass
 
         return weight;
     }
+
+    MWWorld::Ptr
+    Creature::moveToCellImpl(const MWWorld::Ptr &ptr, MWWorld::CellStore &cell) const
+    {
+        MWWorld::LiveCellRef<ESM::Creature> *ref =
+            ptr.get<ESM::Creature>();
+
+        return MWWorld::Ptr(&cell.creatures.insert(*ref), &cell);
+    }
 }

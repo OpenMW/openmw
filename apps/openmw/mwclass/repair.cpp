@@ -146,4 +146,13 @@ namespace MWClass
 
         return info;
     }
+
+    MWWorld::Ptr
+    Repair::moveToCellImpl(const MWWorld::Ptr &ptr, MWWorld::CellStore &cell) const
+    {
+        MWWorld::LiveCellRef<ESM::Repair> *ref =
+            ptr.get<ESM::Repair>();
+
+        return MWWorld::Ptr(&cell.repairs.insert(*ref), &cell);
+    }
 }

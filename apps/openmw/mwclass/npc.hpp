@@ -9,6 +9,9 @@ namespace MWClass
     {
             void ensureCustomData (const MWWorld::Ptr& ptr) const;
 
+            virtual MWWorld::Ptr
+            moveToCellImpl(const MWWorld::Ptr &ptr, MWWorld::CellStore &cell) const;
+
         public:
 
             virtual std::string getId (const MWWorld::Ptr& ptr) const;

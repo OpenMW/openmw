@@ -365,4 +365,13 @@ namespace MWClass
 
         return boost::shared_ptr<MWWorld::Action>(new MWWorld::ActionEquip(ptr));
     }
+
+    MWWorld::Ptr
+    Weapon::moveToCellImpl(const MWWorld::Ptr &ptr, MWWorld::CellStore &cell) const
+    {
+        MWWorld::LiveCellRef<ESM::Weapon> *ref =
+            ptr.get<ESM::Weapon>();
+
+        return MWWorld::Ptr(&cell.weapons.insert(*ref), &cell);
+    }
 }

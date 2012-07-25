@@ -160,4 +160,14 @@ namespace MWClass
         return boost::shared_ptr<MWWorld::Action> (
             new MWWorld::ActionApply (actor, ref->base->mId, actor));
     }
+
+    MWWorld::Ptr
+    Potion::moveToCellImpl(const MWWorld::Ptr &ptr, MWWorld::CellStore &cell) const
+    {
+        MWWorld::LiveCellRef<ESM::Potion> *ref =
+            ptr.get<ESM::Potion>();
+
+        return MWWorld::Ptr(&cell.potions.insert(*ref), &cell);
+    }
 }
+

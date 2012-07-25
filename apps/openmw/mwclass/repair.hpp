@@ -7,9 +7,12 @@ namespace MWClass
 {
     class Repair : public MWWorld::Class
     {
+            virtual MWWorld::Ptr
+            moveToCellImpl(const MWWorld::Ptr &ptr, MWWorld::CellStore &cell) const;
+
         public:
 
-             virtual void insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const;
+            virtual void insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const;
             ///< Add reference into a cell for rendering
 
             virtual void insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics) const;

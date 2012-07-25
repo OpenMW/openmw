@@ -149,4 +149,13 @@ namespace MWClass
     {
         return boost::shared_ptr<MWWorld::Action>(new MWWorld::ActionAlchemy());
     }
+
+    MWWorld::Ptr
+    Apparatus::moveToCellImpl(const MWWorld::Ptr &ptr, MWWorld::CellStore &cell) const
+    {
+        MWWorld::LiveCellRef<ESM::Apparatus> *ref =
+            ptr.get<ESM::Apparatus>();
+
+        return MWWorld::Ptr(&cell.appas.insert(*ref), &cell);
+    }
 }

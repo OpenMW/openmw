@@ -31,12 +31,18 @@ namespace MWGui
     struct ToolTipInfo;
 }
 
+namespace ESM
+{
+    struct Position;
+}
+
 namespace MWWorld
 {
     class Ptr;
     class ContainerStore;
     class InventoryStore;
     class PhysicsSystem;
+    class CellStore;
 
     /// \brief Base class for referenceable esm records
     class Class
@@ -50,6 +56,8 @@ namespace MWWorld
         protected:
 
             Class();
+
+            virtual Ptr moveToCellImpl(const Ptr &ptr, CellStore &cell) const;
 
         public:
 
@@ -206,6 +214,12 @@ namespace MWWorld
             virtual void adjustRotation(const MWWorld::Ptr& ptr,float& x,float& y,float& z) const;
 
             virtual std::string getModel(const MWWorld::Ptr &ptr) const;
+
+            virtual Ptr
+            moveToCell(const Ptr &ptr, CellStore &cell) const;
+
+            virtual Ptr
+            moveToCell(const Ptr &ptr, CellStore &cell, const ESM::Position &pos) const;
     };
 }
 

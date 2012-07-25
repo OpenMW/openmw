@@ -157,4 +157,12 @@ namespace MWClass
         return boost::shared_ptr<MWWorld::Action>(new MWWorld::ActionRead(ptr));
     }
 
+    MWWorld::Ptr
+    Book::moveToCellImpl(const MWWorld::Ptr &ptr, MWWorld::CellStore &cell) const
+    {
+        MWWorld::LiveCellRef<ESM::Book> *ref =
+            ptr.get<ESM::Book>();
+
+        return MWWorld::Ptr(&cell.books.insert(*ref), &cell);
+    }
 }

@@ -7,6 +7,9 @@ namespace MWClass
 {
     class Light : public MWWorld::Class
     {
+            virtual MWWorld::Ptr
+            moveToCellImpl(const MWWorld::Ptr &ptr, MWWorld::CellStore &cell) const;
+
         public:
 
              virtual void insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const;

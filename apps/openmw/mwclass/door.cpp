@@ -209,4 +209,13 @@ namespace MWClass
 
         return info;
     }
+
+    MWWorld::Ptr
+    Door::moveToCellImpl(const MWWorld::Ptr &ptr, MWWorld::CellStore &cell) const
+    {
+        MWWorld::LiveCellRef<ESM::Door> *ref =
+            ptr.get<ESM::Door>();
+
+        return MWWorld::Ptr(&cell.doors.insert(*ref), &cell);
+    }
 }

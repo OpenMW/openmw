@@ -1042,7 +1042,9 @@ namespace MWWorld
     {
         mLocalScripts.remove(object);
 
-        MWWorld::Ptr dropped = cell.insertObject(object, pos);
+        MWWorld::Ptr dropped =
+            MWWorld::Class::get(object).moveToCell(object, cell, pos);
+
         mWorldScene->addObjectToScene(dropped);
 
         std::string script = MWWorld::Class::get(dropped).getScript(dropped);

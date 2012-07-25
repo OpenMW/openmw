@@ -164,4 +164,14 @@ namespace MWClass
 
         return boost::shared_ptr<MWWorld::Action>(new MWWorld::ActionEquip(ptr));
     }
+
+    MWWorld::Ptr
+    Probe::moveToCellImpl(const MWWorld::Ptr &ptr, MWWorld::CellStore &cell) const
+    {
+        MWWorld::LiveCellRef<ESM::Probe> *ref =
+            ptr.get<ESM::Probe>();
+
+        return MWWorld::Ptr(&cell.probes.insert(*ref), &cell);
+    }
 }
+

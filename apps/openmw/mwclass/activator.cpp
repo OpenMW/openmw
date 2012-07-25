@@ -94,4 +94,14 @@ namespace MWClass
 
         return info;
     }
+
+    MWWorld::Ptr
+    Activator::moveToCellImpl(const MWWorld::Ptr &ptr, MWWorld::CellStore &cell) const
+    {
+        MWWorld::LiveCellRef<ESM::Activator> *ref =
+            ptr.get<ESM::Activator>();
+
+        return MWWorld::Ptr(&cell.activators.insert(*ref), &cell);
+    }
 }
+

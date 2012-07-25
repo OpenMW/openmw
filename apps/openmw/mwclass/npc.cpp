@@ -380,4 +380,13 @@ namespace MWClass
         y = 0;
         x = 0;
     }
+
+    MWWorld::Ptr
+    Npc::moveToCellImpl(const MWWorld::Ptr &ptr, MWWorld::CellStore &cell) const
+    {
+        MWWorld::LiveCellRef<ESM::NPC> *ref =
+            ptr.get<ESM::NPC>();
+
+        return MWWorld::Ptr(&cell.npcs.insert(*ref), &cell);
+    }
 }

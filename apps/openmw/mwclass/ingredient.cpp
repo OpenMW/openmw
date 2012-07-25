@@ -156,4 +156,13 @@ namespace MWClass
 
         return info;
     }
+
+    MWWorld::Ptr
+    Ingredient::moveToCellImpl(const MWWorld::Ptr &ptr, MWWorld::CellStore &cell) const
+    {
+        MWWorld::LiveCellRef<ESM::Ingredient> *ref =
+            ptr.get<ESM::Ingredient>();
+
+        return MWWorld::Ptr(&cell.ingreds.insert(*ref), &cell);
+    }
 }

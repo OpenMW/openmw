@@ -113,9 +113,9 @@ namespace MWWorld
     CellRefList<ESM::Ingredient>        ingreds;
     CellRefList<ESM::CreatureLevList>   creatureLists;
     CellRefList<ESM::ItemLevList>       itemLists;
-    CellRefList<ESM::Light>        lights;
+    CellRefList<ESM::Light>             lights;
     CellRefList<ESM::Tool>              lockpicks;
-    CellRefList<ESM::Miscellaneous>              miscItems;
+    CellRefList<ESM::Miscellaneous>     miscItems;
     CellRefList<ESM::NPC>               npcs;
     CellRefList<ESM::Probe>             probes;
     CellRefList<ESM::Repair>            repairs;
@@ -154,8 +154,6 @@ namespace MWWorld
             forEachImp (functor, statics) &&
             forEachImp (functor, weapons);
     }
-
-    const MWWorld::Ptr insertObject(const MWWorld::Ptr &ptr, const ESM::Position &pos);
 
   private:
 

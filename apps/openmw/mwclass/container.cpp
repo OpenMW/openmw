@@ -207,4 +207,13 @@ namespace MWClass
     {
         ptr.getCellRef().lockLevel = 0;
     }
+
+    MWWorld::Ptr
+    Container::moveToCellImpl(const MWWorld::Ptr &ptr, MWWorld::CellStore &cell) const
+    {
+        MWWorld::LiveCellRef<ESM::Container> *ref =
+            ptr.get<ESM::Container>();
+
+        return MWWorld::Ptr(&cell.containers.insert(*ref), &cell);
+    }
 }

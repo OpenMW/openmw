@@ -276,4 +276,13 @@ namespace MWClass
 
         return boost::shared_ptr<MWWorld::Action>(new MWWorld::ActionEquip(ptr));
     }
+
+    MWWorld::Ptr
+    Armor::moveToCellImpl(const MWWorld::Ptr &ptr, MWWorld::CellStore &cell) const
+    {
+        MWWorld::LiveCellRef<ESM::Armor> *ref =
+            ptr.get<ESM::Armor>();
+
+        return MWWorld::Ptr(&cell.armors.insert(*ref), &cell);
+    }
 }
