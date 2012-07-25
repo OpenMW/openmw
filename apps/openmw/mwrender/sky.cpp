@@ -287,6 +287,8 @@ SkyManager::SkyManager (SceneNode* pMwRoot, Camera* pCamera)
 
 void SkyManager::create()
 {
+    assert(!mCreated);
+
     sh::Factory::getInstance().setSharedParameter ("cloudBlendFactor",
         sh::makeProperty<sh::FloatValue>(new sh::FloatValue(0)));
     sh::Factory::getInstance().setSharedParameter ("cloudOpacity",
@@ -302,7 +304,7 @@ void SkyManager::create()
     sh::Factory::getInstance().setTextureAlias ("cloud_texture_1", "");
     sh::Factory::getInstance().setTextureAlias ("cloud_texture_2", "");
 
-    // Create overlay used for thunderstorm
+    // Create light used for thunderstorm
     mLightning = mSceneMgr->createLight();
     mLightning->setType (Ogre::Light::LT_DIRECTIONAL);
     mLightning->setDirection (Ogre::Vector3(0.3, -0.7, 0.3));
@@ -324,52 +326,57 @@ void SkyManager::create()
     mSunGlare->setVisibilityFlags(RV_NoReflection);
 
     // Stars
-    MeshPtr mesh = NifOgre::NIFLoader::load("meshes\\sky_night_01.nif");
-    Entity* night1_ent = mSceneMgr->createEntity("meshes\\sky_night_01.nif");
-    night1_ent->setRenderQueueGroup(RQG_SkiesEarly+1);
-    night1_ent->setVisibilityFlags(RV_Sky);
-    night1_ent->setCastShadows(false);
-
     mAtmosphereNight = mRootNode->createChildSceneNode();
-    mAtmosphereNight->attachObject(night1_ent);
-
-    for (unsigned int i=0; i<night1_ent->getNumSubEntities(); ++i)
+    NifOgre::EntityList entities = NifOgre::NIFLoader::createEntities(mAtmosphereNight, NULL, "meshes\\sky_night_01.nif");
+    for(size_t i = 0, matidx = 0;i < entities.mEntities.size();i++)
     {
-        std::string matName = "openmw_stars_" + boost::lexical_cast<std::string>(i);
-        sh::MaterialInstance* m = sh::Factory::getInstance ().createMaterialInstance (matName, "openmw_stars");
+        Entity* night1_ent = entities.mEntities[i];
+        night1_ent->setRenderQueueGroup(RQG_SkiesEarly+1);
+        night1_ent->setVisibilityFlags(RV_Sky);
+        night1_ent->setCastShadows(false);
 
-        std::string textureName = sh::retrieveValue<sh::StringValue>(
-                    sh::Factory::getInstance().getMaterialInstance(night1_ent->getSubEntity (i)->getMaterialName ())->getProperty("diffuseMap"), NULL).get();
+        for (unsigned int j=0; j<night1_ent->getNumSubEntities(); ++j)
+        {
+            std::string matName = "openmw_stars_" + boost::lexical_cast<std::string>(matidx++);
+            sh::MaterialInstance* m = sh::Factory::getInstance().createMaterialInstance(matName, "openmw_stars");
 
-        m->setProperty ("texture", sh::makeProperty<sh::StringValue>(new sh::StringValue(textureName)));
+            std::string textureName = sh::retrieveValue<sh::StringValue>(
+                        sh::Factory::getInstance().getMaterialInstance(night1_ent->getSubEntity(j)->getMaterialName())->getProperty("diffuseMap"), NULL).get();
 
-        night1_ent->getSubEntity(i)->setMaterialName (matName);
+            m->setProperty("texture", sh::makeProperty<sh::StringValue>(new sh::StringValue(textureName)));
+
+            night1_ent->getSubEntity(j)->setMaterialName(matName);
+        }
     }
 
+
     // Atmosphere (day)
-    mesh = NifOgre::NIFLoader::load("meshes\\sky_atmosphere.nif");
-    Entity* atmosphere_ent = mSceneMgr->createEntity("meshes\\sky_atmosphere.nif");
-    atmosphere_ent->setCastShadows(false);
-
-    ModVertexAlpha(atmosphere_ent, 0);
-
-    atmosphere_ent->setRenderQueueGroup(RQG_SkiesEarly);
-    atmosphere_ent->setVisibilityFlags(RV_Sky);
     mAtmosphereDay = mRootNode->createChildSceneNode();
-    mAtmosphereDay->attachObject(atmosphere_ent);
-    atmosphere_ent->getSubEntity (0)->setMaterialName ("openmw_atmosphere");
+    entities = NifOgre::NIFLoader::createEntities(mAtmosphereDay, NULL, "meshes\\sky_atmosphere.nif");
+    for(size_t i = 0;i < entities.mEntities.size();i++)
+    {
+        Entity* atmosphere_ent = entities.mEntities[i];
+        atmosphere_ent->setCastShadows(false);
+        atmosphere_ent->setRenderQueueGroup(RQG_SkiesEarly);
+        atmosphere_ent->setVisibilityFlags(RV_Sky);
+        atmosphere_ent->getSubEntity (0)->setMaterialName ("openmw_atmosphere");
+        ModVertexAlpha(atmosphere_ent, 0);
+    }
+
 
     // Clouds
-    NifOgre::NIFLoader::load("meshes\\sky_clouds_01.nif");
-    Entity* clouds_ent = mSceneMgr->createEntity("meshes\\sky_clouds_01.nif");
-    clouds_ent->setVisibilityFlags(RV_Sky);
-    clouds_ent->setRenderQueueGroup(RQG_SkiesEarly+5);
     SceneNode* clouds_node = mRootNode->createChildSceneNode();
-    clouds_node->attachObject(clouds_ent);
-    clouds_ent->getSubEntity(0)->setMaterialName ("openmw_clouds");
-    clouds_ent->setCastShadows(false);
+    entities = NifOgre::NIFLoader::createEntities(clouds_node, NULL, "meshes\\sky_clouds_01.nif");
+    for(size_t i = 0;i < entities.mEntities.size();i++)
+    {
+        Entity* clouds_ent = entities.mEntities[i];
+        clouds_ent->setVisibilityFlags(RV_Sky);
+        clouds_ent->setRenderQueueGroup(RQG_SkiesEarly+5);
+        clouds_ent->getSubEntity(0)->setMaterialName ("openmw_clouds");
+        clouds_ent->setCastShadows(false);
 
-    ModVertexAlpha(clouds_ent, 1);
+        ModVertexAlpha(clouds_ent, 1);
+    }
 
     mCreated = true;
 }

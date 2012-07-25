@@ -24,6 +24,8 @@
 #ifndef _NIF_NODE_H_
 #define _NIF_NODE_H_
 
+#include <OgreMatrix4.h>
+
 #include "controlled.hpp"
 #include "data.hpp"
 #include "property.hpp"
@@ -43,6 +45,7 @@ public:
     // Node flags. Interpretation depends somewhat on the type of node.
     int flags;
     Transformation trafo;
+    Ogre::Vector3 velocity; // Unused? Might be a run-time game state
     PropertyList props;
 
     // Bounding box info
@@ -57,6 +60,7 @@ public:
 
         flags = nif->getUShort();
         trafo = nif->getTrafo();
+        velocity = nif->getVector3();
         props.read(nif);
 
         hasBounds = !!nif->getInt();
@@ -106,20 +110,9 @@ public:
         boneTrafo = &bi.trafo;
         boneIndex = ind;
     }
-};
 
-struct NiTriShapeCopy
-{
-    std::string sname;
-    std::vector<std::string> boneSequence;
-    Nif::NiSkinData::BoneTrafoCopy trafo;
-    //Ogre::Quaternion initialBoneRotation;
-    //Ogre::Vector3 initialBoneTranslation;
-    std::vector<Ogre::Vector3> vertices;
-    std::vector<Ogre::Vector3> normals;
-    std::vector<Nif::NiSkinData::BoneInfoCopy> boneinfo;
-    std::map<int, std::vector<Nif::NiSkinData::IndividualWeight> > vertsToWeights;
-    Nif::NiMorphData morph;
+    Ogre::Matrix4 getLocalTransform();
+    Ogre::Matrix4 getWorldTransform();
 };
 
 struct NiNode : Node
@@ -151,8 +144,8 @@ struct NiNode : Node
         for(size_t i = 0;i < children.length();i++)
         {
             // Why would a unique list of children contain empty refs?
-            if(children.has(i))
-                children[i].parent = this;
+            if(!children[i].empty())
+                children[i]->parent = this;
         }
     }
 };
@@ -181,28 +174,6 @@ struct NiTriShape : Node
         Node::post(nif);
         data.post(nif);
         skin.post(nif);
-    }
-
-    NiTriShapeCopy clone()
-    {
-        NiTriShapeCopy copy;
-        copy.sname = name;
-        float *ptr = (float*)&data->vertices[0];
-        float *ptrNormals = (float*)&data->normals[0];
-        int numVerts = data->vertices.size() / 3;
-        for(int i = 0; i < numVerts; i++)
-        {
-            float *current = (float*) (ptr + i * 3);
-            copy.vertices.push_back(Ogre::Vector3(*current, *(current + 1), *(current + 2)));
-
-            if(ptrNormals)
-            {
-                float *currentNormals = (float*) (ptrNormals + i * 3);
-                copy.normals.push_back(Ogre::Vector3(*currentNormals, *(currentNormals + 1), *(currentNormals + 2)));
-            }
-        }
-
-        return copy;
     }
 };
 

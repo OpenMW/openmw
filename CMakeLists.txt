@@ -186,6 +186,9 @@ if (UNIX AND NOT APPLE)
 find_package (Threads)
 endif()
 
+# find boost without components so we can use Boost_VERSION
+find_package(Boost REQUIRED)
+
 set(BOOST_COMPONENTS system filesystem program_options thread)
 
 if (Boost_VERSION LESS 104900)
