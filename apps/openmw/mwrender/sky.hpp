@@ -1,6 +1,8 @@
 #ifndef _GAME_RENDER_SKY_H
 #define _GAME_RENDER_SKY_H
 
+#include <vector>
+
 #include <OgreVector3.h>
 #include <OgreString.h>
 #include <OgreMaterial.h>
@@ -9,7 +11,7 @@
 
 #include <extern/shiny/Main/Factory.hpp>
 
-#include "sky.hpp"
+
 #include "../mwworld/weather.hpp"
 
 namespace Ogre

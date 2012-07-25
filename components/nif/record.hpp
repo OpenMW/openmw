@@ -24,7 +24,7 @@
 #ifndef _NIF_RECORD_H_
 #define _NIF_RECORD_H_
 
-#include <components/misc/slice_array.hpp>
+#include <string>
 
 namespace Nif
 {
