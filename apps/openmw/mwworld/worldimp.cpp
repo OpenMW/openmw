@@ -1023,9 +1023,6 @@ namespace MWWorld
 
         MWWorld::Ptr dropped = cell->insertObject(object, pos);
         mWorldScene->addObjectToScene(dropped);
-        mLocalScripts.add(
-            MWWorld::Class::get(dropped).getScript(),
-            dropped);
 
         return true;
     }
@@ -1053,9 +1050,6 @@ namespace MWWorld
         MWWorld::Ptr dropped = cell->insertObject(object, pos);
 
         mWorldScene->addObjectToScene(dropped);
-        mLocalScripts.add(
-            MWWorld::Class::get(dropped).getScript(),
-            dropped);
     }
 
     void World::processChangedSettings(const Settings::CategorySettingVector& settings)
