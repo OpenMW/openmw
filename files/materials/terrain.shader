@@ -55,7 +55,7 @@
         shUniform(float2, lodMorph) @shAutoConstant(lodMorph, custom, 1001)
         
         shVertexInput(float2, uv0)
-        shVertexInput(float2, delta) // lodDelta, lodThreshold
+        shVertexInput(float2, uv1) // lodDelta, lodThreshold
         
 #if SHADOWS
         shUniform(float4x4, texViewProjMatrix0) @shAutoConstant(texViewProjMatrix0, texture_viewproj_matrix)
@@ -85,11 +85,11 @@
         // result is negative (it will only be -1 in fact, since after that
         // the vertex will never be indexed), we will achieve our aim.
         // sign(vertexLOD - targetLOD) == -1 is to morph
-        float toMorph = -min(0, sign(delta.y - lodMorph.y));
+        float toMorph = -min(0, sign(uv1.y - lodMorph.y));
 
         // morph
         // this assumes XZ terrain alignment
-        worldPos.y += delta.x * toMorph * lodMorph.x;
+        worldPos.y += uv1.x * toMorph * lodMorph.x;
 
 
         shOutputPosition = shMatrixMult(viewProjMatrix, worldPos);
