@@ -337,7 +337,12 @@ namespace MWWorld
         mRendering.addObject (ptr);
 
         float *pos = ptr.getRefData().getPosition().pos;
-        pos[2] += mPhysics->getObjectHeight(ptr) / 2;
+        float min[3], max[3];
+        if (mPhysics->getObjectAABB(ptr, min, max)) {
+            pos[0] -= (min[0] + max[0]) / 2;
+            pos[1] -= (min[1] + max[1]) / 2;
+            pos[2] -= min[2];
+        }
 
         ptr.getRefData().getBaseNode()->setPosition(pos[0], pos[1], pos[2]);
 

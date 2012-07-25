@@ -65,7 +65,7 @@ namespace MWWorld
 
             void setCurrentWater(bool hasWater, int waterHeight);
 
-            float getObjectHeight(const MWWorld::Ptr &ptr);
+            bool getObjectAABB(const MWWorld::Ptr &ptr, float *min, float *max);
 
         private:
             OEngine::Render::OgreRenderer &mRender;

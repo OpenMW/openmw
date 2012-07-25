@@ -12,6 +12,8 @@
 
 #include <boost/lexical_cast.hpp>
 
+#include <stdio.h>
+
 #define BIT(x) (1<<(x))
 
 namespace OEngine {
@@ -569,7 +571,8 @@ namespace Physic
         return results2;
     }
 
-    float PhysicEngine::getObjectHeight(const std::string &mesh, float scale) {
+    void PhysicEngine::getObjectAABB(const std::string &mesh, float scale, float *min, float *max)
+    {
         char uniqueID[8];
         sprintf( uniqueID, "%07.3f", scale );
         std::string sid = uniqueID;
@@ -582,11 +585,17 @@ namespace Physic
 
         
         btTransform trans;
-        btVector3 min, max;
+        btVector3 btmin, btmax;
 
         trans.setIdentity();
-        shape->Shape->getAabb(trans, min, max);
+        shape->Shape->getAabb(trans, btmin, btmax);
 
-        return max.z() - min.z();
+        min[0] = btmin.x();
+        min[1] = btmin.y();
+        min[2] = btmin.z();
+
+        max[0] = btmax.x();
+        max[1] = btmax.y();
+        max[2] = btmax.z();
     }
 }};

@@ -221,7 +221,7 @@ namespace Physic
 
         bool toggleDebugRendering();
 
-        float getObjectHeight(const std::string &mesh, float scale);
+        void getObjectAABB(const std::string &mesh, float scale, float *min, float *max);
 
         /**
          * Return the closest object hit by a ray. If there are no objects, it will return ("",-1).

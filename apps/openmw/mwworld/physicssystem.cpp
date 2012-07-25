@@ -366,13 +366,15 @@ namespace MWWorld
         addActor (node->getName(), model, node->getPosition());
     }
 
-    float PhysicsSystem::getObjectHeight(const MWWorld::Ptr &ptr)
+    bool PhysicsSystem::getObjectAABB(const MWWorld::Ptr &ptr, float *min, float *max)
     {
         std::string model = MWWorld::Class::get(ptr).getModel(ptr);
         if (model.empty()) {
-            return 0.0;
+            return false;
         }
         float scale = ptr.getRefData().getBaseNode()->getScale().x;
-        return mEngine->getObjectHeight(model, scale);
+        mEngine->getObjectAABB(model, scale, min, max);
+
+        return true;
     }
 }
