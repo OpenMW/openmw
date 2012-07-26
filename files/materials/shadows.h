@@ -36,12 +36,16 @@ float pssmDepthShadow (
 {
     float shadow;
     
+    float pcf1 = depthShadowPCF(shadowMap0, lightSpacePos0, invShadowmapSize0);
+    float pcf2 = depthShadowPCF(shadowMap1, lightSpacePos1, invShadowmapSize1);
+    float pcf3 = depthShadowPCF(shadowMap2, lightSpacePos2, invShadowmapSize2);
+    
     if (depth < pssmSplitPoints.x)
-        shadow = depthShadowPCF(shadowMap0, lightSpacePos0, invShadowmapSize0);
+        shadow = pcf1;
     else if (depth < pssmSplitPoints.y)
-        shadow = depthShadowPCF(shadowMap1, lightSpacePos1, invShadowmapSize1);
+        shadow = pcf2;
     else
-        shadow = depthShadowPCF(shadowMap2, lightSpacePos2, invShadowmapSize2);
+        shadow = pcf3;
 
     return shadow;
 }

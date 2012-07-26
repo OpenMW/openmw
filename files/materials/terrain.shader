@@ -55,7 +55,7 @@
         shUniform(float2, lodMorph) @shAutoConstant(lodMorph, custom, 1001)
         
         shVertexInput(float2, uv0)
-        shVertexInput(float2, delta) // lodDelta, lodThreshold
+        shVertexInput(float2, uv1) // lodDelta, lodThreshold
         
 #if SHADOWS
         shUniform(float4x4, texViewProjMatrix0) @shAutoConstant(texViewProjMatrix0, texture_viewproj_matrix)
@@ -85,11 +85,11 @@
         // result is negative (it will only be -1 in fact, since after that
         // the vertex will never be indexed), we will achieve our aim.
         // sign(vertexLOD - targetLOD) == -1 is to morph
-        float toMorph = -min(0, sign(delta.y - lodMorph.y));
+        float toMorph = -min(0, sign(uv1.y - lodMorph.y));
 
         // morph
         // this assumes XZ terrain alignment
-        worldPos.y += delta.x * toMorph * lodMorph.x;
+        worldPos.y += uv1.x * toMorph * lodMorph.x;
 
 
         shOutputPosition = shMatrixMult(viewProjMatrix, worldPos);
@@ -161,7 +161,7 @@
 
 #if LIGHTING
         shUniform(float4, lightAmbient)                       @shAutoConstant(lightAmbient, ambient_light_colour)
-    @shForeach(@shGlobalSettingString(num_lights))
+    @shForeach(@shGlobalSettingString(terrain_num_lights))
         shUniform(float4, lightPosObjSpace@shIterator)        @shAutoConstant(lightPosObjSpace@shIterator, light_position_object_space, @shIterator)
         shUniform(float4, lightAttenuation@shIterator)        @shAutoConstant(lightAttenuation@shIterator, light_attenuation, @shIterator)
         shUniform(float4, lightDiffuse@shIterator)            @shAutoConstant(lightDiffuse@shIterator, light_diffuse_colour, @shIterator)
@@ -224,13 +224,14 @@
 
         float3 worldPos = shMatrixMult(worldMatrix, float4(objSpacePosition,1)).xyz;
         float3 waterEyePos = float3(1,1,1);
-        if (worldPos.y < waterLevel)
-        {
-            // NOTE: this calculation would be wrong for non-uniform scaling
-            float4 worldNormal = shMatrixMult(worldMatrix, float4(normal.xyz, 0));
-            waterEyePos = intercept(worldPos, cameraPos.xyz - worldPos, float3(0,1,0), waterLevel);
-            caustics = getCaustics(causticMap, worldPos, waterEyePos.xyz, worldNormal.xyz, lightDirectionWS0.xyz, waterLevel, waterTimer, windDir_windSpeed);
-        }
+        // NOTE: this calculation would be wrong for non-uniform scaling
+        float4 worldNormal = shMatrixMult(worldMatrix, float4(normal.xyz, 0));
+        waterEyePos = intercept(worldPos, cameraPos.xyz - worldPos, float3(0,1,0), waterLevel);
+        caustics = getCaustics(causticMap, worldPos, waterEyePos.xyz, worldNormal.xyz, lightDirectionWS0.xyz, waterLevel, waterTimer, windDir_windSpeed);
+        if (worldPos.y >= waterLevel)
+            caustics = float3(1,1,1);
+        
+
 
 #endif
         
@@ -285,7 +286,7 @@
 #if SHADOWS || SHADOWS_PSSM
             float fadeRange = shadowFar_fadeStart.x - shadowFar_fadeStart.y;
             float fade = 1-((depth - shadowFar_fadeStart.y) / fadeRange);
-            shadow = (depth > shadowFar_fadeStart.x) ? 1 : ((depth > shadowFar_fadeStart.y) ? 1-((1-shadow)*fade) : shadow);
+            shadow = (depth > shadowFar_fadeStart.x) ? 1.0 : ((depth > shadowFar_fadeStart.y) ? 1.0-((1.0-shadow)*fade) : shadow);
 #endif
 
 #if !SHADOWS && !SHADOWS_PSSM
@@ -298,7 +299,7 @@
         float3 diffuse = float3(0,0,0);
         float d;
         
-    @shForeach(@shGlobalSettingString(num_lights))
+    @shForeach(@shGlobalSettingString(terrain_num_lights))
     
         lightDir = lightPosObjSpace@shIterator.xyz - (objSpacePosition.xyz * lightPosObjSpace@shIterator.w);
         d = length(lightDir);
