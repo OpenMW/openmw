@@ -72,6 +72,7 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
     else
         lang = sh::Language_CG;
     mFactory->setCurrentLanguage (lang);
+    mFactory->loadAllFiles();
 
     //The fog type must be set before any terrain objects are created as if the
     //fog type is set to FOG_NONE then the initially created terrain won't have any fog
