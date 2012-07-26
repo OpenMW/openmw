@@ -11,6 +11,9 @@ namespace MWClass
     {
             void ensureCustomData (const MWWorld::Ptr& ptr) const;
 
+            virtual MWWorld::Ptr
+            copyToCellImpl(const MWWorld::Ptr &ptr, MWWorld::CellStore &cell) const;
+
         public:
 
             virtual std::string getId (const MWWorld::Ptr& ptr) const;
@@ -54,6 +57,8 @@ namespace MWClass
             /// effects). Throws an exception, if the object can't hold other objects.
 
             static void registerSelf();
+
+            virtual std::string getModel(const MWWorld::Ptr &ptr) const;
     };
 }
 
