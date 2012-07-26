@@ -1054,8 +1054,9 @@ namespace MWWorld
         }
 
         if (mWorldScene->isCellActive(cell)) {
-            mWorldScene->addObjectToScene(dropped);
-
+            if (dropped.getRefData().isEnabled()) {
+                mWorldScene->addObjectToScene(dropped);
+            }
             std::string script = MWWorld::Class::get(dropped).getScript(dropped);
             if (!script.empty()) {
                 mLocalScripts.add(script, dropped);

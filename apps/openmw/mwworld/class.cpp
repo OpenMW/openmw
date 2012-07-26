@@ -233,7 +233,11 @@ namespace MWWorld
         Ptr newPtr = copyToCellImpl(ptr, cell);
 
         newPtr.getRefData().setCount(ptr.getRefData().getCount());
-        newPtr.getRefData().enable();
+        if (ptr.getRefData().isEnabled()) {
+            newPtr.getRefData().enable();
+        } else {
+            newPtr.getRefData().disable();
+        }
 
         return newPtr;
     }
