@@ -39,6 +39,7 @@
 
 #include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string.hpp>
+#include <boost/functional/hash.hpp>
 
 #include <extern/shiny/Main/Factory.hpp>
 
@@ -441,7 +442,7 @@ static CompareFunction getTestMode(int mode)
 
 class NIFMaterialLoader {
 
-static std::multimap<std::string,std::string> MaterialMap;
+static std::map<size_t,std::string> MaterialMap;
 
 static void warn(const std::string &msg)
 {
@@ -472,6 +473,8 @@ static Ogre::String getMaterial(const NiTriShape *shape, const Ogre::String &nam
     int alphaFlags = -1;
     ubyte alphaTest = 0;
     Ogre::String texName;
+
+    bool vertexColour = (shape->data->colors.size() != 0);
 
     // These are set below if present
     const NiTexturingProperty *t = NULL;
@@ -537,23 +540,32 @@ static Ogre::String getMaterial(const NiTriShape *shape, const Ogre::String &nam
     Ogre::String matname = name;
     if (m || !texName.empty())
     {
-        // If we're here, then this mesh has a material. Thus we
-        // need to calculate a snappy material name. It should
-        // contain the mesh name (mesh->getName()) but also has to
-        // be unique. One mesh may use many materials.
-        std::multimap<std::string,std::string>::iterator itr = MaterialMap.find(texName);
-        std::multimap<std::string,std::string>::iterator lastElement;
-        lastElement = MaterialMap.upper_bound(texName);
+        // Generate a hash out of all properties that can affect the material.
+        size_t h = 0;
+        boost::hash_combine(h, ambient.x);
+        boost::hash_combine(h, ambient.y);
+        boost::hash_combine(h, ambient.z);
+        boost::hash_combine(h, diffuse.x);
+        boost::hash_combine(h, diffuse.y);
+        boost::hash_combine(h, diffuse.z);
+        boost::hash_combine(h, specular.x);
+        boost::hash_combine(h, specular.y);
+        boost::hash_combine(h, specular.z);
+        boost::hash_combine(h, emissive.x);
+        boost::hash_combine(h, emissive.y);
+        boost::hash_combine(h, emissive.z);
+        boost::hash_combine(h, texName);
+        boost::hash_combine(h, vertexColour);
+        boost::hash_combine(h, alphaFlags);
+
+        std::map<size_t,std::string>::iterator itr = MaterialMap.find(h);
         if (itr != MaterialMap.end())
         {
-            for ( ; itr != lastElement; ++itr)
-            {
-                //std::cout << "OK!";
-                //MaterialPtr mat = MaterialManager::getSingleton().getByName(itr->second,recourceGroup);
-                return itr->second;
-                //if( mat->getA
-            }
+            // a suitable material exists already - use it
+            return itr->second;
         }
+        // not found, create a new one
+        MaterialMap.insert(std::make_pair(h, matname));
     }
 
     // No existing material like this. Create a new one.
@@ -572,7 +584,7 @@ static Ogre::String getMaterial(const NiTriShape *shape, const Ogre::String &nam
 
     instance->setProperty ("diffuseMap", sh::makeProperty(texName));
 
-    if (shape->data->colors.size() != 0)
+    if (vertexColour)
         instance->setProperty ("has_vertex_colour", sh::makeProperty<sh::BooleanValue>(new sh::BooleanValue(true)));
 
     // Add transparency if NiAlphaProperty was present
@@ -628,12 +640,11 @@ static Ogre::String getMaterial(const NiTriShape *shape, const Ogre::String &nam
     }
 */
 
-    MaterialMap.insert(std::make_pair(texName, matname));
     return matname;
 }
 
 };
-std::multimap<std::string,std::string> NIFMaterialLoader::MaterialMap;
+std::map<size_t,std::string> NIFMaterialLoader::MaterialMap;
 
 
 class NIFMeshLoader : Ogre::ManualResourceLoader
