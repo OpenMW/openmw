@@ -1016,14 +1016,13 @@ namespace MWWorld
         else
             cell = getPlayer().getPlayer().getCell();
 
-        ESM::Position& pos = object.getRefData().getPosition();
+        ESM::Position pos = getPlayer().getPlayer().getRefData().getPosition();
         pos.pos[0] = result.second[0];
         pos.pos[1] = -result.second[2];
         pos.pos[2] = result.second[1];
 
-        mWorldScene->insertObject(object, cell);
-
-        /// \todo retrieve the bounds of the object and translate it accordingly
+        placeObject(object, *cell, pos);
+        object.getRefData().setCount(0);
 
         return true;
     }
@@ -1039,18 +1038,52 @@ namespace MWWorld
         return true;
     }
 
+    void
+    World::placeObject(const Ptr &object, CellStore &cell, const ESM::Position &pos)
+    {
+        /// \todo add searching correct cell for position specified
+        MWWorld::Ptr dropped =
+            MWWorld::Class::get(object).copyToCell(object, cell, pos);
+
+        Ogre::Vector3 min, max;
+        if (mPhysics->getObjectAABB(object, min, max)) {
+            float *pos = dropped.getRefData().getPosition().pos;
+            pos[0] -= (min.x + max.x) / 2;
+            pos[1] -= (min.y + max.y) / 2;
+            pos[2] -= min.z;
+        }
+
+        if (mWorldScene->isCellActive(cell)) {
+            if (dropped.getRefData().isEnabled()) {
+                mWorldScene->addObjectToScene(dropped);
+            }
+            std::string script = MWWorld::Class::get(dropped).getScript(dropped);
+            if (!script.empty()) {
+                mLocalScripts.add(script, dropped);
+            }
+        }
+    }
+
     void World::dropObjectOnGround (const Ptr& object)
     {
         MWWorld::Ptr::CellStore* cell = getPlayer().getPlayer().getCell();
 
-        float* playerPos = getPlayer().getPlayer().getRefData().getPosition().pos;
+        ESM::Position pos =
+            getPlayer().getPlayer().getRefData().getPosition();
 
-        ESM::Position& pos = object.getRefData().getPosition();
-        pos.pos[0] = playerPos[0];
-        pos.pos[1] = playerPos[1];
-        pos.pos[2] = playerPos[2];
+        Ogre::Vector3 orig =
+            Ogre::Vector3(pos.pos[0], pos.pos[1], pos.pos[2]);
+        Ogre::Vector3 dir = Ogre::Vector3(0, 0, -1);
+        
+        float len = (pos.pos[2] >= 0) ? pos.pos[2] : -pos.pos[2];
+        len += 100.0;
 
-        mWorldScene->insertObject(object, cell);
+        std::pair<bool, Ogre::Vector3> hit =
+            mPhysics->castRay(orig, dir, len);
+        pos.pos[2] = hit.second.z;
+
+        placeObject(object, *cell, pos);
+        object.getRefData().setCount(0);
     }
 
     void World::processChangedSettings(const Settings::CategorySettingVector& settings)

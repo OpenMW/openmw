@@ -9,6 +9,9 @@ namespace MWClass
     {
             void ensureCustomData (const MWWorld::Ptr& ptr) const;
 
+            virtual MWWorld::Ptr
+            copyToCellImpl(const MWWorld::Ptr &ptr, MWWorld::CellStore &cell) const;
+
         public:
 
             virtual std::string getId (const MWWorld::Ptr& ptr) const;
@@ -88,6 +91,8 @@ namespace MWClass
             virtual void adjustRotation(const MWWorld::Ptr& ptr,float& x,float& y,float& z) const;
 
             static void registerSelf();
+
+            virtual std::string getModel(const MWWorld::Ptr &ptr) const;
     };
 }
 

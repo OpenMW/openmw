@@ -7,6 +7,9 @@ namespace MWClass
 {
     class Ingredient : public MWWorld::Class
     {
+            virtual MWWorld::Ptr
+            copyToCellImpl(const MWWorld::Ptr &ptr, MWWorld::CellStore &cell) const;
+
         public:
 
             virtual void insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const;
@@ -44,6 +47,8 @@ namespace MWClass
 
             virtual std::string getInventoryIcon (const MWWorld::Ptr& ptr) const;
             ///< Return name of inventory icon.
+
+            virtual std::string getModel(const MWWorld::Ptr &ptr) const;
     };
 }
 

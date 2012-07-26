@@ -25,32 +25,33 @@ namespace MWClass
 {
     void Clothing::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const
     {
-        MWWorld::LiveCellRef<ESM::Clothing> *ref =
-            ptr.get<ESM::Clothing>();
-
-        assert (ref->base != NULL);
-        const std::string &model = ref->base->model;
-
-        if (!model.empty())
-        {
+        const std::string model = getModel(ptr);
+        if (!model.empty()) {
             MWRender::Objects& objects = renderingInterface.getObjects();
             objects.insertBegin(ptr, ptr.getRefData().isEnabled(), false);
-            objects.insertMesh(ptr, "meshes\\" + model);
+            objects.insertMesh(ptr, model);
         }
     }
 
     void Clothing::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics) const
     {
+        const std::string model = getModel(ptr);
+        if(!model.empty()) {
+            physics.insertObjectPhysics(ptr, model);
+        }
+    }
+    
+    std::string Clothing::getModel(const MWWorld::Ptr &ptr) const
+    {
         MWWorld::LiveCellRef<ESM::Clothing> *ref =
             ptr.get<ESM::Clothing>();
-
+        assert(ref->base != NULL);
 
         const std::string &model = ref->base->model;
-        assert (ref->base != NULL);
-        if(!model.empty()){
-            physics.insertObjectPhysics(ptr, "meshes\\" + model);
+        if (!model.empty()) {
+            return "meshes\\" + model;
         }
-
+        return "";
     }
 
     std::string Clothing::getName (const MWWorld::Ptr& ptr) const
@@ -225,5 +226,14 @@ namespace MWClass
         MWBase::Environment::get().getSoundManager()->playSound (getUpSoundId(ptr), 1.0, 1.0);
 
         return boost::shared_ptr<MWWorld::Action>(new MWWorld::ActionEquip(ptr));
+    }
+
+    MWWorld::Ptr
+    Clothing::copyToCellImpl(const MWWorld::Ptr &ptr, MWWorld::CellStore &cell) const
+    {
+        MWWorld::LiveCellRef<ESM::Clothing> *ref =
+            ptr.get<ESM::Clothing>();
+
+        return MWWorld::Ptr(&cell.clothes.insert(*ref), &cell);
     }
 }
