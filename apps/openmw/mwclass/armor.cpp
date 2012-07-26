@@ -278,7 +278,7 @@ namespace MWClass
     }
 
     MWWorld::Ptr
-    Armor::moveToCellImpl(const MWWorld::Ptr &ptr, MWWorld::CellStore &cell) const
+    Armor::copyToCellImpl(const MWWorld::Ptr &ptr, MWWorld::CellStore &cell) const
     {
         MWWorld::LiveCellRef<ESM::Armor> *ref =
             ptr.get<ESM::Armor>();

@@ -209,7 +209,7 @@ namespace MWClass
     }
 
     MWWorld::Ptr
-    Container::moveToCellImpl(const MWWorld::Ptr &ptr, MWWorld::CellStore &cell) const
+    Container::copyToCellImpl(const MWWorld::Ptr &ptr, MWWorld::CellStore &cell) const
     {
         MWWorld::LiveCellRef<ESM::Container> *ref =
             ptr.get<ESM::Container>();

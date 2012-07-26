@@ -158,7 +158,7 @@ namespace MWClass
     }
 
     MWWorld::Ptr
-    Ingredient::moveToCellImpl(const MWWorld::Ptr &ptr, MWWorld::CellStore &cell) const
+    Ingredient::copyToCellImpl(const MWWorld::Ptr &ptr, MWWorld::CellStore &cell) const
     {
         MWWorld::LiveCellRef<ESM::Ingredient> *ref =
             ptr.get<ESM::Ingredient>();

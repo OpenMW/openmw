@@ -68,7 +68,7 @@ namespace MWWorld
 
             void setCurrentWater(bool hasWater, int waterHeight);
 
-            bool getObjectAABB(const MWWorld::Ptr &ptr, float *min, float *max);
+            bool getObjectAABB(const MWWorld::Ptr &ptr, Ogre::Vector3 &min, Ogre::Vector3 &max);
 
         private:
             OEngine::Render::OgreRenderer &mRender;

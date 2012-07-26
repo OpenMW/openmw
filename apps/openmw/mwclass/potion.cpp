@@ -162,7 +162,7 @@ namespace MWClass
     }
 
     MWWorld::Ptr
-    Potion::moveToCellImpl(const MWWorld::Ptr &ptr, MWWorld::CellStore &cell) const
+    Potion::copyToCellImpl(const MWWorld::Ptr &ptr, MWWorld::CellStore &cell) const
     {
         MWWorld::LiveCellRef<ESM::Potion> *ref =
             ptr.get<ESM::Potion>();

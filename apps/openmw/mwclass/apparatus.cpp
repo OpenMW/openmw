@@ -151,7 +151,7 @@ namespace MWClass
     }
 
     MWWorld::Ptr
-    Apparatus::moveToCellImpl(const MWWorld::Ptr &ptr, MWWorld::CellStore &cell) const
+    Apparatus::copyToCellImpl(const MWWorld::Ptr &ptr, MWWorld::CellStore &cell) const
     {
         MWWorld::LiveCellRef<ESM::Apparatus> *ref =
             ptr.get<ESM::Apparatus>();

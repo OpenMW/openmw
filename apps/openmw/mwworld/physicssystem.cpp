@@ -382,14 +382,23 @@ namespace MWWorld
         addActor (node->getName(), model, node->getPosition());
     }
 
-    bool PhysicsSystem::getObjectAABB(const MWWorld::Ptr &ptr, float *min, float *max)
+    bool PhysicsSystem::getObjectAABB(const MWWorld::Ptr &ptr, Ogre::Vector3 &min, Ogre::Vector3 &max)
     {
         std::string model = MWWorld::Class::get(ptr).getModel(ptr);
         if (model.empty()) {
             return false;
         }
-        float scale = ptr.getRefData().getBaseNode()->getScale().x;
-        mEngine->getObjectAABB(model, scale, min, max);
+        btVector3 btMin, btMax;
+        float scale = ptr.getCellRef().scale;
+        mEngine->getObjectAABB(model, scale, btMin, btMax);
+
+        min.x = btMin.x();
+        min.y = btMin.y();
+        min.z = btMin.z();
+
+        max.x = btMax.x();
+        max.y = btMax.y();
+        max.z = btMax.z();
 
         return true;
     }

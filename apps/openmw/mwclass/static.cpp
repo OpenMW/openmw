@@ -55,7 +55,7 @@ namespace MWClass
     }
 
     MWWorld::Ptr
-    Static::moveToCellImpl(const MWWorld::Ptr &ptr, MWWorld::CellStore &cell) const
+    Static::copyToCellImpl(const MWWorld::Ptr &ptr, MWWorld::CellStore &cell) const
     {
         MWWorld::LiveCellRef<ESM::Static> *ref =
             ptr.get<ESM::Static>();

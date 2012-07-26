@@ -197,7 +197,7 @@ namespace MWClass
     }
 
     MWWorld::Ptr
-    Creature::moveToCellImpl(const MWWorld::Ptr &ptr, MWWorld::CellStore &cell) const
+    Creature::copyToCellImpl(const MWWorld::Ptr &ptr, MWWorld::CellStore &cell) const
     {
         MWWorld::LiveCellRef<ESM::Creature> *ref =
             ptr.get<ESM::Creature>();

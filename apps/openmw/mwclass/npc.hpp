@@ -10,7 +10,7 @@ namespace MWClass
             void ensureCustomData (const MWWorld::Ptr& ptr) const;
 
             virtual MWWorld::Ptr
-            moveToCellImpl(const MWWorld::Ptr &ptr, MWWorld::CellStore &cell) const;
+            copyToCellImpl(const MWWorld::Ptr &ptr, MWWorld::CellStore &cell) const;
 
         public:
 

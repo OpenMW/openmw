@@ -229,7 +229,7 @@ namespace MWClass
     }
 
     MWWorld::Ptr
-    Clothing::moveToCellImpl(const MWWorld::Ptr &ptr, MWWorld::CellStore &cell) const
+    Clothing::copyToCellImpl(const MWWorld::Ptr &ptr, MWWorld::CellStore &cell) const
     {
         MWWorld::LiveCellRef<ESM::Clothing> *ref =
             ptr.get<ESM::Clothing>();

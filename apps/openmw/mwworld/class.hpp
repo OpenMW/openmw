@@ -57,7 +57,7 @@ namespace MWWorld
 
             Class();
 
-            virtual Ptr moveToCellImpl(const Ptr &ptr, CellStore &cell) const;
+            virtual Ptr copyToCellImpl(const Ptr &ptr, CellStore &cell) const;
 
         public:
 
@@ -216,10 +216,10 @@ namespace MWWorld
             virtual std::string getModel(const MWWorld::Ptr &ptr) const;
 
             virtual Ptr
-            moveToCell(const Ptr &ptr, CellStore &cell) const;
+            copyToCell(const Ptr &ptr, CellStore &cell) const;
 
             virtual Ptr
-            moveToCell(const Ptr &ptr, CellStore &cell, const ESM::Position &pos) const;
+            copyToCell(const Ptr &ptr, CellStore &cell, const ESM::Position &pos) const;
     };
 }
 

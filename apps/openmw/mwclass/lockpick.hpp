@@ -8,7 +8,7 @@ namespace MWClass
     class Lockpick : public MWWorld::Class
     {
             virtual MWWorld::Ptr
-            moveToCellImpl(const MWWorld::Ptr &ptr, MWWorld::CellStore &cell) const;
+            copyToCellImpl(const MWWorld::Ptr &ptr, MWWorld::CellStore &cell) const;
 
         public:
 

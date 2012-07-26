@@ -158,7 +158,7 @@ namespace MWClass
     }
 
     MWWorld::Ptr
-    Book::moveToCellImpl(const MWWorld::Ptr &ptr, MWWorld::CellStore &cell) const
+    Book::copyToCellImpl(const MWWorld::Ptr &ptr, MWWorld::CellStore &cell) const
     {
         MWWorld::LiveCellRef<ESM::Book> *ref =
             ptr.get<ESM::Book>();

@@ -95,6 +95,8 @@ namespace MWWorld
 
             void removeObjectFromScene (const Ptr& ptr);
             ///< Remove an object from the scene, but not from the world model.
+
+            bool isCellActive(const CellStore &cell);
     };
 }
 

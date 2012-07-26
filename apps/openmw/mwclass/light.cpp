@@ -198,7 +198,7 @@ namespace MWClass
     }
 
     MWWorld::Ptr
-    Light::moveToCellImpl(const MWWorld::Ptr &ptr, MWWorld::CellStore &cell) const
+    Light::copyToCellImpl(const MWWorld::Ptr &ptr, MWWorld::CellStore &cell) const
     {
         MWWorld::LiveCellRef<ESM::Light> *ref =
             ptr.get<ESM::Light>();

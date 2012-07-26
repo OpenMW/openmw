@@ -211,7 +211,7 @@ namespace MWClass
     }
 
     MWWorld::Ptr
-    Door::moveToCellImpl(const MWWorld::Ptr &ptr, MWWorld::CellStore &cell) const
+    Door::copyToCellImpl(const MWWorld::Ptr &ptr, MWWorld::CellStore &cell) const
     {
         MWWorld::LiveCellRef<ESM::Door> *ref =
             ptr.get<ESM::Door>();

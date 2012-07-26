@@ -334,26 +334,30 @@ namespace MWWorld
 
     void Scene::addObjectToScene (const Ptr& ptr)
     {
-        mRendering.addObject (ptr);
-
-        float *pos = ptr.getRefData().getPosition().pos;
-        float min[3], max[3];
-        if (mPhysics->getObjectAABB(ptr, min, max)) {
-            pos[0] -= (min[0] + max[0]) / 2;
-            pos[1] -= (min[1] + max[1]) / 2;
-            pos[2] -= min[2];
-        }
-
-        ptr.getRefData().getBaseNode()->setPosition(pos[0], pos[1], pos[2]);
-
-        MWWorld::Class::get (ptr).insertObject (ptr, *mPhysics);
+        mRendering.addObject(ptr);
+        MWWorld::Class::get(ptr).insertObject(ptr, *mPhysics);
     }
-
+   
     void Scene::removeObjectFromScene (const Ptr& ptr)
     {
         MWBase::Environment::get().getMechanicsManager()->removeActor (ptr);
         MWBase::Environment::get().getSoundManager()->stopSound3D (ptr);
         mPhysics->removeObject (ptr.getRefData().getHandle());
         mRendering.removeObject (ptr);
+    }
+
+    bool Scene::isCellActive(const CellStore &cell)
+    {
+        CellStoreCollection::iterator active = mActiveCells.begin();
+        while (active != mActiveCells.end()) {
+            if ((*active)->cell->name == cell.cell->name &&
+                (*active)->cell->data.gridX == cell.cell->data.gridX &&
+                (*active)->cell->data.gridY == cell.cell->data.gridY)
+            {
+                return true;
+            }
+            ++active;
+        }
+        return false;
     }
 }

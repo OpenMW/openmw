@@ -148,7 +148,7 @@ namespace MWClass
     }
 
     MWWorld::Ptr
-    Repair::moveToCellImpl(const MWWorld::Ptr &ptr, MWWorld::CellStore &cell) const
+    Repair::copyToCellImpl(const MWWorld::Ptr &ptr, MWWorld::CellStore &cell) const
     {
         MWWorld::LiveCellRef<ESM::Repair> *ref =
             ptr.get<ESM::Repair>();

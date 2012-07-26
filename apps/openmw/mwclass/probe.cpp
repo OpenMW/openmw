@@ -166,7 +166,7 @@ namespace MWClass
     }
 
     MWWorld::Ptr
-    Probe::moveToCellImpl(const MWWorld::Ptr &ptr, MWWorld::CellStore &cell) const
+    Probe::copyToCellImpl(const MWWorld::Ptr &ptr, MWWorld::CellStore &cell) const
     {
         MWWorld::LiveCellRef<ESM::Probe> *ref =
             ptr.get<ESM::Probe>();

@@ -1022,6 +1022,7 @@ namespace MWWorld
         pos.pos[2] = result.second[1];
 
         placeObject(object, *cell, pos);
+        object.getRefData().setCount(0);
 
         return true;
     }
@@ -1040,16 +1041,25 @@ namespace MWWorld
     void
     World::placeObject(const Ptr &object, CellStore &cell, const ESM::Position &pos)
     {
-        mLocalScripts.remove(object);
-
+        /// \todo add searching correct cell for position specified
         MWWorld::Ptr dropped =
-            MWWorld::Class::get(object).moveToCell(object, cell, pos);
+            MWWorld::Class::get(object).copyToCell(object, cell, pos);
 
-        mWorldScene->addObjectToScene(dropped);
+        Ogre::Vector3 min, max;
+        if (mPhysics->getObjectAABB(object, min, max)) {
+            float *pos = dropped.getRefData().getPosition().pos;
+            pos[0] -= (min.x + max.x) / 2;
+            pos[1] -= (min.y + max.y) / 2;
+            pos[2] -= min.z;
+        }
 
-        std::string script = MWWorld::Class::get(dropped).getScript(dropped);
-        if (!script.empty()) {
-            mLocalScripts.add(script, dropped);
+        if (mWorldScene->isCellActive(cell)) {
+            mWorldScene->addObjectToScene(dropped);
+
+            std::string script = MWWorld::Class::get(dropped).getScript(dropped);
+            if (!script.empty()) {
+                mLocalScripts.add(script, dropped);
+            }
         }
     }
 
@@ -1071,8 +1081,8 @@ namespace MWWorld
             mPhysics->castRay(orig, dir, len);
         pos.pos[2] = hit.second.z;
 
-        /// \todo fix item dropping at player object center position
         placeObject(object, *cell, pos);
+        object.getRefData().setCount(0);
     }
 
     void World::processChangedSettings(const Settings::CategorySettingVector& settings)

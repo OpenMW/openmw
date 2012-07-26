@@ -382,7 +382,7 @@ namespace MWClass
     }
 
     MWWorld::Ptr
-    Npc::moveToCellImpl(const MWWorld::Ptr &ptr, MWWorld::CellStore &cell) const
+    Npc::copyToCellImpl(const MWWorld::Ptr &ptr, MWWorld::CellStore &cell) const
     {
         MWWorld::LiveCellRef<ESM::NPC> *ref =
             ptr.get<ESM::NPC>();

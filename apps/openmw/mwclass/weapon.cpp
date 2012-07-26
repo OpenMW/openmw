@@ -367,7 +367,7 @@ namespace MWClass
     }
 
     MWWorld::Ptr
-    Weapon::moveToCellImpl(const MWWorld::Ptr &ptr, MWWorld::CellStore &cell) const
+    Weapon::copyToCellImpl(const MWWorld::Ptr &ptr, MWWorld::CellStore &cell) const
     {
         MWWorld::LiveCellRef<ESM::Weapon> *ref =
             ptr.get<ESM::Weapon>();

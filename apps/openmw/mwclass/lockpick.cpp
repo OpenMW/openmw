@@ -167,7 +167,7 @@ namespace MWClass
     }
 
     MWWorld::Ptr
-    Lockpick::moveToCellImpl(const MWWorld::Ptr &ptr, MWWorld::CellStore &cell) const
+    Lockpick::copyToCellImpl(const MWWorld::Ptr &ptr, MWWorld::CellStore &cell) const
     {
         MWWorld::LiveCellRef<ESM::Tool> *ref =
             ptr.get<ESM::Tool>();

@@ -186,7 +186,7 @@ namespace MWClass
     }
 
     MWWorld::Ptr
-    Miscellaneous::moveToCellImpl(const MWWorld::Ptr &ptr, MWWorld::CellStore &cell) const
+    Miscellaneous::copyToCellImpl(const MWWorld::Ptr &ptr, MWWorld::CellStore &cell) const
     {
         MWWorld::Ptr newPtr;
         

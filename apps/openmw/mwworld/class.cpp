@@ -222,27 +222,26 @@ namespace MWWorld
     }
 
     MWWorld::Ptr
-    Class::moveToCellImpl(const Ptr &ptr, CellStore &cell) const
+    Class::copyToCellImpl(const Ptr &ptr, CellStore &cell) const
     {
         throw std::runtime_error("unable to move class to cell");
     }
 
     MWWorld::Ptr
-    Class::moveToCell(const Ptr &ptr, CellStore &cell) const
+    Class::copyToCell(const Ptr &ptr, CellStore &cell) const
     {
-        Ptr newPtr = moveToCellImpl(ptr, cell);
+        Ptr newPtr = copyToCellImpl(ptr, cell);
 
         newPtr.getRefData().setCount(ptr.getRefData().getCount());
-        ptr.getRefData().setCount(0);
         newPtr.getRefData().enable();
 
         return newPtr;
     }
 
     MWWorld::Ptr
-    Class::moveToCell(const Ptr &ptr, CellStore &cell, const ESM::Position &pos) const
+    Class::copyToCell(const Ptr &ptr, CellStore &cell, const ESM::Position &pos) const
     {
-        Ptr newPtr = moveToCell(ptr, cell);
+        Ptr newPtr = copyToCell(ptr, cell);
         newPtr.getRefData().getPosition() = pos;
 
         return newPtr;
