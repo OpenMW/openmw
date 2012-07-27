@@ -7,6 +7,6 @@ namespace Ogre {
 	class Root;
 }
 
-extern bool loadOgrePlugin(std::string pluginDir, std::string pluginName, Ogre::Root &ogreRoot);
+extern bool loadOgrePlugin(const std::string &pluginDir, std::string pluginName, Ogre::Root &ogreRoot);
 
 #endif
