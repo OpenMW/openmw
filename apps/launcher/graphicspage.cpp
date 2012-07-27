@@ -7,6 +7,7 @@
 
 #include <components/files/configurationmanager.hpp>
 #include <components/settings/settings.hpp>
+#include <components/ogreplugin/ogreplugin.h>
 
 #include "graphicspage.hpp"
 #include "naturalsort.hpp"
@@ -115,17 +116,13 @@ bool GraphicsPage::setupOgre()
 #endif
     }
 
-    std::string glPlugin = std::string(pluginDir) + "/RenderSystem_GL" + OGRE_PLUGIN_DEBUG_SUFFIX;
-    if (boost::filesystem::exists(glPlugin + ".so") ||
-        boost::filesystem::exists(glPlugin + ".dll") ||
-        boost::filesystem::exists(glPlugin + ".dylib"))
-        mOgre->loadPlugin (glPlugin);
+    boost::filesystem::path absPluginPath = boost::filesystem::absolute(boost::filesystem::path(pluginDir));
 
-    std::string dxPlugin = std::string(pluginDir) + "/RenderSystem_Direct3D9" + OGRE_PLUGIN_DEBUG_SUFFIX;
-    if (boost::filesystem::exists(dxPlugin + ".so") ||
-        boost::filesystem::exists(dxPlugin + ".dll") ||
-        boost::filesystem::exists(dxPlugin + ".dylib"))
-        mOgre->loadPlugin (dxPlugin);
+    pluginDir = absPluginPath.string();
+
+    loadOgrePlugin(pluginDir, "RenderSystem_GL", *mOgre);
+    loadOgrePlugin(pluginDir, "RenderSystem_Direct3D9", *mOgre);
+    loadOgrePlugin(pluginDir, "RenderSystem_GL", *mOgre);
 
 #ifdef ENABLE_PLUGIN_GL
     mGLPlugin = new Ogre::GLPlugin();

@@ -11,6 +11,8 @@
 
 #include <boost/filesystem.hpp>
 
+#include <components/ogreplugin/ogreplugin.h>
+
 #include <cassert>
 #include <cstdlib>
 #include <stdexcept>
@@ -94,6 +96,7 @@ void OgreRenderer::configure(const std::string &logPath,
     loadPlugins();
     #endif
 
+    std::cout << "current path is: " << boost::filesystem::current_path() << std::endl;
     std::string pluginDir;
     const char* pluginEnv = getenv("OPENMW_OGRE_PLUGIN_DIR");
     if (pluginEnv)
@@ -111,23 +114,13 @@ void OgreRenderer::configure(const std::string &logPath,
 #endif
     }
 
-    std::string glPlugin = std::string(pluginDir) + "/RenderSystem_GL" + OGRE_PLUGIN_DEBUG_SUFFIX;
-    if (boost::filesystem::exists(glPlugin + ".so") ||
-        boost::filesystem::exists(glPlugin + ".dll") ||
-        boost::filesystem::exists(glPlugin + ".dylib"))
-        mRoot->loadPlugin (glPlugin);
+    boost::filesystem::path absPluginPath = boost::filesystem::absolute(boost::filesystem::path(pluginDir));
 
-    std::string dxPlugin = std::string(pluginDir) + "/RenderSystem_Direct3D9" + OGRE_PLUGIN_DEBUG_SUFFIX;
-    if (boost::filesystem::exists(dxPlugin + ".so") ||
-        boost::filesystem::exists(dxPlugin + ".dll") ||
-        boost::filesystem::exists(dxPlugin + ".dylib"))
-        mRoot->loadPlugin (dxPlugin);
+    pluginDir = absPluginPath.string();
 
-    std::string cgPlugin = std::string(pluginDir) + "/Plugin_CgProgramManager" + OGRE_PLUGIN_DEBUG_SUFFIX;
-    if (boost::filesystem::exists(cgPlugin + ".so") ||
-        boost::filesystem::exists(cgPlugin + ".dll") ||
-        boost::filesystem::exists(cgPlugin + ".dylib"))
-        mRoot->loadPlugin (cgPlugin);
+    loadOgrePlugin(pluginDir, "RenderSystem_GL", *mRoot);
+    loadOgrePlugin(pluginDir, "RenderSystem_Direct3D9", *mRoot);
+    loadOgrePlugin(pluginDir, "Plugin_CgProgramManager", *mRoot);
 
     RenderSystem* rs = mRoot->getRenderSystemByName(renderSystem);
     if (rs == 0)
