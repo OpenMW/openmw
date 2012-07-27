@@ -1,6 +1,8 @@
 #ifndef GAME_MWWORLD_ACTION_H
 #define GAME_MWWORLD_ACTION_H
 
+#include <string>
+
 namespace MWWorld
 {
     class Ptr;
@@ -8,6 +10,8 @@ namespace MWWorld
     /// \brief Abstract base for actions
     class Action
     {
+            std::string mSoundId;
+
             // not implemented
             Action (const Action& action);
             Action& operator= (const Action& action);
@@ -21,6 +25,8 @@ namespace MWWorld
             virtual ~Action();
 
             void execute (const Ptr& actor);
+
+            void setSound (const std::string& id);
     };
 }
 
