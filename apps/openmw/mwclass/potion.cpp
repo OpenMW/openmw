@@ -157,8 +157,12 @@ namespace MWClass
 
         MWWorld::Ptr actor = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
 
-        return boost::shared_ptr<MWWorld::Action> (
+        boost::shared_ptr<MWWorld::Action> action (
             new MWWorld::ActionApply (actor, ref->base->mId));
+
+        action->setSound ("Drink");
+
+        return action;
     }
 
     MWWorld::Ptr
