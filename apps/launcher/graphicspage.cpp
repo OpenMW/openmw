@@ -122,7 +122,6 @@ bool GraphicsPage::setupOgre()
 
     loadOgrePlugin(pluginDir, "RenderSystem_GL", *mOgre);
     loadOgrePlugin(pluginDir, "RenderSystem_Direct3D9", *mOgre);
-    loadOgrePlugin(pluginDir, "RenderSystem_GL", *mOgre);
 
 #ifdef ENABLE_PLUGIN_GL
     mGLPlugin = new Ogre::GLPlugin();
