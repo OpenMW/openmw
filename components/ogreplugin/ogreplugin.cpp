@@ -6,10 +6,11 @@
 #include <boost/filesystem.hpp>
 
 bool loadOgrePlugin(std::string pluginDir, std::string pluginName, Ogre::Root &ogreRoot) {
+	pluginName = pluginName + OGRE_PLUGIN_DEBUG_SUFFIX;
 #if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
 	std::ostringstream verStream;
 	verStream << "." << OGRE_VERSION_MAJOR << "." << OGRE_VERSION_MINOR << "." << OGRE_VERSION_PATCH;
-	pluginName = pluginName + OGRE_PLUGIN_DEBUG_SUFFIX + verStream.str();
+	pluginName = pluginName + verStream.str();
 #endif
 
 	std::string pluginExt;
@@ -24,9 +25,6 @@ bool loadOgrePlugin(std::string pluginDir, std::string pluginName, Ogre::Root &o
 #endif
 
     std::string pluginPath = pluginDir + "/" + pluginName + pluginExt;
-
-    std::cout << "loading plugin: " << pluginPath << std::endl;
-
     if (boost::filesystem::exists(pluginPath)) {
     	ogreRoot.loadPlugin(pluginPath);
     	return true;
