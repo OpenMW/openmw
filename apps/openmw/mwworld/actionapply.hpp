@@ -13,29 +13,27 @@ namespace MWWorld
     {
             Ptr mTarget;
             std::string mId;
-            Ptr mActor;
+
+            virtual void executeImp (const Ptr& actor);
 
         public:
 
-            ActionApply (const Ptr& target, const std::string& id, const Ptr& actor);
-
-            virtual void execute();
+            ActionApply (const Ptr& target, const std::string& id);
     };
 
     class ActionApplyWithSkill : public Action
     {
             Ptr mTarget;
             std::string mId;
-            Ptr mActor;
             int mSkillIndex;
             int mUsageType;
 
+            virtual void executeImp (const Ptr& actor);
+
         public:
 
-            ActionApplyWithSkill (const Ptr& target, const std::string& id, const Ptr& actor,
+            ActionApplyWithSkill (const Ptr& target, const std::string& id,
                 int skillIndex, int usageType);
-
-            virtual void execute();
     };
 }
 

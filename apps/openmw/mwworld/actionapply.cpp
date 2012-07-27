@@ -5,24 +5,24 @@
 
 namespace MWWorld
 {
-    ActionApply::ActionApply (const Ptr& target, const std::string& id, const Ptr& actor)
-    : mTarget (target), mId (id), mActor (actor)
+    ActionApply::ActionApply (const Ptr& target, const std::string& id)
+    : mTarget (target), mId (id)
     {}
 
-    void ActionApply::execute()
+    void ActionApply::executeImp (const Ptr& actor)
     {
-        MWWorld::Class::get (mTarget).apply (mTarget, mId, mActor);
+        MWWorld::Class::get (mTarget).apply (mTarget, mId, actor);
     }
 
 
     ActionApplyWithSkill::ActionApplyWithSkill (const Ptr& target, const std::string& id,
-        const Ptr& actor, int skillIndex, int usageType)
-    : mTarget (target), mId (id), mActor (actor), mSkillIndex (skillIndex), mUsageType (usageType)
+        int skillIndex, int usageType)
+    : mTarget (target), mId (id), mSkillIndex (skillIndex), mUsageType (usageType)
     {}
 
-    void ActionApplyWithSkill::execute()
+    void ActionApplyWithSkill::executeImp (const Ptr& actor)
     {
-        if (MWWorld::Class::get (mTarget).apply (mTarget, mId, mActor) && mUsageType!=-1)
-            MWWorld::Class::get (mTarget).skillUsageSucceeded (mActor, mSkillIndex, mUsageType);
+        if (MWWorld::Class::get (mTarget).apply (mTarget, mId, actor) && mUsageType!=-1)
+            MWWorld::Class::get (mTarget).skillUsageSucceeded (actor, mSkillIndex, mUsageType);
     }
 }

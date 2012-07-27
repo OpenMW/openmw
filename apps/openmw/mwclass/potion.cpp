@@ -40,7 +40,7 @@ namespace MWClass
             physics.insertObjectPhysics(ptr, model);
         }
     }
-    
+
     std::string Potion::getModel(const MWWorld::Ptr &ptr) const
     {
         MWWorld::LiveCellRef<ESM::Potion> *ref =
@@ -158,7 +158,7 @@ namespace MWClass
         MWWorld::Ptr actor = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
 
         return boost::shared_ptr<MWWorld::Action> (
-            new MWWorld::ActionApply (actor, ref->base->mId, actor));
+            new MWWorld::ActionApply (actor, ref->base->mId));
     }
 
     MWWorld::Ptr
@@ -170,4 +170,3 @@ namespace MWClass
         return MWWorld::Ptr(&cell.potions.insert(*ref), &cell);
     }
 }
-

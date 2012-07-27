@@ -40,7 +40,7 @@ namespace MWClass
             physics.insertObjectPhysics(ptr, model);
         }
     }
-    
+
     std::string Door::getModel(const MWWorld::Ptr &ptr) const
     {
         MWWorld::LiveCellRef<ESM::Door> *ref =
@@ -97,18 +97,18 @@ namespace MWClass
         if (ref->ref.teleport)
         {
             // teleport door
+            /// \todo remove this if clause once ActionTeleport can also support other actors
             if (MWBase::Environment::get().getWorld()->getPlayer().getPlayer()==actor)
             {
                 // the player is using the door
                 // The reason this is not 3D is that it would get interrupted when you teleport
                 MWBase::Environment::get().getSoundManager()->playSound(openSound, 1.0, 1.0);
                 return boost::shared_ptr<MWWorld::Action> (
-                    new MWWorld::ActionTeleportPlayer (ref->ref.destCell, ref->ref.doorDest));
+                    new MWWorld::ActionTeleport (ref->ref.destCell, ref->ref.doorDest));
             }
             else
             {
                 // another NPC or a creature is using the door
-                // TODO return action for teleporting other NPC/creature
                 return boost::shared_ptr<MWWorld::Action> (new MWWorld::NullAction);
             }
         }

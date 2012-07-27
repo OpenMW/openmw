@@ -175,7 +175,7 @@ namespace MWGui
 
             boost::shared_ptr<MWWorld::Action> action = MWWorld::Class::get(ptr).use(ptr);
 
-            action->execute();
+            action->execute (MWBase::Environment::get().getWorld()->getPlayer().getPlayer());
 
             // this is necessary for books/scrolls: if they are already in the player's inventory,
             // the "Take" button should not be visible.

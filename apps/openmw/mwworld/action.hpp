@@ -3,6 +3,8 @@
 
 namespace MWWorld
 {
+    class Ptr;
+
     /// \brief Abstract base for actions
     class Action
     {
@@ -10,13 +12,15 @@ namespace MWWorld
             Action (const Action& action);
             Action& operator= (const Action& action);
 
+            virtual void executeImp (const Ptr& actor) = 0;
+
         public:
 
-            Action() {}
+            Action();
 
-            virtual ~Action() {}
+            virtual ~Action();
 
-            virtual void execute() = 0;
+            void execute (const Ptr& actor);
     };
 }
 

@@ -5,7 +5,7 @@
 
 namespace MWWorld
 {
-    void ActionAlchemy::execute()
+    void ActionAlchemy::executeImp (const Ptr& actor)
     {
         MWBase::Environment::get().getWindowManager()->pushGuiMode(MWGui::GM_Alchemy);
     }
