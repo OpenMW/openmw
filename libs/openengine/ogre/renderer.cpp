@@ -96,7 +96,6 @@ void OgreRenderer::configure(const std::string &logPath,
     loadPlugins();
     #endif
 
-    std::cout << "current path is: " << boost::filesystem::current_path() << std::endl;
     std::string pluginDir;
     const char* pluginEnv = getenv("OPENMW_OGRE_PLUGIN_DIR");
     if (pluginEnv)
