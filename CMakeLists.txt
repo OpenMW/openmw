@@ -256,11 +256,9 @@ endif (APPLE)
 
 
 # Set up Ogre plugin folder & debug suffix
-set(DEBUG_SUFFIX "")
 if (DEFINED CMAKE_BUILD_TYPE)
     # Ogre on OS X doesn't use "_d" suffix (see Ogre's CMakeLists.txt)
     if (CMAKE_BUILD_TYPE STREQUAL "Debug" AND NOT APPLE)
-        set(DEBUG_SUFFIX "_d")
         add_definitions(-DOGRE_PLUGIN_DEBUG_SUFFIX="_d")
     else()
         add_definitions(-DOGRE_PLUGIN_DEBUG_SUFFIX="")
