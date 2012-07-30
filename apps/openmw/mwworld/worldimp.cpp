@@ -555,6 +555,7 @@ namespace MWWorld
         // a bit ugly
         if (ptr == mPlayer->getPlayer()) {
             currCell = mWorldScene->getCurrentCell();
+            haveToMove = true;
         } else {
             currCell = ptr.getCell();
         }
@@ -570,7 +571,6 @@ namespace MWWorld
                 {
                     if (ptr == mPlayer->getPlayer()) {
                         mWorldScene->changeCell(cellX, cellY, pos, false);
-                        haveToMove = true;
                     } else {
                         CellStore *newCell =
                             MWBase::Environment::get().getWorld()->getExterior(cellX, cellY);
