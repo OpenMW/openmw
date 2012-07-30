@@ -175,6 +175,32 @@ namespace MWGui
         print("#FF2222" + msg + "\n");
     }
 
+    void Console::execute (const std::string& command)
+    {
+        // Log the command
+        print("#FFFFFF> " + command + "\n");
+
+        Compiler::Locals locals;
+        Compiler::Output output (locals);
+
+        if (compile (command + "\n", output))
+        {
+            try
+            {
+                ConsoleInterpreterContext interpreterContext (*this, mPtr);
+                Interpreter::Interpreter interpreter;
+                MWScript::installOpcodes (interpreter, mConsoleOnlyScripts);
+                std::vector<Interpreter::Type_Code> code;
+                output.getCode (code);
+                interpreter.run (&code[0], code.size(), interpreterContext);
+            }
+            catch (const std::exception& error)
+            {
+                printError (std::string ("An exception has been thrown: ") + error.what());
+            }
+        }
+    }
+
     void Console::keyPress(MyGUI::WidgetPtr _sender,
                   MyGUI::KeyCode key,
                   MyGUI::Char _char)
@@ -236,28 +262,7 @@ namespace MWGui
         current = command_history.end();
         editString.clear();
 
-        // Log the command
-        print("#FFFFFF> " + cm + "\n");
-
-        Compiler::Locals locals;
-        Compiler::Output output (locals);
-
-        if (compile (cm + "\n", output))
-        {
-            try
-            {
-                ConsoleInterpreterContext interpreterContext (*this, mPtr);
-                Interpreter::Interpreter interpreter;
-                MWScript::installOpcodes (interpreter, mConsoleOnlyScripts);
-                std::vector<Interpreter::Type_Code> code;
-                output.getCode (code);
-                interpreter.run (&code[0], code.size(), interpreterContext);
-            }
-            catch (const std::exception& error)
-            {
-                printError (std::string ("An exception has been thrown: ") + error.what());
-            }
-        }
+        execute (cm);
 
         command->setCaption("");
     }

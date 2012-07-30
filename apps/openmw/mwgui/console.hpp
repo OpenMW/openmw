@@ -89,6 +89,8 @@ namespace MWGui
     /// Error message
     void printError(const std::string &msg);
 
+    void execute (const std::string& command);
+
   private:
 
     void keyPress(MyGUI::WidgetPtr _sender,
