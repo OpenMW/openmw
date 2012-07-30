@@ -45,6 +45,7 @@ namespace MWRender{
 
         void update (float duration);
 
+        void updateObjectCell(const MWWorld::Ptr &ptr);
     };
 }
 #endif

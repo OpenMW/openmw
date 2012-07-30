@@ -220,6 +220,11 @@ namespace MWWorld
 
             virtual Ptr
             copyToCell(const Ptr &ptr, CellStore &cell, const ESM::Position &pos) const;
+            
+            virtual bool
+            isActor() const {
+                return false;
+            }
     };
 }
 

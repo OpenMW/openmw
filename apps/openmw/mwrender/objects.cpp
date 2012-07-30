@@ -11,6 +11,7 @@
 #include <components/settings/settings.hpp>
 
 #include "../mwworld/ptr.hpp"
+#include "../mwworld/class.hpp"
 
 #include "renderconst.hpp"
 
@@ -474,3 +475,23 @@ void Objects::rebuildStaticGeometry()
         it->second->build();
     }
 }
+
+void
+Objects::updateObjectCell(const MWWorld::Ptr &ptr)
+{
+    Ogre::SceneNode *node;
+    MWWorld::CellStore *newCell = ptr.getCell();
+
+    if(mCellSceneNodes.find(newCell) == mCellSceneNodes.end()) {
+        node = mMwRoot->createChildSceneNode();
+        mCellSceneNodes[newCell] = node;
+    } else {
+        node = mCellSceneNodes[newCell];
+    }
+    node->addChild(ptr.getRefData().getBaseNode());
+
+    /// \note Still unaware how to move aabb and static w/o full rebuild,
+    /// moving static objects may cause problems
+    insertMesh(ptr, MWWorld::Class::get(ptr).getModel(ptr));
+}
+

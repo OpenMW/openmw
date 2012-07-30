@@ -132,3 +132,24 @@ void Actors::update (float duration){
     for(std::map<MWWorld::Ptr, Animation*>::iterator iter = mAllActors.begin(); iter != mAllActors.end(); iter++)
         iter->second->runAnimation(duration);
 }
+
+void
+Actors::updateObjectCell(const MWWorld::Ptr &ptr)
+{
+    Ogre::SceneNode *node;
+    MWWorld::CellStore *newCell = ptr.getCell();
+
+    if(mCellSceneNodes.find(newCell) == mCellSceneNodes.end()) {
+        node = mMwRoot->createChildSceneNode();
+        mCellSceneNodes[newCell] = node;
+    } else {
+        node = mCellSceneNodes[newCell];
+    }
+    node->addChild(ptr.getRefData().getBaseNode());
+    if (Animation *anim = mAllActors[ptr]) {
+        /// \note Update key (Ptr's are compared only with refdata so mCell
+        /// on key is outdated), maybe redundant
+        mAllActors.erase(ptr);
+        mAllActors[ptr] = anim;
+    }
+}

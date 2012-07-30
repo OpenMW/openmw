@@ -256,8 +256,25 @@ void RenderingManager::scaleObject (const MWWorld::Ptr& ptr, const Ogre::Vector3
 void RenderingManager::rotateObject (const MWWorld::Ptr& ptr, const::Ogre::Quaternion& orientation){
 
 }
-void RenderingManager::moveObjectToCell (const MWWorld::Ptr& ptr, const Ogre::Vector3& position, MWWorld::Ptr::CellStore *store){
 
+void
+RenderingManager::moveObjectToCell(
+    const MWWorld::Ptr& ptr,
+    const Ogre::Vector3& pos,
+    MWWorld::CellStore *store)
+{
+    Ogre::SceneNode *child =
+        mRendering.getScene()->getSceneNode(ptr.getRefData().getHandle());
+
+    Ogre::SceneNode *parent = child->getParentSceneNode();
+    parent->removeChild(child);
+
+    if (MWWorld::Class::get(ptr).isActor()) {
+        mActors.updateObjectCell(ptr);
+    } else {
+        mObjects.updateObjectCell(ptr);
+    }
+    child->setPosition(pos);
 }
 
 void RenderingManager::update (float duration){
