@@ -8,10 +8,19 @@
 #include <OgreCompositorInstance.h>
 #include <OgreCompositorChain.h>
 #include <OgreRoot.h>
+#include <OgreOverlayManager.h>
+#include <OgreOverlayContainer.h>
+#include <OgreOverlayElement.h>
 
 #include "sky.hpp"
 #include "renderingmanager.hpp"
 #include "compositors.hpp"
+
+#include <extern/shiny/Main/Factory.hpp>
+#include <extern/shiny/Platforms/Ogre/OgreMaterial.hpp>
+
+#include "../mwbase/environment.hpp"
+#include "../mwbase/world.hpp"
 
 using namespace Ogre;
 
@@ -22,9 +31,13 @@ Water::Water (Ogre::Camera *camera, RenderingManager* rend, const ESM::Cell* cel
     mCamera (camera), mSceneManager (camera->getSceneManager()),
     mIsUnderwater(false), mVisibilityFlags(0),
     mReflectionTarget(0), mActive(1), mToggled(1),
-    mReflectionRenderActive(false), mRendering(rend)
+    mReflectionRenderActive(false), mRendering(rend),
+    mOldFarClip(0), mOldFarClip2(0),
+    mWaterTimer(0.f)
 {
     mSky = rend->getSkyManager();
+
+    mMaterial = MaterialManager::getSingleton().getByName("Water");
 
     mTop = cell->water;
 
@@ -40,7 +53,6 @@ Water::Water (Ogre::Camera *camera, RenderingManager* rend, const ESM::Cell* cel
     mWater->setCastShadows(false);
 
     mWaterNode = mSceneManager->getRootSceneNode()->createChildSceneNode();
-    mWaterNode->setPosition(0, mTop, 0);
 
     mReflectionCamera = mSceneManager->createCamera("ReflectionCamera");
 
@@ -53,27 +65,38 @@ Water::Water (Ogre::Camera *camera, RenderingManager* rend, const ESM::Cell* cel
     applyRTT();
     applyVisibilityMask();
 
-
-    createMaterial();
     mWater->setMaterial(mMaterial);
 
-    mUnderwaterEffect = Settings::Manager::getBool("underwater effect", "Water");
+    /*
+    Ogre::Entity* underwaterDome = mSceneManager->createEntity ("underwater_dome.mesh");
+    underwaterDome->setRenderQueueGroup (RQG_UnderWater);
+    mUnderwaterDome = mSceneManager->getRootSceneNode ()->createChildSceneNode ();
+    mUnderwaterDome->attachObject (underwaterDome);
+    mUnderwaterDome->setScale(10000,10000,10000);
+    mUnderwaterDome->setVisible(false);
+    underwaterDome->setMaterialName("Underwater_Dome");
+    */
 
     mSceneManager->addRenderQueueListener(this);
 
     assignTextures();
 
+    setHeight(mTop);
+
+    sh::MaterialInstance* m = sh::Factory::getInstance ().getMaterialInstance ("Water");
+    m->setListener (this);
+
 
     // ----------------------------------------------------------------------------------------------
     // ---------------------------------- reflection debug overlay ----------------------------------
     // ----------------------------------------------------------------------------------------------
-    /*
+/*
     if (Settings::Manager::getBool("shader", "Water"))
     {
         OverlayManager& mgr = OverlayManager::getSingleton();
         Overlay* overlay;
         // destroy if already exists
-        if (overlay = mgr.getByName("ReflectionDebugOverlay"))
+        if ((overlay = mgr.getByName("ReflectionDebugOverlay")))
             mgr.destroy(overlay);
 
         overlay = mgr.create("ReflectionDebugOverlay");
@@ -85,18 +108,17 @@ Water::Water (Ogre::Camera *camera, RenderingManager* rend, const ESM::Cell* cel
             ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
 
         debugMat->getTechnique(0)->getPass(0)->setLightingEnabled(false);
-        TextureUnitState *t = debugMat->getTechnique(0)->getPass(0)->createTextureUnitState(tex->getName());
-        t->setTextureAddressingMode(TextureUnitState::TAM_CLAMP);
+        debugMat->getTechnique(0)->getPass(0)->createTextureUnitState(mReflectionTexture->getName());
 
         OverlayContainer* debugPanel;
 
         // destroy container if exists
         try
         {
-            if (debugPanel =
+            if ((debugPanel =
                 static_cast<OverlayContainer*>(
                     mgr.getOverlayElement("Ogre/ReflectionDebugTexPanel"
-                )))
+                ))))
                 mgr.destroyOverlayElement(debugPanel);
         }
         catch (Ogre::Exception&) {}
@@ -110,13 +132,15 @@ Water::Water (Ogre::Camera *camera, RenderingManager* rend, const ESM::Cell* cel
         overlay->add2D(debugPanel);
         overlay->show();
     }
-    */
+*/
 }
 
 void Water::setActive(bool active)
 {
     mActive = active;
     updateVisible();
+
+    sh::Factory::getInstance ().setSharedParameter ("waterEnabled", sh::makeProperty<sh::FloatValue> (new sh::FloatValue(active ? 1.0 : 0.0)));
 }
 
 Water::~Water()
@@ -144,8 +168,14 @@ void Water::changeCell(const ESM::Cell* cell)
 void Water::setHeight(const float height)
 {
     mTop = height;
+
     mWaterPlane = Plane(Vector3::UNIT_Y, height);
+
+    // small error due to reflection texture size & reflection distortion
+    mErrorPlane = Plane(Vector3::UNIT_Y, height - 5);
+
     mWaterNode->setPosition(0, height, 0);
+    sh::Factory::getInstance ().setSharedParameter ("waterLevel", sh::makeProperty<sh::FloatValue>(new sh::FloatValue(height)));
 }
 
 void Water::toggle()
@@ -158,36 +188,16 @@ void Water::checkUnderwater(float y)
 {
     if (!mActive)
     {
-        mRendering->getCompositors()->setCompositorEnabled(mCompositorName, false);
         return;
     }
 
     if ((mIsUnderwater && y > mTop) || !mWater->isVisible() || mCamera->getPolygonMode() != Ogre::PM_SOLID)
     {
-        mRendering->getCompositors()->setCompositorEnabled(mCompositorName, false);
-
-        // tell the shader we are not underwater
-        Ogre::Pass* pass = mMaterial->getTechnique(0)->getPass(0);
-        if (pass->hasFragmentProgram() && pass->getFragmentProgramParameters()->_findNamedConstantDefinition("isUnderwater", false))
-            pass->getFragmentProgramParameters()->setNamedConstant("isUnderwater", Real(0));
-
-        mWater->setRenderQueueGroup(RQG_Water);
-
         mIsUnderwater = false;
     }
 
     if (!mIsUnderwater && y < mTop && mWater->isVisible() && mCamera->getPolygonMode() == Ogre::PM_SOLID)
     {
-        if (mUnderwaterEffect)
-            mRendering->getCompositors()->setCompositorEnabled(mCompositorName, true);
-
-        // tell the shader we are underwater
-        Ogre::Pass* pass = mMaterial->getTechnique(0)->getPass(0);
-        if (pass->hasFragmentProgram() && pass->getFragmentProgramParameters()->_findNamedConstantDefinition("isUnderwater", false))
-            pass->getFragmentProgramParameters()->setNamedConstant("isUnderwater", Real(1));
-
-        mWater->setRenderQueueGroup(RQG_UnderWater);
-
         mIsUnderwater = true;
     }
 
@@ -211,12 +221,11 @@ void Water::preRenderTargetUpdate(const RenderTargetEvent& evt)
         mReflectionCamera->setFOVy(mCamera->getFOVy());
         mReflectionRenderActive = true;
 
-        /// \todo For some reason this camera is delayed for 1 frame, which causes ugly sky reflection behaviour..
-        /// to circumvent this we just scale the sky up, so it's not that noticable
+        /// \todo the reflection render (and probably all renderingmanager-updates) lag behind 1 camera frame for some reason
         Vector3 pos = mCamera->getRealPosition();
         pos.y = mTop*2 - pos.y;
         mSky->setSkyPosition(pos);
-        mSky->scaleSky(mCamera->getFarClipDistance() / 5000.f);
+        mSky->scaleSky(mCamera->getFarClipDistance() / 50.f);
         mReflectionCamera->enableReflection(mWaterPlane);
     }
 }
@@ -233,48 +242,18 @@ void Water::postRenderTargetUpdate(const RenderTargetEvent& evt)
     }
 }
 
-void Water::createMaterial()
-{
-    if (mReflectionTarget == 0)
-    {
-        mMaterial = MaterialManager::getSingleton().getByName("Water_Fallback");
-    }
-    else
-    {
-        mMaterial = MaterialManager::getSingleton().getByName("Water");
-        mMaterial->getTechnique(0)->getPass(0)->getTextureUnitState(0)->setTexture(mReflectionTexture);
-    }
-
-    // these have to be set in code
-    std::string textureNames[32];
-    for (int i=0; i<32; ++i)
-    {
-        textureNames[i] = "textures\\water\\water" + StringConverter::toString(i, 2, '0') + ".dds";
-    }
-    Ogre::Technique* tech;
-    if (mReflectionTarget == 0)
-        tech = mMaterial->getTechnique(0);
-    else
-        tech = mMaterial->getTechnique(1);
-
-    tech->getPass(0)->getTextureUnitState(0)->setAnimatedTextureName(textureNames, 32, 2);
-}
-
 void Water::assignTextures()
 {
     if (Settings::Manager::getBool("shader", "Water"))
     {
+
         CompositorInstance* compositor = CompositorManager::getSingleton().getCompositorChain(mRendering->getViewport())->getCompositor("gbuffer");
 
         TexturePtr colorTexture = compositor->getTextureInstance("mrt_output", 0);
-        TextureUnitState* tus = mMaterial->getTechnique(0)->getPass(0)->getTextureUnitState("refractionMap");
-        if (tus != 0)
-            tus->setTexture(colorTexture);
+        sh::Factory::getInstance ().setTextureAlias ("WaterRefraction", colorTexture->getName());
 
         TexturePtr depthTexture = compositor->getTextureInstance("mrt_output", 1);
-        tus = mMaterial->getTechnique(0)->getPass(0)->getTextureUnitState("depthMap");
-        if (tus != 0)
-            tus->setTexture(depthTexture);
+        sh::Factory::getInstance ().setTextureAlias ("SceneDepth", depthTexture->getName());
     }
 }
 
@@ -288,7 +267,7 @@ void Water::updateVisible()
 {
     mWater->setVisible(mToggled && mActive);
     if (mReflectionTarget)
-        mReflectionTarget->setActive(mToggled && mActive && !mIsUnderwater);
+        mReflectionTarget->setActive(mToggled && mActive);
 }
 
 void Water::renderQueueStarted (Ogre::uint8 queueGroupId, const Ogre::String &invocation, bool &skipThisInvocation)
@@ -296,22 +275,48 @@ void Water::renderQueueStarted (Ogre::uint8 queueGroupId, const Ogre::String &in
     // We don't want the sky to get clipped by custom near clip plane (the water plane)
     if (queueGroupId < 20 && mReflectionRenderActive)
     {
+        mOldFarClip = mReflectionCamera->getFarClipDistance ();
         mReflectionCamera->disableCustomNearClipPlane();
+        mReflectionCamera->setFarClipDistance (1000000000);
         Root::getSingleton().getRenderSystem()->_setProjectionMatrix(mReflectionCamera->getProjectionMatrixRS());
     }
+    else if (queueGroupId == RQG_UnderWater)
+    {/*
+        mOldFarClip2 = mCamera->getFarClipDistance ();
+        mCamera->setFarClipDistance (1000000000);
+        Root::getSingleton().getRenderSystem()->_setProjectionMatrix(mCamera->getProjectionMatrixRS());
+    */}
 }
 
 void Water::renderQueueEnded (Ogre::uint8 queueGroupId, const Ogre::String &invocation, bool &repeatThisInvocation)
 {
     if (queueGroupId < 20 && mReflectionRenderActive)
     {
-        mReflectionCamera->enableCustomNearClipPlane(mWaterPlane);
+        mReflectionCamera->setFarClipDistance (mOldFarClip);
+        if (!mIsUnderwater)
+            mReflectionCamera->enableCustomNearClipPlane(mErrorPlane);
         Root::getSingleton().getRenderSystem()->_setProjectionMatrix(mReflectionCamera->getProjectionMatrixRS());
     }
+    if (queueGroupId == RQG_UnderWater)
+    {
+        /*
+        mCamera->setFarClipDistance (mOldFarClip2);
+        Root::getSingleton().getRenderSystem()->_setProjectionMatrix(mCamera->getProjectionMatrixRS());
+    */}
 }
 
-void Water::update()
+void Water::update(float dt)
 {
+    /*
+    Ogre::Vector3 pos = mCamera->getDerivedPosition ();
+    pos.y = -mWaterPlane.d;
+    mUnderwaterDome->setPosition (pos);
+    */
+
+    mWaterTimer += dt / 30.0 * MWBase::Environment::get().getWorld()->getTimeScaleFactor();
+    sh::Factory::getInstance ().setSharedParameter ("waterTimer", sh::makeProperty<sh::FloatValue>(new sh::FloatValue(mWaterTimer)));
+
+    mRendering->getSkyManager ()->setGlareEnabled (!mIsUnderwater);
 }
 
 void Water::applyRTT()
@@ -336,14 +341,14 @@ void Water::applyRTT()
         vp->setBackgroundColour(ColourValue(0.8f, 0.9f, 1.0f));
         vp->setShadowsEnabled(false);
         // use fallback techniques without shadows and without mrt (currently not implemented for sky and terrain)
-        //vp->setMaterialScheme("Fallback");
+        vp->setMaterialScheme("water_reflection");
         rtt->addListener(this);
         rtt->setActive(true);
 
         mReflectionTarget = rtt;
-    }
 
-    mCompositorName = RenderingManager::useMRT() ? "Underwater" : "UnderwaterNoMRT";
+        sh::Factory::getInstance ().setTextureAlias ("WaterReflection", mReflectionTexture->getName());
+    }
 }
 
 void Water::applyVisibilityMask()
@@ -386,12 +391,36 @@ void Water::processChangedSettings(const Settings::CategorySettingVector& settin
     {
         applyRTT();
         applyVisibilityMask();
-        createMaterial();
         mWater->setMaterial(mMaterial);
         assignTextures();
     }
     if (applyVisMask)
         applyVisibilityMask();
+}
+
+void Water::requestedConfiguration (sh::MaterialInstance* m, const std::string& configuration)
+{
+}
+
+void Water::createdConfiguration (sh::MaterialInstance* m, const std::string& configuration)
+{
+    if (configuration == "local_map" || !Settings::Manager::getBool("shader", "Water"))
+    {
+        // for simple water, set animated texture names
+        // these have to be set in code
+        std::string textureNames[32];
+        for (int i=0; i<32; ++i)
+        {
+            textureNames[i] = "textures\\water\\water" + StringConverter::toString(i, 2, '0') + ".dds";
+        }
+
+        Ogre::Technique* t = static_cast<sh::OgreMaterial*>(m->getMaterial())->getOgreTechniqueForConfiguration(configuration);
+        if (t->getPass(0)->getNumTextureUnitStates () == 0)
+            return;
+        t->getPass(0)->getTextureUnitState(0)->setAnimatedTextureName(textureNames, 32, 2);
+        t->getPass(0)->setDepthWriteEnabled (false);
+        t->getPass(0)->setSceneBlending (Ogre::SBT_TRANSPARENT_ALPHA);
+    }
 }
 
 } // namespace

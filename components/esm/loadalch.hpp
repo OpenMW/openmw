@@ -24,7 +24,9 @@ struct Potion
     std::string name, model, icon, script;
     EffectList effects;
 
-    void load(ESMReader &esm);
+    std::string mId;
+
+    void load(ESMReader &esm, const std::string& id);
 };
 }
 #endif

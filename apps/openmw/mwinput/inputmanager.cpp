@@ -102,15 +102,15 @@ private:
     {
         if (windows.isGuiMode()) return;
 
-        DrawState state = player.getDrawState();
-        if (state == DrawState_Weapon || state == DrawState_Nothing)
+        MWMechanics::DrawState_ state = player.getDrawState();
+        if (state == MWMechanics::DrawState_Weapon || state == MWMechanics::DrawState_Nothing)
         {
-            player.setDrawState(DrawState_Spell);
+            player.setDrawState(MWMechanics::DrawState_Spell);
             std::cout << "Player has now readied his hands for spellcasting!\n";
         }
         else
         {
-            player.setDrawState(DrawState_Nothing);
+            player.setDrawState(MWMechanics::DrawState_Nothing);
             std::cout << "Player does not have any kind of attack ready now.\n";
         }
     }
@@ -119,15 +119,15 @@ private:
     {
         if (windows.isGuiMode()) return;
 
-        DrawState state = player.getDrawState();
-        if (state == DrawState_Spell || state == DrawState_Nothing)
+        MWMechanics::DrawState_ state = player.getDrawState();
+        if (state == MWMechanics::DrawState_Spell || state == MWMechanics::DrawState_Nothing)
         {
-            player.setDrawState(DrawState_Weapon);
+            player.setDrawState(MWMechanics::DrawState_Weapon);
             std::cout << "Player is now drawing his weapon.\n";
         }
         else
         {
-            player.setDrawState(DrawState_Nothing);
+            player.setDrawState(MWMechanics::DrawState_Nothing);
             std::cout << "Player does not have any kind of attack ready now.\n";
         }
     }
@@ -336,7 +336,7 @@ private:
       poller.bind(A_MoveRight, KC_D);
       poller.bind(A_MoveForward, KC_W);
       poller.bind(A_MoveBackward, KC_S);
-      
+
       poller.bind(A_Jump, KC_E);
       poller.bind(A_Crouch, KC_LCONTROL);
     }

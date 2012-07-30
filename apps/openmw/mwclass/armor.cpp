@@ -27,31 +27,33 @@ namespace MWClass
 {
     void Armor::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const
     {
-        MWWorld::LiveCellRef<ESM::Armor> *ref =
-            ptr.get<ESM::Armor>();
-
-        assert (ref->base != NULL);
-        const std::string &model = ref->base->model;
-
-        if (!model.empty())
-        {
+        const std::string model = getModel(ptr);
+        if (!model.empty()) {
             MWRender::Objects& objects = renderingInterface.getObjects();
             objects.insertBegin(ptr, ptr.getRefData().isEnabled(), false);
-            objects.insertMesh(ptr, "meshes\\" + model);
+            objects.insertMesh(ptr, model);
         }
     }
 
     void Armor::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics) const
     {
+        const std::string model = getModel(ptr);
+        if(!model.empty()) {
+            physics.insertObjectPhysics(ptr, model);
+        }
+    }
+    
+    std::string Armor::getModel(const MWWorld::Ptr &ptr) const
+    {
         MWWorld::LiveCellRef<ESM::Armor> *ref =
             ptr.get<ESM::Armor>();
+        assert(ref->base != NULL);
 
         const std::string &model = ref->base->model;
-        assert (ref->base != NULL);
-        if(!model.empty()){
-            physics.insertObjectPhysics(ptr, "meshes\\" + model);
+        if (!model.empty()) {
+            return "meshes\\" + model;
         }
-
+        return "";
     }
 
     std::string Armor::getName (const MWWorld::Ptr& ptr) const
@@ -273,5 +275,14 @@ namespace MWClass
         MWBase::Environment::get().getSoundManager()->playSound (getUpSoundId(ptr), 1.0, 1.0);
 
         return boost::shared_ptr<MWWorld::Action>(new MWWorld::ActionEquip(ptr));
+    }
+
+    MWWorld::Ptr
+    Armor::copyToCellImpl(const MWWorld::Ptr &ptr, MWWorld::CellStore &cell) const
+    {
+        MWWorld::LiveCellRef<ESM::Armor> *ref =
+            ptr.get<ESM::Armor>();
+
+        return MWWorld::Ptr(&cell.armors.insert(*ref), &cell);
     }
 }

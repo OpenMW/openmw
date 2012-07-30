@@ -10,6 +10,7 @@
 #include "../mwbase/world.hpp"
 
 #include "../mwworld/class.hpp"
+#include "../mwworld/player.hpp"
 
 #include "../mwgui/window_manager.hpp"
 
@@ -236,7 +237,7 @@ namespace MWScript
         if (!mAction.get())
             throw std::runtime_error ("activation failed, because no action to perform");
 
-        mAction->execute();
+        mAction->execute (MWBase::Environment::get().getWorld()->getPlayer().getPlayer());
         mActivationHandled = true;
     }
 

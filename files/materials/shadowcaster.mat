@@ -1,0 +1,35 @@
+material openmw_shadowcaster_default
+{
+    create_configuration Default
+    allow_fixed_function false
+    pass
+    {
+        fog_override true
+
+        vertex_program openmw_shadowcaster_vertex
+        fragment_program openmw_shadowcaster_fragment
+
+        shader_properties
+        {
+            shadow_transparency true
+        }
+    }
+}
+
+material openmw_shadowcaster_noalpha
+{
+    create_configuration Default
+    allow_fixed_function false
+    pass
+    {
+        fog_override true
+
+        vertex_program openmw_shadowcaster_vertex
+        fragment_program openmw_shadowcaster_fragment
+
+        shader_properties
+        {
+            shadow_transparency false
+        }
+    }
+}

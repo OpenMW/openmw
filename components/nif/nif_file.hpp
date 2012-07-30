@@ -24,134 +24,292 @@
 #ifndef _NIF_FILE_H_
 #define _NIF_FILE_H_
 
-#include <libs/mangle/stream/stream.hpp>
-#include <libs/mangle/stream/filters/buffer_stream.hpp>
-#include <components/misc/slice_array.hpp>
+#include <OgreResourceGroupManager.h>
+#include <OgreDataStream.h>
+#include <OgreVector2.h>
+#include <OgreVector3.h>
+#include <OgreVector4.h>
+#include <OgreMatrix3.h>
+#include <OgreQuaternion.h>
+#include <OgreStringConverter.h>
 
 #include <stdexcept>
 #include <vector>
-#include <string>
-#include <assert.h>
+#include <cassert>
 
 #include "record.hpp"
 #include "nif_types.hpp"
-
-using namespace Mangle::Stream;
 
 namespace Nif
 {
 
 class NIFFile
 {
-  enum NIFVersion
-    {
-      VER_MW    = 0x04000002    // Morrowind NIFs
+    enum NIFVersion {
+        VER_MW    = 0x04000002    // Morrowind NIFs
     };
 
-  /// Nif file version
-  int ver;
+    /// Nif file version
+    int ver;
 
-  /// Input stream
-  StreamPtr inp;
+    /// Input stream
+    Ogre::DataStreamPtr inp;
 
-  /// File name, used for error messages
-  std::string filename;
+    /// File name, used for error messages
+    std::string filename;
 
-  /// Record list
-  std::vector<Record*> records;
+    /// Record list
+    std::vector<Record*> records;
 
-  /// Parse the file
-  void parse();
+    /// Parse the file
+    void parse();
 
- public:
-  /// Used for error handling
-  void fail(const std::string &msg)
+    uint8_t read_byte()
     {
-      std::string err = "NIFFile Error: " + msg;
-      err += "\nFile: " + filename;
-      throw std::runtime_error(err);
+        uint8_t byte;
+        if(inp->read(&byte, 1) != 1) return 0;
+        return byte;
+    }
+    uint16_t read_le16()
+    {
+        uint8_t buffer[2];
+        if(inp->read(buffer, 2) != 2) return 0;
+        return buffer[0] | (buffer[1]<<8);
+    }
+    uint32_t read_le32()
+    {
+        uint8_t buffer[4];
+        if(inp->read(buffer, 4) != 4) return 0;
+        return buffer[0] | (buffer[1]<<8) | (buffer[2]<<16) | (buffer[3]<<24);
+    }
+    float read_le32f()
+    {
+        union {
+            uint32_t i;
+            float f;
+        } u = { read_le32() };
+        return u.f;
     }
 
-  /// Open a NIF stream. The name is used for error messages.
-  NIFFile(StreamPtr nif, const std::string &name)
-    : filename(name)
+public:
+    /// Used for error handling
+    void fail(const std::string &msg)
     {
-      /* Load the entire file into memory. This allows us to use
-         direct pointers to the data arrays in the NIF, instead of
-         individually allocating and copying each one.
-
-         The NIF data is only stored temporarily in memory, since once
-         the mesh data is loaded it is siphoned into OGRE and
-         deleted. For that reason, we might improve this further and
-         use a shared region/pool based allocation scheme in the
-         future, especially since only one NIFFile will ever be loaded
-         at any given time.
-      */
-      inp = StreamPtr(new BufferStream(nif));
-
-      parse();
+        std::string err = "NIFFile Error: " + msg;
+        err += "\nFile: " + filename;
+        throw std::runtime_error(err);
     }
 
-  ~NIFFile()
+    void warn(const std::string &msg)
     {
-      for(std::size_t i=0; i<records.size(); i++)
-        {
-          delete records[i];
-        }
+        std::cerr<< "NIFFile Warning: "<<msg <<std::endl
+                 << "File: "<<filename <<std::endl;
     }
 
-  /// Get a given record
-  Record *getRecord(int index)
-  {
-    assert(index >= 0 && index < static_cast<int> (records.size()));
-    Record *res = records[index];
-    assert(res != NULL);
-    return res;
-  }
+    /// Open a NIF stream. The name is used for error messages.
+    NIFFile(const std::string &name)
+      : filename(name)
+    {
+        inp = Ogre::ResourceGroupManager::getSingleton().openResource(name);
+        parse();
+    }
 
-  /// Number of records
-  int numRecords() { return records.size(); }
+    ~NIFFile()
+    {
+        for(std::size_t i=0; i<records.size(); i++)
+            delete records[i];
+    }
 
-  /* ************************************************
+    /// Get a given record
+    Record *getRecord(size_t index)
+    {
+        Record *res = records.at(index);
+        assert(res != NULL);
+        return res;
+    }
 
+    /// Number of records
+    int numRecords() { return records.size(); }
+
+    /*************************************************
                Parser functions
+    ****************************************************/
 
-  ****************************************************/
+    void skip(size_t size) { inp->skip(size); }
 
-  void skip(size_t size) { inp->getPtr(size); }
-
-  template<class X> const X* getPtr() { return (const X*)inp->getPtr(sizeof(X)); }
-  template<class X> X getType() { return *getPtr<X>(); }
-  unsigned short getShort() { return getType<unsigned short>(); }
-  int getInt() { return getType<int>(); }
-  float getFloat() { return getType<float>(); }
-  char getByte() { return getType<char>(); }
-
-  template<class X>
-  Misc::SliceArray<X> getArrayLen(int num)
-    { return Misc::SliceArray<X>((const X*)inp->getPtr(num*sizeof(X)),num); }
-
-  template<class X>
-  Misc::SliceArray<X> getArray()
+    char getChar() { return read_byte(); }
+    short getShort() { return read_le16(); }
+    unsigned short getUShort() { return read_le16(); }
+    int getInt() { return read_le32(); }
+    float getFloat() { return read_le32f(); }
+    Ogre::Vector2 getVector2()
     {
-      int len = getInt();
-      return getArrayLen<X>(len);
+        float a[2];
+        for(size_t i = 0;i < 2;i++)
+            a[i] = getFloat();
+        return Ogre::Vector2(a);
+    }
+    Ogre::Vector3 getVector3()
+    {
+        float a[3];
+        for(size_t i = 0;i < 3;i++)
+            a[i] = getFloat();
+        return Ogre::Vector3(a);
+    }
+    Ogre::Vector4 getVector4()
+    {
+        float a[4];
+        for(size_t i = 0;i < 4;i++)
+            a[i] = getFloat();
+        return Ogre::Vector4(a);
+    }
+    Ogre::Matrix3 getMatrix3()
+    {
+        Ogre::Real a[3][3];
+        for(size_t i = 0;i < 3;i++)
+        {
+            for(size_t j = 0;j < 3;j++)
+                a[i][j] = Ogre::Real(getFloat());
+        }
+        return Ogre::Matrix3(a);
+    }
+    Ogre::Quaternion getQuaternion()
+    {
+        float a[4];
+        for(size_t i = 0;i < 4;i++)
+            a[i] = getFloat();
+        return Ogre::Quaternion(a);
+    }
+    Transformation getTrafo()
+    {
+        Transformation t;
+        t.pos = getVector3();
+        t.rotation = getMatrix3();
+        t.scale = getFloat();
+        return t;
     }
 
-  Misc::SString getString() { return getArray<char>(); }
+    std::string getString(size_t length)
+    {
+        std::string str;
+        str.resize(length);
+        if(inp->read(&str[0], length) != length)
+            return std::string();
+        return str.substr(0, str.find('\0'));
+    }
+    std::string getString()
+    {
+        size_t size = read_le32();
+        return getString(size);
+    }
 
-  const Vector *getVector() { return getPtr<Vector>(); }
-  const Matrix *getMatrix() { return getPtr<Matrix>(); }
-  const Transformation *getTrafo() { return getPtr<Transformation>(); }
-  const Vector4 *getVector4() { return getPtr<Vector4>(); }
-
-  Misc::FloatArray getFloatLen(int num)
-    { return getArrayLen<float>(num); }
-
-  // For fixed-size strings where you already know the size
-  const char *getString(int size)
-    { return (const char*)inp->getPtr(size); }
+    void getShorts(std::vector<short> &vec, size_t size)
+    {
+        vec.resize(size);
+        for(size_t i = 0;i < vec.size();i++)
+            vec[i] = getShort();
+    }
+    void getFloats(std::vector<float> &vec, size_t size)
+    {
+        vec.resize(size);
+        for(size_t i = 0;i < vec.size();i++)
+            vec[i] = getFloat();
+    }
+    void getVector2s(std::vector<Ogre::Vector2> &vec, size_t size)
+    {
+        vec.resize(size);
+        for(size_t i = 0;i < vec.size();i++)
+            vec[i] = getVector2();
+    }
+    void getVector3s(std::vector<Ogre::Vector3> &vec, size_t size)
+    {
+        vec.resize(size);
+        for(size_t i = 0;i < vec.size();i++)
+            vec[i] = getVector3();
+    }
+    void getVector4s(std::vector<Ogre::Vector4> &vec, size_t size)
+    {
+        vec.resize(size);
+        for(size_t i = 0;i < vec.size();i++)
+            vec[i] = getVector4();
+    }
 };
+
+
+template<typename T>
+struct KeyT {
+    float mTime;
+    T mValue;
+    T mForwardValue;  // Only for Quadratic interpolation
+    T mBackwardValue; // Only for Quadratic interpolation
+    float mTension;    // Only for TBC interpolation
+    float mBias;       // Only for TBC interpolation
+    float mContinuity; // Only for TBC interpolation
+};
+typedef KeyT<float> FloatKey;
+typedef KeyT<Ogre::Vector3> Vector3Key;
+typedef KeyT<Ogre::Vector4> Vector4Key;
+typedef KeyT<Ogre::Quaternion> QuaternionKey;
+
+template<typename T, T (NIFFile::*getValue)()>
+struct KeyListT {
+    typedef std::vector< KeyT<T> > VecType;
+
+    static const int sLinearInterpolation = 1;
+    static const int sQuadraticInterpolation = 2;
+    static const int sTBCInterpolation = 3;
+
+    int mInterpolationType;
+    VecType mKeys;
+
+    void read(NIFFile *nif, bool force=false)
+    {
+        size_t count = nif->getInt();
+        if(count == 0 && !force)
+            return;
+
+        mInterpolationType = nif->getInt();
+        mKeys.resize(count);
+        if(mInterpolationType == sLinearInterpolation)
+        {
+            for(size_t i = 0;i < count;i++)
+            {
+                KeyT<T> &key = mKeys[i];
+                key.mTime = nif->getFloat();
+                key.mValue = (nif->*getValue)();
+            }
+        }
+        else if(mInterpolationType == sQuadraticInterpolation)
+        {
+            for(size_t i = 0;i < count;i++)
+            {
+                KeyT<T> &key = mKeys[i];
+                key.mTime = nif->getFloat();
+                key.mValue = (nif->*getValue)();
+                key.mForwardValue = (nif->*getValue)();
+                key.mBackwardValue = (nif->*getValue)();
+            }
+        }
+        else if(mInterpolationType == sTBCInterpolation)
+        {
+            for(size_t i = 0;i < count;i++)
+            {
+                KeyT<T> &key = mKeys[i];
+                key.mTime = nif->getFloat();
+                key.mValue = (nif->*getValue)();
+                key.mTension = nif->getFloat();
+                key.mBias = nif->getFloat();
+                key.mContinuity = nif->getFloat();
+            }
+        }
+        else
+            nif->warn("Unhandled interpolation type: "+Ogre::StringConverter::toString(mInterpolationType));
+    }
+};
+typedef KeyListT<float,&NIFFile::getFloat> FloatKeyList;
+typedef KeyListT<Ogre::Vector3,&NIFFile::getVector3> Vector3KeyList;
+typedef KeyListT<Ogre::Vector4,&NIFFile::getVector4> Vector4KeyList;
+typedef KeyListT<Ogre::Quaternion,&NIFFile::getQuaternion> QuaternionKeyList;
 
 } // Namespace
 #endif

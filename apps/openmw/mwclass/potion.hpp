@@ -7,9 +7,12 @@ namespace MWClass
 {
     class Potion : public MWWorld::Class
     {
+            virtual MWWorld::Ptr
+            copyToCellImpl(const MWWorld::Ptr &ptr, MWWorld::CellStore &cell) const;
+
         public:
 
-             virtual void insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const;
+            virtual void insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const;
             ///< Add reference into a cell for rendering
 
             virtual void insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics) const;
@@ -34,6 +37,9 @@ namespace MWClass
             virtual int getValue (const MWWorld::Ptr& ptr) const;
             ///< Return trade value of the object. Throws an exception, if the object can't be traded.
 
+            virtual boost::shared_ptr<MWWorld::Action> use (const MWWorld::Ptr& ptr) const;
+            ///< Generate action for using via inventory menu
+
             static void registerSelf();
 
             virtual std::string getUpSoundId (const MWWorld::Ptr& ptr) const;
@@ -44,6 +50,8 @@ namespace MWClass
 
             virtual std::string getInventoryIcon (const MWWorld::Ptr& ptr) const;
             ///< Return name of inventory icon.
+
+            virtual std::string getModel(const MWWorld::Ptr &ptr) const;
     };
 }
 

@@ -1,9 +1,13 @@
-
 #include "cellstore.hpp"
 
 #include <iostream>
 
 #include <components/esm_store/store.hpp>
+
+#include "../mwbase/environment.hpp"
+#include "../mwbase/world.hpp"
+
+#include "ptr.hpp"
 
 namespace MWWorld
 {

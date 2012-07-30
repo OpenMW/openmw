@@ -1,8 +1,6 @@
 #ifndef GAME_MWBASE_WORLD_H
 #define GAME_MWBASE_WORLD_H
 
-#include <string>
-#include <map>
 #include <vector>
 
 #include <components/settings/settings.hpp>
@@ -55,6 +53,14 @@ namespace MWBase
 
             World& operator= (const World&);
             ///< not implemented
+
+        protected:
+
+            virtual void
+            placeObject(
+                const MWWorld::Ptr &ptr,
+                MWWorld::CellStore &cell,
+                const ESM::Position &pos) = 0;
 
         public:
 

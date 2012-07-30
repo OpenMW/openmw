@@ -12,6 +12,7 @@
 #include "../mwworld/actiontake.hpp"
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/physicssystem.hpp"
+#include "../mwworld/manualref.hpp"
 
 #include "../mwgui/window_manager.hpp"
 #include "../mwgui/tooltips.hpp"
@@ -27,32 +28,33 @@ namespace MWClass
 {
     void Miscellaneous::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const
     {
-        MWWorld::LiveCellRef<ESM::Miscellaneous> *ref =
-            ptr.get<ESM::Miscellaneous>();
-
-        assert (ref->base != NULL);
-        const std::string &model = ref->base->model;
-
-        if (!model.empty())
-        {
+        const std::string model = getModel(ptr);
+        if (!model.empty()) {
             MWRender::Objects& objects = renderingInterface.getObjects();
             objects.insertBegin(ptr, ptr.getRefData().isEnabled(), false);
-            objects.insertMesh(ptr, "meshes\\" + model);
+            objects.insertMesh(ptr, model);
         }
     }
 
     void Miscellaneous::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics) const
     {
+        const std::string model = getModel(ptr);
+        if(!model.empty()) {
+            physics.insertObjectPhysics(ptr, model);
+        }
+    }
+    
+    std::string Miscellaneous::getModel(const MWWorld::Ptr &ptr) const
+    {
         MWWorld::LiveCellRef<ESM::Miscellaneous> *ref =
             ptr.get<ESM::Miscellaneous>();
-
+        assert(ref->base != NULL);
 
         const std::string &model = ref->base->model;
-        assert (ref->base != NULL);
-        if(!model.empty()){
-            physics.insertObjectPhysics(ptr, "meshes\\" + model);
+        if (!model.empty()) {
+            return "meshes\\" + model;
         }
-
+        return "";
     }
 
     std::string Miscellaneous::getName (const MWWorld::Ptr& ptr) const
@@ -181,5 +183,40 @@ namespace MWClass
         info.text = text;
 
         return info;
+    }
+
+    MWWorld::Ptr
+    Miscellaneous::copyToCellImpl(const MWWorld::Ptr &ptr, MWWorld::CellStore &cell) const
+    {
+        MWWorld::Ptr newPtr;
+        
+        const ESMS::ESMStore &store =
+            MWBase::Environment::get().getWorld()->getStore();
+
+        if (MWWorld::Class::get(ptr).getName(ptr) == store.gameSettings.search("sGold")->str) {
+            int goldAmount = ptr.getRefData().getCount();
+
+            std::string base = "Gold_001";
+            if (goldAmount >= 100)
+                base = "Gold_100";
+            else if (goldAmount >= 25)
+                base = "Gold_025";
+            else if (goldAmount >= 10)
+                base = "Gold_010";
+            else if (goldAmount >= 5)
+                base = "Gold_005";
+
+            // Really, I have no idea why moving ref out of conditional
+            // scope causes list::push_back throwing std::bad_alloc
+            MWWorld::ManualRef newRef(store, base);
+            MWWorld::LiveCellRef<ESM::Miscellaneous> *ref =
+                newRef.getPtr().get<ESM::Miscellaneous>();
+            newPtr = MWWorld::Ptr(&cell.miscItems.insert(*ref), &cell);
+        } else {
+            MWWorld::LiveCellRef<ESM::Miscellaneous> *ref =
+                ptr.get<ESM::Miscellaneous>();
+            newPtr = MWWorld::Ptr(&cell.miscItems.insert(*ref), &cell);
+        }
+        return newPtr;
     }
 }

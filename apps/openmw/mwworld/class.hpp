@@ -22,7 +22,7 @@ namespace MWRender
 namespace MWMechanics
 {
     struct CreatureStats;
-    struct NpcStats;
+    class NpcStats;
     struct Movement;
 }
 
@@ -31,12 +31,18 @@ namespace MWGui
     struct ToolTipInfo;
 }
 
+namespace ESM
+{
+    struct Position;
+}
+
 namespace MWWorld
 {
     class Ptr;
     class ContainerStore;
     class InventoryStore;
     class PhysicsSystem;
+    class CellStore;
 
     /// \brief Base class for referenceable esm records
     class Class
@@ -50,6 +56,8 @@ namespace MWWorld
         protected:
 
             Class();
+
+            virtual Ptr copyToCellImpl(const Ptr &ptr, CellStore &cell) const;
 
         public:
 
@@ -165,6 +173,19 @@ namespace MWWorld
             /// effects). Throws an exception, if the object can't hold other objects.
             /// (default implementation: throws an exception)
 
+            virtual bool apply (const MWWorld::Ptr& ptr, const std::string& id,
+                const MWWorld::Ptr& actor) const;
+            ///< Apply \a id on \a ptr.
+            /// \param actor Actor that is resposible for the ID being applied to \a ptr.
+            /// \return Any effect?
+            ///
+            /// (default implementation: ignore and return false)
+
+            virtual void skillUsageSucceeded (const MWWorld::Ptr& ptr, int skill, int usageType) const;
+            ///< Inform actor \a ptr that a skill use has succeeded.
+            ///
+            /// (default implementations: throws an exception)
+
             static const Class& get (const std::string& key);
             ///< If there is no class for this \a key, an exception is thrown.
 
@@ -191,6 +212,14 @@ namespace MWWorld
             virtual void adjustScale(const MWWorld::Ptr& ptr,float& scale) const;
 
             virtual void adjustRotation(const MWWorld::Ptr& ptr,float& x,float& y,float& z) const;
+
+            virtual std::string getModel(const MWWorld::Ptr &ptr) const;
+
+            virtual Ptr
+            copyToCell(const Ptr &ptr, CellStore &cell) const;
+
+            virtual Ptr
+            copyToCell(const Ptr &ptr, CellStore &cell, const ESM::Position &pos) const;
     };
 }
 

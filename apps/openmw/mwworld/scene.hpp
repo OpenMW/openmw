@@ -1,15 +1,7 @@
 #ifndef GAME_MWWORLD_SCENE_H
 #define GAME_MWWORLD_SCENE_H
 
-#include <vector>
-#include <map>
-
-#include <boost/filesystem.hpp>
-
-#include <openengine/bullet/physic.hpp>
-
 #include "../mwrender/renderingmanager.hpp"
-#include "../mwrender/renderinginterface.hpp"
 
 #include "physicssystem.hpp"
 #include "globals.hpp"
@@ -96,10 +88,6 @@ namespace MWWorld
 
             void insertCell (Ptr::CellStore &cell);
 
-            /// this method is only meant for dropping objects into the gameworld from a container
-            /// and thus only handles object types that can be placed in a container
-            void insertObject (const Ptr& object, CellStore* cell);
-
             void update (float duration);
 
             void addObjectToScene (const Ptr& ptr);
@@ -107,6 +95,8 @@ namespace MWWorld
 
             void removeObjectFromScene (const Ptr& ptr);
             ///< Remove an object from the scene, but not from the world model.
+
+            bool isCellActive(const CellStore &cell);
     };
 }
 

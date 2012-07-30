@@ -12,6 +12,8 @@
 #include <OgreOverlayContainer.h>
 #include <OgreOverlayManager.h>
 
+#include <extern/shiny/Main/Factory.hpp>
+
 #include "renderconst.hpp"
 
 using namespace Ogre;
@@ -34,6 +36,9 @@ void Shadows::recreate()
     bool split = Settings::Manager::getBool("split", "Shadows");
     //const bool split = false;
 
+    sh::Factory::getInstance ().setGlobalSetting ("shadows", enabled && !split ? "true" : "false");
+    sh::Factory::getInstance ().setGlobalSetting ("shadows_pssm", enabled && split ? "true" : "false");
+
     if (!enabled)
     {
         mSceneMgr->setShadowTechnique(SHADOWTYPE_NONE);
@@ -53,7 +58,7 @@ void Shadows::recreate()
 
     mSceneMgr->setShadowTextureSelfShadow(true);
     mSceneMgr->setShadowCasterRenderBackFaces(true);
-    mSceneMgr->setShadowTextureCasterMaterial("depth_shadow_caster");
+    mSceneMgr->setShadowTextureCasterMaterial("openmw_shadowcaster_default");
     mSceneMgr->setShadowTexturePixelFormat(PF_FLOAT32_R);
     mSceneMgr->setShadowDirectionalLightExtrusionDistance(1000000);
 
@@ -84,17 +89,26 @@ void Shadows::recreate()
                 mSceneMgr->setShadowTextureConfig(i, texsize/4, texsize/4, Ogre::PF_FLOAT32_R);*/
         }
 
+        // Populate from split point 1, not 0, since split 0 isn't useful (usually 0)
+        const PSSMShadowCameraSetup::SplitPointList& splitPointList = getPSSMSetup()->getSplitPoints();
+        sh::Vector3* splitPoints = new sh::Vector3(splitPointList[1], splitPointList[2], splitPointList[3]);
+
+        sh::Factory::getInstance ().setSharedParameter ("pssmSplitPoints", sh::makeProperty<sh::Vector3>(splitPoints));
+
         shadowCameraSetup = ShadowCameraSetupPtr(mPSSMSetup);
     }
     else
     {
         LiSPSMShadowCameraSetup* lispsmSetup = new LiSPSMShadowCameraSetup();
-        lispsmSetup->setOptimalAdjustFactor(2);
+        lispsmSetup->setOptimalAdjustFactor(64);
         //lispsmSetup->setCameraLightDirectionThreshold(Degree(0));
         //lispsmSetup->setUseAggressiveFocusRegion(false);
         shadowCameraSetup = ShadowCameraSetupPtr(lispsmSetup);
     }
     mSceneMgr->setShadowCameraSetup(shadowCameraSetup);
+
+    sh::Vector4* shadowFar_fadeStart = new sh::Vector4(mShadowFar, mFadeStart * mShadowFar, 0, 0);
+    sh::Factory::getInstance ().setSharedParameter ("shadowFar_fadeStart", sh::makeProperty<sh::Vector4>(shadowFar_fadeStart));
 
     // Set visibility mask for the shadow render textures
     int visibilityMask = RV_Actors * Settings::Manager::getBool("actor shadows", "Shadows")
@@ -111,53 +125,62 @@ void Shadows::recreate()
     // --------------------------------------------------------------------------------------------------------------------
     // --------------------------- Debug overlays to display the content of shadow maps -----------------------------------
     // --------------------------------------------------------------------------------------------------------------------
-    /*
-	OverlayManager& mgr = OverlayManager::getSingleton();
-	Overlay* overlay;
-	
-	// destroy if already exists
-	if (overlay = mgr.getByName("DebugOverlay"))
-		mgr.destroy(overlay);
-		
-	overlay = mgr.create("DebugOverlay");
-	for (size_t i = 0; i < (split ? 3 : 1); ++i) {
-		TexturePtr tex = mRendering->getScene()->getShadowTexture(i);
-		
-		// Set up a debug panel to display the shadow
-		
-		if (MaterialManager::getSingleton().resourceExists("Ogre/DebugTexture" + StringConverter::toString(i)))
-			MaterialManager::getSingleton().remove("Ogre/DebugTexture" + StringConverter::toString(i));
-		MaterialPtr debugMat = MaterialManager::getSingleton().create(
-			"Ogre/DebugTexture" + StringConverter::toString(i), 
-			ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
-			
-		debugMat->getTechnique(0)->getPass(0)->setLightingEnabled(false);
-		TextureUnitState *t = debugMat->getTechnique(0)->getPass(0)->createTextureUnitState(tex->getName());
-		t->setTextureAddressingMode(TextureUnitState::TAM_CLAMP);
+    if (Settings::Manager::getBool("debug", "Shadows"))
+    {
+        OverlayManager& mgr = OverlayManager::getSingleton();
+        Overlay* overlay;
 
-		OverlayContainer* debugPanel;
-		
-		// destroy container if exists
-		try
-		{
-			if (debugPanel = 
-				static_cast<OverlayContainer*>(
-					mgr.getOverlayElement("Ogre/DebugTexPanel" + StringConverter::toString(i)
-				)))
-				mgr.destroyOverlayElement(debugPanel);
-		}
-		catch (Ogre::Exception&) {}
-		
-		debugPanel = (OverlayContainer*)
-			(OverlayManager::getSingleton().createOverlayElement("Panel", "Ogre/DebugTexPanel" + StringConverter::toString(i)));
-		debugPanel->_setPosition(0.8, i*0.25);
-		debugPanel->_setDimensions(0.2, 0.24);
-		debugPanel->setMaterialName(debugMat->getName());
-		debugPanel->show();
-		overlay->add2D(debugPanel);
-		overlay->show();
-	}
-    */
+        // destroy if already exists
+        if ((overlay = mgr.getByName("DebugOverlay")))
+            mgr.destroy(overlay);
+
+        overlay = mgr.create("DebugOverlay");
+        for (size_t i = 0; i < (split ? 3 : 1); ++i) {
+            TexturePtr tex = mRendering->getScene()->getShadowTexture(i);
+
+            // Set up a debug panel to display the shadow
+
+            if (MaterialManager::getSingleton().resourceExists("Ogre/DebugTexture" + StringConverter::toString(i)))
+                MaterialManager::getSingleton().remove("Ogre/DebugTexture" + StringConverter::toString(i));
+            MaterialPtr debugMat = MaterialManager::getSingleton().create(
+                "Ogre/DebugTexture" + StringConverter::toString(i),
+                ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
+
+            debugMat->getTechnique(0)->getPass(0)->setLightingEnabled(false);
+            TextureUnitState *t = debugMat->getTechnique(0)->getPass(0)->createTextureUnitState(tex->getName());
+            t->setTextureAddressingMode(TextureUnitState::TAM_CLAMP);
+
+            OverlayContainer* debugPanel;
+
+            // destroy container if exists
+            try
+            {
+                if ((debugPanel =
+                    static_cast<OverlayContainer*>(
+                        mgr.getOverlayElement("Ogre/DebugTexPanel" + StringConverter::toString(i)
+                    ))))
+                    mgr.destroyOverlayElement(debugPanel);
+            }
+            catch (Ogre::Exception&) {}
+
+            debugPanel = (OverlayContainer*)
+                (OverlayManager::getSingleton().createOverlayElement("Panel", "Ogre/DebugTexPanel" + StringConverter::toString(i)));
+            debugPanel->_setPosition(0.8, i*0.25);
+            debugPanel->_setDimensions(0.2, 0.24);
+            debugPanel->setMaterialName(debugMat->getName());
+            debugPanel->show();
+            overlay->add2D(debugPanel);
+            overlay->show();
+        }
+    }
+    else
+    {
+        OverlayManager& mgr = OverlayManager::getSingleton();
+        Overlay* overlay;
+
+        if ((overlay = mgr.getByName("DebugOverlay")))
+            mgr.destroy(overlay);
+    }
 }
 
 PSSMShadowCameraSetup* Shadows::getPSSMSetup()

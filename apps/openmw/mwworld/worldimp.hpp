@@ -1,31 +1,16 @@
 #ifndef GAME_MWWORLD_WORLDIMP_H
 #define GAME_MWWORLD_WORLDIMP_H
 
-#include <vector>
-#include <map>
-
-#include <boost/filesystem.hpp>
-
 #include <components/esm_store/store.hpp>
 
-#include <components/settings/settings.hpp>
-
 #include "../mwrender/debugging.hpp"
-#include "../mwrender/renderingmanager.hpp"
 
-#include "refdata.hpp"
 #include "ptr.hpp"
-#include "globals.hpp"
 #include "scene.hpp"
 #include "physicssystem.hpp"
 #include "cells.hpp"
 #include "localscripts.hpp"
 #include "timestamp.hpp"
-
-#include <openengine/bullet/physic.hpp>
-#include <openengine/ogre/fader.hpp>
-
-#include <OgreTimer.h>
 
 #include "../mwbase/world.hpp"
 
@@ -103,6 +88,9 @@ namespace MWWorld
 
             bool moveObjectImp (const Ptr& ptr, float x, float y, float z);
             ///< @return true if the active cell (cell player is in) changed
+
+            virtual void
+            placeObject(const Ptr &ptr, CellStore &cell, const ESM::Position &pos);
 
         public:
 

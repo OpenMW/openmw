@@ -15,7 +15,7 @@ source_group(game FILES ${GAME} ${GAME_HEADER})
 
 add_openmw_dir (mwrender
     renderingmanager debugging sky player animation npcanimation creatureanimation actors objects
-    renderinginterface localmap occlusionquery terrain terrainmaterial water shadows shaderhelper
+    renderinginterface localmap occlusionquery terrain terrainmaterial water shadows
     compositors
     )
 
@@ -39,7 +39,7 @@ add_openmw_dir (mwscript
     locals scriptmanager compilercontext interpretercontext cellextensions miscextensions
     guiextensions soundextensions skyextensions statsextensions containerextensions
     aiextensions controlextensions extensions globalscripts ref dialogueextensions
-    animationextensions
+    animationextensions transformationextensions
     )
 
 add_openmw_dir (mwsound
@@ -50,7 +50,7 @@ add_openmw_dir (mwworld
     refdata worldimp physicssystem scene globals class action nullaction actionteleport
     containerstore actiontalk actiontake manualref player cellfunctors
     cells localscripts customdata weather inventorystore ptr actionopen actionread
-    actionequip timestamp actionalchemy cellstore
+    actionequip timestamp actionalchemy cellstore actionapply
     )
 
 add_openmw_dir (mwclass
@@ -60,7 +60,7 @@ add_openmw_dir (mwclass
 
 add_openmw_dir (mwmechanics
     mechanicsmanager stat creaturestats magiceffects movement actors drawstate spells
-    activespells
+    activespells npcstats
     )
 
 add_openmw_dir (mwbase
@@ -79,7 +79,6 @@ ENDIF(WIN32)
 ENDIF(OGRE_STATIC)
 add_executable(openmw
     ${OPENMW_LIBS} ${OPENMW_LIBS_HEADER}
-    ${COMPONENT_FILES}
     ${OPENMW_FILES}
     ${GAME} ${GAME_HEADER}
     ${APPLE_BUNDLE_RESOURCES}
@@ -101,6 +100,8 @@ target_link_libraries(openmw
     ${BULLET_LIBRARIES}
     ${MYGUI_LIBRARIES}
     ${MYGUI_PLATFORM_LIBRARIES}
+    "shiny"
+    "shiny.OgrePlatform"
     components
 )
 

@@ -24,7 +24,7 @@
 #ifndef _NIF_RECORD_H_
 #define _NIF_RECORD_H_
 
-#include <components/misc/slice_array.hpp>
+#include <string>
 
 namespace Nif
 {
@@ -88,26 +88,25 @@ enum RecordType
 /// Base class for all records
 struct Record
 {
-  // Record type and type name
-  int recType;
-  Misc::SString recName;
+    // Record type and type name
+    int recType;
+    std::string recName;
 
-  Record() : recType(RC_MISSING) {}
+    Record() : recType(RC_MISSING) {}
 
-  /// Parses the record from file
-  virtual void read(NIFFile *nif) = 0;
+    /// Parses the record from file
+    virtual void read(NIFFile *nif) = 0;
 
-  /// Does post-processing, after the entire tree is loaded
-  virtual void post(NIFFile *nif) {}
+    /// Does post-processing, after the entire tree is loaded
+    virtual void post(NIFFile *nif) {}
 
     virtual ~Record() {}
 
-  /*
-    Use these later if you want custom allocation of all NIF objects
-
-  static void* operator new(size_t size);
-  static void operator delete(void *p);
-  */
+    /*
+       Use these later if you want custom allocation of all NIF objects
+    static void* operator new(size_t size);
+    static void operator delete(void *p);
+    */
 };
 
 } // Namespace

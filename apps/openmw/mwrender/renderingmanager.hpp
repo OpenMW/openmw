@@ -1,24 +1,13 @@
 #ifndef _GAME_RENDERING_MANAGER_H
 #define _GAME_RENDERING_MANAGER_H
 
-
 #include "sky.hpp"
 #include "terrain.hpp"
 #include "debugging.hpp"
 
-#include "../mwworld/class.hpp"
-
-#include <OgreWindowEventUtilities.h>
-
-#include <utility>
-#include <openengine/ogre/renderer.hpp>
 #include <openengine/ogre/fader.hpp>
-#include <openengine/bullet/physic.hpp>
 
 #include <components/settings/settings.hpp>
-
-#include <vector>
-#include <string>
 
 #include <boost/filesystem.hpp>
 
@@ -43,11 +32,14 @@ namespace MWWorld
     class CellStore;
 }
 
+namespace sh
+{
+    class Factory;
+}
+
 namespace MWRender
 {
-
     class Shadows;
-    class ShaderHelper;
     class LocalMap;
     class Water;
     class Compositors;
@@ -174,6 +166,8 @@ class RenderingManager: private RenderingInterface, public Ogre::WindowEventList
 
   private:
 
+    sh::Factory* mFactory;
+
     void setAmbientMode();
 
     void setMenuTransparency(float val);
@@ -215,8 +209,6 @@ class RenderingManager: private RenderingInterface, public Ogre::WindowEventList
     MWRender::LocalMap* mLocalMap;
 
     MWRender::Shadows* mShadows;
-
-    MWRender::ShaderHelper* mShaderHelper;
 
     MWRender::Compositors* mCompositors;
 };

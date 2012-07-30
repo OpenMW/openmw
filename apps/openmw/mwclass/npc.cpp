@@ -67,11 +67,11 @@ namespace MWClass
                 boost::algorithm::to_lower(faction);
                 if(ref->base->npdt52.gold != -10)
                 {
-                    data->mNpcStats.mFactionRank[faction] = (int)ref->base->npdt52.rank;
+                    data->mNpcStats.getFactionRanks()[faction] = (int)ref->base->npdt52.rank;
                 }
                 else
                 {
-                    data->mNpcStats.mFactionRank[faction] = (int)ref->base->npdt12.rank;
+                    data->mNpcStats.getFactionRanks()[faction] = (int)ref->base->npdt12.rank;
                 }
             }
 
@@ -79,31 +79,31 @@ namespace MWClass
             if(ref->base->npdt52.gold != -10)
             {
                 for (int i=0; i<27; ++i)
-                    data->mNpcStats.mSkill[i].setBase (ref->base->npdt52.skills[i]);
+                    data->mNpcStats.getSkill (i).setBase (ref->base->npdt52.skills[i]);
 
-                data->mCreatureStats.mAttributes[0].set (ref->base->npdt52.strength);
-                data->mCreatureStats.mAttributes[1].set (ref->base->npdt52.intelligence);
-                data->mCreatureStats.mAttributes[2].set (ref->base->npdt52.willpower);
-                data->mCreatureStats.mAttributes[3].set (ref->base->npdt52.agility);
-                data->mCreatureStats.mAttributes[4].set (ref->base->npdt52.speed);
-                data->mCreatureStats.mAttributes[5].set (ref->base->npdt52.endurance);
-                data->mCreatureStats.mAttributes[6].set (ref->base->npdt52.personality);
-                data->mCreatureStats.mAttributes[7].set (ref->base->npdt52.luck);
-                data->mCreatureStats.mDynamic[0].set (ref->base->npdt52.health);
-                data->mCreatureStats.mDynamic[1].set (ref->base->npdt52.mana);
-                data->mCreatureStats.mDynamic[2].set (ref->base->npdt52.fatigue);
+                data->mCreatureStats.getAttribute(0).set (ref->base->npdt52.strength);
+                data->mCreatureStats.getAttribute(1).set (ref->base->npdt52.intelligence);
+                data->mCreatureStats.getAttribute(2).set (ref->base->npdt52.willpower);
+                data->mCreatureStats.getAttribute(3).set (ref->base->npdt52.agility);
+                data->mCreatureStats.getAttribute(4).set (ref->base->npdt52.speed);
+                data->mCreatureStats.getAttribute(5).set (ref->base->npdt52.endurance);
+                data->mCreatureStats.getAttribute(6).set (ref->base->npdt52.personality);
+                data->mCreatureStats.getAttribute(7).set (ref->base->npdt52.luck);
+                data->mCreatureStats.getHealth().set (ref->base->npdt52.health);
+                data->mCreatureStats.getMagicka().set (ref->base->npdt52.mana);
+                data->mCreatureStats.getFatigue().set (ref->base->npdt52.fatigue);
 
-                data->mCreatureStats.mLevel = ref->base->npdt52.level;
+                data->mCreatureStats.setLevel(ref->base->npdt52.level);
             }
             else
             {
                 /// \todo do something with npdt12 maybe:p
             }
 
-            data->mCreatureStats.mHello = ref->base->AI.hello;
-            data->mCreatureStats.mFight = ref->base->AI.fight;
-            data->mCreatureStats.mFlee = ref->base->AI.flee;
-            data->mCreatureStats.mAlarm = ref->base->AI.alarm;
+            data->mCreatureStats.setHello(ref->base->AI.hello);
+            data->mCreatureStats.setFight(ref->base->AI.fight);
+            data->mCreatureStats.setFlee(ref->base->AI.flee);
+            data->mCreatureStats.setAlarm(ref->base->AI.alarm);
 
             // store
             ptr.getRefData().setCustomData (data.release());
@@ -125,25 +125,29 @@ namespace MWClass
 
     void Npc::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics) const
     {
+        physics.insertActorPhysics(ptr, getModel(ptr));
+        MWBase::Environment::get().getMechanicsManager()->addActor(ptr);
+    }
 
+    std::string Npc::getModel(const MWWorld::Ptr &ptr) const
+    {
         MWWorld::LiveCellRef<ESM::NPC> *ref =
             ptr.get<ESM::NPC>();
-
-        assert (ref->base != NULL);
-
-		 
+        assert(ref->base != NULL);
 
         std::string headID = ref->base->head;
-        std::string bodyRaceID = headID.substr(0, headID.find_last_of("head_") - 4);
-        bool beast = bodyRaceID == "b_n_khajiit_m_" || bodyRaceID == "b_n_khajiit_f_" || bodyRaceID == "b_n_argonian_m_" || bodyRaceID == "b_n_argonian_f_";
+        int end = headID.find_last_of("head_") - 4;
+        std::string bodyRaceID = headID.substr(0, end);
 
-        std::string smodel = "meshes\\base_anim.nif";
-        if(beast)
-            smodel = "meshes\\base_animkna.nif";
-         physics.insertActorPhysics(ptr, smodel);
-
-
-        MWBase::Environment::get().getMechanicsManager()->addActor (ptr);
+        std::string model = "meshes\\base_anim.nif";
+        if (bodyRaceID == "b_n_khajiit_m_" ||
+            bodyRaceID == "b_n_khajiit_f_" ||
+            bodyRaceID == "b_n_argonian_m_" ||
+            bodyRaceID == "b_n_argonian_f_")
+        {
+            model = "meshes\\base_animkna.nif";
+        }
+        return model;
     }
 
     std::string Npc::getName (const MWWorld::Ptr& ptr) const
@@ -206,12 +210,12 @@ namespace MWClass
         {
             case Run:
 
-                stats.mForceRun = force;
+                stats.setMovementFlag (MWMechanics::NpcStats::Flag_ForceRun, force);
                 break;
 
             case Sneak:
 
-                stats.mForceSneak = force;
+                stats.setMovementFlag (MWMechanics::NpcStats::Flag_ForceSneak, force);
                 break;
 
             case Combat:
@@ -228,17 +232,18 @@ namespace MWClass
         {
             case Run:
 
-                stats.mRun = set;
+                stats.setMovementFlag (MWMechanics::NpcStats::Flag_Run, set);
                 break;
 
             case Sneak:
 
-                stats.mSneak = set;
+                stats.setMovementFlag (MWMechanics::NpcStats::Flag_Sneak, set);
                 break;
 
             case Combat:
 
-                stats.mCombat = set;
+                // Combat stance ignored for now; need to be determined based on draw state instead of
+                // being maunally set.
                 break;
         }
     }
@@ -251,21 +256,21 @@ namespace MWClass
         {
             case Run:
 
-                if (!ignoreForce && stats.mForceRun)
+                if (!ignoreForce && stats.getMovementFlag (MWMechanics::NpcStats::Flag_ForceRun))
                     return true;
 
-                return stats.mRun;
+                return stats.getMovementFlag (MWMechanics::NpcStats::Flag_Run);
 
             case Sneak:
 
-                if (!ignoreForce && stats.mForceSneak)
+                if (!ignoreForce && stats.getMovementFlag (MWMechanics::NpcStats::Flag_ForceSneak))
                     return true;
 
-                return stats.mSneak;
+                return stats.getMovementFlag (MWMechanics::NpcStats::Flag_Sneak);
 
             case Combat:
 
-                return stats.mCombat;
+                return false;
         }
 
         return false;
@@ -329,7 +334,7 @@ namespace MWClass
     float Npc::getCapacity (const MWWorld::Ptr& ptr) const
     {
         const MWMechanics::CreatureStats& stats = getCreatureStats (ptr);
-        return stats.mAttributes[0].getModified()*5;
+        return stats.getAttribute(0).getModified()*5;
     }
 
     float Npc::getEncumbrance (const MWWorld::Ptr& ptr) const
@@ -338,9 +343,9 @@ namespace MWClass
 
         const MWMechanics::CreatureStats& stats = getCreatureStats (ptr);
 
-        weight -= stats.mMagicEffects.get (MWMechanics::EffectKey (8)).mMagnitude; // feather
+        weight -= stats.getMagicEffects().get (MWMechanics::EffectKey (8)).mMagnitude; // feather
 
-        weight += stats.mMagicEffects.get (MWMechanics::EffectKey (7)).mMagnitude; // burden
+        weight += stats.getMagicEffects().get (MWMechanics::EffectKey (7)).mMagnitude; // burden
 
         if (weight<0)
             weight = 0;
@@ -348,18 +353,40 @@ namespace MWClass
         return weight;
     }
 
-    void Npc::adjustScale(const MWWorld::Ptr& ptr,float& scale) const
+    bool Npc::apply (const MWWorld::Ptr& ptr, const std::string& id,
+        const MWWorld::Ptr& actor) const
     {
-        //ptr.
-        //MWWorld::LiveCellRef<ESM::NPC>* npc = ptr.get<ESM::NPC>();
-        //npc->base->race
-        //ESM::Race
+        MWMechanics::CreatureStats& stats = getCreatureStats (ptr);
+
+        /// \todo consider instant effects
+
+        return stats.getActiveSpells().addSpell (id);
+    }
+
+    void Npc::skillUsageSucceeded (const MWWorld::Ptr& ptr, int skill, int usageType) const
+    {
+        MWMechanics::NpcStats& stats = getNpcStats (ptr);
+
+        MWWorld::LiveCellRef<ESM::NPC> *ref = ptr.get<ESM::NPC>();
+
+        const ESM::Class *class_ = MWBase::Environment::get().getWorld()->getStore().classes.find (
+            ref->base->cls);
+
+        stats.useSkill (skill, *class_, usageType);
     }
 
     void Npc::adjustRotation(const MWWorld::Ptr& ptr,float& x,float& y,float& z) const
     {
         y = 0;
         x = 0;
-        std::cout << "dfdfdfdfnzdofnmqsldgnmqskdhblqkdbv lqksdf";
+    }
+
+    MWWorld::Ptr
+    Npc::copyToCellImpl(const MWWorld::Ptr &ptr, MWWorld::CellStore &cell) const
+    {
+        MWWorld::LiveCellRef<ESM::NPC> *ref =
+            ptr.get<ESM::NPC>();
+
+        return MWWorld::Ptr(&cell.npcs.insert(*ref), &cell);
     }
 }

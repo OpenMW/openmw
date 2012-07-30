@@ -2,8 +2,10 @@
 
 namespace ESM
 {
-void Potion::load(ESMReader &esm)
+void Potion::load(ESMReader &esm, const std::string& id)
 {
+    mId = id;
+
     model = esm.getHNString("MODL");
     icon = esm.getHNOString("TEXT"); // not ITEX here for some reason
     script = esm.getHNOString("SCRI");

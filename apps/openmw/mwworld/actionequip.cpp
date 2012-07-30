@@ -13,7 +13,7 @@ namespace MWWorld
     {
     }
 
-    void ActionEquip::execute ()
+    void ActionEquip::executeImp (const Ptr& actor)
     {
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
         MWWorld::InventoryStore& invStore = MWWorld::Class::get(player).getInventoryStore(player);

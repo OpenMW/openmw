@@ -9,11 +9,7 @@
 
 #include "../mwgui/window_manager.hpp"
 
-#include "../mwworld/manualref.hpp" /// FIXME
-
-#include "ptr.hpp"
 #include "player.hpp"
-#include "class.hpp"
 #include "localscripts.hpp"
 
 #include "cellfunctors.hpp"
@@ -336,144 +332,32 @@ namespace MWWorld
         insertCellRefList(mRendering, cell.weapons, cell, *mPhysics);
     }
 
-
-    /// \todo this whole code needs major clean up, and doesn't belong in this class.
-    void Scene::insertObject (const Ptr& ptr, CellStore* cell)
-    {
-        std::string type = ptr.getTypeName();
-
-        MWWorld::Ptr newPtr;
-
-        // insert into the correct CellRefList
-        if      (type == typeid(ESM::Potion).name())
-        {
-            MWWorld::LiveCellRef<ESM::Potion>* ref = ptr.get<ESM::Potion>();
-            cell->potions.list.push_back( *ref );
-            newPtr = MWWorld::Ptr(&cell->potions.list.back(), cell);
-        }
-        else if (type == typeid(ESM::Apparatus).name())
-        {
-            MWWorld::LiveCellRef<ESM::Apparatus>* ref = ptr.get<ESM::Apparatus>();
-            cell->appas.list.push_back( *ref );
-            newPtr = MWWorld::Ptr(&cell->appas.list.back(), cell);
-        }
-        else if (type == typeid(ESM::Armor).name())
-        {
-            MWWorld::LiveCellRef<ESM::Armor>* ref = ptr.get<ESM::Armor>();
-            cell->armors.list.push_back( *ref );
-            newPtr = MWWorld::Ptr(&cell->armors.list.back(), cell);
-        }
-        else if (type == typeid(ESM::Book).name())
-        {
-            MWWorld::LiveCellRef<ESM::Book>* ref = ptr.get<ESM::Book>();
-            cell->books.list.push_back( *ref );
-            newPtr = MWWorld::Ptr(&cell->books.list.back(), cell);
-        }
-        else if (type == typeid(ESM::Clothing).name())
-        {
-            MWWorld::LiveCellRef<ESM::Clothing>* ref = ptr.get<ESM::Clothing>();
-            cell->clothes.list.push_back( *ref );
-            newPtr = MWWorld::Ptr(&cell->clothes.list.back(), cell);
-        }
-        else if (type == typeid(ESM::Ingredient).name())
-        {
-            MWWorld::LiveCellRef<ESM::Ingredient>* ref = ptr.get<ESM::Ingredient>();
-            cell->ingreds.list.push_back( *ref );
-            newPtr = MWWorld::Ptr(&cell->ingreds.list.back(), cell);
-        }
-        else if (type == typeid(ESM::Light).name())
-        {
-            MWWorld::LiveCellRef<ESM::Light>* ref = ptr.get<ESM::Light>();
-            cell->lights.list.push_back( *ref );
-            newPtr = MWWorld::Ptr(&cell->lights.list.back(), cell);
-        }
-        else if (type == typeid(ESM::Tool).name())
-        {
-            MWWorld::LiveCellRef<ESM::Tool>* ref = ptr.get<ESM::Tool>();
-            cell->lockpicks.list.push_back( *ref );
-            newPtr = MWWorld::Ptr(&cell->lockpicks.list.back(), cell);
-        }
-        else if (type == typeid(ESM::Repair).name())
-        {
-            MWWorld::LiveCellRef<ESM::Repair>* ref = ptr.get<ESM::Repair>();
-            cell->repairs.list.push_back( *ref );
-            newPtr = MWWorld::Ptr(&cell->repairs.list.back(), cell);
-        }
-        else if (type == typeid(ESM::Probe).name())
-        {
-            MWWorld::LiveCellRef<ESM::Probe>* ref = ptr.get<ESM::Probe>();
-            cell->probes.list.push_back( *ref );
-            newPtr = MWWorld::Ptr(&cell->probes.list.back(), cell);
-        }
-        else if (type == typeid(ESM::Weapon).name())
-        {
-            MWWorld::LiveCellRef<ESM::Weapon>* ref = ptr.get<ESM::Weapon>();
-            cell->weapons.list.push_back( *ref );
-            newPtr = MWWorld::Ptr(&cell->weapons.list.back(), cell);
-        }
-        else if (type == typeid(ESM::Miscellaneous).name())
-        {
-
-            // if this is gold, we need to fetch the correct mesh depending on the amount of gold.
-            if (MWWorld::Class::get(ptr).getName(ptr) == MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sGold")->str)
-            {
-                int goldAmount = ptr.getRefData().getCount();
-
-                std::string base = "Gold_001";
-                if (goldAmount >= 100)
-                    base = "Gold_100";
-                else if (goldAmount >= 25)
-                    base = "Gold_025";
-                else if (goldAmount >= 10)
-                    base = "Gold_010";
-                else if (goldAmount >= 5)
-                    base = "Gold_005";
-
-                MWWorld::ManualRef newRef (MWBase::Environment::get().getWorld()->getStore(), base);
-
-                MWWorld::LiveCellRef<ESM::Miscellaneous>* ref = newRef.getPtr().get<ESM::Miscellaneous>();
-
-                cell->miscItems.list.push_back( *ref );
-                newPtr = MWWorld::Ptr(&cell->miscItems.list.back(), cell);
-
-                ESM::Position& p = newPtr.getRefData().getPosition();
-                p.pos[0] = ptr.getRefData().getPosition().pos[0];
-                p.pos[1] = ptr.getRefData().getPosition().pos[1];
-                p.pos[2] = ptr.getRefData().getPosition().pos[2];
-            }
-            else
-            {
-                MWWorld::LiveCellRef<ESM::Miscellaneous>* ref = ptr.get<ESM::Miscellaneous>();
-
-                cell->miscItems.list.push_back( *ref );
-                newPtr = MWWorld::Ptr(&cell->miscItems.list.back(), cell);
-            }
-        }
-        else
-            throw std::runtime_error("Trying to insert object of unhandled type");
-
-
-
-        newPtr.getRefData().setCount(ptr.getRefData().getCount());
-        ptr.getRefData().setCount(0);
-        newPtr.getRefData().enable();
-
-        mRendering.addObject(newPtr);
-        MWWorld::Class::get(newPtr).insertObject(newPtr, *mPhysics);
-
-    }
-
     void Scene::addObjectToScene (const Ptr& ptr)
     {
-        mRendering.addObject (ptr);
-        MWWorld::Class::get (ptr).insertObject (ptr, *mPhysics);
+        mRendering.addObject(ptr);
+        MWWorld::Class::get(ptr).insertObject(ptr, *mPhysics);
     }
-
+   
     void Scene::removeObjectFromScene (const Ptr& ptr)
     {
         MWBase::Environment::get().getMechanicsManager()->removeActor (ptr);
         MWBase::Environment::get().getSoundManager()->stopSound3D (ptr);
         mPhysics->removeObject (ptr.getRefData().getHandle());
         mRendering.removeObject (ptr);
+    }
+
+    bool Scene::isCellActive(const CellStore &cell)
+    {
+        CellStoreCollection::iterator active = mActiveCells.begin();
+        while (active != mActiveCells.end()) {
+            if ((*active)->cell->name == cell.cell->name &&
+                (*active)->cell->data.gridX == cell.cell->data.gridX &&
+                (*active)->cell->data.gridY == cell.cell->data.gridY)
+            {
+                return true;
+            }
+            ++active;
+        }
+        return false;
     }
 }

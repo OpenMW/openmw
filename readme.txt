@@ -12,8 +12,6 @@ EBGaramond-Regular.ttf: OFL (see OFL.txt for more information)
 VeraMono.ttf: custom (see Bitstream Vera License.txt for more information)
 
 
-THIS IS A WORK IN PROGRESS
-
 
 INSTALLATION
 
@@ -88,47 +86,6 @@ Allowed options:
                                    win1252 - Western European (Latin) alphabet,
                                    used by default
   --fallback arg                   fallback values
-
-
-CREDITS
-
-Current Developers:
-Aleksandar Jovanov
-Alexander “Ace” Olofsson
-athile
-BrotherBrick
-Cris “Mirceam” Mihalache
-gugus / gus
-Jacob “Yacoby” Essex
-Jannik “scrawl” Heller
-Jason “jhooks” Hooks
-Karl-Felix “k1ll” Glatzer
-Lukasz “lgro” Gromanowski
-Marc “Zini” Zinnschlag
-Michael “werdanith” Papageorgiou
-Nikolay “corristo” Kasyanov
-Pieter “pvdk” van der Kloet
-Roman "Kromgart" Melnik
-Sebastian “swick” Wick
-Sylvain "Garvek" T.
-
-Retired Developers:
-Ardekantur
-Armin Preiml
-Diggory Hardy
-Jan Borsodi
-Jan-Peter “peppe” Nilsson
-Josua Grawitter
-Nicolay Korslund
-sergoz
-Star-Demon
-Yuri Krupenin
-
-OpenMW:
-Thanks to DokterDume for kindly providing us with the Moon and Star logo used as the application icon and project logo.
-
-Launcher:
-Thanks to Kevin Ryan for kindly providing us with the icon used for the Data Files tab.
 
 
 CHANGELOG
@@ -215,7 +172,6 @@ Task #113: Morrowind.ini Importer
 Task #215: Refactor the sound code
 Task #216: Update MyGUI
 
-
 0.13.0
 
 Bug #145: Fixed sound problems after cell change
@@ -273,7 +229,6 @@ Task #131: NPC Activation doesn't work properly
 Task #144: MWRender cleanup
 Task #155: cmake cleanup
 
-
 0.11.1
 
 Bug #2: Resources loading doesn't work outside of bsa files
@@ -300,4 +255,95 @@ Task #14: Replace tabs with 4 spaces
 Task #18: Move components from global namespace into their own namespace
 Task #123: refactor header files in components/esm
 
-TODO add old changelog (take pre 0.11.1 changelog from wiki)
+0.10.0
+
+* NPC dialogue window (not functional yet)
+* Collisions with objects
+* Refactor the PlayerPos class
+* Adjust file locations
+* CMake files and test linking for Bullet
+* Replace Ogre raycasting test for activation with something more precise
+* Adjust player movement according to collision results
+* FPS display
+* Various Portability Improvements
+* Mac OS X support is back!
+
+0.9.0
+
+* Exterior cells loading, unloading and management
+* Character Creation GUI
+* Character creation
+* Make cell names case insensitive when doing internal lookups
+* Music player
+* NPCs rendering
+
+0.8.0
+
+* GUI
+* Complete and working script engine
+* In game console
+* Sky rendering
+* Sound and music
+* Tons of smaller stuff
+
+0.7.0
+
+* This release is a complete rewrite in C++.
+* All D code has been culled, and all modules have been rewritten.
+* The game is now back up to the level of rendering interior cells and moving around, but physics, sound, GUI, and scripting still remain to be ported from the old codebase.
+
+0.6.0
+
+* Coded a GUI system using MyGUI
+* Skinned MyGUI to look like Morrowind (work in progress)
+* Integrated the Monster script engine
+* Rewrote some functions into script code
+* Very early MyGUI < > Monster binding
+* Fixed Windows sound problems (replaced old openal32.dll)
+
+0.5.0
+
+* Collision detection with Bullet
+* Experimental walk & fall character physics
+* New key bindings:
+  * t toggle physics mode (walking, flying, ghost),
+  * n night eye, brightens the scene
+* Fixed incompatability with DMD 1.032 and newer compilers
+* * (thanks to tomqyp)
+* Various minor changes and updates
+
+0.4.0
+
+* Switched from Audiere to OpenAL
+* * (BIG thanks to Chris Robinson)
+* Added complete Makefile (again) as a alternative build tool
+* More realistic lighting (thanks again to Chris Robinson)
+* Various localization fixes tested with Russian and French versions
+* Temporary workaround for the Unicode issue: invalid UTF displayed as '?'
+* Added ns option to disable sound, for debugging
+* Various bug fixes
+* Cosmetic changes to placate gdc Wall
+
+0.3.0
+
+* Built and tested on Windows XP
+* Partial support for FreeBSD (exceptions do not work)
+* You no longer have to download Monster separately
+* Made an alternative for building without DSSS (but DSSS still works)
+* Renamed main program from 'morro' to 'openmw'
+* Made the config system more robust
+* Added oc switch for showing Ogre config window on startup
+* Removed some config files, these are auto generated when missing.
+* Separated plugins.cfg into linux and windows versions.
+* Updated Makefile and sources for increased portability
+* confirmed to work against OIS 1.0.0 (Ubuntu repository package)
+
+0.2.0
+
+* Compiles with gdc
+* Switched to DSSS for building D code
+* Includes the program esmtool
+
+0.1.0
+
+first release

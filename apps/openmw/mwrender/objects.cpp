@@ -92,11 +92,16 @@ void Objects::insertMesh (const MWWorld::Ptr& ptr, const std::string& mesh)
     Ogre::SceneNode* insert = ptr.getRefData().getBaseNode();
     assert(insert);
 
-    NifOgre::NIFLoader::load(mesh);
-    Ogre::Entity *ent = mRenderer.getScene()->createEntity(mesh);
-
-
-    Ogre::Vector3 extents = ent->getBoundingBox().getSize();
+    Ogre::AxisAlignedBox bounds = Ogre::AxisAlignedBox::BOX_NULL;
+    NifOgre::EntityList entities = NifOgre::NIFLoader::createEntities(insert, NULL, mesh);
+    for(size_t i = 0;i < entities.mEntities.size();i++)
+    {
+        const Ogre::AxisAlignedBox &tmp = entities.mEntities[i]->getBoundingBox();
+        bounds.merge(Ogre::AxisAlignedBox(insert->_getDerivedPosition() + tmp.getMinimum(),
+                                          insert->_getDerivedPosition() + tmp.getMaximum())
+        );
+    }
+    Ogre::Vector3 extents = bounds.getSize();
     extents *= insert->getScale();
     float size = std::max(std::max(extents.x, extents.y), extents.z);
 
@@ -108,42 +113,41 @@ void Objects::insertMesh (const MWWorld::Ptr& ptr, const std::string& mesh)
 
     if (mBounds.find(ptr.getCell()) == mBounds.end())
         mBounds[ptr.getCell()] = Ogre::AxisAlignedBox::BOX_NULL;
-
-    Ogre::AxisAlignedBox bounds = ent->getBoundingBox();
-    bounds = Ogre::AxisAlignedBox(
-        insert->_getDerivedPosition() + bounds.getMinimum(),
-        insert->_getDerivedPosition() + bounds.getMaximum()
-    );
-
-    bounds.scale(insert->getScale());
     mBounds[ptr.getCell()].merge(bounds);
 
     bool transparent = false;
-    for (unsigned int i=0; i<ent->getNumSubEntities(); ++i)
+    for(size_t i = 0;i < entities.mEntities.size();i++)
     {
-        Ogre::MaterialPtr mat = ent->getSubEntity(i)->getMaterial();
-        Ogre::Material::TechniqueIterator techIt = mat->getTechniqueIterator();
-        while (techIt.hasMoreElements())
+        Ogre::Entity *ent = entities.mEntities[i];
+        for (unsigned int i=0; i<ent->getNumSubEntities(); ++i)
         {
-            Ogre::Technique* tech = techIt.getNext();
-            Ogre::Technique::PassIterator passIt = tech->getPassIterator();
-            while (passIt.hasMoreElements())
+            Ogre::MaterialPtr mat = ent->getSubEntity(i)->getMaterial();
+            Ogre::Material::TechniqueIterator techIt = mat->getTechniqueIterator();
+            while (techIt.hasMoreElements())
             {
-                Ogre::Pass* pass = passIt.getNext();
+                Ogre::Technique* tech = techIt.getNext();
+                Ogre::Technique::PassIterator passIt = tech->getPassIterator();
+                while (passIt.hasMoreElements())
+                {
+                    Ogre::Pass* pass = passIt.getNext();
 
-                if (pass->getDepthWriteEnabled() == false)
-                    transparent = true;
+                    if (pass->getDepthWriteEnabled() == false)
+                        transparent = true;
+                }
             }
         }
     }
 
     if(!mIsStatic || !Settings::Manager::getBool("use static geometry", "Objects") || transparent)
     {
-        insert->attachObject(ent);
+        for(size_t i = 0;i < entities.mEntities.size();i++)
+        {
+            Ogre::Entity *ent = entities.mEntities[i];
 
-        ent->setRenderingDistance(small ? Settings::Manager::getInt("small object distance", "Viewing distance") : 0);
-        ent->setVisibilityFlags(mIsStatic ? (small ? RV_StaticsSmall : RV_Statics) : RV_Misc);
-        ent->setRenderQueueGroup(transparent ? RQG_Alpha : RQG_Main);
+            ent->setRenderingDistance(small ? Settings::Manager::getInt("small object distance", "Viewing distance") : 0);
+            ent->setVisibilityFlags(mIsStatic ? (small ? RV_StaticsSmall : RV_Statics) : RV_Misc);
+            ent->setRenderQueueGroup(transparent ? RQG_Alpha : RQG_Main);
+        }
     }
     else
     {
@@ -183,15 +187,20 @@ void Objects::insertMesh (const MWWorld::Ptr& ptr, const std::string& mesh)
         //  - there will be too many batches.
         sg->setRegionDimensions(Ogre::Vector3(2500,2500,2500));
 
-        sg->addEntity(ent,insert->_getDerivedPosition(),insert->_getDerivedOrientation(),insert->_getDerivedScale());
-
         sg->setVisibilityFlags(small ? RV_StaticsSmall : RV_Statics);
 
         sg->setCastShadows(true);
 
         sg->setRenderQueueGroup(transparent ? RQG_Alpha : RQG_Main);
 
-        mRenderer.getScene()->destroyEntity(ent);
+        for(size_t i = 0;i < entities.mEntities.size();i++)
+        {
+            Ogre::Entity *ent = entities.mEntities[i];
+            insert->detachObject(ent);
+            sg->addEntity(ent,insert->_getDerivedPosition(),insert->_getDerivedOrientation(),insert->_getDerivedScale());
+
+            mRenderer.getScene()->destroyEntity(ent);
+        }
     }
 }
 
@@ -448,5 +457,20 @@ void Objects::update(const float dt)
         }
         else
             it = mLights.erase(it);
+    }
+}
+
+void Objects::rebuildStaticGeometry()
+{
+    for (std::map<MWWorld::CellStore *, Ogre::StaticGeometry*>::iterator it = mStaticGeometry.begin(); it != mStaticGeometry.end(); ++it)
+    {
+        it->second->destroy();
+        it->second->build();
+    }
+
+    for (std::map<MWWorld::CellStore *, Ogre::StaticGeometry*>::iterator it = mStaticGeometrySmall.begin(); it != mStaticGeometrySmall.end(); ++it)
+    {
+        it->second->destroy();
+        it->second->build();
     }
 }

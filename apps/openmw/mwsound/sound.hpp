@@ -3,6 +3,8 @@
 
 #include <OgreVector3.h>
 
+#include "soundmanager.hpp"
+
 namespace MWSound
 {
     class Sound

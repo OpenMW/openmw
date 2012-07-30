@@ -14,6 +14,9 @@
 #include <OgreCompositionPass.h>
 #include <OgreHardwarePixelBuffer.h>
 
+#include <extern/shiny/Main/Factory.hpp>
+#include <extern/shiny/Platforms/Ogre/OgrePlatform.hpp>
+
 #include <components/esm/loadstat.hpp>
 #include <components/settings/settings.hpp>
 
@@ -27,7 +30,6 @@
 #include "../mwinput/inputmanager.hpp" // FIXME
 
 #include "shadows.hpp"
-#include "shaderhelper.hpp"
 #include "localmap.hpp"
 #include "water.hpp"
 #include "compositors.hpp"
@@ -40,12 +42,37 @@ namespace MWRender {
 RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const boost::filesystem::path& resDir, OEngine::Physic::PhysicEngine* engine)
     :mRendering(_rend), mObjects(mRendering), mActors(mRendering), mAmbientMode(0), mSunEnabled(0)
 {
+    // select best shader mode
+    if (Settings::Manager::getString("shader mode", "General") == "")
+    {
+        if (Ogre::Root::getSingleton ().getRenderSystem ()->getName().find("OpenGL") == std::string::npos)
+            Settings::Manager::setString("shader mode", "General", "cg");
+        else
+            Settings::Manager::setString("shader mode", "General", "glsl");
+    }
+
     mRendering.createScene("PlayerCam", Settings::Manager::getFloat("field of view", "General"), 5);
     mRendering.setWindowEventListener(this);
 
     mCompositors = new Compositors(mRendering.getViewport());
 
     mWater = 0;
+
+    // material system
+    sh::OgrePlatform* platform = new sh::OgrePlatform("General", (resDir / "materials").string());
+    platform->setCacheFolder ("./");
+    mFactory = new sh::Factory(platform);
+
+    sh::Language lang;
+    std::string l = Settings::Manager::getString("shader mode", "General");
+    if (l == "glsl")
+        lang = sh::Language_GLSL;
+    else if (l == "hlsl")
+        lang = sh::Language_HLSL;
+    else
+        lang = sh::Language_CG;
+    mFactory->setCurrentLanguage (lang);
+    mFactory->loadAllFiles();
 
     //The fog type must be set before any terrain objects are created as if the
     //fog type is set to FOG_NONE then the initially created terrain won't have any fog
@@ -68,17 +95,32 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
     // Load resources
     ResourceGroupManager::getSingleton().initialiseAllResourceGroups();
 
-    // Due to the huge world size of MW, we'll want camera-relative rendering.
-    // This prevents precision artifacts when moving very far from the origin.
-    mRendering.getScene()->setCameraRelativeRendering(true);
+    // causes light flicker in opengl when moving..
+    //mRendering.getScene()->setCameraRelativeRendering(true);
 
     // disable unsupported effects
-    const RenderSystemCapabilities* caps = Root::getSingleton().getRenderSystem()->getCapabilities();
+    //const RenderSystemCapabilities* caps = Root::getSingleton().getRenderSystem()->getCapabilities();
     if (!waterShaderSupported())
         Settings::Manager::setBool("shader", "Water", false);
-    if ( !(caps->isShaderProfileSupported("fp40") || caps->isShaderProfileSupported("ps_4_0"))
-        || !Settings::Manager::getBool("shaders", "Objects"))
+    if (!Settings::Manager::getBool("shaders", "Objects"))
         Settings::Manager::setBool("enabled", "Shadows", false);
+
+    sh::Factory::getInstance ().setShadersEnabled (Settings::Manager::getBool("shaders", "Objects"));
+
+    sh::Factory::getInstance ().setGlobalSetting ("mrt_output", useMRT() ? "true" : "false");
+    sh::Factory::getInstance ().setGlobalSetting ("fog", "true");
+    sh::Factory::getInstance ().setGlobalSetting ("lighting", "true");
+    sh::Factory::getInstance ().setGlobalSetting ("num_lights", Settings::Manager::getString ("num lights", "Objects"));
+    sh::Factory::getInstance ().setGlobalSetting ("terrain_num_lights", Settings::Manager::getString ("num lights", "Terrain"));
+    sh::Factory::getInstance ().setGlobalSetting ("underwater_effects", Settings::Manager::getString("underwater effect", "Water"));
+    sh::Factory::getInstance ().setGlobalSetting ("simple_water", Settings::Manager::getBool("shader", "Water") ? "false" : "true");
+
+    sh::Factory::getInstance ().setSharedParameter ("viewportBackground", sh::makeProperty<sh::Vector3> (new sh::Vector3(0,0,0)));
+    sh::Factory::getInstance ().setSharedParameter ("waterEnabled", sh::makeProperty<sh::FloatValue> (new sh::FloatValue(0.0)));
+    sh::Factory::getInstance ().setSharedParameter ("waterLevel", sh::makeProperty<sh::FloatValue>(new sh::FloatValue(0)));
+    sh::Factory::getInstance ().setSharedParameter ("waterTimer", sh::makeProperty<sh::FloatValue>(new sh::FloatValue(0)));
+    sh::Factory::getInstance ().setSharedParameter ("windDir_windSpeed", sh::makeProperty<sh::Vector3>(new sh::Vector3(0.5, -0.8, 0.2)));
+    sh::Factory::getInstance ().setSharedParameter ("waterSunFade_sunHeight", sh::makeProperty<sh::Vector2>(new sh::Vector2(1, 0.6)));
 
     applyCompositors();
 
@@ -100,7 +142,6 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
     cameraPitchNode->attachObject(mRendering.getCamera());
 
     mShadows = new Shadows(&mRendering);
-    mShaderHelper = new ShaderHelper(this);
 
     mTerrainManager = new TerrainManager(mRendering.getScene(), this);
 
@@ -124,7 +165,6 @@ RenderingManager::~RenderingManager ()
     delete mPlayer;
     delete mSkyManager;
     delete mDebugging;
-    delete mShaderHelper;
     delete mShadows;
     delete mTerrainManager;
     delete mLocalMap;
@@ -237,7 +277,8 @@ void RenderingManager::update (float duration){
 
     checkUnderwater();
 
-    mWater->update();
+    if (mWater)
+        mWater->update(duration);
 }
 void RenderingManager::waterAdded (MWWorld::Ptr::CellStore *store){
     if(store->cell->data.flags & store->cell->HasWater
@@ -336,6 +377,9 @@ void RenderingManager::configureFog(MWWorld::Ptr::CellStore &mCell)
     color.setAsABGR (mCell.cell->ambi.fog);
 
     configureFog(mCell.cell->ambi.fogDensity, color);
+
+    if (mWater)
+        mWater->setViewportBackground (Ogre::ColourValue(0.8f, 0.9f, 1.0f));
 }
 
 void RenderingManager::configureFog(const float density, const Ogre::ColourValue& colour)
@@ -350,11 +394,12 @@ void RenderingManager::configureFog(const float density, const Ogre::ColourValue
     mRendering.getCamera()->setFarClipDistance ( max / density );
     mRendering.getViewport()->setBackgroundColour (colour);
 
-    CompositorInstance* inst = CompositorManager::getSingleton().getCompositorChain(mRendering.getViewport())->getCompositor("gbuffer");
-    if (inst != 0)
-        inst->getCompositor()->getTechnique(0)->getTargetPass(0)->getPass(0)->setClearColour(colour);
     if (mWater)
-        mWater->setViewportBackground(colour);
+        mWater->setViewportBackground (colour);
+
+    sh::Factory::getInstance ().setSharedParameter ("viewportBackground",
+        sh::makeProperty<sh::Vector3> (new sh::Vector3(colour.r, colour.g, colour.b)));
+
 }
 
 
@@ -517,12 +562,14 @@ Shadows* RenderingManager::getShadows()
 
 void RenderingManager::switchToInterior()
 {
-    mRendering.getScene()->setCameraRelativeRendering(false);
+    // causes light flicker in opengl when moving..
+    //mRendering.getScene()->setCameraRelativeRendering(false);
 }
 
 void RenderingManager::switchToExterior()
 {
-    mRendering.getScene()->setCameraRelativeRendering(true);
+    // causes light flicker in opengl when moving..
+    //mRendering.getScene()->setCameraRelativeRendering(true);
 }
 
 Ogre::Vector4 RenderingManager::boundingBoxToScreen(Ogre::AxisAlignedBox bounds)
@@ -607,7 +654,38 @@ void RenderingManager::processChangedSettings(const Settings::CategorySettingVec
         else if (it->second == "shader" && it->first == "Water")
         {
             applyCompositors();
-            mShaderHelper->applyShaders();
+            sh::Factory::getInstance ().setGlobalSetting ("mrt_output", useMRT() ? "true" : "false");
+            sh::Factory::getInstance ().setGlobalSetting ("simple_water", Settings::Manager::getBool("shader", "Water") ? "false" : "true");
+            mObjects.rebuildStaticGeometry ();
+        }
+        else if (it->second == "underwater effect" && it->first == "Water")
+        {
+            sh::Factory::getInstance ().setGlobalSetting ("underwater_effects", Settings::Manager::getString("underwater effect", "Water"));
+            mObjects.rebuildStaticGeometry ();
+        }
+        else if (it->second == "shaders" && it->first == "Objects")
+        {
+            sh::Factory::getInstance ().setShadersEnabled (Settings::Manager::getBool("shaders", "Objects"));
+            mObjects.rebuildStaticGeometry ();
+        }
+        else if (it->second == "shader mode" && it->first == "General")
+        {
+            sh::Language lang;
+            std::string l = Settings::Manager::getString("shader mode", "General");
+            if (l == "glsl")
+                lang = sh::Language_GLSL;
+            else if (l == "hlsl")
+                lang = sh::Language_HLSL;
+            else
+                lang = sh::Language_CG;
+            sh::Factory::getInstance ().setCurrentLanguage (lang);
+            mObjects.rebuildStaticGeometry ();
+        }
+        else if (it->first == "Shadows")
+        {
+            mShadows->recreate ();
+
+            mObjects.rebuildStaticGeometry ();
         }
     }
 
@@ -671,13 +749,8 @@ void RenderingManager::applyCompositors()
     {
         mCompositors->addCompositor("gbuffer", 0);
         mCompositors->setCompositorEnabled("gbuffer", true);
-        mCompositors->addCompositor("Underwater", 1);
         mCompositors->addCompositor("gbufferFinalizer", 2);
         mCompositors->setCompositorEnabled("gbufferFinalizer", true);
-    }
-    else
-    {
-        mCompositors->addCompositor("UnderwaterNoMRT", 0);
     }
 
     if (mWater)

@@ -15,7 +15,6 @@ namespace Files
 {
 
 static const char* const openmwCfgFile = "openmw.cfg";
-static const char* const pluginsCfgFile = "plugins.cfg";
 
 const char* const mwToken = "?mw?";
 const char* const localToken = "?local?";
@@ -27,16 +26,7 @@ ConfigurationManager::ConfigurationManager()
 {
     setupTokensMapping();
 
-    mPluginsCfgPath = mFixedPath.getLocalPath() / pluginsCfgFile;
-    if (!boost::filesystem::is_regular_file(mPluginsCfgPath))
-    {
-        mPluginsCfgPath = mFixedPath.getGlobalPath() / pluginsCfgFile;
-        if (!boost::filesystem::is_regular_file(mPluginsCfgPath))
-        {
-            std::cerr << "Failed to find " << pluginsCfgFile << " file!" << std::endl;
-            mPluginsCfgPath.clear();
-        }
-    }
+    boost::filesystem::create_directories(mFixedPath.getUserPath());
 
     mLogPath = mFixedPath.getUserPath();
 }
@@ -160,11 +150,6 @@ const boost::filesystem::path& ConfigurationManager::getGlobalDataPath() const
 const boost::filesystem::path& ConfigurationManager::getInstallPath() const
 {
     return mFixedPath.getInstallPath();
-}
-
-const boost::filesystem::path& ConfigurationManager::getPluginsConfigPath() const
-{
-    return mPluginsCfgPath;
 }
 
 const boost::filesystem::path& ConfigurationManager::getLogPath() const

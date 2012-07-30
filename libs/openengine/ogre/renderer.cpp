@@ -9,7 +9,10 @@
 #include "OgreTexture.h"
 #include "OgreHardwarePixelBuffer.h"
 
-#include <assert.h>
+#include <boost/filesystem.hpp>
+
+#include <cassert>
+#include <cstdlib>
 #include <stdexcept>
 
 using namespace Ogre;
@@ -70,7 +73,6 @@ float OgreRenderer::getFPS()
 }
 
 void OgreRenderer::configure(const std::string &logPath,
-                            const std::string &pluginCfg,
                             const std::string& renderSystem,
                             bool _logging)
 {
@@ -86,12 +88,40 @@ void OgreRenderer::configure(const std::string &logPath,
         // Disable logging
         log->setDebugOutputEnabled(false);
 
-    #if defined(ENABLE_PLUGIN_GL) || defined(ENABLE_PLUGIN_Direct3D9) || defined(ENABLE_PLUGIN_CgProgramManager) || defined(ENABLE_PLUGIN_OctreeSceneManager) || defined(ENABLE_PLUGIN_ParticleFX)
     mRoot = new Root("", "", "");
+
+    #if defined(ENABLE_PLUGIN_GL) || defined(ENABLE_PLUGIN_Direct3D9) || defined(ENABLE_PLUGIN_CgProgramManager) || defined(ENABLE_PLUGIN_OctreeSceneManager) || defined(ENABLE_PLUGIN_ParticleFX)
     loadPlugins();
-    #else
-    mRoot = new Root(pluginCfg, "", "");
     #endif
+
+    std::string pluginDir;
+    const char* pluginEnv = getenv("OPENMW_OGRE_PLUGIN_DIR");
+    if (pluginEnv)
+        pluginDir = pluginEnv;
+    else
+    {
+#if OGRE_PLATFORM == OGRE_PLATFORM_WIN32
+        pluginDir = ".\\";
+#endif
+#if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
+        pluginDir = OGRE_PLUGIN_DIR;
+#endif
+#if OGRE_PLATFORM == OGRE_PLATFORM_LINUX
+        pluginDir = OGRE_PLUGIN_DIR_REL;
+#endif
+    }
+
+    std::string glPlugin = std::string(pluginDir) + "/RenderSystem_GL" + OGRE_PLUGIN_DEBUG_SUFFIX;
+    if (boost::filesystem::exists(glPlugin + ".so") || boost::filesystem::exists(glPlugin + ".dll"))
+        mRoot->loadPlugin (glPlugin);
+
+    std::string dxPlugin = std::string(pluginDir) + "/RenderSystem_Direct3D9" + OGRE_PLUGIN_DEBUG_SUFFIX;
+    if (boost::filesystem::exists(dxPlugin + ".so") || boost::filesystem::exists(dxPlugin + ".dll"))
+        mRoot->loadPlugin (dxPlugin);
+
+    std::string cgPlugin = std::string(pluginDir) + "/Plugin_CgProgramManager" + OGRE_PLUGIN_DEBUG_SUFFIX;
+    if (boost::filesystem::exists(cgPlugin + ".so") || boost::filesystem::exists(cgPlugin + ".dll"))
+        mRoot->loadPlugin (cgPlugin);
 
     RenderSystem* rs = mRoot->getRenderSystemByName(renderSystem);
     if (rs == 0)

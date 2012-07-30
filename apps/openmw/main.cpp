@@ -1,13 +1,5 @@
 #include <iostream>
 
-#include <string>
-#include <fstream>
-
-#include <boost/program_options.hpp>
-
-#include <components/files/fileops.hpp>
-#include <components/files/fixedpath.hpp>
-#include <components/files/collections.hpp>
 #include <components/files/configurationmanager.hpp>
 
 #include "engine.hpp"
@@ -16,15 +8,10 @@
 #include <boost/iostreams/concepts.hpp>
 #include <boost/iostreams/stream_buffer.hpp>
 
-#  if !defined(_DEBUG)
-#  include <iostream>
-#  include <fstream>
-#  endif
-
 // For OutputDebugString
 #include <Windows.h>
 // makes __argc and __argv available on windows
-#include <stdlib.h>
+#include <cstdlib>
 
 #endif
 
@@ -51,8 +38,6 @@ inline boost::filesystem::path lexical_cast<boost::filesystem::path, std::string
 
 } /* namespace boost */
 #endif /* (BOOST_VERSION <= 104600) */
-
-using namespace std;
 
 struct FallbackMap {
     std::map<std::string,std::string> mMap;

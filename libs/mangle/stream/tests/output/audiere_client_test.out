@@ -1,9 +1,0 @@
-pos=0
-2 bytes: he
-pos=2
-pos=4
-3 bytes: o w
-pos=6
-pos=7
-last 4 bytes: orld
-entire stream: hello world

@@ -5,7 +5,10 @@
 
 #include <OgreVector3.h>
 
+#include <components/esm/defs.hpp>
+
 #include "ptr.hpp"
+#include "refdata.hpp"
 #include "nullaction.hpp"
 #include "containerstore.hpp"
 
@@ -32,6 +35,16 @@ namespace MWWorld
     void Class::insertObject(const Ptr& ptr, MWWorld::PhysicsSystem& physics) const
     {
 
+    }
+
+    bool Class::apply (const MWWorld::Ptr& ptr, const std::string& id,  const MWWorld::Ptr& actor) const
+    {
+        return false;
+    }
+
+    void Class::skillUsageSucceeded (const MWWorld::Ptr& ptr, int skill, int usageType) const
+    {
+        throw std::runtime_error ("class does not represent an actor");
     }
 
     MWMechanics::CreatureStats& Class::getCreatureStats (const Ptr& ptr) const
@@ -201,5 +214,33 @@ namespace MWWorld
 
     void Class::adjustRotation(const MWWorld::Ptr& ptr,float& x,float& y,float& z) const
     {
+    }
+
+    std::string Class::getModel(const MWWorld::Ptr &ptr) const
+    {
+        return "";
+    }
+
+    MWWorld::Ptr
+    Class::copyToCellImpl(const Ptr &ptr, CellStore &cell) const
+    {
+        throw std::runtime_error("unable to move class to cell");
+    }
+
+    MWWorld::Ptr
+    Class::copyToCell(const Ptr &ptr, CellStore &cell) const
+    {
+        Ptr newPtr = copyToCellImpl(ptr, cell);
+
+        return newPtr;
+    }
+
+    MWWorld::Ptr
+    Class::copyToCell(const Ptr &ptr, CellStore &cell, const ESM::Position &pos) const
+    {
+        Ptr newPtr = copyToCell(ptr, cell);
+        newPtr.getRefData().getPosition() = pos;
+
+        return newPtr;
     }
 }

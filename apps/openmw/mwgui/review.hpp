@@ -82,23 +82,23 @@ namespace MWGui
         void onScrollChangePosition(MyGUI::ScrollBar* scroller, size_t pos);
         void onWindowResize(MyGUI::Window* window);
 
-        static const int lineHeight;
+        static const int sLineHeight;
 
-        MyGUI::TextBox *nameWidget, *raceWidget, *classWidget, *birthSignWidget;
-        MyGUI::WidgetPtr skillAreaWidget, skillClientWidget;
-        MyGUI::ScrollBar* skillScrollerWidget;
-        int lastPos, clientHeight;
+        MyGUI::TextBox *mNameWidget, *mRaceWidget, *mClassWidget, *mBirthSignWidget;
+        MyGUI::WidgetPtr mSkillAreaWidget, mSkillClientWidget;
+        MyGUI::ScrollBar* mSkillScrollerWidget;
+        int mLastPos, mClientHeight;
 
-        Widgets::MWDynamicStatPtr health, magicka, fatigue;
+        Widgets::MWDynamicStatPtr mHealth, mMagicka, mFatigue;
 
-        std::map<int, Widgets::MWAttributePtr> attributeWidgets;
+        std::map<int, Widgets::MWAttributePtr> mAttributeWidgets;
 
-        SkillList majorSkills, minorSkills, miscSkills;
-        std::map<int, MWMechanics::Stat<float> > skillValues;
-        std::map<int, MyGUI::TextBox*> skillWidgetMap;
-        std::string name, raceId, birthSignId;
-        ESM::Class klass;
-        std::vector<MyGUI::WidgetPtr> skillWidgets; //< Skills and other information
+        SkillList mMajorSkills, mMinorSkills, mMiscSkills;
+        std::map<int, MWMechanics::Stat<float> > mSkillValues;
+        std::map<int, MyGUI::TextBox*> mSkillWidgetMap;
+        std::string mName, mRaceId, mBirthSignId;
+        ESM::Class mKlass;
+        std::vector<MyGUI::WidgetPtr> mSkillWidgets; //< Skills and other information
     };
 }
 #endif

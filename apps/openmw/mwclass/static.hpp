@@ -7,9 +7,12 @@ namespace MWClass
 {
     class Static : public MWWorld::Class
     {
+            virtual MWWorld::Ptr
+            copyToCellImpl(const MWWorld::Ptr &ptr, MWWorld::CellStore &cell) const;
+
         public:
 
-             virtual void insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const;
+            virtual void insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const;
             ///< Add reference into a cell for rendering
 
             virtual void insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics) const;
@@ -19,6 +22,8 @@ namespace MWClass
             /// can return an empty string.
 
             static void registerSelf();
+
+            virtual std::string getModel(const MWWorld::Ptr &ptr) const;
     };
 }
 

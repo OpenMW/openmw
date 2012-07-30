@@ -32,13 +32,13 @@ namespace MWGui
             GM_Female
         };
 
-        const std::string &getRaceId() const { return currentRaceId; }
-        Gender getGender() const { return genderIndex == 0 ? GM_Male : GM_Female; }
+        const std::string &getRaceId() const { return mCurrentRaceId; }
+        Gender getGender() const { return mGenderIndex == 0 ? GM_Male : GM_Female; }
         // getFace()
         // getHair()
 
         void setRaceId(const std::string &raceId);
-        void setGender(Gender gender) { genderIndex = gender == GM_Male ? 0 : 1; }
+        void setGender(Gender gender) { mGenderIndex = gender == GM_Male ? 0 : 1; }
         // setFace()
         // setHair()
 
@@ -75,20 +75,20 @@ namespace MWGui
         void updateSkills();
         void updateSpellPowers();
 
-        MyGUI::CanvasPtr  appearanceBox;
-        MyGUI::ListBox*    raceList;
-        MyGUI::ScrollBar* headRotate;
+        MyGUI::CanvasPtr  mAppearanceBox;
+        MyGUI::ListBox*   mRaceList;
+        MyGUI::ScrollBar* mHeadRotate;
 
-        MyGUI::WidgetPtr skillList;
-        std::vector<MyGUI::WidgetPtr> skillItems;
+        MyGUI::WidgetPtr mSkillList;
+        std::vector<MyGUI::WidgetPtr> mSkillItems;
 
-        MyGUI::WidgetPtr spellPowerList;
-        std::vector<MyGUI::WidgetPtr> spellPowerItems;
+        MyGUI::WidgetPtr mSpellPowerList;
+        std::vector<MyGUI::WidgetPtr> mSpellPowerItems;
 
-        int genderIndex, faceIndex, hairIndex;
-        int faceCount, hairCount;
+        int mGenderIndex, mFaceIndex, mHairIndex;
+        int mFaceCount, mHairCount;
 
-        std::string currentRaceId;
+        std::string mCurrentRaceId;
     };
 }
 #endif

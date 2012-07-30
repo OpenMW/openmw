@@ -9,6 +9,9 @@ namespace MWClass
     {
             void ensureCustomData (const MWWorld::Ptr& ptr) const;
 
+            virtual MWWorld::Ptr
+            copyToCellImpl(const MWWorld::Ptr &ptr, MWWorld::CellStore &cell) const;
+
         public:
 
             virtual std::string getId (const MWWorld::Ptr& ptr) const;
@@ -48,7 +51,7 @@ namespace MWClass
             virtual std::string getScript (const MWWorld::Ptr& ptr) const;
             ///< Return name of the script attached to ptr
 
-           virtual void setForceStance (const MWWorld::Ptr& ptr, Stance stance, bool force) const;
+            virtual void setForceStance (const MWWorld::Ptr& ptr, Stance stance, bool force) const;
             ///< Force or unforce a stance.
 
             virtual void setStance (const MWWorld::Ptr& ptr, Stance stance, bool set) const;
@@ -76,11 +79,20 @@ namespace MWClass
             ///< Returns total weight of objects inside this object (including modifications from magic
             /// effects). Throws an exception, if the object can't hold other objects.
 
-            virtual void adjustScale(const MWWorld::Ptr& ptr,float& scale) const;
+            virtual bool apply (const MWWorld::Ptr& ptr, const std::string& id,
+                const MWWorld::Ptr& actor) const;
+            ///< Apply \a id on \a ptr.
+            /// \param actor Actor that is resposible for the ID being applied to \a ptr.
+            /// \return Any effect?
+
+            virtual void skillUsageSucceeded (const MWWorld::Ptr& ptr, int skill, int usageType) const;
+            ///< Inform actor \a ptr that a skill use has succeeded.
 
             virtual void adjustRotation(const MWWorld::Ptr& ptr,float& x,float& y,float& z) const;
 
             static void registerSelf();
+
+            virtual std::string getModel(const MWWorld::Ptr &ptr) const;
     };
 }
 
