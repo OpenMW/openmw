@@ -110,7 +110,9 @@ void OgreRenderer::configure(const std::string &logPath,
         pluginDir = OGRE_PLUGIN_DIR_REL;
 #endif
     }
-
+#ifndef OGRE_PLUGIN_DEBUG_SUFFIX
+#define OGRE_PLUGIN_DEBUG_SUFFIX ""
+#endif
     std::string glPlugin = std::string(pluginDir) + "/RenderSystem_GL" + OGRE_PLUGIN_DEBUG_SUFFIX;
     if (boost::filesystem::exists(glPlugin + ".so") || boost::filesystem::exists(glPlugin + ".dll"))
         mRoot->loadPlugin (glPlugin);
