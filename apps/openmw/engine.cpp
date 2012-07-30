@@ -390,6 +390,9 @@ void OMW::Engine::go()
                 << std::endl;
     }
 
+    if (!mStartupScript.empty())
+        MWBase::Environment::get().getWindowManager()->executeInConsole (mStartupScript);
+
     // Start the main rendering loop
     mOgre->start();
 
@@ -496,4 +499,9 @@ void OMW::Engine::setFallbackValues(std::map<std::string,std::string> fallbackMa
 void OMW::Engine::setScriptConsoleMode (bool enabled)
 {
     mScriptConsoleMode = enabled;
+}
+
+void OMW::Engine::setStartupScript (const std::string& path)
+{
+    mStartupScript = path;
 }

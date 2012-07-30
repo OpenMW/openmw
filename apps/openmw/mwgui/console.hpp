@@ -91,6 +91,8 @@ namespace MWGui
 
     void execute (const std::string& command);
 
+    void executeFile (const std::string& command);
+
   private:
 
     void keyPress(MyGUI::WidgetPtr _sender,

@@ -237,6 +237,8 @@ namespace MWGui
 
     void processChangedSettings(const Settings::CategorySettingVector& changed);
 
+    void executeInConsole (const std::string& path);
+
   private:
     OEngine::GUI::MyGUIManager *mGuiManager;
     HUD *mHud;

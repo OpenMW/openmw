@@ -130,6 +130,11 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
         ("script-console", bpo::value<bool>()->implicit_value(true)
             ->default_value(false), "enable console-only script functionality")
 
+        ("script-run", bpo::value<std::string>()->default_value(""),
+            "set a file that is execute in the console on startup\n\n"
+            "Note: The file contains a list of script lines, but not a complete scripts. "
+            "That means no begin/end and no variable declarations.")
+
         ("new-game", bpo::value<bool>()->implicit_value(true)
             ->default_value(false), "activate char gen/new game mechanics")
 
@@ -253,6 +258,7 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
     engine.setAnimationVerbose(variables["anim-verbose"].as<bool>());
     engine.setFallbackValues(variables["fallback"].as<FallbackMap>().mMap);
     engine.setScriptConsoleMode (variables["script-console"].as<bool>());
+    engine.setStartupScript (variables["script-run"].as<std::string>());
 
     return true;
 }

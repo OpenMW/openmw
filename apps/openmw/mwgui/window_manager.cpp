@@ -740,3 +740,8 @@ bool WindowManager::getWorldMouseOver()
 {
     return mHud->getWorldMouseOver();
 }
+
+void WindowManager::executeInConsole (const std::string& path)
+{
+    mConsole->executeFile (path);
+}

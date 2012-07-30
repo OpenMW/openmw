@@ -2,6 +2,7 @@
 #include "console.hpp"
 
 #include <algorithm>
+#include <fstream>
 
 #include <components/esm_store/reclists.hpp>
 #include <components/esm_store/store.hpp>
@@ -198,6 +199,21 @@ namespace MWGui
             {
                 printError (std::string ("An exception has been thrown: ") + error.what());
             }
+        }
+    }
+
+    void Console::executeFile (const std::string& path)
+    {
+        std::ifstream stream (path.c_str());
+
+        if (!stream.is_open())
+            printError ("failed to open file: " + path);
+        else
+        {
+            std::string line;
+
+            while (std::getline (stream, line))
+                execute (line);
         }
     }
 
