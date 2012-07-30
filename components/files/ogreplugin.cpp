@@ -1,9 +1,11 @@
-#include "ogreplugin.h"
+#include "ogreplugin.hpp"
 
 #include <OgrePrerequisites.h>
 #include <OgreRoot.h>
 
 #include <boost/filesystem.hpp>
+
+namespace Files {
 
 bool loadOgrePlugin(const std::string &pluginDir, std::string pluginName, Ogre::Root &ogreRoot) {
 	pluginName = pluginName + OGRE_PLUGIN_DEBUG_SUFFIX;
@@ -32,4 +34,6 @@ bool loadOgrePlugin(const std::string &pluginDir, std::string pluginName, Ogre::
     else {
     	return false;
     }
+}
+
 }

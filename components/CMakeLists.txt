@@ -52,7 +52,7 @@ add_component_dir (misc
 
 add_component_dir (files
     linuxpath windowspath macospath fixedpath multidircollection collections fileops configurationmanager
-    filelibrary
+    filelibrary ogreplugin
     )
 
 add_component_dir (compiler
@@ -65,10 +65,6 @@ add_component_dir (interpreter
     context controlopcodes genericopcodes installopcodes interpreter localopcodes mathopcodes
     miscopcodes opcodes runtime scriptopcodes spatialopcodes types
     )
-
-add_component_dir (ogreplugin
-    ogreplugin
-)
 
 include_directories(${BULLET_INCLUDE_DIRS})
 

@@ -6,8 +6,8 @@
 #include <boost/filesystem.hpp>
 
 #include <components/files/configurationmanager.hpp>
+#include <components/files/ogreplugin.hpp>
 #include <components/settings/settings.hpp>
-#include <components/ogreplugin/ogreplugin.h>
 
 #include "graphicspage.hpp"
 #include "naturalsort.hpp"
@@ -120,8 +120,8 @@ bool GraphicsPage::setupOgre()
 
     pluginDir = absPluginPath.string();
 
-    loadOgrePlugin(pluginDir, "RenderSystem_GL", *mOgre);
-    loadOgrePlugin(pluginDir, "RenderSystem_Direct3D9", *mOgre);
+    Files::loadOgrePlugin(pluginDir, "RenderSystem_GL", *mOgre);
+    Files::loadOgrePlugin(pluginDir, "RenderSystem_Direct3D9", *mOgre);
 
 #ifdef ENABLE_PLUGIN_GL
     mGLPlugin = new Ogre::GLPlugin();

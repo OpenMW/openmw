@@ -11,7 +11,7 @@
 
 #include <boost/filesystem.hpp>
 
-#include <components/ogreplugin/ogreplugin.h>
+#include <components/files/ogreplugin.hpp>
 
 #include <cassert>
 #include <cstdlib>
@@ -117,9 +117,9 @@ void OgreRenderer::configure(const std::string &logPath,
 
     pluginDir = absPluginPath.string();
 
-    loadOgrePlugin(pluginDir, "RenderSystem_GL", *mRoot);
-    loadOgrePlugin(pluginDir, "RenderSystem_Direct3D9", *mRoot);
-    loadOgrePlugin(pluginDir, "Plugin_CgProgramManager", *mRoot);
+    Files::loadOgrePlugin(pluginDir, "RenderSystem_GL", *mRoot);
+    Files::loadOgrePlugin(pluginDir, "RenderSystem_Direct3D9", *mRoot);
+    Files::loadOgrePlugin(pluginDir, "Plugin_CgProgramManager", *mRoot);
 
     RenderSystem* rs = mRoot->getRenderSystemByName(renderSystem);
     if (rs == 0)
