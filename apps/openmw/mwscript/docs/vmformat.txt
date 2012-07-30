@@ -169,5 +169,14 @@ op 0x2000164: SetScale
 op 0x2000165: SetScale, explicit reference
 op 0x2000166: SetAngle
 op 0x2000167: SetAngle, explicit reference
-opcodes 0x2000168-0x3ffffff unused
-
+op 0x2000168: GetScale
+op 0x2000169: GetScale, explicit reference
+op 0x200016a: GetAngle
+op 0x200016b: GetAngle, explicit reference
+op 0x200016c: user1 (console only, requires --script-console switch)
+op 0x200016d: user2 (console only, requires --script-console switch)
+op 0x200016e: user3, explicit reference (console only, requires --script-console switch)
+op 0x200016f: user3 (implicit reference, console only, requires --script-console switch)
+op 0x2000170: user4, explicit reference (console only, requires --script-console switch)
+op 0x2000171: user4 (implicit reference, console only, requires --script-console switch)
+opcodes 0x2000172-0x3ffffff unused

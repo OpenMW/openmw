@@ -94,7 +94,7 @@ namespace MWGui
     typedef std::vector<Faction> FactionList;
     typedef std::vector<int> SkillList;
 
-    WindowManager(const Compiler::Extensions& extensions, int fpsLevel, bool newGame, OEngine::Render::OgreRenderer *mOgre, const std::string& logpath);
+    WindowManager(const Compiler::Extensions& extensions, int fpsLevel, bool newGame, OEngine::Render::OgreRenderer *mOgre, const std::string& logpath, bool consoleOnlyScripts);
     virtual ~WindowManager();
 
     /**
@@ -236,6 +236,8 @@ namespace MWGui
     const ESMS::ESMStore& getStore() const;
 
     void processChangedSettings(const Settings::CategorySettingVector& changed);
+
+    void executeInConsole (const std::string& path);
 
   private:
     OEngine::GUI::MyGUIManager *mGuiManager;
