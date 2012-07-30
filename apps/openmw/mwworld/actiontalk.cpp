@@ -9,7 +9,7 @@ namespace MWWorld
 {
     ActionTalk::ActionTalk (const Ptr& actor) : mActor (actor) {}
 
-    void ActionTalk::execute()
+    void ActionTalk::executeImp (const Ptr& actor)
     {
         MWBase::Environment::get().getDialogueManager()->startDialogue (mActor);
     }

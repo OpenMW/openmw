@@ -54,6 +54,14 @@ namespace MWBase
             World& operator= (const World&);
             ///< not implemented
 
+        protected:
+
+            virtual void
+            placeObject(
+                const MWWorld::Ptr &ptr,
+                MWWorld::CellStore &cell,
+                const ESM::Position &pos) = 0;
+
         public:
 
             enum RenderMode

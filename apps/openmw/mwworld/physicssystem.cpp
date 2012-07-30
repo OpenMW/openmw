@@ -14,6 +14,7 @@
 #include "../mwbase/world.hpp" // FIXME
 
 #include "ptr.hpp"
+#include "class.hpp"
 
 using namespace Ogre;
 namespace MWWorld
@@ -119,6 +120,22 @@ namespace MWWorld
         std::pair<std::string, float> result = mEngine->rayTest(_from, _to);
 
         return !(result.first == "");
+    }
+
+    std::pair<bool, Ogre::Vector3>
+    PhysicsSystem::castRay(const Ogre::Vector3 &orig, const Ogre::Vector3 &dir, float len)
+    {
+        Ogre::Ray ray = Ogre::Ray(orig, dir);
+        Ogre::Vector3 to = ray.getPoint(len);
+
+        btVector3 btFrom = btVector3(orig.x, orig.y, orig.z);
+        btVector3 btTo = btVector3(to.x, to.y, to.z);
+
+        std::pair<std::string, float> test = mEngine->rayTest(btFrom, btTo);
+        if (test.first == "") {
+            return std::make_pair(false, Ogre::Vector3());
+        }
+        return std::make_pair(true, ray.getPoint(len * test.second));
     }
 
     std::pair<bool, Ogre::Vector3> PhysicsSystem::castRay(float mouseX, float mouseY)
@@ -348,21 +365,41 @@ namespace MWWorld
         throw std::logic_error ("can't find player");
     }
 
-     void PhysicsSystem::insertObjectPhysics(const MWWorld::Ptr& ptr, const std::string model){
+    void PhysicsSystem::insertObjectPhysics(const MWWorld::Ptr& ptr, const std::string model){
 
-           Ogre::SceneNode* node = ptr.getRefData().getBaseNode();
+        Ogre::SceneNode* node = ptr.getRefData().getBaseNode();
 
-           // unused
-		   //Ogre::Vector3 objPos = node->getPosition();
+        addObject(
+            node->getName(),
+            model,
+            node->getOrientation(),
+            node->getScale().x,
+            node->getPosition());
+    }
 
-         addObject (node->getName(), model, node->getOrientation(),
-            node->getScale().x, node->getPosition());
-     }
+    void PhysicsSystem::insertActorPhysics(const MWWorld::Ptr& ptr, const std::string model){
+        Ogre::SceneNode* node = ptr.getRefData().getBaseNode();
+        addActor (node->getName(), model, node->getPosition());
+    }
 
-     void PhysicsSystem::insertActorPhysics(const MWWorld::Ptr& ptr, const std::string model){
-           Ogre::SceneNode* node = ptr.getRefData().getBaseNode();
-            // std::cout << "Adding node with name" << node->getName();
-         addActor (node->getName(), model, node->getPosition());
-     }
+    bool PhysicsSystem::getObjectAABB(const MWWorld::Ptr &ptr, Ogre::Vector3 &min, Ogre::Vector3 &max)
+    {
+        std::string model = MWWorld::Class::get(ptr).getModel(ptr);
+        if (model.empty()) {
+            return false;
+        }
+        btVector3 btMin, btMax;
+        float scale = ptr.getCellRef().scale;
+        mEngine->getObjectAABB(model, scale, btMin, btMax);
 
+        min.x = btMin.x();
+        min.y = btMin.y();
+        min.z = btMin.z();
+
+        max.x = btMax.x();
+        max.y = btMax.y();
+        max.z = btMax.z();
+
+        return true;
+    }
 }

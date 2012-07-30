@@ -189,6 +189,9 @@ if (UNIX AND NOT APPLE)
 find_package (Threads)
 endif()
 
+# find boost without components so we can use Boost_VERSION
+find_package(Boost REQUIRED)
+
 set(BOOST_COMPONENTS system filesystem program_options thread)
 
 if (Boost_VERSION LESS 104900)
@@ -256,14 +259,13 @@ endif (APPLE)
 
 
 # Set up Ogre plugin folder & debug suffix
-if (DEFINED CMAKE_BUILD_TYPE)
-    # Ogre on OS X doesn't use "_d" suffix (see Ogre's CMakeLists.txt)
-    if (CMAKE_BUILD_TYPE STREQUAL "Debug" AND NOT APPLE)
-        add_definitions(-DOGRE_PLUGIN_DEBUG_SUFFIX="_d")
-    else()
-        add_definitions(-DOGRE_PLUGIN_DEBUG_SUFFIX="")
-    endif()
+# Ogre on OS X doesn't use "_d" suffix (see Ogre's CMakeLists.txt)
+if (DEFINED CMAKE_BUILD_TYPE AND CMAKE_BUILD_TYPE STREQUAL "Debug" AND NOT APPLE)
+	add_definitions(-DOGRE_PLUGIN_DEBUG_SUFFIX="_d")
+else()
+	add_definitions(-DOGRE_PLUGIN_DEBUG_SUFFIX="")
 endif()
+
 add_definitions(-DOGRE_PLUGIN_DIR_REL="${OGRE_PLUGIN_DIR_REL}")
 add_definitions(-DOGRE_PLUGIN_DIR_DBG="${OGRE_PLUGIN_DIR_DBG}")
 if (APPLE AND OPENMW_OSX_DEPLOYMENT)

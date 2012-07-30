@@ -15,7 +15,7 @@ namespace MWWorld
         mContainer = container;
     }
 
-    void ActionOpen::execute ()
+    void ActionOpen::executeImp (const MWWorld::Ptr& actor)
     {
         if (!MWBase::Environment::get().getWindowManager()->isAllowed(MWGui::GW_Inventory))
             return;

@@ -10,11 +10,11 @@ namespace MWWorld
     {
             Ptr mObject;
 
+            virtual void executeImp (const Ptr& actor);
+
         public:
             /// @param item to equip
             ActionEquip (const Ptr& object);
-
-            virtual void execute ();
     };
 }
 

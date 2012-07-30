@@ -11,6 +11,7 @@
 #include "BtOgreExtras.h"
 
 #include <boost/lexical_cast.hpp>
+#include <boost/format.hpp>
 
 #define BIT(x) (1<<(x))
 
@@ -333,10 +334,8 @@ namespace Physic
 
     RigidBody* PhysicEngine::createRigidBody(std::string mesh,std::string name,float scale)
     {
-        char uniqueID[8];
-        sprintf( uniqueID, "%07.3f", scale );
-        std::string sid = uniqueID;
-        std::string outputstring = mesh + uniqueID + "\"|";
+        std::string sid = (boost::format("%07.3f") % scale).str();
+        std::string outputstring = mesh + sid;
         //std::cout << "The string" << outputstring << "\n";
 
         //get the shape from the .nif
@@ -567,5 +566,21 @@ namespace Physic
         std::sort(results2.begin(), results2.end(), MyRayResultCallback::cmp);
 
         return results2;
+    }
+
+    void PhysicEngine::getObjectAABB(const std::string &mesh, float scale, btVector3 &min, btVector3 &max)
+    {
+        std::string sid = (boost::format("%07.3f") % scale).str();
+        std::string outputstring = mesh + sid;
+
+        mShapeLoader->load(outputstring, "General");
+        BulletShapeManager::getSingletonPtr()->load(outputstring, "General");
+        BulletShapePtr shape =
+            BulletShapeManager::getSingleton().getByName(outputstring, "General");
+
+        btTransform trans;
+        trans.setIdentity();
+
+        shape->Shape->getAabb(trans, min, max);
     }
 }};

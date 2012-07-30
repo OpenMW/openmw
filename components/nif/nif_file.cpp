@@ -205,8 +205,22 @@ void NiSkinInstance::post(NIFFile *nif)
 
     for(size_t i=0; i<bnum; i++)
     {
-        if(!bones.has(i))
+        if(bones[i].empty())
             nif->fail("Oops: Missing bone! Don't know how to handle this.");
-        bones[i].makeBone(i, data->bones[i]);
+        bones[i]->makeBone(i, data->bones[i]);
     }
+}
+
+Ogre::Matrix4 Node::getLocalTransform()
+{
+    Ogre::Matrix4 mat4(Ogre::Matrix4::IDENTITY);
+    mat4.makeTransform(trafo.pos, Ogre::Vector3(trafo.scale), Ogre::Quaternion(trafo.rotation));
+    return mat4;
+}
+
+Ogre::Matrix4 Node::getWorldTransform()
+{
+    if(parent != NULL)
+        return parent->getWorldTransform() * getLocalTransform();
+    return getLocalTransform();
 }

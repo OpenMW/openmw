@@ -88,10 +88,6 @@ namespace MWWorld
 
             void insertCell (Ptr::CellStore &cell);
 
-            /// this method is only meant for dropping objects into the gameworld from a container
-            /// and thus only handles object types that can be placed in a container
-            void insertObject (const Ptr& object, CellStore* cell);
-
             void update (float duration);
 
             void addObjectToScene (const Ptr& ptr);
@@ -99,6 +95,8 @@ namespace MWWorld
 
             void removeObjectFromScene (const Ptr& ptr);
             ///< Remove an object from the scene, but not from the world model.
+
+            bool isCellActive(const CellStore &cell);
     };
 }
 

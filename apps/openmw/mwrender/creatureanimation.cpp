@@ -14,7 +14,7 @@ namespace MWRender{
 
 CreatureAnimation::~CreatureAnimation()
 {
-}                 
+}
 
 CreatureAnimation::CreatureAnimation(const MWWorld::Ptr& ptr, OEngine::Render::OgreRenderer& _rend): Animation(_rend)
 {
@@ -24,75 +24,54 @@ CreatureAnimation::CreatureAnimation(const MWWorld::Ptr& ptr, OEngine::Render::O
     assert (ref->base != NULL);
     if(!ref->base->model.empty())
     {
-        const std::string &mesh = "meshes\\" + ref->base->model;
-        std::string meshNumbered = mesh + getUniqueID(mesh) + ">|";
-        NifOgre::NIFLoader::load(meshNumbered);
-        mBase = mRend.getScene()->createEntity(meshNumbered);
-        mBase->setVisibilityFlags(RV_Actors);
+        std::string mesh = "meshes\\" + ref->base->model;
 
-        bool transparent = false;
-        for (unsigned int i=0; i < mBase->getNumSubEntities(); ++i)
+        mEntityList = NifOgre::NIFLoader::createEntities(mInsert, &mTextKeys, mesh);
+        for(size_t i = 0;i < mEntityList.mEntities.size();i++)
         {
-            Ogre::MaterialPtr mat = mBase->getSubEntity(i)->getMaterial();
-            Ogre::Material::TechniqueIterator techIt = mat->getTechniqueIterator();
-            while (techIt.hasMoreElements())
-            {
-                Ogre::Technique* tech = techIt.getNext();
-                Ogre::Technique::PassIterator passIt = tech->getPassIterator();
-                while (passIt.hasMoreElements())
-                {
-                    Ogre::Pass* pass = passIt.getNext();
+            Ogre::Entity *ent = mEntityList.mEntities[i];
+            ent->setVisibilityFlags(RV_Actors);
 
-                    if (pass->getDepthWriteEnabled() == false)
-                        transparent = true;
+            bool transparent = false;
+            for (unsigned int j=0;j < ent->getNumSubEntities() && !transparent; ++j)
+            {
+                Ogre::MaterialPtr mat = ent->getSubEntity(j)->getMaterial();
+                Ogre::Material::TechniqueIterator techIt = mat->getTechniqueIterator();
+                while (techIt.hasMoreElements() && !transparent)
+                {
+                    Ogre::Technique* tech = techIt.getNext();
+                    Ogre::Technique::PassIterator passIt = tech->getPassIterator();
+                    while (passIt.hasMoreElements() && !transparent)
+                    {
+                        Ogre::Pass* pass = passIt.getNext();
+
+                        if (pass->getDepthWriteEnabled() == false)
+                            transparent = true;
+                    }
                 }
             }
+            ent->setRenderQueueGroup(transparent ? RQG_Alpha : RQG_Main);
         }
-        mBase->setRenderQueueGroup(transparent ? RQG_Alpha : RQG_Main);
 
-        std::string meshZero = mesh + "0000>|";
-
-        if((mTransformations = (NIFLoader::getSingletonPtr())->getAnim(meshZero)))
+        if(mEntityList.mSkelBase)
         {
-            for(std::size_t init = 0; init < mTransformations->size(); init++)
+            Ogre::AnimationStateSet *aset = mEntityList.mSkelBase->getAllAnimationStates();
+            Ogre::AnimationStateIterator as = aset->getAnimationStateIterator();
+            while(as.hasMoreElements())
             {
-                mRindexI.push_back(0);
-                mTindexI.push_back(0);
+                Ogre::AnimationState *state = as.getNext();
+                state->setEnabled(true);
+                state->setLoop(false);
             }
-            mStopTime = mTransformations->begin()->getStopTime();
-            mStartTime = mTransformations->begin()->getStartTime();
-            mShapes = (NIFLoader::getSingletonPtr())->getShapes(meshZero);
         }
-        mTextmappings = NIFLoader::getSingletonPtr()->getTextIndices(meshZero);
-        mInsert->attachObject(mBase);
     }
 }
 
 void CreatureAnimation::runAnimation(float timepassed)
 {
-    mVecRotPos.clear();
-    if(mAnimate > 0)
-    {
-        //Add the amount of time passed to time
+    // Placeholder
 
-        //Handle the animation transforms dependent on time
-
-        //Handle the shapes dependent on animation transforms
-        mTime += timepassed;
-        if(mTime >= mStopTime)
-        {
-            mAnimate--;
-            //std::cout << "Stopping the animation\n";
-            if(mAnimate == 0)
-                mTime = mStopTime;
-            else
-                mTime = mStartTime + (mTime - mStopTime);
-        }
-
-        handleAnimationTransforms();
-        handleShapes(mShapes, mBase, mBase->getSkeleton());
-
-    }
+    Animation::runAnimation(timepassed);
 }
 
 }

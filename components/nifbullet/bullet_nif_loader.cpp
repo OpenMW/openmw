@@ -79,7 +79,7 @@ void ManualBulletShapeLoader::loadResource(Ogre::Resource *resource)
     // of the early stages of development. Right now we WANT to catch
     // every error as early and intrusively as possible, as it's most
     // likely a sign of incomplete code rather than faulty input.
-    Nif::NIFFile nif(resourceName);
+    Nif::NIFFile nif(resourceName.substr(0, resourceName.length()-7));
     if (nif.numRecords() < 1)
     {
         warn("Found no records in NIF.");
@@ -138,9 +138,9 @@ bool ManualBulletShapeLoader::hasRootCollisionNode(Nif::Node* node)
         int n = list.length();
         for (int i=0; i<n; i++)
         {
-            if (list.has(i))
+            if (!list[i].empty())
             {
-                if(hasRootCollisionNode(&list[i])) return true;;
+                if(hasRootCollisionNode(list[i].getPtr())) return true;;
             }
         }
     }
@@ -204,7 +204,6 @@ void ManualBulletShapeLoader::handleNode(Nif::Node *node, int flags,
         // For both position and rotation we have that:
         // final_vector = old_vector + old_rotation*new_vector*old_scale
         final.pos = trafo->pos + trafo->rotation*final.pos*trafo->scale;
-        final.velocity = trafo->velocity + trafo->rotation*final.velocity*trafo->scale;
 
         // Merge the rotations together
         final.rotation = trafo->rotation * final.rotation;
@@ -222,9 +221,9 @@ void ManualBulletShapeLoader::handleNode(Nif::Node *node, int flags,
         int n = list.length();
         for (int i=0; i<n; i++)
         {
-            if (list.has(i))
+            if (!list[i].empty())
             {
-                handleNode(&list[i], flags,&node->trafo,hasCollisionNode,isCollisionNode,raycastingOnly);
+                handleNode(list[i].getPtr(), flags,&node->trafo,hasCollisionNode,isCollisionNode,raycastingOnly);
             }
         }
     }
@@ -239,8 +238,8 @@ void ManualBulletShapeLoader::handleNode(Nif::Node *node, int flags,
         int n = list.length();
         for (int i=0; i<n; i++)
         {
-            if (list.has(i))
-                handleNode(&list[i], flags,&node->trafo, hasCollisionNode,true,raycastingOnly);
+            if (!list[i].empty())
+                handleNode(list[i].getPtr(), flags,&node->trafo, hasCollisionNode,true,raycastingOnly);
         }
     }
 }
@@ -272,19 +271,16 @@ void ManualBulletShapeLoader::handleNiTriShape(Nif::NiTriShape *shape, int flags
 
     Nif::NiTriShapeData *data = shape->data.getPtr();
 
-    float* vertices = &data->vertices[0];
-    short* triangles = &data->triangles[0];
+    const std::vector<Ogre::Vector3> &vertices = data->vertices;
     const Ogre::Matrix3 &rot = shape->trafo.rotation;
     const Ogre::Vector3 &pos = shape->trafo.pos;
-    float scale = shape->trafo.scale;
-    for(unsigned int i=0; i < data->triangles.size(); i = i+3)
+    float scale = shape->trafo.scale * parentScale;
+    short* triangles = &data->triangles[0];
+    for(size_t i = 0;i < data->triangles.size();i+=3)
     {
-        Ogre::Vector3 b1(vertices[triangles[i+0]*3]*parentScale,vertices[triangles[i+0]*3+1]*parentScale,vertices[triangles[i+0]*3+2]*parentScale);
-        Ogre::Vector3 b2(vertices[triangles[i+1]*3]*parentScale,vertices[triangles[i+1]*3+1]*parentScale,vertices[triangles[i+1]*3+2]*parentScale);
-        Ogre::Vector3 b3(vertices[triangles[i+2]*3]*parentScale,vertices[triangles[i+2]*3+1]*parentScale,vertices[triangles[i+2]*3+2]*parentScale);
-        b1 = pos + rot*b1*scale;
-        b2 = pos + rot*b2*scale;
-        b3 = pos + rot*b3*scale;
+        Ogre::Vector3 b1 = pos + rot*vertices[triangles[i+0]]*scale;
+        Ogre::Vector3 b2 = pos + rot*vertices[triangles[i+1]]*scale;
+        Ogre::Vector3 b3 = pos + rot*vertices[triangles[i+2]]*scale;
         mTriMesh->addTriangle(btVector3(b1.x,b1.y,b1.z),btVector3(b2.x,b2.y,b2.z),btVector3(b3.x,b3.y,b3.z));
     }
 }

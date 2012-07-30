@@ -6,12 +6,12 @@
 
 namespace MWWorld
 {
-    ActionTeleportPlayer::ActionTeleportPlayer (const std::string& cellName,
+    ActionTeleport::ActionTeleport (const std::string& cellName,
         const ESM::Position& position)
     : mCellName (cellName), mPosition (position)
     {}
 
-    void ActionTeleportPlayer::execute()
+    void ActionTeleport::executeImp (const Ptr& actor)
     {
         if (mCellName.empty())
             MWBase::Environment::get().getWorld()->changeToExteriorCell (mPosition);
