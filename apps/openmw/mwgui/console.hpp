@@ -11,6 +11,7 @@
 #include <components/compiler/scanner.hpp>
 #include <components/compiler/locals.hpp>
 #include <components/compiler/output.hpp>
+#include <components/compiler/extensions.hpp>
 #include <components/interpreter/interpreter.hpp>
 
 #include "../mwscript/compilercontext.hpp"
@@ -24,8 +25,10 @@ namespace MWGui
   {
     private:
 
+        Compiler::Extensions mExtensions;
         MWScript::CompilerContext mCompilerContext;
         std::vector<std::string> mNames;
+        bool mConsoleOnlyScripts;
 
         bool compile (const std::string& cmd, Compiler::Output& output);
 
@@ -62,7 +65,7 @@ namespace MWGui
     StringList::iterator current;
     std::string editString;
 
-    Console(int w, int h, const Compiler::Extensions& extensions);
+    Console(int w, int h, bool consoleOnlyScripts);
 
     void enable();
 

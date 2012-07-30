@@ -129,6 +129,7 @@ OMW::Engine::Engine(Files::ConfigurationManager& configurationManager)
   , mCompileAll (false)
   , mScriptContext (0)
   , mFSStrict (false)
+  , mScriptConsoleMode (false)
   , mCfgMgr(configurationManager)
 {
     std::srand ( std::time(NULL) );
@@ -326,7 +327,8 @@ void OMW::Engine::go()
     MWScript::registerExtensions (mExtensions);
 
     mEnvironment.setWindowManager (new MWGui::WindowManager(
-        mExtensions, mFpsLevel, mNewGame, mOgre, mCfgMgr.getLogPath().string() + std::string("/")));
+        mExtensions, mFpsLevel, mNewGame, mOgre, mCfgMgr.getLogPath().string() + std::string("/"),
+        mScriptConsoleMode));
 
     // Create sound system
     mEnvironment.setSoundManager (new MWSound::SoundManager(mUseSound));
@@ -489,4 +491,9 @@ void OMW::Engine::setEncoding(const std::string& encoding)
 void OMW::Engine::setFallbackValues(std::map<std::string,std::string> fallbackMap)
 {
     mFallbackMap = fallbackMap;
+}
+
+void OMW::Engine::setScriptConsoleMode (bool enabled)
+{
+    mScriptConsoleMode = enabled;
 }

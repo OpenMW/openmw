@@ -105,9 +105,10 @@ namespace MWGui
         }
     }
 
-    Console::Console(int w, int h, const Compiler::Extensions& extensions)
+    Console::Console(int w, int h, bool consoleOnlyScripts)
       : Layout("openmw_console.layout"),
-        mCompilerContext (MWScript::CompilerContext::Type_Console)
+        mCompilerContext (MWScript::CompilerContext::Type_Console),
+        mConsoleOnlyScripts (consoleOnlyScripts)
     {
         setCoord(10,10, w-10, h/2);
 
@@ -126,7 +127,8 @@ namespace MWGui
         history->setVisibleVScroll(true);
 
         // compiler
-        mCompilerContext.setExtensions (&extensions);
+        MWScript::registerExtensions (mExtensions, mConsoleOnlyScripts);
+        mCompilerContext.setExtensions (&mExtensions);
     }
 
     void Console::enable()
@@ -246,7 +248,7 @@ namespace MWGui
             {
                 ConsoleInterpreterContext interpreterContext (*this, mPtr);
                 Interpreter::Interpreter interpreter;
-                MWScript::installOpcodes (interpreter);
+                MWScript::installOpcodes (interpreter, mConsoleOnlyScripts);
                 std::vector<Interpreter::Type_Code> code;
                 output.getCode (code);
                 interpreter.run (&code[0], code.size(), interpreterContext);

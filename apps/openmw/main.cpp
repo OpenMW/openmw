@@ -124,11 +124,14 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
         ("script-verbose", bpo::value<bool>()->implicit_value(true)
             ->default_value(false), "verbose script output")
 
-        ("new-game", bpo::value<bool>()->implicit_value(true)
-            ->default_value(false), "activate char gen/new game mechanics")
-
         ("script-all", bpo::value<bool>()->implicit_value(true)
             ->default_value(false), "compile all scripts (excluding dialogue scripts) at startup")
+
+        ("script-console", bpo::value<bool>()->implicit_value(true)
+            ->default_value(false), "enable console-only script functionality")
+
+        ("new-game", bpo::value<bool>()->implicit_value(true)
+            ->default_value(false), "activate char gen/new game mechanics")
 
         ("fs-strict", bpo::value<bool>()->implicit_value(true)
             ->default_value(false), "strict file system handling (no case folding)")
@@ -249,6 +252,7 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
     engine.setCompileAll(variables["script-all"].as<bool>());
     engine.setAnimationVerbose(variables["anim-verbose"].as<bool>());
     engine.setFallbackValues(variables["fallback"].as<FallbackMap>().mMap);
+    engine.setScriptConsoleMode (variables["script-console"].as<bool>());
 
     return true;
 }

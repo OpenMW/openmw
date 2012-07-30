@@ -41,7 +41,7 @@
 using namespace MWGui;
 
 WindowManager::WindowManager(
-    const Compiler::Extensions& extensions, int fpsLevel, bool newGame, OEngine::Render::OgreRenderer *mOgre, const std::string& logpath)
+    const Compiler::Extensions& extensions, int fpsLevel, bool newGame, OEngine::Render::OgreRenderer *mOgre, const std::string& logpath, bool consoleOnlyScripts)
   : mGuiManager(NULL)
   , mHud(NULL)
   , mMap(NULL)
@@ -113,7 +113,7 @@ WindowManager::WindowManager(
     mMenu = new MainMenu(w,h);
     mMap = new MapWindow(*this);
     mStatsWindow = new StatsWindow(*this);
-    mConsole = new Console(w,h, extensions);
+    mConsole = new Console(w,h, consoleOnlyScripts);
     mJournal = new JournalWindow(*this);
     mMessageBoxManager = new MessageBoxManager(this);
     mInventoryWindow = new InventoryWindow(*this,mDragAndDrop);
