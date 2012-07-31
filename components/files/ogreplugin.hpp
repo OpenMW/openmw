@@ -25,9 +25,24 @@
 
 #include <string>
 
+#include <boost/filesystem.hpp>
+#include <boost/version.hpp>
+
 namespace Ogre {
 	class Root;
 }
+
+#if (BOOST_VERSION <= 104300)
+#error BOOST_VERSION
+namespace boost {
+namespace filesystem {
+path absolute(const path& p, const path& base=current_path()) {
+	// call obsolete version of this function on older boost
+	return complete(p, base);
+}
+}
+}
+#endif /* (BOOST_VERSION <= 104300) */
 
 /**
  * \namespace Files

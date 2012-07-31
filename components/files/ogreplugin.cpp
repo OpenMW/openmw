@@ -3,8 +3,6 @@
 #include <OgrePrerequisites.h>
 #include <OgreRoot.h>
 
-#include <boost/filesystem.hpp>
-
 namespace Files {
 
 bool loadOgrePlugin(const std::string &pluginDir, std::string pluginName, Ogre::Root &ogreRoot) {
