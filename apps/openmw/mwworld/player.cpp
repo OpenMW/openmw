@@ -38,12 +38,6 @@ namespace MWWorld
         delete mClass;
     }
 
-    void Player::setPos(float x, float y, float z)
-    {
-        /// \todo This fcuntion should be removed during the mwrender-refactoring.
-        MWBase::Environment::get().getWorld()->moveObject (getPlayer(), x, y, z);
-    }
-
     void Player::setRot(float x, float y, float z)
     {
         mRenderer->setRot(x, y, z);
