@@ -95,6 +95,7 @@ class RenderingManager: private RenderingInterface, public Ogre::WindowEventList
     void setWaterHeight(const float height);
     void toggleWater();
 
+    /// Moves object rendering part to proper container
     /// \param store Cell the object was in previously (\a ptr has already been updated to the new cell).
     void moveObjectToCell (const MWWorld::Ptr& ptr, const Ogre::Vector3& position, MWWorld::CellStore *store);
 

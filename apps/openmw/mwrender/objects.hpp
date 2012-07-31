@@ -96,6 +96,7 @@ public:
 
     void rebuildStaticGeometry();
 
+    /// Updates containing cell for object rendering data
     void updateObjectCell(const MWWorld::Ptr &ptr);
 };
 }

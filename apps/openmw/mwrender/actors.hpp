@@ -15,7 +15,7 @@ namespace MWRender{
         OEngine::Render::OgreRenderer &mRend;
         std::map<MWWorld::CellStore *, Ogre::SceneNode *> mCellSceneNodes;
         Ogre::SceneNode* mMwRoot;
-		std::map<MWWorld::Ptr, Animation*> mAllActors;
+        std::map<MWWorld::Ptr, Animation*> mAllActors;
 
 
 
@@ -45,6 +45,7 @@ namespace MWRender{
 
         void update (float duration);
 
+        /// Updates containing cell for object rendering data
         void updateObjectCell(const MWWorld::Ptr &ptr);
     };
 }

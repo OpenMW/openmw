@@ -552,7 +552,7 @@ namespace MWWorld
         Ogre::Vector3 vec(x, y, z);
 
         CellStore *currCell;
-        // a bit ugly
+        /// \todo fix assertion fail on player ptr.getCell() on start
         if (ptr == mPlayer->getPlayer()) {
             currCell = mWorldScene->getCurrentCell();
         } else {
@@ -574,6 +574,8 @@ namespace MWWorld
                         CellStore *newCell =
                             MWBase::Environment::get().getWorld()->getExterior(cellX, cellY);
 
+                        // placeObject() handles both target cell states
+                        // with active current cell
                         if (!mWorldScene->isCellActive(*currCell)) {
                             placeObject(ptr, *newCell, pos);
                             haveToMove = false;
@@ -589,8 +591,6 @@ namespace MWWorld
 
                             mRendering->moveObjectToCell(copy, vec, currCell);
 
-                            /// \note Maybe mechanics actors change is redundant
-                            /// because of Ptr comparing operators
                             if (MWWorld::Class::get(ptr).isActor()) {
                                 MWMechanics::MechanicsManager *mechMgr =
                                     MWBase::Environment::get().getMechanicsManager();
