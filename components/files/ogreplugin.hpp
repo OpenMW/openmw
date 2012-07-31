@@ -33,7 +33,6 @@ namespace Ogre {
 }
 
 #if (BOOST_VERSION <= 104300)
-#error BOOST_VERSION
 namespace boost {
 namespace filesystem {
 path absolute(const path& p, const path& base=current_path()) {
