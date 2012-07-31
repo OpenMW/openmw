@@ -545,7 +545,7 @@ namespace MWWorld
 
     bool World::moveObjectImp (const Ptr& ptr, float x, float y, float z)
     {
-        bool cellChanged = false, haveToMove = false;
+        bool cellChanged = false, haveToMove = true;
 
         ESM::Position &pos = ptr.getRefData().getPosition();
         pos.pos[0] = x, pos.pos[1] = y, pos.pos[2] = z;
@@ -555,7 +555,6 @@ namespace MWWorld
         // a bit ugly
         if (ptr == mPlayer->getPlayer()) {
             currCell = mWorldScene->getCurrentCell();
-            haveToMove = true;
         } else {
             currCell = ptr.getCell();
         }
@@ -577,10 +576,13 @@ namespace MWWorld
 
                         if (!mWorldScene->isCellActive(*currCell)) {
                             placeObject(ptr, *newCell, pos);
+                            haveToMove = false;
                         } else if (!mWorldScene->isCellActive(*newCell)) {
                             MWWorld::Class::get(ptr).copyToCell(ptr, *newCell);
                             mWorldScene->removeObjectFromScene(ptr);
                             mLocalScripts.remove(ptr);
+
+                            haveToMove = false;
                         } else {
                             MWWorld::Ptr copy =
                                 MWWorld::Class::get(ptr).copyToCell(ptr, *newCell);
@@ -595,8 +597,13 @@ namespace MWWorld
 
                                 mechMgr->removeActor(ptr);
                                 mechMgr->addActor(copy);
-
-                                haveToMove = true;
+                            } else {
+                                std::string script =
+                                    MWWorld::Class::get(ptr).getScript(ptr);
+                                if (!script.empty()) {
+                                    mLocalScripts.remove(ptr);
+                                    mLocalScripts.add(script, copy);
+                                }
                             }
                         }
                         ptr.getRefData().setCount(0);
