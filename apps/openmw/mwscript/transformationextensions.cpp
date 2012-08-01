@@ -82,7 +82,7 @@ namespace MWScript
         };
 
         template<class R>
-        class OpGetAngle : public Interpreter::Opcode0
+        class OpGetStartingAngle : public Interpreter::Opcode0
         {
             public:
 
@@ -108,6 +108,33 @@ namespace MWScript
                 }
         };
 
+        template<class R>
+        class OpGetAngle : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWWorld::Ptr ptr = R()(runtime);
+
+                    std::string axis = runtime.getStringLiteral (runtime[0].mInteger);
+                    runtime.pop();
+                    
+                    if(axis == "X")
+                    {
+                        runtime.push(Ogre::Radian(ptr.getCellRef().pos.rot[0]).valueDegrees());
+                    }
+                    if(axis == "Y")
+                    {
+                        runtime.push(Ogre::Radian(ptr.getCellRef().pos.rot[1]).valueDegrees());
+                    }
+                    if(axis == "Z")
+                    {
+                        runtime.push(Ogre::Radian(ptr.getCellRef().pos.rot[2]).valueDegrees());
+                    }
+                }
+        };
+
         const int opcodeSetScale = 0x2000164;
         const int opcodeSetScaleExplicit = 0x2000165;
         const int opcodeSetAngle = 0x2000166;
@@ -116,6 +143,8 @@ namespace MWScript
         const int opcodeGetScaleExplicit = 0x2000169;
         const int opcodeGetAngle = 0x200016a;
         const int opcodeGetAngleExplicit = 0x200016b;
+        const int opcodeGetStartingAngle = 0x200016c;
+        const int opcodeGetStartingAngleExplicit = 0x200016d;
 
         void registerExtensions (Compiler::Extensions& extensions)
         {
@@ -123,6 +152,7 @@ namespace MWScript
             extensions.registerFunction("getscale",'f',"",opcodeGetScale,opcodeGetScaleExplicit);
             extensions.registerInstruction("setangle","Sf",opcodeSetAngle,opcodeSetAngleExplicit);
             extensions.registerFunction("getangle",'f',"S",opcodeGetAngle,opcodeGetAngleExplicit);
+            extensions.registerFunction("getstartingangle",'f',"S",opcodeGetStartingAngle,opcodeGetStartingAngleExplicit);
         }
 
         void installOpcodes (Interpreter::Interpreter& interpreter)
@@ -135,6 +165,8 @@ namespace MWScript
             interpreter.installSegment5(opcodeGetScaleExplicit,new OpGetScale<ExplicitRef>);
             interpreter.installSegment5(opcodeGetAngle,new OpGetAngle<ImplicitRef>);
             interpreter.installSegment5(opcodeGetAngleExplicit,new OpGetAngle<ExplicitRef>);
+            interpreter.installSegment5(opcodeGetStartingAngle,new OpGetStartingAngle<ImplicitRef>);
+            interpreter.installSegment5(opcodeGetStartingAngleExplicit,new OpGetStartingAngle<ExplicitRef>);
         }
     }
 }
