@@ -43,12 +43,14 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
     :mRendering(_rend), mObjects(mRendering), mActors(mRendering), mAmbientMode(0), mSunEnabled(0)
 {
     // select best shader mode
-    if (Settings::Manager::getString("shader mode", "General") == "")
+    bool openGL = (Ogre::Root::getSingleton ().getRenderSystem ()->getName().find("OpenGL") != std::string::npos);
+
+    // glsl is only supported in opengl mode and hlsl only in direct3d mode.
+    if (Settings::Manager::getString("shader mode", "General") == ""
+            || (openGL && Settings::Manager::getString("shader mode", "General") == "hlsl")
+            || (!openGL && Settings::Manager::getString("shader mode", "General") == "glsl"))
     {
-        if (Ogre::Root::getSingleton ().getRenderSystem ()->getName().find("OpenGL") == std::string::npos)
-            Settings::Manager::setString("shader mode", "General", "cg");
-        else
-            Settings::Manager::setString("shader mode", "General", "glsl");
+        Settings::Manager::setString("shader mode", "General", openGL ? "glsl" : "hlsl");
     }
 
     mRendering.createScene("PlayerCam", Settings::Manager::getFloat("field of view", "General"), 5);
@@ -73,10 +75,6 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
         lang = sh::Language_CG;
     mFactory->setCurrentLanguage (lang);
     mFactory->loadAllFiles();
-
-    //The fog type must be set before any terrain objects are created as if the
-    //fog type is set to FOG_NONE then the initially created terrain won't have any fog
-    configureFog(1, ColourValue(1,1,1));
 
     // Set default mipmap level (NB some APIs ignore this)
     TextureManager::getSingleton().setDefaultNumMipmaps(Settings::Manager::getInt("num mipmaps", "General"));

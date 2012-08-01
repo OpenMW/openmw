@@ -198,7 +198,7 @@
         float depth = shSample(depthMap, screenCoords).x * far - depthPassthrough;
         float shoreFade = shSaturate(depth / 50.0);
 
-	    float2 nCoord = float2(0.0);
+	    float2 nCoord = float2(0,0);
 
       	nCoord = UV * (WAVE_SCALE * 0.05) + WIND_DIR * waterTimer * (WIND_SPEED*0.04);
 	    float3 normal0 = 2.0 * shSample(normalMap, nCoord + float2(-waterTimer*0.015,-waterTimer*0.005)).rgb - 1.0;
@@ -238,12 +238,12 @@
         
         // sunlight scattering
         float3 pNormal = float3(0,1,0);
-    	vec3 lR = reflect(lVec, lNormal);
-        vec3 llR = reflect(lVec, pNormal);
+    	float3 lR = reflect(lVec, lNormal);
+        float3 llR = reflect(lVec, pNormal);
         
         float s = shSaturate(dot(lR, vVec)*2.0-1.2);
         float lightScatter = shSaturate(dot(-lVec,lNormal)*0.7+0.3) * s * SCATTER_AMOUNT * waterSunFade_sunHeight.x * shSaturate(1.0-exp(-waterSunFade_sunHeight.y));
-        float3 scatterColour = shLerp(vec3(SCATTER_COLOUR)*vec3(1.0,0.4,0.0), SCATTER_COLOUR, shSaturate(1.0-exp(-waterSunFade_sunHeight.y*SUN_EXT)));
+        float3 scatterColour = shLerp(float3(SCATTER_COLOUR)*float3(1.0,0.4,0.0), SCATTER_COLOUR, shSaturate(1.0-exp(-waterSunFade_sunHeight.y*SUN_EXT)));
 
         // fresnel
         float ior = (cameraPos.y>0)?(1.333/1.0):(1.0/1.333); //air to water; water to air
@@ -284,7 +284,7 @@
             waterGradient = clamp((waterGradient*0.5+0.5),0.2,1.0);
             float3 watercolour = (float3(0.0078, 0.5176, 0.700)+waterSunColour)*waterGradient*2.0;
             float3 waterext = float3(0.6, 0.9, 1.0);//water extinction
-            watercolour = mix(watercolour*0.3*waterSunFade_sunHeight.x, watercolour, shSaturate(1.0-exp(-waterSunFade_sunHeight.y*SUN_EXT)));
+            watercolour = shLerp(watercolour*0.3*waterSunFade_sunHeight.x, watercolour, shSaturate(1.0-exp(-waterSunFade_sunHeight.y*SUN_EXT)));
         
             float darkness = VISIBILITY*2.0;
             darkness = clamp((cameraPos.y+darkness)/darkness,0.2,1.0);
@@ -299,6 +299,7 @@
             shOutputColour(0).xyz = shLerp (shOutputColour(0).xyz, fogColor, fogValue);
         }
 
+		shOutputColour(0).w = 1;
     }
 
 #endif

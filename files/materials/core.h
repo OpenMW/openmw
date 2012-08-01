@@ -1,20 +1,20 @@
-#if SH_HLSL == 1
-    #error "HLSL is unsupported"
-#endif
-
-#if SH_CG == 1
+#if SH_HLSL == 1 || SH_CG == 1
 
     #define shTexture2D sampler2D
     #define shSample(tex, coord) tex2D(tex, coord)
+    #define shCubicSample(tex, coord) texCUBE(tex, coord)
     #define shLerp(a, b, t) lerp(a, b, t)
     #define shSaturate(a) saturate(a)
 
     #define shSampler2D(name) , uniform sampler2D name : register(s@shCounter(0)) @shUseSampler(name)
+    
+    #define shSamplerCube(name) , uniform samplerCUBE name : register(s@shCounter(0)) @shUseSampler(name)
 
     #define shMatrixMult(m, v) mul(m, v)
 
     #define shUniform(type, name) , uniform type name
 
+    #define shTangentInput(type) , in type tangent : TANGENT
     #define shVertexInput(type, name) , in type name : TEXCOORD@shCounter(1)
     #define shInput(type, name) , in type name : TEXCOORD@shCounter(1)
     #define shOutput(type, name) , out type name : TEXCOORD@shCounter(2)
@@ -65,9 +65,10 @@
     #define float4 vec4
     #define int2 ivec2
     #define int3 ivec3
-    #define int4 ivec4/
+    #define int4 ivec4
     #define shTexture2D sampler2D
     #define shSample(tex, coord) texture2D(tex, coord)
+    #define shCubicSample(tex, coord) textureCube(tex, coord)
     #define shLerp(a, b, t) mix(a, b, t)
     #define shSaturate(a) clamp(a, 0.0, 1.0)
 
@@ -75,11 +76,14 @@
 
     #define shSampler2D(name) uniform sampler2D name; @shUseSampler(name)
 
+    #define shSamplerCube(name) uniform samplerCube name; @shUseSampler(name)
+
     #define shMatrixMult(m, v) (m * v)
 
     #define shOutputPosition gl_Position
 
     #define float4x4 mat4
+    #define float3x3 mat3
     
     // GLSL 1.3
     #if 0
@@ -89,8 +93,8 @@
 
     #define shOutputColour(num) oColor##num
 
-
-
+    #define shTangentInput(type) in type tangent;
+    #define shVertexInput(type, name) in type name;
     #define shInput(type, name) in type name;
     #define shOutput(type, name) out type name;
 
@@ -101,7 +105,7 @@
     #ifdef SH_VERTEX_SHADER
 
         #define SH_BEGIN_PROGRAM \
-            in float4 shInputPosition;
+            in float4 vertex;
         #define SH_START_PROGRAM \
             void main(void)
 
@@ -126,10 +130,11 @@
     #if 1
     
     // automatically recognized by ogre when the input name equals this
-    #define shInputPosition gl_Vertex
+    #define shInputPosition vertex
 
     #define shOutputColour(num) gl_FragData[num]
 
+    #define shTangentInput(type) attribute type tangent;
     #define shVertexInput(type, name) attribute type name;
     #define shInput(type, name) varying type name;
     #define shOutput(type, name) varying type name;
@@ -140,8 +145,8 @@
 
     #ifdef SH_VERTEX_SHADER
 
-        #define SH_BEGIN_PROGRAM 
-
+        #define SH_BEGIN_PROGRAM \
+            attribute vec4 vertex; 
         #define SH_START_PROGRAM \
             void main(void)
 
