@@ -35,7 +35,7 @@ namespace Ogre {
 #if (BOOST_VERSION <= 104300)
 namespace boost {
 namespace filesystem {
-path absolute(const path& p, const path& base=current_path()) {
+inline path absolute(const path& p, const path& base=current_path()) {
 	// call obsolete version of this function on older boost
 	return complete(p, base);
 }
@@ -50,7 +50,7 @@ namespace Files {
 
 /**
  * \brief Loads Ogre plugin with given name.
- * 
+ *
  * \param pluginDir absolute path to plugins
  * \param pluginName plugin name, for example "RenderSystem_GL"
  * \param ogreRoot Ogre::Root instance
