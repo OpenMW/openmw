@@ -28,7 +28,7 @@ float3 intercept(float3 lineP,
 
 float3 perturb1(shTexture2D tex, float2 coords, float bend, float2 windDir, float windSpeed, float timer)
 {
-    float2 nCoord = float2(0.0);
+    float2 nCoord = float2(0,0);
     bend *= WAVE_CHOPPYNESS;
   	nCoord = coords * (WAVE_SCALE * 0.05) + windDir * timer * (windSpeed*0.04);
     float3 normal0 = 2.0 * shSample(tex, nCoord + float2(-timer*0.015,-timer*0.05)).rgb - 1.0;
@@ -55,8 +55,8 @@ float3 perturb1(shTexture2D tex, float2 coords, float bend, float2 windDir, floa
 float3 perturb(shTexture2D tex, float2 coords, float bend, float2 windDir, float windSpeed, float timer)
 {
     bend *= WAVE_CHOPPYNESS;
-    float3 col = float3(0.0);
-    float2 nCoord = float2(0.0); //normal coords
+    float3 col = float3(0,0,0);
+    float2 nCoord = float2(0,0); //normal coords
 
     nCoord = coords * (WAVE_SCALE * 0.025) + windDir * timer * (windSpeed*0.03);
     col += shSample(tex,nCoord + float2(-timer*0.005,-timer*0.01)).rgb*0.20;
@@ -102,11 +102,11 @@ float3 getCaustics (shTexture2D causticMap, float3 worldPos, float3 waterEyePos,
     /// \todo sunFade
     
    // float3 caustics = clamp(pow(float3(causticR)*5.5,float3(5.5*causticdepth)),0.0,1.0)*NdotL*sunFade*causticdepth;
-    float3 caustics = clamp(pow(float3(causticR)*5.5,float3(5.5*causticdepth)),0.0,1.0)*NdotL*causticdepth;
+    float3 caustics = clamp(pow(float3(causticR,causticR,causticR)*5.5,float3(5.5*causticdepth,5.5*causticdepth,5.5*causticdepth)),0.0,1.0)*NdotL*causticdepth;
     float causticG = 1.0-perturb(causticMap,causticPos.xz+(1.0-causticdepth)*ABBERATION, causticdepth, windDir_windSpeed.xy, windDir_windSpeed.z, waterTimer).z;
     float causticB = 1.0-perturb(causticMap,causticPos.xz+(1.0-causticdepth)*ABBERATION*2.0, causticdepth, windDir_windSpeed.xy, windDir_windSpeed.z, waterTimer).z;
     //caustics = shSaturate(pow(float3(causticR,causticG,causticB)*5.5,float3(5.5*causticdepth)))*NdotL*sunFade*causticdepth;
-                caustics = shSaturate(pow(float3(causticR,causticG,causticB)*5.5,float3(5.5*causticdepth)))*NdotL*causticdepth;
+                caustics = shSaturate(pow(float3(causticR,causticG,causticB)*5.5,float3(5.5*causticdepth,5.5*causticdepth,5.5*causticdepth)))*NdotL*causticdepth;
 
     caustics *= 3;
     

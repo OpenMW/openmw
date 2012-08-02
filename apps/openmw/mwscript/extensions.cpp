@@ -16,10 +16,12 @@
 #include "dialogueextensions.hpp"
 #include "animationextensions.hpp"
 #include "transformationextensions.hpp"
+#include "consoleextensions.hpp"
+#include "userextensions.hpp"
 
 namespace MWScript
 {
-    void registerExtensions (Compiler::Extensions& extensions)
+    void registerExtensions (Compiler::Extensions& extensions, bool consoleOnly)
     {
         Cell::registerExtensions (extensions);
         Misc::registerExtensions (extensions);
@@ -33,9 +35,15 @@ namespace MWScript
         Dialogue::registerExtensions (extensions);
         Animation::registerExtensions (extensions);
         Transformation::registerExtensions (extensions);
+
+        if (consoleOnly)
+        {
+            Console::registerExtensions (extensions);
+            User::registerExtensions (extensions);
+        }
     }
 
-    void installOpcodes (Interpreter::Interpreter& interpreter)
+    void installOpcodes (Interpreter::Interpreter& interpreter, bool consoleOnly)
     {
         Interpreter::installOpcodes (interpreter);
         Cell::installOpcodes (interpreter);
@@ -50,5 +58,11 @@ namespace MWScript
         Dialogue::installOpcodes (interpreter);
         Animation::installOpcodes (interpreter);
         Transformation::installOpcodes (interpreter);
+
+        if (consoleOnly)
+        {
+            Console::installOpcodes (interpreter);
+            User::installOpcodes (interpreter);
+        }
     }
 }

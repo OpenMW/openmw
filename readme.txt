@@ -66,9 +66,16 @@ Allowed options:
   --debug [=arg(=1)] (=0)          debug mode
   --nosound [=arg(=1)] (=0)        disable all sounds
   --script-verbose [=arg(=1)] (=0) verbose script output
-  --new-game [=arg(=1)] (=0)       activate char gen/new game mechanics
   --script-all [=arg(=1)] (=0)     compile all scripts (excluding dialogue scri
                                    pts) at startup
+  --script-console [=arg(=1)] (=0) enable console-only script functionality
+  --script-run arg                 select a file that is executed in the consol
+                                   e on startup
+
+                                   Note: The file contains a list of script
+                                   lines, but not a complete scripts. That mean
+                                   s no begin/end and no variable declarations.
+  --new-game [=arg(=1)] (=0)       activate char gen/new game mechanics
   --fs-strict [=arg(=1)] (=0)      strict file system handling (no case folding
                                    )
   --encoding arg (=win1252)        Character encoding used in OpenMW game messa

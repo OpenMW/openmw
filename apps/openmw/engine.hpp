@@ -73,6 +73,8 @@ namespace OMW
             bool mCompileAll;
             std::string mFocusName;
             std::map<std::string,std::string> mFallbackMap;
+            bool mScriptConsoleMode;
+            std::string mStartupScript;
 
             Compiler::Extensions mExtensions;
             Compiler::Context *mScriptContext;
@@ -157,6 +159,12 @@ namespace OMW
             void setAnimationVerbose(bool animverbose);
 
             void setFallbackValues(std::map<std::string,std::string> map);
+
+            /// Enable console-only script functionality
+            void setScriptConsoleMode (bool enabled);
+
+            /// Set path for a script that is run on startup in the console.
+            void setStartupScript (const std::string& path);
 
         private:
             Files::ConfigurationManager& mCfgMgr;

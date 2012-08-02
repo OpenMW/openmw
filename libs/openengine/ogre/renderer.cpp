@@ -11,6 +11,8 @@
 
 #include <boost/filesystem.hpp>
 
+#include <components/files/ogreplugin.hpp>
+
 #include <cassert>
 #include <cstdlib>
 #include <stdexcept>
@@ -110,20 +112,14 @@ void OgreRenderer::configure(const std::string &logPath,
         pluginDir = OGRE_PLUGIN_DIR_REL;
 #endif
     }
-#ifndef OGRE_PLUGIN_DEBUG_SUFFIX
-#define OGRE_PLUGIN_DEBUG_SUFFIX ""
-#endif
-    std::string glPlugin = std::string(pluginDir) + "/RenderSystem_GL" + OGRE_PLUGIN_DEBUG_SUFFIX;
-    if (boost::filesystem::exists(glPlugin + ".so") || boost::filesystem::exists(glPlugin + ".dll"))
-        mRoot->loadPlugin (glPlugin);
 
-    std::string dxPlugin = std::string(pluginDir) + "/RenderSystem_Direct3D9" + OGRE_PLUGIN_DEBUG_SUFFIX;
-    if (boost::filesystem::exists(dxPlugin + ".so") || boost::filesystem::exists(dxPlugin + ".dll"))
-        mRoot->loadPlugin (dxPlugin);
+    boost::filesystem::path absPluginPath = boost::filesystem::absolute(boost::filesystem::path(pluginDir));
 
-    std::string cgPlugin = std::string(pluginDir) + "/Plugin_CgProgramManager" + OGRE_PLUGIN_DEBUG_SUFFIX;
-    if (boost::filesystem::exists(cgPlugin + ".so") || boost::filesystem::exists(cgPlugin + ".dll"))
-        mRoot->loadPlugin (cgPlugin);
+    pluginDir = absPluginPath.string();
+
+    Files::loadOgrePlugin(pluginDir, "RenderSystem_GL", *mRoot);
+    Files::loadOgrePlugin(pluginDir, "RenderSystem_Direct3D9", *mRoot);
+    Files::loadOgrePlugin(pluginDir, "Plugin_CgProgramManager", *mRoot);
 
     RenderSystem* rs = mRoot->getRenderSystemByName(renderSystem);
     if (rs == 0)
@@ -145,7 +141,7 @@ void OgreRenderer::createWindow(const std::string &title, const WindowSettings& 
 
     // create the semi-transparent black background texture used by the GUI.
     // has to be created in code with TU_DYNAMIC_WRITE_ONLY_DISCARDABLE param
-    // so that it can be modified at runtime. 
+    // so that it can be modified at runtime.
     Ogre::TextureManager::getSingleton().createManual(
                     "transparent.png",
                     Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,

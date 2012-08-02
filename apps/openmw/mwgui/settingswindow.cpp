@@ -75,9 +75,9 @@ namespace
         return boost::lexical_cast<std::string>(xaspect) + " : " + boost::lexical_cast<std::string>(yaspect);
     }
 
-    bool hasGLSL ()
+    std::string hlslGlsl ()
     {
-        return (Ogre::Root::getSingleton ().getRenderSystem ()->getName ().find("OpenGL") != std::string::npos);
+        return (Ogre::Root::getSingleton ().getRenderSystem ()->getName ().find("OpenGL") != std::string::npos) ? "glsl" : "hlsl";
     }
 }
 
@@ -393,12 +393,9 @@ namespace MWGui
         std::string val = static_cast<MyGUI::Button*>(_sender)->getCaption();
         if (val == "off")
         {
-            if (hasGLSL ())
-                val = "glsl";
-            else
-                val = "cg";
+            val = hlslGlsl();
         }
-        else if (val == "glsl")
+        else if (val == hlslGlsl())
             val = "cg";
         else
             val = "off";
@@ -411,6 +408,7 @@ namespace MWGui
 
             // water shader not supported with object shaders off
             mWaterShaderButton->setCaptionWithReplacing("#{sOff}");
+            mUnderwaterButton->setCaptionWithReplacing("#{sOff}");
             mWaterShaderButton->setEnabled(false);
             mReflectObjectsButton->setEnabled(false);
             mReflectActorsButton->setEnabled(false);

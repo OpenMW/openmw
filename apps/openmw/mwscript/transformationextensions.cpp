@@ -119,7 +119,7 @@ namespace MWScript
 
                     std::string axis = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
-                    
+
                     if(axis == "X")
                     {
                         runtime.push(Ogre::Radian(ptr.getCellRef().pos.rot[0]).valueDegrees());
@@ -143,8 +143,8 @@ namespace MWScript
         const int opcodeGetScaleExplicit = 0x2000169;
         const int opcodeGetAngle = 0x200016a;
         const int opcodeGetAngleExplicit = 0x200016b;
-        const int opcodeGetStartingAngle = 0x200016c;
-        const int opcodeGetStartingAngleExplicit = 0x200016d;
+        const int opcodeGetStartingAngle = 0x2000172;
+        const int opcodeGetStartingAngleExplicit = 0x2000173;
 
         void registerExtensions (Compiler::Extensions& extensions)
         {
