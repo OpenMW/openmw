@@ -39,6 +39,7 @@
 
 #include "record.hpp"
 #include "nif_types.hpp"
+#include "components/esm/loadland.hpp"
 
 namespace Nif
 {
