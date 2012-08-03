@@ -2,6 +2,8 @@
 
 #include <OgreTerrain.h>
 
+#include <stdexcept>
+
 #include <extern/shiny/Main/Factory.hpp>
 
 namespace
