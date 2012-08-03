@@ -108,6 +108,67 @@ namespace MWScript
                 }
         };
 
+        template<class R>
+        class OpGetPos : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWWorld::Ptr ptr = R()(runtime);
+
+                    std::string axis = runtime.getStringLiteral (runtime[0].mInteger);
+                    runtime.pop();
+
+                    if(axis == "X")
+                    {
+                        runtime.push(ptr.getRefData().getPosition().pos[0]);
+                    }
+                    if(axis == "Y")
+                    {
+                        runtime.push(ptr.getRefData().getPosition().pos[1]);
+                    }
+                    if(axis == "Z")
+                    {
+                        runtime.push(ptr.getRefData().getPosition().pos[2]);
+                    }
+                }
+        };
+
+        template<class R>
+        class OpSetPos : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWWorld::Ptr ptr = R()(runtime);
+
+                    std::string axis = runtime.getStringLiteral (runtime[0].mInteger);
+                    runtime.pop();
+                    Interpreter::Type_Float pos = runtime[0].mFloat;
+                    runtime.pop();
+
+                    float ax = ptr.getRefData().getPosition().pos[0];
+                    float ay = ptr.getRefData().getPosition().pos[1];
+                    float az = ptr.getRefData().getPosition().pos[2];
+                    std::cout << "setPos";
+
+                    if(axis == "X")
+                    {
+                        MWBase::Environment::get().getWorld()->moveObject(ptr,pos,ay,az);
+                    }
+                    if(axis == "Y")
+                    {
+                        MWBase::Environment::get().getWorld()->moveObject(ptr,ax,pos,az);
+                    }
+                    if(axis == "Z")
+                    {
+                        MWBase::Environment::get().getWorld()->moveObject(ptr,ax,ay,pos);
+                    }
+                }
+        };
+
         const int opcodeSetScale = 0x2000164;
         const int opcodeSetScaleExplicit = 0x2000165;
         const int opcodeSetAngle = 0x2000166;
@@ -116,6 +177,10 @@ namespace MWScript
         const int opcodeGetScaleExplicit = 0x2000169;
         const int opcodeGetAngle = 0x200016a;
         const int opcodeGetAngleExplicit = 0x200016b;
+        const int opcodeGetPos = 0x200016c;
+        const int opcodeGetPosExplicit = 0x200016d;
+        const int opcodeSetPos = 0x200016e;
+        const int opcodeSetPosExplicit = 0x200016f;
 
         void registerExtensions (Compiler::Extensions& extensions)
         {
@@ -123,6 +188,8 @@ namespace MWScript
             extensions.registerFunction("getscale",'f',"",opcodeGetScale,opcodeGetScaleExplicit);
             extensions.registerInstruction("setangle","Sf",opcodeSetAngle,opcodeSetAngleExplicit);
             extensions.registerFunction("getangle",'f',"S",opcodeGetAngle,opcodeGetAngleExplicit);
+            extensions.registerInstruction("setpos","Sf",opcodeSetPos,opcodeSetPosExplicit);
+            extensions.registerFunction("getpos",'f',"S",opcodeGetPos,opcodeGetPosExplicit);
         }
 
         void installOpcodes (Interpreter::Interpreter& interpreter)
@@ -135,6 +202,10 @@ namespace MWScript
             interpreter.installSegment5(opcodeGetScaleExplicit,new OpGetScale<ExplicitRef>);
             interpreter.installSegment5(opcodeGetAngle,new OpGetAngle<ImplicitRef>);
             interpreter.installSegment5(opcodeGetAngleExplicit,new OpGetAngle<ExplicitRef>);
+            interpreter.installSegment5(opcodeGetPos,new OpGetPos<ImplicitRef>);
+            interpreter.installSegment5(opcodeGetPosExplicit,new OpGetPos<ExplicitRef>);
+            interpreter.installSegment5(opcodeSetPos,new OpSetPos<ImplicitRef>);
+            interpreter.installSegment5(opcodeSetPosExplicit,new OpSetPos<ExplicitRef>);
         }
     }
 }
