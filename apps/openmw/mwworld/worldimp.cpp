@@ -18,6 +18,8 @@
 #include "manualref.hpp"
 #include "cellfunctors.hpp"
 
+#include <iostream>
+
 using namespace Ogre;
 
 namespace
@@ -1094,5 +1096,29 @@ namespace MWWorld
     void World::getTriangleBatchCount(unsigned int &triangles, unsigned int &batches)
     {
         mRendering->getTriangleBatchCount(triangles, batches);
+    }
+
+    bool
+    World::isSwimming(const MWWorld::Ptr &object)
+    {
+        /// \todo add check ifActor() - only actors can swim
+        float *fpos = object.getRefData().getPosition().pos;
+        Ogre::Vector3 pos(fpos[0], fpos[1], fpos[2]);
+
+        /// \fixme should rely on object height
+        pos.z += 30;
+
+        return isUnderwater(*object.getCell()->cell, pos);
+    }
+
+    bool
+    World::isUnderwater(const ESM::Cell &cell, const Ogre::Vector3 &pos)
+    {
+        if (cell.data.flags & ESM::Cell::HasWater == 0) {
+            return false;
+        }
+        bool res = pos.z < cell.water;
+        std::cout << "World::isUnderwater(" << pos.z << "):" << res << std::endl;
+        return res;
     }
 }

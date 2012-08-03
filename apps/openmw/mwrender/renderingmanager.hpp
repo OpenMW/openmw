@@ -91,7 +91,6 @@ class RenderingManager: private RenderingInterface, public Ogre::WindowEventList
     void scaleObject (const MWWorld::Ptr& ptr, const Ogre::Vector3& scale);
     void rotateObject (const MWWorld::Ptr& ptr, const::Ogre::Quaternion& orientation);
 
-    void checkUnderwater();
     void setWaterHeight(const float height);
     void toggleWater();
 
