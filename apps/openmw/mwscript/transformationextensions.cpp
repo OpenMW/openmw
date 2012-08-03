@@ -169,6 +169,33 @@ namespace MWScript
                 }
         };
 
+        template<class R>
+        class OpGetStartingPos : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWWorld::Ptr ptr = R()(runtime);
+
+                    std::string axis = runtime.getStringLiteral (runtime[0].mInteger);
+                    runtime.pop();
+
+                    if(axis == "X")
+                    {
+                        runtime.push(ptr.getCellRef().pos.pos[0]);
+                    }
+                    if(axis == "Y")
+                    {
+                        runtime.push(ptr.getCellRef().pos.pos[1]);
+                    }
+                    if(axis == "Z")
+                    {
+                        runtime.push(ptr.getCellRef().pos.pos[2]);
+                    }
+                }
+        };
+
         const int opcodeSetScale = 0x2000164;
         const int opcodeSetScaleExplicit = 0x2000165;
         const int opcodeSetAngle = 0x2000166;
@@ -181,6 +208,8 @@ namespace MWScript
         const int opcodeGetPosExplicit = 0x200016d;
         const int opcodeSetPos = 0x200016e;
         const int opcodeSetPosExplicit = 0x200016f;
+        const int opcodeGetStartingPos = 0x2000170;
+        const int opcodeGetStartingPosExplicit = 0x2000171;
 
         void registerExtensions (Compiler::Extensions& extensions)
         {
@@ -190,6 +219,7 @@ namespace MWScript
             extensions.registerFunction("getangle",'f',"S",opcodeGetAngle,opcodeGetAngleExplicit);
             extensions.registerInstruction("setpos","Sf",opcodeSetPos,opcodeSetPosExplicit);
             extensions.registerFunction("getpos",'f',"S",opcodeGetPos,opcodeGetPosExplicit);
+            extensions.registerFunction("getstartingpos",'f',"S",opcodeGetStartingPos,opcodeGetStartingPosExplicit);
         }
 
         void installOpcodes (Interpreter::Interpreter& interpreter)
@@ -206,6 +236,8 @@ namespace MWScript
             interpreter.installSegment5(opcodeGetPosExplicit,new OpGetPos<ExplicitRef>);
             interpreter.installSegment5(opcodeSetPos,new OpSetPos<ImplicitRef>);
             interpreter.installSegment5(opcodeSetPosExplicit,new OpSetPos<ExplicitRef>);
+            interpreter.installSegment5(opcodeGetStartingPos,new OpGetStartingPos<ImplicitRef>);
+            interpreter.installSegment5(opcodeGetStartingPosExplicit,new OpGetStartingPos<ExplicitRef>);
         }
     }
 }
