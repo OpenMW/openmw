@@ -156,10 +156,11 @@ namespace MWWorld
             act->setWalkDirection(btVector3(0,0,0));
         }
 		playerMove::playercmd& pm_ref = playerphysics->cmd;
-
+        //playerphysics->ps.snappingImplemented = false;
         pm_ref.rightmove = 0;
         pm_ref.forwardmove = 0;
         pm_ref.upmove = 0;
+       
 
 		//playerphysics->ps.move_type = PM_NOCLIP;
         for (std::vector<std::pair<std::string, Ogre::Vector3> >::const_iterator iter (actors.begin());
@@ -175,12 +176,14 @@ namespace MWWorld
 			Ogre::Quaternion yawQuat = yawNode->getOrientation();
             Ogre::Quaternion pitchQuat = pitchNode->getOrientation();
 
+            
            
 
             playerphysics->ps.viewangles.x = pitchQuat.getPitch().valueDegrees();
            
-			playerphysics->ps.viewangles.y = yawQuat.getYaw().valueDegrees() *-1 + 90;
-
+			playerphysics->ps.viewangles.y = yawQuat.getYaw().valueDegrees() * -1 + 90;
+            if(playerphysics->ps.viewangles.y < 0)
+                playerphysics->ps.viewangles.y += 360;
 
                 Ogre::Quaternion quat = yawNode->getOrientation();
                 Ogre::Vector3 dir1(iter->second.x,iter->second.z,-iter->second.y);
@@ -213,7 +216,7 @@ namespace MWWorld
             Ogre::Vector3 coord(newPos.x(), newPos.y(), newPos.z());
             if(it->first == "player"){
 
-                coord = playerphysics->ps.origin;
+                coord = playerphysics->ps.origin ;
             }
 
 
@@ -242,7 +245,12 @@ namespace MWWorld
         OEngine::Physic::RigidBody* body = mEngine->createRigidBody(mesh,handle,scale);
         mEngine->addRigidBody(body);
         btTransform tr;
-        tr.setOrigin(btVector3(position.x,position.y,position.z));
+        btBoxShape* box = dynamic_cast<btBoxShape*>(body->getCollisionShape());
+        if(box != NULL){
+            tr.setOrigin(btVector3(position.x,position.y,position.z + box->getHalfExtentsWithMargin().getZ()));
+        }
+        else
+            tr.setOrigin(btVector3(position.x,position.y,position.z));
         tr.setRotation(btQuaternion(rotation.x,rotation.y,rotation.z,rotation.w));
         body->setWorldTransform(tr);
     }

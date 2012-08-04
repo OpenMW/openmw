@@ -136,6 +136,7 @@ void ManualBulletShapeLoader::loadResource(Ogre::Resource *resource)
     cShape = static_cast<BulletShape *>(resource);
     resourceName = cShape->getName();
     cShape->collide = false;
+    mBoundingBox = NULL;
 
     mTriMesh = new btTriangleMesh();
 
@@ -199,9 +200,13 @@ void ManualBulletShapeLoader::loadResource(Ogre::Resource *resource)
             delete m_meshInterface;
         }
     };
-
-    currentShape = new TriangleMeshShape(mTriMesh,true);
-    cShape->Shape = currentShape;
+    if(mBoundingBox != NULL)
+        cShape->Shape = mBoundingBox;
+    else
+    {
+        currentShape = new TriangleMeshShape(mTriMesh,true);
+        cShape->Shape = currentShape;
+    }
 }
 
 bool ManualBulletShapeLoader::hasRootCollisionNode(Nif::Node* node)
@@ -289,7 +294,15 @@ void ManualBulletShapeLoader::handleNode(Nif::Node *node, int flags,
         final.scale *= trafo->scale;
         
     }
-    
+    if(node->hasBounds)
+    {
+        btVector3 getHalf = getbtVector(*(node->boundXYZ));
+        //getHalf.setX(getHalf.getX() / 2);
+        //getHalf.setY(getHalf.getY() / 2);
+        //getHalf.setZ(getHalf.getZ() / 2);
+        const btVector3 boxsize = getHalf;
+        mBoundingBox = new btBoxShape(boxsize);
+    }
 
     // For NiNodes, loop through children
     if (node->recType == Nif::RC_NiNode)

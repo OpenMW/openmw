@@ -9,7 +9,6 @@
 #include <openengine/bullet/physic.hpp>
 
 
-
 enum traceWorldType
 {
 	collisionWorldTrace = 1,

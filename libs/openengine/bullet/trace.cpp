@@ -13,7 +13,8 @@
 
 void newtrace(traceResults* const results, const Ogre::Vector3& start, const Ogre::Vector3& end, const Ogre::Vector3& BBHalfExtents, const float rotation, bool isInterior, OEngine::Physic::PhysicEngine* enginePass)  //Traceobj was a Aedra Object
 {
-
+    static float lastyaw = 0.0f;
+    static float lastpitch = 0.0f;
 	//if (!traceobj)
 	//	return;
 
@@ -21,10 +22,12 @@ void newtrace(traceResults* const results, const Ogre::Vector3& start, const Ogr
 	//	return;
 
 	const Ogre::Vector3 rayDir = end - start;
+    
+    
+   
 
-	// Nudge starting point backwards
-	//const Position3D nudgestart = start + (rayDir * -0.1f); // by 10% (isn't that too much?)
-	//const Position3D nudgestart = start;
+       
+ 
 
 	NewPhysTraceResults out;
 	//std::cout << "Starting trace\n";
@@ -32,7 +35,7 @@ void newtrace(traceResults* const results, const Ogre::Vector3& start, const Ogr
 	//Ogre::Vector3 endReplace = startReplace;
 	//endReplace.z -= .25;
 	
-	const bool hasHit = NewPhysicsTrace<collisionWorldTrace>(&out, start, end, BBHalfExtents, Ogre::Vector3(0.0f, 0.0, rotation), isInterior, enginePass);
+	const bool hasHit = NewPhysicsTrace<collisionWorldTrace>(&out, start, end, BBHalfExtents, Ogre::Vector3(0.0f, 0.0f,0.0f), isInterior, enginePass);
 	
 	if (out.fraction < 0.001f)
 		results->startsolid = true;

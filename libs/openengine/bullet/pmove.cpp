@@ -449,7 +449,7 @@ int PM_StepSlideMove( bool gravity )
 	//pm->trace (&trace, start_o, pm->mins, pm->maxs, down, pm->ps->clientNum, pm->tracemask);
 	//tracefunc(&trace, start_o, down, , 0, pml.scene);
 	//tracefunc(&trace, *(const D3DXVECTOR3* const)&start_o, *(const D3DXVECTOR3* const)&down, D3DXVECTOR3(0.0f, -STEPSIZE, 0.0f), 0, pml.traceObj);
-	newtrace(&trace, start_o, down, halfExtents, Ogre::Math::DegreesToRadians(pm->ps.viewangles.y), pm->isInterior, pm->mEngine);
+	newtrace(&trace, down, start_o, halfExtents, Ogre::Math::DegreesToRadians(pm->ps.viewangles.y), pm->isInterior, pm->mEngine);
 	
 	// up = vec3(0, 0, 1)
 	//VectorSet(up, 0, 0, 1);

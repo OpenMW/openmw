@@ -161,7 +161,7 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, OEngine::Render::OgreRendere
     textmappings = NIFLoader::getSingletonPtr()->getTextIndices(smodel);
     insert->attachObject(base);
 
-
+    
         if(isFemale)
             insert->scale(race->data.height.female, race->data.height.female, race->data.height.female);
         else

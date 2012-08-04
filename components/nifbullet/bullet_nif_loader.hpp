@@ -126,6 +126,7 @@ private:
 
     BulletShape* cShape;//current shape
     btTriangleMesh *mTriMesh;
+    btBoxShape *mBoundingBox;
     btBvhTriangleMeshShape* currentShape;//the shape curently under construction
 };
 
