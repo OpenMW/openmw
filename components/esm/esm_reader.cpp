@@ -1,4 +1,5 @@
 #include "esm_reader.hpp"
+#include <stdexcept>
 
 namespace ESM
 {
