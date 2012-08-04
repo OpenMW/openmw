@@ -184,22 +184,16 @@ void Water::toggle()
     updateVisible();
 }
 
-void Water::checkUnderwater(float y)
+void
+Water::updateUnderwater(bool underwater)
 {
-    if (!mActive)
-    {
+    if (!mActive) {
         return;
     }
-
-    if ((mIsUnderwater && y > mTop) || !mWater->isVisible() || mCamera->getPolygonMode() != Ogre::PM_SOLID)
-    {
-        mIsUnderwater = false;
-    }
-
-    if (!mIsUnderwater && y < mTop && mWater->isVisible() && mCamera->getPolygonMode() == Ogre::PM_SOLID)
-    {
-        mIsUnderwater = true;
-    }
+    mIsUnderwater =
+        underwater &&
+        mWater->isVisible() &&
+        mCamera->getPolygonMode() == Ogre::PM_SOLID;
 
     updateVisible();
 }

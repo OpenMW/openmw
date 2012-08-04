@@ -90,6 +90,7 @@ namespace MWInput
 
     bool mDragDrop;
 
+    std::map<std::string, bool> mControlSwitch;
 
    /* InputImpl Methods */
 public:
@@ -339,6 +340,14 @@ private:
 
       poller.bind(A_Jump, KC_E);
       poller.bind(A_Crouch, KC_LCONTROL);
+
+      mControlSwitch["playercontrols"]      = true;
+      mControlSwitch["playerfighting"]      = true;
+      mControlSwitch["playerjumping"]       = true;
+      mControlSwitch["playerlooking"]       = true;
+      mControlSwitch["playermagic"]         = true;
+      mControlSwitch["playerviewswitch"]    = true;
+      mControlSwitch["vanitymode"]          = true;
     }
 
     void setDragDrop(bool dragDrop)
@@ -366,33 +375,35 @@ private:
 
         // Configure player movement according to keyboard input. Actual movement will
         // be done in the physics system.
-        if (poller.isDown(A_MoveLeft))
-        {
-            player.setAutoMove (false);
-            player.setLeftRight (1);
-        }
-        else if (poller.isDown(A_MoveRight))
-        {
-            player.setAutoMove (false);
-            player.setLeftRight (-1);
-        }
-        else
-            player.setLeftRight (0);
+        if (mControlSwitch["playercontrols"]) {
+            if (poller.isDown(A_MoveLeft))
+            {
+                player.setAutoMove (false);
+                player.setLeftRight (1);
+            }
+            else if (poller.isDown(A_MoveRight))
+            {
+                player.setAutoMove (false);
+                player.setLeftRight (-1);
+            }
+            else
+                player.setLeftRight (0);
 
-        if (poller.isDown(A_MoveForward))
-        {
-            player.setAutoMove (false);
-            player.setForwardBackward (1);
+            if (poller.isDown(A_MoveForward))
+            {
+                player.setAutoMove (false);
+                player.setForwardBackward (1);
+            }
+            else if (poller.isDown(A_MoveBackward))
+            {
+                player.setAutoMove (false);
+                player.setForwardBackward (-1);
+            }
+            else
+                player.setForwardBackward (0);
         }
-        else if (poller.isDown(A_MoveBackward))
-        {
-            player.setAutoMove (false);
-            player.setForwardBackward (-1);
-        }
-        else
-            player.setForwardBackward (0);
 
-        if (poller.isDown(A_Jump))
+        if (poller.isDown(A_Jump) && mControlSwitch["playerjumping"])
             player.setUpDown (1);
         else if (poller.isDown(A_Crouch))
             player.setUpDown (-1);
@@ -423,6 +434,24 @@ private:
           guiEvents->enabled = false;
         }
     }
+
+    void toggleControlSwitch(std::string sw, bool value)
+    {
+        if (mControlSwitch[sw] == value) {
+            return;
+        }
+        /// \note 7 switches at all, if-else is relevant
+        if (sw == "playercontrols") {
+            player.setLeftRight(0);
+            player.setForwardBackward(0);
+            player.setAutoMove(false);
+        } else if (sw == "playerjumping") {
+            /// \fixme maybe crouching at this time
+            player.setUpDown(0);
+        }
+        mControlSwitch[sw] = value;
+    }
+
   };
 
   /***CONSTRUCTOR***/
@@ -471,4 +500,9 @@ private:
       if (changeRes)
           impl->adjustMouseRegion(Settings::Manager::getInt("resolution x", "Video"), Settings::Manager::getInt("resolution y", "Video"));
   }
+
+    void MWInputManager::toggleControlSwitch(std::string sw, bool value)
+    {
+        impl->toggleControlSwitch(sw, value); 
+    }
 }

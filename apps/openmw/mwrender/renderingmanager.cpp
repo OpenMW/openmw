@@ -273,11 +273,20 @@ void RenderingManager::update (float duration){
 
     mLocalMap->updatePlayer( mRendering.getCamera()->getRealPosition(), mRendering.getCamera()->getRealOrientation() );
 
-    checkUnderwater();
+    if (mWater) {
+        Ogre::Vector3 cam = mRendering.getCamera()->getRealPosition();
 
-    if (mWater)
+        MWBase::World *world = MWBase::Environment::get().getWorld();
+
+        mWater->updateUnderwater(
+            world->isUnderwater(
+                *world->getPlayer().getPlayer().getCell()->cell,
+                Ogre::Vector3(cam.x, -cam.z, cam.y))
+        );
         mWater->update(duration);
+    }
 }
+
 void RenderingManager::waterAdded (MWWorld::Ptr::CellStore *store){
     if(store->cell->data.flags & store->cell->HasWater
         || ((!(store->cell->data.flags & ESM::Cell::Interior))
@@ -456,13 +465,6 @@ void RenderingManager::toggleLight()
     }
 
     setAmbientMode();
-}
-void RenderingManager::checkUnderwater()
-{
-    if(mWater)
-    {
-         mWater->checkUnderwater( mRendering.getCamera()->getRealPosition().y );
-    }
 }
 
 void RenderingManager::playAnimationGroup (const MWWorld::Ptr& ptr, const std::string& groupName,

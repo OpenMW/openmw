@@ -249,6 +249,9 @@ namespace MWBase
             ///< @return true if it is possible to place on object at specified cursor location
 
             virtual void processChangedSettings (const Settings::CategorySettingVector& settings) = 0;
+
+            virtual bool isSwimming(const MWWorld::Ptr &object) = 0;
+            virtual bool isUnderwater(const ESM::Cell &cell, const Ogre::Vector3 &pos) = 0;
     };
 }
 

@@ -42,9 +42,6 @@ namespace MWWorld
 
         ~Player();
 
-        /// Set the player position. Uses Morrowind coordinates.
-        void setPos(float x, float y, float z);
-
         /// Set where the player is looking at. Uses Morrowind (euler) angles
         void setRot(float x, float y, float z);
 
