@@ -6,7 +6,6 @@
 #include <cassert>
 #include <vector>
 #include <sstream>
-#include <stdexcept>
 
 #include <OgreDataStream.h>
 
