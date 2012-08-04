@@ -66,18 +66,20 @@ namespace MWScript
                     float ay = Ogre::Radian(ptr.getRefData().getPosition().rot[1]).valueDegrees();
                     float az = Ogre::Radian(ptr.getRefData().getPosition().rot[2]).valueDegrees();
 
-                    if(axis == "X")
+                    if (axis == "x")
                     {
                         MWBase::Environment::get().getWorld()->rotateObject(ptr,angle,ay,az);
                     }
-                    if(axis == "Y")
+                    else if (axis == "y")
                     {
                         MWBase::Environment::get().getWorld()->rotateObject(ptr,ax,angle,az);
                     }
-                    if(axis == "Z")
+                    else if (axis == "z")
                     {
                         MWBase::Environment::get().getWorld()->rotateObject(ptr,ax,ay,angle);
                     }
+                    else
+                        throw std::runtime_error ("invalid ration axis: " + axis);
                 }
         };
 
@@ -93,18 +95,20 @@ namespace MWScript
                     std::string axis = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
 
-                    if(axis == "X")
+                    if (axis == "x")
                     {
                         runtime.push(Ogre::Radian(ptr.getRefData().getPosition().rot[0]).valueDegrees());
                     }
-                    if(axis == "Y")
+                    else if (axis == "y")
                     {
                         runtime.push(Ogre::Radian(ptr.getRefData().getPosition().rot[1]).valueDegrees());
                     }
-                    if(axis == "Z")
+                    else if (axis == "z")
                     {
                         runtime.push(Ogre::Radian(ptr.getRefData().getPosition().rot[2]).valueDegrees());
                     }
+                    else
+                        throw std::runtime_error ("invalid ration axis: " + axis);
                 }
         };
 
@@ -120,18 +124,20 @@ namespace MWScript
                     std::string axis = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
 
-                    if(axis == "X")
+                    if (axis=="x")
                     {
                         runtime.push(Ogre::Radian(ptr.getCellRef().pos.rot[0]).valueDegrees());
                     }
-                    if(axis == "Y")
+                    else if (axis=="y")
                     {
                         runtime.push(Ogre::Radian(ptr.getCellRef().pos.rot[1]).valueDegrees());
                     }
-                    if(axis == "Z")
+                    else if (axis=="z")
                     {
                         runtime.push(Ogre::Radian(ptr.getCellRef().pos.rot[2]).valueDegrees());
                     }
+                    else
+                        throw std::runtime_error ("invalid ration axis: " + axis);
                 }
         };
 
@@ -150,9 +156,9 @@ namespace MWScript
         {
             extensions.registerInstruction("setscale","f",opcodeSetScale,opcodeSetScaleExplicit);
             extensions.registerFunction("getscale",'f',"",opcodeGetScale,opcodeGetScaleExplicit);
-            extensions.registerInstruction("setangle","Sf",opcodeSetAngle,opcodeSetAngleExplicit);
-            extensions.registerFunction("getangle",'f',"S",opcodeGetAngle,opcodeGetAngleExplicit);
-            extensions.registerFunction("getstartingangle",'f',"S",opcodeGetStartingAngle,opcodeGetStartingAngleExplicit);
+            extensions.registerInstruction("setangle","cf",opcodeSetAngle,opcodeSetAngleExplicit);
+            extensions.registerFunction("getangle",'f',"c",opcodeGetAngle,opcodeGetAngleExplicit);
+            extensions.registerFunction("getstartingangle",'f',"c",opcodeGetStartingAngle,opcodeGetStartingAngleExplicit);
         }
 
         void installOpcodes (Interpreter::Interpreter& interpreter)
