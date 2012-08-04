@@ -606,10 +606,10 @@ namespace MWWorld
         ptr.getRefData().getPosition().rot[1] = Ogre::Degree(y).valueRadians();
         ptr.getRefData().getPosition().rot[2] = Ogre::Degree(z).valueRadians();
 
-        Ogre::Quaternion rotx(Ogre::Degree(x),Ogre::Vector3::UNIT_X);
-        Ogre::Quaternion roty(Ogre::Degree(y),Ogre::Vector3::UNIT_Y);
-        Ogre::Quaternion rotz(Ogre::Degree(z),Ogre::Vector3::UNIT_Z);
-        ptr.getRefData().getBaseNode()->setOrientation(rotz*roty*rotx);
+        Ogre::Quaternion rotx(Ogre::Degree(-x),Ogre::Vector3::UNIT_X);
+        Ogre::Quaternion roty(Ogre::Degree(-y),Ogre::Vector3::UNIT_Y);
+        Ogre::Quaternion rotz(Ogre::Degree(-z),Ogre::Vector3::UNIT_Z);
+        ptr.getRefData().getBaseNode()->setOrientation(rotx*roty*rotz);
         mPhysics->rotateObject(ptr.getRefData().getHandle(),ptr.getRefData().getBaseNode()->getOrientation());
     }
 
@@ -1074,7 +1074,7 @@ namespace MWWorld
         Ogre::Vector3 orig =
             Ogre::Vector3(pos.pos[0], pos.pos[1], pos.pos[2]);
         Ogre::Vector3 dir = Ogre::Vector3(0, 0, -1);
-        
+
         float len = (pos.pos[2] >= 0) ? pos.pos[2] : -pos.pos[2];
         len += 100.0;
 
