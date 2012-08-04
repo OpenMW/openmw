@@ -36,7 +36,8 @@
 #include <stdexcept>
 #include <vector>
 #include <cassert>
-#include <stdint.h>
+
+#include <libs/platform/stdint.h>
 
 #include "record.hpp"
 #include "nif_types.hpp"
