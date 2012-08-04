@@ -1112,7 +1112,7 @@ namespace MWWorld
     bool
     World::isUnderwater(const ESM::Cell &cell, const Ogre::Vector3 &pos)
     {
-        if (cell.data.flags & ESM::Cell::HasWater == 0) {
+        if (!(cell.data.flags & ESM::Cell::HasWater)) {
             return false;
         }
         return pos.z < cell.water;
