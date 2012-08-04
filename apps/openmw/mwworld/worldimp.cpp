@@ -18,8 +18,6 @@
 #include "manualref.hpp"
 #include "cellfunctors.hpp"
 
-#include <iostream>
-
 using namespace Ogre;
 
 namespace
@@ -1117,8 +1115,6 @@ namespace MWWorld
         if (cell.data.flags & ESM::Cell::HasWater == 0) {
             return false;
         }
-        bool res = pos.z < cell.water;
-        std::cout << "World::isUnderwater(" << pos.z << "):" << res << std::endl;
-        return res;
+        return pos.z < cell.water;
     }
 }
