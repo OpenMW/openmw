@@ -66,15 +66,15 @@ namespace MWScript
                     float ay = Ogre::Radian(ptr.getRefData().getPosition().rot[1]).valueDegrees();
                     float az = Ogre::Radian(ptr.getRefData().getPosition().rot[2]).valueDegrees();
 
-                    if(axis == "X")
+                    if(axis == "x")
                     {
                         MWBase::Environment::get().getWorld()->rotateObject(ptr,angle,ay,az);
                     }
-                    if(axis == "Y")
+                    if(axis == "y")
                     {
                         MWBase::Environment::get().getWorld()->rotateObject(ptr,ax,angle,az);
                     }
-                    if(axis == "Z")
+                    if(axis == "z")
                     {
                         MWBase::Environment::get().getWorld()->rotateObject(ptr,ax,ay,angle);
                     }
@@ -93,15 +93,15 @@ namespace MWScript
                     std::string axis = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
 
-                    if(axis == "X")
+                    if(axis == "x")
                     {
                         runtime.push(Ogre::Radian(ptr.getRefData().getPosition().rot[0]).valueDegrees());
                     }
-                    if(axis == "Y")
+                    if(axis == "y")
                     {
                         runtime.push(Ogre::Radian(ptr.getRefData().getPosition().rot[1]).valueDegrees());
                     }
-                    if(axis == "Z")
+                    if(axis == "z")
                     {
                         runtime.push(Ogre::Radian(ptr.getRefData().getPosition().rot[2]).valueDegrees());
                     }
@@ -120,15 +120,15 @@ namespace MWScript
                     std::string axis = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
 
-                    if(axis == "X")
+                    if(axis == "x")
                     {
                         runtime.push(ptr.getRefData().getPosition().pos[0]);
                     }
-                    if(axis == "Y")
+                    if(axis == "y")
                     {
                         runtime.push(ptr.getRefData().getPosition().pos[1]);
                     }
-                    if(axis == "Z")
+                    if(axis == "z")
                     {
                         runtime.push(ptr.getRefData().getPosition().pos[2]);
                     }
@@ -154,15 +154,15 @@ namespace MWScript
                     float az = ptr.getRefData().getPosition().pos[2];
                     std::cout << "setPos";
 
-                    if(axis == "X")
+                    if(axis == "x")
                     {
                         MWBase::Environment::get().getWorld()->moveObject(ptr,pos,ay,az);
                     }
-                    if(axis == "Y")
+                    if(axis == "y")
                     {
                         MWBase::Environment::get().getWorld()->moveObject(ptr,ax,pos,az);
                     }
-                    if(axis == "Z")
+                    if(axis == "z")
                     {
                         MWBase::Environment::get().getWorld()->moveObject(ptr,ax,ay,pos);
                     }
@@ -181,15 +181,15 @@ namespace MWScript
                     std::string axis = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
 
-                    if(axis == "X")
+                    if(axis == "x")
                     {
                         runtime.push(ptr.getCellRef().pos.pos[0]);
                     }
-                    if(axis == "Y")
+                    if(axis == "y")
                     {
                         runtime.push(ptr.getCellRef().pos.pos[1]);
                     }
-                    if(axis == "Z")
+                    if(axis == "z")
                     {
                         runtime.push(ptr.getCellRef().pos.pos[2]);
                     }
@@ -217,9 +217,9 @@ namespace MWScript
             extensions.registerFunction("getscale",'f',"",opcodeGetScale,opcodeGetScaleExplicit);
             extensions.registerInstruction("setangle","Sf",opcodeSetAngle,opcodeSetAngleExplicit);
             extensions.registerFunction("getangle",'f',"S",opcodeGetAngle,opcodeGetAngleExplicit);
-            extensions.registerInstruction("setpos","Sf",opcodeSetPos,opcodeSetPosExplicit);
-            extensions.registerFunction("getpos",'f',"S",opcodeGetPos,opcodeGetPosExplicit);
-            extensions.registerFunction("getstartingpos",'f',"S",opcodeGetStartingPos,opcodeGetStartingPosExplicit);
+            extensions.registerInstruction("setpos","cf",opcodeSetPos,opcodeSetPosExplicit);
+            extensions.registerFunction("getpos",'f',"c",opcodeGetPos,opcodeGetPosExplicit);
+            extensions.registerFunction("getstartingpos",'f',"c",opcodeGetStartingPos,opcodeGetStartingPosExplicit);
         }
 
         void installOpcodes (Interpreter::Interpreter& interpreter)
