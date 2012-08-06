@@ -545,7 +545,7 @@ namespace MWWorld
 
     bool World::moveObjectImp (const Ptr& ptr, float x, float y, float z)
     {
-        bool cellChanged = false, haveToMove = true;
+        bool cellChanged = false;
 
         ESM::Position &pos = ptr.getRefData().getPosition();
         pos.pos[0] = x, pos.pos[1] = y, pos.pos[2] = z;
@@ -558,6 +558,7 @@ namespace MWWorld
         } else {
             currCell = ptr.getCell();
         }
+        bool haveToMove = mWorldScene->isCellActive(*currCell);
 
         if (currCell) {
             if (!(currCell->cell->data.flags & ESM::Cell::Interior)) {
@@ -575,7 +576,7 @@ namespace MWWorld
                             MWBase::Environment::get().getWorld()->getExterior(cellX, cellY);
 
                         // placeObject() handles both target cell states
-                        // with active current cell
+                        // with inactive current cell
                         if (!mWorldScene->isCellActive(*currCell)) {
                             placeObject(ptr, *newCell, pos);
                             haveToMove = false;
