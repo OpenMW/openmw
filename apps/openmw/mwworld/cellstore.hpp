@@ -69,7 +69,7 @@ namespace MWWorld
     {
         for (typename std::list<LiveRef>::iterator iter (list.begin()); iter!=list.end(); ++iter)
         {
-            if (iter->ref.refID==name)
+            if (iter->mData.getCount() > 0 && iter->ref.refID == name)
                 return &*iter;
         }
 

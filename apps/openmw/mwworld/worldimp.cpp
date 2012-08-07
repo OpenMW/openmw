@@ -51,7 +51,7 @@ namespace
 
         for (iterator iter (refList.list.begin()); iter!=refList.list.end(); ++iter)
         {
-            if(iter->mData.getBaseNode()){
+            if(iter->mData.getCount() > 0 && iter->mData.getBaseNode()){
             if (iter->mData.getHandle()==handle)
             {
                 return &*iter;
