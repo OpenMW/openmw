@@ -183,10 +183,6 @@ MWRender::Actors& RenderingManager::getActors(){
     return mActors;
 }
 
-MWRender::Player& RenderingManager::getPlayer(){
-    return (*mPlayer);
-}
-
 OEngine::Render::Fader* RenderingManager::getFader()
 {
     return mRendering.getFader();
@@ -251,9 +247,31 @@ void RenderingManager::moveObject (const MWWorld::Ptr& ptr, const Ogre::Vector3&
 void RenderingManager::scaleObject (const MWWorld::Ptr& ptr, const Ogre::Vector3& scale){
 
 }
-void RenderingManager::rotateObject (const MWWorld::Ptr& ptr, const::Ogre::Quaternion& orientation){
 
+bool
+RenderingManager::rotateObject(
+    const MWWorld::Ptr &ptr,
+    Ogre::Vector3 &rot,
+    bool adjust)
+{
+    if (ptr.getRefData().getHandle() == "player") {
+        if (adjust) {
+            return mPlayer->adjustRotation(rot);
+        } else {
+            return mPlayer->setRotation(rot);
+        }
+    }
+    MWWorld::Class::get(ptr).adjustRotation(ptr, rot.x, rot.y, rot.z);
+
+    Ogre::Quaternion xr(Ogre::Degree(rot.x), Ogre::Vector3::UNIT_X);
+    Ogre::Quaternion yr(Ogre::Degree(-rot.z), Ogre::Vector3::UNIT_Y);
+    Ogre::Quaternion zr(Ogre::Degree(rot.y), Ogre::Vector3::UNIT_Z);
+
+    ptr.getRefData().getBaseNode()->setOrientation(xr * yr * zr);
+
+    return true;
 }
+
 void RenderingManager::moveObjectToCell (const MWWorld::Ptr& ptr, const Ogre::Vector3& position, MWWorld::Ptr::CellStore *store){
 
 }
@@ -768,6 +786,11 @@ void RenderingManager::getTriangleBatchCount(unsigned int &triangles, unsigned i
         triangles = mRendering.getWindow()->getTriangleCount();
         batches = mRendering.getWindow()->getBatchCount();
     }
+}
+
+void RenderingManager::attachCameraTo(const MWWorld::Ptr &ptr)
+{
+    mPlayer->attachTo(ptr);
 }
 
 } // namespace

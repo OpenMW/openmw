@@ -492,11 +492,13 @@ namespace MWSound
             startRandomTitle();
 
         const ESM::Cell *cell = MWBase::Environment::get().getWorld()->getPlayer().getPlayer().getCell()->cell;
-        Ogre::Camera *cam = MWBase::Environment::get().getWorld()->getPlayer().getRenderer()->getCamera();
+//        Ogre::Camera *cam = MWBase::Environment::get().getWorld()->getPlayer().getRenderer()->getCamera();
         Ogre::Vector3 nPos, nDir, nUp;
+        /*
         nPos = cam->getRealPosition();
         nDir = cam->getRealDirection();
         nUp  = cam->getRealUp();
+        */
 
         Environment env = Env_Normal;
         if((cell->data.flags&cell->HasWater) && nPos.y < cell->water)

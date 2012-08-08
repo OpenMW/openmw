@@ -6,7 +6,6 @@
 #include <openengine/gui/events.hpp>
 
 #include <openengine/ogre/exitlistener.hpp>
-#include <openengine/ogre/mouselook.hpp>
 #include <openengine/ogre/renderer.hpp>
 
 #include "../mwgui/window_manager.hpp"
@@ -16,11 +15,11 @@
 
 #include <libs/platform/strings.h>
 
+#include "mouselookevent.hpp"
+
 #include "../engine.hpp"
 
 #include "../mwworld/player.hpp"
-
-#include "../mwrender/player.hpp"
 
 #include <boost/bind.hpp>
 #include <boost/filesystem.hpp>
@@ -82,7 +81,7 @@ namespace MWInput
     OEngine::Render::ExitListener exit;
     Mangle::Input::OISDriver input;
     OEngine::Input::Poller poller;
-    OEngine::Render::MouseLookEventPtr mouse;
+    MouseLookEventPtr mouse;
     OEngine::GUI::EventInjectorPtr guiEvents;
     MWWorld::Player &player;
     MWGui::WindowManager &windows;
@@ -279,8 +278,7 @@ private:
       // Add the exit listener
       ogre.getRoot()->addFrameListener(&exit);
 
-      // Set up the mouse handler and tell it about the player camera
-      mouse = MouseLookEventPtr(new MouseLookEvent(player.getRenderer()->getCamera()));
+      mouse = MouseLookEventPtr(new MouseLookEvent());
 
       // This event handler pumps events into MyGUI
       guiEvents = EventInjectorPtr(new EventInjector(windows.getGui()));
@@ -419,7 +417,7 @@ private:
       if(guiMode)
         {
           // Disable mouse look
-          mouse->setCamera(NULL);
+          mouse->disable();
 
           // Enable GUI events
           guiEvents->enabled = true;
@@ -428,7 +426,7 @@ private:
         {
           // Start mouse-looking again. TODO: This should also allow
           // for other ways to disable mouselook, like paralyzation.
-          mouse->setCamera(player.getRenderer()->getCamera());
+          mouse->enable();
 
           // Disable GUI events
           guiEvents->enabled = false;

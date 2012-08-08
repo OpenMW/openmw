@@ -14,11 +14,6 @@ namespace MWBase
     class World;
 }
 
-namespace MWRender
-{
-    class Player;
-}
-
 namespace MWWorld
 {
     class CellStore;
@@ -28,7 +23,6 @@ namespace MWWorld
     {
         LiveCellRef<ESM::NPC> mPlayer;
         MWWorld::CellStore *mCellStore;
-        MWRender::Player *mRenderer;
         std::string mName;
         bool mMale;
         std::string mRace;
@@ -38,12 +32,9 @@ namespace MWWorld
         int mForwardBackward;
     public:
 
-        Player(MWRender::Player *renderer, const ESM::NPC *player, const MWBase::World& world);
+        Player(const ESM::NPC *player, const MWBase::World& world);
 
         ~Player();
-
-        /// Set where the player is looking at. Uses Morrowind (euler) angles
-        void setRot(float x, float y, float z);
 
         void setCell (MWWorld::CellStore *cellStore)
         {
@@ -55,8 +46,6 @@ namespace MWWorld
             MWWorld::Ptr ptr (&mPlayer, mCellStore);
             return ptr;
         }
-
-        MWRender::Player *getRenderer() { return mRenderer; }
 
         void setName (const std::string& name)
         {

@@ -149,7 +149,7 @@ namespace MWWorld
 
         if (adjustPlayerPos) {
             world->moveObject(player, pos.pos[0], pos.pos[1], pos.pos[2]);
-            MWBase::Environment::get().getWorld()->getPlayer().setRot (pos.rot[0], pos.rot[1], pos.rot[2]);
+            world->rotateObject(player, pos.rot[0], pos.rot[1], pos.rot[2]);
         }
         world->getPlayer().setCell(cell);
 

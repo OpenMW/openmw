@@ -21,6 +21,7 @@ add_openmw_dir (mwrender
 
 add_openmw_dir (mwinput
     inputmanager
+    mouselookevent
     )
 
 add_openmw_dir (mwgui
