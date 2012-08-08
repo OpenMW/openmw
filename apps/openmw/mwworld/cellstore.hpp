@@ -155,6 +155,20 @@ namespace MWWorld
             forEachImp (functor, weapons);
     }
 
+    bool operator==(const CellStore &cell) {
+        return  this->cell->name == cell.cell->name &&
+                this->cell->data.gridX == cell.cell->data.gridX &&
+                this->cell->data.gridY == cell.cell->data.gridY;
+    }
+
+    bool operator!=(const CellStore &cell) {
+        return !(*this == cell);
+    }
+
+    bool isExterior() const {
+        return cell->isExterior();
+    }
+
   private:
 
     template<class Functor, class List>

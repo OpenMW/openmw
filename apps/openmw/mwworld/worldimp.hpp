@@ -90,7 +90,7 @@ namespace MWWorld
             ///< @return true if the active cell (cell player is in) changed
 
             virtual void
-            placeObject(const Ptr &ptr, CellStore &cell, const ESM::Position &pos);
+            copyObjectToCell(const Ptr &ptr, CellStore &cell, const ESM::Position &pos);
 
         public:
 
@@ -206,6 +206,7 @@ namespace MWWorld
             virtual void deleteObject (const Ptr& ptr);
 
             virtual void moveObject (const Ptr& ptr, float x, float y, float z);
+            virtual void moveObject (const Ptr& ptr, CellStore &newCell, float x, float y, float z);
 
             virtual void scaleObject (const Ptr& ptr, float scale);
 

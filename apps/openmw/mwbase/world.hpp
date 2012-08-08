@@ -57,7 +57,7 @@ namespace MWBase
         protected:
 
             virtual void
-            placeObject(
+            copyObjectToCell(
                 const MWWorld::Ptr &ptr,
                 MWWorld::CellStore &cell,
                 const ESM::Position &pos) = 0;
@@ -183,6 +183,9 @@ namespace MWBase
             virtual void deleteObject (const MWWorld::Ptr& ptr) = 0;
 
             virtual void moveObject (const MWWorld::Ptr& ptr, float x, float y, float z) = 0;
+
+            virtual void
+            moveObject(const MWWorld::Ptr &ptr, MWWorld::CellStore &newCell, float x, float y, float z) = 0;
 
             virtual void scaleObject (const MWWorld::Ptr& ptr, float scale) = 0;
 
