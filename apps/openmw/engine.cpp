@@ -18,7 +18,7 @@
 #include "mwgui/window_manager.hpp"
 #include "mwgui/cursorreplace.hpp"
 
-#include "mwscript/scriptmanager.hpp"
+#include "mwscript/scriptmanagerimp.hpp"
 #include "mwscript/extensions.hpp"
 
 #include "mwsound/soundmanager.hpp"

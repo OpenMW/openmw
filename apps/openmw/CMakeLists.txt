@@ -36,7 +36,7 @@ add_openmw_dir (mwdialogue
     )
 
 add_openmw_dir (mwscript
-    locals scriptmanager compilercontext interpretercontext cellextensions miscextensions
+    locals scriptmanagerimp compilercontext interpretercontext cellextensions miscextensions
     guiextensions soundextensions skyextensions statsextensions containerextensions
     aiextensions controlextensions extensions globalscripts ref dialogueextensions
     animationextensions transformationextensions consoleextensions userextensions
@@ -64,7 +64,7 @@ add_openmw_dir (mwmechanics
     )
 
 add_openmw_dir (mwbase
-    environment world
+    environment world scriptmanager
     )
 
 # Main executable

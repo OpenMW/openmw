@@ -11,6 +11,7 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
+#include "../mwbase/scriptmanager.hpp"
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/refdata.hpp"
@@ -26,7 +27,6 @@
 #include <iostream>
 
 #include "../mwscript/extensions.hpp"
-#include "../mwscript/scriptmanager.hpp"
 
 #include <components/compiler/exception.hpp>
 #include <components/compiler/errorhandler.hpp>

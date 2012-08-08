@@ -10,6 +10,8 @@
 #include <components/interpreter/interpreter.hpp>
 #include <components/interpreter/types.hpp>
 
+#include "../mwbase/scriptmanager.hpp"
+
 #include "globalscripts.hpp"
 
 namespace ESMS
@@ -30,7 +32,7 @@ namespace Interpreter
 
 namespace MWScript
 {
-    class ScriptManager
+    class ScriptManager : public MWBase::ScriptManager
     {
             Compiler::StreamErrorHandler mErrorHandler;
             const ESMS::ESMStore& mStore;
@@ -51,23 +53,24 @@ namespace MWScript
             ScriptManager (const ESMS::ESMStore& store, bool verbose,
                 Compiler::Context& compilerContext);
 
-            void run (const std::string& name, Interpreter::Context& interpreterContext);
+            virtual void run (const std::string& name, Interpreter::Context& interpreterContext);
             ///< Run the script with the given name (compile first, if not compiled yet)
 
-            bool compile (const std::string& name);
+            virtual bool compile (const std::string& name);
             ///< Compile script with the given namen
             /// \return Success?
 
-            std::pair<int, int> compileAll();
+            virtual std::pair<int, int> compileAll();
             ///< Compile all scripts
             /// \return count, success
 
-            Compiler::Locals& getLocals (const std::string& name);
+            virtual Compiler::Locals& getLocals (const std::string& name);
             ///< Return locals for script \a name.
 
-            GlobalScripts& getGlobalScripts();
+            virtual GlobalScripts& getGlobalScripts();
 
-            int getLocalIndex (const std::string& scriptId, const std::string& variable, char type);
+            virtual int getLocalIndex (const std::string& scriptId, const std::string& variable,
+                char type);
             ///< Return index of the variable of the given name and type in the given script. Will
             /// throw an exception, if there is no such script or variable or the type does not match.
     };

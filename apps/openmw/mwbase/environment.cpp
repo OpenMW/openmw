@@ -5,8 +5,6 @@
 
 #include "../mwinput/inputmanager.hpp"
 
-#include "../mwscript/scriptmanager.hpp"
-
 #include "../mwsound/soundmanager.hpp"
 
 #include "../mwdialogue/dialoguemanager.hpp"
@@ -15,6 +13,7 @@
 #include "../mwmechanics/mechanicsmanager.hpp"
 
 #include "world.hpp"
+#include "scriptmanager.hpp"
 
 MWBase::Environment *MWBase::Environment::sThis = 0;
 
@@ -42,7 +41,7 @@ void MWBase::Environment::setSoundManager (MWSound::SoundManager *soundManager)
     mSoundManager = soundManager;
 }
 
-void MWBase::Environment::setScriptManager (MWScript::ScriptManager *scriptManager)
+void MWBase::Environment::setScriptManager (ScriptManager *scriptManager)
 {
     mScriptManager = scriptManager;
 }
@@ -89,7 +88,7 @@ MWSound::SoundManager *MWBase::Environment::getSoundManager() const
     return mSoundManager;
 }
 
-MWScript::ScriptManager *MWBase::Environment::getScriptManager() const
+MWBase::ScriptManager *MWBase::Environment::getScriptManager() const
 {
     assert (mScriptManager);
     return mScriptManager;

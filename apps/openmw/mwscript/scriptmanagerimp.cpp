@@ -1,5 +1,5 @@
 
-#include "scriptmanager.hpp"
+#include "scriptmanagerimp.hpp"
 
 #include <cassert>
 #include <iostream>
@@ -21,7 +21,7 @@ namespace MWScript
         Compiler::Context& compilerContext)
     : mErrorHandler (std::cerr), mStore (store), mVerbose (verbose),
       mCompilerContext (compilerContext), mParser (mErrorHandler, mCompilerContext),
-      mOpcodesInstalled (false), mGlobalScripts (store, *this)
+      mOpcodesInstalled (false), mGlobalScripts (store)
     {}
 
     bool ScriptManager::compile (const std::string& name)

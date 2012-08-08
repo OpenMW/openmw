@@ -6,11 +6,6 @@ namespace MWSound
     class SoundManager;
 }
 
-namespace MWScript
-{
-    class ScriptManager;
-}
-
 namespace MWGui
 {
     class WindowManager;
@@ -35,6 +30,7 @@ namespace MWInput
 namespace MWBase
 {
     class World;
+    class ScriptManager;
 
     /// \brief Central hub for mw-subsystems
     ///
@@ -48,7 +44,7 @@ namespace MWBase
 
             World *mWorld;
             MWSound::SoundManager *mSoundManager;
-            MWScript::ScriptManager *mScriptManager;
+            ScriptManager *mScriptManager;
             MWGui::WindowManager *mWindowManager;
             MWMechanics::MechanicsManager *mMechanicsManager;
             MWDialogue::DialogueManager *mDialogueManager;
@@ -72,7 +68,7 @@ namespace MWBase
 
             void setSoundManager (MWSound::SoundManager *soundManager);
 
-            void setScriptManager (MWScript::ScriptManager *scriptManager);
+            void setScriptManager (MWBase::ScriptManager *scriptManager);
 
             void setWindowManager (MWGui::WindowManager *windowManager);
 
@@ -91,7 +87,7 @@ namespace MWBase
 
             MWSound::SoundManager *getSoundManager() const;
 
-            MWScript::ScriptManager *getScriptManager() const;
+            MWBase::ScriptManager *getScriptManager() const;
 
             MWGui::WindowManager *getWindowManager() const;
 
