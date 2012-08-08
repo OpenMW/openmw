@@ -32,7 +32,7 @@ namespace Ogre {
 	class Root;
 }
 
-#if (BOOST_VERSION <= 104300)
+#if (BOOST_VERSION <= 104500)
 namespace boost {
 namespace filesystem {
 inline path absolute(const path& p, const path& base=current_path()) {
