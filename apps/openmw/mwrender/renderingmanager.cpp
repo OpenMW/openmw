@@ -263,6 +263,11 @@ RenderingManager::rotateObject(
     }
     MWWorld::Class::get(ptr).adjustRotation(ptr, rot.x, rot.y, rot.z);
 
+    if (adjust) {
+        float *f = ptr.getRefData().getPosition().rot;
+        rot.x += f[0], rot.y += f[1], rot.z += f[2];
+    }
+
     Ogre::Quaternion xr(Ogre::Degree(rot.x), Ogre::Vector3::UNIT_X);
     Ogre::Quaternion yr(Ogre::Degree(-rot.z), Ogre::Vector3::UNIT_Y);
     Ogre::Quaternion zr(Ogre::Degree(rot.y), Ogre::Vector3::UNIT_Z);
