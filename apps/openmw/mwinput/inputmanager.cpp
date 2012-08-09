@@ -399,14 +399,14 @@ private:
             }
             else
                 player.setForwardBackward (0);
-        }
 
-        if (poller.isDown(A_Jump) && mControlSwitch["playerjumping"])
-            player.setUpDown (1);
-        else if (poller.isDown(A_Crouch))
-            player.setUpDown (-1);
-        else
-            player.setUpDown (0);
+            if (poller.isDown(A_Jump) && mControlSwitch["playerjumping"])
+                player.setUpDown (1);
+            else if (poller.isDown(A_Crouch))
+                player.setUpDown (-1);
+            else
+                player.setUpDown (0);
+        }
     }
 
     // Switch between gui modes. Besides controlling the Gui windows
@@ -444,6 +444,7 @@ private:
             player.setLeftRight(0);
             player.setForwardBackward(0);
             player.setAutoMove(false);
+            player.setUpDown(0);
         } else if (sw == "playerjumping" && !value) {
             /// \fixme maybe crouching at this time
             player.setUpDown(0);
