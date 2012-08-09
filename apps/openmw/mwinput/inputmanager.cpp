@@ -295,6 +295,14 @@ private:
         lst->add(guiEvents,Event::EV_ALL);
       }
 
+      mControlSwitch["playercontrols"]      = true;
+      mControlSwitch["playerfighting"]      = true;
+      mControlSwitch["playerjumping"]       = true;
+      mControlSwitch["playerlooking"]       = true;
+      mControlSwitch["playermagic"]         = true;
+      mControlSwitch["playerviewswitch"]    = true;
+      mControlSwitch["vanitymode"]          = true;
+
       changeInputMode(false);
 
       /**********************************
@@ -338,14 +346,6 @@ private:
 
       poller.bind(A_Jump, KC_E);
       poller.bind(A_Crouch, KC_LCONTROL);
-
-      mControlSwitch["playercontrols"]      = true;
-      mControlSwitch["playerfighting"]      = true;
-      mControlSwitch["playerjumping"]       = true;
-      mControlSwitch["playerlooking"]       = true;
-      mControlSwitch["playermagic"]         = true;
-      mControlSwitch["playerviewswitch"]    = true;
-      mControlSwitch["vanitymode"]          = true;
     }
 
     void setDragDrop(bool dragDrop)
