@@ -29,7 +29,7 @@
 
 #include "mwclass/classes.hpp"
 
-#include "mwdialogue/dialoguemanager.hpp"
+#include "mwdialogue/dialoguemanagerimp.hpp"
 #include "mwdialogue/journal.hpp"
 
 #include "mwmechanics/mechanicsmanager.hpp"

@@ -1,5 +1,5 @@
 
-#include "dialoguemanager.hpp"
+#include "dialoguemanagerimp.hpp"
 
 #include <cctype>
 #include <algorithm>

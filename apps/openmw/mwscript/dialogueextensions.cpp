@@ -7,8 +7,10 @@
 #include <components/interpreter/runtime.hpp>
 #include <components/interpreter/opcodes.hpp>
 
+#include "../mwbase/environment.hpp"
+#include "../mwbase/dialoguemanager.hpp"
+
 #include "../mwdialogue/journal.hpp"
-#include "../mwdialogue/dialoguemanager.hpp"
 
 #include "interpretercontext.hpp"
 #include "ref.hpp"
@@ -84,7 +86,7 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime, unsigned int arg0)
                 {
-                    MWDialogue::DialogueManager* dialogue = MWBase::Environment::get().getDialogueManager();
+                    MWBase::DialogueManager* dialogue = MWBase::Environment::get().getDialogueManager();
                     while(arg0>0)
                     {
                         std::string question = runtime.getStringLiteral (runtime[0].mInteger);

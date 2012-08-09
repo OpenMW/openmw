@@ -7,13 +7,13 @@
 
 #include "../mwsound/soundmanager.hpp"
 
-#include "../mwdialogue/dialoguemanager.hpp"
 #include "../mwdialogue/journal.hpp"
 
 #include "../mwmechanics/mechanicsmanager.hpp"
 
 #include "world.hpp"
 #include "scriptmanager.hpp"
+#include "dialoguemanager.hpp"
 
 MWBase::Environment *MWBase::Environment::sThis = 0;
 
@@ -56,7 +56,7 @@ void MWBase::Environment::setMechanicsManager (MWMechanics::MechanicsManager *me
     mMechanicsManager = mechanicsManager;
 }
 
-void MWBase::Environment::setDialogueManager (MWDialogue::DialogueManager *dialogueManager)
+void MWBase::Environment::setDialogueManager (DialogueManager *dialogueManager)
 {
     mDialogueManager = dialogueManager;
 }
@@ -106,7 +106,7 @@ MWMechanics::MechanicsManager *MWBase::Environment::getMechanicsManager() const
     return mMechanicsManager;
 }
 
-MWDialogue::DialogueManager *MWBase::Environment::getDialogueManager() const
+MWBase::DialogueManager *MWBase::Environment::getDialogueManager() const
 {
     assert (mDialogueManager);
     return mDialogueManager;

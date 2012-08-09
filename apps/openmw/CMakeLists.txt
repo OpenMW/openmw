@@ -32,7 +32,7 @@ add_openmw_dir (mwgui
     )
 
 add_openmw_dir (mwdialogue
-    dialoguemanager journal journalentry quest topic
+    dialoguemanagerimp journal journalentry quest topic
     )
 
 add_openmw_dir (mwscript
@@ -64,7 +64,7 @@ add_openmw_dir (mwmechanics
     )
 
 add_openmw_dir (mwbase
-    environment world scriptmanager
+    environment world scriptmanager dialoguemanager
     )
 
 # Main executable
