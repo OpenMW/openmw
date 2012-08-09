@@ -6,8 +6,6 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 
-#include "../mwrender/player.hpp"
-
 #include "../mwmechanics/movement.hpp"
 #include "../mwmechanics/npcstats.hpp"
 
@@ -15,8 +13,8 @@
 
 namespace MWWorld
 {
-    Player::Player (MWRender::Player *renderer, const ESM::NPC *player, const MWBase::World& world) :
-      mCellStore (0), mRenderer (renderer), mClass (0),
+    Player::Player (const ESM::NPC *player, const MWBase::World& world) :
+      mCellStore (0), mClass (0),
       mAutoMove (false), mForwardBackward (0)
     {
         mPlayer.base = player;
@@ -28,7 +26,6 @@ namespace MWWorld
         float* playerPos = mPlayer.mData.getPosition().pos;
         playerPos[0] = playerPos[1] = playerPos[2] = 0;
 
-        mPlayer.mData.setBaseNode(renderer->getNode());
         /// \todo Do not make a copy of classes defined in esm/p records.
         mClass = new ESM::Class (*world.getStore().classes.find (player->cls));
     }
@@ -36,11 +33,6 @@ namespace MWWorld
     Player::~Player()
     {
         delete mClass;
-    }
-
-    void Player::setRot(float x, float y, float z)
-    {
-        mRenderer->setRot(x, y, z);
     }
 
     void Player::setClass (const ESM::Class& class_)

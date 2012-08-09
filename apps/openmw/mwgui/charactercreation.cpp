@@ -9,7 +9,7 @@
 #include "mode.hpp"
 
 #include "../mwbase/environment.hpp"
-#include "../mwsound/soundmanager.hpp"
+#include "../mwbase/soundmanager.hpp"
 
 namespace
 {

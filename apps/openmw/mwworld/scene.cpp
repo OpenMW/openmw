@@ -2,10 +2,9 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp" /// FIXME
+#include "../mwbase/soundmanager.hpp"
 
 #include "../mwmechanics/mechanicsmanager.hpp"
-
-#include "../mwsound/soundmanager.hpp"
 
 #include "../mwgui/window_manager.hpp"
 
@@ -149,7 +148,7 @@ namespace MWWorld
 
         if (adjustPlayerPos) {
             world->moveObject(player, pos.pos[0], pos.pos[1], pos.pos[2]);
-            MWBase::Environment::get().getWorld()->getPlayer().setRot (pos.rot[0], pos.rot[1], pos.rot[2]);
+            world->rotateObject(player, pos.rot[0], pos.rot[1], pos.rot[2]);
         }
         world->getPlayer().setCell(cell);
 
@@ -345,7 +344,7 @@ namespace MWWorld
         mRendering.addObject(ptr);
         MWWorld::Class::get(ptr).insertObject(ptr, *mPhysics);
     }
-   
+
     void Scene::removeObjectFromScene (const Ptr& ptr)
     {
         MWBase::Environment::get().getMechanicsManager()->removeActor (ptr);

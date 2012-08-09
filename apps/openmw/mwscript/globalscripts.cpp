@@ -6,13 +6,15 @@
 #include <components/esm_store/reclists.hpp>
 #include <components/esm_store/store.hpp>
 
+#include "../mwbase/environment.hpp"
+#include "../mwbase/scriptmanager.hpp"
+
 #include "interpretercontext.hpp"
-#include "scriptmanager.hpp"
 
 namespace MWScript
 {
-    GlobalScripts::GlobalScripts (const ESMS::ESMStore& store, ScriptManager& scriptManager)
-    : mStore (store), mScriptManager (scriptManager)
+    GlobalScripts::GlobalScripts (const ESMS::ESMStore& store)
+    : mStore (store)
     {
         addScript ("Main");
 
@@ -63,9 +65,8 @@ namespace MWScript
             {
                 MWScript::InterpreterContext interpreterContext (
                     &iter->second.second, MWWorld::Ptr());
-                mScriptManager.run (iter->first, interpreterContext);
+                MWBase::Environment::get().getScriptManager()->run (iter->first, interpreterContext);
             }
         }
-
     }
 }

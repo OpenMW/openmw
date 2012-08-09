@@ -4,13 +4,12 @@
 #include <components/files/collections.hpp>
 
 #include "../mwbase/environment.hpp"
+#include "../mwbase/soundmanager.hpp"
 
 #include "../mwrender/sky.hpp"
 #include "../mwrender/player.hpp"
 
 #include "../mwmechanics/mechanicsmanager.hpp"
-
-#include "../mwsound/soundmanager.hpp"
 
 #include "../mwgui/window_manager.hpp"
 
@@ -189,8 +188,9 @@ namespace MWWorld
         mEsm.open (masterPath.string());
         mStore.load (mEsm);
 
-        MWRender::Player* play = &(mRendering->getPlayer());
-        mPlayer = new MWWorld::Player (play, mStore.npcs.find ("player"), *this);
+        mPlayer = new MWWorld::Player (mStore.npcs.find ("player"), *this);
+        mRendering->attachCameraTo(mPlayer->getPlayer());
+
         mPhysics->addActor (mPlayer->getPlayer().getRefData().getHandle(), "", Ogre::Vector3 (0, 0, 0));
 
         // global variables
@@ -598,19 +598,20 @@ namespace MWWorld
         mPhysics->scaleObject( ptr.getRefData().getHandle(), scale );
     }
 
-    void World::rotateObject (const Ptr& ptr,float x,float y,float z)
+    void World::rotateObject (const Ptr& ptr,float x,float y,float z, bool adjust)
     {
-        MWWorld::Class::get(ptr).adjustRotation(ptr,x,y,z);
+        Ogre::Vector3 rot(x, y, z);
+        if (mRendering->rotateObject(ptr, rot, adjust)) {
+            float *objRot = ptr.getRefData().getPosition().rot;
+            objRot[0] = Ogre::Degree(rot.x).valueRadians();
+            objRot[1] = Ogre::Degree(rot.y).valueRadians();
+            objRot[2] = Ogre::Degree(rot.z).valueRadians();
 
-        ptr.getRefData().getPosition().rot[0] = Ogre::Degree(x).valueRadians();
-        ptr.getRefData().getPosition().rot[1] = Ogre::Degree(y).valueRadians();
-        ptr.getRefData().getPosition().rot[2] = Ogre::Degree(z).valueRadians();
-
-        Ogre::Quaternion rotx(Ogre::Degree(-x),Ogre::Vector3::UNIT_X);
-        Ogre::Quaternion roty(Ogre::Degree(-y),Ogre::Vector3::UNIT_Y);
-        Ogre::Quaternion rotz(Ogre::Degree(-z),Ogre::Vector3::UNIT_Z);
-        ptr.getRefData().getBaseNode()->setOrientation(rotx*roty*rotz);
-        mPhysics->rotateObject(ptr.getRefData().getHandle(),ptr.getRefData().getBaseNode()->getOrientation());
+            mPhysics->rotateObject(
+                ptr.getRefData().getHandle(),
+                ptr.getRefData().getBaseNode()->getOrientation()
+            );
+        }
     }
 
     void World::indexToPosition (int cellX, int cellY, float &x, float &y, bool centre) const

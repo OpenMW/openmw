@@ -1,5 +1,5 @@
 
-#include "journal.hpp"
+#include "journalimp.hpp"
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
