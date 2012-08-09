@@ -46,6 +46,7 @@ namespace MWWorld
 
 namespace MWBase
 {
+    /// \brief Interface for the World (implemented in MWWorld)
     class World
     {
             World (const World&);
@@ -53,14 +54,6 @@ namespace MWBase
 
             World& operator= (const World&);
             ///< not implemented
-
-        protected:
-
-            virtual void
-            placeObject(
-                const MWWorld::Ptr &ptr,
-                MWWorld::CellStore &cell,
-                const ESM::Position &pos) = 0;
 
         public:
 

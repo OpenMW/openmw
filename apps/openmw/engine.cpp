@@ -18,10 +18,10 @@
 #include "mwgui/window_manager.hpp"
 #include "mwgui/cursorreplace.hpp"
 
-#include "mwscript/scriptmanager.hpp"
+#include "mwscript/scriptmanagerimp.hpp"
 #include "mwscript/extensions.hpp"
 
-#include "mwsound/soundmanager.hpp"
+#include "mwsound/soundmanagerimp.hpp"
 
 #include "mwworld/class.hpp"
 #include "mwworld/player.hpp"
@@ -29,8 +29,8 @@
 
 #include "mwclass/classes.hpp"
 
-#include "mwdialogue/dialoguemanager.hpp"
-#include "mwdialogue/journal.hpp"
+#include "mwdialogue/dialoguemanagerimp.hpp"
+#include "mwdialogue/journalimp.hpp"
 
 #include "mwmechanics/mechanicsmanager.hpp"
 

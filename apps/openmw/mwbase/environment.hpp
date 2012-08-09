@@ -1,16 +1,6 @@
 #ifndef GAME_BASE_INVIRONMENT_H
 #define GAME_BASE_INVIRONMENT_H
 
-namespace MWSound
-{
-    class SoundManager;
-}
-
-namespace MWScript
-{
-    class ScriptManager;
-}
-
 namespace MWGui
 {
     class WindowManager;
@@ -21,12 +11,6 @@ namespace MWMechanics
     class MechanicsManager;
 }
 
-namespace MWDialogue
-{
-    class DialogueManager;
-    class Journal;
-}
-
 namespace MWInput
 {
     struct MWInputManager;
@@ -35,6 +19,10 @@ namespace MWInput
 namespace MWBase
 {
     class World;
+    class ScriptManager;
+    class DialogueManager;
+    class Journal;
+    class SoundManager;
 
     /// \brief Central hub for mw-subsystems
     ///
@@ -47,12 +35,12 @@ namespace MWBase
             static Environment *sThis;
 
             World *mWorld;
-            MWSound::SoundManager *mSoundManager;
-            MWScript::ScriptManager *mScriptManager;
+            SoundManager *mSoundManager;
+            ScriptManager *mScriptManager;
             MWGui::WindowManager *mWindowManager;
             MWMechanics::MechanicsManager *mMechanicsManager;
-            MWDialogue::DialogueManager *mDialogueManager;
-            MWDialogue::Journal *mJournal;
+            DialogueManager *mDialogueManager;
+            Journal *mJournal;
             MWInput::MWInputManager *mInputManager;
             float mFrameDuration;
 
@@ -70,17 +58,17 @@ namespace MWBase
 
             void setWorld (World *world);
 
-            void setSoundManager (MWSound::SoundManager *soundManager);
+            void setSoundManager (SoundManager *soundManager);
 
-            void setScriptManager (MWScript::ScriptManager *scriptManager);
+            void setScriptManager (MWBase::ScriptManager *scriptManager);
 
             void setWindowManager (MWGui::WindowManager *windowManager);
 
             void setMechanicsManager (MWMechanics::MechanicsManager *mechanicsManager);
 
-            void setDialogueManager (MWDialogue::DialogueManager *dialogueManager);
+            void setDialogueManager (DialogueManager *dialogueManager);
 
-            void setJournal (MWDialogue::Journal *journal);
+            void setJournal (Journal *journal);
 
             void setInputManager (MWInput::MWInputManager *inputManager);
 
@@ -89,17 +77,17 @@ namespace MWBase
 
             World *getWorld() const;
 
-            MWSound::SoundManager *getSoundManager() const;
+            SoundManager *getSoundManager() const;
 
-            MWScript::ScriptManager *getScriptManager() const;
+            MWBase::ScriptManager *getScriptManager() const;
 
             MWGui::WindowManager *getWindowManager() const;
 
             MWMechanics::MechanicsManager *getMechanicsManager() const;
 
-            MWDialogue::DialogueManager *getDialogueManager() const;
+            DialogueManager *getDialogueManager() const;
 
-            MWDialogue::Journal *getJournal() const;
+            Journal *getJournal() const;
 
             MWInput::MWInputManager *getInputManager() const;
 

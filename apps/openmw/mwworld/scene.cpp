@@ -2,10 +2,9 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp" /// FIXME
+#include "../mwbase/soundmanager.hpp"
 
 #include "../mwmechanics/mechanicsmanager.hpp"
-
-#include "../mwsound/soundmanager.hpp"
 
 #include "../mwgui/window_manager.hpp"
 
@@ -345,7 +344,7 @@ namespace MWWorld
         mRendering.addObject(ptr);
         MWWorld::Class::get(ptr).insertObject(ptr, *mPhysics);
     }
-   
+
     void Scene::removeObjectFromScene (const Ptr& ptr)
     {
         MWBase::Environment::get().getMechanicsManager()->removeActor (ptr);

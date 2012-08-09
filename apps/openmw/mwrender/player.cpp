@@ -4,11 +4,10 @@
 #include <OgreCamera.h>
 
 #include "../mwbase/environment.hpp"
+#include "../mwbase/soundmanager.hpp"
 
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/refdata.hpp"
-
-#include "../mwsound/soundmanager.hpp"
 
 namespace MWRender
 {

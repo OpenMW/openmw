@@ -5,16 +5,13 @@
 
 #include "../mwinput/inputmanager.hpp"
 
-#include "../mwscript/scriptmanager.hpp"
-
-#include "../mwsound/soundmanager.hpp"
-
-#include "../mwdialogue/dialoguemanager.hpp"
-#include "../mwdialogue/journal.hpp"
-
 #include "../mwmechanics/mechanicsmanager.hpp"
 
 #include "world.hpp"
+#include "scriptmanager.hpp"
+#include "dialoguemanager.hpp"
+#include "journal.hpp"
+#include "soundmanager.hpp"
 
 MWBase::Environment *MWBase::Environment::sThis = 0;
 
@@ -37,12 +34,12 @@ void MWBase::Environment::setWorld (World *world)
     mWorld = world;
 }
 
-void MWBase::Environment::setSoundManager (MWSound::SoundManager *soundManager)
+void MWBase::Environment::setSoundManager (SoundManager *soundManager)
 {
     mSoundManager = soundManager;
 }
 
-void MWBase::Environment::setScriptManager (MWScript::ScriptManager *scriptManager)
+void MWBase::Environment::setScriptManager (ScriptManager *scriptManager)
 {
     mScriptManager = scriptManager;
 }
@@ -57,12 +54,12 @@ void MWBase::Environment::setMechanicsManager (MWMechanics::MechanicsManager *me
     mMechanicsManager = mechanicsManager;
 }
 
-void MWBase::Environment::setDialogueManager (MWDialogue::DialogueManager *dialogueManager)
+void MWBase::Environment::setDialogueManager (DialogueManager *dialogueManager)
 {
     mDialogueManager = dialogueManager;
 }
 
-void MWBase::Environment::setJournal (MWDialogue::Journal *journal)
+void MWBase::Environment::setJournal (Journal *journal)
 {
     mJournal = journal;
 }
@@ -83,13 +80,13 @@ MWBase::World *MWBase::Environment::getWorld() const
     return mWorld;
 }
 
-MWSound::SoundManager *MWBase::Environment::getSoundManager() const
+MWBase::SoundManager *MWBase::Environment::getSoundManager() const
 {
     assert (mSoundManager);
     return mSoundManager;
 }
 
-MWScript::ScriptManager *MWBase::Environment::getScriptManager() const
+MWBase::ScriptManager *MWBase::Environment::getScriptManager() const
 {
     assert (mScriptManager);
     return mScriptManager;
@@ -107,13 +104,13 @@ MWMechanics::MechanicsManager *MWBase::Environment::getMechanicsManager() const
     return mMechanicsManager;
 }
 
-MWDialogue::DialogueManager *MWBase::Environment::getDialogueManager() const
+MWBase::DialogueManager *MWBase::Environment::getDialogueManager() const
 {
     assert (mDialogueManager);
     return mDialogueManager;
 }
 
-MWDialogue::Journal *MWBase::Environment::getJournal() const
+MWBase::Journal *MWBase::Environment::getJournal() const
 {
     assert (mJournal);
     return mJournal;

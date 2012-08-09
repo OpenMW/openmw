@@ -5,6 +5,7 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
+#include "../mwbase/soundmanager.hpp"
 
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/actiontake.hpp"
@@ -16,8 +17,6 @@
 
 #include "../mwrender/objects.hpp"
 #include "../mwrender/renderinginterface.hpp"
-
-#include "../mwsound/soundmanager.hpp"
 
 namespace MWClass
 {
@@ -38,7 +37,7 @@ namespace MWClass
             physics.insertObjectPhysics(ptr, model);
         }
     }
-    
+
     std::string Ingredient::getModel(const MWWorld::Ptr &ptr) const
     {
         MWWorld::LiveCellRef<ESM::Ingredient> *ref =
@@ -63,7 +62,7 @@ namespace MWClass
     boost::shared_ptr<MWWorld::Action> Ingredient::activate (const MWWorld::Ptr& ptr,
         const MWWorld::Ptr& actor) const
     {
-        MWBase::Environment::get().getSoundManager()->playSound3D (ptr, getUpSoundId(ptr), 1.0, 1.0, MWSound::Play_NoTrack);
+        MWBase::Environment::get().getSoundManager()->playSound3D (ptr, getUpSoundId(ptr), 1.0, 1.0, MWBase::SoundManager::Play_NoTrack);
 
         return boost::shared_ptr<MWWorld::Action> (
             new MWWorld::ActionTake (ptr));
