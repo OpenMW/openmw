@@ -89,7 +89,7 @@ namespace MWClass
     {
         const std::string model = getModel(ptr);
         if(!model.empty()){
-            physics.insertActorPhysics(ptr, model);
+            physics.insertObjectPhysics(ptr, model);
         }
         MWBase::Environment::get().getMechanicsManager()->addActor (ptr);
     }
