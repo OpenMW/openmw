@@ -28,13 +28,11 @@
 #include <OgreArchiveFactory.h>
 #include <OgreArchiveManager.h>
 #include "bsa_file.hpp"
-#include <libs/mangle/stream/clients/ogre_datastream.hpp>
 
 namespace
 {
 
 using namespace Ogre;
-using namespace Mangle::Stream;
 using namespace Bsa;
 
 struct ciLessBoost : std::binary_function<std::string, std::string, bool>
@@ -64,28 +62,13 @@ static bool fsstrict = false;
 /// An OGRE Archive wrapping a BSAFile archive
 class DirArchive: public Ogre::FileSystemArchive
 {
-
     boost::filesystem::path currentdir;
     std::map<std::string, std::vector<std::string>, ciLessBoost> m;
     unsigned int cutoff;
 
     bool findFile(const String& filename, std::string& copy) const
     {
-        {
-            String passed = filename;
-	        if(filename.at(filename.length() - 2) == '>' || filename.at(filename.length() - 2) == ':')
-		          passed = filename.substr(0, filename.length() - 6);
-            else if(filename.at(filename.length() - 2) == '"')
-		        passed = filename.substr(0, filename.length() - 9);
-	        else if(filename.at(filename.length() - 1) == '*' || filename.at(filename.length() - 1) == '?' ||  filename.at(filename.length() - 1) == '<'
-		        || filename.at(filename.length() - 1) == '"' || filename.at(filename.length() - 1) == '>' ||  filename.at(filename.length() - 1) == ':'
-		        || filename.at(filename.length() - 1) == '|')
-	           passed = filename.substr(0, filename.length() - 2);
-	        
-	
-            copy = passed;
-        }
-
+        copy = filename;
         std::replace(copy.begin(), copy.end(), '\\', '/');
 
         if(copy.at(0) == '/')
@@ -225,46 +208,20 @@ public:
     // OGRE's fault. You should NOT expect an open() command not to
     // have any side effects on the archive, and hence this function
     // should not have been declared const in the first place.
-    BSAFile *narc = (BSAFile*)&arc;
+    BSAFile *narc = const_cast<BSAFile*>(&arc);
 
-    String passed = filename;
-    if(filename.at(filename.length() - 2) == '>' || filename.at(filename.length() - 2) == ':')
-		passed = filename.substr(0, filename.length() - 6);
-    else if(filename.at(filename.length() - 2) == '"')
-		passed = filename.substr(0, filename.length() - 9);
-	else if(filename.at(filename.length() - 1) == '*' || filename.at(filename.length() - 1) == '?' ||  filename.at(filename.length() - 1) == '<'
-		|| filename.at(filename.length() - 1) == '"' || filename.at(filename.length() - 1) == '>' ||  filename.at(filename.length() - 1) == ':'
-		|| filename.at(filename.length() - 1) == '|')
-	   passed = filename.substr(0, filename.length() - 2);
-	
-	
     // Open the file
-    StreamPtr strm = narc->getFile(passed.c_str());
-
-    // Wrap it into an Ogre::DataStream.
-    return DataStreamPtr(new Mangle2OgreStream(strm));
+    return narc->getFile(filename.c_str());
   }
 
-bool exists(const String& filename) {
-    return cexists(filename);
-}
+  bool exists(const String& filename) {
+    return arc.exists(filename.c_str());
+  }
 
-  // Check if the file exists.
   bool cexists(const String& filename) const {
-    String passed = filename;
-	  if(filename.at(filename.length() - 2) == '>' || filename.at(filename.length() - 2) == ':')
-		passed = filename.substr(0, filename.length() - 6);
-    else if(filename.at(filename.length() - 2) == '"')
-		passed = filename.substr(0, filename.length() - 9);
-	else if(filename.at(filename.length() - 1) == '*' || filename.at(filename.length() - 1) == '?' ||  filename.at(filename.length() - 1) == '<'
-		|| filename.at(filename.length() - 1) == '"' || filename.at(filename.length() - 1) == '>' ||  filename.at(filename.length() - 1) == ':'
-		|| filename.at(filename.length() - 1) == '|')
-	   passed = filename.substr(0, filename.length() - 2);
-	
-	
+    return arc.exists(filename.c_str());
+  }
 
-return arc.exists(passed.c_str());
-}
   time_t getModifiedTime(const String&) { return 0; }
 
   // This is never called as far as I can see.

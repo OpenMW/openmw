@@ -4,9 +4,6 @@
 #include <components/esm/records.hpp>
 
 #include <list>
-#include <string>
-#include <vector>
-#include <stdexcept>
 #include <algorithm>
 
 #include "refdata.hpp"
@@ -18,6 +15,8 @@ namespace ESMS
 
 namespace MWWorld
 {
+    class Ptr;
+
   /// A reference to one object (of any type) in a cell.
   ///
   /// Constructing this with a CellRef instance in the constructor means that
@@ -76,6 +75,11 @@ namespace MWWorld
 
         return 0;
     }
+
+    LiveRef &insert(const LiveRef &item) {
+        list.push_back(item);
+        return list.back();
+    }
   };
 
   /// A storage struct for one single cell reference.
@@ -109,9 +113,9 @@ namespace MWWorld
     CellRefList<ESM::Ingredient>        ingreds;
     CellRefList<ESM::CreatureLevList>   creatureLists;
     CellRefList<ESM::ItemLevList>       itemLists;
-    CellRefList<ESM::Light>        lights;
+    CellRefList<ESM::Light>             lights;
     CellRefList<ESM::Tool>              lockpicks;
-    CellRefList<ESM::Miscellaneous>              miscItems;
+    CellRefList<ESM::Miscellaneous>     miscItems;
     CellRefList<ESM::NPC>               npcs;
     CellRefList<ESM::Probe>             probes;
     CellRefList<ESM::Repair>            repairs;

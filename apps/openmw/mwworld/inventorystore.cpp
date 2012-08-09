@@ -148,7 +148,7 @@ void MWWorld::InventoryStore::autoEquip (const MWMechanics::NpcStats& stats)
             bool use = false;
 
             if (slots.at (*iter2)==end())
-                use = true; // slot was empty before -> skill all further checks
+                use = true; // slot was empty before -> skip all further checks
             else
             {
                 Ptr old = *slots.at (*iter2);
@@ -159,12 +159,14 @@ void MWWorld::InventoryStore::autoEquip (const MWMechanics::NpcStats& stats)
                     int oldSkill =
                         MWWorld::Class::get (old).getEquipmentSkill (old);
 
-                    if (testSkill!=-1 || oldSkill!=-1 || testSkill!=oldSkill)
+                    if (testSkill!=-1 && oldSkill==-1)
+                        use = true;
+                    else if (testSkill!=-1 && oldSkill!=-1 && testSkill!=oldSkill)
                     {
-                        if (stats.mSkill[oldSkill].getModified()>stats.mSkill[testSkill].getModified())
+                        if (stats.getSkill (oldSkill).getModified()>stats.getSkill (testSkill).getModified())
                             continue; // rejected, because old item better matched the NPC's skills.
 
-                        if (stats.mSkill[oldSkill].getModified()<stats.mSkill[testSkill].getModified())
+                        if (stats.getSkill (oldSkill).getModified()<stats.getSkill (testSkill).getModified())
                             use = true;
                     }
                 }

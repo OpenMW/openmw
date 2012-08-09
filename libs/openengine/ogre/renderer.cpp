@@ -9,7 +9,12 @@
 #include "OgreTexture.h"
 #include "OgreHardwarePixelBuffer.h"
 
-#include <assert.h>
+#include <boost/filesystem.hpp>
+
+#include <components/files/ogreplugin.hpp>
+
+#include <cassert>
+#include <cstdlib>
 #include <stdexcept>
 
 using namespace Ogre;
@@ -70,7 +75,6 @@ float OgreRenderer::getFPS()
 }
 
 void OgreRenderer::configure(const std::string &logPath,
-                            const std::string &pluginCfg,
                             const std::string& renderSystem,
                             bool _logging)
 {
@@ -86,12 +90,36 @@ void OgreRenderer::configure(const std::string &logPath,
         // Disable logging
         log->setDebugOutputEnabled(false);
 
-    #if defined(ENABLE_PLUGIN_GL) || defined(ENABLE_PLUGIN_Direct3D9) || defined(ENABLE_PLUGIN_CgProgramManager) || defined(ENABLE_PLUGIN_OctreeSceneManager) || defined(ENABLE_PLUGIN_ParticleFX)
     mRoot = new Root("", "", "");
+
+    #if defined(ENABLE_PLUGIN_GL) || defined(ENABLE_PLUGIN_Direct3D9) || defined(ENABLE_PLUGIN_CgProgramManager) || defined(ENABLE_PLUGIN_OctreeSceneManager) || defined(ENABLE_PLUGIN_ParticleFX)
     loadPlugins();
-    #else
-    mRoot = new Root(pluginCfg, "", "");
     #endif
+
+    std::string pluginDir;
+    const char* pluginEnv = getenv("OPENMW_OGRE_PLUGIN_DIR");
+    if (pluginEnv)
+        pluginDir = pluginEnv;
+    else
+    {
+#if OGRE_PLATFORM == OGRE_PLATFORM_WIN32
+        pluginDir = ".\\";
+#endif
+#if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
+        pluginDir = OGRE_PLUGIN_DIR;
+#endif
+#if OGRE_PLATFORM == OGRE_PLATFORM_LINUX
+        pluginDir = OGRE_PLUGIN_DIR_REL;
+#endif
+    }
+
+    boost::filesystem::path absPluginPath = boost::filesystem::absolute(boost::filesystem::path(pluginDir));
+
+    pluginDir = absPluginPath.string();
+
+    Files::loadOgrePlugin(pluginDir, "RenderSystem_GL", *mRoot);
+    Files::loadOgrePlugin(pluginDir, "RenderSystem_Direct3D9", *mRoot);
+    Files::loadOgrePlugin(pluginDir, "Plugin_CgProgramManager", *mRoot);
 
     RenderSystem* rs = mRoot->getRenderSystemByName(renderSystem);
     if (rs == 0)
@@ -113,7 +141,7 @@ void OgreRenderer::createWindow(const std::string &title, const WindowSettings& 
 
     // create the semi-transparent black background texture used by the GUI.
     // has to be created in code with TU_DYNAMIC_WRITE_ONLY_DISCARDABLE param
-    // so that it can be modified at runtime. 
+    // so that it can be modified at runtime.
     Ogre::TextureManager::getSingleton().createManual(
                     "transparent.png",
                     Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,

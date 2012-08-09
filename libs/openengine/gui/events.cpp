@@ -1,6 +1,6 @@
 #include <MyGUI.h>
 #include <OIS/OIS.h>
-#include <assert.h>
+#include <cassert>
 
 #include "events.hpp"
 

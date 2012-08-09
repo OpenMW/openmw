@@ -26,8 +26,8 @@ namespace MWDialogue
             void updateTopics();
 
             std::map<std::string,ESM::Dialogue> mDialogueMap;
-            std::map<std::string,bool> knownTopics;// Those are the topics the player knows.
-            std::list<std::string> actorKnownTopics;
+            std::map<std::string,bool> mKnownTopics;// Those are the topics the player knows.
+            std::list<std::string> mActorKnownTopics;
 
             MWScript::CompilerContext mCompilerContext;
             std::ostream mErrorStream;

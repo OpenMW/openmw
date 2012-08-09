@@ -1,8 +1,5 @@
 #include "worldimp.hpp"
 
-#include <cmath>
-#include <iostream>
-
 #include <components/bsa/bsa_archive.hpp>
 #include <components/files/collections.hpp>
 
@@ -17,16 +14,10 @@
 
 #include "../mwgui/window_manager.hpp"
 
-#include "ptr.hpp"
-#include "class.hpp"
 #include "player.hpp"
-#include "weather.hpp"
 #include "manualref.hpp"
-#include "refdata.hpp"
-#include "globals.hpp"
 #include "cellfunctors.hpp"
 
-#include <OgreVector3.h>
 using namespace Ogre;
 
 namespace
@@ -597,6 +588,31 @@ namespace MWWorld
         mPhysics->moveObject (ptr.getRefData().getHandle(), Ogre::Vector3 (x, y, z));
     }
 
+    void World::scaleObject (const Ptr& ptr, float scale)
+    {
+        MWWorld::Class::get(ptr).adjustScale(ptr,scale);
+
+        ptr.getCellRef().scale = scale;
+        //scale = scale/ptr.getRefData().getBaseNode()->getScale().x;
+        ptr.getRefData().getBaseNode()->setScale(scale,scale,scale);
+        mPhysics->scaleObject( ptr.getRefData().getHandle(), scale );
+    }
+
+    void World::rotateObject (const Ptr& ptr,float x,float y,float z)
+    {
+        MWWorld::Class::get(ptr).adjustRotation(ptr,x,y,z);
+
+        ptr.getRefData().getPosition().rot[0] = Ogre::Degree(x).valueRadians();
+        ptr.getRefData().getPosition().rot[1] = Ogre::Degree(y).valueRadians();
+        ptr.getRefData().getPosition().rot[2] = Ogre::Degree(z).valueRadians();
+
+        Ogre::Quaternion rotx(Ogre::Degree(-x),Ogre::Vector3::UNIT_X);
+        Ogre::Quaternion roty(Ogre::Degree(-y),Ogre::Vector3::UNIT_Y);
+        Ogre::Quaternion rotz(Ogre::Degree(-z),Ogre::Vector3::UNIT_Z);
+        ptr.getRefData().getBaseNode()->setOrientation(rotx*roty*rotz);
+        mPhysics->rotateObject(ptr.getRefData().getHandle(),ptr.getRefData().getBaseNode()->getOrientation());
+    }
+
     void World::indexToPosition (int cellX, int cellY, float &x, float &y, bool centre) const
     {
         const int cellSize = 8192;
@@ -1000,14 +1016,13 @@ namespace MWWorld
         else
             cell = getPlayer().getPlayer().getCell();
 
-        ESM::Position& pos = object.getRefData().getPosition();
+        ESM::Position pos = getPlayer().getPlayer().getRefData().getPosition();
         pos.pos[0] = result.second[0];
         pos.pos[1] = -result.second[2];
         pos.pos[2] = result.second[1];
 
-        mWorldScene->insertObject(object, cell);
-
-        /// \todo retrieve the bounds of the object and translate it accordingly
+        placeObject(object, *cell, pos);
+        object.getRefData().setCount(0);
 
         return true;
     }
@@ -1023,18 +1038,52 @@ namespace MWWorld
         return true;
     }
 
+    void
+    World::placeObject(const Ptr &object, CellStore &cell, const ESM::Position &pos)
+    {
+        /// \todo add searching correct cell for position specified
+        MWWorld::Ptr dropped =
+            MWWorld::Class::get(object).copyToCell(object, cell, pos);
+
+        Ogre::Vector3 min, max;
+        if (mPhysics->getObjectAABB(object, min, max)) {
+            float *pos = dropped.getRefData().getPosition().pos;
+            pos[0] -= (min.x + max.x) / 2;
+            pos[1] -= (min.y + max.y) / 2;
+            pos[2] -= min.z;
+        }
+
+        if (mWorldScene->isCellActive(cell)) {
+            if (dropped.getRefData().isEnabled()) {
+                mWorldScene->addObjectToScene(dropped);
+            }
+            std::string script = MWWorld::Class::get(dropped).getScript(dropped);
+            if (!script.empty()) {
+                mLocalScripts.add(script, dropped);
+            }
+        }
+    }
+
     void World::dropObjectOnGround (const Ptr& object)
     {
         MWWorld::Ptr::CellStore* cell = getPlayer().getPlayer().getCell();
 
-        float* playerPos = getPlayer().getPlayer().getRefData().getPosition().pos;
+        ESM::Position pos =
+            getPlayer().getPlayer().getRefData().getPosition();
 
-        ESM::Position& pos = object.getRefData().getPosition();
-        pos.pos[0] = playerPos[0];
-        pos.pos[1] = playerPos[1];
-        pos.pos[2] = playerPos[2];
+        Ogre::Vector3 orig =
+            Ogre::Vector3(pos.pos[0], pos.pos[1], pos.pos[2]);
+        Ogre::Vector3 dir = Ogre::Vector3(0, 0, -1);
 
-        mWorldScene->insertObject(object, cell);
+        float len = (pos.pos[2] >= 0) ? pos.pos[2] : -pos.pos[2];
+        len += 100.0;
+
+        std::pair<bool, Ogre::Vector3> hit =
+            mPhysics->castRay(orig, dir, len);
+        pos.pos[2] = hit.second.z;
+
+        placeObject(object, *cell, pos);
+        object.getRefData().setCount(0);
     }
 
     void World::processChangedSettings(const Settings::CategorySettingVector& settings)
@@ -1045,5 +1094,27 @@ namespace MWWorld
     void World::getTriangleBatchCount(unsigned int &triangles, unsigned int &batches)
     {
         mRendering->getTriangleBatchCount(triangles, batches);
+    }
+
+    bool
+    World::isSwimming(const MWWorld::Ptr &object)
+    {
+        /// \todo add check ifActor() - only actors can swim
+        float *fpos = object.getRefData().getPosition().pos;
+        Ogre::Vector3 pos(fpos[0], fpos[1], fpos[2]);
+
+        /// \fixme should rely on object height
+        pos.z += 30;
+
+        return isUnderwater(*object.getCell()->cell, pos);
+    }
+
+    bool
+    World::isUnderwater(const ESM::Cell &cell, const Ogre::Vector3 &pos)
+    {
+        if (!(cell.data.flags & ESM::Cell::HasWater)) {
+            return false;
+        }
+        return pos.z < cell.water;
     }
 }

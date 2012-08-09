@@ -11,7 +11,7 @@ namespace MWWorld
     {
     }
 
-    void ActionRead::execute ()
+    void ActionRead::executeImp (const MWWorld::Ptr& actor)
     {
         LiveCellRef<ESM::Book> *ref = mObject.get<ESM::Book>();
 

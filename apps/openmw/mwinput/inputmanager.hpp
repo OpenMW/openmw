@@ -57,6 +57,8 @@ namespace MWInput
     void processChangedSettings(const Settings::CategorySettingVector& changed);
 
     void setDragDrop(bool dragDrop);
+
+    void toggleControlSwitch(std::string sw, bool value);
   };
 }
 #endif

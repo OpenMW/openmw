@@ -1,13 +1,17 @@
 #ifndef _GAME_RENDER_SKY_H
 #define _GAME_RENDER_SKY_H
 
+#include <vector>
+
 #include <OgreVector3.h>
 #include <OgreString.h>
 #include <OgreMaterial.h>
 #include <OgreColourValue.h>
 #include <OgreHighLevelGpuProgram.h>
 
-#include "sky.hpp"
+#include <extern/shiny/Main/Factory.hpp>
+
+
 #include "../mwworld/weather.hpp"
 
 namespace Ogre
@@ -25,15 +29,19 @@ namespace Ogre
 
 namespace MWRender
 {
-    class BillboardObject
+    class BillboardObject : public sh::MaterialInstanceListener
     {
     public:
         BillboardObject(  const Ogre::String& textureName,
                         const float size,
                         const Ogre::Vector3& position,
-                        Ogre::SceneNode* rootNode
+                        Ogre::SceneNode* rootNode,
+                          const std::string& material
                     );
         BillboardObject();
+
+        void requestedConfiguration (sh::MaterialInstance* m, const std::string& configuration);
+        void createdConfiguration (sh::MaterialInstance* m, const std::string& configuration);
 
         virtual ~BillboardObject() {}
 
@@ -50,13 +58,10 @@ namespace MWRender
         Ogre::SceneNode* getNode();
 
     protected:
-        virtual void init(const Ogre::String& textureName,
-                        const float size,
-                        const Ogre::Vector3& position,
-                        Ogre::SceneNode* rootNode);
-
+        float mVisibility;
+        Ogre::ColourValue mColour;
         Ogre::SceneNode* mNode;
-        Ogre::MaterialPtr mMaterial;
+        sh::MaterialInstance* mMaterial;
         Ogre::BillboardSet* mBBSet;
     };
 
@@ -70,7 +75,8 @@ namespace MWRender
         Moon(  const Ogre::String& textureName,
                         const float size,
                         const Ogre::Vector3& position,
-                        Ogre::SceneNode* rootNode
+                        Ogre::SceneNode* rootNode,
+               const std::string& material
                     );
 
         virtual ~Moon() {}
@@ -95,7 +101,6 @@ namespace MWRender
 
         void setPhase(const Phase& phase);
         void setType(const Type& type);
-        void setSkyColour(const Ogre::ColourValue& colour);
 
         Phase getPhase() const;
         unsigned int getPhaseInt() const;
@@ -137,9 +142,6 @@ namespace MWRender
         void setMoonColour (bool red);
         ///< change Secunda colour to red
 
-        void setCloudsOpacity(float opacity);
-        ///< change opacity of the clouds
-
         void setWeather(const MWWorld::WeatherResult& weather);
 
         Ogre::SceneNode* getSunNode();
@@ -164,9 +166,11 @@ namespace MWRender
         void secundaEnable();
         void secundaDisable();
 
-        void setThunder(const float factor);
+        void setLightningStrength(const float factor);
+        void setLightningDirection(const Ogre::Vector3& dir);
 
         void setGlare(const float glare);
+        void setGlareEnabled(bool enabled);
         Ogre::Vector3 getRealSunPos();
 
         void setSkyPosition(const Ogre::Vector3& position);
@@ -176,9 +180,13 @@ namespace MWRender
     private:
         bool mCreated;
 
+        bool mMoonRed;
+
         float mHour;
         int mDay;
         int mMonth;
+
+        float mCloudAnimationTimer;
 
         BillboardObject* mSun;
         BillboardObject* mSunGlare;
@@ -192,11 +200,6 @@ namespace MWRender
         Ogre::SceneNode* mAtmosphereDay;
         Ogre::SceneNode* mAtmosphereNight;
 
-        Ogre::MaterialPtr mCloudMaterial;
-        Ogre::MaterialPtr mAtmosphereMaterial;
-
-        Ogre::MaterialPtr mStarsMaterials[7];
-
         Ogre::HighLevelGpuProgramPtr mCloudFragmentShader;
 
         // remember some settings so we don't have to apply them again if they didnt change
@@ -209,8 +212,7 @@ namespace MWRender
         Ogre::ColourValue mCloudColour;
         Ogre::ColourValue mSkyColour;
 
-        Ogre::Overlay* mThunderOverlay;
-        Ogre::TextureUnitState* mThunderTextureUnit;
+        Ogre::Light* mLightning;
 
         float mRemainingTransitionTime;
 

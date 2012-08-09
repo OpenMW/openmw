@@ -1,71 +1,57 @@
 #ifndef _GAME_RENDER_ANIMATION_H
 #define _GAME_RENDER_ANIMATION_H
-#include <components/nif/data.hpp>
+
+#include <vector>
+
+#include <components/nifogre/ogre_nif_loader.hpp>
 #include <openengine/ogre/renderer.hpp>
-#include "../mwworld/refdata.hpp"
-#include "../mwworld/ptr.hpp"
 #include "../mwworld/actiontalk.hpp"
 #include <components/nif/node.hpp>
-#include <map>
 #include <openengine/bullet/physic.hpp>
 
 
 
 
-namespace MWRender{
+namespace MWRender {
 
-struct PosAndRot{
-    Ogre::Quaternion vecRot;
-    Ogre::Vector3 vecPos;
-};
+class Animation {
+    struct GroupTimes {
+        float mStart;
+        float mStop;
+        float mLoopStart;
+        float mLoopStop;
 
-class Animation{
+        size_t mLoops;
 
-   protected:
-    Ogre::SceneNode* insert;
+        GroupTimes()
+          : mStart(-1.0f), mStop(-1.0f), mLoopStart(-1.0f), mLoopStop(-1.0f),
+            mLoops(0)
+        { }
+    };
+
+protected:
+    Ogre::SceneNode* mInsert;
     OEngine::Render::OgreRenderer &mRend;
-    std::map<Nif::NiSkinData::BoneInfoCopy*, PosAndRot> vecRotPos;
-    static std::map<std::string, int> mUniqueIDs;
 
+    float mTime;
+    GroupTimes mCurGroup;
+    GroupTimes mNextGroup;
 
+    bool mSkipFrame;
 
+    NifOgre::EntityList mEntityList;
+    NifOgre::TextKeyMap mTextKeys;
 
+    bool findGroupTimes(const std::string &groupname, GroupTimes *times);
 
-    float time;
-	float startTime;
-	float stopTime;
-	int animate;
-	//Represents a rotation index for each bone
-	std::vector<int>rindexI;
-    //Represents a translation index for each bone
-	std::vector<int>tindexI;
+public:
+    Animation(OEngine::Render::OgreRenderer& _rend);
+    virtual ~Animation();
 
-	//Only shapes with morphing data will use a shape number
-	int shapeNumber;
-	std::vector<std::vector<int> > shapeIndexI;
-
-	//Ogre::SkeletonInstance* skel;
-     std::vector<Nif::NiTriShapeCopy>* shapes;          //All the NiTriShapeData for a creature
-
-
-
-    std::vector<Nif::NiKeyframeData>* transformations;
-    std::map<std::string,float>* textmappings;
-    Ogre::Entity* base;
-    void handleShapes(std::vector<Nif::NiTriShapeCopy>* allshapes, Ogre::Entity* creaturemodel, Ogre::SkeletonInstance *skel);
-    void handleAnimationTransforms();
-    bool timeIndex( float time, const std::vector<float> & times, int & i, int & j, float & x );
-    std::string getUniqueID(std::string mesh);
-
-    public:
-        Animation(OEngine::Render::OgreRenderer& _rend);
-        virtual void runAnimation(float timepassed) = 0;
-        void startScript(std::string groupname, int mode, int loops);
-        void stopScript();
-
-
-        virtual ~Animation();
-
+    void playGroup(std::string groupname, int mode, int loops);
+    void skipAnim();
+    virtual void runAnimation(float timepassed);
 };
+
 }
 #endif

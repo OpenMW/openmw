@@ -59,7 +59,7 @@ namespace MWGui
         protected:
             MessageBoxManager& mMessageBoxManager;
             int mHeight;
-            const std::string& cMessage;
+            const std::string& mMessage;
             MyGUI::EditPtr mMessageWidget;
             int mFixedWidth;
             int mBottomPadding;

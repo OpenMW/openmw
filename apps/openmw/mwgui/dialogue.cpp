@@ -1,6 +1,5 @@
 #include "dialogue.hpp"
 
-#include <assert.h>
 #include <iostream>
 #include <iterator>
 
@@ -51,9 +50,9 @@ DialogueWindow::DialogueWindow(WindowManager& parWindowManager)
     center();
 
     //History view
-    getWidget(history, "History");
-    history->setOverflowToTheLeft(true);
-    history->setMaxTextLength(1000000);
+    getWidget(mHistory, "History");
+    mHistory->setOverflowToTheLeft(true);
+    mHistory->setMaxTextLength(1000000);
     Widget* eventbox;
 
     //An EditBox cannot receive mouse click events, so we use an
@@ -63,36 +62,36 @@ DialogueWindow::DialogueWindow(WindowManager& parWindowManager)
     eventbox->eventMouseWheel += MyGUI::newDelegate(this, &DialogueWindow::onMouseWheel);
 
     //Topics list
-    getWidget(topicsList, "TopicsList");
-    topicsList->eventItemSelected += MyGUI::newDelegate(this, &DialogueWindow::onSelectTopic);
+    getWidget(mTopicsList, "TopicsList");
+    mTopicsList->eventItemSelected += MyGUI::newDelegate(this, &DialogueWindow::onSelectTopic);
 
     MyGUI::ButtonPtr byeButton;
     getWidget(byeButton, "ByeButton");
     byeButton->eventMouseButtonClick += MyGUI::newDelegate(this, &DialogueWindow::onByeClicked);
 
-    getWidget(pDispositionBar, "Disposition");
-    getWidget(pDispositionText,"DispositionText");
+    getWidget(mDispositionBar, "Disposition");
+    getWidget(mDispositionText,"DispositionText");
 
     static_cast<MyGUI::Window*>(mMainWidget)->eventWindowChangeCoord += MyGUI::newDelegate(this, &DialogueWindow::onWindowResize);
 }
 
 void DialogueWindow::onHistoryClicked(MyGUI::Widget* _sender)
 {
-    ISubWidgetText* t = history->getClient()->getSubWidgetText();
+    ISubWidgetText* t = mHistory->getClient()->getSubWidgetText();
     if(t == nullptr)
         return;
 
     const IntPoint& lastPressed = InputManager::getInstance().getLastPressedPosition(MyGUI::MouseButton::Left);
 
     size_t cursorPosition = t->getCursorPosition(lastPressed);
-    MyGUI::UString color = history->getColorAtPos(cursorPosition);
+    MyGUI::UString color = mHistory->getColorAtPos(cursorPosition);
 
     if (!mEnabled && color == "#572D21")
         MWBase::Environment::get().getDialogueManager()->goodbyeSelected();
 
     if(color != "#B29154")
     {
-        UString key = history->getColorTextAt(cursorPosition);
+        UString key = mHistory->getColorTextAt(cursorPosition);
         if(color == "#686EBA") MWBase::Environment::get().getDialogueManager()->keywordSelected(lower_string(key));
 
         if(color == "#572D21") MWBase::Environment::get().getDialogueManager()->questionAnswered(lower_string(key));
@@ -101,15 +100,15 @@ void DialogueWindow::onHistoryClicked(MyGUI::Widget* _sender)
 
 void DialogueWindow::onWindowResize(MyGUI::Window* _sender)
 {
-    topicsList->adjustSize();
+    mTopicsList->adjustSize();
 }
 
 void DialogueWindow::onMouseWheel(MyGUI::Widget* _sender, int _rel)
 {
-    if (history->getVScrollPosition() - _rel*0.3 < 0)
-        history->setVScrollPosition(0);
+    if (mHistory->getVScrollPosition() - _rel*0.3 < 0)
+        mHistory->setVScrollPosition(0);
     else
-        history->setVScrollPosition(history->getVScrollPosition() - _rel*0.3);
+        mHistory->setVScrollPosition(mHistory->getVScrollPosition() - _rel*0.3);
 }
 
 void DialogueWindow::onByeClicked(MyGUI::Widget* _sender)
@@ -136,40 +135,40 @@ void DialogueWindow::startDialogue(MWWorld::Ptr actor, std::string npcName)
 {
     mEnabled = true;
     mPtr = actor;
-    topicsList->setEnabled(true);
+    mTopicsList->setEnabled(true);
     setTitle(npcName);
 
-    topicsList->clear();
-    history->eraseText(0,history->getTextLength());
+    mTopicsList->clear();
+    mHistory->eraseText(0,mHistory->getTextLength());
     updateOptions();
 }
 
 void DialogueWindow::setKeywords(std::list<std::string> keyWords)
 {
-    topicsList->clear();
+    mTopicsList->clear();
 
     bool anyService = mShowTrade;
 
     if (mShowTrade)
-        topicsList->addItem(MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sBarter")->str);
+        mTopicsList->addItem(MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sBarter")->str);
 
     if (anyService)
-        topicsList->addSeparator();
+        mTopicsList->addSeparator();
 
     for(std::list<std::string>::iterator it = keyWords.begin(); it != keyWords.end(); ++it)
     {
-        topicsList->addItem(*it);
+        mTopicsList->addItem(*it);
     }
-    topicsList->adjustSize();
+    mTopicsList->adjustSize();
 }
 
 void DialogueWindow::removeKeyword(std::string keyWord)
 {
-    if(topicsList->hasItem(keyWord))
+    if(mTopicsList->hasItem(keyWord))
     {
-        topicsList->removeItem(keyWord);
+        mTopicsList->removeItem(keyWord);
     }
-    topicsList->adjustSize();
+    mTopicsList->adjustSize();
 }
 
 void addColorInString(std::string& str, const std::string& keyword,std::string color1, std::string color2)
@@ -206,9 +205,9 @@ void addColorInString(std::string& str, const std::string& keyword,std::string c
 std::string DialogueWindow::parseText(std::string text)
 {
     bool separatorReached = false; // only parse topics that are below the separator (this prevents actions like "Barter" that are not topics from getting blue-colored)
-    for(unsigned int i = 0;i<topicsList->getItemCount();i++)
+    for(unsigned int i = 0;i<mTopicsList->getItemCount();i++)
     {
-        std::string keyWord = topicsList->getItemNameAt(i);
+        std::string keyWord = mTopicsList->getItemNameAt(i);
         if (separatorReached && keyWord != "")
             addColorInString(text,keyWord,"#686EBA","#B29154");
         else
@@ -219,7 +218,7 @@ std::string DialogueWindow::parseText(std::string text)
 
 void DialogueWindow::addText(std::string text)
 {
-    history->addDialogText("#B29154"+parseText(text)+"#B29154");
+    mHistory->addDialogText("#B29154"+parseText(text)+"#B29154");
 }
 
 void DialogueWindow::addTitle(std::string text)
@@ -227,37 +226,37 @@ void DialogueWindow::addTitle(std::string text)
     // This is called from the dialogue manager, so text is
     // case-smashed - thus we have to retrieve the correct case
     // of the text through the topic list.
-    for (size_t i=0; i<topicsList->getItemCount(); ++i)
+    for (size_t i=0; i<mTopicsList->getItemCount(); ++i)
     {
-        std::string item = topicsList->getItemNameAt(i);
+        std::string item = mTopicsList->getItemNameAt(i);
         if (lower_string(item) == text)
             text = item;
     }
 
-    history->addDialogHeading(text);
+    mHistory->addDialogHeading(text);
 }
 
 void DialogueWindow::askQuestion(std::string question)
 {
-    history->addDialogText("#572D21"+question+"#B29154"+" ");
+    mHistory->addDialogText("#572D21"+question+"#B29154"+" ");
 }
 
 void DialogueWindow::updateOptions()
 {
     //Clear the list of topics
-    topicsList->clear();
-    history->eraseText(0,history->getTextLength());
+    mTopicsList->clear();
+    mHistory->eraseText(0, mHistory->getTextLength());
 
-    pDispositionBar->setProgressRange(100);
-    pDispositionBar->setProgressPosition(40);
-    pDispositionText->eraseText(0,pDispositionText->getTextLength());
-    pDispositionText->addText("#B29154"+std::string("40/100")+"#B29154");
+    mDispositionBar->setProgressRange(100);
+    mDispositionBar->setProgressPosition(40);
+    mDispositionText->eraseText(0, mDispositionText->getTextLength());
+    mDispositionText->addText("#B29154"+std::string("40/100")+"#B29154");
 }
 
 void DialogueWindow::goodbye()
 {
-    history->addDialogText("\n#572D21" + MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sGoodbye")->str);
-    topicsList->setEnabled(false);
+    mHistory->addDialogText("\n#572D21" + MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sGoodbye")->str);
+    mTopicsList->setEnabled(false);
     mEnabled = false;
 }
 

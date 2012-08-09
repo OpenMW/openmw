@@ -23,21 +23,21 @@ namespace MWMechanics
         const ESM::NPC *player = ptr.get<ESM::NPC>()->base;
 
         // reset
-        creatureStats.mLevel = player->npdt52.level;
-        creatureStats.mSpells.clear();
-        creatureStats.mMagicEffects = MagicEffects();
+        creatureStats.setLevel(player->npdt52.level);
+        creatureStats.getSpells().clear();
+        creatureStats.setMagicEffects(MagicEffects());
 
         for (int i=0; i<27; ++i)
-            npcStats.mSkill[i].setBase (player->npdt52.skills[i]);
+            npcStats.getSkill (i).setBase (player->npdt52.skills[i]);
 
-        creatureStats.mAttributes[0].setBase (player->npdt52.strength);
-        creatureStats.mAttributes[1].setBase (player->npdt52.intelligence);
-        creatureStats.mAttributes[2].setBase (player->npdt52.willpower);
-        creatureStats.mAttributes[3].setBase (player->npdt52.agility);
-        creatureStats.mAttributes[4].setBase (player->npdt52.speed);
-        creatureStats.mAttributes[5].setBase (player->npdt52.endurance);
-        creatureStats.mAttributes[6].setBase (player->npdt52.personality);
-        creatureStats.mAttributes[7].setBase (player->npdt52.luck);
+        creatureStats.getAttribute(0).setBase (player->npdt52.strength);
+        creatureStats.getAttribute(1).setBase (player->npdt52.intelligence);
+        creatureStats.getAttribute(2).setBase (player->npdt52.willpower);
+        creatureStats.getAttribute(3).setBase (player->npdt52.agility);
+        creatureStats.getAttribute(4).setBase (player->npdt52.speed);
+        creatureStats.getAttribute(5).setBase (player->npdt52.endurance);
+        creatureStats.getAttribute(6).setBase (player->npdt52.personality);
+        creatureStats.getAttribute(7).setBase (player->npdt52.luck);
 
         // race
         if (mRaceSelected)
@@ -63,7 +63,7 @@ namespace MWMechanics
                     case 7: attribute = &race->data.luck; break;
                 }
 
-                creatureStats.mAttributes[i].setBase (
+                creatureStats.getAttribute(i).setBase (
                     static_cast<int> (male ? attribute->male : attribute->female));
             }
 
@@ -73,15 +73,15 @@ namespace MWMechanics
 
                 if (index>=0 && index<27)
                 {
-                    npcStats.mSkill[index].setBase (
-                        npcStats.mSkill[index].getBase() + race->data.bonus[i].bonus);
+                    npcStats.getSkill (index).setBase (
+                        npcStats.getSkill (index).getBase() + race->data.bonus[i].bonus);
                 }
             }
 
             for (std::vector<std::string>::const_iterator iter (race->powers.list.begin());
                 iter!=race->powers.list.end(); ++iter)
             {
-                creatureStats.mSpells.add (*iter);
+                creatureStats.getSpells().add (*iter);
             }
         }
 
@@ -95,7 +95,7 @@ namespace MWMechanics
             for (std::vector<std::string>::const_iterator iter (sign->powers.list.begin());
                 iter!=sign->powers.list.end(); ++iter)
             {
-                creatureStats.mSpells.add (*iter);
+                creatureStats.getSpells().add (*iter);
             }
         }
 
@@ -109,8 +109,8 @@ namespace MWMechanics
                 int attribute = class_.data.attribute[i];
                 if (attribute>=0 && attribute<8)
                 {
-                    creatureStats.mAttributes[attribute].setBase (
-                        creatureStats.mAttributes[attribute].getBase() + 10);
+                    creatureStats.getAttribute(attribute).setBase (
+                        creatureStats.getAttribute(attribute).getBase() + 10);
                 }
             }
 
@@ -124,8 +124,8 @@ namespace MWMechanics
 
                     if (index>=0 && index<27)
                     {
-                        npcStats.mSkill[index].setBase (
-                            npcStats.mSkill[index].getBase() + bonus);
+                        npcStats.getSkill (index).setBase (
+                            npcStats.getSkill (index).getBase() + bonus);
                     }
                 }
             }
@@ -141,8 +141,8 @@ namespace MWMechanics
 
                     if (index>=0 && index<27)
                     {
-                        npcStats.mSkill[index].setBase (
-                            npcStats.mSkill[index].getBase() + 5);
+                        npcStats.getSkill (index).setBase (
+                            npcStats.getSkill (index).getBase() + 5);
                     }
                 }
             }
@@ -151,8 +151,9 @@ namespace MWMechanics
         // forced update and current value adjustments
         mActors.updateActor (ptr, 0);
 
-        for (int i=0; i<3; ++i)
-            creatureStats.mDynamic[i].setCurrent (creatureStats.mDynamic[i].getModified());
+        creatureStats.getHealth().setCurrent(creatureStats.getHealth().getModified());
+        creatureStats.getMagicka().setCurrent(creatureStats.getMagicka().getModified());
+        creatureStats.getFatigue().setCurrent(creatureStats.getFatigue().getModified());
     }
 
 
@@ -213,22 +214,25 @@ namespace MWMechanics
 
             for (int i=0; i<8; ++i)
             {
-                if (stats.mAttributes[i]!=mWatchedCreature.mAttributes[i])
+                if (stats.getAttribute(i)!=mWatchedCreature.getAttribute(i))
                 {
-                    mWatchedCreature.mAttributes[i] = stats.mAttributes[i];
+                    mWatchedCreature.setAttribute(i, stats.getAttribute(i));
 
-                    MWBase::Environment::get().getWindowManager()->setValue (attributeNames[i], stats.mAttributes[i]);
+                    MWBase::Environment::get().getWindowManager()->setValue (attributeNames[i], stats.getAttribute(i));
                 }
             }
 
-            for (int i=0; i<3; ++i)
-            {
-                if (stats.mDynamic[i]!=mWatchedCreature.mDynamic[i])
-                {
-                    mWatchedCreature.mDynamic[i] = stats.mDynamic[i];
-
-                    MWBase::Environment::get().getWindowManager()->setValue (dynamicNames[i], stats.mDynamic[i]);
-                }
+            if (stats.getHealth() != mWatchedCreature.getHealth()) {
+                mWatchedCreature.setHealth(stats.getHealth());
+                MWBase::Environment::get().getWindowManager()->setValue(dynamicNames[0], stats.getHealth());
+            }
+            if (stats.getMagicka() != mWatchedCreature.getMagicka()) {
+                mWatchedCreature.setMagicka(stats.getMagicka());
+                MWBase::Environment::get().getWindowManager()->setValue(dynamicNames[1], stats.getMagicka());
+            }
+            if (stats.getFatigue() != mWatchedCreature.getFatigue()) {
+                mWatchedCreature.setFatigue(stats.getFatigue());
+                MWBase::Environment::get().getWindowManager()->setValue(dynamicNames[2], stats.getFatigue());
             }
 
             bool update = false;
@@ -236,18 +240,18 @@ namespace MWMechanics
             //Loop over ESM::Skill::SkillEnum
             for(int i = 0; i < 27; ++i)
             {
-                if(npcStats.mSkill[i] != mWatchedNpc.mSkill[i])
+                if(npcStats.getSkill (i) != mWatchedNpc.getSkill (i))
                 {
                     update = true;
-                    mWatchedNpc.mSkill[i] = npcStats.mSkill[i];
-                    MWBase::Environment::get().getWindowManager()->setValue((ESM::Skill::SkillEnum)i, npcStats.mSkill[i]);
+                    mWatchedNpc.getSkill (i) = npcStats.getSkill (i);
+                    MWBase::Environment::get().getWindowManager()->setValue((ESM::Skill::SkillEnum)i, npcStats.getSkill (i));
                 }
             }
 
             if (update)
                 MWBase::Environment::get().getWindowManager()->updateSkillArea();
 
-            MWBase::Environment::get().getWindowManager()->setValue ("level", stats.mLevel);
+            MWBase::Environment::get().getWindowManager()->setValue ("level", stats.getLevel());
         }
 
         if (mUpdatePlayer)

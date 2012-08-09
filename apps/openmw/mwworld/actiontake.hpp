@@ -10,11 +10,11 @@ namespace MWWorld
     {
             MWWorld::Ptr mObject;
 
+            virtual void executeImp (const Ptr& actor);
+
         public:
 
             ActionTake (const MWWorld::Ptr& object);
-
-            virtual void execute();
     };
 }
 

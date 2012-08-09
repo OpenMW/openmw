@@ -7,6 +7,10 @@ namespace MWClass
 {
     class Activator : public MWWorld::Class
     {
+
+            virtual MWWorld::Ptr
+            copyToCellImpl(const MWWorld::Ptr &ptr, MWWorld::CellStore &cell) const;
+
         public:
 
             virtual void insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const;
@@ -28,6 +32,8 @@ namespace MWClass
             ///< Return name of the script attached to ptr
 
             static void registerSelf();
+
+            virtual std::string getModel(const MWWorld::Ptr &ptr) const;
     };
 }
 

@@ -1,0 +1,59 @@
+CREDITS
+
+Current Developers:
+Aleksandar Jovanov
+Alexander “Ace” Olofsson
+Artem “greye” Kotsynyak
+athile
+BrotherBrick
+Cris “Mirceam” Mihalache
+gugus / gus
+Jacob “Yacoby” Essex
+Jannik “scrawl” Heller
+Jason “jhooks” Hooks
+Karl-Felix “k1ll” Glatzer
+Lukasz “lgro” Gromanowski
+Marc “Zini” Zinnschlag
+Michael “werdanith” Papageorgiou
+Nikolay “corristo” Kasyanov
+Pieter “pvdk” van der Kloet
+Roman "Kromgart" Melnik
+Sebastian “swick” Wick
+Sylvain "Garvek" T.
+
+Retired Developers:
+Ardekantur
+Armin Preiml
+Diggory Hardy
+Jan Borsodi
+Jan-Peter “peppe” Nilsson
+Josua Grawitter
+Nicolay Korslund
+sergoz
+Star-Demon
+Yuri Krupenin
+
+PR team and Translators:
+Julien (jvoisin/ap0) Voisin
+sirherrbatka
+ElderTroll
+spyboot
+corristo
+Okulo
+penguinroad
+Kingpix
+
+Reverser and Research:
+natirips
+Sadler
+fragonard
+Greendogo
+Myckel
+modred11
+HiPhish
+
+OpenMW:
+Thanks to DokterDume for kindly providing us with the Moon and Star logo used as the application icon and project logo.
+
+Launcher:
+Thanks to Kevin Ryan for kindly providing us with the icon used for the Data Files tab.

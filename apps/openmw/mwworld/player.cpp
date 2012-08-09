@@ -38,12 +38,6 @@ namespace MWWorld
         delete mClass;
     }
 
-    void Player::setPos(float x, float y, float z)
-    {
-        /// \todo This fcuntion should be removed during the mwrender-refactoring.
-        MWBase::Environment::get().getWorld()->moveObject (getPlayer(), x, y, z);
-    }
-
     void Player::setRot(float x, float y, float z)
     {
         mRenderer->setRot(x, y, z);
@@ -56,10 +50,10 @@ namespace MWWorld
         mClass = new_class;
     }
 
-    void Player::setDrawState(const DrawState& value)
+    void Player::setDrawState (MWMechanics::DrawState_ state)
     {
          MWWorld::Ptr ptr = getPlayer();
-         MWWorld::Class::get(ptr).getNpcStats(ptr).mDrawState = value;
+         MWWorld::Class::get(ptr).getNpcStats(ptr).setDrawState (state);
     }
 
     void Player::setAutoMove (bool enable)
@@ -111,10 +105,10 @@ namespace MWWorld
         MWWorld::Class::get (ptr).setStance (ptr, MWWorld::Class::Run, !running);
     }
 
-    DrawState Player::getDrawState()
+    MWMechanics::DrawState_ Player::getDrawState()
     {
          MWWorld::Ptr ptr = getPlayer();
-         return MWWorld::Class::get(ptr).getNpcStats(ptr).mDrawState;
+         return MWWorld::Class::get(ptr).getNpcStats(ptr).getDrawState();
     }
 
 }

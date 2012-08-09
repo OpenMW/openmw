@@ -24,7 +24,9 @@ struct Ingredient
     IRDTstruct data;
     std::string name, model, icon, script;
 
-    void load(ESMReader &esm);
+    std::string mId;
+
+    void load(ESMReader &esm, const std::string& id);
 };
 }
 #endif

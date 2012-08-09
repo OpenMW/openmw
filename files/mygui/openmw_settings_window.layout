@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <MyGUI type="Layout">
-    <Widget type="Window" skin="MW_Dialog" layer="Windows" position="0 0 390 390" name="_Main">
+    <Widget type="Window" skin="MW_Window_NoCaption" layer="Windows" position="0 0 400 414" name="_Main">
+
+        <Property key="MinSize" value="400 414"/>
+        <Property key="MaxSize" value="400 414"/>
 
         <Widget type="TabControl" skin="TabControl" position="8 8 368 340" align="Left Top" name="SettingsTab">
             <Property key="ButtonAutoWidth" value="true"/>
@@ -100,6 +103,12 @@
                         </Widget>
                         <Widget type="Button" skin="MW_Button" position="212 34 34 24" align="Left Top" name="VSyncButton"/>
 
+                        <Widget type="TextBox" skin="SandText" position="262 104 120 24" align="Left Top">
+                            <Property key="Caption" value="Shaders"/>
+                        </Widget>
+                        <Widget type="Button" skin="MW_Button" position="212 104 44 24" align="Left Top" name="ShadersButton"/>
+
+
                         <Widget type="TextBox" skin="SandText" position="74 163 250 24" align="Left Top">
                             <Property key="Caption" value="Show frames per second"/>
                         </Widget>
@@ -179,6 +188,55 @@
                             <Widget type="Button" skin="MW_Button" position="4 56 34 24" align="Left Top" name="ReflectTerrainButton"/>
 
                         </Widget>
+
+                        <Widget type="TextBox" skin="SandText" position="42 135 300 24" align="Left Top">
+                            <Property key="Caption" value="Underwater effects (caustics, fog)"/>
+                        </Widget>
+                        <Widget type="Button" skin="MW_Button" position="4 135 34 24" align="Left Top" name="UnderwaterButton"/>
+                    </Widget>
+
+                    <Widget type="TabItem" skin="" position="4 28 344 272">
+                        <Property key="Caption" value="  Shadows  "/>
+
+                        <Widget type="TextBox" skin="SandText" position="42 4 120 24" align="Left Top">
+                            <Property key="Caption" value="Enabled"/>
+                        </Widget>
+                        <Widget type="Button" skin="MW_Button" position="4 4 34 24" align="Left Top" name="ShadowsEnabledButton"/>
+
+                        <Widget type="Widget" skin="" position="24 32 300 230">
+                            <Widget type="TextBox" skin="SandText" position="42 0 300 24" align="Left Top">
+                                <Property key="Caption" value="Large distance (PSSM3)"/>
+                            </Widget>
+                            <Widget type="Button" skin="MW_Button" position="4 0 34 24" align="Left Top" name="ShadowsLargeDistance"/>
+
+                            <Widget type="TextBox" skin="SandText" position="72 28 120 24" align="Left Top">
+                                <Property key="Caption" value="Texture size"/>
+                            </Widget>
+                            <Widget type="Button" skin="MW_Button" position="4 28 64 24" align="Left Top" name="ShadowsTextureSize"/>
+
+                            <Widget type="TextBox" skin="SandText" position="42 56 120 24" align="Left Top">
+                                <Property key="Caption" value="Actor shadows"/>
+                            </Widget>
+                            <Widget type="Button" skin="MW_Button" position="4 56 34 24" align="Left Top" name="ActorShadows"/>
+
+                            <Widget type="TextBox" skin="SandText" position="42 84 120 24" align="Left Top">
+                                <Property key="Caption" value="World shadows"/>
+                            </Widget>
+                            <Widget type="Button" skin="MW_Button" position="4 84 34 24" align="Left Top" name="StaticsShadows"/>
+
+                            <Widget type="TextBox" skin="SandText" position="42 112 120 24" align="Left Top">
+                                <Property key="Caption" value="Misc shadows"/>
+                            </Widget>
+                            <Widget type="Button" skin="MW_Button" position="4 112 34 24" align="Left Top" name="MiscShadows"/>
+
+                            <Widget type="TextBox" skin="SandText" position="42 172 120 24" align="Left Top">
+                                <Property key="Caption" value="Debug overlay"/>
+                            </Widget>
+                            <Widget type="Button" skin="MW_Button" position="4 172 34 24" align="Left Top" name="ShadowsDebug"/>
+
+
+                        </Widget>
+
                     </Widget>
 
                 </Widget>

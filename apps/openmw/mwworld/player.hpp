@@ -9,9 +9,6 @@
 
 #include "../mwmechanics/drawstate.hpp"
 
-#undef DrawState // How did this get defined again?
-                 // Maybe it's defined by default in every file for windows?
-
 namespace MWBase
 {
     class World;
@@ -44,9 +41,6 @@ namespace MWWorld
         Player(MWRender::Player *renderer, const ESM::NPC *player, const MWBase::World& world);
 
         ~Player();
-
-        /// Set the player position. Uses Morrowind coordinates.
-        void setPos(float x, float y, float z);
 
         /// Set where the player is looking at. Uses Morrowind (euler) angles
         void setRot(float x, float y, float z);
@@ -86,7 +80,7 @@ namespace MWWorld
 
         void setClass (const ESM::Class& class_);
 
-        void setDrawState(const DrawState& state);
+        void setDrawState (MWMechanics::DrawState_ state);
 
         std::string getName() const
         {
@@ -118,7 +112,7 @@ namespace MWWorld
             return mAutoMove;
         }
 
-        DrawState getDrawState();
+        MWMechanics::DrawState_ getDrawState(); /// \todo constness
 
         void setAutoMove (bool enable);
 

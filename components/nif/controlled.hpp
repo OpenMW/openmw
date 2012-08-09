@@ -25,6 +25,7 @@
 #define _NIF_CONTROLLED_H_
 
 #include "extra.hpp"
+#include "controller.hpp"
 
 namespace Nif
 {
@@ -33,92 +34,104 @@ namespace Nif
 class Controlled : public Extra
 {
 public:
-  ControllerPtr controller;
+    ControllerPtr controller;
 
-  void read(NIFFile *nif)
-  {
-    Extra::read(nif);
-    controller.read(nif);
-  }
+    void read(NIFFile *nif)
+    {
+        Extra::read(nif);
+        controller.read(nif);
+    }
+
+    void post(NIFFile *nif)
+    {
+        Extra::post(nif);
+        controller.post(nif);
+    }
 };
 
 /// Has name, extra-data and controller
 class Named : public Controlled
 {
 public:
-  Misc::SString name;
+    std::string name;
 
-  void read(NIFFile *nif)
-  {
-    name = nif->getString();
-    Controlled::read(nif);
-  }
+    void read(NIFFile *nif)
+    {
+        name = nif->getString();
+        Controlled::read(nif);
+    }
 };
 typedef Named NiSequenceStreamHelper;
 
 class NiParticleGrowFade : public Controlled
 {
 public:
-  void read(NIFFile *nif)
-  {
-    Controlled::read(nif);
+    void read(NIFFile *nif)
+    {
+        Controlled::read(nif);
 
-    // Two floats.
-    nif->skip(8);
-  }
+        // Two floats.
+        nif->skip(8);
+    }
 };
 
 class NiParticleColorModifier : public Controlled
 {
 public:
-  NiColorDataPtr data;
+    NiColorDataPtr data;
 
-  void read(NIFFile *nif)
-  {
-    Controlled::read(nif);
-    data.read(nif);
-  }
+    void read(NIFFile *nif)
+    {
+        Controlled::read(nif);
+        data.read(nif);
+    }
+
+    void post(NIFFile *nif)
+    {
+        Controlled::post(nif);
+        data.post(nif);
+    }
 };
 
 class NiGravity : public Controlled
 {
 public:
-  void read(NIFFile *nif)
-  {
-    Controlled::read(nif);
+    void read(NIFFile *nif)
+    {
+        Controlled::read(nif);
 
-    // two floats, one int, six floats
-    nif->skip(9*4);
-  }
+        // two floats, one int, six floats
+        nif->skip(9*4);
+    }
 };
 
 // NiPinaColada
 class NiPlanarCollider : public Controlled
 {
 public:
-  void read(NIFFile *nif)
-  {
-    Controlled::read(nif);
+    void read(NIFFile *nif)
+    {
+        Controlled::read(nif);
 
-    // (I think) 4 floats + 4 vectors
-    nif->skip(4*16);
-  }
+        // (I think) 4 floats + 4 vectors
+        nif->skip(4*16);
+    }
 };
 
 class NiParticleRotation : public Controlled
 {
 public:
-  void read(NIFFile *nif)
-  {
-    Controlled::read(nif);
+    void read(NIFFile *nif)
+    {
+        Controlled::read(nif);
 
-    /*
-      byte (0 or 1)
-      float (1)
-      float*3
-     */
-    nif->skip(17);
-  }
+        /*
+           byte (0 or 1)
+           float (1)
+           float*3
+        */
+        nif->skip(17);
+    }
 };
 
 } // Namespace
