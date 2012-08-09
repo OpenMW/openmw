@@ -14,6 +14,8 @@
 
 #include "../mwmechanics/npcstats.hpp"
 
+#include "../mwinput/inputmanager.hpp"
+
 #include "interpretercontext.hpp"
 #include "ref.hpp"
 
@@ -36,6 +38,10 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
+                    MWBase::Environment::get()
+                        .getInputManager()
+                        ->toggleControlSwitch(mControl, mEnable);
+
                     if (mEnable)
                         std::cout << "enable: " << mControl << std::endl;
                     else

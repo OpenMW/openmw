@@ -4,12 +4,11 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
+#include "../mwbase/soundmanager.hpp"
 
 #include "../mwworld/player.hpp"
 #include "../mwworld/manualref.hpp"
 #include "../mwworld/containerstore.hpp"
-
-#include "../mwsound/soundmanager.hpp"
 
 #include "window_manager.hpp"
 

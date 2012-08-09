@@ -101,7 +101,8 @@ namespace MWRender {
 
         void processChangedSettings(const Settings::CategorySettingVector& settings);
 
-        void checkUnderwater(float y);
+        /// Updates underwater state accordingly
+        void updateUnderwater(bool underwater);
         void changeCell(const ESM::Cell* cell);
         void setHeight(const float height);
 

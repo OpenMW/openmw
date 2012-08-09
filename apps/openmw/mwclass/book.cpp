@@ -5,6 +5,7 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
+#include "../mwbase/soundmanager.hpp"
 
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/actionread.hpp"
@@ -16,8 +17,6 @@
 
 #include "../mwgui/window_manager.hpp"
 #include "../mwgui/tooltips.hpp"
-
-#include "../mwsound/soundmanager.hpp"
 
 namespace MWClass
 {
@@ -38,7 +37,7 @@ namespace MWClass
             physics.insertObjectPhysics(ptr, model);
         }
     }
-    
+
     std::string Book::getModel(const MWWorld::Ptr &ptr) const
     {
         MWWorld::LiveCellRef<ESM::Book> *ref =

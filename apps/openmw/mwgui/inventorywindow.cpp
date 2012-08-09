@@ -9,6 +9,7 @@
 
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
+#include "../mwbase/soundmanager.hpp"
 
 #include "../mwworld/containerstore.hpp"
 #include "../mwworld/class.hpp"
@@ -16,10 +17,6 @@
 #include "../mwworld/manualref.hpp"
 #include "../mwworld/actiontake.hpp"
 #include "../mwworld/inventorystore.hpp"
-
-#include "../mwsound/soundmanager.hpp"
-
-#include "../mwclass/container.hpp"
 
 #include "window_manager.hpp"
 #include "widgets.hpp"

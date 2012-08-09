@@ -14,6 +14,7 @@ Jason “jhooks” Hooks
 Karl-Felix “k1ll” Glatzer
 Lukasz “lgro” Gromanowski
 Marc “Zini” Zinnschlag
+Michael Mc Donnell
 Michael “werdanith” Papageorgiou
 Nikolay “corristo” Kasyanov
 Pieter “pvdk” van der Kloet

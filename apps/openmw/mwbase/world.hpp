@@ -46,6 +46,7 @@ namespace MWWorld
 
 namespace MWBase
 {
+    /// \brief Interface for the World (implemented in MWWorld)
     class World
     {
             World (const World&);
@@ -53,14 +54,6 @@ namespace MWBase
 
             World& operator= (const World&);
             ///< not implemented
-
-        protected:
-
-            virtual void
-            copyObjectToCell(
-                const MWWorld::Ptr &ptr,
-                MWWorld::CellStore &cell,
-                const ESM::Position &pos) = 0;
 
         public:
 
@@ -189,7 +182,7 @@ namespace MWBase
 
             virtual void scaleObject (const MWWorld::Ptr& ptr, float scale) = 0;
 
-            virtual void rotateObject(const MWWorld::Ptr& ptr,float x,float y,float z) = 0;
+            virtual void rotateObject(const MWWorld::Ptr& ptr,float x,float y,float z, bool adjust = false) = 0;
 
             virtual void indexToPosition (int cellX, int cellY, float &x, float &y, bool centre = false)
                 const = 0;
@@ -252,6 +245,9 @@ namespace MWBase
             ///< @return true if it is possible to place on object at specified cursor location
 
             virtual void processChangedSettings (const Settings::CategorySettingVector& settings) = 0;
+
+            virtual bool isSwimming(const MWWorld::Ptr &object) = 0;
+            virtual bool isUnderwater(const ESM::Cell &cell, const Ogre::Vector3 &pos) = 0;
     };
 }
 

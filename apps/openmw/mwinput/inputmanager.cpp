@@ -6,7 +6,6 @@
 #include <openengine/gui/events.hpp>
 
 #include <openengine/ogre/exitlistener.hpp>
-#include <openengine/ogre/mouselook.hpp>
 #include <openengine/ogre/renderer.hpp>
 
 #include "../mwgui/window_manager.hpp"
@@ -16,11 +15,11 @@
 
 #include <libs/platform/strings.h>
 
+#include "mouselookevent.hpp"
+
 #include "../engine.hpp"
 
 #include "../mwworld/player.hpp"
-
-#include "../mwrender/player.hpp"
 
 #include <boost/bind.hpp>
 #include <boost/filesystem.hpp>
@@ -82,7 +81,7 @@ namespace MWInput
     OEngine::Render::ExitListener exit;
     Mangle::Input::OISDriver input;
     OEngine::Input::Poller poller;
-    OEngine::Render::MouseLookEventPtr mouse;
+    MouseLookEventPtr mouse;
     OEngine::GUI::EventInjectorPtr guiEvents;
     MWWorld::Player &player;
     MWGui::WindowManager &windows;
@@ -90,6 +89,7 @@ namespace MWInput
 
     bool mDragDrop;
 
+    std::map<std::string, bool> mControlSwitch;
 
    /* InputImpl Methods */
 public:
@@ -278,8 +278,7 @@ private:
       // Add the exit listener
       ogre.getRoot()->addFrameListener(&exit);
 
-      // Set up the mouse handler and tell it about the player camera
-      mouse = MouseLookEventPtr(new MouseLookEvent(player.getRenderer()->getCamera()));
+      mouse = MouseLookEventPtr(new MouseLookEvent());
 
       // This event handler pumps events into MyGUI
       guiEvents = EventInjectorPtr(new EventInjector(windows.getGui()));
@@ -295,6 +294,14 @@ private:
         lst->add(disp,Event::EV_KeyDown);
         lst->add(guiEvents,Event::EV_ALL);
       }
+
+      mControlSwitch["playercontrols"]      = true;
+      mControlSwitch["playerfighting"]      = true;
+      mControlSwitch["playerjumping"]       = true;
+      mControlSwitch["playerlooking"]       = true;
+      mControlSwitch["playermagic"]         = true;
+      mControlSwitch["playerviewswitch"]    = true;
+      mControlSwitch["vanitymode"]          = true;
 
       changeInputMode(false);
 
@@ -366,38 +373,40 @@ private:
 
         // Configure player movement according to keyboard input. Actual movement will
         // be done in the physics system.
-        if (poller.isDown(A_MoveLeft))
-        {
-            player.setAutoMove (false);
-            player.setLeftRight (1);
-        }
-        else if (poller.isDown(A_MoveRight))
-        {
-            player.setAutoMove (false);
-            player.setLeftRight (-1);
-        }
-        else
-            player.setLeftRight (0);
+        if (mControlSwitch["playercontrols"]) {
+            if (poller.isDown(A_MoveLeft))
+            {
+                player.setAutoMove (false);
+                player.setLeftRight (1);
+            }
+            else if (poller.isDown(A_MoveRight))
+            {
+                player.setAutoMove (false);
+                player.setLeftRight (-1);
+            }
+            else
+                player.setLeftRight (0);
 
-        if (poller.isDown(A_MoveForward))
-        {
-            player.setAutoMove (false);
-            player.setForwardBackward (1);
-        }
-        else if (poller.isDown(A_MoveBackward))
-        {
-            player.setAutoMove (false);
-            player.setForwardBackward (-1);
-        }
-        else
-            player.setForwardBackward (0);
+            if (poller.isDown(A_MoveForward))
+            {
+                player.setAutoMove (false);
+                player.setForwardBackward (1);
+            }
+            else if (poller.isDown(A_MoveBackward))
+            {
+                player.setAutoMove (false);
+                player.setForwardBackward (-1);
+            }
+            else
+                player.setForwardBackward (0);
 
-        if (poller.isDown(A_Jump))
-            player.setUpDown (1);
-        else if (poller.isDown(A_Crouch))
-            player.setUpDown (-1);
-        else
-            player.setUpDown (0);
+            if (poller.isDown(A_Jump) && mControlSwitch["playerjumping"])
+                player.setUpDown (1);
+            else if (poller.isDown(A_Crouch))
+                player.setUpDown (-1);
+            else
+                player.setUpDown (0);
+        }
     }
 
     // Switch between gui modes. Besides controlling the Gui windows
@@ -408,21 +417,47 @@ private:
       if(guiMode)
         {
           // Disable mouse look
-          mouse->setCamera(NULL);
+          mouse->disable();
 
           // Enable GUI events
           guiEvents->enabled = true;
         }
       else
         {
-          // Start mouse-looking again. TODO: This should also allow
-          // for other ways to disable mouselook, like paralyzation.
-          mouse->setCamera(player.getRenderer()->getCamera());
+            // Start mouse-looking again if allowed.
+            if (mControlSwitch["playerlooking"]) {
+                mouse->enable();
+            }
 
           // Disable GUI events
           guiEvents->enabled = false;
         }
     }
+
+    void toggleControlSwitch(std::string sw, bool value)
+    {
+        if (mControlSwitch[sw] == value) {
+            return;
+        }
+        /// \note 7 switches at all, if-else is relevant
+        if (sw == "playercontrols" && !value) {
+            player.setLeftRight(0);
+            player.setForwardBackward(0);
+            player.setAutoMove(false);
+            player.setUpDown(0);
+        } else if (sw == "playerjumping" && !value) {
+            /// \fixme maybe crouching at this time
+            player.setUpDown(0);
+        } else if (sw == "playerlooking") {
+            if (value) {
+                mouse->enable();
+            } else {
+                mouse->disable();
+            }
+        }
+        mControlSwitch[sw] = value;
+    }
+
   };
 
   /***CONSTRUCTOR***/
@@ -471,4 +506,9 @@ private:
       if (changeRes)
           impl->adjustMouseRegion(Settings::Manager::getInt("resolution x", "Video"), Settings::Manager::getInt("resolution y", "Video"));
   }
+
+    void MWInputManager::toggleControlSwitch(std::string sw, bool value)
+    {
+        impl->toggleControlSwitch(sw, value); 
+    }
 }

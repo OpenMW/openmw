@@ -6,6 +6,7 @@
 #include <boost/filesystem.hpp>
 
 #include <components/files/configurationmanager.hpp>
+#include <components/files/ogreplugin.hpp>
 #include <components/settings/settings.hpp>
 
 #include "graphicspage.hpp"
@@ -115,13 +116,12 @@ bool GraphicsPage::setupOgre()
 #endif
     }
 
-    std::string glPlugin = std::string(pluginDir) + "/RenderSystem_GL" + OGRE_PLUGIN_DEBUG_SUFFIX;
-    if (boost::filesystem::exists(glPlugin + ".so") || boost::filesystem::exists(glPlugin + ".dll"))
-        mOgre->loadPlugin (glPlugin);
+    boost::filesystem::path absPluginPath = boost::filesystem::absolute(boost::filesystem::path(pluginDir));
 
-    std::string dxPlugin = std::string(pluginDir) + "/RenderSystem_Direct3D9" + OGRE_PLUGIN_DEBUG_SUFFIX;
-    if (boost::filesystem::exists(dxPlugin + ".so") || boost::filesystem::exists(dxPlugin + ".dll"))
-        mOgre->loadPlugin (dxPlugin);
+    pluginDir = absPluginPath.string();
+
+    Files::loadOgrePlugin(pluginDir, "RenderSystem_GL", *mOgre);
+    Files::loadOgrePlugin(pluginDir, "RenderSystem_Direct3D9", *mOgre);
 
 #ifdef ENABLE_PLUGIN_GL
     mGLPlugin = new Ogre::GLPlugin();

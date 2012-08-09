@@ -3,13 +3,14 @@
 
 #include <components/esm_store/store.hpp>
 
+#include <components/compiler/locals.hpp>
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
+#include "../mwbase/scriptmanager.hpp"
 
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/class.hpp"
-
-#include "scriptmanager.hpp"
 
 namespace MWScript
 {
