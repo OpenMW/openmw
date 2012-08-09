@@ -52,19 +52,19 @@ namespace MWDialogue
 
             void startDialogue (const MWWorld::Ptr& actor);
 
-            void addTopic(std::string topic);
+            void addTopic (const std::string& topic);
 
-            void askQuestion(std::string question,int choice);
+            void askQuestion (const std::string& question,int choice);
 
             void goodbye();
 
             ///get the faction of the actor you are talking with
-            std::string getFaction();
+            std::string getFaction() const;
 
             //calbacks for the GUI
-            void keywordSelected(std::string keyword);
+            void keywordSelected (const std::string& keyword);
             void goodbyeSelected();
-            void questionAnswered(std::string answere);
+            void questionAnswered (const std::string& answer);
 
     };
 }

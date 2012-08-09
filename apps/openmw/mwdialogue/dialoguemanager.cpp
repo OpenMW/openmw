@@ -599,12 +599,12 @@ namespace MWDialogue
         }
     }
 
-    void DialogueManager::addTopic(std::string topic)
+    void DialogueManager::addTopic (const std::string& topic)
     {
         mKnownTopics[toLower(topic)] = true;
     }
 
-    void DialogueManager::parseText(std::string text)
+    void DialogueManager::parseText (std::string text)
     {
         std::list<std::string>::iterator it;
         for(it = mActorKnownTopics.begin();it != mActorKnownTopics.end();++it)
@@ -804,7 +804,7 @@ namespace MWDialogue
         mChoice = choice;
     }
 
-    void DialogueManager::keywordSelected(std::string keyword)
+    void DialogueManager::keywordSelected (const std::string& keyword)
     {
         if(!mIsInChoice)
         {
@@ -846,11 +846,11 @@ namespace MWDialogue
         MWBase::Environment::get().getWindowManager()->removeGuiMode(MWGui::GM_Dialogue);
     }
 
-    void DialogueManager::questionAnswered(std::string answere)
+    void DialogueManager::questionAnswered (const std::string& answer)
     {
-        if(mChoiceMap.find(answere) != mChoiceMap.end())
+        if(mChoiceMap.find(answer) != mChoiceMap.end())
         {
-            mChoice = mChoiceMap[answere];
+            mChoice = mChoiceMap[answer];
 
             std::vector<ESM::DialInfo>::const_iterator iter;
             if(mDialogueMap.find(mLastTopic) != mDialogueMap.end())
@@ -882,13 +882,13 @@ namespace MWDialogue
         }
     }
 
-    void DialogueManager::printError(std::string error)
+    void DialogueManager::printError (std::string error)
     {
         MWGui::DialogueWindow* win = MWBase::Environment::get().getWindowManager()->getDialogueWindow();
         win->addText(error);
     }
 
-    void DialogueManager::askQuestion(std::string question, int choice)
+    void DialogueManager::askQuestion (const std::string& question, int choice)
     {
         MWGui::DialogueWindow* win = MWBase::Environment::get().getWindowManager()->getDialogueWindow();
         win->askQuestion(question);
@@ -896,7 +896,7 @@ namespace MWDialogue
         mIsInChoice = true;
     }
 
-    std::string DialogueManager::getFaction()
+    std::string DialogueManager::getFaction() const
     {
         if (mActor.getTypeName() != typeid(ESM::NPC).name())
             return "";
