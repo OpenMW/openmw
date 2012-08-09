@@ -269,8 +269,8 @@ RenderingManager::rotateObject(
     }
 
     Ogre::Quaternion xr(Ogre::Degree(rot.x), Ogre::Vector3::UNIT_X);
-    Ogre::Quaternion yr(Ogre::Degree(-rot.z), Ogre::Vector3::UNIT_Y);
-    Ogre::Quaternion zr(Ogre::Degree(rot.y), Ogre::Vector3::UNIT_Z);
+    Ogre::Quaternion yr(Ogre::Degree(rot.y), Ogre::Vector3::UNIT_Y);
+    Ogre::Quaternion zr(Ogre::Degree(rot.z), Ogre::Vector3::UNIT_Z);
 
     ptr.getRefData().getBaseNode()->setOrientation(xr * yr * zr);
 
