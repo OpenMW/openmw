@@ -27,6 +27,8 @@ namespace MWRender
         bool mFirstPersonView;
         bool mVanityModeEnabled;
 
+        void controlFlip();
+
     public:
 
         Player (Ogre::Camera *camera, Ogre::SceneNode* mNode);

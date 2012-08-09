@@ -24,13 +24,15 @@ namespace MWRender
         // we are only interested in X and Y rotation
 
         // Rotate around X axis
-        Ogre::Quaternion xr(Ogre::Radian(rot.x), Ogre::Vector3::UNIT_X);
+        Ogre::Quaternion xr(Ogre::Degree(rot.x), Ogre::Vector3::UNIT_X);
 
         // Rotate around Y axis
-        Ogre::Quaternion yr(Ogre::Radian(-rot.z), Ogre::Vector3::UNIT_Y);
+        Ogre::Quaternion yr(Ogre::Degree(-rot.z), Ogre::Vector3::UNIT_Y);
 
         pitchNode->setOrientation(xr);
         yawNode->setOrientation(yr);
+
+        controlFlip();
 
         return !mVanityModeEnabled;
     }
@@ -51,8 +53,32 @@ namespace MWRender
         Ogre::SceneNode *yawNode = pitchNode->getParentSceneNode();
 
         pitchNode->pitch(Ogre::Degree(rot.x));
-        yawNode->yaw(Ogre::Degree(rot.z));
+        yawNode->yaw(Ogre::Degree(-rot.z));
+
+        controlFlip();
 
         return !mVanityModeEnabled;
+    }
+
+    void Player::controlFlip()
+    {
+        Ogre::SceneNode *pitchNode = mCamera->getParentSceneNode();
+        Ogre::Quaternion orient = pitchNode->getOrientation();
+
+        float pitchAngle =
+            (2 * Ogre::Degree(Ogre::Math::ACos(orient.w)).valueDegrees());
+
+        // Limit the pitch between -90 degress and +90 degrees, Quake3-style.
+        if (pitchAngle > 90.0f)
+        {
+            Ogre::Real sqrt = Ogre::Math::Sqrt(0.5f);
+            if (orient.x > 0) {
+                // Set orientation to 90 degrees on X-axis.
+                pitchNode->setOrientation(Ogre::Quaternion(sqrt, sqrt, 0, 0));
+            } else if (orient.x < 0) {
+                // Sets orientation to -90 degrees on X-axis.
+                pitchNode->setOrientation(Ogre::Quaternion(sqrt, -sqrt, 0, 0));
+            }
+        }
     }
 }
