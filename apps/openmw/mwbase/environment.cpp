@@ -7,13 +7,12 @@
 
 #include "../mwsound/soundmanager.hpp"
 
-#include "../mwdialogue/journal.hpp"
-
 #include "../mwmechanics/mechanicsmanager.hpp"
 
 #include "world.hpp"
 #include "scriptmanager.hpp"
 #include "dialoguemanager.hpp"
+#include "journal.hpp"
 
 MWBase::Environment *MWBase::Environment::sThis = 0;
 
@@ -61,7 +60,7 @@ void MWBase::Environment::setDialogueManager (DialogueManager *dialogueManager)
     mDialogueManager = dialogueManager;
 }
 
-void MWBase::Environment::setJournal (MWDialogue::Journal *journal)
+void MWBase::Environment::setJournal (Journal *journal)
 {
     mJournal = journal;
 }
@@ -112,7 +111,7 @@ MWBase::DialogueManager *MWBase::Environment::getDialogueManager() const
     return mDialogueManager;
 }
 
-MWDialogue::Journal *MWBase::Environment::getJournal() const
+MWBase::Journal *MWBase::Environment::getJournal() const
 {
     assert (mJournal);
     return mJournal;

@@ -30,7 +30,7 @@
 #include "mwclass/classes.hpp"
 
 #include "mwdialogue/dialoguemanagerimp.hpp"
-#include "mwdialogue/journal.hpp"
+#include "mwdialogue/journalimp.hpp"
 
 #include "mwmechanics/mechanicsmanager.hpp"
 

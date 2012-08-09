@@ -9,8 +9,7 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/dialoguemanager.hpp"
-
-#include "../mwdialogue/journal.hpp"
+#include "../mwbase/journal.hpp"
 
 #include "interpretercontext.hpp"
 #include "ref.hpp"

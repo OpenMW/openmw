@@ -12,6 +12,7 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/scriptmanager.hpp"
+#include "../mwbase/journal.hpp"
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/refdata.hpp"
@@ -21,8 +22,6 @@
 #include "../mwinput/inputmanager.hpp"
 #include "../mwgui/dialogue.hpp"
 #include "../mwgui/window_manager.hpp"
-
-#include "journal.hpp"
 
 #include <iostream>
 

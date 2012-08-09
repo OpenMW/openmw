@@ -16,11 +16,6 @@ namespace MWMechanics
     class MechanicsManager;
 }
 
-namespace MWDialogue
-{
-    class Journal;
-}
-
 namespace MWInput
 {
     struct MWInputManager;
@@ -31,6 +26,7 @@ namespace MWBase
     class World;
     class ScriptManager;
     class DialogueManager;
+    class Journal;
 
     /// \brief Central hub for mw-subsystems
     ///
@@ -48,7 +44,7 @@ namespace MWBase
             MWGui::WindowManager *mWindowManager;
             MWMechanics::MechanicsManager *mMechanicsManager;
             DialogueManager *mDialogueManager;
-            MWDialogue::Journal *mJournal;
+            Journal *mJournal;
             MWInput::MWInputManager *mInputManager;
             float mFrameDuration;
 
@@ -76,7 +72,7 @@ namespace MWBase
 
             void setDialogueManager (DialogueManager *dialogueManager);
 
-            void setJournal (MWDialogue::Journal *journal);
+            void setJournal (Journal *journal);
 
             void setInputManager (MWInput::MWInputManager *inputManager);
 
@@ -95,7 +91,7 @@ namespace MWBase
 
             DialogueManager *getDialogueManager() const;
 
-            MWDialogue::Journal *getJournal() const;
+            Journal *getJournal() const;
 
             MWInput::MWInputManager *getInputManager() const;
 
