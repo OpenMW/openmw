@@ -4,13 +4,12 @@
 #include <components/files/collections.hpp>
 
 #include "../mwbase/environment.hpp"
+#include "../mwbase/soundmanager.hpp"
 
 #include "../mwrender/sky.hpp"
 #include "../mwrender/player.hpp"
 
 #include "../mwmechanics/mechanicsmanager.hpp"
-
-#include "../mwsound/soundmanager.hpp"
 
 #include "../mwgui/window_manager.hpp"
 
@@ -51,7 +50,7 @@ namespace
 
         for (iterator iter (refList.list.begin()); iter!=refList.list.end(); ++iter)
         {
-            if(iter->mData.getBaseNode()){
+            if(iter->mData.getCount() > 0 && iter->mData.getBaseNode()){
             if (iter->mData.getHandle()==handle)
             {
                 return &*iter;
@@ -189,8 +188,9 @@ namespace MWWorld
         mEsm.open (masterPath.string());
         mStore.load (mEsm);
 
-        MWRender::Player* play = &(mRendering->getPlayer());
-        mPlayer = new MWWorld::Player (play, mStore.npcs.find ("player"), *this);
+        mPlayer = new MWWorld::Player (mStore.npcs.find ("player"), *this);
+        mRendering->attachCameraTo(mPlayer->getPlayer());
+
         mPhysics->addActor (mPlayer->getPlayer().getRefData().getHandle(), "", Ogre::Vector3 (0, 0, 0));
 
         // global variables
@@ -543,80 +543,73 @@ namespace MWWorld
         }
     }
 
-    bool World::moveObjectImp (const Ptr& ptr, float x, float y, float z)
+    void World::moveObject(const Ptr &ptr, CellStore &newCell, float x, float y, float z)
     {
-        bool cellChanged = false, haveToMove = true;
-
         ESM::Position &pos = ptr.getRefData().getPosition();
         pos.pos[0] = x, pos.pos[1] = y, pos.pos[2] = z;
         Ogre::Vector3 vec(x, y, z);
 
-        CellStore *currCell;
-        /// \todo fix assertion fail on player ptr.getCell() on start
-        if (ptr == mPlayer->getPlayer()) {
-            currCell = mWorldScene->getCurrentCell();
-        } else {
-            currCell = ptr.getCell();
-        }
+        CellStore *currCell = ptr.getCell();
+        bool isPlayer = ptr == mPlayer->getPlayer();
+        bool haveToMove = mWorldScene->isCellActive(*currCell) || isPlayer;
 
-        if (currCell) {
-            if (!(currCell->cell->data.flags & ESM::Cell::Interior)) {
-                // exterior -> adjust loaded cells
-                int cellX = 0, cellY = 0;
-                positionToIndex (x, y, cellX, cellY);
-
-                if (currCell->cell->data.gridX != cellX ||
-                    currCell->cell->data.gridY != cellY)
-                {
-                    if (ptr == mPlayer->getPlayer()) {
-                        mWorldScene->changeCell(cellX, cellY, pos, false);
-                    } else {
-                        CellStore *newCell =
-                            MWBase::Environment::get().getWorld()->getExterior(cellX, cellY);
-
-                        // placeObject() handles both target cell states
-                        // with active current cell
-                        if (!mWorldScene->isCellActive(*currCell)) {
-                            placeObject(ptr, *newCell, pos);
-                            haveToMove = false;
-                        } else if (!mWorldScene->isCellActive(*newCell)) {
-                            MWWorld::Class::get(ptr).copyToCell(ptr, *newCell);
-                            mWorldScene->removeObjectFromScene(ptr);
-                            mLocalScripts.remove(ptr);
-
-                            haveToMove = false;
-                        } else {
-                            MWWorld::Ptr copy =
-                                MWWorld::Class::get(ptr).copyToCell(ptr, *newCell);
-
-                            mRendering->moveObjectToCell(copy, vec, currCell);
-
-                            if (MWWorld::Class::get(ptr).isActor()) {
-                                MWMechanics::MechanicsManager *mechMgr =
-                                    MWBase::Environment::get().getMechanicsManager();
-
-                                mechMgr->removeActor(ptr);
-                                mechMgr->addActor(copy);
-                            } else {
-                                std::string script =
-                                    MWWorld::Class::get(ptr).getScript(ptr);
-                                if (!script.empty()) {
-                                    mLocalScripts.remove(ptr);
-                                    mLocalScripts.add(script, copy);
-                                }
-                            }
-                        }
-                        ptr.getRefData().setCount(0);
-                    }
-                    cellChanged = true;
+        if (*currCell != newCell) {
+            if (isPlayer) {
+                if (!newCell.isExterior()) {
+                    changeToInteriorCell(newCell.cell->name, pos);
+                } else {
+                    changeToExteriorCell(pos);
                 }
+            } else {
+                if (!mWorldScene->isCellActive(newCell)) {
+                    copyObjectToCell(ptr, newCell, pos);
+                } else if (!mWorldScene->isCellActive(*currCell)) {
+                    MWWorld::Class::get(ptr).copyToCell(ptr, newCell);
+                    mWorldScene->removeObjectFromScene(ptr);
+                    mLocalScripts.remove(ptr);
+                    haveToMove = false;
+                } else {
+                    MWWorld::Ptr copy =
+                        MWWorld::Class::get(ptr).copyToCell(ptr, newCell);
+
+                    mRendering->moveObjectToCell(copy, vec, currCell);
+
+                    if (MWWorld::Class::get(ptr).isActor()) {
+                        MWMechanics::MechanicsManager *mechMgr =
+                            MWBase::Environment::get().getMechanicsManager();
+
+                        mechMgr->removeActor(ptr);
+                        mechMgr->addActor(copy);
+                    } else {
+                        std::string script =
+                            MWWorld::Class::get(ptr).getScript(ptr);
+                        if (!script.empty()) {
+                            mLocalScripts.remove(ptr);
+                            mLocalScripts.add(script, copy);
+                        }
+                    }
+                }
+                ptr.getRefData().setCount(0);
             }
         }
         if (haveToMove) {
             mRendering->moveObject(ptr, vec);
             mPhysics->moveObject(ptr.getRefData().getHandle(), vec);
         }
-        return cellChanged;
+    }
+
+    bool World::moveObjectImp(const Ptr& ptr, float x, float y, float z)
+    {
+        CellStore *cell = ptr.getCell();
+        if (cell->isExterior()) {
+            int cellX, cellY;
+            positionToIndex(x, y, cellX, cellY);
+        
+            cell = getExterior(cellX, cellY);
+        }
+        moveObject(ptr, *cell, x, y, z);
+       
+        return cell != ptr.getCell();
     }
 
     void World::moveObject (const Ptr& ptr, float x, float y, float z)
@@ -634,19 +627,20 @@ namespace MWWorld
         mPhysics->scaleObject( ptr.getRefData().getHandle(), scale );
     }
 
-    void World::rotateObject (const Ptr& ptr,float x,float y,float z)
+    void World::rotateObject (const Ptr& ptr,float x,float y,float z, bool adjust)
     {
-        MWWorld::Class::get(ptr).adjustRotation(ptr,x,y,z);
+        Ogre::Vector3 rot(x, y, z);
+        if (mRendering->rotateObject(ptr, rot, adjust)) {
+            float *objRot = ptr.getRefData().getPosition().rot;
+            objRot[0] = Ogre::Degree(rot.x).valueRadians();
+            objRot[1] = Ogre::Degree(rot.y).valueRadians();
+            objRot[2] = Ogre::Degree(rot.z).valueRadians();
 
-        ptr.getRefData().getPosition().rot[0] = Ogre::Degree(x).valueRadians();
-        ptr.getRefData().getPosition().rot[1] = Ogre::Degree(y).valueRadians();
-        ptr.getRefData().getPosition().rot[2] = Ogre::Degree(z).valueRadians();
-
-        Ogre::Quaternion rotx(Ogre::Degree(x),Ogre::Vector3::UNIT_X);
-        Ogre::Quaternion roty(Ogre::Degree(y),Ogre::Vector3::UNIT_Y);
-        Ogre::Quaternion rotz(Ogre::Degree(z),Ogre::Vector3::UNIT_Z);
-        ptr.getRefData().getBaseNode()->setOrientation(rotz*roty*rotx);
-        mPhysics->rotateObject(ptr.getRefData().getHandle(),ptr.getRefData().getBaseNode()->getOrientation());
+            mPhysics->rotateObject(
+                ptr.getRefData().getHandle(),
+                ptr.getRefData().getBaseNode()->getOrientation()
+            );
+        }
     }
 
     void World::indexToPosition (int cellX, int cellY, float &x, float &y, bool centre) const
@@ -1057,7 +1051,7 @@ namespace MWWorld
         pos.pos[1] = -result.second[2];
         pos.pos[2] = result.second[1];
 
-        placeObject(object, *cell, pos);
+        copyObjectToCell(object, *cell, pos);
         object.getRefData().setCount(0);
 
         return true;
@@ -1075,7 +1069,7 @@ namespace MWWorld
     }
 
     void
-    World::placeObject(const Ptr &object, CellStore &cell, const ESM::Position &pos)
+    World::copyObjectToCell(const Ptr &object, CellStore &cell, const ESM::Position &pos)
     {
         /// \todo add searching correct cell for position specified
         MWWorld::Ptr dropped =
@@ -1110,7 +1104,7 @@ namespace MWWorld
         Ogre::Vector3 orig =
             Ogre::Vector3(pos.pos[0], pos.pos[1], pos.pos[2]);
         Ogre::Vector3 dir = Ogre::Vector3(0, 0, -1);
-        
+
         float len = (pos.pos[2] >= 0) ? pos.pos[2] : -pos.pos[2];
         len += 100.0;
 
@@ -1118,7 +1112,7 @@ namespace MWWorld
             mPhysics->castRay(orig, dir, len);
         pos.pos[2] = hit.second.z;
 
-        placeObject(object, *cell, pos);
+        copyObjectToCell(object, *cell, pos);
         object.getRefData().setCount(0);
     }
 
@@ -1130,5 +1124,27 @@ namespace MWWorld
     void World::getTriangleBatchCount(unsigned int &triangles, unsigned int &batches)
     {
         mRendering->getTriangleBatchCount(triangles, batches);
+    }
+
+    bool
+    World::isSwimming(const MWWorld::Ptr &object)
+    {
+        /// \todo add check ifActor() - only actors can swim
+        float *fpos = object.getRefData().getPosition().pos;
+        Ogre::Vector3 pos(fpos[0], fpos[1], fpos[2]);
+
+        /// \fixme should rely on object height
+        pos.z += 30;
+
+        return isUnderwater(*object.getCell()->cell, pos);
+    }
+
+    bool
+    World::isUnderwater(const ESM::Cell &cell, const Ogre::Vector3 &pos)
+    {
+        if (!(cell.data.flags & ESM::Cell::HasWater)) {
+            return false;
+        }
+        return pos.z < cell.water;
     }
 }

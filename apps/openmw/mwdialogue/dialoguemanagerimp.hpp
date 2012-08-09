@@ -1,5 +1,5 @@
-#ifndef GAME_MMDIALOG_DIALOGUEMANAGER_H
-#define GAME_MWDIALOG_DIALOGUEMANAGER_H
+#ifndef GAME_MMDIALOG_DIALOGUEMANAGERIMP_H
+#define GAME_MWDIALOG_DIALOGUEMANAGERIMP_H
 
 #include <components/esm/loadinfo.hpp>
 
@@ -8,12 +8,15 @@
 #include "../mwscript/interpretercontext.hpp"
 #include <components/compiler/output.hpp>
 
+#include "../mwbase/dialoguemanager.hpp"
+
 #include "../mwworld/ptr.hpp"
+
 #include <map>
 
 namespace MWDialogue
 {
-    class DialogueManager
+    class DialogueManager : public MWBase::DialogueManager
     {
             bool isMatching (const MWWorld::Ptr& actor, const ESM::DialInfo::SelectStruct& select) const;
 
@@ -50,21 +53,21 @@ namespace MWDialogue
 
             DialogueManager (const Compiler::Extensions& extensions);
 
-            void startDialogue (const MWWorld::Ptr& actor);
+            virtual void startDialogue (const MWWorld::Ptr& actor);
 
-            void addTopic(std::string topic);
+            virtual void addTopic (const std::string& topic);
 
-            void askQuestion(std::string question,int choice);
+            virtual void askQuestion (const std::string& question,int choice);
 
-            void goodbye();
+            virtual void goodbye();
 
             ///get the faction of the actor you are talking with
-            std::string getFaction();
+            virtual std::string getFaction() const;
 
             //calbacks for the GUI
-            void keywordSelected(std::string keyword);
-            void goodbyeSelected();
-            void questionAnswered(std::string answere);
+            virtual void keywordSelected (const std::string& keyword);
+            virtual void goodbyeSelected();
+            virtual void questionAnswered (const std::string& answer);
 
     };
 }

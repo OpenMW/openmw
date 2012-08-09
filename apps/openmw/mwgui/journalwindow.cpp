@@ -2,10 +2,10 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
+#include "../mwbase/journal.hpp"
+#include "../mwbase/soundmanager.hpp"
 
-#include "../mwdialogue/journal.hpp"
-
-#include "../mwsound/soundmanager.hpp"
+#include "../mwdialogue/journalentry.hpp"
 
 #include "window_manager.hpp"
 

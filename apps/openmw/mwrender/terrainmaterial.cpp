@@ -2,6 +2,8 @@
 
 #include <OgreTerrain.h>
 
+#include <stdexcept>
+
 #include <extern/shiny/Main/Factory.hpp>
 
 namespace
@@ -86,15 +88,15 @@ namespace MWRender
         normalMap->setProperty ("direct_texture", sh::makeProperty<sh::StringValue> (new sh::StringValue(terrain->getTerrainNormalMap ()->getName())));
         normalMap->setProperty ("tex_address_mode", sh::makeProperty<sh::StringValue> (new sh::StringValue("clamp")));
 
-        uint maxLayers = getMaxLayers(terrain);
-        uint numBlendTextures = std::min(terrain->getBlendTextureCount(maxLayers), terrain->getBlendTextureCount());
-        uint numLayers = std::min(maxLayers, static_cast<uint>(terrain->getLayerCount()));
+        Ogre::uint maxLayers = getMaxLayers(terrain);
+        Ogre::uint numBlendTextures = std::min(terrain->getBlendTextureCount(maxLayers), terrain->getBlendTextureCount());
+        Ogre::uint numLayers = std::min(maxLayers, static_cast<Ogre::uint>(terrain->getLayerCount()));
 
         p->mShaderProperties.setProperty ("num_layers", sh::makeProperty<sh::StringValue>(new sh::StringValue(Ogre::StringConverter::toString(numLayers))));
         p->mShaderProperties.setProperty ("num_blendmaps", sh::makeProperty<sh::StringValue>(new sh::StringValue(Ogre::StringConverter::toString(numBlendTextures))));
 
         // blend maps
-        for (uint i = 0; i < numBlendTextures; ++i)
+        for (Ogre::uint i = 0; i < numBlendTextures; ++i)
         {
             sh::MaterialInstanceTextureUnit* blendTex = p->createTextureUnit ("blendMap" + Ogre::StringConverter::toString(i));
             blendTex->setProperty ("direct_texture", sh::makeProperty<sh::StringValue> (new sh::StringValue(terrain->getBlendTextureName(i))));
@@ -102,7 +104,7 @@ namespace MWRender
         }
 
         // layer maps
-        for (uint i = 0; i < numLayers; ++i)
+        for (Ogre::uint i = 0; i < numLayers; ++i)
         {
             sh::MaterialInstanceTextureUnit* diffuseTex = p->createTextureUnit ("diffuseMap" + Ogre::StringConverter::toString(i));
             diffuseTex->setProperty ("direct_texture", sh::makeProperty<sh::StringValue> (new sh::StringValue(terrain->getLayerTextureName(i, 0))));
@@ -111,7 +113,7 @@ namespace MWRender
         }
 
         // shadow
-        for (uint i = 0; i < 3; ++i)
+        for (Ogre::uint i = 0; i < 3; ++i)
         {
             sh::MaterialInstanceTextureUnit* shadowTex = p->createTextureUnit ("shadowMap" + Ogre::StringConverter::toString(i));
             shadowTex->setProperty ("content_type", sh::makeProperty<sh::StringValue> (new sh::StringValue("shadow")));

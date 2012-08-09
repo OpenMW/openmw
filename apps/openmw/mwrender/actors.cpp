@@ -146,9 +146,10 @@ Actors::updateObjectCell(const MWWorld::Ptr &ptr)
         node = mCellSceneNodes[newCell];
     }
     node->addChild(ptr.getRefData().getBaseNode());
-    if (Animation *anim = mAllActors[ptr]) {
+    if (mAllActors.find(ptr) != mAllActors.end()) {
         /// \note Update key (Ptr's are compared only with refdata so mCell
         /// on key is outdated), maybe redundant
+        Animation *anim = mAllActors[ptr];
         mAllActors.erase(ptr);
         mAllActors[ptr] = anim;
     }

@@ -43,12 +43,14 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
     :mRendering(_rend), mObjects(mRendering), mActors(mRendering), mAmbientMode(0), mSunEnabled(0)
 {
     // select best shader mode
-    if (Settings::Manager::getString("shader mode", "General") == "")
+    bool openGL = (Ogre::Root::getSingleton ().getRenderSystem ()->getName().find("OpenGL") != std::string::npos);
+
+    // glsl is only supported in opengl mode and hlsl only in direct3d mode.
+    if (Settings::Manager::getString("shader mode", "General") == ""
+            || (openGL && Settings::Manager::getString("shader mode", "General") == "hlsl")
+            || (!openGL && Settings::Manager::getString("shader mode", "General") == "glsl"))
     {
-        if (Ogre::Root::getSingleton ().getRenderSystem ()->getName().find("OpenGL") == std::string::npos)
-            Settings::Manager::setString("shader mode", "General", "cg");
-        else
-            Settings::Manager::setString("shader mode", "General", "glsl");
+        Settings::Manager::setString("shader mode", "General", openGL ? "glsl" : "hlsl");
     }
 
     mRendering.createScene("PlayerCam", Settings::Manager::getFloat("field of view", "General"), 5);
@@ -73,10 +75,6 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
         lang = sh::Language_CG;
     mFactory->setCurrentLanguage (lang);
     mFactory->loadAllFiles();
-
-    //The fog type must be set before any terrain objects are created as if the
-    //fog type is set to FOG_NONE then the initially created terrain won't have any fog
-    configureFog(1, ColourValue(1,1,1));
 
     // Set default mipmap level (NB some APIs ignore this)
     TextureManager::getSingleton().setDefaultNumMipmaps(Settings::Manager::getInt("num mipmaps", "General"));
@@ -185,10 +183,6 @@ MWRender::Actors& RenderingManager::getActors(){
     return mActors;
 }
 
-MWRender::Player& RenderingManager::getPlayer(){
-    return (*mPlayer);
-}
-
 OEngine::Render::Fader* RenderingManager::getFader()
 {
     return mRendering.getFader();
@@ -253,8 +247,34 @@ void RenderingManager::moveObject (const MWWorld::Ptr& ptr, const Ogre::Vector3&
 void RenderingManager::scaleObject (const MWWorld::Ptr& ptr, const Ogre::Vector3& scale){
 
 }
-void RenderingManager::rotateObject (const MWWorld::Ptr& ptr, const::Ogre::Quaternion& orientation){
 
+bool
+RenderingManager::rotateObject(
+    const MWWorld::Ptr &ptr,
+    Ogre::Vector3 &rot,
+    bool adjust)
+{
+    if (ptr.getRefData().getHandle() == "player") {
+        if (adjust) {
+            return mPlayer->adjustRotation(rot);
+        } else {
+            return mPlayer->setRotation(rot);
+        }
+    }
+    MWWorld::Class::get(ptr).adjustRotation(ptr, rot.x, rot.y, rot.z);
+
+    if (adjust) {
+        float *f = ptr.getRefData().getPosition().rot;
+        rot.x += f[0], rot.y += f[1], rot.z += f[2];
+    }
+
+    Ogre::Quaternion xr(Ogre::Degree(rot.x), Ogre::Vector3::UNIT_X);
+    Ogre::Quaternion yr(Ogre::Degree(rot.y), Ogre::Vector3::UNIT_Y);
+    Ogre::Quaternion zr(Ogre::Degree(rot.z), Ogre::Vector3::UNIT_Z);
+
+    ptr.getRefData().getBaseNode()->setOrientation(xr * yr * zr);
+
+    return true;
 }
 
 void
@@ -292,11 +312,20 @@ void RenderingManager::update (float duration){
 
     mLocalMap->updatePlayer( mRendering.getCamera()->getRealPosition(), mRendering.getCamera()->getRealOrientation() );
 
-    checkUnderwater();
+    if (mWater) {
+        Ogre::Vector3 cam = mRendering.getCamera()->getRealPosition();
 
-    if (mWater)
+        MWBase::World *world = MWBase::Environment::get().getWorld();
+
+        mWater->updateUnderwater(
+            world->isUnderwater(
+                *world->getPlayer().getPlayer().getCell()->cell,
+                Ogre::Vector3(cam.x, -cam.z, cam.y))
+        );
         mWater->update(duration);
+    }
 }
+
 void RenderingManager::waterAdded (MWWorld::Ptr::CellStore *store){
     if(store->cell->data.flags & store->cell->HasWater
         || ((!(store->cell->data.flags & ESM::Cell::Interior))
@@ -475,13 +504,6 @@ void RenderingManager::toggleLight()
     }
 
     setAmbientMode();
-}
-void RenderingManager::checkUnderwater()
-{
-    if(mWater)
-    {
-         mWater->checkUnderwater( mRendering.getCamera()->getRealPosition().y );
-    }
 }
 
 void RenderingManager::playAnimationGroup (const MWWorld::Ptr& ptr, const std::string& groupName,
@@ -785,6 +807,11 @@ void RenderingManager::getTriangleBatchCount(unsigned int &triangles, unsigned i
         triangles = mRendering.getWindow()->getTriangleCount();
         batches = mRendering.getWindow()->getBatchCount();
     }
+}
+
+void RenderingManager::attachCameraTo(const MWWorld::Ptr &ptr)
+{
+    mPlayer->attachTo(ptr);
 }
 
 } // namespace

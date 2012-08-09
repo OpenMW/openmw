@@ -37,6 +37,9 @@ option(USE_FFMPEG "use ffmpeg for sound" OFF)
 option(USE_AUDIERE "use audiere for sound" OFF)
 option(USE_MPG123 "use mpg123 + libsndfile for sound" ON)
 
+# OS X deployment
+option(OPENMW_OSX_DEPLOYMENT OFF)
+
 find_program(DPKG_PROGRAM dpkg DOC "dpkg program of Debian-based systems")
 
 # Location of morrowind data files
@@ -230,22 +233,46 @@ if (APPLE)
                           ${OGRE_Plugin_OctreeSceneManager_LIBRARY_REL}
                           ${OGRE_Plugin_CgProgramManager_LIBRARY_REL}
                           ${OGRE_Plugin_ParticleFX_LIBRARY_REL})
+
+    if (${OGRE_PLUGIN_DIR_REL}})
+        set(OGRE_PLUGINS_REL_FOUND TRUE)
+    endif ()
+
+    if (${OGRE_PLUGIN_DIR_DBG})
+        set(OGRE_PLUGINS_DBG_FOUND TRUE)
+    endif ()
+
+    if (${OGRE_PLUGINS_REL_FOUND})
+        set(OGRE_PLUGIN_DIR ${OGRE_PLUGIN_DIR_REL})
+    else ()
+        set(OGRE_PLUGIN_DIR ${OGRE_PLUGIN_DIR_DBG})
+    endif ()
+    
+    #set(OGRE_PLUGIN_DIR "${OGRE_PLUGIN_DIR}/")
+
+    configure_file(${OpenMW_SOURCE_DIR}/files/mac/Info.plist
+        "${APP_BUNDLE_DIR}/Contents/Info.plist")
+
+    configure_file(${OpenMW_SOURCE_DIR}/files/mac/openmw.icns
+        "${APP_BUNDLE_DIR}/Contents/Resources/OpenMW.icns" COPYONLY)
 endif (APPLE)
 
 
 # Set up Ogre plugin folder & debug suffix
-set(DEBUG_SUFFIX "")
-if (DEFINED CMAKE_BUILD_TYPE)
-    if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-        set(DEBUG_SUFFIX "_d")
-        add_definitions(-DOGRE_PLUGIN_DEBUG_SUFFIX="_d")
-    else()
-        add_definitions(-DOGRE_PLUGIN_DEBUG_SUFFIX="")
-    endif()
+# Ogre on OS X doesn't use "_d" suffix (see Ogre's CMakeLists.txt)
+if (DEFINED CMAKE_BUILD_TYPE AND CMAKE_BUILD_TYPE STREQUAL "Debug" AND NOT APPLE)
+	add_definitions(-DOGRE_PLUGIN_DEBUG_SUFFIX="_d")
+else()
+	add_definitions(-DOGRE_PLUGIN_DEBUG_SUFFIX="")
 endif()
+
 add_definitions(-DOGRE_PLUGIN_DIR_REL="${OGRE_PLUGIN_DIR_REL}")
 add_definitions(-DOGRE_PLUGIN_DIR_DBG="${OGRE_PLUGIN_DIR_DBG}")
-add_definitions(-DOGRE_PLUGIN_DIR="${OGRE_PLUGIN_DIR}")
+if (APPLE AND OPENMW_OSX_DEPLOYMENT)
+    add_definitions(-DOGRE_PLUGIN_DIR="${APP_BUNDLE_NAME}/Contents/Plugins")
+else()
+    add_definitions(-DOGRE_PLUGIN_DIR="${OGRE_PLUGIN_DIR}")
+endif()
 
 
 add_subdirectory(files/)
@@ -277,35 +304,6 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
     configure_file(${OpenMW_SOURCE_DIR}/files/openmw.desktop
         "${OpenMW_BINARY_DIR}/openmw.desktop")
 endif()
-
-if (APPLE)
-    if (${OGRE_PLUGIN_DIR_REL}})
-        set(OGRE_PLUGINS_REL_FOUND TRUE)
-    endif ()
-
-    if (${OGRE_PLUGIN_DIR_DBG})
-        set(OGRE_PLUGINS_DBG_FOUND TRUE)
-    endif ()
-
-    if (${OGRE_PLUGINS_REL_FOUND})
-        set(OGRE_PLUGIN_DIR ${OGRE_PLUGIN_DIR_REL})
-    else ()
-        set(OGRE_PLUGIN_DIR ${OGRE_PLUGIN_DIR_DBG})
-    endif ()
-
-    set(OGRE_PLUGIN_DIR "${OGRE_PLUGIN_DIR}/")
-
-    set(OGRE_PLUGIN_DIR_2 ${OGRE_PLUGIN_DIR})
-    set(OGRE_PLUGIN_DIR "")
-    set(OGRE_PLUGIN_DIR ${OGRE_PLUGIN_DIR_2})
-
-    configure_file(${OpenMW_SOURCE_DIR}/files/mac/Info.plist
-        "${APP_BUNDLE_DIR}/Contents/Info.plist")
-
-    configure_file(${OpenMW_SOURCE_DIR}/files/mac/openmw.icns
-        "${APP_BUNDLE_DIR}/Contents/Resources/OpenMW.icns" COPYONLY)
-endif (APPLE)
-
 
 # Compiler settings
 if (CMAKE_COMPILER_IS_GNUCC)

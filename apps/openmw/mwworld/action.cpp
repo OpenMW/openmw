@@ -2,8 +2,7 @@
 #include "action.hpp"
 
 #include "../mwbase/environment.hpp"
-
-#include "../mwsound/soundmanager.hpp"
+#include "../mwbase/soundmanager.hpp"
 
 MWWorld::Action::Action() {}
 
@@ -13,7 +12,7 @@ void MWWorld::Action::execute (const Ptr& actor)
 {
     if (!mSoundId.empty())
         MWBase::Environment::get().getSoundManager()->playSound3D (actor, mSoundId, 1.0, 1.0,
-            MWSound::Play_NoTrack);
+            MWBase::SoundManager::Play_NoTrack);
 
     executeImp (actor);
 }

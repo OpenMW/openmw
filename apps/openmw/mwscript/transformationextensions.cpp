@@ -66,18 +66,49 @@ namespace MWScript
                     float ay = Ogre::Radian(ptr.getRefData().getPosition().rot[1]).valueDegrees();
                     float az = Ogre::Radian(ptr.getRefData().getPosition().rot[2]).valueDegrees();
 
-                    if(axis == "x")
+                    if (axis == "x")
                     {
                         MWBase::Environment::get().getWorld()->rotateObject(ptr,angle,ay,az);
                     }
-                    if(axis == "y")
+                    else if (axis == "y")
                     {
                         MWBase::Environment::get().getWorld()->rotateObject(ptr,ax,angle,az);
                     }
-                    if(axis == "z")
+                    else if (axis == "z")
                     {
                         MWBase::Environment::get().getWorld()->rotateObject(ptr,ax,ay,angle);
                     }
+                    else
+                        throw std::runtime_error ("invalid ration axis: " + axis);
+                }
+        };
+
+        template<class R>
+        class OpGetStartingAngle : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWWorld::Ptr ptr = R()(runtime);
+
+                    std::string axis = runtime.getStringLiteral (runtime[0].mInteger);
+                    runtime.pop();
+
+                    if (axis == "x")
+                    {
+                        runtime.push(Ogre::Radian(ptr.getRefData().getPosition().rot[0]).valueDegrees());
+                    }
+                    else if (axis == "y")
+                    {
+                        runtime.push(Ogre::Radian(ptr.getRefData().getPosition().rot[1]).valueDegrees());
+                    }
+                    else if (axis == "z")
+                    {
+                        runtime.push(Ogre::Radian(ptr.getRefData().getPosition().rot[2]).valueDegrees());
+                    }
+                    else
+                        throw std::runtime_error ("invalid ration axis: " + axis);
                 }
         };
 
@@ -93,18 +124,20 @@ namespace MWScript
                     std::string axis = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
 
-                    if(axis == "x")
+                    if (axis=="x")
                     {
-                        runtime.push(Ogre::Radian(ptr.getRefData().getPosition().rot[0]).valueDegrees());
+                        runtime.push(Ogre::Radian(ptr.getCellRef().pos.rot[0]).valueDegrees());
                     }
-                    if(axis == "y")
+                    else if (axis=="y")
                     {
-                        runtime.push(Ogre::Radian(ptr.getRefData().getPosition().rot[1]).valueDegrees());
+                        runtime.push(Ogre::Radian(ptr.getCellRef().pos.rot[1]).valueDegrees());
                     }
-                    if(axis == "z")
+                    else if (axis=="z")
                     {
-                        runtime.push(Ogre::Radian(ptr.getRefData().getPosition().rot[2]).valueDegrees());
+                        runtime.push(Ogre::Radian(ptr.getCellRef().pos.rot[2]).valueDegrees());
                     }
+                    else
+                        throw std::runtime_error ("invalid ration axis: " + axis);
                 }
         };
 
@@ -124,11 +157,11 @@ namespace MWScript
                     {
                         runtime.push(ptr.getRefData().getPosition().pos[0]);
                     }
-                    if(axis == "y")
+                    else if(axis == "y")
                     {
                         runtime.push(ptr.getRefData().getPosition().pos[1]);
                     }
-                    if(axis == "z")
+                    else if(axis == "z")
                     {
                         runtime.push(ptr.getRefData().getPosition().pos[2]);
                     }
@@ -158,11 +191,11 @@ namespace MWScript
                     {
                         MWBase::Environment::get().getWorld()->moveObject(ptr,pos,ay,az);
                     }
-                    if(axis == "y")
+                    else if(axis == "y")
                     {
                         MWBase::Environment::get().getWorld()->moveObject(ptr,ax,pos,az);
                     }
-                    if(axis == "z")
+                    else if(axis == "z")
                     {
                         MWBase::Environment::get().getWorld()->moveObject(ptr,ax,ay,pos);
                     }
@@ -185,11 +218,11 @@ namespace MWScript
                     {
                         runtime.push(ptr.getCellRef().pos.pos[0]);
                     }
-                    if(axis == "y")
+                    else if(axis == "y")
                     {
                         runtime.push(ptr.getCellRef().pos.pos[1]);
                     }
-                    if(axis == "z")
+                    else if(axis == "z")
                     {
                         runtime.push(ptr.getCellRef().pos.pos[2]);
                     }

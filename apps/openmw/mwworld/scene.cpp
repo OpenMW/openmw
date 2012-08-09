@@ -2,10 +2,9 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp" /// FIXME
+#include "../mwbase/soundmanager.hpp"
 
 #include "../mwmechanics/mechanicsmanager.hpp"
-
-#include "../mwsound/soundmanager.hpp"
 
 #include "../mwgui/window_manager.hpp"
 
@@ -135,23 +134,33 @@ namespace MWWorld
 
     }
 
-    void Scene::playerCellChange (Ptr::CellStore *cell, const ESM::Position& position,
+    void
+    Scene::playerCellChange(
+        MWWorld::CellStore *cell,
+        const ESM::Position& pos,
         bool adjustPlayerPos)
     {
-        bool hasWater = cell->cell->data.flags & cell->cell->HasWater;
-        mPhysics->setCurrentWater(hasWater, cell->cell->water);
-        if (adjustPlayerPos)
-        {
-            MWBase::Environment::get().getWorld()->getPlayer().setPos (position.pos[0], position.pos[1], position.pos[2]);
-            MWBase::Environment::get().getWorld()->getPlayer().setRot (position.rot[0], position.rot[1], position.rot[2]);
-        }
-
         MWBase::Environment::get().getWorld()->getPlayer().setCell (cell);
 
-        MWBase::Environment::get().getMechanicsManager()->addActor (MWBase::Environment::get().getWorld()->getPlayer().getPlayer());
-        MWBase::Environment::get().getMechanicsManager()->watchActor (MWBase::Environment::get().getWorld()->getPlayer().getPlayer());
+        bool hasWater = cell->cell->data.flags & cell->cell->HasWater;
+        mPhysics->setCurrentWater(hasWater, cell->cell->water);
 
-        MWBase::Environment::get().getWindowManager()->changeCell( mCurrentCell );
+        MWBase::World *world = MWBase::Environment::get().getWorld();
+        MWWorld::Ptr player = world->getPlayer().getPlayer();
+
+        if (adjustPlayerPos) {
+            world->moveObject(player, pos.pos[0], pos.pos[1], pos.pos[2]);
+            world->rotateObject(player, pos.rot[0], pos.rot[1], pos.rot[2]);
+        }
+        world->getPlayer().setCell(cell);
+
+        MWMechanics::MechanicsManager *mechMgr =
+            MWBase::Environment::get().getMechanicsManager();
+
+        mechMgr->addActor(player);
+        mechMgr->watchActor(player);
+
+        MWBase::Environment::get().getWindowManager()->changeCell(mCurrentCell);
     }
 
     void Scene::changeCell (int X, int Y, const ESM::Position& position, bool adjustPlayerPos)
@@ -224,7 +233,7 @@ namespace MWWorld
 
 
         // adjust player
-        playerCellChange (MWBase::Environment::get().getWorld()->getExterior(X, Y), position, adjustPlayerPos);
+        playerCellChange (mCurrentCell, position, adjustPlayerPos);
 
         // Sky system
         MWBase::Environment::get().getWorld()->adjustSky();
@@ -337,7 +346,7 @@ namespace MWWorld
         mRendering.addObject(ptr);
         MWWorld::Class::get(ptr).insertObject(ptr, *mPhysics);
     }
-   
+
     void Scene::removeObjectFromScene (const Ptr& ptr)
     {
         MWBase::Environment::get().getMechanicsManager()->removeActor (ptr);
@@ -350,10 +359,7 @@ namespace MWWorld
     {
         CellStoreCollection::iterator active = mActiveCells.begin();
         while (active != mActiveCells.end()) {
-            if ((*active)->cell->name == cell.cell->name &&
-                (*active)->cell->data.gridX == cell.cell->data.gridX &&
-                (*active)->cell->data.gridY == cell.cell->data.gridY)
-            {
+            if (**active == cell) {
                 return true;
             }
             ++active;

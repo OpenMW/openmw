@@ -8,7 +8,7 @@
 #include "openal_output.hpp"
 #include "sound_decoder.hpp"
 #include "sound.hpp"
-#include "soundmanager.hpp"
+#include "soundmanagerimp.hpp"
 
 #ifndef ALC_ALL_DEVICES_SPECIFIER
 #define ALC_ALL_DEVICES_SPECIFIER 0x1013
@@ -263,7 +263,7 @@ void OpenAL_SoundStream::update()
 {
     ALfloat gain = mVolume*mBaseVolume;
     ALfloat pitch = mPitch;
-    if(!(mFlags&Play_NoEnv) && mOutput.mLastEnvironment == Env_Underwater)
+    if(!(mFlags&MWBase::SoundManager::Play_NoEnv) && mOutput.mLastEnvironment == Env_Underwater)
     {
         gain *= 0.9f;
         pitch *= 0.7f;
@@ -400,7 +400,7 @@ void OpenAL_Sound::update()
 {
     ALfloat gain = mVolume*mBaseVolume;
     ALfloat pitch = mPitch;
-    if(!(mFlags&Play_NoEnv) && mOutput.mLastEnvironment == Env_Underwater)
+    if(!(mFlags&MWBase::SoundManager::Play_NoEnv) && mOutput.mLastEnvironment == Env_Underwater)
     {
         gain *= 0.9f;
         pitch *= 0.7f;
@@ -420,7 +420,7 @@ void OpenAL_Sound3D::update()
     ALfloat pitch = mPitch;
     if(mPos.squaredDistance(mOutput.mPos) > mMaxDistance*mMaxDistance)
         gain = 0.0f;
-    else if(!(mFlags&Play_NoEnv) && mOutput.mLastEnvironment == Env_Underwater)
+    else if(!(mFlags&MWBase::SoundManager::Play_NoEnv) && mOutput.mLastEnvironment == Env_Underwater)
     {
         gain *= 0.9f;
         pitch *= 0.7f;
@@ -642,7 +642,7 @@ void OpenAL_Output::bufferFinished(ALuint buf)
 }
 
 
-SoundPtr OpenAL_Output::playSound(const std::string &fname, float volume, float pitch, int flags)
+MWBase::SoundPtr OpenAL_Output::playSound(const std::string &fname, float volume, float pitch, int flags)
 {
     boost::shared_ptr<OpenAL_Sound> sound;
     ALuint src=0, buf=0;
@@ -674,7 +674,7 @@ SoundPtr OpenAL_Output::playSound(const std::string &fname, float volume, float 
     alSourcef(src, AL_MAX_DISTANCE, 1000.0f);
     alSourcef(src, AL_ROLLOFF_FACTOR, 0.0f);
 
-    if(!(flags&Play_NoEnv) && mLastEnvironment == Env_Underwater)
+    if(!(flags&MWBase::SoundManager::Play_NoEnv) && mLastEnvironment == Env_Underwater)
     {
         volume *= 0.9f;
         pitch *= 0.7f;
@@ -683,7 +683,7 @@ SoundPtr OpenAL_Output::playSound(const std::string &fname, float volume, float 
     alSourcef(src, AL_PITCH, pitch);
 
     alSourcei(src, AL_SOURCE_RELATIVE, AL_TRUE);
-    alSourcei(src, AL_LOOPING, (flags&Play_Loop) ? AL_TRUE : AL_FALSE);
+    alSourcei(src, AL_LOOPING, (flags&MWBase::SoundManager::Play_Loop) ? AL_TRUE : AL_FALSE);
     throwALerror();
 
     alSourcei(src, AL_BUFFER, buf);
@@ -693,7 +693,7 @@ SoundPtr OpenAL_Output::playSound(const std::string &fname, float volume, float 
     return sound;
 }
 
-SoundPtr OpenAL_Output::playSound3D(const std::string &fname, const Ogre::Vector3 &pos, float volume, float pitch,
+MWBase::SoundPtr OpenAL_Output::playSound3D(const std::string &fname, const Ogre::Vector3 &pos, float volume, float pitch,
                                     float min, float max, int flags)
 {
     boost::shared_ptr<OpenAL_Sound> sound;
@@ -726,7 +726,7 @@ SoundPtr OpenAL_Output::playSound3D(const std::string &fname, const Ogre::Vector
     alSourcef(src, AL_MAX_DISTANCE, max);
     alSourcef(src, AL_ROLLOFF_FACTOR, 1.0f);
 
-    if(!(flags&Play_NoEnv) && mLastEnvironment == Env_Underwater)
+    if(!(flags&MWBase::SoundManager::Play_NoEnv) && mLastEnvironment == Env_Underwater)
     {
         volume *= 0.9f;
         pitch *= 0.7f;
@@ -736,7 +736,7 @@ SoundPtr OpenAL_Output::playSound3D(const std::string &fname, const Ogre::Vector
     alSourcef(src, AL_PITCH, pitch);
 
     alSourcei(src, AL_SOURCE_RELATIVE, AL_FALSE);
-    alSourcei(src, AL_LOOPING, (flags&Play_Loop) ? AL_TRUE : AL_FALSE);
+    alSourcei(src, AL_LOOPING, (flags&MWBase::SoundManager::Play_Loop) ? AL_TRUE : AL_FALSE);
     throwALerror();
 
     alSourcei(src, AL_BUFFER, buf);
@@ -747,7 +747,7 @@ SoundPtr OpenAL_Output::playSound3D(const std::string &fname, const Ogre::Vector
 }
 
 
-SoundPtr OpenAL_Output::streamSound(const std::string &fname, float volume, float pitch, int flags)
+MWBase::SoundPtr OpenAL_Output::streamSound(const std::string &fname, float volume, float pitch, int flags)
 {
     boost::shared_ptr<OpenAL_SoundStream> sound;
     ALuint src;
@@ -759,7 +759,7 @@ SoundPtr OpenAL_Output::streamSound(const std::string &fname, float volume, floa
 
     try
     {
-        if((flags&Play_Loop))
+        if((flags&MWBase::SoundManager::Play_Loop))
             std::cout <<"Warning: cannot loop stream "<<fname<< std::endl;
         DecoderPtr decoder = mManager.getDecoder();
         decoder->open(fname);
@@ -779,7 +779,7 @@ SoundPtr OpenAL_Output::streamSound(const std::string &fname, float volume, floa
     alSourcef(src, AL_MAX_DISTANCE, 1000.0f);
     alSourcef(src, AL_ROLLOFF_FACTOR, 0.0f);
 
-    if(!(flags&Play_NoEnv) && mLastEnvironment == Env_Underwater)
+    if(!(flags&MWBase::SoundManager::Play_NoEnv) && mLastEnvironment == Env_Underwater)
     {
         volume *= 0.9f;
         pitch *= 0.7f;

@@ -9,7 +9,8 @@
 #include <components/esm_store/store.hpp>
 
 #include "../mwbase/environment.hpp"
-#include "../mwdialogue/dialoguemanager.hpp"
+#include "../mwbase/dialoguemanager.hpp"
+#include "../mwbase/world.hpp"
 
 #include "dialogue_history.hpp"
 #include "window_manager.hpp"

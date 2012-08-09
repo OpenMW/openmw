@@ -8,6 +8,7 @@
 
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
+#include "../mwbase/soundmanager.hpp"
 
 #include "../mwworld/player.hpp"
 #include "../mwworld/inventorystore.hpp"
@@ -15,8 +16,6 @@
 #include "../mwmechanics/spells.hpp"
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/spellsuccess.hpp"
-
-#include "../mwsound/soundmanager.hpp"
 
 #include "window_manager.hpp"
 #include "inventorywindow.hpp"
