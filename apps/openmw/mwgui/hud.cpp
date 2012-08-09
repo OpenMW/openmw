@@ -8,11 +8,10 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
+#include "../mwbase/soundmanager.hpp"
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/player.hpp"
-
-#include "../mwsound/soundmanager.hpp"
 
 #include "../mwgui/widgets.hpp"
 

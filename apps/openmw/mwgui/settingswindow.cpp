@@ -12,10 +12,9 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
+#include "../mwbase/soundmanager.hpp"
 
 #include "../mwrender/renderingmanager.hpp"
-
-#include "../mwsound/soundmanager.hpp"
 
 #include "../mwinput/inputmanager.hpp"
 

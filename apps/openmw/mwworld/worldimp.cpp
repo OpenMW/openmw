@@ -4,13 +4,12 @@
 #include <components/files/collections.hpp>
 
 #include "../mwbase/environment.hpp"
+#include "../mwbase/soundmanager.hpp"
 
 #include "../mwrender/sky.hpp"
 #include "../mwrender/player.hpp"
 
 #include "../mwmechanics/mechanicsmanager.hpp"
-
-#include "../mwsound/soundmanager.hpp"
 
 #include "../mwgui/window_manager.hpp"
 

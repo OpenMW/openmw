@@ -1,4 +1,4 @@
-#include "soundmanager.hpp"
+#include "soundmanagerimp.hpp"
 
 #include <iostream>
 #include <algorithm>
@@ -222,7 +222,7 @@ namespace MWSound
             const ESM::Position &pos = ptr.getCellRef().pos;
             const Ogre::Vector3 objpos(pos.pos[0], pos.pos[1], pos.pos[2]);
 
-            SoundPtr sound = mOutput->playSound3D(filePath, objpos, basevol, 1.0f,
+            MWBase::SoundPtr sound = mOutput->playSound3D(filePath, objpos, basevol, 1.0f,
                                                   20.0f, 12750.0f, Play_Normal);
             sound->mPos = objpos;
             sound->mBaseVolume = basevol;
@@ -244,7 +244,7 @@ namespace MWSound
             float basevol = mMasterVolume * mVoiceVolume;
             std::string filePath = "Sound/"+filename;
 
-            SoundPtr sound = mOutput->playSound(filePath, basevol, 1.0f, Play_Normal);
+            MWBase::SoundPtr sound = mOutput->playSound(filePath, basevol, 1.0f, Play_Normal);
             sound->mBaseVolume = basevol;
 
             mActiveSounds[sound] = std::make_pair(MWWorld::Ptr(), std::string("_say_sound"));
@@ -277,9 +277,9 @@ namespace MWSound
 
 
 
-    SoundPtr SoundManager::playSound(const std::string& soundId, float volume, float pitch, int mode)
+    MWBase::SoundPtr SoundManager::playSound(const std::string& soundId, float volume, float pitch, int mode)
     {
-        SoundPtr sound;
+        MWBase::SoundPtr sound;
         if(!mOutput->isInitialized())
             return sound;
         try
@@ -305,10 +305,10 @@ namespace MWSound
         return sound;
     }
 
-    SoundPtr SoundManager::playSound3D(MWWorld::Ptr ptr, const std::string& soundId,
+    MWBase::SoundPtr SoundManager::playSound3D(MWWorld::Ptr ptr, const std::string& soundId,
                                        float volume, float pitch, int mode)
     {
-        SoundPtr sound;
+        MWBase::SoundPtr sound;
         if(!mOutput->isInitialized())
             return sound;
         try

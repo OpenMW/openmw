@@ -21,7 +21,7 @@
 #include "mwscript/scriptmanagerimp.hpp"
 #include "mwscript/extensions.hpp"
 
-#include "mwsound/soundmanager.hpp"
+#include "mwsound/soundmanagerimp.hpp"
 
 #include "mwworld/class.hpp"
 #include "mwworld/player.hpp"

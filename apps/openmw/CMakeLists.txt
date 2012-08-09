@@ -43,7 +43,7 @@ add_openmw_dir (mwscript
     )
 
 add_openmw_dir (mwsound
-    soundmanager openal_output audiere_decoder mpgsnd_decoder ffmpeg_decoder
+    soundmanagerimp openal_output audiere_decoder mpgsnd_decoder ffmpeg_decoder
     )
 
 add_openmw_dir (mwworld
@@ -64,7 +64,7 @@ add_openmw_dir (mwmechanics
     )
 
 add_openmw_dir (mwbase
-    environment world scriptmanager dialoguemanager journal
+    environment world scriptmanager dialoguemanager journal soundmanager
     )
 
 # Main executable

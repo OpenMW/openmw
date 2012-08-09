@@ -5,14 +5,13 @@
 
 #include "../mwinput/inputmanager.hpp"
 
-#include "../mwsound/soundmanager.hpp"
-
 #include "../mwmechanics/mechanicsmanager.hpp"
 
 #include "world.hpp"
 #include "scriptmanager.hpp"
 #include "dialoguemanager.hpp"
 #include "journal.hpp"
+#include "soundmanager.hpp"
 
 MWBase::Environment *MWBase::Environment::sThis = 0;
 
@@ -35,7 +34,7 @@ void MWBase::Environment::setWorld (World *world)
     mWorld = world;
 }
 
-void MWBase::Environment::setSoundManager (MWSound::SoundManager *soundManager)
+void MWBase::Environment::setSoundManager (SoundManager *soundManager)
 {
     mSoundManager = soundManager;
 }
@@ -81,7 +80,7 @@ MWBase::World *MWBase::Environment::getWorld() const
     return mWorld;
 }
 
-MWSound::SoundManager *MWBase::Environment::getSoundManager() const
+MWBase::SoundManager *MWBase::Environment::getSoundManager() const
 {
     assert (mSoundManager);
     return mSoundManager;
