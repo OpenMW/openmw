@@ -1,5 +1,5 @@
-#ifndef GAME_MWBASE_DIALOGUEMANAGERIMP_H
-#define GAME_MWBASE_DIALOGUEMANAGERIMP_H
+#ifndef GAME_MWBASE_DIALOGUEMANAGER_H
+#define GAME_MWBASE_DIALOGUEMANAGER_H
 
 #include <string>
 
@@ -10,6 +10,7 @@ namespace MWWorld
 
 namespace MWBase
 {
+    /// \brief Interface for dialogue manager (implemented in MWDialogue)
     class DialogueManager
     {
             DialogueManager (const DialogueManager&);
