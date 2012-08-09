@@ -424,9 +424,10 @@ private:
         }
       else
         {
-          // Start mouse-looking again. TODO: This should also allow
-          // for other ways to disable mouselook, like paralyzation.
-          mouse->enable();
+            // Start mouse-looking again if allowed.
+            if (mControlSwitch["playerlooking"]) {
+                mouse->enable();
+            }
 
           // Disable GUI events
           guiEvents->enabled = false;
@@ -439,13 +440,19 @@ private:
             return;
         }
         /// \note 7 switches at all, if-else is relevant
-        if (sw == "playercontrols") {
+        if (sw == "playercontrols" && !value) {
             player.setLeftRight(0);
             player.setForwardBackward(0);
             player.setAutoMove(false);
-        } else if (sw == "playerjumping") {
+        } else if (sw == "playerjumping" && !value) {
             /// \fixme maybe crouching at this time
             player.setUpDown(0);
+        } else if (sw == "playerlooking") {
+            if (value) {
+                mouse->enable();
+            } else {
+                mouse->disable();
+            }
         }
         mControlSwitch[sw] = value;
     }
