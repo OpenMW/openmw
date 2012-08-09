@@ -197,6 +197,39 @@ namespace MWScript
         };
 
         template<class R>
+        class OpPositionCell : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWWorld::Ptr ptr = R()(runtime);
+
+                    Interpreter::Type_Float x = runtime[0].mFloat;
+                    runtime.pop();
+                    Interpreter::Type_Float y = runtime[0].mFloat;
+                    runtime.pop();
+                    Interpreter::Type_Float z = runtime[0].mFloat;
+                    runtime.pop();
+                    Interpreter::Type_Float zRot = runtime[0].mFloat;
+                    runtime.pop();
+                    std::string cellID = runtime.getStringLiteral (runtime[0].mInteger);
+                    runtime.pop();
+
+                    MWBase::Environment::get().getWorld()->moveObjectToCell(ptr,cellID,x,y,z);
+                    float ax = Ogre::Radian(ptr.getRefData().getPosition().rot[0]).valueDegrees();
+                    float ay = Ogre::Radian(ptr.getRefData().getPosition().rot[1]).valueDegrees();
+                    if(ptr.getTypeName() == "struct ESM::NPC")//some morrowind oddity
+                    {
+                        ax = ax/60.;
+                        ay = ay/60.;
+                        zRot = zRot/60.;
+                    }
+                    MWBase::Environment::get().getWorld()->rotateObject(ptr,ax,ay,zRot);
+                }
+        };
+
+        template<class R>
         class OpPosition : public Interpreter::Opcode0
         {
             public:
@@ -243,6 +276,8 @@ namespace MWScript
         const int opcodeGetStartingPosExplicit = 0x2000171;
         const int opcodePosition = 0x2000172;
         const int opcodePositionExplicit = 0x2000173;
+        const int opcodePositionCell = 0x2000174;
+        const int opcodePositionCellExplicit = 0x2000175;
 
         void registerExtensions (Compiler::Extensions& extensions)
         {
@@ -254,6 +289,7 @@ namespace MWScript
             extensions.registerFunction("getpos",'f',"c",opcodeGetPos,opcodeGetPosExplicit);
             extensions.registerFunction("getstartingpos",'f',"c",opcodeGetStartingPos,opcodeGetStartingPosExplicit);
             extensions.registerInstruction("position","ffff",opcodePosition,opcodePositionExplicit);
+            extensions.registerInstruction("positioncell","ffffS",opcodePositionCell,opcodePositionCellExplicit);
         }
 
         void installOpcodes (Interpreter::Interpreter& interpreter)
@@ -274,6 +310,8 @@ namespace MWScript
             interpreter.installSegment5(opcodeGetStartingPosExplicit,new OpGetStartingPos<ExplicitRef>);
             interpreter.installSegment5(opcodePosition,new OpPosition<ImplicitRef>);
             interpreter.installSegment5(opcodePositionExplicit,new OpPosition<ExplicitRef>);
+            interpreter.installSegment5(opcodePositionCell,new OpPositionCell<ImplicitRef>);
+            interpreter.installSegment5(opcodePositionCellExplicit,new OpPositionCell<ExplicitRef>);
         }
     }
 }
