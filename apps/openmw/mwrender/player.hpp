@@ -28,6 +28,7 @@ namespace MWRender
         bool mVanityModeEnabled;
 
         void controlFlip();
+        void updateListener();
 
     public:
 

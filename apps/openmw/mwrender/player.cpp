@@ -3,8 +3,12 @@
 #include <OgreSceneNode.h>
 #include <OgreCamera.h>
 
+#include "../mwbase/environment.hpp"
+
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/refdata.hpp"
+
+#include "../mwsound/soundmanager.hpp"
 
 namespace MWRender
 {
@@ -33,6 +37,7 @@ namespace MWRender
         yawNode->setOrientation(yr);
 
         controlFlip();
+        updateListener();
 
         return !mVanityModeEnabled;
     }
@@ -56,6 +61,7 @@ namespace MWRender
         yawNode->yaw(Ogre::Degree(-rot.z));
 
         controlFlip();
+        updateListener();
 
         return !mVanityModeEnabled;
     }
@@ -80,5 +86,17 @@ namespace MWRender
                 pitchNode->setOrientation(Ogre::Quaternion(sqrt, -sqrt, 0, 0));
             }
         }
+    }
+
+    void Player::updateListener()
+    {
+        Ogre::Vector3 pos = mCamera->getRealPosition();
+        Ogre::Vector3 dir = mCamera->getRealDirection();
+
+        Ogre::Real xch;
+        xch = pos.y, pos.y = -pos.z, pos.z = xch;
+        xch = dir.y, dir.y = -dir.z, dir.z = xch;
+
+        MWBase::Environment::get().getSoundManager()->setListenerPosDir(pos, dir);
     }
 }

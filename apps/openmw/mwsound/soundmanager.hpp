@@ -7,18 +7,12 @@
 
 #include <boost/shared_ptr.hpp>
 
+#include <OgreVector3.h>
 #include <OgreResourceGroupManager.h>
 
 #include <components/settings/settings.hpp>
 
 #include "../mwworld/ptr.hpp"
-
-
-namespace Ogre
-{
-    class Root;
-    class Camera;
-}
 
 namespace MWSound
 {
@@ -67,6 +61,9 @@ namespace MWSound
         typedef std::pair<MWWorld::Ptr,std::string> PtrIDPair;
         typedef std::map<SoundPtr,PtrIDPair> SoundMap;
         SoundMap mActiveSounds;
+
+        Ogre::Vector3 mListenerPos;
+        Ogre::Vector3 mListenerDir;
 
         std::string lookup(const std::string &soundId,
                   float &volume, float &min, float &max);
@@ -145,6 +142,8 @@ namespace MWSound
         ///< Update the position of all sounds connected to the given object.
 
         void update(float duration);
+
+        void setListenerPosDir(const Ogre::Vector3 &pos, const Ogre::Vector3 &dir);
     };
 }
 
