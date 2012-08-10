@@ -4,8 +4,7 @@ The OpenMW project was started in 2008 by Nicolay Korslund.
 In the course of years many people have contributed to the project.
 
 If you feel your name is missing from this list,
-Feel free to modify it directly in our GitHub Repository,
-or ask a developer to do it for you.
+please notify a developer.
 
 
 Programmers:
