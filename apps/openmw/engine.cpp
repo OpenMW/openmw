@@ -116,7 +116,7 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
         std::cerr << "Error in framelistener: " << e.what() << std::endl;
     }
 
-    return !MWBase::Environment::get().getWorld()->getExitNow();
+    return true;
 }
 
 OMW::Engine::Engine(Files::ConfigurationManager& configurationManager)

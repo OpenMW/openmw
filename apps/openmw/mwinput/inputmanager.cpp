@@ -1,5 +1,7 @@
 #include "inputmanager.hpp"
 
+#include <OgreRoot.h>
+
 #include <openengine/input/dispatcher.hpp>
 #include <openengine/input/poller.hpp>
 
@@ -222,7 +224,7 @@ private:
     void exitNow()
     {
         if(!windows.isGuiMode())
-            MWBase::Environment::get().getWorld()->exitNow();
+            Ogre::Root::getSingleton().queueEndRendering ();
     }
 
   public:

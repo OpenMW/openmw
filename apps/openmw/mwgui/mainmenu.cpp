@@ -1,5 +1,8 @@
 #include "mainmenu.hpp"
 
+#include <OgreRoot.h>
+
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 
@@ -69,7 +72,7 @@ namespace MWGui
 
     void MainMenu::exitGame(MyGUI::Widget* sender)
     {
-        MWBase::Environment::get().getWorld ()->exitNow();
+        Ogre::Root::getSingleton ().queueEndRendering ();
     }
 
 }

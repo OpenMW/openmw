@@ -248,9 +248,6 @@ namespace MWBase
 
             virtual bool isSwimming(const MWWorld::Ptr &object) = 0;
             virtual bool isUnderwater(const ESM::Cell &cell, const Ogre::Vector3 &pos) = 0;
-
-            virtual void exitNow() = 0; ///< exit after this frame has ended
-            virtual bool getExitNow() = 0; ///< @return true if the application should exit
     };
 }
 
