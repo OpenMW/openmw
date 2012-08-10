@@ -144,9 +144,9 @@ namespace MWWorld
         mPhysics->setCurrentWater(hasWater, cell->cell->water);
 
         MWBase::World *world = MWBase::Environment::get().getWorld();
-        MWWorld::Ptr player = world->getPlayer().getPlayer();
-
         world->getPlayer().setCell(cell);
+
+        MWWorld::Ptr player = world->getPlayer().getPlayer();
 
         if (adjustPlayerPos) {
             world->moveObject(player, pos.pos[0], pos.pos[1], pos.pos[2]);
