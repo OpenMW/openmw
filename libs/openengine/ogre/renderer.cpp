@@ -17,6 +17,10 @@
 #include <cstdlib>
 #include <stdexcept>
 
+#if defined(__APPLE__) && !__LP64__
+#include <Carbon/Carbon.h>
+#endif
+
 using namespace Ogre;
 using namespace OEngine::Render;
 
@@ -31,7 +35,33 @@ void OgreRenderer::cleanup()
 
 void OgreRenderer::start()
 {
+#if defined(__APPLE__) && !defined(__LP64__)
+    bool quit = false;
+    // OSX Carbon Message Pump
+    do {
+        EventRef event = NULL;
+        EventTargetRef targetWindow;
+        targetWindow = GetEventDispatcherTarget();
+
+        // If we are unable to get the target then we no longer care about events.
+        if (!targetWindow) return;
+
+        // Grab the next event while possible
+        while (ReceiveNextEvent(0, NULL, kEventDurationNoWait, true, &event) == noErr)
+        {
+            // Dispatch the event
+            SendEventToEventTarget(event, targetWindow);
+            ReleaseEvent(event);
+        }
+
+        if (!Ogre::Root::getSingleton().renderOneFrame()) {
+            quit = true;
+        }
+
+    } while (!quit);
+#else
     mRoot->startRendering();
+#endif
 }
 
 bool OgreRenderer::loadPlugins() const
