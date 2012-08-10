@@ -17,7 +17,7 @@
 #include <cstdlib>
 #include <stdexcept>
 
-#if defined(__APPLE__) && !__LP64__
+#if defined(__APPLE__) && !defined(__LP64__)
 #include <Carbon/Carbon.h>
 #endif
 
