@@ -84,8 +84,6 @@ namespace MWWorld
             unsigned long lastTick;
             Ogre::Timer mTimer;
 
-            bool mExit;
-
             int getDaysPerMonth (int month) const;
 
             bool moveObjectImp (const Ptr& ptr, float x, float y, float z);
