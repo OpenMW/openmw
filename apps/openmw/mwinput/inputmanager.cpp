@@ -5,7 +5,6 @@
 
 #include <openengine/gui/events.hpp>
 
-#include <openengine/ogre/exitlistener.hpp>
 #include <openengine/ogre/renderer.hpp>
 
 #include "../mwgui/window_manager.hpp"
@@ -20,6 +19,7 @@
 #include "../engine.hpp"
 
 #include "../mwworld/player.hpp"
+#include "../mwbase/world.hpp"
 
 #include <boost/bind.hpp>
 #include <boost/filesystem.hpp>
@@ -68,8 +68,6 @@ namespace MWInput
       A_ToggleWeapon,
       A_ToggleSpell,
 
-      A_Settings, // Temporary hotkey
-
       A_LAST            // Marker for the last item
     };
 
@@ -78,7 +76,6 @@ namespace MWInput
   {
     OEngine::Input::DispatcherPtr disp;
     OEngine::Render::OgreRenderer &ogre;
-    OEngine::Render::ExitListener exit;
     Mangle::Input::OISDriver input;
     OEngine::Input::Poller poller;
     MouseLookEventPtr mouse;
@@ -138,15 +135,6 @@ private:
 
         std::vector<std::string> empty;
         windows.messageBox ("Screenshot saved", empty);
-    }
-
-    void showSettings()
-    {
-        if (mDragDrop)
-            return;
-
-        if (!windows.isGuiMode() || windows.getMode() != MWGui::GM_Settings)
-            windows.pushGuiMode(MWGui::GM_Settings);
     }
 
     /* toggleInventory() is called when the user presses the button to toggle the inventory screen. */
@@ -222,11 +210,19 @@ private:
         player.toggleRunning();
     }
 
+    void toggleMainMenu()
+    {
+        if (windows.isGuiMode () && windows.getMode () == MWGui::GM_MainMenu)
+            windows.removeGuiMode (MWGui::GM_MainMenu);
+        else
+            windows.pushGuiMode (MWGui::GM_MainMenu);
+    }
+
     // Exit program now button (which is disabled in GUI mode)
     void exitNow()
     {
         if(!windows.isGuiMode())
-            exit.exitNow();
+            MWBase::Environment::get().getWorld()->exitNow();
     }
 
   public:
@@ -236,7 +232,6 @@ private:
                    bool debug,
                    OMW::Engine& engine)
       : ogre(_ogre),
-        exit(ogre.getWindow()),
         input(ogre.getWindow(), !debug),
         poller(input),
         player(_player),
@@ -273,10 +268,8 @@ private:
                       "Draw Weapon");
       disp->funcs.bind(A_ToggleSpell,boost::bind(&InputImpl::toggleSpell,this),
                       "Ready hands");
-      disp->funcs.bind(A_Settings, boost::bind(&InputImpl::showSettings, this),
-                      "Show settings window");
-      // Add the exit listener
-      ogre.getRoot()->addFrameListener(&exit);
+      disp->funcs.bind(A_GameMenu, boost::bind(&InputImpl::toggleMainMenu, this),
+                      "Toggle main menu");
 
       mouse = MouseLookEventPtr(new MouseLookEvent());
 
@@ -316,7 +309,7 @@ private:
       // NOTE: These keys do not require constant polling - use in conjuction with variables in loops.
 
       disp->bind(A_Quit, KC_Q);
-      disp->bind(A_Quit, KC_ESCAPE);
+      disp->bind(A_GameMenu, KC_ESCAPE);
       disp->bind(A_Screenshot, KC_SYSRQ);
       disp->bind(A_Inventory, KC_I);
       disp->bind(A_Console, KC_F1);
@@ -327,7 +320,6 @@ private:
       disp->bind(A_ToggleWalk, KC_C);
       disp->bind(A_ToggleWeapon,KC_F);
       disp->bind(A_ToggleSpell,KC_R);
-      disp->bind(A_Settings, KC_F2);
 
       // Key bindings for polled keys
       // NOTE: These keys are constantly being polled. Only add keys that must be checked each frame.

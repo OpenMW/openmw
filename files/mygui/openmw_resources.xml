@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <MyGUI type="Resource">
+
+    <!-- Cursors -->
     <Resource type="ResourceImageSet" name="ArrowPointerImage">
         <Group name="Pointer" texture="textures\tx_cursor.dds" size="32 32">
             <Index name="Pointer" >
@@ -44,6 +46,10 @@
         </Group>
     </Resource>
 
+
+
+
+    <!-- Journal, book, scroll -->
     <Resource type="ResourceImageSet" name="MenuBook_Close">
         <Group name="States" texture="mwgui1" size="96 24">
             <Index name="disabled">
@@ -111,6 +117,124 @@
             </Index>
         </Group>
     </Resource>
+
+
+
+
+    <!-- Main menu -->
+    <Resource type="ResourceImageSet" name="Menu_NewGame">
+        <Group name="States" texture="mwgui2" size="128 64">
+            <Index name="disabled">
+                <Frame point="0 0"/>
+            </Index>
+            <Index name="normal">
+                <Frame point="0 0"/>
+            </Index>
+            <Index name="highlighted">
+                <Frame point="256 0"/>
+            </Index>
+            <Index name="pushed">
+                <Frame point="128 0"/>
+            </Index>
+        </Group>
+    </Resource>
+    <Resource type="ResourceImageSet" name="Menu_LoadGame">
+        <Group name="States" texture="mwgui2" size="128 64">
+            <Index name="disabled">
+                <Frame point="384 0"/>
+            </Index>
+            <Index name="normal">
+                <Frame point="384 0"/>
+            </Index>
+            <Index name="highlighted">
+                <Frame point="128 64"/>
+            </Index>
+            <Index name="pushed">
+                <Frame point="0 64"/>
+            </Index>
+        </Group>
+    </Resource>
+    <Resource type="ResourceImageSet" name="Menu_Options">
+        <Group name="States" texture="mwgui2" size="128 64">
+            <Index name="disabled">
+                <Frame point="256 64"/>
+            </Index>
+            <Index name="normal">
+                <Frame point="256 64"/>
+            </Index>
+            <Index name="highlighted">
+                <Frame point="0 128"/>
+            </Index>
+            <Index name="pushed">
+                <Frame point="384 64"/>
+            </Index>
+        </Group>
+    </Resource>
+    <Resource type="ResourceImageSet" name="Menu_Credits">
+        <Group name="States" texture="mwgui2" size="128 64">
+            <Index name="disabled">
+                <Frame point="128 128"/>
+            </Index>
+            <Index name="normal">
+                <Frame point="128 128"/>
+            </Index>
+            <Index name="highlighted">
+                <Frame point="384 128"/>
+            </Index>
+            <Index name="pushed">
+                <Frame point="256 128"/>
+            </Index>
+        </Group>
+    </Resource>
+    <Resource type="ResourceImageSet" name="Menu_ExitGame">
+        <Group name="States" texture="mwgui2" size="128 64">
+            <Index name="disabled">
+                <Frame point="0 192"/>
+            </Index>
+            <Index name="normal">
+                <Frame point="0 192"/>
+            </Index>
+            <Index name="highlighted">
+                <Frame point="256 192"/>
+            </Index>
+            <Index name="pushed">
+                <Frame point="128 192"/>
+            </Index>
+        </Group>
+    </Resource>
+    <Resource type="ResourceImageSet" name="Menu_SaveGame">
+        <Group name="States" texture="mwgui2" size="128 64">
+            <Index name="disabled">
+                <Frame point="384 192"/>
+            </Index>
+            <Index name="normal">
+                <Frame point="384 192"/>
+            </Index>
+            <Index name="highlighted">
+                <Frame point="128 256"/>
+            </Index>
+            <Index name="pushed">
+                <Frame point="0 256"/>
+            </Index>
+        </Group>
+    </Resource>
+    <Resource type="ResourceImageSet" name="Menu_Return">
+        <Group name="States" texture="mwgui2" size="128 64">
+            <Index name="disabled">
+                <Frame point="256 256"/>
+            </Index>
+            <Index name="normal">
+                <Frame point="256 256"/>
+            </Index>
+            <Index name="highlighted">
+                <Frame point="0 320"/>
+            </Index>
+            <Index name="pushed">
+                <Frame point="384 256"/>
+            </Index>
+        </Group>
+    </Resource>
+
 
 
     <!-- Skins -->

@@ -9,8 +9,6 @@
   inspired by http://www.ogre3d.org/tikiwiki/FadeEffectOverlay (heavily adjusted)
  */
  
-#include <OgreFrameListener.h>
-
 namespace Ogre
 {
     class TextureUnitState;

@@ -170,7 +170,7 @@ namespace MWWorld
         const std::string& encoding, std::map<std::string,std::string> fallbackMap)
     : mPlayer (0), mLocalScripts (mStore), mGlobalVariables (0),
       mSky (true), mNextDynamicRecord (0), mCells (mStore, mEsm),
-      mNumFacing(0)
+      mNumFacing(0), mExit(false)
     {
         mPhysics = new PhysicsSystem(renderer);
         mPhysEngine = mPhysics->getEngine();
@@ -1147,4 +1147,15 @@ namespace MWWorld
         }
         return pos.z < cell.water;
     }
+
+    void World::exitNow()
+    {
+        mExit = true;
+    }
+
+    bool World::getExitNow()
+    {
+        return mExit;
+    }
+
 }

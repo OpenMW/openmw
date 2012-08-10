@@ -84,6 +84,8 @@ namespace MWWorld
             unsigned long lastTick;
             Ogre::Timer mTimer;
 
+            bool mExit;
+
             int getDaysPerMonth (int month) const;
 
             bool moveObjectImp (const Ptr& ptr, float x, float y, float z);
@@ -274,6 +276,10 @@ namespace MWWorld
 
             virtual bool isSwimming(const MWWorld::Ptr &object);
             virtual bool isUnderwater(const ESM::Cell &cell, const Ogre::Vector3 &pos);
+
+            virtual void exitNow(); ///< exit after this frame has ended
+            virtual bool getExitNow(); ///< @return true if the application should exit
+
     };
 }
 

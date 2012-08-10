@@ -5,6 +5,7 @@ set(DDIR ${OpenMW_BINARY_DIR}/resources/mygui)
 
 set(MYGUI_FILES
     atlas1.cfg
+    mainmenu.cfg
     bigbars.png
     black.png
     core.skin
