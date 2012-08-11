@@ -253,15 +253,15 @@ namespace MWScript
                     MWWorld::CellStore* store = MWBase::Environment::get().getWorld()->getInterior(cellID);
                     if(!store)
                     {
-                        ESM::Cell cell = MWBase::Environment::get().getWorld()->getExterior(cellID);
+                        const ESM::Cell* cell = MWBase::Environment::get().getWorld()->getExterior(cellID);
                         if(cell)
                         {
-                            store = MWBase::Environment::get().getWorld()->getExterior(cell.getGridX(),cell.getGridY());
+                            store = MWBase::Environment::get().getWorld()->getExterior(cell->getGridX(),cell->getGridY());
                         }
                     }
                     if(store)
                     {
-                        MWBase::Environment::get().getWorld()->moveObject(ptr,store,x,y,z);
+                        MWBase::Environment::get().getWorld()->moveObject(ptr,*store,x,y,z);
                         float ax = Ogre::Radian(ptr.getRefData().getPosition().rot[0]).valueDegrees();
                         float ay = Ogre::Radian(ptr.getRefData().getPosition().rot[1]).valueDegrees();
                         if(ptr.getTypeName() == "struct ESM::NPC")//some morrowind oddity
@@ -294,7 +294,7 @@ namespace MWScript
                     runtime.pop();
 
                     MWBase::Environment::get().getWorld()->moveObject(ptr,
-                        MWBase::Environment::get().getWorld()->getExterior(x,y),x,y,z);
+                        *MWBase::Environment::get().getWorld()->getExterior(x,y),x,y,z);
                     float ax = Ogre::Radian(ptr.getRefData().getPosition().rot[0]).valueDegrees();
                     float ay = Ogre::Radian(ptr.getRefData().getPosition().rot[1]).valueDegrees();
                     if(ptr.getTypeName() == "struct ESM::NPC")//some morrowind oddity
