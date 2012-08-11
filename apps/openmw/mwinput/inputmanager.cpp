@@ -214,8 +214,8 @@ private:
 
     void toggleMainMenu()
     {
-        if (windows.isGuiMode () && windows.getMode () == MWGui::GM_MainMenu)
-            windows.removeGuiMode (MWGui::GM_MainMenu);
+        if (windows.isGuiMode () && (windows.getMode () == MWGui::GM_MainMenu || windows.getMode () == MWGui::GM_Settings))
+            windows.popGuiMode();
         else
             windows.pushGuiMode (MWGui::GM_MainMenu);
     }
