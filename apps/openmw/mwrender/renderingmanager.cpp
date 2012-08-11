@@ -254,7 +254,8 @@ RenderingManager::rotateObject(
     Ogre::Vector3 &rot,
     bool adjust)
 {
-    bool isPlayer = ptr.getRefData().getHandle() == "player";
+    bool isActive = ptr.getRefData().getBaseNode() != 0;
+    bool isPlayer = isActive && ptr.getRefData().getHandle() == "player";
     bool force = true;
     
     if (isPlayer) {
@@ -271,7 +272,7 @@ RenderingManager::rotateObject(
         float *f = ptr.getRefData().getPosition().rot;
         rot.x += f[0], rot.y += f[1], rot.z += f[2];
     }
-    if (!isPlayer) {
+    if (!isPlayer && isActive) {
         Ogre::Quaternion xr(Ogre::Radian(rot.x), Ogre::Vector3::UNIT_X);
         Ogre::Quaternion yr(Ogre::Radian(rot.y), Ogre::Vector3::UNIT_Y);
         Ogre::Quaternion zr(Ogre::Radian(rot.z), Ogre::Vector3::UNIT_Z);
