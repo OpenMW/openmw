@@ -5,13 +5,12 @@
 
 #include "../mwinput/inputmanager.hpp"
 
-#include "../mwmechanics/mechanicsmanager.hpp"
-
 #include "world.hpp"
 #include "scriptmanager.hpp"
 #include "dialoguemanager.hpp"
 #include "journal.hpp"
 #include "soundmanager.hpp"
+#include "mechanicsmanager.hpp"
 
 MWBase::Environment *MWBase::Environment::sThis = 0;
 
@@ -49,7 +48,7 @@ void MWBase::Environment::setWindowManager (MWGui::WindowManager *windowManager)
     mWindowManager = windowManager;
 }
 
-void MWBase::Environment::setMechanicsManager (MWMechanics::MechanicsManager *mechanicsManager)
+void MWBase::Environment::setMechanicsManager (MechanicsManager *mechanicsManager)
 {
     mMechanicsManager = mechanicsManager;
 }
@@ -98,7 +97,7 @@ MWGui::WindowManager *MWBase::Environment::getWindowManager() const
     return mWindowManager;
 }
 
-MWMechanics::MechanicsManager *MWBase::Environment::getMechanicsManager() const
+MWBase::MechanicsManager *MWBase::Environment::getMechanicsManager() const
 {
     assert (mMechanicsManager);
     return mMechanicsManager;

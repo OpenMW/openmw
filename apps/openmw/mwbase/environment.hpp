@@ -6,11 +6,6 @@ namespace MWGui
     class WindowManager;
 }
 
-namespace MWMechanics
-{
-    class MechanicsManager;
-}
-
 namespace MWInput
 {
     struct MWInputManager;
@@ -23,6 +18,7 @@ namespace MWBase
     class DialogueManager;
     class Journal;
     class SoundManager;
+    class MechanicsManager;
 
     /// \brief Central hub for mw-subsystems
     ///
@@ -38,7 +34,7 @@ namespace MWBase
             SoundManager *mSoundManager;
             ScriptManager *mScriptManager;
             MWGui::WindowManager *mWindowManager;
-            MWMechanics::MechanicsManager *mMechanicsManager;
+            MechanicsManager *mMechanicsManager;
             DialogueManager *mDialogueManager;
             Journal *mJournal;
             MWInput::MWInputManager *mInputManager;
@@ -64,7 +60,7 @@ namespace MWBase
 
             void setWindowManager (MWGui::WindowManager *windowManager);
 
-            void setMechanicsManager (MWMechanics::MechanicsManager *mechanicsManager);
+            void setMechanicsManager (MechanicsManager *mechanicsManager);
 
             void setDialogueManager (DialogueManager *dialogueManager);
 
@@ -79,11 +75,11 @@ namespace MWBase
 
             SoundManager *getSoundManager() const;
 
-            MWBase::ScriptManager *getScriptManager() const;
+            ScriptManager *getScriptManager() const;
 
             MWGui::WindowManager *getWindowManager() const;
 
-            MWMechanics::MechanicsManager *getMechanicsManager() const;
+            MechanicsManager *getMechanicsManager() const;
 
             DialogueManager *getDialogueManager() const;
 

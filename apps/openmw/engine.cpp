@@ -32,7 +32,7 @@
 #include "mwdialogue/dialoguemanagerimp.hpp"
 #include "mwdialogue/journalimp.hpp"
 
-#include "mwmechanics/mechanicsmanager.hpp"
+#include "mwmechanics/mechanicsmanagerimp.hpp"
 
 
 void OMW::Engine::executeLocalScripts()

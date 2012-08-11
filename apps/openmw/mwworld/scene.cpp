@@ -3,8 +3,7 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp" /// FIXME
 #include "../mwbase/soundmanager.hpp"
-
-#include "../mwmechanics/mechanicsmanager.hpp"
+#include "../mwbase/mechanicsmanager.hpp"
 
 #include "../mwgui/window_manager.hpp"
 
@@ -154,7 +153,7 @@ namespace MWWorld
         }
         world->getPlayer().setCell(cell);
 
-        MWMechanics::MechanicsManager *mechMgr =
+        MWBase::MechanicsManager *mechMgr =
             MWBase::Environment::get().getMechanicsManager();
 
         mechMgr->addActor(player);

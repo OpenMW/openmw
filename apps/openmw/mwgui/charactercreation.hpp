@@ -7,7 +7,6 @@
 
 #include "../mwbase/world.hpp"
 
-#include "../mwmechanics/mechanicsmanager.hpp"
 #include "../mwmechanics/stat.hpp"
 
 namespace MWGui
