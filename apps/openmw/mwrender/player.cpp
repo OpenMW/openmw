@@ -27,10 +27,10 @@ namespace MWRender
         // we are only interested in X and Y rotation
 
         // Rotate around X axis
-        Ogre::Quaternion xr(Ogre::Degree(rot.x), Ogre::Vector3::UNIT_X);
+        Ogre::Quaternion xr(Ogre::Radian(rot.x), Ogre::Vector3::UNIT_X);
 
         // Rotate around Y axis
-        Ogre::Quaternion yr(Ogre::Degree(-rot.z), Ogre::Vector3::UNIT_Y);
+        Ogre::Quaternion yr(Ogre::Radian(-rot.z), Ogre::Vector3::UNIT_Y);
 
         pitchNode->setOrientation(xr);
         yawNode->setOrientation(yr);
@@ -56,8 +56,8 @@ namespace MWRender
         Ogre::SceneNode *pitchNode = mCamera->getParentSceneNode();
         Ogre::SceneNode *yawNode = pitchNode->getParentSceneNode();
 
-        pitchNode->pitch(Ogre::Degree(rot.x));
-        yawNode->yaw(Ogre::Degree(-rot.z));
+        pitchNode->pitch(Ogre::Radian(rot.x));
+        yawNode->yaw(Ogre::Radian(-rot.z));
 
         controlFlip();
         updateListener();

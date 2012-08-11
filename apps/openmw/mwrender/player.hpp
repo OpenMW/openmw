@@ -37,9 +37,11 @@ namespace MWRender
         Player (Ogre::Camera *camera, Ogre::SceneNode* mNode);
 
         /// Set where the player is looking at. Uses Morrowind (euler) angles
+        /// \param rot Rotation angles in radians
         /// \return true if player object needs to bo rotated physically
         bool setRotation(const Ogre::Vector3 &rot);
 
+        /// \param rot Rotation angles in radians
         /// \return true if player object needs to bo rotated physically
         bool adjustRotation(const Ogre::Vector3 &rot);
 

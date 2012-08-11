@@ -210,6 +210,8 @@ namespace MWWorld
 
             virtual void scaleObject (const Ptr& ptr, float scale);
 
+            /// Rotates object, uses degrees
+            /// \param adjust indicates rotation should be set or adjusted
             virtual void rotateObject (const Ptr& ptr,float x,float y,float z, bool adjust = false);
 
             virtual void indexToPosition (int cellX, int cellY, float &x, float &y, bool centre = false)

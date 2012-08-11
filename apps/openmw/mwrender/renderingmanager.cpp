@@ -254,27 +254,31 @@ RenderingManager::rotateObject(
     Ogre::Vector3 &rot,
     bool adjust)
 {
-    if (ptr.getRefData().getHandle() == "player") {
+    bool isPlayer = ptr.getRefData().getHandle() == "player";
+    bool force = true;
+    
+    if (isPlayer) {
         if (adjust) {
-            return mPlayer->adjustRotation(rot);
+            force = mPlayer->adjustRotation(rot);
         } else {
-            return mPlayer->setRotation(rot);
+            force = mPlayer->setRotation(rot);
         }
     }
     MWWorld::Class::get(ptr).adjustRotation(ptr, rot.x, rot.y, rot.z);
 
     if (adjust) {
+        /// \note Stored and passed in radians
         float *f = ptr.getRefData().getPosition().rot;
         rot.x += f[0], rot.y += f[1], rot.z += f[2];
     }
+    if (!isPlayer) {
+        Ogre::Quaternion xr(Ogre::Radian(rot.x), Ogre::Vector3::UNIT_X);
+        Ogre::Quaternion yr(Ogre::Radian(rot.y), Ogre::Vector3::UNIT_Y);
+        Ogre::Quaternion zr(Ogre::Radian(rot.z), Ogre::Vector3::UNIT_Z);
 
-    Ogre::Quaternion xr(Ogre::Degree(rot.x), Ogre::Vector3::UNIT_X);
-    Ogre::Quaternion yr(Ogre::Degree(rot.y), Ogre::Vector3::UNIT_Y);
-    Ogre::Quaternion zr(Ogre::Degree(rot.z), Ogre::Vector3::UNIT_Z);
-
-    ptr.getRefData().getBaseNode()->setOrientation(xr * yr * zr);
-
-    return true;
+        ptr.getRefData().getBaseNode()->setOrientation(xr * yr * zr);
+    }
+    return force;
 }
 
 void
