@@ -5,6 +5,7 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
+#include "../mwbase/soundmanager.hpp"
 
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/nullaction.hpp"
@@ -19,8 +20,6 @@
 
 #include "../mwrender/objects.hpp"
 #include "../mwrender/renderinginterface.hpp"
-
-#include "../mwsound/soundmanager.hpp"
 
 namespace
 {
@@ -69,7 +68,7 @@ namespace MWClass
             physics.insertObjectPhysics(ptr, model);
         }
     }
-    
+
     std::string Container::getModel(const MWWorld::Ptr &ptr) const
     {
         MWWorld::LiveCellRef<ESM::Container> *ref =

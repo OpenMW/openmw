@@ -16,6 +16,7 @@
 #include <components/interpreter/opcodes.hpp>
 
 #include "../mwbase/environment.hpp"
+#include "../mwbase/dialoguemanager.hpp"
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/player.hpp"
@@ -26,7 +27,6 @@
 #include "interpretercontext.hpp"
 #include "ref.hpp"
 
-#include "../mwdialogue/dialoguemanager.hpp"
 
 namespace MWScript
 {

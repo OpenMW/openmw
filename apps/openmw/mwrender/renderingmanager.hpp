@@ -56,11 +56,7 @@ class RenderingManager: private RenderingInterface, public Ogre::WindowEventList
     RenderingManager(OEngine::Render::OgreRenderer& _rend, const boost::filesystem::path& resDir, OEngine::Physic::PhysicEngine* engine);
     virtual ~RenderingManager();
 
-
-
-    virtual MWRender::Player& getPlayer(); /// \todo move this to private again as soon as
-                                            /// MWWorld::Player has been rewritten to not need access
-                                            /// to internal details of the rendering system anymore
+    void attachCameraTo(const MWWorld::Ptr &ptr);
 
     SkyManager* getSkyManager();
     Compositors* getCompositors();
@@ -89,12 +85,17 @@ class RenderingManager: private RenderingInterface, public Ogre::WindowEventList
 
     void moveObject (const MWWorld::Ptr& ptr, const Ogre::Vector3& position);
     void scaleObject (const MWWorld::Ptr& ptr, const Ogre::Vector3& scale);
-    void rotateObject (const MWWorld::Ptr& ptr, const::Ogre::Quaternion& orientation);
 
-    void checkUnderwater();
+    /// Rotates object accordingly to its type
+    /// \param rot euler angles in radians
+    /// \param adjust indicates should rotation be set or adjusted
+    /// \return true if object needs to be rotated physically
+    bool rotateObject (const MWWorld::Ptr& ptr, Ogre::Vector3 &rot, bool adjust = false);
+
     void setWaterHeight(const float height);
     void toggleWater();
 
+    /// Moves object rendering part to proper container
     /// \param store Cell the object was in previously (\a ptr has already been updated to the new cell).
     void moveObjectToCell (const MWWorld::Ptr& ptr, const Ogre::Vector3& position, MWWorld::CellStore *store);
 

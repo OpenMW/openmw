@@ -183,10 +183,6 @@ MWRender::Actors& RenderingManager::getActors(){
     return mActors;
 }
 
-MWRender::Player& RenderingManager::getPlayer(){
-    return (*mPlayer);
-}
-
 OEngine::Render::Fader* RenderingManager::getFader()
 {
     return mRendering.getFader();
@@ -251,11 +247,58 @@ void RenderingManager::moveObject (const MWWorld::Ptr& ptr, const Ogre::Vector3&
 void RenderingManager::scaleObject (const MWWorld::Ptr& ptr, const Ogre::Vector3& scale){
 
 }
-void RenderingManager::rotateObject (const MWWorld::Ptr& ptr, const::Ogre::Quaternion& orientation){
 
+bool
+RenderingManager::rotateObject(
+    const MWWorld::Ptr &ptr,
+    Ogre::Vector3 &rot,
+    bool adjust)
+{
+    bool isPlayer = ptr.getRefData().getHandle() == "player";
+    bool force = true;
+    
+    if (isPlayer) {
+        if (adjust) {
+            force = mPlayer->adjustRotation(rot);
+        } else {
+            force = mPlayer->setRotation(rot);
+        }
+    }
+    MWWorld::Class::get(ptr).adjustRotation(ptr, rot.x, rot.y, rot.z);
+
+    if (adjust) {
+        /// \note Stored and passed in radians
+        float *f = ptr.getRefData().getPosition().rot;
+        rot.x += f[0], rot.y += f[1], rot.z += f[2];
+    }
+    if (!isPlayer) {
+        Ogre::Quaternion xr(Ogre::Radian(rot.x), Ogre::Vector3::UNIT_X);
+        Ogre::Quaternion yr(Ogre::Radian(rot.y), Ogre::Vector3::UNIT_Y);
+        Ogre::Quaternion zr(Ogre::Radian(rot.z), Ogre::Vector3::UNIT_Z);
+
+        ptr.getRefData().getBaseNode()->setOrientation(xr * yr * zr);
+    }
+    return force;
 }
-void RenderingManager::moveObjectToCell (const MWWorld::Ptr& ptr, const Ogre::Vector3& position, MWWorld::Ptr::CellStore *store){
 
+void
+RenderingManager::moveObjectToCell(
+    const MWWorld::Ptr& ptr,
+    const Ogre::Vector3& pos,
+    MWWorld::CellStore *store)
+{
+    Ogre::SceneNode *child =
+        mRendering.getScene()->getSceneNode(ptr.getRefData().getHandle());
+
+    Ogre::SceneNode *parent = child->getParentSceneNode();
+    parent->removeChild(child);
+
+    if (MWWorld::Class::get(ptr).isActor()) {
+        mActors.updateObjectCell(ptr);
+    } else {
+        mObjects.updateObjectCell(ptr);
+    }
+    child->setPosition(pos);
 }
 
 void RenderingManager::update (float duration){
@@ -273,11 +316,20 @@ void RenderingManager::update (float duration){
 
     mLocalMap->updatePlayer( mRendering.getCamera()->getRealPosition(), mRendering.getCamera()->getRealOrientation() );
 
-    checkUnderwater();
+    if (mWater) {
+        Ogre::Vector3 cam = mRendering.getCamera()->getRealPosition();
 
-    if (mWater)
+        MWBase::World *world = MWBase::Environment::get().getWorld();
+
+        mWater->updateUnderwater(
+            world->isUnderwater(
+                *world->getPlayer().getPlayer().getCell()->cell,
+                Ogre::Vector3(cam.x, -cam.z, cam.y))
+        );
         mWater->update(duration);
+    }
 }
+
 void RenderingManager::waterAdded (MWWorld::Ptr::CellStore *store){
     if(store->cell->data.flags & store->cell->HasWater
         || ((!(store->cell->data.flags & ESM::Cell::Interior))
@@ -456,13 +508,6 @@ void RenderingManager::toggleLight()
     }
 
     setAmbientMode();
-}
-void RenderingManager::checkUnderwater()
-{
-    if(mWater)
-    {
-         mWater->checkUnderwater( mRendering.getCamera()->getRealPosition().y );
-    }
 }
 
 void RenderingManager::playAnimationGroup (const MWWorld::Ptr& ptr, const std::string& groupName,
@@ -766,6 +811,11 @@ void RenderingManager::getTriangleBatchCount(unsigned int &triangles, unsigned i
         triangles = mRendering.getWindow()->getTriangleCount();
         batches = mRendering.getWindow()->getBatchCount();
     }
+}
+
+void RenderingManager::attachCameraTo(const MWWorld::Ptr &ptr)
+{
+    mPlayer->attachTo(ptr);
 }
 
 } // namespace

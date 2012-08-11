@@ -12,10 +12,9 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
+#include "../mwbase/soundmanager.hpp"
 
 #include "../mwrender/renderingmanager.hpp"
-
-#include "../mwsound/soundmanager.hpp"
 
 #include "../mwinput/inputmanager.hpp"
 
@@ -264,6 +263,7 @@ namespace MWGui
         dialog->eventOkClicked.clear();
         dialog->eventOkClicked += MyGUI::newDelegate(this, &SettingsWindow::onResolutionAccept);
         dialog->eventCancelClicked.clear();
+        dialog->eventCancelClicked += MyGUI::newDelegate(this, &SettingsWindow::onResolutionCancel);
     }
 
     void SettingsWindow::onResolutionAccept()

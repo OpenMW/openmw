@@ -5,6 +5,7 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
+#include "../mwbase/soundmanager.hpp"
 
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/actiontake.hpp"
@@ -16,8 +17,6 @@
 
 #include "../mwgui/window_manager.hpp"
 #include "../mwgui/tooltips.hpp"
-
-#include "../mwsound/soundmanager.hpp"
 
 #include "../mwrender/objects.hpp"
 #include "../mwrender/renderinginterface.hpp"
@@ -58,7 +57,7 @@ namespace MWClass
             physics.insertObjectPhysics(ptr, "meshes\\" + model);
         }
         if (!ref->base->sound.empty()) {
-            MWBase::Environment::get().getSoundManager()->playSound3D(ptr, ref->base->sound, 1.0, 1.0, MWSound::Play_Loop);
+            MWBase::Environment::get().getSoundManager()->playSound3D(ptr, ref->base->sound, 1.0, 1.0, MWBase::SoundManager::Play_Loop);
         }
     }
 
@@ -95,7 +94,7 @@ namespace MWClass
         if (!(ref->base->data.flags & ESM::Light::Carry))
             return boost::shared_ptr<MWWorld::Action> (new MWWorld::NullAction);
 
-        MWBase::Environment::get().getSoundManager()->playSound3D (ptr, getUpSoundId(ptr), 1.0, 1.0, MWSound::Play_NoTrack);
+        MWBase::Environment::get().getSoundManager()->playSound3D (ptr, getUpSoundId(ptr), 1.0, 1.0, MWBase::SoundManager::Play_NoTrack);
 
         return boost::shared_ptr<MWWorld::Action> (
             new MWWorld::ActionTake (ptr));

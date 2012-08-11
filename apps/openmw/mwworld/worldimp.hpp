@@ -90,7 +90,7 @@ namespace MWWorld
             ///< @return true if the active cell (cell player is in) changed
 
             virtual void
-            placeObject(const Ptr &ptr, CellStore &cell, const ESM::Position &pos);
+            copyObjectToCell(const Ptr &ptr, CellStore &cell, const ESM::Position &pos);
 
         public:
 
@@ -206,10 +206,13 @@ namespace MWWorld
             virtual void deleteObject (const Ptr& ptr);
 
             virtual void moveObject (const Ptr& ptr, float x, float y, float z);
+            virtual void moveObject (const Ptr& ptr, CellStore &newCell, float x, float y, float z);
 
             virtual void scaleObject (const Ptr& ptr, float scale);
 
-            virtual void rotateObject (const Ptr& ptr,float x,float y,float z);
+            /// Rotates object, uses degrees
+            /// \param adjust indicates rotation should be set or adjusted
+            virtual void rotateObject (const Ptr& ptr,float x,float y,float z, bool adjust = false);
 
             virtual void indexToPosition (int cellX, int cellY, float &x, float &y, bool centre = false)
                 const;
@@ -270,6 +273,10 @@ namespace MWWorld
             ///< @return true if it is possible to place on object at specified cursor location
 
             virtual void processChangedSettings(const Settings::CategorySettingVector& settings);
+
+            virtual bool isSwimming(const MWWorld::Ptr &object);
+            virtual bool isUnderwater(const ESM::Cell &cell, const Ogre::Vector3 &pos);
+
     };
 }
 

@@ -95,6 +95,9 @@ public:
     void setMwRoot(Ogre::SceneNode* root);
 
     void rebuildStaticGeometry();
+
+    /// Updates containing cell for object rendering data
+    void updateObjectCell(const MWWorld::Ptr &ptr);
 };
 }
 #endif

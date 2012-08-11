@@ -21,6 +21,7 @@ add_openmw_dir (mwrender
 
 add_openmw_dir (mwinput
     inputmanager
+    mouselookevent
     )
 
 add_openmw_dir (mwgui
@@ -28,22 +29,22 @@ add_openmw_dir (mwgui
     dialogue_history window_base stats_window messagebox journalwindow charactercreation
     map_window window_pinnable_base cursorreplace tooltips scrollwindow bookwindow list
     formatting inventorywindow container hud countdialog tradewindow settingswindow
-    confirmationdialog alchemywindow referenceinterface spellwindow
+    confirmationdialog alchemywindow referenceinterface spellwindow mainmenu
     )
 
 add_openmw_dir (mwdialogue
-    dialoguemanager journal journalentry quest topic
+    dialoguemanagerimp journalimp journalentry quest topic
     )
 
 add_openmw_dir (mwscript
-    locals scriptmanager compilercontext interpretercontext cellextensions miscextensions
+    locals scriptmanagerimp compilercontext interpretercontext cellextensions miscextensions
     guiextensions soundextensions skyextensions statsextensions containerextensions
     aiextensions controlextensions extensions globalscripts ref dialogueextensions
     animationextensions transformationextensions consoleextensions userextensions
     )
 
 add_openmw_dir (mwsound
-    soundmanager openal_output audiere_decoder mpgsnd_decoder ffmpeg_decoder
+    soundmanagerimp openal_output audiere_decoder mpgsnd_decoder ffmpeg_decoder
     )
 
 add_openmw_dir (mwworld
@@ -64,7 +65,7 @@ add_openmw_dir (mwmechanics
     )
 
 add_openmw_dir (mwbase
-    environment world
+    environment world scriptmanager dialoguemanager journal soundmanager
     )
 
 # Main executable

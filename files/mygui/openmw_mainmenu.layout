@@ -2,16 +2,5 @@
 
 <MyGUI type="Layout">
     <!-- The entire screen -->
-    <Widget type="Widget" layer="MainMenu" position="0 0 300 300" name="_Main">
-        <!-- Centered box containing the buttons -->
-        <Widget type="Widget" position="86 12 128 276" align="Center">
-            <!-- Menu boxes -->
-            <Widget type="Button" skin="ReturnButton" position="0 0 128 64" align="Top Left" name="Return"/>
-            <Widget type="Button" skin="NewButton" position="0 46 128 64" align="Top Left" name="New"/>
-            <Widget type="Button" skin="SaveButton" position="0 92 128 64" align="Top Left" name="Save"/>
-            <Widget type="Button" skin="LoadButton" position="0 138 128 64" align="Top Left" name="Load"/>
-            <Widget type="Button" skin="OptionsButton" position="0 184 128 64" align="Top Left" name="Options"/>
-            <Widget type="Button" skin="ExitButton" position="0 230 128 64" align="Top Left" name="Exit"/>
-        </Widget>
-    </Widget>
+    <Widget type="Widget" layer="Windows" position="0 0 300 300" name="_Main" />
 </MyGUI>
