@@ -249,21 +249,16 @@ namespace MWScript
                     std::string cellID = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
 
-                    bool interior = true;
-                    MWWorld::CellStore* store;
+                    MWWorld::CellStore* store = 0;
                     try
                     {
                         MWWorld::CellStore* store = MWBase::Environment::get().getWorld()->getInterior(cellID);
                     }
                     catch(std::exception &e)
                     {
-                        std::cout << "trying exterior";
                         const ESM::Cell* cell = MWBase::Environment::get().getWorld()->getExterior(cellID);
                         if(cell)
                         {
-                            std::cout << "exteriorfffffffffffffffffmZEJFB";
-                            //cell->getGridX();
-                            //MWBase::Environment::get().getWorld()->getExterior(cell->getGridX(),cell->getGridY());
                             store = MWBase::Environment::get().getWorld()->getExterior(cell->getGridX(),cell->getGridY());
                         }
                     }
