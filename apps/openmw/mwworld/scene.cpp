@@ -150,7 +150,11 @@ namespace MWWorld
 
         if (adjustPlayerPos) {
             world->moveObject(player, pos.pos[0], pos.pos[1], pos.pos[2]);
-            world->rotateObject(player, pos.rot[0], pos.rot[1], pos.rot[2]);
+
+            float x = Ogre::Radian(pos.rot[0]).valueDegrees();
+            float y = Ogre::Radian(pos.rot[1]).valueDegrees();
+            float z = Ogre::Radian(pos.rot[2]).valueDegrees();
+            world->rotateObject(player, x, y, z);
         }
 
         MWMechanics::MechanicsManager *mechMgr =

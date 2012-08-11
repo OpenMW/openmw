@@ -1,4 +1,4 @@
-#ifndef GAME_MMDIALOG_QUEST_H
+#ifndef GAME_MWDIALOG_QUEST_H
 #define GAME_MWDIALOG_QUEST_H
 
 #include "topic.hpp"

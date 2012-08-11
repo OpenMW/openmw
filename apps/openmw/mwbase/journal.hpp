@@ -5,12 +5,9 @@
 #include <deque>
 #include <map>
 
-namespace MWDialogue
-{
-    class Quest;
-    class Topic;
-    struct StampedJournalEntry;
-}
+#include "../mwdialogue/journalentry.hpp"
+#include "../mwdialogue/topic.hpp"
+#include "../mwdialogue/quest.hpp"
 
 namespace MWBase
 {

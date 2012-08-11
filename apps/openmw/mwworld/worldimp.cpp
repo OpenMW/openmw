@@ -629,12 +629,14 @@ namespace MWWorld
 
     void World::rotateObject (const Ptr& ptr,float x,float y,float z, bool adjust)
     {
-        Ogre::Vector3 rot(x, y, z);
+        Ogre::Vector3 rot;
+        rot.x = Ogre::Degree(x).valueRadians();
+        rot.y = Ogre::Degree(y).valueRadians();
+        rot.z = Ogre::Degree(z).valueRadians();
+
         if (mRendering->rotateObject(ptr, rot, adjust)) {
             float *objRot = ptr.getRefData().getPosition().rot;
-            objRot[0] = Ogre::Degree(rot.x).valueRadians();
-            objRot[1] = Ogre::Degree(rot.y).valueRadians();
-            objRot[2] = Ogre::Degree(rot.z).valueRadians();
+            objRot[0] = rot.x, objRot[1] = rot.y, objRot[2] = rot.z;
 
             mPhysics->rotateObject(
                 ptr.getRefData().getHandle(),
@@ -1147,4 +1149,5 @@ namespace MWWorld
         }
         return pos.z < cell.water;
     }
+
 }
