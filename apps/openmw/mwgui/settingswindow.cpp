@@ -263,6 +263,7 @@ namespace MWGui
         dialog->eventOkClicked.clear();
         dialog->eventOkClicked += MyGUI::newDelegate(this, &SettingsWindow::onResolutionAccept);
         dialog->eventCancelClicked.clear();
+        dialog->eventCancelClicked += MyGUI::newDelegate(this, &SettingsWindow::onResolutionCancel);
     }
 
     void SettingsWindow::onResolutionAccept()

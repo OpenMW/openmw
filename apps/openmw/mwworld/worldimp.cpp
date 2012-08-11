@@ -1147,4 +1147,5 @@ namespace MWWorld
         }
         return pos.z < cell.water;
     }
+
 }

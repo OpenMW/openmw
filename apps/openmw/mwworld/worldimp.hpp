@@ -274,6 +274,7 @@ namespace MWWorld
 
             virtual bool isSwimming(const MWWorld::Ptr &object);
             virtual bool isUnderwater(const ESM::Cell &cell, const Ogre::Vector3 &pos);
+
     };
 }
 
