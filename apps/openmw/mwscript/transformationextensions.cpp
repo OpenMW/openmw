@@ -292,9 +292,10 @@ namespace MWScript
                     runtime.pop();
                     Interpreter::Type_Float zRot = runtime[0].mFloat;
                     runtime.pop();
-
+                    int cx,cy;
+                    MWBase::Environment::get().getWorld()->positionToIndex(x,y,cx,cy);
                     MWBase::Environment::get().getWorld()->moveObject(ptr,
-                        *MWBase::Environment::get().getWorld()->getExterior(x,y),x,y,z);
+                        *MWBase::Environment::get().getWorld()->getExterior(cx,cy),x,y,z);
                     float ax = Ogre::Radian(ptr.getRefData().getPosition().rot[0]).valueDegrees();
                     float ay = Ogre::Radian(ptr.getRefData().getPosition().rot[1]).valueDegrees();
                     if(ptr.getTypeName() == "struct ESM::NPC")//some morrowind oddity
