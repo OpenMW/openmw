@@ -85,6 +85,10 @@ class RenderingManager: private RenderingInterface, public Ogre::WindowEventList
 
     void moveObject (const MWWorld::Ptr& ptr, const Ogre::Vector3& position);
     void scaleObject (const MWWorld::Ptr& ptr, const Ogre::Vector3& scale);
+
+    /// Rotates object accordingly to its type
+    /// \param adjust indicates should rotation be set or adjusted
+    /// \return true if object needs to be rotated physically
     bool rotateObject (const MWWorld::Ptr& ptr, Ogre::Vector3 &rot, bool adjust = false);
 
     void setWaterHeight(const float height);

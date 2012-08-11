@@ -28,6 +28,8 @@ namespace MWRender
         bool mVanityModeEnabled;
 
         void controlFlip();
+
+        /// Updates sound manager listener data
         void updateListener();
 
     public:
@@ -35,11 +37,17 @@ namespace MWRender
         Player (Ogre::Camera *camera, Ogre::SceneNode* mNode);
 
         /// Set where the player is looking at. Uses Morrowind (euler) angles
+        /// \return true if player object needs to bo rotated physically
         bool setRotation(const Ogre::Vector3 &rot);
+
+        /// \return true if player object needs to bo rotated physically
         bool adjustRotation(const Ogre::Vector3 &rot);
 
         std::string getHandle() const;
 
+        /// Attach camera to object
+        /// \note there is no protection from attaching the same camera to
+        /// several different objects
         void attachTo(const MWWorld::Ptr &);
 
         void toggleViewMode() {

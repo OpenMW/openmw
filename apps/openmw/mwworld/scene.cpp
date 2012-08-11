@@ -140,19 +140,18 @@ namespace MWWorld
         const ESM::Position& pos,
         bool adjustPlayerPos)
     {
-        MWBase::Environment::get().getWorld()->getPlayer().setCell (cell);
-
         bool hasWater = cell->cell->data.flags & cell->cell->HasWater;
         mPhysics->setCurrentWater(hasWater, cell->cell->water);
 
         MWBase::World *world = MWBase::Environment::get().getWorld();
+        world->getPlayer().setCell(cell);
+
         MWWorld::Ptr player = world->getPlayer().getPlayer();
 
         if (adjustPlayerPos) {
             world->moveObject(player, pos.pos[0], pos.pos[1], pos.pos[2]);
             world->rotateObject(player, pos.rot[0], pos.rot[1], pos.rot[2]);
         }
-        world->getPlayer().setCell(cell);
 
         MWMechanics::MechanicsManager *mechMgr =
             MWBase::Environment::get().getMechanicsManager();
