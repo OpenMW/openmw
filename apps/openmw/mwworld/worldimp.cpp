@@ -558,7 +558,9 @@ namespace MWWorld
                 if (!newCell.isExterior()) {
                     changeToInteriorCell(newCell.cell->name, pos);
                 } else {
-                    changeToExteriorCell(pos);
+                    int cellX = newCell.cell->data.gridX;
+                    int cellY = newCell.cell->data.gridY;
+                    mWorldScene->changeCell(cellX, cellY, pos, false);
                 }
             } else {
                 if (!mWorldScene->isCellActive(newCell)) {
