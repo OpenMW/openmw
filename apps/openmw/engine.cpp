@@ -13,7 +13,7 @@
 #include <components/nifbullet/bullet_nif_loader.hpp>
 #include <components/nifogre/ogre_nif_loader.hpp>
 
-#include "mwinput/inputmanager.hpp"
+#include "mwinput/inputmanagerimp.hpp"
 
 #include "mwgui/window_manager.hpp"
 #include "mwgui/cursorreplace.hpp"

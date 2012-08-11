@@ -21,10 +21,9 @@
 #include "alchemywindow.hpp"
 #include "spellwindow.hpp"
 
-#include "../mwinput/inputmanager.hpp"
-
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
+#include "../mwbase/inputmanager.hpp"
 
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/cellstore.hpp"

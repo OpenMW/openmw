@@ -13,10 +13,9 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/soundmanager.hpp"
+#include "../mwbase/inputmanager.hpp"
 
 #include "../mwrender/renderingmanager.hpp"
-
-#include "../mwinput/inputmanager.hpp"
 
 #include "window_manager.hpp"
 #include "confirmationdialog.hpp"

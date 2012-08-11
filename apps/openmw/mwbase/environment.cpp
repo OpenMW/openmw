@@ -3,14 +3,13 @@
 
 #include <cassert>
 
-#include "../mwinput/inputmanager.hpp"
-
 #include "world.hpp"
 #include "scriptmanager.hpp"
 #include "dialoguemanager.hpp"
 #include "journal.hpp"
 #include "soundmanager.hpp"
 #include "mechanicsmanager.hpp"
+#include "inputmanager.hpp"
 
 MWBase::Environment *MWBase::Environment::sThis = 0;
 
@@ -63,7 +62,7 @@ void MWBase::Environment::setJournal (Journal *journal)
     mJournal = journal;
 }
 
-void MWBase::Environment::setInputManager (MWInput::MWInputManager *inputManager)
+void MWBase::Environment::setInputManager (InputManager *inputManager)
 {
     mInputManager = inputManager;
 }
@@ -115,7 +114,7 @@ MWBase::Journal *MWBase::Environment::getJournal() const
     return mJournal;
 }
 
-MWInput::MWInputManager *MWBase::Environment::getInputManager() const
+MWBase::InputManager *MWBase::Environment::getInputManager() const
 {
     assert (mInputManager);
     return mInputManager;

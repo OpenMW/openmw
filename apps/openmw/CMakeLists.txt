@@ -20,7 +20,7 @@ add_openmw_dir (mwrender
     )
 
 add_openmw_dir (mwinput
-    inputmanager
+    inputmanagerimp
     mouselookevent
     )
 
@@ -66,6 +66,7 @@ add_openmw_dir (mwmechanics
 
 add_openmw_dir (mwbase
     environment world scriptmanager dialoguemanager journal soundmanager mechanicsmanager
+    inputmanager
     )
 
 # Main executable

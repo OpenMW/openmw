@@ -6,11 +6,6 @@ namespace MWGui
     class WindowManager;
 }
 
-namespace MWInput
-{
-    struct MWInputManager;
-}
-
 namespace MWBase
 {
     class World;
@@ -19,6 +14,7 @@ namespace MWBase
     class Journal;
     class SoundManager;
     class MechanicsManager;
+    class InputManager;
 
     /// \brief Central hub for mw-subsystems
     ///
@@ -37,7 +33,7 @@ namespace MWBase
             MechanicsManager *mMechanicsManager;
             DialogueManager *mDialogueManager;
             Journal *mJournal;
-            MWInput::MWInputManager *mInputManager;
+            InputManager *mInputManager;
             float mFrameDuration;
 
             Environment (const Environment&);
@@ -66,7 +62,7 @@ namespace MWBase
 
             void setJournal (Journal *journal);
 
-            void setInputManager (MWInput::MWInputManager *inputManager);
+            void setInputManager (InputManager *inputManager);
 
             void setFrameDuration (float duration);
             ///< Set length of current frame in seconds.
@@ -85,7 +81,7 @@ namespace MWBase
 
             Journal *getJournal() const;
 
-            MWInput::MWInputManager *getInputManager() const;
+            InputManager *getInputManager() const;
 
             float getFrameDuration() const;
 
