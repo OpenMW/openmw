@@ -1,60 +1,103 @@
-CREDITS
+Contributors
 
-Current Developers:
+The OpenMW project was started in 2008 by Nicolay Korslund.
+In the course of years many people have contributed to the project.
+
+If you feel your name is missing from this list,
+please notify a developer.
+
+
+Programmers:
+Marc Zinnschlag (Zini) - Lead Programmer/Project Manager
+
 Aleksandar Jovanov
-Alexander “Ace” Olofsson
-Artem “greye” Kotsynyak
+Alexander Olofsson (Ace)
+Artem Kotsynyak (greye)
 athile
 BrotherBrick
-Cris “Mirceam” Mihalache
+Cris Mihalache (Mirceam)
+Eli2
 gugus / gus
-Jacob “Yacoby” Essex
-Jannik “scrawl” Heller
-Jason “jhooks” Hooks
-Karl-Felix “k1ll” Glatzer
-Lukasz “lgro” Gromanowski
-Marc “Zini” Zinnschlag
+Jacob Essex (Yacoby)
+Jannik Heller (scrawl)
+Jason Hooks (jhooks)
+Karl-Felix Glatzer (k1ll)
+Lukasz Gromanowski (lgro)
 Michael Mc Donnell
-Michael “werdanith” Papageorgiou
-Nikolay “corristo” Kasyanov
-Pieter “pvdk” van der Kloet
-Roman "Kromgart" Melnik
-Sebastian “swick” Wick
-Sylvain "Garvek" T.
+Michael Papageorgiou (werdanith)
+Nikolay Kasyanov (corristo)
+Pieter van der Kloet (pvdk)
+Roman Melnik (Kromgart)
+Sebastian Wick (swick)
+Sylvain T. (Garvek)
 
-Retired Developers:
+
+Packagers:
+Alexander Olofsson (Ace) - Windows
+BrotherBrick - Ubuntu Linux
+edmundo - Gentoo Linux
+Kenny Armstrong (artorius) - Fedora Linux
+Nikolay Kasyanov (corristo) - Mac OS X
+Sandy Carter (bwrsandman) - Arch Linux
+
+
+Public Relations:
+ElderTroll - Release Manager
+sir_herrbatka - News Writer
+WeirdSexy - Podcaster
+
+
+Website:
+juanmnzsk8 - Spanish News Writer
+Julien Voisin (jvoisin/ap0) - French News Writer
+Kingpix - Italian News Writer
+Lukasz Gromanowski (lgro) - Website Administrator
+Nikolay Kasyanov (corristo) - Russian News Writer
+Okulo - Dutch News Writer
+penguinroad - Indonesian News Writer
+Ryan Sardonic (Wry) - Wiki Editor
+sir_herrbatka - Forum Admin/Polish News Writer
+spyboot - German News Writer
+
+
+Formula Research:
+fragonard
+Greendogo
+HiPhish
+modred11
+Myckel
+natirips
+Sadler
+
+
+Artwork:
+Necrod - OpenMW Logo
+raevol - Wordpress Theme
+
+
+Inactive Contributors:
 Ardekantur
 Armin Preiml
 Diggory Hardy
 Jan Borsodi
-Jan-Peter “peppe” Nilsson
+Jan-Peter Nilsson (peppe)
 Josua Grawitter
+Lordrea
 Nicolay Korslund
 sergoz
 Star-Demon
 Yuri Krupenin
 
-PR team and Translators:
-Julien (jvoisin/ap0) Voisin
-sirherrbatka
-ElderTroll
-spyboot
-corristo
-Okulo
-penguinroad
-Kingpix
 
-Reverser and Research:
-natirips
-Sadler
-fragonard
-Greendogo
-Myckel
-modred11
-HiPhish
+Additional Credits:
+In this section we would like to thank people not part of OpenMW for their work.
 
-OpenMW:
-Thanks to DokterDume for kindly providing us with the Moon and Star logo used as the application icon and project logo.
+Thanks to Maxim Nikolaev,
+for allowing us to use his excellent Morrowind fan-art on our website and in other places.
 
-Launcher:
-Thanks to Kevin Ryan for kindly providing us with the icon used for the Data Files tab.
+Thanks to DokterDume,
+for kindly providing us with the Moon and Star logo,
+used as the application icon and project logo.
+
+Thanks to Kevin Ryan,
+for creating the icon used for the Data Files tab of the OpenMW Launcher.
