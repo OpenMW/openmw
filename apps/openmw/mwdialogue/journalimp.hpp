@@ -1,4 +1,4 @@
-#ifndef GAME_MMDIALOG_JOURNAL_H
+#ifndef GAME_MWDIALOG_JOURNAL_H
 #define GAME_MWDIALOG_JOURNAL_H
 
 #include "../mwbase/journal.hpp"
