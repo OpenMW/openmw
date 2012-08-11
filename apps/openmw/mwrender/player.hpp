@@ -27,7 +27,7 @@ namespace MWRender
         bool mFirstPersonView;
         bool mVanityModeEnabled;
 
-        void controlFlip();
+        float controlFlip(float shift = 0.f);
 
         /// Updates sound manager listener data
         void updateListener();

@@ -558,12 +558,14 @@ namespace MWWorld
                 if (!newCell.isExterior()) {
                     changeToInteriorCell(newCell.cell->name, pos);
                 } else {
-                    changeToExteriorCell(pos);
+                    int cellX = newCell.cell->data.gridX;
+                    int cellY = newCell.cell->data.gridY;
+                    mWorldScene->changeCell(cellX, cellY, pos, false);
                 }
             } else {
-                if (!mWorldScene->isCellActive(newCell)) {
+                if (!mWorldScene->isCellActive(*currCell)) {
                     copyObjectToCell(ptr, newCell, pos);
-                } else if (!mWorldScene->isCellActive(*currCell)) {
+                } else if (!mWorldScene->isCellActive(newCell)) {
                     MWWorld::Class::get(ptr).copyToCell(ptr, newCell);
                     mWorldScene->removeObjectFromScene(ptr);
                     mLocalScripts.remove(ptr);
@@ -638,10 +640,12 @@ namespace MWWorld
             float *objRot = ptr.getRefData().getPosition().rot;
             objRot[0] = rot.x, objRot[1] = rot.y, objRot[2] = rot.z;
 
-            mPhysics->rotateObject(
-                ptr.getRefData().getHandle(),
-                ptr.getRefData().getBaseNode()->getOrientation()
-            );
+            if (ptr.getRefData().getBaseNode() != 0) {
+                mPhysics->rotateObject(
+                    ptr.getRefData().getHandle(),
+                    ptr.getRefData().getBaseNode()->getOrientation()
+                );
+            }
         }
     }
 

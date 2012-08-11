@@ -116,8 +116,9 @@
         shInput(float3, normalPassthrough)
         shInput(float3, objSpacePositionPassthrough)
         shUniform(float4, lightAmbient)                       @shAutoConstant(lightAmbient, ambient_light_colour)
-        //shUniform(float, passIteration)                       @shAutoConstant(passIteration, pass_iteration_number)
+        #if !HAS_VERTEXCOLOR
         shUniform(float4, materialAmbient)                    @shAutoConstant(materialAmbient, surface_ambient_colour)
+        #endif
         shUniform(float4, materialDiffuse)                    @shAutoConstant(materialDiffuse, surface_diffuse_colour)
         shUniform(float4, materialEmissive)                   @shAutoConstant(materialEmissive, surface_emissive_colour)
     @shForeach(@shGlobalSettingString(num_lights))
@@ -178,8 +179,13 @@
         float3 lightDir;
         float3 diffuse = float3(0,0,0);
         float d;
+
+#if HAS_VERTEXCOLOR
+        // ambient vertex colour tracking, FFP behaviour
+        float3 ambient = colourPassthrough.xyz * lightAmbient.xyz;
+#else
         float3 ambient = materialAmbient.xyz * lightAmbient.xyz;
-    
+#endif
     
             // shadows only for the first (directional) light
 #if SHADOWS
@@ -237,10 +243,6 @@
 #endif
 
     @shEndForeach
-    
-#if HAS_VERTEXCOLOR
-        ambient *= colourPassthrough.xyz;
-#endif
 
         shOutputColour(0).xyz *= (ambient + diffuse + materialEmissive.xyz);
 #endif
@@ -293,6 +295,7 @@
 #if MRT
         shOutputColour(1) = float4(depthPassthrough / far,1,1,1);
 #endif
+
     }
 
 #endif
