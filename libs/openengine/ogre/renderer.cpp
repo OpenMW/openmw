@@ -24,6 +24,21 @@
 using namespace Ogre;
 using namespace OEngine::Render;
 
+#if defined(__APPLE__) && !defined(__LP64__)
+
+CustomRoot::CustomRoot(const Ogre::String& pluginFileName, 
+                    const Ogre::String& configFileName, 
+                    const Ogre::String& logFileName)
+: Ogre::Root(pluginFileName, configFileName, logFileName)
+{}
+
+bool CustomRoot::isQueuedEnd() const
+{
+    return mQueuedEnd;
+}
+
+#endif
+
 void OgreRenderer::cleanup()
 {
     delete mFader;
@@ -36,7 +51,6 @@ void OgreRenderer::cleanup()
 void OgreRenderer::start()
 {
 #if defined(__APPLE__) && !defined(__LP64__)
-    bool quit = false;
     // OSX Carbon Message Pump
     do {
         EventRef event = NULL;
@@ -54,11 +68,11 @@ void OgreRenderer::start()
             ReleaseEvent(event);
         }
 
-        if (!Ogre::Root::getSingleton().renderOneFrame()) {
-            quit = true;
+        if (!mRoot->renderOneFrame()) {
+            break;
         }
 
-    } while (!quit);
+    } while (!mRoot->isQueuedEnd());
 #else
     mRoot->startRendering();
 #endif
@@ -120,7 +134,11 @@ void OgreRenderer::configure(const std::string &logPath,
         // Disable logging
         log->setDebugOutputEnabled(false);
 
+#if defined(__APPLE__) && !defined(__LP64__)
+    mRoot = new CustomRoot("", "", "");
+#else
     mRoot = new Root("", "", "");
+#endif
 
     #if defined(ENABLE_PLUGIN_GL) || defined(ENABLE_PLUGIN_Direct3D9) || defined(ENABLE_PLUGIN_CgProgramManager) || defined(ENABLE_PLUGIN_OctreeSceneManager) || defined(ENABLE_PLUGIN_ParticleFX)
     loadPlugins();
