@@ -285,9 +285,6 @@ endif (APPLE)
 configure_file(${OpenMW_SOURCE_DIR}/files/settings-default.cfg
     "${OpenMW_BINARY_DIR}/settings-default.cfg")
 
-configure_file(${OpenMW_SOURCE_DIR}/files/input-default.xml
-    "${OpenMW_BINARY_DIR}/input-default.xml")
-
 configure_file(${OpenMW_SOURCE_DIR}/files/transparency-overrides.cfg
     "${OpenMW_BINARY_DIR}/transparency-overrides.cfg")
 

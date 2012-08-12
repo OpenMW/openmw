@@ -7,8 +7,7 @@
 #include <OgreRoot.h>
 #include <OgreRenderWindow.h>
 
-#include <boost/bind.hpp>
-#include <boost/filesystem.hpp>
+#include <boost/lexical_cast.hpp>
 
 #include <OIS/OISInputManager.h>
 
@@ -32,8 +31,7 @@ namespace MWInput
             MWBase::WindowManager &windows,
             bool debug,
             OMW::Engine& engine,
-            const std::string& defaultFile,
-            const std::string& userFile, bool userFileExists)
+            const std::string& userFile)
         : mOgre(ogre)
         , mPlayer(player)
         , mWindows(windows)
@@ -43,6 +41,7 @@ namespace MWInput
         , mMouseY(ogre.getWindow()->getHeight ()/2.f)
         , mUserFile(userFile)
         , mDragDrop(false)
+        , mGuiCursorEnabled(false)
     {
         Ogre::RenderWindow* window = ogre.getWindow ();
         size_t windowHnd;
@@ -102,15 +101,9 @@ namespace MWInput
 
         MyGUI::InputManager::getInstance().injectMouseMove(mMouseX, mMouseY, mMouse->getMouseState ().Z.abs);
 
-        std::string configFile;
-        if (userFileExists)
-            configFile = userFile;
-        else
-            configFile = defaultFile;
+        mInputCtrl = new ICS::InputControlSystem(userFile, true, NULL, NULL, A_LAST);
 
-        std::cout << "Loading input configuration: " << configFile << std::endl;
-
-        mInputCtrl = new ICS::InputControlSystem(configFile, true, NULL, NULL, A_LAST);
+        loadKeyDefaults();
 
         for (int i = 0; i < A_LAST; ++i)
         {
@@ -339,8 +332,7 @@ namespace MWInput
     {
         mInputCtrl->keyReleased (arg);
 
-        if (mGuiCursorEnabled)
-            MyGUI::InputManager::getInstance().injectKeyRelease(MyGUI::KeyCode::Enum(arg.key));
+        MyGUI::InputManager::getInstance().injectKeyRelease(MyGUI::KeyCode::Enum(arg.key));
 
         return true;
     }
@@ -359,8 +351,7 @@ namespace MWInput
     {
         mInputCtrl->mouseReleased (arg, id);
 
-        if (mGuiCursorEnabled)
-            MyGUI::InputManager::getInstance().injectMouseRelease(mMouseX, mMouseY, MyGUI::MouseButton::Enum(id));
+        MyGUI::InputManager::getInstance().injectMouseRelease(mMouseX, mMouseY, MyGUI::MouseButton::Enum(id));
 
         return true;
     }
@@ -449,11 +440,15 @@ namespace MWInput
     {
         bool gameMode = !mWindows.isGuiMode();
 
+        std::cout << "gameMode: " << gameMode << std::endl;
+
         // Toggle between game mode and inventory mode
         if(gameMode)
             mWindows.pushGuiMode(MWGui::GM_Inventory);
         else if(mWindows.getMode() == MWGui::GM_Inventory)
             mWindows.popGuiMode();
+        else
+            std::cout << "toggleInv didnt do anything!!!" << std::endl;
 
         // .. but don't touch any other mode.
     }
@@ -514,6 +509,46 @@ namespace MWInput
     bool InputManager::actionIsActive (int id)
     {
         return mInputCtrl->getChannel (id)->getValue () == 1;
+    }
+
+    void InputManager::loadKeyDefaults ()
+    {
+        // using hardcoded key defaults is inevitable, if we want the configuration files to stay valid
+        // across different versions of OpenMW (in the case where another input action is added)
+        std::map<int, int> defaultKeyBindings;
+
+        defaultKeyBindings[A_Activate] = OIS::KC_SPACE;
+        defaultKeyBindings[A_MoveBackward] = OIS::KC_S;
+        defaultKeyBindings[A_MoveForward] = OIS::KC_W;
+        defaultKeyBindings[A_MoveLeft] = OIS::KC_A;
+        defaultKeyBindings[A_MoveRight] = OIS::KC_D;
+        defaultKeyBindings[A_ToggleWeapon] = OIS::KC_F;
+        defaultKeyBindings[A_ToggleSpell] = OIS::KC_R;
+        defaultKeyBindings[A_Console] = OIS::KC_F1;
+        defaultKeyBindings[A_Crouch] = OIS::KC_LCONTROL;
+        defaultKeyBindings[A_AutoMove] = OIS::KC_Q;
+        defaultKeyBindings[A_Jump] = OIS::KC_E;
+        defaultKeyBindings[A_Journal] = OIS::KC_J;
+        defaultKeyBindings[A_Rest] = OIS::KC_T;
+        defaultKeyBindings[A_GameMenu] = OIS::KC_ESCAPE;
+
+        std::map<int, int> defaultMouseButtonBindings;
+        defaultMouseButtonBindings[A_Inventory] = OIS::MB_Right;
+
+        for (int i = 0; i < A_LAST; ++i)
+        {
+            if (mInputCtrl->getChannel(i)->getControlsCount () == 0)
+            {
+                ICS::Control* control1 = new ICS::Control(boost::lexical_cast<std::string>(i), false, true, 0, ICS::ICS_MAX, ICS::ICS_MAX);
+                mInputCtrl->addControl(control1);
+                control1->attachChannel(mInputCtrl->getChannel(i), ICS::Channel::DIRECT);
+
+                if (defaultKeyBindings.find(i) != defaultKeyBindings.end())
+                    mInputCtrl->addKeyBinding(control1, static_cast<OIS::KeyCode>(defaultKeyBindings[i]), ICS::Control::INCREASE);
+                else if (defaultMouseButtonBindings.find(i) != defaultMouseButtonBindings.end())
+                    mInputCtrl->addMouseButtonBinding (control1, defaultMouseButtonBindings[i], ICS::Control::INCREASE);
+            }
+        }
     }
 
 }

@@ -61,8 +61,7 @@ namespace MWInput
             MWBase::WindowManager &_windows,
             bool debug,
             OMW::Engine& engine,
-            const std::string& defaultFile,
-            const std::string& userFile, bool userFileExists);
+            const std::string& userFile);
 
         virtual ~InputManager();
 
@@ -129,6 +128,8 @@ namespace MWInput
         void exitNow();
 
         bool actionIsActive (int id);
+
+        void loadKeyDefaults();
 
     private:
         enum Actions
