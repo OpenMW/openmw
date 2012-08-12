@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Controller>
+    <Control name="GameMenu" autoChangeDirectionOnLimitsAfterStop="false" autoReverseToInitialValue="true" initialValue="0" stepSize="MAX" stepsPerSeconds="MAX">
+        <KeyBinder key="ESCAPE" direction="INCREASE" />
+        <Channel number="0" direction="DIRECT" percentage="1" />
+    </Control>
+
+    <Control name="Quit" autoChangeDirectionOnLimitsAfterStop="false" autoReverseToInitialValue="true" initialValue="0" stepSize="MAX" stepsPerSeconds="MAX">
+        <KeyBinder key="Q" direction="INCREASE" />
+        <Channel number="1" direction="DIRECT" percentage="1" />
+    </Control>
+
+    <Control name="Screenshot" autoChangeDirectionOnLimitsAfterStop="false" autoReverseToInitialValue="true" initialValue="0" stepSize="MAX" stepsPerSeconds="MAX">
+        <KeyBinder key="SYSRQ" direction="INCREASE" />
+        <Channel number="2" direction="DIRECT" percentage="1" />
+    </Control>
+
+    <Control name="Inventory" autoChangeDirectionOnLimitsAfterStop="false" autoReverseToInitialValue="true" initialValue="0" stepSize="MAX" stepsPerSeconds="MAX">
+        <KeyBinder key="I" direction="INCREASE" />
+        <Channel number="3" direction="DIRECT" percentage="1" />
+    </Control>
+
+    <Control name="Console" autoChangeDirectionOnLimitsAfterStop="false" autoReverseToInitialValue="true" initialValue="0" stepSize="MAX" stepsPerSeconds="MAX">
+        <KeyBinder key="F1" direction="INCREASE" />
+        <Channel number="4" direction="DIRECT" percentage="1" />
+    </Control>
+
+
+    <Control name="MoveLeft" autoChangeDirectionOnLimitsAfterStop="false" autoReverseToInitialValue="true" initialValue="0" stepSize="MAX" stepsPerSeconds="MAX">
+        <KeyBinder key="A" direction="INCREASE" />
+        <KeyBinder key="LEFT" direction="INCREASE" />
+        <Channel number="5" direction="DIRECT" percentage="1" />
+    </Control>
+
+    <Control name="MoveRight" autoChangeDirectionOnLimitsAfterStop="false" autoReverseToInitialValue="true" initialValue="0" stepSize="MAX" stepsPerSeconds="MAX">
+        <KeyBinder key="D" direction="INCREASE" />
+        <KeyBinder key="RIGHT" direction="INCREASE" />
+        <Channel number="6" direction="DIRECT" percentage="1" />
+    </Control>
+
+    <Control name="MoveForward" autoChangeDirectionOnLimitsAfterStop="false" autoReverseToInitialValue="true" initialValue="0" stepSize="MAX" stepsPerSeconds="MAX">
+        <KeyBinder key="W" direction="INCREASE" />
+        <KeyBinder key="UP" direction="INCREASE" />
+        <Channel number="7" direction="DIRECT" percentage="1" />
+    </Control>
+
+    <Control name="MoveBackward" autoChangeDirectionOnLimitsAfterStop="false" autoReverseToInitialValue="true" initialValue="0" stepSize="MAX" stepsPerSeconds="MAX">
+        <KeyBinder key="S" direction="INCREASE" />
+        <KeyBinder key="DOWN" direction="INCREASE" />
+        <Channel number="8" direction="DIRECT" percentage="1" />
+    </Control>
+
+
+
+    <Control name="Activate" autoChangeDirectionOnLimitsAfterStop="false" autoReverseToInitialValue="true" initialValue="0" stepSize="MAX" stepsPerSeconds="MAX">
+        <KeyBinder key="SPACE" direction="INCREASE" />
+        <Channel number="9" direction="DIRECT" percentage="1" />
+    </Control>
+
+ 
+    <Control name="Jump" autoChangeDirectionOnLimitsAfterStop="false" autoReverseToInitialValue="true" initialValue="0" stepSize="MAX" stepsPerSeconds="MAX">
+        <KeyBinder key="E" direction="INCREASE" />
+        <Channel number="11" direction="DIRECT" percentage="1" />
+    </Control>
+
+    <Control name="AutoMove" autoChangeDirectionOnLimitsAfterStop="false" autoReverseToInitialValue="true" initialValue="0" stepSize="MAX" stepsPerSeconds="MAX">
+        <KeyBinder key="Z" direction="INCREASE" />
+        <Channel number="12" direction="DIRECT" percentage="1" />
+    </Control>
+
+    <Control name="Journal" autoChangeDirectionOnLimitsAfterStop="false" autoReverseToInitialValue="true" initialValue="0" stepSize="MAX" stepsPerSeconds="MAX">
+        <KeyBinder key="J" direction="INCREASE" />
+        <Channel number="14" direction="DIRECT" percentage="1" />
+    </Control>
+    
+    <Control name="Sneak" autoChangeDirectionOnLimitsAfterStop="false" autoReverseToInitialValue="true" initialValue="0" stepSize="MAX" stepsPerSeconds="MAX">
+        <KeyBinder key="X" direction="INCREASE" />
+        <Channel number="22" direction="DIRECT" percentage="1" />
+    </Control>
+
+    <Control name="Walk" autoChangeDirectionOnLimitsAfterStop="false" autoReverseToInitialValue="true" initialValue="0" stepSize="MAX" stepsPerSeconds="MAX">
+        <KeyBinder key="C" direction="INCREASE" />
+        <Channel number="23" direction="DIRECT" percentage="1" />
+    </Control>
+
+    <Control name="Crouch" autoChangeDirectionOnLimitsAfterStop="false" autoReverseToInitialValue="true" initialValue="0" stepSize="MAX" stepsPerSeconds="MAX">
+        <KeyBinder key="LCONTROL" direction="INCREASE" />
+        <Channel number="24" direction="DIRECT" percentage="1" />
+    </Control>
+
+    <Control name="ReadyWeapon" autoChangeDirectionOnLimitsAfterStop="false" autoReverseToInitialValue="true" initialValue="0" stepSize="MAX" stepsPerSeconds="MAX">
+        <KeyBinder key="F" direction="INCREASE" />
+        <Channel number="28" direction="DIRECT" percentage="1" />
+    </Control>
+
+    <Control name="ReadySpell" autoChangeDirectionOnLimitsAfterStop="false" autoReverseToInitialValue="true" initialValue="0" stepSize="MAX" stepsPerSeconds="MAX">
+        <KeyBinder key="R" direction="INCREASE" />
+        <Channel number="29" direction="DIRECT" percentage="1" />
+    </Control>
+</Controller>

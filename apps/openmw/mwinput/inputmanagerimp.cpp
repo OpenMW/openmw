@@ -1,357 +1,200 @@
 #include "inputmanagerimp.hpp"
 
 #include <OgreRoot.h>
+#include <OgreRenderWindow.h>
 
-#include <openengine/input/dispatcher.hpp>
-#include <openengine/input/poller.hpp>
+#include <boost/bind.hpp>
+#include <boost/filesystem.hpp>
 
-#include <openengine/gui/events.hpp>
+#include <OIS/OISInputManager.h>
+
+#include <MyGUI_InputManager.h>
+#include <MyGUI_RenderManager.h>
+
+#include <extern/oics/ICSInputControlSystem.h>
 
 #include <openengine/ogre/renderer.hpp>
-
-#include "../mwbase/windowmanager.hpp"
-
-#include <mangle/input/servers/ois_driver.hpp>
-#include <mangle/input/filters/eventlist.hpp>
-
-#include <libs/platform/strings.h>
-
-#include "mouselookevent.hpp"
 
 #include "../engine.hpp"
 
 #include "../mwworld/player.hpp"
 #include "../mwbase/world.hpp"
-
-#include <boost/bind.hpp>
-#include <boost/filesystem.hpp>
-#include <OgreRoot.h>
-#include <OIS/OIS.h>
+#include "../mwbase/windowmanager.hpp"
 
 namespace MWInput
 {
-  enum Actions
+    InputManager::InputManager(OEngine::Render::OgreRenderer &ogre,
+            MWWorld::Player &player,
+            MWBase::WindowManager &windows,
+            bool debug,
+            OMW::Engine& engine,
+            const std::string& defaultFile,
+            const std::string& userFile, bool userFileExists)
+        : mOgre(ogre)
+        , mPlayer(player)
+        , mWindows(windows)
+        , mEngine(engine)
+        , mMouseLookEnabled(true)
+        , mMouseX(ogre.getWindow()->getWidth ()/2.f)
+        , mMouseY(ogre.getWindow()->getHeight ()/2.f)
+        , mUserFile(userFile)
+        , mDragDrop(false)
     {
-      A_Quit,           // Exit the program
+        Ogre::RenderWindow* window = ogre.getWindow ();
+        size_t windowHnd;
 
-      A_Screenshot,     // Take a screenshot
+        window->getCustomAttribute("WINDOW", &windowHnd);
 
-      A_Inventory,      // Toggle inventory screen
+        std::ostringstream windowHndStr;
+        OIS::ParamList pl;
 
-      A_Console,        // Toggle console screen
+        windowHndStr << windowHnd;
+        pl.insert(std::make_pair(std::string("WINDOW"), windowHndStr.str()));
 
-      A_MoveLeft,       // Move player left / right
-      A_MoveRight,
-      A_MoveForward,    // Forward / Backward
-      A_MoveBackward,
-
-      A_Activate,
-
-      A_Use,        //Use weapon, spell, etc.
-      A_Jump,
-      A_AutoMove,   //Toggle Auto-move forward
-      A_Rest,       //Rest
-      A_Journal,    //Journal
-      A_Weapon,     //Draw/Sheath weapon
-      A_Spell,      //Ready/Unready Casting
-      A_AlwaysRun,  //Toggle Always Run
-      A_CycleSpellLeft, //cycling through spells
-      A_CycleSpellRight,
-      A_CycleWeaponLeft,//Cycling through weapons
-      A_CycleWeaponRight,
-      A_ToggleSneak,    //Toggles Sneak, add Push-Sneak later
-      A_ToggleWalk, //Toggle Walking/Running
-      A_Crouch,
-
-      A_QuickSave,
-      A_QuickLoad,
-      A_QuickMenu,
-      A_GameMenu,
-      A_ToggleWeapon,
-      A_ToggleSpell,
-
-      A_LAST            // Marker for the last item
-    };
-
-  // Class that handles all input and key bindings for OpenMW
-  class InputImpl
-  {
-    OEngine::Input::DispatcherPtr disp;
-    OEngine::Render::OgreRenderer &ogre;
-    Mangle::Input::OISDriver input;
-    OEngine::Input::Poller poller;
-    MouseLookEventPtr mouse;
-    OEngine::GUI::EventInjectorPtr guiEvents;
-    MWWorld::Player &player;
-    MWBase::WindowManager &windows;
-    OMW::Engine& mEngine;
-
-    bool mDragDrop;
-
-    std::map<std::string, bool> mControlSwitch;
-
-   /* InputImpl Methods */
-public:
-    void adjustMouseRegion(int width, int height)
-    {
-        input.adjustMouseClippingSize(width, height);
-    }
-private:
-    void toggleSpell()
-    {
-        if (windows.isGuiMode()) return;
-
-        MWMechanics::DrawState_ state = player.getDrawState();
-        if (state == MWMechanics::DrawState_Weapon || state == MWMechanics::DrawState_Nothing)
+        // Set non-exclusive mouse and keyboard input if the user requested
+        // it.
+        if (debug)
         {
-            player.setDrawState(MWMechanics::DrawState_Spell);
-            std::cout << "Player has now readied his hands for spellcasting!\n";
+            #if defined OIS_WIN32_PLATFORM
+            pl.insert(std::make_pair(std::string("w32_mouse"),
+                std::string("DISCL_FOREGROUND" )));
+            pl.insert(std::make_pair(std::string("w32_mouse"),
+                std::string("DISCL_NONEXCLUSIVE")));
+            pl.insert(std::make_pair(std::string("w32_keyboard"),
+                std::string("DISCL_FOREGROUND")));
+            pl.insert(std::make_pair(std::string("w32_keyboard"),
+                std::string("DISCL_NONEXCLUSIVE")));
+            #elif defined OIS_LINUX_PLATFORM
+            pl.insert(std::make_pair(std::string("x11_mouse_grab"),
+                std::string("false")));
+            pl.insert(std::make_pair(std::string("x11_mouse_hide"),
+                std::string("false")));
+            pl.insert(std::make_pair(std::string("x11_keyboard_grab"),
+                std::string("false")));
+            pl.insert(std::make_pair(std::string("XAutoRepeatOn"),
+                std::string("true")));
+            #endif
         }
+
+        #ifdef __APPLE_CC__
+        // Give the application window focus to receive input events
+        ProcessSerialNumber psn = { 0, kCurrentProcess };
+        TransformProcessType(&psn, kProcessTransformToForegroundApplication);
+        SetFrontProcess(&psn);
+        #endif
+
+        mInputManager = OIS::InputManager::createInputSystem( pl );
+
+        // Create all devices
+        mKeyboard = static_cast<OIS::Keyboard*>(mInputManager->createInputObject
+            ( OIS::OISKeyboard, true ));
+        mMouse = static_cast<OIS::Mouse*>(mInputManager->createInputObject
+            ( OIS::OISMouse, true ));
+
+        mKeyboard->setEventCallback (this);
+        mMouse->setEventCallback (this);
+
+        adjustMouseRegion (window->getWidth(), window->getHeight());
+
+        MyGUI::InputManager::getInstance().injectMouseMove(mMouseX, mMouseY, mMouse->getMouseState ().Z.abs);
+
+        std::string configFile;
+        if (userFileExists)
+            configFile = userFile;
         else
+            configFile = defaultFile;
+
+        std::cout << "Loading input configuration: " << configFile << std::endl;
+
+        mInputCtrl = new ICS::InputControlSystem(configFile, true, NULL, NULL, A_LAST);
+
+        for (int i = 0; i < A_LAST; ++i)
         {
-            player.setDrawState(MWMechanics::DrawState_Nothing);
-            std::cout << "Player does not have any kind of attack ready now.\n";
+            mInputCtrl->getChannel (i)->addListener (this);
         }
+
+        mControlSwitch["playercontrols"]      = true;
+        mControlSwitch["playerfighting"]      = true;
+        mControlSwitch["playerjumping"]       = true;
+        mControlSwitch["playerlooking"]       = true;
+        mControlSwitch["playermagic"]         = true;
+        mControlSwitch["playerviewswitch"]    = true;
+        mControlSwitch["vanitymode"]          = true;
+
+        changeInputMode(false);
     }
 
-    void toggleWeapon()
+    InputManager::~InputManager()
     {
-        if (windows.isGuiMode()) return;
+        mInputCtrl->save (mUserFile);
 
-        MWMechanics::DrawState_ state = player.getDrawState();
-        if (state == MWMechanics::DrawState_Spell || state == MWMechanics::DrawState_Nothing)
-        {
-            player.setDrawState(MWMechanics::DrawState_Weapon);
-            std::cout << "Player is now drawing his weapon.\n";
-        }
-        else
-        {
-            player.setDrawState(MWMechanics::DrawState_Nothing);
-            std::cout << "Player does not have any kind of attack ready now.\n";
-        }
+        delete mInputCtrl;
+
+        mInputManager->destroyInputObject(mKeyboard);
+        mInputManager->destroyInputObject(mMouse);
+        OIS::InputManager::destroyInputSystem(mInputManager);
     }
 
-    void screenshot()
+    void InputManager::channelChanged(ICS::Channel* channel, float currentValue, float previousValue)
     {
-        mEngine.screenshot();
-
-        std::vector<std::string> empty;
-        windows.messageBox ("Screenshot saved", empty);
-    }
-
-    /* toggleInventory() is called when the user presses the button to toggle the inventory screen. */
-    void toggleInventory()
-    {
-        using namespace MWGui;
-
         if (mDragDrop)
             return;
 
-        bool gameMode = !windows.isGuiMode();
+        int action = channel->getNumber();
+        if (currentValue == 1)
+        {
+            // trigger action activated
 
-        // Toggle between game mode and inventory mode
-        if(gameMode)
-            windows.pushGuiMode(GM_Inventory);
-        else if(windows.getMode() == GM_Inventory)
-            windows.popGuiMode();
-
-        // .. but don't touch any other mode.
+            switch (action)
+            {
+            case A_GameMenu:
+                toggleMainMenu ();
+                break;
+            case A_Quit:
+                exitNow();
+                break;
+            case A_Screenshot:
+                screenshot();
+                break;
+            case A_Inventory:
+                toggleInventory ();
+                break;
+            case A_Console:
+                toggleConsole ();
+                break;
+            case A_Activate:
+                activate();
+                break;
+            case A_Journal:
+                toggleJournal ();
+                break;
+            case A_AutoMove:
+                toggleAutoMove ();
+                break;
+            case A_ToggleSneak:
+                /// \todo implement
+                break;
+            case A_ToggleWalk:
+                toggleWalking ();
+                break;
+            case A_ToggleWeapon:
+                toggleWeapon ();
+                break;
+            case A_ToggleSpell:
+                toggleSpell ();
+                break;
+            }
+        }
     }
 
-    // Toggle console
-    void toggleConsole()
-    {
-      using namespace MWGui;
-
-      if (mDragDrop)
-        return;
-
-      bool gameMode = !windows.isGuiMode();
-
-      // Switch to console mode no matter what mode we are currently
-      // in, except of course if we are already in console mode
-      if (!gameMode)
-      {
-          if (windows.getMode() == GM_Console)
-              windows.popGuiMode();
-          else
-              windows.pushGuiMode(GM_Console);
-      }
-      else
-          windows.pushGuiMode(GM_Console);
-    }
-
-    void toggleJournal()
-    {
-        using namespace MWGui;
-
-        // Toggle between game mode and journal mode
-        bool gameMode = !windows.isGuiMode();
-
-        if(gameMode)
-            windows.pushGuiMode(GM_Journal);
-        else if(windows.getMode() == GM_Journal)
-            windows.popGuiMode();
-        // .. but don't touch any other mode.
-    }
-
-    void activate()
-    {
-        mEngine.activate();
-    }
-
-    void toggleAutoMove()
-    {
-        if (windows.isGuiMode()) return;
-        player.setAutoMove (!player.getAutoMove());
-    }
-
-    void toggleWalking()
-    {
-        if (windows.isGuiMode()) return;
-        player.toggleRunning();
-    }
-
-    void toggleMainMenu()
-    {
-        if (windows.isGuiMode () && (windows.getMode () == MWGui::GM_MainMenu || windows.getMode () == MWGui::GM_Settings))
-            windows.popGuiMode();
-        else
-            windows.pushGuiMode (MWGui::GM_MainMenu);
-    }
-
-    // Exit program now button (which is disabled in GUI mode)
-    void exitNow()
-    {
-        if(!windows.isGuiMode())
-            Ogre::Root::getSingleton().queueEndRendering ();
-    }
-
-  public:
-    InputImpl(OEngine::Render::OgreRenderer &_ogre,
-                   MWWorld::Player &_player,
-                   MWBase::WindowManager &_windows,
-                   bool debug,
-                   OMW::Engine& engine)
-      : ogre(_ogre),
-        input(ogre.getWindow(), !debug),
-        poller(input),
-        player(_player),
-        windows(_windows),
-        mEngine (engine),
-        mDragDrop(false)
-    {
-      using namespace OEngine::Input;
-      using namespace OEngine::Render;
-      using namespace OEngine::GUI;
-      using namespace Mangle::Input;
-      using namespace OIS;
-
-      disp = DispatcherPtr(new Dispatcher(A_LAST));
-
-      // Bind MW-specific functions
-      disp->funcs.bind(A_Quit, boost::bind(&InputImpl::exitNow, this),
-                      "Quit program");
-      disp->funcs.bind(A_Screenshot, boost::bind(&InputImpl::screenshot, this),
-                      "Screenshot");
-      disp->funcs.bind(A_Inventory, boost::bind(&InputImpl::toggleInventory, this),
-                       "Toggle inventory screen");
-      disp->funcs.bind(A_Console, boost::bind(&InputImpl::toggleConsole, this),
-                       "Toggle console");
-      disp->funcs.bind(A_Journal, boost::bind(&InputImpl::toggleJournal, this),
-                       "Toggle journal");
-      disp->funcs.bind(A_Activate, boost::bind(&InputImpl::activate, this),
-                       "Activate");
-      disp->funcs.bind(A_AutoMove, boost::bind(&InputImpl::toggleAutoMove, this),
-                      "Auto Move");
-      disp->funcs.bind(A_ToggleWalk, boost::bind(&InputImpl::toggleWalking, this),
-                      "Toggle Walk/Run");
-      disp->funcs.bind(A_ToggleWeapon,boost::bind(&InputImpl::toggleWeapon,this),
-                      "Draw Weapon");
-      disp->funcs.bind(A_ToggleSpell,boost::bind(&InputImpl::toggleSpell,this),
-                      "Ready hands");
-      disp->funcs.bind(A_GameMenu, boost::bind(&InputImpl::toggleMainMenu, this),
-                      "Toggle main menu");
-
-      mouse = MouseLookEventPtr(new MouseLookEvent());
-
-      // This event handler pumps events into MyGUI
-      guiEvents = EventInjectorPtr(new EventInjector(windows.getGui()));
-
-      // Hook 'mouse' and 'disp' up as event handlers into 'input'
-      // (the OIS driver and event source.) We do this through an
-      // EventList which dispatches the event to multiple handlers for
-      // us.
-      {
-        EventList *lst = new EventList;
-        input.setEvent(EventPtr(lst));
-        lst->add(mouse,Event::EV_MouseMove);
-        lst->add(disp,Event::EV_KeyDown);
-        lst->add(guiEvents,Event::EV_ALL);
-      }
-
-      mControlSwitch["playercontrols"]      = true;
-      mControlSwitch["playerfighting"]      = true;
-      mControlSwitch["playerjumping"]       = true;
-      mControlSwitch["playerlooking"]       = true;
-      mControlSwitch["playermagic"]         = true;
-      mControlSwitch["playerviewswitch"]    = true;
-      mControlSwitch["vanitymode"]          = true;
-
-      changeInputMode(false);
-
-      /**********************************
-        Key binding section
-
-        The rest of this function has hard coded key bindings, and is
-        intended to be replaced by user defined bindings later.
-       **********************************/
-
-      // Key bindings for keypress events
-      // NOTE: These keys do not require constant polling - use in conjuction with variables in loops.
-
-      disp->bind(A_Quit, KC_Q);
-      disp->bind(A_GameMenu, KC_ESCAPE);
-      disp->bind(A_Screenshot, KC_SYSRQ);
-      disp->bind(A_Inventory, KC_I);
-      disp->bind(A_Console, KC_F1);
-      disp->bind(A_Journal, KC_J);
-      disp->bind(A_Activate, KC_SPACE);
-      disp->bind(A_AutoMove, KC_Z);
-      disp->bind(A_ToggleSneak, KC_X);
-      disp->bind(A_ToggleWalk, KC_C);
-      disp->bind(A_ToggleWeapon,KC_F);
-      disp->bind(A_ToggleSpell,KC_R);
-
-      // Key bindings for polled keys
-      // NOTE: These keys are constantly being polled. Only add keys that must be checked each frame.
-
-      // Arrow keys
-      poller.bind(A_MoveLeft, KC_LEFT);
-      poller.bind(A_MoveRight, KC_RIGHT);
-      poller.bind(A_MoveForward, KC_UP);
-      poller.bind(A_MoveBackward, KC_DOWN);
-
-      // WASD keys
-      poller.bind(A_MoveLeft, KC_A);
-      poller.bind(A_MoveRight, KC_D);
-      poller.bind(A_MoveForward, KC_W);
-      poller.bind(A_MoveBackward, KC_S);
-
-      poller.bind(A_Jump, KC_E);
-      poller.bind(A_Crouch, KC_LCONTROL);
-    }
-
-    void setDragDrop(bool dragDrop)
-    {
-        mDragDrop = dragDrop;
-    }
-
-    //NOTE: Used to check for movement keys
-    void update ()
+    void InputManager::update(float dt)
     {
         // Tell OIS to handle all input events
-        input.capture();
+        mKeyboard->capture();
+        mMouse->capture();
+
+        // update values of channels (as a result of pressed keys)
+        mInputCtrl->update(dt);
 
         // Update windows/gui as a result of input events
         // For instance this could mean opening a new window/dialog,
@@ -359,150 +202,314 @@ private:
         // ensure that window/gui changes appear quickly while
         // avoiding that window/gui changes does not happen in
         // event callbacks (which may crash)
-        windows.update();
+        mWindows.update();
 
         // Disable movement in Gui mode
+        if (mWindows.isGuiMode()) return;
 
-        if (windows.isGuiMode()) return;
 
         // Configure player movement according to keyboard input. Actual movement will
         // be done in the physics system.
-        if (mControlSwitch["playercontrols"]) {
-            if (poller.isDown(A_MoveLeft))
+        if (mControlSwitch["playercontrols"])
+        {
+            if (actionIsActive(A_MoveLeft))
             {
-                player.setAutoMove (false);
-                player.setLeftRight (1);
+                mPlayer.setAutoMove (false);
+                mPlayer.setLeftRight (1);
             }
-            else if (poller.isDown(A_MoveRight))
+            else if (actionIsActive(A_MoveRight))
             {
-                player.setAutoMove (false);
-                player.setLeftRight (-1);
+                mPlayer.setAutoMove (false);
+                mPlayer.setLeftRight (-1);
             }
             else
-                player.setLeftRight (0);
+                mPlayer.setLeftRight (0);
 
-            if (poller.isDown(A_MoveForward))
+            if (actionIsActive(A_MoveForward))
             {
-                player.setAutoMove (false);
-                player.setForwardBackward (1);
+                mPlayer.setAutoMove (false);
+                mPlayer.setForwardBackward (1);
             }
-            else if (poller.isDown(A_MoveBackward))
+            else if (actionIsActive(A_MoveBackward))
             {
-                player.setAutoMove (false);
-                player.setForwardBackward (-1);
+                mPlayer.setAutoMove (false);
+                mPlayer.setForwardBackward (-1);
             }
             else
-                player.setForwardBackward (0);
+                mPlayer.setForwardBackward (0);
 
-            if (poller.isDown(A_Jump) && mControlSwitch["playerjumping"])
-                player.setUpDown (1);
-            else if (poller.isDown(A_Crouch))
-                player.setUpDown (-1);
+            if (actionIsActive(A_Jump) && mControlSwitch["playerjumping"])
+                mPlayer.setUpDown (1);
+            else if (actionIsActive(A_Crouch))
+                mPlayer.setUpDown (-1);
             else
-                player.setUpDown (0);
+                mPlayer.setUpDown (0);
         }
+
     }
 
-    // Switch between gui modes. Besides controlling the Gui windows
-    // this also makes sure input is directed to the right place
-    void changeInputMode(bool guiMode)
+    void InputManager::setDragDrop(bool dragDrop)
     {
-      // Are we in GUI mode now?
-      if(guiMode)
-        {
-          // Disable mouse look
-          mouse->disable();
+        mDragDrop = dragDrop;
+    }
 
-          // Enable GUI events
-          guiEvents->enabled = true;
+    void InputManager::changeInputMode(bool guiMode)
+    {
+        // Are we in GUI mode now?
+        if(guiMode)
+        {
+            // Disable mouse look
+            mMouseLookEnabled = false;
+
+            // Enable GUI events
+            mGuiCursorEnabled = true;
         }
-      else
+        else
         {
             // Start mouse-looking again if allowed.
             if (mControlSwitch["playerlooking"]) {
-                mouse->enable();
+                mMouseLookEnabled = true;
             }
 
-          // Disable GUI events
-          guiEvents->enabled = false;
+            // Disable GUI events
+            mGuiCursorEnabled = false;
         }
     }
 
-    void toggleControlSwitch(std::string sw, bool value)
+    void InputManager::processChangedSettings(const Settings::CategorySettingVector& changed)
+    {
+        bool changeRes = false;
+        for (Settings::CategorySettingVector::const_iterator it = changed.begin();
+        it != changed.end(); ++it)
+        {
+            if (it->first == "Video" && (it->second == "resolution x" || it->second == "resolution y"))
+                changeRes = true;
+        }
+
+        if (changeRes)
+            adjustMouseRegion(Settings::Manager::getInt("resolution x", "Video"), Settings::Manager::getInt("resolution y", "Video"));
+    }
+
+    void InputManager::toggleControlSwitch (const std::string& sw, bool value)
     {
         if (mControlSwitch[sw] == value) {
             return;
         }
         /// \note 7 switches at all, if-else is relevant
         if (sw == "playercontrols" && !value) {
-            player.setLeftRight(0);
-            player.setForwardBackward(0);
-            player.setAutoMove(false);
-            player.setUpDown(0);
+            mPlayer.setLeftRight(0);
+            mPlayer.setForwardBackward(0);
+            mPlayer.setAutoMove(false);
+            mPlayer.setUpDown(0);
         } else if (sw == "playerjumping" && !value) {
             /// \fixme maybe crouching at this time
-            player.setUpDown(0);
+            mPlayer.setUpDown(0);
         } else if (sw == "playerlooking") {
             if (value) {
-                mouse->enable();
+                mMouseLookEnabled = true;
             } else {
-                mouse->disable();
+                mMouseLookEnabled = false;
             }
         }
         mControlSwitch[sw] = value;
     }
 
-  };
-
-  /***CONSTRUCTOR***/
-  MWInputManager::MWInputManager(OEngine::Render::OgreRenderer &ogre,
-                                 MWWorld::Player &player,
-                                 MWBase::WindowManager &windows,
-                                 bool debug,
-                                 OMW::Engine& engine)
-  {
-    impl = new InputImpl(ogre,player,windows,debug, engine);
-  }
-
-  /***DESTRUCTOR***/
-  MWInputManager::~MWInputManager()
-  {
-    delete impl;
-  }
-
-  void MWInputManager::update()
-  {
-      impl->update();
-  }
-
-  void MWInputManager::setDragDrop(bool dragDrop)
-  {
-      impl->setDragDrop(dragDrop);
-  }
-
-  void MWInputManager::changeInputMode(bool guiMode)
-  {
-      impl->changeInputMode(guiMode);
-  }
-
-  void MWInputManager::processChangedSettings(const Settings::CategorySettingVector& changed)
-  {
-      bool changeRes = false;
-      for (Settings::CategorySettingVector::const_iterator it = changed.begin();
-        it != changed.end(); ++it)
-      {
-          if (it->first == "Video" && (
-            it->second == "resolution x"
-            || it->second == "resolution y"))
-                changeRes = true;
-      }
-
-      if (changeRes)
-          impl->adjustMouseRegion(Settings::Manager::getInt("resolution x", "Video"), Settings::Manager::getInt("resolution y", "Video"));
-  }
-
-    void MWInputManager::toggleControlSwitch (const std::string& sw, bool value)
+    void InputManager::adjustMouseRegion(int width, int height)
     {
-        impl->toggleControlSwitch(sw, value);
+        const OIS::MouseState &ms = mMouse->getMouseState();
+        ms.width  = width;
+        ms.height = height;
     }
+
+    bool InputManager::keyPressed( const OIS::KeyEvent &arg )
+    {
+        mInputCtrl->keyPressed (arg);
+
+        if (mGuiCursorEnabled)
+            MyGUI::InputManager::getInstance().injectKeyPress(MyGUI::KeyCode::Enum(arg.key), arg.text);
+
+        return true;
+    }
+
+    bool InputManager::keyReleased( const OIS::KeyEvent &arg )
+    {
+        mInputCtrl->keyReleased (arg);
+
+        if (mGuiCursorEnabled)
+            MyGUI::InputManager::getInstance().injectKeyRelease(MyGUI::KeyCode::Enum(arg.key));
+
+        return true;
+    }
+
+    bool InputManager::mousePressed( const OIS::MouseEvent &arg, OIS::MouseButtonID id )
+    {
+        mInputCtrl->mousePressed (arg, id);
+
+        if (mGuiCursorEnabled)
+            MyGUI::InputManager::getInstance().injectMousePress(mMouseX, mMouseY, MyGUI::MouseButton::Enum(id));
+
+        return true;
+    }
+
+    bool InputManager::mouseReleased( const OIS::MouseEvent &arg, OIS::MouseButtonID id )
+    {
+        mInputCtrl->mouseReleased (arg, id);
+
+        if (mGuiCursorEnabled)
+            MyGUI::InputManager::getInstance().injectMouseRelease(mMouseX, mMouseY, MyGUI::MouseButton::Enum(id));
+
+        return true;
+    }
+
+    bool InputManager::mouseMoved( const OIS::MouseEvent &arg )
+    {
+        mInputCtrl->mouseMoved (arg);
+
+        if (mGuiCursorEnabled)
+        {
+            const MyGUI::IntSize& viewSize = MyGUI::RenderManager::getInstance().getViewSize();
+
+            // We keep track of our own mouse position, so that moving the mouse while in
+            // game mode does not move the position of the GUI cursor
+            mMouseX += arg.state.X.rel;
+            mMouseY += arg.state.Y.rel;
+            mMouseX = std::max(0, std::min(mMouseX, viewSize.width));
+            mMouseY = std::max(0, std::min(mMouseY, viewSize.height));
+
+            MyGUI::InputManager::getInstance().injectMouseMove(mMouseX, mMouseY, arg.state.Z.abs);
+        }
+
+        if (mMouseLookEnabled)
+        {
+            float x = arg.state.X.rel * 0.2;
+            float y = arg.state.Y.rel * 0.2;
+
+            MWBase::World *world = MWBase::Environment::get().getWorld();
+            world->rotateObject(world->getPlayer().getPlayer(), -y, 0.f, x, true);
+        }
+
+        return true;
+    }
+
+    void InputManager::toggleMainMenu()
+    {
+        if (mWindows.isGuiMode () && (mWindows.getMode () == MWGui::GM_MainMenu || mWindows.getMode () == MWGui::GM_Settings))
+            mWindows.popGuiMode();
+        else
+            mWindows.pushGuiMode (MWGui::GM_MainMenu);
+    }
+
+    void InputManager::toggleSpell()
+    {
+        if (mWindows.isGuiMode()) return;
+
+        MWMechanics::DrawState_ state = mPlayer.getDrawState();
+        if (state == MWMechanics::DrawState_Weapon || state == MWMechanics::DrawState_Nothing)
+        {
+            mPlayer.setDrawState(MWMechanics::DrawState_Spell);
+            std::cout << "Player has now readied his hands for spellcasting!\n" << std::endl;
+        }
+        else
+        {
+            mPlayer.setDrawState(MWMechanics::DrawState_Nothing);
+            std::cout << "Player does not have any kind of attack ready now.\n" << std::endl;
+        }
+    }
+
+    void InputManager::toggleWeapon()
+    {
+        if (mWindows.isGuiMode()) return;
+
+        MWMechanics::DrawState_ state = mPlayer.getDrawState();
+        if (state == MWMechanics::DrawState_Spell || state == MWMechanics::DrawState_Nothing)
+        {
+            mPlayer.setDrawState(MWMechanics::DrawState_Weapon);
+            std::cout << "Player is now drawing his weapon.\n" << std::endl;
+        }
+        else
+        {
+            mPlayer.setDrawState(MWMechanics::DrawState_Nothing);
+            std::cout << "Player does not have any kind of attack ready now.\n" << std::endl;
+        }
+    }
+
+    void InputManager::screenshot()
+    {
+        mEngine.screenshot();
+
+        std::vector<std::string> empty;
+        mWindows.messageBox ("Screenshot saved", empty);
+    }
+
+    void InputManager::toggleInventory()
+    {
+        bool gameMode = !mWindows.isGuiMode();
+
+        // Toggle between game mode and inventory mode
+        if(gameMode)
+            mWindows.pushGuiMode(MWGui::GM_Inventory);
+        else if(mWindows.getMode() == MWGui::GM_Inventory)
+            mWindows.popGuiMode();
+
+        // .. but don't touch any other mode.
+    }
+
+    void InputManager::toggleConsole()
+    {
+        bool gameMode = !mWindows.isGuiMode();
+
+        // Switch to console mode no matter what mode we are currently
+        // in, except of course if we are already in console mode
+        if (!gameMode)
+        {
+            if (mWindows.getMode() == MWGui::GM_Console)
+                mWindows.popGuiMode();
+            else
+                mWindows.pushGuiMode(MWGui::GM_Console);
+        }
+        else
+            mWindows.pushGuiMode(MWGui::GM_Console);
+    }
+
+    void InputManager::toggleJournal()
+    {
+        // Toggle between game mode and journal mode
+        bool gameMode = !mWindows.isGuiMode();
+
+        if(gameMode)
+            mWindows.pushGuiMode(MWGui::GM_Journal);
+        else if(mWindows.getMode() == MWGui::GM_Journal)
+            mWindows.popGuiMode();
+        // .. but don't touch any other mode.
+    }
+
+    void InputManager::activate()
+    {
+        mEngine.activate();
+    }
+
+    void InputManager::toggleAutoMove()
+    {
+        if (mWindows.isGuiMode()) return;
+        mPlayer.setAutoMove (!mPlayer.getAutoMove());
+    }
+
+    void InputManager::toggleWalking()
+    {
+        if (mWindows.isGuiMode()) return;
+        mPlayer.toggleRunning();
+    }
+
+    // Exit program now button (which is disabled in GUI mode)
+    void InputManager::exitNow()
+    {
+        if(!mWindows.isGuiMode())
+            Ogre::Root::getSingleton().queueEndRendering ();
+    }
+
+    bool InputManager::actionIsActive (int id)
+    {
+        return mInputCtrl->getChannel (id)->getValue () == 1;
+    }
+
 }

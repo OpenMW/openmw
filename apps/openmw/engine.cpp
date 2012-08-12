@@ -67,7 +67,7 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
         mEnvironment.setFrameDuration (evt.timeSinceLastFrame);
 
         // update input
-        MWBase::Environment::get().getInputManager()->update();
+        MWBase::Environment::get().getInputManager()->update(evt.timeSinceLastFrame);
 
         // sound
         if (mUseSound)
@@ -270,6 +270,24 @@ void OMW::Engine::go()
     else if (boost::filesystem::exists(globaldefault))
         settings.loadUser(globaldefault);
 
+    // Get the path for the keybinder xml file
+    std::string keybinderDefault;
+
+    // load user settings if they exist, otherwise just load the default settings as user settings
+    const std::string keybinderUser = (mCfgMgr.getUserPath() / "input.xml").string();
+    const std::string keybinderDefaultLocal = (mCfgMgr.getLocalPath() / "input-default.xml").string();
+    const std::string keybinderDefaultGlobal = (mCfgMgr.getGlobalPath() / "input-default.xml").string();
+
+    bool keybinderUserExists = boost::filesystem::exists(keybinderUser);
+
+    if (boost::filesystem::exists(keybinderDefaultLocal))
+        keybinderDefault = keybinderDefaultLocal;
+    else if (boost::filesystem::exists(keybinderDefaultGlobal))
+        keybinderDefault = keybinderDefaultGlobal;
+    else
+        throw std::runtime_error ("No default input settings found! Make sure the file \"input-default.xml\" was properly installed.");
+
+
     mFpsLevel = settings.getInt("fps", "HUD");
 
     // load nif overrides
@@ -366,9 +384,9 @@ void OMW::Engine::go()
 
     // Sets up the input system
 
-    mEnvironment.setInputManager (new MWInput::MWInputManager (*mOgre,
+    mEnvironment.setInputManager (new MWInput::InputManager (*mOgre,
         MWBase::Environment::get().getWorld()->getPlayer(),
-        *MWBase::Environment::get().getWindowManager(), mDebug, *this));
+         *MWBase::Environment::get().getWindowManager(), mDebug, *this, keybinderDefault, keybinderUser, keybinderUserExists));
 
     std::cout << "\nPress Q/ESC or close window to exit.\n";
 
