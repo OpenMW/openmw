@@ -338,10 +338,12 @@ void WindowManager::setValue (const std::string& id, const MWMechanics::Stat<int
 }
 
 
-void WindowManager::setValue(const ESM::Skill::SkillEnum parSkill, const MWMechanics::Stat<float>& value)
+void WindowManager::setValue (int parSkill, const MWMechanics::Stat<float>& value)
 {
-    mStatsWindow->setValue(parSkill, value);
-    mCharGen->setValue(parSkill, value);
+    /// \todo Don't use the skill enum as a parameter type (we will have to drop it anyway, once we
+    /// allow custom skills.
+    mStatsWindow->setValue(static_cast<ESM::Skill::SkillEnum> (parSkill), value);
+    mCharGen->setValue(static_cast<ESM::Skill::SkillEnum> (parSkill), value);
     mPlayerSkillValues[parSkill] = value;
 }
 
@@ -800,12 +802,12 @@ MWGui::GuiMode WindowManager::getMode() const
     return mGuiModes.back();
 }
 
-std::map<ESM::Skill::SkillEnum, MWMechanics::Stat<float> > WindowManager::getPlayerSkillValues()
+std::map<int, MWMechanics::Stat<float> > WindowManager::getPlayerSkillValues()
 {
     return mPlayerSkillValues;
 }
 
-std::map<ESM::Attribute::AttributeID, MWMechanics::Stat<int> > WindowManager::getPlayerAttributeValues()
+std::map<int, MWMechanics::Stat<int> > WindowManager::getPlayerAttributeValues()
 {
     return mPlayerAttributes;
 }

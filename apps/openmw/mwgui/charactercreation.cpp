@@ -268,20 +268,20 @@ void CharacterCreation::spawnDialog(const char id)
             mReviewDialog->setFatigue(mPlayerFatigue);
 
             {
-                std::map<ESM::Attribute::AttributeID, MWMechanics::Stat<int> > attributes = mWM->getPlayerAttributeValues();
-                for (std::map<ESM::Attribute::AttributeID, MWMechanics::Stat<int> >::iterator it = attributes.begin();
+                std::map<int, MWMechanics::Stat<int> > attributes = mWM->getPlayerAttributeValues();
+                for (std::map<int, MWMechanics::Stat<int> >::iterator it = attributes.begin();
                     it != attributes.end(); ++it)
                 {
-                    mReviewDialog->setAttribute(it->first, it->second);
+                    mReviewDialog->setAttribute(static_cast<ESM::Attribute::AttributeID> (it->first), it->second);
                 }
             }
 
             {
-                std::map<ESM::Skill::SkillEnum, MWMechanics::Stat<float> > skills = mWM->getPlayerSkillValues();
-                for (std::map<ESM::Skill::SkillEnum, MWMechanics::Stat<float> >::iterator it = skills.begin();
+                std::map<int, MWMechanics::Stat<float> > skills = mWM->getPlayerSkillValues();
+                for (std::map<int, MWMechanics::Stat<float> >::iterator it = skills.begin();
                     it != skills.end(); ++it)
                 {
-                    mReviewDialog->setSkillValue(it->first, it->second);
+                    mReviewDialog->setSkillValue(static_cast<ESM::Skill::SkillEnum> (it->first), it->second);
                 }
                 mReviewDialog->configureSkills(mWM->getPlayerMajorSkills(), mWM->getPlayerMinorSkills());
             }

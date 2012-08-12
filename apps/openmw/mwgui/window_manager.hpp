@@ -131,7 +131,7 @@ namespace MWGui
 
     ///< Set value for the given ID.
     void setValue (const std::string& id, const MWMechanics::Stat<int>& value);
-    void setValue(const ESM::Skill::SkillEnum parSkill, const MWMechanics::Stat<float>& value);
+    void setValue (int parSkill, const MWMechanics::Stat<float>& value);
     void setValue (const std::string& id, const MWMechanics::DynamicStat<int>& value);
     void setValue (const std::string& id, const std::string& value);
     void setValue (const std::string& id, int value);
@@ -184,8 +184,8 @@ namespace MWGui
 
     void onFrame (float frameDuration);
 
-    std::map<ESM::Skill::SkillEnum, MWMechanics::Stat<float> > getPlayerSkillValues();
-    std::map<ESM::Attribute::AttributeID, MWMechanics::Stat<int> > getPlayerAttributeValues();
+    std::map<int, MWMechanics::Stat<float> > getPlayerSkillValues();
+    std::map<int, MWMechanics::Stat<int> > getPlayerAttributeValues();
     SkillList getPlayerMinorSkills();
     SkillList getPlayerMajorSkills();
 
@@ -233,9 +233,9 @@ namespace MWGui
     ESM::Class mPlayerClass;
     std::string mPlayerName;
     std::string mPlayerRaceId;
-    std::map<ESM::Attribute::AttributeID, MWMechanics::Stat<int> > mPlayerAttributes;
+    std::map<int, MWMechanics::Stat<int> > mPlayerAttributes;
     SkillList mPlayerMajorSkills, mPlayerMinorSkills;
-    std::map<ESM::Skill::SkillEnum, MWMechanics::Stat<float> > mPlayerSkillValues;
+    std::map<int, MWMechanics::Stat<float> > mPlayerSkillValues;
     MWMechanics::DynamicStat<int> mPlayerHealth, mPlayerMagicka, mPlayerFatigue;
 
 
