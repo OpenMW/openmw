@@ -146,8 +146,7 @@ void MWBase::Environment::cleanup()
     delete mScriptManager;
     mScriptManager = 0;
 
-/// \todo Re-enable (currently throwing an exception)
-//    delete mWindowManager;
+    delete mWindowManager;
     mWindowManager = 0;
 
     delete mWorld;

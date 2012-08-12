@@ -159,7 +159,6 @@ WindowManager::WindowManager(
 
 WindowManager::~WindowManager()
 {
-    delete mGuiManager;
     delete mConsole;
     delete mMessageBoxManager;
     delete mHud;
@@ -182,6 +181,8 @@ WindowManager::~WindowManager()
     delete mSpellWindow;
 
     cleanupGarbage();
+
+    delete mGuiManager;
 }
 
 void WindowManager::cleanupGarbage()
