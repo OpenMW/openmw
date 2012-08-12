@@ -73,6 +73,7 @@ void ManualBulletShapeLoader::loadResource(Ogre::Resource *resource)
     resourceName = cShape->getName();
     cShape->collide = false;
     mBoundingBox = NULL;
+    boxTranslation = Ogre::Vector3(0,0,0);
 
     mTriMesh = new btTriangleMesh();
 
@@ -126,8 +127,10 @@ void ManualBulletShapeLoader::loadResource(Ogre::Resource *resource)
             delete m_meshInterface;
         }
     };
+    cShape->boxTranslation = boxTranslation;
     if(mBoundingBox != NULL)
         cShape->Shape = mBoundingBox;
+
     else
     {
         currentShape = new TriangleMeshShape(mTriMesh,true);
@@ -220,8 +223,11 @@ void ManualBulletShapeLoader::handleNode(Nif::Node *node, int flags,
 
     if(node->hasBounds)
     {
-        btVector3 boxsize = getbtVector((node->boundXYZ));
+
         
+        btVector3 boxsize = getbtVector((node->boundXYZ));
+        boxTranslation = node->boundPos;
+
         mBoundingBox = new btBoxShape(boxsize);
     }
 

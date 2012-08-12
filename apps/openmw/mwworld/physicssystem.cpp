@@ -173,7 +173,7 @@ namespace MWWorld
             act->setWalkDirection(btVector3(0,0,0));
         }
 		playerMove::playercmd& pm_ref = playerphysics->cmd;
-        //playerphysics->ps.snappingImplemented = false;
+        
         pm_ref.rightmove = 0;
         pm_ref.forwardmove = 0;
         pm_ref.upmove = 0;
@@ -259,17 +259,8 @@ namespace MWWorld
         const Ogre::Quaternion& rotation, float scale, const Ogre::Vector3& position)
     {
         handleToMesh[handle] = mesh;
-        OEngine::Physic::RigidBody* body = mEngine->createRigidBody(mesh,handle,scale);
+        OEngine::Physic::RigidBody* body = mEngine->createAndAdjustRigidBody(mesh,handle,scale, position, rotation);
         mEngine->addRigidBody(body);
-        btTransform tr;
-        btBoxShape* box = dynamic_cast<btBoxShape*>(body->getCollisionShape());
-        if(box != NULL){
-            tr.setOrigin(btVector3(position.x,position.y,position.z + box->getHalfExtentsWithMargin().getZ()));
-        }
-        else
-            tr.setOrigin(btVector3(position.x,position.y,position.z));
-        tr.setRotation(btQuaternion(rotation.x,rotation.y,rotation.z,rotation.w));
-        body->setWorldTransform(tr);
     }
 
     void PhysicsSystem::addActor (const std::string& handle, const std::string& mesh,

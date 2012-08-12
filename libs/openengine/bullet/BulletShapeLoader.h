@@ -4,7 +4,7 @@
 #include <OgreResource.h>
 #include <OgreResourceManager.h>
 #include <btBulletCollisionCommon.h>
-
+#include <OgreVector3.h>
 //For some reason, Ogre Singleton  cannot be used in another namespace, that's why there is no namespace here.
 //But the risk of name collision seems pretty low here.
 
@@ -31,6 +31,7 @@ public:
     virtual ~BulletShape();
 
     btCollisionShape* Shape;
+    Ogre::Vector3 boxTranslation;
     //this flag indicate if the shape is used for collision or if it's for raycasting only.
     bool collide;
 };

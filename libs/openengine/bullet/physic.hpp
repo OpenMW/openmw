@@ -146,7 +146,7 @@ namespace Physic
          * Create a RigidBody.It does not add it to the simulation, but it does add it to the rigidBody Map,
          * so you can get it with the getRigidBody function.
          */
-        RigidBody* createRigidBody(std::string mesh,std::string name,float scale);
+        RigidBody* createAndAdjustRigidBody(std::string mesh,std::string name,float scale, Ogre::Vector3 position, Ogre::Quaternion rotation);
 
         /**
          * Add a HeightField to the simulation

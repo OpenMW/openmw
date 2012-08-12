@@ -332,7 +332,7 @@ namespace Physic
         mHeightFieldMap.erase(name);
     }
 
-    RigidBody* PhysicEngine::createRigidBody(std::string mesh,std::string name,float scale)
+    RigidBody* PhysicEngine::createAndAdjustRigidBody(std::string mesh,std::string name,float scale, Ogre::Vector3 position, Ogre::Quaternion rotation)
     {
         std::string sid = (boost::format("%07.3f") % scale).str();
         std::string outputstring = mesh + sid;
@@ -354,6 +354,19 @@ namespace Physic
         btRigidBody::btRigidBodyConstructionInfo CI = btRigidBody::btRigidBodyConstructionInfo(0,newMotionState,shape->Shape);
         RigidBody* body = new RigidBody(CI,name);
         body->collide = shape->collide;
+
+        btTransform tr;
+        btBoxShape* box = dynamic_cast<btBoxShape*>(body->getCollisionShape());
+        if(box != NULL){
+            Ogre::Vector3 transrot = rotation * (shape->boxTranslation * scale);
+            Ogre::Vector3 newPosition = transrot + position;
+            tr.setOrigin(btVector3(newPosition.x, newPosition.y, newPosition.z));
+        }
+        else
+            tr.setOrigin(btVector3(position.x,position.y,position.z));
+        tr.setRotation(btQuaternion(rotation.x,rotation.y,rotation.z,rotation.w));
+        body->setWorldTransform(tr);
+
         return body;
 
     }
