@@ -1,7 +1,8 @@
 #include "actionread.hpp"
 
 #include "../mwbase/environment.hpp"
-#include "../mwgui/window_manager.hpp"
+#include "../mwbase/windowmanager.hpp"
+
 #include "../mwgui/bookwindow.hpp"
 #include "../mwgui/scrollwindow.hpp"
 

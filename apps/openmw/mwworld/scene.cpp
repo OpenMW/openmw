@@ -1,12 +1,12 @@
 #include "scene.hpp"
 
+#include <components/esm_store/store.hpp>
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp" /// FIXME
 #include "../mwbase/soundmanager.hpp"
-
-#include "../mwmechanics/mechanicsmanager.hpp"
-
-#include "../mwgui/window_manager.hpp"
+#include "../mwbase/mechanicsmanager.hpp"
+#include "../mwbase/windowmanager.hpp"
 
 #include "player.hpp"
 #include "localscripts.hpp"
@@ -157,7 +157,7 @@ namespace MWWorld
             world->rotateObject(player, x, y, z);
         }
 
-        MWMechanics::MechanicsManager *mechMgr =
+        MWBase::MechanicsManager *mechMgr =
             MWBase::Environment::get().getMechanicsManager();
 
         mechMgr->addActor(player);

@@ -4,10 +4,11 @@
 #include <OgreMaterialManager.h>
 #include <OgreHardwarePixelBuffer.h>
 
+#include <components/esm_store/store.hpp>
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
-
-#include "../mwgui/window_manager.hpp"
+#include "../mwbase/windowmanager.hpp"
 
 #include "renderconst.hpp"
 #include "renderingmanager.hpp"

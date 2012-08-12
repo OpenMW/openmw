@@ -13,30 +13,28 @@
 #include "../mwbase/world.hpp"
 #include "../mwbase/scriptmanager.hpp"
 #include "../mwbase/journal.hpp"
+#include "../mwbase/windowmanager.hpp"
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/refdata.hpp"
 #include "../mwworld/player.hpp"
 #include "../mwworld/containerstore.hpp"
 
-#include "../mwinput/inputmanager.hpp"
 #include "../mwgui/dialogue.hpp"
-#include "../mwgui/window_manager.hpp"
 
 #include <iostream>
-
-#include "../mwscript/extensions.hpp"
 
 #include <components/compiler/exception.hpp>
 #include <components/compiler/errorhandler.hpp>
 #include <components/compiler/scanner.hpp>
 #include <components/compiler/locals.hpp>
 #include <components/compiler/output.hpp>
+#include <components/compiler/scriptparser.hpp>
 #include <components/interpreter/interpreter.hpp>
 
 #include "../mwscript/compilercontext.hpp"
 #include "../mwscript/interpretercontext.hpp"
-#include <components/compiler/scriptparser.hpp>
+#include "../mwscript/extensions.hpp"
 
 #include "../mwclass/npc.hpp"
 #include "../mwmechanics/npcstats.hpp"

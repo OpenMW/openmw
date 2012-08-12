@@ -13,9 +13,9 @@
 #include <components/nifbullet/bullet_nif_loader.hpp>
 #include <components/nifogre/ogre_nif_loader.hpp>
 
-#include "mwinput/inputmanager.hpp"
+#include "mwinput/inputmanagerimp.hpp"
 
-#include "mwgui/window_manager.hpp"
+#include "mwgui/windowmanagerimp.hpp"
 #include "mwgui/cursorreplace.hpp"
 
 #include "mwscript/scriptmanagerimp.hpp"
@@ -32,7 +32,7 @@
 #include "mwdialogue/dialoguemanagerimp.hpp"
 #include "mwdialogue/journalimp.hpp"
 
-#include "mwmechanics/mechanicsmanager.hpp"
+#include "mwmechanics/mechanicsmanagerimp.hpp"
 
 
 void OMW::Engine::executeLocalScripts()

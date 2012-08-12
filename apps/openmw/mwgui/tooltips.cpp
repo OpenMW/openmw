@@ -8,16 +8,16 @@
 
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
+#include "../mwbase/windowmanager.hpp"
 
 #include "../mwworld/class.hpp"
 
-#include "window_manager.hpp"
 #include "widgets.hpp"
 
 using namespace MWGui;
 using namespace MyGUI;
 
-ToolTips::ToolTips(WindowManager* windowManager) :
+ToolTips::ToolTips(MWBase::WindowManager* windowManager) :
     Layout("openmw_tooltips.layout")
     , mGameMode(true)
     , mWindowManager(windowManager)

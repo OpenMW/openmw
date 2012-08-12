@@ -45,11 +45,11 @@ namespace MWGui
     class MapWindow : public MWGui::WindowPinnableBase, public LocalMapBase
     {
     public:
-        MapWindow(WindowManager& parWindowManager);
+        MapWindow(MWBase::WindowManager& parWindowManager);
         virtual ~MapWindow(){}
 
         void setCellName(const std::string& cellName);
-  
+
     private:
         void onDragStart(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id);
         void onMouseDrag(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id);

@@ -9,7 +9,7 @@ namespace MWGui
     class InventoryWindow : public ContainerBase, public WindowPinnableBase
     {
         public:
-            InventoryWindow(WindowManager& parWindowManager,DragAndDrop* dragAndDrop);
+            InventoryWindow(MWBase::WindowManager& parWindowManager,DragAndDrop* dragAndDrop);
 
             virtual void open();
 

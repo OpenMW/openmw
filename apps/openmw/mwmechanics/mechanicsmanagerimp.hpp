@@ -1,8 +1,7 @@
-#ifndef GAME_MWMECHANICS_MECHANICSMANAGER_H
-#define GAME_MWMECHANICS_MECHANICSMANAGER_H
+#ifndef GAME_MWMECHANICS_MECHANICSMANAGERIMP_H
+#define GAME_MWMECHANICS_MECHANICSMANAGERIMP_H
 
-#include <vector>
-#include <string>
+#include "../mwbase/mechanicsmanager.hpp"
 
 #include "../mwworld/ptr.hpp"
 
@@ -22,7 +21,7 @@ namespace MWWorld
 
 namespace MWMechanics
 {
-    class MechanicsManager
+    class MechanicsManager : public MWBase::MechanicsManager
     {
             MWWorld::Ptr mWatched;
             CreatureStats mWatchedCreature;
@@ -38,43 +37,41 @@ namespace MWMechanics
 
         public:
 
-            MechanicsManager ();
+            MechanicsManager();
 
-            void configureGUI();
-
-            void addActor (const MWWorld::Ptr& ptr);
+            virtual void addActor (const MWWorld::Ptr& ptr);
             ///< Register an actor for stats management
 
-            void removeActor (const MWWorld::Ptr& ptr);
+            virtual void removeActor (const MWWorld::Ptr& ptr);
             ///< Deregister an actor for stats management
 
-            void dropActors (const MWWorld::CellStore *cellStore);
+            virtual void dropActors (const MWWorld::CellStore *cellStore);
             ///< Deregister all actors in the given cell.
 
-            void watchActor (const MWWorld::Ptr& ptr);
+            virtual void watchActor (const MWWorld::Ptr& ptr);
             ///< On each update look for changes in a previously registered actor and update the
             /// GUI accordingly.
 
-            void update (std::vector<std::pair<std::string, Ogre::Vector3> >& movement, float duration,
-                bool paused);
+            virtual void update (std::vector<std::pair<std::string, Ogre::Vector3> >& movement,
+                float duration, bool paused);
             ///< Update actor stats and store desired velocity vectors in \a movement
             ///
             /// \param paused In game type does not currently advance (this usually means some GUI
             /// component is up).
 
-            void setPlayerName (const std::string& name);
+            virtual void setPlayerName (const std::string& name);
             ///< Set player name.
 
-            void setPlayerRace (const std::string& id, bool male);
+            virtual void setPlayerRace (const std::string& id, bool male);
             ///< Set player race.
 
-            void setPlayerBirthsign (const std::string& id);
+            virtual void setPlayerBirthsign (const std::string& id);
             ///< Set player birthsign.
 
-            void setPlayerClass (const std::string& id);
+            virtual void setPlayerClass (const std::string& id);
             ///< Set player class to stock class.
 
-            void setPlayerClass (const ESM::Class& class_);
+            virtual void setPlayerClass (const ESM::Class& class_);
             ///< Set player class to custom class.
     };
 }

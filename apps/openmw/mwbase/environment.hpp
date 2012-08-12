@@ -1,21 +1,6 @@
 #ifndef GAME_BASE_INVIRONMENT_H
 #define GAME_BASE_INVIRONMENT_H
 
-namespace MWGui
-{
-    class WindowManager;
-}
-
-namespace MWMechanics
-{
-    class MechanicsManager;
-}
-
-namespace MWInput
-{
-    struct MWInputManager;
-}
-
 namespace MWBase
 {
     class World;
@@ -23,6 +8,9 @@ namespace MWBase
     class DialogueManager;
     class Journal;
     class SoundManager;
+    class MechanicsManager;
+    class InputManager;
+    class WindowManager;
 
     /// \brief Central hub for mw-subsystems
     ///
@@ -37,11 +25,11 @@ namespace MWBase
             World *mWorld;
             SoundManager *mSoundManager;
             ScriptManager *mScriptManager;
-            MWGui::WindowManager *mWindowManager;
-            MWMechanics::MechanicsManager *mMechanicsManager;
+            WindowManager *mWindowManager;
+            MechanicsManager *mMechanicsManager;
             DialogueManager *mDialogueManager;
             Journal *mJournal;
-            MWInput::MWInputManager *mInputManager;
+            InputManager *mInputManager;
             float mFrameDuration;
 
             Environment (const Environment&);
@@ -62,15 +50,15 @@ namespace MWBase
 
             void setScriptManager (MWBase::ScriptManager *scriptManager);
 
-            void setWindowManager (MWGui::WindowManager *windowManager);
+            void setWindowManager (WindowManager *windowManager);
 
-            void setMechanicsManager (MWMechanics::MechanicsManager *mechanicsManager);
+            void setMechanicsManager (MechanicsManager *mechanicsManager);
 
             void setDialogueManager (DialogueManager *dialogueManager);
 
             void setJournal (Journal *journal);
 
-            void setInputManager (MWInput::MWInputManager *inputManager);
+            void setInputManager (InputManager *inputManager);
 
             void setFrameDuration (float duration);
             ///< Set length of current frame in seconds.
@@ -79,17 +67,17 @@ namespace MWBase
 
             SoundManager *getSoundManager() const;
 
-            MWBase::ScriptManager *getScriptManager() const;
+            ScriptManager *getScriptManager() const;
 
-            MWGui::WindowManager *getWindowManager() const;
+            WindowManager *getWindowManager() const;
 
-            MWMechanics::MechanicsManager *getMechanicsManager() const;
+            MechanicsManager *getMechanicsManager() const;
 
             DialogueManager *getDialogueManager() const;
 
             Journal *getJournal() const;
 
-            MWInput::MWInputManager *getInputManager() const;
+            InputManager *getInputManager() const;
 
             float getFrameDuration() const;
 

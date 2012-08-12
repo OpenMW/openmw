@@ -10,14 +10,19 @@
 #undef MYGUI_EXPORT
 #define MYGUI_EXPORT
 
+namespace MWBase
+{
+    class WindowManager;
+}
+
 /*
   This file contains various custom widgets used in OpenMW.
  */
 
 namespace MWGui
 {
+    /// \todo remove!
     using namespace MyGUI;
-    class WindowManager;
 
     namespace Widgets
     {
@@ -81,12 +86,12 @@ namespace MWGui
 
             typedef MWMechanics::Stat<float> SkillValue;
 
-            void setWindowManager(WindowManager *m) { mManager = m; }
+            void setWindowManager(MWBase::WindowManager *m) { mManager = m; } /// \todo remove
             void setSkillId(ESM::Skill::SkillEnum skillId);
             void setSkillNumber(int skillId);
             void setSkillValue(const SkillValue& value);
 
-            WindowManager *getWindowManager() const { return mManager; }
+            MWBase::WindowManager *getWindowManager() const { return mManager; }
             ESM::Skill::SkillEnum getSkillId() const { return mSkillId; }
             const SkillValue& getSkillValue() const { return mValue; }
 
@@ -109,7 +114,7 @@ namespace MWGui
 
             void updateWidgets();
 
-            WindowManager *mManager;
+            MWBase::WindowManager *mManager;
             ESM::Skill::SkillEnum mSkillId;
             SkillValue mValue;
             MyGUI::WidgetPtr mSkillNameWidget, mSkillValueWidget;
@@ -124,11 +129,11 @@ namespace MWGui
 
             typedef MWMechanics::Stat<int> AttributeValue;
 
-            void setWindowManager(WindowManager *m) { mManager = m; }
+            void setWindowManager(MWBase::WindowManager *m) { mManager = m; }
             void setAttributeId(int attributeId);
             void setAttributeValue(const AttributeValue& value);
 
-            WindowManager *getWindowManager() const { return mManager; }
+            MWBase::WindowManager *getWindowManager() const { return mManager; }
             int getAttributeId() const { return mId; }
             const AttributeValue& getAttributeValue() const { return mValue; }
 
@@ -151,7 +156,7 @@ namespace MWGui
 
             void updateWidgets();
 
-            WindowManager *mManager;
+            MWBase::WindowManager *mManager;
             int mId;
             AttributeValue mValue;
             MyGUI::WidgetPtr mAttributeNameWidget, mAttributeValueWidget;
@@ -170,7 +175,7 @@ namespace MWGui
 
             typedef MWMechanics::Stat<int> SpellValue;
 
-            void setWindowManager(WindowManager* parWindowManager) { mWindowManager = parWindowManager; }
+            void setWindowManager(MWBase::WindowManager* parWindowManager) { mWindowManager = parWindowManager; }
             void setSpellId(const std::string &id);
 
             /**
@@ -192,7 +197,7 @@ namespace MWGui
         private:
             void updateWidgets();
 
-            WindowManager* mWindowManager;
+            MWBase::WindowManager* mWindowManager;
             std::string mId;
             MyGUI::TextBox* mSpellNameWidget;
         };
@@ -212,7 +217,7 @@ namespace MWGui
                 EF_Constant = 0x02 // constant effect means that duration will not be displayed
             };
 
-            void setWindowManager(WindowManager* parWindowManager) { mWindowManager = parWindowManager; }
+            void setWindowManager(MWBase::WindowManager* parWindowManager) { mWindowManager = parWindowManager; }
             void setEffectList(const SpellEffectList& list);
 
             static SpellEffectList effectListFromESM(const ESM::EffectList* effects);
@@ -234,7 +239,7 @@ namespace MWGui
         private:
             void updateWidgets();
 
-            WindowManager* mWindowManager;
+            MWBase::WindowManager* mWindowManager;
             SpellEffectList mEffectList;
         };
         typedef MWEffectList* MWEffectListPtr;
@@ -247,7 +252,7 @@ namespace MWGui
 
             typedef ESM::ENAMstruct SpellEffectValue;
 
-            void setWindowManager(WindowManager* parWindowManager) { mWindowManager = parWindowManager; }
+            void setWindowManager(MWBase::WindowManager* parWindowManager) { mWindowManager = parWindowManager; }
             void setSpellEffect(const SpellEffectParams& params);
 
             std::string effectIDToString(const short effectID);
@@ -262,12 +267,12 @@ namespace MWGui
             virtual ~MWSpellEffect();
 
             virtual void initialiseOverride();
-            
+
         private:
 
             void updateWidgets();
 
-            WindowManager* mWindowManager;
+            MWBase::WindowManager* mWindowManager;
             SpellEffectParams mEffectParams;
             MyGUI::ImageBox* mImageWidget;
             MyGUI::TextBox* mTextWidget;

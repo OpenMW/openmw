@@ -13,12 +13,11 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/soundmanager.hpp"
+#include "../mwbase/inputmanager.hpp"
+#include "../mwbase/windowmanager.hpp"
 
 #include "../mwrender/renderingmanager.hpp"
 
-#include "../mwinput/inputmanager.hpp"
-
-#include "window_manager.hpp"
 #include "confirmationdialog.hpp"
 
 namespace
@@ -82,7 +81,7 @@ namespace
 
 namespace MWGui
 {
-    SettingsWindow::SettingsWindow(WindowManager& parWindowManager) :
+    SettingsWindow::SettingsWindow(MWBase::WindowManager& parWindowManager) :
         WindowBase("openmw_settings_window.layout", parWindowManager)
     {
         getWidget(mOkButton, "OkButton");

@@ -1,10 +1,12 @@
 
 #include "journalimp.hpp"
 
+#include <components/esm_store/store.hpp>
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
+#include "../mwbase/windowmanager.hpp"
 
-#include "../mwgui/window_manager.hpp"
 #include "../mwgui/messagebox.hpp"
 
 namespace MWDialogue

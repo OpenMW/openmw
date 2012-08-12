@@ -127,7 +127,7 @@ namespace MWGui
     class ContainerWindow : public ContainerBase, public WindowBase
     {
     public:
-        ContainerWindow(WindowManager& parWindowManager,DragAndDrop* dragAndDrop);
+        ContainerWindow(MWBase::WindowManager& parWindowManager,DragAndDrop* dragAndDrop);
 
         virtual ~ContainerWindow();
 

@@ -4,10 +4,11 @@
 #include <components/esm/loadcrea.hpp>
 
 #include "../mwmechanics/creaturestats.hpp"
-#include "../mwmechanics/mechanicsmanager.hpp"
 #include "../mwmechanics/magiceffects.hpp"
 
 #include "../mwbase/environment.hpp"
+#include "../mwbase/mechanicsmanager.hpp"
+#include "../mwbase/windowmanager.hpp"
 
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/actiontalk.hpp"
@@ -17,7 +18,6 @@
 
 #include "../mwrender/renderinginterface.hpp"
 
-#include "../mwgui/window_manager.hpp"
 #include "../mwgui/tooltips.hpp"
 
 namespace
@@ -104,7 +104,7 @@ namespace MWClass
         if (!model.empty()) {
             return "meshes\\" + model;
         }
-        return "";        
+        return "";
     }
 
     std::string Creature::getName (const MWWorld::Ptr& ptr) const

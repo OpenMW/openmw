@@ -1,9 +1,10 @@
 #include "text_input.hpp"
-#include "window_manager.hpp"
+
+#include "../mwbase/windowmanager.hpp"
 
 using namespace MWGui;
 
-TextInputDialog::TextInputDialog(WindowManager& parWindowManager)
+TextInputDialog::TextInputDialog(MWBase::WindowManager& parWindowManager)
   : WindowBase("openmw_text_input.layout", parWindowManager)
 {
     // Centre dialog

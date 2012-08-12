@@ -11,6 +11,7 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/soundmanager.hpp"
+#include "../mwbase/windowmanager.hpp"
 
 #include "../mwworld/manualref.hpp"
 #include "../mwworld/containerstore.hpp"
@@ -19,9 +20,6 @@
 
 #include "../mwclass/container.hpp"
 
-#include "../mwinput/inputmanager.hpp"
-
-#include "window_manager.hpp"
 #include "widgets.hpp"
 #include "countdialog.hpp"
 #include "tradewindow.hpp"
@@ -593,7 +591,7 @@ MWWorld::ContainerStore& ContainerBase::getContainerStore()
 
 // ------------------------------------------------------------------------------------------------
 
-ContainerWindow::ContainerWindow(WindowManager& parWindowManager,DragAndDrop* dragAndDrop)
+ContainerWindow::ContainerWindow(MWBase::WindowManager& parWindowManager,DragAndDrop* dragAndDrop)
     : ContainerBase(dragAndDrop)
     , WindowBase("openmw_container_window.layout", parWindowManager)
 {
