@@ -10,12 +10,11 @@
    this class.
 **/
 
-#include "MyGUI_UString.h"
+#include <vector>
+#include <string>
 
 #include <components/esm_store/store.hpp>
 #include <components/settings/settings.hpp>
-#include <openengine/ogre/renderer.hpp>
-#include <openengine/gui/manager.hpp>
 
 #include "../mwmechanics/stat.hpp"
 
@@ -23,8 +22,9 @@
 
 namespace MyGUI
 {
-  class Gui;
-  class Widget;
+    class Gui;
+    class Widget;
+    class UString;
 }
 
 namespace Compiler
@@ -38,16 +38,17 @@ namespace MWWorld
     class CellStore;
 }
 
-namespace MWMechanics
-{
-    class MechanicsManager;
-}
-
 namespace OEngine
 {
     namespace GUI
     {
         class Layout;
+        class MyGUIManager;
+    }
+
+    namespace Render
+    {
+        class OgreRenderer;
     }
 }
 

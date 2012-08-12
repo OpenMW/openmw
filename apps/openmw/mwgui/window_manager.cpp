@@ -1,4 +1,25 @@
 #include "window_manager.hpp"
+
+#include <cassert>
+#include <iterator>
+
+#include "MyGUI_UString.h"
+
+#include <openengine/ogre/renderer.hpp>
+#include <openengine/gui/manager.hpp>
+
+#include <components/settings/settings.hpp>
+
+#include "../mwbase/environment.hpp"
+#include "../mwbase/mechanicsmanager.hpp"
+#include "../mwbase/inputmanager.hpp"
+
+#include "../mwworld/ptr.hpp"
+#include "../mwworld/cellstore.hpp"
+
+#include "console.hpp"
+#include "journalwindow.hpp"
+#include "charactercreation.hpp"
 #include "text_input.hpp"
 #include "review.hpp"
 #include "dialogue.hpp"
@@ -20,22 +41,6 @@
 #include "confirmationdialog.hpp"
 #include "alchemywindow.hpp"
 #include "spellwindow.hpp"
-
-#include "../mwbase/environment.hpp"
-#include "../mwbase/mechanicsmanager.hpp"
-#include "../mwbase/inputmanager.hpp"
-
-#include "../mwworld/ptr.hpp"
-#include "../mwworld/cellstore.hpp"
-
-#include "console.hpp"
-#include "journalwindow.hpp"
-#include "charactercreation.hpp"
-
-#include <components/settings/settings.hpp>
-
-#include <cassert>
-#include <iterator>
 
 using namespace MWGui;
 
