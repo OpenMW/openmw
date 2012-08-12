@@ -52,7 +52,7 @@ namespace MWInput
                    OMW::Engine& engine);
     virtual ~MWInputManager();
 
-    virtual void update();
+    void update(float duration);
 
     virtual void changeInputMode(bool guiMode);
 

@@ -133,11 +133,10 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
     mObjects.setMwRoot(mMwRoot);
     mActors.setMwRoot(mMwRoot);
 
+
     Ogre::SceneNode *playerNode = mMwRoot->createChildSceneNode ("player");
     playerNode->pitch(Degree(90));
-    Ogre::SceneNode *cameraYawNode = playerNode->createChildSceneNode();
-    Ogre::SceneNode *cameraPitchNode = cameraYawNode->createChildSceneNode();
-    cameraPitchNode->attachObject(mRendering.getCamera());
+    mPlayer = new MWRender::Player (mRendering.getCamera(), playerNode);
 
     mShadows = new Shadows(&mRendering);
 
@@ -147,7 +146,6 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
 
     mOcclusionQuery = new OcclusionQuery(&mRendering, mSkyManager->getSunNode());
 
-    mPlayer = new MWRender::Player (mRendering.getCamera(), playerNode);
     mSun = 0;
 
     mDebugging = new Debugging(mMwRoot, engine);
@@ -259,11 +257,7 @@ RenderingManager::rotateObject(
     bool force = true;
     
     if (isPlayer) {
-        if (adjust) {
-            force = mPlayer->adjustRotation(rot);
-        } else {
-            force = mPlayer->setRotation(rot);
-        }
+        force = mPlayer->rotate(rot, adjust);
     }
     MWWorld::Class::get(ptr).adjustRotation(ptr, rot.x, rot.y, rot.z);
 
@@ -329,6 +323,8 @@ void RenderingManager::update (float duration){
         );
         mWater->update(duration);
     }
+
+    mPlayer->update(duration);
 }
 
 void RenderingManager::waterAdded (MWWorld::Ptr::CellStore *store){

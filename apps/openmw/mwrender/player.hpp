@@ -22,15 +22,23 @@ namespace MWRender
     class Player
     {
         Ogre::Camera *mCamera;
-        Ogre::SceneNode* mNode;
+
+        Ogre::SceneNode *mPlayerNode;
+        Ogre::SceneNode *mCameraNode;
 
         bool mFirstPersonView;
-        bool mVanityModeEnabled;
+        bool mVanityMode;
+        bool mPreviewMode;
 
-        float controlFlip(float shift = 0.f);
+        float mTimeIdle;
+
+        float limitPitchAngle(float limitAbs, float shift = 0.f);
 
         /// Updates sound manager listener data
         void updateListener();
+
+        void rotateCamera(Ogre::Vector3 &rot, bool adjust);
+        void moveCamera(float r, float h);
 
     public:
 
@@ -39,11 +47,7 @@ namespace MWRender
         /// Set where the player is looking at. Uses Morrowind (euler) angles
         /// \param rot Rotation angles in radians
         /// \return true if player object needs to bo rotated physically
-        bool setRotation(const Ogre::Vector3 &rot);
-
-        /// \param rot Rotation angles in radians
-        /// \return true if player object needs to bo rotated physically
-        bool adjustRotation(const Ogre::Vector3 &rot);
+        bool rotate(const Ogre::Vector3 &rot, bool adjust);
 
         std::string getHandle() const;
 
@@ -52,13 +56,13 @@ namespace MWRender
         /// several different objects
         void attachTo(const MWWorld::Ptr &);
 
-        void toggleViewMode() {
-            mFirstPersonView = !mFirstPersonView;
-        }
+        void toggleViewMode();
 
-        void toggleVanityMode() {
-            mVanityModeEnabled = !mVanityModeEnabled;
-        }
+        void toggleVanityMode();
+
+        void togglePreviewMode();
+
+        void update(float duration);
     };
 }
 

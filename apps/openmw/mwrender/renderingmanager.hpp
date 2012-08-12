@@ -56,6 +56,10 @@ class RenderingManager: private RenderingInterface, public Ogre::WindowEventList
     RenderingManager(OEngine::Render::OgreRenderer& _rend, const boost::filesystem::path& resDir, OEngine::Physic::PhysicEngine* engine);
     virtual ~RenderingManager();
 
+    void togglePOV() {
+        mPlayer->toggleViewMode();
+    }
+
     void attachCameraTo(const MWWorld::Ptr &ptr);
 
     SkyManager* getSkyManager();

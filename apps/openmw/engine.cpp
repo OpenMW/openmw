@@ -67,7 +67,7 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
         mEnvironment.setFrameDuration (evt.timeSinceLastFrame);
 
         // update input
-        MWBase::Environment::get().getInputManager()->update();
+        MWBase::Environment::get().getInputManager()->update(evt.timeSinceLastFrame);
 
         // sound
         if (mUseSound)

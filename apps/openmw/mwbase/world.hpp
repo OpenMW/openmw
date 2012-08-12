@@ -248,6 +248,8 @@ namespace MWBase
 
             virtual bool isSwimming(const MWWorld::Ptr &object) = 0;
             virtual bool isUnderwater(const ESM::Cell &cell, const Ogre::Vector3 &pos) = 0;
+
+            virtual void togglePOV() = 0;
     };
 }
 

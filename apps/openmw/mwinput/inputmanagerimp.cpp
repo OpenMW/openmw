@@ -62,6 +62,7 @@ namespace MWInput
       A_ToggleSneak,    //Toggles Sneak, add Push-Sneak later
       A_ToggleWalk, //Toggle Walking/Running
       A_Crouch,
+      A_TogglePOV,
 
       A_QuickSave,
       A_QuickLoad,
@@ -89,6 +90,8 @@ namespace MWInput
     bool mDragDrop;
 
     std::map<std::string, bool> mControlSwitch;
+
+    float mPreviewPOVDelay;
 
    /* InputImpl Methods */
 public:
@@ -340,6 +343,8 @@ private:
 
       poller.bind(A_Jump, KC_E);
       poller.bind(A_Crouch, KC_LCONTROL);
+
+      poller.bind(A_TogglePOV, KC_TAB);
     }
 
     void setDragDrop(bool dragDrop)
@@ -348,7 +353,7 @@ private:
     }
 
     //NOTE: Used to check for movement keys
-    void update ()
+    void update (float duration)
     {
         // Tell OIS to handle all input events
         input.capture();
@@ -400,6 +405,21 @@ private:
                 player.setUpDown (-1);
             else
                 player.setUpDown (0);
+
+            if (poller.isDown(A_TogglePOV)) {
+                if (mPreviewPOVDelay <= 0.5 &&
+                    (mPreviewPOVDelay += duration) > 0.5)
+                {
+                    // enable preview mode
+                }
+            } else {
+                if (mPreviewPOVDelay > 0.5) {
+                    //disable preview mode
+                } else if (mPreviewPOVDelay > 0.f) {
+                    togglePOV();
+                }
+                mPreviewPOVDelay = 0.f;
+            }
         }
     }
 
@@ -452,6 +472,11 @@ private:
         mControlSwitch[sw] = value;
     }
 
+    void togglePOV()
+    {
+        MWBase::Environment::get().getWorld()->togglePOV();
+    }
+
   };
 
   /***CONSTRUCTOR***/
@@ -470,9 +495,9 @@ private:
     delete impl;
   }
 
-  void MWInputManager::update()
+  void MWInputManager::update(float duration)
   {
-      impl->update();
+      impl->update(duration);
   }
 
   void MWInputManager::setDragDrop(bool dragDrop)
