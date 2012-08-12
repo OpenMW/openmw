@@ -776,6 +776,7 @@ void RenderingManager::windowResized(Ogre::RenderWindow* rw)
 
 void RenderingManager::windowClosed(Ogre::RenderWindow* rw)
 {
+    Ogre::Root::getSingleton ().queueEndRendering ();
 }
 
 bool RenderingManager::waterShaderSupported()

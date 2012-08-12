@@ -639,6 +639,7 @@ void WindowManager::processChangedSettings(const Settings::CategorySettingVector
         int y = Settings::Manager::getInt("resolution y", "Video");
         mHud->onResChange(x, y);
         mConsole->onResChange(x, y);
+        mMenu->onResChange(x, y);
         mSettingsWindow->center();
         mAlchemyWindow->center();
         mScrollWindow->center();

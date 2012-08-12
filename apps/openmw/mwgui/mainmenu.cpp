@@ -11,10 +11,19 @@ namespace MWGui
 
     MainMenu::MainMenu(int w, int h)
         : OEngine::GUI::Layout("openmw_mainmenu.layout")
+        , mButtonBox(0)
+    {
+        onResChange(w,h);
+    }
+
+    void MainMenu::onResChange(int w, int h)
     {
         setCoord(0,0,w,h);
 
         int height = 64 * 3;
+
+        if (mButtonBox)
+            MyGUI::Gui::getInstance ().destroyWidget(mButtonBox);
 
         mButtonBox = mMainWidget->createWidget<MyGUI::Widget>("", MyGUI::IntCoord(w/2 - 64, h/2 - height/2, 128, height), MyGUI::Align::Default);
         int curH = 0;
@@ -55,7 +64,6 @@ namespace MWGui
         mExitGame->setImageResource ("Menu_ExitGame");
         mExitGame->eventMouseButtonClick += MyGUI::newDelegate(this, &MainMenu::exitGame);
         curH += 64;
-
     }
 
     void MainMenu::returnToGame(MyGUI::Widget* sender)
