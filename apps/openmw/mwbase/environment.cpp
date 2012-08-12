@@ -3,15 +3,13 @@
 
 #include <cassert>
 
-#include "../mwinput/inputmanager.hpp"
-
-#include "../mwmechanics/mechanicsmanager.hpp"
-
 #include "world.hpp"
 #include "scriptmanager.hpp"
 #include "dialoguemanager.hpp"
 #include "journal.hpp"
 #include "soundmanager.hpp"
+#include "mechanicsmanager.hpp"
+#include "inputmanager.hpp"
 
 MWBase::Environment *MWBase::Environment::sThis = 0;
 
@@ -49,7 +47,7 @@ void MWBase::Environment::setWindowManager (MWGui::WindowManager *windowManager)
     mWindowManager = windowManager;
 }
 
-void MWBase::Environment::setMechanicsManager (MWMechanics::MechanicsManager *mechanicsManager)
+void MWBase::Environment::setMechanicsManager (MechanicsManager *mechanicsManager)
 {
     mMechanicsManager = mechanicsManager;
 }
@@ -64,7 +62,7 @@ void MWBase::Environment::setJournal (Journal *journal)
     mJournal = journal;
 }
 
-void MWBase::Environment::setInputManager (MWInput::MWInputManager *inputManager)
+void MWBase::Environment::setInputManager (InputManager *inputManager)
 {
     mInputManager = inputManager;
 }
@@ -98,7 +96,7 @@ MWGui::WindowManager *MWBase::Environment::getWindowManager() const
     return mWindowManager;
 }
 
-MWMechanics::MechanicsManager *MWBase::Environment::getMechanicsManager() const
+MWBase::MechanicsManager *MWBase::Environment::getMechanicsManager() const
 {
     assert (mMechanicsManager);
     return mMechanicsManager;
@@ -116,7 +114,7 @@ MWBase::Journal *MWBase::Environment::getJournal() const
     return mJournal;
 }
 
-MWInput::MWInputManager *MWBase::Environment::getInputManager() const
+MWBase::InputManager *MWBase::Environment::getInputManager() const
 {
     assert (mInputManager);
     return mInputManager;

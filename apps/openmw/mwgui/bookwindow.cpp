@@ -6,8 +6,6 @@
 #include "../mwbase/world.hpp"
 #include "../mwbase/soundmanager.hpp"
 
-#include "../mwinput/inputmanager.hpp"
-
 #include "../mwworld/actiontake.hpp"
 #include "../mwworld/player.hpp"
 

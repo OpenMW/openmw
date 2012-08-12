@@ -1,9 +1,11 @@
-#ifndef _MWINPUT_MWINPUTMANAGER_H
-#define _MWINPUT_MWINPUTMANAGER_H
+#ifndef _MWINPUT_MWINPUTMANAGERIMP_H
+#define _MWINPUT_MWINPUTMANAGERIMP_H
 
 #include "../mwgui/mode.hpp"
 
 #include <components/settings/settings.hpp>
+
+#include "../mwbase/inputmanager.hpp"
 
 namespace OEngine
 {
@@ -38,7 +40,7 @@ namespace MWInput
      This class is just an interface. All the messy details are in
      inputmanager.cpp.
    */
-  struct MWInputManager
+  struct MWInputManager : public MWBase::InputManager
   {
     InputImpl *impl;
 
@@ -48,17 +50,17 @@ namespace MWInput
                    MWGui::WindowManager &_windows,
                    bool debug,
                    OMW::Engine& engine);
-    ~MWInputManager();
+    virtual ~MWInputManager();
 
-    void update();
+    virtual void update();
 
-    void changeInputMode(bool guiMode);
+    virtual void changeInputMode(bool guiMode);
 
-    void processChangedSettings(const Settings::CategorySettingVector& changed);
+    virtual void processChangedSettings(const Settings::CategorySettingVector& changed);
 
-    void setDragDrop(bool dragDrop);
+    virtual void setDragDrop(bool dragDrop);
 
-    void toggleControlSwitch(std::string sw, bool value);
+    virtual void toggleControlSwitch (const std::string& sw, bool value);
   };
 }
 #endif

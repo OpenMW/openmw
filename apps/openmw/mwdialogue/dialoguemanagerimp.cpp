@@ -19,7 +19,6 @@
 #include "../mwworld/player.hpp"
 #include "../mwworld/containerstore.hpp"
 
-#include "../mwinput/inputmanager.hpp"
 #include "../mwgui/dialogue.hpp"
 #include "../mwgui/window_manager.hpp"
 

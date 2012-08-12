@@ -19,8 +19,6 @@
 
 #include "../mwclass/container.hpp"
 
-#include "../mwinput/inputmanager.hpp"
-
 #include "window_manager.hpp"
 #include "widgets.hpp"
 #include "countdialog.hpp"

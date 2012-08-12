@@ -10,7 +10,6 @@
 #include "../mwbase/environment.hpp"
 
 #include "../mwgui/window_manager.hpp"
-#include "../mwinput/inputmanager.hpp"
 
 #include "interpretercontext.hpp"
 

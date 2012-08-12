@@ -5,11 +5,10 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/soundmanager.hpp"
+#include "../mwbase/mechanicsmanager.hpp"
 
 #include "../mwrender/sky.hpp"
 #include "../mwrender/player.hpp"
-
-#include "../mwmechanics/mechanicsmanager.hpp"
 
 #include "../mwgui/window_manager.hpp"
 
@@ -577,7 +576,7 @@ namespace MWWorld
                     mRendering->moveObjectToCell(copy, vec, currCell);
 
                     if (MWWorld::Class::get(ptr).isActor()) {
-                        MWMechanics::MechanicsManager *mechMgr =
+                        MWBase::MechanicsManager *mechMgr =
                             MWBase::Environment::get().getMechanicsManager();
 
                         mechMgr->removeActor(ptr);
@@ -606,11 +605,11 @@ namespace MWWorld
         if (cell->isExterior()) {
             int cellX, cellY;
             positionToIndex(x, y, cellX, cellY);
-        
+
             cell = getExterior(cellX, cellY);
         }
         moveObject(ptr, *cell, x, y, z);
-       
+
         return cell != ptr.getCell();
     }
 

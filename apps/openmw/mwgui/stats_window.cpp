@@ -8,11 +8,12 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
+#include "../mwbase/mechanicsmanager.hpp"
 
 #include "../mwworld/player.hpp"
 #include "../mwworld/class.hpp"
 
-#include "../mwmechanics/mechanicsmanager.hpp"
+#include "../mwmechanics/npcstats.hpp"
 
 #include "window_manager.hpp"
 #include "tooltips.hpp"

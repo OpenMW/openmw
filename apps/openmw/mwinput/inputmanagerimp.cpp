@@ -1,4 +1,4 @@
-#include "inputmanager.hpp"
+#include "inputmanagerimp.hpp"
 
 #include <OgreRoot.h>
 
@@ -501,8 +501,8 @@ private:
           impl->adjustMouseRegion(Settings::Manager::getInt("resolution x", "Video"), Settings::Manager::getInt("resolution y", "Video"));
   }
 
-    void MWInputManager::toggleControlSwitch(std::string sw, bool value)
+    void MWInputManager::toggleControlSwitch (const std::string& sw, bool value)
     {
-        impl->toggleControlSwitch(sw, value); 
+        impl->toggleControlSwitch(sw, value);
     }
 }

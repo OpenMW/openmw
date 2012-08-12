@@ -15,8 +15,6 @@
 
 #include "../mwgui/window_manager.hpp"
 
-#include "../mwinput/inputmanager.hpp"
-
 #include "locals.hpp"
 #include "globalscripts.hpp"
 
