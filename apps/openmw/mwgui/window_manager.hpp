@@ -115,6 +115,7 @@ namespace MWGui
 
     bool isAllowed(GuiWindow wnd) const;
 
+    /// \todo investigate, if we really need to expose every single lousy UI element to the outside world
     MWGui::DialogueWindow* getDialogueWindow();
     MWGui::ContainerWindow* getContainerWindow();
     MWGui::InventoryWindow* getInventoryWindow();
@@ -185,6 +186,7 @@ namespace MWGui
 
     void onFrame (float frameDuration);
 
+    /// \todo get rid of this stuff. Move it to the respective UI element classes, if needed.
     std::map<int, MWMechanics::Stat<float> > getPlayerSkillValues();
     std::map<int, MWMechanics::Stat<int> > getPlayerAttributeValues();
     SkillList getPlayerMinorSkills();
@@ -230,6 +232,7 @@ namespace MWGui
 
     CharacterCreation* mCharGen;
 
+    /// \todo get rid of this stuff. Move it to the respective UI element classes, if needed.
     // Various stats about player as needed by window manager
     ESM::Class mPlayerClass;
     std::string mPlayerName;
