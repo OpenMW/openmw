@@ -497,11 +497,6 @@ void WindowManager::onFrame (float frameDuration)
     mConsole->checkReferenceAvailable();
 }
 
-const ESMS::ESMStore& WindowManager::getStore() const
-{
-    return MWBase::Environment::get().getWorld()->getStore();
-}
-
 void WindowManager::changeCell(MWWorld::Ptr::CellStore* cell)
 {
     if (!(cell->cell->data.flags & ESM::Cell::Interior))

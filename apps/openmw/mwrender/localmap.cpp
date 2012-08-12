@@ -4,6 +4,8 @@
 #include <OgreMaterialManager.h>
 #include <OgreHardwarePixelBuffer.h>
 
+#include <components/esm_store/store.hpp>
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 

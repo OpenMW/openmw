@@ -7,6 +7,9 @@
 
 #include <components/esm_store/store.hpp>
 
+#include "../mwbase/environment.hpp"
+#include "../mwbase/world.hpp"
+
 #include "window_manager.hpp"
 #include "tooltips.hpp"
 
@@ -57,8 +60,7 @@ void GenerateClassResultDialog::setClassId(const std::string &classId)
 {
     mCurrentClassId = classId;
     mClassImage->setImageTexture(std::string("textures\\levelup\\") + mCurrentClassId + ".dds");
-    const ESMS::ESMStore &store = mWindowManager.getStore();
-    mClassName->setCaption(store.classes.find(mCurrentClassId)->name);
+    mClassName->setCaption(MWBase::Environment::get().getWorld()->getStore().classes.find(mCurrentClassId)->name);
 }
 
 // widget controls
@@ -193,7 +195,7 @@ void PickClassDialog::updateClasses()
 {
     mClassList->removeAllItems();
 
-    const ESMS::ESMStore &store = mWindowManager.getStore();
+    const ESMS::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
 
     ESMS::RecListT<ESM::Class>::MapType::const_iterator it = store.classes.list.begin();
     ESMS::RecListT<ESM::Class>::MapType::const_iterator end = store.classes.list.end();
@@ -217,7 +219,7 @@ void PickClassDialog::updateStats()
 {
     if (mCurrentClassId.empty())
         return;
-    const ESMS::ESMStore &store = mWindowManager.getStore();
+    const ESMS::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
     const ESM::Class *klass = store.classes.search(mCurrentClassId);
     if (!klass)
         return;

@@ -1,6 +1,8 @@
 
 #include "journalimp.hpp"
 
+#include <components/esm_store/store.hpp>
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 

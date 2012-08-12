@@ -1,10 +1,15 @@
 #include "birth.hpp"
-#include "window_manager.hpp"
-#include "widgets.hpp"
-#include "components/esm_store/store.hpp"
 
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
+
+#include "components/esm_store/store.hpp"
+
+#include "../mwbase/environment.hpp"
+#include "../mwbase/world.hpp"
+
+#include "window_manager.hpp"
+#include "widgets.hpp"
 
 using namespace MWGui;
 using namespace Widgets;
@@ -114,7 +119,7 @@ void BirthDialog::updateBirths()
 {
     mBirthList->removeAllItems();
 
-    const ESMS::ESMStore &store = mWindowManager.getStore();
+    const ESMS::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
 
     ESMS::RecListT<ESM::BirthSign>::MapType::const_iterator it = store.birthSigns.list.begin();
     ESMS::RecListT<ESM::BirthSign>::MapType::const_iterator end = store.birthSigns.list.end();
@@ -144,7 +149,7 @@ void BirthDialog::updateSpells()
     const int lineHeight = 18;
     MyGUI::IntCoord coord(0, 0, mSpellArea->getWidth(), 18);
 
-    const ESMS::ESMStore &store = mWindowManager.getStore();
+    const ESMS::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
     const ESM::BirthSign *birth = store.birthSigns.find(mCurrentBirthId);
 
     std::string texturePath = std::string("textures\\") + birth->texture;

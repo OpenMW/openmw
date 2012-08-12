@@ -13,8 +13,8 @@
 #include <vector>
 #include <string>
 
-#include <components/esm_store/store.hpp>
 #include <components/settings/settings.hpp>
+#include <components/esm/loadclas.hpp>
 
 #include "../mwmechanics/stat.hpp"
 
@@ -200,8 +200,6 @@ namespace MWGui
      * @param default Default value if the GMST setting cannot be used.
      */
     const std::string &getGameSettingString(const std::string &id, const std::string &default_);
-
-    const ESMS::ESMStore& getStore() const;
 
     void processChangedSettings(const Settings::CategorySettingVector& changed);
 
