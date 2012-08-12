@@ -743,3 +743,79 @@ void WindowManager::executeInConsole (const std::string& path)
 {
     mConsole->executeFile (path);
 }
+
+void WindowManager::wmUpdateFps(float fps, unsigned int triangleCount, unsigned int batchCount)
+{
+    mFPS = fps;
+    mTriangleCount = triangleCount;
+    mBatchCount = batchCount;
+}
+
+MyGUI::Gui* WindowManager::getGui() const { return mGui; }
+
+MWGui::DialogueWindow* WindowManager::getDialogueWindow() { return mDialogueWindow;  }
+MWGui::ContainerWindow* WindowManager::getContainerWindow() { return mContainerWindow; }
+MWGui::InventoryWindow* WindowManager::getInventoryWindow() { return mInventoryWindow; }
+MWGui::BookWindow* WindowManager::getBookWindow() { return mBookWindow; }
+MWGui::ScrollWindow* WindowManager::getScrollWindow() { return mScrollWindow; }
+MWGui::CountDialog* WindowManager::getCountDialog() { return mCountDialog; }
+MWGui::ConfirmationDialog* WindowManager::getConfirmationDialog() { return mConfirmationDialog; }
+MWGui::TradeWindow* WindowManager::getTradeWindow() { return mTradeWindow; }
+MWGui::SpellWindow* WindowManager::getSpellWindow() { return mSpellWindow; }
+MWGui::Console* WindowManager::getConsole() { return mConsole; }
+
+bool WindowManager::isAllowed (GuiWindow wnd) const
+{
+    return mAllowed & wnd;
+}
+
+void WindowManager::allow (GuiWindow wnd)
+{
+    mAllowed = (GuiWindow)(mAllowed | wnd);
+    updateVisible();
+}
+
+void WindowManager::disallowAll()
+{
+    mAllowed = GW_None;
+    updateVisible();
+}
+
+void WindowManager::toggleVisible (GuiWindow wnd)
+{
+    mShown = (mShown & wnd) ? (GuiWindow) (mShown & ~wnd) : (GuiWindow) (mShown | wnd);
+    updateVisible();
+}
+
+bool WindowManager::isGuiMode() const
+{
+    return !mGuiModes.empty();
+}
+
+MWGui::GuiMode WindowManager::getMode() const
+{
+    if (mGuiModes.empty())
+        throw std::runtime_error ("getMode() called, but there is no active mode");
+
+    return mGuiModes.back();
+}
+
+std::map<ESM::Skill::SkillEnum, MWMechanics::Stat<float> > WindowManager::getPlayerSkillValues()
+{
+    return mPlayerSkillValues;
+}
+
+std::map<ESM::Attribute::AttributeID, MWMechanics::Stat<int> > WindowManager::getPlayerAttributeValues()
+{
+    return mPlayerAttributes;
+}
+
+WindowManager::SkillList WindowManager::getPlayerMinorSkills()
+{
+    return mPlayerMinorSkills;
+}
+
+WindowManager::SkillList WindowManager::getPlayerMajorSkills()
+{
+    return mPlayerMajorSkills;
+}

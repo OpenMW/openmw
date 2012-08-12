@@ -100,61 +100,34 @@ namespace MWGui
     void popGuiMode();
     void removeGuiMode(GuiMode mode); ///< can be anywhere in the stack
 
-    GuiMode getMode() const
-    {
-        if (mGuiModes.empty())
-            throw std::runtime_error ("getMode() called, but there is no active mode");
-        return mGuiModes.back();
-    }
+    GuiMode getMode() const;
 
-    bool isGuiMode() const { return !mGuiModes.empty(); }
+    bool isGuiMode() const;
 
-    void toggleVisible(GuiWindow wnd)
-    {
-        mShown = (mShown & wnd) ? (GuiWindow) (mShown & ~wnd) : (GuiWindow) (mShown | wnd);
-        updateVisible();
-    }
+    void toggleVisible(GuiWindow wnd);
 
     // Disallow all inventory mode windows
-    void disallowAll()
-    {
-      mAllowed = GW_None;
-      updateVisible();
-    }
+    void disallowAll();
 
     // Allow one or more windows
-    void allow(GuiWindow wnd)
-    {
-      mAllowed = (GuiWindow)(mAllowed | wnd);
-      updateVisible();
-    }
+    void allow(GuiWindow wnd);
 
-    bool isAllowed(GuiWindow wnd) const
-    {
-        return mAllowed & wnd;
-    }
+    bool isAllowed(GuiWindow wnd) const;
 
-    MWGui::DialogueWindow* getDialogueWindow() {return mDialogueWindow;}
-    MWGui::ContainerWindow* getContainerWindow() {return mContainerWindow;}
-    MWGui::InventoryWindow* getInventoryWindow() {return mInventoryWindow;}
-    MWGui::BookWindow* getBookWindow() {return mBookWindow;}
-    MWGui::ScrollWindow* getScrollWindow() {return mScrollWindow;}
-    MWGui::CountDialog* getCountDialog() {return mCountDialog;}
-    MWGui::ConfirmationDialog* getConfirmationDialog() {return mConfirmationDialog;}
-    MWGui::TradeWindow* getTradeWindow() {return mTradeWindow;}
-    MWGui::SpellWindow* getSpellWindow() {return mSpellWindow;}
-    MWGui::Console* getConsole() {return mConsole;}
+    MWGui::DialogueWindow* getDialogueWindow();
+    MWGui::ContainerWindow* getContainerWindow();
+    MWGui::InventoryWindow* getInventoryWindow();
+    MWGui::BookWindow* getBookWindow();
+    MWGui::ScrollWindow* getScrollWindow();
+    MWGui::CountDialog* getCountDialog();
+    MWGui::ConfirmationDialog* getConfirmationDialog();
+    MWGui::TradeWindow* getTradeWindow();
+    MWGui::SpellWindow* getSpellWindow();
+    MWGui::Console* getConsole();
 
-    MyGUI::Gui* getGui() const { return mGui; }
+    MyGUI::Gui* getGui() const;
 
-    void wmUpdateFps(float fps, unsigned int triangleCount, unsigned int batchCount)
-    {
-        mFPS = fps;
-        mTriangleCount = triangleCount;
-        mBatchCount = batchCount;
-    }
-
-//    MWMechanics::DynamicStat<int> getValue(const std::string& id);
+    void wmUpdateFps(float fps, unsigned int triangleCount, unsigned int batchCount);
 
     ///< Set value for the given ID.
     void setValue (const std::string& id, const MWMechanics::Stat<int>& value);
@@ -211,10 +184,10 @@ namespace MWGui
 
     void onFrame (float frameDuration);
 
-    std::map<ESM::Skill::SkillEnum, MWMechanics::Stat<float> > getPlayerSkillValues() { return mPlayerSkillValues; }
-    std::map<ESM::Attribute::AttributeID, MWMechanics::Stat<int> > getPlayerAttributeValues() { return mPlayerAttributes; }
-    SkillList getPlayerMinorSkills() { return mPlayerMinorSkills; }
-    SkillList getPlayerMajorSkills() { return mPlayerMajorSkills; }
+    std::map<ESM::Skill::SkillEnum, MWMechanics::Stat<float> > getPlayerSkillValues();
+    std::map<ESM::Attribute::AttributeID, MWMechanics::Stat<int> > getPlayerAttributeValues();
+    SkillList getPlayerMinorSkills();
+    SkillList getPlayerMajorSkills();
 
     /**
      * Fetches a GMST string from the store, if there is no setting with the given
