@@ -424,7 +424,6 @@ void WindowManager::updateSkillArea()
 
 void WindowManager::removeDialog(OEngine::GUI::Layout*dialog)
 {
-    assert(dialog);
     if (!dialog)
         return;
     dialog->setVisible(false);
