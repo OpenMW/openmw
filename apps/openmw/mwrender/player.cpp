@@ -24,19 +24,29 @@ namespace MWRender
         pitchNode->attachObject(mCamera);
     }
     
-    bool Player::rotate(const Ogre::Vector3 &rot, bool adjust)
+    void Player::rotateImpl(Ogre::Vector3 &rot, bool adjust, float r)
     {
-        bool force = !mVanityMode && !mPreviewMode;
-        Ogre::Vector3 newRot = rot;
+        rotateCamera(rot, adjust);
 
-        rotateCamera(newRot, adjust);
-
-        if (!force || !mFirstPersonView) {
-            moveCamera(400.f, 1600.f);
+        if (mVanityMode || mPreviewMode || !mFirstPersonView) {
+            moveCamera(r);
         }
         updateListener();
+    }
 
-        return force;
+    bool Player::rotate(const Ogre::Vector3 &rot, bool adjust)
+    {
+        Ogre::Vector3 _rot = rot;
+        rotateImpl(_rot, adjust, 400.f);
+
+        mUpdates = 0;
+        mTimeIdle = 0.f;
+
+        if (mVanityMode) {
+            toggleVanityMode();
+        }
+
+        return !mVanityMode && !mPreviewMode;
     }
 
     void Player::rotateCamera(Ogre::Vector3 &rot, bool adjust)
@@ -67,7 +77,7 @@ namespace MWRender
         }
     }
 
-    void Player::moveCamera(float rsq, float hsq)
+    void Player::moveCamera(float r)
     {
 /*
         Ogre::Quaternion orient =
@@ -97,7 +107,7 @@ namespace MWRender
 
         Ogre::Ray ray(Ogre::Vector3(0, 0, 0), dir);
 
-        mCameraNode->setPosition(ray.getPoint(800.f));
+        mCameraNode->setPosition(ray.getPoint(r));
     }
 
     std::string Player::getHandle() const
@@ -145,13 +155,20 @@ namespace MWRender
 
     void Player::update(float duration)
     {
+        if (!mVanityMode) {
+            ++mUpdates;
+            mTimeIdle += duration;
+            if (mTimeIdle > 30.f) {
+                toggleVanityMode();
+            }
+        }
         if (mFirstPersonView && !mVanityMode) {
             return;
         }
         if (mVanityMode) {
-            /// \todo adjust rotation constantly
-        } else {
-            /// \todo move camera closer or change view mode if needed
+            Ogre::Vector3 rot(0.f, 0.f, 0.f);
+            rot.z = Ogre::Degree(3.f * duration).valueRadians();
+            rotateImpl(rot, true, 300.f);
         }
     }
 
@@ -161,19 +178,57 @@ namespace MWRender
         if (mFirstPersonView) {
             mCameraNode->setPosition(0.f, 0.f, 0.f);
         } else {
-            moveCamera(400.f, 1600.f);
+            moveCamera(400.f);
         }
     }
 
     void Player::toggleVanityMode()
     {
-        /// \todo move camera
         mVanityMode = !mVanityMode;
+
+        float r = 400.f;
+        Ogre::Vector3 rot(0.f, 0.f, 0.f);
+        if (mVanityMode) {
+            mPitch = getPitchAngle();
+            mYaw = getYawAngle();
+
+            rot.x = Ogre::Degree(-30.f).valueRadians();
+            rot.z = 0;
+            r = 300.f;
+        } else {
+            rot.x = Ogre::Degree(mPitch).valueRadians();
+            rot.z = Ogre::Degree(mYaw).valueRadians();
+        }
+        rotateImpl(rot, false, r);
     }
 
     void Player::togglePreviewMode()
     {
         /// \todo move camera
         mPreviewMode = !mPreviewMode;
+    }
+
+    float Player::getPitchAngle()
+    {
+        Ogre::Quaternion orient
+            = mCamera->getParentSceneNode()->getOrientation();
+
+        float angle =
+            (2 * Ogre::Degree(Ogre::Math::ASin(orient.x)).valueDegrees());
+
+        return angle;
+    }
+
+    float Player::getYawAngle()
+    {
+        Ogre::Quaternion orient
+            = mCameraNode->getOrientation();
+
+        float angle =
+            (2 * Ogre::Degree(Ogre::Math::ASin(orient.y)).valueDegrees());
+        if (orient.w < 0) {
+            angle = -angle;
+        }
+        return -angle;
     }
 }

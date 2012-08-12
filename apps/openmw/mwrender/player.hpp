@@ -3,9 +3,8 @@
 
 #include <string>
 
-
 namespace Ogre
-{   
+{
     class Vector3;
     class Camera;
     class SceneNode;
@@ -30,15 +29,22 @@ namespace MWRender
         bool mVanityMode;
         bool mPreviewMode;
 
+        float mPitch, mYaw;
+
         float mTimeIdle;
+        int mUpdates;
 
         float limitPitchAngle(float limitAbs, float shift = 0.f);
 
         /// Updates sound manager listener data
         void updateListener();
 
+        void rotateImpl(Ogre::Vector3 &rot, bool adjust, float r);
         void rotateCamera(Ogre::Vector3 &rot, bool adjust);
-        void moveCamera(float r, float h);
+        void moveCamera(float r);
+
+        float getYawAngle();
+        float getPitchAngle();
 
     public:
 

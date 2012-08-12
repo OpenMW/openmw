@@ -309,7 +309,17 @@ void RenderingManager::update (float duration){
 
     mRendering.update(duration);
 
-    mLocalMap->updatePlayer( mRendering.getCamera()->getRealPosition(), mRendering.getCamera()->getRealOrientation() );
+    float *fpos =
+        MWBase::Environment::get()
+            .getWorld()
+            ->getPlayer()
+            .getPlayer()
+            .getRefData()
+            .getPosition()
+            .pos;
+    Ogre::Vector3 pos(fpos[0], fpos[1], fpos[2]);
+
+    mLocalMap->updatePlayer(pos, mRendering.getCamera()->getRealOrientation() );
 
     if (mWater) {
         Ogre::Vector3 cam = mRendering.getCamera()->getRealPosition();
@@ -323,7 +333,6 @@ void RenderingManager::update (float duration){
         );
         mWater->update(duration);
     }
-
     mPlayer->update(duration);
 }
 
