@@ -14,8 +14,6 @@
 #include <MyGUI_InputManager.h>
 #include <MyGUI_RenderManager.h>
 
-#include <extern/oics/ICSInputControlSystem.h>
-
 #include <openengine/ogre/renderer.hpp>
 
 #include "../engine.hpp"
@@ -31,7 +29,7 @@ namespace MWInput
             MWBase::WindowManager &windows,
             bool debug,
             OMW::Engine& engine,
-            const std::string& userFile)
+            const std::string& userFile, bool userFileExists)
         : mOgre(ogre)
         , mPlayer(player)
         , mWindows(windows)
@@ -101,11 +99,12 @@ namespace MWInput
 
         MyGUI::InputManager::getInstance().injectMouseMove(mMouseX, mMouseY, mMouse->getMouseState ().Z.abs);
 
-        mInputCtrl = new ICS::InputControlSystem(userFile, true, NULL, NULL, A_LAST);
+        std::string file = userFileExists ? userFile : "";
+        mInputCtrl = new ICS::InputControlSystem(file, true, this, NULL, A_Last);
 
         loadKeyDefaults();
 
-        for (int i = 0; i < A_LAST; ++i)
+        for (int i = 0; i < A_Last; ++i)
         {
             mInputCtrl->getChannel (i)->addListener (this);
         }
@@ -322,8 +321,7 @@ namespace MWInput
     {
         mInputCtrl->keyPressed (arg);
 
-        if (mGuiCursorEnabled)
-            MyGUI::InputManager::getInstance().injectKeyPress(MyGUI::KeyCode::Enum(arg.key), arg.text);
+        MyGUI::InputManager::getInstance().injectKeyPress(MyGUI::KeyCode::Enum(arg.key), arg.text);
 
         return true;
     }
@@ -341,8 +339,7 @@ namespace MWInput
     {
         mInputCtrl->mousePressed (arg, id);
 
-        if (mGuiCursorEnabled)
-            MyGUI::InputManager::getInstance().injectMousePress(mMouseX, mMouseY, MyGUI::MouseButton::Enum(id));
+        MyGUI::InputManager::getInstance().injectMousePress(mMouseX, mMouseY, MyGUI::MouseButton::Enum(id));
 
         return true;
     }
@@ -440,15 +437,11 @@ namespace MWInput
     {
         bool gameMode = !mWindows.isGuiMode();
 
-        std::cout << "gameMode: " << gameMode << std::endl;
-
         // Toggle between game mode and inventory mode
         if(gameMode)
             mWindows.pushGuiMode(MWGui::GM_Inventory);
         else if(mWindows.getMode() == MWGui::GM_Inventory)
             mWindows.popGuiMode();
-        else
-            std::cout << "toggleInv didnt do anything!!!" << std::endl;
 
         // .. but don't touch any other mode.
     }
@@ -535,7 +528,7 @@ namespace MWInput
         std::map<int, int> defaultMouseButtonBindings;
         defaultMouseButtonBindings[A_Inventory] = OIS::MB_Right;
 
-        for (int i = 0; i < A_LAST; ++i)
+        for (int i = 0; i < A_Last; ++i)
         {
             if (mInputCtrl->getChannel(i)->getControlsCount () == 0)
             {
@@ -549,6 +542,143 @@ namespace MWInput
                     mInputCtrl->addMouseButtonBinding (control1, defaultMouseButtonBindings[i], ICS::Control::INCREASE);
             }
         }
+    }
+
+    std::string InputManager::getActionDescription (int action)
+    {
+        std::map<int, std::string> descriptions;
+
+        descriptions[A_Activate] = "sActivate";
+        descriptions[A_MoveBackward] = "sBack";
+        descriptions[A_MoveForward] = "sForward";
+        descriptions[A_MoveLeft] = "sLeft";
+        descriptions[A_MoveRight] = "sRight";
+        descriptions[A_ToggleWeapon] = "sReady_Weapon";
+        descriptions[A_ToggleSpell] = "sReady_Magic";
+        descriptions[A_Console] = "sConsoleTitle";
+        descriptions[A_Crouch] = "sCrouch_Sneak";
+        descriptions[A_AutoMove] = "sAuto_Run";
+        descriptions[A_Jump] = "sJump";
+        descriptions[A_Journal] = "sJournal";
+        descriptions[A_Rest] = "sRestKey";
+        descriptions[A_Inventory] = "sInventory";
+
+        if (action == A_GameMenu)
+            return "Menu"; // not configurable in morrowind so no GMST
+
+        if (descriptions[action] == "")
+            return ""; // not configurable
+
+        return "#{" + descriptions[action] + "}";
+    }
+
+    std::string InputManager::getActionBindingName (int action)
+    {
+        if (mInputCtrl->getChannel (action)->getControlsCount () == 0)
+            return "#{sNone}";
+
+        ICS::Control* c = mInputCtrl->getChannel (action)->getAttachedControls ().front().control;
+
+        if (mInputCtrl->getKeyBinding (c, ICS::Control::INCREASE) != OIS::KC_UNASSIGNED)
+            return mInputCtrl->keyCodeToString (mInputCtrl->getKeyBinding (c, ICS::Control::INCREASE));
+        else if (mInputCtrl->getMouseButtonBinding (c, ICS::Control::INCREASE) != ICS_MAX_DEVICE_BUTTONS)
+            return "#{sMouse} " + boost::lexical_cast<std::string>(mInputCtrl->getMouseButtonBinding (c, ICS::Control::INCREASE));
+        else
+            return "#{sNone}";
+    }
+
+    std::vector<int> InputManager::getActionSorting()
+    {
+        std::vector<int> ret;
+        ret.push_back(A_MoveForward);
+        ret.push_back(A_MoveBackward);
+        ret.push_back(A_MoveLeft);
+        ret.push_back(A_MoveRight);
+        ret.push_back(A_Crouch);
+        ret.push_back(A_Activate);
+        ret.push_back(A_ToggleWeapon);
+        ret.push_back(A_AutoMove);
+        ret.push_back(A_Jump);
+        ret.push_back(A_Inventory);
+        ret.push_back(A_Journal);
+        ret.push_back(A_Rest);
+        ret.push_back(A_Console);
+        ret.push_back(A_GameMenu);
+
+        return ret;
+    }
+
+    void InputManager::enableDetectingBindingMode (int action)
+    {
+        ICS::Control* c = mInputCtrl->getChannel (action)->getAttachedControls ().front().control;
+
+        mInputCtrl->enableDetectingBindingState (c, ICS::Control::INCREASE);
+    }
+
+    void InputManager::mouseAxisBindingDetected(ICS::InputControlSystem* ICS, ICS::Control* control
+        , ICS::InputControlSystem::NamedAxis axis, ICS::Control::ControlChangingDirection direction)
+    {
+        // we don't want mouse movement bindings
+        return;
+    }
+
+    void InputManager::keyBindingDetected(ICS::InputControlSystem* ICS, ICS::Control* control
+        , OIS::KeyCode key, ICS::Control::ControlChangingDirection direction)
+    {
+        clearAllBindings(control);
+        ICS::DetectingBindingListener::keyBindingDetected (ICS, control, key, direction);
+        MWBase::Environment::get().getWindowManager ()->notifyInputActionBound ();
+    }
+
+    void InputManager::mouseButtonBindingDetected(ICS::InputControlSystem* ICS, ICS::Control* control
+        , unsigned int button, ICS::Control::ControlChangingDirection direction)
+    {
+        clearAllBindings(control);
+        ICS::DetectingBindingListener::mouseButtonBindingDetected (ICS, control, button, direction);
+        MWBase::Environment::get().getWindowManager ()->notifyInputActionBound ();
+    }
+
+    void InputManager::joystickAxisBindingDetected(ICS::InputControlSystem* ICS, ICS::Control* control
+        , int deviceId, int axis, ICS::Control::ControlChangingDirection direction)
+    {
+        clearAllBindings(control);
+        ICS::DetectingBindingListener::joystickAxisBindingDetected (ICS, control, deviceId, axis, direction);
+        MWBase::Environment::get().getWindowManager ()->notifyInputActionBound ();
+    }
+
+    void InputManager::joystickButtonBindingDetected(ICS::InputControlSystem* ICS, ICS::Control* control
+        , int deviceId, unsigned int button, ICS::Control::ControlChangingDirection direction)
+    {
+        clearAllBindings(control);
+        ICS::DetectingBindingListener::joystickButtonBindingDetected (ICS, control, deviceId, button, direction);
+        MWBase::Environment::get().getWindowManager ()->notifyInputActionBound ();
+    }
+
+    void InputManager::joystickPOVBindingDetected(ICS::InputControlSystem* ICS, ICS::Control* control
+        , int deviceId, int pov,ICS:: InputControlSystem::POVAxis axis, ICS::Control::ControlChangingDirection direction)
+    {
+        clearAllBindings(control);
+        ICS::DetectingBindingListener::joystickPOVBindingDetected (ICS, control, deviceId, pov, axis, direction);
+        MWBase::Environment::get().getWindowManager ()->notifyInputActionBound ();
+    }
+
+    void InputManager::joystickSliderBindingDetected(ICS::InputControlSystem* ICS, ICS::Control* control
+        , int deviceId, int slider, ICS::Control::ControlChangingDirection direction)
+    {
+        clearAllBindings(control);
+        ICS::DetectingBindingListener::joystickSliderBindingDetected (ICS, control, deviceId, slider, direction);
+        MWBase::Environment::get().getWindowManager ()->notifyInputActionBound ();
+    }
+
+    void InputManager::clearAllBindings (ICS::Control* control)
+    {
+        // right now we don't really need multiple bindings for the same action, so remove all others first
+        if (mInputCtrl->getKeyBinding (control, ICS::Control::INCREASE) != OIS::KC_UNASSIGNED)
+            mInputCtrl->removeKeyBinding (mInputCtrl->getKeyBinding (control, ICS::Control::INCREASE));
+        if (mInputCtrl->getMouseButtonBinding (control, ICS::Control::INCREASE) != ICS_MAX_DEVICE_BUTTONS)
+            mInputCtrl->removeMouseButtonBinding (mInputCtrl->getMouseButtonBinding (control, ICS::Control::INCREASE));
+
+        /// \todo add joysticks here once they are added
     }
 
 }

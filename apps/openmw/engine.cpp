@@ -272,9 +272,7 @@ void OMW::Engine::go()
 
     // Get the path for the keybinder xml file
     std::string keybinderUser = (mCfgMgr.getUserPath() / "input.xml").string();
-
-    if (!boost::filesystem::exists(keybinderUser))
-        keybinderUser = "";
+    bool keybinderUserExists = boost::filesystem::exists(keybinderUser);
 
     mFpsLevel = settings.getInt("fps", "HUD");
 
@@ -374,7 +372,7 @@ void OMW::Engine::go()
 
     mEnvironment.setInputManager (new MWInput::InputManager (*mOgre,
         MWBase::Environment::get().getWorld()->getPlayer(),
-         *MWBase::Environment::get().getWindowManager(), mDebug, *this, keybinderUser));
+         *MWBase::Environment::get().getWindowManager(), mDebug, *this, keybinderUser, keybinderUserExists));
 
     std::cout << "\nPress Q/ESC or close window to exit.\n";
 

@@ -134,6 +134,8 @@ WindowManager::WindowManager(
     mAlchemyWindow = new AlchemyWindow(*this);
     mSpellWindow = new SpellWindow(*this);
 
+    mInputBlocker = mGui->createWidget<MyGUI::Widget>("",0,0,w,h,MyGUI::Align::Default,"Windows","");
+
     // The HUD is always on
     mHud->setVisible(true);
 
@@ -230,10 +232,15 @@ void WindowManager::updateVisible()
 
     bool gameMode = !isGuiMode();
 
+    mInputBlocker->setVisible (gameMode);
+
     if (gameMode)
         mToolTips->enterGameMode();
     else
         mToolTips->enterGuiMode();
+
+    if (gameMode)
+        MyGUI::InputManager::getInstance ().setKeyFocusWidget (NULL);
 
     setMinimapVisibility((mAllowed & GW_Map) && !mMap->pinned());
     setWeaponVisibility((mAllowed & GW_Inventory) && !mInventoryWindow->pinned());
@@ -646,6 +653,7 @@ void WindowManager::processChangedSettings(const Settings::CategorySettingVector
         mScrollWindow->center();
         mBookWindow->center();
         mDragAndDrop->mDragAndDropWidget->setSize(MyGUI::IntSize(x, y));
+        mInputBlocker->setSize(MyGUI::IntSize(x,y));
     }
 }
 
@@ -822,4 +830,20 @@ WindowManager::SkillList WindowManager::getPlayerMinorSkills()
 WindowManager::SkillList WindowManager::getPlayerMajorSkills()
 {
     return mPlayerMajorSkills;
+}
+
+void WindowManager::disallowMouse()
+{
+    mInputBlocker->setVisible (true);
+}
+
+void WindowManager::allowMouse()
+{
+    mInputBlocker->setVisible (!isGuiMode ());
+}
+
+void WindowManager::notifyInputActionBound ()
+{
+    mSettingsWindow->updateControlsBox ();
+    allowMouse();
 }

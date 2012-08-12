@@ -15,6 +15,10 @@ namespace MWGui
         public:
             SettingsWindow(MWBase::WindowManager& parWindowManager);
 
+            virtual void open();
+
+            void updateControlsBox();
+
         private:
             static int const sFovMin = 30;
             static int const sFovMax = 140;
@@ -60,6 +64,9 @@ namespace MWGui
             MyGUI::ScrollBar* mFootstepsVolumeSlider;
             MyGUI::ScrollBar* mMusicVolumeSlider;
 
+            // controls
+            MyGUI::ScrollView* mControlsBox;
+
             void onOkButtonClicked(MyGUI::Widget* _sender);
             void onFpsToggled(MyGUI::Widget* _sender);
             void onTextureFilteringToggled(MyGUI::Widget* _sender);
@@ -71,6 +78,8 @@ namespace MWGui
 
             void onShadersToggled(MyGUI::Widget* _sender);
             void onShadowTextureSize(MyGUI::Widget* _sender);
+
+            void onRebindAction(MyGUI::Widget* _sender);
 
             void apply();
     };

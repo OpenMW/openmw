@@ -115,6 +115,7 @@ namespace MWGui
         getWidget(mMiscShadows, "MiscShadows");
         getWidget(mShadowsDebug, "ShadowsDebug");
         getWidget(mUnderwaterButton, "UnderwaterButton");
+        getWidget(mControlsBox, "ControlsBox");
 
         mOkButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onOkButtonClicked);
         mUnderwaterButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onButtonToggled);
@@ -510,5 +511,55 @@ namespace MWGui
         MWBase::Environment::get().getSoundManager()->processChangedSettings(changed);
         MWBase::Environment::get().getWindowManager()->processChangedSettings(changed);
         MWBase::Environment::get().getInputManager()->processChangedSettings(changed);
+    }
+
+    void SettingsWindow::updateControlsBox()
+    {
+        while (mControlsBox->getChildCount())
+            MyGUI::Gui::getInstance().destroyWidget(mControlsBox->getChildAt(0));
+
+        std::vector<int> actions = MWBase::Environment::get().getInputManager()->getActionSorting ();
+
+        const int h = 18;
+        const int w = mControlsBox->getWidth() - 34;
+        int curH = 6;
+        for (std::vector<int>::const_iterator it = actions.begin(); it != actions.end(); ++it)
+        {
+            std::string desc = MWBase::Environment::get().getInputManager()->getActionDescription (*it);
+            if (desc == "")
+                continue;
+
+            std::string binding = MWBase::Environment::get().getInputManager()->getActionBindingName (*it);
+
+            MyGUI::TextBox* leftText = mControlsBox->createWidget<MyGUI::TextBox>("SandText", MyGUI::IntCoord(0,curH,w,h), MyGUI::Align::Default);
+            leftText->setCaptionWithReplacing(desc);
+
+            MyGUI::Button* rightText = mControlsBox->createWidget<MyGUI::Button>("SandTextButton", MyGUI::IntCoord(0,curH,w,h), MyGUI::Align::Default);
+            rightText->setCaptionWithReplacing(binding);
+            rightText->setTextAlign (MyGUI::Align::Right);
+            rightText->setUserData(*it); // save the action id for callbacks
+            rightText->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onRebindAction);
+            curH += h;
+        }
+
+        mControlsBox->setCanvasSize (mControlsBox->getWidth(), std::max(curH, mControlsBox->getHeight()));
+    }
+
+    void SettingsWindow::onRebindAction(MyGUI::Widget* _sender)
+    {
+        int actionId = *_sender->getUserData<int>();
+
+        static_cast<MyGUI::Button*>(_sender)->setCaptionWithReplacing("#{sNone}");
+
+        MWBase::Environment::get().getWindowManager ()->messageBox ("#{sControlsMenu3}", std::vector<std::string>());
+        MWBase::Environment::get().getWindowManager ()->disallowMouse();
+
+        MWBase::Environment::get().getInputManager ()->enableDetectingBindingMode (actionId);
+
+    }
+
+    void SettingsWindow::open()
+    {
+        updateControlsBox ();
     }
 }

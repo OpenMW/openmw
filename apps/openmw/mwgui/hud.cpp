@@ -237,6 +237,9 @@ void HUD::setBottomRightVisibility(bool effectBoxVisible, bool minimapBoxVisible
 
 void HUD::onWorldClicked(MyGUI::Widget* _sender)
 {
+    if (!MWBase::Environment::get().getWindowManager ()->isGuiMode ())
+        return;
+
     if (mDragAndDrop->mIsOnDragAndDrop)
     {
         // drop item into the gameworld

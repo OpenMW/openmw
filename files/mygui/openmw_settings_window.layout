@@ -82,6 +82,13 @@
             </Widget>
             <Widget type="TabItem" skin="" position="4 28 360 312">
                 <Property key="Caption" value="  #{sControls}  "/>
+
+                <Widget type="Widget" skin="MW_Box" position="8 8 344 180">
+
+                    <Widget type="ScrollView" skin="MW_ScrollView" name="ControlsBox" position="4 4 336 172"/>
+
+                </Widget>
+
             </Widget>
             <Widget type="TabItem" skin="" position="4 28 360 312">
                 <Property key="Caption" value="  #{sVideo}  "/>

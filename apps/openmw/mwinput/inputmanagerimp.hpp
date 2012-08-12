@@ -46,6 +46,7 @@ namespace OIS
 #include <OIS/OISMouse.h>
 
 #include <extern/oics/ICSChannelListener.h>
+#include <extern/oics/ICSInputControlSystem.h>
 
 namespace MWInput
 {
@@ -53,7 +54,7 @@ namespace MWInput
     /**
     * @brief Class that handles all input and key bindings for OpenMW.
     */
-    class InputManager : public MWBase::InputManager, public OIS::KeyListener, public OIS::MouseListener, public ICS::ChannelListener
+    class InputManager : public MWBase::InputManager, public OIS::KeyListener, public OIS::MouseListener, public ICS::ChannelListener, public ICS::DetectingBindingListener
     {
     public:
         InputManager(OEngine::Render::OgreRenderer &_ogre,
@@ -61,7 +62,7 @@ namespace MWInput
             MWBase::WindowManager &_windows,
             bool debug,
             OMW::Engine& engine,
-            const std::string& userFile);
+            const std::string& userFile, bool userFileExists);
 
         virtual ~InputManager();
 
@@ -75,6 +76,12 @@ namespace MWInput
 
         virtual void toggleControlSwitch (const std::string& sw, bool value);
 
+        virtual std::string getActionDescription (int action);
+        virtual std::string getActionBindingName (int action);
+        virtual int getNumActions() { return A_Last; }
+        virtual std::vector<int> getActionSorting ();
+        virtual void enableDetectingBindingMode (int action);
+
 
     public:
         virtual bool keyPressed( const OIS::KeyEvent &arg );
@@ -85,6 +92,29 @@ namespace MWInput
         virtual bool mouseMoved( const OIS::MouseEvent &arg );
 
         virtual void channelChanged(ICS::Channel* channel, float currentValue, float previousValue);
+
+        virtual void mouseAxisBindingDetected(ICS::InputControlSystem* ICS, ICS::Control* control
+            , ICS::InputControlSystem::NamedAxis axis, ICS::Control::ControlChangingDirection direction);
+
+        virtual void keyBindingDetected(ICS::InputControlSystem* ICS, ICS::Control* control
+            , OIS::KeyCode key, ICS::Control::ControlChangingDirection direction);
+
+        virtual void mouseButtonBindingDetected(ICS::InputControlSystem* ICS, ICS::Control* control
+            , unsigned int button, ICS::Control::ControlChangingDirection direction);
+
+        virtual void joystickAxisBindingDetected(ICS::InputControlSystem* ICS, ICS::Control* control
+            , int deviceId, int axis, ICS::Control::ControlChangingDirection direction);
+
+        virtual void joystickButtonBindingDetected(ICS::InputControlSystem* ICS, ICS::Control* control
+            , int deviceId, unsigned int button, ICS::Control::ControlChangingDirection direction);
+
+        virtual void joystickPOVBindingDetected(ICS::InputControlSystem* ICS, ICS::Control* control
+            , int deviceId, int pov,ICS:: InputControlSystem::POVAxis axis, ICS::Control::ControlChangingDirection direction);
+
+        virtual void joystickSliderBindingDetected(ICS::InputControlSystem* ICS, ICS::Control* control
+            , int deviceId, int slider, ICS::Control::ControlChangingDirection direction);
+
+        void clearAllBindings (ICS::Control* control);
 
     private:
         OEngine::Render::OgreRenderer &mOgre;
@@ -175,7 +205,7 @@ namespace MWInput
             A_ToggleWeapon,
             A_ToggleSpell,
 
-            A_LAST            // Marker for the last item
+            A_Last            // Marker for the last item
         };
 
 
