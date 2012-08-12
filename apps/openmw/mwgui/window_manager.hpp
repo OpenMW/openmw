@@ -177,8 +177,6 @@ namespace MWGui
     void unsetSelectedSpell();
     void unsetSelectedWeapon();
 
-    template<typename T>
-    void removeDialog(T*& dialog); ///< Casts to OEngine::GUI::Layout and calls removeDialog, then resets pointer to nullptr.
     void removeDialog(OEngine::GUI::Layout* dialog); ///< Hides dialog and schedules dialog to be deleted.
 
     void messageBox (const std::string& message, const std::vector<std::string>& buttons);
@@ -271,14 +269,6 @@ namespace MWGui
      */
     void onRetrieveTag(const MyGUI::UString& _tag, MyGUI::UString& _result);
   };
-
-  template<typename T>
-  void WindowManager::removeDialog(T*& dialog)
-  {
-      OEngine::GUI::Layout *d = static_cast<OEngine::GUI::Layout*>(dialog);
-      removeDialog(d);
-      dialog = 0;
-  }
 }
 
 #endif

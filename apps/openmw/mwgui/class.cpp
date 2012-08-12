@@ -558,26 +558,17 @@ void CreateClassDialog::open()
 
 void CreateClassDialog::onDialogCancel()
 {
-    if (mSpecDialog)
-    {
-        mWindowManager.removeDialog(mSpecDialog);
-        mSpecDialog = 0;
-    }
-    if (mAttribDialog)
-    {
-        mWindowManager.removeDialog(mAttribDialog);
-        mAttribDialog = 0;
-    }
-    if (mSkillDialog)
-    {
-        mWindowManager.removeDialog(mSkillDialog);
-        mSkillDialog = 0;
-    }
-    if (mDescDialog)
-    {
-        mWindowManager.removeDialog(mDescDialog);
-        mDescDialog = 0;
-    }
+    mWindowManager.removeDialog(mSpecDialog);
+    mSpecDialog = 0;
+
+    mWindowManager.removeDialog(mAttribDialog);
+    mAttribDialog = 0;
+
+    mWindowManager.removeDialog(mSkillDialog);
+    mSkillDialog = 0;
+
+    mWindowManager.removeDialog(mDescDialog);
+    mDescDialog = 0;
 }
 
 void CreateClassDialog::onSpecializationClicked(MyGUI::WidgetPtr _sender)
