@@ -12,6 +12,7 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
+#include "../mwbase/windowmanager.hpp"
 
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/npcstats.hpp"
@@ -26,7 +27,6 @@
 #include "../mwrender/actors.hpp"
 #include "../mwrender/renderinginterface.hpp"
 
-#include "../mwgui/window_manager.hpp"
 #include "../mwgui/tooltips.hpp"
 
 namespace

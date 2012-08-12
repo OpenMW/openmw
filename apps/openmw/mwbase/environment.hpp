@@ -1,11 +1,6 @@
 #ifndef GAME_BASE_INVIRONMENT_H
 #define GAME_BASE_INVIRONMENT_H
 
-namespace MWGui
-{
-    class WindowManager;
-}
-
 namespace MWBase
 {
     class World;
@@ -15,6 +10,7 @@ namespace MWBase
     class SoundManager;
     class MechanicsManager;
     class InputManager;
+    class WindowManager;
 
     /// \brief Central hub for mw-subsystems
     ///
@@ -29,7 +25,7 @@ namespace MWBase
             World *mWorld;
             SoundManager *mSoundManager;
             ScriptManager *mScriptManager;
-            MWGui::WindowManager *mWindowManager;
+            WindowManager *mWindowManager;
             MechanicsManager *mMechanicsManager;
             DialogueManager *mDialogueManager;
             Journal *mJournal;
@@ -54,7 +50,7 @@ namespace MWBase
 
             void setScriptManager (MWBase::ScriptManager *scriptManager);
 
-            void setWindowManager (MWGui::WindowManager *windowManager);
+            void setWindowManager (WindowManager *windowManager);
 
             void setMechanicsManager (MechanicsManager *mechanicsManager);
 
@@ -73,7 +69,7 @@ namespace MWBase
 
             ScriptManager *getScriptManager() const;
 
-            MWGui::WindowManager *getWindowManager() const;
+            WindowManager *getWindowManager() const;
 
             MechanicsManager *getMechanicsManager() const;
 

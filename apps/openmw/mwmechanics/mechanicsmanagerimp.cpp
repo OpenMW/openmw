@@ -5,11 +5,10 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
+#include "../mwbase/windowmanager.hpp"
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/player.hpp"
-
-#include "../mwgui/window_manager.hpp"
 
 namespace MWMechanics
 {
@@ -265,8 +264,8 @@ namespace MWMechanics
                 MWBase::Environment::get().getWorld()->getPlayer().getClass().name);
             mUpdatePlayer = false;
 
-            MWGui::WindowManager::SkillList majorSkills (5);
-            MWGui::WindowManager::SkillList minorSkills (5);
+            MWBase::WindowManager::SkillList majorSkills (5);
+            MWBase::WindowManager::SkillList minorSkills (5);
 
             for (int i=0; i<5; ++i)
             {

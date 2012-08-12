@@ -6,11 +6,10 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
+#include "../mwbase/windowmanager.hpp"
 
 #include "../mwrender/sky.hpp"
 #include "../mwrender/player.hpp"
-
-#include "../mwgui/window_manager.hpp"
 
 #include "player.hpp"
 #include "manualref.hpp"

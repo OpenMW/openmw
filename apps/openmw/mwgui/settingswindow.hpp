@@ -13,7 +13,7 @@ namespace MWGui
     class SettingsWindow : public WindowBase
     {
         public:
-            SettingsWindow(WindowManager& parWindowManager);
+            SettingsWindow(MWBase::WindowManager& parWindowManager);
 
         private:
             static int const sFovMin = 30;
@@ -77,4 +77,3 @@ namespace MWGui
 }
 
 #endif
-

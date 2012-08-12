@@ -10,6 +10,7 @@
 #include "soundmanager.hpp"
 #include "mechanicsmanager.hpp"
 #include "inputmanager.hpp"
+#include "windowmanager.hpp"
 
 MWBase::Environment *MWBase::Environment::sThis = 0;
 
@@ -42,7 +43,7 @@ void MWBase::Environment::setScriptManager (ScriptManager *scriptManager)
     mScriptManager = scriptManager;
 }
 
-void MWBase::Environment::setWindowManager (MWGui::WindowManager *windowManager)
+void MWBase::Environment::setWindowManager (WindowManager *windowManager)
 {
     mWindowManager = windowManager;
 }
@@ -90,7 +91,7 @@ MWBase::ScriptManager *MWBase::Environment::getScriptManager() const
     return mScriptManager;
 }
 
-MWGui::WindowManager *MWBase::Environment::getWindowManager() const
+MWBase::WindowManager *MWBase::Environment::getWindowManager() const
 {
     assert (mWindowManager);
     return mWindowManager;
@@ -144,6 +145,10 @@ void MWBase::Environment::cleanup()
 
     delete mScriptManager;
     mScriptManager = 0;
+
+/// \todo Re-enable (currently throwing an exception)
+//    delete mWindowManager;
+    mWindowManager = 0;
 
     delete mWorld;
     mWorld = 0;

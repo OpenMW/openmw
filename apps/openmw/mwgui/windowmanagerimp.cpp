@@ -1,4 +1,25 @@
-#include "window_manager.hpp"
+#include "windowmanagerimp.hpp"
+
+#include <cassert>
+#include <iterator>
+
+#include "MyGUI_UString.h"
+
+#include <openengine/ogre/renderer.hpp>
+#include <openengine/gui/manager.hpp>
+
+#include <components/settings/settings.hpp>
+
+#include "../mwbase/environment.hpp"
+#include "../mwbase/mechanicsmanager.hpp"
+#include "../mwbase/inputmanager.hpp"
+
+#include "../mwworld/ptr.hpp"
+#include "../mwworld/cellstore.hpp"
+
+#include "console.hpp"
+#include "journalwindow.hpp"
+#include "charactercreation.hpp"
 #include "text_input.hpp"
 #include "review.hpp"
 #include "dialogue.hpp"
@@ -20,22 +41,6 @@
 #include "confirmationdialog.hpp"
 #include "alchemywindow.hpp"
 #include "spellwindow.hpp"
-
-#include "../mwbase/environment.hpp"
-#include "../mwbase/mechanicsmanager.hpp"
-#include "../mwbase/inputmanager.hpp"
-
-#include "../mwworld/ptr.hpp"
-#include "../mwworld/cellstore.hpp"
-
-#include "console.hpp"
-#include "journalwindow.hpp"
-#include "charactercreation.hpp"
-
-#include <components/settings/settings.hpp>
-
-#include <cassert>
-#include <iterator>
 
 using namespace MWGui;
 
@@ -338,10 +343,12 @@ void WindowManager::setValue (const std::string& id, const MWMechanics::Stat<int
 }
 
 
-void WindowManager::setValue(const ESM::Skill::SkillEnum parSkill, const MWMechanics::Stat<float>& value)
+void WindowManager::setValue (int parSkill, const MWMechanics::Stat<float>& value)
 {
-    mStatsWindow->setValue(parSkill, value);
-    mCharGen->setValue(parSkill, value);
+    /// \todo Don't use the skill enum as a parameter type (we will have to drop it anyway, once we
+    /// allow custom skills.
+    mStatsWindow->setValue(static_cast<ESM::Skill::SkillEnum> (parSkill), value);
+    mCharGen->setValue(static_cast<ESM::Skill::SkillEnum> (parSkill), value);
     mPlayerSkillValues[parSkill] = value;
 }
 
@@ -424,7 +431,6 @@ void WindowManager::updateSkillArea()
 
 void WindowManager::removeDialog(OEngine::GUI::Layout*dialog)
 {
-    assert(dialog);
     if (!dialog)
         return;
     dialog->setVisible(false);
@@ -489,11 +495,6 @@ void WindowManager::onFrame (float frameDuration)
     mTradeWindow->checkReferenceAvailable();
     mContainerWindow->checkReferenceAvailable();
     mConsole->checkReferenceAvailable();
-}
-
-const ESMS::ESMStore& WindowManager::getStore() const
-{
-    return MWBase::Environment::get().getWorld()->getStore();
 }
 
 void WindowManager::changeCell(MWWorld::Ptr::CellStore* cell)
@@ -744,4 +745,80 @@ bool WindowManager::getWorldMouseOver()
 void WindowManager::executeInConsole (const std::string& path)
 {
     mConsole->executeFile (path);
+}
+
+void WindowManager::wmUpdateFps(float fps, unsigned int triangleCount, unsigned int batchCount)
+{
+    mFPS = fps;
+    mTriangleCount = triangleCount;
+    mBatchCount = batchCount;
+}
+
+MyGUI::Gui* WindowManager::getGui() const { return mGui; }
+
+MWGui::DialogueWindow* WindowManager::getDialogueWindow() { return mDialogueWindow;  }
+MWGui::ContainerWindow* WindowManager::getContainerWindow() { return mContainerWindow; }
+MWGui::InventoryWindow* WindowManager::getInventoryWindow() { return mInventoryWindow; }
+MWGui::BookWindow* WindowManager::getBookWindow() { return mBookWindow; }
+MWGui::ScrollWindow* WindowManager::getScrollWindow() { return mScrollWindow; }
+MWGui::CountDialog* WindowManager::getCountDialog() { return mCountDialog; }
+MWGui::ConfirmationDialog* WindowManager::getConfirmationDialog() { return mConfirmationDialog; }
+MWGui::TradeWindow* WindowManager::getTradeWindow() { return mTradeWindow; }
+MWGui::SpellWindow* WindowManager::getSpellWindow() { return mSpellWindow; }
+MWGui::Console* WindowManager::getConsole() { return mConsole; }
+
+bool WindowManager::isAllowed (GuiWindow wnd) const
+{
+    return mAllowed & wnd;
+}
+
+void WindowManager::allow (GuiWindow wnd)
+{
+    mAllowed = (GuiWindow)(mAllowed | wnd);
+    updateVisible();
+}
+
+void WindowManager::disallowAll()
+{
+    mAllowed = GW_None;
+    updateVisible();
+}
+
+void WindowManager::toggleVisible (GuiWindow wnd)
+{
+    mShown = (mShown & wnd) ? (GuiWindow) (mShown & ~wnd) : (GuiWindow) (mShown | wnd);
+    updateVisible();
+}
+
+bool WindowManager::isGuiMode() const
+{
+    return !mGuiModes.empty();
+}
+
+MWGui::GuiMode WindowManager::getMode() const
+{
+    if (mGuiModes.empty())
+        throw std::runtime_error ("getMode() called, but there is no active mode");
+
+    return mGuiModes.back();
+}
+
+std::map<int, MWMechanics::Stat<float> > WindowManager::getPlayerSkillValues()
+{
+    return mPlayerSkillValues;
+}
+
+std::map<int, MWMechanics::Stat<int> > WindowManager::getPlayerAttributeValues()
+{
+    return mPlayerAttributes;
+}
+
+WindowManager::SkillList WindowManager::getPlayerMinorSkills()
+{
+    return mPlayerMinorSkills;
+}
+
+WindowManager::SkillList WindowManager::getPlayerMajorSkills()
+{
+    return mPlayerMajorSkills;
 }

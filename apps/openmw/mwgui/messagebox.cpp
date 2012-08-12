@@ -2,7 +2,7 @@
 
 using namespace MWGui;
 
-MessageBoxManager::MessageBoxManager (WindowManager *windowManager)
+MessageBoxManager::MessageBoxManager (MWBase::WindowManager *windowManager)
 {
     mWindowManager = windowManager;
     // defines

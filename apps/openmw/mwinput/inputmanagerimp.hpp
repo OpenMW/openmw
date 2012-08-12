@@ -20,7 +20,7 @@ namespace MWWorld
   class Player;
 }
 
-namespace MWGui
+namespace MWBase
 {
   class WindowManager;
 }
@@ -47,7 +47,7 @@ namespace MWInput
   public:
     MWInputManager(OEngine::Render::OgreRenderer &_ogre,
                    MWWorld::Player&_player,
-                   MWGui::WindowManager &_windows,
+                   MWBase::WindowManager &_windows,
                    bool debug,
                    OMW::Engine& engine);
     virtual ~MWInputManager();

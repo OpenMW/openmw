@@ -3,6 +3,11 @@
 
 #include <openengine/gui/layout.hpp>
 
+namespace MWBase
+{
+    class WindowManager;
+}
+
 namespace MWGui
 {
     class WindowManager;
@@ -10,7 +15,7 @@ namespace MWGui
     class WindowBase: public OEngine::GUI::Layout
     {
         public:
-        WindowBase(const std::string& parLayout, WindowManager& parWindowManager);
+        WindowBase(const std::string& parLayout, MWBase::WindowManager& parWindowManager);
 
         // Events
         typedef MyGUI::delegates::CMultiDelegate1<WindowBase*> EventHandle_WindowBase;
@@ -25,9 +30,9 @@ namespace MWGui
         EventHandle_WindowBase eventDone;
 
         protected:
-        WindowManager& mWindowManager;
+        /// \todo remove
+        MWBase::WindowManager& mWindowManager;
     };
 }
 
 #endif
-

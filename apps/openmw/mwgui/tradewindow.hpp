@@ -23,7 +23,7 @@ namespace MWGui
     class TradeWindow : public ContainerBase, public WindowBase
     {
         public:
-            TradeWindow(WindowManager& parWindowManager);
+            TradeWindow(MWBase::WindowManager& parWindowManager);
 
             void startTrade(MWWorld::Ptr actor);
 

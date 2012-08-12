@@ -4,6 +4,7 @@
 #include <components/esm/loadacti.hpp>
 
 #include "../mwbase/environment.hpp"
+#include "../mwbase/windowmanager.hpp"
 
 #include "../mwworld//cellstore.hpp"
 #include "../mwworld/ptr.hpp"
@@ -12,7 +13,6 @@
 #include "../mwrender/objects.hpp"
 #include "../mwrender/renderinginterface.hpp"
 
-#include "../mwgui/window_manager.hpp"
 #include "../mwgui/tooltips.hpp"
 
 namespace MWClass
@@ -34,7 +34,7 @@ namespace MWClass
             physics.insertObjectPhysics(ptr, model);
         }
     }
-    
+
     std::string Activator::getModel(const MWWorld::Ptr &ptr) const
     {
         MWWorld::LiveCellRef<ESM::Activator> *ref =
@@ -104,4 +104,3 @@ namespace MWClass
         return MWWorld::Ptr(&cell.activators.insert(*ref), &cell);
     }
 }
-
