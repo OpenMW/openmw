@@ -1,5 +1,9 @@
 #include "inputmanagerimp.hpp"
 
+#if defined(__APPLE__) && !defined(__LP64__)
+#include <Carbon/Carbon.h>
+#endif
+
 #include <OgreRoot.h>
 #include <OgreRenderWindow.h>
 
@@ -76,12 +80,12 @@ namespace MWInput
             #endif
         }
 
-        #ifdef __APPLE_CC__
+#if defined(__APPLE__) && !defined(__LP64__)
         // Give the application window focus to receive input events
         ProcessSerialNumber psn = { 0, kCurrentProcess };
         TransformProcessType(&psn, kProcessTransformToForegroundApplication);
         SetFrontProcess(&psn);
-        #endif
+#endif
 
         mInputManager = OIS::InputManager::createInputSystem( pl );
 
