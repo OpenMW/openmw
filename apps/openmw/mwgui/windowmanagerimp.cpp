@@ -1,4 +1,4 @@
-#include "window_manager.hpp"
+#include "windowmanagerimp.hpp"
 
 #include <cassert>
 #include <iterator>

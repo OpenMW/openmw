@@ -1,17 +1,15 @@
 #ifndef CHARACTER_CREATION_HPP
 #define CHARACTER_CREATION_HPP
 
-#include "window_manager.hpp"
-
 #include <components/esm_store/store.hpp>
 
 #include "../mwbase/world.hpp"
+#include "../mwbase/windowmanager.hpp"
 
 #include "../mwmechanics/stat.hpp"
 
 namespace MWGui
 {
-    class WindowManager;
     class WindowBase;
 
     class TextInputDialog;
@@ -31,7 +29,7 @@ namespace MWGui
     public:
     typedef std::vector<int> SkillList;
 
-    CharacterCreation(WindowManager* _wm);
+    CharacterCreation(MWBase::WindowManager* _wm);
     ~CharacterCreation();
 
     //Show a dialog
@@ -60,7 +58,7 @@ namespace MWGui
     BirthDialog* mBirthSignDialog;
     ReviewDialog* mReviewDialog;
 
-    WindowManager* mWM;
+    MWBase::WindowManager* mWM;
 
     //Player data
     std::string mPlayerName;

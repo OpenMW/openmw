@@ -6,8 +6,7 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
-
-#include "window_manager.hpp"
+#include "../mwbase/windowmanager.hpp"
 
 #undef min
 #undef max

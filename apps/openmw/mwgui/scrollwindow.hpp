@@ -10,7 +10,7 @@ namespace MWGui
     class ScrollWindow : public WindowBase
     {
         public:
-            ScrollWindow (WindowManager& parWindowManager);
+            ScrollWindow (MWBase::WindowManager& parWindowManager);
 
             void open (MWWorld::Ptr scroll);
             void setTakeButtonShow(bool show);

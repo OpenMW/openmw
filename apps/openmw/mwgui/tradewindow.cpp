@@ -5,16 +5,16 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/soundmanager.hpp"
+#include "../mwbase/windowmanager.hpp"
 
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/manualref.hpp"
 
-#include "window_manager.hpp"
 #include "inventorywindow.hpp"
 
 namespace MWGui
 {
-    TradeWindow::TradeWindow(WindowManager& parWindowManager) :
+    TradeWindow::TradeWindow(MWBase::WindowManager& parWindowManager) :
         WindowBase("openmw_trade_window.layout", parWindowManager)
         , ContainerBase(NULL) // no drag&drop
         , mCurrentBalance(0)

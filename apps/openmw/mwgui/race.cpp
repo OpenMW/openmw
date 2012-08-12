@@ -10,15 +10,15 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
+#include "../mwbase/windowmanager.hpp"
 
-#include "window_manager.hpp"
 #include "widgets.hpp"
 #include "tooltips.hpp"
 
 using namespace MWGui;
 using namespace Widgets;
 
-RaceDialog::RaceDialog(WindowManager& parWindowManager)
+RaceDialog::RaceDialog(MWBase::WindowManager& parWindowManager)
   : WindowBase("openmw_chargen_race.layout", parWindowManager)
   , mGenderIndex(0)
   , mFaceIndex(0)

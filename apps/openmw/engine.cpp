@@ -15,7 +15,7 @@
 
 #include "mwinput/inputmanagerimp.hpp"
 
-#include "mwgui/window_manager.hpp"
+#include "mwgui/windowmanagerimp.hpp"
 #include "mwgui/cursorreplace.hpp"
 
 #include "mwscript/scriptmanagerimp.hpp"

@@ -8,8 +8,7 @@
 #include <components/interpreter/opcodes.hpp>
 
 #include "../mwbase/environment.hpp"
-
-#include "../mwgui/window_manager.hpp"
+#include "../mwbase/windowmanager.hpp"
 
 #include "interpretercontext.hpp"
 

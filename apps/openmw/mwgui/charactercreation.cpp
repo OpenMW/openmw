@@ -116,7 +116,7 @@ namespace
 
 using namespace MWGui;
 
-CharacterCreation::CharacterCreation(WindowManager* _wm)
+CharacterCreation::CharacterCreation(MWBase::WindowManager* _wm)
     : mNameDialog(0)
     , mRaceDialog(0)
     , mClassChoiceDialog(0)

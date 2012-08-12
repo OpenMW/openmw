@@ -9,8 +9,8 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
+#include "../mwbase/windowmanager.hpp"
 
-#include "window_manager.hpp"
 #include "widgets.hpp"
 #include "tooltips.hpp"
 
@@ -22,7 +22,7 @@ using namespace Widgets;
 
 const int ReviewDialog::sLineHeight = 18;
 
-ReviewDialog::ReviewDialog(WindowManager& parWindowManager)
+ReviewDialog::ReviewDialog(MWBase::WindowManager& parWindowManager)
     : WindowBase("openmw_chargen_review.layout", parWindowManager)
     , mLastPos(0)
 {

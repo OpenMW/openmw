@@ -9,20 +9,20 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
+#include "../mwbase/windowmanager.hpp"
 
 #include "../mwworld/player.hpp"
 #include "../mwworld/class.hpp"
 
 #include "../mwmechanics/npcstats.hpp"
 
-#include "window_manager.hpp"
 #include "tooltips.hpp"
 
 
 using namespace MWGui;
 const int StatsWindow::sLineHeight = 18;
 
-StatsWindow::StatsWindow (WindowManager& parWindowManager)
+StatsWindow::StatsWindow (MWBase::WindowManager& parWindowManager)
   : WindowPinnableBase("openmw_stats_window.layout", parWindowManager)
   , mSkillAreaWidget(NULL)
   , mSkillClientWidget(NULL)

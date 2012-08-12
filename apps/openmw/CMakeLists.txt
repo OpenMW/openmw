@@ -25,7 +25,7 @@ add_openmw_dir (mwinput
     )
 
 add_openmw_dir (mwgui
-    text_input widgets race class birth review window_manager console dialogue
+    text_input widgets race class birth review windowmanagerimp console dialogue
     dialogue_history window_base stats_window messagebox journalwindow charactercreation
     map_window window_pinnable_base cursorreplace tooltips scrollwindow bookwindow list
     formatting inventorywindow container hud countdialog tradewindow settingswindow
@@ -66,7 +66,7 @@ add_openmw_dir (mwmechanics
 
 add_openmw_dir (mwbase
     environment world scriptmanager dialoguemanager journal soundmanager mechanicsmanager
-    inputmanager
+    inputmanager windowmanager
     )
 
 # Main executable

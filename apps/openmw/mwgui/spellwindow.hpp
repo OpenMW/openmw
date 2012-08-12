@@ -8,7 +8,7 @@ namespace MWGui
     class SpellWindow : public WindowPinnableBase
     {
     public:
-        SpellWindow(WindowManager& parWindowManager);
+        SpellWindow(MWBase::WindowManager& parWindowManager);
 
         void updateSpells();
 

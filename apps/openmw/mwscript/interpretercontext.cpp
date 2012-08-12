@@ -10,11 +10,10 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/scriptmanager.hpp"
+#include "../mwbase/windowmanager.hpp"
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/player.hpp"
-
-#include "../mwgui/window_manager.hpp"
 
 #include "locals.hpp"
 #include "globalscripts.hpp"

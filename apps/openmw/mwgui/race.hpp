@@ -24,7 +24,7 @@ namespace MWGui
     class RaceDialog : public WindowBase
     {
     public:
-        RaceDialog(WindowManager& parWindowManager);
+        RaceDialog(MWBase::WindowManager& parWindowManager);
 
         enum Gender
         {

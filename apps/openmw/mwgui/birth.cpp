@@ -7,14 +7,14 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
+#include "../mwbase/windowmanager.hpp"
 
-#include "window_manager.hpp"
 #include "widgets.hpp"
 
 using namespace MWGui;
 using namespace Widgets;
 
-BirthDialog::BirthDialog(WindowManager& parWindowManager)
+BirthDialog::BirthDialog(MWBase::WindowManager& parWindowManager)
   : WindowBase("openmw_chargen_birth.layout", parWindowManager)
 {
     // Centre dialog

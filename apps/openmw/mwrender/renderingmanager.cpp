@@ -24,11 +24,10 @@
 #include "../mwbase/world.hpp" // these includes can be removed once the static-hack is gone
 #include "../mwbase/environment.hpp"
 #include "../mwbase/inputmanager.hpp" // FIXME
+#include "../mwbase/windowmanager.hpp" // FIXME
 
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/player.hpp"
-
-#include "../mwgui/window_manager.hpp" // FIXME
 
 #include "shadows.hpp"
 #include "localmap.hpp"

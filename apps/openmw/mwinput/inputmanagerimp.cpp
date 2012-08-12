@@ -9,7 +9,7 @@
 
 #include <openengine/ogre/renderer.hpp>
 
-#include "../mwgui/window_manager.hpp"
+#include "../mwbase/windowmanager.hpp"
 
 #include <mangle/input/servers/ois_driver.hpp>
 #include <mangle/input/filters/eventlist.hpp>
@@ -83,7 +83,7 @@ namespace MWInput
     MouseLookEventPtr mouse;
     OEngine::GUI::EventInjectorPtr guiEvents;
     MWWorld::Player &player;
-    MWGui::WindowManager &windows;
+    MWBase::WindowManager &windows;
     OMW::Engine& mEngine;
 
     bool mDragDrop;
@@ -230,7 +230,7 @@ private:
   public:
     InputImpl(OEngine::Render::OgreRenderer &_ogre,
                    MWWorld::Player &_player,
-                   MWGui::WindowManager &_windows,
+                   MWBase::WindowManager &_windows,
                    bool debug,
                    OMW::Engine& engine)
       : ogre(_ogre),
@@ -457,7 +457,7 @@ private:
   /***CONSTRUCTOR***/
   MWInputManager::MWInputManager(OEngine::Render::OgreRenderer &ogre,
                                  MWWorld::Player &player,
-                                 MWGui::WindowManager &windows,
+                                 MWBase::WindowManager &windows,
                                  bool debug,
                                  OMW::Engine& engine)
   {

@@ -3,16 +3,16 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/soundmanager.hpp"
+#include "../mwbase/windowmanager.hpp"
 
 #include "../mwworld/actiontake.hpp"
 #include "../mwworld/player.hpp"
 
 #include "formatting.hpp"
-#include "window_manager.hpp"
 
 using namespace MWGui;
 
-ScrollWindow::ScrollWindow (WindowManager& parWindowManager) :
+ScrollWindow::ScrollWindow (MWBase::WindowManager& parWindowManager) :
     WindowBase("openmw_scroll.layout", parWindowManager)
 {
     getWidget(mTextView, "TextView");

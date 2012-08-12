@@ -6,8 +6,7 @@
 #include "../mwbase/world.hpp" /// FIXME
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
-
-#include "../mwgui/window_manager.hpp"
+#include "../mwbase/windowmanager.hpp"
 
 #include "player.hpp"
 #include "localscripts.hpp"
