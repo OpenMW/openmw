@@ -40,6 +40,7 @@ namespace MWInput
         , mUserFile(userFile)
         , mDragDrop(false)
         , mGuiCursorEnabled(false)
+        , mInvertY (Settings::Manager::getBool("invert y axis", "Input"))
     {
         Ogre::RenderWindow* window = ogre.getWindow ();
         size_t windowHnd;
@@ -280,6 +281,9 @@ namespace MWInput
         {
             if (it->first == "Video" && (it->second == "resolution x" || it->second == "resolution y"))
                 changeRes = true;
+
+            if (it->first == "Input" && it->second == "invert y axis")
+                mInvertY = Settings::Manager::getBool("invert y axis", "Input");
         }
 
         if (changeRes)
@@ -374,7 +378,7 @@ namespace MWInput
         if (mMouseLookEnabled)
         {
             float x = arg.state.X.rel * 0.2;
-            float y = arg.state.Y.rel * 0.2;
+            float y = arg.state.Y.rel * 0.2 * (mInvertY ? -1 : 1);
 
             MWBase::World *world = MWBase::Environment::get().getWorld();
             world->rotateObject(world->getPlayer().getPlayer(), -y, 0.f, x, true);
@@ -504,7 +508,7 @@ namespace MWInput
         return mInputCtrl->getChannel (id)->getValue () == 1;
     }
 
-    void InputManager::loadKeyDefaults ()
+    void InputManager::loadKeyDefaults (bool force)
     {
         // using hardcoded key defaults is inevitable, if we want the configuration files to stay valid
         // across different versions of OpenMW (in the case where another input action is added)
@@ -530,16 +534,27 @@ namespace MWInput
 
         for (int i = 0; i < A_Last; ++i)
         {
-            if (mInputCtrl->getChannel(i)->getControlsCount () == 0)
+            ICS::Control* control;
+            bool controlExists = mInputCtrl->getChannel(i)->getControlsCount () != 0;
+            if (!controlExists)
             {
-                ICS::Control* control1 = new ICS::Control(boost::lexical_cast<std::string>(i), false, true, 0, ICS::ICS_MAX, ICS::ICS_MAX);
-                mInputCtrl->addControl(control1);
-                control1->attachChannel(mInputCtrl->getChannel(i), ICS::Channel::DIRECT);
+                control = new ICS::Control(boost::lexical_cast<std::string>(i), false, true, 0, ICS::ICS_MAX, ICS::ICS_MAX);
+                mInputCtrl->addControl(control);
+                control->attachChannel(mInputCtrl->getChannel(i), ICS::Channel::DIRECT);
+            }
+            else
+            {
+                control = mInputCtrl->getChannel(i)->getAttachedControls ().front().control;
+            }
+
+            if (!controlExists || force)
+            {
+                clearAllBindings (control);
 
                 if (defaultKeyBindings.find(i) != defaultKeyBindings.end())
-                    mInputCtrl->addKeyBinding(control1, static_cast<OIS::KeyCode>(defaultKeyBindings[i]), ICS::Control::INCREASE);
+                    mInputCtrl->addKeyBinding(control, static_cast<OIS::KeyCode>(defaultKeyBindings[i]), ICS::Control::INCREASE);
                 else if (defaultMouseButtonBindings.find(i) != defaultMouseButtonBindings.end())
-                    mInputCtrl->addMouseButtonBinding (control1, defaultMouseButtonBindings[i], ICS::Control::INCREASE);
+                    mInputCtrl->addMouseButtonBinding (control, defaultMouseButtonBindings[i], ICS::Control::INCREASE);
             }
         }
     }
@@ -597,6 +612,7 @@ namespace MWInput
         ret.push_back(A_Crouch);
         ret.push_back(A_Activate);
         ret.push_back(A_ToggleWeapon);
+        ret.push_back(A_ToggleSpell);
         ret.push_back(A_AutoMove);
         ret.push_back(A_Jump);
         ret.push_back(A_Inventory);
@@ -679,6 +695,11 @@ namespace MWInput
             mInputCtrl->removeMouseButtonBinding (mInputCtrl->getMouseButtonBinding (control, ICS::Control::INCREASE));
 
         /// \todo add joysticks here once they are added
+    }
+
+    void InputManager::resetToDefaultBindings()
+    {
+        loadKeyDefaults(true);
     }
 
 }

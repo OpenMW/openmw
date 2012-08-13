@@ -66,6 +66,8 @@ namespace MWGui
 
             // controls
             MyGUI::ScrollView* mControlsBox;
+            MyGUI::Button* mResetControlsButton;
+            MyGUI::Button* mInvertYButton;
 
             void onOkButtonClicked(MyGUI::Widget* _sender);
             void onFpsToggled(MyGUI::Widget* _sender);
@@ -80,6 +82,9 @@ namespace MWGui
             void onShadowTextureSize(MyGUI::Widget* _sender);
 
             void onRebindAction(MyGUI::Widget* _sender);
+            void onInputTabMouseWheel(MyGUI::Widget* _sender, int _rel);
+            void onResetDefaultBindings(MyGUI::Widget* _sender);
+            void onResetDefaultBindingsAccept ();
 
             void apply();
     };

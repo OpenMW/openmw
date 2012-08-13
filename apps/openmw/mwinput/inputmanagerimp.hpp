@@ -81,6 +81,7 @@ namespace MWInput
         virtual int getNumActions() { return A_Last; }
         virtual std::vector<int> getActionSorting ();
         virtual void enableDetectingBindingMode (int action);
+        virtual void resetToDefaultBindings();
 
 
     public:
@@ -132,6 +133,8 @@ namespace MWInput
 
         bool mDragDrop;
 
+        bool mInvertY;
+
         bool mMouseLookEnabled;
         bool mGuiCursorEnabled;
 
@@ -159,7 +162,7 @@ namespace MWInput
 
         bool actionIsActive (int id);
 
-        void loadKeyDefaults();
+        void loadKeyDefaults(bool force = false);
 
     private:
         enum Actions

@@ -84,9 +84,16 @@
                 <Property key="Caption" value="  #{sControls}  "/>
 
                 <Widget type="Widget" skin="MW_Box" position="8 8 344 180">
-
                     <Widget type="ScrollView" skin="MW_ScrollView" name="ControlsBox" position="4 4 336 172"/>
+                </Widget>
 
+                <Widget type="Button" skin="MW_Button" name="ResetControlsButton" position="4 192 100 24">
+                    <Property key="Caption" value="#{sControlsMenu1}"/>
+                </Widget>
+
+                <Widget type="Button" skin="MW_Button" name="InvertYButton" position="4 222 32 24"/>
+                <Widget type="TextBox" skin="SandText" position="40 222 200 24">
+                    <Property key="Caption" value="#{sMouseFlip}"/>
                 </Widget>
 
             </Widget>

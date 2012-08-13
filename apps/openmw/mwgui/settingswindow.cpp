@@ -116,7 +116,10 @@ namespace MWGui
         getWidget(mShadowsDebug, "ShadowsDebug");
         getWidget(mUnderwaterButton, "UnderwaterButton");
         getWidget(mControlsBox, "ControlsBox");
+        getWidget(mResetControlsButton, "ResetControlsButton");
+        getWidget(mInvertYButton, "InvertYButton");
 
+        mInvertYButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onButtonToggled);
         mOkButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onOkButtonClicked);
         mUnderwaterButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onButtonToggled);
         mShadersButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onShadersToggled);
@@ -154,6 +157,9 @@ namespace MWGui
         int okSize = mOkButton->getTextSize().width + 24;
         mOkButton->setCoord(mMainWidget->getWidth()-16-okSize, mOkButton->getTop(),
                             okSize, mOkButton->getHeight());
+
+        mResetControlsButton->setSize (mResetControlsButton->getTextSize ().width + 24, mResetControlsButton->getHeight());
+        mResetControlsButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onResetDefaultBindings);
 
         // fill resolution list
         Ogre::RenderSystem* rs = Ogre::Root::getSingleton().getRenderSystem();
@@ -219,6 +225,8 @@ namespace MWGui
         mStaticsShadows->setCaptionWithReplacing(Settings::Manager::getBool("statics shadows", "Shadows") ? "#{sOn}" : "#{sOff}");
         mMiscShadows->setCaptionWithReplacing(Settings::Manager::getBool("misc shadows", "Shadows") ? "#{sOn}" : "#{sOff}");
         mShadowsDebug->setCaptionWithReplacing(Settings::Manager::getBool("debug", "Shadows") ? "#{sOn}" : "#{sOff}");
+
+        mInvertYButton->setCaptionWithReplacing(Settings::Manager::getBool("invert y axis", "Input") ? "#{sOn}" : "#{sOff}");
 
         std::string shaders;
         if (!Settings::Manager::getBool("shaders", "Objects"))
@@ -383,6 +391,8 @@ namespace MWGui
                 Settings::Manager::setBool("misc shadows", "Shadows", newState);
             else if (_sender == mShadowsDebug)
                 Settings::Manager::setBool("debug", "Shadows", newState);
+            else if (_sender == mInvertYButton)
+                Settings::Manager::setBool("invert y axis", "Input", newState);
 
             apply();
         }
@@ -521,8 +531,8 @@ namespace MWGui
         std::vector<int> actions = MWBase::Environment::get().getInputManager()->getActionSorting ();
 
         const int h = 18;
-        const int w = mControlsBox->getWidth() - 34;
-        int curH = 6;
+        const int w = mControlsBox->getWidth() - 28;
+        int curH = 0;
         for (std::vector<int>::const_iterator it = actions.begin(); it != actions.end(); ++it)
         {
             std::string desc = MWBase::Environment::get().getInputManager()->getActionDescription (*it);
@@ -539,6 +549,7 @@ namespace MWGui
             rightText->setTextAlign (MyGUI::Align::Right);
             rightText->setUserData(*it); // save the action id for callbacks
             rightText->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onRebindAction);
+            rightText->eventMouseWheel += MyGUI::newDelegate(this, &SettingsWindow::onInputTabMouseWheel);
             curH += h;
         }
 
@@ -556,6 +567,29 @@ namespace MWGui
 
         MWBase::Environment::get().getInputManager ()->enableDetectingBindingMode (actionId);
 
+    }
+
+    void SettingsWindow::onInputTabMouseWheel(MyGUI::Widget* _sender, int _rel)
+    {
+        if (mControlsBox->getViewOffset().top + _rel*0.3 > 0)
+            mControlsBox->setViewOffset(MyGUI::IntPoint(0, 0));
+        else
+            mControlsBox->setViewOffset(MyGUI::IntPoint(0, mControlsBox->getViewOffset().top + _rel*0.3));
+    }
+
+    void SettingsWindow::onResetDefaultBindings(MyGUI::Widget* _sender)
+    {
+        ConfirmationDialog* dialog = mWindowManager.getConfirmationDialog();
+        dialog->open("#{sNotifyMessage66}");
+        dialog->eventOkClicked.clear();
+        dialog->eventOkClicked += MyGUI::newDelegate(this, &SettingsWindow::onResetDefaultBindingsAccept);
+        dialog->eventCancelClicked.clear();
+    }
+
+    void SettingsWindow::onResetDefaultBindingsAccept()
+    {
+        MWBase::Environment::get().getInputManager ()->resetToDefaultBindings ();
+        updateControlsBox ();
     }
 
     void SettingsWindow::open()
