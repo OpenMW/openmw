@@ -11,7 +11,7 @@
 
 #include <components/nifbullet/bullet_nif_loader.hpp>
 
-#include "../mwbase/world.hpp" // FIXME
+//#include "../mwbase/world.hpp" // FIXME
 
 #include "ptr.hpp"
 #include "class.hpp"
@@ -172,7 +172,7 @@ namespace MWWorld
             OEngine::Physic::PhysicActor* act = it->second;
             act->setWalkDirection(btVector3(0,0,0));
         }
-		playerMove::playercmd& pm_ref = playerphysics->cmd;
+        playerMove::playercmd& pm_ref = playerphysics->cmd;
 
         pm_ref.rightmove = 0;
         pm_ref.forwardmove = 0;
@@ -183,35 +183,25 @@ namespace MWWorld
             iter!=actors.end(); ++iter)
         {
             //dirty stuff to get the camera orientation. Must be changed!
+            Ogre::Quaternion orient =
+                mRender.getScene()->getSceneNode(iter->first)->getOrientation();
 
-            Ogre::SceneNode *sceneNode = mRender.getScene()->getSceneNode (iter->first);
-            Ogre::Vector3 dir;
-            Ogre::Node* yawNode = sceneNode->getChildIterator().getNext();
-            Ogre::Node* pitchNode = yawNode->getChildIterator().getNext();
-			Ogre::Quaternion yawQuat = yawNode->getOrientation();
-            Ogre::Quaternion pitchQuat = pitchNode->getOrientation();
+            float yaw = orient.getRoll().valueDegrees();
+            float pitch = 0.f;
 
+            if (iter->first == "player") {
+                /// \fixme should not rely on player camera, real pitch needed
+                Ogre::SceneNode *node = mRender.getCamera()->getParentSceneNode();
+                pitch = node->getOrientation().getPitch().valueDegrees();
 
+                playerphysics->ps.viewangles.x = pitch - 90;
+                playerphysics->ps.viewangles.y = -yaw + 90;
 
-            playerphysics->ps.viewangles.x = pitchQuat.getPitch().valueDegrees();
-
-			playerphysics->ps.viewangles.y = yawQuat.getYaw().valueDegrees() *-1 + 90;
-
-
-            Ogre::Vector3 dir1(iter->second.x,iter->second.z,-iter->second.y);
-
-            pm_ref.rightmove = -iter->second.x;
-            pm_ref.forwardmove = -iter->second.y;
-            pm_ref.upmove = iter->second.z;
-
-
-
+                pm_ref.rightmove = -iter->second.x;
+                pm_ref.forwardmove = -iter->second.y;
+                pm_ref.upmove = iter->second.z;
+            }
         }
-
-
-
-
-
         mEngine->stepSimulation(dt);
     }
 

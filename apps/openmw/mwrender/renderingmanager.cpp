@@ -135,7 +135,6 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
 
 
     Ogre::SceneNode *playerNode = mMwRoot->createChildSceneNode ("player");
-    playerNode->pitch(Degree(90));
     mPlayer = new MWRender::Player (mRendering.getCamera(), playerNode);
 
     mShadows = new Shadows(&mRendering);
@@ -309,17 +308,23 @@ void RenderingManager::update (float duration){
 
     mRendering.update(duration);
 
-    float *fpos =
+    MWWorld::RefData &data = 
         MWBase::Environment::get()
             .getWorld()
             ->getPlayer()
             .getPlayer()
-            .getRefData()
-            .getPosition()
-            .pos;
-    Ogre::Vector3 pos(fpos[0], fpos[1], fpos[2]);
+            .getRefData();
 
-    mLocalMap->updatePlayer(pos, mRendering.getCamera()->getRealOrientation() );
+    float *fpos = data.getPosition().pos;
+
+    /// \note only for LocalMap::updatePlayer()
+    Ogre::Vector3 pos(fpos[0], -fpos[2], fpos[1]);
+
+    Ogre::SceneNode *node = data.getBaseNode();
+    Ogre::Quaternion orient =
+        node->convertLocalToWorldOrientation(node->_getDerivedOrientation());
+
+    mLocalMap->updatePlayer(mRendering.getCamera()->getRealPosition(), orient);
 
     if (mWater) {
         Ogre::Vector3 cam = mRendering.getCamera()->getRealPosition();

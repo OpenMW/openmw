@@ -20,29 +20,36 @@ namespace MWRender
     /// \brief Player character rendering and camera control
     class Player
     {
+        struct CamData {
+            float pitch, yaw, offset;
+        };
+
         Ogre::Camera *mCamera;
 
         Ogre::SceneNode *mPlayerNode;
         Ogre::SceneNode *mCameraNode;
+        Ogre::SceneNode *mVanityNode;
 
         bool mFirstPersonView;
         bool mVanityMode;
         bool mPreviewMode;
 
-        float mPitch, mYaw, mOffset;
+        float mHeight;
+        CamData mMainCam, mPreviewCam;
 
         float mTimeIdle;
         int mUpdates;
-
-        float limitPitchAngle(float limitAbs, float shift = 0.f);
 
         /// Updates sound manager listener data
         void updateListener();
 
         void rotateCamera(const Ogre::Vector3 &rot, bool adjust);
 
-        float getYawAngle();
-        float getPitchAngle();
+        float getYaw();
+        void setYaw(float angle);
+
+        float getPitch();
+        void setPitch(float angle);
 
     public:
 
@@ -62,9 +69,9 @@ namespace MWRender
 
         void toggleViewMode();
 
-        void toggleVanityMode();
+        void toggleVanityMode(bool enable, bool force = false);
 
-        void togglePreviewMode();
+        void togglePreviewMode(bool enable);
 
         void update(float duration);
     };
