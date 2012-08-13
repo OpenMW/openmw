@@ -135,6 +135,11 @@ namespace MWInput
 
         bool mInvertY;
 
+        float mCameraSensitivity;
+        float mUISensitivity;
+        float mCameraYMultiplier;
+        float mUIYMultiplier;
+
         bool mMouseLookEnabled;
         bool mGuiCursorEnabled;
 

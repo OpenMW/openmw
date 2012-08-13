@@ -41,6 +41,10 @@ namespace MWInput
         , mDragDrop(false)
         , mGuiCursorEnabled(false)
         , mInvertY (Settings::Manager::getBool("invert y axis", "Input"))
+        , mCameraSensitivity (Settings::Manager::getFloat("camera sensitivity", "Input"))
+        , mUISensitivity (Settings::Manager::getFloat("ui sensitivity", "Input"))
+        , mCameraYMultiplier (Settings::Manager::getFloat("camera y multiplier", "Input"))
+        , mUIYMultiplier (Settings::Manager::getFloat("ui y multiplier", "Input"))
     {
         Ogre::RenderWindow* window = ogre.getWindow ();
         size_t windowHnd;
@@ -284,6 +288,13 @@ namespace MWInput
 
             if (it->first == "Input" && it->second == "invert y axis")
                 mInvertY = Settings::Manager::getBool("invert y axis", "Input");
+
+            if (it->first == "Input" && it->second == "camera sensitivity")
+                mCameraSensitivity = Settings::Manager::getFloat("camera sensitivity", "Input");
+
+            if (it->first == "Input" && it->second == "ui sensitivity")
+                mUISensitivity = Settings::Manager::getFloat("ui sensitivity", "Input");
+
         }
 
         if (changeRes)
@@ -367,8 +378,8 @@ namespace MWInput
 
             // We keep track of our own mouse position, so that moving the mouse while in
             // game mode does not move the position of the GUI cursor
-            mMouseX += arg.state.X.rel;
-            mMouseY += arg.state.Y.rel;
+            mMouseX += arg.state.X.rel * mUISensitivity;
+            mMouseY += arg.state.Y.rel * mUISensitivity * mUIYMultiplier;
             mMouseX = std::max(0, std::min(mMouseX, viewSize.width));
             mMouseY = std::max(0, std::min(mMouseY, viewSize.height));
 
@@ -377,8 +388,8 @@ namespace MWInput
 
         if (mMouseLookEnabled)
         {
-            float x = arg.state.X.rel * 0.2;
-            float y = arg.state.Y.rel * 0.2 * (mInvertY ? -1 : 1);
+            float x = arg.state.X.rel * mCameraSensitivity * 0.2;
+            float y = arg.state.Y.rel * mCameraSensitivity * 0.2 * (mInvertY ? -1 : 1) * mUIYMultiplier;
 
             MWBase::World *world = MWBase::Environment::get().getWorld();
             world->rotateObject(world->getPlayer().getPlayer(), -y, 0.f, x, true);
@@ -578,9 +589,6 @@ namespace MWInput
         descriptions[A_Rest] = "sRestKey";
         descriptions[A_Inventory] = "sInventory";
 
-        if (action == A_GameMenu)
-            return "Menu"; // not configurable in morrowind so no GMST
-
         if (descriptions[action] == "")
             return ""; // not configurable
 
@@ -619,7 +627,6 @@ namespace MWInput
         ret.push_back(A_Journal);
         ret.push_back(A_Rest);
         ret.push_back(A_Console);
-        ret.push_back(A_GameMenu);
 
         return ret;
     }
