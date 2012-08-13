@@ -143,8 +143,8 @@ namespace MWInput
         bool mMouseLookEnabled;
         bool mGuiCursorEnabled;
 
-        int mMouseX;
-        int mMouseY;
+        float mMouseX;
+        float mMouseY;
 
         std::map<std::string, bool> mControlSwitch;
 

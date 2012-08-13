@@ -378,12 +378,12 @@ namespace MWInput
 
             // We keep track of our own mouse position, so that moving the mouse while in
             // game mode does not move the position of the GUI cursor
-            mMouseX += arg.state.X.rel * mUISensitivity;
-            mMouseY += arg.state.Y.rel * mUISensitivity * mUIYMultiplier;
-            mMouseX = std::max(0, std::min(mMouseX, viewSize.width));
-            mMouseY = std::max(0, std::min(mMouseY, viewSize.height));
+            mMouseX += float(arg.state.X.rel) * mUISensitivity;
+            mMouseY += float(arg.state.Y.rel) * mUISensitivity * mUIYMultiplier;
+            mMouseX = std::max(0.f, std::min(mMouseX, float(viewSize.width)));
+            mMouseY = std::max(0.f, std::min(mMouseY, float(viewSize.height)));
 
-            MyGUI::InputManager::getInstance().injectMouseMove(mMouseX, mMouseY, arg.state.Z.abs);
+            MyGUI::InputManager::getInstance().injectMouseMove( int(mMouseX), int(mMouseY), arg.state.Z.abs);
         }
 
         if (mMouseLookEnabled)
