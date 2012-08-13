@@ -29,7 +29,7 @@ namespace MWRender
         bool mVanityMode;
         bool mPreviewMode;
 
-        float mPitch, mYaw;
+        float mPitch, mYaw, mOffset;
 
         float mTimeIdle;
         int mUpdates;
@@ -39,9 +39,7 @@ namespace MWRender
         /// Updates sound manager listener data
         void updateListener();
 
-        void rotateImpl(Ogre::Vector3 &rot, bool adjust, float r);
-        void rotateCamera(Ogre::Vector3 &rot, bool adjust);
-        void moveCamera(float r);
+        void rotateCamera(const Ogre::Vector3 &rot, bool adjust);
 
         float getYawAngle();
         float getPitchAngle();
