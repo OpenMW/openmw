@@ -21,6 +21,7 @@ void newtrace(traceResults* const results, const Ogre::Vector3& start, const Ogr
 	//if (!traceobj->incellptr)
 	//	return;
 
+    
 	const Ogre::Vector3 rayDir = end - start;
     
     
@@ -34,6 +35,7 @@ void newtrace(traceResults* const results, const Ogre::Vector3& start, const Ogr
 	//Ogre::Vector3 startReplace = Ogre::Vector3(650,950, 45);
 	//Ogre::Vector3 endReplace = startReplace;
 	//endReplace.z -= .25;
+
 	
 	const bool hasHit = NewPhysicsTrace<collisionWorldTrace>(&out, start, end, BBHalfExtents, Ogre::Vector3(0.0f, 0.0f,0.0f), isInterior, enginePass);
 	
@@ -104,7 +106,8 @@ const bool NewPhysicsTrace(NewPhysTraceResults* const out, const Ogre::Vector3& 
 	const btVector3 btend(end.x, end.y, end.z);
 	const btQuaternion btrot(rotation.y, rotation.x, rotation.z);   //y, x, z
 
-	const btBoxShape newshape(btVector3(BBHalfExtents.x, BBHalfExtents.y, BBHalfExtents.z));
+    const btBoxShape newshape(btVector3(BBHalfExtents.x, BBHalfExtents.y, BBHalfExtents.z));
+	//const btCapsuleShapeZ newshape(BBHalfExtents.x, BBHalfExtents.z * 2 - BBHalfExtents.x * 2);
 	const btTransform from(btrot, btstart);
 	const btTransform to(btrot, btend);
 

@@ -332,6 +332,20 @@ namespace Physic
         mHeightFieldMap.erase(name);
     }
 
+    void PhysicEngine::adjustRigidBody(BulletShapePtr shape, RigidBody* body, float scale, Ogre::Vector3 position, Ogre::Quaternion rotation){
+        btTransform tr;
+        btBoxShape* box = dynamic_cast<btBoxShape*>(body->getCollisionShape());
+        if(box != NULL){
+            Ogre::Vector3 transrot = rotation * (shape->boxTranslation * scale);
+            Ogre::Vector3 newPosition = transrot + position;
+            tr.setOrigin(btVector3(newPosition.x, newPosition.y, newPosition.z));
+        }
+        else
+            tr.setOrigin(btVector3(position.x,position.y,position.z));
+        tr.setRotation(btQuaternion(rotation.x,rotation.y,rotation.z,rotation.w));
+        body->setWorldTransform(tr);
+    }
+
     RigidBody* PhysicEngine::createAndAdjustRigidBody(std::string mesh,std::string name,float scale, Ogre::Vector3 position, Ogre::Quaternion rotation)
     {
         std::string sid = (boost::format("%07.3f") % scale).str();
@@ -355,17 +369,9 @@ namespace Physic
         RigidBody* body = new RigidBody(CI,name);
         body->collide = shape->collide;
 
-        btTransform tr;
-        btBoxShape* box = dynamic_cast<btBoxShape*>(body->getCollisionShape());
-        if(box != NULL){
-            Ogre::Vector3 transrot = rotation * (shape->boxTranslation * scale);
-            Ogre::Vector3 newPosition = transrot + position;
-            tr.setOrigin(btVector3(newPosition.x, newPosition.y, newPosition.z));
-        }
-        else
-            tr.setOrigin(btVector3(position.x,position.y,position.z));
-        tr.setRotation(btQuaternion(rotation.x,rotation.y,rotation.z,rotation.w));
-        body->setWorldTransform(tr);
+        //Pass in BulletShape, RigidBody, scale, position, rotation
+
+        adjustRigidBody(shape, body, scale, position, rotation);
 
         return body;
 

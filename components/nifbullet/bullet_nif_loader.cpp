@@ -129,7 +129,7 @@ void ManualBulletShapeLoader::loadResource(Ogre::Resource *resource)
     };
     cShape->boxTranslation = boxTranslation;
     if(mBoundingBox != NULL)
-        cShape->Shape = mBoundingBox;
+       cShape->Shape = mBoundingBox;
 
     else
     {

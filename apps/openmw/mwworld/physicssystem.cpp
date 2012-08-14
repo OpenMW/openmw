@@ -193,8 +193,8 @@ namespace MWWorld
             Ogre::Quaternion pitchQuat = pitchNode->getOrientation();
 
 
+            //playerphysics->ps.snappingImplemented = false;
             
-           
 
             playerphysics->ps.viewangles.x = pitchQuat.getPitch().valueDegrees();
            
@@ -280,19 +280,20 @@ namespace MWWorld
         mEngine->deleteRigidBody(handle);
     }
 
-    void PhysicsSystem::moveObject (const std::string& handle, const Ogre::Vector3& position)
+    void PhysicsSystem::moveObject (const std::string& handle, Ogre::SceneNode* node)
     {
         if (OEngine::Physic::RigidBody* body = mEngine->getRigidBody(handle))
         {
             // TODO very dirty hack to avoid crash during setup -> needs cleaning up to allow
             // start positions others than 0, 0, 0
             btTransform tr = body->getWorldTransform();
+            Ogre::Vector3 position = node->getPosition();
             tr.setOrigin(btVector3(position.x,position.y,position.z));
             body->setWorldTransform(tr);
         }
         if (OEngine::Physic::PhysicActor* act = mEngine->getCharacter(handle))
         {
-            // TODO very dirty hack to avoid crash during setup -> needs cleaning up to allow
+            /*// TODO very dirty hack to avoid crash during setup -> needs cleaning up to allow
             // start positions others than 0, 0, 0
             if (handle == "player")
             {
@@ -301,31 +302,32 @@ namespace MWWorld
             else
             {
                 act->setPosition(btVector3(position.x,position.y,position.z));
-            }
+            }*/
         }
     }
 
-    void PhysicsSystem::rotateObject (const std::string& handle, const Ogre::Quaternion& rotation)
+    void PhysicsSystem::rotateObject (const std::string& handle, Ogre::SceneNode* node)
     {
-        if (OEngine::Physic::PhysicActor* act = mEngine->getCharacter(handle))
+        /*if (OEngine::Physic::PhysicActor* act = mEngine->getCharacter(handle))
         {
             act->setRotation(btQuaternion(rotation.x, rotation.y, rotation.z, rotation.w));
-        }
+        }*/
         if (OEngine::Physic::RigidBody* body = mEngine->getRigidBody(handle))
         {
+            Ogre::Quaternion rotation = node->getOrientation();
             body->getWorldTransform().setRotation(btQuaternion(rotation.x, rotation.y, rotation.z, rotation.w));
         }
     }
 
-    void PhysicsSystem::scaleObject (const std::string& handle, float scale)
+    void PhysicsSystem::scaleObject (const std::string& handle, Ogre::SceneNode* node)
     {
         if(handleToMesh.find(handle) != handleToMesh.end())
         {
-            btTransform transform = mEngine->getRigidBody(handle)->getWorldTransform();
             removeObject(handle);
 
-            Ogre::Quaternion quat = Ogre::Quaternion(transform.getRotation().getW(), transform.getRotation().getX(), transform.getRotation().getY(), transform.getRotation().getZ());
-            Ogre::Vector3 vec = Ogre::Vector3(transform.getOrigin().getX(), transform.getOrigin().getY(), transform.getOrigin().getZ());
+            float scale = node->getScale().x;
+            Ogre::Quaternion quat = node->getOrientation();
+            Ogre::Vector3 vec = node->getPosition();
             addObject(handle, handleToMesh[handle], quat, scale, vec);
         }
     }

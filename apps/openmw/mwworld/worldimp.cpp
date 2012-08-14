@@ -585,7 +585,7 @@ namespace MWWorld
     {
         moveObjectImp(ptr, x, y, z);
 
-        mPhysics->moveObject (ptr.getRefData().getHandle(), Ogre::Vector3 (x, y, z));
+        mPhysics->moveObject (ptr.getRefData().getHandle(), ptr.getRefData().getBaseNode());
     }
 
     void World::scaleObject (const Ptr& ptr, float scale)
@@ -595,7 +595,7 @@ namespace MWWorld
         ptr.getCellRef().scale = scale;
         //scale = scale/ptr.getRefData().getBaseNode()->getScale().x;
         ptr.getRefData().getBaseNode()->setScale(scale,scale,scale);
-        mPhysics->scaleObject( ptr.getRefData().getHandle(), scale );
+        mPhysics->scaleObject( ptr.getRefData().getHandle(), ptr.getRefData().getBaseNode());
     }
 
     void World::rotateObject (const Ptr& ptr,float x,float y,float z)
@@ -610,7 +610,7 @@ namespace MWWorld
         Ogre::Quaternion roty(Ogre::Degree(-y),Ogre::Vector3::UNIT_Y);
         Ogre::Quaternion rotz(Ogre::Degree(-z),Ogre::Vector3::UNIT_Z);
         ptr.getRefData().getBaseNode()->setOrientation(rotx*roty*rotz);
-        mPhysics->rotateObject(ptr.getRefData().getHandle(),ptr.getRefData().getBaseNode()->getOrientation());
+        mPhysics->rotateObject(ptr.getRefData().getHandle(),ptr.getRefData().getBaseNode());
     }
 
     void World::indexToPosition (int cellX, int cellY, float &x, float &y, bool centre) const

@@ -34,11 +34,11 @@ namespace MWWorld
 
             void removeObject (const std::string& handle);
 
-            void moveObject (const std::string& handle, const Ogre::Vector3& position);
+            void moveObject (const std::string& handle, Ogre::SceneNode* node);
 
-            void rotateObject (const std::string& handle, const Ogre::Quaternion& rotation);
+            void rotateObject (const std::string& handle, Ogre::SceneNode* node);
 
-            void scaleObject (const std::string& handle, float scale);
+            void scaleObject (const std::string& handle, Ogre::SceneNode* node);
 
             bool toggleCollisionMode();
             
