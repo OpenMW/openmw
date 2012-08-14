@@ -31,10 +31,13 @@ namespace MWRender
         Ogre::SceneNode *mVanityNode;
 
         bool mFirstPersonView;
-        bool mVanityMode;
         bool mPreviewMode;
 
-        float mHeight;
+        struct {
+            bool enabled, allowed, forced;
+        } mVanity;
+
+        float mHeight, mCameraDistance;
         CamData mMainCam, mPreviewCam;
 
         float mTimeIdle;
@@ -50,6 +53,8 @@ namespace MWRender
 
         float getPitch();
         void setPitch(float angle);
+
+        void moveCameraNode(Ogre::SceneNode *node);
 
     public:
 
@@ -69,11 +74,14 @@ namespace MWRender
 
         void toggleViewMode();
 
-        void toggleVanityMode(bool enable, bool force = false);
+        bool toggleVanityMode(bool enable, bool force = false);
+        void allowVanityMode(bool allow);
 
         void togglePreviewMode(bool enable);
 
         void update(float duration);
+
+        void setCameraDistance(float dist, bool adjust = false);
     };
 }
 

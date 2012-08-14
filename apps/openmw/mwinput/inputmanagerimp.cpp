@@ -406,19 +406,22 @@ private:
             else
                 player.setUpDown (0);
 
-            if (poller.isDown(A_TogglePOV)) {
-                if (mPreviewPOVDelay <= 0.5 &&
-                    (mPreviewPOVDelay += duration) > 0.5)
-                {
-                    // enable preview mode
+            if (mControlSwitch["playerviewswitch"]) {
+                if (poller.isDown(A_TogglePOV)) {
+                    if (mPreviewPOVDelay <= 0.5 &&
+                        (mPreviewPOVDelay += duration) > 0.5)
+                    {
+                        MWBase::Environment::get().getWorld()->togglePreviewMode(true);
+                    }
+                } else {
+                    if (mPreviewPOVDelay > 0.5) {
+                        //disable preview mode
+                        MWBase::Environment::get().getWorld()->togglePreviewMode(false);
+                    } else if (mPreviewPOVDelay > 0.f) {
+                        togglePOV();
+                    }
+                    mPreviewPOVDelay = 0.f;
                 }
-            } else {
-                if (mPreviewPOVDelay > 0.5) {
-                    //disable preview mode
-                } else if (mPreviewPOVDelay > 0.f) {
-                    togglePOV();
-                }
-                mPreviewPOVDelay = 0.f;
             }
         }
     }

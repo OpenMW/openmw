@@ -250,6 +250,9 @@ namespace MWBase
             virtual bool isUnderwater(const ESM::Cell &cell, const Ogre::Vector3 &pos) = 0;
 
             virtual void togglePOV() = 0;
+            virtual void togglePreviewMode(bool enable) = 0;
+            virtual bool toggleVanityMode(bool enable, bool force) = 0;
+            virtual void allowVanityMode(bool allow) = 0;
     };
 }
 

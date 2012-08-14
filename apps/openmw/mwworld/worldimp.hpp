@@ -280,6 +280,18 @@ namespace MWWorld
             virtual void togglePOV() {
                 mRendering->togglePOV();
             }
+
+            virtual void togglePreviewMode(bool enable) {
+                mRendering->togglePreviewMode(enable);
+            }
+
+            virtual bool toggleVanityMode(bool enable, bool force) {
+                return mRendering->toggleVanityMode(enable, force);
+            }
+
+            virtual void allowVanityMode(bool allow) {
+                mRendering->allowVanityMode(allow);
+            }
     };
 }
 

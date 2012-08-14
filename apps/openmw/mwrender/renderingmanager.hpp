@@ -60,6 +60,18 @@ class RenderingManager: private RenderingInterface, public Ogre::WindowEventList
         mPlayer->toggleViewMode();
     }
 
+    void togglePreviewMode(bool enable) {
+        mPlayer->togglePreviewMode(enable);
+    }
+
+    virtual bool toggleVanityMode(bool enable, bool force) {
+        return mPlayer->toggleVanityMode(enable, force);
+    }
+
+    virtual void allowVanityMode(bool allow) {
+        mPlayer->allowVanityMode(allow);
+    }
+
     void attachCameraTo(const MWWorld::Ptr &ptr);
 
     SkyManager* getSkyManager();
