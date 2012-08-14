@@ -33,6 +33,7 @@
 #include "localmap.hpp"
 #include "water.hpp"
 #include "compositors.hpp"
+#include "npcanimation.hpp"
 
 using namespace MWRender;
 using namespace Ogre;
@@ -828,6 +829,17 @@ void RenderingManager::getTriangleBatchCount(unsigned int &triangles, unsigned i
 void RenderingManager::attachCameraTo(const MWWorld::Ptr &ptr)
 {
     mPlayer->attachTo(ptr);
+}
+
+void RenderingManager::renderPlayer(const MWWorld::Ptr &ptr)
+{
+    MWRender::NpcAnimation *anim =
+        new MWRender::NpcAnimation(
+            ptr,
+            mRendering,
+            MWWorld::Class::get(ptr).getInventoryStore(ptr)
+        );
+    mPlayer->setAnimation(anim);
 }
 
 } // namespace

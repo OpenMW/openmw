@@ -1151,4 +1151,9 @@ namespace MWWorld
         }
         return pos.z < cell.water;
     }
+
+    void World::renderPlayer()
+    {
+        mRendering->renderPlayer(mPlayer->getPlayer());
+    }
 }

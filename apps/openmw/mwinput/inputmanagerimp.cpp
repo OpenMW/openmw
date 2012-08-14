@@ -411,6 +411,7 @@ private:
                     if (mPreviewPOVDelay <= 0.5 &&
                         (mPreviewPOVDelay += duration) > 0.5)
                     {
+                        mPreviewPOVDelay = 1.f;
                         MWBase::Environment::get().getWorld()->togglePreviewMode(true);
                     }
                 } else {

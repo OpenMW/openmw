@@ -10,6 +10,8 @@
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/refdata.hpp"
 
+#include "npcanimation.hpp"
+
 namespace MWRender
 {
     Player::Player (Ogre::Camera *camera, Ogre::SceneNode* node)
@@ -19,7 +21,7 @@ namespace MWRender
       mVanityNode(mPlayerNode->createChildSceneNode()),
       mFirstPersonView(true),
       mPreviewMode(false),
-      mHeight(40.f),
+      mHeight(128.f),
       mCameraDistance(400.f)
     {
         mVanity.enabled = false;
@@ -111,12 +113,16 @@ namespace MWRender
 
     void Player::update(float duration)
     {
+        Ogre::Vector3 pos = mPlayerNode->getPosition();
         if (!mVanity.enabled) {
             ++mUpdates;
             mTimeIdle += duration;
             if (mTimeIdle > 30.f) {
                 toggleVanityMode(true);
             }
+        }
+        if (mAnimation) {
+            mAnimation->runAnimation(duration);
         }
         if (mFirstPersonView && !mVanity.enabled) {
             return;
@@ -133,8 +139,10 @@ namespace MWRender
         mFirstPersonView = !mFirstPersonView;
         if (mFirstPersonView) {
             mCamera->setPosition(0.f, 0.f, 0.f);
+            mCameraNode->setPosition(0.f, 0.f, 128.f);
         } else {
             mCamera->setPosition(0.f, 0.f, mCameraDistance);
+            mCameraNode->setPosition(0.f, 0.f, 104.f);
         }
     }
     
@@ -278,5 +286,16 @@ namespace MWRender
                 mCameraDistance = v.z;
             }
         }
+    }
+
+    void Player::setHeight(float height)
+    {
+        mHeight = height;
+        mCameraNode->setPosition(0.f, 0.f, mHeight);
+    }
+
+    float Player::getHeight()
+    {
+        return mHeight;
     }
 }

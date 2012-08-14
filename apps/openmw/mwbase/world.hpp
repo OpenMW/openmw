@@ -253,6 +253,8 @@ namespace MWBase
             virtual void togglePreviewMode(bool enable) = 0;
             virtual bool toggleVanityMode(bool enable, bool force) = 0;
             virtual void allowVanityMode(bool allow) = 0;
+
+            virtual void renderPlayer() = 0;
     };
 }
 

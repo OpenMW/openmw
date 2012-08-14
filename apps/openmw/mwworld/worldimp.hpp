@@ -292,6 +292,8 @@ namespace MWWorld
             virtual void allowVanityMode(bool allow) {
                 mRendering->allowVanityMode(allow);
             }
+
+            virtual void renderPlayer();
     };
 }
 

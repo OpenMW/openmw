@@ -17,6 +17,7 @@ namespace MWWorld
 
 namespace MWRender
 {
+    class NpcAnimation;
     /// \brief Player character rendering and camera control
     class Player
     {
@@ -29,6 +30,8 @@ namespace MWRender
         Ogre::SceneNode *mPlayerNode;
         Ogre::SceneNode *mCameraNode;
         Ogre::SceneNode *mVanityNode;
+
+        NpcAnimation *mAnimation;
 
         bool mFirstPersonView;
         bool mPreviewMode;
@@ -82,6 +85,13 @@ namespace MWRender
         void update(float duration);
 
         void setCameraDistance(float dist, bool adjust = false);
+
+        void setAnimation(MWRender::NpcAnimation *anim) {
+            mAnimation = anim;
+        }
+
+        void setHeight(float height);
+        float getHeight();
     };
 }
 

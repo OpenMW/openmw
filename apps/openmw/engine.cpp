@@ -352,6 +352,8 @@ void OMW::Engine::go()
     pos.rot[0] = pos.rot[1] = pos.rot[2] = 0;
     pos.pos[2] = 0;
 
+    mEnvironment.getWorld()->renderPlayer();
+
     if (const ESM::Cell *exterior = MWBase::Environment::get().getWorld()->getExterior (mCellName))
     {
         MWBase::Environment::get().getWorld()->indexToPosition (exterior->data.gridX, exterior->data.gridY,
