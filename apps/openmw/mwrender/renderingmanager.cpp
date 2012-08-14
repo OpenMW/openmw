@@ -131,9 +131,9 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
     SceneNode *rt = mRendering.getScene()->getRootSceneNode();
     mMwRoot = rt->createChildSceneNode();
     mMwRoot->pitch(Degree(-90));
+
     mObjects.setMwRoot(mMwRoot);
     mActors.setMwRoot(mMwRoot);
-
 
     Ogre::SceneNode *playerNode = mMwRoot->createChildSceneNode ("player");
     mPlayer = new MWRender::Player (mRendering.getCamera(), playerNode);

@@ -31,6 +31,8 @@ namespace MWRender
         mCameraNode->attachObject(mCamera);
         mCameraNode->setPosition(0.f, 0.f, mHeight);
 
+        mPlayerNode->setVisible(false);
+
         mPreviewCam.yaw = 0.f;
         mPreviewCam.offset = 600.f;
     }
@@ -140,9 +142,11 @@ namespace MWRender
         if (mFirstPersonView) {
             mCamera->setPosition(0.f, 0.f, 0.f);
             mCameraNode->setPosition(0.f, 0.f, 128.f);
+            mPlayerNode->setVisible(false);
         } else {
             mCamera->setPosition(0.f, 0.f, mCameraDistance);
             mCameraNode->setPosition(0.f, 0.f, 104.f);
+            mPlayerNode->setVisible(true);
         }
     }
     
@@ -169,6 +173,7 @@ namespace MWRender
         float offset = 300.f;
         Ogre::Vector3 rot(0.f, 0.f, 0.f);
         if (mVanity.enabled) {
+            mPlayerNode->setVisible(true);
             rot.x = Ogre::Degree(-30.f).valueRadians();
             mMainCam.offset = mCamera->getPosition().z;
 
@@ -178,6 +183,9 @@ namespace MWRender
             offset = mMainCam.offset;
 
             moveCameraNode(mPlayerNode);
+        }
+        if (offset == 0.f) {
+            mPlayerNode->setVisible(false);
         }
         rot.z = getYaw();
         mCamera->setPosition(0.f, 0.f, offset);
@@ -194,6 +202,7 @@ namespace MWRender
         mPreviewMode = enable;
         float offset = mCamera->getPosition().z;
         if (mPreviewMode) {
+            mPlayerNode->setVisible(true);
             mMainCam.offset = offset;
             offset = mPreviewCam.offset;
 
@@ -204,7 +213,10 @@ namespace MWRender
 
             moveCameraNode(mPlayerNode);
         }
-        mCamera->setPosition(0.f, 0.f, mPreviewCam.offset);
+        if (offset == 0.f) {
+            mPlayerNode->setVisible(false);
+        }
+        mCamera->setPosition(0.f, 0.f, offset);
         rotateCamera(Ogre::Vector3(getPitch(), 0.f, getYaw()), false);
     }
 
