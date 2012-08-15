@@ -657,10 +657,11 @@ static void PM_Accelerate( Ogre::Vector3& wishdir, float wishspeed, float accel 
 //	int			i;
 	float		addspeed, accelspeed, currentspeed;
 
+    
 	// currentspeed = pm->ps->velocity dot wishdir
 	//currentspeed = DotProduct (pm->ps->velocity, wishdir);
 	currentspeed = pm->ps.velocity.dotProduct(wishdir);
-
+    
 	addspeed = wishspeed - currentspeed;
 	if (addspeed <= 0) 
 		return;
@@ -675,6 +676,8 @@ static void PM_Accelerate( Ogre::Vector3& wishdir, float wishspeed, float accel 
 	//for (i=0 ; i<3 ; i++)
 		//pm->ps->velocity[i] += accelspeed * wishdir[i];	
 	pm->ps.velocity += (wishdir * accelspeed);
+    //pm->ps.velocity = wishdir * wishspeed;  //New, for instant acceleration
+    
 }
 
 static bool PM_CheckJump(void)

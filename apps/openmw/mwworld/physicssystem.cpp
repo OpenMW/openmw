@@ -194,7 +194,7 @@ namespace MWWorld
 
 
             //playerphysics->ps.snappingImplemented = false;
-            
+            //playerphysics->ps.speed = 240;
 
             playerphysics->ps.viewangles.x = pitchQuat.getPitch().valueDegrees();
            

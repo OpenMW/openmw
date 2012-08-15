@@ -102,7 +102,7 @@ private:
     std::string resourceName;
     std::string resourceGroup;
 
-    Ogre::Vector3 boxTranslation;
+    
 
     BulletShape* cShape;//current shape
     btTriangleMesh *mTriMesh;

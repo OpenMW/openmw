@@ -336,9 +336,10 @@ namespace Physic
         btTransform tr;
         btBoxShape* box = dynamic_cast<btBoxShape*>(body->getCollisionShape());
         if(box != NULL){
-            Ogre::Vector3 transrot = rotation * (shape->boxTranslation * scale);
+            Ogre::Vector3 transrot = rotation * shape->boxRotation * (shape->boxTranslation * scale);
             Ogre::Vector3 newPosition = transrot + position;
             tr.setOrigin(btVector3(newPosition.x, newPosition.y, newPosition.z));
+            rotation = rotation * shape->boxRotation;
         }
         else
             tr.setOrigin(btVector3(position.x,position.y,position.z));

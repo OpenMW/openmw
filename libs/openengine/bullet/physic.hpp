@@ -145,10 +145,19 @@ namespace Physic
         /**
          * Create a RigidBody.It does not add it to the simulation, but it does add it to the rigidBody Map,
          * so you can get it with the getRigidBody function.
+
+           After created, the body is set to the correct rotation, position, and scale
          */
         RigidBody* createAndAdjustRigidBody(std::string mesh,std::string name,float scale, Ogre::Vector3 position, Ogre::Quaternion rotation);
 
+        /**
+         * Adjusts a rigid body to the right position and rotation
+         */
+
         void adjustRigidBody(BulletShapePtr shape, RigidBody* body, float scale, Ogre::Vector3 position, Ogre::Quaternion rotation);
+        /**
+         Mainly used to (but not limited to) adjust rigid bodies based on box shapes to the right position and rotation.
+         */
         void boxAdjustExternal(std::string mesh, RigidBody* body, float scale, Ogre::Vector3 position, Ogre::Quaternion rotation);
         /**
          * Add a HeightField to the simulation

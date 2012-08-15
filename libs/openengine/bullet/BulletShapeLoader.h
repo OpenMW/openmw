@@ -32,6 +32,7 @@ public:
 
     btCollisionShape* Shape;
     Ogre::Vector3 boxTranslation;
+    Ogre::Quaternion boxRotation;
     //this flag indicate if the shape is used for collision or if it's for raycasting only.
     bool collide;
 };
