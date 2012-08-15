@@ -207,6 +207,7 @@ void Water::preRenderTargetUpdate(const RenderTargetEvent& evt)
 {
     if (evt.source == mReflectionTarget)
     {
+        mCamera->getParentSceneNode ()->needUpdate ();
         mReflectionCamera->setOrientation(mCamera->getDerivedOrientation());
         mReflectionCamera->setPosition(mCamera->getDerivedPosition());
         mReflectionCamera->setNearClipDistance(mCamera->getNearClipDistance());
@@ -215,11 +216,9 @@ void Water::preRenderTargetUpdate(const RenderTargetEvent& evt)
         mReflectionCamera->setFOVy(mCamera->getFOVy());
         mReflectionRenderActive = true;
 
-        /// \todo the reflection render (and probably all renderingmanager-updates) lag behind 1 camera frame for some reason
         Vector3 pos = mCamera->getRealPosition();
         pos.y = mTop*2 - pos.y;
         mSky->setSkyPosition(pos);
-        mSky->scaleSky(mCamera->getFarClipDistance() / 50.f);
         mReflectionCamera->enableReflection(mWaterPlane);
     }
 }
@@ -229,7 +228,6 @@ void Water::postRenderTargetUpdate(const RenderTargetEvent& evt)
     if (evt.source == mReflectionTarget)
     {
         mSky->resetSkyPosition();
-        mSky->scaleSky(1);
         mReflectionCamera->disableReflection();
         mReflectionCamera->disableCustomNearClipPlane();
         mReflectionRenderActive = false;

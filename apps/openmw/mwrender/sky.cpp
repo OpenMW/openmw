@@ -280,7 +280,7 @@ SkyManager::SkyManager (SceneNode* pMwRoot, Camera* pCamera)
     , mMoonRed(false)
 {
     mSceneMgr = pMwRoot->getCreator();
-    mRootNode = mCamera->getParentSceneNode()->createChildSceneNode();
+    mRootNode = mSceneMgr->getRootSceneNode()->createChildSceneNode();
     mRootNode->pitch(Degree(-90)); // convert MW to ogre coordinates
     mRootNode->setInheritOrientation(false);
 }
@@ -405,7 +405,8 @@ void SkyManager::update(float duration)
 {
     if (!mEnabled) return;
 
-    mRootNode->setPosition(mCamera->getPosition());
+    mCamera->getParentSceneNode ()->needUpdate ();
+    mRootNode->setPosition(mCamera->getDerivedPosition());
 
     // UV Scroll the clouds
     mCloudAnimationTimer += duration * mCloudSpeed * (MWBase::Environment::get().getWorld()->getTimeScaleFactor()/30.f);
@@ -668,12 +669,13 @@ Ogre::SceneNode* SkyManager::getSunNode()
 
 void SkyManager::setSkyPosition(const Ogre::Vector3& position)
 {
-    mRootNode->_setDerivedPosition(position);
+    mRootNode->setPosition(position);
 }
 
 void SkyManager::resetSkyPosition()
 {
-    mRootNode->setPosition(0,0,0);
+    mCamera->getParentSceneNode ()->needUpdate ();
+    mRootNode->setPosition(mCamera->getDerivedPosition());
 }
 
 void SkyManager::scaleSky(float scale)
