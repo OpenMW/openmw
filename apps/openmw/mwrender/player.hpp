@@ -86,9 +86,7 @@ namespace MWRender
 
         void setCameraDistance(float dist, bool adjust = false);
 
-        void setAnimation(MWRender::NpcAnimation *anim) {
-            mAnimation = anim;
-        }
+        void setAnimation(MWRender::NpcAnimation *anim);
 
         void setHeight(float height);
         float getHeight();

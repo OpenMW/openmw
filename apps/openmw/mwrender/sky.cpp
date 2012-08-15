@@ -405,6 +405,8 @@ void SkyManager::update(float duration)
 {
     if (!mEnabled) return;
 
+    mRootNode->setPosition(mCamera->getPosition());
+
     // UV Scroll the clouds
     mCloudAnimationTimer += duration * mCloudSpeed * (MWBase::Environment::get().getWorld()->getTimeScaleFactor()/30.f);
     sh::Factory::getInstance().setSharedParameter ("cloudAnimationTimer",
