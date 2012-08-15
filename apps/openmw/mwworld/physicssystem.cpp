@@ -286,10 +286,15 @@ namespace MWWorld
         {
             // TODO very dirty hack to avoid crash during setup -> needs cleaning up to allow
             // start positions others than 0, 0, 0
-            btTransform tr = body->getWorldTransform();
             Ogre::Vector3 position = node->getPosition();
-            tr.setOrigin(btVector3(position.x,position.y,position.z));
-            body->setWorldTransform(tr);
+            
+            if(dynamic_cast<btBoxShape*>(body->getCollisionShape()) == NULL){
+                btTransform tr = body->getWorldTransform();
+                tr.setOrigin(btVector3(position.x,position.y,position.z));
+                body->setWorldTransform(tr);
+            }
+            else
+                mEngine->boxAdjustExternal(handleToMesh[handle], body, node->getScale().x, position, node->getOrientation());
         }
         if (OEngine::Physic::PhysicActor* act = mEngine->getCharacter(handle))
         {
@@ -315,7 +320,10 @@ namespace MWWorld
         if (OEngine::Physic::RigidBody* body = mEngine->getRigidBody(handle))
         {
             Ogre::Quaternion rotation = node->getOrientation();
-            body->getWorldTransform().setRotation(btQuaternion(rotation.x, rotation.y, rotation.z, rotation.w));
+            if(dynamic_cast<btBoxShape*>(body->getCollisionShape()) == NULL)
+                body->getWorldTransform().setRotation(btQuaternion(rotation.x, rotation.y, rotation.z, rotation.w));
+            else
+                mEngine->boxAdjustExternal(handleToMesh[handle], body, node->getScale().x, node->getPosition(), rotation);
         }
     }
 

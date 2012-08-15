@@ -149,7 +149,7 @@ namespace Physic
         RigidBody* createAndAdjustRigidBody(std::string mesh,std::string name,float scale, Ogre::Vector3 position, Ogre::Quaternion rotation);
 
         void adjustRigidBody(BulletShapePtr shape, RigidBody* body, float scale, Ogre::Vector3 position, Ogre::Quaternion rotation);
-
+        void boxAdjustExternal(std::string mesh, RigidBody* body, float scale, Ogre::Vector3 position, Ogre::Quaternion rotation);
         /**
          * Add a HeightField to the simulation
          */

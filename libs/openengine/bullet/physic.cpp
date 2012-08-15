@@ -345,6 +345,18 @@ namespace Physic
         tr.setRotation(btQuaternion(rotation.x,rotation.y,rotation.z,rotation.w));
         body->setWorldTransform(tr);
     }
+    void PhysicEngine::boxAdjustExternal(std::string mesh, RigidBody* body, float scale, Ogre::Vector3 position, Ogre::Quaternion rotation){
+        std::string sid = (boost::format("%07.3f") % scale).str();
+        std::string outputstring = mesh + sid;
+        //std::cout << "The string" << outputstring << "\n";
+
+        //get the shape from the .nif
+        mShapeLoader->load(outputstring,"General");
+        BulletShapeManager::getSingletonPtr()->load(outputstring,"General");
+        BulletShapePtr shape = BulletShapeManager::getSingleton().getByName(outputstring,"General");
+
+        adjustRigidBody(shape, body, scale, position, rotation);
+    }
 
     RigidBody* PhysicEngine::createAndAdjustRigidBody(std::string mesh,std::string name,float scale, Ogre::Vector3 position, Ogre::Quaternion rotation)
     {
