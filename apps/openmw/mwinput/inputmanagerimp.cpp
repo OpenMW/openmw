@@ -242,7 +242,8 @@ private:
         player(_player),
         windows(_windows),
         mEngine (engine),
-        mDragDrop(false)
+        mDragDrop(false),
+        mPreviewPOVDelay(0.f)
     {
       using namespace OEngine::Input;
       using namespace OEngine::Render;

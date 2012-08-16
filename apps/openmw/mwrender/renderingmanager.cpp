@@ -41,7 +41,7 @@ using namespace Ogre;
 namespace MWRender {
 
 RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const boost::filesystem::path& resDir, OEngine::Physic::PhysicEngine* engine)
-    :mRendering(_rend), mObjects(mRendering), mActors(mRendering), mAmbientMode(0), mSunEnabled(0)
+    :mRendering(_rend), mObjects(mRendering), mActors(mRendering), mAmbientMode(0), mSunEnabled(0), mPhysicsEngine(engine)
 {
     // select best shader mode
     bool openGL = (Ogre::Root::getSingleton ().getRenderSystem ()->getName().find("OpenGL") != std::string::npos);
@@ -296,7 +296,22 @@ RenderingManager::moveObjectToCell(
     child->setPosition(pos);
 }
 
-void RenderingManager::update (float duration){
+void RenderingManager::update (float duration)
+{
+    Ogre::Vector3 orig, dest;
+    mPlayer->setCameraDistance();
+    if (!mPlayer->getPosition(orig, dest)) {
+        orig.z += mPlayer->getHeight() * mMwRoot->getScale().z;
+
+        btVector3 btOrig(orig.x, orig.y, orig.z);
+        btVector3 btDest(dest.x, dest.y, dest.z);
+        std::pair<std::string, float> test =
+            mPhysicsEngine->rayTest(btOrig, btDest);
+        if (!test.first.empty()) {
+            mPlayer->setCameraDistance(test.second * orig.distance(dest), false, false);
+        }
+    }
+    mPlayer->update(duration);
 
     mActors.update (duration);
     mObjects.update (duration);
@@ -339,7 +354,6 @@ void RenderingManager::update (float duration){
         );
         mWater->update(duration);
     }
-    mPlayer->update(duration);
 }
 
 void RenderingManager::waterAdded (MWWorld::Ptr::CellStore *store){

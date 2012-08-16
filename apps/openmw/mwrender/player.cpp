@@ -22,7 +22,8 @@ namespace MWRender
       mFirstPersonView(true),
       mPreviewMode(false),
       mHeight(128.f),
-      mCameraDistance(400.f)
+      mCameraDistance(300.f),
+      mDistanceAdjusted(false)
     {
         mVanity.enabled = false;
         mVanity.allowed = true;
@@ -32,7 +33,7 @@ namespace MWRender
         mCameraNode->setPosition(0.f, 0.f, mHeight);
 
         mPreviewCam.yaw = 0.f;
-        mPreviewCam.offset = 600.f;
+        mPreviewCam.offset = 400.f;
     }
     
     bool Player::rotate(const Ogre::Vector3 &rot, bool adjust)
@@ -167,7 +168,7 @@ namespace MWRender
         mVanity.enabled = enable;
         mVanity.forced = force && enable;
 
-        float offset = 300.f;
+        float offset = mPreviewCam.offset;
         Ogre::Vector3 rot(0.f, 0.f, 0.f);
         if (mVanity.enabled) {
             mPlayerNode->setVisible(true, false);
@@ -267,30 +268,43 @@ namespace MWRender
         node->addChild(mCameraNode);
     }
 
-    void Player::setCameraDistance(float dist, bool adjust)
+    void Player::setCameraDistance(float dist, bool adjust, bool override)
     {
-        /// \note non-Morrowind feature: allow to change camera distance
-        /// int 3d-person mode
-        /// \todo review and simplify condition if possible
-        if (mPreviewMode ||
-            mVanity.forced ||
-            (!mVanity.enabled && !mFirstPersonView))
-        {
-            Ogre::Vector3 v(0.f, 0.f, dist);
-            if (adjust) {
-                v += mCamera->getPosition();
-            }
-            if (v.z > 800.f) {
-                v.z = 800.f;
-            } else if (v.z < 100.f) {
-                v.z = 100.f;
-            }
-            mCamera->setPosition(v);
+        if (mFirstPersonView && !mPreviewMode && !mVanity.enabled) {
+            return;
+        }
+        Ogre::Vector3 v(0.f, 0.f, dist);
+        if (adjust) {
+            v += mCamera->getPosition();
+        }
+        if (v.z > 800.f) {
+            v.z = 800.f;
+        } else if (v.z < 10.f) {
+            v.z = 10.f;
+        }
+        mCamera->setPosition(v);
 
-            if (!mVanity.enabled && !mFirstPersonView) {
+        if (override) {
+            if (mVanity.enabled || mPreviewMode) {
+                mPreviewCam.offset = v.z;
+            } else if (!mFirstPersonView) {
                 mCameraDistance = v.z;
             }
+        } else {
+            mDistanceAdjusted = true;
         }
+    }
+
+    void Player::setCameraDistance()
+    {
+        if (mDistanceAdjusted) {
+            if (mVanity.enabled || mPreviewMode) {
+                mCamera->setPosition(0, 0, mPreviewCam.offset);
+            } else if (!mFirstPersonView) {
+                mCamera->setPosition(0, 0, mCameraDistance);
+            }
+        }
+        mDistanceAdjusted = false;
     }
 
     void Player::setAnimation(NpcAnimation *anim)
@@ -307,6 +321,16 @@ namespace MWRender
 
     float Player::getHeight()
     {
-        return mHeight;
+        return mHeight * mPlayerNode->getScale().z;
+    }
+
+    bool Player::getPosition(Ogre::Vector3 &player, Ogre::Vector3 &camera)
+    {
+        float xch;
+        camera = mCamera->getRealPosition();
+        xch = camera.z, camera.z = camera.y, camera.y = -xch;
+        player = mPlayerNode->getPosition();
+
+        return mFirstPersonView && !mVanity.enabled && !mPreviewMode;
     }
 }

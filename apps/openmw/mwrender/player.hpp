@@ -43,6 +43,8 @@ namespace MWRender
         float mHeight, mCameraDistance;
         CamData mMainCam, mPreviewCam;
 
+        bool mDistanceAdjusted;
+
         float mTimeIdle;
         int mUpdates;
 
@@ -84,12 +86,23 @@ namespace MWRender
 
         void update(float duration);
 
-        void setCameraDistance(float dist, bool adjust = false);
+        /// Set camera distance for current mode. Don't work on 1st person view.
+        /// \param adjust Indicates should distance be adjusted or set.
+        /// \param override If true new distance will be used as default.
+        /// If false, default distance can be restored with setCameraDistance().
+        void setCameraDistance(float dist, bool adjust = false, bool override = true);
+
+        /// Restore default camera distance for current mode.
+        void setCameraDistance();
 
         void setAnimation(MWRender::NpcAnimation *anim);
 
         void setHeight(float height);
         float getHeight();
+
+        /// Stores player and camera world positions in passed arguments
+        /// \return true if camera at the eye-place
+        bool getPosition(Ogre::Vector3 &player, Ogre::Vector3 &camera);
     };
 }
 
