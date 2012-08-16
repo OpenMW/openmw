@@ -5,7 +5,8 @@
 
 #include <components/esm_store/store.hpp>
 
-#include "../mwworld/world.hpp"
+#include "../mwbase/environment.hpp"
+#include "../mwbase/world.hpp"
 
 namespace MWDialogue
 {
@@ -27,16 +28,14 @@ namespace MWDialogue
         throw std::runtime_error ("unknown info ID " + mInfoId + " for topic " + mTopic);
     }
 
-    JournalEntry JournalEntry::makeFromQuest (const std::string& topic, int index,
-        const MWWorld::World& world)
+    JournalEntry JournalEntry::makeFromQuest (const std::string& topic, int index)
     {
-        return JournalEntry (topic, idFromIndex (topic, index, world));
+        return JournalEntry (topic, idFromIndex (topic, index));
     }
 
-    std::string JournalEntry::idFromIndex (const std::string& topic, int index,
-        const MWWorld::World& world)
+    std::string JournalEntry::idFromIndex (const std::string& topic, int index)
     {
-        const ESM::Dialogue *dialogue = world.getStore().dialogs.find (topic);
+        const ESM::Dialogue *dialogue = MWBase::Environment::get().getWorld()->getStore().dialogs.find (topic);
 
         for (std::vector<ESM::DialInfo>::const_iterator iter (dialogue->mInfo.begin());
             iter!=dialogue->mInfo.end(); ++iter)
@@ -57,13 +56,12 @@ namespace MWDialogue
     : JournalEntry (topic, infoId), mDay (day), mMonth (month), mDayOfMonth (dayOfMonth)
     {}
 
-    StampedJournalEntry StampedJournalEntry::makeFromQuest (const std::string& topic, int index,
-        const MWWorld::World& world)
+    StampedJournalEntry StampedJournalEntry::makeFromQuest (const std::string& topic, int index)
     {
-        int day = world.getGlobalVariable ("dayspassed").mLong;
-        int month = world.getGlobalVariable ("day").mLong;
-        int dayOfMonth = world.getGlobalVariable ("month").mLong;
+        int day = MWBase::Environment::get().getWorld()->getGlobalVariable ("dayspassed").mLong;
+        int month = MWBase::Environment::get().getWorld()->getGlobalVariable ("day").mLong;
+        int dayOfMonth = MWBase::Environment::get().getWorld()->getGlobalVariable ("month").mLong;
 
-        return StampedJournalEntry (topic, idFromIndex (topic, index, world), day, month, dayOfMonth);
+        return StampedJournalEntry (topic, idFromIndex (topic, index), day, month, dayOfMonth);
     }
 }

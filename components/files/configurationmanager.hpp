@@ -8,7 +8,6 @@
 #endif
 
 #include <boost/program_options.hpp>
-#include <boost/filesystem.hpp>
 
 #include <components/files/fixedpath.hpp>
 #include <components/files/collections.hpp>
@@ -41,7 +40,6 @@ struct ConfigurationManager
     const boost::filesystem::path& getLocalDataPath() const;
     const boost::filesystem::path& getInstallPath() const;
 
-    const boost::filesystem::path& getPluginsConfigPath() const;
     const boost::filesystem::path& getLogPath() const;
 
     private:
@@ -58,7 +56,6 @@ struct ConfigurationManager
 
         FixedPathType mFixedPath;
 
-        boost::filesystem::path mPluginsCfgPath;
         boost::filesystem::path mLogPath;
 
         TokensMappingContainer mTokensMapping;

@@ -15,42 +15,43 @@ source_group(game FILES ${GAME} ${GAME_HEADER})
 
 add_openmw_dir (mwrender
     renderingmanager debugging sky player animation npcanimation creatureanimation actors objects
-    renderinginterface localmap occlusionquery terrain terrainmaterial water shadows shaderhelper
+    renderinginterface localmap occlusionquery terrain terrainmaterial water shadows
     compositors
     )
 
 add_openmw_dir (mwinput
-    inputmanager
+    inputmanagerimp
+    mouselookevent
     )
 
 add_openmw_dir (mwgui
-    text_input widgets race class birth review window_manager console dialogue
+    text_input widgets race class birth review windowmanagerimp console dialogue
     dialogue_history window_base stats_window messagebox journalwindow charactercreation
     map_window window_pinnable_base cursorreplace tooltips scrollwindow bookwindow list
     formatting inventorywindow container hud countdialog tradewindow settingswindow
-    confirmationdialog alchemywindow referenceinterface spellwindow
+    confirmationdialog alchemywindow referenceinterface spellwindow mainmenu
     )
 
 add_openmw_dir (mwdialogue
-    dialoguemanager journal journalentry quest topic
+    dialoguemanagerimp journalimp journalentry quest topic
     )
 
 add_openmw_dir (mwscript
-    locals scriptmanager compilercontext interpretercontext cellextensions miscextensions
+    locals scriptmanagerimp compilercontext interpretercontext cellextensions miscextensions
     guiextensions soundextensions skyextensions statsextensions containerextensions
     aiextensions controlextensions extensions globalscripts ref dialogueextensions
-    animationextensions
+    animationextensions transformationextensions consoleextensions userextensions
     )
 
 add_openmw_dir (mwsound
-    soundmanager openal_output audiere_decoder mpgsnd_decoder ffmpeg_decoder
+    soundmanagerimp openal_output audiere_decoder mpgsnd_decoder ffmpeg_decoder
     )
 
 add_openmw_dir (mwworld
-    refdata world physicssystem scene globals class action nullaction actionteleport
+    refdata worldimp physicssystem scene globals class action nullaction actionteleport
     containerstore actiontalk actiontake manualref player cellfunctors
     cells localscripts customdata weather inventorystore ptr actionopen actionread
-    actionequip timestamp actionalchemy
+    actionequip timestamp actionalchemy cellstore actionapply
     )
 
 add_openmw_dir (mwclass
@@ -59,12 +60,13 @@ add_openmw_dir (mwclass
     )
 
 add_openmw_dir (mwmechanics
-    mechanicsmanager stat creaturestats magiceffects movement actors drawstate spells
-    activespells
+    mechanicsmanagerimp stat creaturestats magiceffects movement actors drawstate spells
+    activespells npcstats
     )
 
 add_openmw_dir (mwbase
-    environment
+    environment world scriptmanager dialoguemanager journal soundmanager mechanicsmanager
+    inputmanager windowmanager
     )
 
 # Main executable
@@ -79,7 +81,6 @@ ENDIF(WIN32)
 ENDIF(OGRE_STATIC)
 add_executable(openmw
     ${OPENMW_LIBS} ${OPENMW_LIBS_HEADER}
-    ${COMPONENT_FILES}
     ${OPENMW_FILES}
     ${GAME} ${GAME_HEADER}
     ${APPLE_BUNDLE_RESOURCES}
@@ -101,6 +102,8 @@ target_link_libraries(openmw
     ${BULLET_LIBRARIES}
     ${MYGUI_LIBRARIES}
     ${MYGUI_PLATFORM_LIBRARIES}
+    "shiny"
+    "shiny.OgrePlatform"
     components
 )
 

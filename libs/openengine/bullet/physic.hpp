@@ -7,6 +7,7 @@
 #include <list>
 #include <map>
 #include "BulletShapeLoader.h"
+#include "BulletCollision/CollisionShapes/btScaledBvhTriangleMeshShape.h"
 
 class btRigidBody;
 class btBroadphaseInterface;
@@ -219,6 +220,8 @@ namespace Physic
         void setDebugRenderingMode(int mode);
 
         bool toggleDebugRendering();
+
+        void getObjectAABB(const std::string &mesh, float scale, btVector3 &min, btVector3 &max);
 
         /**
          * Return the closest object hit by a ray. If there are no objects, it will return ("",-1).

@@ -5,19 +5,18 @@
 
 /*
   This file contains the dialog for choosing a birth sign.
-  Layout is defined by resources/mygui/openmw_chargen_race_layout.xml.
+  Layout is defined by resources/mygui/openmw_chargen_race.layout.
  */
 
 namespace MWGui
 {
+    /// \todo remove
     using namespace MyGUI;
-
-    class WindowManager;
 
     class BirthDialog : public WindowBase
     {
     public:
-        BirthDialog(WindowManager& parWindowManager);
+        BirthDialog(MWBase::WindowManager& parWindowManager);
 
         enum Gender
         {
@@ -25,7 +24,7 @@ namespace MWGui
             GM_Female
         };
 
-        const std::string &getBirthId() const { return currentBirthId; }
+        const std::string &getBirthId() const { return mCurrentBirthId; }
         void setBirthId(const std::string &raceId);
 
         void setNextButtonShow(bool shown);
@@ -49,12 +48,12 @@ namespace MWGui
         void updateBirths();
         void updateSpells();
 
-        MyGUI::ListBox*    birthList;
-        MyGUI::WidgetPtr  spellArea;
-        MyGUI::ImageBox* birthImage;
-        std::vector<MyGUI::WidgetPtr> spellItems;
+        MyGUI::ListBox* mBirthList;
+        MyGUI::WidgetPtr  mSpellArea;
+        MyGUI::ImageBox* mBirthImage;
+        std::vector<MyGUI::WidgetPtr> mSpellItems;
 
-        std::string currentBirthId;
+        std::string mCurrentBirthId;
     };
 }
 #endif

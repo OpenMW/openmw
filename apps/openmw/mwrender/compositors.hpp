@@ -44,6 +44,10 @@ namespace MWRender
          */
         void addCompositor (const std::string& name, const int priority);
 
+        bool anyCompositorEnabled();
+
+        void countTrianglesBatches(unsigned int &triangles, unsigned int &batches);
+
         void removeAll ();
 
     protected:

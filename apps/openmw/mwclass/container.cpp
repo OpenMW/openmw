@@ -3,23 +3,23 @@
 
 #include <components/esm/loadcont.hpp>
 
-#include <components/esm_store/cell_store.hpp>
-
 #include "../mwbase/environment.hpp"
+#include "../mwbase/world.hpp"
+#include "../mwbase/soundmanager.hpp"
+#include "../mwbase/windowmanager.hpp"
 
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/nullaction.hpp"
 #include "../mwworld/containerstore.hpp"
 #include "../mwworld/customdata.hpp"
-#include "../mwworld/world.hpp"
+#include "../mwworld/cellstore.hpp"
+#include "../mwworld/actionopen.hpp"
+#include "../mwworld/physicssystem.hpp"
 
-#include "../mwgui/window_manager.hpp"
 #include "../mwgui/tooltips.hpp"
 
 #include "../mwrender/objects.hpp"
-#include "../mwworld/actionopen.hpp"
-
-#include "../mwsound/soundmanager.hpp"
+#include "../mwrender/renderinginterface.hpp"
 
 namespace
 {
@@ -53,32 +53,33 @@ namespace MWClass
 
     void Container::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const
     {
-        ESMS::LiveCellRef<ESM::Container, MWWorld::RefData> *ref =
-            ptr.get<ESM::Container>();
-
-        assert (ref->base != NULL);
-        const std::string &model = ref->base->model;
-
-        if (!model.empty())
-        {
+        const std::string model = getModel(ptr);
+        if (!model.empty()) {
             MWRender::Objects& objects = renderingInterface.getObjects();
             objects.insertBegin(ptr, ptr.getRefData().isEnabled(), false);
-            objects.insertMesh(ptr, "meshes\\" + model);
+            objects.insertMesh(ptr, model);
         }
     }
 
     void Container::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics) const
     {
-        ESMS::LiveCellRef<ESM::Container, MWWorld::RefData> *ref =
-            ptr.get<ESM::Container>();
+        const std::string model = getModel(ptr);
+        if(!model.empty()) {
+            physics.insertObjectPhysics(ptr, model);
+        }
+    }
 
+    std::string Container::getModel(const MWWorld::Ptr &ptr) const
+    {
+        MWWorld::LiveCellRef<ESM::Container> *ref =
+            ptr.get<ESM::Container>();
+        assert(ref->base != NULL);
 
         const std::string &model = ref->base->model;
-        assert (ref->base != NULL);
-        if(!model.empty()){
-            physics.insertObjectPhysics(ptr, "meshes\\" + model);
+        if (!model.empty()) {
+            return "meshes\\" + model;
         }
-
+        return "";
     }
 
     boost::shared_ptr<MWWorld::Action> Container::activate (const MWWorld::Ptr& ptr,
@@ -117,7 +118,7 @@ namespace MWClass
 
     std::string Container::getName (const MWWorld::Ptr& ptr) const
     {
-        ESMS::LiveCellRef<ESM::Container, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Container> *ref =
             ptr.get<ESM::Container>();
 
         return ref->base->name;
@@ -133,7 +134,7 @@ namespace MWClass
 
     std::string Container::getScript (const MWWorld::Ptr& ptr) const
     {
-        ESMS::LiveCellRef<ESM::Container, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Container> *ref =
             ptr.get<ESM::Container>();
 
         return ref->base->script;
@@ -148,7 +149,7 @@ namespace MWClass
 
     bool Container::hasToolTip (const MWWorld::Ptr& ptr) const
     {
-        ESMS::LiveCellRef<ESM::Container, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Container> *ref =
             ptr.get<ESM::Container>();
 
         return (ref->base->name != "");
@@ -156,7 +157,7 @@ namespace MWClass
 
     MWGui::ToolTipInfo Container::getToolTipInfo (const MWWorld::Ptr& ptr) const
     {
-        ESMS::LiveCellRef<ESM::Container, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Container> *ref =
             ptr.get<ESM::Container>();
 
         MWGui::ToolTipInfo info;
@@ -182,7 +183,7 @@ namespace MWClass
 
     float Container::getCapacity (const MWWorld::Ptr& ptr) const
     {
-        ESMS::LiveCellRef<ESM::Container, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Container> *ref =
             ptr.get<ESM::Container>();
 
         return ref->base->weight;
@@ -204,5 +205,14 @@ namespace MWClass
     void Container::unlock (const MWWorld::Ptr& ptr) const
     {
         ptr.getCellRef().lockLevel = 0;
+    }
+
+    MWWorld::Ptr
+    Container::copyToCellImpl(const MWWorld::Ptr &ptr, MWWorld::CellStore &cell) const
+    {
+        MWWorld::LiveCellRef<ESM::Container> *ref =
+            ptr.get<ESM::Container>();
+
+        return MWWorld::Ptr(&cell.containers.insert(*ref), &cell);
     }
 }

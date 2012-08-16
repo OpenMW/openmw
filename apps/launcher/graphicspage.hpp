@@ -30,6 +30,7 @@ class GraphicsPage : public QWidget
 public:
     GraphicsPage(Files::ConfigurationManager &cfg, QWidget *parent = 0);
 
+    bool setupOgre();
     void writeConfig();
 
 public slots:
@@ -62,8 +63,6 @@ private:
     QStringList getAvailableResolutions(Ogre::RenderSystem *renderer);
 
     void createPages();
-    void setupConfig();
-    void setupOgre();
     void readConfig();
 };
 

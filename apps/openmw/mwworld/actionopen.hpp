@@ -12,10 +12,11 @@ namespace MWWorld
     {
             Ptr mContainer;
 
+            virtual void executeImp (const MWWorld::Ptr& actor);
+
         public:
             ActionOpen (const Ptr& container);
             ///< \param The Container the Player has activated.
-            virtual void execute ();
     };
 }
 

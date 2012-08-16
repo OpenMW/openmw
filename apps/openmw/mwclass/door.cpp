@@ -3,56 +3,59 @@
 
 #include <components/esm/loaddoor.hpp>
 
-#include <components/esm_store/cell_store.hpp>
-
 #include "../mwbase/environment.hpp"
+#include "../mwbase/world.hpp"
+#include "../mwbase/soundmanager.hpp"
+#include "../mwbase/windowmanager.hpp"
 
 #include "../mwworld/player.hpp"
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/nullaction.hpp"
 #include "../mwworld/actionteleport.hpp"
-#include "../mwworld/world.hpp"
+#include "../mwworld/cellstore.hpp"
+#include "../mwworld/physicssystem.hpp"
 
-#include "../mwgui/window_manager.hpp"
 #include "../mwgui/tooltips.hpp"
 
 #include "../mwrender/objects.hpp"
-
-#include "../mwsound/soundmanager.hpp"
+#include "../mwrender/renderinginterface.hpp"
 
 namespace MWClass
 {
     void Door::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const
     {
-         ESMS::LiveCellRef<ESM::Door, MWWorld::RefData> *ref =
-            ptr.get<ESM::Door>();
-
-        assert (ref->base != NULL);
-        const std::string &model = ref->base->model;
-
-        if (!model.empty())
-        {
+        const std::string model = getModel(ptr);
+        if (!model.empty()) {
             MWRender::Objects& objects = renderingInterface.getObjects();
             objects.insertBegin(ptr, ptr.getRefData().isEnabled(), false);
-            objects.insertMesh(ptr, "meshes\\" + model);
+            objects.insertMesh(ptr, model);
         }
     }
 
     void Door::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics) const
     {
-         ESMS::LiveCellRef<ESM::Door, MWWorld::RefData> *ref =
+        const std::string model = getModel(ptr);
+        if(!model.empty()) {
+            physics.insertObjectPhysics(ptr, model);
+        }
+    }
+
+    std::string Door::getModel(const MWWorld::Ptr &ptr) const
+    {
+        MWWorld::LiveCellRef<ESM::Door> *ref =
             ptr.get<ESM::Door>();
+        assert(ref->base != NULL);
 
         const std::string &model = ref->base->model;
-        assert (ref->base != NULL);
-        if(!model.empty()){
-            physics.insertObjectPhysics(ptr, "meshes\\" + model);
+        if (!model.empty()) {
+            return "meshes\\" + model;
         }
+        return "";
     }
 
     std::string Door::getName (const MWWorld::Ptr& ptr) const
     {
-        ESMS::LiveCellRef<ESM::Door, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Door> *ref =
             ptr.get<ESM::Door>();
 
         if (ref->ref.teleport && !ref->ref.destCell.empty()) // TODO doors that lead to exteriors
@@ -64,7 +67,7 @@ namespace MWClass
     boost::shared_ptr<MWWorld::Action> Door::activate (const MWWorld::Ptr& ptr,
         const MWWorld::Ptr& actor) const
     {
-        ESMS::LiveCellRef<ESM::Door, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Door> *ref =
             ptr.get<ESM::Door>();
 
         const std::string &openSound = ref->base->openSound;
@@ -93,18 +96,18 @@ namespace MWClass
         if (ref->ref.teleport)
         {
             // teleport door
+            /// \todo remove this if clause once ActionTeleport can also support other actors
             if (MWBase::Environment::get().getWorld()->getPlayer().getPlayer()==actor)
             {
                 // the player is using the door
                 // The reason this is not 3D is that it would get interrupted when you teleport
                 MWBase::Environment::get().getSoundManager()->playSound(openSound, 1.0, 1.0);
                 return boost::shared_ptr<MWWorld::Action> (
-                    new MWWorld::ActionTeleportPlayer (ref->ref.destCell, ref->ref.doorDest));
+                    new MWWorld::ActionTeleport (ref->ref.destCell, ref->ref.doorDest));
             }
             else
             {
                 // another NPC or a creature is using the door
-                // TODO return action for teleporting other NPC/creature
                 return boost::shared_ptr<MWWorld::Action> (new MWWorld::NullAction);
             }
         }
@@ -134,7 +137,7 @@ namespace MWClass
 
     std::string Door::getScript (const MWWorld::Ptr& ptr) const
     {
-        ESMS::LiveCellRef<ESM::Door, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Door> *ref =
             ptr.get<ESM::Door>();
 
         return ref->base->script;
@@ -149,7 +152,7 @@ namespace MWClass
 
     bool Door::hasToolTip (const MWWorld::Ptr& ptr) const
     {
-        ESMS::LiveCellRef<ESM::Door, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Door> *ref =
             ptr.get<ESM::Door>();
 
         return (ref->base->name != "");
@@ -157,7 +160,7 @@ namespace MWClass
 
     MWGui::ToolTipInfo Door::getToolTipInfo (const MWWorld::Ptr& ptr) const
     {
-        ESMS::LiveCellRef<ESM::Door, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Door> *ref =
             ptr.get<ESM::Door>();
 
         MWGui::ToolTipInfo info;
@@ -204,5 +207,14 @@ namespace MWClass
         info.text = text;
 
         return info;
+    }
+
+    MWWorld::Ptr
+    Door::copyToCellImpl(const MWWorld::Ptr &ptr, MWWorld::CellStore &cell) const
+    {
+        MWWorld::LiveCellRef<ESM::Door> *ref =
+            ptr.get<ESM::Door>();
+
+        return MWWorld::Ptr(&cell.doors.insert(*ref), &cell);
     }
 }

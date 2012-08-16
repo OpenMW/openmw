@@ -1,13 +1,17 @@
 #include "localmap.hpp"
-#include "renderingmanager.hpp"
-
-#include "../mwbase/environment.hpp"
-#include "../mwworld/world.hpp"
-#include "../mwgui/window_manager.hpp"
-#include "renderconst.hpp"
 
 #include <OgreOverlayManager.h>
 #include <OgreMaterialManager.h>
+#include <OgreHardwarePixelBuffer.h>
+
+#include <components/esm_store/store.hpp>
+
+#include "../mwbase/environment.hpp"
+#include "../mwbase/world.hpp"
+#include "../mwbase/windowmanager.hpp"
+
+#include "renderconst.hpp"
+#include "renderingmanager.hpp"
 
 using namespace MWRender;
 using namespace Ogre;
@@ -226,7 +230,7 @@ void LocalMap::render(const float x, const float y,
             vp->setVisibilityMask(RV_Map);
 
             // use fallback techniques without shadows and without mrt
-            vp->setMaterialScheme("Fallback");
+            vp->setMaterialScheme("local_map");
 
             rtt->update();
 

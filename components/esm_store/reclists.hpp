@@ -7,7 +7,7 @@
 #include <vector>
 #include <algorithm>
 #include <cctype>
-#include <assert.h>
+#include <cassert>
 #include <stdexcept>
 #include <iterator>
 #include    <boost/algorithm/string.hpp>

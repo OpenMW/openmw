@@ -3,58 +3,59 @@
 
 #include <components/esm/loadclot.hpp>
 
-#include <components/esm_store/cell_store.hpp>
-
 #include "../mwbase/environment.hpp"
+#include "../mwbase/world.hpp"
+#include "../mwbase/soundmanager.hpp"
+#include "../mwbase/windowmanager.hpp"
 
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/actiontake.hpp"
 #include "../mwworld/actionequip.hpp"
 #include "../mwworld/inventorystore.hpp"
-#include "../mwworld/world.hpp"
+#include "../mwworld/cellstore.hpp"
+#include "../mwworld/physicssystem.hpp"
 
 #include "../mwgui/tooltips.hpp"
-#include "../mwgui/window_manager.hpp"
 
 #include "../mwrender/objects.hpp"
-
-#include "../mwsound/soundmanager.hpp"
+#include "../mwrender/renderinginterface.hpp"
 
 namespace MWClass
 {
     void Clothing::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const
     {
-        ESMS::LiveCellRef<ESM::Clothing, MWWorld::RefData> *ref =
-            ptr.get<ESM::Clothing>();
-
-        assert (ref->base != NULL);
-        const std::string &model = ref->base->model;
-
-        if (!model.empty())
-        {
+        const std::string model = getModel(ptr);
+        if (!model.empty()) {
             MWRender::Objects& objects = renderingInterface.getObjects();
             objects.insertBegin(ptr, ptr.getRefData().isEnabled(), false);
-            objects.insertMesh(ptr, "meshes\\" + model);
+            objects.insertMesh(ptr, model);
         }
     }
 
     void Clothing::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics) const
     {
-        ESMS::LiveCellRef<ESM::Clothing, MWWorld::RefData> *ref =
-            ptr.get<ESM::Clothing>();
+        const std::string model = getModel(ptr);
+        if(!model.empty()) {
+            physics.insertObjectPhysics(ptr, model);
+        }
+    }
 
+    std::string Clothing::getModel(const MWWorld::Ptr &ptr) const
+    {
+        MWWorld::LiveCellRef<ESM::Clothing> *ref =
+            ptr.get<ESM::Clothing>();
+        assert(ref->base != NULL);
 
         const std::string &model = ref->base->model;
-        assert (ref->base != NULL);
-        if(!model.empty()){
-            physics.insertObjectPhysics(ptr, "meshes\\" + model);
+        if (!model.empty()) {
+            return "meshes\\" + model;
         }
-
+        return "";
     }
 
     std::string Clothing::getName (const MWWorld::Ptr& ptr) const
     {
-        ESMS::LiveCellRef<ESM::Clothing, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Clothing> *ref =
             ptr.get<ESM::Clothing>();
 
         return ref->base->name;
@@ -63,7 +64,7 @@ namespace MWClass
     boost::shared_ptr<MWWorld::Action> Clothing::activate (const MWWorld::Ptr& ptr,
         const MWWorld::Ptr& actor) const
     {
-         MWBase::Environment::get().getSoundManager()->playSound3D (ptr, getUpSoundId(ptr), 1.0, 1.0, MWSound::Play_NoTrack);
+         MWBase::Environment::get().getSoundManager()->playSound3D (ptr, getUpSoundId(ptr), 1.0, 1.0, MWBase::SoundManager::Play_NoTrack);
 
         return boost::shared_ptr<MWWorld::Action> (
             new MWWorld::ActionTake (ptr));
@@ -71,7 +72,7 @@ namespace MWClass
 
     std::string Clothing::getScript (const MWWorld::Ptr& ptr) const
     {
-        ESMS::LiveCellRef<ESM::Clothing, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Clothing> *ref =
             ptr.get<ESM::Clothing>();
 
         return ref->base->script;
@@ -79,7 +80,7 @@ namespace MWClass
 
     std::pair<std::vector<int>, bool> Clothing::getEquipmentSlots (const MWWorld::Ptr& ptr) const
     {
-        ESMS::LiveCellRef<ESM::Clothing, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Clothing> *ref =
             ptr.get<ESM::Clothing>();
 
         std::vector<int> slots;
@@ -119,7 +120,7 @@ namespace MWClass
 
     int Clothing::getEquipmentSkill (const MWWorld::Ptr& ptr) const
     {
-        ESMS::LiveCellRef<ESM::Clothing, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Clothing> *ref =
             ptr.get<ESM::Clothing>();
 
         if (ref->base->data.type==ESM::Clothing::Shoes)
@@ -130,7 +131,7 @@ namespace MWClass
 
     int Clothing::getValue (const MWWorld::Ptr& ptr) const
     {
-        ESMS::LiveCellRef<ESM::Clothing, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Clothing> *ref =
             ptr.get<ESM::Clothing>();
 
         return ref->base->data.value;
@@ -145,7 +146,7 @@ namespace MWClass
 
     std::string Clothing::getUpSoundId (const MWWorld::Ptr& ptr) const
     {
-         ESMS::LiveCellRef<ESM::Clothing, MWWorld::RefData> *ref =
+         MWWorld::LiveCellRef<ESM::Clothing> *ref =
             ptr.get<ESM::Clothing>();
 
         if (ref->base->data.type == 8)
@@ -157,7 +158,7 @@ namespace MWClass
 
     std::string Clothing::getDownSoundId (const MWWorld::Ptr& ptr) const
     {
-         ESMS::LiveCellRef<ESM::Clothing, MWWorld::RefData> *ref =
+         MWWorld::LiveCellRef<ESM::Clothing> *ref =
             ptr.get<ESM::Clothing>();
 
         if (ref->base->data.type == 8)
@@ -169,7 +170,7 @@ namespace MWClass
 
     std::string Clothing::getInventoryIcon (const MWWorld::Ptr& ptr) const
     {
-          ESMS::LiveCellRef<ESM::Clothing, MWWorld::RefData> *ref =
+          MWWorld::LiveCellRef<ESM::Clothing> *ref =
             ptr.get<ESM::Clothing>();
 
         return ref->base->icon;
@@ -177,7 +178,7 @@ namespace MWClass
 
     bool Clothing::hasToolTip (const MWWorld::Ptr& ptr) const
     {
-        ESMS::LiveCellRef<ESM::Clothing, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Clothing> *ref =
             ptr.get<ESM::Clothing>();
 
         return (ref->base->name != "");
@@ -185,7 +186,7 @@ namespace MWClass
 
     MWGui::ToolTipInfo Clothing::getToolTipInfo (const MWWorld::Ptr& ptr) const
     {
-        ESMS::LiveCellRef<ESM::Clothing, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Clothing> *ref =
             ptr.get<ESM::Clothing>();
 
         MWGui::ToolTipInfo info;
@@ -213,7 +214,7 @@ namespace MWClass
 
     std::string Clothing::getEnchantment (const MWWorld::Ptr& ptr) const
     {
-        ESMS::LiveCellRef<ESM::Clothing, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Clothing> *ref =
             ptr.get<ESM::Clothing>();
 
         return ref->base->enchant;
@@ -224,5 +225,14 @@ namespace MWClass
         MWBase::Environment::get().getSoundManager()->playSound (getUpSoundId(ptr), 1.0, 1.0);
 
         return boost::shared_ptr<MWWorld::Action>(new MWWorld::ActionEquip(ptr));
+    }
+
+    MWWorld::Ptr
+    Clothing::copyToCellImpl(const MWWorld::Ptr &ptr, MWWorld::CellStore &cell) const
+    {
+        MWWorld::LiveCellRef<ESM::Clothing> *ref =
+            ptr.get<ESM::Clothing>();
+
+        return MWWorld::Ptr(&cell.clothes.insert(*ref), &cell);
     }
 }

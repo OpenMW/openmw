@@ -93,3 +93,13 @@ bool naturalSortLessThanCI( const QString &left, const QString &right )
 {
     return (naturalCompare( left, right, Qt::CaseInsensitive ) < 0);
 }
+
+bool naturalSortGreaterThanCS( const QString &left, const QString &right )
+{
+    return (naturalCompare( left, right, Qt::CaseSensitive ) > 0);
+}
+
+bool naturalSortGreaterThanCI( const QString &left, const QString &right )
+{
+    return (naturalCompare( left, right, Qt::CaseInsensitive ) > 0);
+}

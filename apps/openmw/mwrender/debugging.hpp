@@ -4,10 +4,14 @@
 #include <utility>
 #include <openengine/ogre/renderer.hpp>
 #include <openengine/bullet/physic.hpp>
-#include "../mwworld/ptr.hpp"
 
 #include <vector>
 #include <string>
+
+namespace ESM
+{
+    struct Pathgrid;
+}
 
 namespace Ogre
 {
@@ -22,7 +26,8 @@ namespace Ogre
 
 namespace MWWorld
 {
-    class World;
+    class Ptr;
+    class CellStore;
 }
 
 namespace MWRender
@@ -39,7 +44,7 @@ namespace MWRender
 
         void togglePathgrid();
 
-        typedef std::vector<MWWorld::Ptr::CellStore *> CellList;
+        typedef std::vector<MWWorld::CellStore *> CellList;
         CellList mActiveCells;
 
         Ogre::SceneNode *mMwRoot;
@@ -50,8 +55,8 @@ namespace MWRender
         ExteriorPathgridNodes mExteriorPathgridNodes;
         Ogre::SceneNode *mInteriorPathgridNode;
 
-        void enableCellPathgrid(MWWorld::Ptr::CellStore *store);
-        void disableCellPathgrid(MWWorld::Ptr::CellStore *store);
+        void enableCellPathgrid(MWWorld::CellStore *store);
+        void disableCellPathgrid(MWWorld::CellStore *store);
 
         // utility
         void destroyCellPathgridNode(Ogre::SceneNode *node);
@@ -70,8 +75,8 @@ namespace MWRender
         ~Debugging();
         bool toggleRenderMode (int mode);
 
-        void cellAdded(MWWorld::Ptr::CellStore* store);
-        void cellRemoved(MWWorld::Ptr::CellStore* store);
+        void cellAdded(MWWorld::CellStore* store);
+        void cellRemoved(MWWorld::CellStore* store);
     };
 
 

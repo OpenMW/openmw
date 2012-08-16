@@ -3,29 +3,26 @@
 
 #include "OgreCamera.h"
 
-#include <components/esm_store/cell_store.hpp>
-
+#include "../mwworld/cellstore.hpp"
 #include "../mwworld/refdata.hpp"
 #include "../mwworld/ptr.hpp"
 
 #include "../mwmechanics/drawstate.hpp"
 
-namespace MWRender
+namespace MWBase
 {
-    class Player;
+    class World;
 }
 
 namespace MWWorld
 {
-    class World;
+    class CellStore;
 
     /// \brief NPC object representing the player and additional player data
-    class Player 
+    class Player
     {
-        ESMS::LiveCellRef<ESM::NPC, MWWorld::RefData> mPlayer;
-        MWWorld::Ptr::CellStore *mCellStore;
-        MWRender::Player *mRenderer;
-        MWWorld::World& mWorld;
+        LiveCellRef<ESM::NPC> mPlayer;
+        MWWorld::CellStore *mCellStore;
         std::string mName;
         bool mMale;
         std::string mRace;
@@ -35,17 +32,11 @@ namespace MWWorld
         int mForwardBackward;
     public:
 
-        Player(MWRender::Player *renderer, const ESM::NPC *player, MWWorld::World& world);
+        Player(const ESM::NPC *player, const MWBase::World& world);
 
         ~Player();
 
-        /// Set the player position. Uses Morrowind coordinates.
-        void setPos(float x, float y, float z);
-
-        /// Set where the player is looking at. Uses Morrowind (euler) angles
-        void setRot(float x, float y, float z);
-
-        void setCell (MWWorld::Ptr::CellStore *cellStore)
+        void setCell (MWWorld::CellStore *cellStore)
         {
             mCellStore = cellStore;
         }
@@ -55,8 +46,6 @@ namespace MWWorld
             MWWorld::Ptr ptr (&mPlayer, mCellStore);
             return ptr;
         }
-
-        MWRender::Player *getRenderer() { return mRenderer; }
 
         void setName (const std::string& name)
         {
@@ -80,7 +69,7 @@ namespace MWWorld
 
         void setClass (const ESM::Class& class_);
 
-        void setDrawState(const DrawState& state);
+        void setDrawState (MWMechanics::DrawState_ state);
 
         std::string getName() const
         {
@@ -112,14 +101,14 @@ namespace MWWorld
             return mAutoMove;
         }
 
-        DrawState getDrawState();
+        MWMechanics::DrawState_ getDrawState(); /// \todo constness
 
         void setAutoMove (bool enable);
 
         void setLeftRight (int value);
 
         void setForwardBackward (int value);
-		void setUpDown(int value);
+        void setUpDown(int value);
 
         void toggleRunning();
     };

@@ -1,13 +1,17 @@
 
 #include "localscripts.hpp"
 
+#include <components/esm_store/store.hpp>
+
+#include "cellstore.hpp"
+
 namespace
 {
     template<typename T>
     void listCellScripts (MWWorld::LocalScripts& localScripts,
-        ESMS::CellRefList<T, MWWorld::RefData>& cellRefList,  MWWorld::Ptr::CellStore *cell)
+        MWWorld::CellRefList<T>& cellRefList,  MWWorld::Ptr::CellStore *cell)
     {
-        for (typename ESMS::CellRefList<T, MWWorld::RefData>::List::iterator iter (
+        for (typename MWWorld::CellRefList<T>::List::iterator iter (
             cellRefList.list.begin());
             iter!=cellRefList.list.end(); ++iter)
         {

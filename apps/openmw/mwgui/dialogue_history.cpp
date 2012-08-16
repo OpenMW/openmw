@@ -1,9 +1,10 @@
 #include "dialogue_history.hpp"
-#include "window_manager.hpp"
+
+#include "../mwbase/windowmanager.hpp"
+
 #include "widgets.hpp"
 #include "components/esm_store/store.hpp"
 
-#include <assert.h>
 #include <iostream>
 #include <iterator>
 
@@ -72,4 +73,3 @@ void DialogueHistory::addDialogText(const UString& parText)
     addText(parText);
     addText("\n");
 }
-

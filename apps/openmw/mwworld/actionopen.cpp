@@ -1,12 +1,12 @@
 #include "actionopen.hpp"
 
 #include "../mwbase/environment.hpp"
-#include "class.hpp"
-#include "world.hpp"
-#include "containerstore.hpp"
-#include "../mwclass/container.hpp"
-#include "../mwgui/window_manager.hpp"
+#include "../mwbase/windowmanager.hpp"
+
 #include "../mwgui/container.hpp"
+
+#include "class.hpp"
+#include "containerstore.hpp"
 
 namespace MWWorld
 {
@@ -14,7 +14,7 @@ namespace MWWorld
         mContainer = container;
     }
 
-    void ActionOpen::execute ()
+    void ActionOpen::executeImp (const MWWorld::Ptr& actor)
     {
         if (!MWBase::Environment::get().getWindowManager()->isAllowed(MWGui::GW_Inventory))
             return;

@@ -1,20 +1,24 @@
 #include "tooltips.hpp"
 
-#include "window_manager.hpp"
-#include "widgets.hpp"
-#include "../mwworld/class.hpp"
-#include "../mwworld/world.hpp"
-#include "../mwbase/environment.hpp"
-
 #include <boost/lexical_cast.hpp>
 
+#include <OgreResourceGroupManager.h>
+
 #include <components/settings/settings.hpp>
+
+#include "../mwbase/world.hpp"
+#include "../mwbase/environment.hpp"
+#include "../mwbase/windowmanager.hpp"
+
+#include "../mwworld/class.hpp"
+
+#include "widgets.hpp"
 
 using namespace MWGui;
 using namespace MyGUI;
 
-ToolTips::ToolTips(WindowManager* windowManager) :
-    Layout("openmw_tooltips.xml")
+ToolTips::ToolTips(MWBase::WindowManager* windowManager) :
+    Layout("openmw_tooltips.layout")
     , mGameMode(true)
     , mWindowManager(windowManager)
     , mFullHelp(false)
@@ -77,7 +81,7 @@ void ToolTips::onFrame(float frameDuration)
             {
                 mFocusObject = MWBase::Environment::get().getWorld()->getPtrViaHandle(handle);
             }
-            catch (std::exception& e)
+            catch (std::exception /* & e */)
             {
                 return;
             }
@@ -392,7 +396,7 @@ IntSize ToolTips::createToolTip(const MWGui::ToolTipInfo& info)
 
         /**
          * \todo
-         * the various potion effects should appear in the tooltip depending if the player 
+         * the various potion effects should appear in the tooltip depending if the player
          * has enough skill in alchemy to know about the effects of this potion.
          */
 
@@ -564,8 +568,6 @@ void ToolTips::createAttributeToolTip(MyGUI::Widget* widget, int attributeId)
     if (attributeId == -1)
         return;
 
-    const ESM::Attribute* attr = MWBase::Environment::get().getWorld()->getStore().attributes.search(attributeId);
-    assert(attr);
     std::string icon = ESM::Attribute::attributeIcons[attributeId];
     std::string name = ESM::Attribute::gmstAttributeIds[attributeId];
     std::string desc = ESM::Attribute::gmstAttributeDescIds[attributeId];

@@ -31,6 +31,11 @@ namespace MWMechanics
                 return mModified;
             }
 
+            T getModifier() const
+            {
+                return mModified-mBase;
+            }
+
             /// Set base and modified to \a value.
             void set (const T& value)
             {
@@ -65,10 +70,9 @@ namespace MWMechanics
                 mBase += diff;
             }
 
-            /// Change modified relatively.
-            void modify (const T& diff)
+            void setModifier (const T& modifier)
             {
-                mModified += diff;
+                mModified = mBase + modifier;
             }
     };
 
@@ -143,7 +147,7 @@ namespace MWMechanics
             void modify (const T& diff)
             {
                 mStatic.modify (diff);
-                modifyCurrent (diff);
+                setCurrent (getCurrent()+diff);
             }
 
             void setCurrent (const T& value)
@@ -154,6 +158,13 @@ namespace MWMechanics
                     mCurrent = 0;
                 else if (mCurrent>getModified())
                     mCurrent = getModified();
+            }
+
+            void setModifier (const T& modifier)
+            {
+                T diff =  modifier - mStatic.getModifier();
+                mStatic.setModifier (modifier);
+                setCurrent (getCurrent()+diff);
             }
     };
 

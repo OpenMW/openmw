@@ -2,7 +2,7 @@
 
 using namespace MWGui;
 
-MessageBoxManager::MessageBoxManager (WindowManager *windowManager)
+MessageBoxManager::MessageBoxManager (MWBase::WindowManager *windowManager)
 {
     mWindowManager = windowManager;
     // defines
@@ -147,9 +147,9 @@ int MessageBoxManager::readPressedButton ()
 
 
 MessageBox::MessageBox(MessageBoxManager& parMessageBoxManager, const std::string& message)
-  : Layout("openmw_messagebox_layout.xml")
+  : Layout("openmw_messagebox.layout")
   , mMessageBoxManager(parMessageBoxManager)
-  , cMessage(message)
+  , mMessage(message)
 {
     // defines
     mFixedWidth = 300;
@@ -160,7 +160,7 @@ MessageBox::MessageBox(MessageBoxManager& parMessageBoxManager, const std::strin
     getWidget(mMessageWidget, "message");
 
     mMessageWidget->setOverflowToTheLeft(true);
-    mMessageWidget->setCaptionWithReplacing(cMessage);
+    mMessageWidget->setCaptionWithReplacing(mMessage);
 
     MyGUI::IntSize size;
     size.width = mFixedWidth;
@@ -177,7 +177,7 @@ MessageBox::MessageBox(MessageBoxManager& parMessageBoxManager, const std::strin
     size.height = mHeight = textSize.height + 20; // this is the padding between the text and the box
 
     mMainWidget->setSize(size);
-    size.width -= 15; // this is to center the text (see messagebox_layout.xml, Widget type="Edit" position="-2 -3 0 0")
+    size.width -= 15; // this is to center the text (see messagebox.layout, Widget type="Edit" position="-2 -3 0 0")
     mMessageWidget->setSize(size);
 }
 
@@ -205,7 +205,7 @@ int MessageBox::getHeight ()
 
 
 InteractiveMessageBox::InteractiveMessageBox(MessageBoxManager& parMessageBoxManager, const std::string& message, const std::vector<std::string>& buttons)
-  : Layout("openmw_interactive_messagebox_layout.xml")
+  : Layout("openmw_interactive_messagebox.layout")
   , mMessageBoxManager(parMessageBoxManager)
   , mButtonPressed(-1)
 {
@@ -265,11 +265,8 @@ InteractiveMessageBox::InteractiveMessageBox(MessageBoxManager& parMessageBoxMan
     if(buttonsWidth < fixedWidth)
     {
         // on one line
-        std::cout << "on one line" << std::endl;
-
         if(textSize.width + 2*textPadding < buttonsWidth)
         {
-            std::cout << "width = buttonsWidth" << std::endl;
             mainWidgetSize.width = buttonsWidth;
         }
         else
@@ -282,12 +279,8 @@ InteractiveMessageBox::InteractiveMessageBox(MessageBoxManager& parMessageBoxMan
         absCoord.left = (gameWindowSize.width - mainWidgetSize.width)/2;
         absCoord.top = (gameWindowSize.height - mainWidgetSize.height)/2;
 
-        std::cout << "width " << mainWidgetSize.width << " height " << mainWidgetSize.height << std::endl;
-        std::cout << "left " << absCoord.left << " top " << absCoord.top << std::endl;
-
         mMainWidget->setCoord(absCoord);
         mMainWidget->setSize(mainWidgetSize);
-
 
         MyGUI::IntCoord messageWidgetCoord;
         messageWidgetCoord.left = (mainWidgetSize.width - textSize.width)/2;
@@ -318,7 +311,6 @@ InteractiveMessageBox::InteractiveMessageBox(MessageBoxManager& parMessageBoxMan
     else
     {
         // among each other
-
         if(biggestButtonWidth > textSize.width) {
             mainWidgetSize.width = biggestButtonWidth + buttonTopPadding;
         }
@@ -327,8 +319,6 @@ InteractiveMessageBox::InteractiveMessageBox(MessageBoxManager& parMessageBoxMan
         }
         mainWidgetSize.height = textSize.height + 2*textPadding + textButtonPadding + buttonHeight * buttons.size() + buttonMainPadding;
 
-        std::cout << "biggestButtonWidth " << biggestButtonWidth << " textSize.width " << textSize.width << std::endl;
-        std::cout << "width " << mainWidgetSize.width << " height " << mainWidgetSize.height << std::endl;
         mMainWidget->setSize(mainWidgetSize);
 
         MyGUI::IntCoord absCoord;
@@ -383,7 +373,6 @@ void InteractiveMessageBox::mousePressed (MyGUI::Widget* pressed)
         }
         index++;
     }
-    std::cout << "Cant be possible :/" << std::endl;
 }
 
 int InteractiveMessageBox::readPressedButton ()

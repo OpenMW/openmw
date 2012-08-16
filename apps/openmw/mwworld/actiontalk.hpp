@@ -10,12 +10,12 @@ namespace MWWorld
     {
             Ptr mActor;
 
+            virtual void executeImp (const Ptr& actor);
+
         public:
 
             ActionTalk (const Ptr& actor);
             ///< \param actor The actor the player is talking to
-
-            virtual void execute();
     };
 }
 

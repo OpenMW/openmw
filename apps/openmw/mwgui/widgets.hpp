@@ -10,14 +10,19 @@
 #undef MYGUI_EXPORT
 #define MYGUI_EXPORT
 
+namespace MWBase
+{
+    class WindowManager;
+}
+
 /*
   This file contains various custom widgets used in OpenMW.
  */
 
 namespace MWGui
 {
+    /// \todo remove!
     using namespace MyGUI;
-    class WindowManager;
 
     namespace Widgets
     {
@@ -73,7 +78,7 @@ namespace MWGui
 
         typedef std::vector<SpellEffectParams> SpellEffectList;
 
-        class MYGUI_EXPORT MWSkill : public Widget
+        class MYGUI_EXPORT MWSkill : public MyGUI::Widget
         {
             MYGUI_RTTI_DERIVED( MWSkill );
         public:
@@ -81,14 +86,14 @@ namespace MWGui
 
             typedef MWMechanics::Stat<float> SkillValue;
 
-            void setWindowManager(WindowManager *m) { manager = m; }
+            void setWindowManager(MWBase::WindowManager *m) { mManager = m; } /// \todo remove
             void setSkillId(ESM::Skill::SkillEnum skillId);
             void setSkillNumber(int skillId);
             void setSkillValue(const SkillValue& value);
 
-            WindowManager *getWindowManager() const { return manager; }
-            ESM::Skill::SkillEnum getSkillId() const { return skillId; }
-            const SkillValue& getSkillValue() const { return value; }
+            MWBase::WindowManager *getWindowManager() const { return mManager; }
+            ESM::Skill::SkillEnum getSkillId() const { return mSkillId; }
+            const SkillValue& getSkillValue() const { return mValue; }
 
             // Events
             typedef delegates::CMultiDelegate1<MWSkill*> EventHandle_SkillVoid;
@@ -109,14 +114,14 @@ namespace MWGui
 
             void updateWidgets();
 
-            WindowManager *manager;
-            ESM::Skill::SkillEnum skillId;
-            SkillValue value;
-            MyGUI::WidgetPtr skillNameWidget, skillValueWidget;
+            MWBase::WindowManager *mManager;
+            ESM::Skill::SkillEnum mSkillId;
+            SkillValue mValue;
+            MyGUI::WidgetPtr mSkillNameWidget, mSkillValueWidget;
         };
         typedef MWSkill* MWSkillPtr;
 
-        class MYGUI_EXPORT MWAttribute : public Widget
+        class MYGUI_EXPORT MWAttribute : public MyGUI::Widget
         {
             MYGUI_RTTI_DERIVED( MWAttribute );
         public:
@@ -124,13 +129,13 @@ namespace MWGui
 
             typedef MWMechanics::Stat<int> AttributeValue;
 
-            void setWindowManager(WindowManager *m) { manager = m; }
+            void setWindowManager(MWBase::WindowManager *m) { mManager = m; }
             void setAttributeId(int attributeId);
             void setAttributeValue(const AttributeValue& value);
 
-            WindowManager *getWindowManager() const { return manager; }
-            int getAttributeId() const { return id; }
-            const AttributeValue& getAttributeValue() const { return value; }
+            MWBase::WindowManager *getWindowManager() const { return mManager; }
+            int getAttributeId() const { return mId; }
+            const AttributeValue& getAttributeValue() const { return mValue; }
 
             // Events
             typedef delegates::CMultiDelegate1<MWAttribute*> EventHandle_AttributeVoid;
@@ -151,10 +156,10 @@ namespace MWGui
 
             void updateWidgets();
 
-            WindowManager *manager;
-            int id;
-            AttributeValue value;
-            MyGUI::WidgetPtr attributeNameWidget, attributeValueWidget;
+            MWBase::WindowManager *mManager;
+            int mId;
+            AttributeValue mValue;
+            MyGUI::WidgetPtr mAttributeNameWidget, mAttributeValueWidget;
         };
         typedef MWAttribute* MWAttributePtr;
 
@@ -162,7 +167,7 @@ namespace MWGui
          * @todo remove this class and use MWEffectList instead
          */
         class MWSpellEffect;
-        class MYGUI_EXPORT MWSpell : public Widget
+        class MYGUI_EXPORT MWSpell : public MyGUI::Widget
         {
             MYGUI_RTTI_DERIVED( MWSpell );
         public:
@@ -170,7 +175,7 @@ namespace MWGui
 
             typedef MWMechanics::Stat<int> SpellValue;
 
-            void setWindowManager(WindowManager* parWindowManager) { mWindowManager = parWindowManager; }
+            void setWindowManager(MWBase::WindowManager* parWindowManager) { mWindowManager = parWindowManager; }
             void setSpellId(const std::string &id);
 
             /**
@@ -182,7 +187,7 @@ namespace MWGui
              */
             void createEffectWidgets(std::vector<MyGUI::WidgetPtr> &effects, MyGUI::WidgetPtr creator, MyGUI::IntCoord &coord, int flags);
 
-            const std::string &getSpellId() const { return id; }
+            const std::string &getSpellId() const { return mId; }
 
         protected:
             virtual ~MWSpell();
@@ -192,13 +197,13 @@ namespace MWGui
         private:
             void updateWidgets();
 
-            WindowManager* mWindowManager;
-            std::string id;
-            MyGUI::TextBox* spellNameWidget;
+            MWBase::WindowManager* mWindowManager;
+            std::string mId;
+            MyGUI::TextBox* mSpellNameWidget;
         };
         typedef MWSpell* MWSpellPtr;
 
-        class MYGUI_EXPORT MWEffectList : public Widget
+        class MYGUI_EXPORT MWEffectList : public MyGUI::Widget
         {
             MYGUI_RTTI_DERIVED( MWEffectList );
         public:
@@ -212,7 +217,7 @@ namespace MWGui
                 EF_Constant = 0x02 // constant effect means that duration will not be displayed
             };
 
-            void setWindowManager(WindowManager* parWindowManager) { mWindowManager = parWindowManager; }
+            void setWindowManager(MWBase::WindowManager* parWindowManager) { mWindowManager = parWindowManager; }
             void setEffectList(const SpellEffectList& list);
 
             static SpellEffectList effectListFromESM(const ESM::EffectList* effects);
@@ -234,12 +239,12 @@ namespace MWGui
         private:
             void updateWidgets();
 
-            WindowManager* mWindowManager;
+            MWBase::WindowManager* mWindowManager;
             SpellEffectList mEffectList;
         };
         typedef MWEffectList* MWEffectListPtr;
 
-        class MYGUI_EXPORT MWSpellEffect : public Widget
+        class MYGUI_EXPORT MWSpellEffect : public MyGUI::Widget
         {
             MYGUI_RTTI_DERIVED( MWSpellEffect );
         public:
@@ -247,7 +252,7 @@ namespace MWGui
 
             typedef ESM::ENAMstruct SpellEffectValue;
 
-            void setWindowManager(WindowManager* parWindowManager) { mWindowManager = parWindowManager; }
+            void setWindowManager(MWBase::WindowManager* parWindowManager) { mWindowManager = parWindowManager; }
             void setSpellEffect(const SpellEffectParams& params);
 
             std::string effectIDToString(const short effectID);
@@ -262,20 +267,20 @@ namespace MWGui
             virtual ~MWSpellEffect();
 
             virtual void initialiseOverride();
-            
+
         private:
 
             void updateWidgets();
 
-            WindowManager* mWindowManager;
+            MWBase::WindowManager* mWindowManager;
             SpellEffectParams mEffectParams;
-            MyGUI::ImageBox* imageWidget;
-            MyGUI::TextBox* textWidget;
+            MyGUI::ImageBox* mImageWidget;
+            MyGUI::TextBox* mTextWidget;
             int mRequestedWidth;
         };
         typedef MWSpellEffect* MWSpellEffectPtr;
 
-        class MYGUI_EXPORT MWDynamicStat : public Widget
+        class MYGUI_EXPORT MWDynamicStat : public MyGUI::Widget
         {
             MYGUI_RTTI_DERIVED( MWDynamicStat );
         public:
@@ -284,8 +289,8 @@ namespace MWGui
             void setValue(int value, int max);
             void setTitle(const std::string& text);
 
-            int getValue() const { return value; }
-            int getMax() const { return max; }
+            int getValue() const { return mValue; }
+            int getMax() const { return mMax; }
 
         protected:
             virtual ~MWDynamicStat();
@@ -294,10 +299,10 @@ namespace MWGui
 
         private:
 
-            int value, max;
-            MyGUI::TextBox* textWidget;
-            MyGUI::ProgressPtr barWidget;
-            MyGUI::TextBox* barTextWidget;
+            int mValue, mMax;
+            MyGUI::TextBox* mTextWidget;
+            MyGUI::ProgressPtr mBarWidget;
+            MyGUI::TextBox* mBarTextWidget;
         };
         typedef MWDynamicStat* MWDynamicStatPtr;
     }

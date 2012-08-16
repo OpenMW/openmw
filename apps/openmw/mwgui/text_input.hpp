@@ -18,10 +18,10 @@ namespace MWGui
     class TextInputDialog : public WindowBase
     {
     public:
-        TextInputDialog(WindowManager& parWindowManager);
+        TextInputDialog(MWBase::WindowManager& parWindowManager);
 
-        std::string getTextInput() const { return textEdit ? textEdit->getOnlyText() : ""; }
-        void setTextInput(const std::string &text) { if (textEdit) textEdit->setOnlyText(text); }
+        std::string getTextInput() const { return mTextEdit ? mTextEdit->getOnlyText() : ""; }
+        void setTextInput(const std::string &text) { if (mTextEdit) mTextEdit->setOnlyText(text); }
 
         void setNextButtonShow(bool shown);
         void setTextLabel(const std::string &label);
@@ -32,7 +32,7 @@ namespace MWGui
         void onTextAccepted(MyGUI::Edit* _sender);
 
     private:
-        MyGUI::EditPtr textEdit;
+        MyGUI::EditPtr mTextEdit;
     };
 }
 #endif

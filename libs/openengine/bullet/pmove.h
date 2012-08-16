@@ -6,12 +6,12 @@ which was released under the GNU GPL (v2) in 2005.
 Quake 3 Arena is copyright (C) 1999-2005 Id Software, Inc.
 */
 
-#include <Ogre.h>
 #include <OgreMath.h>
 #include <float.h>
 #include "trace.h"
 #include "physic.hpp"
 
+#include <OgreVector3.h>
 
 //#include "GameMath.h"
 //#include "GameTime.h"
@@ -28,7 +28,7 @@ static const Ogre::Vector3 halfExtents(14.64f * 2, 14.24f * 2, 33.25f * 2);
 #define	MAX_CLIP_PLANES	5
 #define	OVERCLIP 1.001f
 //#define	STEPSIZE 18 // 18 is way too much
-#define STEPSIZE (18 / 2)
+#define STEPSIZE (9)
 #ifndef M_PI
 	#define M_PI 3.14159265358979323846f
 #endif
@@ -41,7 +41,7 @@ static const Ogre::Vector3 halfExtents(14.64f * 2, 14.24f * 2, 33.25f * 2);
 #define	MAX_GENTITIES (1 << GENTITYNUM_BITS)
 #define	ENTITYNUM_NONE (MAX_GENTITIES - 1)
 #define ENTITYNUM_WORLD (MAX_GENTITIES - 2)
-#define	MIN_WALK_NORMAL 0.7f // can't walk on very steep slopes
+#define	MIN_WALK_NORMAL .7f // can't walk on very steep slopes
 #define	JUMP_VELOCITY (270)
 #define PS_PMOVEFRAMECOUNTBITS 6
 #define	MINS_Z -24
@@ -154,7 +154,7 @@ struct playerMove
 			KEYUP
 		};
 
-		playercmd() : forwardmove(0), rightmove(0), upmove(0), serverTime(50), ducking(false), 
+		playercmd() : forwardmove(0), rightmove(0), upmove(0), serverTime(50), ducking(false),
 			activating(false), lastActivatingState(false), procActivating(NO_CHANGE),
 			dropping(false), lastDroppingState(false), procDropping(NO_CHANGE)
 		{

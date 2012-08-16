@@ -19,7 +19,7 @@ namespace MWGui
 
 /*
   This file contains the dialouge window
-  Layout is defined by resources/mygui/openmw_dialogue_window_layout.xml.
+  Layout is defined by resources/mygui/openmw_dialogue_window.layout.
  */
 
 namespace MWGui
@@ -29,7 +29,7 @@ namespace MWGui
     class DialogueWindow: public WindowBase, public ReferenceInterface
     {
     public:
-        DialogueWindow(WindowManager& parWindowManager);
+        DialogueWindow(MWBase::WindowManager& parWindowManager);
 
         // Events
         typedef MyGUI::delegates::CMultiDelegate0 EventHandle_Void;
@@ -73,10 +73,10 @@ namespace MWGui
 
         bool mEnabled;
 
-        DialogueHistory*     history;
-        Widgets::MWList*      topicsList;
-        MyGUI::ProgressPtr pDispositionBar;
-        MyGUI::EditPtr pDispositionText;
+        DialogueHistory*   mHistory;
+        Widgets::MWList*   mTopicsList;
+        MyGUI::ProgressPtr mDispositionBar;
+        MyGUI::EditPtr     mDispositionText;
     };
 }
 #endif

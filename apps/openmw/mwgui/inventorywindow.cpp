@@ -3,22 +3,22 @@
 #include <cmath>
 #include <algorithm>
 #include <iterator>
-#include <assert.h>
-#include <iostream>
+#include <cassert>
 
 #include <boost/lexical_cast.hpp>
 
-#include "../mwclass/container.hpp"
+#include "../mwbase/world.hpp"
+#include "../mwbase/environment.hpp"
+#include "../mwbase/soundmanager.hpp"
+#include "../mwbase/windowmanager.hpp"
+
 #include "../mwworld/containerstore.hpp"
 #include "../mwworld/class.hpp"
-#include "../mwworld/world.hpp"
 #include "../mwworld/player.hpp"
-#include "../mwbase/environment.hpp"
 #include "../mwworld/manualref.hpp"
 #include "../mwworld/actiontake.hpp"
-#include "../mwsound/soundmanager.hpp"
+#include "../mwworld/inventorystore.hpp"
 
-#include "window_manager.hpp"
 #include "widgets.hpp"
 #include "bookwindow.hpp"
 #include "scrollwindow.hpp"
@@ -40,9 +40,9 @@ namespace
 namespace MWGui
 {
 
-    InventoryWindow::InventoryWindow(WindowManager& parWindowManager,DragAndDrop* dragAndDrop)
+    InventoryWindow::InventoryWindow(MWBase::WindowManager& parWindowManager,DragAndDrop* dragAndDrop)
         : ContainerBase(dragAndDrop)
-        , WindowPinnableBase("openmw_inventory_window_layout.xml", parWindowManager)
+        , WindowPinnableBase("openmw_inventory_window.layout", parWindowManager)
         , mTrading(false)
     {
         static_cast<MyGUI::Window*>(mMainWidget)->eventWindowChangeCoord += MyGUI::newDelegate(this, &InventoryWindow::onWindowResize);
@@ -171,8 +171,8 @@ namespace MWGui
             /// \todo scripts
 
             boost::shared_ptr<MWWorld::Action> action = MWWorld::Class::get(ptr).use(ptr);
-            
-            action->execute();
+
+            action->execute (MWBase::Environment::get().getWorld()->getPlayer().getPlayer());
 
             // this is necessary for books/scrolls: if they are already in the player's inventory,
             // the "Take" button should not be visible.
@@ -305,6 +305,9 @@ namespace MWGui
             && (type != typeid(ESM::Repair).name())
             && (type != typeid(ESM::Weapon).name())
             && (type != typeid(ESM::Potion).name()))
+            return;
+
+        if (MWWorld::Class::get(object).getName(object) == "") // objects without name presented to user can never be picked up
             return;
 
         // sound

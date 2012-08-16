@@ -3,17 +3,19 @@
 #include <boost/lexical_cast.hpp>
 
 #include "../mwbase/environment.hpp"
-#include "../mwinput/inputmanager.hpp"
-#include "../mwsound/soundmanager.hpp"
+#include "../mwbase/world.hpp"
+#include "../mwbase/soundmanager.hpp"
+#include "../mwbase/windowmanager.hpp"
+
 #include "../mwworld/actiontake.hpp"
+#include "../mwworld/player.hpp"
 
 #include "formatting.hpp"
-#include "window_manager.hpp"
 
 using namespace MWGui;
 
-BookWindow::BookWindow (WindowManager& parWindowManager) :
-    WindowBase("openmw_book_layout.xml", parWindowManager)
+BookWindow::BookWindow (MWBase::WindowManager& parWindowManager) :
+    WindowBase("openmw_book.layout", parWindowManager)
 {
     getWidget(mCloseButton, "CloseButton");
     mCloseButton->eventMouseButtonClick += MyGUI::newDelegate(this, &BookWindow::onCloseButtonClicked);
@@ -55,8 +57,7 @@ void BookWindow::open (MWWorld::Ptr book)
 
     MWBase::Environment::get().getSoundManager()->playSound ("book open", 1.0, 1.0);
 
-    ESMS::LiveCellRef<ESM::Book, MWWorld::RefData> *ref =
-        mBook.get<ESM::Book>();
+    MWWorld::LiveCellRef<ESM::Book> *ref = mBook.get<ESM::Book>();
 
     BookTextParser parser;
     std::vector<std::string> results = parser.split(ref->base->text, mLeftPage->getSize().width, mLeftPage->getSize().height);
@@ -97,10 +98,10 @@ void BookWindow::onCloseButtonClicked (MyGUI::Widget* _sender)
 
 void BookWindow::onTakeButtonClicked (MyGUI::Widget* _sender)
 {
-    MWBase::Environment::get().getSoundManager()->playSound ("Item Book Up", 1.0, 1.0, MWSound::Play_NoTrack);
+    MWBase::Environment::get().getSoundManager()->playSound ("Item Book Up", 1.0, 1.0, MWBase::SoundManager::Play_NoTrack);
 
     MWWorld::ActionTake take(mBook);
-    take.execute();
+    take.execute (MWBase::Environment::get().getWorld()->getPlayer().getPlayer());
 
     mWindowManager.removeGuiMode(GM_Book);
 }

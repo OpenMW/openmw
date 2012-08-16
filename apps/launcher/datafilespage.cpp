@@ -140,7 +140,7 @@ DataFilesPage::DataFilesPage(Files::ConfigurationManager &cfg, QWidget *parent)
 
     createActions();
     setupConfig();
-    setupDataFiles();
+    //setupDataFiles();
 
 }
 
@@ -189,7 +189,7 @@ void DataFilesPage::setupConfig()
 }
 
 
-void DataFilesPage::setupDataFiles()
+bool DataFilesPage::setupDataFiles()
 {
     // We use the Configuration Manager to retrieve the configuration values
     boost::program_options::variables_map variables;
@@ -245,19 +245,13 @@ void DataFilesPage::setupDataFiles()
                 mCfgMgr.processPaths(mDataDirs);
             } else {
                 // Cancel from within the dir selection dialog
-                break;
+                return false;
             }
 
         } else {
             // Cancel
-            break;
+            return false;
         }
-    }
-
-    // Check if cancel was clicked because we can't exit from while loop
-    if (mDataDirs.empty()) {
-        QApplication::exit(1);
-        return;
     }
 
     // Create a file collection for the data dirs
@@ -362,6 +356,7 @@ void DataFilesPage::setupDataFiles()
     }
 
     readConfig();
+    return true;
 }
 
 void DataFilesPage::createActions()
@@ -1076,7 +1071,7 @@ void DataFilesPage::writeConfig(QString profile)
                               Please make sure you have the right permissions and try again.<br>").arg(pathStr));
             msgBox.exec();
 
-            qApp->exit(1);
+            qApp->quit();
             return;
         }
     }
@@ -1093,7 +1088,7 @@ void DataFilesPage::writeConfig(QString profile)
                           Please make sure you have the right permissions and try again.<br>").arg(file.fileName()));
         msgBox.exec();
 
-        qApp->exit(1);
+        qApp->quit();
         return;
     }
 
@@ -1124,7 +1119,7 @@ void DataFilesPage::writeConfig(QString profile)
                           Please make sure you have the right permissions and try again.<br>").arg(file.fileName()));
         msgBox.exec();
 
-        qApp->exit(1);
+        qApp->quit();
         return;
     }
 

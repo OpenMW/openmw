@@ -1,13 +1,5 @@
 #include <iostream>
 
-#include <string>
-#include <fstream>
-
-#include <boost/program_options.hpp>
-
-#include <components/files/fileops.hpp>
-#include <components/files/fixedpath.hpp>
-#include <components/files/collections.hpp>
 #include <components/files/configurationmanager.hpp>
 
 #include "engine.hpp"
@@ -16,15 +8,10 @@
 #include <boost/iostreams/concepts.hpp>
 #include <boost/iostreams/stream_buffer.hpp>
 
-#  if !defined(_DEBUG)
-#  include <iostream>
-#  include <fstream>
-#  endif
-
 // For OutputDebugString
 #include <Windows.h>
 // makes __argc and __argv available on windows
-#include <stdlib.h>
+#include <cstdlib>
 
 #endif
 
@@ -51,8 +38,6 @@ inline boost::filesystem::path lexical_cast<boost::filesystem::path, std::string
 
 } /* namespace boost */
 #endif /* (BOOST_VERSION <= 104600) */
-
-using namespace std;
 
 struct FallbackMap {
     std::map<std::string,std::string> mMap;
@@ -139,11 +124,19 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
         ("script-verbose", bpo::value<bool>()->implicit_value(true)
             ->default_value(false), "verbose script output")
 
-        ("new-game", bpo::value<bool>()->implicit_value(true)
-            ->default_value(false), "activate char gen/new game mechanics")
-
         ("script-all", bpo::value<bool>()->implicit_value(true)
             ->default_value(false), "compile all scripts (excluding dialogue scripts) at startup")
+
+        ("script-console", bpo::value<bool>()->implicit_value(true)
+            ->default_value(false), "enable console-only script functionality")
+
+        ("script-run", bpo::value<std::string>()->default_value(""),
+            "select a file that is executed in the console on startup\n\n"
+            "Note: The file contains a list of script lines, but not a complete scripts. "
+            "That means no begin/end and no variable declarations.")
+
+        ("new-game", bpo::value<bool>()->implicit_value(true)
+            ->default_value(false), "activate char gen/new game mechanics")
 
         ("fs-strict", bpo::value<bool>()->implicit_value(true)
             ->default_value(false), "strict file system handling (no case folding)")
@@ -264,6 +257,8 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
     engine.setCompileAll(variables["script-all"].as<bool>());
     engine.setAnimationVerbose(variables["anim-verbose"].as<bool>());
     engine.setFallbackValues(variables["fallback"].as<FallbackMap>().mMap);
+    engine.setScriptConsoleMode (variables["script-console"].as<bool>());
+    engine.setStartupScript (variables["script-run"].as<std::string>());
 
     return true;
 }

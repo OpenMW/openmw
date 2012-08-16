@@ -1,5 +1,6 @@
 #include "map_window.hpp"
-#include "window_manager.hpp"
+
+#include "../mwbase/windowmanager.hpp"
 
 #include <boost/lexical_cast.hpp>
 
@@ -154,8 +155,8 @@ void LocalMapBase::setPlayerDir(const float x, const float y)
 
 // ------------------------------------------------------------------------------------------
 
-MapWindow::MapWindow(WindowManager& parWindowManager) : 
-    MWGui::WindowPinnableBase("openmw_map_window_layout.xml", parWindowManager),
+MapWindow::MapWindow(MWBase::WindowManager& parWindowManager) :
+    MWGui::WindowPinnableBase("openmw_map_window.layout", parWindowManager),
     mGlobal(false)
 {
     setCoord(500,0,320,300);

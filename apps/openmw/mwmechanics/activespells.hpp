@@ -12,11 +12,15 @@
 namespace ESM
 {
     struct Spell;
+    struct EffectList;
 }
 
 namespace MWMechanics
 {
     /// \brief Lasting spell effects
+    ///
+    /// \note The name of this class is slightly misleading, since it also handels lasting potion
+    /// effects.
     class ActiveSpells
     {
         public:
@@ -33,13 +37,17 @@ namespace MWMechanics
 
             void update() const;
 
+            const ESM::EffectList& getEffectList (const std::string& id) const;
+
         public:
 
             ActiveSpells();
 
-            void addSpell (const std::string& id);
+            bool addSpell (const std::string& id);
             ///< Overwrites an existing spell with the same ID. If the spell does not have any
             /// non-instant effects, it is ignored.
+            ///
+            /// \return Has the spell been added?
 
             void removeSpell (const std::string& id);
 

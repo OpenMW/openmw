@@ -3,54 +3,57 @@
 
 #include <components/esm/loadingr.hpp>
 
-#include <components/esm_store/cell_store.hpp>
-
 #include "../mwbase/environment.hpp"
+#include "../mwbase/world.hpp"
+#include "../mwbase/soundmanager.hpp"
+#include "../mwbase/windowmanager.hpp"
 
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/actiontake.hpp"
-#include "../mwworld/world.hpp"
+#include "../mwworld/cellstore.hpp"
+#include "../mwworld/physicssystem.hpp"
 
-#include "../mwgui/window_manager.hpp"
 #include "../mwgui/tooltips.hpp"
 
 #include "../mwrender/objects.hpp"
-
-#include "../mwsound/soundmanager.hpp"
+#include "../mwrender/renderinginterface.hpp"
 
 namespace MWClass
 {
     void Ingredient::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const
     {
-        ESMS::LiveCellRef<ESM::Ingredient, MWWorld::RefData> *ref =
-            ptr.get<ESM::Ingredient>();
-
-        assert (ref->base != NULL);
-        const std::string &model = ref->base->model;
-
-        if (!model.empty())
-        {
+        const std::string model = getModel(ptr);
+        if (!model.empty()) {
             MWRender::Objects& objects = renderingInterface.getObjects();
             objects.insertBegin(ptr, ptr.getRefData().isEnabled(), false);
-            objects.insertMesh(ptr, "meshes\\" + model);
+            objects.insertMesh(ptr, model);
         }
     }
 
     void Ingredient::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics) const
     {
-        ESMS::LiveCellRef<ESM::Ingredient, MWWorld::RefData> *ref =
+        const std::string model = getModel(ptr);
+        if(!model.empty()) {
+            physics.insertObjectPhysics(ptr, model);
+        }
+    }
+
+    std::string Ingredient::getModel(const MWWorld::Ptr &ptr) const
+    {
+        MWWorld::LiveCellRef<ESM::Ingredient> *ref =
             ptr.get<ESM::Ingredient>();
+        assert(ref->base != NULL);
 
         const std::string &model = ref->base->model;
-        assert (ref->base != NULL);
-        if(!model.empty()){
-            physics.insertObjectPhysics(ptr, "meshes\\" + model);
+        if (!model.empty()) {
+            return "meshes\\" + model;
         }
+        return "";
     }
 
     std::string Ingredient::getName (const MWWorld::Ptr& ptr) const
     {
-        ESMS::LiveCellRef<ESM::Ingredient, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Ingredient> *ref =
             ptr.get<ESM::Ingredient>();
 
         return ref->base->name;
@@ -59,7 +62,7 @@ namespace MWClass
     boost::shared_ptr<MWWorld::Action> Ingredient::activate (const MWWorld::Ptr& ptr,
         const MWWorld::Ptr& actor) const
     {
-        MWBase::Environment::get().getSoundManager()->playSound3D (ptr, getUpSoundId(ptr), 1.0, 1.0, MWSound::Play_NoTrack);
+        MWBase::Environment::get().getSoundManager()->playSound3D (ptr, getUpSoundId(ptr), 1.0, 1.0, MWBase::SoundManager::Play_NoTrack);
 
         return boost::shared_ptr<MWWorld::Action> (
             new MWWorld::ActionTake (ptr));
@@ -67,7 +70,7 @@ namespace MWClass
 
     std::string Ingredient::getScript (const MWWorld::Ptr& ptr) const
     {
-        ESMS::LiveCellRef<ESM::Ingredient, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Ingredient> *ref =
             ptr.get<ESM::Ingredient>();
 
         return ref->base->script;
@@ -75,7 +78,7 @@ namespace MWClass
 
     int Ingredient::getValue (const MWWorld::Ptr& ptr) const
     {
-        ESMS::LiveCellRef<ESM::Ingredient, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Ingredient> *ref =
             ptr.get<ESM::Ingredient>();
 
         return ref->base->data.value;
@@ -100,7 +103,7 @@ namespace MWClass
 
     std::string Ingredient::getInventoryIcon (const MWWorld::Ptr& ptr) const
     {
-          ESMS::LiveCellRef<ESM::Ingredient, MWWorld::RefData> *ref =
+          MWWorld::LiveCellRef<ESM::Ingredient> *ref =
             ptr.get<ESM::Ingredient>();
 
         return ref->base->icon;
@@ -108,7 +111,7 @@ namespace MWClass
 
     bool Ingredient::hasToolTip (const MWWorld::Ptr& ptr) const
     {
-        ESMS::LiveCellRef<ESM::Ingredient, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Ingredient> *ref =
             ptr.get<ESM::Ingredient>();
 
         return (ref->base->name != "");
@@ -116,7 +119,7 @@ namespace MWClass
 
     MWGui::ToolTipInfo Ingredient::getToolTipInfo (const MWWorld::Ptr& ptr) const
     {
-        ESMS::LiveCellRef<ESM::Ingredient, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Ingredient> *ref =
             ptr.get<ESM::Ingredient>();
 
         MWGui::ToolTipInfo info;
@@ -151,5 +154,14 @@ namespace MWClass
         info.text = text;
 
         return info;
+    }
+
+    MWWorld::Ptr
+    Ingredient::copyToCellImpl(const MWWorld::Ptr &ptr, MWWorld::CellStore &cell) const
+    {
+        MWWorld::LiveCellRef<ESM::Ingredient> *ref =
+            ptr.get<ESM::Ingredient>();
+
+        return MWWorld::Ptr(&cell.ingreds.insert(*ref), &cell);
     }
 }

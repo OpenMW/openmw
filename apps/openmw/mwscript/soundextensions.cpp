@@ -8,10 +8,8 @@
 #include <components/interpreter/opcodes.hpp>
 
 #include "../mwbase/environment.hpp"
-
-#include "../mwworld/world.hpp"
-
-#include "../mwsound/soundmanager.hpp"
+#include "../mwbase/world.hpp"
+#include "../mwbase/soundmanager.hpp"
 
 #include "interpretercontext.hpp"
 #include "ref.hpp"
@@ -117,7 +115,7 @@ namespace MWScript
                     std::string sound = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
 
-                    MWBase::Environment::get().getSoundManager()->playSound3D (ptr, sound, 1.0, 1.0, mLoop ? MWSound::Play_Loop : 0);
+                    MWBase::Environment::get().getSoundManager()->playSound3D (ptr, sound, 1.0, 1.0, mLoop ? MWBase::SoundManager::Play_Loop : 0);
                 }
         };
 
@@ -143,7 +141,7 @@ namespace MWScript
                     Interpreter::Type_Float pitch = runtime[0].mFloat;
                     runtime.pop();
 
-                    MWBase::Environment::get().getSoundManager()->playSound3D (ptr, sound, volume, pitch, mLoop ? MWSound::Play_Loop : 0);
+                    MWBase::Environment::get().getSoundManager()->playSound3D (ptr, sound, volume, pitch, mLoop ? MWBase::SoundManager::Play_Loop : 0);
 
                 }
         };

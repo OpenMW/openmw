@@ -7,6 +7,9 @@ namespace MWClass
 {
     class Weapon : public MWWorld::Class
     {
+            virtual MWWorld::Ptr
+            copyToCellImpl(const MWWorld::Ptr &ptr, MWWorld::CellStore &cell) const;
+
         public:
 
             virtual void insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const;
@@ -66,6 +69,7 @@ namespace MWClass
                 const;
             ///< Generate action for using via inventory menu
 
+            virtual std::string getModel(const MWWorld::Ptr &ptr) const;
     };
 }
 

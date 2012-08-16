@@ -8,7 +8,7 @@ namespace MWGui
     class ConfirmationDialog : public WindowBase
     {
         public:
-            ConfirmationDialog(WindowManager& parWindowManager);
+            ConfirmationDialog(MWBase::WindowManager& parWindowManager);
             void open(const std::string& message);
 
             typedef MyGUI::delegates::CMultiDelegate0 EventHandle_Void;

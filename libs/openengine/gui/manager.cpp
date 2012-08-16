@@ -1,6 +1,6 @@
 #include <MyGUI.h>
 #include <MyGUI_OgrePlatform.h>
-#include <assert.h>
+#include <cassert>
 
 #include "manager.hpp"
 
@@ -36,6 +36,7 @@ void MyGUIManager::setup(Ogre::RenderWindow *wnd, Ogre::SceneManager *mgr, bool 
 
 void MyGUIManager::shutdown()
 {
+    mGui->shutdown ();
   delete mGui;
   if(mPlatform)
     {

@@ -24,11 +24,16 @@
 #ifndef _NIF_NODE_H_
 #define _NIF_NODE_H_
 
+#include <OgreMatrix4.h>
+
 #include "controlled.hpp"
 #include "data.hpp"
+#include "property.hpp"
 
 namespace Nif
 {
+
+class NiNode;
 
 /** A Node is an object that's part of the main NIF tree. It has
     parent node (unless it's the root), and transformation (location
@@ -37,191 +42,219 @@ namespace Nif
 class Node : public Named
 {
 public:
-  // Node flags. Interpretation depends somewhat on the type of node.
-  int flags;
-  const Transformation *trafo;
-  PropertyList props;
+    // Node flags. Interpretation depends somewhat on the type of node.
+    int flags;
+    Transformation trafo;
+    Ogre::Vector3 velocity; // Unused? Might be a run-time game state
+    PropertyList props;
 
-  // Bounding box info
-  bool hasBounds;
-  const Vector *boundPos;
-  const Matrix *boundRot;
-  const Vector *boundXYZ; // Box size
+    // Bounding box info
+    bool hasBounds;
+    Ogre::Vector3 boundPos;
+    Ogre::Matrix3 boundRot;
+    Ogre::Vector3 boundXYZ; // Box size
 
-  void read(NIFFile *nif)
-  {
-    Named::read(nif);
+    void read(NIFFile *nif)
+    {
+        Named::read(nif);
 
-    flags = nif->getShort();
-    trafo = nif->getTrafo();
-    props.read(nif);
+        flags = nif->getUShort();
+        trafo = nif->getTrafo();
+        velocity = nif->getVector3();
+        props.read(nif);
 
-    hasBounds = !!nif->getInt();
-    if(hasBounds)
-      {
-        nif->getInt(); // always 1
-        boundPos = nif->getVector();
-        boundRot = nif->getMatrix();
-        boundXYZ = nif->getVector();
-      }
+        hasBounds = !!nif->getInt();
+        if(hasBounds)
+        {
+            nif->getInt(); // always 1
+            boundPos = nif->getVector3();
+            boundRot = nif->getMatrix3();
+            boundXYZ = nif->getVector3();
+        }
 
-    boneTrafo = NULL;
-    boneIndex = -1;
-  }
+        parent = NULL;
 
-  // Bone transformation. If set, node is a part of a skeleton.
-  const NiSkinData::BoneTrafo *boneTrafo;
+        boneTrafo = NULL;
+        boneIndex = -1;
+    }
 
-  // Bone weight info, from NiSkinData
-  const NiSkinData::BoneInfo *boneInfo;
+    void post(NIFFile *nif)
+    {
+        Named::post(nif);
+        props.post(nif);
+    }
 
-  // Bone index. If -1, this node is either not a bone, or if
-  // boneTrafo is set it is the root bone in the skeleton.
-  short boneIndex;
+    // Parent node, or NULL for the root node. As far as I'm aware, only
+    // NiNodes (or types derived from NiNodes) can be parents.
+    NiNode *parent;
 
-  void makeRootBone(const NiSkinData::BoneTrafo *tr)
-  {
-    boneTrafo = tr;
-    boneIndex = -1;
-  }
+    // Bone transformation. If set, node is a part of a skeleton.
+    const NiSkinData::BoneTrafo *boneTrafo;
 
-  void makeBone(short ind, const NiSkinData::BoneInfo &bi)
-  {
-    boneInfo = &bi;
-    boneTrafo = bi.trafo;
-    boneIndex = ind;
-  }
-};
+    // Bone weight info, from NiSkinData
+    const NiSkinData::BoneInfo *boneInfo;
 
-struct NiTriShapeCopy
-{
- std::string sname;
- std::vector<std::string> boneSequence;
- Nif::NiSkinData::BoneTrafoCopy trafo;
- //Ogre::Quaternion initialBoneRotation;
- //Ogre::Vector3 initialBoneTranslation;
- std::vector<Ogre::Vector3> vertices;
- std::vector<Ogre::Vector3> normals;
- std::vector<Nif::NiSkinData::BoneInfoCopy> boneinfo;
- std::map<int, std::vector<Nif::NiSkinData::IndividualWeight> > vertsToWeights;
- Nif::NiMorphData morph;
+    // Bone index. If -1, this node is either not a bone, or if
+    // boneTrafo is set it is the root bone in the skeleton.
+    short boneIndex;
+
+    void makeRootBone(const NiSkinData::BoneTrafo *tr)
+    {
+        boneTrafo = tr;
+        boneIndex = -1;
+    }
+
+    void makeBone(short ind, const NiSkinData::BoneInfo &bi)
+    {
+        boneInfo = &bi;
+        boneTrafo = &bi.trafo;
+        boneIndex = ind;
+    }
+
+    Ogre::Matrix4 getLocalTransform();
+    Ogre::Matrix4 getWorldTransform();
 };
 
 struct NiNode : Node
 {
-  NodeList children;
-  NodeList effects;
+    NodeList children;
+    NodeList effects;
 
-  /* Known NiNode flags:
+    /* Known NiNode flags:
+        0x01 hidden
+        0x02 use mesh for collision
+        0x04 use bounding box for collision (?)
+        0x08 unknown, but common
+        0x20, 0x40, 0x80 unknown
+    */
 
-     0x01 hidden
-     0x02 use mesh for collision
-     0x04 use bounding box for collision (?)
-     0x08 unknown, but common
-     0x20, 0x40, 0x80 unknown
-   */
+    void read(NIFFile *nif)
+    {
+        Node::read(nif);
+        children.read(nif);
+        effects.read(nif);
+    }
 
-  void read(NIFFile *nif)
-  {
-    Node::read(nif);
-    children.read(nif);
-    effects.read(nif);
-  }
+    void post(NIFFile *nif)
+    {
+        Node::post(nif);
+        children.post(nif);
+        effects.post(nif);
+
+        for(size_t i = 0;i < children.length();i++)
+        {
+            // Why would a unique list of children contain empty refs?
+            if(!children[i].empty())
+                children[i]->parent = this;
+        }
+    }
 };
 
 struct NiTriShape : Node
 {
-  /* Possible flags:
-     0x40 - mesh has no vertex normals ?
+    /* Possible flags:
+        0x40 - mesh has no vertex normals ?
 
-     Only flags included in 0x47 (ie. 0x01, 0x02, 0x04 and 0x40) have
-     been observed so far.
-   */
+        Only flags included in 0x47 (ie. 0x01, 0x02, 0x04 and 0x40) have
+        been observed so far.
+    */
 
-  NiTriShapeDataPtr data;
-  NiSkinInstancePtr skin;
+    NiTriShapeDataPtr data;
+    NiSkinInstancePtr skin;
 
-  void read(NIFFile *nif)
-  {
-    Node::read(nif);
-    data.read(nif);
-    skin.read(nif);
-  }
+    void read(NIFFile *nif)
+    {
+        Node::read(nif);
+        data.read(nif);
+        skin.read(nif);
+    }
 
-  NiTriShapeCopy clone(){
-	  NiTriShapeCopy copy;
-      copy.sname = name.toString();
-	  float *ptr = (float*)data->vertices.ptr;
-	  float *ptrNormals = (float*)data->normals.ptr;
-	  int numVerts = data->vertices.length / 3;
-	  for(int i = 0; i < numVerts; i++)
-	  {
-		   float *current = (float*) (ptr + i * 3);
-		   copy.vertices.push_back(Ogre::Vector3(*current, *(current + 1), *(current + 2)));
-
-		   if(ptrNormals){
-			float *currentNormals = (float*) (ptrNormals + i * 3);
-		   copy.normals.push_back(Ogre::Vector3(*currentNormals, *(currentNormals + 1), *(currentNormals + 2)));
-	 		  }
-      }
-
-
-  return copy;
-  }
+    void post(NIFFile *nif)
+    {
+        Node::post(nif);
+        data.post(nif);
+        skin.post(nif);
+    }
 };
 
 struct NiCamera : Node
 {
-  struct Camera
-  {
-    // Camera frustrum
-    float left, right, top, bottom, nearDist, farDist;
+    struct Camera
+    {
+        // Camera frustrum
+        float left, right, top, bottom, nearDist, farDist;
 
-    // Viewport
-    float vleft, vright, vtop, vbottom;
+        // Viewport
+        float vleft, vright, vtop, vbottom;
 
-    // Level of detail modifier
-    float LOD;
-  };
+        // Level of detail modifier
+        float LOD;
 
-  const Camera *cam;
+        void read(NIFFile *nif)
+        {
+            left = nif->getFloat();
+            right = nif->getFloat();
+            top = nif->getFloat();
+            bottom = nif->getFloat();
+            nearDist = nif->getFloat();
+            farDist = nif->getFloat();
 
-  void read(NIFFile *nif)
-  {
-    Node::read(nif);
+            vleft = nif->getFloat();
+            vright = nif->getFloat();
+            vtop = nif->getFloat();
+            vbottom = nif->getFloat();
 
-    nif->getPtr<Camera>();
+            LOD = nif->getFloat();
+        }
+    };
+    Camera cam;
 
-    nif->getInt(); // -1
-    nif->getInt(); // 0
-  }
+    void read(NIFFile *nif)
+    {
+        Node::read(nif);
+
+        cam.read(nif);
+
+        nif->getInt(); // -1
+        nif->getInt(); // 0
+    }
 };
 
 struct NiAutoNormalParticles : Node
 {
-  NiAutoNormalParticlesDataPtr data;
+    NiAutoNormalParticlesDataPtr data;
 
-  void read(NIFFile *nif)
-  {
-    Node::read(nif);
-    data.read(nif);
-    nif->getInt(); // -1
-  }
+    void read(NIFFile *nif)
+    {
+        Node::read(nif);
+        data.read(nif);
+        nif->getInt(); // -1
+    }
+
+    void post(NIFFile *nif)
+    {
+        Node::post(nif);
+        data.post(nif);
+    }
 };
 
 struct NiRotatingParticles : Node
 {
-  NiRotatingParticlesDataPtr data;
+    NiRotatingParticlesDataPtr data;
 
-  void read(NIFFile *nif)
-  {
-    Node::read(nif);
-    data.read(nif);
-    nif->getInt(); // -1
-  }
+    void read(NIFFile *nif)
+    {
+        Node::read(nif);
+        data.read(nif);
+        nif->getInt(); // -1
+    }
+
+    void post(NIFFile *nif)
+    {
+        Node::post(nif);
+        data.post(nif);
+    }
 };
-
-
 
 } // Namespace
 #endif

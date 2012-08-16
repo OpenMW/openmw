@@ -1,56 +1,38 @@
 #include "engine.hpp"
 #include "components/esm/loadcell.hpp"
 
-#include <cassert>
-
-#include <iostream>
-#include <utility>
-
 #include <OgreRoot.h>
 #include <OgreRenderWindow.h>
 
 #include <MyGUI_WidgetManager.h>
 
-#include <openengine/ogre/renderer.hpp>
-#include <openengine/gui/manager.hpp>
-
-#include <components/esm/records.hpp>
-#include <components/esm_store/cell_store.hpp>
 #include <components/bsa/bsa_archive.hpp>
-#include <components/esm/esm_reader.hpp>
-#include <components/files/fixedpath.hpp>
 #include <components/files/configurationmanager.hpp>
-#include <components/settings/settings.hpp>
 #include <components/nifoverrides/nifoverrides.hpp>
 
 #include <components/nifbullet/bullet_nif_loader.hpp>
 #include <components/nifogre/ogre_nif_loader.hpp>
 
-#include "mwinput/inputmanager.hpp"
+#include "mwinput/inputmanagerimp.hpp"
 
-#include "mwgui/window_manager.hpp"
+#include "mwgui/windowmanagerimp.hpp"
 #include "mwgui/cursorreplace.hpp"
 
-#include "mwscript/scriptmanager.hpp"
-#include "mwscript/compilercontext.hpp"
-#include "mwscript/interpretercontext.hpp"
+#include "mwscript/scriptmanagerimp.hpp"
 #include "mwscript/extensions.hpp"
-#include "mwscript/globalscripts.hpp"
 
-#include "mwsound/soundmanager.hpp"
+#include "mwsound/soundmanagerimp.hpp"
 
-#include "mwworld/world.hpp"
 #include "mwworld/class.hpp"
 #include "mwworld/player.hpp"
+#include "mwworld/worldimp.hpp"
 
 #include "mwclass/classes.hpp"
 
-#include "mwdialogue/dialoguemanager.hpp"
-#include "mwdialogue/journal.hpp"
+#include "mwdialogue/dialoguemanagerimp.hpp"
+#include "mwdialogue/journalimp.hpp"
 
-#include "mwmechanics/mechanicsmanager.hpp"
-
-#include "mwbase/environment.hpp"
+#include "mwmechanics/mechanicsmanagerimp.hpp"
 
 
 void OMW::Engine::executeLocalScripts()
@@ -74,11 +56,8 @@ void OMW::Engine::executeLocalScripts()
     localScripts.setIgnore (MWWorld::Ptr());
 }
 
-void OMW::Engine::setAnimationVerbose(bool animverbose){
-    if(animverbose){
-        NifOgre::NIFLoader::getSingletonPtr()->setOutputAnimFiles(true);
-        NifOgre::NIFLoader::getSingletonPtr()->setVerbosePath(mCfgMgr.getLogPath().string());
-    }
+void OMW::Engine::setAnimationVerbose(bool animverbose)
+{
 }
 
 bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
@@ -126,9 +105,9 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
 
         // update GUI
         Ogre::RenderWindow* window = mOgre->getWindow();
-        MWBase::Environment::get().getWindowManager()->wmUpdateFps(window->getLastFPS(),
-                                                 window->getTriangleCount(),
-                                                 window->getBatchCount());
+        unsigned int tri, batch;
+        MWBase::Environment::get().getWorld()->getTriangleBatchCount(tri, batch);
+        MWBase::Environment::get().getWindowManager()->wmUpdateFps(window->getLastFPS(), tri, batch);
 
         MWBase::Environment::get().getWindowManager()->onFrame(evt.timeSinceLastFrame);
     }
@@ -150,6 +129,7 @@ OMW::Engine::Engine(Files::ConfigurationManager& configurationManager)
   , mCompileAll (false)
   , mScriptContext (0)
   , mFSStrict (false)
+  , mScriptConsoleMode (false)
   , mCfgMgr(configurationManager)
 {
     std::srand ( std::time(NULL) );
@@ -310,7 +290,6 @@ void OMW::Engine::go()
     }
     mOgre->configure(
         mCfgMgr.getLogPath().string(),
-        mCfgMgr.getPluginsConfigPath().string(),
         renderSystem,
         false);
 
@@ -348,7 +327,8 @@ void OMW::Engine::go()
     MWScript::registerExtensions (mExtensions);
 
     mEnvironment.setWindowManager (new MWGui::WindowManager(
-        mExtensions, mFpsLevel, mNewGame, mOgre, mCfgMgr.getLogPath().string() + std::string("/")));
+        mExtensions, mFpsLevel, mNewGame, mOgre, mCfgMgr.getLogPath().string() + std::string("/"),
+        mScriptConsoleMode));
 
     // Create sound system
     mEnvironment.setSoundManager (new MWSound::SoundManager(mUseSound));
@@ -409,6 +389,9 @@ void OMW::Engine::go()
                 << "%)"
                 << std::endl;
     }
+
+    if (!mStartupScript.empty())
+        MWBase::Environment::get().getWindowManager()->executeInConsole (mStartupScript);
 
     // Start the main rendering loop
     mOgre->start();
@@ -511,4 +494,14 @@ void OMW::Engine::setEncoding(const std::string& encoding)
 void OMW::Engine::setFallbackValues(std::map<std::string,std::string> fallbackMap)
 {
     mFallbackMap = fallbackMap;
+}
+
+void OMW::Engine::setScriptConsoleMode (bool enabled)
+{
+    mScriptConsoleMode = enabled;
+}
+
+void OMW::Engine::setStartupScript (const std::string& path)
+{
+    mStartupScript = path;
 }

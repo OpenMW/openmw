@@ -5,11 +5,15 @@
 #include <vector>
 #include <string>
 
-#include "../mwworld/ptr.hpp"
-
 namespace Ogre
 {
     class Vector3;
+}
+
+namespace MWWorld
+{
+    class Ptr;
+    class CellStore;
 }
 
 namespace MWMechanics
@@ -23,6 +27,10 @@ namespace MWMechanics
 
             void adjustMagicEffects (const MWWorld::Ptr& creature);
 
+            void calculateDynamicStats (const MWWorld::Ptr& ptr);
+
+            void calculateCreatureStatModifiers (const MWWorld::Ptr& ptr);
+
         public:
 
             Actors();
@@ -35,7 +43,7 @@ namespace MWMechanics
             ///
             /// \note Ignored, if \a ptr is not a registered actor.
 
-            void dropActors (const MWWorld::Ptr::CellStore *cellStore);
+            void dropActors (const MWWorld::CellStore *cellStore);
             ///< Deregister all actors in the given cell.
 
             void update (std::vector<std::pair<std::string, Ogre::Vector3> >& movement,

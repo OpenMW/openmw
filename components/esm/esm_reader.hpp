@@ -1,18 +1,14 @@
 #ifndef _ESM_READER_H
 #define _ESM_READER_H
 
-#include <string.h>
-
-#include <string>
 #include <libs/platform/stdint.h>
 #include <libs/platform/string.h>
-#include <assert.h>
+#include <cassert>
 #include <vector>
 #include <sstream>
-#include <stdexcept>
 
-#include <libs/mangle/stream/stream.hpp>
-#include <libs/mangle/stream/servers/file_stream.hpp>
+#include <OgreDataStream.h>
+
 #include <components/misc/stringops.hpp>
 
 #include <components/to_utf8/to_utf8.hpp>
@@ -183,11 +179,11 @@ public:
 
   /// Raw opening. Opens the file and sets everything up but doesn't
   /// parse the header.
-  void openRaw(Mangle::Stream::StreamPtr _esm, const std::string &name);
+  void openRaw(Ogre::DataStreamPtr _esm, const std::string &name);
 
   /// Load ES file from a new stream, parses the header. Closes the
   /// currently open file first, if any.
-  void open(Mangle::Stream::StreamPtr _esm, const std::string &name);
+  void open(Ogre::DataStreamPtr _esm, const std::string &name);
 
   void open(const std::string &file);
 
@@ -354,7 +350,7 @@ public:
   void setEncoding(const std::string& encoding);
 
 private:
-  Mangle::Stream::StreamPtr mEsm;
+  Ogre::DataStreamPtr mEsm;
 
   ESM_Context mCtx;
 

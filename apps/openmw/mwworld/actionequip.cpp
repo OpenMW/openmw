@@ -1,9 +1,11 @@
 #include "actionequip.hpp"
 
 #include "../mwbase/environment.hpp"
-#include "../mwworld/world.hpp"
-#include "../mwworld/inventorystore.hpp"
-#include "../mwworld/player.hpp"
+#include "../mwbase/world.hpp"
+
+#include "inventorystore.hpp"
+#include "player.hpp"
+#include "class.hpp"
 
 namespace MWWorld
 {
@@ -11,10 +13,10 @@ namespace MWWorld
     {
     }
 
-    void ActionEquip::execute ()
+    void ActionEquip::executeImp (const Ptr& actor)
     {
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
-        MWWorld::InventoryStore& invStore = static_cast<MWWorld::InventoryStore&>(MWWorld::Class::get(player).getContainerStore(player));
+        MWWorld::InventoryStore& invStore = MWWorld::Class::get(player).getInventoryStore(player);
 
         // slots that this item can be equipped in
         std::pair<std::vector<int>, bool> slots = MWWorld::Class::get(mObject).getEquipmentSlots(mObject);
@@ -51,4 +53,3 @@ namespace MWWorld
         }
     }
 }
-

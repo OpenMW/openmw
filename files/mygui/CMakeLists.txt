@@ -1,68 +1,73 @@
-# Minimal MyGUI build system for OpenMW
 
 # Copy resource files into the build directory
 set(SDIR ${CMAKE_CURRENT_SOURCE_DIR})
 set(DDIR ${OpenMW_BINARY_DIR}/resources/mygui)
 
-configure_file("${SDIR}/bigbars.png" "${DDIR}/bigbars.png" COPYONLY)
-configure_file("${SDIR}/black.png" "${DDIR}/black.png" COPYONLY)
-configure_file("${SDIR}/core.skin" "${DDIR}/core.skin" COPYONLY)
-configure_file("${SDIR}/core.xml" "${DDIR}/core.xml" COPYONLY)
-configure_file("${SDIR}/mwgui.png" "${DDIR}/mwgui.png" COPYONLY)
-configure_file("${SDIR}/openmw_resources.xml" "${DDIR}/openmw_resources.xml" COPYONLY)
-configure_file("${SDIR}/openmw_settings.xml" "${DDIR}/openmw_settings.xml" COPYONLY)
-configure_file("${SDIR}/openmw_box.skin.xml" "${DDIR}/openmw_box.skin.xml" COPYONLY)
-configure_file("${SDIR}/openmw_button.skin.xml" "${DDIR}/openmw_button.skin.xml" COPYONLY)
-configure_file("${SDIR}/openmw_list.skin.xml" "${DDIR}/openmw_list.skin.xml" COPYONLY)
-configure_file("${SDIR}/openmw_edit.skin.xml" "${DDIR}/openmw_edit.skin.xml" COPYONLY)
-configure_file("${SDIR}/openmw_console_layout.xml" "${DDIR}/openmw_console_layout.xml" COPYONLY)
-configure_file("${SDIR}/openmw_console.skin.xml" "${DDIR}/openmw_console.skin.xml" COPYONLY)
-configure_file("${SDIR}/openmw.font.xml" "${DDIR}/openmw.font.xml" COPYONLY)
-configure_file("${SDIR}/openmw_hud_box.skin.xml" "${DDIR}/openmw_hud_box.skin.xml" COPYONLY)
-configure_file("${SDIR}/openmw_hud_energybar.skin.xml" "${DDIR}/openmw_hud_energybar.skin.xml" COPYONLY)
-configure_file("${SDIR}/openmw_hud_layout.xml" "${DDIR}/openmw_hud_layout.xml" COPYONLY)
-configure_file("${SDIR}/openmw_text_input_layout.xml" "${DDIR}/openmw_text_input_layout.xml" COPYONLY)
-configure_file("${SDIR}/openmw_infobox_layout.xml" "${DDIR}/openmw_infobox_layout.xml" COPYONLY)
-configure_file("${SDIR}/openmw_chargen_race_layout.xml" "${DDIR}/openmw_chargen_race_layout.xml" COPYONLY)
-configure_file("${SDIR}/openmw_chargen_class_layout.xml" "${DDIR}/openmw_chargen_class_layout.xml" COPYONLY)
-configure_file("${SDIR}/openmw_chargen_generate_class_result_layout.xml" "${DDIR}/openmw_chargen_generate_class_result_layout.xml" COPYONLY)
-configure_file("${SDIR}/openmw_chargen_create_class_layout.xml" "${DDIR}/openmw_chargen_create_class_layout.xml" COPYONLY)
-configure_file("${SDIR}/openmw_chargen_select_specialization_layout.xml" "${DDIR}/openmw_chargen_select_specialization_layout.xml" COPYONLY)
-configure_file("${SDIR}/openmw_chargen_select_attribute_layout.xml" "${DDIR}/openmw_chargen_select_attribute_layout.xml" COPYONLY)
-configure_file("${SDIR}/openmw_chargen_select_skill_layout.xml" "${DDIR}/openmw_chargen_select_skill_layout.xml" COPYONLY)
-configure_file("${SDIR}/openmw_chargen_class_description_layout.xml" "${DDIR}/openmw_chargen_class_description_layout.xml" COPYONLY)
-configure_file("${SDIR}/openmw_chargen_birth_layout.xml" "${DDIR}/openmw_chargen_birth_layout.xml" COPYONLY)
-configure_file("${SDIR}/openmw_chargen_review_layout.xml" "${DDIR}/openmw_chargen_review_layout.xml" COPYONLY)
-configure_file("${SDIR}/openmw_dialogue_window_layout.xml" "${DDIR}/openmw_dialogue_window_layout.xml" COPYONLY)
-configure_file("${SDIR}/openmw_dialogue_window_skin.xml" "${DDIR}/openmw_dialogue_window_skin.xml" COPYONLY)
-configure_file("${SDIR}/openmw_inventory_window_layout.xml" "${DDIR}/openmw_inventory_window_layout.xml" COPYONLY)
-configure_file("${SDIR}/openmw_container_window_layout.xml" "${DDIR}/openmw_container_window_layout.xml" COPYONLY)
-configure_file("${SDIR}/openmw_layers.xml" "${DDIR}/openmw_layers.xml" COPYONLY)
-configure_file("${SDIR}/openmw_mainmenu_layout.xml" "${DDIR}/openmw_mainmenu_layout.xml" COPYONLY)
-configure_file("${SDIR}/openmw_mainmenu_skin.xml" "${DDIR}/openmw_mainmenu_skin.xml" COPYONLY)
-configure_file("${SDIR}/openmw_map_window_layout.xml" "${DDIR}/openmw_map_window_layout.xml" COPYONLY)
-configure_file("${SDIR}/openmw_map_window_skin.xml" "${DDIR}/openmw_map_window_skin.xml" COPYONLY)
-configure_file("${SDIR}/openmw.pointer.xml" "${DDIR}/openmw.pointer.xml" COPYONLY)
-configure_file("${SDIR}/openmw_progress.skin.xml" "${DDIR}/openmw_progress.skin.xml" COPYONLY)
-configure_file("${SDIR}/openmw_stats_window_layout.xml" "${DDIR}/openmw_stats_window_layout.xml" COPYONLY)
-configure_file("${SDIR}/openmw_text.skin.xml" "${DDIR}/openmw_text.skin.xml" COPYONLY)
-configure_file("${SDIR}/openmw_windows.skin.xml" "${DDIR}/openmw_windows.skin.xml" COPYONLY)
-configure_file("${SDIR}/openmw_messagebox_layout.xml" "${DDIR}/openmw_messagebox_layout.xml" COPYONLY)
-configure_file("${SDIR}/openmw_interactive_messagebox_layout.xml" "${DDIR}/openmw_interactive_messagebox_layout.xml" COPYONLY)
-configure_file("${SDIR}/openmw_journal_layout.xml" "${DDIR}/openmw_journal_layout.xml" COPYONLY)
-configure_file("${SDIR}/openmw_journal_skin.xml" "${DDIR}/openmw_journal_skin.xml" COPYONLY)
-configure_file("${SDIR}/openmw_tooltips.xml" "${DDIR}/openmw_tooltips.xml" COPYONLY)
-configure_file("${SDIR}/openmw_scroll_layout.xml" "${DDIR}/openmw_scroll_layout.xml" COPYONLY)
-configure_file("${SDIR}/openmw_scroll_skin.xml" "${DDIR}/openmw_scroll_skin.xml" COPYONLY)
-configure_file("${SDIR}/openmw_book_layout.xml" "${DDIR}/openmw_book_layout.xml" COPYONLY)
-configure_file("${SDIR}/openmw_count_window_layout.xml" "${DDIR}/openmw_count_window_layout.xml" COPYONLY)
-configure_file("${SDIR}/openmw_trade_window_layout.xml" "${DDIR}/openmw_trade_window_layout.xml" COPYONLY)
-configure_file("${SDIR}/openmw_settings_window_layout.xml" "${DDIR}/openmw_settings_window_layout.xml" COPYONLY)
-configure_file("${SDIR}/openmw_confirmation_dialog_layout.xml" "${DDIR}/openmw_confirmation_dialog_layout.xml" COPYONLY)
-configure_file("${SDIR}/openmw_alchemy_window_layout.xml" "${DDIR}/openmw_alchemy_window_layout.xml" COPYONLY)
-configure_file("${SDIR}/openmw_spell_window_layout.xml" "${DDIR}/openmw_spell_window_layout.xml" COPYONLY)
-configure_file("${SDIR}/atlas1.cfg" "${DDIR}/atlas1.cfg" COPYONLY)
-configure_file("${SDIR}/smallbars.png" "${DDIR}/smallbars.png" COPYONLY)
-configure_file("${SDIR}/EBGaramond-Regular.ttf" "${DDIR}/EBGaramond-Regular.ttf" COPYONLY)
-configure_file("${SDIR}/Obliviontt.zip" "${DDIR}/Obliviontt.zip" COPYONLY)
-configure_file("${SDIR}/VeraMono.ttf" "${DDIR}/VeraMono.ttf" COPYONLY)
+set(MYGUI_FILES
+    atlas1.cfg
+    mainmenu.cfg
+    bigbars.png
+    black.png
+    core.skin
+    core.xml
+    EBGaramond-Regular.ttf
+    mwgui.png
+    Obliviontt.zip
+    openmw_alchemy_window.layout
+    openmw_book.layout
+    openmw_box.skin.xml
+    openmw_button.skin.xml
+    openmw_chargen_birth.layout
+    openmw_chargen_class_description.layout
+    openmw_chargen_class.layout
+    openmw_chargen_create_class.layout
+    openmw_chargen_generate_class_result.layout
+    openmw_chargen_race.layout
+    openmw_chargen_review.layout
+    openmw_chargen_select_attribute.layout
+    openmw_chargen_select_skill.layout
+    openmw_chargen_select_specialization.layout
+    openmw_confirmation_dialog.layout
+    openmw_console.layout
+    openmw_console.skin.xml
+    openmw_container_window.layout
+    openmw_count_window.layout
+    openmw_dialogue_window.layout
+    openmw_dialogue_window_skin.xml
+    openmw_edit.skin.xml
+    openmw.font.xml
+    openmw_hud_box.skin.xml
+    openmw_hud_energybar.skin.xml
+    openmw_hud.layout
+    openmw_infobox.layout
+    openmw_interactive_messagebox.layout
+    openmw_inventory_window.layout
+    openmw_journal.layout
+    openmw_journal_skin.xml
+    openmw_layers.xml
+    openmw_list.skin.xml
+    openmw_mainmenu.layout
+    openmw_mainmenu_skin.xml
+    openmw_map_window.layout
+    openmw_map_window_skin.xml
+    openmw_messagebox.layout
+    openmw.pointer.xml
+    openmw_progress.skin.xml
+    openmw_resources.xml
+    openmw_scroll.layout
+    openmw_scroll_skin.xml
+    openmw_settings_window.layout
+    openmw_settings.xml
+    openmw_spell_window.layout
+    openmw_stats_window.layout
+    openmw_text_input.layout
+    openmw_text.skin.xml
+    openmw_tooltips.layout
+    openmw_trade_window.layout
+    openmw_windows.skin.xml
+    smallbars.png
+    VeraMono.ttf
+)
+
+
+copy_all_files(${CMAKE_CURRENT_SOURCE_DIR} ${DDIR} "${MYGUI_FILES}")

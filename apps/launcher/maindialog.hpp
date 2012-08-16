@@ -28,6 +28,7 @@ public slots:
     void changePage(QListWidgetItem *current, QListWidgetItem *previous);
     void play();
     void profileChanged(int index);
+    bool setup();
 
 private:
     void createIcons();

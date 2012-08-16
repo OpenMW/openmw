@@ -1,18 +1,20 @@
 
 #include "player.hpp"
 
-#include "../mwrender/player.hpp"
+#include <components/esm_store/store.hpp>
+
+#include "../mwbase/environment.hpp"
+#include "../mwbase/world.hpp"
 
 #include "../mwmechanics/movement.hpp"
 #include "../mwmechanics/npcstats.hpp"
 
-#include "world.hpp"
 #include "class.hpp"
 
 namespace MWWorld
 {
-    Player::Player (MWRender::Player *renderer, const ESM::NPC *player, MWWorld::World& world) :
-      mCellStore (0), mRenderer (renderer), mWorld (world), mClass (0),
+    Player::Player (const ESM::NPC *player, const MWBase::World& world) :
+      mCellStore (0), mClass (0),
       mAutoMove (false), mForwardBackward (0)
     {
         mPlayer.base = player;
@@ -24,7 +26,6 @@ namespace MWWorld
         float* playerPos = mPlayer.mData.getPosition().pos;
         playerPos[0] = playerPos[1] = playerPos[2] = 0;
 
-        mPlayer.mData.setBaseNode(renderer->getNode());
         /// \todo Do not make a copy of classes defined in esm/p records.
         mClass = new ESM::Class (*world.getStore().classes.find (player->cls));
     }
@@ -34,17 +35,6 @@ namespace MWWorld
         delete mClass;
     }
 
-    void Player::setPos(float x, float y, float z)
-    {
-      /// \todo This fcuntion should be removed during the mwrender-refactoring.
-        mWorld.moveObject (getPlayer(), x, y, z);
-    }
-
-    void Player::setRot(float x, float y, float z)
-    {
-        mRenderer->setRot(x, y, z);
-    }
-
     void Player::setClass (const ESM::Class& class_)
     {
         ESM::Class *new_class = new ESM::Class (class_);
@@ -52,10 +42,10 @@ namespace MWWorld
         mClass = new_class;
     }
 
-    void Player::setDrawState(const DrawState& value)
+    void Player::setDrawState (MWMechanics::DrawState_ state)
     {
          MWWorld::Ptr ptr = getPlayer();
-         MWWorld::Class::get(ptr).getNpcStats(ptr).mDrawState = value;
+         MWWorld::Class::get(ptr).getNpcStats(ptr).setDrawState (state);
     }
 
     void Player::setAutoMove (bool enable)
@@ -90,14 +80,13 @@ namespace MWWorld
 
         MWWorld::Class::get (ptr).getMovementSettings (ptr).mForwardBackward = value;
     }
-	void Player::setUpDown(int value)
-	{
-		MWWorld::Ptr ptr = getPlayer();
 
-        
+    void Player::setUpDown(int value)
+    {
+        MWWorld::Ptr ptr = getPlayer();
 
         MWWorld::Class::get (ptr).getMovementSettings (ptr).mUpDown = value;
-	}
+    }
 
     void Player::toggleRunning()
     {
@@ -108,10 +97,10 @@ namespace MWWorld
         MWWorld::Class::get (ptr).setStance (ptr, MWWorld::Class::Run, !running);
     }
 
-    DrawState Player::getDrawState()
+    MWMechanics::DrawState_ Player::getDrawState()
     {
          MWWorld::Ptr ptr = getPlayer();
-         return MWWorld::Class::get(ptr).getNpcStats(ptr).mDrawState;
+         return MWWorld::Class::get(ptr).getNpcStats(ptr).getDrawState();
     }
 
 }

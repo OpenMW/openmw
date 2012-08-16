@@ -22,7 +22,8 @@
         stop:0.9 rgba(0, 0, 0, 55),
         stop:1 rgba(0, 0, 0, 100));
 
-    font: 26pt "EB Garamond";
+    font-size: 26pt;
+    font-family: "EB Garamond", "EB Garamond 08";
     color: black;
 
     border-right: 1px solid rgba(0, 0, 0, 155);
@@ -54,7 +55,8 @@
 }
 
 #ProfileLabel {
-    font: 18pt "EB Garamond";
+    font-size: 18pt;
+    font-family: "EB Garamond", "EB Garamond 08";
 }
 
 #ProfilesComboBox {
@@ -82,7 +84,8 @@
     padding-top: 3px;
     padding-left: 4px;
 
-    font: 12pt "EB Garamond";
+    font-size: 12pt;
+    font-family: "EB Garamond", "EB Garamond 08";
 }
 
 #ProfilesComboBox::drop-down {

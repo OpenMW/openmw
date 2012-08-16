@@ -19,7 +19,10 @@
 
 #include "btBulletDynamicsCommon.h"
 #include "BtOgreExtras.h"
-#include "Ogre.h"
+
+#include <OgreMatrix4.h>
+#include <OgreMesh.h>
+#include <OgreVector3.h>
 
 namespace BtOgre {
 

@@ -3,22 +3,23 @@
 #include <cmath>
 #include <algorithm>
 #include <iterator>
-#include <assert.h>
+#include <cassert>
 #include <iostream>
 
 #include <boost/lexical_cast.hpp>
 
 #include "../mwbase/environment.hpp"
+#include "../mwbase/world.hpp"
+#include "../mwbase/soundmanager.hpp"
+#include "../mwbase/windowmanager.hpp"
+
 #include "../mwworld/manualref.hpp"
-#include "../mwworld/world.hpp"
 #include "../mwworld/containerstore.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/player.hpp"
-#include "../mwclass/container.hpp"
-#include "../mwinput/inputmanager.hpp"
-#include "../mwsound/soundmanager.hpp"
 
-#include "window_manager.hpp"
+#include "../mwclass/container.hpp"
+
 #include "widgets.hpp"
 #include "countdialog.hpp"
 #include "tradewindow.hpp"
@@ -273,7 +274,7 @@ void ContainerBase::onContainerClicked(MyGUI::Widget* _sender)
             // check the container's Organic flag (if this is a container). container with Organic flag doesn't allow putting items inside
             if (mPtr.getTypeName() == typeid(ESM::Container).name())
             {
-                ESMS::LiveCellRef<ESM::Container, MWWorld::RefData>* ref = mPtr.get<ESM::Container>();
+                MWWorld::LiveCellRef<ESM::Container>* ref = mPtr.get<ESM::Container>();
                 if (ref->base->flags & ESM::Container::Organic)
                 {
                     // user notification
@@ -556,7 +557,7 @@ void ContainerBase::addItem(MWWorld::Ptr item, int count)
 {
     MWWorld::ContainerStore& containerStore = MWWorld::Class::get(mPtr).getContainerStore(mPtr);
 
-    int origCount = item.getRefData().getCount();    
+    int origCount = item.getRefData().getCount();
 
     item.getRefData().setCount(count);
     MWWorld::ContainerStoreIterator it = containerStore.add(item);
@@ -590,9 +591,9 @@ MWWorld::ContainerStore& ContainerBase::getContainerStore()
 
 // ------------------------------------------------------------------------------------------------
 
-ContainerWindow::ContainerWindow(WindowManager& parWindowManager,DragAndDrop* dragAndDrop)
+ContainerWindow::ContainerWindow(MWBase::WindowManager& parWindowManager,DragAndDrop* dragAndDrop)
     : ContainerBase(dragAndDrop)
-    , WindowBase("openmw_container_window_layout.xml", parWindowManager)
+    , WindowBase("openmw_container_window.layout", parWindowManager)
 {
     getWidget(mTakeButton, "TakeButton");
     getWidget(mCloseButton, "CloseButton");
@@ -612,12 +613,9 @@ ContainerWindow::ContainerWindow(WindowManager& parWindowManager,DragAndDrop* dr
     mCloseButton->setCoord(600-20-closeButtonWidth, mCloseButton->getCoord().top, closeButtonWidth, mCloseButton->getCoord().height);
     mTakeButton->setCoord(600-20-closeButtonWidth-takeButtonWidth-8, mTakeButton->getCoord().top, takeButtonWidth, mTakeButton->getCoord().height);
 
-    int w = MyGUI::RenderManager::getInstance().getViewSize().width;
-    //int h = MyGUI::RenderManager::getInstance().getViewSize().height;
-
     static_cast<MyGUI::Window*>(mMainWidget)->eventWindowChangeCoord += MyGUI::newDelegate(this, &ContainerWindow::onWindowResize);
 
-    setCoord(w-600,0,600,300);
+    setCoord(200,0,600,300);
 }
 
 ContainerWindow::~ContainerWindow()

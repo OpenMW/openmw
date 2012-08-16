@@ -1,7 +1,8 @@
 #include "actionread.hpp"
 
 #include "../mwbase/environment.hpp"
-#include "../mwgui/window_manager.hpp"
+#include "../mwbase/windowmanager.hpp"
+
 #include "../mwgui/bookwindow.hpp"
 #include "../mwgui/scrollwindow.hpp"
 
@@ -11,10 +12,9 @@ namespace MWWorld
     {
     }
 
-    void ActionRead::execute ()
+    void ActionRead::executeImp (const MWWorld::Ptr& actor)
     {
-        ESMS::LiveCellRef<ESM::Book, MWWorld::RefData> *ref =
-            mObject.get<ESM::Book>();
+        LiveCellRef<ESM::Book> *ref = mObject.get<ESM::Book>();
 
         if (ref->base->data.isScroll)
         {
@@ -28,4 +28,3 @@ namespace MWWorld
         }
     }
 }
-

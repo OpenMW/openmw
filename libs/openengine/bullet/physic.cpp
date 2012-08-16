@@ -3,7 +3,6 @@
 #include <btBulletCollisionCommon.h>
 #include <BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h>
 #include <components/nifbullet/bullet_nif_loader.hpp>
-//#include <apps\openmw\mwworld\world.hpp>
 #include "CMotionState.h"
 #include "OgreRoot.h"
 #include "btKinematicCharacterController.h"
@@ -12,6 +11,7 @@
 #include "BtOgreExtras.h"
 
 #include <boost/lexical_cast.hpp>
+#include <boost/format.hpp>
 
 #define BIT(x) (1<<(x))
 
@@ -286,7 +286,7 @@ namespace Physic
                 minh = h;
                 maxh = h;
             }
-            
+
             if (h>maxh) maxh = h;
             if (h<minh) minh = h;
         }
@@ -334,11 +334,16 @@ namespace Physic
 
     RigidBody* PhysicEngine::createRigidBody(std::string mesh,std::string name,float scale)
     {
+        std::string sid = (boost::format("%07.3f") % scale).str();
+        std::string outputstring = mesh + sid;
+        //std::cout << "The string" << outputstring << "\n";
+
         //get the shape from the .nif
-        mShapeLoader->load(mesh,"General");
-        BulletShapeManager::getSingletonPtr()->load(mesh,"General");
-        BulletShapePtr shape = BulletShapeManager::getSingleton().getByName(mesh,"General");
-        shape->Shape->setLocalScaling(btVector3(scale,scale,scale));
+        mShapeLoader->load(outputstring,"General");
+        BulletShapeManager::getSingletonPtr()->load(outputstring,"General");
+        BulletShapePtr shape = BulletShapeManager::getSingleton().getByName(outputstring,"General");
+        shape->Shape->setLocalScaling( btVector3(scale,scale,scale));
+        //btScaledBvhTriangleMeshShape* scaled = new btScaledBvhTriangleMeshShape(dynamic_cast<btBvhTriangleMeshShape*> (shape->Shape), btVector3(scale,scale,scale));
 
         //create the motionState
         CMotionState* newMotionState = new CMotionState(this,name);
@@ -401,18 +406,32 @@ namespace Physic
         if (it != RigidBodyMap.end() )
         {
             RigidBody* body = it->second;
+            //btScaledBvhTriangleMeshShape* scaled = dynamic_cast<btScaledBvhTriangleMeshShape*> (body->getCollisionShape());
+            
             if(body != NULL)
             {
                 delete body;
             }
+            /*if(scaled != NULL)
+            {
+                delete scaled;
+            }*/
             RigidBodyMap.erase(it);
         }
     }
 
     RigidBody* PhysicEngine::getRigidBody(std::string name)
     {
-        RigidBody* body = RigidBodyMap[name];
-        return body;
+        RigidBodyContainer::iterator it = RigidBodyMap.find(name);
+        if (it != RigidBodyMap.end() )
+        {
+            RigidBody* body = RigidBodyMap[name];
+            return body;
+        }
+        else
+        {
+            return 0;
+        }
     }
 
     void PhysicEngine::stepSimulation(double deltaT)
@@ -469,8 +488,16 @@ namespace Physic
 
     PhysicActor* PhysicEngine::getCharacter(std::string name)
     {
-        PhysicActor* act = PhysicActorMap[name];
-        return act;
+        PhysicActorContainer::iterator it = PhysicActorMap.find(name);
+        if (it != PhysicActorMap.end() )
+        {
+            PhysicActor* act = PhysicActorMap[name];
+            return act;
+        }
+        else
+        {
+            return 0;
+        }
     }
 
     void PhysicEngine::emptyEventLists(void)
@@ -539,5 +566,21 @@ namespace Physic
         std::sort(results2.begin(), results2.end(), MyRayResultCallback::cmp);
 
         return results2;
+    }
+
+    void PhysicEngine::getObjectAABB(const std::string &mesh, float scale, btVector3 &min, btVector3 &max)
+    {
+        std::string sid = (boost::format("%07.3f") % scale).str();
+        std::string outputstring = mesh + sid;
+
+        mShapeLoader->load(outputstring, "General");
+        BulletShapeManager::getSingletonPtr()->load(outputstring, "General");
+        BulletShapePtr shape =
+            BulletShapeManager::getSingleton().getByName(outputstring, "General");
+
+        btTransform trans;
+        trans.setIdentity();
+
+        shape->Shape->getAabb(trans, min, max);
     }
 }};

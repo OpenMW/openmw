@@ -3,9 +3,10 @@
 
 #include <OgreTerrain.h>
 #include <OgreTerrainGroup.h>
-#include "terrainmaterial.hpp"
 
-#include "../mwworld/ptr.hpp"
+#include <components/esm/loadland.hpp>
+
+#include "terrainmaterial.hpp"
 
 namespace Ogre{
     class SceneManager;
@@ -14,7 +15,14 @@ namespace Ogre{
     class Terrain;
 }
 
+namespace MWWorld
+{
+    class CellStore;
+}
+
 namespace MWRender{
+
+    class RenderingManager;
 
     /**
      * Implements the Morrowind terrain using the Ogre Terrain Component
@@ -30,15 +38,15 @@ namespace MWRender{
         void setDiffuse(const Ogre::ColourValue& diffuse);
         void setAmbient(const Ogre::ColourValue& ambient);
 
-        void cellAdded(MWWorld::Ptr::CellStore* store);
-        void cellRemoved(MWWorld::Ptr::CellStore* store);
+        void cellAdded(MWWorld::CellStore* store);
+        void cellRemoved(MWWorld::CellStore* store);
     private:
         Ogre::TerrainGlobalOptions* mTerrainGlobals;
         Ogre::TerrainGroup mTerrainGroup;
 
         RenderingManager* mRendering;
 
-        Ogre::TerrainMaterialGeneratorB::SM2Profile* mActiveProfile;
+        TerrainMaterial::Profile* mActiveProfile;
 
         /**
          * The length in verticies of a single terrain block.

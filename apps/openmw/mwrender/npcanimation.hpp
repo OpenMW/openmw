@@ -1,73 +1,58 @@
 #ifndef _GAME_RENDER_NPCANIMATION_H
 #define _GAME_RENDER_NPCANIMATION_H
-#include "animation.hpp"
-#include <components/nif/data.hpp>
-#include <components/nif/node.hpp>
-#include <components/nif/property.hpp>
-#include <components/nif/controller.hpp>
-#include <components/nif/extra.hpp>
-#include <utility>
 
-#include "../mwworld/refdata.hpp"
-#include "../mwworld/ptr.hpp"
+#include "animation.hpp"
+
 #include "components/nifogre/ogre_nif_loader.hpp"
 #include "../mwworld/inventorystore.hpp"
 #include "../mwclass/npc.hpp"
 #include "../mwworld/containerstore.hpp"
-#include "components/esm/loadarmo.hpp"
 
 namespace MWRender{
 
 class NpcAnimation: public Animation{
 private:
-	MWWorld::InventoryStore& inv;
-	int mStateID;
-	//Free Parts
-	   std::pair<Ogre::Entity*, std::vector<Nif::NiTriShapeCopy>*> chest;
-	   std::pair<Ogre::Entity*, std::vector<Nif::NiTriShapeCopy>*> skirt;
-	   std::pair<Ogre::Entity*, std::vector<Nif::NiTriShapeCopy>*> lhand;
-	   std::pair<Ogre::Entity*, std::vector<Nif::NiTriShapeCopy>*> rhand;
-	   std::pair<Ogre::Entity*, std::vector<Nif::NiTriShapeCopy>*> tail;
-	   std::pair<Ogre::Entity*, std::vector<Nif::NiTriShapeCopy>*> lFreeFoot;
-	   std::pair<Ogre::Entity*, std::vector<Nif::NiTriShapeCopy>*> rFreeFoot;
+    MWWorld::InventoryStore& mInv;
+    int mStateID;
 
-       int partslots[27];  //Each part slot is taken by clothing, armor, or is empty
-       int partpriorities[27];
-       std::pair<Ogre::Entity*, std::vector<Nif::NiTriShapeCopy>*> zero;
+    int mPartslots[27];  //Each part slot is taken by clothing, armor, or is empty
+    int mPartPriorities[27];
 
+    //Bounded Parts
+    NifOgre::EntityList lclavicle;
+    NifOgre::EntityList rclavicle;
+    NifOgre::EntityList rupperArm;
+    NifOgre::EntityList lupperArm;
+    NifOgre::EntityList rUpperLeg;
+    NifOgre::EntityList lUpperLeg;
+    NifOgre::EntityList lForearm;
+    NifOgre::EntityList rForearm;
+    NifOgre::EntityList lWrist;
+    NifOgre::EntityList rWrist;
+    NifOgre::EntityList rKnee;
+    NifOgre::EntityList lKnee;
+    NifOgre::EntityList neck;
+    NifOgre::EntityList rAnkle;
+    NifOgre::EntityList lAnkle;
+    NifOgre::EntityList groin;
+    NifOgre::EntityList skirt;
+    NifOgre::EntityList lfoot;
+    NifOgre::EntityList rfoot;
+    NifOgre::EntityList hair;
+    NifOgre::EntityList rHand;
+    NifOgre::EntityList lHand;
+    NifOgre::EntityList head;
+    NifOgre::EntityList chest;
+    NifOgre::EntityList tail;
 
-
-	//Bounded Parts
-	Ogre::Entity* lclavicle;
-	Ogre::Entity* rclavicle;
-	Ogre::Entity* rupperArm;
-	Ogre::Entity* lupperArm;
-	Ogre::Entity* rUpperLeg;
-	Ogre::Entity* lUpperLeg;
-	Ogre::Entity* lForearm;
-	Ogre::Entity* rForearm;
-	Ogre::Entity* lWrist;
-	Ogre::Entity* rWrist;
-	Ogre::Entity* rKnee;
-	Ogre::Entity* lKnee;
-	Ogre::Entity* neck;
-	Ogre::Entity* rAnkle;
-	Ogre::Entity* lAnkle;
-	Ogre::Entity* groin;
-	Ogre::Entity* lfoot;
-	Ogre::Entity* rfoot;
-	Ogre::Entity* hair;
-	Ogre::Entity* head;
-
-	Ogre::SceneNode* insert;
     bool isBeast;
     bool isFemale;
-	std::string headModel;
-	std::string hairModel;
-	std::string npcName;
-	std::string bodyRaceID;
-	float timeToChange;
-	MWWorld::ContainerStoreIterator robe;
+    std::string headModel;
+    std::string hairModel;
+    std::string npcName;
+    std::string bodyRaceID;
+    float timeToChange;
+    MWWorld::ContainerStoreIterator robe;
     MWWorld::ContainerStoreIterator helmet;
     MWWorld::ContainerStoreIterator shirt;
     MWWorld::ContainerStoreIterator cuirass;
@@ -80,22 +65,20 @@ private:
     MWWorld::ContainerStoreIterator rightglove;
     MWWorld::ContainerStoreIterator skirtiter;
 
-    public:
-     NpcAnimation(const MWWorld::Ptr& ptr, OEngine::Render::OgreRenderer& _rend, MWWorld::InventoryStore& _inv);
-     virtual ~NpcAnimation();
-    Ogre::Entity* insertBoundedPart(const std::string &mesh, std::string bonename);
-     std::pair<Ogre::Entity*, std::vector<Nif::NiTriShapeCopy>*> insertFreePart(const std::string &mesh, const std::string& suffix);
-     void insertFootPart(int type, const std::string &mesh);
-	virtual void runAnimation(float timepassed);
-	void updateParts();
+public:
+    NpcAnimation(const MWWorld::Ptr& ptr, OEngine::Render::OgreRenderer& _rend, MWWorld::InventoryStore& _inv);
+    virtual ~NpcAnimation();
+    NifOgre::EntityList insertBoundedPart(const std::string &mesh, const std::string &bonename);
+    virtual void runAnimation(float timepassed);
+    void updateParts();
+    void removeEntities(NifOgre::EntityList &entities);
     void removeIndividualPart(int type);
     void reserveIndividualPart(int type, int group, int priority);
 
     bool addOrReplaceIndividualPart(int type, int group, int priority, const std::string &mesh);
-     void removePartGroup(int group);
+    void removePartGroup(int group);
     void addPartGroup(int group, int priority, std::vector<ESM::PartReference>& parts);
-
-
 };
+
 }
 #endif

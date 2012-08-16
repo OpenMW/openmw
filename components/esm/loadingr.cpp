@@ -3,8 +3,10 @@
 namespace ESM
 {
 
-void Ingredient::load(ESMReader &esm)
+void Ingredient::load(ESMReader &esm, const std::string& id)
 {
+    mId = id;
+
     model = esm.getHNString("MODL");
     name = esm.getHNString("FNAM");
     esm.getHNT(data, "IRDT", 56);

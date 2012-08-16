@@ -2,17 +2,17 @@
 #include "actiontake.hpp"
 
 #include "../mwbase/environment.hpp"
-#include "../mwgui/window_manager.hpp"
+#include "../mwbase/world.hpp"
+#include "../mwbase/windowmanager.hpp"
 
 #include "class.hpp"
-#include "world.hpp"
 #include "containerstore.hpp"
 
 namespace MWWorld
 {
     ActionTake::ActionTake (const MWWorld::Ptr& object) : mObject (object) {}
 
-    void ActionTake::execute()
+    void ActionTake::executeImp (const Ptr& actor)
     {
         if (!MWBase::Environment::get().getWindowManager()->isAllowed(MWGui::GW_Inventory))
             return;

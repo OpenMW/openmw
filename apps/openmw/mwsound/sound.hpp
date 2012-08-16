@@ -3,6 +3,8 @@
 
 #include <OgreVector3.h>
 
+#include "soundmanagerimp.hpp"
+
 namespace MWSound
 {
     class Sound
@@ -33,7 +35,7 @@ namespace MWSound
                 , mPitch(1.0f)
                 , mMinDistance(20.0f) /* 1 * min_range_scale */
                 , mMaxDistance(12750.0f) /* 255 * max_range_scale */
-                , mFlags(Play_Normal)
+                , mFlags(MWBase::SoundManager::Play_Normal)
         { }
         virtual ~Sound() { }
 

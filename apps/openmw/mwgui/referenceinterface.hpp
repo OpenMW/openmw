@@ -13,6 +13,7 @@ namespace MWGui
     {
     public:
         ReferenceInterface();
+        virtual ~ReferenceInterface();
 
         void checkReferenceAvailable(); ///< closes the window, if the MW-reference has become unavailable
 
@@ -22,7 +23,7 @@ namespace MWGui
         MWWorld::Ptr mPtr;
 
     private:
-        MWWorld::Ptr::CellStore* mCurrentPlayerCell;
+        MWWorld::CellStore* mCurrentPlayerCell;
     };
 }
 

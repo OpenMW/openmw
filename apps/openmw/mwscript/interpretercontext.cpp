@@ -3,21 +3,20 @@
 
 #include <cmath>
 #include <stdexcept>
-#include <iostream>
 
 #include <components/interpreter/types.hpp>
+#include <components/esm_store/store.hpp>
 
 #include "../mwbase/environment.hpp"
+#include "../mwbase/world.hpp"
+#include "../mwbase/scriptmanager.hpp"
+#include "../mwbase/windowmanager.hpp"
 
-#include "../mwworld/world.hpp"
-
-#include "../mwgui/window_manager.hpp"
-
-#include "../mwinput/inputmanager.hpp"
+#include "../mwworld/class.hpp"
+#include "../mwworld/player.hpp"
 
 #include "locals.hpp"
 #include "globalscripts.hpp"
-#include "scriptmanager.hpp"
 
 namespace MWScript
 {
@@ -236,7 +235,7 @@ namespace MWScript
         if (!mAction.get())
             throw std::runtime_error ("activation failed, because no action to perform");
 
-        mAction->execute();
+        mAction->execute (MWBase::Environment::get().getWorld()->getPlayer().getPlayer());
         mActivationHandled = true;
     }
 
