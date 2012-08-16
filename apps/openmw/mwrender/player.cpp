@@ -82,7 +82,7 @@ namespace MWRender
             Ogre::Radian(getPitch() + Ogre::Math::HALF_PI),
             Ogre::Vector3::UNIT_X
         );
-        Ogre::Quaternion zr(Ogre::Radian(getYaw()), Ogre::Vector3::UNIT_Z);
+        Ogre::Quaternion zr(Ogre::Radian(getYaw()), Ogre::Vector3::NEGATIVE_UNIT_Z);
 
         pitchNode->setOrientation(xr);
         yawNode->setOrientation(zr);
@@ -130,7 +130,7 @@ namespace MWRender
         }
         if (mVanity.enabled) {
             Ogre::Vector3 rot(0.f, 0.f, 0.f);
-            rot.z = Ogre::Degree(-3.f * duration).valueRadians();
+            rot.z = Ogre::Degree(3.f * duration).valueRadians();
             rotateCamera(rot, true);
         }
     }

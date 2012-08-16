@@ -24,5 +24,5 @@ void MouseLookEvent::event(Type type, int index, const void *p)
     float y = arg->state.Y.rel * sensY;
 
     MWBase::World *world = MWBase::Environment::get().getWorld();
-    world->rotateObject(world->getPlayer().getPlayer(), -y, 0.f, -x, true);
+    world->rotateObject(world->getPlayer().getPlayer(), -y, 0.f, x, true);
 }
