@@ -97,8 +97,8 @@ const bool NewPhysicsTrace(NewPhysTraceResults* const out, const Ogre::Vector3& 
 	
 
 
-	const btVector3 btstart(start.x, start.y, start.z);
-	const btVector3 btend(end.x, end.y, end.z);
+	const btVector3 btstart(start.x, start.y, start.z + BBHalfExtents.z);
+	const btVector3 btend(end.x, end.y, end.z + BBHalfExtents.z);
 	const btQuaternion btrot(rotation.y, rotation.x, rotation.z);   //y, x, z
 
 	const btBoxShape newshape(btVector3(BBHalfExtents.x, BBHalfExtents.y, BBHalfExtents.z));
