@@ -66,15 +66,18 @@ namespace MWMechanics
                     static_cast<int> (male ? attribute->male : attribute->female));
             }
 
-            for (int i=0; i<7; ++i)
+            for (int i=0; i<27; ++i)
             {
-                int index = race->data.bonus[i].skill;
-
-                if (index>=0 && index<27)
-                {
-                    npcStats.getSkill (index).setBase (
-                        npcStats.getSkill (index).getBase() + race->data.bonus[i].bonus);
-                }
+                int bonus = 0;
+                
+                for (int i2=0; i2<7; ++i2)
+                    if (race->data.bonus[i2].skill==i)
+                    {
+                        bonus = race->data.bonus[i2].bonus;
+                        break;
+                    }
+            
+                npcStats.getSkill (i).setBase (5 + bonus);
             }
 
             for (std::vector<std::string>::const_iterator iter (race->powers.list.begin());
