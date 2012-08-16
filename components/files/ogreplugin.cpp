@@ -6,7 +6,11 @@
 namespace Files {
 
 bool loadOgrePlugin(const std::string &pluginDir, std::string pluginName, Ogre::Root &ogreRoot) {
+    // Append plugin suffix if debugging.
+#if defined(DEBUG) || defined(_DEBUG)
 	pluginName = pluginName + OGRE_PLUGIN_DEBUG_SUFFIX;
+#endif
+
 #if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
 	std::ostringstream verStream;
 	verStream << "." << OGRE_VERSION_MAJOR << "." << OGRE_VERSION_MINOR << "." << OGRE_VERSION_PATCH;
