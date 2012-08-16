@@ -379,7 +379,8 @@ namespace MWClass
 
     void Npc::adjustRotation(const MWWorld::Ptr& ptr,float& x,float& y,float& z) const
     {
-        
+        y = 0;
+        x = 0;
     }
 
     MWWorld::Ptr
