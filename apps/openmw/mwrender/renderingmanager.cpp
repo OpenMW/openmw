@@ -856,4 +856,11 @@ void RenderingManager::renderPlayer(const MWWorld::Ptr &ptr)
     mPlayer->setAnimation(anim);
 }
 
+void RenderingManager::getPlayerData(Ogre::Vector3 &eyepos, float &pitch, float &yaw)
+{
+    eyepos = mPlayer->getPosition();
+    eyepos.z += mPlayer->getHeight();
+    mPlayer->getSightAngles(pitch, yaw);
+}
+
 } // namespace

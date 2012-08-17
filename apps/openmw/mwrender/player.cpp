@@ -11,6 +11,7 @@
 #include "../mwworld/refdata.hpp"
 
 #include "npcanimation.hpp"
+#include <stdio.h>
 
 namespace MWRender
 {
@@ -332,5 +333,16 @@ namespace MWRender
         player = mPlayerNode->getPosition();
 
         return mFirstPersonView && !mVanity.enabled && !mPreviewMode;
+    }
+
+    Ogre::Vector3 Player::getPosition()
+    {
+        return mPlayerNode->getPosition();
+    }
+
+    void Player::getSightAngles(float &pitch, float &yaw)
+    {
+        pitch = mMainCam.pitch;
+        yaw = mMainCam.yaw;
     }
 }

@@ -103,6 +103,9 @@ namespace MWRender
         /// Stores player and camera world positions in passed arguments
         /// \return true if camera at the eye-place
         bool getPosition(Ogre::Vector3 &player, Ogre::Vector3 &camera);
+        Ogre::Vector3 getPosition();
+
+        void getSightAngles(float &pitch, float &yaw);
     };
 }
 

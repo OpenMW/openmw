@@ -16,6 +16,8 @@
 #include "ptr.hpp"
 #include "class.hpp"
 
+#include <stdio.h>
+
 using namespace Ogre;
 namespace MWWorld
 {
@@ -42,10 +44,8 @@ namespace MWWorld
         return mEngine;
     }
 
-	std::pair<std::string, float> PhysicsSystem::getFacedHandle (MWWorld::World& world)
-	{
-		std::string handle = "";
-
+    std::pair<std::string, float> PhysicsSystem::getFacedHandle (MWWorld::World& world)
+    {
         //get a ray pointing to the center of the viewport
         Ray centerRay = mRender.getCamera()->getCameraToViewportRay(
         mRender.getViewport()->getWidth()/2,
@@ -190,12 +190,11 @@ namespace MWWorld
             float pitch = 0.f;
 
             if (iter->first == "player") {
-                /// \fixme should not rely on player camera, real pitch needed
-                Ogre::SceneNode *node = mRender.getCamera()->getParentSceneNode();
-                pitch = node->getOrientation().getPitch().valueDegrees();
+                playerphysics->ps.viewangles.x =
+                    Ogre::Radian(mPlayerData.pitch).valueDegrees();
 
-                playerphysics->ps.viewangles.x = pitch - 90;
-                playerphysics->ps.viewangles.y = -yaw + 90;
+                playerphysics->ps.viewangles.y =
+                    Ogre::Radian(mPlayerData.yaw).valueDegrees() + 90;
 
                 pm_ref.rightmove = -iter->second.x;
                 pm_ref.forwardmove = -iter->second.y;
@@ -391,5 +390,12 @@ namespace MWWorld
         max.z = btMax.z();
 
         return true;
+    }
+
+    void PhysicsSystem::updatePlayerData(Ogre::Vector3 &eyepos, float pitch, float yaw)
+    {
+        mPlayerData.eyepos = eyepos;
+        mPlayerData.pitch = pitch;
+        mPlayerData.yaw = yaw;
     }
 }

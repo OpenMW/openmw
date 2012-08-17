@@ -806,6 +806,11 @@ namespace MWWorld
         /// \todo split this function up into subfunctions
 
         mWorldScene->update (duration);
+        
+        float pitch, yaw;
+        Ogre::Vector3 eyepos;
+        mRendering->getPlayerData(eyepos, pitch, yaw);
+        mPhysics->updatePlayerData(eyepos, pitch, yaw);
 
         mWeatherManager->update (duration);
 
