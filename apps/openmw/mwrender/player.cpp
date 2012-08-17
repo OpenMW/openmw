@@ -5,6 +5,7 @@
 #include <OgreRay.h>
 
 #include "../mwbase/environment.hpp"
+#include "../mwbase/windowmanager.hpp"
 #include "../mwbase/soundmanager.hpp"
 
 #include "../mwworld/ptr.hpp"
@@ -119,7 +120,8 @@ namespace MWRender
 
     void Player::update(float duration)
     {
-        if (!mVanity.enabled) {
+        bool isGuiMode = MWBase::Environment::get().getWindowManager ()->isGuiMode();
+        if (!mVanity.enabled && !isGuiMode) {
             ++mUpdates;
             mTimeIdle += duration;
             if (mTimeIdle > 30.f) {
