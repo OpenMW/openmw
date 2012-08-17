@@ -22,7 +22,7 @@ namespace MWBase
 
             virtual ~InputManager() {}
 
-            virtual void update() = 0;
+            virtual void update(float duration) = 0;
 
             virtual void changeInputMode(bool guiMode) = 0;
 

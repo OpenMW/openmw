@@ -450,7 +450,7 @@ private:
         }
     }
 
-    void toggleControlSwitch(std::string sw, bool value)
+    void toggleControlSwitch(const std::string &sw, bool value)
     {
         if (mControlSwitch[sw] == value) {
             return;
@@ -472,7 +472,7 @@ private:
         mControlSwitch[sw] = value;
     }
 
-    bool getControlSwitch(std::string sw)
+    bool getControlSwitch(const std::string &sw)
     {
         return mControlSwitch[sw];
     }
@@ -536,7 +536,7 @@ private:
         impl->toggleControlSwitch(sw, value);
     }
 
-    bool MWInputManager::getControlSwitch(std::string sw)
+    bool MWInputManager::getControlSwitch(const std::string &sw)
     {
         return impl->getControlSwitch(sw);
     }
