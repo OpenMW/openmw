@@ -139,6 +139,7 @@ namespace MWInput
         float mUISensitivity;
         float mCameraYMultiplier;
         float mUIYMultiplier;
+        float mPreviewPOVDelay;
 
         bool mMouseLookEnabled;
         bool mGuiCursorEnabled;
@@ -206,6 +207,8 @@ namespace MWInput
             A_ToggleSneak,    //Toggles Sneak, add Push-Sneak later
             A_ToggleWalk, //Toggle Walking/Running
             A_Crouch,
+
+            A_TogglePOV,
 
             A_QuickSave,
             A_QuickLoad,

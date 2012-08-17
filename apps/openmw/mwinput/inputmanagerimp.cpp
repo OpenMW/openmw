@@ -45,6 +45,7 @@ namespace MWInput
         , mUISensitivity (Settings::Manager::getFloat("ui sensitivity", "Input"))
         , mCameraYMultiplier (Settings::Manager::getFloat("camera y multiplier", "Input"))
         , mUIYMultiplier (Settings::Manager::getFloat("ui y multiplier", "Input"))
+        , mPreviewPOVDelay(0.f)
     {
         Ogre::RenderWindow* window = ogre.getWindow ();
         size_t windowHnd;
@@ -243,12 +244,12 @@ namespace MWInput
             else if (actionIsActive(A_Crouch))
                 mPlayer.setUpDown (-1);
             else
-                player.setUpDown (0);
+                mPlayer.setUpDown (0);
 
             if (mControlSwitch["playerviewswitch"]) {
-                if (poller.isDown(A_TogglePOV)) {
+                if (actionIsActive(A_TogglePOV)) {
                     if (mPreviewPOVDelay <= 0.5 &&
-                        (mPreviewPOVDelay += duration) > 0.5)
+                        (mPreviewPOVDelay += dt) > 0.5)
                     {
                         mPreviewPOVDelay = 1.f;
                         MWBase::Environment::get().getWorld()->togglePreviewMode(true);
@@ -258,7 +259,7 @@ namespace MWInput
                         //disable preview mode
                         MWBase::Environment::get().getWorld()->togglePreviewMode(false);
                     } else if (mPreviewPOVDelay > 0.f) {
-                        togglePOV();
+                        MWBase::Environment::get().getWorld()->togglePOV();
                     }
                     mPreviewPOVDelay = 0.f;
                 }
@@ -329,7 +330,7 @@ namespace MWInput
             mPlayer.setUpDown(0);
         } else if (sw == "playerjumping" && !value) {
             /// \fixme maybe crouching at this time
-            player.setUpDown(0);
+            mPlayer.setUpDown(0);
         } else if (sw == "vanitymode") {
             MWBase::Environment::get().getWorld()->allowVanityMode(value);
         } else if (sw == "playerlooking") {
@@ -552,6 +553,7 @@ namespace MWInput
         defaultKeyBindings[A_Journal] = OIS::KC_J;
         defaultKeyBindings[A_Rest] = OIS::KC_T;
         defaultKeyBindings[A_GameMenu] = OIS::KC_ESCAPE;
+        defaultKeyBindings[A_TogglePOV] = OIS::KC_TAB;
 
         std::map<int, int> defaultMouseButtonBindings;
         defaultMouseButtonBindings[A_Inventory] = OIS::MB_Right;
@@ -601,6 +603,7 @@ namespace MWInput
         descriptions[A_Journal] = "sJournal";
         descriptions[A_Rest] = "sRestKey";
         descriptions[A_Inventory] = "sInventory";
+        descriptions[A_TogglePOV] = "Toggle POV";
 
         if (descriptions[action] == "")
             return ""; // not configurable
@@ -631,6 +634,7 @@ namespace MWInput
         ret.push_back(A_MoveLeft);
         ret.push_back(A_MoveRight);
         ret.push_back(A_Crouch);
+        ret.push_back(A_TogglePOV);
         ret.push_back(A_Activate);
         ret.push_back(A_ToggleWeapon);
         ret.push_back(A_ToggleSpell);
