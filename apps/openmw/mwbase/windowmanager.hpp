@@ -177,6 +177,10 @@ namespace MWBase
             virtual void unsetSelectedSpell() = 0;
             virtual void unsetSelectedWeapon() = 0;
 
+            virtual void disallowMouse() = 0;
+            virtual void allowMouse() = 0;
+            virtual void notifyInputActionBound() = 0;
+
             virtual void removeDialog(OEngine::GUI::Layout* dialog) = 0;
             ///< Hides dialog and schedules dialog to be deleted.
 

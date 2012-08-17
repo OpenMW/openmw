@@ -157,6 +157,10 @@ namespace MWGui
     virtual void unsetSelectedSpell();
     virtual void unsetSelectedWeapon();
 
+    virtual void disallowMouse();
+    virtual void allowMouse();
+    virtual void notifyInputActionBound();
+
     virtual void removeDialog(OEngine::GUI::Layout* dialog); ///< Hides dialog and schedules dialog to be deleted.
 
     virtual void messageBox (const std::string& message, const std::vector<std::string>& buttons);
@@ -207,6 +211,8 @@ namespace MWGui
     SpellWindow* mSpellWindow;
 
     CharacterCreation* mCharGen;
+
+    MyGUI::Widget* mInputBlocker;
 
     /// \todo get rid of this stuff. Move it to the respective UI element classes, if needed.
     // Various stats about player as needed by window manager

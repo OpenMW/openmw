@@ -22,7 +22,7 @@ namespace MWBase
 
             virtual ~InputManager() {}
 
-            virtual void update(float duration) = 0;
+            virtual void update(float dt) = 0;
 
             virtual void changeInputMode(bool guiMode) = 0;
 
@@ -31,6 +31,13 @@ namespace MWBase
             virtual void setDragDrop(bool dragDrop) = 0;
 
             virtual void toggleControlSwitch (const std::string& sw, bool value) = 0;
+
+            virtual std::string getActionDescription (int action) = 0;
+            virtual std::string getActionBindingName (int action) = 0;
+            virtual std::vector<int> getActionSorting () = 0;
+            virtual int getNumActions() = 0;
+            virtual void enableDetectingBindingMode (int action) = 0;
+            virtual void resetToDefaultBindings() = 0;
     };
 }
 

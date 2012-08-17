@@ -48,6 +48,8 @@ namespace MWGui
         MyGUI::TextBox* mCellNameBox;
         MyGUI::TextBox* mWeaponSpellBox;
 
+        MyGUI::Widget* mDummy;
+
         MyGUI::WidgetPtr fpsbox;
         MyGUI::TextBox* fpscounter;
         MyGUI::TextBox* trianglecounter;

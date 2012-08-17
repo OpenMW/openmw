@@ -104,6 +104,7 @@ target_link_libraries(openmw
     ${MYGUI_PLATFORM_LIBRARIES}
     "shiny"
     "shiny.OgrePlatform"
+    "oics"
     components
 )
 
