@@ -2,7 +2,6 @@
 
 #include <OgreSceneNode.h>
 #include <OgreCamera.h>
-#include <OgreRay.h>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/soundmanager.hpp"
@@ -38,9 +37,6 @@ namespace MWRender
     
     bool Player::rotate(const Ogre::Vector3 &rot, bool adjust)
     {
-        mUpdates = 0;
-        mTimeIdle = 0.f;
-
         if (mVanity.enabled) {
             toggleVanityMode(false);
         }
@@ -120,13 +116,6 @@ namespace MWRender
     void Player::update(float duration)
     {
         Ogre::Vector3 pos = mPlayerNode->getPosition();
-        if (!mVanity.enabled) {
-            ++mUpdates;
-            mTimeIdle += duration;
-            if (mTimeIdle > 30.f) {
-                toggleVanityMode(true);
-            }
-        }
         if (mAnimation) {
             mAnimation->runAnimation(duration);
         }
@@ -145,10 +134,10 @@ namespace MWRender
         mFirstPersonView = !mFirstPersonView;
         if (mFirstPersonView) {
             mCamera->setPosition(0.f, 0.f, 0.f);
-            mCameraNode->setPosition(0.f, 0.f, 128.f);
+            setLowHeight(false);
         } else {
             mCamera->setPosition(0.f, 0.f, mCameraDistance);
-            mCameraNode->setPosition(0.f, 0.f, 104.f);
+            setLowHeight(true);
         }
         mPlayerNode->setVisible(!mFirstPersonView, false);
     }
@@ -176,15 +165,17 @@ namespace MWRender
         float offset = mPreviewCam.offset;
         Ogre::Vector3 rot(0.f, 0.f, 0.f);
         if (mVanity.enabled) {
-            mPlayerNode->setVisible(true, false);
             rot.x = Ogre::Degree(-30.f).valueRadians();
             mMainCam.offset = mCamera->getPosition().z;
 
+            mPlayerNode->setVisible(true, false);
+            setLowHeight(true);
         } else {
             rot.x = getPitch();
             offset = mMainCam.offset;
 
             mPlayerNode->setVisible(!mFirstPersonView, false);
+            setLowHeight(!mFirstPersonView);
         }
         rot.z = getYaw();
         mCamera->setPosition(0.f, 0.f, offset);
@@ -201,15 +192,17 @@ namespace MWRender
         mPreviewMode = enable;
         float offset = mCamera->getPosition().z;
         if (mPreviewMode) {
-            mPlayerNode->setVisible(true, false);
             mMainCam.offset = offset;
             offset = mPreviewCam.offset;
 
+            mPlayerNode->setVisible(true, false);
+            setLowHeight(true);
         } else {
             mPreviewCam.offset = offset;
             offset = mMainCam.offset;
 
             mPlayerNode->setVisible(!mFirstPersonView, false);
+            setLowHeight(!mFirstPersonView);
         }
         mCamera->setPosition(0.f, 0.f, offset);
         rotateCamera(Ogre::Vector3(getPitch(), 0.f, getYaw()), false);
@@ -356,5 +349,14 @@ namespace MWRender
     void Player::togglePlayerLooking(bool enable)
     {
         mFreeLook = enable;
+    }
+
+    void Player::setLowHeight(bool low)
+    {
+        if (low) {
+            mCameraNode->setPosition(0.f, 0.f, mHeight * 0.85);
+        } else {
+            mCameraNode->setPosition(0.f, 0.f, mHeight);
+        }
     }
 }
