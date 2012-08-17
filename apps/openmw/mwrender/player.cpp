@@ -11,7 +11,6 @@
 #include "../mwworld/refdata.hpp"
 
 #include "npcanimation.hpp"
-#include <stdio.h>
 
 namespace MWRender
 {
@@ -21,6 +20,7 @@ namespace MWRender
       mCameraNode(mPlayerNode->createChildSceneNode()),
       mFirstPersonView(true),
       mPreviewMode(false),
+      mFreeLook(true),
       mHeight(128.f),
       mCameraDistance(300.f),
       mDistanceAdjusted(false)
@@ -49,18 +49,21 @@ namespace MWRender
 
         /// \note rotate player on forced vanity
         if (mVanity.forced) {
-            float diff = (adjust) ? rot.z : mMainCam.yaw - rot.z;
+            if (mFreeLook) {
+                float diff = (adjust) ? rot.z : mMainCam.yaw - rot.z;
 
-            mVanity.enabled = false;
-            rotateCamera(rot, adjust);
-            mVanity.enabled = true;
+                mVanity.enabled = false;
+                rotateCamera(rot, adjust);
+                mVanity.enabled = true;
 
-            compensateYaw(diff);
-
+                compensateYaw(diff);
+            }
             trueRot.z = 0.f;
         }
 
-        rotateCamera(trueRot, adjust);
+        if (mFreeLook || mVanity.enabled || mPreviewMode) {
+            rotateCamera(trueRot, adjust);
+        }
 
         /// \note if vanity mode is forced by TVM then rotate player
         return (!mVanity.enabled && !mPreviewMode) || mVanity.forced;
@@ -348,5 +351,10 @@ namespace MWRender
             Ogre::Radian(mPreviewCam.pitch),
             Ogre::Vector3::UNIT_X);
         mCameraNode->setOrientation(zr * xr);
+    }
+
+    void Player::togglePlayerLooking(bool enable)
+    {
+        mFreeLook = enable;
     }
 }

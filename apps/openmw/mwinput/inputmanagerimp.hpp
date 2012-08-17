@@ -60,7 +60,8 @@ namespace MWInput
 
     virtual void setDragDrop(bool dragDrop);
 
-    virtual void toggleControlSwitch (const std::string& sw, bool value);
+    void toggleControlSwitch(std::string sw, bool value);
+    bool getControlSwitch(std::string sw);
   };
 }
 #endif

@@ -293,6 +293,10 @@ namespace MWWorld
                 mRendering->allowVanityMode(allow);
             }
 
+            virtual void togglePlayerLooking(bool enable) {
+                mRendering->togglePlayerLooking(enable);
+            }
+
             virtual void renderPlayer();
     };
 }

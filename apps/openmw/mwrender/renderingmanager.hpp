@@ -72,6 +72,10 @@ class RenderingManager: private RenderingInterface, public Ogre::WindowEventList
         mPlayer->allowVanityMode(allow);
     }
 
+    virtual void togglePlayerLooking(bool enable) {
+        mPlayer->togglePlayerLooking(enable);
+    }
+
     void getPlayerData(Ogre::Vector3 &eyepos, float &pitch, float &yaw);
 
     void attachCameraTo(const MWWorld::Ptr &ptr);

@@ -443,10 +443,7 @@ private:
         }
       else
         {
-            // Start mouse-looking again if allowed.
-            if (mControlSwitch["playerlooking"]) {
-                mouse->enable();
-            }
+          mouse->enable();
 
           // Disable GUI events
           guiEvents->enabled = false;
@@ -467,14 +464,17 @@ private:
         } else if (sw == "playerjumping" && !value) {
             /// \fixme maybe crouching at this time
             player.setUpDown(0);
+        } else if (sw == "vanitymode") {
+            MWBase::Environment::get().getWorld()->allowVanityMode(value);
         } else if (sw == "playerlooking") {
-            if (value) {
-                mouse->enable();
-            } else {
-                mouse->disable();
-            }
+            MWBase::Environment::get().getWorld()->togglePlayerLooking(value);
         }
         mControlSwitch[sw] = value;
+    }
+
+    bool getControlSwitch(std::string sw)
+    {
+        return mControlSwitch[sw];
     }
 
     void togglePOV()
@@ -534,5 +534,10 @@ private:
     void MWInputManager::toggleControlSwitch (const std::string& sw, bool value)
     {
         impl->toggleControlSwitch(sw, value);
+    }
+
+    bool MWInputManager::getControlSwitch(std::string sw)
+    {
+        return impl->getControlSwitch(sw);
     }
 }

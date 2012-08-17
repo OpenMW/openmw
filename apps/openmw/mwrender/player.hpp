@@ -29,12 +29,12 @@ namespace MWRender
 
         Ogre::SceneNode *mPlayerNode;
         Ogre::SceneNode *mCameraNode;
-        Ogre::SceneNode *mVanityNode;
 
         NpcAnimation *mAnimation;
 
         bool mFirstPersonView;
         bool mPreviewMode;
+        bool mFreeLook;
 
         struct {
             bool enabled, allowed, forced;
@@ -106,6 +106,8 @@ namespace MWRender
         Ogre::Vector3 getPosition();
 
         void getSightAngles(float &pitch, float &yaw);
+
+        void togglePlayerLooking(bool enable);
     };
 }
 
