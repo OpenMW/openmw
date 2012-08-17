@@ -116,7 +116,7 @@ private:
         if (mTimeIdle >= 0.f) {
             mTimeIdle += dt;
         }
-        if (mTimeIdle > 30.f) {
+        if (mTimeIdle > 30.f && !windows.isGuiMode()) {
             MWBase::Environment::get().getWorld()->toggleVanityMode(true, false);
             mTimeIdle = -1.f;
         }
