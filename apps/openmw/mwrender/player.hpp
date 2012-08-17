@@ -45,9 +45,6 @@ namespace MWRender
 
         bool mDistanceAdjusted;
 
-        float mTimeIdle;
-        int mUpdates;
-
         /// Updates sound manager listener data
         void updateListener();
 
@@ -60,6 +57,8 @@ namespace MWRender
         void setPitch(float angle);
 
         void compensateYaw(float diff);
+
+        void setLowHeight(bool low = true);
 
     public:
 
