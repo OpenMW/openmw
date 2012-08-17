@@ -259,11 +259,11 @@ endif (APPLE)
 
 
 # Set up Ogre plugin folder & debug suffix
-if (APPLE)
-	# Ogre on OS X doesn't use "_d" suffix (see Ogre's CMakeLists.txt)
-	add_definitions(-DOGRE_PLUGIN_DEBUG_SUFFIX="")
-else ()
+# Ogre on OS X doesn't use "_d" suffix (see Ogre's CMakeLists.txt)
+if (DEFINED CMAKE_BUILD_TYPE AND CMAKE_BUILD_TYPE STREQUAL "Debug" AND NOT APPLE)
 	add_definitions(-DOGRE_PLUGIN_DEBUG_SUFFIX="_d")
+else()
+	add_definitions(-DOGRE_PLUGIN_DEBUG_SUFFIX="")
 endif()
 
 add_definitions(-DOGRE_PLUGIN_DIR_REL="${OGRE_PLUGIN_DIR_REL}")
