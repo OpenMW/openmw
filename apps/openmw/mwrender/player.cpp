@@ -119,7 +119,6 @@ namespace MWRender
 
     void Player::update(float duration)
     {
-        Ogre::Vector3 pos = mPlayerNode->getPosition();
         if (!mVanity.enabled) {
             ++mUpdates;
             mTimeIdle += duration;

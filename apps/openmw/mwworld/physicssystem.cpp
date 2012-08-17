@@ -189,12 +189,6 @@ namespace MWWorld
             iter!=actors.end(); ++iter)
         {
             //dirty stuff to get the camera orientation. Must be changed!
-            Ogre::Quaternion orient =
-                mRender.getScene()->getSceneNode(iter->first)->getOrientation();
-
-            float yaw = orient.getRoll().valueDegrees();
-            float pitch = 0.f;
-
             if (iter->first == "player") {
                 playerphysics->ps.viewangles.x =
                     Ogre::Radian(mPlayerData.pitch).valueDegrees();
