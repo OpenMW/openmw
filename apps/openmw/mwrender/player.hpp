@@ -59,7 +59,7 @@ namespace MWRender
         float getPitch();
         void setPitch(float angle);
 
-        void moveCameraNode(Ogre::SceneNode *node);
+        void compensateYaw(float diff);
 
     public:
 

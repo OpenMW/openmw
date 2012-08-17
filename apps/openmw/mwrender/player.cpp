@@ -19,7 +19,6 @@ namespace MWRender
     : mCamera(camera),
       mPlayerNode(node),
       mCameraNode(mPlayerNode->createChildSceneNode()),
-      mVanityNode(mPlayerNode->createChildSceneNode()),
       mFirstPersonView(true),
       mPreviewMode(false),
       mHeight(128.f),
@@ -50,13 +49,13 @@ namespace MWRender
 
         /// \note rotate player on forced vanity
         if (mVanity.forced) {
-            moveCameraNode(mPlayerNode);
+            float diff = (adjust) ? rot.z : mMainCam.yaw - rot.z;
+
             mVanity.enabled = false;
-
             rotateCamera(rot, adjust);
-
-            moveCameraNode(mVanityNode);
             mVanity.enabled = true;
+
+            compensateYaw(diff);
 
             trueRot.z = 0.f;
         }
@@ -69,9 +68,6 @@ namespace MWRender
 
     void Player::rotateCamera(const Ogre::Vector3 &rot, bool adjust)
     {
-        Ogre::SceneNode *pitchNode = mCamera->getParentSceneNode();
-        Ogre::SceneNode *yawNode = pitchNode->getParentSceneNode();
-
         if (adjust) {
             setYaw(getYaw() + rot.z);
             setPitch(getPitch() + rot.x);
@@ -83,11 +79,16 @@ namespace MWRender
             Ogre::Radian(getPitch() + Ogre::Math::HALF_PI),
             Ogre::Vector3::UNIT_X
         );
-        Ogre::Quaternion zr(Ogre::Radian(getYaw()), Ogre::Vector3::NEGATIVE_UNIT_Z);
-
-        pitchNode->setOrientation(xr);
-        yawNode->setOrientation(zr);
-
+        Ogre::Quaternion zr(
+            Ogre::Radian(getYaw()),
+            Ogre::Vector3::NEGATIVE_UNIT_Z
+        );
+        if (!mVanity.enabled && !mPreviewMode) {
+            mPlayerNode->setOrientation(zr);
+            mCameraNode->setOrientation(xr);
+        } else {
+            mCameraNode->setOrientation(zr * xr);
+        }
         updateListener();
     }
 
@@ -176,12 +177,10 @@ namespace MWRender
             rot.x = Ogre::Degree(-30.f).valueRadians();
             mMainCam.offset = mCamera->getPosition().z;
 
-            moveCameraNode(mVanityNode);
         } else {
             rot.x = getPitch();
             offset = mMainCam.offset;
 
-            moveCameraNode(mPlayerNode);
             mPlayerNode->setVisible(!mFirstPersonView, false);
         }
         rot.z = getYaw();
@@ -203,12 +202,10 @@ namespace MWRender
             mMainCam.offset = offset;
             offset = mPreviewCam.offset;
 
-            moveCameraNode(mVanityNode);
         } else {
             mPreviewCam.offset = offset;
             offset = mMainCam.offset;
 
-            moveCameraNode(mPlayerNode);
             mPlayerNode->setVisible(!mFirstPersonView, false);
         }
         mCamera->setPosition(0.f, 0.f, offset);
@@ -261,12 +258,6 @@ namespace MWRender
         } else {
             mMainCam.pitch = angle;
         }
-    }
-
-    void Player::moveCameraNode(Ogre::SceneNode *node)
-    {
-        mCameraNode->getParentSceneNode()->removeChild(mCameraNode);
-        node->addChild(mCameraNode);
     }
 
     void Player::setCameraDistance(float dist, bool adjust, bool override)
@@ -344,5 +335,18 @@ namespace MWRender
     {
         pitch = mMainCam.pitch;
         yaw = mMainCam.yaw;
+    }
+
+    void Player::compensateYaw(float diff)
+    {
+        mPreviewCam.yaw -= diff;
+        Ogre::Quaternion zr(
+            Ogre::Radian(mPreviewCam.yaw),
+            Ogre::Vector3::NEGATIVE_UNIT_Z
+        );
+        Ogre::Quaternion xr(
+            Ogre::Radian(mPreviewCam.pitch),
+            Ogre::Vector3::UNIT_X);
+        mCameraNode->setOrientation(zr * xr);
     }
 }
