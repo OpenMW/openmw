@@ -97,6 +97,37 @@ Allowed options:
 
 CHANGELOG
 
+0.17.0
+
+Bug #225: Valgrind reports about 40MB of leaked memory
+Bug #241: Some physics meshes still don't match
+Bug #248: Some textures are too dark
+Bug #300: Dependency on proprietary CG toolkit
+Bug #302: Some objects don't collide although they should
+Bug #308: Freeze in Balmora, Meldor: Armorer
+Bug #313: openmw without a ~/.config/openmw folder segfault.
+Bug #317: adding non-existing spell via console locks game
+Bug #318: Wrong character normals
+Bug #341: Building with Ogre Debug libraries does not use debug version of plugins
+Bug #347: Crash when running openmw with --start="XYZ"
+Bug #353: FindMyGUI.cmake breaks path on Windows
+Bug #359: WindowManager throws exception at destruction
+Feature #33: Allow objects to cross cell-borders
+Feature #59: Dropping Items (replaced stopgap implementation with a proper one)
+Feature #93: Main Menu
+Feature #96/329/330/331/332/333: Player Control
+Feature #180: Object rotation and scaling.
+Feature #272: Incorrect NIF material sharing
+Feature #314: Potion usage
+Feature #324: Skill Gain
+Feature #342: Drain/fortify dynamic stats/attributes magic effects
+Feature #350: Allow console only script instructions
+Feature #352: Run scripts in console on startup
+Task #107: Refactor mw*-subsystems
+Task #325: Make CreatureStats into a class
+Task #345: Use Ogre's animation system
+Task #351: Rewrite Action class to support automatic sound playing
+
 0.16.0
 
 Bug #250: OpenMW launcher erratic behaviour
