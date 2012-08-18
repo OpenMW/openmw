@@ -298,6 +298,10 @@ namespace MWWorld
             }
 
             virtual void renderPlayer();
+
+            virtual bool isVanityEnabled() {
+                return mRendering->isVanityEnabled();
+            }
     };
 }
 

@@ -107,6 +107,10 @@ namespace MWRender
         void getSightAngles(float &pitch, float &yaw);
 
         void togglePlayerLooking(bool enable);
+
+        bool isVanityEnabled() {
+            return mVanity.enabled;
+        }
     };
 }
 

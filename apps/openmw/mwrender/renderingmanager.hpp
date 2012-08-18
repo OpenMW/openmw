@@ -64,15 +64,19 @@ class RenderingManager: private RenderingInterface, public Ogre::WindowEventList
         mPlayer->togglePreviewMode(enable);
     }
 
-    virtual bool toggleVanityMode(bool enable, bool force) {
+    bool toggleVanityMode(bool enable, bool force) {
         return mPlayer->toggleVanityMode(enable, force);
     }
 
-    virtual void allowVanityMode(bool allow) {
+    bool isVanityEnabled() {
+        return mPlayer->isVanityEnabled();
+    }
+
+    void allowVanityMode(bool allow) {
         mPlayer->allowVanityMode(allow);
     }
 
-    virtual void togglePlayerLooking(bool enable) {
+    void togglePlayerLooking(bool enable) {
         mPlayer->togglePlayerLooking(enable);
     }
 
