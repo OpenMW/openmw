@@ -31,6 +31,8 @@ namespace MWBase
             virtual void setDragDrop(bool dragDrop) = 0;
 
             virtual void toggleControlSwitch (const std::string& sw, bool value) = 0;
+
+            virtual void resetIdleTime() = 0;
     };
 }
 

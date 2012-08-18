@@ -1,6 +1,7 @@
 #include "mouselookevent.hpp"
 
 #include "../mwbase/environment.hpp"
+#include "../mwbase/inputmanager.hpp"
 #include "../mwbase/world.hpp"
 
 #include "../mwworld/player.hpp"
@@ -17,6 +18,7 @@ void MouseLookEvent::event(Type type, int index, const void *p)
     if (type != EV_MouseMove || mDisabled) {
         return;
     }
+    MWBase::Environment::get().getInputManager()->resetIdleTime();
 
     MouseEvent *arg = (MouseEvent*)(p);
 

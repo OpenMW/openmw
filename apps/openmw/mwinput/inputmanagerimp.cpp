@@ -92,6 +92,7 @@ namespace MWInput
     std::map<std::string, bool> mControlSwitch;
 
     float mPreviewPOVDelay;
+    float mTimeIdle;
 
    /* InputImpl Methods */
 public:
@@ -99,10 +100,33 @@ public:
     {
         input.adjustMouseClippingSize(width, height);
     }
+
+    void resetIdleTime()
+    {
+        if (mTimeIdle < 0) {
+            MWBase::Environment::get().getWorld()->toggleVanityMode(false, false);
+        }
+        mTimeIdle = 0.f;
+    }
+
 private:
+
+    void updateIdleTime(float dt)
+    {
+        if (mTimeIdle >= 0.f) {
+            mTimeIdle += dt;
+        }
+        if (mTimeIdle > 30.f && !windows.isGuiMode()) {
+            MWBase::Environment::get().getWorld()->toggleVanityMode(true, false);
+            mTimeIdle = -1.f;
+        }
+    }
+
     void toggleSpell()
     {
         if (windows.isGuiMode()) return;
+
+        resetIdleTime();
 
         MWMechanics::DrawState_ state = player.getDrawState();
         if (state == MWMechanics::DrawState_Weapon || state == MWMechanics::DrawState_Nothing)
@@ -120,6 +144,8 @@ private:
     void toggleWeapon()
     {
         if (windows.isGuiMode()) return;
+
+        resetIdleTime();
 
         MWMechanics::DrawState_ state = player.getDrawState();
         if (state == MWMechanics::DrawState_Spell || state == MWMechanics::DrawState_Nothing)
@@ -200,18 +226,26 @@ private:
 
     void activate()
     {
+        resetIdleTime();
+
         mEngine.activate();
     }
 
     void toggleAutoMove()
     {
         if (windows.isGuiMode()) return;
+        
+        resetIdleTime();
+
         player.setAutoMove (!player.getAutoMove());
     }
 
     void toggleWalking()
     {
         if (windows.isGuiMode()) return;
+
+        resetIdleTime();
+
         player.toggleRunning();
     }
 
@@ -243,7 +277,8 @@ private:
         windows(_windows),
         mEngine (engine),
         mDragDrop(false),
-        mPreviewPOVDelay(0.f)
+        mPreviewPOVDelay(0.f),
+        mTimeIdle(0.f)
     {
       using namespace OEngine::Input;
       using namespace OEngine::Render;
@@ -426,6 +461,19 @@ private:
                 }
             }
         }
+        // Idle time update despite of control switches
+        if (poller.isDown(A_MoveLeft) ||
+            poller.isDown(A_MoveRight) ||
+            poller.isDown(A_MoveForward) ||
+            poller.isDown(A_MoveBackward) ||
+            poller.isDown(A_Jump) ||
+            poller.isDown(A_Crouch) ||
+            poller.isDown(A_TogglePOV))
+        {
+            resetIdleTime();
+        } else {
+            updateIdleTime(duration);
+        }
     }
 
     // Switch between gui modes. Besides controlling the Gui windows
@@ -440,6 +488,8 @@ private:
 
           // Enable GUI events
           guiEvents->enabled = true;
+          
+          resetIdleTime();
         }
       else
         {
@@ -470,11 +520,6 @@ private:
             MWBase::Environment::get().getWorld()->togglePlayerLooking(value);
         }
         mControlSwitch[sw] = value;
-    }
-
-    bool getControlSwitch(const std::string &sw)
-    {
-        return mControlSwitch[sw];
     }
 
     void togglePOV()
@@ -536,8 +581,8 @@ private:
         impl->toggleControlSwitch(sw, value);
     }
 
-    bool MWInputManager::getControlSwitch(const std::string &sw)
+    void MWInputManager::resetIdleTime()
     {
-        return impl->getControlSwitch(sw);
+        impl->resetIdleTime();
     }
 }
