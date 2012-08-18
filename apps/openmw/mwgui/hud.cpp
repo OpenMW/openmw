@@ -9,6 +9,7 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/soundmanager.hpp"
+#include "../mwbase/windowmanager.hpp"
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/player.hpp"
@@ -16,7 +17,6 @@
 #include "../mwgui/widgets.hpp"
 
 #include "inventorywindow.hpp"
-#include "window_manager.hpp"
 #include "container.hpp"
 #include "console.hpp"
 
@@ -237,6 +237,9 @@ void HUD::setBottomRightVisibility(bool effectBoxVisible, bool minimapBoxVisible
 
 void HUD::onWorldClicked(MyGUI::Widget* _sender)
 {
+    if (!MWBase::Environment::get().getWindowManager ()->isGuiMode ())
+        return;
+
     if (mDragAndDrop->mIsOnDragAndDrop)
     {
         // drop item into the gameworld

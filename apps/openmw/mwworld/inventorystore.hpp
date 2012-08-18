@@ -7,7 +7,7 @@
 
 namespace MWMechanics
 {
-    struct NpcStats;
+    class NpcStats;
 }
 
 namespace MWWorld

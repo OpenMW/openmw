@@ -8,18 +8,15 @@
 #include <components/interpreter/opcodes.hpp>
 
 #include "../mwbase/environment.hpp"
+#include "../mwbase/inputmanager.hpp"
 
 #include "../mwworld/player.hpp"
 #include "../mwworld/class.hpp"
 
 #include "../mwmechanics/npcstats.hpp"
 
-#include "../mwinput/inputmanager.hpp"
-
 #include "interpretercontext.hpp"
 #include "ref.hpp"
-
-#include <iostream>
 
 namespace MWScript
 {
@@ -41,11 +38,6 @@ namespace MWScript
                     MWBase::Environment::get()
                         .getInputManager()
                         ->toggleControlSwitch(mControl, mEnable);
-
-                    if (mEnable)
-                        std::cout << "enable: " << mControl << std::endl;
-                    else
-                        std::cout << "disable: " << mControl << std::endl;
                 }
         };
 

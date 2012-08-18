@@ -10,14 +10,13 @@
 
 namespace MWGui
 {
+    /// \todo remove
     using namespace MyGUI;
-
-    class WindowManager;
 
     class BirthDialog : public WindowBase
     {
     public:
-        BirthDialog(WindowManager& parWindowManager);
+        BirthDialog(MWBase::WindowManager& parWindowManager);
 
         enum Gender
         {

@@ -82,6 +82,54 @@
             </Widget>
             <Widget type="TabItem" skin="" position="4 28 360 312">
                 <Property key="Caption" value="  #{sControls}  "/>
+
+                <Widget type="Widget" skin="MW_Box" position="8 8 344 150">
+                    <Widget type="ScrollView" skin="MW_ScrollView" name="ControlsBox" position="4 4 336 142"/>
+                </Widget>
+
+                <Widget type="Button" skin="MW_Button" name="ResetControlsButton" position="4 162 100 24">
+                    <Property key="Caption" value="#{sControlsMenu1}"/>
+                </Widget>
+
+                <Widget type="Button" skin="MW_Button" name="InvertYButton" position="4 192 32 24"/>
+                <Widget type="TextBox" skin="SandText" position="40 192 200 24">
+                    <Property key="Caption" value="#{sMouseFlip}"/>
+                </Widget>
+
+
+                <Widget type="TextBox" skin="NormalText" position="4 228 160 18" align="Left Top">
+                    <Property key="Caption" value="UI cursor sensitivity"/>
+                </Widget>
+                <Widget type="ScrollBar" skin="MW_HSlider" position="4 252 160 18" align="Left Top" name="UISensitivitySlider">
+                    <Property key="Range" value="1000000"/>
+                </Widget>
+                <Widget type="TextBox" skin="SandText" position="4 276 160 18" align="Left Top">
+                    <Property key="Caption" value="#{sLow}"/>
+                    <Property key="TextAlign" value="Left"/>
+                </Widget>
+                <Widget type="TextBox" skin="SandText" position="4 276 160 18" align="Left Top">
+                    <Property key="Caption" value="#{sHigh}"/>
+                    <Property key="TextAlign" value="Right"/>
+                </Widget>
+
+
+                <Widget type="TextBox" skin="NormalText" position="180 228 160 18" align="Left Top">
+                    <Property key="Caption" value="Camera sensitivity"/>
+                </Widget>
+                <Widget type="ScrollBar" skin="MW_HSlider" position="180 252 160 18" align="Left Top" name="CameraSensitivitySlider">
+                    <Property key="Range" value="1000000"/>
+                </Widget>
+                <Widget type="TextBox" skin="SandText" position="180 276 160 18" align="Left Top">
+                    <Property key="Caption" value="#{sLow}"/>
+                    <Property key="TextAlign" value="Left"/>
+                </Widget>
+                <Widget type="TextBox" skin="SandText" position="180 276 160 18" align="Left Top">
+                    <Property key="Caption" value="#{sHigh}"/>
+                    <Property key="TextAlign" value="Right"/>
+                </Widget>
+
+
+
             </Widget>
             <Widget type="TabItem" skin="" position="4 28 360 312">
                 <Property key="Caption" value="  #{sVideo}  "/>
@@ -121,11 +169,11 @@
                             <Property key="Range" value="1000000"/>
                         </Widget>
                         <Widget type="TextBox" skin="SandText" position="4 246 329 18" align="Left Top">
-                            <Property key="Caption" value="Low"/>
+                            <Property key="Caption" value="#{sLow}"/>
                             <Property key="TextAlign" value="Left"/>
                         </Widget>
                         <Widget type="TextBox" skin="SandText" position="4 246 329 18" align="Left Top">
-                            <Property key="Caption" value="High"/>
+                            <Property key="Caption" value="#{sHigh}"/>
                             <Property key="TextAlign" value="Right"/>
                         </Widget>
                     </Widget>

@@ -1,9 +1,10 @@
 #include "window_pinnable_base.hpp"
-#include "window_manager.hpp"
+
+#include "../mwbase/windowmanager.hpp"
 
 using namespace MWGui;
 
-WindowPinnableBase::WindowPinnableBase(const std::string& parLayout, WindowManager& parWindowManager)
+WindowPinnableBase::WindowPinnableBase(const std::string& parLayout, MWBase::WindowManager& parWindowManager)
   : WindowBase(parLayout, parWindowManager), mPinned(false), mVisible(false)
 {
     MyGUI::WindowPtr t = static_cast<MyGUI::WindowPtr>(mMainWidget);
@@ -30,4 +31,3 @@ void WindowPinnableBase::onWindowButtonPressed(MyGUI::Window* sender, const std:
 
     eventDone(this);
 }
-

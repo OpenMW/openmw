@@ -18,16 +18,16 @@
 #include <extern/shiny/Platforms/Ogre/OgrePlatform.hpp>
 
 #include <components/esm/loadstat.hpp>
+#include <components/esm_store/store.hpp>
 #include <components/settings/settings.hpp>
 
 #include "../mwbase/world.hpp" // these includes can be removed once the static-hack is gone
 #include "../mwbase/environment.hpp"
+#include "../mwbase/inputmanager.hpp" // FIXME
+#include "../mwbase/windowmanager.hpp" // FIXME
 
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/player.hpp"
-
-#include "../mwgui/window_manager.hpp" // FIXME
-#include "../mwinput/inputmanager.hpp" // FIXME
 
 #include "shadows.hpp"
 #include "localmap.hpp"
@@ -776,6 +776,7 @@ void RenderingManager::windowResized(Ogre::RenderWindow* rw)
 
 void RenderingManager::windowClosed(Ogre::RenderWindow* rw)
 {
+    Ogre::Root::getSingleton ().queueEndRendering ();
 }
 
 bool RenderingManager::waterShaderSupported()

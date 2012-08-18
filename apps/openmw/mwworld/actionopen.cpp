@@ -1,9 +1,8 @@
 #include "actionopen.hpp"
 
 #include "../mwbase/environment.hpp"
+#include "../mwbase/windowmanager.hpp"
 
-#include "../mwclass/container.hpp"
-#include "../mwgui/window_manager.hpp"
 #include "../mwgui/container.hpp"
 
 #include "class.hpp"

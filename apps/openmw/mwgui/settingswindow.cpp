@@ -13,12 +13,11 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/soundmanager.hpp"
+#include "../mwbase/inputmanager.hpp"
+#include "../mwbase/windowmanager.hpp"
 
 #include "../mwrender/renderingmanager.hpp"
 
-#include "../mwinput/inputmanager.hpp"
-
-#include "window_manager.hpp"
 #include "confirmationdialog.hpp"
 
 namespace
@@ -82,7 +81,7 @@ namespace
 
 namespace MWGui
 {
-    SettingsWindow::SettingsWindow(WindowManager& parWindowManager) :
+    SettingsWindow::SettingsWindow(MWBase::WindowManager& parWindowManager) :
         WindowBase("openmw_settings_window.layout", parWindowManager)
     {
         getWidget(mOkButton, "OkButton");
@@ -116,7 +115,13 @@ namespace MWGui
         getWidget(mMiscShadows, "MiscShadows");
         getWidget(mShadowsDebug, "ShadowsDebug");
         getWidget(mUnderwaterButton, "UnderwaterButton");
+        getWidget(mControlsBox, "ControlsBox");
+        getWidget(mResetControlsButton, "ResetControlsButton");
+        getWidget(mInvertYButton, "InvertYButton");
+        getWidget(mUISensitivitySlider, "UISensitivitySlider");
+        getWidget(mCameraSensitivitySlider, "CameraSensitivitySlider");
 
+        mInvertYButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onButtonToggled);
         mOkButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onOkButtonClicked);
         mUnderwaterButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onButtonToggled);
         mShadersButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onShadersToggled);
@@ -154,6 +159,9 @@ namespace MWGui
         int okSize = mOkButton->getTextSize().width + 24;
         mOkButton->setCoord(mMainWidget->getWidth()-16-okSize, mOkButton->getTop(),
                             okSize, mOkButton->getHeight());
+
+        mResetControlsButton->setSize (mResetControlsButton->getTextSize ().width + 24, mResetControlsButton->getHeight());
+        mResetControlsButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onResetDefaultBindings);
 
         // fill resolution list
         Ogre::RenderSystem* rs = Ogre::Root::getSingleton().getRenderSystem();
@@ -219,6 +227,16 @@ namespace MWGui
         mStaticsShadows->setCaptionWithReplacing(Settings::Manager::getBool("statics shadows", "Shadows") ? "#{sOn}" : "#{sOff}");
         mMiscShadows->setCaptionWithReplacing(Settings::Manager::getBool("misc shadows", "Shadows") ? "#{sOn}" : "#{sOff}");
         mShadowsDebug->setCaptionWithReplacing(Settings::Manager::getBool("debug", "Shadows") ? "#{sOn}" : "#{sOff}");
+
+        float cameraSens = (Settings::Manager::getFloat("camera sensitivity", "Input")-0.2)/(5.0-0.2);
+        mCameraSensitivitySlider->setScrollPosition (cameraSens * (mCameraSensitivitySlider->getScrollRange()-1));
+        float uiSens = (Settings::Manager::getFloat("ui sensitivity", "Input")-0.2)/(5.0-0.2);
+        mUISensitivitySlider->setScrollPosition (uiSens * (mUISensitivitySlider->getScrollRange()-1));
+        mCameraSensitivitySlider->eventScrollChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onSliderChangePosition);
+        mUISensitivitySlider->eventScrollChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onSliderChangePosition);
+
+
+        mInvertYButton->setCaptionWithReplacing(Settings::Manager::getBool("invert y axis", "Input") ? "#{sOn}" : "#{sOff}");
 
         std::string shaders;
         if (!Settings::Manager::getBool("shaders", "Objects"))
@@ -383,6 +401,8 @@ namespace MWGui
                 Settings::Manager::setBool("misc shadows", "Shadows", newState);
             else if (_sender == mShadowsDebug)
                 Settings::Manager::setBool("debug", "Shadows", newState);
+            else if (_sender == mInvertYButton)
+                Settings::Manager::setBool("invert y axis", "Input", newState);
 
             apply();
         }
@@ -500,6 +520,10 @@ namespace MWGui
             Settings::Manager::setFloat("footsteps volume", "Sound", val);
         else if (scroller == mMusicVolumeSlider)
             Settings::Manager::setFloat("music volume", "Sound", val);
+        else if (scroller == mUISensitivitySlider)
+            Settings::Manager::setFloat("ui sensitivity", "Input", (1-val) * 0.2 + val * 5.f);
+        else if (scroller == mCameraSensitivitySlider)
+            Settings::Manager::setFloat("camera sensitivity", "Input", (1-val) * 0.2 + val * 5.f);
 
         apply();
     }
@@ -511,5 +535,79 @@ namespace MWGui
         MWBase::Environment::get().getSoundManager()->processChangedSettings(changed);
         MWBase::Environment::get().getWindowManager()->processChangedSettings(changed);
         MWBase::Environment::get().getInputManager()->processChangedSettings(changed);
+    }
+
+    void SettingsWindow::updateControlsBox()
+    {
+        while (mControlsBox->getChildCount())
+            MyGUI::Gui::getInstance().destroyWidget(mControlsBox->getChildAt(0));
+
+        std::vector<int> actions = MWBase::Environment::get().getInputManager()->getActionSorting ();
+
+        const int h = 18;
+        const int w = mControlsBox->getWidth() - 28;
+        int curH = 0;
+        for (std::vector<int>::const_iterator it = actions.begin(); it != actions.end(); ++it)
+        {
+            std::string desc = MWBase::Environment::get().getInputManager()->getActionDescription (*it);
+            if (desc == "")
+                continue;
+
+            std::string binding = MWBase::Environment::get().getInputManager()->getActionBindingName (*it);
+
+            MyGUI::TextBox* leftText = mControlsBox->createWidget<MyGUI::TextBox>("SandText", MyGUI::IntCoord(0,curH,w,h), MyGUI::Align::Default);
+            leftText->setCaptionWithReplacing(desc);
+
+            MyGUI::Button* rightText = mControlsBox->createWidget<MyGUI::Button>("SandTextButton", MyGUI::IntCoord(0,curH,w,h), MyGUI::Align::Default);
+            rightText->setCaptionWithReplacing(binding);
+            rightText->setTextAlign (MyGUI::Align::Right);
+            rightText->setUserData(*it); // save the action id for callbacks
+            rightText->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onRebindAction);
+            rightText->eventMouseWheel += MyGUI::newDelegate(this, &SettingsWindow::onInputTabMouseWheel);
+            curH += h;
+        }
+
+        mControlsBox->setCanvasSize (mControlsBox->getWidth(), std::max(curH, mControlsBox->getHeight()));
+    }
+
+    void SettingsWindow::onRebindAction(MyGUI::Widget* _sender)
+    {
+        int actionId = *_sender->getUserData<int>();
+
+        static_cast<MyGUI::Button*>(_sender)->setCaptionWithReplacing("#{sNone}");
+
+        MWBase::Environment::get().getWindowManager ()->messageBox ("#{sControlsMenu3}", std::vector<std::string>());
+        MWBase::Environment::get().getWindowManager ()->disallowMouse();
+
+        MWBase::Environment::get().getInputManager ()->enableDetectingBindingMode (actionId);
+
+    }
+
+    void SettingsWindow::onInputTabMouseWheel(MyGUI::Widget* _sender, int _rel)
+    {
+        if (mControlsBox->getViewOffset().top + _rel*0.3 > 0)
+            mControlsBox->setViewOffset(MyGUI::IntPoint(0, 0));
+        else
+            mControlsBox->setViewOffset(MyGUI::IntPoint(0, mControlsBox->getViewOffset().top + _rel*0.3));
+    }
+
+    void SettingsWindow::onResetDefaultBindings(MyGUI::Widget* _sender)
+    {
+        ConfirmationDialog* dialog = mWindowManager.getConfirmationDialog();
+        dialog->open("#{sNotifyMessage66}");
+        dialog->eventOkClicked.clear();
+        dialog->eventOkClicked += MyGUI::newDelegate(this, &SettingsWindow::onResetDefaultBindingsAccept);
+        dialog->eventCancelClicked.clear();
+    }
+
+    void SettingsWindow::onResetDefaultBindingsAccept()
+    {
+        MWBase::Environment::get().getInputManager ()->resetToDefaultBindings ();
+        updateControlsBox ();
+    }
+
+    void SettingsWindow::open()
+    {
+        updateControlsBox ();
     }
 }

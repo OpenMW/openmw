@@ -1,7 +1,7 @@
 #include "actionalchemy.hpp"
 
 #include "../mwbase/environment.hpp"
-#include "../mwgui/window_manager.hpp"
+#include "../mwbase/windowmanager.hpp"
 
 namespace MWWorld
 {

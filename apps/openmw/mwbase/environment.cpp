@@ -3,15 +3,14 @@
 
 #include <cassert>
 
-#include "../mwinput/inputmanager.hpp"
-
-#include "../mwmechanics/mechanicsmanager.hpp"
-
 #include "world.hpp"
 #include "scriptmanager.hpp"
 #include "dialoguemanager.hpp"
 #include "journal.hpp"
 #include "soundmanager.hpp"
+#include "mechanicsmanager.hpp"
+#include "inputmanager.hpp"
+#include "windowmanager.hpp"
 
 MWBase::Environment *MWBase::Environment::sThis = 0;
 
@@ -44,12 +43,12 @@ void MWBase::Environment::setScriptManager (ScriptManager *scriptManager)
     mScriptManager = scriptManager;
 }
 
-void MWBase::Environment::setWindowManager (MWGui::WindowManager *windowManager)
+void MWBase::Environment::setWindowManager (WindowManager *windowManager)
 {
     mWindowManager = windowManager;
 }
 
-void MWBase::Environment::setMechanicsManager (MWMechanics::MechanicsManager *mechanicsManager)
+void MWBase::Environment::setMechanicsManager (MechanicsManager *mechanicsManager)
 {
     mMechanicsManager = mechanicsManager;
 }
@@ -64,7 +63,7 @@ void MWBase::Environment::setJournal (Journal *journal)
     mJournal = journal;
 }
 
-void MWBase::Environment::setInputManager (MWInput::MWInputManager *inputManager)
+void MWBase::Environment::setInputManager (InputManager *inputManager)
 {
     mInputManager = inputManager;
 }
@@ -92,13 +91,13 @@ MWBase::ScriptManager *MWBase::Environment::getScriptManager() const
     return mScriptManager;
 }
 
-MWGui::WindowManager *MWBase::Environment::getWindowManager() const
+MWBase::WindowManager *MWBase::Environment::getWindowManager() const
 {
     assert (mWindowManager);
     return mWindowManager;
 }
 
-MWMechanics::MechanicsManager *MWBase::Environment::getMechanicsManager() const
+MWBase::MechanicsManager *MWBase::Environment::getMechanicsManager() const
 {
     assert (mMechanicsManager);
     return mMechanicsManager;
@@ -116,7 +115,7 @@ MWBase::Journal *MWBase::Environment::getJournal() const
     return mJournal;
 }
 
-MWInput::MWInputManager *MWBase::Environment::getInputManager() const
+MWBase::InputManager *MWBase::Environment::getInputManager() const
 {
     assert (mInputManager);
     return mInputManager;
@@ -146,6 +145,9 @@ void MWBase::Environment::cleanup()
 
     delete mScriptManager;
     mScriptManager = 0;
+
+    delete mWindowManager;
+    mWindowManager = 0;
 
     delete mWorld;
     mWorld = 0;

@@ -1,14 +1,14 @@
 #ifndef GAME_MWDIALOG_DIALOGUEMANAGERIMP_H
 #define GAME_MWDIALOG_DIALOGUEMANAGERIMP_H
 
+#include "../mwbase/dialoguemanager.hpp"
+
 #include <components/esm/loadinfo.hpp>
 
 #include <components/compiler/streamerrorhandler.hpp>
 #include "../mwscript/compilercontext.hpp"
 #include "../mwscript/interpretercontext.hpp"
 #include <components/compiler/output.hpp>
-
-#include "../mwbase/dialoguemanager.hpp"
 
 #include "../mwworld/ptr.hpp"
 

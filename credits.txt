@@ -61,6 +61,7 @@ spyboot - German News Writer
 
 
 Formula Research:
+Epsilon
 fragonard
 Greendogo
 HiPhish
@@ -101,3 +102,12 @@ used as the application icon and project logo.
 
 Thanks to Kevin Ryan,
 for creating the icon used for the Data Files tab of the OpenMW Launcher.
+
+Thanks to Georg Duffner,
+for the open-source EB Garamond fontface.
+
+Thanks to Dongle,
+for his Daedric fontface, see Daedric Font License.txt for his license terms.
+
+Thanks to Bitstream Inc.
+for their Bitstream Vera fontface, see Bitstream Vera License.txt for their license terms.

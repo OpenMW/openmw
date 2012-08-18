@@ -10,12 +10,10 @@
 
 namespace MWGui
 {
-    class WindowManager;
-
     class JournalWindow : public WindowBase
     {
         public:
-            JournalWindow(WindowManager& parWindowManager);
+            JournalWindow(MWBase::WindowManager& parWindowManager);
             void open();
 
             virtual void setVisible(bool visible); // only used to play close sound

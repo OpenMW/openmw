@@ -9,8 +9,6 @@
 
 namespace MWGui
 {
-    class WindowManager;
-
     // Info about tooltip that is supplied by the MWWorld::Class object
     struct ToolTipInfo
     {
@@ -29,7 +27,7 @@ namespace MWGui
     class ToolTips : public OEngine::GUI::Layout
     {
     public:
-        ToolTips(WindowManager* windowManager);
+        ToolTips(MWBase::WindowManager* windowManager);
 
         void onFrame(float frameDuration);
 
@@ -45,7 +43,7 @@ namespace MWGui
 
         void setFocusObject(const MWWorld::Ptr& focus);
         void setFocusObjectScreenCoords(float min_x, float min_y, float max_x, float max_y);
-        ///< set the screen-space position of the tooltip for focused object 
+        ///< set the screen-space position of the tooltip for focused object
 
         static std::string getValueString(const int value, const std::string& prefix);
         ///< @return "prefix: value" or "" if value is 0
@@ -71,7 +69,7 @@ namespace MWGui
     private:
         MyGUI::Widget* mDynamicToolTipBox;
 
-        WindowManager* mWindowManager;
+        MWBase::WindowManager* mWindowManager;
 
         MWWorld::Ptr mFocusObject;
 

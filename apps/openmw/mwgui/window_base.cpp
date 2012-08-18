@@ -1,11 +1,12 @@
 #include "window_base.hpp"
-#include "window_manager.hpp"
 
 #include <components/settings/settings.hpp>
 
+#include "../mwbase/windowmanager.hpp"
+
 using namespace MWGui;
 
-WindowBase::WindowBase(const std::string& parLayout, WindowManager& parWindowManager)
+WindowBase::WindowBase(const std::string& parLayout, MWBase::WindowManager& parWindowManager)
   : Layout(parLayout)
   , mWindowManager(parWindowManager)
 {

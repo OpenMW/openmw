@@ -13,9 +13,9 @@
 #include <components/nifbullet/bullet_nif_loader.hpp>
 #include <components/nifogre/ogre_nif_loader.hpp>
 
-#include "mwinput/inputmanager.hpp"
+#include "mwinput/inputmanagerimp.hpp"
 
-#include "mwgui/window_manager.hpp"
+#include "mwgui/windowmanagerimp.hpp"
 #include "mwgui/cursorreplace.hpp"
 
 #include "mwscript/scriptmanagerimp.hpp"
@@ -32,7 +32,7 @@
 #include "mwdialogue/dialoguemanagerimp.hpp"
 #include "mwdialogue/journalimp.hpp"
 
-#include "mwmechanics/mechanicsmanager.hpp"
+#include "mwmechanics/mechanicsmanagerimp.hpp"
 
 
 void OMW::Engine::executeLocalScripts()
@@ -67,7 +67,7 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
         mEnvironment.setFrameDuration (evt.timeSinceLastFrame);
 
         // update input
-        MWBase::Environment::get().getInputManager()->update();
+        MWBase::Environment::get().getInputManager()->update(evt.timeSinceLastFrame);
 
         // sound
         if (mUseSound)
@@ -270,6 +270,10 @@ void OMW::Engine::go()
     else if (boost::filesystem::exists(globaldefault))
         settings.loadUser(globaldefault);
 
+    // Get the path for the keybinder xml file
+    std::string keybinderUser = (mCfgMgr.getUserPath() / "input.xml").string();
+    bool keybinderUserExists = boost::filesystem::exists(keybinderUser);
+
     mFpsLevel = settings.getInt("fps", "HUD");
 
     // load nif overrides
@@ -366,9 +370,9 @@ void OMW::Engine::go()
 
     // Sets up the input system
 
-    mEnvironment.setInputManager (new MWInput::MWInputManager (*mOgre,
+    mEnvironment.setInputManager (new MWInput::InputManager (*mOgre,
         MWBase::Environment::get().getWorld()->getPlayer(),
-        *MWBase::Environment::get().getWindowManager(), mDebug, *this));
+         *MWBase::Environment::get().getWindowManager(), mDebug, *this, keybinderUser, keybinderUserExists));
 
     std::cout << "\nPress Q/ESC or close window to exit.\n";
 

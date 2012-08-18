@@ -9,6 +9,7 @@
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwbase/soundmanager.hpp"
+#include "../mwbase/windowmanager.hpp"
 
 #include "../mwworld/player.hpp"
 #include "../mwworld/inventorystore.hpp"
@@ -17,7 +18,6 @@
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/spellsuccess.hpp"
 
-#include "window_manager.hpp"
 #include "inventorywindow.hpp"
 #include "confirmationdialog.hpp"
 
@@ -42,7 +42,7 @@ namespace
 
 namespace MWGui
 {
-    SpellWindow::SpellWindow(WindowManager& parWindowManager)
+    SpellWindow::SpellWindow(MWBase::WindowManager& parWindowManager)
         : WindowPinnableBase("openmw_spell_window.layout", parWindowManager)
         , mHeight(0)
         , mWidth(0)

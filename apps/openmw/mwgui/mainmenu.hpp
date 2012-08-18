@@ -8,6 +8,8 @@ namespace MWGui
     public:
         MainMenu(int w, int h);
 
+        void onResChange(int w, int h);
+
     private:
         MyGUI::Button* mReturn;
         MyGUI::Button* mNewGame;

@@ -30,7 +30,7 @@ namespace MWGui
         };
         typedef std::vector<int> SkillList;
 
-        ReviewDialog(WindowManager& parWindowManager);
+        ReviewDialog(MWBase::WindowManager& parWindowManager);
 
         void setPlayerName(const std::string &name);
         void setRace(const std::string &raceId);

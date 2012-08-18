@@ -5,18 +5,16 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/soundmanager.hpp"
-
-#include "../mwinput/inputmanager.hpp"
+#include "../mwbase/windowmanager.hpp"
 
 #include "../mwworld/actiontake.hpp"
 #include "../mwworld/player.hpp"
 
 #include "formatting.hpp"
-#include "window_manager.hpp"
 
 using namespace MWGui;
 
-BookWindow::BookWindow (WindowManager& parWindowManager) :
+BookWindow::BookWindow (MWBase::WindowManager& parWindowManager) :
     WindowBase("openmw_book.layout", parWindowManager)
 {
     getWidget(mCloseButton, "CloseButton");
