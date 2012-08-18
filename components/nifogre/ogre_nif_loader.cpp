@@ -274,14 +274,18 @@ void loadResource(Ogre::Resource *resource)
         if(scaleiter != scalekeys.mKeys.end())
             lastscale = curscale = Ogre::Vector3(scaleiter->mValue) / startscale;
         bool didlast = false;
-        //The times are right
+        
         while(!didlast)
         {
             float curtime = kfc->timeStop;
+            // Get the latest quaternion, translation, and scale for the
+            // current time
+
+            //Get latest time
             if(quatiter != quatkeys.mKeys.end()){
                 curtime = std::min(curtime, quatiter->mTime);
                 lastquat = curquat;
-                curquat = startquat.Inverse() * quatiter->mValue;
+                curquat = startquat.Inverse() * quatiter->mValue ;
 
             }
             if(traniter != trankeys.mKeys.end()){
@@ -302,8 +306,39 @@ void loadResource(Ogre::Resource *resource)
                 curtime = kfc->timeStop;
             }
 
-            // Get the latest quaternion, translation, and scale for the
-            // current time
+            bool rinterpolate = quatiter != quatkeys.mKeys.end() && quatiter != quatkeys.mKeys.begin()  && curtime != quatiter->mTime;
+            bool tinterpolate = traniter != trankeys.mKeys.end() && traniter != trankeys.mKeys.begin() && curtime != traniter->mTime;
+            bool sinterpolate = scaleiter != scalekeys.mKeys.end() && scaleiter != scalekeys.mKeys.begin() && curtime != scaleiter->mTime;
+
+            
+            
+            Ogre::TransformKeyFrame *kframe;
+            kframe = nodetrack->createNodeKeyFrame(curtime);
+            if(!rinterpolate)
+                kframe->setRotation(curquat);
+            else
+            {
+                QuaternionKeyList::VecType::const_iterator last = quatiter-1;
+                float diff = (curtime-last->mTime) / (quatiter->mTime-last->mTime);
+                kframe->setRotation(Ogre::Quaternion::nlerp(diff, lastquat, curquat));
+            }
+            if(!tinterpolate)
+                kframe->setTranslate(curtrans);
+            else
+            {
+                Vector3KeyList::VecType::const_iterator last = traniter-1;
+                float diff = (curtime-last->mTime) / (traniter->mTime-last->mTime);
+                kframe->setTranslate(lasttrans + ((curtrans-lasttrans)*diff));
+            }
+            if(!sinterpolate)
+                kframe->setScale(curscale);
+            else
+            {
+                FloatKeyList::VecType::const_iterator last = scaleiter-1;
+                float diff = (curtime-last->mTime) / (scaleiter->mTime-last->mTime);
+                kframe->setScale(lastscale + ((curscale-lastscale)*diff));
+            }
+
             while(quatiter != quatkeys.mKeys.end() && curtime >= quatiter->mTime)
             {
                 quatiter++;
@@ -317,32 +352,6 @@ void loadResource(Ogre::Resource *resource)
                 scaleiter++;
             }
 
-            Ogre::TransformKeyFrame *kframe;
-            kframe = nodetrack->createNodeKeyFrame(curtime);
-            if(quatiter == quatkeys.mKeys.end() || quatiter == quatkeys.mKeys.begin() || (quatiter-1)->mTime == curtime)
-                kframe->setRotation(curquat);
-            else
-            {
-                QuaternionKeyList::VecType::const_iterator last = quatiter-1;
-                float diff = (curtime-last->mTime) / (quatiter->mTime-last->mTime);
-                kframe->setRotation(Ogre::Quaternion::Slerp(diff, lastquat, curquat, true));
-            }
-            if(traniter == trankeys.mKeys.end() || traniter == trankeys.mKeys.begin() || (traniter-1)->mTime == curtime)
-                kframe->setTranslate(curtrans);
-            else
-            {
-                Vector3KeyList::VecType::const_iterator last = traniter-1;
-                float diff = (curtime-last->mTime) / (traniter->mTime-last->mTime);
-                kframe->setTranslate(lasttrans + ((curtrans-lasttrans)*diff));
-            }
-            if(scaleiter == scalekeys.mKeys.end() || scaleiter == scalekeys.mKeys.begin() || (scaleiter-1)->mTime == curtime)
-                kframe->setScale(curscale);
-            else
-            {
-                FloatKeyList::VecType::const_iterator last = scaleiter-1;
-                float diff = (curtime-last->mTime) / (scaleiter->mTime-last->mTime);
-                kframe->setScale(lastscale + ((curscale-lastscale)*diff));
-            }
         }
     }
     anim->optimise();
