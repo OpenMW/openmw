@@ -185,7 +185,7 @@ namespace MWScript
                     float ax = ptr.getRefData().getPosition().pos[0];
                     float ay = ptr.getRefData().getPosition().pos[1];
                     float az = ptr.getRefData().getPosition().pos[2];
-                    std::cout << "setPos";
+                    
 
                     if(axis == "x")
                     {
@@ -252,28 +252,32 @@ namespace MWScript
                     MWWorld::CellStore* store = 0;
                     try
                     {
-                        MWWorld::CellStore* store = MWBase::Environment::get().getWorld()->getInterior(cellID);
+                        store = MWBase::Environment::get().getWorld()->getInterior(cellID);
                     }
                     catch(std::exception &e)
                     {
-                        const ESM::Cell* cell = MWBase::Environment::get().getWorld()->getExterior(cellID);
+                        /*const ESM::Cell* cell = MWBase::Environment::get().getWorld()->getExterior(cellID);
                         if(cell)
                         {
                             store = MWBase::Environment::get().getWorld()->getExterior(cell->getGridX(),cell->getGridY());
-                        }
+                        }*/
                     }
                     if(store)
                     {
                         MWBase::Environment::get().getWorld()->moveObject(ptr,*store,x,y,z);
                         float ax = Ogre::Radian(ptr.getRefData().getPosition().rot[0]).valueDegrees();
                         float ay = Ogre::Radian(ptr.getRefData().getPosition().rot[1]).valueDegrees();
-                        if(ptr.getTypeName() == "struct ESM::NPC")//some morrowind oddity
+                        if(ptr.getTypeName() == typeid(ESM::NPC).name())//some morrowind oddity
                         {
                             ax = ax/60.;
                             ay = ay/60.;
                             zRot = zRot/60.;
                         }
-                        MWBase::Environment::get().getWorld()->rotateObject(ptr,ax,ay,zRot);
+                        //MWBase::Environment::get().getWorld()->rotateObject(ptr,ax,ay,zRot);
+                    }
+                    else
+                    {
+                        throw std::runtime_error ("unknown cell");
                     }
                 }
         };
@@ -301,7 +305,7 @@ namespace MWScript
                         *MWBase::Environment::get().getWorld()->getExterior(cx,cy),x,y,z);
                     float ax = Ogre::Radian(ptr.getRefData().getPosition().rot[0]).valueDegrees();
                     float ay = Ogre::Radian(ptr.getRefData().getPosition().rot[1]).valueDegrees();
-                    if(ptr.getTypeName() == "struct ESM::NPC")//some morrowind oddity
+                    if(ptr.getTypeName() == typeid(ESM::NPC).name())//some morrowind oddity
                     {
                         ax = ax/60.;
                         ay = ay/60.;
