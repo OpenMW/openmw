@@ -284,19 +284,13 @@ void loadResource(Ogre::Resource *resource)
             //Get latest time
             if(quatiter != quatkeys.mKeys.end()){
                 curtime = std::min(curtime, quatiter->mTime);
-                lastquat = curquat;
-                curquat = startquat.Inverse() * quatiter->mValue ;
-
             }
             if(traniter != trankeys.mKeys.end()){
                 curtime = std::min(curtime, traniter->mTime);
-                lasttrans = curtrans;
-                curtrans = traniter->mValue - starttrans;
+                
             }
             if(scaleiter != scalekeys.mKeys.end()){
                 curtime = std::min(curtime, scaleiter->mTime);
-                lastscale = curscale;
-                curscale = Ogre::Vector3(scaleiter->mValue) / startscale;
             }
 
             curtime = std::max(curtime, kfc->timeStart);
@@ -342,14 +336,23 @@ void loadResource(Ogre::Resource *resource)
             while(quatiter != quatkeys.mKeys.end() && curtime >= quatiter->mTime)
             {
                 quatiter++;
+                lastquat = curquat;
+                if(quatiter != quatkeys.mKeys.end())
+                    curquat = startquat.Inverse() * quatiter->mValue ;
             }
             while(traniter != trankeys.mKeys.end() && curtime >= traniter->mTime)
             {
                 traniter++;
+                lasttrans = curtrans;
+                if(traniter != trankeys.mKeys.end())
+                    curtrans = traniter->mValue - starttrans;
             }
             while(scaleiter != scalekeys.mKeys.end() && curtime >= scaleiter->mTime)
             {
                 scaleiter++;
+                lastscale = curscale;
+                if(scaleiter != scalekeys.mKeys.end())
+                    curscale = Ogre::Vector3(scaleiter->mValue) / startscale;
             }
 
         }
