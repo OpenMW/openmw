@@ -278,8 +278,7 @@ void loadResource(Ogre::Resource *resource)
         while(!didlast)
         {
             float curtime = kfc->timeStop;
-            // Get the latest quaternion, translation, and scale for the
-            // current time
+            
 
             //Get latest time
             if(quatiter != quatkeys.mKeys.end()){
@@ -333,6 +332,8 @@ void loadResource(Ogre::Resource *resource)
                 kframe->setScale(lastscale + ((curscale-lastscale)*diff));
             }
 
+            // Get the latest quaternion, translation, and scale for the
+            // current time
             while(quatiter != quatkeys.mKeys.end() && curtime >= quatiter->mTime)
             {
                 quatiter++;
