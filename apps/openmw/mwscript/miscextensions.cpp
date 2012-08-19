@@ -209,6 +209,8 @@ namespace MWScript
 
         class OpToggleVanityMode : public Interpreter::Opcode0
         {
+            static bool sActivate;
+
         public:
         
             virtual void execute(Interpreter::Runtime &runtime)
@@ -219,16 +221,17 @@ namespace MWScript
                 MWBase::World *world =
                     MWBase::Environment::get().getWorld();
 
-                bool value = !world->isVanityEnabled();
-                if (world->toggleVanityMode(value, true)) {
+                if (world->toggleVanityMode(sActivate, true)) {
                     context.report(
-                        (value) ? "Vanity Mode -> On" : "Vanity Mode -> Off"
+                        (sActivate) ? "Vanity Mode -> On" : "Vanity Mode -> Off"
                     );
+                    sActivate = !sActivate;
                 } else {
                     context.report("Vanity Mode -> No");
                 }
             }
         };
+        bool OpToggleVanityMode::sActivate = true;
 
         const int opcodeXBox = 0x200000c;
         const int opcodeOnActivate = 0x200000d;

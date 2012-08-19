@@ -68,10 +68,6 @@ class RenderingManager: private RenderingInterface, public Ogre::WindowEventList
         return mPlayer->toggleVanityMode(enable, force);
     }
 
-    bool isVanityEnabled() {
-        return mPlayer->isVanityEnabled();
-    }
-
     void allowVanityMode(bool allow) {
         mPlayer->allowVanityMode(allow);
     }
