@@ -5,7 +5,6 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
-#include "../mwbase/soundmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
 
 #include "../mwworld/ptr.hpp"
@@ -63,10 +62,11 @@ namespace MWClass
     boost::shared_ptr<MWWorld::Action> Probe::activate (const MWWorld::Ptr& ptr,
         const MWWorld::Ptr& actor) const
     {
-        MWBase::Environment::get().getSoundManager()->playSound3D (ptr, getUpSoundId(ptr), 1.0, 1.0, MWBase::SoundManager::Play_NoTrack);
+        boost::shared_ptr<MWWorld::Action> action(new MWWorld::ActionTake (ptr));
 
-        return boost::shared_ptr<MWWorld::Action> (
-            new MWWorld::ActionTake (ptr));
+        action->setSound(getUpSoundId(ptr));
+
+        return action;
     }
 
     std::string Probe::getScript (const MWWorld::Ptr& ptr) const
@@ -159,9 +159,11 @@ namespace MWClass
 
     boost::shared_ptr<MWWorld::Action> Probe::use (const MWWorld::Ptr& ptr) const
     {
-        MWBase::Environment::get().getSoundManager()->playSound (getUpSoundId(ptr), 1.0, 1.0);
+        boost::shared_ptr<MWWorld::Action> action(new MWWorld::ActionEquip(ptr));
 
-        return boost::shared_ptr<MWWorld::Action>(new MWWorld::ActionEquip(ptr));
+        action->setSound(getUpSoundId(ptr));
+
+        return action;
     }
 
     MWWorld::Ptr

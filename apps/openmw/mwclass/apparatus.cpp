@@ -5,7 +5,6 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
-#include "../mwbase/soundmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
 
 #include "../mwworld/ptr.hpp"
@@ -63,10 +62,12 @@ namespace MWClass
     boost::shared_ptr<MWWorld::Action> Apparatus::activate (const MWWorld::Ptr& ptr,
         const MWWorld::Ptr& actor) const
     {
-        MWBase::Environment::get().getSoundManager()->playSound3D (ptr, getUpSoundId(ptr), 1.0, 1.0, MWBase::SoundManager::Play_NoTrack);
+    	boost::shared_ptr<MWWorld::Action> action(
+    	            new MWWorld::ActionTake (ptr));
 
-        return boost::shared_ptr<MWWorld::Action> (
-            new MWWorld::ActionTake (ptr));
+    	action->setSound(getUpSoundId(ptr));
+
+        return action;
     }
 
     std::string Apparatus::getScript (const MWWorld::Ptr& ptr) const

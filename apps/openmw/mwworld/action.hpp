@@ -11,6 +11,7 @@ namespace MWWorld
     class Action
     {
             std::string mSoundId;
+            bool onActor;
 
             // not implemented
             Action (const Action& action);
@@ -26,7 +27,7 @@ namespace MWWorld
 
             void execute (const Ptr& actor);
 
-            void setSound (const std::string& id);
+            void setSound (const std::string& id, const bool onActor = false);
     };
 }
 

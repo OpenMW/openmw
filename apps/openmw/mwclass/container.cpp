@@ -5,7 +5,6 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
-#include "../mwbase/soundmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
 
 #include "../mwworld/ptr.hpp"
@@ -93,8 +92,9 @@ namespace MWClass
         {
             // TODO check for key
             std::cout << "Locked container" << std::endl;
-            MWBase::Environment::get().getSoundManager()->playSound3D (ptr, lockedSound, 1.0, 1.0);
-            return boost::shared_ptr<MWWorld::Action> (new MWWorld::NullAction);
+            boost::shared_ptr<MWWorld::Action> action(new MWWorld::NullAction);
+            action->setSound(lockedSound);
+            return action;
         }
         else
         {
@@ -109,9 +109,10 @@ namespace MWClass
             {
                 // Trap activation goes here
                 std::cout << "Activated trap: " << ptr.getCellRef().trap << std::endl;
-                MWBase::Environment::get().getSoundManager()->playSound3D (ptr, trapActivationSound, 1.0, 1.0);
+                boost::shared_ptr<MWWorld::Action> action(new MWWorld::NullAction);
+                action->setSound(trapActivationSound);
                 ptr.getCellRef().trap = "";
-                return boost::shared_ptr<MWWorld::Action> (new MWWorld::NullAction);
+                return action;
             }
         }
     }
