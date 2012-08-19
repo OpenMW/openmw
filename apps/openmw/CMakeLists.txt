@@ -120,3 +120,8 @@ endif(APPLE)
 if(DPKG_PROGRAM)
     INSTALL(TARGETS openmw RUNTIME DESTINATION games COMPONENT openmw)
 endif(DPKG_PROGRAM)
+
+if (BUILD_WITH_CODE_COVERAGE)
+  add_definitions (--coverage)
+  target_link_libraries(openmw gcov)
+endif()

@@ -31,6 +31,8 @@ option(OGRE_STATIC "Link static build of Ogre and Ogre Plugins into the binaries
 option(BUILD_ESMTOOL "build ESM inspector" ON)
 option(BUILD_LAUNCHER "build Launcher" ON)
 option(BUILD_MWINIIMPORTER "build MWiniImporter" ON)
+option(BUILD_WITH_CODE_COVERAGE "Enable code coverage with gconv" OFF)
+option(BUILD_UNITTESTS "Enable Unittests with Google C++ Unittest ang GMock frameworks" OFF)
 
 # Sound source selection
 option(USE_FFMPEG "use ffmpeg for sound" OFF)
@@ -462,6 +464,11 @@ endif()
 
 if (BUILD_MWINIIMPORTER)
    add_subdirectory( apps/mwiniimporter )
+endif()
+
+# UnitTests
+if (BUILD_UNITTESTS)
+  add_subdirectory( apps/openmw_test_suite )
 endif()
 
 if (WIN32)

@@ -100,3 +100,8 @@ else()
     configure_file(${CMAKE_SOURCE_DIR}/files/launcher.cfg
         "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/launcher.cfg")
 endif()
+
+if (BUILD_WITH_CODE_COVERAGE)
+  add_definitions (--coverage)
+  target_link_libraries(omwlauncher gcov)
+endif()
