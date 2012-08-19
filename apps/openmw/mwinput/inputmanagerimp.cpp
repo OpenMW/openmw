@@ -275,7 +275,8 @@ namespace MWInput
                 || actionIsActive(A_MoveForward)
                 || actionIsActive(A_MoveBackward)
                 || actionIsActive(A_Jump)
-                || actionIsActive(A_Crouch))
+                || actionIsActive(A_Crouch)
+                || actionIsActive(A_TogglePOV))
 
         {
             resetIdleTime ();
