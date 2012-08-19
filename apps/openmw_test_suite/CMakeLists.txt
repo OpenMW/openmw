@@ -19,6 +19,10 @@ if (GTEST_FOUND AND GMOCK_FOUND)
     add_executable(openmw_test_suite openmw_test_suite.cpp ${UNITTEST_SRC_FILES})
 
     target_link_libraries(openmw_test_suite ${GMOCK_BOTH_LIBRARIES} ${GTEST_BOTH_LIBRARIES})
+    # Fix for not visible pthreads functions for linker with glibc 2.15
+    if (UNIX AND NOT APPLE)
+        target_link_libraries(openmw_test_suite ${CMAKE_THREAD_LIBS_INIT})
+    endif()
 endif()
 
 
