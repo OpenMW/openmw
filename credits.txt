@@ -35,7 +35,7 @@ Sylvain T. (Garvek)
 Packagers:
 Alexander Olofsson (Ace) - Windows
 BrotherBrick - Ubuntu Linux
-edmundo - Gentoo Linux
+Edmondo Tommasina - Gentoo Linux
 Kenny Armstrong (artorius) - Fedora Linux
 Nikolay Kasyanov (corristo) - Mac OS X
 Sandy Carter (bwrsandman) - Arch Linux

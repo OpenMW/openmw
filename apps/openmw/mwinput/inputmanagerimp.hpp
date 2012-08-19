@@ -146,6 +146,9 @@ namespace MWInput
         float mMouseX;
         float mMouseY;
 
+        float mPreviewPOVDelay;
+        float mTimeIdle;
+
         std::map<std::string, bool> mControlSwitch;
 
 
@@ -168,6 +171,8 @@ namespace MWInput
         bool actionIsActive (int id);
 
         void loadKeyDefaults(bool force = false);
+
+        void resetIdleTime();
 
     private:
         enum Actions
@@ -213,10 +218,10 @@ namespace MWInput
             A_ToggleWeapon,
             A_ToggleSpell,
 
+            A_TogglePOV,
+
             A_Last            // Marker for the last item
         };
-
-
     };
 }
 #endif

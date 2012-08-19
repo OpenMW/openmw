@@ -56,7 +56,34 @@ class RenderingManager: private RenderingInterface, public Ogre::WindowEventList
     RenderingManager(OEngine::Render::OgreRenderer& _rend, const boost::filesystem::path& resDir, OEngine::Physic::PhysicEngine* engine);
     virtual ~RenderingManager();
 
+    void togglePOV() {
+        mPlayer->toggleViewMode();
+    }
+
+    void togglePreviewMode(bool enable) {
+        mPlayer->togglePreviewMode(enable);
+    }
+
+    bool toggleVanityMode(bool enable, bool force) {
+        return mPlayer->toggleVanityMode(enable, force);
+    }
+
+    bool isVanityEnabled() {
+        return mPlayer->isVanityEnabled();
+    }
+
+    void allowVanityMode(bool allow) {
+        mPlayer->allowVanityMode(allow);
+    }
+
+    void togglePlayerLooking(bool enable) {
+        mPlayer->togglePlayerLooking(enable);
+    }
+
+    void getPlayerData(Ogre::Vector3 &eyepos, float &pitch, float &yaw);
+
     void attachCameraTo(const MWWorld::Ptr &ptr);
+    void renderPlayer(const MWWorld::Ptr &ptr);
 
     SkyManager* getSkyManager();
     Compositors* getCompositors();

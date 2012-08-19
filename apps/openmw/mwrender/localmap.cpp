@@ -290,7 +290,7 @@ void LocalMap::updatePlayer (const Ogre::Vector3& position, const Ogre::Quaterni
     }
 
 
-    Vector3 playerdirection = -mCameraRotNode->convertWorldToLocalOrientation(orientation).zAxis();
+    Vector3 playerdirection = mCameraRotNode->convertWorldToLocalOrientation(orientation).zAxis();
 
     Vector2 min(mBounds.getMinimum().x, mBounds.getMinimum().z);
 

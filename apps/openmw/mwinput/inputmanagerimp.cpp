@@ -49,6 +49,8 @@ namespace MWInput
         Ogre::RenderWindow* window = ogre.getWindow ();
         size_t windowHnd;
 
+        resetIdleTime();
+
         window->getCustomAttribute("WINDOW", &windowHnd);
 
         std::ostringstream windowHndStr;
@@ -140,6 +142,8 @@ namespace MWInput
     {
         if (mDragDrop)
             return;
+
+        resetIdleTime ();
 
         int action = channel->getNumber();
         if (currentValue == 1)
@@ -245,6 +249,46 @@ namespace MWInput
                 mPlayer.setUpDown (-1);
             else
                 mPlayer.setUpDown (0);
+
+            if (mControlSwitch["playerviewswitch"]) {
+                if (actionIsActive(A_TogglePOV)) {
+                    if (mPreviewPOVDelay <= 0.5 &&
+                        (mPreviewPOVDelay += dt) > 0.5)
+                    {
+                        mPreviewPOVDelay = 1.f;
+                        MWBase::Environment::get().getWorld()->togglePreviewMode(true);
+                    }
+                } else {
+                    if (mPreviewPOVDelay > 0.5) {
+                        //disable preview mode
+                        MWBase::Environment::get().getWorld()->togglePreviewMode(false);
+                    } else if (mPreviewPOVDelay > 0.f) {
+                        MWBase::Environment::get().getWorld()->togglePOV();
+                    }
+                    mPreviewPOVDelay = 0.f;
+                }
+            }
+        }
+
+        if (actionIsActive(A_MoveLeft)
+                || actionIsActive(A_MoveRight)
+                || actionIsActive(A_MoveForward)
+                || actionIsActive(A_MoveBackward)
+                || actionIsActive(A_Jump)
+                || actionIsActive(A_Crouch))
+
+        {
+            resetIdleTime ();
+        }
+        else
+        {
+            if (mTimeIdle >= 0.f) {
+                mTimeIdle += dt;
+            }
+            if (mTimeIdle > 30.f && !mWindows.isGuiMode()) {
+                MWBase::Environment::get().getWorld()->toggleVanityMode(true, false);
+                mTimeIdle = -1.f;
+            }
         }
 
     }
@@ -325,6 +369,14 @@ namespace MWInput
         mControlSwitch[sw] = value;
     }
 
+    void InputManager::resetIdleTime ()
+    {
+        if (mTimeIdle < 0) {
+            MWBase::Environment::get().getWorld()->toggleVanityMode(false, false);
+        }
+        mTimeIdle = 0.f;
+    }
+
     void InputManager::adjustMouseRegion(int width, int height)
     {
         const OIS::MouseState &ms = mMouse->getMouseState();
@@ -371,6 +423,8 @@ namespace MWInput
     bool InputManager::mouseMoved( const OIS::MouseEvent &arg )
     {
         mInputCtrl->mouseMoved (arg);
+
+        resetIdleTime ();
 
         if (mGuiCursorEnabled)
         {
@@ -539,6 +593,7 @@ namespace MWInput
         defaultKeyBindings[A_Journal] = OIS::KC_J;
         defaultKeyBindings[A_Rest] = OIS::KC_T;
         defaultKeyBindings[A_GameMenu] = OIS::KC_ESCAPE;
+        defaultKeyBindings[A_TogglePOV] = OIS::KC_TAB;
 
         std::map<int, int> defaultMouseButtonBindings;
         defaultMouseButtonBindings[A_Inventory] = OIS::MB_Right;
@@ -588,6 +643,7 @@ namespace MWInput
         descriptions[A_Journal] = "sJournal";
         descriptions[A_Rest] = "sRestKey";
         descriptions[A_Inventory] = "sInventory";
+        descriptions[A_TogglePOV] = "sTogglePOVCmd";
 
         if (descriptions[action] == "")
             return ""; // not configurable
@@ -617,6 +673,7 @@ namespace MWInput
         ret.push_back(A_MoveBackward);
         ret.push_back(A_MoveLeft);
         ret.push_back(A_MoveRight);
+        ret.push_back(A_TogglePOV);
         ret.push_back(A_Crouch);
         ret.push_back(A_Activate);
         ret.push_back(A_ToggleWeapon);
@@ -708,5 +765,4 @@ namespace MWInput
     {
         loadKeyDefaults(true);
     }
-
 }

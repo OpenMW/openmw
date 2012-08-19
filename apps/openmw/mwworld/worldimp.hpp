@@ -277,6 +277,31 @@ namespace MWWorld
             virtual bool isSwimming(const MWWorld::Ptr &object);
             virtual bool isUnderwater(const ESM::Cell &cell, const Ogre::Vector3 &pos);
 
+            virtual void togglePOV() {
+                mRendering->togglePOV();
+            }
+
+            virtual void togglePreviewMode(bool enable) {
+                mRendering->togglePreviewMode(enable);
+            }
+
+            virtual bool toggleVanityMode(bool enable, bool force) {
+                return mRendering->toggleVanityMode(enable, force);
+            }
+
+            virtual void allowVanityMode(bool allow) {
+                mRendering->allowVanityMode(allow);
+            }
+
+            virtual void togglePlayerLooking(bool enable) {
+                mRendering->togglePlayerLooking(enable);
+            }
+
+            virtual void renderPlayer();
+
+            virtual bool isVanityEnabled() {
+                return mRendering->isVanityEnabled();
+            }
     };
 }
 

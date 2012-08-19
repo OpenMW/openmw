@@ -11,7 +11,7 @@
 
 #include <components/nifbullet/bullet_nif_loader.hpp>
 
-#include "../mwbase/world.hpp" // FIXME
+//#include "../mwbase/world.hpp" // FIXME
 
 #include "ptr.hpp"
 #include "class.hpp"
@@ -42,32 +42,38 @@ namespace MWWorld
         return mEngine;
     }
 
-	std::pair<std::string, float> PhysicsSystem::getFacedHandle (MWWorld::World& world)
-	{
-		std::string handle = "";
+    std::pair<std::string, float> PhysicsSystem::getFacedHandle (MWWorld::World& world)
+    {
+        btVector3 dir(0, 1, 0);
+        dir = dir.rotate(btVector3(1, 0, 0), mPlayerData.pitch);
+        dir = dir.rotate(btVector3(0, 0, 1), mPlayerData.yaw);
+        dir.setX(-dir.x());
 
-        //get a ray pointing to the center of the viewport
-        Ray centerRay = mRender.getCamera()->getCameraToViewportRay(
-        mRender.getViewport()->getWidth()/2,
-        mRender.getViewport()->getHeight()/2);
-        //let's avoid the capsule shape of the player.
-        centerRay.setOrigin(centerRay.getOrigin() + 20*centerRay.getDirection());
-        btVector3 from(centerRay.getOrigin().x,-centerRay.getOrigin().z,centerRay.getOrigin().y);
-        btVector3 to(centerRay.getPoint(500).x,-centerRay.getPoint(500).z,centerRay.getPoint(500).y);
+        btVector3 origin(
+            mPlayerData.eyepos.x,
+            mPlayerData.eyepos.y,
+            mPlayerData.eyepos.z);
+        origin += dir * 5;
 
-        return mEngine->rayTest(from,to);
+        btVector3 dest = origin + dir * 500;
+        return mEngine->rayTest(origin, dest);
     }
 
     std::vector < std::pair <float, std::string> > PhysicsSystem::getFacedObjects ()
     {
-        //get a ray pointing to the center of the viewport
-        Ray centerRay = mRender.getCamera()->getCameraToViewportRay(
-        mRender.getViewport()->getWidth()/2,
-        mRender.getViewport()->getHeight()/2);
-        btVector3 from(centerRay.getOrigin().x,-centerRay.getOrigin().z,centerRay.getOrigin().y);
-        btVector3 to(centerRay.getPoint(500).x,-centerRay.getPoint(500).z,centerRay.getPoint(500).y);
+        btVector3 dir(0, 1, 0);
+        dir = dir.rotate(btVector3(1, 0, 0), mPlayerData.pitch);
+        dir = dir.rotate(btVector3(0, 0, 1), mPlayerData.yaw);
+        dir.setX(-dir.x());
 
-        return mEngine->rayTest2(from,to);
+        btVector3 origin(
+            mPlayerData.eyepos.x,
+            mPlayerData.eyepos.y,
+            mPlayerData.eyepos.z);
+        origin += dir * 5;
+
+        btVector3 dest = origin + dir * 500;
+        return mEngine->rayTest2(origin, dest);
     }
 
     std::vector < std::pair <float, std::string> > PhysicsSystem::getFacedObjects (float mouseX, float mouseY)
@@ -172,7 +178,7 @@ namespace MWWorld
             OEngine::Physic::PhysicActor* act = it->second;
             act->setWalkDirection(btVector3(0,0,0));
         }
-		playerMove::playercmd& pm_ref = playerphysics->cmd;
+        playerMove::playercmd& pm_ref = playerphysics->cmd;
 
         pm_ref.rightmove = 0;
         pm_ref.forwardmove = 0;
@@ -183,35 +189,18 @@ namespace MWWorld
             iter!=actors.end(); ++iter)
         {
             //dirty stuff to get the camera orientation. Must be changed!
+            if (iter->first == "player") {
+                playerphysics->ps.viewangles.x =
+                    Ogre::Radian(mPlayerData.pitch).valueDegrees();
 
-            Ogre::SceneNode *sceneNode = mRender.getScene()->getSceneNode (iter->first);
-            Ogre::Vector3 dir;
-            Ogre::Node* yawNode = sceneNode->getChildIterator().getNext();
-            Ogre::Node* pitchNode = yawNode->getChildIterator().getNext();
-			Ogre::Quaternion yawQuat = yawNode->getOrientation();
-            Ogre::Quaternion pitchQuat = pitchNode->getOrientation();
+                playerphysics->ps.viewangles.y =
+                    Ogre::Radian(mPlayerData.yaw).valueDegrees() + 90;
 
-
-
-            playerphysics->ps.viewangles.x = pitchQuat.getPitch().valueDegrees();
-
-			playerphysics->ps.viewangles.y = yawQuat.getYaw().valueDegrees() *-1 + 90;
-
-
-            Ogre::Vector3 dir1(iter->second.x,iter->second.z,-iter->second.y);
-
-            pm_ref.rightmove = -iter->second.x;
-            pm_ref.forwardmove = -iter->second.y;
-            pm_ref.upmove = iter->second.z;
-
-
-
+                pm_ref.rightmove = -iter->second.x;
+                pm_ref.forwardmove = -iter->second.y;
+                pm_ref.upmove = iter->second.z;
+            }
         }
-
-
-
-
-
         mEngine->stepSimulation(dt);
     }
 
@@ -401,5 +390,12 @@ namespace MWWorld
         max.z = btMax.z();
 
         return true;
+    }
+
+    void PhysicsSystem::updatePlayerData(Ogre::Vector3 &eyepos, float pitch, float yaw)
+    {
+        mPlayerData.eyepos = eyepos;
+        mPlayerData.pitch = pitch;
+        mPlayerData.yaw = yaw;
     }
 }

@@ -32,7 +32,6 @@ Water::Water (Ogre::Camera *camera, RenderingManager* rend, const ESM::Cell* cel
     mIsUnderwater(false), mVisibilityFlags(0),
     mReflectionTarget(0), mActive(1), mToggled(1),
     mReflectionRenderActive(false), mRendering(rend),
-    mOldFarClip(0), mOldFarClip2(0),
     mWaterTimer(0.f)
 {
     mSky = rend->getSkyManager();
@@ -207,6 +206,7 @@ void Water::preRenderTargetUpdate(const RenderTargetEvent& evt)
 {
     if (evt.source == mReflectionTarget)
     {
+        mCamera->getParentSceneNode ()->needUpdate ();
         mReflectionCamera->setOrientation(mCamera->getDerivedOrientation());
         mReflectionCamera->setPosition(mCamera->getDerivedPosition());
         mReflectionCamera->setNearClipDistance(mCamera->getNearClipDistance());
@@ -215,11 +215,9 @@ void Water::preRenderTargetUpdate(const RenderTargetEvent& evt)
         mReflectionCamera->setFOVy(mCamera->getFOVy());
         mReflectionRenderActive = true;
 
-        /// \todo the reflection render (and probably all renderingmanager-updates) lag behind 1 camera frame for some reason
         Vector3 pos = mCamera->getRealPosition();
         pos.y = mTop*2 - pos.y;
         mSky->setSkyPosition(pos);
-        mSky->scaleSky(mCamera->getFarClipDistance() / 50.f);
         mReflectionCamera->enableReflection(mWaterPlane);
     }
 }
@@ -229,7 +227,6 @@ void Water::postRenderTargetUpdate(const RenderTargetEvent& evt)
     if (evt.source == mReflectionTarget)
     {
         mSky->resetSkyPosition();
-        mSky->scaleSky(1);
         mReflectionCamera->disableReflection();
         mReflectionCamera->disableCustomNearClipPlane();
         mReflectionRenderActive = false;
@@ -269,34 +266,19 @@ void Water::renderQueueStarted (Ogre::uint8 queueGroupId, const Ogre::String &in
     // We don't want the sky to get clipped by custom near clip plane (the water plane)
     if (queueGroupId < 20 && mReflectionRenderActive)
     {
-        mOldFarClip = mReflectionCamera->getFarClipDistance ();
         mReflectionCamera->disableCustomNearClipPlane();
-        mReflectionCamera->setFarClipDistance (1000000000);
         Root::getSingleton().getRenderSystem()->_setProjectionMatrix(mReflectionCamera->getProjectionMatrixRS());
     }
-    else if (queueGroupId == RQG_UnderWater)
-    {/*
-        mOldFarClip2 = mCamera->getFarClipDistance ();
-        mCamera->setFarClipDistance (1000000000);
-        Root::getSingleton().getRenderSystem()->_setProjectionMatrix(mCamera->getProjectionMatrixRS());
-    */}
 }
 
 void Water::renderQueueEnded (Ogre::uint8 queueGroupId, const Ogre::String &invocation, bool &repeatThisInvocation)
 {
     if (queueGroupId < 20 && mReflectionRenderActive)
     {
-        mReflectionCamera->setFarClipDistance (mOldFarClip);
         if (!mIsUnderwater)
             mReflectionCamera->enableCustomNearClipPlane(mErrorPlane);
         Root::getSingleton().getRenderSystem()->_setProjectionMatrix(mReflectionCamera->getProjectionMatrixRS());
     }
-    if (queueGroupId == RQG_UnderWater)
-    {
-        /*
-        mCamera->setFarClipDistance (mOldFarClip2);
-        Root::getSingleton().getRenderSystem()->_setProjectionMatrix(mCamera->getProjectionMatrixRS());
-    */}
 }
 
 void Water::update(float dt)
