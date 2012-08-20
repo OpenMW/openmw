@@ -114,7 +114,9 @@ endif()
 
 if(APPLE)
     find_library(CARBON_FRAMEWORK Carbon)
-    target_link_libraries(openmw ${CARBON_FRAMEWORK})
+    find_library(COCOA_FRAMEWORK Cocoa)
+    find_library(IOKIT_FRAMEWORK IOKit)
+    target_link_libraries(openmw ${CARBON_FRAMEWORK} ${COCOA_FRAMEWORK} ${IOKIT_FRAMEWORK})
 endif(APPLE)
 
 if(DPKG_PROGRAM)
