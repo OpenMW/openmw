@@ -387,16 +387,14 @@ namespace MWInput
 
     bool InputManager::keyPressed( const OIS::KeyEvent &arg )
     {
-        std::cout << "text received: " << arg.text << std::endl;
-
         mInputCtrl->keyPressed (arg);
         unsigned int text = arg.text;
-        #ifdef __APPLE__ // filter \016 symbol for F-keys on OS X
+#ifdef __APPLE__ // filter \016 symbol for F-keys on OS X
         if ((arg.key >= OIS::KC_F1 && arg.key <= OIS::KC_F10) ||
             (arg.key >= OIS::KC_F11 && arg.key <= OIS::KC_F15)) {
             text = 0;
         }
-        #endif
+#endif
 
         MyGUI::InputManager::getInstance().injectKeyPress(MyGUI::KeyCode::Enum(arg.key), text);
 
