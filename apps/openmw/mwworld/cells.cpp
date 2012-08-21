@@ -8,6 +8,17 @@
 #include "class.hpp"
 #include "containerstore.hpp"
 
+//helper function
+std::string toLower (const std::string& name)
+{
+    std::string lowerCase;
+
+    std::transform (name.begin(), name.end(), std::back_inserter (lowerCase),
+        (int(*)(int)) std::tolower);
+
+    return lowerCase;
+}
+
 MWWorld::Ptr::CellStore *MWWorld::Cells::getCellStore (const ESM::Cell *cell)
 {
     if (cell->data.flags & ESM::Cell::Interior)
@@ -129,13 +140,14 @@ MWWorld::Ptr::CellStore *MWWorld::Cells::getExterior (int x, int y)
 
 MWWorld::Ptr::CellStore *MWWorld::Cells::getInterior (const std::string& name)
 {
-    std::map<std::string, Ptr::CellStore>::iterator result = mInteriors.find (name);
+    std::string nName = toLower(name);
+    std::map<std::string, Ptr::CellStore>::iterator result = mInteriors.find (nName);
 
     if (result==mInteriors.end())
     {
-        const ESM::Cell *cell = mStore.cells.findInt (name);
+        const ESM::Cell *cell = mStore.cells.findInt (nName);
 
-        result = mInteriors.insert (std::make_pair (name, Ptr::CellStore (cell))).first;
+        result = mInteriors.insert (std::make_pair (nName, Ptr::CellStore (cell))).first;
     }
 
     if (result->second.mState!=Ptr::CellStore::State_Loaded)
