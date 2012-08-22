@@ -634,3 +634,34 @@ if (APPLE)
         " COMPONENT Runtime)
         include(CPack)
 endif (APPLE)
+
+## Linux building
+# paths
+set(BINDIR "${CMAKE_INSTALL_PREFIX}/usr/bin" CACHE PATH "Where to install binaries")
+set(DATAROOTDIR "${CMAKE_INSTALL_PREFIX}/share" CACHE PATH "Sets the root of data directories to a non-default location")
+set(DATADIR "${DATAROOTDIR}/openmw" CACHE PATH "Sets the openmw data directories to a non-default location")
+set(DOCDIR "${DATAROOTDIR}/doc/openmw" CACHE PATH "Sets the doc directory to a non-default location.")
+set(MANDIR "${DATAROOTDIR}/man" CACHE PATH "Where to install manpages")
+set(SYSCONFDIR "${CMAKE_INSTALL_PREFIX}/etc/openmw" CACHE PATH "Set config dir")
+set(ICONDIR "${DATAROOTDIR}/pixmaps" CACHE PATH "Set icon dir")
+
+# Install binaries
+INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/openmw" DESTINATION "${BINDIR}" )
+INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/omwlauncher" DESTINATION "${BINDIR}" )
+INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/esmtool" DESTINATION "${BINDIR}" )
+INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/mwiniimport" DESTINATION "${BINDIR}" )
+
+# Install icon and .desktop
+INSTALL(FILES "${OpenMW_SOURCE_DIR}/apps/launcher/resources/images/openmw.png" DESTINATION "${ICONDIR}")
+INSTALL(FILES "${OpenMW_BINARY_DIR}/openmw.desktop" DESTINATION "${DATAROOTDIR}/applications")
+
+# Install global configuration files
+INSTALL(FILES "${OpenMW_BINARY_DIR}/openmw.cfg.install" DESTINATION "${SYSCONFDIR}" RENAME "openmw.cfg" )
+#INSTALL(FILES "${OpenMW_BINARY_DIR}/plugins.cfg" DESTINATION "${SYSCONFDIR}" )
+INSTALL(FILES "${OpenMW_BINARY_DIR}/settings-default.cfg" DESTINATION "${SYSCONFDIR}" )
+INSTALL(FILES "${OpenMW_BINARY_DIR}/transparency-overrides.cfg" DESTINATION "${SYSCONFDIR}" )
+INSTALL(FILES "${OpenMW_BINARY_DIR}/launcher.cfg" DESTINATION "${SYSCONFDIR}" )
+
+# Install resources
+INSTALL(DIRECTORY "${OpenMW_BINARY_DIR}/resources" DESTINATION "${DATADIR}" )
+INSTALL(FILES "${OpenMW_BINARY_DIR}/launcher.qss" DESTINATION "${DATADIR}/resources" )
