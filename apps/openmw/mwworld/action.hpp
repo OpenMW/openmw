@@ -11,7 +11,6 @@ namespace MWWorld
     class Action
     {
             std::string mSoundId;
-            bool onActor;
 
             // not implemented
             Action (const Action& action);
@@ -19,7 +18,10 @@ namespace MWWorld
 
             virtual void executeImp (const Ptr& actor) = 0;
 
-        public:
+    protected:
+            bool teleport; //True if the action will teleport the actor
+
+    public:
 
             Action();
 
@@ -27,7 +29,7 @@ namespace MWWorld
 
             void execute (const Ptr& actor);
 
-            void setSound (const std::string& id, const bool onActor = false);
+            void setSound (const std::string& id);
     };
 }
 

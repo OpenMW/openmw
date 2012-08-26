@@ -6,8 +6,6 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"
-#include "../mwbase/soundmanager.hpp"
-
 
 #include "../mwworld/player.hpp"
 #include "../mwworld/ptr.hpp"
@@ -108,13 +106,9 @@ namespace MWClass
             /// \todo remove this if clause once ActionTeleport can also support other actors
             if (MWBase::Environment::get().getWorld()->getPlayer().getPlayer()==actor)
             {
-                // the player is using the door
-                // The reason this is not 3D is that it would get interrupted when you teleport
-                //MWBase::Environment::get().getSoundManager()->playSound3D(ptr,openSound, 1.0, 1.0);
-
             	boost::shared_ptr<MWWorld::Action> action(new MWWorld::ActionTeleport (ref->ref.destCell, ref->ref.doorDest));
 
-            	action->setSound(openSound, true);
+            	action->setSound(openSound);
 
                 return action;
             }

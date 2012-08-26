@@ -9,10 +9,14 @@ namespace MWWorld
     ActionTeleport::ActionTeleport (const std::string& cellName,
         const ESM::Position& position)
     : mCellName (cellName), mPosition (position)
-    {}
+    {
+    	teleport = true;
+    }
 
     void ActionTeleport::executeImp (const Ptr& actor)
     {
+    	teleport = true;
+
         if (mCellName.empty())
             MWBase::Environment::get().getWorld()->changeToExteriorCell (mPosition);
         else
