@@ -168,6 +168,9 @@ namespace MWInput
         void toggleAutoMove();
         void exitNow();
 
+        void quickKey (int index);
+        void showQuickKeysMenu();
+
         bool actionIsActive (int id);
 
         void loadKeyDefaults(bool force = false);
@@ -219,6 +222,19 @@ namespace MWInput
             A_ToggleSpell,
 
             A_TogglePOV,
+
+            A_QuickKey1,
+            A_QuickKey2,
+            A_QuickKey3,
+            A_QuickKey4,
+            A_QuickKey5,
+            A_QuickKey6,
+            A_QuickKey7,
+            A_QuickKey8,
+            A_QuickKey9,
+            A_QuickKey10,
+
+            A_QuickKeysMenu,
 
             A_Last            // Marker for the last item
         };

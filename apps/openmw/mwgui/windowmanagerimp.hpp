@@ -60,6 +60,7 @@ namespace MWGui
   class MessageBoxManager;
   class SettingsWindow;
   class AlchemyWindow;
+  class QuickKeysMenu;
 
   class WindowManager : public MWBase::WindowManager
   {
@@ -209,6 +210,7 @@ namespace MWGui
     ConfirmationDialog* mConfirmationDialog;
     AlchemyWindow* mAlchemyWindow;
     SpellWindow* mSpellWindow;
+    QuickKeysMenu* mQuickKeysMenu;
 
     CharacterCreation* mCharGen;
 

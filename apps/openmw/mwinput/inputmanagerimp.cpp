@@ -188,7 +188,40 @@ namespace MWInput
             case A_ToggleSpell:
                 toggleSpell ();
                 break;
-            }
+            case A_QuickKey1:
+                quickKey(1);
+                break;
+            case A_QuickKey2:
+                quickKey(2);
+                break;
+            case A_QuickKey3:
+                quickKey(3);
+                break;
+            case A_QuickKey4:
+                quickKey(4);
+                break;
+            case A_QuickKey5:
+                quickKey(5);
+                break;
+            case A_QuickKey6:
+                quickKey(6);
+                break;
+            case A_QuickKey7:
+                quickKey(7);
+                break;
+            case A_QuickKey8:
+                quickKey(8);
+                break;
+            case A_QuickKey9:
+                quickKey(9);
+                break;
+            case A_QuickKey10:
+                quickKey(10);
+                break;
+            case A_QuickKeysMenu:
+                showQuickKeysMenu();
+                break;
+         }
         }
     }
 
@@ -545,6 +578,17 @@ namespace MWInput
         // .. but don't touch any other mode.
     }
 
+    void InputManager::quickKey (int index)
+    {
+        std::cout << "quick key " << index << std::endl;
+    }
+
+    void InputManager::showQuickKeysMenu()
+    {
+        if (!mWindows.isGuiMode ())
+            mWindows.pushGuiMode (MWGui::GM_QuickKeysMenu);
+    }
+
     void InputManager::activate()
     {
         mEngine.activate();
@@ -587,7 +631,8 @@ namespace MWInput
         defaultKeyBindings[A_MoveRight] = OIS::KC_D;
         defaultKeyBindings[A_ToggleWeapon] = OIS::KC_F;
         defaultKeyBindings[A_ToggleSpell] = OIS::KC_R;
-        defaultKeyBindings[A_Console] = OIS::KC_F1;
+        defaultKeyBindings[A_QuickKeysMenu] = OIS::KC_F1;
+        defaultKeyBindings[A_Console] = OIS::KC_F2;
         defaultKeyBindings[A_Crouch] = OIS::KC_LCONTROL;
         defaultKeyBindings[A_AutoMove] = OIS::KC_Q;
         defaultKeyBindings[A_Jump] = OIS::KC_E;
@@ -595,9 +640,20 @@ namespace MWInput
         defaultKeyBindings[A_Rest] = OIS::KC_T;
         defaultKeyBindings[A_GameMenu] = OIS::KC_ESCAPE;
         defaultKeyBindings[A_TogglePOV] = OIS::KC_TAB;
+        defaultKeyBindings[A_QuickKey1] = OIS::KC_1;
+        defaultKeyBindings[A_QuickKey2] = OIS::KC_2;
+        defaultKeyBindings[A_QuickKey3] = OIS::KC_3;
+        defaultKeyBindings[A_QuickKey4] = OIS::KC_4;
+        defaultKeyBindings[A_QuickKey5] = OIS::KC_5;
+        defaultKeyBindings[A_QuickKey6] = OIS::KC_6;
+        defaultKeyBindings[A_QuickKey7] = OIS::KC_7;
+        defaultKeyBindings[A_QuickKey8] = OIS::KC_8;
+        defaultKeyBindings[A_QuickKey9] = OIS::KC_9;
+        defaultKeyBindings[A_QuickKey10] = OIS::KC_0;
 
         std::map<int, int> defaultMouseButtonBindings;
         defaultMouseButtonBindings[A_Inventory] = OIS::MB_Right;
+        defaultMouseButtonBindings[A_Use] = OIS::MB_Left;
 
         for (int i = 0; i < A_Last; ++i)
         {
@@ -645,6 +701,17 @@ namespace MWInput
         descriptions[A_Rest] = "sRestKey";
         descriptions[A_Inventory] = "sInventory";
         descriptions[A_TogglePOV] = "sTogglePOVCmd";
+        descriptions[A_QuickKeysMenu] = "sQuickMenu";
+        descriptions[A_QuickKey1] = "sQuick1Cmd";
+        descriptions[A_QuickKey2] = "sQuick2Cmd";
+        descriptions[A_QuickKey3] = "sQuick3Cmd";
+        descriptions[A_QuickKey4] = "sQuick4Cmd";
+        descriptions[A_QuickKey5] = "sQuick5Cmd";
+        descriptions[A_QuickKey6] = "sQuick6Cmd";
+        descriptions[A_QuickKey7] = "sQuick7Cmd";
+        descriptions[A_QuickKey8] = "sQuick8Cmd";
+        descriptions[A_QuickKey9] = "sQuick9Cmd";
+        descriptions[A_QuickKey10] = "sQuick10Cmd";
 
         if (descriptions[action] == "")
             return ""; // not configurable
@@ -685,6 +752,17 @@ namespace MWInput
         ret.push_back(A_Journal);
         ret.push_back(A_Rest);
         ret.push_back(A_Console);
+        ret.push_back(A_QuickKeysMenu);
+        ret.push_back(A_QuickKey1);
+        ret.push_back(A_QuickKey2);
+        ret.push_back(A_QuickKey3);
+        ret.push_back(A_QuickKey4);
+        ret.push_back(A_QuickKey5);
+        ret.push_back(A_QuickKey6);
+        ret.push_back(A_QuickKey7);
+        ret.push_back(A_QuickKey8);
+        ret.push_back(A_QuickKey9);
+        ret.push_back(A_QuickKey10);
 
         return ret;
     }

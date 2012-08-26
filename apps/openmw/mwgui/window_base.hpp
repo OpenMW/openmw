@@ -20,8 +20,9 @@ namespace MWGui
         // Events
         typedef MyGUI::delegates::CMultiDelegate1<WindowBase*> EventHandle_WindowBase;
 
-        virtual void open();
-        virtual void setVisible(bool visible); // calls open() if visible is true and was false before
+        virtual void open() {}
+        virtual void close () {}
+        virtual void setVisible(bool visible);
         void center();
 
         /** Event : Dialog finished, OK button clicked.\n
@@ -32,6 +33,18 @@ namespace MWGui
         protected:
         /// \todo remove
         MWBase::WindowManager& mWindowManager;
+    };
+
+
+    /*
+     * "Modal" windows cause the rest of the interface to be unaccessible while they are visible
+     */
+    class WindowModal : public WindowBase
+    {
+    public:
+        WindowModal(const std::string& parLayout, MWBase::WindowManager& parWindowManager);
+        virtual void open();
+        virtual void close();
     };
 }
 

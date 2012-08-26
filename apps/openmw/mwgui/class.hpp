@@ -134,7 +134,7 @@ namespace MWGui
         std::string mCurrentClassId;
     };
 
-    class SelectSpecializationDialog : public WindowBase
+    class SelectSpecializationDialog : public WindowModal
     {
     public:
         SelectSpecializationDialog(MWBase::WindowManager& parWindowManager);
@@ -165,7 +165,7 @@ namespace MWGui
         ESM::Class::Specialization mSpecializationId;
     };
 
-    class SelectAttributeDialog : public WindowBase
+    class SelectAttributeDialog : public WindowModal
     {
     public:
         SelectAttributeDialog(MWBase::WindowManager& parWindowManager);
@@ -198,7 +198,7 @@ namespace MWGui
         ESM::Attribute::AttributeID mAttributeId;
     };
 
-    class SelectSkillDialog : public WindowBase
+    class SelectSkillDialog : public WindowModal
     {
     public:
         SelectSkillDialog(MWBase::WindowManager& parWindowManager);
@@ -234,7 +234,7 @@ namespace MWGui
         ESM::Skill::SkillEnum mSkillId;
     };
 
-    class DescriptionDialog : public WindowBase
+    class DescriptionDialog : public WindowModal
     {
     public:
         DescriptionDialog(MWBase::WindowManager& parWindowManager);
