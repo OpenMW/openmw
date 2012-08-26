@@ -18,7 +18,10 @@ namespace MWWorld
 
             virtual void executeImp (const Ptr& actor) = 0;
 
-        public:
+    protected:
+            bool teleport; //True if the action will teleport the actor
+
+    public:
 
             Action();
 
