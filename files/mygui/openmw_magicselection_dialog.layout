@@ -7,7 +7,7 @@
         </Widget>
 
         <Widget type="Widget" skin="MW_Box" position="8 38 314 285" name="box" align="Left Top Stretch">
-            <Widget type="ScrollView" skin="MW_ScrollViewH" position="4 4 306 277" name="MagicList" align="Left Top Stretch">
+            <Widget type="ScrollView" skin="MW_ScrollView" position="4 4 306 277" name="MagicList" align="Left Top Stretch">
             </Widget>
         </Widget>
 

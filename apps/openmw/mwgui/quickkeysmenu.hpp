@@ -71,12 +71,25 @@ namespace MWGui
     public:
         MagicSelectionDialog(MWBase::WindowManager& parWindowManager, QuickKeysMenu* parent);
 
+        virtual void open();
+
     private:
         MyGUI::Button* mCancelButton;
+        MyGUI::ScrollView* mMagicList;
+
+        int mWidth;
+        int mHeight;
 
         QuickKeysMenu* mParent;
 
         void onCancelButtonClicked (MyGUI::Widget* sender);
+        void onMouseWheel(MyGUI::Widget* _sender, int _rel);
+        void onEnchantedItemSelected(MyGUI::Widget* _sender);
+        void onSpellSelected(MyGUI::Widget* _sender);
+        int estimateHeight(int numSpells) const;
+
+
+        void addGroup(const std::string& label, const std::string& label2);
     };
 }
 
