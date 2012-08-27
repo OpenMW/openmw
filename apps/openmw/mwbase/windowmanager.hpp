@@ -171,6 +171,8 @@ namespace MWBase
             virtual void setWeaponVisibility(bool visible) = 0;
             virtual void setSpellVisibility(bool visible) = 0;
 
+            virtual void activateQuickKey  (int index) = 0;
+
             virtual void setSelectedSpell(const std::string& spellId, int successChancePercent) = 0;
             virtual void setSelectedEnchantItem(const MWWorld::Ptr& item, int chargePercent) = 0;
             virtual void setSelectedWeapon(const MWWorld::Ptr& item, int durabilityPercent) = 0;

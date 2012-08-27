@@ -854,3 +854,8 @@ void WindowManager::notifyInputActionBound ()
     mSettingsWindow->updateControlsBox ();
     allowMouse();
 }
+
+void WindowManager::activateQuickKey (int index)
+{
+    mQuickKeysMenu->activateQuickKey(index);
+}

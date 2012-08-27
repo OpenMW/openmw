@@ -31,6 +31,16 @@ namespace MWGui
         void onAssignMagic (const std::string& spellId);
         void onAssignMagicCancel ();
 
+        void activateQuickKey(int index);
+
+        enum QuickKeyType
+        {
+            Type_Item,
+            Type_Magic,
+            Type_MagicItem,
+            Type_Unassigned
+        };
+
 
     private:
         MyGUI::EditBox* mInstructionLabel;

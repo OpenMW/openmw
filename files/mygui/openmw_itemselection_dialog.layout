@@ -4,14 +4,14 @@
 
         <Widget type="TextBox" skin="SandText" position="8 8 300 18" name="Label"/>
 
-        <Widget type="Widget" skin="MW_Box" position="8 34 340 70" name="box" align="Left Top Stretch">
-            <Widget type="ScrollView" skin="MW_ScrollViewH" position="4 4 332 62" name="ItemView" align="Left Top Stretch">
+        <Widget type="Widget" skin="MW_Box" position="8 34 355 70" name="box" align="Left Top Stretch">
+            <Widget type="ScrollView" skin="MW_ScrollViewH" position="4 4 347 62" name="ItemView" align="Left Top Stretch">
                 <Property key="CanvasAlign" value="Left Top"/>
-                <Widget type="Button" skin="" name="Items" position="0 0 332 62" name="Items" align="Left Top Stretch"/>
+                <Widget type="Button" skin="" name="Items" position="0 0 347 62" name="Items" align="Left Top Stretch"/>
             </Widget>
         </Widget>
 
-        <Widget type="Button" skin="MW_Button" position="350 110 24 24" name="CancelButton">
+        <Widget type="Button" skin="MW_Button" position="340 110 24 24" name="CancelButton">
             <Property key="Caption" value="#{sCancel}"/>
         </Widget>
 

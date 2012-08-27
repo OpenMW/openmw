@@ -82,6 +82,8 @@ namespace MWGui
         while (key->getChildCount ())
             MyGUI::Gui::getInstance ().destroyWidget (key->getChildAt(0));
 
+        key->setUserData(Type_Unassigned);
+
         MyGUI::TextBox* textBox = key->createWidgetReal<MyGUI::TextBox>("SandText", MyGUI::FloatCoord(0,0,1,1), MyGUI::Align::Default);
         textBox->setTextAlign (MyGUI::Align::Center);
         textBox->setCaption (boost::lexical_cast<std::string>(index+1));
@@ -159,16 +161,25 @@ namespace MWGui
         while (button->getChildCount ())
             MyGUI::Gui::getInstance ().destroyWidget (button->getChildAt(0));
 
-        MyGUI::ImageBox* image = button->createWidget<MyGUI::ImageBox>("ImageBox", MyGUI::IntCoord(9, 8, 42, 42), MyGUI::Align::Default);
-        image->setUserString ("ToolTipType", "ItemPtr");
-        image->setUserData(item);
+        button->setUserData(Type_Item);
+
+        MyGUI::ImageBox* frame = button->createWidget<MyGUI::ImageBox>("ImageBox", MyGUI::IntCoord(9, 8, 42, 42), MyGUI::Align::Default);
+        std::string backgroundTex = "textures\\menu_icon_barter.dds";
+        frame->setImageTexture (backgroundTex);
+        frame->setImageCoord (MyGUI::IntCoord(4, 4, 40, 40));
+        frame->setUserString ("ToolTipType", "ItemPtr");
+        frame->setUserData(item);
+        frame->eventMouseButtonClick += MyGUI::newDelegate(this, &QuickKeysMenu::onQuickKeyButtonClicked);
+
+
+        MyGUI::ImageBox* image = frame->createWidget<MyGUI::ImageBox>("ImageBox", MyGUI::IntCoord(5, 5, 32, 32), MyGUI::Align::Default);
         std::string path = std::string("icons\\");
         path += MWWorld::Class::get(item).getInventoryIcon(item);
         int pos = path.rfind(".");
         path.erase(pos);
         path.append(".dds");
         image->setImageTexture (path);
-        image->eventMouseButtonClick += MyGUI::newDelegate(this, &QuickKeysMenu::onQuickKeyButtonClicked);
+        image->setNeedMouseFocus (false);
 
         mItemSelectionDialog->setVisible(false);
     }
@@ -180,7 +191,29 @@ namespace MWGui
 
     void QuickKeysMenu::onAssignMagicItem (MWWorld::Ptr item)
     {
-        onAssignItem(item);
+        MyGUI::Button* button = mQuickKeyButtons[mSelectedIndex];
+        while (button->getChildCount ())
+            MyGUI::Gui::getInstance ().destroyWidget (button->getChildAt(0));
+
+        button->setUserData(Type_MagicItem);
+
+        MyGUI::ImageBox* frame = button->createWidget<MyGUI::ImageBox>("ImageBox", MyGUI::IntCoord(9, 8, 42, 42), MyGUI::Align::Default);
+        std::string backgroundTex = "textures\\menu_icon_select_magic_magic.dds";
+        frame->setImageTexture (backgroundTex);
+        frame->setImageCoord (MyGUI::IntCoord(2, 2, 40, 40));
+        frame->setUserString ("ToolTipType", "ItemPtr");
+        frame->setUserData(item);
+        frame->eventMouseButtonClick += MyGUI::newDelegate(this, &QuickKeysMenu::onQuickKeyButtonClicked);
+
+        MyGUI::ImageBox* image = frame->createWidget<MyGUI::ImageBox>("ImageBox", MyGUI::IntCoord(5, 5, 32, 32), MyGUI::Align::Default);
+        std::string path = std::string("icons\\");
+        path += MWWorld::Class::get(item).getInventoryIcon(item);
+        int pos = path.rfind(".");
+        path.erase(pos);
+        path.append(".dds");
+        image->setImageTexture (path);
+        image->setNeedMouseFocus (false);
+
         mMagicSelectionDialog->setVisible(false);
     }
 
@@ -190,9 +223,17 @@ namespace MWGui
         while (button->getChildCount ())
             MyGUI::Gui::getInstance ().destroyWidget (button->getChildAt(0));
 
-        MyGUI::ImageBox* image = button->createWidget<MyGUI::ImageBox>("ImageBox", MyGUI::IntCoord(9, 8, 42, 42), MyGUI::Align::Default);
-        image->setUserString ("ToolTipType", "Spell");
-        image->setUserString ("Spell", spellId);
+        button->setUserData(Type_Magic);
+
+        MyGUI::ImageBox* frame = button->createWidget<MyGUI::ImageBox>("ImageBox", MyGUI::IntCoord(9, 8, 42, 42), MyGUI::Align::Default);
+        std::string backgroundTex = "textures\\menu_icon_select_magic.dds";
+        frame->setImageTexture (backgroundTex);
+        frame->setImageCoord (MyGUI::IntCoord(2, 2, 40, 40));
+        frame->setUserString ("ToolTipType", "Spell");
+        frame->setUserString ("Spell", spellId);
+        frame->eventMouseButtonClick += MyGUI::newDelegate(this, &QuickKeysMenu::onQuickKeyButtonClicked);
+
+        MyGUI::ImageBox* image = frame->createWidget<MyGUI::ImageBox>("ImageBox", MyGUI::IntCoord(5, 5, 32, 32), MyGUI::Align::Default);
 
         // use the icon of the first effect
         const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().spells.find(spellId);
@@ -206,7 +247,7 @@ namespace MWGui
         path.append(".dds");
 
         image->setImageTexture (path);
-        image->eventMouseButtonClick += MyGUI::newDelegate(this, &QuickKeysMenu::onQuickKeyButtonClicked);
+        image->setNeedMouseFocus (false);
 
         mMagicSelectionDialog->setVisible(false);
     }
@@ -214,6 +255,29 @@ namespace MWGui
     void QuickKeysMenu::onAssignMagicCancel ()
     {
         mMagicSelectionDialog->setVisible(false);
+    }
+
+    void QuickKeysMenu::activateQuickKey(int index)
+    {
+        MyGUI::Button* button = mQuickKeyButtons[index-1];
+
+        QuickKeyType type = *button->getUserData<QuickKeyType>();
+
+        if (type == Type_Magic)
+        {
+            std::string spellId = button->getChildAt(0)->getUserString("Spell");
+            MWBase::Environment::get().getWindowManager ()->setSelectedSpell (spellId, 100);
+        }
+        else if (type == Type_Item)
+        {
+            MWWorld::Ptr item = *button->getChildAt (0)->getUserData<MWWorld::Ptr>();
+            MWBase::Environment::get().getWindowManager ()->setSelectedWeapon(item, 100);
+        }
+        else if (type == Type_MagicItem)
+        {
+            MWWorld::Ptr item = *button->getChildAt (0)->getUserData<MWWorld::Ptr>();
+            MWBase::Environment::get().getWindowManager ()->setSelectedEnchantItem (item, 100);
+        }
     }
 
     // ---------------------------------------------------------------------------------------------------------

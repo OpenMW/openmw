@@ -599,7 +599,7 @@ namespace MWInput
 
     void InputManager::quickKey (int index)
     {
-        std::cout << "quick key " << index << std::endl;
+        mWindows.activateQuickKey (index);
     }
 
     void InputManager::showQuickKeysMenu()
@@ -669,6 +669,7 @@ namespace MWInput
         defaultKeyBindings[A_QuickKey8] = OIS::KC_8;
         defaultKeyBindings[A_QuickKey9] = OIS::KC_9;
         defaultKeyBindings[A_QuickKey10] = OIS::KC_0;
+        defaultKeyBindings[A_Screenshot] = OIS::KC_SYSRQ;
 
         std::map<int, int> defaultMouseButtonBindings;
         defaultMouseButtonBindings[A_Inventory] = OIS::MB_Right;
@@ -689,7 +690,10 @@ namespace MWInput
                 control = mInputCtrl->getChannel(i)->getAttachedControls ().front().control;
             }
 
-            if (!controlExists || force)
+            if (!controlExists || force ||
+                    ( mInputCtrl->getKeyBinding (control, ICS::Control::INCREASE) == OIS::KC_UNASSIGNED
+                      && mInputCtrl->getMouseButtonBinding (control, ICS::Control::INCREASE) == ICS_MAX_DEVICE_BUTTONS
+                      ))
             {
                 clearAllBindings (control);
 
