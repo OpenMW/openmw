@@ -1,7 +1,6 @@
 // This program generates the file tables_gen.hpp
 
 #include <iostream>
-#include <iomanip>
 using namespace std;
 
 #include <iconv.h>
@@ -10,9 +9,11 @@ using namespace std;
 void tab() { cout << "   "; }
 
 // write one number with a space in front of it and a comma after it
-void num(unsigned char i, bool last)
+void num(char i, bool last)
 {
-  cout << " (char)0x" << (unsigned)i;
+  // Convert i to its integer value, i.e. -128 to 127. Printing it directly
+  // would result in non-printable characters in the source code, which is bad.
+  cout << " " << static_cast<int>(i);
   if(!last) cout << ",";
 }
 
@@ -80,8 +81,6 @@ int write_table(const std::string &charset, const std::string &tableName)
 
 int main()
 {
-  cout << hex;
-
   // Write header guard
   cout << "#ifndef COMPONENTS_TOUTF8_TABLE_GEN_H\n#define COMPONENTS_TOUTF8_TABLE_GEN_H\n\n";
 
