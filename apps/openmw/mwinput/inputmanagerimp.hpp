@@ -83,7 +83,6 @@ namespace MWInput
         virtual void enableDetectingBindingMode (int action);
         virtual void resetToDefaultBindings();
 
-
     public:
         virtual bool keyPressed( const OIS::KeyEvent &arg );
         virtual bool keyReleased( const OIS::KeyEvent &arg );
@@ -139,6 +138,8 @@ namespace MWInput
         float mUISensitivity;
         float mCameraYMultiplier;
         float mUIYMultiplier;
+        float mPreviewPOVDelay;
+        float mTimeIdle;
 
         bool mMouseLookEnabled;
         bool mGuiCursorEnabled;
@@ -146,14 +147,13 @@ namespace MWInput
         float mMouseX;
         float mMouseY;
 
-        float mPreviewPOVDelay;
-        float mTimeIdle;
-
         std::map<std::string, bool> mControlSwitch;
-
 
     private:
         void adjustMouseRegion(int width, int height);
+
+        void resetIdleTime();
+        void updateIdleTime(float dt);
 
     private:
         void toggleMainMenu();
@@ -171,8 +171,6 @@ namespace MWInput
         bool actionIsActive (int id);
 
         void loadKeyDefaults(bool force = false);
-
-        void resetIdleTime();
 
     private:
         enum Actions

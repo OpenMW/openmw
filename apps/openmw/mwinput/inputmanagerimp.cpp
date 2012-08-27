@@ -45,6 +45,8 @@ namespace MWInput
         , mUISensitivity (Settings::Manager::getFloat("ui sensitivity", "Input"))
         , mCameraYMultiplier (Settings::Manager::getFloat("camera y multiplier", "Input"))
         , mUIYMultiplier (Settings::Manager::getFloat("ui y multiplier", "Input"))
+        , mPreviewPOVDelay(0.f)
+        , mTimeIdle(0.f)
     {
         Ogre::RenderWindow* window = ogre.getWindow ();
         size_t windowHnd;
@@ -149,7 +151,6 @@ namespace MWInput
         if (currentValue == 1)
         {
             // trigger action activated
-
             switch (action)
             {
             case A_GameMenu:
@@ -168,24 +169,30 @@ namespace MWInput
                 toggleConsole ();
                 break;
             case A_Activate:
+                resetIdleTime();
                 activate();
                 break;
             case A_Journal:
                 toggleJournal ();
                 break;
             case A_AutoMove:
+                resetIdleTime();
                 toggleAutoMove ();
                 break;
             case A_ToggleSneak:
                 /// \todo implement
+                resetIdleTime();
                 break;
             case A_ToggleWalk:
+                resetIdleTime();
                 toggleWalking ();
                 break;
             case A_ToggleWeapon:
+                resetIdleTime();
                 toggleWeapon ();
                 break;
             case A_ToggleSpell:
+                resetIdleTime();
                 toggleSpell ();
                 break;
             }
@@ -269,29 +276,18 @@ namespace MWInput
                 }
             }
         }
-
-        if (actionIsActive(A_MoveLeft)
-                || actionIsActive(A_MoveRight)
-                || actionIsActive(A_MoveForward)
-                || actionIsActive(A_MoveBackward)
-                || actionIsActive(A_Jump)
-                || actionIsActive(A_Crouch)
-                || actionIsActive(A_TogglePOV))
-
+        if (actionIsActive(A_MoveForward) ||
+            actionIsActive(A_MoveBackward) ||
+            actionIsActive(A_MoveLeft) ||
+            actionIsActive(A_MoveRight) ||
+            actionIsActive(A_Jump) ||
+            actionIsActive(A_Crouch) ||
+            actionIsActive(A_TogglePOV))
         {
-            resetIdleTime ();
+            resetIdleTime();
+        } else {
+            updateIdleTime(dt);
         }
-        else
-        {
-            if (mTimeIdle >= 0.f) {
-                mTimeIdle += dt;
-            }
-            if (mTimeIdle > 30.f && !mWindows.isGuiMode()) {
-                MWBase::Environment::get().getWorld()->toggleVanityMode(true, false);
-                mTimeIdle = -1.f;
-            }
-        }
-
     }
 
     void InputManager::setDragDrop(bool dragDrop)
@@ -312,10 +308,8 @@ namespace MWInput
         }
         else
         {
-            // Start mouse-looking again if allowed.
-            if (mControlSwitch["playerlooking"]) {
-                mMouseLookEnabled = true;
-            }
+            // Enable mouse look
+            mMouseLookEnabled = true;
 
             // Disable GUI events
             mGuiCursorEnabled = false;
@@ -360,22 +354,12 @@ namespace MWInput
         } else if (sw == "playerjumping" && !value) {
             /// \fixme maybe crouching at this time
             mPlayer.setUpDown(0);
+        } else if (sw == "vanitymode") {
+            MWBase::Environment::get().getWorld()->allowVanityMode(value);
         } else if (sw == "playerlooking") {
-            if (value) {
-                mMouseLookEnabled = true;
-            } else {
-                mMouseLookEnabled = false;
-            }
+            MWBase::Environment::get().getWorld()->togglePlayerLooking(value);
         }
         mControlSwitch[sw] = value;
-    }
-
-    void InputManager::resetIdleTime ()
-    {
-        if (mTimeIdle < 0) {
-            MWBase::Environment::get().getWorld()->toggleVanityMode(false, false);
-        }
-        mTimeIdle = 0.f;
     }
 
     void InputManager::adjustMouseRegion(int width, int height)
@@ -450,6 +434,8 @@ namespace MWInput
 
         if (mMouseLookEnabled)
         {
+            resetIdleTime();
+
             float x = arg.state.X.rel * mCameraSensitivity * 0.2;
             float y = arg.state.Y.rel * mCameraSensitivity * 0.2 * (mInvertY ? -1 : 1) * mUIYMultiplier;
 
@@ -574,6 +560,25 @@ namespace MWInput
     {
         if(!mWindows.isGuiMode())
             Ogre::Root::getSingleton().queueEndRendering ();
+    }
+
+    void InputManager::resetIdleTime()
+    {
+        if (mTimeIdle < 0) {
+            MWBase::Environment::get().getWorld()->toggleVanityMode(false, false);
+        }
+        mTimeIdle = 0.f;
+    }
+
+    void InputManager::updateIdleTime(float dt)
+    {
+        if (mTimeIdle >= 0.f) {
+            mTimeIdle += dt;
+        }
+        if (mTimeIdle > 30.f) {
+            MWBase::Environment::get().getWorld()->toggleVanityMode(true, false);
+            mTimeIdle = -1.f;
+        }
     }
 
     bool InputManager::actionIsActive (int id)
