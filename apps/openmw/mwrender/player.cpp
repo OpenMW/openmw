@@ -116,6 +116,10 @@ namespace MWRender
 
     void Player::update(float duration)
     {
+        // only show the crosshair in game mode and in first person mode.
+        MWBase::Environment::get().getWindowManager ()->showCrosshair
+                (!MWBase::Environment::get().getWindowManager ()->isGuiMode () && (mFirstPersonView && !mVanity.enabled && !mPreviewMode));
+
         if (mAnimation) {
             mAnimation->runAnimation(duration);
         }

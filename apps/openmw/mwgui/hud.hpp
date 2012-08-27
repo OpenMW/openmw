@@ -18,8 +18,14 @@ namespace MWGui
         void setFPS(float fps);
         void setTriangleCount(unsigned int count);
         void setBatchCount(unsigned int count);
-        void setBottomLeftVisibility(bool hmsVisible, bool weapVisible, bool spellVisible);
-        void setBottomRightVisibility(bool effectBoxVisible, bool minimapVisible);
+
+        void setHmsVisible(bool visible);
+        void setWeapVisible(bool visible);
+        void setSpellVisible(bool visible);
+
+        void setEffectVisible(bool visible);
+        void setMinimapVisible(bool visible);
+
         void setFpsLevel(const int level);
 
         void setSelectedSpell(const std::string& spellId, int successChancePercent);
@@ -28,6 +34,8 @@ namespace MWGui
         void unsetSelectedSpell();
         void unsetSelectedWeapon();
 
+        void setCrosshairVisible(bool visible);
+
         void onFrame(float dt);
         void onResChange(int width, int height);
 
@@ -35,7 +43,8 @@ namespace MWGui
 
         bool getWorldMouseOver() { return mWorldMouseOver; }
 
-        MyGUI::ProgressPtr health, magicka, stamina;
+    private:
+        MyGUI::ProgressPtr mHealth, mMagicka, mStamina;
         MyGUI::Widget* mHealthFrame;
         MyGUI::Widget *mWeapBox, *mSpellBox;
         MyGUI::ImageBox *mWeapImage, *mSpellImage;
@@ -50,12 +59,11 @@ namespace MWGui
 
         MyGUI::Widget* mDummy;
 
-        MyGUI::WidgetPtr fpsbox;
-        MyGUI::TextBox* fpscounter;
-        MyGUI::TextBox* trianglecounter;
-        MyGUI::TextBox* batchcounter;
+        MyGUI::WidgetPtr mFpsBox;
+        MyGUI::TextBox* mFpsCounter;
+        MyGUI::TextBox* mTriangleCounter;
+        MyGUI::TextBox* mBatchCounter;
 
-    private:
         // bottom left elements
         int mHealthManaStaminaBaseLeft, mWeapBoxBaseLeft, mSpellBoxBaseLeft;
         // bottom right elements
@@ -83,5 +91,7 @@ namespace MWGui
         void onWeaponClicked(MyGUI::Widget* _sender);
         void onMagicClicked(MyGUI::Widget* _sender);
         void onMapClicked(MyGUI::Widget* _sender);
+
+        void updatePositions();
     };
 }
