@@ -157,6 +157,8 @@ namespace MWGui
     virtual void unsetSelectedSpell();
     virtual void unsetSelectedWeapon();
 
+    virtual void showCrosshair(bool show);
+
     virtual void disallowMouse();
     virtual void allowMouse();
     virtual void notifyInputActionBound();

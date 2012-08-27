@@ -176,23 +176,18 @@ namespace MWInput
                 toggleJournal ();
                 break;
             case A_AutoMove:
-                resetIdleTime();
                 toggleAutoMove ();
                 break;
             case A_ToggleSneak:
                 /// \todo implement
-                resetIdleTime();
                 break;
             case A_ToggleWalk:
-                resetIdleTime();
                 toggleWalking ();
                 break;
             case A_ToggleWeapon:
-                resetIdleTime();
                 toggleWeapon ();
                 break;
             case A_ToggleSpell:
-                resetIdleTime();
                 toggleSpell ();
                 break;
             }
@@ -303,6 +298,8 @@ namespace MWInput
             // Disable mouse look
             mMouseLookEnabled = false;
 
+            mWindows.showCrosshair (false);
+
             // Enable GUI events
             mGuiCursorEnabled = true;
         }
@@ -310,6 +307,8 @@ namespace MWInput
         {
             // Enable mouse look
             mMouseLookEnabled = true;
+
+            mWindows.showCrosshair (false);
 
             // Disable GUI events
             mGuiCursorEnabled = false;

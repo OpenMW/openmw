@@ -177,6 +177,8 @@ namespace MWBase
             virtual void unsetSelectedSpell() = 0;
             virtual void unsetSelectedWeapon() = 0;
 
+            virtual void showCrosshair(bool show) = 0;
+
             virtual void disallowMouse() = 0;
             virtual void allowMouse() = 0;
             virtual void notifyInputActionBound() = 0;

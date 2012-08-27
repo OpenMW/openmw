@@ -559,12 +559,12 @@ void WindowManager::setPlayerDir(const float x, const float y)
 
 void WindowManager::setHMSVisibility(bool visible)
 {
-    mHud->setBottomLeftVisibility(visible, mHud->mWeapBox->getVisible(), mHud->mSpellBox->getVisible());
+    mHud->setHmsVisible (visible);
 }
 
 void WindowManager::setMinimapVisibility(bool visible)
 {
-    mHud->setBottomRightVisibility(mHud->mEffectBox->getVisible(), visible);
+    mHud->setMinimapVisible (visible);
 }
 
 void WindowManager::toggleFogOfWar()
@@ -595,13 +595,13 @@ bool WindowManager::getFullHelp() const
 
 void WindowManager::setWeaponVisibility(bool visible)
 {
-    mHud->setBottomLeftVisibility(mHud->health->getVisible(), visible, mHud->mSpellBox->getVisible());
+    mHud->setWeapVisible (visible);
 }
 
 void WindowManager::setSpellVisibility(bool visible)
 {
-    mHud->setBottomLeftVisibility(mHud->health->getVisible(), mHud->mWeapBox->getVisible(), visible);
-    mHud->setBottomRightVisibility(visible, mHud->mMinimapBox->getVisible());
+    mHud->setSpellVisible (visible);
+    mHud->setEffectVisible (visible);
 }
 
 void WindowManager::setMouseVisible(bool visible)
@@ -846,4 +846,9 @@ void WindowManager::notifyInputActionBound ()
 {
     mSettingsWindow->updateControlsBox ();
     allowMouse();
+}
+
+void WindowManager::showCrosshair (bool show)
+{
+    mHud->setCrosshairVisible (show);
 }
