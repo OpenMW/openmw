@@ -258,7 +258,9 @@ namespace MWInput
                 mPlayer.setUpDown (0);
 
             if (mControlSwitch["playerviewswitch"]) {
-                if (actionIsActive(A_TogglePOV)) {
+
+                // work around preview mode toggle when pressing Alt+Tab
+                if (actionIsActive(A_TogglePOV) && !mKeyboard->isModifierDown (OIS::Keyboard::Alt)) {
                     if (mPreviewPOVDelay <= 0.5 &&
                         (mPreviewPOVDelay += dt) > 0.5)
                     {
