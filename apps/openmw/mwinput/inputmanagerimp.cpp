@@ -13,6 +13,8 @@
 
 #include <MyGUI_InputManager.h>
 #include <MyGUI_RenderManager.h>
+#include <MyGUI_Widget.h>
+#include <MyGUI_Button.h>
 
 #include <openengine/ogre/renderer.hpp>
 
@@ -21,6 +23,7 @@
 #include "../mwworld/player.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"
+#include "../mwbase/soundmanager.hpp"
 
 namespace MWInput
 {
@@ -441,6 +444,15 @@ namespace MWInput
         mInputCtrl->mousePressed (arg, id);
 
         MyGUI::InputManager::getInstance().injectMousePress(mMouseX, mMouseY, MyGUI::MouseButton::Enum(id));
+
+        if (MyGUI::InputManager::getInstance ().getMouseFocusWidget () != 0)
+        {
+            MyGUI::Button* b = MyGUI::InputManager::getInstance ().getMouseFocusWidget ()->castType<MyGUI::Button>(false);
+            if (b)
+            {
+                MWBase::Environment::get().getSoundManager ()->playSound ("Menu Click", 1.f, 1.f);
+            }
+        }
 
         return true;
     }
