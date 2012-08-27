@@ -112,6 +112,7 @@ Bug #341: Building with Ogre Debug libraries does not use debug version of plugi
 Bug #347: Crash when running openmw with --start="XYZ"
 Bug #353: FindMyGUI.cmake breaks path on Windows
 Bug #359: WindowManager throws exception at destruction
+Bug #364: Laggy input on OS X due to bug in Ogre's event pump implementation
 Feature #33: Allow objects to cross cell-borders
 Feature #59: Dropping Items (replaced stopgap implementation with a proper one)
 Feature #93: Main Menu
