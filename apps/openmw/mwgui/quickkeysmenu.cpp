@@ -67,9 +67,6 @@ namespace MWGui
             MyGUI::Button* button;
             getWidget(button, "QuickKey" + boost::lexical_cast<std::string>(i+1));
 
-            if (i != 9) // 10th quick key is always set to hand-to-hand
-                button->eventMouseButtonClick += MyGUI::newDelegate(this, &QuickKeysMenu::onQuickKeyButtonClicked);
-
             unassign(button, i);
 
             mQuickKeyButtons.push_back(button);
