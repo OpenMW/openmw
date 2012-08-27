@@ -67,6 +67,8 @@ namespace MWGui
             MyGUI::Button* button;
             getWidget(button, "QuickKey" + boost::lexical_cast<std::string>(i+1));
 
+            button->eventMouseButtonClick += MyGUI::newDelegate(this, &QuickKeysMenu::onQuickKeyButtonClicked);
+
             unassign(button, i);
 
             mQuickKeyButtons.push_back(button);
