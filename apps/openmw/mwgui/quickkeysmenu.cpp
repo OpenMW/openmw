@@ -77,6 +77,8 @@ namespace MWGui
     QuickKeysMenu::~QuickKeysMenu()
     {
         delete mAssignDialog;
+        delete mItemSelectionDialog;
+        delete mMagicSelectionDialog;
     }
 
     void QuickKeysMenu::unassign(MyGUI::Widget* key, int index)
