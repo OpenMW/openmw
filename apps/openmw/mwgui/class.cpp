@@ -46,11 +46,6 @@ GenerateClassResultDialog::GenerateClassResultDialog(MWBase::WindowManager& parW
     backButton->setCoord(315 - okButtonWidth - backButtonWidth - 6, 219, backButtonWidth, 23);
 }
 
-void GenerateClassResultDialog::open()
-{
-    setVisible(true);
-}
-
 std::string GenerateClassResultDialog::getClassId() const
 {
     return mClassName->getCaption();
@@ -143,7 +138,6 @@ void PickClassDialog::open()
 {
     updateClasses();
     updateStats();
-    setVisible(true);
 }
 
 
@@ -341,7 +335,6 @@ void InfoBoxDialog::open()
     layoutVertically(mMainWidget, 4 + 6);
 
     center();
-    setVisible(true);
 }
 
 int InfoBoxDialog::getChosenButton() const
@@ -547,11 +540,6 @@ void CreateClassDialog::setNextButtonShow(bool shown)
     okButton->setCoord(459 - okButtonWidth, 158, okButtonWidth, 23);
     backButton->setCoord(459 - okButtonWidth - backButtonWidth - 6, 158, backButtonWidth, 23);
     descriptionButton->setCoord(459 - okButtonWidth - backButtonWidth - descriptionButtonWidth - 12, 158, descriptionButtonWidth, 23);
-}
-
-void CreateClassDialog::open()
-{
-    setVisible(true);
 }
 
 // widget controls

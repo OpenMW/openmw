@@ -110,7 +110,6 @@ ReviewDialog::ReviewDialog(MWBase::WindowManager& parWindowManager)
 void ReviewDialog::open()
 {
     updateSkillArea();
-    setVisible(true);
 }
 
 void ReviewDialog::onScrollChangePosition(MyGUI::ScrollBar* scroller, size_t pos)

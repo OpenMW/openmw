@@ -26,7 +26,7 @@ namespace MWGui
         std::string getText() const;
         void setButtons(ButtonList &buttons);
 
-        void open();
+        virtual void open();
         int getChosenButton() const;
 
         // Events
@@ -74,8 +74,6 @@ namespace MWGui
         std::string getClassId() const;
         void setClassId(const std::string &classId);
 
-        void open();
-
         // Events
         typedef delegates::CMultiDelegate0 EventHandle_Void;
 
@@ -104,7 +102,7 @@ namespace MWGui
         void setClassId(const std::string &classId);
 
         void setNextButtonShow(bool shown);
-        void open();
+        virtual void open();
 
         // Events
         typedef delegates::CMultiDelegate0 EventHandle_Void;
@@ -264,7 +262,6 @@ namespace MWGui
         std::vector<ESM::Skill::SkillEnum> getMinorSkills() const;
 
         void setNextButtonShow(bool shown);
-        void open();
 
         // Events
         typedef delegates::CMultiDelegate0 EventHandle_Void;

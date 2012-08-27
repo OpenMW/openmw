@@ -318,7 +318,6 @@ void WindowManager::updateVisible()
             break;
         case GM_Journal:
             mJournal->setVisible(true);
-            mJournal->open();
             break;
         default:
             // Unsupported mode, switch back to game

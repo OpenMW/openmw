@@ -28,7 +28,7 @@ namespace MWGui
         void setBirthId(const std::string &raceId);
 
         void setNextButtonShow(bool shown);
-        void open();
+        virtual void open();
 
         // Events
         typedef delegates::CMultiDelegate0 EventHandle_Void;
