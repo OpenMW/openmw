@@ -1035,11 +1035,11 @@ namespace MWWorld
     {
         std::vector<World::DoorMarker> result;
 
-        MWWorld::CellRefList<ESM::Door> doors = cell->doors;
-        std::list< MWWorld::LiveCellRef<ESM::Door> > refList = doors.list;
+        MWWorld::CellRefList<ESM::Door>& doors = cell->doors;
+        std::list< MWWorld::LiveCellRef<ESM::Door> >& refList = doors.list;
         for (std::list< MWWorld::LiveCellRef<ESM::Door> >::iterator it = refList.begin(); it != refList.end(); ++it)
         {
-            MWWorld::LiveCellRef<ESM::Door> ref = *it;
+            MWWorld::LiveCellRef<ESM::Door>& ref = *it;
 
             if (ref.ref.teleport)
             {
