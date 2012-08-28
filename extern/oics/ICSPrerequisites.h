@@ -39,7 +39,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "tinyxml.h"
 
-#define OIS_DYNAMIC_LIB
 #include <OIS.h>
 #include <OISMouse.h>
 #include <OISKeyboard.h>
