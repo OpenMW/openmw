@@ -1021,7 +1021,7 @@ namespace MWWorld
 
     Ogre::Vector2 World::getNorthVector (CellStore* cell)
     {
-        MWWorld::CellRefList<ESM::Static> statics = cell->statics;
+        MWWorld::CellRefList<ESM::Static>& statics = cell->statics;
         MWWorld::LiveCellRef<ESM::Static>* ref = statics.find("northmarker");
         if (!ref)
             return Vector2(0, 1);
