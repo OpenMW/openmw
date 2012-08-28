@@ -93,6 +93,16 @@ void LocalMapBase::applyFogOfWar()
     }
 }
 
+void LocalMapBase::onMarkerFocused (MyGUI::Widget* w1, MyGUI::Widget* w2)
+{
+    applyFogOfWar ();
+}
+
+void LocalMapBase::onMarkerUnfocused (MyGUI::Widget* w1, MyGUI::Widget* w2)
+{
+    applyFogOfWar ();
+}
+
 void LocalMapBase::setActiveCell(const int x, const int y, bool interior)
 {
     if (x==mCurX && y==mCurY && mInterior==interior && !mChanged) return; // don't do anything if we're still in the same cell
@@ -173,6 +183,8 @@ void LocalMapBase::setActiveCell(const int x, const int y, bool interior)
                 markerWidget->setUserString("ToolTipLayout", "TextToolTip");
                 markerWidget->setUserString("Caption_Text", marker.name);
                 markerWidget->setUserString("IsMarker", "true");
+                markerWidget->eventMouseSetFocus += MyGUI::newDelegate(this, &LocalMapBase::onMarkerFocused);
+                markerWidget->eventMouseLostFocus += MyGUI::newDelegate(this, &LocalMapBase::onMarkerUnfocused);
 
                 MarkerPosition markerPos;
                 markerPos.interior = interior;

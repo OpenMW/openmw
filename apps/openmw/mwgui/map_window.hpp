@@ -41,6 +41,9 @@ namespace MWGui
 
         void applyFogOfWar();
 
+        void onMarkerFocused(MyGUI::Widget* w1, MyGUI::Widget* w2);
+        void onMarkerUnfocused(MyGUI::Widget* w1, MyGUI::Widget* w2);
+
         OEngine::GUI::Layout* mLayout;
 
         bool mMapDragAndDrop;
