@@ -164,8 +164,6 @@ void LocalMapBase::setActiveCell(const int x, const int y, bool interior)
                     widgetCoord = MyGUI::IntCoord(nX * 512 - 3 + (1+cellDx-x) * 512, nY * 512 - 3 + (1+cellDy-y) * 512, 7, 7);
                 }
 
-                std::cout << "widgetCoord " << widgetCoord.left << " " << widgetCoord.top << " nX " << nX << " nY " << nY << " xy " << x << " " << y << std::endl;
-
                 static int counter = 0;
                 ++counter;
                 MyGUI::ImageBox* markerWidget = mLocalMap->createWidget<MyGUI::ImageBox>("ImageBox",
