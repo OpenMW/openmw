@@ -745,8 +745,11 @@ namespace MWWorld
         std::ostringstream stream;
         stream << "$dynamic" << mNextDynamicRecord++;
 
+        ESM::Potion record2 (record);
+        record2.mId = stream.str();
+
         const ESM::Potion *created =
-            &mStore.potions.list.insert (std::make_pair (stream.str(), record)).first->second;
+            &mStore.potions.list.insert (std::make_pair (stream.str(), record2)).first->second;
 
         mStore.all.insert (std::make_pair (stream.str(), ESM::REC_ALCH));
 
