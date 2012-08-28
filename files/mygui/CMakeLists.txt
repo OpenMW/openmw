@@ -71,6 +71,7 @@ set(MYGUI_FILES
     openmw_magicselection_dialog.layout
     smallbars.png
     VeraMono.ttf
+    markers.png
 )
 
 

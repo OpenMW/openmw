@@ -154,22 +154,21 @@ void LocalMapBase::setActiveCell(const int x, const int y, bool interior)
                     nX = (marker.x - cellSize * (x+mx-1)) / cellSize;
                     nY = 1 - (marker.y - cellSize * (y-(my-1))) / cellSize;
 
-                    widgetCoord = MyGUI::IntCoord(nX * 512 - 3 + mx * 512, nY * 512 - 3 + my * 512, 7, 7);
+                    widgetCoord = MyGUI::IntCoord(nX * 512 - 4 + mx * 512, nY * 512 - 4 + my * 512, 8, 8);
                 }
                 else
                 {
                     Ogre::Vector2 position (marker.x, -marker.y);
                     MWBase::Environment::get().getWorld ()->getInteriorMapPosition (position, nX, nY, cellDx, cellDy);
 
-                    widgetCoord = MyGUI::IntCoord(nX * 512 - 3 + (1+cellDx-x) * 512, nY * 512 - 3 + (1+cellDy-y) * 512, 7, 7);
+                    widgetCoord = MyGUI::IntCoord(nX * 512 - 4 + (1+cellDx-x) * 512, nY * 512 - 4 + (1+cellDy-y) * 512, 8, 8);
                 }
 
                 static int counter = 0;
                 ++counter;
-                MyGUI::ImageBox* markerWidget = mLocalMap->createWidget<MyGUI::ImageBox>("ImageBox",
+                MyGUI::Button* markerWidget = mLocalMap->createWidget<MyGUI::Button>("ButtonImage",
                     widgetCoord, MyGUI::Align::Default, "Marker" + boost::lexical_cast<std::string>(counter));
-                markerWidget->setImageTexture ("textures\\door_icon.dds");
-                markerWidget->setImageCoord (MyGUI::IntCoord(0,0,7,7));
+                markerWidget->setImageResource("DoorMarker");
                 markerWidget->setUserString("ToolTipType", "Layout");
                 markerWidget->setUserString("ToolTipLayout", "TextToolTip");
                 markerWidget->setUserString("Caption_Text", marker.name);
