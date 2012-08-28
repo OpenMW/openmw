@@ -12,6 +12,7 @@
 
 #include "../mwworld/class.hpp"
 
+#include "map_window.hpp"
 #include "widgets.hpp"
 
 using namespace MWGui;
@@ -150,7 +151,19 @@ void ToolTips::onFrame(float frameDuration)
             {
                 return;
             }
-            else if (type == "ItemPtr")
+
+            // special handling for markers on the local map: the tooltip should only be visible
+            // if the marker is not hidden due to the fog of war.
+            if (focus->getUserString ("IsMarker") == "true")
+            {
+                LocalMapBase::MarkerPosition pos = *focus->getUserData<LocalMapBase::MarkerPosition>();
+
+                if (!MWBase::Environment::get().getWorld ()->isPositionExplored (pos.nX, pos.nY, pos.cellX, pos.cellY, pos.interior))
+                    return;
+            }
+
+
+            if (type == "ItemPtr")
             {
                 mFocusObject = *focus->getUserData<MWWorld::Ptr>();
                 tooltipSize = getToolTipViaPtr(false);
@@ -199,7 +212,8 @@ void ToolTips::onFrame(float frameDuration)
                     it != userStrings.end(); ++it)
                 {
                     if (it->first == "ToolTipType"
-                        || it->first == "ToolTipLayout")
+                        || it->first == "ToolTipLayout"
+                        || it->first == "IsMarker")
                         continue;
 
 

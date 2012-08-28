@@ -50,6 +50,7 @@ namespace MWGui
         MyGUI::ImageBox *mWeapImage, *mSpellImage;
         MyGUI::ProgressPtr mWeapStatus, mSpellStatus;
         MyGUI::Widget *mEffectBox, *mMinimapBox;
+        MyGUI::Button* mMinimapButton;
         MyGUI::ImageBox* mEffect1;
         MyGUI::ScrollView* mMinimap;
         MyGUI::ImageBox* mCompass;

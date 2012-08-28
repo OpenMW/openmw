@@ -1031,6 +1031,64 @@ namespace MWWorld
         return d;
     }
 
+    std::vector<World::DoorMarker> World::getDoorMarkers (CellStore* cell)
+    {
+        std::vector<World::DoorMarker> result;
+
+        MWWorld::CellRefList<ESM::Door> doors = cell->doors;
+        std::list< MWWorld::LiveCellRef<ESM::Door> > refList = doors.list;
+        for (std::list< MWWorld::LiveCellRef<ESM::Door> >::iterator it = refList.begin(); it != refList.end(); ++it)
+        {
+            MWWorld::LiveCellRef<ESM::Door> ref = *it;
+
+            if (ref.ref.teleport)
+            {
+                World::DoorMarker newMarker;
+
+                std::string dest;
+                if (ref.ref.destCell != "")
+                {
+                    // door leads to an interior, use interior name
+                    dest = ref.ref.destCell;
+                }
+                else
+                {
+                    // door leads to exterior, use cell name (if any), otherwise translated region name
+                    int x,y;
+                    positionToIndex (ref.ref.doorDest.pos[0], ref.ref.doorDest.pos[1], x, y);
+                    const ESM::Cell* cell = mStore.cells.findExt(x,y);
+                    if (cell->name != "")
+                        dest = cell->name;
+                    else
+                    {
+                        const ESM::Region* region = mStore.regions.search(cell->region);
+                        dest = region->name;
+                    }
+                }
+
+                newMarker.name = dest;
+
+                ESM::Position pos = ref.mData.getPosition ();
+
+                newMarker.x = pos.pos[0];
+                newMarker.y = pos.pos[1];
+                result.push_back(newMarker);
+            }
+        }
+
+        return result;
+    }
+
+    void World::getInteriorMapPosition (Ogre::Vector2 position, float& nX, float& nY, int &x, int& y)
+    {
+        mRendering->getInteriorMapPosition(position, nX, nY, x, y);
+    }
+
+    bool World::isPositionExplored (float nX, float nY, int x, int y, bool interior)
+    {
+        return mRendering->isPositionExplored(nX, nY, x, y, interior);
+    }
+
     void World::setWaterHeight(const float height)
     {
         mRendering->setWaterHeight(height);

@@ -65,6 +65,12 @@ namespace MWBase
                 Render_Compositors
             };
 
+            struct DoorMarker
+            {
+                std::string name;
+                float x, y; // world position
+            };
+
             World() {}
 
             virtual ~World() {}
@@ -107,6 +113,15 @@ namespace MWBase
 
             virtual Ogre::Vector2 getNorthVector (MWWorld::CellStore* cell) = 0;
             ///< get north vector (OGRE coordinates) for given interior cell
+
+            virtual std::vector<DoorMarker> getDoorMarkers (MWWorld::CellStore* cell) = 0;
+            ///< get a list of teleport door markers for a given cell, to be displayed on the local map
+
+            virtual void getInteriorMapPosition (Ogre::Vector2 position, float& nX, float& nY, int &x, int& y) = 0;
+            ///< see MWRender::LocalMap::getInteriorMapPosition
+
+            virtual bool isPositionExplored (float nX, float nY, int x, int y, bool interior) = 0;
+            ///< see MWRender::LocalMap::isPositionExplored
 
             virtual MWWorld::Globals::Data& getGlobalVariable (const std::string& name) = 0;
 

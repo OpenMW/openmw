@@ -1,8 +1,12 @@
 #include "map_window.hpp"
 
-#include "../mwbase/windowmanager.hpp"
-
 #include <boost/lexical_cast.hpp>
+
+#include <OgreVector2.h>
+
+#include "../mwbase/windowmanager.hpp"
+#include "../mwbase/world.hpp"
+#include "../mwbase/environment.hpp"
 
 using namespace MWGui;
 
@@ -92,10 +96,21 @@ void LocalMapBase::applyFogOfWar()
 void LocalMapBase::setActiveCell(const int x, const int y, bool interior)
 {
     if (x==mCurX && y==mCurY && mInterior==interior && !mChanged) return; // don't do anything if we're still in the same cell
+
+    // clear all previous markers
+    for (unsigned int i=0; i< mLocalMap->getChildCount(); ++i)
+    {
+        if (mLocalMap->getChildAt(i)->getName ().substr (0, 6) == "Marker")
+        {
+            MyGUI::Gui::getInstance ().destroyWidget (mLocalMap->getChildAt(i));
+        }
+    }
+
     for (int mx=0; mx<3; ++mx)
     {
         for (int my=0; my<3; ++my)
         {
+            // map
             std::string image = mPrefix+"_"+ boost::lexical_cast<std::string>(x + (mx-1)) + "_"
                     + boost::lexical_cast<std::string>(y + (interior ? (my-1) : -1*(my-1)));
 
@@ -108,12 +123,79 @@ void LocalMapBase::setActiveCell(const int x, const int y, bool interior)
                 box->setImageTexture(image);
             else
                 box->setImageTexture("black.png");
+
+
+            // door markers
+
+            // interior map only consists of one cell, so handle the markers only once
+            if (interior && (mx != 2 || my != 2))
+                continue;
+
+            MWWorld::CellStore* cell;
+            if (interior)
+                cell = MWBase::Environment::get().getWorld ()->getInterior (mPrefix);
+            else
+                cell = MWBase::Environment::get().getWorld ()->getExterior (x+mx-1, y-(my-1));
+
+            std::vector<MWBase::World::DoorMarker> doors = MWBase::Environment::get().getWorld ()->getDoorMarkers (cell);
+
+            for (std::vector<MWBase::World::DoorMarker>::iterator it = doors.begin(); it != doors.end(); ++it)
+            {
+                MWBase::World::DoorMarker marker = *it;
+
+                // convert world coordinates to normalized cell coordinates
+                MyGUI::IntCoord widgetCoord;
+                float nX,nY;
+                int cellDx, cellDy;
+                if (!interior)
+                {
+                    const int cellSize = 8192;
+
+                    nX = (marker.x - cellSize * (x+mx-1)) / cellSize;
+                    nY = 1 - (marker.y - cellSize * (y-(my-1))) / cellSize;
+
+                    widgetCoord = MyGUI::IntCoord(nX * 512 - 3 + mx * 512, nY * 512 - 3 + my * 512, 7, 7);
+                }
+                else
+                {
+                    Ogre::Vector2 position (marker.x, -marker.y);
+                    MWBase::Environment::get().getWorld ()->getInteriorMapPosition (position, nX, nY, cellDx, cellDy);
+
+                    widgetCoord = MyGUI::IntCoord(nX * 512 - 3 + (1+cellDx-x) * 512, nY * 512 - 3 + (1+cellDy-y) * 512, 7, 7);
+                }
+
+                std::cout << "widgetCoord " << widgetCoord.left << " " << widgetCoord.top << " nX " << nX << " nY " << nY << " xy " << x << " " << y << std::endl;
+
+                static int counter = 0;
+                ++counter;
+                MyGUI::ImageBox* markerWidget = mLocalMap->createWidget<MyGUI::ImageBox>("ImageBox",
+                    widgetCoord, MyGUI::Align::Default, "Marker" + boost::lexical_cast<std::string>(counter));
+                markerWidget->setImageTexture ("textures\\door_icon.dds");
+                markerWidget->setImageCoord (MyGUI::IntCoord(0,0,7,7));
+                markerWidget->setUserString("ToolTipType", "Layout");
+                markerWidget->setUserString("ToolTipLayout", "TextToolTip");
+                markerWidget->setUserString("Caption_Text", marker.name);
+                markerWidget->setUserString("IsMarker", "true");
+
+                MarkerPosition markerPos;
+                markerPos.interior = interior;
+                markerPos.cellX = interior ? cellDx : x + mx - 1;
+                markerPos.cellY = interior ? cellDy : y + ((my - 1)*-1);
+                markerPos.nX = nX;
+                markerPos.nY = nY;
+
+                markerWidget->setUserData(markerPos);
+            }
+
+
         }
     }
     mInterior = interior;
     mCurX = x;
     mCurY = y;
     mChanged = false;
+
+    // fog of war
     applyFogOfWar();
 
     // set the compass texture again, because MyGUI determines sorting of ImageBox widgets

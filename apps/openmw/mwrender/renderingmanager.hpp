@@ -184,6 +184,12 @@ class RenderingManager: private RenderingInterface, public Ogre::WindowEventList
 
     static bool waterShaderSupported();
 
+    virtual void getInteriorMapPosition (Ogre::Vector2 position, float& nX, float& nY, int &x, int& y);
+    ///< see MWRender::LocalMap::getInteriorMapPosition
+
+    virtual bool isPositionExplored (float nX, float nY, int x, int y, bool interior);
+    ///< see MWRender::LocalMap::isPositionExplored
+
   protected:
 	virtual void windowResized(Ogre::RenderWindow* rw);
     virtual void windowClosed(Ogre::RenderWindow* rw);

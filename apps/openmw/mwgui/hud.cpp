@@ -60,7 +60,6 @@ HUD::HUD(int width, int height, int fpsLevel, DragAndDrop* dragAndDrop)
     getWidget(mHealth, "Health");
     getWidget(mMagicka, "Magicka");
     getWidget(mStamina, "Stamina");
-
     mHealthManaStaminaBaseLeft = mHealthFrame->getLeft();
 
     MyGUI::Widget *healthFrame, *magickaFrame, *fatigueFrame;
@@ -93,9 +92,10 @@ HUD::HUD(int width, int height, int fpsLevel, DragAndDrop* dragAndDrop)
 
     getWidget(mMinimapBox, "MiniMapBox");
     mMinimapBoxBaseRight = viewSize.width - mMinimapBox->getRight();
-    mMinimapBox->eventMouseButtonClick += MyGUI::newDelegate(this, &HUD::onMapClicked);
     getWidget(mMinimap, "MiniMap");
     getWidget(mCompass, "Compass");
+    getWidget(mMinimapButton, "MiniMapButton");
+    mMinimapButton->eventMouseButtonClick += MyGUI::newDelegate(this, &HUD::onMapClicked);
 
     getWidget(mCellNameBox, "CellName");
     getWidget(mWeaponSpellBox, "WeaponSpellName");

@@ -18,6 +18,15 @@ namespace MWGui
 
         void toggleFogOfWar();
 
+        struct MarkerPosition
+        {
+            bool interior;
+            int cellX;
+            int cellY;
+            float nX;
+            float nY;
+        };
+
     protected:
         int mCurX, mCurY;
         bool mInterior;

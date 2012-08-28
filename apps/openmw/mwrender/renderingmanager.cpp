@@ -863,4 +863,14 @@ void RenderingManager::getPlayerData(Ogre::Vector3 &eyepos, float &pitch, float 
     mPlayer->getSightAngles(pitch, yaw);
 }
 
+void RenderingManager::getInteriorMapPosition (Ogre::Vector2 position, float& nX, float& nY, int &x, int& y)
+{
+    return mLocalMap->getInteriorMapPosition (position, nX, nY, x, y);
+}
+
+bool RenderingManager::isPositionExplored (float nX, float nY, int x, int y, bool interior)
+{
+    return mLocalMap->isPositionExplored(nX, nY, x, y, interior);
+}
+
 } // namespace
