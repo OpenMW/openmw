@@ -123,6 +123,11 @@ namespace MWRender
         if (mAnimation) {
             mAnimation->runAnimation(duration);
         }
+        mPlayerNode->setVisible(
+            mVanity.enabled || mPreviewMode || !mFirstPersonView,
+            false
+        );
+
         if (mFirstPersonView && !mVanity.enabled) {
             return;
         }
@@ -143,7 +148,6 @@ namespace MWRender
             mCamera->setPosition(0.f, 0.f, mCameraDistance);
             setLowHeight(true);
         }
-        mPlayerNode->setVisible(!mFirstPersonView, false);
     }
     
     void Player::allowVanityMode(bool allow)
@@ -172,13 +176,11 @@ namespace MWRender
             rot.x = Ogre::Degree(-30.f).valueRadians();
             mMainCam.offset = mCamera->getPosition().z;
 
-            mPlayerNode->setVisible(true, false);
             setLowHeight(true);
         } else {
             rot.x = getPitch();
             offset = mMainCam.offset;
 
-            mPlayerNode->setVisible(!mFirstPersonView, false);
             setLowHeight(!mFirstPersonView);
         }
         rot.z = getYaw();
@@ -199,13 +201,11 @@ namespace MWRender
             mMainCam.offset = offset;
             offset = mPreviewCam.offset;
 
-            mPlayerNode->setVisible(true, false);
             setLowHeight(true);
         } else {
             mPreviewCam.offset = offset;
             offset = mMainCam.offset;
 
-            mPlayerNode->setVisible(!mFirstPersonView, false);
             setLowHeight(!mFirstPersonView);
         }
         mCamera->setPosition(0.f, 0.f, offset);
@@ -302,7 +302,6 @@ namespace MWRender
     void Player::setAnimation(NpcAnimation *anim)
     {
         mAnimation = anim;
-        mPlayerNode->setVisible(!mFirstPersonView, false);
     }
 
     void Player::setHeight(float height)
