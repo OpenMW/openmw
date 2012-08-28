@@ -113,7 +113,6 @@ void RaceDialog::open()
     updateRaces();
     updateSkills();
     updateSpellPowers();
-    setVisible(true);
 }
 
 

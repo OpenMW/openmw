@@ -8,6 +8,8 @@
 #include "../mwworld/class.hpp"
 #include "../mwmechanics/creaturestats.hpp"
 
+#include <components/esm_store/store.hpp>
+
 #include "npcstats.hpp"
 
 namespace MWMechanics

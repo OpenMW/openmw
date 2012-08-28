@@ -194,7 +194,7 @@ void CharacterCreation::spawnDialog(const char id)
             mNameDialog->setTextInput(mPlayerName);
             mNameDialog->setNextButtonShow(mCreationStage >= CSE_NameChosen);
             mNameDialog->eventDone += MyGUI::newDelegate(this, &CharacterCreation::onNameDialogDone);
-            mNameDialog->open();
+            mNameDialog->setVisible(true);
             break;
 
         case GM_Race:
@@ -205,7 +205,7 @@ void CharacterCreation::spawnDialog(const char id)
             mRaceDialog->setRaceId(mPlayerRaceId);
             mRaceDialog->eventDone += MyGUI::newDelegate(this, &CharacterCreation::onRaceDialogDone);
             mRaceDialog->eventBack += MyGUI::newDelegate(this, &CharacterCreation::onRaceDialogBack);
-            mRaceDialog->open();
+            mRaceDialog->setVisible(true);;
             break;
 
         case GM_Class:
@@ -213,7 +213,7 @@ void CharacterCreation::spawnDialog(const char id)
             mClassChoiceDialog = 0;
             mClassChoiceDialog = new ClassChoiceDialog(*mWM);
             mClassChoiceDialog->eventButtonSelected += MyGUI::newDelegate(this, &CharacterCreation::onClassChoice);
-            mClassChoiceDialog->open();
+            mClassChoiceDialog->setVisible(true);
             break;
 
         case GM_ClassPick:
@@ -224,7 +224,7 @@ void CharacterCreation::spawnDialog(const char id)
             mPickClassDialog->setClassId(mPlayerClass.name);
             mPickClassDialog->eventDone += MyGUI::newDelegate(this, &CharacterCreation::onPickClassDialogDone);
             mPickClassDialog->eventBack += MyGUI::newDelegate(this, &CharacterCreation::onPickClassDialogBack);
-            mPickClassDialog->open();
+            mPickClassDialog->setVisible(true);
             break;
 
         case GM_Birth:
@@ -234,7 +234,7 @@ void CharacterCreation::spawnDialog(const char id)
             mBirthSignDialog->setNextButtonShow(mCreationStage >= CSE_BirthSignChosen);
             mBirthSignDialog->eventDone += MyGUI::newDelegate(this, &CharacterCreation::onBirthSignDialogDone);
             mBirthSignDialog->eventBack += MyGUI::newDelegate(this, &CharacterCreation::onBirthSignDialogBack);
-            mBirthSignDialog->open();
+            mBirthSignDialog->setVisible(true);
             break;
 
         case GM_ClassCreate:
@@ -244,7 +244,7 @@ void CharacterCreation::spawnDialog(const char id)
             mCreateClassDialog->setNextButtonShow(mCreationStage >= CSE_ClassChosen);
             mCreateClassDialog->eventDone += MyGUI::newDelegate(this, &CharacterCreation::onCreateClassDialogDone);
             mCreateClassDialog->eventBack += MyGUI::newDelegate(this, &CharacterCreation::onCreateClassDialogBack);
-            mCreateClassDialog->open();
+            mCreateClassDialog->setVisible(true);
             break;
         case GM_ClassGenerate:
             mGenerateClassStep = 0;
@@ -289,7 +289,7 @@ void CharacterCreation::spawnDialog(const char id)
             mReviewDialog->eventDone += MyGUI::newDelegate(this, &CharacterCreation::onReviewDialogDone);
             mReviewDialog->eventBack += MyGUI::newDelegate(this, &CharacterCreation::onReviewDialogBack);
             mReviewDialog->eventActivateDialog += MyGUI::newDelegate(this, &CharacterCreation::onReviewActivateDialog);
-            mReviewDialog->open();
+            mReviewDialog->setVisible(true);
             break;
     }
 }
@@ -680,7 +680,7 @@ void CharacterCreation::showClassQuestionDialog()
         mGenerateClassResultDialog->setClassId(mGenerateClass);
         mGenerateClassResultDialog->eventBack += MyGUI::newDelegate(this, &CharacterCreation::onGenerateClassBack);
         mGenerateClassResultDialog->eventDone += MyGUI::newDelegate(this, &CharacterCreation::onGenerateClassDone);
-        mGenerateClassResultDialog->open();
+        mGenerateClassResultDialog->setVisible(true);
         return;
     }
 
@@ -703,7 +703,7 @@ void CharacterCreation::showClassQuestionDialog()
     buttons.push_back(sGenerateClassSteps[mGenerateClassStep].mButtons[2]);
     mGenerateClassQuestionDialog->setButtons(buttons);
     mGenerateClassQuestionDialog->eventButtonSelected += MyGUI::newDelegate(this, &CharacterCreation::onClassQuestionChosen);
-    mGenerateClassQuestionDialog->open();
+    mGenerateClassQuestionDialog->setVisible(true);
 
     MWBase::Environment::get().getSoundManager()->say(sGenerateClassSteps[mGenerateClassStep].mSound);
 }

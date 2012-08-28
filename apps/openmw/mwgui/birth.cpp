@@ -65,9 +65,9 @@ void BirthDialog::setNextButtonShow(bool shown)
 
 void BirthDialog::open()
 {
+    WindowBase::open();
     updateBirths();
     updateSpells();
-    setVisible(true);
 }
 
 

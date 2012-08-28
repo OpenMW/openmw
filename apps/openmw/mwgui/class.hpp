@@ -26,7 +26,7 @@ namespace MWGui
         std::string getText() const;
         void setButtons(ButtonList &buttons);
 
-        void open();
+        virtual void open();
         int getChosenButton() const;
 
         // Events
@@ -74,8 +74,6 @@ namespace MWGui
         std::string getClassId() const;
         void setClassId(const std::string &classId);
 
-        void open();
-
         // Events
         typedef delegates::CMultiDelegate0 EventHandle_Void;
 
@@ -104,7 +102,7 @@ namespace MWGui
         void setClassId(const std::string &classId);
 
         void setNextButtonShow(bool shown);
-        void open();
+        virtual void open();
 
         // Events
         typedef delegates::CMultiDelegate0 EventHandle_Void;
@@ -134,7 +132,7 @@ namespace MWGui
         std::string mCurrentClassId;
     };
 
-    class SelectSpecializationDialog : public WindowBase
+    class SelectSpecializationDialog : public WindowModal
     {
     public:
         SelectSpecializationDialog(MWBase::WindowManager& parWindowManager);
@@ -165,7 +163,7 @@ namespace MWGui
         ESM::Class::Specialization mSpecializationId;
     };
 
-    class SelectAttributeDialog : public WindowBase
+    class SelectAttributeDialog : public WindowModal
     {
     public:
         SelectAttributeDialog(MWBase::WindowManager& parWindowManager);
@@ -198,7 +196,7 @@ namespace MWGui
         ESM::Attribute::AttributeID mAttributeId;
     };
 
-    class SelectSkillDialog : public WindowBase
+    class SelectSkillDialog : public WindowModal
     {
     public:
         SelectSkillDialog(MWBase::WindowManager& parWindowManager);
@@ -234,7 +232,7 @@ namespace MWGui
         ESM::Skill::SkillEnum mSkillId;
     };
 
-    class DescriptionDialog : public WindowBase
+    class DescriptionDialog : public WindowModal
     {
     public:
         DescriptionDialog(MWBase::WindowManager& parWindowManager);
@@ -264,7 +262,6 @@ namespace MWGui
         std::vector<ESM::Skill::SkillEnum> getMinorSkills() const;
 
         void setNextButtonShow(bool shown);
-        void open();
 
         // Events
         typedef delegates::CMultiDelegate0 EventHandle_Void;

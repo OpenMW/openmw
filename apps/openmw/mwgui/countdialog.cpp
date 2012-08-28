@@ -8,7 +8,7 @@
 namespace MWGui
 {
     CountDialog::CountDialog(MWBase::WindowManager& parWindowManager) :
-        WindowBase("openmw_count_window.layout", parWindowManager)
+        WindowModal("openmw_count_window.layout", parWindowManager)
     {
         getWidget(mSlider, "CountSlider");
         getWidget(mItemEdit, "ItemEdit");
@@ -40,9 +40,6 @@ namespace MWGui
                 width,
                 mMainWidget->getHeight());
 
-        // make other gui elements inaccessible while this dialog is open
-        MyGUI::InputManager::getInstance().addWidgetModal(mMainWidget);
-
         MyGUI::InputManager::getInstance().setKeyFocusWidget(mItemEdit);
 
         mSlider->setScrollPosition(maxCount-1);
@@ -63,14 +60,14 @@ namespace MWGui
 
     void CountDialog::onCancelButtonClicked(MyGUI::Widget* _sender)
     {
-        close();
+        setVisible(false);
     }
 
     void CountDialog::onOkButtonClicked(MyGUI::Widget* _sender)
     {
         eventOkClicked(NULL, mSlider->getScrollPosition()+1);
 
-        close();
+        setVisible(false);
     }
 
     void CountDialog::onEditTextChange(MyGUI::EditBox* _sender)
@@ -98,11 +95,5 @@ namespace MWGui
     void CountDialog::onSliderMoved(MyGUI::ScrollBar* _sender, size_t _position)
     {
         mItemEdit->setCaption(boost::lexical_cast<std::string>(_position+1));
-    }
-
-    void CountDialog::close()
-    {
-        setVisible(false);
-        MyGUI::InputManager::getInstance().removeWidgetModal(mMainWidget);
     }
 }

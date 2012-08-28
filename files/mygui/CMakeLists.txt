@@ -65,6 +65,10 @@ set(MYGUI_FILES
     openmw_tooltips.layout
     openmw_trade_window.layout
     openmw_windows.skin.xml
+    openmw_quickkeys_menu.layout
+    openmw_quickkeys_menu_assign.layout
+    openmw_itemselection_dialog.layout
+    openmw_magicselection_dialog.layout
     smallbars.png
     VeraMono.ttf
 )

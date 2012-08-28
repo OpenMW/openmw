@@ -25,7 +25,7 @@ namespace MWGui
 
         void setNextButtonShow(bool shown);
         void setTextLabel(const std::string &label);
-        void open();
+        virtual void open();
 
     protected:
         void onOkClicked(MyGUI::Widget* _sender);

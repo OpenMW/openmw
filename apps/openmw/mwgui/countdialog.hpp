@@ -5,7 +5,7 @@
 
 namespace MWGui
 {
-    class CountDialog : public WindowBase
+    class CountDialog : public WindowModal
     {
         public:
             CountDialog(MWBase::WindowManager& parWindowManager);
@@ -30,8 +30,6 @@ namespace MWGui
             void onOkButtonClicked(MyGUI::Widget* _sender);
             void onEditTextChange(MyGUI::EditBox* _sender);
             void onSliderMoved(MyGUI::ScrollBar* _sender, size_t _position);
-
-            void close();
     };
 
 }

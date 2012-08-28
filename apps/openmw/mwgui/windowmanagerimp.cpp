@@ -41,6 +41,7 @@
 #include "confirmationdialog.hpp"
 #include "alchemywindow.hpp"
 #include "spellwindow.hpp"
+#include "quickkeysmenu.hpp"
 
 using namespace MWGui;
 
@@ -133,6 +134,7 @@ WindowManager::WindowManager(
     mConfirmationDialog = new ConfirmationDialog(*this);
     mAlchemyWindow = new AlchemyWindow(*this);
     mSpellWindow = new SpellWindow(*this);
+    mQuickKeysMenu = new QuickKeysMenu(*this);
 
     mInputBlocker = mGui->createWidget<MyGUI::Widget>("",0,0,w,h,MyGUI::Align::Default,"Windows","");
 
@@ -226,6 +228,7 @@ void WindowManager::updateVisible()
     mSettingsWindow->setVisible(false);
     mAlchemyWindow->setVisible(false);
     mSpellWindow->setVisible(false);
+    mQuickKeysMenu->setVisible(false);
 
     // Mouse is visible whenever we're not in game mode
     MyGUI::PointerManager::getInstance().setVisible(isGuiMode());
@@ -254,6 +257,9 @@ void WindowManager::updateVisible()
     GuiMode mode = mGuiModes.back();
 
     switch(mode) {
+        case GM_QuickKeysMenu:
+            mQuickKeysMenu->setVisible (true);
+            break;
         case GM_MainMenu:
             mMenu->setVisible(true);
             break;
@@ -312,7 +318,6 @@ void WindowManager::updateVisible()
             break;
         case GM_Journal:
             mJournal->setVisible(true);
-            mJournal->open();
             break;
         default:
             // Unsupported mode, switch back to game
@@ -652,6 +657,7 @@ void WindowManager::processChangedSettings(const Settings::CategorySettingVector
         mAlchemyWindow->center();
         mScrollWindow->center();
         mBookWindow->center();
+        mQuickKeysMenu->center();
         mDragAndDrop->mDragAndDropWidget->setSize(MyGUI::IntSize(x, y));
         mInputBlocker->setSize(MyGUI::IntSize(x,y));
     }
@@ -848,7 +854,13 @@ void WindowManager::notifyInputActionBound ()
     allowMouse();
 }
 
+
 void WindowManager::showCrosshair (bool show)
 {
     mHud->setCrosshairVisible (show);
+}
+
+void WindowManager::activateQuickKey (int index)
+{
+    mQuickKeysMenu->activateQuickKey(index);
 }
