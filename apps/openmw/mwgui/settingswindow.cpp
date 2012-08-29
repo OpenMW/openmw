@@ -85,6 +85,8 @@ namespace MWGui
         WindowBase("openmw_settings_window.layout", parWindowManager)
     {
         getWidget(mOkButton, "OkButton");
+        getWidget(mSubtitlesButton, "SubtitlesButton");
+        getWidget(mCrosshairButton, "CrosshairButton");
         getWidget(mResolutionList, "ResolutionList");
         getWidget(mMenuTransparencySlider, "MenuTransparencySlider");
         getWidget(mToolTipDelaySlider, "ToolTipDelaySlider");
@@ -121,6 +123,8 @@ namespace MWGui
         getWidget(mUISensitivitySlider, "UISensitivitySlider");
         getWidget(mCameraSensitivitySlider, "CameraSensitivitySlider");
 
+        mSubtitlesButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onButtonToggled);
+        mCrosshairButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onButtonToggled);
         mInvertYButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onButtonToggled);
         mOkButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onOkButtonClicked);
         mUnderwaterButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onButtonToggled);
@@ -191,6 +195,9 @@ namespace MWGui
         mMenuTransparencySlider->setScrollPosition(menu_transparency);
         int tooltip_delay = (mToolTipDelaySlider->getScrollRange()-1) * Settings::Manager::getFloat("tooltip delay", "GUI");
         mToolTipDelaySlider->setScrollPosition(tooltip_delay);
+
+        mSubtitlesButton->setCaptionWithReplacing(Settings::Manager::getBool("subtitles", "GUI") ? "#{sOn}" : "#{sOff}");
+        mCrosshairButton->setCaptionWithReplacing(Settings::Manager::getBool("crosshair", "HUD") ? "#{sOn}" : "#{sOff}");
 
         float fovVal = (Settings::Manager::getFloat("field of view", "General")-sFovMin)/(sFovMax-sFovMin);
         mFOVSlider->setScrollPosition(fovVal * (mFOVSlider->getScrollRange()-1));
@@ -403,6 +410,10 @@ namespace MWGui
                 Settings::Manager::setBool("debug", "Shadows", newState);
             else if (_sender == mInvertYButton)
                 Settings::Manager::setBool("invert y axis", "Input", newState);
+            else if (_sender == mCrosshairButton)
+                Settings::Manager::setBool("crosshair", "HUD", newState);
+            else if (_sender == mSubtitlesButton)
+                Settings::Manager::setBool("subtitles", "GUI", newState);
 
             apply();
         }

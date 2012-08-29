@@ -161,6 +161,7 @@ namespace MWGui
     virtual void unsetSelectedWeapon();
 
     virtual void showCrosshair(bool show);
+    virtual bool getSubtitlesEnabled();
 
     virtual void disallowMouse();
     virtual void allowMouse();
@@ -219,6 +220,9 @@ namespace MWGui
     CharacterCreation* mCharGen;
 
     MyGUI::Widget* mInputBlocker;
+
+    bool mCrosshairEnabled;
+    bool mSubtitlesEnabled;
 
     /// \todo get rid of this stuff. Move it to the respective UI element classes, if needed.
     // Various stats about player as needed by window manager
