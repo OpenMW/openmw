@@ -4,6 +4,7 @@
 #include "esm_reader.hpp"
 #include "loadcont.hpp"
 #include "defs.hpp"
+#include "defs_ai.hpp"
 
 namespace ESM {
 
@@ -71,17 +72,13 @@ struct NPC
       unknown1, unknown2, unknown3;
     int gold; // ?? not certain
   }; // 12 bytes
-
-  struct AIDTstruct
-  {
-    // These are probabilities
-    char hello, u1, fight, flee, alarm, u2, u3, u4;
-    // The last u's might be the skills that this NPC can train you
-    // in?
-    int services; // See the Services enum
-  }; // 12 bytes
-
 #pragma pack(pop)
+
+    struct Dest
+    {
+        Position pos;
+        std::string cellName;
+    };
 
   NPDTstruct52 npdt52;
   NPDTstruct12 npdt12; // Use this if npdt52.gold == -10
@@ -93,6 +90,9 @@ struct NPC
 
   AIDTstruct AI;
   bool hasAI;
+
+  std::vector<Dest> dest;
+  AIPackageList     aiPack;
 
   std::string name, model, race, cls, faction, script,
     hair, head; // body parts

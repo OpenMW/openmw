@@ -3,6 +3,7 @@
 
 #include "esm_reader.hpp"
 #include "loadcont.hpp"
+#include "defs_ai.hpp"
 
 namespace ESM
 {
@@ -50,15 +51,6 @@ struct Creature
         int attack[6]; // AttackMin1, AttackMax1, ditto2, ditto3
         int gold;
     }; // 96 bytes
-
-    struct AIDTstruct
-    {
-        // These are probabilities
-        char hello, u1, fight, flee, alarm, u2, u3, u4;
-        // The last u's might be the skills that this NPC can train you
-        // in?
-        int services; // See the NPC::Services enum
-    }; // 12 bytes
 
     NPDTstruct data;
 
