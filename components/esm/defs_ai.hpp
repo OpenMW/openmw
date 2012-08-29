@@ -93,7 +93,6 @@ namespace ESM
                 AIPackage pack;
 
                 esm.getSubName();
-                std::cout << esm.retSubName().toString() << std::endl;
                 if (esm.retSubName() == 0x54444e43) { // CNDT
                     list.back().cellName = esm.getHString();
                 } else if (esm.retSubName() == AI_Wander) {
