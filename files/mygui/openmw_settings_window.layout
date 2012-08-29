@@ -41,6 +41,18 @@
                     <Property key="Caption" value="#{sSlow}"/>
                     <Property key="TextAlign" value="Right"/>
                 </Widget>
+
+
+                <Widget type="Button" skin="MW_Button" position="4 200 34 24" align="Left Top" name="SubtitlesButton"/>
+                <Widget type="TextBox" skin="SandText" position="44 200 200 24" align="Left Top">
+                    <Property key="Caption" value="#{sSubtitles}"/>
+                </Widget>
+
+                <Widget type="Button" skin="MW_Button" position="4 230 34 24" align="Left Top" name="CrosshairButton"/>
+                <Widget type="TextBox" skin="SandText" position="44 230 200 24" align="Left Top">
+                    <Property key="Caption" value="#{sCursorOff}"/>
+                </Widget>
+
             </Widget>
             <Widget type="TabItem" skin="" position="4 28 360 312">
                 <Property key="Caption" value="  #{sAudio}  "/>

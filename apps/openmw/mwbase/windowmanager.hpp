@@ -180,6 +180,7 @@ namespace MWBase
             virtual void unsetSelectedWeapon() = 0;
 
             virtual void showCrosshair(bool show) = 0;
+            virtual bool getSubtitlesEnabled() = 0;
 
             virtual void disallowMouse() = 0;
             virtual void allowMouse() = 0;
