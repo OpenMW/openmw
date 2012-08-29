@@ -92,7 +92,7 @@ struct playerMove
 	{
 		playerStruct() : gravity(800.0f), speed(480.0f), pmove_framecount(20), groundEntityNum(ENTITYNUM_NONE), commandTime(40), move_type(PM_NOCLIP), pm_time(0), snappingImplemented(true), bSnap(false), counter(-1)
 		{
-			origin = Ogre::Vector3(733.164f,900.0f, 839.432f);
+			origin = Ogre::Vector3(0.0f, 0.0f, 0.0f);
 			velocity = Ogre::Vector3(0.0f, 0.0f, 0.0f);
 
 			viewangles = Ogre::Vector3(0.0f, 0.0f, 0.0f);

@@ -301,7 +301,7 @@ bool	PM_SlideMove( bool gravity )
             
             if(planes[i].x >= .70)
             {
-                pm->ps.velocity = Ogre::Vector3(0,0,0);
+                pm->ps.velocity.z = 0;
 				return true;
             }
 			// see how hard we are hitting things
