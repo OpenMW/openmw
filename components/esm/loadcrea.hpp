@@ -4,7 +4,7 @@
 #include "esm_reader.hpp"
 #include "loadcont.hpp"
 #include "defs.hpp"
-#include "defs_ai.hpp"
+#include "aipackage.hpp"
 
 namespace ESM
 {
@@ -62,11 +62,11 @@ struct Creature
 
     // Defined in loadcont.hpp
     InventoryList inventory;
-    SpellList spells;
+    SpellList mSpells;
 
-    bool hasAI;
-    AIDTstruct AI;
-    AIPackageList aiPack;
+    bool mHasAI;
+    AIData mAiData;
+    AIPackageList mAiPackage;
 
     std::string mId;
 

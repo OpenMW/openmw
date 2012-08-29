@@ -36,22 +36,22 @@ void NPC::load(ESMReader &esm, const std::string& id)
 
     if (esm.isNextSub("AIDT"))
     {
-        esm.getHExact(&AI, sizeof(AI));
-        hasAI = true;
+        esm.getHExact(&mAiData, sizeof(mAiData));
+        mHasAI= true;
     }
     else
-        hasAI = false;
+        mHasAI = false;
 
     while (esm.isNextSub("DODT") || esm.isNextSub("DNAM")) {
         if (esm.retSubName() == 0x54444f44) { // DODT struct
             Dest dodt;
-            esm.getHExact(&dodt.pos, 24);
-            dest.push_back(dodt);
+            esm.getHExact(&dodt.mPos, 24);
+            mTransport.push_back(dodt);
         } else if (esm.retSubName() == 0x4d414e44) { // DNAM struct
-            dest.back().cellName = esm.getHString();
+            mTransport.back().mCellName = esm.getHString();
         } 
     }
-    aiPack.load(esm);
+    mAiPackage.load(esm);
     esm.skipRecord();
 }
 

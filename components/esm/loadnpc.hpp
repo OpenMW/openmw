@@ -4,7 +4,7 @@
 #include "esm_reader.hpp"
 #include "loadcont.hpp"
 #include "defs.hpp"
-#include "defs_ai.hpp"
+#include "aipackage.hpp"
 
 namespace ESM {
 
@@ -19,16 +19,16 @@ struct NPC
     {
       // This merchant buys:
       Weapon        = 0x00001,
-      Armor     = 0x00002,
+      Armor         = 0x00002,
       Clothing      = 0x00004,
-      Books     = 0x00008,
+      Books         = 0x00008,
       Ingredients   = 0x00010,
-      Picks     = 0x00020,
+      Picks         = 0x00020,
       Probes        = 0x00040,
       Lights        = 0x00080,
       Apparatus     = 0x00100,
       RepairItem    = 0x00200,
-      Misc      = 0x00400,
+      Misc          = 0x00400,
 
       // Other services
       Spells        = 0x00800,
@@ -47,7 +47,7 @@ struct NPC
       Respawn   = 0x0004,
       Autocalc  = 0x0008,
       Skeleton  = 0x0400, // Skeleton blood effect (white)
-      Metal = 0x0800  // Metal blood effect (golden?)
+      Metal     = 0x0800  // Metal blood effect (golden?)
     };
 
 #pragma pack(push)
@@ -76,8 +76,8 @@ struct NPC
 
     struct Dest
     {
-        Position pos;
-        std::string cellName;
+        Position    mPos;
+        std::string mCellName;
     };
 
   NPDTstruct52 npdt52;
@@ -88,19 +88,21 @@ struct NPC
   InventoryList inventory;
   SpellList spells;
 
-  AIDTstruct AI;
-  bool hasAI;
+    AIData mAiData;
+    bool mHasAI;
 
-  std::vector<Dest> dest;
-  AIPackageList     aiPack;
+    std::vector<Dest> mTransport;
+    AIPackageList     mAiPackage;
 
-  std::string name, model, race, cls, faction, script,
-    hair, head; // body parts
+    std::string name, model, race, cls, faction, script;
+
+    // body parts
+    std::string hair, head;
 
     std::string mId;
 
-  // Implementation moved to load_impl.cpp
-  void load(ESMReader &esm, const std::string& id);
+    // Implementation moved to load_impl.cpp
+    void load(ESMReader &esm, const std::string& id);
 };
 }
 #endif

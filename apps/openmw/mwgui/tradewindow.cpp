@@ -291,14 +291,14 @@ namespace MWGui
         if (mPtr.getTypeName() == typeid(ESM::NPC).name())
         {
             MWWorld::LiveCellRef<ESM::NPC>* ref = mPtr.get<ESM::NPC>();
-            if (ref->base->hasAI)
-                services = ref->base->AI.services;
+            if (ref->base->mHasAI)
+                services = ref->base->mAiData.mServices;
         }
         else if (mPtr.getTypeName() == typeid(ESM::Creature).name())
         {
             MWWorld::LiveCellRef<ESM::Creature>* ref = mPtr.get<ESM::Creature>();
-            if (ref->base->hasAI)
-                services = ref->base->AI.services;
+            if (ref->base->mHasAI)
+                services = ref->base->mAiData.mServices;
         }
 
         /// \todo what about potions, there doesn't seem to be a flag for them??

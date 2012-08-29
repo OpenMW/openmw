@@ -769,14 +769,14 @@ namespace MWDialogue
         if (mActor.getTypeName() == typeid(ESM::NPC).name())
         {
             MWWorld::LiveCellRef<ESM::NPC>* ref = mActor.get<ESM::NPC>();
-            if (ref->base->hasAI)
-                services = ref->base->AI.services;
+            if (ref->base->mHasAI)
+                services = ref->base->mAiData.mServices;
         }
         else if (mActor.getTypeName() == typeid(ESM::Creature).name())
         {
             MWWorld::LiveCellRef<ESM::Creature>* ref = mActor.get<ESM::Creature>();
-            if (ref->base->hasAI)
-                services = ref->base->AI.services;
+            if (ref->base->mHasAI)
+                services = ref->base->mAiData.mServices;
         }
 
         if (services & ESM::NPC::Weapon

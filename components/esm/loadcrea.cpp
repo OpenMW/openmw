@@ -18,17 +18,17 @@ void Creature::load(ESMReader &esm, const std::string& id)
     esm.getHNOT(scale, "XSCL");
 
     inventory.load(esm);
-    spells.load(esm);
+    mSpells.load(esm);
 
     if (esm.isNextSub("AIDT"))
     {
-        esm.getHExact(&AI, sizeof(AI));
-        hasAI = true;
+        esm.getHExact(&mAiData, sizeof(mAiData));
+        mHasAI = true;
     }
     else
-        hasAI = false;
+        mHasAI = false;
 
-    aiPack.load(esm);
+    mAiPackage.load(esm);
     esm.skipRecord();
 }
 
