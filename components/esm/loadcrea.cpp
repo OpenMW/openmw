@@ -18,29 +18,18 @@ void Creature::load(ESMReader &esm, const std::string& id)
     esm.getHNOT(scale, "XSCL");
 
     inventory.load(esm);
+    mSpells.load(esm);
 
     if (esm.isNextSub("AIDT"))
     {
-        esm.getHExact(&AI, sizeof(AI));
-        hasAI = true;
+        esm.getHExact(&mAiData, sizeof(mAiData));
+        mHasAI = true;
     }
     else
-        hasAI = false;
+        mHasAI = false;
 
-    // More subrecords:
-    // AI_W - wander (14 bytes, i don't understand it)
-    //    short distance
-    //    byte duration
-    //    byte timeOfDay
-    //    byte idle[10]
-    //
-    // Rest is optional:
-    // AI_T - travel?
-    // AI_F - follow?
-    // AI_E - escort?
-    // AI_A - activate?
+    mAiPackage.load(esm);
     esm.skipRecord();
-
 }
 
 }
