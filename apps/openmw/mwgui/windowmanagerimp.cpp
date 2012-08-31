@@ -86,6 +86,7 @@ WindowManager::WindowManager(
   , mBatchCount(0)
   , mCrosshairEnabled(Settings::Manager::getBool ("crosshair", "HUD"))
   , mSubtitlesEnabled(Settings::Manager::getBool ("subtitles", "GUI"))
+  , mHudEnabled(true)
 {
 
     // Set up the GUI system
@@ -874,4 +875,10 @@ void WindowManager::activateQuickKey (int index)
 bool WindowManager::getSubtitlesEnabled ()
 {
     return mSubtitlesEnabled;
+}
+
+void WindowManager::toggleHud ()
+{
+    mHudEnabled = !mHudEnabled;
+    mHud->setVisible (mHudEnabled);
 }

@@ -226,6 +226,9 @@ namespace MWInput
             case A_QuickKeysMenu:
                 showQuickKeysMenu();
                 break;
+            case A_ToggleHUD:
+                mWindows.toggleHud();
+                break;
          }
         }
     }
@@ -676,6 +679,7 @@ namespace MWInput
         defaultKeyBindings[A_QuickKey9] = OIS::KC_9;
         defaultKeyBindings[A_QuickKey10] = OIS::KC_0;
         defaultKeyBindings[A_Screenshot] = OIS::KC_SYSRQ;
+        defaultKeyBindings[A_ToggleHUD] = OIS::KC_F12;
 
         std::map<int, int> defaultMouseButtonBindings;
         defaultMouseButtonBindings[A_Inventory] = OIS::MB_Right;

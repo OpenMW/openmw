@@ -12,6 +12,7 @@
             <Code range="192 382"/> <!-- Central and Eastern European languages glyphs -->
             <Code range="1025 1105"/>
             <Code range="8470"/>
+            <Code range="8211"/>   <!-- Minus -->
             <Code range="8216 8217"/> <!-- Single quotes -->
             <Code range="8220 8221"/> <!-- Right and Left Double Quotation mark -->
             <Code hide="128"/>

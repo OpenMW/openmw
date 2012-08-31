@@ -234,6 +234,8 @@ namespace MWInput
 
             A_QuickKeysMenu,
 
+            A_ToggleHUD,
+
             A_Last            // Marker for the last item
         };
     };
