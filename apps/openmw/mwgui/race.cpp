@@ -8,14 +8,17 @@
 
 #include <components/esm_store/store.hpp>
 
-#include "window_manager.hpp"
+#include "../mwbase/environment.hpp"
+#include "../mwbase/world.hpp"
+#include "../mwbase/windowmanager.hpp"
+
 #include "widgets.hpp"
 #include "tooltips.hpp"
 
 using namespace MWGui;
 using namespace Widgets;
 
-RaceDialog::RaceDialog(WindowManager& parWindowManager)
+RaceDialog::RaceDialog(MWBase::WindowManager& parWindowManager)
   : WindowBase("openmw_chargen_race.layout", parWindowManager)
   , mGenderIndex(0)
   , mFaceIndex(0)
@@ -110,7 +113,6 @@ void RaceDialog::open()
     updateRaces();
     updateSkills();
     updateSpellPowers();
-    setVisible(true);
 }
 
 
@@ -209,7 +211,7 @@ void RaceDialog::updateRaces()
 {
     mRaceList->removeAllItems();
 
-    const ESMS::ESMStore &store = mWindowManager.getStore();
+    const ESMS::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
 
     ESMS::RecListT<ESM::Race>::MapType::const_iterator it = store.races.list.begin();
     ESMS::RecListT<ESM::Race>::MapType::const_iterator end = store.races.list.end();
@@ -243,7 +245,7 @@ void RaceDialog::updateSkills()
     const int lineHeight = 18;
     MyGUI::IntCoord coord1(0, 0, mSkillList->getWidth(), 18);
 
-    const ESMS::ESMStore &store = mWindowManager.getStore();
+    const ESMS::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
     const ESM::Race *race = store.races.find(mCurrentRaceId);
     int count = sizeof(race->data.bonus)/sizeof(race->data.bonus[0]); // TODO: Find a portable macro for this ARRAYSIZE?
     for (int i = 0; i < count; ++i)
@@ -281,7 +283,7 @@ void RaceDialog::updateSpellPowers()
     const int lineHeight = 18;
     MyGUI::IntCoord coord(0, 0, mSpellPowerList->getWidth(), 18);
 
-    const ESMS::ESMStore &store = mWindowManager.getStore();
+    const ESMS::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
     const ESM::Race *race = store.races.find(mCurrentRaceId);
 
     std::vector<std::string>::const_iterator it = race->powers.list.begin();

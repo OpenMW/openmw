@@ -5,6 +5,7 @@ set(DDIR ${OpenMW_BINARY_DIR}/resources/mygui)
 
 set(MYGUI_FILES
     atlas1.cfg
+    mainmenu.cfg
     bigbars.png
     black.png
     core.skin
@@ -64,8 +65,13 @@ set(MYGUI_FILES
     openmw_tooltips.layout
     openmw_trade_window.layout
     openmw_windows.skin.xml
+    openmw_quickkeys_menu.layout
+    openmw_quickkeys_menu_assign.layout
+    openmw_itemselection_dialog.layout
+    openmw_magicselection_dialog.layout
     smallbars.png
     VeraMono.ttf
+    markers.png
 )
 
 

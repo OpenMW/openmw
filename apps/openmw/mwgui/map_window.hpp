@@ -18,6 +18,15 @@ namespace MWGui
 
         void toggleFogOfWar();
 
+        struct MarkerPosition
+        {
+            bool interior;
+            int cellX;
+            int cellY;
+            float nX;
+            float nY;
+        };
+
     protected:
         int mCurX, mCurY;
         bool mInterior;
@@ -32,6 +41,9 @@ namespace MWGui
 
         void applyFogOfWar();
 
+        void onMarkerFocused(MyGUI::Widget* w1, MyGUI::Widget* w2);
+        void onMarkerUnfocused(MyGUI::Widget* w1, MyGUI::Widget* w2);
+
         OEngine::GUI::Layout* mLayout;
 
         bool mMapDragAndDrop;
@@ -45,11 +57,11 @@ namespace MWGui
     class MapWindow : public MWGui::WindowPinnableBase, public LocalMapBase
     {
     public:
-        MapWindow(WindowManager& parWindowManager);
+        MapWindow(MWBase::WindowManager& parWindowManager);
         virtual ~MapWindow(){}
 
         void setCellName(const std::string& cellName);
-  
+
     private:
         void onDragStart(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id);
         void onMouseDrag(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id);

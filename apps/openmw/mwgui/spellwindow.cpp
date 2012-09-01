@@ -8,17 +8,17 @@
 
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
+#include "../mwbase/soundmanager.hpp"
+#include "../mwbase/windowmanager.hpp"
 
 #include "../mwworld/player.hpp"
 #include "../mwworld/inventorystore.hpp"
+#include "../mwworld/actionequip.hpp"
 
 #include "../mwmechanics/spells.hpp"
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/spellsuccess.hpp"
 
-#include "../mwsound/soundmanager.hpp"
-
-#include "window_manager.hpp"
 #include "inventorywindow.hpp"
 #include "confirmationdialog.hpp"
 
@@ -43,7 +43,7 @@ namespace
 
 namespace MWGui
 {
-    SpellWindow::SpellWindow(WindowManager& parWindowManager)
+    SpellWindow::SpellWindow(MWBase::WindowManager& parWindowManager)
         : WindowPinnableBase("openmw_spell_window.layout", parWindowManager)
         , mHeight(0)
         , mWidth(0)
@@ -351,34 +351,10 @@ namespace MWGui
         if (_sender->getUserString("Equipped") == "false"
             && !MWWorld::Class::get(item).getEquipmentSlots(item).first.empty())
         {
-            // sound
-            MWBase::Environment::get().getSoundManager()->playSound(MWWorld::Class::get(item).getUpSoundId(item), 1.0, 1.0);
-
             // Note: can't use Class::use here because enchanted scrolls for example would then open the scroll window instead of equipping
 
-            /// \todo the following code is pretty much copy&paste from ActionEquip, put it in a function?
-            // slots that this item can be equipped in
-            std::pair<std::vector<int>, bool> slots = MWWorld::Class::get(item).getEquipmentSlots(item);
-
-            // equip the item in the first free slot
-            for (std::vector<int>::const_iterator slot=slots.first.begin();
-                slot!=slots.first.end(); ++slot)
-            {
-                // if all slots are occupied, replace the last slot
-                if (slot == --slots.first.end())
-                {
-                    store.equip(*slot, it);
-                    break;
-                }
-
-                if (store.getSlot(*slot) == store.end())
-                {
-                    // slot is not occupied
-                    store.equip(*slot, it);
-                    break;
-                }
-            }
-            /// \todo scripts?
+            MWWorld::ActionEquip action(item);
+            action.execute (MWBase::Environment::get().getWorld ()->getPlayer ().getPlayer ());
 
             // since we changed equipping status, update the inventory window
             mWindowManager.getInventoryWindow()->drawItems();

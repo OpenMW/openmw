@@ -2,8 +2,7 @@
 #include "actiontalk.hpp"
 
 #include "../mwbase/environment.hpp"
-#include "../mwgui/window_manager.hpp"
-#include "../mwdialogue/dialoguemanager.hpp"
+#include "../mwbase/dialoguemanager.hpp"
 
 namespace MWWorld
 {

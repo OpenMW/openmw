@@ -7,8 +7,8 @@
 
 namespace MWGui
 {
-    ConfirmationDialog::ConfirmationDialog(WindowManager& parWindowManager) :
-        WindowBase("openmw_confirmation_dialog.layout", parWindowManager)
+    ConfirmationDialog::ConfirmationDialog(MWBase::WindowManager& parWindowManager) :
+        WindowModal("openmw_confirmation_dialog.layout", parWindowManager)
     {
         getWidget(mMessage, "Message");
         getWidget(mOkButton, "OkButton");
@@ -32,9 +32,6 @@ namespace MWGui
 
         center();
 
-        // make other gui elements inaccessible while this dialog is open
-        MyGUI::InputManager::getInstance().addWidgetModal(mMainWidget);
-
         int okButtonWidth = mOkButton->getTextSize().width + 24;
         mOkButton->setCoord(mMainWidget->getWidth() - 30 - okButtonWidth,
                             mOkButton->getTop(),
@@ -52,19 +49,13 @@ namespace MWGui
     {
         eventCancelClicked();
 
-        close();
+        setVisible(false);
     }
 
     void ConfirmationDialog::onOkButtonClicked(MyGUI::Widget* _sender)
     {
         eventOkClicked();
 
-        close();
-    }
-
-    void ConfirmationDialog::close()
-    {
         setVisible(false);
-        MyGUI::InputManager::getInstance().removeWidgetModal(mMainWidget);
     }
 }

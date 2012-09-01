@@ -5,19 +5,17 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
+#include "../mwbase/windowmanager.hpp"
 
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/actiontake.hpp"
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/physicssystem.hpp"
 
-#include "../mwgui/window_manager.hpp"
 #include "../mwgui/tooltips.hpp"
 
 #include "../mwrender/objects.hpp"
 #include "../mwrender/renderinginterface.hpp"
-
-#include "../mwsound/soundmanager.hpp"
 
 namespace MWClass
 {
@@ -38,7 +36,7 @@ namespace MWClass
             physics.insertObjectPhysics(ptr, model);
         }
     }
-    
+
     std::string Repair::getModel(const MWWorld::Ptr &ptr) const
     {
         MWWorld::LiveCellRef<ESM::Repair> *ref =
@@ -63,10 +61,11 @@ namespace MWClass
     boost::shared_ptr<MWWorld::Action> Repair::activate (const MWWorld::Ptr& ptr,
         const MWWorld::Ptr& actor) const
     {
-        MWBase::Environment::get().getSoundManager()->playSound3D (ptr, getUpSoundId(ptr), 1.0, 1.0, MWSound::Play_NoTrack);
+        boost::shared_ptr<MWWorld::Action> action(new MWWorld::ActionTake (ptr));
 
-        return boost::shared_ptr<MWWorld::Action> (
-            new MWWorld::ActionTake (ptr));
+        action->setSound(getUpSoundId(ptr));
+
+        return action;
     }
 
     std::string Repair::getScript (const MWWorld::Ptr& ptr) const

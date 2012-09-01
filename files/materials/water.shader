@@ -118,7 +118,6 @@
         #define WAVE_CHOPPYNESS 0.15                // wave choppyness
         #define WAVE_SCALE 75                      // overall wave scale
 
-        #define ABBERATION 0.001                    // chromatic abberation amount
         #define BUMP 1.5                            // overall water surface bumpiness
         #define REFL_BUMP 0.08                      // reflection distortion amount
         #define REFR_BUMP 0.06                      // refraction distortion amount
@@ -256,11 +255,15 @@
 		
 		// refraction
         float3 R = reflect(vVec, normal);
+        
+        // check the depth at the refracted coords, and don't do any normal distortion for the refraction if the object to refract
+        // is actually above the water (objectDepth < waterDepth)
+        // this solves silhouettes around objects above the water
+        float refractDepth = shSample(depthMap, screenCoords-(shoreFade * normal.xz*REFR_BUMP)).x * far - depthPassthrough;
+        float doRefraction = (refractDepth < 0) ? 0.f : 1.f;
 		
 		float3 refraction = float3(0,0,0);
-        refraction.r = shSample(refractionMap, (screenCoords-(shoreFade * normal.xz*REFR_BUMP))*1.0).r;
-        refraction.g = shSample(refractionMap, (screenCoords-(shoreFade * normal.xz*REFR_BUMP))*1.0-(R.xy*ABBERATION)).g;
-        refraction.b = shSample(refractionMap, (screenCoords-(shoreFade * normal.xz*REFR_BUMP))*1.0-(R.xy*ABBERATION*2.0)).b;
+        refraction.rgb = shSample(refractionMap, (screenCoords-(shoreFade * normal.xz*REFR_BUMP * doRefraction))*1.0).rgb;
         
          // brighten up the refraction underwater
         refraction = (cameraPos.y < 0) ? shSaturate(refraction * 1.5) : refraction;

@@ -29,7 +29,7 @@ namespace MWGui
     class DialogueWindow: public WindowBase, public ReferenceInterface
     {
     public:
-        DialogueWindow(WindowManager& parWindowManager);
+        DialogueWindow(MWBase::WindowManager& parWindowManager);
 
         // Events
         typedef MyGUI::delegates::CMultiDelegate0 EventHandle_Void;

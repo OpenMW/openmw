@@ -8,20 +8,21 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
+#include "../mwbase/mechanicsmanager.hpp"
+#include "../mwbase/windowmanager.hpp"
 
 #include "../mwworld/player.hpp"
 #include "../mwworld/class.hpp"
 
-#include "../mwmechanics/mechanicsmanager.hpp"
+#include "../mwmechanics/npcstats.hpp"
 
-#include "window_manager.hpp"
 #include "tooltips.hpp"
 
 
 using namespace MWGui;
 const int StatsWindow::sLineHeight = 18;
 
-StatsWindow::StatsWindow (WindowManager& parWindowManager)
+StatsWindow::StatsWindow (MWBase::WindowManager& parWindowManager)
   : WindowPinnableBase("openmw_stats_window.layout", parWindowManager)
   , mSkillAreaWidget(NULL)
   , mSkillClientWidget(NULL)
@@ -56,7 +57,7 @@ StatsWindow::StatsWindow (WindowManager& parWindowManager)
         { 0, 0 }
     };
 
-    const ESMS::ESMStore &store = mWindowManager.getStore();
+    const ESMS::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
     for (int i=0; names[i][0]; ++i)
     {
         setText (names[i][0], store.gameSettings.find (names[i][1])->str);
@@ -382,12 +383,12 @@ void StatsWindow::addSkills(const SkillList &skills, const std::string &titleId,
         float modified = stat.getModified();
         int progressPercent = (modified - float(static_cast<int>(modified))) * 100;
 
-        const ESM::Skill* skill = mWindowManager.getStore().skills.search(skillId);
+        const ESM::Skill* skill = MWBase::Environment::get().getWorld()->getStore().skills.search(skillId);
         assert(skill);
 
         std::string icon = "icons\\k\\" + ESM::Skill::sIconNames[skillId];
 
-        const ESM::Attribute* attr = mWindowManager.getStore().attributes.search(skill->data.attribute);
+        const ESM::Attribute* attr = MWBase::Environment::get().getWorld()->getStore().attributes.search(skill->data.attribute);
         assert(attr);
 
         std::string state = "normal";
@@ -442,7 +443,7 @@ void StatsWindow::updateSkillArea()
     if (!mMiscSkills.empty())
         addSkills(mMiscSkills, "sSkillClassMisc", "Misc Skills", coord1, coord2);
 
-    const ESMS::ESMStore &store = mWindowManager.getStore();
+    const ESMS::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
 
     // race tooltip
     const ESM::Race* playerRace =  store.races.find (MWBase::Environment::get().getWorld()->getPlayer().getRace());
@@ -484,8 +485,8 @@ void StatsWindow::updateSkillArea()
                 text += std::string("\n\n#DDC79E#{sNextRank} ") + faction->ranks[it->second+1];
 
                 ESM::RankData rankData = faction->data.rankData[it->second+1];
-                const ESM::Attribute* attr1 = mWindowManager.getStore().attributes.search(faction->data.attribute1);
-                const ESM::Attribute* attr2 = mWindowManager.getStore().attributes.search(faction->data.attribute2);
+                const ESM::Attribute* attr1 = MWBase::Environment::get().getWorld()->getStore().attributes.search(faction->data.attribute1);
+                const ESM::Attribute* attr2 = MWBase::Environment::get().getWorld()->getStore().attributes.search(faction->data.attribute2);
                 assert(attr1 && attr2);
 
                 text += "\n#BF9959#{" + attr1->name + "}: " + boost::lexical_cast<std::string>(rankData.attribute1)
@@ -495,7 +496,7 @@ void StatsWindow::updateSkillArea()
                 text += "\n#BF9959";
                 for (int i=0; i<6; ++i)
                 {
-                    const ESM::Skill* skill = mWindowManager.getStore().skills.search(faction->data.skillID[i]);
+                    const ESM::Skill* skill = MWBase::Environment::get().getWorld()->getStore().skills.search(faction->data.skillID[i]);
                     assert(skill);
                     text += "#{"+ESM::Skill::sSkillNameIds[faction->data.skillID[i]]+"}";
                     if (i<5)

@@ -76,18 +76,21 @@
         </Widget>
 
         <!-- Map box -->
-        <Widget type="Button" skin="" position="223 123 65 65" name="MiniMapBox" align="Right Bottom">
+        <Widget type="Widget" skin="" position="223 123 65 65" name="MiniMapBox" align="Right Bottom">
             <Widget type="Widget" skin="HUD_Box" position="0 0 65 65" align="Center">
-                <Property key="NeedMouse" value="false"/>
 
                 <Widget type="ScrollView" skin="MW_MapView" position="2 2 61 61" align="Left Bottom" name="MiniMap">
-                    <Property key="NeedMouse" value="false"/>
                     <Property key="CanvasSize" value="1536 1536"/>
 
                     <Widget type="ImageBox" skin="RotatingSkin" position="0 0 32 32" align="ALIGN_BOTTOM ALIGN_LEFT" name="Compass">
                         <Property key="ImageTexture" value="textures\compass.dds"/>
                     </Widget>
+
+                    <Widget type="Button" skin="" position="0 0 1536 1536" name="MiniMapButton" align="Right Bottom">
+                    </Widget>
+
                 </Widget>
+
             </Widget>
         </Widget>
 

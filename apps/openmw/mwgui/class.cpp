@@ -7,7 +7,10 @@
 
 #include <components/esm_store/store.hpp>
 
-#include "window_manager.hpp"
+#include "../mwbase/environment.hpp"
+#include "../mwbase/world.hpp"
+#include "../mwbase/windowmanager.hpp"
+
 #include "tooltips.hpp"
 
 #undef min
@@ -17,7 +20,7 @@ using namespace MWGui;
 
 /* GenerateClassResultDialog */
 
-GenerateClassResultDialog::GenerateClassResultDialog(WindowManager& parWindowManager)
+GenerateClassResultDialog::GenerateClassResultDialog(MWBase::WindowManager& parWindowManager)
   : WindowBase("openmw_chargen_generate_class_result.layout", parWindowManager)
 {
     // Centre dialog
@@ -43,11 +46,6 @@ GenerateClassResultDialog::GenerateClassResultDialog(WindowManager& parWindowMan
     backButton->setCoord(315 - okButtonWidth - backButtonWidth - 6, 219, backButtonWidth, 23);
 }
 
-void GenerateClassResultDialog::open()
-{
-    setVisible(true);
-}
-
 std::string GenerateClassResultDialog::getClassId() const
 {
     return mClassName->getCaption();
@@ -57,8 +55,7 @@ void GenerateClassResultDialog::setClassId(const std::string &classId)
 {
     mCurrentClassId = classId;
     mClassImage->setImageTexture(std::string("textures\\levelup\\") + mCurrentClassId + ".dds");
-    const ESMS::ESMStore &store = mWindowManager.getStore();
-    mClassName->setCaption(store.classes.find(mCurrentClassId)->name);
+    mClassName->setCaption(MWBase::Environment::get().getWorld()->getStore().classes.find(mCurrentClassId)->name);
 }
 
 // widget controls
@@ -75,7 +72,7 @@ void GenerateClassResultDialog::onBackClicked(MyGUI::Widget* _sender)
 
 /* PickClassDialog */
 
-PickClassDialog::PickClassDialog(WindowManager& parWindowManager)
+PickClassDialog::PickClassDialog(MWBase::WindowManager& parWindowManager)
   : WindowBase("openmw_chargen_class.layout", parWindowManager)
 {
     // Centre dialog
@@ -141,7 +138,6 @@ void PickClassDialog::open()
 {
     updateClasses();
     updateStats();
-    setVisible(true);
 }
 
 
@@ -193,7 +189,7 @@ void PickClassDialog::updateClasses()
 {
     mClassList->removeAllItems();
 
-    const ESMS::ESMStore &store = mWindowManager.getStore();
+    const ESMS::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
 
     ESMS::RecListT<ESM::Class>::MapType::const_iterator it = store.classes.list.begin();
     ESMS::RecListT<ESM::Class>::MapType::const_iterator end = store.classes.list.end();
@@ -217,7 +213,7 @@ void PickClassDialog::updateStats()
 {
     if (mCurrentClassId.empty())
         return;
-    const ESMS::ESMStore &store = mWindowManager.getStore();
+    const ESMS::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
     const ESM::Class *klass = store.classes.search(mCurrentClassId);
     if (!klass)
         return;
@@ -281,7 +277,7 @@ void InfoBoxDialog::layoutVertically(MyGUI::WidgetPtr widget, int margin)
     widget->setSize(width, pos);
 }
 
-InfoBoxDialog::InfoBoxDialog(WindowManager& parWindowManager)
+InfoBoxDialog::InfoBoxDialog(MWBase::WindowManager& parWindowManager)
     : WindowBase("openmw_infobox.layout", parWindowManager)
     , mCurrentButton(-1)
 {
@@ -339,7 +335,6 @@ void InfoBoxDialog::open()
     layoutVertically(mMainWidget, 4 + 6);
 
     center();
-    setVisible(true);
 }
 
 int InfoBoxDialog::getChosenButton() const
@@ -365,7 +360,7 @@ void InfoBoxDialog::onButtonClicked(MyGUI::WidgetPtr _sender)
 
 /* ClassChoiceDialog */
 
-ClassChoiceDialog::ClassChoiceDialog(WindowManager& parWindowManager)
+ClassChoiceDialog::ClassChoiceDialog(MWBase::WindowManager& parWindowManager)
     : InfoBoxDialog(parWindowManager)
 {
     setText("");
@@ -379,7 +374,7 @@ ClassChoiceDialog::ClassChoiceDialog(WindowManager& parWindowManager)
 
 /* CreateClassDialog */
 
-CreateClassDialog::CreateClassDialog(WindowManager& parWindowManager)
+CreateClassDialog::CreateClassDialog(MWBase::WindowManager& parWindowManager)
   : WindowBase("openmw_chargen_create_class.layout", parWindowManager)
   , mSpecDialog(nullptr)
   , mAttribDialog(nullptr)
@@ -547,35 +542,21 @@ void CreateClassDialog::setNextButtonShow(bool shown)
     descriptionButton->setCoord(459 - okButtonWidth - backButtonWidth - descriptionButtonWidth - 12, 158, descriptionButtonWidth, 23);
 }
 
-void CreateClassDialog::open()
-{
-    setVisible(true);
-}
-
 // widget controls
 
 void CreateClassDialog::onDialogCancel()
 {
-    if (mSpecDialog)
-    {
-        mWindowManager.removeDialog(mSpecDialog);
-        mSpecDialog = 0;
-    }
-    if (mAttribDialog)
-    {
-        mWindowManager.removeDialog(mAttribDialog);
-        mAttribDialog = 0;
-    }
-    if (mSkillDialog)
-    {
-        mWindowManager.removeDialog(mSkillDialog);
-        mSkillDialog = 0;
-    }
-    if (mDescDialog)
-    {
-        mWindowManager.removeDialog(mDescDialog);
-        mDescDialog = 0;
-    }
+    mWindowManager.removeDialog(mSpecDialog);
+    mSpecDialog = 0;
+
+    mWindowManager.removeDialog(mAttribDialog);
+    mAttribDialog = 0;
+
+    mWindowManager.removeDialog(mSkillDialog);
+    mSkillDialog = 0;
+
+    mWindowManager.removeDialog(mDescDialog);
+    mDescDialog = 0;
 }
 
 void CreateClassDialog::onSpecializationClicked(MyGUI::WidgetPtr _sender)
@@ -701,8 +682,8 @@ void CreateClassDialog::onBackClicked(MyGUI::Widget* _sender)
 
 /* SelectSpecializationDialog */
 
-SelectSpecializationDialog::SelectSpecializationDialog(WindowManager& parWindowManager)
-  : WindowBase("openmw_chargen_select_specialization.layout", parWindowManager)
+SelectSpecializationDialog::SelectSpecializationDialog(MWBase::WindowManager& parWindowManager)
+  : WindowModal("openmw_chargen_select_specialization.layout", parWindowManager)
 {
     // Centre dialog
     center();
@@ -734,13 +715,10 @@ SelectSpecializationDialog::SelectSpecializationDialog(WindowManager& parWindowM
     cancelButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SelectSpecializationDialog::onCancelClicked);
     int buttonWidth = cancelButton->getTextSize().width + 24;
     cancelButton->setCoord(216 - buttonWidth, 90, buttonWidth, 21);
-
-    MyGUI::InputManager::getInstance().addWidgetModal(mMainWidget);
 }
 
 SelectSpecializationDialog::~SelectSpecializationDialog()
 {
-    MyGUI::InputManager::getInstance().removeWidgetModal(mMainWidget);
 }
 
 // widget controls
@@ -766,8 +744,8 @@ void SelectSpecializationDialog::onCancelClicked(MyGUI::Widget* _sender)
 
 /* SelectAttributeDialog */
 
-SelectAttributeDialog::SelectAttributeDialog(WindowManager& parWindowManager)
-  : WindowBase("openmw_chargen_select_attribute.layout", parWindowManager)
+SelectAttributeDialog::SelectAttributeDialog(MWBase::WindowManager& parWindowManager)
+  : WindowModal("openmw_chargen_select_attribute.layout", parWindowManager)
 {
     // Centre dialog
     center();
@@ -792,13 +770,10 @@ SelectAttributeDialog::SelectAttributeDialog(WindowManager& parWindowManager)
     cancelButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SelectAttributeDialog::onCancelClicked);
     int buttonWidth = cancelButton->getTextSize().width + 24;
     cancelButton->setCoord(186 - buttonWidth, 180, buttonWidth, 21);
-
-    MyGUI::InputManager::getInstance().addWidgetModal(mMainWidget);
 }
 
 SelectAttributeDialog::~SelectAttributeDialog()
 {
-    MyGUI::InputManager::getInstance().removeWidgetModal(mMainWidget);
 }
 
 // widget controls
@@ -818,8 +793,8 @@ void SelectAttributeDialog::onCancelClicked(MyGUI::Widget* _sender)
 
 /* SelectSkillDialog */
 
-SelectSkillDialog::SelectSkillDialog(WindowManager& parWindowManager)
-  : WindowBase("openmw_chargen_select_skill.layout", parWindowManager)
+SelectSkillDialog::SelectSkillDialog(MWBase::WindowManager& parWindowManager)
+  : WindowModal("openmw_chargen_select_skill.layout", parWindowManager)
 {
     // Centre dialog
     center();
@@ -891,12 +866,10 @@ SelectSkillDialog::SelectSkillDialog(WindowManager& parWindowManager)
     int buttonWidth = cancelButton->getTextSize().width + 24;
     cancelButton->setCoord(447 - buttonWidth, 218, buttonWidth, 21);
 
-    MyGUI::InputManager::getInstance().addWidgetModal(mMainWidget);
 }
 
 SelectSkillDialog::~SelectSkillDialog()
 {
-    MyGUI::InputManager::getInstance().removeWidgetModal(mMainWidget);
 }
 
 // widget controls
@@ -914,8 +887,8 @@ void SelectSkillDialog::onCancelClicked(MyGUI::Widget* _sender)
 
 /* DescriptionDialog */
 
-DescriptionDialog::DescriptionDialog(WindowManager& parWindowManager)
-  : WindowBase("openmw_chargen_class_description.layout", parWindowManager)
+DescriptionDialog::DescriptionDialog(MWBase::WindowManager& parWindowManager)
+  : WindowModal("openmw_chargen_class_description.layout", parWindowManager)
 {
     // Centre dialog
     center();
@@ -931,13 +904,10 @@ DescriptionDialog::DescriptionDialog(WindowManager& parWindowManager)
 
     // Make sure the edit box has focus
     MyGUI::InputManager::getInstance().setKeyFocusWidget(mTextEdit);
-
-    MyGUI::InputManager::getInstance().addWidgetModal(mMainWidget);
 }
 
 DescriptionDialog::~DescriptionDialog()
 {
-    MyGUI::InputManager::getInstance().removeWidgetModal(mMainWidget);
 }
 
 // widget controls

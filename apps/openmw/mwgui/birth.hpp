@@ -10,14 +10,13 @@
 
 namespace MWGui
 {
+    /// \todo remove
     using namespace MyGUI;
-
-    class WindowManager;
 
     class BirthDialog : public WindowBase
     {
     public:
-        BirthDialog(WindowManager& parWindowManager);
+        BirthDialog(MWBase::WindowManager& parWindowManager);
 
         enum Gender
         {
@@ -29,7 +28,7 @@ namespace MWGui
         void setBirthId(const std::string &raceId);
 
         void setNextButtonShow(bool shown);
-        void open();
+        virtual void open();
 
         // Events
         typedef delegates::CMultiDelegate0 EventHandle_Void;

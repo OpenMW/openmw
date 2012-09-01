@@ -46,6 +46,7 @@ namespace MWWorld
 
 namespace MWBase
 {
+    /// \brief Interface for the World (implemented in MWWorld)
     class World
     {
             World (const World&);
@@ -53,14 +54,6 @@ namespace MWBase
 
             World& operator= (const World&);
             ///< not implemented
-
-        protected:
-
-            virtual void
-            placeObject(
-                const MWWorld::Ptr &ptr,
-                MWWorld::CellStore &cell,
-                const ESM::Position &pos) = 0;
 
         public:
 
@@ -70,6 +63,12 @@ namespace MWBase
                 Render_Wireframe,
                 Render_Pathgrid,
                 Render_Compositors
+            };
+
+            struct DoorMarker
+            {
+                std::string name;
+                float x, y; // world position
             };
 
             World() {}
@@ -114,6 +113,15 @@ namespace MWBase
 
             virtual Ogre::Vector2 getNorthVector (MWWorld::CellStore* cell) = 0;
             ///< get north vector (OGRE coordinates) for given interior cell
+
+            virtual std::vector<DoorMarker> getDoorMarkers (MWWorld::CellStore* cell) = 0;
+            ///< get a list of teleport door markers for a given cell, to be displayed on the local map
+
+            virtual void getInteriorMapPosition (Ogre::Vector2 position, float& nX, float& nY, int &x, int& y) = 0;
+            ///< see MWRender::LocalMap::getInteriorMapPosition
+
+            virtual bool isPositionExplored (float nX, float nY, int x, int y, bool interior) = 0;
+            ///< see MWRender::LocalMap::isPositionExplored
 
             virtual MWWorld::Globals::Data& getGlobalVariable (const std::string& name) = 0;
 
@@ -184,9 +192,12 @@ namespace MWBase
 
             virtual void moveObject (const MWWorld::Ptr& ptr, float x, float y, float z) = 0;
 
+            virtual void
+            moveObject(const MWWorld::Ptr &ptr, MWWorld::CellStore &newCell, float x, float y, float z) = 0;
+
             virtual void scaleObject (const MWWorld::Ptr& ptr, float scale) = 0;
 
-            virtual void rotateObject(const MWWorld::Ptr& ptr,float x,float y,float z) = 0;
+            virtual void rotateObject(const MWWorld::Ptr& ptr,float x,float y,float z, bool adjust = false) = 0;
 
             virtual void indexToPosition (int cellX, int cellY, float &x, float &y, bool centre = false)
                 const = 0;
@@ -252,6 +263,14 @@ namespace MWBase
 
             virtual bool isSwimming(const MWWorld::Ptr &object) = 0;
             virtual bool isUnderwater(const ESM::Cell &cell, const Ogre::Vector3 &pos) = 0;
+
+            virtual void togglePOV() = 0;
+            virtual void togglePreviewMode(bool enable) = 0;
+            virtual bool toggleVanityMode(bool enable, bool force) = 0;
+            virtual void allowVanityMode(bool allow) = 0;
+            virtual void togglePlayerLooking(bool enable) = 0;
+
+            virtual void renderPlayer() = 0;
     };
 }
 

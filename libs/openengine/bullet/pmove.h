@@ -55,7 +55,7 @@ static const Ogre::Vector3 halfExtents(14.64f * 2, 14.24f * 2, 33.25f * 2);
 #define	CONTENTS_FOG			64
 static const float	pm_accelerate = 10.0f;
 static const float	pm_stopspeed = 100.0f;
-static const float	pm_friction = 6.0f;
+static const float	pm_friction = 12.0f;
 static const float  pm_flightfriction = 3.0f;
 static const float	pm_waterfriction = 1.0f;
 static const float	pm_airaccelerate = 1.0f;

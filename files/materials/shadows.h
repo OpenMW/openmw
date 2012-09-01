@@ -1,5 +1,5 @@
 
-#define FIXED_BIAS 0.005
+#define FIXED_BIAS 0.0003
 
 float depthShadowPCF (shTexture2D shadowMap, float4 shadowMapPos, float2 offset)
 {

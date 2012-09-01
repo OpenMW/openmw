@@ -5,6 +5,7 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
+#include "../mwbase/windowmanager.hpp"
 
 #include "../mwworld/player.hpp"
 #include "../mwworld/ptr.hpp"
@@ -13,13 +14,10 @@
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/physicssystem.hpp"
 
-#include "../mwgui/window_manager.hpp"
 #include "../mwgui/tooltips.hpp"
 
 #include "../mwrender/objects.hpp"
 #include "../mwrender/renderinginterface.hpp"
-
-#include "../mwsound/soundmanager.hpp"
 
 namespace MWClass
 {
@@ -81,17 +79,25 @@ namespace MWClass
             // TODO check for key
             // TODO report failure to player (message, sound?). Look up behaviour of original MW.
             std::cout << "Locked!" << std::endl;
-            MWBase::Environment::get().getSoundManager()->playSound3D (ptr, lockedSound, 1.0, 1.0);
-            return boost::shared_ptr<MWWorld::Action> (new MWWorld::NullAction);
+
+            boost::shared_ptr<MWWorld::Action> action(new MWWorld::NullAction);
+
+            action->setSound(lockedSound);
+
+            return action;
         }
 
         if(!ptr.getCellRef().trap.empty())
         {
             // Trap activation
             std::cout << "Activated trap: " << ptr.getCellRef().trap << std::endl;
-            MWBase::Environment::get().getSoundManager()->playSound3D(ptr, trapActivationSound, 1.0, 1.0);
+
+            boost::shared_ptr<MWWorld::Action> action(new MWWorld::NullAction);
+
+            action->setSound(trapActivationSound);
             ptr.getCellRef().trap = "";
-            return boost::shared_ptr<MWWorld::Action> (new MWWorld::NullAction);
+
+            return action;
         }
 
         if (ref->ref.teleport)
@@ -100,11 +106,11 @@ namespace MWClass
             /// \todo remove this if clause once ActionTeleport can also support other actors
             if (MWBase::Environment::get().getWorld()->getPlayer().getPlayer()==actor)
             {
-                // the player is using the door
-                // The reason this is not 3D is that it would get interrupted when you teleport
-                MWBase::Environment::get().getSoundManager()->playSound(openSound, 1.0, 1.0);
-                return boost::shared_ptr<MWWorld::Action> (
-                    new MWWorld::ActionTeleport (ref->ref.destCell, ref->ref.doorDest));
+            	boost::shared_ptr<MWWorld::Action> action(new MWWorld::ActionTeleport (ref->ref.destCell, ref->ref.doorDest));
+
+            	action->setSound(openSound);
+
+                return action;
             }
             else
             {
@@ -118,8 +124,11 @@ namespace MWClass
             // TODO return action for rotating the door
 
             // This is a little pointless, but helps with testing
-            MWBase::Environment::get().getSoundManager()->playSound3D (ptr, openSound, 1.0, 1.0);
-            return boost::shared_ptr<MWWorld::Action> (new MWWorld::NullAction);
+            boost::shared_ptr<MWWorld::Action> action(new MWWorld::NullAction);
+
+            action->setSound(openSound);
+
+            return action;
         }
     }
 

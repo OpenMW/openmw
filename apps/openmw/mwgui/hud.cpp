@@ -8,16 +8,15 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
+#include "../mwbase/soundmanager.hpp"
+#include "../mwbase/windowmanager.hpp"
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/player.hpp"
 
-#include "../mwsound/soundmanager.hpp"
-
 #include "../mwgui/widgets.hpp"
 
 #include "inventorywindow.hpp"
-#include "window_manager.hpp"
 #include "container.hpp"
 #include "console.hpp"
 
@@ -25,9 +24,9 @@ using namespace MWGui;
 
 HUD::HUD(int width, int height, int fpsLevel, DragAndDrop* dragAndDrop)
     : Layout("openmw_hud.layout")
-    , health(NULL)
-    , magicka(NULL)
-    , stamina(NULL)
+    , mHealth(NULL)
+    , mMagicka(NULL)
+    , mStamina(NULL)
     , mWeapImage(NULL)
     , mSpellImage(NULL)
     , mWeapStatus(NULL)
@@ -37,10 +36,10 @@ HUD::HUD(int width, int height, int fpsLevel, DragAndDrop* dragAndDrop)
     , mMinimap(NULL)
     , mCompass(NULL)
     , mCrosshair(NULL)
-    , fpsbox(NULL)
-    , fpscounter(NULL)
-    , trianglecounter(NULL)
-    , batchcounter(NULL)
+    , mFpsBox(NULL)
+    , mFpsCounter(NULL)
+    , mTriangleCounter(NULL)
+    , mBatchCounter(NULL)
     , mHealthManaStaminaBaseLeft(0)
     , mWeapBoxBaseLeft(0)
     , mSpellBoxBaseLeft(0)
@@ -58,10 +57,9 @@ HUD::HUD(int width, int height, int fpsLevel, DragAndDrop* dragAndDrop)
 
     // Energy bars
     getWidget(mHealthFrame, "HealthFrame");
-    getWidget(health, "Health");
-    getWidget(magicka, "Magicka");
-    getWidget(stamina, "Stamina");
-
+    getWidget(mHealth, "Health");
+    getWidget(mMagicka, "Magicka");
+    getWidget(mStamina, "Stamina");
     mHealthManaStaminaBaseLeft = mHealthFrame->getLeft();
 
     MyGUI::Widget *healthFrame, *magickaFrame, *fatigueFrame;
@@ -94,9 +92,10 @@ HUD::HUD(int width, int height, int fpsLevel, DragAndDrop* dragAndDrop)
 
     getWidget(mMinimapBox, "MiniMapBox");
     mMinimapBoxBaseRight = viewSize.width - mMinimapBox->getRight();
-    mMinimapBox->eventMouseButtonClick += MyGUI::newDelegate(this, &HUD::onMapClicked);
     getWidget(mMinimap, "MiniMap");
     getWidget(mCompass, "Compass");
+    getWidget(mMinimapButton, "MiniMapButton");
+    mMinimapButton->eventMouseButtonClick += MyGUI::newDelegate(this, &HUD::onMapClicked);
 
     getWidget(mCellNameBox, "CellName");
     getWidget(mWeaponSpellBox, "WeaponSpellName");
@@ -105,8 +104,8 @@ HUD::HUD(int width, int height, int fpsLevel, DragAndDrop* dragAndDrop)
 
     setFpsLevel(fpsLevel);
 
-    getWidget(trianglecounter, "TriangleCounter");
-    getWidget(batchcounter, "BatchCounter");
+    getWidget(mTriangleCounter, "TriangleCounter");
+    getWidget(mBatchCounter, "BatchCounter");
 
     setEffect("icons\\s\\tx_s_chameleon.dds");
 
@@ -119,7 +118,7 @@ HUD::HUD(int width, int height, int fpsLevel, DragAndDrop* dragAndDrop)
 
 void HUD::setFpsLevel(int level)
 {
-    fpscounter = 0;
+    mFpsCounter = 0;
 
     MyGUI::Widget* fps;
     getWidget(fps, "FPSBoxAdv");
@@ -129,32 +128,32 @@ void HUD::setFpsLevel(int level)
 
     if (level == 2)
     {
-        getWidget(fpsbox, "FPSBoxAdv");
-        fpsbox->setVisible(true);
-        getWidget(fpscounter, "FPSCounterAdv");
+        getWidget(mFpsBox, "FPSBoxAdv");
+        mFpsBox->setVisible(true);
+        getWidget(mFpsCounter, "FPSCounterAdv");
     }
     else if (level == 1)
     {
-        getWidget(fpsbox, "FPSBox");
-        fpsbox->setVisible(true);
-        getWidget(fpscounter, "FPSCounter");
+        getWidget(mFpsBox, "FPSBox");
+        mFpsBox->setVisible(true);
+        getWidget(mFpsCounter, "FPSCounter");
     }
 }
 
 void HUD::setFPS(float fps)
 {
-    if (fpscounter)
-        fpscounter->setCaption(boost::lexical_cast<std::string>((int)fps));
+    if (mFpsCounter)
+        mFpsCounter->setCaption(boost::lexical_cast<std::string>((int)fps));
 }
 
 void HUD::setTriangleCount(unsigned int count)
 {
-    trianglecounter->setCaption(boost::lexical_cast<std::string>(count));
+    mTriangleCounter->setCaption(boost::lexical_cast<std::string>(count));
 }
 
 void HUD::setBatchCount(unsigned int count)
 {
-    batchcounter->setCaption(boost::lexical_cast<std::string>(count));
+    mBatchCounter->setCaption(boost::lexical_cast<std::string>(count));
 }
 
 void HUD::setEffect(const char *img)
@@ -177,20 +176,20 @@ void HUD::setValue(const std::string& id, const MWMechanics::DynamicStat<int>& v
             switch (i)
             {
                 case 0:
-                    health->setProgressRange (value.getModified());
-                    health->setProgressPosition (value.getCurrent());
+                    mHealth->setProgressRange (value.getModified());
+                    mHealth->setProgressPosition (value.getCurrent());
                     getWidget(w, "HealthFrame");
                     w->setUserString("Caption_HealthDescription", "#{sHealthDesc}\n" + valStr);
                     break;
                 case 1:
-                    magicka->setProgressRange (value.getModified());
-                    magicka->setProgressPosition (value.getCurrent());
+                    mMagicka->setProgressRange (value.getModified());
+                    mMagicka->setProgressPosition (value.getCurrent());
                     getWidget(w, "MagickaFrame");
                     w->setUserString("Caption_HealthDescription", "#{sIntDesc}\n" + valStr);
                     break;
                 case 2:
-                    stamina->setProgressRange (value.getModified());
-                    stamina->setProgressPosition (value.getCurrent());
+                    mStamina->setProgressRange (value.getModified());
+                    mStamina->setProgressPosition (value.getCurrent());
                     getWidget(w, "FatigueFrame");
                     w->setUserString("Caption_HealthDescription", "#{sFatDesc}\n" + valStr);
                     break;
@@ -198,46 +197,11 @@ void HUD::setValue(const std::string& id, const MWMechanics::DynamicStat<int>& v
         }
 }
 
-void HUD::setBottomLeftVisibility(bool hmsVisible, bool weapVisible, bool spellVisible)
-{
-    int weapDx = 0, spellDx = 0;
-    if (!hmsVisible)
-        spellDx = weapDx = mWeapBoxBaseLeft - mHealthManaStaminaBaseLeft;
-
-    if (!weapVisible)
-        spellDx += mSpellBoxBaseLeft - mWeapBoxBaseLeft;
-
-    mWeaponVisible = weapVisible;
-    mSpellVisible = spellVisible;
-    if (!mWeaponVisible && !mSpellVisible)
-        mWeaponSpellBox->setVisible(false);
-
-    health->setVisible(hmsVisible);
-    stamina->setVisible(hmsVisible);
-    magicka->setVisible(hmsVisible);
-    mWeapBox->setPosition(mWeapBoxBaseLeft - weapDx, mWeapBox->getTop());
-    mWeapBox->setVisible(weapVisible);
-    mSpellBox->setPosition(mSpellBoxBaseLeft - spellDx, mSpellBox->getTop());
-    mSpellBox->setVisible(spellVisible);
-}
-
-void HUD::setBottomRightVisibility(bool effectBoxVisible, bool minimapBoxVisible)
-{
-    const MyGUI::IntSize& viewSize = MyGUI::RenderManager::getInstance().getViewSize();
-
-    // effect box can have variable width -> variable left coordinate
-    int effectsDx = 0;
-    if (!minimapBoxVisible)
-        effectsDx = (viewSize.width - mMinimapBoxBaseRight) - (viewSize.width - mEffectBoxBaseRight);
-
-    mMapVisible = minimapBoxVisible;
-    mMinimapBox->setVisible(minimapBoxVisible);
-    mEffectBox->setPosition((viewSize.width - mEffectBoxBaseRight) - mEffectBox->getWidth() + effectsDx, mEffectBox->getTop());
-    mEffectBox->setVisible(effectBoxVisible);
-}
-
 void HUD::onWorldClicked(MyGUI::Widget* _sender)
 {
+    if (!MWBase::Environment::get().getWindowManager ()->isGuiMode ())
+        return;
+
     if (mDragAndDrop->mIsOnDragAndDrop)
     {
         // drop item into the gameworld
@@ -517,4 +481,69 @@ void HUD::unsetSelectedWeapon()
     mWeapStatus->setProgressPosition(0);
     mWeapImage->setImageTexture("icons\\k\\stealth_handtohand.dds");
     mWeapBox->clearUserStrings();
+}
+
+void HUD::setCrosshairVisible(bool visible)
+{
+    mCrosshair->setVisible (visible);
+}
+
+void HUD::setHmsVisible(bool visible)
+{
+    mHealth->setVisible(visible);
+    mMagicka->setVisible(visible);
+    mStamina->setVisible(visible);
+    updatePositions();
+}
+
+void HUD::setWeapVisible(bool visible)
+{
+    mWeapBox->setVisible(visible);
+    updatePositions();
+}
+
+void HUD::setSpellVisible(bool visible)
+{
+    mSpellBox->setVisible(visible);
+    updatePositions();
+}
+
+void HUD::setEffectVisible(bool visible)
+{
+    mEffectBox->setVisible (visible);
+    updatePositions();
+}
+
+void HUD::setMinimapVisible(bool visible)
+{
+    mMinimapBox->setVisible (visible);
+    updatePositions();
+}
+
+void HUD::updatePositions()
+{
+    int weapDx = 0, spellDx = 0;
+    if (!mHealth->getVisible())
+        spellDx = weapDx = mWeapBoxBaseLeft - mHealthManaStaminaBaseLeft;
+
+    if (!mWeapBox->getVisible())
+        spellDx += mSpellBoxBaseLeft - mWeapBoxBaseLeft;
+
+    mWeaponVisible = mWeapBox->getVisible();
+    mSpellVisible = mSpellBox->getVisible();
+    if (!mWeaponVisible && !mSpellVisible)
+        mWeaponSpellBox->setVisible(false);
+
+    mWeapBox->setPosition(mWeapBoxBaseLeft - weapDx, mWeapBox->getTop());
+    mSpellBox->setPosition(mSpellBoxBaseLeft - spellDx, mSpellBox->getTop());
+
+    const MyGUI::IntSize& viewSize = MyGUI::RenderManager::getInstance().getViewSize();
+
+    // effect box can have variable width -> variable left coordinate
+    int effectsDx = 0;
+    if (!mMinimapBox->getVisible ())
+        effectsDx = (viewSize.width - mMinimapBoxBaseRight) - (viewSize.width - mEffectBoxBaseRight);
+
+    mMapVisible = mMinimapBox->getVisible ();
+    mEffectBox->setPosition((viewSize.width - mEffectBoxBaseRight) - mEffectBox->getWidth() + effectsDx, mEffectBox->getTop());
 }

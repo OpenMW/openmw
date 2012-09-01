@@ -76,12 +76,12 @@ namespace MWWorld
 
     TimeStamp operator+ (const TimeStamp& stamp, double hours)
     {
-        return TimeStamp (stamp) + hours;
+        return TimeStamp (stamp) += hours;
     }
 
     TimeStamp operator+ (double hours, const TimeStamp& stamp)
     {
-        return TimeStamp (stamp) + hours;
+        return TimeStamp (stamp) += hours;
     }
 
     double operator- (const TimeStamp& left, const TimeStamp& right)

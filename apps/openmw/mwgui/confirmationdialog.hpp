@@ -5,10 +5,10 @@
 
 namespace MWGui
 {
-    class ConfirmationDialog : public WindowBase
+    class ConfirmationDialog : public WindowModal
     {
         public:
-            ConfirmationDialog(WindowManager& parWindowManager);
+            ConfirmationDialog(MWBase::WindowManager& parWindowManager);
             void open(const std::string& message);
 
             typedef MyGUI::delegates::CMultiDelegate0 EventHandle_Void;
@@ -26,8 +26,6 @@ namespace MWGui
 
             void onCancelButtonClicked(MyGUI::Widget* _sender);
             void onOkButtonClicked(MyGUI::Widget* _sender);
-
-            void close();
     };
 
 }

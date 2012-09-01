@@ -471,7 +471,7 @@ static Ogre::String getMaterial(const NiTriShape *shape, const Ogre::String &nam
     float glossiness = 0.0f;
     float alpha = 1.0f;
     int alphaFlags = -1;
-    ubyte alphaTest = 0;
+//    ubyte alphaTest = 0;
     Ogre::String texName;
 
     bool vertexColour = (shape->data->colors.size() != 0);
@@ -523,7 +523,7 @@ static Ogre::String getMaterial(const NiTriShape *shape, const Ogre::String &nam
     if (a)
     {
         alphaFlags = a->flags;
-        alphaTest = a->data.threshold;
+//        alphaTest = a->data.threshold;
     }
 
     // Material

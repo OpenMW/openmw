@@ -11,11 +11,12 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
+#include "../mwbase/mechanicsmanager.hpp"
+#include "../mwbase/windowmanager.hpp"
 
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/npcstats.hpp"
 #include "../mwmechanics/movement.hpp"
-#include "../mwmechanics/mechanicsmanager.hpp"
 
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/actiontalk.hpp"
@@ -26,7 +27,6 @@
 #include "../mwrender/actors.hpp"
 #include "../mwrender/renderinginterface.hpp"
 
-#include "../mwgui/window_manager.hpp"
 #include "../mwgui/tooltips.hpp"
 
 namespace
@@ -100,10 +100,10 @@ namespace MWClass
                 /// \todo do something with npdt12 maybe:p
             }
 
-            data->mCreatureStats.setHello(ref->base->AI.hello);
-            data->mCreatureStats.setFight(ref->base->AI.fight);
-            data->mCreatureStats.setFlee(ref->base->AI.flee);
-            data->mCreatureStats.setAlarm(ref->base->AI.alarm);
+            data->mCreatureStats.setHello(ref->base->mAiData.mHello);
+            data->mCreatureStats.setFight(ref->base->mAiData.mFight);
+            data->mCreatureStats.setFlee(ref->base->mAiData.mFlee);
+            data->mCreatureStats.setAlarm(ref->base->mAiData.mAlarm);
 
             // store
             ptr.getRefData().setCustomData (data.release());

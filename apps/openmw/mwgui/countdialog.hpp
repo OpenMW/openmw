@@ -5,10 +5,10 @@
 
 namespace MWGui
 {
-    class CountDialog : public WindowBase
+    class CountDialog : public WindowModal
     {
         public:
-            CountDialog(WindowManager& parWindowManager);
+            CountDialog(MWBase::WindowManager& parWindowManager);
             void open(const std::string& item, const std::string& message, const int maxCount);
 
             typedef MyGUI::delegates::CMultiDelegate2<MyGUI::Widget*, int> EventHandle_WidgetInt;
@@ -30,8 +30,6 @@ namespace MWGui
             void onOkButtonClicked(MyGUI::Widget* _sender);
             void onEditTextChange(MyGUI::EditBox* _sender);
             void onSliderMoved(MyGUI::ScrollBar* _sender, size_t _position);
-
-            void close();
     };
 
 }

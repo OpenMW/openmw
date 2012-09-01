@@ -15,7 +15,7 @@ include (OpenMWMacros)
 # Version
 
 set (OPENMW_VERSION_MAJOR 0)
-set (OPENMW_VERSION_MINOR 16)
+set (OPENMW_VERSION_MINOR 17)
 set (OPENMW_VERSION_RELEASE 0)
 
 set (OPENMW_VERSION "${OPENMW_VERSION_MAJOR}.${OPENMW_VERSION_MINOR}.${OPENMW_VERSION_RELEASE}")
@@ -96,19 +96,13 @@ ENDIF()
 
 set(LIBDIR ${CMAKE_SOURCE_DIR}/libs)
 
-set(MANGLE_INPUT ${LIBDIR}/mangle/input/servers/ois_driver.cpp)
-set(MANGLE_ALL ${MANGLE_INPUT})
-source_group(libs\\mangle FILES ${MANGLE_ALL})
-
 set(OENGINE_OGRE
   ${LIBDIR}/openengine/ogre/renderer.cpp
-  ${LIBDIR}/openengine/ogre/mouselook.cpp
   ${LIBDIR}/openengine/ogre/fader.cpp
   ${LIBDIR}/openengine/ogre/imagerotate.cpp
   ${LIBDIR}/openengine/ogre/atlas.cpp
 )
 set(OENGINE_GUI
-  ${LIBDIR}/openengine/gui/events.cpp
   ${LIBDIR}/openengine/gui/manager.cpp
 )
 
@@ -135,7 +129,7 @@ set(OENGINE_BULLET
 set(OENGINE_ALL ${OENGINE_OGRE} ${OENGINE_GUI} ${OENGINE_BULLET})
 source_group(libs\\openengine FILES ${OENGINE_ALL})
 
-set(OPENMW_LIBS ${MANGLE_ALL} ${OENGINE_ALL})
+set(OPENMW_LIBS ${OENGINE_ALL})
 set(OPENMW_LIBS_HEADER)
 
 # Sound setup
@@ -257,13 +251,15 @@ if (APPLE)
         "${APP_BUNDLE_DIR}/Contents/Resources/OpenMW.icns" COPYONLY)
 endif (APPLE)
 
+# Set up DEBUG define
+set_directory_properties(PROPERTIES COMPILE_DEFINITIONS_DEBUG DEBUG=1)
 
 # Set up Ogre plugin folder & debug suffix
-# Ogre on OS X doesn't use "_d" suffix (see Ogre's CMakeLists.txt)
-if (DEFINED CMAKE_BUILD_TYPE AND CMAKE_BUILD_TYPE STREQUAL "Debug" AND NOT APPLE)
-	add_definitions(-DOGRE_PLUGIN_DEBUG_SUFFIX="_d")
-else()
+if (APPLE)
+	# Ogre on OS X doesn't use "_d" suffix (see Ogre's CMakeLists.txt)
 	add_definitions(-DOGRE_PLUGIN_DEBUG_SUFFIX="")
+else ()
+	add_definitions(-DOGRE_PLUGIN_DEBUG_SUFFIX="_d")
 endif()
 
 add_definitions(-DOGRE_PLUGIN_DIR_REL="${OGRE_PLUGIN_DIR_REL}")
@@ -443,6 +439,7 @@ endif(WIN32)
 
 # Extern
 add_subdirectory (extern/shiny)
+add_subdirectory (extern/oics)
 
 # Components
 add_subdirectory (components)

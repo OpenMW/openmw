@@ -49,23 +49,23 @@ union NAME_T
   char name[LEN];
   int32_t val;
 
-  bool operator==(const char *str)
+  bool operator==(const char *str) const
   {
     for(int i=0; i<LEN; i++)
       if(name[i] != str[i]) return false;
       else if(name[i] == 0) return true;
     return str[LEN] == 0;
   }
-  bool operator!=(const char *str) { return !((*this)==str); }
+  bool operator!=(const char *str) const { return !((*this)==str); }
 
-  bool operator==(const std::string &str)
+  bool operator==(const std::string &str) const
   {
     return (*this) == str.c_str();
   }
-  bool operator!=(const std::string &str) { return !((*this)==str); }
+  bool operator!=(const std::string &str) const { return !((*this)==str); }
 
-  bool operator==(int v) { return v == val; }
-  bool operator!=(int v) { return v != val; }
+  bool operator==(int v) const { return v == val; }
+  bool operator!=(int v) const { return v != val; }
 
   std::string toString() const { return std::string(name, strnlen(name, LEN)); }
 };

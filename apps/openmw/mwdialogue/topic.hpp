@@ -1,4 +1,4 @@
-#ifndef GAME_MMDIALOG_TOPIC_H
+#ifndef GAME_MWDIALOG_TOPIC_H
 #define GAME_MWDIALOG_TOPIC_H
 
 #include <string>

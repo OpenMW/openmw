@@ -1,9 +1,10 @@
 #include "text_input.hpp"
-#include "window_manager.hpp"
+
+#include "../mwbase/windowmanager.hpp"
 
 using namespace MWGui;
 
-TextInputDialog::TextInputDialog(WindowManager& parWindowManager)
+TextInputDialog::TextInputDialog(MWBase::WindowManager& parWindowManager)
   : WindowBase("openmw_text_input.layout", parWindowManager)
 {
     // Centre dialog
@@ -44,7 +45,6 @@ void TextInputDialog::open()
 {
     // Make sure the edit box has focus
     MyGUI::InputManager::getInstance().setKeyFocusWidget(mTextEdit);
-    setVisible(true);
 }
 
 // widget controls

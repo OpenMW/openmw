@@ -8,8 +8,9 @@ namespace MWWorld
 {
     ActionTeleport::ActionTeleport (const std::string& cellName,
         const ESM::Position& position)
-    : mCellName (cellName), mPosition (position)
-    {}
+    : Action (true), mCellName (cellName), mPosition (position)
+    {
+    }
 
     void ActionTeleport::executeImp (const Ptr& actor)
     {

@@ -69,7 +69,7 @@ namespace MWWorld
     {
         for (typename std::list<LiveRef>::iterator iter (list.begin()); iter!=list.end(); ++iter)
         {
-            if (iter->ref.refID==name)
+            if (iter->mData.getCount() > 0 && iter->ref.refID == name)
                 return &*iter;
         }
 
@@ -153,6 +153,20 @@ namespace MWWorld
             forEachImp (functor, repairs) &&
             forEachImp (functor, statics) &&
             forEachImp (functor, weapons);
+    }
+
+    bool operator==(const CellStore &cell) {
+        return  this->cell->name == cell.cell->name &&
+                this->cell->data.gridX == cell.cell->data.gridX &&
+                this->cell->data.gridY == cell.cell->data.gridY;
+    }
+
+    bool operator!=(const CellStore &cell) {
+        return !(*this == cell);
+    }
+
+    bool isExterior() const {
+        return cell->isExterior();
     }
 
   private:

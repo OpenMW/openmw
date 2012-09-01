@@ -1,13 +1,12 @@
 #include "scene.hpp"
 
+#include <components/esm_store/store.hpp>
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp" /// FIXME
-
-#include "../mwmechanics/mechanicsmanager.hpp"
-
-#include "../mwsound/soundmanager.hpp"
-
-#include "../mwgui/window_manager.hpp"
+#include "../mwbase/soundmanager.hpp"
+#include "../mwbase/mechanicsmanager.hpp"
+#include "../mwbase/windowmanager.hpp"
 
 #include "player.hpp"
 #include "localscripts.hpp"
@@ -145,15 +144,20 @@ namespace MWWorld
         mPhysics->setCurrentWater(hasWater, cell->cell->water);
 
         MWBase::World *world = MWBase::Environment::get().getWorld();
+        world->getPlayer().setCell(cell);
+
         MWWorld::Ptr player = world->getPlayer().getPlayer();
 
         if (adjustPlayerPos) {
             world->moveObject(player, pos.pos[0], pos.pos[1], pos.pos[2]);
-            MWBase::Environment::get().getWorld()->getPlayer().setRot (pos.rot[0], pos.rot[1], pos.rot[2]);
-        }
-        world->getPlayer().setCell(cell);
 
-        MWMechanics::MechanicsManager *mechMgr =
+            float x = Ogre::Radian(pos.rot[0]).valueDegrees();
+            float y = Ogre::Radian(pos.rot[1]).valueDegrees();
+            float z = Ogre::Radian(pos.rot[2]).valueDegrees();
+            world->rotateObject(player, x, y, z);
+        }
+
+        MWBase::MechanicsManager *mechMgr =
             MWBase::Environment::get().getMechanicsManager();
 
         mechMgr->addActor(player);
@@ -232,7 +236,7 @@ namespace MWWorld
 
 
         // adjust player
-        playerCellChange (MWBase::Environment::get().getWorld()->getExterior(X, Y), position, adjustPlayerPos);
+        playerCellChange (mCurrentCell, position, adjustPlayerPos);
 
         // Sky system
         MWBase::Environment::get().getWorld()->adjustSky();
@@ -345,7 +349,7 @@ namespace MWWorld
         mRendering.addObject(ptr);
         MWWorld::Class::get(ptr).insertObject(ptr, *mPhysics);
     }
-   
+
     void Scene::removeObjectFromScene (const Ptr& ptr)
     {
         MWBase::Environment::get().getMechanicsManager()->removeActor (ptr);
@@ -358,10 +362,7 @@ namespace MWWorld
     {
         CellStoreCollection::iterator active = mActiveCells.begin();
         while (active != mActiveCells.end()) {
-            if ((*active)->cell->name == cell.cell->name &&
-                (*active)->cell->data.gridX == cell.cell->data.gridX &&
-                (*active)->cell->data.gridY == cell.cell->data.gridY)
-            {
+            if (**active == cell) {
                 return true;
             }
             ++active;

@@ -9,8 +9,8 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
-
-#include "../mwsound/soundmanager.hpp"
+#include "../mwbase/soundmanager.hpp"
+#include "../mwbase/windowmanager.hpp"
 
 #include "interpretercontext.hpp"
 #include "ref.hpp"
@@ -38,7 +38,9 @@ namespace MWScript
                     runtime.pop();
 
                     MWBase::Environment::get().getSoundManager()->say (ptr, file);
-                    context.messageBox (text);
+
+                    if (MWBase::Environment::get().getWindowManager ()->getSubtitlesEnabled())
+                        context.messageBox (text);
                 }
         };
 
@@ -116,7 +118,7 @@ namespace MWScript
                     std::string sound = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
 
-                    MWBase::Environment::get().getSoundManager()->playSound3D (ptr, sound, 1.0, 1.0, mLoop ? MWSound::Play_Loop : 0);
+                    MWBase::Environment::get().getSoundManager()->playSound3D (ptr, sound, 1.0, 1.0, mLoop ? MWBase::SoundManager::Play_Loop : 0);
                 }
         };
 
@@ -142,7 +144,7 @@ namespace MWScript
                     Interpreter::Type_Float pitch = runtime[0].mFloat;
                     runtime.pop();
 
-                    MWBase::Environment::get().getSoundManager()->playSound3D (ptr, sound, volume, pitch, mLoop ? MWSound::Play_Loop : 0);
+                    MWBase::Environment::get().getSoundManager()->playSound3D (ptr, sound, volume, pitch, mLoop ? MWBase::SoundManager::Play_Loop : 0);
 
                 }
         };

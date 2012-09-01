@@ -7,7 +7,10 @@
 
 #include <components/esm_store/store.hpp>
 
-#include "window_manager.hpp"
+#include "../mwbase/environment.hpp"
+#include "../mwbase/world.hpp"
+#include "../mwbase/windowmanager.hpp"
+
 #include "widgets.hpp"
 #include "tooltips.hpp"
 
@@ -19,7 +22,7 @@ using namespace Widgets;
 
 const int ReviewDialog::sLineHeight = 18;
 
-ReviewDialog::ReviewDialog(WindowManager& parWindowManager)
+ReviewDialog::ReviewDialog(MWBase::WindowManager& parWindowManager)
     : WindowBase("openmw_chargen_review.layout", parWindowManager)
     , mLastPos(0)
 {
@@ -107,7 +110,6 @@ ReviewDialog::ReviewDialog(WindowManager& parWindowManager)
 void ReviewDialog::open()
 {
     updateSkillArea();
-    setVisible(true);
 }
 
 void ReviewDialog::onScrollChangePosition(MyGUI::ScrollBar* scroller, size_t pos)
@@ -138,7 +140,7 @@ void ReviewDialog::setPlayerName(const std::string &name)
 void ReviewDialog::setRace(const std::string &raceId)
 {
     mRaceId = raceId;
-    const ESM::Race *race = mWindowManager.getStore().races.search(mRaceId);
+    const ESM::Race *race = MWBase::Environment::get().getWorld()->getStore().races.search(mRaceId);
     if (race)
     {
         ToolTips::createRaceToolTip(mRaceWidget, race);
@@ -156,7 +158,7 @@ void ReviewDialog::setClass(const ESM::Class& class_)
 void ReviewDialog::setBirthSign(const std::string& signId)
 {
     mBirthSignId = signId;
-    const ESM::BirthSign *sign = mWindowManager.getStore().birthSigns.search(mBirthSignId);
+    const ESM::BirthSign *sign = MWBase::Environment::get().getWorld()->getStore().birthSigns.search(mBirthSignId);
     if (sign)
     {
         mBirthSignWidget->setCaption(sign->name);

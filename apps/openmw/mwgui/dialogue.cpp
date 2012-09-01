@@ -9,10 +9,11 @@
 #include <components/esm_store/store.hpp>
 
 #include "../mwbase/environment.hpp"
-#include "../mwdialogue/dialoguemanager.hpp"
+#include "../mwbase/dialoguemanager.hpp"
+#include "../mwbase/world.hpp"
+#include "../mwbase/windowmanager.hpp"
 
 #include "dialogue_history.hpp"
-#include "window_manager.hpp"
 #include "widgets.hpp"
 #include "list.hpp"
 #include "tradewindow.hpp"
@@ -41,7 +42,7 @@ std::string::size_type find_str_ci(const std::string& str, const std::string& su
 }
 
 
-DialogueWindow::DialogueWindow(WindowManager& parWindowManager)
+DialogueWindow::DialogueWindow(MWBase::WindowManager& parWindowManager)
     : WindowBase("openmw_dialogue_window.layout", parWindowManager)
     , mEnabled(true)
     , mShowTrade(false)

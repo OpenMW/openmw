@@ -2,12 +2,11 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
+#include "../mwbase/journal.hpp"
+#include "../mwbase/soundmanager.hpp"
+#include "../mwbase/windowmanager.hpp"
 
-#include "../mwdialogue/journal.hpp"
-
-#include "../mwsound/soundmanager.hpp"
-
-#include "window_manager.hpp"
+#include "../mwdialogue/journalentry.hpp"
 
 namespace
 {
@@ -82,7 +81,7 @@ book formatText(std::string text,book mBook,int maxLine, int lineSize)
 }
 
 
-MWGui::JournalWindow::JournalWindow (WindowManager& parWindowManager)
+MWGui::JournalWindow::JournalWindow (MWBase::WindowManager& parWindowManager)
     : WindowBase("openmw_journal.layout", parWindowManager)
     , mLastPos(0)
     , mVisible(false)

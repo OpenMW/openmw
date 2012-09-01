@@ -18,14 +18,14 @@ namespace MWGui
     class TextInputDialog : public WindowBase
     {
     public:
-        TextInputDialog(WindowManager& parWindowManager);
+        TextInputDialog(MWBase::WindowManager& parWindowManager);
 
         std::string getTextInput() const { return mTextEdit ? mTextEdit->getOnlyText() : ""; }
         void setTextInput(const std::string &text) { if (mTextEdit) mTextEdit->setOnlyText(text); }
 
         void setNextButtonShow(bool shown);
         void setTextLabel(const std::string &label);
-        void open();
+        virtual void open();
 
     protected:
         void onOkClicked(MyGUI::Widget* _sender);

@@ -50,9 +50,6 @@ namespace MWRender {
         bool mToggled;
         int mTop;
 
-        int mOldFarClip;
-        int mOldFarClip2;
-
         float mWaterTimer;
 
         bool mReflectionRenderActive;

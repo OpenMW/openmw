@@ -90,7 +90,7 @@ namespace MWWorld
             ///< @return true if the active cell (cell player is in) changed
 
             virtual void
-            placeObject(const Ptr &ptr, CellStore &cell, const ESM::Position &pos);
+            copyObjectToCell(const Ptr &ptr, CellStore &cell, const ESM::Position &pos);
 
         public:
 
@@ -139,6 +139,15 @@ namespace MWWorld
 
             virtual Ogre::Vector2 getNorthVector (CellStore* cell);
             ///< get north vector (OGRE coordinates) for given interior cell
+
+            virtual std::vector<DoorMarker> getDoorMarkers (MWWorld::CellStore* cell);
+            ///< get a list of teleport door markers for a given cell, to be displayed on the local map
+
+            virtual void getInteriorMapPosition (Ogre::Vector2 position, float& nX, float& nY, int &x, int& y);
+            ///< see MWRender::LocalMap::getInteriorMapPosition
+
+            virtual bool isPositionExplored (float nX, float nY, int x, int y, bool interior);
+            ///< see MWRender::LocalMap::isPositionExplored
 
             virtual Globals::Data& getGlobalVariable (const std::string& name);
 
@@ -206,10 +215,13 @@ namespace MWWorld
             virtual void deleteObject (const Ptr& ptr);
 
             virtual void moveObject (const Ptr& ptr, float x, float y, float z);
+            virtual void moveObject (const Ptr& ptr, CellStore &newCell, float x, float y, float z);
 
             virtual void scaleObject (const Ptr& ptr, float scale);
 
-            virtual void rotateObject (const Ptr& ptr,float x,float y,float z);
+            /// Rotates object, uses degrees
+            /// \param adjust indicates rotation should be set or adjusted
+            virtual void rotateObject (const Ptr& ptr,float x,float y,float z, bool adjust = false);
 
             virtual void indexToPosition (int cellX, int cellY, float &x, float &y, bool centre = false)
                 const;
@@ -273,6 +285,28 @@ namespace MWWorld
 
             virtual bool isSwimming(const MWWorld::Ptr &object);
             virtual bool isUnderwater(const ESM::Cell &cell, const Ogre::Vector3 &pos);
+
+            virtual void togglePOV() {
+                mRendering->togglePOV();
+            }
+
+            virtual void togglePreviewMode(bool enable) {
+                mRendering->togglePreviewMode(enable);
+            }
+
+            virtual bool toggleVanityMode(bool enable, bool force) {
+                return mRendering->toggleVanityMode(enable, force);
+            }
+
+            virtual void allowVanityMode(bool allow) {
+                mRendering->allowVanityMode(allow);
+            }
+
+            virtual void togglePlayerLooking(bool enable) {
+                mRendering->togglePlayerLooking(enable);
+            }
+
+            virtual void renderPlayer();
     };
 }
 

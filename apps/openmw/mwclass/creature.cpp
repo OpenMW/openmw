@@ -4,10 +4,11 @@
 #include <components/esm/loadcrea.hpp>
 
 #include "../mwmechanics/creaturestats.hpp"
-#include "../mwmechanics/mechanicsmanager.hpp"
 #include "../mwmechanics/magiceffects.hpp"
 
 #include "../mwbase/environment.hpp"
+#include "../mwbase/mechanicsmanager.hpp"
+#include "../mwbase/windowmanager.hpp"
 
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/actiontalk.hpp"
@@ -17,7 +18,6 @@
 
 #include "../mwrender/renderinginterface.hpp"
 
-#include "../mwgui/window_manager.hpp"
 #include "../mwgui/tooltips.hpp"
 
 namespace
@@ -61,10 +61,10 @@ namespace MWClass
 
             data->mCreatureStats.setLevel(ref->base->data.level);
 
-            data->mCreatureStats.setHello(ref->base->AI.hello);
-            data->mCreatureStats.setFight(ref->base->AI.fight);
-            data->mCreatureStats.setFlee(ref->base->AI.flee);
-            data->mCreatureStats.setAlarm(ref->base->AI.alarm);
+            data->mCreatureStats.setHello(ref->base->mAiData.mHello);
+            data->mCreatureStats.setFight(ref->base->mAiData.mFight);
+            data->mCreatureStats.setFlee(ref->base->mAiData.mFlee);
+            data->mCreatureStats.setAlarm(ref->base->mAiData.mAlarm);
 
             // store
             ptr.getRefData().setCustomData (data.release());
@@ -104,7 +104,7 @@ namespace MWClass
         if (!model.empty()) {
             return "meshes\\" + model;
         }
-        return "";        
+        return "";
     }
 
     std::string Creature::getName (const MWWorld::Ptr& ptr) const

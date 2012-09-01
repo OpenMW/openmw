@@ -2,17 +2,17 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
-#include "../mwinput/inputmanager.hpp"
+#include "../mwbase/soundmanager.hpp"
+#include "../mwbase/windowmanager.hpp"
+
 #include "../mwworld/actiontake.hpp"
 #include "../mwworld/player.hpp"
-#include "../mwsound/soundmanager.hpp"
 
 #include "formatting.hpp"
-#include "window_manager.hpp"
 
 using namespace MWGui;
 
-ScrollWindow::ScrollWindow (WindowManager& parWindowManager) :
+ScrollWindow::ScrollWindow (MWBase::WindowManager& parWindowManager) :
     WindowBase("openmw_scroll.layout", parWindowManager)
 {
     getWidget(mTextView, "TextView");
@@ -62,7 +62,7 @@ void ScrollWindow::onCloseButtonClicked (MyGUI::Widget* _sender)
 
 void ScrollWindow::onTakeButtonClicked (MyGUI::Widget* _sender)
 {
-    MWBase::Environment::get().getSoundManager()->playSound ("Item Book Up", 1.0, 1.0, MWSound::Play_NoTrack);
+    MWBase::Environment::get().getSoundManager()->playSound ("Item Book Up", 1.0, 1.0, MWBase::SoundManager::Play_NoTrack);
 
     MWWorld::ActionTake take(mScroll);
     take.execute (MWBase::Environment::get().getWorld()->getPlayer().getPlayer());

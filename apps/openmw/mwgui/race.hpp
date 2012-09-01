@@ -24,7 +24,7 @@ namespace MWGui
     class RaceDialog : public WindowBase
     {
     public:
-        RaceDialog(WindowManager& parWindowManager);
+        RaceDialog(MWBase::WindowManager& parWindowManager);
 
         enum Gender
         {
@@ -43,7 +43,7 @@ namespace MWGui
         // setHair()
 
         void setNextButtonShow(bool shown);
-        void open();
+        virtual void open();
 
         // Events
         typedef delegates::CMultiDelegate0 EventHandle_Void;
