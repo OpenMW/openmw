@@ -969,6 +969,7 @@ public:
                 }
 
                 mesh = meshMgr.createManual(fullname, mGroup, loader);
+                mesh->setAutoBuildEdgeLists(false);
             }
 
             meshes.push_back(std::make_pair(mesh, shape->name));
