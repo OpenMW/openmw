@@ -31,7 +31,7 @@ op 0x2000e: PCGetRank implicit
 op 0x2000f: PCGetRank explicit
 op 0x20010: AiWander
 op 0x20011: AiWander, explicit reference
-opcodes 0x20012-0x3ffff unused
+op s 0x20012-0x3ffff unused
 
 Segment 4:
 (not implemented yet)
@@ -181,4 +181,19 @@ op 0x2000170: user4, explicit reference (console only, requires --script-console
 op 0x2000171: user4 (implicit reference, console only, requires --script-console switch)
 op 0x2000172: GetStartingAngle
 op 0x2000173: GetStartingAngle, explicit reference
-opcodes 0x2000174-0x3ffffff unused
+op 0x200016c: GetPos
+op 0x200016d: GetPosExplicit
+op 0x200016e: SetPos
+op 0x200016f: SetPosExplicit
+op 0x2000170: GetStartingPos
+op 0x2000171: GetStartingPosExplicit
+op 0x2000172: Position
+op 0x2000173: Position Explicit
+op 0x2000174: PositionCell
+op 0x2000175: PositionCell Explicit
+op 0x2000176: PlaceItemCell
+op 0x2000177: PlaceItem 
+op 0x2000178: PlaceAtPc
+op 0x2000179: PlaceAtMe 
+op 0x200017a: PlaceAtMe Explicit
+opcodes 0x200017b-0x3ffffff unused
