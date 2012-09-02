@@ -16,6 +16,11 @@
 #include "ref.hpp"
 #include "OgreSceneNode.h"
 
+
+#include "../mwworld/player.hpp"
+#include "components\esm\loadcell.hpp"
+
+#include "OgreMath.h"
 namespace MWScript
 {
     namespace Transformation
@@ -256,11 +261,13 @@ namespace MWScript
                     }
                     catch(std::exception &e)
                     {
-                        /*const ESM::Cell* cell = MWBase::Environment::get().getWorld()->getExterior(cellID);
+                        const ESM::Cell* cell = MWBase::Environment::get().getWorld()->getExterior(cellID);
                         if(cell)
                         {
-                            store = MWBase::Environment::get().getWorld()->getExterior(cell->getGridX(),cell->getGridY());
-                        }*/
+                            int cx,cy;
+                            MWBase::Environment::get().getWorld()->positionToIndex(x,y,cx,cy);
+                            store = MWBase::Environment::get().getWorld()->getExterior(cx,cy);
+                        }
                     }
                     if(store)
                     {
@@ -273,7 +280,7 @@ namespace MWScript
                             ay = ay/60.;
                             zRot = zRot/60.;
                         }
-                        //MWBase::Environment::get().getWorld()->rotateObject(ptr,ax,ay,zRot);
+                        MWBase::Environment::get().getWorld()->rotateObject(ptr,ax,ay,zRot);
                     }
                     else
                     {
@@ -315,6 +322,185 @@ namespace MWScript
                 }
         };
 
+        template<class R>
+        class OpPlaceItemCell : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    //MWWorld::Ptr ptr = R()(runtime);
+
+                    std::string itemID = runtime.getStringLiteral (runtime[0].mInteger);
+                    runtime.pop();
+                    std::string cellID = runtime.getStringLiteral (runtime[0].mInteger);
+                    runtime.pop();
+
+                    Interpreter::Type_Float x = runtime[0].mFloat;
+                    runtime.pop();
+                    Interpreter::Type_Float y = runtime[0].mFloat;
+                    runtime.pop();
+                    Interpreter::Type_Float z = runtime[0].mFloat;
+                    runtime.pop();
+                    Interpreter::Type_Float zRot = runtime[0].mFloat;
+                    runtime.pop();
+
+                    MWWorld::CellStore* store = 0;
+                    try
+                    {
+                        store = MWBase::Environment::get().getWorld()->getInterior(cellID);
+                    }
+                    catch(std::exception &e)
+                    {
+                        const ESM::Cell* cell = MWBase::Environment::get().getWorld()->getExterior(cellID);
+                        if(cell)
+                        {
+                            int cx,cy;
+                            MWBase::Environment::get().getWorld()->positionToIndex(x,y,cx,cy);
+                            store = MWBase::Environment::get().getWorld()->getExterior(cx,cy);
+                        }
+                    }
+                    if(store)
+                    {
+                        ESM::Position pos;
+                        pos.pos[0] = x;
+                        pos.pos[1] = y;
+                        pos.pos[2] = z;
+                        pos.rot[0] = pos.rot[1] = 0;
+                        pos.rot[2]  = zRot;
+                        MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->getPtr(itemID,false);
+                        MWBase::Environment::get().getWorld()->copyObjectToCell(ptr,*store,pos);
+                    }
+                    else
+                    {
+                        throw std::runtime_error ("unknown cell");
+                    }
+                }
+        };
+
+        template<class R>
+        class OpPlaceItem : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    //MWWorld::Ptr ptr = R()(runtime);
+
+                    std::string itemID = runtime.getStringLiteral (runtime[0].mInteger);
+                    runtime.pop();
+
+                    Interpreter::Type_Float x = runtime[0].mFloat;
+                    runtime.pop();
+                    Interpreter::Type_Float y = runtime[0].mFloat;
+                    runtime.pop();
+                    Interpreter::Type_Float z = runtime[0].mFloat;
+                    runtime.pop();
+                    Interpreter::Type_Float zRot = runtime[0].mFloat;
+                    runtime.pop();
+
+                    MWWorld::CellStore* store = 0;
+                    int cx,cy;
+                    MWBase::Environment::get().getWorld()->positionToIndex(x,y,cx,cy);
+                    store = MWBase::Environment::get().getWorld()->getExterior(cx,cy);
+                    if(store)
+                    {
+                        ESM::Position pos;
+                        pos.pos[0] = x;
+                        pos.pos[1] = y;
+                        pos.pos[2] = z;
+                        pos.rot[0] = pos.rot[1] = 0;
+                        pos.rot[2]  = zRot;
+                        MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->getPtr(itemID,false);
+                        MWBase::Environment::get().getWorld()->copyObjectToCell(ptr,*store,pos);
+                    }
+                    else
+                    {
+                        throw std::runtime_error ("unknown cell");
+                    }
+                }
+        };
+
+        template<class R>
+        class OpPlaceAtPc : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    std::string itemID = runtime.getStringLiteral (runtime[0].mInteger);
+                    runtime.pop();
+
+                    Interpreter::Type_Integer count = runtime[0].mInteger;
+                    runtime.pop();
+                    Interpreter::Type_Float distance = runtime[0].mFloat;
+                    runtime.pop();
+                    Interpreter::Type_Integer direction = runtime[0].mInteger;
+                    runtime.pop();
+
+                    ESM::Position ipos = MWBase::Environment::get().getWorld()->getPlayer().getPlayer().getRefData().getPosition();
+                    Ogre::Vector3 pos(ipos.pos[0],ipos.pos[1],ipos.pos[2]);
+                    Ogre::Quaternion rot(Ogre::Radian(ipos.rot[2]), Ogre::Vector3::UNIT_Z);
+                    if(direction == 0) pos = pos + distance*rot.yAxis();
+                    else if(direction == 1) pos = pos - distance*rot.yAxis();
+                    else if(direction == 2) pos = pos - distance*rot.xAxis();
+                    else if(direction == 3) pos = pos + distance*rot.xAxis();
+                    else throw std::runtime_error ("direction must be 0,1,2 or 3");
+
+                    ipos.pos[0] = pos.x;
+                    ipos.pos[1] = pos.y;
+                    ipos.pos[2] = pos.z;
+                    MWWorld::CellStore* store = MWBase::Environment::get().getWorld()->getPlayer().getPlayer().getCell();                    
+                    MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->getPtr(itemID,false);
+                    int icount = ptr.getRefData().getCount();
+                    ptr.getRefData().setCount(count);
+                    MWBase::Environment::get().getWorld()->copyObjectToCell(ptr,*store,ipos);
+                    ptr.getRefData().setCount(icount);
+                    //store->ge
+                }
+        };
+
+        template<class R>
+        class OpPlaceAtMe : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWWorld::Ptr me = R()(runtime);
+
+                    std::string itemID = runtime.getStringLiteral (runtime[0].mInteger);
+                    runtime.pop();
+
+                    Interpreter::Type_Integer count = runtime[0].mInteger;
+                    runtime.pop();
+                    Interpreter::Type_Float distance = runtime[0].mFloat;
+                    runtime.pop();
+                    Interpreter::Type_Integer direction = runtime[0].mInteger;
+                    runtime.pop();
+
+                    ESM::Position ipos = me.getRefData().getPosition();
+                    Ogre::Vector3 pos(ipos.pos[0],ipos.pos[1],ipos.pos[2]);
+                    Ogre::Quaternion rot(Ogre::Radian(ipos.rot[2]), Ogre::Vector3::UNIT_Z);
+                    if(direction == 0) pos = pos + distance*rot.yAxis();
+                    else if(direction == 1) pos = pos - distance*rot.yAxis();
+                    else if(direction == 2) pos = pos - distance*rot.xAxis();
+                    else if(direction == 3) pos = pos + distance*rot.xAxis();
+                    else throw std::runtime_error ("direction must be 0,1,2 or 3");
+
+                    ipos.pos[0] = pos.x;
+                    ipos.pos[1] = pos.y;
+                    ipos.pos[2] = pos.z;
+                    MWWorld::CellStore* store = me.getCell();                    
+                    MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->getPtr(itemID,false);
+                    int icount = ptr.getRefData().getCount();
+                    ptr.getRefData().setCount(count);
+                    MWBase::Environment::get().getWorld()->copyObjectToCell(ptr,*store,ipos);
+                    ptr.getRefData().setCount(icount);
+                    //store->ge
+                }
+        };
+
         const int opcodeSetScale = 0x2000164;
         const int opcodeSetScaleExplicit = 0x2000165;
         const int opcodeSetAngle = 0x2000166;
@@ -334,6 +520,12 @@ namespace MWScript
         const int opcodePositionCell = 0x2000174;
         const int opcodePositionCellExplicit = 0x2000175;
 
+        const int opcodePlaceItemCell = 0x2000176;
+        const int opcodePlaceItem = 0x2000177;
+        const int opcodePlaceAtPc = 0x2000178;  
+        const int opcodePlaceAtMe = 0x2000179;
+        const int opcodePlaceAtMeExplicit = 0x200017a;
+
         void registerExtensions (Compiler::Extensions& extensions)
         {
             extensions.registerInstruction("setscale","f",opcodeSetScale,opcodeSetScaleExplicit);
@@ -345,6 +537,10 @@ namespace MWScript
             extensions.registerFunction("getstartingpos",'f',"c",opcodeGetStartingPos,opcodeGetStartingPosExplicit);
             extensions.registerInstruction("position","ffff",opcodePosition,opcodePositionExplicit);
             extensions.registerInstruction("positioncell","ffffS",opcodePositionCell,opcodePositionCellExplicit);
+            extensions.registerInstruction("placeitemcell","ccffff",opcodePlaceItemCell);
+            extensions.registerInstruction("placeitem","cffff",opcodePlaceItem);
+            extensions.registerInstruction("placeatpc","clfl",opcodePlaceAtPc);
+            extensions.registerInstruction("placeatme","clfl",opcodePlaceAtMe,opcodePlaceAtMeExplicit);
         }
 
         void installOpcodes (Interpreter::Interpreter& interpreter)
@@ -367,6 +563,11 @@ namespace MWScript
             interpreter.installSegment5(opcodePositionExplicit,new OpPosition<ExplicitRef>);
             interpreter.installSegment5(opcodePositionCell,new OpPositionCell<ImplicitRef>);
             interpreter.installSegment5(opcodePositionCellExplicit,new OpPositionCell<ExplicitRef>);
+            interpreter.installSegment5(opcodePlaceItemCell,new OpPlaceItemCell<ImplicitRef>);            
+            interpreter.installSegment5(opcodePlaceItem,new OpPlaceItem<ImplicitRef>);            
+            interpreter.installSegment5(opcodePlaceAtPc,new OpPlaceAtPc<ImplicitRef>);   
+            interpreter.installSegment5(opcodePlaceAtMe,new OpPlaceAtPc<ImplicitRef>);   
+            interpreter.installSegment5(opcodePlaceAtMeExplicit,new OpPlaceAtPc<ExplicitRef>); 
         }
     }
 }

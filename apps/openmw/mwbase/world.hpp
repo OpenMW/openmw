@@ -122,6 +122,9 @@ namespace MWBase
             virtual MWWorld::Ptr getPtrViaHandle (const std::string& handle) = 0;
             ///< Return a pointer to a liveCellRef with the given Ogre handle.
 
+            virtual void
+            copyObjectToCell(const MWWorld::Ptr &ptr, MWWorld::CellStore &cell, const ESM::Position &pos) = 0;
+
             /// \todo enable reference in the OGRE scene
             virtual void enable (const MWWorld::Ptr& ptr) = 0;
 
