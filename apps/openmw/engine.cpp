@@ -325,7 +325,7 @@ void OMW::Engine::go()
 
     // Create the world
     mEnvironment.setWorld (new MWWorld::World (*mOgre, mFileCollections, mMaster,
-        mResDir, mNewGame, mEncoding, mFallbackMap));
+        mResDir, mCfgMgr.getCachePath(), mNewGame, mEncoding, mFallbackMap));
 
     // Create window manager - this manages all the MW-specific GUI windows
     MWScript::registerExtensions (mExtensions);

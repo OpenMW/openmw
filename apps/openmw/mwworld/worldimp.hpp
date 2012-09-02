@@ -96,7 +96,7 @@ namespace MWWorld
 
             World (OEngine::Render::OgreRenderer& renderer,
                 const Files::Collections& fileCollections,
-                const std::string& master, const boost::filesystem::path& resDir, bool newGame,
+                const std::string& master, const boost::filesystem::path& resDir, const boost::filesystem::path& cacheDir, bool newGame,
                 const std::string& encoding, std::map<std::string,std::string> fallbackMap);
 
             virtual ~World();

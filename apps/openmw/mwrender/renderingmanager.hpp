@@ -53,7 +53,8 @@ class RenderingManager: private RenderingInterface, public Ogre::WindowEventList
     virtual MWRender::Actors& getActors();
 
   public:
-    RenderingManager(OEngine::Render::OgreRenderer& _rend, const boost::filesystem::path& resDir, OEngine::Physic::PhysicEngine* engine);
+    RenderingManager(OEngine::Render::OgreRenderer& _rend, const boost::filesystem::path& resDir,
+                     const boost::filesystem::path& cacheDir, OEngine::Physic::PhysicEngine* engine);
     virtual ~RenderingManager();
 
     void togglePOV() {

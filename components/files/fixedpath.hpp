@@ -75,6 +75,7 @@ struct FixedPath
         , mLocalPath(mPath.getLocalPath())
         , mGlobalDataPath(mPath.getGlobalDataPath())
         , mInstallPath(mPath.getInstallPath())
+        , mCachePath(mPath.getCachePath())
     {
         if (!application_name.empty())
         {
@@ -83,6 +84,7 @@ struct FixedPath
             mUserPath /= suffix;
             mGlobalPath /= suffix;
             mGlobalDataPath /= suffix;
+            mCachePath /= suffix;
         }
     }
 
@@ -126,6 +128,11 @@ struct FixedPath
         return mGlobalDataPath;
     }
 
+    const boost::filesystem::path& getCachePath() const
+    {
+        return mCachePath;
+    }
+
     private:
         PathType mPath;
 
@@ -134,6 +141,8 @@ struct FixedPath
         boost::filesystem::path mLocalPath;      /**< It is the same directory where application was run */
 
         boost::filesystem::path mGlobalDataPath;        /**< Global application data path */
+
+        boost::filesystem::path mCachePath;
 
         boost::filesystem::path mInstallPath;
 

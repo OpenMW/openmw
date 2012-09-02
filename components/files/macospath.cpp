@@ -69,6 +69,27 @@ boost::filesystem::path MacOsPath::getGlobalPath() const
     return globalPath;
 }
 
+boost::filesystem::path MacOsPath::getCachePath() const
+{
+    boost::filesystem::path userPath(".");
+
+    const char* theDir = getenv("HOME");
+    if (theDir == NULL)
+    {
+        struct passwd* pwd = getpwuid(getuid());
+        if (pwd != NULL)
+        {
+            theDir = pwd->pw_dir;
+        }
+    }
+    if (theDir != NULL)
+    {
+        userPath = boost::filesystem::path(theDir) / "Library/Caches/";
+    }
+
+    return userPath;
+}
+
 boost::filesystem::path MacOsPath::getLocalPath() const
 {
     return boost::filesystem::path("./");

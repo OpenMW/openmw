@@ -67,6 +67,11 @@ boost::filesystem::path WindowsPath::getGlobalDataPath() const
     return getGlobalPath();
 }
 
+boost::filesystem::path WindowsPath::getCachePath() const
+{
+    return getUserPath() / "/cache";
+}
+
 boost::filesystem::path WindowsPath::getInstallPath() const
 {
     boost::filesystem::path installPath("");
