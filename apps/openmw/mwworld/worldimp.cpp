@@ -541,6 +541,16 @@ namespace MWWorld
         }
     }
 
+    std::string toLower (const std::string& name)
+    {
+        std::string lowerCase;
+
+        std::transform (name.begin(), name.end(), std::back_inserter (lowerCase),
+            (int(*)(int)) std::tolower);
+
+        return lowerCase;
+    }
+
     void World::moveObject(const Ptr &ptr, CellStore &newCell, float x, float y, float z)
     {
         ESM::Position &pos = ptr.getRefData().getPosition();
@@ -550,11 +560,10 @@ namespace MWWorld
         CellStore *currCell = ptr.getCell();
         bool isPlayer = ptr == mPlayer->getPlayer();
         bool haveToMove = mWorldScene->isCellActive(*currCell) || isPlayer;
-
         if (*currCell != newCell) {
             if (isPlayer) {
                 if (!newCell.isExterior()) {
-                    changeToInteriorCell(newCell.cell->name, pos);
+                    changeToInteriorCell(toLower(newCell.cell->name), pos);
                 } else {
                     int cellX = newCell.cell->data.gridX;
                     int cellY = newCell.cell->data.gridY;
