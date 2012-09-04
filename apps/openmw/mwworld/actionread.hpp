@@ -8,8 +8,6 @@ namespace MWWorld
 {
     class ActionRead : public Action
     {
-            Ptr mObject; // book or scroll to read
-
             virtual void executeImp (const MWWorld::Ptr& actor);
 
         public:
