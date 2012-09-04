@@ -11,7 +11,7 @@ namespace MWWorld
     class Action
     {
             std::string mSoundId;
-            bool mTeleport;
+            bool mKeepSound;
             Ptr mTarget;
 
             // not implemented
@@ -26,8 +26,8 @@ namespace MWWorld
 
         public:
 
-            Action (bool teleport = false, const Ptr& target = Ptr());
-            ///< \param teleport action will teleport the actor
+            Action (bool keepSound = false, const Ptr& target = Ptr());
+            ///< \param keepSound Keep playing the sound even if the object the sound is played on is removed.
 
             virtual ~Action();
 

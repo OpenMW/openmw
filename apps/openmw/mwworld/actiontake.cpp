@@ -10,7 +10,7 @@
 
 namespace MWWorld
 {
-    ActionTake::ActionTake (const MWWorld::Ptr& object) : Action (false, object) {}
+    ActionTake::ActionTake (const MWWorld::Ptr& object) : Action (true, object) {}
 
     void ActionTake::executeImp (const Ptr& actor)
     {

@@ -11,7 +11,7 @@ const MWWorld::Ptr& MWWorld::Action::getTarget() const
     return mTarget;
 }
 
-MWWorld::Action::Action (bool teleport, const Ptr& target) : mTeleport (teleport), mTarget (target)
+MWWorld::Action::Action (bool keepSound, const Ptr& target) : mKeepSound (keepSound), mTarget (target)
 {}
 
 MWWorld::Action::~Action() {}
@@ -20,7 +20,7 @@ void MWWorld::Action::execute (const Ptr& actor)
 {
     if (!mSoundId.empty())
     {
-        if (mTeleport && actor.getRefData().getHandle()=="player")
+        if (mKeepSound && actor.getRefData().getHandle()=="player")
         {
             // sound moves with player when teleporting
             MWBase::Environment::get().getSoundManager()->playSound(mSoundId, 1.0, 1.0,
@@ -32,7 +32,7 @@ void MWWorld::Action::execute (const Ptr& actor)
         
             MWBase::Environment::get().getSoundManager()->playSound3D (local ? actor : mTarget,
                 mSoundId, 1.0, 1.0,
-                mTeleport ? MWBase::SoundManager::Play_NoTrack : MWBase::SoundManager::Play_Normal);
+                mKeepSound ? MWBase::SoundManager::Play_NoTrack : MWBase::SoundManager::Play_Normal);
         }
     }
 
