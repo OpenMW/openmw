@@ -40,6 +40,8 @@ struct ConfigurationManager
     const boost::filesystem::path& getLocalDataPath() const;
     const boost::filesystem::path& getInstallPath() const;
 
+    const boost::filesystem::path& getCachePath() const;
+
     const boost::filesystem::path& getLogPath() const;
 
     private:

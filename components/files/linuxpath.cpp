@@ -62,6 +62,29 @@ boost::filesystem::path LinuxPath::getUserPath() const
     return userPath;
 }
 
+boost::filesystem::path LinuxPath::getCachePath() const
+{
+    boost::filesystem::path userPath(".");
+
+    const char* theDir = getenv("HOME");
+    if (theDir == NULL)
+    {
+        struct passwd* pwd = getpwuid(getuid());
+        if (pwd != NULL)
+        {
+            theDir = pwd->pw_dir;
+        }
+    }
+
+    if (theDir != NULL)
+    {
+        userPath = boost::filesystem::path(theDir);
+    }
+    userPath /= "/.cache/";
+
+    return userPath;
+}
+
 boost::filesystem::path LinuxPath::getGlobalPath() const
 {
     boost::filesystem::path globalPath("/etc/");

@@ -164,7 +164,7 @@ namespace MWWorld
 
     World::World (OEngine::Render::OgreRenderer& renderer,
         const Files::Collections& fileCollections,
-        const std::string& master, const boost::filesystem::path& resDir, bool newGame,
+        const std::string& master, const boost::filesystem::path& resDir, const boost::filesystem::path& cacheDir, bool newGame,
         const std::string& encoding, std::map<std::string,std::string> fallbackMap)
     : mPlayer (0), mLocalScripts (mStore), mGlobalVariables (0),
       mSky (true), mNextDynamicRecord (0), mCells (mStore, mEsm),
@@ -173,7 +173,7 @@ namespace MWWorld
         mPhysics = new PhysicsSystem(renderer);
         mPhysEngine = mPhysics->getEngine();
 
-        mRendering = new MWRender::RenderingManager(renderer, resDir, mPhysEngine);
+        mRendering = new MWRender::RenderingManager(renderer, resDir, cacheDir, mPhysEngine);
 
         mWeatherManager = new MWWorld::WeatherManager(mRendering);
 
