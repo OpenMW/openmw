@@ -24,7 +24,7 @@ namespace MWWorld
                 const Ogre::Quaternion& rotation, float scale, const Ogre::Vector3& position);
 
             void addActor (const std::string& handle, const std::string& mesh,
-                const Ogre::Vector3& position);
+                const Ogre::Vector3& position, float scale, const Ogre::Quaternion& rotation);
 
             void addHeightField (float* heights,
                 int x, int y, float yoffset,

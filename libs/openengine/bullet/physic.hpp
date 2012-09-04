@@ -15,7 +15,6 @@ class btDefaultCollisionConfiguration;
 class btSequentialImpulseConstraintSolver;
 class btCollisionDispatcher;
 class btDiscreteDynamicsWorld;
-class btKinematicCharacterController;
 class btHeightfieldTerrainShape;
 
 namespace BtOgre
@@ -33,6 +32,8 @@ namespace Physic
 {
     class CMotionState;
     struct PhysicEvent;
+    class PhysicEngine;
+    class RigidBody;
 
     /**
     *This is just used to be able to name objects.
@@ -55,7 +56,7 @@ namespace Physic
     class PhysicActor
     {
     public:
-        PhysicActor(std::string name);
+        PhysicActor(std::string name, std::string mesh, PhysicEngine *engine, Ogre::Vector3 position, Ogre::Quaternion rotation, float scale);
 
         ~PhysicActor();
 
@@ -65,8 +66,6 @@ namespace Physic
          * setWalkDirection( mvt * orientation * dt)
          */
         void setWalkDirection(const btVector3& mvt);
-
-        void Rotate(const btQuaternion& quat);
 
         void setRotation(const btQuaternion& quat);
 
@@ -84,21 +83,17 @@ namespace Physic
 
         void setPosition(const btVector3& pos);
 
-        btKinematicCharacterController* mCharacter;
-
-        PairCachingGhostObject* internalGhostObject;
-        btCollisionShape* internalCollisionShape;
-
-        PairCachingGhostObject* externalGhostObject;
-        btCollisionShape* externalCollisionShape;
+       
 
         std::string mName;
 
-        /**
-        *NPC scenenode is located on there feet, and you can't simply translate a btShape, so this vector is used
-        *each time get/setposition is called.
-        */
-        btVector3 mTranslation;
+
+    private:
+        OEngine::Physic::RigidBody* mBody;
+        Ogre::Vector3 mBoxTranslation;
+        Ogre::Quaternion mBoxRotation;
+        std::string mMesh;
+        PhysicEngine* mEngine;
     };
 
     /**
@@ -195,7 +190,8 @@ namespace Physic
         /**
          * Create and add a character to the scene, and add it to the ActorMap.
          */
-        void addCharacter(std::string name);
+        void addCharacter(std::string name, std::string mesh,
+        Ogre::Vector3 position, float scale, Ogre::Quaternion rotation);
 
         /**
          * Remove a character from the scene. TODO:delete it! for now, a small memory leak^^ done?

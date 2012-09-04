@@ -254,12 +254,12 @@ namespace MWWorld
     }
 
     void PhysicsSystem::addActor (const std::string& handle, const std::string& mesh,
-        const Ogre::Vector3& position)
+        const Ogre::Vector3& position, float scale, const Ogre::Quaternion& rotation)
     {
         //TODO:optimize this. Searching the std::map isn't very efficient i think.
-        mEngine->addCharacter(handle);
+        mEngine->addCharacter(handle, mesh, position, scale, rotation);
         OEngine::Physic::PhysicActor* act = mEngine->getCharacter(handle);
-        act->setPosition(btVector3(position.x,position.y,position.z));
+        
     }
 
     void PhysicsSystem::removeObject (const std::string& handle)
@@ -272,11 +272,12 @@ namespace MWWorld
 
     void PhysicsSystem::moveObject (const std::string& handle, Ogre::SceneNode* node)
     {
+        Ogre::Vector3 position = node->getPosition();
         if (OEngine::Physic::RigidBody* body = mEngine->getRigidBody(handle))
         {
             // TODO very dirty hack to avoid crash during setup -> needs cleaning up to allow
             // start positions others than 0, 0, 0
-            Ogre::Vector3 position = node->getPosition();
+            
             
             if(dynamic_cast<btBoxShape*>(body->getCollisionShape()) == NULL){
                 btTransform tr = body->getWorldTransform();
@@ -288,7 +289,7 @@ namespace MWWorld
         }
         if (OEngine::Physic::PhysicActor* act = mEngine->getCharacter(handle))
         {
-            /*// TODO very dirty hack to avoid crash during setup -> needs cleaning up to allow
+            // TODO very dirty hack to avoid crash during setup -> needs cleaning up to allow
             // start positions others than 0, 0, 0
             if (handle == "player")
             {
@@ -297,19 +298,20 @@ namespace MWWorld
             else
             {
                 act->setPosition(btVector3(position.x,position.y,position.z));
-            }*/
+            }
         }
     }
 
     void PhysicsSystem::rotateObject (const std::string& handle, Ogre::SceneNode* node)
     {
-        /*if (OEngine::Physic::PhysicActor* act = mEngine->getCharacter(handle))
+        Ogre::Quaternion rotation = node->getOrientation();
+        if (OEngine::Physic::PhysicActor* act = mEngine->getCharacter(handle))
         {
+            //Needs to be changed
             act->setRotation(btQuaternion(rotation.x, rotation.y, rotation.z, rotation.w));
-        }*/
+        }
         if (OEngine::Physic::RigidBody* body = mEngine->getRigidBody(handle))
         {
-            Ogre::Quaternion rotation = node->getOrientation();
             if(dynamic_cast<btBoxShape*>(body->getCollisionShape()) == NULL)
                 body->getWorldTransform().setRotation(btQuaternion(rotation.x, rotation.y, rotation.z, rotation.w));
             else
@@ -380,7 +382,7 @@ namespace MWWorld
 
     void PhysicsSystem::insertActorPhysics(const MWWorld::Ptr& ptr, const std::string model){
         Ogre::SceneNode* node = ptr.getRefData().getBaseNode();
-        addActor (node->getName(), model, node->getPosition());
+        addActor (node->getName(), model, node->getPosition(), node->getScale().x, node->getOrientation());
     }
 
     bool PhysicsSystem::getObjectAABB(const MWWorld::Ptr &ptr, Ogre::Vector3 &min, Ogre::Vector3 &max)

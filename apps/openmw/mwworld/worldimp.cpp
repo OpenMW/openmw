@@ -189,7 +189,7 @@ namespace MWWorld
         mPlayer = new MWWorld::Player (mStore.npcs.find ("player"), *this);
         mRendering->attachCameraTo(mPlayer->getPlayer());
 
-        mPhysics->addActor (mPlayer->getPlayer().getRefData().getHandle(), "", Ogre::Vector3 (0, 0, 0));
+        mPhysics->addActor (mPlayer->getPlayer().getRefData().getHandle(), "", Ogre::Vector3 (0, 0, 0), 0, Ogre::Quaternion::ZERO);
 
         // global variables
         mGlobalVariables = new Globals (mStore);

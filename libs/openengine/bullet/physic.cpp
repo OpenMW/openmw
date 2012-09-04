@@ -26,111 +26,71 @@ namespace Physic
         COL_RAYCASTING = BIT(3)
     };
 
-    PhysicActor::PhysicActor(std::string name)
+    PhysicActor::PhysicActor(std::string name, std::string mesh, PhysicEngine* engine, Ogre::Vector3 position, Ogre::Quaternion rotation, float scale): 
+        mName(name), mEngine(engine), mMesh(mesh), mBoxTranslation(Ogre::Vector3::ZERO), mBoxRotation(Ogre::Quaternion::ZERO), mBody(0)
     {
-        mName = name;
 
         // The capsule is at the origin
         btTransform transform;
         transform.setIdentity();
 
-        // External capsule
-        externalGhostObject = new PairCachingGhostObject(name);
-        externalGhostObject->setWorldTransform( transform );
-
-        btScalar externalCapsuleHeight = 120;
-        btScalar externalCapsuleWidth = 19;
-
-        externalCollisionShape = new btCapsuleShapeZ( externalCapsuleWidth,  externalCapsuleHeight );
-        externalCollisionShape->setMargin( 0.1 );
-
-        externalGhostObject->setCollisionShape( externalCollisionShape );
-        externalGhostObject->setCollisionFlags( btCollisionObject::CF_CHARACTER_OBJECT );
-
-        // Internal capsule
-        internalGhostObject = new PairCachingGhostObject(name);
-        internalGhostObject->setWorldTransform( transform );
-        //internalGhostObject->getBroadphaseHandle()->s
-        btScalar internalCapsuleHeight =  110;
-        btScalar internalCapsuleWidth =  17;
-
-        internalCollisionShape = new btCapsuleShapeZ( internalCapsuleWidth, internalCapsuleHeight );
-        internalCollisionShape->setMargin( 0.1 );
-
-        internalGhostObject->setCollisionShape( internalCollisionShape );
-        internalGhostObject->setCollisionFlags( btCollisionObject::CF_CHARACTER_OBJECT );
-
-        mCharacter = new btKinematicCharacterController( externalGhostObject,internalGhostObject,btScalar( 40 ),1,4,20,9.8,0.2 );
-        mCharacter->setUpAxis(btKinematicCharacterController::Z_AXIS);
-        mCharacter->setUseGhostSweepTest(false);
-
-        mCharacter->mCollision = false;
-        setGravity(0);
-
-        mTranslation = btVector3(0,0,70);
     }
 
     PhysicActor::~PhysicActor()
     {
-        delete mCharacter;
-        delete internalGhostObject;
-        delete internalCollisionShape;
-        delete externalGhostObject;
-        delete externalCollisionShape;
+        if(mBody){
+            mEngine->dynamicsWorld->removeRigidBody(mBody);
+            delete mBody;
+        }
     }
 
     void PhysicActor::setGravity(float gravity)
     {
-        mCharacter->setGravity(gravity);
-        //mCharacter->
+        
     }
 
     void PhysicActor::enableCollisions(bool collision)
     {
-        mCharacter->mCollision = collision;
+       
     }
 
     void PhysicActor::setVerticalVelocity(float z)
     {
-        mCharacter->setVerticalVelocity(z);
+        
     }
 
     bool PhysicActor::getCollisionMode()
     {
-        return mCharacter->mCollision;
+        return false;
     }
 
     void PhysicActor::setWalkDirection(const btVector3& mvt)
     {
-        mCharacter->setWalkDirection( mvt );
+        
     }
 
-    void PhysicActor::Rotate(const btQuaternion& quat)
-    {
-        externalGhostObject->getWorldTransform().setRotation( externalGhostObject->getWorldTransform().getRotation() * quat );
-        internalGhostObject->getWorldTransform().setRotation( internalGhostObject->getWorldTransform().getRotation() * quat );
-    }
+    
 
     void PhysicActor::setRotation(const btQuaternion& quat)
     {
-        externalGhostObject->getWorldTransform().setRotation( quat );
-        internalGhostObject->getWorldTransform().setRotation( quat );
+        //externalGhostObject->getWorldTransform().setRotation( quat );
+        //internalGhostObject->getWorldTransform().setRotation( quat );
     }
 
     btVector3 PhysicActor::getPosition(void)
     {
-        return internalGhostObject->getWorldTransform().getOrigin() -mTranslation;
+        return btVector3(0,0,0);//return internalGhostObject->getWorldTransform().getOrigin() -mTranslation;
     }
 
     btQuaternion PhysicActor::getRotation(void)
     {
-        return internalGhostObject->getWorldTransform().getRotation();
+        return btQuaternion(0,0,0);//return btQuaternion::internalGhostObject->getWorldTransform().getRotation();
     }
 
     void PhysicActor::setPosition(const btVector3& pos)
     {
-        internalGhostObject->getWorldTransform().setOrigin(pos+mTranslation);
-        externalGhostObject->getWorldTransform().setOrigin(pos+mTranslation);
+        //internalGhostObject->getWorldTransform().setOrigin(pos+mTranslation);
+        //externalGhostObject->getWorldTransform().setOrigin(pos+mTranslation);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -247,9 +207,7 @@ namespace Physic
         {
             if (pa_it->second != NULL)
             {
-                dynamicsWorld->removeCollisionObject(pa_it->second->externalGhostObject);
-                dynamicsWorld->removeCollisionObject(pa_it->second->internalGhostObject);
-                dynamicsWorld->removeAction(pa_it->second->mCharacter);
+                
 
                 delete pa_it->second;
                 pa_it->second = NULL;
@@ -477,16 +435,17 @@ namespace Physic
         }
     }
 
-    void PhysicEngine::addCharacter(std::string name)
+    void PhysicEngine::addCharacter(std::string name, std::string mesh,
+        Ogre::Vector3 position, float scale, Ogre::Quaternion rotation)
     {
         // Remove character with given name, so we don't make memory
         // leak when character would be added twice
         removeCharacter(name);
 
-        PhysicActor* newActor = new PhysicActor(name);
-        dynamicsWorld->addCollisionObject( newActor->externalGhostObject, COL_ACTOR_EXTERNAL, COL_WORLD |COL_ACTOR_EXTERNAL );
-        dynamicsWorld->addCollisionObject( newActor->internalGhostObject, COL_ACTOR_INTERNAL, COL_WORLD |COL_ACTOR_INTERNAL );
-        dynamicsWorld->addAction( newActor->mCharacter );
+        PhysicActor* newActor = new PhysicActor(name, mesh, this, position, rotation, scale);
+        
+
+        //dynamicsWorld->addAction( newActor->mCharacter );
         PhysicActorMap[name] = newActor;
     }
 
@@ -499,20 +458,7 @@ namespace Physic
             PhysicActor* act = it->second;
             if(act != NULL)
             {
-                /*broadphase->getOverlappingPairCache()->removeOverlappingPairsContainingProxy(act->externalGhostObject->getBroadphaseHandle(),dispatcher);
-                  broadphase->getOverlappingPairCache()->removeOverlappingPairsContainingProxy(act->internalGhostObject->getBroadphaseHandle(),dispatcher);
-                  PhysicActorContainer::iterator it2 = PhysicActorMap.begin();
-                  for(;it2!=PhysicActorMap.end();it++)
-                  {
-                  it->second->internalGhostObject->getOverlappingPairCache()->removeOverlappingPairsContainingProxy(act->externalGhostObject->getBroadphaseHandle(),dispatcher);
-                  it->second->externalGhostObject->getOverlappingPairCache()->removeOverlappingPairsContainingProxy(act->externalGhostObject->getBroadphaseHandle(),dispatcher);
-                  it->second->internalGhostObject->getOverlappingPairCache()->removeOverlappingPairsContainingProxy(act->internalGhostObject->getBroadphaseHandle(),dispatcher);
-                  it->second->externalGhostObject->getOverlappingPairCache()->removeOverlappingPairsContainingProxy(act->internalGhostObject->getBroadphaseHandle(),dispatcher);
-                  }*/
-                //act->externalGhostObject->
-                dynamicsWorld->removeCollisionObject(act->externalGhostObject);
-                dynamicsWorld->removeCollisionObject(act->internalGhostObject);
-                dynamicsWorld->removeAction(act->mCharacter);
+                
                 delete act;
             }
             PhysicActorMap.erase(it);
