@@ -8,8 +8,6 @@ namespace MWWorld
 {
     class ActionEquip : public Action
     {
-            Ptr mObject;
-
             virtual void executeImp (const Ptr& actor);
 
         public:

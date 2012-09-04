@@ -6,23 +6,23 @@
 namespace MWWorld
 {
     ActionApply::ActionApply (const Ptr& target, const std::string& id)
-    : mTarget (target), mId (id)
+    : Action (false, target), mId (id)
     {}
 
     void ActionApply::executeImp (const Ptr& actor)
     {
-        MWWorld::Class::get (mTarget).apply (mTarget, mId, actor);
+        MWWorld::Class::get (getTarget()).apply (getTarget(), mId, actor);
     }
 
 
     ActionApplyWithSkill::ActionApplyWithSkill (const Ptr& target, const std::string& id,
         int skillIndex, int usageType)
-    : mTarget (target), mId (id), mSkillIndex (skillIndex), mUsageType (usageType)
+    : Action (false, target), mId (id), mSkillIndex (skillIndex), mUsageType (usageType)
     {}
 
     void ActionApplyWithSkill::executeImp (const Ptr& actor)
     {
-        if (MWWorld::Class::get (mTarget).apply (mTarget, mId, actor) && mUsageType!=-1)
-            MWWorld::Class::get (mTarget).skillUsageSucceeded (actor, mSkillIndex, mUsageType);
+        if (MWWorld::Class::get (getTarget()).apply (getTarget(), mId, actor) && mUsageType!=-1)
+            MWWorld::Class::get (getTarget()).skillUsageSucceeded (actor, mSkillIndex, mUsageType);
     }
 }

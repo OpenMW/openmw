@@ -75,6 +75,9 @@ namespace MWWorld
 
     std::string RefData::getHandle()
     {
+        if (!mBaseNode)
+            return "";
+            
         return mBaseNode->getName();
     }
 
