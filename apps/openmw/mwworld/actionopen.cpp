@@ -10,8 +10,8 @@
 
 namespace MWWorld
 {
-    ActionOpen::ActionOpen (const MWWorld::Ptr& container) : mContainer (container) {
-        mContainer = container;
+    ActionOpen::ActionOpen (const MWWorld::Ptr& container) : Action (false, container)
+    {
     }
 
     void ActionOpen::executeImp (const MWWorld::Ptr& actor)
@@ -20,6 +20,6 @@ namespace MWWorld
             return;
 
         MWBase::Environment::get().getWindowManager()->pushGuiMode(MWGui::GM_Container);
-        MWBase::Environment::get().getWindowManager()->getContainerWindow()->open(mContainer);
+        MWBase::Environment::get().getWindowManager()->getContainerWindow()->open(getTarget());
     }
 }
