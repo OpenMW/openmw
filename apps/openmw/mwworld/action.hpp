@@ -3,15 +3,16 @@
 
 #include <string>
 
+#include "ptr.hpp"
+
 namespace MWWorld
 {
-    class Ptr;
-
     /// \brief Abstract base for actions
     class Action
     {
             std::string mSoundId;
             bool mTeleport;
+            Ptr mTarget;
 
             // not implemented
             Action (const Action& action);
@@ -19,9 +20,13 @@ namespace MWWorld
 
             virtual void executeImp (const Ptr& actor) = 0;
 
-    public:
+        protected:
 
-            Action (bool teleport = false);
+            const Ptr& getTarget() const;
+
+        public:
+
+            Action (bool teleport = false, const Ptr& target = Ptr());
             ///< \param teleport action will teleport the actor
 
             virtual ~Action();

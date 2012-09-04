@@ -6,7 +6,12 @@
 
 #include "../mwbase/soundmanager.hpp"
 
-MWWorld::Action::Action (bool teleport) : mTeleport (teleport)
+const MWWorld::Ptr& MWWorld::Action::getTarget() const
+{
+    return mTarget;
+}
+
+MWWorld::Action::Action (bool teleport, const Ptr& target) : mTeleport (teleport), mTarget (target)
 {}
 
 MWWorld::Action::~Action() {}
@@ -15,16 +20,16 @@ void MWWorld::Action::execute (const Ptr& actor)
 {
     if (!mSoundId.empty())
     {
-        if (mTeleport == true)
+        if (mTeleport && actor.getRefData().getHandle()=="player")
         {
-            //this is a teleport action, so we need to call playSound
             MWBase::Environment::get().getSoundManager()->playSound(mSoundId, 1.0, 1.0,
                 MWBase::SoundManager::Play_NoTrack);
         }
         else
         {
-            MWBase::Environment::get().getSoundManager()->playSound3D (actor, mSoundId, 1.0, 1.0,
-                MWBase::SoundManager::Play_NoTrack);
+            MWBase::Environment::get().getSoundManager()->playSound3D (mTarget.isEmpty() ? actor : mTarget,
+                mSoundId, 1.0, 1.0,
+                mTeleport ? MWBase::SoundManager::Play_NoTrack : MWBase::SoundManager::Play_Normal);
         }
     }
 
