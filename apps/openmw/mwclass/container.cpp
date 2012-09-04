@@ -87,7 +87,6 @@ namespace MWClass
         const std::string lockedSound = "LockedChest";
         const std::string trapActivationSound = "Disarm Trap Fail";
 
-
         if (ptr.getCellRef().lockLevel>0)
         {
             // TODO check for key
@@ -98,12 +97,11 @@ namespace MWClass
         }
         else
         {
-            std::cout << "Unlocked container" << std::endl;
             if(ptr.getCellRef().trap.empty())
             {
-                // Not trapped, Inventory GUI goes here
-                //return boost::shared_ptr<MWWorld::Action> (new MWWorld::NullAction);
-                return boost::shared_ptr<MWWorld::Action> (new MWWorld::ActionOpen(ptr));
+                boost::shared_ptr<MWWorld::Action> action (new MWWorld::ActionOpen(ptr));
+                action->setSound ("chest open");
+                return action;
             }
             else
             {
