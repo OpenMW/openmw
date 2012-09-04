@@ -11,7 +11,6 @@ namespace MWWorld
 {
     class ActionApply : public Action
     {
-            Ptr mTarget;
             std::string mId;
 
             virtual void executeImp (const Ptr& actor);
@@ -23,7 +22,6 @@ namespace MWWorld
 
     class ActionApplyWithSkill : public Action
     {
-            Ptr mTarget;
             std::string mId;
             int mSkillIndex;
             int mUsageType;
