@@ -22,12 +22,15 @@ void MWWorld::Action::execute (const Ptr& actor)
     {
         if (mTeleport && actor.getRefData().getHandle()=="player")
         {
+            // sound moves with player when teleporting
             MWBase::Environment::get().getSoundManager()->playSound(mSoundId, 1.0, 1.0,
                 MWBase::SoundManager::Play_NoTrack);
         }
         else
         {
-            MWBase::Environment::get().getSoundManager()->playSound3D (mTarget.isEmpty() ? actor : mTarget,
+            bool local = mTarget.isEmpty() || !mTarget.isInCell(); // no usable target
+        
+            MWBase::Environment::get().getSoundManager()->playSound3D (local ? actor : mTarget,
                 mSoundId, 1.0, 1.0,
                 mTeleport ? MWBase::SoundManager::Play_NoTrack : MWBase::SoundManager::Play_Normal);
         }
