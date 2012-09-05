@@ -92,6 +92,7 @@ namespace Physic
         OEngine::Physic::RigidBody* mBody;
         Ogre::Vector3 mBoxTranslation;
         Ogre::Quaternion mBoxRotation;
+        bool collisionMode;
         std::string mMesh;
         PhysicEngine* mEngine;
     };
@@ -138,18 +139,18 @@ namespace Physic
         ~PhysicEngine();
 
         /**
-         * Create a RigidBody.It does not add it to the simulation, but it does add it to the rigidBody Map,
-         * so you can get it with the getRigidBody function.
-
-           After created, the body is set to the correct rotation, position, and scale
+         * Creates a RigidBody.  It does not add it to the simulation.
+         * After created, the body is set to the correct rotation, position, and scale
          */
-        RigidBody* createAndAdjustRigidBody(std::string mesh,std::string name,float scale, Ogre::Vector3 position, Ogre::Quaternion rotation);
+        RigidBody* createAndAdjustRigidBody(std::string mesh,std::string name,float scale, Ogre::Vector3 position, Ogre::Quaternion rotation, 
+            Ogre::Vector3* scaledBoxPosition = 0, Ogre::Quaternion* boxRotation = 0);
 
         /**
          * Adjusts a rigid body to the right position and rotation
          */
 
-        void adjustRigidBody(BulletShapePtr shape, RigidBody* body, float scale, Ogre::Vector3 position, Ogre::Quaternion rotation);
+        void adjustRigidBody(BulletShapePtr shape, RigidBody* body, float scale, Ogre::Vector3 position, Ogre::Quaternion rotation, 
+            Ogre::Vector3 scaledBoxPosition = Ogre::Vector3::ZERO, Ogre::Quaternion boxRotation = Ogre::Quaternion::ZERO);
         /**
          Mainly used to (but not limited to) adjust rigid bodies based on box shapes to the right position and rotation.
          */
@@ -169,7 +170,7 @@ namespace Physic
         /**
          * Add a RigidBody to the simulation
          */
-        void addRigidBody(RigidBody* body);
+        void addRigidBody(RigidBody* body, bool addToMap = true);
 
         /**
          * Remove a RigidBody from the simulation. It does not delete it, and does not remove it from the RigidBodyMap.

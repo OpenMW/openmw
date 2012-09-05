@@ -35,9 +35,8 @@ void newtrace(traceResults* const results, const Ogre::Vector3& start, const Ogr
 	//Ogre::Vector3 startReplace = Ogre::Vector3(650,950, 45);
 	//Ogre::Vector3 endReplace = startReplace;
 	//endReplace.z -= .25;
-
 	
-	const bool hasHit = NewPhysicsTrace<collisionWorldTrace>(&out, start, end, BBHalfExtents, Ogre::Vector3(0.0f, 0.0f,0.0f), isInterior, enginePass);
+	const bool hasHit = NewPhysicsTrace<collisionWorldTrace>(&out, start, end, BBHalfExtents, Ogre::Vector3(0.0f, 0.0f, 0.0f), isInterior, enginePass);
 	
 	if (out.fraction < 0.001f)
 		results->startsolid = true;
@@ -100,7 +99,7 @@ const bool NewPhysicsTrace(NewPhysTraceResults* const out, const Ogre::Vector3& 
 	//if(enginePass->dynamicsWorld->getCollisionObjectArray().at(60)->getCollisionShape()->isConvex())
 	//	std::cout << "It's convex\n";
 	
-
+    
 
 	const btVector3 btstart(start.x, start.y, start.z + BBHalfExtents.z);
 	const btVector3 btend(end.x, end.y, end.z + BBHalfExtents.z);

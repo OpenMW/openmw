@@ -201,8 +201,7 @@ namespace MWWorld
                 playerphysics->ps.viewangles.y =
                     Ogre::Radian(mPlayerData.yaw).valueDegrees() + 90;
 
-
-                pm_ref.rightmove = -iter->second.x;
+                pm_ref.rightmove = iter->second.x;
                 pm_ref.forwardmove = -iter->second.y;
                 pm_ref.upmove = iter->second.z;
             }
@@ -214,6 +213,7 @@ namespace MWWorld
         const std::vector<std::pair<std::string, Ogre::Vector3> >& actors)
     {
         Pmove(playerphysics);
+       
 
         std::vector< std::pair<std::string, Ogre::Vector3> > response;
         for(std::map<std::string,OEngine::Physic::PhysicActor*>::iterator it = mEngine->PhysicActorMap.begin(); it != mEngine->PhysicActorMap.end();it++)
@@ -224,6 +224,7 @@ namespace MWWorld
             if(it->first == "player"){
 
                 coord = playerphysics->ps.origin ;
+                 
             }
 
 
@@ -257,8 +258,9 @@ namespace MWWorld
         const Ogre::Vector3& position, float scale, const Ogre::Quaternion& rotation)
     {
         //TODO:optimize this. Searching the std::map isn't very efficient i think.
+        std::cout << "NPC position" << position << "\n";
         mEngine->addCharacter(handle, mesh, position, scale, rotation);
-        OEngine::Physic::PhysicActor* act = mEngine->getCharacter(handle);
+        
         
     }
 

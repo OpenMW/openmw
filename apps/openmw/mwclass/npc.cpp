@@ -125,7 +125,7 @@ namespace MWClass
 
     void Npc::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics) const
     {
-        physics.insertObjectPhysics(ptr, getModel(ptr));
+        physics.insertActorPhysics(ptr, getModel(ptr));
         MWBase::Environment::get().getMechanicsManager()->addActor(ptr);
     }
 
@@ -294,7 +294,7 @@ namespace MWClass
     {
         Ogre::Vector3 vector (0, 0, 0);
 
-        vector.x = - getMovementSettings (ptr).mLeftRight * 127;
+        vector.x = getMovementSettings (ptr).mLeftRight * 127;
         vector.y = getMovementSettings (ptr).mForwardBackward * 127;
 		vector.z = getMovementSettings(ptr).mUpDown * 127;
 

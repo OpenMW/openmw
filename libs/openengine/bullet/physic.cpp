@@ -27,12 +27,12 @@ namespace Physic
     };
 
     PhysicActor::PhysicActor(std::string name, std::string mesh, PhysicEngine* engine, Ogre::Vector3 position, Ogre::Quaternion rotation, float scale): 
-        mName(name), mEngine(engine), mMesh(mesh), mBoxTranslation(Ogre::Vector3::ZERO), mBoxRotation(Ogre::Quaternion::ZERO), mBody(0)
+        mName(name), mEngine(engine), mMesh(mesh), mBoxTranslation(Ogre::Vector3::ZERO), mBoxRotation(Ogre::Quaternion::ZERO), mBody(0), collisionMode(false)
     {
-
-        // The capsule is at the origin
-        btTransform transform;
-        transform.setIdentity();
+        Ogre::Vector3 test;
+        mBody = mEngine->createAndAdjustRigidBody(mesh, mName, scale, position, rotation, &test);
+        std::cout << "Test" << test << "\n";
+        mEngine->addRigidBody(mBody, false);  //Add rigid body to dynamics world, but do not add to object map
 
     }
 
@@ -51,7 +51,7 @@ namespace Physic
 
     void PhysicActor::enableCollisions(bool collision)
     {
-       
+        collisionMode = collision;
     }
 
     void PhysicActor::setVerticalVelocity(float z)
@@ -61,7 +61,7 @@ namespace Physic
 
     bool PhysicActor::getCollisionMode()
     {
-        return false;
+        return collisionMode;
     }
 
     void PhysicActor::setWalkDirection(const btVector3& mvt)
@@ -79,12 +79,12 @@ namespace Physic
 
     btVector3 PhysicActor::getPosition(void)
     {
-        return btVector3(0,0,0);//return internalGhostObject->getWorldTransform().getOrigin() -mTranslation;
+        return mBody->getWorldTransform().getOrigin();//return internalGhostObject->getWorldTransform().getOrigin() -mTranslation;
     }
 
     btQuaternion PhysicActor::getRotation(void)
     {
-        return btQuaternion(0,0,0);//return btQuaternion::internalGhostObject->getWorldTransform().getRotation();
+        return mBody->getWorldTransform().getRotation();//return btQuaternion::internalGhostObject->getWorldTransform().getRotation();
     }
 
     void PhysicActor::setPosition(const btVector3& pos)
@@ -290,7 +290,8 @@ namespace Physic
         mHeightFieldMap.erase(name);
     }
 
-    void PhysicEngine::adjustRigidBody(BulletShapePtr shape, RigidBody* body, float scale, Ogre::Vector3 position, Ogre::Quaternion rotation){
+    void PhysicEngine::adjustRigidBody(BulletShapePtr shape, RigidBody* body, float scale, Ogre::Vector3 position, Ogre::Quaternion rotation, 
+        Ogre::Vector3 scaledBoxPosition, Ogre::Quaternion boxRotation){
         btTransform tr;
         btBoxShape* box = dynamic_cast<btBoxShape*>(body->getCollisionShape());
         if(box != NULL){
@@ -317,8 +318,11 @@ namespace Physic
         adjustRigidBody(shape, body, scale, position, rotation);
     }
 
-    RigidBody* PhysicEngine::createAndAdjustRigidBody(std::string mesh,std::string name,float scale, Ogre::Vector3 position, Ogre::Quaternion rotation)
+    RigidBody* PhysicEngine::createAndAdjustRigidBody(std::string mesh,std::string name,float scale, Ogre::Vector3 position, Ogre::Quaternion rotation,
+        Ogre::Vector3* scaledBoxPosition, Ogre::Quaternion* boxRotation)
     {
+        if(scaledBoxPosition != 0)
+            *scaledBoxPosition = Ogre::Vector3(0, 5, 0);
         std::string sid = (boost::format("%07.3f") % scale).str();
         std::string outputstring = mesh + sid;
         //std::cout << "The string" << outputstring << "\n";
@@ -348,7 +352,7 @@ namespace Physic
 
     }
 
-    void PhysicEngine::addRigidBody(RigidBody* body)
+    void PhysicEngine::addRigidBody(RigidBody* body, bool addToMap)
     {
         if(body)
         {
@@ -361,14 +365,16 @@ namespace Physic
                 dynamicsWorld->addRigidBody(body,COL_RAYCASTING,COL_RAYCASTING|COL_WORLD);
             }
             body->setActivationState(DISABLE_DEACTIVATION);
-            RigidBody* oldBody = RigidBodyMap[body->mName];
-            if (oldBody != NULL)
-            {
-                dynamicsWorld->removeRigidBody(oldBody);
-                delete oldBody;
-            }
+            if(addToMap){
+                RigidBody* oldBody = RigidBodyMap[body->mName];
+                if (oldBody != NULL)
+                {
+                    dynamicsWorld->removeRigidBody(oldBody);
+                    delete oldBody;
+                }
 
-            RigidBodyMap[body->mName] = body;
+                RigidBodyMap[body->mName] = body;
+            }
         }
     }
 
