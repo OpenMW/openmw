@@ -1,6 +1,7 @@
 #include "settings.hpp"
 
 #include <fstream>
+#include <stdexcept>
 
 #include <OgreResourceGroupManager.h>
 #include <OgreStringConverter.h>
