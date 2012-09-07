@@ -143,14 +143,14 @@ namespace Physic
          * After created, the body is set to the correct rotation, position, and scale
          */
         RigidBody* createAndAdjustRigidBody(std::string mesh,std::string name,float scale, Ogre::Vector3 position, Ogre::Quaternion rotation, 
-            Ogre::Vector3* scaledBoxPosition = 0, Ogre::Quaternion* boxRotation = 0);
+            Ogre::Vector3* scaledBoxTranslation = 0, Ogre::Quaternion* boxRotation = 0);
 
         /**
          * Adjusts a rigid body to the right position and rotation
          */
 
-        void adjustRigidBody(BulletShapePtr shape, RigidBody* body, float scale, Ogre::Vector3 position, Ogre::Quaternion rotation, 
-            Ogre::Vector3 scaledBoxPosition = Ogre::Vector3::ZERO, Ogre::Quaternion boxRotation = Ogre::Quaternion::ZERO);
+        void adjustRigidBody(RigidBody* body, Ogre::Vector3 position, Ogre::Quaternion rotation, 
+            Ogre::Vector3 scaledBoxTranslation = Ogre::Vector3::ZERO, Ogre::Quaternion boxRotation = Ogre::Quaternion::IDENTITY);
         /**
          Mainly used to (but not limited to) adjust rigid bodies based on box shapes to the right position and rotation.
          */

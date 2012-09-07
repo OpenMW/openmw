@@ -290,18 +290,13 @@ namespace Physic
         mHeightFieldMap.erase(name);
     }
 
-    void PhysicEngine::adjustRigidBody(BulletShapePtr shape, RigidBody* body, float scale, Ogre::Vector3 position, Ogre::Quaternion rotation, 
-        Ogre::Vector3 scaledBoxPosition, Ogre::Quaternion boxRotation){
+    void PhysicEngine::adjustRigidBody(RigidBody* body, Ogre::Vector3 position, Ogre::Quaternion rotation, 
+        Ogre::Vector3 scaledBoxTranslation, Ogre::Quaternion boxRotation){
         btTransform tr;
-        btBoxShape* box = dynamic_cast<btBoxShape*>(body->getCollisionShape());
-        if(box != NULL){
-            Ogre::Vector3 transrot = rotation * shape->boxRotation * (shape->boxTranslation * scale);
-            Ogre::Vector3 newPosition = transrot + position;
-            tr.setOrigin(btVector3(newPosition.x, newPosition.y, newPosition.z));
-            rotation = rotation * shape->boxRotation;
-        }
-        else
-            tr.setOrigin(btVector3(position.x,position.y,position.z));
+        rotation = rotation * boxRotation;
+        Ogre::Vector3 transrot = rotation * scaledBoxTranslation;
+        Ogre::Vector3 newPosition = transrot + position;
+        tr.setOrigin(btVector3(newPosition.x, newPosition.y, newPosition.z));
         tr.setRotation(btQuaternion(rotation.x,rotation.y,rotation.z,rotation.w));
         body->setWorldTransform(tr);
     }
@@ -315,14 +310,18 @@ namespace Physic
         BulletShapeManager::getSingletonPtr()->load(outputstring,"General");
         BulletShapePtr shape = BulletShapeManager::getSingleton().getByName(outputstring,"General");
 
-        adjustRigidBody(shape, body, scale, position, rotation);
+        btBoxShape* box = dynamic_cast<btBoxShape*>(shape->Shape);
+        if(box != NULL)
+            adjustRigidBody(body, position, rotation, shape->boxTranslation * scale, shape->boxRotation);
+        else
+            adjustRigidBody(body, position, rotation);
     }
 
     RigidBody* PhysicEngine::createAndAdjustRigidBody(std::string mesh,std::string name,float scale, Ogre::Vector3 position, Ogre::Quaternion rotation,
-        Ogre::Vector3* scaledBoxPosition, Ogre::Quaternion* boxRotation)
+        Ogre::Vector3* scaledBoxTranslation, Ogre::Quaternion* boxRotation)
     {
-        if(scaledBoxPosition != 0)
-            *scaledBoxPosition = Ogre::Vector3(0, 5, 0);
+        if(scaledBoxTranslation != 0)
+            *scaledBoxTranslation = Ogre::Vector3(0, 5, 0);
         std::string sid = (boost::format("%07.3f") % scale).str();
         std::string outputstring = mesh + sid;
         //std::cout << "The string" << outputstring << "\n";
@@ -332,6 +331,7 @@ namespace Physic
         BulletShapeManager::getSingletonPtr()->load(outputstring,"General");
         BulletShapePtr shape = BulletShapeManager::getSingleton().getByName(outputstring,"General");
         shape->Shape->setLocalScaling( btVector3(scale,scale,scale));
+
         
         
         //
@@ -344,9 +344,11 @@ namespace Physic
         RigidBody* body = new RigidBody(CI,name);
         body->collide = shape->collide;
 
-        //Pass in BulletShape, RigidBody, scale, position, rotation
-
-        adjustRigidBody(shape, body, scale, position, rotation);
+        btBoxShape* box = dynamic_cast<btBoxShape*>(shape->Shape);
+        if(box != NULL)
+            adjustRigidBody(body, position, rotation, shape->boxTranslation * scale, shape->boxRotation);
+        else
+            adjustRigidBody(body, position, rotation);
 
         return body;
 
