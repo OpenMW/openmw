@@ -57,11 +57,10 @@ boost::filesystem::path LinuxPath::getUserPath() const
 
     if (theDir != NULL)
     {
-        suffix = boost::filesystem::path("/.config/");
         userPath = boost::filesystem::path(theDir);
     }
 
-    return userPath / mName;
+    return userPath / ".config" / mName;
 }
 
 boost::filesystem::path LinuxPath::getCachePath() const
@@ -82,9 +81,8 @@ boost::filesystem::path LinuxPath::getCachePath() const
     {
         userPath = boost::filesystem::path(theDir);
     }
-    userPath /= ".cache";
 
-    return userPath / mName;
+    return userPath / ".cache" / mName;
 }
 
 boost::filesystem::path LinuxPath::getGlobalPath() const
