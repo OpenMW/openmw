@@ -47,7 +47,6 @@ MacOsPath::MacOsPath(const std::string& application_name)
 boost::filesystem::path MacOsPath::getUserPath() const
 {
     boost::filesystem::path userPath(".");
-    boost::filesystem::path suffix(mName);
 
     const char* theDir = getenv("HOME");
     if (theDir == NULL)
@@ -63,9 +62,7 @@ boost::filesystem::path MacOsPath::getUserPath() const
         userPath = boost::filesystem::path(theDir) / "Library/Preferences/";
     }
 
-    userPath /= suffix;
-
-    return userPath;
+    return userPath / mName;
 }
 
 boost::filesystem::path MacOsPath::getGlobalPath() const
