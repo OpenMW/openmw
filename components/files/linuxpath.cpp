@@ -36,10 +36,15 @@
 namespace Files
 {
 
+LinuxPath::LinuxPath(const std::string& application_name)
+    : mName(application_name)
+{
+}
+
 boost::filesystem::path LinuxPath::getUserPath() const
 {
     boost::filesystem::path userPath(".");
-    boost::filesystem::path suffix("/");
+    boost::filesystem::path suffix(mName);
 
     const char* theDir = getenv("HOME");
     if (theDir == NULL)
@@ -65,6 +70,7 @@ boost::filesystem::path LinuxPath::getUserPath() const
 boost::filesystem::path LinuxPath::getCachePath() const
 {
     boost::filesystem::path userPath(".");
+    boost::filesystem::path suffix(mName);
 
     const char* theDir = getenv("HOME");
     if (theDir == NULL)
@@ -80,7 +86,7 @@ boost::filesystem::path LinuxPath::getCachePath() const
     {
         userPath = boost::filesystem::path(theDir);
     }
-    userPath /= ".cache";
+    userPath /= ".cache" / suffix;
 
     return userPath;
 }
@@ -88,7 +94,7 @@ boost::filesystem::path LinuxPath::getCachePath() const
 boost::filesystem::path LinuxPath::getGlobalPath() const
 {
     boost::filesystem::path globalPath("/etc/");
-    return globalPath;
+    return globalPath / mName;
 }
 
 boost::filesystem::path LinuxPath::getLocalPath() const
@@ -99,7 +105,7 @@ boost::filesystem::path LinuxPath::getLocalPath() const
 boost::filesystem::path LinuxPath::getGlobalDataPath() const
 {
     boost::filesystem::path globalDataPath("/usr/share/games/");
-    return globalDataPath;
+    return globalDataPath / mName;
 }
 
 boost::filesystem::path LinuxPath::getInstallPath() const

@@ -38,6 +38,8 @@ namespace Files
  */
 struct LinuxPath
 {
+    LinuxPath(const std::string& application_name);
+
     /**
      * \brief Return path to the user directory.
      *
@@ -80,6 +82,8 @@ struct LinuxPath
      * \return boost::filesystem::path
      */
     boost::filesystem::path getInstallPath() const;
+
+    std::string mName;
 };
 
 } /* namespace Files */

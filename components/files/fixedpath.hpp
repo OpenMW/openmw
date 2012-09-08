@@ -69,7 +69,7 @@ struct FixedPath
      * \param [in] application_name - Name of the application
      */
     FixedPath(const std::string& application_name)
-        : mPath()
+        : mPath(application_name)
         , mUserPath(mPath.getUserPath())
         , mGlobalPath(mPath.getGlobalPath())
         , mLocalPath(mPath.getLocalPath())
@@ -77,18 +77,6 @@ struct FixedPath
         , mInstallPath(mPath.getInstallPath())
         , mCachePath(mPath.getCachePath())
     {
-        if (!application_name.empty())
-        {
-            boost::filesystem::path suffix(application_name + std::string("/"));
-
-            mUserPath /= suffix;
-            mGlobalPath /= suffix;
-            mGlobalDataPath /= suffix;
-            mCachePath /= suffix;
-#ifdef _WIN32
-            mCachePath /= "cache";
-#endif
-        }
     }
 
     /**

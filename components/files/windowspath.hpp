@@ -39,6 +39,13 @@ namespace Files
 struct WindowsPath
 {
     /**
+     * \brief WindowsPath constructor.
+     *
+     * \param [in] application_name - The name of the application.
+     */
+    WindowsPath(const std::string& application_name);
+
+    /**
      * \brief Returns user path i.e.:
      * "X:\Documents And Settings\<User name>\My Documents\My Games\"
      *
@@ -81,6 +88,8 @@ struct WindowsPath
      * \return boost::filesystem::path
      */
     boost::filesystem::path getInstallPath() const;
+
+    std::string mName;
 };
 
 } /* namespace Files */

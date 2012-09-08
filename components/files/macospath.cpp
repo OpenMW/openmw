@@ -39,10 +39,15 @@
 namespace Files
 {
 
+MacOsPath::MacOsPath(const std::string& application_name)
+    : mName(application_name)
+{
+}
+
 boost::filesystem::path MacOsPath::getUserPath() const
 {
     boost::filesystem::path userPath(".");
-    boost::filesystem::path suffix("/");
+    boost::filesystem::path suffix(mName);
 
     const char* theDir = getenv("HOME");
     if (theDir == NULL)
@@ -66,7 +71,7 @@ boost::filesystem::path MacOsPath::getUserPath() const
 boost::filesystem::path MacOsPath::getGlobalPath() const
 {
     boost::filesystem::path globalPath("/Library/Preferences/");
-    return globalPath;
+    return globalPath / mName;
 }
 
 boost::filesystem::path MacOsPath::getCachePath() const
@@ -84,7 +89,7 @@ boost::filesystem::path MacOsPath::getCachePath() const
     }
     if (theDir != NULL)
     {
-        userPath = boost::filesystem::path(theDir) / "Library/Caches";
+        userPath = boost::filesystem::path(theDir) / "Library/Caches" / mName;
     }
 
     return userPath;
@@ -98,7 +103,7 @@ boost::filesystem::path MacOsPath::getLocalPath() const
 boost::filesystem::path MacOsPath::getGlobalDataPath() const
 {
     boost::filesystem::path globalDataPath("/Library/Application Support/");
-    return globalDataPath;
+    return globalDataPath / mName;
 }
 
 boost::filesystem::path MacOsPath::getInstallPath() const
