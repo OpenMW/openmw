@@ -80,7 +80,7 @@ boost::filesystem::path LinuxPath::getCachePath() const
     {
         userPath = boost::filesystem::path(theDir);
     }
-    userPath /= "/.cache/";
+    userPath /= "/.cache/openmw";
 
     return userPath;
 }

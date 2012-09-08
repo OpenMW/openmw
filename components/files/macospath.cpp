@@ -84,7 +84,7 @@ boost::filesystem::path MacOsPath::getCachePath() const
     }
     if (theDir != NULL)
     {
-        userPath = boost::filesystem::path(theDir) / "Library/Caches/";
+        userPath = boost::filesystem::path(theDir) / "Library/Caches/openmw";
     }
 
     return userPath;

@@ -84,7 +84,6 @@ struct FixedPath
             mUserPath /= suffix;
             mGlobalPath /= suffix;
             mGlobalDataPath /= suffix;
-            mCachePath /= suffix;
         }
     }
 
