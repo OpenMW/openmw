@@ -42,6 +42,7 @@ namespace MWGui
     class Console;
     class SpellWindow;
     class TradeWindow;
+    class SpellsWindow;
     class ConfirmationDialog;
     class CountDialog;
     class ScrollWindow;
@@ -106,6 +107,7 @@ namespace MWBase
             virtual MWGui::CountDialog* getCountDialog() = 0;
             virtual MWGui::ConfirmationDialog* getConfirmationDialog() = 0;
             virtual MWGui::TradeWindow* getTradeWindow() = 0;
+            virtual MWGui::SpellsWindow* getSpellsWindow() = 0;
             virtual MWGui::SpellWindow* getSpellWindow() = 0;
             virtual MWGui::Console* getConsole() = 0;
 

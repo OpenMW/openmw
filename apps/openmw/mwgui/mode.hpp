@@ -20,6 +20,7 @@ namespace MWGui
       GM_Dialogue,      // NPC interaction
       GM_Barter,
       GM_Rest,
+      GM_Spells,
 
       // Startup character creation dialogs
       GM_Name,

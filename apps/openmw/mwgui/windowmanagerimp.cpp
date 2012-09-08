@@ -37,6 +37,7 @@
 #include "mainmenu.hpp"
 #include "countdialog.hpp"
 #include "tradewindow.hpp"
+#include "spellswindow.hpp"
 #include "settingswindow.hpp"
 #include "confirmationdialog.hpp"
 #include "alchemywindow.hpp"
@@ -61,6 +62,7 @@ WindowManager::WindowManager(
   , mScrollWindow(NULL)
   , mCountDialog(NULL)
   , mTradeWindow(NULL)
+  , mSpellsWindow(NULL)
   , mSettingsWindow(NULL)
   , mConfirmationDialog(NULL)
   , mAlchemyWindow(NULL)
@@ -126,6 +128,7 @@ WindowManager::WindowManager(
     mMessageBoxManager = new MessageBoxManager(this);
     mInventoryWindow = new InventoryWindow(*this,mDragAndDrop);
     mTradeWindow = new TradeWindow(*this);
+    mSpellsWindow = new SpellsWindow(*this);
     mDialogueWindow = new DialogueWindow(*this);
     mContainerWindow = new ContainerWindow(*this,mDragAndDrop);
     mHud = new HUD(w,h, mShowFPSLevel, mDragAndDrop);
@@ -182,6 +185,7 @@ WindowManager::~WindowManager()
     delete mBookWindow;
     delete mScrollWindow;
     delete mTradeWindow;
+    delete mSpellsWindow;
     delete mSettingsWindow;
     delete mConfirmationDialog;
     delete mAlchemyWindow;
@@ -228,6 +232,7 @@ void WindowManager::updateVisible()
     mScrollWindow->setVisible(false);
     mBookWindow->setVisible(false);
     mTradeWindow->setVisible(false);
+    mSpellsWindow->setVisible(false);
     mSettingsWindow->setVisible(false);
     mAlchemyWindow->setVisible(false);
     mSpellWindow->setVisible(false);
@@ -316,6 +321,9 @@ void WindowManager::updateVisible()
         case GM_Barter:
             mInventoryWindow->setVisible(true);
             mTradeWindow->setVisible(true);
+            break;
+        case GM_Spells:
+            mSpellsWindow->setVisible(true);
             break;
         case GM_InterMessageBox:
             break;
@@ -509,6 +517,7 @@ void WindowManager::onFrame (float frameDuration)
 
     mDialogueWindow->checkReferenceAvailable();
     mTradeWindow->checkReferenceAvailable();
+    mSpellsWindow->checkReferenceAvailable();
     mContainerWindow->checkReferenceAvailable();
     mConsole->checkReferenceAvailable();
 }
@@ -786,6 +795,7 @@ MWGui::ScrollWindow* WindowManager::getScrollWindow() { return mScrollWindow; }
 MWGui::CountDialog* WindowManager::getCountDialog() { return mCountDialog; }
 MWGui::ConfirmationDialog* WindowManager::getConfirmationDialog() { return mConfirmationDialog; }
 MWGui::TradeWindow* WindowManager::getTradeWindow() { return mTradeWindow; }
+MWGui::SpellsWindow* WindowManager::getSpellsWindow() { return mSpellsWindow; }
 MWGui::SpellWindow* WindowManager::getSpellWindow() { return mSpellWindow; }
 MWGui::Console* WindowManager::getConsole() { return mConsole; }
 

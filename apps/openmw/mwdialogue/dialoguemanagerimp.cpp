@@ -794,6 +794,11 @@ namespace MWDialogue
         else
             win->setShowTrade(false);
 
+        if (services & ESM::NPC::Spells)
+            win->setShowSpells(true);
+        else
+            win->setShowSpells(false);
+
         // sort again, because the previous sort was case-sensitive
         keywordList.sort(stringCompareNoCase);
         win->setKeywords(keywordList);

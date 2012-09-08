@@ -136,6 +136,33 @@ namespace MWGui
         drawItems();
     }
 
+    void TradeWindow::addOrRemoveGold(int amount)
+    {
+        bool goldFound = false;
+        MWWorld::Ptr gold;
+        MWWorld::ContainerStore& playerStore = mWindowManager.getInventoryWindow()->getContainerStore();
+        for (MWWorld::ContainerStoreIterator it = playerStore.begin();
+                it != playerStore.end(); ++it)
+        {
+            if (MWWorld::Class::get(*it).getName(*it) == MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sGold")->str)
+            {
+                goldFound = true;
+                gold = *it;
+            }
+        }
+        if (goldFound)
+        {
+            gold.getRefData().setCount(gold.getRefData().getCount() + amount);
+        }
+        else
+        {
+            assert(amount > 0);
+            MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), "Gold_001");
+            ref.getPtr().getRefData().setCount(amount);
+            playerStore.add(ref.getPtr());
+        }
+    }
+
     void TradeWindow::onOfferButtonClicked(MyGUI::Widget* _sender)
     {
         // were there any items traded at all?
@@ -186,29 +213,7 @@ namespace MWGui
         mWindowManager.getInventoryWindow()->transferBoughtItems();
 
         // add or remove gold from the player.
-        bool goldFound = false;
-        MWWorld::Ptr gold;
-        MWWorld::ContainerStore& playerStore = mWindowManager.getInventoryWindow()->getContainerStore();
-        for (MWWorld::ContainerStoreIterator it = playerStore.begin();
-                it != playerStore.end(); ++it)
-        {
-            if (MWWorld::Class::get(*it).getName(*it) == MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sGold")->str)
-            {
-                goldFound = true;
-                gold = *it;
-            }
-        }
-        if (goldFound)
-        {
-            gold.getRefData().setCount(gold.getRefData().getCount() + mCurrentBalance);
-        }
-        else
-        {
-            assert(mCurrentBalance > 0);
-            MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), "Gold_001");
-            ref.getPtr().getRefData().setCount(mCurrentBalance);
-            playerStore.add(ref.getPtr());
-        }
+        addOrRemoveGold(mCurrentBalance);
 
         std::string sound = "Item Gold Up";
         MWBase::Environment::get().getSoundManager()->playSound (sound, 1.0, 1.0);

@@ -17,6 +17,7 @@
 #include "widgets.hpp"
 #include "list.hpp"
 #include "tradewindow.hpp"
+#include "spellswindow.hpp"
 #include "inventorywindow.hpp"
 
 using namespace MWGui;
@@ -46,6 +47,7 @@ DialogueWindow::DialogueWindow(MWBase::WindowManager& parWindowManager)
     : WindowBase("openmw_dialogue_window.layout", parWindowManager)
     , mEnabled(true)
     , mShowTrade(false)
+    , mShowSpells(false)
 {
     // Centre dialog
     center();
@@ -127,6 +129,11 @@ void DialogueWindow::onSelectTopic(std::string topic)
         mWindowManager.pushGuiMode(GM_Barter);
         mWindowManager.getTradeWindow()->startTrade(mPtr);
     }
+    else if (topic == MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sSpells")->str)
+    {
+        mWindowManager.pushGuiMode(GM_Spells);
+        mWindowManager.getSpellsWindow()->startSpells(mPtr);
+    }
 
     else
         MWBase::Environment::get().getDialogueManager()->keywordSelected(lower_string(topic));
@@ -148,10 +155,13 @@ void DialogueWindow::setKeywords(std::list<std::string> keyWords)
 {
     mTopicsList->clear();
 
-    bool anyService = mShowTrade;
+    bool anyService = mShowTrade||mShowSpells;
 
     if (mShowTrade)
         mTopicsList->addItem(MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sBarter")->str);
+
+    if (mShowSpells)
+        mTopicsList->addItem(MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sSpells")->str);
 
     if (anyService)
         mTopicsList->addSeparator();
