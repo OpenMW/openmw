@@ -147,6 +147,11 @@ const boost::filesystem::path& ConfigurationManager::getGlobalDataPath() const
     return mFixedPath.getGlobalDataPath();
 }
 
+const boost::filesystem::path& ConfigurationManager::getCachePath() const
+{
+    return mFixedPath.getCachePath();
+}
+
 const boost::filesystem::path& ConfigurationManager::getInstallPath() const
 {
     return mFixedPath.getInstallPath();

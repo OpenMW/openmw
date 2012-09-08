@@ -58,6 +58,18 @@ namespace MWRender
          */
         void saveFogOfWar(MWWorld::CellStore* cell);
 
+
+        /**
+         * Get the interior map texture index and normalized position
+         * on this texture, given a world position (in ogre coordinates)
+         */
+        void getInteriorMapPosition (Ogre::Vector2 pos, float& nX, float& nY, int& x, int& y);
+
+        /**
+         * Check if a given position is explored by the player (i.e. not obscured by fog of war)
+         */
+        bool isPositionExplored (float nX, float nY, int x, int y, bool interior);
+
     private:
         OEngine::Render::OgreRenderer* mRendering;
         MWRender::RenderingManager* mRenderingManager;

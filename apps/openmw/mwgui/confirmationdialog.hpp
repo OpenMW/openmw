@@ -5,7 +5,7 @@
 
 namespace MWGui
 {
-    class ConfirmationDialog : public WindowBase
+    class ConfirmationDialog : public WindowModal
     {
         public:
             ConfirmationDialog(MWBase::WindowManager& parWindowManager);
@@ -26,8 +26,6 @@ namespace MWGui
 
             void onCancelButtonClicked(MyGUI::Widget* _sender);
             void onOkButtonClicked(MyGUI::Widget* _sender);
-
-            void close();
     };
 
 }

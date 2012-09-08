@@ -171,11 +171,21 @@ namespace MWBase
             virtual void setWeaponVisibility(bool visible) = 0;
             virtual void setSpellVisibility(bool visible) = 0;
 
+            virtual void activateQuickKey  (int index) = 0;
+
             virtual void setSelectedSpell(const std::string& spellId, int successChancePercent) = 0;
             virtual void setSelectedEnchantItem(const MWWorld::Ptr& item, int chargePercent) = 0;
             virtual void setSelectedWeapon(const MWWorld::Ptr& item, int durabilityPercent) = 0;
             virtual void unsetSelectedSpell() = 0;
             virtual void unsetSelectedWeapon() = 0;
+
+            virtual void showCrosshair(bool show) = 0;
+            virtual bool getSubtitlesEnabled() = 0;
+            virtual void toggleHud() = 0;
+
+            virtual void disallowMouse() = 0;
+            virtual void allowMouse() = 0;
+            virtual void notifyInputActionBound() = 0;
 
             virtual void removeDialog(OEngine::GUI::Layout* dialog) = 0;
             ///< Hides dialog and schedules dialog to be deleted.

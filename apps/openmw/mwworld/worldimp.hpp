@@ -96,7 +96,7 @@ namespace MWWorld
 
             World (OEngine::Render::OgreRenderer& renderer,
                 const Files::Collections& fileCollections,
-                const std::string& master, const boost::filesystem::path& resDir, bool newGame,
+                const std::string& master, const boost::filesystem::path& resDir, const boost::filesystem::path& cacheDir, bool newGame,
                 const std::string& encoding, std::map<std::string,std::string> fallbackMap);
 
             virtual ~World();
@@ -139,6 +139,15 @@ namespace MWWorld
 
             virtual Ogre::Vector2 getNorthVector (CellStore* cell);
             ///< get north vector (OGRE coordinates) for given interior cell
+
+            virtual std::vector<DoorMarker> getDoorMarkers (MWWorld::CellStore* cell);
+            ///< get a list of teleport door markers for a given cell, to be displayed on the local map
+
+            virtual void getInteriorMapPosition (Ogre::Vector2 position, float& nX, float& nY, int &x, int& y);
+            ///< see MWRender::LocalMap::getInteriorMapPosition
+
+            virtual bool isPositionExplored (float nX, float nY, int x, int y, bool interior);
+            ///< see MWRender::LocalMap::isPositionExplored
 
             virtual Globals::Data& getGlobalVariable (const std::string& name);
 

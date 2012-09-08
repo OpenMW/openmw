@@ -10,7 +10,7 @@
 
 namespace MWWorld
 {
-    ActionTake::ActionTake (const MWWorld::Ptr& object) : mObject (object) {}
+    ActionTake::ActionTake (const MWWorld::Ptr& object) : Action (true, object) {}
 
     void ActionTake::executeImp (const Ptr& actor)
     {
@@ -20,10 +20,8 @@ namespace MWWorld
         // insert into player's inventory
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPtr ("player", true);
 
-        MWWorld::Class::get (player).getContainerStore (player).add (mObject);
+        MWWorld::Class::get (player).getContainerStore (player).add (getTarget());
 
-        // remove from world, if the item is currently in the world (it could also be in a container)
-        if (mObject.isInCell())
-            MWBase::Environment::get().getWorld()->deleteObject (mObject);
+        MWBase::Environment::get().getWorld()->deleteObject (getTarget());
     }
 }

@@ -10,6 +10,7 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/soundmanager.hpp"
+#include "../mwbase/windowmanager.hpp"
 
 #include "interpretercontext.hpp"
 #include "ref.hpp"
@@ -37,7 +38,9 @@ namespace MWScript
                     runtime.pop();
 
                     MWBase::Environment::get().getSoundManager()->say (ptr, file);
-                    context.messageBox (text);
+
+                    if (MWBase::Environment::get().getWindowManager ()->getSubtitlesEnabled())
+                        context.messageBox (text);
                 }
         };
 

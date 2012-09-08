@@ -236,6 +236,24 @@
     </Resource>
 
 
+    <Resource type="ResourceImageSet" name="DoorMarker">
+        <Group name="States" texture="markers.png" size="8 8">
+            <Index name="disabled">
+                <Frame point="8 0"/>
+            </Index>
+            <Index name="normal">
+                <Frame point="8 0"/>
+            </Index>
+            <Index name="highlighted">
+                <Frame point="0 0"/>
+            </Index>
+            <Index name="pushed">
+                <Frame point="0 0"/>
+            </Index>
+        </Group>
+    </Resource>
+
+
 
     <!-- Skins -->
 

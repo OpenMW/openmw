@@ -60,6 +60,7 @@ namespace MWGui
   class MessageBoxManager;
   class SettingsWindow;
   class AlchemyWindow;
+  class QuickKeysMenu;
 
   class WindowManager : public MWBase::WindowManager
   {
@@ -151,11 +152,21 @@ namespace MWGui
     virtual void setWeaponVisibility(bool visible);
     virtual void setSpellVisibility(bool visible);
 
+    virtual void activateQuickKey  (int index);
+
     virtual void setSelectedSpell(const std::string& spellId, int successChancePercent);
     virtual void setSelectedEnchantItem(const MWWorld::Ptr& item, int chargePercent);
     virtual void setSelectedWeapon(const MWWorld::Ptr& item, int durabilityPercent);
     virtual void unsetSelectedSpell();
     virtual void unsetSelectedWeapon();
+
+    virtual void showCrosshair(bool show);
+    virtual bool getSubtitlesEnabled();
+    virtual void toggleHud();
+
+    virtual void disallowMouse();
+    virtual void allowMouse();
+    virtual void notifyInputActionBound();
 
     virtual void removeDialog(OEngine::GUI::Layout* dialog); ///< Hides dialog and schedules dialog to be deleted.
 
@@ -205,8 +216,15 @@ namespace MWGui
     ConfirmationDialog* mConfirmationDialog;
     AlchemyWindow* mAlchemyWindow;
     SpellWindow* mSpellWindow;
+    QuickKeysMenu* mQuickKeysMenu;
 
     CharacterCreation* mCharGen;
+
+    MyGUI::Widget* mInputBlocker;
+
+    bool mCrosshairEnabled;
+    bool mSubtitlesEnabled;
+    bool mHudEnabled;
 
     /// \todo get rid of this stuff. Move it to the respective UI element classes, if needed.
     // Various stats about player as needed by window manager

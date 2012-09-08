@@ -274,15 +274,23 @@ void loadResource(Ogre::Resource *resource)
         if(scaleiter != scalekeys.mKeys.end())
             lastscale = curscale = Ogre::Vector3(scaleiter->mValue) / startscale;
         bool didlast = false;
+        
         while(!didlast)
         {
             float curtime = kfc->timeStop;
-            if(quatiter != quatkeys.mKeys.end())
+            
+
+            //Get latest time
+            if(quatiter != quatkeys.mKeys.end()){
                 curtime = std::min(curtime, quatiter->mTime);
-            if(traniter != trankeys.mKeys.end())
+            }
+            if(traniter != trankeys.mKeys.end()){
                 curtime = std::min(curtime, traniter->mTime);
-            if(scaleiter != scalekeys.mKeys.end())
+                
+            }
+            if(scaleiter != scalekeys.mKeys.end()){
                 curtime = std::min(curtime, scaleiter->mTime);
+            }
 
             curtime = std::max(curtime, kfc->timeStart);
             if(curtime >= kfc->timeStop)
@@ -291,30 +299,15 @@ void loadResource(Ogre::Resource *resource)
                 curtime = kfc->timeStop;
             }
 
-            // Get the latest quaternion, translation, and scale for the
-            // current time
-            while(quatiter != quatkeys.mKeys.end() && curtime >= quatiter->mTime)
-            {
-                lastquat = curquat;
-                curquat = startquat.Inverse() * quatiter->mValue;
-                quatiter++;
-            }
-            while(traniter != trankeys.mKeys.end() && curtime >= traniter->mTime)
-            {
-                lasttrans = curtrans;
-                curtrans = traniter->mValue - starttrans;
-                traniter++;
-            }
-            while(scaleiter != scalekeys.mKeys.end() && curtime >= scaleiter->mTime)
-            {
-                lastscale = curscale;
-                curscale = Ogre::Vector3(scaleiter->mValue) / startscale;
-                scaleiter++;
-            }
+            bool rinterpolate = quatiter != quatkeys.mKeys.end() && quatiter != quatkeys.mKeys.begin()  && curtime != quatiter->mTime;
+            bool tinterpolate = traniter != trankeys.mKeys.end() && traniter != trankeys.mKeys.begin() && curtime != traniter->mTime;
+            bool sinterpolate = scaleiter != scalekeys.mKeys.end() && scaleiter != scalekeys.mKeys.begin() && curtime != scaleiter->mTime;
 
+            
+            
             Ogre::TransformKeyFrame *kframe;
             kframe = nodetrack->createNodeKeyFrame(curtime);
-            if(quatiter == quatkeys.mKeys.end() || quatiter == quatkeys.mKeys.begin())
+            if(!rinterpolate)
                 kframe->setRotation(curquat);
             else
             {
@@ -322,7 +315,7 @@ void loadResource(Ogre::Resource *resource)
                 float diff = (curtime-last->mTime) / (quatiter->mTime-last->mTime);
                 kframe->setRotation(Ogre::Quaternion::nlerp(diff, lastquat, curquat));
             }
-            if(traniter == trankeys.mKeys.end() || traniter == trankeys.mKeys.begin())
+            if(!tinterpolate)
                 kframe->setTranslate(curtrans);
             else
             {
@@ -330,7 +323,7 @@ void loadResource(Ogre::Resource *resource)
                 float diff = (curtime-last->mTime) / (traniter->mTime-last->mTime);
                 kframe->setTranslate(lasttrans + ((curtrans-lasttrans)*diff));
             }
-            if(scaleiter == scalekeys.mKeys.end() || scaleiter == scalekeys.mKeys.begin())
+            if(!sinterpolate)
                 kframe->setScale(curscale);
             else
             {
@@ -338,6 +331,31 @@ void loadResource(Ogre::Resource *resource)
                 float diff = (curtime-last->mTime) / (scaleiter->mTime-last->mTime);
                 kframe->setScale(lastscale + ((curscale-lastscale)*diff));
             }
+
+            // Get the latest quaternion, translation, and scale for the
+            // current time
+            while(quatiter != quatkeys.mKeys.end() && curtime >= quatiter->mTime)
+            {
+                quatiter++;
+                lastquat = curquat;
+                if(quatiter != quatkeys.mKeys.end())
+                    curquat = startquat.Inverse() * quatiter->mValue ;
+            }
+            while(traniter != trankeys.mKeys.end() && curtime >= traniter->mTime)
+            {
+                traniter++;
+                lasttrans = curtrans;
+                if(traniter != trankeys.mKeys.end())
+                    curtrans = traniter->mValue - starttrans;
+            }
+            while(scaleiter != scalekeys.mKeys.end() && curtime >= scaleiter->mTime)
+            {
+                scaleiter++;
+                lastscale = curscale;
+                if(scaleiter != scalekeys.mKeys.end())
+                    curscale = Ogre::Vector3(scaleiter->mValue) / startscale;
+            }
+
         }
     }
     anim->optimise();
@@ -969,6 +987,7 @@ public:
                 }
 
                 mesh = meshMgr.createManual(fullname, mGroup, loader);
+                mesh->setAutoBuildEdgeLists(false);
             }
 
             meshes.push_back(std::make_pair(mesh, shape->name));

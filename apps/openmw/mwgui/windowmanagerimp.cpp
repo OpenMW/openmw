@@ -41,6 +41,7 @@
 #include "confirmationdialog.hpp"
 #include "alchemywindow.hpp"
 #include "spellwindow.hpp"
+#include "quickkeysmenu.hpp"
 
 using namespace MWGui;
 
@@ -83,6 +84,9 @@ WindowManager::WindowManager(
   , mFPS(0.0f)
   , mTriangleCount(0)
   , mBatchCount(0)
+  , mCrosshairEnabled(Settings::Manager::getBool ("crosshair", "HUD"))
+  , mSubtitlesEnabled(Settings::Manager::getBool ("subtitles", "GUI"))
+  , mHudEnabled(true)
 {
 
     // Set up the GUI system
@@ -133,6 +137,9 @@ WindowManager::WindowManager(
     mConfirmationDialog = new ConfirmationDialog(*this);
     mAlchemyWindow = new AlchemyWindow(*this);
     mSpellWindow = new SpellWindow(*this);
+    mQuickKeysMenu = new QuickKeysMenu(*this);
+
+    mInputBlocker = mGui->createWidget<MyGUI::Widget>("",0,0,w,h,MyGUI::Align::Default,"Windows","");
 
     // The HUD is always on
     mHud->setVisible(true);
@@ -224,16 +231,22 @@ void WindowManager::updateVisible()
     mSettingsWindow->setVisible(false);
     mAlchemyWindow->setVisible(false);
     mSpellWindow->setVisible(false);
+    mQuickKeysMenu->setVisible(false);
 
     // Mouse is visible whenever we're not in game mode
     MyGUI::PointerManager::getInstance().setVisible(isGuiMode());
 
     bool gameMode = !isGuiMode();
 
+    mInputBlocker->setVisible (gameMode);
+
     if (gameMode)
         mToolTips->enterGameMode();
     else
         mToolTips->enterGuiMode();
+
+    if (gameMode)
+        MyGUI::InputManager::getInstance ().setKeyFocusWidget (NULL);
 
     setMinimapVisibility((mAllowed & GW_Map) && !mMap->pinned());
     setWeaponVisibility((mAllowed & GW_Inventory) && !mInventoryWindow->pinned());
@@ -247,6 +260,9 @@ void WindowManager::updateVisible()
     GuiMode mode = mGuiModes.back();
 
     switch(mode) {
+        case GM_QuickKeysMenu:
+            mQuickKeysMenu->setVisible (true);
+            break;
         case GM_MainMenu:
             mMenu->setVisible(true);
             break;
@@ -305,7 +321,6 @@ void WindowManager::updateVisible()
             break;
         case GM_Journal:
             mJournal->setVisible(true);
-            mJournal->open();
             break;
         default:
             // Unsupported mode, switch back to game
@@ -552,12 +567,12 @@ void WindowManager::setPlayerDir(const float x, const float y)
 
 void WindowManager::setHMSVisibility(bool visible)
 {
-    mHud->setBottomLeftVisibility(visible, mHud->mWeapBox->getVisible(), mHud->mSpellBox->getVisible());
+    mHud->setHmsVisible (visible);
 }
 
 void WindowManager::setMinimapVisibility(bool visible)
 {
-    mHud->setBottomRightVisibility(mHud->mEffectBox->getVisible(), visible);
+    mHud->setMinimapVisible (visible);
 }
 
 void WindowManager::toggleFogOfWar()
@@ -588,13 +603,13 @@ bool WindowManager::getFullHelp() const
 
 void WindowManager::setWeaponVisibility(bool visible)
 {
-    mHud->setBottomLeftVisibility(mHud->health->getVisible(), visible, mHud->mSpellBox->getVisible());
+    mHud->setWeapVisible (visible);
 }
 
 void WindowManager::setSpellVisibility(bool visible)
 {
-    mHud->setBottomLeftVisibility(mHud->health->getVisible(), mHud->mWeapBox->getVisible(), visible);
-    mHud->setBottomRightVisibility(visible, mHud->mMinimapBox->getVisible());
+    mHud->setSpellVisible (visible);
+    mHud->setEffectVisible (visible);
 }
 
 void WindowManager::setMouseVisible(bool visible)
@@ -632,6 +647,10 @@ void WindowManager::processChangedSettings(const Settings::CategorySettingVector
         {
             changeRes = true;
         }
+        else if (it->first == "HUD" && it->second == "crosshair")
+            mCrosshairEnabled = Settings::Manager::getBool ("crosshair", "HUD");
+        else if (it->first == "GUI" && it->second == "subtitles")
+            mSubtitlesEnabled = Settings::Manager::getBool ("subtitles", "GUI");
     }
 
     if (changeRes)
@@ -645,7 +664,9 @@ void WindowManager::processChangedSettings(const Settings::CategorySettingVector
         mAlchemyWindow->center();
         mScrollWindow->center();
         mBookWindow->center();
+        mQuickKeysMenu->center();
         mDragAndDrop->mDragAndDropWidget->setSize(MyGUI::IntSize(x, y));
+        mInputBlocker->setSize(MyGUI::IntSize(x,y));
     }
 }
 
@@ -822,4 +843,42 @@ WindowManager::SkillList WindowManager::getPlayerMinorSkills()
 WindowManager::SkillList WindowManager::getPlayerMajorSkills()
 {
     return mPlayerMajorSkills;
+}
+
+void WindowManager::disallowMouse()
+{
+    mInputBlocker->setVisible (true);
+}
+
+void WindowManager::allowMouse()
+{
+    mInputBlocker->setVisible (!isGuiMode ());
+}
+
+void WindowManager::notifyInputActionBound ()
+{
+    mSettingsWindow->updateControlsBox ();
+    allowMouse();
+}
+
+
+void WindowManager::showCrosshair (bool show)
+{
+    mHud->setCrosshairVisible (show && mCrosshairEnabled);
+}
+
+void WindowManager::activateQuickKey (int index)
+{
+    mQuickKeysMenu->activateQuickKey(index);
+}
+
+bool WindowManager::getSubtitlesEnabled ()
+{
+    return mSubtitlesEnabled;
+}
+
+void WindowManager::toggleHud ()
+{
+    mHudEnabled = !mHudEnabled;
+    mHud->setVisible (mHudEnabled);
 }

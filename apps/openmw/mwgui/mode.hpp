@@ -32,7 +32,9 @@ namespace MWGui
       GM_Review,
       
       // interactive MessageBox
-      GM_InterMessageBox
+      GM_InterMessageBox,
+
+      GM_QuickKeysMenu
     };
 
   // Windows shown in inventory mode

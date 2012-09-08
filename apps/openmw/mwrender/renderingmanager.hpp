@@ -53,7 +53,8 @@ class RenderingManager: private RenderingInterface, public Ogre::WindowEventList
     virtual MWRender::Actors& getActors();
 
   public:
-    RenderingManager(OEngine::Render::OgreRenderer& _rend, const boost::filesystem::path& resDir, OEngine::Physic::PhysicEngine* engine);
+    RenderingManager(OEngine::Render::OgreRenderer& _rend, const boost::filesystem::path& resDir,
+                     const boost::filesystem::path& cacheDir, OEngine::Physic::PhysicEngine* engine);
     virtual ~RenderingManager();
 
     void togglePOV() {
@@ -183,6 +184,12 @@ class RenderingManager: private RenderingInterface, public Ogre::WindowEventList
     Ogre::Viewport* getViewport() { return mRendering.getViewport(); }
 
     static bool waterShaderSupported();
+
+    virtual void getInteriorMapPosition (Ogre::Vector2 position, float& nX, float& nY, int &x, int& y);
+    ///< see MWRender::LocalMap::getInteriorMapPosition
+
+    virtual bool isPositionExplored (float nX, float nY, int x, int y, bool interior);
+    ///< see MWRender::LocalMap::isPositionExplored
 
   protected:
 	virtual void windowResized(Ogre::RenderWindow* rw);

@@ -98,19 +98,13 @@ ENDIF()
 
 set(LIBDIR ${CMAKE_SOURCE_DIR}/libs)
 
-set(MANGLE_INPUT ${LIBDIR}/mangle/input/servers/ois_driver.cpp)
-set(MANGLE_ALL ${MANGLE_INPUT})
-source_group(libs\\mangle FILES ${MANGLE_ALL})
-
 set(OENGINE_OGRE
   ${LIBDIR}/openengine/ogre/renderer.cpp
-  ${LIBDIR}/openengine/ogre/mouselook.cpp
   ${LIBDIR}/openengine/ogre/fader.cpp
   ${LIBDIR}/openengine/ogre/imagerotate.cpp
   ${LIBDIR}/openengine/ogre/atlas.cpp
 )
 set(OENGINE_GUI
-  ${LIBDIR}/openengine/gui/events.cpp
   ${LIBDIR}/openengine/gui/manager.cpp
 )
 
@@ -137,7 +131,7 @@ set(OENGINE_BULLET
 set(OENGINE_ALL ${OENGINE_OGRE} ${OENGINE_GUI} ${OENGINE_BULLET})
 source_group(libs\\openengine FILES ${OENGINE_ALL})
 
-set(OPENMW_LIBS ${MANGLE_ALL} ${OENGINE_ALL})
+set(OPENMW_LIBS ${OENGINE_ALL})
 set(OPENMW_LIBS_HEADER)
 
 # Sound setup
@@ -447,6 +441,7 @@ endif(WIN32)
 
 # Extern
 add_subdirectory (extern/shiny)
+add_subdirectory (extern/oics)
 
 # Components
 add_subdirectory (components)

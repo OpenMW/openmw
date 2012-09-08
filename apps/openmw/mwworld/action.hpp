@@ -3,14 +3,16 @@
 
 #include <string>
 
+#include "ptr.hpp"
+
 namespace MWWorld
 {
-    class Ptr;
-
     /// \brief Abstract base for actions
     class Action
     {
             std::string mSoundId;
+            bool mKeepSound;
+            Ptr mTarget;
 
             // not implemented
             Action (const Action& action);
@@ -18,9 +20,14 @@ namespace MWWorld
 
             virtual void executeImp (const Ptr& actor) = 0;
 
+        protected:
+
+            const Ptr& getTarget() const;
+
         public:
 
-            Action();
+            Action (bool keepSound = false, const Ptr& target = Ptr());
+            ///< \param keepSound Keep playing the sound even if the object the sound is played on is removed.
 
             virtual ~Action();
 

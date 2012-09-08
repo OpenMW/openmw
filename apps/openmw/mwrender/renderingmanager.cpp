@@ -40,7 +40,8 @@ using namespace Ogre;
 
 namespace MWRender {
 
-RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const boost::filesystem::path& resDir, OEngine::Physic::PhysicEngine* engine)
+RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const boost::filesystem::path& resDir,
+                                    const boost::filesystem::path& cacheDir, OEngine::Physic::PhysicEngine* engine)
     :mRendering(_rend), mObjects(mRendering), mActors(mRendering), mAmbientMode(0), mSunEnabled(0), mPhysicsEngine(engine)
 {
     // select best shader mode
@@ -63,7 +64,9 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
 
     // material system
     sh::OgrePlatform* platform = new sh::OgrePlatform("General", (resDir / "materials").string());
-    platform->setCacheFolder ("./");
+    if (!boost::filesystem::exists (cacheDir))
+        boost::filesystem::create_directory (cacheDir);
+    platform->setCacheFolder (cacheDir.string());
     mFactory = new sh::Factory(platform);
 
     sh::Language lang;
@@ -75,6 +78,11 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
     else
         lang = sh::Language_CG;
     mFactory->setCurrentLanguage (lang);
+    mFactory->setWriteSourceCache (true);
+    mFactory->setReadSourceCache (true);
+    mFactory->setReadMicrocodeCache (true);
+    mFactory->setWriteMicrocodeCache (true);
+
     mFactory->loadAllFiles();
 
     // Set default mipmap level (NB some APIs ignore this)
@@ -861,6 +869,16 @@ void RenderingManager::getPlayerData(Ogre::Vector3 &eyepos, float &pitch, float 
     eyepos = mPlayer->getPosition();
     eyepos.z += mPlayer->getHeight();
     mPlayer->getSightAngles(pitch, yaw);
+}
+
+void RenderingManager::getInteriorMapPosition (Ogre::Vector2 position, float& nX, float& nY, int &x, int& y)
+{
+    return mLocalMap->getInteriorMapPosition (position, nX, nY, x, y);
+}
+
+bool RenderingManager::isPositionExplored (float nX, float nY, int x, int y, bool interior)
+{
+    return mLocalMap->isPositionExplored(nX, nY, x, y, interior);
 }
 
 } // namespace

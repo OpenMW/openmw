@@ -46,7 +46,7 @@ namespace MWGui
         void configureSkills(const SkillList& major, const SkillList& minor);
         void setSkillValue(ESM::Skill::SkillEnum skillId, const MWMechanics::Stat<float>& value);
 
-        void open();
+        virtual void open();
 
         // Events
         typedef delegates::CMultiDelegate0 EventHandle_Void;

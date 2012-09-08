@@ -18,6 +18,15 @@ namespace MWGui
 
         void toggleFogOfWar();
 
+        struct MarkerPosition
+        {
+            bool interior;
+            int cellX;
+            int cellY;
+            float nX;
+            float nY;
+        };
+
     protected:
         int mCurX, mCurY;
         bool mInterior;
@@ -31,6 +40,9 @@ namespace MWGui
         std::vector<MyGUI::ImageBox*> mFogWidgets;
 
         void applyFogOfWar();
+
+        void onMarkerFocused(MyGUI::Widget* w1, MyGUI::Widget* w2);
+        void onMarkerUnfocused(MyGUI::Widget* w1, MyGUI::Widget* w2);
 
         OEngine::GUI::Layout* mLayout;
 

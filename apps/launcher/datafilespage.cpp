@@ -197,7 +197,7 @@ bool DataFilesPage::setupDataFiles()
 
     desc.add_options()
         ("data", boost::program_options::value<Files::PathContainer>()->default_value(Files::PathContainer(), "data")->multitoken())
-//        ("data-local", boost::program_options::value<std::string>()->default_value(""))
+        ("data-local", boost::program_options::value<std::string>()->default_value(""))
         ("fs-strict", boost::program_options::value<bool>()->implicit_value(true)->default_value(false))
         ("encoding", boost::program_options::value<std::string>()->default_value("win1252"));
 
@@ -206,11 +206,10 @@ bool DataFilesPage::setupDataFiles()
     // Put the paths in a boost::filesystem vector to use with Files::Collections
     mDataDirs = Files::PathContainer(variables["data"].as<Files::PathContainer>());
 
-//     std::string local = variables["data-local"].as<std::string>();
-//     if (!local.empty()) {
-//         mDataLocal.push_back(Files::PathContainer::value_type(local));
-//         dataDirs.push_back(Files::PathContainer::value_type(local));
-//     }
+     std::string local = variables["data-local"].as<std::string>();
+     if (!local.empty()) {
+         mDataLocal.push_back(Files::PathContainer::value_type(local));
+     }
 
     if (mDataDirs.size()>1)
         mDataDirs.resize (1);

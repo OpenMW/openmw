@@ -8,8 +8,6 @@ namespace MWWorld
 {
     class ActionTalk : public Action
     {
-            Ptr mActor;
-
             virtual void executeImp (const Ptr& actor);
 
         public:

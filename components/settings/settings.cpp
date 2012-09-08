@@ -1,6 +1,7 @@
 #include "settings.hpp"
 
 #include <fstream>
+#include <stdexcept>
 
 #include <OgreResourceGroupManager.h>
 #include <OgreStringConverter.h>
@@ -75,8 +76,12 @@ const std::string Manager::getString (const std::string& setting, const std::str
     if (mNewSettings.find(std::make_pair(category, setting)) != mNewSettings.end())
         return mNewSettings[std::make_pair(category, setting)];
 
-    std::string defaultval = mDefaultFile.getSetting(setting, category);
-    return mFile.getSetting(setting, category, defaultval);
+    std::string defaultval = mDefaultFile.getSetting(setting, category, "NOTFOUND");
+    std::string val = mFile.getSetting(setting, category, defaultval);
+
+    if (val == "NOTFOUND")
+        throw std::runtime_error("Trying to retrieve a non-existing setting: " + setting + " Make sure the settings-default.cfg file was properly installed.");
+    return val;
 }
 
 const float Manager::getFloat (const std::string& setting, const std::string& category)

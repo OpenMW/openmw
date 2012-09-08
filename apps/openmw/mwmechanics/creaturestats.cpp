@@ -45,4 +45,14 @@ namespace MWMechanics
 
         return *this;
     }
+    
+    const AiSequence& CreatureStats::getAiSequence() const
+    {
+        return mAiSequence;
+    }
+    
+    AiSequence& CreatureStats::getAiSequence()
+    {
+        return mAiSequence;   
+    }
 }

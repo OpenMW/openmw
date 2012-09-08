@@ -21,7 +21,6 @@ add_openmw_dir (mwrender
 
 add_openmw_dir (mwinput
     inputmanagerimp
-    mouselookevent
     )
 
 add_openmw_dir (mwgui
@@ -29,7 +28,8 @@ add_openmw_dir (mwgui
     dialogue_history window_base stats_window messagebox journalwindow charactercreation
     map_window window_pinnable_base cursorreplace tooltips scrollwindow bookwindow list
     formatting inventorywindow container hud countdialog tradewindow settingswindow
-    confirmationdialog alchemywindow referenceinterface spellwindow mainmenu
+    confirmationdialog alchemywindow referenceinterface spellwindow mainmenu quickkeysmenu
+    itemselection
     )
 
 add_openmw_dir (mwdialogue
@@ -61,7 +61,7 @@ add_openmw_dir (mwclass
 
 add_openmw_dir (mwmechanics
     mechanicsmanagerimp stat creaturestats magiceffects movement actors drawstate spells
-    activespells npcstats
+    activespells npcstats aipackage aisequence
     )
 
 add_openmw_dir (mwbase
@@ -104,6 +104,7 @@ target_link_libraries(openmw
     ${MYGUI_PLATFORM_LIBRARIES}
     "shiny"
     "shiny.OgrePlatform"
+    "oics"
     components
 )
 
@@ -114,7 +115,9 @@ endif()
 
 if(APPLE)
     find_library(CARBON_FRAMEWORK Carbon)
-    target_link_libraries(openmw ${CARBON_FRAMEWORK})
+    find_library(COCOA_FRAMEWORK Cocoa)
+    find_library(IOKIT_FRAMEWORK IOKit)
+    target_link_libraries(openmw ${CARBON_FRAMEWORK} ${COCOA_FRAMEWORK} ${IOKIT_FRAMEWORK})
 endif(APPLE)
 
 if(DPKG_PROGRAM)

@@ -106,7 +106,7 @@ void Objects::insertMesh (const MWWorld::Ptr& ptr, const std::string& mesh)
     extents *= insert->getScale();
     float size = std::max(std::max(extents.x, extents.y), extents.z);
 
-    bool small = (size < Settings::Manager::getInt("small object size", "Viewing distance")) && Settings::Manager::getBool("limit small object distance", "Objects");
+    bool small = (size < Settings::Manager::getInt("small object size", "Viewing distance")) && Settings::Manager::getBool("limit small object distance", "Viewing distance");
 
     // do not fade out doors. that will cause holes and look stupid
     if (ptr.getTypeName().find("Door") != std::string::npos)

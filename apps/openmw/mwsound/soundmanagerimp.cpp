@@ -215,7 +215,7 @@ namespace MWSound
             // The range values are not tested
             float basevol = mMasterVolume * mVoiceVolume;
             std::string filePath = "Sound/"+filename;
-            const ESM::Position &pos = ptr.getCellRef().pos;
+            const ESM::Position &pos = ptr.getRefData().getPosition();
             const Ogre::Vector3 objpos(pos.pos[0], pos.pos[1], pos.pos[2]);
 
             MWBase::SoundPtr sound = mOutput->playSound3D(filePath, objpos, basevol, 1.0f,
@@ -313,7 +313,7 @@ namespace MWSound
             float basevol = mMasterVolume * mSFXVolume;
             float min, max;
             std::string file = lookup(soundId, basevol, min, max);
-            const ESM::Position &pos = ptr.getCellRef().pos;
+            const ESM::Position &pos = ptr.getRefData().getPosition();;
             const Ogre::Vector3 objpos(pos.pos[0], pos.pos[1], pos.pos[2]);
 
             sound = mOutput->playSound3D(file, objpos, volume*basevol, pitch, min, max, mode);
@@ -406,7 +406,7 @@ namespace MWSound
 
     void SoundManager::updateObject(MWWorld::Ptr ptr)
     {
-        const ESM::Position &pos = ptr.getCellRef().pos;
+        const ESM::Position &pos = ptr.getRefData().getPosition();;
         const Ogre::Vector3 objpos(pos.pos[0], pos.pos[1], pos.pos[2]);
         SoundMap::iterator snditer = mActiveSounds.begin();
         while(snditer != mActiveSounds.end())

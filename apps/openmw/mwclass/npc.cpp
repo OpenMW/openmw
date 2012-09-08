@@ -100,10 +100,10 @@ namespace MWClass
                 /// \todo do something with npdt12 maybe:p
             }
 
-            data->mCreatureStats.setHello(ref->base->AI.hello);
-            data->mCreatureStats.setFight(ref->base->AI.fight);
-            data->mCreatureStats.setFlee(ref->base->AI.flee);
-            data->mCreatureStats.setAlarm(ref->base->AI.alarm);
+            data->mCreatureStats.setHello(ref->base->mAiData.mHello);
+            data->mCreatureStats.setFight(ref->base->mAiData.mFight);
+            data->mCreatureStats.setFlee(ref->base->mAiData.mFlee);
+            data->mCreatureStats.setAlarm(ref->base->mAiData.mAlarm);
 
             // store
             ptr.getRefData().setCustomData (data.release());

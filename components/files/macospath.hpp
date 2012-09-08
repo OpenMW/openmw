@@ -38,6 +38,8 @@ namespace Files
  */
 struct MacOsPath
 {
+    MacOsPath(const std::string& application_name);
+
     /**
      * \brief Return path to the local directory.
      *
@@ -65,9 +67,18 @@ struct MacOsPath
      *
      * \return boost::filesystem::path
      */
+    boost::filesystem::path getCachePath() const;
+
+    /**
+     * \brief
+     *
+     * \return boost::filesystem::path
+     */
     boost::filesystem::path getGlobalDataPath() const;
 
     boost::filesystem::path getInstallPath() const;
+
+    std::string mName;
 };
 
 } /* namespace Files */

@@ -20,10 +20,15 @@
 namespace Files
 {
 
+WindowsPath::WindowsPath(const std::string& application_name)
+    : mName(application_name)
+{
+}
+
 boost::filesystem::path WindowsPath::getUserPath() const
 {
     boost::filesystem::path userPath(".");
-    boost::filesystem::path suffix("/");
+    boost::filesystem::path suffix(mName);
 
     TCHAR path[MAX_PATH];
     memset(path, 0, sizeof(path));
@@ -42,7 +47,7 @@ boost::filesystem::path WindowsPath::getUserPath() const
 boost::filesystem::path WindowsPath::getGlobalPath() const
 {
     boost::filesystem::path globalPath(".");
-    boost::filesystem::path suffix("/");
+    boost::filesystem::path suffix(mName);
 
     TCHAR path[MAX_PATH];
     memset(path, 0, sizeof(path));
@@ -65,6 +70,11 @@ boost::filesystem::path WindowsPath::getLocalPath() const
 boost::filesystem::path WindowsPath::getGlobalDataPath() const
 {
     return getGlobalPath();
+}
+
+boost::filesystem::path WindowsPath::getCachePath() const
+{
+    return getUserPath() / "cache";
 }
 
 boost::filesystem::path WindowsPath::getInstallPath() const

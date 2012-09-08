@@ -9,7 +9,7 @@
 
 namespace MWWorld
 {
-    ActionEquip::ActionEquip (const MWWorld::Ptr& object) : mObject (object)
+    ActionEquip::ActionEquip (const MWWorld::Ptr& object) : Action (false, object)
     {
     }
 
@@ -19,13 +19,13 @@ namespace MWWorld
         MWWorld::InventoryStore& invStore = MWWorld::Class::get(player).getInventoryStore(player);
 
         // slots that this item can be equipped in
-        std::pair<std::vector<int>, bool> slots = MWWorld::Class::get(mObject).getEquipmentSlots(mObject);
+        std::pair<std::vector<int>, bool> slots = MWWorld::Class::get(getTarget()).getEquipmentSlots(getTarget());
 
         // retrieve ContainerStoreIterator to the item
         MWWorld::ContainerStoreIterator it = invStore.begin();
         for (; it != invStore.end(); ++it)
         {
-            if (*it == mObject)
+            if (*it == getTarget())
             {
                 break;
             }

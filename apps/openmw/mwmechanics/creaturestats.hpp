@@ -9,6 +9,7 @@
 #include "magiceffects.hpp"
 #include "spells.hpp"
 #include "activespells.hpp"
+#include "aisequence.hpp"
 
 namespace MWMechanics
 {
@@ -27,6 +28,7 @@ namespace MWMechanics
         int mFight;
         int mFlee;
         int mAlarm;
+        AiSequence mAiSequence;
 
     public:
         CreatureStats();
@@ -100,6 +102,10 @@ namespace MWMechanics
         void setFlee(int value);
 
         void setAlarm(int value);
+        
+        const AiSequence& getAiSequence() const;
+        
+        AiSequence& getAiSequence();
     };
 
     // Inline const getters
