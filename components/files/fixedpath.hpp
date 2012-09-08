@@ -84,6 +84,10 @@ struct FixedPath
             mUserPath /= suffix;
             mGlobalPath /= suffix;
             mGlobalDataPath /= suffix;
+            mCachePath /= suffix;
+#ifdef _WIN32
+            mCachePath /= "cache";
+#endif
         }
     }
 

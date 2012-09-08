@@ -69,7 +69,7 @@ boost::filesystem::path WindowsPath::getGlobalDataPath() const
 
 boost::filesystem::path WindowsPath::getCachePath() const
 {
-    return getUserPath() / "openmw/cache";
+    return getUserPath();
 }
 
 boost::filesystem::path WindowsPath::getInstallPath() const
