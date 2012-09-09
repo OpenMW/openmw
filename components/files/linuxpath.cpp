@@ -44,7 +44,6 @@ LinuxPath::LinuxPath(const std::string& application_name)
 boost::filesystem::path LinuxPath::getUserPath() const
 {
     boost::filesystem::path userPath(".");
-    boost::filesystem::path suffix(mName);
 
     const char* theDir = getenv("HOME");
     if (theDir == NULL)
@@ -58,19 +57,15 @@ boost::filesystem::path LinuxPath::getUserPath() const
 
     if (theDir != NULL)
     {
-        suffix = boost::filesystem::path("/.config/");
         userPath = boost::filesystem::path(theDir);
     }
 
-    userPath /= suffix;
-
-    return userPath;
+    return userPath / ".config" / mName;
 }
 
 boost::filesystem::path LinuxPath::getCachePath() const
 {
     boost::filesystem::path userPath(".");
-    boost::filesystem::path suffix(mName);
 
     const char* theDir = getenv("HOME");
     if (theDir == NULL)
@@ -86,9 +81,8 @@ boost::filesystem::path LinuxPath::getCachePath() const
     {
         userPath = boost::filesystem::path(theDir);
     }
-    userPath /= ".cache" / suffix;
 
-    return userPath;
+    return userPath / ".cache" / mName;
 }
 
 boost::filesystem::path LinuxPath::getGlobalPath() const
