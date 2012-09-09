@@ -17,7 +17,7 @@
 #include "widgets.hpp"
 #include "list.hpp"
 #include "tradewindow.hpp"
-#include "spellswindow.hpp"
+#include "spellbuyingwindow.hpp"
 #include "inventorywindow.hpp"
 
 using namespace MWGui;
@@ -131,8 +131,8 @@ void DialogueWindow::onSelectTopic(std::string topic)
     }
     else if (topic == MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sSpells")->str)
     {
-        mWindowManager.pushGuiMode(GM_Spells);
-        mWindowManager.getSpellsWindow()->startSpells(mPtr);
+        mWindowManager.pushGuiMode(GM_SpellBuying);
+        mWindowManager.getSpellBuyingWindow()->startSpellBuying(mPtr);
     }
 
     else

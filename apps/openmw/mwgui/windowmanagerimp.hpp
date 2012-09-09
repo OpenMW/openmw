@@ -105,7 +105,7 @@ namespace MWGui
     virtual MWGui::CountDialog* getCountDialog();
     virtual MWGui::ConfirmationDialog* getConfirmationDialog();
     virtual MWGui::TradeWindow* getTradeWindow();
-    virtual MWGui::SpellsWindow* getSpellsWindow();
+    virtual MWGui::SpellBuyingWindow* getSpellBuyingWindow();
     virtual MWGui::SpellWindow* getSpellWindow();
     virtual MWGui::Console* getConsole();
 
@@ -213,11 +213,11 @@ namespace MWGui
     BookWindow* mBookWindow;
     CountDialog* mCountDialog;
     TradeWindow* mTradeWindow;
-    SpellsWindow* mSpellsWindow; // Npc selling spells window
+    SpellBuyingWindow* mSpellBuyingWindow;
     SettingsWindow* mSettingsWindow;
     ConfirmationDialog* mConfirmationDialog;
     AlchemyWindow* mAlchemyWindow;
-    SpellWindow* mSpellWindow; // Player owned spells window
+    SpellWindow* mSpellWindow;
     QuickKeysMenu* mQuickKeysMenu;
 
     CharacterCreation* mCharGen;
