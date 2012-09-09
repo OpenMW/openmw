@@ -69,7 +69,7 @@ struct FixedPath
      * \param [in] application_name - Name of the application
      */
     FixedPath(const std::string& application_name)
-        : mPath(application_name)
+        : mPath(application_name + "/")
         , mUserPath(mPath.getUserPath())
         , mGlobalPath(mPath.getGlobalPath())
         , mLocalPath(mPath.getLocalPath())
