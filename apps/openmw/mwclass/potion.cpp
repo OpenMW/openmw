@@ -137,6 +137,7 @@ namespace MWClass
         text += MWGui::ToolTips::getValueString(ref->base->data.value, store.gameSettings.search("sValue")->str);
 
         info.effects = MWGui::Widgets::MWEffectList::effectListFromESM(&ref->base->effects);
+        info.isPotion = true;
 
         if (MWBase::Environment::get().getWindowManager()->getFullHelp()) {
             text += MWGui::ToolTips::getMiscString(ref->ref.owner, "Owner");
