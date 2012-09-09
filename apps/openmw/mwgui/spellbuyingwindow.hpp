@@ -38,7 +38,7 @@ namespace MWGui
 
             MWWorld::Ptr mActor;
 
-            std::map<MyGUI::Widget*, const ESM::Spell*> mSpellsWidgetMap;
+            std::map<MyGUI::Widget*, std::string> mSpellsWidgetMap;
 
             void onCancelButtonClicked(MyGUI::Widget* _sender);
             void onSpellButtonClick(MyGUI::Widget* _sender);

@@ -58,12 +58,11 @@ namespace MWGui
                           mSelect->getHeight());
     }
 
-    void SpellBuyingWindow::addSpell(std::string spellID)
+    void SpellBuyingWindow::addSpell(std::string spellId)
     {
-        MyGUI::Button* toAdd;
-        const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().spells.find(spellID);
+        const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().spells.find(spellId);
         int price = spell->data.cost*MWBase::Environment::get().getWorld()->getStore().gameSettings.search("fSpellValueMult")->f;
-        toAdd = mSpellsClientWidget->createWidget<MyGUI::Button>((price>mWindowManager.getInventoryWindow()->getPlayerGold()) ? "SandTextGreyedOut" : "SpellText", 0, mCurrentY, 200, sLineHeight, MyGUI::Align::Default);
+        MyGUI::Button* toAdd = mSpellsClientWidget->createWidget<MyGUI::Button>((price>mWindowManager.getInventoryWindow()->getPlayerGold()) ? "SandTextGreyedOut" : "SpellText", 0, mCurrentY, 200, sLineHeight, MyGUI::Align::Default);
         mCurrentY += sLineHeight;
         /// \todo price adjustment depending on merchantile skill
         toAdd->setUserData(price);
@@ -71,9 +70,9 @@ namespace MWGui
         toAdd->setSize(toAdd->getTextSize().width,sLineHeight);
         toAdd->eventMouseWheel += MyGUI::newDelegate(this, &SpellBuyingWindow::onMouseWheel);
         toAdd->setUserString("ToolTipType", "Spell");
-        toAdd->setUserString("Spell", spellID);
+        toAdd->setUserString("Spell", spellId);
         toAdd->eventMouseButtonClick += MyGUI::newDelegate(this, &SpellBuyingWindow::onSpellButtonClick);
-        mSpellsWidgetMap.insert(std::pair<MyGUI::Widget*, const ESM::Spell*>(toAdd,spell));
+        mSpellsWidgetMap.insert(std::make_pair (toAdd, spellId));
     }
 
     void SpellBuyingWindow::clearSpells()
@@ -92,33 +91,33 @@ namespace MWGui
         mActor = actor;
         clearSpells();
 
-        if (actor.getTypeName() == typeid(ESM::NPC).name())
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+        MWMechanics::CreatureStats& stats = MWWorld::Class::get(player).getCreatureStats(player);
+        MWMechanics::Spells& playerSpells = stats.getSpells();
+        /// \todo get spell list via class interface
+        std::vector<std::string> spellList = actor.get<ESM::NPC>()->base->spells.list;
+        for (std::vector<std::string>::const_iterator it = spellList.begin(); it != spellList.end(); ++it)
         {
-            MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
-            MWMechanics::CreatureStats& stats = MWWorld::Class::get(player).getCreatureStats(player);
-            MWMechanics::Spells& playerSpells = stats.getSpells();
-            std::vector<std::string> spellList = actor.get<ESM::NPC>()->base->spells.list;
-            for (std::vector<std::string>::const_iterator it = spellList.begin(); it != spellList.end(); ++it)
+            bool alreadyHave = false;
+            for (std::vector<std::string>::const_iterator it2 = playerSpells.begin(); it2 != playerSpells.end(); ++it2)
             {
-                bool alreadyHave = false;
-                for (std::vector<std::string>::const_iterator it2 = playerSpells.begin(); it2 != playerSpells.end(); ++it2)
+                if (*it==*it2)
                 {
-                    std::string spellname1 = MWBase::Environment::get().getWorld()->getStore().spells.find(*it)->name;
-                    std::string spellname2 = MWBase::Environment::get().getWorld()->getStore().spells.find(*it2)->name;
-                    if (spellname1.compare(spellname2)==0)
-                        alreadyHave = true;
+                    alreadyHave = true;
+                    break;
                 }
-                if (alreadyHave==false)
-                    addSpell(*it);
             }
+            
+            if (alreadyHave==false)
+                addSpell(*it);
         }
+
         updateLabels();
         updateScroller();
     }
 
     void SpellBuyingWindow::onSpellButtonClick(MyGUI::Widget* _sender)
     {
-        const ESM::Spell* spell = mSpellsWidgetMap.find(_sender)->second;
         int price = *_sender->getUserData<int>();
 
         if (mWindowManager.getInventoryWindow()->getPlayerGold()>=price)
@@ -126,7 +125,7 @@ namespace MWGui
             MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
             MWMechanics::CreatureStats& stats = MWWorld::Class::get(player).getCreatureStats(player);
             MWMechanics::Spells& spells = stats.getSpells();
-            spells.add(spell->name);
+            spells.add (mSpellsWidgetMap.find(_sender)->second);
             mWindowManager.getTradeWindow()->addOrRemoveGold(-price);
             mSpellsScrollerWidget->setScrollPosition(0);
             onScrollChangePosition(mSpellsScrollerWidget, mSpellsScrollerWidget->getScrollPosition());
