@@ -186,6 +186,7 @@ void ToolTips::onFrame(float frameDuration)
                     params.mMagnMax = it->magnMax;
                     params.mRange = it->range;
                     params.mIsConstant = (spell->data.type == ESM::Spell::ST_Ability);
+                    params.mNoTarget = false;
                     effects.push_back(params);
                 }
                 info.effects = effects;
@@ -420,7 +421,7 @@ IntSize ToolTips::createToolTip(const MWGui::ToolTipInfo& info)
         effectsWidget->setEffectList(info.effects);
 
         std::vector<MyGUI::WidgetPtr> effectItems;
-        effectsWidget->createEffectWidgets(effectItems, effectArea, coord, true, Widgets::MWEffectList::EF_NoTarget);
+        effectsWidget->createEffectWidgets(effectItems, effectArea, coord, true, info.isPotion ? Widgets::MWEffectList::EF_NoTarget : 0);
         totalSize.height += coord.top-6;
         totalSize.width = std::max(totalSize.width, coord.width);
     }

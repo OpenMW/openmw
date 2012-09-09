@@ -13,6 +13,10 @@ namespace MWGui
     struct ToolTipInfo
     {
     public:
+        ToolTipInfo()
+            : isPotion(false)
+        {}
+
         std::string caption;
         std::string text;
         std::string icon;
@@ -22,6 +26,8 @@ namespace MWGui
 
         // effects (for potions, ingredients)
         Widgets::SpellEffectList effects;
+
+        bool isPotion; // potions do not show target in the tooltip
     };
 
     class ToolTips : public OEngine::GUI::Layout
