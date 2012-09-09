@@ -173,8 +173,7 @@ namespace MWGui
 
         for (unsigned int i=0;i<mSpellsClientWidget->getChildCount();i++)
         {
-            MyGUI::Widget* toMove;
-            toMove = mSpellsClientWidget->getChildAt(i);
+            MyGUI::Widget* toMove = mSpellsClientWidget->getChildAt(i);
             toMove->setCoord(toMove->getCoord() + MyGUI::IntPoint(0, diff));
         }
     }
