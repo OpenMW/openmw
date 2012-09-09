@@ -48,12 +48,10 @@ namespace MWGui
             void addGroup(const std::string &label, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
             MyGUI::TextBox* addValueItem(const std::string& text, const std::string &value, const std::string& state, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
             MyGUI::Widget* addItem(const std::string& text, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
-            void updateScroller();
 
             void setFactions (const FactionList& factions);
             void setBirthSign (const std::string &signId);
 
-            void onScrollChangePosition(MyGUI::ScrollBar* scroller, size_t pos);
             void onWindowResize(MyGUI::Window* window);
             void onMouseWheel(MyGUI::Widget* _sender, int _rel);
 
@@ -62,8 +60,8 @@ namespace MWGui
             MyGUI::Widget* mLeftPane;
             MyGUI::Widget* mRightPane;
 
-            MyGUI::WidgetPtr mSkillAreaWidget, mSkillClientWidget;
-            MyGUI::ScrollBar* mSkillScrollerWidget;
+            MyGUI::WidgetPtr mSkillAreaWidget;
+            MyGUI::ScrollView* mSkillView;
             int mLastPos, mClientHeight;
 
             SkillList mMajorSkills, mMinorSkills, mMiscSkills;
