@@ -25,7 +25,7 @@ namespace MWGui
         public:
             SpellBuyingWindow(MWBase::WindowManager& parWindowManager);
 
-            void startSpellBuying(MWWorld::Ptr actor);
+            void startSpellBuying(const MWWorld::Ptr& actor);
 
         protected:
             MyGUI::Button* mCancelButton;
@@ -45,7 +45,7 @@ namespace MWGui
             void updateScroller();
             void onScrollChangePosition(MyGUI::ScrollBar* scroller, size_t pos);
             void onMouseWheel(MyGUI::Widget* _sender, int _rel);
-            void addSpell(std::string spellID);
+            void addSpell(const std::string& spellID);
             void clearSpells();
             int mLastPos,mCurrentY;
 

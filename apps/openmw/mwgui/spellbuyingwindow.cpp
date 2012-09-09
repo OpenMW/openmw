@@ -23,7 +23,6 @@ namespace MWGui
     SpellBuyingWindow::SpellBuyingWindow(MWBase::WindowManager& parWindowManager) :
         WindowBase("openmw_spell_buying_window.layout", parWindowManager)
         , ContainerBase(NULL) // no drag&drop
-        , mSpellsWidgetMap()
         , mCurrentY(0)
         , mLastPos(0)
     {
@@ -58,7 +57,7 @@ namespace MWGui
                           mSelect->getHeight());
     }
 
-    void SpellBuyingWindow::addSpell(std::string spellId)
+    void SpellBuyingWindow::addSpell(const std::string& spellId)
     {
         const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().spells.find(spellId);
         int price = spell->data.cost*MWBase::Environment::get().getWorld()->getStore().gameSettings.search("fSpellValueMult")->f;
@@ -85,7 +84,7 @@ namespace MWGui
         mSpellsWidgetMap.clear();
     }
 
-    void SpellBuyingWindow::startSpellBuying(MWWorld::Ptr actor)
+    void SpellBuyingWindow::startSpellBuying(const MWWorld::Ptr& actor)
     {
         center();
         mActor = actor;
@@ -94,7 +93,7 @@ namespace MWGui
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
         MWMechanics::CreatureStats& stats = MWWorld::Class::get(player).getCreatureStats(player);
         MWMechanics::Spells& playerSpells = stats.getSpells();
-        /// \todo get spell list via class interface
+        /// \todo get spell list via MWWorld::Class interface
         std::vector<std::string> spellList = actor.get<ESM::NPC>()->base->spells.list;
         for (std::vector<std::string>::const_iterator it = spellList.begin(); it != spellList.end(); ++it)
         {
@@ -172,8 +171,7 @@ namespace MWGui
             return;
         mLastPos = pos;
 
-        unsigned int i;
-        for (i=0;i<mSpellsClientWidget->getChildCount();i++)
+        for (unsigned int i=0;i<mSpellsClientWidget->getChildCount();i++)
         {
             MyGUI::Widget* toMove;
             toMove = mSpellsClientWidget->getChildAt(i);
