@@ -24,7 +24,6 @@ const int StatsWindow::sLineHeight = 18;
 
 StatsWindow::StatsWindow (MWBase::WindowManager& parWindowManager)
   : WindowPinnableBase("openmw_stats_window.layout", parWindowManager)
-  , mSkillAreaWidget(NULL)
   , mSkillView(NULL)
   , mClientHeight(0)
   , mMajorSkills()
@@ -61,7 +60,6 @@ StatsWindow::StatsWindow (MWBase::WindowManager& parWindowManager)
         setText (names[i][0], store.gameSettings.find (names[i][1])->str);
     }
 
-    getWidget(mSkillAreaWidget, "Skills");
     getWidget(mSkillView, "SkillView");
     getWidget(mLeftPane, "LeftPane");
     getWidget(mRightPane, "RightPane");

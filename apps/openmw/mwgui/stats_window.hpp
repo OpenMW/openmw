@@ -60,7 +60,6 @@ namespace MWGui
             MyGUI::Widget* mLeftPane;
             MyGUI::Widget* mRightPane;
 
-            MyGUI::WidgetPtr mSkillAreaWidget;
             MyGUI::ScrollView* mSkillView;
             int mLastPos, mClientHeight;
 
