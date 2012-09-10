@@ -13,6 +13,7 @@
 #include "../mwworld/actionteleport.hpp"
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/physicssystem.hpp"
+#include "../mwworld/inventorystore.hpp"
 
 #include "../mwgui/tooltips.hpp"
 
@@ -74,60 +75,80 @@ namespace MWClass
         const std::string lockedSound = "LockedDoor";
         const std::string trapActivationSound = "Disarm Trap Fail";
 
-        if (ptr.getCellRef().lockLevel>0)
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld ()->getPlayer().getPlayer();
+        MWWorld::InventoryStore& invStore = MWWorld::Class::get(player).getInventoryStore(player);
+
+        bool needKey = ptr.getCellRef().lockLevel>0;
+        bool hasKey = false;
+        std::string keyName;
+        for (MWWorld::ContainerStoreIterator it = invStore.begin(); it != invStore.end(); ++it)
         {
-            // TODO check for key
-            // TODO report failure to player (message, sound?). Look up behaviour of original MW.
-            std::cout << "Locked!" << std::endl;
-
-            boost::shared_ptr<MWWorld::Action> action(new MWWorld::NullAction);
-
-            action->setSound(lockedSound);
-
-            return action;
-        }
-
-        if(!ptr.getCellRef().trap.empty())
-        {
-            // Trap activation
-            std::cout << "Activated trap: " << ptr.getCellRef().trap << std::endl;
-
-            boost::shared_ptr<MWWorld::Action> action(new MWWorld::NullAction);
-
-            action->setSound(trapActivationSound);
-            ptr.getCellRef().trap = "";
-
-            return action;
-        }
-
-        if (ref->ref.teleport)
-        {
-            // teleport door
-            /// \todo remove this if clause once ActionTeleport can also support other actors
-            if (MWBase::Environment::get().getWorld()->getPlayer().getPlayer()==actor)
+            if (it->getCellRef ().refID == ptr.getCellRef().key)
             {
-            	boost::shared_ptr<MWWorld::Action> action(new MWWorld::ActionTeleport (ref->ref.destCell, ref->ref.doorDest));
+                hasKey = true;
+                keyName = MWWorld::Class::get(*it).getName(*it);
+            }
+        }
 
-            	action->setSound(openSound);
+        if (needKey && hasKey)
+        {
+            MWBase::Environment::get().getWindowManager ()->messageBox (keyName + " #{sKeyUsed}", std::vector<std::string>());
+            ptr.getCellRef().lockLevel = 0;
+            // using a key disarms the trap
+            ptr.getCellRef().trap = "";
+        }
+
+        if (!needKey || hasKey)
+        {
+            if(!ptr.getCellRef().trap.empty())
+            {
+                // Trap activation
+                std::cout << "Activated trap: " << ptr.getCellRef().trap << std::endl;
+
+                boost::shared_ptr<MWWorld::Action> action(new MWWorld::NullAction);
+
+                action->setSound(trapActivationSound);
+                ptr.getCellRef().trap = "";
 
                 return action;
             }
+
+            if (ref->ref.teleport)
+            {
+                // teleport door
+                /// \todo remove this if clause once ActionTeleport can also support other actors
+                if (MWBase::Environment::get().getWorld()->getPlayer().getPlayer()==actor)
+                {
+                    boost::shared_ptr<MWWorld::Action> action(new MWWorld::ActionTeleport (ref->ref.destCell, ref->ref.doorDest));
+
+                    action->setSound(openSound);
+
+                    return action;
+                }
+                else
+                {
+                    // another NPC or a creature is using the door
+                    return boost::shared_ptr<MWWorld::Action> (new MWWorld::NullAction);
+                }
+            }
             else
             {
-                // another NPC or a creature is using the door
-                return boost::shared_ptr<MWWorld::Action> (new MWWorld::NullAction);
+                // animated door
+                // TODO return action for rotating the door
+
+                // This is a little pointless, but helps with testing
+                boost::shared_ptr<MWWorld::Action> action(new MWWorld::NullAction);
+
+                action->setSound(openSound);
+
+                return action;
             }
         }
         else
         {
-            // animated door
-            // TODO return action for rotating the door
-
-            // This is a little pointless, but helps with testing
+            // locked, and we can't open.
             boost::shared_ptr<MWWorld::Action> action(new MWWorld::NullAction);
-
-            action->setSound(openSound);
-
+            action->setSound(lockedSound);
             return action;
         }
     }

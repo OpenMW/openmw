@@ -179,7 +179,8 @@ namespace MWGui
         mWindowManager.getInventoryWindow()->transferBoughtItems();
 
         // add or remove gold from the player.
-        addOrRemoveGold(mCurrentBalance);
+        if (mCurrentBalance != 0)
+            addOrRemoveGold(mCurrentBalance);
 
         std::string sound = "Item Gold Up";
         MWBase::Environment::get().getSoundManager()->playSound (sound, 1.0, 1.0);

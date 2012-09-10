@@ -14,6 +14,8 @@
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/actionopen.hpp"
 #include "../mwworld/physicssystem.hpp"
+#include "../mwworld/player.hpp"
+#include "../mwworld/inventorystore.hpp"
 
 #include "../mwgui/tooltips.hpp"
 
@@ -87,15 +89,31 @@ namespace MWClass
         const std::string lockedSound = "LockedChest";
         const std::string trapActivationSound = "Disarm Trap Fail";
 
-        if (ptr.getCellRef().lockLevel>0)
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld ()->getPlayer().getPlayer();
+        MWWorld::InventoryStore& invStore = MWWorld::Class::get(player).getInventoryStore(player);
+
+        bool needKey = ptr.getCellRef().lockLevel>0;
+        bool hasKey = false;
+        std::string keyName;
+        for (MWWorld::ContainerStoreIterator it = invStore.begin(); it != invStore.end(); ++it)
         {
-            // TODO check for key
-            std::cout << "Locked container" << std::endl;
-            boost::shared_ptr<MWWorld::Action> action(new MWWorld::NullAction);
-            action->setSound(lockedSound);
-            return action;
+            if (it->getCellRef ().refID == ptr.getCellRef().key)
+            {
+                hasKey = true;
+                keyName = MWWorld::Class::get(*it).getName(*it);
+            }
         }
-        else
+
+        if (needKey && hasKey)
+        {
+            MWBase::Environment::get().getWindowManager ()->messageBox (keyName + " #{sKeyUsed}", std::vector<std::string>());
+            ptr.getCellRef().lockLevel = 0;
+            // using a key disarms the trap
+            ptr.getCellRef().trap = "";
+        }
+
+
+        if (!needKey || hasKey)
         {
             if(ptr.getCellRef().trap.empty())
             {
@@ -111,6 +129,12 @@ namespace MWClass
                 ptr.getCellRef().trap = "";
                 return action;
             }
+        }
+        else
+        {
+            boost::shared_ptr<MWWorld::Action> action(new MWWorld::NullAction);
+            action->setSound(lockedSound);
+            return action;
         }
     }
 
