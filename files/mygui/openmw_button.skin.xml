@@ -74,7 +74,7 @@
         <Child type="Widget" skin="BTN_BottomRight" offset="132 20 4 4" align="ALIGN_BOTTOM ALIGN_RIGHT"/>
 
         <BasisSkin type="SimpleText" offset="4 4 128 16" align="ALIGN_STRETCH">
-            <State name="disabled" colour="0.5 0.5 0.5" shift="0"/>
+            <State name="disabled" colour="0.6 0.56 0.45" shift="0"/>
             <State name="normal" colour="0.75 0.6 0.35" shift="0"/>
             <State name="highlighted" colour="0.85 0.76 0.60" shift="0"/>
             <State name="pushed" colour="1 1 1" shift="0"/>
