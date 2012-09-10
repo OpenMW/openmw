@@ -10,6 +10,7 @@ please notify a developer.
 Programmers:
 Marc Zinnschlag (Zini) - Lead Programmer/Project Manager
 
+Adam Hogan (aurix)
 Aleksandar Jovanov
 Alexander Olofsson (Ace)
 Artem Kotsynyak (greye)
