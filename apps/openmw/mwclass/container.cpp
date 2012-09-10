@@ -100,7 +100,6 @@ namespace MWClass
             if(ptr.getCellRef().trap.empty())
             {
                 boost::shared_ptr<MWWorld::Action> action (new MWWorld::ActionOpen(ptr));
-                action->setSound ("chest open");
                 return action;
             }
             else
