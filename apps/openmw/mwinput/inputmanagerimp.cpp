@@ -380,6 +380,11 @@ namespace MWInput
             adjustMouseRegion(Settings::Manager::getInt("resolution x", "Video"), Settings::Manager::getInt("resolution y", "Video"));
     }
 
+    bool InputManager::getControlSwitch (const std::string& sw)
+    {
+        return mControlSwitch[sw];
+    }
+
     void InputManager::toggleControlSwitch (const std::string& sw, bool value)
     {
         if (mControlSwitch[sw] == value) {

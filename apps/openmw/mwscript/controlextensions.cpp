@@ -41,6 +41,22 @@ namespace MWScript
                 }
         };
 
+        class OpGetDisabled : public Interpreter::Opcode0
+        {
+                std::string mControl;
+
+            public:
+
+                OpGetDisabled (const std::string& control)
+                : mControl (control)
+                {}
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    runtime.push(!MWBase::Environment::get().getInputManager()->getControlSwitch (mControl));
+                }
+        };
+
         class OpToggleCollision : public Interpreter::Opcode0
         {
             public:
@@ -103,6 +119,7 @@ namespace MWScript
         const int opcodeClearForceSneakExplicit = 0x2000159;
         const int opcodeForceSneak = 0x200015a;
         const int opcodeForceSneakExplicit = 0x200015b;
+        const int opcodeGetDisabled = 0x2000175;
 
         const char *controls[numberOfControls] =
         {
@@ -119,6 +136,7 @@ namespace MWScript
             {
                 extensions.registerInstruction (enable + controls[i], "", opcodeEnable+i);
                 extensions.registerInstruction (disable + controls[i], "", opcodeDisable+i);
+                extensions.registerFunction (std::string("get") + controls[i] + std::string("disabled"), 'l', "", opcodeGetDisabled+i);
             }
 
             extensions.registerInstruction ("togglecollision", "", opcodeToggleCollision);
@@ -141,6 +159,7 @@ namespace MWScript
             {
                 interpreter.installSegment5 (opcodeEnable+i, new OpSetControl (controls[i], true));
                 interpreter.installSegment5 (opcodeDisable+i, new OpSetControl (controls[i], false));
+                interpreter.installSegment5 (opcodeGetDisabled+i, new OpGetDisabled (controls[i]));
             }
 
             interpreter.installSegment5 (opcodeToggleCollision, new OpToggleCollision);

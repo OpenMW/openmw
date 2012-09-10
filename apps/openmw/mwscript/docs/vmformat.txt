@@ -182,4 +182,5 @@ op 0x2000171: user4 (implicit reference, console only, requires --script-console
 op 0x2000172: GetStartingAngle
 op 0x2000173: GetStartingAngle, explicit reference
 op 0x2000174: ToggleVanityMode
+op 0x2000175-0x200018B: Get controls disabled
 opcodes 0x2000175-0x3ffffff unused
