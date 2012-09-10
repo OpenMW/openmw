@@ -43,14 +43,18 @@
                 </Widget>
 
 
-                <Widget type="Button" skin="MW_Button" position="4 200 34 24" align="Left Top" name="SubtitlesButton"/>
-                <Widget type="TextBox" skin="SandText" position="44 200 200 24" align="Left Top">
-                    <Property key="Caption" value="#{sSubtitles}"/>
+                <Widget type="HBox" skin="" position="4 200 260 24">
+                    <Widget type="AutoSizedButton" skin="MW_Button" align="Left Top" name="SubtitlesButton"/>
+                    <Widget type="AutoSizedTextBox" skin="SandText" align="Left Top">
+                        <Property key="Caption" value="#{sSubtitles}"/>
+                    </Widget>
                 </Widget>
 
-                <Widget type="Button" skin="MW_Button" position="4 230 34 24" align="Left Top" name="CrosshairButton"/>
-                <Widget type="TextBox" skin="SandText" position="44 230 200 24" align="Left Top">
-                    <Property key="Caption" value="#{sCursorOff}"/>
+                <Widget type="HBox" skin="" position="4 230 260 24">
+                    <Widget type="AutoSizedButton" skin="MW_Button" align="Left Top" name="CrosshairButton"/>
+                    <Widget type="AutoSizedTextBox" skin="SandText" align="Left Top">
+                        <Property key="Caption" value="#{sCursorOff}"/>
+                    </Widget>
                 </Widget>
 
             </Widget>

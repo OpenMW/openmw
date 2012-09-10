@@ -66,26 +66,6 @@ namespace MWGui
         getWidget(itemView, "ItemView");
         setWidgets(containerWidget, itemView);
 
-        // adjust size of buttons to fit text
-        int curX = 0;
-        mFilterAll->setSize( mFilterAll->getTextSize().width + 24, mFilterAll->getSize().height );
-        curX += mFilterAll->getTextSize().width + 24 + 4;
-
-        mFilterWeapon->setPosition(curX, mFilterWeapon->getPosition().top);
-        mFilterWeapon->setSize( mFilterWeapon->getTextSize().width + 24, mFilterWeapon->getSize().height );
-        curX += mFilterWeapon->getTextSize().width + 24 + 4;
-
-        mFilterApparel->setPosition(curX, mFilterApparel->getPosition().top);
-        mFilterApparel->setSize( mFilterApparel->getTextSize().width + 24, mFilterApparel->getSize().height );
-        curX += mFilterApparel->getTextSize().width + 24 + 4;
-
-        mFilterMagic->setPosition(curX, mFilterMagic->getPosition().top);
-        mFilterMagic->setSize( mFilterMagic->getTextSize().width + 24, mFilterMagic->getSize().height );
-        curX += mFilterMagic->getTextSize().width + 24 + 4;
-
-        mFilterMisc->setPosition(curX, mFilterMisc->getPosition().top);
-        mFilterMisc->setSize( mFilterMisc->getTextSize().width + 24, mFilterMisc->getSize().height );
-
         mFilterAll->eventMouseButtonClick += MyGUI::newDelegate(this, &InventoryWindow::onFilterChanged);
         mFilterWeapon->eventMouseButtonClick += MyGUI::newDelegate(this, &InventoryWindow::onFilterChanged);
         mFilterApparel->eventMouseButtonClick += MyGUI::newDelegate(this, &InventoryWindow::onFilterChanged);

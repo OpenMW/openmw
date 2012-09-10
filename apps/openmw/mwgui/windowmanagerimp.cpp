@@ -102,6 +102,10 @@ WindowManager::WindowManager(
     MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWSpellEffect>("Widget");
     MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWDynamicStat>("Widget");
     MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWList>("Widget");
+    MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::HBox>("Widget");
+    MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::VBox>("Widget");
+    MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::AutoSizedTextBox>("Widget");
+    MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::AutoSizedButton>("Widget");
 
     MyGUI::LanguageManager::getInstance().eventRequestTag = MyGUI::newDelegate(this, &WindowManager::onRetrieveTag);
 
