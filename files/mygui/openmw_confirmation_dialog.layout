@@ -13,11 +13,14 @@
             <Property key="MultiLine" value="true" />
         </Widget>
 
-        <Widget type="Button" skin="MW_Button" position="212 84 60 24" name="OkButton" align="Right Bottom">
-            <Property key="Caption" value="#{sOk}"/>
-        </Widget>
-        <Widget type="Button" skin="MW_Button" position="117 84 60 24" name="CancelButton" align="Right Bottom">
-            <Property key="Caption" value="#{sCancel}"/>
+        <Widget type="HBox" position="0 84 272 24">
+            <Widget type="Widget"/> <!-- spacer -->
+            <Widget type="AutoSizedButton" skin="MW_Button" name="CancelButton" align="Right Bottom">
+                <Property key="Caption" value="#{sCancel}"/>
+            </Widget>
+            <Widget type="AutoSizedButton" skin="MW_Button" name="OkButton" align="Right Bottom">
+                <Property key="Caption" value="#{sOk}"/>
+            </Widget>
         </Widget>
 
     </Widget>

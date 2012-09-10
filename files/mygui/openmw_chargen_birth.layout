@@ -14,11 +14,14 @@
         </Widget>
 
         <!-- Dialog buttons -->
-        <Widget type="Button" skin="MW_Button" position="375 340 53 23" name="BackButton">
-            <Property key="Caption" value="#{sBack}"/>
-        </Widget>
-        <Widget type="Button" skin="MW_Button" position="431 340 42 23" name="OKButton">
-            <Property key="Caption" value="OK"/>
+        <Widget type="HBox" position="0 340 473 24">
+            <Widget type="Widget"/> <!-- spacer -->
+            <Widget type="AutoSizedButton" skin="MW_Button" name="BackButton">
+                <Property key="Caption" value="#{sBack}"/>
+            </Widget>
+            <Widget type="AutoSizedButton" skin="MW_Button" name="OKButton">
+                <Property key="Caption" value="OK"/>
+            </Widget>
         </Widget>
     </Widget>
 </MyGUI>

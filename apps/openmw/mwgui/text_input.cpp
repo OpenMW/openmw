@@ -30,10 +30,6 @@ void TextInputDialog::setNextButtonShow(bool shown)
         okButton->setCaption(mWindowManager.getGameSettingString("sNext", ""));
     else
         okButton->setCaption(mWindowManager.getGameSettingString("sOK", ""));
-
-    int okButtonWidth = okButton->getTextSize().width + 24;
-
-    okButton->setCoord(306 - okButtonWidth, 60, okButtonWidth, 23);
 }
 
 void TextInputDialog::setTextLabel(const std::string &label)

@@ -52,13 +52,8 @@ namespace MWGui
         mMainWidget->setSize(mMainWidget->getWidth(),
                              mMainWidget->getHeight() + (mInstructionLabel->getTextSize().height - mInstructionLabel->getHeight()));
 
-        int okButtonWidth = mOkButton->getTextSize ().width + 24;
-        mOkButton->setCoord(mOkButton->getLeft() - (okButtonWidth - mOkButton->getWidth()),
-                            mOkButton->getTop(),
-                            okButtonWidth,
-                            mOkButton->getHeight());
         mOkButton->eventMouseButtonClick += MyGUI::newDelegate(this, &QuickKeysMenu::onOkButtonClicked);
-
+        std::cout << "real ok button is : " << mOkButton->getName() << std::endl;
         center();
 
 
@@ -72,7 +67,6 @@ namespace MWGui
             unassign(button, i);
 
             mQuickKeyButtons.push_back(button);
-
         }
     }
 
@@ -406,12 +400,6 @@ namespace MWGui
         getWidget(mCancelButton, "CancelButton");
         getWidget(mMagicList, "MagicList");
         mCancelButton->eventMouseButtonClick += MyGUI::newDelegate(this, &MagicSelectionDialog::onCancelButtonClicked);
-
-        int dx = (mCancelButton->getTextSize().width + 24) - mCancelButton->getWidth();
-        mCancelButton->setCoord(mCancelButton->getLeft() - dx,
-                               mCancelButton->getTop(),
-                               mCancelButton->getTextSize ().width + 24,
-                               mCancelButton->getHeight());
 
         center();
     }

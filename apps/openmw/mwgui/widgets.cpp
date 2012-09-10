@@ -803,6 +803,15 @@ void AutoSizedWidget::notifySizeChange (MyGUI::Widget* w)
         Box* b = dynamic_cast<Box*>(w->getParent());
         if (b)
             b->notifyChildrenSizeChanged ();
+        else
+        {
+            if (mExpandDirection == MyGUI::Align::Left)
+            {
+                int hdiff = getRequestedSize ().width - w->getSize().width;
+                w->setPosition(w->getPosition() - MyGUI::IntPoint(hdiff, 0));
+            }
+            w->setSize(getRequestedSize ());
+        }
     }
 }
 
@@ -819,10 +828,24 @@ void AutoSizedTextBox::setCaption(const MyGUI::UString& _value)
     notifySizeChange (this);
 }
 
+void AutoSizedTextBox::setPropertyOverride(const std::string& _key, const std::string& _value)
+{
+    if (_key == "ExpandDirection")
+    {
+        mExpandDirection = MyGUI::Align::parse (_value);
+    }
+    else
+    {
+        TextBox::setPropertyOverride (_key, _value);
+    }
+}
+
 
 MyGUI::IntSize AutoSizedButton::getRequestedSize()
 {
-    return getTextSize() + MyGUI::IntSize(24,0);
+    MyGUI::IntSize size = getTextSize() + MyGUI::IntSize(24,0);
+    size.height = std::max(24, size.height);
+    return size;
 }
 
 void AutoSizedButton::setCaption(const MyGUI::UString& _value)
@@ -832,6 +855,17 @@ void AutoSizedButton::setCaption(const MyGUI::UString& _value)
     notifySizeChange (this);
 }
 
+void AutoSizedButton::setPropertyOverride(const std::string& _key, const std::string& _value)
+{
+    if (_key == "ExpandDirection")
+    {
+        mExpandDirection = MyGUI::Align::parse (_value);
+    }
+    else
+    {
+        Button::setPropertyOverride (_key, _value);
+    }
+}
 
 Box::Box()
     : mSpacing(4)
@@ -870,11 +904,15 @@ void HBox::align ()
         {
             sizes.push_back(std::make_pair(aw->getRequestedSize (), hstretch));
             total_width += aw->getRequestedSize ().width;
-            if (i != count-1)
-                total_width += mSpacing;
         }
         else
-            sizes.push_back (std::make_pair(MyGUI::IntSize(0,0), hstretch));
+        {
+            if (!hstretch) h_stretched_count ++;
+            sizes.push_back (std::make_pair(MyGUI::IntSize(0,0), true));
+        }
+
+        if (i != count-1)
+            total_width += mSpacing;
     }
 
     int curX = 0;
@@ -883,11 +921,11 @@ void HBox::align ()
         MyGUI::Widget* w = getChildAt(i);
         MyGUI::IntCoord widgetCoord;
         widgetCoord.left = curX;
-        widgetCoord.top = 0; /// \todo
+        widgetCoord.top = (getSize().height - sizes[i].first.height) / 2;
         int width = sizes[i].second ? sizes[i].first.width + (getSize().width - total_width)/h_stretched_count
                                     : sizes[i].first.width;
         widgetCoord.width = width;
-        widgetCoord.height = getSize().height; /// \todo
+        widgetCoord.height = sizes[i].first.height;
         w->setCoord(widgetCoord);
         curX += width;
 
@@ -925,7 +963,7 @@ MyGUI::IntSize HBox::getRequestedSize ()
 
 void VBox::align ()
 {
-
+    // not yet implemented
 }
 
 void VBox::setSize (const MyGUI::IntSize& _value)

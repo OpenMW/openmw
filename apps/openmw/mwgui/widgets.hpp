@@ -315,6 +315,8 @@ namespace MWGui
 
         protected:
             void notifySizeChange(MyGUI::Widget* w);
+
+            MyGUI::Align mExpandDirection;
         };
 
         class AutoSizedTextBox : public AutoSizedWidget, public MyGUI::TextBox
@@ -324,6 +326,9 @@ namespace MWGui
         public:
             virtual MyGUI::IntSize getRequestedSize();
             virtual void setCaption(const MyGUI::UString& _value);
+
+        protected:
+            virtual void setPropertyOverride(const std::string& _key, const std::string& _value);
         };
 
         class AutoSizedButton : public AutoSizedWidget, public MyGUI::Button
@@ -333,6 +338,9 @@ namespace MWGui
         public:
             virtual MyGUI::IntSize getRequestedSize();
             virtual void setCaption(const MyGUI::UString& _value);
+
+        protected:
+            virtual void setPropertyOverride(const std::string& _key, const std::string& _value);
         };
 
         /**

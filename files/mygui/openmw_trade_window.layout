@@ -5,20 +5,20 @@
         <Property key="Visible" value="false"/>
 
         <!-- Categories -->
-        <Widget type="Widget" position="8 8 566 24" align="Left Top HStretch" name="Categories">
-            <Widget type="Button" skin="MW_Button" position="0 0 60 24" name="AllButton">
+        <Widget type="HBox" position="8 8 566 24" align="Left Top HStretch" name="Categories">
+            <Widget type="AutoSizedButton" skin="MW_Button" name="AllButton">
                 <Property key="Caption" value="#{sAllTab}"/>
             </Widget>
-            <Widget type="Button" skin="MW_Button" position="0 0 60 24" name="WeaponButton">
+            <Widget type="AutoSizedButton" skin="MW_Button" name="WeaponButton">
                 <Property key="Caption" value="#{sWeaponTab}"/>
             </Widget>
-            <Widget type="Button" skin="MW_Button" position="0 0 60 24" name="ApparelButton">
+            <Widget type="AutoSizedButton" skin="MW_Button" name="ApparelButton">
                 <Property key="Caption" value="#{sApparelTab}"/>
             </Widget>
-            <Widget type="Button" skin="MW_Button" position="0 0 60 24" name="MagicButton">
+            <Widget type="AutoSizedButton" skin="MW_Button" name="MagicButton">
                 <Property key="Caption" value="#{sMagicTab}"/>
             </Widget>
-            <Widget type="Button" skin="MW_Button" position="0 0 60 24" name="MiscButton">
+            <Widget type="AutoSizedButton" skin="MW_Button" name="MiscButton">
                 <Property key="Caption" value="#{sMiscTab}"/>
             </Widget>
         </Widget>
@@ -51,14 +51,18 @@
                 <Property key="TextAlign" value="Center"/>
             </Widget>
 
-            <Widget type="Button" skin="MW_Button" position="0 60 60 24" name="MaxSaleButton" align="Left Top">
+            <Widget type="AutoSizedButton" skin="MW_Button" position="0 60 60 24" name="MaxSaleButton" align="Left Top">
                 <Property key="Caption" value="Max. Sale"/> <!-- GMST sMaxSale doesn't work -->
             </Widget>
-            <Widget type="Button" skin="MW_Button" position="0 60 60 24" name="CancelButton" align="Right Top">
-                <Property key="Caption" value="#{sCancel}"/>
-            </Widget>
-            <Widget type="Button" skin="MW_Button" position="0 60 60 24" name="OfferButton" align="Right Top">
-                <Property key="Caption" value="#{sBarterDialog8}"/>
+
+            <Widget type="HBox" position="0 60 566 24" align="Right Bottom">
+                <Widget type="Widget"/>
+                <Widget type="AutoSizedButton" skin="MW_Button" name="OfferButton" align="Right Top">
+                    <Property key="Caption" value="#{sBarterDialog8}"/>
+                </Widget>
+                <Widget type="AutoSizedButton" skin="MW_Button" name="CancelButton" align="Right Top">
+                    <Property key="Caption" value="#{sCancel}"/>
+                </Widget>
             </Widget>
         </Widget>
 

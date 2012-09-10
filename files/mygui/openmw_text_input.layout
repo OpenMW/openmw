@@ -10,7 +10,8 @@
         <Widget type="EditBox" skin="MW_TextEdit" position="6 28 300 30" name="TextEdit" align="ALIGN_LEFT ALIGN_TOP"/>
 
         <!-- Dialog buttons -->
-        <Widget type="Button" skin="MW_Button" position="264 60 42 23" name="OKButton">
+        <Widget type="AutoSizedButton" skin="MW_Button" position="264 60 42 23" name="OKButton">
+            <Property key="ExpandDirection" value="Left"/>
             <Property key="Caption" value="OK"/>
         </Widget>
     </Widget>

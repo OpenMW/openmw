@@ -103,15 +103,16 @@
                     <Widget type="ScrollView" skin="MW_ScrollView" name="ControlsBox" position="4 4 336 142"/>
                 </Widget>
 
-                <Widget type="Button" skin="MW_Button" name="ResetControlsButton" position="4 162 100 24">
+                <Widget type="AutoSizedButton" skin="MW_Button" name="ResetControlsButton" position="4 162 100 24">
                     <Property key="Caption" value="#{sControlsMenu1}"/>
                 </Widget>
 
-                <Widget type="Button" skin="MW_Button" name="InvertYButton" position="4 192 32 24"/>
-                <Widget type="TextBox" skin="SandText" position="40 192 200 24">
-                    <Property key="Caption" value="#{sMouseFlip}"/>
+                <Widget type="HBox" position="4 192 300 24">
+                    <Widget type="AutoSizedButton" skin="MW_Button" name="InvertYButton"/>
+                    <Widget type="AutoSizedTextBox" skin="SandText">
+                        <Property key="Caption" value="#{sMouseFlip}"/>
+                    </Widget>
                 </Widget>
-
 
                 <Widget type="TextBox" skin="NormalText" position="4 228 160 18" align="Left Top">
                     <Property key="Caption" value="UI cursor sensitivity"/>
@@ -157,26 +158,35 @@
                         <Property key="Caption" value="  Video  "/>
 
                         <Widget type="ListBox" skin="MW_List" position="4 4 200 150" align="Left Top" name="ResolutionList"/>
-                        <Widget type="TextBox" skin="SandText" position="252 4 120 24" align="Left Top">
-                            <Property key="Caption" value="Fullscreen"/>
-                        </Widget>
-
-                        <Widget type="Button" skin="MW_Button" position="212 4 34 24" align="Left Top" name="FullscreenButton"/>
-                        <Widget type="TextBox" skin="SandText" position="252 34 120 24" align="Left Top">
-                            <Property key="Caption" value="VSync"/>
-                        </Widget>
-                        <Widget type="Button" skin="MW_Button" position="212 34 34 24" align="Left Top" name="VSyncButton"/>
-
-                        <Widget type="TextBox" skin="SandText" position="262 104 120 24" align="Left Top">
-                            <Property key="Caption" value="Shaders"/>
-                        </Widget>
-                        <Widget type="Button" skin="MW_Button" position="212 104 44 24" align="Left Top" name="ShadersButton"/>
 
 
-                        <Widget type="TextBox" skin="SandText" position="74 163 250 24" align="Left Top">
-                            <Property key="Caption" value="Show frames per second"/>
+                        <Widget type="HBox" position="212 4 300 24">
+                            <Widget type="AutoSizedButton" skin="MW_Button" align="Left Top" name="FullscreenButton"/>
+                            <Widget type="AutoSizedTextBox" skin="SandText" align="Left Top">
+                                <Property key="Caption" value="Fullscreen"/>
+                            </Widget>
                         </Widget>
-                        <Widget type="Button" skin="MW_Button" position="4 163 64 24" align="Left Top" name="FPSButton"/>
+
+                        <Widget type="HBox" position="212 34 300 24">
+                            <Widget type="AutoSizedButton" skin="MW_Button" align="Left Top" name="VSyncButton"/>
+                            <Widget type="AutoSizedTextBox" skin="SandText" align="Left Top">
+                                <Property key="Caption" value="VSync"/>
+                            </Widget>
+                        </Widget>
+
+                        <Widget type="HBox" position="212 104 300 24">
+                            <Widget type="AutoSizedButton" skin="MW_Button" align="Left Top" name="ShadersButton"/>
+                            <Widget type="AutoSizedTextBox" skin="SandText" align="Left Top">
+                                <Property key="Caption" value="Shaders"/>
+                            </Widget>
+                        </Widget>
+
+                        <Widget type="HBox" position="4 163 300 24">
+                            <Widget type="AutoSizedButton" skin="MW_Button" align="Left Top" name="FPSButton"/>
+                            <Widget type="AutoSizedTextBox" skin="SandText" align="Left Top">
+                                <Property key="Caption" value="Show frames per second"/>
+                            </Widget>
+                        </Widget>
 
                         <Widget type="TextBox" skin="NormalText" position="4 198 329 18" align="Left Top" name="FovText">
                             <Property key="Caption" value="Field of View"/>
@@ -200,7 +210,7 @@
                         <Widget type="TextBox" skin="NormalText" position="4 4 300 24" align="Left Top">
                             <Property key="Caption" value="Texture filtering"/>
                         </Widget>
-                        <Widget type="Button" skin="MW_Button" position="18 28 140 24" align="Left Top" name="TextureFilteringButton"/>
+                        <Widget type="AutoSizedButton" skin="MW_Button" position="18 28 140 24" align="Left Top" name="TextureFilteringButton"/>
 
                         <Widget type="Widget" skin="" position="184 4 300 50" align="Left Top" name="AnisotropyBox">
                             <Widget type="TextBox" skin="SandText" position="0 0 300 24" align="Left Top" name="AnisotropyLabel">
@@ -230,74 +240,99 @@
                     <Widget type="TabItem" skin="" position="4 28 344 272">
                         <Property key="Caption" value="  Water  "/>
 
-                        <Widget type="TextBox" skin="SandText" position="42 4 120 24" align="Left Top">
-                            <Property key="Caption" value="Reflection"/>
+
+                        <Widget type="HBox" position="4 4 350 24">
+                            <Widget type="AutoSizedButton" skin="MW_Button" position="4 4 34 24" align="Left Top" name="WaterShaderButton"/>
+                            <Widget type="AutoSizedTextBox" skin="SandText" position="42 4 120 24" align="Left Top">
+                                <Property key="Caption" value="Reflection"/>
+                            </Widget>
                         </Widget>
-                        <Widget type="Button" skin="MW_Button" position="4 4 34 24" align="Left Top" name="WaterShaderButton"/>
+
 
                         <Widget type="Widget" skin="" position="24 32 300 230">
-                            <Widget type="TextBox" skin="SandText" position="42 0 120 24" align="Left Top">
-                                <Property key="Caption" value="Reflect actors"/>
+                            <Widget type="HBox" position="4 0 350 24">
+                                <Widget type="AutoSizedButton" skin="MW_Button" align="Left Top" name="ReflectActorsButton"/>
+                                <Widget type="AutoSizedTextBox" skin="SandText" align="Left Top">
+                                        <Property key="Caption" value="Reflect actors"/>
+                                </Widget>
                             </Widget>
-                            <Widget type="Button" skin="MW_Button" position="4 0 34 24" align="Left Top" name="ReflectActorsButton"/>
 
-                            <Widget type="TextBox" skin="SandText" position="42 28 120 24" align="Left Top">
-                                <Property key="Caption" value="Reflect objects"/>
+                            <Widget type="HBox" position="4 28 350 24">
+                                <Widget type="AutoSizedButton" skin="MW_Button" align="Left Top" name="ReflectObjectsButton"/>
+                                <Widget type="AutoSizedTextBox" skin="SandText" align="Left Top">
+                                    <Property key="Caption" value="Reflect objects"/>
+                                </Widget>
                             </Widget>
-                            <Widget type="Button" skin="MW_Button" position="4 28 34 24" align="Left Top" name="ReflectObjectsButton"/>
 
-                            <Widget type="TextBox" skin="SandText" position="42 56 120 24" align="Left Top">
-                                <Property key="Caption" value="Reflect terrain"/>
+                            <Widget type="HBox" position="4 56 350 24">
+                                <Widget type="AutoSizedButton" skin="MW_Button" align="Left Top" name="ReflectTerrainButton"/>
+                                <Widget type="AutoSizedTextBox" skin="SandText" align="Left Top">
+                                    <Property key="Caption" value="Reflect terrain"/>
+                                </Widget>
                             </Widget>
-                            <Widget type="Button" skin="MW_Button" position="4 56 34 24" align="Left Top" name="ReflectTerrainButton"/>
-
                         </Widget>
 
-                        <Widget type="TextBox" skin="SandText" position="42 135 300 24" align="Left Top">
-                            <Property key="Caption" value="Underwater effects (caustics, fog)"/>
+                        <Widget type="HBox" position="4 135 350 24">
+                            <Widget type="AutoSizedButton" skin="MW_Button" align="Left Top" name="UnderwaterButton"/>
+                            <Widget type="AutoSizedTextBox" skin="SandText" align="Left Top">
+                                <Property key="Caption" value="Underwater effects (caustics, fog)"/>
+                            </Widget>
                         </Widget>
-                        <Widget type="Button" skin="MW_Button" position="4 135 34 24" align="Left Top" name="UnderwaterButton"/>
                     </Widget>
 
                     <Widget type="TabItem" skin="" position="4 28 344 272">
                         <Property key="Caption" value="  Shadows  "/>
 
-                        <Widget type="TextBox" skin="SandText" position="42 4 120 24" align="Left Top">
-                            <Property key="Caption" value="Enabled"/>
+                        <Widget type="HBox" position="4 4 350 24">
+                            <Widget type="AutoSizedButton" skin="MW_Button" align="Left Top" name="ShadowsEnabledButton"/>
+                            <Widget type="AutoSizedTextBox" skin="SandText" align="Left Top">
+                                <Property key="Caption" value="Enabled"/>
+                            </Widget>
                         </Widget>
-                        <Widget type="Button" skin="MW_Button" position="4 4 34 24" align="Left Top" name="ShadowsEnabledButton"/>
 
                         <Widget type="Widget" skin="" position="24 32 300 230">
-                            <Widget type="TextBox" skin="SandText" position="42 0 300 24" align="Left Top">
-                                <Property key="Caption" value="Large distance (PSSM3)"/>
-                            </Widget>
-                            <Widget type="Button" skin="MW_Button" position="4 0 34 24" align="Left Top" name="ShadowsLargeDistance"/>
 
-                            <Widget type="TextBox" skin="SandText" position="72 28 120 24" align="Left Top">
-                                <Property key="Caption" value="Texture size"/>
+                            <Widget type="HBox" position="4 0 350 24">
+                                <Widget type="AutoSizedButton" skin="MW_Button" align="Left Top" name="ShadowsLargeDistance"/>
+                                <Widget type="AutoSizedTextBox" skin="SandText" align="Left Top">
+                                    <Property key="Caption" value="Large distance (PSSM3)"/>
+                                </Widget>
                             </Widget>
-                            <Widget type="Button" skin="MW_Button" position="4 28 64 24" align="Left Top" name="ShadowsTextureSize"/>
 
-                            <Widget type="TextBox" skin="SandText" position="42 56 120 24" align="Left Top">
-                                <Property key="Caption" value="Actor shadows"/>
+                            <Widget type="HBox" position="4 28 350 24">
+                                <Widget type="AutoSizedButton" skin="MW_Button" align="Left Top" name="ShadowsTextureSize"/>
+                                <Widget type="AutoSizedTextBox" skin="SandText" align="Left Top">
+                                    <Property key="Caption" value="Texture size"/>
+                                </Widget>
                             </Widget>
-                            <Widget type="Button" skin="MW_Button" position="4 56 34 24" align="Left Top" name="ActorShadows"/>
 
-                            <Widget type="TextBox" skin="SandText" position="42 84 120 24" align="Left Top">
-                                <Property key="Caption" value="World shadows"/>
+                            <Widget type="HBox" position="4 56 350 24">
+                                <Widget type="AutoSizedButton" skin="MW_Button" align="Left Top" name="ActorShadows"/>
+                                <Widget type="AutoSizedTextBox" skin="SandText" align="Left Top">
+                                    <Property key="Caption" value="Actor shadows"/>
+                                </Widget>
                             </Widget>
-                            <Widget type="Button" skin="MW_Button" position="4 84 34 24" align="Left Top" name="StaticsShadows"/>
 
-                            <Widget type="TextBox" skin="SandText" position="42 112 120 24" align="Left Top">
-                                <Property key="Caption" value="Misc shadows"/>
+                            <Widget type="HBox" position="4 84 350 24">
+                                <Widget type="AutoSizedButton" skin="MW_Button" align="Left Top" name="StaticsShadows"/>
+                                <Widget type="AutoSizedTextBox" skin="SandText" align="Left Top">
+                                    <Property key="Caption" value="World shadows"/>
+                                </Widget>
                             </Widget>
-                            <Widget type="Button" skin="MW_Button" position="4 112 34 24" align="Left Top" name="MiscShadows"/>
 
-                            <Widget type="TextBox" skin="SandText" position="42 172 120 24" align="Left Top">
-                                <Property key="Caption" value="Debug overlay"/>
+                             <Widget type="HBox" position="4 112 350 24">
+                                <Widget type="AutoSizedButton" skin="MW_Button" align="Left Top" name="MiscShadows"/>
+                                <Widget type="AutoSizedTextBox" skin="SandText" align="Left Top">
+                                    <Property key="Caption" value="Misc shadows"/>
+                                </Widget>
+                             </Widget>
+
+                            <Widget type="HBox" position="4 172 350 24">
+                                <Widget type="AutoSizedButton" skin="MW_Button" align="Left Top" name="ShadowsDebug"/>
+                                <Widget type="AutoSizedTextBox" skin="SandText" align="Left Top">
+                                    <Property key="Caption" value="Debug overlay"/>
+                                </Widget>
                             </Widget>
-                            <Widget type="Button" skin="MW_Button" position="4 172 34 24" align="Left Top" name="ShadowsDebug"/>
-
 
                         </Widget>
 
@@ -307,8 +342,9 @@
             </Widget>
         </Widget>
 
-        <Widget type="Button" skin="MW_Button" position="0 351 60 24" name="OkButton" align="Right Bottom">
-            <Property key="Caption" value="#{sOk}"/>
+        <Widget type="AutoSizedButton" skin="MW_Button" position="317 351 60 24" name="OkButton" align="Right Bottom">
+            <Property key="ExpandDirection" value="Left"/>
+            <Property key="Caption" value="#{sOK}"/>
         </Widget>
 
     </Widget>

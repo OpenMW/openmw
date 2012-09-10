@@ -259,8 +259,6 @@ MapWindow::MapWindow(MWBase::WindowManager& parWindowManager) :
     getWidget(mButton, "WorldButton");
     mButton->eventMouseButtonClick += MyGUI::newDelegate(this, &MapWindow::onWorldButtonClicked);
     mButton->setCaptionWithReplacing("#{sWorld}");
-    int width = mButton->getTextSize().width + 24;
-    mButton->setCoord(mMainWidget->getSize().width - width - 22, mMainWidget->getSize().height - 64, width, 22);
 
     MyGUI::Button* eventbox;
     getWidget(eventbox, "EventBox");
@@ -303,8 +301,6 @@ void MapWindow::onWorldButtonClicked(MyGUI::Widget* _sender)
 
     mButton->setCaptionWithReplacing( mGlobal ? "#{sLocal}" :
             "#{sWorld}");
-    int width = mButton->getTextSize().width + 24;
-    mButton->setCoord(mMainWidget->getSize().width - width - 22, mMainWidget->getSize().height - 64, width, 22);
 }
 
 void MapWindow::onPinToggled()
