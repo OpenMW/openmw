@@ -91,24 +91,21 @@ namespace MWGui
         clearSpells();
 
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
-        MWMechanics::CreatureStats& stats = MWWorld::Class::get(player).getCreatureStats(player);
-        MWMechanics::Spells& playerSpells = stats.getSpells();
-        /// \todo get spell list via MWWorld::Class interface
-        std::vector<std::string> spellList = actor.get<ESM::NPC>()->base->spells.list;
-        for (std::vector<std::string>::const_iterator it = spellList.begin(); it != spellList.end(); ++it)
+
+        MWMechanics::Spells& playerSpells = MWWorld::Class::get (player).getCreatureStats (player).getSpells();
+        MWMechanics::Spells& merchantSpells = MWWorld::Class::get (actor).getCreatureStats (actor).getSpells();
+         
+        for (MWMechanics::Spells::TIterator iter = merchantSpells.begin(); iter!=merchantSpells.end(); ++iter)
         {
-            bool alreadyHave = false;
-            for (std::vector<std::string>::const_iterator it2 = playerSpells.begin(); it2 != playerSpells.end(); ++it2)
-            {
-                if (*it==*it2)
-                {
-                    alreadyHave = true;
-                    break;
-                }
-            }
+            const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().spells.find (*iter);
             
-            if (alreadyHave==false)
-                addSpell(*it);
+            if (spell->data.type!=ESM::Spell::ST_Spell)
+                continue; // don't try to sell diseases, curses or powers
+            
+            if (std::find (playerSpells.begin(), playerSpells.end(), *iter)!=playerSpells.end())
+                continue; // we have that spell already
+            
+            addSpell (*iter);
         }
 
         updateLabels();
