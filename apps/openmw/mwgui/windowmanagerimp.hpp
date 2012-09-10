@@ -105,6 +105,7 @@ namespace MWGui
     virtual MWGui::CountDialog* getCountDialog();
     virtual MWGui::ConfirmationDialog* getConfirmationDialog();
     virtual MWGui::TradeWindow* getTradeWindow();
+    virtual MWGui::SpellBuyingWindow* getSpellBuyingWindow();
     virtual MWGui::SpellWindow* getSpellWindow();
     virtual MWGui::Console* getConsole();
 
@@ -212,6 +213,7 @@ namespace MWGui
     BookWindow* mBookWindow;
     CountDialog* mCountDialog;
     TradeWindow* mTradeWindow;
+    SpellBuyingWindow* mSpellBuyingWindow;
     SettingsWindow* mSettingsWindow;
     ConfirmationDialog* mConfirmationDialog;
     AlchemyWindow* mAlchemyWindow;

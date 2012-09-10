@@ -17,6 +17,14 @@
         <BasisSkin type="SimpleText" offset = "0 0 16 16" align = "ALIGN_STRETCH"/>
     </Skin>
 
+    <!-- HTML colour: #9A9074 -->
+    <Skin name = "SandTextGreyedOut" size = "16 16">
+        <Property key="FontName" value = "Default" />
+        <Property key="TextAlign" value = "ALIGN_LEFT ALIGN_BOTTOM" />
+        <Property key="TextColour" value = "0.6 0.56 0.45" />
+        <BasisSkin type="SimpleText" offset = "0 0 16 16"  align = "ALIGN_STRETCH"/>
+    </Skin>
+
     <!-- HTML colour: #BF9959 -->
     <Skin name = "SandText" size = "16 16">
         <Property key="FontName" value = "Default" />
