@@ -17,8 +17,6 @@ Layout is defined by resources/mygui/openmw_chargen_review.layout.
 
 namespace MWGui
 {
-    using namespace MyGUI;
-
     class ReviewDialog : public WindowBase
     {
     public:
@@ -49,8 +47,8 @@ namespace MWGui
         virtual void open();
 
         // Events
-        typedef delegates::CMultiDelegate0 EventHandle_Void;
-        typedef delegates::CMultiDelegate1<int> EventHandle_Int;
+        typedef MyGUI::delegates::CMultiDelegate0 EventHandle_Void;
+        typedef MyGUI::delegates::CMultiDelegate1<int> EventHandle_Int;
 
         /** Event : Back button clicked.\n
         signature : void method()\n

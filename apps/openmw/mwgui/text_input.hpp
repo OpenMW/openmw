@@ -13,8 +13,6 @@ namespace MWGui
 
 namespace MWGui
 {
-    using namespace MyGUI;
-
     class TextInputDialog : public WindowBase
     {
     public:

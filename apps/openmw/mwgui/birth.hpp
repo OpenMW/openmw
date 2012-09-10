@@ -10,9 +10,6 @@
 
 namespace MWGui
 {
-    /// \todo remove
-    using namespace MyGUI;
-
     class BirthDialog : public WindowBase
     {
     public:
@@ -31,7 +28,7 @@ namespace MWGui
         virtual void open();
 
         // Events
-        typedef delegates::CMultiDelegate0 EventHandle_Void;
+        typedef MyGUI::delegates::CMultiDelegate0 EventHandle_Void;
 
         /** Event : Back button clicked.\n
             signature : void method()\n

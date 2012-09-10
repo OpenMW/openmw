@@ -328,12 +328,12 @@ namespace MWGui
 
         std::string path = std::string("icons\\");
         path += MWWorld::Class::get(newObject).getInventoryIcon(newObject);
-        MyGUI::ImageBox* baseWidget = mContainerWidget->createWidget<ImageBox>("ImageBox", MyGUI::IntCoord(0, 0, 42, 42), MyGUI::Align::Default);
+        MyGUI::ImageBox* baseWidget = mContainerWidget->createWidget<MyGUI::ImageBox>("ImageBox", MyGUI::IntCoord(0, 0, 42, 42), MyGUI::Align::Default);
         baseWidget->detachFromWidget();
         baseWidget->attachToWidget(mDragAndDrop->mDragAndDropWidget);
         baseWidget->setUserData(newObject);
         mDragAndDrop->mDraggedWidget = baseWidget;
-        ImageBox* image = baseWidget->createWidget<ImageBox>("ImageBox", MyGUI::IntCoord(5, 5, 32, 32), MyGUI::Align::Default);
+        MyGUI::ImageBox* image = baseWidget->createWidget<MyGUI::ImageBox>("ImageBox", MyGUI::IntCoord(5, 5, 32, 32), MyGUI::Align::Default);
         int pos = path.rfind(".");
         path.erase(pos);
         path.append(".dds");

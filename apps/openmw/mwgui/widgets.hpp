@@ -7,9 +7,6 @@
 
 #include "../mwmechanics/stat.hpp"
 
-#undef MYGUI_EXPORT
-#define MYGUI_EXPORT
-
 namespace MWBase
 {
     class WindowManager;
@@ -21,9 +18,6 @@ namespace MWBase
 
 namespace MWGui
 {
-    /// \todo remove!
-    using namespace MyGUI;
-
     namespace Widgets
     {
         class MWEffectList;
@@ -78,9 +72,9 @@ namespace MWGui
 
         typedef std::vector<SpellEffectParams> SpellEffectList;
 
-        class MYGUI_EXPORT MWSkill : public MyGUI::Widget
+        class MWSkill : public MyGUI::Widget
         {
-            MYGUI_RTTI_DERIVED( MWSkill );
+            MYGUI_RTTI_DERIVED( MWSkill )
         public:
             MWSkill();
 
@@ -96,7 +90,7 @@ namespace MWGui
             const SkillValue& getSkillValue() const { return mValue; }
 
             // Events
-            typedef delegates::CMultiDelegate1<MWSkill*> EventHandle_SkillVoid;
+            typedef MyGUI::delegates::CMultiDelegate1<MWSkill*> EventHandle_SkillVoid;
 
             /** Event : Skill clicked.\n
                 signature : void method(MWSkill* _sender)\n
@@ -121,9 +115,9 @@ namespace MWGui
         };
         typedef MWSkill* MWSkillPtr;
 
-        class MYGUI_EXPORT MWAttribute : public MyGUI::Widget
+        class MWAttribute : public MyGUI::Widget
         {
-            MYGUI_RTTI_DERIVED( MWAttribute );
+            MYGUI_RTTI_DERIVED( MWAttribute )
         public:
             MWAttribute();
 
@@ -138,7 +132,7 @@ namespace MWGui
             const AttributeValue& getAttributeValue() const { return mValue; }
 
             // Events
-            typedef delegates::CMultiDelegate1<MWAttribute*> EventHandle_AttributeVoid;
+            typedef MyGUI::delegates::CMultiDelegate1<MWAttribute*> EventHandle_AttributeVoid;
 
             /** Event : Attribute clicked.\n
                 signature : void method(MWAttribute* _sender)\n
@@ -167,9 +161,9 @@ namespace MWGui
          * @todo remove this class and use MWEffectList instead
          */
         class MWSpellEffect;
-        class MYGUI_EXPORT MWSpell : public MyGUI::Widget
+        class MWSpell : public MyGUI::Widget
         {
-            MYGUI_RTTI_DERIVED( MWSpell );
+            MYGUI_RTTI_DERIVED( MWSpell )
         public:
             MWSpell();
 
@@ -203,9 +197,9 @@ namespace MWGui
         };
         typedef MWSpell* MWSpellPtr;
 
-        class MYGUI_EXPORT MWEffectList : public MyGUI::Widget
+        class MWEffectList : public MyGUI::Widget
         {
-            MYGUI_RTTI_DERIVED( MWEffectList );
+            MYGUI_RTTI_DERIVED( MWEffectList )
         public:
             MWEffectList();
 
@@ -244,9 +238,9 @@ namespace MWGui
         };
         typedef MWEffectList* MWEffectListPtr;
 
-        class MYGUI_EXPORT MWSpellEffect : public MyGUI::Widget
+        class MWSpellEffect : public MyGUI::Widget
         {
-            MYGUI_RTTI_DERIVED( MWSpellEffect );
+            MYGUI_RTTI_DERIVED( MWSpellEffect )
         public:
             MWSpellEffect();
 
@@ -280,9 +274,9 @@ namespace MWGui
         };
         typedef MWSpellEffect* MWSpellEffectPtr;
 
-        class MYGUI_EXPORT MWDynamicStat : public MyGUI::Widget
+        class MWDynamicStat : public MyGUI::Widget
         {
-            MYGUI_RTTI_DERIVED( MWDynamicStat );
+            MYGUI_RTTI_DERIVED( MWDynamicStat )
         public:
             MWDynamicStat();
 
