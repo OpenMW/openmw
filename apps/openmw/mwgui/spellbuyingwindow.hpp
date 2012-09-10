@@ -33,8 +33,7 @@ namespace MWGui
             MyGUI::TextBox* mSpells;
             MyGUI::TextBox* mSelect;
 
-            MyGUI::WidgetPtr mSpellsBoxWidget, mSpellsClientWidget;
-            MyGUI::ScrollBar* mSpellsScrollerWidget;
+            MyGUI::ScrollView* mSpellsView;
 
             MWWorld::Ptr mActor;
 
@@ -42,8 +41,6 @@ namespace MWGui
 
             void onCancelButtonClicked(MyGUI::Widget* _sender);
             void onSpellButtonClick(MyGUI::Widget* _sender);
-            void updateScroller();
-            void onScrollChangePosition(MyGUI::ScrollBar* scroller, size_t pos);
             void onMouseWheel(MyGUI::Widget* _sender, int _rel);
             void addSpell(const std::string& spellID);
             void clearSpells();

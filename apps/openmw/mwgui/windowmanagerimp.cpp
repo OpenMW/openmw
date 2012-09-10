@@ -678,6 +678,7 @@ void WindowManager::processChangedSettings(const Settings::CategorySettingVector
         mScrollWindow->center();
         mBookWindow->center();
         mQuickKeysMenu->center();
+        mSpellBuyingWindow->center();
         mDragAndDrop->mDragAndDropWidget->setSize(MyGUI::IntSize(x, y));
         mInputBlocker->setSize(MyGUI::IntSize(x,y));
     }

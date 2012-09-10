@@ -15,9 +15,10 @@
         </Widget>
 
 
-        <Widget type="Widget" skin="MW_Box" position="6 31 430 225" align="ALIGN_LEFT ALIGN_STRETCH" name="SpellsBox">
-            <Widget type="Widget" skin="" position="4 4 404 217" align="ALIGN_LEFT ALIGN_TOP ALIGN_STRETCH" name="SpellsClient" />
-            <Widget type="ScrollBar" skin="MW_VScroll" position="412 4 14 217" align="ALIGN_RIGHT ALIGN_VSTRETCH" name="SpellsScroller" />
+        <Widget type="Widget" skin="MW_Box" position="6 31 430 225" align="ALIGN_LEFT ALIGN_STRETCH">
+            <Widget type="ScrollView" skin="MW_ScrollView" position="4 4 422 217" align="ALIGN_LEFT ALIGN_TOP ALIGN_STRETCH" name="SpellsView">
+                <Property key="CanvasAlign" value="Left"/>
+            </Widget>
         </Widget>
 
 

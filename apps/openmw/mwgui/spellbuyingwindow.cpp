@@ -34,13 +34,7 @@ namespace MWGui
         getWidget(mPlayerGold, "PlayerGold");
         getWidget(mSelect, "Select");
         getWidget(mSpells, "Spells");
-        getWidget(mSpellsBoxWidget, "SpellsBox");
-        getWidget(mSpellsClientWidget, "SpellsClient");
-        getWidget(mSpellsScrollerWidget, "SpellsScroller");
-
-        mSpellsClientWidget->eventMouseWheel += MyGUI::newDelegate(this, &SpellBuyingWindow::onMouseWheel);
-
-        mSpellsScrollerWidget->eventScrollChangePosition += MyGUI::newDelegate(this, &SpellBuyingWindow::onScrollChangePosition);
+        getWidget(mSpellsView, "SpellsView");
 
         mCancelButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SpellBuyingWindow::onCancelButtonClicked);
 
@@ -58,7 +52,7 @@ namespace MWGui
     {
         const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().spells.find(spellId);
         int price = spell->data.cost*MWBase::Environment::get().getWorld()->getStore().gameSettings.search("fSpellValueMult")->f;
-        MyGUI::Button* toAdd = mSpellsClientWidget->createWidget<MyGUI::Button>((price>mWindowManager.getInventoryWindow()->getPlayerGold()) ? "SandTextGreyedOut" : "SpellText", 0, mCurrentY, 200, sLineHeight, MyGUI::Align::Default);
+        MyGUI::Button* toAdd = mSpellsView->createWidget<MyGUI::Button>((price>mWindowManager.getInventoryWindow()->getPlayerGold()) ? "SandTextGreyedOut" : "SpellText", 0, mCurrentY, 200, sLineHeight, MyGUI::Align::Default);
         mCurrentY += sLineHeight;
         /// \todo price adjustment depending on merchantile skill
         toAdd->setUserData(price);
@@ -73,11 +67,10 @@ namespace MWGui
 
     void SpellBuyingWindow::clearSpells()
     {
-        mSpellsScrollerWidget->setScrollPosition(0);
-        onScrollChangePosition(mSpellsScrollerWidget, mSpellsScrollerWidget->getScrollPosition());
+        mSpellsView->setViewOffset(MyGUI::IntPoint(0,0));
         mCurrentY = 0;
-        while (mSpellsClientWidget->getChildCount())
-            MyGUI::Gui::getInstance().destroyWidget(mSpellsClientWidget->getChildAt(0));
+        while (mSpellsView->getChildCount())
+            MyGUI::Gui::getInstance().destroyWidget(mSpellsView->getChildAt(0));
         mSpellsWidgetMap.clear();
     }
 
@@ -106,7 +99,8 @@ namespace MWGui
         }
 
         updateLabels();
-        updateScroller();
+
+        mSpellsView->setCanvasSize (MyGUI::IntSize(mSpellsView->getWidth(), std::max(mSpellsView->getHeight(), mCurrentY)));
     }
 
     void SpellBuyingWindow::onSpellButtonClick(MyGUI::Widget* _sender)
@@ -120,10 +114,9 @@ namespace MWGui
             MWMechanics::Spells& spells = stats.getSpells();
             spells.add (mSpellsWidgetMap.find(_sender)->second);
             mWindowManager.getTradeWindow()->addOrRemoveGold(-price);
-            mSpellsScrollerWidget->setScrollPosition(0);
-            onScrollChangePosition(mSpellsScrollerWidget, mSpellsScrollerWidget->getScrollPosition());
-            updateScroller();
             startSpellBuying(mActor);
+
+            MWBase::Environment::get().getSoundManager()->playSound ("Item Gold Up", 1.0, 1.0);
         }
     }
 
@@ -149,39 +142,12 @@ namespace MWGui
         mWindowManager.removeGuiMode(GM_Dialogue);
     }
 
-    void SpellBuyingWindow::updateScroller()
-    {
-        mSpellsScrollerWidget->setScrollRange(std::max(mCurrentY - mSpellsClientWidget->getHeight(), 0));
-        mSpellsScrollerWidget->setScrollPage(std::max(mSpellsClientWidget->getHeight() - sLineHeight, 0));
-        if (mCurrentY != 0)
-            mSpellsScrollerWidget->setTrackSize( (mSpellsBoxWidget->getHeight() / float(mCurrentY)) * mSpellsScrollerWidget->getLineSize() );
-    }
-
-    void SpellBuyingWindow::onScrollChangePosition(MyGUI::ScrollBar* scroller, size_t pos)
-    {
-        int diff = mLastPos - pos;
-        // Adjust position of all widget according to difference
-        if (diff == 0)
-            return;
-        mLastPos = pos;
-
-        for (unsigned int i=0;i<mSpellsClientWidget->getChildCount();i++)
-        {
-            MyGUI::Widget* toMove = mSpellsClientWidget->getChildAt(i);
-            toMove->setCoord(toMove->getCoord() + MyGUI::IntPoint(0, diff));
-        }
-    }
-
     void SpellBuyingWindow::onMouseWheel(MyGUI::Widget* _sender, int _rel)
     {
-        if (mSpellsScrollerWidget->getScrollPosition() - _rel*0.3 < 0)
-            mSpellsScrollerWidget->setScrollPosition(0);
-        else if (mSpellsScrollerWidget->getScrollPosition() - _rel*0.3 > mSpellsScrollerWidget->getScrollRange()-1)
-            mSpellsScrollerWidget->setScrollPosition(mSpellsScrollerWidget->getScrollRange()-1);
+        if (mSpellsView->getViewOffset().top + _rel*0.3 > 0)
+            mSpellsView->setViewOffset(MyGUI::IntPoint(0, 0));
         else
-            mSpellsScrollerWidget->setScrollPosition(mSpellsScrollerWidget->getScrollPosition() - _rel*0.3);
-
-        onScrollChangePosition(mSpellsScrollerWidget, mSpellsScrollerWidget->getScrollPosition());
+            mSpellsView->setViewOffset(MyGUI::IntPoint(0, mSpellsView->getViewOffset().top + _rel*0.3));
     }
 }
 
