@@ -45,9 +45,6 @@ BirthDialog::BirthDialog(MWBase::WindowManager& parWindowManager)
 
 void BirthDialog::setNextButtonShow(bool shown)
 {
-    MyGUI::ButtonPtr backButton;
-    getWidget(backButton, "BackButton");
-
     MyGUI::ButtonPtr okButton;
     getWidget(okButton, "OKButton");
 
@@ -55,12 +52,6 @@ void BirthDialog::setNextButtonShow(bool shown)
         okButton->setCaption(mWindowManager.getGameSettingString("sNext", ""));
     else
         okButton->setCaption(mWindowManager.getGameSettingString("sOK", ""));
-
-    int okButtonWidth = okButton->getTextSize().width + 24;
-    int backButtonWidth = backButton->getTextSize().width + 24;
-
-    okButton->setCoord(473 - okButtonWidth, 340, okButtonWidth, 23);
-    backButton->setCoord(473 - okButtonWidth - backButtonWidth - 6, 340, backButtonWidth, 23);
 }
 
 void BirthDialog::open()

@@ -31,18 +31,6 @@ namespace MWGui
         mMessage->setSize(mMessage->getWidth(), mMessage->getTextSize().height+24);
 
         center();
-
-        int okButtonWidth = mOkButton->getTextSize().width + 24;
-        mOkButton->setCoord(mMainWidget->getWidth() - 30 - okButtonWidth,
-                            mOkButton->getTop(),
-                            okButtonWidth,
-                            mOkButton->getHeight());
-
-        int cancelButtonWidth = mCancelButton->getTextSize().width + 24;
-        mCancelButton->setCoord(mMainWidget->getWidth() - 30 - okButtonWidth - cancelButtonWidth - 8,
-                            mCancelButton->getTop(),
-                            cancelButtonWidth,
-                            mCancelButton->getHeight());
     }
 
     void ConfirmationDialog::onCancelButtonClicked(MyGUI::Widget* _sender)

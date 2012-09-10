@@ -48,14 +48,6 @@ namespace MWGui
         mIngredient3->eventMouseButtonClick += MyGUI::newDelegate(this, &AlchemyWindow::onIngredientSelected);
         mIngredient4->eventMouseButtonClick += MyGUI::newDelegate(this, &AlchemyWindow::onIngredientSelected);
 
-        MyGUI::Widget* buttonBox = mCancelButton->getParent();
-        int cancelButtonWidth = mCancelButton->getTextSize().width + 24;
-        mCancelButton->setCoord(buttonBox->getWidth() - cancelButtonWidth,
-                                mCancelButton->getTop(), cancelButtonWidth, mCancelButton->getHeight());
-        int createButtonWidth = mCreateButton->getTextSize().width + 24;
-        mCreateButton->setCoord(buttonBox->getWidth() - createButtonWidth - cancelButtonWidth - 4,
-                                mCreateButton->getTop(), createButtonWidth, mCreateButton->getHeight());
-
         mCreateButton->eventMouseButtonClick += MyGUI::newDelegate(this, &AlchemyWindow::onCreateButtonClicked);
         mCancelButton->eventMouseButtonClick += MyGUI::newDelegate(this, &AlchemyWindow::onCancelButtonClicked);
 

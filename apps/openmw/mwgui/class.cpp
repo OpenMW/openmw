@@ -39,11 +39,6 @@ GenerateClassResultDialog::GenerateClassResultDialog(MWBase::WindowManager& parW
     getWidget(okButton, "OKButton");
     okButton->setCaption(mWindowManager.getGameSettingString("sOK", ""));
     okButton->eventMouseButtonClick += MyGUI::newDelegate(this, &GenerateClassResultDialog::onOkClicked);
-
-    int okButtonWidth = okButton->getTextSize().width + 24;
-    int backButtonWidth = backButton->getTextSize().width + 24;
-    okButton->setCoord(315 - okButtonWidth, 219, okButtonWidth, 23);
-    backButton->setCoord(315 - okButtonWidth - backButtonWidth - 6, 219, backButtonWidth, 23);
 }
 
 std::string GenerateClassResultDialog::getClassId() const
@@ -116,9 +111,6 @@ PickClassDialog::PickClassDialog(MWBase::WindowManager& parWindowManager)
 
 void PickClassDialog::setNextButtonShow(bool shown)
 {
-    MyGUI::ButtonPtr backButton;
-    getWidget(backButton, "BackButton");
-
     MyGUI::ButtonPtr okButton;
     getWidget(okButton, "OKButton");
 
@@ -126,12 +118,6 @@ void PickClassDialog::setNextButtonShow(bool shown)
         okButton->setCaption(mWindowManager.getGameSettingString("sNext", ""));
     else
         okButton->setCaption(mWindowManager.getGameSettingString("sOK", ""));
-
-    int okButtonWidth = okButton->getTextSize().width + 24;
-    int backButtonWidth = backButton->getTextSize().width + 24;
-
-    okButton->setCoord(476 - okButtonWidth, 265, okButtonWidth, 23);
-    backButton->setCoord(476 - okButtonWidth - backButtonWidth - 6, 265, backButtonWidth, 23);
 }
 
 void PickClassDialog::open()
@@ -422,7 +408,6 @@ CreateClassDialog::CreateClassDialog(MWBase::WindowManager& parWindowManager)
 
     MyGUI::ButtonPtr descriptionButton;
     getWidget(descriptionButton, "DescriptionButton");
-    descriptionButton->setCaption(mWindowManager.getGameSettingString("sCreateClassMenu1", ""));
     descriptionButton->eventMouseButtonClick += MyGUI::newDelegate(this, &CreateClassDialog::onDescriptionClicked);
 
     MyGUI::ButtonPtr backButton;
@@ -519,27 +504,13 @@ std::vector<ESM::Skill::SkillEnum> CreateClassDialog::getMinorSkills() const
 
 void CreateClassDialog::setNextButtonShow(bool shown)
 {
-    MyGUI::ButtonPtr backButton;
-    getWidget(backButton, "BackButton");
-
     MyGUI::ButtonPtr okButton;
     getWidget(okButton, "OKButton");
-
-    MyGUI::ButtonPtr descriptionButton;
-    getWidget(descriptionButton, "DescriptionButton");
 
     if (shown)
         okButton->setCaption(mWindowManager.getGameSettingString("sNext", ""));
     else
         okButton->setCaption(mWindowManager.getGameSettingString("sOK", ""));
-
-    int okButtonWidth = okButton->getTextSize().width + 24;
-    int backButtonWidth = backButton->getTextSize().width + 24;
-    int descriptionButtonWidth = descriptionButton->getTextSize().width + 24;
-
-    okButton->setCoord(459 - okButtonWidth, 158, okButtonWidth, 23);
-    backButton->setCoord(459 - okButtonWidth - backButtonWidth - 6, 158, backButtonWidth, 23);
-    descriptionButton->setCoord(459 - okButtonWidth - backButtonWidth - descriptionButtonWidth - 12, 158, descriptionButtonWidth, 23);
 }
 
 // widget controls
@@ -713,8 +684,6 @@ SelectSpecializationDialog::SelectSpecializationDialog(MWBase::WindowManager& pa
     getWidget(cancelButton, "CancelButton");
     cancelButton->setCaption(mWindowManager.getGameSettingString("sCancel", ""));
     cancelButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SelectSpecializationDialog::onCancelClicked);
-    int buttonWidth = cancelButton->getTextSize().width + 24;
-    cancelButton->setCoord(216 - buttonWidth, 90, buttonWidth, 21);
 }
 
 SelectSpecializationDialog::~SelectSpecializationDialog()
@@ -768,8 +737,6 @@ SelectAttributeDialog::SelectAttributeDialog(MWBase::WindowManager& parWindowMan
     getWidget(cancelButton, "CancelButton");
     cancelButton->setCaption(mWindowManager.getGameSettingString("sCancel", ""));
     cancelButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SelectAttributeDialog::onCancelClicked);
-    int buttonWidth = cancelButton->getTextSize().width + 24;
-    cancelButton->setCoord(186 - buttonWidth, 180, buttonWidth, 21);
 }
 
 SelectAttributeDialog::~SelectAttributeDialog()
@@ -863,9 +830,6 @@ SelectSkillDialog::SelectSkillDialog(MWBase::WindowManager& parWindowManager)
     getWidget(cancelButton, "CancelButton");
     cancelButton->setCaption(mWindowManager.getGameSettingString("sCancel", ""));
     cancelButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SelectSkillDialog::onCancelClicked);
-    int buttonWidth = cancelButton->getTextSize().width + 24;
-    cancelButton->setCoord(447 - buttonWidth, 218, buttonWidth, 21);
-
 }
 
 SelectSkillDialog::~SelectSkillDialog()
@@ -899,8 +863,6 @@ DescriptionDialog::DescriptionDialog(MWBase::WindowManager& parWindowManager)
     getWidget(okButton, "OKButton");
     okButton->eventMouseButtonClick += MyGUI::newDelegate(this, &DescriptionDialog::onOkClicked);
     okButton->setCaption(mWindowManager.getGameSettingString("sInputMenu1", ""));
-    int buttonWidth = okButton->getTextSize().width + 24;
-    okButton->setCoord(234 - buttonWidth, 214, buttonWidth, 24);
 
     // Make sure the edit box has focus
     MyGUI::InputManager::getInstance().setKeyFocusWidget(mTextEdit);

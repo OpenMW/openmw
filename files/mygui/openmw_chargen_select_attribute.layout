@@ -20,7 +20,8 @@
             <Widget type="MWAttribute" skin="MW_StatNameButtonC" position="0 154 186 18" name="Attribute7" align="ALIGN_LEFT ALIGN_TOP" />
 
             <!-- Dialog buttons -->
-            <Widget type="Button" skin="MW_Button" position="120 180 66 21" name="CancelButton">
+            <Widget type="AutoSizedButton" skin="MW_Button" position="120 180 66 21" name="CancelButton">
+                <Property key="ExpandDirection" value="Left"/>
                 <Property key="Caption" value="Cancel"/>
             </Widget>
 

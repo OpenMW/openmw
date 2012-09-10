@@ -107,16 +107,18 @@
 
         <!-- Player skills, factions, birthsign and reputation -->
         <Widget type="Widget" skin="MW_Box" position="258 12 244 356" align="ALIGN_LEFT ALIGN_VSTRETCH" name="Skills">
-            <Widget type="Widget" skin="" position="4 4 218 346" align="ALIGN_STRETCH" name="SkillClient" />
-            <Widget type="ScrollBar" skin="MW_VScroll" position="226 4 14 346" align="ALIGN_RIGHT ALIGN_VSTRETCH" name="SkillScroller" />
+            <Widget type="ScrollView" skin="MW_ScrollView" position="4 4 236 346" align="ALIGN_STRETCH" name="SkillView" />
         </Widget>
 
         <!-- Dialog buttons -->
-        <Widget type="Button" skin="MW_Button" position="400 372 53 23" name="BackButton">
-            <Property key="Caption" value="#{sBack}"/>
-        </Widget>
-        <Widget type="Button" skin="MW_Button" position="460 372 42 23" name="OKButton">
-            <Property key="Caption" value="#{sOK}"/>
+        <Widget type="HBox" position="0 372 502 24">
+            <Widget type="Widget"/>
+            <Widget type="AutoSizedButton" skin="MW_Button" name="BackButton">
+                <Property key="Caption" value="#{sBack}"/>
+            </Widget>
+            <Widget type="AutoSizedButton" skin="MW_Button" name="OKButton">
+                <Property key="Caption" value="#{sOK}"/>
+            </Widget>
         </Widget>
     </Widget>
 </MyGUI>

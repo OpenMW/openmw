@@ -19,7 +19,9 @@
         </Widget>
 
         <!-- World button -->
-        <Widget type="Button" skin="MW_Button" position="213 233 61 22" align="ALIGN_BOTTOM ALIGN_RIGHT" name="WorldButton"/>
+        <Widget type="AutoSizedButton" skin="MW_Button" position="213 233 61 22" align="ALIGN_BOTTOM ALIGN_RIGHT" name="WorldButton">
+            <Property key="ExpandDirection" value="Left"/>
+        </Widget>
 
     </Widget>
 </MyGUI>

@@ -90,9 +90,6 @@ RaceDialog::RaceDialog(MWBase::WindowManager& parWindowManager)
 
 void RaceDialog::setNextButtonShow(bool shown)
 {
-    MyGUI::ButtonPtr backButton;
-    getWidget(backButton, "BackButton");
-
     MyGUI::ButtonPtr okButton;
     getWidget(okButton, "OKButton");
 
@@ -100,12 +97,6 @@ void RaceDialog::setNextButtonShow(bool shown)
         okButton->setCaption(mWindowManager.getGameSettingString("sNext", ""));
     else
         okButton->setCaption(mWindowManager.getGameSettingString("sOK", ""));
-
-    int okButtonWidth = okButton->getTextSize().width + 24;
-    int backButtonWidth = backButton->getTextSize().width + 24;
-
-    okButton->setCoord(574 - okButtonWidth, 397, okButtonWidth, 23);
-    backButton->setCoord(574 - okButtonWidth - backButtonWidth - 6, 397, backButtonWidth, 23);
 }
 
 void RaceDialog::open()

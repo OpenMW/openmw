@@ -23,12 +23,6 @@ namespace MWGui
         getWidget(cancelButton, "CancelButton");
         cancelButton->eventMouseButtonClick += MyGUI::newDelegate(this, &ItemSelectionDialog::onCancelButtonClicked);
 
-        int dx = (cancelButton->getTextSize().width + 24) - cancelButton->getWidth();
-        cancelButton->setCoord(cancelButton->getLeft() - dx,
-                               cancelButton->getTop(),
-                               cancelButton->getTextSize ().width + 24,
-                               cancelButton->getHeight());
-
         center();
     }
 

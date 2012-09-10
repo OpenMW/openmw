@@ -76,11 +76,13 @@
         </Widget>
 
         <!-- Buttons -->
-        <Widget type="Widget" skin="" position="270 370 270 24">
-            <Widget type="Button" skin="MW_Button" position="0 0 60 24" name="CreateButton">
+        <Widget type="HBox" skin="" position="160 370 380 24">
+            <Widget type="Widget"/> <!-- spacer -->
+
+            <Widget type="AutoSizedButton" skin="MW_Button" name="CreateButton">
                 <Property key="Caption" value="#{sCreate}"/>
             </Widget>
-            <Widget type="Button" skin="MW_Button" position="0 0 60 24" name="CancelButton">
+            <Widget type="AutoSizedButton" skin="MW_Button" name="CancelButton">
                 <Property key="Caption" value="#{sCancel}"/>
             </Widget>
         </Widget>

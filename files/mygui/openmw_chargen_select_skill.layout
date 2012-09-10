@@ -55,7 +55,8 @@
             <Widget type="MWSkill" skin="MW_StatNameButton" position="316 194 131 18" name="StealthSkill8" align="ALIGN_LEFT ALIGN_TOP" />
 
             <!-- Dialog buttons -->
-            <Widget type="Button" skin="MW_Button" position="381 218 66 21" name="CancelButton">
+            <Widget type="AutoSizedButton" skin="MW_Button" position="381 218 66 21" name="CancelButton">
+                <Property key="ExpandDirection" value="Left"/>
                 <Property key="Caption" value="Cancel"/>
             </Widget>
 

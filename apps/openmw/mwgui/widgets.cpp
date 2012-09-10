@@ -789,3 +789,203 @@ void MWDynamicStat::initialiseOverride()
     assignWidget(mBarWidget, "Bar");
     assignWidget(mBarTextWidget, "BarText");
 }
+
+
+
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+
+void AutoSizedWidget::notifySizeChange (MyGUI::Widget* w)
+{
+    if (w->getParent () != 0)
+    {
+        Box* b = dynamic_cast<Box*>(w->getParent());
+        if (b)
+            b->notifyChildrenSizeChanged ();
+        else
+        {
+            if (mExpandDirection == MyGUI::Align::Left)
+            {
+                int hdiff = getRequestedSize ().width - w->getSize().width;
+                w->setPosition(w->getPosition() - MyGUI::IntPoint(hdiff, 0));
+            }
+            w->setSize(getRequestedSize ());
+        }
+    }
+}
+
+
+MyGUI::IntSize AutoSizedTextBox::getRequestedSize()
+{
+    return getTextSize();
+}
+
+void AutoSizedTextBox::setCaption(const MyGUI::UString& _value)
+{
+    TextBox::setCaption(_value);
+
+    notifySizeChange (this);
+}
+
+void AutoSizedTextBox::setPropertyOverride(const std::string& _key, const std::string& _value)
+{
+    if (_key == "ExpandDirection")
+    {
+        mExpandDirection = MyGUI::Align::parse (_value);
+    }
+    else
+    {
+        TextBox::setPropertyOverride (_key, _value);
+    }
+}
+
+
+MyGUI::IntSize AutoSizedButton::getRequestedSize()
+{
+    MyGUI::IntSize size = getTextSize() + MyGUI::IntSize(24,0);
+    size.height = std::max(24, size.height);
+    return size;
+}
+
+void AutoSizedButton::setCaption(const MyGUI::UString& _value)
+{
+    Button::setCaption(_value);
+
+    notifySizeChange (this);
+}
+
+void AutoSizedButton::setPropertyOverride(const std::string& _key, const std::string& _value)
+{
+    if (_key == "ExpandDirection")
+    {
+        mExpandDirection = MyGUI::Align::parse (_value);
+    }
+    else
+    {
+        Button::setPropertyOverride (_key, _value);
+    }
+}
+
+Box::Box()
+    : mSpacing(4)
+{
+
+}
+
+void Box::setPropertyOverride(const std::string& _key, const std::string& _value)
+{
+    if (_key == "Spacing")
+    {
+        mSpacing = MyGUI::utility::parseValue<int>(_value);
+    }
+}
+
+void Box::notifyChildrenSizeChanged ()
+{
+    align();
+}
+
+
+void HBox::align ()
+{
+    unsigned int count = getChildCount ();
+    size_t h_stretched_count = 0;
+    int total_width = 0;
+    std::vector< std::pair<MyGUI::IntSize, bool> > sizes;
+
+    for (unsigned int i = 0; i < count; ++i)
+    {
+        MyGUI::Widget* w = getChildAt(i);
+        bool hstretch = w->getUserString ("HStretch") == "true";
+        h_stretched_count += hstretch;
+        AutoSizedWidget* aw = dynamic_cast<AutoSizedWidget*>(w);
+        if (aw)
+        {
+            sizes.push_back(std::make_pair(aw->getRequestedSize (), hstretch));
+            total_width += aw->getRequestedSize ().width;
+        }
+        else
+        {
+            if (!hstretch) h_stretched_count ++;
+            sizes.push_back (std::make_pair(MyGUI::IntSize(0,0), true));
+        }
+
+        if (i != count-1)
+            total_width += mSpacing;
+    }
+
+    int curX = 0;
+    for (unsigned int i = 0; i < count; ++i)
+    {
+        MyGUI::Widget* w = getChildAt(i);
+        MyGUI::IntCoord widgetCoord;
+        widgetCoord.left = curX;
+        widgetCoord.top = (getSize().height - sizes[i].first.height) / 2;
+        int width = sizes[i].second ? sizes[i].first.width + (getSize().width - total_width)/h_stretched_count
+                                    : sizes[i].first.width;
+        widgetCoord.width = width;
+        widgetCoord.height = sizes[i].first.height;
+        w->setCoord(widgetCoord);
+        curX += width;
+
+        if (i != count-1)
+            curX += mSpacing;
+    }
+}
+
+void HBox::setSize (const MyGUI::IntSize& _value)
+{
+    MyGUI::Widget::setSize (_value);
+    align();
+}
+
+MyGUI::IntSize HBox::getRequestedSize ()
+{
+    MyGUI::IntSize size(0,0);
+    for (unsigned int i = 0; i < getChildCount (); ++i)
+    {
+        AutoSizedWidget* w = dynamic_cast<AutoSizedWidget*>(getChildAt(i));
+        if (w)
+        {
+            MyGUI::IntSize requested = w->getRequestedSize ();
+            size.height = std::max(size.height, requested.height);
+            size.width = size.width + requested.width;
+            if (i != getChildCount()-1)
+                size.width += mSpacing;
+        }
+    }
+    return size;
+}
+
+
+
+
+void VBox::align ()
+{
+    // not yet implemented
+}
+
+void VBox::setSize (const MyGUI::IntSize& _value)
+{
+    MyGUI::Widget::setSize (_value);
+    align();
+}
+
+MyGUI::IntSize VBox::getRequestedSize ()
+{
+    MyGUI::IntSize size(0,0);
+    for (unsigned int i = 0; i < getChildCount (); ++i)
+    {
+        AutoSizedWidget* w = dynamic_cast<AutoSizedWidget*>(getChildAt(i));
+        if (w)
+        {
+            MyGUI::IntSize requested = w->getRequestedSize ();
+            size.width = std::max(size.width, requested.width);
+            size.height = size.height + requested.height;
+            if (i != getChildCount()-1)
+                size.height += mSpacing;
+        }
+    }
+    return size;
+}

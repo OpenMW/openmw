@@ -299,6 +299,93 @@ namespace MWGui
             MyGUI::TextBox* mBarTextWidget;
         };
         typedef MWDynamicStat* MWDynamicStatPtr;
+
+
+
+
+
+        // ---------------------------------------------------------------------------------------------------------------------
+
+
+
+        class AutoSizedWidget
+        {
+        public:
+            virtual MyGUI::IntSize getRequestedSize() = 0;
+
+        protected:
+            void notifySizeChange(MyGUI::Widget* w);
+
+            MyGUI::Align mExpandDirection;
+        };
+
+        class AutoSizedTextBox : public AutoSizedWidget, public MyGUI::TextBox
+        {
+            MYGUI_RTTI_DERIVED( AutoSizedTextBox )
+
+        public:
+            virtual MyGUI::IntSize getRequestedSize();
+            virtual void setCaption(const MyGUI::UString& _value);
+
+        protected:
+            virtual void setPropertyOverride(const std::string& _key, const std::string& _value);
+        };
+
+        class AutoSizedButton : public AutoSizedWidget, public MyGUI::Button
+        {
+            MYGUI_RTTI_DERIVED( AutoSizedButton )
+
+        public:
+            virtual MyGUI::IntSize getRequestedSize();
+            virtual void setCaption(const MyGUI::UString& _value);
+
+        protected:
+            virtual void setPropertyOverride(const std::string& _key, const std::string& _value);
+        };
+
+        /**
+         * @brief A container widget that automatically sizes its children
+         * @note the box being an AutoSizedWidget as well allows to put boxes inside a box
+         */
+        class Box : public AutoSizedWidget
+        {
+        public:
+            Box();
+
+            void notifyChildrenSizeChanged();
+
+        protected:
+            virtual void align() = 0;
+
+            virtual void setPropertyOverride(const std::string& _key, const std::string& _value);
+
+
+            int mSpacing; // how much space to put between elements
+        };
+
+        class HBox : public Box, public MyGUI::Widget
+        {
+            MYGUI_RTTI_DERIVED( HBox )
+
+        public:
+            virtual void setSize (const MyGUI::IntSize &_value);
+
+        protected:
+            virtual void align();
+            virtual MyGUI::IntSize getRequestedSize();
+        };
+
+        class VBox : public Box, public MyGUI::Widget
+        {
+            MYGUI_RTTI_DERIVED( VBox)
+
+        public:
+            virtual void setSize (const MyGUI::IntSize &_value);
+
+        protected:
+            virtual void align();
+            virtual MyGUI::IntSize getRequestedSize();
+        };
     }
 }
 

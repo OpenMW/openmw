@@ -44,18 +44,6 @@ namespace MWGui
 
         mSlider->setScrollPosition(maxCount-1);
         mItemEdit->setCaption(boost::lexical_cast<std::string>(maxCount));
-
-        int okButtonWidth = mOkButton->getTextSize().width + 24;
-        mOkButton->setCoord(width - 30 - okButtonWidth,
-                            mOkButton->getTop(),
-                            okButtonWidth,
-                            mOkButton->getHeight());
-
-        int cancelButtonWidth = mCancelButton->getTextSize().width + 24;
-        mCancelButton->setCoord(width - 30 - okButtonWidth - cancelButtonWidth - 8,
-                            mCancelButton->getTop(),
-                            cancelButtonWidth,
-                            mCancelButton->getHeight());
     }
 
     void CountDialog::onCancelButtonClicked(MyGUI::Widget* _sender)

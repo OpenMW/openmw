@@ -77,12 +77,8 @@ ReviewDialog::ReviewDialog(MWBase::WindowManager& parWindowManager)
     }
 
     // Setup skills
-    getWidget(mSkillAreaWidget, "Skills");
-    getWidget(mSkillClientWidget, "SkillClient");
-    getWidget(mSkillScrollerWidget, "SkillScroller");
-    mSkillClientWidget->eventMouseWheel += MyGUI::newDelegate(this, &ReviewDialog::onMouseWheel);
-    mSkillScrollerWidget->eventScrollChangePosition += MyGUI::newDelegate(this, &ReviewDialog::onScrollChangePosition);
-    updateScroller();
+    getWidget(mSkillView, "SkillView");
+    mSkillView->eventMouseWheel += MyGUI::newDelegate(this, &ReviewDialog::onMouseWheel);
 
     for (int i = 0; i < ESM::Skill::Length; ++i)
     {
@@ -90,46 +86,18 @@ ReviewDialog::ReviewDialog(MWBase::WindowManager& parWindowManager)
         mSkillWidgetMap.insert(std::make_pair(i, static_cast<MyGUI::TextBox*> (0)));
     }
 
-    static_cast<MyGUI::WindowPtr>(mMainWidget)->eventWindowChangeCoord += MyGUI::newDelegate(this, &ReviewDialog::onWindowResize);
-
     MyGUI::ButtonPtr backButton;
     getWidget(backButton, "BackButton");
     backButton->eventMouseButtonClick += MyGUI::newDelegate(this, &ReviewDialog::onBackClicked);
 
     MyGUI::ButtonPtr okButton;
     getWidget(okButton, "OKButton");
-    okButton->setCaption(mWindowManager.getGameSettingString("sOK", ""));
     okButton->eventMouseButtonClick += MyGUI::newDelegate(this, &ReviewDialog::onOkClicked);
-
-    int backButtonWidth = backButton->getTextSize().width + 24;
-    int okButtonWidth = okButton->getTextSize().width + 24;
-    okButton->setCoord(502 - okButtonWidth, 372, okButtonWidth, 23);
-    backButton->setCoord(502 - okButtonWidth - backButtonWidth - 6, 372, backButtonWidth, 23);
 }
 
 void ReviewDialog::open()
 {
     updateSkillArea();
-}
-
-void ReviewDialog::onScrollChangePosition(MyGUI::ScrollBar* scroller, size_t pos)
-{
-    int diff = mLastPos - pos;
-    // Adjust position of all widget according to difference
-    if (diff == 0)
-        return;
-    mLastPos = pos;
-
-    std::vector<MyGUI::WidgetPtr>::const_iterator end = mSkillWidgets.end();
-    for (std::vector<MyGUI::WidgetPtr>::const_iterator it = mSkillWidgets.begin(); it != end; ++it)
-    {
-        (*it)->setCoord((*it)->getCoord() + MyGUI::IntPoint(0, diff));
-    }
-}
-
-void ReviewDialog::onWindowResize(MyGUI::Window* window)
-{
-    updateScroller();
 }
 
 void ReviewDialog::setPlayerName(const std::string &name)
@@ -239,7 +207,7 @@ void ReviewDialog::configureSkills(const std::vector<int>& major, const std::vec
 
 void ReviewDialog::addSeparator(MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2)
 {
-    MyGUI::ImageBox* separator = mSkillClientWidget->createWidget<MyGUI::ImageBox>("MW_HLine", MyGUI::IntCoord(10, coord1.top, coord1.width + coord2.width - 4, 18), MyGUI::Align::Default);
+    MyGUI::ImageBox* separator = mSkillView->createWidget<MyGUI::ImageBox>("MW_HLine", MyGUI::IntCoord(10, coord1.top, coord1.width + coord2.width - 4, 18), MyGUI::Align::Default);
     separator->eventMouseWheel += MyGUI::newDelegate(this, &ReviewDialog::onMouseWheel);
 
     mSkillWidgets.push_back(separator);
@@ -250,7 +218,7 @@ void ReviewDialog::addSeparator(MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2
 
 void ReviewDialog::addGroup(const std::string &label, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2)
 {
-    MyGUI::TextBox* groupWidget = mSkillClientWidget->createWidget<MyGUI::TextBox>("SandBrightText", MyGUI::IntCoord(0, coord1.top, coord1.width + coord2.width, coord1.height), MyGUI::Align::Default);
+    MyGUI::TextBox* groupWidget = mSkillView->createWidget<MyGUI::TextBox>("SandBrightText", MyGUI::IntCoord(0, coord1.top, coord1.width + coord2.width, coord1.height), MyGUI::Align::Default);
     groupWidget->eventMouseWheel += MyGUI::newDelegate(this, &ReviewDialog::onMouseWheel);
     groupWidget->setCaption(label);
     mSkillWidgets.push_back(groupWidget);
@@ -264,11 +232,11 @@ MyGUI::TextBox* ReviewDialog::addValueItem(const std::string& text, const std::s
     MyGUI::TextBox* skillNameWidget;
     MyGUI::TextBox* skillValueWidget;
 
-    skillNameWidget = mSkillClientWidget->createWidget<MyGUI::TextBox>("SandText", coord1, MyGUI::Align::Default);
+    skillNameWidget = mSkillView->createWidget<MyGUI::TextBox>("SandText", coord1, MyGUI::Align::Default);
     skillNameWidget->setCaption(text);
     skillNameWidget->eventMouseWheel += MyGUI::newDelegate(this, &ReviewDialog::onMouseWheel);
 
-    skillValueWidget = mSkillClientWidget->createWidget<MyGUI::TextBox>("SandTextRight", coord2, MyGUI::Align::Top | MyGUI::Align::Right);
+    skillValueWidget = mSkillView->createWidget<MyGUI::TextBox>("SandTextRight", coord2, MyGUI::Align::Top | MyGUI::Align::Right);
     skillValueWidget->setCaption(value);
     skillValueWidget->_setWidgetState(state);
     skillValueWidget->eventMouseWheel += MyGUI::newDelegate(this, &ReviewDialog::onMouseWheel);
@@ -286,7 +254,7 @@ void ReviewDialog::addItem(const std::string& text, MyGUI::IntCoord &coord1, MyG
 {
     MyGUI::TextBox* skillNameWidget;
 
-    skillNameWidget = mSkillClientWidget->createWidget<MyGUI::TextBox>("SandText", coord1 + MyGUI::IntSize(coord2.width, 0), MyGUI::Align::Default);
+    skillNameWidget = mSkillView->createWidget<MyGUI::TextBox>("SandText", coord1 + MyGUI::IntSize(coord2.width, 0), MyGUI::Align::Default);
     skillNameWidget->setCaption(text);
     skillNameWidget->eventMouseWheel += MyGUI::newDelegate(this, &ReviewDialog::onMouseWheel);
 
@@ -343,7 +311,7 @@ void ReviewDialog::updateSkillArea()
     mSkillWidgets.clear();
 
     const int valueSize = 40;
-    MyGUI::IntCoord coord1(10, 0, mSkillClientWidget->getWidth() - (10 + valueSize), 18);
+    MyGUI::IntCoord coord1(10, 0, mSkillView->getWidth() - (10 + valueSize) - 24, 18);
     MyGUI::IntCoord coord2(coord1.left + coord1.width, coord1.top, valueSize, coord1.height);
 
     if (!mMajorSkills.empty())
@@ -356,15 +324,8 @@ void ReviewDialog::updateSkillArea()
         addSkills(mMiscSkills, "sSkillClassMisc", "Misc Skills", coord1, coord2);
 
     mClientHeight = coord1.top;
-    updateScroller();
-}
 
-void ReviewDialog::updateScroller()
-{
-    mSkillScrollerWidget->setScrollRange(std::max(mClientHeight - mSkillClientWidget->getHeight(), 0));
-    mSkillScrollerWidget->setScrollPage(std::max(mSkillClientWidget->getHeight() - sLineHeight, 0));
-    if (mClientHeight != 0)
-        mSkillScrollerWidget->setTrackSize( (mSkillAreaWidget->getHeight() / float(mClientHeight)) * mSkillScrollerWidget->getLineSize() );
+    mSkillView->setCanvasSize (mSkillView->getWidth(), std::max(mSkillView->getHeight(), mClientHeight));
 }
 
 // widget controls
@@ -401,12 +362,8 @@ void ReviewDialog::onBirthSignClicked(MyGUI::Widget* _sender)
 
 void ReviewDialog::onMouseWheel(MyGUI::Widget* _sender, int _rel)
 {
-    if (mSkillScrollerWidget->getScrollPosition() - _rel*0.3 < 0)
-        mSkillScrollerWidget->setScrollPosition(0);
-    else if (mSkillScrollerWidget->getScrollPosition() - _rel*0.3 > mSkillScrollerWidget->getScrollRange()-1)
-        mSkillScrollerWidget->setScrollPosition(mSkillScrollerWidget->getScrollRange()-1);
+    if (mSkillView->getViewOffset().top + _rel*0.3 > 0)
+        mSkillView->setViewOffset(MyGUI::IntPoint(0, 0));
     else
-        mSkillScrollerWidget->setScrollPosition(mSkillScrollerWidget->getScrollPosition() - _rel*0.3);
-
-    onScrollChangePosition(mSkillScrollerWidget, mSkillScrollerWidget->getScrollPosition());
+        mSkillView->setViewOffset(MyGUI::IntPoint(0, mSkillView->getViewOffset().top + _rel*0.3));
 }

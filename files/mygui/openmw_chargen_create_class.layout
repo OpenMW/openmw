@@ -58,14 +58,17 @@
         </Widget>
 
         <!-- Dialog buttons -->
-        <Widget type="Button" skin="MW_Button" position="207 158 143 23" name="DescriptionButton">
-            <Property key="Caption" value="Class Description"/>
-        </Widget>
-        <Widget type="Button" skin="MW_Button" position="356 158 53 23" name="BackButton">
-            <Property key="Caption" value="#{sBack}"/>
-        </Widget>
-        <Widget type="Button" skin="MW_Button" position="417 158 42 23" name="OKButton">
-            <Property key="Caption" value="#{sOK}"/>
+        <Widget type="HBox" position="0 158 459 24">
+            <Widget type="Widget"/> <!-- spacer -->
+            <Widget type="AutoSizedButton" skin="MW_Button" name="DescriptionButton">
+                <Property key="Caption" value="#{sCreateClassMenu1}"/>
+            </Widget>
+            <Widget type="AutoSizedButton" skin="MW_Button" name="BackButton">
+                <Property key="Caption" value="#{sBack}"/>
+            </Widget>
+            <Widget type="AutoSizedButton" skin="MW_Button" name="OKButton">
+                <Property key="Caption" value="#{sOK}"/>
+            </Widget>
         </Widget>
     </Widget>
 </MyGUI>

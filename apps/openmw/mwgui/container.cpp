@@ -607,12 +607,6 @@ ContainerWindow::ContainerWindow(MWBase::WindowManager& parWindowManager,DragAnd
     mCloseButton->eventMouseButtonClick += MyGUI::newDelegate(this, &ContainerWindow::onCloseButtonClicked);
     mTakeButton->eventMouseButtonClick += MyGUI::newDelegate(this, &ContainerWindow::onTakeAllButtonClicked);
 
-    // adjust buttons size to fit text
-    int closeButtonWidth = mCloseButton->getTextSize().width+24;
-    int takeButtonWidth = mTakeButton->getTextSize().width+24;
-    mCloseButton->setCoord(600-20-closeButtonWidth, mCloseButton->getCoord().top, closeButtonWidth, mCloseButton->getCoord().height);
-    mTakeButton->setCoord(600-20-closeButtonWidth-takeButtonWidth-8, mTakeButton->getCoord().top, takeButtonWidth, mTakeButton->getCoord().height);
-
     static_cast<MyGUI::Window*>(mMainWidget)->eventWindowChangeCoord += MyGUI::newDelegate(this, &ContainerWindow::onWindowResize);
 
     setCoord(200,0,600,300);

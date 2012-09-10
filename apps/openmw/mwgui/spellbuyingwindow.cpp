@@ -44,11 +44,6 @@ namespace MWGui
 
         mCancelButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SpellBuyingWindow::onCancelButtonClicked);
 
-        int cancelButtonWidth = mCancelButton->getTextSize().width + 24;
-        mCancelButton->setCoord(430-cancelButtonWidth,
-                                mCancelButton->getTop(),
-                                cancelButtonWidth,
-                                mCancelButton->getHeight());
         mSpells->setCoord(450/2-mSpells->getTextSize().width/2,
                           mSpells->getTop(),
                           mSpells->getTextSize().width,

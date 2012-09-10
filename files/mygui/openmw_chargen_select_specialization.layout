@@ -22,7 +22,8 @@
             </Widget>
 
             <!-- Dialog buttons -->
-            <Widget type="Button" skin="MW_Button" position="150 90 66 21" name="CancelButton">
+            <Widget type="AutoSizedButton" skin="MW_Button" position="150 90 66 21" name="CancelButton">
+                <Property key="ExpandDirection" value="Left"/>
                 <Property key="Caption" value="Cancel"/>
             </Widget>
 

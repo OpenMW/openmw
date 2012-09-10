@@ -160,11 +160,6 @@ namespace MWGui
 
         center();
 
-        int okSize = mOkButton->getTextSize().width + 24;
-        mOkButton->setCoord(mMainWidget->getWidth()-16-okSize, mOkButton->getTop(),
-                            okSize, mOkButton->getHeight());
-
-        mResetControlsButton->setSize (mResetControlsButton->getTextSize ().width + 24, mResetControlsButton->getHeight());
         mResetControlsButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onResetDefaultBindings);
 
         // fill resolution list
