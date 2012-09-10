@@ -661,4 +661,4 @@ if (NOT WIN32 AND NOT DPKG_PROGRAM)
     # Install resources
     INSTALL(DIRECTORY "${OpenMW_BINARY_DIR}/resources" DESTINATION "${DATADIR}" )
     INSTALL(FILES "${OpenMW_BINARY_DIR}/launcher.qss" DESTINATION "${DATADIR}/resources" )
-endif(NOT WIN32)
+endif(NOT WIN32 AND NOT DPKG_PROGRAM)
