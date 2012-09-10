@@ -630,8 +630,8 @@ if (APPLE)
         include(CPack)
 endif (APPLE)
 
-if (NOT WIN32)
-    ## Linux building
+if (NOT WIN32 AND NOT DPKG_PROGRAM)
+    ## Non Debian based Linux building
     # paths
     set(BINDIR "${CMAKE_INSTALL_PREFIX}/usr/bin" CACHE PATH "Where to install binaries")
     set(DATAROOTDIR "${CMAKE_INSTALL_PREFIX}/share" CACHE PATH "Sets the root of data directories to a non-default location")
