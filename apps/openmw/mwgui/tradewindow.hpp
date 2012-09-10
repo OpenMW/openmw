@@ -32,6 +32,8 @@ namespace MWGui
 
             bool npcAcceptsItem(MWWorld::Ptr item);
 
+            void addOrRemoveGold(int gold);
+
         protected:
             MyGUI::Button* mFilterAll;
             MyGUI::Button* mFilterWeapon;

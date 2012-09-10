@@ -66,6 +66,11 @@ namespace MWClass
             data->mCreatureStats.setFlee(ref->base->mAiData.mFlee);
             data->mCreatureStats.setAlarm(ref->base->mAiData.mAlarm);
 
+            // spells
+            for (std::vector<std::string>::const_iterator iter (ref->base->mSpells.list.begin());
+                iter!=ref->base->mSpells.list.end(); ++iter)
+                data->mCreatureStats.getSpells().add (*iter);
+
             // store
             ptr.getRefData().setCustomData (data.release());
         }
