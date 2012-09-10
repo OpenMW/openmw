@@ -53,7 +53,6 @@ namespace MWGui
                              mMainWidget->getHeight() + (mInstructionLabel->getTextSize().height - mInstructionLabel->getHeight()));
 
         mOkButton->eventMouseButtonClick += MyGUI::newDelegate(this, &QuickKeysMenu::onOkButtonClicked);
-        std::cout << "real ok button is : " << mOkButton->getName() << std::endl;
         center();
 
 
