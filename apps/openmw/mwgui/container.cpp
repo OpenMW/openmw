@@ -76,7 +76,7 @@ ContainerBase::ContainerBase(DragAndDrop* dragAndDrop) :
 {
 }
 
-void ContainerBase::setWidgets(Widget* containerWidget, ScrollView* itemView)
+void ContainerBase::setWidgets(MyGUI::Widget* containerWidget, MyGUI::ScrollView* itemView)
 {
     mContainerWidget = containerWidget;
     mItemView = itemView;
@@ -471,7 +471,7 @@ void ContainerBase::drawItems()
 
             // background widget (for the "equipped" frame and magic item background image)
             bool isMagic = (MWWorld::Class::get(*iter).getEnchantment(*iter) != "");
-            MyGUI::ImageBox* backgroundWidget = mContainerWidget->createWidget<ImageBox>("ImageBox", MyGUI::IntCoord(x, y, 42, 42), MyGUI::Align::Default);
+            MyGUI::ImageBox* backgroundWidget = mContainerWidget->createWidget<MyGUI::ImageBox>("ImageBox", MyGUI::IntCoord(x, y, 42, 42), MyGUI::Align::Default);
             backgroundWidget->setUserString("ToolTipType", "ItemPtr");
             backgroundWidget->setUserData(*iter);
 
@@ -503,7 +503,7 @@ void ContainerBase::drawItems()
             backgroundWidget->eventMouseWheel += MyGUI::newDelegate(this, &ContainerBase::onMouseWheel);
 
             // image
-            ImageBox* image = backgroundWidget->createWidget<ImageBox>("ImageBox", MyGUI::IntCoord(5, 5, 32, 32), MyGUI::Align::Default);
+            MyGUI::ImageBox* image = backgroundWidget->createWidget<MyGUI::ImageBox>("ImageBox", MyGUI::IntCoord(5, 5, 32, 32), MyGUI::Align::Default);
             int pos = path.rfind(".");
             path.erase(pos);
             path.append(".dds");

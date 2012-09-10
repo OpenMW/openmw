@@ -30,7 +30,7 @@ ReviewDialog::ReviewDialog(MWBase::WindowManager& parWindowManager)
     center();
 
     // Setup static stats
-    ButtonPtr button;
+    MyGUI::Button* button;
     getWidget(mNameWidget, "NameText");
     getWidget(button, "NameButton");
     adjustButtonSize(button);

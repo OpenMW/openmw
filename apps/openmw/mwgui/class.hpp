@@ -12,9 +12,6 @@
 
 namespace MWGui
 {
-    /// \todo remove!
-    using namespace MyGUI;
-
     class InfoBoxDialog : public WindowBase
     {
     public:
@@ -30,7 +27,7 @@ namespace MWGui
         int getChosenButton() const;
 
         // Events
-        typedef delegates::CMultiDelegate1<int> EventHandle_Int;
+        typedef MyGUI::delegates::CMultiDelegate1<int> EventHandle_Int;
 
         /** Event : Button was clicked.\n
             signature : void method(int index)\n
@@ -75,7 +72,7 @@ namespace MWGui
         void setClassId(const std::string &classId);
 
         // Events
-        typedef delegates::CMultiDelegate0 EventHandle_Void;
+        typedef MyGUI::delegates::CMultiDelegate0 EventHandle_Void;
 
         /** Event : Back button clicked.\n
             signature : void method()\n
@@ -105,7 +102,7 @@ namespace MWGui
         virtual void open();
 
         // Events
-        typedef delegates::CMultiDelegate0 EventHandle_Void;
+        typedef MyGUI::delegates::CMultiDelegate0 EventHandle_Void;
 
         /** Event : Back button clicked.\n
             signature : void method()\n
@@ -141,7 +138,7 @@ namespace MWGui
         ESM::Class::Specialization getSpecializationId() const { return mSpecializationId; }
 
         // Events
-        typedef delegates::CMultiDelegate0 EventHandle_Void;
+        typedef MyGUI::delegates::CMultiDelegate0 EventHandle_Void;
 
         /** Event : Cancel button clicked.\n
             signature : void method()\n
@@ -174,7 +171,7 @@ namespace MWGui
         void setAffectedWidget(Widgets::MWAttributePtr widget) { mAffectedWidget = widget; }
 
         // Events
-        typedef delegates::CMultiDelegate0 EventHandle_Void;
+        typedef MyGUI::delegates::CMultiDelegate0 EventHandle_Void;
 
         /** Event : Cancel button clicked.\n
             signature : void method()\n
@@ -207,7 +204,7 @@ namespace MWGui
         void setAffectedWidget(Widgets::MWSkillPtr widget) { mAffectedWidget = widget; }
 
         // Events
-        typedef delegates::CMultiDelegate0 EventHandle_Void;
+        typedef MyGUI::delegates::CMultiDelegate0 EventHandle_Void;
 
         /** Event : Cancel button clicked.\n
             signature : void method()\n
@@ -264,7 +261,7 @@ namespace MWGui
         void setNextButtonShow(bool shown);
 
         // Events
-        typedef delegates::CMultiDelegate0 EventHandle_Void;
+        typedef MyGUI::delegates::CMultiDelegate0 EventHandle_Void;
 
         /** Event : Back button clicked.\n
             signature : void method()\n

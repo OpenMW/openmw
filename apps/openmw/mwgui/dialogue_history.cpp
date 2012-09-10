@@ -14,10 +14,10 @@
 using namespace MWGui;
 using namespace Widgets;
 
-UString DialogueHistory::getColorAtPos(size_t _pos)
+MyGUI::UString DialogueHistory::getColorAtPos(size_t _pos)
 {
-    UString colour = TextIterator::convertTagColour(getTextColour());
-    TextIterator iterator(getCaption());
+    MyGUI::UString colour = MyGUI::TextIterator::convertTagColour(getTextColour());
+    MyGUI::TextIterator iterator(getCaption());
     while(iterator.moveNext())
     {
         size_t pos = iterator.getPosition();
@@ -30,13 +30,13 @@ UString DialogueHistory::getColorAtPos(size_t _pos)
     return colour;
 }
 
-UString DialogueHistory::getColorTextAt(size_t _pos)
+MyGUI::UString DialogueHistory::getColorTextAt(size_t _pos)
 {
     bool breakOnNext = false;
-    UString colour = TextIterator::convertTagColour(getTextColour());
-    UString colour2 = colour;
-    TextIterator iterator(getCaption());
-    TextIterator col_start = iterator;
+    MyGUI::UString colour = MyGUI::TextIterator::convertTagColour(getTextColour());
+    MyGUI::UString colour2 = colour;
+    MyGUI::TextIterator iterator(getCaption());
+    MyGUI::TextIterator col_start = iterator;
     while(iterator.moveNext())
     {
         size_t pos = iterator.getPosition();
@@ -60,15 +60,15 @@ UString DialogueHistory::getColorTextAt(size_t _pos)
     return "";
 }
 
-void DialogueHistory::addDialogHeading(const UString& parText)
+void DialogueHistory::addDialogHeading(const MyGUI::UString& parText)
 {
-    UString head("\n#D8C09A");
+    MyGUI::UString head("\n#D8C09A");
     head.append(parText);
     head.append("#B29154\n");
     addText(head);
 }
 
-void DialogueHistory::addDialogText(const UString& parText)
+void DialogueHistory::addDialogText(const MyGUI::UString& parText)
 {
     addText(parText);
     addText("\n");

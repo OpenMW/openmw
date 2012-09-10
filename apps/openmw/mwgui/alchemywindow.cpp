@@ -493,7 +493,7 @@ namespace MWGui
 
         MyGUI::IntCoord coord(0, 0, mEffectsBox->getWidth(), 24);
         Widgets::MWEffectListPtr effectsWidget = mEffectsBox->createWidget<Widgets::MWEffectList>
-            ("MW_StatName", coord, Align::Left | Align::Top);
+            ("MW_StatName", coord, MyGUI::Align::Left | MyGUI::Align::Top);
         effectsWidget->setWindowManager(&mWindowManager);
         effectsWidget->setEffectList(effects);
 

@@ -4,16 +4,15 @@
 
 namespace MWGui
 {
-    using namespace MyGUI;
     class DialogueHistory : public MyGUI::EditBox
     {
         MYGUI_RTTI_DERIVED( DialogueHistory )
         public:
             Widget* getClient() { return mClient; }
-            UString getColorAtPos(size_t _pos);
-            UString getColorTextAt(size_t _pos);
-            void addDialogHeading(const UString& parText);
-            void addDialogText(const UString& parText);
+            MyGUI::UString getColorAtPos(size_t _pos);
+            MyGUI::UString getColorTextAt(size_t _pos);
+            void addDialogHeading(const MyGUI::UString& parText);
+            void addDialogText(const MyGUI::UString& parText);
     };
 }
 #endif

@@ -54,7 +54,7 @@ DialogueWindow::DialogueWindow(MWBase::WindowManager& parWindowManager)
     getWidget(mHistory, "History");
     mHistory->setOverflowToTheLeft(true);
     mHistory->setMaxTextLength(1000000);
-    Widget* eventbox;
+    MyGUI::Widget* eventbox;
 
     //An EditBox cannot receive mouse click events, so we use an
     //invisible widget on top of the editbox to receive them
@@ -78,11 +78,11 @@ DialogueWindow::DialogueWindow(MWBase::WindowManager& parWindowManager)
 
 void DialogueWindow::onHistoryClicked(MyGUI::Widget* _sender)
 {
-    ISubWidgetText* t = mHistory->getClient()->getSubWidgetText();
+    MyGUI::ISubWidgetText* t = mHistory->getClient()->getSubWidgetText();
     if(t == nullptr)
         return;
 
-    const IntPoint& lastPressed = InputManager::getInstance().getLastPressedPosition(MyGUI::MouseButton::Left);
+    const MyGUI::IntPoint& lastPressed = MyGUI::InputManager::getInstance().getLastPressedPosition(MyGUI::MouseButton::Left);
 
     size_t cursorPosition = t->getCursorPosition(lastPressed);
     MyGUI::UString color = mHistory->getColorAtPos(cursorPosition);
@@ -92,7 +92,7 @@ void DialogueWindow::onHistoryClicked(MyGUI::Widget* _sender)
 
     if(color != "#B29154")
     {
-        UString key = mHistory->getColorTextAt(cursorPosition);
+        MyGUI::UString key = mHistory->getColorTextAt(cursorPosition);
         if(color == "#686EBA") MWBase::Environment::get().getDialogueManager()->keywordSelected(lower_string(key));
 
         if(color == "#572D21") MWBase::Environment::get().getDialogueManager()->questionAnswered(lower_string(key));
