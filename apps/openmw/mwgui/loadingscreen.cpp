@@ -29,15 +29,17 @@ namespace MWGui
         if (!mLoadingOn)
             loadingOn();
 
+        const int numRefLists = 20;
+
         if (depth == 0)
         {
             mCurrentCellLoading = current;
             mTotalCellsLoading = total;
 
             mCurrentRefLoading = 0;
-
+            mCurrentRefList = 0;
         }
-        if (depth == 1)
+        else if (depth == 1)
         {
             mCurrentRefLoading = current;
             mTotalRefsLoading = total;
@@ -54,7 +56,14 @@ namespace MWGui
             refProgress = 1;
         else
             refProgress = float(mCurrentRefLoading) / float(mTotalRefsLoading-1);
-std::cout << refProgress << "  (" << mCurrentRefLoading << ", " << mTotalRefsLoading-1 << std::endl;
+        refProgress += mCurrentRefList;
+        refProgress /= numRefLists;
+
+        assert(refProgress <= 1 && refProgress >= 0);
+
+        if (depth == 1 && mCurrentRefLoading == mTotalRefsLoading-1)
+            ++mCurrentRefList;
+
         float progress = (float(mCurrentCellLoading)+refProgress) / float(mTotalCellsLoading);
         assert(progress <= 1 && progress >= 0);
         if (progress >= 1)
@@ -78,7 +87,7 @@ std::cout << refProgress << "  (" << mCurrentRefLoading << ", " << mTotalRefsLoa
             // SCRQM_INCLUDE with RENDER_QUEUE_OVERLAY does not work.
             for (int i = 0; i < Ogre::RENDER_QUEUE_MAX; ++i)
             {
-                if (i > 10 && i < 90)
+                if (i > 0 && i < 90)
                     mSceneMgr->addSpecialCaseRenderQueue(i);
             }
             mSceneMgr->setSpecialCaseRenderQueueMode(Ogre::SceneManager::SCRQM_EXCLUDE);
@@ -87,7 +96,9 @@ std::cout << refProgress << "  (" << mCurrentRefLoading << ", " << mTotalRefsLoa
             // (e.g. when using "coc" console command, it would enter an infinite loop and crash due to overflow)
             MWBase::Environment::get().getInputManager()->update(0, true);
 
+            mWindow->getViewport(0)->setClearEveryFrame(false);
             mWindow->update();
+            mWindow->getViewport(0)->setClearEveryFrame(true);
 
             // resume 3d rendering
             mSceneMgr->clearSpecialCaseRenderQueues();

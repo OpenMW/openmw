@@ -31,6 +31,7 @@ namespace MWGui
         int mTotalCellsLoading;
         int mCurrentRefLoading;
         int mTotalRefsLoading;
+        int mCurrentRefList;
 
 
         bool mLoadingOn;

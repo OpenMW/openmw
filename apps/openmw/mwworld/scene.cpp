@@ -50,6 +50,10 @@ namespace
                 }
             }
         }
+        else
+        {
+            MWBase::Environment::get().getWindowManager ()->setLoadingProgress ("Loading cells", 1, 0, 1);
+        }
     }
 
 }
