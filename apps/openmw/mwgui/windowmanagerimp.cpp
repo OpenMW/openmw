@@ -199,6 +199,7 @@ WindowManager::~WindowManager()
     delete mConfirmationDialog;
     delete mAlchemyWindow;
     delete mSpellWindow;
+    delete mLoadingScreen;
 
     cleanupGarbage();
 
