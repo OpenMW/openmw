@@ -25,9 +25,14 @@ namespace
             const MWWorld::Class& class_ =
                 MWWorld::Class::get (MWWorld::Ptr (&*cellRefList.list.begin(), &cell));
 
+            int numRefs = cellRefList.list.size();
+            int current = 0;
             for (typename T::List::iterator it = cellRefList.list.begin();
                 it != cellRefList.list.end(); it++)
             {
+                MWBase::Environment::get().getWindowManager ()->setLoadingProgress ("Loading cells", 1, current, numRefs);
+                ++current;
+
                 if (it->mData.getCount() || it->mData.isEnabled())
                 {
                     MWWorld::Ptr ptr (&*it, &cell);
@@ -175,6 +180,26 @@ namespace MWWorld
 
         CellStoreCollection::iterator active = mActiveCells.begin();
 
+        // get the number of cells to unload
+        int numUnload = 0;
+        while (active!=mActiveCells.end())
+        {
+            if (!((*active)->cell->data.flags & ESM::Cell::Interior))
+            {
+                if (std::abs (X-(*active)->cell->data.gridX)<=1 &&
+                    std::abs (Y-(*active)->cell->data.gridY)<=1)
+                {
+                    // keep cells within the new 3x3 grid
+                    ++active;
+                    continue;
+                }
+            }
+            ++active;
+            ++numUnload;
+        }
+
+        int current = 0;
+        active = mActiveCells.begin();
         while (active!=mActiveCells.end())
         {
             if (!((*active)->cell->data.flags & ESM::Cell::Interior))
@@ -188,10 +213,35 @@ namespace MWWorld
                 }
             }
 
+            MWBase::Environment::get().getWindowManager ()->setLoadingProgress ("Unloading cells", 0, current, numUnload);
             unloadCell (active++);
+            ++current;
         }
 
+        int numLoad = 0;
+        // get the number of cells to load
+        for (int x=X-1; x<=X+1; ++x)
+            for (int y=Y-1; y<=Y+1; ++y)
+            {
+                CellStoreCollection::iterator iter = mActiveCells.begin();
+
+                while (iter!=mActiveCells.end())
+                {
+                    assert (!((*iter)->cell->data.flags & ESM::Cell::Interior));
+
+                    if (x==(*iter)->cell->data.gridX &&
+                        y==(*iter)->cell->data.gridY)
+                        break;
+
+                    ++iter;
+                }
+
+                if (iter==mActiveCells.end())
+                    ++numLoad;
+            }
+
         // Load cells
+        current = 0;
         for (int x=X-1; x<=X+1; ++x)
             for (int y=Y-1; y<=Y+1; ++y)
             {
@@ -212,7 +262,9 @@ namespace MWWorld
                 {
                     CellStore *cell = MWBase::Environment::get().getWorld()->getExterior(x, y);
 
+                    MWBase::Environment::get().getWindowManager ()->setLoadingProgress ("Loading cells", 0, current, numLoad);
                     loadCell (cell);
+                    ++current;
                 }
             }
 
@@ -275,14 +327,30 @@ namespace MWWorld
         // remove active
         CellStoreCollection::iterator active = mActiveCells.begin();
 
+        // count number of cells to unload
+        int numUnload = 0;
         while (active!=mActiveCells.end())
         {
+            ++active;
+            ++numUnload;
+        }
+
+        // unload
+        int current = 0;
+        active = mActiveCells.begin();
+        while (active!=mActiveCells.end())
+        {
+            MWBase::Environment::get().getWindowManager ()->setLoadingProgress ("Unloading cells", 0, current, numUnload);
+
             unloadCell (active++);
+            ++current;
         }
 
         // Load cell.
         std::cout << "cellName:" << cellName << std::endl;
 
+
+        MWBase::Environment::get().getWindowManager ()->setLoadingProgress ("Loading cells", 0, 0, 1);
         loadCell (cell);
 
         // adjust player

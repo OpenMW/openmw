@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<MyGUI type="Layout">
+    <!-- The entire screen -->
+    <Widget type="Widget" layer="LoadingScreen" position="0 0 300 300" name="_Main">
+
+        <Widget type="Widget" skin="HUD_Box" position="0 200 300 80" align="Bottom HCenter">
+
+            <Widget type="AutoSizedTextBox" skin="SandText" position="30 35 240 24" name="LoadingText">
+                <Property key="Caption" value="Asdf"/>
+            </Widget>
+
+        </Widget>
+
+    </Widget>
+</MyGUI>

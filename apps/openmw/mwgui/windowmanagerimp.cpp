@@ -43,6 +43,7 @@
 #include "alchemywindow.hpp"
 #include "spellwindow.hpp"
 #include "quickkeysmenu.hpp"
+#include "loadingscreen.hpp"
 
 using namespace MWGui;
 
@@ -67,6 +68,7 @@ WindowManager::WindowManager(
   , mConfirmationDialog(NULL)
   , mAlchemyWindow(NULL)
   , mSpellWindow(NULL)
+  , mLoadingScreen(NULL)
   , mCharGen(NULL)
   , mPlayerClass()
   , mPlayerName()
@@ -145,6 +147,9 @@ WindowManager::WindowManager(
     mAlchemyWindow = new AlchemyWindow(*this);
     mSpellWindow = new SpellWindow(*this);
     mQuickKeysMenu = new QuickKeysMenu(*this);
+
+    mLoadingScreen = new LoadingScreen(mOgre->getScene (), mOgre->getWindow (), *this);
+    mLoadingScreen->setCoord (0,0,w,h);
 
     mInputBlocker = mGui->createWidget<MyGUI::Widget>("",0,0,w,h,MyGUI::Align::Default,"Windows","");
 
@@ -679,6 +684,7 @@ void WindowManager::processChangedSettings(const Settings::CategorySettingVector
         mBookWindow->center();
         mQuickKeysMenu->center();
         mSpellBuyingWindow->center();
+        mLoadingScreen->setCoord (0,0,x,y);
         mDragAndDrop->mDragAndDropWidget->setSize(MyGUI::IntSize(x, y));
         mInputBlocker->setSize(MyGUI::IntSize(x,y));
     }
@@ -896,4 +902,9 @@ void WindowManager::toggleHud ()
 {
     mHudEnabled = !mHudEnabled;
     mHud->setVisible (mHudEnabled);
+}
+
+void WindowManager::setLoadingProgress (const std::string& stage, int depth, int current, int total)
+{
+    mLoadingScreen->setLoadingProgress (stage, depth, current, total);
 }

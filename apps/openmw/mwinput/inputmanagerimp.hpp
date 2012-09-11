@@ -66,7 +66,7 @@ namespace MWInput
 
         virtual ~InputManager();
 
-        virtual void update(float dt);
+        virtual void update(float dt, bool loading);
 
         virtual void changeInputMode(bool guiMode);
 

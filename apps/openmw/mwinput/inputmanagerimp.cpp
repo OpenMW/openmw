@@ -233,14 +233,15 @@ namespace MWInput
         }
     }
 
-    void InputManager::update(float dt)
+    void InputManager::update(float dt, bool loading)
     {
         // Tell OIS to handle all input events
         mKeyboard->capture();
         mMouse->capture();
 
         // update values of channels (as a result of pressed keys)
-        mInputCtrl->update(dt);
+        if (!loading)
+            mInputCtrl->update(dt);
 
         // Update windows/gui as a result of input events
         // For instance this could mean opening a new window/dialog,
