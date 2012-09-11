@@ -17,6 +17,7 @@ namespace MWGui
         , mLastRenderTime(0.f)
     {
         getWidget(mLoadingText, "LoadingText");
+        getWidget(mProgressBar, "ProgressBar");
     }
 
     LoadingScreen::~LoadingScreen()
@@ -50,10 +51,10 @@ namespace MWGui
 
         float refProgress;
         if (mTotalRefsLoading <= 1)
-            refProgress = 0;
+            refProgress = 1;
         else
             refProgress = float(mCurrentRefLoading) / float(mTotalRefsLoading-1);
-
+std::cout << refProgress << "  (" << mCurrentRefLoading << ", " << mTotalRefsLoading-1 << std::endl;
         float progress = (float(mCurrentCellLoading)+refProgress) / float(mTotalCellsLoading);
         assert(progress <= 1 && progress >= 0);
         if (progress >= 1)
@@ -62,11 +63,12 @@ namespace MWGui
             return;
         }
 
-        mLoadingText->setCaption(stage + "... " + Ogre::StringConverter::toString(progress));
+        mLoadingText->setCaption(stage + "... ");
+        mProgressBar->setProgressPosition (static_cast<size_t>(progress * 1000));
 
-        static float loadingScreenFps = 40.f;
+        static float loadingScreenFps = 30.f;
 
-        //if (mTimer.getMilliseconds () > mLastRenderTime + (1.f/loadingScreenFps) * 1000.f)
+        if (mTimer.getMilliseconds () > mLastRenderTime + (1.f/loadingScreenFps) * 1000.f)
         {
             mLastRenderTime = mTimer.getMilliseconds ();
 

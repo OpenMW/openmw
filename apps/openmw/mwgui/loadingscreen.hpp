@@ -25,6 +25,7 @@ namespace MWGui
         Ogre::Timer mTimer;
 
         MyGUI::TextBox* mLoadingText;
+        MyGUI::ProgressBar* mProgressBar;
 
         int mCurrentCellLoading;
         int mTotalCellsLoading;

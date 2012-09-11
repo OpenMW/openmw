@@ -6,8 +6,11 @@
 
         <Widget type="Widget" skin="HUD_Box" position="0 200 300 80" align="Bottom HCenter">
 
-            <Widget type="AutoSizedTextBox" skin="SandText" position="30 35 240 24" name="LoadingText">
-                <Property key="Caption" value="Asdf"/>
+            <Widget type="AutoSizedTextBox" skin="SandText" position="30 20 240 24" name="LoadingText">
+            </Widget>
+
+            <Widget type="ProgressBar" skin="MW_Progress_Blue" position="30 50 240 24" name="ProgressBar">
+                <Property key="Range" value="1000"/>
             </Widget>
 
         </Widget>
