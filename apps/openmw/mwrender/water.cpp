@@ -309,7 +309,7 @@ void Water::applyRTT()
     if (Settings::Manager::getBool("shader", "Water"))
     {
         mReflectionTexture = TextureManager::getSingleton().createManual("WaterReflection",
-            ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, TEX_TYPE_2D, rttsize, rttsize, 0, PF_FLOAT16_RGBA, TU_RENDERTARGET);
+            ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, TEX_TYPE_2D, rttsize, rttsize, 0, PF_A8R8G8B8, TU_RENDERTARGET);
 
         RenderTarget* rtt = mReflectionTexture->getBuffer()->getRenderTarget();
         Viewport* vp = rtt->addViewport(mReflectionCamera);
