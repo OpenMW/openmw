@@ -122,6 +122,7 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, OEngine::Render::OgreRendere
     }
 
 
+
     if(isFemale)
         mInsert->scale(race->data.height.female, race->data.height.female, race->data.height.female);
     else

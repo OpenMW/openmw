@@ -27,13 +27,10 @@ namespace Physic
     };
 
     PhysicActor::PhysicActor(std::string name, std::string mesh, PhysicEngine* engine, Ogre::Vector3 position, Ogre::Quaternion rotation, float scale): 
-        mName(name), mEngine(engine), mMesh(mesh), mBoxTranslation(Ogre::Vector3::ZERO), mBoxRotation(Ogre::Quaternion::ZERO), mBody(0), collisionMode(false)
+        mName(name), mEngine(engine), mMesh(mesh), mBoxScaledTranslation(0,0,0), mBoxRotationInverse(0,0,0,0), mBody(0), collisionMode(false), mBoxRotation(0,0,0,0)
     {
-        Ogre::Vector3 test;
-        mBody = mEngine->createAndAdjustRigidBody(mesh, mName, scale, position, rotation, &test);
-        std::cout << "Test" << test << "\n";
+        mBody = mEngine->createAndAdjustRigidBody(mesh, mName, scale, position, rotation, &mBoxScaledTranslation, &mBoxRotation, &mBoxRotationInverse);
         mEngine->addRigidBody(mBody, false);  //Add rigid body to dynamics world, but do not add to object map
-
     }
 
     PhysicActor::~PhysicActor()
@@ -79,12 +76,17 @@ namespace Physic
 
     btVector3 PhysicActor::getPosition(void)
     {
-        return mBody->getWorldTransform().getOrigin();//return internalGhostObject->getWorldTransform().getOrigin() -mTranslation;
+        btVector3 vec = mBody->getWorldTransform().getOrigin();
+        Ogre::Quaternion rotation = Ogre::Quaternion(mBody->getWorldTransform().getRotation().getW(), mBody->getWorldTransform().getRotation().getX(),
+            mBody->getWorldTransform().getRotation().getY(), mBody->getWorldTransform().getRotation().getZ());
+        Ogre::Vector3 transrot = rotation * mBoxScaledTranslation;
+        btVector3 visualPosition = vec - btVector3(transrot.x, transrot.y, transrot.z);
+        return visualPosition;
     }
 
     btQuaternion PhysicActor::getRotation(void)
     {
-        return mBody->getWorldTransform().getRotation();//return btQuaternion::internalGhostObject->getWorldTransform().getRotation();
+        return mBody->getWorldTransform().getRotation() * mBoxRotationInverse;
     }
 
     void PhysicActor::setPosition(const btVector3& pos)
@@ -296,6 +298,7 @@ namespace Physic
         rotation = rotation * boxRotation;
         Ogre::Vector3 transrot = rotation * scaledBoxTranslation;
         Ogre::Vector3 newPosition = transrot + position;
+        
         tr.setOrigin(btVector3(newPosition.x, newPosition.y, newPosition.z));
         tr.setRotation(btQuaternion(rotation.x,rotation.y,rotation.z,rotation.w));
         body->setWorldTransform(tr);
@@ -310,21 +313,14 @@ namespace Physic
         BulletShapeManager::getSingletonPtr()->load(outputstring,"General");
         BulletShapePtr shape = BulletShapeManager::getSingleton().getByName(outputstring,"General");
 
-        btBoxShape* box = dynamic_cast<btBoxShape*>(shape->Shape);
-        if(box != NULL)
-            adjustRigidBody(body, position, rotation, shape->boxTranslation * scale, shape->boxRotation);
-        else
-            adjustRigidBody(body, position, rotation);
+        adjustRigidBody(body, position, rotation, shape->boxTranslation * scale, shape->boxRotation);
     }
 
     RigidBody* PhysicEngine::createAndAdjustRigidBody(std::string mesh,std::string name,float scale, Ogre::Vector3 position, Ogre::Quaternion rotation,
-        Ogre::Vector3* scaledBoxTranslation, Ogre::Quaternion* boxRotation)
+        Ogre::Vector3* scaledBoxTranslation, btQuaternion* boxRotation, btQuaternion* boxRotationInverse)
     {
-        if(scaledBoxTranslation != 0)
-            *scaledBoxTranslation = Ogre::Vector3(0, 5, 0);
         std::string sid = (boost::format("%07.3f") % scale).str();
         std::string outputstring = mesh + sid;
-        //std::cout << "The string" << outputstring << "\n";
 
         //get the shape from the .nif
         mShapeLoader->load(outputstring,"General");
@@ -332,9 +328,6 @@ namespace Physic
         BulletShapePtr shape = BulletShapeManager::getSingleton().getByName(outputstring,"General");
         shape->Shape->setLocalScaling( btVector3(scale,scale,scale));
 
-        
-        
-        //
 
         //create the motionState
         CMotionState* newMotionState = new CMotionState(this,name);
@@ -344,11 +337,16 @@ namespace Physic
         RigidBody* body = new RigidBody(CI,name);
         body->collide = shape->collide;
 
-        btBoxShape* box = dynamic_cast<btBoxShape*>(shape->Shape);
-        if(box != NULL)
-            adjustRigidBody(body, position, rotation, shape->boxTranslation * scale, shape->boxRotation);
-        else
-            adjustRigidBody(body, position, rotation);
+        if(scaledBoxTranslation != 0)
+            *scaledBoxTranslation = shape->boxTranslation * scale;
+        if(boxRotation != 0)
+            *boxRotation = btQuaternion(shape->boxRotation.x, shape->boxRotation.y, shape->boxRotation.z,shape->boxRotation.w);
+        if(boxRotationInverse != 0){
+            Ogre::Quaternion inverse = shape->boxRotation.Inverse();
+            *boxRotationInverse = btQuaternion(inverse.x,inverse.y,inverse.z,inverse.w);
+        }
+
+        adjustRigidBody(body, position, rotation, shape->boxTranslation * scale, shape->boxRotation);
 
         return body;
 

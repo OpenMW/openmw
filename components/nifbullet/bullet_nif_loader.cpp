@@ -74,6 +74,7 @@ void ManualBulletShapeLoader::loadResource(Ogre::Resource *resource)
     cShape->collide = false;
     mBoundingBox = NULL;
     cShape->boxTranslation = Ogre::Vector3(0,0,0);
+    cShape->boxRotation = Ogre::Quaternion::IDENTITY;
 
     mTriMesh = new btTriangleMesh();
 
