@@ -61,6 +61,7 @@ namespace MWGui
   class SettingsWindow;
   class AlchemyWindow;
   class QuickKeysMenu;
+  class LoadingScreen;
 
   class WindowManager : public MWBase::WindowManager
   {
@@ -195,6 +196,8 @@ namespace MWGui
 
     virtual void executeInConsole (const std::string& path);
 
+    virtual void setLoadingProgress (const std::string& stage, int depth, int current, int total);
+
   private:
     OEngine::GUI::MyGUIManager *mGuiManager;
     HUD *mHud;
@@ -219,6 +222,7 @@ namespace MWGui
     AlchemyWindow* mAlchemyWindow;
     SpellWindow* mSpellWindow;
     QuickKeysMenu* mQuickKeysMenu;
+    LoadingScreen* mLoadingScreen;
 
     CharacterCreation* mCharGen;
 

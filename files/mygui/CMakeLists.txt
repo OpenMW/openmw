@@ -71,6 +71,7 @@ set(MYGUI_FILES
     openmw_itemselection_dialog.layout
     openmw_magicselection_dialog.layout
     openmw_spell_buying_window.layout
+    openmw_loading_screen.layout
     smallbars.png
     VeraMono.ttf
     markers.png
