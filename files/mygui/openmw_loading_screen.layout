@@ -4,13 +4,17 @@
     <!-- The entire screen -->
     <Widget type="Widget" layer="LoadingScreen" position="0 0 300 300" name="_Main">
 
-        <Widget type="Widget" skin="HUD_Box" position="0 200 300 80" align="Bottom HCenter">
+        <Widget type="ImageBox" skin="ImageBox" position="0 0 300 300" align="Stretch" name="BackgroundImage">
 
-            <Widget type="AutoSizedTextBox" skin="SandText" position="30 20 240 24" name="LoadingText">
-            </Widget>
+            <Widget type="Widget" skin="HUD_Box" position="0 200 300 70" align="Bottom HCenter">
 
-            <Widget type="ProgressBar" skin="MW_Progress_Blue" position="30 50 240 24" name="ProgressBar">
-                <Property key="Range" value="1000"/>
+                <Widget type="AutoSizedTextBox" skin="SandText" position="20 12 260 24" name="LoadingText">
+                </Widget>
+
+                <Widget type="ProgressBar" skin="MW_Progress_Blue" position="20 38 260 24" name="ProgressBar">
+                    <Property key="Range" value="1000"/>
+                </Widget>
+
             </Widget>
 
         </Widget>

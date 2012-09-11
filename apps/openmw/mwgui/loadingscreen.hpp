@@ -8,7 +8,6 @@
 
 namespace MWGui
 {
-
     class LoadingScreen : public WindowBase
     {
     public:
@@ -16,6 +15,8 @@ namespace MWGui
         virtual ~LoadingScreen();
 
         void setLoadingProgress (const std::string& stage, int depth, int current, int total);
+
+        void onResChange(int w, int h);
 
     private:
         Ogre::SceneManager* mSceneMgr;
@@ -26,12 +27,16 @@ namespace MWGui
 
         MyGUI::TextBox* mLoadingText;
         MyGUI::ProgressBar* mProgressBar;
+        MyGUI::ImageBox* mBackgroundImage;
 
         int mCurrentCellLoading;
         int mTotalCellsLoading;
         int mCurrentRefLoading;
         int mTotalRefsLoading;
         int mCurrentRefList;
+
+        Ogre::Rectangle2D* mRectangle;
+        Ogre::MaterialPtr mBackgroundMaterial;
 
 
         bool mLoadingOn;

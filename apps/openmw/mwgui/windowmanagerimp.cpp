@@ -149,7 +149,7 @@ WindowManager::WindowManager(
     mQuickKeysMenu = new QuickKeysMenu(*this);
 
     mLoadingScreen = new LoadingScreen(mOgre->getScene (), mOgre->getWindow (), *this);
-    mLoadingScreen->setCoord (0,0,w,h);
+    mLoadingScreen->onResChange (w,h);
 
     mInputBlocker = mGui->createWidget<MyGUI::Widget>("",0,0,w,h,MyGUI::Align::Default,"Windows","");
 
@@ -684,7 +684,7 @@ void WindowManager::processChangedSettings(const Settings::CategorySettingVector
         mBookWindow->center();
         mQuickKeysMenu->center();
         mSpellBuyingWindow->center();
-        mLoadingScreen->setCoord (0,0,x,y);
+        mLoadingScreen->onResChange (x,y);
         mDragAndDrop->mDragAndDropWidget->setSize(MyGUI::IntSize(x, y));
         mInputBlocker->setSize(MyGUI::IntSize(x,y));
     }

@@ -2,6 +2,11 @@
 
 #include <OgreRenderWindow.h>
 #include <OgreRoot.h>
+#include <OgreCompositorManager.h>
+#include <OgreCompositorChain.h>
+#include <OgreMaterial.h>
+
+
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/inputmanager.hpp"
@@ -18,10 +23,37 @@ namespace MWGui
     {
         getWidget(mLoadingText, "LoadingText");
         getWidget(mProgressBar, "ProgressBar");
+        getWidget(mBackgroundImage, "BackgroundImage");
+
+
+        mBackgroundMaterial = Ogre::MaterialManager::getSingleton().create("BackgroundMaterial", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
+        mBackgroundMaterial->getTechnique(0)->getPass(0)->setLightingEnabled(false);
+        mBackgroundMaterial->getTechnique(0)->getPass(0)->setDepthCheckEnabled(false);
+        mBackgroundMaterial->getTechnique(0)->getPass(0)->createTextureUnitState("");
+
+        mRectangle = new Ogre::Rectangle2D(true);
+        mRectangle->setCorners(-1.0, 1.0, 1.0, -1.0);
+        mRectangle->setMaterial("BackgroundMaterial");
+        // Render the background before everything else
+        mRectangle->setRenderQueueGroup(Ogre::RENDER_QUEUE_OVERLAY-1);
+        // Use infinite AAB to always stay visible
+        Ogre::AxisAlignedBox aabInf;
+        aabInf.setInfinite();
+        mRectangle->setBoundingBox(aabInf);
+        // Attach background to the scene
+        Ogre::SceneNode* node = mSceneMgr->getRootSceneNode()->createChildSceneNode();
+        node->attachObject(mRectangle);
+        mRectangle->setVisible(false);
     }
 
     LoadingScreen::~LoadingScreen()
     {
+        delete mRectangle;
+    }
+
+    void LoadingScreen::onResChange(int w, int h)
+    {
+        setCoord(0,0,w,h);
     }
 
     void LoadingScreen::setLoadingProgress (const std::string& stage, int depth, int current, int total)
@@ -87,7 +119,7 @@ namespace MWGui
             // SCRQM_INCLUDE with RENDER_QUEUE_OVERLAY does not work.
             for (int i = 0; i < Ogre::RENDER_QUEUE_MAX; ++i)
             {
-                if (i > 0 && i < 90)
+                if (i > 0 && i < 96)
                     mSceneMgr->addSpecialCaseRenderQueue(i);
             }
             mSceneMgr->setSpecialCaseRenderQueueMode(Ogre::SceneManager::SCRQM_EXCLUDE);
@@ -96,9 +128,38 @@ namespace MWGui
             // (e.g. when using "coc" console command, it would enter an infinite loop and crash due to overflow)
             MWBase::Environment::get().getInputManager()->update(0, true);
 
-            mWindow->getViewport(0)->setClearEveryFrame(false);
+            Ogre::CompositorChain* chain = Ogre::CompositorManager::getSingleton().getCompositorChain(mWindow->getViewport(0));
+
+            bool hasCompositor = chain->getCompositor ("gbufferFinalizer");
+
+
+            if (!hasCompositor)
+            {
+                mWindow->getViewport(0)->setClearEveryFrame(false);
+            }
+            else
+            {
+                mBackgroundMaterial->getTechnique(0)->getPass(0)->getTextureUnitState(0)->setTextureName(chain->getCompositor ("gbufferFinalizer")->getTextureInstance ("no_mrt_output", 0)->getName());
+                mRectangle->setVisible(true);
+
+                for (unsigned int i = 0; i<chain->getNumCompositors(); ++i)
+                {
+                    Ogre::CompositorManager::getSingleton().setCompositorEnabled(mWindow->getViewport(0), chain->getCompositor(i)->getCompositor()->getName(), false);
+                }
+            }
+
             mWindow->update();
-            mWindow->getViewport(0)->setClearEveryFrame(true);
+
+            if (!hasCompositor)
+                mWindow->getViewport(0)->setClearEveryFrame(true);
+            else
+            {
+                for (unsigned int i = 0; i<chain->getNumCompositors(); ++i)
+                {
+                    Ogre::CompositorManager::getSingleton().setCompositorEnabled(mWindow->getViewport(0), chain->getCompositor(i)->getCompositor()->getName(), true);
+                }
+                mRectangle->setVisible(false);
+            }
 
             // resume 3d rendering
             mSceneMgr->clearSpecialCaseRenderQueues();

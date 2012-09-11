@@ -734,6 +734,7 @@ void RenderingManager::processChangedSettings(const Settings::CategorySettingVec
             sh::Factory::getInstance ().setGlobalSetting ("mrt_output", useMRT() ? "true" : "false");
             sh::Factory::getInstance ().setGlobalSetting ("simple_water", Settings::Manager::getBool("shader", "Water") ? "false" : "true");
             mObjects.rebuildStaticGeometry ();
+            mRendering.getViewport ()->setClearEveryFrame (true);
         }
         else if (it->second == "underwater effect" && it->first == "Water")
         {
