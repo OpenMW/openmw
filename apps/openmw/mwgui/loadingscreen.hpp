@@ -15,6 +15,7 @@ namespace MWGui
         virtual ~LoadingScreen();
 
         void setLoadingProgress (const std::string& stage, int depth, int current, int total);
+        void loadingDone();
 
         void onResChange(int w, int h);
 

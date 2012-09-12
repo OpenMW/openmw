@@ -80,11 +80,7 @@ namespace MWGui
             mTotalRefsLoading = total;
         }
 
-        if (mTotalCellsLoading == 0)
-        {
-            loadingOff();
-            return;
-        }
+        assert (mTotalCellsLoading != 0);
 
         float refProgress;
         if (mTotalRefsLoading <= 1)
@@ -101,11 +97,6 @@ namespace MWGui
 
         float progress = (float(mCurrentCellLoading)+refProgress) / float(mTotalCellsLoading);
         assert(progress <= 1 && progress >= 0);
-        if (progress >= 1)
-        {
-            loadingOff();
-            return;
-        }
 
         mLoadingText->setCaption(stage + "... ");
         mProgressBar->setProgressPosition (static_cast<size_t>(progress * 1000));
@@ -138,13 +129,14 @@ namespace MWGui
 
             if (!hasCompositor)
             {
-                mWindow->getViewport(0)->setClearEveryFrame(false);
+                //mWindow->getViewport(0)->setClearEveryFrame(false);
             }
             else
             {
                 if (!mFirstLoad)
-                    mBackgroundMaterial->getTechnique(0)->getPass(0)->getTextureUnitState(0)->setTextureName(chain->getCompositor ("gbufferFinalizer")->getTextureInstance ("no_mrt_output", 0)->getName());
-                mRectangle->setVisible(true);
+                {
+                    //mBackgroundMaterial->getTechnique(0)->getPass(0)->getTextureUnitState(0)->setTextureName(chain->getCompositor ("gbufferFinalizer")->getTextureInstance ("no_mrt_output", 0)->getName());
+                }
 
                 for (unsigned int i = 0; i<chain->getNumCompositors(); ++i)
                 {
@@ -152,6 +144,9 @@ namespace MWGui
                 }
             }
 
+            mRectangle->setVisible(hasCompositor || mFirstLoad);
+            std::cout << "rect vis? " << mRectangle->getVisible () << " first load? " << mFirstLoad << std::endl;
+            mBackgroundMaterial->getTechnique(0)->getPass(0)->getTextureUnitState(0)->setTextureName("Splash/Splash_Bonelord.tga");
             mWindow->update();
 
             if (!hasCompositor)
@@ -162,8 +157,9 @@ namespace MWGui
                 {
                     Ogre::CompositorManager::getSingleton().setCompositorEnabled(mWindow->getViewport(0), chain->getCompositor(i)->getCompositor()->getName(), true);
                 }
-                mRectangle->setVisible(false);
             }
+
+            mRectangle->setVisible(false);
 
             // resume 3d rendering
             mSceneMgr->clearSpecialCaseRenderQueues();
@@ -171,8 +167,14 @@ namespace MWGui
         }
     }
 
+    void LoadingScreen::loadingDone()
+    {
+        loadingOff();
+    }
+
     void LoadingScreen::loadingOn()
     {
+        std::cout << "loading on " <<std::endl;
         setVisible(true);
         mLoadingOn = true;
 
@@ -204,10 +206,10 @@ namespace MWGui
 
     void LoadingScreen::loadingOff()
     {
+        std::cout << "loading off " << std::endl;
         setVisible(false);
         mLoadingOn = false;
-        mFirstLoad = false;
-        mRectangle->setVisible(false);
+        //mFirstLoad = false;
 
         mWindowManager.removeGuiMode(GM_Loading);
         mWindowManager.removeGuiMode(GM_LoadingWallpaper);

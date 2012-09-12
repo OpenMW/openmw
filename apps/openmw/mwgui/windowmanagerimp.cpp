@@ -918,3 +918,8 @@ void WindowManager::setLoadingProgress (const std::string& stage, int depth, int
 {
     mLoadingScreen->setLoadingProgress (stage, depth, current, total);
 }
+
+void WindowManager::loadingDone ()
+{
+    mLoadingScreen->loadingDone ();
+}
