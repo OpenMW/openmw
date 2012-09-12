@@ -11,6 +11,8 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/inputmanager.hpp"
 
+#include "../mwbase/windowmanager.hpp"
+
 namespace MWGui
 {
 
@@ -20,6 +22,7 @@ namespace MWGui
         , WindowBase("openmw_loading_screen.layout", parWindowManager)
         , mLoadingOn(false)
         , mLastRenderTime(0.f)
+        , mFirstLoad(true)
     {
         getWidget(mLoadingText, "LoadingText");
         getWidget(mProgressBar, "ProgressBar");
@@ -139,7 +142,8 @@ namespace MWGui
             }
             else
             {
-                mBackgroundMaterial->getTechnique(0)->getPass(0)->getTextureUnitState(0)->setTextureName(chain->getCompositor ("gbufferFinalizer")->getTextureInstance ("no_mrt_output", 0)->getName());
+                if (!mFirstLoad)
+                    mBackgroundMaterial->getTechnique(0)->getPass(0)->getTextureUnitState(0)->setTextureName(chain->getCompositor ("gbufferFinalizer")->getTextureInstance ("no_mrt_output", 0)->getName());
                 mRectangle->setVisible(true);
 
                 for (unsigned int i = 0; i<chain->getNumCompositors(); ++i)
@@ -171,6 +175,30 @@ namespace MWGui
     {
         setVisible(true);
         mLoadingOn = true;
+
+        if (mFirstLoad)
+        {
+            /// \todo use a directory listing here
+            std::vector<std::string> splash;
+            splash.push_back ("Splash/Splash_Bonelord.tga");
+            splash.push_back ("Splash/Splash_ClannDaddy.tga");
+            splash.push_back ("Splash/Splash_ClannFear.tga");
+            splash.push_back ("Splash/Splash_Daedroth.tga");
+            splash.push_back ("Splash/Splash_Hunger.tga");
+            splash.push_back ("Splash/Splash_KwamaWarrior.tga");
+            splash.push_back ("Splash/Splash_Netch.tga");
+            splash.push_back ("Splash/Splash_NixHound.tga");
+            splash.push_back ("Splash/Splash_Siltstriker.tga");
+            splash.push_back ("Splash/Splash_Skeleton.tga");
+            splash.push_back ("Splash/Splash_SphereCenturion.tga");
+
+            mBackgroundMaterial->getTechnique(0)->getPass(0)->getTextureUnitState(0)->setTextureName(splash[rand() % splash.size()]);
+            mRectangle->setVisible(true);
+
+            mWindowManager.pushGuiMode(GM_LoadingWallpaper);
+        }
+        else
+            mWindowManager.pushGuiMode(GM_Loading);
     }
 
 
@@ -178,5 +206,10 @@ namespace MWGui
     {
         setVisible(false);
         mLoadingOn = false;
+        mFirstLoad = false;
+        mRectangle->setVisible(false);
+
+        mWindowManager.removeGuiMode(GM_Loading);
+        mWindowManager.removeGuiMode(GM_LoadingWallpaper);
     }
 }

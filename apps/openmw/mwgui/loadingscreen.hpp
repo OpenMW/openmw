@@ -19,6 +19,8 @@ namespace MWGui
         void onResChange(int w, int h);
 
     private:
+        bool mFirstLoad;
+
         Ogre::SceneManager* mSceneMgr;
         Ogre::RenderWindow* mWindow;
 

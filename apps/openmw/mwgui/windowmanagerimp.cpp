@@ -248,6 +248,8 @@ void WindowManager::updateVisible()
     mSpellWindow->setVisible(false);
     mQuickKeysMenu->setVisible(false);
 
+    mHud->setVisible(true);
+
     // Mouse is visible whenever we're not in game mode
     MyGUI::PointerManager::getInstance().setVisible(isGuiMode());
 
@@ -339,6 +341,13 @@ void WindowManager::updateVisible()
             break;
         case GM_Journal:
             mJournal->setVisible(true);
+            break;
+        case GM_LoadingWallpaper:
+            mHud->setVisible(false);
+            MyGUI::PointerManager::getInstance().setVisible(false);
+            break;
+        case GM_Loading:
+            MyGUI::PointerManager::getInstance().setVisible(false);
             break;
         default:
             // Unsupported mode, switch back to game
