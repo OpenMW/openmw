@@ -164,6 +164,11 @@ void ManualBulletShapeLoader::handleNode(Nif::Node *node, int flags,
     // the flags we currently use, at least.
     flags |= node->flags;
 
+    // Marker objects: just skip the entire node
+    /// \todo don't do this in the editor
+    if (node->name.find("marker") != std::string::npos)
+        return;
+
     // Check for extra data
     Nif::Extra *e = node;
     while (!e->extra.empty())
