@@ -111,7 +111,7 @@ void Shadows::recreate()
     sh::Factory::getInstance ().setSharedParameter ("shadowFar_fadeStart", sh::makeProperty<sh::Vector4>(shadowFar_fadeStart));
 
     // Set visibility mask for the shadow render textures
-    int visibilityMask = RV_Actors * Settings::Manager::getBool("actor shadows", "Shadows")
+    int visibilityMask = (RV_Actors + RV_Player) * Settings::Manager::getBool("actor shadows", "Shadows")
                             + (RV_Statics + RV_StaticsSmall) * Settings::Manager::getBool("statics shadows", "Shadows")
                             + RV_Misc * Settings::Manager::getBool("misc shadows", "Shadows");
 

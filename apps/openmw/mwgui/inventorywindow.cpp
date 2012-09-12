@@ -48,6 +48,7 @@ namespace MWGui
         static_cast<MyGUI::Window*>(mMainWidget)->eventWindowChangeCoord += MyGUI::newDelegate(this, &InventoryWindow::onWindowResize);
 
         getWidget(mAvatar, "Avatar");
+        getWidget(mAvatarImage, "AvatarImage");
         getWidget(mEncumbranceBar, "EncumbranceBar");
         getWidget(mEncumbranceText, "EncumbranceBarT");
         getWidget(mFilterAll, "AllButton");
@@ -100,6 +101,13 @@ namespace MWGui
                               _sender->getSize().width - 12 - (_sender->getSize().height-44) * aspect - 15,
                               _sender->getSize().height-44 );
         drawItems();
+
+        MyGUI::IntSize size = mAvatarImage->getSize();
+
+        std::cout << "dims " << size.width << " " << size.height << std::endl;
+        MWBase::Environment::get().getWorld()->updateCharacterPreview (size.width, size.height);
+
+        mAvatarImage->setImageCoord (MyGUI::IntCoord(0,0,size.width, size.height));
     }
 
     void InventoryWindow::onFilterChanged(MyGUI::Widget* _sender)
@@ -171,14 +179,7 @@ namespace MWGui
 
             drawItems();
 
-            // update selected weapon icon
-            MWWorld::InventoryStore& invStore = MWWorld::Class::get(mPtr).getInventoryStore(mPtr);
-            MWWorld::ContainerStoreIterator weaponSlot = invStore.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
-            if (weaponSlot == invStore.end())
-                mWindowManager.unsetSelectedWeapon();
-            else
-                mWindowManager.setSelectedWeapon(*weaponSlot, 100); /// \todo track weapon durability
-
+            notifyContentChanged();
         }
     }
 
@@ -265,6 +266,10 @@ namespace MWGui
             mWindowManager.unsetSelectedWeapon();
         else
             mWindowManager.setSelectedWeapon(*weaponSlot, 100); /// \todo track weapon durability
+
+        MyGUI::IntSize size = mAvatarImage->getSize();
+        mAvatarImage->setImageCoord (MyGUI::IntCoord(0,0,size.width, size.height));
+        MWBase::Environment::get().getWorld()->updateCharacterPreview (size.width, size.height);
     }
 
     void InventoryWindow::pickUpObject (MWWorld::Ptr object)

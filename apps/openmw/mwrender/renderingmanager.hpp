@@ -43,6 +43,7 @@ namespace MWRender
     class LocalMap;
     class Water;
     class Compositors;
+    class CharacterPreview;
 
 class RenderingManager: private RenderingInterface, public Ogre::WindowEventListener {
 
@@ -191,6 +192,8 @@ class RenderingManager: private RenderingInterface, public Ogre::WindowEventList
     virtual bool isPositionExplored (float nX, float nY, int x, int y, bool interior);
     ///< see MWRender::LocalMap::isPositionExplored
 
+    void updateCharacterPreview(int sizeX, int sizeY);
+
   protected:
 	virtual void windowResized(Ogre::RenderWindow* rw);
     virtual void windowClosed(Ogre::RenderWindow* rw);
@@ -212,6 +215,8 @@ class RenderingManager: private RenderingInterface, public Ogre::WindowEventList
     OcclusionQuery* mOcclusionQuery;
 
     TerrainManager* mTerrainManager;
+
+    CharacterPreview* mCharacterPreview;
 
     MWRender::Water *mWater;
 

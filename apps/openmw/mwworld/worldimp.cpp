@@ -1222,4 +1222,9 @@ namespace MWWorld
     {
         mRendering->renderPlayer(mPlayer->getPlayer());
     }
+
+    void World::updateCharacterPreview (int sizeX, int sizeY)
+    {
+        mRendering->updateCharacterPreview(sizeX, sizeY);
+    }
 }

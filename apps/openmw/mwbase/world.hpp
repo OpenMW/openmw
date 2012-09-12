@@ -271,6 +271,8 @@ namespace MWBase
             virtual void togglePlayerLooking(bool enable) = 0;
 
             virtual void renderPlayer() = 0;
+
+            virtual void updateCharacterPreview(int sizeX, int sizeY) = 0;
     };
 }
 

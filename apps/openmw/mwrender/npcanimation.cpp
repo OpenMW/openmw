@@ -45,7 +45,7 @@ NpcAnimation::~NpcAnimation()
 }
 
 
-NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, OEngine::Render::OgreRenderer& _rend, MWWorld::InventoryStore& _inv)
+NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, OEngine::Render::OgreRenderer& _rend, MWWorld::InventoryStore& _inv, bool player)
   : Animation(_rend), mStateID(-1), mInv(_inv), timeToChange(0),
     robe(mInv.end()), helmet(mInv.end()), shirt(mInv.end()),
     cuirass(mInv.end()), greaves(mInv.end()),
@@ -53,6 +53,7 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, OEngine::Render::OgreRendere
     boots(mInv.end()),
     leftglove(mInv.end()), rightglove(mInv.end()), skirtiter(mInv.end()),
     pants(mInv.end())
+  , mIsPlayer(player)
 {
     MWWorld::LiveCellRef<ESM::NPC> *ref = ptr.get<ESM::NPC>();
 
@@ -94,7 +95,7 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, OEngine::Render::OgreRendere
     {
         Ogre::Entity *base = mEntityList.mEntities[i];
 
-        base->setVisibilityFlags(RV_Actors);
+        base->setVisibilityFlags(mIsPlayer ? RV_Player : RV_Actors);
         bool transparent = false;
         for(unsigned int j=0;j < base->getNumSubEntities();++j)
         {
@@ -357,13 +358,13 @@ NifOgre::EntityList NpcAnimation::insertBoundedPart(const std::string &mesh, con
                                                              mInsert, mesh);
     std::vector<Ogre::Entity*> &parts = entities.mEntities;
     for(size_t i = 0;i < parts.size();i++)
-        parts[i]->setVisibilityFlags(RV_Actors);
+        parts[i]->setVisibilityFlags(mIsPlayer ? RV_Player : RV_Actors);
     return entities;
 }
 
 void NpcAnimation::runAnimation(float timepassed)
 {
-    if(timeToChange > .2)
+    //if(timeToChange > .2)
     {
         timeToChange = 0;
         updateParts();

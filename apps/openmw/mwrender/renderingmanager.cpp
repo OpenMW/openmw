@@ -34,6 +34,7 @@
 #include "water.hpp"
 #include "compositors.hpp"
 #include "npcanimation.hpp"
+#include "characterpreview.hpp"
 
 using namespace MWRender;
 using namespace Ogre;
@@ -159,6 +160,8 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
     mDebugging = new Debugging(mMwRoot, engine);
     mLocalMap = new MWRender::LocalMap(&mRendering, this);
 
+    mCharacterPreview = new CharacterPreview(mRendering.getScene (), playerNode);
+
     setMenuTransparency(Settings::Manager::getFloat("menu transparency", "GUI"));
 }
 
@@ -175,6 +178,7 @@ RenderingManager::~RenderingManager ()
     delete mOcclusionQuery;
     delete mCompositors;
     delete mWater;
+    delete mCharacterPreview;
 }
 
 MWRender::SkyManager* RenderingManager::getSkyManager()
@@ -860,7 +864,7 @@ void RenderingManager::renderPlayer(const MWWorld::Ptr &ptr)
         new MWRender::NpcAnimation(
             ptr,
             mRendering,
-            MWWorld::Class::get(ptr).getInventoryStore(ptr)
+            MWWorld::Class::get(ptr).getInventoryStore(ptr), true
         );
     mPlayer->setAnimation(anim);
 }
@@ -880,6 +884,11 @@ void RenderingManager::getInteriorMapPosition (Ogre::Vector2 position, float& nX
 bool RenderingManager::isPositionExplored (float nX, float nY, int x, int y, bool interior)
 {
     return mLocalMap->isPositionExplored(nX, nY, x, y, interior);
+}
+
+void RenderingManager::updateCharacterPreview (int sizeX, int sizeY)
+{
+    mCharacterPreview->update(sizeX, sizeY);
 }
 
 } // namespace

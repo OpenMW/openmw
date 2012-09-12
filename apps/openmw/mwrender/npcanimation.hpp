@@ -18,6 +18,8 @@ private:
     int mPartslots[27];  //Each part slot is taken by clothing, armor, or is empty
     int mPartPriorities[27];
 
+    bool mIsPlayer;
+
     //Bounded Parts
     NifOgre::EntityList lclavicle;
     NifOgre::EntityList rclavicle;
@@ -66,7 +68,7 @@ private:
     MWWorld::ContainerStoreIterator skirtiter;
 
 public:
-    NpcAnimation(const MWWorld::Ptr& ptr, OEngine::Render::OgreRenderer& _rend, MWWorld::InventoryStore& _inv);
+    NpcAnimation(const MWWorld::Ptr& ptr, OEngine::Render::OgreRenderer& _rend, MWWorld::InventoryStore& _inv, bool player=false);
     virtual ~NpcAnimation();
     NifOgre::EntityList insertBoundedPart(const std::string &mesh, const std::string &bonename);
     virtual void runAnimation(float timepassed);

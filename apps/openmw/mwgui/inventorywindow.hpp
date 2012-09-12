@@ -24,6 +24,7 @@ namespace MWGui
 
         protected:
             MyGUI::Widget* mAvatar;
+            MyGUI::ImageBox* mAvatarImage;
             MyGUI::TextBox* mArmorRating;
             MyGUI::ProgressBar* mEncumbranceBar;
             MyGUI::TextBox* mEncumbranceText;
