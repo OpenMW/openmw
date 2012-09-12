@@ -218,9 +218,8 @@ namespace MWWorld
         std::vector< std::pair<std::string, Ogre::Vector3> > response;
         for(std::map<std::string,OEngine::Physic::PhysicActor*>::iterator it = mEngine->PhysicActorMap.begin(); it != mEngine->PhysicActorMap.end();it++)
         {
-            btVector3 newPos = it->second->getPosition();
 
-            Ogre::Vector3 coord(newPos.x(), newPos.y(), newPos.z());
+            Ogre::Vector3 coord = it->second->getPosition();
             if(it->first == "player"){
 
                 coord = playerphysics->ps.origin ;
@@ -331,6 +330,12 @@ namespace MWWorld
             Ogre::Quaternion quat = node->getOrientation();
             Ogre::Vector3 vec = node->getPosition();
             addObject(handle, handleToMesh[handle], quat, scale, vec);
+        }
+
+        if (OEngine::Physic::PhysicActor* act = mEngine->getCharacter(handle))
+        {
+            float scale = node->getScale().x;
+            act->setScale(scale);
         }
     }
 

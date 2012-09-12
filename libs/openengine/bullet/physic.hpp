@@ -77,13 +77,13 @@ namespace Physic
 
         bool getCollisionMode();
 
-        btVector3 getPosition(void);
+        Ogre::Vector3 getPosition(void);
 
-        btQuaternion getRotation(void);
+        Ogre::Quaternion getRotation(void);
 
         void setPosition(const btVector3& pos);
 
-       
+        void setScale(float scale);
 
         std::string mName;
 

@@ -29,7 +29,7 @@ namespace Physic
     PhysicActor::PhysicActor(std::string name, std::string mesh, PhysicEngine* engine, Ogre::Vector3 position, Ogre::Quaternion rotation, float scale): 
         mName(name), mEngine(engine), mMesh(mesh), mBoxScaledTranslation(0,0,0), mBoxRotationInverse(0,0,0,0), mBody(0), collisionMode(false), mBoxRotation(0,0,0,0)
     {
-        mBody = mEngine->createAndAdjustRigidBody(mesh, mName, scale, position, rotation, &mBoxScaledTranslation, &mBoxRotation, &mBoxRotationInverse);
+        mBody = mEngine->createAndAdjustRigidBody(mMesh, mName, scale, position, rotation, &mBoxScaledTranslation, &mBoxRotation, &mBoxRotationInverse);
         mEngine->addRigidBody(mBody, false);  //Add rigid body to dynamics world, but do not add to object map
     }
 
@@ -74,25 +74,42 @@ namespace Physic
         //internalGhostObject->getWorldTransform().setRotation( quat );
     }
 
-    btVector3 PhysicActor::getPosition(void)
+    Ogre::Vector3 PhysicActor::getPosition(void)
     {
         btVector3 vec = mBody->getWorldTransform().getOrigin();
         Ogre::Quaternion rotation = Ogre::Quaternion(mBody->getWorldTransform().getRotation().getW(), mBody->getWorldTransform().getRotation().getX(),
             mBody->getWorldTransform().getRotation().getY(), mBody->getWorldTransform().getRotation().getZ());
         Ogre::Vector3 transrot = rotation * mBoxScaledTranslation;
-        btVector3 visualPosition = vec - btVector3(transrot.x, transrot.y, transrot.z);
+        Ogre::Vector3 visualPosition = Ogre::Vector3(vec.getX(), vec.getY(), vec.getZ()) - transrot;
         return visualPosition;
     }
 
-    btQuaternion PhysicActor::getRotation(void)
+    Ogre::Quaternion PhysicActor::getRotation(void)
     {
-        return mBody->getWorldTransform().getRotation() * mBoxRotationInverse;
+        btQuaternion quat = mBody->getWorldTransform().getRotation() * mBoxRotationInverse;
+        return Ogre::Quaternion(quat.getW(), quat.getX(), quat.getY(), quat.getZ());
     }
 
     void PhysicActor::setPosition(const btVector3& pos)
     {
         //internalGhostObject->getWorldTransform().setOrigin(pos+mTranslation);
         //externalGhostObject->getWorldTransform().setOrigin(pos+mTranslation);
+    }
+
+    void PhysicActor::setScale(float scale){
+        std::cout << "Trying to set scale to " << scale << "\n";
+        Ogre::Vector3 position = getPosition();
+        Ogre::Quaternion rotation = getRotation();
+        //We only need to change the scaled box translation, box rotations remain the same.
+        mBoxScaledTranslation = mBoxScaledTranslation / mBody->getCollisionShape()->getLocalScaling().getX();
+        mBoxScaledTranslation *= scale;
+        if(mBody){
+            mEngine->dynamicsWorld->removeRigidBody(mBody);
+            delete mBody;
+        }
+        //Create the newly scaled rigid body
+        mBody = mEngine->createAndAdjustRigidBody(mMesh, mName, scale, position, rotation);
+        mEngine->addRigidBody(mBody, false);  //Add rigid body to dynamics world, but do not add to object map
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
