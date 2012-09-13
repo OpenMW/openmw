@@ -8,7 +8,9 @@
             <Property key="Caption" value="Appearance"/>
             <Property key="TextAlign" value="ALIGN_LEFT ALIGN_TOP"/>
         </Widget>
-        <Widget type="Canvas" skin="MW_Box" position="8 39 241 230" name="AppearanceBox"/>
+        <Widget type="Widget" skin="MW_Box" position="8 39 241 230">
+            <Widget type="ImageBox" skin="ImageBox" position_real="0 0 1 1" align="Stretch" name="PreviewImage"/>
+        </Widget>
 
         <!-- Sliders -->
         <!-- Rotation of head -->

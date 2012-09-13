@@ -73,7 +73,7 @@ namespace MWGui
         void updateSkills();
         void updateSpellPowers();
 
-        MyGUI::CanvasPtr  mAppearanceBox;
+        MyGUI::ImageBox*  mPreviewImage;
         MyGUI::ListBox*   mRaceList;
         MyGUI::ScrollBar* mHeadRotate;
 
@@ -87,6 +87,8 @@ namespace MWGui
         int mFaceCount, mHairCount;
 
         std::string mCurrentRaceId;
+
+        float mCurrentAngle;
     };
 }
 #endif

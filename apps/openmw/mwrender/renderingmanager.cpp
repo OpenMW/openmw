@@ -160,8 +160,6 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
     mDebugging = new Debugging(mMwRoot, engine);
     mLocalMap = new MWRender::LocalMap(&mRendering, this);
 
-    mCharacterPreview = new CharacterPreview(mRendering.getScene (), playerNode);
-
     setMenuTransparency(Settings::Manager::getFloat("menu transparency", "GUI"));
 }
 
@@ -178,7 +176,9 @@ RenderingManager::~RenderingManager ()
     delete mOcclusionQuery;
     delete mCompositors;
     delete mWater;
-    delete mCharacterPreview;
+    delete mInventoryPreview;
+    delete mRaceSelectionPreview;
+    delete mPreviewAnimation;
 }
 
 MWRender::SkyManager* RenderingManager::getSkyManager()
@@ -862,11 +862,20 @@ void RenderingManager::renderPlayer(const MWWorld::Ptr &ptr)
 {
     MWRender::NpcAnimation *anim =
         new MWRender::NpcAnimation(
-            ptr,
+            ptr, ptr.getRefData ().getBaseNode (),
             mRendering,
-            MWWorld::Class::get(ptr).getInventoryStore(ptr), true
+            MWWorld::Class::get(ptr).getInventoryStore(ptr), RV_Actors
         );
     mPlayer->setAnimation(anim);
+
+    MWWorld::InventoryStore& invStore = MWWorld::Class::get(ptr).getInventoryStore (ptr);
+
+    Ogre::SceneNode* previewNode = mMwRoot->createChildSceneNode ();
+    mPreviewAnimation = new NpcAnimation(ptr, previewNode, mRendering, invStore, RV_PlayerPreview);
+
+    mInventoryPreview = new InventoryPreview(mRendering.getScene (), previewNode);
+    mInventoryPreview->setNpcAnimation (mPreviewAnimation);
+    mRaceSelectionPreview = new RaceSelectionPreview(mRendering.getScene (), previewNode);
 }
 
 void RenderingManager::getPlayerData(Ogre::Vector3 &eyepos, float &pitch, float &yaw)
@@ -888,7 +897,12 @@ bool RenderingManager::isPositionExplored (float nX, float nY, int x, int y, boo
 
 void RenderingManager::updateCharacterPreview (int sizeX, int sizeY)
 {
-    mCharacterPreview->update(sizeX, sizeY);
+    mInventoryPreview->update(sizeX, sizeY);
+}
+
+void RenderingManager::updateRaceSelectionPreview (float angle)
+{
+    mRaceSelectionPreview->update(angle);
 }
 
 } // namespace

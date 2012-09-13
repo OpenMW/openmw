@@ -309,6 +309,7 @@ namespace MWWorld
             virtual void renderPlayer();
 
             virtual void updateCharacterPreview(int sizeX, int sizeY);
+            virtual void updateRaceSelectionPreview(float angle);
     };
 }
 

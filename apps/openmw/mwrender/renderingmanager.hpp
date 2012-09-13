@@ -43,7 +43,8 @@ namespace MWRender
     class LocalMap;
     class Water;
     class Compositors;
-    class CharacterPreview;
+    class InventoryPreview;
+    class RaceSelectionPreview;
 
 class RenderingManager: private RenderingInterface, public Ogre::WindowEventListener {
 
@@ -193,6 +194,7 @@ class RenderingManager: private RenderingInterface, public Ogre::WindowEventList
     ///< see MWRender::LocalMap::isPositionExplored
 
     void updateCharacterPreview(int sizeX, int sizeY);
+    void updateRaceSelectionPreview(float angle);
 
   protected:
 	virtual void windowResized(Ogre::RenderWindow* rw);
@@ -216,7 +218,8 @@ class RenderingManager: private RenderingInterface, public Ogre::WindowEventList
 
     TerrainManager* mTerrainManager;
 
-    CharacterPreview* mCharacterPreview;
+    InventoryPreview* mInventoryPreview;
+    RaceSelectionPreview* mRaceSelectionPreview;
 
     MWRender::Water *mWater;
 
@@ -247,6 +250,8 @@ class RenderingManager: private RenderingInterface, public Ogre::WindowEventList
     MWRender::Shadows* mShadows;
 
     MWRender::Compositors* mCompositors;
+
+    MWRender::NpcAnimation* mPreviewAnimation;
 };
 
 }

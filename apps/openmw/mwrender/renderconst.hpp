@@ -54,7 +54,7 @@ enum VisibilityFlags
 
     RV_OcclusionQuery = 256,
 
-    RV_Player = 512,
+    RV_PlayerPreview = 512,
 
     RV_Map = RV_Terrain + RV_Statics + RV_StaticsSmall + RV_Misc + RV_Water
 

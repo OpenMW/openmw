@@ -273,6 +273,7 @@ namespace MWBase
             virtual void renderPlayer() = 0;
 
             virtual void updateCharacterPreview(int sizeX, int sizeY) = 0;
+            virtual void updateRaceSelectionPreview(float angle) = 0;
     };
 }
 

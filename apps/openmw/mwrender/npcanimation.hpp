@@ -67,8 +67,11 @@ private:
     MWWorld::ContainerStoreIterator rightglove;
     MWWorld::ContainerStoreIterator skirtiter;
 
+    int mVisibilityFlags;
+
 public:
-    NpcAnimation(const MWWorld::Ptr& ptr, OEngine::Render::OgreRenderer& _rend, MWWorld::InventoryStore& _inv, bool player=false);
+    NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node, OEngine::Render::OgreRenderer& _rend,
+                 MWWorld::InventoryStore& _inv, int visibilityFlags);
     virtual ~NpcAnimation();
     NifOgre::EntityList insertBoundedPart(const std::string &mesh, const std::string &bonename);
     virtual void runAnimation(float timepassed);
@@ -80,6 +83,8 @@ public:
     bool addOrReplaceIndividualPart(int type, int group, int priority, const std::string &mesh);
     void removePartGroup(int group);
     void addPartGroup(int group, int priority, std::vector<ESM::PartReference>& parts);
+
+    void forceUpdate();
 };
 
 }

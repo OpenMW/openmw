@@ -45,15 +45,14 @@ NpcAnimation::~NpcAnimation()
 }
 
 
-NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, OEngine::Render::OgreRenderer& _rend, MWWorld::InventoryStore& _inv, bool player)
-  : Animation(_rend), mStateID(-1), mInv(_inv), timeToChange(0),
+NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node, OEngine::Render::OgreRenderer& _rend, MWWorld::InventoryStore& _inv, int visibilityFlags)
+    : Animation(_rend), mStateID(-1), mInv(_inv), timeToChange(0), mVisibilityFlags(visibilityFlags),
     robe(mInv.end()), helmet(mInv.end()), shirt(mInv.end()),
     cuirass(mInv.end()), greaves(mInv.end()),
     leftpauldron(mInv.end()), rightpauldron(mInv.end()),
     boots(mInv.end()),
     leftglove(mInv.end()), rightglove(mInv.end()), skirtiter(mInv.end()),
     pants(mInv.end())
-  , mIsPlayer(player)
 {
     MWWorld::LiveCellRef<ESM::NPC> *ref = ptr.get<ESM::NPC>();
 
@@ -85,7 +84,7 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, OEngine::Render::OgreRendere
         std::cout << " Sex: Male" << " Height: " << race->data.height.male << "\n";
     */
 
-    mInsert = ptr.getRefData().getBaseNode();
+    mInsert = node;
     assert(mInsert);
 
     std::string smodel = (!isBeast ? "meshes\\base_anim.nif" : "meshes\\base_animkna.nif");
@@ -95,7 +94,7 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, OEngine::Render::OgreRendere
     {
         Ogre::Entity *base = mEntityList.mEntities[i];
 
-        base->setVisibilityFlags(mIsPlayer ? RV_Player : RV_Actors);
+        base->setVisibilityFlags(mVisibilityFlags);
         bool transparent = false;
         for(unsigned int j=0;j < base->getNumSubEntities();++j)
         {
@@ -358,7 +357,7 @@ NifOgre::EntityList NpcAnimation::insertBoundedPart(const std::string &mesh, con
                                                              mInsert, mesh);
     std::vector<Ogre::Entity*> &parts = entities.mEntities;
     for(size_t i = 0;i < parts.size();i++)
-        parts[i]->setVisibilityFlags(mIsPlayer ? RV_Player : RV_Actors);
+        parts[i]->setVisibilityFlags(mVisibilityFlags);
     return entities;
 }
 
@@ -580,6 +579,11 @@ void NpcAnimation::addPartGroup(int group, int priority, std::vector<ESM::PartRe
         else
             reserveIndividualPart(part.part, group, priority);
     }
+}
+
+void NpcAnimation::forceUpdate ()
+{
+    updateParts();
 }
 
 }

@@ -1227,4 +1227,9 @@ namespace MWWorld
     {
         mRendering->updateCharacterPreview(sizeX, sizeY);
     }
+
+    void World::updateRaceSelectionPreview (float angle)
+    {
+        mRendering->updateRaceSelectionPreview(angle);
+    }
 }
