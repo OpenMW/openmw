@@ -15,13 +15,17 @@ namespace MWGui
         virtual ~LoadingScreen();
 
         void setLoadingProgress (const std::string& stage, int depth, int current, int total);
+        void loadingDone();
 
         void onResChange(int w, int h);
 
     private:
+        bool mFirstLoad;
+
         Ogre::SceneManager* mSceneMgr;
         Ogre::RenderWindow* mWindow;
 
+        unsigned long mLastWallpaperChangeTime;
         unsigned long mLastRenderTime;
         Ogre::Timer mTimer;
 
@@ -43,6 +47,8 @@ namespace MWGui
 
         void loadingOn();
         void loadingOff();
+
+        void changeWallpaper();
     };
 
 }

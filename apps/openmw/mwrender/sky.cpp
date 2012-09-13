@@ -11,9 +11,6 @@
 #include <OgreBillboardSet.h>
 #include <OgreEntity.h>
 #include <OgreSubEntity.h>
-#include <OgreOverlay.h>
-#include <OgreOverlayManager.h>
-#include <OgreOverlayContainer.h>
 
 #include <boost/lexical_cast.hpp>
 

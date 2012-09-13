@@ -24,7 +24,6 @@ namespace Ogre
     class Entity;
     class BillboardSet;
     class TextureUnitState;
-    class Overlay;
 }
 
 namespace MWRender

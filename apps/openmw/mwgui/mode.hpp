@@ -35,6 +35,9 @@ namespace MWGui
       // interactive MessageBox
       GM_InterMessageBox,
 
+      GM_Loading,
+      GM_LoadingWallpaper,
+
       GM_QuickKeysMenu
     };
 

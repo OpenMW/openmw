@@ -290,7 +290,6 @@ namespace MWWorld
 
         mCurrentCell = *iter;
 
-
         // adjust player
         playerCellChange (mCurrentCell, position, adjustPlayerPos);
 
@@ -300,6 +299,8 @@ namespace MWWorld
         mRendering.switchToExterior();
 
         mCellChanged = true;
+
+        MWBase::Environment::get().getWindowManager ()->loadingDone ();
     }
 
     //We need the ogre renderer and a scene node.
@@ -369,6 +370,8 @@ namespace MWWorld
         MWBase::Environment::get().getWorld()->adjustSky();
 
         mCellChanged = true;
+
+        MWBase::Environment::get().getWindowManager ()->loadingDone ();
     }
 
     void Scene::changeToExteriorCell (const ESM::Position& position)

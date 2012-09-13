@@ -197,6 +197,7 @@ namespace MWGui
     virtual void executeInConsole (const std::string& path);
 
     virtual void setLoadingProgress (const std::string& stage, int depth, int current, int total);
+    virtual void loadingDone();
 
   private:
     OEngine::GUI::MyGUIManager *mGuiManager;

@@ -365,7 +365,7 @@ namespace MWClass
 
         /// \todo consider instant effects
 
-        return stats.getActiveSpells().addSpell (id);
+        return stats.getActiveSpells().addSpell (id, actor);
     }
 
     void Npc::skillUsageSucceeded (const MWWorld::Ptr& ptr, int skill, int usageType) const

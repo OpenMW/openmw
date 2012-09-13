@@ -940,6 +940,11 @@ public:
     {
         flags |= node->flags;
 
+        // Marker objects: just skip the entire node
+        /// \todo don't do this in the editor
+        if (node->name.find("marker") != std::string::npos)
+            return;
+
         Nif::ExtraPtr e = node->extra;
         while(!e.empty())
         {
