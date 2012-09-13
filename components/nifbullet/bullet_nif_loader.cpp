@@ -164,10 +164,12 @@ void ManualBulletShapeLoader::handleNode(Nif::Node *node, int flags,
     // the flags we currently use, at least.
     flags |= node->flags;
 
-    // Marker objects: just skip the entire node
+    // Marker objects: no collision
     /// \todo don't do this in the editor
     if (node->name.find("marker") != std::string::npos)
-        return;
+    {
+        flags |= 0x800;
+    }
 
     // Check for extra data
     Nif::Extra *e = node;
@@ -183,12 +185,10 @@ void ManualBulletShapeLoader::handleNode(Nif::Node *node, int flags,
             // affecting the entire subtree of this node
             Nif::NiStringExtraData *sd = (Nif::NiStringExtraData*)e;
 
-            if (sd->string == "NCO" && !raycastingOnly)
+            if (sd->string == "NCO")
             {
                 // No collision. Use an internal flag setting to mark this.
-                // We ignor this node!
                 flags |= 0x800;
-                return;
             }
             else if (sd->string == "MRK" && !raycastingOnly)
                 // Marker objects. These are only visible in the
@@ -234,7 +234,7 @@ void ManualBulletShapeLoader::handleNode(Nif::Node *node, int flags,
     }
     else if (node->recType == Nif::RC_NiTriShape && (isCollisionNode || !hasCollisionNode))
     {
-        cShape->collide = true;
+        cShape->collide = !(flags&0x800);
         handleNiTriShape(dynamic_cast<Nif::NiTriShape*>(node), flags,node->trafo.rotation,node->trafo.pos,node->trafo.scale,raycastingOnly);
     }
     else if(node->recType == Nif::RC_RootCollisionNode)
