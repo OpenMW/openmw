@@ -31,11 +31,6 @@ namespace MWMechanics
         AiSequence mAiSequence;
 
     public:
-        CreatureStats();
-        CreatureStats(const CreatureStats &);
-        virtual ~CreatureStats();
-
-        const CreatureStats & operator=(const CreatureStats &);
 
         const Stat<int> & getAttribute(int index) const;
 
