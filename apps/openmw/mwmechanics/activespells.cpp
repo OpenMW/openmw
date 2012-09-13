@@ -7,11 +7,17 @@
 #include <components/esm/loadspel.hpp>
 #include <components/esm/loadingr.hpp>
 #include <components/esm/loadmgef.hpp>
+#include <components/esm/loadskil.hpp>
 
 #include <components/esm_store/store.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
+
+#include "../mwworld/class.hpp"
+
+#include "creaturestats.hpp"
+#include "npcstats.hpp"
 
 namespace MWMechanics
 {
@@ -43,36 +49,66 @@ namespace MWMechanics
         }
 
         if (rebuild)
+            rebuildEffects();
+    }
+
+    void ActiveSpells::rebuildEffects() const
+    {
+        MWWorld::TimeStamp now = MWBase::Environment::get().getWorld()->getTimeStamp();
+    
+        mEffects = MagicEffects();
+
+        for (TIterator iter (begin()); iter!=end(); ++iter)
         {
-            mEffects = MagicEffects();
+            std::pair<ESM::EffectList, bool> effects = getEffectList (iter->first);
 
-            for (TIterator iter (begin()); iter!=end(); ++iter)
+            const MWWorld::TimeStamp& start = iter->second.first;
+            float magnitude = iter->second.second;
+
+            for (std::vector<ESM::ENAMstruct>::const_iterator iter (effects.first.list.begin());
+                iter!=effects.first.list.end(); ++iter)
             {
-                std::pair<ESM::EffectList, bool> effects = getEffectList (iter->first);
-
-                const MWWorld::TimeStamp& start = iter->second.first;
-                float magnitude = iter->second.second;
-
-                for (std::vector<ESM::ENAMstruct>::const_iterator iter (effects.first.list.begin());
-                    iter!=effects.first.list.end(); ++iter)
+                if (iter->duration)
                 {
-                    if (iter->duration)
-                    {
-                        MWWorld::TimeStamp end = start;
-                        end += static_cast<double> (iter->duration)*
-                            MWBase::Environment::get().getWorld()->getTimeScaleFactor()/(60*60);
+                    int duration = iter->duration;
+                    
+                    if (effects.second)
+                        duration *= magnitude;
+                    
+                    MWWorld::TimeStamp end = start;
+                    end += static_cast<double> (duration)*
+                        MWBase::Environment::get().getWorld()->getTimeScaleFactor()/(60*60);
 
-                        if (end>now)
+                    if (end>now)
+                    {
+                        EffectParam param;
+                        
+                        if (effects.second)
                         {
-                            EffectParam param;
-                            param.mMagnitude = static_cast<int> (
-                                (iter->magnMax-iter->magnMin+1)*magnitude + iter->magnMin);
-                            mEffects.add (*iter, param);
+                            const ESM::MagicEffect *magicEffect =
+                                MWBase::Environment::get().getWorld()->getStore().magicEffects.find (
+                                iter->effectID);                            
+                                
+                            if (iter->duration==0)
+                            {
+                                param.mMagnitude =
+                                    static_cast<int> (magnitude / (0.1 * magicEffect->data.baseCost));
+                            }
+                            else
+                            {
+                                param.mMagnitude =
+                                    static_cast<int> (0.05*magnitude / (0.1 * magicEffect->data.baseCost));
+                            }
                         }
+                        else
+                            param.mMagnitude = static_cast<int> (
+                                (iter->magnMax-iter->magnMin)*magnitude + iter->magnMin);
+                                
+                        mEffects.add (*iter, param);
                     }
                 }
             }
-        }
+        }    
     }
 
     std::pair<ESM::EffectList, bool> ActiveSpells::getEffectList (const std::string& id) const
@@ -99,8 +135,8 @@ namespace MWMechanics
             effect.range = 0;
             effect.area = 0;
             effect.duration = magicEffect->data.flags & ESM::MagicEffect::NoDuration ? 0 : 1;
-            effect.magnMin = 0;
-            effect.magnMax = 0;
+            effect.magnMin = 1;
+            effect.magnMax = 1;
             
             std::pair<ESM::EffectList, bool> result;
             
@@ -115,7 +151,7 @@ namespace MWMechanics
     : mSpellsChanged (false), mLastUpdate (MWBase::Environment::get().getWorld()->getTimeStamp())
     {}
 
-    bool ActiveSpells::addSpell (const std::string& id)
+    bool ActiveSpells::addSpell (const std::string& id, const MWWorld::Ptr& actor)
     {
         std::pair<ESM::EffectList, bool> effects = getEffectList (id);
 
@@ -137,6 +173,22 @@ namespace MWMechanics
         TContainer::iterator iter = mSpells.find (id);
 
         float random = static_cast<float> (std::rand()) / RAND_MAX;
+
+        if (effects.second)
+        {
+            // ingredient -> special treatment required.
+            const CreatureStats& creatureStats = MWWorld::Class::get (actor).getCreatureStats (actor);
+            const NpcStats& npcStats = MWWorld::Class::get (actor).getNpcStats (actor);
+        
+            float x =
+                (npcStats.getSkill (ESM::Skill::Alchemy).getModified() +
+                0.2 * creatureStats.getAttribute (1).getModified()
+                + 0.1 * creatureStats.getAttribute (7).getModified())
+                * creatureStats.getFatigueTerm();
+            random *= 100;
+            random = random / std::min (x, 100.0f);
+            random *= 0.25 * x;
+        }
 
         if (iter==mSpells.end())
             mSpells.insert (std::make_pair (id,
@@ -190,6 +242,9 @@ namespace MWMechanics
             if (iter->duration>duration)
                 duration = iter->duration;
         }
+
+        if (effects.second)
+            duration *= iterator->second.second;
 
         double scaledDuration = duration *
               MWBase::Environment::get().getWorld()->getTimeScaleFactor()/(60*60);
