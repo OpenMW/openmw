@@ -51,7 +51,7 @@ add_openmw_dir (mwworld
     refdata worldimp physicssystem scene globals class action nullaction actionteleport
     containerstore actiontalk actiontake manualref player cellfunctors
     cells localscripts customdata weather inventorystore ptr actionopen actionread
-    actionequip timestamp actionalchemy cellstore actionapply
+    actionequip timestamp actionalchemy cellstore actionapply actioneat
     )
 
 add_openmw_dir (mwclass

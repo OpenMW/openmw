@@ -11,6 +11,7 @@
 #include "../mwworld/actiontake.hpp"
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/physicssystem.hpp"
+#include "../mwworld/actioneat.hpp"
 
 #include "../mwgui/tooltips.hpp"
 
@@ -19,6 +20,14 @@
 
 namespace MWClass
 {
+    std::string Ingredient::getId (const MWWorld::Ptr& ptr) const
+    {
+        MWWorld::LiveCellRef<ESM::Ingredient> *ref =
+            ptr.get<ESM::Ingredient>();
+
+        return ref->base->mId;
+    }
+    
     void Ingredient::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const
     {
         const std::string model = getModel(ptr);
@@ -84,6 +93,16 @@ namespace MWClass
         return ref->base->data.value;
     }
 
+   
+    boost::shared_ptr<MWWorld::Action> Ingredient::use (const MWWorld::Ptr& ptr) const
+    {
+        boost::shared_ptr<MWWorld::Action> action (new MWWorld::ActionEat (ptr));
+
+        action->setSound ("Swallow");
+
+        return action;    
+    }
+    
     void Ingredient::registerSelf()
     {
         boost::shared_ptr<Class> instance (new Ingredient);
