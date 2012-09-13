@@ -98,6 +98,8 @@ namespace MWClass
     {
         boost::shared_ptr<MWWorld::Action> action (new MWWorld::ActionEat (ptr));
 
+        action->setSound ("Swallow");
+
         return action;    
     }
     
