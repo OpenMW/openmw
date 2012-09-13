@@ -142,6 +142,8 @@ namespace MWMechanics
             
             result.first.list.push_back (effect);
             result.second = true;
+            
+            return result;
         }
 
         throw std::runtime_error ("ID " + id + " can not produce lasting effects");
