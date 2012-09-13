@@ -22,6 +22,7 @@ namespace MWGui
         , WindowBase("openmw_loading_screen.layout", parWindowManager)
         , mLoadingOn(false)
         , mLastRenderTime(0.f)
+        , mLastWallpaperChangeTime(0.f)
         , mFirstLoad(true)
     {
         getWidget(mLoadingText, "LoadingText");
@@ -107,6 +108,11 @@ namespace MWGui
         {
             mLastRenderTime = mTimer.getMilliseconds ();
 
+            if (mFirstLoad && mTimer.getMilliseconds () > mLastWallpaperChangeTime + 3000*1)
+            {
+                mLastWallpaperChangeTime = mTimer.getMilliseconds ();
+                changeWallpaper();
+            }
 
             // Turn off rendering except the GUI
             mSceneMgr->clearSpecialCaseRenderQueues();
@@ -129,13 +135,14 @@ namespace MWGui
 
             if (!hasCompositor)
             {
-                //mWindow->getViewport(0)->setClearEveryFrame(false);
+                mWindow->getViewport(0)->setClearEveryFrame(false);
             }
             else
             {
                 if (!mFirstLoad)
                 {
-                    //mBackgroundMaterial->getTechnique(0)->getPass(0)->getTextureUnitState(0)->setTextureName(chain->getCompositor ("gbufferFinalizer")->getTextureInstance ("no_mrt_output", 0)->getName());
+                    mBackgroundMaterial->getTechnique(0)->getPass(0)->getTextureUnitState(0)->setTextureName(chain->getCompositor ("gbufferFinalizer")->getTextureInstance ("no_mrt_output", 0)->getName());
+                    mRectangle->setVisible(true);
                 }
 
                 for (unsigned int i = 0; i<chain->getNumCompositors(); ++i)
@@ -144,9 +151,6 @@ namespace MWGui
                 }
             }
 
-            mRectangle->setVisible(hasCompositor || mFirstLoad);
-            std::cout << "rect vis? " << mRectangle->getVisible () << " first load? " << mFirstLoad << std::endl;
-            mBackgroundMaterial->getTechnique(0)->getPass(0)->getTextureUnitState(0)->setTextureName("Splash/Splash_Bonelord.tga");
             mWindow->update();
 
             if (!hasCompositor)
@@ -174,44 +178,49 @@ namespace MWGui
 
     void LoadingScreen::loadingOn()
     {
-        std::cout << "loading on " <<std::endl;
         setVisible(true);
         mLoadingOn = true;
 
         if (mFirstLoad)
         {
-            /// \todo use a directory listing here
-            std::vector<std::string> splash;
-            splash.push_back ("Splash/Splash_Bonelord.tga");
-            splash.push_back ("Splash/Splash_ClannDaddy.tga");
-            splash.push_back ("Splash/Splash_ClannFear.tga");
-            splash.push_back ("Splash/Splash_Daedroth.tga");
-            splash.push_back ("Splash/Splash_Hunger.tga");
-            splash.push_back ("Splash/Splash_KwamaWarrior.tga");
-            splash.push_back ("Splash/Splash_Netch.tga");
-            splash.push_back ("Splash/Splash_NixHound.tga");
-            splash.push_back ("Splash/Splash_Siltstriker.tga");
-            splash.push_back ("Splash/Splash_Skeleton.tga");
-            splash.push_back ("Splash/Splash_SphereCenturion.tga");
-
-            mBackgroundMaterial->getTechnique(0)->getPass(0)->getTextureUnitState(0)->setTextureName(splash[rand() % splash.size()]);
-            mRectangle->setVisible(true);
+            changeWallpaper();
 
             mWindowManager.pushGuiMode(GM_LoadingWallpaper);
         }
         else
+        {
+            mBackgroundImage->setImageTexture("");
             mWindowManager.pushGuiMode(GM_Loading);
+        }
     }
 
 
     void LoadingScreen::loadingOff()
     {
-        std::cout << "loading off " << std::endl;
         setVisible(false);
         mLoadingOn = false;
-        //mFirstLoad = false;
+        mFirstLoad = false;
 
         mWindowManager.removeGuiMode(GM_Loading);
         mWindowManager.removeGuiMode(GM_LoadingWallpaper);
+    }
+
+    void LoadingScreen::changeWallpaper ()
+    {
+        /// \todo use a directory listing here
+        std::vector<std::string> splash;
+        splash.push_back ("Splash_Bonelord.tga");
+        splash.push_back ("Splash_ClannDaddy.tga");
+        splash.push_back ("Splash_Clannfear.tga");
+        splash.push_back ("Splash_Daedroth.tga");
+        splash.push_back ("Splash_Hunger.tga");
+        splash.push_back ("Splash_KwamaWarrior.tga");
+        splash.push_back ("Splash_Netch.tga");
+        splash.push_back ("Splash_NixHound.tga");
+        splash.push_back ("Splash_Siltstriker.tga");
+        splash.push_back ("Splash_Skeleton.tga");
+        splash.push_back ("Splash_SphereCenturion.tga");
+
+        mBackgroundImage->setImageTexture (splash[rand() % splash.size()]);
     }
 }

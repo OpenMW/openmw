@@ -25,6 +25,7 @@ namespace MWGui
         Ogre::SceneManager* mSceneMgr;
         Ogre::RenderWindow* mWindow;
 
+        unsigned long mLastWallpaperChangeTime;
         unsigned long mLastRenderTime;
         Ogre::Timer mTimer;
 
@@ -46,6 +47,8 @@ namespace MWGui
 
         void loadingOn();
         void loadingOff();
+
+        void changeWallpaper();
     };
 
 }
