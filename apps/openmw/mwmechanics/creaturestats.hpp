@@ -106,6 +106,9 @@ namespace MWMechanics
         const AiSequence& getAiSequence() const;
         
         AiSequence& getAiSequence();
+   
+        float getFatigueTerm() const;
+        ///< Return effective fatigue
     };
 
     // Inline const getters
