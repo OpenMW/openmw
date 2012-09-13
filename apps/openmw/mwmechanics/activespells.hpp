@@ -37,7 +37,7 @@ namespace MWMechanics
 
             void update() const;
 
-            const ESM::EffectList& getEffectList (const std::string& id) const;
+            std::pair<ESM::EffectList, bool> getEffectList (const std::string& id) const;
 
         public:
 

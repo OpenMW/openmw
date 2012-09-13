@@ -5,6 +5,8 @@
 
 #include <components/esm/loadalch.hpp>
 #include <components/esm/loadspel.hpp>
+#include <components/esm/loadingr.hpp>
+#include <components/esm/loadmgef.hpp>
 
 #include <components/esm_store/store.hpp>
 
@@ -46,13 +48,13 @@ namespace MWMechanics
 
             for (TIterator iter (begin()); iter!=end(); ++iter)
             {
-                const ESM::EffectList& effects = getEffectList (iter->first);
+                std::pair<ESM::EffectList, bool> effects = getEffectList (iter->first);
 
                 const MWWorld::TimeStamp& start = iter->second.first;
                 float magnitude = iter->second.second;
 
-                for (std::vector<ESM::ENAMstruct>::const_iterator iter (effects.list.begin());
-                    iter!=effects.list.end(); ++iter)
+                for (std::vector<ESM::ENAMstruct>::const_iterator iter (effects.first.list.begin());
+                    iter!=effects.first.list.end(); ++iter)
                 {
                     if (iter->duration)
                     {
@@ -73,15 +75,38 @@ namespace MWMechanics
         }
     }
 
-    const ESM::EffectList& ActiveSpells::getEffectList (const std::string& id) const
+    std::pair<ESM::EffectList, bool> ActiveSpells::getEffectList (const std::string& id) const
     {
         if (const ESM::Spell *spell =
             MWBase::Environment::get().getWorld()->getStore().spells.search (id))
-            return spell->effects;
+            return std::make_pair (spell->effects, false);
 
         if (const ESM::Potion *potion =
             MWBase::Environment::get().getWorld()->getStore().potions.search (id))
-            return potion->effects;
+            return std::make_pair (potion->effects, false);
+
+        if (const ESM::Ingredient *ingredient =
+            MWBase::Environment::get().getWorld()->getStore().ingreds.search (id))
+        {
+            const ESM::MagicEffect *magicEffect =
+                MWBase::Environment::get().getWorld()->getStore().magicEffects.find (
+                ingredient->data.effectID[0]);
+        
+            ESM::ENAMstruct effect;
+            effect.effectID = ingredient->data.effectID[0];
+            effect.skill = ingredient->data.skills[0];
+            effect.attribute = ingredient->data.attributes[0];
+            effect.range = 0;
+            effect.area = 0;
+            effect.duration = magicEffect->data.flags & ESM::MagicEffect::NoDuration ? 0 : 1;
+            effect.magnMin = 0;
+            effect.magnMax = 0;
+            
+            std::pair<ESM::EffectList, bool> result;
+            
+            result.first.list.push_back (effect);
+            result.second = true;
+        }
 
         throw std::runtime_error ("ID " + id + " can not produce lasting effects");
     }
@@ -92,12 +117,12 @@ namespace MWMechanics
 
     bool ActiveSpells::addSpell (const std::string& id)
     {
-        const ESM::EffectList& effects = getEffectList (id);
+        std::pair<ESM::EffectList, bool> effects = getEffectList (id);
 
         bool found = false;
 
-        for (std::vector<ESM::ENAMstruct>::const_iterator iter (effects.list.begin());
-            iter!=effects.list.end(); ++iter)
+        for (std::vector<ESM::ENAMstruct>::const_iterator iter (effects.first.list.begin());
+            iter!=effects.first.list.end(); ++iter)
         {
             if (iter->duration)
             {
@@ -155,12 +180,12 @@ namespace MWMechanics
 
     double ActiveSpells::timeToExpire (const TIterator& iterator) const
     {
-        const ESM::EffectList& effects = getEffectList (iterator->first);
+        std::pair<ESM::EffectList, bool> effects = getEffectList (iterator->first);
 
         int duration = 0;
 
-        for (std::vector<ESM::ENAMstruct>::const_iterator iter (effects.list.begin());
-            iter!=effects.list.end(); ++iter)
+        for (std::vector<ESM::ENAMstruct>::const_iterator iter (effects.first.list.begin());
+            iter!=effects.first.list.end(); ++iter)
         {
             if (iter->duration>duration)
                 duration = iter->duration;
