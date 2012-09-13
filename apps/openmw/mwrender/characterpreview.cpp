@@ -42,7 +42,7 @@ namespace MWRender
     {
         bool wasVisible = mNode->getParentSceneNode()->getAttachedObject(0)->getVisible ();
         mNode->getParentSceneNode()->setVisible(true, false);
-        //mViewport->setDimensions (0, 0, float(sizeX) / float(512), float(sizeY) / float(1024));
+        mViewport->setDimensions (0, 0, std::min(1.f, float(sizeX) / float(512)), std::min(1.f, float(sizeY) / float(1024)));
 
         mRenderTarget->update();
 

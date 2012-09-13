@@ -15,9 +15,9 @@
                 <Widget type="ImageBox" skin="ImageBox" position="0 0 212 185" align="Stretch" name="AvatarImage">
                     <Property key="ImageTexture" value="CharacterPreview"/>
                     <Property key="NeedMouse" value="false"/>
-                    <Widget type="TextBox" skin="ProgressText" position="0 150 212 24" align="HCenter Bottom" name="ArmorRating">
-                        <Property key="Caption" value="Armor Rating"/>
-                    </Widget>
+                </Widget>
+                <Widget type="TextBox" skin="ProgressText" position="0 150 212 24" align="HCenter Bottom" name="ArmorRating">
+                    <Property key="Caption" value="Armor Rating"/>
                 </Widget>
             </Widget>
 

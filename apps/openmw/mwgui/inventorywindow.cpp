@@ -102,12 +102,10 @@ namespace MWGui
                               _sender->getSize().height-44 );
         drawItems();
 
-        MyGUI::IntSize size = mAvatarImage->getSize();
+        MyGUI::IntSize size = mAvatar->getSize();
 
-        std::cout << "dims " << size.width << " " << size.height << std::endl;
         MWBase::Environment::get().getWorld()->updateCharacterPreview (size.width, size.height);
-
-        mAvatarImage->setImageCoord (MyGUI::IntCoord(0,0,size.width, size.height));
+        mAvatarImage->setSize(MyGUI::IntSize(std::max(mAvatar->getSize().width, 512), std::max(mAvatar->getSize().height, 1024)));
     }
 
     void InventoryWindow::onFilterChanged(MyGUI::Widget* _sender)
@@ -267,9 +265,11 @@ namespace MWGui
         else
             mWindowManager.setSelectedWeapon(*weaponSlot, 100); /// \todo track weapon durability
 
-        MyGUI::IntSize size = mAvatarImage->getSize();
-        mAvatarImage->setImageCoord (MyGUI::IntCoord(0,0,size.width, size.height));
+        MyGUI::IntSize size = mAvatar->getSize();
+
         MWBase::Environment::get().getWorld()->updateCharacterPreview (size.width, size.height);
+
+        mAvatarImage->setSize(MyGUI::IntSize(512, 1024));
     }
 
     void InventoryWindow::pickUpObject (MWWorld::Ptr object)
