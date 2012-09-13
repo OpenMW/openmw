@@ -1,7 +1,14 @@
 #include "loadgmst.hpp"
 
+#include <stdexcept>
+
+#include "defs.hpp"
+
 namespace ESM
 {
+
+/// \todo Review GMST "fixing". Probably remove completely or at least make it optional. Its definitely not
+/// working properly in its current state and I doubt it can be fixed without breaking other stuff.
 
 // Some handy macros
 #define cI(s,x) { if(id == (s)) return (i == (x)); }
@@ -167,6 +174,34 @@ void GameSetting::load(ESMReader &esm)
     if ((spf != SF_Tribunal && isDirtyTribunal()) || (spf != SF_Bloodmoon
             && isDirtyBloodmoon()))
         dirty = true;
+}
+
+int GameSetting::getInt() const
+{
+    switch (type)
+    {
+        case VT_Float: return static_cast<int> (f);
+        case VT_Int: return i;
+        default: throw std::runtime_error ("GMST " + id + " is not of a numeric type");
+    }
+}
+
+int GameSetting::getFloat() const
+{
+    switch (type)
+    {
+        case VT_Float: return f;
+        case VT_Int: return i;
+        default: throw std::runtime_error ("GMST " + id + " is not of a numeric type");
+    }
+}
+
+std::string GameSetting::getString() const
+{
+    if (type==VT_String)
+        return str;
+        
+    throw std::runtime_error ("GMST " + id + " is not a string");
 }
 
 }
