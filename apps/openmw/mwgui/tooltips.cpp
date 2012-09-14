@@ -177,7 +177,8 @@ void ToolTips::onFrame(float frameDuration)
                 MWWorld::Ptr item = MWBase::Environment::get().getWorld ()->getCharacterPreviewItemSelected (realX, realY);
 
                 mFocusObject = item;
-                tooltipSize = getToolTipViaPtr(false);
+                if (!mFocusObject.isEmpty ())
+                    tooltipSize = getToolTipViaPtr(false);
             }
             else if (type == "Spell")
             {
