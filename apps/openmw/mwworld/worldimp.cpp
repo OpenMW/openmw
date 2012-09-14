@@ -1222,4 +1222,9 @@ namespace MWWorld
     {
         mRendering->renderPlayer(mPlayer->getPlayer());
     }
+    
+    void World::setupExternalRendering (MWRender::ExternalRendering& rendering)
+    {
+        mRendering->setupExternalRendering (rendering);
+    }
 }

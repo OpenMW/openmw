@@ -43,6 +43,7 @@ namespace MWRender
     class LocalMap;
     class Water;
     class Compositors;
+    class ExternalRendering;
 
 class RenderingManager: private RenderingInterface, public Ogre::WindowEventListener {
 
@@ -185,11 +186,13 @@ class RenderingManager: private RenderingInterface, public Ogre::WindowEventList
 
     static bool waterShaderSupported();
 
-    virtual void getInteriorMapPosition (Ogre::Vector2 position, float& nX, float& nY, int &x, int& y);
+    void getInteriorMapPosition (Ogre::Vector2 position, float& nX, float& nY, int &x, int& y);
     ///< see MWRender::LocalMap::getInteriorMapPosition
 
-    virtual bool isPositionExplored (float nX, float nY, int x, int y, bool interior);
+    bool isPositionExplored (float nX, float nY, int x, int y, bool interior);
     ///< see MWRender::LocalMap::isPositionExplored
+
+    void setupExternalRendering (MWRender::ExternalRendering& rendering);
 
   protected:
 	virtual void windowResized(Ogre::RenderWindow* rw);

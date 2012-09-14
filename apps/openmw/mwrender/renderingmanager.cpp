@@ -34,6 +34,7 @@
 #include "water.hpp"
 #include "compositors.hpp"
 #include "npcanimation.hpp"
+#include "externalrendering.hpp"
 
 using namespace MWRender;
 using namespace Ogre;
@@ -880,6 +881,11 @@ void RenderingManager::getInteriorMapPosition (Ogre::Vector2 position, float& nX
 bool RenderingManager::isPositionExplored (float nX, float nY, int x, int y, bool interior)
 {
     return mLocalMap->isPositionExplored(nX, nY, x, y, interior);
+}
+
+void RenderingManager::setupExternalRendering (MWRender::ExternalRendering& rendering)
+{
+    rendering.setup (mRendering.getScene());
 }
 
 } // namespace
