@@ -71,7 +71,6 @@ namespace Render
             {
                 const Ogre::SubEntity *subEntity = static_cast<const Ogre::SubEntity *>(rend);
                 int id = subEntity->getParent ()->getUserObjectBindings().getUserAny().get<int>();
-                std::cout << "found ID:" << id << " entity name is " << subEntity->getParent()->getName() << std::endl;
                 bool found = false;
                 Ogre::ColourValue colour;
                 for (std::map<Ogre::ColourValue, int>::iterator it = mColourMap.begin(); it != mColourMap.end(); ++it)

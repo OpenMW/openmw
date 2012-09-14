@@ -109,7 +109,6 @@ namespace MWGui
         MWBase::Environment::get().getWorld()->updateCharacterPreview (size.width, size.height);
         mAvatarImage->setSize(MyGUI::IntSize(std::max(mAvatar->getSize().width, 512), std::max(mAvatar->getSize().height, 1024)));
         mAvatarImage->setImageTexture("CharacterPreview");
-        mAvatarImage->setImageTexture("SelectionBuffer");
     }
 
     void InventoryWindow::onFilterChanged(MyGUI::Widget* _sender)
@@ -294,7 +293,6 @@ namespace MWGui
         MyGUI::IntSize size = mAvatar->getSize();
 
         MWBase::Environment::get().getWorld()->updateCharacterPreview (size.width, size.height);
-
         mAvatarImage->setSize(MyGUI::IntSize(512, 1024));
         mAvatarImage->setImageTexture("CharacterPreview");
     }

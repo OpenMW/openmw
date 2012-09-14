@@ -84,7 +84,6 @@ namespace MWRender
 
     int InventoryPreview::getSlotSelected (int posX, int posY)
     {
-        std::cout << posX << " " << posY << std::endl;
         return mSelectionBuffer->getSelected (posX, posY);
     }
 
