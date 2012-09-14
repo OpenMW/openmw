@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<MyGUI type="Layout">
+    <Widget type="Window" skin="MW_Dialog" layer="Windows" position="0 0 440 438" name="_Main">
+
+        <Widget type="Widget" skin="MW_Box" position="28 14 391 198">
+            <Widget type="ImageBox" skin="ImageBox" name="ClassImage" position="0 0 391 198">
+            </Widget>
+        </Widget>
+
+        <Widget type="TextBox" skin="SandText" position="28 218 391 24" name="LevelText">
+        </Widget>
+
+        <Widget type="Widget" skin="" position="36 280 400 400">
+            <Widget type="TextBox" skin="SandText" position="0 0 100 24" name="AttribMultiplier1"/>
+            <Widget type="TextBox" skin="SandText" position="0 24 100 24" name="AttribMultiplier2"/>
+            <Widget type="TextBox" skin="SandText" position="0 48 100 24" name="AttribMultiplier3"/>
+            <Widget type="TextBox" skin="SandText" position="0 72 100 24" name="AttribMultiplier4"/>
+            <Widget type="TextBox" skin="SandText" position="200 0 100 24" name="AttribMultiplier5"/>
+            <Widget type="TextBox" skin="SandText" position="200 24 100 24" name="AttribMultiplier6"/>
+            <Widget type="TextBox" skin="SandText" position="200 48 100 24" name="AttribMultiplier7"/>
+            <Widget type="TextBox" skin="SandText" position="200 72 100 24" name="AttribMultiplier8"/>
+
+            <Widget type="HBox" position="22 0 200 24">
+                <Widget type="AutoSizedButton" skin="SandTextButton" name="Attrib1">
+                    <UserString key="ToolTipType" value="Layout"/>
+                    <UserString key="ToolTipLayout" value="AttributeToolTip"/>
+                    <UserString key="Caption_AttributeName" value="#{sAttributeStrength}"/>
+                    <UserString key="Caption_AttributeDescription" value="#{sStrDesc}"/>
+                    <UserString key="ImageTexture_AttributeImage" value="icons\k\attribute_strength.dds"/>
+                    <Property key="Caption" value="#{sAttributeStrength}"/>
+                </Widget>
+                <Widget type="AutoSizedTextBox" skin="SandText" name="AttribVal1">
+                    <Property key="Caption" value="54"/>
+                </Widget>
+            </Widget>
+
+            <Widget type="HBox" position="22 24 200 24">
+                <Widget type="AutoSizedButton" skin="SandTextButton" name="Attrib2">
+                    <UserString key="ToolTipType" value="Layout"/>
+                    <UserString key="ToolTipLayout" value="AttributeToolTip"/>
+                    <UserString key="Caption_AttributeName" value="#{sAttributeIntelligence}"/>
+                    <UserString key="Caption_AttributeDescription" value="#{sIntDesc}"/>
+                    <UserString key="ImageTexture_AttributeImage" value="icons\k\attribute_int.dds"/>
+                    <Property key="Caption" value="#{sAttributeIntelligence}"/>
+                </Widget>
+                <Widget type="AutoSizedTextBox" skin="SandText" name="AttribVal2">
+                    <Property key="Caption" value="54"/>
+                </Widget>
+            </Widget>
+
+            <Widget type="HBox" position="22 48 200 24">
+                <Widget type="AutoSizedButton" skin="SandTextButton" name="Attrib3">
+                    <UserString key="ToolTipType" value="Layout"/>
+                    <UserString key="ToolTipLayout" value="AttributeToolTip"/>
+                    <UserString key="Caption_AttributeName" value="#{sAttributeWillpower}"/>
+                    <UserString key="Caption_AttributeDescription" value="#{sWilDesc}"/>
+                    <UserString key="ImageTexture_AttributeImage" value="icons\k\attribute_wilpower.dds"/>
+                    <Property key="Caption" value="#{sAttributeWillpower}"/>
+                </Widget>
+                <Widget type="AutoSizedTextBox" skin="SandText" name="AttribVal3">
+                    <Property key="Caption" value="54"/>
+                </Widget>
+            </Widget>
+
+            <Widget type="HBox" position="22 72 200 24">
+                <Widget type="AutoSizedButton" skin="SandTextButton" name="Attrib4">
+                    <UserString key="ToolTipType" value="Layout"/>
+                    <UserString key="ToolTipLayout" value="AttributeToolTip"/>
+                    <UserString key="Caption_AttributeName" value="#{sAttributeAgility}"/>
+                    <UserString key="Caption_AttributeDescription" value="#{sAgiDesc}"/>
+                    <UserString key="ImageTexture_AttributeImage" value="icons\k\attribute_agility.dds"/>
+                    <Property key="Caption" value="#{sAttributeAgility}"/>
+                </Widget>
+                <Widget type="AutoSizedTextBox" skin="SandText" name="AttribVal4">
+                    <Property key="Caption" value="54"/>
+                </Widget>
+            </Widget>
+
+
+            <Widget type="HBox" position="222 0 200 24">
+                <Widget type="AutoSizedButton" skin="SandTextButton" name="Attrib5">
+                    <UserString key="ToolTipType" value="Layout"/>
+                    <UserString key="ToolTipLayout" value="AttributeToolTip"/>
+                    <UserString key="Caption_AttributeName" value="#{sAttributeSpeed}"/>
+                    <UserString key="Caption_AttributeDescription" value="#{sSpdDesc}"/>
+                    <UserString key="ImageTexture_AttributeImage" value="icons\k\attribute_speed.dds"/>
+                    <Property key="Caption" value="#{sAttributeSpeed}"/>
+                </Widget>
+                <Widget type="AutoSizedTextBox" skin="SandText" name="AttribVal5">
+                    <Property key="Caption" value="54"/>
+                </Widget>
+            </Widget>
+
+            <Widget type="HBox" position="222 24 200 24">
+                <Widget type="AutoSizedButton" skin="SandTextButton" name="Attrib6">
+                    <UserString key="ToolTipType" value="Layout"/>
+                    <UserString key="ToolTipLayout" value="AttributeToolTip"/>
+                    <UserString key="Caption_AttributeName" value="#{sAttributeEndurance}"/>
+                    <UserString key="Caption_AttributeDescription" value="#{sEndDesc}"/>
+                    <UserString key="ImageTexture_AttributeImage" value="icons\k\attribute_endurance.dds"/>
+                    <Property key="Caption" value="#{sAttributeEndurance}"/>
+                </Widget>
+                <Widget type="AutoSizedTextBox" skin="SandText" name="AttribVal6">
+                    <Property key="Caption" value="54"/>
+                </Widget>
+            </Widget>
+
+            <Widget type="HBox" position="222 48 200 24">
+                <Widget type="AutoSizedButton" skin="SandTextButton" name="Attrib7">
+                <UserString key="ToolTipType" value="Layout"/>
+                <UserString key="ToolTipLayout" value="AttributeToolTip"/>
+                <UserString key="Caption_AttributeName" value="#{sAttributePersonality}"/>
+                <UserString key="Caption_AttributeDescription" value="#{sPerDesc}"/>
+                <UserString key="ImageTexture_AttributeImage" value="icons\k\attribute_personality.dds"/>
+                    <Property key="Caption" value="#{sAttributePersonality}"/>
+                </Widget>
+                <Widget type="AutoSizedTextBox" skin="SandText" name="AttribVal7">
+                    <Property key="Caption" value="54"/>
+                </Widget>
+            </Widget>
+
+            <Widget type="HBox" position="222 72 200 24">
+                <Widget type="AutoSizedButton" skin="SandTextButton" name="Attrib8">
+                <UserString key="ToolTipType" value="Layout"/>
+                <UserString key="ToolTipLayout" value="AttributeToolTip"/>
+                <UserString key="Caption_AttributeName" value="#{sAttributeLuck}"/>
+                <UserString key="Caption_AttributeDescription" value="#{sLucDesc}"/>
+                <UserString key="ImageTexture_AttributeImage" value="icons\k\attribute_luck.dds"/>
+                    <Property key="Caption" value="#{sAttributeLuck}"/>
+                </Widget>
+                <Widget type="AutoSizedTextBox" skin="SandText" name="AttribVal8">
+                    <Property key="Caption" value="54"/>
+                </Widget>
+            </Widget>
+        </Widget>
+
+
+        <Widget type="AutoSizedButton" skin="MW_Button" position="422 398 0 24" name="OkButton">
+            <Property key="ExpandDirection" value="Left"/>
+            <Property key="Caption" value="#{sOk}"/>
+        </Widget>
+
+    </Widget>
+
+</MyGUI>

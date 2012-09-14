@@ -62,6 +62,7 @@ namespace MWGui
   class AlchemyWindow;
   class QuickKeysMenu;
   class LoadingScreen;
+  class LevelupDialog;
 
   class WindowManager : public MWBase::WindowManager
   {
@@ -224,6 +225,7 @@ namespace MWGui
     SpellWindow* mSpellWindow;
     QuickKeysMenu* mQuickKeysMenu;
     LoadingScreen* mLoadingScreen;
+    LevelupDialog* mLevelupDialog;
 
     CharacterCreation* mCharGen;
 

@@ -44,6 +44,7 @@
 #include "spellwindow.hpp"
 #include "quickkeysmenu.hpp"
 #include "loadingscreen.hpp"
+#include "levelupdialog.hpp"
 
 using namespace MWGui;
 
@@ -147,6 +148,7 @@ WindowManager::WindowManager(
     mAlchemyWindow = new AlchemyWindow(*this);
     mSpellWindow = new SpellWindow(*this);
     mQuickKeysMenu = new QuickKeysMenu(*this);
+    mLevelupDialog = new LevelupDialog(*this);
 
     mLoadingScreen = new LoadingScreen(mOgre->getScene (), mOgre->getWindow (), *this);
     mLoadingScreen->onResChange (w,h);
@@ -200,6 +202,7 @@ WindowManager::~WindowManager()
     delete mAlchemyWindow;
     delete mSpellWindow;
     delete mLoadingScreen;
+    delete mLevelupDialog;
 
     cleanupGarbage();
 
