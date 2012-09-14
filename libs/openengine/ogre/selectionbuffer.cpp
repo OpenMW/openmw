@@ -70,7 +70,7 @@ namespace Render
             if(typeid(*rend) == typeid(Ogre::SubEntity))
             {
                 const Ogre::SubEntity *subEntity = static_cast<const Ogre::SubEntity *>(rend);
-                int id = subEntity->getParent ()->getUserObjectBindings().getUserAny().get<int>();
+                int id = Ogre::any_cast<int>(subEntity->getParent ()->getUserObjectBindings().getUserAny());
                 bool found = false;
                 Ogre::ColourValue colour;
                 for (std::map<Ogre::ColourValue, int>::iterator it = mColourMap.begin(); it != mColourMap.end(); ++it)
