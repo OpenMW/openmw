@@ -35,6 +35,11 @@ namespace ESMS
     struct ESMStore;
 }
 
+namespace MWRender
+{
+    class ExternalRendering;
+}
+
 namespace MWWorld
 {
     class CellStore;
@@ -271,10 +276,8 @@ namespace MWBase
             virtual void togglePlayerLooking(bool enable) = 0;
 
             virtual void renderPlayer() = 0;
-
-            virtual void updateCharacterPreview(int sizeX, int sizeY) = 0;
-            virtual void updateRaceSelectionPreview(float angle) = 0;
-            virtual MWWorld::Ptr getCharacterPreviewItemSelected(int posX, int posY) = 0;
+            
+            virtual void setupExternalRendering (MWRender::ExternalRendering& rendering) = 0;
     };
 }
 

@@ -34,7 +34,7 @@
 #include "water.hpp"
 #include "compositors.hpp"
 #include "npcanimation.hpp"
-#include "characterpreview.hpp"
+#include "externalrendering.hpp"
 
 using namespace MWRender;
 using namespace Ogre;
@@ -138,7 +138,7 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
     // Morrowind uses, and it automagically makes everything work as it
     // should.
     SceneNode *rt = mRendering.getScene()->getRootSceneNode();
-    mMwRoot = rt->createChildSceneNode();
+    mMwRoot = rt->createChildSceneNode("mwRoot");
     mMwRoot->pitch(Degree(-90));
 
     mObjects.setMwRoot(mMwRoot);
@@ -176,8 +176,6 @@ RenderingManager::~RenderingManager ()
     delete mOcclusionQuery;
     delete mCompositors;
     delete mWater;
-    delete mInventoryPreview;
-    delete mRaceSelectionPreview;
     delete mPreviewAnimation;
 }
 
@@ -863,19 +861,9 @@ void RenderingManager::renderPlayer(const MWWorld::Ptr &ptr)
     MWRender::NpcAnimation *anim =
         new MWRender::NpcAnimation(
             ptr, ptr.getRefData ().getBaseNode (),
-            mRendering,
             MWWorld::Class::get(ptr).getInventoryStore(ptr), RV_Actors
         );
     mPlayer->setAnimation(anim);
-
-    MWWorld::InventoryStore& invStore = MWWorld::Class::get(ptr).getInventoryStore (ptr);
-
-    Ogre::SceneNode* previewNode = mMwRoot->createChildSceneNode ();
-    mPreviewAnimation = new NpcAnimation(ptr, previewNode, mRendering, invStore, RV_PlayerPreview);
-
-    mInventoryPreview = new InventoryPreview(mRendering.getScene (), previewNode);
-    mInventoryPreview->setNpcAnimation (mPreviewAnimation);
-    mRaceSelectionPreview = new RaceSelectionPreview(mRendering.getScene (), previewNode);
 }
 
 void RenderingManager::getPlayerData(Ogre::Vector3 &eyepos, float &pitch, float &yaw)
@@ -895,19 +883,9 @@ bool RenderingManager::isPositionExplored (float nX, float nY, int x, int y, boo
     return mLocalMap->isPositionExplored(nX, nY, x, y, interior);
 }
 
-void RenderingManager::updateCharacterPreview (int sizeX, int sizeY)
+void RenderingManager::setupExternalRendering (MWRender::ExternalRendering& rendering)
 {
-    mInventoryPreview->update(sizeX, sizeY);
-}
-
-void RenderingManager::updateRaceSelectionPreview (float angle)
-{
-    mRaceSelectionPreview->update(angle);
-}
-
-int RenderingManager::getCharacterPreviewSlotSelected(int posX, int posY)
-{
-    return mInventoryPreview->getSlotSelected(posX, posY);
+    rendering.setup (mRendering.getScene());
 }
 
 } // namespace

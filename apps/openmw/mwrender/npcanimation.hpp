@@ -68,7 +68,7 @@ private:
     int mVisibilityFlags;
 
 public:
-    NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node, OEngine::Render::OgreRenderer& _rend,
+    NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node,
                  MWWorld::InventoryStore& _inv, int visibilityFlags);
     virtual ~NpcAnimation();
     NifOgre::EntityList insertBoundedPart(const std::string &mesh, int group, const std::string &bonename);

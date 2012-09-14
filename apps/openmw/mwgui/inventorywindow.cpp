@@ -46,6 +46,7 @@ namespace MWGui
         , mTrading(false)
         , mLastXSize(0)
         , mLastYSize(0)
+        , mPreview(MWBase::Environment::get().getWorld ()->getPlayer ().getPlayer ())
     {
         static_cast<MyGUI::Window*>(mMainWidget)->eventWindowChangeCoord += MyGUI::newDelegate(this, &InventoryWindow::onWindowResize);
 
@@ -78,6 +79,8 @@ namespace MWGui
         mFilterAll->setStateSelected(true);
 
         setCoord(0, 342, 498, 258);
+
+        MWBase::Environment::get().getWorld ()->setupExternalRendering (mPreview);
 
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
         openContainer(player);
@@ -189,10 +192,10 @@ namespace MWGui
             MyGUI::IntPoint relPos = mousePos - mAvatar->getAbsolutePosition ();
             int realX = int(float(relPos.left) / float(mAvatar->getSize().width) * 512.f );
             int realY = int(float(relPos.top) / float(mAvatar->getSize().height) * 1024.f );
-            MWWorld::Ptr itemSelected = MWBase::Environment::get().getWorld ()->getCharacterPreviewItemSelected (realX, realY);
+
+            MWWorld::Ptr itemSelected = getAvatarSelectedItem (realX, realY);
             if (itemSelected.isEmpty ())
                 return;
-
 
             for (unsigned int i=0; i < mContainerWidget->getChildCount (); ++i)
             {
@@ -205,6 +208,21 @@ namespace MWGui
                 }
             }
         }
+    }
+
+    MWWorld::Ptr InventoryWindow::getAvatarSelectedItem(int x, int y)
+    {
+        int slot = mPreview.getSlotSelected (x, y);
+
+        if (slot == -1)
+            return MWWorld::Ptr();
+
+        MWWorld::Ptr player = mPtr;
+        MWWorld::InventoryStore& invStore = MWWorld::Class::get(player).getInventoryStore(player);
+        if (invStore.getSlot(slot) != invStore.end())
+            return *invStore.getSlot (slot);
+        else
+            return MWWorld::Ptr();
     }
 
     std::vector<MWWorld::Ptr> InventoryWindow::getEquippedItems()
@@ -293,7 +311,7 @@ namespace MWGui
 
         MyGUI::IntSize size = mAvatar->getSize();
 
-        MWBase::Environment::get().getWorld()->updateCharacterPreview (size.width, size.height);
+        mPreview.update (size.width, size.height);
         mAvatarImage->setSize(MyGUI::IntSize(std::max(mAvatar->getSize().width, 512), std::max(mAvatar->getSize().height, 1024)));
         mAvatarImage->setImageTexture("CharacterPreview");
     }

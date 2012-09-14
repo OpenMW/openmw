@@ -1223,28 +1223,8 @@ namespace MWWorld
         mRendering->renderPlayer(mPlayer->getPlayer());
     }
 
-    void World::updateCharacterPreview (int sizeX, int sizeY)
+    void World::setupExternalRendering (MWRender::ExternalRendering& rendering)
     {
-        mRendering->updateCharacterPreview(sizeX, sizeY);
-    }
-
-    void World::updateRaceSelectionPreview (float angle)
-    {
-        mRendering->updateRaceSelectionPreview(angle);
-    }
-
-    MWWorld::Ptr World::getCharacterPreviewItemSelected(int posX, int posY)
-    {
-        int slot = mRendering->getCharacterPreviewSlotSelected(posX, posY);
-
-        if (slot == -1)
-            return MWWorld::Ptr();
-
-        MWWorld::Ptr player = getPlayer().getPlayer ();
-        MWWorld::InventoryStore& invStore = MWWorld::Class::get(player).getInventoryStore(player);
-        if (invStore.getSlot(slot) != invStore.end())
-            return *invStore.getSlot (slot);
-        else
-            return MWWorld::Ptr();
+        mRendering->setupExternalRendering (rendering);
     }
 }

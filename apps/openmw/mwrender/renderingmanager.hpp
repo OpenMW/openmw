@@ -43,8 +43,7 @@ namespace MWRender
     class LocalMap;
     class Water;
     class Compositors;
-    class InventoryPreview;
-    class RaceSelectionPreview;
+    class ExternalRendering;
 
 class RenderingManager: private RenderingInterface, public Ogre::WindowEventListener {
 
@@ -187,15 +186,13 @@ class RenderingManager: private RenderingInterface, public Ogre::WindowEventList
 
     static bool waterShaderSupported();
 
-    virtual void getInteriorMapPosition (Ogre::Vector2 position, float& nX, float& nY, int &x, int& y);
+    void getInteriorMapPosition (Ogre::Vector2 position, float& nX, float& nY, int &x, int& y);
     ///< see MWRender::LocalMap::getInteriorMapPosition
 
-    virtual bool isPositionExplored (float nX, float nY, int x, int y, bool interior);
+    bool isPositionExplored (float nX, float nY, int x, int y, bool interior);
     ///< see MWRender::LocalMap::isPositionExplored
 
-    void updateCharacterPreview(int sizeX, int sizeY);
-    void updateRaceSelectionPreview(float angle);
-    int getCharacterPreviewSlotSelected(int posX, int posY);
+    void setupExternalRendering (MWRender::ExternalRendering& rendering);
 
   protected:
 	virtual void windowResized(Ogre::RenderWindow* rw);
@@ -218,9 +215,6 @@ class RenderingManager: private RenderingInterface, public Ogre::WindowEventList
     OcclusionQuery* mOcclusionQuery;
 
     TerrainManager* mTerrainManager;
-
-    InventoryPreview* mInventoryPreview;
-    RaceSelectionPreview* mRaceSelectionPreview;
 
     MWRender::Water *mWater;
 

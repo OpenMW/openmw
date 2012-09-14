@@ -5,6 +5,10 @@
 #include <OgreMaterialManager.h>
 
 
+#include "externalrendering.hpp"
+
+#include "../mwworld/ptr.hpp"
+
 namespace OEngine
 {
 namespace Render
@@ -18,11 +22,16 @@ namespace MWRender
 
     class NpcAnimation;
 
-    class CharacterPreview
+    class CharacterPreview : public ExternalRendering
     {
     public:
-        CharacterPreview(Ogre::SceneManager* sceneMgr, Ogre::SceneNode* node, int sizeX, int sizeY, const std::string& name,
+        CharacterPreview(MWWorld::Ptr character, int sizeX, int sizeY, const std::string& name,
                          Ogre::Vector3 position, Ogre::Vector3 lookAt);
+        virtual ~CharacterPreview();
+
+        virtual void setup (Ogre::SceneManager *sceneManager);
+        virtual void onSetup();
+
 
     protected:
         Ogre::TexturePtr mTexture;
@@ -34,6 +43,15 @@ namespace MWRender
         Ogre::SceneManager* mSceneMgr;
         Ogre::SceneNode* mNode;
 
+        Ogre::Vector3 mPosition;
+        Ogre::Vector3 mLookAt;
+
+        MWWorld::Ptr mCharacter;
+
+        MWRender::NpcAnimation* mAnimation;
+
+        std::string mName;
+
         int mSizeX;
         int mSizeY;
     };
@@ -41,8 +59,10 @@ namespace MWRender
     class InventoryPreview : public CharacterPreview
     {
     public:
-        InventoryPreview(Ogre::SceneManager* sceneMgr, Ogre::SceneNode* node);
+
+        InventoryPreview(MWWorld::Ptr character);
         virtual ~InventoryPreview();
+        virtual void onSetup();
 
         void update(int sizeX, int sizeY);
 
@@ -51,7 +71,6 @@ namespace MWRender
         void setNpcAnimation (NpcAnimation* anim);
 
     private:
-        NpcAnimation* mAnimation;
 
         OEngine::Render::SelectionBuffer* mSelectionBuffer;
     };
@@ -59,7 +78,7 @@ namespace MWRender
     class RaceSelectionPreview : public CharacterPreview
     {
     public:
-        RaceSelectionPreview(Ogre::SceneManager* sceneMgr, Ogre::SceneNode* node);
+        RaceSelectionPreview();
 
         void update(float angle);
     };

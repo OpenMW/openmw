@@ -78,7 +78,7 @@ void OgreRenderer::start()
 #endif
 }
 
-bool OgreRenderer::loadPlugins() const
+bool OgreRenderer::loadPlugins() 
 {
     #ifdef ENABLE_PLUGIN_GL
     mGLPlugin = new Ogre::GLPlugin();

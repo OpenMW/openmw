@@ -307,10 +307,8 @@ namespace MWWorld
             }
 
             virtual void renderPlayer();
-
-            virtual void updateCharacterPreview(int sizeX, int sizeY);
-            virtual void updateRaceSelectionPreview(float angle);
-            virtual MWWorld::Ptr getCharacterPreviewItemSelected(int posX, int posY);
+            
+            virtual void setupExternalRendering (MWRender::ExternalRendering& rendering);
     };
 }
 

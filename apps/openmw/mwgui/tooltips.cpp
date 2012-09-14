@@ -174,7 +174,7 @@ void ToolTips::onFrame(float frameDuration)
                 MyGUI::IntPoint relMousePos = MyGUI::InputManager::getInstance ().getMousePosition () - MyGUI::IntPoint(avatarPos.left, avatarPos.top);
                 int realX = int(float(relMousePos.left) / float(avatarPos.width) * 512.f );
                 int realY = int(float(relMousePos.top) / float(avatarPos.height) * 1024.f );
-                MWWorld::Ptr item = MWBase::Environment::get().getWorld ()->getCharacterPreviewItemSelected (realX, realY);
+                MWWorld::Ptr item = mWindowManager->getInventoryWindow ()->getAvatarSelectedItem (realX, realY);
 
                 mFocusObject = item;
                 if (!mFocusObject.isEmpty ())

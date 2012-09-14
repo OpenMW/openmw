@@ -1,6 +1,8 @@
 #ifndef MGUI_Inventory_H
 #define MGUI_Inventory_H
 
+#include "../mwrender/characterpreview.hpp"
+
 #include "container.hpp"
 #include "window_pinnable_base.hpp"
 
@@ -24,6 +26,8 @@ namespace MWGui
 
             MyGUI::IntCoord getAvatarScreenCoord();
 
+            MWWorld::Ptr getAvatarSelectedItem(int x, int y);
+
         protected:
             MyGUI::Widget* mAvatar;
             MyGUI::ImageBox* mAvatarImage;
@@ -43,6 +47,7 @@ namespace MWGui
             int mLastXSize;
             int mLastYSize;
 
+            MWRender::InventoryPreview mPreview;
 
             bool mTrading;
 

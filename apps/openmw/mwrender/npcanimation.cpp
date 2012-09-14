@@ -45,8 +45,8 @@ NpcAnimation::~NpcAnimation()
 }
 
 
-NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node, OEngine::Render::OgreRenderer& _rend, MWWorld::InventoryStore& _inv, int visibilityFlags)
-    : Animation(_rend), mStateID(-1), mInv(_inv), timeToChange(0), mVisibilityFlags(visibilityFlags),
+NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node, MWWorld::InventoryStore& _inv, int visibilityFlags)
+    : Animation(), mStateID(-1), mInv(_inv), timeToChange(0), mVisibilityFlags(visibilityFlags),
     robe(mInv.end()), helmet(mInv.end()), shirt(mInv.end()),
     cuirass(mInv.end()), greaves(mInv.end()),
     leftpauldron(mInv.end()), rightpauldron(mInv.end()),
