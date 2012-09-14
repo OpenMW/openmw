@@ -40,8 +40,8 @@ namespace MWGui
             MyGUI::Button* mFilterMagic;
             MyGUI::Button* mFilterMisc;
 
-            int mAvatarClickedPosX;
-            int mAvatarClickedPosY;
+            int mLastXSize;
+            int mLastYSize;
 
 
             bool mTrading;

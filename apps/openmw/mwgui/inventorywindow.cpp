@@ -44,8 +44,8 @@ namespace MWGui
         : ContainerBase(dragAndDrop)
         , WindowPinnableBase("openmw_inventory_window.layout", parWindowManager)
         , mTrading(false)
-        , mAvatarClickedPosX(0)
-        , mAvatarClickedPosY(0)
+        , mLastXSize(0)
+        , mLastYSize(0)
     {
         static_cast<MyGUI::Window*>(mMainWidget)->eventWindowChangeCoord += MyGUI::newDelegate(this, &InventoryWindow::onWindowResize);
 
@@ -102,13 +102,13 @@ namespace MWGui
                               mRightPane->getPosition().top,
                               _sender->getSize().width - 12 - (_sender->getSize().height-44) * aspect - 15,
                               _sender->getSize().height-44 );
-        drawItems();
 
-        MyGUI::IntSize size = mAvatar->getSize();
-
-        MWBase::Environment::get().getWorld()->updateCharacterPreview (size.width, size.height);
-        mAvatarImage->setSize(MyGUI::IntSize(std::max(mAvatar->getSize().width, 512), std::max(mAvatar->getSize().height, 1024)));
-        mAvatarImage->setImageTexture("CharacterPreview");
+        if (mMainWidget->getSize().width != mLastXSize || mMainWidget->getSize().height != mLastYSize)
+        {
+            drawItems();
+            mLastXSize = mMainWidget->getSize().width;
+            mLastYSize = mMainWidget->getSize().height;
+        }
     }
 
     void InventoryWindow::onFilterChanged(MyGUI::Widget* _sender)
