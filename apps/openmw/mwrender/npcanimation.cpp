@@ -368,7 +368,7 @@ NifOgre::EntityList NpcAnimation::insertBoundedPart(const std::string &mesh, int
 
 void NpcAnimation::runAnimation(float timepassed)
 {
-    //if(timeToChange > .2)
+    if(timeToChange > .2)
     {
         timeToChange = 0;
         updateParts();

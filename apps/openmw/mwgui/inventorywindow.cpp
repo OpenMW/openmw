@@ -92,6 +92,7 @@ namespace MWGui
         mBoughtItems.clear();
 
         onWindowResize(static_cast<MyGUI::Window*>(mMainWidget));
+        drawItems();
     }
 
     void InventoryWindow::onWindowResize(MyGUI::Window* _sender)
@@ -293,7 +294,7 @@ namespace MWGui
         MyGUI::IntSize size = mAvatar->getSize();
 
         MWBase::Environment::get().getWorld()->updateCharacterPreview (size.width, size.height);
-        mAvatarImage->setSize(MyGUI::IntSize(512, 1024));
+        mAvatarImage->setSize(MyGUI::IntSize(std::max(mAvatar->getSize().width, 512), std::max(mAvatar->getSize().height, 1024)));
         mAvatarImage->setImageTexture("CharacterPreview");
     }
 
