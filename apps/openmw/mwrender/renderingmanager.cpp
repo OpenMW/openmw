@@ -95,7 +95,7 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
     if (filter == "anisotropic") tfo = TFO_ANISOTROPIC;
     else if (filter == "trilinear") tfo = TFO_TRILINEAR;
     else if (filter == "bilinear") tfo = TFO_BILINEAR;
-    else if (filter == "none") tfo = TFO_NONE;
+    else /*if (filter == "none")*/ tfo = TFO_NONE;
 
     MaterialManager::getSingleton().setDefaultTextureFiltering(tfo);
     MaterialManager::getSingleton().setDefaultAnisotropy( (filter == "anisotropic") ? Settings::Manager::getInt("anisotropy", "General") : 1 );
@@ -176,7 +176,6 @@ RenderingManager::~RenderingManager ()
     delete mOcclusionQuery;
     delete mCompositors;
     delete mWater;
-    delete mPreviewAnimation;
 }
 
 MWRender::SkyManager* RenderingManager::getSkyManager()
@@ -725,7 +724,7 @@ void RenderingManager::processChangedSettings(const Settings::CategorySettingVec
             if (filter == "anisotropic") tfo = TFO_ANISOTROPIC;
             else if (filter == "trilinear") tfo = TFO_TRILINEAR;
             else if (filter == "bilinear") tfo = TFO_BILINEAR;
-            else if (filter == "none") tfo = TFO_NONE;
+            else /*if (filter == "none")*/ tfo = TFO_NONE;
 
             MaterialManager::getSingleton().setDefaultTextureFiltering(tfo);
             MaterialManager::getSingleton().setDefaultAnisotropy( (filter == "anisotropic") ? Settings::Manager::getInt("anisotropy", "General") : 1 );

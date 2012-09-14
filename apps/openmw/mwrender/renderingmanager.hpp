@@ -245,8 +245,6 @@ class RenderingManager: private RenderingInterface, public Ogre::WindowEventList
     MWRender::Shadows* mShadows;
 
     MWRender::Compositors* mCompositors;
-
-    MWRender::NpcAnimation* mPreviewAnimation;
 };
 
 }
