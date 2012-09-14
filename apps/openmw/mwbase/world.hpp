@@ -274,6 +274,7 @@ namespace MWBase
 
             virtual void updateCharacterPreview(int sizeX, int sizeY) = 0;
             virtual void updateRaceSelectionPreview(float angle) = 0;
+            virtual MWWorld::Ptr getCharacterPreviewItemSelected(int posX, int posY) = 0;
     };
 }
 

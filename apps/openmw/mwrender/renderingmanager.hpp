@@ -195,6 +195,7 @@ class RenderingManager: private RenderingInterface, public Ogre::WindowEventList
 
     void updateCharacterPreview(int sizeX, int sizeY);
     void updateRaceSelectionPreview(float angle);
+    int getCharacterPreviewSlotSelected(int posX, int posY);
 
   protected:
 	virtual void windowResized(Ogre::RenderWindow* rw);

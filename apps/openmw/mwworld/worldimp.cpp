@@ -1232,4 +1232,19 @@ namespace MWWorld
     {
         mRendering->updateRaceSelectionPreview(angle);
     }
+
+    MWWorld::Ptr World::getCharacterPreviewItemSelected(int posX, int posY)
+    {
+        int slot = mRendering->getCharacterPreviewSlotSelected(posX, posY);
+
+        if (slot == -1)
+            return MWWorld::Ptr();
+
+        MWWorld::Ptr player = getPlayer().getPlayer ();
+        MWWorld::InventoryStore& invStore = MWWorld::Class::get(player).getInventoryStore(player);
+        if (invStore.getSlot(slot) != invStore.end())
+            return *invStore.getSlot (slot);
+        else
+            return MWWorld::Ptr();
+    }
 }

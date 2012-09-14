@@ -12,6 +12,7 @@
 
             <!-- Avatar -->
             <Widget type="Widget" skin="MW_Box" position="8 38 212 185" name="Avatar" align="Left Top Stretch">
+                <UserString key="ToolTipType" value="AvatarItemSelection"/>
                 <Widget type="ImageBox" skin="ImageBox" position="0 0 212 185" align="Stretch" name="AvatarImage">
                     <Property key="NeedMouse" value="false"/>
                 </Widget>

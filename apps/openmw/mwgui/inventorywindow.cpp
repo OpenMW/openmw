@@ -44,6 +44,8 @@ namespace MWGui
         : ContainerBase(dragAndDrop)
         , WindowPinnableBase("openmw_inventory_window.layout", parWindowManager)
         , mTrading(false)
+        , mAvatarClickedPosX(0)
+        , mAvatarClickedPosY(0)
     {
         static_cast<MyGUI::Window*>(mMainWidget)->eventWindowChangeCoord += MyGUI::newDelegate(this, &InventoryWindow::onWindowResize);
 
@@ -107,6 +109,7 @@ namespace MWGui
         MWBase::Environment::get().getWorld()->updateCharacterPreview (size.width, size.height);
         mAvatarImage->setSize(MyGUI::IntSize(std::max(mAvatar->getSize().width, 512), std::max(mAvatar->getSize().height, 1024)));
         mAvatarImage->setImageTexture("CharacterPreview");
+        mAvatarImage->setImageTexture("SelectionBuffer");
     }
 
     void InventoryWindow::onFilterChanged(MyGUI::Widget* _sender)
@@ -179,6 +182,28 @@ namespace MWGui
             drawItems();
 
             notifyContentChanged();
+        }
+        else
+        {
+            MyGUI::IntPoint mousePos = MyGUI::InputManager::getInstance ().getLastPressedPosition (MyGUI::MouseButton::Left);
+            MyGUI::IntPoint relPos = mousePos - mAvatar->getAbsolutePosition ();
+            int realX = int(float(relPos.left) / float(mAvatar->getSize().width) * 512.f );
+            int realY = int(float(relPos.top) / float(mAvatar->getSize().height) * 1024.f );
+            MWWorld::Ptr itemSelected = MWBase::Environment::get().getWorld ()->getCharacterPreviewItemSelected (realX, realY);
+            if (itemSelected.isEmpty ())
+                return;
+
+
+            for (unsigned int i=0; i < mContainerWidget->getChildCount (); ++i)
+            {
+                MyGUI::Widget* w = mContainerWidget->getChildAt (i);
+
+                if (*w->getUserData<MWWorld::Ptr>() == itemSelected)
+                {
+                    onSelectedItem(w);
+                    return;
+                }
+            }
         }
     }
 
@@ -335,5 +360,10 @@ namespace MWGui
         text->setTextShadowColour(MyGUI::Colour(0,0,0));
         text->setCaption(getCountString(count));
         mDragAndDrop->mDraggedFrom = this;
+    }
+
+    MyGUI::IntCoord InventoryWindow::getAvatarScreenCoord ()
+    {
+        return mAvatar->getAbsoluteCoord ();
     }
 }

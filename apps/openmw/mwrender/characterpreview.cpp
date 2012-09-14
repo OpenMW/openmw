@@ -4,6 +4,8 @@
 #include <OgreSceneManager.h>
 #include <OgreHardwarePixelBuffer.h>
 
+#include <libs/openengine/ogre/selectionbuffer.hpp>
+
 
 #include "renderconst.hpp"
 #include "npcanimation.hpp"
@@ -50,7 +52,12 @@ namespace MWRender
         : CharacterPreview(sceneMgr, node, 512, 1024, "CharacterPreview", Ogre::Vector3(0, 65, -180), Ogre::Vector3(0,65,0))
         , mAnimation(NULL)
     {
+        mSelectionBuffer = new OEngine::Render::SelectionBuffer(mCamera, 512, 1024, RV_PlayerPreview);
+    }
 
+    InventoryPreview::~InventoryPreview()
+    {
+        delete mSelectionBuffer;
     }
 
     void InventoryPreview::update(int sizeX, int sizeY)
@@ -63,13 +70,22 @@ namespace MWRender
         mNode->setOrientation (Ogre::Quaternion::IDENTITY);
 
         mNode->setVisible (true);
+
         mRenderTarget->update();
+        mSelectionBuffer->update();
+
         mNode->setVisible (false);
     }
 
     void InventoryPreview::setNpcAnimation (NpcAnimation *anim)
     {
         mAnimation = anim;
+    }
+
+    int InventoryPreview::getSlotSelected (int posX, int posY)
+    {
+        std::cout << posX << " " << posY << std::endl;
+        return mSelectionBuffer->getSelected (posX, posY);
     }
 
     // --------------------------------------------------------------------------------------------------

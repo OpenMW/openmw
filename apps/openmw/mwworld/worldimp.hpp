@@ -310,6 +310,7 @@ namespace MWWorld
 
             virtual void updateCharacterPreview(int sizeX, int sizeY);
             virtual void updateRaceSelectionPreview(float angle);
+            virtual MWWorld::Ptr getCharacterPreviewItemSelected(int posX, int posY);
     };
 }
 

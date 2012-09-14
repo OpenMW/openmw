@@ -905,4 +905,10 @@ void RenderingManager::updateRaceSelectionPreview (float angle)
     mRaceSelectionPreview->update(angle);
 }
 
+int RenderingManager::getCharacterPreviewSlotSelected(int posX, int posY)
+{
+    std::cout << "SLOT IS " << mInventoryPreview->getSlotSelected(posX, posY) << std::endl;
+    return mInventoryPreview->getSlotSelected(posX, posY);
+}
+
 } // namespace

@@ -22,6 +22,8 @@ namespace MWGui
 
             int getPlayerGold();
 
+            MyGUI::IntCoord getAvatarScreenCoord();
+
         protected:
             MyGUI::Widget* mAvatar;
             MyGUI::ImageBox* mAvatarImage;
@@ -37,6 +39,10 @@ namespace MWGui
             MyGUI::Button* mFilterApparel;
             MyGUI::Button* mFilterMagic;
             MyGUI::Button* mFilterMisc;
+
+            int mAvatarClickedPosX;
+            int mAvatarClickedPosY;
+
 
             bool mTrading;
 

@@ -1,0 +1,8 @@
+material SelectionColour
+{
+    pass
+    {
+        vertex_program selection_vertex
+        fragment_program selection_fragment
+    }
+}

@@ -94,6 +94,8 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node, OEngi
     {
         Ogre::Entity *base = mEntityList.mEntities[i];
 
+        base->getUserObjectBindings ().setUserAny (Ogre::Any(-1));
+
         base->setVisibilityFlags(mVisibilityFlags);
         bool transparent = false;
         for(unsigned int j=0;j < base->getNumSubEntities();++j)
@@ -351,13 +353,16 @@ void NpcAnimation::updateParts()
     }
 }
 
-NifOgre::EntityList NpcAnimation::insertBoundedPart(const std::string &mesh, const std::string &bonename)
+NifOgre::EntityList NpcAnimation::insertBoundedPart(const std::string &mesh, int group, const std::string &bonename)
 {
     NifOgre::EntityList entities = NIFLoader::createEntities(mEntityList.mSkelBase, bonename,
                                                              mInsert, mesh);
     std::vector<Ogre::Entity*> &parts = entities.mEntities;
     for(size_t i = 0;i < parts.size();i++)
+    {
         parts[i]->setVisibilityFlags(mVisibilityFlags);
+        parts[i]->getUserObjectBindings ().setUserAny (Ogre::Any(group));
+    }
     return entities;
 }
 
@@ -480,83 +485,83 @@ bool NpcAnimation::addOrReplaceIndividualPart(int type, int group, int priority,
     switch(type)
     {
         case ESM::PRT_Head:                           //0
-            head = insertBoundedPart(mesh, "Head");
+            head = insertBoundedPart(mesh, group, "Head");
             break;
         case ESM::PRT_Hair:                          //1
-            hair = insertBoundedPart(mesh, "Head");
+            hair = insertBoundedPart(mesh, group, "Head");
             break;
         case ESM::PRT_Neck:                          //2
-            neck = insertBoundedPart(mesh, "Neck");
+            neck = insertBoundedPart(mesh, group, "Neck");
             break;
         case ESM::PRT_Cuirass:                          //3
-            chest = insertBoundedPart(mesh, "Chest");
+            chest = insertBoundedPart(mesh, group, "Chest");
             break;
         case ESM::PRT_Groin:                          //4
-            groin = insertBoundedPart(mesh, "Groin");
+            groin = insertBoundedPart(mesh, group, "Groin");
             break;
         case ESM::PRT_Skirt:                          //5
-            skirt = insertBoundedPart(mesh, "Groin");
+            skirt = insertBoundedPart(mesh, group, "Groin");
             break;
         case ESM::PRT_RHand:                         //6
-            rHand = insertBoundedPart(mesh, "Right Hand");
+            rHand = insertBoundedPart(mesh, group, "Right Hand");
             break;
         case ESM::PRT_LHand:                         //7
-            lHand = insertBoundedPart(mesh, "Left Hand");
+            lHand = insertBoundedPart(mesh, group, "Left Hand");
             break;
         case ESM::PRT_RWrist:                          //8
-            rWrist = insertBoundedPart(mesh, "Right Wrist");
+            rWrist = insertBoundedPart(mesh, group, "Right Wrist");
             break;
         case ESM::PRT_LWrist:                          //9
-            lWrist = insertBoundedPart(mesh, "Left Wrist");
+            lWrist = insertBoundedPart(mesh, group, "Left Wrist");
             break;
         case ESM::PRT_Shield:                         //10
             break;
         case ESM::PRT_RForearm:                          //11
-            rForearm = insertBoundedPart(mesh, "Right Forearm");
+            rForearm = insertBoundedPart(mesh, group, "Right Forearm");
             break;
         case ESM::PRT_LForearm:                          //12
-            lForearm = insertBoundedPart(mesh, "Left Forearm");
+            lForearm = insertBoundedPart(mesh, group, "Left Forearm");
             break;
         case ESM::PRT_RUpperarm:                          //13
-            rupperArm = insertBoundedPart(mesh, "Right Upper Arm");
+            rupperArm = insertBoundedPart(mesh, group, "Right Upper Arm");
             break;
         case ESM::PRT_LUpperarm:                          //14
-            lupperArm = insertBoundedPart(mesh, "Left Upper Arm");
+            lupperArm = insertBoundedPart(mesh, group, "Left Upper Arm");
             break;
         case ESM::PRT_RFoot:                             //15
-            rfoot = insertBoundedPart(mesh, "Right Foot");
+            rfoot = insertBoundedPart(mesh, group, "Right Foot");
             break;
         case ESM::PRT_LFoot:                             //16
-            lfoot = insertBoundedPart(mesh, "Left Foot");
+            lfoot = insertBoundedPart(mesh, group, "Left Foot");
             break;
         case ESM::PRT_RAnkle:                          //17
-            rAnkle = insertBoundedPart(mesh, "Right Ankle");
+            rAnkle = insertBoundedPart(mesh, group, "Right Ankle");
             break;
         case ESM::PRT_LAnkle:                          //18
-            lAnkle = insertBoundedPart(mesh, "Left Ankle");
+            lAnkle = insertBoundedPart(mesh, group, "Left Ankle");
             break;
         case ESM::PRT_RKnee:                          //19
-            rKnee = insertBoundedPart(mesh, "Right Knee");
+            rKnee = insertBoundedPart(mesh, group, "Right Knee");
             break;
         case ESM::PRT_LKnee:                          //20
-            lKnee = insertBoundedPart(mesh, "Left Knee");
+            lKnee = insertBoundedPart(mesh, group, "Left Knee");
             break;
         case ESM::PRT_RLeg:                          //21
-            rUpperLeg = insertBoundedPart(mesh, "Right Upper Leg");
+            rUpperLeg = insertBoundedPart(mesh, group, "Right Upper Leg");
             break;
         case ESM::PRT_LLeg:                          //22
-            lUpperLeg = insertBoundedPart(mesh, "Left Upper Leg");
+            lUpperLeg = insertBoundedPart(mesh, group, "Left Upper Leg");
             break;
         case ESM::PRT_RPauldron:                          //23
-            rclavicle = insertBoundedPart(mesh , "Right Clavicle");
+            rclavicle = insertBoundedPart(mesh , group, "Right Clavicle");
             break;
         case ESM::PRT_LPauldron:                          //24
-            lclavicle = insertBoundedPart(mesh, "Left Clavicle");
+            lclavicle = insertBoundedPart(mesh, group, "Left Clavicle");
             break;
         case ESM::PRT_Weapon:                             //25
             break;
         case ESM::PRT_Tail:                              //26
-            tail = insertBoundedPart(mesh, "Tail");
+            tail = insertBoundedPart(mesh, group, "Tail");
             break;
     }
     return true;
@@ -575,7 +580,7 @@ void NpcAnimation::addPartGroup(int group, int priority, std::vector<ESM::PartRe
             bodypart = MWBase::Environment::get().getWorld()->getStore().bodyParts.search(part.male);
 
         if(bodypart)
-            addOrReplaceIndividualPart(part.part, group,priority,"meshes\\" + bodypart->model);
+            addOrReplaceIndividualPart(part.part, group, priority,"meshes\\" + bodypart->model);
         else
             reserveIndividualPart(part.part, group, priority);
     }
