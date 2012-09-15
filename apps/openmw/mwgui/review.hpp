@@ -35,9 +35,9 @@ namespace MWGui
         void setClass(const ESM::Class& class_);
         void setBirthSign (const std::string &signId);
 
-        void setHealth(const MWMechanics::DynamicStat<int>& value);
-        void setMagicka(const MWMechanics::DynamicStat<int>& value);
-        void setFatigue(const MWMechanics::DynamicStat<int>& value);
+        void setHealth(const MWMechanics::DynamicStat<float>& value);
+        void setMagicka(const MWMechanics::DynamicStat<float>& value);
+        void setFatigue(const MWMechanics::DynamicStat<float>& value);
 
         void setAttribute(ESM::Attribute::AttributeID attributeId, const MWMechanics::Stat<int>& value);
 

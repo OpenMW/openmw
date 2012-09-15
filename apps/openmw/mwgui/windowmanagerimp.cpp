@@ -250,6 +250,7 @@ void WindowManager::updateVisible()
     mAlchemyWindow->setVisible(false);
     mSpellWindow->setVisible(false);
     mQuickKeysMenu->setVisible(false);
+    mLevelupDialog->setVisible(false);
 
     mHud->setVisible(true);
 
@@ -300,6 +301,9 @@ void WindowManager::updateVisible()
             break;
         case GM_Alchemy:
             mAlchemyWindow->setVisible(true);
+            break;
+        case GM_Rest:
+            mLevelupDialog->setVisible(true);
             break;
         case GM_Name:
         case GM_Race:
@@ -398,8 +402,9 @@ void WindowManager::setValue (int parSkill, const MWMechanics::Stat<float>& valu
     mPlayerSkillValues[parSkill] = value;
 }
 
-void WindowManager::setValue (const std::string& id, const MWMechanics::DynamicStat<int>& value)
+void WindowManager::setValue (const std::string& id, const MWMechanics::DynamicStat<float>& value)
 {
+    std::cout << " set value " << id << value.getModified () << std::endl;
     mStatsWindow->setValue (id, value);
     mHud->setValue (id, value);
     mCharGen->setValue(id, value);

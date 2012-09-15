@@ -18,11 +18,20 @@ namespace MWGui
         MyGUI::ImageBox* mClassImage;
         MyGUI::TextBox* mLevelText;
 
+        std::vector<MyGUI::Button*> mAttributes;
         std::vector<MyGUI::TextBox*> mAttributeValues;
         std::vector<MyGUI::TextBox*> mAttributeMultipliers;
+        std::vector<MyGUI::ImageBox*> mCoins;
+
+        std::vector<int> mSpentAttributes;
 
         void onOkButtonClicked (MyGUI::Widget* sender);
         void onAttributeClicked (MyGUI::Widget* sender);
+
+        void assignCoins();
+        void resetCoins();
+
+        void setAttributeValues();
     };
 
 }

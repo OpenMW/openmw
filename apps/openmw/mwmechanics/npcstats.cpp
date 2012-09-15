@@ -12,10 +12,16 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
+#include "../mwbase/windowmanager.hpp"
 
 MWMechanics::NpcStats::NpcStats()
 : mMovementFlags (0), mDrawState (DrawState_Nothing)
-{}
+, mLevelProgress(0)
+{
+    mSkillIncreases.resize (ESM::Attribute::Length);
+    for (int i=0; i<ESM::Attribute::Length; ++i)
+        mSkillIncreases[i] = 0;
+}
 
 MWMechanics::DrawState_ MWMechanics::NpcStats::getDrawState() const
 {
@@ -122,7 +128,10 @@ float MWMechanics::NpcStats::getSkillGain (int skillIndex, const ESM::Class& cla
             throw std::runtime_error ("invalid skill specialisation factor");
     }
 
-    return 1.0 / (level +1) * (1.0 / skillFactor) * typeFactor * specialisationFactor;
+    //return 1.0 / (level +1) * (1.0 / (skillFactor)) * typeFactor * specialisationFactor;
+
+    ///FIXME: TEST FOR FASTER LEVELLING
+    return 1.0 / (level +1) * (1.0 / (skillFactor/100)) * typeFactor * specialisationFactor;
 }
 
 void MWMechanics::NpcStats::useSkill (int skillIndex, const ESM::Class& class_, int usageType)
@@ -134,7 +143,64 @@ void MWMechanics::NpcStats::useSkill (int skillIndex, const ESM::Class& class_, 
     base += getSkillGain (skillIndex, class_, usageType);
 
     if (static_cast<int> (base)!=level)
+    {
+        // skill leveled up
         base = level+1;
 
+        // if this is a major or minor skill of the class, increase level progress
+        //bool levelProgress = false;
+        bool levelProgress = true;
+        for (int i=0; i<2; ++i)
+            for (int j=0; j<5; ++j)
+            {
+                int skill = class_.data.skills[j][i];
+                if (skill == skillIndex)
+                    levelProgress = true;
+            }
+
+        if (!levelProgress)
+            std::cout <<"This is not a level skilL" << std::endl;
+
+        mLevelProgress += levelProgress;
+
+        // check the attribute this skill belongs to
+        const ESM::Skill* skill = MWBase::Environment::get().getWorld ()->getStore ().skills.find(skillIndex);
+        ++mSkillIncreases[skill->data.attribute];
+
+        if (mLevelProgress >= 10)
+        {
+            // levelup is possible now
+            MWBase::Environment::get().getWindowManager ()->messageBox ("#{sLevelUpMsg}", std::vector<std::string>());
+        }
+   }
+
     getSkill (skillIndex).setBase (base);
+}
+
+int MWMechanics::NpcStats::getLevelProgress () const
+{
+    return mLevelProgress;
+}
+
+void MWMechanics::NpcStats::levelUp()
+{
+    mLevelProgress -= 10;
+    for (int i=0; i<ESM::Attribute::Length; ++i)
+        mSkillIncreases[i] = 0;
+}
+
+int MWMechanics::NpcStats::getLevelupAttributeMultiplier(int attribute) const
+{
+    // Source: http://www.uesp.net/wiki/Morrowind:Level#How_to_Level_Up
+    int num = mSkillIncreases[attribute];
+    if (num <= 1)
+        return 1;
+    else if (num <= 4)
+        return 2;
+    else if (num <= 7)
+        return 3;
+    else if (num <= 9)
+        return 4;
+    else
+        return 5;
 }

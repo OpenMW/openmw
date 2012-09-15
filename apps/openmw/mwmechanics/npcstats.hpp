@@ -4,6 +4,7 @@
 #include <map>
 #include <set>
 #include <string>
+#include <vector>
 
 #include "stat.hpp"
 #include "drawstate.hpp"
@@ -45,6 +46,10 @@ namespace MWMechanics
             unsigned int mMovementFlags;
             Stat<float> mSkill[27];
 
+            int mLevelProgress; // 0-10
+
+            std::vector<int> mSkillIncreases; // number of skill increases for each attribute
+
         public:
 
             NpcStats();
@@ -73,6 +78,12 @@ namespace MWMechanics
 
             void useSkill (int skillIndex, const ESM::Class& class_, int usageType = -1);
             ///< Increase skill by usage.
+
+            int getLevelProgress() const;
+
+            int getLevelupAttributeMultiplier(int attribute) const;
+
+            void levelUp();
     };
 }
 

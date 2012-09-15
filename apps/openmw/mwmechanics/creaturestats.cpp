@@ -9,6 +9,21 @@
 
 namespace MWMechanics
 {  
+    CreatureStats::CreatureStats()
+        : mLevelHealthBonus(0.f)
+    {
+    }
+
+    void CreatureStats::increaseLevelHealthBonus (float value)
+    {
+        mLevelHealthBonus += value;
+    }
+
+    float CreatureStats::getLevelHealthBonus () const
+    {
+        return mLevelHealthBonus;
+    }
+
     const AiSequence& CreatureStats::getAiSequence() const
     {
         return mAiSequence;
@@ -40,17 +55,17 @@ namespace MWMechanics
         return mAttributes[index];
     }
 
-    const DynamicStat<int> &CreatureStats::getHealth() const
+    const DynamicStat<float> &CreatureStats::getHealth() const
     {
         return mDynamic[0];
     }
 
-    const DynamicStat<int> &CreatureStats::getMagicka() const
+    const DynamicStat<float> &CreatureStats::getMagicka() const
     {
         return mDynamic[1];
     }
 
-    const DynamicStat<int> &CreatureStats::getFatigue() const
+    const DynamicStat<float> &CreatureStats::getFatigue() const
     {
         return mDynamic[2];
     }
@@ -103,22 +118,22 @@ namespace MWMechanics
         return mAttributes[index];
     }
 
-    DynamicStat<int> &CreatureStats::getHealth()
+    DynamicStat<float> &CreatureStats::getHealth()
     {
         return mDynamic[0];
     }
 
-    DynamicStat<int> &CreatureStats::getMagicka()
+    DynamicStat<float> &CreatureStats::getMagicka()
     {
         return mDynamic[1];
     }
 
-    DynamicStat<int> &CreatureStats::getFatigue()
+    DynamicStat<float> &CreatureStats::getFatigue()
     {
         return mDynamic[2];
     }
 
-    DynamicStat<int> &CreatureStats::getDynamic(int index)
+    DynamicStat<float> &CreatureStats::getDynamic(int index)
     {
         if (index < 0 || index > 2) {
             throw std::runtime_error("dynamic stat index is out of range");
@@ -154,17 +169,17 @@ namespace MWMechanics
         mAttributes[index] = value;
     }
 
-    void CreatureStats::setHealth(const DynamicStat<int> &value)
+    void CreatureStats::setHealth(const DynamicStat<float> &value)
     {
         mDynamic[0] = value;
     }
 
-    void CreatureStats::setMagicka(const DynamicStat<int> &value)
+    void CreatureStats::setMagicka(const DynamicStat<float> &value)
     {
         mDynamic[1] = value;
     }
 
-    void CreatureStats::setFatigue(const DynamicStat<int> &value)
+    void CreatureStats::setFatigue(const DynamicStat<float> &value)
     {
         mDynamic[2] = value;
     }

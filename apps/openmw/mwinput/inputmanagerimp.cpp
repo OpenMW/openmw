@@ -190,6 +190,9 @@ namespace MWInput
             case A_ToggleWeapon:
                 toggleWeapon ();
                 break;
+            case A_Rest:
+                rest();
+                break;
             case A_ToggleSpell:
                 toggleSpell ();
                 break;
@@ -541,6 +544,12 @@ namespace MWInput
             mPlayer.setDrawState(MWMechanics::DrawState_Nothing);
             std::cout << "Player does not have any kind of attack ready now.\n" << std::endl;
         }
+    }
+
+    void InputManager::rest()
+    {
+        if (!mWindows.isGuiMode ())
+            mWindows.pushGuiMode (MWGui::GM_Rest);
     }
 
     void InputManager::screenshot()

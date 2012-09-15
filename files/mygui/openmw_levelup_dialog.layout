@@ -4,7 +4,7 @@
     <Widget type="Window" skin="MW_Dialog" layer="Windows" position="0 0 440 438" name="_Main">
 
         <Widget type="Widget" skin="MW_Box" position="28 14 391 198">
-            <Widget type="ImageBox" skin="ImageBox" name="ClassImage" position="0 0 391 198">
+            <Widget type="ImageBox" skin="ImageBox" name="ClassImage" position="4 4 383 190">
             </Widget>
         </Widget>
 
@@ -31,7 +31,6 @@
                     <Property key="Caption" value="#{sAttributeStrength}"/>
                 </Widget>
                 <Widget type="AutoSizedTextBox" skin="SandText" name="AttribVal1">
-                    <Property key="Caption" value="54"/>
                 </Widget>
             </Widget>
 
@@ -45,7 +44,6 @@
                     <Property key="Caption" value="#{sAttributeIntelligence}"/>
                 </Widget>
                 <Widget type="AutoSizedTextBox" skin="SandText" name="AttribVal2">
-                    <Property key="Caption" value="54"/>
                 </Widget>
             </Widget>
 
@@ -59,7 +57,6 @@
                     <Property key="Caption" value="#{sAttributeWillpower}"/>
                 </Widget>
                 <Widget type="AutoSizedTextBox" skin="SandText" name="AttribVal3">
-                    <Property key="Caption" value="54"/>
                 </Widget>
             </Widget>
 
@@ -73,7 +70,6 @@
                     <Property key="Caption" value="#{sAttributeAgility}"/>
                 </Widget>
                 <Widget type="AutoSizedTextBox" skin="SandText" name="AttribVal4">
-                    <Property key="Caption" value="54"/>
                 </Widget>
             </Widget>
 
@@ -88,7 +84,6 @@
                     <Property key="Caption" value="#{sAttributeSpeed}"/>
                 </Widget>
                 <Widget type="AutoSizedTextBox" skin="SandText" name="AttribVal5">
-                    <Property key="Caption" value="54"/>
                 </Widget>
             </Widget>
 
@@ -102,7 +97,6 @@
                     <Property key="Caption" value="#{sAttributeEndurance}"/>
                 </Widget>
                 <Widget type="AutoSizedTextBox" skin="SandText" name="AttribVal6">
-                    <Property key="Caption" value="54"/>
                 </Widget>
             </Widget>
 
@@ -116,7 +110,6 @@
                     <Property key="Caption" value="#{sAttributePersonality}"/>
                 </Widget>
                 <Widget type="AutoSizedTextBox" skin="SandText" name="AttribVal7">
-                    <Property key="Caption" value="54"/>
                 </Widget>
             </Widget>
 
@@ -130,7 +123,6 @@
                     <Property key="Caption" value="#{sAttributeLuck}"/>
                 </Widget>
                 <Widget type="AutoSizedTextBox" skin="SandText" name="AttribVal8">
-                    <Property key="Caption" value="54"/>
                 </Widget>
             </Widget>
         </Widget>

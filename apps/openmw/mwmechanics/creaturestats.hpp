@@ -19,7 +19,7 @@ namespace MWMechanics
     class CreatureStats
     {
         Stat<int> mAttributes[8];
-        DynamicStat<int> mDynamic[3]; // health, magicka, fatigue
+        DynamicStat<float> mDynamic[3]; // health, magicka, fatigue
         int mLevel;
         Spells mSpells;
         ActiveSpells mActiveSpells;
@@ -30,15 +30,18 @@ namespace MWMechanics
         int mAlarm;
         AiSequence mAiSequence;
 
+        float mLevelHealthBonus;
+
     public:
+        CreatureStats();
 
         const Stat<int> & getAttribute(int index) const;
 
-        const DynamicStat<int> & getHealth() const;
+        const DynamicStat<float> & getHealth() const;
 
-        const DynamicStat<int> & getMagicka() const;
+        const DynamicStat<float> & getMagicka() const;
 
-        const DynamicStat<int> & getFatigue() const;
+        const DynamicStat<float> & getFatigue() const;
 
         const Spells & getSpells() const;
 
@@ -59,13 +62,13 @@ namespace MWMechanics
 
         Stat<int> & getAttribute(int index);
 
-        DynamicStat<int> & getHealth();
+        DynamicStat<float> & getHealth();
 
-        DynamicStat<int> & getMagicka();
+        DynamicStat<float> & getMagicka();
 
-        DynamicStat<int> & getFatigue();
+        DynamicStat<float> & getFatigue();
 
-        DynamicStat<int> & getDynamic(int index);
+        DynamicStat<float> & getDynamic(int index);
 
         Spells & getSpells();
 
@@ -76,11 +79,11 @@ namespace MWMechanics
 
         void setAttribute(int index, const Stat<int> &value);
 
-        void setHealth(const DynamicStat<int> &value);
+        void setHealth(const DynamicStat<float> &value);
 
-        void setMagicka(const DynamicStat<int> &value);
+        void setMagicka(const DynamicStat<float> &value);
 
-        void setFatigue(const DynamicStat<int> &value);
+        void setFatigue(const DynamicStat<float> &value);
 
         void setSpells(const Spells &spells);
 
@@ -104,6 +107,10 @@ namespace MWMechanics
    
         float getFatigueTerm() const;
         ///< Return effective fatigue
+
+        // small hack to allow the fact that Health permanently increases by 10% of endurance on each level up
+        void increaseLevelHealthBonus(float value);
+        float getLevelHealthBonus() const;
     };
 }
 
