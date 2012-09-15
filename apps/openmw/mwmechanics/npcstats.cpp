@@ -4,6 +4,8 @@
 #include <cmath>
 #include <stdexcept>
 
+#include <boost/format.hpp>
+
 #include <components/esm/loadskil.hpp>
 #include <components/esm/loadclas.hpp>
 #include <components/esm/loadgmst.hpp>
@@ -13,6 +15,7 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"
+#include "../mwbase/soundmanager.hpp"
 
 MWMechanics::NpcStats::NpcStats()
 : mMovementFlags (0), mDrawState (DrawState_Nothing)
@@ -159,6 +162,16 @@ void MWMechanics::NpcStats::useSkill (int skillIndex, const ESM::Class& class_, 
         // check the attribute this skill belongs to
         const ESM::Skill* skill = MWBase::Environment::get().getWorld ()->getStore ().skills.find(skillIndex);
         ++mSkillIncreases[skill->data.attribute];
+
+        // Play sound & skill progress notification
+        /// \todo check if character is the player, if levelling is ever implemented for NPCs
+        MWBase::Environment::get().getSoundManager ()->playSound ("skillraise", 1, 1);
+
+        std::stringstream message;
+        message << boost::format(MWBase::Environment::get().getWindowManager ()->getGameSettingString ("sNotifyMessage39", ""))
+                   % std::string("#{" + ESM::Skill::sSkillNameIds[skillIndex] + "}")
+                   % base;
+        MWBase::Environment::get().getWindowManager ()->messageBox(message.str(), std::vector<std::string>());
 
         if (mLevelProgress >= 10)
         {
