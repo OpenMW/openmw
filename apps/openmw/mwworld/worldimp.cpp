@@ -637,7 +637,7 @@ namespace MWWorld
         rot.x = Ogre::Degree(x).valueRadians();
         rot.y = Ogre::Degree(y).valueRadians();
         rot.z = Ogre::Degree(z).valueRadians();
-
+        
         if (mRendering->rotateObject(ptr, rot, adjust)) {
             float *objRot = ptr.getRefData().getPosition().rot;
             objRot[0] = rot.x, objRot[1] = rot.y, objRot[2] = rot.z;

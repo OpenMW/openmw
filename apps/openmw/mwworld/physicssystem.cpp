@@ -282,8 +282,11 @@ namespace MWWorld
                 tr.setOrigin(btVector3(position.x,position.y,position.z));
                 body->setWorldTransform(tr);
             }
-            else
+            else{
+                //For objects that contain a box shape.  
+                //Do any such objects exist?  Perhaps animated objects?
                 mEngine->boxAdjustExternal(handleToMesh[handle], body, node->getScale().x, position, node->getOrientation());
+            }
         }
         if (OEngine::Physic::PhysicActor* act = mEngine->getCharacter(handle))
         {
@@ -295,7 +298,7 @@ namespace MWWorld
             }
             else
             {
-                act->setPosition(btVector3(position.x,position.y,position.z));
+                act->setPosition(position);
             }
         }
     }

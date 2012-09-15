@@ -51,7 +51,8 @@ namespace Physic
     };
 
     /**
-     * A physic Actor use a modifed KinematicCharacterController taken in the bullet forum.
+     * A physic actor uses a rigid body based on box shapes.
+     * Pmove is used to move the physic actor around the dynamic world.
      */
     class PhysicActor
     {
@@ -82,15 +83,29 @@ namespace Physic
 
         bool getCollisionMode();
 
+        /**
+         * This returns the visual position of the PhysicActor (used to position a scenenode).
+         * Note - this is different from the position of the contained mBody.
+         */
         Ogre::Vector3 getPosition(void);
 
+        /**
+         * Returns the visual orientation of the PhysicActor
+         */
         Ogre::Quaternion getRotation(void);
 
-        void setPosition(const btVector3& pos);
+        /**
+         * Sets the position of mBody from a visual position input.
+         * For most cases this should not be used.  We should instead let pmove move the PhysicActor around for us
+         */
+        void setPosition(const Ogre::Vector3 pos);
 
+        /**
+         * Sets the scale of the PhysicActor
+         */
         void setScale(float scale);
 
-        std::string mName;
+        
 
 
     private:
@@ -101,6 +116,7 @@ namespace Physic
         bool collisionMode;
         std::string mMesh;
         PhysicEngine* mEngine;
+        std::string mName;
     };
 
     /**

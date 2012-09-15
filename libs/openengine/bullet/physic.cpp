@@ -93,10 +93,9 @@ namespace Physic
         return Ogre::Quaternion(quat.getW(), quat.getX(), quat.getY(), quat.getZ());
     }
 
-    void PhysicActor::setPosition(const btVector3& pos)
+    void PhysicActor::setPosition(const Ogre::Vector3 pos)
     {
-        //internalGhostObject->getWorldTransform().setOrigin(pos+mTranslation);
-        //externalGhostObject->getWorldTransform().setOrigin(pos+mTranslation);
+        mEngine->adjustRigidBody(mBody, pos, getRotation(), mBoxScaledTranslation, mBoxRotation);
     }
 
     void PhysicActor::setScale(float scale){
