@@ -145,40 +145,54 @@ void MWMechanics::NpcStats::useSkill (int skillIndex, const ESM::Class& class_, 
     if (static_cast<int> (base)!=level)
     {
         // skill leveled up
+        increaseSkill(skillIndex, class_, false);
+    }
+    else
+        getSkill (skillIndex).setBase (base);
+}
+
+void MWMechanics::NpcStats::increaseSkill(int skillIndex, const ESM::Class &class_, bool preserveProgress)
+{
+    float base = getSkill (skillIndex).getBase();
+
+    int level = static_cast<int> (base);
+
+    if (preserveProgress)
+        base += 1;
+    else
         base = level+1;
 
-        // if this is a major or minor skill of the class, increase level progress
-        bool levelProgress = false;
-        for (int i=0; i<2; ++i)
-            for (int j=0; j<5; ++j)
-            {
-                int skill = class_.data.skills[j][i];
-                if (skill == skillIndex)
-                    levelProgress = true;
-            }
-
-        mLevelProgress += levelProgress;
-
-        // check the attribute this skill belongs to
-        const ESM::Skill* skill = MWBase::Environment::get().getWorld ()->getStore ().skills.find(skillIndex);
-        ++mSkillIncreases[skill->data.attribute];
-
-        // Play sound & skill progress notification
-        /// \todo check if character is the player, if levelling is ever implemented for NPCs
-        MWBase::Environment::get().getSoundManager ()->playSound ("skillraise", 1, 1);
-
-        std::stringstream message;
-        message << boost::format(MWBase::Environment::get().getWindowManager ()->getGameSettingString ("sNotifyMessage39", ""))
-                   % std::string("#{" + ESM::Skill::sSkillNameIds[skillIndex] + "}")
-                   % base;
-        MWBase::Environment::get().getWindowManager ()->messageBox(message.str(), std::vector<std::string>());
-
-        if (mLevelProgress >= 10)
+    // if this is a major or minor skill of the class, increase level progress
+    bool levelProgress = false;
+    for (int i=0; i<2; ++i)
+        for (int j=0; j<5; ++j)
         {
-            // levelup is possible now
-            MWBase::Environment::get().getWindowManager ()->messageBox ("#{sLevelUpMsg}", std::vector<std::string>());
+            int skill = class_.data.skills[j][i];
+            if (skill == skillIndex)
+                levelProgress = true;
         }
-   }
+
+    mLevelProgress += levelProgress;
+
+    // check the attribute this skill belongs to
+    const ESM::Skill* skill = MWBase::Environment::get().getWorld ()->getStore ().skills.find(skillIndex);
+    ++mSkillIncreases[skill->data.attribute];
+
+    // Play sound & skill progress notification
+    /// \todo check if character is the player, if levelling is ever implemented for NPCs
+    MWBase::Environment::get().getSoundManager ()->playSound ("skillraise", 1, 1);
+
+    std::stringstream message;
+    message << boost::format(MWBase::Environment::get().getWindowManager ()->getGameSettingString ("sNotifyMessage39", ""))
+               % std::string("#{" + ESM::Skill::sSkillNameIds[skillIndex] + "}")
+               % base;
+    MWBase::Environment::get().getWindowManager ()->messageBox(message.str(), std::vector<std::string>());
+
+    if (mLevelProgress >= 10)
+    {
+        // levelup is possible now
+        MWBase::Environment::get().getWindowManager ()->messageBox ("#{sLevelUpMsg}", std::vector<std::string>());
+    }
 
     getSkill (skillIndex).setBase (base);
 }

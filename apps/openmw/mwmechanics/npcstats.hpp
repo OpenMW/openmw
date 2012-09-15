@@ -79,6 +79,8 @@ namespace MWMechanics
             void useSkill (int skillIndex, const ESM::Class& class_, int usageType = -1);
             ///< Increase skill by usage.
 
+            void increaseSkill (int skillIndex, const ESM::Class& class_, bool preserveProgress);
+
             int getLevelProgress() const;
 
             int getLevelupAttributeMultiplier(int attribute) const;
