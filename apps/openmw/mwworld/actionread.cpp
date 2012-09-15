@@ -45,9 +45,8 @@ namespace MWWorld
 
             npcStats.increaseSkill (ref->base->data.skillID, *class_, true);
 
-            // Remove skill from the book
-            /// \todo This will have to be changed later
-            const_cast<ESM::Book*>(ref->base)->data.skillID = -1;
+            /// \todo Remove skill from the book. Right now you can read as many times as you want
+            /// and the skill will still increase.
         }
 
     }
