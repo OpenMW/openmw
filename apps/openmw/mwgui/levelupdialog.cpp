@@ -43,7 +43,6 @@ namespace MWGui
 
             getWidget(t, "AttribMultiplier" + boost::lexical_cast<std::string>(i));
 
-            t->setCaption("x2");
             mAttributeMultipliers.push_back(t);
         }
 

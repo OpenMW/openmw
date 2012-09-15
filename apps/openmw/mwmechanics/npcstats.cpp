@@ -128,10 +128,7 @@ float MWMechanics::NpcStats::getSkillGain (int skillIndex, const ESM::Class& cla
             throw std::runtime_error ("invalid skill specialisation factor");
     }
 
-    //return 1.0 / (level +1) * (1.0 / (skillFactor)) * typeFactor * specialisationFactor;
-
-    ///FIXME: TEST FOR FASTER LEVELLING
-    return 1.0 / (level +1) * (1.0 / (skillFactor/100)) * typeFactor * specialisationFactor;
+    return 1.0 / (level +1) * (1.0 / (skillFactor)) * typeFactor * specialisationFactor;
 }
 
 void MWMechanics::NpcStats::useSkill (int skillIndex, const ESM::Class& class_, int usageType)
@@ -148,8 +145,7 @@ void MWMechanics::NpcStats::useSkill (int skillIndex, const ESM::Class& class_, 
         base = level+1;
 
         // if this is a major or minor skill of the class, increase level progress
-        //bool levelProgress = false;
-        bool levelProgress = true;
+        bool levelProgress = false;
         for (int i=0; i<2; ++i)
             for (int j=0; j<5; ++j)
             {
@@ -157,9 +153,6 @@ void MWMechanics::NpcStats::useSkill (int skillIndex, const ESM::Class& class_, 
                 if (skill == skillIndex)
                     levelProgress = true;
             }
-
-        if (!levelProgress)
-            std::cout <<"This is not a level skilL" << std::endl;
 
         mLevelProgress += levelProgress;
 

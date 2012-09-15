@@ -404,7 +404,6 @@ void WindowManager::setValue (int parSkill, const MWMechanics::Stat<float>& valu
 
 void WindowManager::setValue (const std::string& id, const MWMechanics::DynamicStat<float>& value)
 {
-    std::cout << " set value " << id << value.getModified () << std::endl;
     mStatsWindow->setValue (id, value);
     mHud->setValue (id, value);
     mCharGen->setValue(id, value);

@@ -95,7 +95,6 @@ void StatsWindow::setBar(const std::string& name, const std::string& tname, int 
     getWidget(pt, name);
     pt->setProgressRange(max);
     pt->setProgressPosition(val);
-    std::cout << "set bar " << name << val << " " << max << std::endl;
 
     std::stringstream out;
     out << val << "/" << max;
