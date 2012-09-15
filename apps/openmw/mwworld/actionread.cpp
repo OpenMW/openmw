@@ -35,6 +35,8 @@ namespace MWWorld
             MWBase::Environment::get().getWindowManager()->getBookWindow()->open(getTarget());
         }
 
+        /*
+        // Skill gain from books
         if (ref->base->data.skillID >= 0 && ref->base->data.skillID < ESM::Skill::Length)
         {
             MWWorld::Ptr player = MWBase::Environment::get().getWorld ()->getPlayer().getPlayer();
@@ -48,6 +50,7 @@ namespace MWWorld
             /// \todo Remove skill from the book. Right now you can read as many times as you want
             /// and the skill will still increase.
         }
+        */
 
     }
 }
