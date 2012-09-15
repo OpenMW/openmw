@@ -9,6 +9,8 @@
 #include "BulletShapeLoader.h"
 #include "BulletCollision/CollisionShapes/btScaledBvhTriangleMeshShape.h"
 
+
+
 class btRigidBody;
 class btBroadphaseInterface;
 class btDefaultCollisionConfiguration;
@@ -16,6 +18,7 @@ class btSequentialImpulseConstraintSolver;
 class btCollisionDispatcher;
 class btDiscreteDynamicsWorld;
 class btHeightfieldTerrainShape;
+struct playerMove;
 
 namespace BtOgre
 {
@@ -26,6 +29,7 @@ namespace MWWorld
 {
     class World;
 }
+
 
 namespace OEngine {
 namespace Physic
@@ -109,6 +113,7 @@ namespace Physic
 
 
     private:
+        
         OEngine::Physic::RigidBody* mBody;
         Ogre::Vector3 mBoxScaledTranslation;
         btQuaternion mBoxRotationInverse;
@@ -117,6 +122,8 @@ namespace Physic
         std::string mMesh;
         PhysicEngine* mEngine;
         std::string mName;
+        playerMove* pmove;
+       
     };
 
     /**
@@ -284,7 +291,7 @@ namespace Physic
         HeightFieldContainer mHeightFieldMap;
 
         typedef std::map<std::string,RigidBody*> RigidBodyContainer;
-        RigidBodyContainer RigidBodyMap;
+        RigidBodyContainer ObjectMap;
 
         typedef std::map<std::string, PhysicActor*>  PhysicActorContainer;
         PhysicActorContainer PhysicActorMap;
@@ -293,6 +300,7 @@ namespace Physic
         BtOgre::DebugDrawer* mDebugDrawer;
         bool isDebugCreated;
         bool mDebugActive;
+       
     };
 
 

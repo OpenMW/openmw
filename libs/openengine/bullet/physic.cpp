@@ -2,6 +2,7 @@
 #include <btBulletDynamicsCommon.h>
 #include <btBulletCollisionCommon.h>
 #include <BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h>
+#include "pmove.h"
 #include <components/nifbullet/bullet_nif_loader.hpp>
 #include "CMotionState.h"
 #include "OgreRoot.h"
@@ -33,6 +34,7 @@ namespace Physic
         Ogre::Quaternion inverse = mBoxRotation.Inverse();
         mBoxRotationInverse = btQuaternion(inverse.x, inverse.y, inverse.z,inverse.w);
         mEngine->addRigidBody(mBody, false);  //Add rigid body to dynamics world, but do not add to object map
+        pmove = new playerMove;
     }
 
     PhysicActor::~PhysicActor()
@@ -41,6 +43,7 @@ namespace Physic
             mEngine->dynamicsWorld->removeRigidBody(mBody);
             delete mBody;
         }
+        delete pmove;
     }
 
     void PhysicActor::setGravity(float gravity)
@@ -210,8 +213,8 @@ namespace Physic
             delete hf_it->second.mBody;
         }
 
-        RigidBodyContainer::iterator rb_it = RigidBodyMap.begin();
-        for (; rb_it != RigidBodyMap.end(); ++rb_it)
+        RigidBodyContainer::iterator rb_it = ObjectMap.begin();
+        for (; rb_it != ObjectMap.end(); ++rb_it)
         {
             if (rb_it->second != NULL)
             {
@@ -380,22 +383,22 @@ namespace Physic
             }
             body->setActivationState(DISABLE_DEACTIVATION);
             if(addToMap){
-                RigidBody* oldBody = RigidBodyMap[body->mName];
+                RigidBody* oldBody = ObjectMap[body->mName];
                 if (oldBody != NULL)
                 {
                     dynamicsWorld->removeRigidBody(oldBody);
                     delete oldBody;
                 }
 
-                RigidBodyMap[body->mName] = body;
+                ObjectMap[body->mName] = body;
             }
         }
     }
 
     void PhysicEngine::removeRigidBody(std::string name)
     {
-        RigidBodyContainer::iterator it = RigidBodyMap.find(name);
-        if (it != RigidBodyMap.end() )
+        RigidBodyContainer::iterator it = ObjectMap.find(name);
+        if (it != ObjectMap.end() )
         {
             RigidBody* body = it->second;
             if(body != NULL)
@@ -414,8 +417,8 @@ namespace Physic
 
     void PhysicEngine::deleteRigidBody(std::string name)
     {
-        RigidBodyContainer::iterator it = RigidBodyMap.find(name);
-        if (it != RigidBodyMap.end() )
+        RigidBodyContainer::iterator it = ObjectMap.find(name);
+        if (it != ObjectMap.end() )
         {
             RigidBody* body = it->second;
             //btScaledBvhTriangleMeshShape* scaled = dynamic_cast<btScaledBvhTriangleMeshShape*> (body->getCollisionShape());
@@ -428,16 +431,16 @@ namespace Physic
             {
                 delete scaled;
             }*/
-            RigidBodyMap.erase(it);
+            ObjectMap.erase(it);
         }
     }
 
     RigidBody* PhysicEngine::getRigidBody(std::string name)
     {
-        RigidBodyContainer::iterator it = RigidBodyMap.find(name);
-        if (it != RigidBodyMap.end() )
+        RigidBodyContainer::iterator it = ObjectMap.find(name);
+        if (it != ObjectMap.end() )
         {
-            RigidBody* body = RigidBodyMap[name];
+            RigidBody* body = ObjectMap[name];
             return body;
         }
         else
@@ -483,7 +486,6 @@ namespace Physic
             }
             PhysicActorMap.erase(it);
         }
-        //std::cout << "ok";
     }
 
     PhysicActor* PhysicEngine::getCharacter(std::string name)
