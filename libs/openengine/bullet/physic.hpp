@@ -67,7 +67,12 @@ namespace Physic
          */
         void setWalkDirection(const btVector3& mvt);
 
-        void setRotation(const btQuaternion& quat);
+        /**
+         * This adjusts the rotation of a PhysicActor
+         * If we have any problems with this (getting stuck in pmove) we should change it 
+         * from setting the visual orientation to setting the orientation of the rigid body directly.
+         */
+        void setRotation(const Ogre::Quaternion quat);
 
         void setGravity(float gravity);
 
@@ -92,7 +97,7 @@ namespace Physic
         OEngine::Physic::RigidBody* mBody;
         Ogre::Vector3 mBoxScaledTranslation;
         btQuaternion mBoxRotationInverse;
-        btQuaternion mBoxRotation;
+        Ogre::Quaternion mBoxRotation;
         bool collisionMode;
         std::string mMesh;
         PhysicEngine* mEngine;
@@ -144,7 +149,7 @@ namespace Physic
          * After created, the body is set to the correct rotation, position, and scale
          */
         RigidBody* createAndAdjustRigidBody(std::string mesh,std::string name,float scale, Ogre::Vector3 position, Ogre::Quaternion rotation, 
-            Ogre::Vector3* scaledBoxTranslation = 0, btQuaternion* boxRotation = 0, btQuaternion* boxRotationInverse = 0);
+            Ogre::Vector3* scaledBoxTranslation = 0, Ogre::Quaternion* boxRotation = 0);
 
         /**
          * Adjusts a rigid body to the right position and rotation

@@ -257,10 +257,7 @@ namespace MWWorld
         const Ogre::Vector3& position, float scale, const Ogre::Quaternion& rotation)
     {
         //TODO:optimize this. Searching the std::map isn't very efficient i think.
-        std::cout << "NPC position" << position << "\n";
         mEngine->addCharacter(handle, mesh, position, scale, rotation);
-        
-        
     }
 
     void PhysicsSystem::removeObject (const std::string& handle)
@@ -309,7 +306,7 @@ namespace MWWorld
         if (OEngine::Physic::PhysicActor* act = mEngine->getCharacter(handle))
         {
             //Needs to be changed
-            act->setRotation(btQuaternion(rotation.x, rotation.y, rotation.z, rotation.w));
+            act->setRotation(rotation);
         }
         if (OEngine::Physic::RigidBody* body = mEngine->getRigidBody(handle))
         {

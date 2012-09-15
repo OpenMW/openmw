@@ -29,7 +29,9 @@ namespace Physic
     PhysicActor::PhysicActor(std::string name, std::string mesh, PhysicEngine* engine, Ogre::Vector3 position, Ogre::Quaternion rotation, float scale): 
         mName(name), mEngine(engine), mMesh(mesh), mBoxScaledTranslation(0,0,0), mBoxRotationInverse(0,0,0,0), mBody(0), collisionMode(false), mBoxRotation(0,0,0,0)
     {
-        mBody = mEngine->createAndAdjustRigidBody(mMesh, mName, scale, position, rotation, &mBoxScaledTranslation, &mBoxRotation, &mBoxRotationInverse);
+        mBody = mEngine->createAndAdjustRigidBody(mMesh, mName, scale, position, rotation, &mBoxScaledTranslation, &mBoxRotation);
+        Ogre::Quaternion inverse = mBoxRotation.Inverse();
+        mBoxRotationInverse = btQuaternion(inverse.x, inverse.y, inverse.z,inverse.w);
         mEngine->addRigidBody(mBody, false);  //Add rigid body to dynamics world, but do not add to object map
     }
 
@@ -68,10 +70,11 @@ namespace Physic
 
     
 
-    void PhysicActor::setRotation(const btQuaternion& quat)
+    void PhysicActor::setRotation(const Ogre::Quaternion quat)
     {
-        //externalGhostObject->getWorldTransform().setRotation( quat );
-        //internalGhostObject->getWorldTransform().setRotation( quat );
+        if(!quat.equals(getRotation(), Ogre::Radian(0))){
+            mEngine->adjustRigidBody(mBody, getPosition(), quat, mBoxScaledTranslation, mBoxRotation);
+        }
     }
 
     Ogre::Vector3 PhysicActor::getPosition(void)
@@ -97,7 +100,6 @@ namespace Physic
     }
 
     void PhysicActor::setScale(float scale){
-        std::cout << "Trying to set scale to " << scale << "\n";
         Ogre::Vector3 position = getPosition();
         Ogre::Quaternion rotation = getRotation();
         //We only need to change the scaled box translation, box rotations remain the same.
@@ -334,7 +336,7 @@ namespace Physic
     }
 
     RigidBody* PhysicEngine::createAndAdjustRigidBody(std::string mesh,std::string name,float scale, Ogre::Vector3 position, Ogre::Quaternion rotation,
-        Ogre::Vector3* scaledBoxTranslation, btQuaternion* boxRotation, btQuaternion* boxRotationInverse)
+        Ogre::Vector3* scaledBoxTranslation, Ogre::Quaternion* boxRotation)
     {
         std::string sid = (boost::format("%07.3f") % scale).str();
         std::string outputstring = mesh + sid;
@@ -357,11 +359,7 @@ namespace Physic
         if(scaledBoxTranslation != 0)
             *scaledBoxTranslation = shape->boxTranslation * scale;
         if(boxRotation != 0)
-            *boxRotation = btQuaternion(shape->boxRotation.x, shape->boxRotation.y, shape->boxRotation.z,shape->boxRotation.w);
-        if(boxRotationInverse != 0){
-            Ogre::Quaternion inverse = shape->boxRotation.Inverse();
-            *boxRotationInverse = btQuaternion(inverse.x,inverse.y,inverse.z,inverse.w);
-        }
+            *boxRotation = shape->boxRotation;
 
         adjustRigidBody(body, position, rotation, shape->boxTranslation * scale, shape->boxRotation);
 
