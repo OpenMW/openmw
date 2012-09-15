@@ -157,6 +157,9 @@ void MWMechanics::NpcStats::increaseSkill(int skillIndex, const ESM::Class &clas
 
     int level = static_cast<int> (base);
 
+    if (level == 100)
+        return;
+
     if (preserveProgress)
         base += 1;
     else
