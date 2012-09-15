@@ -11,9 +11,8 @@
 namespace MWRender
 {
 
-Animation::Animation(OEngine::Render::OgreRenderer& _rend)
+Animation::Animation()
     : mInsert(NULL)
-    , mRend(_rend)
     , mTime(0.0f)
     , mSkipFrame(false)
 {

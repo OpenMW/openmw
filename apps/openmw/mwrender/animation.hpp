@@ -31,7 +31,6 @@ class Animation {
 
 protected:
     Ogre::SceneNode* mInsert;
-    OEngine::Render::OgreRenderer &mRend;
 
     float mTime;
     GroupTimes mCurGroup;
@@ -45,7 +44,7 @@ protected:
     bool findGroupTimes(const std::string &groupname, GroupTimes *times);
 
 public:
-    Animation(OEngine::Render::OgreRenderer& _rend);
+    Animation();
     virtual ~Animation();
 
     void playGroup(std::string groupname, int mode, int loops);

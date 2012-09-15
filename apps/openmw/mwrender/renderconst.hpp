@@ -41,7 +41,7 @@ enum VisibilityFlags
     // Water
     RV_Water = 8,
 
-    // Actors (player, npcs, creatures)
+    // Actors (npcs, creatures)
     RV_Actors = 16,
 
     // Misc objects (containers, dynamic objects)
@@ -53,6 +53,8 @@ enum VisibilityFlags
     RV_NoReflection = 128,
 
     RV_OcclusionQuery = 256,
+
+    RV_PlayerPreview = 512,
 
     RV_Map = RV_Terrain + RV_Statics + RV_StaticsSmall + RV_Misc + RV_Water
 

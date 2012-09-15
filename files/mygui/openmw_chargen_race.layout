@@ -8,11 +8,13 @@
             <Property key="Caption" value="Appearance"/>
             <Property key="TextAlign" value="ALIGN_LEFT ALIGN_TOP"/>
         </Widget>
-        <Widget type="Canvas" skin="MW_Box" position="8 39 241 230" name="AppearanceBox"/>
+        <Widget type="Widget" skin="MW_Box" position="8 39 241 230">
+            <Widget type="ImageBox" skin="ImageBox" position_real="0 0 1 1" align="Stretch" name="PreviewImage"/>
+        </Widget>
 
         <!-- Sliders -->
         <!-- Rotation of head -->
-        <Widget type="HScroll" skin="MW_HScroll" position="8 276 241 14" name="HeadRotate"/>
+        <Widget type="ScrollBar" skin="MW_HScroll" position="8 276 241 14" name="HeadRotate"/>
 
         <!-- Gender choice -->
         <Widget type="Button" skin="MW_ScrollLeft" position="8 298 14 14" name="PrevGenderButton"/>

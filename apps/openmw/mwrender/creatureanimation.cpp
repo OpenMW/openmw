@@ -16,7 +16,7 @@ CreatureAnimation::~CreatureAnimation()
 {
 }
 
-CreatureAnimation::CreatureAnimation(const MWWorld::Ptr& ptr, OEngine::Render::OgreRenderer& _rend): Animation(_rend)
+CreatureAnimation::CreatureAnimation(const MWWorld::Ptr& ptr): Animation()
 {
     mInsert = ptr.getRefData().getBaseNode();
     MWWorld::LiveCellRef<ESM::Creature> *ref = ptr.get<ESM::Creature>();

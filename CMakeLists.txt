@@ -103,6 +103,7 @@ set(OENGINE_OGRE
   ${LIBDIR}/openengine/ogre/fader.cpp
   ${LIBDIR}/openengine/ogre/imagerotate.cpp
   ${LIBDIR}/openengine/ogre/atlas.cpp
+  ${LIBDIR}/openengine/ogre/selectionbuffer.cpp
 )
 set(OENGINE_GUI
   ${LIBDIR}/openengine/gui/manager.cpp

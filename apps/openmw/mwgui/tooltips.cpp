@@ -14,6 +14,7 @@
 
 #include "map_window.hpp"
 #include "widgets.hpp"
+#include "inventorywindow.hpp"
 
 using namespace MWGui;
 using namespace MyGUI;
@@ -162,11 +163,22 @@ void ToolTips::onFrame(float frameDuration)
                     return;
             }
 
-
             if (type == "ItemPtr")
             {
                 mFocusObject = *focus->getUserData<MWWorld::Ptr>();
                 tooltipSize = getToolTipViaPtr(false);
+            }
+            else if (type == "AvatarItemSelection")
+            {
+                MyGUI::IntCoord avatarPos = mWindowManager->getInventoryWindow ()->getAvatarScreenCoord ();
+                MyGUI::IntPoint relMousePos = MyGUI::InputManager::getInstance ().getMousePosition () - MyGUI::IntPoint(avatarPos.left, avatarPos.top);
+                int realX = int(float(relMousePos.left) / float(avatarPos.width) * 512.f );
+                int realY = int(float(relMousePos.top) / float(avatarPos.height) * 1024.f );
+                MWWorld::Ptr item = mWindowManager->getInventoryWindow ()->getAvatarSelectedItem (realX, realY);
+
+                mFocusObject = item;
+                if (!mFocusObject.isEmpty ())
+                    tooltipSize = getToolTipViaPtr(false);
             }
             else if (type == "Spell")
             {

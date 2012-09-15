@@ -3,6 +3,8 @@
 #include <OgreSceneNode.h>
 #include <OgreSceneManager.h>
 
+#include "renderconst.hpp"
+
 
 using namespace Ogre;
 using namespace MWRender;
@@ -23,7 +25,7 @@ void Actors::setMwRoot(Ogre::SceneNode* root){
 void Actors::insertNPC(const MWWorld::Ptr& ptr, MWWorld::InventoryStore& inv){
 
     insertBegin(ptr, true, true);
-    NpcAnimation* anim = new MWRender::NpcAnimation(ptr, mRend, inv);
+    NpcAnimation* anim = new MWRender::NpcAnimation(ptr, ptr.getRefData ().getBaseNode (), inv, RV_Actors);
 
     mAllActors[ptr] = anim;
 }
@@ -68,7 +70,7 @@ void Actors::insertBegin (const MWWorld::Ptr& ptr, bool enabled, bool static_){
 void Actors::insertCreature (const MWWorld::Ptr& ptr){
 
     insertBegin(ptr, true, true);
-    CreatureAnimation* anim = new MWRender::CreatureAnimation(ptr, mRend);
+    CreatureAnimation* anim = new MWRender::CreatureAnimation(ptr);
     //mAllActors.insert(std::pair<MWWorld::Ptr, Animation*>(ptr,anim));
     delete mAllActors[ptr];
     mAllActors[ptr] = anim;
