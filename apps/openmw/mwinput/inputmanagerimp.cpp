@@ -548,8 +548,11 @@ namespace MWInput
 
     void InputManager::rest()
     {
-        if (!mWindows.isGuiMode ())
-            mWindows.pushGuiMode (MWGui::GM_Rest);
+        if (!mWindows.getRestEnabled () || mWindows.isGuiMode ())
+            return;
+
+        /// \todo check if resting is currently allowed (enemies nearby?)
+        mWindows.pushGuiMode (MWGui::GM_Rest);
     }
 
     void InputManager::screenshot()

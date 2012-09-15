@@ -219,6 +219,9 @@ namespace MWBase
 
             virtual void setLoadingProgress (const std::string& stage, int depth, int current, int total) = 0;
             virtual void loadingDone() = 0;
+
+            virtual void enableRest() = 0;
+            virtual bool getRestEnabled() = 0;
     };
 }
 

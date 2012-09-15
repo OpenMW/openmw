@@ -200,6 +200,9 @@ namespace MWGui
     virtual void setLoadingProgress (const std::string& stage, int depth, int current, int total);
     virtual void loadingDone();
 
+    virtual void enableRest() { mRestAllowed = true; }
+    virtual bool getRestEnabled() { return mRestAllowed; }
+
   private:
     OEngine::GUI::MyGUIManager *mGuiManager;
     HUD *mHud;
@@ -260,6 +263,8 @@ namespace MWGui
        allow() and disableAll().
      */
     GuiWindow mAllowed;
+    // is the rest window allowed?
+    bool mRestAllowed;
 
     void updateVisible(); // Update visibility of all windows based on mode, shown and allowed settings
 

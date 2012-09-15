@@ -85,6 +85,7 @@ WindowManager::WindowManager(
   , mGarbageDialogs()
   , mShown(GW_ALL)
   , mAllowed(newGame ? GW_None : GW_ALL)
+  , mRestAllowed(newGame ? false : true)
   , mShowFPSLevel(fpsLevel)
   , mFPS(0.0f)
   , mTriangleCount(0)
