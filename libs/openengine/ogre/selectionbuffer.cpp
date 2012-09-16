@@ -4,6 +4,7 @@
 #include <OgreRenderTexture.h>
 #include <OgreSubEntity.h>
 #include <OgreEntity.h>
+#include <stdexcept>
 
 #include <extern/shiny/Main/Factory.hpp>
 
