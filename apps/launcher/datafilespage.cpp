@@ -208,11 +208,9 @@ bool DataFilesPage::setupDataFiles()
 
      std::string local = variables["data-local"].as<std::string>();
      if (!local.empty()) {
-         mDataLocal.push_back(Files::PathContainer::value_type(local));
+         mDataDirs.push_back(Files::PathContainer::value_type(local));
+         mDataLocal.push_back(Files::PathContainer::value_type(local)); // For config writing
      }
-
-    if (mDataDirs.size()>1)
-        mDataDirs.resize (1);
 
     mCfgMgr.processPaths(mDataDirs);
 
