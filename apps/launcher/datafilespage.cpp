@@ -350,6 +350,7 @@ bool DataFilesPage::setupDataFiles()
 
         } catch(std::runtime_error &e) {
             // An error occurred while reading the .esp
+            std::cerr << "Error reading .esp: " << e.what() << std::endl;
             continue;
         }
     }
