@@ -37,9 +37,11 @@ namespace Physic
         pmove = new playerMove;
         pmove->mEngine = mEngine;
         btBoxShape* box = static_cast<btBoxShape*> (mBody->getCollisionShape());
-        btVector3 size = box->getHalfExtentsWithMargin();
-        Ogre::Vector3 halfExtents = Ogre::Vector3(size.getX(), size.getY(), size.getZ());
-        pmove->ps.halfExtents = halfExtents;
+        if(box != NULL){
+            btVector3 size = box->getHalfExtentsWithMargin();
+            Ogre::Vector3 halfExtents = Ogre::Vector3(size.getX(), size.getY(), size.getZ());
+            pmove->ps.halfExtents = halfExtents;
+        }
     }
 
     PhysicActor::~PhysicActor()
@@ -147,9 +149,11 @@ namespace Physic
         mBody = mEngine->createAndAdjustRigidBody(mMesh, mName, scale, position, rotation);
         mEngine->addRigidBody(mBody, false);  //Add rigid body to dynamics world, but do not add to object map
         btBoxShape* box = static_cast<btBoxShape*> (mBody->getCollisionShape());
-        btVector3 size = box->getHalfExtentsWithMargin();
-        Ogre::Vector3 halfExtents = Ogre::Vector3(size.getX(), size.getY(), size.getZ());
-        pmove->ps.halfExtents = halfExtents;
+        if(box != NULL){
+            btVector3 size = box->getHalfExtentsWithMargin();
+            Ogre::Vector3 halfExtents = Ogre::Vector3(size.getX(), size.getY(), size.getZ());
+            pmove->ps.halfExtents = halfExtents;
+        }
     }
 
     void PhysicActor::runPmove(){
