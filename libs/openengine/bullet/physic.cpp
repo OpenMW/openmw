@@ -35,6 +35,7 @@ namespace Physic
         mBoxRotationInverse = btQuaternion(inverse.x, inverse.y, inverse.z,inverse.w);
         mEngine->addRigidBody(mBody, false);  //Add rigid body to dynamics world, but do not add to object map
         pmove = new playerMove;
+        pmove->mEngine = mEngine;
     }
 
     PhysicActor::~PhysicActor()
@@ -77,9 +78,18 @@ namespace Physic
         return collisionMode;
     }
 
-    void PhysicActor::setWalkDirection(const btVector3& mvt)
+    void PhysicActor::setMovement(signed char rightmove, signed char forwardmove, signed char upmove)
     {
-        
+        playerMove::playercmd& pm_ref = pmove->cmd;
+        pm_ref.rightmove = rightmove;
+        pm_ref.forwardmove = forwardmove;
+        pm_ref.upmove = upmove;
+    }
+
+    void PhysicActor::setPmoveViewAngles(float pitch, float yaw, float roll){
+        pmove->ps.viewangles.x = pitch;
+        pmove->ps.viewangles.y = yaw;
+        pmove->ps.viewangles.z = roll;
     }
 
     
@@ -110,6 +120,8 @@ namespace Physic
     void PhysicActor::setPosition(const Ogre::Vector3 pos)
     {
         mEngine->adjustRigidBody(mBody, pos, getRotation(), mBoxScaledTranslation, mBoxRotation);
+        btVector3 vec = mBody->getWorldTransform().getOrigin();
+        pmove->ps.origin = Ogre::Vector3(vec.getX(), vec.getY(), vec.getZ());
     }
 
     void PhysicActor::setScale(float scale){
@@ -125,6 +137,12 @@ namespace Physic
         //Create the newly scaled rigid body
         mBody = mEngine->createAndAdjustRigidBody(mMesh, mName, scale, position, rotation);
         mEngine->addRigidBody(mBody, false);  //Add rigid body to dynamics world, but do not add to object map
+    }
+
+    void PhysicActor::runPmove(){
+        Pmove(pmove);
+        Ogre::Vector3 newpos = pmove->ps.origin;
+        mBody->getWorldTransform().setOrigin(btVector3(newpos.x, newpos.y, newpos.z));
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////

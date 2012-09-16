@@ -176,11 +176,11 @@ namespace MWWorld
         //set the DebugRenderingMode. To disable it,set it to 0
         //eng->setDebugRenderingMode(1);
 
-        //set the walkdirection to 0 (no movement) for every actor)
+        //set the movement keys to 0 (no movement) for every actor)
         for(std::map<std::string,OEngine::Physic::PhysicActor*>::iterator it = mEngine->PhysicActorMap.begin(); it != mEngine->PhysicActorMap.end();it++)
         {
             OEngine::Physic::PhysicActor* act = it->second;
-            act->setWalkDirection(btVector3(0,0,0));
+            act->setMovement(0,0,0);
         }
 
         playerMove::playercmd& pm_ref = playerphysics->cmd;

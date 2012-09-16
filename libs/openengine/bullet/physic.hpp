@@ -68,11 +68,9 @@ namespace Physic
         void setCurrentWater(bool hasWater, int waterHeight);
 
         /**
-         * This function set the walkDirection. This is not relative to the actor orientation.
-         * I think it's also needed to take time into account. A typical call should look like this:
-         * setWalkDirection( mvt * orientation * dt)
+         * This function sets the movement keys for pmove
          */
-        void setWalkDirection(const btVector3& mvt);
+        void setMovement(signed char rightmove, signed char forwardmove, signed char upmove);
 
         /**
          * This adjusts the rotation of a PhysicActor
@@ -107,9 +105,20 @@ namespace Physic
         void setPosition(const Ogre::Vector3 pos);
 
         /**
+         * Sets the view angles for pmove directly.
+         * Remember, add 90 for yaw.  Set roll to 0.
+         */
+        void setPmoveViewAngles(float pitch, float yaw, float roll);
+
+        /**
          * Sets the scale of the PhysicActor
          */
         void setScale(float scale);
+
+        /**
+         * Runs pmove for this PhysicActor
+         */
+        void runPmove();
 
         
 
