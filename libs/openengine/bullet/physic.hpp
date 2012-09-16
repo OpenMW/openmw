@@ -81,6 +81,8 @@ namespace Physic
 
         void setGravity(float gravity);
 
+        void setSpeed(float speed);
+
         void setJumpVelocity(float velocity);
 
         void enableCollisions(bool collision);

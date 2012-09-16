@@ -36,6 +36,10 @@ namespace Physic
         mEngine->addRigidBody(mBody, false);  //Add rigid body to dynamics world, but do not add to object map
         pmove = new playerMove;
         pmove->mEngine = mEngine;
+        btBoxShape* box = static_cast<btBoxShape*> (mBody->getCollisionShape());
+        btVector3 size = box->getHalfExtentsWithMargin();
+        Ogre::Vector3 halfExtents = Ogre::Vector3(size.getX(), size.getY(), size.getZ());
+        pmove->ps.halfExtents = halfExtents;
     }
 
     PhysicActor::~PhysicActor()
@@ -57,6 +61,11 @@ namespace Physic
     void PhysicActor::setGravity(float gravity)
     {
         pmove->ps.gravity = gravity;
+    }
+    
+    void PhysicActor::setSpeed(float speed)
+    {
+        pmove->ps.speed = speed;
     }
 
     void PhysicActor::enableCollisions(bool collision)
@@ -137,6 +146,10 @@ namespace Physic
         //Create the newly scaled rigid body
         mBody = mEngine->createAndAdjustRigidBody(mMesh, mName, scale, position, rotation);
         mEngine->addRigidBody(mBody, false);  //Add rigid body to dynamics world, but do not add to object map
+        btBoxShape* box = static_cast<btBoxShape*> (mBody->getCollisionShape());
+        btVector3 size = box->getHalfExtentsWithMargin();
+        Ogre::Vector3 halfExtents = Ogre::Vector3(size.getX(), size.getY(), size.getZ());
+        pmove->ps.halfExtents = halfExtents;
     }
 
     void PhysicActor::runPmove(){
