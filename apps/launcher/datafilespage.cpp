@@ -189,73 +189,8 @@ void DataFilesPage::setupConfig()
 }
 
 
-bool DataFilesPage::setupDataFiles()
+void DataFilesPage::addDataFiles(Files::Collections &fileCollections, const QString &encoding)
 {
-    // We use the Configuration Manager to retrieve the configuration values
-    boost::program_options::variables_map variables;
-    boost::program_options::options_description desc;
-
-    desc.add_options()
-        ("data", boost::program_options::value<Files::PathContainer>()->default_value(Files::PathContainer(), "data")->multitoken())
-        ("data-local", boost::program_options::value<std::string>()->default_value(""))
-        ("fs-strict", boost::program_options::value<bool>()->implicit_value(true)->default_value(false))
-        ("encoding", boost::program_options::value<std::string>()->default_value("win1252"));
-
-    mCfgMgr.readConfiguration(variables, desc);
-
-    // Put the paths in a boost::filesystem vector to use with Files::Collections
-    mDataDirs = Files::PathContainer(variables["data"].as<Files::PathContainer>());
-
-     std::string local = variables["data-local"].as<std::string>();
-     if (!local.empty()) {
-         mDataLocal.push_back(Files::PathContainer::value_type(local));
-     }
-
-    if (mDataDirs.size()>1)
-        mDataDirs.resize (1);
-
-    mCfgMgr.processPaths(mDataDirs);
-
-    while (mDataDirs.empty()) {
-        QMessageBox msgBox;
-        msgBox.setWindowTitle("Error detecting Morrowind installation");
-        msgBox.setIcon(QMessageBox::Warning);
-        msgBox.setStandardButtons(QMessageBox::Cancel);
-        msgBox.setText(tr("<br><b>Could not find the Data Files location</b><br><br> \
-                          The directory containing the data files was not found.<br><br> \
-                          Press \"Browse...\" to specify the location manually.<br>"));
-
-        QAbstractButton *dirSelectButton =
-                msgBox.addButton(tr("B&rowse..."), QMessageBox::ActionRole);
-
-        msgBox.exec();
-
-        if (msgBox.clickedButton() == dirSelectButton) {
-
-            // Show a custom dir selection dialog which only accepts valid dirs
-            QString selectedDir = FileDialog::getExistingDirectory(
-                        this, tr("Select Data Files Directory"),
-                        QDir::currentPath(),
-                        QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
-
-            // Add the user selected data directory
-            if (!selectedDir.isEmpty()) {
-                mDataDirs.push_back(Files::PathContainer::value_type(selectedDir.toStdString()));
-                mCfgMgr.processPaths(mDataDirs);
-            } else {
-                // Cancel from within the dir selection dialog
-                return false;
-            }
-
-        } else {
-            // Cancel
-            return false;
-        }
-    }
-
-    // Create a file collection for the data dirs
-    Files::Collections fileCollections(mDataDirs, !variables["fs-strict"].as<bool>());
-
      // First we add all the master files
     const Files::MultiDirCollection &esm = fileCollections.getCollection(".esm");
     unsigned int i = 0; // Row number
@@ -283,7 +218,7 @@ bool DataFilesPage::setupDataFiles()
             ESMReader fileReader;
             QStringList availableMasters; // Will contain all found masters
 
-            fileReader.setEncoding(variables["encoding"].as<std::string>());
+            fileReader.setEncoding(encoding.toStdString());
             fileReader.open(iter->second.string());
 
             // First we fill the availableMasters and the mMastersWidget
@@ -354,6 +289,81 @@ bool DataFilesPage::setupDataFiles()
             continue;
         }
     }
+
+
+}
+
+
+bool DataFilesPage::setupDataFiles()
+{
+    // We use the Configuration Manager to retrieve the configuration values
+    boost::program_options::variables_map variables;
+    boost::program_options::options_description desc;
+
+    desc.add_options()
+        ("data", boost::program_options::value<Files::PathContainer>()->default_value(Files::PathContainer(), "data")->multitoken())
+        ("data-local", boost::program_options::value<std::string>()->default_value(""))
+        ("fs-strict", boost::program_options::value<bool>()->implicit_value(true)->default_value(false))
+        ("encoding", boost::program_options::value<std::string>()->default_value("win1252"));
+
+    mCfgMgr.readConfiguration(variables, desc);
+
+    // Put the paths in a boost::filesystem vector to use with Files::Collections
+    mDataDirs = Files::PathContainer(variables["data"].as<Files::PathContainer>());
+
+     std::string local = variables["data-local"].as<std::string>();
+     if (!local.empty()) {
+         mDataLocal.push_back(Files::PathContainer::value_type(local));
+     }
+
+    mCfgMgr.processPaths(mDataDirs);
+    mCfgMgr.processPaths(mDataLocal);
+
+    while (mDataDirs.empty()) {
+        QMessageBox msgBox;
+        msgBox.setWindowTitle("Error detecting Morrowind installation");
+        msgBox.setIcon(QMessageBox::Warning);
+        msgBox.setStandardButtons(QMessageBox::Cancel);
+        msgBox.setText(tr("<br><b>Could not find the Data Files location</b><br><br> \
+                          The directory containing the data files was not found.<br><br> \
+                          Press \"Browse...\" to specify the location manually.<br>"));
+
+        QAbstractButton *dirSelectButton =
+                msgBox.addButton(tr("B&rowse..."), QMessageBox::ActionRole);
+
+        msgBox.exec();
+
+        if (msgBox.clickedButton() == dirSelectButton) {
+
+            // Show a custom dir selection dialog which only accepts valid dirs
+            QString selectedDir = FileDialog::getExistingDirectory(
+                        this, tr("Select Data Files Directory"),
+                        QDir::currentPath(),
+                        QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+
+            // Add the user selected data directory
+            if (!selectedDir.isEmpty()) {
+                mDataDirs.push_back(Files::PathContainer::value_type(selectedDir.toStdString()));
+                mCfgMgr.processPaths(mDataDirs);
+            } else {
+                // Cancel from within the dir selection dialog
+                return false;
+            }
+
+        } else {
+            // Cancel
+            return false;
+        }
+    }
+
+    // Add the plugins in the data directories
+    Files::Collections dataCollections(mDataDirs, !variables["fs-strict"].as<bool>());
+    Files::Collections dataLocalCollections(mDataLocal, !variables["fs-strict"].as<bool>());
+
+    addDataFiles(dataCollections, QString::fromStdString(variables["encoding"].as<std::string>()));
+    addDataFiles(dataLocalCollections, QString::fromStdString(variables["encoding"].as<std::string>()));
+
+    mDataFilesModel->sort(0);
 
     readConfig();
     return true;
@@ -1140,11 +1150,13 @@ void DataFilesPage::writeConfig(QString profile)
         path = QString::fromStdString(it->string());
         path.remove(QChar('\"'));
 
+        QDir dir(path);
+
         // Make sure the string is quoted when it contains spaces
         if (path.contains(" ")) {
-            gameConfig << "data=\"" << path << "\"" << endl;
+            gameConfig << "data=\"" << dir.absolutePath() << "\"" << endl;
         } else {
-            gameConfig << "data=" << path << endl;
+            gameConfig << "data=" << dir.absolutePath() << endl;
         }
     }
 
@@ -1153,10 +1165,12 @@ void DataFilesPage::writeConfig(QString profile)
         path = QString::fromStdString(mDataLocal.front().string());
         path.remove(QChar('\"'));
 
+        QDir dir(path);
+
         if (path.contains(" ")) {
-            gameConfig << "data-local=\"" << path << "\"" << endl;
+            gameConfig << "data-local=\"" << dir.absolutePath() << "\"" << endl;
         } else {
-            gameConfig << "data-local=" << path << endl;
+            gameConfig << "data-local=" << dir.absolutePath() << endl;
         }
     }
 
