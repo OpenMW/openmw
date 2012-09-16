@@ -46,19 +46,30 @@ namespace Physic
         delete pmove;
     }
 
+    void PhysicActor::setCurrentWater(bool hasWater, int waterHeight){
+        pmove->hasWater = hasWater;
+        if(hasWater){
+            pmove->waterHeight = waterHeight;
+        }
+    }
+
     void PhysicActor::setGravity(float gravity)
     {
-        
+        pmove->ps.gravity = gravity;
     }
 
     void PhysicActor::enableCollisions(bool collision)
     {
         collisionMode = collision;
+        if(collisionMode)
+            pmove->ps.move_type=PM_NORMAL;
+        else
+            pmove->ps.move_type=PM_NOCLIP;
     }
 
-    void PhysicActor::setVerticalVelocity(float z)
+    void PhysicActor::setJumpVelocity(float velocity)
     {
-        
+        pmove->ps.jump_velocity = velocity;
     }
 
     bool PhysicActor::getCollisionMode()

@@ -96,6 +96,10 @@ namespace MWWorld
         if(hasWater){
             playerphysics->waterHeight = waterHeight;
         }
+        for(std::map<std::string,OEngine::Physic::PhysicActor*>::iterator it = mEngine->PhysicActorMap.begin(); it != mEngine->PhysicActorMap.end();it++)
+        {
+            it->second->setCurrentWater(hasWater, waterHeight);
+        }
 
     }
 
@@ -356,8 +360,6 @@ namespace MWWorld
                 if(cmode)
                 {
                     act->enableCollisions(false);
-                    act->setGravity(0.);
-                    act->setVerticalVelocity(0);
                     mFreeFly = true;
                     return false;
                 }
@@ -365,8 +367,6 @@ namespace MWWorld
                 {
                     mFreeFly = false;
                     act->enableCollisions(true);
-                    act->setGravity(4.);
-                    act->setVerticalVelocity(0);
                     return true;
                 }
             }

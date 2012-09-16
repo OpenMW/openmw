@@ -65,6 +65,8 @@ namespace Physic
 
         ~PhysicActor();
 
+        void setCurrentWater(bool hasWater, int waterHeight);
+
         /**
          * This function set the walkDirection. This is not relative to the actor orientation.
          * I think it's also needed to take time into account. A typical call should look like this:
@@ -81,7 +83,7 @@ namespace Physic
 
         void setGravity(float gravity);
 
-        void setVerticalVelocity(float z);
+        void setJumpVelocity(float velocity);
 
         void enableCollisions(bool collision);
 

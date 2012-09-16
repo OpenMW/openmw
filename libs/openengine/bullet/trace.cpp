@@ -181,7 +181,8 @@ const bool NewPhysicsTrace(NewPhysTraceResults* const out, const Ogre::Vector3& 
 			if (!TestPointAgainstAabb2(aabbMin, aabbMax, *(const btVector3* const)&(start) ) )
 			{
 				//We're solid
-				out->startSolid = true;
+				//THIS NEEDS TO BE TURNED OFF IF WE WANT FALLING IN EXTERIORS TO WORK CORRECTLY!!!!!!!
+                //out->startSolid = true;
 			}
 		}
 	}

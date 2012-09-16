@@ -704,7 +704,7 @@ static bool PM_CheckJump(void)
 	//pm->ps->pm_flags |= PMF_JUMP_HELD;
 
 	pm->ps.groundEntityNum = ENTITYNUM_NONE;
-	pm->ps.velocity.z = JUMP_VELOCITY;
+	pm->ps.velocity.z = pm->ps.jump_velocity;
     pm->ps.bSnap = false;
 	//PM_AddEvent( EV_JUMP );
 
