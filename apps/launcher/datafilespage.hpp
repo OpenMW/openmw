@@ -89,6 +89,7 @@ private:
     const QStringList checkedPlugins();
     const QStringList selectedMasters();
 
+    void addDataFiles(Files::Collections &fileCollections, const QString &encoding);
     void addPlugins(const QModelIndex &index);
     void removePlugins(const QModelIndex &index);
     void uncheckPlugins();
