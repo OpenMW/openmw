@@ -1,7 +1,10 @@
 #ifndef _ESM_FACT_H
 #define _ESM_FACT_H
 
-#include "esm_reader.hpp"
+#include <string>
+#include <vector>
+
+#include "record.hpp"
 
 namespace ESM
 {
@@ -13,46 +16,49 @@ namespace ESM
 // Requirements for each rank
 struct RankData
 {
-    int attribute1, attribute2; // Attribute level
+    int mAttribute1, mAttribute2; // Attribute level
 
-    int skill1, skill2; // Skill level (faction skills given in
+    int mSkill1, mSkill2; // Skill level (faction skills given in
     // skillID below.) You need one skill at
     // level 'skill1' and two skills at level
     // 'skill2' to advance to this rank.
 
-    int factReaction; // Reaction from faction members
+    int mFactReaction; // Reaction from faction members
 };
 
-struct Faction
+struct Faction : public Record
 {
-    std::string id, name;
+    std::string mName;
 
     struct FADTstruct
     {
         // Which attributes we like
-        int attribute1, attribute2;
+        int mAttribute1, mAttribute2;
 
-        RankData rankData[10];
+        RankData mRankData[10];
 
-        int skillID[6]; // IDs of skills this faction require
-        int unknown; // Always -1?
-        int isHidden; // 1 - hidden from player
+        int mSkillID[6]; // IDs of skills this faction require
+        int mUnknown; // Always -1?
+        int mIsHidden; // 1 - hidden from player
     }; // 240 bytes
 
-    FADTstruct data;
+    FADTstruct mData;
 
     struct Reaction
     {
-        std::string faction;
-        int reaction;
+        std::string mFaction;
+        int mReaction;
     };
 
-    std::vector<Reaction> reactions;
+    std::vector<Reaction> mReactions;
 
     // Name of faction ranks (may be empty for NPC factions)
-    std::string ranks[10];
+    std::string mRanks[10];
 
     void load(ESMReader &esm);
+    void save(ESMWriter &esm);
+
+    int getName() { return REC_FACT; }
 };
 }
 #endif

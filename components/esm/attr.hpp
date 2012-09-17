@@ -24,18 +24,18 @@ struct Attribute
         Length
     };
 
-    AttributeID id;
-    std::string name, description;
+    AttributeID mId;
+    std::string mName, mDescription;
 
-    static const AttributeID attributeIds[Length];
-    static const std::string gmstAttributeIds[Length];
-    static const std::string gmstAttributeDescIds[Length];
-    static const std::string attributeIcons[Length];
+    static const AttributeID sAttributeIds[Length];
+    static const std::string sGmstAttributeIds[Length];
+    static const std::string sGmstAttributeDescIds[Length];
+    static const std::string sAttributeIcons[Length];
 
     Attribute(AttributeID id, const std::string &name, const std::string &description)
-        : id(id)
-        , name(name)
-        , description(description)
+        : mId(id)
+        , mName(name)
+        , mDescription(description)
     {
     }
 };

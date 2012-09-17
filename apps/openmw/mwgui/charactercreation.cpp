@@ -221,7 +221,7 @@ void CharacterCreation::spawnDialog(const char id)
             mPickClassDialog = 0;
             mPickClassDialog = new PickClassDialog(*mWM);
             mPickClassDialog->setNextButtonShow(mCreationStage >= CSE_ClassChosen);
-            mPickClassDialog->setClassId(mPlayerClass.name);
+            mPickClassDialog->setClassId(mPlayerClass.mName);
             mPickClassDialog->eventDone += MyGUI::newDelegate(this, &CharacterCreation::onPickClassDialogDone);
             mPickClassDialog->eventBack += MyGUI::newDelegate(this, &CharacterCreation::onPickClassDialogBack);
             mPickClassDialog->setVisible(true);
@@ -537,24 +537,24 @@ void CharacterCreation::onCreateClassDialogDone(WindowBase* parWindow)
     if (mCreateClassDialog)
     {
         ESM::Class klass;
-        klass.name = mCreateClassDialog->getName();
-        klass.description = mCreateClassDialog->getDescription();
-        klass.data.specialization = mCreateClassDialog->getSpecializationId();
-        klass.data.isPlayable = 0x1;
+        klass.mName = mCreateClassDialog->getName();
+        klass.mDescription = mCreateClassDialog->getDescription();
+        klass.mData.mSpecialization = mCreateClassDialog->getSpecializationId();
+        klass.mData.mIsPlayable = 0x1;
 
         std::vector<int> attributes = mCreateClassDialog->getFavoriteAttributes();
         assert(attributes.size() == 2);
-        klass.data.attribute[0] = attributes[0];
-        klass.data.attribute[1] = attributes[1];
+        klass.mData.mAttribute[0] = attributes[0];
+        klass.mData.mAttribute[1] = attributes[1];
 
         std::vector<ESM::Skill::SkillEnum> majorSkills = mCreateClassDialog->getMajorSkills();
         std::vector<ESM::Skill::SkillEnum> minorSkills = mCreateClassDialog->getMinorSkills();
-        assert(majorSkills.size() >= sizeof(klass.data.skills)/sizeof(klass.data.skills[0]));
-        assert(minorSkills.size() >= sizeof(klass.data.skills)/sizeof(klass.data.skills[0]));
-        for (size_t i = 0; i < sizeof(klass.data.skills)/sizeof(klass.data.skills[0]); ++i)
+        assert(majorSkills.size() >= sizeof(klass.mData.mSkills)/sizeof(klass.mData.mSkills[0]));
+        assert(minorSkills.size() >= sizeof(klass.mData.mSkills)/sizeof(klass.mData.mSkills[0]));
+        for (size_t i = 0; i < sizeof(klass.mData.mSkills)/sizeof(klass.mData.mSkills[0]); ++i)
         {
-            klass.data.skills[i][1] = majorSkills[i];
-            klass.data.skills[i][0] = minorSkills[i];
+            klass.mData.mSkills[i][1] = majorSkills[i];
+            klass.mData.mSkills[i][0] = minorSkills[i];
         }
         MWBase::Environment::get().getMechanicsManager()->setPlayerClass(klass);
         mPlayerClass = klass;

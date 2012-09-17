@@ -1,7 +1,11 @@
 #ifndef _ESM_CONT_H
 #define _ESM_CONT_H
 
-#include "esm_reader.hpp"
+#include <string>
+#include <vector>
+
+#include "record.hpp"
+#include "esm_common.hpp"
 
 namespace ESM
 {
@@ -12,18 +16,19 @@ namespace ESM
 
 struct ContItem
 {
-    int count;
-    NAME32 item;
+    int mCount;
+    NAME32 mItem;
 };
 
 struct InventoryList
 {
-    std::vector<ContItem> list;
+    std::vector<ContItem> mList;
 
     void load(ESMReader &esm);
+    void save(ESMWriter &esm);
 };
 
-struct Container
+struct Container : public Record
 {
     enum Flags
     {
@@ -32,13 +37,16 @@ struct Container
         Unknown = 8
     };
 
-    std::string name, model, script;
+    std::string mName, mModel, mScript;
 
-    float weight; // Not sure, might be max total weight allowed?
-    int flags;
-    InventoryList inventory;
+    float mWeight; // Not sure, might be max total weight allowed?
+    int mFlags;
+    InventoryList mInventory;
 
     void load(ESMReader &esm);
+    void save(ESMWriter &esm);
+
+    int getName() { return REC_CONT; }
 };
 }
 #endif

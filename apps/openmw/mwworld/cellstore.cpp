@@ -13,7 +13,7 @@ namespace MWWorld
 {
     CellStore::CellStore (const ESM::Cell *cell_) : cell (cell_), mState (State_Unloaded)
     {
-        mWaterLevel = cell->water;
+        mWaterLevel = cell->mWater;
     }
 
     void CellStore::load (const ESMS::ESMStore &store, ESM::ESMReader &esm)
@@ -45,7 +45,7 @@ namespace MWWorld
     {
         assert (cell);
 
-        if (cell->context.filename.empty())
+        if (cell->mContext.filename.empty())
             return; // this is a dynamically generated cell -> skipping.
 
         // Reopen the ESM reader and seek to the right position.
@@ -58,7 +58,7 @@ namespace MWWorld
         {
             std::string lowerCase;
 
-            std::transform (ref.refID.begin(), ref.refID.end(), std::back_inserter (lowerCase),
+            std::transform (ref.mRefID.begin(), ref.mRefID.end(), std::back_inserter (lowerCase),
                 (int(*)(int)) std::tolower);
 
             mIds.push_back (lowerCase);
@@ -71,7 +71,7 @@ namespace MWWorld
     {
       assert (cell);
 
-        if (cell->context.filename.empty())
+        if (cell->mContext.filename.empty())
             return; // this is a dynamically generated cell -> skipping.
 
       // Reopen the ESM reader and seek to the right position.
@@ -84,12 +84,12 @@ namespace MWWorld
         {
             std::string lowerCase;
 
-            std::transform (ref.refID.begin(), ref.refID.end(), std::back_inserter (lowerCase),
+            std::transform (ref.mRefID.begin(), ref.mRefID.end(), std::back_inserter (lowerCase),
                 (int(*)(int)) std::tolower);
 
-            int rec = store.find(ref.refID);
+            int rec = store.find(ref.mRefID);
 
-            ref.refID = lowerCase;
+            ref.mRefID = lowerCase;
 
           /* We can optimize this further by storing the pointer to the
              record itself in store.all, so that we don't need to look it
@@ -119,9 +119,9 @@ namespace MWWorld
             case ESM::REC_STAT: statics.find(ref, store.statics); break;
             case ESM::REC_WEAP: weapons.find(ref, store.weapons); break;
 
-            case 0: std::cout << "Cell reference " + ref.refID + " not found!\n"; break;
+            case 0: std::cout << "Cell reference " + ref.mRefID + " not found!\n"; break;
             default:
-              std::cout << "WARNING: Ignoring reference '" << ref.refID << "' of unhandled type\n";
+              std::cout << "WARNING: Ignoring reference '" << ref.mRefID << "' of unhandled type\n";
             }
         }
     }

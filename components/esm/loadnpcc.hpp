@@ -1,6 +1,9 @@
 #ifndef _ESM_NPCC_H
 #define _ESM_NPCC_H
 
+#include "record.hpp"
+
+// TODO: create implementation files to remove this
 #include "esm_reader.hpp"
 
 namespace ESM {
@@ -70,12 +73,17 @@ namespace ESM {
  * will be harder than reading it.
  */
 
-struct LoadNPCC
+struct LoadNPCC : public Record
 {
   void load(ESMReader &esm)
   {
     esm.skipRecord();
   }
+  void save(ESMWriter &esm)
+  {
+  }
+
+    int getName() { return REC_NPCC; }
 };
 }
 #endif

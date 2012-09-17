@@ -1,16 +1,15 @@
 #ifndef _ESM_APPA_H
 #define _ESM_APPA_H
 
-#include "esm_reader.hpp"
+#include "record.hpp"
 
 namespace ESM
 {
-
 /*
  * Alchemist apparatus
  */
 
-struct Apparatus
+struct Apparatus : public Record
 {
     enum AppaType
     {
@@ -22,16 +21,19 @@ struct Apparatus
 
     struct AADTstruct
     {
-        int type;
-        float quality;
-        float weight;
-        int value;
+        int mType;
+        float mQuality;
+        float mWeight;
+        int mValue;
     };
 
-    AADTstruct data;
-    std::string model, icon, script, name;
+    AADTstruct mData;
+    std::string mModel, mIcon, mScript, mName;
 
     void load(ESMReader &esm);
+    void save(ESMWriter &esm);
+
+    int getName() { return REC_APPA; }
 };
 }
 #endif

@@ -1,22 +1,27 @@
 #ifndef _ESM_SOUN_H
 #define _ESM_SOUN_H
 
-#include "esm_reader.hpp"
+#include <string>
+
+#include "record.hpp"
 
 namespace ESM
 {
 
 struct SOUNstruct
 {
-    unsigned char volume, minRange, maxRange;
+    unsigned char mVolume, mMinRange, mMaxRange;
 };
 
-struct Sound
+struct Sound : public Record
 {
-    SOUNstruct data;
-    std::string sound;
+    SOUNstruct mData;
+    std::string mSound;
 
     void load(ESMReader &esm);
+    void save(ESMWriter &esm);
+
+    int getName() { return REC_SOUN; }
 };
 }
 #endif

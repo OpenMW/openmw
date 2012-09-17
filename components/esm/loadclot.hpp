@@ -1,7 +1,9 @@
 #ifndef _ESM_CLOT_H
 #define _ESM_CLOT_H
 
-#include "esm_reader.hpp"
+#include <string>
+
+#include "record.hpp"
 #include "loadarmo.hpp"
 
 namespace ESM
@@ -11,7 +13,7 @@ namespace ESM
  * Clothing
  */
 
-struct Clothing
+struct Clothing : public Record
 {
     enum Type
     {
@@ -29,18 +31,21 @@ struct Clothing
 
     struct CTDTstruct
     {
-        int type;
-        float weight;
-        short value;
-        short enchant;
+        int mType;
+        float mWeight;
+        short mValue;
+        short mEnchant;
     };
-    CTDTstruct data;
+    CTDTstruct mData;
 
-    PartReferenceList parts;
+    PartReferenceList mParts;
 
-    std::string name, model, icon, enchant, script;
+    std::string mName, mModel, mIcon, mEnchant, mScript;
 
     void load(ESMReader &esm);
+    void save(ESMWriter &esm);
+
+    int getName() { return REC_CLOT; }
 };
 }
 #endif

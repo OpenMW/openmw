@@ -1,16 +1,21 @@
 #ifndef _ESM_DOOR_H
 #define _ESM_DOOR_H
 
-#include "esm_reader.hpp"
+#include <string>
+
+#include "record.hpp"
 
 namespace ESM
 {
 
-struct Door
+struct Door : public Record
 {
-    std::string name, model, script, openSound, closeSound;
+    std::string mName, mModel, mScript, mOpenSound, mCloseSound;
 
     void load(ESMReader &esm);
+    void save(ESMWriter &esm);
+
+    int getName() { return REC_DOOR; }
 };
 }
 #endif

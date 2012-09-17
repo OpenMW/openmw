@@ -45,7 +45,7 @@ namespace MWClass
             ptr.get<ESM::Probe>();
         assert(ref->base != NULL);
 
-        const std::string &model = ref->base->model;
+        const std::string &model = ref->base->mModel;
         if (!model.empty()) {
             return "meshes\\" + model;
         }
@@ -57,7 +57,7 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Probe> *ref =
             ptr.get<ESM::Probe>();
 
-        return ref->base->name;
+        return ref->base->mName;
     }
     boost::shared_ptr<MWWorld::Action> Probe::activate (const MWWorld::Ptr& ptr,
         const MWWorld::Ptr& actor) const
@@ -74,7 +74,7 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Probe> *ref =
             ptr.get<ESM::Probe>();
 
-        return ref->base->script;
+        return ref->base->mScript;
     }
 
     std::pair<std::vector<int>, bool> Probe::getEquipmentSlots (const MWWorld::Ptr& ptr) const
@@ -91,7 +91,7 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Probe> *ref =
             ptr.get<ESM::Probe>();
 
-        return ref->base->data.value;
+        return ref->base->mData.mValue;
     }
 
     void Probe::registerSelf()
@@ -116,7 +116,7 @@ namespace MWClass
           MWWorld::LiveCellRef<ESM::Probe> *ref =
             ptr.get<ESM::Probe>();
 
-        return ref->base->icon;
+        return ref->base->mIcon;
     }
 
     bool Probe::hasToolTip (const MWWorld::Ptr& ptr) const
@@ -124,7 +124,7 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Probe> *ref =
             ptr.get<ESM::Probe>();
 
-        return (ref->base->name != "");
+        return (ref->base->mName != "");
     }
 
     MWGui::ToolTipInfo Probe::getToolTipInfo (const MWWorld::Ptr& ptr) const
@@ -133,8 +133,8 @@ namespace MWClass
             ptr.get<ESM::Probe>();
 
         MWGui::ToolTipInfo info;
-        info.caption = ref->base->name + MWGui::ToolTips::getCountString(ptr.getRefData().getCount());
-        info.icon = ref->base->icon;
+        info.caption = ref->base->mName + MWGui::ToolTips::getCountString(ptr.getRefData().getCount());
+        info.icon = ref->base->mIcon;
 
         const ESMS::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
 
@@ -142,14 +142,14 @@ namespace MWClass
 
         /// \todo store remaining uses somewhere
 
-        text += "\n" + store.gameSettings.search("sUses")->str + ": " + MWGui::ToolTips::toString(ref->base->data.uses);
-        text += "\n" + store.gameSettings.search("sQuality")->str + ": " + MWGui::ToolTips::toString(ref->base->data.quality);
-        text += "\n" + store.gameSettings.search("sWeight")->str + ": " + MWGui::ToolTips::toString(ref->base->data.weight);
-        text += MWGui::ToolTips::getValueString(ref->base->data.value, store.gameSettings.search("sValue")->str);
+        text += "\n" + store.gameSettings.search("sUses")->mStr + ": " + MWGui::ToolTips::toString(ref->base->mData.mUses);
+        text += "\n" + store.gameSettings.search("sQuality")->mStr + ": " + MWGui::ToolTips::toString(ref->base->mData.mQuality);
+        text += "\n" + store.gameSettings.search("sWeight")->mStr + ": " + MWGui::ToolTips::toString(ref->base->mData.mWeight);
+        text += MWGui::ToolTips::getValueString(ref->base->mData.mValue, store.gameSettings.search("sValue")->mStr);
 
         if (MWBase::Environment::get().getWindowManager()->getFullHelp()) {
-            text += MWGui::ToolTips::getMiscString(ref->ref.owner, "Owner");
-            text += MWGui::ToolTips::getMiscString(ref->base->script, "Script");
+            text += MWGui::ToolTips::getMiscString(ref->ref.mOwner, "Owner");
+            text += MWGui::ToolTips::getMiscString(ref->base->mScript, "Script");
         }
 
         info.text = text;

@@ -233,19 +233,19 @@ void MWSpell::createEffectWidgets(std::vector<MyGUI::WidgetPtr> &effects, MyGUI:
     MYGUI_ASSERT(spell, "spell with id '" << mId << "' not found");
 
     MWSpellEffectPtr effect = nullptr;
-    std::vector<ESM::ENAMstruct>::const_iterator end = spell->effects.list.end();
-    for (std::vector<ESM::ENAMstruct>::const_iterator it = spell->effects.list.begin(); it != end; ++it)
+    std::vector<ESM::ENAMstruct>::const_iterator end = spell->mEffects.mList.end();
+    for (std::vector<ESM::ENAMstruct>::const_iterator it = spell->mEffects.mList.begin(); it != end; ++it)
     {
         effect = creator->createWidget<MWSpellEffect>("MW_EffectImage", coord, MyGUI::Align::Default);
         effect->setWindowManager(mWindowManager);
         SpellEffectParams params;
-        params.mEffectID = it->effectID;
-        params.mSkill = it->skill;
-        params.mAttribute = it->attribute;
-        params.mDuration = it->duration;
-        params.mMagnMin = it->magnMin;
-        params.mMagnMax = it->magnMax;
-        params.mRange = it->range;
+        params.mEffectID = it->mEffectID;
+        params.mSkill = it->mSkill;
+        params.mAttribute = it->mAttribute;
+        params.mDuration = it->mDuration;
+        params.mMagnMin = it->mMagnMin;
+        params.mMagnMax = it->mMagnMax;
+        params.mRange = it->mRange;
         params.mIsConstant = (flags & MWEffectList::EF_Constant);
         params.mNoTarget = (flags & MWEffectList::EF_NoTarget);
         effect->setSpellEffect(params);
@@ -262,7 +262,7 @@ void MWSpell::updateWidgets()
         const ESMS::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
         const ESM::Spell *spell = store.spells.search(mId);
         if (spell)
-            static_cast<MyGUI::TextBox*>(mSpellNameWidget)->setCaption(spell->name);
+            static_cast<MyGUI::TextBox*>(mSpellNameWidget)->setCaption(spell->mName);
         else
             static_cast<MyGUI::TextBox*>(mSpellNameWidget)->setCaption("");
     }
@@ -351,17 +351,17 @@ MWEffectList::~MWEffectList()
 SpellEffectList MWEffectList::effectListFromESM(const ESM::EffectList* effects)
 {
     SpellEffectList result;
-    std::vector<ESM::ENAMstruct>::const_iterator end = effects->list.end();
-    for (std::vector<ESM::ENAMstruct>::const_iterator it = effects->list.begin(); it != end; ++it)
+    std::vector<ESM::ENAMstruct>::const_iterator end = effects->mList.end();
+    for (std::vector<ESM::ENAMstruct>::const_iterator it = effects->mList.begin(); it != end; ++it)
     {
         SpellEffectParams params;
-        params.mEffectID = it->effectID;
-        params.mSkill = it->skill;
-        params.mAttribute = it->attribute;
-        params.mDuration = it->duration;
-        params.mMagnMin = it->magnMin;
-        params.mMagnMax = it->magnMax;
-        params.mRange = it->range;
+        params.mEffectID = it->mEffectID;
+        params.mSkill = it->mSkill;
+        params.mAttribute = it->mAttribute;
+        params.mDuration = it->mDuration;
+        params.mMagnMin = it->mMagnMin;
+        params.mMagnMax = it->mMagnMax;
+        params.mRange = it->mRange;
         result.push_back(params);
     }
     return result;
@@ -457,7 +457,7 @@ void MWSpellEffect::updateWidgets()
     }
     if (mImageWidget)
     {
-        std::string path = std::string("icons\\") + magicEffect->icon;
+        std::string path = std::string("icons\\") + magicEffect->mIcon;
         fixTexturePath(path);
         mImageWidget->setImageTexture(path);
     }

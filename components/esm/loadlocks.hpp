@@ -1,7 +1,7 @@
 #ifndef _ESM_LOCKS_H
 #define _ESM_LOCKS_H
 
-#include "esm_reader.hpp"
+#include "record.hpp"
 
 namespace ESM
 {
@@ -11,33 +11,52 @@ namespace ESM
  * items (REPA). These have nearly identical data structures.
  */
 
-struct Tool
+struct Tool : public Record
 {
+    enum Type
+    {
+        Type_Pick,
+        Type_Probe,
+        Type_Repair
+    };
+
     struct Data
     {
-        float weight;
-        int value;
+        float mWeight;
+        int mValue;
 
-        float quality; // And when I say nearly identical structure, I
-        int uses;      // mean perfectly identical except that these two
+        float mQuality; // And when I say nearly identical structure, I
+        int mUses;      // mean perfectly identical except that these two
                        // variables are swaped for repair items. Don't ask
                        // me why.
     }; // Size = 16
 
-    Data data;
-    std::string name, model, icon, script;
+    Data mData;
+    Type mType;
+    std::string mName, mModel, mIcon, mScript;
 
     void load(ESMReader &esm);
+    void save(ESMWriter &esm);
+
+    int getName()
+    {
+        if (mType == Type_Probe)
+            return REC_PROB;
+        else if (mType == Type_Repair)
+            return REC_REPA;
+        else
+            return REC_LOCK;
+    }
 };
 
 struct Probe: Tool
 {
-
+    Probe() { mType = Type_Probe; }
 };
 
 struct Repair: Tool
 {
-
+    Repair() { mType = Type_Repair; }
 };
 
 }

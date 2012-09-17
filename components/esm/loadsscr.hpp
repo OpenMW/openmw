@@ -1,7 +1,9 @@
 #ifndef _ESM_SSCR_H
 #define _ESM_SSCR_H
 
-#include "esm_reader.hpp"
+#include <string>
+
+#include "record.hpp"
 
 namespace ESM
 {
@@ -14,12 +16,15 @@ namespace ESM
  reference.
  */
 
-struct StartScript
+struct StartScript : public Record
 {
-    std::string script;
+    std::string mScript;
 
     // Load a record and add it to the list
     void load(ESMReader &esm);
+    void save(ESMWriter &esm);
+
+    int getName() { return REC_SSCR; }
 };
 
 }

@@ -16,7 +16,7 @@ namespace MWWorld
     {
         LiveCellRef<ESM::Book> *ref = getTarget().get<ESM::Book>();
 
-        if (ref->base->data.isScroll)
+        if (ref->base->mData.mIsScroll)
         {
             MWBase::Environment::get().getWindowManager()->pushGuiMode(MWGui::GM_Scroll);
             MWBase::Environment::get().getWindowManager()->getScrollWindow()->open(getTarget());

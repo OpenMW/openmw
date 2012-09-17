@@ -1,7 +1,9 @@
 #ifndef _ESM_MISC_H
 #define _ESM_MISC_H
 
-#include "esm_reader.hpp"
+#include <string>
+
+#include "record.hpp"
 
 namespace ESM
 {
@@ -11,21 +13,24 @@ namespace ESM
  * carried, bought and sold. It also includes keys.
  */
 
-struct Miscellaneous
+struct Miscellaneous : public Record
 {
     struct MCDTstruct
     {
-        float weight;
-        int value;
-        int isKey; // There are many keys in Morrowind.esm that has this
+        float mWeight;
+        int mValue;
+        int mIsKey; // There are many keys in Morrowind.esm that has this
                    // set to 0. TODO: Check what this field corresponds to
                    // in the editor.
     };
-    MCDTstruct data;
+    MCDTstruct mData;
 
-    std::string name, model, icon, script;
+    std::string mName, mModel, mIcon, mScript;
 
     void load(ESMReader &esm);
+    void save(ESMWriter &esm);
+
+    int getName() { return REC_MISC; }
 };
 }
 #endif

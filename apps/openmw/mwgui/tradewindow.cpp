@@ -110,7 +110,7 @@ namespace MWGui
         for (MWWorld::ContainerStoreIterator it = playerStore.begin();
                 it != playerStore.end(); ++it)
         {
-            if (MWWorld::Class::get(*it).getName(*it) == MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sGold")->str)
+            if (MWWorld::Class::get(*it).getName(*it) == MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sGold")->mStr)
             {
                 goldFound = true;
                 gold = *it;
@@ -138,7 +138,7 @@ namespace MWGui
         {
             // user notification
             MWBase::Environment::get().getWindowManager()->
-                messageBox(MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sBarterDialog11")->str, std::vector<std::string>());
+                messageBox(MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sBarterDialog11")->mStr, std::vector<std::string>());
             return;
         }
 
@@ -147,7 +147,7 @@ namespace MWGui
         {
             // user notification
             MWBase::Environment::get().getWindowManager()->
-                messageBox(MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sBarterDialog1")->str, std::vector<std::string>());
+                messageBox(MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sBarterDialog1")->mStr, std::vector<std::string>());
             return;
         }
 
@@ -156,21 +156,21 @@ namespace MWGui
         if (mPtr.getTypeName() == typeid(ESM::NPC).name())
         {
             MWWorld::LiveCellRef<ESM::NPC>* ref = mPtr.get<ESM::NPC>();
-            if (ref->base->npdt52.gold == -10)
-                merchantgold = ref->base->npdt12.gold;
+            if (ref->base->mNpdt52.mGold == -10)
+                merchantgold = ref->base->mNpdt12.mGold;
             else
-                merchantgold = ref->base->npdt52.gold;
+                merchantgold = ref->base->mNpdt52.mGold;
         }
         else // ESM::Creature
         {
             MWWorld::LiveCellRef<ESM::Creature>* ref = mPtr.get<ESM::Creature>();
-            merchantgold = ref->base->data.gold;
+            merchantgold = ref->base->mData.mGold;
         }
         if (mCurrentBalance > 0 && merchantgold < mCurrentBalance)
         {
             // user notification
             MWBase::Environment::get().getWindowManager()->
-                messageBox(MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sBarterDialog2")->str, std::vector<std::string>());
+                messageBox(MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sBarterDialog2")->mStr, std::vector<std::string>());
             return;
         }
 
@@ -200,17 +200,17 @@ namespace MWGui
 
     void TradeWindow::updateLabels()
     {
-        mPlayerGold->setCaption(MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sYourGold")->str
+        mPlayerGold->setCaption(MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sYourGold")->mStr
             + " " + boost::lexical_cast<std::string>(mWindowManager.getInventoryWindow()->getPlayerGold()));
 
         if (mCurrentBalance > 0)
         {
-            mTotalBalanceLabel->setCaption(MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sTotalSold")->str);
+            mTotalBalanceLabel->setCaption(MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sTotalSold")->mStr);
             mTotalBalance->setCaption(boost::lexical_cast<std::string>(mCurrentBalance));
         }
         else
         {
-            mTotalBalanceLabel->setCaption(MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sTotalCost")->str);
+            mTotalBalanceLabel->setCaption(MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sTotalCost")->mStr);
             mTotalBalance->setCaption(boost::lexical_cast<std::string>(-mCurrentBalance));
         }
 
@@ -218,18 +218,18 @@ namespace MWGui
         if (mPtr.getTypeName() == typeid(ESM::NPC).name())
         {
             MWWorld::LiveCellRef<ESM::NPC>* ref = mPtr.get<ESM::NPC>();
-            if (ref->base->npdt52.gold == -10)
-                merchantgold = ref->base->npdt12.gold;
+            if (ref->base->mNpdt52.mGold == -10)
+                merchantgold = ref->base->mNpdt12.mGold;
             else
-                merchantgold = ref->base->npdt52.gold;
+                merchantgold = ref->base->mNpdt52.mGold;
         }
         else // ESM::Creature
         {
             MWWorld::LiveCellRef<ESM::Creature>* ref = mPtr.get<ESM::Creature>();
-            merchantgold = ref->base->data.gold;
+            merchantgold = ref->base->mData.mGold;
         }
 
-        mMerchantGold->setCaption(MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sSellerGold")->str
+        mMerchantGold->setCaption(MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sSellerGold")->mStr
             + " " + boost::lexical_cast<std::string>(merchantgold));
     }
 

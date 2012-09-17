@@ -173,7 +173,8 @@ namespace ESMS
     void load(ESMReader &esm, const std::string &id)
     {
       std::string id2 = toLower (id);
-      list[id2].load(esm, id2);
+      list[id2].setId(id2);
+      list[id2].load(esm);
     }
 
     // Find the given object ID, or return NULL if not found.
@@ -225,7 +226,7 @@ namespace ESMS
       std::string id2 = toLower (id);
       X& ref = list[id2];
 
-      ref.id = id;
+      ref.mId = id;
       ref.load(esm);
     }
 
@@ -292,14 +293,14 @@ namespace ESMS
     {
       LandTexture lt;
       lt.load(esm);
-      lt.id = id;
+      lt.setId(id);
 
       // Make sure we have room for the structure
-      if(lt.index + 1 > (int)ltex.size())
-        ltex.resize(lt.index+1);
+      if(lt.mIndex + 1 > (int)ltex.size())
+        ltex.resize(lt.mIndex+1);
 
       // Store it
-      ltex[lt.index] = lt;
+      ltex[lt.mIndex] = lt;
     }
   };
 
@@ -327,7 +328,7 @@ namespace ESMS
 
     virtual void listIdentifier (std::vector<std::string>& identifier) const {}
 
-    // Find land for the given coordinates. Return null if no data.
+    // Find land for the given coordinates. Return null if no mData.
     Land *search(int x, int y) const
     {
       LandMap::const_iterator itr = lands.find(std::make_pair<int, int>(x, y));
@@ -349,7 +350,7 @@ namespace ESMS
       land->load(esm);
 
       // Store the structure
-      lands[std::make_pair<int, int>(land->X, land->Y)] = land;
+      lands[std::make_pair<int, int>(land->mX, land->mY)] = land;
     }
   };
 
@@ -377,7 +378,7 @@ namespace ESMS
     typedef std::map<std::string,ESM::Cell*, ciLessBoost> IntCells;
     IntCells intCells;
 
-    // List of exterior cells. Indexed as extCells[gridX][gridY].
+    // List of exterior cells. Indexed as extCells[mX][mY].
     typedef std::map<std::pair<int, int>, ESM::Cell*> ExtCells;
     ExtCells extCells;
 
@@ -439,7 +440,7 @@ namespace ESMS
     {
         for (ExtCells::const_iterator iter = extCells.begin(); iter!=extCells.end(); ++iter)
         {
-            if (toLower (iter->second->name) == toLower (id))
+            if (toLower (iter->second->mName) == toLower (id))
                 return iter->second;
         }
 
@@ -451,7 +452,7 @@ namespace ESMS
         std::string id2 = toLower (id);
 
         for (ExtCells::const_iterator iter = extCells.begin(); iter!=extCells.end(); ++iter)
-            if (toLower (iter->second->region)==id)
+            if (toLower (iter->second->mRegion)==id)
                 return iter->second;
 
         return 0;
@@ -463,12 +464,12 @@ namespace ESMS
 
       // All cells have a name record, even nameless exterior cells.
       ESM::Cell *cell = new ESM::Cell;
-      cell->name = id;
+      cell->mName = id;
 
       // The cell itself takes care of all the hairy details
       cell->load(esm);
 
-      if(cell->data.flags & ESM::Cell::Interior)
+      if(cell->mData.mFlags & ESM::Cell::Interior)
         {
           // Store interior cell by name
           intCells[id] = cell;
@@ -476,7 +477,7 @@ namespace ESMS
       else
         {
           // Store exterior cells by grid position
-          extCells[std::make_pair (cell->data.gridX, cell->data.gridY)] = cell;
+          extCells[std::make_pair (cell->mData.mX, cell->mData.mY)] = cell;
         }
     }
   };
@@ -489,7 +490,7 @@ namespace ESMS
       typedef std::map<std::string,ESM::Pathgrid*, ciLessBoost> IntGrids;
       IntGrids intGrids;
 
-      // List of grids for exterior cells. Indexed as extCells[gridX][gridY].
+      // List of grids for exterior cells. Indexed as extCells[mX][mY].
       typedef std::map<std::pair<int, int>, ESM::Pathgrid*> ExtGrids;
       ExtGrids extGrids;
 
@@ -516,13 +517,13 @@ namespace ESMS
           count++;
           ESM::Pathgrid *grid = new ESM::Pathgrid;
           grid->load(esm);
-          if (grid->data.x == 0 && grid->data.y == 0)
+          if (grid->mData.mX == 0 && grid->mData.mY == 0)
           {
-              intGrids[grid->cell] = grid;
+              intGrids[grid->mCell] = grid;
           }
           else
           {
-              extGrids[std::make_pair(grid->data.x, grid->data.y)] = grid;
+              extGrids[std::make_pair(grid->mData.mX, grid->mData.mY)] = grid;
           }
       }
 
@@ -557,16 +558,16 @@ namespace ESMS
       Pathgrid *search(const ESM::Cell &cell) const
       {
           int cellX, cellY;
-          if (cell.data.flags & ESM::Cell::Interior)
+          if (cell.mData.mFlags & ESM::Cell::Interior)
           {
               cellX = cellY = 0;
           }
           else
           {
-              cellX = cell.data.gridX;
-              cellY = cell.data.gridY;
+              cellX = cell.mData.mX;
+              cellY = cell.mData.mY;
           }
-          return search(cellX, cellY, cell.name);
+          return search(cellX, cellY, cell.mName);
       }
   };
 
@@ -585,7 +586,7 @@ namespace ESMS
       X ref;
       ref.load (esm);
 
-      std::string realId = toLower (ref.data.name.toString());
+      std::string realId = toLower (ref.mData.mName.toString());
 
       std::swap (list[realId], ref);
     }
@@ -636,7 +637,7 @@ namespace ESMS
         {
             X ref;
             ref.load (esm);
-            int index = ref.index;
+            int index = ref.mIndex;
             list[index] = ref;
         }
 

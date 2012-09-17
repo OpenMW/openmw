@@ -1,29 +1,30 @@
 #ifndef _ESM_GMST_H
 #define _ESM_GMST_H
 
-#include "esm_reader.hpp"
+#include <string>
+
+#include "record.hpp"
 #include "defs.hpp"
 
 namespace ESM
 {
-
 /*
  *  Game setting, with automatic cleaning of "dirty" entries.
  *
  */
 
-struct GameSetting
+struct GameSetting : public Record
 {
-    std::string id;
+    std::string mId;
 
     // One of these is used depending on the variable type
-    std::string str;
-    int i;
-    float f;
-    VarType type;
+    std::string mStr;
+    int mI;
+    float mF;
+    VarType mType;
 
     // Set to true if this is a 'dirty' entry which should be ignored
-    bool dirty;
+    bool mDirty;
 
     /*
      These functions check if this game setting is one of the "dirty"
@@ -92,6 +93,10 @@ struct GameSetting
     
     std::string getString() const;
     ///< Throwns an exception if GMST is not of type string.
+
+    void save(ESMWriter &esm);
+
+    int getName() { return REC_GMST; }
 };
 }
 #endif

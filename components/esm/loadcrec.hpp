@@ -1,6 +1,9 @@
 #ifndef _ESM_CREC_H
 #define _ESM_CREC_H
 
+#include "record.hpp"
+
+// TODO create implementation files and remove this one
 #include "esm_reader.hpp"
 
 namespace ESM {
@@ -9,21 +12,33 @@ namespace ESM {
  */
 
 /// Changes a creature
-struct LoadCREC
+struct LoadCREC : public Record
 {
-  void load(ESMReader &esm)
+    void load(ESMReader &esm)
     {
       esm.skipRecord();
     }
+
+    void save(ESMWriter &esm)
+    {
+    }
+
+    int getName() { return REC_CREC; }
 };
 
 /// Changes an item list / container
-struct LoadCNTC
+struct LoadCNTC : public Record
 {
-  void load(ESMReader &esm)
+    void load(ESMReader &esm)
     {
       esm.skipRecord();
     }
+
+    void save(ESMWriter &esm)
+    {
+    }
+
+    int getName() { return REC_CNTC; }
 };
 }
 #endif

@@ -1,32 +1,34 @@
 #ifndef _ESM_ALCH_H
 #define _ESM_ALCH_H
 
-#include "esm_reader.hpp"
-#include "defs.hpp"
+#include <string>
+
+#include "record.hpp"
+#include "effectlist.hpp"
 
 namespace ESM
 {
-
 /*
  * Alchemy item (potions)
  */
 
-struct Potion
+struct Potion : public Record
 {
     struct ALDTstruct
     {
-        float weight;
-        int value;
-        int autoCalc;
+        float mWeight;
+        int mValue;
+        int mAutoCalc;
     };
-    ALDTstruct data;
+    ALDTstruct mData;
 
-    std::string name, model, icon, script;
-    EffectList effects;
+    std::string mName, mModel, mIcon, mScript;
+    EffectList mEffects;
 
-    std::string mId;
-
-    void load(ESMReader &esm, const std::string& id);
+    void load(ESMReader &esm);
+    void save(ESMWriter &esm);
+    
+    int getName() { return REC_ALCH; }
 };
 }
 #endif

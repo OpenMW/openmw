@@ -1,38 +1,45 @@
 #include "loadnpc.hpp"
 
+#include "esm_reader.hpp"
+#include "esm_writer.hpp"
+
 namespace ESM
 {
 
-void NPC::load(ESMReader &esm, const std::string& id)
+void NPC::load(ESMReader &esm)
 {
-    mId = id;
+    mNpdt52.mGold = -10;
 
-    npdt52.gold = -10;
+    mModel = esm.getHNOString("MODL");
+    mName = esm.getHNOString("FNAM");
 
-    model = esm.getHNOString("MODL");
-    name = esm.getHNOString("FNAM");
+    mRace = esm.getHNString("RNAM");
+    mClass = esm.getHNString("CNAM");
+    mFaction = esm.getHNString("ANAM");
+    mHead = esm.getHNString("BNAM");
+    mHair = esm.getHNString("KNAM");
 
-    race = esm.getHNString("RNAM");
-    cls = esm.getHNString("CNAM");
-    faction = esm.getHNString("ANAM");
-    head = esm.getHNString("BNAM");
-    hair = esm.getHNString("KNAM");
-
-    script = esm.getHNOString("SCRI");
+    mScript = esm.getHNOString("SCRI");
 
     esm.getSubNameIs("NPDT");
     esm.getSubHeader();
     if (esm.getSubSize() == 52)
-        esm.getExact(&npdt52, 52);
+    {
+        mNpdtType = 52;
+        esm.getExact(&mNpdt52, 52);
+    }
     else if (esm.getSubSize() == 12)
-        esm.getExact(&npdt12, 12);
+    {
+        mNpdtType = 12;
+        esm.getExact(&mNpdt12, 12);
+    }
     else
         esm.fail("NPC_NPDT must be 12 or 52 bytes long");
 
-    esm.getHNT(flags, "FLAG");
+    esm.getHNT(mFlags, "FLAG");
 
-    inventory.load(esm);
-    spells.load(esm);
+    mInventory.load(esm);
+    mSpells.load(esm);
 
     if (esm.isNextSub("AIDT"))
     {
@@ -53,6 +60,28 @@ void NPC::load(ESMReader &esm, const std::string& id)
     }
     mAiPackage.load(esm);
     esm.skipRecord();
+}
+void NPC::save(ESMWriter &esm)
+{
+    esm.writeHNOCString("MODL", mModel);
+    esm.writeHNOCString("FNAM", mName);
+    esm.writeHNCString("RNAM", mRace);
+    esm.writeHNCString("CNAM", mClass);
+    esm.writeHNCString("ANAM", mFaction);
+    esm.writeHNCString("BNAM", mHead);
+    esm.writeHNCString("KNAM", mHair);
+    esm.writeHNOCString("SCRI", mScript);
+    
+    if (mNpdtType == 52)
+        esm.writeHNT("NPDT", mNpdt52, 52);
+    else if (mNpdtType == 12)
+        esm.writeHNT("NPDT", mNpdt12, 12);
+
+    esm.writeHNT("FLAG", mFlags);
+    
+    mInventory.save(esm);
+    mSpells.save(esm);
+    mAiPackage.save(esm);
 }
 
 }

@@ -350,7 +350,7 @@ void HUD::onResChange(int width, int height)
 void HUD::setSelectedSpell(const std::string& spellId, int successChancePercent)
 {
     const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().spells.find(spellId);
-    std::string spellName = spell->name;
+    std::string spellName = spell->mName;
     if (spellName != mSpellName && mSpellVisible)
     {
         mWeaponSpellTimer = 5.0f;
@@ -369,8 +369,8 @@ void HUD::setSelectedSpell(const std::string& spellId, int successChancePercent)
     mSpellBox->setUserString("Spell", spellId);
 
     // use the icon of the first effect
-    const ESM::MagicEffect* effect = MWBase::Environment::get().getWorld()->getStore().magicEffects.find(spell->effects.list.front().effectID);
-    std::string icon = effect->icon;
+    const ESM::MagicEffect* effect = MWBase::Environment::get().getWorld()->getStore().magicEffects.find(spell->mEffects.mList.front().mEffectID);
+    std::string icon = effect->mIcon;
     int slashPos = icon.find("\\");
     icon.insert(slashPos+1, "b_");
     icon = std::string("icons\\") + icon;

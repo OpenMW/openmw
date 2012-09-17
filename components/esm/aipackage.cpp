@@ -1,5 +1,8 @@
 #include "aipackage.hpp"
 
+#include "esm_reader.hpp"
+#include "esm_writer.hpp"
+
 namespace ESM
 {
     void AIPackageList::load(ESMReader &esm)
@@ -33,5 +36,9 @@ namespace ESM
                  return;
             }
         }
+    }
+
+    void AIPackageList::save(ESMWriter &esm)
+    {
     }
 }

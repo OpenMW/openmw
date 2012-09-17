@@ -1,13 +1,15 @@
 #ifndef _ESM_SPEL_H
 #define _ESM_SPEL_H
 
-#include "esm_reader.hpp"
-#include "defs.hpp"
+#include <string>
+
+#include "record.hpp"
+#include "effectlist.hpp"
 
 namespace ESM
 {
 
-struct Spell
+struct Spell : public Record
 {
     enum SpellType
     {
@@ -28,16 +30,19 @@ struct Spell
 
     struct SPDTstruct
     {
-        int type; // SpellType
-        int cost; // Mana cost
-        int flags; // Flags
+        int mType; // SpellType
+        int mCost; // Mana cost
+        int mFlags; // Flags
     };
 
-    SPDTstruct data;
-    std::string name;
-    EffectList effects;
+    SPDTstruct mData;
+    std::string mName;
+    EffectList mEffects;
 
     void load(ESMReader &esm);
+    void save(ESMWriter &esm);
+
+    int getName() { return REC_SPEL; }
 };
 }
 #endif

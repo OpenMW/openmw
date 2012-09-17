@@ -40,7 +40,7 @@ namespace MWDialogue
         quest.addEntry (entry); // we are doing slicing on purpose here
 
         std::vector<std::string> empty;
-        std::string notification = MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sJournalEntry")->str;
+        std::string notification = MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sJournalEntry")->mStr;
         MWBase::Environment::get().getWindowManager()->messageBox (notification, empty);
     }
 

@@ -81,29 +81,29 @@ float MWMechanics::NpcStats::getSkillGain (int skillIndex, const ESM::Class& cla
 
     if (usageType>0)
     {
-        skillFactor = skill->data.useValue[usageType];
+        skillFactor = skill->mData.mUseValue[usageType];
 
         if (skillFactor<=0)
             throw std::runtime_error ("invalid skill gain factor");
     }
 
     float typeFactor =
-        MWBase::Environment::get().getWorld()->getStore().gameSettings.find ("fMiscSkillBonus")->f;
+        MWBase::Environment::get().getWorld()->getStore().gameSettings.find ("fMiscSkillBonus")->mF;
 
     for (int i=0; i<5; ++i)
-        if (class_.data.skills[i][0]==skillIndex)
+        if (class_.mData.mSkills[i][0]==skillIndex)
         {
             typeFactor =
-                MWBase::Environment::get().getWorld()->getStore().gameSettings.find ("fMinorSkillBonus")->f;
+                MWBase::Environment::get().getWorld()->getStore().gameSettings.find ("fMinorSkillBonus")->mF;
 
             break;
         }
 
     for (int i=0; i<5; ++i)
-        if (class_.data.skills[i][1]==skillIndex)
+        if (class_.mData.mSkills[i][1]==skillIndex)
         {
             typeFactor =
-                MWBase::Environment::get().getWorld()->getStore().gameSettings.find ("fMajorSkillBonus")->f;
+                MWBase::Environment::get().getWorld()->getStore().gameSettings.find ("fMajorSkillBonus")->mF;
 
             break;
         }
@@ -113,10 +113,10 @@ float MWMechanics::NpcStats::getSkillGain (int skillIndex, const ESM::Class& cla
 
     float specialisationFactor = 1;
 
-    if (skill->data.specialization==class_.data.specialization)
+    if (skill->mData.mSpecialization==class_.mData.mSpecialization)
     {
         specialisationFactor =
-            MWBase::Environment::get().getWorld()->getStore().gameSettings.find ("fSpecialSkillBonus")->f;
+            MWBase::Environment::get().getWorld()->getStore().gameSettings.find ("fSpecialSkillBonus")->mF;
 
         if (specialisationFactor<=0)
             throw std::runtime_error ("invalid skill specialisation factor");

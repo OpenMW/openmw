@@ -1,7 +1,9 @@
 #ifndef _ESM_WEAP_H
 #define _ESM_WEAP_H
 
-#include "esm_reader.hpp"
+#include <string>
+
+#include "record.hpp"
 
 namespace ESM
 {
@@ -10,7 +12,7 @@ namespace ESM
  * Weapon definition
  */
 
-struct Weapon
+struct Weapon : public Record
 {
     enum Type
     {
@@ -40,22 +42,25 @@ struct Weapon
 #pragma pack(1)
     struct WPDTstruct
     {
-        float weight;
-        int value;
-        short type;
-        short health;
-        float speed, reach;
-        short enchant; // Enchantment points
-        unsigned char chop[2], slash[2], thrust[2]; // Min and max
-        int flags;
+        float mWeight;
+        int mValue;
+        short mType;
+        short mHealth;
+        float mSpeed, mReach;
+        short mEnchant; // Enchantment points
+        unsigned char mChop[2], mSlash[2], mThrust[2]; // Min and max
+        int mFlags;
     }; // 32 bytes
 #pragma pack(pop)
 
-    WPDTstruct data;
+    WPDTstruct mData;
 
-    std::string name, model, icon, enchant, script;
+    std::string mName, mModel, mIcon, mEnchant, mScript;
 
     void load(ESMReader &esm);
+    void save(ESMWriter &esm);
+
+    int getName() { return REC_WEAP; }
 };
 }
 #endif

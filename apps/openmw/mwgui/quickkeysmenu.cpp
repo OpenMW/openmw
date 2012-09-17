@@ -32,7 +32,7 @@ namespace
         const ESM::Spell* a = MWBase::Environment::get().getWorld()->getStore().spells.find(left);
         const ESM::Spell* b = MWBase::Environment::get().getWorld()->getStore().spells.find(right);
 
-        int cmp = a->name.compare(b->name);
+        int cmp = a->mName.compare(b->mName);
         return cmp < 0;
     }
 }
@@ -236,8 +236,8 @@ namespace MWGui
 
         // use the icon of the first effect
         const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().spells.find(spellId);
-        const ESM::MagicEffect* effect = MWBase::Environment::get().getWorld()->getStore().magicEffects.find(spell->effects.list.front().effectID);
-        std::string path = effect->icon;
+        const ESM::MagicEffect* effect = MWBase::Environment::get().getWorld()->getStore().magicEffects.find(spell->mEffects.mList.front().mEffectID);
+        std::string path = effect->mIcon;
         int slashPos = path.find("\\");
         path.insert(slashPos+1, "b_");
         path = std::string("icons\\") + path;
@@ -439,15 +439,15 @@ namespace MWGui
         while (it != spellList.end())
         {
             const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().spells.find(*it);
-            if (spell->data.type == ESM::Spell::ST_Power)
+            if (spell->mData.mType == ESM::Spell::ST_Power)
             {
                 powers.push_back(*it);
                 it = spellList.erase(it);
             }
-            else if (spell->data.type == ESM::Spell::ST_Ability
-                || spell->data.type == ESM::Spell::ST_Blight
-                || spell->data.type == ESM::Spell::ST_Curse
-                || spell->data.type == ESM::Spell::ST_Disease)
+            else if (spell->mData.mType == ESM::Spell::ST_Ability
+                || spell->mData.mType == ESM::Spell::ST_Blight
+                || spell->mData.mType == ESM::Spell::ST_Curse
+                || spell->mData.mType == ESM::Spell::ST_Disease)
             {
                 it = spellList.erase(it);
             }
@@ -466,7 +466,7 @@ namespace MWGui
             {
                 // only add items with "Cast once" or "Cast on use"
                 const ESM::Enchantment* enchant = MWBase::Environment::get().getWorld()->getStore().enchants.find(enchantId);
-                int type = enchant->data.type;
+                int type = enchant->mData.mType;
                 if (type != ESM::Enchantment::CastOnce
                     && type != ESM::Enchantment::WhenUsed)
                     continue;
@@ -490,7 +490,7 @@ namespace MWGui
             const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().spells.find(*it);
             MyGUI::Button* t = mMagicList->createWidget<MyGUI::Button>("SpellText",
                 MyGUI::IntCoord(4, mHeight, mWidth-8, spellHeight), MyGUI::Align::Left | MyGUI::Align::Top);
-            t->setCaption(spell->name);
+            t->setCaption(spell->mName);
             t->setTextAlign(MyGUI::Align::Left);
             t->setUserString("ToolTipType", "Spell");
             t->setUserString("Spell", *it);
@@ -507,7 +507,7 @@ namespace MWGui
             const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().spells.find(*it);
             MyGUI::Button* t = mMagicList->createWidget<MyGUI::Button>("SpellText",
                 MyGUI::IntCoord(4, mHeight, mWidth-8, spellHeight), MyGUI::Align::Left | MyGUI::Align::Top);
-            t->setCaption(spell->name);
+            t->setCaption(spell->mName);
             t->setTextAlign(MyGUI::Align::Left);
             t->setUserString("ToolTipType", "Spell");
             t->setUserString("Spell", *it);

@@ -1,7 +1,9 @@
 #ifndef _ESM_SNDG_H
 #define _ESM_SNDG_H
 
-#include "esm_reader.hpp"
+#include <string>
+
+#include "record.hpp"
 
 namespace ESM
 {
@@ -10,7 +12,7 @@ namespace ESM
  * Sound generator. This describes the sounds a creature make.
  */
 
-struct SoundGenerator
+struct SoundGenerator : public Record
 {
     enum Type
     {
@@ -25,11 +27,14 @@ struct SoundGenerator
     };
 
     // Type
-    int type;
+    int mType;
 
-    std::string creature, sound;
+    std::string mCreature, mSound;
 
     void load(ESMReader &esm);
+    void save(ESMWriter &esm);
+
+    int getName() { return REC_SNDG; }
 };
 }
 #endif

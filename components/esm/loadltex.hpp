@@ -1,7 +1,9 @@
 #ifndef _ESM_LTEX_H
 #define _ESM_LTEX_H
 
-#include "esm_reader.hpp"
+#include <string>
+
+#include "record.hpp"
 
 namespace ESM
 {
@@ -22,12 +24,15 @@ namespace ESM
  * texture, and see if it affects the game.
  */
 
-struct LandTexture
+struct LandTexture : public Record
 {
-    std::string id, texture;
-    int index;
+    std::string mTexture;
+    int mIndex;
 
     void load(ESMReader &esm);
+    void save(ESMWriter &esm);
+
+    int getName() { return REC_LTEX; }
 };
 }
 #endif

@@ -50,7 +50,7 @@ void GenerateClassResultDialog::setClassId(const std::string &classId)
 {
     mCurrentClassId = classId;
     mClassImage->setImageTexture(std::string("textures\\levelup\\") + mCurrentClassId + ".dds");
-    mClassName->setCaption(MWBase::Environment::get().getWorld()->getStore().classes.find(mCurrentClassId)->name);
+    mClassName->setCaption(MWBase::Environment::get().getWorld()->getStore().classes.find(mCurrentClassId)->mName);
 }
 
 // widget controls
@@ -183,12 +183,12 @@ void PickClassDialog::updateClasses()
     for (; it != end; ++it)
     {
         const ESM::Class &klass = it->second;
-        bool playable = (klass.data.isPlayable != 0);
+        bool playable = (klass.mData.mIsPlayable != 0);
         if (!playable) // Only display playable classes
             continue;
 
         const std::string &id = it->first;
-        mClassList->addItem(klass.name, id);
+        mClassList->addItem(klass.mName, id);
         if (boost::iequals(id, mCurrentClassId))
             mClassList->setIndexSelected(index);
         ++index;
@@ -204,7 +204,7 @@ void PickClassDialog::updateStats()
     if (!klass)
         return;
 
-    ESM::Class::Specialization specialization = static_cast<ESM::Class::Specialization>(klass->data.specialization);
+    ESM::Class::Specialization specialization = static_cast<ESM::Class::Specialization>(klass->mData.mSpecialization);
 
     static const char *specIds[3] = {
         "sSpecializationCombat",
@@ -215,17 +215,17 @@ void PickClassDialog::updateStats()
     mSpecializationName->setCaption(specName);
     ToolTips::createSpecializationToolTip(mSpecializationName, specName, specialization);
 
-    mFavoriteAttribute[0]->setAttributeId(klass->data.attribute[0]);
-    mFavoriteAttribute[1]->setAttributeId(klass->data.attribute[1]);
+    mFavoriteAttribute[0]->setAttributeId(klass->mData.mAttribute[0]);
+    mFavoriteAttribute[1]->setAttributeId(klass->mData.mAttribute[1]);
     ToolTips::createAttributeToolTip(mFavoriteAttribute[0], mFavoriteAttribute[0]->getAttributeId());
     ToolTips::createAttributeToolTip(mFavoriteAttribute[1], mFavoriteAttribute[1]->getAttributeId());
 
     for (int i = 0; i < 5; ++i)
     {
-        mMinorSkill[i]->setSkillNumber(klass->data.skills[i][0]);
-        mMajorSkill[i]->setSkillNumber(klass->data.skills[i][1]);
-        ToolTips::createSkillToolTip(mMinorSkill[i], klass->data.skills[i][0]);
-        ToolTips::createSkillToolTip(mMajorSkill[i], klass->data.skills[i][1]);
+        mMinorSkill[i]->setSkillNumber(klass->mData.mSkills[i][0]);
+        mMajorSkill[i]->setSkillNumber(klass->mData.mSkills[i][1]);
+        ToolTips::createSkillToolTip(mMinorSkill[i], klass->mData.mSkills[i][0]);
+        ToolTips::createSkillToolTip(mMajorSkill[i], klass->mData.mSkills[i][1]);
     }
 
     mClassImage->setImageTexture(std::string("textures\\levelup\\") + mCurrentClassId + ".dds");
@@ -664,9 +664,9 @@ SelectSpecializationDialog::SelectSpecializationDialog(MWBase::WindowManager& pa
     getWidget(mSpecialization0, "Specialization0");
     getWidget(mSpecialization1, "Specialization1");
     getWidget(mSpecialization2, "Specialization2");
-    std::string combat = mWindowManager.getGameSettingString(ESM::Class::gmstSpecializationIds[ESM::Class::Combat], "");
-    std::string magic = mWindowManager.getGameSettingString(ESM::Class::gmstSpecializationIds[ESM::Class::Magic], "");
-    std::string stealth = mWindowManager.getGameSettingString(ESM::Class::gmstSpecializationIds[ESM::Class::Stealth], "");
+    std::string combat = mWindowManager.getGameSettingString(ESM::Class::sGmstSpecializationIds[ESM::Class::Combat], "");
+    std::string magic = mWindowManager.getGameSettingString(ESM::Class::sGmstSpecializationIds[ESM::Class::Magic], "");
+    std::string stealth = mWindowManager.getGameSettingString(ESM::Class::sGmstSpecializationIds[ESM::Class::Stealth], "");
 
     mSpecialization0->setCaption(combat);
     mSpecialization0->eventMouseButtonClick += MyGUI::newDelegate(this, &SelectSpecializationDialog::onSpecializationClicked);
@@ -728,7 +728,7 @@ SelectAttributeDialog::SelectAttributeDialog(MWBase::WindowManager& parWindowMan
 
         getWidget(attribute,  std::string("Attribute").append(1, theIndex));
         attribute->setWindowManager(&parWindowManager);
-        attribute->setAttributeId(ESM::Attribute::attributeIds[i]);
+        attribute->setAttributeId(ESM::Attribute::sAttributeIds[i]);
         attribute->eventClicked += MyGUI::newDelegate(this, &SelectAttributeDialog::onAttributeClicked);
         ToolTips::createAttributeToolTip(attribute, attribute->getAttributeId());
     }

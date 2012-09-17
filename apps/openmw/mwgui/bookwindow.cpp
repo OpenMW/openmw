@@ -60,7 +60,7 @@ void BookWindow::open (MWWorld::Ptr book)
     MWWorld::LiveCellRef<ESM::Book> *ref = mBook.get<ESM::Book>();
 
     BookTextParser parser;
-    std::vector<std::string> results = parser.split(ref->base->text, mLeftPage->getSize().width, mLeftPage->getSize().height);
+    std::vector<std::string> results = parser.split(ref->base->mText, mLeftPage->getSize().width, mLeftPage->getSize().height);
 
     int i=0;
     for (std::vector<std::string>::iterator it=results.begin();

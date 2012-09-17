@@ -161,12 +161,12 @@ WindowManager::WindowManager(
     // Setup player stats
     for (int i = 0; i < ESM::Attribute::Length; ++i)
     {
-        mPlayerAttributes.insert(std::make_pair(ESM::Attribute::attributeIds[i], MWMechanics::Stat<int>()));
+        mPlayerAttributes.insert(std::make_pair(ESM::Attribute::sAttributeIds[i], MWMechanics::Stat<int>()));
     }
 
     for (int i = 0; i < ESM::Skill::Length; ++i)
     {
-        mPlayerSkillValues.insert(std::make_pair(ESM::Skill::skillIds[i], MWMechanics::Stat<float>()));
+        mPlayerSkillValues.insert(std::make_pair(ESM::Skill::sSkillIds[i], MWMechanics::Stat<float>()));
     }
 
     unsetSelectedSpell();
@@ -446,7 +446,7 @@ void WindowManager::setValue (const std::string& id, int value)
 void WindowManager::setPlayerClass (const ESM::Class &class_)
 {
     mPlayerClass = class_;
-    mStatsWindow->setValue("class", mPlayerClass.name);
+    mStatsWindow->setValue("class", mPlayerClass.mName);
 }
 
 void WindowManager::configureSkills (const SkillList& major, const SkillList& minor)
@@ -501,8 +501,8 @@ int WindowManager::readPressedButton ()
 const std::string &WindowManager::getGameSettingString(const std::string &id, const std::string &default_)
 {
     const ESM::GameSetting *setting = MWBase::Environment::get().getWorld()->getStore().gameSettings.search(id);
-    if (setting && setting->type == ESM::VT_String)
-        return setting->str;
+    if (setting && setting->mType == ESM::VT_String)
+        return setting->mStr;
     return default_;
 }
 
@@ -543,16 +543,16 @@ void WindowManager::onFrame (float frameDuration)
 
 void WindowManager::changeCell(MWWorld::Ptr::CellStore* cell)
 {
-    if (!(cell->cell->data.flags & ESM::Cell::Interior))
+    if (!(cell->cell->mData.mFlags & ESM::Cell::Interior))
     {
         std::string name;
-        if (cell->cell->name != "")
-            name = cell->cell->name;
+        if (cell->cell->mName != "")
+            name = cell->cell->mName;
         else
         {
-            const ESM::Region* region = MWBase::Environment::get().getWorld()->getStore().regions.search(cell->cell->region);
+            const ESM::Region* region = MWBase::Environment::get().getWorld()->getStore().regions.search(cell->cell->mRegion);
             if (region)
-                name = region->name;
+                name = region->mName;
             else
                 name = getGameSettingString("sDefaultCellname", "Wilderness");
         }
@@ -562,15 +562,15 @@ void WindowManager::changeCell(MWWorld::Ptr::CellStore* cell)
 
         mMap->setCellPrefix("Cell");
         mHud->setCellPrefix("Cell");
-        mMap->setActiveCell( cell->cell->data.gridX, cell->cell->data.gridY );
-        mHud->setActiveCell( cell->cell->data.gridX, cell->cell->data.gridY );
+        mMap->setActiveCell( cell->cell->mData.mX, cell->cell->mData.mY );
+        mHud->setActiveCell( cell->cell->mData.mX, cell->cell->mData.mY );
     }
     else
     {
-        mMap->setCellName( cell->cell->name );
-        mHud->setCellName( cell->cell->name );
-        mMap->setCellPrefix( cell->cell->name );
-        mHud->setCellPrefix( cell->cell->name );
+        mMap->setCellName( cell->cell->mName );
+        mHud->setCellName( cell->cell->mName );
+        mMap->setCellPrefix( cell->cell->mName );
+        mHud->setCellPrefix( cell->cell->mName );
     }
 
 }
@@ -654,8 +654,8 @@ void WindowManager::setDragDrop(bool dragDrop)
 void WindowManager::onRetrieveTag(const MyGUI::UString& _tag, MyGUI::UString& _result)
 {
     const ESM::GameSetting *setting = MWBase::Environment::get().getWorld()->getStore().gameSettings.search(_tag);
-    if (setting && setting->type == ESM::VT_String)
-        _result = setting->str;
+    if (setting && setting->mType == ESM::VT_String)
+        _result = setting->mStr;
     else
         _result = _tag;
 }
@@ -745,7 +745,7 @@ void WindowManager::setSelectedSpell(const std::string& spellId, int successChan
 {
     mHud->setSelectedSpell(spellId, successChancePercent);
     const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().spells.find(spellId);
-    mSpellWindow->setTitle(spell->name);
+    mSpellWindow->setTitle(spell->mName);
 }
 
 void WindowManager::setSelectedEnchantItem(const MWWorld::Ptr& item, int chargePercent)

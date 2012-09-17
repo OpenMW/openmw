@@ -1,32 +1,33 @@
 #ifndef _ESM_RACE_H
 #define _ESM_RACE_H
 
-#include "esm_reader.hpp"
-#include "defs.hpp"
+#include <string>
+
+#include "record.hpp"
+#include "spelllist.hpp"
 
 namespace ESM
 {
-
 /*
  * Race definition
  */
 
-struct Race
+struct Race : public Record
 {
     struct SkillBonus
     {
-        int skill; // SkillEnum
-        int bonus;
+        int mSkill; // SkillEnum
+        int mBonus;
     };
 
     struct MaleFemale
     {
-        int male, female;
+        int mMale, mFemale;
     };
 
     struct MaleFemaleF
     {
-        float male, female;
+        float mMale, mFemale;
     };
 
     enum Flags
@@ -38,26 +39,36 @@ struct Race
     struct RADTstruct
     {
         // List of skills that get a bonus
-        SkillBonus bonus[7];
+        SkillBonus mBonus[7];
 
         // Attribute values for male/female
-        MaleFemale strength, intelligence, willpower, agility, speed,
-                endurance, personality, luck;
+        MaleFemale mStrength,
+                   mIntelligence,
+                   mWillpower,
+                   mAgility,
+                   mSpeed,
+                   mEndurance,
+                   mPersonality,
+                   mLuck;
 
         // The actual eye level height (in game units) is (probably) given
         // as 'height' times 128. This has not been tested yet.
-        MaleFemaleF height, weight;
+        MaleFemaleF mHeight, mWeight;
 
-        int flags; // 0x1 - playable, 0x2 - beast race
+        int mFlags; // 0x1 - playable, 0x2 - beast race
 
     }; // Size = 140 bytes
 
-    RADTstruct data;
+    RADTstruct mData;
 
-    std::string name, description;
-    SpellList powers;
+    std::string mName, mDescription;
+    SpellList mPowers;
 
     void load(ESMReader &esm);
+    void save(ESMWriter &esm);
+
+    int getName() { return REC_RACE; }
 };
+
 }
 #endif

@@ -1,7 +1,10 @@
 #ifndef _ESM_LEVLISTS_H
 #define _ESM_LEVLISTS_H
 
-#include "esm_reader.hpp"
+#include <string>
+#include <vector>
+
+#include "record.hpp"
 
 namespace ESM
 {
@@ -14,7 +17,7 @@ namespace ESM
  * several files. 
  */
 
-struct LeveledListBase
+struct LeveledListBase : public Record
 {
     enum Flags
     {
@@ -27,29 +30,38 @@ struct LeveledListBase
     };                    // (used when a container has more
                           // than one instance of one leveled
                           // list.)
-    int flags;
-    unsigned char chanceNone; // Chance that none are selected (0-255?)
+    int mFlags;
+    unsigned char mChanceNone; // Chance that none are selected (0-255?)
 
     // Record name used to read references. Must be set before load() is
     // called.
-    const char *recName;
+    const char *mRecName;
 
     struct LevelItem
     {
-        std::string id;
-        short level;
+        std::string mId;
+        short mLevel;
     };
 
-    std::vector<LevelItem> list;
+    std::vector<LevelItem> mList;
 
     void load(ESMReader &esm);
+    void save(ESMWriter &esm);
+
+    int getName()
+    {
+        if (mRecName[0] == 'C')
+            return REC_LEVC;
+        
+        return REC_LEVI;
+    }
 };
 
 struct CreatureLevList: LeveledListBase
 {
     CreatureLevList()
     {
-        recName = "CNAM";
+        mRecName = "CNAM";
     }
 };
 
@@ -57,7 +69,7 @@ struct ItemLevList: LeveledListBase
 {
     ItemLevList()
     {
-        recName = "INAM";
+        mRecName = "INAM";
     }
 };
 

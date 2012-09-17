@@ -99,7 +99,7 @@ namespace MWRender
         if (land == NULL) // no land data means we're not going to create any terrain.
             return;
 
-        if (!land->dataLoaded)
+        if (!land->mDataLoaded)
         {
             land->loadData();
         }
@@ -134,7 +134,7 @@ namespace MWRender
                     const size_t xOffset = x * (mLandSize-1);
 
                     memcpy(&terrainData.inputFloat[terrainCopyY*mLandSize],
-                           &land->landData->heights[yOffset + xOffset],
+                           &land->mLandData->mHeights[yOffset + xOffset],
                            mLandSize*sizeof(float));
                 }
 
@@ -159,7 +159,7 @@ namespace MWRender
                     terrain->setRenderQueueGroup(RQG_Main);
 
                     // disable or enable global colour map (depends on available vertex colours)
-                    if ( land->landData->usingColours )
+                    if ( land->mLandData->mUsingColours )
                     {
                         TexturePtr vertex = getVertexColours(land,
                                                              cellX, cellY,
@@ -254,7 +254,7 @@ namespace MWRender
                 }
                 else
                 {
-                    texture = MWBase::Environment::get().getWorld()->getStore().landTexts.search(ltexIndex-1)->texture;
+                    texture = MWBase::Environment::get().getWorld()->getStore().landTexts.search(ltexIndex-1)->mTexture;
                     //TODO this is needed due to MWs messed up texture handling
                     texture = texture.substr(0, texture.rfind(".")) + ".dds";
                 }
@@ -413,13 +413,13 @@ namespace MWRender
         ESM::Land* land = MWBase::Environment::get().getWorld()->getStore().lands.search(cellX, cellY);
         if ( land != NULL )
         {
-            if (!land->dataLoaded)
+            if (!land->mDataLoaded)
             {
                 land->loadData();
             }
 
-            return land->landData
-                       ->textures[y * ESM::Land::LAND_TEXTURE_SIZE + x];
+            return land->mLandData
+                       ->mTextures[y * ESM::Land::LAND_TEXTURE_SIZE + x];
         }
         else
         {
@@ -463,7 +463,7 @@ namespace MWRender
 
         if ( land != NULL )
         {
-            const char* const colours = land->landData->colours;
+            const char* const colours = land->mLandData->mColours;
             for ( int y = 0; y < size; y++ )
             {
                 for ( int x = 0; x < size; x++ )

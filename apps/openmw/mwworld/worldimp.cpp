@@ -231,7 +231,7 @@ namespace MWWorld
         for (ESMS::RecListT<ESM::Region>::MapType::const_iterator iter (mStore.regions.list.begin());
             iter!=mStore.regions.list.end(); ++iter)
         {
-            if (ESMS::RecListT<ESM::Region>::toLower (iter->second.name)==cellName2)
+            if (ESMS::RecListT<ESM::Region>::toLower (iter->second.mName)==cellName2)
             {
                 if (const ESM::Cell *cell = mStore.cells.searchExtByRegion (iter->first))
                     return cell;
@@ -514,7 +514,7 @@ namespace MWWorld
             std::pair<std::string, float> result = mPhysics->getFacedHandle (*this);
 
             if (result.first.empty() ||
-                result.second>getStore().gameSettings.find ("iMaxActivateDist")->i)
+                result.second>getStore().gameSettings.find ("iMaxActivateDist")->mI)
                 return "";
 
             return result.first;
@@ -554,10 +554,10 @@ namespace MWWorld
         if (*currCell != newCell) {
             if (isPlayer) {
                 if (!newCell.isExterior()) {
-                    changeToInteriorCell(newCell.cell->name, pos);
+                    changeToInteriorCell(newCell.cell->mName, pos);
                 } else {
-                    int cellX = newCell.cell->data.gridX;
-                    int cellY = newCell.cell->data.gridY;
+                    int cellX = newCell.cell->mData.mX;
+                    int cellY = newCell.cell->mData.mY;
                     mWorldScene->changeCell(cellX, cellY, pos, false);
                 }
             } else {
@@ -621,7 +621,7 @@ namespace MWWorld
     {
         MWWorld::Class::get(ptr).adjustScale(ptr,scale);
 
-        ptr.getCellRef().scale = scale;
+        ptr.getCellRef().mScale = scale;
         //scale = scale/ptr.getRefData().getBaseNode()->getScale().x;
         ptr.getRefData().getBaseNode()->setScale(scale,scale,scale);
         mPhysics->scaleObject( ptr.getRefData().getHandle(), scale );
@@ -746,7 +746,7 @@ namespace MWWorld
         stream << "$dynamic" << mNextDynamicRecord++;
 
         ESM::Potion record2 (record);
-        record2.mId = stream.str();
+        record2.getId() = stream.str();
 
         const ESM::Potion *created =
             &mStore.potions.list.insert (std::make_pair (stream.str(), record2)).first->second;
@@ -772,23 +772,23 @@ namespace MWWorld
 
     const ESM::Cell *World::createRecord (const ESM::Cell& record)
     {
-        if (record.data.flags & ESM::Cell::Interior)
+        if (record.mData.mFlags & ESM::Cell::Interior)
         {
-            if (mStore.cells.searchInt (record.name))
+            if (mStore.cells.searchInt (record.mName))
                 throw std::runtime_error ("failed creating interior cell");
 
             ESM::Cell *cell = new ESM::Cell (record);
-            mStore.cells.intCells.insert (std::make_pair (record.name, cell));
+            mStore.cells.intCells.insert (std::make_pair (record.mName, cell));
             return cell;
         }
         else
         {
-            if (mStore.cells.searchExt (record.data.gridX, record.data.gridY))
+            if (mStore.cells.searchExt (record.mData.mX, record.mData.mY))
                 throw std::runtime_error ("failed creating exterior cell");
 
             ESM::Cell *cell = new ESM::Cell (record);
             mStore.cells.extCells.insert (
-                std::make_pair (std::make_pair (record.data.gridX, record.data.gridY), cell));
+                std::make_pair (std::make_pair (record.mData.mX, record.mData.mY), cell));
             return cell;
         }
     }
@@ -983,7 +983,7 @@ namespace MWWorld
         Ptr::CellStore *currentCell = mWorldScene->getCurrentCell();
         if (currentCell)
         {
-            if (!(currentCell->cell->data.flags & ESM::Cell::Interior))
+            if (!(currentCell->cell->mData.mFlags & ESM::Cell::Interior))
                 return true;
             else
                 return false;
@@ -996,7 +996,7 @@ namespace MWWorld
         Ptr::CellStore *currentCell = mWorldScene->getCurrentCell();
         if (currentCell)
         {
-            if (!(currentCell->cell->data.flags & ESM::Cell::QuasiEx))
+            if (!(currentCell->cell->mData.mFlags & ESM::Cell::QuasiEx))
                 return false;
             else
                 return true;
@@ -1041,28 +1041,28 @@ namespace MWWorld
         {
             MWWorld::LiveCellRef<ESM::Door>& ref = *it;
 
-            if (ref.ref.teleport)
+            if (ref.ref.mTeleport)
             {
                 World::DoorMarker newMarker;
 
                 std::string dest;
-                if (ref.ref.destCell != "")
+                if (ref.ref.mDestCell != "")
                 {
                     // door leads to an interior, use interior name
-                    dest = ref.ref.destCell;
+                    dest = ref.ref.mDestCell;
                 }
                 else
                 {
                     // door leads to exterior, use cell name (if any), otherwise translated region name
                     int x,y;
-                    positionToIndex (ref.ref.doorDest.pos[0], ref.ref.doorDest.pos[1], x, y);
+                    positionToIndex (ref.ref.mDoorDest.pos[0], ref.ref.mDoorDest.pos[1], x, y);
                     const ESM::Cell* cell = mStore.cells.findExt(x,y);
-                    if (cell->name != "")
-                        dest = cell->name;
+                    if (cell->mName != "")
+                        dest = cell->mName;
                     else
                     {
-                        const ESM::Region* region = mStore.regions.search(cell->region);
-                        dest = region->name;
+                        const ESM::Region* region = mStore.regions.search(cell->mRegion);
+                        dest = region->mName;
                     }
                 }
 
@@ -1212,10 +1212,10 @@ namespace MWWorld
     bool
     World::isUnderwater(const ESM::Cell &cell, const Ogre::Vector3 &pos)
     {
-        if (!(cell.data.flags & ESM::Cell::HasWater)) {
+        if (!(cell.mData.mFlags & ESM::Cell::HasWater)) {
             return false;
         }
-        return pos.z < cell.water;
+        return pos.z < cell.mWater;
     }
 
     void World::renderPlayer()
