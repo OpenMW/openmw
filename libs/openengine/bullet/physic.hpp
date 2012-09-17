@@ -93,12 +93,12 @@ namespace Physic
          * This returns the visual position of the PhysicActor (used to position a scenenode).
          * Note - this is different from the position of the contained mBody.
          */
-        Ogre::Vector3 getPosition(void);
+        Ogre::Vector3 getPosition();
 
         /**
          * Returns the visual orientation of the PhysicActor
          */
-        Ogre::Quaternion getRotation(void);
+        Ogre::Quaternion getRotation();
 
         /**
          * Sets the position of mBody from a visual position input.

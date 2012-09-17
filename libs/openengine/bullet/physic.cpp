@@ -112,7 +112,7 @@ namespace Physic
         }
     }
 
-    Ogre::Vector3 PhysicActor::getPosition(void)
+    Ogre::Vector3 PhysicActor::getPosition()
     {
         btVector3 vec = mBody->getWorldTransform().getOrigin();
         Ogre::Quaternion rotation = Ogre::Quaternion(mBody->getWorldTransform().getRotation().getW(), mBody->getWorldTransform().getRotation().getX(),
@@ -122,7 +122,7 @@ namespace Physic
         return visualPosition;
     }
 
-    Ogre::Quaternion PhysicActor::getRotation(void)
+    Ogre::Quaternion PhysicActor::getRotation()
     {
         btQuaternion quat = mBody->getWorldTransform().getRotation() * mBoxRotationInverse;
         return Ogre::Quaternion(quat.getW(), quat.getX(), quat.getY(), quat.getZ());
