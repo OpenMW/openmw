@@ -80,7 +80,7 @@ void OgreRenderer::start()
 #endif
 }
 
-bool OgreRenderer::loadPlugins() 
+void OgreRenderer::loadPlugins() 
 {
     #ifdef ENABLE_PLUGIN_GL
     mGLPlugin = new Ogre::GLPlugin();
@@ -102,10 +102,9 @@ bool OgreRenderer::loadPlugins()
     mParticleFXPlugin = new Ogre::ParticleFXPlugin();
     mRoot->installPlugin(mParticleFXPlugin);
     #endif
-    return true;
 }
 
-bool OgreRenderer::unloadPlugins()
+void OgreRenderer::unloadPlugins()
 {
     #ifdef ENABLE_PLUGIN_GL
     delete mGLPlugin;
@@ -127,7 +126,6 @@ bool OgreRenderer::unloadPlugins()
     delete mParticleFXPlugin;
     mParticleFXPlugin = NULL;
     #endif
-    return true;
 }
 
 void OgreRenderer::update(float dt)
