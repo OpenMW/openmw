@@ -14,7 +14,7 @@ namespace MWGui
     public:
         HUD(int width, int height, int fpsLevel, DragAndDrop* dragAndDrop);
         void setEffect(const char *img);
-        void setValue (const std::string& id, const MWMechanics::DynamicStat<int>& value);
+        void setValue (const std::string& id, const MWMechanics::DynamicStat<float>& value);
         void setFPS(float fps);
         void setTriangleCount(unsigned int count);
         void setBatchCount(unsigned int count);

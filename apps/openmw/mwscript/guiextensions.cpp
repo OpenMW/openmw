@@ -30,6 +30,16 @@ namespace MWScript
                 }
         };
 
+        class OpEnableRest : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWBase::Environment::get().getWindowManager()->enableRest();
+                }
+        };
+
         class OpShowDialogue : public Interpreter::Opcode0
         {
                 MWGui::GuiMode mDialogue;
@@ -146,12 +156,8 @@ opcodeEnableStatsReviewMenu);
             interpreter.installSegment5 (opcodeEnableStatsMenu,
                 new OpEnableWindow (MWGui::GW_Stats));
 
-            /* Not done yet. Enabling rest mode is not really a gui
-               issue, it's a gameplay issue.
-
             interpreter.installSegment5 (opcodeEnableRest,
-                new OpEnableDialogue (MWGui::GM_Rest));
-            */
+                new OpEnableRest ());
 
             interpreter.installSegment5 (opcodeShowRestMenu,
                 new OpShowDialogue (MWGui::GM_Rest));

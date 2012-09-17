@@ -137,7 +137,7 @@ void StatsWindow::setValue (const std::string& id, const MWMechanics::Stat<int>&
         }
 }
 
-void StatsWindow::setValue (const std::string& id, const MWMechanics::DynamicStat<int>& value)
+void StatsWindow::setValue (const std::string& id, const MWMechanics::DynamicStat<float>& value)
 {
     static const char *ids[] =
     {
@@ -150,7 +150,7 @@ void StatsWindow::setValue (const std::string& id, const MWMechanics::DynamicSta
         if (ids[i]==id)
         {
             std::string id (ids[i]);
-            setBar (id, id + "T", value.getCurrent(), value.getModified());
+            setBar (id, id + "T", static_cast<int>(value.getCurrent()), static_cast<int>(value.getModified()));
 
             // health, magicka, fatigue tooltip
             MyGUI::Widget* w;
@@ -236,11 +236,20 @@ void StatsWindow::configureSkills (const std::vector<int>& major, const std::vec
 
 void StatsWindow::onFrame ()
 {
-    if (mMainWidget->getVisible())
+    if (!mMainWidget->getVisible())
         return;
 
     MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
     MWMechanics::NpcStats PCstats = MWWorld::Class::get(player).getNpcStats(player);
+
+    // level progress
+    MyGUI::Widget* levelWidget;
+    for (int i=0; i<2; ++i)
+    {
+        getWidget(levelWidget, i==0 ? "Level_str" : "LevelText");
+        levelWidget->setUserString("RangePosition_LevelProgress", boost::lexical_cast<std::string>(PCstats.getLevelProgress()));
+        levelWidget->setUserString("Caption_LevelProgressText", boost::lexical_cast<std::string>(PCstats.getLevelProgress()) + "/10");
+    }
 
     setFactions(PCstats.getFactionRanks());
 

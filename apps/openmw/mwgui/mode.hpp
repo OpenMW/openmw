@@ -22,6 +22,8 @@ namespace MWGui
       GM_Rest,
       GM_SpellBuying,
 
+      GM_Levelup,
+
       // Startup character creation dialogs
       GM_Name,
       GM_Race,

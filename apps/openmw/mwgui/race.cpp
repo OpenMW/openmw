@@ -25,15 +25,18 @@ RaceDialog::RaceDialog(MWBase::WindowManager& parWindowManager)
   , mHairIndex(0)
   , mFaceCount(10)
   , mHairCount(14)
+  , mCurrentAngle(0)
 {
     // Centre dialog
     center();
 
-    // These are just demo values, you should replace these with
-    // real calls from outside the class later.
-
     setText("AppearanceT", mWindowManager.getGameSettingString("sRaceMenu1", "Appearance"));
-    getWidget(mAppearanceBox, "AppearanceBox");
+    getWidget(mPreviewImage, "PreviewImage");
+
+    MWBase::Environment::get().getWorld ()->setupExternalRendering (mPreview);
+    mPreview.update (0);
+
+    mPreviewImage->setImageTexture ("CharacterHeadPreview");
 
     getWidget(mHeadRotate, "HeadRotate");
     mHeadRotate->setScrollRange(50);
@@ -149,7 +152,10 @@ void RaceDialog::onBackClicked(MyGUI::Widget* _sender)
 
 void RaceDialog::onHeadRotate(MyGUI::ScrollBar*, size_t _position)
 {
-    // TODO: Rotate head
+    float angle = (float(_position) / 49.f - 0.5) * 3.14 * 2;
+    float diff = angle - mCurrentAngle;
+    mPreview.update (diff);
+    mCurrentAngle += diff;
 }
 
 void RaceDialog::onSelectPreviousGender(MyGUI::Widget*)

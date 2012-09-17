@@ -118,7 +118,7 @@ namespace MWBase
             /// Set value for the given ID.
             virtual void setValue (const std::string& id, const MWMechanics::Stat<int>& value) = 0;
             virtual void setValue (int parSkill, const MWMechanics::Stat<float>& value) = 0;
-            virtual void setValue (const std::string& id, const MWMechanics::DynamicStat<int>& value) = 0;
+            virtual void setValue (const std::string& id, const MWMechanics::DynamicStat<float>& value) = 0;
             virtual void setValue (const std::string& id, const std::string& value) = 0;
             virtual void setValue (const std::string& id, int value) = 0;
 
@@ -219,6 +219,9 @@ namespace MWBase
 
             virtual void setLoadingProgress (const std::string& stage, int depth, int current, int total) = 0;
             virtual void loadingDone() = 0;
+
+            virtual void enableRest() = 0;
+            virtual bool getRestEnabled() = 0;
     };
 }
 

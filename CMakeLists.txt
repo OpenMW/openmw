@@ -103,6 +103,7 @@ set(OENGINE_OGRE
   ${LIBDIR}/openengine/ogre/fader.cpp
   ${LIBDIR}/openengine/ogre/imagerotate.cpp
   ${LIBDIR}/openengine/ogre/atlas.cpp
+  ${LIBDIR}/openengine/ogre/selectionbuffer.cpp
 )
 set(OENGINE_GUI
   ${LIBDIR}/openengine/gui/manager.cpp
@@ -512,6 +513,7 @@ if (WIN32)
         4309 # Variable overflow, trying to store 128 in a signed char for example
         4355 # Using 'this' in member initialization list
         4701 # Potentially uninitialized local variable used
+		4800 # Boolean optimization warning, e.g. myBool = (myInt != 0) instead of myBool = myInt
         )
 
     foreach(d ${WARNINGS_DISABLE})
@@ -523,6 +525,7 @@ if (WIN32)
 		set_target_properties(omwlauncher PROPERTIES COMPILE_FLAGS ${WARNINGS})
 	endif (BUILD_LAUNCHER)
     set_target_properties(openmw PROPERTIES COMPILE_FLAGS ${WARNINGS})
+	set_target_properties(esmtool PROPERTIES COMPILE_FLAGS ${WARNINGS})
   endif(MSVC)
 
   # Same for MinGW

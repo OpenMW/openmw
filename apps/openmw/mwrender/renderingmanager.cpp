@@ -34,6 +34,7 @@
 #include "water.hpp"
 #include "compositors.hpp"
 #include "npcanimation.hpp"
+#include "externalrendering.hpp"
 
 using namespace MWRender;
 using namespace Ogre;
@@ -94,7 +95,7 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
     if (filter == "anisotropic") tfo = TFO_ANISOTROPIC;
     else if (filter == "trilinear") tfo = TFO_TRILINEAR;
     else if (filter == "bilinear") tfo = TFO_BILINEAR;
-    else if (filter == "none") tfo = TFO_NONE;
+    else /*if (filter == "none")*/ tfo = TFO_NONE;
 
     MaterialManager::getSingleton().setDefaultTextureFiltering(tfo);
     MaterialManager::getSingleton().setDefaultAnisotropy( (filter == "anisotropic") ? Settings::Manager::getInt("anisotropy", "General") : 1 );
@@ -137,7 +138,7 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
     // Morrowind uses, and it automagically makes everything work as it
     // should.
     SceneNode *rt = mRendering.getScene()->getRootSceneNode();
-    mMwRoot = rt->createChildSceneNode();
+    mMwRoot = rt->createChildSceneNode("mwRoot");
     mMwRoot->pitch(Degree(-90));
 
     mObjects.setMwRoot(mMwRoot);
@@ -723,7 +724,7 @@ void RenderingManager::processChangedSettings(const Settings::CategorySettingVec
             if (filter == "anisotropic") tfo = TFO_ANISOTROPIC;
             else if (filter == "trilinear") tfo = TFO_TRILINEAR;
             else if (filter == "bilinear") tfo = TFO_BILINEAR;
-            else if (filter == "none") tfo = TFO_NONE;
+            else /*if (filter == "none")*/ tfo = TFO_NONE;
 
             MaterialManager::getSingleton().setDefaultTextureFiltering(tfo);
             MaterialManager::getSingleton().setDefaultAnisotropy( (filter == "anisotropic") ? Settings::Manager::getInt("anisotropy", "General") : 1 );
@@ -858,9 +859,8 @@ void RenderingManager::renderPlayer(const MWWorld::Ptr &ptr)
 {
     MWRender::NpcAnimation *anim =
         new MWRender::NpcAnimation(
-            ptr,
-            mRendering,
-            MWWorld::Class::get(ptr).getInventoryStore(ptr)
+            ptr, ptr.getRefData ().getBaseNode (),
+            MWWorld::Class::get(ptr).getInventoryStore(ptr), RV_Actors
         );
     mPlayer->setAnimation(anim);
 }
@@ -880,6 +880,11 @@ void RenderingManager::getInteriorMapPosition (Ogre::Vector2 position, float& nX
 bool RenderingManager::isPositionExplored (float nX, float nY, int x, int y, bool interior)
 {
     return mLocalMap->isPositionExplored(nX, nY, x, y, interior);
+}
+
+void RenderingManager::setupExternalRendering (MWRender::ExternalRendering& rendering)
+{
+    rendering.setup (mRendering.getScene());
 }
 
 } // namespace

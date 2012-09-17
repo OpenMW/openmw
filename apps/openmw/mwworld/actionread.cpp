@@ -2,9 +2,17 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
+#include "../mwbase/world.hpp"
+
+#include "../mwworld/player.hpp"
+#include "../mwworld/class.hpp"
+
+#include "../mwmechanics/npcstats.hpp"
 
 #include "../mwgui/bookwindow.hpp"
 #include "../mwgui/scrollwindow.hpp"
+
+#include <components/esm_store/store.hpp>
 
 namespace MWWorld
 {
@@ -26,5 +34,23 @@ namespace MWWorld
             MWBase::Environment::get().getWindowManager()->pushGuiMode(MWGui::GM_Book);
             MWBase::Environment::get().getWindowManager()->getBookWindow()->open(getTarget());
         }
+
+        /*
+        // Skill gain from books
+        if (ref->base->data.skillID >= 0 && ref->base->data.skillID < ESM::Skill::Length)
+        {
+            MWWorld::Ptr player = MWBase::Environment::get().getWorld ()->getPlayer().getPlayer();
+            MWMechanics::NpcStats& npcStats = MWWorld::Class::get(player).getNpcStats (player);
+            MWWorld::LiveCellRef<ESM::NPC> *playerRef = player.get<ESM::NPC>();
+            const ESM::Class *class_ = MWBase::Environment::get().getWorld()->getStore().classes.find (
+                playerRef->base->cls);
+
+            npcStats.increaseSkill (ref->base->data.skillID, *class_, true);
+
+            /// \todo Remove skill from the book. Right now you can read as many times as you want
+            /// and the skill will still increase.
+        }
+        */
+
     }
 }

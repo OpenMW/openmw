@@ -62,6 +62,7 @@ namespace MWGui
   class AlchemyWindow;
   class QuickKeysMenu;
   class LoadingScreen;
+  class LevelupDialog;
 
   class WindowManager : public MWBase::WindowManager
   {
@@ -117,7 +118,7 @@ namespace MWGui
     ///< Set value for the given ID.
     virtual void setValue (const std::string& id, const MWMechanics::Stat<int>& value);
     virtual void setValue (int parSkill, const MWMechanics::Stat<float>& value);
-    virtual void setValue (const std::string& id, const MWMechanics::DynamicStat<int>& value);
+    virtual void setValue (const std::string& id, const MWMechanics::DynamicStat<float>& value);
     virtual void setValue (const std::string& id, const std::string& value);
     virtual void setValue (const std::string& id, int value);
 
@@ -199,6 +200,9 @@ namespace MWGui
     virtual void setLoadingProgress (const std::string& stage, int depth, int current, int total);
     virtual void loadingDone();
 
+    virtual void enableRest() { mRestAllowed = true; }
+    virtual bool getRestEnabled() { return mRestAllowed; }
+
   private:
     OEngine::GUI::MyGUIManager *mGuiManager;
     HUD *mHud;
@@ -224,6 +228,7 @@ namespace MWGui
     SpellWindow* mSpellWindow;
     QuickKeysMenu* mQuickKeysMenu;
     LoadingScreen* mLoadingScreen;
+    LevelupDialog* mLevelupDialog;
 
     CharacterCreation* mCharGen;
 
@@ -241,7 +246,7 @@ namespace MWGui
     std::map<int, MWMechanics::Stat<int> > mPlayerAttributes;
     SkillList mPlayerMajorSkills, mPlayerMinorSkills;
     std::map<int, MWMechanics::Stat<float> > mPlayerSkillValues;
-    MWMechanics::DynamicStat<int> mPlayerHealth, mPlayerMagicka, mPlayerFatigue;
+    MWMechanics::DynamicStat<float> mPlayerHealth, mPlayerMagicka, mPlayerFatigue;
 
 
     MyGUI::Gui *mGui; // Gui
@@ -258,6 +263,8 @@ namespace MWGui
        allow() and disableAll().
      */
     GuiWindow mAllowed;
+    // is the rest window allowed?
+    bool mRestAllowed;
 
     void updateVisible(); // Update visibility of all windows based on mode, shown and allowed settings
 

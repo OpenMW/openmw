@@ -215,7 +215,7 @@ void OgreRenderer::createWindow(const std::string &title, const WindowSettings& 
     mWindow = mRoot->createRenderWindow(title, settings.window_x, settings.window_y, settings.fullscreen, &params);
 
     // create the semi-transparent black background texture used by the GUI.
-    // has to be created in code with TU_DYNAMIC_WRITE_ONLY_DISCARDABLE param
+    // has to be created in code with TU_DYNAMIC_WRITE_ONLY param
     // so that it can be modified at runtime.
     Ogre::TextureManager::getSingleton().createManual(
                     "transparent.png",
@@ -224,7 +224,7 @@ void OgreRenderer::createWindow(const std::string &title, const WindowSettings& 
                     1, 1,
                     0,
                     Ogre::PF_A8R8G8B8,
-                    Ogre::TU_DYNAMIC_WRITE_ONLY_DISCARDABLE);
+                    Ogre::TU_DYNAMIC_WRITE_ONLY);
 }
 
 void OgreRenderer::createScene(const std::string& camName, float fov, float nearClip)

@@ -151,7 +151,7 @@ void CharacterCreation::setValue (const std::string& id, const MWMechanics::Stat
     }
 }
 
-void CharacterCreation::setValue (const std::string& id, const MWMechanics::DynamicStat<int>& value)
+void CharacterCreation::setValue (const std::string& id, const MWMechanics::DynamicStat<float>& value)
 {
     if (mReviewDialog)
     {
@@ -294,17 +294,17 @@ void CharacterCreation::spawnDialog(const char id)
     }
 }
 
-void CharacterCreation::setPlayerHealth (const MWMechanics::DynamicStat<int>& value)
+void CharacterCreation::setPlayerHealth (const MWMechanics::DynamicStat<float>& value)
 {
     mPlayerHealth = value;
 }
 
-void CharacterCreation::setPlayerMagicka (const MWMechanics::DynamicStat<int>& value)
+void CharacterCreation::setPlayerMagicka (const MWMechanics::DynamicStat<float>& value)
 {
     mPlayerMagicka = value;
 }
 
-void CharacterCreation::setPlayerFatigue (const MWMechanics::DynamicStat<int>& value)
+void CharacterCreation::setPlayerFatigue (const MWMechanics::DynamicStat<float>& value)
 {
     mPlayerFatigue = value;
 }

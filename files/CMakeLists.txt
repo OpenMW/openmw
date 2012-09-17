@@ -40,7 +40,9 @@ set(MATERIAL_FILES
     water.mat
     water.shader
     water.shaderset
-
+    selection.mat
+    selection.shader
+    selection.shaderset
 )
 
 copy_all_files(${CMAKE_CURRENT_SOURCE_DIR}/water "${OpenMW_BINARY_DIR}/resources/water/" "${WATER_FILES}")

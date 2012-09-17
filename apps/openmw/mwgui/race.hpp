@@ -1,11 +1,15 @@
 #ifndef MWGUI_RACE_H
 #define MWGUI_RACE_H
 
+
+#include <boost/array.hpp>
+
 #include <components/esm_store/store.hpp>
+
+#include "../mwrender/characterpreview.hpp"
 
 #include "window_base.hpp"
 
-#include <boost/array.hpp>
 
 namespace MWGui
 {
@@ -73,7 +77,7 @@ namespace MWGui
         void updateSkills();
         void updateSpellPowers();
 
-        MyGUI::CanvasPtr  mAppearanceBox;
+        MyGUI::ImageBox*  mPreviewImage;
         MyGUI::ListBox*   mRaceList;
         MyGUI::ScrollBar* mHeadRotate;
 
@@ -87,6 +91,10 @@ namespace MWGui
         int mFaceCount, mHairCount;
 
         std::string mCurrentRaceId;
+
+        float mCurrentAngle;
+
+        MWRender::RaceSelectionPreview mPreview;
     };
 }
 #endif

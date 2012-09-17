@@ -35,6 +35,11 @@ namespace MWRender
         mPreviewCam.yaw = 0.f;
         mPreviewCam.offset = 400.f;
     }
+
+    Player::~Player()
+    {
+        delete mAnimation;
+    }
     
     bool Player::rotate(const Ogre::Vector3 &rot, bool adjust)
     {

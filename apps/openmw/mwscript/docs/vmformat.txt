@@ -183,4 +183,8 @@ op 0x2000172: GetStartingAngle
 op 0x2000173: GetStartingAngle, explicit reference
 op 0x2000174: ToggleVanityMode
 op 0x2000175-0x200018B: Get controls disabled
-opcodes 0x200018C-0x3ffffff unused
+op 0x200018C: GetLevel
+op 0x200018D: GetLevel, explicit reference
+op 0x200018E: SetLevel
+op 0x200018F: SetLevel, explicit reference
+opcodes 0x200018F-0x3ffffff unused
