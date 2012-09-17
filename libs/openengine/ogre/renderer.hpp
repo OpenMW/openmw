@@ -151,7 +151,9 @@ namespace OEngine
             /// Start the main rendering loop
             void start();
 
-            bool loadPlugins() ;
+            bool loadPlugins();
+
+            bool unloadPlugins();
 
             void update(float dt);
 

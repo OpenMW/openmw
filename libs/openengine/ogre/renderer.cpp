@@ -44,8 +44,10 @@ void OgreRenderer::cleanup()
     delete mFader;
     mFader = NULL;
 
-    OGRE_DELETE mRoot;
+    delete mRoot;
     mRoot = NULL;
+
+    unloadPlugins();
 }
 
 void OgreRenderer::start()
@@ -99,6 +101,31 @@ bool OgreRenderer::loadPlugins()
     #ifdef ENABLE_PLUGIN_ParticleFX
     mParticleFXPlugin = new Ogre::ParticleFXPlugin();
     mRoot->installPlugin(mParticleFXPlugin);
+    #endif
+    return true;
+}
+
+bool OgreRenderer::unloadPlugins()
+{
+    #ifdef ENABLE_PLUGIN_GL
+    delete mGLPlugin;
+    mGLPlugin = NULL;
+    #endif
+    #ifdef ENABLE_PLUGIN_Direct3D9
+    delete mD3D9Plugin;
+    mD3D9Plugin = NULL;
+    #endif
+    #ifdef ENABLE_PLUGIN_CgProgramManager
+    delete mCgPlugin;
+    mCgPlugin = NULL;
+    #endif
+    #ifdef ENABLE_PLUGIN_OctreeSceneManager
+    delete mOctreePlugin;
+    mOctreePlugin = NULL;
+    #endif
+    #ifdef ENABLE_PLUGIN_ParticleFX
+    delete mParticleFXPlugin;
+    mParticleFXPlugin = NULL;
     #endif
     return true;
 }
