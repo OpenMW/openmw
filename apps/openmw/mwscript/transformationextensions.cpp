@@ -369,8 +369,9 @@ namespace MWScript
                         pos.pos[2] = z;
                         pos.rot[0] = pos.rot[1] = 0;
                         pos.rot[2]  = zRot;
-                        MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->getPtr(itemID,false);
-                        MWBase::Environment::get().getWorld()->safePlaceObject(ptr,*store,pos);
+                        MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(),itemID);
+                        ref.getPtr().getCellRef().pos = pos;
+                        MWBase::Environment::get().getWorld()->safePlaceObject(ref.getPtr(),*store,pos);
                     }
                     else
                     {
@@ -412,8 +413,9 @@ namespace MWScript
                         pos.pos[2] = z;
                         pos.rot[0] = pos.rot[1] = 0;
                         pos.rot[2]  = zRot;
-                        MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->getPtr(itemID,false);
-                        MWBase::Environment::get().getWorld()->safePlaceObject(ptr,*store,pos);
+                        MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(),itemID);
+                        ref.getPtr().getCellRef().pos = pos;
+                        MWBase::Environment::get().getWorld()->safePlaceObject(ref.getPtr(),*store,pos);
                     }
                     else
                     {
@@ -457,6 +459,7 @@ namespace MWScript
 
                     MWWorld::CellStore* store = MWBase::Environment::get().getWorld()->getPlayer().getPlayer().getCell();                    
                     MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(),itemID);
+                    ref.getPtr().getCellRef().pos = ipos;
                     ref.getPtr().getRefData().setCount(count);
                     MWBase::Environment::get().getWorld()->safePlaceObject(ref.getPtr(),*store,ipos);
                 }
@@ -499,6 +502,7 @@ namespace MWScript
 
                     MWWorld::CellStore* store = me.getCell();                    
                     MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(),itemID);
+                    ref.getPtr().getCellRef().pos = ipos;
                     ref.getPtr().getRefData().setCount(count);
                     MWBase::Environment::get().getWorld()->safePlaceObject(ref.getPtr(),*store,ipos);
 
