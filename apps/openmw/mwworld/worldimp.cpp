@@ -656,6 +656,11 @@ namespace MWWorld
         }
     }
 
+    void World::safePlaceObject(const MWWorld::Ptr& ptr,MWWorld::CellStore &Cell,ESM::Position pos)
+    {
+        copyObjectToCell(ptr,Cell,pos);
+    }
+
     void World::indexToPosition (int cellX, int cellY, float &x, float &y, bool centre) const
     {
         const int cellSize = 8192;

@@ -19,6 +19,7 @@
 
 #include "../mwworld/player.hpp"
 #include "components\esm\loadcell.hpp"
+#include "../mwworld/manualref.hpp"
 
 #include "OgreMath.h"
 namespace MWScript
@@ -369,7 +370,7 @@ namespace MWScript
                         pos.rot[0] = pos.rot[1] = 0;
                         pos.rot[2]  = zRot;
                         MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->getPtr(itemID,false);
-                        MWBase::Environment::get().getWorld()->copyObjectToCell(ptr,*store,pos);
+                        MWBase::Environment::get().getWorld()->safePlaceObject(ptr,*store,pos);
                     }
                     else
                     {
@@ -412,7 +413,7 @@ namespace MWScript
                         pos.rot[0] = pos.rot[1] = 0;
                         pos.rot[2]  = zRot;
                         MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->getPtr(itemID,false);
-                        MWBase::Environment::get().getWorld()->copyObjectToCell(ptr,*store,pos);
+                        MWBase::Environment::get().getWorld()->safePlaceObject(ptr,*store,pos);
                     }
                     else
                     {
@@ -450,13 +451,14 @@ namespace MWScript
                     ipos.pos[0] = pos.x;
                     ipos.pos[1] = pos.y;
                     ipos.pos[2] = pos.z;
+                    ipos.rot[0] = 0;
+                    ipos.rot[1] = 0;
+                    ipos.rot[2] = 0;
+
                     MWWorld::CellStore* store = MWBase::Environment::get().getWorld()->getPlayer().getPlayer().getCell();                    
-                    MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->getPtr(itemID,false);
-                    int icount = ptr.getRefData().getCount();
-                    ptr.getRefData().setCount(count);
-                    MWBase::Environment::get().getWorld()->copyObjectToCell(ptr,*store,ipos);
-                    ptr.getRefData().setCount(icount);
-                    //store->ge
+                    MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(),itemID);
+                    ref.getPtr().getRefData().setCount(count);
+                    MWBase::Environment::get().getWorld()->safePlaceObject(ref.getPtr(),*store,ipos);
                 }
         };
 
@@ -491,13 +493,15 @@ namespace MWScript
                     ipos.pos[0] = pos.x;
                     ipos.pos[1] = pos.y;
                     ipos.pos[2] = pos.z;
+                    ipos.rot[0] = 0;
+                    ipos.rot[1] = 0;
+                    ipos.rot[2] = 0;
+
                     MWWorld::CellStore* store = me.getCell();                    
-                    MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->getPtr(itemID,false);
-                    int icount = ptr.getRefData().getCount();
-                    ptr.getRefData().setCount(count);
-                    MWBase::Environment::get().getWorld()->copyObjectToCell(ptr,*store,ipos);
-                    ptr.getRefData().setCount(icount);
-                    //store->ge
+                    MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(),itemID);
+                    ref.getPtr().getRefData().setCount(count);
+                    MWBase::Environment::get().getWorld()->safePlaceObject(ref.getPtr(),*store,ipos);
+
                 }
         };
 
@@ -566,8 +570,8 @@ namespace MWScript
             interpreter.installSegment5(opcodePlaceItemCell,new OpPlaceItemCell<ImplicitRef>);            
             interpreter.installSegment5(opcodePlaceItem,new OpPlaceItem<ImplicitRef>);            
             interpreter.installSegment5(opcodePlaceAtPc,new OpPlaceAtPc<ImplicitRef>);   
-            interpreter.installSegment5(opcodePlaceAtMe,new OpPlaceAtPc<ImplicitRef>);   
-            interpreter.installSegment5(opcodePlaceAtMeExplicit,new OpPlaceAtPc<ExplicitRef>); 
+            interpreter.installSegment5(opcodePlaceAtMe,new OpPlaceAtMe<ImplicitRef>);   
+            interpreter.installSegment5(opcodePlaceAtMeExplicit,new OpPlaceAtMe<ExplicitRef>); 
         }
     }
 }
