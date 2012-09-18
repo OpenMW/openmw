@@ -1,6 +1,9 @@
 #include <boost/algorithm/string.hpp>
 
+#include <OgreMath.h>
+
 #include <components/esm_store/store.hpp>
+#include <components/esm/loadcell.hpp>
 
 #include <components/compiler/extensions.hpp>
 
@@ -11,17 +14,12 @@
 #include "../mwbase/environment.hpp"
 
 #include "../mwworld/class.hpp"
+#include "../mwworld/player.hpp"
+#include "../mwworld/manualref.hpp"
 
 #include "interpretercontext.hpp"
 #include "ref.hpp"
 #include "OgreSceneNode.h"
-
-
-#include "../mwworld/player.hpp"
-#include <components/esm/loadcell.hpp>
-#include "../mwworld/manualref.hpp"
-
-#include "OgreMath.h"
 
 namespace MWScript
 {
@@ -172,6 +170,8 @@ namespace MWScript
                     {
                         runtime.push(ptr.getRefData().getPosition().pos[2]);
                     }
+                    else
+                        throw std::runtime_error ("invalid rotation axis: " + axis);                    
                 }
         };
 
@@ -192,7 +192,6 @@ namespace MWScript
                     float ax = ptr.getRefData().getPosition().pos[0];
                     float ay = ptr.getRefData().getPosition().pos[1];
                     float az = ptr.getRefData().getPosition().pos[2];
-                    
 
                     if(axis == "x")
                     {
@@ -206,6 +205,8 @@ namespace MWScript
                     {
                         MWBase::Environment::get().getWorld()->moveObject(ptr,ax,ay,pos);
                     }
+                    else
+                        throw std::runtime_error ("invalid axis: " + axis);
                 }
         };
 
@@ -233,6 +234,8 @@ namespace MWScript
                     {
                         runtime.push(ptr.getCellRef().pos.pos[2]);
                     }
+                    else
+                        throw std::runtime_error ("invalid axis: " + axis);
                 }
         };
 
@@ -331,8 +334,6 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
-                    //MWWorld::Ptr ptr = R()(runtime);
-
                     std::string itemID = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
                     std::string cellID = runtime.getStringLiteral (runtime[0].mInteger);
@@ -402,10 +403,9 @@ namespace MWScript
                     Interpreter::Type_Float zRot = runtime[0].mFloat;
                     runtime.pop();
 
-                    MWWorld::CellStore* store = 0;
                     int cx,cy;
                     MWBase::Environment::get().getWorld()->positionToIndex(x,y,cx,cy);
-                    store = MWBase::Environment::get().getWorld()->getExterior(cx,cy);
+                    MWWorld::CellStore* store = MWBase::Environment::get().getWorld()->getExterior(cx,cy);
                     if(store)
                     {
                         ESM::Position pos;
