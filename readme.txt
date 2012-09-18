@@ -3,7 +3,7 @@ OpenMW: A reimplementation of The Elder Scrolls III: Morrowind
 OpenMW is an attempt at recreating the engine for the popular role-playing game
 Morrowind by Bethesda Softworks. You need to own and install the original game for OpenMW to work.
 
-Version: 0.17.0
+Version: 0.18.0
 License: GPL (see GPL3.txt for more information)
 Website: http://www.openmw.org
 
@@ -96,6 +96,39 @@ Allowed options:
 
 
 CHANGELOG
+
+0.18.0
+
+Bug #310: Button of the "preferences menu" are too small
+Bug #361: Hand-to-hand skill is always 100
+Bug #365: NPC and creature animation is jerky; Characters float around when they are not supposed to
+Bug #372: playSound3D uses original coordinates instead of current coordinates.
+Bug #373: Static OGRE build faulty
+Bug #375: Alt-tab toggle view
+Bug #376: Screenshots are disable
+Bug #378: Exception when drinking self-made potions
+Bug #380: Cloth visibility problem
+Bug #384: Weird character on doors tooltip.
+Bug #398: Some objects do not collide in MW, but do so in OpenMW
+Feature #22: Implement level-up
+Feature #36: Hide Marker
+Feature #88: Hotkey Window
+Feature #91: Level-Up Dialogue
+Feature #118: Keyboard and Mouse-Button bindings
+Feature #119: Spell Buying Window
+Feature #133: Handle resources across multiple data directories
+Feature #134: Generate a suitable default-value for --data-local
+Feature #292: Object Movement/Creation Script Instructions
+Feature #340: AIPackage data structures
+Feature #356: Ingredients use
+Feature #358: Input system rewrite
+Feature #370: Target handling in actions
+Feature #379: Door markers on the local map
+Feature #389: AI framework
+Feature #395: Using keys to open doors / containers
+Feature #396: Loading screens
+Feature #397: Inventory avatar image and race selection head preview
+Task #339: Move sounds into Action
 
 0.17.0
 
