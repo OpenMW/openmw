@@ -13,18 +13,22 @@
 
 void newtrace(traceResults* const results, const Ogre::Vector3& start, const Ogre::Vector3& end, const Ogre::Vector3& BBHalfExtents, const float rotation, bool isInterior, OEngine::Physic::PhysicEngine* enginePass)  //Traceobj was a Aedra Object
 {
-
+    static float lastyaw = 0.0f;
+    static float lastpitch = 0.0f;
 	//if (!traceobj)
 	//	return;
 
 	//if (!traceobj->incellptr)
 	//	return;
 
+    
 	const Ogre::Vector3 rayDir = end - start;
+    
+    
+   
 
-	// Nudge starting point backwards
-	//const Position3D nudgestart = start + (rayDir * -0.1f); // by 10% (isn't that too much?)
-	//const Position3D nudgestart = start;
+       
+ 
 
 	NewPhysTraceResults out;
 	//std::cout << "Starting trace\n";
@@ -32,7 +36,7 @@ void newtrace(traceResults* const results, const Ogre::Vector3& start, const Ogr
 	//Ogre::Vector3 endReplace = startReplace;
 	//endReplace.z -= .25;
 	
-	const bool hasHit = NewPhysicsTrace<collisionWorldTrace>(&out, start, end, BBHalfExtents, Ogre::Vector3(0.0f, 0.0, rotation), isInterior, enginePass);
+	const bool hasHit = NewPhysicsTrace<collisionWorldTrace>(&out, start, end, BBHalfExtents, Ogre::Vector3(0.0f, 0.0f, 0.0f), isInterior, enginePass);
 	
 	if (out.fraction < 0.001f)
 		results->startsolid = true;
@@ -95,13 +99,14 @@ const bool NewPhysicsTrace(NewPhysTraceResults* const out, const Ogre::Vector3& 
 	//if(enginePass->dynamicsWorld->getCollisionObjectArray().at(60)->getCollisionShape()->isConvex())
 	//	std::cout << "It's convex\n";
 	
-
+    
 
 	const btVector3 btstart(start.x, start.y, start.z + BBHalfExtents.z);
 	const btVector3 btend(end.x, end.y, end.z + BBHalfExtents.z);
 	const btQuaternion btrot(rotation.y, rotation.x, rotation.z);   //y, x, z
 
-	const btBoxShape newshape(btVector3(BBHalfExtents.x, BBHalfExtents.y, BBHalfExtents.z));
+    const btBoxShape newshape(btVector3(BBHalfExtents.x, BBHalfExtents.y, BBHalfExtents.z));
+	//const btCapsuleShapeZ newshape(BBHalfExtents.x, BBHalfExtents.z * 2 - BBHalfExtents.x * 2);
 	const btTransform from(btrot, btstart);
 	const btTransform to(btrot, btend);
 
@@ -176,7 +181,8 @@ const bool NewPhysicsTrace(NewPhysTraceResults* const out, const Ogre::Vector3& 
 			if (!TestPointAgainstAabb2(aabbMin, aabbMax, *(const btVector3* const)&(start) ) )
 			{
 				//We're solid
-				out->startSolid = true;
+				//THIS NEEDS TO BE TURNED OFF IF WE WANT FALLING IN EXTERIORS TO WORK CORRECTLY!!!!!!!
+                //out->startSolid = true;
 			}
 		}
 	}

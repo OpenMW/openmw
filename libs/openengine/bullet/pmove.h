@@ -23,7 +23,7 @@ Quake 3 Arena is copyright (C) 1999-2005 Id Software, Inc.
 extern SceneInstance* global_lastscene;
 #endif*/
 
-static const Ogre::Vector3 halfExtents(14.64f * 2, 14.24f * 2, 33.25f * 2);
+static const Ogre::Vector3 halfExtentsDefault(14.64f * 2, 14.24f * 2, 33.25f * 2);
 
 #define	MAX_CLIP_PLANES	5
 #define	OVERCLIP 1.001f
@@ -42,7 +42,6 @@ static const Ogre::Vector3 halfExtents(14.64f * 2, 14.24f * 2, 33.25f * 2);
 #define	ENTITYNUM_NONE (MAX_GENTITIES - 1)
 #define ENTITYNUM_WORLD (MAX_GENTITIES - 2)
 #define	MIN_WALK_NORMAL .7f // can't walk on very steep slopes
-#define	JUMP_VELOCITY (270)
 #define PS_PMOVEFRAMECOUNTBITS 6
 #define	MINS_Z -24
 #define	DEFAULT_VIEWHEIGHT 26
@@ -90,9 +89,9 @@ struct playerMove
 {
 	struct playerStruct
 	{
-		playerStruct() : gravity(800.0f), speed(480.0f), pmove_framecount(20), groundEntityNum(ENTITYNUM_NONE), commandTime(40), move_type(PM_NOCLIP), pm_time(0), snappingImplemented(true), bSnap(false), counter(-1)
+		playerStruct() : gravity(800.0f), speed(480.0f), jump_velocity(270), pmove_framecount(20), groundEntityNum(ENTITYNUM_NONE), commandTime(40), move_type(PM_NOCLIP), pm_time(0), snappingImplemented(true), bSnap(false), counter(-1), halfExtents(halfExtentsDefault)
 		{
-			origin = Ogre::Vector3(733.164f,900.0f, 839.432f);
+			origin = Ogre::Vector3(0.0f, 0.0f, 0.0f);
 			velocity = Ogre::Vector3(0.0f, 0.0f, 0.0f);
 
 			viewangles = Ogre::Vector3(0.0f, 0.0f, 0.0f);
@@ -117,11 +116,13 @@ struct playerMove
 
 		Ogre::Vector3 velocity;
 		Ogre::Vector3 origin;
+        Ogre::Vector3 halfExtents;
         bool bSnap;
         bool snappingImplemented;
         int counter;
 		float gravity; // default = 800
 		float speed; // default = 320
+        float jump_velocity;  //default = 270
 
 		int commandTime; // the time at which this command was issued (in milliseconds)
 
