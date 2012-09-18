@@ -142,6 +142,9 @@ namespace MWBase
             virtual MWWorld::Ptr getPtrViaHandle (const std::string& handle) = 0;
             ///< Return a pointer to a liveCellRef with the given Ogre handle.
 
+            virtual void
+            copyObjectToCell(const MWWorld::Ptr &ptr, MWWorld::CellStore &cell, const ESM::Position &pos) = 0;
+
             /// \todo enable reference in the OGRE scene
             virtual void enable (const MWWorld::Ptr& ptr) = 0;
 
@@ -203,6 +206,9 @@ namespace MWBase
             virtual void scaleObject (const MWWorld::Ptr& ptr, float scale) = 0;
 
             virtual void rotateObject(const MWWorld::Ptr& ptr,float x,float y,float z, bool adjust = false) = 0;
+
+            virtual void safePlaceObject(const MWWorld::Ptr& ptr,MWWorld::CellStore &Cell,ESM::Position pos) = 0;
+            ///< place an object in a "safe" location (ie not in the void, etc). Makes a copy of the Ptr. 
 
             virtual void indexToPosition (int cellX, int cellY, float &x, float &y, bool centre = false)
                 const = 0;
