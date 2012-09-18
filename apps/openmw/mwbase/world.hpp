@@ -142,9 +142,6 @@ namespace MWBase
             virtual MWWorld::Ptr getPtrViaHandle (const std::string& handle) = 0;
             ///< Return a pointer to a liveCellRef with the given Ogre handle.
 
-            virtual void
-            copyObjectToCell(const MWWorld::Ptr &ptr, MWWorld::CellStore &cell, const ESM::Position &pos) = 0;
-
             /// \todo enable reference in the OGRE scene
             virtual void enable (const MWWorld::Ptr& ptr) = 0;
 
@@ -208,7 +205,7 @@ namespace MWBase
             virtual void rotateObject(const MWWorld::Ptr& ptr,float x,float y,float z, bool adjust = false) = 0;
 
             virtual void safePlaceObject(const MWWorld::Ptr& ptr,MWWorld::CellStore &Cell,ESM::Position pos) = 0;
-            ///< place an object in a "safe" location (ie not in the void, etc). Makes a copy of the Ptr. 
+            ///< place an object in a "safe" location (ie not in the void, etc).
 
             virtual void indexToPosition (int cellX, int cellY, float &x, float &y, bool centre = false)
                 const = 0;
@@ -224,7 +221,7 @@ namespace MWBase
             virtual bool toggleCollisionMode() = 0;
             ///< Toggle collision mode for player. If disabled player object should ignore
             /// collisions and gravity.
-            ///< \return Resulting mode
+            /// \return Resulting mode
 
             virtual bool toggleRenderMode (RenderMode mode) = 0;
             ///< Toggle a render mode.

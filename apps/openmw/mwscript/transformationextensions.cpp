@@ -1,6 +1,7 @@
 #include <boost/algorithm/string.hpp>
 
 #include <OgreMath.h>
+#include <OgreSceneNode.h>
 
 #include <components/esm_store/store.hpp>
 #include <components/esm/loadcell.hpp>
@@ -19,7 +20,6 @@
 
 #include "interpretercontext.hpp"
 #include "ref.hpp"
-#include "OgreSceneNode.h"
 
 namespace MWScript
 {
@@ -389,8 +389,6 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
-                    //MWWorld::Ptr ptr = R()(runtime);
-
                     std::string itemID = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
 
