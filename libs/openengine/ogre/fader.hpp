@@ -4,52 +4,52 @@
 /*
   A class that handles fading in the screen from black or fading it out to black.
   
-  To achieve this, it uses a full-screen Ogre::Overlay
-  
-  inspired by http://www.ogre3d.org/tikiwiki/FadeEffectOverlay (heavily adjusted)
+  To achieve this, it uses a full-screen Rectangle2d
  */
  
 namespace Ogre
 {
     class TextureUnitState;
-    class Overlay;
+    class Rectangle2D;
+    class SceneManager;
 }
 
 namespace OEngine {
 namespace Render
 {
-  class Fader
-  {
-  public:
-    Fader();
-    
-    void update(float dt);
-    
-    void fadeIn(const float time);
-    void fadeOut(const float time);
-    void fadeTo(const int percent, const float time);
-        
-  private:
-    enum FadingMode
+    class Fader
     {
-        FadingMode_In,
-        FadingMode_Out
+    public:
+        Fader(Ogre::SceneManager* sceneMgr);
+        ~Fader();
+
+        void update(float dt);
+
+        void fadeIn(const float time);
+        void fadeOut(const float time);
+        void fadeTo(const int percent, const float time);
+
+    private:
+        enum FadingMode
+        {
+            FadingMode_In,
+            FadingMode_Out
+        };
+
+        void applyAlpha();
+
+        Ogre::TextureUnitState* mFadeTextureUnit;
+        Ogre::Rectangle2D* mRectangle;
+
+        FadingMode mMode;
+
+        float mRemainingTime;
+        float mTargetTime;
+        float mTargetAlpha;
+        float mCurrentAlpha;
+        float mStartAlpha;
+
+        Ogre::SceneManager* mSceneMgr;
     };
-    
-    void applyAlpha();
-  
-    Ogre::TextureUnitState* mFadeTextureUnit;
-    Ogre::Overlay* mOverlay;
-    
-    FadingMode mMode;
-    
-    float mRemainingTime;
-    float mTargetTime;
-    float mTargetAlpha;
-    float mCurrentAlpha;
-    float mStartAlpha;
-    
-  protected:
-  };
-}}
+    }}
 #endif
