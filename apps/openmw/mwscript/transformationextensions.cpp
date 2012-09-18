@@ -537,13 +537,13 @@ namespace MWScript
         {
             extensions.registerInstruction("setscale","f",opcodeSetScale,opcodeSetScaleExplicit);
             extensions.registerFunction("getscale",'f',"",opcodeGetScale,opcodeGetScaleExplicit);
-            extensions.registerInstruction("setangle","Sf",opcodeSetAngle,opcodeSetAngleExplicit);
-            extensions.registerFunction("getangle",'f',"S",opcodeGetAngle,opcodeGetAngleExplicit);
+            extensions.registerInstruction("setangle","cf",opcodeSetAngle,opcodeSetAngleExplicit);
+            extensions.registerFunction("getangle",'f',"c",opcodeGetAngle,opcodeGetAngleExplicit);
             extensions.registerInstruction("setpos","cf",opcodeSetPos,opcodeSetPosExplicit);
             extensions.registerFunction("getpos",'f',"c",opcodeGetPos,opcodeGetPosExplicit);
             extensions.registerFunction("getstartingpos",'f',"c",opcodeGetStartingPos,opcodeGetStartingPosExplicit);
             extensions.registerInstruction("position","ffff",opcodePosition,opcodePositionExplicit);
-            extensions.registerInstruction("positioncell","ffffS",opcodePositionCell,opcodePositionCellExplicit);
+            extensions.registerInstruction("positioncell","ffffc",opcodePositionCell,opcodePositionCellExplicit);
             extensions.registerInstruction("placeitemcell","ccffff",opcodePlaceItemCell);
             extensions.registerInstruction("placeitem","cffff",opcodePlaceItem);
             extensions.registerInstruction("placeatpc","clfl",opcodePlaceAtPc);
