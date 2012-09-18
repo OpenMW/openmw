@@ -226,7 +226,7 @@ namespace ESMS
       std::string id2 = toLower (id);
       X& ref = list[id2];
 
-      ref.mId = id;
+      ref.setId(id);
       ref.load(esm);
     }
 

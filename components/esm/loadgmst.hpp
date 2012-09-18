@@ -15,8 +15,6 @@ namespace ESM
 
 struct GameSetting : public Record
 {
-    std::string mId;
-
     // One of these is used depending on the variable type
     std::string mStr;
     int mI;

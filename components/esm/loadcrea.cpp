@@ -47,6 +47,9 @@ void Creature::save(ESMWriter &esm)
 
     mInventory.save(esm);
     mSpells.save(esm);
+    if (mHasAI) {
+        esm.writeHNT("AIDT", mAiData, sizeof(mAiData));
+    }
     mAiPackage.save(esm);
 }
 

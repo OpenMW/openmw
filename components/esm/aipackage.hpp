@@ -35,7 +35,7 @@ namespace ESM
     struct AITravel
     {
         float   mX, mY, mZ;
-        long    mUnk;
+        int     mUnk;
     };
 
     struct AITarget

@@ -81,6 +81,15 @@ void NPC::save(ESMWriter &esm)
     
     mInventory.save(esm);
     mSpells.save(esm);
+    if (mHasAI) {
+        esm.writeHNT("AIDT", mAiData, sizeof(mAiData));
+    }
+
+    typedef std::vector<Dest>::iterator DestIter;
+    for (DestIter it = mTransport.begin(); it != mTransport.end(); ++it) {
+        esm.writeHNT("DODT", it->mPos, sizeof(it->mPos));
+        esm.writeHNOCString("DNAM", it->mCellName);
+    }
     mAiPackage.save(esm);
 }
 
