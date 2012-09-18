@@ -63,6 +63,7 @@ namespace MWGui
   class QuickKeysMenu;
   class LoadingScreen;
   class LevelupDialog;
+  class WaitDialog;
 
   class WindowManager : public MWBase::WindowManager
   {
@@ -229,6 +230,7 @@ namespace MWGui
     QuickKeysMenu* mQuickKeysMenu;
     LoadingScreen* mLoadingScreen;
     LevelupDialog* mLevelupDialog;
+    WaitDialog* mWaitDialog;
 
     CharacterCreation* mCharGen;
 

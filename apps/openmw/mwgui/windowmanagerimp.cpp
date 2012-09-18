@@ -45,6 +45,7 @@
 #include "quickkeysmenu.hpp"
 #include "loadingscreen.hpp"
 #include "levelupdialog.hpp"
+#include "waitdialog.hpp"
 
 using namespace MWGui;
 
@@ -71,6 +72,8 @@ WindowManager::WindowManager(
   , mSpellWindow(NULL)
   , mLoadingScreen(NULL)
   , mCharGen(NULL)
+  , mLevelupDialog(NULL)
+  , mWaitDialog(NULL)
   , mPlayerClass()
   , mPlayerName()
   , mPlayerRaceId()
@@ -150,6 +153,7 @@ WindowManager::WindowManager(
     mSpellWindow = new SpellWindow(*this);
     mQuickKeysMenu = new QuickKeysMenu(*this);
     mLevelupDialog = new LevelupDialog(*this);
+    mWaitDialog = new WaitDialog(*this);
 
     mLoadingScreen = new LoadingScreen(mOgre->getScene (), mOgre->getWindow (), *this);
     mLoadingScreen->onResChange (w,h);
@@ -204,6 +208,7 @@ WindowManager::~WindowManager()
     delete mSpellWindow;
     delete mLoadingScreen;
     delete mLevelupDialog;
+    delete mWaitDialog;
 
     cleanupGarbage();
 
@@ -252,6 +257,7 @@ void WindowManager::updateVisible()
     mSpellWindow->setVisible(false);
     mQuickKeysMenu->setVisible(false);
     mLevelupDialog->setVisible(false);
+    mWaitDialog->setVisible(false);
 
     mHud->setVisible(true);
 
@@ -304,7 +310,8 @@ void WindowManager::updateVisible()
             mAlchemyWindow->setVisible(true);
             break;
         case GM_Rest:
-            mLevelupDialog->setVisible(true);
+            //mLevelupDialog->setVisible(true);
+            mWaitDialog->setVisible(true);
             break;
         case GM_Name:
         case GM_Race:

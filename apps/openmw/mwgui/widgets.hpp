@@ -357,10 +357,13 @@ namespace MWGui
         protected:
             virtual void align() = 0;
 
-            virtual void setPropertyOverride(const std::string& _key, const std::string& _value);
-
+            virtual void _setPropertyImpl(const std::string& _key, const std::string& _value);
 
             int mSpacing; // how much space to put between elements
+
+            int mPadding; // outer padding
+
+            bool mAutoResize; // auto resize the box so that it exactly fits all elements
         };
 
         class HBox : public Box, public MyGUI::Widget
@@ -369,10 +372,16 @@ namespace MWGui
 
         public:
             virtual void setSize (const MyGUI::IntSize &_value);
+            virtual void setCoord (const MyGUI::IntCoord &_value);
 
         protected:
             virtual void align();
             virtual MyGUI::IntSize getRequestedSize();
+
+            virtual void setPropertyOverride(const std::string& _key, const std::string& _value);
+
+            virtual void onWidgetCreated(MyGUI::Widget* _widget);
+            virtual void onWidgetDestroy(MyGUI::Widget* _widget);
         };
 
         class VBox : public Box, public MyGUI::Widget
@@ -381,10 +390,16 @@ namespace MWGui
 
         public:
             virtual void setSize (const MyGUI::IntSize &_value);
+            virtual void setCoord (const MyGUI::IntCoord &_value);
 
         protected:
             virtual void align();
             virtual MyGUI::IntSize getRequestedSize();
+
+            virtual void setPropertyOverride(const std::string& _key, const std::string& _value);
+
+            virtual void onWidgetCreated(MyGUI::Widget* _widget);
+            virtual void onWidgetDestroy(MyGUI::Widget* _widget);
         };
     }
 }
