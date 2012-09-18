@@ -6,22 +6,19 @@
         <Property key="Spacing" value="8"/>
         <Property key="AutoResize" value="true"/>
 
-        <Widget type="AutoSizedTextBox" skin="SandText">
+        <Widget type="AutoSizedTextBox" skin="SandText" name="DateTimeText">
             <Property key="Caption" value="24 Herzfeuer (Tag 24) 2 a.m."/>
         </Widget>
 
-        <Widget type="AutoSizedTextBox" skin="SandText">
-            <Property key="Caption" value="#{sRestIllegal}"/>
+        <Widget type="AutoSizedTextBox" skin="SandText" name="RestText">
         </Widget>
 
-        <Widget type="AutoSizedTextBox" skin="SandText">
-            <Property key="Caption" value="1 Stunde(n)"/>
+        <Widget type="AutoSizedTextBox" skin="SandText" name="HourText">
         </Widget>
 
         <Widget type="ScrollBar" skin="MW_HScroll" name="HourSlider" position="0 0 0 18">
             <Property key="MoveToClick" value="true"/>
-            <Property key="Range" value="25"/>
-            <Property key="RangePosition" value="23"/>
+            <Property key="Range" value="24"/>
             <UserString key="HStretch" value="true"/>
         </Widget>
 

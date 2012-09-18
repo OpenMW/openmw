@@ -998,7 +998,10 @@ MyGUI::IntSize HBox::getRequestedSize ()
         {
             MyGUI::IntSize requested = getChildAt(i)->getSize ();
             size.height = std::max(size.height, requested.height);
-            size.width = size.width + requested.width;
+
+            if (getChildAt(i)->getUserString("HStretch") != "true")
+                size.width = size.width + requested.width;
+
             if (i != getChildCount()-1)
                 size.width += mSpacing;
         }
@@ -1108,7 +1111,10 @@ MyGUI::IntSize VBox::getRequestedSize ()
         {
             MyGUI::IntSize requested = getChildAt(i)->getSize ();
             size.width = std::max(size.width, requested.width);
-            size.height = size.height + requested.height;
+
+            if (getChildAt(i)->getUserString("VStretch") != "true")
+                size.height = size.height + requested.height;
+
             if (i != getChildCount()-1)
                 size.height += mSpacing;
         }

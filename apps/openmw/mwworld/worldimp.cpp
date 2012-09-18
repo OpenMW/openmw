@@ -450,6 +450,16 @@ namespace MWWorld
         mRendering->skySetDate (mGlobalVariables->getInt ("day"), month);
     }
 
+    int World::getDay()
+    {
+        return mGlobalVariables->getInt("day");
+    }
+
+    int World::getMonth()
+    {
+        return mGlobalVariables->getInt("month");
+    }
+
     TimeStamp World::getTimeStamp() const
     {
         return TimeStamp (mGlobalVariables->getFloat ("gamehour"),
@@ -1240,5 +1250,15 @@ namespace MWWorld
     void World::setupExternalRendering (MWRender::ExternalRendering& rendering)
     {
         mRendering->setupExternalRendering (rendering);
+    }
+
+    bool World::canRest ()
+    {
+        Ptr::CellStore *currentCell = mWorldScene->getCurrentCell();
+        assert (currentCell);
+        if (currentCell->cell->data.flags & ESM::Cell::NoSleep)
+            return false;
+        else
+            return true;
     }
 }

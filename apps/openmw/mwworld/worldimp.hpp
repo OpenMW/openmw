@@ -179,6 +179,9 @@ namespace MWWorld
             virtual void setDay (int day);
             ///< Set in-game time day.
 
+            virtual int getDay();
+            virtual int getMonth();
+
             virtual TimeStamp getTimeStamp() const;
             ///< Return current in-game time stamp.
 
@@ -312,6 +315,8 @@ namespace MWWorld
             virtual void renderPlayer();
             
             virtual void setupExternalRendering (MWRender::ExternalRendering& rendering);
+
+            virtual bool canRest();
     };
 }
 
