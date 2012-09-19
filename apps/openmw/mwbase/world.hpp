@@ -160,6 +160,9 @@ namespace MWBase
             virtual void setDay (int day) = 0;
             ///< Set in-game time day.
 
+            virtual int getDay() = 0;
+            virtual int getMonth() = 0;
+
             virtual MWWorld::TimeStamp getTimeStamp() const = 0;
             ///< Return current in-game time stamp.
 
@@ -281,6 +284,13 @@ namespace MWBase
             virtual void renderPlayer() = 0;
             
             virtual void setupExternalRendering (MWRender::ExternalRendering& rendering) = 0;
+
+            virtual int canRest() = 0;
+            ///< check if the player is allowed to rest \n
+            /// 0 - yes \n
+            /// 1 - only waiting \n
+            /// 2 - player is underwater \n
+            /// 3 - enemies are nearby (not implemented)
     };
 }
 

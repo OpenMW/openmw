@@ -452,6 +452,16 @@ namespace MWWorld
         mRendering->skySetDate (mGlobalVariables->getInt ("day"), month);
     }
 
+    int World::getDay()
+    {
+        return mGlobalVariables->getInt("day");
+    }
+
+    int World::getMonth()
+    {
+        return mGlobalVariables->getInt("month");
+    }
+
     TimeStamp World::getTimeStamp() const
     {
         return TimeStamp (mGlobalVariables->getFloat ("gamehour"),
@@ -1246,5 +1256,29 @@ namespace MWWorld
     void World::setupExternalRendering (MWRender::ExternalRendering& rendering)
     {
         mRendering->setupExternalRendering (rendering);
+    }
+
+    int World::canRest ()
+    {
+        Ptr::CellStore *currentCell = mWorldScene->getCurrentCell();
+
+        Ogre::Vector3 playerPos;
+        float* pos = mPlayer->getPlayer ().getRefData ().getPosition ().pos;
+        playerPos.x = pos[0];
+        playerPos.y = pos[1];
+        playerPos.z = pos[2];
+
+        std::pair<bool, Ogre::Vector3> hit =
+                mPhysics->castRay(playerPos, Ogre::Vector3(0,0,-1), 50);
+        bool isOnGround = (hit.first ? (hit.second.distance (playerPos) < 25) : false);
+
+        if (!isOnGround || isUnderwater (*currentCell->cell, playerPos))
+            return 2;
+
+        if (currentCell->cell->data.flags & ESM::Cell::NoSleep)
+            return 1;
+
+        return 0;
+
     }
 }

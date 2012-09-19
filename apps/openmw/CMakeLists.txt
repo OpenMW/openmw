@@ -29,7 +29,7 @@ add_openmw_dir (mwgui
     map_window window_pinnable_base cursorreplace tooltips scrollwindow bookwindow list
     formatting inventorywindow container hud countdialog tradewindow settingswindow
     confirmationdialog alchemywindow referenceinterface spellwindow mainmenu quickkeysmenu
-    itemselection spellbuyingwindow loadingscreen levelupdialog
+    itemselection spellbuyingwindow loadingscreen levelupdialog waitdialog
     )
 
 add_openmw_dir (mwdialogue

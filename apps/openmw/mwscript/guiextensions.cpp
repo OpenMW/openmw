@@ -160,7 +160,7 @@ opcodeEnableStatsReviewMenu);
                 new OpEnableRest ());
 
             interpreter.installSegment5 (opcodeShowRestMenu,
-                new OpShowDialogue (MWGui::GM_Rest));
+                new OpShowDialogue (MWGui::GM_RestBed));
 
             interpreter.installSegment5 (opcodeGetButtonPressed, new OpGetButtonPressed);
 

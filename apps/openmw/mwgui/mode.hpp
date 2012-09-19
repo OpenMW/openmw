@@ -20,6 +20,7 @@ namespace MWGui
       GM_Dialogue,      // NPC interaction
       GM_Barter,
       GM_Rest,
+      GM_RestBed,
       GM_SpellBuying,
 
       GM_Levelup,
