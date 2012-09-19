@@ -749,6 +749,11 @@ void RenderingManager::processChangedSettings(const Settings::CategorySettingVec
             sh::Factory::getInstance ().setShadersEnabled (Settings::Manager::getBool("shaders", "Objects"));
             mObjects.rebuildStaticGeometry ();
         }
+        else if (it->second == "gamma" && it->first == "Video")
+        {
+            sh::Factory::getInstance ().setSharedParameter ("gammaCorrection", sh::makeProperty<sh::FloatValue>(new sh::FloatValue(
+                    Settings::Manager::getFloat ("gamma", "Video"))));
+        }
         else if (it->second == "shader mode" && it->first == "General")
         {
             sh::Language lang;

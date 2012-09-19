@@ -122,6 +122,7 @@ namespace MWGui
         getWidget(mInvertYButton, "InvertYButton");
         getWidget(mUISensitivitySlider, "UISensitivitySlider");
         getWidget(mCameraSensitivitySlider, "CameraSensitivitySlider");
+        getWidget(mGammaSlider, "GammaSlider");
 
         mSubtitlesButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onButtonToggled);
         mCrosshairButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onButtonToggled);
@@ -143,6 +144,7 @@ namespace MWGui
         mViewDistanceSlider->eventScrollChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onSliderChangePosition);
         mResolutionList->eventListChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onResolutionSelected);
         mAnisotropySlider->eventScrollChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onSliderChangePosition);
+        mGammaSlider->eventScrollChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onSliderChangePosition);
 
         mShadowsEnabledButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onButtonToggled);
         mShadowsLargeDistance->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onButtonToggled);
@@ -199,6 +201,14 @@ namespace MWGui
         MyGUI::TextBox* fovText;
         getWidget(fovText, "FovText");
         fovText->setCaption("Field of View (" + boost::lexical_cast<std::string>(int(Settings::Manager::getFloat("field of view", "General"))) + ")");
+
+        float gammaVal = (Settings::Manager::getFloat("gamma", "Video")-0.1f)/(3.f-0.1f);
+        mGammaSlider->setScrollPosition(gammaVal * (mGammaSlider->getScrollRange()-1));
+        MyGUI::TextBox* gammaText;
+        getWidget(gammaText, "GammaText");
+        std::stringstream gamma;
+        gamma << std::setprecision (2) << Settings::Manager::getFloat("gamma", "Video");
+        gammaText->setCaption("Gamma (" + gamma.str() + ")");
 
         float anisotropyVal = Settings::Manager::getInt("anisotropy", "General") / 16.0;
         mAnisotropySlider->setScrollPosition(anisotropyVal * (mAnisotropySlider->getScrollRange()-1));
@@ -510,6 +520,15 @@ namespace MWGui
             getWidget(fovText, "FovText");
             fovText->setCaption("Field of View (" + boost::lexical_cast<std::string>(int((1-val) * sFovMin + val * sFovMax)) + ")");
             Settings::Manager::setFloat("field of view", "General", (1-val) * sFovMin + val * sFovMax);
+        }
+        else if (scroller == mGammaSlider)
+        {
+            Settings::Manager::setFloat("gamma", "Video", (1-val) * 0.1f + val * 3.f);
+            MyGUI::TextBox* gammaText;
+            getWidget(gammaText, "GammaText");
+            std::stringstream gamma;
+            gamma << std::setprecision (2) << Settings::Manager::getFloat("gamma", "Video");
+            gammaText->setCaption("Gamma (" + gamma.str() + ")");
         }
         else if (scroller == mAnisotropySlider)
         {
