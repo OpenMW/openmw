@@ -1,3 +1,7 @@
+#define gammaCorrectRead(v) pow(v, float3(gammaCorrection,gammaCorrection,gammaCorrection))
+#define gammaCorrectOutput(v) pow(v, float3(1.f/gammaCorrection,1.f/gammaCorrection,1.f/gammaCorrection))
+
+
 #if SH_HLSL == 1 || SH_CG == 1
 
     #define shTexture2D sampler2D
