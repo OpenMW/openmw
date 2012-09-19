@@ -40,7 +40,7 @@ RaceDialog::RaceDialog(MWBase::WindowManager& parWindowManager)
 
     getWidget(mHeadRotate, "HeadRotate");
     mHeadRotate->setScrollRange(50);
-    mHeadRotate->setScrollPosition(20);
+    mHeadRotate->setScrollPosition(25);
     mHeadRotate->setScrollViewPage(10);
     mHeadRotate->eventScrollChangePosition += MyGUI::newDelegate(this, &RaceDialog::onHeadRotate);
 

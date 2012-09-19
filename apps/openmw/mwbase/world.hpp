@@ -285,7 +285,12 @@ namespace MWBase
             
             virtual void setupExternalRendering (MWRender::ExternalRendering& rendering) = 0;
 
-            virtual bool canRest() = 0;
+            virtual int canRest() = 0;
+            ///< check if the player is allowed to rest \n
+            /// 0 - yes \n
+            /// 1 - only waiting \n
+            /// 2 - player is underwater \n
+            /// 3 - enemies are nearby (not implemented)
     };
 }
 

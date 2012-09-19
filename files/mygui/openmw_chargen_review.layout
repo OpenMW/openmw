@@ -112,7 +112,9 @@
 
         <!-- Dialog buttons -->
         <Widget type="HBox" position="0 372 502 24">
-            <Widget type="Widget"/>
+            <Widget type="Widget">
+                <UserString key="HStretch" value="true"/>
+            </Widget>
             <Widget type="AutoSizedButton" skin="MW_Button" name="BackButton">
                 <Property key="Caption" value="#{sBack}"/>
             </Widget>

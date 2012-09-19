@@ -56,7 +56,9 @@
             </Widget>
 
             <Widget type="HBox" position="0 60 566 24" align="Right Bottom">
-                <Widget type="Widget"/>
+                <Widget type="Widget">
+                    <UserString key="HStretch" value="true"/>
+                </Widget>
                 <Widget type="AutoSizedButton" skin="MW_Button" name="OfferButton" align="Right Top">
                     <Property key="Caption" value="#{sBarterDialog8}"/>
                 </Widget>

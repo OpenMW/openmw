@@ -173,7 +173,7 @@ namespace MWGui
             creatureStats.setLevel (creatureStats.getLevel()+1);
             pcStats.levelUp ();
 
-            mWindowManager.removeGuiMode (GM_Rest);
+            mWindowManager.removeGuiMode (GM_Levelup);
         }
 
     }

@@ -316,7 +316,12 @@ namespace MWWorld
             
             virtual void setupExternalRendering (MWRender::ExternalRendering& rendering);
 
-            virtual bool canRest();
+            virtual int canRest();
+            ///< check if the player is allowed to rest \n
+            /// 0 - yes \n
+            /// 1 - only waiting \n
+            /// 2 - player is underwater \n
+            /// 3 - enemies are nearby (not implemented)
     };
 }
 

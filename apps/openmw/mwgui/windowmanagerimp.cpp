@@ -310,8 +310,14 @@ void WindowManager::updateVisible()
             mAlchemyWindow->setVisible(true);
             break;
         case GM_Rest:
-            //mLevelupDialog->setVisible(true);
             mWaitDialog->setVisible(true);
+            break;
+        case GM_RestBed:
+            mWaitDialog->setVisible(true);
+            mWaitDialog->bedActivated();
+            break;
+        case GM_Levelup:
+            mLevelupDialog->setVisible(true);
             break;
         case GM_Name:
         case GM_Race:
@@ -546,6 +552,8 @@ void WindowManager::onFrame (float frameDuration)
     mInventoryWindow->onFrame();
 
     mStatsWindow->onFrame();
+
+    mWaitDialog->onFrame(frameDuration);
 
     mHud->onFrame(frameDuration);
 

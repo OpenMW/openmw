@@ -795,7 +795,6 @@ void MWDynamicStat::initialiseOverride()
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-
 void AutoSizedWidget::notifySizeChange (MyGUI::Widget* w)
 {
     if (w->getParent () != 0)

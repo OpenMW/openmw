@@ -39,6 +39,7 @@ Fader::Fader(Ogre::SceneManager* sceneMgr)
     Ogre::SceneNode* node = mSceneMgr->getRootSceneNode()->createChildSceneNode();
     node->attachObject(mRectangle);
     mRectangle->setVisible(false);
+    mRectangle->setVisibilityFlags (0x01);
 }
 
 Fader::~Fader()

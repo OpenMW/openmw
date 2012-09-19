@@ -74,6 +74,7 @@ set(MYGUI_FILES
     openmw_loading_screen.layout
     openmw_levelup_dialog.layout
     openmw_wait_dialog.layout
+    openmw_wait_dialog_progressbar.layout
     smallbars.png
     VeraMono.ttf
     markers.png

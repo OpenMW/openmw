@@ -1252,13 +1252,27 @@ namespace MWWorld
         mRendering->setupExternalRendering (rendering);
     }
 
-    bool World::canRest ()
+    int World::canRest ()
     {
         Ptr::CellStore *currentCell = mWorldScene->getCurrentCell();
-        assert (currentCell);
+
+        Ogre::Vector3 playerPos;
+        float* pos = mPlayer->getPlayer ().getRefData ().getPosition ().pos;
+        playerPos.x = pos[0];
+        playerPos.y = pos[1];
+        playerPos.z = pos[2];
+
+        std::pair<bool, Ogre::Vector3> hit =
+                mPhysics->castRay(playerPos, Ogre::Vector3(0,0,-1), 50);
+        bool isOnGround = (hit.first ? (hit.second.distance (playerPos) < 25) : false);
+
+        if (!isOnGround || isUnderwater (*currentCell->cell, playerPos))
+            return 2;
+
         if (currentCell->cell->data.flags & ESM::Cell::NoSleep)
-            return false;
-        else
-            return true;
+            return 1;
+
+        return 0;
+
     }
 }

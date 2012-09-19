@@ -22,7 +22,9 @@
 
 
         <Widget type="HBox" position="0 90 572 24" align="Right Bottom">
-            <Widget type="Widget"/> <!-- spacer -->
+            <Widget type="Widget">
+                <UserString key="HStretch" value="true"/>
+            </Widget>
             <Widget type="AutoSizedButton" skin="MW_Button" position="417 90 60 24" name="CancelButton" align="Right Top">
                 <Property key="Caption" value="#{sCancel}"/>
             </Widget>
