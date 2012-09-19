@@ -442,7 +442,7 @@ namespace MWScript
 
                     ESM::Position ipos = MWBase::Environment::get().getWorld()->getPlayer().getPlayer().getRefData().getPosition();
                     Ogre::Vector3 pos(ipos.pos[0],ipos.pos[1],ipos.pos[2]);
-                    Ogre::Quaternion rot(Ogre::Radian(ipos.rot[2]), Ogre::Vector3::UNIT_Z);
+                    Ogre::Quaternion rot(Ogre::Radian(-ipos.rot[2]), Ogre::Vector3::UNIT_Z);
                     if(direction == 0) pos = pos + distance*rot.yAxis();
                     else if(direction == 1) pos = pos - distance*rot.yAxis();
                     else if(direction == 2) pos = pos - distance*rot.xAxis();
@@ -485,7 +485,7 @@ namespace MWScript
 
                     ESM::Position ipos = me.getRefData().getPosition();
                     Ogre::Vector3 pos(ipos.pos[0],ipos.pos[1],ipos.pos[2]);
-                    Ogre::Quaternion rot(Ogre::Radian(ipos.rot[2]), Ogre::Vector3::UNIT_Z);
+                    Ogre::Quaternion rot(Ogre::Radian(-ipos.rot[2]), Ogre::Vector3::UNIT_Z);
                     if(direction == 0) pos = pos + distance*rot.yAxis();
                     else if(direction == 1) pos = pos - distance*rot.yAxis();
                     else if(direction == 2) pos = pos - distance*rot.xAxis();
