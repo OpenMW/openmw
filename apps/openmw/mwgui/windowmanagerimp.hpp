@@ -204,6 +204,8 @@ namespace MWGui
     virtual void enableRest() { mRestAllowed = true; }
     virtual bool getRestEnabled() { return mRestAllowed; }
 
+    virtual bool getPlayerSleeping();
+
   private:
     OEngine::GUI::MyGUIManager *mGuiManager;
     HUD *mHud;

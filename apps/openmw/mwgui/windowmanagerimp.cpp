@@ -946,3 +946,8 @@ void WindowManager::loadingDone ()
 {
     mLoadingScreen->loadingDone ();
 }
+
+bool WindowManager::getPlayerSleeping ()
+{
+    return mWaitDialog->getSleeping();
+}
