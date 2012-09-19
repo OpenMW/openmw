@@ -132,6 +132,7 @@ namespace OEngine
             void configure(
                 const std::string &logPath, // Path to directory where to store log files
                 const std::string &renderSystem,
+                const std::string &rttMode,
                 bool _logging);      // Enable or disable logging
 
             /// Create a window with the given title

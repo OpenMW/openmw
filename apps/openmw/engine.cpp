@@ -299,6 +299,7 @@ void OMW::Engine::go()
     mOgre->configure(
         mCfgMgr.getLogPath().string(),
         renderSystem,
+        Settings::Manager::getString("opengl rtt mode", "Video"),
         false);
 
     // This has to be added BEFORE MyGUI is initialized, as it needs

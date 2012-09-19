@@ -145,6 +145,7 @@ float OgreRenderer::getFPS()
 
 void OgreRenderer::configure(const std::string &logPath,
                             const std::string& renderSystem,
+                             const std::string& rttMode,
                             bool _logging)
 {
     // Set up logging first
@@ -198,6 +199,9 @@ void OgreRenderer::configure(const std::string &logPath,
     if (rs == 0)
         throw std::runtime_error ("RenderSystem with name " + renderSystem + " not found, make sure the plugins are loaded");
     mRoot->setRenderSystem(rs);
+
+    if (rs->getName().find("OpenGL") != std::string::npos)
+        rs->setConfigOption ("RTT Preferred Mode", rttMode);
 }
 
 void OgreRenderer::createWindow(const std::string &title, const WindowSettings& settings)
