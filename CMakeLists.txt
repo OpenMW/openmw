@@ -633,7 +633,7 @@ if (APPLE)
         include(CPack)
 endif (APPLE)
 
-if (NOT WIN32 AND NOT DPKG_PROGRAM)
+if (NOT WIN32 AND NOT DPKG_PROGRAM AND NOT APPLE)
     ## Non Debian based Linux building
     # paths
     set(BINDIR "${CMAKE_INSTALL_PREFIX}/usr/bin" CACHE PATH "Where to install binaries")
@@ -664,4 +664,4 @@ if (NOT WIN32 AND NOT DPKG_PROGRAM)
     # Install resources
     INSTALL(DIRECTORY "${OpenMW_BINARY_DIR}/resources" DESTINATION "${DATADIR}" )
     INSTALL(FILES "${OpenMW_BINARY_DIR}/launcher.qss" DESTINATION "${DATADIR}/resources" )
-endif(NOT WIN32 AND NOT DPKG_PROGRAM)
+endif(NOT WIN32 AND NOT DPKG_PROGRAM AND NOT APPLE)
