@@ -126,7 +126,6 @@ namespace MWRender
                             data[texelY * height * 3 + texelX * 3+1] = g;
                             data[texelY * height * 3 + texelX * 3+2] = b;
                         }
-                        assert(0);
                     }
                 }
             }
