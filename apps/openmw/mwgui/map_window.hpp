@@ -62,6 +62,8 @@ namespace MWGui
 
         void setCellName(const std::string& cellName);
 
+        void addVisitedLocation(const std::string& name, int x, int y); // adds the marker to the global map
+
         virtual void open();
 
     private:
@@ -71,10 +73,17 @@ namespace MWGui
 
         MyGUI::ScrollView* mGlobalMap;
         MyGUI::ImageBox* mGlobalMapImage;
-        MyGUI::ImageBox* mPlayerArrow;
+        MyGUI::ImageBox* mPlayerArrowLocal;
+        MyGUI::ImageBox* mPlayerArrowGlobal;
         MyGUI::Button* mButton;
         MyGUI::IntPoint mLastDragPos;
         bool mGlobal;
+
+        MyGUI::Button* mEventBoxGlobal;
+        MyGUI::Button* mEventBoxLocal;
+
+        int mGlobalMapSizeX;
+        int mGlobalMapSizeY;
 
     protected:
         virtual void onPinToggled();

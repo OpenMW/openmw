@@ -7,10 +7,11 @@
         <Widget type="ScrollView" skin="MW_MapView" position="0 0 284 264" align="ALIGN_STRETCH" name="LocalMap">
             <Property key="CanvasSize" value="1536 1536"/>
 
-            <Widget type="ImageBox" skin="RotatingSkin" position="0 0 32 32" align="ALIGN_TOP ALIGN_LEFT" name="Compass">
+            <Widget type="ImageBox" skin="RotatingSkin" position="0 0 32 32" align="ALIGN_TOP ALIGN_LEFT" name="CompassLocal">
                 <Property key="ImageTexture" value="textures\compass.dds"/>
             </Widget>
 
+            <Widget type="Button" skin="" position_real="0 0 1 1" name="EventBoxLocal" align="ALIGN_STRETCH"/>
         </Widget>
 
         <!-- Global map -->
@@ -19,9 +20,14 @@
 
             <Widget type="ImageBox" skin="ImageBox" position_real="0 0 1 1" align="Stretch" name="GlobalMapImage">
             </Widget>
+
+            <Widget type="ImageBox" skin="RotatingSkin" position="0 0 32 32" align="ALIGN_TOP ALIGN_LEFT" name="CompassGlobal">
+                <Property key="ImageTexture" value="textures\compass.dds"/>
+            </Widget>
+
+            <Widget type="Button" skin="" position_real="0 0 1 1" name="EventBoxGlobal" align="ALIGN_STRETCH"/>
         </Widget>
 
-        <Widget type="Button" skin="" position="0 0 300 300" name="EventBox" align="ALIGN_STRETCH"/>
 
         <!-- World button -->
         <Widget type="AutoSizedButton" skin="MW_Button" position="213 233 61 22" align="ALIGN_BOTTOM ALIGN_RIGHT" name="WorldButton">

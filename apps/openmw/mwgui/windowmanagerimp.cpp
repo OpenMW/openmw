@@ -555,7 +555,10 @@ void WindowManager::changeCell(MWWorld::Ptr::CellStore* cell)
     {
         std::string name;
         if (cell->cell->name != "")
+        {
             name = cell->cell->name;
+            mMap->addVisitedLocation (name, cell->cell->getGridX (), cell->cell->getGridY ());
+        }
         else
         {
             const ESM::Region* region = MWBase::Environment::get().getWorld()->getStore().regions.search(cell->cell->region);
