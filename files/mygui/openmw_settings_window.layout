@@ -157,7 +157,7 @@
                     <Widget type="TabItem" skin="" position="4 28 344 272">
                         <Property key="Caption" value="  Video  "/>
 
-                        <Widget type="ListBox" skin="MW_List" position="4 4 200 150" align="Left Top" name="ResolutionList"/>
+                        <Widget type="ListBox" skin="MW_List" position="4 4 200 120" align="Left Top" name="ResolutionList"/>
 
 
                         <Widget type="HBox" position="212 4 300 24">
@@ -174,19 +174,36 @@
                             </Widget>
                         </Widget>
 
-                        <Widget type="HBox" position="212 104 300 24">
+                        <Widget type="HBox" position="212 64 300 24">
                             <Widget type="AutoSizedButton" skin="MW_Button" align="Left Top" name="ShadersButton"/>
                             <Widget type="AutoSizedTextBox" skin="SandText" align="Left Top">
                                 <Property key="Caption" value="Shaders"/>
                             </Widget>
                         </Widget>
 
-                        <Widget type="HBox" position="4 163 300 24">
+                        <Widget type="HBox" position="212 94 300 24">
                             <Widget type="AutoSizedButton" skin="MW_Button" align="Left Top" name="FPSButton"/>
                             <Widget type="AutoSizedTextBox" skin="SandText" align="Left Top">
-                                <Property key="Caption" value="Show frames per second"/>
+                                <Property key="Caption" value="FPS"/>
                             </Widget>
                         </Widget>
+
+
+                        <Widget type="TextBox" skin="NormalText" position="4 128 329 18" align="Left Top" name="GammaText">
+                            <Property key="Caption" value="Gamma"/>
+                        </Widget>
+                        <Widget type="ScrollBar" skin="MW_HSlider" position="4 152 329 18" align="Left Top" name="GammaSlider">
+                            <Property key="Range" value="1000000"/>
+                        </Widget>
+                        <Widget type="TextBox" skin="SandText" position="4 176 329 18" align="Left Top">
+                            <Property key="Caption" value="#{sDark_Gamma}"/>
+                            <Property key="TextAlign" value="Left"/>
+                        </Widget>
+                        <Widget type="TextBox" skin="SandText" position="4 176 329 18" align="Left Top">
+                            <Property key="Caption" value="#{sLight_Gamma}"/>
+                            <Property key="TextAlign" value="Right"/>
+                        </Widget>
+
 
                         <Widget type="TextBox" skin="NormalText" position="4 198 329 18" align="Left Top" name="FovText">
                             <Property key="Caption" value="Field of View"/>

@@ -129,6 +129,8 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
     sh::Factory::getInstance ().setSharedParameter ("waterTimer", sh::makeProperty<sh::FloatValue>(new sh::FloatValue(0)));
     sh::Factory::getInstance ().setSharedParameter ("windDir_windSpeed", sh::makeProperty<sh::Vector3>(new sh::Vector3(0.5, -0.8, 0.2)));
     sh::Factory::getInstance ().setSharedParameter ("waterSunFade_sunHeight", sh::makeProperty<sh::Vector2>(new sh::Vector2(1, 0.6)));
+    sh::Factory::getInstance ().setSharedParameter ("gammaCorrection", sh::makeProperty<sh::FloatValue>(new sh::FloatValue(
+            Settings::Manager::getFloat ("gamma", "Video"))));
 
     applyCompositors();
 
@@ -748,6 +750,11 @@ void RenderingManager::processChangedSettings(const Settings::CategorySettingVec
         {
             sh::Factory::getInstance ().setShadersEnabled (Settings::Manager::getBool("shaders", "Objects"));
             mObjects.rebuildStaticGeometry ();
+        }
+        else if (it->second == "gamma" && it->first == "Video")
+        {
+            sh::Factory::getInstance ().setSharedParameter ("gammaCorrection", sh::makeProperty<sh::FloatValue>(new sh::FloatValue(
+                    Settings::Manager::getFloat ("gamma", "Video"))));
         }
         else if (it->second == "shader mode" && it->first == "General")
         {
