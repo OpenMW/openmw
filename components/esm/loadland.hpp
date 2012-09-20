@@ -60,7 +60,7 @@ struct Land
     {
         float heightOffset;
         float heights[LAND_NUM_VERTS];
-        //float normals[LAND_NUM_VERTS * 3];
+        float normals[LAND_NUM_VERTS * 3];
         uint16_t textures[LAND_NUM_TEXTURES];
 
         bool usingColours;

@@ -62,12 +62,15 @@ namespace MWGui
 
         void setCellName(const std::string& cellName);
 
+        virtual void open();
+
     private:
         void onDragStart(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id);
         void onMouseDrag(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id);
         void onWorldButtonClicked(MyGUI::Widget* _sender);
 
         MyGUI::ScrollView* mGlobalMap;
+        MyGUI::ImageBox* mGlobalMapImage;
         MyGUI::ImageBox* mPlayerArrow;
         MyGUI::Button* mButton;
         MyGUI::IntPoint mLastDragPos;

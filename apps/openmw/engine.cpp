@@ -307,6 +307,8 @@ void OMW::Engine::go()
 
     //addResourcesDirectory(mResDir);
 
+    addResourcesDirectory(mCfgMgr.getCachePath ().string());
+
     addResourcesDirectory(mResDir / "mygui");
     addResourcesDirectory(mResDir / "water");
     addResourcesDirectory(mResDir / "gbuffer");
@@ -367,6 +369,7 @@ void OMW::Engine::go()
     pos.pos[2] = 0;
 
     mEnvironment.getWorld()->renderPlayer();
+    mEnvironment.getWorld()->renderGlobalMap();
 
     if (const ESM::Cell *exterior = MWBase::Environment::get().getWorld()->getExterior (mCellName))
     {

@@ -35,6 +35,7 @@
 #include "compositors.hpp"
 #include "npcanimation.hpp"
 #include "externalrendering.hpp"
+#include "globalmap.hpp"
 
 using namespace MWRender;
 using namespace Ogre;
@@ -43,7 +44,7 @@ namespace MWRender {
 
 RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const boost::filesystem::path& resDir,
                                     const boost::filesystem::path& cacheDir, OEngine::Physic::PhysicEngine* engine)
-    :mRendering(_rend), mObjects(mRendering), mActors(mRendering), mAmbientMode(0), mSunEnabled(0), mPhysicsEngine(engine)
+    : mRendering(_rend), mObjects(mRendering), mActors(mRendering), mAmbientMode(0), mSunEnabled(0), mPhysicsEngine(engine)
 {
     // select best shader mode
     bool openGL = (Ogre::Root::getSingleton ().getRenderSystem ()->getName().find("OpenGL") != std::string::npos);
@@ -100,7 +101,8 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
     MaterialManager::getSingleton().setDefaultTextureFiltering(tfo);
     MaterialManager::getSingleton().setDefaultAnisotropy( (filter == "anisotropic") ? Settings::Manager::getInt("anisotropy", "General") : 1 );
 
-    // Load resources
+    ResourceGroupManager::getSingleton ().declareResource ("GlobalMap.png", "Texture", ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
+
     ResourceGroupManager::getSingleton().initialiseAllResourceGroups();
 
     // causes light flicker in opengl when moving..
@@ -160,6 +162,8 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
     mDebugging = new Debugging(mMwRoot, engine);
     mLocalMap = new MWRender::LocalMap(&mRendering, this);
 
+    mGlobalMap = new GlobalMap(cacheDir.string());
+
     setMenuTransparency(Settings::Manager::getFloat("menu transparency", "GUI"));
 }
 
@@ -176,6 +180,7 @@ RenderingManager::~RenderingManager ()
     delete mOcclusionQuery;
     delete mCompositors;
     delete mWater;
+    delete mGlobalMap;
 }
 
 MWRender::SkyManager* RenderingManager::getSkyManager()
@@ -885,6 +890,11 @@ bool RenderingManager::isPositionExplored (float nX, float nY, int x, int y, boo
 void RenderingManager::setupExternalRendering (MWRender::ExternalRendering& rendering)
 {
     rendering.setup (mRendering.getScene());
+}
+
+void RenderingManager::renderGlobalMap ()
+{
+    mGlobalMap->render ();
 }
 
 } // namespace

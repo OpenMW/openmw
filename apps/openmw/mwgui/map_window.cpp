@@ -3,6 +3,7 @@
 #include <boost/lexical_cast.hpp>
 
 #include <OgreVector2.h>
+#include <OgreTextureManager.h>
 
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"
@@ -254,7 +255,10 @@ MapWindow::MapWindow(MWBase::WindowManager& parWindowManager) :
 
     getWidget(mLocalMap, "LocalMap");
     getWidget(mGlobalMap, "GlobalMap");
+    getWidget(mGlobalMapImage, "GlobalMapImage");
     getWidget(mPlayerArrow, "Compass");
+
+    mGlobalMap->setVisible (false);
 
     getWidget(mButton, "WorldButton");
     mButton->eventMouseButtonClick += MyGUI::newDelegate(this, &MapWindow::onWorldButtonClicked);
@@ -276,21 +280,22 @@ void MapWindow::setCellName(const std::string& cellName)
 void MapWindow::onDragStart(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id)
 {
     if (_id!=MyGUI::MouseButton::Left) return;
-    if (!mGlobal)
-        mLastDragPos = MyGUI::IntPoint(_left, _top);
+    mLastDragPos = MyGUI::IntPoint(_left, _top);
 }
 
 void MapWindow::onMouseDrag(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id)
 {
     if (_id!=MyGUI::MouseButton::Left) return;
 
-    if (!mGlobal)
-    {
-        MyGUI::IntPoint diff = MyGUI::IntPoint(_left, _top) - mLastDragPos;
-        mLocalMap->setViewOffset( mLocalMap->getViewOffset() + diff );
+    MyGUI::IntPoint diff = MyGUI::IntPoint(_left, _top) - mLastDragPos;
 
-        mLastDragPos = MyGUI::IntPoint(_left, _top);
-    }
+    if (!mGlobal)
+        mLocalMap->setViewOffset( mLocalMap->getViewOffset() + diff );
+    else
+        mGlobalMap->setViewOffset( mGlobalMap->getViewOffset() + diff );
+
+
+    mLastDragPos = MyGUI::IntPoint(_left, _top);
 }
 
 void MapWindow::onWorldButtonClicked(MyGUI::Widget* _sender)
@@ -306,4 +311,13 @@ void MapWindow::onWorldButtonClicked(MyGUI::Widget* _sender)
 void MapWindow::onPinToggled()
 {
     mWindowManager.setMinimapVisibility(!mPinned);
+}
+
+void MapWindow::open()
+{
+    mGlobalMapImage->setImageTexture("GlobalMap.png");
+
+    Ogre::TexturePtr tex = Ogre::TextureManager::getSingleton ().getByName("GlobalMap.png");
+    mGlobalMap->setCanvasSize (tex->getWidth(), tex->getHeight());
+    mGlobalMapImage->setSize(tex->getWidth(), tex->getHeight());
 }
