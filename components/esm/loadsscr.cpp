@@ -8,13 +8,12 @@ namespace ESM
 
 void StartScript::load(ESMReader &esm)
 {
-    esm.getSubNameIs("DATA");
-    esm.skipHSub();
+    mData = esm.getHNString("DATA");
     mScript = esm.getHNString("NAME");
 }
 void StartScript::save(ESMWriter &esm)
 {
-    esm.writeHNString("DATA", "NIET");
+    esm.writeHNString("DATA", mData);
     esm.writeHNString("NAME", mScript);
 }
 

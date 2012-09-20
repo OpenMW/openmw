@@ -16,8 +16,8 @@ void SoundGenerator::load(ESMReader &esm)
 void SoundGenerator::save(ESMWriter &esm)
 {
     esm.writeHNT("DATA", mType, 4);
-    esm.writeHNOString("CNAM", mCreature);
-    esm.writeHNOString("SNAM", mSound);
+    esm.writeHNOCString("CNAM", mCreature);
+    esm.writeHNOCString("SNAM", mSound);
 }
 
 }

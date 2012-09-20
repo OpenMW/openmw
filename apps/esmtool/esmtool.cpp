@@ -714,6 +714,15 @@ int load(Arguments& info)
                      << "  Value: " << w.mData.mValue << endl;
                 break;
             }
+            case REC_SSCR:
+            {
+                rec = new StartScript();
+                StartScript &sscr = *(StartScript *) rec;
+                sscr.load(esm);
+                if (quiet) break;
+                cout << "Start script: " << sscr.mScript << endl;
+                break;
+            }
             default:
                 if (find(skipped.begin(), skipped.end(), n.val) == skipped.end())
                 {
@@ -832,16 +841,15 @@ int clone(Arguments& info)
         esm.startRecord(n.toString(), rec->getFlags());
         string id = rec->getId();
 
+        // TODO wrap this with std::set
         if (n.val == REC_GLOB || n.val == REC_CLAS || n.val == REC_FACT || n.val == REC_RACE || n.val == REC_SOUN 
             || n.val == REC_REGN || n.val == REC_BSGN || n.val == REC_LTEX || n.val == REC_STAT || n.val == REC_DOOR
             || n.val == REC_MISC || n.val == REC_WEAP || n.val == REC_CONT || n.val == REC_SPEL || n.val == REC_CREA
             || n.val == REC_BODY || n.val == REC_LIGH || n.val == REC_ENCH || n.val == REC_NPC_ || n.val == REC_ARMO
             || n.val == REC_CLOT || n.val == REC_REPA || n.val == REC_ACTI || n.val == REC_APPA || n.val == REC_LOCK
             || n.val == REC_PROB || n.val == REC_INGR || n.val == REC_BOOK || n.val == REC_ALCH || n.val == REC_LEVI
-            || n.val == REC_LEVC)
+            || n.val == REC_LEVC || n.val == REC_SNDG || n.val == REC_CELL || n.val == REC_DIAL)
             esm.writeHNCString("NAME", id);
-        else if (n.val == REC_CELL)
-            esm.writeHNString("NAME", id);
         else
             esm.writeHNOString("NAME", id);
 

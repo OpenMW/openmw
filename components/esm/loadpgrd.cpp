@@ -73,7 +73,7 @@ void Pathgrid::load(ESMReader &esm)
 void Pathgrid::save(ESMWriter &esm)
 {
     esm.writeHNT("DATA", mData, 12);
-    esm.writeHNString("NAME", mCell);
+    esm.writeHNCString("NAME", mCell);
     
     if (!mPoints.empty())
     {

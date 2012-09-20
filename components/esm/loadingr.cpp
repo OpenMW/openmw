@@ -13,7 +13,7 @@ void Ingredient::load(ESMReader &esm)
     esm.getHNT(mData, "IRDT", 56);
     mScript = esm.getHNOString("SCRI");
     mIcon = esm.getHNOString("ITEX");
-
+/*
     // horrible hack to fix broken data in records
     for (int i=0; i<4; ++i)
     {
@@ -36,6 +36,7 @@ void Ingredient::load(ESMReader &esm)
             mData.mSkills[i] = -1;
         }
     }
+*/
 }
 
 void Ingredient::save(ESMWriter &esm)

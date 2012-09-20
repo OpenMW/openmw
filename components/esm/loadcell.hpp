@@ -71,6 +71,7 @@ public:
   // Brindisi Dorom", where it has the value 100. Also only for
   // activators.
   int mFltv;
+  int mNam0;
 
   // Position and rotation of this object within the cell
   Position mPos;
@@ -120,6 +121,7 @@ struct Cell : public Record
   DATAstruct mData;
   AMBIstruct mAmbi;
   float mWater; // Water level
+  bool mWaterInt;
   int mMapColor;
   int mNAM0;
 

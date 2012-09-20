@@ -18,6 +18,7 @@ namespace ESM
 
 struct StartScript : public Record
 {
+    std::string mData;
     std::string mScript;
 
     // Load a record and add it to the list

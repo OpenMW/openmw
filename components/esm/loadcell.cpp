@@ -18,12 +18,12 @@ void CellRef::save(ESMWriter &esm)
         esm.writeHNT("XSCL", mScale);
     }
 
-    esm.writeHNOString("ANAM", mOwner);
-    esm.writeHNOString("BNAM", mGlob);
-    esm.writeHNOString("XSOL", mSoul);
+    esm.writeHNOCString("ANAM", mOwner);
+    esm.writeHNOCString("BNAM", mGlob);
+    esm.writeHNOCString("XSOL", mSoul);
 
-    esm.writeHNOString("CNAM", mFaction);
-    if (mFactIndex != -1) {
+    esm.writeHNOCString("CNAM", mFaction);
+    if (mFactIndex != -2) {
         esm.writeHNT("INDX", mFactIndex);
     }
 
@@ -31,7 +31,7 @@ void CellRef::save(ESMWriter &esm)
         esm.writeHNT("XCHG", mCharge);
     }
 
-    if (mIntv != 0) {
+    if (mIntv != -1) {
         esm.writeHNT("INTV", mIntv);
     }
     if (mNam9 != 0) {
@@ -44,13 +44,13 @@ void CellRef::save(ESMWriter &esm)
         esm.writeHNOCString("DNAM", mDestCell);
     }
 
-    if (mLockLevel != 0) {
+    if (mLockLevel != -1) {
         esm.writeHNT("FLTV", mLockLevel);
     }
-    esm.writeHNOString("KNAM", mKey);
-    esm.writeHNOString("TNAM", mTrap);
+    esm.writeHNOCString("KNAM", mKey);
+    esm.writeHNOCString("TNAM", mTrap);
 
-    if (mUnam != 0) {
+    if (mUnam != -1) {
         esm.writeHNT("UNAM", mUnam);
     }
     if (mFltv != 0) {
@@ -58,6 +58,9 @@ void CellRef::save(ESMWriter &esm)
     }
 
     esm.writeHNT("DATA", mPos, 24);
+    if (mNam0 != 0) {
+        esm.writeHNT("NAM0", mNam0);
+    }
 }
 
 void Cell::load(ESMReader &esm)
@@ -71,7 +74,7 @@ void Cell::load(ESMReader &esm)
     esm.getHNT(mData, "DATA", 12);
 
     // Water level
-    mWater = 0;
+    mWater = -1;
     mNAM0 = 0;
 
     if (mData.mFlags & Interior)
@@ -82,6 +85,7 @@ void Cell::load(ESMReader &esm)
             int waterl;
             esm.getHT(waterl);
             mWater = (float) waterl;
+            mWaterInt = true;
         }
         else if (esm.isNextSub("WHGT"))
             esm.getHT(mWater);
@@ -114,11 +118,18 @@ void Cell::save(ESMWriter &esm)
     esm.writeHNT("DATA", mData, 12);
     if (mData.mFlags & Interior)
     {
-        if (mWater != 0)
-            esm.writeHNT("WHGT", mWater);
+        if (mWater != -1) {
+            if (mWaterInt) {
+                int water =
+                    (mWater >= 0) ? (int) (mWater + 0.5) : (int) (mWater - 0.5);
+                esm.writeHNT("INTV", water);
+            } else {
+                esm.writeHNT("WHGT", mWater);
+            }
+        }
 
         if (mData.mFlags & QuasiEx)
-            esm.writeHNOString("RGNN", mRegion);
+            esm.writeHNOCString("RGNN", mRegion);
         else
             esm.writeHNT("AMBI", mAmbi, 16);
     }
@@ -157,15 +168,6 @@ bool Cell::getNextRef(ESMReader &esm, CellRef &ref)
     if (!esm.hasMoreSubs())
         return false;
 
-    // Number of references in the cell? Maximum once in each cell,
-    // but not always at the beginning, and not always right. In other
-    // words, completely useless.
-    if (esm.isNextSub("NAM0"))
-    {
-        esm.skipHSubSize(4);
-        //esm.getHNOT(NAM0, "NAM0");
-    }
-
     esm.getHNT(ref.mRefnum, "FRMR");
     ref.mRefID = esm.getHNString("NAME");
 
@@ -179,13 +181,13 @@ bool Cell::getNextRef(ESMReader &esm, CellRef &ref)
     ref.mSoul = esm.getHNOString("XSOL");
 
     ref.mFaction = esm.getHNOString("CNAM");
-    ref.mFactIndex = -1;
+    ref.mFactIndex = -2;
     esm.getHNOT(ref.mFactIndex, "INDX");
 
     ref.mCharge = -1.0;
     esm.getHNOT(ref.mCharge, "XCHG");
 
-    ref.mIntv = 0;
+    ref.mIntv = -1;
     ref.mNam9 = 0;
     esm.getHNOT(ref.mIntv, "INTV");
     esm.getHNOT(ref.mNam9, "NAM9");
@@ -201,17 +203,27 @@ bool Cell::getNextRef(ESMReader &esm, CellRef &ref)
     }
 
     // Integer, despite the name suggesting otherwise
-    ref.mLockLevel = 0;
+    ref.mLockLevel = -1;
     esm.getHNOT(ref.mLockLevel, "FLTV");
     ref.mKey = esm.getHNOString("KNAM");
     ref.mTrap = esm.getHNOString("TNAM");
 
-    ref.mUnam = 0;
+    ref.mUnam = -1;
     ref.mFltv = 0;
     esm.getHNOT(ref.mUnam, "UNAM");
     esm.getHNOT(ref.mFltv, "FLTV");
 
     esm.getHNT(ref.mPos, "DATA", 24);
+
+    // Number of references in the cell? Maximum once in each cell,
+    // but not always at the beginning, and not always right. In other
+    // words, completely useless.
+    ref.mNam0 = 0;
+    if (esm.isNextSub("NAM0"))
+    {
+        esm.getHT(ref.mNam0);
+        //esm.getHNOT(NAM0, "NAM0");
+    }
 
     return true;
 }

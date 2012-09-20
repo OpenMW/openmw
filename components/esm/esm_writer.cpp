@@ -64,7 +64,7 @@ void ESMWriter::save(std::ostream& file)
 
     for (std::list<MasterData>::iterator it = m_masters.begin(); it != m_masters.end(); ++it)
     {
-        writeHNString("MAST", it->name);
+        writeHNCString("MAST", it->name);
         writeHNT("DATA", it->size);
     }
 

@@ -79,6 +79,10 @@ struct Land : public Record
         char mColours[3 * LAND_NUM_VERTS];
         int mDataTypes;
 
+        uint8_t mWnam[81];
+        short mUnk1;
+        uint8_t mUnk2;
+
         void save(ESMWriter &esm);
     };
 

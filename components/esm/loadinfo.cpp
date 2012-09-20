@@ -136,17 +136,17 @@ void DialInfo::load(ESMReader &esm)
 
 void DialInfo::save(ESMWriter &esm)
 {
-    esm.writeHNString("INAM", mSelfId);
-    esm.writeHNString("PNAM", mPrev);
-    esm.writeHNString("NNAM", mNext);
+    esm.writeHNCString("INAM", mSelfId);
+    esm.writeHNCString("PNAM", mPrev);
+    esm.writeHNCString("NNAM", mNext);
     esm.writeHNT("DATA", mData, 12);
-    esm.writeHNOString("ONAM", mActor);
-    esm.writeHNOString("RNAM", mRace);
-    esm.writeHNOString("CNAM", mClass);
-    esm.writeHNOString("FNAM", mNpcFaction);
-    esm.writeHNOString("ANAM", mCell);
-    esm.writeHNOString("DNAM", mPcFaction);
-    esm.writeHNOString("SNAM", mSound);
+    esm.writeHNOCString("ONAM", mActor);
+    esm.writeHNOCString("RNAM", mRace);
+    esm.writeHNOCString("CNAM", mClass);
+    esm.writeHNOCString("FNAM", mNpcFaction);
+    esm.writeHNOCString("ANAM", mCell);
+    esm.writeHNOCString("DNAM", mPcFaction);
+    esm.writeHNOCString("SNAM", mSound);
     esm.writeHNOString("NAME", mResponse);
 
     for (std::vector<SelectStruct>::iterator it = mSelects.begin(); it != mSelects.end(); ++it)
