@@ -368,13 +368,18 @@ void MapWindow::open()
     float worldX = ((pos.x / 8192.f-0.5) / 30.f+1)/2.f;
     float worldY = ((pos.z / 8192.f+1.5) / 30.f+1)/2.f;
 
-    mPlayerArrowGlobal->setPosition(MyGUI::IntPoint(tex->getWidth() * worldX - 16, tex->getHeight() * worldY - 16));
+    // for interiors, we have no choice other than using the last position & direction.
+    /// \todo save this last position in the savegame?
+    if (MWBase::Environment::get().getWorld ()->isCellExterior ())
+    {
+        mPlayerArrowGlobal->setPosition(MyGUI::IntPoint(tex->getWidth() * worldX - 16, tex->getHeight() * worldY - 16));
 
-    MyGUI::ISubWidget* main = mPlayerArrowGlobal->getSubWidgetMain();
-    MyGUI::RotatingSkin* rotatingSubskin = main->castType<MyGUI::RotatingSkin>();
-    rotatingSubskin->setCenter(MyGUI::IntPoint(16,16));
-    float angle = std::atan2(dir.x, dir.y);
-    rotatingSubskin->setAngle(angle);
+        MyGUI::ISubWidget* main = mPlayerArrowGlobal->getSubWidgetMain();
+        MyGUI::RotatingSkin* rotatingSubskin = main->castType<MyGUI::RotatingSkin>();
+        rotatingSubskin->setCenter(MyGUI::IntPoint(16,16));
+        float angle = std::atan2(dir.x, dir.y);
+        rotatingSubskin->setAngle(angle);
+    }
 
     mPlayerArrowGlobal->setImageTexture ("textures\\compass.dds");
 }
