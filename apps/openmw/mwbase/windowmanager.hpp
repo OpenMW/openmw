@@ -189,6 +189,8 @@ namespace MWBase
             virtual void allowMouse() = 0;
             virtual void notifyInputActionBound() = 0;
 
+            virtual void addVisitedLocation(const std::string& name, int x, int y) = 0;
+
             virtual void removeDialog(OEngine::GUI::Layout* dialog) = 0;
             ///< Hides dialog and schedules dialog to be deleted.
 

@@ -172,6 +172,8 @@ namespace MWGui
     virtual void allowMouse();
     virtual void notifyInputActionBound();
 
+    virtual void addVisitedLocation(const std::string& name, int x, int y);
+
     virtual void removeDialog(OEngine::GUI::Layout* dialog); ///< Hides dialog and schedules dialog to be deleted.
 
     virtual void messageBox (const std::string& message, const std::vector<std::string>& buttons);

@@ -203,5 +203,7 @@ op 0x200019c: PlaceAtPc
 op 0x200019d: PlaceAtMe 
 op 0x200019e: PlaceAtMe Explicit
 op 0x200019f: GetPcSleep
-opcodes 0x20001a0-0x3ffffff unused
+op 0x20001a0: ShowMap
+op 0x20001a1: FillMap
+opcodes 0x20001a2-0x3ffffff unused
 

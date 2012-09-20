@@ -1,11 +1,16 @@
 
 #include "guiextensions.hpp"
 
+#include <boost/algorithm/string.hpp>
+
 #include <components/compiler/extensions.hpp>
 
 #include <components/interpreter/interpreter.hpp>
 #include <components/interpreter/runtime.hpp>
 #include <components/interpreter/opcodes.hpp>
+
+#include <components/esm_store/store.hpp>
+#include <components/esm_store/reclists.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
@@ -91,6 +96,47 @@ namespace MWScript
                 }
         };
 
+        class OpShowMap : public Interpreter::Opcode0
+        {
+        public:
+
+            virtual void execute (Interpreter::Runtime& runtime)
+            {
+                std::string cell = (runtime.getStringLiteral (runtime[0].mInteger));
+                boost::algorithm::to_lower(cell);
+                runtime.pop();
+
+                // "Will match complete or partial cells, so ShowMap, "Vivec" will show cells Vivec and Vivec, Fred's House as well."
+                // http://www.uesp.net/wiki/Tes3Mod:ShowMap
+
+                const ESMS::CellList::ExtCells& extCells = MWBase::Environment::get().getWorld ()->getStore ().cells.extCells;
+                for (ESMS::CellList::ExtCells::const_iterator it = extCells.begin(); it != extCells.end(); ++it)
+                {
+                    std::string name = it->second->name;
+                    boost::algorithm::to_lower(name);
+                    if (name.find(cell) != std::string::npos)
+                        MWBase::Environment::get().getWindowManager()->addVisitedLocation (it->second->name, it->first.first, it->first.second);
+                }
+            }
+        };
+
+        class OpFillMap : public Interpreter::Opcode0
+        {
+        public:
+
+            virtual void execute (Interpreter::Runtime& runtime)
+            {
+                const ESMS::CellList::ExtCells& extCells = MWBase::Environment::get().getWorld ()->getStore ().cells.extCells;
+                for (ESMS::CellList::ExtCells::const_iterator it = extCells.begin(); it != extCells.end(); ++it)
+                {
+                    std::string name = it->second->name;
+                    if (name != "")
+                        MWBase::Environment::get().getWindowManager()->addVisitedLocation (name, it->first.first, it->first.second);
+                }
+            }
+        };
+
+
         const int opcodeEnableBirthMenu = 0x200000e;
         const int opcodeEnableClassMenu = 0x200000f;
         const int opcodeEnableNameMenu = 0x2000010;
@@ -105,6 +151,8 @@ namespace MWScript
         const int opcodeGetButtonPressed = 0x2000137;
         const int opcodeToggleFogOfWar = 0x2000145;
         const int opcodeToggleFullHelp = 0x2000151;
+        const int opcodeShowMap = 0x20001a0;
+        const int opcodeFillMap = 0x20001a1;
 
         void registerExtensions (Compiler::Extensions& extensions)
         {
@@ -132,6 +180,9 @@ opcodeEnableStatsReviewMenu);
 
             extensions.registerInstruction ("togglefullhelp", "", opcodeToggleFullHelp);
             extensions.registerInstruction ("tfh", "", opcodeToggleFullHelp);
+
+            extensions.registerInstruction ("showmap", "S", opcodeShowMap);
+            extensions.registerInstruction ("fillmap", "", opcodeFillMap);
         }
 
         void installOpcodes (Interpreter::Interpreter& interpreter)
@@ -167,6 +218,9 @@ opcodeEnableStatsReviewMenu);
             interpreter.installSegment5 (opcodeToggleFogOfWar, new OpToggleFogOfWar);
 
             interpreter.installSegment5 (opcodeToggleFullHelp, new OpToggleFullHelp);
+
+            interpreter.installSegment5 (opcodeShowMap, new OpShowMap);
+            interpreter.installSegment5 (opcodeFillMap, new OpFillMap);
         }
     }
 }

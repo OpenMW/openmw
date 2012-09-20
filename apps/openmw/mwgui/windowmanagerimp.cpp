@@ -954,3 +954,8 @@ bool WindowManager::getPlayerSleeping ()
 {
     return mWaitDialog->getSleeping();
 }
+
+void WindowManager::addVisitedLocation(const std::string& name, int x, int y)
+{
+    mMap->addVisitedLocation (name, x, y);
+}
