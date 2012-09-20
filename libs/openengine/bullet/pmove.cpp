@@ -231,7 +231,7 @@ bool	PM_SlideMove( bool gravity )
 		// see if we can make it there
 		//pm->trace ( &trace, pm->ps->origin, pm->mins, pm->maxs, end, pm->ps->clientNum, pm->tracemaskg);
 		//tracefunc(&trace, *(const D3DXVECTOR3* const)&(pm->ps.origin), *(const D3DXVECTOR3* const)&(end), *(const D3DXVECTOR3* const)&(pm->ps.velocity), 0, pml.traceObj);
-		newtrace(&trace, pm->ps.origin, end, halfExtents, Ogre::Math::DegreesToRadians (pm->ps.viewangles.y), pm->isInterior, pm->mEngine);
+		newtrace(&trace, pm->ps.origin, end, pm->ps.halfExtents, Ogre::Math::DegreesToRadians (pm->ps.viewangles.y), pm->isInterior, pm->mEngine);
 
 		if (trace.allsolid) 
 		{
@@ -301,7 +301,7 @@ bool	PM_SlideMove( bool gravity )
             
             if(planes[i].x >= .70)
             {
-                pm->ps.velocity = Ogre::Vector3(0,0,0);
+                pm->ps.velocity.z = 0;
 				return true;
             }
 			// see how hard we are hitting things
@@ -449,7 +449,7 @@ int PM_StepSlideMove( bool gravity )
 	//pm->trace (&trace, start_o, pm->mins, pm->maxs, down, pm->ps->clientNum, pm->tracemask);
 	//tracefunc(&trace, start_o, down, , 0, pml.scene);
 	//tracefunc(&trace, *(const D3DXVECTOR3* const)&start_o, *(const D3DXVECTOR3* const)&down, D3DXVECTOR3(0.0f, -STEPSIZE, 0.0f), 0, pml.traceObj);
-	newtrace(&trace, start_o, down, halfExtents, Ogre::Math::DegreesToRadians(pm->ps.viewangles.y), pm->isInterior, pm->mEngine);
+	newtrace(&trace, down, start_o, pm->ps.halfExtents, Ogre::Math::DegreesToRadians(pm->ps.viewangles.y), pm->isInterior, pm->mEngine);
 	
 	// up = vec3(0, 0, 1)
 	//VectorSet(up, 0, 0, 1);
@@ -479,7 +479,7 @@ int PM_StepSlideMove( bool gravity )
 	// test the player position if they were a stepheight higher
 	//pm->trace (&trace, start_o, pm->mins, pm->maxs, up, pm->ps->clientNum, pm->tracemask);
 	//tracefunc(&trace, *(const D3DXVECTOR3* const)&start_o, *(const D3DXVECTOR3* const)&up, D3DXVECTOR3(0.0f, STEPSIZE, 0.0f), 0, pml.traceObj);
-	newtrace(&trace, start_o, up, halfExtents, Ogre::Math::DegreesToRadians(pm->ps.viewangles.y), pm->isInterior, pm->mEngine);
+	newtrace(&trace, start_o, up, pm->ps.halfExtents, Ogre::Math::DegreesToRadians(pm->ps.viewangles.y), pm->isInterior, pm->mEngine);
 	if ( trace.allsolid ) 
 	{
 		//if ( pm->debugLevel ) 
@@ -510,7 +510,7 @@ int PM_StepSlideMove( bool gravity )
 
 	//pm->trace (&trace, pm->ps->origin, pm->mins, pm->maxs, down, pm->ps->clientNum, pm->tracemask);
 	//tracefunc(&trace, *(const D3DXVECTOR3* const)&(pm->ps.origin), *(const D3DXVECTOR3* const)&down, D3DXVECTOR3(0.0f, -STEPSIZE, 0.0f), 0, pml.traceObj);
-	newtrace(&trace, pm->ps.origin, down, halfExtents, Ogre::Math::DegreesToRadians(pm->ps.viewangles.y), pm->isInterior, pm->mEngine);
+	newtrace(&trace, pm->ps.origin, down, pm->ps.halfExtents, Ogre::Math::DegreesToRadians(pm->ps.viewangles.y), pm->isInterior, pm->mEngine);
 	if ( !trace.allsolid )
 		//VectorCopy (trace.endpos, pm->ps->origin);
 		pm->ps.origin = trace.endpos;
@@ -527,7 +527,7 @@ int PM_StepSlideMove( bool gravity )
 		delta = pm->ps.origin.z - start_o.z;
 		if ( delta > 2 ) 
 		{
-            pm->ps.counter = 5;
+            pm->ps.counter = 10;
 
             /*
 			if (gravity)
@@ -657,10 +657,11 @@ static void PM_Accelerate( Ogre::Vector3& wishdir, float wishspeed, float accel 
 //	int			i;
 	float		addspeed, accelspeed, currentspeed;
 
+    
 	// currentspeed = pm->ps->velocity dot wishdir
 	//currentspeed = DotProduct (pm->ps->velocity, wishdir);
 	currentspeed = pm->ps.velocity.dotProduct(wishdir);
-
+    
 	addspeed = wishspeed - currentspeed;
 	if (addspeed <= 0) 
 		return;
@@ -675,6 +676,8 @@ static void PM_Accelerate( Ogre::Vector3& wishdir, float wishspeed, float accel 
 	//for (i=0 ; i<3 ; i++)
 		//pm->ps->velocity[i] += accelspeed * wishdir[i];	
 	pm->ps.velocity += (wishdir * accelspeed);
+    //pm->ps.velocity = wishdir * wishspeed;  //New, for instant acceleration
+    
 }
 
 static bool PM_CheckJump(void)
@@ -701,7 +704,7 @@ static bool PM_CheckJump(void)
 	//pm->ps->pm_flags |= PMF_JUMP_HELD;
 
 	pm->ps.groundEntityNum = ENTITYNUM_NONE;
-	pm->ps.velocity.z = JUMP_VELOCITY;
+	pm->ps.velocity.z = pm->ps.jump_velocity;
     pm->ps.bSnap = false;
 	//PM_AddEvent( EV_JUMP );
 
@@ -899,7 +902,7 @@ static void PM_WalkMove( playerMove* const pmove )
 				if (pmove->hasWater )
 				{
 					const float waterHeight = pmove->waterHeight;
-					const float waterSoundStepHeight = waterHeight + halfExtents.y;
+					const float waterSoundStepHeight = waterHeight + pm->ps.halfExtents.y;
 					if (pmove->ps.origin.y < waterSoundStepHeight)
 						step_underwater = true;
 				}
@@ -1179,7 +1182,7 @@ void PM_GroundTraceMissed()
 
 		//pm->trace (&trace, pm->ps->origin, pm->mins, pm->maxs, point, pm->ps->clientNum, pm->tracemask);
 		//tracefunc(&trace, *(const D3DXVECTOR3* const)&(pm->ps.origin), *(const D3DXVECTOR3* const)&point, D3DXVECTOR3(0.0f, -64.0f, 0.0f), 0, pml.traceObj);
-		newtrace(&trace, pm->ps.origin, point, halfExtents, Ogre::Math::DegreesToRadians(pm->ps.viewangles.y), pm->isInterior, pm->mEngine);
+		newtrace(&trace, pm->ps.origin, point, pm->ps.halfExtents, Ogre::Math::DegreesToRadians(pm->ps.viewangles.y), pm->isInterior, pm->mEngine);
 		//It hit the ground below
         if ( trace.fraction < 1.0 && pm->ps.origin.z > trace.endpos.z) 
 		{
@@ -1225,7 +1228,7 @@ static bool PM_CorrectAllSolid(traceResults* const trace)
 
 				//pm->trace (trace, point, pm->mins, pm->maxs, point, pm->ps->clientNum, pm->tracemask);
 				//tracefunc(trace, *(const D3DXVECTOR3* const)&point, *(const D3DXVECTOR3* const)&point, D3DXVECTOR3(0.0f, 0.0f, 0.0f), 0, pml.traceObj);
-				newtrace(trace, point, point, halfExtents, Ogre::Math::DegreesToRadians(pm->ps.viewangles.y), pm->isInterior, pm->mEngine);
+				newtrace(trace, point, point, pm->ps.halfExtents, Ogre::Math::DegreesToRadians(pm->ps.viewangles.y), pm->isInterior, pm->mEngine);
 
 				if ( !trace->allsolid ) 
 				{
@@ -1237,7 +1240,7 @@ static bool PM_CorrectAllSolid(traceResults* const trace)
 
 					//pm->trace (trace, pm->ps->origin, pm->mins, pm->maxs, point, pm->ps->clientNum, pm->tracemask);
 					//tracefunc(trace, *(const D3DXVECTOR3* const)&(pm->ps.origin), *(const D3DXVECTOR3* const)&point, D3DXVECTOR3(0.0f, -0.25f, 0.0f), 0, pml.traceObj);
-					newtrace(trace, pm->ps.origin, point, halfExtents, Ogre::Math::DegreesToRadians(pm->ps.viewangles.y), pm->isInterior, pm->mEngine);
+					newtrace(trace, pm->ps.origin, point, pm->ps.halfExtents, Ogre::Math::DegreesToRadians(pm->ps.viewangles.y), pm->isInterior, pm->mEngine);
 					pml.groundTrace = *trace;
 					return true;
 				}
@@ -1338,7 +1341,7 @@ static void PM_CrashLand( void )
 			{
 				
 					const float waterHeight = pm->waterHeight;
-					const float waterHeightSplash = waterHeight + halfExtents.y;
+					const float waterHeightSplash = waterHeight + pm->ps.halfExtents.y;
 					if (pm->ps.origin.z < waterHeightSplash)
 					{
 						splashSound = true;
@@ -1413,7 +1416,7 @@ static void PM_GroundTrace( void )
 
 	//pm->trace (&trace, pm->ps->origin, pm->mins, pm->maxs, point, pm->ps->clientNum, pm->tracemask);
 	//tracefunc(&trace, *(const D3DXVECTOR3* const)&(pm->ps.origin), *(const D3DXVECTOR3* const)&point, D3DXVECTOR3(0.0f, -0.25f, 0.0f), 0, pml.traceObj);
-	newtrace(&trace, pm->ps.origin, point, halfExtents, Ogre::Math::DegreesToRadians(pm->ps.viewangles.y), pm->isInterior, pm->mEngine);
+	newtrace(&trace, pm->ps.origin, point, pm->ps.halfExtents, Ogre::Math::DegreesToRadians(pm->ps.viewangles.y), pm->isInterior, pm->mEngine);
 	pml.groundTrace = trace;
 
 	// do something corrective if the trace starts in a solid...

@@ -5,9 +5,8 @@
 #include <btBulletDynamicsCommon.h>
 #include <btBulletCollisionCommon.h>
 #include <components/nifbullet/bullet_nif_loader.hpp>
-#include <openengine/bullet/pmove.h>
 #include <openengine/bullet/physic.hpp>
-
+#include "pmove.h"
 
 
 enum traceWorldType

@@ -137,6 +137,8 @@
 
         shSampler2D(normalMap) // global normal map
         
+        shUniform(float, gammaCorrection) @shSharedParameter(gammaCorrection, gammaCorrection)
+
 
 @shForeach(@shPropertyString(num_blendmaps))
         shSampler2D(blendMap@shIterator)
@@ -247,9 +249,9 @@
 
 #if IS_FIRST_PASS == 1 && @shIterator == 0
         // first layer of first pass doesn't need a blend map
-        albedo = shSample(diffuseMap0, UV * 10).rgb;
+        albedo = gammaCorrectRead(shSample(diffuseMap0, UV * 10).rgb);
 #else
-        albedo = shLerp(albedo, shSample(diffuseMap@shIterator, UV * 10).rgb, blendValues@shPropertyString(blendmap_component_@shIterator));
+        albedo = shLerp(albedo, gammaCorrectRead(shSample(diffuseMap@shIterator, UV * 10).rgb), blendValues@shPropertyString(blendmap_component_@shIterator));
 
 #endif
 @shEndForeach
@@ -336,7 +338,7 @@
         // regular fog only if fragment is above water
         if (worldPos.y > waterLevel)
         #endif
-        shOutputColour(0).xyz = shLerp (shOutputColour(0).xyz, fogColour, fogValue);
+        shOutputColour(0).xyz = shLerp (shOutputColour(0).xyz, gammaCorrectRead(fogColour), fogValue);
 #endif
 
         // prevent negative colour output (for example with negative lights)
@@ -351,12 +353,12 @@
         
         float waterSunGradient = dot(eyeVec, -normalize(lightDirectionWS0.xyz));
         waterSunGradient = shSaturate(pow(waterSunGradient*0.7+0.3,2.0));  
-        float3 waterSunColour = float3(0.0,1.0,0.85)*waterSunGradient * 0.5;
+        float3 waterSunColour = gammaCorrectRead(float3(0.0,1.0,0.85))*waterSunGradient * 0.5;
         
         float waterGradient = dot(eyeVec, float3(0.0,-1.0,0.0));
         waterGradient = clamp((waterGradient*0.5+0.5),0.2,1.0);
-        float3 watercolour = (float3(0.0078, 0.5176, 0.700)+waterSunColour)*waterGradient*2.0;
-        float3 waterext = float3(0.6, 0.9, 1.0);//water extinction
+        float3 watercolour = (gammaCorrectRead(float3(0.0078, 0.5176, 0.700))+waterSunColour)*waterGradient*2.0;
+        float3 waterext = gammaCorrectRead(float3(0.6, 0.9, 1.0));//water extinction
         watercolour = shLerp(watercolour*0.3*waterSunFade_sunHeight.x, watercolour, shSaturate(1.0-exp(-waterSunFade_sunHeight.y*SUN_EXT)));
         watercolour = (cameraPos.y <= waterLevel) ? watercolour : watercolour*0.3;
     
@@ -368,6 +370,8 @@
         float isUnderwater = (worldPos.y < waterLevel) ? 1.0 : 0.0;
         shOutputColour(0).xyz = shLerp (shOutputColour(0).xyz, watercolour, fogAmount * isUnderwater);
 #endif
+
+        shOutputColour(0).xyz = gammaCorrectOutput(shOutputColour(0).xyz);
 
 
 #if MRT

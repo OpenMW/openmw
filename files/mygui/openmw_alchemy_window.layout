@@ -77,8 +77,9 @@
 
         <!-- Buttons -->
         <Widget type="HBox" skin="" position="160 370 380 24">
-            <Widget type="Widget"/> <!-- spacer -->
-
+            <Widget type="Widget">
+                <UserString key="HStretch" value="true"/>
+            </Widget>
             <Widget type="AutoSizedButton" skin="MW_Button" name="CreateButton">
                 <Property key="Caption" value="#{sCreate}"/>
             </Widget>

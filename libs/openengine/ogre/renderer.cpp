@@ -247,7 +247,7 @@ void OgreRenderer::createScene(const std::string& camName, float fov, float near
     // Alter the camera aspect ratio to match the viewport
     mCamera->setAspectRatio(Real(mView->getActualWidth()) / Real(mView->getActualHeight()));
 
-    mFader = new Fader();
+    mFader = new Fader(mScene);
 }
 
 void OgreRenderer::adjustViewport()

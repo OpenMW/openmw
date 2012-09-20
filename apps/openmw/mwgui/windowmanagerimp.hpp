@@ -63,6 +63,7 @@ namespace MWGui
   class QuickKeysMenu;
   class LoadingScreen;
   class LevelupDialog;
+  class WaitDialog;
 
   class WindowManager : public MWBase::WindowManager
   {
@@ -203,6 +204,8 @@ namespace MWGui
     virtual void enableRest() { mRestAllowed = true; }
     virtual bool getRestEnabled() { return mRestAllowed; }
 
+    virtual bool getPlayerSleeping();
+
   private:
     OEngine::GUI::MyGUIManager *mGuiManager;
     HUD *mHud;
@@ -229,6 +232,7 @@ namespace MWGui
     QuickKeysMenu* mQuickKeysMenu;
     LoadingScreen* mLoadingScreen;
     LevelupDialog* mLevelupDialog;
+    WaitDialog* mWaitDialog;
 
     CharacterCreation* mCharGen;
 
