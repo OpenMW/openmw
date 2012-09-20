@@ -286,11 +286,11 @@ void MapWindow::addVisitedLocation(const std::string& name, int x, int y)
 {
     const int cellSize = 24;
 
-    Ogre::TexturePtr tex = Ogre::TextureManager::getSingleton ().getByName("GlobalMap.png");
+    int size = 24 * 61;
 
     MyGUI::IntCoord widgetCoord(
                 (x+30)*cellSize+6,
-                (tex->getHeight()-1) - (y+30)*cellSize+6,
+                (size-1) - (y+30)*cellSize+6,
                 12, 12);
 
 
@@ -351,9 +351,10 @@ void MapWindow::open()
 {
     mGlobalMapImage->setImageTexture("GlobalMap.png");
 
-    Ogre::TexturePtr tex = Ogre::TextureManager::getSingleton ().getByName("GlobalMap.png");
-    mGlobalMap->setCanvasSize (tex->getWidth(), tex->getHeight());
-    mGlobalMapImage->setSize(tex->getWidth(), tex->getHeight());
+    int size = 24 * 61;
+
+    mGlobalMap->setCanvasSize (size, size);
+    mGlobalMapImage->setSize(size, size);
 
     for (unsigned int i=0; i<mGlobalMapImage->getChildCount (); ++i)
     {
@@ -372,7 +373,7 @@ void MapWindow::open()
     /// \todo save this last position in the savegame?
     if (MWBase::Environment::get().getWorld ()->isCellExterior ())
     {
-        mPlayerArrowGlobal->setPosition(MyGUI::IntPoint(tex->getWidth() * worldX - 16, tex->getHeight() * worldY - 16));
+        mPlayerArrowGlobal->setPosition(MyGUI::IntPoint(size * worldX - 16, size * worldY - 16));
 
         MyGUI::ISubWidget* main = mPlayerArrowGlobal->getSubWidgetMain();
         MyGUI::RotatingSkin* rotatingSubskin = main->castType<MyGUI::RotatingSkin>();

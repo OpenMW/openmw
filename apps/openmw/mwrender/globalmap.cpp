@@ -1,5 +1,7 @@
 #include "globalmap.hpp"
 
+#include <boost/filesystem.hpp>
+
 #include <OgreImage.h>
 #include <OgreTextureManager.h>
 #include <OgreColourValue.h>
@@ -23,10 +25,9 @@ namespace MWRender
 
     void GlobalMap::render ()
     {
+        Ogre::TexturePtr tex;
 
-        Ogre::TexturePtr tex = Ogre::TextureManager::getSingleton ().getByName ("GlobalMap.png");
-
-        if (tex.isNull ())
+        if (!boost::filesystem::exists(mCacheDir + "/GlobalMap.png"))
         {
 
             int cellSize = 24;
@@ -138,6 +139,9 @@ namespace MWRender
                 Ogre::TEX_TYPE_2D, width, height, 0, Ogre::PF_B8G8R8, Ogre::TU_DEFAULT);
             tex->loadImage(image);
         }
+        else
+            tex = Ogre::TextureManager::getSingleton ().getByName ("GlobalMap.png");
+
         tex->load();
     }
 

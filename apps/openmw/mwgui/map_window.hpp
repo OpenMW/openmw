@@ -82,9 +82,6 @@ namespace MWGui
         MyGUI::Button* mEventBoxGlobal;
         MyGUI::Button* mEventBoxLocal;
 
-        int mGlobalMapSizeX;
-        int mGlobalMapSizeY;
-
     protected:
         virtual void onPinToggled();
     };
