@@ -3,6 +3,8 @@
 #include "esm_reader.hpp"
 #include "esm_writer.hpp"
 
+#include <stdio.h>
+
 namespace
 {
     const int NumberOfHardcodedFlags = 143;
@@ -36,10 +38,9 @@ void MagicEffect::load(ESMReader &esm)
   esm.getHNT(mIndex, "INDX");
 
   esm.getHNT(mData, "MEDT", 36);
-/*  
   if (mIndex>=0 && mIndex<NumberOfHardcodedFlags)
     mData.mFlags |= HardcodedFlags[mIndex];
-*/  
+
   mIcon = esm.getHNOString("ITEX");
   mParticle = esm.getHNOString("PTEX");
 
@@ -58,7 +59,12 @@ void MagicEffect::load(ESMReader &esm)
 void MagicEffect::save(ESMWriter &esm)
 {
     esm.writeHNT("INDX", mIndex);
+
+    mData.mFlags &= 0xe00;
     esm.writeHNT("MEDT", mData, 36);
+    if (mIndex>=0 && mIndex<NumberOfHardcodedFlags) {
+        mData.mFlags |= HardcodedFlags[mIndex];
+    }
 
     esm.writeHNOCString("ITEX", mIcon);
     esm.writeHNOCString("PTEX", mParticle);
