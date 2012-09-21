@@ -282,7 +282,6 @@ namespace MWBase
             virtual void togglePlayerLooking(bool enable) = 0;
 
             virtual void renderPlayer() = 0;
-            virtual void renderGlobalMap() = 0;
             
             virtual void setupExternalRendering (MWRender::ExternalRendering& rendering) = 0;
 

@@ -195,8 +195,6 @@ class RenderingManager: private RenderingInterface, public Ogre::WindowEventList
 
     void setupExternalRendering (MWRender::ExternalRendering& rendering);
 
-    void renderGlobalMap();
-
   protected:
 	virtual void windowResized(Ogre::RenderWindow* rw);
     virtual void windowClosed(Ogre::RenderWindow* rw);

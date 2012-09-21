@@ -50,7 +50,8 @@
 using namespace MWGui;
 
 WindowManager::WindowManager(
-    const Compiler::Extensions& extensions, int fpsLevel, bool newGame, OEngine::Render::OgreRenderer *mOgre, const std::string& logpath, bool consoleOnlyScripts)
+    const Compiler::Extensions& extensions, int fpsLevel, bool newGame, OEngine::Render::OgreRenderer *mOgre,
+        const std::string& logpath, const std::string& cacheDir, bool consoleOnlyScripts)
   : mGuiManager(NULL)
   , mHud(NULL)
   , mMap(NULL)
@@ -132,7 +133,7 @@ WindowManager::WindowManager(
     mDragAndDrop->mDragAndDropWidget = dragAndDropWidget;
 
     mMenu = new MainMenu(w,h);
-    mMap = new MapWindow(*this);
+    mMap = new MapWindow(*this, cacheDir);
     mStatsWindow = new StatsWindow(*this);
     mConsole = new Console(w,h, consoleOnlyScripts);
     mJournal = new JournalWindow(*this);

@@ -11,6 +11,8 @@
 #include "../mwbase/environment.hpp"
 #include "../mwworld/player.hpp"
 
+#include "../mwrender/globalmap.hpp"
+
 using namespace MWGui;
 
 LocalMapBase::LocalMapBase()
@@ -249,11 +251,13 @@ void LocalMapBase::setPlayerDir(const float x, const float y)
 
 // ------------------------------------------------------------------------------------------
 
-MapWindow::MapWindow(MWBase::WindowManager& parWindowManager) :
-    MWGui::WindowPinnableBase("openmw_map_window.layout", parWindowManager),
-    mGlobal(false)
+MapWindow::MapWindow(MWBase::WindowManager& parWindowManager, const std::string& cacheDir)
+    : MWGui::WindowPinnableBase("openmw_map_window.layout", parWindowManager)
+    , mGlobal(false)
 {
     setCoord(500,0,320,300);
+
+    mGlobalMapRender = new MWRender::GlobalMap(cacheDir);
 
     getWidget(mLocalMap, "LocalMap");
     getWidget(mGlobalMap, "GlobalMap");
@@ -275,6 +279,11 @@ MapWindow::MapWindow(MWBase::WindowManager& parWindowManager) :
     mEventBoxLocal->eventMouseButtonPressed += MyGUI::newDelegate(this, &MapWindow::onDragStart);
 
     LocalMapBase::init(mLocalMap, mPlayerArrowLocal, this);
+}
+
+MapWindow::~MapWindow()
+{
+    delete mGlobalMapRender;
 }
 
 void MapWindow::setCellName(const std::string& cellName)

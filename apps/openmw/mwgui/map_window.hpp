@@ -3,6 +3,11 @@
 
 #include "window_pinnable_base.hpp"
 
+namespace MWRender
+{
+    class GlobalMap;
+}
+
 namespace MWGui
 {
     class LocalMapBase
@@ -57,8 +62,8 @@ namespace MWGui
     class MapWindow : public MWGui::WindowPinnableBase, public LocalMapBase
     {
     public:
-        MapWindow(MWBase::WindowManager& parWindowManager);
-        virtual ~MapWindow(){}
+        MapWindow(MWBase::WindowManager& parWindowManager, const std::string& cacheDir);
+        virtual ~MapWindow();
 
         void setCellName(const std::string& cellName);
 
@@ -81,6 +86,8 @@ namespace MWGui
 
         MyGUI::Button* mEventBoxGlobal;
         MyGUI::Button* mEventBoxLocal;
+
+        MWRender::GlobalMap* mGlobalMapRender;
 
     protected:
         virtual void onPinToggled();

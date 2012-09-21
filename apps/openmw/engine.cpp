@@ -339,7 +339,7 @@ void OMW::Engine::go()
 
     mEnvironment.setWindowManager (new MWGui::WindowManager(
         mExtensions, mFpsLevel, mNewGame, mOgre, mCfgMgr.getLogPath().string() + std::string("/"),
-        mScriptConsoleMode));
+        mCfgMgr.getCachePath ().string(), mScriptConsoleMode));
 
     // Create sound system
     mEnvironment.setSoundManager (new MWSound::SoundManager(mUseSound));
@@ -369,7 +369,6 @@ void OMW::Engine::go()
     pos.pos[2] = 0;
 
     mEnvironment.getWorld()->renderPlayer();
-    mEnvironment.getWorld()->renderGlobalMap();
 
     if (const ESM::Cell *exterior = MWBase::Environment::get().getWorld()->getExterior (mCellName))
     {
