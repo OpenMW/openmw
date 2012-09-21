@@ -104,6 +104,8 @@ namespace MWMechanics
             float capacity = MWWorld::Class::get(ptr).getCapacity(ptr);
             float encumbrance = MWWorld::Class::get(ptr).getEncumbrance(ptr);
             float normalizedEncumbrance = (capacity == 0 ? 1 : encumbrance/capacity);
+            if (normalizedEncumbrance > 1)
+                normalizedEncumbrance = 1;
 
             float x = fFatigueReturnBase + fFatigueReturnMult * (1 - normalizedEncumbrance);
             x *= fEndFatigueMult * endurance;
