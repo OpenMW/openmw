@@ -44,6 +44,8 @@
 #include "spellwindow.hpp"
 #include "quickkeysmenu.hpp"
 #include "loadingscreen.hpp"
+#include "levelupdialog.hpp"
+#include "waitdialog.hpp"
 
 using namespace MWGui;
 
@@ -70,6 +72,8 @@ WindowManager::WindowManager(
   , mSpellWindow(NULL)
   , mLoadingScreen(NULL)
   , mCharGen(NULL)
+  , mLevelupDialog(NULL)
+  , mWaitDialog(NULL)
   , mPlayerClass()
   , mPlayerName()
   , mPlayerRaceId()
@@ -84,6 +88,7 @@ WindowManager::WindowManager(
   , mGarbageDialogs()
   , mShown(GW_ALL)
   , mAllowed(newGame ? GW_None : GW_ALL)
+  , mRestAllowed(newGame ? false : true)
   , mShowFPSLevel(fpsLevel)
   , mFPS(0.0f)
   , mTriangleCount(0)
@@ -147,6 +152,8 @@ WindowManager::WindowManager(
     mAlchemyWindow = new AlchemyWindow(*this);
     mSpellWindow = new SpellWindow(*this);
     mQuickKeysMenu = new QuickKeysMenu(*this);
+    mLevelupDialog = new LevelupDialog(*this);
+    mWaitDialog = new WaitDialog(*this);
 
     mLoadingScreen = new LoadingScreen(mOgre->getScene (), mOgre->getWindow (), *this);
     mLoadingScreen->onResChange (w,h);
@@ -200,6 +207,8 @@ WindowManager::~WindowManager()
     delete mAlchemyWindow;
     delete mSpellWindow;
     delete mLoadingScreen;
+    delete mLevelupDialog;
+    delete mWaitDialog;
 
     cleanupGarbage();
 
@@ -247,6 +256,8 @@ void WindowManager::updateVisible()
     mAlchemyWindow->setVisible(false);
     mSpellWindow->setVisible(false);
     mQuickKeysMenu->setVisible(false);
+    mLevelupDialog->setVisible(false);
+    mWaitDialog->setVisible(false);
 
     mHud->setVisible(true);
 
@@ -297,6 +308,16 @@ void WindowManager::updateVisible()
             break;
         case GM_Alchemy:
             mAlchemyWindow->setVisible(true);
+            break;
+        case GM_Rest:
+            mWaitDialog->setVisible(true);
+            break;
+        case GM_RestBed:
+            mWaitDialog->setVisible(true);
+            mWaitDialog->bedActivated();
+            break;
+        case GM_Levelup:
+            mLevelupDialog->setVisible(true);
             break;
         case GM_Name:
         case GM_Race:
@@ -395,7 +416,7 @@ void WindowManager::setValue (int parSkill, const MWMechanics::Stat<float>& valu
     mPlayerSkillValues[parSkill] = value;
 }
 
-void WindowManager::setValue (const std::string& id, const MWMechanics::DynamicStat<int>& value)
+void WindowManager::setValue (const std::string& id, const MWMechanics::DynamicStat<float>& value)
 {
     mStatsWindow->setValue (id, value);
     mHud->setValue (id, value);
@@ -532,6 +553,8 @@ void WindowManager::onFrame (float frameDuration)
 
     mStatsWindow->onFrame();
 
+    mWaitDialog->onFrame(frameDuration);
+
     mHud->onFrame(frameDuration);
 
     mDialogueWindow->checkReferenceAvailable();
@@ -547,7 +570,10 @@ void WindowManager::changeCell(MWWorld::Ptr::CellStore* cell)
     {
         std::string name;
         if (cell->cell->mName != "")
+        {
             name = cell->cell->mName;
+            mMap->addVisitedLocation (name, cell->cell->getGridX (), cell->cell->getGridY ());
+        }
         else
         {
             const ESM::Region* region = MWBase::Environment::get().getWorld()->getStore().regions.search(cell->cell->mRegion);
@@ -922,4 +948,14 @@ void WindowManager::setLoadingProgress (const std::string& stage, int depth, int
 void WindowManager::loadingDone ()
 {
     mLoadingScreen->loadingDone ();
+}
+
+bool WindowManager::getPlayerSleeping ()
+{
+    return mWaitDialog->getSleeping();
+}
+
+void WindowManager::addVisitedLocation(const std::string& name, int x, int y)
+{
+    mMap->addVisitedLocation (name, x, y);
 }

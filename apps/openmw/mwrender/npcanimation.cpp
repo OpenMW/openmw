@@ -77,12 +77,6 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node, MWWor
     bodyRaceID = "b_n_"+ref->base->mRace;
     std::transform(bodyRaceID.begin(), bodyRaceID.end(), bodyRaceID.begin(), ::tolower);
 
-    /*std::cout << "Race: " << ref->base->race ;
-    if(female)
-        std::cout << " Sex: Female" << " Height: " << race->data.height.female << "\n";
-    else
-        std::cout << " Sex: Male" << " Height: " << race->data.height.male << "\n";
-    */
 
     mInsert = node;
     assert(mInsert);

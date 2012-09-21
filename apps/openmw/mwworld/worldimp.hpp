@@ -179,6 +179,9 @@ namespace MWWorld
             virtual void setDay (int day);
             ///< Set in-game time day.
 
+            virtual int getDay();
+            virtual int getMonth();
+
             virtual TimeStamp getTimeStamp() const;
             ///< Return current in-game time stamp.
 
@@ -222,6 +225,9 @@ namespace MWWorld
             /// Rotates object, uses degrees
             /// \param adjust indicates rotation should be set or adjusted
             virtual void rotateObject (const Ptr& ptr,float x,float y,float z, bool adjust = false);
+
+            virtual void safePlaceObject(const MWWorld::Ptr& ptr,MWWorld::CellStore &Cell,ESM::Position pos);
+            ///< place an object in a "safe" location (ie not in the void, etc). Makes a copy of the Ptr. 
 
             virtual void indexToPosition (int cellX, int cellY, float &x, float &y, bool centre = false)
                 const;
@@ -307,8 +313,16 @@ namespace MWWorld
             }
 
             virtual void renderPlayer();
+            virtual void renderGlobalMap();
             
             virtual void setupExternalRendering (MWRender::ExternalRendering& rendering);
+
+            virtual int canRest();
+            ///< check if the player is allowed to rest \n
+            /// 0 - yes \n
+            /// 1 - only waiting \n
+            /// 2 - player is underwater \n
+            /// 3 - enemies are nearby (not implemented)
     };
 }
 

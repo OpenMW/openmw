@@ -10,6 +10,7 @@
 #include <components/interpreter/opcodes.hpp>
 
 #include "../mwbase/environment.hpp"
+#include "../mwbase/windowmanager.hpp"
 
 #include "../mwworld/class.hpp"
 
@@ -20,6 +21,16 @@ namespace MWScript
 {
     namespace Misc
     {
+        class OpGetPcSleep : public Interpreter::Opcode0
+        {
+        public:
+
+            virtual void execute (Interpreter::Runtime& runtime)
+            {
+                runtime.push (MWBase::Environment::get().getWindowManager ()->getPlayerSleeping());
+            }
+        };
+
         class OpXBox : public Interpreter::Opcode0
         {
             public:
@@ -249,6 +260,7 @@ namespace MWScript
         const int opcodeTogglePathgrid = 0x2000146;
         const int opcodeDontSaveObject = 0x2000153;
         const int opcodeToggleVanityMode = 0x2000174;
+        const int opcodeGetPcSleep = 0x200019f;
 
         void registerExtensions (Compiler::Extensions& extensions)
         {
@@ -273,6 +285,7 @@ namespace MWScript
             extensions.registerInstruction ("dontsaveobject", "", opcodeDontSaveObject);
             extensions.registerInstruction ("togglevanitymode", "", opcodeToggleVanityMode);
             extensions.registerInstruction ("tvm", "", opcodeToggleVanityMode);
+            extensions.registerFunction ("getpcsleep", 'l', "", opcodeGetPcSleep);
         }
 
         void installOpcodes (Interpreter::Interpreter& interpreter)
@@ -293,6 +306,7 @@ namespace MWScript
             interpreter.installSegment5 (opcodeToggleWater, new OpToggleWater);
             interpreter.installSegment5 (opcodeDontSaveObject, new OpDontSaveObject);
             interpreter.installSegment5 (opcodeToggleVanityMode, new OpToggleVanityMode);
+            interpreter.installSegment5 (opcodeGetPcSleep, new OpGetPcSleep);
         }
     }
 }

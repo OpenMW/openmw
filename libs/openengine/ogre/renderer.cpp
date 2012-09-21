@@ -44,8 +44,10 @@ void OgreRenderer::cleanup()
     delete mFader;
     mFader = NULL;
 
-    OGRE_DELETE mRoot;
+    delete mRoot;
     mRoot = NULL;
+
+    unloadPlugins();
 }
 
 void OgreRenderer::start()
@@ -78,7 +80,7 @@ void OgreRenderer::start()
 #endif
 }
 
-bool OgreRenderer::loadPlugins() 
+void OgreRenderer::loadPlugins() 
 {
     #ifdef ENABLE_PLUGIN_GL
     mGLPlugin = new Ogre::GLPlugin();
@@ -100,7 +102,30 @@ bool OgreRenderer::loadPlugins()
     mParticleFXPlugin = new Ogre::ParticleFXPlugin();
     mRoot->installPlugin(mParticleFXPlugin);
     #endif
-    return true;
+}
+
+void OgreRenderer::unloadPlugins()
+{
+    #ifdef ENABLE_PLUGIN_GL
+    delete mGLPlugin;
+    mGLPlugin = NULL;
+    #endif
+    #ifdef ENABLE_PLUGIN_Direct3D9
+    delete mD3D9Plugin;
+    mD3D9Plugin = NULL;
+    #endif
+    #ifdef ENABLE_PLUGIN_CgProgramManager
+    delete mCgPlugin;
+    mCgPlugin = NULL;
+    #endif
+    #ifdef ENABLE_PLUGIN_OctreeSceneManager
+    delete mOctreePlugin;
+    mOctreePlugin = NULL;
+    #endif
+    #ifdef ENABLE_PLUGIN_ParticleFX
+    delete mParticleFXPlugin;
+    mParticleFXPlugin = NULL;
+    #endif
 }
 
 void OgreRenderer::update(float dt)
@@ -120,6 +145,7 @@ float OgreRenderer::getFPS()
 
 void OgreRenderer::configure(const std::string &logPath,
                             const std::string& renderSystem,
+                             const std::string& rttMode,
                             bool _logging)
 {
     // Set up logging first
@@ -173,6 +199,9 @@ void OgreRenderer::configure(const std::string &logPath,
     if (rs == 0)
         throw std::runtime_error ("RenderSystem with name " + renderSystem + " not found, make sure the plugins are loaded");
     mRoot->setRenderSystem(rs);
+
+    if (rs->getName().find("OpenGL") != std::string::npos)
+        rs->setConfigOption ("RTT Preferred Mode", rttMode);
 }
 
 void OgreRenderer::createWindow(const std::string &title, const WindowSettings& settings)
@@ -218,7 +247,7 @@ void OgreRenderer::createScene(const std::string& camName, float fov, float near
     // Alter the camera aspect ratio to match the viewport
     mCamera->setAspectRatio(Real(mView->getActualWidth()) / Real(mView->getActualHeight()));
 
-    mFader = new Fader();
+    mFader = new Fader(mScene);
 }
 
 void OgreRenderer::adjustViewport()

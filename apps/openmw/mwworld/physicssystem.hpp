@@ -24,7 +24,7 @@ namespace MWWorld
                 const Ogre::Quaternion& rotation, float scale, const Ogre::Vector3& position);
 
             void addActor (const std::string& handle, const std::string& mesh,
-                const Ogre::Vector3& position);
+                const Ogre::Vector3& position, float scale, const Ogre::Quaternion& rotation);
 
             void addHeightField (float* heights,
                 int x, int y, float yoffset,
@@ -34,11 +34,11 @@ namespace MWWorld
 
             void removeObject (const std::string& handle);
 
-            void moveObject (const std::string& handle, const Ogre::Vector3& position);
+            void moveObject (const std::string& handle, Ogre::SceneNode* node);
 
-            void rotateObject (const std::string& handle, const Ogre::Quaternion& rotation);
+            void rotateObject (const std::string& handle, Ogre::SceneNode* node);
 
-            void scaleObject (const std::string& handle, float scale);
+            void scaleObject (const std::string& handle, Ogre::SceneNode* node);
 
             bool toggleCollisionMode();
             

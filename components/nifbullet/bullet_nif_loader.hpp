@@ -102,8 +102,11 @@ private:
     std::string resourceName;
     std::string resourceGroup;
 
+    
+
     BulletShape* cShape;//current shape
     btTriangleMesh *mTriMesh;
+    btBoxShape *mBoundingBox;
     btBvhTriangleMeshShape* currentShape;//the shape curently under construction
 };
 

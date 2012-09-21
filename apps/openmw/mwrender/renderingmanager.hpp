@@ -44,6 +44,7 @@ namespace MWRender
     class Water;
     class Compositors;
     class ExternalRendering;
+    class GlobalMap;
 
 class RenderingManager: private RenderingInterface, public Ogre::WindowEventListener {
 
@@ -194,6 +195,8 @@ class RenderingManager: private RenderingInterface, public Ogre::WindowEventList
 
     void setupExternalRendering (MWRender::ExternalRendering& rendering);
 
+    void renderGlobalMap();
+
   protected:
 	virtual void windowResized(Ogre::RenderWindow* rw);
     virtual void windowClosed(Ogre::RenderWindow* rw);
@@ -217,6 +220,8 @@ class RenderingManager: private RenderingInterface, public Ogre::WindowEventList
     TerrainManager* mTerrainManager;
 
     MWRender::Water *mWater;
+
+    GlobalMap* mGlobalMap;
 
     OEngine::Render::OgreRenderer &mRendering;
 

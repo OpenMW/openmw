@@ -4,6 +4,7 @@
 #include <OgreRenderTexture.h>
 #include <OgreSubEntity.h>
 #include <OgreEntity.h>
+#include <stdexcept>
 
 #include <extern/shiny/Main/Factory.hpp>
 
@@ -73,7 +74,7 @@ namespace Render
                 int id = Ogre::any_cast<int>(subEntity->getParent ()->getUserObjectBindings().getUserAny());
                 bool found = false;
                 Ogre::ColourValue colour;
-                for (std::map<Ogre::ColourValue, int>::iterator it = mColourMap.begin(); it != mColourMap.end(); ++it)
+                for (std::map<Ogre::ColourValue, int, cmp_ColourValue>::iterator it = mColourMap.begin(); it != mColourMap.end(); ++it)
                 {
                     if (it->second == id)
                     {

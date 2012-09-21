@@ -132,6 +132,7 @@ namespace OEngine
             void configure(
                 const std::string &logPath, // Path to directory where to store log files
                 const std::string &renderSystem,
+                const std::string &rttMode,
                 bool _logging);      // Enable or disable logging
 
             /// Create a window with the given title
@@ -151,7 +152,9 @@ namespace OEngine
             /// Start the main rendering loop
             void start();
 
-            bool loadPlugins() ;
+            void loadPlugins();
+
+            void unloadPlugins();
 
             void update(float dt);
 

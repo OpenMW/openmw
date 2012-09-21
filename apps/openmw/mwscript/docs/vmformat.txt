@@ -31,7 +31,7 @@ op 0x2000e: PCGetRank implicit
 op 0x2000f: PCGetRank explicit
 op 0x20010: AiWander
 op 0x20011: AiWander, explicit reference
-opcodes 0x20012-0x3ffff unused
+op s 0x20012-0x3ffff unused
 
 Segment 4:
 (not implemented yet)
@@ -183,4 +183,27 @@ op 0x2000172: GetStartingAngle
 op 0x2000173: GetStartingAngle, explicit reference
 op 0x2000174: ToggleVanityMode
 op 0x2000175-0x200018B: Get controls disabled
-opcodes 0x200018C-0x3ffffff unused
+op 0x200018C: GetLevel
+op 0x200018D: GetLevel, explicit reference
+op 0x200018E: SetLevel
+op 0x200018F: SetLevel, explicit reference
+op 0x2000190: GetPos
+op 0x2000191: GetPosExplicit
+op 0x2000192: SetPos
+op 0x2000193: SetPosExplicit
+op 0x2000194: GetStartingPos
+op 0x2000195: GetStartingPosExplicit
+op 0x2000196: Position
+op 0x2000197: Position Explicit
+op 0x2000198: PositionCell
+op 0x2000199: PositionCell Explicit
+op 0x200019a: PlaceItemCell
+op 0x200019b: PlaceItem 
+op 0x200019c: PlaceAtPc
+op 0x200019d: PlaceAtMe 
+op 0x200019e: PlaceAtMe Explicit
+op 0x200019f: GetPcSleep
+op 0x20001a0: ShowMap
+op 0x20001a1: FillMap
+opcodes 0x20001a2-0x3ffffff unused
+

@@ -3,10 +3,13 @@
 #include <boost/lexical_cast.hpp>
 
 #include <OgreVector2.h>
+#include <OgreTextureManager.h>
+#include <OgreSceneNode.h>
 
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
+#include "../mwworld/player.hpp"
 
 using namespace MWGui;
 
@@ -254,18 +257,24 @@ MapWindow::MapWindow(MWBase::WindowManager& parWindowManager) :
 
     getWidget(mLocalMap, "LocalMap");
     getWidget(mGlobalMap, "GlobalMap");
-    getWidget(mPlayerArrow, "Compass");
+    getWidget(mGlobalMapImage, "GlobalMapImage");
+    getWidget(mPlayerArrowLocal, "CompassLocal");
+    getWidget(mPlayerArrowGlobal, "CompassGlobal");
+
+    mGlobalMap->setVisible (false);
 
     getWidget(mButton, "WorldButton");
     mButton->eventMouseButtonClick += MyGUI::newDelegate(this, &MapWindow::onWorldButtonClicked);
     mButton->setCaptionWithReplacing("#{sWorld}");
 
-    MyGUI::Button* eventbox;
-    getWidget(eventbox, "EventBox");
-    eventbox->eventMouseDrag += MyGUI::newDelegate(this, &MapWindow::onMouseDrag);
-    eventbox->eventMouseButtonPressed += MyGUI::newDelegate(this, &MapWindow::onDragStart);
+    getWidget(mEventBoxGlobal, "EventBoxGlobal");
+    mEventBoxGlobal->eventMouseDrag += MyGUI::newDelegate(this, &MapWindow::onMouseDrag);
+    mEventBoxGlobal->eventMouseButtonPressed += MyGUI::newDelegate(this, &MapWindow::onDragStart);
+    getWidget(mEventBoxLocal, "EventBoxLocal");
+    mEventBoxLocal->eventMouseDrag += MyGUI::newDelegate(this, &MapWindow::onMouseDrag);
+    mEventBoxLocal->eventMouseButtonPressed += MyGUI::newDelegate(this, &MapWindow::onDragStart);
 
-    LocalMapBase::init(mLocalMap, mPlayerArrow, this);
+    LocalMapBase::init(mLocalMap, mPlayerArrowLocal, this);
 }
 
 void MapWindow::setCellName(const std::string& cellName)
@@ -273,24 +282,54 @@ void MapWindow::setCellName(const std::string& cellName)
     setTitle(cellName);
 }
 
+void MapWindow::addVisitedLocation(const std::string& name, int x, int y)
+{
+    const int cellSize = 24;
+
+    int size = 24 * 61;
+
+    MyGUI::IntCoord widgetCoord(
+                (x+30)*cellSize+6,
+                (size-1) - (y+30)*cellSize+6,
+                12, 12);
+
+
+    static int _counter=0;
+    MyGUI::Button* markerWidget = mGlobalMapImage->createWidget<MyGUI::Button>("ButtonImage",
+        widgetCoord, MyGUI::Align::Default, "Marker" + boost::lexical_cast<std::string>(_counter));
+    markerWidget->setImageResource("DoorMarker");
+    markerWidget->setUserString("ToolTipType", "Layout");
+    markerWidget->setUserString("ToolTipLayout", "TextToolTip");
+    markerWidget->setUserString("Caption_Text", name);
+    ++_counter;
+
+    markerWidget = mEventBoxGlobal->createWidget<MyGUI::Button>("",
+        widgetCoord, MyGUI::Align::Default);
+    markerWidget->setNeedMouseFocus (true);
+    markerWidget->setUserString("ToolTipType", "Layout");
+    markerWidget->setUserString("ToolTipLayout", "TextToolTip");
+    markerWidget->setUserString("Caption_Text", name);
+}
+
 void MapWindow::onDragStart(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id)
 {
     if (_id!=MyGUI::MouseButton::Left) return;
-    if (!mGlobal)
-        mLastDragPos = MyGUI::IntPoint(_left, _top);
+    mLastDragPos = MyGUI::IntPoint(_left, _top);
 }
 
 void MapWindow::onMouseDrag(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id)
 {
     if (_id!=MyGUI::MouseButton::Left) return;
 
-    if (!mGlobal)
-    {
-        MyGUI::IntPoint diff = MyGUI::IntPoint(_left, _top) - mLastDragPos;
-        mLocalMap->setViewOffset( mLocalMap->getViewOffset() + diff );
+    MyGUI::IntPoint diff = MyGUI::IntPoint(_left, _top) - mLastDragPos;
 
-        mLastDragPos = MyGUI::IntPoint(_left, _top);
-    }
+    if (!mGlobal)
+        mLocalMap->setViewOffset( mLocalMap->getViewOffset() + diff );
+    else
+        mGlobalMap->setViewOffset( mGlobalMap->getViewOffset() + diff );
+
+
+    mLastDragPos = MyGUI::IntPoint(_left, _top);
 }
 
 void MapWindow::onWorldButtonClicked(MyGUI::Widget* _sender)
@@ -306,4 +345,42 @@ void MapWindow::onWorldButtonClicked(MyGUI::Widget* _sender)
 void MapWindow::onPinToggled()
 {
     mWindowManager.setMinimapVisibility(!mPinned);
+}
+
+void MapWindow::open()
+{
+    mGlobalMapImage->setImageTexture("GlobalMap.png");
+
+    int size = 24 * 61;
+
+    mGlobalMap->setCanvasSize (size, size);
+    mGlobalMapImage->setSize(size, size);
+
+    for (unsigned int i=0; i<mGlobalMapImage->getChildCount (); ++i)
+    {
+        if (mGlobalMapImage->getChildAt (i)->getName().substr(0,6) == "Marker")
+            mGlobalMapImage->getChildAt (i)->castType<MyGUI::Button>()->setImageResource("DoorMarker");
+    }
+
+    Ogre::Vector3 pos = MWBase::Environment::get().getWorld ()->getPlayer ().getPlayer().getRefData ().getBaseNode ()->_getDerivedPosition ();
+    Ogre::Quaternion orient = MWBase::Environment::get().getWorld ()->getPlayer ().getPlayer().getRefData ().getBaseNode ()->_getDerivedOrientation ();
+    Ogre::Vector2 dir (orient.yAxis ().x, -orient.yAxis().z);
+
+    float worldX = ((pos.x / 8192.f-0.5) / 30.f+1)/2.f;
+    float worldY = ((pos.z / 8192.f+1.5) / 30.f+1)/2.f;
+
+    // for interiors, we have no choice other than using the last position & direction.
+    /// \todo save this last position in the savegame?
+    if (MWBase::Environment::get().getWorld ()->isCellExterior ())
+    {
+        mPlayerArrowGlobal->setPosition(MyGUI::IntPoint(size * worldX - 16, size * worldY - 16));
+
+        MyGUI::ISubWidget* main = mPlayerArrowGlobal->getSubWidgetMain();
+        MyGUI::RotatingSkin* rotatingSubskin = main->castType<MyGUI::RotatingSkin>();
+        rotatingSubskin->setCenter(MyGUI::IntPoint(16,16));
+        float angle = std::atan2(dir.x, dir.y);
+        rotatingSubskin->setAngle(angle);
+    }
+
+    mPlayerArrowGlobal->setImageTexture ("textures\\compass.dds");
 }

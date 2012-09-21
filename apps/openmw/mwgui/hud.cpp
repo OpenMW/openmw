@@ -161,7 +161,7 @@ void HUD::setEffect(const char *img)
     mEffect1->setImageTexture(img);
 }
 
-void HUD::setValue(const std::string& id, const MWMechanics::DynamicStat<int>& value)
+void HUD::setValue(const std::string& id, const MWMechanics::DynamicStat<float>& value)
 {
     static const char *ids[] =
     {

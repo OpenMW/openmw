@@ -189,7 +189,9 @@ namespace MWWorld
         mPlayer = new MWWorld::Player (mStore.npcs.find ("player"), *this);
         mRendering->attachCameraTo(mPlayer->getPlayer());
 
-        mPhysics->addActor (mPlayer->getPlayer().getRefData().getHandle(), "", Ogre::Vector3 (0, 0, 0));
+        std::string playerCollisionFile = "meshes\\base_anim.nif";    //This is used to make a collision shape for our player
+                                                                      //We will need to support the 1st person file too in the future
+        mPhysics->addActor (mPlayer->getPlayer().getRefData().getHandle(), playerCollisionFile, Ogre::Vector3 (0, 0, 0), 1, Ogre::Quaternion::ZERO);
 
         // global variables
         mGlobalVariables = new Globals (mStore);
@@ -450,6 +452,16 @@ namespace MWWorld
         mRendering->skySetDate (mGlobalVariables->getInt ("day"), month);
     }
 
+    int World::getDay()
+    {
+        return mGlobalVariables->getInt("day");
+    }
+
+    int World::getMonth()
+    {
+        return mGlobalVariables->getInt("month");
+    }
+
     TimeStamp World::getTimeStamp() const
     {
         return TimeStamp (mGlobalVariables->getFloat ("gamehour"),
@@ -541,6 +553,16 @@ namespace MWWorld
         }
     }
 
+    std::string toLower (const std::string& name)
+    {
+        std::string lowerCase;
+
+        std::transform (name.begin(), name.end(), std::back_inserter (lowerCase),
+            (int(*)(int)) std::tolower);
+
+        return lowerCase;
+    }
+
     void World::moveObject(const Ptr &ptr, CellStore &newCell, float x, float y, float z)
     {
         ESM::Position &pos = ptr.getRefData().getPosition();
@@ -550,11 +572,10 @@ namespace MWWorld
         CellStore *currCell = ptr.getCell();
         bool isPlayer = ptr == mPlayer->getPlayer();
         bool haveToMove = mWorldScene->isCellActive(*currCell) || isPlayer;
-
         if (*currCell != newCell) {
             if (isPlayer) {
                 if (!newCell.isExterior()) {
-                    changeToInteriorCell(newCell.cell->mName, pos);
+                    changeToInteriorCell(toLower(newCell.cell->mName), pos);
                 } else {
                     int cellX = newCell.cell->mData.mX;
                     int cellY = newCell.cell->mData.mY;
@@ -594,7 +615,7 @@ namespace MWWorld
         }
         if (haveToMove) {
             mRendering->moveObject(ptr, vec);
-            mPhysics->moveObject(ptr.getRefData().getHandle(), vec);
+            mPhysics->moveObject (ptr.getRefData().getHandle(), ptr.getRefData().getBaseNode());
         }
     }
 
@@ -615,6 +636,8 @@ namespace MWWorld
     void World::moveObject (const Ptr& ptr, float x, float y, float z)
     {
         moveObjectImp(ptr, x, y, z);
+
+        
     }
 
     void World::scaleObject (const Ptr& ptr, float scale)
@@ -624,7 +647,7 @@ namespace MWWorld
         ptr.getCellRef().mScale = scale;
         //scale = scale/ptr.getRefData().getBaseNode()->getScale().x;
         ptr.getRefData().getBaseNode()->setScale(scale,scale,scale);
-        mPhysics->scaleObject( ptr.getRefData().getHandle(), scale );
+        mPhysics->scaleObject( ptr.getRefData().getHandle(), ptr.getRefData().getBaseNode());
     }
 
     void World::rotateObject (const Ptr& ptr,float x,float y,float z, bool adjust)
@@ -633,18 +656,25 @@ namespace MWWorld
         rot.x = Ogre::Degree(x).valueRadians();
         rot.y = Ogre::Degree(y).valueRadians();
         rot.z = Ogre::Degree(z).valueRadians();
-
+        
         if (mRendering->rotateObject(ptr, rot, adjust)) {
             float *objRot = ptr.getRefData().getPosition().rot;
             objRot[0] = rot.x, objRot[1] = rot.y, objRot[2] = rot.z;
 
+
             if (ptr.getRefData().getBaseNode() != 0) {
                 mPhysics->rotateObject(
                     ptr.getRefData().getHandle(),
-                    ptr.getRefData().getBaseNode()->getOrientation()
+                    ptr.getRefData().getBaseNode()
                 );
             }
         }
+
+    }
+
+    void World::safePlaceObject(const MWWorld::Ptr& ptr,MWWorld::CellStore &Cell,ESM::Position pos)
+    {
+        copyObjectToCell(ptr,Cell,pos);
     }
 
     void World::indexToPosition (int cellX, int cellY, float &x, float &y, bool centre) const
@@ -1223,8 +1253,37 @@ namespace MWWorld
         mRendering->renderPlayer(mPlayer->getPlayer());
     }
 
+    void World::renderGlobalMap ()
+    {
+        mRendering->renderGlobalMap ();
+    }
+
     void World::setupExternalRendering (MWRender::ExternalRendering& rendering)
     {
         mRendering->setupExternalRendering (rendering);
+    }
+
+    int World::canRest ()
+    {
+        Ptr::CellStore *currentCell = mWorldScene->getCurrentCell();
+
+        Ogre::Vector3 playerPos;
+        float* pos = mPlayer->getPlayer ().getRefData ().getPosition ().pos;
+        playerPos.x = pos[0];
+        playerPos.y = pos[1];
+        playerPos.z = pos[2];
+
+        std::pair<bool, Ogre::Vector3> hit =
+                mPhysics->castRay(playerPos, Ogre::Vector3(0,0,-1), 50);
+        bool isOnGround = (hit.first ? (hit.second.distance (playerPos) < 25) : false);
+
+        if (!isOnGround || isUnderwater (*currentCell->cell, playerPos))
+            return 2;
+
+        if (currentCell->cell->mData.mFlags & ESM::Cell::NoSleep)
+            return 1;
+
+        return 0;
+
     }
 }

@@ -72,6 +72,9 @@ void ManualBulletShapeLoader::loadResource(Ogre::Resource *resource)
     cShape = static_cast<BulletShape *>(resource);
     resourceName = cShape->getName();
     cShape->collide = false;
+    mBoundingBox = NULL;
+    cShape->boxTranslation = Ogre::Vector3(0,0,0);
+    cShape->boxRotation = Ogre::Quaternion::IDENTITY;
 
     mTriMesh = new btTriangleMesh();
 
@@ -125,9 +128,14 @@ void ManualBulletShapeLoader::loadResource(Ogre::Resource *resource)
             delete m_meshInterface;
         }
     };
+    if(mBoundingBox != NULL)
+       cShape->Shape = mBoundingBox;
 
-    currentShape = new TriangleMeshShape(mTriMesh,true);
-    cShape->Shape = currentShape;
+    else
+    {
+        currentShape = new TriangleMeshShape(mTriMesh,true);
+        cShape->Shape = currentShape;
+    }
 }
 
 bool ManualBulletShapeLoader::hasRootCollisionNode(Nif::Node* node)
@@ -216,6 +224,17 @@ void ManualBulletShapeLoader::handleNode(Nif::Node *node, int flags,
         // Scale
         final.scale *= trafo->scale;
 
+    }
+
+    if(node->hasBounds)
+    {
+
+        
+        btVector3 boxsize = getbtVector((node->boundXYZ));
+        cShape->boxTranslation = node->boundPos;
+        cShape->boxRotation = node->boundRot;
+
+        mBoundingBox = new btBoxShape(boxsize);
     }
 
 

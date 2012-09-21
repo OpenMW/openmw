@@ -33,6 +33,42 @@ namespace MWScript
     namespace Stats
     {
         template<class R>
+        class OpGetLevel : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWWorld::Ptr ptr = R()(runtime);
+
+                    Interpreter::Type_Integer value =
+                        MWWorld::Class::get (ptr)
+                            .getCreatureStats (ptr)
+                            .getLevel();
+
+                    runtime.push (value);
+                }
+        };
+
+        template<class R>
+        class OpSetLevel : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWWorld::Ptr ptr = R()(runtime);
+
+                    Interpreter::Type_Integer value = runtime[0].mInteger;
+                    runtime.pop();
+
+                    MWWorld::Class::get (ptr)
+                        .getCreatureStats (ptr)
+                        .setLevel(value);
+                }
+        };
+
+        template<class R>
         class OpGetAttribute : public Interpreter::Opcode0
         {
                 int mIndex;
@@ -592,6 +628,11 @@ namespace MWScript
         const int opcodeModDisposition = 0x200014d;
         const int opcodeModDispositionExplicit = 0x200014e;
 
+        const int opcodeGetLevel = 0x200018c;
+        const int opcodeGetLevelExplicit = 0x200018d;
+        const int opcodeSetLevel = 0x200018e;
+        const int opcodeSetLevelExplicit = 0x200018f;
+
         void registerExtensions (Compiler::Extensions& extensions)
         {
             static const char *attributes[numberOfAttributes] =
@@ -674,6 +715,9 @@ namespace MWScript
             extensions.registerInstruction("moddisposition","l",opcodeModDisposition,
                 opcodeModDispositionExplicit);
             extensions.registerFunction("getpcrank",'l',"/S",opcodeGetPCRank,opcodeGetPCRankExplicit);
+
+            extensions.registerInstruction("setlevel", "l", opcodeSetLevel, opcodeSetLevelExplicit);
+            extensions.registerFunction("getlevel", 'l', "", opcodeGetLevel, opcodeGetLevelExplicit);
         }
 
         void installOpcodes (Interpreter::Interpreter& interpreter)
@@ -745,6 +789,12 @@ namespace MWScript
             interpreter.installSegment5(opcodeModDispositionExplicit,new OpModDisposition<ExplicitRef>);
             interpreter.installSegment3(opcodeGetPCRank,new OpGetPCRank<ImplicitRef>);
             interpreter.installSegment3(opcodeGetPCRankExplicit,new OpGetPCRank<ExplicitRef>);
+
+            interpreter.installSegment5 (opcodeGetLevel, new OpGetLevel<ImplicitRef>);
+            interpreter.installSegment5 (opcodeGetLevelExplicit, new OpGetLevel<ExplicitRef>);
+            interpreter.installSegment5 (opcodeSetLevel, new OpSetLevel<ImplicitRef>);
+            interpreter.installSegment5 (opcodeSetLevelExplicit, new OpSetLevel<ExplicitRef>);
+
         }
     }
 }

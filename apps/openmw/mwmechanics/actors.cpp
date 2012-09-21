@@ -68,7 +68,7 @@ namespace MWMechanics
             creatureStats.getMagicEffects().get (EffectKey (84)).mMagnitude * 0.1 + 0.5;
 
         creatureStats.getHealth().setBase(
-            static_cast<int> (0.5 * (strength + endurance)));
+            static_cast<int> (0.5 * (strength + endurance)) + creatureStats.getLevelHealthBonus ());
 
         creatureStats.getMagicka().setBase(
             static_cast<int> (intelligence + magickaFactor * intelligence));

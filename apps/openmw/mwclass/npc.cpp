@@ -141,6 +141,7 @@ namespace MWClass
         assert(ref->base != NULL);
 
         std::string headID = ref->base->mHead;
+
         int end = headID.find_last_of("head_") - 4;
         std::string bodyRaceID = headID.substr(0, end);
 
@@ -153,6 +154,7 @@ namespace MWClass
             model = "meshes\\base_animkna.nif";
         }
         return model;
+
     }
 
     std::string Npc::getName (const MWWorld::Ptr& ptr) const
@@ -297,7 +299,7 @@ namespace MWClass
     {
         Ogre::Vector3 vector (0, 0, 0);
 
-        vector.x = - getMovementSettings (ptr).mLeftRight * 127;
+        vector.x = getMovementSettings (ptr).mLeftRight * 127;
         vector.y = getMovementSettings (ptr).mForwardBackward * 127;
         vector.z = getMovementSettings(ptr).mUpDown * 127;
 

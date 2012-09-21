@@ -134,21 +134,21 @@ void ReviewDialog::setBirthSign(const std::string& signId)
     }
 }
 
-void ReviewDialog::setHealth(const MWMechanics::DynamicStat<int>& value)
+void ReviewDialog::setHealth(const MWMechanics::DynamicStat<float>& value)
 {
     mHealth->setValue(value.getCurrent(), value.getModified());
     std::string valStr =  boost::lexical_cast<std::string>(value.getCurrent()) + "/" + boost::lexical_cast<std::string>(value.getModified());
     mHealth->setUserString("Caption_HealthDescription", "#{sHealthDesc}\n" + valStr);
 }
 
-void ReviewDialog::setMagicka(const MWMechanics::DynamicStat<int>& value)
+void ReviewDialog::setMagicka(const MWMechanics::DynamicStat<float>& value)
 {
     mMagicka->setValue(value.getCurrent(), value.getModified());
     std::string valStr =  boost::lexical_cast<std::string>(value.getCurrent()) + "/" + boost::lexical_cast<std::string>(value.getModified());
     mMagicka->setUserString("Caption_HealthDescription", "#{sIntDesc}\n" + valStr);
 }
 
-void ReviewDialog::setFatigue(const MWMechanics::DynamicStat<int>& value)
+void ReviewDialog::setFatigue(const MWMechanics::DynamicStat<float>& value)
 {
     mFatigue->setValue(value.getCurrent(), value.getModified());
     std::string valStr =  boost::lexical_cast<std::string>(value.getCurrent()) + "/" + boost::lexical_cast<std::string>(value.getModified());

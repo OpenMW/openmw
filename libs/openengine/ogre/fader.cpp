@@ -1,52 +1,50 @@
 #include "fader.hpp"
 
-#include <OgreOverlayManager.h>
-#include <OgreOverlayContainer.h>
-#include <OgreOverlay.h>
 #include <OgreMaterial.h>
 #include <OgreTechnique.h>
 #include <OgreMaterialManager.h>
 #include <OgreResourceGroupManager.h>
+#include <OgreRectangle2D.h>
+#include <OgreSceneManager.h>
 
-#define FADE_OVERLAY_NAME       "FadeInOutOverlay"
-#define FADE_OVERLAY_PANEL_NAME "FadeInOutOverlayPanel"
-#define FADE_MATERIAL_NAME      "FadeInOutMaterial"
 
 using namespace Ogre;
 using namespace OEngine::Render;
 
-Fader::Fader() : 
-    mMode(FadingMode_In),
-    mRemainingTime(0.f),
-    mTargetTime(0.f),
-    mTargetAlpha(0.f),
-    mCurrentAlpha(0.f),
-    mStartAlpha(0.f)
+Fader::Fader(Ogre::SceneManager* sceneMgr)
+    : mSceneMgr(sceneMgr)
+    , mMode(FadingMode_In)
+    , mRemainingTime(0.f)
+    , mTargetTime(0.f)
+    , mTargetAlpha(0.f)
+    , mCurrentAlpha(0.f)
+    , mStartAlpha(0.f)
 {
-
     // Create the fading material
-    MaterialPtr material = MaterialManager::getSingleton().create( FADE_MATERIAL_NAME, ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME );
+    MaterialPtr material = MaterialManager::getSingleton().create("FadeInOutMaterial", ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME );
     Pass* pass = material->getTechnique(0)->getPass(0);
     pass->setSceneBlending(SBT_TRANSPARENT_ALPHA);
     mFadeTextureUnit = pass->createTextureUnitState();
     mFadeTextureUnit->setColourOperationEx(LBX_SOURCE1, LBS_MANUAL, LBS_CURRENT, ColourValue(0.f, 0.f, 0.f)); // always black colour    
 
-    // Create the overlay
-    OverlayManager& ovm = OverlayManager::getSingleton();
+    mRectangle = new Ogre::Rectangle2D(true);
+    mRectangle->setCorners(-1.0, 1.0, 1.0, -1.0);
+    mRectangle->setMaterial("FadeInOutMaterial");
+    mRectangle->setRenderQueueGroup(Ogre::RENDER_QUEUE_OVERLAY-1);
+    // Use infinite AAB to always stay visible
+    Ogre::AxisAlignedBox aabInf;
+    aabInf.setInfinite();
+    mRectangle->setBoundingBox(aabInf);
+    // Attach background to the scene
+    Ogre::SceneNode* node = mSceneMgr->getRootSceneNode()->createChildSceneNode();
+    node->attachObject(mRectangle);
+    mRectangle->setVisible(false);
+    mRectangle->setVisibilityFlags (0x01);
+}
 
-    mOverlay = ovm.create( FADE_OVERLAY_NAME );
-    
-    OverlayContainer* overlay_panel;
-    overlay_panel = (OverlayContainer*)ovm.createOverlayElement("Panel", FADE_OVERLAY_PANEL_NAME);
-    
-    // position it over the whole screen
-    overlay_panel->_setPosition(0, 0);
-    overlay_panel->_setDimensions(1, 1);
-    
-    overlay_panel->setMaterialName( FADE_MATERIAL_NAME );
-    overlay_panel->show();
-    mOverlay->add2D(overlay_panel);
-    mOverlay->hide();
+Fader::~Fader()
+{
+    delete mRectangle;
 }
 
 void Fader::update(float dt)
@@ -69,12 +67,12 @@ void Fader::update(float dt)
         mRemainingTime -= dt;
     }
     
-   if (mCurrentAlpha == 0.f) mOverlay->hide();
+   if (mCurrentAlpha == 0.f) mRectangle->setVisible(false);
 }
 
 void Fader::applyAlpha()
 {
-    mOverlay->show();
+    mRectangle->setVisible(true);
     mFadeTextureUnit->setAlphaOperation(LBX_SOURCE1, LBS_MANUAL, LBS_CURRENT, mCurrentAlpha);
 }
 

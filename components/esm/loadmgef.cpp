@@ -3,8 +3,6 @@
 #include "esm_reader.hpp"
 #include "esm_writer.hpp"
 
-#include <stdio.h>
-
 namespace
 {
     const int NumberOfHardcodedFlags = 143;

@@ -118,7 +118,7 @@ namespace MWBase
             /// Set value for the given ID.
             virtual void setValue (const std::string& id, const MWMechanics::Stat<int>& value) = 0;
             virtual void setValue (int parSkill, const MWMechanics::Stat<float>& value) = 0;
-            virtual void setValue (const std::string& id, const MWMechanics::DynamicStat<int>& value) = 0;
+            virtual void setValue (const std::string& id, const MWMechanics::DynamicStat<float>& value) = 0;
             virtual void setValue (const std::string& id, const std::string& value) = 0;
             virtual void setValue (const std::string& id, int value) = 0;
 
@@ -189,6 +189,8 @@ namespace MWBase
             virtual void allowMouse() = 0;
             virtual void notifyInputActionBound() = 0;
 
+            virtual void addVisitedLocation(const std::string& name, int x, int y) = 0;
+
             virtual void removeDialog(OEngine::GUI::Layout* dialog) = 0;
             ///< Hides dialog and schedules dialog to be deleted.
 
@@ -219,6 +221,11 @@ namespace MWBase
 
             virtual void setLoadingProgress (const std::string& stage, int depth, int current, int total) = 0;
             virtual void loadingDone() = 0;
+
+            virtual void enableRest() = 0;
+            virtual bool getRestEnabled() = 0;
+
+            virtual bool getPlayerSleeping() = 0;
     };
 }
 

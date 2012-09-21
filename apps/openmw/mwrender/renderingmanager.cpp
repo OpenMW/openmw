@@ -35,6 +35,7 @@
 #include "compositors.hpp"
 #include "npcanimation.hpp"
 #include "externalrendering.hpp"
+#include "globalmap.hpp"
 
 using namespace MWRender;
 using namespace Ogre;
@@ -43,7 +44,7 @@ namespace MWRender {
 
 RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const boost::filesystem::path& resDir,
                                     const boost::filesystem::path& cacheDir, OEngine::Physic::PhysicEngine* engine)
-    :mRendering(_rend), mObjects(mRendering), mActors(mRendering), mAmbientMode(0), mSunEnabled(0), mPhysicsEngine(engine)
+    : mRendering(_rend), mObjects(mRendering), mActors(mRendering), mAmbientMode(0), mSunEnabled(0), mPhysicsEngine(engine)
 {
     // select best shader mode
     bool openGL = (Ogre::Root::getSingleton ().getRenderSystem ()->getName().find("OpenGL") != std::string::npos);
@@ -100,7 +101,8 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
     MaterialManager::getSingleton().setDefaultTextureFiltering(tfo);
     MaterialManager::getSingleton().setDefaultAnisotropy( (filter == "anisotropic") ? Settings::Manager::getInt("anisotropy", "General") : 1 );
 
-    // Load resources
+    ResourceGroupManager::getSingleton ().declareResource ("GlobalMap.png", "Texture", ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
+
     ResourceGroupManager::getSingleton().initialiseAllResourceGroups();
 
     // causes light flicker in opengl when moving..
@@ -129,6 +131,8 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
     sh::Factory::getInstance ().setSharedParameter ("waterTimer", sh::makeProperty<sh::FloatValue>(new sh::FloatValue(0)));
     sh::Factory::getInstance ().setSharedParameter ("windDir_windSpeed", sh::makeProperty<sh::Vector3>(new sh::Vector3(0.5, -0.8, 0.2)));
     sh::Factory::getInstance ().setSharedParameter ("waterSunFade_sunHeight", sh::makeProperty<sh::Vector2>(new sh::Vector2(1, 0.6)));
+    sh::Factory::getInstance ().setSharedParameter ("gammaCorrection", sh::makeProperty<sh::FloatValue>(new sh::FloatValue(
+            Settings::Manager::getFloat ("gamma", "Video"))));
 
     applyCompositors();
 
@@ -160,6 +164,8 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
     mDebugging = new Debugging(mMwRoot, engine);
     mLocalMap = new MWRender::LocalMap(&mRendering, this);
 
+    mGlobalMap = new GlobalMap(cacheDir.string());
+
     setMenuTransparency(Settings::Manager::getFloat("menu transparency", "GUI"));
 }
 
@@ -176,6 +182,7 @@ RenderingManager::~RenderingManager ()
     delete mOcclusionQuery;
     delete mCompositors;
     delete mWater;
+    delete mGlobalMap;
 }
 
 MWRender::SkyManager* RenderingManager::getSkyManager()
@@ -275,13 +282,15 @@ RenderingManager::rotateObject(
         float *f = ptr.getRefData().getPosition().rot;
         rot.x += f[0], rot.y += f[1], rot.z += f[2];
     }
+    
     if (!isPlayer && isActive) {
         Ogre::Quaternion xr(Ogre::Radian(rot.x), Ogre::Vector3::UNIT_X);
         Ogre::Quaternion yr(Ogre::Radian(rot.y), Ogre::Vector3::UNIT_Y);
         Ogre::Quaternion zr(Ogre::Radian(rot.z), Ogre::Vector3::UNIT_Z);
-
+        
         ptr.getRefData().getBaseNode()->setOrientation(xr * yr * zr);
     }
+    
     return force;
 }
 
@@ -747,6 +756,11 @@ void RenderingManager::processChangedSettings(const Settings::CategorySettingVec
             sh::Factory::getInstance ().setShadersEnabled (Settings::Manager::getBool("shaders", "Objects"));
             mObjects.rebuildStaticGeometry ();
         }
+        else if (it->second == "gamma" && it->first == "Video")
+        {
+            sh::Factory::getInstance ().setSharedParameter ("gammaCorrection", sh::makeProperty<sh::FloatValue>(new sh::FloatValue(
+                    Settings::Manager::getFloat ("gamma", "Video"))));
+        }
         else if (it->second == "shader mode" && it->first == "General")
         {
             sh::Language lang;
@@ -885,6 +899,11 @@ bool RenderingManager::isPositionExplored (float nX, float nY, int x, int y, boo
 void RenderingManager::setupExternalRendering (MWRender::ExternalRendering& rendering)
 {
     rendering.setup (mRendering.getScene());
+}
+
+void RenderingManager::renderGlobalMap ()
+{
+    mGlobalMap->render ();
 }
 
 } // namespace

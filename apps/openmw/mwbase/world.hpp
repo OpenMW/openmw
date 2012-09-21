@@ -160,6 +160,9 @@ namespace MWBase
             virtual void setDay (int day) = 0;
             ///< Set in-game time day.
 
+            virtual int getDay() = 0;
+            virtual int getMonth() = 0;
+
             virtual MWWorld::TimeStamp getTimeStamp() const = 0;
             ///< Return current in-game time stamp.
 
@@ -204,6 +207,9 @@ namespace MWBase
 
             virtual void rotateObject(const MWWorld::Ptr& ptr,float x,float y,float z, bool adjust = false) = 0;
 
+            virtual void safePlaceObject(const MWWorld::Ptr& ptr,MWWorld::CellStore &Cell,ESM::Position pos) = 0;
+            ///< place an object in a "safe" location (ie not in the void, etc).
+
             virtual void indexToPosition (int cellX, int cellY, float &x, float &y, bool centre = false)
                 const = 0;
             ///< Convert cell numbers to position.
@@ -218,7 +224,7 @@ namespace MWBase
             virtual bool toggleCollisionMode() = 0;
             ///< Toggle collision mode for player. If disabled player object should ignore
             /// collisions and gravity.
-            ///< \return Resulting mode
+            /// \return Resulting mode
 
             virtual bool toggleRenderMode (RenderMode mode) = 0;
             ///< Toggle a render mode.
@@ -276,8 +282,16 @@ namespace MWBase
             virtual void togglePlayerLooking(bool enable) = 0;
 
             virtual void renderPlayer() = 0;
+            virtual void renderGlobalMap() = 0;
             
             virtual void setupExternalRendering (MWRender::ExternalRendering& rendering) = 0;
+
+            virtual int canRest() = 0;
+            ///< check if the player is allowed to rest \n
+            /// 0 - yes \n
+            /// 1 - only waiting \n
+            /// 2 - player is underwater \n
+            /// 3 - enemies are nearby (not implemented)
     };
 }
 

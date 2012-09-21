@@ -299,12 +299,15 @@ void OMW::Engine::go()
     mOgre->configure(
         mCfgMgr.getLogPath().string(),
         renderSystem,
+        Settings::Manager::getString("opengl rtt mode", "Video"),
         false);
 
     // This has to be added BEFORE MyGUI is initialized, as it needs
     // to find core.xml here.
 
     //addResourcesDirectory(mResDir);
+
+    addResourcesDirectory(mCfgMgr.getCachePath ().string());
 
     addResourcesDirectory(mResDir / "mygui");
     addResourcesDirectory(mResDir / "water");
@@ -366,6 +369,7 @@ void OMW::Engine::go()
     pos.pos[2] = 0;
 
     mEnvironment.getWorld()->renderPlayer();
+    mEnvironment.getWorld()->renderGlobalMap();
 
     if (const ESM::Cell *exterior = MWBase::Environment::get().getWorld()->getExterior (mCellName))
     {
