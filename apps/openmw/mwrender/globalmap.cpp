@@ -19,6 +19,8 @@ namespace MWRender
 
     GlobalMap::GlobalMap(const std::string &cacheDir)
         : mCacheDir(cacheDir)
+        , mMinX(0), mMaxX(0)
+        , mMinY(0), mMaxY(0)
     {
     }
 
@@ -27,21 +29,34 @@ namespace MWRender
     {
         Ogre::TexturePtr tex;
 
+        // get the size of the world
+        const ESMS::CellList::ExtCells& extCells = MWBase::Environment::get().getWorld ()->getStore ().cells.extCells;
+        for (ESMS::CellList::ExtCells::const_iterator it = extCells.begin(); it != extCells.end(); ++it)
+        {
+            if (it->first.first < mMinX)
+                mMinX = it->first.first;
+            if (it->first.first > mMaxX)
+                mMaxX = it->first.first;
+            if (it->first.second < mMinY)
+                mMinY = it->first.second;
+            if (it->first.second > mMaxY)
+                mMaxY = it->first.second;
+        }
+
+        int cellSize = 24;
+        mWidth = cellSize*(mMaxX-mMinX+1);
+        mHeight = cellSize*(mMaxY-mMinY+1);
+
+
         if (!boost::filesystem::exists(mCacheDir + "/GlobalMap.png"))
         {
-
-            int cellSize = 24;
-
             Ogre::Image image;
 
-            int width = cellSize*61;
-            int height = cellSize*61;
+            Ogre::uchar data[mWidth * mHeight * 3];
 
-            Ogre::uchar data[width * height * 3];
-
-            for (int x = -30; x <= 30; ++x)
+            for (int x = mMinX; x <= mMaxX; ++x)
             {
-                for (int y = -30; y <= 30; ++y)
+                for (int y = mMinY; y <= mMaxY; ++y)
                 {
                     ESM::Land* land = MWBase::Environment::get().getWorld ()->getStore ().lands.search (x,y);
 
@@ -61,8 +76,8 @@ namespace MWRender
                             int vertexY = float(cellY)/float(cellSize) * ESM::Land::LAND_SIZE;
 
 
-                            int texelX = (x+30) * cellSize + cellX;
-                            int texelY = (height-1) - ((y+30) * cellSize + cellY);
+                            int texelX = (x-mMinX) * cellSize + cellX;
+                            int texelY = (mHeight-1) - ((y-mMinY) * cellSize + cellY);
 
                             Ogre::ColourValue waterShallowColour(0.15, 0.2, 0.19);
                             Ogre::ColourValue waterDeepColour(0.1, 0.14, 0.13);
@@ -123,20 +138,23 @@ namespace MWRender
                                 b = waterDeepColour.b * 255;
                             }
 
-                            data[texelY * height * 3 + texelX * 3] = r;
-                            data[texelY * height * 3 + texelX * 3+1] = g;
-                            data[texelY * height * 3 + texelX * 3+2] = b;
+                            // uncomment this line to outline cell borders
+                            //if (cellX == 0 || cellX == cellSize-1 || cellY == 0|| cellY == cellSize-1) r = 255;
+
+                            data[texelY * mWidth * 3 + texelX * 3] = r;
+                            data[texelY * mWidth * 3 + texelX * 3+1] = g;
+                            data[texelY * mWidth * 3 + texelX * 3+2] = b;
                         }
                     }
                 }
             }
 
-            image.loadDynamicImage (data, width, height, Ogre::PF_B8G8R8);
+            image.loadDynamicImage (data, mWidth, mHeight, Ogre::PF_B8G8R8);
 
             image.save (mCacheDir + "/GlobalMap.png");
 
             tex = Ogre::TextureManager::getSingleton ().createManual ("GlobalMap.png", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
-                Ogre::TEX_TYPE_2D, width, height, 0, Ogre::PF_B8G8R8, Ogre::TU_DEFAULT);
+                Ogre::TEX_TYPE_2D, mWidth, mHeight, 0, Ogre::PF_B8G8R8, Ogre::TU_DEFAULT);
             tex->loadImage(image);
         }
         else
@@ -144,5 +162,21 @@ namespace MWRender
 
         tex->load();
     }
+
+    void GlobalMap::worldPosToImageSpace(float x, float z, float& imageX, float& imageY)
+    {
+        imageX = float(x / 8192.f - mMinX) / (mMaxX - mMinX + 1);
+
+        imageY = 1.f-float(-z / 8192.f - mMinY) / (mMaxY - mMinY + 1);
+    }
+
+    void GlobalMap::cellTopLeftCornerToImageSpace(int x, int y, float& imageX, float& imageY)
+    {
+        imageX = float(x - mMinX) / (mMaxX - mMinX + 1);
+
+        // NB y + 1, because we want the top left corner, not bottom left where the origin of the cell is
+        imageY = 1.f-float(y - mMinY + 1) / (mMaxY - mMinY + 1);
+    }
+
 
 }

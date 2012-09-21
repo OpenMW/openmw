@@ -258,6 +258,7 @@ MapWindow::MapWindow(MWBase::WindowManager& parWindowManager, const std::string&
     setCoord(500,0,320,300);
 
     mGlobalMapRender = new MWRender::GlobalMap(cacheDir);
+    mGlobalMapRender->render();
 
     getWidget(mLocalMap, "LocalMap");
     getWidget(mGlobalMap, "GlobalMap");
@@ -293,13 +294,12 @@ void MapWindow::setCellName(const std::string& cellName)
 
 void MapWindow::addVisitedLocation(const std::string& name, int x, int y)
 {
-    const int cellSize = 24;
-
-    int size = 24 * 61;
+    float worldX, worldY;
+    mGlobalMapRender->cellTopLeftCornerToImageSpace (x, y, worldX, worldY);
 
     MyGUI::IntCoord widgetCoord(
-                (x+30)*cellSize+6,
-                (size-1) - (y+30)*cellSize+6,
+                worldX * mGlobalMapRender->getWidth()+6,
+                worldY * mGlobalMapRender->getHeight()+6,
                 12, 12);
 
 
@@ -349,6 +349,9 @@ void MapWindow::onWorldButtonClicked(MyGUI::Widget* _sender)
 
     mButton->setCaptionWithReplacing( mGlobal ? "#{sLocal}" :
             "#{sWorld}");
+
+    if (mGlobal)
+        globalMapUpdatePlayer ();
 }
 
 void MapWindow::onPinToggled()
@@ -360,10 +363,8 @@ void MapWindow::open()
 {
     mGlobalMapImage->setImageTexture("GlobalMap.png");
 
-    int size = 24 * 61;
-
-    mGlobalMap->setCanvasSize (size, size);
-    mGlobalMapImage->setSize(size, size);
+    mGlobalMap->setCanvasSize (mGlobalMapRender->getWidth(), mGlobalMapRender->getHeight());
+    mGlobalMapImage->setSize(mGlobalMapRender->getWidth(), mGlobalMapRender->getHeight());
 
     for (unsigned int i=0; i<mGlobalMapImage->getChildCount (); ++i)
     {
@@ -371,18 +372,28 @@ void MapWindow::open()
             mGlobalMapImage->getChildAt (i)->castType<MyGUI::Button>()->setImageResource("DoorMarker");
     }
 
+    globalMapUpdatePlayer();
+
+    mPlayerArrowGlobal->setImageTexture ("textures\\compass.dds");
+}
+
+void MapWindow::globalMapUpdatePlayer ()
+{
     Ogre::Vector3 pos = MWBase::Environment::get().getWorld ()->getPlayer ().getPlayer().getRefData ().getBaseNode ()->_getDerivedPosition ();
     Ogre::Quaternion orient = MWBase::Environment::get().getWorld ()->getPlayer ().getPlayer().getRefData ().getBaseNode ()->_getDerivedOrientation ();
     Ogre::Vector2 dir (orient.yAxis ().x, -orient.yAxis().z);
 
-    float worldX = ((pos.x / 8192.f-0.5) / 30.f+1)/2.f;
-    float worldY = ((pos.z / 8192.f+1.5) / 30.f+1)/2.f;
+    float worldX, worldY;
+    mGlobalMapRender->worldPosToImageSpace (pos.x, pos.z, worldX, worldY);
+    worldX *= mGlobalMapRender->getWidth();
+    worldY *= mGlobalMapRender->getHeight();
+
 
     // for interiors, we have no choice other than using the last position & direction.
     /// \todo save this last position in the savegame?
     if (MWBase::Environment::get().getWorld ()->isCellExterior ())
     {
-        mPlayerArrowGlobal->setPosition(MyGUI::IntPoint(size * worldX - 16, size * worldY - 16));
+        mPlayerArrowGlobal->setPosition(MyGUI::IntPoint(worldX - 16, worldY - 16));
 
         MyGUI::ISubWidget* main = mPlayerArrowGlobal->getSubWidgetMain();
         MyGUI::RotatingSkin* rotatingSubskin = main->castType<MyGUI::RotatingSkin>();
@@ -391,5 +402,8 @@ void MapWindow::open()
         rotatingSubskin->setAngle(angle);
     }
 
-    mPlayerArrowGlobal->setImageTexture ("textures\\compass.dds");
+    // set the view offset so that player is in the center
+    MyGUI::IntSize viewsize = mGlobalMap->getSize();
+    MyGUI::IntPoint viewoffs(0.5*viewsize.width - worldX, 0.5*viewsize.height - worldY);
+    mGlobalMap->setViewOffset(viewoffs);
 }

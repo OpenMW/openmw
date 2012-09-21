@@ -76,6 +76,8 @@ namespace MWGui
         void onMouseDrag(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id);
         void onWorldButtonClicked(MyGUI::Widget* _sender);
 
+        void globalMapUpdatePlayer();
+
         MyGUI::ScrollView* mGlobalMap;
         MyGUI::ImageBox* mGlobalMapImage;
         MyGUI::ImageBox* mPlayerArrowLocal;
