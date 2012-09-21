@@ -237,7 +237,7 @@ bool	PM_SlideMove( bool gravity )
 		{
 			// entity is completely trapped in another solid
 			//pm->ps->velocity[2] = 0;	// don't build up falling damage, but allow sideways acceleration
-			pm->ps.velocity.z = 0;
+			pm->ps.velocity = Ogre::Vector3(0,0,0);
 			return true;
 		}
 
