@@ -31,6 +31,9 @@ namespace MWMechanics
 
             void calculateCreatureStatModifiers (const MWWorld::Ptr& ptr);
 
+            void calculateRestoration (const MWWorld::Ptr& ptr, float duration);
+
+
         public:
 
             Actors();
@@ -54,6 +57,8 @@ namespace MWMechanics
             ///< This function is normally called automatically during the update process, but it can
             /// also be called explicitly at any time to force an update.
 
+            void restoreDynamicStats();
+            ///< If the player is sleeping, this should be called every hour.
     };
 }
 

@@ -7,6 +7,7 @@
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
+#include "../mwbase/mechanicsmanager.hpp"
 
 #include "../mwworld/timestamp.hpp"
 #include "../mwworld/player.hpp"
@@ -186,7 +187,11 @@ namespace MWGui
             mProgressBar.setProgress (mCurHour, mHours);
 
             if (mCurHour <= mHours)
+            {
                 MWBase::Environment::get().getWorld ()->advanceTime (1);
+                if (mSleeping)
+                    MWBase::Environment::get().getMechanicsManager ()->restoreDynamicStats ();
+            }
         }
 
         if (mCurHour > mHours)
