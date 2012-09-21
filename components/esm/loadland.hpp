@@ -61,8 +61,8 @@ struct Land : public Record
     {
         float mHeightOffset;
         int8_t mHeightData[LAND_NUM_VERTS];
-        short mUnknown1;
-        char mUnknown2;
+        short mUnk1;
+        char mUnk2;
     };
 #pragma pack(pop)
 
@@ -84,6 +84,7 @@ struct Land : public Record
         uint8_t mUnk2;
 
         void save(ESMWriter &esm);
+        static void transposeTextureData(uint16_t *in, uint16_t *out);
     };
 
     LandData *mLandData;

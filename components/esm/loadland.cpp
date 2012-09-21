@@ -8,63 +8,57 @@ namespace ESM
 
 void Land::LandData::save(ESMWriter &esm)
 {
-    // TODO: Make this actually work.
-
     if (mDataTypes & Land::DATA_VNML) {
         esm.writeHNT("VNML", mNormals, sizeof(VNML));
     }
-
     if (mDataTypes & Land::DATA_VHGT) {
-    VHGT offsets;
-    offsets.mHeightOffset = mHeights[0] / HEIGHT_SCALE;
-    offsets.mUnknown1 = mUnk1;
-    offsets.mUnknown2 = mUnk2;
+        VHGT offsets;
+        offsets.mHeightOffset = mHeights[0] / HEIGHT_SCALE;
+        offsets.mUnk1 = mUnk1;
+        offsets.mUnk2 = mUnk2;
     
-    float prevY = mHeights[0], prevX;
-    int number = 0; // avoid multiplication
-    for (int i = 0; i < LAND_SIZE; ++i) {
-        float diff = (mHeights[number] - prevY) / HEIGHT_SCALE;
-        offsets.mHeightData[number] =
-            (diff >= 0) ? (int8_t) (diff + 0.5) : (int8_t) (diff - 0.5);
-        
-        prevX = prevY = mHeights[number];
-        ++number;
-
-        for (int j = 1; j < LAND_SIZE; ++j) {
-            diff = (mHeights[number] - prevX) / HEIGHT_SCALE;
+        float prevY = mHeights[0], prevX;
+        int number = 0; // avoid multiplication
+        for (int i = 0; i < LAND_SIZE; ++i) {
+            float diff = (mHeights[number] - prevY) / HEIGHT_SCALE;
             offsets.mHeightData[number] =
                 (diff >= 0) ? (int8_t) (diff + 0.5) : (int8_t) (diff - 0.5);
-
-            prevX = mHeights[number];
+        
+            prevX = prevY = mHeights[number];
             ++number;
+
+            for (int j = 1; j < LAND_SIZE; ++j) {
+                diff = (mHeights[number] - prevX) / HEIGHT_SCALE;
+                offsets.mHeightData[number] =
+                    (diff >= 0) ? (int8_t) (diff + 0.5) : (int8_t) (diff - 0.5);
+
+                prevX = mHeights[number];
+                ++number;
+            }
         }
+        esm.writeHNT("VHGT", offsets, sizeof(VHGT));
     }
-    esm.writeHNT("VHGT", offsets, sizeof(VHGT));
-    }
-    //esm.writeHNT("WNAM", 0, 81);
-/*    esm.startSubRecord("WNAM");
-    for (int i = 0; i < 81; i++)
-        esm.writeT((char)0x80, 1);
-    esm.endRecord("WNAM");
-*/
     if (mDataTypes & Land::DATA_WNAM) {
         esm.writeHNT("WNAM", mWnam, 81);
     }
-    
-    if (mDataTypes & Land::DATA_VCLR)
+    if (mDataTypes & Land::DATA_VCLR) {
         esm.writeHNT("VCLR", mColours, 3*LAND_NUM_VERTS);
-    if (mDataTypes & Land::DATA_VTEX) {
-        uint16_t vtex[256];
-
-        int readPos = 0; //bit ugly, but it works
-        for ( int y1 = 0; y1 < 4; y1++ )
-            for ( int x1 = 0; x1 < 4; x1++ )
-                for ( int y2 = 0; y2 < 4; y2++)
-                    for ( int x2 = 0; x2 < 4; x2++ )
-                        vtex[(y1*4+y2)*16+(x1*4+x2)] = mTextures[readPos++];
-
-        esm.writeHNT("VTEX", vtex, 512);
     }
+    if (mDataTypes & Land::DATA_VTEX) {
+        static uint16_t vtex[LAND_NUM_TEXTURES];
+        transposeTextureData(mTextures, vtex);
+        esm.writeHNT("VTEX", vtex, sizeof(vtex));
+    }
+}
+
+void Land::LandData::transposeTextureData(uint16_t *in, uint16_t *out)
+{
+    int readPos = 0; //bit ugly, but it works
+    for ( int y1 = 0; y1 < 4; y1++ )
+        for ( int x1 = 0; x1 < 4; x1++ )
+            for ( int y2 = 0; y2 < 4; y2++)
+                for ( int x2 = 0; x2 < 4; x2++ )
+                    out[(y1*4+y2)*16+(x1*4+x2)] = in[readPos++];
 }
 
 Land::Land()
@@ -175,56 +169,42 @@ void Land::loadData()
         
         if (mEsm->isNextSub("VNML")) {
             mEsm->getHExact(mLandData->mNormals, sizeof(VNML));
-        }/*
-        if (mEsm->isNextSub("VNML"))
-        {
-            mEsm->skipHSubSize(12675);
-        } */
+        }
 
         if (mEsm->isNextSub("VHGT")) {
-        VHGT rawHeights;
+            VHGT rawHeights;
 
-        mEsm->getHExact(&rawHeights, sizeof(VHGT));
-        float currentHeightOffset = rawHeights.mHeightOffset;
-        for (int y = 0; y < LAND_SIZE; y++)
-        {
-            currentHeightOffset += rawHeights.mHeightData[y * LAND_SIZE];
-            mLandData->mHeights[y * LAND_SIZE] = currentHeightOffset * HEIGHT_SCALE;
-
-            float tempOffset = currentHeightOffset;
-            for (int x = 1; x < LAND_SIZE; x++)
+            mEsm->getHExact(&rawHeights, sizeof(VHGT));
+            float currentHeightOffset = rawHeights.mHeightOffset;
+            for (int y = 0; y < LAND_SIZE; y++)
             {
-                tempOffset += rawHeights.mHeightData[y * LAND_SIZE + x];
-                mLandData->mHeights[x + y * LAND_SIZE] = tempOffset * HEIGHT_SCALE;
+                currentHeightOffset += rawHeights.mHeightData[y * LAND_SIZE];
+                mLandData->mHeights[y * LAND_SIZE] = currentHeightOffset * HEIGHT_SCALE;
+
+                float tempOffset = currentHeightOffset;
+                for (int x = 1; x < LAND_SIZE; x++)
+                {
+                    tempOffset += rawHeights.mHeightData[y * LAND_SIZE + x];
+                    mLandData->mHeights[x + y * LAND_SIZE] = tempOffset * HEIGHT_SCALE;
+                }
             }
-        }
-        mLandData->mUnk1 = rawHeights.mUnknown1;
-        mLandData->mUnk2 = rawHeights.mUnknown2;
+            mLandData->mUnk1 = rawHeights.mUnk1;
+            mLandData->mUnk2 = rawHeights.mUnk2;
         }
 
-        if (mEsm->isNextSub("WNAM"))
-        {
+        if (mEsm->isNextSub("WNAM")) {
             mEsm->getHExact(mLandData->mWnam, 81);
         }
-        if (mEsm->isNextSub("VCLR"))
-        {
+        if (mEsm->isNextSub("VCLR")) {
             mLandData->mUsingColours = true;
             mEsm->getHExact(&mLandData->mColours, 3*LAND_NUM_VERTS);
-        }else{
+        } else {
             mLandData->mUsingColours = false;
         }
-        if (mEsm->isNextSub("VTEX"))
-        {
-            //TODO fix magic numbers
-            uint16_t vtex[256];
-            mEsm->getHExact(&vtex, 512);
-
-            int readPos = 0; //bit ugly, but it works
-            for ( int y1 = 0; y1 < 4; y1++ )
-                for ( int x1 = 0; x1 < 4; x1++ )
-                    for ( int y2 = 0; y2 < 4; y2++)
-                        for ( int x2 = 0; x2 < 4; x2++ )
-                            mLandData->mTextures[(y1*4+y2)*16+(x1*4+x2)] = vtex[readPos++];
+        if (mEsm->isNextSub("VTEX")) {
+            static uint16_t vtex[LAND_NUM_TEXTURES];
+            mEsm->getHExact(&vtex, sizeof(vtex));
+            LandData::transposeTextureData(vtex, mLandData->mTextures);
         }
     }
     else
