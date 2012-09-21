@@ -71,6 +71,9 @@ namespace MWBase
 
             virtual void setPlayerClass (const ESM::Class& class_) = 0;
             ///< Set player class to custom class.
+
+            virtual void restoreDynamicStats() = 0;
+            ///< If the player is sleeping, this should be called every hour.
     };
 }
 
