@@ -12,7 +12,7 @@ void Land::LandData::save(ESMWriter &esm)
         esm.writeHNT("VNML", mNormals, sizeof(VNML));
     }
     if (mDataTypes & Land::DATA_VHGT) {
-        VHGT offsets;
+        static VHGT offsets;
         offsets.mHeightOffset = mHeights[0] / HEIGHT_SCALE;
         offsets.mUnk1 = mUnk1;
         offsets.mUnk2 = mUnk2;
@@ -124,9 +124,9 @@ void Land::load(ESMReader &esm)
 
     // We need all three of VNML, VHGT and VTEX in order to use the
     // landscape. (Though Morrowind seems to accept terrain without VTEX/VCLR entries)
-    mHasData = mDataTypes & (DATA_VNML|DATA_VHGT|DATA_WNAM|DATA_VTEX|DATA_VCLR);
+    mHasData = mDataTypes & (DATA_VNML|DATA_VHGT|DATA_WNAM);
 
-    mDataLoaded = false;
+    mDataLoaded = 0;
     mLandData = NULL;
 }
 
@@ -141,10 +141,10 @@ void Land::save(ESMWriter &esm)
 
     // TODO: Land!
     bool wasLoaded = mDataLoaded;
-    if (mHasData)
-        loadData(); // I think it might be a good idea to have 
-                    // the data loaded before trying to save it
-                    
+    if (mDataTypes) {
+        // Try to load all available data before saving
+        loadData(mDataTypes);
+    }
     if (mDataLoaded)
         mLandData->save(esm);
 
@@ -152,73 +152,71 @@ void Land::save(ESMWriter &esm)
         unloadData(); // Don't need to keep the data loaded if it wasn't already
 }
 
-void Land::loadData()
+/// \todo remove memory allocation when only defaults needed
+void Land::loadData(int flags)
 {
-    if (mDataLoaded)
-    {
+    // Try to load only available data
+    int actual = flags & mDataTypes;
+    // Return if all required data is loaded
+    if (flags == 0 || (actual != 0 && (mDataLoaded & actual) == actual)) {
         return;
     }
+    // Create storage if nothing is loaded
+    if (mLandData == NULL) {
+        mLandData = new LandData;
+        mLandData->mDataTypes = mDataTypes;
+    }
+    mEsm->restoreContext(mContext);
 
-    mLandData = new LandData;
-
-    if (mHasData)
-    {
-        mEsm->restoreContext(mContext);
-
-        memset(mLandData->mNormals, 0, LAND_NUM_VERTS * 3);
+    memset(mLandData->mNormals, 0, LAND_NUM_VERTS * 3);
         
-        if (mEsm->isNextSub("VNML")) {
-            mEsm->getHExact(mLandData->mNormals, sizeof(VNML));
-        }
+    if (mEsm->isNextSub("VNML")) {
+        condLoad(actual, DATA_VNML, mLandData->mNormals, sizeof(VNML));
+    }
 
-        if (mEsm->isNextSub("VHGT")) {
-            VHGT rawHeights;
+    if (mEsm->isNextSub("VHGT")) {
+        static VHGT vhgt;
+        if (condLoad(actual, DATA_VHGT, &vhgt, sizeof(vhgt))) {
+            float rowOffset = vhgt.mHeightOffset;
+            for (int y = 0; y < LAND_SIZE; y++) {
+                rowOffset += vhgt.mHeightData[y * LAND_SIZE];
 
-            mEsm->getHExact(&rawHeights, sizeof(VHGT));
-            float currentHeightOffset = rawHeights.mHeightOffset;
-            for (int y = 0; y < LAND_SIZE; y++)
-            {
-                currentHeightOffset += rawHeights.mHeightData[y * LAND_SIZE];
-                mLandData->mHeights[y * LAND_SIZE] = currentHeightOffset * HEIGHT_SCALE;
+                mLandData->mHeights[y * LAND_SIZE] = rowOffset * HEIGHT_SCALE;
 
-                float tempOffset = currentHeightOffset;
-                for (int x = 1; x < LAND_SIZE; x++)
-                {
-                    tempOffset += rawHeights.mHeightData[y * LAND_SIZE + x];
-                    mLandData->mHeights[x + y * LAND_SIZE] = tempOffset * HEIGHT_SCALE;
+                float colOffset = rowOffset;
+                for (int x = 1; x < LAND_SIZE; x++) {
+                    colOffset += vhgt.mHeightData[y * LAND_SIZE + x];
+                    mLandData->mHeights[x + y * LAND_SIZE] = colOffset * HEIGHT_SCALE;
                 }
             }
-            mLandData->mUnk1 = rawHeights.mUnk1;
-            mLandData->mUnk2 = rawHeights.mUnk2;
+            mLandData->mUnk1 = vhgt.mUnk1;
+            mLandData->mUnk2 = vhgt.mUnk2;
         }
-
-        if (mEsm->isNextSub("WNAM")) {
-            mEsm->getHExact(mLandData->mWnam, 81);
-        }
-        if (mEsm->isNextSub("VCLR")) {
-            mLandData->mUsingColours = true;
-            mEsm->getHExact(&mLandData->mColours, 3*LAND_NUM_VERTS);
-        } else {
-            mLandData->mUsingColours = false;
-        }
-        if (mEsm->isNextSub("VTEX")) {
-            static uint16_t vtex[LAND_NUM_TEXTURES];
-            mEsm->getHExact(&vtex, sizeof(vtex));
-            LandData::transposeTextureData(vtex, mLandData->mTextures);
-        }
-    }
-    else
-    {
-        mLandData->mUsingColours = false;
-        memset(mLandData->mTextures, 0, sizeof(mLandData->mTextures));
-        for (int i = 0; i < LAND_NUM_VERTS; i++)
-        {
+    } else if ((flags & DATA_VHGT) && (mDataLoaded & DATA_VHGT) == 0) {
+        for (int i = 0; i < LAND_NUM_VERTS; ++i) {
             mLandData->mHeights[i] = -256.0f * HEIGHT_SCALE;
         }
+        mDataLoaded |= DATA_VHGT;
     }
 
-    mLandData->mDataTypes = mDataTypes;
-    mDataLoaded = true;
+    if (mEsm->isNextSub("WNAM")) {
+        condLoad(actual, DATA_WNAM, mLandData->mWnam, 81);
+    }
+    if (mEsm->isNextSub("VCLR")) {
+        mLandData->mUsingColours = true;
+        condLoad(actual, DATA_VCLR, mLandData->mColours, 3 * LAND_NUM_VERTS);
+    } else {
+        mLandData->mUsingColours = false;
+    }
+    if (mEsm->isNextSub("VTEX")) {
+        static uint16_t vtex[LAND_NUM_TEXTURES];
+        if (condLoad(actual, DATA_VTEX, vtex, sizeof(vtex))) {
+            LandData::transposeTextureData(vtex, mLandData->mTextures);
+        }
+    } else if ((flags & DATA_VTEX) && (mDataLoaded & DATA_VTEX) == 0) {
+        memset(mLandData->mTextures, 0, sizeof(mLandData->mTextures));
+        mDataLoaded |= DATA_VTEX;
+    }
 }
 
 void Land::unloadData()
@@ -227,8 +225,22 @@ void Land::unloadData()
     {
         delete mLandData;
         mLandData = NULL;
-        mDataLoaded = false;
+        mDataLoaded = 0;
     }
+}
+
+bool Land::condLoad(int flags, int dataFlag, void *ptr, unsigned int size)
+{
+    if ((mDataLoaded & dataFlag) != 0) {
+        return false;
+    }
+    if (flags & dataFlag) {
+        mEsm->getHExact(ptr, size);
+        mDataLoaded |= dataFlag;
+        return true;
+    }
+    mEsm->skipHSubSize(size);
+    return false;
 }
 
 }

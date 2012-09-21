@@ -99,9 +99,10 @@ namespace MWRender
         if (land == NULL) // no land data means we're not going to create any terrain.
             return;
 
-        if (!land->mDataLoaded)
+        int dataRequired = ESM::Land::DATA_VHGT | ESM::Land::DATA_VCLR;
+        if (!land->isDataLoaded(dataRequired))
         {
-            land->loadData();
+            land->loadData(dataRequired);
         }
 
         //split the cell terrain into four segments
@@ -413,9 +414,9 @@ namespace MWRender
         ESM::Land* land = MWBase::Environment::get().getWorld()->getStore().lands.search(cellX, cellY);
         if ( land != NULL )
         {
-            if (!land->mDataLoaded)
+            if (!land->isDataLoaded(ESM::Land::DATA_VTEX))
             {
-                land->loadData();
+                land->loadData(ESM::Land::DATA_VTEX);
             }
 
             return land->mLandData

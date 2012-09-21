@@ -28,7 +28,7 @@ struct Land : public Record
 
     bool mHasData;
     int mDataTypes;
-    bool mDataLoaded;
+    int mDataLoaded;
 
     enum
     {
@@ -97,16 +97,27 @@ struct Land : public Record
     /**
      * Actually loads data
      */
-    void loadData();
+    void loadData(int flags);
 
     /**
      * Frees memory allocated for land data
      */
     void unloadData();
 
+    /// Check if given data type is loaded
+    /// \todo reimplement this
+    bool isDataLoaded(int flags) {
+        return (mDataLoaded & flags) == flags;
+    }
+
     private:
         Land(const Land& land);
         Land& operator=(const Land& land);
+
+        /// Loads data and marks it as loaded
+        /// \return true if data is actually loaded from file, false otherwise
+        /// including the case when data is already loaded
+        bool condLoad(int flags, int dataFlag, void *ptr, unsigned int size);
 };
 
 }
