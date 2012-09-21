@@ -48,7 +48,8 @@ namespace MWRender
         mHeight = cellSize*(mMaxY-mMinY+1);
 
 
-        if (!boost::filesystem::exists(mCacheDir + "/GlobalMap.png"))
+        //if (!boost::filesystem::exists(mCacheDir + "/GlobalMap.png"))
+        if (1)
         {
             Ogre::Image image;
 
@@ -151,7 +152,7 @@ namespace MWRender
 
             image.loadDynamicImage (data, mWidth, mHeight, Ogre::PF_B8G8R8);
 
-            image.save (mCacheDir + "/GlobalMap.png");
+            //image.save (mCacheDir + "/GlobalMap.png");
 
             tex = Ogre::TextureManager::getSingleton ().createManual ("GlobalMap.png", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
                 Ogre::TEX_TYPE_2D, mWidth, mHeight, 0, Ogre::PF_B8G8R8, Ogre::TU_DEFAULT);
