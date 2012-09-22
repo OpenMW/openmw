@@ -266,6 +266,8 @@ MapWindow::MapWindow(MWBase::WindowManager& parWindowManager, const std::string&
     getWidget(mPlayerArrowLocal, "CompassLocal");
     getWidget(mPlayerArrowGlobal, "CompassGlobal");
 
+    mGlobalMapImage->setImageTexture("GlobalMap.png");
+
     mGlobalMap->setVisible (false);
 
     getWidget(mButton, "WorldButton");
@@ -361,8 +363,6 @@ void MapWindow::onPinToggled()
 
 void MapWindow::open()
 {
-    mGlobalMapImage->setImageTexture("GlobalMap.png");
-
     mGlobalMap->setCanvasSize (mGlobalMapRender->getWidth(), mGlobalMapRender->getHeight());
     mGlobalMapImage->setSize(mGlobalMapRender->getWidth(), mGlobalMapRender->getHeight());
 
