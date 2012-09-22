@@ -128,8 +128,8 @@ namespace MWClass
 
         std::string text;
 
-        text += "\n" + store.gameSettings.search("sWeight")->str + ": " + MWGui::ToolTips::toString(ref->base->data.weight);
-        text += MWGui::ToolTips::getValueString(ref->base->data.value, store.gameSettings.search("sValue")->str);
+        text += "\n#{sWeight}: " + MWGui::ToolTips::toString(ref->base->data.weight);
+        text += MWGui::ToolTips::getValueString(ref->base->data.value, "#{sValue}");
 
         if (MWBase::Environment::get().getWindowManager()->getFullHelp()) {
             text += MWGui::ToolTips::getMiscString(ref->ref.owner, "Owner");

@@ -57,7 +57,7 @@ StatsWindow::StatsWindow (MWBase::WindowManager& parWindowManager)
     const ESMS::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
     for (int i=0; names[i][0]; ++i)
     {
-        setText (names[i][0], store.gameSettings.find (names[i][1])->str);
+        setText (names[i][0], store.gameSettings.find (names[i][1])->getString());
     }
 
     getWidget(mSkillView, "SkillView");

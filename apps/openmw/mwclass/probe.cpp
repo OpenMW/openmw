@@ -136,16 +136,14 @@ namespace MWClass
         info.caption = ref->base->name + MWGui::ToolTips::getCountString(ptr.getRefData().getCount());
         info.icon = ref->base->icon;
 
-        const ESMS::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
-
         std::string text;
 
         /// \todo store remaining uses somewhere
 
-        text += "\n" + store.gameSettings.search("sUses")->str + ": " + MWGui::ToolTips::toString(ref->base->data.uses);
-        text += "\n" + store.gameSettings.search("sQuality")->str + ": " + MWGui::ToolTips::toString(ref->base->data.quality);
-        text += "\n" + store.gameSettings.search("sWeight")->str + ": " + MWGui::ToolTips::toString(ref->base->data.weight);
-        text += MWGui::ToolTips::getValueString(ref->base->data.value, store.gameSettings.search("sValue")->str);
+        text += "\n#{sUses}: " + MWGui::ToolTips::toString(ref->base->data.uses);
+        text += "\n#{sQuality}: " + MWGui::ToolTips::toString(ref->base->data.quality);
+        text += "\n#{sWeight}: " + MWGui::ToolTips::toString(ref->base->data.weight);
+        text += MWGui::ToolTips::getValueString(ref->base->data.value, "#{sValue}");
 
         if (MWBase::Environment::get().getWindowManager()->getFullHelp()) {
             text += MWGui::ToolTips::getMiscString(ref->ref.owner, "Owner");

@@ -27,7 +27,7 @@ namespace MWGui
     {
         setVisible(true);
 
-        mLabelText->setCaption(message);
+        mLabelText->setCaptionWithReplacing(message);
 
         MyGUI::IntSize viewSize = MyGUI::RenderManager::getInstance().getViewSize();
 

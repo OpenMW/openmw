@@ -51,12 +51,12 @@ namespace MWGui
     void SpellBuyingWindow::addSpell(const std::string& spellId)
     {
         const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().spells.find(spellId);
-        int price = spell->data.cost*MWBase::Environment::get().getWorld()->getStore().gameSettings.search("fSpellValueMult")->f;
+        int price = spell->data.cost*MWBase::Environment::get().getWorld()->getStore().gameSettings.find("fSpellValueMult")->getFloat();
         MyGUI::Button* toAdd = mSpellsView->createWidget<MyGUI::Button>((price>mWindowManager.getInventoryWindow()->getPlayerGold()) ? "SandTextGreyedOut" : "SpellText", 0, mCurrentY, 200, sLineHeight, MyGUI::Align::Default);
         mCurrentY += sLineHeight;
         /// \todo price adjustment depending on merchantile skill
         toAdd->setUserData(price);
-        toAdd->setCaption(spell->name+"   -   "+boost::lexical_cast<std::string>(price)+MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sgp")->str);
+        toAdd->setCaptionWithReplacing(spell->name+"   -   "+boost::lexical_cast<std::string>(price)+"#{sgp}");
         toAdd->setSize(toAdd->getTextSize().width,sLineHeight);
         toAdd->eventMouseWheel += MyGUI::newDelegate(this, &SpellBuyingWindow::onMouseWheel);
         toAdd->setUserString("ToolTipType", "Spell");
@@ -127,8 +127,7 @@ namespace MWGui
 
     void SpellBuyingWindow::updateLabels()
     {
-        mPlayerGold->setCaption(MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sGold")->str
-            + ": " + boost::lexical_cast<std::string>(mWindowManager.getInventoryWindow()->getPlayerGold()));
+        mPlayerGold->setCaptionWithReplacing("#{sGold}: " + boost::lexical_cast<std::string>(mWindowManager.getInventoryWindow()->getPlayerGold()));
         mPlayerGold->setCoord(8,
                               mPlayerGold->getTop(),
                               mPlayerGold->getTextSize().width,

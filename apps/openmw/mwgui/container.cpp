@@ -110,7 +110,7 @@ void ContainerBase::onSelectedItem(MyGUI::Widget* _sender)
             }
             else
             {
-                std::string message = MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sTake")->str;
+                std::string message = "#{sTake}";
                 CountDialog* dialog = MWBase::Environment::get().getWindowManager()->getCountDialog();
                 dialog->open(MWWorld::Class::get(object).getName(object), message, count);
                 dialog->eventOkClicked.clear();
@@ -130,18 +130,17 @@ void ContainerBase::onSelectedItem(MyGUI::Widget* _sender)
             // the player is trying to sell an item, check if the merchant accepts it
             // also, don't allow selling gold (let's be better than Morrowind at this, can we?)
             if (!MWBase::Environment::get().getWindowManager()->getTradeWindow()->npcAcceptsItem(object)
-                || MWWorld::Class::get(object).getName(object) == MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sGold")->str)
+                    || MWWorld::Class::get(object).getName(object) == MWBase::Environment::get().getWorld()->getStore().gameSettings.find("sGold")->getString())
             {
                 // user notification "i don't buy this item"
                 MWBase::Environment::get().getWindowManager()->
-                    messageBox(MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sBarterDialog4")->str, std::vector<std::string>());
+                        messageBox("#{sBarterDialog4}", std::vector<std::string>());
                 return;
             }
         }
 
         bool buying = isTradeWindow(); // buying or selling?
-        std::string message = buying ? MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sQuanityMenuMessage02")->str
-                :  MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sQuanityMenuMessage01")->str;
+        std::string message = buying ? "#{sQuanityMenuMessage02}" : "#{sQuanityMenuMessage01}";
 
         if (std::find(mBoughtItems.begin(), mBoughtItems.end(), object) != mBoughtItems.end())
         {
@@ -279,7 +278,7 @@ void ContainerBase::onContainerClicked(MyGUI::Widget* _sender)
                 {
                     // user notification
                     MWBase::Environment::get().getWindowManager()->
-                        messageBox(MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sContentsMessage2")->str, std::vector<std::string>());
+                        messageBox("#{sContentsMessage2}", std::vector<std::string>());
                     return;
                 }
             }
@@ -302,7 +301,7 @@ void ContainerBase::onContainerClicked(MyGUI::Widget* _sender)
                     object.getRefData().setCount(origCount);
                     // user notification
                     MWBase::Environment::get().getWindowManager()->
-                        messageBox(MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sContentsMessage3")->str, std::vector<std::string>());
+                        messageBox("#{sContentsMessage3}", std::vector<std::string>());
                     return;
                 }
                 else

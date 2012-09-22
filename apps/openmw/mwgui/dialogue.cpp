@@ -123,13 +123,13 @@ void DialogueWindow::onSelectTopic(std::string topic)
 {
     if (!mEnabled) return;
 
-    if (topic == MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sBarter")->str)
+    if (topic == MWBase::Environment::get().getWorld()->getStore().gameSettings.find("sBarter")->getString())
     {
         /// \todo check if the player is allowed to trade with this actor (e.g. faction rank high enough)?
         mWindowManager.pushGuiMode(GM_Barter);
         mWindowManager.getTradeWindow()->startTrade(mPtr);
     }
-    else if (topic == MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sSpells")->str)
+    else if (topic == MWBase::Environment::get().getWorld()->getStore().gameSettings.find("sSpells")->getString())
     {
         mWindowManager.pushGuiMode(GM_SpellBuying);
         mWindowManager.getSpellBuyingWindow()->startSpellBuying(mPtr);
@@ -158,10 +158,10 @@ void DialogueWindow::setKeywords(std::list<std::string> keyWords)
     bool anyService = mShowTrade||mShowSpells;
 
     if (mShowTrade)
-        mTopicsList->addItem(MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sBarter")->str);
+        mTopicsList->addItem(MWBase::Environment::get().getWorld()->getStore().gameSettings.find("sBarter")->getString());
 
     if (mShowSpells)
-        mTopicsList->addItem(MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sSpells")->str);
+        mTopicsList->addItem(MWBase::Environment::get().getWorld()->getStore().gameSettings.find("sSpells")->getString());
 
     if (anyService)
         mTopicsList->addSeparator();
@@ -266,7 +266,7 @@ void DialogueWindow::updateOptions()
 
 void DialogueWindow::goodbye()
 {
-    mHistory->addDialogText("\n#572D21" + MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sGoodbye")->str);
+    mHistory->addDialogText("\n#572D21" + MWBase::Environment::get().getWorld()->getStore().gameSettings.find("sGoodbye")->getString());
     mTopicsList->setEnabled(false);
     mEnabled = false;
 }

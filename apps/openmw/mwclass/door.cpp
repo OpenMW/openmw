@@ -223,14 +223,14 @@ namespace MWClass
                     dest = region->name;
                 }
             }
-            text += "\n" + store.gameSettings.search("sTo")->str;
+            text += "\n#{sTo}";
             text += "\n"+dest;
         }
 
         if (ref->ref.lockLevel > 0)
-            text += "\n" + store.gameSettings.search("sLockLevel")->str + ": " + MWGui::ToolTips::toString(ref->ref.lockLevel);
+            text += "\n#{sLockLevel}: " + MWGui::ToolTips::toString(ref->ref.lockLevel);
         if (ref->ref.trap != "")
-            text += "\n" + store.gameSettings.search("sTrapped")->str;
+            text += "\n#{sTrapped}";
 
         if (MWBase::Environment::get().getWindowManager()->getFullHelp())
             text += MWGui::ToolTips::getMiscString(ref->base->script, "Script");
