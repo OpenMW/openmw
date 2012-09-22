@@ -522,7 +522,7 @@ int WindowManager::readPressedButton ()
 
 const std::string &WindowManager::getGameSettingString(const std::string &id, const std::string &default_)
 {
-    const ESM::GameSetting *setting = MWBase::Environment::get().getWorld()->getStore().gameSettings.search(id);
+    const ESM::GameSetting *setting = MWBase::Environment::get().getWorld()->getStore().gameSettings.find(id);
     if (setting && setting->type == ESM::VT_String)
         return setting->str;
     return default_;
@@ -680,7 +680,7 @@ void WindowManager::setDragDrop(bool dragDrop)
 
 void WindowManager::onRetrieveTag(const MyGUI::UString& _tag, MyGUI::UString& _result)
 {
-    const ESM::GameSetting *setting = MWBase::Environment::get().getWorld()->getStore().gameSettings.search(_tag);
+    const ESM::GameSetting *setting = MWBase::Environment::get().getWorld()->getStore().gameSettings.find(_tag);
     if (setting && setting->type == ESM::VT_String)
         _result = setting->str;
     else
