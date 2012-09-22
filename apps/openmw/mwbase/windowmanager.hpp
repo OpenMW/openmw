@@ -226,6 +226,8 @@ namespace MWBase
             virtual bool getRestEnabled() = 0;
 
             virtual bool getPlayerSleeping() = 0;
+
+            virtual void startSpellMaking(MWWorld::Ptr actor) = 0;
     };
 }
 

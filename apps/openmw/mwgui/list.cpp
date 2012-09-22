@@ -129,3 +129,8 @@ void MWList::onItemSelected(MyGUI::Widget* _sender)
 
     eventItemSelected(name);
 }
+
+MyGUI::Widget* MWList::getItemWidget(const std::string& name)
+{
+    return mScrollView->findWidget (getName() + "_item_" + name);
+}

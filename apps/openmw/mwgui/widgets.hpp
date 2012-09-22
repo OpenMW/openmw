@@ -249,7 +249,7 @@ namespace MWGui
             void setWindowManager(MWBase::WindowManager* parWindowManager) { mWindowManager = parWindowManager; }
             void setSpellEffect(const SpellEffectParams& params);
 
-            std::string effectIDToString(const short effectID);
+            static std::string effectIDToString(const short effectID);
             bool effectHasMagnitude (const std::string& effect);
             bool effectHasDuration (const std::string& effect);
             bool effectInvolvesAttribute (const std::string& effect);

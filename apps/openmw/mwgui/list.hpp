@@ -38,6 +38,9 @@ namespace MWGui
             std::string getItemNameAt(unsigned int at); ///< \attention if there are separators, this method will return "" at the place where the separator is
             void clear();
 
+            MyGUI::Widget* getItemWidget(const std::string& name);
+            ///< get widget for an item name, useful to set up tooltip
+
         protected:
             void initialiseOverride();
 

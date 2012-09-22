@@ -50,8 +50,14 @@ namespace MWGui
 
         // various service button visibilities, depending if the npc/creature talked to has these services
         // make sure to call these before setKeywords()
-        void setShowTrade(bool show) { mShowTrade = show; }
-        void setShowSpells(bool show) { mShowSpells = show; }
+        void setServices(int services) { mServices = services; }
+
+        enum Services
+        {
+            Service_Trade = 0x01,
+            Service_BuySpells = 0x02,
+            Service_CreateSpells = 0x04
+        };
 
     protected:
         void onSelectTopic(std::string topic);
@@ -72,6 +78,8 @@ namespace MWGui
         // various service button visibilities, depending if the npc/creature talked to has these services
         bool mShowTrade;
         bool mShowSpells;
+
+        int mServices;
 
         bool mEnabled;
 
