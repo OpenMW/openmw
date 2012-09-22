@@ -123,9 +123,9 @@
         #define REFR_BUMP 0.06                      // refraction distortion amount
 
         #define SCATTER_AMOUNT 3.0                  // amount of sunlight scattering
-        #define SCATTER_COLOUR float3(0.0,1.0,0.95) // colour of sunlight scattering
+        #define SCATTER_COLOUR gammaCorrectRead(float3(0.0,1.0,0.95)) // colour of sunlight scattering
         
-        #define SUN_EXT float3(0.45, 0.55, 0.68)    //sunlight extinction
+        #define SUN_EXT gammaCorrectRead(float3(0.45, 0.55, 0.68))    //sunlight extinction
         
         #define SPEC_HARDNESS 256                   // specular highlights hardness
         
@@ -177,6 +177,7 @@
 		shUniform(float4, sunPosition) @shAutoConstant(sunPosition, light_position, 0)
 		shUniform(float4, sunSpecular)  @shAutoConstant(sunSpecular, light_specular_colour, 0)
 
+        shUniform(float, gammaCorrection) @shSharedParameter(gammaCorrection, gammaCorrection)
 
 		
 		shUniform(float, renderTargetFlipping) @shAutoConstant(renderTargetFlipping, render_target_flipping)
@@ -242,7 +243,7 @@
         
         float s = shSaturate(dot(lR, vVec)*2.0-1.2);
         float lightScatter = shSaturate(dot(-lVec,lNormal)*0.7+0.3) * s * SCATTER_AMOUNT * waterSunFade_sunHeight.x * shSaturate(1.0-exp(-waterSunFade_sunHeight.y));
-        float3 scatterColour = shLerp(float3(SCATTER_COLOUR)*float3(1.0,0.4,0.0), SCATTER_COLOUR, shSaturate(1.0-exp(-waterSunFade_sunHeight.y*SUN_EXT)));
+        float3 scatterColour = shLerp(float3(SCATTER_COLOUR)*gammaCorrectRead(float3(1.0,0.4,0.0)), SCATTER_COLOUR, shSaturate(1.0-exp(-waterSunFade_sunHeight.y*SUN_EXT)));
 
         // fresnel
         float ior = (cameraPos.y>0)?(1.333/1.0):(1.0/1.333); //air to water; water to air
@@ -251,7 +252,7 @@
         fresnel = shSaturate(fresnel);
     
         // reflection
-		float3 reflection = shSample(reflectionMap, screenCoords+(normal.xz*REFL_BUMP)).rgb;
+        float3 reflection = gammaCorrectRead(shSample(reflectionMap, screenCoords+(normal.xz*REFL_BUMP)).rgb);
 		
 		// refraction
         float3 R = reflect(vVec, normal);
@@ -262,8 +263,7 @@
         float refractDepth = shSample(depthMap, screenCoords-(shoreFade * normal.xz*REFR_BUMP)).x * far - depthPassthrough;
         float doRefraction = (refractDepth < 0) ? 0.f : 1.f;
 		
-		float3 refraction = float3(0,0,0);
-        refraction.rgb = shSample(refractionMap, (screenCoords-(shoreFade * normal.xz*REFR_BUMP * doRefraction))*1.0).rgb;
+        float3 refraction = gammaCorrectRead(shSample(refractionMap, (screenCoords-(shoreFade * normal.xz*REFR_BUMP * doRefraction))*1.0).rgb);
         
          // brighten up the refraction underwater
         refraction = (cameraPos.y < 0) ? shSaturate(refraction * 1.5) : refraction;
@@ -281,12 +281,12 @@
         {
             float waterSunGradient = dot(-vVec, -lVec);
             waterSunGradient = shSaturate(pow(waterSunGradient*0.7+0.3,2.0));  
-            float3 waterSunColour = float3(0.0,1.0,0.85)*waterSunGradient * 0.5;
+            float3 waterSunColour = gammaCorrectRead(float3(0.0,1.0,0.85))*waterSunGradient * 0.5;
            
             float waterGradient = dot(-vVec, float3(0.0,-1.0,0.0));
             waterGradient = clamp((waterGradient*0.5+0.5),0.2,1.0);
-            float3 watercolour = (float3(0.0078, 0.5176, 0.700)+waterSunColour)*waterGradient*2.0;
-            float3 waterext = float3(0.6, 0.9, 1.0);//water extinction
+            float3 watercolour = (gammaCorrectRead(float3(0.0078, 0.5176, 0.700))+waterSunColour)*waterGradient*2.0;
+            float3 waterext = gammaCorrectRead(float3(0.6, 0.9, 1.0));//water extinction
             watercolour = shLerp(watercolour*0.3*waterSunFade_sunHeight.x, watercolour, shSaturate(1.0-exp(-waterSunFade_sunHeight.y*SUN_EXT)));
         
             float darkness = VISIBILITY*2.0;
@@ -299,8 +299,10 @@
         else
         {
             float fogValue = shSaturate((depthPassthrough - fogParams.y) * fogParams.w);
-            shOutputColour(0).xyz = shLerp (shOutputColour(0).xyz, fogColor, fogValue);
+            shOutputColour(0).xyz = shLerp (shOutputColour(0).xyz, gammaCorrectRead(fogColor), fogValue);
         }
+
+        shOutputColour(0).xyz = gammaCorrectOutput(shOutputColour(0).xyz);
 
 		shOutputColour(0).w = 1;
     }
