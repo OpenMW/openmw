@@ -33,11 +33,6 @@ RaceDialog::RaceDialog(MWBase::WindowManager& parWindowManager)
     setText("AppearanceT", mWindowManager.getGameSettingString("sRaceMenu1", "Appearance"));
     getWidget(mPreviewImage, "PreviewImage");
 
-    MWBase::Environment::get().getWorld ()->setupExternalRendering (mPreview);
-    mPreview.update (0);
-
-    mPreviewImage->setImageTexture ("CharacterHeadPreview");
-
     getWidget(mHeadRotate, "HeadRotate");
     mHeadRotate->setScrollRange(50);
     mHeadRotate->setScrollPosition(20);
@@ -107,6 +102,12 @@ void RaceDialog::open()
     updateRaces();
     updateSkills();
     updateSpellPowers();
+
+    mPreview = new MWRender::RaceSelectionPreview();
+    MWBase::Environment::get().getWorld ()->setupExternalRendering (*mPreview);
+    mPreview->update (0);
+
+    mPreviewImage->setImageTexture ("CharacterHeadPreview");
 }
 
 
@@ -138,6 +139,12 @@ int wrap(int index, int max)
         return index;
 }
 
+void RaceDialog::close()
+{
+    delete mPreview;
+    mPreview = 0;
+}
+
 // widget controls
 
 void RaceDialog::onOkClicked(MyGUI::Widget* _sender)
@@ -154,7 +161,7 @@ void RaceDialog::onHeadRotate(MyGUI::ScrollBar*, size_t _position)
 {
     float angle = (float(_position) / 49.f - 0.5) * 3.14 * 2;
     float diff = angle - mCurrentAngle;
-    mPreview.update (diff);
+    mPreview->update (diff);
     mCurrentAngle += diff;
 }
 
