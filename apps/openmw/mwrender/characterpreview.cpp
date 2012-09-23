@@ -75,7 +75,7 @@ namespace MWRender
 
     CharacterPreview::~CharacterPreview ()
     {
-        Ogre::TextureManager::getSingleton().remove(mName);
+        //Ogre::TextureManager::getSingleton().remove(mName);
         mSceneMgr->destroyCamera (mName);
         delete mAnimation;
     }
