@@ -162,7 +162,7 @@ void ESMWriter::writeHString(const std::string& data)
         ptr[data.size()] = '\0';
 
         // Convert to UTF8 and return
-        std::string ascii = ToUTF8::getASCII(m_encoding);
+        std::string ascii = ToUTF8::getLegacyEnc(m_encoding);
 
         write(ascii.c_str(), ascii.size());
     }

@@ -291,7 +291,7 @@ static void copyFromArray2(const char *arr, char*& chp, char* &out)
   *(out++) = ch; // Could not find glyph, just put whatever
 }
 
-std::string ToUTF8::getASCII(ToUTF8::FromType to)
+std::string ToUTF8::getLegacyEnc(ToUTF8::FromType to)
 {
   // Pick translation array
   const char *arr;
