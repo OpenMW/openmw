@@ -124,8 +124,6 @@ namespace MWClass
         info.caption = ref->base->name + MWGui::ToolTips::getCountString(ptr.getRefData().getCount());
         info.icon = ref->base->icon;
 
-        const ESMS::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
-
         std::string text;
 
         text += "\n#{sWeight}: " + MWGui::ToolTips::toString(ref->base->data.weight);

@@ -362,7 +362,7 @@ void ContainerBase::drawItems()
     int maxHeight = mItemView->getSize().height - 58;
 
     bool onlyMagic = false;
-    int categories;
+    int categories = 0;
     if (mFilter == Filter_All)
         categories = MWWorld::ContainerStore::Type_All;
     else if (mFilter == Filter_Weapon)

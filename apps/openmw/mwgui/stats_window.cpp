@@ -475,8 +475,6 @@ void StatsWindow::updateSkillArea()
                 text += "\n#BF9959";
                 for (int i=0; i<6; ++i)
                 {
-                    const ESM::Skill* skill = MWBase::Environment::get().getWorld()->getStore().skills.search(faction->data.skillID[i]);
-                    assert(skill);
                     text += "#{"+ESM::Skill::sSkillNameIds[faction->data.skillID[i]]+"}";
                     if (i<5)
                         text += ", ";
