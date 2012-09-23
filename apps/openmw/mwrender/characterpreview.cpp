@@ -25,6 +25,7 @@ namespace MWRender
         , mPosition(position)
         , mLookAt(lookAt)
         , mCharacter(character)
+        , mAnimation(NULL)
     {
 
     }

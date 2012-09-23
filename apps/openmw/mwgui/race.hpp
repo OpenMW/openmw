@@ -46,6 +46,7 @@ namespace MWGui
 
         void setNextButtonShow(bool shown);
         virtual void open();
+        virtual void close();
 
         // Events
         typedef MyGUI::delegates::CMultiDelegate0 EventHandle_Void;
@@ -94,7 +95,7 @@ namespace MWGui
 
         float mCurrentAngle;
 
-        MWRender::RaceSelectionPreview mPreview;
+        MWRender::RaceSelectionPreview* mPreview;
     };
 }
 #endif
