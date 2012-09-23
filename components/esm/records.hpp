@@ -1,5 +1,5 @@
-#ifndef _ESM_RECORDS_H
-#define _ESM_RECORDS_H
+#ifndef OPENMW_ESM_RECORDS_H
+#define OPENMW_ESM_RECORDS_H
 
 #include "record.hpp"
 #include "loadacti.hpp"

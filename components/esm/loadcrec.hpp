@@ -1,5 +1,5 @@
-#ifndef _ESM_CREC_H
-#define _ESM_CREC_H
+#ifndef OPENMW_ESM_CREC_H
+#define OPENMW_ESM_CREC_H
 
 #include "record.hpp"
 

@@ -1,5 +1,5 @@
-#ifndef _ESM_ALCH_H
-#define _ESM_ALCH_H
+#ifndef OPENMW_ESM_ALCH_H
+#define OPENMW_ESM_ALCH_H
 
 #include <string>
 

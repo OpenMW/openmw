@@ -1,5 +1,5 @@
-#ifndef _ESM_SSCR_H
-#define _ESM_SSCR_H
+#ifndef OPENMW_ESM_SSCR_H
+#define OPENMW_ESM_SSCR_H
 
 #include <string>
 

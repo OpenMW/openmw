@@ -1,5 +1,5 @@
-#ifndef _ESM_REGN_H
-#define _ESM_REGN_H
+#ifndef OPENMW_ESM_REGN_H
+#define OPENMW_ESM_REGN_H
 
 #include <string>
 #include <vector>

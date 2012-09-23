@@ -1,5 +1,5 @@
-#ifndef _ESM_BSGN_H
-#define _ESM_BSGN_H
+#ifndef OPENMW_ESM_BSGN_H
+#define OPENMW_ESM_BSGN_H
 
 #include <string>
 

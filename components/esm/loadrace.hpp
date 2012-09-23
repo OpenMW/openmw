@@ -1,5 +1,5 @@
-#ifndef _ESM_RACE_H
-#define _ESM_RACE_H
+#ifndef OPENMW_ESM_RACE_H
+#define OPENMW_ESM_RACE_H
 
 #include <string>
 

@@ -1,5 +1,5 @@
-#ifndef _ESM_BODY_H
-#define _ESM_BODY_H
+#ifndef OPENMW_ESM_BODY_H
+#define OPENMW_ESM_BODY_H
 
 #include "record.hpp"
 

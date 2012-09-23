@@ -1,5 +1,5 @@
-#ifndef _ESM_RECORD_H
-#define _ESM_RECORD_H
+#ifndef OPENMW_ESM_RECORD_H
+#define OPENMW_ESM_RECORD_H
 
 #include <string>
 

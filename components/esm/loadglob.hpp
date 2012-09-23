@@ -1,5 +1,5 @@
-#ifndef _ESM_GLOB_H
-#define _ESM_GLOB_H
+#ifndef OPENMW_ESM_GLOB_H
+#define OPENMW_ESM_GLOB_H
 
 #include "record.hpp"
 #include "defs.hpp"

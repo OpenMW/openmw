@@ -1,5 +1,5 @@
-#ifndef _ESM_LTEX_H
-#define _ESM_LTEX_H
+#ifndef OPENMW_ESM_LTEX_H
+#define OPENMW_ESM_LTEX_H
 
 #include <string>
 

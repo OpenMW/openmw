@@ -1,5 +1,5 @@
-#ifndef _ESM_CONT_H
-#define _ESM_CONT_H
+#ifndef OPENMW_ESM_CONT_H
+#define OPENMW_ESM_CONT_H
 
 #include <string>
 #include <vector>

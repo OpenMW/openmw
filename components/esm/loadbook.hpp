@@ -1,5 +1,5 @@
-#ifndef _ESM_BOOK_H
-#define _ESM_BOOK_H
+#ifndef OPENMW_ESM_BOOK_H
+#define OPENMW_ESM_BOOK_H
 
 #include "record.hpp"
 

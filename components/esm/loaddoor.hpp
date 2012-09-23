@@ -1,5 +1,5 @@
-#ifndef _ESM_DOOR_H
-#define _ESM_DOOR_H
+#ifndef OPENMW_ESM_DOOR_H
+#define OPENMW_ESM_DOOR_H
 
 #include <string>
 

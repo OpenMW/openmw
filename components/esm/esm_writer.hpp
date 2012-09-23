@@ -1,5 +1,5 @@
-#ifndef _ESM_WRITER_H
-#define _ESM_WRITER_H
+#ifndef OPENMW_ESM_WRITER_H
+#define OPENMW_ESM_WRITER_H
 
 #include <iostream>
 #include <list>

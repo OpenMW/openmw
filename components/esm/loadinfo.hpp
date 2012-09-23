@@ -1,5 +1,5 @@
-#ifndef _ESM_INFO_H
-#define _ESM_INFO_H
+#ifndef OPENMW_ESM_INFO_H
+#define OPENMW_ESM_INFO_H
 
 #include <string>
 #include <vector>

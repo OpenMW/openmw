@@ -1,5 +1,5 @@
-#ifndef _ESM_LOCKS_H
-#define _ESM_LOCKS_H
+#ifndef OPENMW_ESM_LOCKS_H
+#define OPENMW_ESM_LOCKS_H
 
 #include "record.hpp"
 

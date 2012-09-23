@@ -1,5 +1,5 @@
-#ifndef _ESM_NPCC_H
-#define _ESM_NPCC_H
+#ifndef OPENMW_ESM_NPCC_H
+#define OPENMW_ESM_NPCC_H
 
 #include "record.hpp"
 

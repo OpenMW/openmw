@@ -1,5 +1,5 @@
-#ifndef _ESM_ENCH_H
-#define _ESM_ENCH_H
+#ifndef OPENMW_ESM_ENCH_H
+#define OPENMW_ESM_ENCH_H
 
 #include "record.hpp"
 #include "effectlist.hpp"

@@ -1,5 +1,5 @@
-#ifndef _ESM_ATTR_H
-#define _ESM_ATTR_H
+#ifndef OPENMW_ESM_ATTR_H
+#define OPENMW_ESM_ATTR_H
 
 #include <string>
 

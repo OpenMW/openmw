@@ -1,5 +1,5 @@
-#ifndef _ESM_DEFS_H
-#define _ESM_DEFS_H
+#ifndef OPENMW_ESM_DEFS_H
+#define OPENMW_ESM_DEFS_H
 
 #include <libs/platform/stdint.h>
 

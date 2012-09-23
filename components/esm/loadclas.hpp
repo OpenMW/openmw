@@ -1,5 +1,5 @@
-#ifndef _ESM_CLAS_H
-#define _ESM_CLAS_H
+#ifndef OPENMW_ESM_CLAS_H
+#define OPENMW_ESM_CLAS_H
 
 #include <string>
 

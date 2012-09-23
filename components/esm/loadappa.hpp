@@ -1,5 +1,5 @@
-#ifndef _ESM_APPA_H
-#define _ESM_APPA_H
+#ifndef OPENMW_ESM_APPA_H
+#define OPENMW_ESM_APPA_H
 
 #include "record.hpp"
 

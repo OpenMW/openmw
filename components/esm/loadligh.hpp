@@ -1,5 +1,5 @@
-#ifndef _ESM_LIGH_H
-#define _ESM_LIGH_H
+#ifndef OPENMW_ESM_LIGH_H
+#define OPENMW_ESM_LIGH_H
 
 #include <string>
 

@@ -1,5 +1,5 @@
-#ifndef _ESM_SKIL_H
-#define _ESM_SKIL_H
+#ifndef OPENMW_ESM_SKIL_H
+#define OPENMW_ESM_SKIL_H
 
 #include <string>
 

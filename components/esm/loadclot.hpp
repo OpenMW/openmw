@@ -1,5 +1,5 @@
-#ifndef _ESM_CLOT_H
-#define _ESM_CLOT_H
+#ifndef OPENMW_ESM_CLOT_H
+#define OPENMW_ESM_CLOT_H
 
 #include <string>
 

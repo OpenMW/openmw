@@ -1,5 +1,5 @@
-#ifndef _ESM_SCPT_H
-#define _ESM_SCPT_H
+#ifndef OPENMW_ESM_SCPT_H
+#define OPENMW_ESM_SCPT_H
 
 #include <string>
 #include <vector>

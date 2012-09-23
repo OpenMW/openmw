@@ -1,5 +1,5 @@
-#ifndef _ESM_CREA_H
-#define _ESM_CREA_H
+#ifndef OPENMW_ESM_CREA_H
+#define OPENMW_ESM_CREA_H
 
 #include <string>
 

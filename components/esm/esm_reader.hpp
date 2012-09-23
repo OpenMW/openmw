@@ -1,5 +1,5 @@
-#ifndef _ESM_READER_H
-#define _ESM_READER_H
+#ifndef OPENMW_ESM_READER_H
+#define OPENMW_ESM_READER_H
 
 #include <libs/platform/stdint.h>
 #include <libs/platform/string.h>
