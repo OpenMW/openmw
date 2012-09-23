@@ -12,7 +12,7 @@
 #include <components/misc/stringops.hpp>
 
 #include <components/to_utf8/to_utf8.hpp>
-#include "esm_common.hpp"
+#include "esmcommon.hpp"
 
 namespace ESM {
 

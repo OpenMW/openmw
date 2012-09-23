@@ -4,7 +4,7 @@
 #include "record.hpp"
 
 // TODO: create implementation files to remove this
-#include "esm_reader.hpp"
+#include "esmreader.hpp"
 
 namespace ESM {
 

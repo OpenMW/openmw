@@ -5,7 +5,7 @@
 #include <list>
 #include <assert.h>
 
-#include "esm_common.hpp"
+#include "esmcommon.hpp"
 #include "../to_utf8/to_utf8.hpp"
 
 namespace ESM {

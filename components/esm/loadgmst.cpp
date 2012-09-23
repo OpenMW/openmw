@@ -2,8 +2,8 @@
 
 #include <stdexcept>
 
-#include "esm_reader.hpp"
-#include "esm_writer.hpp"
+#include "esmreader.hpp"
+#include "esmwriter.hpp"
 
 namespace ESM
 {

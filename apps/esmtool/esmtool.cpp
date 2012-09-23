@@ -4,8 +4,8 @@
 
 #include <boost/program_options.hpp>
 
-#include <components/esm/esm_reader.hpp>
-#include <components/esm/esm_writer.hpp>
+#include <components/esm/esmreader.hpp>
+#include <components/esm/esmwriter.hpp>
 #include <components/esm/records.hpp>
 
 #define ESMTOOL_VERSION 1.1

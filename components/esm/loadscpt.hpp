@@ -5,7 +5,7 @@
 #include <vector>
 
 #include "record.hpp"
-#include "esm_common.hpp"
+#include "esmcommon.hpp"
 
 namespace ESM
 {

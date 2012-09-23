@@ -4,7 +4,7 @@
 #include <vector>
 #include <string>
 
-#include "esm_common.hpp"
+#include "esmcommon.hpp"
 
 namespace ESM
 {

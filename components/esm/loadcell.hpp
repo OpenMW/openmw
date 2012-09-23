@@ -3,7 +3,7 @@
 
 #include <string>
 
-#include "esm_common.hpp"
+#include "esmcommon.hpp"
 #include "record.hpp"
 #include "defs.hpp"
 
