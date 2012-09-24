@@ -250,10 +250,12 @@ namespace MWGui
             void setSpellEffect(const SpellEffectParams& params);
 
             static std::string effectIDToString(const short effectID);
-            bool effectHasMagnitude (const std::string& effect);
-            bool effectHasDuration (const std::string& effect);
-            bool effectInvolvesAttribute (const std::string& effect);
-            bool effectInvolvesSkill (const std::string& effect);
+
+            /// \todo Remove all of these! The information can be obtained via the ESM::MagicEffect's flags!
+            static bool effectHasMagnitude (const std::string& effect);
+            static bool effectHasDuration (const std::string& effect);
+            static bool effectInvolvesAttribute (const std::string& effect);
+            static bool effectInvolvesSkill (const std::string& effect);
 
             int getRequestedWidth() const { return mRequestedWidth; }
 

@@ -8,6 +8,9 @@
 namespace MWGui
 {
 
+    class SelectSkillDialog;
+    class SelectAttributeDialog;
+
     class EditEffectDialog : public WindowModal
     {
     public:
@@ -34,7 +37,7 @@ namespace MWGui
         MyGUI::ScrollBar* mDurationSlider;
         MyGUI::ScrollBar* mAreaSlider;
 
-        MyGUI::ScrollBar* mAreaText;
+        MyGUI::TextBox* mAreaText;
 
         MyGUI::ImageBox* mEffectImage;
         MyGUI::TextBox* mEffectName;
@@ -46,7 +49,7 @@ namespace MWGui
         void onCancelButtonClicked (MyGUI::Widget* sender);
 
     protected:
-        int mRange;
+        ESM::ENAMstruct mEffect;
     };
 
     class SpellCreationDialog : public WindowBase, public ReferenceInterface
@@ -76,6 +79,9 @@ namespace MWGui
         MyGUI::TextBox* mPriceLabel;
 
         EditEffectDialog mAddEffectDialog;
+
+        SelectAttributeDialog* mSelectAttributeDialog;
+        SelectSkillDialog* mSelectSkillDialog;
 
     };
 

@@ -31,7 +31,6 @@ namespace MWGui
 
     EditEffectDialog::EditEffectDialog(MWBase::WindowManager &parWindowManager)
         : WindowModal("openmw_edit_effect.layout", parWindowManager)
-        , mRange(ESM::RT_Touch)
     {
         getWidget(mCancelButton, "CancelButton");
         getWidget(mOkButton, "OkButton");
@@ -59,6 +58,10 @@ namespace MWGui
     {
         WindowModal::open();
         center();
+
+        mEffect.range = ESM::RT_Self;
+
+        onRangeButtonClicked(mRangeButton);
     }
 
     void EditEffectDialog::setEffect (const ESM::MagicEffect *effect)
@@ -76,17 +79,17 @@ namespace MWGui
 
     void EditEffectDialog::onRangeButtonClicked (MyGUI::Widget* sender)
     {
-        mRange = (mRange+1)%3;
+        mEffect.range = (mEffect.range+1)%3;
 
-        if (mRange == ESM::RT_Self)
+        if (mEffect.range == ESM::RT_Self)
             mRangeButton->setCaptionWithReplacing ("#{sRangeSelf}");
-        else if (mRange == ESM::RT_Target)
+        else if (mEffect.range == ESM::RT_Target)
             mRangeButton->setCaptionWithReplacing ("#{sRangeTarget}");
-        else if (mRange == ESM::RT_Touch)
+        else if (mEffect.range == ESM::RT_Touch)
             mRangeButton->setCaptionWithReplacing ("#{sRangeTouch}");
 
-        mAreaSlider->setVisible (mRange != ESM::RT_Self);
-        mAreaText->setVisible (mRange != ESM::RT_Self);
+        mAreaSlider->setVisible (mEffect.range != ESM::RT_Self);
+        mAreaText->setVisible (mEffect.range != ESM::RT_Self);
     }
 
     void EditEffectDialog::onDeleteButtonClicked (MyGUI::Widget* sender)
@@ -109,6 +112,8 @@ namespace MWGui
     SpellCreationDialog::SpellCreationDialog(MWBase::WindowManager &parWindowManager)
         : WindowBase("openmw_spellcreation_dialog.layout", parWindowManager)
         , mAddEffectDialog(parWindowManager)
+        , mSelectAttributeDialog(NULL)
+        , mSelectSkillDialog(NULL)
     {
         getWidget(mNameEdit, "NameEdit");
         getWidget(mMagickaCost, "MagickaCost");
@@ -202,10 +207,12 @@ namespace MWGui
 
     void SpellCreationDialog::onAvailableEffectClicked (MyGUI::Widget* sender)
     {
-        mAddEffectDialog.setVisible(true);
 
         short effectId = *sender->getUserData<short>();
         const ESM::MagicEffect* effect = MWBase::Environment::get().getWorld()->getStore().magicEffects.find(effectId);
+
+
+        mAddEffectDialog.setVisible(true);
         mAddEffectDialog.setEffect (effect);
     }
 
