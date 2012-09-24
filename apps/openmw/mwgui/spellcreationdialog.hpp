@@ -8,6 +8,47 @@
 namespace MWGui
 {
 
+    class EditEffectDialog : public WindowModal
+    {
+    public:
+        EditEffectDialog(MWBase::WindowManager& parWindowManager);
+
+        virtual void open();
+
+        void setEffect (const ESM::MagicEffect* effect);
+
+    protected:
+        MyGUI::Button* mCancelButton;
+        MyGUI::Button* mOkButton;
+        MyGUI::Button* mDeleteButton;
+
+        MyGUI::Button* mRangeButton;
+
+        MyGUI::TextBox* mMagnitudeMinValue;
+        MyGUI::TextBox* mMagnitudeMaxValue;
+        MyGUI::TextBox* mDurationValue;
+        MyGUI::TextBox* mAreaValue;
+
+        MyGUI::ScrollBar* mMagnitudeMinSlider;
+        MyGUI::ScrollBar* mMagnitudeMaxSlider;
+        MyGUI::ScrollBar* mDurationSlider;
+        MyGUI::ScrollBar* mAreaSlider;
+
+        MyGUI::ScrollBar* mAreaText;
+
+        MyGUI::ImageBox* mEffectImage;
+        MyGUI::TextBox* mEffectName;
+
+    protected:
+        void onRangeButtonClicked (MyGUI::Widget* sender);
+        void onDeleteButtonClicked (MyGUI::Widget* sender);
+        void onOkButtonClicked (MyGUI::Widget* sender);
+        void onCancelButtonClicked (MyGUI::Widget* sender);
+
+    protected:
+        int mRange;
+    };
+
     class SpellCreationDialog : public WindowBase, public ReferenceInterface
     {
     public:
@@ -22,6 +63,7 @@ namespace MWGui
 
         void onCancelButtonClicked (MyGUI::Widget* sender);
         void onBuyButtonClicked (MyGUI::Widget* sender);
+        void onAvailableEffectClicked (MyGUI::Widget* sender);
 
 
         MyGUI::EditBox* mNameEdit;
@@ -32,6 +74,8 @@ namespace MWGui
         MyGUI::Button* mBuyButton;
         MyGUI::Button* mCancelButton;
         MyGUI::TextBox* mPriceLabel;
+
+        EditEffectDialog mAddEffectDialog;
 
     };
 

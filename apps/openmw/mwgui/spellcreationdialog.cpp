@@ -29,8 +29,86 @@ namespace
 namespace MWGui
 {
 
+    EditEffectDialog::EditEffectDialog(MWBase::WindowManager &parWindowManager)
+        : WindowModal("openmw_edit_effect.layout", parWindowManager)
+        , mRange(ESM::RT_Touch)
+    {
+        getWidget(mCancelButton, "CancelButton");
+        getWidget(mOkButton, "OkButton");
+        getWidget(mDeleteButton, "DeleteButton");
+        getWidget(mRangeButton, "RangeButton");
+        getWidget(mMagnitudeMinValue, "MagnitudeMinValue");
+        getWidget(mMagnitudeMaxValue, "MagnitudeMaxValue");
+        getWidget(mDurationValue, "DurationValue");
+        getWidget(mAreaValue, "AreaValue");
+        getWidget(mMagnitudeMinSlider, "MagnitudeMinSlider");
+        getWidget(mMagnitudeMaxSlider, "MagnitudeMaxSlider");
+        getWidget(mDurationSlider, "DurationSlider");
+        getWidget(mAreaSlider, "AreaSlider");
+        getWidget(mEffectImage, "EffectImage");
+        getWidget(mEffectName, "EffectName");
+        getWidget(mAreaText, "AreaText");
+
+        mRangeButton->eventMouseButtonClick += MyGUI::newDelegate(this, &EditEffectDialog::onRangeButtonClicked);
+        mOkButton->eventMouseButtonClick += MyGUI::newDelegate(this, &EditEffectDialog::onOkButtonClicked);
+        mCancelButton->eventMouseButtonClick += MyGUI::newDelegate(this, &EditEffectDialog::onCancelButtonClicked);
+        mDeleteButton->eventMouseButtonClick += MyGUI::newDelegate(this, &EditEffectDialog::onDeleteButtonClicked);
+    }
+
+    void EditEffectDialog::open()
+    {
+        WindowModal::open();
+        center();
+    }
+
+    void EditEffectDialog::setEffect (const ESM::MagicEffect *effect)
+    {
+        std::string icon = effect->icon;
+        icon[icon.size()-3] = 'd';
+        icon[icon.size()-2] = 'd';
+        icon[icon.size()-1] = 's';
+        icon = "icons\\" + icon;
+
+        mEffectImage->setImageTexture (icon);
+
+        mEffectName->setCaptionWithReplacing("#{"+Widgets::MWSpellEffect::effectIDToString (effect->index)+"}");
+    }
+
+    void EditEffectDialog::onRangeButtonClicked (MyGUI::Widget* sender)
+    {
+        mRange = (mRange+1)%3;
+
+        if (mRange == ESM::RT_Self)
+            mRangeButton->setCaptionWithReplacing ("#{sRangeSelf}");
+        else if (mRange == ESM::RT_Target)
+            mRangeButton->setCaptionWithReplacing ("#{sRangeTarget}");
+        else if (mRange == ESM::RT_Touch)
+            mRangeButton->setCaptionWithReplacing ("#{sRangeTouch}");
+
+        mAreaSlider->setVisible (mRange != ESM::RT_Self);
+        mAreaText->setVisible (mRange != ESM::RT_Self);
+    }
+
+    void EditEffectDialog::onDeleteButtonClicked (MyGUI::Widget* sender)
+    {
+
+    }
+
+    void EditEffectDialog::onOkButtonClicked (MyGUI::Widget* sender)
+    {
+        setVisible(false);
+    }
+
+    void EditEffectDialog::onCancelButtonClicked (MyGUI::Widget* sender)
+    {
+        setVisible(false);
+    }
+
+    // ------------------------------------------------------------------------------------------------
+
     SpellCreationDialog::SpellCreationDialog(MWBase::WindowManager &parWindowManager)
         : WindowBase("openmw_spellcreation_dialog.layout", parWindowManager)
+        , mAddEffectDialog(parWindowManager)
     {
         getWidget(mNameEdit, "NameEdit");
         getWidget(mMagickaCost, "MagickaCost");
@@ -41,8 +119,12 @@ namespace MWGui
         getWidget(mBuyButton, "BuyButton");
         getWidget(mCancelButton, "CancelButton");
 
+        mAddEffectDialog.setVisible(false);
+
         mCancelButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SpellCreationDialog::onCancelButtonClicked);
         mBuyButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SpellCreationDialog::onBuyButtonClicked);
+
+        mAvailableEffectsList->eventWidgetSelected += MyGUI::newDelegate(this, &SpellCreationDialog::onAvailableEffectClicked);
     }
 
 
@@ -101,6 +183,7 @@ namespace MWGui
             std::string name = MWBase::Environment::get().getWorld ()->getStore ().gameSettings.find(
                                                MWGui::Widgets::MWSpellEffect::effectIDToString (*it))->getString();
             MyGUI::Widget* w = mAvailableEffectsList->getItemWidget(name);
+            w->setUserData(*it);
 
             ToolTips::createMagicEffectToolTip (w, *it);
         }
@@ -115,6 +198,15 @@ namespace MWGui
     void SpellCreationDialog::onBuyButtonClicked (MyGUI::Widget* sender)
     {
 
+    }
+
+    void SpellCreationDialog::onAvailableEffectClicked (MyGUI::Widget* sender)
+    {
+        mAddEffectDialog.setVisible(true);
+
+        short effectId = *sender->getUserData<short>();
+        const ESM::MagicEffect* effect = MWBase::Environment::get().getWorld()->getStore().magicEffects.find(effectId);
+        mAddEffectDialog.setEffect (effect);
     }
 
 }

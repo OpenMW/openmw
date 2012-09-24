@@ -76,6 +76,7 @@ set(MYGUI_FILES
     openmw_wait_dialog.layout
     openmw_wait_dialog_progressbar.layout
     openmw_spellcreation_dialog.layout
+    openmw_edit_effect.layout
     smallbars.png
     VeraMono.ttf
     markers.png
