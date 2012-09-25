@@ -3,7 +3,7 @@
 namespace ESM
 {
 
-void Book::load(ESMReader &esm)
+void Book::load(ESMReader &esm, const std::string& recordId)
 {
     model = esm.getHNString("MODL");
     name = esm.getHNOString("FNAM");
@@ -12,6 +12,7 @@ void Book::load(ESMReader &esm)
     icon = esm.getHNOString("ITEX");
     text = esm.getHNOString("TEXT");
     enchant = esm.getHNOString("ENAM");
+    id = recordId;
 }
 
 }

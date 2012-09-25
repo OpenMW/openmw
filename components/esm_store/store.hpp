@@ -34,7 +34,7 @@ namespace ESMS
     RecListT<Apparatus>         appas;
     RecListT<Armor>             armors;
     RecListT<BodyPart>          bodyParts;
-    RecListT<Book>              books;
+    RecListWithIDT<Book>        books;
     RecListT<BirthSign>         birthSigns;
     RecListT<Class>             classes;
     RecListT<Clothing>          clothes;

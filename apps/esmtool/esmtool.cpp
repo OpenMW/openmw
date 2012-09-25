@@ -226,7 +226,7 @@ int main(int argc, char**argv)
         case REC_BOOK:
           {
             Book b;
-            b.load(esm);
+            b.load(esm, id);
             if(quiet) break;
             cout << "  Name: " << b.name << endl;
             cout << "  Mesh: " << b.model << endl;

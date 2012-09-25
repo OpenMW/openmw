@@ -40,7 +40,7 @@ namespace MWWorld
 
         // Skill gain from books
         if (ref->base->data.skillID >= 0 && ref->base->data.skillID < ESM::Skill::Length
-                && !npcStats.hasBeenUsed (ref->base->name))
+                && !npcStats.hasBeenUsed (ref->base->id))
         {
             MWWorld::LiveCellRef<ESM::NPC> *playerRef = player.get<ESM::NPC>();
             const ESM::Class *class_ = MWBase::Environment::get().getWorld()->getStore().classes.find (
@@ -48,7 +48,7 @@ namespace MWWorld
 
             npcStats.increaseSkill (ref->base->data.skillID, *class_, true);
 
-            npcStats.flagAsUsed (ref->base->name);
+            npcStats.flagAsUsed (ref->base->id);
         }
 
     }
