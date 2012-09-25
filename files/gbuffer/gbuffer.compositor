@@ -72,7 +72,7 @@ compositor gbufferFinalizer
             pass render_scene
             {
                 first_render_queue 51
-                last_render_queue 100
+                last_render_queue 105
             }
         }
         target_output

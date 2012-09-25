@@ -16,7 +16,7 @@ source_group(game FILES ${GAME} ${GAME_HEADER})
 add_openmw_dir (mwrender
     renderingmanager debugging sky player animation npcanimation creatureanimation actors objects
     renderinginterface localmap occlusionquery terrain terrainmaterial water shadows
-    compositors characterpreview externalrendering globalmap
+    compositors characterpreview externalrendering globalmap videoplayer
     )
 
 add_openmw_dir (mwinput
@@ -107,6 +107,11 @@ target_link_libraries(openmw
     "oics"
     components
 )
+
+if (USE_FFMPEG)
+    target_link_libraries(openmw
+    "swscale")
+endif()
 
 # Fix for not visible pthreads functions for linker with glibc 2.15
 if (UNIX AND NOT APPLE)

@@ -371,6 +371,9 @@ void WindowManager::updateVisible()
         case GM_Loading:
             MyGUI::PointerManager::getInstance().setVisible(false);
             break;
+        case GM_Video:
+            mHud->setVisible(false);
+            break;
         default:
             // Unsupported mode, switch back to game
             break;

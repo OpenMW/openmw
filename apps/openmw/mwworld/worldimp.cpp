@@ -1281,4 +1281,9 @@ namespace MWWorld
         return 0;
 
     }
+
+    void World::playVideo (const std::string &name)
+    {
+        mRendering->playVideo(name);
+    }
 }

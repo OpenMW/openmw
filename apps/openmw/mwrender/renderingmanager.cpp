@@ -36,6 +36,7 @@
 #include "npcanimation.hpp"
 #include "externalrendering.hpp"
 #include "globalmap.hpp"
+#include "videoplayer.hpp"
 
 using namespace MWRender;
 using namespace Ogre;
@@ -159,6 +160,8 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
 
     mOcclusionQuery = new OcclusionQuery(&mRendering, mSkyManager->getSunNode());
 
+    mVideoPlayer = new VideoPlayer(mRendering.getScene ());
+
     mSun = 0;
 
     mDebugging = new Debugging(mMwRoot, engine);
@@ -180,6 +183,7 @@ RenderingManager::~RenderingManager ()
     delete mOcclusionQuery;
     delete mCompositors;
     delete mWater;
+    delete mVideoPlayer;
 }
 
 MWRender::SkyManager* RenderingManager::getSkyManager()
@@ -338,6 +342,8 @@ void RenderingManager::update (float duration)
     mSkyManager->setGlare(mOcclusionQuery->getSunVisibility());
 
     mRendering.update(duration);
+
+    mVideoPlayer->update ();
 
     MWWorld::RefData &data = 
         MWBase::Environment::get()
@@ -896,6 +902,11 @@ bool RenderingManager::isPositionExplored (float nX, float nY, int x, int y, boo
 void RenderingManager::setupExternalRendering (MWRender::ExternalRendering& rendering)
 {
     rendering.setup (mRendering.getScene());
+}
+
+void RenderingManager::playVideo(const std::string& name)
+{
+    mVideoPlayer->play ("video/" + name);
 }
 
 } // namespace
