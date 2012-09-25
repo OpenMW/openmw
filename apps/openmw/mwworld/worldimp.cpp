@@ -366,6 +366,8 @@ namespace MWWorld
 
     void World::advanceTime (double hours)
     {
+        mWeatherManager->advanceTime (hours);
+
         hours += mGlobalVariables->getFloat ("gamehour");
 
         setHour (hours);
