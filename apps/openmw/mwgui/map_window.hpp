@@ -49,6 +49,8 @@ namespace MWGui
         void onMarkerFocused(MyGUI::Widget* w1, MyGUI::Widget* w2);
         void onMarkerUnfocused(MyGUI::Widget* w1, MyGUI::Widget* w2);
 
+        virtual void notifyPlayerUpdate() {}
+
         OEngine::GUI::Layout* mLayout;
 
         bool mMapDragAndDrop;
@@ -93,6 +95,8 @@ namespace MWGui
 
     protected:
         virtual void onPinToggled();
+
+        virtual void notifyPlayerUpdate();
     };
 }
 #endif
