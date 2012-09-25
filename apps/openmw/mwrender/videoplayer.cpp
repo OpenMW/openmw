@@ -109,6 +109,7 @@ namespace MWRender
 
         mVideoStreamId = -1;
         mEOF = false;
+        mDisplayedFrameCount = 0;
 
         // if something is already playing, close it
         if (mAvContext)
@@ -236,6 +237,8 @@ namespace MWRender
 
         mTextureUnit->setTextureName ("VideoTexture");
 
+        mTimer.reset();
+
     }
 
     void VideoPlayer::throwError(int error)
@@ -309,6 +312,14 @@ namespace MWRender
         if (!mAvContext)
             return;
 
+        // Time elapsed since the video started
+        float realTime = mTimer.getMilliseconds ()/1000.f;
+
+        // Here is the time we're at in the video
+        float movieTime = mDisplayedFrameCount * mWantedFrameTime;
+
+        if (movieTime >= realTime)
+            return;
 
         if (!mVideoPacketQueue.size() && mEOF)
             close();
@@ -353,10 +364,11 @@ namespace MWRender
         Ogre::PixelBox pb(mVideoCodecContext->width, mVideoCodecContext->height, 1, Ogre::PF_BYTE_RGBA, mRGBAFrame->data[0]);
         pixelBuffer->blitFromMemory(pb);
 
-        //m_displayedFrameCount++;
         av_free_packet(mVideoPacketQueue.front());
         av_free(mVideoPacketQueue.front());
         mVideoPacketQueue.pop();
+
+        ++mDisplayedFrameCount;
     }
 
     void VideoPlayer::close ()

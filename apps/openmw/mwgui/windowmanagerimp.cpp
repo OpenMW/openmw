@@ -372,6 +372,7 @@ void WindowManager::updateVisible()
             MyGUI::PointerManager::getInstance().setVisible(false);
             break;
         case GM_Video:
+            MyGUI::PointerManager::getInstance().setVisible(false);
             mHud->setVisible(false);
             break;
         default:

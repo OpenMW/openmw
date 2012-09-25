@@ -9,6 +9,7 @@
 
 #include <OgreDataStream.h>
 #include <OgreTexture.h>
+#include <OgreTimer.h>
 
 namespace Ogre
 {
@@ -53,6 +54,8 @@ namespace MWRender
 
         bool mEOF;
 
+        Ogre::Timer mTimer;
+
         // VIDEO
         AVCodecContext* mVideoCodecContext;
         AVCodec* mVideoCodec;
@@ -63,6 +66,8 @@ namespace MWRender
         float mWantedFrameTime;
         float mDecodingTime;
         std::queue <AVPacket *> mVideoPacketQueue;
+
+        int mDisplayedFrameCount;
 
 
         bool readFrameAndQueue();
