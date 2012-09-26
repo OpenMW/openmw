@@ -52,6 +52,7 @@ namespace MWGui
         // make sure to call these before setKeywords()
         void setShowTrade(bool show) { mShowTrade = show; }
         void setShowSpells(bool show) { mShowSpells = show; }
+        void setShowTravel(bool show) { mShowTravel = show; }
 
     protected:
         void onSelectTopic(std::string topic);
@@ -72,6 +73,7 @@ namespace MWGui
         // various service button visibilities, depending if the npc/creature talked to has these services
         bool mShowTrade;
         bool mShowSpells;
+        bool mShowTravel;
 
         bool mEnabled;
 

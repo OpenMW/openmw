@@ -22,6 +22,7 @@ namespace MWGui
       GM_Rest,
       GM_RestBed,
       GM_SpellBuying,
+      GM_Travel,
 
       GM_Levelup,
 

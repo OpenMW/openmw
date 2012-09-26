@@ -798,6 +798,10 @@ namespace MWDialogue
             win->setShowSpells(true);
         else
             win->setShowSpells(false);
+        if( !mActor.get<ESM::NPC>()->base->mTransport.empty())
+            win->setShowTravel(true);
+        else
+            win->setShowTravel(false);
 
         // sort again, because the previous sort was case-sensitive
         keywordList.sort(stringCompareNoCase);
