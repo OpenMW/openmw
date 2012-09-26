@@ -20,8 +20,9 @@ struct Book
 
     BKDTstruct data;
     std::string name, model, icon, script, enchant, text;
+    std::string id;
 
-    void load(ESMReader &esm);
+    void load(ESMReader &esm, const std::string& recordId);
 };
 }
 #endif

@@ -35,22 +35,21 @@ namespace MWWorld
             MWBase::Environment::get().getWindowManager()->getBookWindow()->open(getTarget());
         }
 
-        /*
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld ()->getPlayer().getPlayer();
+        MWMechanics::NpcStats& npcStats = MWWorld::Class::get(player).getNpcStats (player);
+
         // Skill gain from books
-        if (ref->base->data.skillID >= 0 && ref->base->data.skillID < ESM::Skill::Length)
+        if (ref->base->data.skillID >= 0 && ref->base->data.skillID < ESM::Skill::Length
+                && !npcStats.hasBeenUsed (ref->base->id))
         {
-            MWWorld::Ptr player = MWBase::Environment::get().getWorld ()->getPlayer().getPlayer();
-            MWMechanics::NpcStats& npcStats = MWWorld::Class::get(player).getNpcStats (player);
             MWWorld::LiveCellRef<ESM::NPC> *playerRef = player.get<ESM::NPC>();
             const ESM::Class *class_ = MWBase::Environment::get().getWorld()->getStore().classes.find (
                 playerRef->base->cls);
 
             npcStats.increaseSkill (ref->base->data.skillID, *class_, true);
 
-            /// \todo Remove skill from the book. Right now you can read as many times as you want
-            /// and the skill will still increase.
+            npcStats.flagAsUsed (ref->base->id);
         }
-        */
 
     }
 }
