@@ -102,7 +102,12 @@ namespace MWGui
 
         for(int i = 0;i<mActor.get<ESM::NPC>()->base->mTransport.size();i++)
         {
-            addDestination(mActor.get<ESM::NPC>()->base->mTransport[i].mCellName);
+            std::string cellname = mActor.get<ESM::NPC>()->base->mTransport[i].mCellName;
+            int x,y;
+            MWBase::Environment::get().getWorld()->positionToIndex(mActor.get<ESM::NPC>()->base->mTransport[i].mPos.pos[0],
+                                                                   mActor.get<ESM::NPC>()->base->mTransport[i].mPos.pos[1],x,y);
+            if(cellname == "") cellname = MWBase::Environment::get().getWorld()->getExterior(x,y)->cell->name;
+            addDestination(cellname);
         }
 
         updateLabels();
