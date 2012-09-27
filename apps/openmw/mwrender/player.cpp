@@ -323,6 +323,7 @@ namespace MWRender
     bool Player::getPosition(Ogre::Vector3 &player, Ogre::Vector3 &camera)
     {
         float xch;
+        mCamera->getParentSceneNode ()->needUpdate(true);
         camera = mCamera->getRealPosition();
         xch = camera.z, camera.z = camera.y, camera.y = -xch;
         player = mPlayerNode->getPosition();

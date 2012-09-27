@@ -366,6 +366,8 @@ namespace MWWorld
 
     void World::advanceTime (double hours)
     {
+        mWeatherManager->advanceTime (hours);
+
         hours += mGlobalVariables->getFloat ("gamehour");
 
         setHour (hours);
@@ -526,7 +528,7 @@ namespace MWWorld
             std::pair<std::string, float> result = mPhysics->getFacedHandle (*this);
 
             if (result.first.empty() ||
-                result.second>getStore().gameSettings.find ("iMaxActivateDist")->i)
+                    result.second>getStore().gameSettings.find ("iMaxActivateDist")->getInt())
                 return "";
 
             return result.first;

@@ -224,6 +224,9 @@ void LocalMapBase::setPlayerPos(const float x, const float y)
 {
     if (x == mLastPositionX && y == mLastPositionY)
         return;
+
+    notifyPlayerUpdate ();
+
     MyGUI::IntSize size = mLocalMap->getCanvasSize();
     MyGUI::IntPoint middle = MyGUI::IntPoint((1/3.f + x/3.f)*size.width,(1/3.f + y/3.f)*size.height);
     MyGUI::IntCoord viewsize = mLocalMap->getCoord();
@@ -239,6 +242,9 @@ void LocalMapBase::setPlayerDir(const float x, const float y)
 {
     if (x == mLastDirectionX && y == mLastDirectionY)
         return;
+
+    notifyPlayerUpdate ();
+
     MyGUI::ISubWidget* main = mCompass->getSubWidgetMain();
     MyGUI::RotatingSkin* rotatingSubskin = main->castType<MyGUI::RotatingSkin>();
     rotatingSubskin->setCenter(MyGUI::IntPoint(16,16));
@@ -406,4 +412,10 @@ void MapWindow::globalMapUpdatePlayer ()
     MyGUI::IntSize viewsize = mGlobalMap->getSize();
     MyGUI::IntPoint viewoffs(0.5*viewsize.width - worldX, 0.5*viewsize.height - worldY);
     mGlobalMap->setViewOffset(viewoffs);
+}
+
+void MapWindow::notifyPlayerUpdate ()
+{
+    if (mGlobal)
+        globalMapUpdatePlayer ();
 }

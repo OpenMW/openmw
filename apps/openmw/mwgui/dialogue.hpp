@@ -56,7 +56,8 @@ namespace MWGui
         {
             Service_Trade = 0x01,
             Service_BuySpells = 0x02,
-            Service_CreateSpells = 0x04
+            Service_CreateSpells = 0x04,
+            Service_Enchant = 0x08
         };
 
     protected:

@@ -126,21 +126,26 @@ void DialogueWindow::onSelectTopic(std::string topic)
 {
     if (!mEnabled) return;
 
-    if (topic == MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sBarter")->str)
+    if (topic == MWBase::Environment::get().getWorld()->getStore().gameSettings.find("sBarter")->getString())
     {
         /// \todo check if the player is allowed to trade with this actor (e.g. faction rank high enough)?
         mWindowManager.pushGuiMode(GM_Barter);
         mWindowManager.getTradeWindow()->startTrade(mPtr);
     }
-    else if (topic == MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sSpells")->str)
+    else if (topic == MWBase::Environment::get().getWorld()->getStore().gameSettings.find("sSpells")->getString())
     {
         mWindowManager.pushGuiMode(GM_SpellBuying);
         mWindowManager.getSpellBuyingWindow()->startSpellBuying(mPtr);
     }
-    else if (topic == MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sSpellMakingMenuTitle")->str)
+    else if (topic == MWBase::Environment::get().getWorld()->getStore().gameSettings.find("sSpellMakingMenuTitle")->getString())
     {
         mWindowManager.pushGuiMode(GM_SpellCreation);
         mWindowManager.startSpellMaking (mPtr);
+    }
+    else if (topic == MWBase::Environment::get().getWorld()->getStore().gameSettings.find("sEnchanting")->getString())
+    {
+        mWindowManager.pushGuiMode(GM_Enchanting);
+        mWindowManager.startEnchanting (mPtr);
     }
     else
         MWBase::Environment::get().getDialogueManager()->keywordSelected(lower_string(topic));
@@ -165,13 +170,16 @@ void DialogueWindow::setKeywords(std::list<std::string> keyWords)
     bool anyService = mServices > 0;
 
     if (mServices & Service_Trade)
-        mTopicsList->addItem(MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sBarter")->str);
+        mTopicsList->addItem(MWBase::Environment::get().getWorld()->getStore().gameSettings.find("sBarter")->getString());
 
     if (mServices & Service_BuySpells)
-        mTopicsList->addItem(MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sSpells")->str);
+        mTopicsList->addItem(MWBase::Environment::get().getWorld()->getStore().gameSettings.find("sSpells")->getString());
 
     if (mServices & Service_CreateSpells)
-        mTopicsList->addItem(MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sSpellmakingMenuTitle")->str);
+        mTopicsList->addItem(MWBase::Environment::get().getWorld()->getStore().gameSettings.find("sSpellmakingMenuTitle")->getString());
+
+    if (mServices & Service_Enchant)
+        mTopicsList->addItem(MWBase::Environment::get().getWorld()->getStore().gameSettings.find("sEnchanting")->getString());
 
     if (anyService)
         mTopicsList->addSeparator();
@@ -276,7 +284,7 @@ void DialogueWindow::updateOptions()
 
 void DialogueWindow::goodbye()
 {
-    mHistory->addDialogText("\n#572D21" + MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sGoodbye")->str);
+    mHistory->addDialogText("\n#572D21" + MWBase::Environment::get().getWorld()->getStore().gameSettings.find("sGoodbye")->getString());
     mTopicsList->setEnabled(false);
     mEnabled = false;
 }

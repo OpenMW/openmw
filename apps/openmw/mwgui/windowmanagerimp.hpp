@@ -65,7 +65,7 @@ namespace MWGui
   class LevelupDialog;
   class WaitDialog;
   class SpellCreationDialog;
-
+  class EnchantingDialog;
 
   class WindowManager : public MWBase::WindowManager
   {
@@ -213,6 +213,7 @@ namespace MWGui
     virtual bool getPlayerSleeping();
 
     virtual void startSpellMaking(MWWorld::Ptr actor);
+    virtual void startEnchanting(MWWorld::Ptr actor);
 
   private:
     OEngine::GUI::MyGUIManager *mGuiManager;
@@ -242,6 +243,7 @@ namespace MWGui
     LevelupDialog* mLevelupDialog;
     WaitDialog* mWaitDialog;
     SpellCreationDialog* mSpellCreationDialog;
+    EnchantingDialog* mEnchantingDialog;
 
     CharacterCreation* mCharGen;
 

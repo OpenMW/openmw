@@ -47,6 +47,7 @@
 #include "levelupdialog.hpp"
 #include "waitdialog.hpp"
 #include "spellcreationdialog.hpp"
+#include "enchantingdialog.hpp"
 
 using namespace MWGui;
 
@@ -77,6 +78,7 @@ WindowManager::WindowManager(
   , mLevelupDialog(NULL)
   , mWaitDialog(NULL)
   , mSpellCreationDialog(NULL)
+  , mEnchantingDialog(NULL)
   , mPlayerClass()
   , mPlayerName()
   , mPlayerRaceId()
@@ -158,6 +160,7 @@ WindowManager::WindowManager(
     mLevelupDialog = new LevelupDialog(*this);
     mWaitDialog = new WaitDialog(*this);
     mSpellCreationDialog = new SpellCreationDialog(*this);
+    mEnchantingDialog = new EnchantingDialog(*this);
 
     mLoadingScreen = new LoadingScreen(mOgre->getScene (), mOgre->getWindow (), *this);
     mLoadingScreen->onResChange (w,h);
@@ -214,6 +217,7 @@ WindowManager::~WindowManager()
     delete mLevelupDialog;
     delete mWaitDialog;
     delete mSpellCreationDialog;
+    delete mEnchantingDialog;
 
     cleanupGarbage();
 
@@ -264,6 +268,7 @@ void WindowManager::updateVisible()
     mLevelupDialog->setVisible(false);
     mWaitDialog->setVisible(false);
     mSpellCreationDialog->setVisible(false);
+    mEnchantingDialog->setVisible(false);
 
     mHud->setVisible(true);
 
@@ -366,6 +371,9 @@ void WindowManager::updateVisible()
             break;
         case GM_SpellCreation:
             mSpellCreationDialog->setVisible(true);
+            break;
+        case GM_Enchanting:
+            mEnchantingDialog->setVisible(true);
             break;
         case GM_InterMessageBox:
             break;
@@ -530,7 +538,7 @@ int WindowManager::readPressedButton ()
 
 const std::string &WindowManager::getGameSettingString(const std::string &id, const std::string &default_)
 {
-    const ESM::GameSetting *setting = MWBase::Environment::get().getWorld()->getStore().gameSettings.search(id);
+    const ESM::GameSetting *setting = MWBase::Environment::get().getWorld()->getStore().gameSettings.find(id);
     if (setting && setting->type == ESM::VT_String)
         return setting->str;
     return default_;
@@ -689,7 +697,7 @@ void WindowManager::setDragDrop(bool dragDrop)
 
 void WindowManager::onRetrieveTag(const MyGUI::UString& _tag, MyGUI::UString& _result)
 {
-    const ESM::GameSetting *setting = MWBase::Environment::get().getWorld()->getStore().gameSettings.search(_tag);
+    const ESM::GameSetting *setting = MWBase::Environment::get().getWorld()->getStore().gameSettings.find(_tag);
     if (setting && setting->type == ESM::VT_String)
         _result = setting->str;
     else
@@ -973,4 +981,9 @@ void WindowManager::addVisitedLocation(const std::string& name, int x, int y)
 void WindowManager::startSpellMaking(MWWorld::Ptr actor)
 {
     mSpellCreationDialog->startSpellMaking (actor);
+}
+
+void WindowManager::startEnchanting (MWWorld::Ptr actor)
+{
+    mEnchantingDialog->startEnchanting (actor);
 }

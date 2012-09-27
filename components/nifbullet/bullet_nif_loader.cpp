@@ -193,7 +193,8 @@ void ManualBulletShapeLoader::handleNode(Nif::Node *node, int flags,
             // affecting the entire subtree of this node
             Nif::NiStringExtraData *sd = (Nif::NiStringExtraData*)e;
 
-            if (sd->string == "NCO")
+            // not sure what the difference between NCO and NCC is, or if there even is one
+            if (sd->string == "NCO" || sd->string == "NCC")
             {
                 // No collision. Use an internal flag setting to mark this.
                 flags |= 0x800;

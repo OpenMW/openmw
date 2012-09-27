@@ -801,6 +801,9 @@ namespace MWDialogue
         if (services & ESM::NPC::Spellmaking)
             windowServices |= MWGui::DialogueWindow::Service_CreateSpells;
 
+        if (services & ESM::NPC::Enchanting)
+            windowServices |= MWGui::DialogueWindow::Service_Enchant;
+
         win->setServices (windowServices);
 
         // sort again, because the previous sort was case-sensitive

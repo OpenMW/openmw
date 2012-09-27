@@ -152,13 +152,13 @@ namespace MWClass
         if (typeGmst.empty())
             return -1;
 
-        float iWeight = MWBase::Environment::get().getWorld()->getStore().gameSettings.find (typeGmst)->i;
+        float iWeight = MWBase::Environment::get().getWorld()->getStore().gameSettings.find (typeGmst)->getInt();
 
-        if (iWeight * MWBase::Environment::get().getWorld()->getStore().gameSettings.find ("fLightMaxMod")->f>=
+        if (iWeight * MWBase::Environment::get().getWorld()->getStore().gameSettings.find ("fLightMaxMod")->getFloat()>=
             ref->base->data.weight)
             return ESM::Skill::LightArmor;
 
-        if (iWeight * MWBase::Environment::get().getWorld()->getStore().gameSettings.find ("fMedMaxMod")->f>=
+        if (iWeight * MWBase::Environment::get().getWorld()->getStore().gameSettings.find ("fMedMaxMod")->getFloat()>=
             ref->base->data.weight)
             return ESM::Skill::MediumArmor;
 
@@ -229,25 +229,23 @@ namespace MWClass
 
         std::string text;
 
-        const ESMS::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
-
         // get armor type string (light/medium/heavy)
         int armorType = getEquipmentSkill(ptr);
         std::string typeText;
         if (armorType == ESM::Skill::LightArmor)
-            typeText = store.gameSettings.search("sLight")->str;
+            typeText = "#{sLight}";
         else if (armorType == ESM::Skill::MediumArmor)
-            typeText = store.gameSettings.search("sMedium")->str;
+            typeText = "#{sMedium}";
         else
-            typeText = store.gameSettings.search("sHeavy")->str;
+            typeText = "#{sHeavy}";
 
-        text += "\n" + store.gameSettings.search("sArmorRating")->str + ": " + MWGui::ToolTips::toString(ref->base->data.armor);
+        text += "\n#{sArmorRating}: " + MWGui::ToolTips::toString(ref->base->data.armor);
 
         /// \todo store the current armor health somewhere
-        text += "\n" + store.gameSettings.search("sCondition")->str + ": " + MWGui::ToolTips::toString(ref->base->data.health);
+        text += "\n#{sCondition}: " + MWGui::ToolTips::toString(ref->base->data.health);
 
-        text += "\n" + store.gameSettings.search("sWeight")->str + ": " + MWGui::ToolTips::toString(ref->base->data.weight) + " (" + typeText + ")";
-        text += MWGui::ToolTips::getValueString(ref->base->data.value, store.gameSettings.search("sValue")->str);
+        text += "\n#{sWeight}: " + MWGui::ToolTips::toString(ref->base->data.weight) + " (" + typeText + ")";
+        text += MWGui::ToolTips::getValueString(ref->base->data.value, "#{sValue}");
 
         if (MWBase::Environment::get().getWindowManager()->getFullHelp()) {
             text += MWGui::ToolTips::getMiscString(ref->ref.owner, "Owner");

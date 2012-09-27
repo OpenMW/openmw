@@ -25,6 +25,7 @@ namespace MWRender
         , mPosition(position)
         , mLookAt(lookAt)
         , mCharacter(character)
+        , mAnimation(NULL)
     {
 
     }
@@ -53,10 +54,13 @@ namespace MWRender
         mCamera->setNearClipDistance (0.01);
         mCamera->setFarClipDistance (1000);
 
-        mTexture = Ogre::TextureManager::getSingleton().createManual(mName,
-            Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, Ogre::TEX_TYPE_2D, mSizeX, mSizeY, 0, Ogre::PF_A8R8G8B8, Ogre::TU_RENDERTARGET);
+        mTexture = Ogre::TextureManager::getSingleton().getByName (mName);
+        if (mTexture.isNull ())
+            mTexture = Ogre::TextureManager::getSingleton().createManual(mName,
+                Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, Ogre::TEX_TYPE_2D, mSizeX, mSizeY, 0, Ogre::PF_A8R8G8B8, Ogre::TU_RENDERTARGET);
 
         mRenderTarget = mTexture->getBuffer()->getRenderTarget();
+        mRenderTarget->removeAllViewports ();
         mViewport = mRenderTarget->addViewport(mCamera);
         mViewport->setOverlaysEnabled(false);
         mViewport->setBackgroundColour(Ogre::ColourValue(0, 0, 0, 0));
@@ -71,7 +75,7 @@ namespace MWRender
 
     CharacterPreview::~CharacterPreview ()
     {
-        Ogre::TextureManager::getSingleton().remove(mName);
+        //Ogre::TextureManager::getSingleton().remove(mName);
         mSceneMgr->destroyCamera (mName);
         delete mAnimation;
     }

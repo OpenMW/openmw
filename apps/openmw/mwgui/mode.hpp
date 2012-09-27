@@ -23,6 +23,7 @@ namespace MWGui
       GM_RestBed,
       GM_SpellBuying,
       GM_SpellCreation,
+      GM_Enchanting,
 
       GM_Levelup,
 
