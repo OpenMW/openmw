@@ -1,6 +1,8 @@
 #ifndef MWGUI_ALCHEMY_H
 #define MWGUI_ALCHEMY_H
 
+#include "../mwmechanics/alchemy.hpp"
+
 #include "window_base.hpp"
 #include "container.hpp"
 #include "widgets.hpp"
@@ -46,6 +48,10 @@ namespace MWGui
         virtual void onReferenceUnavailable() { ; }
 
         void update();
+        
+        private:
+        
+            MWMechanics::Alchemy mAlchemy;
     };
 }
 

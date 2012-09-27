@@ -253,8 +253,10 @@ namespace MWGui
 
     void AlchemyWindow::open()
     {
-        openContainer(MWBase::Environment::get().getWorld()->getPlayer().getPlayer());
+        openContainer(MWBase::Environment::get().getWorld()->getPlayer().getPlayer()); // this sets mPtr
         setFilter(ContainerBase::Filter_Ingredients);
+        
+        mAlchemy.setAlchemist (mPtr);
 
         // pick the best available apparatus
         MWWorld::ContainerStore& store = MWWorld::Class::get(mPtr).getContainerStore(mPtr);
