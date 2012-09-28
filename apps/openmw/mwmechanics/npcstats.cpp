@@ -227,3 +227,13 @@ int MWMechanics::NpcStats::getLevelupAttributeMultiplier(int attribute) const
     else
         return 5;
 }
+
+void MWMechanics::NpcStats::flagAsUsed (const std::string& id)
+{
+    mUsedIds.insert (id);
+}
+
+bool MWMechanics::NpcStats::hasBeenUsed (const std::string& id) const
+{
+    return mUsedIds.find (id)!=mUsedIds.end();
+}

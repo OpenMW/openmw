@@ -167,8 +167,6 @@ namespace MWGui
         ~SelectAttributeDialog();
 
         ESM::Attribute::AttributeID getAttributeId() const { return mAttributeId; }
-        Widgets::MWAttributePtr getAffectedWidget() const { return mAffectedWidget; }
-        void setAffectedWidget(Widgets::MWAttributePtr widget) { mAffectedWidget = widget; }
 
         // Events
         typedef MyGUI::delegates::CMultiDelegate0 EventHandle_Void;
@@ -188,8 +186,6 @@ namespace MWGui
         void onCancelClicked(MyGUI::Widget* _sender);
 
     private:
-        Widgets::MWAttributePtr mAffectedWidget;
-
         ESM::Attribute::AttributeID mAttributeId;
     };
 
@@ -200,8 +196,6 @@ namespace MWGui
         ~SelectSkillDialog();
 
         ESM::Skill::SkillEnum getSkillId() const { return mSkillId; }
-        Widgets::MWSkillPtr getAffectedWidget() const { return mAffectedWidget; }
-        void setAffectedWidget(Widgets::MWSkillPtr widget) { mAffectedWidget = widget; }
 
         // Events
         typedef MyGUI::delegates::CMultiDelegate0 EventHandle_Void;
@@ -224,7 +218,6 @@ namespace MWGui
         Widgets::MWSkillPtr mCombatSkill[9];
         Widgets::MWSkillPtr mMagicSkill[9];
         Widgets::MWSkillPtr mStealthSkill[9];
-        Widgets::MWSkillPtr mAffectedWidget;
 
         ESM::Skill::SkillEnum mSkillId;
     };
@@ -301,6 +294,9 @@ namespace MWGui
         DescriptionDialog                *mDescDialog;
 
         ESM::Class::Specialization       mSpecializationId;
+
+        Widgets::MWAttributePtr              mAffectedAttribute;
+        Widgets::MWSkillPtr              mAffectedSkill;
     };
 }
 #endif

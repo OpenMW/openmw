@@ -53,6 +53,15 @@ namespace MWGui
         void setShowTrade(bool show) { mShowTrade = show; }
         void setShowSpells(bool show) { mShowSpells = show; }
         void setShowTravel(bool show) { mShowTravel = show; }
+        void setServices(int services) { mServices = services; }
+
+        enum Services
+        {
+            Service_Trade = 0x01,
+            Service_BuySpells = 0x02,
+            Service_CreateSpells = 0x04,
+            Service_Enchant = 0x08
+        };
 
     protected:
         void onSelectTopic(std::string topic);
@@ -74,6 +83,8 @@ namespace MWGui
         bool mShowTrade;
         bool mShowSpells;
         bool mShowTravel;
+
+        int mServices;
 
         bool mEnabled;
 

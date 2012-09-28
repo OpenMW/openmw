@@ -303,16 +303,11 @@ namespace Physic
             + boost::lexical_cast<std::string>(y);
 
         // find the minimum and maximum heights (needed for bullet)
-        float minh;
-        float maxh;
+        float minh = heights[0];
+        float maxh = heights[0];
         for (int i=0; i<sqrtVerts*sqrtVerts; ++i)
         {
             float h = heights[i];
-            if (i==0)
-            {
-                minh = h;
-                maxh = h;
-            }
 
             if (h>maxh) maxh = h;
             if (h<minh) minh = h;

@@ -47,6 +47,8 @@
 #include "loadingscreen.hpp"
 #include "levelupdialog.hpp"
 #include "waitdialog.hpp"
+#include "spellcreationdialog.hpp"
+#include "enchantingdialog.hpp"
 
 using namespace MWGui;
 
@@ -77,6 +79,8 @@ WindowManager::WindowManager(
   , mCharGen(NULL)
   , mLevelupDialog(NULL)
   , mWaitDialog(NULL)
+  , mSpellCreationDialog(NULL)
+  , mEnchantingDialog(NULL)
   , mPlayerClass()
   , mPlayerName()
   , mPlayerRaceId()
@@ -158,6 +162,8 @@ WindowManager::WindowManager(
     mQuickKeysMenu = new QuickKeysMenu(*this);
     mLevelupDialog = new LevelupDialog(*this);
     mWaitDialog = new WaitDialog(*this);
+    mSpellCreationDialog = new SpellCreationDialog(*this);
+    mEnchantingDialog = new EnchantingDialog(*this);
 
     mLoadingScreen = new LoadingScreen(mOgre->getScene (), mOgre->getWindow (), *this);
     mLoadingScreen->onResChange (w,h);
@@ -214,6 +220,8 @@ WindowManager::~WindowManager()
     delete mLoadingScreen;
     delete mLevelupDialog;
     delete mWaitDialog;
+    delete mSpellCreationDialog;
+    delete mEnchantingDialog;
 
     cleanupGarbage();
 
@@ -264,6 +272,8 @@ void WindowManager::updateVisible()
     mQuickKeysMenu->setVisible(false);
     mLevelupDialog->setVisible(false);
     mWaitDialog->setVisible(false);
+    mSpellCreationDialog->setVisible(false);
+    mEnchantingDialog->setVisible(false);
 
     mHud->setVisible(true);
 
@@ -366,6 +376,11 @@ void WindowManager::updateVisible()
             break;
         case GM_Travel:
             mTravelWindow->setVisible(true);
+        case GM_SpellCreation:
+            mSpellCreationDialog->setVisible(true);
+            break;
+        case GM_Enchanting:
+            mEnchantingDialog->setVisible(true);
             break;
         case GM_InterMessageBox:
             break;
@@ -569,6 +584,7 @@ void WindowManager::onFrame (float frameDuration)
     mDialogueWindow->checkReferenceAvailable();
     mTradeWindow->checkReferenceAvailable();
     mSpellBuyingWindow->checkReferenceAvailable();
+    mSpellCreationDialog->checkReferenceAvailable();
     mContainerWindow->checkReferenceAvailable();
     mConsole->checkReferenceAvailable();
 }
@@ -968,4 +984,14 @@ bool WindowManager::getPlayerSleeping ()
 void WindowManager::addVisitedLocation(const std::string& name, int x, int y)
 {
     mMap->addVisitedLocation (name, x, y);
+}
+
+void WindowManager::startSpellMaking(MWWorld::Ptr actor)
+{
+    mSpellCreationDialog->startSpellMaking (actor);
+}
+
+void WindowManager::startEnchanting (MWWorld::Ptr actor)
+{
+    mEnchantingDialog->startEnchanting (actor);
 }

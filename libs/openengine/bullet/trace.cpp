@@ -13,8 +13,8 @@
 
 void newtrace(traceResults* const results, const Ogre::Vector3& start, const Ogre::Vector3& end, const Ogre::Vector3& BBHalfExtents, const float rotation, bool isInterior, OEngine::Physic::PhysicEngine* enginePass)  //Traceobj was a Aedra Object
 {
-    static float lastyaw = 0.0f;
-    static float lastpitch = 0.0f;
+    //static float lastyaw = 0.0f;
+    //static float lastpitch = 0.0f;
 	//if (!traceobj)
 	//	return;
 
