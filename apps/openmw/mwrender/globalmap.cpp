@@ -53,7 +53,8 @@ namespace MWRender
         {
             Ogre::Image image;
 
-            Ogre::uchar data[mWidth * mHeight * 3];
+            std::vector<Ogre::uchar> data;
+            data.resize(mWidth * mHeight * 3);
 
             for (int x = mMinX; x <= mMaxX; ++x)
             {
@@ -150,7 +151,7 @@ namespace MWRender
                 }
             }
 
-            image.loadDynamicImage (data, mWidth, mHeight, Ogre::PF_B8G8R8);
+            image.loadDynamicImage (data.data(), mWidth, mHeight, Ogre::PF_B8G8R8);
 
             //image.save (mCacheDir + "/GlobalMap.png");
 

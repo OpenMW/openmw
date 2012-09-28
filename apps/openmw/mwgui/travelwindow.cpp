@@ -79,7 +79,7 @@ namespace MWGui
     void TravelWindow::startTravel(const MWWorld::Ptr& actor)
     {
         center();
-        mActor = actor;
+        mPtr = actor;
         clearDestinations();
 
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
@@ -100,18 +100,18 @@ namespace MWGui
             addDestination (*iter);
         }*/
 
-        for(int i = 0;i<mActor.get<ESM::NPC>()->base->mTransport.size();i++)
+        for(int i = 0;i<mPtr.get<ESM::NPC>()->base->mTransport.size();i++)
         {
-            std::string cellname = mActor.get<ESM::NPC>()->base->mTransport[i].mCellName;
+            std::string cellname = mPtr.get<ESM::NPC>()->base->mTransport[i].mCellName;
             int x,y;
-            MWBase::Environment::get().getWorld()->positionToIndex(mActor.get<ESM::NPC>()->base->mTransport[i].mPos.pos[0],
-                                                                   mActor.get<ESM::NPC>()->base->mTransport[i].mPos.pos[1],x,y);
+            MWBase::Environment::get().getWorld()->positionToIndex(mPtr.get<ESM::NPC>()->base->mTransport[i].mPos.pos[0],
+                                                                   mPtr.get<ESM::NPC>()->base->mTransport[i].mPos.pos[1],x,y);
             if(cellname == "") cellname = MWBase::Environment::get().getWorld()->getExterior(x,y)->cell->name;
             addDestination(cellname);
         }
 
         updateLabels();
-
+        mPtr.get<ESM::NPC>()->base->mTransport[0].
         mDestinationsView->setCanvasSize (MyGUI::IntSize(mDestinationsView->getWidth(), std::max(mDestinationsView->getHeight(), mCurrentY)));
     }
 
@@ -126,7 +126,7 @@ namespace MWGui
             MWMechanics::Spells& spells = stats.getSpells();
             spells.add (mSpellsWidgetMap.find(_sender)->second);
             mWindowManager.getTradeWindow()->addOrRemoveGold(-price);
-            startSpellBuying(mActor);
+            startSpellBuying(mPtr);
 
             MWBase::Environment::get().getSoundManager()->playSound ("Item Gold Up", 1.0, 1.0);
         }*/

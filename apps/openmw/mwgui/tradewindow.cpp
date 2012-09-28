@@ -16,7 +16,7 @@ namespace MWGui
 {
     TradeWindow::TradeWindow(MWBase::WindowManager& parWindowManager) :
         WindowBase("openmw_trade_window.layout", parWindowManager)
-        , ContainerBase(NULL) // no drag&drop
+        , ReferenceInterface(NULL) // no drag&drop
         , mCurrentBalance(0)
     {
         MyGUI::ScrollView* itemView;
