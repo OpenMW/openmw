@@ -19,6 +19,7 @@
 #include "../mwworld/ptr.hpp"
 
 #include "player.hpp"
+#include "renderconst.hpp"
 
 using namespace Ogre;
 
@@ -86,6 +87,8 @@ ManualObject *Debugging::createPathgridLines(const ESM::Pathgrid *pathgrid)
     }
     result->end();
 
+    result->setVisibilityFlags (RV_Debug);
+
     return result;
 }
 
@@ -139,6 +142,8 @@ ManualObject *Debugging::createPathgridPoints(const ESM::Pathgrid *pathgrid)
     }
 
     result->end();
+
+    result->setVisibilityFlags (RV_Debug);
 
     return result;
 }
