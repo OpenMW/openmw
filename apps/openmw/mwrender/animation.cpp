@@ -49,44 +49,27 @@ bool Animation::findGroupTimes(const std::string &groupname, Animation::GroupTim
 
         std::string::const_iterator strpos = iter->second.begin();
         std::string::const_iterator strend = iter->second.end();
+        size_t strlen = strend-strpos;
 
-        while(strpos != strend)
+        if(start.size() <= strlen && std::mismatch(strpos, strend, start.begin(), checklow()).first == strend)
         {
-            size_t strlen = strend-strpos;
-            std::string::const_iterator striter;
-
-            if(start.size() <= strlen &&
-               ((striter=std::mismatch(strpos, strend, start.begin(), checklow()).first) == strend ||
-                *striter == '\r' || *striter == '\n'))
-            {
-                times->mStart = iter->first;
-                times->mLoopStart = iter->first;
-            }
-            else if(startloop.size() <= strlen &&
-                    ((striter=std::mismatch(strpos, strend, startloop.begin(), checklow()).first) == strend ||
-                     *striter == '\r' || *striter == '\n'))
-            {
-                times->mLoopStart = iter->first;
-            }
-            else if(stoploop.size() <= strlen &&
-                    ((striter=std::mismatch(strpos, strend, stoploop.begin(), checklow()).first) == strend ||
-                     *striter == '\r' || *striter == '\n'))
-            {
+            times->mStart = iter->first;
+            times->mLoopStart = iter->first;
+        }
+        else if(startloop.size() <= strlen && std::mismatch(strpos, strend, startloop.begin(), checklow()).first == strend)
+        {
+            times->mLoopStart = iter->first;
+        }
+        else if(stoploop.size() <= strlen && std::mismatch(strpos, strend, stoploop.begin(), checklow()).first == strend)
+        {
+            times->mLoopStop = iter->first;
+        }
+        else if(stop.size() <= strlen && std::mismatch(strpos, strend, stop.begin(), checklow()).first == strend)
+        {
+            times->mStop = iter->first;
+            if(times->mLoopStop < 0.0f)
                 times->mLoopStop = iter->first;
-            }
-            else if(stop.size() <= strlen &&
-                    ((striter=std::mismatch(strpos, strend, stop.begin(), checklow()).first) == strend ||
-                     *striter == '\r' || *striter == '\n'))
-            {
-                times->mStop = iter->first;
-                if(times->mLoopStop < 0.0f)
-                    times->mLoopStop = iter->first;
-                break;
-            }
-
-            strpos = std::find(strpos+1, strend, '\n');
-            while(strpos != strend && *strpos == '\n')
-                strpos++;
+            break;
         }
     }
 

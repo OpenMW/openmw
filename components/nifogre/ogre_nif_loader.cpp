@@ -152,6 +152,28 @@ static void fail(const std::string &msg)
 }
 
 
+static void insertTextKeys(const Nif::NiTextKeyExtraData *tk, TextKeyMap *textkeys)
+{
+    for(size_t i = 0;i < tk->list.size();i++)
+    {
+        const std::string &str = tk->list[i].text;
+        std::string::size_type pos = 0;
+        while(pos < str.length())
+        {
+            while(pos < str.length() && ::isspace(str[pos]))
+                pos++;
+            if(pos >= str.length())
+                break;
+
+            std::string::size_type nextpos = std::min(str.find('\r', pos), str.find('\n', pos));
+            textkeys->insert(std::make_pair(tk->list[i].time, str.substr(pos, nextpos-pos)));
+
+            pos = nextpos;
+        }
+    }
+}
+
+
 void buildBones(Ogre::Skeleton *skel, const Nif::Node *node, std::vector<Nif::NiKeyframeController*> &ctrls, Ogre::Bone *parent=NULL)
 {
     Ogre::Bone *bone;
@@ -359,8 +381,7 @@ bool createSkeleton(const std::string &name, const std::string &group, TextKeyMa
             if(e->recType == Nif::RC_NiTextKeyExtraData)
             {
                 const Nif::NiTextKeyExtraData *tk = static_cast<const Nif::NiTextKeyExtraData*>(e.getPtr());
-                for(size_t i = 0;i < tk->list.size();i++)
-                    (*textkeys)[tk->list[i].time] = tk->list[i].text;
+                insertTextKeys(tk, textkeys);
             }
             e = e->extra;
         }
