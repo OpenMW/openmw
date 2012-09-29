@@ -32,6 +32,7 @@ namespace MWGui
         void bedActivated() { setCanRest(true); }
 
         bool getSleeping() { return mWaiting && mSleeping; }
+        void wakeUp();
 
     protected:
         MyGUI::TextBox* mDateTimeText;

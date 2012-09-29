@@ -226,6 +226,7 @@ namespace MWBase
             virtual bool getRestEnabled() = 0;
 
             virtual bool getPlayerSleeping() = 0;
+            virtual void wakeUpPlayer() = 0;
     };
 }
 
