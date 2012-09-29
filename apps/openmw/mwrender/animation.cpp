@@ -87,17 +87,9 @@ void Animation::playGroup(std::string groupname, int mode, int loops)
         times.mStart = times.mLoopStart = 0.0f;
         times.mLoopStop = times.mStop = 0.0f;
 
-        if(mEntityList.mSkelBase)
-        {
-            Ogre::AnimationStateSet *aset = mEntityList.mSkelBase->getAllAnimationStates();
-            Ogre::AnimationStateIterator as = aset->getAnimationStateIterator();
-            while(as.hasMoreElements())
-            {
-                Ogre::AnimationState *state = as.getNext();
-                times.mLoopStop = times.mStop = state->getLength();
-                break;
-            }
-        }
+        NifOgre::TextKeyMap::const_reverse_iterator iter = mTextKeys.rbegin();
+        if(iter != mTextKeys.rend())
+            times.mLoopStop = times.mStop = iter->first;
     }
     else if(!findGroupTimes(groupname, &times))
         throw std::runtime_error("Failed to find animation group "+groupname);
