@@ -130,11 +130,10 @@ namespace MWClass
 
         /// \todo store remaining uses somewhere
 
-        const ESMS::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
-        text += "\n" + store.gameSettings.search("sUses")->mStr + ": " + MWGui::ToolTips::toString(ref->base->mData.mUses);
-        text += "\n" + store.gameSettings.search("sQuality")->mStr + ": " + MWGui::ToolTips::toString(ref->base->mData.mQuality);
-        text += "\n" + store.gameSettings.search("sWeight")->mStr + ": " + MWGui::ToolTips::toString(ref->base->mData.mWeight);
-        text += MWGui::ToolTips::getValueString(ref->base->mData.mValue, store.gameSettings.search("sValue")->mStr);
+        text += "\n#{sUses}: " + MWGui::ToolTips::toString(ref->base->mData.mUses);
+        text += "\n#{sQuality}: " + MWGui::ToolTips::toString(ref->base->mData.mQuality);
+        text += "\n#{sWeight}: " + MWGui::ToolTips::toString(ref->base->mData.mWeight);
+        text += MWGui::ToolTips::getValueString(ref->base->mData.mValue, "#{sValue}");
 
         if (MWBase::Environment::get().getWindowManager()->getFullHelp()) {
             text += MWGui::ToolTips::getMiscString(ref->ref.mOwner, "Owner");

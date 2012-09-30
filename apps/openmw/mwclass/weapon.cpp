@@ -284,7 +284,7 @@ namespace MWClass
         // weapon type & damage. arrows / bolts don't have his info.
         if (ref->base->mData.mType < 12)
         {
-            text += "\n" + store.gameSettings.search("sType")->mStr + " ";
+            text += "\n#{sType} ";
 
             std::map <int, std::pair <std::string, std::string> > mapping;
             mapping[ESM::Weapon::ShortBladeOneHand] = std::make_pair("sSkillShortblade", "sOneHanded");
@@ -303,29 +303,29 @@ namespace MWClass
             std::string type = mapping[ref->base->mData.mType].first;
             std::string oneOrTwoHanded = mapping[ref->base->mData.mType].second;
 
-            text += store.gameSettings.search(type)->mStr +
-                ((oneOrTwoHanded != "") ? ", " + store.gameSettings.search(oneOrTwoHanded)->mStr : "");
+            text += store.gameSettings.find(type)->getString() +
+                ((oneOrTwoHanded != "") ? ", " + store.gameSettings.find(oneOrTwoHanded)->getString() : "");
 
             // weapon damage
             if (ref->base->mData.mType >= 9)
             {
                 // marksman
-                text += "\n" + store.gameSettings.search("sAttack")->mStr + ": "
+                text += "\n#{sAttack}: "
                     + MWGui::ToolTips::toString(static_cast<int>(ref->base->mData.mChop[0]))
                     + " - " + MWGui::ToolTips::toString(static_cast<int>(ref->base->mData.mChop[1]));
             }
             else
             {
                 // Chop
-                text += "\n" + store.gameSettings.search("sChop")->mStr + ": "
+                text += "\n#{sChop}: "
                     + MWGui::ToolTips::toString(static_cast<int>(ref->base->mData.mChop[0]))
                     + " - " + MWGui::ToolTips::toString(static_cast<int>(ref->base->mData.mChop[1]));
                 // Slash
-                text += "\n" + store.gameSettings.search("sSlash")->mStr + ": "
+                text += "\n#{sSlash}: "
                     + MWGui::ToolTips::toString(static_cast<int>(ref->base->mData.mSlash[0]))
                     + " - " + MWGui::ToolTips::toString(static_cast<int>(ref->base->mData.mSlash[1]));
                 // Thrust
-                text += "\n" + store.gameSettings.search("sThrust")->mStr + ": "
+                text += "\n#{sThrust}: "
                     + MWGui::ToolTips::toString(static_cast<int>(ref->base->mData.mThrust[0]))
                     + " - " + MWGui::ToolTips::toString(static_cast<int>(ref->base->mData.mThrust[1]));
             }
@@ -333,10 +333,10 @@ namespace MWClass
 
         /// \todo store the current weapon health somewhere
         if (ref->base->mData.mType < 11) // thrown weapons and arrows/bolts don't have health, only quantity
-            text += "\n" + store.gameSettings.search("sCondition")->mStr + ": " + MWGui::ToolTips::toString(ref->base->mData.mHealth);
+            text += "\n#{sCondition}: " + MWGui::ToolTips::toString(ref->base->mData.mHealth);
 
-        text += "\n" + store.gameSettings.search("sWeight")->mStr + ": " + MWGui::ToolTips::toString(ref->base->mData.mWeight);
-        text += MWGui::ToolTips::getValueString(ref->base->mData.mValue, store.gameSettings.search("sValue")->mStr);
+        text += "\n#{sWeight}: " + MWGui::ToolTips::toString(ref->base->mData.mWeight);
+        text += MWGui::ToolTips::getValueString(ref->base->mData.mValue, "#{sValue}");
 
         info.enchant = ref->base->mEnchant;
 

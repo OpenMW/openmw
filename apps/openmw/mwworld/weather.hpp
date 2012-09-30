@@ -231,6 +231,11 @@ namespace MWWorld
 
         void setDate(const int day, const int month);
 
+        void advanceTime(double hours)
+        {
+            mTimePassed += hours*3600;
+        }
+
         unsigned int getWeatherID() const;
 
     private:
@@ -260,6 +265,8 @@ namespace MWWorld
         float mThunderChance;
         float mThunderChanceNeeded;
         float mThunderSoundDelay;
+
+        double mTimePassed; // time passed since last update
 
         WeatherResult transition(const float factor);
         WeatherResult getResult(const Ogre::String& weather);

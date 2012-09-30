@@ -97,13 +97,13 @@ float MWMechanics::NpcStats::getSkillGain (int skillIndex, const ESM::Class& cla
     }
 
     float typeFactor =
-        MWBase::Environment::get().getWorld()->getStore().gameSettings.find ("fMiscSkillBonus")->mF;
+        MWBase::Environment::get().getWorld()->getStore().gameSettings.find ("fMiscSkillBonus")->getFloat();
 
     for (int i=0; i<5; ++i)
         if (class_.mData.mSkills[i][0]==skillIndex)
         {
             typeFactor =
-                MWBase::Environment::get().getWorld()->getStore().gameSettings.find ("fMinorSkillBonus")->mF;
+                MWBase::Environment::get().getWorld()->getStore().gameSettings.find ("fMinorSkillBonus")->getFloat();
 
             break;
         }
@@ -112,7 +112,7 @@ float MWMechanics::NpcStats::getSkillGain (int skillIndex, const ESM::Class& cla
         if (class_.mData.mSkills[i][1]==skillIndex)
         {
             typeFactor =
-                MWBase::Environment::get().getWorld()->getStore().gameSettings.find ("fMajorSkillBonus")->mF;
+                MWBase::Environment::get().getWorld()->getStore().gameSettings.find ("fMajorSkillBonus")->getFloat();
 
             break;
         }
@@ -125,7 +125,7 @@ float MWMechanics::NpcStats::getSkillGain (int skillIndex, const ESM::Class& cla
     if (skill->mData.mSpecialization==class_.mData.mSpecialization)
     {
         specialisationFactor =
-            MWBase::Environment::get().getWorld()->getStore().gameSettings.find ("fSpecialSkillBonus")->mF;
+            MWBase::Environment::get().getWorld()->getStore().gameSettings.find ("fSpecialSkillBonus")->getFloat();
 
         if (specialisationFactor<=0)
             throw std::runtime_error ("invalid skill specialisation factor");
@@ -226,4 +226,14 @@ int MWMechanics::NpcStats::getLevelupAttributeMultiplier(int attribute) const
         return 4;
     else
         return 5;
+}
+
+void MWMechanics::NpcStats::flagAsUsed (const std::string& id)
+{
+    mUsedIds.insert (id);
+}
+
+bool MWMechanics::NpcStats::hasBeenUsed (const std::string& id) const
+{
+    return mUsedIds.find (id)!=mUsedIds.end();
 }

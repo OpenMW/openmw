@@ -193,12 +193,10 @@ namespace MWClass
         info.caption = ref->base->mName + MWGui::ToolTips::getCountString(ptr.getRefData().getCount());
         info.icon = ref->base->mIcon;
 
-        const ESMS::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
-
         std::string text;
 
-        text += "\n" + store.gameSettings.search("sWeight")->mStr + ": " + MWGui::ToolTips::toString(ref->base->mData.mWeight);
-        text += MWGui::ToolTips::getValueString(ref->base->mData.mValue, store.gameSettings.search("sValue")->mStr);
+        text += "\n#{sWeight}: " + MWGui::ToolTips::toString(ref->base->mData.mWeight);
+        text += MWGui::ToolTips::getValueString(ref->base->mData.mValue, "#{sValue}");
 
         if (MWBase::Environment::get().getWindowManager()->getFullHelp()) {
             text += MWGui::ToolTips::getMiscString(ref->ref.mOwner, "Owner");

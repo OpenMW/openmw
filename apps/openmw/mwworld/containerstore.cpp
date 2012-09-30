@@ -76,7 +76,7 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add (const Ptr& ptr)
 
     // gold needs special handling: when it is inserted into a container, the base object automatically becomes Gold_001
     // this ensures that gold piles of different sizes stack with each other (also, several scripts rely on Gold_001 for detecting player gold)
-    if (MWWorld::Class::get(ptr).getName(ptr) == MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sGold")->mStr)
+    if (MWWorld::Class::get(ptr).getName(ptr) == MWBase::Environment::get().getWorld()->getStore().gameSettings.find("sGold")->getString())
     {
         MWWorld::LiveCellRef<ESM::Miscellaneous> *gold =
             ptr.get<ESM::Miscellaneous>();

@@ -7,6 +7,7 @@
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
+#include "../mwbase/mechanicsmanager.hpp"
 
 #include "../mwworld/timestamp.hpp"
 #include "../mwworld/player.hpp"
@@ -186,7 +187,11 @@ namespace MWGui
             mProgressBar.setProgress (mCurHour, mHours);
 
             if (mCurHour <= mHours)
+            {
                 MWBase::Environment::get().getWorld ()->advanceTime (1);
+                if (mSleeping)
+                    MWBase::Environment::get().getMechanicsManager ()->restoreDynamicStats ();
+            }
         }
 
         if (mCurHour > mHours)
@@ -197,7 +202,7 @@ namespace MWGui
     {
         MWBase::Environment::get().getWorld ()->getFader ()->fadeIn(0.2);
         mProgressBar.setVisible (false);
-        mWindowManager.popGuiMode ();
+        mWindowManager.removeGuiMode (GM_Rest);
         mWaiting = false;
 
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
@@ -208,6 +213,13 @@ namespace MWGui
         {
             mWindowManager.pushGuiMode (GM_Levelup);
         }
+    }
+
+    void WaitDialog::wakeUp ()
+    {
+        mSleeping = false;
+        mWaiting = false;
+        stopWaiting();
     }
 
 }

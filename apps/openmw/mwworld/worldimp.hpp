@@ -313,7 +313,6 @@ namespace MWWorld
             }
 
             virtual void renderPlayer();
-            virtual void renderGlobalMap();
             
             virtual void setupExternalRendering (MWRender::ExternalRendering& rendering);
 

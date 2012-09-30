@@ -307,6 +307,7 @@ int load(Arguments& info)
             esm.getRecHeader(flags);
 
             std::string id = esm.getHNOString("NAME");
+
             if(!quiet)
                 std::cout << "\nRecord: " << n.toString()
                      << " '" << id << "'\n";

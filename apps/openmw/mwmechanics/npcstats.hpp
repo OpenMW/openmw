@@ -50,6 +50,8 @@ namespace MWMechanics
 
             std::vector<int> mSkillIncreases; // number of skill increases for each attribute
 
+            std::set<std::string> mUsedIds;
+
         public:
 
             NpcStats();
@@ -86,6 +88,10 @@ namespace MWMechanics
             int getLevelupAttributeMultiplier(int attribute) const;
 
             void levelUp();
+            
+            void flagAsUsed (const std::string& id);
+            
+            bool hasBeenUsed (const std::string& id) const;
     };
 }
 

@@ -73,6 +73,9 @@ namespace MWMechanics
 
             virtual void setPlayerClass (const ESM::Class& class_);
             ///< Set player class to custom class.
+
+            virtual void restoreDynamicStats();
+            ///< If the player is sleeping, this should be called every hour.
     };
 }
 

@@ -7,8 +7,14 @@
 
 #include <components/esm/loadnpc.hpp>
 
+#include <components/esm_store/store.hpp>
+
 #include "../mwworld/class.hpp"
 #include "../mwworld/inventorystore.hpp"
+
+#include "../mwbase/world.hpp"
+#include "../mwbase/environment.hpp"
+#include "../mwbase/windowmanager.hpp"
 
 #include "creaturestats.hpp"
 
@@ -20,7 +26,7 @@ namespace MWMechanics
         adjustMagicEffects (ptr);
         calculateCreatureStatModifiers (ptr);
         calculateDynamicStats (ptr);
-        
+
         // AI
         CreatureStats& creatureStats =  MWWorld::Class::get (ptr).getCreatureStats (ptr);
         creatureStats.getAiSequence().execute (ptr);
@@ -75,6 +81,48 @@ namespace MWMechanics
 
         creatureStats.getFatigue().setBase(strength+willpower+agility+endurance);
     }
+
+    void Actors::calculateRestoration (const MWWorld::Ptr& ptr, float duration)
+    {
+        CreatureStats& stats = MWWorld::Class::get (ptr).getCreatureStats (ptr);
+
+        if (duration == 3600)
+        {
+            // stunted magicka
+            bool stunted = stats.getMagicEffects ().get(MWMechanics::EffectKey(136)).mMagnitude > 0;
+
+            int endurance = stats.getAttribute (ESM::Attribute::Endurance).getModified ();
+            stats.getHealth().setCurrent(stats.getHealth ().getCurrent ()
+                + 0.1 * endurance);
+
+            const ESMS::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
+
+            float fFatigueReturnBase = store.gameSettings.find("fFatigueReturnBase")->getFloat ();
+            float fFatigueReturnMult = store.gameSettings.find("fFatigueReturnMult")->getFloat ();
+            float fEndFatigueMult = store.gameSettings.find("fEndFatigueMult")->getFloat ();
+
+            float capacity = MWWorld::Class::get(ptr).getCapacity(ptr);
+            float encumbrance = MWWorld::Class::get(ptr).getEncumbrance(ptr);
+            float normalizedEncumbrance = (capacity == 0 ? 1 : encumbrance/capacity);
+            if (normalizedEncumbrance > 1)
+                normalizedEncumbrance = 1;
+
+            float x = fFatigueReturnBase + fFatigueReturnMult * (1 - normalizedEncumbrance);
+            x *= fEndFatigueMult * endurance;
+            stats.getFatigue ().setCurrent (stats.getFatigue ().getCurrent () + 3600 * x);
+
+            if (!stunted)
+            {
+                float fRestMagicMult = store.gameSettings.find("fRestMagicMult")->getFloat ();
+                stats.getMagicka().setCurrent (stats.getMagicka ().getCurrent ()
+                    + fRestMagicMult * stats.getAttribute(ESM::Attribute::Intelligence).getModified ());
+            }
+        }
+
+
+
+    }
+
 
     void Actors::calculateCreatureStatModifiers (const MWWorld::Ptr& ptr)
     {
@@ -157,6 +205,14 @@ namespace MWMechanics
 
             if (vector!=Ogre::Vector3::ZERO)
                 movement.push_back (std::make_pair (iter->getRefData().getHandle(), vector));
+        }
+    }
+
+    void Actors::restoreDynamicStats()
+    {
+        for (std::set<MWWorld::Ptr>::iterator iter (mActors.begin()); iter!=mActors.end(); ++iter)
+        {
+            calculateRestoration (*iter, 3600);
         }
     }
 }

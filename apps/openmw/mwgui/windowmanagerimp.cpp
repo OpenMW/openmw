@@ -50,7 +50,8 @@
 using namespace MWGui;
 
 WindowManager::WindowManager(
-    const Compiler::Extensions& extensions, int fpsLevel, bool newGame, OEngine::Render::OgreRenderer *mOgre, const std::string& logpath, bool consoleOnlyScripts)
+    const Compiler::Extensions& extensions, int fpsLevel, bool newGame, OEngine::Render::OgreRenderer *mOgre,
+        const std::string& logpath, const std::string& cacheDir, bool consoleOnlyScripts)
   : mGuiManager(NULL)
   , mHud(NULL)
   , mMap(NULL)
@@ -132,7 +133,7 @@ WindowManager::WindowManager(
     mDragAndDrop->mDragAndDropWidget = dragAndDropWidget;
 
     mMenu = new MainMenu(w,h);
-    mMap = new MapWindow(*this);
+    mMap = new MapWindow(*this, cacheDir);
     mStatsWindow = new StatsWindow(*this);
     mConsole = new Console(w,h, consoleOnlyScripts);
     mJournal = new JournalWindow(*this);
@@ -521,9 +522,9 @@ int WindowManager::readPressedButton ()
 
 const std::string &WindowManager::getGameSettingString(const std::string &id, const std::string &default_)
 {
-    const ESM::GameSetting *setting = MWBase::Environment::get().getWorld()->getStore().gameSettings.search(id);
+    const ESM::GameSetting *setting = MWBase::Environment::get().getWorld()->getStore().gameSettings.find(id);
     if (setting && setting->mType == ESM::VT_String)
-        return setting->mStr;
+        return setting->getString();
     return default_;
 }
 
@@ -679,9 +680,9 @@ void WindowManager::setDragDrop(bool dragDrop)
 
 void WindowManager::onRetrieveTag(const MyGUI::UString& _tag, MyGUI::UString& _result)
 {
-    const ESM::GameSetting *setting = MWBase::Environment::get().getWorld()->getStore().gameSettings.search(_tag);
+    const ESM::GameSetting *setting = MWBase::Environment::get().getWorld()->getStore().gameSettings.find(_tag);
     if (setting && setting->mType == ESM::VT_String)
-        _result = setting->mStr;
+        _result = setting->getString();
     else
         _result = _tag;
 }
@@ -953,6 +954,11 @@ void WindowManager::loadingDone ()
 bool WindowManager::getPlayerSleeping ()
 {
     return mWaitDialog->getSleeping();
+}
+
+void WindowManager::wakeUpPlayer()
+{
+    mWaitDialog->wakeUp();
 }
 
 void WindowManager::addVisitedLocation(const std::string& name, int x, int y)

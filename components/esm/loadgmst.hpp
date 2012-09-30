@@ -87,7 +87,7 @@ struct GameSetting
     int getInt() const;
     ///< Throws an exception if GMST is not of type int or float.
     
-    int getFloat() const;
+    float getFloat() const;
     ///< Throws an exception if GMST is not of type int or float.
     
     std::string getString() const;

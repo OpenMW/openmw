@@ -368,19 +368,19 @@ IntSize ToolTips::createToolTip(const MWGui::ToolTipInfo& info)
     if (text.size() > 0 && text[0] == '\n')
         text.erase(0, 1);
 
-    const ESM::Enchantment* enchant;
+    const ESM::Enchantment* enchant = 0;
     const ESMS::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
     if (info.enchant != "")
     {
         enchant = store.enchants.search(info.enchant);
         if (enchant->mData.mType == ESM::Enchantment::CastOnce)
-            text += "\n" + store.gameSettings.search("sItemCastOnce")->mStr;
+            text += "\n#{sItemCastOnce}";
         else if (enchant->mData.mType == ESM::Enchantment::WhenStrikes)
-            text += "\n" + store.gameSettings.search("sItemCastWhenStrikes")->mStr;
+            text += "\n#{sItemCastWhenStrikes}";
         else if (enchant->mData.mType == ESM::Enchantment::WhenUsed)
-            text += "\n" + store.gameSettings.search("sItemCastWhenUsed")->mStr;
+            text += "\n#{sItemCastWhenUsed}";
         else if (enchant->mData.mType == ESM::Enchantment::ConstantEffect)
-            text += "\n" + store.gameSettings.search("sItemCastConstant")->mStr;
+            text += "\n#{sItemCastConstant}";
     }
 
     // this the maximum width of the tooltip before it starts word-wrapping
@@ -405,7 +405,7 @@ IntSize ToolTips::createToolTip(const MWGui::ToolTipInfo& info)
     textWidget->setProperty("Static", "true");
     textWidget->setProperty("MultiLine", "true");
     textWidget->setProperty("WordWrap", "true");
-    textWidget->setCaption(text);
+    textWidget->setCaptionWithReplacing(text);
     textWidget->setTextAlign(Align::HCenter | Align::Top);
     IntSize textSize = textWidget->getTextSize();
 
@@ -440,6 +440,7 @@ IntSize ToolTips::createToolTip(const MWGui::ToolTipInfo& info)
 
     if (info.enchant != "")
     {
+        assert(enchant);
         Widget* enchantArea = mDynamicToolTipBox->createWidget<Widget>("",
             IntCoord(0, totalSize.height, 300, 300-totalSize.height),
             Align::Stretch, "ToolTipEnchantArea");
@@ -466,7 +467,8 @@ IntSize ToolTips::createToolTip(const MWGui::ToolTipInfo& info)
             const int chargeWidth = 204;
 
             TextBox* chargeText = enchantArea->createWidget<TextBox>("SandText", IntCoord(0, 0, 10, 18), Align::Default, "ToolTipEnchantChargeText");
-            chargeText->setCaption(store.gameSettings.search("sCharges")->mStr);
+            chargeText->setCaptionWithReplacing("#{sCharges}");
+
             const int chargeTextWidth = chargeText->getTextSize().width + 5;
 
             const int chargeAndTextWidth = chargeWidth + chargeTextWidth;

@@ -197,7 +197,7 @@ int GameSetting::getInt() const
     }
 }
 
-int GameSetting::getFloat() const
+float GameSetting::getFloat() const
 {
     switch (mType)
     {

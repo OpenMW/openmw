@@ -282,6 +282,11 @@ namespace MWMechanics
         mActors.update (movement, duration, paused);
     }
 
+    void MechanicsManager::restoreDynamicStats()
+    {
+        mActors.restoreDynamicStats ();
+    }
+
     void MechanicsManager::setPlayerName (const std::string& name)
     {
         MWBase::Environment::get().getWorld()->getPlayer().setName (name);

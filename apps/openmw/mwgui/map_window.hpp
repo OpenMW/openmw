@@ -3,6 +3,11 @@
 
 #include "window_pinnable_base.hpp"
 
+namespace MWRender
+{
+    class GlobalMap;
+}
+
 namespace MWGui
 {
     class LocalMapBase
@@ -44,6 +49,8 @@ namespace MWGui
         void onMarkerFocused(MyGUI::Widget* w1, MyGUI::Widget* w2);
         void onMarkerUnfocused(MyGUI::Widget* w1, MyGUI::Widget* w2);
 
+        virtual void notifyPlayerUpdate() {}
+
         OEngine::GUI::Layout* mLayout;
 
         bool mMapDragAndDrop;
@@ -57,8 +64,8 @@ namespace MWGui
     class MapWindow : public MWGui::WindowPinnableBase, public LocalMapBase
     {
     public:
-        MapWindow(MWBase::WindowManager& parWindowManager);
-        virtual ~MapWindow(){}
+        MapWindow(MWBase::WindowManager& parWindowManager, const std::string& cacheDir);
+        virtual ~MapWindow();
 
         void setCellName(const std::string& cellName);
 
@@ -71,6 +78,8 @@ namespace MWGui
         void onMouseDrag(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id);
         void onWorldButtonClicked(MyGUI::Widget* _sender);
 
+        void globalMapUpdatePlayer();
+
         MyGUI::ScrollView* mGlobalMap;
         MyGUI::ImageBox* mGlobalMapImage;
         MyGUI::ImageBox* mPlayerArrowLocal;
@@ -82,8 +91,12 @@ namespace MWGui
         MyGUI::Button* mEventBoxGlobal;
         MyGUI::Button* mEventBoxLocal;
 
+        MWRender::GlobalMap* mGlobalMapRender;
+
     protected:
         virtual void onPinToggled();
+
+        virtual void notifyPlayerUpdate();
     };
 }
 #endif

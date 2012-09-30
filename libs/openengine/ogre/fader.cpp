@@ -24,7 +24,8 @@ Fader::Fader(Ogre::SceneManager* sceneMgr)
     MaterialPtr material = MaterialManager::getSingleton().create("FadeInOutMaterial", ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME );
     Pass* pass = material->getTechnique(0)->getPass(0);
     pass->setSceneBlending(SBT_TRANSPARENT_ALPHA);
-    mFadeTextureUnit = pass->createTextureUnitState();
+    pass->setDepthWriteEnabled (false);
+    mFadeTextureUnit = pass->createTextureUnitState("black.png");
     mFadeTextureUnit->setColourOperationEx(LBX_SOURCE1, LBS_MANUAL, LBS_CURRENT, ColourValue(0.f, 0.f, 0.f)); // always black colour    
 
     mRectangle = new Ogre::Rectangle2D(true);

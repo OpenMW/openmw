@@ -185,13 +185,11 @@ namespace MWClass
         MWGui::ToolTipInfo info;
         info.caption = ref->base->mName;
 
-        const ESMS::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
-
         std::string text;
         if (ref->ref.mLockLevel > 0)
-            text += "\n" + store.gameSettings.search("sLockLevel")->mStr + ": " + MWGui::ToolTips::toString(ref->ref.mLockLevel);
+            text += "\n#{sLockLevel}: " + MWGui::ToolTips::toString(ref->ref.mLockLevel);
         if (ref->ref.mTrap != "")
-            text += "\n" + store.gameSettings.search("sTrapped")->mStr;
+            text += "\n#{sTrapped}";
 
         if (MWBase::Environment::get().getWindowManager()->getFullHelp()) {
             text += MWGui::ToolTips::getMiscString(ref->ref.mOwner, "Owner");

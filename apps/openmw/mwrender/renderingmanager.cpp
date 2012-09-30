@@ -101,7 +101,7 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
     MaterialManager::getSingleton().setDefaultTextureFiltering(tfo);
     MaterialManager::getSingleton().setDefaultAnisotropy( (filter == "anisotropic") ? Settings::Manager::getInt("anisotropy", "General") : 1 );
 
-    ResourceGroupManager::getSingleton ().declareResource ("GlobalMap.png", "Texture", ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
+    //ResourceGroupManager::getSingleton ().declareResource ("GlobalMap.png", "Texture", ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
 
     ResourceGroupManager::getSingleton().initialiseAllResourceGroups();
 
@@ -164,8 +164,6 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
     mDebugging = new Debugging(mMwRoot, engine);
     mLocalMap = new MWRender::LocalMap(&mRendering, this);
 
-    mGlobalMap = new GlobalMap(cacheDir.string());
-
     setMenuTransparency(Settings::Manager::getFloat("menu transparency", "GUI"));
 }
 
@@ -182,7 +180,6 @@ RenderingManager::~RenderingManager ()
     delete mOcclusionQuery;
     delete mCompositors;
     delete mWater;
-    delete mGlobalMap;
 }
 
 MWRender::SkyManager* RenderingManager::getSkyManager()
@@ -899,11 +896,6 @@ bool RenderingManager::isPositionExplored (float nX, float nY, int x, int y, boo
 void RenderingManager::setupExternalRendering (MWRender::ExternalRendering& rendering)
 {
     rendering.setup (mRendering.getScene());
-}
-
-void RenderingManager::renderGlobalMap ()
-{
-    mGlobalMap->render ();
 }
 
 } // namespace

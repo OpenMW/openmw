@@ -41,7 +41,8 @@ const float WeatherGlobals::mThunderSoundDelay = 0.25;
 WeatherManager::WeatherManager(MWRender::RenderingManager* rendering) :
      mHour(14), mCurrentWeather("clear"), mFirstUpdate(true), mWeatherUpdateTime(0),
      mThunderFlash(0), mThunderChance(0), mThunderChanceNeeded(50), mThunderSoundDelay(0),
-     mRemainingTransitionTime(0), mMonth(0), mDay(0)
+     mRemainingTransitionTime(0), mMonth(0), mDay(0),
+     mTimePassed(0)
 {
     mRendering = rendering;
 
@@ -487,7 +488,10 @@ WeatherResult WeatherManager::transition(float factor)
 
 void WeatherManager::update(float duration)
 {
-    mWeatherUpdateTime -= duration * MWBase::Environment::get().getWorld()->getTimeScaleFactor();
+    float timePassed = mTimePassed;
+    mTimePassed = 0;
+
+    mWeatherUpdateTime -= timePassed;
 
     bool exterior = (MWBase::Environment::get().getWorld()->isCellExterior() || MWBase::Environment::get().getWorld()->isCellQuasiExterior());
 
@@ -558,7 +562,7 @@ void WeatherManager::update(float duration)
 
         if (mNextWeather != "")
         {
-            mRemainingTransitionTime -= duration * MWBase::Environment::get().getWorld()->getTimeScaleFactor();
+            mRemainingTransitionTime -= timePassed;
             if (mRemainingTransitionTime < 0)
             {
                 mCurrentWeather = mNextWeather;

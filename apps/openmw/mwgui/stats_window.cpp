@@ -57,7 +57,7 @@ StatsWindow::StatsWindow (MWBase::WindowManager& parWindowManager)
     const ESMS::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
     for (int i=0; names[i][0]; ++i)
     {
-        setText (names[i][0], store.gameSettings.find (names[i][1])->mStr);
+        setText (names[i][0], store.gameSettings.find (names[i][1])->getString());
     }
 
     getWidget(mSkillView, "SkillView");
@@ -475,8 +475,6 @@ void StatsWindow::updateSkillArea()
                 text += "\n#BF9959";
                 for (int i=0; i<6; ++i)
                 {
-                    const ESM::Skill* skill = MWBase::Environment::get().getWorld()->getStore().skills.search(faction->mData.mSkillID[i]);
-                    assert(skill);
                     text += "#{"+ESM::Skill::sSkillNameIds[faction->mData.mSkillID[i]]+"}";
                     if (i<5)
                         text += ", ";

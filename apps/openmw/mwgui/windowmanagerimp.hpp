@@ -71,7 +71,9 @@ namespace MWGui
     typedef std::pair<std::string, int> Faction;
     typedef std::vector<Faction> FactionList;
 
-    WindowManager(const Compiler::Extensions& extensions, int fpsLevel, bool newGame, OEngine::Render::OgreRenderer *mOgre, const std::string& logpath, bool consoleOnlyScripts);
+    WindowManager(const Compiler::Extensions& extensions, int fpsLevel, bool newGame,
+                  OEngine::Render::OgreRenderer *mOgre, const std::string& logpath,
+                  const std::string& cacheDir, bool consoleOnlyScripts);
     virtual ~WindowManager();
 
     /**
@@ -207,6 +209,7 @@ namespace MWGui
     virtual bool getRestEnabled() { return mRestAllowed; }
 
     virtual bool getPlayerSleeping();
+    virtual void wakeUpPlayer();
 
   private:
     OEngine::GUI::MyGUIManager *mGuiManager;

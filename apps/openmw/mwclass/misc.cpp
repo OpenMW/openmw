@@ -101,7 +101,7 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Miscellaneous> *ref =
             ptr.get<ESM::Miscellaneous>();
 
-        if (ref->base->mName == MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sGold")->mStr)
+        if (ref->base->mName == MWBase::Environment::get().getWorld()->getStore().gameSettings.find("sGold")->getString())
         {
             return std::string("Item Gold Up");
         }
@@ -113,7 +113,7 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Miscellaneous> *ref =
             ptr.get<ESM::Miscellaneous>();
 
-        if (ref->base->mName == MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sGold")->mStr)
+        if (ref->base->mName == MWBase::Environment::get().getWorld()->getStore().gameSettings.find("sGold")->getString())
         {
             return std::string("Item Gold Down");
         }
@@ -147,7 +147,7 @@ namespace MWClass
 
         int count = ptr.getRefData().getCount();
 
-        bool isGold = (ref->base->mName == store.gameSettings.search("sGold")->mStr);
+        bool isGold = (ref->base->mName == store.gameSettings.find("sGold")->getString());
         if (isGold && count == 1)
             count = ref->base->mData.mValue;
 
@@ -170,8 +170,8 @@ namespace MWClass
 
         if (!isGold)
         {
-            text += "\n" + store.gameSettings.search("sWeight")->mStr + ": " + MWGui::ToolTips::toString(ref->base->mData.mWeight);
-            text += MWGui::ToolTips::getValueString(ref->base->mData.mValue, store.gameSettings.search("sValue")->mStr);
+            text += "\n#{sWeight}: " + MWGui::ToolTips::toString(ref->base->mData.mWeight);
+            text += MWGui::ToolTips::getValueString(ref->base->mData.mValue, "#{sValue}");
         }
 
         if (MWBase::Environment::get().getWindowManager()->getFullHelp()) {
@@ -192,7 +192,7 @@ namespace MWClass
         const ESMS::ESMStore &store =
             MWBase::Environment::get().getWorld()->getStore();
 
-        if (MWWorld::Class::get(ptr).getName(ptr) == store.gameSettings.search("sGold")->mStr) {
+        if (MWWorld::Class::get(ptr).getName(ptr) == store.gameSettings.find("sGold")->getString()) {
             int goldAmount = ptr.getRefData().getCount();
 
             std::string base = "Gold_001";

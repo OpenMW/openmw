@@ -366,6 +366,8 @@ namespace MWWorld
 
     void World::advanceTime (double hours)
     {
+        mWeatherManager->advanceTime (hours);
+
         hours += mGlobalVariables->getFloat ("gamehour");
 
         setHour (hours);
@@ -526,7 +528,7 @@ namespace MWWorld
             std::pair<std::string, float> result = mPhysics->getFacedHandle (*this);
 
             if (result.first.empty() ||
-                result.second>getStore().gameSettings.find ("iMaxActivateDist")->mI)
+                    result.second>getStore().gameSettings.find ("iMaxActivateDist")->getInt())
                 return "";
 
             return result.first;
@@ -1251,11 +1253,6 @@ namespace MWWorld
     void World::renderPlayer()
     {
         mRendering->renderPlayer(mPlayer->getPlayer());
-    }
-
-    void World::renderGlobalMap ()
-    {
-        mRendering->renderGlobalMap ();
     }
 
     void World::setupExternalRendering (MWRender::ExternalRendering& rendering)
