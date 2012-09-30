@@ -28,7 +28,7 @@
   terrains of the same size, once instance can usually be shared.
 */
 
-#include <assert.h>
+#include <cassert>
 
 namespace Terrain
 {

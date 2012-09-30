@@ -3,12 +3,12 @@
 #include <boost/lexical_cast.hpp>
 
 #include "../mwbase/environment.hpp"
-#include "../mwworld/world.hpp"
+#include "../mwbase/world.hpp"
 
 namespace MWGui
 {
-    ConfirmationDialog::ConfirmationDialog(WindowManager& parWindowManager) :
-        WindowBase("openmw_confirmation_dialog_layout.xml", parWindowManager)
+    ConfirmationDialog::ConfirmationDialog(MWBase::WindowManager& parWindowManager) :
+        WindowModal("openmw_confirmation_dialog.layout", parWindowManager)
     {
         getWidget(mMessage, "Message");
         getWidget(mOkButton, "OkButton");
@@ -31,40 +31,19 @@ namespace MWGui
         mMessage->setSize(mMessage->getWidth(), mMessage->getTextSize().height+24);
 
         center();
-
-        // make other gui elements inaccessible while this dialog is open
-        MyGUI::InputManager::getInstance().addWidgetModal(mMainWidget);
-
-        int okButtonWidth = mOkButton->getTextSize().width + 24;
-        mOkButton->setCoord(mMainWidget->getWidth() - 30 - okButtonWidth,
-                            mOkButton->getTop(),
-                            okButtonWidth,
-                            mOkButton->getHeight());
-
-        int cancelButtonWidth = mCancelButton->getTextSize().width + 24;
-        mCancelButton->setCoord(mMainWidget->getWidth() - 30 - okButtonWidth - cancelButtonWidth - 8,
-                            mCancelButton->getTop(),
-                            cancelButtonWidth,
-                            mCancelButton->getHeight());
     }
 
     void ConfirmationDialog::onCancelButtonClicked(MyGUI::Widget* _sender)
     {
         eventCancelClicked();
 
-        close();
+        setVisible(false);
     }
 
     void ConfirmationDialog::onOkButtonClicked(MyGUI::Widget* _sender)
     {
         eventOkClicked();
 
-        close();
-    }
-
-    void ConfirmationDialog::close()
-    {
         setVisible(false);
-        MyGUI::InputManager::getInstance().removeWidgetModal(mMainWidget);
     }
 }

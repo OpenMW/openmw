@@ -3,23 +3,24 @@
 
 #include <components/esm/loadcont.hpp>
 
-#include <components/esm_store/cell_store.hpp>
-
 #include "../mwbase/environment.hpp"
+#include "../mwbase/world.hpp"
+#include "../mwbase/windowmanager.hpp"
 
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/nullaction.hpp"
 #include "../mwworld/containerstore.hpp"
 #include "../mwworld/customdata.hpp"
-#include "../mwworld/world.hpp"
+#include "../mwworld/cellstore.hpp"
+#include "../mwworld/actionopen.hpp"
+#include "../mwworld/physicssystem.hpp"
+#include "../mwworld/player.hpp"
+#include "../mwworld/inventorystore.hpp"
 
-#include "../mwgui/window_manager.hpp"
 #include "../mwgui/tooltips.hpp"
 
 #include "../mwrender/objects.hpp"
-#include "../mwworld/actionopen.hpp"
-
-#include "../mwsound/soundmanager.hpp"
+#include "../mwrender/renderinginterface.hpp"
 
 namespace
 {
@@ -53,32 +54,33 @@ namespace MWClass
 
     void Container::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const
     {
-        ESMS::LiveCellRef<ESM::Container, MWWorld::RefData> *ref =
-            ptr.get<ESM::Container>();
-
-        assert (ref->base != NULL);
-        const std::string &model = ref->base->model;
-
-        if (!model.empty())
-        {
+        const std::string model = getModel(ptr);
+        if (!model.empty()) {
             MWRender::Objects& objects = renderingInterface.getObjects();
             objects.insertBegin(ptr, ptr.getRefData().isEnabled(), false);
-            objects.insertMesh(ptr, "meshes\\" + model);
+            objects.insertMesh(ptr, model);
         }
     }
 
     void Container::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics) const
     {
-        ESMS::LiveCellRef<ESM::Container, MWWorld::RefData> *ref =
-            ptr.get<ESM::Container>();
+        const std::string model = getModel(ptr);
+        if(!model.empty()) {
+            physics.insertObjectPhysics(ptr, model);
+        }
+    }
 
+    std::string Container::getModel(const MWWorld::Ptr &ptr) const
+    {
+        MWWorld::LiveCellRef<ESM::Container> *ref =
+            ptr.get<ESM::Container>();
+        assert(ref->base != NULL);
 
         const std::string &model = ref->base->model;
-        assert (ref->base != NULL);
-        if(!model.empty()){
-            physics.insertObjectPhysics(ptr, "meshes\\" + model);
+        if (!model.empty()) {
+            return "meshes\\" + model;
         }
-
+        return "";
     }
 
     boost::shared_ptr<MWWorld::Action> Container::activate (const MWWorld::Ptr& ptr,
@@ -87,37 +89,58 @@ namespace MWClass
         const std::string lockedSound = "LockedChest";
         const std::string trapActivationSound = "Disarm Trap Fail";
 
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld ()->getPlayer().getPlayer();
+        MWWorld::InventoryStore& invStore = MWWorld::Class::get(player).getInventoryStore(player);
 
-        if (ptr.getCellRef().lockLevel>0)
+        bool needKey = ptr.getCellRef().lockLevel>0;
+        bool hasKey = false;
+        std::string keyName;
+        for (MWWorld::ContainerStoreIterator it = invStore.begin(); it != invStore.end(); ++it)
         {
-            // TODO check for key
-            std::cout << "Locked container" << std::endl;
-            MWBase::Environment::get().getSoundManager()->playSound3D (ptr, lockedSound, 1.0, 1.0);
-            return boost::shared_ptr<MWWorld::Action> (new MWWorld::NullAction);
+            if (it->getCellRef ().refID == ptr.getCellRef().key)
+            {
+                hasKey = true;
+                keyName = MWWorld::Class::get(*it).getName(*it);
+            }
         }
-        else
+
+        if (needKey && hasKey)
         {
-            std::cout << "Unlocked container" << std::endl;
+            MWBase::Environment::get().getWindowManager ()->messageBox (keyName + " #{sKeyUsed}", std::vector<std::string>());
+            ptr.getCellRef().lockLevel = 0;
+            // using a key disarms the trap
+            ptr.getCellRef().trap = "";
+        }
+
+
+        if (!needKey || hasKey)
+        {
             if(ptr.getCellRef().trap.empty())
             {
-                // Not trapped, Inventory GUI goes here
-                //return boost::shared_ptr<MWWorld::Action> (new MWWorld::NullAction);
-                return boost::shared_ptr<MWWorld::Action> (new MWWorld::ActionOpen(ptr));
+                boost::shared_ptr<MWWorld::Action> action (new MWWorld::ActionOpen(ptr));
+                return action;
             }
             else
             {
                 // Trap activation goes here
                 std::cout << "Activated trap: " << ptr.getCellRef().trap << std::endl;
-                MWBase::Environment::get().getSoundManager()->playSound3D (ptr, trapActivationSound, 1.0, 1.0);
+                boost::shared_ptr<MWWorld::Action> action(new MWWorld::NullAction);
+                action->setSound(trapActivationSound);
                 ptr.getCellRef().trap = "";
-                return boost::shared_ptr<MWWorld::Action> (new MWWorld::NullAction);
+                return action;
             }
+        }
+        else
+        {
+            boost::shared_ptr<MWWorld::Action> action(new MWWorld::NullAction);
+            action->setSound(lockedSound);
+            return action;
         }
     }
 
     std::string Container::getName (const MWWorld::Ptr& ptr) const
     {
-        ESMS::LiveCellRef<ESM::Container, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Container> *ref =
             ptr.get<ESM::Container>();
 
         return ref->base->name;
@@ -133,7 +156,7 @@ namespace MWClass
 
     std::string Container::getScript (const MWWorld::Ptr& ptr) const
     {
-        ESMS::LiveCellRef<ESM::Container, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Container> *ref =
             ptr.get<ESM::Container>();
 
         return ref->base->script;
@@ -148,7 +171,7 @@ namespace MWClass
 
     bool Container::hasToolTip (const MWWorld::Ptr& ptr) const
     {
-        ESMS::LiveCellRef<ESM::Container, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Container> *ref =
             ptr.get<ESM::Container>();
 
         return (ref->base->name != "");
@@ -156,19 +179,17 @@ namespace MWClass
 
     MWGui::ToolTipInfo Container::getToolTipInfo (const MWWorld::Ptr& ptr) const
     {
-        ESMS::LiveCellRef<ESM::Container, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Container> *ref =
             ptr.get<ESM::Container>();
 
         MWGui::ToolTipInfo info;
         info.caption = ref->base->name;
 
-        const ESMS::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
-
         std::string text;
         if (ref->ref.lockLevel > 0)
-            text += "\n" + store.gameSettings.search("sLockLevel")->str + ": " + MWGui::ToolTips::toString(ref->ref.lockLevel);
+            text += "\n#{sLockLevel}: " + MWGui::ToolTips::toString(ref->ref.lockLevel);
         if (ref->ref.trap != "")
-            text += "\n" + store.gameSettings.search("sTrapped")->str;
+            text += "\n#{sTrapped}";
 
         if (MWBase::Environment::get().getWindowManager()->getFullHelp()) {
             text += MWGui::ToolTips::getMiscString(ref->ref.owner, "Owner");
@@ -182,7 +203,7 @@ namespace MWClass
 
     float Container::getCapacity (const MWWorld::Ptr& ptr) const
     {
-        ESMS::LiveCellRef<ESM::Container, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Container> *ref =
             ptr.get<ESM::Container>();
 
         return ref->base->weight;
@@ -204,5 +225,14 @@ namespace MWClass
     void Container::unlock (const MWWorld::Ptr& ptr) const
     {
         ptr.getCellRef().lockLevel = 0;
+    }
+
+    MWWorld::Ptr
+    Container::copyToCellImpl(const MWWorld::Ptr &ptr, MWWorld::CellStore &cell) const
+    {
+        MWWorld::LiveCellRef<ESM::Container> *ref =
+            ptr.get<ESM::Container>();
+
+        return MWWorld::Ptr(&cell.containers.insert(*ref), &cell);
     }
 }

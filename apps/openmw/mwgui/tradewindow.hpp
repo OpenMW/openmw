@@ -23,7 +23,7 @@ namespace MWGui
     class TradeWindow : public ContainerBase, public WindowBase
     {
         public:
-            TradeWindow(WindowManager& parWindowManager);
+            TradeWindow(MWBase::WindowManager& parWindowManager);
 
             void startTrade(MWWorld::Ptr actor);
 
@@ -31,6 +31,8 @@ namespace MWGui
             void buyFromNpc(MWWorld::Ptr item, int count); ///< only used for adjusting the gold balance
 
             bool npcAcceptsItem(MWWorld::Ptr item);
+
+            void addOrRemoveGold(int gold);
 
         protected:
             MyGUI::Button* mFilterAll;

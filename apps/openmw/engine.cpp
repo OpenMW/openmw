@@ -1,56 +1,38 @@
 #include "engine.hpp"
 #include "components/esm/loadcell.hpp"
 
-#include <cassert>
-
-#include <iostream>
-#include <utility>
-
 #include <OgreRoot.h>
 #include <OgreRenderWindow.h>
 
 #include <MyGUI_WidgetManager.h>
 
-#include <openengine/ogre/renderer.hpp>
-#include <openengine/gui/manager.hpp>
-
-#include <components/esm/records.hpp>
-#include <components/esm_store/cell_store.hpp>
 #include <components/bsa/bsa_archive.hpp>
-#include <components/esm/esm_reader.hpp>
-#include <components/files/fixedpath.hpp>
 #include <components/files/configurationmanager.hpp>
-#include <components/settings/settings.hpp>
 #include <components/nifoverrides/nifoverrides.hpp>
 
 #include <components/nifbullet/bullet_nif_loader.hpp>
 #include <components/nifogre/ogre_nif_loader.hpp>
 
-#include "mwinput/inputmanager.hpp"
+#include "mwinput/inputmanagerimp.hpp"
 
-#include "mwgui/window_manager.hpp"
+#include "mwgui/windowmanagerimp.hpp"
 #include "mwgui/cursorreplace.hpp"
 
-#include "mwscript/scriptmanager.hpp"
-#include "mwscript/compilercontext.hpp"
-#include "mwscript/interpretercontext.hpp"
+#include "mwscript/scriptmanagerimp.hpp"
 #include "mwscript/extensions.hpp"
-#include "mwscript/globalscripts.hpp"
 
-#include "mwsound/soundmanager.hpp"
+#include "mwsound/soundmanagerimp.hpp"
 
-#include "mwworld/world.hpp"
 #include "mwworld/class.hpp"
 #include "mwworld/player.hpp"
+#include "mwworld/worldimp.hpp"
 
 #include "mwclass/classes.hpp"
 
-#include "mwdialogue/dialoguemanager.hpp"
-#include "mwdialogue/journal.hpp"
+#include "mwdialogue/dialoguemanagerimp.hpp"
+#include "mwdialogue/journalimp.hpp"
 
-#include "mwmechanics/mechanicsmanager.hpp"
-
-#include "mwbase/environment.hpp"
+#include "mwmechanics/mechanicsmanagerimp.hpp"
 
 
 void OMW::Engine::executeLocalScripts()
@@ -74,11 +56,8 @@ void OMW::Engine::executeLocalScripts()
     localScripts.setIgnore (MWWorld::Ptr());
 }
 
-void OMW::Engine::setAnimationVerbose(bool animverbose){
-    if(animverbose){
-        NifOgre::NIFLoader::getSingletonPtr()->setOutputAnimFiles(true);
-        NifOgre::NIFLoader::getSingletonPtr()->setVerbosePath(mCfgMgr.getLogPath().string());
-    }
+void OMW::Engine::setAnimationVerbose(bool animverbose)
+{
 }
 
 bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
@@ -88,7 +67,7 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
         mEnvironment.setFrameDuration (evt.timeSinceLastFrame);
 
         // update input
-        MWBase::Environment::get().getInputManager()->update();
+        MWBase::Environment::get().getInputManager()->update(evt.timeSinceLastFrame, false);
 
         // sound
         if (mUseSound)
@@ -150,6 +129,7 @@ OMW::Engine::Engine(Files::ConfigurationManager& configurationManager)
   , mCompileAll (false)
   , mScriptContext (0)
   , mFSStrict (false)
+  , mScriptConsoleMode (false)
   , mCfgMgr(configurationManager)
 {
     std::srand ( std::time(NULL) );
@@ -182,6 +162,10 @@ void OMW::Engine::loadBSA()
         dataDirectory = iter->string();
         std::cout << "Data dir " << dataDirectory << std::endl;
         Bsa::addDir(dataDirectory, mFSStrict);
+
+        // Workaround: Mygui does not find textures in non-BSA subfolders, _unless_ they are explicitely added like this
+        // For splash screens, this is OK to do, but eventually we will need an investigation why this is necessary
+        Bsa::addDir(dataDirectory + "/Splash", mFSStrict);
     }
 }
 
@@ -290,6 +274,10 @@ void OMW::Engine::go()
     else if (boost::filesystem::exists(globaldefault))
         settings.loadUser(globaldefault);
 
+    // Get the path for the keybinder xml file
+    std::string keybinderUser = (mCfgMgr.getUserPath() / "input.xml").string();
+    bool keybinderUserExists = boost::filesystem::exists(keybinderUser);
+
     mFpsLevel = settings.getInt("fps", "HUD");
 
     // load nif overrides
@@ -310,14 +298,16 @@ void OMW::Engine::go()
     }
     mOgre->configure(
         mCfgMgr.getLogPath().string(),
-        mCfgMgr.getPluginsConfigPath().string(),
         renderSystem,
+        Settings::Manager::getString("opengl rtt mode", "Video"),
         false);
 
     // This has to be added BEFORE MyGUI is initialized, as it needs
     // to find core.xml here.
 
     //addResourcesDirectory(mResDir);
+
+    addResourcesDirectory(mCfgMgr.getCachePath ().string());
 
     addResourcesDirectory(mResDir / "mygui");
     addResourcesDirectory(mResDir / "water");
@@ -342,13 +332,14 @@ void OMW::Engine::go()
 
     // Create the world
     mEnvironment.setWorld (new MWWorld::World (*mOgre, mFileCollections, mMaster,
-        mResDir, mNewGame, mEncoding, mFallbackMap));
+        mResDir, mCfgMgr.getCachePath(), mNewGame, mEncoding, mFallbackMap));
 
     // Create window manager - this manages all the MW-specific GUI windows
     MWScript::registerExtensions (mExtensions);
 
     mEnvironment.setWindowManager (new MWGui::WindowManager(
-        mExtensions, mFpsLevel, mNewGame, mOgre, mCfgMgr.getLogPath().string() + std::string("/")));
+        mExtensions, mFpsLevel, mNewGame, mOgre, mCfgMgr.getLogPath().string() + std::string("/"),
+        mCfgMgr.getCachePath ().string(), mScriptConsoleMode));
 
     // Create sound system
     mEnvironment.setSoundManager (new MWSound::SoundManager(mUseSound));
@@ -367,10 +358,17 @@ void OMW::Engine::go()
     mEnvironment.setJournal (new MWDialogue::Journal);
     mEnvironment.setDialogueManager (new MWDialogue::DialogueManager (mExtensions));
 
+    // Sets up the input system
+    mEnvironment.setInputManager (new MWInput::InputManager (*mOgre,
+        MWBase::Environment::get().getWorld()->getPlayer(),
+         *MWBase::Environment::get().getWindowManager(), mDebug, *this, keybinderUser, keybinderUserExists));
+
     // load cell
     ESM::Position pos;
     pos.rot[0] = pos.rot[1] = pos.rot[2] = 0;
     pos.pos[2] = 0;
+
+    mEnvironment.getWorld()->renderPlayer();
 
     if (const ESM::Cell *exterior = MWBase::Environment::get().getWorld()->getExterior (mCellName))
     {
@@ -383,12 +381,6 @@ void OMW::Engine::go()
         pos.pos[0] = pos.pos[1] = 0;
         MWBase::Environment::get().getWorld()->changeToInteriorCell (mCellName, pos);
     }
-
-    // Sets up the input system
-
-    mEnvironment.setInputManager (new MWInput::MWInputManager (*mOgre,
-        MWBase::Environment::get().getWorld()->getPlayer(),
-        *MWBase::Environment::get().getWindowManager(), mDebug, *this));
 
     std::cout << "\nPress Q/ESC or close window to exit.\n";
 
@@ -409,6 +401,9 @@ void OMW::Engine::go()
                 << "%)"
                 << std::endl;
     }
+
+    if (!mStartupScript.empty())
+        MWBase::Environment::get().getWindowManager()->executeInConsole (mStartupScript);
 
     // Start the main rendering loop
     mOgre->start();
@@ -511,4 +506,14 @@ void OMW::Engine::setEncoding(const std::string& encoding)
 void OMW::Engine::setFallbackValues(std::map<std::string,std::string> fallbackMap)
 {
     mFallbackMap = fallbackMap;
+}
+
+void OMW::Engine::setScriptConsoleMode (bool enabled)
+{
+    mScriptConsoleMode = enabled;
+}
+
+void OMW::Engine::setStartupScript (const std::string& path)
+{
+    mStartupScript = path;
 }

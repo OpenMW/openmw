@@ -1,4 +1,4 @@
-/*
+ /*
 OpenMW - The completely unofficial reimplementation of Morrowind
 Copyright (C) 2008-2010  Nicolay Korslund
 Email: < korslund@gmail.com >
@@ -23,9 +23,8 @@ http://www.gnu.org/licenses/ .
 
 #include "bullet_nif_loader.hpp"
 #include <Ogre.h>
-#include <stdio.h>
+#include <cstdio>
 
-#include <libs/mangle/vfs/servers/ogre_vfs.hpp>
 #include "../nif/nif_file.hpp"
 #include "../nif/node.hpp"
 #include "../nif/data.hpp"
@@ -44,32 +43,15 @@ http://www.gnu.org/licenses/ .
 
 typedef unsigned char ubyte;
 
-using namespace std;
-using namespace Ogre;
-using namespace Nif;
-using namespace Mangle::VFS;
-
 using namespace NifBullet;
+
 
 ManualBulletShapeLoader::~ManualBulletShapeLoader()
 {
-    delete vfs;
 }
 
-Ogre::Matrix3 ManualBulletShapeLoader::getMatrix(Nif::Transformation* tr)
-{
-    Ogre::Matrix3 rot(tr->rotation.v[0].array[0],tr->rotation.v[0].array[1],tr->rotation.v[0].array[2],
-            tr->rotation.v[1].array[0],tr->rotation.v[1].array[1],tr->rotation.v[1].array[2],
-            tr->rotation.v[2].array[0],tr->rotation.v[2].array[1],tr->rotation.v[2].array[2]);
-    return rot;
-}
-Ogre::Vector3 ManualBulletShapeLoader::getVector(Nif::Transformation* tr)
-{
-    Ogre::Vector3 vect3(tr->pos.array[0],tr->pos.array[1],tr->pos.array[2]);
-    return vect3;
-}
 
-btQuaternion ManualBulletShapeLoader::getbtQuat(Ogre::Matrix3 m)
+btQuaternion ManualBulletShapeLoader::getbtQuat(Ogre::Matrix3 &m)
 {
     Ogre::Quaternion oquat(m);
     btQuaternion quat;
@@ -80,10 +62,9 @@ btQuaternion ManualBulletShapeLoader::getbtQuat(Ogre::Matrix3 m)
     return quat;
 }
 
-btVector3 ManualBulletShapeLoader::getbtVector(Nif::Vector v)
+btVector3 ManualBulletShapeLoader::getbtVector(Ogre::Vector3 &v)
 {
-    btVector3 a(v.array[0],v.array[1],v.array[2]);
-    return a;
+    return btVector3(v[0], v[1], v[2]);
 }
 
 void ManualBulletShapeLoader::loadResource(Ogre::Resource *resource)
@@ -91,23 +72,17 @@ void ManualBulletShapeLoader::loadResource(Ogre::Resource *resource)
     cShape = static_cast<BulletShape *>(resource);
     resourceName = cShape->getName();
     cShape->collide = false;
+    mBoundingBox = NULL;
+    cShape->boxTranslation = Ogre::Vector3(0,0,0);
+    cShape->boxRotation = Ogre::Quaternion::IDENTITY;
 
     mTriMesh = new btTriangleMesh();
-
-    if (!vfs) vfs = new OgreVFS(resourceGroup);
-
-    if (!vfs->isFile(resourceName))
-    {
-        warn("File not found.");
-        return;
-    }
 
     // Load the NIF. TODO: Wrap this in a try-catch block once we're out
     // of the early stages of development. Right now we WANT to catch
     // every error as early and intrusively as possible, as it's most
     // likely a sign of incomplete code rather than faulty input.
-    Nif::NIFFile nif(vfs->open(resourceName), resourceName);
-
+    Nif::NIFFile nif(resourceName.substr(0, resourceName.length()-7));
     if (nif.numRecords() < 1)
     {
         warn("Found no records in NIF.");
@@ -120,26 +95,25 @@ void ManualBulletShapeLoader::loadResource(Ogre::Resource *resource)
     assert(r != NULL);
 
     Nif::Node *node = dynamic_cast<Nif::Node*>(r);
-
     if (node == NULL)
     {
         warn("First record in file was not a node, but a " +
-                r->recName.toString() + ". Skipping file.");
+                r->recName + ". Skipping file.");
         return;
     }
 
     bool hasCollisionNode = hasRootCollisionNode(node);
 
     //do a first pass
-    handleNode(node,0,Ogre::Matrix3::IDENTITY,Ogre::Vector3::ZERO,1,hasCollisionNode,false,false);
+    handleNode(node,0,NULL,hasCollisionNode,false,false);
 
     //if collide = false, then it does a second pass which create a shape for raycasting.
     if(cShape->collide == false)
     {
-        handleNode(node,0,Ogre::Matrix3::IDENTITY,Ogre::Vector3::ZERO,1,hasCollisionNode,false,true);
+        handleNode(node,0,NULL,hasCollisionNode,false,true);
     }
 
-    cShape->collide = hasCollisionNode&&cShape->collide;
+    //cShape->collide = hasCollisionNode&&cShape->collide;
 
     struct TriangleMeshShape : public btBvhTriangleMeshShape
     {
@@ -154,9 +128,14 @@ void ManualBulletShapeLoader::loadResource(Ogre::Resource *resource)
             delete m_meshInterface;
         }
     };
+    if(mBoundingBox != NULL)
+       cShape->Shape = mBoundingBox;
 
-    currentShape = new TriangleMeshShape(mTriMesh,true);
-    cShape->Shape = currentShape;
+    else
+    {
+        currentShape = new TriangleMeshShape(mTriMesh,true);
+        cShape->Shape = currentShape;
+    }
 }
 
 bool ManualBulletShapeLoader::hasRootCollisionNode(Nif::Node* node)
@@ -167,9 +146,9 @@ bool ManualBulletShapeLoader::hasRootCollisionNode(Nif::Node* node)
         int n = list.length();
         for (int i=0; i<n; i++)
         {
-            if (list.has(i))
+            if (!list[i].empty())
             {
-                if(hasRootCollisionNode(&list[i])) return true;;
+                if(hasRootCollisionNode(list[i].getPtr())) return true;;
             }
         }
     }
@@ -186,11 +165,19 @@ bool ManualBulletShapeLoader::hasRootCollisionNode(Nif::Node* node)
 }
 
 void ManualBulletShapeLoader::handleNode(Nif::Node *node, int flags,
-    Ogre::Matrix3 parentRot,Ogre::Vector3 parentPos,float parentScale,bool hasCollisionNode,bool isCollisionNode,bool raycastingOnly)
+   const Nif::Transformation *trafo,bool hasCollisionNode,bool isCollisionNode,bool raycastingOnly)
 {
+
     // Accumulate the flags from all the child nodes. This works for all
     // the flags we currently use, at least.
     flags |= node->flags;
+
+    // Marker objects: no collision
+    /// \todo don't do this in the editor
+    if (node->name.find("marker") != std::string::npos)
+    {
+        flags |= 0x800;
+    }
 
     // Check for extra data
     Nif::Extra *e = node;
@@ -206,12 +193,11 @@ void ManualBulletShapeLoader::handleNode(Nif::Node *node, int flags,
             // affecting the entire subtree of this node
             Nif::NiStringExtraData *sd = (Nif::NiStringExtraData*)e;
 
-            if (sd->string == "NCO" && !raycastingOnly)
+            // not sure what the difference between NCO and NCC is, or if there even is one
+            if (sd->string == "NCO" || sd->string == "NCC")
             {
                 // No collision. Use an internal flag setting to mark this.
-                // We ignor this node!
                 flags |= 0x800;
-                return;
             }
             else if (sd->string == "MRK" && !raycastingOnly)
                 // Marker objects. These are only visible in the
@@ -221,18 +207,36 @@ void ManualBulletShapeLoader::handleNode(Nif::Node *node, int flags,
         }
     }
 
-    //transfo of parents node + curent node
-    Ogre::Matrix3 finalRot;
-    Ogre::Vector3 finalPos;
-    float finalScale;
 
-    Nif::Transformation &final = *((Nif::Transformation*)node->trafo);
-    Ogre::Vector3 nodePos = getVector(&final);
-    Ogre::Matrix3 nodeRot = getMatrix(&final);
+    if (trafo)
+    {
 
-    finalPos = nodePos + parentPos;
-    finalRot = parentRot*nodeRot;
-    finalScale = final.scale*parentScale;
+        // Get a non-const reference to the node's data, since we're
+        // overwriting it. TODO: Is this necessary?
+        Nif::Transformation &final = node->trafo;
+
+        // For both position and rotation we have that:
+        // final_vector = old_vector + old_rotation*new_vector*old_scale
+        final.pos = trafo->pos + trafo->rotation*final.pos*trafo->scale;
+
+        // Merge the rotations together
+        final.rotation = trafo->rotation * final.rotation;
+
+        // Scale
+        final.scale *= trafo->scale;
+
+    }
+
+    if(node->hasBounds)
+    {
+
+        
+        btVector3 boxsize = getbtVector((node->boundXYZ));
+        cShape->boxTranslation = node->boundPos;
+        cShape->boxRotation = node->boundRot;
+
+        mBoundingBox = new btBoxShape(boxsize);
+    }
 
 
     // For NiNodes, loop through children
@@ -242,16 +246,16 @@ void ManualBulletShapeLoader::handleNode(Nif::Node *node, int flags,
         int n = list.length();
         for (int i=0; i<n; i++)
         {
-            if (list.has(i))
+            if (!list[i].empty())
             {
-                handleNode(&list[i], flags,finalRot,finalPos,finalScale,hasCollisionNode,isCollisionNode,raycastingOnly);
+                handleNode(list[i].getPtr(), flags,&node->trafo,hasCollisionNode,isCollisionNode,raycastingOnly);
             }
         }
     }
-    else if (node->recType == Nif::RC_NiTriShape && (isCollisionNode || !hasCollisionNode)) 
+    else if (node->recType == Nif::RC_NiTriShape && (isCollisionNode || !hasCollisionNode))
     {
-        cShape->collide = true;
-        handleNiTriShape(dynamic_cast<Nif::NiTriShape*>(node), flags,finalRot,finalPos,parentScale,raycastingOnly);
+        cShape->collide = !(flags&0x800);
+        handleNiTriShape(dynamic_cast<Nif::NiTriShape*>(node), flags,node->trafo.rotation,node->trafo.pos,node->trafo.scale,raycastingOnly);
     }
     else if(node->recType == Nif::RC_RootCollisionNode)
     {
@@ -259,8 +263,8 @@ void ManualBulletShapeLoader::handleNode(Nif::Node *node, int flags,
         int n = list.length();
         for (int i=0; i<n; i++)
         {
-            if (list.has(i))
-                handleNode(&list[i], flags,finalRot,finalPos,finalScale,hasCollisionNode,true,raycastingOnly);
+            if (!list[i].empty())
+                handleNode(list[i].getPtr(), flags,&node->trafo, hasCollisionNode,true,raycastingOnly);
         }
     }
 }
@@ -292,17 +296,16 @@ void ManualBulletShapeLoader::handleNiTriShape(Nif::NiTriShape *shape, int flags
 
     Nif::NiTriShapeData *data = shape->data.getPtr();
 
-    float* vertices = (float*)data->vertices.ptr;
-    unsigned short* triangles = (unsigned short*)data->triangles.ptr;
-
-    for(unsigned int i=0; i < data->triangles.length; i = i+3)
+    const std::vector<Ogre::Vector3> &vertices = data->vertices;
+    const Ogre::Matrix3 &rot = shape->trafo.rotation;
+    const Ogre::Vector3 &pos = shape->trafo.pos;
+    float scale = shape->trafo.scale * parentScale;
+    short* triangles = &data->triangles[0];
+    for(size_t i = 0;i < data->triangles.size();i+=3)
     {
-        Ogre::Vector3 b1(vertices[triangles[i+0]*3]*parentScale,vertices[triangles[i+0]*3+1]*parentScale,vertices[triangles[i+0]*3+2]*parentScale);
-        Ogre::Vector3 b2(vertices[triangles[i+1]*3]*parentScale,vertices[triangles[i+1]*3+1]*parentScale,vertices[triangles[i+1]*3+2]*parentScale);
-        Ogre::Vector3 b3(vertices[triangles[i+2]*3]*parentScale,vertices[triangles[i+2]*3+1]*parentScale,vertices[triangles[i+2]*3+2]*parentScale);
-        b1 = parentRot * b1 + parentPos;
-        b2 = parentRot * b2 + parentPos;
-        b3 = parentRot * b3 + parentPos;
+        Ogre::Vector3 b1 = pos + rot*vertices[triangles[i+0]]*scale;
+        Ogre::Vector3 b2 = pos + rot*vertices[triangles[i+1]]*scale;
+        Ogre::Vector3 b3 = pos + rot*vertices[triangles[i+2]]*scale;
         mTriMesh->addTriangle(btVector3(b1.x,b1.y,b1.z),btVector3(b2.x,b2.y,b2.z),btVector3(b3.x,b3.y,b3.z));
     }
 }

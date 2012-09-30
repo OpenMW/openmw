@@ -1,8 +1,12 @@
 #include "widgets.hpp"
-#include "window_manager.hpp"
-#include "components/esm_store/store.hpp"
 
 #include <boost/lexical_cast.hpp>
+
+#include "components/esm_store/store.hpp"
+
+#include "../mwbase/environment.hpp"
+#include "../mwbase/world.hpp"
+#include "../mwbase/windowmanager.hpp"
 
 #undef min
 #undef max
@@ -27,16 +31,16 @@ void MWGui::Widgets::fixTexturePath(std::string &path)
 /* MWSkill */
 
 MWSkill::MWSkill()
-    : manager(nullptr)
-    , skillId(ESM::Skill::Length)
-    , skillNameWidget(nullptr)
-    , skillValueWidget(nullptr)
+    : mManager(nullptr)
+    , mSkillId(ESM::Skill::Length)
+    , mSkillNameWidget(nullptr)
+    , mSkillValueWidget(nullptr)
 {
 }
 
 void MWSkill::setSkillId(ESM::Skill::SkillEnum skill)
 {
-    skillId = skill;
+    mSkillId = skill;
     updateWidgets();
 }
 
@@ -50,36 +54,36 @@ void MWSkill::setSkillNumber(int skill)
         throw new std::runtime_error("Skill number out of range");
 }
 
-void MWSkill::setSkillValue(const SkillValue& value_)
+void MWSkill::setSkillValue(const SkillValue& value)
 {
-    value = value_;
+    mValue = value;
     updateWidgets();
 }
 
 void MWSkill::updateWidgets()
 {
-    if (skillNameWidget && manager)
+    if (mSkillNameWidget && mManager)
     {
-        if (skillId == ESM::Skill::Length)
+        if (mSkillId == ESM::Skill::Length)
         {
-            static_cast<MyGUI::TextBox*>(skillNameWidget)->setCaption("");
+            static_cast<MyGUI::TextBox*>(mSkillNameWidget)->setCaption("");
         }
         else
         {
-            const std::string &name = manager->getGameSettingString(ESM::Skill::sSkillNameIds[skillId], "");
-            static_cast<MyGUI::TextBox*>(skillNameWidget)->setCaption(name);
+            const std::string &name = mManager->getGameSettingString(ESM::Skill::sSkillNameIds[mSkillId], "");
+            static_cast<MyGUI::TextBox*>(mSkillNameWidget)->setCaption(name);
         }
     }
-    if (skillValueWidget)
+    if (mSkillValueWidget)
     {
-        SkillValue::Type modified = value.getModified(), base = value.getBase();
-        static_cast<MyGUI::TextBox*>(skillValueWidget)->setCaption(boost::lexical_cast<std::string>(modified));
+        SkillValue::Type modified = mValue.getModified(), base = mValue.getBase();
+        static_cast<MyGUI::TextBox*>(mSkillValueWidget)->setCaption(boost::lexical_cast<std::string>(modified));
         if (modified > base)
-            skillValueWidget->_setWidgetState("increased");
+            mSkillValueWidget->_setWidgetState("increased");
         else if (modified < base)
-            skillValueWidget->_setWidgetState("decreased");
+            mSkillValueWidget->_setWidgetState("decreased");
         else
-            skillValueWidget->_setWidgetState("normal");
+            mSkillValueWidget->_setWidgetState("normal");
     }
 }
 
@@ -96,14 +100,14 @@ void MWSkill::initialiseOverride()
 {
     Base::initialiseOverride();
 
-    assignWidget(skillNameWidget, "StatName");
-    assignWidget(skillValueWidget, "StatValue");
+    assignWidget(mSkillNameWidget, "StatName");
+    assignWidget(mSkillValueWidget, "StatValue");
 
     MyGUI::ButtonPtr button;
     assignWidget(button, "StatNameButton");
     if (button)
     {
-        skillNameWidget = button;
+        mSkillNameWidget = button;
         button->eventMouseButtonClick += MyGUI::newDelegate(this, &MWSkill::onClicked);
     }
 
@@ -111,7 +115,7 @@ void MWSkill::initialiseOverride()
     assignWidget(button, "StatValueButton");
     if (button)
     {
-        skillNameWidget = button;
+        mSkillNameWidget = button;
         button->eventMouseButtonClick += MyGUI::newDelegate(this, &MWSkill::onClicked);
     }
 }
@@ -119,22 +123,22 @@ void MWSkill::initialiseOverride()
 /* MWAttribute */
 
 MWAttribute::MWAttribute()
-    : manager(nullptr)
-    , id(-1)
-    , attributeNameWidget(nullptr)
-    , attributeValueWidget(nullptr)
+    : mManager(nullptr)
+    , mId(-1)
+    , mAttributeNameWidget(nullptr)
+    , mAttributeValueWidget(nullptr)
 {
 }
 
 void MWAttribute::setAttributeId(int attributeId)
 {
-    id = attributeId;
+    mId = attributeId;
     updateWidgets();
 }
 
-void MWAttribute::setAttributeValue(const AttributeValue& value_)
+void MWAttribute::setAttributeValue(const AttributeValue& value)
 {
-    value = value_;
+    mValue = value;
     updateWidgets();
 }
 
@@ -145,11 +149,11 @@ void MWAttribute::onClicked(MyGUI::Widget* _sender)
 
 void MWAttribute::updateWidgets()
 {
-    if (attributeNameWidget && manager)
+    if (mAttributeNameWidget && mManager)
     {
-        if (id < 0 || id >= 8)
+        if (mId < 0 || mId >= 8)
         {
-            static_cast<MyGUI::TextBox*>(attributeNameWidget)->setCaption("");
+            static_cast<MyGUI::TextBox*>(mAttributeNameWidget)->setCaption("");
         }
         else
         {
@@ -163,20 +167,20 @@ void MWAttribute::updateWidgets()
                 "sAttributePersonality",
                 "sAttributeLuck"
             };
-            const std::string &name = manager->getGameSettingString(attributes[id], "");
-            static_cast<MyGUI::TextBox*>(attributeNameWidget)->setCaption(name);
+            const std::string &name = mManager->getGameSettingString(attributes[mId], "");
+            static_cast<MyGUI::TextBox*>(mAttributeNameWidget)->setCaption(name);
         }
     }
-    if (attributeValueWidget)
+    if (mAttributeValueWidget)
     {
-        AttributeValue::Type modified = value.getModified(), base = value.getBase();
-        static_cast<MyGUI::TextBox*>(attributeValueWidget)->setCaption(boost::lexical_cast<std::string>(modified));
+        AttributeValue::Type modified = mValue.getModified(), base = mValue.getBase();
+        static_cast<MyGUI::TextBox*>(mAttributeValueWidget)->setCaption(boost::lexical_cast<std::string>(modified));
         if (modified > base)
-            attributeValueWidget->_setWidgetState("increased");
+            mAttributeValueWidget->_setWidgetState("increased");
         else if (modified < base)
-            attributeValueWidget->_setWidgetState("decreased");
+            mAttributeValueWidget->_setWidgetState("decreased");
         else
-            attributeValueWidget->_setWidgetState("normal");
+            mAttributeValueWidget->_setWidgetState("normal");
     }
 }
 
@@ -188,14 +192,14 @@ void MWAttribute::initialiseOverride()
 {
     Base::initialiseOverride();
 
-    assignWidget(attributeNameWidget, "StatName");
-    assignWidget(attributeValueWidget, "StatValue");
-    
+    assignWidget(mAttributeNameWidget, "StatName");
+    assignWidget(mAttributeValueWidget, "StatValue");
+
     MyGUI::ButtonPtr button;
     assignWidget(button, "StatNameButton");
     if (button)
     {
-        attributeNameWidget = button;
+        mAttributeNameWidget = button;
         button->eventMouseButtonClick += MyGUI::newDelegate(this, &MWAttribute::onClicked);
     }
 
@@ -203,7 +207,7 @@ void MWAttribute::initialiseOverride()
     assignWidget(button, "StatValueButton");
     if (button)
     {
-        attributeValueWidget = button;
+        mAttributeValueWidget = button;
         button->eventMouseButtonClick += MyGUI::newDelegate(this, &MWAttribute::onClicked);
     }
 }
@@ -212,21 +216,21 @@ void MWAttribute::initialiseOverride()
 
 MWSpell::MWSpell()
     : mWindowManager(nullptr)
-    , spellNameWidget(nullptr)
+    , mSpellNameWidget(nullptr)
 {
 }
 
 void MWSpell::setSpellId(const std::string &spellId)
 {
-    id = spellId;
+    mId = spellId;
     updateWidgets();
 }
 
 void MWSpell::createEffectWidgets(std::vector<MyGUI::WidgetPtr> &effects, MyGUI::WidgetPtr creator, MyGUI::IntCoord &coord, int flags)
 {
-    const ESMS::ESMStore &store = mWindowManager->getStore();
-    const ESM::Spell *spell = store.spells.search(id);
-    MYGUI_ASSERT(spell, "spell with id '" << id << "' not found");
+    const ESMS::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
+    const ESM::Spell *spell = store.spells.search(mId);
+    MYGUI_ASSERT(spell, "spell with id '" << mId << "' not found");
 
     MWSpellEffectPtr effect = nullptr;
     std::vector<ESM::ENAMstruct>::const_iterator end = spell->effects.list.end();
@@ -253,14 +257,14 @@ void MWSpell::createEffectWidgets(std::vector<MyGUI::WidgetPtr> &effects, MyGUI:
 
 void MWSpell::updateWidgets()
 {
-    if (spellNameWidget && mWindowManager)
+    if (mSpellNameWidget && mWindowManager)
     {
-        const ESMS::ESMStore &store = mWindowManager->getStore();
-        const ESM::Spell *spell = store.spells.search(id);
+        const ESMS::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
+        const ESM::Spell *spell = store.spells.search(mId);
         if (spell)
-            static_cast<MyGUI::TextBox*>(spellNameWidget)->setCaption(spell->name);
+            static_cast<MyGUI::TextBox*>(mSpellNameWidget)->setCaption(spell->name);
         else
-            static_cast<MyGUI::TextBox*>(spellNameWidget)->setCaption("");
+            static_cast<MyGUI::TextBox*>(mSpellNameWidget)->setCaption("");
     }
 }
 
@@ -268,7 +272,7 @@ void MWSpell::initialiseOverride()
 {
     Base::initialiseOverride();
 
-    assignWidget(spellNameWidget, "StatName");
+    assignWidget(mSpellNameWidget, "StatName");
 }
 
 MWSpell::~MWSpell()
@@ -367,8 +371,8 @@ SpellEffectList MWEffectList::effectListFromESM(const ESM::EffectList* effects)
 
 MWSpellEffect::MWSpellEffect()
     : mWindowManager(nullptr)
-    , imageWidget(nullptr)
-    , textWidget(nullptr)
+    , mImageWidget(nullptr)
+    , mTextWidget(nullptr)
     , mRequestedWidth(0)
 {
 }
@@ -384,11 +388,11 @@ void MWSpellEffect::updateWidgets()
     if (!mWindowManager)
         return;
 
-    const ESMS::ESMStore &store = mWindowManager->getStore();
+    const ESMS::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
     const ESM::MagicEffect *magicEffect = store.magicEffects.search(mEffectParams.mEffectID);
     if (!magicEffect)
         return;
-    if (textWidget)
+    if (mTextWidget)
     {
         std::string pt =  mWindowManager->getGameSettingString("spoint", "");
         std::string pts =  mWindowManager->getGameSettingString("spoints", "");
@@ -448,14 +452,14 @@ void MWSpellEffect::updateWidgets()
             }
         }
 
-        static_cast<MyGUI::TextBox*>(textWidget)->setCaption(spellLine);
-        mRequestedWidth = textWidget->getTextSize().width + 24;
+        static_cast<MyGUI::TextBox*>(mTextWidget)->setCaption(spellLine);
+        mRequestedWidth = mTextWidget->getTextSize().width + 24;
     }
-    if (imageWidget)
+    if (mImageWidget)
     {
         std::string path = std::string("icons\\") + magicEffect->icon;
         fixTexturePath(path);
-        imageWidget->setImageTexture(path);
+        mImageWidget->setImageTexture(path);
     }
 }
 
@@ -728,49 +732,49 @@ void MWSpellEffect::initialiseOverride()
 {
     Base::initialiseOverride();
 
-    assignWidget(textWidget, "Text");
-    assignWidget(imageWidget, "Image");
+    assignWidget(mTextWidget, "Text");
+    assignWidget(mImageWidget, "Image");
 }
 
 /* MWDynamicStat */
 
 MWDynamicStat::MWDynamicStat()
-: value(0)
-, max(1)
-, textWidget(nullptr)
-, barWidget(nullptr)
-, barTextWidget(nullptr)
+: mValue(0)
+, mMax(1)
+, mTextWidget(nullptr)
+, mBarWidget(nullptr)
+, mBarTextWidget(nullptr)
 {
 }
 
-void MWDynamicStat::setValue(int cur, int max_)
+void MWDynamicStat::setValue(int cur, int max)
 {
-    value = cur;
-    max = max_;
+    mValue = cur;
+    mMax = max;
 
-    if (barWidget)
+    if (mBarWidget)
     {
-        barWidget->setProgressRange(max);
-        barWidget->setProgressPosition(value);
+        mBarWidget->setProgressRange(mMax);
+        mBarWidget->setProgressPosition(mValue);
     }
 
 
-    if (barTextWidget)
+    if (mBarTextWidget)
     {
-        if (value >= 0 && max > 0)
+        if (mValue >= 0 && mMax > 0)
         {
             std::stringstream out;
-            out << value << "/" << max;
-            static_cast<MyGUI::TextBox*>(barTextWidget)->setCaption(out.str().c_str());
+            out << mValue << "/" << mMax;
+            static_cast<MyGUI::TextBox*>(mBarTextWidget)->setCaption(out.str().c_str());
         }
         else
-            static_cast<MyGUI::TextBox*>(barTextWidget)->setCaption("");
+            static_cast<MyGUI::TextBox*>(mBarTextWidget)->setCaption("");
     }
 }
 void MWDynamicStat::setTitle(const std::string& text)
 {
-    if (textWidget)
-        static_cast<MyGUI::TextBox*>(textWidget)->setCaption(text);
+    if (mTextWidget)
+        static_cast<MyGUI::TextBox*>(mTextWidget)->setCaption(text);
 }
 
 MWDynamicStat::~MWDynamicStat()
@@ -781,7 +785,350 @@ void MWDynamicStat::initialiseOverride()
 {
     Base::initialiseOverride();
 
-    assignWidget(textWidget, "Text");
-    assignWidget(barWidget, "Bar");
-    assignWidget(barTextWidget, "BarText");
+    assignWidget(mTextWidget, "Text");
+    assignWidget(mBarWidget, "Bar");
+    assignWidget(mBarTextWidget, "BarText");
+}
+
+
+
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+void AutoSizedWidget::notifySizeChange (MyGUI::Widget* w)
+{
+    if (w->getParent () != 0)
+    {
+        Box* b = dynamic_cast<Box*>(w->getParent());
+        if (b)
+            b->notifyChildrenSizeChanged ();
+        else
+        {
+            if (mExpandDirection == MyGUI::Align::Left)
+            {
+                int hdiff = getRequestedSize ().width - w->getSize().width;
+                w->setPosition(w->getPosition() - MyGUI::IntPoint(hdiff, 0));
+            }
+            w->setSize(getRequestedSize ());
+        }
+    }
+}
+
+
+MyGUI::IntSize AutoSizedTextBox::getRequestedSize()
+{
+    return getTextSize();
+}
+
+void AutoSizedTextBox::setCaption(const MyGUI::UString& _value)
+{
+    TextBox::setCaption(_value);
+
+    notifySizeChange (this);
+}
+
+void AutoSizedTextBox::setPropertyOverride(const std::string& _key, const std::string& _value)
+{
+    if (_key == "ExpandDirection")
+    {
+        mExpandDirection = MyGUI::Align::parse (_value);
+    }
+    else
+    {
+        TextBox::setPropertyOverride (_key, _value);
+    }
+}
+
+
+MyGUI::IntSize AutoSizedButton::getRequestedSize()
+{
+    MyGUI::IntSize size = getTextSize() + MyGUI::IntSize(24,0);
+    size.height = std::max(24, size.height);
+    return size;
+}
+
+void AutoSizedButton::setCaption(const MyGUI::UString& _value)
+{
+    Button::setCaption(_value);
+
+    notifySizeChange (this);
+}
+
+void AutoSizedButton::setPropertyOverride(const std::string& _key, const std::string& _value)
+{
+    if (_key == "ExpandDirection")
+    {
+        mExpandDirection = MyGUI::Align::parse (_value);
+    }
+    else
+    {
+        Button::setPropertyOverride (_key, _value);
+    }
+}
+
+Box::Box()
+    : mSpacing(4)
+    , mPadding(0)
+    , mAutoResize(false)
+{
+
+}
+
+void Box::notifyChildrenSizeChanged ()
+{
+    align();
+}
+
+void Box::_setPropertyImpl(const std::string& _key, const std::string& _value)
+{
+    if (_key == "Spacing")
+        mSpacing = MyGUI::utility::parseValue<int>(_value);
+    else if (_key == "Padding")
+        mPadding = MyGUI::utility::parseValue<int>(_value);
+    else if (_key == "AutoResize")
+        mAutoResize = MyGUI::utility::parseValue<bool>(_value);
+}
+
+void HBox::align ()
+{
+    unsigned int count = getChildCount ();
+    size_t h_stretched_count = 0;
+    int total_width = 0;
+    int total_height = 0;
+    std::vector< std::pair<MyGUI::IntSize, bool> > sizes;
+
+    for (unsigned int i = 0; i < count; ++i)
+    {
+        MyGUI::Widget* w = getChildAt(i);
+        bool hstretch = w->getUserString ("HStretch") == "true";
+        h_stretched_count += hstretch;
+        AutoSizedWidget* aw = dynamic_cast<AutoSizedWidget*>(w);
+        if (aw)
+        {
+            sizes.push_back(std::make_pair(aw->getRequestedSize (), hstretch));
+            total_width += aw->getRequestedSize ().width;
+            total_height = std::max(total_height, aw->getRequestedSize ().height);
+        }
+        else
+        {
+            sizes.push_back (std::make_pair(w->getSize(), hstretch));
+            total_width += w->getSize().width;
+        }
+
+        if (i != count-1)
+            total_width += mSpacing;
+    }
+
+    if (mAutoResize && (total_width+mPadding*2 != getSize().width || total_height+mPadding*2 != getSize().height))
+    {
+        setSize(MyGUI::IntSize(total_width+mPadding*2, total_height+mPadding*2));
+        return;
+    }
+
+
+    int curX = 0;
+    for (unsigned int i = 0; i < count; ++i)
+    {
+        if (i == 0)
+            curX += mPadding;
+
+        MyGUI::Widget* w = getChildAt(i);
+
+        bool vstretch = w->getUserString ("VStretch") == "true";
+        int height = vstretch ? total_height : sizes[i].first.height;
+
+        MyGUI::IntCoord widgetCoord;
+        widgetCoord.left = curX;
+        widgetCoord.top = mPadding + (getSize().height-mPadding*2 - height) / 2;
+        int width = sizes[i].second ? sizes[i].first.width + (getSize().width-mPadding*2 - total_width)/h_stretched_count
+                                    : sizes[i].first.width;
+        widgetCoord.width = width;
+        widgetCoord.height = height;
+        w->setCoord(widgetCoord);
+        curX += width;
+
+        if (i != count-1)
+            curX += mSpacing;
+    }
+}
+
+void HBox::setPropertyOverride(const std::string& _key, const std::string& _value)
+{
+    Box::_setPropertyImpl (_key, _value);
+}
+
+void HBox::setSize (const MyGUI::IntSize& _value)
+{
+    MyGUI::Widget::setSize (_value);
+    align();
+}
+
+void HBox::setCoord (const MyGUI::IntCoord& _value)
+{
+    MyGUI::Widget::setCoord (_value);
+    align();
+}
+
+void HBox::onWidgetCreated(MyGUI::Widget* _widget)
+{
+    align();
+}
+
+void HBox::onWidgetDestroy(MyGUI::Widget* _widget)
+{
+    align();
+}
+
+MyGUI::IntSize HBox::getRequestedSize ()
+{
+    MyGUI::IntSize size(0,0);
+    for (unsigned int i = 0; i < getChildCount (); ++i)
+    {
+        AutoSizedWidget* w = dynamic_cast<AutoSizedWidget*>(getChildAt(i));
+        if (w)
+        {
+            MyGUI::IntSize requested = w->getRequestedSize ();
+            size.height = std::max(size.height, requested.height);
+            size.width = size.width + requested.width;
+            if (i != getChildCount()-1)
+                size.width += mSpacing;
+        }
+        else
+        {
+            MyGUI::IntSize requested = getChildAt(i)->getSize ();
+            size.height = std::max(size.height, requested.height);
+
+            if (getChildAt(i)->getUserString("HStretch") != "true")
+                size.width = size.width + requested.width;
+
+            if (i != getChildCount()-1)
+                size.width += mSpacing;
+        }
+        size.height += mPadding*2;
+        size.width += mPadding*2;
+    }
+    return size;
+}
+
+
+
+
+void VBox::align ()
+{
+    unsigned int count = getChildCount ();
+    size_t v_stretched_count = 0;
+    int total_height = 0;
+    int total_width = 0;
+    std::vector< std::pair<MyGUI::IntSize, bool> > sizes;
+    for (unsigned int i = 0; i < count; ++i)
+    {
+        MyGUI::Widget* w = getChildAt(i);
+        bool vstretch = w->getUserString ("VStretch") == "true";
+        v_stretched_count += vstretch;
+        AutoSizedWidget* aw = dynamic_cast<AutoSizedWidget*>(w);
+        if (aw)
+        {
+            sizes.push_back(std::make_pair(aw->getRequestedSize (), vstretch));
+            total_height += aw->getRequestedSize ().height;
+            total_width = std::max(total_width, aw->getRequestedSize ().width);
+        }
+        else
+        {
+            sizes.push_back (std::make_pair(w->getSize(), vstretch));
+            total_height += w->getSize().height;
+        }
+
+        if (i != count-1)
+            total_height += mSpacing;
+    }
+
+    if (mAutoResize && (total_width+mPadding*2 != getSize().width || total_height+mPadding*2 != getSize().height))
+    {
+        setSize(MyGUI::IntSize(total_width+mPadding*2, total_height+mPadding*2));
+        return;
+    }
+
+
+    int curY = 0;
+    for (unsigned int i = 0; i < count; ++i)
+    {
+        if (i==0)
+            curY += mPadding;
+
+        MyGUI::Widget* w = getChildAt(i);
+
+        bool hstretch = w->getUserString ("HStretch") == "true";
+        int width = hstretch ? total_width : sizes[i].first.width;
+
+        MyGUI::IntCoord widgetCoord;
+        widgetCoord.top = curY;
+        widgetCoord.left = mPadding + (getSize().width-mPadding*2 - width) / 2;
+        int height = sizes[i].second ? sizes[i].first.height + (getSize().height-mPadding*2 - total_height)/v_stretched_count
+                                    : sizes[i].first.height;
+        widgetCoord.height = height;
+        widgetCoord.width = width;
+        w->setCoord(widgetCoord);
+        curY += height;
+
+        if (i != count-1)
+            curY += mSpacing;
+    }
+}
+
+void VBox::setPropertyOverride(const std::string& _key, const std::string& _value)
+{
+    Box::_setPropertyImpl (_key, _value);
+}
+
+void VBox::setSize (const MyGUI::IntSize& _value)
+{
+    MyGUI::Widget::setSize (_value);
+    align();
+}
+
+void VBox::setCoord (const MyGUI::IntCoord& _value)
+{
+    MyGUI::Widget::setCoord (_value);
+    align();
+}
+
+MyGUI::IntSize VBox::getRequestedSize ()
+{
+    MyGUI::IntSize size(0,0);
+    for (unsigned int i = 0; i < getChildCount (); ++i)
+    {
+        AutoSizedWidget* w = dynamic_cast<AutoSizedWidget*>(getChildAt(i));
+        if (w)
+        {
+            MyGUI::IntSize requested = w->getRequestedSize ();
+            size.width = std::max(size.width, requested.width);
+            size.height = size.height + requested.height;
+            if (i != getChildCount()-1)
+                size.height += mSpacing;
+        }
+        else
+        {
+            MyGUI::IntSize requested = getChildAt(i)->getSize ();
+            size.width = std::max(size.width, requested.width);
+
+            if (getChildAt(i)->getUserString("VStretch") != "true")
+                size.height = size.height + requested.height;
+
+            if (i != getChildCount()-1)
+                size.height += mSpacing;
+        }
+        size.height += mPadding*2;
+        size.width += mPadding*2;
+    }
+    return size;
+}
+
+void VBox::onWidgetCreated(MyGUI::Widget* _widget)
+{
+    align();
+}
+
+void VBox::onWidgetDestroy(MyGUI::Widget* _widget)
+{
+    align();
 }

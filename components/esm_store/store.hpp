@@ -30,11 +30,11 @@ namespace ESMS
 
     // Each individual list
     RecListT<Activator>         activators;
-    RecListT<Potion>            potions;
+    RecListWithIDT<Potion>      potions;
     RecListT<Apparatus>         appas;
     RecListT<Armor>             armors;
     RecListT<BodyPart>          bodyParts;
-    RecListT<Book>              books;
+    RecListWithIDT<Book>        books;
     RecListT<BirthSign>         birthSigns;
     RecListT<Class>             classes;
     RecListT<Clothing>          clothes;
@@ -47,7 +47,7 @@ namespace ESMS
     RecListT<Enchantment>       enchants;
     RecListT<Faction>           factions;
     RecListT<Global>            globals;
-    RecListT<Ingredient>        ingreds;
+    RecListWithIDT<Ingredient>  ingreds;
     RecListT<CreatureLevList>   creatureLists;
     RecListT<ItemLevList>       itemLists;
     RecListT<Light>             lights;

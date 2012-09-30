@@ -1,9 +1,7 @@
 #ifndef GAME_MWWORLD_PHYSICSSYSTEM_H
 #define GAME_MWWORLD_PHYSICSSYSTEM_H
 
-#include <vector>
 #include <openengine/ogre/renderer.hpp>
-#include <openengine/bullet/physic.hpp>
 #include "ptr.hpp"
 #include <openengine/bullet/pmove.h>
 
@@ -26,7 +24,7 @@ namespace MWWorld
                 const Ogre::Quaternion& rotation, float scale, const Ogre::Vector3& position);
 
             void addActor (const std::string& handle, const std::string& mesh,
-                const Ogre::Vector3& position);
+                const Ogre::Vector3& position, float scale, const Ogre::Quaternion& rotation);
 
             void addHeightField (float* heights,
                 int x, int y, float yoffset,
@@ -36,11 +34,11 @@ namespace MWWorld
 
             void removeObject (const std::string& handle);
 
-            void moveObject (const std::string& handle, const Ogre::Vector3& position);
+            void moveObject (const std::string& handle, Ogre::SceneNode* node);
 
-            void rotateObject (const std::string& handle, const Ogre::Quaternion& rotation);
+            void rotateObject (const std::string& handle, Ogre::SceneNode* node);
 
-            void scaleObject (const std::string& handle, float scale);
+            void scaleObject (const std::string& handle, Ogre::SceneNode* node);
 
             bool toggleCollisionMode();
             
@@ -56,6 +54,9 @@ namespace MWWorld
             // cast ray, return true if it hit something
             bool castRay(const Ogre::Vector3& from, const Ogre::Vector3& to);
 
+            std::pair<bool, Ogre::Vector3>
+            castRay(const Ogre::Vector3 &orig, const Ogre::Vector3 &dir, float len);
+
             std::pair<bool, Ogre::Vector3> castRay(float mouseX, float mouseY);
             ///< cast ray from the mouse, return true if it hit something and the first result (in OGRE coordinates)
 
@@ -67,16 +68,25 @@ namespace MWWorld
 
             void setCurrentWater(bool hasWater, int waterHeight);
 
+            bool getObjectAABB(const MWWorld::Ptr &ptr, Ogre::Vector3 &min, Ogre::Vector3 &max);
+
+            void updatePlayerData(Ogre::Vector3 &eyepos, float pitch, float yaw);
+
         private:
+            struct {
+                Ogre::Vector3 eyepos;
+                float pitch, yaw;
+            } mPlayerData;
+
             OEngine::Render::OgreRenderer &mRender;
             OEngine::Physic::PhysicEngine* mEngine;
             bool mFreeFly;
             playerMove* playerphysics;
+            std::map<std::string, std::string> handleToMesh;
 
             PhysicsSystem (const PhysicsSystem&);
             PhysicsSystem& operator= (const PhysicsSystem&);
     };
-
 }
 
 #endif

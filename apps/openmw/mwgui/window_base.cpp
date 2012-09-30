@@ -1,17 +1,14 @@
 #include "window_base.hpp"
-#include "window_manager.hpp"
 
 #include <components/settings/settings.hpp>
 
+#include "../mwbase/windowmanager.hpp"
+
 using namespace MWGui;
 
-WindowBase::WindowBase(const std::string& parLayout, WindowManager& parWindowManager)
+WindowBase::WindowBase(const std::string& parLayout, MWBase::WindowManager& parWindowManager)
   : Layout(parLayout)
   , mWindowManager(parWindowManager)
-{
-}
-
-void WindowBase::open()
 {
 }
 
@@ -20,8 +17,10 @@ void WindowBase::setVisible(bool visible)
     bool wasVisible = mMainWidget->getVisible();
     mMainWidget->setVisible(visible);
 
-    if (!wasVisible && visible)
+    if (visible)
         open();
+    else if (wasVisible && !visible)
+        close();
 }
 
 void WindowBase::center()
@@ -38,4 +37,19 @@ void WindowBase::center()
     coord.left = (gameWindowSize.width - coord.width)/2;
     coord.top = (gameWindowSize.height - coord.height)/2;
     mMainWidget->setCoord(coord);
+}
+
+WindowModal::WindowModal(const std::string& parLayout, MWBase::WindowManager& parWindowManager)
+    : WindowBase(parLayout, parWindowManager)
+{
+}
+
+void WindowModal::open()
+{
+    MyGUI::InputManager::getInstance ().addWidgetModal (mMainWidget);
+}
+
+void WindowModal::close()
+{
+    MyGUI::InputManager::getInstance ().removeWidgetModal (mMainWidget);
 }

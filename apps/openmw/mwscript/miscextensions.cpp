@@ -1,6 +1,8 @@
 
 #include "miscextensions.hpp"
 
+#include <libs/openengine/ogre/fader.hpp>
+
 #include <components/compiler/extensions.hpp>
 
 #include <components/interpreter/interpreter.hpp>
@@ -8,6 +10,7 @@
 #include <components/interpreter/opcodes.hpp>
 
 #include "../mwbase/environment.hpp"
+#include "../mwbase/windowmanager.hpp"
 
 #include "../mwworld/class.hpp"
 
@@ -18,6 +21,26 @@ namespace MWScript
 {
     namespace Misc
     {
+        class OpGetPcSleep : public Interpreter::Opcode0
+        {
+        public:
+
+            virtual void execute (Interpreter::Runtime& runtime)
+            {
+                runtime.push (MWBase::Environment::get().getWindowManager ()->getPlayerSleeping());
+            }
+        };
+
+        class OpWakeUpPc : public Interpreter::Opcode0
+        {
+        public:
+
+            virtual void execute (Interpreter::Runtime& runtime)
+            {
+                MWBase::Environment::get().getWindowManager ()->wakeUpPlayer();
+            }
+        };
+
         class OpXBox : public Interpreter::Opcode0
         {
             public:
@@ -102,7 +125,7 @@ namespace MWScript
                         static_cast<InterpreterContext&> (runtime.getContext());
 
                     bool enabled =
-                        MWBase::Environment::get().getWorld()->toggleRenderMode (MWWorld::World::Render_CollisionDebug);
+                        MWBase::Environment::get().getWorld()->toggleRenderMode (MWBase::World::Render_CollisionDebug);
 
                     context.report (enabled ?
                         "Collision Mesh Rendering -> On" : "Collision Mesh Rendering -> Off");
@@ -119,7 +142,7 @@ namespace MWScript
                         static_cast<InterpreterContext&> (runtime.getContext());
 
                     bool enabled =
-                        MWBase::Environment::get().getWorld()->toggleRenderMode (MWWorld::World::Render_Wireframe);
+                        MWBase::Environment::get().getWorld()->toggleRenderMode (MWBase::World::Render_Wireframe);
 
                     context.report (enabled ?
                         "Wireframe Rendering -> On" : "Wireframe Rendering -> Off");
@@ -135,7 +158,7 @@ namespace MWScript
                     static_cast<InterpreterContext&> (runtime.getContext());
 
                 bool enabled =
-                    MWBase::Environment::get().getWorld()->toggleRenderMode (MWWorld::World::Render_Pathgrid);
+                    MWBase::Environment::get().getWorld()->toggleRenderMode (MWBase::World::Render_Pathgrid);
 
                 context.report (enabled ?
                     "Path Grid rendering -> On" : "Path Grid Rendering -> Off");
@@ -205,6 +228,32 @@ namespace MWScript
                 }
         };
 
+        class OpToggleVanityMode : public Interpreter::Opcode0
+        {
+            static bool sActivate;
+
+        public:
+        
+            virtual void execute(Interpreter::Runtime &runtime)
+            {
+                InterpreterContext& context =
+                    static_cast<InterpreterContext&> (runtime.getContext());
+
+                MWBase::World *world =
+                    MWBase::Environment::get().getWorld();
+
+                if (world->toggleVanityMode(sActivate, true)) {
+                    context.report(
+                        (sActivate) ? "Vanity Mode -> On" : "Vanity Mode -> Off"
+                    );
+                    sActivate = !sActivate;
+                } else {
+                    context.report("Vanity Mode -> No");
+                }
+            }
+        };
+        bool OpToggleVanityMode::sActivate = true;
+
         const int opcodeXBox = 0x200000c;
         const int opcodeOnActivate = 0x200000d;
         const int opcodeActivate = 0x2000075;
@@ -220,6 +269,9 @@ namespace MWScript
         const int opcodeToggleWater = 0x2000144;
         const int opcodeTogglePathgrid = 0x2000146;
         const int opcodeDontSaveObject = 0x2000153;
+        const int opcodeToggleVanityMode = 0x2000174;
+        const int opcodeGetPcSleep = 0x200019f;
+        const int opcodeWakeUpPc = 0x20001a2;
 
         void registerExtensions (Compiler::Extensions& extensions)
         {
@@ -242,6 +294,10 @@ namespace MWScript
             extensions.registerInstruction ("togglepathgrid", "", opcodeTogglePathgrid);
             extensions.registerInstruction ("tpg", "", opcodeTogglePathgrid);
             extensions.registerInstruction ("dontsaveobject", "", opcodeDontSaveObject);
+            extensions.registerInstruction ("togglevanitymode", "", opcodeToggleVanityMode);
+            extensions.registerInstruction ("tvm", "", opcodeToggleVanityMode);
+            extensions.registerFunction ("getpcsleep", 'l', "", opcodeGetPcSleep);
+            extensions.registerInstruction ("wakeuppc", "", opcodeWakeUpPc);
         }
 
         void installOpcodes (Interpreter::Interpreter& interpreter)
@@ -261,6 +317,9 @@ namespace MWScript
             interpreter.installSegment5 (opcodeTogglePathgrid, new OpTogglePathgrid);
             interpreter.installSegment5 (opcodeToggleWater, new OpToggleWater);
             interpreter.installSegment5 (opcodeDontSaveObject, new OpDontSaveObject);
+            interpreter.installSegment5 (opcodeToggleVanityMode, new OpToggleVanityMode);
+            interpreter.installSegment5 (opcodeGetPcSleep, new OpGetPcSleep);
+            interpreter.installSegment5 (opcodeWakeUpPc, new OpWakeUpPc);
         }
     }
 }

@@ -3,22 +3,23 @@
 #include <cmath>
 #include <algorithm>
 #include <iterator>
-#include <assert.h>
+#include <cassert>
 #include <iostream>
 
 #include <boost/lexical_cast.hpp>
 
 #include "../mwbase/environment.hpp"
+#include "../mwbase/world.hpp"
+#include "../mwbase/soundmanager.hpp"
+#include "../mwbase/windowmanager.hpp"
+
 #include "../mwworld/manualref.hpp"
-#include "../mwworld/world.hpp"
 #include "../mwworld/containerstore.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/player.hpp"
-#include "../mwclass/container.hpp"
-#include "../mwinput/inputmanager.hpp"
-#include "../mwsound/soundmanager.hpp"
 
-#include "window_manager.hpp"
+#include "../mwclass/container.hpp"
+
 #include "widgets.hpp"
 #include "countdialog.hpp"
 #include "tradewindow.hpp"
@@ -75,7 +76,7 @@ ContainerBase::ContainerBase(DragAndDrop* dragAndDrop) :
 {
 }
 
-void ContainerBase::setWidgets(Widget* containerWidget, ScrollView* itemView)
+void ContainerBase::setWidgets(MyGUI::Widget* containerWidget, MyGUI::ScrollView* itemView)
 {
     mContainerWidget = containerWidget;
     mItemView = itemView;
@@ -109,7 +110,7 @@ void ContainerBase::onSelectedItem(MyGUI::Widget* _sender)
             }
             else
             {
-                std::string message = MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sTake")->str;
+                std::string message = "#{sTake}";
                 CountDialog* dialog = MWBase::Environment::get().getWindowManager()->getCountDialog();
                 dialog->open(MWWorld::Class::get(object).getName(object), message, count);
                 dialog->eventOkClicked.clear();
@@ -129,18 +130,17 @@ void ContainerBase::onSelectedItem(MyGUI::Widget* _sender)
             // the player is trying to sell an item, check if the merchant accepts it
             // also, don't allow selling gold (let's be better than Morrowind at this, can we?)
             if (!MWBase::Environment::get().getWindowManager()->getTradeWindow()->npcAcceptsItem(object)
-                || MWWorld::Class::get(object).getName(object) == MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sGold")->str)
+                    || MWWorld::Class::get(object).getName(object) == MWBase::Environment::get().getWorld()->getStore().gameSettings.find("sGold")->getString())
             {
                 // user notification "i don't buy this item"
                 MWBase::Environment::get().getWindowManager()->
-                    messageBox(MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sBarterDialog4")->str, std::vector<std::string>());
+                        messageBox("#{sBarterDialog4}", std::vector<std::string>());
                 return;
             }
         }
 
         bool buying = isTradeWindow(); // buying or selling?
-        std::string message = buying ? MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sQuanityMenuMessage02")->str
-                :  MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sQuanityMenuMessage01")->str;
+        std::string message = buying ? "#{sQuanityMenuMessage02}" : "#{sQuanityMenuMessage01}";
 
         if (std::find(mBoughtItems.begin(), mBoughtItems.end(), object) != mBoughtItems.end())
         {
@@ -273,12 +273,12 @@ void ContainerBase::onContainerClicked(MyGUI::Widget* _sender)
             // check the container's Organic flag (if this is a container). container with Organic flag doesn't allow putting items inside
             if (mPtr.getTypeName() == typeid(ESM::Container).name())
             {
-                ESMS::LiveCellRef<ESM::Container, MWWorld::RefData>* ref = mPtr.get<ESM::Container>();
+                MWWorld::LiveCellRef<ESM::Container>* ref = mPtr.get<ESM::Container>();
                 if (ref->base->flags & ESM::Container::Organic)
                 {
                     // user notification
                     MWBase::Environment::get().getWindowManager()->
-                        messageBox(MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sContentsMessage2")->str, std::vector<std::string>());
+                        messageBox("#{sContentsMessage2}", std::vector<std::string>());
                     return;
                 }
             }
@@ -301,7 +301,7 @@ void ContainerBase::onContainerClicked(MyGUI::Widget* _sender)
                     object.getRefData().setCount(origCount);
                     // user notification
                     MWBase::Environment::get().getWindowManager()->
-                        messageBox(MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sContentsMessage3")->str, std::vector<std::string>());
+                        messageBox("#{sContentsMessage3}", std::vector<std::string>());
                     return;
                 }
                 else
@@ -362,7 +362,7 @@ void ContainerBase::drawItems()
     int maxHeight = mItemView->getSize().height - 58;
 
     bool onlyMagic = false;
-    int categories;
+    int categories = 0;
     if (mFilter == Filter_All)
         categories = MWWorld::ContainerStore::Type_All;
     else if (mFilter == Filter_Weapon)
@@ -470,7 +470,7 @@ void ContainerBase::drawItems()
 
             // background widget (for the "equipped" frame and magic item background image)
             bool isMagic = (MWWorld::Class::get(*iter).getEnchantment(*iter) != "");
-            MyGUI::ImageBox* backgroundWidget = mContainerWidget->createWidget<ImageBox>("ImageBox", MyGUI::IntCoord(x, y, 42, 42), MyGUI::Align::Default);
+            MyGUI::ImageBox* backgroundWidget = mContainerWidget->createWidget<MyGUI::ImageBox>("ImageBox", MyGUI::IntCoord(x, y, 42, 42), MyGUI::Align::Default);
             backgroundWidget->setUserString("ToolTipType", "ItemPtr");
             backgroundWidget->setUserData(*iter);
 
@@ -502,7 +502,7 @@ void ContainerBase::drawItems()
             backgroundWidget->eventMouseWheel += MyGUI::newDelegate(this, &ContainerBase::onMouseWheel);
 
             // image
-            ImageBox* image = backgroundWidget->createWidget<ImageBox>("ImageBox", MyGUI::IntCoord(5, 5, 32, 32), MyGUI::Align::Default);
+            MyGUI::ImageBox* image = backgroundWidget->createWidget<MyGUI::ImageBox>("ImageBox", MyGUI::IntCoord(5, 5, 32, 32), MyGUI::Align::Default);
             int pos = path.rfind(".");
             path.erase(pos);
             path.append(".dds");
@@ -556,7 +556,7 @@ void ContainerBase::addItem(MWWorld::Ptr item, int count)
 {
     MWWorld::ContainerStore& containerStore = MWWorld::Class::get(mPtr).getContainerStore(mPtr);
 
-    int origCount = item.getRefData().getCount();    
+    int origCount = item.getRefData().getCount();
 
     item.getRefData().setCount(count);
     MWWorld::ContainerStoreIterator it = containerStore.add(item);
@@ -590,9 +590,9 @@ MWWorld::ContainerStore& ContainerBase::getContainerStore()
 
 // ------------------------------------------------------------------------------------------------
 
-ContainerWindow::ContainerWindow(WindowManager& parWindowManager,DragAndDrop* dragAndDrop)
+ContainerWindow::ContainerWindow(MWBase::WindowManager& parWindowManager,DragAndDrop* dragAndDrop)
     : ContainerBase(dragAndDrop)
-    , WindowBase("openmw_container_window_layout.xml", parWindowManager)
+    , WindowBase("openmw_container_window.layout", parWindowManager)
 {
     getWidget(mTakeButton, "TakeButton");
     getWidget(mCloseButton, "CloseButton");
@@ -606,18 +606,9 @@ ContainerWindow::ContainerWindow(WindowManager& parWindowManager,DragAndDrop* dr
     mCloseButton->eventMouseButtonClick += MyGUI::newDelegate(this, &ContainerWindow::onCloseButtonClicked);
     mTakeButton->eventMouseButtonClick += MyGUI::newDelegate(this, &ContainerWindow::onTakeAllButtonClicked);
 
-    // adjust buttons size to fit text
-    int closeButtonWidth = mCloseButton->getTextSize().width+24;
-    int takeButtonWidth = mTakeButton->getTextSize().width+24;
-    mCloseButton->setCoord(600-20-closeButtonWidth, mCloseButton->getCoord().top, closeButtonWidth, mCloseButton->getCoord().height);
-    mTakeButton->setCoord(600-20-closeButtonWidth-takeButtonWidth-8, mTakeButton->getCoord().top, takeButtonWidth, mTakeButton->getCoord().height);
-
-    int w = MyGUI::RenderManager::getInstance().getViewSize().width;
-    //int h = MyGUI::RenderManager::getInstance().getViewSize().height;
-
     static_cast<MyGUI::Window*>(mMainWidget)->eventWindowChangeCoord += MyGUI::newDelegate(this, &ContainerWindow::onWindowResize);
 
-    setCoord(w-600,0,600,300);
+    setCoord(200,0,600,300);
 }
 
 ContainerWindow::~ContainerWindow()

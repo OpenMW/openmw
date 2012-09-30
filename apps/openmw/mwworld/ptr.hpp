@@ -1,15 +1,9 @@
 #ifndef GAME_MWWORLD_PTR_H
 #define GAME_MWWORLD_PTR_H
 
-#include <cassert>
-
 #include <boost/any.hpp>
 
-#include <components/esm/loadcell.hpp>
-
-#include <components/esm_store/cell_store.hpp>
-
-#include "refdata.hpp"
+#include "cellstore.hpp"
 
 namespace MWWorld
 {
@@ -21,7 +15,8 @@ namespace MWWorld
     {
         public:
 
-            typedef ESMS::CellStore<RefData> CellStore;
+            typedef MWWorld::CellStore CellStore;
+            ///< \deprecated
 
             boost::any mPtr;
             ESM::CellRef *mCellRef;
@@ -51,7 +46,7 @@ namespace MWWorld
             }
 
             template<typename T>
-            Ptr (ESMS::LiveCellRef<T, RefData> *liveCellRef, CellStore *cell)
+            Ptr (MWWorld::LiveCellRef<T> *liveCellRef, CellStore *cell)
             : mContainerStore (0)
             {
                 mPtr = liveCellRef;
@@ -62,9 +57,9 @@ namespace MWWorld
             }
 
             template<typename T>
-            ESMS::LiveCellRef<T, RefData> *get() const
+            MWWorld::LiveCellRef<T> *get() const
             {
-                return boost::any_cast<ESMS::LiveCellRef<T, RefData>*> (mPtr);
+                return boost::any_cast<MWWorld::LiveCellRef<T>*> (mPtr);
             }
 
             ESM::CellRef& getCellRef() const;

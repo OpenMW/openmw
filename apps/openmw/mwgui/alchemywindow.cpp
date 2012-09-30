@@ -3,13 +3,13 @@
 #include <boost/algorithm/string.hpp>
 
 #include "../mwbase/environment.hpp"
-#include "../mwworld/world.hpp"
+#include "../mwbase/world.hpp"
+#include "../mwbase/soundmanager.hpp"
+#include "../mwbase/windowmanager.hpp"
+
 #include "../mwworld/player.hpp"
 #include "../mwworld/manualref.hpp"
 #include "../mwworld/containerstore.hpp"
-#include "../mwsound/soundmanager.hpp"
-
-#include "window_manager.hpp"
 
 namespace
 {
@@ -26,8 +26,8 @@ namespace
 
 namespace MWGui
 {
-    AlchemyWindow::AlchemyWindow(WindowManager& parWindowManager)
-        : WindowBase("openmw_alchemy_window_layout.xml", parWindowManager)
+    AlchemyWindow::AlchemyWindow(MWBase::WindowManager& parWindowManager)
+        : WindowBase("openmw_alchemy_window.layout", parWindowManager)
         , ContainerBase(0)
     {
         getWidget(mCreateButton, "CreateButton");
@@ -47,14 +47,6 @@ namespace MWGui
         mIngredient2->eventMouseButtonClick += MyGUI::newDelegate(this, &AlchemyWindow::onIngredientSelected);
         mIngredient3->eventMouseButtonClick += MyGUI::newDelegate(this, &AlchemyWindow::onIngredientSelected);
         mIngredient4->eventMouseButtonClick += MyGUI::newDelegate(this, &AlchemyWindow::onIngredientSelected);
-
-        MyGUI::Widget* buttonBox = mCancelButton->getParent();
-        int cancelButtonWidth = mCancelButton->getTextSize().width + 24;
-        mCancelButton->setCoord(buttonBox->getWidth() - cancelButtonWidth,
-                                mCancelButton->getTop(), cancelButtonWidth, mCancelButton->getHeight());
-        int createButtonWidth = mCreateButton->getTextSize().width + 24;
-        mCreateButton->setCoord(buttonBox->getWidth() - createButtonWidth - cancelButtonWidth - 4,
-                                mCreateButton->getTop(), createButtonWidth, mCreateButton->getHeight());
 
         mCreateButton->eventMouseButtonClick += MyGUI::newDelegate(this, &AlchemyWindow::onCreateButtonClicked);
         mCancelButton->eventMouseButtonClick += MyGUI::newDelegate(this, &AlchemyWindow::onCancelButtonClicked);
@@ -275,7 +267,7 @@ namespace MWGui
         for (MWWorld::ContainerStoreIterator it(store.begin(MWWorld::ContainerStore::Type_Apparatus));
             it != store.end(); ++it)
         {
-            ESMS::LiveCellRef<ESM::Apparatus, MWWorld::RefData>* ref = it->get<ESM::Apparatus>();
+            MWWorld::LiveCellRef<ESM::Apparatus>* ref = it->get<ESM::Apparatus>();
             if (ref->base->data.type == ESM::Apparatus::Albemic
             && (bestAlbemic.isEmpty() || ref->base->data.quality > bestAlbemic.get<ESM::Apparatus>()->base->data.quality))
                 bestAlbemic = *it;
@@ -420,7 +412,7 @@ namespace MWGui
                 continue;
 
             // add the effects of this ingredient to list of effects
-            ESMS::LiveCellRef<ESM::Ingredient, MWWorld::RefData>* ref = ingredient->getUserData<MWWorld::Ptr>()->get<ESM::Ingredient>();
+            MWWorld::LiveCellRef<ESM::Ingredient>* ref = ingredient->getUserData<MWWorld::Ptr>()->get<ESM::Ingredient>();
             for (int i=0; i<4; ++i)
             {
                 if (ref->base->data.effectID[i] < 0)
@@ -493,7 +485,7 @@ namespace MWGui
 
         MyGUI::IntCoord coord(0, 0, mEffectsBox->getWidth(), 24);
         Widgets::MWEffectListPtr effectsWidget = mEffectsBox->createWidget<Widgets::MWEffectList>
-            ("MW_StatName", coord, Align::Left | Align::Top);
+            ("MW_StatName", coord, MyGUI::Align::Left | MyGUI::Align::Top);
         effectsWidget->setWindowManager(&mWindowManager);
         effectsWidget->setEffectList(effects);
 

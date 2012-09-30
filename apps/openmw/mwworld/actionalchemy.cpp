@@ -1,11 +1,11 @@
 #include "actionalchemy.hpp"
 
 #include "../mwbase/environment.hpp"
-#include "../mwgui/window_manager.hpp"
+#include "../mwbase/windowmanager.hpp"
 
 namespace MWWorld
 {
-    void ActionAlchemy::execute()
+    void ActionAlchemy::executeImp (const Ptr& actor)
     {
         MWBase::Environment::get().getWindowManager()->pushGuiMode(MWGui::GM_Alchemy);
     }

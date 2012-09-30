@@ -7,7 +7,10 @@
 
 #include <components/esm_store/store.hpp>
 
-#include "window_manager.hpp"
+#include "../mwbase/environment.hpp"
+#include "../mwbase/world.hpp"
+#include "../mwbase/windowmanager.hpp"
+
 #include "widgets.hpp"
 #include "tooltips.hpp"
 
@@ -17,49 +20,49 @@
 using namespace MWGui;
 using namespace Widgets;
 
-const int ReviewDialog::lineHeight = 18;
+const int ReviewDialog::sLineHeight = 18;
 
-ReviewDialog::ReviewDialog(WindowManager& parWindowManager)
-    : WindowBase("openmw_chargen_review_layout.xml", parWindowManager)
-    , lastPos(0)
+ReviewDialog::ReviewDialog(MWBase::WindowManager& parWindowManager)
+    : WindowBase("openmw_chargen_review.layout", parWindowManager)
+    , mLastPos(0)
 {
     // Centre dialog
     center();
 
     // Setup static stats
-    ButtonPtr button;
-    getWidget(nameWidget, "NameText");
+    MyGUI::Button* button;
+    getWidget(mNameWidget, "NameText");
     getWidget(button, "NameButton");
     adjustButtonSize(button);
     button->eventMouseButtonClick += MyGUI::newDelegate(this, &ReviewDialog::onNameClicked);;
 
-    getWidget(raceWidget, "RaceText");
+    getWidget(mRaceWidget, "RaceText");
     getWidget(button, "RaceButton");
     adjustButtonSize(button);
     button->eventMouseButtonClick += MyGUI::newDelegate(this, &ReviewDialog::onRaceClicked);;
 
-    getWidget(classWidget, "ClassText");
+    getWidget(mClassWidget, "ClassText");
     getWidget(button, "ClassButton");
     adjustButtonSize(button);
     button->eventMouseButtonClick += MyGUI::newDelegate(this, &ReviewDialog::onClassClicked);;
 
-    getWidget(birthSignWidget, "SignText");
+    getWidget(mBirthSignWidget, "SignText");
     getWidget(button, "SignButton");
     adjustButtonSize(button);
     button->eventMouseButtonClick += MyGUI::newDelegate(this, &ReviewDialog::onBirthSignClicked);;
 
     // Setup dynamic stats
-    getWidget(health, "Health");
-    health->setTitle(mWindowManager.getGameSettingString("sHealth", ""));
-    health->setValue(45, 45);
+    getWidget(mHealth, "Health");
+    mHealth->setTitle(mWindowManager.getGameSettingString("sHealth", ""));
+    mHealth->setValue(45, 45);
 
-    getWidget(magicka, "Magicka");
-    magicka->setTitle(mWindowManager.getGameSettingString("sMagic", ""));
-    magicka->setValue(50, 50);
+    getWidget(mMagicka, "Magicka");
+    mMagicka->setTitle(mWindowManager.getGameSettingString("sMagic", ""));
+    mMagicka->setValue(50, 50);
 
-    getWidget(fatigue, "Fatigue");
-    fatigue->setTitle(mWindowManager.getGameSettingString("sFatigue", ""));
-    fatigue->setValue(160, 160);
+    getWidget(mFatigue, "Fatigue");
+    mFatigue->setTitle(mWindowManager.getGameSettingString("sFatigue", ""));
+    mFatigue->setValue(160, 160);
 
     // Setup attributes
 
@@ -67,27 +70,21 @@ ReviewDialog::ReviewDialog(WindowManager& parWindowManager)
     for (int idx = 0; idx < ESM::Attribute::Length; ++idx)
     {
         getWidget(attribute, std::string("Attribute") + boost::lexical_cast<std::string>(idx));
-        attributeWidgets.insert(std::make_pair(static_cast<int>(ESM::Attribute::attributeIds[idx]), attribute));
+        mAttributeWidgets.insert(std::make_pair(static_cast<int>(ESM::Attribute::attributeIds[idx]), attribute));
         attribute->setWindowManager(&mWindowManager);
         attribute->setAttributeId(ESM::Attribute::attributeIds[idx]);
         attribute->setAttributeValue(MWAttribute::AttributeValue(0, 0));
     }
 
     // Setup skills
-    getWidget(skillAreaWidget, "Skills");
-    getWidget(skillClientWidget, "SkillClient");
-    getWidget(skillScrollerWidget, "SkillScroller");
-    skillClientWidget->eventMouseWheel += MyGUI::newDelegate(this, &ReviewDialog::onMouseWheel);
-    skillScrollerWidget->eventScrollChangePosition += MyGUI::newDelegate(this, &ReviewDialog::onScrollChangePosition);
-    updateScroller();
+    getWidget(mSkillView, "SkillView");
+    mSkillView->eventMouseWheel += MyGUI::newDelegate(this, &ReviewDialog::onMouseWheel);
 
     for (int i = 0; i < ESM::Skill::Length; ++i)
     {
-        skillValues.insert(std::make_pair(i, MWMechanics::Stat<float>()));
-        skillWidgetMap.insert(std::make_pair(i, static_cast<MyGUI::TextBox*> (0)));
+        mSkillValues.insert(std::make_pair(i, MWMechanics::Stat<float>()));
+        mSkillWidgetMap.insert(std::make_pair(i, static_cast<MyGUI::TextBox*> (0)));
     }
-
-    static_cast<MyGUI::WindowPtr>(mMainWidget)->eventWindowChangeCoord += MyGUI::newDelegate(this, &ReviewDialog::onWindowResize);
 
     MyGUI::ButtonPtr backButton;
     getWidget(backButton, "BackButton");
@@ -95,100 +92,73 @@ ReviewDialog::ReviewDialog(WindowManager& parWindowManager)
 
     MyGUI::ButtonPtr okButton;
     getWidget(okButton, "OKButton");
-    okButton->setCaption(mWindowManager.getGameSettingString("sOK", ""));
     okButton->eventMouseButtonClick += MyGUI::newDelegate(this, &ReviewDialog::onOkClicked);
-
-    int backButtonWidth = backButton->getTextSize().width + 24;
-    int okButtonWidth = okButton->getTextSize().width + 24;
-    okButton->setCoord(502 - okButtonWidth, 372, okButtonWidth, 23);
-    backButton->setCoord(502 - okButtonWidth - backButtonWidth - 6, 372, backButtonWidth, 23);
 }
 
 void ReviewDialog::open()
 {
     updateSkillArea();
-    setVisible(true);
-}
-
-void ReviewDialog::onScrollChangePosition(MyGUI::ScrollBar* scroller, size_t pos)
-{
-    int diff = lastPos - pos;
-    // Adjust position of all widget according to difference
-    if (diff == 0)
-        return;
-    lastPos = pos;
-
-    std::vector<MyGUI::WidgetPtr>::const_iterator end = skillWidgets.end();
-    for (std::vector<MyGUI::WidgetPtr>::const_iterator it = skillWidgets.begin(); it != end; ++it)
-    {
-        (*it)->setCoord((*it)->getCoord() + MyGUI::IntPoint(0, diff));
-    }
-}
-
-void ReviewDialog::onWindowResize(MyGUI::Window* window)
-{
-    updateScroller();
 }
 
 void ReviewDialog::setPlayerName(const std::string &name)
 {
-    nameWidget->setCaption(name);
+    mNameWidget->setCaption(name);
 }
 
-void ReviewDialog::setRace(const std::string &raceId_)
+void ReviewDialog::setRace(const std::string &raceId)
 {
-    raceId = raceId_;
-    const ESM::Race *race = mWindowManager.getStore().races.search(raceId);
+    mRaceId = raceId;
+    const ESM::Race *race = MWBase::Environment::get().getWorld()->getStore().races.search(mRaceId);
     if (race)
     {
-        ToolTips::createRaceToolTip(raceWidget, race);
-        raceWidget->setCaption(race->name);
+        ToolTips::createRaceToolTip(mRaceWidget, race);
+        mRaceWidget->setCaption(race->name);
     }
 }
 
 void ReviewDialog::setClass(const ESM::Class& class_)
 {
-    klass = class_;
-    classWidget->setCaption(klass.name);
-    ToolTips::createClassToolTip(classWidget, klass);
+    mKlass = class_;
+    mClassWidget->setCaption(mKlass.name);
+    ToolTips::createClassToolTip(mClassWidget, mKlass);
 }
 
 void ReviewDialog::setBirthSign(const std::string& signId)
 {
-    birthSignId = signId;
-    const ESM::BirthSign *sign = mWindowManager.getStore().birthSigns.search(birthSignId);
+    mBirthSignId = signId;
+    const ESM::BirthSign *sign = MWBase::Environment::get().getWorld()->getStore().birthSigns.search(mBirthSignId);
     if (sign)
     {
-        birthSignWidget->setCaption(sign->name);
-        ToolTips::createBirthsignToolTip(birthSignWidget, birthSignId);
+        mBirthSignWidget->setCaption(sign->name);
+        ToolTips::createBirthsignToolTip(mBirthSignWidget, mBirthSignId);
     }
 }
 
-void ReviewDialog::setHealth(const MWMechanics::DynamicStat<int>& value)
+void ReviewDialog::setHealth(const MWMechanics::DynamicStat<float>& value)
 {
-    health->setValue(value.getCurrent(), value.getModified());
+    mHealth->setValue(value.getCurrent(), value.getModified());
     std::string valStr =  boost::lexical_cast<std::string>(value.getCurrent()) + "/" + boost::lexical_cast<std::string>(value.getModified());
-    health->setUserString("Caption_HealthDescription", "#{sHealthDesc}\n" + valStr);
+    mHealth->setUserString("Caption_HealthDescription", "#{sHealthDesc}\n" + valStr);
 }
 
-void ReviewDialog::setMagicka(const MWMechanics::DynamicStat<int>& value)
+void ReviewDialog::setMagicka(const MWMechanics::DynamicStat<float>& value)
 {
-    magicka->setValue(value.getCurrent(), value.getModified());
+    mMagicka->setValue(value.getCurrent(), value.getModified());
     std::string valStr =  boost::lexical_cast<std::string>(value.getCurrent()) + "/" + boost::lexical_cast<std::string>(value.getModified());
-    magicka->setUserString("Caption_HealthDescription", "#{sIntDesc}\n" + valStr);
+    mMagicka->setUserString("Caption_HealthDescription", "#{sIntDesc}\n" + valStr);
 }
 
-void ReviewDialog::setFatigue(const MWMechanics::DynamicStat<int>& value)
+void ReviewDialog::setFatigue(const MWMechanics::DynamicStat<float>& value)
 {
-    fatigue->setValue(value.getCurrent(), value.getModified());
+    mFatigue->setValue(value.getCurrent(), value.getModified());
     std::string valStr =  boost::lexical_cast<std::string>(value.getCurrent()) + "/" + boost::lexical_cast<std::string>(value.getModified());
-    fatigue->setUserString("Caption_HealthDescription", "#{sFatDesc}\n" + valStr);
+    mFatigue->setUserString("Caption_HealthDescription", "#{sFatDesc}\n" + valStr);
 }
 
 void ReviewDialog::setAttribute(ESM::Attribute::AttributeID attributeId, const MWMechanics::Stat<int>& value)
 {
-    std::map<int, MWAttributePtr>::iterator attr = attributeWidgets.find(static_cast<int>(attributeId));
-    if (attr == attributeWidgets.end())
+    std::map<int, MWAttributePtr>::iterator attr = mAttributeWidgets.find(static_cast<int>(attributeId));
+    if (attr == mAttributeWidgets.end())
         return;
 
     attr->second->setAttributeValue(value);
@@ -196,8 +166,8 @@ void ReviewDialog::setAttribute(ESM::Attribute::AttributeID attributeId, const M
 
 void ReviewDialog::setSkillValue(ESM::Skill::SkillEnum skillId, const MWMechanics::Stat<float>& value)
 {
-    skillValues[skillId] = value;
-    MyGUI::TextBox* widget = skillWidgetMap[skillId];
+    mSkillValues[skillId] = value;
+    MyGUI::TextBox* widget = mSkillWidgetMap[skillId];
     if (widget)
     {
         float modified = value.getModified(), base = value.getBase();
@@ -216,20 +186,20 @@ void ReviewDialog::setSkillValue(ESM::Skill::SkillEnum skillId, const MWMechanic
 
 void ReviewDialog::configureSkills(const std::vector<int>& major, const std::vector<int>& minor)
 {
-    majorSkills = major;
-    minorSkills = minor;
+    mMajorSkills = major;
+    mMinorSkills = minor;
 
     // Update misc skills with the remaining skills not in major or minor
     std::set<int> skillSet;
     std::copy(major.begin(), major.end(), std::inserter(skillSet, skillSet.begin()));
     std::copy(minor.begin(), minor.end(), std::inserter(skillSet, skillSet.begin()));
     boost::array<ESM::Skill::SkillEnum, ESM::Skill::Length>::const_iterator end = ESM::Skill::skillIds.end();
-    miscSkills.clear();
+    mMiscSkills.clear();
     for (boost::array<ESM::Skill::SkillEnum, ESM::Skill::Length>::const_iterator it = ESM::Skill::skillIds.begin(); it != end; ++it)
     {
         int skill = *it;
         if (skillSet.find(skill) == skillSet.end())
-            miscSkills.push_back(skill);
+            mMiscSkills.push_back(skill);
     }
 
     updateSkillArea();
@@ -237,10 +207,10 @@ void ReviewDialog::configureSkills(const std::vector<int>& major, const std::vec
 
 void ReviewDialog::addSeparator(MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2)
 {
-    MyGUI::ImageBox* separator = skillClientWidget->createWidget<MyGUI::ImageBox>("MW_HLine", MyGUI::IntCoord(10, coord1.top, coord1.width + coord2.width - 4, 18), MyGUI::Align::Default);
+    MyGUI::ImageBox* separator = mSkillView->createWidget<MyGUI::ImageBox>("MW_HLine", MyGUI::IntCoord(10, coord1.top, coord1.width + coord2.width - 4, 18), MyGUI::Align::Default);
     separator->eventMouseWheel += MyGUI::newDelegate(this, &ReviewDialog::onMouseWheel);
 
-    skillWidgets.push_back(separator);
+    mSkillWidgets.push_back(separator);
 
     coord1.top += separator->getHeight();
     coord2.top += separator->getHeight();
@@ -248,13 +218,13 @@ void ReviewDialog::addSeparator(MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2
 
 void ReviewDialog::addGroup(const std::string &label, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2)
 {
-    MyGUI::TextBox* groupWidget = skillClientWidget->createWidget<MyGUI::TextBox>("SandBrightText", MyGUI::IntCoord(0, coord1.top, coord1.width + coord2.width, coord1.height), MyGUI::Align::Default);
+    MyGUI::TextBox* groupWidget = mSkillView->createWidget<MyGUI::TextBox>("SandBrightText", MyGUI::IntCoord(0, coord1.top, coord1.width + coord2.width, coord1.height), MyGUI::Align::Default);
     groupWidget->eventMouseWheel += MyGUI::newDelegate(this, &ReviewDialog::onMouseWheel);
     groupWidget->setCaption(label);
-    skillWidgets.push_back(groupWidget);
+    mSkillWidgets.push_back(groupWidget);
 
-    coord1.top += lineHeight;
-    coord2.top += lineHeight;
+    coord1.top += sLineHeight;
+    coord2.top += sLineHeight;
 }
 
 MyGUI::TextBox* ReviewDialog::addValueItem(const std::string& text, const std::string &value, const std::string& state, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2)
@@ -262,20 +232,20 @@ MyGUI::TextBox* ReviewDialog::addValueItem(const std::string& text, const std::s
     MyGUI::TextBox* skillNameWidget;
     MyGUI::TextBox* skillValueWidget;
 
-    skillNameWidget = skillClientWidget->createWidget<MyGUI::TextBox>("SandText", coord1, MyGUI::Align::Default);
+    skillNameWidget = mSkillView->createWidget<MyGUI::TextBox>("SandText", coord1, MyGUI::Align::Default);
     skillNameWidget->setCaption(text);
     skillNameWidget->eventMouseWheel += MyGUI::newDelegate(this, &ReviewDialog::onMouseWheel);
 
-    skillValueWidget = skillClientWidget->createWidget<MyGUI::TextBox>("SandTextRight", coord2, MyGUI::Align::Top | MyGUI::Align::Right);
+    skillValueWidget = mSkillView->createWidget<MyGUI::TextBox>("SandTextRight", coord2, MyGUI::Align::Top | MyGUI::Align::Right);
     skillValueWidget->setCaption(value);
     skillValueWidget->_setWidgetState(state);
     skillValueWidget->eventMouseWheel += MyGUI::newDelegate(this, &ReviewDialog::onMouseWheel);
 
-    skillWidgets.push_back(skillNameWidget);
-    skillWidgets.push_back(skillValueWidget);
+    mSkillWidgets.push_back(skillNameWidget);
+    mSkillWidgets.push_back(skillValueWidget);
 
-    coord1.top += lineHeight;
-    coord2.top += lineHeight;
+    coord1.top += sLineHeight;
+    coord2.top += sLineHeight;
 
     return skillValueWidget;
 }
@@ -284,20 +254,20 @@ void ReviewDialog::addItem(const std::string& text, MyGUI::IntCoord &coord1, MyG
 {
     MyGUI::TextBox* skillNameWidget;
 
-    skillNameWidget = skillClientWidget->createWidget<MyGUI::TextBox>("SandText", coord1 + MyGUI::IntSize(coord2.width, 0), MyGUI::Align::Default);
+    skillNameWidget = mSkillView->createWidget<MyGUI::TextBox>("SandText", coord1 + MyGUI::IntSize(coord2.width, 0), MyGUI::Align::Default);
     skillNameWidget->setCaption(text);
     skillNameWidget->eventMouseWheel += MyGUI::newDelegate(this, &ReviewDialog::onMouseWheel);
 
-    skillWidgets.push_back(skillNameWidget);
+    mSkillWidgets.push_back(skillNameWidget);
 
-    coord1.top += lineHeight;
-    coord2.top += lineHeight;
+    coord1.top += sLineHeight;
+    coord2.top += sLineHeight;
 }
 
 void ReviewDialog::addSkills(const SkillList &skills, const std::string &titleId, const std::string &titleDefault, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2)
 {
     // Add a line separator if there are items above
-    if (!skillWidgets.empty())
+    if (!mSkillWidgets.empty())
     {
         addSeparator(coord1, coord2);
     }
@@ -312,7 +282,7 @@ void ReviewDialog::addSkills(const SkillList &skills, const std::string &titleId
             continue;
         assert(skillId >= 0 && skillId < ESM::Skill::Length);
         const std::string &skillNameId = ESMS::Skill::sSkillNameIds[skillId];
-        const MWMechanics::Stat<float> &stat = skillValues.find(skillId)->second;
+        const MWMechanics::Stat<float> &stat = mSkillValues.find(skillId)->second;
         float base = stat.getBase();
         float modified = stat.getModified();
 
@@ -325,44 +295,37 @@ void ReviewDialog::addSkills(const SkillList &skills, const std::string &titleId
 
         for (int i=0; i<2; ++i)
         {
-            ToolTips::createSkillToolTip(skillWidgets[skillWidgets.size()-1-i], skillId);
+            ToolTips::createSkillToolTip(mSkillWidgets[mSkillWidgets.size()-1-i], skillId);
         }
 
-        skillWidgetMap[skillId] = widget;
+        mSkillWidgetMap[skillId] = widget;
     }
 }
 
 void ReviewDialog::updateSkillArea()
 {
-    for (std::vector<MyGUI::WidgetPtr>::iterator it = skillWidgets.begin(); it != skillWidgets.end(); ++it)
+    for (std::vector<MyGUI::WidgetPtr>::iterator it = mSkillWidgets.begin(); it != mSkillWidgets.end(); ++it)
     {
         MyGUI::Gui::getInstance().destroyWidget(*it);
     }
-    skillWidgets.clear();
+    mSkillWidgets.clear();
 
     const int valueSize = 40;
-    MyGUI::IntCoord coord1(10, 0, skillClientWidget->getWidth() - (10 + valueSize), 18);
+    MyGUI::IntCoord coord1(10, 0, mSkillView->getWidth() - (10 + valueSize) - 24, 18);
     MyGUI::IntCoord coord2(coord1.left + coord1.width, coord1.top, valueSize, coord1.height);
 
-    if (!majorSkills.empty())
-        addSkills(majorSkills, "sSkillClassMajor", "Major Skills", coord1, coord2);
+    if (!mMajorSkills.empty())
+        addSkills(mMajorSkills, "sSkillClassMajor", "Major Skills", coord1, coord2);
 
-    if (!minorSkills.empty())
-        addSkills(minorSkills, "sSkillClassMinor", "Minor Skills", coord1, coord2);
+    if (!mMinorSkills.empty())
+        addSkills(mMinorSkills, "sSkillClassMinor", "Minor Skills", coord1, coord2);
 
-    if (!miscSkills.empty())
-        addSkills(miscSkills, "sSkillClassMisc", "Misc Skills", coord1, coord2);
+    if (!mMiscSkills.empty())
+        addSkills(mMiscSkills, "sSkillClassMisc", "Misc Skills", coord1, coord2);
 
-    clientHeight = coord1.top;
-    updateScroller();
-}
+    mClientHeight = coord1.top;
 
-void ReviewDialog::updateScroller()
-{
-    skillScrollerWidget->setScrollRange(std::max(clientHeight - skillClientWidget->getHeight(), 0));
-    skillScrollerWidget->setScrollPage(std::max(skillClientWidget->getHeight() - lineHeight, 0));
-    if (clientHeight != 0)
-        skillScrollerWidget->setTrackSize( (skillAreaWidget->getHeight() / float(clientHeight)) * skillScrollerWidget->getLineSize() );
+    mSkillView->setCanvasSize (mSkillView->getWidth(), std::max(mSkillView->getHeight(), mClientHeight));
 }
 
 // widget controls
@@ -399,12 +362,8 @@ void ReviewDialog::onBirthSignClicked(MyGUI::Widget* _sender)
 
 void ReviewDialog::onMouseWheel(MyGUI::Widget* _sender, int _rel)
 {
-    if (skillScrollerWidget->getScrollPosition() - _rel*0.3 < 0)
-        skillScrollerWidget->setScrollPosition(0);
-    else if (skillScrollerWidget->getScrollPosition() - _rel*0.3 > skillScrollerWidget->getScrollRange()-1)
-        skillScrollerWidget->setScrollPosition(skillScrollerWidget->getScrollRange()-1);
+    if (mSkillView->getViewOffset().top + _rel*0.3 > 0)
+        mSkillView->setViewOffset(MyGUI::IntPoint(0, 0));
     else
-        skillScrollerWidget->setScrollPosition(skillScrollerWidget->getScrollPosition() - _rel*0.3);
-
-    onScrollChangePosition(skillScrollerWidget, skillScrollerWidget->getScrollPosition());
+        mSkillView->setViewOffset(MyGUI::IntPoint(0, mSkillView->getViewOffset().top + _rel*0.3));
 }

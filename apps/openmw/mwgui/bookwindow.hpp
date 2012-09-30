@@ -10,7 +10,7 @@ namespace MWGui
     class BookWindow : public WindowBase
     {
         public:
-            BookWindow(WindowManager& parWindowManager);
+            BookWindow(MWBase::WindowManager& parWindowManager);
 
             void open(MWWorld::Ptr book);
             void setTakeButtonShow(bool show);
@@ -43,4 +43,3 @@ namespace MWGui
 }
 
 #endif
-

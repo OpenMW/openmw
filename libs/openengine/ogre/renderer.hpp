@@ -27,9 +27,15 @@
 #include "OgreTexture.h"
 #include <OgreWindowEventUtilities.h>
 
+#if defined(__APPLE__) && !defined(__LP64__)  
+#include <OgreRoot.h>
+#endif
+
 namespace Ogre
 {
+#if !defined(__APPLE__) || defined(__LP64__)
     class Root;
+#endif
     class RenderWindow;
     class SceneManager;
     class Camera;
@@ -48,10 +54,25 @@ namespace OEngine
             std::string fsaa;
         };
 
+#if defined(__APPLE__) && !defined(__LP64__)
+        class CustomRoot : public Ogre::Root {
+        public:
+            bool isQueuedEnd() const;
+
+            CustomRoot(const Ogre::String& pluginFileName = "plugins.cfg", 
+                    const Ogre::String& configFileName = "ogre.cfg", 
+                    const Ogre::String& logFileName = "Ogre.log");
+        };
+#endif
+
         class Fader;
         class OgreRenderer
         {
+#if defined(__APPLE__) && !defined(__LP64__)
+            CustomRoot *mRoot;
+#else
             Ogre::Root *mRoot;
+#endif
             Ogre::RenderWindow *mWindow;
             Ogre::SceneManager *mScene;
             Ogre::Camera *mCamera;
@@ -110,8 +131,8 @@ namespace OEngine
             set up the Root and logging classes. */
             void configure(
                 const std::string &logPath, // Path to directory where to store log files
-                const std::string &pluginCfg, // plugin.cfg file
                 const std::string &renderSystem,
+                const std::string &rttMode,
                 bool _logging);      // Enable or disable logging
 
             /// Create a window with the given title
@@ -131,7 +152,9 @@ namespace OEngine
             /// Start the main rendering loop
             void start();
 
-            bool loadPlugins() const;
+            void loadPlugins();
+
+            void unloadPlugins();
 
             void update(float dt);
 

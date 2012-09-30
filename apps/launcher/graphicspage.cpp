@@ -1,8 +1,12 @@
 #include <QtGui>
 
+#include <cstdlib>
+
 #include <boost/math/common_factor.hpp>
+#include <boost/filesystem.hpp>
 
 #include <components/files/configurationmanager.hpp>
+#include <components/files/ogreplugin.hpp>
 #include <components/settings/settings.hpp>
 
 #include "graphicspage.hpp"
@@ -70,20 +74,13 @@ GraphicsPage::GraphicsPage(Files::ConfigurationManager &cfg, QWidget *parent)
 
 bool GraphicsPage::setupOgre()
 {
-    QString pluginCfg = mCfgMgr.getPluginsConfigPath().string().c_str();
-    QFile file(pluginCfg);
-
     // Create a log manager so we can surpress debug text to stdout/stderr
     Ogre::LogManager* logMgr = OGRE_NEW Ogre::LogManager;
     logMgr->createLog((mCfgMgr.getLogPath().string() + "/launcherOgre.log"), true, false, false);
 
     try
     {
-#if defined(ENABLE_PLUGIN_GL) || defined(ENABLE_PLUGIN_Direct3D9)
         mOgre = new Ogre::Root("", "", "./launcherOgre.log");
-#else
-        mOgre = new Ogre::Root(pluginCfg.toStdString(), "", "./launcherOgre.log");
-#endif
     }
     catch(Ogre::Exception &ex)
     {
@@ -93,7 +90,6 @@ bool GraphicsPage::setupOgre()
         msgBox.setIcon(QMessageBox::Critical);
         msgBox.setStandardButtons(QMessageBox::Ok);
         msgBox.setText(tr("<br><b>Failed to create the Ogre::Root object</b><br><br> \
-        Make sure the plugins.cfg is present and valid.<br><br> \
         Press \"Show Details...\" for more information.<br>"));
         msgBox.setDetailedText(ogreError);
         msgBox.exec();
@@ -101,6 +97,31 @@ bool GraphicsPage::setupOgre()
         qCritical("Error creating Ogre::Root, the error reported was:\n %s", qPrintable(ogreError));
         return false;
     }
+
+
+    std::string pluginDir;
+    const char* pluginEnv = getenv("OPENMW_OGRE_PLUGIN_DIR");
+    if (pluginEnv)
+        pluginDir = pluginEnv;
+    else
+    {
+#if OGRE_PLATFORM == OGRE_PLATFORM_WIN32
+        pluginDir = ".\\";
+#endif
+#if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
+        pluginDir = OGRE_PLUGIN_DIR;
+#endif
+#if OGRE_PLATFORM == OGRE_PLATFORM_LINUX
+        pluginDir = OGRE_PLUGIN_DIR_REL;
+#endif
+    }
+
+    boost::filesystem::path absPluginPath = boost::filesystem::absolute(boost::filesystem::path(pluginDir));
+
+    pluginDir = absPluginPath.string();
+
+    Files::loadOgrePlugin(pluginDir, "RenderSystem_GL", *mOgre);
+    Files::loadOgrePlugin(pluginDir, "RenderSystem_Direct3D9", *mOgre);
 
 #ifdef ENABLE_PLUGIN_GL
     mGLPlugin = new Ogre::GLPlugin();
@@ -177,7 +198,7 @@ void GraphicsPage::readConfig()
     QString resolution = QString::number(Settings::Manager::getInt("resolution x", "Video"));
     resolution.append(" x " + QString::number(Settings::Manager::getInt("resolution y", "Video")));
 
-    int resIndex = mResolutionComboBox->findText(resolution);
+    int resIndex = mResolutionComboBox->findText(resolution, Qt::MatchStartsWith);
     if (resIndex != -1)
         mResolutionComboBox->setCurrentIndex(resIndex);
 }
@@ -189,8 +210,8 @@ void GraphicsPage::writeConfig()
     Settings::Manager::setString("antialiasing", "Video", mAntiAliasingComboBox->currentText().toStdString());
     Settings::Manager::setString("render system", "Video", mRendererComboBox->currentText().toStdString());
 
-    // parse resolution x and y from a string like "800 x 600"
-    QString resolution = mResolutionComboBox->currentText();
+    // Get the current resolution, but with the tabs replaced with a single space
+    QString resolution = mResolutionComboBox->currentText().simplified();
     QStringList tokens = resolution.split(" ", QString::SkipEmptyParts);
 
     int resX = tokens.at(0).toInt();
@@ -249,8 +270,9 @@ QStringList GraphicsPage::getAvailableResolutions(Ogre::RenderSystem *renderer)
 
         Ogre::StringVector::iterator opt_it;
         uint idx = 0;
+
         for (opt_it = i->second.possibleValues.begin ();
-        opt_it != i->second.possibleValues.end (); opt_it++, idx++)
+             opt_it != i->second.possibleValues.end (); opt_it++, idx++)
         {
             QString qval = QString::fromStdString(*opt_it).simplified();
             // remove extra tokens after the resolution (for example bpp, can be there or not depending on rendersystem)
@@ -260,7 +282,7 @@ QStringList GraphicsPage::getAvailableResolutions(Ogre::RenderSystem *renderer)
 
             // do not add duplicate resolutions
             if (!result.contains(resolutionStr)) {
-                // Add the aspect ratio
+
                 QString aspect = getAspect(tokens.at(0).toInt(),tokens.at(2).toInt());
 
                 if (aspect == QLatin1String("16:9") || aspect == QLatin1String("16:10")) {
@@ -271,9 +293,8 @@ QStringList GraphicsPage::getAvailableResolutions(Ogre::RenderSystem *renderer)
                 }
 
                 result << resolutionStr;
-              }
+            }
         }
-
     }
 
     // Sort the resolutions in descending order

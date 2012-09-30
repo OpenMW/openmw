@@ -83,6 +83,15 @@ struct GameSetting
     bool isDirtyBloodmoon();
 
     void load(ESMReader &esm);
+    
+    int getInt() const;
+    ///< Throws an exception if GMST is not of type int or float.
+    
+    float getFloat() const;
+    ///< Throws an exception if GMST is not of type int or float.
+    
+    std::string getString() const;
+    ///< Throwns an exception if GMST is not of type string.
 };
 }
 #endif

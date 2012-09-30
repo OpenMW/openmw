@@ -1,9 +1,18 @@
 #include "objects.hpp"
 
 #include <OgreSceneNode.h>
+#include <OgreSceneManager.h>
+#include <OgreEntity.h>
+#include <OgreLight.h>
+#include <OgreSubEntity.h>
+#include <OgreStaticGeometry.h>
 
 #include <components/nifogre/ogre_nif_loader.hpp>
 #include <components/settings/settings.hpp>
+
+#include "../mwworld/ptr.hpp"
+#include "../mwworld/class.hpp"
+
 #include "renderconst.hpp"
 
 using namespace MWRender;
@@ -56,7 +65,7 @@ void Objects::insertBegin (const MWWorld::Ptr& ptr, bool enabled, bool static_)
 
     insert->setPosition(f[0], f[1], f[2]);
     insert->setScale(ptr.getCellRef().scale, ptr.getCellRef().scale, ptr.getCellRef().scale);
-	
+
 
     // Convert MW rotation to a quaternion:
     f = ptr.getCellRef().pos.rot;
@@ -84,15 +93,20 @@ void Objects::insertMesh (const MWWorld::Ptr& ptr, const std::string& mesh)
     Ogre::SceneNode* insert = ptr.getRefData().getBaseNode();
     assert(insert);
 
-    NifOgre::NIFLoader::load(mesh);
-    Ogre::Entity *ent = mRenderer.getScene()->createEntity(mesh);
-
-
-    Ogre::Vector3 extents = ent->getBoundingBox().getSize();
+    Ogre::AxisAlignedBox bounds = Ogre::AxisAlignedBox::BOX_NULL;
+    NifOgre::EntityList entities = NifOgre::NIFLoader::createEntities(insert, NULL, mesh);
+    for(size_t i = 0;i < entities.mEntities.size();i++)
+    {
+        const Ogre::AxisAlignedBox &tmp = entities.mEntities[i]->getBoundingBox();
+        bounds.merge(Ogre::AxisAlignedBox(insert->_getDerivedPosition() + tmp.getMinimum(),
+                                          insert->_getDerivedPosition() + tmp.getMaximum())
+        );
+    }
+    Ogre::Vector3 extents = bounds.getSize();
     extents *= insert->getScale();
     float size = std::max(std::max(extents.x, extents.y), extents.z);
 
-    bool small = (size < Settings::Manager::getInt("small object size", "Viewing distance")) && Settings::Manager::getBool("limit small object distance", "Objects");
+    bool small = (size < Settings::Manager::getInt("small object size", "Viewing distance")) && Settings::Manager::getBool("limit small object distance", "Viewing distance");
 
     // do not fade out doors. that will cause holes and look stupid
     if (ptr.getTypeName().find("Door") != std::string::npos)
@@ -100,42 +114,41 @@ void Objects::insertMesh (const MWWorld::Ptr& ptr, const std::string& mesh)
 
     if (mBounds.find(ptr.getCell()) == mBounds.end())
         mBounds[ptr.getCell()] = Ogre::AxisAlignedBox::BOX_NULL;
-
-    Ogre::AxisAlignedBox bounds = ent->getBoundingBox();
-    bounds = Ogre::AxisAlignedBox(
-        insert->_getDerivedPosition() + bounds.getMinimum(),
-        insert->_getDerivedPosition() + bounds.getMaximum()
-    );
-
-    bounds.scale(insert->getScale());
     mBounds[ptr.getCell()].merge(bounds);
 
     bool transparent = false;
-    for (unsigned int i=0; i<ent->getNumSubEntities(); ++i)
+    for(size_t i = 0;i < entities.mEntities.size();i++)
     {
-        Ogre::MaterialPtr mat = ent->getSubEntity(i)->getMaterial();
-        Ogre::Material::TechniqueIterator techIt = mat->getTechniqueIterator();
-        while (techIt.hasMoreElements())
+        Ogre::Entity *ent = entities.mEntities[i];
+        for (unsigned int i=0; i<ent->getNumSubEntities(); ++i)
         {
-            Ogre::Technique* tech = techIt.getNext();
-            Ogre::Technique::PassIterator passIt = tech->getPassIterator();
-            while (passIt.hasMoreElements())
+            Ogre::MaterialPtr mat = ent->getSubEntity(i)->getMaterial();
+            Ogre::Material::TechniqueIterator techIt = mat->getTechniqueIterator();
+            while (techIt.hasMoreElements())
             {
-                Ogre::Pass* pass = passIt.getNext();
+                Ogre::Technique* tech = techIt.getNext();
+                Ogre::Technique::PassIterator passIt = tech->getPassIterator();
+                while (passIt.hasMoreElements())
+                {
+                    Ogre::Pass* pass = passIt.getNext();
 
-                if (pass->getDepthWriteEnabled() == false)
-                    transparent = true;
+                    if (pass->getDepthWriteEnabled() == false)
+                        transparent = true;
+                }
             }
         }
     }
 
     if(!mIsStatic || !Settings::Manager::getBool("use static geometry", "Objects") || transparent)
     {
-        insert->attachObject(ent);
+        for(size_t i = 0;i < entities.mEntities.size();i++)
+        {
+            Ogre::Entity *ent = entities.mEntities[i];
 
-        ent->setRenderingDistance(small ? Settings::Manager::getInt("small object distance", "Viewing distance") : 0);
-        ent->setVisibilityFlags(mIsStatic ? (small ? RV_StaticsSmall : RV_Statics) : RV_Misc);
-        ent->setRenderQueueGroup(transparent ? RQG_Alpha : RQG_Main);
+            ent->setRenderingDistance(small ? Settings::Manager::getInt("small object distance", "Viewing distance") : 0);
+            ent->setVisibilityFlags(mIsStatic ? (small ? RV_StaticsSmall : RV_Statics) : RV_Misc);
+            ent->setRenderQueueGroup(transparent ? RQG_Alpha : RQG_Main);
+        }
     }
     else
     {
@@ -175,15 +188,20 @@ void Objects::insertMesh (const MWWorld::Ptr& ptr, const std::string& mesh)
         //  - there will be too many batches.
         sg->setRegionDimensions(Ogre::Vector3(2500,2500,2500));
 
-        sg->addEntity(ent,insert->_getDerivedPosition(),insert->_getDerivedOrientation(),insert->_getDerivedScale());
-
         sg->setVisibilityFlags(small ? RV_StaticsSmall : RV_Statics);
 
         sg->setCastShadows(true);
 
         sg->setRenderQueueGroup(transparent ? RQG_Alpha : RQG_Main);
 
-        mRenderer.getScene()->destroyEntity(ent);
+        for(size_t i = 0;i < entities.mEntities.size();i++)
+        {
+            Ogre::Entity *ent = entities.mEntities[i];
+            insert->detachObject(ent);
+            sg->addEntity(ent,insert->_getDerivedPosition(),insert->_getDerivedOrientation(),insert->_getDerivedScale());
+
+            mRenderer.getScene()->destroyEntity(ent);
+        }
     }
 }
 
@@ -194,8 +212,7 @@ void Objects::insertLight (const MWWorld::Ptr& ptr, float r, float g, float b, f
     Ogre::Light *light = mRenderer.getScene()->createLight();
     light->setDiffuseColour (r, g, b);
 
-    ESMS::LiveCellRef<ESM::Light, MWWorld::RefData> *ref =
-        ptr.get<ESM::Light>();
+    MWWorld::LiveCellRef<ESM::Light> *ref = ptr.get<ESM::Light>();
 
     LightInfo info;
     info.name = light->getName();
@@ -307,7 +324,7 @@ void Objects::removeCell(MWWorld::Ptr::CellStore* store)
         mBounds.erase(store);
 }
 
-void Objects::buildStaticGeometry(ESMS::CellStore<MWWorld::RefData>& cell)
+void Objects::buildStaticGeometry(MWWorld::Ptr::CellStore& cell)
 {
     if(mStaticGeometry.find(&cell) != mStaticGeometry.end())
     {
@@ -443,3 +460,38 @@ void Objects::update(const float dt)
             it = mLights.erase(it);
     }
 }
+
+void Objects::rebuildStaticGeometry()
+{
+    for (std::map<MWWorld::CellStore *, Ogre::StaticGeometry*>::iterator it = mStaticGeometry.begin(); it != mStaticGeometry.end(); ++it)
+    {
+        it->second->destroy();
+        it->second->build();
+    }
+
+    for (std::map<MWWorld::CellStore *, Ogre::StaticGeometry*>::iterator it = mStaticGeometrySmall.begin(); it != mStaticGeometrySmall.end(); ++it)
+    {
+        it->second->destroy();
+        it->second->build();
+    }
+}
+
+void
+Objects::updateObjectCell(const MWWorld::Ptr &ptr)
+{
+    Ogre::SceneNode *node;
+    MWWorld::CellStore *newCell = ptr.getCell();
+
+    if(mCellSceneNodes.find(newCell) == mCellSceneNodes.end()) {
+        node = mMwRoot->createChildSceneNode();
+        mCellSceneNodes[newCell] = node;
+    } else {
+        node = mCellSceneNodes[newCell];
+    }
+    node->addChild(ptr.getRefData().getBaseNode());
+
+    /// \note Still unaware how to move aabb and static w/o full rebuild,
+    /// moving static objects may cause problems
+    insertMesh(ptr, MWWorld::Class::get(ptr).getModel(ptr));
+}
+

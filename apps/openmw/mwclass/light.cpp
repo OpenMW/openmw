@@ -3,32 +3,32 @@
 
 #include <components/esm/loadligh.hpp>
 
-#include <components/esm_store/cell_store.hpp>
-
 #include "../mwbase/environment.hpp"
+#include "../mwbase/world.hpp"
+#include "../mwbase/soundmanager.hpp"
+#include "../mwbase/windowmanager.hpp"
 
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/actiontake.hpp"
 #include "../mwworld/actionequip.hpp"
 #include "../mwworld/nullaction.hpp"
 #include "../mwworld/inventorystore.hpp"
-#include "../mwworld/world.hpp"
+#include "../mwworld/cellstore.hpp"
+#include "../mwworld/physicssystem.hpp"
 
-#include "../mwgui/window_manager.hpp"
 #include "../mwgui/tooltips.hpp"
 
-#include "../mwsound/soundmanager.hpp"
-
 #include "../mwrender/objects.hpp"
+#include "../mwrender/renderinginterface.hpp"
 
 namespace MWClass
 {
     void Light::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const
     {
-        ESMS::LiveCellRef<ESM::Light, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Light> *ref =
             ptr.get<ESM::Light>();
-
         assert (ref->base != NULL);
+
         const std::string &model = ref->base->model;
 
         MWRender::Objects& objects = renderingInterface.getObjects();
@@ -47,25 +47,36 @@ namespace MWClass
 
     void Light::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics) const
     {
-        ESMS::LiveCellRef<ESM::Light, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Light> *ref =
             ptr.get<ESM::Light>();
-
         assert (ref->base != NULL);
+
         const std::string &model = ref->base->model;
 
-        if(!model.empty()){
+        if(!model.empty()) {
             physics.insertObjectPhysics(ptr, "meshes\\" + model);
         }
-
-        if (!ref->base->sound.empty())
-        {
-            MWBase::Environment::get().getSoundManager()->playSound3D (ptr, ref->base->sound, 1.0, 1.0, MWSound::Play_Loop);
+        if (!ref->base->sound.empty()) {
+            MWBase::Environment::get().getSoundManager()->playSound3D(ptr, ref->base->sound, 1.0, 1.0, MWBase::SoundManager::Play_Loop);
         }
+    }
+
+    std::string Light::getModel(const MWWorld::Ptr &ptr) const
+    {
+        MWWorld::LiveCellRef<ESM::Light> *ref =
+            ptr.get<ESM::Light>();
+        assert (ref->base != NULL);
+
+        const std::string &model = ref->base->model;
+        if (!model.empty()) {
+            return "meshes\\" + model;
+        }
+        return "";
     }
 
     std::string Light::getName (const MWWorld::Ptr& ptr) const
     {
-        ESMS::LiveCellRef<ESM::Light, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Light> *ref =
             ptr.get<ESM::Light>();
 
         if (ref->base->model.empty())
@@ -77,21 +88,22 @@ namespace MWClass
     boost::shared_ptr<MWWorld::Action> Light::activate (const MWWorld::Ptr& ptr,
         const MWWorld::Ptr& actor) const
     {
-        ESMS::LiveCellRef<ESM::Light, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Light> *ref =
             ptr.get<ESM::Light>();
 
         if (!(ref->base->data.flags & ESM::Light::Carry))
             return boost::shared_ptr<MWWorld::Action> (new MWWorld::NullAction);
 
-        MWBase::Environment::get().getSoundManager()->playSound3D (ptr, getUpSoundId(ptr), 1.0, 1.0, MWSound::Play_NoTrack);
+        boost::shared_ptr<MWWorld::Action> action(new MWWorld::ActionTake (ptr));
 
-        return boost::shared_ptr<MWWorld::Action> (
-            new MWWorld::ActionTake (ptr));
+        action->setSound(getUpSoundId(ptr));
+
+        return action;
     }
 
     std::string Light::getScript (const MWWorld::Ptr& ptr) const
     {
-        ESMS::LiveCellRef<ESM::Light, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Light> *ref =
             ptr.get<ESM::Light>();
 
         return ref->base->script;
@@ -99,7 +111,7 @@ namespace MWClass
 
     std::pair<std::vector<int>, bool> Light::getEquipmentSlots (const MWWorld::Ptr& ptr) const
     {
-        ESMS::LiveCellRef<ESM::Light, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Light> *ref =
             ptr.get<ESM::Light>();
 
         std::vector<int> slots;
@@ -112,7 +124,7 @@ namespace MWClass
 
     int Light::getValue (const MWWorld::Ptr& ptr) const
     {
-        ESMS::LiveCellRef<ESM::Light, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Light> *ref =
             ptr.get<ESM::Light>();
 
         return ref->base->data.value;
@@ -138,7 +150,7 @@ namespace MWClass
 
     std::string Light::getInventoryIcon (const MWWorld::Ptr& ptr) const
     {
-          ESMS::LiveCellRef<ESM::Light, MWWorld::RefData> *ref =
+          MWWorld::LiveCellRef<ESM::Light> *ref =
             ptr.get<ESM::Light>();
 
         return ref->base->icon;
@@ -146,7 +158,7 @@ namespace MWClass
 
     bool Light::hasToolTip (const MWWorld::Ptr& ptr) const
     {
-        ESMS::LiveCellRef<ESM::Light, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Light> *ref =
             ptr.get<ESM::Light>();
 
         return (ref->base->name != "");
@@ -154,19 +166,17 @@ namespace MWClass
 
     MWGui::ToolTipInfo Light::getToolTipInfo (const MWWorld::Ptr& ptr) const
     {
-        ESMS::LiveCellRef<ESM::Light, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Light> *ref =
             ptr.get<ESM::Light>();
 
         MWGui::ToolTipInfo info;
         info.caption = ref->base->name + MWGui::ToolTips::getCountString(ptr.getRefData().getCount());
         info.icon = ref->base->icon;
 
-        const ESMS::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
-
         std::string text;
 
-        text += "\n" + store.gameSettings.search("sWeight")->str + ": " + MWGui::ToolTips::toString(ref->base->data.weight);
-        text += MWGui::ToolTips::getValueString(ref->base->data.value, store.gameSettings.search("sValue")->str);
+        text += "\n#{sWeight}: " + MWGui::ToolTips::toString(ref->base->data.weight);
+        text += MWGui::ToolTips::getValueString(ref->base->data.value, "#{sValue}");
 
         if (MWBase::Environment::get().getWindowManager()->getFullHelp()) {
             text += MWGui::ToolTips::getMiscString(ref->ref.owner, "Owner");
@@ -180,8 +190,19 @@ namespace MWClass
 
     boost::shared_ptr<MWWorld::Action> Light::use (const MWWorld::Ptr& ptr) const
     {
-        MWBase::Environment::get().getSoundManager()->playSound (getUpSoundId(ptr), 1.0, 1.0);
+        boost::shared_ptr<MWWorld::Action> action(new MWWorld::ActionEquip(ptr));
 
-        return boost::shared_ptr<MWWorld::Action>(new MWWorld::ActionEquip(ptr));
+        action->setSound(getUpSoundId(ptr));
+
+        return action;
+    }
+
+    MWWorld::Ptr
+    Light::copyToCellImpl(const MWWorld::Ptr &ptr, MWWorld::CellStore &cell) const
+    {
+        MWWorld::LiveCellRef<ESM::Light> *ref =
+            ptr.get<ESM::Light>();
+
+        return MWWorld::Ptr(&cell.lights.insert(*ref), &cell);
     }
 }

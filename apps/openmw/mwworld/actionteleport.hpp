@@ -9,17 +9,17 @@
 
 namespace MWWorld
 {
-    class ActionTeleportPlayer : public Action
+    class ActionTeleport : public Action
     {
             std::string mCellName;
             ESM::Position mPosition;
 
+            virtual void executeImp (const Ptr& actor);
+
         public:
 
-            ActionTeleportPlayer (const std::string& cellName, const ESM::Position& position);
+            ActionTeleport (const std::string& cellName, const ESM::Position& position);
             ///< If cellName is empty, an exterior cell is asumed.
-
-            virtual void execute();
     };
 }
 

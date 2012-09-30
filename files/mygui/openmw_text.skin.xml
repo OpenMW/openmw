@@ -17,6 +17,14 @@
         <BasisSkin type="SimpleText" offset = "0 0 16 16" align = "ALIGN_STRETCH"/>
     </Skin>
 
+    <!-- HTML colour: #9A9074 -->
+    <Skin name = "SandTextGreyedOut" size = "16 16">
+        <Property key="FontName" value = "Default" />
+        <Property key="TextAlign" value = "ALIGN_LEFT ALIGN_BOTTOM" />
+        <Property key="TextColour" value = "0.6 0.56 0.45" />
+        <BasisSkin type="SimpleText" offset = "0 0 16 16"  align = "ALIGN_STRETCH"/>
+    </Skin>
+
     <!-- HTML colour: #BF9959 -->
     <Skin name = "SandText" size = "16 16">
         <Property key="FontName" value = "Default" />
@@ -73,7 +81,7 @@
         <Property key="FontName" value = "Default" />
         <Property key="TextAlign" value = "Top HCenter" />
         <BasisSkin type="SimpleText" offset = "0 0 16 16"  align = "ALIGN_STRETCH">
-            <State name="disabled" colour="0.5 0.5 0.5" shift="0"/>
+            <State name="disabled" colour="0.6 0.56 0.45" shift="0"/>
             <State name="normal" colour="0.75 0.6 0.35" shift="0"/>
             <State name="highlighted" colour="0.85 0.76 0.60" shift="0"/>
             <State name="pushed" colour="1 1 1" shift="0"/>
@@ -88,7 +96,7 @@
         <Property key="FontName" value = "Default" />
         <Property key="TextAlign" value = "ALIGN_LEFT ALIGN_BOTTOM" />
         <BasisSkin type="SimpleText" offset = "0 0 16 16"  align = "ALIGN_STRETCH">
-            <State name="disabled" colour="0.5 0.5 0.5" shift="0"/>
+            <State name="disabled" colour="0.6 0.56 0.45" shift="0"/>
             <State name="normal" colour="0.75 0.6 0.35" shift="0"/>
             <State name="highlighted" colour="0.85 0.76 0.60" shift="0"/>
             <State name="pushed" colour="1 1 1" shift="0"/>
@@ -103,7 +111,7 @@
         <Property key="FontName" value = "Default" />
         <Property key="TextAlign" value = "ALIGN_LEFT ALIGN_BOTTOM" />
         <BasisSkin type="SimpleText" offset = "0 0 16 16"  align = "ALIGN_STRETCH">
-            <State name="disabled" colour="0.5 0.5 0.5" shift="0"/>
+            <State name="disabled" colour="0.6 0.56 0.45" shift="0"/>
             <State name="normal" colour="0.75 0.6 0.35" shift="0"/>
             <State name="highlighted" colour="0.85 0.76 0.60" shift="0"/>
             <State name="pushed" colour="1 1 1" shift="0"/>
@@ -118,8 +126,8 @@
         <Property key="FontName" value = "Default" />
         <Property key="TextAlign" value = "ALIGN_LEFT ALIGN_BOTTOM" />
         <BasisSkin type="SimpleText" offset = "0 0 16 16"  align = "ALIGN_STRETCH">
-            <State name="disabled" colour="0.5 0.5 0.5" shift="0"/>
-            <State name="normal" colour="0.5 0.5 0.5" shift="0"/>
+            <State name="disabled" colour="0.6 0.56 0.45" shift="0"/>
+            <State name="normal" colour="0.6 0.56 0.45" shift="0"/>
             <State name="highlighted" colour="0.85 0.76 0.60" shift="0"/>
             <State name="pushed" colour="1 1 1" shift="0"/>
             <State name="disabled_checked" colour="0.33 0.38 0.67" shift="0"/>

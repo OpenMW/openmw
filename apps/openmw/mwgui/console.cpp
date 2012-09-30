@@ -2,6 +2,10 @@
 #include "console.hpp"
 
 #include <algorithm>
+#include <fstream>
+
+#include <components/esm_store/reclists.hpp>
+#include <components/esm_store/store.hpp>
 
 #include <components/compiler/exception.hpp>
 
@@ -102,9 +106,10 @@ namespace MWGui
         }
     }
 
-    Console::Console(int w, int h, const Compiler::Extensions& extensions)
-      : Layout("openmw_console_layout.xml"),
-        mCompilerContext (MWScript::CompilerContext::Type_Console)
+    Console::Console(int w, int h, bool consoleOnlyScripts)
+      : Layout("openmw_console.layout"),
+        mCompilerContext (MWScript::CompilerContext::Type_Console),
+        mConsoleOnlyScripts (consoleOnlyScripts)
     {
         setCoord(10,10, w-10, h/2);
 
@@ -123,7 +128,8 @@ namespace MWGui
         history->setVisibleVScroll(true);
 
         // compiler
-        mCompilerContext.setExtensions (&extensions);
+        MWScript::registerExtensions (mExtensions, mConsoleOnlyScripts);
+        mCompilerContext.setExtensions (&mExtensions);
     }
 
     void Console::enable()
@@ -168,6 +174,47 @@ namespace MWGui
     void Console::printError(const std::string &msg)
     {
         print("#FF2222" + msg + "\n");
+    }
+
+    void Console::execute (const std::string& command)
+    {
+        // Log the command
+        print("#FFFFFF> " + command + "\n");
+
+        Compiler::Locals locals;
+        Compiler::Output output (locals);
+
+        if (compile (command + "\n", output))
+        {
+            try
+            {
+                ConsoleInterpreterContext interpreterContext (*this, mPtr);
+                Interpreter::Interpreter interpreter;
+                MWScript::installOpcodes (interpreter, mConsoleOnlyScripts);
+                std::vector<Interpreter::Type_Code> code;
+                output.getCode (code);
+                interpreter.run (&code[0], code.size(), interpreterContext);
+            }
+            catch (const std::exception& error)
+            {
+                printError (std::string ("An exception has been thrown: ") + error.what());
+            }
+        }
+    }
+
+    void Console::executeFile (const std::string& path)
+    {
+        std::ifstream stream (path.c_str());
+
+        if (!stream.is_open())
+            printError ("failed to open file: " + path);
+        else
+        {
+            std::string line;
+
+            while (std::getline (stream, line))
+                execute (line);
+        }
     }
 
     void Console::keyPress(MyGUI::WidgetPtr _sender,
@@ -231,28 +278,7 @@ namespace MWGui
         current = command_history.end();
         editString.clear();
 
-        // Log the command
-        print("#FFFFFF> " + cm + "\n");
-
-        Compiler::Locals locals;
-        Compiler::Output output (locals);
-
-        if (compile (cm + "\n", output))
-        {
-            try
-            {
-                ConsoleInterpreterContext interpreterContext (*this, mPtr);
-                Interpreter::Interpreter interpreter;
-                MWScript::installOpcodes (interpreter);
-                std::vector<Interpreter::Type_Code> code;
-                output.getCode (code);
-                interpreter.run (&code[0], code.size(), interpreterContext);
-            }
-            catch (const std::exception& error)
-            {
-                printError (std::string ("An exception has been thrown: ") + error.what());
-            }
-        }
+        execute (cm);
 
         command->setCaption("");
     }

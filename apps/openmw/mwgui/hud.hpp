@@ -14,12 +14,18 @@ namespace MWGui
     public:
         HUD(int width, int height, int fpsLevel, DragAndDrop* dragAndDrop);
         void setEffect(const char *img);
-        void setValue (const std::string& id, const MWMechanics::DynamicStat<int>& value);
+        void setValue (const std::string& id, const MWMechanics::DynamicStat<float>& value);
         void setFPS(float fps);
         void setTriangleCount(unsigned int count);
         void setBatchCount(unsigned int count);
-        void setBottomLeftVisibility(bool hmsVisible, bool weapVisible, bool spellVisible);
-        void setBottomRightVisibility(bool effectBoxVisible, bool minimapVisible);
+
+        void setHmsVisible(bool visible);
+        void setWeapVisible(bool visible);
+        void setSpellVisible(bool visible);
+
+        void setEffectVisible(bool visible);
+        void setMinimapVisible(bool visible);
+
         void setFpsLevel(const int level);
 
         void setSelectedSpell(const std::string& spellId, int successChancePercent);
@@ -28,6 +34,8 @@ namespace MWGui
         void unsetSelectedSpell();
         void unsetSelectedWeapon();
 
+        void setCrosshairVisible(bool visible);
+
         void onFrame(float dt);
         void onResChange(int width, int height);
 
@@ -35,29 +43,32 @@ namespace MWGui
 
         bool getWorldMouseOver() { return mWorldMouseOver; }
 
-        MyGUI::ProgressPtr health, magicka, stamina;
+    private:
+        MyGUI::ProgressPtr mHealth, mMagicka, mStamina;
         MyGUI::Widget* mHealthFrame;
-        MyGUI::Widget *weapBox, *spellBox;
-        MyGUI::ImageBox *weapImage, *spellImage;
-        MyGUI::ProgressPtr weapStatus, spellStatus;
-        MyGUI::Widget *effectBox, *minimapBox;
-        MyGUI::ImageBox* effect1;
-        MyGUI::ScrollView* minimap;
-        MyGUI::ImageBox* compass;
-        MyGUI::ImageBox* crosshair;
+        MyGUI::Widget *mWeapBox, *mSpellBox;
+        MyGUI::ImageBox *mWeapImage, *mSpellImage;
+        MyGUI::ProgressPtr mWeapStatus, mSpellStatus;
+        MyGUI::Widget *mEffectBox, *mMinimapBox;
+        MyGUI::Button* mMinimapButton;
+        MyGUI::ImageBox* mEffect1;
+        MyGUI::ScrollView* mMinimap;
+        MyGUI::ImageBox* mCompass;
+        MyGUI::ImageBox* mCrosshair;
         MyGUI::TextBox* mCellNameBox;
         MyGUI::TextBox* mWeaponSpellBox;
 
-        MyGUI::WidgetPtr fpsbox;
-        MyGUI::TextBox* fpscounter;
-        MyGUI::TextBox* trianglecounter;
-        MyGUI::TextBox* batchcounter;
+        MyGUI::Widget* mDummy;
 
-    private:
+        MyGUI::WidgetPtr mFpsBox;
+        MyGUI::TextBox* mFpsCounter;
+        MyGUI::TextBox* mTriangleCounter;
+        MyGUI::TextBox* mBatchCounter;
+
         // bottom left elements
-        int hmsBaseLeft, weapBoxBaseLeft, spellBoxBaseLeft;
+        int mHealthManaStaminaBaseLeft, mWeapBoxBaseLeft, mSpellBoxBaseLeft;
         // bottom right elements
-        int minimapBoxBaseRight, effectBoxBaseRight;
+        int mMinimapBoxBaseRight, mEffectBoxBaseRight;
 
         DragAndDrop* mDragAndDrop;
 
@@ -81,5 +92,7 @@ namespace MWGui
         void onWeaponClicked(MyGUI::Widget* _sender);
         void onMagicClicked(MyGUI::Widget* _sender);
         void onMapClicked(MyGUI::Widget* _sender);
+
+        void updatePositions();
     };
 }

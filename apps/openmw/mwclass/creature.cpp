@@ -4,17 +4,21 @@
 #include <components/esm/loadcrea.hpp>
 
 #include "../mwmechanics/creaturestats.hpp"
-#include "../mwmechanics/mechanicsmanager.hpp"
 #include "../mwmechanics/magiceffects.hpp"
 
 #include "../mwbase/environment.hpp"
+#include "../mwbase/mechanicsmanager.hpp"
+#include "../mwbase/windowmanager.hpp"
 
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/actiontalk.hpp"
 #include "../mwworld/customdata.hpp"
 #include "../mwworld/containerstore.hpp"
+#include "../mwworld/physicssystem.hpp"
 
-#include "../mwgui/window_manager.hpp"
+#include "../mwrender/renderinginterface.hpp"
+
+#include "../mwgui/tooltips.hpp"
 
 namespace
 {
@@ -40,27 +44,32 @@ namespace MWClass
         {
             std::auto_ptr<CustomData> data (new CustomData);
 
-            ESMS::LiveCellRef<ESM::Creature, MWWorld::RefData> *ref = ptr.get<ESM::Creature>();
+            MWWorld::LiveCellRef<ESM::Creature> *ref = ptr.get<ESM::Creature>();
 
             // creature stats
-            data->mCreatureStats.mAttributes[0].set (ref->base->data.strength);
-            data->mCreatureStats.mAttributes[1].set (ref->base->data.intelligence);
-            data->mCreatureStats.mAttributes[2].set (ref->base->data.willpower);
-            data->mCreatureStats.mAttributes[3].set (ref->base->data.agility);
-            data->mCreatureStats.mAttributes[4].set (ref->base->data.speed);
-            data->mCreatureStats.mAttributes[5].set (ref->base->data.endurance);
-            data->mCreatureStats.mAttributes[6].set (ref->base->data.personality);
-            data->mCreatureStats.mAttributes[7].set (ref->base->data.luck);
-            data->mCreatureStats.mDynamic[0].set (ref->base->data.health);
-            data->mCreatureStats.mDynamic[1].set (ref->base->data.mana);
-            data->mCreatureStats.mDynamic[2].set (ref->base->data.fatigue);
+            data->mCreatureStats.getAttribute(0).set (ref->base->data.strength);
+            data->mCreatureStats.getAttribute(1).set (ref->base->data.intelligence);
+            data->mCreatureStats.getAttribute(2).set (ref->base->data.willpower);
+            data->mCreatureStats.getAttribute(3).set (ref->base->data.agility);
+            data->mCreatureStats.getAttribute(4).set (ref->base->data.speed);
+            data->mCreatureStats.getAttribute(5).set (ref->base->data.endurance);
+            data->mCreatureStats.getAttribute(6).set (ref->base->data.personality);
+            data->mCreatureStats.getAttribute(7).set (ref->base->data.luck);
+            data->mCreatureStats.getHealth().set (ref->base->data.health);
+            data->mCreatureStats.getMagicka().set (ref->base->data.mana);
+            data->mCreatureStats.getFatigue().set (ref->base->data.fatigue);
 
-            data->mCreatureStats.mLevel = ref->base->data.level;
+            data->mCreatureStats.setLevel(ref->base->data.level);
 
-            data->mCreatureStats.mHello = ref->base->AI.hello;
-            data->mCreatureStats.mFight = ref->base->AI.fight;
-            data->mCreatureStats.mFlee = ref->base->AI.flee;
-            data->mCreatureStats.mAlarm = ref->base->AI.alarm;
+            data->mCreatureStats.setHello(ref->base->mAiData.mHello);
+            data->mCreatureStats.setFight(ref->base->mAiData.mFight);
+            data->mCreatureStats.setFlee(ref->base->mAiData.mFlee);
+            data->mCreatureStats.setAlarm(ref->base->mAiData.mAlarm);
+
+            // spells
+            for (std::vector<std::string>::const_iterator iter (ref->base->mSpells.list.begin());
+                iter!=ref->base->mSpells.list.end(); ++iter)
+                data->mCreatureStats.getSpells().add (*iter);
 
             // store
             ptr.getRefData().setCustomData (data.release());
@@ -69,7 +78,7 @@ namespace MWClass
 
     std::string Creature::getId (const MWWorld::Ptr& ptr) const
     {
-        ESMS::LiveCellRef<ESM::Creature, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Creature> *ref =
             ptr.get<ESM::Creature>();
 
         return ref->base->mId;
@@ -83,21 +92,29 @@ namespace MWClass
 
     void Creature::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics) const
     {
-        ESMS::LiveCellRef<ESM::Creature, MWWorld::RefData> *ref =
+        const std::string model = getModel(ptr);
+        if(!model.empty()){
+            physics.insertActorPhysics(ptr, model);
+        }
+        MWBase::Environment::get().getMechanicsManager()->addActor (ptr);
+    }
+
+    std::string Creature::getModel(const MWWorld::Ptr &ptr) const
+    {
+        MWWorld::LiveCellRef<ESM::Creature> *ref =
             ptr.get<ESM::Creature>();
+        assert (ref->base != NULL);
 
         const std::string &model = ref->base->model;
-        assert (ref->base != NULL);
-        if(!model.empty()){
-            physics.insertActorPhysics(ptr, "meshes\\" + model);
+        if (!model.empty()) {
+            return "meshes\\" + model;
         }
-
-        MWBase::Environment::get().getMechanicsManager()->addActor (ptr);
+        return "";
     }
 
     std::string Creature::getName (const MWWorld::Ptr& ptr) const
     {
-        ESMS::LiveCellRef<ESM::Creature, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Creature> *ref =
             ptr.get<ESM::Creature>();
 
         return ref->base->name;
@@ -126,7 +143,7 @@ namespace MWClass
 
     std::string Creature::getScript (const MWWorld::Ptr& ptr) const
     {
-        ESMS::LiveCellRef<ESM::Creature, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Creature> *ref =
             ptr.get<ESM::Creature>();
 
         return ref->base->script;
@@ -148,7 +165,7 @@ namespace MWClass
 
     MWGui::ToolTipInfo Creature::getToolTipInfo (const MWWorld::Ptr& ptr) const
     {
-        ESMS::LiveCellRef<ESM::Creature, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Creature> *ref =
             ptr.get<ESM::Creature>();
 
         MWGui::ToolTipInfo info;
@@ -165,7 +182,7 @@ namespace MWClass
     float Creature::getCapacity (const MWWorld::Ptr& ptr) const
     {
         const MWMechanics::CreatureStats& stats = getCreatureStats (ptr);
-        return stats.mAttributes[0].getModified()*5;
+        return stats.getAttribute(0).getModified()*5;
     }
 
     float Creature::getEncumbrance (const MWWorld::Ptr& ptr) const
@@ -174,13 +191,22 @@ namespace MWClass
 
         const MWMechanics::CreatureStats& stats = getCreatureStats (ptr);
 
-        weight -= stats.mMagicEffects.get (MWMechanics::EffectKey (8)).mMagnitude; // feather
+        weight -= stats.getMagicEffects().get (MWMechanics::EffectKey (8)).mMagnitude; // feather
 
-        weight += stats.mMagicEffects.get (MWMechanics::EffectKey (7)).mMagnitude; // burden
+        weight += stats.getMagicEffects().get (MWMechanics::EffectKey (7)).mMagnitude; // burden
 
         if (weight<0)
             weight = 0;
 
         return weight;
+    }
+
+    MWWorld::Ptr
+    Creature::copyToCellImpl(const MWWorld::Ptr &ptr, MWWorld::CellStore &cell) const
+    {
+        MWWorld::LiveCellRef<ESM::Creature> *ref =
+            ptr.get<ESM::Creature>();
+
+        return MWWorld::Ptr(&cell.creatures.insert(*ref), &cell);
     }
 }

@@ -1,20 +1,26 @@
 #include "tooltips.hpp"
 
-#include "window_manager.hpp"
-#include "widgets.hpp"
-#include "../mwworld/class.hpp"
-#include "../mwworld/world.hpp"
-#include "../mwbase/environment.hpp"
-
 #include <boost/lexical_cast.hpp>
 
+#include <OgreResourceGroupManager.h>
+
 #include <components/settings/settings.hpp>
+
+#include "../mwbase/world.hpp"
+#include "../mwbase/environment.hpp"
+#include "../mwbase/windowmanager.hpp"
+
+#include "../mwworld/class.hpp"
+
+#include "map_window.hpp"
+#include "widgets.hpp"
+#include "inventorywindow.hpp"
 
 using namespace MWGui;
 using namespace MyGUI;
 
-ToolTips::ToolTips(WindowManager* windowManager) :
-    Layout("openmw_tooltips.xml")
+ToolTips::ToolTips(MWBase::WindowManager* windowManager) :
+    Layout("openmw_tooltips.layout")
     , mGameMode(true)
     , mWindowManager(windowManager)
     , mFullHelp(false)
@@ -77,7 +83,7 @@ void ToolTips::onFrame(float frameDuration)
             {
                 mFocusObject = MWBase::Environment::get().getWorld()->getPtrViaHandle(handle);
             }
-            catch (std::exception& e)
+            catch (std::exception /* & e */)
             {
                 return;
             }
@@ -146,10 +152,33 @@ void ToolTips::onFrame(float frameDuration)
             {
                 return;
             }
-            else if (type == "ItemPtr")
+
+            // special handling for markers on the local map: the tooltip should only be visible
+            // if the marker is not hidden due to the fog of war.
+            if (focus->getUserString ("IsMarker") == "true")
+            {
+                LocalMapBase::MarkerPosition pos = *focus->getUserData<LocalMapBase::MarkerPosition>();
+
+                if (!MWBase::Environment::get().getWorld ()->isPositionExplored (pos.nX, pos.nY, pos.cellX, pos.cellY, pos.interior))
+                    return;
+            }
+
+            if (type == "ItemPtr")
             {
                 mFocusObject = *focus->getUserData<MWWorld::Ptr>();
                 tooltipSize = getToolTipViaPtr(false);
+            }
+            else if (type == "AvatarItemSelection")
+            {
+                MyGUI::IntCoord avatarPos = mWindowManager->getInventoryWindow ()->getAvatarScreenCoord ();
+                MyGUI::IntPoint relMousePos = MyGUI::InputManager::getInstance ().getMousePosition () - MyGUI::IntPoint(avatarPos.left, avatarPos.top);
+                int realX = int(float(relMousePos.left) / float(avatarPos.width) * 512.f );
+                int realY = int(float(relMousePos.top) / float(avatarPos.height) * 1024.f );
+                MWWorld::Ptr item = mWindowManager->getInventoryWindow ()->getAvatarSelectedItem (realX, realY);
+
+                mFocusObject = item;
+                if (!mFocusObject.isEmpty ())
+                    tooltipSize = getToolTipViaPtr(false);
             }
             else if (type == "Spell")
             {
@@ -169,6 +198,7 @@ void ToolTips::onFrame(float frameDuration)
                     params.mMagnMax = it->magnMax;
                     params.mRange = it->range;
                     params.mIsConstant = (spell->data.type == ESM::Spell::ST_Ability);
+                    params.mNoTarget = false;
                     effects.push_back(params);
                 }
                 info.effects = effects;
@@ -195,7 +225,8 @@ void ToolTips::onFrame(float frameDuration)
                     it != userStrings.end(); ++it)
                 {
                     if (it->first == "ToolTipType"
-                        || it->first == "ToolTipLayout")
+                        || it->first == "ToolTipLayout"
+                        || it->first == "IsMarker")
                         continue;
 
 
@@ -337,19 +368,19 @@ IntSize ToolTips::createToolTip(const MWGui::ToolTipInfo& info)
     if (text.size() > 0 && text[0] == '\n')
         text.erase(0, 1);
 
-    const ESM::Enchantment* enchant;
+    const ESM::Enchantment* enchant = 0;
     const ESMS::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
     if (info.enchant != "")
     {
         enchant = store.enchants.search(info.enchant);
         if (enchant->data.type == ESM::Enchantment::CastOnce)
-            text += "\n" + store.gameSettings.search("sItemCastOnce")->str;
+            text += "\n#{sItemCastOnce}";
         else if (enchant->data.type == ESM::Enchantment::WhenStrikes)
-            text += "\n" + store.gameSettings.search("sItemCastWhenStrikes")->str;
+            text += "\n#{sItemCastWhenStrikes}";
         else if (enchant->data.type == ESM::Enchantment::WhenUsed)
-            text += "\n" + store.gameSettings.search("sItemCastWhenUsed")->str;
+            text += "\n#{sItemCastWhenUsed}";
         else if (enchant->data.type == ESM::Enchantment::ConstantEffect)
-            text += "\n" + store.gameSettings.search("sItemCastConstant")->str;
+            text += "\n#{sItemCastConstant}";
     }
 
     // this the maximum width of the tooltip before it starts word-wrapping
@@ -374,7 +405,7 @@ IntSize ToolTips::createToolTip(const MWGui::ToolTipInfo& info)
     textWidget->setProperty("Static", "true");
     textWidget->setProperty("MultiLine", "true");
     textWidget->setProperty("WordWrap", "true");
-    textWidget->setCaption(text);
+    textWidget->setCaptionWithReplacing(text);
     textWidget->setTextAlign(Align::HCenter | Align::Top);
     IntSize textSize = textWidget->getTextSize();
 
@@ -392,7 +423,7 @@ IntSize ToolTips::createToolTip(const MWGui::ToolTipInfo& info)
 
         /**
          * \todo
-         * the various potion effects should appear in the tooltip depending if the player 
+         * the various potion effects should appear in the tooltip depending if the player
          * has enough skill in alchemy to know about the effects of this potion.
          */
 
@@ -402,13 +433,14 @@ IntSize ToolTips::createToolTip(const MWGui::ToolTipInfo& info)
         effectsWidget->setEffectList(info.effects);
 
         std::vector<MyGUI::WidgetPtr> effectItems;
-        effectsWidget->createEffectWidgets(effectItems, effectArea, coord, true, Widgets::MWEffectList::EF_NoTarget);
+        effectsWidget->createEffectWidgets(effectItems, effectArea, coord, true, info.isPotion ? Widgets::MWEffectList::EF_NoTarget : 0);
         totalSize.height += coord.top-6;
         totalSize.width = std::max(totalSize.width, coord.width);
     }
 
     if (info.enchant != "")
     {
+        assert(enchant);
         Widget* enchantArea = mDynamicToolTipBox->createWidget<Widget>("",
             IntCoord(0, totalSize.height, 300, 300-totalSize.height),
             Align::Stretch, "ToolTipEnchantArea");
@@ -435,7 +467,7 @@ IntSize ToolTips::createToolTip(const MWGui::ToolTipInfo& info)
             const int chargeWidth = 204;
 
             TextBox* chargeText = enchantArea->createWidget<TextBox>("SandText", IntCoord(0, 0, 10, 18), Align::Default, "ToolTipEnchantChargeText");
-            chargeText->setCaption(store.gameSettings.search("sCharges")->str);
+            chargeText->setCaptionWithReplacing("#{sCharges}");
             const int chargeTextWidth = chargeText->getTextSize().width + 5;
 
             const int chargeAndTextWidth = chargeWidth + chargeTextWidth;
@@ -564,8 +596,6 @@ void ToolTips::createAttributeToolTip(MyGUI::Widget* widget, int attributeId)
     if (attributeId == -1)
         return;
 
-    const ESM::Attribute* attr = MWBase::Environment::get().getWorld()->getStore().attributes.search(attributeId);
-    assert(attr);
     std::string icon = ESM::Attribute::attributeIcons[attributeId];
     std::string name = ESM::Attribute::gmstAttributeIds[attributeId];
     std::string desc = ESM::Attribute::gmstAttributeDescIds[attributeId];

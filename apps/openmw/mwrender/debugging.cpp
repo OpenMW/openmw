@@ -1,19 +1,25 @@
 #include "debugging.hpp"
 
-#include <assert.h>
+#include <cassert>
 
 #include <OgreNode.h>
 #include <OgreSceneManager.h>
 #include <OgreMaterial.h>
 #include <OgreMaterialManager.h>
+#include <OgreManualObject.h>
 
-#include "../mwworld/world.hpp" // these includes can be removed once the static-hack is gone
-#include "../mwbase/environment.hpp"
-#include "../mwworld/ptr.hpp"
 #include <components/esm/loadstat.hpp>
 #include <components/esm/loadpgrd.hpp>
 
+#include <components/esm_store/store.hpp>
+
+#include "../mwbase/world.hpp" // these includes can be removed once the static-hack is gone
+#include "../mwbase/environment.hpp"
+
+#include "../mwworld/ptr.hpp"
+
 #include "player.hpp"
+#include "renderconst.hpp"
 
 using namespace Ogre;
 
@@ -81,6 +87,8 @@ ManualObject *Debugging::createPathgridLines(const ESM::Pathgrid *pathgrid)
     }
     result->end();
 
+    result->setVisibilityFlags (RV_Debug);
+
     return result;
 }
 
@@ -135,6 +143,8 @@ ManualObject *Debugging::createPathgridPoints(const ESM::Pathgrid *pathgrid)
 
     result->end();
 
+    result->setVisibilityFlags (RV_Debug);
+
     return result;
 }
 
@@ -162,11 +172,11 @@ Debugging::~Debugging()
 bool Debugging::toggleRenderMode (int mode){
     switch (mode)
     {
-        case MWWorld::World::Render_CollisionDebug:
+        case MWBase::World::Render_CollisionDebug:
 
             return mEngine->toggleDebugRendering();
 
-        case MWWorld::World::Render_Pathgrid:
+        case MWBase::World::Render_Pathgrid:
             togglePathgrid();
             return mPathgridEnabled;
     }

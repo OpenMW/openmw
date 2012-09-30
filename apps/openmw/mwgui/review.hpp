@@ -12,13 +12,11 @@ namespace MWGui
 
 /*
 This file contains the dialog for reviewing the generated character.
-Layout is defined by resources/mygui/openmw_chargen_review_layout.xml.
+Layout is defined by resources/mygui/openmw_chargen_review.layout.
 */
 
 namespace MWGui
 {
-    using namespace MyGUI;
-
     class ReviewDialog : public WindowBase
     {
     public:
@@ -30,27 +28,27 @@ namespace MWGui
         };
         typedef std::vector<int> SkillList;
 
-        ReviewDialog(WindowManager& parWindowManager);
+        ReviewDialog(MWBase::WindowManager& parWindowManager);
 
         void setPlayerName(const std::string &name);
         void setRace(const std::string &raceId);
         void setClass(const ESM::Class& class_);
         void setBirthSign (const std::string &signId);
 
-        void setHealth(const MWMechanics::DynamicStat<int>& value);
-        void setMagicka(const MWMechanics::DynamicStat<int>& value);
-        void setFatigue(const MWMechanics::DynamicStat<int>& value);
+        void setHealth(const MWMechanics::DynamicStat<float>& value);
+        void setMagicka(const MWMechanics::DynamicStat<float>& value);
+        void setFatigue(const MWMechanics::DynamicStat<float>& value);
 
         void setAttribute(ESM::Attribute::AttributeID attributeId, const MWMechanics::Stat<int>& value);
 
         void configureSkills(const SkillList& major, const SkillList& minor);
         void setSkillValue(ESM::Skill::SkillEnum skillId, const MWMechanics::Stat<float>& value);
 
-        void open();
+        virtual void open();
 
         // Events
-        typedef delegates::CMultiDelegate0 EventHandle_Void;
-        typedef delegates::CMultiDelegate1<int> EventHandle_Int;
+        typedef MyGUI::delegates::CMultiDelegate0 EventHandle_Void;
+        typedef MyGUI::delegates::CMultiDelegate1<int> EventHandle_Int;
 
         /** Event : Back button clicked.\n
         signature : void method()\n
@@ -76,29 +74,24 @@ namespace MWGui
         void addGroup(const std::string &label, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
         MyGUI::TextBox* addValueItem(const std::string& text, const std::string &value, const std::string& state, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
         void addItem(const std::string& text, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
-        void updateScroller();
         void updateSkillArea();
 
-        void onScrollChangePosition(MyGUI::ScrollBar* scroller, size_t pos);
-        void onWindowResize(MyGUI::Window* window);
+        static const int sLineHeight;
 
-        static const int lineHeight;
+        MyGUI::TextBox *mNameWidget, *mRaceWidget, *mClassWidget, *mBirthSignWidget;
+        MyGUI::ScrollView* mSkillView;
+        int mLastPos, mClientHeight;
 
-        MyGUI::TextBox *nameWidget, *raceWidget, *classWidget, *birthSignWidget;
-        MyGUI::WidgetPtr skillAreaWidget, skillClientWidget;
-        MyGUI::ScrollBar* skillScrollerWidget;
-        int lastPos, clientHeight;
+        Widgets::MWDynamicStatPtr mHealth, mMagicka, mFatigue;
 
-        Widgets::MWDynamicStatPtr health, magicka, fatigue;
+        std::map<int, Widgets::MWAttributePtr> mAttributeWidgets;
 
-        std::map<int, Widgets::MWAttributePtr> attributeWidgets;
-
-        SkillList majorSkills, minorSkills, miscSkills;
-        std::map<int, MWMechanics::Stat<float> > skillValues;
-        std::map<int, MyGUI::TextBox*> skillWidgetMap;
-        std::string name, raceId, birthSignId;
-        ESM::Class klass;
-        std::vector<MyGUI::WidgetPtr> skillWidgets; //< Skills and other information
+        SkillList mMajorSkills, mMinorSkills, mMiscSkills;
+        std::map<int, MWMechanics::Stat<float> > mSkillValues;
+        std::map<int, MyGUI::TextBox*> mSkillWidgetMap;
+        std::string mName, mRaceId, mBirthSignId;
+        ESM::Class mKlass;
+        std::vector<MyGUI::WidgetPtr> mSkillWidgets; //< Skills and other information
     };
 }
 #endif

@@ -3,12 +3,12 @@
 #include <boost/lexical_cast.hpp>
 
 #include "../mwbase/environment.hpp"
-#include "../mwworld/world.hpp"
+#include "../mwbase/world.hpp"
 
 namespace MWGui
 {
-    CountDialog::CountDialog(WindowManager& parWindowManager) :
-        WindowBase("openmw_count_window_layout.xml", parWindowManager)
+    CountDialog::CountDialog(MWBase::WindowManager& parWindowManager) :
+        WindowModal("openmw_count_window.layout", parWindowManager)
     {
         getWidget(mSlider, "CountSlider");
         getWidget(mItemEdit, "ItemEdit");
@@ -27,7 +27,7 @@ namespace MWGui
     {
         setVisible(true);
 
-        mLabelText->setCaption(message);
+        mLabelText->setCaptionWithReplacing(message);
 
         MyGUI::IntSize viewSize = MyGUI::RenderManager::getInstance().getViewSize();
 
@@ -40,44 +40,29 @@ namespace MWGui
                 width,
                 mMainWidget->getHeight());
 
-        // make other gui elements inaccessible while this dialog is open
-        MyGUI::InputManager::getInstance().addWidgetModal(mMainWidget);
-
         MyGUI::InputManager::getInstance().setKeyFocusWidget(mItemEdit);
 
         mSlider->setScrollPosition(maxCount-1);
         mItemEdit->setCaption(boost::lexical_cast<std::string>(maxCount));
-
-        int okButtonWidth = mOkButton->getTextSize().width + 24;
-        mOkButton->setCoord(width - 30 - okButtonWidth,
-                            mOkButton->getTop(),
-                            okButtonWidth,
-                            mOkButton->getHeight());
-
-        int cancelButtonWidth = mCancelButton->getTextSize().width + 24;
-        mCancelButton->setCoord(width - 30 - okButtonWidth - cancelButtonWidth - 8,
-                            mCancelButton->getTop(),
-                            cancelButtonWidth,
-                            mCancelButton->getHeight());
     }
 
     void CountDialog::onCancelButtonClicked(MyGUI::Widget* _sender)
     {
-        close();
+        setVisible(false);
     }
 
     void CountDialog::onOkButtonClicked(MyGUI::Widget* _sender)
     {
         eventOkClicked(NULL, mSlider->getScrollPosition()+1);
 
-        close();
+        setVisible(false);
     }
 
     void CountDialog::onEditTextChange(MyGUI::EditBox* _sender)
     {
         if (_sender->getCaption() == "")
             return;
-    
+
         unsigned int count;
         try
         {
@@ -98,11 +83,5 @@ namespace MWGui
     void CountDialog::onSliderMoved(MyGUI::ScrollBar* _sender, size_t _position)
     {
         mItemEdit->setCaption(boost::lexical_cast<std::string>(_position+1));
-    }
-
-    void CountDialog::close()
-    {
-        setVisible(false);
-        MyGUI::InputManager::getInstance().removeWidgetModal(mMainWidget);
     }
 }

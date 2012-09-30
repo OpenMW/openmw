@@ -7,8 +7,10 @@
 
 #include "../mwmechanics/stat.hpp"
 
-#undef MYGUI_EXPORT
-#define MYGUI_EXPORT
+namespace MWBase
+{
+    class WindowManager;
+}
 
 /*
   This file contains various custom widgets used in OpenMW.
@@ -16,9 +18,6 @@
 
 namespace MWGui
 {
-    using namespace MyGUI;
-    class WindowManager;
-
     namespace Widgets
     {
         class MWEffectList;
@@ -73,25 +72,25 @@ namespace MWGui
 
         typedef std::vector<SpellEffectParams> SpellEffectList;
 
-        class MYGUI_EXPORT MWSkill : public Widget
+        class MWSkill : public MyGUI::Widget
         {
-            MYGUI_RTTI_DERIVED( MWSkill );
+            MYGUI_RTTI_DERIVED( MWSkill )
         public:
             MWSkill();
 
             typedef MWMechanics::Stat<float> SkillValue;
 
-            void setWindowManager(WindowManager *m) { manager = m; }
+            void setWindowManager(MWBase::WindowManager *m) { mManager = m; } /// \todo remove
             void setSkillId(ESM::Skill::SkillEnum skillId);
             void setSkillNumber(int skillId);
             void setSkillValue(const SkillValue& value);
 
-            WindowManager *getWindowManager() const { return manager; }
-            ESM::Skill::SkillEnum getSkillId() const { return skillId; }
-            const SkillValue& getSkillValue() const { return value; }
+            MWBase::WindowManager *getWindowManager() const { return mManager; }
+            ESM::Skill::SkillEnum getSkillId() const { return mSkillId; }
+            const SkillValue& getSkillValue() const { return mValue; }
 
             // Events
-            typedef delegates::CMultiDelegate1<MWSkill*> EventHandle_SkillVoid;
+            typedef MyGUI::delegates::CMultiDelegate1<MWSkill*> EventHandle_SkillVoid;
 
             /** Event : Skill clicked.\n
                 signature : void method(MWSkill* _sender)\n
@@ -109,31 +108,31 @@ namespace MWGui
 
             void updateWidgets();
 
-            WindowManager *manager;
-            ESM::Skill::SkillEnum skillId;
-            SkillValue value;
-            MyGUI::WidgetPtr skillNameWidget, skillValueWidget;
+            MWBase::WindowManager *mManager;
+            ESM::Skill::SkillEnum mSkillId;
+            SkillValue mValue;
+            MyGUI::WidgetPtr mSkillNameWidget, mSkillValueWidget;
         };
         typedef MWSkill* MWSkillPtr;
 
-        class MYGUI_EXPORT MWAttribute : public Widget
+        class MWAttribute : public MyGUI::Widget
         {
-            MYGUI_RTTI_DERIVED( MWAttribute );
+            MYGUI_RTTI_DERIVED( MWAttribute )
         public:
             MWAttribute();
 
             typedef MWMechanics::Stat<int> AttributeValue;
 
-            void setWindowManager(WindowManager *m) { manager = m; }
+            void setWindowManager(MWBase::WindowManager *m) { mManager = m; }
             void setAttributeId(int attributeId);
             void setAttributeValue(const AttributeValue& value);
 
-            WindowManager *getWindowManager() const { return manager; }
-            int getAttributeId() const { return id; }
-            const AttributeValue& getAttributeValue() const { return value; }
+            MWBase::WindowManager *getWindowManager() const { return mManager; }
+            int getAttributeId() const { return mId; }
+            const AttributeValue& getAttributeValue() const { return mValue; }
 
             // Events
-            typedef delegates::CMultiDelegate1<MWAttribute*> EventHandle_AttributeVoid;
+            typedef MyGUI::delegates::CMultiDelegate1<MWAttribute*> EventHandle_AttributeVoid;
 
             /** Event : Attribute clicked.\n
                 signature : void method(MWAttribute* _sender)\n
@@ -151,10 +150,10 @@ namespace MWGui
 
             void updateWidgets();
 
-            WindowManager *manager;
-            int id;
-            AttributeValue value;
-            MyGUI::WidgetPtr attributeNameWidget, attributeValueWidget;
+            MWBase::WindowManager *mManager;
+            int mId;
+            AttributeValue mValue;
+            MyGUI::WidgetPtr mAttributeNameWidget, mAttributeValueWidget;
         };
         typedef MWAttribute* MWAttributePtr;
 
@@ -162,15 +161,15 @@ namespace MWGui
          * @todo remove this class and use MWEffectList instead
          */
         class MWSpellEffect;
-        class MYGUI_EXPORT MWSpell : public Widget
+        class MWSpell : public MyGUI::Widget
         {
-            MYGUI_RTTI_DERIVED( MWSpell );
+            MYGUI_RTTI_DERIVED( MWSpell )
         public:
             MWSpell();
 
             typedef MWMechanics::Stat<int> SpellValue;
 
-            void setWindowManager(WindowManager* parWindowManager) { mWindowManager = parWindowManager; }
+            void setWindowManager(MWBase::WindowManager* parWindowManager) { mWindowManager = parWindowManager; }
             void setSpellId(const std::string &id);
 
             /**
@@ -182,7 +181,7 @@ namespace MWGui
              */
             void createEffectWidgets(std::vector<MyGUI::WidgetPtr> &effects, MyGUI::WidgetPtr creator, MyGUI::IntCoord &coord, int flags);
 
-            const std::string &getSpellId() const { return id; }
+            const std::string &getSpellId() const { return mId; }
 
         protected:
             virtual ~MWSpell();
@@ -192,15 +191,15 @@ namespace MWGui
         private:
             void updateWidgets();
 
-            WindowManager* mWindowManager;
-            std::string id;
-            MyGUI::TextBox* spellNameWidget;
+            MWBase::WindowManager* mWindowManager;
+            std::string mId;
+            MyGUI::TextBox* mSpellNameWidget;
         };
         typedef MWSpell* MWSpellPtr;
 
-        class MYGUI_EXPORT MWEffectList : public Widget
+        class MWEffectList : public MyGUI::Widget
         {
-            MYGUI_RTTI_DERIVED( MWEffectList );
+            MYGUI_RTTI_DERIVED( MWEffectList )
         public:
             MWEffectList();
 
@@ -212,7 +211,7 @@ namespace MWGui
                 EF_Constant = 0x02 // constant effect means that duration will not be displayed
             };
 
-            void setWindowManager(WindowManager* parWindowManager) { mWindowManager = parWindowManager; }
+            void setWindowManager(MWBase::WindowManager* parWindowManager) { mWindowManager = parWindowManager; }
             void setEffectList(const SpellEffectList& list);
 
             static SpellEffectList effectListFromESM(const ESM::EffectList* effects);
@@ -234,20 +233,20 @@ namespace MWGui
         private:
             void updateWidgets();
 
-            WindowManager* mWindowManager;
+            MWBase::WindowManager* mWindowManager;
             SpellEffectList mEffectList;
         };
         typedef MWEffectList* MWEffectListPtr;
 
-        class MYGUI_EXPORT MWSpellEffect : public Widget
+        class MWSpellEffect : public MyGUI::Widget
         {
-            MYGUI_RTTI_DERIVED( MWSpellEffect );
+            MYGUI_RTTI_DERIVED( MWSpellEffect )
         public:
             MWSpellEffect();
 
             typedef ESM::ENAMstruct SpellEffectValue;
 
-            void setWindowManager(WindowManager* parWindowManager) { mWindowManager = parWindowManager; }
+            void setWindowManager(MWBase::WindowManager* parWindowManager) { mWindowManager = parWindowManager; }
             void setSpellEffect(const SpellEffectParams& params);
 
             std::string effectIDToString(const short effectID);
@@ -262,30 +261,30 @@ namespace MWGui
             virtual ~MWSpellEffect();
 
             virtual void initialiseOverride();
-            
+
         private:
 
             void updateWidgets();
 
-            WindowManager* mWindowManager;
+            MWBase::WindowManager* mWindowManager;
             SpellEffectParams mEffectParams;
-            MyGUI::ImageBox* imageWidget;
-            MyGUI::TextBox* textWidget;
+            MyGUI::ImageBox* mImageWidget;
+            MyGUI::TextBox* mTextWidget;
             int mRequestedWidth;
         };
         typedef MWSpellEffect* MWSpellEffectPtr;
 
-        class MYGUI_EXPORT MWDynamicStat : public Widget
+        class MWDynamicStat : public MyGUI::Widget
         {
-            MYGUI_RTTI_DERIVED( MWDynamicStat );
+            MYGUI_RTTI_DERIVED( MWDynamicStat )
         public:
             MWDynamicStat();
 
             void setValue(int value, int max);
             void setTitle(const std::string& text);
 
-            int getValue() const { return value; }
-            int getMax() const { return max; }
+            int getValue() const { return mValue; }
+            int getMax() const { return mMax; }
 
         protected:
             virtual ~MWDynamicStat();
@@ -294,12 +293,114 @@ namespace MWGui
 
         private:
 
-            int value, max;
-            MyGUI::TextBox* textWidget;
-            MyGUI::ProgressPtr barWidget;
-            MyGUI::TextBox* barTextWidget;
+            int mValue, mMax;
+            MyGUI::TextBox* mTextWidget;
+            MyGUI::ProgressPtr mBarWidget;
+            MyGUI::TextBox* mBarTextWidget;
         };
         typedef MWDynamicStat* MWDynamicStatPtr;
+
+
+
+
+
+        // ---------------------------------------------------------------------------------------------------------------------
+
+
+
+        class AutoSizedWidget
+        {
+        public:
+            virtual MyGUI::IntSize getRequestedSize() = 0;
+
+        protected:
+            void notifySizeChange(MyGUI::Widget* w);
+
+            MyGUI::Align mExpandDirection;
+        };
+
+        class AutoSizedTextBox : public AutoSizedWidget, public MyGUI::TextBox
+        {
+            MYGUI_RTTI_DERIVED( AutoSizedTextBox )
+
+        public:
+            virtual MyGUI::IntSize getRequestedSize();
+            virtual void setCaption(const MyGUI::UString& _value);
+
+        protected:
+            virtual void setPropertyOverride(const std::string& _key, const std::string& _value);
+        };
+
+        class AutoSizedButton : public AutoSizedWidget, public MyGUI::Button
+        {
+            MYGUI_RTTI_DERIVED( AutoSizedButton )
+
+        public:
+            virtual MyGUI::IntSize getRequestedSize();
+            virtual void setCaption(const MyGUI::UString& _value);
+
+        protected:
+            virtual void setPropertyOverride(const std::string& _key, const std::string& _value);
+        };
+
+        /**
+         * @brief A container widget that automatically sizes its children
+         * @note the box being an AutoSizedWidget as well allows to put boxes inside a box
+         */
+        class Box : public AutoSizedWidget
+        {
+        public:
+            Box();
+
+            void notifyChildrenSizeChanged();
+
+        protected:
+            virtual void align() = 0;
+
+            virtual void _setPropertyImpl(const std::string& _key, const std::string& _value);
+
+            int mSpacing; // how much space to put between elements
+
+            int mPadding; // outer padding
+
+            bool mAutoResize; // auto resize the box so that it exactly fits all elements
+        };
+
+        class HBox : public Box, public MyGUI::Widget
+        {
+            MYGUI_RTTI_DERIVED( HBox )
+
+        public:
+            virtual void setSize (const MyGUI::IntSize &_value);
+            virtual void setCoord (const MyGUI::IntCoord &_value);
+
+        protected:
+            virtual void align();
+            virtual MyGUI::IntSize getRequestedSize();
+
+            virtual void setPropertyOverride(const std::string& _key, const std::string& _value);
+
+            virtual void onWidgetCreated(MyGUI::Widget* _widget);
+            virtual void onWidgetDestroy(MyGUI::Widget* _widget);
+        };
+
+        class VBox : public Box, public MyGUI::Widget
+        {
+            MYGUI_RTTI_DERIVED( VBox)
+
+        public:
+            virtual void setSize (const MyGUI::IntSize &_value);
+            virtual void setCoord (const MyGUI::IntCoord &_value);
+
+        protected:
+            virtual void align();
+            virtual MyGUI::IntSize getRequestedSize();
+
+            virtual void setPropertyOverride(const std::string& _key, const std::string& _value);
+
+            virtual void onWidgetCreated(MyGUI::Widget* _widget);
+            virtual void onWidgetDestroy(MyGUI::Widget* _widget);
+        };
     }
 }
 

@@ -1,15 +1,10 @@
-#ifndef GAME_MMDIALOG_TOPIC_H
+#ifndef GAME_MWDIALOG_TOPIC_H
 #define GAME_MWDIALOG_TOPIC_H
 
 #include <string>
 #include <vector>
 
 #include "journalentry.hpp"
-
-namespace MWWorld
-{
-    class World;
-}
 
 namespace MWDialogue
 {
@@ -34,7 +29,7 @@ namespace MWDialogue
 
             virtual ~Topic();
 
-            virtual void addEntry (const JournalEntry& entry, const MWWorld::World& world);
+            virtual void addEntry (const JournalEntry& entry);
             ///< Add entry
             ///
             /// \note Redundant entries are ignored.

@@ -84,7 +84,7 @@ void Land::loadData()
     {
         mEsm->restoreContext(context);
 
-        //esm.getHNExact(landData->normals, sizeof(VNML), "VNML");
+        //mEsm->getHNExact(landData->normals, sizeof(VNML), "VNML");
         if (mEsm->isNextSub("VNML"))
         {
             mEsm->skipHSubSize(12675);

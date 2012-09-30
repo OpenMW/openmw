@@ -3,6 +3,11 @@
 
 #include <openengine/gui/layout.hpp>
 
+namespace MWBase
+{
+    class WindowManager;
+}
+
 namespace MWGui
 {
     class WindowManager;
@@ -10,13 +15,14 @@ namespace MWGui
     class WindowBase: public OEngine::GUI::Layout
     {
         public:
-        WindowBase(const std::string& parLayout, WindowManager& parWindowManager);
+        WindowBase(const std::string& parLayout, MWBase::WindowManager& parWindowManager);
 
         // Events
         typedef MyGUI::delegates::CMultiDelegate1<WindowBase*> EventHandle_WindowBase;
 
-        virtual void open();
-        virtual void setVisible(bool visible); // calls open() if visible is true and was false before
+        virtual void open() {}
+        virtual void close () {}
+        virtual void setVisible(bool visible);
         void center();
 
         /** Event : Dialog finished, OK button clicked.\n
@@ -25,9 +31,21 @@ namespace MWGui
         EventHandle_WindowBase eventDone;
 
         protected:
-        WindowManager& mWindowManager;
+        /// \todo remove
+        MWBase::WindowManager& mWindowManager;
+    };
+
+
+    /*
+     * "Modal" windows cause the rest of the interface to be unaccessible while they are visible
+     */
+    class WindowModal : public WindowBase
+    {
+    public:
+        WindowModal(const std::string& parLayout, MWBase::WindowManager& parWindowManager);
+        virtual void open();
+        virtual void close();
     };
 }
 
 #endif
-

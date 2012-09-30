@@ -38,6 +38,8 @@ namespace Files
  */
 struct LinuxPath
 {
+    LinuxPath(const std::string& application_name);
+
     /**
      * \brief Return path to the user directory.
      *
@@ -68,11 +70,20 @@ struct LinuxPath
     boost::filesystem::path getGlobalDataPath() const;
 
     /**
+     * \brief
+     *
+     * \return boost::filesystem::path
+     */
+    boost::filesystem::path getCachePath() const;
+
+    /**
      * \brief Gets the path of the installed Morrowind version if there is one.
      *
      * \return boost::filesystem::path
      */
     boost::filesystem::path getInstallPath() const;
+
+    std::string mName;
 };
 
 } /* namespace Files */

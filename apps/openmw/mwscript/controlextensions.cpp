@@ -8,15 +8,15 @@
 #include <components/interpreter/opcodes.hpp>
 
 #include "../mwbase/environment.hpp"
+#include "../mwbase/inputmanager.hpp"
 
 #include "../mwworld/player.hpp"
+#include "../mwworld/class.hpp"
 
 #include "../mwmechanics/npcstats.hpp"
 
 #include "interpretercontext.hpp"
 #include "ref.hpp"
-
-#include <iostream>
 
 namespace MWScript
 {
@@ -35,10 +35,25 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
-                    if (mEnable)
-                        std::cout << "enable: " << mControl << std::endl;
-                    else
-                        std::cout << "disable: " << mControl << std::endl;
+                    MWBase::Environment::get()
+                        .getInputManager()
+                        ->toggleControlSwitch(mControl, mEnable);
+                }
+        };
+
+        class OpGetDisabled : public Interpreter::Opcode0
+        {
+                std::string mControl;
+
+            public:
+
+                OpGetDisabled (const std::string& control)
+                : mControl (control)
+                {}
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    runtime.push(!MWBase::Environment::get().getInputManager()->getControlSwitch (mControl));
                 }
         };
 
@@ -58,54 +73,36 @@ namespace MWScript
         };
 
         template<class R>
-        class OpClearForceRun : public Interpreter::Opcode0
+        class OpClearMovementFlag : public Interpreter::Opcode0
         {
+                MWMechanics::NpcStats::Flag mFlag;
+
             public:
+
+                OpClearMovementFlag (MWMechanics::NpcStats::Flag flag) : mFlag (flag) {}
 
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    MWWorld::Class::get (ptr).getNpcStats (ptr).mForceRun = false;
+                    MWWorld::Class::get (ptr).getNpcStats (ptr).setMovementFlag (mFlag, false);
                 }
         };
 
         template<class R>
-        class OpForceRun : public Interpreter::Opcode0
+        class OpSetMovementFlag : public Interpreter::Opcode0
         {
+                MWMechanics::NpcStats::Flag mFlag;
+
             public:
+
+                OpSetMovementFlag (MWMechanics::NpcStats::Flag flag) : mFlag (flag) {}
 
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    MWWorld::Class::get (ptr).getNpcStats (ptr).mForceRun = true;
-                }
-        };
-
-        template<class R>
-        class OpClearForceSneak : public Interpreter::Opcode0
-        {
-            public:
-
-                virtual void execute (Interpreter::Runtime& runtime)
-                {
-                    MWWorld::Ptr ptr = R()(runtime);
-
-                    MWWorld::Class::get (ptr).getNpcStats (ptr).mForceSneak = false;
-                }
-        };
-
-        template<class R>
-        class OpForceSneak : public Interpreter::Opcode0
-        {
-            public:
-
-                virtual void execute (Interpreter::Runtime& runtime)
-                {
-                    MWWorld::Ptr ptr = R()(runtime);
-
-                    MWWorld::Class::get (ptr).getNpcStats (ptr).mForceSneak = true;
+                    MWWorld::Class::get (ptr).getNpcStats (ptr).setMovementFlag (mFlag, true);
                 }
         };
 
@@ -122,6 +119,7 @@ namespace MWScript
         const int opcodeClearForceSneakExplicit = 0x2000159;
         const int opcodeForceSneak = 0x200015a;
         const int opcodeForceSneakExplicit = 0x200015b;
+        const int opcodeGetDisabled = 0x2000175;
 
         const char *controls[numberOfControls] =
         {
@@ -138,6 +136,7 @@ namespace MWScript
             {
                 extensions.registerInstruction (enable + controls[i], "", opcodeEnable+i);
                 extensions.registerInstruction (disable + controls[i], "", opcodeDisable+i);
+                extensions.registerFunction (std::string("get") + controls[i] + std::string("disabled"), 'l', "", opcodeGetDisabled+i);
             }
 
             extensions.registerInstruction ("togglecollision", "", opcodeToggleCollision);
@@ -160,23 +159,28 @@ namespace MWScript
             {
                 interpreter.installSegment5 (opcodeEnable+i, new OpSetControl (controls[i], true));
                 interpreter.installSegment5 (opcodeDisable+i, new OpSetControl (controls[i], false));
+                interpreter.installSegment5 (opcodeGetDisabled+i, new OpGetDisabled (controls[i]));
             }
 
             interpreter.installSegment5 (opcodeToggleCollision, new OpToggleCollision);
 
-            interpreter.installSegment5 (opcodeClearForceRun, new OpClearForceRun<ImplicitRef>);
-            interpreter.installSegment5 (opcodeForceRun, new OpForceRun<ImplicitRef>);
-            interpreter.installSegment5 (opcodeClearForceSneak, new OpClearForceSneak<ImplicitRef>);
-            interpreter.installSegment5 (opcodeForceSneak, new OpForceSneak<ImplicitRef>);
+            interpreter.installSegment5 (opcodeClearForceRun,
+                new OpClearMovementFlag<ImplicitRef> (MWMechanics::NpcStats::Flag_ForceRun));
+            interpreter.installSegment5 (opcodeForceRun,
+                new OpSetMovementFlag<ImplicitRef> (MWMechanics::NpcStats::Flag_ForceRun));
+            interpreter.installSegment5 (opcodeClearForceSneak,
+                new OpClearMovementFlag<ImplicitRef> (MWMechanics::NpcStats::Flag_ForceSneak));
+            interpreter.installSegment5 (opcodeForceSneak,
+                new OpSetMovementFlag<ImplicitRef> (MWMechanics::NpcStats::Flag_ForceSneak));
 
             interpreter.installSegment5 (opcodeClearForceRunExplicit,
-                new OpClearForceRun<ExplicitRef>);
+                new OpClearMovementFlag<ExplicitRef> (MWMechanics::NpcStats::Flag_ForceRun));
             interpreter.installSegment5 (opcodeForceRunExplicit,
-                new OpForceRun<ExplicitRef>);
+                new OpSetMovementFlag<ExplicitRef> (MWMechanics::NpcStats::Flag_ForceRun));
             interpreter.installSegment5 (opcodeClearForceSneakExplicit,
-                new OpClearForceSneak<ExplicitRef>);
+                new OpClearMovementFlag<ExplicitRef> (MWMechanics::NpcStats::Flag_ForceSneak));
             interpreter.installSegment5 (opcodeForceSneakExplicit,
-                new OpForceSneak<ExplicitRef>);
+                new OpSetMovementFlag<ExplicitRef> (MWMechanics::NpcStats::Flag_ForceSneak));
         }
     }
 }

@@ -3,6 +3,11 @@
 
 #include "window_pinnable_base.hpp"
 
+namespace MWRender
+{
+    class GlobalMap;
+}
+
 namespace MWGui
 {
     class LocalMapBase
@@ -18,6 +23,15 @@ namespace MWGui
 
         void toggleFogOfWar();
 
+        struct MarkerPosition
+        {
+            bool interior;
+            int cellX;
+            int cellY;
+            float nX;
+            float nY;
+        };
+
     protected:
         int mCurX, mCurY;
         bool mInterior;
@@ -32,6 +46,11 @@ namespace MWGui
 
         void applyFogOfWar();
 
+        void onMarkerFocused(MyGUI::Widget* w1, MyGUI::Widget* w2);
+        void onMarkerUnfocused(MyGUI::Widget* w1, MyGUI::Widget* w2);
+
+        virtual void notifyPlayerUpdate() {}
+
         OEngine::GUI::Layout* mLayout;
 
         bool mMapDragAndDrop;
@@ -45,24 +64,39 @@ namespace MWGui
     class MapWindow : public MWGui::WindowPinnableBase, public LocalMapBase
     {
     public:
-        MapWindow(WindowManager& parWindowManager);
-        virtual ~MapWindow(){}
+        MapWindow(MWBase::WindowManager& parWindowManager, const std::string& cacheDir);
+        virtual ~MapWindow();
 
         void setCellName(const std::string& cellName);
-  
+
+        void addVisitedLocation(const std::string& name, int x, int y); // adds the marker to the global map
+
+        virtual void open();
+
     private:
         void onDragStart(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id);
         void onMouseDrag(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id);
         void onWorldButtonClicked(MyGUI::Widget* _sender);
 
+        void globalMapUpdatePlayer();
+
         MyGUI::ScrollView* mGlobalMap;
-        MyGUI::ImageBox* mPlayerArrow;
+        MyGUI::ImageBox* mGlobalMapImage;
+        MyGUI::ImageBox* mPlayerArrowLocal;
+        MyGUI::ImageBox* mPlayerArrowGlobal;
         MyGUI::Button* mButton;
         MyGUI::IntPoint mLastDragPos;
         bool mGlobal;
 
+        MyGUI::Button* mEventBoxGlobal;
+        MyGUI::Button* mEventBoxLocal;
+
+        MWRender::GlobalMap* mGlobalMapRender;
+
     protected:
         virtual void onPinToggled();
+
+        virtual void notifyPlayerUpdate();
     };
 }
 #endif

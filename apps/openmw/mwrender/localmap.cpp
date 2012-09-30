@@ -1,13 +1,17 @@
 #include "localmap.hpp"
-#include "renderingmanager.hpp"
-
-#include "../mwbase/environment.hpp"
-#include "../mwworld/world.hpp"
-#include "../mwgui/window_manager.hpp"
-#include "renderconst.hpp"
 
 #include <OgreOverlayManager.h>
 #include <OgreMaterialManager.h>
+#include <OgreHardwarePixelBuffer.h>
+
+#include <components/esm_store/store.hpp>
+
+#include "../mwbase/environment.hpp"
+#include "../mwbase/world.hpp"
+#include "../mwbase/windowmanager.hpp"
+
+#include "renderconst.hpp"
+#include "renderingmanager.hpp"
 
 using namespace MWRender;
 using namespace Ogre;
@@ -226,7 +230,7 @@ void LocalMap::render(const float x, const float y,
             vp->setVisibilityMask(RV_Map);
 
             // use fallback techniques without shadows and without mrt
-            vp->setMaterialScheme("Fallback");
+            vp->setMaterialScheme("local_map");
 
             rtt->update();
 
@@ -266,6 +270,34 @@ void LocalMap::render(const float x, const float y,
     mRendering->getScene()->setFog(FOG_LINEAR, clr, 0, fStart, fEnd);
 }
 
+void LocalMap::getInteriorMapPosition (Ogre::Vector2 pos, float& nX, float& nY, int& x, int& y)
+{
+    pos = rotatePoint(pos, Vector2(mBounds.getCenter().x, mBounds.getCenter().z), mAngle);
+
+    Vector2 min(mBounds.getMinimum().x, mBounds.getMinimum().z);
+
+    x = std::ceil((pos.x - min.x)/sSize)-1;
+    y = std::ceil((pos.y - min.y)/sSize)-1;
+
+    nX = (pos.x - min.x - sSize*x)/sSize;
+    nY = (pos.y - min.y - sSize*y)/sSize;
+}
+
+bool LocalMap::isPositionExplored (float nX, float nY, int x, int y, bool interior)
+{
+    std::string texName = (interior ? mInteriorName + "_" : "Cell_") + coordStr(x, y);
+
+    if (mBuffers.find(texName) == mBuffers.end())
+        return false;
+
+    int texU = (sFogOfWarResolution-1) * nX;
+    int texV = (sFogOfWarResolution-1) * nY;
+
+    Ogre::uint32 clr = mBuffers[texName][texV * sFogOfWarResolution + texU];
+    uint8 alpha = (clr >> 24);
+    return alpha < 200;
+}
+
 void LocalMap::updatePlayer (const Ogre::Vector3& position, const Ogre::Quaternion& orientation)
 {
     if (sFogOfWarSkip != 0)
@@ -277,16 +309,14 @@ void LocalMap::updatePlayer (const Ogre::Vector3& position, const Ogre::Quaterni
 
     // retrieve the x,y grid coordinates the player is in
     int x,y;
-    Vector3 _pos(position.x, 0, position.z);
-    Vector2 pos(_pos.x, _pos.z);
+    float u,v;
+
+    Vector2 pos(position.x, position.z);
 
     if (mInterior)
-    {
-        pos = rotatePoint(pos, Vector2(mBounds.getCenter().x, mBounds.getCenter().z), mAngle);
-    }
+        getInteriorMapPosition(pos, u,v, x,y);
 
-
-    Vector3 playerdirection = -mCameraRotNode->convertWorldToLocalOrientation(orientation).zAxis();
+    Vector3 playerdirection = mCameraRotNode->convertWorldToLocalOrientation(orientation).zAxis();
 
     Vector2 min(mBounds.getMinimum().x, mBounds.getMinimum().z);
 
@@ -299,14 +329,10 @@ void LocalMap::updatePlayer (const Ogre::Vector3& position, const Ogre::Quaterni
     }
     else
     {
-        x = std::ceil((pos.x - min.x)/sSize)-1;
-        y = std::ceil((pos.y - min.y)/sSize)-1;
-
         MWBase::Environment::get().getWindowManager()->setInteriorMapTexture(x,y);
     }
 
     // convert from world coordinates to texture UV coordinates
-    float u,v;
     std::string texBaseName;
     if (!mInterior)
     {
@@ -316,9 +342,6 @@ void LocalMap::updatePlayer (const Ogre::Vector3& position, const Ogre::Quaterni
     }
     else
     {
-        u = (pos.x - min.x - sSize*x)/sSize;
-        v = (pos.y - min.y - sSize*y)/sSize;
-
         texBaseName = mInteriorName + "_";
     }
 

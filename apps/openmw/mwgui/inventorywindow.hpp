@@ -1,6 +1,8 @@
 #ifndef MGUI_Inventory_H
 #define MGUI_Inventory_H
 
+#include "../mwrender/characterpreview.hpp"
+
 #include "container.hpp"
 #include "window_pinnable_base.hpp"
 
@@ -9,7 +11,7 @@ namespace MWGui
     class InventoryWindow : public ContainerBase, public WindowPinnableBase
     {
         public:
-            InventoryWindow(WindowManager& parWindowManager,DragAndDrop* dragAndDrop);
+            InventoryWindow(MWBase::WindowManager& parWindowManager,DragAndDrop* dragAndDrop);
 
             virtual void open();
 
@@ -22,8 +24,13 @@ namespace MWGui
 
             int getPlayerGold();
 
+            MyGUI::IntCoord getAvatarScreenCoord();
+
+            MWWorld::Ptr getAvatarSelectedItem(int x, int y);
+
         protected:
             MyGUI::Widget* mAvatar;
+            MyGUI::ImageBox* mAvatarImage;
             MyGUI::TextBox* mArmorRating;
             MyGUI::ProgressBar* mEncumbranceBar;
             MyGUI::TextBox* mEncumbranceText;
@@ -36,6 +43,11 @@ namespace MWGui
             MyGUI::Button* mFilterApparel;
             MyGUI::Button* mFilterMagic;
             MyGUI::Button* mFilterMisc;
+
+            int mLastXSize;
+            int mLastYSize;
+
+            MWRender::InventoryPreview mPreview;
 
             bool mTrading;
 

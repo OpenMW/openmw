@@ -1,33 +1,56 @@
 #ifndef GAME_MWRENDER_WATER_H
 #define GAME_MWRENDER_WATER_H
 
-#include <Ogre.h>
+#include <OgrePlane.h>
+#include <OgreRenderQueue.h>
+#include <OgreRenderQueueListener.h>
+#include <OgreRenderTargetListener.h>
+#include <OgreMaterial.h>
+#include <OgreTexture.h>
+
 #include <components/esm/loadcell.hpp>
 #include <components/settings/settings.hpp>
 
 #include "renderconst.hpp"
 
+#include <extern/shiny/Main/MaterialInstance.hpp>
+
+namespace Ogre
+{
+    class Camera;
+    class SceneManager;
+    class SceneNode;
+    class Entity;
+    class Vector3;
+    struct RenderTargetEvent;
+};
 
 namespace MWRender {
 
     class SkyManager;
     class RenderingManager;
 
-    /// Water rendering 	
-    class Water : public Ogre::RenderTargetListener, public Ogre::RenderQueueListener
+    /// Water rendering
+    class Water : public Ogre::RenderTargetListener, public Ogre::RenderQueueListener, public sh::MaterialInstanceListener
     {
         static const int CELL_SIZE = 8192;
         Ogre::Camera *mCamera;
         Ogre::SceneManager *mSceneManager;
 
         Ogre::Plane mWaterPlane;
+        Ogre::Plane mErrorPlane;
+
         Ogre::SceneNode *mWaterNode;
         Ogre::Entity *mWater;
+
+        //Ogre::SceneNode* mUnderwaterDome;
 
         bool mIsUnderwater;
         bool mActive;
         bool mToggled;
         int mTop;
+
+        float mWaterTimer;
 
         bool mReflectionRenderActive;
 
@@ -50,7 +73,6 @@ namespace MWRender {
 
         std::string mCompositorName;
 
-        void createMaterial();
         Ogre::MaterialPtr mMaterial;
 
         Ogre::Camera* mReflectionCamera;
@@ -68,7 +90,7 @@ namespace MWRender {
         void setActive(bool active);
 
         void toggle();
-        void update();
+        void update(float dt);
 
         void assignTextures();
 
@@ -76,9 +98,13 @@ namespace MWRender {
 
         void processChangedSettings(const Settings::CategorySettingVector& settings);
 
-        void checkUnderwater(float y);
+        /// Updates underwater state accordingly
+        void updateUnderwater(bool underwater);
         void changeCell(const ESM::Cell* cell);
         void setHeight(const float height);
+
+        virtual void requestedConfiguration (sh::MaterialInstance* m, const std::string& configuration);
+        virtual void createdConfiguration (sh::MaterialInstance* m, const std::string& configuration);
 
     };
 

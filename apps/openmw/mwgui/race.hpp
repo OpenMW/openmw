@@ -1,11 +1,15 @@
 #ifndef MWGUI_RACE_H
 #define MWGUI_RACE_H
 
+
+#include <boost/array.hpp>
+
 #include <components/esm_store/store.hpp>
+
+#include "../mwrender/characterpreview.hpp"
 
 #include "window_base.hpp"
 
-#include <boost/array.hpp>
 
 namespace MWGui
 {
@@ -14,17 +18,15 @@ namespace MWGui
 
 /*
   This file contains the dialog for choosing a race.
-  Layout is defined by resources/mygui/openmw_chargen_race_layout.xml.
+  Layout is defined by resources/mygui/openmw_chargen_race.layout.
  */
 
 namespace MWGui
 {
-    using namespace MyGUI;
-
     class RaceDialog : public WindowBase
     {
     public:
-        RaceDialog(WindowManager& parWindowManager);
+        RaceDialog(MWBase::WindowManager& parWindowManager);
 
         enum Gender
         {
@@ -32,21 +34,22 @@ namespace MWGui
             GM_Female
         };
 
-        const std::string &getRaceId() const { return currentRaceId; }
-        Gender getGender() const { return genderIndex == 0 ? GM_Male : GM_Female; }
+        const std::string &getRaceId() const { return mCurrentRaceId; }
+        Gender getGender() const { return mGenderIndex == 0 ? GM_Male : GM_Female; }
         // getFace()
         // getHair()
 
         void setRaceId(const std::string &raceId);
-        void setGender(Gender gender) { genderIndex = gender == GM_Male ? 0 : 1; }
+        void setGender(Gender gender) { mGenderIndex = gender == GM_Male ? 0 : 1; }
         // setFace()
         // setHair()
 
         void setNextButtonShow(bool shown);
-        void open();
+        virtual void open();
+        virtual void close();
 
         // Events
-        typedef delegates::CMultiDelegate0 EventHandle_Void;
+        typedef MyGUI::delegates::CMultiDelegate0 EventHandle_Void;
 
         /** Event : Back button clicked.\n
             signature : void method()\n
@@ -75,20 +78,24 @@ namespace MWGui
         void updateSkills();
         void updateSpellPowers();
 
-        MyGUI::CanvasPtr  appearanceBox;
-        MyGUI::ListBox*    raceList;
-        MyGUI::ScrollBar* headRotate;
+        MyGUI::ImageBox*  mPreviewImage;
+        MyGUI::ListBox*   mRaceList;
+        MyGUI::ScrollBar* mHeadRotate;
 
-        MyGUI::WidgetPtr skillList;
-        std::vector<MyGUI::WidgetPtr> skillItems;
+        MyGUI::WidgetPtr mSkillList;
+        std::vector<MyGUI::WidgetPtr> mSkillItems;
 
-        MyGUI::WidgetPtr spellPowerList;
-        std::vector<MyGUI::WidgetPtr> spellPowerItems;
+        MyGUI::WidgetPtr mSpellPowerList;
+        std::vector<MyGUI::WidgetPtr> mSpellPowerItems;
 
-        int genderIndex, faceIndex, hairIndex;
-        int faceCount, hairCount;
+        int mGenderIndex, mFaceIndex, mHairIndex;
+        int mFaceCount, mHairCount;
 
-        std::string currentRaceId;
+        std::string mCurrentRaceId;
+
+        float mCurrentAngle;
+
+        MWRender::RaceSelectionPreview* mPreview;
     };
 }
 #endif

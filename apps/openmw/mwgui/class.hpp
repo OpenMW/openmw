@@ -7,19 +7,15 @@
 
 /*
   This file contains the dialogs for choosing a class.
-  Layout is defined by resources/mygui/openmw_chargen_class_layout.xml.
+  Layout is defined by resources/mygui/openmw_chargen_class.layout.
  */
 
 namespace MWGui
 {
-    using namespace MyGUI;
-
-    class WindowManager;
-
     class InfoBoxDialog : public WindowBase
     {
     public:
-        InfoBoxDialog(WindowManager& parWindowManager);
+        InfoBoxDialog(MWBase::WindowManager& parWindowManager);
 
         typedef std::vector<std::string> ButtonList;
 
@@ -27,11 +23,11 @@ namespace MWGui
         std::string getText() const;
         void setButtons(ButtonList &buttons);
 
-        void open();
+        virtual void open();
         int getChosenButton() const;
 
         // Events
-        typedef delegates::CMultiDelegate1<int> EventHandle_Int;
+        typedef MyGUI::delegates::CMultiDelegate1<int> EventHandle_Int;
 
         /** Event : Button was clicked.\n
             signature : void method(int index)\n
@@ -45,11 +41,11 @@ namespace MWGui
 
         void fitToText(MyGUI::TextBox* widget);
         void layoutVertically(MyGUI::WidgetPtr widget, int margin);
-        int currentButton;
-        MyGUI::WidgetPtr textBox;
-        MyGUI::TextBox* text;
-        MyGUI::WidgetPtr buttonBar;
-        std::vector<MyGUI::ButtonPtr> buttons;
+        int mCurrentButton;
+        MyGUI::WidgetPtr mTextBox;
+        MyGUI::TextBox* mText;
+        MyGUI::WidgetPtr mButtonBar;
+        std::vector<MyGUI::ButtonPtr> mButtons;
     };
 
     // Lets the player choose between 3 ways of creating a class
@@ -64,21 +60,19 @@ namespace MWGui
             Class_Create = 2,
             Class_Back = 3
         };
-        ClassChoiceDialog(WindowManager& parWindowManager);
+        ClassChoiceDialog(MWBase::WindowManager& parWindowManager);
     };
 
     class GenerateClassResultDialog : public WindowBase
     {
     public:
-        GenerateClassResultDialog(WindowManager& parWindowManager);
+        GenerateClassResultDialog(MWBase::WindowManager& parWindowManager);
 
         std::string getClassId() const;
         void setClassId(const std::string &classId);
 
-        void open();
-
         // Events
-        typedef delegates::CMultiDelegate0 EventHandle_Void;
+        typedef MyGUI::delegates::CMultiDelegate0 EventHandle_Void;
 
         /** Event : Back button clicked.\n
             signature : void method()\n
@@ -90,25 +84,25 @@ namespace MWGui
         void onBackClicked(MyGUI::Widget* _sender);
 
     private:
-        MyGUI::ImageBox* classImage;
-        MyGUI::TextBox*  className;
+        MyGUI::ImageBox* mClassImage;
+        MyGUI::TextBox*  mClassName;
 
-        std::string currentClassId;
+        std::string mCurrentClassId;
     };
 
     class PickClassDialog : public WindowBase
     {
     public:
-        PickClassDialog(WindowManager& parWindowManager);
+        PickClassDialog(MWBase::WindowManager& parWindowManager);
 
-        const std::string &getClassId() const { return currentClassId; }
+        const std::string &getClassId() const { return mCurrentClassId; }
         void setClassId(const std::string &classId);
 
         void setNextButtonShow(bool shown);
-        void open();
+        virtual void open();
 
         // Events
-        typedef delegates::CMultiDelegate0 EventHandle_Void;
+        typedef MyGUI::delegates::CMultiDelegate0 EventHandle_Void;
 
         /** Event : Back button clicked.\n
             signature : void method()\n
@@ -125,26 +119,26 @@ namespace MWGui
         void updateClasses();
         void updateStats();
 
-        MyGUI::ImageBox* classImage;
-        MyGUI::ListBox*        classList;
-        MyGUI::TextBox*  specializationName;
-        Widgets::MWAttributePtr favoriteAttribute[2];
-        Widgets::MWSkillPtr   majorSkill[5];
-        Widgets::MWSkillPtr   minorSkill[5];
+        MyGUI::ImageBox* mClassImage;
+        MyGUI::ListBox*  mClassList;
+        MyGUI::TextBox*  mSpecializationName;
+        Widgets::MWAttributePtr mFavoriteAttribute[2];
+        Widgets::MWSkillPtr   mMajorSkill[5];
+        Widgets::MWSkillPtr   mMinorSkill[5];
 
-        std::string currentClassId;
+        std::string mCurrentClassId;
     };
 
-    class SelectSpecializationDialog : public WindowBase
+    class SelectSpecializationDialog : public WindowModal
     {
     public:
-        SelectSpecializationDialog(WindowManager& parWindowManager);
+        SelectSpecializationDialog(MWBase::WindowManager& parWindowManager);
         ~SelectSpecializationDialog();
 
-        ESM::Class::Specialization getSpecializationId() const { return specializationId; }
+        ESM::Class::Specialization getSpecializationId() const { return mSpecializationId; }
 
         // Events
-        typedef delegates::CMultiDelegate0 EventHandle_Void;
+        typedef MyGUI::delegates::CMultiDelegate0 EventHandle_Void;
 
         /** Event : Cancel button clicked.\n
             signature : void method()\n
@@ -161,23 +155,23 @@ namespace MWGui
         void onCancelClicked(MyGUI::Widget* _sender);
 
     private:
-        MyGUI::TextBox      *specialization0, *specialization1, *specialization2;
+        MyGUI::TextBox *mSpecialization0, *mSpecialization1, *mSpecialization2;
 
-        ESM::Class::Specialization specializationId;
+        ESM::Class::Specialization mSpecializationId;
     };
 
-    class SelectAttributeDialog : public WindowBase
+    class SelectAttributeDialog : public WindowModal
     {
     public:
-        SelectAttributeDialog(WindowManager& parWindowManager);
+        SelectAttributeDialog(MWBase::WindowManager& parWindowManager);
         ~SelectAttributeDialog();
 
-        ESM::Attribute::AttributeID getAttributeId() const { return attributeId; }
-        Widgets::MWAttributePtr getAffectedWidget() const { return affectedWidget; }
-        void setAffectedWidget(Widgets::MWAttributePtr widget) { affectedWidget = widget; }
+        ESM::Attribute::AttributeID getAttributeId() const { return mAttributeId; }
+        Widgets::MWAttributePtr getAffectedWidget() const { return mAffectedWidget; }
+        void setAffectedWidget(Widgets::MWAttributePtr widget) { mAffectedWidget = widget; }
 
         // Events
-        typedef delegates::CMultiDelegate0 EventHandle_Void;
+        typedef MyGUI::delegates::CMultiDelegate0 EventHandle_Void;
 
         /** Event : Cancel button clicked.\n
             signature : void method()\n
@@ -194,23 +188,23 @@ namespace MWGui
         void onCancelClicked(MyGUI::Widget* _sender);
 
     private:
-        Widgets::MWAttributePtr affectedWidget;
+        Widgets::MWAttributePtr mAffectedWidget;
 
-        ESM::Attribute::AttributeID attributeId;
+        ESM::Attribute::AttributeID mAttributeId;
     };
 
-    class SelectSkillDialog : public WindowBase
+    class SelectSkillDialog : public WindowModal
     {
     public:
-        SelectSkillDialog(WindowManager& parWindowManager);
+        SelectSkillDialog(MWBase::WindowManager& parWindowManager);
         ~SelectSkillDialog();
 
-        ESM::Skill::SkillEnum getSkillId() const { return skillId; }
-        Widgets::MWSkillPtr getAffectedWidget() const { return affectedWidget; }
-        void setAffectedWidget(Widgets::MWSkillPtr widget) { affectedWidget = widget; }
+        ESM::Skill::SkillEnum getSkillId() const { return mSkillId; }
+        Widgets::MWSkillPtr getAffectedWidget() const { return mAffectedWidget; }
+        void setAffectedWidget(Widgets::MWSkillPtr widget) { mAffectedWidget = widget; }
 
         // Events
-        typedef delegates::CMultiDelegate0 EventHandle_Void;
+        typedef MyGUI::delegates::CMultiDelegate0 EventHandle_Void;
 
         /** Event : Cancel button clicked.\n
             signature : void method()\n
@@ -227,34 +221,34 @@ namespace MWGui
         void onCancelClicked(MyGUI::Widget* _sender);
 
     private:
-        Widgets::MWSkillPtr combatSkill[9];
-        Widgets::MWSkillPtr magicSkill[9];
-        Widgets::MWSkillPtr stealthSkill[9];
-        Widgets::MWSkillPtr affectedWidget;
+        Widgets::MWSkillPtr mCombatSkill[9];
+        Widgets::MWSkillPtr mMagicSkill[9];
+        Widgets::MWSkillPtr mStealthSkill[9];
+        Widgets::MWSkillPtr mAffectedWidget;
 
-        ESM::Skill::SkillEnum skillId;
+        ESM::Skill::SkillEnum mSkillId;
     };
 
-    class DescriptionDialog : public WindowBase
+    class DescriptionDialog : public WindowModal
     {
     public:
-        DescriptionDialog(WindowManager& parWindowManager);
+        DescriptionDialog(MWBase::WindowManager& parWindowManager);
         ~DescriptionDialog();
 
-        std::string getTextInput() const { return textEdit ? textEdit->getOnlyText() : ""; }
-        void setTextInput(const std::string &text) { if (textEdit) textEdit->setOnlyText(text); }
+        std::string getTextInput() const { return mTextEdit ? mTextEdit->getOnlyText() : ""; }
+        void setTextInput(const std::string &text) { if (mTextEdit) mTextEdit->setOnlyText(text); }
 
     protected:
         void onOkClicked(MyGUI::Widget* _sender);
 
     private:
-        MyGUI::EditPtr textEdit;
+        MyGUI::EditPtr mTextEdit;
     };
 
     class CreateClassDialog : public WindowBase
     {
     public:
-        CreateClassDialog(WindowManager& parWindowManager);
+        CreateClassDialog(MWBase::WindowManager& parWindowManager);
         virtual ~CreateClassDialog();
 
         std::string getName() const;
@@ -265,10 +259,9 @@ namespace MWGui
         std::vector<ESM::Skill::SkillEnum> getMinorSkills() const;
 
         void setNextButtonShow(bool shown);
-        void open();
 
         // Events
-        typedef delegates::CMultiDelegate0 EventHandle_Void;
+        typedef MyGUI::delegates::CMultiDelegate0 EventHandle_Void;
 
         /** Event : Back button clicked.\n
             signature : void method()\n
@@ -294,20 +287,20 @@ namespace MWGui
         void update();
 
     private:
-        MyGUI::EditPtr          editName;
-        MyGUI::TextBox*    specializationName;
-        Widgets::MWAttributePtr favoriteAttribute0, favoriteAttribute1;
-        Widgets::MWSkillPtr     majorSkill[5];
-        Widgets::MWSkillPtr     minorSkill[5];
-        std::vector<Widgets::MWSkillPtr> skills;
-        std::string             description;
+        MyGUI::EditPtr                   mEditName;
+        MyGUI::TextBox*                  mSpecializationName;
+        Widgets::MWAttributePtr          mFavoriteAttribute0, mFavoriteAttribute1;
+        Widgets::MWSkillPtr              mMajorSkill[5];
+        Widgets::MWSkillPtr              mMinorSkill[5];
+        std::vector<Widgets::MWSkillPtr> mSkills;
+        std::string                      mDescription;
 
-        SelectSpecializationDialog *specDialog;
-        SelectAttributeDialog *attribDialog;
-        SelectSkillDialog *skillDialog;
-        DescriptionDialog *descDialog;
+        SelectSpecializationDialog       *mSpecDialog;
+        SelectAttributeDialog            *mAttribDialog;
+        SelectSkillDialog                *mSkillDialog;
+        DescriptionDialog                *mDescDialog;
 
-        ESM::Class::Specialization specializationId;
+        ESM::Class::Specialization       mSpecializationId;
     };
 }
 #endif

@@ -25,37 +25,21 @@
 #define _BULLET_NIF_LOADER_H_
 
 #include <OgreMesh.h>
-#include <assert.h>
+#include <cassert>
 #include <string>
 #include <BulletCollision/CollisionShapes/btBvhTriangleMeshShape.h>
 #include <BulletCollision/CollisionShapes/btConvexTriangleMeshShape.h>
 #include <btBulletDynamicsCommon.h>
-#include <btBulletCollisionCommon.h>
 #include "openengine/bullet/BulletShapeLoader.h"
 
-#include <vector>
-#include <list>
 // For warning messages
 #include <iostream>
-
-// float infinity
-#include <limits>
 
 namespace Nif
 {
     class Node;
     class Transformation;
     class NiTriShape;
-    class Vector;
-    class Matrix;
-}
-
-namespace Mangle
-{
-    namespace VFS
-    {
-        class OgreVFS;
-    }
 }
 
 namespace NifBullet
@@ -68,7 +52,7 @@ class ManualBulletShapeLoader : public BulletShapeLoader
 {
 public:
 
-    ManualBulletShapeLoader():resourceGroup("General"){vfs = 0;}
+    ManualBulletShapeLoader():resourceGroup("General"){}
     virtual ~ManualBulletShapeLoader();
 
     void warn(std::string msg)
@@ -95,22 +79,18 @@ public:
     void load(const std::string &name,const std::string &group);
 
 private:
-    Ogre::Matrix3 getMatrix(Nif::Transformation* tr);
+    btQuaternion getbtQuat(Ogre::Matrix3 &m);
 
-    Ogre::Vector3 getVector(Nif::Transformation* tr);
-
-    btQuaternion getbtQuat(Ogre::Matrix3 m);
-
-    btVector3 getbtVector(Nif::Vector v);
+    btVector3 getbtVector(Ogre::Vector3 &v);
 
     /**
     *Parse a node.
     */
     void handleNode(Nif::Node *node, int flags,
-        Ogre::Matrix3 parentRot,Ogre::Vector3 parentPos,float parentScale,bool hasCollisionNode,bool isCollisionNode,bool raycastingOnly);
+        const Nif::Transformation *trafo, bool hasCollisionNode,bool isCollisionNode,bool raycastingOnly);
 
     /**
-    *Helpler function
+    *Helper function
     */
     bool hasRootCollisionNode(Nif::Node* node);
 
@@ -119,13 +99,14 @@ private:
     */
     void handleNiTriShape(Nif::NiTriShape *shape, int flags,Ogre::Matrix3 parentRot,Ogre::Vector3 parentPos,float parentScales,bool raycastingOnly);
 
-    Mangle::VFS::OgreVFS *vfs;
-
     std::string resourceName;
     std::string resourceGroup;
 
+    
+
     BulletShape* cShape;//current shape
     btTriangleMesh *mTriMesh;
+    btBoxShape *mBoundingBox;
     btBvhTriangleMeshShape* currentShape;//the shape curently under construction
 };
 

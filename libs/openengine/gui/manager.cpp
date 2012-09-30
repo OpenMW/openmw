@@ -1,6 +1,6 @@
 #include <MyGUI.h>
 #include <MyGUI_OgrePlatform.h>
-#include <assert.h>
+#include <cassert>
 
 #include "manager.hpp"
 
@@ -8,40 +8,43 @@ using namespace OEngine::GUI;
 
 void MyGUIManager::setup(Ogre::RenderWindow *wnd, Ogre::SceneManager *mgr, bool logging, const std::string& logDir)
 {
-  assert(wnd);
-  assert(mgr);
+    assert(wnd);
+    assert(mgr);
 
-  using namespace MyGUI;
+    mSceneMgr = mgr;
 
-  // Enable/disable MyGUI logging to stdout. (Logging to MyGUI.log is
-  // still enabled.) In order to do this we have to initialize the log
-  // manager before the main gui system itself, otherwise the main
-  // object will get the chance to spit out a few messages before we
-  // can able to disable it.
+    using namespace MyGUI;
 
-  std::string theLogFile = std::string(MYGUI_PLATFORM_LOG_FILENAME);
-  if(!logDir.empty())
-      theLogFile.insert(0, logDir);
+    // Enable/disable MyGUI logging to stdout. (Logging to MyGUI.log is
+    // still enabled.) In order to do this we have to initialize the log
+    // manager before the main gui system itself, otherwise the main
+    // object will get the chance to spit out a few messages before we
+    // can able to disable it.
 
-  // Set up OGRE platform. We might make this more generic later.
-  mPlatform = new OgrePlatform();
-  LogManager::getInstance().setSTDOutputEnabled(logging);
-  mPlatform->initialise(wnd, mgr, "General", theLogFile);
+    std::string theLogFile = std::string(MYGUI_PLATFORM_LOG_FILENAME);
+    if(!logDir.empty())
+        theLogFile.insert(0, logDir);
+
+    // Set up OGRE platform. We might make this more generic later.
+    mPlatform = new OgrePlatform();
+    LogManager::getInstance().setSTDOutputEnabled(logging);
+    mPlatform->initialise(wnd, mgr, "General", theLogFile);
 
 
-  // Create GUI
-  mGui = new Gui();
-  mGui->initialise("core.xml");
+    // Create GUI
+    mGui = new Gui();
+    mGui->initialise("core.xml");
 }
 
 void MyGUIManager::shutdown()
 {
-  delete mGui;
-  if(mPlatform)
+    mGui->shutdown ();
+    delete mGui;
+    if(mPlatform)
     {
-      mPlatform->shutdown();
-      delete mPlatform;
+        mPlatform->shutdown();
+        delete mPlatform;
     }
-  mGui = NULL;
-  mPlatform = NULL;
+    mGui = NULL;
+    mPlatform = NULL;
 }

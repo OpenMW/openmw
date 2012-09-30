@@ -1,10 +1,14 @@
 #ifndef MWMECHANICS_SPELLSUCCESS_H
 #define MWMECHANICS_SPELLSUCCESS_H
 
-#include "../mwworld/ptr.hpp"
-#include "../mwworld/world.hpp"
+#include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
+
+#include "../mwworld/ptr.hpp"
+#include "../mwworld/class.hpp"
 #include "../mwmechanics/creaturestats.hpp"
+
+#include <components/esm_store/store.hpp>
 
 #include "npcstats.hpp"
 
@@ -39,7 +43,7 @@ namespace MWMechanics
         {
             const ESM::MagicEffect* effect = MWBase::Environment::get().getWorld()->getStore().magicEffects.find(it->effectID);
             int _school = effect->data.school;
-            int _skillLevel = stats.mSkill[spellSchoolToSkill(_school)].getModified();
+            int _skillLevel = stats.getSkill (spellSchoolToSkill(_school)).getModified();
 
             if (school == -1)
             {
@@ -76,15 +80,15 @@ namespace MWMechanics
         NpcStats& stats = MWWorld::Class::get(actor).getNpcStats(actor);
         CreatureStats& creatureStats = MWWorld::Class::get(actor).getCreatureStats(actor);
 
-        int skillLevel = stats.mSkill[getSpellSchool(spellId, actor)].getModified();
+        int skillLevel = stats.getSkill (getSpellSchool(spellId, actor)).getModified();
 
         // Sound magic effect (reduces spell casting chance)
-        int soundMagnitude = creatureStats.mMagicEffects.get (MWMechanics::EffectKey (48)).mMagnitude;
+        int soundMagnitude = creatureStats.getMagicEffects().get (MWMechanics::EffectKey (48)).mMagnitude;
 
-        int willpower = creatureStats.mAttributes[ESM::Attribute::Willpower].getModified();
-        int luck = creatureStats.mAttributes[ESM::Attribute::Luck].getModified();
-        int currentFatigue = creatureStats.mDynamic[2].getCurrent();
-        int maxFatigue = creatureStats.mDynamic[2].getModified();
+        int willpower = creatureStats.getAttribute(ESM::Attribute::Willpower).getModified();
+        int luck = creatureStats.getAttribute(ESM::Attribute::Luck).getModified();
+        int currentFatigue = creatureStats.getFatigue().getCurrent();
+        int maxFatigue = creatureStats.getFatigue().getModified();
         int spellCost = spell->data.cost;
 
         // There we go, all needed variables are there, lets go

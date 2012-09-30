@@ -1,7 +1,7 @@
 #ifndef MISC_LIST_H
 #define MISC_LIST_H
 
-#include <assert.h>
+#include <cassert>
 
 namespace Misc{
 

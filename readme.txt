@@ -3,7 +3,7 @@ OpenMW: A reimplementation of The Elder Scrolls III: Morrowind
 OpenMW is an attempt at recreating the engine for the popular role-playing game
 Morrowind by Bethesda Softworks. You need to own and install the original game for OpenMW to work.
 
-Version: 0.16.0
+Version: 0.18.0
 License: GPL (see GPL3.txt for more information)
 Website: http://www.openmw.org
 
@@ -11,8 +11,6 @@ Font Licenses:
 EBGaramond-Regular.ttf: OFL (see OFL.txt for more information)
 VeraMono.ttf: custom (see Bitstream Vera License.txt for more information)
 
-
-THIS IS A WORK IN PROGRESS
 
 
 INSTALLATION
@@ -68,9 +66,16 @@ Allowed options:
   --debug [=arg(=1)] (=0)          debug mode
   --nosound [=arg(=1)] (=0)        disable all sounds
   --script-verbose [=arg(=1)] (=0) verbose script output
-  --new-game [=arg(=1)] (=0)       activate char gen/new game mechanics
   --script-all [=arg(=1)] (=0)     compile all scripts (excluding dialogue scri
                                    pts) at startup
+  --script-console [=arg(=1)] (=0) enable console-only script functionality
+  --script-run arg                 select a file that is executed in the consol
+                                   e on startup
+
+                                   Note: The file contains a list of script
+                                   lines, but not a complete scripts. That mean
+                                   s no begin/end and no variable declarations.
+  --new-game [=arg(=1)] (=0)       activate char gen/new game mechanics
   --fs-strict [=arg(=1)] (=0)      strict file system handling (no case folding
                                    )
   --encoding arg (=win1252)        Character encoding used in OpenMW game messa
@@ -90,48 +95,72 @@ Allowed options:
   --fallback arg                   fallback values
 
 
-CREDITS
-
-Current Developers:
-Aleksandar Jovanov
-Alexander “Ace” Olofsson
-athile
-BrotherBrick
-Cris “Mirceam” Mihalache
-gugus / gus
-Jacob “Yacoby” Essex
-Jannik “scrawl” Heller
-Jason “jhooks” Hooks
-Karl-Felix “k1ll” Glatzer
-Lukasz “lgro” Gromanowski
-Marc “Zini” Zinnschlag
-Michael “werdanith” Papageorgiou
-Nikolay “corristo” Kasyanov
-Pieter “pvdk” van der Kloet
-Roman "Kromgart" Melnik
-Sebastian “swick” Wick
-Sylvain "Garvek" T.
-
-Retired Developers:
-Ardekantur
-Armin Preiml
-Diggory Hardy
-Jan Borsodi
-Jan-Peter “peppe” Nilsson
-Josua Grawitter
-Nicolay Korslund
-sergoz
-Star-Demon
-Yuri Krupenin
-
-OpenMW:
-Thanks to DokterDume for kindly providing us with the Moon and Star logo used as the application icon and project logo.
-
-Launcher:
-Thanks to Kevin Ryan for kindly providing us with the icon used for the Data Files tab.
-
-
 CHANGELOG
+
+0.18.0
+
+Bug #310: Button of the "preferences menu" are too small
+Bug #361: Hand-to-hand skill is always 100
+Bug #365: NPC and creature animation is jerky; Characters float around when they are not supposed to
+Bug #372: playSound3D uses original coordinates instead of current coordinates.
+Bug #373: Static OGRE build faulty
+Bug #375: Alt-tab toggle view
+Bug #376: Screenshots are disable
+Bug #378: Exception when drinking self-made potions
+Bug #380: Cloth visibility problem
+Bug #384: Weird character on doors tooltip.
+Bug #398: Some objects do not collide in MW, but do so in OpenMW
+Feature #22: Implement level-up
+Feature #36: Hide Marker
+Feature #88: Hotkey Window
+Feature #91: Level-Up Dialogue
+Feature #118: Keyboard and Mouse-Button bindings
+Feature #119: Spell Buying Window
+Feature #133: Handle resources across multiple data directories
+Feature #134: Generate a suitable default-value for --data-local
+Feature #292: Object Movement/Creation Script Instructions
+Feature #340: AIPackage data structures
+Feature #356: Ingredients use
+Feature #358: Input system rewrite
+Feature #370: Target handling in actions
+Feature #379: Door markers on the local map
+Feature #389: AI framework
+Feature #395: Using keys to open doors / containers
+Feature #396: Loading screens
+Feature #397: Inventory avatar image and race selection head preview
+Task #339: Move sounds into Action
+
+0.17.0
+
+Bug #225: Valgrind reports about 40MB of leaked memory
+Bug #241: Some physics meshes still don't match
+Bug #248: Some textures are too dark
+Bug #300: Dependency on proprietary CG toolkit
+Bug #302: Some objects don't collide although they should
+Bug #308: Freeze in Balmora, Meldor: Armorer
+Bug #313: openmw without a ~/.config/openmw folder segfault.
+Bug #317: adding non-existing spell via console locks game
+Bug #318: Wrong character normals
+Bug #341: Building with Ogre Debug libraries does not use debug version of plugins
+Bug #347: Crash when running openmw with --start="XYZ"
+Bug #353: FindMyGUI.cmake breaks path on Windows
+Bug #359: WindowManager throws exception at destruction
+Bug #364: Laggy input on OS X due to bug in Ogre's event pump implementation
+Feature #33: Allow objects to cross cell-borders
+Feature #59: Dropping Items (replaced stopgap implementation with a proper one)
+Feature #93: Main Menu
+Feature #96/329/330/331/332/333: Player Control
+Feature #180: Object rotation and scaling.
+Feature #272: Incorrect NIF material sharing
+Feature #314: Potion usage
+Feature #324: Skill Gain
+Feature #342: Drain/fortify dynamic stats/attributes magic effects
+Feature #350: Allow console only script instructions
+Feature #352: Run scripts in console on startup
+Task #107: Refactor mw*-subsystems
+Task #325: Make CreatureStats into a class
+Task #345: Use Ogre's animation system
+Task #351: Rewrite Action class to support automatic sound playing
 
 0.16.0
 
@@ -215,7 +244,6 @@ Task #113: Morrowind.ini Importer
 Task #215: Refactor the sound code
 Task #216: Update MyGUI
 
-
 0.13.0
 
 Bug #145: Fixed sound problems after cell change
@@ -273,7 +301,6 @@ Task #131: NPC Activation doesn't work properly
 Task #144: MWRender cleanup
 Task #155: cmake cleanup
 
-
 0.11.1
 
 Bug #2: Resources loading doesn't work outside of bsa files
@@ -300,4 +327,95 @@ Task #14: Replace tabs with 4 spaces
 Task #18: Move components from global namespace into their own namespace
 Task #123: refactor header files in components/esm
 
-TODO add old changelog (take pre 0.11.1 changelog from wiki)
+0.10.0
+
+* NPC dialogue window (not functional yet)
+* Collisions with objects
+* Refactor the PlayerPos class
+* Adjust file locations
+* CMake files and test linking for Bullet
+* Replace Ogre raycasting test for activation with something more precise
+* Adjust player movement according to collision results
+* FPS display
+* Various Portability Improvements
+* Mac OS X support is back!
+
+0.9.0
+
+* Exterior cells loading, unloading and management
+* Character Creation GUI
+* Character creation
+* Make cell names case insensitive when doing internal lookups
+* Music player
+* NPCs rendering
+
+0.8.0
+
+* GUI
+* Complete and working script engine
+* In game console
+* Sky rendering
+* Sound and music
+* Tons of smaller stuff
+
+0.7.0
+
+* This release is a complete rewrite in C++.
+* All D code has been culled, and all modules have been rewritten.
+* The game is now back up to the level of rendering interior cells and moving around, but physics, sound, GUI, and scripting still remain to be ported from the old codebase.
+
+0.6.0
+
+* Coded a GUI system using MyGUI
+* Skinned MyGUI to look like Morrowind (work in progress)
+* Integrated the Monster script engine
+* Rewrote some functions into script code
+* Very early MyGUI < > Monster binding
+* Fixed Windows sound problems (replaced old openal32.dll)
+
+0.5.0
+
+* Collision detection with Bullet
+* Experimental walk & fall character physics
+* New key bindings:
+  * t toggle physics mode (walking, flying, ghost),
+  * n night eye, brightens the scene
+* Fixed incompatability with DMD 1.032 and newer compilers
+* * (thanks to tomqyp)
+* Various minor changes and updates
+
+0.4.0
+
+* Switched from Audiere to OpenAL
+* * (BIG thanks to Chris Robinson)
+* Added complete Makefile (again) as a alternative build tool
+* More realistic lighting (thanks again to Chris Robinson)
+* Various localization fixes tested with Russian and French versions
+* Temporary workaround for the Unicode issue: invalid UTF displayed as '?'
+* Added ns option to disable sound, for debugging
+* Various bug fixes
+* Cosmetic changes to placate gdc Wall
+
+0.3.0
+
+* Built and tested on Windows XP
+* Partial support for FreeBSD (exceptions do not work)
+* You no longer have to download Monster separately
+* Made an alternative for building without DSSS (but DSSS still works)
+* Renamed main program from 'morro' to 'openmw'
+* Made the config system more robust
+* Added oc switch for showing Ogre config window on startup
+* Removed some config files, these are auto generated when missing.
+* Separated plugins.cfg into linux and windows versions.
+* Updated Makefile and sources for increased portability
+* confirmed to work against OIS 1.0.0 (Ubuntu repository package)
+
+0.2.0
+
+* Compiles with gdc
+* Switched to DSSS for building D code
+* Includes the program esmtool
+
+0.1.0
+
+first release

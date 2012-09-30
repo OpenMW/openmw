@@ -13,7 +13,11 @@ namespace MWGui
     class SettingsWindow : public WindowBase
     {
         public:
-            SettingsWindow(WindowManager& parWindowManager);
+            SettingsWindow(MWBase::WindowManager& parWindowManager);
+
+            virtual void open();
+
+            void updateControlsBox();
 
         private:
             static int const sFovMin = 30;
@@ -26,6 +30,8 @@ namespace MWGui
 
             MyGUI::ScrollBar* mMenuTransparencySlider;
             MyGUI::ScrollBar* mToolTipDelaySlider;
+            MyGUI::Button* mSubtitlesButton;
+            MyGUI::Button* mCrosshairButton;
 
             // graphics
             MyGUI::ListBox* mResolutionList;
@@ -34,6 +40,7 @@ namespace MWGui
             MyGUI::Button* mFPSButton;
             MyGUI::ScrollBar* mViewDistanceSlider;
             MyGUI::ScrollBar* mFOVSlider;
+            MyGUI::ScrollBar* mGammaSlider;
             MyGUI::ScrollBar* mAnisotropySlider;
             MyGUI::Button* mTextureFilteringButton;
             MyGUI::TextBox* mAnisotropyLabel;
@@ -42,6 +49,16 @@ namespace MWGui
             MyGUI::Button* mReflectObjectsButton;
             MyGUI::Button* mReflectActorsButton;
             MyGUI::Button* mReflectTerrainButton;
+            MyGUI::Button* mShadersButton;
+            MyGUI::Button* mUnderwaterButton;
+
+            MyGUI::Button* mShadowsEnabledButton;
+            MyGUI::Button* mShadowsLargeDistance;
+            MyGUI::Button* mShadowsTextureSize;
+            MyGUI::Button* mActorShadows;
+            MyGUI::Button* mStaticsShadows;
+            MyGUI::Button* mMiscShadows;
+            MyGUI::Button* mShadowsDebug;
 
             // audio
             MyGUI::ScrollBar* mMasterVolumeSlider;
@@ -49,6 +66,13 @@ namespace MWGui
             MyGUI::ScrollBar* mEffectsVolumeSlider;
             MyGUI::ScrollBar* mFootstepsVolumeSlider;
             MyGUI::ScrollBar* mMusicVolumeSlider;
+
+            // controls
+            MyGUI::ScrollView* mControlsBox;
+            MyGUI::Button* mResetControlsButton;
+            MyGUI::Button* mInvertYButton;
+            MyGUI::ScrollBar* mUISensitivitySlider;
+            MyGUI::ScrollBar* mCameraSensitivitySlider;
 
             void onOkButtonClicked(MyGUI::Widget* _sender);
             void onFpsToggled(MyGUI::Widget* _sender);
@@ -59,9 +83,16 @@ namespace MWGui
             void onResolutionAccept();
             void onResolutionCancel();
 
+            void onShadersToggled(MyGUI::Widget* _sender);
+            void onShadowTextureSize(MyGUI::Widget* _sender);
+
+            void onRebindAction(MyGUI::Widget* _sender);
+            void onInputTabMouseWheel(MyGUI::Widget* _sender, int _rel);
+            void onResetDefaultBindings(MyGUI::Widget* _sender);
+            void onResetDefaultBindingsAccept ();
+
             void apply();
     };
 }
 
 #endif
-

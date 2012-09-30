@@ -1,17 +1,19 @@
 #include "scrollwindow.hpp"
 
 #include "../mwbase/environment.hpp"
-#include "../mwinput/inputmanager.hpp"
+#include "../mwbase/world.hpp"
+#include "../mwbase/soundmanager.hpp"
+#include "../mwbase/windowmanager.hpp"
+
 #include "../mwworld/actiontake.hpp"
-#include "../mwsound/soundmanager.hpp"
+#include "../mwworld/player.hpp"
 
 #include "formatting.hpp"
-#include "window_manager.hpp"
 
 using namespace MWGui;
 
-ScrollWindow::ScrollWindow (WindowManager& parWindowManager) :
-    WindowBase("openmw_scroll_layout.xml", parWindowManager)
+ScrollWindow::ScrollWindow (MWBase::WindowManager& parWindowManager) :
+    WindowBase("openmw_scroll.layout", parWindowManager)
 {
     getWidget(mTextView, "TextView");
 
@@ -31,8 +33,7 @@ void ScrollWindow::open (MWWorld::Ptr scroll)
 
     mScroll = scroll;
 
-    ESMS::LiveCellRef<ESM::Book, MWWorld::RefData> *ref =
-        mScroll.get<ESM::Book>();
+    MWWorld::LiveCellRef<ESM::Book> *ref = mScroll.get<ESM::Book>();
 
     BookTextParser parser;
     MyGUI::IntSize size = parser.parse(ref->base->text, mTextView, 390);
@@ -61,10 +62,10 @@ void ScrollWindow::onCloseButtonClicked (MyGUI::Widget* _sender)
 
 void ScrollWindow::onTakeButtonClicked (MyGUI::Widget* _sender)
 {
-    MWBase::Environment::get().getSoundManager()->playSound ("Item Book Up", 1.0, 1.0, MWSound::Play_NoTrack);
+    MWBase::Environment::get().getSoundManager()->playSound ("Item Book Up", 1.0, 1.0, MWBase::SoundManager::Play_NoTrack);
 
     MWWorld::ActionTake take(mScroll);
-    take.execute();
+    take.execute (MWBase::Environment::get().getWorld()->getPlayer().getPlayer());
 
     mWindowManager.removeGuiMode(GM_Scroll);
 }

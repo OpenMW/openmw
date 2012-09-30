@@ -3,18 +3,19 @@
 #include <boost/lexical_cast.hpp>
 
 #include "../mwbase/environment.hpp"
-#include "../mwworld/world.hpp"
+#include "../mwbase/world.hpp"
+#include "../mwbase/soundmanager.hpp"
+#include "../mwbase/windowmanager.hpp"
+
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/manualref.hpp"
-#include "../mwsound/soundmanager.hpp"
 
-#include "window_manager.hpp"
 #include "inventorywindow.hpp"
 
 namespace MWGui
 {
-    TradeWindow::TradeWindow(WindowManager& parWindowManager) :
-        WindowBase("openmw_trade_window_layout.xml", parWindowManager)
+    TradeWindow::TradeWindow(MWBase::WindowManager& parWindowManager) :
+        WindowBase("openmw_trade_window.layout", parWindowManager)
         , ContainerBase(NULL) // no drag&drop
         , mCurrentBalance(0)
     {
@@ -41,26 +42,6 @@ namespace MWGui
         getWidget(mTotalBalanceLabel, "TotalBalanceLabel");
         getWidget(mBottomPane, "BottomPane");
 
-        // adjust size of buttons to fit text
-        int curX = 0;
-        mFilterAll->setSize( mFilterAll->getTextSize().width + 24, mFilterAll->getSize().height );
-        curX += mFilterAll->getTextSize().width + 24 + 4;
-
-        mFilterWeapon->setPosition(curX, mFilterWeapon->getPosition().top);
-        mFilterWeapon->setSize( mFilterWeapon->getTextSize().width + 24, mFilterWeapon->getSize().height );
-        curX += mFilterWeapon->getTextSize().width + 24 + 4;
-
-        mFilterApparel->setPosition(curX, mFilterApparel->getPosition().top);
-        mFilterApparel->setSize( mFilterApparel->getTextSize().width + 24, mFilterApparel->getSize().height );
-        curX += mFilterApparel->getTextSize().width + 24 + 4;
-
-        mFilterMagic->setPosition(curX, mFilterMagic->getPosition().top);
-        mFilterMagic->setSize( mFilterMagic->getTextSize().width + 24, mFilterMagic->getSize().height );
-        curX += mFilterMagic->getTextSize().width + 24 + 4;
-
-        mFilterMisc->setPosition(curX, mFilterMisc->getPosition().top);
-        mFilterMisc->setSize( mFilterMisc->getTextSize().width + 24, mFilterMisc->getSize().height );
-
         mFilterAll->setStateSelected(true);
 
         mFilterAll->eventMouseButtonClick += MyGUI::newDelegate(this, &TradeWindow::onFilterChanged);
@@ -72,21 +53,7 @@ namespace MWGui
         mCancelButton->eventMouseButtonClick += MyGUI::newDelegate(this, &TradeWindow::onCancelButtonClicked);
         mOfferButton->eventMouseButtonClick += MyGUI::newDelegate(this, &TradeWindow::onOfferButtonClicked);
 
-        mMaxSaleButton->setSize(MyGUI::IntSize(mMaxSaleButton->getTextSize().width + 24, mMaxSaleButton->getHeight()));
-
-        int cancelButtonWidth = mCancelButton->getTextSize().width + 24;
-        mCancelButton->setCoord(mBottomPane->getWidth()-cancelButtonWidth,
-                                mCancelButton->getTop(),
-                                cancelButtonWidth,
-                                mCancelButton->getHeight());
-
-        int offerButtonWidth = mOfferButton->getTextSize().width + 24;
-        mOfferButton->setCoord(mBottomPane->getWidth()-cancelButtonWidth-offerButtonWidth-8,
-                                mOfferButton->getTop(),
-                                offerButtonWidth,
-                                mOfferButton->getHeight());
-
-        setCoord(400, 0, 400, 300); 
+        setCoord(400, 0, 400, 300);
 
         static_cast<MyGUI::Window*>(mMainWidget)->eventWindowChangeCoord += MyGUI::newDelegate(this, &TradeWindow::onWindowResize);
     }
@@ -135,6 +102,33 @@ namespace MWGui
         drawItems();
     }
 
+    void TradeWindow::addOrRemoveGold(int amount)
+    {
+        bool goldFound = false;
+        MWWorld::Ptr gold;
+        MWWorld::ContainerStore& playerStore = mWindowManager.getInventoryWindow()->getContainerStore();
+        for (MWWorld::ContainerStoreIterator it = playerStore.begin();
+                it != playerStore.end(); ++it)
+        {
+            if (MWWorld::Class::get(*it).getName(*it) == MWBase::Environment::get().getWorld()->getStore().gameSettings.find("sGold")->getString())
+            {
+                goldFound = true;
+                gold = *it;
+            }
+        }
+        if (goldFound)
+        {
+            gold.getRefData().setCount(gold.getRefData().getCount() + amount);
+        }
+        else
+        {
+            assert(amount > 0);
+            MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), "Gold_001");
+            ref.getPtr().getRefData().setCount(amount);
+            playerStore.add(ref.getPtr());
+        }
+    }
+
     void TradeWindow::onOfferButtonClicked(MyGUI::Widget* _sender)
     {
         // were there any items traded at all?
@@ -144,7 +138,7 @@ namespace MWGui
         {
             // user notification
             MWBase::Environment::get().getWindowManager()->
-                messageBox(MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sBarterDialog11")->str, std::vector<std::string>());
+                messageBox("#{sBarterDialog11}", std::vector<std::string>());
             return;
         }
 
@@ -153,7 +147,7 @@ namespace MWGui
         {
             // user notification
             MWBase::Environment::get().getWindowManager()->
-                messageBox(MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sBarterDialog1")->str, std::vector<std::string>());
+                messageBox("#{sBarterDialog1}", std::vector<std::string>());
             return;
         }
 
@@ -161,7 +155,7 @@ namespace MWGui
         int merchantgold;
         if (mPtr.getTypeName() == typeid(ESM::NPC).name())
         {
-            ESMS::LiveCellRef<ESM::NPC, MWWorld::RefData>* ref = mPtr.get<ESM::NPC>();
+            MWWorld::LiveCellRef<ESM::NPC>* ref = mPtr.get<ESM::NPC>();
             if (ref->base->npdt52.gold == -10)
                 merchantgold = ref->base->npdt12.gold;
             else
@@ -169,14 +163,14 @@ namespace MWGui
         }
         else // ESM::Creature
         {
-            ESMS::LiveCellRef<ESM::Creature, MWWorld::RefData>* ref = mPtr.get<ESM::Creature>();
+            MWWorld::LiveCellRef<ESM::Creature>* ref = mPtr.get<ESM::Creature>();
             merchantgold = ref->base->data.gold;
         }
         if (mCurrentBalance > 0 && merchantgold < mCurrentBalance)
         {
             // user notification
             MWBase::Environment::get().getWindowManager()->
-                messageBox(MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sBarterDialog2")->str, std::vector<std::string>());
+                messageBox("#{sBarterDialog2}", std::vector<std::string>());
             return;
         }
 
@@ -185,29 +179,8 @@ namespace MWGui
         mWindowManager.getInventoryWindow()->transferBoughtItems();
 
         // add or remove gold from the player.
-        bool goldFound = false;
-        MWWorld::Ptr gold;
-        MWWorld::ContainerStore& playerStore = mWindowManager.getInventoryWindow()->getContainerStore();
-        for (MWWorld::ContainerStoreIterator it = playerStore.begin();
-                it != playerStore.end(); ++it)
-        {
-            if (MWWorld::Class::get(*it).getName(*it) == MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sGold")->str)
-            {
-                goldFound = true;
-                gold = *it;
-            }
-        }
-        if (goldFound)
-        {
-            gold.getRefData().setCount(gold.getRefData().getCount() + mCurrentBalance);
-        }
-        else
-        {
-            assert(mCurrentBalance > 0);
-            MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), "Gold_001");
-            ref.getPtr().getRefData().setCount(mCurrentBalance);
-            playerStore.add(ref.getPtr());
-        }
+        if (mCurrentBalance != 0)
+            addOrRemoveGold(mCurrentBalance);
 
         std::string sound = "Item Gold Up";
         MWBase::Environment::get().getSoundManager()->playSound (sound, 1.0, 1.0);
@@ -227,24 +200,23 @@ namespace MWGui
 
     void TradeWindow::updateLabels()
     {
-        mPlayerGold->setCaption(MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sYourGold")->str
-            + " " + boost::lexical_cast<std::string>(mWindowManager.getInventoryWindow()->getPlayerGold()));
+        mPlayerGold->setCaptionWithReplacing("#{sYourGold} " + boost::lexical_cast<std::string>(mWindowManager.getInventoryWindow()->getPlayerGold()));
 
         if (mCurrentBalance > 0)
         {
-            mTotalBalanceLabel->setCaption(MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sTotalSold")->str);
+            mTotalBalanceLabel->setCaptionWithReplacing("#{sTotalSold}");
             mTotalBalance->setCaption(boost::lexical_cast<std::string>(mCurrentBalance));
         }
         else
         {
-            mTotalBalanceLabel->setCaption(MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sTotalCost")->str);
+            mTotalBalanceLabel->setCaptionWithReplacing("#{sTotalCost}");
             mTotalBalance->setCaption(boost::lexical_cast<std::string>(-mCurrentBalance));
         }
 
         int merchantgold;
         if (mPtr.getTypeName() == typeid(ESM::NPC).name())
         {
-            ESMS::LiveCellRef<ESM::NPC, MWWorld::RefData>* ref = mPtr.get<ESM::NPC>();
+            MWWorld::LiveCellRef<ESM::NPC>* ref = mPtr.get<ESM::NPC>();
             if (ref->base->npdt52.gold == -10)
                 merchantgold = ref->base->npdt12.gold;
             else
@@ -252,12 +224,11 @@ namespace MWGui
         }
         else // ESM::Creature
         {
-            ESMS::LiveCellRef<ESM::Creature, MWWorld::RefData>* ref = mPtr.get<ESM::Creature>();
+            MWWorld::LiveCellRef<ESM::Creature>* ref = mPtr.get<ESM::Creature>();
             merchantgold = ref->base->data.gold;
         }
 
-        mMerchantGold->setCaption(MWBase::Environment::get().getWorld()->getStore().gameSettings.search("sSellerGold")->str
-            + " " + boost::lexical_cast<std::string>(merchantgold));
+        mMerchantGold->setCaptionWithReplacing("#{sSellerGold} " + boost::lexical_cast<std::string>(merchantgold));
     }
 
     std::vector<MWWorld::Ptr> TradeWindow::getEquippedItems()
@@ -289,15 +260,15 @@ namespace MWGui
         int services = 0;
         if (mPtr.getTypeName() == typeid(ESM::NPC).name())
         {
-            ESMS::LiveCellRef<ESM::NPC, MWWorld::RefData>* ref = mPtr.get<ESM::NPC>();
-            if (ref->base->hasAI)
-                services = ref->base->AI.services;
+            MWWorld::LiveCellRef<ESM::NPC>* ref = mPtr.get<ESM::NPC>();
+            if (ref->base->mHasAI)
+                services = ref->base->mAiData.mServices;
         }
         else if (mPtr.getTypeName() == typeid(ESM::Creature).name())
         {
-            ESMS::LiveCellRef<ESM::Creature, MWWorld::RefData>* ref = mPtr.get<ESM::Creature>();
-            if (ref->base->hasAI)
-                services = ref->base->AI.services;
+            MWWorld::LiveCellRef<ESM::Creature>* ref = mPtr.get<ESM::Creature>();
+            if (ref->base->mHasAI)
+                services = ref->base->mAiData.mServices;
         }
 
         /// \todo what about potions, there doesn't seem to be a flag for them??

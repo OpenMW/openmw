@@ -1,17 +1,19 @@
 #include "weather.hpp"
-#include "world.hpp"
-#include "player.hpp"
-
-#include "../mwrender/renderingmanager.hpp"
-#include "../mwsound/soundmanager.hpp"
 
 #include <ctime>
 #include <cstdlib>
-#include <iostream>
 
 #include <boost/algorithm/string.hpp>
 
+#include <components/esm_store/store.hpp>
+
 #include "../mwbase/environment.hpp"
+#include "../mwbase/world.hpp"
+#include "../mwbase/soundmanager.hpp"
+
+#include "../mwrender/renderingmanager.hpp"
+
+#include "player.hpp"
 
 using namespace Ogre;
 using namespace MWWorld;
@@ -39,7 +41,8 @@ const float WeatherGlobals::mThunderSoundDelay = 0.25;
 WeatherManager::WeatherManager(MWRender::RenderingManager* rendering) :
      mHour(14), mCurrentWeather("clear"), mFirstUpdate(true), mWeatherUpdateTime(0),
      mThunderFlash(0), mThunderChance(0), mThunderChanceNeeded(50), mThunderSoundDelay(0),
-     mRemainingTransitionTime(0), mMonth(0), mDay(0)
+     mRemainingTransitionTime(0), mMonth(0), mDay(0),
+     mTimePassed(0)
 {
     mRendering = rendering;
 
@@ -473,8 +476,7 @@ WeatherResult WeatherManager::transition(float factor)
     result.mSunDiscColor = lerp(current.mSunDiscColor, other.mSunDiscColor);
     result.mFogDepth = lerp(current.mFogDepth, other.mFogDepth);
     result.mWindSpeed = lerp(current.mWindSpeed, other.mWindSpeed);
-    //result.mCloudSpeed = lerp(current.mCloudSpeed, other.mCloudSpeed);
-    result.mCloudSpeed = current.mCloudSpeed;
+    result.mCloudSpeed = lerp(current.mCloudSpeed, other.mCloudSpeed);
     result.mCloudOpacity = lerp(current.mCloudOpacity, other.mCloudOpacity);
     result.mGlareView = lerp(current.mGlareView, other.mGlareView);
     result.mNightFade = lerp(current.mNightFade, other.mNightFade);
@@ -486,7 +488,10 @@ WeatherResult WeatherManager::transition(float factor)
 
 void WeatherManager::update(float duration)
 {
-    mWeatherUpdateTime -= duration * MWBase::Environment::get().getWorld()->getTimeScaleFactor();
+    float timePassed = mTimePassed;
+    mTimePassed = 0;
+
+    mWeatherUpdateTime -= timePassed;
 
     bool exterior = (MWBase::Environment::get().getWorld()->isCellExterior() || MWBase::Environment::get().getWorld()->isCellQuasiExterior());
 
@@ -557,7 +562,7 @@ void WeatherManager::update(float duration)
 
         if (mNextWeather != "")
         {
-            mRemainingTransitionTime -= duration * MWBase::Environment::get().getWorld()->getTimeScaleFactor();
+            mRemainingTransitionTime -= timePassed;
             if (mRemainingTransitionTime < 0)
             {
                 mCurrentWeather = mNextWeather;
@@ -686,13 +691,13 @@ void WeatherManager::update(float duration)
 
                 mThunderFlash -= duration;
                 if (mThunderFlash > 0)
-                    mRendering->getSkyManager()->setThunder( mThunderFlash / WeatherGlobals::mThunderThreshold );
+                    mRendering->getSkyManager()->setLightningStrength( mThunderFlash / WeatherGlobals::mThunderThreshold );
                 else
                 {
                     srand(time(NULL));
                     mThunderChanceNeeded = rand() % 100;
                     mThunderChance = 0;
-                    mRendering->getSkyManager()->setThunder( 0.f );
+                    mRendering->getSkyManager()->setLightningStrength( 0.f );
                 }
             }
             else
@@ -703,14 +708,14 @@ void WeatherManager::update(float duration)
                 {
                     mThunderFlash = WeatherGlobals::mThunderThreshold;
 
-                    mRendering->getSkyManager()->setThunder( mThunderFlash / WeatherGlobals::mThunderThreshold );
+                    mRendering->getSkyManager()->setLightningStrength( mThunderFlash / WeatherGlobals::mThunderThreshold );
 
                     mThunderSoundDelay = WeatherGlobals::mThunderSoundDelay;
                 }
             }
         }
         else
-            mRendering->getSkyManager()->setThunder(0.f);
+            mRendering->getSkyManager()->setLightningStrength(0.f);
 
         mRendering->setAmbientColour(result.mAmbientColor);
         mRendering->sunEnable();
@@ -722,7 +727,7 @@ void WeatherManager::update(float duration)
     {
         mRendering->sunDisable();
         mRendering->skyDisable();
-        mRendering->getSkyManager()->setThunder(0.f);
+        mRendering->getSkyManager()->setLightningStrength(0.f);
     }
 
     // play sounds

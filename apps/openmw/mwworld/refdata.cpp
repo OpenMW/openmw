@@ -1,9 +1,10 @@
 
 #include "refdata.hpp"
 
-#include <components/esm_store/cell_store.hpp>
+#include <OgreSceneNode.h>
 
 #include "customdata.hpp"
+#include "cellstore.hpp"
 
 namespace MWWorld
 {
@@ -74,6 +75,9 @@ namespace MWWorld
 
     std::string RefData::getHandle()
     {
+        if (!mBaseNode)
+            return "";
+            
         return mBaseNode->getName();
     }
 

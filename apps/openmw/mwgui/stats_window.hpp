@@ -22,7 +22,7 @@ namespace MWGui
 
             typedef std::vector<int> SkillList;
 
-            StatsWindow(WindowManager& parWindowManager);
+            StatsWindow(MWBase::WindowManager& parWindowManager);
 
             /// automatically updates all the data in the stats window, but only if it has changed.
             void onFrame();
@@ -32,14 +32,14 @@ namespace MWGui
 
             /// Set value for the given ID.
             void setValue (const std::string& id, const MWMechanics::Stat<int>& value);
-            void setValue (const std::string& id, const MWMechanics::DynamicStat<int>& value);
+            void setValue (const std::string& id, const MWMechanics::DynamicStat<float>& value);
             void setValue (const std::string& id, const std::string& value);
             void setValue (const std::string& id, int value);
             void setValue(const ESM::Skill::SkillEnum parSkill, const MWMechanics::Stat<float>& value);
 
             void configureSkills (const SkillList& major, const SkillList& minor);
-            void setReputation (int reputation) { this->reputation = reputation; }
-            void setBounty (int bounty) { this->bounty = bounty; }
+            void setReputation (int reputation) { this->mReputation = reputation; }
+            void setBounty (int bounty) { this->mBounty = bounty; }
             void updateSkillArea();
 
         private:
@@ -48,32 +48,29 @@ namespace MWGui
             void addGroup(const std::string &label, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
             MyGUI::TextBox* addValueItem(const std::string& text, const std::string &value, const std::string& state, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
             MyGUI::Widget* addItem(const std::string& text, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
-            void updateScroller();
 
             void setFactions (const FactionList& factions);
             void setBirthSign (const std::string &signId);
 
-            void onScrollChangePosition(MyGUI::ScrollBar* scroller, size_t pos);
             void onWindowResize(MyGUI::Window* window);
             void onMouseWheel(MyGUI::Widget* _sender, int _rel);
 
-            static const int lineHeight;
+            static const int sLineHeight;
 
             MyGUI::Widget* mLeftPane;
             MyGUI::Widget* mRightPane;
 
-            MyGUI::WidgetPtr skillAreaWidget, skillClientWidget;
-            MyGUI::ScrollBar* skillScrollerWidget;
-            int lastPos, clientHeight;
+            MyGUI::ScrollView* mSkillView;
+            int mLastPos, mClientHeight;
 
-            SkillList majorSkills, minorSkills, miscSkills;
-            std::map<int, MWMechanics::Stat<float> > skillValues;
-            std::map<int, MyGUI::TextBox*> skillWidgetMap;
-            std::map<std::string, MyGUI::WidgetPtr> factionWidgetMap;
+            SkillList mMajorSkills, mMinorSkills, mMiscSkills;
+            std::map<int, MWMechanics::Stat<float> > mSkillValues;
+            std::map<int, MyGUI::TextBox*> mSkillWidgetMap;
+            std::map<std::string, MyGUI::WidgetPtr> mFactionWidgetMap;
             FactionList mFactions; ///< Stores a list of factions and the current rank
-            std::string birthSignId;
-            int reputation, bounty;
-            std::vector<MyGUI::WidgetPtr> skillWidgets; //< Skills and other information
+            std::string mBirthSignId;
+            int mReputation, mBounty;
+            std::vector<MyGUI::WidgetPtr> mSkillWidgets; //< Skills and other information
 
             bool mChanged;
 
@@ -82,4 +79,3 @@ namespace MWGui
     };
 }
 #endif
-

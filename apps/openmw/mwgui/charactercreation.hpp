@@ -1,16 +1,15 @@
 #ifndef CHARACTER_CREATION_HPP
 #define CHARACTER_CREATION_HPP
 
-#include "window_manager.hpp"
-
-#include "../mwmechanics/mechanicsmanager.hpp"
-#include "../mwmechanics/stat.hpp"
-#include "../mwworld/world.hpp"
 #include <components/esm_store/store.hpp>
+
+#include "../mwbase/world.hpp"
+#include "../mwbase/windowmanager.hpp"
+
+#include "../mwmechanics/stat.hpp"
 
 namespace MWGui
 {
-    class WindowManager;
     class WindowBase;
 
     class TextInputDialog;
@@ -30,20 +29,20 @@ namespace MWGui
     public:
     typedef std::vector<int> SkillList;
 
-    CharacterCreation(WindowManager* _wm);
+    CharacterCreation(MWBase::WindowManager* _wm);
     ~CharacterCreation();
 
     //Show a dialog
     void spawnDialog(const char id);
 
-    void setPlayerHealth (const MWMechanics::DynamicStat<int>& value);
+    void setPlayerHealth (const MWMechanics::DynamicStat<float>& value);
 
-    void setPlayerMagicka (const MWMechanics::DynamicStat<int>& value);
+    void setPlayerMagicka (const MWMechanics::DynamicStat<float>& value);
 
-    void setPlayerFatigue (const MWMechanics::DynamicStat<int>& value);
+    void setPlayerFatigue (const MWMechanics::DynamicStat<float>& value);
 
     void setValue (const std::string& id, const MWMechanics::Stat<int>& value);
-    void setValue (const std::string& id, const MWMechanics::DynamicStat<int>& value);
+    void setValue (const std::string& id, const MWMechanics::DynamicStat<float>& value);
     void setValue(const ESM::Skill::SkillEnum parSkill, const MWMechanics::Stat<float>& value);
     void configureSkills (const SkillList& major, const SkillList& minor);
 
@@ -59,16 +58,16 @@ namespace MWGui
     BirthDialog* mBirthSignDialog;
     ReviewDialog* mReviewDialog;
 
-    WindowManager* mWM;
+    MWBase::WindowManager* mWM;
 
     //Player data
     std::string mPlayerName;
     std::string mPlayerRaceId;
     std::string mPlayerBirthSignId;
     ESM::Class mPlayerClass;
-    MWMechanics::DynamicStat<int> mPlayerHealth;
-    MWMechanics::DynamicStat<int> mPlayerMagicka;
-    MWMechanics::DynamicStat<int> mPlayerFatigue;
+    MWMechanics::DynamicStat<float> mPlayerHealth;
+    MWMechanics::DynamicStat<float> mPlayerMagicka;
+    MWMechanics::DynamicStat<float> mPlayerFatigue;
 
     //Class generation vars
     unsigned mGenerateClassStep;                 // Keeps track of current step in Generate Class dialog

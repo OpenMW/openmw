@@ -13,17 +13,14 @@ namespace ESMS
 
 namespace MWScript
 {
-    class ScriptManager;
-
     class GlobalScripts
     {
             const ESMS::ESMStore& mStore;
-            ScriptManager& mScriptManager;
             std::map<std::string, std::pair<bool, Locals> > mScripts; // running, local variables
 
         public:
 
-            GlobalScripts (const ESMS::ESMStore& store, ScriptManager& scriptManager);
+            GlobalScripts (const ESMS::ESMStore& store);
 
             void addScript (const std::string& name);
 

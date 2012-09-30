@@ -1,18 +1,20 @@
+#include "physicssystem.hpp"
+
 #include <stdexcept>
 
-#include "physicssystem.hpp"
-#include "../mwworld/ptr.hpp"
-#include "../mwworld/world.hpp" // FIXME
+#include <OgreRoot.h>
+#include <OgreRenderWindow.h>
+#include <OgreSceneManager.h>
+#include <OgreViewport.h>
+#include <OgreCamera.h>
+#include <OgreTextureManager.h>
+
 #include <components/nifbullet/bullet_nif_loader.hpp>
 
-#include "OgreRoot.h"
-#include "OgreRenderWindow.h"
-#include "OgreSceneManager.h"
-#include "OgreViewport.h"
-#include "OgreCamera.h"
-#include "OgreTextureManager.h"
+//#include "../mwbase/world.hpp" // FIXME
 
-
+#include "ptr.hpp"
+#include "class.hpp"
 
 using namespace Ogre;
 namespace MWWorld
@@ -40,32 +42,38 @@ namespace MWWorld
         return mEngine;
     }
 
-	std::pair<std::string, float> PhysicsSystem::getFacedHandle (MWWorld::World& world)
-	{
-		std::string handle = "";
+    std::pair<std::string, float> PhysicsSystem::getFacedHandle (MWWorld::World& world)
+    {
+        btVector3 dir(0, 1, 0);
+        dir = dir.rotate(btVector3(1, 0, 0), mPlayerData.pitch);
+        dir = dir.rotate(btVector3(0, 0, 1), mPlayerData.yaw);
+        dir.setX(-dir.x());
 
-        //get a ray pointing to the center of the viewport
-        Ray centerRay = mRender.getCamera()->getCameraToViewportRay(
-        mRender.getViewport()->getWidth()/2,
-        mRender.getViewport()->getHeight()/2);
-        //let's avoid the capsule shape of the player.
-        centerRay.setOrigin(centerRay.getOrigin() + 20*centerRay.getDirection());
-        btVector3 from(centerRay.getOrigin().x,-centerRay.getOrigin().z,centerRay.getOrigin().y);
-        btVector3 to(centerRay.getPoint(500).x,-centerRay.getPoint(500).z,centerRay.getPoint(500).y);
+        btVector3 origin(
+            mPlayerData.eyepos.x,
+            mPlayerData.eyepos.y,
+            mPlayerData.eyepos.z);
+        origin += dir * 5;
 
-        return mEngine->rayTest(from,to);
+        btVector3 dest = origin + dir * 500;
+        return mEngine->rayTest(origin, dest);
     }
 
     std::vector < std::pair <float, std::string> > PhysicsSystem::getFacedObjects ()
     {
-        //get a ray pointing to the center of the viewport
-        Ray centerRay = mRender.getCamera()->getCameraToViewportRay(
-        mRender.getViewport()->getWidth()/2,
-        mRender.getViewport()->getHeight()/2);
-        btVector3 from(centerRay.getOrigin().x,-centerRay.getOrigin().z,centerRay.getOrigin().y);
-        btVector3 to(centerRay.getPoint(500).x,-centerRay.getPoint(500).z,centerRay.getPoint(500).y);
+        btVector3 dir(0, 1, 0);
+        dir = dir.rotate(btVector3(1, 0, 0), mPlayerData.pitch);
+        dir = dir.rotate(btVector3(0, 0, 1), mPlayerData.yaw);
+        dir.setX(-dir.x());
 
-        return mEngine->rayTest2(from,to);
+        btVector3 origin(
+            mPlayerData.eyepos.x,
+            mPlayerData.eyepos.y,
+            mPlayerData.eyepos.z);
+        origin += dir * 5;
+
+        btVector3 dest = origin + dir * 500;
+        return mEngine->rayTest2(origin, dest);
     }
 
     std::vector < std::pair <float, std::string> > PhysicsSystem::getFacedObjects (float mouseX, float mouseY)
@@ -87,6 +95,10 @@ namespace MWWorld
         playerphysics->hasWater = hasWater;
         if(hasWater){
             playerphysics->waterHeight = waterHeight;
+        }
+        for(std::map<std::string,OEngine::Physic::PhysicActor*>::iterator it = mEngine->PhysicActorMap.begin(); it != mEngine->PhysicActorMap.end();it++)
+        {
+            it->second->setCurrentWater(hasWater, waterHeight);
         }
 
     }
@@ -120,6 +132,22 @@ namespace MWWorld
         return !(result.first == "");
     }
 
+    std::pair<bool, Ogre::Vector3>
+    PhysicsSystem::castRay(const Ogre::Vector3 &orig, const Ogre::Vector3 &dir, float len)
+    {
+        Ogre::Ray ray = Ogre::Ray(orig, dir);
+        Ogre::Vector3 to = ray.getPoint(len);
+
+        btVector3 btFrom = btVector3(orig.x, orig.y, orig.z);
+        btVector3 btTo = btVector3(to.x, to.y, to.z);
+
+        std::pair<std::string, float> test = mEngine->rayTest(btFrom, btTo);
+        if (test.first == "") {
+            return std::make_pair(false, Ogre::Vector3());
+        }
+        return std::make_pair(true, ray.getPoint(len * test.second));
+    }
+
     std::pair<bool, Ogre::Vector3> PhysicsSystem::castRay(float mouseX, float mouseY)
     {
         Ogre::Ray ray = mRender.getCamera()->getCameraToViewportRay(
@@ -148,73 +176,39 @@ namespace MWWorld
         //set the DebugRenderingMode. To disable it,set it to 0
         //eng->setDebugRenderingMode(1);
 
-        //set the walkdirection to 0 (no movement) for every actor)
+        //set the movement keys to 0 (no movement) for every actor)
         for(std::map<std::string,OEngine::Physic::PhysicActor*>::iterator it = mEngine->PhysicActorMap.begin(); it != mEngine->PhysicActorMap.end();it++)
         {
             OEngine::Physic::PhysicActor* act = it->second;
-            act->setWalkDirection(btVector3(0,0,0));
+            act->setMovement(0,0,0);
         }
-		playerMove::playercmd& pm_ref = playerphysics->cmd;
+
+        playerMove::playercmd& pm_ref = playerphysics->cmd;
+
 
         pm_ref.rightmove = 0;
         pm_ref.forwardmove = 0;
         pm_ref.upmove = 0;
+       
 
 		//playerphysics->ps.move_type = PM_NOCLIP;
         for (std::vector<std::pair<std::string, Ogre::Vector3> >::const_iterator iter (actors.begin());
             iter!=actors.end(); ++iter)
         {
-            OEngine::Physic::PhysicActor* act = mEngine->getCharacter(iter->first);
-			//if(iter->first == "player")
-			//	std::cout << "This is player\n";
             //dirty stuff to get the camera orientation. Must be changed!
-
-            Ogre::SceneNode *sceneNode = mRender.getScene()->getSceneNode (iter->first);
-            Ogre::Vector3 dir;
-            Ogre::Node* yawNode = sceneNode->getChildIterator().getNext();
-            Ogre::Node* pitchNode = yawNode->getChildIterator().getNext();
-			Ogre::Quaternion yawQuat = yawNode->getOrientation();
-            Ogre::Quaternion pitchQuat = pitchNode->getOrientation();
-
-            // unused
-            //Ogre::Quaternion both = yawQuat * pitchQuat;
-
-            playerphysics->ps.viewangles.x = pitchQuat.getPitch().valueDegrees();
-            playerphysics->ps.viewangles.z = 0;
-			playerphysics->ps.viewangles.y = yawQuat.getYaw().valueDegrees() *-1 + 90;
-
-            if(mFreeFly)
-            {
-                Ogre::Vector3 dir1(iter->second.x,iter->second.z,-iter->second.y);
-
-				pm_ref.rightmove = -dir1.x;
-				pm_ref.forwardmove = dir1.z;
-				pm_ref.upmove = dir1.y;
+            if (iter->first == "player") {
+                playerphysics->ps.viewangles.x =
+                    Ogre::Radian(mPlayerData.pitch).valueDegrees();
 
 
-				//std::cout << "Current angle" << yawQuat.getYaw().valueDegrees() - 90<< "\n";
-				//playerphysics->ps.viewangles.x = pitchQuat.getPitch().valueDegrees();
-				//std::cout << "Pitch: " << yawQuat.getPitch() << "Yaw:" << yawQuat.getYaw() << "Roll: " << yawQuat.getRoll() << "\n";
-                dir = 0.07*(yawQuat*pitchQuat*dir1);
+
+                playerphysics->ps.viewangles.y =
+                    Ogre::Radian(mPlayerData.yaw).valueDegrees() + 90;
+
+                pm_ref.rightmove = iter->second.x;
+                pm_ref.forwardmove = -iter->second.y;
+                pm_ref.upmove = iter->second.z;
             }
-            else
-            {
-
-                Ogre::Quaternion quat = yawNode->getOrientation();
-                Ogre::Vector3 dir1(iter->second.x,iter->second.z,-iter->second.y);
-
-				pm_ref.rightmove = -dir1.x;
-				pm_ref.forwardmove = dir1.z;
-				pm_ref.upmove = dir1.y;
-
-
-
-                dir = 0.025*(quat*dir1);
-            }
-
-
-            //set the walk direction
-            act->setWalkDirection(btVector3(dir.x,-dir.z,dir.y));
         }
         mEngine->stepSimulation(dt);
     }
@@ -223,20 +217,17 @@ namespace MWWorld
         const std::vector<std::pair<std::string, Ogre::Vector3> >& actors)
     {
         Pmove(playerphysics);
+       
 
         std::vector< std::pair<std::string, Ogre::Vector3> > response;
         for(std::map<std::string,OEngine::Physic::PhysicActor*>::iterator it = mEngine->PhysicActorMap.begin(); it != mEngine->PhysicActorMap.end();it++)
         {
-            btVector3 newPos = it->second->getPosition();
 
-            Ogre::Vector3 coord(newPos.x(), newPos.y(), newPos.z());
+            Ogre::Vector3 coord = it->second->getPosition();
             if(it->first == "player"){
 
-                coord = playerphysics->ps.origin;
-                //std::cout << "ZCoord: " << coord.z << "\n";
-                //std::cout << "Coord" << coord << "\n";
-                //coord = Ogre::Vector3(coord.x, coord.z, coord.y);   //x, z, -y
-
+                coord = playerphysics->ps.origin ;
+                 
             }
 
 
@@ -261,21 +252,16 @@ namespace MWWorld
     void PhysicsSystem::addObject (const std::string& handle, const std::string& mesh,
         const Ogre::Quaternion& rotation, float scale, const Ogre::Vector3& position)
     {
-        OEngine::Physic::RigidBody* body = mEngine->createRigidBody(mesh,handle,scale);
+        handleToMesh[handle] = mesh;
+        OEngine::Physic::RigidBody* body = mEngine->createAndAdjustRigidBody(mesh,handle,scale, position, rotation);
         mEngine->addRigidBody(body);
-        btTransform tr;
-        tr.setOrigin(btVector3(position.x,position.y,position.z));
-        tr.setRotation(btQuaternion(rotation.x,rotation.y,rotation.z,rotation.w));
-        body->setWorldTransform(tr);
     }
 
     void PhysicsSystem::addActor (const std::string& handle, const std::string& mesh,
-        const Ogre::Vector3& position)
+        const Ogre::Vector3& position, float scale, const Ogre::Quaternion& rotation)
     {
         //TODO:optimize this. Searching the std::map isn't very efficient i think.
-        mEngine->addCharacter(handle);
-        OEngine::Physic::PhysicActor* act = mEngine->getCharacter(handle);
-        act->setPosition(btVector3(position.x,position.y,position.z));
+        mEngine->addCharacter(handle, mesh, position, scale, rotation);
     }
 
     void PhysicsSystem::removeObject (const std::string& handle)
@@ -286,15 +272,25 @@ namespace MWWorld
         mEngine->deleteRigidBody(handle);
     }
 
-    void PhysicsSystem::moveObject (const std::string& handle, const Ogre::Vector3& position)
+    void PhysicsSystem::moveObject (const std::string& handle, Ogre::SceneNode* node)
     {
+        Ogre::Vector3 position = node->getPosition();
         if (OEngine::Physic::RigidBody* body = mEngine->getRigidBody(handle))
         {
             // TODO very dirty hack to avoid crash during setup -> needs cleaning up to allow
             // start positions others than 0, 0, 0
-            btTransform tr = body->getWorldTransform();
-            tr.setOrigin(btVector3(position.x,position.y,position.z));
-            body->setWorldTransform(tr);
+            
+            
+            if(dynamic_cast<btBoxShape*>(body->getCollisionShape()) == NULL){
+                btTransform tr = body->getWorldTransform();
+                tr.setOrigin(btVector3(position.x,position.y,position.z));
+                body->setWorldTransform(tr);
+            }
+            else{
+                //For objects that contain a box shape.  
+                //Do any such objects exist?  Perhaps animated objects?
+                mEngine->boxAdjustExternal(handleToMesh[handle], body, node->getScale().x, position, node->getOrientation());
+            }
         }
         if (OEngine::Physic::PhysicActor* act = mEngine->getCharacter(handle))
         {
@@ -306,24 +302,45 @@ namespace MWWorld
             }
             else
             {
-                act->setPosition(btVector3(position.x,position.y,position.z));
+                act->setPosition(position);
             }
         }
     }
 
-    void PhysicsSystem::rotateObject (const std::string& handle, const Ogre::Quaternion& rotation)
+    void PhysicsSystem::rotateObject (const std::string& handle, Ogre::SceneNode* node)
     {
-         if (OEngine::Physic::PhysicActor* act = mEngine->getCharacter(handle))
+        Ogre::Quaternion rotation = node->getOrientation();
+        if (OEngine::Physic::PhysicActor* act = mEngine->getCharacter(handle))
         {
-            // TODO very dirty hack to avoid crash during setup -> needs cleaning up to allow
-            // start positions others than 0, 0, 0
-            act->setRotation(btQuaternion(rotation.x, rotation.y, rotation.z, rotation.w));
+            //Needs to be changed
+            act->setRotation(rotation);
+        }
+        if (OEngine::Physic::RigidBody* body = mEngine->getRigidBody(handle))
+        {
+            if(dynamic_cast<btBoxShape*>(body->getCollisionShape()) == NULL)
+                body->getWorldTransform().setRotation(btQuaternion(rotation.x, rotation.y, rotation.z, rotation.w));
+            else
+                mEngine->boxAdjustExternal(handleToMesh[handle], body, node->getScale().x, node->getPosition(), rotation);
         }
     }
 
-    void PhysicsSystem::scaleObject (const std::string& handle, float scale)
+    void PhysicsSystem::scaleObject (const std::string& handle, Ogre::SceneNode* node)
     {
+        if(handleToMesh.find(handle) != handleToMesh.end())
+        {
+            removeObject(handle);
 
+            float scale = node->getScale().x;
+            Ogre::Quaternion quat = node->getOrientation();
+            Ogre::Vector3 vec = node->getPosition();
+            addObject(handle, handleToMesh[handle], quat, scale, vec);
+        }
+
+        if (OEngine::Physic::PhysicActor* act = mEngine->getCharacter(handle))
+        {
+            float scale = node->getScale().x;
+            act->setScale(scale);
+        }
     }
 
     bool PhysicsSystem::toggleCollisionMode()
@@ -343,8 +360,6 @@ namespace MWWorld
                 if(cmode)
                 {
                     act->enableCollisions(false);
-                    act->setGravity(0.);
-                    act->setVerticalVelocity(0);
                     mFreeFly = true;
                     return false;
                 }
@@ -352,8 +367,6 @@ namespace MWWorld
                 {
                     mFreeFly = false;
                     act->enableCollisions(true);
-                    act->setGravity(4.);
-                    act->setVerticalVelocity(0);
                     return true;
                 }
             }
@@ -362,21 +375,48 @@ namespace MWWorld
         throw std::logic_error ("can't find player");
     }
 
-     void PhysicsSystem::insertObjectPhysics(const MWWorld::Ptr& ptr, const std::string model){
+    void PhysicsSystem::insertObjectPhysics(const MWWorld::Ptr& ptr, const std::string model){
 
-           Ogre::SceneNode* node = ptr.getRefData().getBaseNode();
+        Ogre::SceneNode* node = ptr.getRefData().getBaseNode();
 
-           // unused
-		   //Ogre::Vector3 objPos = node->getPosition();
+        addObject(
+            node->getName(),
+            model,
+            node->getOrientation(),
+            node->getScale().x,
+            node->getPosition());
+    }
 
-         addObject (node->getName(), model, node->getOrientation(),
-            node->getScale().x, node->getPosition());
-     }
+    void PhysicsSystem::insertActorPhysics(const MWWorld::Ptr& ptr, const std::string model){
+        Ogre::SceneNode* node = ptr.getRefData().getBaseNode();
+        addActor (node->getName(), model, node->getPosition(), node->getScale().x, node->getOrientation());
+    }
 
-     void PhysicsSystem::insertActorPhysics(const MWWorld::Ptr& ptr, const std::string model){
-           Ogre::SceneNode* node = ptr.getRefData().getBaseNode();
-            // std::cout << "Adding node with name" << node->getName();
-         addActor (node->getName(), model, node->getPosition());
-     }
+    bool PhysicsSystem::getObjectAABB(const MWWorld::Ptr &ptr, Ogre::Vector3 &min, Ogre::Vector3 &max)
+    {
+        std::string model = MWWorld::Class::get(ptr).getModel(ptr);
+        if (model.empty()) {
+            return false;
+        }
+        btVector3 btMin, btMax;
+        float scale = ptr.getCellRef().scale;
+        mEngine->getObjectAABB(model, scale, btMin, btMax);
 
+        min.x = btMin.x();
+        min.y = btMin.y();
+        min.z = btMin.z();
+
+        max.x = btMax.x();
+        max.y = btMax.y();
+        max.z = btMax.z();
+
+        return true;
+    }
+
+    void PhysicsSystem::updatePlayerData(Ogre::Vector3 &eyepos, float pitch, float yaw)
+    {
+        mPlayerData.eyepos = eyepos;
+        mPlayerData.pitch = pitch;
+        mPlayerData.yaw = yaw;
+    }
 }

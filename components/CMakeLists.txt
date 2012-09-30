@@ -35,7 +35,7 @@ add_component_dir (file_finder
     )
 
 add_component_dir (esm_store
-    cell_store reclists store
+    reclists store
     )
 
 add_component_dir (esm
@@ -43,7 +43,7 @@ add_component_dir (esm
     loadclas loadclot loadcont loadcrea loadcrec loaddial loaddoor loadench loadfact loadglob loadgmst
     loadinfo loadingr loadland loadlevlist loadligh loadlocks loadltex loadmgef loadmisc loadnpcc
     loadnpc loadpgrd loadrace loadregn loadscpt loadskil loadsndg loadsoun loadspel loadsscr loadstat
-    loadweap records
+    loadweap records aipackage
     )
 
 add_component_dir (misc
@@ -52,7 +52,7 @@ add_component_dir (misc
 
 add_component_dir (files
     linuxpath windowspath macospath fixedpath multidircollection collections fileops configurationmanager
-    filelibrary
+    filelibrary ogreplugin
     )
 
 add_component_dir (compiler
@@ -72,6 +72,11 @@ add_library(components STATIC ${COMPONENT_FILES})
 
 target_link_libraries(components ${Boost_LIBRARIES} ${OGRE_LIBRARIES})
 
+# Fix for not visible pthreads functions for linker with glibc 2.15
+if (UNIX AND NOT APPLE)
+target_link_libraries(components ${CMAKE_THREAD_LIBS_INIT})
+endif()
+
+
 # Make the variable accessible for other subdirectories
 set(COMPONENT_FILES ${COMPONENT_FILES} PARENT_SCOPE)
-

@@ -7,6 +7,8 @@
 #include <components/interpreter/runtime.hpp>
 #include <components/interpreter/opcodes.hpp>
 
+#include "../mwworld/class.hpp"
+
 #include "../mwmechanics/creaturestats.hpp"
 
 #include "interpretercontext.hpp"
@@ -128,7 +130,7 @@ namespace MWScript
                     Interpreter::Type_Integer value = runtime[0].mInteger;
                     runtime.pop();
 
-                    MWWorld::Class::get (ptr).getCreatureStats (ptr).mHello = value;
+                    MWWorld::Class::get (ptr).getCreatureStats (ptr).setHello(value);
                 }
         };
 
@@ -144,7 +146,7 @@ namespace MWScript
                     Interpreter::Type_Integer value = runtime[0].mInteger;
                     runtime.pop();
 
-                    MWWorld::Class::get (ptr).getCreatureStats (ptr).mFight = value;
+                    MWWorld::Class::get (ptr).getCreatureStats (ptr).setFight(value);
                 }
         };
 
@@ -160,7 +162,7 @@ namespace MWScript
                     Interpreter::Type_Integer value = runtime[0].mInteger;
                     runtime.pop();
 
-                    MWWorld::Class::get (ptr).getCreatureStats (ptr).mFlee = value;
+                    MWWorld::Class::get (ptr).getCreatureStats (ptr).setFlee(value);
                 }
         };
 
@@ -176,7 +178,7 @@ namespace MWScript
                     Interpreter::Type_Integer value = runtime[0].mInteger;
                     runtime.pop();
 
-                    MWWorld::Class::get (ptr).getCreatureStats (ptr).mAlarm = value;
+                    MWWorld::Class::get (ptr).getCreatureStats (ptr).setAlarm(value);
                 }
         };
 
