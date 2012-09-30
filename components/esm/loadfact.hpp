@@ -4,10 +4,11 @@
 #include <string>
 #include <vector>
 
-#include "record.hpp"
-
 namespace ESM
 {
+
+class ESMReader;
+class ESMWriter;
 
 /*
  * Faction definitions

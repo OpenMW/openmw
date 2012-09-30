@@ -4,11 +4,14 @@
 #include <string>
 
 #include "esmcommon.hpp"
-#include "record.hpp"
 #include "defs.hpp"
 
 namespace ESM
 {
+
+class ESMReader;
+class ESMWriter;
+
 /* Cell reference. This represents ONE object (of many) inside the
    cell. The cell references are not loaded as part of the normal
    loading process, but are rather loaded later on demand when we are

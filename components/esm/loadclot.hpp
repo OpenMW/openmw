@@ -3,11 +3,13 @@
 
 #include <string>
 
-#include "record.hpp"
 #include "loadarmo.hpp"
 
 namespace ESM
 {
+
+class ESMReader;
+class ESMWriter;
 
 /*
  * Clothing

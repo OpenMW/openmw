@@ -3,10 +3,11 @@
 
 #include <string>
 
-#include "record.hpp"
-
 namespace ESM
 {
+
+class ESMReader;
+class ESMWriter;
 
 /*
  * Misc inventory items, basically things that have no use but can be

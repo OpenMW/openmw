@@ -3,11 +3,14 @@
 
 #include <string>
 
-#include "record.hpp"
 #include "spelllist.hpp"
 
 namespace ESM
 {
+
+class ESMReader;
+class ESMWriter;
+
 /*
  * Race definition
  */

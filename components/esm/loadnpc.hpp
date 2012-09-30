@@ -5,12 +5,15 @@
 #include <vector>
 
 #include "defs.hpp"
-#include "record.hpp"
 #include "loadcont.hpp"
 #include "aipackage.hpp"
 #include "spelllist.hpp"
 
 namespace ESM {
+
+class ESMReader;
+class ESMWriter;
+
 /*
  * NPC definition
  */

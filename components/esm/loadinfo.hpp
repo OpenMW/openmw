@@ -4,11 +4,13 @@
 #include <string>
 #include <vector>
 
-#include "record.hpp"
 #include "defs.hpp"
 
 namespace ESM
 {
+
+class ESMReader;
+class ESMWriter;
 
 // NOT DONE
 

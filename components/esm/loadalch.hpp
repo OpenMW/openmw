@@ -3,11 +3,14 @@
 
 #include <string>
 
-#include "record.hpp"
 #include "effectlist.hpp"
 
 namespace ESM
 {
+
+class ESMReader;
+class ESMWriter;
+
 /*
  * Alchemy item (potions)
  */

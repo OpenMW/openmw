@@ -3,11 +3,14 @@
 
 #include <string>
 
-#include "record.hpp"
 #include "defs.hpp"
 
 namespace ESM
 {
+
+class ESMReader;
+class ESMWriter;
+
 /*
  *  Game setting, with automatic cleaning of "dirty" entries.
  *

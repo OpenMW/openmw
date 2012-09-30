@@ -3,11 +3,14 @@
 
 #include <libs/platform/stdint.h>
 
-#include "record.hpp"
 #include "esmcommon.hpp"
 
 namespace ESM
 {
+
+class ESMReader;
+class ESMWriter;
+
 /*
  * Landscape data.
  */

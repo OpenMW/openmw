@@ -1,7 +1,7 @@
 #ifndef OPENMW_ESM_RECORDS_H
 #define OPENMW_ESM_RECORDS_H
 
-#include "record.hpp"
+#include "defs.hpp"
 #include "loadacti.hpp"
 #include "loadalch.hpp"
 #include "loadappa.hpp"

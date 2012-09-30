@@ -3,10 +3,11 @@
 
 #include <string>
 
-#include "record.hpp"
-
 namespace ESM
 {
+
+class ESMReader;
+class ESMWriter;
 
 /*
  * Sound generator. This describes the sounds a creature make.

@@ -1,11 +1,14 @@
 #ifndef OPENMW_ESM_ENCH_H
 #define OPENMW_ESM_ENCH_H
 
-#include "record.hpp"
 #include "effectlist.hpp"
 
 namespace ESM
 {
+
+class ESMReader;
+class ESMWriter;
+
 /*
  * Enchantments
  */

@@ -4,10 +4,11 @@
 #include <string>
 #include <vector>
 
-#include "record.hpp"
-
 namespace ESM
 {
+
+class ESMReader;
+class ESMWriter;
 
 /*
  * Leveled lists. Since these have identical layout, I only bothered

@@ -1,12 +1,13 @@
 #ifndef OPENMW_ESM_NPCC_H
 #define OPENMW_ESM_NPCC_H
 
-#include "record.hpp"
-
 // TODO: create implementation files to remove this
 #include "esmreader.hpp"
 
 namespace ESM {
+
+class ESMReader;
+class ESMWriter;
 
 /*
  * NPC change information (found in savegame files only). We can't

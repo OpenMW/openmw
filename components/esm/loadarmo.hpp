@@ -4,10 +4,11 @@
 #include <vector>
 #include <string>
 
-#include "record.hpp"
-
 namespace ESM
 {
+
+class ESMReader;
+class ESMWriter;
 
 enum PartReferenceType
 {

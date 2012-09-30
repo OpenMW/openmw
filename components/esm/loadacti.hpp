@@ -1,10 +1,13 @@
 #ifndef OPENMW_ESM_ACTI_H
 #define OPENMW_ESM_ACTI_H
 
-#include "record.hpp"
+#include <string>
 
 namespace ESM
 {
+
+class ESMReader;
+class ESMWriter;
 
 struct Activator
 {

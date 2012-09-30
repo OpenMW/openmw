@@ -1,10 +1,14 @@
 #ifndef OPENMW_ESM_APPA_H
 #define OPENMW_ESM_APPA_H
 
-#include "record.hpp"
+#include <string>
 
 namespace ESM
 {
+
+class ESMReader;
+class ESMWriter;
+
 /*
  * Alchemist apparatus
  */

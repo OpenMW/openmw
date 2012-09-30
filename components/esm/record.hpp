@@ -1,8 +1,6 @@
 #ifndef OPENMW_ESM_RECORD_H
 #define OPENMW_ESM_RECORD_H
 
-#include <string>
-
 namespace ESM
 {
 
@@ -55,30 +53,6 @@ enum RecNameInts
     REC_WEAP = 0x50414557
 };
 
-class ESMReader;
-class ESMWriter;
-
-class Record
-{
-public:
-    Record() {}
-    virtual ~Record() {}
-
-    virtual void load(ESMReader& esm) = 0;
-    virtual void save(ESMWriter& esm) = 0;
-
-    std::string getId() const { return mId; }
-    void setId(const std::string& in) { mId = in; } 
-    
-    int getFlags() const { return (mFlags & 0x1 ? 0x00002000 : 0) | (mFlags & 0x2 ? 0x00000400 : 0); }
-    void setFlags(int in) { mFlags = (in & 0x00002000 ? 0x1 : 0) | (in & 0x00000400 ? 0x2 : 0); }
-
-    virtual int getName() = 0;
-
-protected:
-    std::string mId;
-    char mFlags;
-};
 
 }
 

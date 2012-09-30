@@ -5,10 +5,12 @@
 
 #include <boost/array.hpp>
 
-#include "record.hpp"
 #include "defs.hpp"
 
 namespace ESM {
+
+class ESMReader;
+class ESMWriter;
 
 /*
  * Skill information

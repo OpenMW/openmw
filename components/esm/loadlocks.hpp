@@ -1,10 +1,13 @@
 #ifndef OPENMW_ESM_LOCKS_H
 #define OPENMW_ESM_LOCKS_H
 
-#include "record.hpp"
+#include <string>
 
 namespace ESM
 {
+
+class ESMReader;
+class ESMWriter;
 
 /*
  * This file covers lockpicks (LOCK), probes (PROB) and armor repair

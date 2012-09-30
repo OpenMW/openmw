@@ -4,11 +4,13 @@
 #include <string>
 #include <vector>
 
-#include "record.hpp"
 #include "esmcommon.hpp"
 
 namespace ESM
 {
+
+class ESMReader;
+class ESMWriter;
 
 /*
  * Script definitions

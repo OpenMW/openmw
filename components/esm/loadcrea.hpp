@@ -3,13 +3,15 @@
 
 #include <string>
 
-#include "record.hpp"
 #include "loadcont.hpp"
 #include "spelllist.hpp"
 #include "aipackage.hpp"
 
 namespace ESM
 {
+
+class ESMReader;
+class ESMWriter;
 
 /*
  * Creature definition

@@ -1,13 +1,16 @@
 #ifndef OPENMW_ESM_BOOK_H
 #define OPENMW_ESM_BOOK_H
 
-#include "record.hpp"
+#include <string>
 
 namespace ESM
 {
 /*
  * Books, magic scrolls, notes and so on
  */
+
+class ESMReader;
+class ESMWriter;
 
 struct Book
 {

@@ -3,10 +3,11 @@
 
 #include <string>
 
-#include "record.hpp"
-
 namespace ESM
 {
+
+class ESMReader;
+class ESMWriter;
 
 /*
  * Lights. Includes static light sources and also carryable candles

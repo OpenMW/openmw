@@ -3,9 +3,10 @@
 
 #include <string>
 
-#include "record.hpp"
-
 namespace ESM {
+
+class ESMReader;
+class ESMWriter;
 
 /*
  * Definition of static object.

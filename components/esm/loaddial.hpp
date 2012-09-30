@@ -1,13 +1,16 @@
 #ifndef OPENMW_ESM_DIAL_H
 #define OPENMW_ESM_DIAL_H
 
+#include <string>
 #include <vector>
 
-#include "record.hpp"
 #include "loadinfo.hpp"
 
 namespace ESM
 {
+
+class ESMReader;
+class ESMWriter;
 
 /*
  * Dialogue topic and journal entries. The actual data is contained in

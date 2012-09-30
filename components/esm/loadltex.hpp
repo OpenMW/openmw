@@ -3,10 +3,11 @@
 
 #include <string>
 
-#include "record.hpp"
-
 namespace ESM
 {
+
+class ESMReader;
+class ESMWriter;
 
 /*
  * Texture used for texturing landscape.
