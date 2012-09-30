@@ -12,7 +12,7 @@ namespace ESM
 /*
  * Path grid.
  */
-struct Pathgrid : public Record
+struct Pathgrid
 {
     struct DATAstruct
     {
@@ -46,8 +46,6 @@ struct Pathgrid : public Record
 
     void load(ESMReader &esm);
     void save(ESMWriter &esm);
-
-    int getName() { return REC_PGRD; }
 };
 }
 #endif

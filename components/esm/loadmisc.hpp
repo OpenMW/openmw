@@ -13,7 +13,7 @@ namespace ESM
  * carried, bought and sold. It also includes keys.
  */
 
-struct Miscellaneous : public Record
+struct Miscellaneous
 {
     struct MCDTstruct
     {
@@ -29,8 +29,6 @@ struct Miscellaneous : public Record
 
     void load(ESMReader &esm);
     void save(ESMWriter &esm);
-
-    int getName() { return REC_MISC; }
 };
 }
 #endif

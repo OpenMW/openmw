@@ -12,7 +12,7 @@ namespace ESM
  * Weapon definition
  */
 
-struct Weapon : public Record
+struct Weapon
 {
     enum Type
     {
@@ -59,8 +59,6 @@ struct Weapon : public Record
 
     void load(ESMReader &esm);
     void save(ESMWriter &esm);
-
-    int getName() { return REC_WEAP; }
 };
 }
 #endif

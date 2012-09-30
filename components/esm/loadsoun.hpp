@@ -13,15 +13,13 @@ struct SOUNstruct
     unsigned char mVolume, mMinRange, mMaxRange;
 };
 
-struct Sound : public Record
+struct Sound
 {
     SOUNstruct mData;
     std::string mSound;
 
     void load(ESMReader &esm);
     void save(ESMWriter &esm);
-
-    int getName() { return REC_SOUN; }
 };
 }
 #endif

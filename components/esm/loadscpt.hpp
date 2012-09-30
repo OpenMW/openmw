@@ -14,7 +14,7 @@ namespace ESM
  * Script definitions
  */
 
-class Script : public Record
+class Script
 {
 public:
     struct SCHDstruct
@@ -55,8 +55,6 @@ public:
 
     void load(ESMReader &esm);
     void save(ESMWriter &esm);
-
-    int getName() { return REC_SCPT; }
 };
 }
 #endif

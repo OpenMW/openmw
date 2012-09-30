@@ -25,7 +25,7 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Ingredient> *ref =
             ptr.get<ESM::Ingredient>();
 
-        return ref->base->getId();
+        return ref->base->mId;
     }
     
     void Ingredient::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const

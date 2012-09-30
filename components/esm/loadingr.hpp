@@ -11,7 +11,7 @@ namespace ESM
  * Alchemy ingredient
  */
 
-struct Ingredient : public Record
+struct Ingredient
 {
     struct IRDTstruct
     {
@@ -23,12 +23,10 @@ struct Ingredient : public Record
     };
 
     IRDTstruct mData;
-    std::string mName, mModel, mIcon, mScript;
+    std::string mId, mName, mModel, mIcon, mScript;
 
     void load(ESMReader &esm);
     void save(ESMWriter &esm);
-
-    int getName() { return REC_INGR; }
 };
 }
 #endif

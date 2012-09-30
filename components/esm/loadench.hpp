@@ -10,7 +10,7 @@ namespace ESM
  * Enchantments
  */
 
-struct Enchantment : public Record
+struct Enchantment
 {
     enum Type
     {
@@ -34,8 +34,6 @@ struct Enchantment : public Record
 
     void load(ESMReader &esm);
     void save(ESMWriter &esm);
-
-    int getName() { return REC_ENCH; }
 };
 }
 #endif

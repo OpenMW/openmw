@@ -8,7 +8,7 @@
 namespace ESM
 {
 
-struct MagicEffect : public Record
+struct MagicEffect
 {
     enum Flags
     {
@@ -50,8 +50,6 @@ struct MagicEffect : public Record
 
     void load(ESMReader &esm);
     void save(ESMWriter &esm);
-
-    int getName() { return REC_MGEF; }
 };
 }
 #endif

@@ -12,7 +12,7 @@ namespace ESM
  * Landscape data.
  */
 
-struct Land : public Record
+struct Land
 {
     Land();
     ~Land();
@@ -91,8 +91,6 @@ struct Land : public Record
 
     void load(ESMReader &esm);
     void save(ESMWriter &esm);
-
-    int getName() { return REC_LAND; }
 
     /**
      * Actually loads data

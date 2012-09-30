@@ -16,7 +16,7 @@ namespace ESM
  *
  */
 
-struct Creature : public Record
+struct Creature
 {
     // Default is 0x48?
     enum Flags
@@ -69,7 +69,7 @@ struct Creature : public Record
     int mFlags;
     float mScale;
 
-    std::string mModel, mName, mScript;
+    std::string mId, mModel, mName, mScript;
     std::string mOriginal; // Base creature that this is a modification of
 
     InventoryList mInventory;
@@ -79,8 +79,6 @@ struct Creature : public Record
     bool mHasAI;
     AIData mAiData;
     AIPackageList mAiPackage;
-
-    int getName() { return REC_CREA; }
 
     void load(ESMReader &esm);
     void save(ESMWriter &esm);

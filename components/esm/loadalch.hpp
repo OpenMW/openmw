@@ -12,7 +12,7 @@ namespace ESM
  * Alchemy item (potions)
  */
 
-struct Potion : public Record
+struct Potion
 {
     struct ALDTstruct
     {
@@ -22,13 +22,11 @@ struct Potion : public Record
     };
     ALDTstruct mData;
 
-    std::string mName, mModel, mIcon, mScript;
+    std::string mId, mName, mModel, mIcon, mScript;
     EffectList mEffects;
 
     void load(ESMReader &esm);
     void save(ESMWriter &esm);
-    
-    int getName() { return REC_ALCH; }
-};
+    };
 }
 #endif

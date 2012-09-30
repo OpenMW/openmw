@@ -67,7 +67,7 @@ namespace MWDialogue
 
         for (std::vector<ESM::DialInfo>::const_iterator iter (dialogue->mInfo.begin());
             iter!=dialogue->mInfo.end(); ++iter)
-            if (iter->getId() == entry.mInfoId)
+            if (iter->mId == entry.mInfoId)
             {
                 index = iter->mData.mDisposition; /// \todo cleanup info structure
                 break;

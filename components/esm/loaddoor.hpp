@@ -8,14 +8,12 @@
 namespace ESM
 {
 
-struct Door : public Record
+struct Door
 {
     std::string mName, mModel, mScript, mOpenSound, mCloseSound;
 
     void load(ESMReader &esm);
     void save(ESMWriter &esm);
-
-    int getName() { return REC_DOOR; }
 };
 }
 #endif

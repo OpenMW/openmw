@@ -13,8 +13,9 @@ namespace ESM
  *
  */
 
-struct GameSetting : public Record
+struct GameSetting
 {
+    std::string mId;
     // One of these is used depending on the variable type
     std::string mStr;
     int mI;
@@ -93,8 +94,6 @@ struct GameSetting : public Record
     ///< Throwns an exception if GMST is not of type string.
 
     void save(ESMWriter &esm);
-
-    int getName() { return REC_GMST; }
 };
 }
 #endif

@@ -14,7 +14,7 @@ namespace ESM
  * Region data
  */
 
-struct Region : public Record
+struct Region
 {
 #pragma pack(push)
 #pragma pack(1)
@@ -46,8 +46,6 @@ struct Region : public Record
 
     void load(ESMReader &esm);
     void save(ESMWriter &esm);
-
-    int getName() { return REC_REGN; }
 };
 }
 #endif

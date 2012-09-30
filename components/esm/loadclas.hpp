@@ -13,7 +13,7 @@ namespace ESM
 
 // These flags tells us which items should be auto-calculated for this
 // class
-struct Class : public Record
+struct Class
 {
     enum AutoCalc
     {
@@ -63,8 +63,6 @@ struct Class : public Record
 
     void load(ESMReader &esm);
     void save(ESMWriter &esm);
-
-    int getName() { return REC_CLAS; }
 };
 }
 #endif

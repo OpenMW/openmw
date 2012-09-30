@@ -12,7 +12,7 @@ namespace ESM
  * Sound generator. This describes the sounds a creature make.
  */
 
-struct SoundGenerator : public Record
+struct SoundGenerator
 {
     enum Type
     {
@@ -33,8 +33,6 @@ struct SoundGenerator : public Record
 
     void load(ESMReader &esm);
     void save(ESMWriter &esm);
-
-    int getName() { return REC_SNDG; }
 };
 }
 #endif

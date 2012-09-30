@@ -13,7 +13,7 @@ namespace ESM
  * and torches.
  */
 
-struct Light : public Record
+struct Light
 {
     enum Flags
     {
@@ -44,8 +44,6 @@ struct Light : public Record
 
     void load(ESMReader &esm);
     void save(ESMWriter &esm);
-
-    int getName() { return REC_LIGH; }
 };
 }
 #endif

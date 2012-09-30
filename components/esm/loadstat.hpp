@@ -19,14 +19,12 @@ namespace ESM {
  * you decode the CELL blocks, if you want to test this hypothesis.
  */
 
-struct Static : public Record
+struct Static
 {
   std::string mModel;
 
   void load(ESMReader &esm);
   void save(ESMWriter &esm);
-
-    int getName() { return REC_STAT; }
 };
 }
 #endif

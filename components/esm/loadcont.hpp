@@ -28,7 +28,7 @@ struct InventoryList
     void save(ESMWriter &esm);
 };
 
-struct Container : public Record
+struct Container
 {
     enum Flags
     {
@@ -45,8 +45,6 @@ struct Container : public Record
 
     void load(ESMReader &esm);
     void save(ESMWriter &esm);
-
-    int getName() { return REC_CONT; }
 };
 }
 #endif

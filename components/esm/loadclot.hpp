@@ -13,7 +13,7 @@ namespace ESM
  * Clothing
  */
 
-struct Clothing : public Record
+struct Clothing
 {
     enum Type
     {
@@ -44,8 +44,6 @@ struct Clothing : public Record
 
     void load(ESMReader &esm);
     void save(ESMWriter &esm);
-
-    int getName() { return REC_CLOT; }
 };
 }
 #endif

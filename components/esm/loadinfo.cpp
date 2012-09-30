@@ -8,7 +8,7 @@ namespace ESM
 
 void DialInfo::load(ESMReader &esm)
 {
-    mSelfId = esm.getHNString("INAM");
+    mId = esm.getHNString("INAM");
     mPrev = esm.getHNString("PNAM");
     mNext = esm.getHNString("NNAM");
 
@@ -127,7 +127,7 @@ void DialInfo::load(ESMReader &esm)
     else
         esm.fail(
                 "Don't know what to do with " + subName.toString()
-                        + " in INFO " + mSelfId);
+                        + " in INFO " + mId);
 
     if (mQuestStatus != QS_None)
         // Skip rest of record
@@ -136,7 +136,7 @@ void DialInfo::load(ESMReader &esm)
 
 void DialInfo::save(ESMWriter &esm)
 {
-    esm.writeHNCString("INAM", mSelfId);
+    esm.writeHNCString("INAM", mId);
     esm.writeHNCString("PNAM", mPrev);
     esm.writeHNCString("NNAM", mNext);
     esm.writeHNT("DATA", mData, 12);

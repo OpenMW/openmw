@@ -17,7 +17,7 @@ namespace ESM
  * several files. 
  */
 
-struct LeveledListBase : public Record
+struct LeveledListBase
 {
     enum Flags
     {
@@ -47,14 +47,6 @@ struct LeveledListBase : public Record
 
     void load(ESMReader &esm);
     void save(ESMWriter &esm);
-
-    int getName()
-    {
-        if (mRecName[0] == 'C')
-            return REC_LEVC;
-        
-        return REC_LEVI;
-    }
 };
 
 struct CreatureLevList: LeveledListBase

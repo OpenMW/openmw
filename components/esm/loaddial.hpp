@@ -14,7 +14,7 @@ namespace ESM
  * the INFO records following the DIAL.
  */
 
-struct Dialogue : public Record
+struct Dialogue
 {
     enum Type
     {
@@ -26,13 +26,12 @@ struct Dialogue : public Record
         Deleted = -1
     };
 
+    std::string mId;
     char mType;
     std::vector<DialInfo> mInfo;
 
     void load(ESMReader &esm);
     void save(ESMWriter &esm);
-
-    int getName() { return REC_DIAL; }
 };
 }
 #endif

@@ -6,14 +6,12 @@
 namespace ESM
 {
 
-struct Activator : public Record
+struct Activator
 {
     std::string mName, mScript, mModel;
 
     void load(ESMReader &esm);
     void save(ESMWriter &esm);
-
-    int getName() { return REC_ACTI; }
 };
 
 }

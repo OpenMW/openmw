@@ -22,7 +22,7 @@ namespace MWDialogue
 
         for (std::vector<ESM::DialInfo>::const_iterator iter (dialogue->mInfo.begin());
             iter!=dialogue->mInfo.end(); ++iter)
-            if (iter->getId() == mInfoId)
+            if (iter->mId == mInfoId)
                 return iter->mResponse;
 
         throw std::runtime_error ("unknown info ID " + mInfoId + " for topic " + mTopic);
@@ -41,7 +41,7 @@ namespace MWDialogue
             iter!=dialogue->mInfo.end(); ++iter)
             if (iter->mData.mDisposition==index) /// \todo cleanup info structure
             {
-                return iter->getId();
+                return iter->mId;
             }
 
         throw std::runtime_error ("unknown journal index for topic " + topic);

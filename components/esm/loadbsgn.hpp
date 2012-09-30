@@ -9,7 +9,7 @@
 namespace ESM
 {
 
-struct BirthSign : public Record
+struct BirthSign
 {
     std::string mName, mDescription, mTexture;
 
@@ -18,8 +18,6 @@ struct BirthSign : public Record
 
     void load(ESMReader &esm);
     void save(ESMWriter &esm);
-
-    int getName() { return REC_BSGN; }
 };
 }
 #endif

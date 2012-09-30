@@ -87,7 +87,7 @@ public:
    (using ESMReader::getContext()) and jumping back into place
    whenever we need to load a given cell.
  */
-struct Cell : public Record
+struct Cell
 {
   enum Flags
     {
@@ -127,8 +127,6 @@ struct Cell : public Record
 
   void load(ESMReader &esm);
   void save(ESMWriter &esm);
-
-  int getName() { return REC_CELL; }
 
   bool isExterior() const
   {

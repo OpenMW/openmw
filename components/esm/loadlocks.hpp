@@ -11,7 +11,7 @@ namespace ESM
  * items (REPA). These have nearly identical data structures.
  */
 
-struct Tool : public Record
+struct Tool
 {
     enum Type
     {
@@ -37,16 +37,6 @@ struct Tool : public Record
 
     void load(ESMReader &esm);
     void save(ESMWriter &esm);
-
-    int getName()
-    {
-        if (mType == Type_Probe)
-            return REC_PROB;
-        else if (mType == Type_Repair)
-            return REC_REPA;
-        else
-            return REC_LOCK;
-    }
 };
 
 struct Probe: Tool

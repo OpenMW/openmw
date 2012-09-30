@@ -15,7 +15,7 @@ namespace ESM {
  *
  */
 
-struct Skill : public Record
+struct Skill
 {
   struct SKDTstruct
   {
@@ -71,8 +71,6 @@ struct Skill : public Record
 
   void load(ESMReader &esm);
   void save(ESMWriter &esm);
-
-    int getName() { return REC_SKIL; }
 };
 }
 #endif

@@ -9,7 +9,7 @@
 namespace ESM
 {
 
-struct Spell : public Record
+struct Spell
 {
     enum SpellType
     {
@@ -41,8 +41,6 @@ struct Spell : public Record
 
     void load(ESMReader &esm);
     void save(ESMWriter &esm);
-
-    int getName() { return REC_SPEL; }
 };
 }
 #endif

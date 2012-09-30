@@ -56,7 +56,7 @@ struct PartReferenceList
     void save(ESMWriter &esm);
 };
 
-struct Armor : public Record
+struct Armor
 {
     enum Type
     {
@@ -87,8 +87,6 @@ struct Armor : public Record
 
     void load(ESMReader &esm);
     void save(ESMWriter &esm);
-
-    int getName() { return REC_ARMO; }
 };
 }
 #endif

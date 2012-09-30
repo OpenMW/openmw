@@ -12,7 +12,7 @@ namespace ESM {
  */
 
 /// Changes a creature
-struct LoadCREC : public Record
+struct LoadCREC
 {
     void load(ESMReader &esm)
     {
@@ -22,12 +22,10 @@ struct LoadCREC : public Record
     void save(ESMWriter &esm)
     {
     }
-
-    int getName() { return REC_CREC; }
 };
 
 /// Changes an item list / container
-struct LoadCNTC : public Record
+struct LoadCNTC
 {
     void load(ESMReader &esm)
     {
@@ -37,8 +35,6 @@ struct LoadCNTC : public Record
     void save(ESMWriter &esm)
     {
     }
-
-    int getName() { return REC_CNTC; }
 };
 }
 #endif

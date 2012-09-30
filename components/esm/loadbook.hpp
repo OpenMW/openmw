@@ -9,7 +9,7 @@ namespace ESM
  * Books, magic scrolls, notes and so on
  */
 
-struct Book : public Record
+struct Book
 {
     struct BKDTstruct
     {
@@ -22,8 +22,6 @@ struct Book : public Record
 
     void load(ESMReader &esm);
     void save(ESMWriter &esm);
-    
-    int getName() { return REC_BOOK; }
-};
+    };
 }
 #endif

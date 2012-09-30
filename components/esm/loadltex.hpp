@@ -24,15 +24,13 @@ namespace ESM
  * texture, and see if it affects the game.
  */
 
-struct LandTexture : public Record
+struct LandTexture
 {
-    std::string mTexture;
+    std::string mId, mTexture;
     int mIndex;
 
     void load(ESMReader &esm);
     void save(ESMWriter &esm);
-
-    int getName() { return REC_LTEX; }
 };
 }
 #endif

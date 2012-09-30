@@ -17,7 +17,7 @@ namespace ESM
  * and form a linked list of dialogue items.
  */
 
-struct DialInfo : public Record
+struct DialInfo
 {
     enum Gender
     {
@@ -61,7 +61,7 @@ struct DialInfo : public Record
     std::vector<SelectStruct> mSelects;
 
     // Id of this, previous and next INFO items
-    std::string mSelfId, mPrev, mNext;
+    std::string mId, mPrev, mNext;
 
     // Various references used in determining when to select this item.
     std::string mActor, mRace, mClass, mNpcFaction, mPcFaction, mCell;
@@ -102,8 +102,6 @@ struct DialInfo : public Record
 
     void load(ESMReader &esm);
     void save(ESMWriter &esm);
-
-    int getName() { return REC_INFO; }
 };
 
 /*

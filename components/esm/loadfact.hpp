@@ -26,9 +26,9 @@ struct RankData
     int mFactReaction; // Reaction from faction members
 };
 
-struct Faction : public Record
+struct Faction
 {
-    std::string mName;
+    std::string mId, mName;
 
     struct FADTstruct
     {
@@ -57,8 +57,6 @@ struct Faction : public Record
 
     void load(ESMReader &esm);
     void save(ESMWriter &esm);
-
-    int getName() { return REC_FACT; }
 };
 }
 #endif

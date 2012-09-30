@@ -12,7 +12,7 @@ namespace ESM
  * Race definition
  */
 
-struct Race : public Record
+struct Race
 {
     struct SkillBonus
     {
@@ -66,8 +66,6 @@ struct Race : public Record
 
     void load(ESMReader &esm);
     void save(ESMWriter &esm);
-
-    int getName() { return REC_RACE; }
 };
 
 }

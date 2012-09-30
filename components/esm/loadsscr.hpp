@@ -16,7 +16,7 @@ namespace ESM
  reference.
  */
 
-struct StartScript : public Record
+struct StartScript
 {
     std::string mData;
     std::string mScript;
@@ -24,8 +24,6 @@ struct StartScript : public Record
     // Load a record and add it to the list
     void load(ESMReader &esm);
     void save(ESMWriter &esm);
-
-    int getName() { return REC_SSCR; }
 };
 
 }

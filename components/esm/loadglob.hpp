@@ -11,15 +11,13 @@ namespace ESM
  * Global script variables
  */
 
-struct Global : public Record
+struct Global
 {
     unsigned mValue;
     VarType mType;
 
     void load(ESMReader &esm);
     void save(ESMWriter &esm);
-
-    int getName() { return REC_GLOB; }
 };
 }
 #endif

@@ -15,7 +15,7 @@ namespace ESM {
  * NPC definition
  */
 
-struct NPC : public Record
+struct NPC
 {
   // Services
   enum Services
@@ -106,7 +106,7 @@ struct NPC : public Record
     std::vector<Dest> mTransport;
     AIPackageList     mAiPackage;
 
-    std::string mName, mModel, mRace, mClass, mFaction, mScript;
+    std::string mId, mName, mModel, mRace, mClass, mFaction, mScript;
 
     // body parts
     std::string mHair, mHead;
@@ -114,8 +114,6 @@ struct NPC : public Record
     // Implementation moved to load_impl.cpp
     void load(ESMReader &esm);
     void save(ESMWriter &esm);
-
-    int getName() { return REC_NPC_; }
 };
 }
 #endif

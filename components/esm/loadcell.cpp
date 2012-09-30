@@ -102,6 +102,8 @@ void Cell::load(ESMReader &esm)
     {
         // Exterior cells
         mRegion = esm.getHNOString("RGNN");
+
+        mMapColor = 0;
         esm.getHNOT(mMapColor, "NAM5");
     }
     if (esm.isNextSub("NAM0")) {

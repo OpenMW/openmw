@@ -6,7 +6,7 @@
 namespace ESM
 {
 
-struct BodyPart : public Record
+struct BodyPart
 {
     enum MeshPart
     {
@@ -53,8 +53,6 @@ struct BodyPart : public Record
 
     void load(ESMReader &esm);
     void save(ESMWriter &esm);
-
-    int getName() { return REC_BODY; }
 };
 }
 #endif

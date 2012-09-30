@@ -173,7 +173,7 @@ namespace ESMS
     void load(ESMReader &esm, const std::string &id)
     {
       std::string id2 = toLower (id);
-      list[id2].setId(id2);
+      list[id2].mId = id2;
       list[id2].load(esm);
     }
 
@@ -226,7 +226,7 @@ namespace ESMS
       std::string id2 = toLower (id);
       X& ref = list[id2];
 
-      ref.setId(id);
+      ref.mId = id;
       ref.load(esm);
     }
 
@@ -293,7 +293,7 @@ namespace ESMS
     {
       LandTexture lt;
       lt.load(esm);
-      lt.setId(id);
+      lt.mId = id;
 
       // Make sure we have room for the structure
       if(lt.mIndex + 1 > (int)ltex.size())
