@@ -28,7 +28,7 @@ namespace MWGui
 {
     AlchemyWindow::AlchemyWindow(MWBase::WindowManager& parWindowManager)
         : WindowBase("openmw_alchemy_window.layout", parWindowManager)
-        , ContainerBase(0)
+        , ContainerBase(0), mApparatus (4)
     {
         getWidget(mCreateButton, "CreateButton");
         getWidget(mCancelButton, "CancelButton");
@@ -36,10 +36,10 @@ namespace MWGui
         getWidget(mIngredient2, "Ingredient2");
         getWidget(mIngredient3, "Ingredient3");
         getWidget(mIngredient4, "Ingredient4");
-        getWidget(mApparatus1, "Apparatus1");
-        getWidget(mApparatus2, "Apparatus2");
-        getWidget(mApparatus3, "Apparatus3");
-        getWidget(mApparatus4, "Apparatus4");
+        getWidget(mApparatus[0], "Apparatus1");
+        getWidget(mApparatus[1], "Apparatus2");
+        getWidget(mApparatus[2], "Apparatus3");
+        getWidget(mApparatus[3], "Apparatus4");
         getWidget(mEffectsBox, "CreatedEffects");
         getWidget(mNameEdit, "NameEdit");
 
@@ -70,7 +70,7 @@ namespace MWGui
     {
         // check if mortar & pestle is available (always needed)
         /// \todo check albemic, calcinator, retort (sometimes needed)
-        if (!mApparatus1->isUserString("ToolTipType"))
+        if (!mApparatus[0]->isUserString("ToolTipType"))
         {
             mWindowManager.messageBox("#{sNotifyMessage45}", std::vector<std::string>());
             return;
@@ -253,60 +253,22 @@ namespace MWGui
 
     void AlchemyWindow::open()
     {
-        openContainer(MWBase::Environment::get().getWorld()->getPlayer().getPlayer()); // this sets mPtr
-        setFilter(ContainerBase::Filter_Ingredients);
+        openContainer (MWBase::Environment::get().getWorld()->getPlayer().getPlayer()); // this sets mPtr
+        setFilter (ContainerBase::Filter_Ingredients);
         
         mAlchemy.setAlchemist (mPtr);
 
-        // pick the best available apparatus
-        MWWorld::ContainerStore& store = MWWorld::Class::get(mPtr).getContainerStore(mPtr);
+        int index = 0;
 
-        MWWorld::Ptr bestAlbemic;
-        MWWorld::Ptr bestMortarPestle;
-        MWWorld::Ptr bestCalcinator;
-        MWWorld::Ptr bestRetort;
-
-        for (MWWorld::ContainerStoreIterator it(store.begin(MWWorld::ContainerStore::Type_Apparatus));
-            it != store.end(); ++it)
+        for (MWMechanics::Alchemy::TToolsIterator iter (mAlchemy.beginTools());
+            iter!=mAlchemy.endTools() && index<static_cast<int> (mApparatus.size()); ++iter, ++index)
         {
-            MWWorld::LiveCellRef<ESM::Apparatus>* ref = it->get<ESM::Apparatus>();
-            if (ref->base->data.type == ESM::Apparatus::Albemic
-            && (bestAlbemic.isEmpty() || ref->base->data.quality > bestAlbemic.get<ESM::Apparatus>()->base->data.quality))
-                bestAlbemic = *it;
-            else if (ref->base->data.type == ESM::Apparatus::MortarPestle
-            && (bestMortarPestle.isEmpty() || ref->base->data.quality > bestMortarPestle.get<ESM::Apparatus>()->base->data.quality))
-                bestMortarPestle = *it;
-            else if (ref->base->data.type == ESM::Apparatus::Calcinator
-            && (bestCalcinator.isEmpty() || ref->base->data.quality > bestCalcinator.get<ESM::Apparatus>()->base->data.quality))
-                bestCalcinator = *it;
-            else if (ref->base->data.type == ESM::Apparatus::Retort
-            && (bestRetort.isEmpty() || ref->base->data.quality > bestRetort.get<ESM::Apparatus>()->base->data.quality))
-                bestRetort = *it;
-        }
-
-        if (!bestMortarPestle.isEmpty())
-        {
-            mApparatus1->setUserString("ToolTipType", "ItemPtr");
-            mApparatus1->setUserData(bestMortarPestle);
-            mApparatus1->setImageTexture(getIconPath(bestMortarPestle));
-        }
-        if (!bestAlbemic.isEmpty())
-        {
-            mApparatus2->setUserString("ToolTipType", "ItemPtr");
-            mApparatus2->setUserData(bestAlbemic);
-            mApparatus2->setImageTexture(getIconPath(bestAlbemic));
-        }
-        if (!bestCalcinator.isEmpty())
-        {
-            mApparatus3->setUserString("ToolTipType", "ItemPtr");
-            mApparatus3->setUserData(bestCalcinator);
-            mApparatus3->setImageTexture(getIconPath(bestCalcinator));
-        }
-        if (!bestRetort.isEmpty())
-        {
-            mApparatus4->setUserString("ToolTipType", "ItemPtr");
-            mApparatus4->setUserData(bestRetort);
-            mApparatus4->setImageTexture(getIconPath(bestRetort));
+            if (!iter->isEmpty())
+            {
+                mApparatus[index]->setUserString ("ToolTipType", "ItemPtr");
+                mApparatus[index]->setUserData (*iter);
+                mApparatus[index]->setImageTexture (getIconPath (*iter));
+            }
         }
     }
 

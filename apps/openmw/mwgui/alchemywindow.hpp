@@ -1,6 +1,8 @@
 #ifndef MWGUI_ALCHEMY_H
 #define MWGUI_ALCHEMY_H
 
+#include <vector>
+
 #include "../mwmechanics/alchemy.hpp"
 
 #include "window_base.hpp"
@@ -25,11 +27,6 @@ namespace MWGui
         MyGUI::ImageBox* mIngredient3;
         MyGUI::ImageBox* mIngredient4;
 
-        MyGUI::ImageBox* mApparatus1;
-        MyGUI::ImageBox* mApparatus2;
-        MyGUI::ImageBox* mApparatus3;
-        MyGUI::ImageBox* mApparatus4;
-
         MyGUI::Widget* mEffectsBox;
 
         MyGUI::EditBox* mNameEdit;
@@ -52,6 +49,8 @@ namespace MWGui
         private:
         
             MWMechanics::Alchemy mAlchemy;
+
+            std::vector<MyGUI::ImageBox *> mApparatus;
     };
 }
 
