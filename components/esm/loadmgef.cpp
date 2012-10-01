@@ -1,5 +1,8 @@
 #include "loadmgef.hpp"
 
+#include "esmreader.hpp"
+#include "esmwriter.hpp"
+
 namespace
 {
     const int NumberOfHardcodedFlags = 143;
@@ -30,27 +33,50 @@ namespace ESM
 
 void MagicEffect::load(ESMReader &esm)
 {
-  esm.getHNT(index, "INDX");
+  esm.getHNT(mIndex, "INDX");
 
-  esm.getHNT(data, "MEDT", 36);
-  
-  if (index>=0 && index<NumberOfHardcodedFlags)
-    data.flags |= HardcodedFlags[index];
-  
-  icon = esm.getHNOString("ITEX");
-  particle = esm.getHNOString("PTEX");
+  esm.getHNT(mData, "MEDT", 36);
+  if (mIndex>=0 && mIndex<NumberOfHardcodedFlags)
+    mData.mFlags |= HardcodedFlags[mIndex];
 
-  boltSound = esm.getHNOString("BSND");
-  castSound = esm.getHNOString("CSND");
-  hitSound = esm.getHNOString("HSND");
-  areaSound = esm.getHNOString("ASND");
+  mIcon = esm.getHNOString("ITEX");
+  mParticle = esm.getHNOString("PTEX");
 
-  casting = esm.getHNOString("CVFX");
-  bolt = esm.getHNOString("BVFX");
-  hit = esm.getHNOString("HVFX");
-  area = esm.getHNOString("AVFX");
+  mBoltSound = esm.getHNOString("BSND");
+  mCastSound = esm.getHNOString("CSND");
+  mHitSound = esm.getHNOString("HSND");
+  mAreaSound = esm.getHNOString("ASND");
 
-  description = esm.getHNOString("DESC");
+  mCasting = esm.getHNOString("CVFX");
+  mBolt = esm.getHNOString("BVFX");
+  mHit = esm.getHNOString("HVFX");
+  mArea = esm.getHNOString("AVFX");
+
+  mDescription = esm.getHNOString("DESC");
+}
+void MagicEffect::save(ESMWriter &esm)
+{
+    esm.writeHNT("INDX", mIndex);
+
+    mData.mFlags &= 0xe00;
+    esm.writeHNT("MEDT", mData, 36);
+    if (mIndex>=0 && mIndex<NumberOfHardcodedFlags) {
+        mData.mFlags |= HardcodedFlags[mIndex];
+    }
+
+    esm.writeHNOCString("ITEX", mIcon);
+    esm.writeHNOCString("PTEX", mParticle);
+    esm.writeHNOCString("BSND", mBoltSound);
+    esm.writeHNOCString("CSND", mCastSound);
+    esm.writeHNOCString("HSND", mHitSound);
+    esm.writeHNOCString("ASND", mAreaSound);
+    
+    esm.writeHNOCString("CVFX", mCasting);
+    esm.writeHNOCString("BVFX", mBolt);
+    esm.writeHNOCString("HVFX", mHit);
+    esm.writeHNOCString("AVFX", mArea);
+    
+    esm.writeHNOString("DESC", mDescription);
 }
 
 }

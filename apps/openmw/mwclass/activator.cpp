@@ -41,7 +41,7 @@ namespace MWClass
             ptr.get<ESM::Activator>();
         assert(ref->base != NULL);
 
-        const std::string &model = ref->base->model;
+        const std::string &model = ref->base->mModel;
         if (!model.empty()) {
             return "meshes\\" + model;
         }
@@ -53,7 +53,7 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Activator> *ref =
             ptr.get<ESM::Activator>();
 
-        return ref->base->name;
+        return ref->base->mName;
     }
 
     std::string Activator::getScript (const MWWorld::Ptr& ptr) const
@@ -61,7 +61,7 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Activator> *ref =
             ptr.get<ESM::Activator>();
 
-        return ref->base->script;
+        return ref->base->mScript;
     }
 
     void Activator::registerSelf()
@@ -76,7 +76,7 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Activator> *ref =
             ptr.get<ESM::Activator>();
 
-        return (ref->base->name != "");
+        return (ref->base->mName != "");
     }
 
     MWGui::ToolTipInfo Activator::getToolTipInfo (const MWWorld::Ptr& ptr) const
@@ -85,11 +85,11 @@ namespace MWClass
             ptr.get<ESM::Activator>();
 
         MWGui::ToolTipInfo info;
-        info.caption = ref->base->name + MWGui::ToolTips::getCountString(ptr.getRefData().getCount());
+        info.caption = ref->base->mName + MWGui::ToolTips::getCountString(ptr.getRefData().getCount());
 
         std::string text;
         if (MWBase::Environment::get().getWindowManager()->getFullHelp())
-            text += MWGui::ToolTips::getMiscString(ref->base->script, "Script");
+            text += MWGui::ToolTips::getMiscString(ref->base->mScript, "Script");
         info.text = text;
 
         return info;

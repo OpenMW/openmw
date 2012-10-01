@@ -64,11 +64,11 @@ void Objects::insertBegin (const MWWorld::Ptr& ptr, bool enabled, bool static_)
     const float *f = ptr.getRefData().getPosition().pos;
 
     insert->setPosition(f[0], f[1], f[2]);
-    insert->setScale(ptr.getCellRef().scale, ptr.getCellRef().scale, ptr.getCellRef().scale);
+    insert->setScale(ptr.getCellRef().mScale, ptr.getCellRef().mScale, ptr.getCellRef().mScale);
 
 
     // Convert MW rotation to a quaternion:
-    f = ptr.getCellRef().pos.rot;
+    f = ptr.getCellRef().mPos.rot;
 
     // Rotate around X axis
     Ogre::Quaternion xr(Ogre::Radian(-f[0]), Ogre::Vector3::UNIT_X);
@@ -219,18 +219,18 @@ void Objects::insertLight (const MWWorld::Ptr& ptr, float r, float g, float b, f
     info.radius = radius;
     info.colour = Ogre::ColourValue(r, g, b);
 
-    if (ref->base->data.flags & ESM::Light::Negative)
+    if (ref->base->mData.mFlags & ESM::Light::Negative)
         info.colour *= -1;
 
-    info.interior = (ptr.getCell()->cell->data.flags & ESM::Cell::Interior);
+    info.interior = (ptr.getCell()->cell->mData.mFlags & ESM::Cell::Interior);
 
-    if (ref->base->data.flags & ESM::Light::Flicker)
+    if (ref->base->mData.mFlags & ESM::Light::Flicker)
         info.type = LT_Flicker;
-    else if (ref->base->data.flags & ESM::Light::FlickerSlow)
+    else if (ref->base->mData.mFlags & ESM::Light::FlickerSlow)
         info.type = LT_FlickerSlow;
-    else if (ref->base->data.flags & ESM::Light::Pulse)
+    else if (ref->base->mData.mFlags & ESM::Light::Pulse)
         info.type = LT_Pulse;
-    else if (ref->base->data.flags & ESM::Light::PulseSlow)
+    else if (ref->base->mData.mFlags & ESM::Light::PulseSlow)
         info.type = LT_PulseSlow;
     else
         info.type = LT_Normal;

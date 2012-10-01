@@ -35,14 +35,14 @@ namespace MWMechanics
         // determine the spell's school
         // this is always the school where the player's respective skill is the least advanced
         // out of all the magic effects' schools
-        const std::vector<ESM::ENAMstruct>& effects = spell->effects.list;
+        const std::vector<ESM::ENAMstruct>& effects = spell->mEffects.mList;
         int school = -1;
         int skillLevel = -1;
         for (std::vector<ESM::ENAMstruct>::const_iterator it = effects.begin();
             it != effects.end(); ++it)
         {
-            const ESM::MagicEffect* effect = MWBase::Environment::get().getWorld()->getStore().magicEffects.find(it->effectID);
-            int _school = effect->data.school;
+            const ESM::MagicEffect* effect = MWBase::Environment::get().getWorld()->getStore().magicEffects.find(it->mEffectID);
+            int _school = effect->mData.mSchool;
             int _skillLevel = stats.getSkill (spellSchoolToSkill(_school)).getModified();
 
             if (school == -1)
@@ -73,8 +73,8 @@ namespace MWMechanics
     {
         const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().spells.find(spellId);
 
-        if (spell->data.flags & ESM::Spell::F_Always // spells with this flag always succeed (usually birthsign spells)
-            || spell->data.type == ESM::Spell::ST_Power) // powers always succeed, but can be cast only once per day
+        if (spell->mData.mFlags & ESM::Spell::F_Always // spells with this flag always succeed (usually birthsign spells)
+            || spell->mData.mType == ESM::Spell::ST_Power) // powers always succeed, but can be cast only once per day
             return 100.0;
 
         NpcStats& stats = MWWorld::Class::get(actor).getNpcStats(actor);
@@ -89,7 +89,7 @@ namespace MWMechanics
         int luck = creatureStats.getAttribute(ESM::Attribute::Luck).getModified();
         int currentFatigue = creatureStats.getFatigue().getCurrent();
         int maxFatigue = creatureStats.getFatigue().getModified();
-        int spellCost = spell->data.cost;
+        int spellCost = spell->mData.mCost;
 
         // There we go, all needed variables are there, lets go
         float chance = (float(skillLevel * 2) + float(willpower)/5.0 + float(luck)/ 10.0 - spellCost - soundMagnitude) * (float(currentFatigue + maxFatigue * 1.5)) / float(maxFatigue * 2.0);

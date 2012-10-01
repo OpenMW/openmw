@@ -1,15 +1,27 @@
 #include "loaddoor.hpp"
 
+#include "esmreader.hpp"
+#include "esmwriter.hpp"
+
 namespace ESM
 {
 
 void Door::load(ESMReader &esm)
 {
-    model = esm.getHNString("MODL");
-    name = esm.getHNOString("FNAM");
-    script = esm.getHNOString("SCRI");
-    openSound = esm.getHNOString("SNAM");
-    closeSound = esm.getHNOString("ANAM");
+    mModel = esm.getHNString("MODL");
+    mName = esm.getHNOString("FNAM");
+    mScript = esm.getHNOString("SCRI");
+    mOpenSound = esm.getHNOString("SNAM");
+    mCloseSound = esm.getHNOString("ANAM");
+}
+
+void Door::save(ESMWriter &esm)
+{
+    esm.writeHNCString("MODL", mModel);
+    esm.writeHNOCString("FNAM", mName);
+    esm.writeHNOCString("SCRI", mScript);
+    esm.writeHNOCString("SNAM", mOpenSound);
+    esm.writeHNOCString("ANAM", mCloseSound);
 }
 
 }

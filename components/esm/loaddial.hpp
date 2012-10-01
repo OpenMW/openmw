@@ -1,13 +1,16 @@
-#ifndef _ESM_DIAL_H
-#define _ESM_DIAL_H
+#ifndef OPENMW_ESM_DIAL_H
+#define OPENMW_ESM_DIAL_H
 
+#include <string>
 #include <vector>
 
-#include "esm_reader.hpp"
 #include "loadinfo.hpp"
 
 namespace ESM
 {
+
+class ESMReader;
+class ESMWriter;
 
 /*
  * Dialogue topic and journal entries. The actual data is contained in
@@ -26,10 +29,12 @@ struct Dialogue
         Deleted = -1
     };
 
-    char type;
+    std::string mId;
+    char mType;
     std::vector<DialInfo> mInfo;
 
     void load(ESMReader &esm);
+    void save(ESMWriter &esm);
 };
 }
 #endif

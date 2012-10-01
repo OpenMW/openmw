@@ -21,7 +21,7 @@ namespace MWScript
         for (ESMS::RecListT<ESM::StartScript>::MapType::const_iterator iter
             (store.startScripts.list.begin());
             iter != store.startScripts.list.end(); ++iter)
-            addScript (iter->second.script);
+            addScript (iter->second.mScript);
     }
 
     void GlobalScripts::addScript (const std::string& name)

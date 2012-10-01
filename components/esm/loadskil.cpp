@@ -1,5 +1,8 @@
 #include "loadskil.hpp"
 
+#include "esmreader.hpp"
+#include "esmwriter.hpp"
+
 namespace ESM
 {
     const std::string Skill::sSkillNameIds[Length] = {
@@ -60,7 +63,7 @@ namespace ESM
         "stealth_speechcraft.dds",
         "stealth_handtohand.dds",
     };
-    const boost::array<Skill::SkillEnum, Skill::Length> Skill::skillIds = {{
+    const boost::array<Skill::SkillEnum, Skill::Length> Skill::sSkillIds = {{
         Block,
         Armorer,
         MediumArmor,
@@ -92,8 +95,14 @@ namespace ESM
 
 void Skill::load(ESMReader &esm)
 {
-    esm.getHNT(index, "INDX");
-    esm.getHNT(data, "SKDT", 24);
-    description = esm.getHNOString("DESC");
+    esm.getHNT(mIndex, "INDX");
+    esm.getHNT(mData, "SKDT", 24);
+    mDescription = esm.getHNOString("DESC");
+}
+void Skill::save(ESMWriter &esm)
+{
+    esm.writeHNT("INDX", mIndex);
+    esm.writeHNT("SKDT", mData, 24);
+    esm.writeHNOString("DESC", mDescription);
 }
 }

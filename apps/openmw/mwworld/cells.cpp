@@ -10,13 +10,13 @@
 
 MWWorld::Ptr::CellStore *MWWorld::Cells::getCellStore (const ESM::Cell *cell)
 {
-    if (cell->data.flags & ESM::Cell::Interior)
+    if (cell->mData.mFlags & ESM::Cell::Interior)
     {
-        std::map<std::string, Ptr::CellStore>::iterator result = mInteriors.find (cell->name);
+        std::map<std::string, Ptr::CellStore>::iterator result = mInteriors.find (cell->mName);
 
         if (result==mInteriors.end())
         {
-            result = mInteriors.insert (std::make_pair (cell->name, Ptr::CellStore (cell))).first;
+            result = mInteriors.insert (std::make_pair (cell->mName, Ptr::CellStore (cell))).first;
         }
 
         return &result->second;
@@ -24,12 +24,12 @@ MWWorld::Ptr::CellStore *MWWorld::Cells::getCellStore (const ESM::Cell *cell)
     else
     {
         std::map<std::pair<int, int>, Ptr::CellStore>::iterator result =
-            mExteriors.find (std::make_pair (cell->data.gridX, cell->data.gridY));
+            mExteriors.find (std::make_pair (cell->mData.mX, cell->mData.mY));
 
         if (result==mExteriors.end())
         {
             result = mExteriors.insert (std::make_pair (
-                std::make_pair (cell->data.gridX, cell->data.gridY), Ptr::CellStore (cell))).first;
+                std::make_pair (cell->mData.mX, cell->mData.mY), Ptr::CellStore (cell))).first;
 
         }
 
@@ -46,7 +46,7 @@ void MWWorld::Cells::fillContainers (Ptr::CellStore& cellStore)
         Ptr container (&*iter, &cellStore);
 
         Class::get (container).getContainerStore (container).fill (
-            iter->base->inventory, mStore);
+            iter->base->mInventory, mStore);
     }
 
     for (CellRefList<ESM::Creature>::List::iterator iter (
@@ -56,7 +56,7 @@ void MWWorld::Cells::fillContainers (Ptr::CellStore& cellStore)
         Ptr container (&*iter, &cellStore);
 
         Class::get (container).getContainerStore (container).fill (
-            iter->base->inventory, mStore);
+            iter->base->mInventory, mStore);
     }
 
     for (CellRefList<ESM::NPC>::List::iterator iter (
@@ -66,7 +66,7 @@ void MWWorld::Cells::fillContainers (Ptr::CellStore& cellStore)
         Ptr container (&*iter, &cellStore);
 
         Class::get (container).getContainerStore (container).fill (
-            iter->base->inventory, mStore);
+            iter->base->mInventory, mStore);
     }
 }
 
@@ -105,11 +105,11 @@ MWWorld::Ptr::CellStore *MWWorld::Cells::getExterior (int x, int y)
             // Cell isn't predefined. Make one on the fly.
             ESM::Cell record;
 
-            record.data.flags = 0;
-            record.data.gridX = x;
-            record.data.gridY = y;
-            record.water = 0;
-            record.mapColor = 0;
+            record.mData.mFlags = 0;
+            record.mData.mX = x;
+            record.mData.mY = y;
+            record.mWater = 0;
+            record.mMapColor = 0;
 
             cell = MWBase::Environment::get().getWorld()->createRecord (record);
         }

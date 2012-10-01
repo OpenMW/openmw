@@ -95,24 +95,24 @@ namespace
 
         int i = 0;
 
-        for (; i<static_cast<int> (script->varNames.size()); ++i)
-            if (script->varNames[i]==name)
+        for (; i<static_cast<int> (script->mVarNames.size()); ++i)
+            if (script->mVarNames[i]==name)
                 break;
 
-        if (i>=static_cast<int> (script->varNames.size()))
+        if (i>=static_cast<int> (script->mVarNames.size()))
             return false; // script does not have a variable of this name
 
         const MWScript::Locals& locals = actor.getRefData().getLocals();
 
-        if (i<script->data.numShorts)
+        if (i<script->mData.mNumShorts)
             return selectCompare (comp, locals.mShorts[i], value);
         else
-            i -= script->data.numShorts;
+            i -= script->mData.mNumShorts;
 
-        if (i<script->data.numLongs)
+        if (i<script->mData.mNumLongs)
             return selectCompare (comp, locals.mLongs[i], value);
         else
-            i -= script->data.numShorts;
+            i -= script->mData.mNumShorts;
 
         return selectCompare (comp, locals.mFloats.at (i), value);
     }
@@ -161,16 +161,16 @@ namespace MWDialogue
     {
         bool isCreature = (actor.getTypeName() != typeid(ESM::NPC).name());
 
-        for (std::vector<ESM::DialInfo::SelectStruct>::const_iterator iter (info.selects.begin());
-            iter != info.selects.end(); ++iter)
+        for (std::vector<ESM::DialInfo::SelectStruct>::const_iterator iter (info.mSelects.begin());
+            iter != info.mSelects.end(); ++iter)
         {
             ESM::DialInfo::SelectStruct select = *iter;
-            char type = select.selectRule[1];
+            char type = select.mSelectRule[1];
             if(type == '1')
             {
-                char comp = select.selectRule[4];
-                std::string name = select.selectRule.substr (5);
-                std::string function = select.selectRule.substr(2,2);
+                char comp = select.mSelectRule[4];
+                std::string name = select.mSelectRule.substr (5);
+                std::string function = select.mSelectRule.substr(2,2);
 
                 int ifunction;
                 std::istringstream iss(function);
@@ -178,19 +178,19 @@ namespace MWDialogue
                 switch(ifunction)
                 {
                 case 39://PC Expelled
-                    if(!selectCompare<int,int>(comp,0,select.i)) return false;
+                    if(!selectCompare<int,int>(comp,0,select.mI)) return false;
                     break;
 
                 case 40://PC Common Disease
-                    if(!selectCompare<int,int>(comp,0,select.i)) return false;
+                    if(!selectCompare<int,int>(comp,0,select.mI)) return false;
                     break;
 
                 case 41://PC Blight Disease
-                    if(!selectCompare<int,int>(comp,0,select.i)) return false;
+                    if(!selectCompare<int,int>(comp,0,select.mI)) return false;
                     break;
 
                 case 43://PC Crime level
-                    if(!selectCompare<int,int>(comp,0,select.i)) return false;
+                    if(!selectCompare<int,int>(comp,0,select.mI)) return false;
                     break;
 
                 case 46://Same faction
@@ -206,71 +206,71 @@ namespace MWDialogue
                         std::string NPCFaction = NPCstats.getFactionRanks().begin()->first;
                         if(PCstats.getFactionRanks().find(toLower(NPCFaction)) != PCstats.getFactionRanks().end()) sameFaction = 1;
                     }
-                    if(!selectCompare<int,int>(comp,sameFaction,select.i)) return false;
+                    if(!selectCompare<int,int>(comp,sameFaction,select.mI)) return false;
                     }
                     break;
 
                 case 48://Detected
-                    if(!selectCompare<int,int>(comp,1,select.i)) return false;
+                    if(!selectCompare<int,int>(comp,1,select.mI)) return false;
                     break;
 
                 case 49://Alarmed
-                    if(!selectCompare<int,int>(comp,0,select.i)) return false;
+                    if(!selectCompare<int,int>(comp,0,select.mI)) return false;
                     break;
 
                 case 50://choice
                     if(choice)
                     {
-                        if(!selectCompare<int,int>(comp,mChoice,select.i)) return false;
+                        if(!selectCompare<int,int>(comp,mChoice,select.mI)) return false;
                     }
                     break;
 
                 case 60://PC Vampire
-                    if(!selectCompare<int,int>(comp,0,select.i)) return false;
+                    if(!selectCompare<int,int>(comp,0,select.mI)) return false;
                     break;
 
                 case 61://Level
-                    if(!selectCompare<int,int>(comp,1,select.i)) return false;
+                    if(!selectCompare<int,int>(comp,1,select.mI)) return false;
                     break;
 
                 case 62://Attacked
-                    if(!selectCompare<int,int>(comp,0,select.i)) return false;
+                    if(!selectCompare<int,int>(comp,0,select.mI)) return false;
                     break;
 
                 case 63://Talked to PC
-                    if(!selectCompare<int,int>(comp,0,select.i)) return false;
+                    if(!selectCompare<int,int>(comp,0,select.mI)) return false;
                     break;
 
                 case 64://PC Health
-                    if(!selectCompare<int,int>(comp,50,select.i)) return false;
+                    if(!selectCompare<int,int>(comp,50,select.mI)) return false;
                     break;
 
                 case 65://Creature target
-                    if(!selectCompare<int,int>(comp,0,select.i)) return false;
+                    if(!selectCompare<int,int>(comp,0,select.mI)) return false;
                     break;
 
                 case 66://Friend hit
-                    if(!selectCompare<int,int>(comp,0,select.i)) return false;
+                    if(!selectCompare<int,int>(comp,0,select.mI)) return false;
                     break;
 
                 case 67://Fight
-                    if(!selectCompare<int,int>(comp,0,select.i)) return false;
+                    if(!selectCompare<int,int>(comp,0,select.mI)) return false;
                     break;
 
                 case 68://Hello????
-                    if(!selectCompare<int,int>(comp,0,select.i)) return false;
+                    if(!selectCompare<int,int>(comp,0,select.mI)) return false;
                     break;
 
                 case 69://Alarm
-                    if(!selectCompare<int,int>(comp,0,select.i)) return false;
+                    if(!selectCompare<int,int>(comp,0,select.mI)) return false;
                     break;
 
                 case 70://Flee
-                    if(!selectCompare<int,int>(comp,0,select.i)) return false;
+                    if(!selectCompare<int,int>(comp,0,select.mI)) return false;
                     break;
 
                 case 71://Should Attack
-                    if(!selectCompare<int,int>(comp,0,select.i)) return false;
+                    if(!selectCompare<int,int>(comp,0,select.mI)) return false;
                     break;
 
                 default:
@@ -288,13 +288,13 @@ namespace MWDialogue
     {
         bool isCreature = (actor.getTypeName() != typeid(ESM::NPC).name());
 
-        char type = select.selectRule[1];
+        char type = select.mSelectRule[1];
 
         if (type!='0')
         {
-            char comp = select.selectRule[4];
-            std::string name = select.selectRule.substr (5);
-            std::string function = select.selectRule.substr(1,2);
+            char comp = select.mSelectRule[4];
+            std::string name = select.mSelectRule.substr (5);
+            std::string function = select.mSelectRule.substr(1,2);
 
             switch (type)
             {
@@ -304,15 +304,15 @@ namespace MWDialogue
 
             case '2': // global
 
-                if (select.type==ESM::VT_Short || select.type==ESM::VT_Int ||
-                    select.type==ESM::VT_Long)
+                if (select.mType==ESM::VT_Short || select.mType==ESM::VT_Int ||
+                    select.mType==ESM::VT_Long)
                 {
-                    if (!checkGlobal (comp, toLower (name), select.i))
+                    if (!checkGlobal (comp, toLower (name), select.mI))
                         return false;
                 }
-                else if (select.type==ESM::VT_Float)
+                else if (select.mType==ESM::VT_Float)
                 {
-                    if (!checkGlobal (comp, toLower (name), select.f))
+                    if (!checkGlobal (comp, toLower (name), select.mF))
                         return false;
                 }
                 else
@@ -323,16 +323,16 @@ namespace MWDialogue
 
             case '3': // local
 
-                if (select.type==ESM::VT_Short || select.type==ESM::VT_Int ||
-                    select.type==ESM::VT_Long)
+                if (select.mType==ESM::VT_Short || select.mType==ESM::VT_Int ||
+                    select.mType==ESM::VT_Long)
                 {
-                    if (!checkLocal (comp, toLower (name), select.i, actor,
+                    if (!checkLocal (comp, toLower (name), select.mI, actor,
                         MWBase::Environment::get().getWorld()->getStore()))
                         return false;
                 }
-                else if (select.type==ESM::VT_Float)
+                else if (select.mType==ESM::VT_Float)
                 {
-                    if (!checkLocal (comp, toLower (name), select.f, actor,
+                    if (!checkLocal (comp, toLower (name), select.mF, actor,
                         MWBase::Environment::get().getWorld()->getStore()))
                         return false;
                 }
@@ -343,9 +343,9 @@ namespace MWDialogue
                 return true;
 
             case '4'://journal
-                if(select.type==ESM::VT_Int)
+                if(select.mType==ESM::VT_Int)
                 {
-                    if(!selectCompare<int,int>(comp,MWBase::Environment::get().getJournal()->getJournalIndex(toLower(name)),select.i)) return false;
+                    if(!selectCompare<int,int>(comp,MWBase::Environment::get().getJournal()->getJournalIndex(toLower(name)),select.mI)) return false;
                 }
                 else
                     throw std::runtime_error (
@@ -361,22 +361,22 @@ namespace MWDialogue
                 int sum = 0;
 
                 for (MWWorld::ContainerStoreIterator iter (store.begin()); iter!=store.end(); ++iter)
-                    if (toLower(iter->getCellRef().refID) == toLower(name))
+                    if (toLower(iter->getCellRef().mRefID) == toLower(name))
                         sum += iter->getRefData().getCount();
-                if(!selectCompare<int,int>(comp,sum,select.i)) return false;
+                if(!selectCompare<int,int>(comp,sum,select.mI)) return false;
                 }
 
                 return true;
 
 
             case '6'://dead
-                if(!selectCompare<int,int>(comp,0,select.i)) return false;
+                if(!selectCompare<int,int>(comp,0,select.mI)) return false;
 
             case '7':// not ID
-                if(select.type==ESM::VT_String ||select.type==ESM::VT_Int)//bug in morrowind here? it's not a short, it's a string
+                if(select.mType==ESM::VT_String ||select.mType==ESM::VT_Int)//bug in morrowind here? it's not a short, it's a string
                 {
                     int isID = int(toLower(name)==toLower(MWWorld::Class::get (actor).getId (actor)));
-                    if (selectCompare<int,int>(comp,!isID,select.i)) return false;
+                    if (selectCompare<int,int>(comp,!isID,select.mI)) return false;
                 }
                 else
                     throw std::runtime_error (
@@ -388,11 +388,11 @@ namespace MWDialogue
                 if (isCreature)
                     return false;
 
-                if(select.type==ESM::VT_Int)
+                if(select.mType==ESM::VT_Int)
                 {
                     MWWorld::LiveCellRef<ESM::NPC>* npc = actor.get<ESM::NPC>();
-                    int isFaction = int(toLower(npc->base->faction) == toLower(name));
-                    if(selectCompare<int,int>(comp,!isFaction,select.i))
+                    int isFaction = int(toLower(npc->base->mFaction) == toLower(name));
+                    if(selectCompare<int,int>(comp,!isFaction,select.mI))
                         return false;
                 }
                 else
@@ -405,11 +405,11 @@ namespace MWDialogue
                 if (isCreature)
                     return false;
 
-                if(select.type==ESM::VT_Int)
+                if(select.mType==ESM::VT_Int)
                 {
                     MWWorld::LiveCellRef<ESM::NPC>* npc = actor.get<ESM::NPC>();
-                    int isClass = int(toLower(npc->base->cls) == toLower(name));
-                    if(selectCompare<int,int>(comp,!isClass,select.i))
+                    int isClass = int(toLower(npc->base->mClass) == toLower(name));
+                    if(selectCompare<int,int>(comp,!isClass,select.mI))
                         return false;
                 }
                 else
@@ -422,11 +422,11 @@ namespace MWDialogue
                 if (isCreature)
                     return false;
 
-                if(select.type==ESM::VT_Int)
+                if(select.mType==ESM::VT_Int)
                 {
                     MWWorld::LiveCellRef<ESM::NPC>* npc = actor.get<ESM::NPC>();
-                    int isRace = int(toLower(npc->base->race) == toLower(name));
-                    if(selectCompare<int,int>(comp,!isRace,select.i))
+                    int isRace = int(toLower(npc->base->mRace) == toLower(name));
+                    if(selectCompare<int,int>(comp,!isRace,select.mI))
                         return false;
                 }
                 else
@@ -436,10 +436,10 @@ namespace MWDialogue
                 return true;
 
             case 'B'://not Cell
-                if(select.type==ESM::VT_Int)
+                if(select.mType==ESM::VT_Int)
                 {
-                    int isCell = int(toLower(actor.getCell()->cell->name) == toLower(name));
-                    if(selectCompare<int,int>(comp,!isCell,select.i))
+                    int isCell = int(toLower(actor.getCell()->cell->mName) == toLower(name));
+                    if(selectCompare<int,int>(comp,!isCell,select.mI))
                         return false;
                 }
                 else
@@ -448,16 +448,16 @@ namespace MWDialogue
                 return true;
 
             case 'C'://not local
-                if (select.type==ESM::VT_Short || select.type==ESM::VT_Int ||
-                    select.type==ESM::VT_Long)
+                if (select.mType==ESM::VT_Short || select.mType==ESM::VT_Int ||
+                    select.mType==ESM::VT_Long)
                 {
-                    if (checkLocal (comp, toLower (name), select.i, actor,
+                    if (checkLocal (comp, toLower (name), select.mI, actor,
                         MWBase::Environment::get().getWorld()->getStore()))
                         return false;
                 }
-                else if (select.type==ESM::VT_Float)
+                else if (select.mType==ESM::VT_Float)
                 {
-                    if (checkLocal (comp, toLower (name), select.f, actor,
+                    if (checkLocal (comp, toLower (name), select.mF, actor,
                         MWBase::Environment::get().getWorld()->getStore()))
                         return false;
                 }
@@ -481,12 +481,12 @@ namespace MWDialogue
         bool isCreature = (actor.getTypeName() != typeid(ESM::NPC).name());
 
         // actor id
-        if (!info.actor.empty())
-            if (toLower (info.actor)!=MWWorld::Class::get (actor).getId (actor))
+        if (!info.mActor.empty())
+            if (toLower (info.mActor)!=MWWorld::Class::get (actor).getId (actor))
                 return false;
 
         //NPC race
-        if (!info.race.empty())
+        if (!info.mRace.empty())
         {
             if (isCreature)
                 return false;
@@ -496,12 +496,12 @@ namespace MWDialogue
             if (!cellRef)
                 return false;
 
-            if (toLower (info.race)!=toLower (cellRef->base->race))
+            if (toLower (info.mRace)!=toLower (cellRef->base->mRace))
                 return false;
         }
 
         //NPC class
-        if (!info.clas.empty())
+        if (!info.mClass.empty())
         {
             if (isCreature)
                 return false;
@@ -511,23 +511,23 @@ namespace MWDialogue
             if (!cellRef)
                 return false;
 
-            if (toLower (info.clas)!=toLower (cellRef->base->cls))
+            if (toLower (info.mClass)!=toLower (cellRef->base->mClass))
                 return false;
         }
 
         //NPC faction
-        if (!info.npcFaction.empty())
+        if (!info.mNpcFaction.empty())
         {
             if (isCreature)
                 return false;
 
             //MWWorld::Class npcClass = MWWorld::Class::get(actor);
             MWMechanics::NpcStats stats = MWWorld::Class::get(actor).getNpcStats(actor);
-            std::map<std::string,int>::iterator it = stats.getFactionRanks().find(toLower(info.npcFaction));
+            std::map<std::string,int>::iterator it = stats.getFactionRanks().find(toLower(info.mNpcFaction));
             if(it!=stats.getFactionRanks().end())
             {
                 //check rank
-                if(it->second < (int)info.data.rank) return false;
+                if(it->second < (int)info.mData.mRank) return false;
             }
             else
             {
@@ -537,14 +537,14 @@ namespace MWDialogue
         }
 
         // TODO check player faction
-        if(!info.pcFaction.empty())
+        if(!info.mPcFaction.empty())
         {
             MWMechanics::NpcStats stats = MWWorld::Class::get(MWBase::Environment::get().getWorld()->getPlayer().getPlayer()).getNpcStats(MWBase::Environment::get().getWorld()->getPlayer().getPlayer());
-            std::map<std::string,int>::iterator it = stats.getFactionRanks().find(toLower(info.pcFaction));
+            std::map<std::string,int>::iterator it = stats.getFactionRanks().find(toLower(info.mPcFaction));
             if(it!=stats.getFactionRanks().end())
             {
                 //check rank
-                if(it->second < (int)info.data.PCrank) return false;
+                if(it->second < (int)info.mData.mPCrank) return false;
             }
             else
             {
@@ -557,24 +557,24 @@ namespace MWDialogue
         if (!isCreature)
         {
             MWWorld::LiveCellRef<ESM::NPC>* npc = actor.get<ESM::NPC>();
-            if(npc->base->flags&npc->base->Female)
+            if(npc->base->mFlags & npc->base->Female)
             {
-                if(static_cast<int> (info.data.gender)==0)  return false;
+                if(static_cast<int> (info.mData.mGender)==0)  return false;
             }
             else
             {
-                if(static_cast<int> (info.data.gender)==1)  return false;
+                if(static_cast<int> (info.mData.mGender)==1)  return false;
             }
         }
 
         // check cell
-        if (!info.cell.empty())
-            if (MWBase::Environment::get().getWorld()->getPlayer().getPlayer().getCell()->cell->name != info.cell)
+        if (!info.mCell.empty())
+            if (MWBase::Environment::get().getWorld()->getPlayer().getPlayer().getCell()->cell->mName != info.mCell)
                 return false;
 
         // TODO check DATAstruct
-        for (std::vector<ESM::DialInfo::SelectStruct>::const_iterator iter (info.selects.begin());
-            iter != info.selects.end(); ++iter)
+        for (std::vector<ESM::DialInfo::SelectStruct>::const_iterator iter (info.mSelects.begin());
+            iter != info.mSelects.end(); ++iter)
             if (!isMatching (actor, *iter))
                 return false;
 
@@ -647,7 +647,7 @@ namespace MWDialogue
         for(ESMS::RecListCaseT<ESM::Dialogue>::MapType::iterator it = dialogueList.begin(); it!=dialogueList.end();it++)
         {
             ESM::Dialogue ndialogue = it->second;
-            if(ndialogue.type == ESM::Dialogue::Greeting)
+            if(ndialogue.mType == ESM::Dialogue::Greeting)
             {
                 if (greetingFound) break;
                 for (std::vector<ESM::DialInfo>::const_iterator iter (it->second.mInfo.begin());
@@ -655,15 +655,15 @@ namespace MWDialogue
                 {
                     if (isMatching (actor, *iter) && functionFilter(mActor,*iter,true))
                     {
-                        if (!iter->sound.empty())
+                        if (!iter->mSound.empty())
                         {
                             // TODO play sound
                         }
 
-                        std::string text = iter->response;
+                        std::string text = iter->mResponse;
                         parseText(text);
-                        win->addText(iter->response);
-                        executeScript(iter->resultScript);
+                        win->addText(iter->mResponse);
+                        executeScript(iter->mResultScript);
                         greetingFound = true;
                         mLastTopic = it->first;
                         mLastDialogue = *iter;
@@ -746,7 +746,7 @@ namespace MWDialogue
         for(ESMS::RecListCaseT<ESM::Dialogue>::MapType::iterator it = dialogueList.begin(); it!=dialogueList.end();it++)
         {
             ESM::Dialogue ndialogue = it->second;
-            if(ndialogue.type == ESM::Dialogue::Topic)
+            if(ndialogue.mType == ESM::Dialogue::Topic)
             {
                 for (std::vector<ESM::DialInfo>::const_iterator iter (it->second.mInfo.begin());
                     iter!=it->second.mInfo.end(); ++iter)
@@ -820,21 +820,21 @@ namespace MWDialogue
             if(mDialogueMap.find(keyword) != mDialogueMap.end())
             {
                 ESM::Dialogue ndialogue = mDialogueMap[keyword];
-                if(ndialogue.type == ESM::Dialogue::Topic)
+                if(ndialogue.mType == ESM::Dialogue::Topic)
                 {
                     for (std::vector<ESM::DialInfo>::const_iterator iter  = ndialogue.mInfo.begin();
                         iter!=ndialogue.mInfo.end(); ++iter)
                     {
                         if (isMatching (mActor, *iter) && functionFilter(mActor,*iter,true))
                         {
-                            std::string text = iter->response;
-                            std::string script = iter->resultScript;
+                            std::string text = iter->mResponse;
+                            std::string script = iter->mResultScript;
 
                             parseText(text);
 
                             MWGui::DialogueWindow* win = MWBase::Environment::get().getWindowManager()->getDialogueWindow();
                             win->addTitle(keyword);
-                            win->addText(iter->response);
+                            win->addText(iter->mResponse);
 
                             executeScript(script);
 
@@ -865,7 +865,7 @@ namespace MWDialogue
             if(mDialogueMap.find(mLastTopic) != mDialogueMap.end())
             {
                 ESM::Dialogue ndialogue = mDialogueMap[mLastTopic];
-                if(ndialogue.type == ESM::Dialogue::Topic)
+                if(ndialogue.mType == ESM::Dialogue::Topic)
                 {
                     for (std::vector<ESM::DialInfo>::const_iterator iter = ndialogue.mInfo.begin();
                         iter!=ndialogue.mInfo.end(); ++iter)
@@ -876,10 +876,10 @@ namespace MWDialogue
                             mChoice = -1;
                             mIsInChoice = false;
                             MWGui::DialogueWindow* win = MWBase::Environment::get().getWindowManager()->getDialogueWindow();
-                            std::string text = iter->response;
+                            std::string text = iter->mResponse;
                             parseText(text);
                             win->addText(text);
-                            executeScript(iter->resultScript);
+                            executeScript(iter->mResultScript);
                             mLastTopic = mLastTopic;
                             mLastDialogue = *iter;
                             break;

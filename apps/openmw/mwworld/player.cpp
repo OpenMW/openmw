@@ -18,16 +18,16 @@ namespace MWWorld
       mAutoMove (false), mForwardBackward (0)
     {
         mPlayer.base = player;
-        mPlayer.ref.refID = "player";
-        mName = player->name;
-        mMale = !(player->flags & ESM::NPC::Female);
-        mRace = player->race;
+        mPlayer.ref.mRefID = "player";
+        mName = player->mName;
+        mMale = !(player->mFlags & ESM::NPC::Female);
+        mRace = player->mRace;
 
         float* playerPos = mPlayer.mData.getPosition().pos;
         playerPos[0] = playerPos[1] = playerPos[2] = 0;
 
         /// \todo Do not make a copy of classes defined in esm/p records.
-        mClass = new ESM::Class (*world.getStore().classes.find (player->cls));
+        mClass = new ESM::Class (*world.getStore().classes.find (player->mClass));
     }
 
     Player::~Player()

@@ -50,12 +50,23 @@ namespace MWGui
     void SpellBuyingWindow::addSpell(const std::string& spellId)
     {
         const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().spells.find(spellId);
-        int price = spell->data.cost*MWBase::Environment::get().getWorld()->getStore().gameSettings.find("fSpellValueMult")->getFloat();
-        MyGUI::Button* toAdd = mSpellsView->createWidget<MyGUI::Button>((price>mWindowManager.getInventoryWindow()->getPlayerGold()) ? "SandTextGreyedOut" : "SpellText", 0, mCurrentY, 200, sLineHeight, MyGUI::Align::Default);
+        int price = spell->mData.mCost*MWBase::Environment::get().getWorld()->getStore().gameSettings.find("fSpellValueMult")->getFloat();
+
+        MyGUI::Button* toAdd =
+            mSpellsView->createWidget<MyGUI::Button>(
+                (price>mWindowManager.getInventoryWindow()->getPlayerGold()) ? "SandTextGreyedOut" : "SpellText",
+                0,
+                mCurrentY,
+                200,
+                sLineHeight,
+                MyGUI::Align::Default
+            );
+
         mCurrentY += sLineHeight;
         /// \todo price adjustment depending on merchantile skill
+
         toAdd->setUserData(price);
-        toAdd->setCaptionWithReplacing(spell->name+"   -   "+boost::lexical_cast<std::string>(price)+"#{sgp}");
+        toAdd->setCaptionWithReplacing(spell->mName+"   -   "+boost::lexical_cast<std::string>(price)+"#{sgp}");
         toAdd->setSize(toAdd->getTextSize().width,sLineHeight);
         toAdd->eventMouseWheel += MyGUI::newDelegate(this, &SpellBuyingWindow::onMouseWheel);
         toAdd->setUserString("ToolTipType", "Spell");
@@ -88,7 +99,7 @@ namespace MWGui
         {
             const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().spells.find (*iter);
             
-            if (spell->data.type!=ESM::Spell::ST_Spell)
+            if (spell->mData.mType!=ESM::Spell::ST_Spell)
                 continue; // don't try to sell diseases, curses or powers
             
             if (std::find (playerSpells.begin(), playerSpells.end(), *iter)!=playerSpells.end())

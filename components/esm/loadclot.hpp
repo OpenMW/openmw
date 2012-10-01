@@ -1,11 +1,15 @@
-#ifndef _ESM_CLOT_H
-#define _ESM_CLOT_H
+#ifndef OPENMW_ESM_CLOT_H
+#define OPENMW_ESM_CLOT_H
 
-#include "esm_reader.hpp"
+#include <string>
+
 #include "loadarmo.hpp"
 
 namespace ESM
 {
+
+class ESMReader;
+class ESMWriter;
 
 /*
  * Clothing
@@ -29,18 +33,19 @@ struct Clothing
 
     struct CTDTstruct
     {
-        int type;
-        float weight;
-        short value;
-        short enchant;
+        int mType;
+        float mWeight;
+        short mValue;
+        short mEnchant;
     };
-    CTDTstruct data;
+    CTDTstruct mData;
 
-    PartReferenceList parts;
+    PartReferenceList mParts;
 
-    std::string name, model, icon, enchant, script;
+    std::string mName, mModel, mIcon, mEnchant, mScript;
 
     void load(ESMReader &esm);
+    void save(ESMWriter &esm);
 };
 }
 #endif

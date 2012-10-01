@@ -1,10 +1,16 @@
-#ifndef _ESM_LAND_H
-#define _ESM_LAND_H
+#ifndef OPENMW_ESM_LAND_H
+#define OPENMW_ESM_LAND_H
 
-#include "esm_reader.hpp"
+#include <libs/platform/stdint.h>
+
+#include "esmcommon.hpp"
 
 namespace ESM
 {
+
+class ESMReader;
+class ESMWriter;
+
 /*
  * Landscape data.
  */
@@ -14,18 +20,27 @@ struct Land
     Land();
     ~Land();
 
-    int flags; // Only first four bits seem to be used, don't know what
+    int mFlags; // Only first four bits seem to be used, don't know what
     // they mean.
-    int X, Y; // Map coordinates.
+    int mX, mY; // Map coordinates.
 
     // File context. This allows the ESM reader to be 'reset' to this
     // location later when we are ready to load the full data set.
     ESMReader* mEsm;
-    ESM_Context context;
+    ESM_Context mContext;
 
-    bool hasData;
+    bool mHasData;
+    int mDataTypes;
+    int mDataLoaded;
 
-    bool dataLoaded;
+    enum
+    {
+        DATA_VNML = 1,
+        DATA_VHGT = 2,
+        DATA_WNAM = 4,
+        DATA_VCLR = 8,
+        DATA_VTEX = 16
+    };
 
     // number of vertices per side
     static const int LAND_SIZE = 65;
@@ -47,10 +62,10 @@ struct Land
 #pragma pack(push,1)
     struct VHGT
     {
-        float heightOffset;
-        int8_t heightData[LAND_NUM_VERTS];
-        short unknown1;
-        char unknown2;
+        float mHeightOffset;
+        int8_t mHeightData[LAND_NUM_VERTS];
+        short mUnk1;
+        char mUnk2;
     };
 #pragma pack(pop)
 
@@ -58,32 +73,52 @@ struct Land
 
     struct LandData
     {
-        float heightOffset;
-        float heights[LAND_NUM_VERTS];
-        //float normals[LAND_NUM_VERTS * 3];
-        uint16_t textures[LAND_NUM_TEXTURES];
+        float mHeightOffset;
+        float mHeights[LAND_NUM_VERTS];
+        VNML mNormals;
+        uint16_t mTextures[LAND_NUM_TEXTURES];
 
-        bool usingColours;
-        char colours[3 * LAND_NUM_VERTS];
+        bool mUsingColours;
+        char mColours[3 * LAND_NUM_VERTS];
+        int mDataTypes;
+
+        uint8_t mWnam[81];
+        short mUnk1;
+        uint8_t mUnk2;
+
+        void save(ESMWriter &esm);
+        static void transposeTextureData(uint16_t *in, uint16_t *out);
     };
 
-    LandData *landData;
+    LandData *mLandData;
 
     void load(ESMReader &esm);
+    void save(ESMWriter &esm);
 
     /**
      * Actually loads data
      */
-    void loadData();
+    void loadData(int flags);
 
     /**
      * Frees memory allocated for land data
      */
     void unloadData();
 
+    /// Check if given data type is loaded
+    /// \todo reimplement this
+    bool isDataLoaded(int flags) {
+        return (mDataLoaded & flags) == flags;
+    }
+
     private:
         Land(const Land& land);
         Land& operator=(const Land& land);
+
+        /// Loads data and marks it as loaded
+        /// \return true if data is actually loaded from file, false otherwise
+        /// including the case when data is already loaded
+        bool condLoad(int flags, int dataFlag, void *ptr, unsigned int size);
 };
 
 }

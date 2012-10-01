@@ -59,14 +59,14 @@ namespace MWGui
         WindowModal::open();
         center();
 
-        mEffect.range = ESM::RT_Self;
+        mEffect.mRange = ESM::RT_Self;
 
         onRangeButtonClicked(mRangeButton);
     }
 
     void EditEffectDialog::setEffect (const ESM::MagicEffect *effect)
     {
-        std::string icon = effect->icon;
+        std::string icon = effect->mIcon;
         icon[icon.size()-3] = 'd';
         icon[icon.size()-2] = 'd';
         icon[icon.size()-1] = 's';
@@ -74,22 +74,22 @@ namespace MWGui
 
         mEffectImage->setImageTexture (icon);
 
-        mEffectName->setCaptionWithReplacing("#{"+Widgets::MWSpellEffect::effectIDToString (effect->index)+"}");
+        mEffectName->setCaptionWithReplacing("#{"+Widgets::MWSpellEffect::effectIDToString (effect->mIndex)+"}");
     }
 
     void EditEffectDialog::onRangeButtonClicked (MyGUI::Widget* sender)
     {
-        mEffect.range = (mEffect.range+1)%3;
+        mEffect.mRange = (mEffect.mRange+1)%3;
 
-        if (mEffect.range == ESM::RT_Self)
+        if (mEffect.mRange == ESM::RT_Self)
             mRangeButton->setCaptionWithReplacing ("#{sRangeSelf}");
-        else if (mEffect.range == ESM::RT_Target)
+        else if (mEffect.mRange == ESM::RT_Target)
             mRangeButton->setCaptionWithReplacing ("#{sRangeTarget}");
-        else if (mEffect.range == ESM::RT_Touch)
+        else if (mEffect.mRange == ESM::RT_Touch)
             mRangeButton->setCaptionWithReplacing ("#{sRangeTouch}");
 
-        mAreaSlider->setVisible (mEffect.range != ESM::RT_Self);
-        mAreaText->setVisible (mEffect.range != ESM::RT_Self);
+        mAreaSlider->setVisible (mEffect.mRange != ESM::RT_Self);
+        mAreaText->setVisible (mEffect.mRange != ESM::RT_Self);
     }
 
     void EditEffectDialog::onDeleteButtonClicked (MyGUI::Widget* sender)
@@ -161,14 +161,14 @@ namespace MWGui
             const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().spells.find(*it);
 
             // only normal spells count
-            if (spell->data.type != ESM::Spell::ST_Spell)
+            if (spell->mData.mType != ESM::Spell::ST_Spell)
                 continue;
 
-            const std::vector<ESM::ENAMstruct>& list = spell->effects.list;
+            const std::vector<ESM::ENAMstruct>& list = spell->mEffects.mList;
             for (std::vector<ESM::ENAMstruct>::const_iterator it2 = list.begin(); it2 != list.end(); ++it2)
             {
-                if (std::find(knownEffects.begin(), knownEffects.end(), it2->effectID) == knownEffects.end())
-                    knownEffects.push_back(it2->effectID);
+                if (std::find(knownEffects.begin(), knownEffects.end(), it2->mEffectID) == knownEffects.end())
+                    knownEffects.push_back(it2->mEffectID);
             }
         }
 

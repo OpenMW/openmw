@@ -56,9 +56,9 @@ enum VisibilityFlags
 
     RV_PlayerPreview = 512,
 
-    RV_Map = RV_Terrain + RV_Statics + RV_StaticsSmall + RV_Misc + RV_Water
+    RV_Debug = 1024,
 
-    /// \todo markers (normally hidden)
+    RV_Map = RV_Terrain + RV_Statics + RV_StaticsSmall + RV_Misc + RV_Water
 };
 
 }
