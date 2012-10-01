@@ -209,60 +209,6 @@ namespace ESMS
     }
   };
 
-  // The only difference to the above is a slight change to the load()
-  // function. We might merge these together later, and store the id
-  // in all the structs.
-  template <typename X>
-  struct RecIDListT : RecList
-  {
-    virtual ~RecIDListT() {}
-
-    typedef std::map<std::string,X> MapType;
-
-    MapType list;
-
-    void load(ESMReader &esm, const std::string &id)
-    {
-      std::string id2 = toLower (id);
-      X& ref = list[id2];
-
-      ref.mId = id;
-      ref.load(esm);
-    }
-
-    // Find the given object ID, or return NULL if not found.
-    const X* search(const std::string &id) const
-    {
-        std::string id2 = toLower (id);
-
-        typename MapType::const_iterator iter = list.find (id2);
-
-        if (iter == list.end())
-            return NULL;
-
-        return &iter->second;
-    }
-
-    // Find the given object ID (throws an exception if not found)
-    const X* find(const std::string &id) const
-    {
-        const X *object = search (id);
-
-        if (!object)
-            throw std::runtime_error ("object " + id + " not found");
-
-        return object;
-    }
-
-    int getSize() { return list.size(); }
-
-    virtual void listIdentifier (std::vector<std::string>& identifier) const
-    {
-        for (typename MapType::const_iterator iter (list.begin()); iter!=list.end(); ++iter)
-            identifier.push_back (iter->first);
-    }
-  };
-
   /* Land textures are indexed by an integer number
    */
   struct LTexList : RecList

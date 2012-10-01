@@ -68,7 +68,7 @@ namespace ESMS
 
     // Lists that need special rules
     CellList                    cells;
-    RecIDListT<GameSetting>     gameSettings;
+    RecListWithIDT<GameSetting> gameSettings;
     LandList                    lands;
     LTexList                    landTexts;
     ScriptListT<Script>         scripts;
