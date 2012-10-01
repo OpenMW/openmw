@@ -129,8 +129,8 @@ void ContainerBase::onSelectedItem(MyGUI::Widget* _sender)
         {
             // the player is trying to sell an item, check if the merchant accepts it
             // also, don't allow selling gold (let's be better than Morrowind at this, can we?)
-            if (!MWBase::Environment::get().getWindowManager()->getTradeWindow()->npcAcceptsItem(object)
-                    || MWWorld::Class::get(object).getName(object) == MWBase::Environment::get().getWorld()->getStore().gameSettings.find("sGold")->getString())
+            if (!MWBase::Environment::get().getWindowManager()->getTradeWindow()->npcAcceptsItem(object) ||
+                MWWorld::Class::get(object).getName(object) == MWBase::Environment::get().getWorld()->getStore().gameSettings.find("sGold")->getString())
             {
                 // user notification "i don't buy this item"
                 MWBase::Environment::get().getWindowManager()->
@@ -274,11 +274,12 @@ void ContainerBase::onContainerClicked(MyGUI::Widget* _sender)
             if (mPtr.getTypeName() == typeid(ESM::Container).name())
             {
                 MWWorld::LiveCellRef<ESM::Container>* ref = mPtr.get<ESM::Container>();
-                if (ref->base->flags & ESM::Container::Organic)
+                if (ref->base->mFlags & ESM::Container::Organic)
                 {
                     // user notification
                     MWBase::Environment::get().getWindowManager()->
                         messageBox("#{sContentsMessage2}", std::vector<std::string>());
+
                     return;
                 }
             }
@@ -302,6 +303,7 @@ void ContainerBase::onContainerClicked(MyGUI::Widget* _sender)
                     // user notification
                     MWBase::Environment::get().getWindowManager()->
                         messageBox("#{sContentsMessage3}", std::vector<std::string>());
+
                     return;
                 }
                 else

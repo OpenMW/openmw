@@ -3,7 +3,7 @@
 // The first one already includes the others implicitly, but it
 // doesn't hurt to be explicit.
 #include "../esm_store/store.hpp"
-#include "../esm/esm_reader.hpp"
+#include "../esm/esmreader.hpp"
 #include "../esm/loadland.hpp"
 
 using namespace Terrain;

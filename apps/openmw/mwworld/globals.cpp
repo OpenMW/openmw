@@ -35,27 +35,27 @@ namespace MWWorld
             char type = ' ';
             Data value;
         
-            switch (iter->second.type)
+            switch (iter->second.mType)
             {
                 case ESM::VT_Short:
                     
                     type = 's';
                     value.mShort = *reinterpret_cast<const Interpreter::Type_Float *> (
-                        &iter->second.value);
+                        &iter->second.mValue);
                     break;
                     
                 case ESM::VT_Int:
                 
                     type = 'l';
                     value.mLong = *reinterpret_cast<const Interpreter::Type_Float *> (
-                        &iter->second.value);
+                        &iter->second.mValue);
                     break;
                     
                 case ESM::VT_Float:
                 
                     type = 'f';
                     value.mFloat = *reinterpret_cast<const Interpreter::Type_Float *> (
-                        &iter->second.value);
+                        &iter->second.mValue);
                     break;
                     
                 default:

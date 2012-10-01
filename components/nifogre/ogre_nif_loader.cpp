@@ -152,6 +152,28 @@ static void fail(const std::string &msg)
 }
 
 
+static void insertTextKeys(const Nif::NiTextKeyExtraData *tk, TextKeyMap *textkeys)
+{
+    for(size_t i = 0;i < tk->list.size();i++)
+    {
+        const std::string &str = tk->list[i].text;
+        std::string::size_type pos = 0;
+        while(pos < str.length())
+        {
+            while(pos < str.length() && ::isspace(str[pos]))
+                pos++;
+            if(pos >= str.length())
+                break;
+
+            std::string::size_type nextpos = std::min(str.find('\r', pos), str.find('\n', pos));
+            textkeys->insert(std::make_pair(tk->list[i].time, str.substr(pos, nextpos-pos)));
+
+            pos = nextpos;
+        }
+    }
+}
+
+
 void buildBones(Ogre::Skeleton *skel, const Nif::Node *node, std::vector<Nif::NiKeyframeController*> &ctrls, Ogre::Bone *parent=NULL)
 {
     Ogre::Bone *bone;
@@ -274,23 +296,18 @@ void loadResource(Ogre::Resource *resource)
         if(scaleiter != scalekeys.mKeys.end())
             lastscale = curscale = Ogre::Vector3(scaleiter->mValue) / startscale;
         bool didlast = false;
-        
+
         while(!didlast)
         {
             float curtime = kfc->timeStop;
-            
 
             //Get latest time
-            if(quatiter != quatkeys.mKeys.end()){
+            if(quatiter != quatkeys.mKeys.end())
                 curtime = std::min(curtime, quatiter->mTime);
-            }
-            if(traniter != trankeys.mKeys.end()){
+            if(traniter != trankeys.mKeys.end())
                 curtime = std::min(curtime, traniter->mTime);
-                
-            }
-            if(scaleiter != scalekeys.mKeys.end()){
+            if(scaleiter != scalekeys.mKeys.end())
                 curtime = std::min(curtime, scaleiter->mTime);
-            }
 
             curtime = std::max(curtime, kfc->timeStart);
             if(curtime >= kfc->timeStop)
@@ -299,15 +316,33 @@ void loadResource(Ogre::Resource *resource)
                 curtime = kfc->timeStop;
             }
 
-            bool rinterpolate = quatiter != quatkeys.mKeys.end() && quatiter != quatkeys.mKeys.begin()  && curtime != quatiter->mTime;
-            bool tinterpolate = traniter != trankeys.mKeys.end() && traniter != trankeys.mKeys.begin() && curtime != traniter->mTime;
-            bool sinterpolate = scaleiter != scalekeys.mKeys.end() && scaleiter != scalekeys.mKeys.begin() && curtime != scaleiter->mTime;
+            // Get the latest quaternions, translations, and scales for the
+            // current time
+            while(quatiter != quatkeys.mKeys.end() && curtime >= quatiter->mTime)
+            {
+                lastquat = curquat;
+                quatiter++;
+                if(quatiter != quatkeys.mKeys.end())
+                    curquat = startquat.Inverse() * quatiter->mValue ;
+            }
+            while(traniter != trankeys.mKeys.end() && curtime >= traniter->mTime)
+            {
+                lasttrans = curtrans;
+                traniter++;
+                if(traniter != trankeys.mKeys.end())
+                    curtrans = traniter->mValue - starttrans;
+            }
+            while(scaleiter != scalekeys.mKeys.end() && curtime >= scaleiter->mTime)
+            {
+                lastscale = curscale;
+                scaleiter++;
+                if(scaleiter != scalekeys.mKeys.end())
+                    curscale = Ogre::Vector3(scaleiter->mValue) / startscale;
+            }
 
-            
-            
             Ogre::TransformKeyFrame *kframe;
             kframe = nodetrack->createNodeKeyFrame(curtime);
-            if(!rinterpolate)
+            if(quatiter == quatkeys.mKeys.end() || quatiter == quatkeys.mKeys.begin())
                 kframe->setRotation(curquat);
             else
             {
@@ -315,7 +350,7 @@ void loadResource(Ogre::Resource *resource)
                 float diff = (curtime-last->mTime) / (quatiter->mTime-last->mTime);
                 kframe->setRotation(Ogre::Quaternion::nlerp(diff, lastquat, curquat));
             }
-            if(!tinterpolate)
+            if(traniter == trankeys.mKeys.end() || traniter == trankeys.mKeys.begin())
                 kframe->setTranslate(curtrans);
             else
             {
@@ -323,7 +358,7 @@ void loadResource(Ogre::Resource *resource)
                 float diff = (curtime-last->mTime) / (traniter->mTime-last->mTime);
                 kframe->setTranslate(lasttrans + ((curtrans-lasttrans)*diff));
             }
-            if(!sinterpolate)
+            if(scaleiter == scalekeys.mKeys.end() || scaleiter == scalekeys.mKeys.begin())
                 kframe->setScale(curscale);
             else
             {
@@ -331,31 +366,6 @@ void loadResource(Ogre::Resource *resource)
                 float diff = (curtime-last->mTime) / (scaleiter->mTime-last->mTime);
                 kframe->setScale(lastscale + ((curscale-lastscale)*diff));
             }
-
-            // Get the latest quaternion, translation, and scale for the
-            // current time
-            while(quatiter != quatkeys.mKeys.end() && curtime >= quatiter->mTime)
-            {
-                quatiter++;
-                lastquat = curquat;
-                if(quatiter != quatkeys.mKeys.end())
-                    curquat = startquat.Inverse() * quatiter->mValue ;
-            }
-            while(traniter != trankeys.mKeys.end() && curtime >= traniter->mTime)
-            {
-                traniter++;
-                lasttrans = curtrans;
-                if(traniter != trankeys.mKeys.end())
-                    curtrans = traniter->mValue - starttrans;
-            }
-            while(scaleiter != scalekeys.mKeys.end() && curtime >= scaleiter->mTime)
-            {
-                scaleiter++;
-                lastscale = curscale;
-                if(scaleiter != scalekeys.mKeys.end())
-                    curscale = Ogre::Vector3(scaleiter->mValue) / startscale;
-            }
-
         }
     }
     anim->optimise();
@@ -371,8 +381,7 @@ bool createSkeleton(const std::string &name, const std::string &group, TextKeyMa
             if(e->recType == Nif::RC_NiTextKeyExtraData)
             {
                 const Nif::NiTextKeyExtraData *tk = static_cast<const Nif::NiTextKeyExtraData*>(e.getPtr());
-                for(size_t i = 0;i < tk->list.size();i++)
-                    (*textkeys)[tk->list[i].time] = tk->list[i].text;
+                insertTextKeys(tk, textkeys);
             }
             e = e->extra;
         }

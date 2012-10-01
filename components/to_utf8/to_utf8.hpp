@@ -21,6 +21,7 @@ namespace ToUTF8
   // Convert the previously written buffer to UTF8 from the given code
   // page.
   std::string getUtf8(FromType from);
+  std::string getLegacyEnc(FromType to);
 }
 
 #endif

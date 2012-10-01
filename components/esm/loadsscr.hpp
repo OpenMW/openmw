@@ -1,10 +1,13 @@
-#ifndef _ESM_SSCR_H
-#define _ESM_SSCR_H
+#ifndef OPENMW_ESM_SSCR_H
+#define OPENMW_ESM_SSCR_H
 
-#include "esm_reader.hpp"
+#include <string>
 
 namespace ESM
 {
+
+class ESMReader;
+class ESMWriter;
 
 /*
  Startup script. I think this is simply a 'main' script that is run
@@ -16,10 +19,12 @@ namespace ESM
 
 struct StartScript
 {
-    std::string script;
+    std::string mData;
+    std::string mScript;
 
     // Load a record and add it to the list
     void load(ESMReader &esm);
+    void save(ESMWriter &esm);
 };
 
 }

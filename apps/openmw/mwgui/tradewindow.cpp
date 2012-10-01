@@ -156,15 +156,15 @@ namespace MWGui
         if (mPtr.getTypeName() == typeid(ESM::NPC).name())
         {
             MWWorld::LiveCellRef<ESM::NPC>* ref = mPtr.get<ESM::NPC>();
-            if (ref->base->npdt52.gold == -10)
-                merchantgold = ref->base->npdt12.gold;
+            if (ref->base->mNpdt52.mGold == -10)
+                merchantgold = ref->base->mNpdt12.mGold;
             else
-                merchantgold = ref->base->npdt52.gold;
+                merchantgold = ref->base->mNpdt52.mGold;
         }
         else // ESM::Creature
         {
             MWWorld::LiveCellRef<ESM::Creature>* ref = mPtr.get<ESM::Creature>();
-            merchantgold = ref->base->data.gold;
+            merchantgold = ref->base->mData.mGold;
         }
         if (mCurrentBalance > 0 && merchantgold < mCurrentBalance)
         {
@@ -217,15 +217,15 @@ namespace MWGui
         if (mPtr.getTypeName() == typeid(ESM::NPC).name())
         {
             MWWorld::LiveCellRef<ESM::NPC>* ref = mPtr.get<ESM::NPC>();
-            if (ref->base->npdt52.gold == -10)
-                merchantgold = ref->base->npdt12.gold;
+            if (ref->base->mNpdt52.mGold == -10)
+                merchantgold = ref->base->mNpdt12.mGold;
             else
-                merchantgold = ref->base->npdt52.gold;
+                merchantgold = ref->base->mNpdt52.mGold;
         }
         else // ESM::Creature
         {
             MWWorld::LiveCellRef<ESM::Creature>* ref = mPtr.get<ESM::Creature>();
-            merchantgold = ref->base->data.gold;
+            merchantgold = ref->base->mData.mGold;
         }
 
         mMerchantGold->setCaptionWithReplacing("#{sSellerGold} " + boost::lexical_cast<std::string>(merchantgold));

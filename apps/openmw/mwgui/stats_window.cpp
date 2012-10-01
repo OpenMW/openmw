@@ -222,9 +222,9 @@ void StatsWindow::configureSkills (const std::vector<int>& major, const std::vec
     std::set<int> skillSet;
     std::copy(major.begin(), major.end(), std::inserter(skillSet, skillSet.begin()));
     std::copy(minor.begin(), minor.end(), std::inserter(skillSet, skillSet.begin()));
-    boost::array<ESM::Skill::SkillEnum, ESM::Skill::Length>::const_iterator end = ESM::Skill::skillIds.end();
+    boost::array<ESM::Skill::SkillEnum, ESM::Skill::Length>::const_iterator end = ESM::Skill::sSkillIds.end();
     mMiscSkills.clear();
-    for (boost::array<ESM::Skill::SkillEnum, ESM::Skill::Length>::const_iterator it = ESM::Skill::skillIds.begin(); it != end; ++it)
+    for (boost::array<ESM::Skill::SkillEnum, ESM::Skill::Length>::const_iterator it = ESM::Skill::sSkillIds.begin(); it != end; ++it)
     {
         int skill = *it;
         if (skillSet.find(skill) == skillSet.end())
@@ -368,7 +368,7 @@ void StatsWindow::addSkills(const SkillList &skills, const std::string &titleId,
 
         std::string icon = "icons\\k\\" + ESM::Skill::sIconNames[skillId];
 
-        const ESM::Attribute* attr = MWBase::Environment::get().getWorld()->getStore().attributes.search(skill->data.attribute);
+        const ESM::Attribute* attr = MWBase::Environment::get().getWorld()->getStore().attributes.search(skill->mData.mAttribute);
         assert(attr);
 
         std::string state = "normal";
@@ -384,8 +384,8 @@ void StatsWindow::addSkills(const SkillList &skills, const std::string &titleId,
             mSkillWidgets[mSkillWidgets.size()-1-i]->setUserString("ToolTipType", "Layout");
             mSkillWidgets[mSkillWidgets.size()-1-i]->setUserString("ToolTipLayout", "SkillToolTip");
             mSkillWidgets[mSkillWidgets.size()-1-i]->setUserString("Caption_SkillName", "#{"+skillNameId+"}");
-            mSkillWidgets[mSkillWidgets.size()-1-i]->setUserString("Caption_SkillDescription", skill->description);
-            mSkillWidgets[mSkillWidgets.size()-1-i]->setUserString("Caption_SkillAttribute", "#{sGoverningAttribute}: #{" + attr->name + "}");
+            mSkillWidgets[mSkillWidgets.size()-1-i]->setUserString("Caption_SkillDescription", skill->mDescription);
+            mSkillWidgets[mSkillWidgets.size()-1-i]->setUserString("Caption_SkillAttribute", "#{sGoverningAttribute}: #{" + attr->mName + "}");
             mSkillWidgets[mSkillWidgets.size()-1-i]->setUserString("ImageTexture_SkillImage", icon);
             mSkillWidgets[mSkillWidgets.size()-1-i]->setUserString("Caption_SkillProgressText", boost::lexical_cast<std::string>(progressPercent)+"/100");
             mSkillWidgets[mSkillWidgets.size()-1-i]->setUserString("Range_SkillProgress", "100");
@@ -451,41 +451,41 @@ void StatsWindow::updateSkillArea()
         for (FactionList::const_iterator it = mFactions.begin(); it != end; ++it)
         {
             const ESM::Faction *faction = store.factions.find(it->first);
-            MyGUI::Widget* w = addItem(faction->name, coord1, coord2);
+            MyGUI::Widget* w = addItem(faction->mName, coord1, coord2);
 
             std::string text;
 
-            text += std::string("#DDC79E") + faction->name;
-            text += std::string("\n#BF9959") + faction->ranks[it->second];
+            text += std::string("#DDC79E") + faction->mName;
+            text += std::string("\n#BF9959") + faction->mRanks[it->second];
 
             if (it->second < 9)
             {
                 // player doesn't have max rank yet
-                text += std::string("\n\n#DDC79E#{sNextRank} ") + faction->ranks[it->second+1];
+                text += std::string("\n\n#DDC79E#{sNextRank} ") + faction->mRanks[it->second+1];
 
-                ESM::RankData rankData = faction->data.rankData[it->second+1];
-                const ESM::Attribute* attr1 = MWBase::Environment::get().getWorld()->getStore().attributes.search(faction->data.attribute1);
-                const ESM::Attribute* attr2 = MWBase::Environment::get().getWorld()->getStore().attributes.search(faction->data.attribute2);
+                ESM::RankData rankData = faction->mData.mRankData[it->second+1];
+                const ESM::Attribute* attr1 = MWBase::Environment::get().getWorld()->getStore().attributes.search(faction->mData.mAttribute1);
+                const ESM::Attribute* attr2 = MWBase::Environment::get().getWorld()->getStore().attributes.search(faction->mData.mAttribute2);
                 assert(attr1 && attr2);
 
-                text += "\n#BF9959#{" + attr1->name + "}: " + boost::lexical_cast<std::string>(rankData.attribute1)
-                        + ", #{" + attr2->name + "}: " + boost::lexical_cast<std::string>(rankData.attribute2);
+                text += "\n#BF9959#{" + attr1->mName + "}: " + boost::lexical_cast<std::string>(rankData.mAttribute1)
+                        + ", #{" + attr2->mName + "}: " + boost::lexical_cast<std::string>(rankData.mAttribute2);
 
                 text += "\n\n#DDC79E#{sFavoriteSkills}";
                 text += "\n#BF9959";
                 for (int i=0; i<6; ++i)
                 {
-                    text += "#{"+ESM::Skill::sSkillNameIds[faction->data.skillID[i]]+"}";
+                    text += "#{"+ESM::Skill::sSkillNameIds[faction->mData.mSkillID[i]]+"}";
                     if (i<5)
                         text += ", ";
                 }
 
                 text += "\n";
 
-                if (rankData.skill1 > 0)
-                    text += "\n#{sNeedOneSkill} " + boost::lexical_cast<std::string>(rankData.skill1);
-                if (rankData.skill2 > 0)
-                    text += "\n#{sNeedTwoSkills} " + boost::lexical_cast<std::string>(rankData.skill2);
+                if (rankData.mSkill1 > 0)
+                    text += "\n#{sNeedOneSkill} " + boost::lexical_cast<std::string>(rankData.mSkill1);
+                if (rankData.mSkill2 > 0)
+                    text += "\n#{sNeedTwoSkills} " + boost::lexical_cast<std::string>(rankData.mSkill2);
             }
 
             w->setUserString("ToolTipType", "Layout");
@@ -502,7 +502,7 @@ void StatsWindow::updateSkillArea()
 
         addGroup(mWindowManager.getGameSettingString("sBirthSign", "Sign"), coord1, coord2);
         const ESM::BirthSign *sign = store.birthSigns.find(mBirthSignId);
-        MyGUI::Widget* w = addItem(sign->name, coord1, coord2);
+        MyGUI::Widget* w = addItem(sign->mName, coord1, coord2);
 
         ToolTips::createBirthsignToolTip(w, mBirthSignId);
     }

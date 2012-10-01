@@ -378,9 +378,9 @@ void RenderingManager::update (float duration)
 }
 
 void RenderingManager::waterAdded (MWWorld::Ptr::CellStore *store){
-    if(store->cell->data.flags & store->cell->HasWater
-        || ((!(store->cell->data.flags & ESM::Cell::Interior))
-            && !MWBase::Environment::get().getWorld()->getStore().lands.search(store->cell->data.gridX,store->cell->data.gridY) )) // always use water, if the cell does not have land.
+    if(store->cell->mData.mFlags & store->cell->HasWater
+        || ((!(store->cell->mData.mFlags & ESM::Cell::Interior))
+            && !MWBase::Environment::get().getWorld()->getStore().lands.search(store->cell->mData.mX,store->cell->mData.mY) )) // always use water, if the cell does not have land.
     {
         if(mWater == 0)
             mWater = new MWRender::Water(mRendering.getCamera(), this, store->cell);
@@ -471,9 +471,9 @@ bool RenderingManager::toggleRenderMode(int mode)
 void RenderingManager::configureFog(MWWorld::Ptr::CellStore &mCell)
 {
     Ogre::ColourValue color;
-    color.setAsABGR (mCell.cell->ambi.fog);
+    color.setAsABGR (mCell.cell->mAmbi.mFog);
 
-    configureFog(mCell.cell->ambi.fogDensity, color);
+    configureFog(mCell.cell->mAmbi.mFogDensity, color);
 
     if (mWater)
         mWater->setViewportBackground (Ogre::ColourValue(0.8f, 0.9f, 1.0f));
@@ -523,7 +523,7 @@ void RenderingManager::setAmbientMode()
 
 void RenderingManager::configureAmbient(MWWorld::Ptr::CellStore &mCell)
 {
-    mAmbientColor.setAsABGR (mCell.cell->ambi.ambient);
+    mAmbientColor.setAsABGR (mCell.cell->mAmbi.mAmbient);
     setAmbientMode();
 
     // Create a "sun" that shines light downwards. It doesn't look
@@ -533,7 +533,7 @@ void RenderingManager::configureAmbient(MWWorld::Ptr::CellStore &mCell)
         mSun = mRendering.getScene()->createLight();
     }
     Ogre::ColourValue colour;
-    colour.setAsABGR (mCell.cell->ambi.sunlight);
+    colour.setAsABGR (mCell.cell->mAmbi.mSunlight);
     mSun->setDiffuseColour (colour);
     mSun->setType(Ogre::Light::LT_DIRECTIONAL);
     mSun->setDirection(0,-1,0);
@@ -617,7 +617,7 @@ void RenderingManager::setGlare(bool glare)
 
 void RenderingManager::requestMap(MWWorld::Ptr::CellStore* cell)
 {
-    if (!(cell->cell->data.flags & ESM::Cell::Interior))
+    if (!(cell->cell->mData.mFlags & ESM::Cell::Interior))
         mLocalMap->requestMap(cell);
     else
         mLocalMap->requestMap(cell, mObjects.getDimensions(cell));

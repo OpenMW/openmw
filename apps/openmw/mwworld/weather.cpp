@@ -41,7 +41,8 @@ const float WeatherGlobals::mThunderSoundDelay = 0.25;
 WeatherManager::WeatherManager(MWRender::RenderingManager* rendering) :
      mHour(14), mCurrentWeather("clear"), mFirstUpdate(true), mWeatherUpdateTime(0),
      mThunderFlash(0), mThunderChance(0), mThunderChanceNeeded(50), mThunderSoundDelay(0),
-     mRemainingTransitionTime(0), mMonth(0), mDay(0)
+     mRemainingTransitionTime(0), mMonth(0), mDay(0),
+     mTimePassed(0)
 {
     mRendering = rendering;
 
@@ -487,13 +488,16 @@ WeatherResult WeatherManager::transition(float factor)
 
 void WeatherManager::update(float duration)
 {
-    mWeatherUpdateTime -= duration * MWBase::Environment::get().getWorld()->getTimeScaleFactor();
+    float timePassed = mTimePassed;
+    mTimePassed = 0;
+
+    mWeatherUpdateTime -= timePassed;
 
     bool exterior = (MWBase::Environment::get().getWorld()->isCellExterior() || MWBase::Environment::get().getWorld()->isCellQuasiExterior());
 
     if (exterior)
     {
-        std::string regionstr = MWBase::Environment::get().getWorld()->getPlayer().getPlayer().getCell()->cell->region;
+        std::string regionstr = MWBase::Environment::get().getWorld()->getPlayer().getPlayer().getCell()->cell->mRegion;
         boost::algorithm::to_lower(regionstr);
 
         if (mWeatherUpdateTime <= 0 || regionstr != mCurrentRegion)
@@ -512,16 +516,16 @@ void WeatherManager::update(float duration)
 
                 if (region != 0)
                 {
-                    float clear = region->data.clear/255.f;
-                    float cloudy = region->data.cloudy/255.f;
-                    float foggy = region->data.foggy/255.f;
-                    float overcast = region->data.overcast/255.f;
-                    float rain = region->data.rain/255.f;
-                    float thunder = region->data.thunder/255.f;
-                    float ash = region->data.ash/255.f;
-                    float blight = region->data.blight/255.f;
-                    //float snow = region->data.a/255.f;
-                    //float blizzard = region->data.b/255.f;
+                    float clear = region->mData.mClear/255.f;
+                    float cloudy = region->mData.mCloudy/255.f;
+                    float foggy = region->mData.mFoggy/255.f;
+                    float overcast = region->mData.mOvercast/255.f;
+                    float rain = region->mData.mRain/255.f;
+                    float thunder = region->mData.mThunder/255.f;
+                    float ash = region->mData.mAsh/255.f;
+                    float blight = region->mData.mBlight/255.f;
+                    //float snow = region->mData.a/255.f;
+                    //float blizzard = region->mData.b/255.f;
 
                     // re-scale to 100 percent
                     const float total = clear+cloudy+foggy+overcast+rain+thunder+ash+blight;//+snow+blizzard;
@@ -558,7 +562,7 @@ void WeatherManager::update(float duration)
 
         if (mNextWeather != "")
         {
-            mRemainingTransitionTime -= duration * MWBase::Environment::get().getWorld()->getTimeScaleFactor();
+            mRemainingTransitionTime -= timePassed;
             if (mRemainingTransitionTime < 0)
             {
                 mCurrentWeather = mNextWeather;

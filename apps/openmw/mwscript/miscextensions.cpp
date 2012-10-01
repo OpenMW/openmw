@@ -44,6 +44,16 @@ namespace MWScript
             }
         };
 
+        class OpWakeUpPc : public Interpreter::Opcode0
+        {
+        public:
+
+            virtual void execute (Interpreter::Runtime& runtime)
+            {
+                MWBase::Environment::get().getWindowManager ()->wakeUpPlayer();
+            }
+        };
+
         class OpXBox : public Interpreter::Opcode0
         {
             public:
@@ -274,7 +284,9 @@ namespace MWScript
         const int opcodeDontSaveObject = 0x2000153;
         const int opcodeToggleVanityMode = 0x2000174;
         const int opcodeGetPcSleep = 0x200019f;
-        const int opcodePlayBink = 0x20001a2;
+        const int opcodeWakeUpPc = 0x20001a2;
+
+        const int opcodePlayBink = 0x20001a3;
 
         void registerExtensions (Compiler::Extensions& extensions)
         {
@@ -300,6 +312,8 @@ namespace MWScript
             extensions.registerInstruction ("togglevanitymode", "", opcodeToggleVanityMode);
             extensions.registerInstruction ("tvm", "", opcodeToggleVanityMode);
             extensions.registerFunction ("getpcsleep", 'l', "", opcodeGetPcSleep);
+            extensions.registerInstruction ("wakeuppc", "", opcodeWakeUpPc);
+
             extensions.registerInstruction ("playbink", "S", opcodePlayBink);
         }
 
@@ -322,6 +336,8 @@ namespace MWScript
             interpreter.installSegment5 (opcodeDontSaveObject, new OpDontSaveObject);
             interpreter.installSegment5 (opcodeToggleVanityMode, new OpToggleVanityMode);
             interpreter.installSegment5 (opcodeGetPcSleep, new OpGetPcSleep);
+            interpreter.installSegment5 (opcodeWakeUpPc, new OpWakeUpPc);
+
             interpreter.installSegment5 (opcodePlayBink, new OpPlayBink);
         }
     }

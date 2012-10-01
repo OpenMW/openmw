@@ -2,7 +2,7 @@
 
 using namespace ESM;
 
-const Attribute::AttributeID Attribute::attributeIds[Attribute::Length] = {
+const Attribute::AttributeID Attribute::sAttributeIds[Attribute::Length] = {
     Attribute::Strength,
     Attribute::Intelligence,
     Attribute::Willpower,
@@ -13,7 +13,7 @@ const Attribute::AttributeID Attribute::attributeIds[Attribute::Length] = {
     Attribute::Luck
 };
 
-const std::string Attribute::gmstAttributeIds[Attribute::Length] = {
+const std::string Attribute::sGmstAttributeIds[Attribute::Length] = {
     "sAttributeStrength",
     "sAttributeIntelligence",
     "sAttributeWillpower",
@@ -24,7 +24,7 @@ const std::string Attribute::gmstAttributeIds[Attribute::Length] = {
     "sAttributeLuck"
 };
 
-const std::string Attribute::gmstAttributeDescIds[Attribute::Length] = {
+const std::string Attribute::sGmstAttributeDescIds[Attribute::Length] = {
     "sStrDesc",
     "sIntDesc",
     "sWilDesc",
@@ -35,7 +35,7 @@ const std::string Attribute::gmstAttributeDescIds[Attribute::Length] = {
     "sLucDesc"
 };
 
-const std::string Attribute::attributeIcons[Attribute::Length] = {
+const std::string Attribute::sAttributeIcons[Attribute::Length] = {
     "icons\\k\\attribute_strength.dds",
     "icons\\k\\attribute_int.dds",
     "icons\\k\\attribute_wilpower.dds",
