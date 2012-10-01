@@ -169,7 +169,7 @@ void Land::loadData(int flags)
     mEsm->restoreContext(mContext);
 
     memset(mLandData->mNormals, 0, LAND_NUM_VERTS * 3);
-        
+
     if (mEsm->isNextSub("VNML")) {
         condLoad(actual, DATA_VNML, mLandData->mNormals, sizeof(VNML));
     }
@@ -231,10 +231,7 @@ void Land::unloadData()
 
 bool Land::condLoad(int flags, int dataFlag, void *ptr, unsigned int size)
 {
-    if ((mDataLoaded & dataFlag) != 0) {
-        return false;
-    }
-    if (flags & dataFlag) {
+    if ((mDataLoaded & dataFlag) == 0 && (flags & dataFlag) != 0) {
         mEsm->getHExact(ptr, size);
         mDataLoaded |= dataFlag;
         return true;
