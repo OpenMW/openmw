@@ -296,7 +296,7 @@ namespace MWSound
         }
         catch(std::exception &e)
         {
-            std::cout <<"Sound Error: "<<e.what()<< std::endl;
+            //std::cout <<"Sound Error: "<<e.what()<< std::endl;
         }
         return sound;
     }
@@ -332,7 +332,7 @@ namespace MWSound
         }
         catch(std::exception &e)
         {
-            std::cout <<"Sound Error: "<<e.what()<< std::endl;
+            //std::cout <<"Sound Error: "<<e.what()<< std::endl;
         }
         return sound;
     }
