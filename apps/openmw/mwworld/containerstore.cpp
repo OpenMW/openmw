@@ -145,7 +145,7 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::addImpl (const Ptr& ptr
     return it;
 }
 
-void MWWorld::ContainerStore::fill (const ESM::InventoryList& items, const ESMS::ESMStore& store)
+void MWWorld::ContainerStore::fill (const ESM::InventoryList& items, const MWWorld::ESMStore& store)
 {
     for (std::vector<ESM::ContItem>::const_iterator iter (items.mList.begin()); iter!=items.mList.end();
         ++iter)

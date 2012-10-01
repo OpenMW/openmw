@@ -54,7 +54,7 @@ StatsWindow::StatsWindow (MWBase::WindowManager& parWindowManager)
         { 0, 0 }
     };
 
-    const ESMS::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
+    const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
     for (int i=0; names[i][0]; ++i)
     {
         setText (names[i][0], store.gameSettings.find (names[i][1])->getString());
@@ -357,7 +357,7 @@ void StatsWindow::addSkills(const SkillList &skills, const std::string &titleId,
         if (skillId < 0 || skillId > ESM::Skill::Length) // Skip unknown skill indexes
             continue;
         assert(skillId >= 0 && skillId < ESM::Skill::Length);
-        const std::string &skillNameId = ESMS::Skill::sSkillNameIds[skillId];
+        const std::string &skillNameId = ESM::Skill::sSkillNameIds[skillId];
         const MWMechanics::Stat<float> &stat = mSkillValues.find(skillId)->second;
         float base = stat.getBase();
         float modified = stat.getModified();
@@ -422,7 +422,7 @@ void StatsWindow::updateSkillArea()
     if (!mMiscSkills.empty())
         addSkills(mMiscSkills, "sSkillClassMisc", "Misc Skills", coord1, coord2);
 
-    const ESMS::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
+    const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
 
     // race tooltip
     const ESM::Race* playerRace =  store.races.find (MWBase::Environment::get().getWorld()->getPlayer().getRace());

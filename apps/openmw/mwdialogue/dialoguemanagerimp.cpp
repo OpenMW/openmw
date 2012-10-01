@@ -7,8 +7,6 @@
 
 #include <components/esm/loaddial.hpp>
 
-#include <components/esm_store/store.hpp>
-
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/scriptmanager.hpp"
@@ -19,6 +17,7 @@
 #include "../mwworld/refdata.hpp"
 #include "../mwworld/player.hpp"
 #include "../mwworld/containerstore.hpp"
+#include "../mwworld/esmstore.hpp"
 
 #include "../mwgui/dialogue.hpp"
 
@@ -84,7 +83,7 @@ namespace
 
     template<typename T>
     bool checkLocal (char comp, const std::string& name, T value, const MWWorld::Ptr& actor,
-        const ESMS::ESMStore& store)
+        const MWWorld::ESMStore& store)
     {
         std::string scriptName = MWWorld::Class::get (actor).getScript (actor);
 
@@ -590,8 +589,8 @@ namespace MWDialogue
         mCompilerContext.setExtensions (&extensions);
         mDialogueMap.clear();
         mActorKnownTopics.clear();
-        ESMS::RecListCaseT<ESM::Dialogue>::MapType dialogueList = MWBase::Environment::get().getWorld()->getStore().dialogs.list;
-        for(ESMS::RecListCaseT<ESM::Dialogue>::MapType::iterator it = dialogueList.begin(); it!=dialogueList.end();it++)
+        MWWorld::RecListCaseT<ESM::Dialogue>::MapType dialogueList = MWBase::Environment::get().getWorld()->getStore().dialogs.list;
+        for(MWWorld::RecListCaseT<ESM::Dialogue>::MapType::iterator it = dialogueList.begin(); it!=dialogueList.end();it++)
         {
             mDialogueMap[toLower(it->first)] = it->second;
         }
@@ -642,9 +641,9 @@ namespace MWDialogue
 
         //greeting
         bool greetingFound = false;
-        //ESMS::RecListT<ESM::Dialogue>::MapType dialogueList = MWBase::Environment::get().getWorld()->getStore().dialogs.list;
-        ESMS::RecListCaseT<ESM::Dialogue>::MapType dialogueList = MWBase::Environment::get().getWorld()->getStore().dialogs.list;
-        for(ESMS::RecListCaseT<ESM::Dialogue>::MapType::iterator it = dialogueList.begin(); it!=dialogueList.end();it++)
+        //MWWorld::RecListT<ESM::Dialogue>::MapType dialogueList = MWBase::Environment::get().getWorld()->getStore().dialogs.list;
+        MWWorld::RecListCaseT<ESM::Dialogue>::MapType dialogueList = MWBase::Environment::get().getWorld()->getStore().dialogs.list;
+        for(MWWorld::RecListCaseT<ESM::Dialogue>::MapType::iterator it = dialogueList.begin(); it!=dialogueList.end();it++)
         {
             ESM::Dialogue ndialogue = it->second;
             if(ndialogue.mType == ESM::Dialogue::Greeting)
@@ -742,8 +741,8 @@ namespace MWDialogue
         mChoice = -1;
         mActorKnownTopics.clear();
         MWGui::DialogueWindow* win = MWBase::Environment::get().getWindowManager()->getDialogueWindow();
-        ESMS::RecListCaseT<ESM::Dialogue>::MapType dialogueList = MWBase::Environment::get().getWorld()->getStore().dialogs.list;
-        for(ESMS::RecListCaseT<ESM::Dialogue>::MapType::iterator it = dialogueList.begin(); it!=dialogueList.end();it++)
+        MWWorld::RecListCaseT<ESM::Dialogue>::MapType dialogueList = MWBase::Environment::get().getWorld()->getStore().dialogs.list;
+        for(MWWorld::RecListCaseT<ESM::Dialogue>::MapType::iterator it = dialogueList.begin(); it!=dialogueList.end();it++)
         {
             ESM::Dialogue ndialogue = it->second;
             if(ndialogue.mType == ESM::Dialogue::Topic)

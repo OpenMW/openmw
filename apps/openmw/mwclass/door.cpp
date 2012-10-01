@@ -205,7 +205,7 @@ namespace MWClass
 
         std::string text;
 
-        const ESMS::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
+        const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
 
         if (ref->ref.mTeleport)
         {

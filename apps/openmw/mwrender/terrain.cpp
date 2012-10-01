@@ -4,7 +4,7 @@
 #include <OgreTerrainGroup.h>
 #include <OgreHardwarePixelBuffer.h>
 
-#include <components/esm_store/store.hpp>
+#include "../mwworld/esmstore.hpp"
 
 #include <components/settings/settings.hpp>
 

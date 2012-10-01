@@ -1,11 +1,10 @@
 #include "cells.hpp"
 
-#include <components/esm_store/store.hpp>
-
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 
 #include "class.hpp"
+#include "esmstore.hpp"
 #include "containerstore.hpp"
 
 MWWorld::Ptr::CellStore *MWWorld::Cells::getCellStore (const ESM::Cell *cell)
@@ -85,7 +84,7 @@ MWWorld::Ptr MWWorld::Cells::getPtrAndCache (const std::string& name, Ptr::CellS
     return ptr;
 }
 
-MWWorld::Cells::Cells (const ESMS::ESMStore& store, ESM::ESMReader& reader)
+MWWorld::Cells::Cells (const MWWorld::ESMStore& store, ESM::ESMReader& reader)
 : mStore (store), mReader (reader),
   mIdCache (20, std::pair<std::string, Ptr::CellStore *> ("", (Ptr::CellStore*)0)), /// \todo make cache size configurable
   mIdCacheIndex (0)
@@ -265,7 +264,7 @@ MWWorld::Ptr MWWorld::Cells::getPtr (const std::string& name)
     }
 
     // Now try the other cells
-    for (ESMS::CellList::IntCells::const_iterator iter = mStore.cells.intCells.begin();
+    for (MWWorld::CellList::IntCells::const_iterator iter = mStore.cells.intCells.begin();
         iter!=mStore.cells.intCells.end(); ++iter)
     {
         Ptr::CellStore *cellStore = getCellStore (iter->second);
@@ -276,7 +275,7 @@ MWWorld::Ptr MWWorld::Cells::getPtr (const std::string& name)
             return ptr;
     }
 
-    for (ESMS::CellList::ExtCells::const_iterator iter = mStore.cells.extCells.begin();
+    for (MWWorld::CellList::ExtCells::const_iterator iter = mStore.cells.extCells.begin();
         iter!=mStore.cells.extCells.end(); ++iter)
     {
         Ptr::CellStore *cellStore = getCellStore (iter->second);

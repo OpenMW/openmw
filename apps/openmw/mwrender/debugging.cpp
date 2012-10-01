@@ -11,7 +11,7 @@
 #include <components/esm/loadstat.hpp>
 #include <components/esm/loadpgrd.hpp>
 
-#include <components/esm_store/store.hpp>
+#include "../mwworld/esmstore.hpp"
 
 #include "../mwbase/world.hpp" // these includes can be removed once the static-hack is gone
 #include "../mwbase/environment.hpp"

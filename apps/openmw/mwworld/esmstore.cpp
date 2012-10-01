@@ -1,31 +1,21 @@
+#include "esmstore.hpp"
+
 #include <set>
 #include <iostream>
-#include "store.hpp"
 
-using namespace std;
-using namespace ESM;
-using namespace ESMS;
-
-/*
-static string toStr(int i)
+namespace MWWorld
 {
-  char name[5];
-  *((int*)name) = i;
-  name[4] = 0;
-  return std::string(name);
-}
-*/
 
-void ESMStore::load(ESMReader &esm)
+void ESMStore::load(ESM::ESMReader &esm)
 {
-    set<string> missing;
+    std::set<std::string> missing;
 
     ESM::Dialogue *dialogue = 0;
 
     // Loop through all records
     while(esm.hasMoreRecs())
     {
-        NAME n = esm.getRecName();
+        ESM::NAME n = esm.getRecName();
         esm.getRecHeader();
 
         // Look up the record type.
@@ -71,7 +61,8 @@ void ESMStore::load(ESMReader &esm)
 
             if (n.val==ESM::REC_DIAL)
             {
-                RecListCaseT<Dialogue>& recList = static_cast<RecListCaseT<Dialogue>& > (*it->second);
+                RecListCaseT<ESM::Dialogue>& recList =
+                    static_cast<RecListCaseT<ESM::Dialogue>& > (*it->second);
 
                 ESM::Dialogue* d = recList.search (id);
 
@@ -84,20 +75,22 @@ void ESMStore::load(ESMReader &esm)
 
             // Insert the reference into the global lookup
             if(!id.empty() &&
-                (n.val==REC_ACTI || n.val==REC_ALCH || n.val==REC_APPA || n.val==REC_ARMO ||
-                n.val==REC_BOOK || n.val==REC_CLOT || n.val==REC_CONT || n.val==REC_CREA ||
-                n.val==REC_DOOR || n.val==REC_INGR || n.val==REC_LEVC || n.val==REC_LEVI ||
-                n.val==REC_LIGH || n.val==REC_LOCK || n.val==REC_MISC || n.val==REC_NPC_ ||
-                n.val==REC_PROB || n.val==REC_REPA || n.val==REC_STAT || n.val==REC_WEAP)
+                (n.val==ESM::REC_ACTI || n.val==ESM::REC_ALCH || n.val==ESM::REC_APPA || n.val==ESM::REC_ARMO ||
+                n.val==ESM::REC_BOOK || n.val==ESM::REC_CLOT || n.val==ESM::REC_CONT || n.val==ESM::REC_CREA ||
+                n.val==ESM::REC_DOOR || n.val==ESM::REC_INGR || n.val==ESM::REC_LEVC || n.val==ESM::REC_LEVI ||
+                n.val==ESM::REC_LIGH || n.val==ESM::REC_LOCK || n.val==ESM::REC_MISC || n.val==ESM::REC_NPC_ ||
+                n.val==ESM::REC_PROB || n.val==ESM::REC_REPA || n.val==ESM::REC_STAT || n.val==ESM::REC_WEAP)
                 )
                 all[id] = n.val;
         }
     }
 
-    for (int i = 0; i < Attribute::Length; ++i)
+    for (int i = 0; i < ESM::Attribute::Length; ++i)
     {
-        Attribute::AttributeID id = Attribute::sAttributeIds[i];
-        attributes.list.insert(std::make_pair(id, Attribute(id, Attribute::sGmstAttributeIds[i], Attribute::sGmstAttributeDescIds[i])));
+        typedef ESM::Attribute EsmAttr;
+
+        EsmAttr::AttributeID id = EsmAttr::sAttributeIds[i];
+        attributes.list.insert(std::make_pair(id, ESM::Attribute(id, EsmAttr::sGmstAttributeIds[i], EsmAttr::sGmstAttributeDescIds[i])));
     }
 
   /* This information isn't needed on screen. But keep the code around
@@ -113,3 +106,5 @@ void ESMStore::load(ESMReader &esm)
   cout << endl;
   */
 }
+
+} // end namespace

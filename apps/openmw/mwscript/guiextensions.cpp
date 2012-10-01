@@ -9,8 +9,7 @@
 #include <components/interpreter/runtime.hpp>
 #include <components/interpreter/opcodes.hpp>
 
-#include <components/esm_store/store.hpp>
-#include <components/esm_store/reclists.hpp>
+#include "../mwworld/esmstore.hpp"
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
@@ -109,8 +108,8 @@ namespace MWScript
                 // "Will match complete or partial cells, so ShowMap, "Vivec" will show cells Vivec and Vivec, Fred's House as well."
                 // http://www.uesp.net/wiki/Tes3Mod:ShowMap
 
-                const ESMS::CellList::ExtCells& extCells = MWBase::Environment::get().getWorld ()->getStore ().cells.extCells;
-                for (ESMS::CellList::ExtCells::const_iterator it = extCells.begin(); it != extCells.end(); ++it)
+                const MWWorld::CellList::ExtCells& extCells = MWBase::Environment::get().getWorld ()->getStore ().cells.extCells;
+                for (MWWorld::CellList::ExtCells::const_iterator it = extCells.begin(); it != extCells.end(); ++it)
                 {
                     std::string name = it->second->mName;
                     boost::algorithm::to_lower(name);
@@ -126,8 +125,8 @@ namespace MWScript
 
             virtual void execute (Interpreter::Runtime& runtime)
             {
-                const ESMS::CellList::ExtCells& extCells = MWBase::Environment::get().getWorld ()->getStore ().cells.extCells;
-                for (ESMS::CellList::ExtCells::const_iterator it = extCells.begin(); it != extCells.end(); ++it)
+                const MWWorld::CellList::ExtCells& extCells = MWBase::Environment::get().getWorld ()->getStore ().cells.extCells;
+                for (MWWorld::CellList::ExtCells::const_iterator it = extCells.begin(); it != extCells.end(); ++it)
                 {
                     std::string name = it->second->mName;
                     if (name != "")

@@ -5,7 +5,7 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
 
-#include <components/esm_store/store.hpp>
+#include "../mwworld/esmstore.hpp"
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -185,10 +185,10 @@ void PickClassDialog::updateClasses()
 {
     mClassList->removeAllItems();
 
-    const ESMS::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
+    const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
 
-    ESMS::RecListT<ESM::Class>::MapType::const_iterator it = store.classes.list.begin();
-    ESMS::RecListT<ESM::Class>::MapType::const_iterator end = store.classes.list.end();
+    MWWorld::RecListT<ESM::Class>::MapType::const_iterator it = store.classes.list.begin();
+    MWWorld::RecListT<ESM::Class>::MapType::const_iterator end = store.classes.list.end();
     int index = 0;
     for (; it != end; ++it)
     {
@@ -209,7 +209,7 @@ void PickClassDialog::updateStats()
 {
     if (mCurrentClassId.empty())
         return;
-    const ESMS::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
+    const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
     const ESM::Class *klass = store.classes.search(mCurrentClassId);
     if (!klass)
         return;

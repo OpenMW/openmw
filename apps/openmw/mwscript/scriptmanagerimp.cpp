@@ -7,7 +7,7 @@
 #include <exception>
 
 #include <components/esm/loadscpt.hpp>
-#include <components/esm_store/store.hpp>
+#include "../mwworld/esmstore.hpp"
 
 #include <components/compiler/scanner.hpp>
 #include <components/compiler/context.hpp>
@@ -17,7 +17,7 @@
 
 namespace MWScript
 {
-    ScriptManager::ScriptManager (const ESMS::ESMStore& store, bool verbose,
+    ScriptManager::ScriptManager (const MWWorld::ESMStore& store, bool verbose,
         Compiler::Context& compilerContext)
     : mErrorHandler (std::cerr), mStore (store), mVerbose (verbose),
       mCompilerContext (compilerContext), mParser (mErrorHandler, mCompilerContext),
@@ -125,7 +125,7 @@ namespace MWScript
 
     std::pair<int, int> ScriptManager::compileAll()
     {
-        typedef ESMS::ScriptListT<ESM::Script>::MapType Container;
+        typedef MWWorld::ScriptListT<ESM::Script>::MapType Container;
 
         const Container& scripts = mStore.scripts.list;
 

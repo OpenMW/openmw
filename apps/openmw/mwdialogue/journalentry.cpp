@@ -3,10 +3,10 @@
 
 #include <stdexcept>
 
-#include <components/esm_store/store.hpp>
-
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
+
+#include "../mwworld/esmstore.hpp"
 
 namespace MWDialogue
 {
@@ -16,7 +16,7 @@ namespace MWDialogue
     : mTopic (topic), mInfoId (infoId)
     {}
 
-    std::string JournalEntry::getText (const ESMS::ESMStore& store) const
+    std::string JournalEntry::getText (const MWWorld::ESMStore& store) const
     {
         const ESM::Dialogue *dialogue = store.dialogs.find (mTopic);
 

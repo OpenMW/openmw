@@ -3,7 +3,7 @@
 
 #include <stdexcept>
 
-#include <components/esm_store/store.hpp>
+#include "esmstore.hpp"
 
 namespace MWWorld
 {
@@ -27,9 +27,9 @@ namespace MWWorld
         return iter;    
     }
 
-    Globals::Globals (const ESMS::ESMStore& store)
+    Globals::Globals (const MWWorld::ESMStore& store)
     {
-        for (ESMS::RecListT<ESM::Global>::MapType::const_iterator iter
+        for (MWWorld::RecListT<ESM::Global>::MapType::const_iterator iter
             (store.globals.list.begin()); iter != store.globals.list.end(); ++iter)
         {
             char type = ' ';

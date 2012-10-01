@@ -4,15 +4,14 @@
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"
 
-#include "../mwworld/player.hpp"
-#include "../mwworld/class.hpp"
-
 #include "../mwmechanics/npcstats.hpp"
 
 #include "../mwgui/bookwindow.hpp"
 #include "../mwgui/scrollwindow.hpp"
 
-#include <components/esm_store/store.hpp>
+#include "player.hpp"
+#include "class.hpp"
+#include "esmstore.hpp"
 
 namespace MWWorld
 {

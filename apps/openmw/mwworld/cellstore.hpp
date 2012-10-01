@@ -8,14 +8,10 @@
 
 #include "refdata.hpp"
 
-namespace ESMS
-{
-    struct ESMStore;
-}
-
 namespace MWWorld
 {
     class Ptr;
+    class ESMStore;
 
   /// A reference to one object (of any type) in a cell.
   ///
@@ -122,9 +118,9 @@ namespace MWWorld
     CellRefList<ESM::Static>            statics;
     CellRefList<ESM::Weapon>            weapons;
 
-    void load (const ESMS::ESMStore &store, ESM::ESMReader &esm);
+    void load (const MWWorld::ESMStore &store, ESM::ESMReader &esm);
 
-    void preload (const ESMS::ESMStore &store, ESM::ESMReader &esm);
+    void preload (const MWWorld::ESMStore &store, ESM::ESMReader &esm);
 
     /// Call functor (ref) for each reference. functor must return a bool. Returning
     /// false will abort the iteration.
@@ -183,9 +179,9 @@ namespace MWWorld
     }
 
     /// Run through references and store IDs
-    void listRefs(const ESMS::ESMStore &store, ESM::ESMReader &esm);
+    void listRefs(const MWWorld::ESMStore &store, ESM::ESMReader &esm);
 
-    void loadRefs(const ESMS::ESMStore &store, ESM::ESMReader &esm);
+    void loadRefs(const MWWorld::ESMStore &store, ESM::ESMReader &esm);
   };
 }
 

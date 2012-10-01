@@ -1,6 +1,5 @@
 #include "scene.hpp"
 
-#include <components/esm_store/store.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp" /// FIXME
@@ -10,6 +9,7 @@
 
 #include "player.hpp"
 #include "localscripts.hpp"
+#include "esmstore.hpp"
 
 #include "cellfunctors.hpp"
 

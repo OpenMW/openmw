@@ -277,7 +277,7 @@ namespace MWClass
         info.caption = ref->base->mName + MWGui::ToolTips::getCountString(ptr.getRefData().getCount());
         info.icon = ref->base->mIcon;
 
-        const ESMS::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
+        const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
 
         std::string text;
 

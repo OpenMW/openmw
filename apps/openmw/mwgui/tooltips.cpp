@@ -365,7 +365,7 @@ IntSize ToolTips::createToolTip(const MWGui::ToolTipInfo& info)
         text.erase(0, 1);
 
     const ESM::Enchantment* enchant = 0;
-    const ESMS::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
+    const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
     if (info.enchant != "")
     {
         enchant = store.enchants.search(info.enchant);
@@ -571,7 +571,7 @@ void ToolTips::createSkillToolTip(MyGUI::Widget* widget, int skillId)
     if (skillId == -1)
         return;
 
-    const std::string &skillNameId = ESMS::Skill::sSkillNameIds[skillId];
+    const std::string &skillNameId = ESM::Skill::sSkillNameIds[skillId];
     const ESM::Skill* skill = MWBase::Environment::get().getWorld()->getStore().skills.search(skillId);
     assert(skill);
     const ESM::Attribute* attr = MWBase::Environment::get().getWorld()->getStore().attributes.search(skill->mData.mAttribute);

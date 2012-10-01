@@ -7,7 +7,7 @@
 
 #include <components/esm/loadnpc.hpp>
 
-#include <components/esm_store/store.hpp>
+#include "../mwworld/esmstore.hpp"
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/inventorystore.hpp"
@@ -101,7 +101,7 @@ namespace MWMechanics
             health.setCurrent (health.getCurrent() + 0.1 * endurance);
             stats.setHealth (health);
 
-            const ESMS::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
+            const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
 
             float fFatigueReturnBase = store.gameSettings.find("fFatigueReturnBase")->getFloat ();
             float fFatigueReturnMult = store.gameSettings.find("fFatigueReturnMult")->getFloat ();

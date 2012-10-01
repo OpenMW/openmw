@@ -4,7 +4,7 @@
 #include <OgreEntity.h>
 #include <OgreSubEntity.h>
 
-#include <components/esm_store/store.hpp>
+#include "../mwworld/esmstore.hpp"
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -62,7 +62,7 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node, MWWor
         mPartPriorities[init] = 0;
     }
 
-    const ESMS::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
+    const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
     const ESM::Race *race = store.races.find(ref->base->mRace);
 
     std::string hairID = ref->base->mHair;
@@ -322,7 +322,7 @@ void NpcAnimation::updateParts()
         { ESM::PRT_Tail,      { "tail", "" } }
     };
 
-    const ESMS::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
+    const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
     for(size_t i = 0;i < sizeof(PartTypeList)/sizeof(PartTypeList[0]);i++)
     {
         if(mPartPriorities[PartTypeList[i].type] < 1)

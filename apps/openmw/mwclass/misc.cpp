@@ -143,7 +143,7 @@ namespace MWClass
 
         MWGui::ToolTipInfo info;
 
-        const ESMS::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
+        const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
 
         int count = ptr.getRefData().getCount();
 
@@ -189,7 +189,7 @@ namespace MWClass
     {
         MWWorld::Ptr newPtr;
 
-        const ESMS::ESMStore &store =
+        const MWWorld::ESMStore &store =
             MWBase::Environment::get().getWorld()->getStore();
 
         if (MWWorld::Class::get(ptr).getName(ptr) == store.gameSettings.find("sGold")->getString()) {

@@ -9,7 +9,7 @@
 #include <components/esm/loadmgef.hpp>
 #include <components/esm/loadskil.hpp>
 
-#include <components/esm_store/store.hpp>
+#include "../mwworld/esmstore.hpp"
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"

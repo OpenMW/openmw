@@ -10,7 +10,7 @@
 #include <components/esm/loadclas.hpp>
 #include <components/esm/loadgmst.hpp>
 
-#include <components/esm_store/store.hpp>
+#include "../mwworld/esmstore.hpp"
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"

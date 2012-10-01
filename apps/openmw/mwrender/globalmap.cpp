@@ -11,8 +11,7 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 
-#include <components/esm_store/store.hpp>
-#include <components/esm_store/reclists.hpp>
+#include "../mwworld/esmstore.hpp"
 
 namespace MWRender
 {
@@ -30,8 +29,8 @@ namespace MWRender
         Ogre::TexturePtr tex;
 
         // get the size of the world
-        const ESMS::CellList::ExtCells& extCells = MWBase::Environment::get().getWorld ()->getStore ().cells.extCells;
-        for (ESMS::CellList::ExtCells::const_iterator it = extCells.begin(); it != extCells.end(); ++it)
+        const MWWorld::CellList::ExtCells& extCells = MWBase::Environment::get().getWorld ()->getStore ().cells.extCells;
+        for (MWWorld::CellList::ExtCells::const_iterator it = extCells.begin(); it != extCells.end(); ++it)
         {
             if (it->first.first < mMinX)
                 mMinX = it->first.first;

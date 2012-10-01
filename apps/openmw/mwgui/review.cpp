@@ -5,7 +5,7 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
 
-#include <components/esm_store/store.hpp>
+#include "../mwworld/esmstore.hpp"
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -281,7 +281,7 @@ void ReviewDialog::addSkills(const SkillList &skills, const std::string &titleId
         if (skillId < 0 || skillId > ESM::Skill::Length) // Skip unknown skill indexes
             continue;
         assert(skillId >= 0 && skillId < ESM::Skill::Length);
-        const std::string &skillNameId = ESMS::Skill::sSkillNameIds[skillId];
+        const std::string &skillNameId = ESM::Skill::sSkillNameIds[skillId];
         const MWMechanics::Stat<float> &stat = mSkillValues.find(skillId)->second;
         float base = stat.getBase();
         float modified = stat.getModified();

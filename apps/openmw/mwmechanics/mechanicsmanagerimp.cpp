@@ -1,7 +1,7 @@
 
 #include "mechanicsmanagerimp.hpp"
 
-#include <components/esm_store/store.hpp>
+#include "../mwworld/esmstore.hpp"
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -132,7 +132,7 @@ namespace MWMechanics
                 }
             }
 
-            typedef ESMS::IndexListT<ESM::Skill>::MapType ContainerType;
+            typedef MWWorld::IndexListT<ESM::Skill>::MapType ContainerType;
             const ContainerType& skills = MWBase::Environment::get().getWorld()->getStore().skills.list;
 
             for (ContainerType::const_iterator iter (skills.begin()); iter!=skills.end(); ++iter)

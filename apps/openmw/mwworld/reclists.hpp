@@ -1,7 +1,7 @@
-#ifndef _GAME_ESM_RECLISTS_H
-#define _GAME_ESM_RECLISTS_H
+#ifndef OPENMW_MWWORLD_RECLISTS_H
+#define OPENMW_MWWORLD_RECLISTS_H
 
-#include "components/esm/records.hpp"
+#include <components/esm/records.hpp>
 #include <map>
 #include <string>
 #include <vector>
@@ -10,21 +10,17 @@
 #include <cassert>
 #include <stdexcept>
 #include <iterator>
-#include    <boost/algorithm/string.hpp>
-
-
+#include <boost/algorithm/string.hpp>
 
 using namespace boost::algorithm;
 
-namespace ESMS
+namespace MWWorld 
 {
-  using namespace ESM;
-
   struct RecList
   {
     virtual ~RecList() {}
 
-    virtual void load(ESMReader &esm, const std::string &id) = 0;
+    virtual void load(ESM::ESMReader &esm, const std::string &id) = 0;
     virtual int getSize() = 0;
     virtual void listIdentifier (std::vector<std::string>& identifier) const = 0;
 
@@ -51,7 +47,7 @@ namespace ESMS
     MapType list;
 
     // Load one object of this type
-    void load(ESMReader &esm, const std::string &id)
+    void load(ESM::ESMReader &esm, const std::string &id)
     {
       std::string id2 = toLower (id);
       list[id2].load(esm);
@@ -102,7 +98,7 @@ namespace ESMS
     MapType list;
 
     // Load one object of this type
-    void load(ESMReader &esm, const std::string &id)
+    void load(ESM::ESMReader &esm, const std::string &id)
     {
         //std::string id2 = toLower (id);
 
@@ -170,7 +166,7 @@ namespace ESMS
     MapType list;
 
     // Load one object of this type
-    void load(ESMReader &esm, const std::string &id)
+    void load(ESM::ESMReader &esm, const std::string &id)
     {
       std::string id2 = toLower (id);
       list[id2].mId = id2;
@@ -216,7 +212,7 @@ namespace ESMS
     virtual ~LTexList() {}
 
     // TODO: For multiple ESM/ESP files we need one list per file.
-    std::vector<LandTexture> ltex;
+    std::vector<ESM::LandTexture> ltex;
 
     LTexList()
     {
@@ -224,7 +220,7 @@ namespace ESMS
       ltex.reserve(128);
     }
 
-    const LandTexture* search(size_t index) const
+    const ESM::LandTexture* search(size_t index) const
     {
         assert(index < ltex.size());
         return &ltex.at(index);
@@ -235,9 +231,9 @@ namespace ESMS
 
     virtual void listIdentifier (std::vector<std::string>& identifier) const {}
 
-    void load(ESMReader &esm, const std::string &id)
+    void load(ESM::ESMReader &esm, const std::string &id)
     {
-      LandTexture lt;
+      ESM::LandTexture lt;
       lt.load(esm);
       lt.mId = id;
 
@@ -265,7 +261,7 @@ namespace ESMS
 
     // Map containing all landscapes
     typedef std::pair<int, int> LandCoord;
-    typedef std::map<LandCoord, Land*> LandMap;
+    typedef std::map<LandCoord, ESM::Land*> LandMap;
     LandMap lands;
 
     int count;
@@ -275,7 +271,7 @@ namespace ESMS
     virtual void listIdentifier (std::vector<std::string>& identifier) const {}
 
     // Find land for the given coordinates. Return null if no mData.
-    Land *search(int x, int y) const
+    ESM::Land *search(int x, int y) const
     {
       LandMap::const_iterator itr = lands.find(std::make_pair (x, y));
       if ( itr == lands.end() )
@@ -286,13 +282,13 @@ namespace ESMS
       return itr->second;
     }
 
-    void load(ESMReader &esm, const std::string &id)
+    void load(ESM::ESMReader &esm, const std::string &id)
     {
       count++;
 
       // Create the structure and load it. This actually skips the
       // landscape data and remembers the file position for later.
-      Land *land = new Land();
+      ESM::Land *land = new ESM::Land();
       land->load(esm);
 
       // Store the structure
@@ -404,7 +400,7 @@ namespace ESMS
         return 0;
     }
 
-    void load(ESMReader &esm, const std::string &id)
+    void load(ESM::ESMReader &esm, const std::string &id)
     {
       count++;
 
@@ -458,7 +454,7 @@ namespace ESMS
           // do nothing
       }
 
-      void load(ESMReader &esm, const std::string &id)
+      void load(ESM::ESMReader &esm, const std::string &id)
       {
           count++;
           ESM::Pathgrid *grid = new ESM::Pathgrid;
@@ -473,9 +469,9 @@ namespace ESMS
           }
       }
 
-      Pathgrid *find(int cellX, int cellY, const std::string &cellName) const
+      ESM::Pathgrid *find(int cellX, int cellY, const std::string &cellName) const
       {
-          Pathgrid *result = search(cellX, cellY, cellName);
+          ESM::Pathgrid *result = search(cellX, cellY, cellName);
           if (!result)
           {
               throw std::runtime_error("no pathgrid found for cell " + cellName);
@@ -483,9 +479,9 @@ namespace ESMS
           return result;
       }
 
-      Pathgrid *search(int cellX, int cellY, const std::string &cellName) const
+      ESM::Pathgrid *search(int cellX, int cellY, const std::string &cellName) const
       {
-          Pathgrid *result = NULL;
+          ESM::Pathgrid *result = NULL;
           if (cellX == 0 && cellY == 0) // possibly interior
           {
               IntGrids::const_iterator it = intGrids.find(cellName);
@@ -501,7 +497,7 @@ namespace ESMS
           return result;
       }
 
-      Pathgrid *search(const ESM::Cell &cell) const
+      ESM::Pathgrid *search(const ESM::Cell &cell) const
       {
           int cellX, cellY;
           if (cell.mData.mFlags & ESM::Cell::Interior)
@@ -527,7 +523,7 @@ namespace ESMS
     MapType list;
 
     // Load one object of this type
-    void load(ESMReader &esm, const std::string &id)
+    void load(ESM::ESMReader &esm, const std::string &id)
     {
       X ref;
       ref.load (esm);
@@ -579,7 +575,7 @@ namespace ESMS
 
         MapType list;
 
-        void load(ESMReader &esm)
+        void load(ESM::ESMReader &esm)
         {
             X ref;
             ref.load (esm);
@@ -620,10 +616,5 @@ namespace ESMS
             return object;
         }
   };
-
-  /* We need special lists for:
-
-     Path grids
-  */
 }
 #endif

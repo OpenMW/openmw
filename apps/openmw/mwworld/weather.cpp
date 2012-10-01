@@ -5,8 +5,6 @@
 
 #include <boost/algorithm/string.hpp>
 
-#include <components/esm_store/store.hpp>
-
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/soundmanager.hpp"
@@ -14,6 +12,7 @@
 #include "../mwrender/renderingmanager.hpp"
 
 #include "player.hpp"
+#include "esmstore.hpp"
 
 using namespace Ogre;
 using namespace MWWorld;

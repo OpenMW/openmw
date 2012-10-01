@@ -3,7 +3,7 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
 
-#include "components/esm_store/store.hpp"
+#include "../mwworld/esmstore.hpp"
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -130,10 +130,10 @@ void BirthDialog::updateBirths()
 {
     mBirthList->removeAllItems();
 
-    const ESMS::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
+    const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
 
-    ESMS::RecListT<ESM::BirthSign>::MapType::const_iterator it = store.birthSigns.list.begin();
-    ESMS::RecListT<ESM::BirthSign>::MapType::const_iterator end = store.birthSigns.list.end();
+    MWWorld::RecListT<ESM::BirthSign>::MapType::const_iterator it = store.birthSigns.list.begin();
+    MWWorld::RecListT<ESM::BirthSign>::MapType::const_iterator end = store.birthSigns.list.end();
     int index = 0;
 
     // sort by name
@@ -170,7 +170,7 @@ void BirthDialog::updateSpells()
     const int lineHeight = 18;
     MyGUI::IntCoord coord(0, 0, mSpellArea->getWidth(), 18);
 
-    const ESMS::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
+    const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
     const ESM::BirthSign *birth = store.birthSigns.find(mCurrentBirthId);
 
     std::string texturePath = std::string("textures\\") + birth->mTexture;

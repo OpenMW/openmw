@@ -3,8 +3,7 @@
 
 #include <boost/any.hpp>
 
-#include <components/esm_store/store.hpp>
-
+#include "esmstore.hpp"
 #include "ptr.hpp"
 #include "cellstore.hpp"
 
@@ -20,7 +19,7 @@ namespace MWWorld
             ManualRef& operator= (const ManualRef&);
 
             template<typename T>
-            bool create (const ESMS::RecListT<T>& list, const std::string& name)
+            bool create (const MWWorld::RecListT<T>& list, const std::string& name)
             {
                 if (const T *instance = list.search (name))
                 {
@@ -37,7 +36,7 @@ namespace MWWorld
             }
 
             template<typename T>
-            bool create (const ESMS::RecListWithIDT<T>& list, const std::string& name)
+            bool create (const MWWorld::RecListWithIDT<T>& list, const std::string& name)
             {
                 if (const T *instance = list.search (name))
                 {
@@ -55,7 +54,7 @@ namespace MWWorld
 
         public:
 
-            ManualRef (const ESMS::ESMStore& store, const std::string& name)
+            ManualRef (const MWWorld::ESMStore& store, const std::string& name)
             {
                 // create
                 if (!create (store.activators, name) &&

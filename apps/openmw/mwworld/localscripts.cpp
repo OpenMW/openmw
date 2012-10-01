@@ -1,8 +1,6 @@
-
 #include "localscripts.hpp"
 
-#include <components/esm_store/store.hpp>
-
+#include "esmstore.hpp"
 #include "cellstore.hpp"
 
 namespace
@@ -23,7 +21,7 @@ namespace
     }
 }
 
-MWWorld::LocalScripts::LocalScripts (const ESMS::ESMStore& store) : mStore (store) {}
+MWWorld::LocalScripts::LocalScripts (const MWWorld::ESMStore& store) : mStore (store) {}
 
 void MWWorld::LocalScripts::setIgnore (const Ptr& ptr)
 {

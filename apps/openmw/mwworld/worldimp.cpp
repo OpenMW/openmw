@@ -20,7 +20,7 @@ using namespace Ogre;
 namespace
 {
     template<typename T>
-    void listCellScripts (const ESMS::ESMStore& store,
+    void listCellScripts (const MWWorld::ESMStore& store,
         MWWorld::CellRefList<T>& cellRefList, MWWorld::LocalScripts& localScripts,
         MWWorld::Ptr::CellStore *cell)
     {
@@ -228,12 +228,12 @@ namespace MWWorld
             return cell;
 
         // didn't work -> now check for regions
-        std::string cellName2 = ESMS::RecListT<ESM::Region>::toLower (cellName);
+        std::string cellName2 = MWWorld::RecListT<ESM::Region>::toLower (cellName);
 
-        for (ESMS::RecListT<ESM::Region>::MapType::const_iterator iter (mStore.regions.list.begin());
+        for (MWWorld::RecListT<ESM::Region>::MapType::const_iterator iter (mStore.regions.list.begin());
             iter!=mStore.regions.list.end(); ++iter)
         {
-            if (ESMS::RecListT<ESM::Region>::toLower (iter->second.mName)==cellName2)
+            if (MWWorld::RecListT<ESM::Region>::toLower (iter->second.mName)==cellName2)
             {
                 if (const ESM::Cell *cell = mStore.cells.searchExtByRegion (iter->first))
                     return cell;
@@ -260,7 +260,7 @@ namespace MWWorld
         return *mPlayer;
     }
 
-    const ESMS::ESMStore& World::getStore() const
+    const MWWorld::ESMStore& World::getStore() const
     {
         return mStore;
     }

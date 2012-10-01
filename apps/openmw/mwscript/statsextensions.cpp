@@ -7,7 +7,7 @@
 
 #include <components/esm/loadnpc.hpp>
 
-#include <components/esm_store/store.hpp>
+#include "../mwworld/esmstore.hpp"
 
 #include <components/compiler/extensions.hpp>
 

@@ -1,7 +1,7 @@
 #ifndef MWGUI_STATS_WINDOW_H
 #define MWGUI_STATS_WINDOW_H
 
-#include <components/esm_store/store.hpp>
+#include "../mwworld/esmstore.hpp"
 
 #include <sstream>
 #include <set>

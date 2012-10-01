@@ -2,12 +2,11 @@
 
 #include <iostream>
 
-#include <components/esm_store/store.hpp>
-
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 
 #include "ptr.hpp"
+#include "esmstore.hpp"
 
 namespace MWWorld
 {
@@ -16,7 +15,7 @@ namespace MWWorld
         mWaterLevel = cell->mWater;
     }
 
-    void CellStore::load (const ESMS::ESMStore &store, ESM::ESMReader &esm)
+    void CellStore::load (const MWWorld::ESMStore &store, ESM::ESMReader &esm)
     {
         if (mState!=State_Loaded)
         {
@@ -31,7 +30,7 @@ namespace MWWorld
         }
     }
 
-    void CellStore::preload (const ESMS::ESMStore &store, ESM::ESMReader &esm)
+    void CellStore::preload (const MWWorld::ESMStore &store, ESM::ESMReader &esm)
     {
         if (mState==State_Unloaded)
         {
@@ -41,7 +40,7 @@ namespace MWWorld
         }
     }
 
-    void CellStore::listRefs(const ESMS::ESMStore &store, ESM::ESMReader &esm)
+    void CellStore::listRefs(const MWWorld::ESMStore &store, ESM::ESMReader &esm)
     {
         assert (cell);
 
@@ -67,7 +66,7 @@ namespace MWWorld
         std::sort (mIds.begin(), mIds.end());
     }
 
-    void CellStore::loadRefs(const ESMS::ESMStore &store, ESM::ESMReader &esm)
+    void CellStore::loadRefs(const MWWorld::ESMStore &store, ESM::ESMReader &esm)
     {
       assert (cell);
 
