@@ -223,11 +223,11 @@ void RaceDialog::updateRaces()
     for (; it != end; ++it)
     {
         const ESM::Race &race = it->second;
-        bool playable = race.data.flags & ESM::Race::Playable;
+        bool playable = race.mData.mFlags & ESM::Race::Playable;
         if (!playable) // Only display playable races
             continue;
 
-        mRaceList->addItem(race.name, it->first);
+        mRaceList->addItem(race.mName, it->first);
         if (boost::iequals(it->first, mCurrentRaceId))
             mRaceList->setIndexSelected(index);
         ++index;
@@ -251,10 +251,10 @@ void RaceDialog::updateSkills()
 
     const ESMS::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
     const ESM::Race *race = store.races.find(mCurrentRaceId);
-    int count = sizeof(race->data.bonus)/sizeof(race->data.bonus[0]); // TODO: Find a portable macro for this ARRAYSIZE?
+    int count = sizeof(race->mData.mBonus)/sizeof(race->mData.mBonus[0]); // TODO: Find a portable macro for this ARRAYSIZE?
     for (int i = 0; i < count; ++i)
     {
-        int skillId = race->data.bonus[i].skill;
+        int skillId = race->mData.mBonus[i].mSkill;
         if (skillId < 0 || skillId > ESM::Skill::Length) // Skip unknown skill indexes
             continue;
 
@@ -262,7 +262,7 @@ void RaceDialog::updateSkills()
                                                        std::string("Skill") + boost::lexical_cast<std::string>(i));
         skillWidget->setWindowManager(&mWindowManager);
         skillWidget->setSkillNumber(skillId);
-        skillWidget->setSkillValue(MWSkill::SkillValue(race->data.bonus[i].bonus));
+        skillWidget->setSkillValue(MWSkill::SkillValue(race->mData.mBonus[i].mBonus));
         ToolTips::createSkillToolTip(skillWidget, skillId);
 
 
@@ -290,8 +290,8 @@ void RaceDialog::updateSpellPowers()
     const ESMS::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
     const ESM::Race *race = store.races.find(mCurrentRaceId);
 
-    std::vector<std::string>::const_iterator it = race->powers.list.begin();
-    std::vector<std::string>::const_iterator end = race->powers.list.end();
+    std::vector<std::string>::const_iterator it = race->mPowers.mList.begin();
+    std::vector<std::string>::const_iterator end = race->mPowers.mList.end();
     for (int i = 0; it != end; ++it)
     {
         const std::string &spellpower = *it;

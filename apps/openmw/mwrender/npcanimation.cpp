@@ -63,18 +63,18 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node, MWWor
     }
 
     const ESMS::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
-    const ESM::Race *race = store.races.find(ref->base->race);
+    const ESM::Race *race = store.races.find(ref->base->mRace);
 
-    std::string hairID = ref->base->hair;
-    std::string headID = ref->base->head;
-    headModel = "meshes\\" + store.bodyParts.find(headID)->model;
-    hairModel = "meshes\\" + store.bodyParts.find(hairID)->model;
-    npcName = ref->base->name;
+    std::string hairID = ref->base->mHair;
+    std::string headID = ref->base->mHead;
+    headModel = "meshes\\" + store.bodyParts.find(headID)->mModel;
+    hairModel = "meshes\\" + store.bodyParts.find(hairID)->mModel;
+    npcName = ref->base->mName;
 
-    isFemale = !!(ref->base->flags&ESM::NPC::Female);
-    isBeast = !!(race->data.flags&ESM::Race::Beast);
+    isFemale = !!(ref->base->mFlags&ESM::NPC::Female);
+    isBeast = !!(race->mData.mFlags&ESM::Race::Beast);
 
-    bodyRaceID = "b_n_"+ref->base->race;
+    bodyRaceID = "b_n_"+ref->base->mRace;
     std::transform(bodyRaceID.begin(), bodyRaceID.end(), bodyRaceID.begin(), ::tolower);
 
 
@@ -123,12 +123,12 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node, MWWor
         }
     }
 
+    float scale = race->mData.mHeight.mMale;
+    if (isFemale) {
+        scale = race->mData.mHeight.mFemale;
+    }
+    mInsert->scale(scale, scale, scale);
 
-
-    if(isFemale)
-        mInsert->scale(race->data.height.female, race->data.height.female, race->data.height.female);
-    else
-        mInsert->scale(race->data.height.male, race->data.height.male, race->data.height.male);
     updateParts();
 }
 
@@ -171,7 +171,7 @@ void NpcAnimation::updateParts()
             MWWorld::Ptr ptr = *robe;
 
             const ESM::Clothing *clothes = (ptr.get<ESM::Clothing>())->base;
-            std::vector<ESM::PartReference> parts = clothes->parts.parts;
+            std::vector<ESM::PartReference> parts = clothes->mParts.mParts;
             addPartGroup(MWWorld::InventoryStore::Slot_Robe, 5, parts);
             reserveIndividualPart(ESM::PRT_Groin, MWWorld::InventoryStore::Slot_Robe, 5);
             reserveIndividualPart(ESM::PRT_Skirt, MWWorld::InventoryStore::Slot_Robe, 5);
@@ -191,7 +191,7 @@ void NpcAnimation::updateParts()
             MWWorld::Ptr ptr = *skirtiter;
 
             const ESM::Clothing *clothes = (ptr.get<ESM::Clothing>())->base;
-            std::vector<ESM::PartReference> parts = clothes->parts.parts;
+            std::vector<ESM::PartReference> parts = clothes->mParts.mParts;
             addPartGroup(MWWorld::InventoryStore::Slot_Skirt, 4, parts);
             reserveIndividualPart(ESM::PRT_Groin, MWWorld::InventoryStore::Slot_Skirt, 4);
             reserveIndividualPart(ESM::PRT_RLeg, MWWorld::InventoryStore::Slot_Skirt, 4);
@@ -202,32 +202,32 @@ void NpcAnimation::updateParts()
         {
             removeIndividualPart(ESM::PRT_Hair);
             const ESM::Armor *armor = (helmet->get<ESM::Armor>())->base;
-            std::vector<ESM::PartReference> parts = armor->parts.parts;
+            std::vector<ESM::PartReference> parts = armor->mParts.mParts;
             addPartGroup(MWWorld::InventoryStore::Slot_Helmet, 3, parts);
         }
         if(cuirass != mInv.end())
         {
             const ESM::Armor *armor = (cuirass->get<ESM::Armor>())->base;
-            std::vector<ESM::PartReference> parts = armor->parts.parts;
+            std::vector<ESM::PartReference> parts = armor->mParts.mParts;
             addPartGroup(MWWorld::InventoryStore::Slot_Cuirass, 3, parts);
         }
         if(greaves != mInv.end())
         {
             const ESM::Armor *armor = (greaves->get<ESM::Armor>())->base;
-            std::vector<ESM::PartReference> parts = armor->parts.parts;
+            std::vector<ESM::PartReference> parts = armor->mParts.mParts;
             addPartGroup(MWWorld::InventoryStore::Slot_Greaves, 3, parts);
         }
 
         if(leftpauldron != mInv.end())
         {
             const ESM::Armor *armor = (leftpauldron->get<ESM::Armor>())->base;
-            std::vector<ESM::PartReference> parts = armor->parts.parts;
+            std::vector<ESM::PartReference> parts = armor->mParts.mParts;
             addPartGroup(MWWorld::InventoryStore::Slot_LeftPauldron, 3, parts);
         }
         if(rightpauldron != mInv.end())
         {
             const ESM::Armor *armor = (rightpauldron->get<ESM::Armor>())->base;
-            std::vector<ESM::PartReference> parts = armor->parts.parts;
+            std::vector<ESM::PartReference> parts = armor->mParts.mParts;
             addPartGroup(MWWorld::InventoryStore::Slot_RightPauldron, 3, parts);
         }
         if(boots != mInv.end())
@@ -235,13 +235,13 @@ void NpcAnimation::updateParts()
             if(boots->getTypeName() == typeid(ESM::Clothing).name())
             {
                 const ESM::Clothing *clothes = (boots->get<ESM::Clothing>())->base;
-                std::vector<ESM::PartReference> parts = clothes->parts.parts;
+                std::vector<ESM::PartReference> parts = clothes->mParts.mParts;
                 addPartGroup(MWWorld::InventoryStore::Slot_Boots, 2, parts);
             }
             else if(boots->getTypeName() == typeid(ESM::Armor).name())
             {
                 const ESM::Armor *armor = (boots->get<ESM::Armor>())->base;
-                std::vector<ESM::PartReference> parts = armor->parts.parts;
+                std::vector<ESM::PartReference> parts = armor->mParts.mParts;
                 addPartGroup(MWWorld::InventoryStore::Slot_Boots, 3, parts);
             }
         }
@@ -250,13 +250,13 @@ void NpcAnimation::updateParts()
             if(leftglove->getTypeName() == typeid(ESM::Clothing).name())
             {
                 const ESM::Clothing *clothes = (leftglove->get<ESM::Clothing>())->base;
-                std::vector<ESM::PartReference> parts = clothes->parts.parts;
+                std::vector<ESM::PartReference> parts = clothes->mParts.mParts;
                 addPartGroup(MWWorld::InventoryStore::Slot_LeftGauntlet, 2, parts);
             }
             else
             {
                 const ESM::Armor *armor = (leftglove->get<ESM::Armor>())->base;
-                std::vector<ESM::PartReference> parts = armor->parts.parts;
+                std::vector<ESM::PartReference> parts = armor->mParts.mParts;
                 addPartGroup(MWWorld::InventoryStore::Slot_LeftGauntlet, 3, parts);
             }
         }
@@ -265,13 +265,13 @@ void NpcAnimation::updateParts()
             if(rightglove->getTypeName() == typeid(ESM::Clothing).name())
             {
                 const ESM::Clothing *clothes = (rightglove->get<ESM::Clothing>())->base;
-                std::vector<ESM::PartReference> parts = clothes->parts.parts;
+                std::vector<ESM::PartReference> parts = clothes->mParts.mParts;
                 addPartGroup(MWWorld::InventoryStore::Slot_RightGauntlet, 2, parts);
             }
             else
             {
                 const ESM::Armor *armor = (rightglove->get<ESM::Armor>())->base;
-                std::vector<ESM::PartReference> parts = armor->parts.parts;
+                std::vector<ESM::PartReference> parts = armor->mParts.mParts;
                 addPartGroup(MWWorld::InventoryStore::Slot_RightGauntlet, 3, parts);
             }
 
@@ -280,13 +280,13 @@ void NpcAnimation::updateParts()
         if(shirt != mInv.end())
         {
             const ESM::Clothing *clothes = (shirt->get<ESM::Clothing>())->base;
-            std::vector<ESM::PartReference> parts = clothes->parts.parts;
+            std::vector<ESM::PartReference> parts = clothes->mParts.mParts;
             addPartGroup(MWWorld::InventoryStore::Slot_Shirt, 2, parts);
         }
         if(pants != mInv.end())
         {
             const ESM::Clothing *clothes = (pants->get<ESM::Clothing>())->base;
-            std::vector<ESM::PartReference> parts = clothes->parts.parts;
+            std::vector<ESM::PartReference> parts = clothes->mParts.mParts;
             addPartGroup(MWWorld::InventoryStore::Slot_Pants, 2, parts);
         }
     }
@@ -344,7 +344,7 @@ void NpcAnimation::updateParts()
             } while(1);
 
             if(part)
-                addOrReplaceIndividualPart(PartTypeList[i].type, -1,1, "meshes\\"+part->model);
+                addOrReplaceIndividualPart(PartTypeList[i].type, -1,1, "meshes\\"+part->mModel);
         }
     }
 }
@@ -571,14 +571,14 @@ void NpcAnimation::addPartGroup(int group, int priority, std::vector<ESM::PartRe
 
         const ESM::BodyPart *bodypart = 0;
         if(isFemale)
-            bodypart = MWBase::Environment::get().getWorld()->getStore().bodyParts.search(part.female);
+            bodypart = MWBase::Environment::get().getWorld()->getStore().bodyParts.search(part.mFemale);
         if(!bodypart)
-            bodypart = MWBase::Environment::get().getWorld()->getStore().bodyParts.search(part.male);
+            bodypart = MWBase::Environment::get().getWorld()->getStore().bodyParts.search(part.mMale);
 
         if(bodypart)
-            addOrReplaceIndividualPart(part.part, group, priority,"meshes\\" + bodypart->model);
+            addOrReplaceIndividualPart(part.mPart, group, priority,"meshes\\" + bodypart->mModel);
         else
-            reserveIndividualPart(part.part, group, priority);
+            reserveIndividualPart(part.mPart, group, priority);
     }
 }
 

@@ -22,8 +22,8 @@ namespace MWDialogue
 
         for (std::vector<ESM::DialInfo>::const_iterator iter (dialogue->mInfo.begin());
             iter!=dialogue->mInfo.end(); ++iter)
-            if (iter->questStatus==ESM::DialInfo::QS_Name)
-                return iter->response;
+            if (iter->mQuestStatus==ESM::DialInfo::QS_Name)
+                return iter->mResponse;
 
         return "";
     }
@@ -39,13 +39,13 @@ namespace MWDialogue
 
         for (std::vector<ESM::DialInfo>::const_iterator iter (dialogue->mInfo.begin());
             iter!=dialogue->mInfo.end(); ++iter)
-            if (iter->data.disposition==index && iter->questStatus!=ESM::DialInfo::QS_Name)
+            if (iter->mData.mDisposition==index && iter->mQuestStatus!=ESM::DialInfo::QS_Name)
             {
                 mIndex = index;
 
-                if (iter->questStatus==ESM::DialInfo::QS_Finished)
+                if (iter->mQuestStatus==ESM::DialInfo::QS_Finished)
                     mFinished = true;
-                else if (iter->questStatus==ESM::DialInfo::QS_Restart)
+                else if (iter->mQuestStatus==ESM::DialInfo::QS_Restart)
                     mFinished = false;
 
                 return;
@@ -67,9 +67,9 @@ namespace MWDialogue
 
         for (std::vector<ESM::DialInfo>::const_iterator iter (dialogue->mInfo.begin());
             iter!=dialogue->mInfo.end(); ++iter)
-            if (iter->id==entry.mInfoId)
+            if (iter->mId == entry.mInfoId)
             {
-                index = iter->data.disposition; /// \todo cleanup info structure
+                index = iter->mData.mDisposition; /// \todo cleanup info structure
                 break;
             }
 

@@ -1,9 +1,13 @@
-#ifndef _ESM_NPCC_H
-#define _ESM_NPCC_H
+#ifndef OPENMW_ESM_NPCC_H
+#define OPENMW_ESM_NPCC_H
 
-#include "esm_reader.hpp"
+// TODO: create implementation files to remove this
+#include "esmreader.hpp"
 
 namespace ESM {
+
+class ESMReader;
+class ESMWriter;
 
 /*
  * NPC change information (found in savegame files only). We can't
@@ -75,6 +79,9 @@ struct LoadNPCC
   void load(ESMReader &esm)
   {
     esm.skipRecord();
+  }
+  void save(ESMWriter &esm)
+  {
   }
 };
 }

@@ -128,7 +128,7 @@ namespace MWGui
         std::map<std::string, ESM::Class> list = MWBase::Environment::get().getWorld()->getStore ().classes.list;
         for (std::map<std::string, ESM::Class>::iterator it = list.begin(); it != list.end(); ++it)
         {
-            if (playerClass.name == it->second.name)
+            if (playerClass.mName == it->second.mName)
                 classId = it->first;
         }
         mClassImage->setImageTexture ("textures\\levelup\\" + classId + ".dds");

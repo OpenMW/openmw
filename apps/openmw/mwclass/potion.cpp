@@ -45,7 +45,7 @@ namespace MWClass
             ptr.get<ESM::Potion>();
         assert(ref->base != NULL);
 
-        const std::string &model = ref->base->model;
+        const std::string &model = ref->base->mModel;
         if (!model.empty()) {
             return "meshes\\" + model;
         }
@@ -57,7 +57,7 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Potion> *ref =
             ptr.get<ESM::Potion>();
 
-        return ref->base->name;
+        return ref->base->mName;
     }
 
     boost::shared_ptr<MWWorld::Action> Potion::activate (const MWWorld::Ptr& ptr,
@@ -76,7 +76,7 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Potion> *ref =
             ptr.get<ESM::Potion>();
 
-        return ref->base->script;
+        return ref->base->mScript;
     }
 
     int Potion::getValue (const MWWorld::Ptr& ptr) const
@@ -84,7 +84,7 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Potion> *ref =
             ptr.get<ESM::Potion>();
 
-        return ref->base->data.value;
+        return ref->base->mData.mValue;
     }
 
     void Potion::registerSelf()
@@ -109,7 +109,7 @@ namespace MWClass
           MWWorld::LiveCellRef<ESM::Potion> *ref =
             ptr.get<ESM::Potion>();
 
-        return ref->base->icon;
+        return ref->base->mIcon;
     }
 
     bool Potion::hasToolTip (const MWWorld::Ptr& ptr) const
@@ -117,7 +117,7 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Potion> *ref =
             ptr.get<ESM::Potion>();
 
-        return (ref->base->name != "");
+        return (ref->base->mName != "");
     }
 
     MWGui::ToolTipInfo Potion::getToolTipInfo (const MWWorld::Ptr& ptr) const
@@ -126,20 +126,20 @@ namespace MWClass
             ptr.get<ESM::Potion>();
 
         MWGui::ToolTipInfo info;
-        info.caption = ref->base->name + MWGui::ToolTips::getCountString(ptr.getRefData().getCount());
-        info.icon = ref->base->icon;
+        info.caption = ref->base->mName + MWGui::ToolTips::getCountString(ptr.getRefData().getCount());
+        info.icon = ref->base->mIcon;
 
         std::string text;
 
-        text += "\n#{sWeight}: " + MWGui::ToolTips::toString(ref->base->data.weight);
-        text += MWGui::ToolTips::getValueString(ref->base->data.value, "#{sValue}");
+        text += "\n#{sWeight}: " + MWGui::ToolTips::toString(ref->base->mData.mWeight);
+        text += MWGui::ToolTips::getValueString(ref->base->mData.mValue, "#{sValue}");
 
-        info.effects = MWGui::Widgets::MWEffectList::effectListFromESM(&ref->base->effects);
+        info.effects = MWGui::Widgets::MWEffectList::effectListFromESM(&ref->base->mEffects);
         info.isPotion = true;
 
         if (MWBase::Environment::get().getWindowManager()->getFullHelp()) {
-            text += MWGui::ToolTips::getMiscString(ref->ref.owner, "Owner");
-            text += MWGui::ToolTips::getMiscString(ref->base->script, "Script");
+            text += MWGui::ToolTips::getMiscString(ref->ref.mOwner, "Owner");
+            text += MWGui::ToolTips::getMiscString(ref->base->mScript, "Script");
         }
 
         info.text = text;

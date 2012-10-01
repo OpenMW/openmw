@@ -65,12 +65,12 @@ namespace MWMechanics
             const MWWorld::TimeStamp& start = iter->second.first;
             float magnitude = iter->second.second;
 
-            for (std::vector<ESM::ENAMstruct>::const_iterator iter (effects.first.list.begin());
-                iter!=effects.first.list.end(); ++iter)
+            for (std::vector<ESM::ENAMstruct>::const_iterator iter (effects.first.mList.begin());
+                iter!=effects.first.mList.end(); ++iter)
             {
-                if (iter->duration)
+                if (iter->mDuration)
                 {
-                    int duration = iter->duration;
+                    int duration = iter->mDuration;
                     
                     if (effects.second)
                         duration *= magnitude;
@@ -87,22 +87,22 @@ namespace MWMechanics
                         {
                             const ESM::MagicEffect *magicEffect =
                                 MWBase::Environment::get().getWorld()->getStore().magicEffects.find (
-                                iter->effectID);                            
+                                iter->mEffectID);                            
                                 
-                            if (iter->duration==0)
+                            if (iter->mDuration==0)
                             {
                                 param.mMagnitude =
-                                    static_cast<int> (magnitude / (0.1 * magicEffect->data.baseCost));
+                                    static_cast<int> (magnitude / (0.1 * magicEffect->mData.mBaseCost));
                             }
                             else
                             {
                                 param.mMagnitude =
-                                    static_cast<int> (0.05*magnitude / (0.1 * magicEffect->data.baseCost));
+                                    static_cast<int> (0.05*magnitude / (0.1 * magicEffect->mData.mBaseCost));
                             }
                         }
                         else
                             param.mMagnitude = static_cast<int> (
-                                (iter->magnMax-iter->magnMin)*magnitude + iter->magnMin);
+                                (iter->mMagnMax-iter->mMagnMin)*magnitude + iter->mMagnMin);
                                 
                         mEffects.add (*iter, param);
                     }
@@ -115,32 +115,32 @@ namespace MWMechanics
     {
         if (const ESM::Spell *spell =
             MWBase::Environment::get().getWorld()->getStore().spells.search (id))
-            return std::make_pair (spell->effects, false);
+            return std::make_pair (spell->mEffects, false);
 
         if (const ESM::Potion *potion =
             MWBase::Environment::get().getWorld()->getStore().potions.search (id))
-            return std::make_pair (potion->effects, false);
+            return std::make_pair (potion->mEffects, false);
 
         if (const ESM::Ingredient *ingredient =
             MWBase::Environment::get().getWorld()->getStore().ingreds.search (id))
         {
             const ESM::MagicEffect *magicEffect =
                 MWBase::Environment::get().getWorld()->getStore().magicEffects.find (
-                ingredient->data.effectID[0]);
+                ingredient->mData.mEffectID[0]);
         
             ESM::ENAMstruct effect;
-            effect.effectID = ingredient->data.effectID[0];
-            effect.skill = ingredient->data.skills[0];
-            effect.attribute = ingredient->data.attributes[0];
-            effect.range = 0;
-            effect.area = 0;
-            effect.duration = magicEffect->data.flags & ESM::MagicEffect::NoDuration ? 0 : 1;
-            effect.magnMin = 1;
-            effect.magnMax = 1;
+            effect.mEffectID = ingredient->mData.mEffectID[0];
+            effect.mSkill = ingredient->mData.mSkills[0];
+            effect.mAttribute = ingredient->mData.mAttributes[0];
+            effect.mRange = 0;
+            effect.mArea = 0;
+            effect.mDuration = magicEffect->mData.mFlags & ESM::MagicEffect::NoDuration ? 0 : 1;
+            effect.mMagnMin = 1;
+            effect.mMagnMax = 1;
             
             std::pair<ESM::EffectList, bool> result;
             
-            result.first.list.push_back (effect);
+            result.first.mList.push_back (effect);
             result.second = true;
             
             return result;
@@ -159,10 +159,10 @@ namespace MWMechanics
 
         bool found = false;
 
-        for (std::vector<ESM::ENAMstruct>::const_iterator iter (effects.first.list.begin());
-            iter!=effects.first.list.end(); ++iter)
+        for (std::vector<ESM::ENAMstruct>::const_iterator iter (effects.first.mList.begin());
+            iter!=effects.first.mList.end(); ++iter)
         {
-            if (iter->duration)
+            if (iter->mDuration)
             {
                 found = true;
                 break;
@@ -238,11 +238,11 @@ namespace MWMechanics
 
         int duration = 0;
 
-        for (std::vector<ESM::ENAMstruct>::const_iterator iter (effects.first.list.begin());
-            iter!=effects.first.list.end(); ++iter)
+        for (std::vector<ESM::ENAMstruct>::const_iterator iter (effects.first.mList.begin());
+            iter!=effects.first.mList.end(); ++iter)
         {
-            if (iter->duration>duration)
-                duration = iter->duration;
+            if (iter->mDuration > duration)
+                duration = iter->mDuration;
         }
 
         if (effects.second)

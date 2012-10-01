@@ -29,7 +29,7 @@ namespace
             ++iter)
         {
             if (iter->mData.getCount()>0)
-                sum += iter->mData.getCount()*iter->base->data.weight;
+                sum += iter->mData.getCount()*iter->base->mData.mWeight;
         }
 
         return sum;
@@ -59,12 +59,12 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::end()
 bool MWWorld::ContainerStore::stacks(const Ptr& ptr1, const Ptr& ptr2)
 {
     /// \todo add current weapon/armor health, remaining lockpick/repair uses, current enchantment charge here as soon as they are implemented
-    if (  ptr1.mCellRef->refID == ptr2.mCellRef->refID
+    if (  ptr1.mCellRef->mRefID == ptr2.mCellRef->mRefID
         && MWWorld::Class::get(ptr1).getScript(ptr1) == "" // item with a script never stacks
         && MWWorld::Class::get(ptr1).getEnchantment(ptr1) == "" // item with enchantment never stacks (we could revisit this later, but for now it makes selecting items in the spell window much easier)
-        && ptr1.mCellRef->owner == ptr2.mCellRef->owner
-        && ptr1.mCellRef->soul == ptr2.mCellRef->soul
-        && ptr1.mCellRef->charge == ptr2.mCellRef->charge)
+        && ptr1.mCellRef->mOwner == ptr2.mCellRef->mOwner
+        && ptr1.mCellRef->mSoul == ptr2.mCellRef->mSoul
+        && ptr1.mCellRef->mCharge == ptr2.mCellRef->mCharge)
         return true;
 
     return false;
@@ -81,19 +81,19 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add (const Ptr& ptr)
         MWWorld::LiveCellRef<ESM::Miscellaneous> *gold =
             ptr.get<ESM::Miscellaneous>();
 
-        if (compare_string_ci(gold->ref.refID, "gold_001")
-            || compare_string_ci(gold->ref.refID, "gold_005")
-            || compare_string_ci(gold->ref.refID, "gold_010")
-            || compare_string_ci(gold->ref.refID, "gold_025")
-            || compare_string_ci(gold->ref.refID, "gold_100"))
+        if (compare_string_ci(gold->ref.mRefID, "gold_001")
+            || compare_string_ci(gold->ref.mRefID, "gold_005")
+            || compare_string_ci(gold->ref.mRefID, "gold_010")
+            || compare_string_ci(gold->ref.mRefID, "gold_025")
+            || compare_string_ci(gold->ref.mRefID, "gold_100"))
         {
             MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), "Gold_001");
 
-            int count = (ptr.getRefData().getCount() == 1) ? gold->base->data.value : ptr.getRefData().getCount();
+            int count = (ptr.getRefData().getCount() == 1) ? gold->base->mData.mValue : ptr.getRefData().getCount();
             ref.getPtr().getRefData().setCount(count);
             for (MWWorld::ContainerStoreIterator iter (begin(type)); iter!=end(); ++iter)
             {
-                if (compare_string_ci((*iter).get<ESM::Miscellaneous>()->ref.refID, "gold_001"))
+                if (compare_string_ci((*iter).get<ESM::Miscellaneous>()->ref.mRefID, "gold_001"))
                 {
                     (*iter).getRefData().setCount( (*iter).getRefData().getCount() + count);
                     flagAsModified();
@@ -117,7 +117,6 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add (const Ptr& ptr)
             return iter;
         }
     }
-
     // if we got here, this means no stacking
     return addImpl(ptr);
 }
@@ -148,10 +147,10 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::addImpl (const Ptr& ptr
 
 void MWWorld::ContainerStore::fill (const ESM::InventoryList& items, const ESMS::ESMStore& store)
 {
-    for (std::vector<ESM::ContItem>::const_iterator iter (items.list.begin()); iter!=items.list.end();
+    for (std::vector<ESM::ContItem>::const_iterator iter (items.mList.begin()); iter!=items.mList.end();
         ++iter)
     {
-        ManualRef ref (store, iter->item.toString());
+        ManualRef ref (store, iter->mItem.toString());
 
         if (ref.getPtr().getTypeName()==typeid (ESM::ItemLevList).name())
         {
@@ -159,7 +158,7 @@ void MWWorld::ContainerStore::fill (const ESM::InventoryList& items, const ESMS:
             continue;
         }
 
-        ref.getPtr().getRefData().setCount (std::abs(iter->count)); /// \todo implement item restocking (indicated by negative count)
+        ref.getPtr().getRefData().setCount (std::abs(iter->mCount)); /// \todo implement item restocking (indicated by negative count)
         add (ref.getPtr());
     }
 

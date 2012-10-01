@@ -233,8 +233,8 @@ const MWMechanics::MagicEffects& MWWorld::InventoryStore::getMagicEffects()
                     const ESM::Enchantment& enchantment =
                         *MWBase::Environment::get().getWorld()->getStore().enchants.find (enchantmentId);
 
-                    if (enchantment.data.type==ESM::Enchantment::ConstantEffect)
-                        mMagicEffects.add (enchantment.effects);
+                    if (enchantment.mData.mType==ESM::Enchantment::ConstantEffect)
+                        mMagicEffects.add (enchantment.mEffects);
                 }
             }
 

@@ -22,21 +22,21 @@ namespace MWMechanics
         const ESM::NPC *player = ptr.get<ESM::NPC>()->base;
 
         // reset
-        creatureStats.setLevel(player->npdt52.level);
+        creatureStats.setLevel(player->mNpdt52.mLevel);
         creatureStats.getSpells().clear();
         creatureStats.setMagicEffects(MagicEffects());
 
         for (int i=0; i<27; ++i)
-            npcStats.getSkill (i).setBase (player->npdt52.skills[i]);
+            npcStats.getSkill (i).setBase (player->mNpdt52.mSkills[i]);
 
-        creatureStats.getAttribute(0).setBase (player->npdt52.strength);
-        creatureStats.getAttribute(1).setBase (player->npdt52.intelligence);
-        creatureStats.getAttribute(2).setBase (player->npdt52.willpower);
-        creatureStats.getAttribute(3).setBase (player->npdt52.agility);
-        creatureStats.getAttribute(4).setBase (player->npdt52.speed);
-        creatureStats.getAttribute(5).setBase (player->npdt52.endurance);
-        creatureStats.getAttribute(6).setBase (player->npdt52.personality);
-        creatureStats.getAttribute(7).setBase (player->npdt52.luck);
+        creatureStats.getAttribute(0).setBase (player->mNpdt52.mStrength);
+        creatureStats.getAttribute(1).setBase (player->mNpdt52.mIntelligence);
+        creatureStats.getAttribute(2).setBase (player->mNpdt52.mWillpower);
+        creatureStats.getAttribute(3).setBase (player->mNpdt52.mAgility);
+        creatureStats.getAttribute(4).setBase (player->mNpdt52.mSpeed);
+        creatureStats.getAttribute(5).setBase (player->mNpdt52.mEndurance);
+        creatureStats.getAttribute(6).setBase (player->mNpdt52.mPersonality);
+        creatureStats.getAttribute(7).setBase (player->mNpdt52.mLuck);
 
         // race
         if (mRaceSelected)
@@ -52,18 +52,18 @@ namespace MWMechanics
                 const ESM::Race::MaleFemale *attribute = 0;
                 switch (i)
                 {
-                    case 0: attribute = &race->data.strength; break;
-                    case 1: attribute = &race->data.intelligence; break;
-                    case 2: attribute = &race->data.willpower; break;
-                    case 3: attribute = &race->data.agility; break;
-                    case 4: attribute = &race->data.speed; break;
-                    case 5: attribute = &race->data.endurance; break;
-                    case 6: attribute = &race->data.personality; break;
-                    case 7: attribute = &race->data.luck; break;
+                    case 0: attribute = &race->mData.mStrength; break;
+                    case 1: attribute = &race->mData.mIntelligence; break;
+                    case 2: attribute = &race->mData.mWillpower; break;
+                    case 3: attribute = &race->mData.mAgility; break;
+                    case 4: attribute = &race->mData.mSpeed; break;
+                    case 5: attribute = &race->mData.mEndurance; break;
+                    case 6: attribute = &race->mData.mPersonality; break;
+                    case 7: attribute = &race->mData.mLuck; break;
                 }
 
                 creatureStats.getAttribute(i).setBase (
-                    static_cast<int> (male ? attribute->male : attribute->female));
+                    static_cast<int> (male ? attribute->mMale : attribute->mFemale));
             }
 
             for (int i=0; i<27; ++i)
@@ -71,17 +71,17 @@ namespace MWMechanics
                 int bonus = 0;
                 
                 for (int i2=0; i2<7; ++i2)
-                    if (race->data.bonus[i2].skill==i)
+                    if (race->mData.mBonus[i2].mSkill==i)
                     {
-                        bonus = race->data.bonus[i2].bonus;
+                        bonus = race->mData.mBonus[i2].mBonus;
                         break;
                     }
             
                 npcStats.getSkill (i).setBase (5 + bonus);
             }
 
-            for (std::vector<std::string>::const_iterator iter (race->powers.list.begin());
-                iter!=race->powers.list.end(); ++iter)
+            for (std::vector<std::string>::const_iterator iter (race->mPowers.mList.begin());
+                iter!=race->mPowers.mList.end(); ++iter)
             {
                 creatureStats.getSpells().add (*iter);
             }
@@ -94,8 +94,8 @@ namespace MWMechanics
                 MWBase::Environment::get().getWorld()->getStore().birthSigns.find (
                 MWBase::Environment::get().getWorld()->getPlayer().getBirthsign());
 
-            for (std::vector<std::string>::const_iterator iter (sign->powers.list.begin());
-                iter!=sign->powers.list.end(); ++iter)
+            for (std::vector<std::string>::const_iterator iter (sign->mPowers.mList.begin());
+                iter!=sign->mPowers.mList.end(); ++iter)
             {
                 creatureStats.getSpells().add (*iter);
             }
@@ -108,7 +108,7 @@ namespace MWMechanics
 
             for (int i=0; i<2; ++i)
             {
-                int attribute = class_.data.attribute[i];
+                int attribute = class_.mData.mAttribute[i];
                 if (attribute>=0 && attribute<8)
                 {
                     creatureStats.getAttribute(attribute).setBase (
@@ -122,7 +122,7 @@ namespace MWMechanics
 
                 for (int i2=0; i2<5; ++i2)
                 {
-                    int index = class_.data.skills[i2][i];
+                    int index = class_.mData.mSkills[i2][i];
 
                     if (index>=0 && index<27)
                     {
@@ -137,7 +137,7 @@ namespace MWMechanics
 
             for (ContainerType::const_iterator iter (skills.begin()); iter!=skills.end(); ++iter)
             {
-                if (iter->second.data.specialization==class_.data.specialization)
+                if (iter->second.mData.mSpecialization==class_.mData.mSpecialization)
                 {
                     int index = iter->first;
 
@@ -262,9 +262,9 @@ namespace MWMechanics
             MWBase::Environment::get().getWindowManager()->setValue ("name", MWBase::Environment::get().getWorld()->getPlayer().getName());
             MWBase::Environment::get().getWindowManager()->setValue ("race",
                 MWBase::Environment::get().getWorld()->getStore().races.find (MWBase::Environment::get().getWorld()->getPlayer().
-                getRace())->name);
+                getRace())->mName);
             MWBase::Environment::get().getWindowManager()->setValue ("class",
-                MWBase::Environment::get().getWorld()->getPlayer().getClass().name);
+                MWBase::Environment::get().getWorld()->getPlayer().getClass().mName);
             mUpdatePlayer = false;
 
             MWBase::WindowManager::SkillList majorSkills (5);
@@ -272,8 +272,8 @@ namespace MWMechanics
 
             for (int i=0; i<5; ++i)
             {
-                minorSkills[i] = MWBase::Environment::get().getWorld()->getPlayer().getClass().data.skills[i][0];
-                majorSkills[i] = MWBase::Environment::get().getWorld()->getPlayer().getClass().data.skills[i][1];
+                minorSkills[i] = MWBase::Environment::get().getWorld()->getPlayer().getClass().mData.mSkills[i][0];
+                majorSkills[i] = MWBase::Environment::get().getWorld()->getPlayer().getClass().mData.mSkills[i][1];
             }
 
             MWBase::Environment::get().getWindowManager()->configureSkills (majorSkills, minorSkills);

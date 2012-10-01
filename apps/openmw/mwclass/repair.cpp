@@ -43,7 +43,7 @@ namespace MWClass
             ptr.get<ESM::Repair>();
         assert(ref->base != NULL);
 
-        const std::string &model = ref->base->model;
+        const std::string &model = ref->base->mModel;
         if (!model.empty()) {
             return "meshes\\" + model;
         }
@@ -55,7 +55,7 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Repair> *ref =
             ptr.get<ESM::Repair>();
 
-        return ref->base->name;
+        return ref->base->mName;
     }
 
     boost::shared_ptr<MWWorld::Action> Repair::activate (const MWWorld::Ptr& ptr,
@@ -73,7 +73,7 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Repair> *ref =
             ptr.get<ESM::Repair>();
 
-        return ref->base->script;
+        return ref->base->mScript;
     }
 
     int Repair::getValue (const MWWorld::Ptr& ptr) const
@@ -81,7 +81,7 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Repair> *ref =
             ptr.get<ESM::Repair>();
 
-        return ref->base->data.value;
+        return ref->base->mData.mValue;
     }
 
     void Repair::registerSelf()
@@ -106,7 +106,7 @@ namespace MWClass
           MWWorld::LiveCellRef<ESM::Repair> *ref =
             ptr.get<ESM::Repair>();
 
-        return ref->base->icon;
+        return ref->base->mIcon;
     }
 
     bool Repair::hasToolTip (const MWWorld::Ptr& ptr) const
@@ -114,7 +114,7 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Repair> *ref =
             ptr.get<ESM::Repair>();
 
-        return (ref->base->name != "");
+        return (ref->base->mName != "");
     }
 
     MWGui::ToolTipInfo Repair::getToolTipInfo (const MWWorld::Ptr& ptr) const
@@ -123,21 +123,21 @@ namespace MWClass
             ptr.get<ESM::Repair>();
 
         MWGui::ToolTipInfo info;
-        info.caption = ref->base->name + MWGui::ToolTips::getCountString(ptr.getRefData().getCount());
-        info.icon = ref->base->icon;
+        info.caption = ref->base->mName + MWGui::ToolTips::getCountString(ptr.getRefData().getCount());
+        info.icon = ref->base->mIcon;
 
         std::string text;
 
         /// \todo store remaining uses somewhere
 
-        text += "\n#{sUses}: " + MWGui::ToolTips::toString(ref->base->data.uses);
-        text += "\n#{sQuality}: " + MWGui::ToolTips::toString(ref->base->data.quality);
-        text += "\n#{sWeight}: " + MWGui::ToolTips::toString(ref->base->data.weight);
-        text += MWGui::ToolTips::getValueString(ref->base->data.value, "#{sValue}");
+        text += "\n#{sUses}: " + MWGui::ToolTips::toString(ref->base->mData.mUses);
+        text += "\n#{sQuality}: " + MWGui::ToolTips::toString(ref->base->mData.mQuality);
+        text += "\n#{sWeight}: " + MWGui::ToolTips::toString(ref->base->mData.mWeight);
+        text += MWGui::ToolTips::getValueString(ref->base->mData.mValue, "#{sValue}");
 
         if (MWBase::Environment::get().getWindowManager()->getFullHelp()) {
-            text += MWGui::ToolTips::getMiscString(ref->ref.owner, "Owner");
-            text += MWGui::ToolTips::getMiscString(ref->base->script, "Script");
+            text += MWGui::ToolTips::getMiscString(ref->ref.mOwner, "Owner");
+            text += MWGui::ToolTips::getMiscString(ref->base->mScript, "Script");
         }
 
         info.text = text;

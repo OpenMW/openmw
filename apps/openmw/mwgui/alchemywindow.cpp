@@ -112,22 +112,22 @@ namespace MWGui
         if (rand() % 2 == 0) /// \todo
         {
             ESM::Potion newPotion;
-            newPotion.name = mNameEdit->getCaption();
+            newPotion.mName = mNameEdit->getCaption();
             ESM::EffectList effects;
             for (unsigned int i=0; i<4; ++i)
             {
                 if (mEffects.size() >= i+1)
                 {
                     ESM::ENAMstruct effect;
-                    effect.effectID = mEffects[i].mEffectID;
-                    effect.area = 0;
-                    effect.range = ESM::RT_Self;
-                    effect.skill = mEffects[i].mSkill;
-                    effect.attribute = mEffects[i].mAttribute;
-                    effect.magnMin = 1; /// \todo
-                    effect.magnMax = 10; /// \todo
-                    effect.duration = 60; /// \todo
-                    effects.list.push_back(effect);
+                    effect.mEffectID = mEffects[i].mEffectID;
+                    effect.mArea = 0;
+                    effect.mRange = ESM::RT_Self;
+                    effect.mSkill = mEffects[i].mSkill;
+                    effect.mAttribute = mEffects[i].mAttribute;
+                    effect.mMagnMin = 1; /// \todo
+                    effect.mMagnMax = 10; /// \todo
+                    effect.mDuration = 60; /// \todo
+                    effects.mList.push_back(effect);
                 }
             }
 
@@ -137,17 +137,17 @@ namespace MWGui
             // have 0 weight when using ingredients with 0.1 weight respectively
             float weight = 0;
             if (mIngredient1->isUserString("ToolTipType"))
-                weight += mIngredient1->getUserData<MWWorld::Ptr>()->get<ESM::Ingredient>()->base->data.weight;
+                weight += mIngredient1->getUserData<MWWorld::Ptr>()->get<ESM::Ingredient>()->base->mData.mWeight;
             if (mIngredient2->isUserString("ToolTipType"))
-                weight += mIngredient2->getUserData<MWWorld::Ptr>()->get<ESM::Ingredient>()->base->data.weight;
+                weight += mIngredient2->getUserData<MWWorld::Ptr>()->get<ESM::Ingredient>()->base->mData.mWeight;
             if (mIngredient3->isUserString("ToolTipType"))
-                weight += mIngredient3->getUserData<MWWorld::Ptr>()->get<ESM::Ingredient>()->base->data.weight;
+                weight += mIngredient3->getUserData<MWWorld::Ptr>()->get<ESM::Ingredient>()->base->mData.mWeight;
             if (mIngredient4->isUserString("ToolTipType"))
-                weight += mIngredient4->getUserData<MWWorld::Ptr>()->get<ESM::Ingredient>()->base->data.weight;
-            newPotion.data.weight = weight / float(numIngreds);
+                weight += mIngredient4->getUserData<MWWorld::Ptr>()->get<ESM::Ingredient>()->base->mData.mWeight;
+            newPotion.mData.mWeight = weight / float(numIngreds);
 
-            newPotion.data.value = 100; /// \todo
-            newPotion.effects = effects;
+            newPotion.mData.mValue = 100; /// \todo
+            newPotion.mEffects = effects;
             // pick a random mesh and icon
             std::vector<std::string> names;
             /// \todo is the mesh/icon dependent on alchemy skill?
@@ -158,8 +158,8 @@ namespace MWGui
             names.push_back("exclusive");
             names.push_back("quality");
             int random = rand() % names.size();
-            newPotion.model = "m\\misc_potion_" + names[random ] + "_01.nif";
-            newPotion.icon = "m\\tx_potion_" + names[random ] + "_01.dds";
+            newPotion.mModel = "m\\misc_potion_" + names[random ] + "_01.nif";
+            newPotion.mIcon = "m\\tx_potion_" + names[random ] + "_01.dds";
 
             // check if a similiar potion record exists already
             bool found = false;
@@ -170,24 +170,24 @@ namespace MWGui
             {
                 if (found) break;
 
-                if (it->second.data.value == newPotion.data.value
-                    && it->second.data.weight == newPotion.data.weight
-                    && it->second.name == newPotion.name
-                    && it->second.effects.list.size() == newPotion.effects.list.size())
+                if (it->second.mData.mValue == newPotion.mData.mValue
+                    && it->second.mData.mWeight == newPotion.mData.mWeight
+                    && it->second.mName == newPotion.mName
+                    && it->second.mEffects.mList.size() == newPotion.mEffects.mList.size())
                 {
                     // check effects
-                    for (unsigned int i=0; i < it->second.effects.list.size(); ++i)
+                    for (unsigned int i=0; i < it->second.mEffects.mList.size(); ++i)
                     {
-                        const ESM::ENAMstruct& a = it->second.effects.list[i];
-                        const ESM::ENAMstruct& b = newPotion.effects.list[i];
-                        if (a.effectID == b.effectID
-                            && a.area == b.area
-                            && a.range == b.range
-                            && a.skill == b.skill
-                            && a.attribute == b.attribute
-                            && a.magnMin == b.magnMin
-                            && a.magnMax == b.magnMax
-                            && a.duration == b.duration)
+                        const ESM::ENAMstruct& a = it->second.mEffects.mList[i];
+                        const ESM::ENAMstruct& b = newPotion.mEffects.mList[i];
+                        if (a.mEffectID == b.mEffectID
+                            && a.mArea == b.mArea
+                            && a.mRange == b.mRange
+                            && a.mSkill == b.mSkill
+                            && a.mAttribute == b.mAttribute
+                            && a.mMagnMin == b.mMagnMin
+                            && a.mMagnMax == b.mMagnMax
+                            && a.mDuration == b.mDuration)
                         {
                             found = true;
                             objectId = it->first;
@@ -268,17 +268,17 @@ namespace MWGui
             it != store.end(); ++it)
         {
             MWWorld::LiveCellRef<ESM::Apparatus>* ref = it->get<ESM::Apparatus>();
-            if (ref->base->data.type == ESM::Apparatus::Albemic
-            && (bestAlbemic.isEmpty() || ref->base->data.quality > bestAlbemic.get<ESM::Apparatus>()->base->data.quality))
+            if (ref->base->mData.mType == ESM::Apparatus::Albemic
+            && (bestAlbemic.isEmpty() || ref->base->mData.mQuality > bestAlbemic.get<ESM::Apparatus>()->base->mData.mQuality))
                 bestAlbemic = *it;
-            else if (ref->base->data.type == ESM::Apparatus::MortarPestle
-            && (bestMortarPestle.isEmpty() || ref->base->data.quality > bestMortarPestle.get<ESM::Apparatus>()->base->data.quality))
+            else if (ref->base->mData.mType == ESM::Apparatus::MortarPestle
+            && (bestMortarPestle.isEmpty() || ref->base->mData.mQuality > bestMortarPestle.get<ESM::Apparatus>()->base->mData.mQuality))
                 bestMortarPestle = *it;
-            else if (ref->base->data.type == ESM::Apparatus::Calcinator
-            && (bestCalcinator.isEmpty() || ref->base->data.quality > bestCalcinator.get<ESM::Apparatus>()->base->data.quality))
+            else if (ref->base->mData.mType == ESM::Apparatus::Calcinator
+            && (bestCalcinator.isEmpty() || ref->base->mData.mQuality > bestCalcinator.get<ESM::Apparatus>()->base->mData.mQuality))
                 bestCalcinator = *it;
-            else if (ref->base->data.type == ESM::Apparatus::Retort
-            && (bestRetort.isEmpty() || ref->base->data.quality > bestRetort.get<ESM::Apparatus>()->base->data.quality))
+            else if (ref->base->mData.mType == ESM::Apparatus::Retort
+            && (bestRetort.isEmpty() || ref->base->mData.mQuality > bestRetort.get<ESM::Apparatus>()->base->mData.mQuality))
                 bestRetort = *it;
         }
 
@@ -415,12 +415,12 @@ namespace MWGui
             MWWorld::LiveCellRef<ESM::Ingredient>* ref = ingredient->getUserData<MWWorld::Ptr>()->get<ESM::Ingredient>();
             for (int i=0; i<4; ++i)
             {
-                if (ref->base->data.effectID[i] < 0)
+                if (ref->base->mData.mEffectID[i] < 0)
                     continue;
                 MWGui::Widgets::SpellEffectParams params;
-                params.mEffectID = ref->base->data.effectID[i];
-                params.mAttribute = ref->base->data.attributes[i];
-                params.mSkill = ref->base->data.skills[i];
+                params.mEffectID = ref->base->mData.mEffectID[i];
+                params.mAttribute = ref->base->mData.mAttributes[i];
+                params.mSkill = ref->base->mData.mSkills[i];
                 effects.push_back(params);
             }
 

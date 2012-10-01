@@ -1,12 +1,18 @@
-#ifndef _ESM_NPC_H
-#define _ESM_NPC_H
+#ifndef OPENMW_ESM_NPC_H
+#define OPENMW_ESM_NPC_H
 
-#include "esm_reader.hpp"
-#include "loadcont.hpp"
+#include <string>
+#include <vector>
+
 #include "defs.hpp"
+#include "loadcont.hpp"
 #include "aipackage.hpp"
+#include "spelllist.hpp"
 
 namespace ESM {
+
+class ESMReader;
+class ESMWriter;
 
 /*
  * NPC definition
@@ -50,43 +56,52 @@ struct NPC
       Metal     = 0x0800  // Metal blood effect (golden?)
     };
 
-#pragma pack(push)
-#pragma pack(1)
-  struct NPDTstruct52
-  {
-    short level;
-    char strength, intelligence, willpower, agility,
-      speed, endurance, personality, luck;
-    char skills[27];
-    char reputation;
-    short health, mana, fatigue;
-    char disposition, factionID, rank;
-    char unknown;
-    int gold;
-  }; // 52 bytes
+    #pragma pack(push)
+    #pragma pack(1)
 
-  struct NPDTstruct12
-  {
-    short level;
-    char disposition, reputation, rank,
-      unknown1, unknown2, unknown3;
-    int gold; // ?? not certain
-  }; // 12 bytes
-#pragma pack(pop)
+    struct NPDTstruct52
+    {
+        short mLevel;
+        char mStrength,
+             mIntelligence,
+             mWillpower,
+             mAgility,
+             mSpeed,
+             mEndurance,
+             mPersonality,
+             mLuck;
+
+        char mSkills[27];
+        char mReputation;
+        short mHealth, mMana, mFatigue;
+        char mDisposition, mFactionID, mRank;
+        char mUnknown;
+        int mGold;
+    }; // 52 bytes
+
+    struct NPDTstruct12
+    {
+        short mLevel;
+        char mDisposition, mReputation, mRank;
+        char mUnknown1, mUnknown2, mUnknown3;
+        int mGold; // ?? not certain
+    }; // 12 bytes
 
     struct Dest
     {
         Position    mPos;
         std::string mCellName;
     };
+    #pragma pack(pop)
 
-  NPDTstruct52 npdt52;
-  NPDTstruct12 npdt12; // Use this if npdt52.gold == -10
+    char mNpdtType;
+    NPDTstruct52 mNpdt52;
+    NPDTstruct12 mNpdt12; // Use this if npdt52.gold == -10
 
-  int flags;
+    int mFlags;
 
-  InventoryList inventory;
-  SpellList spells;
+    InventoryList mInventory;
+    SpellList mSpells;
 
     AIData mAiData;
     bool mHasAI;
@@ -94,15 +109,14 @@ struct NPC
     std::vector<Dest> mTransport;
     AIPackageList     mAiPackage;
 
-    std::string name, model, race, cls, faction, script;
+    std::string mId, mName, mModel, mRace, mClass, mFaction, mScript;
 
     // body parts
-    std::string hair, head;
-
-    std::string mId;
+    std::string mHair, mHead;
 
     // Implementation moved to load_impl.cpp
-    void load(ESMReader &esm, const std::string& id);
+    void load(ESMReader &esm);
+    void save(ESMWriter &esm);
 };
 }
 #endif

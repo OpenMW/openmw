@@ -1,9 +1,12 @@
-#ifndef _ESM_STAT_H
-#define _ESM_STAT_H
+#ifndef OPENMW_ESM_STAT_H
+#define OPENMW_ESM_STAT_H
 
-#include "esm_reader.hpp"
+#include <string>
 
 namespace ESM {
+
+class ESMReader;
+class ESMWriter;
 
 /*
  * Definition of static object.
@@ -19,9 +22,10 @@ namespace ESM {
 
 struct Static
 {
-  std::string model;
+  std::string mModel;
 
   void load(ESMReader &esm);
+  void save(ESMWriter &esm);
 };
 }
 #endif
