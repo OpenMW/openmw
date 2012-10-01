@@ -716,7 +716,7 @@ void ToolTips::createClassToolTip(MyGUI::Widget* widget, const ESM::Class& playe
 void ToolTips::createMagicEffectToolTip(MyGUI::Widget* widget, short id)
 {
     const ESM::MagicEffect* effect = MWBase::Environment::get().getWorld ()->getStore ().magicEffects.find(id);
-    const std::string &name = Widgets::MWSpellEffect::effectIDToString (id);
+    const std::string &name = ESM::MagicEffect::effectIdToString (id);
 
     std::string icon = effect->mIcon;
 

@@ -400,13 +400,13 @@ void MWSpellEffect::updateWidgets()
         std::string sec =  " " + mWindowManager->getGameSettingString("ssecond", "");
         std::string secs =  " " + mWindowManager->getGameSettingString("sseconds", "");
 
-        std::string effectIDStr = effectIDToString(mEffectParams.mEffectID);
+        std::string effectIDStr = ESM::MagicEffect::effectIdToString(mEffectParams.mEffectID);
         std::string spellLine = mWindowManager->getGameSettingString(effectIDStr, "");
-        if (effectInvolvesSkill(effectIDStr) && mEffectParams.mSkill >= 0 && mEffectParams.mSkill < ESM::Skill::Length)
+        if (magicEffect->mData.mFlags & ESM::MagicEffect::TargetSkill)
         {
             spellLine += " " + mWindowManager->getGameSettingString(ESM::Skill::sSkillNameIds[mEffectParams.mSkill], "");
         }
-        if (effectInvolvesAttribute(effectIDStr) && mEffectParams.mAttribute >= 0 && mEffectParams.mAttribute < 8)
+        if (magicEffect->mData.mFlags & ESM::MagicEffect::TargetAttribute)
         {
             static const char *attributes[8] = {
                 "sAttributeStrength",
@@ -421,7 +421,7 @@ void MWSpellEffect::updateWidgets()
             spellLine += " " + mWindowManager->getGameSettingString(attributes[mEffectParams.mAttribute], "");
         }
 
-        if ((mEffectParams.mMagnMin >= 0 || mEffectParams.mMagnMax >= 0) && effectHasMagnitude(effectIDStr))
+        if ((mEffectParams.mMagnMin >= 0 || mEffectParams.mMagnMax >= 0) && !(magicEffect->mData.mFlags & ESM::MagicEffect::NoMagnitude))
         {
             if (mEffectParams.mMagnMin == mEffectParams.mMagnMax)
                 spellLine += " " + boost::lexical_cast<std::string>(mEffectParams.mMagnMin) + " " + ((mEffectParams.mMagnMin == 1) ? pt : pts);
@@ -434,7 +434,7 @@ void MWSpellEffect::updateWidgets()
         // constant effects have no duration and no target
         if (!mEffectParams.mIsConstant)
         {
-            if (mEffectParams.mDuration >= 0 && effectHasDuration(effectIDStr))
+            if (mEffectParams.mDuration >= 0 && !(magicEffect->mData.mFlags & ESM::MagicEffect::NoDuration))
             {
                 spellLine += " " + mWindowManager->getGameSettingString("sfor", "") + " " + boost::lexical_cast<std::string>(mEffectParams.mDuration) + ((mEffectParams.mDuration == 1) ? sec : secs);
             }
@@ -461,267 +461,6 @@ void MWSpellEffect::updateWidgets()
         fixTexturePath(path);
         mImageWidget->setImageTexture(path);
     }
-}
-
-std::string MWSpellEffect::effectIDToString(const short effectID)
-{
-    // Map effect ID to GMST name
-    // http://www.uesp.net/morrow/hints/mweffects.shtml
-    std::map<short, std::string> names;
-    names[85] ="sEffectAbsorbAttribute";
-    names[88] ="sEffectAbsorbFatigue";
-    names[86] ="sEffectAbsorbHealth";
-    names[87] ="sEffectAbsorbSpellPoints";
-    names[89] ="sEffectAbsorbSkill";
-    names[63] ="sEffectAlmsiviIntervention";
-    names[47] ="sEffectBlind";
-    names[123] ="sEffectBoundBattleAxe";
-    names[129] ="sEffectBoundBoots";
-    names[127] ="sEffectBoundCuirass";
-    names[120] ="sEffectBoundDagger";
-    names[131] ="sEffectBoundGloves";
-    names[128] ="sEffectBoundHelm";
-    names[125] ="sEffectBoundLongbow";
-    names[121] ="sEffectBoundLongsword";
-    names[122] ="sEffectBoundMace";
-    names[130] ="sEffectBoundShield";
-    names[124] ="sEffectBoundSpear";
-    names[7] ="sEffectBurden";
-    names[50] ="sEffectCalmCreature";
-    names[49] ="sEffectCalmHumanoid";
-    names[40] ="sEffectChameleon";
-    names[44] ="sEffectCharm";
-    names[118] ="sEffectCommandCreatures";
-    names[119] ="sEffectCommandHumanoids";
-    names[132] ="sEffectCorpus"; // NB this typo. (bethesda made it)
-    names[70] ="sEffectCureBlightDisease";
-    names[69] ="sEffectCureCommonDisease";
-    names[71] ="sEffectCureCorprusDisease";
-    names[73] ="sEffectCureParalyzation";
-    names[72] ="sEffectCurePoison";
-    names[22] ="sEffectDamageAttribute";
-    names[25] ="sEffectDamageFatigue";
-    names[23] ="sEffectDamageHealth";
-    names[24] ="sEffectDamageMagicka";
-    names[26] ="sEffectDamageSkill";
-    names[54] ="sEffectDemoralizeCreature";
-    names[53] ="sEffectDemoralizeHumanoid";
-    names[64] ="sEffectDetectAnimal";
-    names[65] ="sEffectDetectEnchantment";
-    names[66] ="sEffectDetectKey";
-    names[38] ="sEffectDisintegrateArmor";
-    names[37] ="sEffectDisintegrateWeapon";
-    names[57] ="sEffectDispel";
-    names[62] ="sEffectDivineIntervention";
-    names[17] ="sEffectDrainAttribute";
-    names[20] ="sEffectDrainFatigue";
-    names[18] ="sEffectDrainHealth";
-    names[19] ="sEffectDrainSpellpoints";
-    names[21] ="sEffectDrainSkill";
-    names[8] ="sEffectFeather";
-    names[14] ="sEffectFireDamage";
-    names[4] ="sEffectFireShield";
-    names[117] ="sEffectFortifyAttackBonus";
-    names[79] ="sEffectFortifyAttribute";
-    names[82] ="sEffectFortifyFatigue";
-    names[80] ="sEffectFortifyHealth";
-    names[81] ="sEffectFortifySpellpoints";
-    names[84] ="sEffectFortifyMagickaMultiplier";
-    names[83] ="sEffectFortifySkill";
-    names[52] ="sEffectFrenzyCreature";
-    names[51] ="sEffectFrenzyHumanoid";
-    names[16] ="sEffectFrostDamage";
-    names[6] ="sEffectFrostShield";
-    names[39] ="sEffectInvisibility";
-    names[9] ="sEffectJump";
-    names[10] ="sEffectLevitate";
-    names[41] ="sEffectLight";
-    names[5] ="sEffectLightningShield";
-    names[12] ="sEffectLock";
-    names[60] ="sEffectMark";
-    names[43] ="sEffectNightEye";
-    names[13] ="sEffectOpen";
-    names[45] ="sEffectParalyze";
-    names[27] ="sEffectPoison";
-    names[56] ="sEffectRallyCreature";
-    names[55] ="sEffectRallyHumanoid";
-    names[61] ="sEffectRecall";
-    names[68] ="sEffectReflect";
-    names[100] ="sEffectRemoveCurse";
-    names[95] ="sEffectResistBlightDisease";
-    names[94] ="sEffectResistCommonDisease";
-    names[96] ="sEffectResistCorprusDisease";
-    names[90] ="sEffectResistFire";
-    names[91] ="sEffectResistFrost";
-    names[93] ="sEffectResistMagicka";
-    names[98] ="sEffectResistNormalWeapons";
-    names[99] ="sEffectResistParalysis";
-    names[97] ="sEffectResistPoison";
-    names[92] ="sEffectResistShock";
-    names[74] ="sEffectRestoreAttribute";
-    names[77] ="sEffectRestoreFatigue";
-    names[75] ="sEffectRestoreHealth";
-    names[76] ="sEffectRestoreSpellPoints";
-    names[78] ="sEffectRestoreSkill";
-    names[42] ="sEffectSanctuary";
-    names[3] ="sEffectShield";
-    names[15] ="sEffectShockDamage";
-    names[46] ="sEffectSilence";
-    names[11] ="sEffectSlowFall";
-    names[58] ="sEffectSoultrap";
-    names[48] ="sEffectSound";
-    names[67] ="sEffectSpellAbsorption";
-    names[136] ="sEffectStuntedMagicka";
-    names[106] ="sEffectSummonAncestralGhost";
-    names[110] ="sEffectSummonBonelord";
-    names[108] ="sEffectSummonLeastBonewalker";
-    names[134] ="sEffectSummonCenturionSphere";
-    names[103] ="sEffectSummonClannfear";
-    names[104] ="sEffectSummonDaedroth";
-    names[105] ="sEffectSummonDremora";
-    names[114] ="sEffectSummonFlameAtronach";
-    names[115] ="sEffectSummonFrostAtronach";
-    names[113] ="sEffectSummonGoldenSaint";
-    names[109] ="sEffectSummonGreaterBonewalker";
-    names[112] ="sEffectSummonHunger";
-    names[102] ="sEffectSummonScamp";
-    names[107] ="sEffectSummonSkeletalMinion";
-    names[116] ="sEffectSummonStormAtronach";
-    names[111] ="sEffectSummonWingedTwilight";
-    names[135] ="sEffectSunDamage";
-    names[1] ="sEffectSwiftSwim";
-    names[59] ="sEffectTelekinesis";
-    names[101] ="sEffectTurnUndead";
-    names[133] ="sEffectVampirism";
-    names[0] ="sEffectWaterBreathing";
-    names[2] ="sEffectWaterWalking";
-    names[33] ="sEffectWeaknesstoBlightDisease";
-    names[32] ="sEffectWeaknesstoCommonDisease";
-    names[34] ="sEffectWeaknesstoCorprusDisease";
-    names[28] ="sEffectWeaknesstoFire";
-    names[29] ="sEffectWeaknesstoFrost";
-    names[31] ="sEffectWeaknesstoMagicka";
-    names[36] ="sEffectWeaknesstoNormalWeapons";
-    names[35] ="sEffectWeaknesstoPoison";
-    names[30] ="sEffectWeaknesstoShock";
-
-    // bloodmoon
-    names[138] ="sEffectSummonCreature01";
-    names[139] ="sEffectSummonCreature02";
-    names[140] ="sEffectSummonCreature03";
-    names[141] ="sEffectSummonCreature04";
-    names[142] ="sEffectSummonCreature05";
-
-    // tribunal
-    names[137] ="sEffectSummonFabricant";
-
-    assert(names.find(effectID) != names.end() && "Unimplemented effect type");
-
-    return names[effectID];
-}
-
-bool MWSpellEffect::effectHasDuration(const std::string& effect)
-{
-    // lists effects that have no duration (e.g. open lock)
-    std::vector<std::string> effectsWithoutDuration;
-    effectsWithoutDuration.push_back("sEffectOpen");
-    effectsWithoutDuration.push_back("sEffectLock");
-    effectsWithoutDuration.push_back("sEffectDispel");
-    effectsWithoutDuration.push_back("sEffectSunDamage");
-    effectsWithoutDuration.push_back("sEffectCorpus");
-    effectsWithoutDuration.push_back("sEffectVampirism");
-    effectsWithoutDuration.push_back("sEffectMark");
-    effectsWithoutDuration.push_back("sEffectRecall");
-    effectsWithoutDuration.push_back("sEffectDivineIntervention");
-    effectsWithoutDuration.push_back("sEffectAlmsiviIntervention");
-    effectsWithoutDuration.push_back("sEffectCureCommonDisease");
-    effectsWithoutDuration.push_back("sEffectCureBlightDisease");
-    effectsWithoutDuration.push_back("sEffectCureCorprusDisease");
-    effectsWithoutDuration.push_back("sEffectCurePoison");
-    effectsWithoutDuration.push_back("sEffectCureParalyzation");
-    effectsWithoutDuration.push_back("sEffectRemoveCurse");
-    effectsWithoutDuration.push_back("sEffectRestoreAttribute");
-
-    return (std::find(effectsWithoutDuration.begin(), effectsWithoutDuration.end(), effect) == effectsWithoutDuration.end());
-}
-
-bool MWSpellEffect::effectHasMagnitude(const std::string& effect)
-{
-    // lists effects that have no magnitude (e.g. invisiblity)
-    std::vector<std::string> effectsWithoutMagnitude;
-    effectsWithoutMagnitude.push_back("sEffectInvisibility");
-    effectsWithoutMagnitude.push_back("sEffectStuntedMagicka");
-    effectsWithoutMagnitude.push_back("sEffectParalyze");
-    effectsWithoutMagnitude.push_back("sEffectSoultrap");
-    effectsWithoutMagnitude.push_back("sEffectSilence");
-    effectsWithoutMagnitude.push_back("sEffectParalyze");
-    effectsWithoutMagnitude.push_back("sEffectInvisibility");
-    effectsWithoutMagnitude.push_back("sEffectWaterWalking");
-    effectsWithoutMagnitude.push_back("sEffectWaterBreathing");
-    effectsWithoutMagnitude.push_back("sEffectSummonScamp");
-    effectsWithoutMagnitude.push_back("sEffectSummonClannfear");
-    effectsWithoutMagnitude.push_back("sEffectSummonDaedroth");
-    effectsWithoutMagnitude.push_back("sEffectSummonDremora");
-    effectsWithoutMagnitude.push_back("sEffectSummonAncestralGhost");
-    effectsWithoutMagnitude.push_back("sEffectSummonSkeletalMinion");
-    effectsWithoutMagnitude.push_back("sEffectSummonBonewalker");
-    effectsWithoutMagnitude.push_back("sEffectSummonGreaterBonewalker");
-    effectsWithoutMagnitude.push_back("sEffectSummonBonelord");
-    effectsWithoutMagnitude.push_back("sEffectSummonWingedTwilight");
-    effectsWithoutMagnitude.push_back("sEffectSummonHunger");
-    effectsWithoutMagnitude.push_back("sEffectSummonGoldenSaint");
-    effectsWithoutMagnitude.push_back("sEffectSummonFlameAtronach");
-    effectsWithoutMagnitude.push_back("sEffectSummonFrostAtronach");
-    effectsWithoutMagnitude.push_back("sEffectSummonStormAtronach");
-    effectsWithoutMagnitude.push_back("sEffectSummonCenturionSphere");
-    effectsWithoutMagnitude.push_back("sEffectBoundDagger");
-    effectsWithoutMagnitude.push_back("sEffectBoundLongsword");
-    effectsWithoutMagnitude.push_back("sEffectBoundMace");
-    effectsWithoutMagnitude.push_back("sEffectBoundBattleAxe");
-    effectsWithoutMagnitude.push_back("sEffectBoundSpear");
-    effectsWithoutMagnitude.push_back("sEffectBoundLongbow");
-    effectsWithoutMagnitude.push_back("sEffectBoundCuirass");
-    effectsWithoutMagnitude.push_back("sEffectBoundHelm");
-    effectsWithoutMagnitude.push_back("sEffectBoundBoots");
-    effectsWithoutMagnitude.push_back("sEffectBoundShield");
-    effectsWithoutMagnitude.push_back("sEffectBoundGloves");
-    effectsWithoutMagnitude.push_back("sEffectStuntedMagicka");
-    effectsWithoutMagnitude.push_back("sEffectMark");
-    effectsWithoutMagnitude.push_back("sEffectRecall");
-    effectsWithoutMagnitude.push_back("sEffectDivineIntervention");
-    effectsWithoutMagnitude.push_back("sEffectAlmsiviIntervention");
-    effectsWithoutMagnitude.push_back("sEffectCureCommonDisease");
-    effectsWithoutMagnitude.push_back("sEffectCureBlightDisease");
-    effectsWithoutMagnitude.push_back("sEffectCureCorprusDisease");
-    effectsWithoutMagnitude.push_back("sEffectCurePoison");
-    effectsWithoutMagnitude.push_back("sEffectCureParalyzation");
-    effectsWithoutMagnitude.push_back("sEffectRemoveCurse");
-    effectsWithoutMagnitude.push_back("sEffectSummonCreature01");
-    effectsWithoutMagnitude.push_back("sEffectSummonCreature02");
-    effectsWithoutMagnitude.push_back("sEffectSummonCreature03");
-    effectsWithoutMagnitude.push_back("sEffectSummonCreature04");
-    effectsWithoutMagnitude.push_back("sEffectSummonCreature05");
-    effectsWithoutMagnitude.push_back("sEffectSummonFabricant");
-
-    return (std::find(effectsWithoutMagnitude.begin(), effectsWithoutMagnitude.end(), effect) == effectsWithoutMagnitude.end());
-}
-
-bool MWSpellEffect::effectInvolvesAttribute (const std::string& effect)
-{
-    return (effect == "sEffectRestoreAttribute"
-        || effect == "sEffectAbsorbAttribute"
-        || effect == "sEffectDrainAttribute"
-        || effect == "sEffectFortifyAttribute"
-        || effect == "sEffectDamageAttribute");
-}
-
-bool MWSpellEffect::effectInvolvesSkill (const std::string& effect)
-{
-    return (effect == "sEffectRestoreSkill"
-        || effect == "sEffectAbsorbSkill"
-        || effect == "sEffectDrainSkill"
-        || effect == "sEffectFortifySkill"
-        || effect == "sEffectDamageSkill");
 }
 
 MWSpellEffect::~MWSpellEffect()

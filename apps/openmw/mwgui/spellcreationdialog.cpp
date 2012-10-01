@@ -21,8 +21,8 @@ namespace
 
     bool sortMagicEffects (short id1, short id2)
     {
-        return MWBase::Environment::get().getWorld ()->getStore ().gameSettings.find(MWGui::Widgets::MWSpellEffect::effectIDToString (id1))->getString()
-                < MWBase::Environment::get().getWorld ()->getStore ().gameSettings.find(MWGui::Widgets::MWSpellEffect::effectIDToString (id2))->getString();
+        return MWBase::Environment::get().getWorld ()->getStore ().gameSettings.find(ESM::MagicEffect::effectIdToString (id1))->getString()
+                < MWBase::Environment::get().getWorld ()->getStore ().gameSettings.find(ESM::MagicEffect::effectIdToString  (id2))->getString();
     }
 }
 
@@ -74,7 +74,7 @@ namespace MWGui
 
         mEffectImage->setImageTexture (icon);
 
-        mEffectName->setCaptionWithReplacing("#{"+Widgets::MWSpellEffect::effectIDToString (effect->mIndex)+"}");
+        mEffectName->setCaptionWithReplacing("#{"+ESM::MagicEffect::effectIdToString  (effect->mIndex)+"}");
     }
 
     void EditEffectDialog::onRangeButtonClicked (MyGUI::Widget* sender)
@@ -179,14 +179,14 @@ namespace MWGui
         for (std::vector<short>::const_iterator it = knownEffects.begin(); it != knownEffects.end(); ++it)
         {
             mAvailableEffectsList->addItem(MWBase::Environment::get().getWorld ()->getStore ().gameSettings.find(
-                                               MWGui::Widgets::MWSpellEffect::effectIDToString (*it))->getString());
+                                               ESM::MagicEffect::effectIdToString  (*it))->getString());
         }
         mAvailableEffectsList->adjustSize ();
 
         for (std::vector<short>::const_iterator it = knownEffects.begin(); it != knownEffects.end(); ++it)
         {
             std::string name = MWBase::Environment::get().getWorld ()->getStore ().gameSettings.find(
-                                               MWGui::Widgets::MWSpellEffect::effectIDToString (*it))->getString();
+                                               ESM::MagicEffect::effectIdToString  (*it))->getString();
             MyGUI::Widget* w = mAvailableEffectsList->getItemWidget(name);
             w->setUserData(*it);
 
