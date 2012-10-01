@@ -111,12 +111,14 @@ namespace MWRender
     {
         Ogre::Vector3 pos = mCamera->getRealPosition();
         Ogre::Vector3 dir = mCamera->getRealDirection();
+        Ogre::Vector3 up  = mCamera->getRealUp();
 
         Ogre::Real xch;
         xch = pos.y, pos.y = -pos.z, pos.z = xch;
         xch = dir.y, dir.y = -dir.z, dir.z = xch;
+        xch = up.y,  up.y  = -up.z,  up.z = xch;
 
-        MWBase::Environment::get().getSoundManager()->setListenerPosDir(pos, dir);
+        MWBase::Environment::get().getSoundManager()->setListenerPosDir(pos, dir, up);
     }
 
     void Player::update(float duration)

@@ -52,6 +52,7 @@ namespace MWSound
 
         Ogre::Vector3 mListenerPos;
         Ogre::Vector3 mListenerDir;
+        Ogre::Vector3 mListenerUp;
 
         std::string lookup(const std::string &soundId,
                   float &volume, float &min, float &max);
@@ -128,7 +129,7 @@ namespace MWSound
 
         virtual void update(float duration);
 
-        virtual void setListenerPosDir(const Ogre::Vector3 &pos, const Ogre::Vector3 &dir);
+        virtual void setListenerPosDir(const Ogre::Vector3 &pos, const Ogre::Vector3 &dir, const Ogre::Vector3 &up);
     };
 }
 

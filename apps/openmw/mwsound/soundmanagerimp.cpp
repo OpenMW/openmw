@@ -486,7 +486,7 @@ namespace MWSound
         mOutput->updateListener(
             mListenerPos,
             mListenerDir,
-            Ogre::Vector3::UNIT_Z,
+            mListenerUp,
             env
         );
 
@@ -546,10 +546,11 @@ namespace MWSound
         }
     }
 
-    void SoundManager::setListenerPosDir(const Ogre::Vector3 &pos, const Ogre::Vector3 &dir)
+    void SoundManager::setListenerPosDir(const Ogre::Vector3 &pos, const Ogre::Vector3 &dir, const Ogre::Vector3 &up)
     {
         mListenerPos = pos;
         mListenerDir = dir;
+        mListenerUp  = up;
     }
 
     // Default readAll implementation, for decoders that can't do anything
