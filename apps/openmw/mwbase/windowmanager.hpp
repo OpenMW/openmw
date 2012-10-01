@@ -213,7 +213,7 @@ namespace MWBase
              * @param id Identifier for the GMST setting, e.g. "aName"
              * @param default Default value if the GMST setting cannot be used.
              */
-            virtual const std::string &getGameSettingString(const std::string &id, const std::string &default_) = 0;
+            virtual std::string getGameSettingString(const std::string &id, const std::string &default_) = 0;
 
             virtual void processChangedSettings(const Settings::CategorySettingVector& changed) = 0;
 

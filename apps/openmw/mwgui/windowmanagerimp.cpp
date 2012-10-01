@@ -520,9 +520,9 @@ int WindowManager::readPressedButton ()
     return mMessageBoxManager->readPressedButton();
 }
 
-const std::string &WindowManager::getGameSettingString(const std::string &id, const std::string &default_)
+std::string WindowManager::getGameSettingString(const std::string &id, const std::string &default_)
 {
-    const ESM::GameSetting *setting = MWBase::Environment::get().getWorld()->getStore().gameSettings.find(id);
+    const ESM::GameSetting *setting = MWBase::Environment::get().getWorld()->getStore().gameSettings.search(id);
     if (setting && setting->mType == ESM::VT_String)
         return setting->getString();
     return default_;
