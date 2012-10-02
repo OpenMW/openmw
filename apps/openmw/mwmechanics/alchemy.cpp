@@ -11,6 +11,10 @@ void MWMechanics::Alchemy::setAlchemist (const MWWorld::Ptr& npc)
 {
     mNpc = npc;
     
+    mIngredients.resize (4);
+
+    std::fill (mIngredients.begin(), mIngredients.end(), MWWorld::Ptr());
+    
     mTools.resize (4);
     
     std::fill (mTools.begin(), mTools.end(), MWWorld::Ptr());
@@ -44,3 +48,51 @@ MWMechanics::Alchemy::TToolsIterator MWMechanics::Alchemy::endTools() const
 {
     return mTools.end();
 }
+
+MWMechanics::Alchemy::TIngredientsIterator MWMechanics::Alchemy::beginIngredients() const
+{
+    return mIngredients.begin();
+}
+
+MWMechanics::Alchemy::TIngredientsIterator MWMechanics::Alchemy::endIngredients() const
+{
+    return mIngredients.end();
+}
+
+void MWMechanics::Alchemy::clear()
+{
+    mNpc = MWWorld::Ptr();
+    mTools.clear();
+    mIngredients.clear();
+}
+
+int MWMechanics::Alchemy::addIngredient (const MWWorld::Ptr& ingredient)
+{
+    // find a free slot
+    int slot = -1;
+
+    for (int i=0; i<static_cast<int> (mIngredients.size()); ++i)
+        if (mIngredients[i].isEmpty())
+        {
+            slot = i;
+            break;
+        }    
+    
+    if (slot==-1)
+        return -1;
+        
+    for (TIngredientsIterator iter (mIngredients.begin()); iter!=mIngredients.end(); ++iter)
+        if (!iter->isEmpty() && ingredient.get<ESM::Ingredient>()==iter->get<ESM::Ingredient>())
+            return -1;
+        
+    mIngredients[slot] = ingredient;
+        
+    return slot;
+}
+
+void MWMechanics::Alchemy::removeIngredient (int index)
+{
+    if (index>=0 && index<static_cast<int> (mIngredients.size()))
+        mIngredients[index] = MWWorld::Ptr();
+}
+
