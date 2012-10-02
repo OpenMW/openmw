@@ -62,6 +62,8 @@ namespace MWGui
 
     void AlchemyWindow::onCancelButtonClicked(MyGUI::Widget* _sender)
     {
+        mAlchemy.clear();
+        
         mWindowManager.removeGuiMode(GM_Alchemy);
         mWindowManager.removeGuiMode(GM_Inventory);
     }
@@ -265,9 +267,9 @@ namespace MWGui
         {
             if (!iter->isEmpty())
             {
-                mApparatus[index]->setUserString ("ToolTipType", "ItemPtr");
-                mApparatus[index]->setUserData (*iter);
-                mApparatus[index]->setImageTexture (getIconPath (*iter));
+                mApparatus.at (index)->setUserString ("ToolTipType", "ItemPtr");
+                mApparatus.at (index)->setUserData (*iter);
+                mApparatus.at (index)->setImageTexture (getIconPath (*iter));
             }
         }
     }
