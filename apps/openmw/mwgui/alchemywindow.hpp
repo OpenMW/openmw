@@ -22,11 +22,6 @@ namespace MWGui
         MyGUI::Button* mCreateButton;
         MyGUI::Button* mCancelButton;
 
-        MyGUI::ImageBox* mIngredient1;
-        MyGUI::ImageBox* mIngredient2;
-        MyGUI::ImageBox* mIngredient3;
-        MyGUI::ImageBox* mIngredient4;
-
         MyGUI::Widget* mEffectsBox;
 
         MyGUI::EditBox* mNameEdit;
@@ -51,6 +46,7 @@ namespace MWGui
             MWMechanics::Alchemy mAlchemy;
 
             std::vector<MyGUI::ImageBox *> mApparatus;
+            std::vector<MyGUI::ImageBox *> mIngredients;
     };
 }
 

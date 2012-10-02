@@ -28,14 +28,14 @@ namespace MWGui
 {
     AlchemyWindow::AlchemyWindow(MWBase::WindowManager& parWindowManager)
         : WindowBase("openmw_alchemy_window.layout", parWindowManager)
-        , ContainerBase(0), mApparatus (4)
+        , ContainerBase(0), mApparatus (4), mIngredients (4)
     {
         getWidget(mCreateButton, "CreateButton");
         getWidget(mCancelButton, "CancelButton");
-        getWidget(mIngredient1, "Ingredient1");
-        getWidget(mIngredient2, "Ingredient2");
-        getWidget(mIngredient3, "Ingredient3");
-        getWidget(mIngredient4, "Ingredient4");
+        getWidget(mIngredients[0], "Ingredient1");
+        getWidget(mIngredients[1], "Ingredient2");
+        getWidget(mIngredients[2], "Ingredient3");
+        getWidget(mIngredients[3], "Ingredient4");
         getWidget(mApparatus[0], "Apparatus1");
         getWidget(mApparatus[1], "Apparatus2");
         getWidget(mApparatus[2], "Apparatus3");
@@ -43,10 +43,10 @@ namespace MWGui
         getWidget(mEffectsBox, "CreatedEffects");
         getWidget(mNameEdit, "NameEdit");
 
-        mIngredient1->eventMouseButtonClick += MyGUI::newDelegate(this, &AlchemyWindow::onIngredientSelected);
-        mIngredient2->eventMouseButtonClick += MyGUI::newDelegate(this, &AlchemyWindow::onIngredientSelected);
-        mIngredient3->eventMouseButtonClick += MyGUI::newDelegate(this, &AlchemyWindow::onIngredientSelected);
-        mIngredient4->eventMouseButtonClick += MyGUI::newDelegate(this, &AlchemyWindow::onIngredientSelected);
+        mIngredients[0]->eventMouseButtonClick += MyGUI::newDelegate(this, &AlchemyWindow::onIngredientSelected);
+        mIngredients[1]->eventMouseButtonClick += MyGUI::newDelegate(this, &AlchemyWindow::onIngredientSelected);
+        mIngredients[2]->eventMouseButtonClick += MyGUI::newDelegate(this, &AlchemyWindow::onIngredientSelected);
+        mIngredients[3]->eventMouseButtonClick += MyGUI::newDelegate(this, &AlchemyWindow::onIngredientSelected);
 
         mCreateButton->eventMouseButtonClick += MyGUI::newDelegate(this, &AlchemyWindow::onCreateButtonClicked);
         mCancelButton->eventMouseButtonClick += MyGUI::newDelegate(this, &AlchemyWindow::onCancelButtonClicked);
@@ -80,14 +80,10 @@ namespace MWGui
 
         // make sure 2 or more ingredients were selected
         int numIngreds = 0;
-        if (mIngredient1->isUserString("ToolTipType"))
-            ++numIngreds;
-        if (mIngredient2->isUserString("ToolTipType"))
-            ++numIngreds;
-        if (mIngredient3->isUserString("ToolTipType"))
-            ++numIngreds;
-        if (mIngredient4->isUserString("ToolTipType"))
-            ++numIngreds;
+        for (int i=0; i<4; ++i)
+            if (mIngredients[i]->isUserString("ToolTipType"))
+                ++numIngreds;
+
         if (numIngreds < 2)
         {
             mWindowManager.messageBox("#{sNotifyMessage6a}", std::vector<std::string>());
@@ -138,14 +134,9 @@ namespace MWGui
             // note by scrawl: not rounding down here, I can't imagine a created potion to
             // have 0 weight when using ingredients with 0.1 weight respectively
             float weight = 0;
-            if (mIngredient1->isUserString("ToolTipType"))
-                weight += mIngredient1->getUserData<MWWorld::Ptr>()->get<ESM::Ingredient>()->base->mData.mWeight;
-            if (mIngredient2->isUserString("ToolTipType"))
-                weight += mIngredient2->getUserData<MWWorld::Ptr>()->get<ESM::Ingredient>()->base->mData.mWeight;
-            if (mIngredient3->isUserString("ToolTipType"))
-                weight += mIngredient3->getUserData<MWWorld::Ptr>()->get<ESM::Ingredient>()->base->mData.mWeight;
-            if (mIngredient4->isUserString("ToolTipType"))
-                weight += mIngredient4->getUserData<MWWorld::Ptr>()->get<ESM::Ingredient>()->base->mData.mWeight;
+            for (int i=0; i<4; ++i)
+                if (mIngredients[i]->isUserString("ToolTipType"))
+                    weight += mIngredients[i]->getUserData<MWWorld::Ptr>()->get<ESM::Ingredient>()->base->mData.mWeight;
             newPotion.mData.mWeight = weight / float(numIngreds);
 
             newPotion.mData.mValue = 100; /// \todo
@@ -222,34 +213,15 @@ namespace MWGui
         }
 
         // reduce count of the ingredients
-        if (mIngredient1->isUserString("ToolTipType"))
-        {
-            MWWorld::Ptr ingred = *mIngredient1->getUserData<MWWorld::Ptr>();
-            ingred.getRefData().setCount(ingred.getRefData().getCount()-1);
-            if (ingred.getRefData().getCount() == 0)
-                removeIngredient(mIngredient1);
+        for (int i=0; i<4; ++i)
+            if (mIngredients[i]->isUserString("ToolTipType"))
+            {
+                MWWorld::Ptr ingred = *mIngredients[i]->getUserData<MWWorld::Ptr>();
+                ingred.getRefData().setCount(ingred.getRefData().getCount()-1);
+                if (ingred.getRefData().getCount() == 0)
+                    removeIngredient(mIngredients[i]);
         }
-        if (mIngredient2->isUserString("ToolTipType"))
-        {
-            MWWorld::Ptr ingred = *mIngredient2->getUserData<MWWorld::Ptr>();
-            ingred.getRefData().setCount(ingred.getRefData().getCount()-1);
-            if (ingred.getRefData().getCount() == 0)
-                removeIngredient(mIngredient2);
-        }
-        if (mIngredient3->isUserString("ToolTipType"))
-        {
-            MWWorld::Ptr ingred = *mIngredient3->getUserData<MWWorld::Ptr>();
-            ingred.getRefData().setCount(ingred.getRefData().getCount()-1);
-            if (ingred.getRefData().getCount() == 0)
-                removeIngredient(mIngredient3);
-        }
-        if (mIngredient4->isUserString("ToolTipType"))
-        {
-            MWWorld::Ptr ingred = *mIngredient4->getUserData<MWWorld::Ptr>();
-            ingred.getRefData().setCount(ingred.getRefData().getCount()-1);
-            if (ingred.getRefData().getCount() == 0)
-                removeIngredient(mIngredient4);
-        }
+
         update();
     }
 
@@ -289,45 +261,24 @@ namespace MWGui
         // (which could happen if two similiar ingredients don't stack because of script / owner)
         bool alreadyAdded = false;
         std::string name = MWWorld::Class::get(item).getName(item);
-        if (mIngredient1->isUserString("ToolTipType"))
-        {
-            MWWorld::Ptr item2 = *mIngredient1->getUserData<MWWorld::Ptr>();
-            std::string name2 = MWWorld::Class::get(item2).getName(item2);
-            if (name == name2)
-                alreadyAdded = true;
-        }
-        if (mIngredient2->isUserString("ToolTipType"))
-        {
-            MWWorld::Ptr item2 = *mIngredient2->getUserData<MWWorld::Ptr>();
-            std::string name2 = MWWorld::Class::get(item2).getName(item2);
-            if (name == name2)
-                alreadyAdded = true;
-        }
-        if (mIngredient3->isUserString("ToolTipType"))
-        {
-            MWWorld::Ptr item2 = *mIngredient3->getUserData<MWWorld::Ptr>();
-            std::string name2 = MWWorld::Class::get(item2).getName(item2);
-            if (name == name2)
-                alreadyAdded = true;
-        }
-        if (mIngredient4->isUserString("ToolTipType"))
-        {
-            MWWorld::Ptr item2 = *mIngredient4->getUserData<MWWorld::Ptr>();
-            std::string name2 = MWWorld::Class::get(item2).getName(item2);
-            if (name == name2)
-                alreadyAdded = true;
-        }
+        for (int i=0; i<4; ++i)       
+            if (mIngredients[i]->isUserString("ToolTipType"))
+            {
+                MWWorld::Ptr item2 = *mIngredients[i]->getUserData<MWWorld::Ptr>();
+                std::string name2 = MWWorld::Class::get(item2).getName(item2);
+                if (name == name2)
+                    alreadyAdded = true;
+            }
+
         if (alreadyAdded)
             return;
 
-        if (!mIngredient1->isUserString("ToolTipType"))
-            add = mIngredient1;
-        if (add == NULL  && !mIngredient2->isUserString("ToolTipType"))
-            add = mIngredient2;
-        if (add == NULL  && !mIngredient3->isUserString("ToolTipType"))
-            add = mIngredient3;
-        if (add == NULL  && !mIngredient4->isUserString("ToolTipType"))
-            add = mIngredient4;
+        for (int i=0; i<4; ++i)
+            if (!mIngredients[i]->isUserString("ToolTipType"))
+            {
+                add = mIngredients[i];
+                break;
+            }
 
         if (add != NULL)
         {
@@ -346,14 +297,9 @@ namespace MWGui
     {
         std::vector<MWWorld::Ptr> ignore;
         // don't show ingredients that are currently selected in the "available ingredients" box.
-        if (mIngredient1->isUserString("ToolTipType"))
-            ignore.push_back(*mIngredient1->getUserData<MWWorld::Ptr>());
-        if (mIngredient2->isUserString("ToolTipType"))
-            ignore.push_back(*mIngredient2->getUserData<MWWorld::Ptr>());
-        if (mIngredient3->isUserString("ToolTipType"))
-            ignore.push_back(*mIngredient3->getUserData<MWWorld::Ptr>());
-        if (mIngredient4->isUserString("ToolTipType"))
-            ignore.push_back(*mIngredient4->getUserData<MWWorld::Ptr>());
+        for (int i=0; i<4; ++i)
+            if (mIngredients[i]->isUserString("ToolTipType"))
+                ignore.push_back(*mIngredients[i]->getUserData<MWWorld::Ptr>());
 
         return ignore;
     }
@@ -364,15 +310,7 @@ namespace MWGui
 
         for (int i=0; i<4; ++i)
         {
-            MyGUI::ImageBox* ingredient;
-            if (i==0)
-                ingredient = mIngredient1;
-            else if (i==1)
-                ingredient = mIngredient2;
-            else if (i==2)
-                ingredient = mIngredient3;
-            else if (i==3)
-                ingredient = mIngredient4;
+            MyGUI::ImageBox* ingredient = mIngredients[i];
 
             if (!ingredient->isUserString("ToolTipType"))
                 continue;
