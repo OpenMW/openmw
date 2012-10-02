@@ -118,7 +118,7 @@ void BirthDialog::updateBirths()
     for (; it != end; ++it)
     {
         const ESM::BirthSign &birth = it->second;
-        mBirthList->addItem(birth.name, it->first);
+        mBirthList->addItem(birth.mName, it->first);
         if (boost::iequals(it->first, mCurrentBirthId))
             mBirthList->setIndexSelected(index);
         ++index;
@@ -143,21 +143,21 @@ void BirthDialog::updateSpells()
     const ESMS::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
     const ESM::BirthSign *birth = store.birthSigns.find(mCurrentBirthId);
 
-    std::string texturePath = std::string("textures\\") + birth->texture;
+    std::string texturePath = std::string("textures\\") + birth->mTexture;
     fixTexturePath(texturePath);
     mBirthImage->setImageTexture(texturePath);
 
     std::vector<std::string> abilities, powers, spells;
 
-    std::vector<std::string>::const_iterator it = birth->powers.list.begin();
-    std::vector<std::string>::const_iterator end = birth->powers.list.end();
+    std::vector<std::string>::const_iterator it = birth->mPowers.mList.begin();
+    std::vector<std::string>::const_iterator end = birth->mPowers.mList.end();
     for (; it != end; ++it)
     {
         const std::string &spellId = *it;
         const ESM::Spell *spell = store.spells.search(spellId);
         if (!spell)
             continue; // Skip spells which cannot be found
-        ESM::Spell::SpellType type = static_cast<ESM::Spell::SpellType>(spell->data.type);
+        ESM::Spell::SpellType type = static_cast<ESM::Spell::SpellType>(spell->mData.mType);
         if (type != ESM::Spell::ST_Spell && type != ESM::Spell::ST_Ability && type != ESM::Spell::ST_Power)
             continue; // We only want spell, ability and powers.
 

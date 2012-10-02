@@ -35,7 +35,7 @@ namespace MWClass
             ptr.get<ESM::Static>();
         assert(ref->base != NULL);
 
-        const std::string &model = ref->base->model;
+        const std::string &model = ref->base->mModel;
         if (!model.empty()) {
             return "meshes\\" + model;
         }

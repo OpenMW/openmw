@@ -1,10 +1,13 @@
-#ifndef _ESM_CLAS_H
-#define _ESM_CLAS_H
+#ifndef OPENMW_ESM_CLAS_H
+#define OPENMW_ESM_CLAS_H
 
-#include "esm_reader.hpp"
+#include <string>
 
 namespace ESM
 {
+
+class ESMReader;
+class ESMWriter;
 
 /*
  * Character class definitions
@@ -43,24 +46,25 @@ struct Class
         Stealth = 2
     };
 
-    static const Specialization specializationIds[3];
-    static const char *gmstSpecializationIds[3];
+    static const Specialization sSpecializationIds[3];
+    static const char *sGmstSpecializationIds[3];
 
     struct CLDTstruct
     {
-        int attribute[2]; // Attributes that get class bonus
-        int specialization; // 0 = Combat, 1 = Magic, 2 = Stealth
-        int skills[5][2]; // Minor and major skills.
-        int isPlayable; // 0x0001 - Playable class
+        int mAttribute[2]; // Attributes that get class bonus
+        int mSpecialization; // 0 = Combat, 1 = Magic, 2 = Stealth
+        int mSkills[5][2]; // Minor and major skills.
+        int mIsPlayable; // 0x0001 - Playable class
 
         // I have no idea how to autocalculate these items...
-        int calc;
+        int mCalc;
     }; // 60 bytes
 
-    std::string name, description;
-    CLDTstruct data;
+    std::string mName, mDescription;
+    CLDTstruct mData;
 
     void load(ESMReader &esm);
+    void save(ESMWriter &esm);
 };
 }
 #endif

@@ -196,7 +196,7 @@ namespace MWGui
      * @param id Identifier for the GMST setting, e.g. "aName"
      * @param default Default value if the GMST setting cannot be used.
      */
-    virtual const std::string &getGameSettingString(const std::string &id, const std::string &default_);
+    virtual std::string getGameSettingString(const std::string &id, const std::string &default_);
 
     virtual void processChangedSettings(const Settings::CategorySettingVector& changed);
 
@@ -209,6 +209,7 @@ namespace MWGui
     virtual bool getRestEnabled() { return mRestAllowed; }
 
     virtual bool getPlayerSleeping();
+    virtual void wakeUpPlayer();
 
   private:
     OEngine::GUI::MyGUIManager *mGuiManager;

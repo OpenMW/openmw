@@ -49,44 +49,27 @@ bool Animation::findGroupTimes(const std::string &groupname, Animation::GroupTim
 
         std::string::const_iterator strpos = iter->second.begin();
         std::string::const_iterator strend = iter->second.end();
+        size_t strlen = strend-strpos;
 
-        while(strpos != strend)
+        if(start.size() <= strlen && std::mismatch(strpos, strend, start.begin(), checklow()).first == strend)
         {
-            size_t strlen = strend-strpos;
-            std::string::const_iterator striter;
-
-            if(start.size() <= strlen &&
-               ((striter=std::mismatch(strpos, strend, start.begin(), checklow()).first) == strend ||
-                *striter == '\r' || *striter == '\n'))
-            {
-                times->mStart = iter->first;
-                times->mLoopStart = iter->first;
-            }
-            else if(startloop.size() <= strlen &&
-                    ((striter=std::mismatch(strpos, strend, startloop.begin(), checklow()).first) == strend ||
-                     *striter == '\r' || *striter == '\n'))
-            {
-                times->mLoopStart = iter->first;
-            }
-            else if(stoploop.size() <= strlen &&
-                    ((striter=std::mismatch(strpos, strend, stoploop.begin(), checklow()).first) == strend ||
-                     *striter == '\r' || *striter == '\n'))
-            {
+            times->mStart = iter->first;
+            times->mLoopStart = iter->first;
+        }
+        else if(startloop.size() <= strlen && std::mismatch(strpos, strend, startloop.begin(), checklow()).first == strend)
+        {
+            times->mLoopStart = iter->first;
+        }
+        else if(stoploop.size() <= strlen && std::mismatch(strpos, strend, stoploop.begin(), checklow()).first == strend)
+        {
+            times->mLoopStop = iter->first;
+        }
+        else if(stop.size() <= strlen && std::mismatch(strpos, strend, stop.begin(), checklow()).first == strend)
+        {
+            times->mStop = iter->first;
+            if(times->mLoopStop < 0.0f)
                 times->mLoopStop = iter->first;
-            }
-            else if(stop.size() <= strlen &&
-                    ((striter=std::mismatch(strpos, strend, stop.begin(), checklow()).first) == strend ||
-                     *striter == '\r' || *striter == '\n'))
-            {
-                times->mStop = iter->first;
-                if(times->mLoopStop < 0.0f)
-                    times->mLoopStop = iter->first;
-                break;
-            }
-
-            strpos = std::find(strpos+1, strend, '\n');
-            while(strpos != strend && *strpos == '\n')
-                strpos++;
+            break;
         }
     }
 
@@ -104,17 +87,9 @@ void Animation::playGroup(std::string groupname, int mode, int loops)
         times.mStart = times.mLoopStart = 0.0f;
         times.mLoopStop = times.mStop = 0.0f;
 
-        if(mEntityList.mSkelBase)
-        {
-            Ogre::AnimationStateSet *aset = mEntityList.mSkelBase->getAllAnimationStates();
-            Ogre::AnimationStateIterator as = aset->getAnimationStateIterator();
-            while(as.hasMoreElements())
-            {
-                Ogre::AnimationState *state = as.getNext();
-                times.mLoopStop = times.mStop = state->getLength();
-                break;
-            }
-        }
+        NifOgre::TextKeyMap::const_reverse_iterator iter = mTextKeys.rbegin();
+        if(iter != mTextKeys.rend())
+            times.mLoopStop = times.mStop = iter->first;
     }
     else if(!findGroupTimes(groupname, &times))
         throw std::runtime_error("Failed to find animation group "+groupname);

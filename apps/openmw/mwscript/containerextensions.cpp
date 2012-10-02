@@ -78,7 +78,7 @@ namespace MWScript
                     Interpreter::Type_Integer sum = 0;
 
                     for (MWWorld::ContainerStoreIterator iter (store.begin()); iter!=store.end(); ++iter)
-                        if (toLower(iter->getCellRef().refID) == toLower(item))
+                        if (toLower(iter->getCellRef().mRefID) == toLower(item))
                             sum += iter->getRefData().getCount();
 
                     runtime.push (sum);
@@ -108,7 +108,7 @@ namespace MWScript
                     for (MWWorld::ContainerStoreIterator iter (store.begin()); iter!=store.end() && count;
                         ++iter)
                     {
-                        if (toLower(iter->getCellRef().refID) == toLower(item))
+                        if (toLower(iter->getCellRef().mRefID) == toLower(item))
                         {
                             if (iter->getRefData().getCount()<=count)
                             {

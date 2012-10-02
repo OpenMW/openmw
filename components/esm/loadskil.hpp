@@ -1,12 +1,16 @@
-#ifndef _ESM_SKIL_H
-#define _ESM_SKIL_H
+#ifndef OPENMW_ESM_SKIL_H
+#define OPENMW_ESM_SKIL_H
+
+#include <string>
 
 #include <boost/array.hpp>
 
-#include "esm_reader.hpp"
 #include "defs.hpp"
 
 namespace ESM {
+
+class ESMReader;
+class ESMWriter;
 
 /*
  * Skill information
@@ -17,20 +21,20 @@ struct Skill
 {
   struct SKDTstruct
   {
-    int attribute;     // see defs.hpp
-    int specialization;// 0 - Combat, 1 - Magic, 2 - Stealth
-    float useValue[4]; // How much skill improves through use. Meaning
+    int mAttribute;     // see defs.hpp
+    int mSpecialization;// 0 - Combat, 1 - Magic, 2 - Stealth
+    float mUseValue[4]; // How much skill improves through use. Meaning
                // of each field depends on what skill this
                // is. We should document this better later.
   }; // Total size: 24 bytes
-  SKDTstruct data;
+  SKDTstruct mData;
 
   // Skill index. Skils don't have an id ("NAME") like most records,
   // they only have a numerical index that matches one of the
   // hard-coded skills in the game.
-  int index;
+  int mIndex;
 
-  std::string description;
+  std::string mDescription;
 
     enum SkillEnum
     {
@@ -65,9 +69,10 @@ struct Skill
     };
   static const std::string sSkillNameIds[Length];
   static const std::string sIconNames[Length];
-  static const boost::array<SkillEnum, Length> skillIds;
+  static const boost::array<SkillEnum, Length> sSkillIds;
 
   void load(ESMReader &esm);
+  void save(ESMWriter &esm);
 };
 }
 #endif

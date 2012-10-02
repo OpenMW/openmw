@@ -58,9 +58,9 @@ namespace MWWorld
     template <typename Y>
     void find(ESM::CellRef &ref, const Y& recList)
     {
-      const X* obj = recList.find(ref.refID);
+      const X* obj = recList.find(ref.mRefID);
       if(obj == NULL)
-        throw std::runtime_error("Error resolving cell reference " + ref.refID);
+        throw std::runtime_error("Error resolving cell reference " + ref.mRefID);
 
       list.push_back(LiveRef(ref, obj));
     }
@@ -69,7 +69,7 @@ namespace MWWorld
     {
         for (typename std::list<LiveRef>::iterator iter (list.begin()); iter!=list.end(); ++iter)
         {
-            if (iter->mData.getCount() > 0 && iter->ref.refID == name)
+            if (iter->mData.getCount() > 0 && iter->ref.mRefID == name)
                 return &*iter;
         }
 
@@ -156,9 +156,9 @@ namespace MWWorld
     }
 
     bool operator==(const CellStore &cell) {
-        return  this->cell->name == cell.cell->name &&
-                this->cell->data.gridX == cell.cell->data.gridX &&
-                this->cell->data.gridY == cell.cell->data.gridY;
+        return  this->cell->mName == cell.cell->mName &&
+                this->cell->mData.mX == cell.cell->mData.mX &&
+                this->cell->mData.mY == cell.cell->mData.mY;
     }
 
     bool operator!=(const CellStore &cell) {

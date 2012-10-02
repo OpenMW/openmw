@@ -1,6 +1,6 @@
 #include <QtGui>
 
-#include <components/esm/esm_reader.hpp>
+#include <components/esm/esmreader.hpp>
 #include <components/files/configurationmanager.hpp>
 
 #include "datafilespage.hpp"

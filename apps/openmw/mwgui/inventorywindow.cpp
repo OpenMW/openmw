@@ -284,7 +284,7 @@ namespace MWGui
         for (MWWorld::ContainerStoreIterator it = invStore.begin();
                 it != invStore.end(); ++it)
         {
-            if (toLower(it->getCellRef().refID) == "gold_001")
+            if (toLower(it->getCellRef().mRefID) == "gold_001")
                 return it->getRefData().getCount();
         }
         return 0;

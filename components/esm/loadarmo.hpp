@@ -1,10 +1,14 @@
-#ifndef _ESM_ARMO_H
-#define _ESM_ARMO_H
+#ifndef OPENMW_ESM_ARMO_H
+#define OPENMW_ESM_ARMO_H
 
-#include "esm_reader.hpp"
+#include <vector>
+#include <string>
 
 namespace ESM
 {
+
+class ESMReader;
+class ESMWriter;
 
 enum PartReferenceType
 {
@@ -40,16 +44,17 @@ enum PartReferenceType
 // Reference to body parts
 struct PartReference
 {
-    char part;
-    std::string male, female;
+    char mPart;
+    std::string mMale, mFemale;
 };
 
 // A list of references to body parts
 struct PartReferenceList
 {
-    std::vector<PartReference> parts;
+    std::vector<PartReference> mParts;
 
     void load(ESMReader &esm);
+    void save(ESMWriter &esm);
 };
 
 struct Armor
@@ -71,17 +76,18 @@ struct Armor
 
     struct AODTstruct
     {
-        int type;
-        float weight;
-        int value, health, enchant, armor;
+        int mType;
+        float mWeight;
+        int mValue, mHealth, mEnchant, mArmor;
     };
 
-    AODTstruct data;
-    PartReferenceList parts;
+    AODTstruct mData;
+    PartReferenceList mParts;
 
-    std::string name, model, icon, script, enchant;
+    std::string mName, mModel, mIcon, mScript, mEnchant;
 
     void load(ESMReader &esm);
+    void save(ESMWriter &esm);
 };
 }
 #endif

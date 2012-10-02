@@ -202,7 +202,7 @@ namespace MWGui
     {
         MWBase::Environment::get().getWorld ()->getFader ()->fadeIn(0.2);
         mProgressBar.setVisible (false);
-        mWindowManager.popGuiMode ();
+        mWindowManager.removeGuiMode (GM_Rest);
         mWaiting = false;
 
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
@@ -213,6 +213,13 @@ namespace MWGui
         {
             mWindowManager.pushGuiMode (GM_Levelup);
         }
+    }
+
+    void WaitDialog::wakeUp ()
+    {
+        mSleeping = false;
+        mWaiting = false;
+        stopWaiting();
     }
 
 }

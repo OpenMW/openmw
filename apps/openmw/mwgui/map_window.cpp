@@ -406,16 +406,15 @@ void MapWindow::globalMapUpdatePlayer ()
         rotatingSubskin->setCenter(MyGUI::IntPoint(16,16));
         float angle = std::atan2(dir.x, dir.y);
         rotatingSubskin->setAngle(angle);
-    }
 
-    // set the view offset so that player is in the center
-    MyGUI::IntSize viewsize = mGlobalMap->getSize();
-    MyGUI::IntPoint viewoffs(0.5*viewsize.width - worldX, 0.5*viewsize.height - worldY);
-    mGlobalMap->setViewOffset(viewoffs);
+        // set the view offset so that player is in the center
+        MyGUI::IntSize viewsize = mGlobalMap->getSize();
+        MyGUI::IntPoint viewoffs(0.5*viewsize.width - worldX, 0.5*viewsize.height - worldY);
+        mGlobalMap->setViewOffset(viewoffs);
+    }
 }
 
 void MapWindow::notifyPlayerUpdate ()
 {
-    if (mGlobal)
-        globalMapUpdatePlayer ();
+    globalMapUpdatePlayer ();
 }

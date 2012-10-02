@@ -1,10 +1,14 @@
-#ifndef _ESM_LEVLISTS_H
-#define _ESM_LEVLISTS_H
+#ifndef OPENMW_ESM_LEVLISTS_H
+#define OPENMW_ESM_LEVLISTS_H
 
-#include "esm_reader.hpp"
+#include <string>
+#include <vector>
 
 namespace ESM
 {
+
+class ESMReader;
+class ESMWriter;
 
 /*
  * Leveled lists. Since these have identical layout, I only bothered
@@ -27,29 +31,30 @@ struct LeveledListBase
     };                    // (used when a container has more
                           // than one instance of one leveled
                           // list.)
-    int flags;
-    unsigned char chanceNone; // Chance that none are selected (0-255?)
+    int mFlags;
+    unsigned char mChanceNone; // Chance that none are selected (0-255?)
 
     // Record name used to read references. Must be set before load() is
     // called.
-    const char *recName;
+    const char *mRecName;
 
     struct LevelItem
     {
-        std::string id;
-        short level;
+        std::string mId;
+        short mLevel;
     };
 
-    std::vector<LevelItem> list;
+    std::vector<LevelItem> mList;
 
     void load(ESMReader &esm);
+    void save(ESMWriter &esm);
 };
 
 struct CreatureLevList: LeveledListBase
 {
     CreatureLevList()
     {
-        recName = "CNAM";
+        mRecName = "CNAM";
     }
 };
 
@@ -57,7 +62,7 @@ struct ItemLevList: LeveledListBase
 {
     ItemLevList()
     {
-        recName = "INAM";
+        mRecName = "INAM";
     }
 };
 

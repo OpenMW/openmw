@@ -88,11 +88,11 @@ namespace MWWorld
                 mPhysics->removeObject (node->getName());
             }
 
-            if (!((*iter)->cell->data.flags & ESM::Cell::Interior))
+            if (!((*iter)->cell->mData.mFlags & ESM::Cell::Interior))
             {
-                ESM::Land* land = MWBase::Environment::get().getWorld()->getStore().lands.search((*iter)->cell->data.gridX,(*iter)->cell->data.gridY);
+                ESM::Land* land = MWBase::Environment::get().getWorld()->getStore().lands.search((*iter)->cell->mData.mX,(*iter)->cell->mData.mY);
                 if (land)
-                    mPhysics->removeHeightField( (*iter)->cell->data.gridX, (*iter)->cell->data.gridY );
+                    mPhysics->removeHeightField( (*iter)->cell->mData.mX, (*iter)->cell->mData.mY );
             }
         }
 
@@ -126,12 +126,12 @@ namespace MWWorld
             float verts = ESM::Land::LAND_SIZE;
             float worldsize = ESM::Land::REAL_SIZE;
 
-            if (!(cell->cell->data.flags & ESM::Cell::Interior))
+            if (!(cell->cell->mData.mFlags & ESM::Cell::Interior))
             {
-                ESM::Land* land = MWBase::Environment::get().getWorld()->getStore().lands.search(cell->cell->data.gridX,cell->cell->data.gridY);
+                ESM::Land* land = MWBase::Environment::get().getWorld()->getStore().lands.search(cell->cell->mData.mX,cell->cell->mData.mY);
                 if (land)
-                    mPhysics->addHeightField (land->landData->heights,
-                        cell->cell->data.gridX, cell->cell->data.gridY,
+                    mPhysics->addHeightField (land->mLandData->mHeights,
+                        cell->cell->mData.mX, cell->cell->mData.mY,
                         0, ( worldsize/(verts-1) ), verts);
             }
 
@@ -149,8 +149,8 @@ namespace MWWorld
         const ESM::Position& pos,
         bool adjustPlayerPos)
     {
-        bool hasWater = cell->cell->data.flags & cell->cell->HasWater;
-        mPhysics->setCurrentWater(hasWater, cell->cell->water);
+        bool hasWater = cell->cell->mData.mFlags & cell->cell->HasWater;
+        mPhysics->setCurrentWater(hasWater, cell->cell->mWater);
 
         MWBase::World *world = MWBase::Environment::get().getWorld();
         world->getPlayer().setCell(cell);
@@ -188,10 +188,10 @@ namespace MWWorld
         int numUnload = 0;
         while (active!=mActiveCells.end())
         {
-            if (!((*active)->cell->data.flags & ESM::Cell::Interior))
+            if (!((*active)->cell->mData.mFlags & ESM::Cell::Interior))
             {
-                if (std::abs (X-(*active)->cell->data.gridX)<=1 &&
-                    std::abs (Y-(*active)->cell->data.gridY)<=1)
+                if (std::abs (X-(*active)->cell->mData.mX)<=1 &&
+                    std::abs (Y-(*active)->cell->mData.mY)<=1)
                 {
                     // keep cells within the new 3x3 grid
                     ++active;
@@ -206,10 +206,10 @@ namespace MWWorld
         active = mActiveCells.begin();
         while (active!=mActiveCells.end())
         {
-            if (!((*active)->cell->data.flags & ESM::Cell::Interior))
+            if (!((*active)->cell->mData.mFlags & ESM::Cell::Interior))
             {
-                if (std::abs (X-(*active)->cell->data.gridX)<=1 &&
-                    std::abs (Y-(*active)->cell->data.gridY)<=1)
+                if (std::abs (X-(*active)->cell->mData.mX)<=1 &&
+                    std::abs (Y-(*active)->cell->mData.mY)<=1)
                 {
                     // keep cells within the new 3x3 grid
                     ++active;
@@ -231,10 +231,10 @@ namespace MWWorld
 
                 while (iter!=mActiveCells.end())
                 {
-                    assert (!((*iter)->cell->data.flags & ESM::Cell::Interior));
+                    assert (!((*iter)->cell->mData.mFlags & ESM::Cell::Interior));
 
-                    if (x==(*iter)->cell->data.gridX &&
-                        y==(*iter)->cell->data.gridY)
+                    if (x==(*iter)->cell->mData.mX &&
+                        y==(*iter)->cell->mData.mY)
                         break;
 
                     ++iter;
@@ -253,10 +253,10 @@ namespace MWWorld
 
                 while (iter!=mActiveCells.end())
                 {
-                    assert (!((*iter)->cell->data.flags & ESM::Cell::Interior));
+                    assert (!((*iter)->cell->mData.mFlags & ESM::Cell::Interior));
 
-                    if (x==(*iter)->cell->data.gridX &&
-                        y==(*iter)->cell->data.gridY)
+                    if (x==(*iter)->cell->mData.mX &&
+                        y==(*iter)->cell->mData.mY)
                         break;
 
                     ++iter;
@@ -277,10 +277,10 @@ namespace MWWorld
 
         while (iter!=mActiveCells.end())
         {
-            assert (!((*iter)->cell->data.flags & ESM::Cell::Interior));
+            assert (!((*iter)->cell->mData.mFlags & ESM::Cell::Interior));
 
-            if (X==(*iter)->cell->data.gridX &&
-                Y==(*iter)->cell->data.gridY)
+            if (X==(*iter)->cell->mData.mX &&
+                Y==(*iter)->cell->mData.mY)
                 break;
 
             ++iter;

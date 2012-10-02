@@ -112,12 +112,9 @@ namespace MWBase
             virtual bool getSoundPlaying(MWWorld::Ptr reference, const std::string& soundId) const = 0;
             ///< Is the given sound currently playing on the given object?
 
-            virtual void updateObject(MWWorld::Ptr reference) = 0;
-            ///< Update the position of all sounds connected to the given object.
-
             virtual void update(float duration) = 0;
 
-            virtual void setListenerPosDir(const Ogre::Vector3 &pos, const Ogre::Vector3 &dir) = 0;
+            virtual void setListenerPosDir(const Ogre::Vector3 &pos, const Ogre::Vector3 &dir, const Ogre::Vector3 &up) = 0;
     };
 
     inline int operator|(SoundManager::PlayMode a, SoundManager::PlayMode b)

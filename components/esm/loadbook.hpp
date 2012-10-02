@@ -1,28 +1,31 @@
-#ifndef _ESM_BOOK_H
-#define _ESM_BOOK_H
+#ifndef OPENMW_ESM_BOOK_H
+#define OPENMW_ESM_BOOK_H
 
-#include "esm_reader.hpp"
+#include <string>
 
 namespace ESM
 {
-
 /*
  * Books, magic scrolls, notes and so on
  */
+
+class ESMReader;
+class ESMWriter;
 
 struct Book
 {
     struct BKDTstruct
     {
-        float weight;
-        int value, isScroll, skillID, enchant;
+        float mWeight;
+        int mValue, mIsScroll, mSkillID, mEnchant;
     };
 
-    BKDTstruct data;
-    std::string name, model, icon, script, enchant, text;
-    std::string id;
+    BKDTstruct mData;
+    std::string mName, mModel, mIcon, mScript, mEnchant, mText;
+    std::string mId;
 
-    void load(ESMReader &esm, const std::string& recordId);
+    void load(ESMReader &esm);
+    void save(ESMWriter &esm);
 };
 }
 #endif

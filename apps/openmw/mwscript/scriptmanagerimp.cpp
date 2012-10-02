@@ -38,7 +38,7 @@ namespace MWScript
 
             try
             {
-                std::istringstream input (script->scriptText);
+                std::istringstream input (script->mScriptText);
 
                 Compiler::Scanner scanner (mErrorHandler, input, mCompilerContext.getExtensions());
 
@@ -62,7 +62,7 @@ namespace MWScript
             {
                 std::cerr
                     << "compiling failed: " << name << std::endl
-                    << script->scriptText
+                    << script->mScriptText
                     << std::endl << std::endl;
             }
 
@@ -180,19 +180,19 @@ namespace MWScript
             case 's':
 
                 offset = 0;
-                size = script->data.numShorts;
+                size = script->mData.mNumShorts;
                 break;
 
             case 'l':
 
-                offset = script->data.numShorts;
-                size = script->data.numLongs;
+                offset = script->mData.mNumShorts;
+                size = script->mData.mNumLongs;
                 break;
 
             case 'f':
 
-                offset = script->data.numShorts+script->data.numLongs;
-                size = script->data.numFloats;
+                offset = script->mData.mNumShorts+script->mData.mNumLongs;
+                size = script->mData.mNumFloats;
 
             default:
 
@@ -200,7 +200,7 @@ namespace MWScript
         }
 
         for (int i=0; i<size; ++i)
-            if (script->varNames.at (i+offset)==variable)
+            if (script->mVarNames.at (i+offset)==variable)
                 return i;
 
         throw std::runtime_error ("unable to access local variable " + variable + " of " + scriptId);

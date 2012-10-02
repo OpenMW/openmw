@@ -1,12 +1,16 @@
 #ifndef OPENMW_ESM_AIPACKAGE_H
 #define OPENMW_ESM_AIPACKAGE_H
 
-#include "esm_reader.hpp"
-
 #include <vector>
+#include <string>
+
+#include "esmcommon.hpp"
 
 namespace ESM
 {
+    class ESMReader;
+    class ESMWriter;
+
     #pragma pack(push)
     #pragma pack(1)
 
@@ -31,7 +35,7 @@ namespace ESM
     struct AITravel
     {
         float   mX, mY, mZ;
-        long    mUnk;
+        int     mUnk;
     };
 
     struct AITarget
@@ -88,6 +92,7 @@ namespace ESM
         /// it needs to use retSubName() if needed. But, hey, there
         /// is only one field left (XSCL) and only two records uses AI
         void load(ESMReader &esm);
+        void save(ESMWriter &esm);
     };
 }
 

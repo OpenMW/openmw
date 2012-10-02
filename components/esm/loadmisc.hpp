@@ -1,10 +1,13 @@
-#ifndef _ESM_MISC_H
-#define _ESM_MISC_H
+#ifndef OPENMW_ESM_MISC_H
+#define OPENMW_ESM_MISC_H
 
-#include "esm_reader.hpp"
+#include <string>
 
 namespace ESM
 {
+
+class ESMReader;
+class ESMWriter;
 
 /*
  * Misc inventory items, basically things that have no use but can be
@@ -15,17 +18,18 @@ struct Miscellaneous
 {
     struct MCDTstruct
     {
-        float weight;
-        int value;
-        int isKey; // There are many keys in Morrowind.esm that has this
+        float mWeight;
+        int mValue;
+        int mIsKey; // There are many keys in Morrowind.esm that has this
                    // set to 0. TODO: Check what this field corresponds to
                    // in the editor.
     };
-    MCDTstruct data;
+    MCDTstruct mData;
 
-    std::string name, model, icon, script;
+    std::string mName, mModel, mIcon, mScript;
 
     void load(ESMReader &esm);
+    void save(ESMWriter &esm);
 };
 }
 #endif

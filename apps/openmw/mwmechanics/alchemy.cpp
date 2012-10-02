@@ -22,13 +22,13 @@ void MWMechanics::Alchemy::setAlchemist (const MWWorld::Ptr& npc)
     {    
         MWWorld::LiveCellRef<ESM::Apparatus>* ref = iter->get<ESM::Apparatus>();
     
-        int type = ref->base->data.type;
+        int type = ref->base->mData.mType;
     
         if (type<0 || type>=static_cast<int> (mTools.size()))
             throw std::runtime_error ("invalid apparatus type");
             
         if (!mTools[type].isEmpty())
-            if (ref->base->data.quality<=mTools[type].get<ESM::Apparatus>()->base->data.quality)
+            if (ref->base->mData.mQuality<=mTools[type].get<ESM::Apparatus>()->base->mData.mQuality)
                 continue;
         
         mTools[type] = *iter;        
