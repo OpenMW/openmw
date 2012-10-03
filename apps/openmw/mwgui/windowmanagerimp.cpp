@@ -578,6 +578,7 @@ void WindowManager::onFrame (float frameDuration)
     mTradeWindow->checkReferenceAvailable();
     mSpellBuyingWindow->checkReferenceAvailable();
     mSpellCreationDialog->checkReferenceAvailable();
+    mEnchantingDialog->checkReferenceAvailable();
     mContainerWindow->checkReferenceAvailable();
     mConsole->checkReferenceAvailable();
 }

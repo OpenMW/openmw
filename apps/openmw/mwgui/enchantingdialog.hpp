@@ -19,6 +19,10 @@ namespace MWGui
 
     protected:
         virtual void onReferenceUnavailable();
+
+        void onCancelButtonClicked(MyGUI::Widget* sender);
+
+        MyGUI::Button* mCancelButton;
     };
 
 }

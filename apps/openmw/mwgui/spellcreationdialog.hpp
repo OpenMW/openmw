@@ -4,6 +4,7 @@
 #include "window_base.hpp"
 #include "referenceinterface.hpp"
 #include "list.hpp"
+#include "widgets.hpp"
 
 namespace MWGui
 {
@@ -18,7 +19,17 @@ namespace MWGui
 
         virtual void open();
 
-        void setEffect (const ESM::MagicEffect* effect);
+        void setSkill(int skill);
+        void setAttribute(int attribute);
+
+        void newEffect (const ESM::MagicEffect* effect);
+        void editEffect (ESM::ENAMstruct effect);
+
+        typedef MyGUI::delegates::CMultiDelegate1<ESM::ENAMstruct> EventHandle_Effect;
+
+        EventHandle_Effect eventEffectAdded;
+        EventHandle_Effect eventEffectModified;
+        EventHandle_Effect eventEffectRemoved;
 
     protected:
         MyGUI::Button* mCancelButton;
@@ -42,11 +53,15 @@ namespace MWGui
         MyGUI::ImageBox* mEffectImage;
         MyGUI::TextBox* mEffectName;
 
+        bool mEditing;
+
     protected:
         void onRangeButtonClicked (MyGUI::Widget* sender);
         void onDeleteButtonClicked (MyGUI::Widget* sender);
         void onOkButtonClicked (MyGUI::Widget* sender);
         void onCancelButtonClicked (MyGUI::Widget* sender);
+
+        void setMagicEffect(const ESM::MagicEffect* effect);
 
     protected:
         ESM::ENAMstruct mEffect;
@@ -68,6 +83,17 @@ namespace MWGui
         void onBuyButtonClicked (MyGUI::Widget* sender);
         void onAvailableEffectClicked (MyGUI::Widget* sender);
 
+        void onAttributeOrSkillCancel();
+        void onSelectAttribute();
+        void onSelectSkill();
+
+        void onEffectAdded(ESM::ENAMstruct effect);
+        void onEffectModified(ESM::ENAMstruct effect);
+        void onEffectRemoved(ESM::ENAMstruct effect);
+
+        void updateEffectsView();
+
+        void onEditEffect(MyGUI::Widget* sender);
 
         MyGUI::EditBox* mNameEdit;
         MyGUI::TextBox* mMagickaCost;
@@ -78,10 +104,16 @@ namespace MWGui
         MyGUI::Button* mCancelButton;
         MyGUI::TextBox* mPriceLabel;
 
+        int mSelectedEffect;
+
         EditEffectDialog mAddEffectDialog;
 
         SelectAttributeDialog* mSelectAttributeDialog;
         SelectSkillDialog* mSelectSkillDialog;
+
+        Widgets::MWEffectList* mUsedEffectsList;
+
+        std::vector<ESM::ENAMstruct> mEffects;
 
     };
 

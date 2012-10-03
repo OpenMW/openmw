@@ -385,82 +385,77 @@ void MWSpellEffect::setSpellEffect(const SpellEffectParams& params)
 
 void MWSpellEffect::updateWidgets()
 {
-    if (!mWindowManager)
-        return;
-
     const ESMS::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
     const ESM::MagicEffect *magicEffect = store.magicEffects.search(mEffectParams.mEffectID);
-    if (!magicEffect)
-        return;
-    if (mTextWidget)
+
+    assert(magicEffect);
+    assert(mWindowManager);
+
+    std::string pt =  mWindowManager->getGameSettingString("spoint", "");
+    std::string pts =  mWindowManager->getGameSettingString("spoints", "");
+    std::string to =  " " + mWindowManager->getGameSettingString("sTo", "") + " ";
+    std::string sec =  " " + mWindowManager->getGameSettingString("ssecond", "");
+    std::string secs =  " " + mWindowManager->getGameSettingString("sseconds", "");
+
+    std::string effectIDStr = ESM::MagicEffect::effectIdToString(mEffectParams.mEffectID);
+    std::string spellLine = mWindowManager->getGameSettingString(effectIDStr, "");
+
+    if (magicEffect->mData.mFlags & ESM::MagicEffect::TargetSkill)
     {
-        std::string pt =  mWindowManager->getGameSettingString("spoint", "");
-        std::string pts =  mWindowManager->getGameSettingString("spoints", "");
-        std::string to =  " " + mWindowManager->getGameSettingString("sTo", "") + " ";
-        std::string sec =  " " + mWindowManager->getGameSettingString("ssecond", "");
-        std::string secs =  " " + mWindowManager->getGameSettingString("sseconds", "");
-
-        std::string effectIDStr = ESM::MagicEffect::effectIdToString(mEffectParams.mEffectID);
-        std::string spellLine = mWindowManager->getGameSettingString(effectIDStr, "");
-        if (magicEffect->mData.mFlags & ESM::MagicEffect::TargetSkill)
-        {
-            spellLine += " " + mWindowManager->getGameSettingString(ESM::Skill::sSkillNameIds[mEffectParams.mSkill], "");
-        }
-        if (magicEffect->mData.mFlags & ESM::MagicEffect::TargetAttribute)
-        {
-            static const char *attributes[8] = {
-                "sAttributeStrength",
-                "sAttributeIntelligence",
-                "sAttributeWillpower",
-                "sAttributeAgility",
-                "sAttributeSpeed",
-                "sAttributeEndurance",
-                "sAttributePersonality",
-                "sAttributeLuck"
-            };
-            spellLine += " " + mWindowManager->getGameSettingString(attributes[mEffectParams.mAttribute], "");
-        }
-
-        if ((mEffectParams.mMagnMin >= 0 || mEffectParams.mMagnMax >= 0) && !(magicEffect->mData.mFlags & ESM::MagicEffect::NoMagnitude))
-        {
-            if (mEffectParams.mMagnMin == mEffectParams.mMagnMax)
-                spellLine += " " + boost::lexical_cast<std::string>(mEffectParams.mMagnMin) + " " + ((mEffectParams.mMagnMin == 1) ? pt : pts);
-            else
-            {
-                spellLine += " " + boost::lexical_cast<std::string>(mEffectParams.mMagnMin) + to + boost::lexical_cast<std::string>(mEffectParams.mMagnMax) + " " + pts;
-            }
-        }
-
-        // constant effects have no duration and no target
-        if (!mEffectParams.mIsConstant)
-        {
-            if (mEffectParams.mDuration >= 0 && !(magicEffect->mData.mFlags & ESM::MagicEffect::NoDuration))
-            {
-                spellLine += " " + mWindowManager->getGameSettingString("sfor", "") + " " + boost::lexical_cast<std::string>(mEffectParams.mDuration) + ((mEffectParams.mDuration == 1) ? sec : secs);
-            }
-
-            // potions have no target
-            if (!mEffectParams.mNoTarget)
-            {
-                std::string on = mWindowManager->getGameSettingString("sonword", "");
-                if (mEffectParams.mRange == ESM::RT_Self)
-                    spellLine += " " + on + " " + mWindowManager->getGameSettingString("sRangeSelf", "");
-                else if (mEffectParams.mRange == ESM::RT_Touch)
-                    spellLine += " " + on + " " + mWindowManager->getGameSettingString("sRangeTouch", "");
-                else if (mEffectParams.mRange == ESM::RT_Target)
-                    spellLine += " " + on + " " + mWindowManager->getGameSettingString("sRangeTarget", "");
-            }
-        }
-
-        static_cast<MyGUI::TextBox*>(mTextWidget)->setCaption(spellLine);
-        mRequestedWidth = mTextWidget->getTextSize().width + 24;
+        spellLine += " " + mWindowManager->getGameSettingString(ESM::Skill::sSkillNameIds[mEffectParams.mSkill], "");
     }
-    if (mImageWidget)
+    if (magicEffect->mData.mFlags & ESM::MagicEffect::TargetAttribute)
     {
-        std::string path = std::string("icons\\") + magicEffect->mIcon;
-        fixTexturePath(path);
-        mImageWidget->setImageTexture(path);
+        static const char *attributes[8] = {
+            "sAttributeStrength",
+            "sAttributeIntelligence",
+            "sAttributeWillpower",
+            "sAttributeAgility",
+            "sAttributeSpeed",
+            "sAttributeEndurance",
+            "sAttributePersonality",
+            "sAttributeLuck"
+        };
+        spellLine += " " + mWindowManager->getGameSettingString(attributes[mEffectParams.mAttribute], "");
     }
+
+    if ((mEffectParams.mMagnMin >= 0 || mEffectParams.mMagnMax >= 0) && !(magicEffect->mData.mFlags & ESM::MagicEffect::NoMagnitude))
+    {
+        if (mEffectParams.mMagnMin == mEffectParams.mMagnMax)
+            spellLine += " " + boost::lexical_cast<std::string>(mEffectParams.mMagnMin) + " " + ((mEffectParams.mMagnMin == 1) ? pt : pts);
+        else
+        {
+            spellLine += " " + boost::lexical_cast<std::string>(mEffectParams.mMagnMin) + to + boost::lexical_cast<std::string>(mEffectParams.mMagnMax) + " " + pts;
+        }
+    }
+
+    // constant effects have no duration and no target
+    if (!mEffectParams.mIsConstant)
+    {
+        if (mEffectParams.mDuration >= 0 && !(magicEffect->mData.mFlags & ESM::MagicEffect::NoDuration))
+        {
+            spellLine += " " + mWindowManager->getGameSettingString("sfor", "") + " " + boost::lexical_cast<std::string>(mEffectParams.mDuration) + ((mEffectParams.mDuration == 1) ? sec : secs);
+        }
+
+        // potions have no target
+        if (!mEffectParams.mNoTarget)
+        {
+            std::string on = mWindowManager->getGameSettingString("sonword", "");
+            if (mEffectParams.mRange == ESM::RT_Self)
+                spellLine += " " + on + " " + mWindowManager->getGameSettingString("sRangeSelf", "");
+            else if (mEffectParams.mRange == ESM::RT_Touch)
+                spellLine += " " + on + " " + mWindowManager->getGameSettingString("sRangeTouch", "");
+            else if (mEffectParams.mRange == ESM::RT_Target)
+                spellLine += " " + on + " " + mWindowManager->getGameSettingString("sRangeTarget", "");
+        }
+    }
+
+    static_cast<MyGUI::TextBox*>(mTextWidget)->setCaption(spellLine);
+    mRequestedWidth = mTextWidget->getTextSize().width + 24;
+
+    std::string path = std::string("icons\\") + magicEffect->mIcon;
+    fixTexturePath(path);
+    mImageWidget->setImageTexture(path);
 }
 
 MWSpellEffect::~MWSpellEffect()

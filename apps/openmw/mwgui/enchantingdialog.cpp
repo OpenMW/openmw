@@ -8,7 +8,9 @@ namespace MWGui
     EnchantingDialog::EnchantingDialog(MWBase::WindowManager &parWindowManager)
         : WindowBase("openmw_enchanting_dialog.layout", parWindowManager)
     {
+        getWidget(mCancelButton, "CancelButton");
 
+        mCancelButton->eventMouseButtonClick += MyGUI::newDelegate(this, &EnchantingDialog::onCancelButtonClicked);
     }
 
     void EnchantingDialog::open()
@@ -27,4 +29,8 @@ namespace MWGui
         mWindowManager.removeGuiMode (GM_Enchanting);
     }
 
+    void EnchantingDialog::onCancelButtonClicked(MyGUI::Widget* sender)
+    {
+        mWindowManager.removeGuiMode (GM_Enchanting);
+    }
 }

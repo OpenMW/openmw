@@ -48,7 +48,8 @@
             <Property key="Caption" value="#{sEffects}"/>
         </Widget>
         <Widget type="Widget" skin="MW_Box" position="226 76 316 269">
-            <Widget type="ScrollView" skin="MW_ScrollView" position="4 4 308 261" name="UsedEffects">
+            <Widget type="ScrollView" skin="MW_ScrollViewH" position="4 4 308 261" name="UsedEffects">
+                <Property key="CanvasAlign" value="Left Top"/>
             </Widget>
         </Widget>
 
