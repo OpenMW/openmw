@@ -152,9 +152,7 @@ namespace MWGui
 
     SpellCreationDialog::SpellCreationDialog(MWBase::WindowManager &parWindowManager)
         : WindowBase("openmw_spellcreation_dialog.layout", parWindowManager)
-        , mAddEffectDialog(parWindowManager)
-        , mSelectAttributeDialog(NULL)
-        , mSelectSkillDialog(NULL)
+        , EffectEditorBase(parWindowManager)
     {
         getWidget(mNameEdit, "NameEdit");
         getWidget(mMagickaCost, "MagickaCost");
@@ -165,18 +163,28 @@ namespace MWGui
         getWidget(mBuyButton, "BuyButton");
         getWidget(mCancelButton, "CancelButton");
 
-        mAddEffectDialog.setVisible(false);
-
         mCancelButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SpellCreationDialog::onCancelButtonClicked);
         mBuyButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SpellCreationDialog::onBuyButtonClicked);
 
-        mAvailableEffectsList->eventWidgetSelected += MyGUI::newDelegate(this, &SpellCreationDialog::onAvailableEffectClicked);
-
-        mAddEffectDialog.eventEffectAdded += MyGUI::newDelegate(this, &SpellCreationDialog::onEffectAdded);
-        mAddEffectDialog.eventEffectModified += MyGUI::newDelegate(this, &SpellCreationDialog::onEffectModified);
-        mAddEffectDialog.eventEffectRemoved += MyGUI::newDelegate(this, &SpellCreationDialog::onEffectRemoved);
+        setWidgets(mAvailableEffectsList, mUsedEffectsView);
     }
 
+    void SpellCreationDialog::startSpellMaking (MWWorld::Ptr actor)
+    {
+        mPtr = actor;
+
+        startEditing();
+    }
+
+    void SpellCreationDialog::onCancelButtonClicked (MyGUI::Widget* sender)
+    {
+        mWindowManager.removeGuiMode (MWGui::GM_SpellCreation);
+    }
+
+    void SpellCreationDialog::onBuyButtonClicked (MyGUI::Widget* sender)
+    {
+
+    }
 
     void SpellCreationDialog::open()
     {
@@ -189,10 +197,23 @@ namespace MWGui
         mWindowManager.removeGuiMode (GM_SpellCreation);
     }
 
-    void SpellCreationDialog::startSpellMaking (MWWorld::Ptr actor)
-    {
-        mPtr = actor;
+    // ------------------------------------------------------------------------------------------------
 
+
+    EffectEditorBase::EffectEditorBase(MWBase::WindowManager& parWindowManager)
+        : mAddEffectDialog(parWindowManager)
+        , mSelectAttributeDialog(NULL)
+        , mSelectSkillDialog(NULL)
+    {
+        mAddEffectDialog.eventEffectAdded += MyGUI::newDelegate(this, &EffectEditorBase::onEffectAdded);
+        mAddEffectDialog.eventEffectModified += MyGUI::newDelegate(this, &EffectEditorBase::onEffectModified);
+        mAddEffectDialog.eventEffectRemoved += MyGUI::newDelegate(this, &EffectEditorBase::onEffectRemoved);
+
+        mAddEffectDialog.setVisible (false);
+    }
+
+    void EffectEditorBase::startEditing ()
+    {
         // get the list of magic effects that are known to the player
 
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
@@ -237,47 +258,44 @@ namespace MWGui
 
             ToolTips::createMagicEffectToolTip (w, *it);
         }
-
     }
 
-    void SpellCreationDialog::onCancelButtonClicked (MyGUI::Widget* sender)
+    void EffectEditorBase::setWidgets (Widgets::MWList *availableEffectsList, MyGUI::ScrollView *usedEffectsView)
     {
-        mWindowManager.removeGuiMode (MWGui::GM_SpellCreation);
+        mAvailableEffectsList = availableEffectsList;
+        mUsedEffectsView = usedEffectsView;
+
+        mAvailableEffectsList->eventWidgetSelected += MyGUI::newDelegate(this, &EffectEditorBase::onAvailableEffectClicked);
     }
 
-    void SpellCreationDialog::onBuyButtonClicked (MyGUI::Widget* sender)
-    {
-
-    }
-
-    void SpellCreationDialog::onSelectAttribute ()
+    void EffectEditorBase::onSelectAttribute ()
     {
         mAddEffectDialog.setVisible(true);
         mAddEffectDialog.setAttribute (mSelectAttributeDialog->getAttributeId());
-        mWindowManager.removeDialog (mSelectAttributeDialog);
+        MWBase::Environment::get().getWindowManager ()->removeDialog (mSelectAttributeDialog);
         mSelectAttributeDialog = 0;
     }
 
-    void SpellCreationDialog::onSelectSkill ()
+    void EffectEditorBase::onSelectSkill ()
     {
         mAddEffectDialog.setVisible(true);
         mAddEffectDialog.setSkill (mSelectSkillDialog->getSkillId ());
-        mWindowManager.removeDialog (mSelectSkillDialog);
+        MWBase::Environment::get().getWindowManager ()->removeDialog (mSelectSkillDialog);
         mSelectSkillDialog = 0;
     }
 
-    void SpellCreationDialog::onAttributeOrSkillCancel ()
+    void EffectEditorBase::onAttributeOrSkillCancel ()
     {
         if (mSelectSkillDialog)
-            mWindowManager.removeDialog (mSelectSkillDialog);
+            MWBase::Environment::get().getWindowManager ()->removeDialog (mSelectSkillDialog);
         if (mSelectAttributeDialog)
-            mWindowManager.removeDialog (mSelectAttributeDialog);
+            MWBase::Environment::get().getWindowManager ()->removeDialog (mSelectAttributeDialog);
 
         mSelectSkillDialog = 0;
         mSelectAttributeDialog = 0;
     }
 
-    void SpellCreationDialog::onAvailableEffectClicked (MyGUI::Widget* sender)
+    void EffectEditorBase::onAvailableEffectClicked (MyGUI::Widget* sender)
     {
 
         short effectId = *sender->getUserData<short>();
@@ -288,7 +306,7 @@ namespace MWGui
         if (effect->mData.mFlags & ESM::MagicEffect::TargetSkill)
         {
             delete mSelectSkillDialog;
-            mSelectSkillDialog = new SelectSkillDialog(mWindowManager);
+            mSelectSkillDialog = new SelectSkillDialog(*MWBase::Environment::get().getWindowManager ());
             mSelectSkillDialog->eventCancel += MyGUI::newDelegate(this, &SpellCreationDialog::onAttributeOrSkillCancel);
             mSelectSkillDialog->eventItemSelected += MyGUI::newDelegate(this, &SpellCreationDialog::onSelectSkill);
             mSelectSkillDialog->setVisible (true);
@@ -296,7 +314,7 @@ namespace MWGui
         else if (effect->mData.mFlags & ESM::MagicEffect::TargetAttribute)
         {
             delete mSelectAttributeDialog;
-            mSelectAttributeDialog = new SelectAttributeDialog(mWindowManager);
+            mSelectAttributeDialog = new SelectAttributeDialog(*MWBase::Environment::get().getWindowManager ());
             mSelectAttributeDialog->eventCancel += MyGUI::newDelegate(this, &SpellCreationDialog::onAttributeOrSkillCancel);
             mSelectAttributeDialog->eventItemSelected += MyGUI::newDelegate(this, &SpellCreationDialog::onSelectAttribute);
             mSelectAttributeDialog->setVisible (true);
@@ -307,20 +325,20 @@ namespace MWGui
         }
     }
 
-    void SpellCreationDialog::onEffectModified (ESM::ENAMstruct effect)
+    void EffectEditorBase::onEffectModified (ESM::ENAMstruct effect)
     {
         mEffects[mSelectedEffect] = effect;
 
         updateEffectsView();
     }
 
-    void SpellCreationDialog::onEffectRemoved (ESM::ENAMstruct effect)
+    void EffectEditorBase::onEffectRemoved (ESM::ENAMstruct effect)
     {
         mEffects.erase(mEffects.begin() + mSelectedEffect);
         updateEffectsView();
     }
 
-    void SpellCreationDialog::updateEffectsView ()
+    void EffectEditorBase::updateEffectsView ()
     {
         MyGUI::EnumeratorWidgetPtr oldWidgets = mUsedEffectsView->getEnumerator ();
         MyGUI::Gui::getInstance ().destroyWidgets (oldWidgets);
@@ -347,7 +365,7 @@ namespace MWGui
             Widgets::MWSpellEffectPtr effect = button->createWidget<Widgets::MWSpellEffect>("MW_EffectImage", MyGUI::IntCoord(0,0,0,24), MyGUI::Align::Default);
 
             effect->setNeedMouseFocus (false);
-            effect->setWindowManager (&mWindowManager);
+            effect->setWindowManager (MWBase::Environment::get().getWindowManager ());
             effect->setSpellEffect (params);
 
             effect->setSize(effect->getRequestedWidth (), 24);
@@ -361,14 +379,14 @@ namespace MWGui
         mUsedEffectsView->setCanvasSize(size);
     }
 
-    void SpellCreationDialog::onEffectAdded (ESM::ENAMstruct effect)
+    void EffectEditorBase::onEffectAdded (ESM::ENAMstruct effect)
     {
         mEffects.push_back(effect);
 
         updateEffectsView();
     }
 
-    void SpellCreationDialog::onEditEffect (MyGUI::Widget *sender)
+    void EffectEditorBase::onEditEffect (MyGUI::Widget *sender)
     {
         int id = *sender->getUserData<int>();
 

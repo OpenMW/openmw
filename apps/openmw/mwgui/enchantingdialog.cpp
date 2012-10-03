@@ -7,8 +7,13 @@ namespace MWGui
 
     EnchantingDialog::EnchantingDialog(MWBase::WindowManager &parWindowManager)
         : WindowBase("openmw_enchanting_dialog.layout", parWindowManager)
+        , EffectEditorBase(parWindowManager)
     {
         getWidget(mCancelButton, "CancelButton");
+        getWidget(mAvailableEffectsList, "AvailableEffects");
+        getWidget(mUsedEffectsView, "UsedEffects");
+
+        setWidgets(mAvailableEffectsList, mUsedEffectsView);
 
         mCancelButton->eventMouseButtonClick += MyGUI::newDelegate(this, &EnchantingDialog::onCancelButtonClicked);
     }
@@ -21,6 +26,8 @@ namespace MWGui
     void EnchantingDialog::startEnchanting (MWWorld::Ptr actor)
     {
         mPtr = actor;
+
+        startEditing ();
     }
 
     void EnchantingDialog::onReferenceUnavailable ()

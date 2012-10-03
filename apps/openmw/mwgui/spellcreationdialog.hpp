@@ -67,7 +67,45 @@ namespace MWGui
         ESM::ENAMstruct mEffect;
     };
 
-    class SpellCreationDialog : public WindowBase, public ReferenceInterface
+
+    class EffectEditorBase
+    {
+    public:
+        EffectEditorBase(MWBase::WindowManager& parWindowManager);
+
+
+    protected:
+        Widgets::MWList* mAvailableEffectsList;
+        MyGUI::ScrollView* mUsedEffectsView;
+
+        EditEffectDialog mAddEffectDialog;
+        SelectAttributeDialog* mSelectAttributeDialog;
+        SelectSkillDialog* mSelectSkillDialog;
+
+        int mSelectedEffect;
+
+        std::vector<ESM::ENAMstruct> mEffects;
+
+        void onEffectAdded(ESM::ENAMstruct effect);
+        void onEffectModified(ESM::ENAMstruct effect);
+        void onEffectRemoved(ESM::ENAMstruct effect);
+
+        void onAvailableEffectClicked (MyGUI::Widget* sender);
+
+        void onAttributeOrSkillCancel();
+        void onSelectAttribute();
+        void onSelectSkill();
+
+        void onEditEffect(MyGUI::Widget* sender);
+
+        void updateEffectsView();
+
+        void startEditing();
+        void setWidgets (Widgets::MWList* availableEffectsList, MyGUI::ScrollView* usedEffectsView);
+
+    };
+
+    class SpellCreationDialog : public WindowBase, public ReferenceInterface, public EffectEditorBase
     {
     public:
         SpellCreationDialog(MWBase::WindowManager& parWindowManager);
@@ -81,39 +119,16 @@ namespace MWGui
 
         void onCancelButtonClicked (MyGUI::Widget* sender);
         void onBuyButtonClicked (MyGUI::Widget* sender);
-        void onAvailableEffectClicked (MyGUI::Widget* sender);
 
-        void onAttributeOrSkillCancel();
-        void onSelectAttribute();
-        void onSelectSkill();
-
-        void onEffectAdded(ESM::ENAMstruct effect);
-        void onEffectModified(ESM::ENAMstruct effect);
-        void onEffectRemoved(ESM::ENAMstruct effect);
-
-        void updateEffectsView();
-
-        void onEditEffect(MyGUI::Widget* sender);
 
         MyGUI::EditBox* mNameEdit;
         MyGUI::TextBox* mMagickaCost;
         MyGUI::TextBox* mSuccessChance;
-        Widgets::MWList* mAvailableEffectsList;
-        MyGUI::ScrollView* mUsedEffectsView;
         MyGUI::Button* mBuyButton;
         MyGUI::Button* mCancelButton;
         MyGUI::TextBox* mPriceLabel;
 
-        int mSelectedEffect;
-
-        EditEffectDialog mAddEffectDialog;
-
-        SelectAttributeDialog* mSelectAttributeDialog;
-        SelectSkillDialog* mSelectSkillDialog;
-
         Widgets::MWEffectList* mUsedEffectsList;
-
-        std::vector<ESM::ENAMstruct> mEffects;
 
     };
 

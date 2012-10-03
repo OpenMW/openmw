@@ -3,13 +3,14 @@
 
 #include "window_base.hpp"
 #include "referenceinterface.hpp"
+#include "spellcreationdialog.hpp"
 
 #include "../mwbase/windowmanager.hpp"
 
 namespace MWGui
 {
 
-    class EnchantingDialog : public WindowBase, public ReferenceInterface
+    class EnchantingDialog : public WindowBase, public ReferenceInterface, public EffectEditorBase
     {
     public:
         EnchantingDialog(MWBase::WindowManager& parWindowManager);
