@@ -376,6 +376,7 @@ void WindowManager::updateVisible()
             break;
         case GM_Travel:
             mTravelWindow->setVisible(true);
+            break;
         case GM_SpellCreation:
             mSpellCreationDialog->setVisible(true);
             break;

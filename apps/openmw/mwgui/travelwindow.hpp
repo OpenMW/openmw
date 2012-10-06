@@ -20,7 +20,7 @@ namespace MWGui
 
 namespace MWGui
 {
-    class TravelWindow : public ContainerBase, public WindowBase
+    class TravelWindow : public ReferenceInterface, public WindowBase
     {
         public:
             TravelWindow(MWBase::WindowManager& parWindowManager);
@@ -34,8 +34,6 @@ namespace MWGui
             MyGUI::TextBox* mSelect;
 
             MyGUI::ScrollView* mDestinationsView;
-
-            MWWorld::Ptr mActor;
 
             std::map<MyGUI::Widget*, std::string> mDestinationsWidgetMap;
 

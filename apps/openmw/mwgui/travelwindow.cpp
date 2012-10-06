@@ -23,8 +23,7 @@ namespace MWGui
     const int TravelWindow::sLineHeight = 18;
 
     TravelWindow::TravelWindow(MWBase::WindowManager& parWindowManager) :
-        WindowBase("openmw_spell_buying_window.layout", parWindowManager)
-        , ContainerBase(NULL) // no drag&drop
+        WindowBase("openmw_travel_window.layout", parWindowManager)
         , mCurrentY(0)
         , mLastPos(0)
     {
@@ -33,8 +32,8 @@ namespace MWGui
         getWidget(mCancelButton, "CancelButton");
         getWidget(mPlayerGold, "PlayerGold");
         getWidget(mSelect, "Select");
-        getWidget(mDestinations, "Spells");
-        getWidget(mDestinationsView, "SpellsView");
+        getWidget(mDestinations, "Travel");
+        getWidget(mDestinationsView, "DestinationsView");
 
         mCancelButton->eventMouseButtonClick += MyGUI::newDelegate(this, &TravelWindow::onCancelButtonClicked);
 
@@ -61,8 +60,8 @@ namespace MWGui
         toAdd->setCaptionWithReplacing(travelId+"   -   "+boost::lexical_cast<std::string>(price)+"#{sgp}");
         toAdd->setSize(toAdd->getTextSize().width,sLineHeight);
         toAdd->eventMouseWheel += MyGUI::newDelegate(this, &TravelWindow::onMouseWheel);
-        toAdd->setUserString("ToolTipType", "Spell");
-        toAdd->setUserString("Spell", travelId);
+        //toAdd->setUserString("ToolTipType", "Spell");
+        toAdd->setUserString("Destination", travelId);
         toAdd->eventMouseButtonClick += MyGUI::newDelegate(this, &TravelWindow::onTravelButtonClick);
         mDestinationsWidgetMap.insert(std::make_pair (toAdd, travelId));
     }
@@ -111,12 +110,13 @@ namespace MWGui
         }
 
         updateLabels();
-        mPtr.get<ESM::NPC>()->base->mTransport[0].
+        //mPtr.get<ESM::NPC>()->base->mTransport[0].
         mDestinationsView->setCanvasSize (MyGUI::IntSize(mDestinationsView->getWidth(), std::max(mDestinationsView->getHeight(), mCurrentY)));
     }
 
     void TravelWindow::onTravelButtonClick(MyGUI::Widget* _sender)
     {
+        std::cout << "traveling to:" << _sender->getUserString("Destination");
         /*int price = *_sender->getUserData<int>();
 
         if (mWindowManager.getInventoryWindow()->getPlayerGold()>=price)

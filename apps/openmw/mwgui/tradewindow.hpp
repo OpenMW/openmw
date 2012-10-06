@@ -20,7 +20,7 @@ namespace MWGui
 
 namespace MWGui
 {
-    class TradeWindow : public ReferenceInterface, public WindowBase
+    class TradeWindow : public ContainerBase, public WindowBase
     {
         public:
             TradeWindow(MWBase::WindowManager& parWindowManager);

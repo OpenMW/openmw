@@ -78,6 +78,7 @@ set(MYGUI_FILES
     openmw_spellcreation_dialog.layout
     openmw_edit_effect.layout
     openmw_enchanting_dialog.layout
+    openmw_travel_window.layout
     smallbars.png
     VeraMono.ttf
     markers.png
