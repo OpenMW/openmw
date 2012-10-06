@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<MyGUI type="Layout">
+    <Widget type="Window" skin="MW_Dialog" layer="Windows" position="0 0 450 300" name="_Main">
+        <Property key="Visible" value="false"/>
+
+
+        <Widget type="TextBox" skin="SandText" position="8 10 24 24" name="Select" align="Right Top">
+            <Property key="TextAlign" value="Right"/>
+            <Property key="Caption" value="#{sTravelServiceTitle}"/>
+        </Widget>
+        <Widget type="TextBox" skin="SandText" position="0 0 24 24" name="Travel" align="Right Top">
+            <Property key="TextAlign" value="Right"/>
+            <Property key="Caption" value="#D8C09A#{sTravel}"/>
+        </Widget>
+
+
+        <Widget type="Widget" skin="MW_Box" position="6 31 430 225" align="ALIGN_LEFT ALIGN_STRETCH">
+            <Widget type="ScrollView" skin="MW_ScrollView" position="4 4 422 217" align="ALIGN_LEFT ALIGN_TOP ALIGN_STRETCH" name="DestinationsView">
+                <Property key="CanvasAlign" value="Left"/>
+            </Widget>
+        </Widget>
+
+
+        <Widget type="TextBox" skin="SandText" position="8 255 24 24" name="PlayerGold" align="Right Top">
+            <Property key="TextAlign" value="Right"/>
+        </Widget>
+        <Widget type="AutoSizedButton" skin="MW_Button" position="375 260 60 24" name="CancelButton" align="Right Top">
+            <Property key="ExpandDirection" value="Left"/>
+            <Property key="Caption" value="#{sOK}"/>
+        </Widget>
+
+    </Widget>
+
+</MyGUI>
