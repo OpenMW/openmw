@@ -1,6 +1,8 @@
 #ifndef OPENMW_ESM_GLOB_H
 #define OPENMW_ESM_GLOB_H
 
+#include <string>
+
 #include "defs.hpp"
 
 namespace ESM
@@ -15,6 +17,7 @@ class ESMWriter;
 
 struct Global
 {
+    std::string mId;
     unsigned mValue;
     VarType mType;
 
