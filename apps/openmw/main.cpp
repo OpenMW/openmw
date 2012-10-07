@@ -224,18 +224,19 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
         master.push_back("Morrowind");
     }
 
-    if (master.size() > 1)
-    {
-        std::cout
-            << "Ignoring all but the first master file (multiple master files not yet supported)."
-            << std::endl;
-    }
-    engine.addMaster(master[0]);
-
     StringsVector plugin = variables["plugin"].as<StringsVector>();
-    if (!plugin.empty())
+    // Removed check for 255 files, which would be the hard-coded limit in Morrowind.
+    //  I'll keep the following variable in, maybe we can use it for somethng different.
+    int cnt = master.size() + plugin.size();
+
+    // Prepare loading master/plugin files (i.e. send filenames to engine)
+    for (std::vector<std::string>::size_type i = 0; i < master.size(); i++)
     {
-        std::cout << "Ignoring plugin files (plugins not yet supported)." << std::endl;
+        engine.addMaster(master[i]);
+    }
+    for (std::vector<std::string>::size_type i = 0; i < plugin.size(); i++)
+    {
+        engine.addPlugin(plugin[i]);
     }
 
     // startup-settings

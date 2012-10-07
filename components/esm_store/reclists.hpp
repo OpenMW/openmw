@@ -26,6 +26,7 @@ namespace ESMS
 
     virtual void load(ESMReader &esm, const std::string &id) = 0;
     virtual int getSize() = 0;
+    virtual void remove(const std::string &id) {};
     virtual void listIdentifier (std::vector<std::string>& identifier) const = 0;
 
     static std::string toLower (const std::string& name)
@@ -55,6 +56,14 @@ namespace ESMS
     {
       std::string id2 = toLower (id);
       list[id2].load(esm);
+    }
+
+    // Delete the given object ID. Plugin files support this, so we need to do this, too.
+    void remove(const std::string &id)
+    {
+        std::string id2 = toLower (id);
+
+        list.erase(id2);
     }
 
     // Find the given object ID, or return NULL if not found.
@@ -268,38 +277,63 @@ namespace ESMS
   {
     virtual ~LTexList() {}
 
-    // TODO: For multiple ESM/ESP files we need one list per file.
-    std::vector<LandTexture> ltex;
+    // For multiple ESM/ESP files we need one list per file.
+    typedef std::vector<LandTexture> LandTextureList;
+    std::vector<LandTextureList> ltex;
 
     LTexList()
     {
-      // More than enough to hold Morrowind.esm.
-      ltex.reserve(128);
+      ltex.push_back(LandTextureList());
+      LandTextureList &ltexl = ltex[0];
+      // More than enough to hold Morrowind.esm. Extra lists for plugins will we
+      //  added on-the-fly in a different method.
+      ltexl.reserve(128);
     }
 
-    const LandTexture* search(size_t index) const
+    const LandTexture* search(size_t index, size_t plugin) const
     {
-        assert(index < ltex.size());
-        return &ltex.at(index);
+      assert(plugin < ltex.size());
+      const LandTextureList &ltexl = ltex[plugin];
+
+      assert(index < ltexl.size());
+      return &ltexl.at(index);
     }
 
+    // "getSize" returns the number of individual terrain palettes.
+    // "getSizePlugin" returns the number of land textures in a specific palette.
     int getSize() { return ltex.size(); }
     int getSize() const { return ltex.size(); }
 
+    int getSizePlugin(size_t plugin) { assert(plugin < ltex.size()); return ltex[plugin].size(); }
+    int getSizePlugin(size_t plugin) const { assert(plugin < ltex.size()); return ltex[plugin].size(); }
+    
     virtual void listIdentifier (std::vector<std::string>& identifier) const {}
 
-    void load(ESMReader &esm, const std::string &id)
+    void load(ESMReader &esm, const std::string &id, size_t plugin)
     {
       LandTexture lt;
       lt.load(esm);
       lt.id = id;
 
       // Make sure we have room for the structure
-      if(lt.index + 1 > (int)ltex.size())
-        ltex.resize(lt.index+1);
+      if (plugin >= ltex.size()) {
+	ltex.resize(plugin+1);
+      }
+      LandTextureList &ltexl = ltex[plugin];
+      if(lt.index + 1 > (int)ltexl.size())
+        ltexl.resize(lt.index+1);
 
       // Store it
-      ltex[lt.index] = lt;
+      ltexl[lt.index] = lt;
+    }
+
+    // Load all terrain palettes at the same size. Inherited virtual function
+    //  from "RecList". Mostly useless, because we need the implementation
+    //  above this one.
+    void load(ESMReader &esm, const std::string &id)
+    {
+      size_t plugin = esm.getIndex();
+      load(esm, id, plugin);
     }
   };
 
