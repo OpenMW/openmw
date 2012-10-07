@@ -1,11 +1,16 @@
-#ifndef _ESM_INFO_H
-#define _ESM_INFO_H
+#ifndef OPENMW_ESM_INFO_H
+#define OPENMW_ESM_INFO_H
 
-#include "esm_reader.hpp"
+#include <string>
+#include <vector>
+
 #include "defs.hpp"
 
 namespace ESM
 {
+
+class ESMReader;
+class ESMWriter;
 
 // NOT DONE
 
@@ -25,22 +30,22 @@ struct DialInfo
 
     struct DATAstruct
     {
-        int unknown1;
-        int disposition;
-        char rank; // Rank of NPC
-        char gender; // See Gender enum
-        char PCrank; // Player rank
-        char unknown2;
+        int mUnknown1;
+        int mDisposition;
+        char mRank; // Rank of NPC
+        char mGender; // See Gender enum
+        char mPCrank; // Player rank
+        char mUnknown2;
     }; // 12 bytes
-    DATAstruct data;
+    DATAstruct mData;
 
     // The rules for whether or not we will select this dialog item.
     struct SelectStruct
     {
-        std::string selectRule; // This has a complicated format
-        float f; // Only one of 'f' or 'i' is used
-        int i;
-        VarType type;
+        std::string mSelectRule; // This has a complicated format
+        float mF; // Only one of 'f' or 'i' is used
+        int mI;
+        VarType mType;
     };
 
     // Journal quest indices (introduced with the quest system in Tribunal)
@@ -55,26 +60,26 @@ struct DialInfo
 
     // Rules for when to include this item in the final list of options
     // visible to the player.
-    std::vector<SelectStruct> selects;
+    std::vector<SelectStruct> mSelects;
 
     // Id of this, previous and next INFO items
-    std::string id, prev, next,
+    std::string mId, mPrev, mNext;
 
     // Various references used in determining when to select this item.
-            actor, race, clas, npcFaction, pcFaction, cell,
+    std::string mActor, mRace, mClass, mNpcFaction, mPcFaction, mCell;
 
-            // Sound and text associated with this item
-            sound, response,
+    // Sound and text associated with this item
+    std::string mSound, mResponse;
 
-            // Result script (uncomiled) to run whenever this dialog item is
-            // selected
-            resultScript;
+    // Result script (uncomiled) to run whenever this dialog item is
+    // selected
+    std::string mResultScript;
 
     // ONLY include this item the NPC is not part of any faction.
-    bool factionLess;
+    bool mFactionLess;
 
     // Status of this quest item
-    QuestStatus questStatus;
+    QuestStatus mQuestStatus;
 
     // Hexadecimal versions of the various subrecord names.
     enum SubNames
@@ -98,6 +103,7 @@ struct DialInfo
     };
 
     void load(ESMReader &esm);
+    void save(ESMWriter &esm);
 };
 
 /*

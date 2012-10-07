@@ -1,18 +1,30 @@
 #include "loadbook.hpp"
 
+#include "esmreader.hpp"
+#include "esmwriter.hpp"
+
 namespace ESM
 {
 
-void Book::load(ESMReader &esm, const std::string& recordId)
+void Book::load(ESMReader &esm)
 {
-    model = esm.getHNString("MODL");
-    name = esm.getHNOString("FNAM");
-    esm.getHNT(data, "BKDT", 20);
-    script = esm.getHNOString("SCRI");
-    icon = esm.getHNOString("ITEX");
-    text = esm.getHNOString("TEXT");
-    enchant = esm.getHNOString("ENAM");
-    id = recordId;
+    mModel = esm.getHNString("MODL");
+    mName = esm.getHNOString("FNAM");
+    esm.getHNT(mData, "BKDT", 20);
+    mScript = esm.getHNOString("SCRI");
+    mIcon = esm.getHNOString("ITEX");
+    mText = esm.getHNOString("TEXT");
+    mEnchant = esm.getHNOString("ENAM");
+}
+void Book::save(ESMWriter &esm)
+{
+    esm.writeHNCString("MODL", mModel);
+    esm.writeHNOCString("FNAM", mName);
+    esm.writeHNT("BKDT", mData, 20);
+    esm.writeHNOCString("SCRI", mScript);
+    esm.writeHNOCString("ITEX", mIcon);
+    esm.writeHNOString("TEXT", mText);
+    esm.writeHNOCString("ENAM", mEnchant);
 }
 
 }

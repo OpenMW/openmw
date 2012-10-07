@@ -193,3 +193,167 @@ std::string ToUTF8::getUtf8(ToUTF8::FromType from)
   return std::string(&output[0], outlen);
 }
 
+static size_t getLength2(const char *arr, const char* input, bool &ascii)
+{
+  ascii = true;
+  size_t len = 0;
+  const char* ptr = input;
+  unsigned char inp = *ptr;
+
+  // Do away with the ascii part of the string first (this is almost
+  // always the entire string.)
+  while(inp && inp < 128)
+    inp = *(++ptr);
+  len += (ptr-input);
+
+  // If we're not at the null terminator at this point, then there
+  // were some non-ascii characters to deal with. Go to slow-mode for
+  // the rest of the string.
+  if(inp)
+    {
+      ascii = false;
+      while(inp)
+        {
+            len += 1;
+          // Find the translated length of this character in the
+          // lookup table.
+            switch(inp)
+            {
+            case 0xe2: len -= 2; break;
+            case 0xc2:
+            case 0xcb:
+            case 0xc4:
+            case 0xc6:
+            case 0xc3:
+            case 0xd0:
+            case 0xd1:
+            case 0xd2:
+            case 0xc5: len -= 1; break;
+            }
+
+          inp = *(++ptr);
+        }
+    }
+  return len;
+}
+
+#include <iostream>
+#include <iomanip>
+
+static void copyFromArray2(const char *arr, char*& chp, char* &out)
+{
+    unsigned char ch = *(chp++);
+  // Optimize for ASCII values
+  if(ch < 128)
+    {
+      *(out++) = ch;
+      return;
+    }
+
+  int len = 1;
+  switch (ch)
+  {
+  case 0xe2: len = 3; break;
+  case 0xc2:
+  case 0xcb:
+  case 0xc4:
+  case 0xc6:
+  case 0xc3:
+  case 0xd0:
+  case 0xd1:
+  case 0xd2:
+  case 0xc5: len = 2; break;
+  }
+
+  if (len == 1) // There is no 1 length utf-8 glyph that is not 0x20 (empty space)
+  {
+      *(out++) = ch;
+      return;
+  }
+
+  unsigned char ch2 = *(chp++);
+  unsigned char ch3 = '\0';
+  if (len == 3)
+      ch3 = *(chp++);
+
+  for (int i = 128; i < 256; i++)
+  {
+      unsigned char b1 = arr[i*6 + 1], b2 = arr[i*6 + 2], b3 = arr[i*6 + 3];
+      if (b1 == ch && b2 == ch2 && (len != 3 || b3 == ch3))
+      {
+          *(out++) = (char)i;
+          return;
+      }
+  }
+
+  std::cout << "Could not find glyph " << std::hex << (int)ch << " " << (int)ch2 << " " << (int)ch3 << std::endl;
+
+  *(out++) = ch; // Could not find glyph, just put whatever
+}
+
+std::string ToUTF8::getLegacyEnc(ToUTF8::FromType to)
+{
+  // Pick translation array
+  const char *arr;
+  switch (to)
+  {
+    case ToUTF8::WINDOWS_1252:
+    {
+      arr = ToUTF8::windows_1252;
+      break;
+    }
+    case ToUTF8::WINDOWS_1250:
+    {
+      arr = ToUTF8::windows_1250;
+      break;
+    }
+    case ToUTF8::WINDOWS_1251:
+    {
+      arr = ToUTF8::windows_1251;
+      break;
+    }
+    default:
+    {
+      assert(0);
+    }
+  }
+
+  // Double check that the input string stops at some point (it might
+  // contain zero terminators before this, inside its own data, which
+  // is also ok.)
+  char* input = &buf[0];
+  assert(input[size] == 0);
+
+  // TODO: The rest of this function is designed for single-character
+  // input encodings only. It also assumes that the input the input
+  // encoding shares its first 128 values (0-127) with ASCII. These
+  // conditions must be checked again if you add more input encodings
+  // later.
+
+  // Compute output length, and check for pure ascii input at the same
+  // time.
+  bool ascii;
+  size_t outlen = getLength2(arr, input, ascii);
+
+  // If we're pure ascii, then don't bother converting anything.
+  if(ascii)
+      return std::string(input, outlen);
+
+  // Make sure the output is large enough
+  resize(output, outlen);
+  char *out = &output[0];
+
+  // Translate
+  while(*input)
+    copyFromArray2(arr, input, out);
+
+  // Make sure that we wrote the correct number of bytes
+  assert((out-&output[0]) == (int)outlen);
+
+  // And make extra sure the output is null terminated
+  assert(output.size() > outlen);
+  assert(output[outlen] == 0);
+
+  // Return a string
+  return std::string(&output[0], outlen);
+}

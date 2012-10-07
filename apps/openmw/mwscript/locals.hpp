@@ -17,11 +17,11 @@ namespace MWScript
         void configure (const ESM::Script& script)
         {
             mShorts.clear();
-            mShorts.resize (script.data.numShorts, 0);
+            mShorts.resize (script.mData.mNumShorts, 0);
             mLongs.clear();
-            mLongs.resize (script.data.numLongs, 0);
+            mLongs.resize (script.mData.mNumLongs, 0);
             mFloats.clear();
-            mFloats.resize (script.data.numFloats, 0);
+            mFloats.resize (script.mData.mNumFloats, 0);
         }
     };
 }

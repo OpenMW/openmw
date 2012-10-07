@@ -1,10 +1,16 @@
-#ifndef _ESM_CELL_H
-#define _ESM_CELL_H
+#ifndef OPENMW_ESM_CELL_H
+#define OPENMW_ESM_CELL_H
 
-#include "esm_reader.hpp"
+#include <string>
+
+#include "esmcommon.hpp"
 #include "defs.hpp"
 
-namespace ESM {
+namespace ESM
+{
+
+class ESMReader;
+class ESMWriter;
 
 /* Cell reference. This represents ONE object (of many) inside the
    cell. The cell references are not loaded as part of the normal
@@ -14,63 +20,66 @@ namespace ESM {
 class CellRef
 {
 public:
-  int refnum;           // Reference number
-  std::string refID;    // ID of object being referenced
+  int mRefnum;           // Reference number
+  std::string mRefID;    // ID of object being referenced
 
-  float scale;          // Scale applied to mesh
+  float mScale;          // Scale applied to mesh
 
   // The NPC that owns this object (and will get angry if you steal
   // it)
-  std::string owner;
+  std::string mOwner;
 
   // I have no idea, looks like a link to a global variable?
-  std::string glob;
+  std::string mGlob;
 
   // ID of creature trapped in this soul gem (?)
-  std::string soul;
+  std::string mSoul;
 
   // ?? CNAM has a faction name, might be for objects/beds etc
   // belonging to a faction.
-  std::string faction;
+  std::string mFaction;
 
   // INDX might be PC faction rank required to use the item? Sometimes
   // is -1, which I assume means "any rank".
-  int factIndex;
+  int mFactIndex;
 
   // Depends on context - possibly weapon health, number of uses left
   // or weapon magic charge?
-  float charge;
+  float mCharge;
 
   // I have no idea, these are present some times, often along with
   // owner (ANAM) and sometimes otherwise. They are often (but not
   // always) 1. INTV is big for lights (possibly a float?), might have
   // something to do with remaining light "charge".
-  int intv, nam9;
+  int mIntv, mNam9;
 
   // For doors - true if this door teleports to somewhere else, false
   // if it should open through animation.
-  bool teleport;
+  bool mTeleport;
 
   // Teleport location for the door, if this is a teleporting door.
-  Position doorDest;
+  Position mDoorDest;
 
   // Destination cell for doors (optional)
-  std::string destCell;
+  std::string mDestCell;
 
   // Lock level for doors and containers
-  int lockLevel;
-  std::string key, trap; // Key and trap ID names, if any
+  int mLockLevel;
+  std::string mKey, mTrap; // Key and trap ID names, if any
 
   // No idea - occurs ONCE in Morrowind.esm, for an activator
-  char unam;
+  char mUnam;
 
   // Occurs in Tribunal.esm, eg. in the cell "Mournhold, Plaza
   // Brindisi Dorom", where it has the value 100. Also only for
   // activators.
-  int fltv;
+  int mFltv;
+  int mNam0;
 
   // Position and rotation of this object within the cell
-  Position pos;
+  Position mPos;
+
+  void save(ESMWriter &esm);
 };
 
 /* Cells hold data about objects, creatures, statics (rocks, walls,
@@ -94,44 +103,47 @@ struct Cell
 
   struct DATAstruct
   {
-    int flags;
-    int gridX, gridY;
+    int mFlags;
+    int mX, mY;
   };
 
   struct AMBIstruct
   {
-    Color ambient, sunlight, fog;
-    float fogDensity;
+    Color mAmbient, mSunlight, mFog;
+    float mFogDensity;
   };
 
   // Interior cells are indexed by this (it's the 'id'), for exterior
   // cells it is optional.
-  std::string name,
+  std::string mName;
 
   // Optional region name for exterior and quasi-exterior cells.
-    region;
+  std::string mRegion;
 
-  ESM_Context context; // File position
-  DATAstruct data;
-  AMBIstruct ambi;
-  float water; // Water level
-  int mapColor;
+  ESM_Context mContext; // File position
+  DATAstruct mData;
+  AMBIstruct mAmbi;
+  float mWater; // Water level
+  bool mWaterInt;
+  int mMapColor;
+  int mNAM0;
 
   void load(ESMReader &esm);
+  void save(ESMWriter &esm);
 
   bool isExterior() const
   {
-      return !(data.flags & Interior);
+      return !(mData.mFlags & Interior);
   }
 
   int getGridX() const
   {
-      return data.gridX;
+      return mData.mX;
   }
 
   int getGridY() const
   {
-      return data.gridY;
+      return mData.mY;
   }
 
   // Restore the given reader to the stored position. Will try to open

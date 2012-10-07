@@ -112,10 +112,10 @@ namespace MWScript
                 const ESMS::CellList::ExtCells& extCells = MWBase::Environment::get().getWorld ()->getStore ().cells.extCells;
                 for (ESMS::CellList::ExtCells::const_iterator it = extCells.begin(); it != extCells.end(); ++it)
                 {
-                    std::string name = it->second->name;
+                    std::string name = it->second->mName;
                     boost::algorithm::to_lower(name);
                     if (name.find(cell) != std::string::npos)
-                        MWBase::Environment::get().getWindowManager()->addVisitedLocation (it->second->name, it->first.first, it->first.second);
+                        MWBase::Environment::get().getWindowManager()->addVisitedLocation (it->second->mName, it->first.first, it->first.second);
                 }
             }
         };
@@ -129,7 +129,7 @@ namespace MWScript
                 const ESMS::CellList::ExtCells& extCells = MWBase::Environment::get().getWorld ()->getStore ().cells.extCells;
                 for (ESMS::CellList::ExtCells::const_iterator it = extCells.begin(); it != extCells.end(); ++it)
                 {
-                    std::string name = it->second->name;
+                    std::string name = it->second->mName;
                     if (name != "")
                         MWBase::Environment::get().getWindowManager()->addVisitedLocation (name, it->first.first, it->first.second);
                 }

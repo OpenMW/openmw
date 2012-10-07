@@ -82,16 +82,16 @@ namespace MWWorld
 
                 // initialise
                 ESM::CellRef& cellRef = mPtr.getCellRef();
-                cellRef.refID = name;
-                cellRef.refnum = -1;
-                cellRef.scale = 1;
-                cellRef.factIndex = 0;
-                cellRef.charge = 0;
-                cellRef.intv = 0;
-                cellRef.nam9 = 0;
-                cellRef.teleport = false;
-                cellRef.lockLevel = 0;
-                cellRef.unam = 0;
+                cellRef.mRefID = name;
+                cellRef.mRefnum = -1;
+                cellRef.mScale = 1;
+                cellRef.mFactIndex = 0;
+                cellRef.mCharge = 0;
+                cellRef.mIntv = 0;
+                cellRef.mNam9 = 0;
+                cellRef.mTeleport = false;
+                cellRef.mLockLevel = 0;
+                cellRef.mUnam = 0;
             }
 
             const Ptr& getPtr() const

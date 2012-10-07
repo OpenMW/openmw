@@ -316,7 +316,7 @@ namespace MWScript
                     assert (ref);
 
                     const ESM::Class& class_ =
-                        *MWBase::Environment::get().getWorld()->getStore().classes.find (ref->base->cls);
+                        *MWBase::Environment::get().getWorld()->getStore().classes.find (ref->base->mClass);
 
                     float level = 0;
                     float progress = std::modf (stats.getSkill (mIndex).getBase(), &level);

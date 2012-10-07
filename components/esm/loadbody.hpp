@@ -1,10 +1,13 @@
-#ifndef _ESM_BODY_H
-#define _ESM_BODY_H
+#ifndef OPENMW_ESM_BODY_H
+#define OPENMW_ESM_BODY_H
 
-#include "esm_reader.hpp"
+#include <string>
 
 namespace ESM
 {
+
+class ESMReader;
+class ESMWriter;
 
 struct BodyPart
 {
@@ -42,16 +45,17 @@ struct BodyPart
 
     struct BYDTstruct
     {
-        char part;
-        char vampire;
-        char flags;
-        char type;
+        char mPart;
+        char mVampire;
+        char mFlags;
+        char mType;
     };
 
-    BYDTstruct data;
-    std::string model, name;
+    BYDTstruct mData;
+    std::string mModel, mName;
 
     void load(ESMReader &esm);
+    void save(ESMWriter &esm);
 };
 }
 #endif

@@ -94,7 +94,6 @@ namespace MWRender
         } else {
             mCameraNode->setOrientation(zr * xr);
         }
-        updateListener();
     }
 
     std::string Player::getHandle() const
@@ -111,16 +110,20 @@ namespace MWRender
     {
         Ogre::Vector3 pos = mCamera->getRealPosition();
         Ogre::Vector3 dir = mCamera->getRealDirection();
+        Ogre::Vector3 up  = mCamera->getRealUp();
 
         Ogre::Real xch;
         xch = pos.y, pos.y = -pos.z, pos.z = xch;
         xch = dir.y, dir.y = -dir.z, dir.z = xch;
+        xch = up.y,  up.y  = -up.z,  up.z = xch;
 
-        MWBase::Environment::get().getSoundManager()->setListenerPosDir(pos, dir);
+        MWBase::Environment::get().getSoundManager()->setListenerPosDir(pos, dir, up);
     }
 
     void Player::update(float duration)
     {
+        updateListener();
+
         // only show the crosshair in game mode and in first person mode.
         MWBase::Environment::get().getWindowManager ()->showCrosshair
                 (!MWBase::Environment::get().getWindowManager ()->isGuiMode () && (mFirstPersonView && !mVanity.enabled && !mPreviewMode));

@@ -52,6 +52,7 @@ namespace MWSound
 
         Ogre::Vector3 mListenerPos;
         Ogre::Vector3 mListenerDir;
+        Ogre::Vector3 mListenerUp;
 
         std::string lookup(const std::string &soundId,
                   float &volume, float &min, float &max);
@@ -126,12 +127,9 @@ namespace MWSound
         virtual bool getSoundPlaying(MWWorld::Ptr reference, const std::string& soundId) const;
         ///< Is the given sound currently playing on the given object?
 
-        virtual void updateObject(MWWorld::Ptr reference);
-        ///< Update the position of all sounds connected to the given object.
-
         virtual void update(float duration);
 
-        virtual void setListenerPosDir(const Ogre::Vector3 &pos, const Ogre::Vector3 &dir);
+        virtual void setListenerPosDir(const Ogre::Vector3 &pos, const Ogre::Vector3 &dir, const Ogre::Vector3 &up);
     };
 }
 

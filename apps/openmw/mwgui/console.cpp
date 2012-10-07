@@ -407,7 +407,7 @@ namespace MWGui
     {
         mPtr = object;
         if (!mPtr.isEmpty())
-            setTitle("#{sConsoleTitle} (" + mPtr.getCellRef().refID + ")");
+            setTitle("#{sConsoleTitle} (" + mPtr.getCellRef().mRefID + ")");
         else
             setTitle("#{sConsoleTitle}");
         MyGUI::InputManager::getInstance().setKeyFocusWidget(command);

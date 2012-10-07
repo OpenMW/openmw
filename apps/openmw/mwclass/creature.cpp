@@ -47,19 +47,19 @@ namespace MWClass
             MWWorld::LiveCellRef<ESM::Creature> *ref = ptr.get<ESM::Creature>();
 
             // creature stats
-            data->mCreatureStats.getAttribute(0).set (ref->base->data.strength);
-            data->mCreatureStats.getAttribute(1).set (ref->base->data.intelligence);
-            data->mCreatureStats.getAttribute(2).set (ref->base->data.willpower);
-            data->mCreatureStats.getAttribute(3).set (ref->base->data.agility);
-            data->mCreatureStats.getAttribute(4).set (ref->base->data.speed);
-            data->mCreatureStats.getAttribute(5).set (ref->base->data.endurance);
-            data->mCreatureStats.getAttribute(6).set (ref->base->data.personality);
-            data->mCreatureStats.getAttribute(7).set (ref->base->data.luck);
-            data->mCreatureStats.getHealth().set (ref->base->data.health);
-            data->mCreatureStats.getMagicka().set (ref->base->data.mana);
-            data->mCreatureStats.getFatigue().set (ref->base->data.fatigue);
+            data->mCreatureStats.getAttribute(0).set (ref->base->mData.mStrength);
+            data->mCreatureStats.getAttribute(1).set (ref->base->mData.mIntelligence);
+            data->mCreatureStats.getAttribute(2).set (ref->base->mData.mWillpower);
+            data->mCreatureStats.getAttribute(3).set (ref->base->mData.mAgility);
+            data->mCreatureStats.getAttribute(4).set (ref->base->mData.mSpeed);
+            data->mCreatureStats.getAttribute(5).set (ref->base->mData.mEndurance);
+            data->mCreatureStats.getAttribute(6).set (ref->base->mData.mPersonality);
+            data->mCreatureStats.getAttribute(7).set (ref->base->mData.mLuck);
+            data->mCreatureStats.getHealth().set (ref->base->mData.mHealth);
+            data->mCreatureStats.getMagicka().set (ref->base->mData.mMana);
+            data->mCreatureStats.getFatigue().set (ref->base->mData.mFatigue);
 
-            data->mCreatureStats.setLevel(ref->base->data.level);
+            data->mCreatureStats.setLevel(ref->base->mData.mLevel);
 
             data->mCreatureStats.setHello(ref->base->mAiData.mHello);
             data->mCreatureStats.setFight(ref->base->mAiData.mFight);
@@ -67,8 +67,8 @@ namespace MWClass
             data->mCreatureStats.setAlarm(ref->base->mAiData.mAlarm);
 
             // spells
-            for (std::vector<std::string>::const_iterator iter (ref->base->mSpells.list.begin());
-                iter!=ref->base->mSpells.list.end(); ++iter)
+            for (std::vector<std::string>::const_iterator iter (ref->base->mSpells.mList.begin());
+                iter!=ref->base->mSpells.mList.end(); ++iter)
                 data->mCreatureStats.getSpells().add (*iter);
 
             // store
@@ -105,7 +105,7 @@ namespace MWClass
             ptr.get<ESM::Creature>();
         assert (ref->base != NULL);
 
-        const std::string &model = ref->base->model;
+        const std::string &model = ref->base->mModel;
         if (!model.empty()) {
             return "meshes\\" + model;
         }
@@ -117,7 +117,7 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Creature> *ref =
             ptr.get<ESM::Creature>();
 
-        return ref->base->name;
+        return ref->base->mName;
     }
 
     MWMechanics::CreatureStats& Creature::getCreatureStats (const MWWorld::Ptr& ptr) const
@@ -146,7 +146,7 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Creature> *ref =
             ptr.get<ESM::Creature>();
 
-        return ref->base->script;
+        return ref->base->mScript;
     }
 
     void Creature::registerSelf()
@@ -169,11 +169,11 @@ namespace MWClass
             ptr.get<ESM::Creature>();
 
         MWGui::ToolTipInfo info;
-        info.caption = ref->base->name;
+        info.caption = ref->base->mName;
 
         std::string text;
         if (MWBase::Environment::get().getWindowManager()->getFullHelp())
-            text += MWGui::ToolTips::getMiscString(ref->base->script, "Script");
+            text += MWGui::ToolTips::getMiscString(ref->base->mScript, "Script");
         info.text = text;
 
         return info;

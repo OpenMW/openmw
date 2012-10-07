@@ -38,7 +38,7 @@ Water::Water (Ogre::Camera *camera, RenderingManager* rend, const ESM::Cell* cel
 
     mMaterial = MaterialManager::getSingleton().getByName("Water");
 
-    mTop = cell->water;
+    mTop = cell->mWater;
 
     mIsUnderwater = false;
 
@@ -55,9 +55,9 @@ Water::Water (Ogre::Camera *camera, RenderingManager* rend, const ESM::Cell* cel
 
     mReflectionCamera = mSceneManager->createCamera("ReflectionCamera");
 
-    if(!(cell->data.flags & cell->Interior))
+    if(!(cell->mData.mFlags & cell->Interior))
     {
-        mWaterNode->setPosition(getSceneNodeCoordinates(cell->data.gridX, cell->data.gridY));
+        mWaterNode->setPosition(getSceneNodeCoordinates(cell->mData.mX, cell->mData.mY));
     }
     mWaterNode->attachObject(mWater);
 
@@ -156,12 +156,12 @@ Water::~Water()
 
 void Water::changeCell(const ESM::Cell* cell)
 {
-    mTop = cell->water;
+    mTop = cell->mWater;
 
     setHeight(mTop);
 
-    if(!(cell->data.flags & cell->Interior))
-        mWaterNode->setPosition(getSceneNodeCoordinates(cell->data.gridX, cell->data.gridY));
+    if(!(cell->mData.mFlags & cell->Interior))
+        mWaterNode->setPosition(getSceneNodeCoordinates(cell->mData.mX, cell->mData.mY));
 }
 
 void Water::setHeight(const float height)

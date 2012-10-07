@@ -45,10 +45,10 @@ void Actors::insertBegin (const MWWorld::Ptr& ptr, bool enabled, bool static_){
     Ogre::SceneNode* insert = cellnode->createChildSceneNode();
     const float *f = ptr.getRefData().getPosition().pos;
     insert->setPosition(f[0], f[1], f[2]);
-    insert->setScale(ptr.getCellRef().scale, ptr.getCellRef().scale, ptr.getCellRef().scale);
+    insert->setScale(ptr.getCellRef().mScale, ptr.getCellRef().mScale, ptr.getCellRef().mScale);
 
     // Convert MW rotation to a quaternion:
-    f = ptr.getCellRef().pos.rot;
+    f = ptr.getCellRef().mPos.rot;
 
     // Rotate around X axis
     Quaternion xr(Radian(-f[0]), Vector3::UNIT_X);

@@ -385,7 +385,7 @@ void OMW::Engine::go()
 
     if (const ESM::Cell *exterior = MWBase::Environment::get().getWorld()->getExterior (mCellName))
     {
-        MWBase::Environment::get().getWorld()->indexToPosition (exterior->data.gridX, exterior->data.gridY,
+        MWBase::Environment::get().getWorld()->indexToPosition (exterior->mData.mX, exterior->mData.mY,
             pos.pos[0], pos.pos[1], true);
         MWBase::Environment::get().getWorld()->changeToExteriorCell (pos);
     }

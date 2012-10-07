@@ -76,7 +76,7 @@ namespace MWClass
             ptr.get<ESM::Container>();
         assert(ref->base != NULL);
 
-        const std::string &model = ref->base->model;
+        const std::string &model = ref->base->mModel;
         if (!model.empty()) {
             return "meshes\\" + model;
         }
@@ -92,12 +92,12 @@ namespace MWClass
         MWWorld::Ptr player = MWBase::Environment::get().getWorld ()->getPlayer().getPlayer();
         MWWorld::InventoryStore& invStore = MWWorld::Class::get(player).getInventoryStore(player);
 
-        bool needKey = ptr.getCellRef().lockLevel>0;
+        bool needKey = ptr.getCellRef().mLockLevel>0;
         bool hasKey = false;
         std::string keyName;
         for (MWWorld::ContainerStoreIterator it = invStore.begin(); it != invStore.end(); ++it)
         {
-            if (it->getCellRef ().refID == ptr.getCellRef().key)
+            if (it->getCellRef ().mRefID == ptr.getCellRef().mKey)
             {
                 hasKey = true;
                 keyName = MWWorld::Class::get(*it).getName(*it);
@@ -107,15 +107,15 @@ namespace MWClass
         if (needKey && hasKey)
         {
             MWBase::Environment::get().getWindowManager ()->messageBox (keyName + " #{sKeyUsed}", std::vector<std::string>());
-            ptr.getCellRef().lockLevel = 0;
+            ptr.getCellRef().mLockLevel = 0;
             // using a key disarms the trap
-            ptr.getCellRef().trap = "";
+            ptr.getCellRef().mTrap = "";
         }
 
 
         if (!needKey || hasKey)
         {
-            if(ptr.getCellRef().trap.empty())
+            if(ptr.getCellRef().mTrap.empty())
             {
                 boost::shared_ptr<MWWorld::Action> action (new MWWorld::ActionOpen(ptr));
                 return action;
@@ -123,10 +123,10 @@ namespace MWClass
             else
             {
                 // Trap activation goes here
-                std::cout << "Activated trap: " << ptr.getCellRef().trap << std::endl;
+                std::cout << "Activated trap: " << ptr.getCellRef().mTrap << std::endl;
                 boost::shared_ptr<MWWorld::Action> action(new MWWorld::NullAction);
                 action->setSound(trapActivationSound);
-                ptr.getCellRef().trap = "";
+                ptr.getCellRef().mTrap = "";
                 return action;
             }
         }
@@ -143,7 +143,7 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Container> *ref =
             ptr.get<ESM::Container>();
 
-        return ref->base->name;
+        return ref->base->mName;
     }
 
     MWWorld::ContainerStore& Container::getContainerStore (const MWWorld::Ptr& ptr)
@@ -159,7 +159,7 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Container> *ref =
             ptr.get<ESM::Container>();
 
-        return ref->base->script;
+        return ref->base->mScript;
     }
 
     void Container::registerSelf()
@@ -174,7 +174,7 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Container> *ref =
             ptr.get<ESM::Container>();
 
-        return (ref->base->name != "");
+        return (ref->base->mName != "");
     }
 
     MWGui::ToolTipInfo Container::getToolTipInfo (const MWWorld::Ptr& ptr) const
@@ -183,17 +183,17 @@ namespace MWClass
             ptr.get<ESM::Container>();
 
         MWGui::ToolTipInfo info;
-        info.caption = ref->base->name;
+        info.caption = ref->base->mName;
 
         std::string text;
-        if (ref->ref.lockLevel > 0)
-            text += "\n#{sLockLevel}: " + MWGui::ToolTips::toString(ref->ref.lockLevel);
-        if (ref->ref.trap != "")
+        if (ref->ref.mLockLevel > 0)
+            text += "\n#{sLockLevel}: " + MWGui::ToolTips::toString(ref->ref.mLockLevel);
+        if (ref->ref.mTrap != "")
             text += "\n#{sTrapped}";
 
         if (MWBase::Environment::get().getWindowManager()->getFullHelp()) {
-            text += MWGui::ToolTips::getMiscString(ref->ref.owner, "Owner");
-            text += MWGui::ToolTips::getMiscString(ref->base->script, "Script");
+            text += MWGui::ToolTips::getMiscString(ref->ref.mOwner, "Owner");
+            text += MWGui::ToolTips::getMiscString(ref->base->mScript, "Script");
         }
 
         info.text = text;
@@ -206,7 +206,7 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Container> *ref =
             ptr.get<ESM::Container>();
 
-        return ref->base->weight;
+        return ref->base->mWeight;
     }
 
     float Container::getEncumbrance (const MWWorld::Ptr& ptr) const
@@ -219,12 +219,12 @@ namespace MWClass
         if (lockLevel<0)
             lockLevel = 0;
 
-        ptr.getCellRef().lockLevel = lockLevel;
+        ptr.getCellRef().mLockLevel = lockLevel;
     }
 
     void Container::unlock (const MWWorld::Ptr& ptr) const
     {
-        ptr.getCellRef().lockLevel = 0;
+        ptr.getCellRef().mLockLevel = 0;
     }
 
     MWWorld::Ptr

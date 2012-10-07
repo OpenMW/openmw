@@ -59,7 +59,7 @@ namespace NifOgre
 {
 
 // FIXME: These should not be in NifOgre, it works agnostic of what model format is used
-typedef std::map<float,std::string> TextKeyMap;
+typedef std::multimap<float,std::string> TextKeyMap;
 struct EntityList {
     std::vector<Ogre::Entity*> mEntities;
     Ogre::Entity *mSkelBase;
