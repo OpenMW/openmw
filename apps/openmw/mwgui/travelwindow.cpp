@@ -56,11 +56,23 @@ namespace MWGui
         MyGUI::Button* toAdd = mDestinationsView->createWidget<MyGUI::Button>((price>mWindowManager.getInventoryWindow()->getPlayerGold()) ? "SandTextGreyedOut" : "SpellText", 0, mCurrentY, 200, sLineHeight, MyGUI::Align::Default);
         mCurrentY += sLineHeight;
         /// \todo price adjustment depending on merchantile skill
+        if(interior)
+        {
+            toAdd->setUserString("interior","y");
+            price = MWBase::Environment::get().getWorld()->getStore().gameSettings.find("fMagesGuildTravel")->getFloat();
+        }
+        else
+        {
+            toAdd->setUserString("interior","n");
+            MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+            ESM::Position PlayerPos = player.getRefData().getPosition();
+            float d = sqrt( pow(pos.pos[0] - PlayerPos.pos[0],2) + pow(pos.pos[1] - PlayerPos.pos[1],2) + pow(pos.pos[2] - PlayerPos.pos[2],2)   );
+            price = d/MWBase::Environment::get().getWorld()->getStore().gameSettings.find("fTravelMult")->getFloat();
+        }
         std::ostringstream oss;
         oss << price;
         toAdd->setUserString("price",oss.str());
-        if(interior) toAdd->setUserString("interior","y");
-        else toAdd->setUserString("interior","n");
+
         toAdd->setCaptionWithReplacing(travelId+"   -   "+boost::lexical_cast<std::string>(price)+"#{sgp}");
         toAdd->setSize(toAdd->getTextSize().width,sLineHeight);
         toAdd->eventMouseWheel += MyGUI::newDelegate(this, &TravelWindow::onMouseWheel);
