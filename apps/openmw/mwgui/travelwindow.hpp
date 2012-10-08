@@ -40,7 +40,7 @@ namespace MWGui
             void onCancelButtonClicked(MyGUI::Widget* _sender);
             void onTravelButtonClick(MyGUI::Widget* _sender);
             void onMouseWheel(MyGUI::Widget* _sender, int _rel);
-            void addDestination(const std::string& destinationID);
+            void addDestination(const std::string& destinationID,ESM::Position pos,bool interior);
             void clearDestinations();
             int mLastPos,mCurrentY;
 
