@@ -57,6 +57,8 @@ struct Arguments
     std::string encoding;
     std::string filename;
     std::string outname;
+
+    std::vector<std::string> types;
   
     ESMData data;
     ESM::ESMReader reader;
@@ -71,6 +73,8 @@ bool parseOptions (int argc, char** argv, Arguments &info)
         ("help,h", "print help message.")
         ("version,v", "print version information and quit.")
         ("raw,r", "Show an unformattet list of all records and subrecords.")
+	("type,t", bpo::value< std::vector<std::string> >(),
+	 "Show only records of this type.")
         ("quiet,q", "Supress all record information. Useful for speed tests.")
         ("loadcells,C", "Browse through contents of all cells.")
 
@@ -121,6 +125,9 @@ bool parseOptions (int argc, char** argv, Arguments &info)
                   << desc << finalText << std::endl;
         return false;
     }
+
+    if (variables.count("type") > 0)
+      info.types = variables["type"].as< std::vector<std::string> >();
 
     info.mode = variables["mode"].as<std::string>();
     if (!(info.mode == "dump" || info.mode == "clone" || info.mode == "comp"))
@@ -306,14 +313,23 @@ int load(Arguments& info)
             uint32_t flags;
             esm.getRecHeader(flags);
 
+	    // Is the user interested in this record type?
+	    bool interested = true;
+	    if (info.types.size() > 0)
+	    {
+		std::vector<std::string>::iterator match;
+		match = std::find(info.types.begin(), info.types.end(), 
+				  n.toString());
+		if (match == info.types.end()) interested = false;
+	    }
+
             std::string id = esm.getHNOString("NAME");
 
-            if(!quiet)
+            if(!quiet && interested)
                 std::cout << "\nRecord: " << n.toString()
                      << " '" << id << "'\n";
 
-            EsmTool::RecordBase *record =
-                EsmTool::RecordBase::create(n.val);
+            EsmTool::RecordBase *record = EsmTool::RecordBase::create(n);
 
             if (record == 0) {
                 if (std::find(skipped.begin(), skipped.end(), n.val) == skipped.end())
@@ -326,18 +342,16 @@ int load(Arguments& info)
                 if (quiet) break;
                 std::cout << "  Skipping\n";
             } else {
-                if (record->getType() == ESM::REC_GMST) {
+                if (record->getType().val == ESM::REC_GMST) {
                     // preset id for GameSetting record
                     record->cast<ESM::GameSetting>()->get().mId = id;
                 }
                 record->setId(id);
                 record->setFlags((int) flags);
                 record->load(esm);
-                if (!quiet) {
-                    record->print();
-                }
+                if (!quiet && interested) record->print();
 
-                if (record->getType() == ESM::REC_CELL && loadCells) {
+                if (record->getType().val == ESM::REC_CELL && loadCells) {
                     loadCell(record->cast<ESM::Cell>()->get(), esm, info);
                 }
 
@@ -434,7 +448,7 @@ int clone(Arguments& info)
     {
         EsmTool::RecordBase *record = *it;
         
-        name.val = record->getType();
+        name.val = record->getType().val;
 
         esm.startRecord(name.toString(), record->getFlags());
 
