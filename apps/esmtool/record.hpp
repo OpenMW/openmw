@@ -20,7 +20,7 @@ namespace EsmTool
     protected:
         std::string mId;
         int mFlags;
-	ESM::NAME mType;
+        ESM::NAME mType;
 
     public:
         RecordBase () {}
@@ -42,7 +42,7 @@ namespace EsmTool
             mFlags = flags;
         }
 
-	ESM::NAME getType() const {
+        ESM::NAME getType() const {
             return mType;
         }
 

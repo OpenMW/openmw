@@ -13,7 +13,7 @@
 
 #include "record.hpp"
 
-#define ESMTOOL_VERSION 1.1
+#define ESMTOOL_VERSION 1.2
 
 // Create a local alias for brevity
 namespace bpo = boost::program_options;
@@ -72,9 +72,12 @@ bool parseOptions (int argc, char** argv, Arguments &info)
     desc.add_options()
         ("help,h", "print help message.")
         ("version,v", "print version information and quit.")
-        ("raw,r", "Show an unformattet list of all records and subrecords.")
-	("type,t", bpo::value< std::vector<std::string> >(),
-	 "Show only records of this type.")
+        ("raw,r", "Show an unformatted list of all records and subrecords.")
+        // The intention is that this option would interact better
+        // with other modes including clone, dump, and raw. 
+        ("type,t", bpo::value< std::vector<std::string> >(),
+         "Show only records of this type (four character record code).  May "
+         "be specified multiple times.  Only affects dump mode.")
         ("quiet,q", "Supress all record information. Useful for speed tests.")
         ("loadcells,C", "Browse through contents of all cells.")
 
@@ -313,15 +316,15 @@ int load(Arguments& info)
             uint32_t flags;
             esm.getRecHeader(flags);
 
-	    // Is the user interested in this record type?
-	    bool interested = true;
-	    if (info.types.size() > 0)
-	    {
-		std::vector<std::string>::iterator match;
-		match = std::find(info.types.begin(), info.types.end(), 
-				  n.toString());
-		if (match == info.types.end()) interested = false;
-	    }
+            // Is the user interested in this record type?
+            bool interested = true;
+            if (info.types.size() > 0)
+            {
+                std::vector<std::string>::iterator match;
+                match = std::find(info.types.begin(), info.types.end(), 
+                                  n.toString());
+                if (match == info.types.end()) interested = false;
+            }
 
             std::string id = esm.getHNOString("NAME");
 
