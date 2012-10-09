@@ -24,6 +24,6 @@ public slots:
 
 };
 
-Q_DECLARE_METATYPE(QVector<QPersistentModelIndex>);
+Q_DECLARE_METATYPE(QVector<QPersistentModelIndex>)
 
 #endif

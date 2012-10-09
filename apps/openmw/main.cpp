@@ -68,7 +68,7 @@ void validate(boost::any &v, std::vector<std::string> const &tokens, FallbackMap
 
         if((mapIt = map->mMap.find(key)) == map->mMap.end())
         {
-            map->mMap.insert(std::make_pair<std::string,std::string>(key,value));
+            map->mMap.insert(std::make_pair (key,value));
         }
     }
 }

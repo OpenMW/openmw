@@ -74,6 +74,6 @@ namespace MWScript
             ///< Return index of the variable of the given name and type in the given script. Will
             /// throw an exception, if there is no such script or variable or the type does not match.
     };
-};
+}
 
 #endif
