@@ -1,5 +1,6 @@
 set(LAUNCHER
     datafilespage.cpp
+    filedialog.cpp
     graphicspage.cpp
     lineedit.cpp
     main.cpp
@@ -8,14 +9,18 @@ set(LAUNCHER
     playpage.cpp
     pluginsmodel.cpp
     pluginsview.cpp
-    filedialog.cpp
 
     launcher.rc
+
+    model/datafilesmodel.cpp
+    model/modelitem.cpp
+    model/esm/esmfile.cpp
 )
 
 set(LAUNCHER_HEADER
     combobox.hpp
     datafilespage.hpp
+    filedialog.hpp
     graphicspage.hpp
     lineedit.hpp
     maindialog.hpp
@@ -23,20 +28,27 @@ set(LAUNCHER_HEADER
     playpage.hpp
     pluginsmodel.hpp
     pluginsview.hpp
-    filedialog.hpp
+
+    model/datafilesmodel.hpp
+    model/modelitem.hpp
+    model/esm/esmfile.hpp
 )
 
 # Headers that must be pre-processed
 set(LAUNCHER_HEADER_MOC
     combobox.hpp
     datafilespage.hpp
+    filedialog.hpp
     graphicspage.hpp
     lineedit.hpp
     maindialog.hpp
     playpage.hpp
     pluginsmodel.hpp
     pluginsview.hpp
-    filedialog.hpp
+
+    model/datafilesmodel.hpp
+    model/modelitem.hpp
+    model/esm/esmfile.hpp
 )
 
 source_group(launcher FILES ${LAUNCHER} ${LAUNCHER_HEADER} ${LAUNCHER_HEADER_MOC})
