@@ -2,7 +2,7 @@
 #include <QFileInfo>
 #include <QDir>
 
-#include <components/esm/esm_reader.hpp>
+#include <components/esm/esmreader.hpp>
 
 #include "esm/esmfile.hpp"
 

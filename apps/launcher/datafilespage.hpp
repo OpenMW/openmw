@@ -8,19 +8,15 @@
 
 #include "combobox.hpp"
 
-class QTableWidget;
-class QStandardItemModel;
-class QItemSelection;
-class QItemSelectionModel;
+class QTableView;
 class QSortFilterProxyModel;
-class QStringListModel;
 class QSettings;
 class QAction;
 class QToolBar;
 class QMenu;
-class PluginsModel;
-class PluginsView;
 class ComboBox;
+class DataFilesModel;
+
 
 namespace Files { struct ConfigurationManager; }
 
@@ -37,7 +33,6 @@ public:
     bool setupDataFiles();
 
 public slots:
-    void masterSelectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
     void setCheckState(QModelIndex index);
 
     void filterChanged(const QString filter);
@@ -46,37 +41,34 @@ public slots:
 
     // Action slots
     void newProfile();
-    void copyProfile();
     void deleteProfile();
-    void moveUp();
-    void moveDown();
-    void moveTop();
-    void moveBottom();
+//    void moveUp();
+//    void moveDown();
+//    void moveTop();
+//    void moveBottom();
     void check();
     void uncheck();
     void refresh();
 
 private:
-    QTableWidget *mMastersWidget;
-    PluginsView *mPluginsTable;
-
-    QStandardItemModel *mDataFilesModel;
-    PluginsModel *mPluginsModel;
+    DataFilesModel *mMastersModel;
+    DataFilesModel *mPluginsModel;
 
     QSortFilterProxyModel *mPluginsProxyModel;
-    QItemSelectionModel *mPluginsSelectModel;
+
+    QTableView *mMastersTable;
+    QTableView *mPluginsTable;
 
     QToolBar *mProfileToolBar;
     QMenu *mContextMenu;
 
     QAction *mNewProfileAction;
-    QAction *mCopyProfileAction;
     QAction *mDeleteProfileAction;
 
-    QAction *mMoveUpAction;
-    QAction *mMoveDownAction;
-    QAction *mMoveTopAction;
-    QAction *mMoveBottomAction;
+//    QAction *mMoveUpAction;
+//    QAction *mMoveDownAction;
+//    QAction *mMoveTopAction;
+//    QAction *mMoveBottomAction;
     QAction *mCheckAction;
     QAction *mUncheckAction;
 
@@ -86,17 +78,12 @@ private:
 
     QSettings *mLauncherConfig;
 
-    const QStringList checkedPlugins();
-    const QStringList selectedMasters();
+//    const QStringList checkedPlugins();
+//    const QStringList selectedMasters();
 
-    void addDataFiles(Files::Collections &fileCollections, const QString &encoding);
-    void addPlugins(const QModelIndex &index);
-    void removePlugins(const QModelIndex &index);
-    void uncheckPlugins();
     void createActions();
     void setupConfig();
     void readConfig();
-    void scrollToSelection();
 
 };
 
