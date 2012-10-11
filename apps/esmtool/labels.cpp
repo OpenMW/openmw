@@ -48,7 +48,6 @@ std::string bodyPartLabel(char idx)
         "Tail"
     };
     
-    // BUG? idx should probably be unsigned char instead
     if ((int)idx >= 0 && (int)(idx) <= 26)
         return bodyPartLabels[(int)(idx)];
     else
@@ -576,7 +575,6 @@ std::string ruleFunction(int idx)
         "Player Skill Mercantile",
         "Player Skill Speechcraft",
         "Player Skill Hand to Hand",
-// Unknown1=0->Male, Unknown1=1->Female
         "Player Gender",
         "Player Expelled from Faction",
         "Player Diseased (Common)",
@@ -646,7 +644,7 @@ std::string cellFlags(int flags)
     if (flags & ESM::Cell::Interior) properties += "Interior ";
     if (flags & ESM::Cell::NoSleep) properties += "NoSleep ";
     if (flags & ESM::Cell::QuasiEx) properties += "QuasiEx ";
-    // CHANGE? This used value is not in the ESM component.
+    // This used value is not in the ESM component.
     if (flags & 0x00000040) properties += "Unknown ";
     int unused = (0xFFFFFFFF ^
                   (ESM::Cell::HasWater|
@@ -725,9 +723,8 @@ std::string leveledListFlags(int flags)
     std::string properties = "";
     if (flags == 0) properties += "[None] ";
     if (flags & ESM::LeveledListBase::AllLevels) properties += "AllLevels ";
-    // BUG? This flag apparently not present on creature lists...
+    // This flag apparently not present on creature lists...
     if (flags & ESM::LeveledListBase::Each) properties += "Each ";
-    // BUG! The unsused bits should be defined in LeveledListBase.
     int unused = (0xFFFFFFFF ^
                   (ESM::LeveledListBase::AllLevels|
                    ESM::LeveledListBase::Each));
