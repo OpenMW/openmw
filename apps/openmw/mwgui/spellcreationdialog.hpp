@@ -38,6 +38,10 @@ namespace MWGui
 
         MyGUI::Button* mRangeButton;
 
+        MyGUI::Widget* mDurationBox;
+        MyGUI::Widget* mMagnitudeBox;
+        MyGUI::Widget* mAreaBox;
+
         MyGUI::TextBox* mMagnitudeMinValue;
         MyGUI::TextBox* mMagnitudeMaxValue;
         MyGUI::TextBox* mDurationValue;
@@ -61,10 +65,19 @@ namespace MWGui
         void onOkButtonClicked (MyGUI::Widget* sender);
         void onCancelButtonClicked (MyGUI::Widget* sender);
 
+        void onMagnitudeMinChanged (MyGUI::ScrollBar* sender, size_t pos);
+        void onMagnitudeMaxChanged (MyGUI::ScrollBar* sender, size_t pos);
+        void onDurationChanged (MyGUI::ScrollBar* sender, size_t pos);
+        void onAreaChanged (MyGUI::ScrollBar* sender, size_t pos);
+
         void setMagicEffect(const ESM::MagicEffect* effect);
+
+        void updateBoxes();
 
     protected:
         ESM::ENAMstruct mEffect;
+
+        const ESM::MagicEffect* mMagicEffect;
     };
 
 

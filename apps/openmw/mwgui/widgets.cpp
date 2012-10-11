@@ -362,6 +362,7 @@ SpellEffectList MWEffectList::effectListFromESM(const ESM::EffectList* effects)
         params.mMagnMin = it->mMagnMin;
         params.mMagnMax = it->mMagnMax;
         params.mRange = it->mRange;
+        params.mArea = it->mArea;
         result.push_back(params);
     }
     return result;
@@ -437,6 +438,11 @@ void MWSpellEffect::updateWidgets()
             spellLine += " " + mWindowManager->getGameSettingString("sfor", "") + " " + boost::lexical_cast<std::string>(mEffectParams.mDuration) + ((mEffectParams.mDuration == 1) ? sec : secs);
         }
 
+        if (mEffectParams.mArea > 0)
+        {
+            spellLine += " #{sin} " + boost::lexical_cast<std::string>(mEffectParams.mArea) + " #{sfootarea}";
+        }
+
         // potions have no target
         if (!mEffectParams.mNoTarget)
         {
@@ -450,7 +456,7 @@ void MWSpellEffect::updateWidgets()
         }
     }
 
-    static_cast<MyGUI::TextBox*>(mTextWidget)->setCaption(spellLine);
+    static_cast<MyGUI::TextBox*>(mTextWidget)->setCaptionWithReplacing(spellLine);
     mRequestedWidth = mTextWidget->getTextSize().width + 24;
 
     std::string path = std::string("icons\\") + magicEffect->mIcon;

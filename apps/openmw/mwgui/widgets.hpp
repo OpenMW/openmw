@@ -32,6 +32,7 @@ namespace MWGui
                 , mRange(-1)
                 , mDuration(-1)
                 , mSkill(-1)
+                , mArea(0)
                 , mAttribute(-1)
                 , mEffectID(-1)
                 , mNoTarget(false)
@@ -51,6 +52,9 @@ namespace MWGui
             // value of -1 here means the value is unavailable
             int mMagnMin, mMagnMax, mRange, mDuration;
 
+            // value of 0 -> no area effect
+            int mArea;
+
             bool operator==(const SpellEffectParams& other) const
             {
                 if (mEffectID !=  other.mEffectID)
@@ -66,7 +70,7 @@ namespace MWGui
                                         || mEffectID == 21 // drain skill
                                         || mEffectID == 83 // fortify skill
                                         || mEffectID == 26); // damage skill
-                return ((other.mSkill == mSkill) || !involvesSkill) && ((other.mAttribute == mAttribute) && !involvesAttribute);
+                return ((other.mSkill == mSkill) || !involvesSkill) && ((other.mAttribute == mAttribute) && !involvesAttribute) && (other.mArea == mArea);
             }
         };
 

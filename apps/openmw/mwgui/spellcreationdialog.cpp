@@ -1,5 +1,7 @@
 #include "spellcreationdialog.hpp"
 
+#include <boost/lexical_cast.hpp>
+
 #include <components/esm_store/store.hpp>
 
 #include "../mwbase/windowmanager.hpp"
@@ -49,21 +51,25 @@ namespace MWGui
         getWidget(mEffectImage, "EffectImage");
         getWidget(mEffectName, "EffectName");
         getWidget(mAreaText, "AreaText");
+        getWidget(mDurationBox, "DurationBox");
+        getWidget(mAreaBox, "AreaBox");
+        getWidget(mMagnitudeBox, "MagnitudeBox");
 
         mRangeButton->eventMouseButtonClick += MyGUI::newDelegate(this, &EditEffectDialog::onRangeButtonClicked);
         mOkButton->eventMouseButtonClick += MyGUI::newDelegate(this, &EditEffectDialog::onOkButtonClicked);
         mCancelButton->eventMouseButtonClick += MyGUI::newDelegate(this, &EditEffectDialog::onCancelButtonClicked);
         mDeleteButton->eventMouseButtonClick += MyGUI::newDelegate(this, &EditEffectDialog::onDeleteButtonClicked);
+
+        mMagnitudeMinSlider->eventScrollChangePosition += MyGUI::newDelegate(this, &EditEffectDialog::onMagnitudeMinChanged);
+        mMagnitudeMaxSlider->eventScrollChangePosition += MyGUI::newDelegate(this, &EditEffectDialog::onMagnitudeMaxChanged);
+        mDurationSlider->eventScrollChangePosition += MyGUI::newDelegate(this, &EditEffectDialog::onDurationChanged);
+        mAreaSlider->eventScrollChangePosition += MyGUI::newDelegate(this, &EditEffectDialog::onAreaChanged);
     }
 
     void EditEffectDialog::open()
     {
         WindowModal::open();
         center();
-
-        mEffect.mRange = ESM::RT_Self;
-
-        onRangeButtonClicked(mRangeButton);
     }
 
     void EditEffectDialog::newEffect (const ESM::MagicEffect *effect)
@@ -72,6 +78,25 @@ namespace MWGui
         mEditing = false;
 
         mDeleteButton->setVisible (false);
+
+        mEffect.mRange = ESM::RT_Self;
+
+        onRangeButtonClicked(mRangeButton);
+
+        mMagnitudeMinSlider->setScrollPosition (0);
+        mMagnitudeMaxSlider->setScrollPosition (0);
+        mAreaSlider->setScrollPosition (0);
+        mDurationSlider->setScrollPosition (0);
+
+        mDurationValue->setCaption("1");
+        mMagnitudeMinValue->setCaption("1");
+        mMagnitudeMaxValue->setCaption("- 1");
+        mAreaValue->setCaption("0");
+
+        mEffect.mMagnMin = 1;
+        mEffect.mMagnMax = 1;
+        mEffect.mDuration = 1;
+        mEffect.mArea = 0;
     }
 
     void EditEffectDialog::editEffect (ESM::ENAMstruct effect)
@@ -84,6 +109,16 @@ namespace MWGui
         mEditing = true;
 
         mDeleteButton->setVisible (true);
+
+        mMagnitudeMinSlider->setScrollPosition (effect.mMagnMin-1);
+        mMagnitudeMaxSlider->setScrollPosition (effect.mMagnMax-1);
+        mAreaSlider->setScrollPosition (effect.mArea);
+        mDurationSlider->setScrollPosition (effect.mDuration-1);
+
+        onMagnitudeMinChanged (mMagnitudeMinSlider, effect.mMagnMin-1);
+        onMagnitudeMaxChanged (mMagnitudeMinSlider, effect.mMagnMax-1);
+        onAreaChanged (mAreaSlider, effect.mArea);
+        onDurationChanged (mDurationSlider, effect.mDuration-1);
     }
 
     void EditEffectDialog::setMagicEffect (const ESM::MagicEffect *effect)
@@ -99,6 +134,39 @@ namespace MWGui
         mEffectName->setCaptionWithReplacing("#{"+ESM::MagicEffect::effectIdToString  (effect->mIndex)+"}");
 
         mEffect.mEffectID = effect->mIndex;
+
+        mMagicEffect = effect;
+
+        updateBoxes();
+    }
+
+    void EditEffectDialog::updateBoxes()
+    {
+        static int startY = mMagnitudeBox->getPosition().top;
+        int curY = startY;
+
+        mMagnitudeBox->setVisible (false);
+        mDurationBox->setVisible (false);
+        mAreaBox->setVisible (false);
+
+        if (!(mMagicEffect->mData.mFlags & ESM::MagicEffect::NoMagnitude))
+        {
+            mMagnitudeBox->setPosition(mMagnitudeBox->getPosition().left, curY);
+            mMagnitudeBox->setVisible (true);
+            curY += mMagnitudeBox->getSize().height;
+        }
+        if (!(mMagicEffect->mData.mFlags & ESM::MagicEffect::NoDuration))
+        {
+            mDurationBox->setPosition(mDurationBox->getPosition().left, curY);
+            mDurationBox->setVisible (true);
+            curY += mDurationBox->getSize().height;
+        }
+        if (mEffect.mRange == ESM::RT_Target)
+        {
+            mAreaBox->setPosition(mAreaBox->getPosition().left, curY);
+            mAreaBox->setVisible (true);
+            curY += mAreaBox->getSize().height;
+        }
     }
 
     void EditEffectDialog::onRangeButtonClicked (MyGUI::Widget* sender)
@@ -114,6 +182,16 @@ namespace MWGui
 
         mAreaSlider->setVisible (mEffect.mRange != ESM::RT_Self);
         mAreaText->setVisible (mEffect.mRange != ESM::RT_Self);
+
+        // cycle through range types until we find something that's allowed
+        if (mEffect.mRange == ESM::RT_Target && !(mMagicEffect->mData.mFlags & ESM::MagicEffect::CastTarget))
+            onRangeButtonClicked(sender);
+        if (mEffect.mRange == ESM::RT_Self && !(mMagicEffect->mData.mFlags & ESM::MagicEffect::CastSelf))
+            onRangeButtonClicked(sender);
+        if (mEffect.mRange == ESM::RT_Touch && !(mMagicEffect->mData.mFlags & ESM::MagicEffect::CastTouch))
+            onRangeButtonClicked(sender);
+
+        updateBoxes();
     }
 
     void EditEffectDialog::onDeleteButtonClicked (MyGUI::Widget* sender)
@@ -146,6 +224,42 @@ namespace MWGui
     void EditEffectDialog::setAttribute (int attribute)
     {
         mEffect.mAttribute = attribute;
+    }
+
+    void EditEffectDialog::onMagnitudeMinChanged (MyGUI::ScrollBar* sender, size_t pos)
+    {
+        mMagnitudeMinValue->setCaption(boost::lexical_cast<std::string>(pos+1));
+        mEffect.mMagnMin = pos+1;
+
+        // trigger the check again (see below)
+        onMagnitudeMaxChanged(mMagnitudeMaxSlider, mMagnitudeMaxSlider->getScrollPosition ());
+    }
+
+    void EditEffectDialog::onMagnitudeMaxChanged (MyGUI::ScrollBar* sender, size_t pos)
+    {
+        // make sure the max value is actually larger or equal than the min value
+        size_t magnMin = std::abs(mEffect.mMagnMin); // should never be < 0, this is just here to avoid the compiler warning
+        if (pos+1 < magnMin)
+        {
+            pos = mEffect.mMagnMin-1;
+            sender->setScrollPosition (pos);
+        }
+
+        mEffect.mMagnMax = pos+1;
+
+        mMagnitudeMaxValue->setCaption("- " + boost::lexical_cast<std::string>(pos+1));
+    }
+
+    void EditEffectDialog::onDurationChanged (MyGUI::ScrollBar* sender, size_t pos)
+    {
+        mDurationValue->setCaption(boost::lexical_cast<std::string>(pos+1));
+        mEffect.mDuration = pos+1;
+    }
+
+    void EditEffectDialog::onAreaChanged (MyGUI::ScrollBar* sender, size_t pos)
+    {
+        mAreaValue->setCaption(boost::lexical_cast<std::string>(pos));
+        mEffect.mArea = pos;
     }
 
     // ------------------------------------------------------------------------------------------------
@@ -356,6 +470,7 @@ namespace MWGui
             params.mMagnMin = it->mMagnMin;
             params.mMagnMax = it->mMagnMax;
             params.mRange = it->mRange;
+            params.mArea = it->mArea;
 
             MyGUI::Button* button = mUsedEffectsView->createWidget<MyGUI::Button>("", MyGUI::IntCoord(0, size.height, 0, 24), MyGUI::Align::Default);
             button->setUserData(i);

@@ -21,49 +21,60 @@
         </Widget>
 
         <!-- Magnitude -->
-        <Widget type="TextBox" skin="NormalText" position="8 80 400 24">
-            <Property key="Caption" value="#{sMagnitude}"/>
-            <Property key="TextAlign" value="Left HCenter"/>
+        <Widget type="Widget" position="8 80 400 70" name="MagnitudeBox">
+            <Widget type="TextBox" skin="NormalText" position="0 0 400 24">
+                <Property key="Caption" value="#{sMagnitude}"/>
+                <Property key="TextAlign" value="Left HCenter"/>
+            </Widget>
+
+            <Widget type="TextBox" skin="SandText" position="122 0 210 20" name="MagnitudeMinValue">
+                <Property key="TextAlign" value="Center"/>
+                <Property key="Caption" value="0"/>
+            </Widget>
+            <Widget type="ScrollBar" skin="MW_HSlider" position="122 20 210 13" name="MagnitudeMinSlider">
+                <Property key="Range" value="100"/>
+            </Widget>
+
+            <Widget type="TextBox" skin="SandText" position="122 32 210 20" name="MagnitudeMaxValue">
+                <Property key="TextAlign" value="Center"/>
+                <Property key="Caption" value="0"/>
+            </Widget>
+            <Widget type="ScrollBar" skin="MW_HSlider" position="122 52 210 13" name="MagnitudeMaxSlider">
+                <Property key="Range" value="100"/>
+            </Widget>
         </Widget>
 
-        <Widget type="TextBox" skin="SandText" position="130 80 210 20" name="MagnitudeMinValue">
-            <Property key="TextAlign" value="Center"/>
-            <Property key="Caption" value="0"/>
-        </Widget>
-        <Widget type="ScrollBar" skin="MW_HSlider" position="130 100 210 13" name="MagnitudeMinSlider">
-        </Widget>
-
-        <Widget type="TextBox" skin="SandText" position="130 112 210 20" name="MagnitudeMaxValue">
-            <Property key="TextAlign" value="Center"/>
-            <Property key="Caption" value="0"/>
-        </Widget>
-        <Widget type="ScrollBar" skin="MW_HSlider" position="130 132 210 13" name="MagnitudeMaxSlider">
-        </Widget>
 
         <!-- Duration -->
-        <Widget type="TextBox" skin="NormalText" position="8 173 400 24">
-            <Property key="Caption" value="#{sDuration}"/>
-            <Property key="TextAlign" value="Left Top"/>
-        </Widget>
+        <Widget type="Widget" position="8 153 400 40" name="DurationBox">
+            <Widget type="TextBox" skin="NormalText" position="0 20 400 24">
+                <Property key="Caption" value="#{sDuration}"/>
+                <Property key="TextAlign" value="Left Top"/>
+            </Widget>
 
-        <Widget type="TextBox" skin="SandText" position="130 153 210 20" name="DurationValue">
-            <Property key="TextAlign" value="Center"/>
-            <Property key="Caption" value="0"/>
-        </Widget>
-        <Widget type="ScrollBar" skin="MW_HSlider" position="130 173 210 13" name="DurationSlider">
+            <Widget type="TextBox" skin="SandText" position="122 0 210 20" name="DurationValue">
+                <Property key="TextAlign" value="Center"/>
+                <Property key="Caption" value="0"/>
+            </Widget>
+            <Widget type="ScrollBar" skin="MW_HSlider" position="122 20 210 13" name="DurationSlider">
+                <Property key="Range" value="1440"/>
+            </Widget>
         </Widget>
 
         <!-- Area -->
-        <Widget type="TextBox" skin="NormalText" position="8 217 400 24" name="AreaText">
-            <Property key="Caption" value="#{sArea}"/>
-            <Property key="TextAlign" value="Left Top"/>
-        </Widget>
+        <Widget type="Widget" position="8 197 400 40" name="AreaBox">
+            <Widget type="TextBox" skin="NormalText" position="0 20 400 24" name="AreaText">
+                <Property key="Caption" value="#{sArea}"/>
+                <Property key="TextAlign" value="Left Top"/>
+            </Widget>
 
-        <Widget type="TextBox" skin="SandText" position="130 197 210 20" name="AreaValue">
-            <Property key="TextAlign" value="Center"/>
-            <Property key="Caption" value="0"/>
-        </Widget>
-        <Widget type="ScrollBar" skin="MW_HSlider" position="130 217 210 13" name="AreaSlider">
+            <Widget type="TextBox" skin="SandText" position="122 0 210 20" name="AreaValue">
+                <Property key="TextAlign" value="Center"/>
+                <Property key="Caption" value="0"/>
+            </Widget>
+            <Widget type="ScrollBar" skin="MW_HSlider" position="122 20 210 13" name="AreaSlider">
+                <Property key="Range" value="51"/>
+            </Widget>
         </Widget>
 
         <Widget type="HBox" position="8 266 336 24">
