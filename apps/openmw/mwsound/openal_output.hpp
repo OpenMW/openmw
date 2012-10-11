@@ -66,6 +66,6 @@ namespace MWSound
 #ifndef DEFAULT_OUTPUT
 #define DEFAULT_OUTPUT (::MWSound::OpenAL_Output)
 #endif
-};
+}
 
 #endif

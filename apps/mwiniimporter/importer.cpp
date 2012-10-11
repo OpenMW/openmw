@@ -78,7 +78,7 @@ MwIniImporter::multistrmap MwIniImporter::loadIniFile(std::string filename) {
 
         multistrmap::iterator it;
         if((it = map.find(key)) == map.end()) {
-            map.insert( std::make_pair<std::string, std::vector<std::string> > (key, std::vector<std::string>() ) );
+            map.insert( std::make_pair (key, std::vector<std::string>() ) );
         }
         map[key].push_back(value);
     }
@@ -115,7 +115,7 @@ MwIniImporter::multistrmap MwIniImporter::loadCfgFile(std::string filename) {
 
         multistrmap::iterator it;
         if((it = map.find(key)) == map.end()) {
-            map.insert( std::make_pair<std::string, std::vector<std::string> > (key, std::vector<std::string>() ) );
+            map.insert( std::make_pair (key, std::vector<std::string>() ) );
         }
         map[key].push_back(value);
     }
@@ -152,12 +152,12 @@ void MwIniImporter::mergeFallback(multistrmap &cfg, multistrmap &ini) {
             }
         }
     }
-};
+}
 
 void MwIniImporter::insertMultistrmap(multistrmap &cfg, std::string key, std::string value) {
     multistrmap::iterator it = cfg.find(key);
     if(it == cfg.end()) {
-        cfg.insert(std::make_pair<std::string, std::vector<std::string> >(key, std::vector<std::string>() ));
+        cfg.insert(std::make_pair (key, std::vector<std::string>() ));
     }
     cfg[key].push_back(value);
 }
