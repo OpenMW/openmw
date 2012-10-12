@@ -6,8 +6,9 @@
 
 #include "esm/esmfile.hpp"
 
+#include "../utils/naturalsort.hpp"
+
 #include "datafilesmodel.hpp"
-#include "../naturalsort.hpp"
 
 DataFilesModel::DataFilesModel(QObject *parent) :
     QAbstractTableModel(parent)

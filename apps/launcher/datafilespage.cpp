@@ -6,11 +6,12 @@
 #include "model/datafilesmodel.hpp"
 #include "model/esm/esmfile.hpp"
 
-#include "combobox.hpp"
+#include "utils/combobox.hpp"
+#include "utils/filedialog.hpp"
+#include "utils/lineedit.hpp"
+#include "utils/naturalsort.hpp"
+
 #include "datafilespage.hpp"
-#include "filedialog.hpp"
-#include "lineedit.hpp"
-#include "naturalsort.hpp"
 
 #include <boost/version.hpp>
 /**
@@ -110,6 +111,7 @@ DataFilesPage::DataFilesPage(Files::ConfigurationManager &cfg, QWidget *parent)
     mPluginsTable->setAlternatingRowColors(true);
     mPluginsTable->setVerticalScrollMode(QAbstractItemView::ScrollPerItem);
     mPluginsTable->horizontalHeader()->setStretchLastSection(true);
+    mPluginsTable->horizontalHeader()->hide();
 
     mPluginsTable->verticalHeader()->setDefaultSectionSize(height);
     mPluginsTable->verticalHeader()->setResizeMode(QHeaderView::Fixed);
