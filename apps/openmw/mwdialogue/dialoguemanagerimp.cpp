@@ -145,16 +145,17 @@ namespace
 
         return false;
     }
-}
-
-namespace MWDialogue
-{
 
     //helper function
     std::string::size_type find_str_ci(const std::string& str, const std::string& substr,size_t pos)
     {
         return toLower(str).find(toLower(substr),pos);
     }
+}
+
+namespace MWDialogue
+{
+
 
     bool DialogueManager::functionFilter(const MWWorld::Ptr& actor, const ESM::DialInfo& info,bool choice)
     {
@@ -779,6 +780,8 @@ namespace MWDialogue
                 services = ref->base->mAiData.mServices;
         }
 
+        int windowServices = 0;
+
         if (services & ESM::NPC::Weapon
             || services & ESM::NPC::Armor
             || services & ESM::NPC::Clothing
@@ -790,14 +793,18 @@ namespace MWDialogue
             || services & ESM::NPC::Apparatus
             || services & ESM::NPC::RepairItem
             || services & ESM::NPC::Misc)
-            win->setShowTrade(true);
-        else
-            win->setShowTrade(false);
+            windowServices |= MWGui::DialogueWindow::Service_Trade;
 
         if (services & ESM::NPC::Spells)
-            win->setShowSpells(true);
-        else
-            win->setShowSpells(false);
+            windowServices |= MWGui::DialogueWindow::Service_BuySpells;
+
+        if (services & ESM::NPC::Spellmaking)
+            windowServices |= MWGui::DialogueWindow::Service_CreateSpells;
+
+        if (services & ESM::NPC::Enchanting)
+            windowServices |= MWGui::DialogueWindow::Service_Enchant;
+
+        win->setServices (windowServices);
 
         // sort again, because the previous sort was case-sensitive
         keywordList.sort(stringCompareNoCase);

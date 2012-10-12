@@ -588,8 +588,6 @@ void ToolTips::createSkillToolTip(MyGUI::Widget* widget, int skillId)
     widget->setUserString("Caption_SkillNoProgressDescription", skill->mDescription);
     widget->setUserString("Caption_SkillNoProgressAttribute", "#{sGoverningAttribute}: #{" + attr->mName + "}");
     widget->setUserString("ImageTexture_SkillNoProgressImage", icon);
-    widget->setUserString("ToolTipLayout", "SkillNoProgressToolTip");
-    widget->setUserString("ToolTipLayout", "SkillNoProgressToolTip");
 }
 
 void ToolTips::createAttributeToolTip(MyGUI::Widget* widget, int attributeId)
@@ -713,6 +711,38 @@ void ToolTips::createClassToolTip(MyGUI::Widget* widget, const ESM::Class& playe
     widget->setUserString("Caption_ClassSpecialisation", "#{sSpecialization}: " + specStr);
     widget->setUserString("ToolTipType", "Layout");
     widget->setUserString("ToolTipLayout", "ClassToolTip");
+}
+
+void ToolTips::createMagicEffectToolTip(MyGUI::Widget* widget, short id)
+{
+    const ESM::MagicEffect* effect = MWBase::Environment::get().getWorld ()->getStore ().magicEffects.find(id);
+    const std::string &name = ESM::MagicEffect::effectIdToString (id);
+
+    std::string icon = effect->mIcon;
+
+    int slashPos = icon.find("\\");
+    icon.insert(slashPos+1, "b_");
+
+    icon[icon.size()-3] = 'd';
+    icon[icon.size()-2] = 'd';
+    icon[icon.size()-1] = 's';
+
+    icon = "icons\\" + icon;
+
+    std::vector<std::string> schools;
+    schools.push_back ("#{sSchoolAlteration}");
+    schools.push_back ("#{sSchoolConjuration}");
+    schools.push_back ("#{sSchoolDestruction}");
+    schools.push_back ("#{sSchoolIllusion}");
+    schools.push_back ("#{sSchoolMysticism}");
+    schools.push_back ("#{sSchoolRestoration}");
+
+    widget->setUserString("ToolTipType", "Layout");
+    widget->setUserString("ToolTipLayout", "MagicEffectToolTip");
+    widget->setUserString("Caption_MagicEffectName", "#{" + name + "}");
+    widget->setUserString("Caption_MagicEffectDescription", effect->mDescription);
+    widget->setUserString("Caption_MagicEffectSchool", "#{sSchool}: " + schools[effect->mData.mSchool]);
+    widget->setUserString("ImageTexture_MagicEffectImage", icon);
 }
 
 void ToolTips::setDelay(float delay)

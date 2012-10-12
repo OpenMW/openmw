@@ -256,7 +256,7 @@
 #endif
 
 #if FOG
-        float fogValue = shSaturate((depthPassthrough - fogParams.y) * fogParams.w);
+        float fogValue = shSaturate((length(cameraPos.xyz-worldPos) - fogParams.y) * fogParams.w);
         
         #if UNDERWATER
         // regular fog only if fragment is above water
