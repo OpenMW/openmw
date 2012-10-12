@@ -1,5 +1,7 @@
 #include "loadmgef.hpp"
 
+#include <boost/lexical_cast.hpp>
+
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 
@@ -231,7 +233,8 @@ std::string MagicEffect::effectIdToString(short effectID)
     // tribunal
     names[137] ="sEffectSummonFabricant";
 
-    assert(names.find(effectID) != names.end() && "Unimplemented effect type");
+    if (names.find(effectID) == names.end())
+        throw std::runtime_error( std::string("Unimplemented effect ID ") + boost::lexical_cast<std::string>(effectID));
 
     return names[effectID];
 }
