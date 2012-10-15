@@ -8,6 +8,7 @@
 
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
+#include "../mwbase/soundmanager.hpp"
 
 #include "../mwworld/player.hpp"
 #include "../mwworld/class.hpp"
@@ -297,7 +298,35 @@ namespace MWGui
 
     void SpellCreationDialog::onBuyButtonClicked (MyGUI::Widget* sender)
     {
+        if (mEffects.size() <= 0)
+        {
+            mWindowManager.messageBox ("#{sNotifyMessage30}", std::vector<std::string>());
+            return;
+        }
 
+        if (mNameEdit->getCaption () == "")
+        {
+            mWindowManager.messageBox ("#{sNotifyMessage10}", std::vector<std::string>());
+            return;
+        }
+
+        ESM::Spell newSpell;
+        ESM::EffectList effectList;
+        effectList.mList = mEffects;
+        newSpell.mEffects = effectList;
+        newSpell.mName = mNameEdit->getCaption();
+        newSpell.mData.mType = ESM::Spell::ST_Spell;
+
+        std::pair<std::string, const ESM::Spell*> result = MWBase::Environment::get().getWorld()->createRecord(newSpell);
+
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+        MWMechanics::CreatureStats& stats = MWWorld::Class::get(player).getCreatureStats(player);
+        MWMechanics::Spells& spells = stats.getSpells();
+        spells.add (result.first);
+
+        MWBase::Environment::get().getSoundManager()->playSound ("Item Gold Up", 1.0, 1.0);
+
+        mWindowManager.removeGuiMode (GM_SpellCreation);
     }
 
     void SpellCreationDialog::open()
@@ -372,6 +401,9 @@ namespace MWGui
 
             ToolTips::createMagicEffectToolTip (w, *it);
         }
+
+        mEffects.clear();
+        updateEffectsView ();
     }
 
     void EffectEditorBase::setWidgets (Widgets::MWList *availableEffectsList, MyGUI::ScrollView *usedEffectsView)
@@ -413,6 +445,16 @@ namespace MWGui
     {
 
         short effectId = *sender->getUserData<short>();
+
+        for (std::vector<ESM::ENAMstruct>::const_iterator it = mEffects.begin(); it != mEffects.end(); ++it)
+        {
+            if (it->mEffectID == effectId)
+            {
+                MWBase::Environment::get().getWindowManager()->messageBox ("#{sOnetypeEffectMessage}", std::vector<std::string>());
+                return;
+            }
+        }
+
         const ESM::MagicEffect* effect = MWBase::Environment::get().getWorld()->getStore().magicEffects.find(effectId);
 
         mAddEffectDialog.newEffect (effect);
