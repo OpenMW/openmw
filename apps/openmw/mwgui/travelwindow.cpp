@@ -52,26 +52,28 @@ namespace MWGui
 
     void TravelWindow::addDestination(const std::string& travelId,ESM::Position pos,bool interior)
     {
-        //std::cout << "travel to" << travelId;
-        /*const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().spells.find(spellId);
-        int price = spell->data.cost*MWBase::Environment::get().getWorld()->getStore().gameSettings.find("fSpellValueMult")->getFloat();*/
         int price = 0;
-        MyGUI::Button* toAdd = mDestinationsView->createWidget<MyGUI::Button>((price>mWindowManager.getInventoryWindow()->getPlayerGold()) ? "SandTextGreyedOut" : "SpellText", 0, mCurrentY, 200, sLineHeight, MyGUI::Align::Default);
-        mCurrentY += sLineHeight;
-        /// \todo price adjustment depending on merchantile skill
+
         if(interior)
         {
-            toAdd->setUserString("interior","y");
             price = MWBase::Environment::get().getWorld()->getStore().gameSettings.find("fMagesGuildTravel")->getFloat();
         }
         else
         {
-            toAdd->setUserString("interior","n");
             MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
             ESM::Position PlayerPos = player.getRefData().getPosition();
             float d = sqrt( pow(pos.pos[0] - PlayerPos.pos[0],2) + pow(pos.pos[1] - PlayerPos.pos[1],2) + pow(pos.pos[2] - PlayerPos.pos[2],2)   );
             price = d/MWBase::Environment::get().getWorld()->getStore().gameSettings.find("fTravelMult")->getFloat();
         }
+
+        MyGUI::Button* toAdd = mDestinationsView->createWidget<MyGUI::Button>((price>mWindowManager.getInventoryWindow()->getPlayerGold()) ? "SandTextGreyedOut" : "SpellText", 0, mCurrentY, 200, sLineHeight, MyGUI::Align::Default);
+        mCurrentY += sLineHeight;
+        /// \todo price adjustment depending on merchantile skill
+        if(interior)
+            toAdd->setUserString("interior","y");
+        else
+            toAdd->setUserString("interior","n");
+
         std::ostringstream oss;
         oss << price;
         toAdd->setUserString("price",oss.str());
@@ -118,7 +120,7 @@ namespace MWGui
             addDestination (*iter);
         }*/
 
-        for(int i = 0;i<mPtr.get<ESM::NPC>()->base->mTransport.size();i++)
+        for(unsigned int i = 0;i<mPtr.get<ESM::NPC>()->base->mTransport.size();i++)
         {
             std::string cellname = mPtr.get<ESM::NPC>()->base->mTransport[i].mCellName;
             bool interior = true;
@@ -141,35 +143,35 @@ namespace MWGui
         int price;
         iss >> price;
 
-        if (mWindowManager.getInventoryWindow()->getPlayerGold()>=price)
+        assert (mWindowManager.getInventoryWindow()->getPlayerGold()>=price);
+
+        MWBase::Environment::get().getWorld ()->getFader ()->fadeOut(1);
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+        ESM::Position pos = *_sender->getUserData<ESM::Position>();
+        std::string cellname = _sender->getUserString("Destination");
+        int x,y;
+        bool interior = _sender->getUserString("interior") == "y";
+        MWBase::Environment::get().getWorld()->positionToIndex(pos.pos[0],pos.pos[1],x,y);
+        MWWorld::CellStore* cell;
+        if(interior) cell = MWBase::Environment::get().getWorld()->getInterior(cellname);
+        else
         {
-            MWBase::Environment::get().getWorld ()->getFader ()->fadeOut(1);
-            MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
-            ESM::Position pos = *_sender->getUserData<ESM::Position>();
-            std::string cellname = _sender->getUserString("Destination");
-            int x,y;
-            bool interior = _sender->getUserString("interior") == "y";
-            MWBase::Environment::get().getWorld()->positionToIndex(pos.pos[0],pos.pos[1],x,y);
-            MWWorld::CellStore* cell;
-            if(interior) cell = MWBase::Environment::get().getWorld()->getInterior(cellname);
-            else 
+            cell = MWBase::Environment::get().getWorld()->getExterior(x,y);
+            ESM::Position PlayerPos = player.getRefData().getPosition();
+            float d = sqrt( pow(pos.pos[0] - PlayerPos.pos[0],2) + pow(pos.pos[1] - PlayerPos.pos[1],2) + pow(pos.pos[2] - PlayerPos.pos[2],2)   );
+            int time = int(d /MWBase::Environment::get().getWorld()->getStore().gameSettings.find("fTravelTimeMult")->getFloat());
+            std::cout << time;
+            for(int i = 0;i < time;i++)
             {
-                cell = MWBase::Environment::get().getWorld()->getExterior(x,y);
-                ESM::Position PlayerPos = player.getRefData().getPosition();
-                float d = sqrt( pow(pos.pos[0] - PlayerPos.pos[0],2) + pow(pos.pos[1] - PlayerPos.pos[1],2) + pow(pos.pos[2] - PlayerPos.pos[2],2)   );
-                int time = int(d /MWBase::Environment::get().getWorld()->getStore().gameSettings.find("fTravelTimeMult")->getFloat());
-                std::cout << time;
-                for(int i = 0;i < time;i++)
-                {
-                    MWBase::Environment::get().getMechanicsManager ()->restoreDynamicStats ();
-                }
-                MWBase::Environment::get().getWorld()->advanceTime(time);
+                MWBase::Environment::get().getMechanicsManager ()->restoreDynamicStats ();
             }
-            MWBase::Environment::get().getWorld()->moveObject(player,*cell,pos.pos[0],pos.pos[1],pos.pos[2]);
-            mWindowManager.removeGuiMode(GM_Travel);
-            mWindowManager.removeGuiMode(GM_Dialogue);
-            MWBase::Environment::get().getWorld ()->getFader ()->fadeIn(1);
+            MWBase::Environment::get().getWorld()->advanceTime(time);
         }
+        MWBase::Environment::get().getWorld()->moveObject(player,*cell,pos.pos[0],pos.pos[1],pos.pos[2]);
+        mWindowManager.removeGuiMode(GM_Travel);
+        mWindowManager.removeGuiMode(GM_Dialogue);
+        MWBase::Environment::get().getWorld ()->getFader ()->fadeOut(0);
+        MWBase::Environment::get().getWorld ()->getFader ()->fadeIn(1);
     }
 
     void TravelWindow::onCancelButtonClicked(MyGUI::Widget* _sender)
