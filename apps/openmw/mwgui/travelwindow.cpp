@@ -143,7 +143,7 @@ namespace MWGui
 
         if (mWindowManager.getInventoryWindow()->getPlayerGold()>=price)
         {
-            //MWBase::Environment::get().getWorld ()->getFader ()->fadeOut(1);
+            MWBase::Environment::get().getWorld ()->getFader ()->fadeOut(1);
             MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
             ESM::Position pos = *_sender->getUserData<ESM::Position>();
             std::string cellname = _sender->getUserString("Destination");
@@ -168,7 +168,7 @@ namespace MWGui
             MWBase::Environment::get().getWorld()->moveObject(player,*cell,pos.pos[0],pos.pos[1],pos.pos[2]);
             mWindowManager.removeGuiMode(GM_Travel);
             mWindowManager.removeGuiMode(GM_Dialogue);
-            //MWBase::Environment::get().getWorld ()->getFader ()->fadeIn(0.5);
+            MWBase::Environment::get().getWorld ()->getFader ()->fadeIn(1);
         }
     }
 
