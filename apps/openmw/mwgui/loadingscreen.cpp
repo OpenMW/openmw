@@ -6,6 +6,8 @@
 #include <OgreCompositorChain.h>
 #include <OgreMaterial.h>
 
+#include <boost/algorithm/string.hpp>
+
 
 
 #include "../mwbase/environment.hpp"
@@ -207,20 +209,16 @@ namespace MWGui
 
     void LoadingScreen::changeWallpaper ()
     {
-        /// \todo use a directory listing here
         std::vector<std::string> splash;
-        splash.push_back ("Splash_Bonelord.tga");
-        splash.push_back ("Splash_ClannDaddy.tga");
-        splash.push_back ("Splash_Clannfear.tga");
-        splash.push_back ("Splash_Daedroth.tga");
-        splash.push_back ("Splash_Hunger.tga");
-        splash.push_back ("Splash_KwamaWarrior.tga");
-        splash.push_back ("Splash_Netch.tga");
-        splash.push_back ("Splash_NixHound.tga");
-        splash.push_back ("Splash_Siltstriker.tga");
-        splash.push_back ("Splash_Skeleton.tga");
-        splash.push_back ("Splash_SphereCenturion.tga");
 
+        Ogre::StringVectorPtr resources = Ogre::ResourceGroupManager::getSingleton ().listResourceNames ("General", false);
+        for (Ogre::StringVector::const_iterator it = resources->begin(); it != resources->end(); ++it)
+        {
+            std::string start = it->substr(0, 6);
+            boost::to_lower(start);
+            if (start == "splash")
+                splash.push_back (*it);
+        }
         mBackgroundImage->setImageTexture (splash[rand() % splash.size()]);
     }
 }
