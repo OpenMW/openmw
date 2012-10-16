@@ -4,10 +4,13 @@
 
 #include <boost/lexical_cast.hpp>
 
+#include <libs/openengine/ogre/fader.hpp>
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
+#include "../mwbase/mechanicsmanager.hpp"
 
 #include "../mwworld/player.hpp"
 #include "../mwworld/manualref.hpp"
@@ -76,7 +79,6 @@ namespace MWGui
         toAdd->setCaptionWithReplacing(travelId+"   -   "+boost::lexical_cast<std::string>(price)+"#{sgp}");
         toAdd->setSize(toAdd->getTextSize().width,sLineHeight);
         toAdd->eventMouseWheel += MyGUI::newDelegate(this, &TravelWindow::onMouseWheel);
-        //toAdd->setUserString("ToolTipType", "Spell");
         toAdd->setUserString("Destination", travelId);
         toAdd->setUserData(pos);
         toAdd->eventMouseButtonClick += MyGUI::newDelegate(this, &TravelWindow::onTravelButtonClick);
@@ -141,6 +143,7 @@ namespace MWGui
 
         if (mWindowManager.getInventoryWindow()->getPlayerGold()>=price)
         {
+            //MWBase::Environment::get().getWorld ()->getFader ()->fadeOut(1);
             MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
             ESM::Position pos = *_sender->getUserData<ESM::Position>();
             std::string cellname = _sender->getUserString("Destination");
@@ -149,10 +152,23 @@ namespace MWGui
             MWBase::Environment::get().getWorld()->positionToIndex(pos.pos[0],pos.pos[1],x,y);
             MWWorld::CellStore* cell;
             if(interior) cell = MWBase::Environment::get().getWorld()->getInterior(cellname);
-            else cell = MWBase::Environment::get().getWorld()->getExterior(x,y);
+            else 
+            {
+                cell = MWBase::Environment::get().getWorld()->getExterior(x,y);
+                ESM::Position PlayerPos = player.getRefData().getPosition();
+                float d = sqrt( pow(pos.pos[0] - PlayerPos.pos[0],2) + pow(pos.pos[1] - PlayerPos.pos[1],2) + pow(pos.pos[2] - PlayerPos.pos[2],2)   );
+                int time = int(d /MWBase::Environment::get().getWorld()->getStore().gameSettings.find("fTravelTimeMult")->getFloat());
+                std::cout << time;
+                for(int i = 0;i < time;i++)
+                {
+                    MWBase::Environment::get().getMechanicsManager ()->restoreDynamicStats ();
+                }
+                MWBase::Environment::get().getWorld()->advanceTime(time);
+            }
             MWBase::Environment::get().getWorld()->moveObject(player,*cell,pos.pos[0],pos.pos[1],pos.pos[2]);
             mWindowManager.removeGuiMode(GM_Travel);
             mWindowManager.removeGuiMode(GM_Dialogue);
+            //MWBase::Environment::get().getWorld ()->getFader ()->fadeIn(0.5);
         }
     }
 
