@@ -54,7 +54,7 @@ namespace MWGui
 
         MyGUI::Button* toAdd =
             mSpellsView->createWidget<MyGUI::Button>(
-                (price>mWindowManager.getInventoryWindow()->getPlayerGold()) ? "SandTextGreyedOut" : "SpellText",
+                (price>mWindowManager.getInventoryWindow()->getPlayerGold()) ? "SandTextGreyedOut" : "SandTextButton",
                 0,
                 mCurrentY,
                 200,

@@ -19,6 +19,7 @@
 #include "tradewindow.hpp"
 #include "spellbuyingwindow.hpp"
 #include "inventorywindow.hpp"
+#include "travelwindow.hpp"
 
 using namespace MWGui;
 using namespace Widgets;
@@ -137,6 +138,13 @@ void DialogueWindow::onSelectTopic(std::string topic)
         mWindowManager.pushGuiMode(GM_SpellBuying);
         mWindowManager.getSpellBuyingWindow()->startSpellBuying(mPtr);
     }
+    else if (topic == MWBase::Environment::get().getWorld()->getStore().gameSettings.find("sTravel")->getString())
+    {
+        std::cout << "travel!";
+        mWindowManager.pushGuiMode(GM_Travel);
+        mWindowManager.getTravelWindow()->startTravel(mPtr);
+        //mWindowManager.getSpellBuyingWindow()->startSpellBuying(mPtr);
+    }
     else if (topic == MWBase::Environment::get().getWorld()->getStore().gameSettings.find("sSpellMakingMenuTitle")->getString())
     {
         mWindowManager.pushGuiMode(GM_SpellCreation);
@@ -179,6 +187,9 @@ void DialogueWindow::setKeywords(std::list<std::string> keyWords)
 
     if (mServices & Service_BuySpells)
         mTopicsList->addItem(MWBase::Environment::get().getWorld()->getStore().gameSettings.find("sSpells")->getString());
+
+    if (mServices & Service_Travel)
+        mTopicsList->addItem(MWBase::Environment::get().getWorld()->getStore().gameSettings.find("sTravel")->getString());
 
     if (mServices & Service_CreateSpells)
         mTopicsList->addItem(MWBase::Environment::get().getWorld()->getStore().gameSettings.find("sSpellmakingMenuTitle")->getString());

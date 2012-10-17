@@ -6,10 +6,12 @@
 #include <OgreCompositorChain.h>
 #include <OgreMaterial.h>
 
+#include <openengine/ogre/fader.hpp>
 
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/inputmanager.hpp"
+#include "../mwbase/world.hpp"
 
 #include "../mwbase/windowmanager.hpp"
 
@@ -106,6 +108,7 @@ namespace MWGui
 
         if (mTimer.getMilliseconds () > mLastRenderTime + (1.f/loadingScreenFps) * 1000.f)
         {
+            float dt = mTimer.getMilliseconds () - mLastRenderTime;
             mLastRenderTime = mTimer.getMilliseconds ();
 
             if (mFirstLoad && mTimer.getMilliseconds () > mLastWallpaperChangeTime + 3000*1)
@@ -150,6 +153,8 @@ namespace MWGui
                     Ogre::CompositorManager::getSingleton().setCompositorEnabled(mWindow->getViewport(0), chain->getCompositor(i)->getCompositor()->getName(), false);
                 }
             }
+
+            MWBase::Environment::get().getWorld ()->getFader ()->update (dt);
 
             mWindow->update();
 

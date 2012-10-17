@@ -795,6 +795,9 @@ namespace MWDialogue
             || services & ESM::NPC::Misc)
             windowServices |= MWGui::DialogueWindow::Service_Trade;
 
+        if( !mActor.get<ESM::NPC>()->base->mTransport.empty())
+            windowServices |= MWGui::DialogueWindow::Service_Travel;
+
         if (services & ESM::NPC::Spells)
             windowServices |= MWGui::DialogueWindow::Service_BuySpells;
 
