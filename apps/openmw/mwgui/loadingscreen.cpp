@@ -216,9 +216,13 @@ namespace MWGui
         {
             std::string start = it->substr(0, 6);
             boost::to_lower(start);
+
             if (start == "splash")
                 splash.push_back (*it);
         }
-        mBackgroundImage->setImageTexture (splash[rand() % splash.size()]);
+        std::string randomSplash = splash[rand() % splash.size()];
+
+        Ogre::TexturePtr tex = Ogre::TextureManager::getSingleton ().load (randomSplash, "General");
+        mBackgroundImage->setImageTexture (randomSplash);
     }
 }
