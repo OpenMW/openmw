@@ -140,10 +140,8 @@ void DialogueWindow::onSelectTopic(std::string topic)
     }
     else if (topic == MWBase::Environment::get().getWorld()->getStore().gameSettings.find("sTravel")->getString())
     {
-        std::cout << "travel!";
         mWindowManager.pushGuiMode(GM_Travel);
         mWindowManager.getTravelWindow()->startTravel(mPtr);
-        //mWindowManager.getSpellBuyingWindow()->startSpellBuying(mPtr);
     }
     else if (topic == MWBase::Environment::get().getWorld()->getStore().gameSettings.find("sSpellMakingMenuTitle")->getString())
     {
