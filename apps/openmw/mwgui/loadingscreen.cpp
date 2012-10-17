@@ -214,6 +214,8 @@ namespace MWGui
         Ogre::StringVectorPtr resources = Ogre::ResourceGroupManager::getSingleton ().listResourceNames ("General", false);
         for (Ogre::StringVector::const_iterator it = resources->begin(); it != resources->end(); ++it)
         {
+            if (it->size() < 6)
+                continue;
             std::string start = it->substr(0, 6);
             boost::to_lower(start);
 
