@@ -119,6 +119,13 @@ namespace MWGui
         if (mWindowManager.getInventoryWindow()->getPlayerGold()<price)
             return;
 
+        MWMechanics::NpcStats& npcStats = MWWorld::Class::get(mPtr).getNpcStats (mPtr);
+        if (npcStats.getSkill (skillId).getBase () <= pcStats.getSkill (skillId).getBase ())
+        {
+            mWindowManager.messageBox ("#{sServiceTrainingWords}", std::vector<std::string>());
+            return;
+        }
+
         // increase skill
         MWWorld::LiveCellRef<ESM::NPC> *playerRef = player.get<ESM::NPC>();
         const ESM::Class *class_ = MWBase::Environment::get().getWorld()->getStore().classes.find (
