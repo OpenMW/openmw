@@ -30,7 +30,7 @@ add_openmw_dir (mwgui
     formatting inventorywindow container hud countdialog tradewindow settingswindow
     confirmationdialog alchemywindow referenceinterface spellwindow mainmenu quickkeysmenu
     itemselection spellbuyingwindow loadingscreen levelupdialog waitdialog spellcreationdialog
-    enchantingdialog
+    enchantingdialog trainingwindow
     )
 
 add_openmw_dir (mwdialogue

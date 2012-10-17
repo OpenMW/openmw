@@ -66,6 +66,7 @@ namespace MWGui
   class WaitDialog;
   class SpellCreationDialog;
   class EnchantingDialog;
+  class TrainingWindow;
 
   class WindowManager : public MWBase::WindowManager
   {
@@ -215,6 +216,7 @@ namespace MWGui
 
     virtual void startSpellMaking(MWWorld::Ptr actor);
     virtual void startEnchanting(MWWorld::Ptr actor);
+    virtual void startTraining(MWWorld::Ptr actor);
 
   private:
     OEngine::GUI::MyGUIManager *mGuiManager;
@@ -245,6 +247,7 @@ namespace MWGui
     WaitDialog* mWaitDialog;
     SpellCreationDialog* mSpellCreationDialog;
     EnchantingDialog* mEnchantingDialog;
+    TrainingWindow* mTrainingWindow;
 
     CharacterCreation* mCharGen;
 

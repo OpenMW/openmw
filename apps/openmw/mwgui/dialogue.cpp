@@ -147,6 +147,11 @@ void DialogueWindow::onSelectTopic(std::string topic)
         mWindowManager.pushGuiMode(GM_Enchanting);
         mWindowManager.startEnchanting (mPtr);
     }
+    else if (topic == MWBase::Environment::get().getWorld()->getStore().gameSettings.find("sServiceTrainingTitle")->getString())
+    {
+        mWindowManager.pushGuiMode(GM_Training);
+        mWindowManager.startTraining (mPtr);
+    }
     else
         MWBase::Environment::get().getDialogueManager()->keywordSelected(lower_string(topic));
 }
@@ -180,6 +185,9 @@ void DialogueWindow::setKeywords(std::list<std::string> keyWords)
 
     if (mServices & Service_Enchant)
         mTopicsList->addItem(MWBase::Environment::get().getWorld()->getStore().gameSettings.find("sEnchanting")->getString());
+
+    if (mServices & Service_Training)
+        mTopicsList->addItem(MWBase::Environment::get().getWorld()->getStore().gameSettings.find("sServiceTrainingTitle")->getString());
 
     if (anyService)
         mTopicsList->addSeparator();

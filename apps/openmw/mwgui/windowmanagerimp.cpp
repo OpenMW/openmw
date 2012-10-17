@@ -48,6 +48,7 @@
 #include "waitdialog.hpp"
 #include "spellcreationdialog.hpp"
 #include "enchantingdialog.hpp"
+#include "trainingwindow.hpp"
 
 using namespace MWGui;
 
@@ -79,6 +80,7 @@ WindowManager::WindowManager(
   , mWaitDialog(NULL)
   , mSpellCreationDialog(NULL)
   , mEnchantingDialog(NULL)
+  , mTrainingWindow(NULL)
   , mPlayerClass()
   , mPlayerName()
   , mPlayerRaceId()
@@ -161,6 +163,7 @@ WindowManager::WindowManager(
     mWaitDialog = new WaitDialog(*this);
     mSpellCreationDialog = new SpellCreationDialog(*this);
     mEnchantingDialog = new EnchantingDialog(*this);
+    mTrainingWindow = new TrainingWindow(*this);
 
     mLoadingScreen = new LoadingScreen(mOgre->getScene (), mOgre->getWindow (), *this);
     mLoadingScreen->onResChange (w,h);
@@ -218,6 +221,7 @@ WindowManager::~WindowManager()
     delete mWaitDialog;
     delete mSpellCreationDialog;
     delete mEnchantingDialog;
+    delete mTrainingWindow;
 
     cleanupGarbage();
 
@@ -269,6 +273,7 @@ void WindowManager::updateVisible()
     mWaitDialog->setVisible(false);
     mSpellCreationDialog->setVisible(false);
     mEnchantingDialog->setVisible(false);
+    mTrainingWindow->setVisible(false);
 
     mHud->setVisible(true);
 
@@ -374,6 +379,9 @@ void WindowManager::updateVisible()
             break;
         case GM_Enchanting:
             mEnchantingDialog->setVisible(true);
+            break;
+        case GM_Training:
+            mTrainingWindow->setVisible(true);
             break;
         case GM_InterMessageBox:
             break;
@@ -574,6 +582,9 @@ void WindowManager::onFrame (float frameDuration)
 
     mHud->onFrame(frameDuration);
 
+    mTrainingWindow->onFrame (frameDuration);
+
+    mTrainingWindow->checkReferenceAvailable();
     mDialogueWindow->checkReferenceAvailable();
     mTradeWindow->checkReferenceAvailable();
     mSpellBuyingWindow->checkReferenceAvailable();
@@ -992,4 +1003,9 @@ void WindowManager::startSpellMaking(MWWorld::Ptr actor)
 void WindowManager::startEnchanting (MWWorld::Ptr actor)
 {
     mEnchantingDialog->startEnchanting (actor);
+}
+
+void WindowManager::startTraining(MWWorld::Ptr actor)
+{
+    mTrainingWindow->startTraining(actor);
 }

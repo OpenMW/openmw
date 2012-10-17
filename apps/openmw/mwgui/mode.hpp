@@ -24,6 +24,7 @@ namespace MWGui
       GM_SpellBuying,
       GM_SpellCreation,
       GM_Enchanting,
+      GM_Training,
 
       GM_Levelup,
 

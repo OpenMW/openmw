@@ -18,8 +18,6 @@ namespace ESM
     {
         // These are probabilities
         char mHello, mU1, mFight, mFlee, mAlarm, mU2, mU3, mU4;
-        // The last u's might be the skills that this NPC can train you
-        // in?
         int mServices; // See the Services enum
     }; // 12 bytes
 
