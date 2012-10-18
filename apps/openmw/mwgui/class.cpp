@@ -565,7 +565,7 @@ void CreateClassDialog::onAttributeClicked(Widgets::MWAttributePtr _sender)
 {
     delete mAttribDialog;
     mAttribDialog = new SelectAttributeDialog(mWindowManager);
-    mAttribDialog->setAffectedWidget(_sender);
+    mAffectedAttribute = _sender;
     mAttribDialog->eventCancel += MyGUI::newDelegate(this, &CreateClassDialog::onDialogCancel);
     mAttribDialog->eventItemSelected += MyGUI::newDelegate(this, &CreateClassDialog::onAttributeSelected);
     mAttribDialog->setVisible(true);
@@ -574,18 +574,17 @@ void CreateClassDialog::onAttributeClicked(Widgets::MWAttributePtr _sender)
 void CreateClassDialog::onAttributeSelected()
 {
     ESM::Attribute::AttributeID id = mAttribDialog->getAttributeId();
-    Widgets::MWAttributePtr attribute = mAttribDialog->getAffectedWidget();
-    if (attribute == mFavoriteAttribute0)
+    if (mAffectedAttribute == mFavoriteAttribute0)
     {
         if (mFavoriteAttribute1->getAttributeId() == id)
             mFavoriteAttribute1->setAttributeId(mFavoriteAttribute0->getAttributeId());
     }
-    else if (attribute == mFavoriteAttribute1)
+    else if (mAffectedAttribute == mFavoriteAttribute1)
     {
         if (mFavoriteAttribute0->getAttributeId() == id)
             mFavoriteAttribute0->setAttributeId(mFavoriteAttribute1->getAttributeId());
     }
-    attribute->setAttributeId(id);
+    mAffectedAttribute->setAttributeId(id);
     mWindowManager.removeDialog(mAttribDialog);
     mAttribDialog = 0;
 
@@ -596,7 +595,7 @@ void CreateClassDialog::onSkillClicked(Widgets::MWSkillPtr _sender)
 {
     delete mSkillDialog;
     mSkillDialog = new SelectSkillDialog(mWindowManager);
-    mSkillDialog->setAffectedWidget(_sender);
+    mAffectedSkill = _sender;
     mSkillDialog->eventCancel += MyGUI::newDelegate(this, &CreateClassDialog::onDialogCancel);
     mSkillDialog->eventItemSelected += MyGUI::newDelegate(this, &CreateClassDialog::onSkillSelected);
     mSkillDialog->setVisible(true);
@@ -605,22 +604,21 @@ void CreateClassDialog::onSkillClicked(Widgets::MWSkillPtr _sender)
 void CreateClassDialog::onSkillSelected()
 {
     ESM::Skill::SkillEnum id = mSkillDialog->getSkillId();
-    Widgets::MWSkillPtr skill = mSkillDialog->getAffectedWidget();
 
     // Avoid duplicate skills by swapping any skill field that matches the selected one
     std::vector<Widgets::MWSkillPtr>::const_iterator end = mSkills.end();
     for (std::vector<Widgets::MWSkillPtr>::const_iterator it = mSkills.begin(); it != end; ++it)
     {
-        if (*it == skill)
+        if (*it == mAffectedSkill)
             continue;
         if ((*it)->getSkillId() == id)
         {
-            (*it)->setSkillId(skill->getSkillId());
+            (*it)->setSkillId(mAffectedSkill->getSkillId());
             break;
         }
     }
 
-    skill->setSkillId(mSkillDialog->getSkillId());
+    mAffectedSkill->setSkillId(mSkillDialog->getSkillId());
     mWindowManager.removeDialog(mSkillDialog);
     mSkillDialog = 0;
     update();

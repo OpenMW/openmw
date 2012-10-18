@@ -26,7 +26,7 @@ namespace MWSound
 
     enum Environment {
         Env_Normal,
-        Env_Underwater,
+        Env_Underwater
     };
 
     class SoundManager : public MWBase::SoundManager

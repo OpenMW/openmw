@@ -138,11 +138,11 @@ void ESMWriter::writeHNString(const std::string& name, const std::string& data)
 
 void ESMWriter::writeHNString(const std::string& name, const std::string& data, int size)
 {
-    assert(data.size() <= size);
+    assert(static_cast<int> (data.size()) <= size);
     startSubRecord(name);
     writeHString(data);
 
-    if (data.size() < size)
+    if (static_cast<int> (data.size()) < size)
     {
         for (int i = data.size(); i < size; ++i)
             write("\0",1);

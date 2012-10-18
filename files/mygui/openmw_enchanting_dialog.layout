@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<MyGUI type="Layout">
+    <Widget type="Window" skin="MW_Dialog" layer="Windows" position="0 0 560 400" name="_Main">
+
+        <Widget type="HBox" position="12 12 250 30">
+
+            <Widget type="AutoSizedTextBox" skin="NormalText">
+                <Property key="Caption" value="#{sName}"/>
+            </Widget>
+
+            <Widget type="EditBox" skin="MW_TextEdit" position="0 0 30 30" name="NameEdit">
+                <UserString key="HStretch" value="true"/>
+            </Widget>
+
+            <Widget type="Widget">
+            </Widget>
+
+        </Widget>
+
+        <!-- Item -->
+
+        <Widget type="HBox" position="12 48 400 59">
+            <Property key="Spacing" value="8"/>
+
+            <Widget type="AutoSizedTextBox" skin="NormalText">
+                <Property key="Caption" value="#{sItem}"/>
+            </Widget>
+            <Widget type="Button" skin="MW_Box" position="0 0 60 59" name="ItemBox"/>
+
+            <Widget type="Widget" position="0 0 8 0"/>
+
+            <Widget type="AutoSizedTextBox" skin="NormalText">
+                <Property key="Caption" value="#{sSoulGem}"/>
+            </Widget>
+            <Widget type="Button" skin="MW_Box" position="0 0 60 59" name="SoulBox"/>
+
+        </Widget>
+
+
+        <Widget type="TextBox" skin="NormalText" position="320 0 300 24">
+            <Property key="Caption" value="#{sEnchantmentMenu3}:"/>
+        </Widget>
+        <Widget type="TextBox" skin="SandText" position="280 0 258 24" name="Enchantment">
+            <Property key="Caption" value="1"/>
+            <Property key="TextAlign" value="Right HCenter"/>
+        </Widget>
+
+
+        <Widget type="TextBox" skin="NormalText" position="320 24 300 24">
+            <Property key="Caption" value="#{sCastCost}:"/>
+        </Widget>
+        <Widget type="TextBox" skin="SandText" position="280 24 258 24" name="CastCost">
+            <Property key="Caption" value="39"/>
+            <Property key="TextAlign" value="Right HCenter"/>
+        </Widget>
+
+
+        <Widget type="TextBox" skin="NormalText" position="320 48 300 24">
+            <Property key="Caption" value="#{sCharges}"/>
+        </Widget>
+        <Widget type="TextBox" skin="SandText" position="280 48 258 24" name="Charge">
+            <Property key="Caption" value="39"/>
+            <Property key="TextAlign" value="Right HCenter"/>
+        </Widget>
+
+
+        <!-- Available effects -->
+        <Widget type="TextBox" skin="NormalText" position="12 148 300 24">
+            <Property key="Caption" value="#{sMagicEffects}"/>
+        </Widget>
+        <Widget type="MWList" skin="MW_SimpleList" position="12 176 202 169" name="AvailableEffects">
+        </Widget>
+
+        <!-- Used effects -->
+        <Widget type="TextBox" skin="NormalText" position="226 148 300 24">
+            <Property key="Caption" value="#{sEffects}"/>
+        </Widget>
+        <Widget type="Widget" skin="MW_Box" position="226 176 316 169">
+            <Widget type="ScrollView" skin="MW_ScrollViewH" position="4 4 308 161" name="UsedEffects">
+                <Property key="CanvasAlign" value="Left Top"/>
+            </Widget>
+        </Widget>
+
+        <Widget type="HBox" position="0 340 560 60">
+            <Property key="Padding" value="16"/>
+
+            <Widget type="Widget" position="0 0 0 0">
+                <UserString key="HStretch" value="true"/>
+            </Widget>
+
+            <Widget type="AutoSizedTextBox" skin="NormalText">
+                <Property key="Caption" value="#{sBarterDialog7}"/>
+            </Widget>
+            <Widget type="AutoSizedTextBox" skin="SandText" name="PriceLabel">
+                <Property key="Caption" value="30"/>
+            </Widget>
+
+
+            <Widget type="AutoSizedButton" skin="MW_Button" name="BuyButton">
+                <Property key="Caption" value="#{sBuy}"/>
+            </Widget>
+
+            <Widget type="AutoSizedButton" skin="MW_Button" name="CancelButton">
+                <Property key="Caption" value="#{sCancel}"/>
+            </Widget>
+        </Widget>
+
+    </Widget>
+</MyGUI>
