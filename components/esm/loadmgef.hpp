@@ -14,6 +14,8 @@ struct MagicEffect
     enum Flags
     {
         NoDuration = 0x4,
+        NoMagnitude = 0x8,
+        Negative2 = 0x10,
         SpellMaking = 0x0200,
         Enchanting = 0x0400,
         Negative = 0x0800 // A harmful effect. Will determine whether

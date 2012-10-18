@@ -2,11 +2,16 @@
 #define GAME_MWMECHANICS_ALCHEMY_H
 
 #include <vector>
+#include <set>
+
+#include <components/esm/effectlist.hpp>
 
 #include "../mwworld/ptr.hpp"
 
 namespace MWMechanics
 {
+    struct EffectKey;
+
     /// \brief Potion creation via alchemy skill
     class Alchemy
     {
@@ -17,13 +22,54 @@ namespace MWMechanics
     
             typedef std::vector<MWWorld::Ptr> TIngredientsContainer;
             typedef TIngredientsContainer::const_iterator TIngredientsIterator;
+
+            typedef std::vector<ESM::ENAMstruct> TEffectsContainer;
+            typedef TEffectsContainer::const_iterator TEffectsIterator;
+    
+            enum Result
+            {
+                Result_Success,
+                
+                Result_NoMortarAndPestle,
+                Result_LessThanTwoIngredients,
+                Result_NoName,
+                Result_NoEffects,
+                Result_RandomFailure
+            };
     
         private:
     
-            MWWorld::Ptr mNpc;
+            MWWorld::Ptr mAlchemist;
             TToolsContainer mTools;
             TIngredientsContainer mIngredients;
+            TEffectsContainer mEffects;
 
+            std::set<EffectKey> listEffects() const;
+            ///< List all effects of all used ingredients.
+            
+            void filterEffects (std::set<EffectKey>& effects) const;
+            ///< Filter out effects not shared by all ingredients.
+
+            void applyTools (int flags, float& value) const;
+
+            void updateEffects();
+            
+            const ESM::Potion *getRecord() const;
+            ///< Return existing recrod for created potion (may return 0)
+            
+            void removeIngredients();
+            ///< Remove selected ingredients from alchemist's inventory, cleanup selected ingredients and
+            /// update effect list accordingly.
+
+            void addPotion (const std::string& name);
+            ///< Add a potion to the alchemist's inventory.
+            
+            void increaseSkill();
+            ///< Increase alchemist's skill.
+            
+            float getChance() const;
+            ///< Return chance of success.
+            
         public:
         
             void setAlchemist (const MWWorld::Ptr& npc);
@@ -49,6 +95,20 @@ namespace MWMechanics
             
             void removeIngredient (int index);
             ///< Remove ingredient from slot (calling this function on an empty slot is a no-op).
+            
+            TEffectsIterator beginEffects() const;
+            
+            TEffectsIterator endEffects() const;
+            
+            std::string getPotionName() const;
+            ///< Return the name of the potion that would be created when calling create (if a record for such
+            /// a potion already exists) or return an empty string.
+            
+            Result create (const std::string& name);
+            ///< Try to create a potion from the ingredients, place it in the inventory of the alchemist and
+            /// adjust the skills of the alchemist accordingly.
+            /// \param name must not be an empty string, unless there is already a potion record (
+            /// getPotionName() does not return an empty string).
     };
 }
 
