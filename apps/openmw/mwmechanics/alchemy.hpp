@@ -70,6 +70,8 @@ namespace MWMechanics
             float getChance() const;
             ///< Return chance of success.
             
+            int countIngredients() const;
+            
         public:
         
             void setAlchemist (const MWWorld::Ptr& npc);
@@ -77,10 +79,12 @@ namespace MWMechanics
             /// there is no alchemist (alchemy session has ended).
             
             TToolsIterator beginTools() const;
+            ///< \attention Iterates over tool slots, not over tools. Some of the slots may be empty.
             
             TToolsIterator endTools() const;
             
             TIngredientsIterator beginIngredients() const;
+            ///< \attention Iterates over ingredient slots, not over ingredients. Some of the slots may be empty.
             
             TIngredientsIterator endIngredients() const;
             

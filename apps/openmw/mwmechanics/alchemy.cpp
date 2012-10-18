@@ -148,13 +148,7 @@ void MWMechanics::Alchemy::updateEffects()
 {
     mEffects.clear();
 
-    int ingredients = 0;
-
-    for (TIngredientsIterator iter (beginIngredients()); iter!=endIngredients(); ++iter)
-        if (!iter->isEmpty())
-            ++ingredients;
-
-    if (ingredients<2 || mAlchemist.isEmpty() || mTools[ESM::Apparatus::MortarPestle].isEmpty())
+    if (countIngredients()<2 || mAlchemist.isEmpty() || mTools[ESM::Apparatus::MortarPestle].isEmpty())
         return;
 
     // find effects
@@ -249,6 +243,17 @@ float MWMechanics::Alchemy::getChance() const
         (npcStats.getSkill (ESM::Skill::Alchemy).getModified() +
         0.1 * creatureStats.getAttribute (1).getModified()
         + 0.1 * creatureStats.getAttribute (7).getModified());
+}
+
+int MWMechanics::Alchemy::countIngredients() const
+{
+    int ingredients = 0;
+
+    for (TIngredientsIterator iter (beginIngredients()); iter!=endIngredients(); ++iter)
+        if (!iter->isEmpty())
+            ++ingredients;
+
+    return ingredients;
 }
 
 void MWMechanics::Alchemy::setAlchemist (const MWWorld::Ptr& npc)
@@ -370,14 +375,8 @@ MWMechanics::Alchemy::Result MWMechanics::Alchemy::create (const std::string& na
 {
     if (mTools[ESM::Apparatus::MortarPestle].isEmpty())
         return Result_NoMortarAndPestle;
-
-    int ingredients = 0;
-
-    for (TIngredientsIterator iter (beginIngredients()); iter!=endIngredients(); ++iter)
-        if (!iter->isEmpty())
-            ++ingredients;
-            
-    if (ingredients<2)
+           
+    if (countIngredients()<2)
         return Result_LessThanTwoIngredients;
 
     if (name.empty() && getPotionName().empty())
