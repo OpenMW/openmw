@@ -43,6 +43,7 @@ namespace MWMechanics
             TToolsContainer mTools;
             TIngredientsContainer mIngredients;
             TEffectsContainer mEffects;
+            int mValue;
 
             std::set<EffectKey> listEffects() const;
             ///< List all effects of all used ingredients.

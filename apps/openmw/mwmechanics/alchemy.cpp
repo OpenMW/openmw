@@ -1,6 +1,7 @@
 
 #include "alchemy.hpp"
 
+#include <cassert>
 #include <cstdlib>
 
 #include <algorithm>
@@ -19,6 +20,7 @@
 #include "../mwworld/containerstore.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/cellstore.hpp"
+#include "../mwworld/manualref.hpp"
 
 #include "magiceffects.hpp"
 #include "creaturestats.hpp"
@@ -147,6 +149,7 @@ void MWMechanics::Alchemy::applyTools (int flags, float& value) const
 void MWMechanics::Alchemy::updateEffects()
 {
     mEffects.clear();
+    mValue = 0;
 
     if (countIngredients()<2 || mAlchemist.isEmpty() || mTools[ESM::Apparatus::MortarPestle].isEmpty())
         return;
@@ -160,6 +163,10 @@ void MWMechanics::Alchemy::updateEffects()
 
     x *= mTools[ESM::Apparatus::MortarPestle].get<ESM::Apparatus>()->base->mData.mQuality;
     x *= MWBase::Environment::get().getWorld()->getStore().gameSettings.find ("fPotionStrengthMult")->getFloat();
+
+    // value
+    mValue = static_cast<int> (
+        x * MWBase::Environment::get().getWorld()->getStore().gameSettings.find ("iAlchemyMod")->getFloat());
 
     // build quantified effect list
     for (std::set<EffectKey>::const_iterator iter (effects.begin()); iter!=effects.end(); ++iter)
@@ -216,7 +223,39 @@ void MWMechanics::Alchemy::updateEffects()
 
 const ESM::Potion *MWMechanics::Alchemy::getRecord() const
 {
+    for (ESMS::RecListWithIDT<ESM::Potion>::MapType::const_iterator iter (
+        MWBase::Environment::get().getWorld()->getStore().potions.list.begin());
+        iter!=MWBase::Environment::get().getWorld()->getStore().potions.list.end(); ++iter)
+    {
+        if (iter->second.mEffects.mList.size()!=mEffects.size())
+            continue;
+         
+        bool mismatch = false; 
 
+        for (int i=0; i<static_cast<int> (iter->second.mEffects.mList.size()); ++iter)
+        {
+            const ESM::ENAMstruct& first = iter->second.mEffects.mList[i];
+            const ESM::ENAMstruct& second = mEffects[i];
+                
+            if (first.mEffectID!=second.mEffectID ||
+                first.mArea!=second.mArea ||
+                first.mRange!=second.mRange ||
+                first.mSkill!=second.mSkill ||
+                first.mAttribute!=second.mAttribute ||
+                first.mMagnMin!=second.mMagnMin ||
+                first.mMagnMax!=second.mMagnMax ||
+                first.mDuration!=second.mDuration)
+            {
+                mismatch = true;
+                break;
+            }
+        }
+        
+        if (!mismatch)
+            return &iter->second;
+    }
+    
+    return 0;
 }
 
 void MWMechanics::Alchemy::removeIngredients()
@@ -240,7 +279,40 @@ void MWMechanics::Alchemy::removeIngredients()
 
 void MWMechanics::Alchemy::addPotion (const std::string& name)
 {
+    const ESM::Potion *record = getRecord();
+    
+    if (!record)
+    {
+        ESM::Potion newRecord;
+        
+        newRecord.mData.mWeight = 0;
+        
+        for (TIngredientsIterator iter (beginIngredients()); iter!=endIngredients(); ++iter)
+            if (!iter->isEmpty())
+                newRecord.mData.mWeight += iter->get<ESM::Ingredient>()->base->mData.mWeight;
+            
+        newRecord.mData.mWeight /= countIngredients();
+        
+        newRecord.mData.mValue = mValue;
+        newRecord.mData.mAutoCalc = 0;
+        
+        newRecord.mName = name;
 
+        int index = static_cast<int> (std::rand()/static_cast<double> (RAND_MAX)*6);
+        assert (index>=0 && index<6);
+        
+        static const char *name[] = { "standard", "bargain", "cheap", "fresh", "exclusive", "quality" };
+        
+        newRecord.mModel = "m\\misc_potion_" + std::string (name[index]) + "_01.nif";
+        newRecord.mIcon = "m\\tx_potion_" + std::string (name[index]) + "_01.dds";
+        
+        newRecord.mEffects.mList = mEffects;
+        
+        record = MWBase::Environment::get().getWorld()->createRecord (newRecord).second;
+    }
+    
+    MWWorld::ManualRef ref (MWBase::Environment::get().getWorld()->getStore(), record->mId);
+    MWWorld::Class::get (mAlchemist).getContainerStore (mAlchemist).add (ref.getPtr());
 }
 
 void MWMechanics::Alchemy::increaseSkill()
