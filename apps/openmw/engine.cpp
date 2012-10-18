@@ -163,9 +163,8 @@ void OMW::Engine::loadBSA()
         std::cout << "Data dir " << dataDirectory << std::endl;
         Bsa::addDir(dataDirectory, mFSStrict);
 
-        // Workaround: Mygui does not find textures in non-BSA subfolders, _unless_ they are explicitely added like this
-        // For splash screens, this is OK to do, but eventually we will need an investigation why this is necessary
-        Bsa::addDir(dataDirectory + "/Splash", mFSStrict);
+        // Workaround until resource listing capabilities are added to DirArchive, we need those to list available splash screens
+        addResourcesDirectory (dataDirectory);
     }
 }
 
