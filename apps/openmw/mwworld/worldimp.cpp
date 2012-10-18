@@ -339,7 +339,7 @@ namespace MWWorld
                 return ptr;
         }
 
-        throw std::runtime_error ("unknown Ogre handle: " + handle);
+        return MWWorld::Ptr();
     }
 
     void World::enable (const Ptr& reference)
@@ -850,12 +850,13 @@ namespace MWWorld
         mWeatherManager->update (duration);
 
         // inform the GUI about focused object
-        try
-        {
-            MWWorld::Ptr object = getPtrViaHandle(mFacedHandle);
-            MWBase::Environment::get().getWindowManager()->setFocusObject(object);
+        MWWorld::Ptr object = getPtrViaHandle(mFacedHandle);
 
-            // retrieve object dimensions so we know where to place the floating label
+        MWBase::Environment::get().getWindowManager()->setFocusObject(object);
+
+        // retrieve object dimensions so we know where to place the floating label
+        if (!object.isEmpty ())
+        {
             Ogre::SceneNode* node = object.getRefData().getBaseNode();
             Ogre::AxisAlignedBox bounds;
             int i;
@@ -870,11 +871,6 @@ namespace MWWorld
                 MWBase::Environment::get().getWindowManager()->setFocusObjectScreenCoords(
                     screenCoords[0], screenCoords[1], screenCoords[2], screenCoords[3]);
             }
-        }
-        catch (std::runtime_error&)
-        {
-            MWWorld::Ptr null;
-            MWBase::Environment::get().getWindowManager()->setFocusObject(null);
         }
 
         if (!mRendering->occlusionQuerySupported())

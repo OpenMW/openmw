@@ -62,6 +62,9 @@ void MWMechanics::Alchemy::filterEffects (std::set<EffectKey>& effects) const
             {
                 bool found = false;
 
+                if (iter->isEmpty())
+                    continue;
+
                 const MWWorld::LiveCellRef<ESM::Ingredient> *ingredient = iter->get<ESM::Ingredient>();       
 
                 for (int i=0; i<4; ++i)
@@ -178,7 +181,7 @@ void MWMechanics::Alchemy::updateEffects()
             throw std::runtime_error ("invalid base cost for magic effect " + iter->mId);
         
         float fPotionT1MagMul =
-            MWBase::Environment::get().getWorld()->getStore().gameSettings.find ("fPotionT1MagMul")->getFloat();
+            MWBase::Environment::get().getWorld()->getStore().gameSettings.find ("fPotionT1MagMult")->getFloat();
 
         if (fPotionT1MagMul<=0)
             throw std::runtime_error ("invalid gmst: fPotionT1MagMul");
@@ -189,15 +192,15 @@ void MWMechanics::Alchemy::updateEffects()
         if (fPotionT1DurMult<=0)
             throw std::runtime_error ("invalid gmst: fPotionT1DurMult");
 
-        float magnitude = magicEffect->mData.mFlags && ESM::MagicEffect::NoMagnitude ?
+        float magnitude = magicEffect->mData.mFlags & ESM::MagicEffect::NoMagnitude ?
             1 : (x / fPotionT1MagMul) / magicEffect->mData.mBaseCost;
-        float duration = magicEffect->mData.mFlags && ESM::MagicEffect::NoDuration ?
+        float duration = magicEffect->mData.mFlags & ESM::MagicEffect::NoDuration ?
             1 : (x / fPotionT1DurMult) / magicEffect->mData.mBaseCost;
 
-        if (!(magicEffect->mData.mFlags && ESM::MagicEffect::NoMagnitude))
+        if (!(magicEffect->mData.mFlags & ESM::MagicEffect::NoMagnitude))
             applyTools (magicEffect->mData.mFlags, magnitude);
 
-        if (!(magicEffect->mData.mFlags && ESM::MagicEffect::NoDuration))
+        if (!(magicEffect->mData.mFlags & ESM::MagicEffect::NoDuration))
             applyTools (magicEffect->mData.mFlags, duration);
         
         duration = static_cast<int> (duration+0.5);           
@@ -471,7 +474,7 @@ MWMechanics::Alchemy::Result MWMechanics::Alchemy::create (const std::string& na
     if (beginEffects()==endEffects())
         return Result_NoEffects;
 
-    if (getChance()<std::rand()/static_cast<double> (RAND_MAX)*100)
+    if (getChance()<std::rand()/static_cast<double> (RAND_MAX))
     {
         removeIngredients();
         return Result_RandomFailure;

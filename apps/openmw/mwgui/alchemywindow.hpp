@@ -26,8 +26,6 @@ namespace MWGui
 
         MyGUI::EditBox* mNameEdit;
 
-        Widgets::SpellEffectList mEffects; // effects of created potion
-
         void onCancelButtonClicked(MyGUI::Widget* _sender);
         void onCreateButtonClicked(MyGUI::Widget* _sender);
         void onIngredientSelected(MyGUI::Widget* _sender);
@@ -41,12 +39,12 @@ namespace MWGui
 
         void update();
         
-        private:
-        
-            MWMechanics::Alchemy mAlchemy;
+    private:
 
-            std::vector<MyGUI::ImageBox *> mApparatus;
-            std::vector<MyGUI::ImageBox *> mIngredients;
+        MWMechanics::Alchemy mAlchemy;
+
+        std::vector<MyGUI::ImageBox *> mApparatus;
+        std::vector<MyGUI::ImageBox *> mIngredients;
     };
 }
 
