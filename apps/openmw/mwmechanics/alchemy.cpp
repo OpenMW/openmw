@@ -221,7 +221,21 @@ const ESM::Potion *MWMechanics::Alchemy::getRecord() const
 
 void MWMechanics::Alchemy::removeIngredients()
 {
-
+    bool needsUpdate = false;
+    
+    for (TIngredientsContainer::iterator iter (mIngredients.begin()); iter!=mIngredients.end(); ++iter)
+        if (!iter->isEmpty())
+        {
+            iter->getRefData().setCount (iter->getRefData().getCount()-1);
+            if (iter->getRefData().getCount()<1)
+            {
+                needsUpdate = true;
+                *iter = MWWorld::Ptr();
+            }
+        }
+    
+    if (needsUpdate)
+        updateEffects();
 }
 
 void MWMechanics::Alchemy::addPotion (const std::string& name)
