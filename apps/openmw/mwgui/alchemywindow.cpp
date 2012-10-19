@@ -146,6 +146,8 @@ namespace MWGui
                 mApparatus.at (index)->setImageTexture (getIconPath (*iter));
             }
         }
+
+        update();
     }
 
     void AlchemyWindow::onIngredientSelected(MyGUI::Widget* _sender)
@@ -185,8 +187,12 @@ namespace MWGui
         {
             MyGUI::ImageBox* ingredient = mIngredients[i];
 
-            MWWorld::Ptr item = *it;
-            ++it;
+            MWWorld::Ptr item;
+            if (it != mAlchemy.endIngredients ())
+            {
+                item = *it;
+                ++it;
+            }
 
             if (ingredient->getChildCount())
                 MyGUI::Gui::getInstance().destroyWidget(ingredient->getChildAt(0));
