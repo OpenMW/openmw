@@ -151,46 +151,15 @@ namespace MWGui
     void AlchemyWindow::onIngredientSelected(MyGUI::Widget* _sender)
     {
         removeIngredient(_sender);
-        drawItems();
         update();
     }
 
     void AlchemyWindow::onSelectedItemImpl(MWWorld::Ptr item)
     {
-        MyGUI::ImageBox* add = NULL;
+        int res = mAlchemy.addIngredient(item);
 
-        // don't allow to add an ingredient that is already added
-        // (which could happen if two similiar ingredients don't stack because of script / owner)
-        bool alreadyAdded = false;
-        std::string name = MWWorld::Class::get(item).getName(item);
-        for (int i=0; i<4; ++i)       
-            if (mIngredients[i]->isUserString("ToolTipType"))
-            {
-                MWWorld::Ptr item2 = *mIngredients[i]->getUserData<MWWorld::Ptr>();
-                std::string name2 = MWWorld::Class::get(item2).getName(item2);
-                if (name == name2)
-                    alreadyAdded = true;
-            }
-
-        if (alreadyAdded)
-            return;
-
-        for (int i=0; i<4; ++i)
-            if (!mIngredients[i]->isUserString("ToolTipType"))
-            {
-                add = mIngredients[i];
-
-                mAlchemy.addIngredient(item);
-
-                break;
-            }
-
-        if (add != NULL)
+        if (res != -1)
         {
-            add->setUserString("ToolTipType", "ItemPtr");
-            add->setUserData(item);
-            add->setImageTexture(getIconPath(item));
-            drawItems();
             update();
 
             std::string sound = MWWorld::Class::get(item).getUpSoundId(item);
@@ -211,16 +180,26 @@ namespace MWGui
 
     void AlchemyWindow::update()
     {
+        MWMechanics::Alchemy::TIngredientsIterator it = mAlchemy.beginIngredients ();
         for (int i=0; i<4; ++i)
         {
             MyGUI::ImageBox* ingredient = mIngredients[i];
 
-            if (!ingredient->isUserString("ToolTipType"))
-                continue;
+            MWWorld::Ptr item = *it;
+            ++it;
 
-            // update ingredient count labels
             if (ingredient->getChildCount())
                 MyGUI::Gui::getInstance().destroyWidget(ingredient->getChildAt(0));
+
+            ingredient->setImageTexture("");
+            ingredient->clearUserStrings ();
+
+            if (item.isEmpty ())
+                continue;
+
+            ingredient->setUserString("ToolTipType", "ItemPtr");
+            ingredient->setUserData(item);
+            ingredient->setImageTexture(getIconPath(item));
 
             MyGUI::TextBox* text = ingredient->createWidget<MyGUI::TextBox>("SandBrightText", MyGUI::IntCoord(0, 14, 32, 18), MyGUI::Align::Default, std::string("Label"));
             text->setTextAlign(MyGUI::Align::Right);
@@ -229,6 +208,8 @@ namespace MWGui
             text->setTextShadowColour(MyGUI::Colour(0,0,0));
             text->setCaption(getCountString(ingredient->getUserData<MWWorld::Ptr>()->getRefData().getCount()));
         }
+
+        drawItems();
 
         std::vector<ESM::ENAMstruct> effects;
         ESM::EffectList list;
@@ -256,13 +237,10 @@ namespace MWGui
 
     void AlchemyWindow::removeIngredient(MyGUI::Widget* ingredient)
     {
-        ingredient->clearUserStrings();
-        static_cast<MyGUI::ImageBox*>(ingredient)->setImageTexture("");
-        if (ingredient->getChildCount())
-            MyGUI::Gui::getInstance().destroyWidget(ingredient->getChildAt(0));
-
         for (int i=0; i<4; ++i)
             if (mIngredients[i] == ingredient)
                 mAlchemy.removeIngredient (i);
+
+        update();
     }
 }
