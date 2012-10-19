@@ -80,7 +80,7 @@ void ToolTips::onFrame(float frameDuration)
         {
             std::string handle = MWBase::Environment::get().getWorld()->getFacedHandle();
 
-            mFocusObject = MWBase::Environment::get().getWorld()->getPtrViaHandle(handle);
+            mFocusObject = MWBase::Environment::get().getWorld()->searchPtrViaHandle(handle);
             if (mFocusObject.isEmpty ())
                 return;
 

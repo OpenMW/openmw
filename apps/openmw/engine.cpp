@@ -424,7 +424,7 @@ void OMW::Engine::activate()
     if (handle.empty())
         return;
 
-    MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->getPtrViaHandle (handle);
+    MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->searchPtrViaHandle (handle);
 
     if (ptr.isEmpty())
         return;

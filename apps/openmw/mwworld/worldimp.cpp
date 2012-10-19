@@ -327,6 +327,14 @@ namespace MWWorld
 
     Ptr World::getPtrViaHandle (const std::string& handle)
     {
+        Ptr res = searchPtrViaHandle (handle);
+        if (res.isEmpty ())
+            throw std::runtime_error ("unknown Ogre handle: " + handle);
+        return res;
+    }
+
+    Ptr World::searchPtrViaHandle (const std::string& handle)
+    {
         if (mPlayer->getPlayer().getRefData().getHandle()==handle)
             return mPlayer->getPlayer();
         for (Scene::CellStoreCollection::const_iterator iter (mWorldScene->getActiveCells().begin());
@@ -850,7 +858,7 @@ namespace MWWorld
         mWeatherManager->update (duration);
 
         // inform the GUI about focused object
-        MWWorld::Ptr object = getPtrViaHandle(mFacedHandle);
+        MWWorld::Ptr object = searchPtrViaHandle(mFacedHandle);
 
         MWBase::Environment::get().getWindowManager()->setFocusObject(object);
 
