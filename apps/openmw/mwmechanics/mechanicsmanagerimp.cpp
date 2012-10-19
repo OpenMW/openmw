@@ -153,11 +153,13 @@ namespace MWMechanics
         // forced update and current value adjustments
         mActors.updateActor (ptr, 0);
 
-        creatureStats.getHealth().setCurrent(creatureStats.getHealth().getModified());
-        creatureStats.getMagicka().setCurrent(creatureStats.getMagicka().getModified());
-        creatureStats.getFatigue().setCurrent(creatureStats.getFatigue().getModified());
+        for (int i=0; i<2; ++i)
+        {
+            DynamicStat<float> stat = creatureStats.getDynamic (i);
+            stat.setCurrent (stat.getModified());
+            creatureStats.setDynamic (i, stat);
+        }
     }
-
 
     MechanicsManager::MechanicsManager()
     : mUpdatePlayer (true), mClassSelected (false),

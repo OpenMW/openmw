@@ -188,10 +188,12 @@ namespace MWScript
                     Interpreter::Type_Integer value = runtime[0].mInteger;
                     runtime.pop();
 
-                    MWWorld::Class::get(ptr)
-                        .getCreatureStats(ptr)
-                        .getDynamic(mIndex)
-                        .setModified(value, 0);
+                    MWMechanics::DynamicStat<float> stat (MWWorld::Class::get (ptr).getCreatureStats (ptr)
+                        .getDynamic (mIndex));
+
+                    stat.setModified (value, 0);
+                    
+                    MWWorld::Class::get (ptr).getCreatureStats (ptr).setDynamic (mIndex, stat);
                 }
         };
 
@@ -215,10 +217,14 @@ namespace MWScript
 
                     Interpreter::Type_Integer current = stats.getDynamic(mIndex).getCurrent();
 
-                    stats.getDynamic(mIndex).setModified(
-                        diff + stats.getDynamic(mIndex).getModified(), 0);
+                    MWMechanics::DynamicStat<float> stat (MWWorld::Class::get (ptr).getCreatureStats (ptr)
+                        .getDynamic (mIndex));
 
-                    stats.getDynamic(mIndex).setCurrent(diff + current);
+                    stat.setModified (diff + stat.getModified(), 0);
+
+                    stat.setCurrent (diff + current);
+
+                    MWWorld::Class::get (ptr).getCreatureStats (ptr).setDynamic (mIndex, stat);
                 }
         };
 
@@ -242,7 +248,12 @@ namespace MWScript
 
                     Interpreter::Type_Integer current = stats.getDynamic(mIndex).getCurrent();
 
-                    stats.getDynamic(mIndex).setCurrent (diff + current);
+                    MWMechanics::DynamicStat<float> stat (MWWorld::Class::get (ptr).getCreatureStats (ptr)
+                        .getDynamic (mIndex));
+
+                    stat.setCurrent (diff + current);
+
+                    MWWorld::Class::get (ptr).getCreatureStats (ptr).setDynamic (mIndex, stat);
                 }
         };
 

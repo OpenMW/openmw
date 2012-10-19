@@ -43,6 +43,8 @@ namespace MWMechanics
 
         const DynamicStat<float> & getFatigue() const;
 
+        const DynamicStat<float> & getDynamic (int index) const;
+
         const Spells & getSpells() const;
 
         const ActiveSpells & getActiveSpells() const;
@@ -59,23 +61,13 @@ namespace MWMechanics
 
         int getAlarm() const;
 
-
         Stat<int> & getAttribute(int index);
-
-        DynamicStat<float> & getHealth();
-
-        DynamicStat<float> & getMagicka();
-
-        DynamicStat<float> & getFatigue();
-
-        DynamicStat<float> & getDynamic(int index);
 
         Spells & getSpells();
 
         ActiveSpells & getActiveSpells();
 
         MagicEffects & getMagicEffects();
-
 
         void setAttribute(int index, const Stat<int> &value);
 
@@ -84,6 +76,8 @@ namespace MWMechanics
         void setMagicka(const DynamicStat<float> &value);
 
         void setFatigue(const DynamicStat<float> &value);
+
+        void setDynamic (int index, const DynamicStat<float> &value);
 
         void setSpells(const Spells &spells);
 

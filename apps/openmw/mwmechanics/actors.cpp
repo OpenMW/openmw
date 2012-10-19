@@ -73,13 +73,17 @@ namespace MWMechanics
         double magickaFactor =
             creatureStats.getMagicEffects().get (EffectKey (84)).mMagnitude * 0.1 + 0.5;
 
-        creatureStats.getHealth().setBase(
-            static_cast<int> (0.5 * (strength + endurance)) + creatureStats.getLevelHealthBonus ());
+        DynamicStat<float> health = creatureStats.getHealth();
+        health.setBase (static_cast<int> (0.5 * (strength + endurance)) + creatureStats.getLevelHealthBonus ());
+        creatureStats.setHealth (health);
 
-        creatureStats.getMagicka().setBase(
-            static_cast<int> (intelligence + magickaFactor * intelligence));
-
-        creatureStats.getFatigue().setBase(strength+willpower+agility+endurance);
+        DynamicStat<float> magicka = creatureStats.getMagicka();
+        magicka.setBase (static_cast<int> (intelligence + magickaFactor * intelligence));
+        creatureStats.setMagicka (magicka);
+       
+        DynamicStat<float> fatigue = creatureStats.getFatigue();
+        fatigue.setBase (strength+willpower+agility+endurance);
+        creatureStats.setFatigue (fatigue);
     }
 
     void Actors::calculateRestoration (const MWWorld::Ptr& ptr, float duration)
@@ -92,8 +96,10 @@ namespace MWMechanics
             bool stunted = stats.getMagicEffects ().get(MWMechanics::EffectKey(136)).mMagnitude > 0;
 
             int endurance = stats.getAttribute (ESM::Attribute::Endurance).getModified ();
-            stats.getHealth().setCurrent(stats.getHealth ().getCurrent ()
-                + 0.1 * endurance);
+            
+            DynamicStat<float> health = stats.getHealth();
+            health.setCurrent (health.getCurrent() + 0.1 * endurance);
+            stats.setHealth (health);
 
             const ESMS::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
 
@@ -109,13 +115,19 @@ namespace MWMechanics
 
             float x = fFatigueReturnBase + fFatigueReturnMult * (1 - normalizedEncumbrance);
             x *= fEndFatigueMult * endurance;
-            stats.getFatigue ().setCurrent (stats.getFatigue ().getCurrent () + 3600 * x);
-
+            
+            DynamicStat<float> fatigue = stats.getFatigue();
+            fatigue.setCurrent (fatigue.getCurrent() + 3600 * x);
+            stats.setFatigue (fatigue);
+            
             if (!stunted)
             {
                 float fRestMagicMult = store.gameSettings.find("fRestMagicMult")->getFloat ();
-                stats.getMagicka().setCurrent (stats.getMagicka ().getCurrent ()
-                    + fRestMagicMult * stats.getAttribute(ESM::Attribute::Intelligence).getModified ());
+                
+                DynamicStat<float> magicka = stats.getMagicka();
+                magicka.setCurrent (magicka.getCurrent()
+                    + fRestMagicMult * stats.getAttribute(ESM::Attribute::Intelligence).getModified());
+                stats.setMagicka (magicka);
             }
         }
     }
@@ -137,14 +149,16 @@ namespace MWMechanics
 
         // dynamic stats
         MagicEffects effects = creatureStats.getMagicEffects();
-        creatureStats.getHealth().setModifier(
-            effects.get(EffectKey(80)).mMagnitude - effects.get(EffectKey(18)).mMagnitude);
-
-        creatureStats.getMagicka().setModifier(
-            effects.get(EffectKey(81)).mMagnitude - effects.get(EffectKey(19)).mMagnitude);
-
-        creatureStats.getFatigue().setModifier(
-            effects.get(EffectKey(82)).mMagnitude - effects.get(EffectKey(20)).mMagnitude);
+        
+        for (int i=0; i<3; ++i)
+        {
+            DynamicStat<float> stat = creatureStats.getDynamic (i);
+            
+            stat.setModifier (
+                effects.get (EffectKey(80+i)).mMagnitude - effects.get (EffectKey(18+i)).mMagnitude);
+        
+            creatureStats.setDynamic (i, stat);
+        }        
     }
 
     Actors::Actors() : mDuration (0) {}

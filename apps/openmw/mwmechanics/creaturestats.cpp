@@ -118,22 +118,7 @@ namespace MWMechanics
         return mAttributes[index];
     }
 
-    DynamicStat<float> &CreatureStats::getHealth()
-    {
-        return mDynamic[0];
-    }
-
-    DynamicStat<float> &CreatureStats::getMagicka()
-    {
-        return mDynamic[1];
-    }
-
-    DynamicStat<float> &CreatureStats::getFatigue()
-    {
-        return mDynamic[2];
-    }
-
-    DynamicStat<float> &CreatureStats::getDynamic(int index)
+    const DynamicStat<float> &CreatureStats::getDynamic(int index) const
     {
         if (index < 0 || index > 2) {
             throw std::runtime_error("dynamic stat index is out of range");
@@ -184,6 +169,14 @@ namespace MWMechanics
         mDynamic[2] = value;
     }
 
+    void CreatureStats::setDynamic (int index, const DynamicStat<float> &value)
+    {
+        if (index < 0 || index > 2)
+            throw std::runtime_error("dynamic stat index is out of range");
+    
+        mDynamic[index] = value;
+    }
+    
     void CreatureStats::setLevel(int level)
     {
         mLevel = level;
