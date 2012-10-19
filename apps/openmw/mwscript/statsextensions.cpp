@@ -155,7 +155,7 @@ namespace MWScript
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
                     MWWorld::Ptr ptr = R()(runtime);
-                    Interpreter::Type_Integer value;
+                    Interpreter::Type_Float value;
 
                     if (mIndex==0 && MWWorld::Class::get (ptr).hasItemHealth (ptr))
                     {
@@ -185,7 +185,7 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    Interpreter::Type_Integer value = runtime[0].mInteger;
+                    Interpreter::Type_Float value = runtime[0].mFloat;
                     runtime.pop();
 
                     MWMechanics::DynamicStat<float> stat (MWWorld::Class::get (ptr).getCreatureStats (ptr)
@@ -210,12 +210,12 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    Interpreter::Type_Integer diff = runtime[0].mInteger;
+                    Interpreter::Type_Float diff = runtime[0].mFloat;
                     runtime.pop();
 
                     MWMechanics::CreatureStats& stats = MWWorld::Class::get (ptr).getCreatureStats (ptr);
 
-                    Interpreter::Type_Integer current = stats.getDynamic(mIndex).getCurrent();
+                    Interpreter::Type_Float current = stats.getDynamic(mIndex).getCurrent();
 
                     MWMechanics::DynamicStat<float> stat (MWWorld::Class::get (ptr).getCreatureStats (ptr)
                         .getDynamic (mIndex));
@@ -241,12 +241,12 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    Interpreter::Type_Integer diff = runtime[0].mInteger;
+                    Interpreter::Type_Float diff = runtime[0].mFloat;
                     runtime.pop();
 
                     MWMechanics::CreatureStats& stats = MWWorld::Class::get (ptr).getCreatureStats (ptr);
 
-                    Interpreter::Type_Integer current = stats.getDynamic(mIndex).getCurrent();
+                    Interpreter::Type_Float current = stats.getDynamic(mIndex).getCurrent();
 
                     MWMechanics::DynamicStat<float> stat (MWWorld::Class::get (ptr).getCreatureStats (ptr)
                         .getDynamic (mIndex));
@@ -687,16 +687,16 @@ namespace MWScript
 
             for (int i=0; i<numberOfDynamics; ++i)
             {
-                extensions.registerFunction (get + dynamics[i], 'l', "",
+                extensions.registerFunction (get + dynamics[i], 'f', "",
                     opcodeGetDynamic+i, opcodeGetDynamicExplicit+i);
 
-                extensions.registerInstruction (set + dynamics[i], "l",
+                extensions.registerInstruction (set + dynamics[i], "f",
                     opcodeSetDynamic+i, opcodeSetDynamicExplicit+i);
 
-                extensions.registerInstruction (mod + dynamics[i], "l",
+                extensions.registerInstruction (mod + dynamics[i], "f",
                     opcodeModDynamic+i, opcodeModDynamicExplicit+i);
 
-                extensions.registerInstruction (modCurrent + dynamics[i], "l",
+                extensions.registerInstruction (modCurrent + dynamics[i], "f",
                     opcodeModCurrentDynamic+i, opcodeModCurrentDynamicExplicit+i);
 
                 extensions.registerFunction (get + dynamics[i] + getRatio, 'f', "",
