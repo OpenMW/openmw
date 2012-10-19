@@ -795,11 +795,17 @@ namespace MWDialogue
             || services & ESM::NPC::Misc)
             windowServices |= MWGui::DialogueWindow::Service_Trade;
 
+        if( !mActor.get<ESM::NPC>()->base->mTransport.empty())
+            windowServices |= MWGui::DialogueWindow::Service_Travel;
+
         if (services & ESM::NPC::Spells)
             windowServices |= MWGui::DialogueWindow::Service_BuySpells;
 
         if (services & ESM::NPC::Spellmaking)
             windowServices |= MWGui::DialogueWindow::Service_CreateSpells;
+
+        if (services & ESM::NPC::Training)
+            windowServices |= MWGui::DialogueWindow::Service_Training;
 
         if (services & ESM::NPC::Enchanting)
             windowServices |= MWGui::DialogueWindow::Service_Enchant;

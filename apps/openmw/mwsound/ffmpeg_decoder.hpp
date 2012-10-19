@@ -54,6 +54,6 @@ namespace MWSound
 #ifndef DEFAULT_DECODER
 #define DEFAULT_DECODER (::MWSound::FFmpeg_Decoder)
 #endif
-};
+}
 
 #endif

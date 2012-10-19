@@ -38,6 +38,7 @@
 #include "countdialog.hpp"
 #include "tradewindow.hpp"
 #include "spellbuyingwindow.hpp"
+#include "travelwindow.hpp"
 #include "settingswindow.hpp"
 #include "confirmationdialog.hpp"
 #include "alchemywindow.hpp"
@@ -48,6 +49,7 @@
 #include "waitdialog.hpp"
 #include "spellcreationdialog.hpp"
 #include "enchantingdialog.hpp"
+#include "trainingwindow.hpp"
 
 using namespace MWGui;
 
@@ -69,6 +71,7 @@ WindowManager::WindowManager(
   , mCountDialog(NULL)
   , mTradeWindow(NULL)
   , mSpellBuyingWindow(NULL)
+  , mTravelWindow(NULL)
   , mSettingsWindow(NULL)
   , mConfirmationDialog(NULL)
   , mAlchemyWindow(NULL)
@@ -79,6 +82,7 @@ WindowManager::WindowManager(
   , mWaitDialog(NULL)
   , mSpellCreationDialog(NULL)
   , mEnchantingDialog(NULL)
+  , mTrainingWindow(NULL)
   , mPlayerClass()
   , mPlayerName()
   , mPlayerRaceId()
@@ -145,6 +149,7 @@ WindowManager::WindowManager(
     mInventoryWindow = new InventoryWindow(*this,mDragAndDrop);
     mTradeWindow = new TradeWindow(*this);
     mSpellBuyingWindow = new SpellBuyingWindow(*this);
+    mTravelWindow = new TravelWindow(*this);
     mDialogueWindow = new DialogueWindow(*this);
     mContainerWindow = new ContainerWindow(*this,mDragAndDrop);
     mHud = new HUD(w,h, mShowFPSLevel, mDragAndDrop);
@@ -161,6 +166,7 @@ WindowManager::WindowManager(
     mWaitDialog = new WaitDialog(*this);
     mSpellCreationDialog = new SpellCreationDialog(*this);
     mEnchantingDialog = new EnchantingDialog(*this);
+    mTrainingWindow = new TrainingWindow(*this);
 
     mLoadingScreen = new LoadingScreen(mOgre->getScene (), mOgre->getWindow (), *this);
     mLoadingScreen->onResChange (w,h);
@@ -209,6 +215,7 @@ WindowManager::~WindowManager()
     delete mScrollWindow;
     delete mTradeWindow;
     delete mSpellBuyingWindow;
+    delete mTravelWindow;
     delete mSettingsWindow;
     delete mConfirmationDialog;
     delete mAlchemyWindow;
@@ -218,6 +225,7 @@ WindowManager::~WindowManager()
     delete mWaitDialog;
     delete mSpellCreationDialog;
     delete mEnchantingDialog;
+    delete mTrainingWindow;
 
     cleanupGarbage();
 
@@ -261,6 +269,7 @@ void WindowManager::updateVisible()
     mBookWindow->setVisible(false);
     mTradeWindow->setVisible(false);
     mSpellBuyingWindow->setVisible(false);
+    mTravelWindow->setVisible(false);
     mSettingsWindow->setVisible(false);
     mAlchemyWindow->setVisible(false);
     mSpellWindow->setVisible(false);
@@ -269,6 +278,7 @@ void WindowManager::updateVisible()
     mWaitDialog->setVisible(false);
     mSpellCreationDialog->setVisible(false);
     mEnchantingDialog->setVisible(false);
+    mTrainingWindow->setVisible(false);
 
     mHud->setVisible(true);
 
@@ -369,11 +379,17 @@ void WindowManager::updateVisible()
         case GM_SpellBuying:
             mSpellBuyingWindow->setVisible(true);
             break;
+        case GM_Travel:
+            mTravelWindow->setVisible(true);
+            break;
         case GM_SpellCreation:
             mSpellCreationDialog->setVisible(true);
             break;
         case GM_Enchanting:
             mEnchantingDialog->setVisible(true);
+            break;
+        case GM_Training:
+            mTrainingWindow->setVisible(true);
             break;
         case GM_InterMessageBox:
             break;
@@ -574,6 +590,9 @@ void WindowManager::onFrame (float frameDuration)
 
     mHud->onFrame(frameDuration);
 
+    mTrainingWindow->onFrame (frameDuration);
+
+    mTrainingWindow->checkReferenceAvailable();
     mDialogueWindow->checkReferenceAvailable();
     mTradeWindow->checkReferenceAvailable();
     mSpellBuyingWindow->checkReferenceAvailable();
@@ -862,6 +881,7 @@ MWGui::CountDialog* WindowManager::getCountDialog() { return mCountDialog; }
 MWGui::ConfirmationDialog* WindowManager::getConfirmationDialog() { return mConfirmationDialog; }
 MWGui::TradeWindow* WindowManager::getTradeWindow() { return mTradeWindow; }
 MWGui::SpellBuyingWindow* WindowManager::getSpellBuyingWindow() { return mSpellBuyingWindow; }
+MWGui::TravelWindow* WindowManager::getTravelWindow() { return mTravelWindow; }
 MWGui::SpellWindow* WindowManager::getSpellWindow() { return mSpellWindow; }
 MWGui::Console* WindowManager::getConsole() { return mConsole; }
 
@@ -992,4 +1012,9 @@ void WindowManager::startSpellMaking(MWWorld::Ptr actor)
 void WindowManager::startEnchanting (MWWorld::Ptr actor)
 {
     mEnchantingDialog->startEnchanting (actor);
+}
+
+void WindowManager::startTraining(MWWorld::Ptr actor)
+{
+    mTrainingWindow->startTraining(actor);
 }

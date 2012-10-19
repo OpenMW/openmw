@@ -48,7 +48,6 @@ namespace MWGui
         void askQuestion(std::string question);
         void goodbye();
 
-        // various service button visibilities, depending if the npc/creature talked to has these services
         // make sure to call these before setKeywords()
         void setServices(int services) { mServices = services; }
 
@@ -57,7 +56,9 @@ namespace MWGui
             Service_Trade = 0x01,
             Service_BuySpells = 0x02,
             Service_CreateSpells = 0x04,
-            Service_Enchant = 0x08
+            Service_Enchant = 0x08,
+            Service_Training = 0x10,
+            Service_Travel = 0x20
         };
 
     protected:
@@ -75,10 +76,6 @@ namespace MWGui
         *Helper function that add topic keyword in blue in a text.
         */
         std::string parseText(std::string text);
-
-        // various service button visibilities, depending if the npc/creature talked to has these services
-        bool mShowTrade;
-        bool mShowSpells;
 
         int mServices;
 

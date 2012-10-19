@@ -245,15 +245,7 @@ void HUD::onWorldClicked(MyGUI::Widget* _sender)
             return;
 
         std::string handle = MWBase::Environment::get().getWorld()->getFacedHandle();
-        MWWorld::Ptr object;
-        try
-        {
-            object = MWBase::Environment::get().getWorld()->getPtrViaHandle(handle);
-        }
-        catch (std::exception& /* e */)
-        {
-            return;
-        }
+        MWWorld::Ptr object = MWBase::Environment::get().getWorld()->searchPtrViaHandle(handle);
 
         if (mode == GM_Console)
             MWBase::Environment::get().getWindowManager()->getConsole()->setSelectedObject(object);

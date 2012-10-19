@@ -19,6 +19,7 @@
 #include "tradewindow.hpp"
 #include "spellbuyingwindow.hpp"
 #include "inventorywindow.hpp"
+#include "travelwindow.hpp"
 
 using namespace MWGui;
 using namespace Widgets;
@@ -137,6 +138,11 @@ void DialogueWindow::onSelectTopic(std::string topic)
         mWindowManager.pushGuiMode(GM_SpellBuying);
         mWindowManager.getSpellBuyingWindow()->startSpellBuying(mPtr);
     }
+    else if (topic == MWBase::Environment::get().getWorld()->getStore().gameSettings.find("sTravel")->getString())
+    {
+        mWindowManager.pushGuiMode(GM_Travel);
+        mWindowManager.getTravelWindow()->startTravel(mPtr);
+    }
     else if (topic == MWBase::Environment::get().getWorld()->getStore().gameSettings.find("sSpellMakingMenuTitle")->getString())
     {
         mWindowManager.pushGuiMode(GM_SpellCreation);
@@ -146,6 +152,11 @@ void DialogueWindow::onSelectTopic(std::string topic)
     {
         mWindowManager.pushGuiMode(GM_Enchanting);
         mWindowManager.startEnchanting (mPtr);
+    }
+    else if (topic == MWBase::Environment::get().getWorld()->getStore().gameSettings.find("sServiceTrainingTitle")->getString())
+    {
+        mWindowManager.pushGuiMode(GM_Training);
+        mWindowManager.startTraining (mPtr);
     }
     else
         MWBase::Environment::get().getDialogueManager()->keywordSelected(lower_string(topic));
@@ -175,11 +186,17 @@ void DialogueWindow::setKeywords(std::list<std::string> keyWords)
     if (mServices & Service_BuySpells)
         mTopicsList->addItem(MWBase::Environment::get().getWorld()->getStore().gameSettings.find("sSpells")->getString());
 
+    if (mServices & Service_Travel)
+        mTopicsList->addItem(MWBase::Environment::get().getWorld()->getStore().gameSettings.find("sTravel")->getString());
+
     if (mServices & Service_CreateSpells)
         mTopicsList->addItem(MWBase::Environment::get().getWorld()->getStore().gameSettings.find("sSpellmakingMenuTitle")->getString());
 
     if (mServices & Service_Enchant)
         mTopicsList->addItem(MWBase::Environment::get().getWorld()->getStore().gameSettings.find("sEnchanting")->getString());
+
+    if (mServices & Service_Training)
+        mTopicsList->addItem(MWBase::Environment::get().getWorld()->getStore().gameSettings.find("sServiceTrainingTitle")->getString());
 
     if (anyService)
         mTopicsList->addSeparator();

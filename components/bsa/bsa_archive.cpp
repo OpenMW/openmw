@@ -375,7 +375,7 @@ void addBSA(const std::string& name, const std::string& group)
 {
   insertBSAFactory();
   ResourceGroupManager::getSingleton().
-    addResourceLocation(name, "BSA", group);
+    addResourceLocation(name, "BSA", group, true);
 }
 
 void addDir(const std::string& name, const bool& fs, const std::string& group)
@@ -384,7 +384,7 @@ void addDir(const std::string& name, const bool& fs, const std::string& group)
     insertDirFactory();
 
     ResourceGroupManager::getSingleton().
-    addResourceLocation(name, "Dir", group);
+    addResourceLocation(name, "Dir", group, true);
 }
 
 }
