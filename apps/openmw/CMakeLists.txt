@@ -62,7 +62,7 @@ add_openmw_dir (mwclass
 
 add_openmw_dir (mwmechanics
     mechanicsmanagerimp stat creaturestats magiceffects movement actors drawstate spells
-    activespells npcstats aipackage aisequence
+    activespells npcstats aipackage aisequence alchemy
     )
 
 add_openmw_dir (mwbase

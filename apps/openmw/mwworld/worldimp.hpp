@@ -163,6 +163,9 @@ namespace MWWorld
             virtual Ptr getPtrViaHandle (const std::string& handle);
             ///< Return a pointer to a liveCellRef with the given Ogre handle.
 
+            virtual Ptr searchPtrViaHandle (const std::string& handle);
+            ///< Return a pointer to a liveCellRef with the given Ogre handle or Ptr() if not found
+
             virtual void enable (const Ptr& ptr);
 
             virtual void disable (const Ptr& ptr);
