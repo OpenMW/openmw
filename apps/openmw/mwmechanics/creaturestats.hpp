@@ -29,8 +29,8 @@ namespace MWMechanics
         int mFlee;
         int mAlarm;
         AiSequence mAiSequence;
-
         float mLevelHealthBonus;
+        bool mDead;        
 
     public:
         CreatureStats();
@@ -105,6 +105,10 @@ namespace MWMechanics
         // small hack to allow the fact that Health permanently increases by 10% of endurance on each level up
         void increaseLevelHealthBonus(float value);
         float getLevelHealthBonus() const;
+
+        bool isDead() const;
+        
+        void resurrect();
     };
 }
 
