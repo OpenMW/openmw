@@ -474,7 +474,7 @@ MWMechanics::Alchemy::Result MWMechanics::Alchemy::create (const std::string& na
     if (beginEffects()==endEffects())
         return Result_NoEffects;
 
-    if (getChance()<std::rand()/static_cast<double> (RAND_MAX))
+    if (getChance()<std::rand()/static_cast<double> (RAND_MAX)*100)
     {
         removeIngredients();
         return Result_RandomFailure;
