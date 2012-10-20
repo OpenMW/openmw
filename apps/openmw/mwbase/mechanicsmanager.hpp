@@ -39,6 +39,8 @@ namespace MWBase
 
             virtual void addActor (const MWWorld::Ptr& ptr) = 0;
             ///< Register an actor for stats management
+            ///
+            /// \note Dead actors are ignored.
 
             virtual void removeActor (const MWWorld::Ptr& ptr) = 0;
             ///< Deregister an actor for stats management

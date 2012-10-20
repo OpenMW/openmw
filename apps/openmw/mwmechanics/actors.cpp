@@ -165,7 +165,8 @@ namespace MWMechanics
 
     void Actors::addActor (const MWWorld::Ptr& ptr)
     {
-        mActors.insert (ptr);
+        if (!MWWorld::Class::get (ptr).getCreatureStats (ptr).isDead())
+            mActors.insert (ptr);
     }
 
     void Actors::removeActor (const MWWorld::Ptr& ptr)
