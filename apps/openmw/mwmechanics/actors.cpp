@@ -199,13 +199,23 @@ namespace MWMechanics
         {
             float totalDuration = mDuration;
             mDuration = 0;
+            
+            std::set<MWWorld::Ptr>::iterator iter (mActors.begin());
 
-            for (std::set<MWWorld::Ptr>::iterator iter (mActors.begin()); iter!=mActors.end(); ++iter)
+            while (iter!=mActors.end())
             {
-                updateActor (*iter, totalDuration);
+                if (!MWWorld::Class::get (*iter).getCreatureStats (*iter).isDead())
+                {
+                    updateActor (*iter, totalDuration);
 
-                if (iter->getTypeName()==typeid (ESM::NPC).name())
-                    updateNpc (*iter, totalDuration, paused);
+                    if (iter->getTypeName()==typeid (ESM::NPC).name())
+                        updateNpc (*iter, totalDuration, paused);
+                }
+
+                if (MWWorld::Class::get (*iter).getCreatureStats (*iter).isDead())
+                    mActors.erase (iter++);
+                else
+                    ++iter;
             }
         }
 
