@@ -9,8 +9,9 @@
 #include <components/files/ogreplugin.hpp>
 #include <components/settings/settings.hpp>
 
+#include "utils/naturalsort.hpp"
+
 #include "graphicspage.hpp"
-#include "naturalsort.hpp"
 
 QString getAspect(int x, int y)
 {

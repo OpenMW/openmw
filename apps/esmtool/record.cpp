@@ -1,54 +1,126 @@
 #include "record.hpp"
+#include "labels.hpp"
 
 #include <iostream>
 #include <boost/format.hpp>
 
 void printAIPackage(ESM::AIPackage p)
 {
-  if (p.mType == ESM::AI_Wander)
-  {
-      std::cout << "  AIType Wander:" << std::endl;
-      std::cout << "    Distance: " << p.mWander.mDistance << std::endl;
-      std::cout << "    Duration: " << p.mWander.mDuration << std::endl;
-      std::cout << "    Time of Day: " << (int)p.mWander.mTimeOfDay << std::endl;
-      if (p.mWander.mUnk != 1)
-          std::cout <<  "    Unknown: " << (int)p.mWander.mUnk << std::endl;
+    std::cout << "  AI Type: " << aiTypeLabel(p.mType)
+              << " (" << boost::format("0x%08X") % p.mType << ")" << std::endl;
+    if (p.mType == ESM::AI_Wander)
+    {
+        std::cout << "    Distance: " << p.mWander.mDistance << std::endl;
+        std::cout << "    Duration: " << p.mWander.mDuration << std::endl;
+        std::cout << "    Time of Day: " << (int)p.mWander.mTimeOfDay << std::endl;
+        if (p.mWander.mUnk != 1)
+            std::cout <<  "    Unknown: " << (int)p.mWander.mUnk << std::endl;
+        
+        std::cout << "    Idle: ";
+        for (int i = 0; i != 8; i++)
+            std::cout << (int)p.mWander.mIdle[i] << " ";
+        std::cout << std::endl;
+    }
+    else if (p.mType == ESM::AI_Travel)
+    {
+        std::cout << "    Travel Coordinates: (" << p.mTravel.mX << ","
+                  << p.mTravel.mY << "," << p.mTravel.mZ << ")" << std::endl;
+        std::cout << "    Travel Unknown: " << (int)p.mTravel.mUnk << std::endl;
+    }
+    else if (p.mType == ESM::AI_Follow || p.mType == ESM::AI_Escort)
+    {       
+        std::cout << "    Follow Coordinates: (" << p.mTarget.mX << ","
+                  << p.mTarget.mY << "," << p.mTarget.mZ << ")" << std::endl;
+        std::cout << "    Duration: " << p.mTarget.mDuration << std::endl;
+        std::cout << "    Target ID: " << p.mTarget.mId.toString() << std::endl;
+        std::cout << "    Unknown: " << (int)p.mTarget.mUnk << std::endl;
+    }
+    else if (p.mType == ESM::AI_Activate)
+    {
+        std::cout << "    Name: " << p.mActivate.mName.toString() << std::endl;
+        std::cout << "    Activate Unknown: " << (int)p.mActivate.mUnk << std::endl;
+    }
+    else {
+        std::cout << "    BadPackage: " << boost::format("0x%08x") % p.mType << std::endl;
+    }
+    
+    if (p.mCellName != "")
+        std::cout << "    Cell Name: " << p.mCellName << std::endl;
+}
 
-      std::cout << "    Idle: ";
-      for (int i = 0; i != 8; i++)
-          std::cout << (int)p.mWander.mIdle[i] << " ";
-      std::cout << std::endl;
-  }
-  else if (p.mType == ESM::AI_Travel)
-  {
-      std::cout << "  AIType Travel:" << std::endl;
-      std::cout << "    Travel Coordinates: (" << p.mTravel.mX << ","
-           << p.mTravel.mY << "," << p.mTravel.mZ << ")" << std::endl;
-      std::cout << "    Travel Unknown: " << (int)p.mTravel.mUnk << std::endl;
-  }
-  else if (p.mType == ESM::AI_Follow || p.mType == ESM::AI_Escort)
-  {
-      if (p.mType == ESM::AI_Follow) std::cout << "  AIType Follow:" << std::endl;
-      else std::cout << "  AIType Escort:" << std::endl;
+std::string ruleString(ESM::DialInfo::SelectStruct ss)
+{
+    std::string rule = ss.mSelectRule;
+    
+    if (rule.length() < 5)
+        return "INVALID";
+    
+    char type = rule[1];
+    char indicator = rule[2];
+    
+    std::string type_str = "INVALID";
+    std::string func_str = str(boost::format("INVALID=%s") % rule.substr(1,3));
+    int func;
+    std::istringstream iss(rule.substr(2,2));
+    iss >> func;
 
-      std::cout << "    Follow Coordinates: (" << p.mTarget.mX << ","
-           << p.mTarget.mY << "," << p.mTarget.mZ << ")" << std::endl;
-      std::cout << "    Duration: " << p.mTarget.mDuration << std::endl;
-      std::cout << "    Target ID: " << p.mTarget.mId.toString() << std::endl;
-      std::cout << "    Unknown: " << (int)p.mTarget.mUnk << std::endl;
-  }
-  else if (p.mType == ESM::AI_Activate)
-  {
-      std::cout << "  AIType Activate:" << std::endl;
-      std::cout << "    Name: " << p.mActivate.mName.toString() << std::endl;
-      std::cout << "    Activate Unknown: " << (int)p.mActivate.mUnk << std::endl;
-  }
-  else {
-      std::cout << "    BadPackage: " << boost::format("0x%08x") % p.mType << std::endl;
-  }
+    switch(type)
+    {
+    case '1':
+        type_str = "Function";
+        func_str = ruleFunction(func);
+        break;
+    case '2':
+        if (indicator == 's') type_str = "Global short"; 
+        else if (indicator == 'l') type_str = "Global long"; 
+        else if (indicator == 'f') type_str = "Global float"; 
+        break;
+    case '3':
+        if (indicator == 's') type_str = "Local short"; 
+        else if (indicator == 'l') type_str = "Local long"; 
+        else if (indicator == 'f') type_str = "Local float"; 
+        break;
+    case '4': if (indicator == 'J') type_str = "Journal"; break;
+    case '5': if (indicator == 'I') type_str = "Item type"; break;
+    case '6': if (indicator == 'D') type_str = "NPC Dead"; break;
+    case '7': if (indicator == 'X') type_str = "Not ID"; break;
+    case '8': if (indicator == 'F') type_str = "Not Faction"; break;
+    case '9': if (indicator == 'C') type_str = "Not Class"; break;
+    case 'A': if (indicator == 'R') type_str = "Not Race"; break;
+    case 'B': if (indicator == 'L') type_str = "Not Cell"; break;
+    case 'C': if (indicator == 's') type_str = "Not Local"; break;
+    }
+    
+    // Append the variable name to the function string if any.
+    if (type != '1') func_str = rule.substr(5);
+    
+    // In the previous switch, we assumed that the second char was X
+    // for all types not qual to one.  If this wasn't true, go back to
+    // the error message.
+    if (type != '1' && rule[3] != 'X')
+        func_str = str(boost::format("INVALID=%s") % rule.substr(1,3));    
 
-  if (p.mCellName != "")
-      std::cout << "    Cell Name: " << p.mCellName << std::endl;
+    char oper = rule[4];
+    std::string oper_str = "??";
+    switch (oper)
+    {
+    case '0': oper_str = "=="; break;
+    case '1': oper_str = "!="; break;
+    case '2': oper_str = "< "; break;
+    case '3': oper_str = "<="; break;
+    case '4': oper_str = "> "; break;
+    case '5': oper_str = ">="; break;
+    }
+
+    std::string value_str = "??";
+    if (ss.mType == ESM::VT_Int)
+        value_str = str(boost::format("%d") % ss.mI);
+    else if (ss.mType == ESM::VT_Float)
+        value_str = str(boost::format("%f") % ss.mF);
+    
+    std::string result = str(boost::format("%-12s %-32s %2s %s") 
+                             % type_str % func_str % oper_str % value_str);
+    return result;
 }
 
 void printEffectList(ESM::EffectList effects)
@@ -57,12 +129,16 @@ void printEffectList(ESM::EffectList effects)
     std::vector<ESM::ENAMstruct>::iterator eit;
     for (eit = effects.mList.begin(); eit != effects.mList.end(); eit++)
     {
-        std::cout << "  Effect[" << i << "]: " << eit->mEffectID << std::endl;
+        std::cout << "  Effect[" << i << "]: " << magicEffectLabel(eit->mEffectID)
+                  << " (" << eit->mEffectID << ")" << std::endl;
         if (eit->mSkill != -1)
-            std::cout << "    Skill: " << (int)eit->mSkill << std::endl;
+            std::cout << "    Skill: " << skillLabel(eit->mSkill)
+                      << " (" << (int)eit->mSkill << ")" << std::endl;
         if (eit->mAttribute != -1)
-            std::cout << "    Attribute: " << (int)eit->mAttribute << std::endl; 
-        std::cout << "    Range: " << eit->mRange << std::endl;
+            std::cout << "    Attribute: " << attributeLabel(eit->mAttribute)
+                      << " (" << (int)eit->mAttribute << ")" << std::endl; 
+        std::cout << "    Range: " << rangeTypeLabel(eit->mRange)
+                  << " (" << eit->mRange << ")" << std::endl;
         // Area is always zero if range type is "Self"
         if (eit->mRange != ESM::RT_Self)
             std::cout << "    Area: " << eit->mArea << std::endl;
@@ -331,7 +407,8 @@ void Record<ESM::Armor>::print()
         std::cout << "  Script: " << mData.mScript << std::endl;
     if (mData.mEnchant != "")
         std::cout << "  Enchantment: " << mData.mEnchant << std::endl;
-    std::cout << "  Type: " << mData.mData.mType << std::endl;
+    std::cout << "  Type: " << armorTypeLabel(mData.mData.mType)
+              << " (" << mData.mData.mType << ")" << std::endl;
     std::cout << "  Weight: " << mData.mData.mWeight << std::endl;
     std::cout << "  Value: " << mData.mData.mValue << std::endl;
     std::cout << "  Health: " << mData.mData.mHealth << std::endl;
@@ -340,7 +417,8 @@ void Record<ESM::Armor>::print()
     std::vector<ESM::PartReference>::iterator pit;
     for (pit = mData.mParts.mParts.begin(); pit != mData.mParts.mParts.end(); pit++)
     {
-        std::cout << "  Body Part: " << (int)(pit->mPart) << std::endl;
+        std::cout << "  Body Part: " << bodyPartLabel(pit->mPart)
+                  << " (" << (int)(pit->mPart) << ")" << std::endl;
         std::cout << "    Male Name: " << pit->mMale << std::endl;
         if (pit->mFemale != "")
             std::cout << "    Female Name: " << pit->mFemale << std::endl;
@@ -354,7 +432,8 @@ void Record<ESM::Apparatus>::print()
     std::cout << "  Model: " << mData.mModel << std::endl;
     std::cout << "  Icon: " << mData.mIcon << std::endl;
     std::cout << "  Script: " << mData.mScript << std::endl;
-    std::cout << "  Type: " << mData.mData.mType << std::endl;
+    std::cout << "  Type: " << apparatusTypeLabel(mData.mData.mType)
+              << " (" << (int)mData.mData.mType << ")" << std::endl;
     std::cout << "  Weight: " << mData.mData.mWeight << std::endl;
     std::cout << "  Value: " << mData.mData.mValue << std::endl;
     std::cout << "  Quality: " << mData.mData.mQuality << std::endl;
@@ -365,9 +444,11 @@ void Record<ESM::BodyPart>::print()
 {
     std::cout << "  Name: " << mData.mName << std::endl;
     std::cout << "  Model: " << mData.mModel << std::endl;
-    std::cout << "  Type: " << (int)mData.mData.mType << std::endl;
-    std::cout << "  Flags: " << (int)mData.mData.mFlags << std::endl;
-    std::cout << "  Part: " << (int)mData.mData.mPart << std::endl;
+    std::cout << "  Type: " << meshTypeLabel(mData.mData.mType)
+              << " (" << (int)mData.mData.mType << ")" << std::endl;
+    std::cout << "  Flags: " << bodyPartFlags(mData.mData.mFlags) << std::endl;
+    std::cout << "  Part: " << meshPartLabel(mData.mData.mPart)
+              << " (" << (int)mData.mData.mPart << ")" << std::endl;
     std::cout << "  Vampire: " << (int)mData.mData.mVampire << std::endl;
 }
 
@@ -413,7 +494,7 @@ void Record<ESM::Cell>::print()
         std::cout << "  Name: " << mData.mName << std::endl;
     if (mData.mRegion != "")
         std::cout << "  Region: " << mData.mRegion << std::endl;
-    std::cout << "  Flags: " << (int)mData.mData.mFlags << std::endl;
+    std::cout << "  Flags: " << cellFlags(mData.mData.mFlags) << std::endl;
     
     std::cout << "  Coordinates: " << " (" << mData.getGridX() << ","
               << mData.getGridY() << ")" << std::endl;
@@ -441,13 +522,18 @@ void Record<ESM::Class>::print()
     std::cout << "  Description: " << mData.mDescription << std::endl;
     std::cout << "  Playable: " << mData.mData.mIsPlayable << std::endl;
     std::cout << "  AutoCalc: " << mData.mData.mCalc << std::endl;
-    std::cout << "  Attribute1: " << mData.mData.mAttribute[0] << std::endl;
-    std::cout << "  Attribute2: " << mData.mData.mAttribute[1] << std::endl;
-    std::cout << "  Specialization: " << mData.mData.mSpecialization << std::endl;
+    std::cout << "  Attribute1: " << attributeLabel(mData.mData.mAttribute[0])
+              << " (" << mData.mData.mAttribute[0] << ")" << std::endl;
+    std::cout << "  Attribute2: " << attributeLabel(mData.mData.mAttribute[1])
+              << " (" << mData.mData.mAttribute[1] << ")" << std::endl;
+    std::cout << "  Specialization: " << specializationLabel(mData.mData.mSpecialization)
+              << " (" << mData.mData.mSpecialization << ")" << std::endl;
     for (int i = 0; i != 5; i++)
-        std::cout << "  Major Skill: " << mData.mData.mSkills[i][0] << std::endl;
+        std::cout << "  Major Skill: " << skillLabel(mData.mData.mSkills[i][0])
+                  << " (" << mData.mData.mSkills[i][0] << ")" << std::endl; 
     for (int i = 0; i != 5; i++)
-        std::cout << "  Minor Skill: " << mData.mData.mSkills[i][1] << std::endl;
+        std::cout << "  Minor Skill: " << skillLabel(mData.mData.mSkills[i][1])
+                  << " (" << mData.mData.mSkills[i][1] << ")" << std::endl;
 }
 
 template<>
@@ -460,10 +546,20 @@ void Record<ESM::Clothing>::print()
         std::cout << "  Script: " << mData.mScript << std::endl;
     if (mData.mEnchant != "")
         std::cout << "  Enchantment: " << mData.mEnchant << std::endl;
-    std::cout << "  Type: " << mData.mData.mType << std::endl;
+    std::cout << "  Type: " << clothingTypeLabel(mData.mData.mType)
+              << " (" << mData.mData.mType << ")" << std::endl;
     std::cout << "  Weight: " << mData.mData.mWeight << std::endl;
     std::cout << "  Value: " << mData.mData.mValue << std::endl;
-    // mEnchant also in CTDTstruct?
+    std::cout << "  Enchantment Points: " << mData.mData.mEnchant << std::endl;
+    std::vector<ESM::PartReference>::iterator pit;
+    for (pit = mData.mParts.mParts.begin(); pit != mData.mParts.mParts.end(); pit++)
+    {
+        std::cout << "  Body Part: " << bodyPartLabel(pit->mPart)
+                  << " (" << (int)(pit->mPart) << ")" << std::endl;
+        std::cout << "    Male Name: " << pit->mMale << std::endl;
+        if (pit->mFemale != "")
+            std::cout << "    Female Name: " << pit->mFemale << std::endl;
+    }
 }
 
 template<>
@@ -473,7 +569,7 @@ void Record<ESM::Container>::print()
     std::cout << "  Model: " << mData.mModel << std::endl;
     if (mData.mScript != "")
         std::cout << "  Script: " << mData.mScript << std::endl;
-    std::cout << "  Flags: " << mData.mFlags << std::endl;
+    std::cout << "  Flags: " << containerFlags(mData.mFlags) << std::endl;
     std::cout << "  Weight: " << mData.mWeight << std::endl;
     std::vector<ESM::ContItem>::iterator cit;
     for (cit = mData.mInventory.mList.begin(); cit != mData.mInventory.mList.end(); cit++)
@@ -487,11 +583,12 @@ void Record<ESM::Creature>::print()
     std::cout << "  Name: " << mData.mName << std::endl;
     std::cout << "  Model: " << mData.mModel << std::endl;
     std::cout << "  Script: " << mData.mScript << std::endl;
-    std::cout << "  Flags: " << mData.mFlags << std::endl;
+    std::cout << "  Flags: " << creatureFlags(mData.mFlags) << std::endl;
     std::cout << "  Original: " << mData.mOriginal << std::endl;
     std::cout << "  Scale: " << mData.mScale << std::endl;
 
-    std::cout << "  Type: " << mData.mData.mType << std::endl;
+    std::cout << "  Type: " << creatureTypeLabel(mData.mData.mType)
+              << " (" << mData.mData.mType << ")" << std::endl;
     std::cout << "  Level: " << mData.mData.mLevel << std::endl;
 
     std::cout << "  Attributes:" << std::endl;
@@ -547,7 +644,8 @@ void Record<ESM::Creature>::print()
 template<>
 void Record<ESM::Dialogue>::print()
 {
-    std::cout << "  Type: " << (int)mData.mType << std::endl;
+    std::cout << "  Type: " << dialogTypeLabel(mData.mType)
+              << " (" << (int)mData.mType << ")" << std::endl;
     // Sadly, there are no DialInfos, because the loader dumps as it
     // loads, rather than loading and then dumping. :-( Anyone mind if
     // I change this?
@@ -569,7 +667,8 @@ void Record<ESM::Door>::print()
 template<>
 void Record<ESM::Enchantment>::print()
 {
-    std::cout << "  Type: " << mData.mData.mType << std::endl;
+    std::cout << "  Type: " << enchantTypeLabel(mData.mData.mType)
+              << " (" << mData.mData.mType << ")" << std::endl;
     std::cout << "  Cost: " << mData.mData.mCost << std::endl;
     std::cout << "  Charge: " << mData.mData.mCharge << std::endl;
     std::cout << "  AutoCalc: " << mData.mData.mAutocalc << std::endl;
@@ -583,11 +682,14 @@ void Record<ESM::Faction>::print()
     std::cout << "  Hidden: " << mData.mData.mIsHidden << std::endl;
     if (mData.mData.mUnknown != -1)
         std::cout << "  Unknown: " << mData.mData.mUnknown << std::endl;
-    std::cout << "  Attribute1: " << mData.mData.mAttribute1 << std::endl;
-    std::cout << "  Attribute2: " << mData.mData.mAttribute2 << std::endl;
+    std::cout << "  Attribute1: " << attributeLabel(mData.mData.mAttribute1)
+              << " (" << mData.mData.mAttribute1 << ")" << std::endl;
+    std::cout << "  Attribute2: " << attributeLabel(mData.mData.mAttribute2)
+              << " (" << mData.mData.mAttribute2 << ")" << std::endl;
     for (int i = 0; i != 6; i++)
         if (mData.mData.mSkillID[i] != -1)
-            std::cout << "  Skill: " << mData.mData.mSkillID[i] << std::endl;
+            std::cout << "  Skill: " << skillLabel(mData.mData.mSkillID[i])
+                      << " (" << mData.mData.mSkillID[i] << ")" << std::endl;
     for (int i = 0; i != 10; i++)
         if (mData.mRanks[i] != "")
         {
@@ -683,13 +785,14 @@ void Record<ESM::DialInfo>::print()
         // std::cout << "-------------------------------------------" << std::endl;
     }
 
-    std::cout << "  Quest Status: " << mData.mQuestStatus << std::endl;
+    std::cout << "  Quest Status: " << questStatusLabel(mData.mQuestStatus)
+              << " (" << mData.mQuestStatus << ")" << std::endl;
     std::cout << "  Unknown1: " << mData.mData.mUnknown1 << std::endl;
     std::cout << "  Unknown2: " << (int)mData.mData.mUnknown2 << std::endl;
 
     std::vector<ESM::DialInfo::SelectStruct>::iterator sit;
     for (sit = mData.mSelects.begin(); sit != mData.mSelects.end(); sit++)
-        std::cout << "  Select Rule: " << sit->mType << " " << sit->mSelectRule << std::endl;
+        std::cout << "  Select Rule: " << ruleString(*sit) << std::endl;
 }
 
 template<>
@@ -706,9 +809,12 @@ void Record<ESM::Ingredient>::print()
     {
         // A value of -1 means no effect
         if (mData.mData.mEffectID[i] == -1) continue;
-        std::cout << "  Effect: " << mData.mData.mEffectID[i] << std::endl;
-        std::cout << "  Skill: " << mData.mData.mSkills[i] << std::endl;
-        std::cout << "  Attribute: " << mData.mData.mAttributes[i] << std::endl;
+        std::cout << "  Effect: " << magicEffectLabel(mData.mData.mEffectID[i])
+                  << " (" << mData.mData.mEffectID[i] << ")" << std::endl;
+        std::cout << "  Skill: " << skillLabel(mData.mData.mSkills[i])
+                  << " (" << mData.mData.mSkills[i] << ")" << std::endl;
+        std::cout << "  Attribute: " << attributeLabel(mData.mData.mAttributes[i])
+                  << " (" << mData.mData.mAttributes[i] << ")" << std::endl;
     }
 }
 
@@ -716,7 +822,7 @@ template<>
 void Record<ESM::Land>::print()
 {
     std::cout << "  Coordinates: (" << mData.mX << "," << mData.mY << ")" << std::endl;
-    std::cout << "  Flags: " << mData.mFlags << std::endl;
+    std::cout << "  Flags: " << landFlags(mData.mFlags) << std::endl;
     std::cout << "  HasData: " << mData.mHasData << std::endl;
     std::cout << "  DataTypes: " << mData.mDataTypes << std::endl;
 
@@ -739,7 +845,7 @@ template<>
 void Record<ESM::CreatureLevList>::print()
 {
     std::cout << "  Chance for None: " << (int)mData.mChanceNone << std::endl;
-    std::cout << "  Flags: " << mData.mFlags << std::endl;
+    std::cout << "  Flags: " << leveledListFlags(mData.mFlags) << std::endl;
     std::cout << "  Number of items: " << mData.mList.size() << std::endl;
     std::vector<ESM::LeveledListBase::LevelItem>::iterator iit;
     for (iit = mData.mList.begin(); iit != mData.mList.end(); iit++)
@@ -751,7 +857,7 @@ template<>
 void Record<ESM::ItemLevList>::print()
 {
     std::cout << "  Chance for None: " << (int)mData.mChanceNone << std::endl;
-    std::cout << "  Flags: " << mData.mFlags << std::endl;
+    std::cout << "  Flags: " << leveledListFlags(mData.mFlags) << std::endl;
     std::cout << "  Number of items: " << mData.mList.size() << std::endl;
     std::vector<ESM::LeveledListBase::LevelItem>::iterator iit;
     for (iit = mData.mList.begin(); iit != mData.mList.end(); iit++)
@@ -770,7 +876,7 @@ void Record<ESM::Light>::print()
         std::cout << "  Icon: " << mData.mIcon << std::endl;
     if (mData.mScript != "")
         std::cout << "  Script: " << mData.mScript << std::endl;
-    std::cout << "  Flags: " << mData.mData.mFlags << std::endl;
+    std::cout << "  Flags: " << lightFlags(mData.mData.mFlags) << std::endl;
     std::cout << "  Weight: " << mData.mData.mWeight << std::endl;
     std::cout << "  Value: " << mData.mData.mValue << std::endl;
     std::cout << "  Sound: " << mData.mSound << std::endl;
@@ -802,6 +908,7 @@ void Record<ESM::Probe>::print()
     std::cout << "  Icon: " << mData.mIcon << std::endl;
     if (mData.mScript != "")
         std::cout << "  Script: " << mData.mScript << std::endl;
+    // BUG? No Type Label?
     std::cout << "  Type: " << mData.mType << std::endl;
     std::cout << "  Weight: " << mData.mData.mWeight << std::endl;
     std::cout << "  Value: " << mData.mData.mValue << std::endl;
@@ -835,10 +942,11 @@ void Record<ESM::LandTexture>::print()
 template<>
 void Record<ESM::MagicEffect>::print()
 {
-    std::cout << "  Index: " << mData.mIndex << std::endl;
+    std::cout << "  Index: " << magicEffectLabel(mData.mIndex)
+              << " (" << mData.mIndex << ")" << std::endl;
     std::cout << "  Description: " << mData.mDescription << std::endl;
     std::cout << "  Icon: " << mData.mIcon << std::endl;
-    std::cout << "  Flags: " << mData.mData.mFlags << std::endl;
+    std::cout << "  Flags: " << magicEffectFlags(mData.mData.mFlags) << std::endl;
     std::cout << "  Particle Texture: " << mData.mParticle << std::endl;
     if (mData.mCasting != "")
         std::cout << "  Casting Static: " << mData.mCasting << std::endl;
@@ -856,7 +964,8 @@ void Record<ESM::MagicEffect>::print()
         std::cout << "  Area Static: " << mData.mArea << std::endl;
     if (mData.mAreaSound != "")
         std::cout << "  Area Sound: " << mData.mAreaSound << std::endl;
-    std::cout << "  School: " << mData.mData.mSchool << std::endl;
+    std::cout << "  School: " << schoolLabel(mData.mData.mSchool)
+              << " (" << mData.mData.mSchool << ")" << std::endl;
     std::cout << "  Base Cost: " << mData.mData.mBaseCost << std::endl;
     std::cout << "  Speed: " << mData.mData.mSpeed << std::endl;
     std::cout << "  Size: " << mData.mData.mSize << std::endl;
@@ -893,7 +1002,7 @@ void Record<ESM::NPC>::print()
         std::cout << "  Script: " << mData.mScript << std::endl;
     if (mData.mFaction != "")
         std::cout << "  Faction: " << mData.mFaction << std::endl;
-    std::cout << "  Flags: " << mData.mFlags << std::endl;
+    std::cout << "  Flags: " << npcFlags(mData.mFlags) << std::endl;
 
     // Seriously?
     if (mData.mNpdt52.mGold == -10)
@@ -929,7 +1038,7 @@ void Record<ESM::NPC>::print()
 
         std::cout << "  Skills:" << std::endl;
         for (int i = 0; i != 27; i++)
-            std::cout << "    " << i << " = " 
+            std::cout << "    " << skillLabel(i) << ": " 
                       << (int)((unsigned char)mData.mNpdt52.mSkills[i]) << std::endl;   
         
         std::cout << "  Health: " << mData.mNpdt52.mHealth << std::endl;
@@ -1018,7 +1127,7 @@ void Record<ESM::Race>::print()
 {
     std::cout << "  Name: " << mData.mName << std::endl;
     std::cout << "  Description: " << mData.mDescription << std::endl;
-    std::cout << "  Flags: " << mData.mData.mFlags << std::endl;
+    std::cout << "  Flags: " << raceFlags(mData.mData.mFlags) << std::endl;
 
     std::cout << "  Male:" << std::endl;
     std::cout << "    Strength: "
@@ -1067,8 +1176,10 @@ void Record<ESM::Race>::print()
     for (int i = 0; i != 7; i++)
         // Not all races have 7 skills.
         if (mData.mData.mBonus[i].mSkill != -1)
-            std::cout << "  Skill: " << mData.mData.mBonus[i].mSkill
-                      << " = " << mData.mData.mBonus[i].mBonus << std::endl;
+            std::cout << "  Skill: "
+                      << skillLabel(mData.mData.mBonus[i].mSkill)
+                      << " (" << mData.mData.mBonus[i].mSkill << ") = "
+                      << mData.mData.mBonus[i].mBonus << std::endl;
 
     std::vector<std::string>::iterator sit;
     for (sit = mData.mPowers.mList.begin(); sit != mData.mPowers.mList.end(); sit++)
@@ -1130,18 +1241,15 @@ void Record<ESM::Script>::print()
 template<>
 void Record<ESM::Skill>::print()
 {
-    std::cout << "  ID: " << mData.mIndex << std::endl;
-
-    const char *spec = 0;
-    int specId = mData.mData.mSpecialization;
-    if (specId == 0) {
-        spec = "Combat";
-    } else if (specId == 1) {
-        spec = "Magic";
-    } else {
-        spec = "Stealth";
-    }
-    std::cout << "  Type: " << spec << std::endl;
+    std::cout << "  ID: " << skillLabel(mData.mIndex)
+              << " (" << mData.mIndex << ")" << std::endl;
+    std::cout << "  Description: " << mData.mDescription << std::endl;
+    std::cout << "  Governing Attribute: " << attributeLabel(mData.mData.mAttribute)
+              << " (" << mData.mData.mAttribute << ")" << std::endl;
+    std::cout << "  Specialization: " << specializationLabel(mData.mData.mSpecialization)
+              << " (" << mData.mData.mSpecialization << ")" << std::endl;
+    for (int i = 0; i != 4; i++)
+        std::cout << "  UseValue[" << i << "]:" << mData.mData.mUseValue[i] << std::endl;
 }
 
 template<>
@@ -1149,7 +1257,8 @@ void Record<ESM::SoundGenerator>::print()
 {
     std::cout << "  Creature: " << mData.mCreature << std::endl;
     std::cout << "  Sound: " << mData.mSound << std::endl;
-    std::cout << "  Type: " << mData.mType << std::endl;
+    std::cout << "  Type: " << soundTypeLabel(mData.mType)
+              << " (" << mData.mType << ")" << std::endl;
 }
 
 template<>
@@ -1166,8 +1275,9 @@ template<>
 void Record<ESM::Spell>::print()
 {
     std::cout << "  Name: " << mData.mName << std::endl;
-    std::cout << "  Type: " << mData.mData.mType << std::endl;
-    std::cout << "  Flags: " << mData.mData.mFlags << std::endl;
+    std::cout << "  Type: " << spellTypeLabel(mData.mData.mType)
+              << " (" << mData.mData.mType << ")" << std::endl;
+    std::cout << "  Flags: " << spellFlags(mData.mData.mFlags) << std::endl;
     std::cout << "  Cost: " << mData.mData.mCost << std::endl;
     printEffectList(mData.mEffects);
 }
@@ -1199,8 +1309,9 @@ void Record<ESM::Weapon>::print()
         std::cout << "  Script: " << mData.mScript << std::endl;
     if (mData.mEnchant != "")
         std::cout << "  Enchantment: " << mData.mEnchant << std::endl;    
-    std::cout << "  Type: " << mData.mData.mType << std::endl;
-    std::cout << "  Flags: " << mData.mData.mFlags << std::endl;
+    std::cout << "  Type: " << weaponTypeLabel(mData.mData.mType)
+              << " (" << mData.mData.mType << ")" << std::endl;
+    std::cout << "  Flags: " << weaponFlags(mData.mData.mFlags) << std::endl;
     std::cout << "  Weight: " << mData.mData.mWeight << std::endl;
     std::cout << "  Value: " << mData.mData.mValue << std::endl;
     std::cout << "  Health: " << mData.mData.mHealth << std::endl;

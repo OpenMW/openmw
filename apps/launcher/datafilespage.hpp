@@ -6,7 +6,6 @@
 
 #include <components/files/collections.hpp>
 
-#include "combobox.hpp"
 
 class QTableView;
 class QSortFilterProxyModel;
