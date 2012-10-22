@@ -19,6 +19,7 @@
 #include "tradewindow.hpp"
 #include "spellbuyingwindow.hpp"
 #include "inventorywindow.hpp"
+#include "travelwindow.hpp"
 
 using namespace MWGui;
 using namespace Widgets;
@@ -26,6 +27,8 @@ using namespace Widgets;
 /**
 *Copied from the internet.
 */
+
+namespace {
 
 std::string lower_string(const std::string& str)
 {
@@ -42,12 +45,13 @@ std::string::size_type find_str_ci(const std::string& str, const std::string& su
     return lower_string(str).find(lower_string(substr),pos);
 }
 
+}
+
 
 DialogueWindow::DialogueWindow(MWBase::WindowManager& parWindowManager)
     : WindowBase("openmw_dialogue_window.layout", parWindowManager)
     , mEnabled(true)
-    , mShowTrade(false)
-    , mShowSpells(false)
+    , mServices(0)
 {
     // Centre dialog
     center();
@@ -134,7 +138,26 @@ void DialogueWindow::onSelectTopic(std::string topic)
         mWindowManager.pushGuiMode(GM_SpellBuying);
         mWindowManager.getSpellBuyingWindow()->startSpellBuying(mPtr);
     }
-
+    else if (topic == MWBase::Environment::get().getWorld()->getStore().gameSettings.find("sTravel")->getString())
+    {
+        mWindowManager.pushGuiMode(GM_Travel);
+        mWindowManager.getTravelWindow()->startTravel(mPtr);
+    }
+    else if (topic == MWBase::Environment::get().getWorld()->getStore().gameSettings.find("sSpellMakingMenuTitle")->getString())
+    {
+        mWindowManager.pushGuiMode(GM_SpellCreation);
+        mWindowManager.startSpellMaking (mPtr);
+    }
+    else if (topic == MWBase::Environment::get().getWorld()->getStore().gameSettings.find("sEnchanting")->getString())
+    {
+        mWindowManager.pushGuiMode(GM_Enchanting);
+        mWindowManager.startEnchanting (mPtr);
+    }
+    else if (topic == MWBase::Environment::get().getWorld()->getStore().gameSettings.find("sServiceTrainingTitle")->getString())
+    {
+        mWindowManager.pushGuiMode(GM_Training);
+        mWindowManager.startTraining (mPtr);
+    }
     else
         MWBase::Environment::get().getDialogueManager()->keywordSelected(lower_string(topic));
 }
@@ -155,13 +178,25 @@ void DialogueWindow::setKeywords(std::list<std::string> keyWords)
 {
     mTopicsList->clear();
 
-    bool anyService = mShowTrade||mShowSpells;
+    bool anyService = mServices > 0;
 
-    if (mShowTrade)
+    if (mServices & Service_Trade)
         mTopicsList->addItem(MWBase::Environment::get().getWorld()->getStore().gameSettings.find("sBarter")->getString());
 
-    if (mShowSpells)
+    if (mServices & Service_BuySpells)
         mTopicsList->addItem(MWBase::Environment::get().getWorld()->getStore().gameSettings.find("sSpells")->getString());
+
+    if (mServices & Service_Travel)
+        mTopicsList->addItem(MWBase::Environment::get().getWorld()->getStore().gameSettings.find("sTravel")->getString());
+
+    if (mServices & Service_CreateSpells)
+        mTopicsList->addItem(MWBase::Environment::get().getWorld()->getStore().gameSettings.find("sSpellmakingMenuTitle")->getString());
+
+    if (mServices & Service_Enchant)
+        mTopicsList->addItem(MWBase::Environment::get().getWorld()->getStore().gameSettings.find("sEnchanting")->getString());
+
+    if (mServices & Service_Training)
+        mTopicsList->addItem(MWBase::Environment::get().getWorld()->getStore().gameSettings.find("sServiceTrainingTitle")->getString());
 
     if (anyService)
         mTopicsList->addSeparator();

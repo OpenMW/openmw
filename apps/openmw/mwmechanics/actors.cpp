@@ -118,18 +118,14 @@ namespace MWMechanics
                     + fRestMagicMult * stats.getAttribute(ESM::Attribute::Intelligence).getModified ());
             }
         }
-
-
-
     }
-
 
     void Actors::calculateCreatureStatModifiers (const MWWorld::Ptr& ptr)
     {
         CreatureStats& creatureStats = MWWorld::Class::get (ptr).getCreatureStats (ptr);
 
         // attributes
-        for (int i=0; i<5; ++i)
+        for (int i=0; i<8; ++i)
         {
             int modifier =
                 creatureStats.getMagicEffects().get (EffectKey (79, i)).mMagnitude;

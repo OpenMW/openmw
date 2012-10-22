@@ -18,12 +18,20 @@ namespace MWGui
             MWList();
 
             typedef MyGUI::delegates::CMultiDelegate1<std::string> EventHandle_String;
+            typedef MyGUI::delegates::CMultiDelegate1<MyGUI::Widget*> EventHandle_Widget;
 
             /**
              * Event: Item selected with the mouse.
              * signature: void method(std::string itemName)
              */
             EventHandle_String eventItemSelected;
+
+            /**
+             * Event: Item selected with the mouse.
+             * signature: void method(MyGUI::Widget* sender)
+             */
+            EventHandle_Widget eventWidgetSelected;
+
 
             /**
              * Call after the size of the list changed, or items were inserted/removed
@@ -37,6 +45,9 @@ namespace MWGui
             unsigned int getItemCount();
             std::string getItemNameAt(unsigned int at); ///< \attention if there are separators, this method will return "" at the place where the separator is
             void clear();
+
+            MyGUI::Widget* getItemWidget(const std::string& name);
+            ///< get widget for an item name, useful to set up tooltip
 
         protected:
             void initialiseOverride();

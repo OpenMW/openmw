@@ -1,6 +1,10 @@
 #ifndef MWGUI_ALCHEMY_H
 #define MWGUI_ALCHEMY_H
 
+#include <vector>
+
+#include "../mwmechanics/alchemy.hpp"
+
 #include "window_base.hpp"
 #include "container.hpp"
 #include "widgets.hpp"
@@ -18,21 +22,9 @@ namespace MWGui
         MyGUI::Button* mCreateButton;
         MyGUI::Button* mCancelButton;
 
-        MyGUI::ImageBox* mIngredient1;
-        MyGUI::ImageBox* mIngredient2;
-        MyGUI::ImageBox* mIngredient3;
-        MyGUI::ImageBox* mIngredient4;
-
-        MyGUI::ImageBox* mApparatus1;
-        MyGUI::ImageBox* mApparatus2;
-        MyGUI::ImageBox* mApparatus3;
-        MyGUI::ImageBox* mApparatus4;
-
         MyGUI::Widget* mEffectsBox;
 
         MyGUI::EditBox* mNameEdit;
-
-        Widgets::SpellEffectList mEffects; // effects of created potion
 
         void onCancelButtonClicked(MyGUI::Widget* _sender);
         void onCreateButtonClicked(MyGUI::Widget* _sender);
@@ -46,6 +38,13 @@ namespace MWGui
         virtual void onReferenceUnavailable() { ; }
 
         void update();
+        
+    private:
+
+        MWMechanics::Alchemy mAlchemy;
+
+        std::vector<MyGUI::ImageBox *> mApparatus;
+        std::vector<MyGUI::ImageBox *> mIngredients;
     };
 }
 

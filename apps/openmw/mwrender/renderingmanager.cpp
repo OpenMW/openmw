@@ -180,6 +180,8 @@ RenderingManager::~RenderingManager ()
     delete mOcclusionQuery;
     delete mCompositors;
     delete mWater;
+
+    delete mFactory;
 }
 
 MWRender::SkyManager* RenderingManager::getSkyManager()
