@@ -157,10 +157,15 @@
         shUniform(float4, shadowFar_fadeStart) @shSharedParameter(shadowFar_fadeStart)
 #endif
 
-#if UNDERWATER
+#if (UNDERWATER) || (FOG)
         shUniform(float4x4, worldMatrix) @shAutoConstant(worldMatrix, world_matrix)
-        shUniform(float, waterLevel) @shSharedParameter(waterLevel)
         shUniform(float4, cameraPos) @shAutoConstant(cameraPos, camera_position) 
+#endif
+
+#if UNDERWATER
+
+        shUniform(float, waterLevel) @shSharedParameter(waterLevel)
+
         shUniform(float4, lightDirectionWS0) @shAutoConstant(lightDirectionWS0, light_position, 0)
         
         shSampler2D(causticMap)
@@ -211,8 +216,12 @@
 
 
         float3 caustics = float3(1,1,1);
-#if UNDERWATER
+
+#if (UNDERWATER) || (FOG)
     float3 worldPos = shMatrixMult(worldMatrix, float4(objSpacePositionPassthrough,1)).xyz;
+#endif
+
+#if UNDERWATER
     float3 waterEyePos = float3(1,1,1);
     // NOTE: this calculation would be wrong for non-uniform scaling
     float4 worldNormal = shMatrixMult(worldMatrix, float4(normal.xyz, 0));
