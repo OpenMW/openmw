@@ -90,6 +90,7 @@ DataFilesPage::DataFilesPage(Files::ConfigurationManager &cfg, QWidget *parent)
 
     // Set the row height to the size of the checkboxes
     mMastersTable->verticalHeader()->setDefaultSectionSize(height);
+    mMastersTable->verticalHeader()->setResizeMode(QHeaderView::Fixed);
     mMastersTable->verticalHeader()->hide();
     mMastersTable->setColumnHidden(1, true);
     mMastersTable->setColumnHidden(2, true);
@@ -110,7 +111,7 @@ DataFilesPage::DataFilesPage(Files::ConfigurationManager &cfg, QWidget *parent)
     mPluginsTable->setAlternatingRowColors(true);
     mPluginsTable->setVerticalScrollMode(QAbstractItemView::ScrollPerItem);
     mPluginsTable->horizontalHeader()->setStretchLastSection(true);
-
+    mPluginsTable->horizontalHeader()->hide();
     mPluginsTable->verticalHeader()->setDefaultSectionSize(height);
     mPluginsTable->verticalHeader()->setResizeMode(QHeaderView::Fixed);
     mPluginsTable->setColumnHidden(1, true);

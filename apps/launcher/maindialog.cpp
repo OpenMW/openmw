@@ -244,10 +244,10 @@ void MainDialog::play()
     const std::string settingspath = (mCfgMgr.getUserPath() / "settings.cfg").string();
     mSettings.saveUser(settingspath);
 
-#ifdef Q_WS_WIN
+#ifdef Q_OS_WIN
     QString game = "./openmw.exe";
     QFile file(game);
-#elif defined(Q_WS_MAC)
+#elif defined(Q_OS_MAC)
     QDir dir(QCoreApplication::applicationDirPath());
     QString game = dir.absoluteFilePath("openmw");
     QFile file(game);
