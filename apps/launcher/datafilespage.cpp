@@ -6,10 +6,11 @@
 #include "model/datafilesmodel.hpp"
 #include "model/esm/esmfile.hpp"
 
-#include "utils/combobox.hpp"
+#include "utils/profilescombobox.hpp"
 #include "utils/filedialog.hpp"
 #include "utils/lineedit.hpp"
 #include "utils/naturalsort.hpp"
+#include "utils/textinputdialog.hpp"
 
 #include "datafilespage.hpp"
 
@@ -139,9 +140,11 @@ DataFilesPage::DataFilesPage(Files::ConfigurationManager &cfg, QWidget *parent)
     // Bottom part with profile options
     QLabel *profileLabel = new QLabel(tr("Current Profile: "), this);
 
-    mProfilesComboBox = new ComboBox(this);
+    mProfilesComboBox = new ProfilesComboBox(this);
     mProfilesComboBox->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum));
-    mProfilesComboBox->setInsertPolicy(QComboBox::InsertAtBottom);
+    mProfilesComboBox->setInsertPolicy(QComboBox::NoInsert);
+    mProfilesComboBox->setDuplicatesEnabled(false);
+    mProfilesComboBox->setEditEnabled(false);
 
     mProfileToolBar = new QToolBar(this);
     mProfileToolBar->setMovable(false);
@@ -156,16 +159,22 @@ DataFilesPage::DataFilesPage(Files::ConfigurationManager &cfg, QWidget *parent)
     pageLayout->addWidget(splitter);
     pageLayout->addWidget(mProfileToolBar);
 
+    // Create a dialog for the new profile name input
+    mNewProfileDialog = new TextInputDialog(tr("New Profile"), tr("Profile name:"), this);
+
+    connect(mNewProfileDialog->lineEdit(), SIGNAL(textChanged(QString)), this, SLOT(updateOkButton(QString)));
+
     connect(mPluginsTable, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(setCheckState(QModelIndex)));
     connect(mMastersTable, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(setCheckState(QModelIndex)));
 
     connect(mMastersModel, SIGNAL(checkedItemsChanged(QStringList,QStringList)), mPluginsModel, SLOT(slotcheckedItemsChanged(QStringList,QStringList)));
 
-    connect(filterLineEdit, SIGNAL(textChanged(QString)), this, SLOT(filterChanged(const QString)));
+    connect(filterLineEdit, SIGNAL(textChanged(QString)), this, SLOT(filterChanged(QString)));
 
-    connect(mPluginsTable, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(showContextMenu(const QPoint&)));
+    connect(mPluginsTable, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(showContextMenu(QPoint)));
 
-    connect(mProfilesComboBox, SIGNAL(textChanged(const QString&, const QString&)), this, SLOT(profileChanged(const QString&, const QString&)));
+    connect(mProfilesComboBox, SIGNAL(profileRenamed(QString,QString)), this, SLOT(profileRenamed(QString,QString)));
+    connect(mProfilesComboBox, SIGNAL(profileChanged(QString,QString)), this, SLOT(profileChanged(QString,QString)));
 
     createActions();
     setupConfig();
@@ -230,12 +239,21 @@ void DataFilesPage::setupConfig()
     mLauncherConfig->beginGroup("Profiles");
     QStringList profiles = mLauncherConfig->childGroups();
 
-    if (profiles.isEmpty()) {
-        // Add a default profile
-        profiles.append("Default");
+    // Add the profiles to the combobox
+    foreach (const QString &profile, profiles) {
+
+        if (profile.contains(QRegExp("[^a-zA-Z0-9_]")))
+            continue; // Profile name contains garbage
+
+
+         qDebug() << "adding " << profile;
+         mProfilesComboBox->addItem(profile);
     }
 
-    mProfilesComboBox->addItems(profiles);
+    // Add a default profile
+    if (mProfilesComboBox->count() == 0) {
+         mProfilesComboBox->addItem(QString("Default"));
+    }
 
     QString currentProfile = mLauncherConfig->value("CurrentProfile").toString();
 
@@ -572,33 +590,37 @@ void DataFilesPage::writeConfig(QString profile)
 
 void DataFilesPage::newProfile()
 {
-    bool ok;
-    QString text = QInputDialog::getText(this, tr("New Profile"),
-                                         tr("Profile Name:"), QLineEdit::Normal,
-                                         tr("New Profile"), &ok);
-    if (ok && !text.isEmpty()) {
-        if (mProfilesComboBox->findText(text) != -1) {
-            QMessageBox::warning(this, tr("Profile already exists"),
-                                 tr("the profile <b>%0</b> already exists.").arg(text),
-                                 QMessageBox::Ok);
-        } else {
-            // Add the new profile to the combobox
-            mProfilesComboBox->addItem(text);
-            mProfilesComboBox->setCurrentIndex(mProfilesComboBox->findText(text));
+    if (mNewProfileDialog->exec() == QDialog::Accepted) {
 
-        }
+        const QString text = mNewProfileDialog->lineEdit()->text();
+        mProfilesComboBox->addItem(text);
 
+        // Copy the currently checked items to cfg
+        writeConfig(text);
+        mLauncherConfig->sync();
+
+        mProfilesComboBox->setCurrentIndex(mProfilesComboBox->findText(text));
     }
+}
+
+void DataFilesPage::updateOkButton(const QString &text)
+{
+    if (text.isEmpty()) {
+         mNewProfileDialog->setOkButtonEnabled(false);
+         return;
+    }
+
+    (mProfilesComboBox->findText(text) == -1)
+            ? mNewProfileDialog->setOkButtonEnabled(true)
+            : mNewProfileDialog->setOkButtonEnabled(false);
 }
 
 void DataFilesPage::deleteProfile()
 {
     QString profile = mProfilesComboBox->currentText();
 
-
-    if (profile.isEmpty()) {
+    if (profile.isEmpty())
         return;
-    }
 
     QMessageBox msgBox(this);
     msgBox.setWindowTitle(tr("Delete Profile"));
@@ -694,19 +716,17 @@ void DataFilesPage::setCheckState(QModelIndex index)
         return;
 
     if (object->objectName() == QLatin1String("PluginsTable")) {
-        if (mPluginsModel->checkState(index) == Qt::Checked) {
-            mPluginsModel->setCheckState(index, Qt::Unchecked);
-        } else {
-            mPluginsModel->setCheckState(index, Qt::Checked);
-        }
+        QModelIndex sourceIndex = mPluginsProxyModel->mapToSource(index);
+
+        (mPluginsModel->checkState(sourceIndex) == Qt::Checked)
+                ? mPluginsModel->setCheckState(index, Qt::Unchecked)
+                : mPluginsModel->setCheckState(index, Qt::Checked);
     }
 
     if (object->objectName() == QLatin1String("MastersTable")) {
-        if (mMastersModel->checkState(index) == Qt::Checked) {
-            mMastersModel->setCheckState(index, Qt::Unchecked);
-        } else {
-            mMastersModel->setCheckState(index, Qt::Checked);
-        }
+        (mMastersModel->checkState(index) == Qt::Checked)
+                ? mMastersModel->setCheckState(index, Qt::Unchecked)
+                : mMastersModel->setCheckState(index, Qt::Checked);
     }
 
     return;
@@ -721,13 +741,23 @@ void DataFilesPage::filterChanged(const QString filter)
 
 void DataFilesPage::profileChanged(const QString &previous, const QString &current)
 {
+    qDebug() << "Profile is changed from: " << previous << " to " << current;
     // Prevent the deletion of the default profile
-    (current == QLatin1String("Default")) ? mDeleteProfileAction->setEnabled(false)
-                                          : mDeleteProfileAction->setEnabled(true);
+    if (current == QLatin1String("Default")) {
+        mDeleteProfileAction->setEnabled(false);
+        mProfilesComboBox->setEditEnabled(false);
+    } else {
+        mDeleteProfileAction->setEnabled(true);
+        mProfilesComboBox->setEditEnabled(true);
+    }
 
     if (!previous.isEmpty()) {
         writeConfig(previous);
         mLauncherConfig->sync();
+
+        if (mProfilesComboBox->currentIndex() == -1)
+            return;
+
     } else {
         return;
     }
@@ -735,6 +765,36 @@ void DataFilesPage::profileChanged(const QString &previous, const QString &curre
     mMastersModel->uncheckAll();
     mPluginsModel->uncheckAll();
     readConfig();
+}
+
+void DataFilesPage::profileRenamed(const QString &previous, const QString &current)
+{
+    if (previous.isEmpty())
+        return;
+
+    // Save the new profile name
+    writeConfig(current);
+
+    // Make sure we have no groups open
+     while (!mLauncherConfig->group().isEmpty()) {
+         mLauncherConfig->endGroup();
+     }
+
+     mLauncherConfig->beginGroup("Profiles");
+
+     // Open the profile-name subgroup
+     mLauncherConfig->beginGroup(previous);
+     mLauncherConfig->remove(""); // Clear the subgroup
+     mLauncherConfig->endGroup();
+     mLauncherConfig->endGroup();
+     mLauncherConfig->sync();
+
+     // Remove the profile from the combobox
+     mProfilesComboBox->removeItem(mProfilesComboBox->findText(previous));
+
+     mMastersModel->uncheckAll();
+     mPluginsModel->uncheckAll();
+     readConfig();
 }
 
 void DataFilesPage::showContextMenu(const QPoint &point)
@@ -756,11 +816,9 @@ void DataFilesPage::showContextMenu(const QPoint &point)
         if (!index.isValid())
             return;
 
-         if (mPluginsModel->checkState(index) == Qt::Checked) {
-             mUncheckAction->setEnabled(true);
-         } else {
-             mCheckAction->setEnabled(true);
-         }
+         (mPluginsModel->checkState(index) == Qt::Checked)
+             ? mUncheckAction->setEnabled(true)
+             : mCheckAction->setEnabled(true);
     }
 
     // Show menu

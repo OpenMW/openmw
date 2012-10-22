@@ -3,7 +3,7 @@
 
 #include <QWidget>
 #include <QModelIndex>
-
+#include "utils/profilescombobox.hpp"
 #include <components/files/collections.hpp>
 
 
@@ -13,9 +13,10 @@ class QSettings;
 class QAction;
 class QToolBar;
 class QMenu;
-class ComboBox;
+class ProfilesComboBox;
 class DataFilesModel;
 
+class TextInputDialog;
 
 namespace Files { struct ConfigurationManager; }
 
@@ -26,7 +27,7 @@ class DataFilesPage : public QWidget
 public:
     DataFilesPage(Files::ConfigurationManager& cfg, QWidget *parent = 0);
 
-    ComboBox *mProfilesComboBox;
+    ProfilesComboBox *mProfilesComboBox;
 
     void writeConfig(QString profile = QString());
     bool setupDataFiles();
@@ -37,6 +38,8 @@ public slots:
     void filterChanged(const QString filter);
     void showContextMenu(const QPoint &point);
     void profileChanged(const QString &previous, const QString &current);
+    void profileRenamed(const QString &previous, const QString &current);
+    void updateOkButton(const QString &text);
 
     // Action slots
     void newProfile();
@@ -76,6 +79,8 @@ private:
     Files::PathContainer mDataLocal;
 
     QSettings *mLauncherConfig;
+
+    TextInputDialog *mNewProfileDialog;
 
 //    const QStringList checkedPlugins();
 //    const QStringList selectedMasters();

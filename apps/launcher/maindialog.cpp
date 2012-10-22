@@ -1,7 +1,5 @@
 #include <QtGui>
 
-#include "utils/combobox.hpp"
-
 #include "maindialog.hpp"
 #include "playpage.hpp"
 #include "graphicspage.hpp"
