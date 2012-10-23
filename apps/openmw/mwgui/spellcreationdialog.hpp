@@ -116,6 +116,7 @@ namespace MWGui
         void startEditing();
         void setWidgets (Widgets::MWList* availableEffectsList, MyGUI::ScrollView* usedEffectsView);
 
+        virtual void notifyEffectsChanged () {}
     };
 
     class SpellCreationDialog : public WindowBase, public ReferenceInterface, public EffectEditorBase
@@ -133,6 +134,7 @@ namespace MWGui
         void onCancelButtonClicked (MyGUI::Widget* sender);
         void onBuyButtonClicked (MyGUI::Widget* sender);
 
+        virtual void notifyEffectsChanged ();
 
         MyGUI::EditBox* mNameEdit;
         MyGUI::TextBox* mMagickaCost;
@@ -142,6 +144,8 @@ namespace MWGui
         MyGUI::TextBox* mPriceLabel;
 
         Widgets::MWEffectList* mUsedEffectsList;
+
+        ESM::Spell mSpell;
 
     };
 

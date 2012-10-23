@@ -22,7 +22,6 @@
             <Property key="Caption" value="#{sEnchantmentMenu4}"/>
         </Widget>
         <Widget type="TextBox" skin="SandText" position="280 0 258 24" name="MagickaCost">
-            <Property key="Caption" value="1"/>
             <Property key="TextAlign" value="Right HCenter"/>
         </Widget>
 
@@ -31,7 +30,6 @@
             <Property key="Caption" value="#{sSpellmakingMenu1}"/>
         </Widget>
         <Widget type="TextBox" skin="SandText" position="280 24 258 24" name="SuccessChance">
-            <Property key="Caption" value="39"/>
             <Property key="TextAlign" value="Right HCenter"/>
         </Widget>
 
@@ -64,7 +62,6 @@
                 <Property key="Caption" value="#{sBarterDialog7}"/>
             </Widget>
             <Widget type="AutoSizedTextBox" skin="SandText" name="PriceLabel">
-                <Property key="Caption" value="30"/>
             </Widget>
 
 
