@@ -24,8 +24,8 @@ namespace MWMechanics
     {
         // magic effects
         adjustMagicEffects (ptr);
-        calculateCreatureStatModifiers (ptr);
         calculateDynamicStats (ptr);
+        calculateCreatureStatModifiers (ptr);
 
         // AI
         CreatureStats& creatureStats =  MWWorld::Class::get (ptr).getCreatureStats (ptr);
