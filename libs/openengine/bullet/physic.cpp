@@ -626,4 +626,4 @@ namespace Physic
 
         shape->Shape->getAabb(trans, min, max);
     }
-}};
+}}

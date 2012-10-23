@@ -331,7 +331,7 @@ namespace ESMS
     // Find land for the given coordinates. Return null if no mData.
     Land *search(int x, int y) const
     {
-      LandMap::const_iterator itr = lands.find(std::make_pair<int, int>(x, y));
+      LandMap::const_iterator itr = lands.find(std::make_pair (x, y));
       if ( itr == lands.end() )
       {
         return NULL;
@@ -350,7 +350,7 @@ namespace ESMS
       land->load(esm);
 
       // Store the structure
-      lands[std::make_pair<int, int>(land->mX, land->mY)] = land;
+      lands[std::make_pair (land->mX, land->mY)] = land;
     }
   };
 

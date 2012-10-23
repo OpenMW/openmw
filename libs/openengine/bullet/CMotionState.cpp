@@ -16,7 +16,7 @@ namespace Physic
         pEng = eng;
         tr.setIdentity();
         pName = name;
-    };
+    }
 
     void CMotionState::getWorldTransform(btTransform &worldTrans) const
     {

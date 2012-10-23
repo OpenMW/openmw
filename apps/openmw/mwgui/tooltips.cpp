@@ -79,14 +79,10 @@ void ToolTips::onFrame(float frameDuration)
             || (mWindowManager->getMode() == GM_Inventory)))
         {
             std::string handle = MWBase::Environment::get().getWorld()->getFacedHandle();
-            try
-            {
-                mFocusObject = MWBase::Environment::get().getWorld()->getPtrViaHandle(handle);
-            }
-            catch (std::exception /* & e */)
-            {
+
+            mFocusObject = MWBase::Environment::get().getWorld()->searchPtrViaHandle(handle);
+            if (mFocusObject.isEmpty ())
                 return;
-            }
 
             MyGUI::IntSize tooltipSize = getToolTipViaPtr(true);
 

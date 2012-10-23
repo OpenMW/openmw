@@ -306,7 +306,7 @@ endif()
 
 # Compiler settings
 if (CMAKE_COMPILER_IS_GNUCC)
-    add_definitions (-Wall -Wextra -Wno-unused-parameter -Wno-reorder)
+    add_definitions (-Wall -Wextra -Wno-unused-parameter -Wno-reorder -std=c++0x -pedantic)
 
     # Silence warnings in OGRE headers. Remove once OGRE got fixed!
     add_definitions (-Wno-ignored-qualifiers)
