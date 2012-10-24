@@ -152,7 +152,8 @@ namespace Physic
         std::string mName;
 
         //is this body used for raycasting only?
-        bool collide;
+        bool mCollide;
+        bool mIgnore;
     };
 
     struct HeightField

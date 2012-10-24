@@ -169,6 +169,7 @@ namespace Physic
     RigidBody::RigidBody(btRigidBody::btRigidBodyConstructionInfo& CI,std::string name)
         : btRigidBody(CI)
         , mName(name)
+        , mIgnore(false)
     {
     }
 
@@ -327,7 +328,7 @@ namespace Physic
 
         btRigidBody::btRigidBodyConstructionInfo CI = btRigidBody::btRigidBodyConstructionInfo(0,newMotionState,hfShape);
         RigidBody* body = new RigidBody(CI,name);
-        body->collide = true;
+        body->mCollide = true;
         body->getWorldTransform().setOrigin(btVector3( (x+0.5)*triSize*(sqrtVerts-1), (y+0.5)*triSize*(sqrtVerts-1), (maxh+minh)/2.f));
 
         HeightField hf;
@@ -397,7 +398,8 @@ namespace Physic
         //create the real body
         btRigidBody::btRigidBodyConstructionInfo CI = btRigidBody::btRigidBodyConstructionInfo(0,newMotionState,shape->Shape);
         RigidBody* body = new RigidBody(CI,name);
-        body->collide = shape->collide;
+        body->mCollide = shape->mCollide;
+        body->mIgnore = shape->mIgnore;
 
         if(scaledBoxTranslation != 0)
             *scaledBoxTranslation = shape->boxTranslation * scale;
@@ -414,7 +416,9 @@ namespace Physic
     {
         if(body)
         {
-            if(body->collide)
+            if (body->mIgnore)
+                return;
+            if(body->mCollide)
             {
                 dynamicsWorld->addRigidBody(body,COL_WORLD,COL_WORLD|COL_ACTOR_INTERNAL|COL_ACTOR_EXTERNAL);
             }
