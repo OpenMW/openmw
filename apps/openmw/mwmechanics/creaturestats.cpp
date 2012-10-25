@@ -176,7 +176,7 @@ namespace MWMechanics
 
         mDynamic[index] = value;
 
-        if (index==2 && mDynamic[index].getCurrent()<1)
+        if (index==0 && mDynamic[index].getCurrent()<1)
             mDead = true;
     }
     
