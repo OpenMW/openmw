@@ -213,7 +213,27 @@ namespace MWMechanics
                 }
 
                 if (MWWorld::Class::get (*iter).getCreatureStats (*iter).isDead())
+                {
+                    // workaround: always keep player alive for now
+                    // \todo remove workaround, once player death can be handled
+                    if (iter->getRefData().getHandle()=="player")
+                    {
+                        MWMechanics::DynamicStat<float> stat (
+                            MWWorld::Class::get (*iter).getCreatureStats (*iter).getHealth());
+                            
+                        if (stat.getModified()<1)
+                        {
+                            stat.setModified (1, 0);
+                            MWWorld::Class::get (*iter).getCreatureStats (*iter).setHealth (stat);
+                        }
+
+                        MWWorld::Class::get (*iter).getCreatureStats (*iter).resurrect();
+                        ++iter;
+                        continue;
+                    }
+                    
                     mActors.erase (iter++);
+                }
                 else
                     ++iter;
             }
