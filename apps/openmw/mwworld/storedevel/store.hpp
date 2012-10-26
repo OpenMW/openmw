@@ -184,7 +184,9 @@ namespace MWWorld
         std::vector<T *>    mShared;
 
     public:
-        Store() {}
+        Store()
+          : mComp(false)
+        {}
 
         Store(bool ci)
           : mComp(ci)
@@ -215,6 +217,31 @@ namespace MWWorld
                 throw std::runtime_error("object '" + id + "' not found");
             }
             return ptr;
+        }
+
+        void load(ESM::ESMReader &esm, const std::string &id) {
+            // reduce size of allocated memory to copy
+            mData.push_back(T());
+
+            // some records requires id before loading
+            // make sure that string case is the same across container
+            if (mComp.isCaseInsensitive()) {
+                mData.back().mId = id;
+            } else {
+                mData.back().mId = lowerCase(id);
+            }
+            mData.back().load(esm);
+
+            // allow records to overwrite id on loading
+            if (!mComp.isCaseInsensitive()) {
+                std::string &s = mData.back().mId;
+                std::transform(
+                    s.begin(),
+                    s.end(),
+                    s.begin(),
+                    (int (*)(int)) std::tolower
+                );
+            }
         }
 
         void setUp() {
