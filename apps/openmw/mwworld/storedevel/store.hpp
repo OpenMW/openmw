@@ -70,6 +70,14 @@ namespace MWWorld
                 return x.mId < y.mId;
             }
 
+            template <>
+            bool operator()<ESM::Cell>(const ESM::Cell &x, const ESM::Cell &y) {
+                if (mCaseInsensitive) {
+                    return CICompareString()(x.mName, y.mName);
+                }
+                return x.mName < y.mName;
+            }
+
             bool isCaseInsensitive() const {
                 return mCaseInsensitive;
             }
@@ -218,6 +226,18 @@ namespace MWWorld
         iterator end() {
             return mShared.end();
         }
+
+        int getSize() const {
+            return mShared.size();
+        }
+
+        void listIdentifier(std::vector<std::string> &list) const {
+            list.reserve(list.size() + getSize());
+            typename std::vector<T *>::iterator it = mShared.begin();
+            for (; it != mShared.end(); ++it) {
+                list.push_back((*it)->mId);
+            }
+        }
     };
 
     template <>
@@ -339,30 +359,66 @@ namespace MWWorld
     template <>
     class Store<ESM::Cell> : public StoreBase
     {
+    public:
+        typedef std::vector<ESM::Cell>::const_iterator iterator;
+
+    private:
+        struct ExtCompare
+        {
+            bool operator()(const ESM::Cell &x, const ESM::Cell &y) {
+                if (x.mData.mX == y.mData.mX) {
+                    return x.mData.mY < y.mData.mY;
+                }
+                return x.mData.mX < y.mData.mX;
+            }
+        };
+
+        struct IntExtOrdering
+        {
+            bool operator()(const ESM::Cell &x, const ESM::Cell &y) {
+                // interiors precedes exteriors (x < y)
+                if ((x.mData.mFlags & ESM::Cell::Interior) != 0 &&
+                    (y.mData.mFlags & ESM::Cell::Interior) == 0)
+                {
+                    return true;
+                }
+                return false;
+            }
+        };
+
         Compare                 mIntCmp;
-        std::vector<ESM::Cell>  mInt;
-        std::vector<ESM::Cell>  mExt;
+        std::vector<ESM::Cell>  mData;
+        iterator                mIntBegin, mIntEnd, mExtBegin, mExtEnd;
 
     public:
         Store<ESM::Cell>()
           : mIntCmp(true)
         {}
 
-        typedef std::vector<ESM::Cell>::const_iterator iterator;
 
         const ESM::Cell *search(const std::string &id) const {
             ESM::Cell cell;
+            cell.mName = id;
 
             iterator it =
-                std::lower_bound(mInt.begin(), mInt.end(), cell, mIntCmp);
+                std::lower_bound(mIntBegin, mIntEnd, cell, mIntCmp);
 
-            if (it != mInt.end() && mIntCmp.equalString(it->mId, id)) {
+            if (it != mIntEnd && mIntCmp.equalString(it->mId, id)) {
                 return &(*it);
             }
             return 0;
         }
 
         const ESM::Cell *search(int x, int y) const {
+            ESM::Cell cell;
+            cell.mData.mX = x, cell.mData.mY = y;
+
+            iterator it =
+                std::lower_bound(mExtBegin, mExtEnd, cell, ExtCompare());
+
+            if (it != mExtEnd && it->mData.mX == x && it->mData.mY == y) {
+                return &(*it);
+            }
             return 0;
         }
 
@@ -384,6 +440,84 @@ namespace MWWorld
                 );
             }
             return ptr;
+        }
+
+        void setUp() {
+            IntExtOrdering cmp;
+            std::sort(mData.begin(), mData.end(), cmp);
+
+            ESM::Cell cell;
+            cell.mData.mFlags = 0;
+            mExtBegin = std::lower_bound(mData.begin(), mData.end(), cell, cmp);
+            mExtEnd = mData.end();
+
+            mIntBegin = mData.begin();
+            mIntEnd = mExtBegin;
+
+            std::sort(mIntBegin, mIntEnd, mIntCmp);
+            std::sort(mExtBegin, mExtEnd, ExtCompare());
+        }
+
+        void load(ESM::ESMReader &esm, const std::string &id) {
+            mData.push_back(ESM::Cell());
+            mData.back().mName = id;
+            mData.back().load(esm);
+        }
+
+        iterator begin() {
+            return mData.begin();
+        }
+
+        iterator end() {
+            return mData.end();
+        }
+
+        iterator interiorsBegin() {
+            return mIntBegin;
+        }
+
+        iterator interiorsEnd() {
+            return mIntEnd;
+        }
+
+        iterator exteriorsBegin() {
+            return mExtBegin;
+        }
+
+        iterator exteriorsEnd() {
+            return mExtEnd;
+        }
+
+        /// \todo implement appropriate index
+        const ESM::Cell *searchExteriorByName(const std::string &id) {
+            for (iterator it = mExtBegin; it != mExtEnd; ++it) {
+                if (mIntCmp.equalString(it->mName, id)) {
+                    return &(*it);
+                }
+            }
+            return 0;
+        }
+
+        /// \todo implement appropriate index
+        const ESM::Cell *searchExteriorByRegion(const std::string &id) {
+            for (iterator it = mExtBegin; it != mExtEnd; ++it) {
+                if (mIntCmp.equalString(it->mRegion, id)) {
+                    return &(*it);
+                }
+            }
+            return 0;
+        }
+
+        int getSize() const {
+            return mData.size();
+        }
+
+        void listIdentifier(std::vector<std::string> &list) const {
+            list.reserve(list.size() + (mIntEnd - mIntBegin));
+            std::vector<ESM::Cell>::iterator it = mIntBegin;
+            for (; it != mIntEnd; ++it) {
+                list.push_back(it->mName);
+            }
         }
     };
 
