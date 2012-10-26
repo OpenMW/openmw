@@ -676,12 +676,6 @@ namespace MWWorld
             return mExtEnd;
         }
     };
-
-    template <>
-    class Store<ESM::Script>
-    {
-    };
-
 } //end namespace
 
 #endif
