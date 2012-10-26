@@ -78,6 +78,14 @@ namespace MWWorld
                 return x.mName < y.mName;
             }
 
+            template <>
+            bool operator()<ESM::Pathgrid>(const ESM::Pathgrid &x, const ESM::Pathgrid &x) {    
+                if (mCaseInsensitive) {
+                    return CICompareString()(x.mCell, y.mCell);
+                }
+                return x.mCell < y.mCell;
+            }
+
             bool isCaseInsensitive() const {
                 return mCaseInsensitive;
             }
@@ -403,7 +411,7 @@ namespace MWWorld
             iterator it =
                 std::lower_bound(mIntBegin, mIntEnd, cell, mIntCmp);
 
-            if (it != mIntEnd && mIntCmp.equalString(it->mId, id)) {
+            if (it != mIntEnd && mIntCmp.equalString(it->mName, id)) {
                 return &(*it);
             }
             return 0;
@@ -448,7 +456,8 @@ namespace MWWorld
 
             ESM::Cell cell;
             cell.mData.mFlags = 0;
-            mExtBegin = std::lower_bound(mData.begin(), mData.end(), cell, cmp);
+            mExtBegin =
+                std::lower_bound(mData.begin(), mData.end(), cell, cmp);
             mExtEnd = mData.end();
 
             mIntBegin = mData.begin();
@@ -464,32 +473,32 @@ namespace MWWorld
             mData.back().load(esm);
         }
 
-        iterator begin() {
+        iterator begin() const {
             return mData.begin();
         }
 
-        iterator end() {
+        iterator end() const {
             return mData.end();
         }
 
-        iterator interiorsBegin() {
+        iterator interiorsBegin() const {
             return mIntBegin;
         }
 
-        iterator interiorsEnd() {
+        iterator interiorsEnd() const {
             return mIntEnd;
         }
 
-        iterator exteriorsBegin() {
+        iterator exteriorsBegin() const {
             return mExtBegin;
         }
 
-        iterator exteriorsEnd() {
+        iterator exteriorsEnd() const {
             return mExtEnd;
         }
 
         /// \todo implement appropriate index
-        const ESM::Cell *searchExteriorByName(const std::string &id) {
+        const ESM::Cell *searchExteriorByName(const std::string &id) const {
             for (iterator it = mExtBegin; it != mExtEnd; ++it) {
                 if (mIntCmp.equalString(it->mName, id)) {
                     return &(*it);
@@ -499,7 +508,7 @@ namespace MWWorld
         }
 
         /// \todo implement appropriate index
-        const ESM::Cell *searchExteriorByRegion(const std::string &id) {
+        const ESM::Cell *searchExteriorByRegion(const std::string &id) const {
             for (iterator it = mExtBegin; it != mExtEnd; ++it) {
                 if (mIntCmp.equalString(it->mRegion, id)) {
                     return &(*it);
@@ -524,6 +533,148 @@ namespace MWWorld
     template <>
     class Store<ESM::Pathgrid> : public StoreBase
     {
+    public:
+        typedef std::vector<ESM::Pathgrid>::const_iterator iterator;
+
+    private:
+        Compare                     mIntCmp;
+        std::vector<ESM::Pathgrid>  mData;
+        iterator                    mIntBegin, mIntEnd, mExtBegin, mExtEnd;
+
+        struct IntExtOrdering
+        {
+            bool operator()(const ESM::Pathgrid &x, const ESM::Pathgrid &y) const {
+                // interior pathgrids precedes exterior ones (x < y)
+                if ((x.mData.mX == 0 && x.mData.mY == 0) &&
+                    (y.mData.mX != 0 || y.mData.mY != 0))
+                {
+                    return false;
+                }
+            }
+        };
+
+        struct ExtCompare
+        {
+            bool operator()(const ESM::Pathgrid &x, const ESM::Pathgrid &y) const {
+                if (x.mData.mX == y.mData.mX) {
+                    return x.mData.mY < y.mData.mY;
+                }
+                return x.mData.mX < y.mData.mX;
+            }
+        };
+
+    public:
+        Store<ESM::Pathgrid>()
+          : mIntCmp(true)
+        {}
+
+        void load(ESM::ESMReader &esm, const std::string &id) {
+            mData.push_back(ESM::Pathgrid());
+            mData.back().load(esm);
+        }
+
+        int getSize() const {
+            return mData.size();
+        }
+
+        void setUp() {
+            IntExtOrdering cmp;
+            std::sort(mData.begin(), mData.end(), cmp);
+
+            ESM::Pathgrid pg;
+            pg.mData.mX = pg.mData.mY = 1;
+            mExtBegin =
+                std::lower_bound(mData.begin(), mData.end(), pg, cmp);
+            mExtEnd = mData.end();
+
+            mIntBegin = mData.begin();
+            mIntEnd = mExtBegin;
+
+            std::sort(mIntBegin, mIntEnd, mIntCmp);
+            std::sort(mExtBegin, mExtEnd, ExtCompare());
+        }
+
+        const ESM::Pathgrid *search(int x, int y) const {
+            ESM::Pathgrid pg;
+            pg.mData.mX = x;
+            pg.mData.mY = y;
+
+            iterator it =
+                std::lower_bound(mExtBegin, mExtEnd, pg, ExtCompare());
+            if (it != mExtEnd && it->mData.mX == x && it->mData.mY == y) {
+                return &(*it);
+            }
+            return 0;
+        }
+
+        const ESM::Pathgrid *find(int x, int y) const {
+            ESM::Pathgrid *ptr = search(x, y);
+            if (ptr == 0) {
+                throw std::runtime_error(
+                    "Pathgrid at (" + x + ", " + y + ") not found"
+                );
+            }
+            return ptr;
+        }
+
+        const ESM::Pathgrid *search(const std::string &name) const {
+            ESM::Pathgrid pg;
+            pg.mCell = name;
+
+            iterator it = std::lower_bound(mIntBegin, mIntEnd, pg, mIntCmp);
+            if (it != mIntEnd && mIntCmp.equalString(it->mCell, name)) {
+                return &(*it);
+            }
+            return 0;
+        }
+
+        const ESM::Pathgrid *find(const std::string &name) const {
+            ESM::Pathgrid *ptr = search(name);
+            if (ptr == 0) {
+                throw std::runtime_error(
+                    "Pathgrid in cell '" + name + "' not found"
+                );
+            }
+            return ptr;
+        }
+
+        const ESM::Pathgrid *search(const ESM::Cell &cell) const {
+            if (cell.mData.mFlags & ESM::Cell::Interior) {
+                return search(cell.mName);
+            }
+            return search(cell.mData.mX, cell.mData.mY);
+        }
+
+        const ESM::Pathgrid *find(const ESM::Cell &cell) const {
+            if (cell.mData.mFlags & ESM::Cell:Interior) {
+                return find(cell.mName);
+            }
+            return find(cell.mData.mX, cell.mData.mY);
+        }
+
+        iterator begin() const {
+            return mData.begin();
+        }
+
+        iterator end() const {
+            return mData.end();
+        }
+
+        iterator interiorPathsBegin() const {
+            return mIntBegin;
+        }
+
+        iterator interiorPathsEnd() const {
+            return mIntEnd;
+        }
+
+        iterator exteriorPathsBegin() const {
+            return mExtBegin;
+        }
+
+        iterator exteriorPathsEnd() const {
+            return mExtEnd;
+        }
     };
 
     template <>
