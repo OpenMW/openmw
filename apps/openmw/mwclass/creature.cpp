@@ -149,6 +149,14 @@ namespace MWClass
         return ref->base->mScript;
     }
 
+    bool Creature::isEssential (const MWWorld::Ptr& ptr) const
+    {
+        MWWorld::LiveCellRef<ESM::Creature> *ref =
+            ptr.get<ESM::Creature>();
+
+        return ref->base->mFlags & ESM::Creature::Essential;
+    }
+
     void Creature::registerSelf()
     {
         boost::shared_ptr<Class> instance (new Creature);

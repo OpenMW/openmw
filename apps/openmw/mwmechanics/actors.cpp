@@ -238,6 +238,10 @@ namespace MWMechanics
 
                     MWBase::Environment::get().getWorld()->playAnimationGroup (*iter, "death1", 0);
 
+                    if (MWWorld::Class::get (*iter).isEssential (*iter))
+                        MWBase::Environment::get().getWindowManager()->messageBox (
+                            "#{sKilledEssential}", std::vector<std::string>());
+
                     mActors.erase (iter++);
                 }
                 else
