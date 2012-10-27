@@ -315,7 +315,15 @@ namespace MWClass
 
         return vector;
     }
+    
+    bool Npc::isEssential (const MWWorld::Ptr& ptr) const
+    {
+        MWWorld::LiveCellRef<ESM::NPC> *ref =
+            ptr.get<ESM::NPC>();
 
+        return ref->base->mFlags & ESM::NPC::Essential;
+    }
+    
     void Npc::registerSelf()
     {
         boost::shared_ptr<Class> instance (new Npc);
