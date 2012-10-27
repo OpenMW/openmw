@@ -78,6 +78,10 @@ namespace MWMechanics
 
             virtual void restoreDynamicStats();
             ///< If the player is sleeping, this should be called every hour.
+
+            virtual int countDeaths (const std::string& id) const;
+            ///< Return the number of deaths for actors with the given ID.
+            
     };
 }
 

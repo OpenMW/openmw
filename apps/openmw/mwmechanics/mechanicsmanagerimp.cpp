@@ -326,4 +326,9 @@ namespace MWMechanics
         buildPlayer();
         mUpdatePlayer = true;
     }
+    
+    int MechanicsManager::countDeaths (const std::string& id) const
+    {
+        return mActors.countDeaths (id);
+    }
 }

@@ -17,6 +17,7 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/dialoguemanager.hpp"
+#include "../mwbase/mechanicsmanager.hpp"
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/player.hpp"
@@ -591,6 +592,17 @@ namespace MWScript
                     /// \todo modify disposition towards the player
                 }
         };
+        
+        class OpGetDeadCount : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    std::string id = runtime.getStringLiteral (runtime[0].mInteger);
+                    runtime[0].mInteger = MWBase::Environment::get().getMechanicsManager()->countDeaths (id);
+                }
+        };        
 
 
         const int numberOfAttributes = 8;
@@ -643,6 +655,8 @@ namespace MWScript
         const int opcodeGetLevelExplicit = 0x200018d;
         const int opcodeSetLevel = 0x200018e;
         const int opcodeSetLevelExplicit = 0x200018f;
+        
+        const int opcodeGetDeadCount = 0x20001a3;
 
         void registerExtensions (Compiler::Extensions& extensions)
         {
@@ -729,6 +743,8 @@ namespace MWScript
 
             extensions.registerInstruction("setlevel", "l", opcodeSetLevel, opcodeSetLevelExplicit);
             extensions.registerFunction("getlevel", 'l', "", opcodeGetLevel, opcodeGetLevelExplicit);
+
+            extensions.registerFunction("getdeadcount", 'l', "c", opcodeGetDeadCount);
         }
 
         void installOpcodes (Interpreter::Interpreter& interpreter)
@@ -806,6 +822,7 @@ namespace MWScript
             interpreter.installSegment5 (opcodeSetLevel, new OpSetLevel<ImplicitRef>);
             interpreter.installSegment5 (opcodeSetLevelExplicit, new OpSetLevel<ExplicitRef>);
 
+            interpreter.installSegment5 (opcodeGetDeadCount, new OpGetDeadCount);
         }
     }
 }

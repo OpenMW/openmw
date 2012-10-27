@@ -262,4 +262,14 @@ namespace MWMechanics
             calculateRestoration (*iter, 3600);
         }
     }
+    
+    int Actors::countDeaths (const std::string& id) const
+    {
+        std::map<std::string, int>::const_iterator iter = mDeathCount.find (id);
+
+        if (iter!=mDeathCount.end())
+            return iter->second;
+
+        return 0;
+    }
 }
