@@ -39,6 +39,8 @@ namespace MWBase
 
             virtual void addActor (const MWWorld::Ptr& ptr) = 0;
             ///< Register an actor for stats management
+            ///
+            /// \note Dead actors are ignored.
 
             virtual void removeActor (const MWWorld::Ptr& ptr) = 0;
             ///< Deregister an actor for stats management
@@ -74,6 +76,9 @@ namespace MWBase
 
             virtual void restoreDynamicStats() = 0;
             ///< If the player is sleeping, this should be called every hour.
+            
+            virtual int countDeaths (const std::string& id) const = 0;
+            ///< Return the number of deaths for actors with the given ID.
     };
 }
 

@@ -55,9 +55,9 @@ namespace MWClass
             data->mCreatureStats.getAttribute(5).set (ref->base->mData.mEndurance);
             data->mCreatureStats.getAttribute(6).set (ref->base->mData.mPersonality);
             data->mCreatureStats.getAttribute(7).set (ref->base->mData.mLuck);
-            data->mCreatureStats.getHealth().set (ref->base->mData.mHealth);
-            data->mCreatureStats.getMagicka().set (ref->base->mData.mMana);
-            data->mCreatureStats.getFatigue().set (ref->base->mData.mFatigue);
+            data->mCreatureStats.setHealth (ref->base->mData.mHealth);
+            data->mCreatureStats.setMagicka (ref->base->mData.mMana);
+            data->mCreatureStats.setFatigue (ref->base->mData.mFatigue);
 
             data->mCreatureStats.setLevel(ref->base->mData.mLevel);
 
