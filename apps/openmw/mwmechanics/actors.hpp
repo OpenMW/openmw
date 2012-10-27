@@ -4,6 +4,7 @@
 #include <set>
 #include <vector>
 #include <string>
+#include <map>
 
 namespace Ogre
 {
@@ -22,6 +23,7 @@ namespace MWMechanics
     {
             std::set<MWWorld::Ptr> mActors;
             float mDuration;
+            std::map<std::string, int> mDeathCount;
 
             void updateNpc (const MWWorld::Ptr& ptr, float duration, bool paused);
 

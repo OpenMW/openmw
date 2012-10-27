@@ -234,6 +234,8 @@ namespace MWMechanics
                         continue;
                     }
 
+                    ++mDeathCount[MWWorld::Class::get (*iter).getId (*iter)];
+
                     MWBase::Environment::get().getWorld()->playAnimationGroup (*iter, "death1", 0);
 
                     mActors.erase (iter++);
