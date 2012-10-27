@@ -167,6 +167,8 @@ namespace MWMechanics
     {
         if (!MWWorld::Class::get (ptr).getCreatureStats (ptr).isDead())
             mActors.insert (ptr);
+        else
+            MWBase::Environment::get().getWorld()->playAnimationGroup (ptr, "death1", 2);
     }
 
     void Actors::removeActor (const MWWorld::Ptr& ptr)
@@ -231,7 +233,9 @@ namespace MWMechanics
                         ++iter;
                         continue;
                     }
-                    
+
+                    MWBase::Environment::get().getWorld()->playAnimationGroup (*iter, "death1", 0);
+
                     mActors.erase (iter++);
                 }
                 else
