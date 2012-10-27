@@ -85,6 +85,7 @@ MWGui::JournalWindow::JournalWindow (MWBase::WindowManager& parWindowManager)
     : WindowBase("openmw_journal.layout", parWindowManager)
     , mLastPos(0)
     , mVisible(false)
+    , mPageNumber(0)
 {
     //setCoord(0,0,498, 342);
     center();
