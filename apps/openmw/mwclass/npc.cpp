@@ -20,6 +20,7 @@
 
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/actiontalk.hpp"
+#include "../mwworld/actionopen.hpp"
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/customdata.hpp"
 #include "../mwworld/physicssystem.hpp"
@@ -189,7 +190,10 @@ namespace MWClass
     boost::shared_ptr<MWWorld::Action> Npc::activate (const MWWorld::Ptr& ptr,
         const MWWorld::Ptr& actor) const
     {
-        return boost::shared_ptr<MWWorld::Action> (new MWWorld::ActionTalk (ptr));
+        if (MWWorld::Class::get (ptr).getCreatureStats (ptr).isDead())
+            return boost::shared_ptr<MWWorld::Action> (new MWWorld::ActionOpen(ptr));
+        else
+            return boost::shared_ptr<MWWorld::Action> (new MWWorld::ActionTalk (ptr));
     }
 
     MWWorld::ContainerStore& Npc::getContainerStore (const MWWorld::Ptr& ptr)
