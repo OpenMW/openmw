@@ -46,10 +46,7 @@ namespace MWMechanics
             int mValue;
 
             std::set<EffectKey> listEffects() const;
-            ///< List all effects of all used ingredients.
-            
-            void filterEffects (std::set<EffectKey>& effects) const;
-            ///< Filter out effects not shared by all ingredients.
+            ///< List all effects shared by at least two ingredients.
 
             void applyTools (int flags, float& value) const;
 
