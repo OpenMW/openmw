@@ -347,6 +347,47 @@ void DataFilesPage::readConfig()
 
 }
 
+bool DataFilesPage::showDataFilesWarning()
+{
+
+    QMessageBox msgBox;
+    msgBox.setWindowTitle("Error detecting Morrowind installation");
+    msgBox.setIcon(QMessageBox::Warning);
+    msgBox.setStandardButtons(QMessageBox::Cancel);
+    msgBox.setText(tr("<br><b>Could not find the Data Files location</b><br><br> \
+                      The directory containing the data files was not found.<br><br> \
+                      Press \"Browse...\" to specify the location manually.<br>"));
+
+    QAbstractButton *dirSelectButton =
+            msgBox.addButton(tr("B&rowse..."), QMessageBox::ActionRole);
+
+    msgBox.exec();
+
+    if (msgBox.clickedButton() == dirSelectButton) {
+
+        // Show a custom dir selection dialog which only accepts valid dirs
+        QString selectedDir = FileDialog::getExistingDirectory(
+                    this, tr("Select Data Files Directory"),
+                    QDir::currentPath(),
+                    QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+
+        // Add the user selected data directory
+        if (!selectedDir.isEmpty()) {
+            mDataDirs.push_back(Files::PathContainer::value_type(selectedDir.toStdString()));
+            mCfgMgr.processPaths(mDataDirs);
+        } else {
+            // Cancel from within the dir selection dialog
+            return false;
+        }
+
+    } else {
+        // Cancel
+        return false;
+    }
+
+    return true;
+}
+
 bool DataFilesPage::setupDataFiles()
 {
     // We use the Configuration Manager to retrieve the configuration values
@@ -359,12 +400,16 @@ bool DataFilesPage::setupDataFiles()
         ("fs-strict", boost::program_options::value<bool>()->implicit_value(true)->default_value(false))
         ("encoding", boost::program_options::value<std::string>()->default_value("win1252"));
 
-    //boost::program_options::notify(variables);
+    boost::program_options::notify(variables);
 
     mCfgMgr.readConfiguration(variables, desc);
 
-    // Put the paths in a boost::filesystem vector to use with Files::Collections
-    mDataDirs = Files::PathContainer(variables["data"].as<Files::PathContainer>());
+    if (variables["data"].empty()) {
+        if (!showDataFilesWarning())
+           return false;
+    } else {
+        mDataDirs = Files::PathContainer(variables["data"].as<Files::PathContainer>());
+    }
 
      std::string local = variables["data-local"].as<std::string>();
      if (!local.empty()) {
@@ -374,43 +419,11 @@ bool DataFilesPage::setupDataFiles()
     mCfgMgr.processPaths(mDataDirs);
     mCfgMgr.processPaths(mDataLocal);
 
+    // Second chance to display the warning, the data= entries are invalid
     while (mDataDirs.empty()) {
-        QMessageBox msgBox;
-        msgBox.setWindowTitle("Error detecting Morrowind installation");
-        msgBox.setIcon(QMessageBox::Warning);
-        msgBox.setStandardButtons(QMessageBox::Cancel);
-        msgBox.setText(tr("<br><b>Could not find the Data Files location</b><br><br> \
-                          The directory containing the data files was not found.<br><br> \
-                          Press \"Browse...\" to specify the location manually.<br>"));
-
-        QAbstractButton *dirSelectButton =
-                msgBox.addButton(tr("B&rowse..."), QMessageBox::ActionRole);
-
-        msgBox.exec();
-
-        if (msgBox.clickedButton() == dirSelectButton) {
-
-            // Show a custom dir selection dialog which only accepts valid dirs
-            QString selectedDir = FileDialog::getExistingDirectory(
-                        this, tr("Select Data Files Directory"),
-                        QDir::currentPath(),
-                        QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
-
-            // Add the user selected data directory
-            if (!selectedDir.isEmpty()) {
-                mDataDirs.push_back(Files::PathContainer::value_type(selectedDir.toStdString()));
-                mCfgMgr.processPaths(mDataDirs);
-            } else {
-                // Cancel from within the dir selection dialog
-                return false;
-            }
-
-        } else {
-            // Cancel
+        if (!showDataFilesWarning())
             return false;
-        }
     }
-
     // Add the paths to the respective models
     for (Files::PathContainer::iterator it = mDataDirs.begin(); it != mDataDirs.end(); ++it) {
         QString path = QString::fromStdString(it->string());

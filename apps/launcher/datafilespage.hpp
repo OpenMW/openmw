@@ -30,6 +30,7 @@ public:
     ProfilesComboBox *mProfilesComboBox;
 
     void writeConfig(QString profile = QString());
+    bool showDataFilesWarning();
     bool setupDataFiles();
 
 public slots:
