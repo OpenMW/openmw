@@ -12,6 +12,7 @@
 
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/actiontalk.hpp"
+#include "../mwworld/actionopen.hpp"
 #include "../mwworld/customdata.hpp"
 #include "../mwworld/containerstore.hpp"
 #include "../mwworld/physicssystem.hpp"
@@ -55,9 +56,9 @@ namespace MWClass
             data->mCreatureStats.getAttribute(5).set (ref->base->mData.mEndurance);
             data->mCreatureStats.getAttribute(6).set (ref->base->mData.mPersonality);
             data->mCreatureStats.getAttribute(7).set (ref->base->mData.mLuck);
-            data->mCreatureStats.getHealth().set (ref->base->mData.mHealth);
-            data->mCreatureStats.getMagicka().set (ref->base->mData.mMana);
-            data->mCreatureStats.getFatigue().set (ref->base->mData.mFatigue);
+            data->mCreatureStats.setHealth (ref->base->mData.mHealth);
+            data->mCreatureStats.setMagicka (ref->base->mData.mMana);
+            data->mCreatureStats.setFatigue (ref->base->mData.mFatigue);
 
             data->mCreatureStats.setLevel(ref->base->mData.mLevel);
 
@@ -130,7 +131,10 @@ namespace MWClass
     boost::shared_ptr<MWWorld::Action> Creature::activate (const MWWorld::Ptr& ptr,
         const MWWorld::Ptr& actor) const
     {
-        return boost::shared_ptr<MWWorld::Action> (new MWWorld::ActionTalk (ptr));
+        if (MWWorld::Class::get (ptr).getCreatureStats (ptr).isDead())
+            return boost::shared_ptr<MWWorld::Action> (new MWWorld::ActionOpen(ptr));
+        else
+            return boost::shared_ptr<MWWorld::Action> (new MWWorld::ActionTalk (ptr));
     }
 
     MWWorld::ContainerStore& Creature::getContainerStore (const MWWorld::Ptr& ptr)
@@ -147,6 +151,14 @@ namespace MWClass
             ptr.get<ESM::Creature>();
 
         return ref->base->mScript;
+    }
+
+    bool Creature::isEssential (const MWWorld::Ptr& ptr) const
+    {
+        MWWorld::LiveCellRef<ESM::Creature> *ref =
+            ptr.get<ESM::Creature>();
+
+        return ref->base->mFlags & ESM::Creature::Essential;
     }
 
     void Creature::registerSelf()

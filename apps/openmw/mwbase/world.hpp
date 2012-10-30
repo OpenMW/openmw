@@ -28,6 +28,7 @@ namespace ESM
     struct Cell;
     struct Class;
     struct Potion;
+    struct Spell;
 }
 
 namespace ESMS
@@ -236,6 +237,11 @@ namespace MWBase
             virtual std::pair<std::string, const ESM::Potion *> createRecord (const ESM::Potion& record)
                 = 0;
             ///< Create a new recrod (of type potion) in the ESM store.
+            /// \return ID, pointer to created record
+
+            virtual std::pair<std::string, const ESM::Spell *> createRecord (const ESM::Spell& record)
+                = 0;
+            ///< Create a new recrod (of type spell) in the ESM store.
             /// \return ID, pointer to created record
 
             virtual std::pair<std::string, const ESM::Class *> createRecord (const ESM::Class& record)

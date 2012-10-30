@@ -67,7 +67,7 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
     // material system
     sh::OgrePlatform* platform = new sh::OgrePlatform("General", (resDir / "materials").string());
     if (!boost::filesystem::exists (cacheDir))
-        boost::filesystem::create_directory (cacheDir);
+        boost::filesystem::create_directories (cacheDir);
     platform->setCacheFolder (cacheDir.string());
     mFactory = new sh::Factory(platform);
 

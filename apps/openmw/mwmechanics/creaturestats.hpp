@@ -29,8 +29,8 @@ namespace MWMechanics
         int mFlee;
         int mAlarm;
         AiSequence mAiSequence;
-
         float mLevelHealthBonus;
+        bool mDead;        
 
     public:
         CreatureStats();
@@ -42,6 +42,8 @@ namespace MWMechanics
         const DynamicStat<float> & getMagicka() const;
 
         const DynamicStat<float> & getFatigue() const;
+
+        const DynamicStat<float> & getDynamic (int index) const;
 
         const Spells & getSpells() const;
 
@@ -59,23 +61,13 @@ namespace MWMechanics
 
         int getAlarm() const;
 
-
         Stat<int> & getAttribute(int index);
-
-        DynamicStat<float> & getHealth();
-
-        DynamicStat<float> & getMagicka();
-
-        DynamicStat<float> & getFatigue();
-
-        DynamicStat<float> & getDynamic(int index);
 
         Spells & getSpells();
 
         ActiveSpells & getActiveSpells();
 
         MagicEffects & getMagicEffects();
-
 
         void setAttribute(int index, const Stat<int> &value);
 
@@ -84,6 +76,8 @@ namespace MWMechanics
         void setMagicka(const DynamicStat<float> &value);
 
         void setFatigue(const DynamicStat<float> &value);
+
+        void setDynamic (int index, const DynamicStat<float> &value);
 
         void setSpells(const Spells &spells);
 
@@ -111,6 +105,10 @@ namespace MWMechanics
         // small hack to allow the fact that Health permanently increases by 10% of endurance on each level up
         void increaseLevelHealthBonus(float value);
         float getLevelHealthBonus() const;
+
+        bool isDead() const;
+        
+        void resurrect();
     };
 }
 

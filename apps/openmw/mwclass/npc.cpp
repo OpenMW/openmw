@@ -20,6 +20,7 @@
 
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/actiontalk.hpp"
+#include "../mwworld/actionopen.hpp"
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/customdata.hpp"
 #include "../mwworld/physicssystem.hpp"
@@ -89,15 +90,22 @@ namespace MWClass
                 data->mCreatureStats.getAttribute(5).set (ref->base->mNpdt52.mEndurance);
                 data->mCreatureStats.getAttribute(6).set (ref->base->mNpdt52.mPersonality);
                 data->mCreatureStats.getAttribute(7).set (ref->base->mNpdt52.mLuck);
-                data->mCreatureStats.getHealth().set (ref->base->mNpdt52.mHealth);
-                data->mCreatureStats.getMagicka().set (ref->base->mNpdt52.mMana);
-                data->mCreatureStats.getFatigue().set (ref->base->mNpdt52.mFatigue);
+                data->mCreatureStats.setHealth (ref->base->mNpdt52.mHealth);
+                data->mCreatureStats.setMagicka (ref->base->mNpdt52.mMana);
+                data->mCreatureStats.setFatigue (ref->base->mNpdt52.mFatigue);
 
                 data->mCreatureStats.setLevel(ref->base->mNpdt52.mLevel);
             }
             else
             {
                 /// \todo do something with mNpdt12 maybe:p
+                for (int i=0; i<8; ++i)
+                    data->mCreatureStats.getAttribute (i).set (10);
+
+                for (int i=0; i<3; ++i)
+                    data->mCreatureStats.setDynamic (i, 10);
+
+                data->mCreatureStats.setLevel (1);
             }
 
             data->mCreatureStats.setHello(ref->base->mAiData.mHello);
@@ -182,7 +190,10 @@ namespace MWClass
     boost::shared_ptr<MWWorld::Action> Npc::activate (const MWWorld::Ptr& ptr,
         const MWWorld::Ptr& actor) const
     {
-        return boost::shared_ptr<MWWorld::Action> (new MWWorld::ActionTalk (ptr));
+        if (MWWorld::Class::get (ptr).getCreatureStats (ptr).isDead())
+            return boost::shared_ptr<MWWorld::Action> (new MWWorld::ActionOpen(ptr));
+        else
+            return boost::shared_ptr<MWWorld::Action> (new MWWorld::ActionTalk (ptr));
     }
 
     MWWorld::ContainerStore& Npc::getContainerStore (const MWWorld::Ptr& ptr)
@@ -308,7 +319,15 @@ namespace MWClass
 
         return vector;
     }
+    
+    bool Npc::isEssential (const MWWorld::Ptr& ptr) const
+    {
+        MWWorld::LiveCellRef<ESM::NPC> *ref =
+            ptr.get<ESM::NPC>();
 
+        return ref->base->mFlags & ESM::NPC::Essential;
+    }
+    
     void Npc::registerSelf()
     {
         boost::shared_ptr<Class> instance (new Npc);

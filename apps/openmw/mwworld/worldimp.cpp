@@ -810,6 +810,20 @@ namespace MWWorld
         return std::make_pair (stream.str(), created);
     }
 
+    std::pair<std::string, const ESM::Spell *> World::createRecord (const ESM::Spell& record)
+    {
+        /// \todo See function above.
+        std::ostringstream stream;
+        stream << "$dynamic" << mNextDynamicRecord++;
+
+        const ESM::Spell *created =
+            &mStore.spells.list.insert (std::make_pair (stream.str(), record)).first->second;
+
+        mStore.all.insert (std::make_pair (stream.str(), ESM::REC_SPEL));
+
+        return std::make_pair (stream.str(), created);
+    }
+
     const ESM::Cell *World::createRecord (const ESM::Cell& record)
     {
         if (record.mData.mFlags & ESM::Cell::Interior)

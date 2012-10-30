@@ -6,6 +6,7 @@
 
 #include <algorithm>
 #include <stdexcept>
+#include <map>
 
 #include <components/esm/loadskil.hpp>
 #include <components/esm/loadappa.hpp>
@@ -28,7 +29,7 @@
 
 std::set<MWMechanics::EffectKey> MWMechanics::Alchemy::listEffects() const
 {
-    std::set<EffectKey> effects;
+    std::map<EffectKey, int> effects;
     
     for (TIngredientsIterator iter (mIngredients.begin()); iter!=mIngredients.end(); ++iter)
     {
@@ -38,57 +39,23 @@ std::set<MWMechanics::EffectKey> MWMechanics::Alchemy::listEffects() const
             
             for (int i=0; i<4; ++i)
                 if (ingredient->base->mData.mEffectID[i]!=-1)
-                    effects.insert (EffectKey (
+                {
+                    EffectKey key (
                         ingredient->base->mData.mEffectID[i], ingredient->base->mData.mSkills[i]!=-1 ?
-                        ingredient->base->mData.mSkills[i] : ingredient->base->mData.mAttributes[i]));
+                        ingredient->base->mData.mSkills[i] : ingredient->base->mData.mAttributes[i]);
+
+                    ++effects[key];
+                }
         }
     }
     
-    return effects;
-}
-
-void MWMechanics::Alchemy::filterEffects (std::set<EffectKey>& effects) const
-{
-    std::set<EffectKey>::iterator iter = effects.begin();
+    std::set<EffectKey> effects2;
     
-    while (iter!=effects.end())
-    {
-        bool remove = false;
-        
-        const EffectKey& key = *iter;
-        
-        { // dodge pointless g++ warning
-            for (TIngredientsIterator iter (mIngredients.begin()); iter!=mIngredients.end(); ++iter)
-            {
-                bool found = false;
-
-                if (iter->isEmpty())
-                    continue;
-
-                const MWWorld::LiveCellRef<ESM::Ingredient> *ingredient = iter->get<ESM::Ingredient>();       
-
-                for (int i=0; i<4; ++i)
-                    if (key.mId==ingredient->base->mData.mEffectID[i] &&
-                        (key.mArg==ingredient->base->mData.mSkills[i] ||
-                        key.mArg==ingredient->base->mData.mAttributes[i]))
-                    {
-                        found = true;
-                        break;
-                    }
-            
-                if (!found)
-                {
-                    remove = true;
-                    break;
-                }
-            }
-        }       
-        
-        if (remove)
-            effects.erase (iter++);
-        else
-            ++iter;
-    }
+    for (std::map<EffectKey, int>::const_iterator iter (effects.begin()); iter!=effects.end(); ++iter)
+        if (iter->second>1)
+            effects2.insert (iter->first);
+    
+    return effects2;
 }
 
 void MWMechanics::Alchemy::applyTools (int flags, float& value) const
@@ -159,7 +126,6 @@ void MWMechanics::Alchemy::updateEffects()
 
     // find effects
     std::set<EffectKey> effects (listEffects());
-    filterEffects (effects);
 
     // general alchemy factor
     float x = getChance();
