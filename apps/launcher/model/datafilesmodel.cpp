@@ -13,10 +13,16 @@
 DataFilesModel::DataFilesModel(QObject *parent) :
     QAbstractTableModel(parent)
 {
+    mEncoding = QString("win1252");
 }
 
 DataFilesModel::~DataFilesModel()
 {
+}
+
+void DataFilesModel::setEncoding(const QString &encoding)
+{
+    mEncoding = encoding;
 }
 
 void DataFilesModel::setCheckState(const QModelIndex &index, Qt::CheckState state)
@@ -268,7 +274,7 @@ void DataFilesModel::addMasters(const QString &path)
 
         try {
             ESM::ESMReader fileReader;
-            fileReader.setEncoding(std::string("win1252"));
+            fileReader.setEncoding(mEncoding.toStdString());
             fileReader.open(dir.absoluteFilePath(path).toStdString());
 
             ESM::ESMReader::MasterList mlist = fileReader.getMasters();
@@ -328,7 +334,7 @@ void DataFilesModel::addPlugins(const QString &path)
 
         try {
             ESM::ESMReader fileReader;
-            fileReader.setEncoding(std::string("win1252"));
+            fileReader.setEncoding(mEncoding.toStdString());
             fileReader.open(dir.absoluteFilePath(path).toStdString());
 
             ESM::ESMReader::MasterList mlist = fileReader.getMasters();

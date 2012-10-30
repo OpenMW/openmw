@@ -32,6 +32,8 @@ public:
     inline QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const
        { return QAbstractTableModel::index(row, column, parent); }
 
+    void setEncoding(const QString &encoding);
+
     void addFile(EsmFile *file);
 
     void addMasters(const QString &path);
@@ -61,6 +63,8 @@ private:
 
     QHash<QString, QStringList> mDependencies;
     QHash<QString, Qt::CheckState> mCheckStates;
+
+    QString mEncoding;
 
 };
 

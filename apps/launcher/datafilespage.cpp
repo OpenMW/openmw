@@ -418,6 +418,13 @@ bool DataFilesPage::setupDataFiles()
             return false;
     }
 
+    // Set the charset for reading the esm/esp files
+    QString encoding = QString::fromStdString(variables["encoding"].as<std::string>());
+    if (!encoding.isEmpty() && encoding != QLatin1String("win1252")) {
+        mMastersModel->setEncoding(encoding);
+        mPluginsModel->setEncoding(encoding);
+    }
+
     // Add the paths to the respective models
     for (Files::PathContainer::iterator it = mDataDirs.begin(); it != mDataDirs.end(); ++it) {
         QString path = QString::fromStdString(it->string());
