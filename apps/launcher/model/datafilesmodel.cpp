@@ -223,35 +223,33 @@ void DataFilesModel::sort(int column, Qt::SortOrder order)
     // TODO: Make this more efficient
     emit layoutAboutToBeChanged();
 
+    QList<EsmFile *> sortedFiles;
 
-    QMap<QString, QString> timestamps;
+    QMultiMap<QString, QString> timestamps;
 
-    QList<EsmFile *>::ConstIterator it;
-    QList<EsmFile *>::ConstIterator itEnd = mFiles.constEnd();
+    foreach (EsmFile *file, mFiles)
+        timestamps.insert(file->modified().toString(Qt::ISODate), file->fileName());
 
-    // Make a list of files sorted by timestamp
-    int i = 0;
-    for (it = mFiles.constBegin(); it != itEnd; ++it) {
-        EsmFile *file = item(i);
-        ++i;
-        timestamps[file->modified().toString(Qt::ISODate)] = file->fileName();
-    }
-
-
-    // Now sort the actual list of files by timestamp
-    i = 0;
     QMapIterator<QString, QString> ti(timestamps);
+
     while (ti.hasNext()) {
         ti.next();
-        i++;
 
         QModelIndex index = indexFromItem(findItem(ti.value()));
 
-        if (index.isValid()) {
-            mFiles.swap(index.row(), i);
-        }
+        if (!index.isValid())
+            continue;
 
+        EsmFile *file = item(index.row());
+
+        if (!file)
+            continue;
+
+        sortedFiles.append(file);
     }
+
+    mFiles.clear();
+    mFiles = sortedFiles;
 
     emit layoutChanged();
 }
@@ -301,6 +299,7 @@ void DataFilesModel::addMasters(const QString &path)
 
         } catch(std::runtime_error &e) {
             // An error occurred while reading the .esp
+            qWarning() << "Error reading esp: " << e.what();
             continue;
         }
     }
@@ -361,6 +360,7 @@ void DataFilesModel::addPlugins(const QString &path)
             addFile(file);
         } catch(std::runtime_error &e) {
             // An error occurred while reading the .esp
+            qWarning() << "Error reading esp: " << e.what();
             continue;
         }
 
