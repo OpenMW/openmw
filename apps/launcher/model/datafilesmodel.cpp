@@ -60,10 +60,10 @@ QVariant DataFilesModel::data(const QModelIndex &index, int role) const
     if (!index.isValid())
         return QVariant();
 
-//    if (index.row() < 0 || index.row() >= mPlugins.size())
-//        return QVariant();
+    EsmFile *file = item(index.row());
 
-    EsmFile *file = mFiles.at(index.row());
+    if (!file)
+        return QVariant();
 
     const int column = index.column();
 
@@ -146,7 +146,10 @@ Qt::ItemFlags DataFilesModel::flags(const QModelIndex &index) const
     if (!index.isValid())
         return Qt::NoItemFlags;
 
-    EsmFile *file = mFiles.at(index.row());
+    EsmFile *file = item(index.row());
+
+    if (!file)
+        return Qt::NoItemFlags;
 
     if (mAvailableFiles.contains(file->fileName())) {
         if (index.column() == 0) {
@@ -384,7 +387,7 @@ EsmFile* DataFilesModel::findItem(const QString &name)
     return 0;
 }
 
-EsmFile* DataFilesModel::item(int row)
+EsmFile* DataFilesModel::item(int row) const
 {
     if (row >= 0 && row < mFiles.count())
         return mFiles.at(row);
