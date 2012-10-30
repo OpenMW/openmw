@@ -220,16 +220,9 @@ void DataFilesPage::createActions()
 
 void DataFilesPage::setupConfig()
 {
-    QString config = QString::fromStdString((mCfgMgr.getLocalPath() / "launcher.cfg").string());
-    QFile file(config);
-
-    if (!file.exists()) {
-        config = QString::fromStdString((mCfgMgr.getUserPath() / "launcher.cfg").string());
-    }
-
     // Open our config file
+    QString config = QString::fromStdString((mCfgMgr.getUserPath() / "launcher.cfg").string());
     mLauncherConfig = new QSettings(config, QSettings::IniFormat);
-    file.close();
 
     // Make sure we have no groups open
     while (!mLauncherConfig->group().isEmpty()) {
