@@ -141,11 +141,11 @@ void MainDialog::createPages()
 
     connect(mPlayPage->mProfilesComboBox,
             SIGNAL(currentIndexChanged(int)),
-            this, SLOT(profileChanged(int)));
+            mDataFilesPage->mProfilesComboBox, SLOT(setCurrentIndex(int)));
 
     connect(mDataFilesPage->mProfilesComboBox,
             SIGNAL(currentIndexChanged(int)),
-            this, SLOT(profileChanged(int)));
+            mPlayPage->mProfilesComboBox, SLOT(setCurrentIndex(int)));
 
 }
 
@@ -194,23 +194,6 @@ bool MainDialog::setup()
     }
 
     return true;
-}
-
-void MainDialog::profileChanged(int index)
-{
-    // Just to be sure, should always have a selection
-    if (!mIconWidget->selectionModel()->hasSelection()) {
-        return;
-    }
-
-    QString currentPage = mIconWidget->currentItem()->data(Qt::DisplayRole).toString();
-    if (currentPage == QLatin1String("Play")) {
-        mDataFilesPage->mProfilesComboBox->setCurrentIndex(index);
-    }
-
-    if (currentPage == QLatin1String("Data Files")) {
-        mPlayPage->mProfilesComboBox->setCurrentIndex(index);
-    }
 }
 
 void MainDialog::changePage(QListWidgetItem *current, QListWidgetItem *previous)

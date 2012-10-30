@@ -251,7 +251,7 @@ void DataFilesPage::setupConfig()
     }
 
     // Add a default profile
-    if (mProfilesComboBox->count() == 0) {
+    if (mProfilesComboBox->findText(QString("Default")) == -1) {
          mProfilesComboBox->addItem(QString("Default"));
     }
 
@@ -358,6 +358,8 @@ bool DataFilesPage::setupDataFiles()
         ("data-local", boost::program_options::value<std::string>()->default_value(""))
         ("fs-strict", boost::program_options::value<bool>()->implicit_value(true)->default_value(false))
         ("encoding", boost::program_options::value<std::string>()->default_value("win1252"));
+
+    //boost::program_options::notify(variables);
 
     mCfgMgr.readConfiguration(variables, desc);
 
