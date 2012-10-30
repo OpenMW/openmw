@@ -281,6 +281,7 @@ void DataFilesModel::addMasters(const QString &path)
                     continue;
 
                 EsmFile *file = new EsmFile(master);
+                file->setDates(info.lastModified(), info.lastRead());
 
                 // Add the master to the table
                 if (findItem(master) == 0)
@@ -299,9 +300,12 @@ void DataFilesModel::addMasters(const QString &path)
     dir.setNameFilters(QStringList(QLatin1String("*.esm")));
 
     foreach (const QString &path, dir.entryList()) {
+        QFileInfo info(dir.absoluteFilePath(path));
 
         if (findItem(path) == 0) {
             EsmFile *file = new EsmFile(path);
+            file->setDates(info.lastModified(), info.lastRead());
+
             addFile(file);
         }
 
