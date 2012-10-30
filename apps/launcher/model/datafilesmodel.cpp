@@ -96,15 +96,11 @@ QVariant DataFilesModel::data(const QModelIndex &index, int role) const
     case Qt::TextAlignmentRole: {
         switch (column) {
         case 0:
-            return Qt::AlignLeft + Qt::AlignVCenter;
         case 1:
             return Qt::AlignLeft + Qt::AlignVCenter;
         case 2:
-            return Qt::AlignRight + Qt::AlignVCenter;
         case 3:
-            return Qt::AlignRight + Qt::AlignVCenter;
         case 4:
-            return Qt::AlignRight + Qt::AlignVCenter;
         case 5:
             return Qt::AlignRight + Qt::AlignVCenter;
         default:
@@ -218,20 +214,34 @@ void DataFilesModel::sort(int column, Qt::SortOrder order)
     // TODO: Make this more efficient
     emit layoutAboutToBeChanged();
 
-    // A reference list we can sort
-    QStringList all = uncheckedItems();
-    //all.append(uncheckedItems());
 
-    // Sort the list of items naturally
-    qSort(all.begin(), all.end(), naturalSortLessThanCI);
+    QMap<QString, QString> timestamps;
 
-    for (int i = 0; i < all.size(); ++i) {
-        const QString currentItem = all.at(i);
-        QModelIndex index = indexFromItem(findItem(currentItem));
+    QList<EsmFile *>::ConstIterator it;
+    QList<EsmFile *>::ConstIterator itEnd = mFiles.constEnd();
 
-        // Move the actual item from the old position to the new
-        if (index.isValid())
+    // Make a list of files sorted by timestamp
+    int i = 0;
+    for (it = mFiles.constBegin(); it != itEnd; ++it) {
+        EsmFile *file = item(i);
+        ++i;
+        timestamps[file->modified().toString(Qt::ISODate)] = file->fileName();
+    }
+
+
+    // Now sort the actual list of files by timestamp
+    i = 0;
+    QMapIterator<QString, QString> ti(timestamps);
+    while (ti.hasNext()) {
+        ti.next();
+        i++;
+
+        QModelIndex index = indexFromItem(findItem(ti.value()));
+
+        if (index.isValid()) {
             mFiles.swap(index.row(), i);
+        }
+
     }
 
     emit layoutChanged();
@@ -381,13 +391,20 @@ EsmFile* DataFilesModel::item(int row)
 QStringList DataFilesModel::checkedItems()
 {
     QStringList list;
-    QHash<QString, Qt::CheckState>::ConstIterator it;
-    QHash<QString, Qt::CheckState>::ConstIterator itEnd = mCheckStates.constEnd();
 
-    for (it = mCheckStates.constBegin(); it != itEnd; ++it) {
-        if (it.value() == Qt::Checked) {
-            list << it.key();
-        }
+    QList<EsmFile *>::ConstIterator it;
+    QList<EsmFile *>::ConstIterator itEnd = mFiles.constEnd();
+
+    int i = 0;
+    for (it = mFiles.constBegin(); it != itEnd; ++it) {
+        EsmFile *file = item(i);
+        ++i;
+
+        QString name = file->fileName();
+
+        // Only add the items that are in the checked list and available
+        if (mCheckStates[name] == Qt::Checked && mAvailableFiles.contains(name))
+            list << name;
     }
 
     return list;

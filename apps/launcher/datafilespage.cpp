@@ -424,6 +424,7 @@ bool DataFilesPage::setupDataFiles()
         if (!showDataFilesWarning())
             return false;
     }
+
     // Add the paths to the respective models
     for (Files::PathContainer::iterator it = mDataDirs.begin(); it != mDataDirs.end(); ++it) {
         QString path = QString::fromStdString(it->string());
@@ -440,8 +441,10 @@ bool DataFilesPage::setupDataFiles()
         mPluginsModel->addPlugins(path);
     }
 
-//    mMastersModel->sort(0);
-//    mPluginsModel->sort(0);
+    mMastersModel->sort(0);
+    mPluginsModel->sort(0);
+//    mMastersTable->sortByColumn(3, Qt::AscendingOrder);
+//    mPluginsTable->sortByColumn(3, Qt::AscendingOrder);
 
 
     readConfig();
@@ -734,8 +737,8 @@ void DataFilesPage::setCheckState(QModelIndex index)
         QModelIndex sourceIndex = mPluginsProxyModel->mapToSource(index);
 
         (mPluginsModel->checkState(sourceIndex) == Qt::Checked)
-                ? mPluginsModel->setCheckState(index, Qt::Unchecked)
-                : mPluginsModel->setCheckState(index, Qt::Checked);
+                ? mPluginsModel->setCheckState(sourceIndex, Qt::Unchecked)
+                : mPluginsModel->setCheckState(sourceIndex, Qt::Checked);
     }
 
     if (object->objectName() == QLatin1String("MastersTable")) {
