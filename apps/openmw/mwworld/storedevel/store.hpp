@@ -70,22 +70,6 @@ namespace MWWorld
                 return x.mId < y.mId;
             }
 
-            template <>
-            bool operator()<ESM::Cell>(const ESM::Cell &x, const ESM::Cell &y) {
-                if (mCaseInsensitive) {
-                    return CICompareString()(x.mName, y.mName);
-                }
-                return x.mName < y.mName;
-            }
-
-            template <>
-            bool operator()<ESM::Pathgrid>(const ESM::Pathgrid &x, const ESM::Pathgrid &x) {    
-                if (mCaseInsensitive) {
-                    return CICompareString()(x.mCell, y.mCell);
-                }
-                return x.mCell < y.mCell;
-            }
-
             bool isCaseInsensitive() const {
                 return mCaseInsensitive;
             }
@@ -97,8 +81,8 @@ namespace MWWorld
                 if (x.length() != y.length()) {
                     return false;
                 }
-                std::string::iterator xit = x.begin();
-                std::string::iterator yit = y.begin();
+                std::string::const_iterator xit = x.begin();
+                std::string::const_iterator yit = y.begin();
                 for (; xit != x.end(); ++xit, ++yit) {
                     if (std::tolower(*xit) != std::tolower(*yit)) {
                         return false;
@@ -116,6 +100,22 @@ namespace MWWorld
         virtual int getSize() const = 0;
         virtual void load(ESM::ESMReader &esm, const std::string &id) = 0;
     };
+
+    template <>
+    bool StoreBase::Compare::operator()<ESM::Cell>(const ESM::Cell &x, const ESM::Cell &y) {
+        if (mCaseInsensitive) {
+            return CICompareString()(x.mName, y.mName);
+        }
+        return x.mName < y.mName;
+    }
+
+    template <>
+    bool StoreBase::Compare::operator()<ESM::Pathgrid>(const ESM::Pathgrid &x, const ESM::Pathgrid &y) {    
+        if (mCaseInsensitive) {
+            return CICompareString()(x.mCell, y.mCell);
+        }
+        return x.mCell < y.mCell;
+    }
 
     template <class T>
     class SharedIterator
@@ -214,7 +214,9 @@ namespace MWWorld
         const T *find(const std::string &id) const {
             const T *ptr = search(id);
             if (ptr == 0) {
-                throw std::runtime_error("object '" + id + "' not found");
+                std::ostringstream msg;
+                msg << "Object '" << id << "' not found";
+                throw std::runtime_error(msg.str());
             }
             return ptr;
         }
@@ -268,7 +270,7 @@ namespace MWWorld
 
         void listIdentifier(std::vector<std::string> &list) const {
             list.reserve(list.size() + getSize());
-            typename std::vector<T *>::iterator it = mShared.begin();
+            typename std::vector<T *>::const_iterator it = mShared.begin();
             for (; it != mShared.end(); ++it) {
                 list.push_back((*it)->mId);
             }
@@ -295,11 +297,11 @@ namespace MWWorld
         }
 
         const ESM::LandTexture *find(size_t index) const {
-            ESM::LandTexture *ptr = search(index);
+            const ESM::LandTexture *ptr = search(index);
             if (ptr == 0) {
-                throw std::runtime_error(
-                    "Land texture with index " + index " not found"
-                );
+                std::ostringstream msg;
+                msg << "Land texture with index " << index << " not found";
+                throw std::runtime_error(msg.str());
             }
             return ptr;
         }
@@ -308,7 +310,7 @@ namespace MWWorld
             return mData.size();
         }
 
-        int load(ESM::ESMReader &esm, const std::string &id) {
+        void load(ESM::ESMReader &esm, const std::string &id) {
             ESM::LandTexture ltex;
             ltex.load(esm);
 
@@ -331,59 +333,61 @@ namespace MWWorld
     template <>
     class Store<ESM::Land> : public StoreBase
     {
-        std::vector<ESM::Land> mData;
+        std::vector<ESM::Land *> mData;
 
         struct Compare
         {
-            bool operator()(const ESM::Land &x, const ESM::Land &y) {
-                if (x.mX == y.mX) {
-                    return x.mY < y.mY;
+            bool operator()(const ESM::Land *x, const ESM::Land *y) {
+                if (x->mX == y->mX) {
+                    return x->mY < y->mY;
                 }
-                return x.mX < y.mX;
+                return x->mX < y->mX;
             }
         };
 
     public:
-        typedef typename std::vector<ESM::Land>::const_iterator iterator;
+        typedef SharedIterator<ESM::Land> iterator;
 
         int getSize() const {
             return mData.size();
         }
 
         iterator begin() {
-            return mData.begin();
+            return iterator(mData.begin());
         }
 
         iterator end() {
-            return mData.end();
+            return iterator(mData.end());
         }
 
-        ESM::Land *search(int x, int y) const {
+        ESM::Land *search(int x, int y) {
             ESM::Land land;
             land.mX = x, land.mY = y;
 
-            std::vector<ESM::Land>::iterator it =
-                std::lower_bound(mData.begin(), mData.end(), land, Compare());
+            std::vector<ESM::Land *>::iterator it =
+                std::lower_bound(mData.begin(), mData.end(), &land, Compare());
 
-            if (it != mData.end() && it->mX == x && it->mY == y) {
-                return &(*it);
+            if (it != mData.end() && (*it)->mX == x && (*it)->mY == y) {
+                return *it;
             }
             return 0;
         }
 
-        ESM::Land *find(int x, int y) const {
+        ESM::Land *find(int x, int y) {
             ESM::Land *ptr = search(x, y);
             if (ptr == 0) {
-                throw std::runtime_error(
-                    "Land at (" + x + ", " + y + ") not found"
-                );
+                std::ostringstream msg;
+                msg << "Land at (" << x << ", " << y << ") not found";
+                throw std::runtime_error(msg.str());
             }
             return ptr;
         }
 
         void load(ESM::ESMReader &esm, const std::string &id) {
-            mData.push_back(ESM::Land());
-            mData.back().load(esm);
+            ESM::Land *ptr = new ESM::Land();
+            ptr->load(esm);
+
+            mData.push_back(ptr);
         }
 
         void setUp() {
@@ -423,7 +427,7 @@ namespace MWWorld
 
         Compare                 mIntCmp;
         std::vector<ESM::Cell>  mData;
-        iterator                mIntBegin, mIntEnd, mExtBegin, mExtEnd;
+        std::vector<ESM::Cell>::iterator mIntBegin, mIntEnd, mExtBegin, mExtEnd;
 
     public:
         Store<ESM::Cell>()
@@ -458,21 +462,21 @@ namespace MWWorld
         }
 
         const ESM::Cell *find(const std::string &id) const {
-            ESM::Cell *ptr = search(id);
+            const ESM::Cell *ptr = search(id);
             if (ptr == 0) {
-                throw std::runtime_error(
-                    "Interior cell '" + id + "' not found"
-                );
+                std::ostringstream msg;
+                msg << "Interior cell '" << id << "' not found";
+                throw std::runtime_error(msg.str());
             }
             return ptr;
         }
 
         const ESM::Cell *find(int x, int y) const {
-            ESM::Cell *ptr = search(x, y);
+            const ESM::Cell *ptr = search(x, y);
             if (ptr == 0) {
-                throw std::runtime_error(
-                    "Exterior cell at (" + x + ", " + y + ") not found"
-                );
+                std::ostringstream msg;
+                msg << "Exterior at (" << x << ", " << y << ") not found";
+                throw std::runtime_error(msg.str());
             }
             return ptr;
         }
@@ -550,8 +554,7 @@ namespace MWWorld
 
         void listIdentifier(std::vector<std::string> &list) const {
             list.reserve(list.size() + (mIntEnd - mIntBegin));
-            std::vector<ESM::Cell>::iterator it = mIntBegin;
-            for (; it != mIntEnd; ++it) {
+            for (iterator it = mIntBegin; it != mIntEnd; ++it) {
                 list.push_back(it->mName);
             }
         }
@@ -566,7 +569,8 @@ namespace MWWorld
     private:
         Compare                     mIntCmp;
         std::vector<ESM::Pathgrid>  mData;
-        iterator                    mIntBegin, mIntEnd, mExtBegin, mExtEnd;
+
+        std::vector<ESM::Pathgrid>::iterator mIntBegin, mIntEnd, mExtBegin, mExtEnd;
 
         struct IntExtOrdering
         {
@@ -635,11 +639,11 @@ namespace MWWorld
         }
 
         const ESM::Pathgrid *find(int x, int y) const {
-            ESM::Pathgrid *ptr = search(x, y);
+            const ESM::Pathgrid *ptr = search(x, y);
             if (ptr == 0) {
-                throw std::runtime_error(
-                    "Pathgrid at (" + x + ", " + y + ") not found"
-                );
+                std::ostringstream msg;
+                msg << "Pathgrid at (" << x << ", " << y << ") not found";
+                throw std::runtime_error(msg.str());
             }
             return ptr;
         }
@@ -656,11 +660,11 @@ namespace MWWorld
         }
 
         const ESM::Pathgrid *find(const std::string &name) const {
-            ESM::Pathgrid *ptr = search(name);
+            const ESM::Pathgrid *ptr = search(name);
             if (ptr == 0) {
-                throw std::runtime_error(
-                    "Pathgrid in cell '" + name + "' not found"
-                );
+                std::ostringstream msg;
+                msg << "Pathgrid in cell '" << name << "' not found";
+                throw std::runtime_error(msg.str());
             }
             return ptr;
         }
@@ -673,7 +677,7 @@ namespace MWWorld
         }
 
         const ESM::Pathgrid *find(const ESM::Cell &cell) const {
-            if (cell.mData.mFlags & ESM::Cell:Interior) {
+            if (cell.mData.mFlags & ESM::Cell::Interior) {
                 return find(cell.mName);
             }
             return find(cell.mData.mX, cell.mData.mY);
@@ -703,6 +707,145 @@ namespace MWWorld
             return mExtEnd;
         }
     };
+
+    template <class T>
+    class IndexedStore
+    {
+        struct Compare
+        {
+            bool operator()(const T &x, const T &y) const {
+                return x.mIndex < y.mIndex;
+            }
+        };
+    protected:
+        std::vector<T> mData;
+
+    public:
+        typedef typename std::vector<T>::const_iterator iterator;
+
+        IndexedStore() {}
+
+        IndexedStore(unsigned int size) {
+            mData.reserve(size);
+        }
+
+        iterator begin() const {
+            return mData.begin();
+        }
+
+        iterator end() const {
+            return mData.end();
+        }
+
+        /// \todo refine loading order
+        void load(ESM::ESMReader &esm) {
+            mData.push_back(T());
+            mData.back().load(esm);
+        }
+
+        int getSize() const {
+            return mData.size();
+        }
+
+        void setUp() {
+            std::sort(mData.begin(), mData.end(), Compare());
+        }
+
+        const T *search(int index) const {
+            T item;
+            item.mIndex = index;
+
+            iterator it =
+                std::lower_bound(mData.begin(), mData.end(), item, Compare());
+            if (it != mData.end() && it->mIndex == index) {
+                return &(*it);
+            }
+            return 0;
+        }
+
+        const T *find(int index) const {
+            T *ptr = search(index);
+            if (ptr == 0) {
+                std::ostringstream msg;
+                msg << "Object with index " << index << " not found";
+                throw std::runtime_error(msg.str());
+            }
+            return ptr;
+        }
+    };
+
+    template <>
+    struct Store<ESM::Skill> : public IndexedStore<ESM::Skill>
+    {
+        Store() {}
+        Store(unsigned int size)
+          : IndexedStore<ESM::Skill>(size)
+        {}
+    };
+
+    template <>
+    struct Store<ESM::MagicEffect> : public IndexedStore<ESM::MagicEffect>
+    {
+        Store() {}
+        Store(unsigned int size)
+          : IndexedStore<ESM::MagicEffect>(size)
+        {}
+    };
+
+    template <>
+    class Store<ESM::Attribute> : public IndexedStore<ESM::Attribute>
+    {
+        std::vector<ESM::Attribute> mData;
+
+    public:
+        typedef std::vector<ESM::Attribute>::const_iterator iterator;
+
+        Store() {
+            mData.reserve(ESM::Attribute::Length);
+        }
+
+        const ESM::Attribute *search(int index) const {
+            if (index < 0 || index >= mData.size()) {
+                return 0;
+            }
+            return &mData.at(index);
+        }
+
+        const ESM::Attribute *find(int index) const {
+            const ESM::Attribute *ptr = search(index);
+            if (ptr == 0) {
+                std::ostringstream msg;
+                msg << "Attribute with index " << index << " not found";
+                throw std::runtime_error(msg.str());
+            }
+            return ptr;
+        }
+
+        void setUp() {
+            for (int i = 0; i < ESM::Attribute::Length; ++i) {
+                mData.push_back(
+                    ESM::Attribute(
+                        ESM::Attribute::sAttributeIds[i],
+                        ESM::Attribute::sGmstAttributeIds[i],
+                        ESM::Attribute::sGmstAttributeDescIds[i]
+                    )
+                );
+            }
+        }
+
+        int getSize() const {
+            return mData.size();
+        }
+
+        iterator begin() const {
+            return mData.begin();
+        }
+
+        iterator end() const {
+            return mData.end();
+        }
+    };
+
 } //end namespace
 
 #endif
