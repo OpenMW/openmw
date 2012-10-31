@@ -659,7 +659,6 @@ if (NOT WIN32 AND NOT DPKG_PROGRAM AND NOT APPLE)
     #INSTALL(FILES "${OpenMW_BINARY_DIR}/plugins.cfg" DESTINATION "${SYSCONFDIR}" )
     INSTALL(FILES "${OpenMW_BINARY_DIR}/settings-default.cfg" DESTINATION "${SYSCONFDIR}" )
     INSTALL(FILES "${OpenMW_BINARY_DIR}/transparency-overrides.cfg" DESTINATION "${SYSCONFDIR}" )
-    INSTALL(FILES "${OpenMW_BINARY_DIR}/launcher.cfg" DESTINATION "${SYSCONFDIR}" )
 
     # Install resources
     INSTALL(DIRECTORY "${OpenMW_BINARY_DIR}/resources" DESTINATION "${DATADIR}" )

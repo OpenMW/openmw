@@ -101,8 +101,6 @@ endif()
 if (APPLE)
     configure_file(${CMAKE_SOURCE_DIR}/files/launcher.qss
         "${APP_BUNDLE_DIR}/../launcher.qss")
-    configure_file(${CMAKE_SOURCE_DIR}/files/launcher.cfg
-        "${APP_BUNDLE_DIR}/../launcher.cfg")
 else()
     configure_file(${CMAKE_SOURCE_DIR}/files/launcher.qss
         "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/resources/launcher.qss")
@@ -110,9 +108,6 @@ else()
     # Fallback in case getGlobalDataPath does not point to resources
     configure_file(${CMAKE_SOURCE_DIR}/files/launcher.qss
         "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/launcher.qss")
-
-    configure_file(${CMAKE_SOURCE_DIR}/files/launcher.cfg
-        "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/launcher.cfg")
 endif()
 
 if (BUILD_WITH_CODE_COVERAGE)
