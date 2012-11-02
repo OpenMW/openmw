@@ -67,7 +67,7 @@ StatsWindow::StatsWindow (MWBase::WindowManager& parWindowManager)
     for (int i = 0; i < ESM::Skill::Length; ++i)
     {
         mSkillValues.insert(std::pair<int, MWMechanics::Stat<float> >(i, MWMechanics::Stat<float>()));
-        mSkillWidgetMap.insert(std::pair<int, MyGUI::TextBox*>(i, nullptr));
+        mSkillWidgetMap.insert(std::pair<int, MyGUI::TextBox*>(i, (MyGUI::TextBox*)nullptr));
     }
 
     MyGUI::WindowPtr t = static_cast<MyGUI::WindowPtr>(mMainWidget);

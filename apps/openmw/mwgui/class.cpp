@@ -148,6 +148,8 @@ void PickClassDialog::setClassId(const std::string &classId)
 
 void PickClassDialog::onOkClicked(MyGUI::Widget* _sender)
 {
+    if(mClassList->getIndexSelected() == MyGUI::ITEM_NONE)
+	return;
     eventDone(this);
 }
 
@@ -641,6 +643,8 @@ void CreateClassDialog::onDescriptionEntered(WindowBase* parWindow)
 
 void CreateClassDialog::onOkClicked(MyGUI::Widget* _sender)
 {
+    if(getName().size() <= 0)
+        return;
     eventDone(this);
 }
 

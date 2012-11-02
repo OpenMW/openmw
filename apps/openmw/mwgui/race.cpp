@@ -149,6 +149,8 @@ void RaceDialog::close()
 
 void RaceDialog::onOkClicked(MyGUI::Widget* _sender)
 {
+    if(mRaceList->getIndexSelected() == MyGUI::ITEM_NONE)
+	return;
     eventDone(this);
 }
 

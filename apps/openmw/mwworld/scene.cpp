@@ -70,17 +70,9 @@ namespace MWWorld
     {
         std::cout << "Unloading cell\n";
         ListHandles functor;
-
-
-
-
-
-
+	
         (*iter)->forEach<ListHandles>(functor);
-
         {
-
-
             // silence annoying g++ warning
             for (std::vector<Ogre::SceneNode*>::const_iterator iter2 (functor.mHandles.begin());
                 iter2!=functor.mHandles.end(); ++iter2){
@@ -96,27 +88,20 @@ namespace MWWorld
             }
         }
 
-		mRendering.removeCell(*iter);
-		//mPhysics->removeObject("Unnamed_43");
+        mRendering.removeCell(*iter);
+       //mPhysics->removeObject("Unnamed_43");
 
         MWBase::Environment::get().getWorld()->getLocalScripts().clearCell (*iter);
         MWBase::Environment::get().getMechanicsManager()->dropActors (*iter);
         MWBase::Environment::get().getSoundManager()->stopSound (*iter);
-		mActiveCells.erase(*iter);
-
-
-
+        mActiveCells.erase(*iter);
     }
 
     void Scene::loadCell (Ptr::CellStore *cell)
     {
         // register local scripts
         MWBase::Environment::get().getWorld()->getLocalScripts().addCell (cell);
-
-
-
-        std::pair<CellStoreCollection::iterator, bool> result =
-            mActiveCells.insert(cell);
+        std::pair<CellStoreCollection::iterator, bool> result = mActiveCells.insert(cell);
 
         if(result.second)
         {
@@ -138,16 +123,10 @@ namespace MWWorld
             mRendering.configureAmbient(*cell);
             mRendering.requestMap(cell);
             mRendering.configureAmbient(*cell);
-
         }
-
     }
 
-    void
-    Scene::playerCellChange(
-        MWWorld::CellStore *cell,
-        const ESM::Position& pos,
-        bool adjustPlayerPos)
+    void Scene::playerCellChange(MWWorld::CellStore *cell, const ESM::Position& pos, bool adjustPlayerPos)
     {
         bool hasWater = cell->cell->mData.mFlags & cell->cell->HasWater;
         mPhysics->setCurrentWater(hasWater, cell->cell->mWater);
