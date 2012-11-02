@@ -268,8 +268,6 @@ void DataFilesModel::addMasters(const QString &path)
 
     // Read the dependencies from the plugins
     foreach (const QString &path, dir.entryList()) {
-        QFileInfo info(dir.absoluteFilePath(path));
-
         try {
             ESM::ESMReader fileReader;
             fileReader.setEncoding(mEncoding.toStdString());
@@ -286,6 +284,8 @@ void DataFilesModel::addMasters(const QString &path)
                 // Don't add esps
                 if (master.endsWith(".esp", Qt::CaseInsensitive))
                     continue;
+
+                QFileInfo info(dir.absoluteFilePath(master));
 
                 EsmFile *file = new EsmFile(master);
                 file->setDates(info.lastModified(), info.lastRead());
