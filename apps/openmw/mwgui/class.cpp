@@ -149,7 +149,7 @@ void PickClassDialog::setClassId(const std::string &classId)
 void PickClassDialog::onOkClicked(MyGUI::Widget* _sender)
 {
     if(mClassList->getIndexSelected() == MyGUI::ITEM_NONE)
-	return;
+        return;
     eventDone(this);
 }
 

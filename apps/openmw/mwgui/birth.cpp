@@ -94,7 +94,7 @@ void BirthDialog::setBirthId(const std::string &birthId)
 void BirthDialog::onOkClicked(MyGUI::Widget* _sender)
 {
     if(mBirthList->getIndexSelected() == MyGUI::ITEM_NONE)
-	return;
+        return;
     eventDone(this);
 }
 

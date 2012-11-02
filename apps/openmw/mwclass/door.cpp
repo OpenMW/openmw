@@ -81,14 +81,14 @@ namespace MWClass
         bool needKey = ptr.getCellRef().mLockLevel>0;
         bool hasKey = false;
         std::string keyName;
-	
-	// make key id lowercase
-	std::string keyId = ptr.getCellRef().mKey;
-	std::transform(keyId.begin(), keyId.end(), keyId.begin(), ::tolower);
+
+        // make key id lowercase
+        std::string keyId = ptr.getCellRef().mKey;
+        std::transform(keyId.begin(), keyId.end(), keyId.begin(), ::tolower);
         for (MWWorld::ContainerStoreIterator it = invStore.begin(); it != invStore.end(); ++it)
         {
-	    std::string refId = it->getCellRef().mRefID;
-	    std::transform(refId.begin(), refId.end(), refId.begin(), ::tolower);
+            std::string refId = it->getCellRef().mRefID;
+            std::transform(refId.begin(), refId.end(), refId.begin(), ::tolower);
             if (refId == keyId)
             {
                 hasKey = true;

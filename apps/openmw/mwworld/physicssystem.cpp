@@ -345,7 +345,7 @@ namespace MWWorld
 
     bool PhysicsSystem::toggleCollisionMode()
     {
-	playerphysics->ps.move_type = (playerphysics->ps.move_type == PM_NOCLIP ? PM_NORMAL : PM_NOCLIP);
+        playerphysics->ps.move_type = (playerphysics->ps.move_type == PM_NOCLIP ? PM_NORMAL : PM_NOCLIP);
         for(std::map<std::string,OEngine::Physic::PhysicActor*>::iterator it = mEngine->PhysicActorMap.begin(); it != mEngine->PhysicActorMap.end();it++)
         {
             if (it->first=="player")
