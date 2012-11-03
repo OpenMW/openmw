@@ -101,8 +101,7 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
             MWBase::Environment::get().getWorld()->doPhysics (movement, mEnvironment.getFrameDuration());
 
         // update world
-        if (!MWBase::Environment::get().getWindowManager()->isGuiMode())
-            MWBase::Environment::get().getWorld()->update (evt.timeSinceLastFrame);
+        MWBase::Environment::get().getWorld()->update (evt.timeSinceLastFrame, MWBase::Environment::get().getWindowManager()->isGuiMode());
 
         // update GUI
         Ogre::RenderWindow* window = mOgre->getWindow();

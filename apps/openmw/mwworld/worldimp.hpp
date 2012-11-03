@@ -280,7 +280,7 @@ namespace MWWorld
             ///< Skip the animation for the given MW-reference for one frame. Calls to this function for
             /// references that are currently not in the rendered scene should be ignored.
 
-            virtual void update (float duration);
+            virtual void update (float duration, bool paused);
 
             virtual bool placeObject (const Ptr& object, float cursorX, float cursorY);
             ///< place an object into the gameworld at the specified cursor position

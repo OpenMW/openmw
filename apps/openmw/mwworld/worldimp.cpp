@@ -858,11 +858,11 @@ namespace MWWorld
         mRendering->skipAnimation (ptr);
     }
 
-    void World::update (float duration)
+    void World::update (float duration, bool paused)
     {
         /// \todo split this function up into subfunctions
 
-        mWorldScene->update (duration);
+        mWorldScene->update (duration, paused);
         
         float pitch, yaw;
         Ogre::Vector3 eyepos;

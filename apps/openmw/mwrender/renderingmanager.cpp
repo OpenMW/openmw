@@ -313,7 +313,7 @@ RenderingManager::moveObjectToCell(
     child->setPosition(pos);
 }
 
-void RenderingManager::update (float duration)
+void RenderingManager::update (float duration, bool paused)
 {
     Ogre::Vector3 orig, dest;
     mPlayer->setCameraDistance();
@@ -328,12 +328,16 @@ void RenderingManager::update (float duration)
             mPlayer->setCameraDistance(test.second * orig.distance(dest), false, false);
         }
     }
+    mOcclusionQuery->update(duration);
+    
+    if(paused)
+        return;
+    
     mPlayer->update(duration);
 
     mActors.update (duration);
     mObjects.update (duration);
 
-    mOcclusionQuery->update(duration);
 
     mSkyManager->update(duration);
 

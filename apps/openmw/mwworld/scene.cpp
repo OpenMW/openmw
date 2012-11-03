@@ -62,8 +62,8 @@ namespace
 namespace MWWorld
 {
 
-    void Scene::update (float duration){
-        mRendering.update (duration);
+    void Scene::update (float duration, bool paused){
+        mRendering.update (duration, paused);
     }
 
     void Scene::unloadCell (CellStoreCollection::iterator iter)
@@ -306,45 +306,58 @@ namespace MWWorld
     {
         std::cout << "Changing to interior\n";
 
-        CellStore *cell = MWBase::Environment::get().getWorld()->getInterior(cellName);
 
-        // remove active
-        CellStoreCollection::iterator active = mActiveCells.begin();
-
-        // count number of cells to unload
-        int numUnload = 0;
-        while (active!=mActiveCells.end())
+        bool loadcell = (mCurrentCell == NULL);
+        if(!loadcell)
         {
-            ++active;
-            ++numUnload;
+            std::string nam = std::string(cellName);
+            std::string curnam = std::string(mCurrentCell->cell->mName);
+            std::transform(nam.begin(), nam.end(), nam.begin(), ::tolower);
+            std::transform(curnam.begin(), curnam.end(), curnam.begin(), ::tolower);
+            loadcell = nam != curnam;
         }
-
-        // unload
-        int current = 0;
-        active = mActiveCells.begin();
-        while (active!=mActiveCells.end())
+        if(loadcell)
         {
-            MWBase::Environment::get().getWindowManager ()->setLoadingProgress ("Unloading cells", 0, current, numUnload);
+            CellStore *cell = MWBase::Environment::get().getWorld()->getInterior(cellName);
 
-            unloadCell (active++);
-            ++current;
+            // remove active
+            CellStoreCollection::iterator active = mActiveCells.begin();
+
+            // count number of cells to unload
+            int numUnload = 0;
+            while (active!=mActiveCells.end())
+            {
+                ++active;
+                ++numUnload;
+            }
+
+            // unload
+            int current = 0;
+            active = mActiveCells.begin();
+            while (active!=mActiveCells.end())
+            {
+                MWBase::Environment::get().getWindowManager ()->setLoadingProgress ("Unloading cells", 0, current, numUnload);
+
+                unloadCell (active++);
+                ++current;
+            }
+
+            // Load cell.
+            std::cout << "cellName:" << cellName << std::endl;
+
+
+            MWBase::Environment::get().getWindowManager ()->setLoadingProgress ("Loading cells", 0, 0, 1);
+            loadCell (cell);
+
+            mCurrentCell = cell;
+
+            // adjust fog
+            mRendering.switchToInterior();
+            mRendering.configureFog(*cell);
         }
-
-        // Load cell.
-        std::cout << "cellName:" << cellName << std::endl;
-
-
-        MWBase::Environment::get().getWindowManager ()->setLoadingProgress ("Loading cells", 0, 0, 1);
-        loadCell (cell);
-
         // adjust player
-        mCurrentCell = cell;
-        playerCellChange (cell, position);
-
-        // adjust fog
-        mRendering.switchToInterior();
-        mRendering.configureFog(*cell);
-
+        playerCellChange (mCurrentCell, position);
+        
         // Sky system
         MWBase::Environment::get().getWorld()->adjustSky();
 
