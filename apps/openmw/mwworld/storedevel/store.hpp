@@ -1,97 +1,16 @@
 #ifndef OPENMW_MWWORLD_STORE_H
 #define OPENMW_MWWORLD_STORE_H
 
-#include <cctype>
-#include <cassert>
 #include <string>
 #include <vector>
-#include <algorithm>
 #include <stdexcept>
+
+#include "recordcmp.hpp"
 
 namespace MWWorld
 {
-    std::string lowerCase(const std::string &in)
-    {
-        std::string out = in;
-        std::transform(
-            in.begin(),
-            in.end(),
-            out.begin(),
-            (int (*)(int)) std::tolower
-        );
-
-        return out;
-    }
-
-    struct CICompareString
-    {
-        struct ci
-        {
-            bool operator()(int x, int y) {
-                return std::tolower(x) < std::tolower(y);
-            }
-        };
-
-        bool operator()(const std::string &x, const std::string &y) {
-            return std::lexicographical_compare(
-                x.begin(),
-                x.end(),
-                y.begin(),
-                y.end(),
-                ci()
-            );
-        }
-    };
-
     struct StoreBase
     {
-        class Compare
-        {
-            bool mCaseInsensitive;
-
-        public:
-            Compare()
-              : mCaseInsensitive(false)
-            {}
-
-            Compare(bool ci)
-              : mCaseInsensitive(ci)
-            {}
-
-            Compare(const Compare &orig)
-              : mCaseInsensitive(orig.mCaseInsensitive)
-            {}
-
-            template<class T>
-            bool operator()(const T &x, const T &y) {
-                if (mCaseInsensitive) {
-                    return CICompareString()(x.mId, y.mId);
-                }
-                return x.mId < y.mId;
-            }
-
-            bool isCaseInsensitive() const {
-                return mCaseInsensitive;
-            }
-
-            bool equalString(const std::string &x, const std::string &y) const {
-                if (!mCaseInsensitive) {
-                    return x == y;
-                }
-                if (x.length() != y.length()) {
-                    return false;
-                }
-                std::string::const_iterator xit = x.begin();
-                std::string::const_iterator yit = y.begin();
-                for (; xit != x.end(); ++xit, ++yit) {
-                    if (std::tolower(*xit) != std::tolower(*yit)) {
-                        return false;
-                    }
-                }
-                return true;
-            }
-        };
-
         virtual ~StoreBase() {}
 
         virtual void setUp() {}
@@ -100,22 +19,6 @@ namespace MWWorld
         virtual int getSize() const = 0;
         virtual void load(ESM::ESMReader &esm, const std::string &id) = 0;
     };
-
-    template <>
-    bool StoreBase::Compare::operator()<ESM::Cell>(const ESM::Cell &x, const ESM::Cell &y) {
-        if (mCaseInsensitive) {
-            return CICompareString()(x.mName, y.mName);
-        }
-        return x.mName < y.mName;
-    }
-
-    template <>
-    bool StoreBase::Compare::operator()<ESM::Pathgrid>(const ESM::Pathgrid &x, const ESM::Pathgrid &y) {    
-        if (mCaseInsensitive) {
-            return CICompareString()(x.mCell, y.mCell);
-        }
-        return x.mCell < y.mCell;
-    }
 
     template <class T>
     class SharedIterator
@@ -179,33 +82,27 @@ namespace MWWorld
     template <class T>
     class Store : public StoreBase
     {
-        Compare             mComp;
         std::vector<T>      mData;
         std::vector<T *>    mShared;
 
     public:
         Store()
-          : mComp(false)
-        {}
-
-        Store(bool ci)
-          : mComp(ci)
         {}
 
         Store(const Store<T> &orig)
-          : mComp(orig.mComp), mData(orig.mData)
+          : mData(orig.mData)
         {}
 
         typedef SharedIterator<T> iterator;
 
         const T* search(const std::string &id) const {
             T item;
-            item.mId = lowerCase(id);
+            item.mId = StringUtils::lowerCase(id);
 
             typename std::vector<T>::const_iterator it =
-                std::lower_bound(mData.begin(), mData.end(), item, mComp);
+                std::lower_bound(mData.begin(), mData.end(), item, RecordCmp());
 
-            if (it != mData.end() && mComp.equalString(it->mId, item.mId)) {
+            if (it != mData.end() && it->mId == item.mId) {
                 return &(*it);
             }
             return 0;
@@ -222,32 +119,13 @@ namespace MWWorld
         }
 
         void load(ESM::ESMReader &esm, const std::string &id) {
-            // reduce size of allocated memory to copy
             mData.push_back(T());
-
-            // some records requires id before loading
-            // make sure that string case is the same across container
-            if (mComp.isCaseInsensitive()) {
-                mData.back().mId = id;
-            } else {
-                mData.back().mId = lowerCase(id);
-            }
+            mData.back().mId = StringUtils::lowerCase(id);
             mData.back().load(esm);
-
-            // allow records to overwrite id on loading
-            if (!mComp.isCaseInsensitive()) {
-                std::string &s = mData.back().mId;
-                std::transform(
-                    s.begin(),
-                    s.end(),
-                    s.begin(),
-                    (int (*)(int)) std::tolower
-                );
-            }
         }
 
         void setUp() {
-            std::sort(mData.begin(), mData.end(), mComp);
+            std::sort(mData.begin(), mData.end(), RecordCmp());
 
             mShared.reserve(mData.size());
             typename std::vector<T>::iterator it = mData.begin();
@@ -276,6 +154,34 @@ namespace MWWorld
             }
         }
     };
+
+    template <>
+    void Store<ESM::Dialogue>::load(ESM::ESMReader &esm, const std::string &id) {
+        mData.push_back(ESM::Dialogue());
+        mData.back().mId = id;
+        mData.back().load(esm);
+    }
+
+    template <>
+    const ESM::Dialogue *Store<ESM::Dialogue>::search(const std::string &id) const {
+        ESM::Dialogue item;
+        item.mId = id;
+
+        std::vector<ESM::Dialogue>::const_iterator it =
+            std::lower_bound(mData.begin(), mData.end(), item, RecordCmp());
+
+        if (it != mData.end() && StringUtils::ciEqual(it->mId, id)) {
+            return &(*it);
+        }
+        return 0;
+    }
+
+    template <>
+    void Store<ESM::Script>::load(ESM::ESMReader &esm, const std::string &id) {
+        mData.push_back(ESM::Script());
+        mData.back().load(esm);
+        StringUtils::toLower(mData.back().mId);
+    }
 
     template <>
     class Store<ESM::LandTexture> : public StoreBase
@@ -402,6 +308,7 @@ namespace MWWorld
         typedef std::vector<ESM::Cell>::const_iterator iterator;
 
     private:
+
         struct ExtCompare
         {
             bool operator()(const ESM::Cell &x, const ESM::Cell &y) {
@@ -425,24 +332,21 @@ namespace MWWorld
             }
         };
 
-        Compare                 mIntCmp;
         std::vector<ESM::Cell>  mData;
         std::vector<ESM::Cell>::iterator mIntBegin, mIntEnd, mExtBegin, mExtEnd;
 
     public:
         Store<ESM::Cell>()
-          : mIntCmp(true)
         {}
-
 
         const ESM::Cell *search(const std::string &id) const {
             ESM::Cell cell;
             cell.mName = id;
 
             iterator it =
-                std::lower_bound(mIntBegin, mIntEnd, cell, mIntCmp);
+                std::lower_bound(mIntBegin, mIntEnd, cell, RecordCmp());
 
-            if (it != mIntEnd && mIntCmp.equalString(it->mName, id)) {
+            if (it != mIntEnd && StringUtils::ciEqual(it->mName, id)) {
                 return &(*it);
             }
             return 0;
@@ -494,7 +398,7 @@ namespace MWWorld
             mIntBegin = mData.begin();
             mIntEnd = mExtBegin;
 
-            std::sort(mIntBegin, mIntEnd, mIntCmp);
+            std::sort(mIntBegin, mIntEnd, RecordCmp());
             std::sort(mExtBegin, mExtEnd, ExtCompare());
         }
 
@@ -531,7 +435,7 @@ namespace MWWorld
         /// \todo implement appropriate index
         const ESM::Cell *searchExteriorByName(const std::string &id) const {
             for (iterator it = mExtBegin; it != mExtEnd; ++it) {
-                if (mIntCmp.equalString(it->mName, id)) {
+                if (StringUtils::ciEqual(it->mName, id)) {
                     return &(*it);
                 }
             }
@@ -541,7 +445,7 @@ namespace MWWorld
         /// \todo implement appropriate index
         const ESM::Cell *searchExteriorByRegion(const std::string &id) const {
             for (iterator it = mExtBegin; it != mExtEnd; ++it) {
-                if (mIntCmp.equalString(it->mRegion, id)) {
+                if (StringUtils::ciEqual(it->mRegion, id)) {
                     return &(*it);
                 }
             }
@@ -567,7 +471,6 @@ namespace MWWorld
         typedef std::vector<ESM::Pathgrid>::const_iterator iterator;
 
     private:
-        Compare                     mIntCmp;
         std::vector<ESM::Pathgrid>  mData;
 
         std::vector<ESM::Pathgrid>::iterator mIntBegin, mIntEnd, mExtBegin, mExtEnd;
@@ -595,9 +498,6 @@ namespace MWWorld
         };
 
     public:
-        Store<ESM::Pathgrid>()
-          : mIntCmp(true)
-        {}
 
         void load(ESM::ESMReader &esm, const std::string &id) {
             mData.push_back(ESM::Pathgrid());
@@ -621,7 +521,7 @@ namespace MWWorld
             mIntBegin = mData.begin();
             mIntEnd = mExtBegin;
 
-            std::sort(mIntBegin, mIntEnd, mIntCmp);
+            std::sort(mIntBegin, mIntEnd, RecordCmp());
             std::sort(mExtBegin, mExtEnd, ExtCompare());
         }
 
@@ -652,8 +552,8 @@ namespace MWWorld
             ESM::Pathgrid pg;
             pg.mCell = name;
 
-            iterator it = std::lower_bound(mIntBegin, mIntEnd, pg, mIntCmp);
-            if (it != mIntEnd && mIntCmp.equalString(it->mCell, name)) {
+            iterator it = std::lower_bound(mIntBegin, mIntEnd, pg, RecordCmp());
+            if (it != mIntEnd && StringUtils::ciEqual(it->mCell, name)) {
                 return &(*it);
             }
             return 0;
@@ -804,14 +704,14 @@ namespace MWWorld
             mData.reserve(ESM::Attribute::Length);
         }
 
-        const ESM::Attribute *search(int index) const {
-            if (index < 0 || index >= mData.size()) {
+        const ESM::Attribute *search(size_t index) const {
+            if (index >= mData.size()) {
                 return 0;
             }
             return &mData.at(index);
         }
 
-        const ESM::Attribute *find(int index) const {
+        const ESM::Attribute *find(size_t index) const {
             const ESM::Attribute *ptr = search(index);
             if (ptr == 0) {
                 std::ostringstream msg;
