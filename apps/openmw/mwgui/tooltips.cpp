@@ -364,6 +364,9 @@ IntSize ToolTips::createToolTip(const MWGui::ToolTipInfo& info)
     if (text.size() > 0 && text[0] == '\n')
         text.erase(0, 1);
 
+    if(caption.size() > 0 && isalnum(caption[0]))
+        caption[0] = toupper(caption[0]);
+
     const ESM::Enchantment* enchant = 0;
     const ESMS::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
     if (info.enchant != "")
