@@ -48,6 +48,7 @@ BirthDialog::BirthDialog(MWBase::WindowManager& parWindowManager)
     getWidget(okButton, "OKButton");
     okButton->setCaption(mWindowManager.getGameSettingString("sOK", ""));
     okButton->eventMouseButtonClick += MyGUI::newDelegate(this, &BirthDialog::onOkClicked);
+    okButton->setTextColour(MyGUI::Colour(0.6f, 0.56f, 0.45f));
 
     updateBirths();
     updateSpells();
@@ -82,6 +83,9 @@ void BirthDialog::setBirthId(const std::string &birthId)
         if (boost::iequals(*mBirthList->getItemDataAt<std::string>(i), birthId))
         {
             mBirthList->setIndexSelected(i);
+            MyGUI::ButtonPtr okButton;
+            getWidget(okButton, "OKButton");
+            okButton->setTextColour(MyGUI::Colour(0.75f, 0.6f, 0.35f));
             break;
         }
     }
@@ -107,6 +111,10 @@ void BirthDialog::onSelectBirth(MyGUI::ListBox* _sender, size_t _index)
 {
     if (_index == MyGUI::ITEM_NONE)
         return;
+
+    MyGUI::ButtonPtr okButton;
+    getWidget(okButton, "OKButton");
+    okButton->setTextColour(MyGUI::Colour(0.75f, 0.6f, 0.35f));
 
     const std::string *birthId = mBirthList->getItemDataAt<std::string>(_index);
     if (boost::iequals(mCurrentBirthId, *birthId))

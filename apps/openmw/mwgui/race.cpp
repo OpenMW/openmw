@@ -80,6 +80,7 @@ RaceDialog::RaceDialog(MWBase::WindowManager& parWindowManager)
     getWidget(okButton, "OKButton");
     okButton->setCaption(mWindowManager.getGameSettingString("sOK", ""));
     okButton->eventMouseButtonClick += MyGUI::newDelegate(this, &RaceDialog::onOkClicked);
+    okButton->setTextColour(MyGUI::Colour(0.6f, 0.56f, 0.45f));
 
     updateRaces();
     updateSkills();
@@ -121,6 +122,9 @@ void RaceDialog::setRaceId(const std::string &raceId)
         if (boost::iequals(*mRaceList->getItemDataAt<std::string>(i), raceId))
         {
             mRaceList->setIndexSelected(i);
+            MyGUI::ButtonPtr okButton;
+            getWidget(okButton, "OKButton");
+            okButton->setTextColour(MyGUI::Colour(0.75f, 0.6f, 0.35f));
             break;
         }
     }
@@ -202,6 +206,9 @@ void RaceDialog::onSelectRace(MyGUI::ListBox* _sender, size_t _index)
     if (_index == MyGUI::ITEM_NONE)
         return;
 
+    MyGUI::ButtonPtr okButton;
+    getWidget(okButton, "OKButton");
+    okButton->setTextColour(MyGUI::Colour(0.75f, 0.6f, 0.35f));
     const std::string *raceId = mRaceList->getItemDataAt<std::string>(_index);
     if (boost::iequals(mCurrentRaceId, *raceId))
         return;
