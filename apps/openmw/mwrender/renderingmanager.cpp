@@ -13,6 +13,7 @@
 #include <OgreCompositionTargetPass.h>
 #include <OgreCompositionPass.h>
 #include <OgreHardwarePixelBuffer.h>
+#include <OgreControllerManager.h>
 
 #include <extern/shiny/Main/Factory.hpp>
 #include <extern/shiny/Platforms/Ogre/OgrePlatform.hpp>
@@ -331,8 +332,13 @@ void RenderingManager::update (float duration, bool paused)
     mOcclusionQuery->update(duration);
     
     if(paused)
+    {
+        Ogre::ControllerManager::getSingleton().setTimeFactor(0.f);
         return;
-    
+    }
+    Ogre::ControllerManager::getSingleton().setTimeFactor(
+                MWBase::Environment::get().getWorld()->getTimeScaleFactor()/30.f);
+
     mPlayer->update(duration);
 
     mActors.update (duration);
