@@ -14,6 +14,7 @@
 #include "../mwbase/scriptmanager.hpp"
 #include "../mwbase/journal.hpp"
 #include "../mwbase/windowmanager.hpp"
+#include "../mwbase/mechanicsmanager.hpp"
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/refdata.hpp"
@@ -368,9 +369,12 @@ namespace MWDialogue
 
                 return true;
 
-
-            case '6'://dead
-                if(!selectCompare<int,int>(comp,0,select.mI)) return false;
+            case '6': // dead
+{
+std::cout<<"### "<<name<<", "<<select.mI<<", "<<MWBase::Environment::get().getMechanicsManager()->countDeaths (toLower (name))<<std::endl;
+}
+                 return selectCompare<int,int> (comp,
+                    MWBase::Environment::get().getMechanicsManager()->countDeaths (toLower (name)), select.mI);
 
             case '7':// not ID
                 if(select.mType==ESM::VT_String ||select.mType==ESM::VT_Int)//bug in morrowind here? it's not a short, it's a string
