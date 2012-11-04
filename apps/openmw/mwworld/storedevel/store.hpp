@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <map>
 #include <stdexcept>
 
 #include "recordcmp.hpp"
@@ -82,27 +83,35 @@ namespace MWWorld
     template <class T>
     class Store : public StoreBase
     {
-        std::vector<T>      mData;
+        std::vector<T>      mStatic;
         std::vector<T *>    mShared;
+        std::map<std::string, T> mDynamic;
+
+        typedef std::map<std::string, T> Dynamic;
 
     public:
         Store()
         {}
 
         Store(const Store<T> &orig)
-          : mData(orig.mData)
+          : mStatic(orig.mData)
         {}
 
         typedef SharedIterator<T> iterator;
 
-        const T* search(const std::string &id) const {
+        const T *search(const std::string &id) const {
             T item;
             item.mId = StringUtils::lowerCase(id);
 
-            typename std::vector<T>::const_iterator it =
-                std::lower_bound(mData.begin(), mData.end(), item, RecordCmp());
+            typename Dynamic::const_iterator dit = mDynamic.find(item.mId);
+            if (dit != mDynamic.end()) {
+                return &dit->second;
+            }
 
-            if (it != mData.end() && it->mId == item.mId) {
+            typename std::vector<T>::const_iterator it =
+                std::lower_bound(mStatic.begin(), mStatic.end(), item, RecordCmp());
+
+            if (it != mStatic.end() && it->mId == item.mId) {
                 return &(*it);
             }
             return 0;
@@ -112,33 +121,33 @@ namespace MWWorld
             const T *ptr = search(id);
             if (ptr == 0) {
                 std::ostringstream msg;
-                msg << "Object '" << id << "' not found";
+                msg << "Object '" << id << "' not found (const)";
                 throw std::runtime_error(msg.str());
             }
             return ptr;
         }
 
         void load(ESM::ESMReader &esm, const std::string &id) {
-            mData.push_back(T());
-            mData.back().mId = StringUtils::lowerCase(id);
-            mData.back().load(esm);
+            mStatic.push_back(T());
+            mStatic.back().mId = StringUtils::lowerCase(id);
+            mStatic.back().load(esm);
         }
 
         void setUp() {
-            std::sort(mData.begin(), mData.end(), RecordCmp());
+            std::sort(mStatic.begin(), mStatic.end(), RecordCmp());
 
-            mShared.reserve(mData.size());
-            typename std::vector<T>::iterator it = mData.begin();
-            for (; it != mData.end(); ++it) {
+            mShared.reserve(mStatic.size());
+            typename std::vector<T>::iterator it = mStatic.begin();
+            for (; it != mStatic.end(); ++it) {
                 mShared.push_back(&(*it));
             }
         }
 
-        iterator begin() {
+        iterator begin() const {
             return mShared.begin();
         }
 
-        iterator end() {
+        iterator end() const {
             return mShared.end();
         }
 
@@ -153,51 +162,90 @@ namespace MWWorld
                 list.push_back((*it)->mId);
             }
         }
+
+        T *search(const std::string &id) {
+            std::string key = StringUtils::lowerCase(id);
+            typename Dynamic::iterator dit = mDynamic.find(key);
+
+            if (dit != mDynamic.end()) {
+                return &dit->second;
+            }
+            return 0;
+        }
+
+        T *find(const std::string &id) {
+            T *ptr = search(id);
+            if (ptr == 0) {
+                std::ostringstream msg;
+                msg << "Object '" << id << "' not found (non-const)";
+                throw std::runtime_error(msg.str());
+            }
+            return ptr;
+        }
+
+        T *insert(const T &item) {
+            std::string id = StringUtils::lowerCase(item.mId);
+            std::pair<typename Dynamic::iterator, bool> result =
+                mDynamic.insert(std::pair<std::string, T>(id, item));
+            T *ptr = &result.first->second;
+            if (result.second) {
+                mShared.push_back(ptr);
+            } else {
+                *ptr = item;
+            }
+            return ptr;
+        }
+
+        bool erase(const std::string &id) {
+            std::string key = StringUtils::lowerCase(id);
+            typename Dynamic::iterator it = mDynamic.find(key);
+            if (it == mDynamic.end()) {
+                return false;
+            }
+            mDynamic.erase(it);
+
+            // have to reinit the whole shared part
+            mShared.erase(mShared.begin() + mStatic.size(), mShared.end());
+            for (it = mDynamic.begin(); it != mDynamic.end(); ++it) {
+                mShared.push_back(&it->second);
+            }
+            return true;
+        }
+
+        bool erase(const T &item) {
+            return erase(item.mId);
+        }
     };
 
     template <>
     void Store<ESM::Dialogue>::load(ESM::ESMReader &esm, const std::string &id) {
-        mData.push_back(ESM::Dialogue());
-        mData.back().mId = id;
-        mData.back().load(esm);
-    }
-
-    template <>
-    const ESM::Dialogue *Store<ESM::Dialogue>::search(const std::string &id) const {
-        ESM::Dialogue item;
-        item.mId = id;
-
-        std::vector<ESM::Dialogue>::const_iterator it =
-            std::lower_bound(mData.begin(), mData.end(), item, RecordCmp());
-
-        if (it != mData.end() && StringUtils::ciEqual(it->mId, id)) {
-            return &(*it);
-        }
-        return 0;
+        mStatic.push_back(ESM::Dialogue());
+        mStatic.back().mId = id;
+        mStatic.back().load(esm);
     }
 
     template <>
     void Store<ESM::Script>::load(ESM::ESMReader &esm, const std::string &id) {
-        mData.push_back(ESM::Script());
-        mData.back().load(esm);
-        StringUtils::toLower(mData.back().mId);
+        mStatic.push_back(ESM::Script());
+        mStatic.back().load(esm);
+        StringUtils::toLower(mStatic.back().mId);
     }
 
     template <>
     class Store<ESM::LandTexture> : public StoreBase
     {
-        std::vector<ESM::LandTexture> mData;
+        std::vector<ESM::LandTexture> mStatic;
 
     public:
         Store<ESM::LandTexture>() {
-            mData.reserve(128);
+            mStatic.reserve(128);
         }
 
         typedef std::vector<ESM::LandTexture>::const_iterator iterator;
 
         const ESM::LandTexture *search(size_t index) const {
-            if (index < mData.size()) {
-                return &mData.at(index);
+            if (index < mStatic.size()) {
+                return &mStatic.at(index);
             }
             return 0;
         }
@@ -213,33 +261,33 @@ namespace MWWorld
         }
 
         int getSize() const {
-            return mData.size();
+            return mStatic.size();
         }
 
         void load(ESM::ESMReader &esm, const std::string &id) {
             ESM::LandTexture ltex;
             ltex.load(esm);
 
-            if (ltex.mIndex >= (int) mData.size()) {
-                mData.resize(ltex.mIndex + 1);
+            if (ltex.mIndex >= (int) mStatic.size()) {
+                mStatic.resize(ltex.mIndex + 1);
             }
-            mData[ltex.mIndex] = ltex;
-            mData[ltex.mIndex].mId = id;
+            mStatic[ltex.mIndex] = ltex;
+            mStatic[ltex.mIndex].mId = id;
         }
 
-        iterator begin() {
-            return mData.begin();
+        iterator begin() const {
+            return mStatic.begin();
         }
 
-        iterator end() {
-            return mData.end();
+        iterator end() const {
+            return mStatic.end();
         }
     };
 
     template <>
     class Store<ESM::Land> : public StoreBase
     {
-        std::vector<ESM::Land *> mData;
+        std::vector<ESM::Land *> mStatic;
 
         struct Compare
         {
@@ -255,15 +303,15 @@ namespace MWWorld
         typedef SharedIterator<ESM::Land> iterator;
 
         int getSize() const {
-            return mData.size();
+            return mStatic.size();
         }
 
-        iterator begin() {
-            return iterator(mData.begin());
+        iterator begin() const {
+            return iterator(mStatic.begin());
         }
 
-        iterator end() {
-            return iterator(mData.end());
+        iterator end() const {
+            return iterator(mStatic.end());
         }
 
         ESM::Land *search(int x, int y) {
@@ -271,9 +319,9 @@ namespace MWWorld
             land.mX = x, land.mY = y;
 
             std::vector<ESM::Land *>::iterator it =
-                std::lower_bound(mData.begin(), mData.end(), &land, Compare());
+                std::lower_bound(mStatic.begin(), mStatic.end(), &land, Compare());
 
-            if (it != mData.end() && (*it)->mX == x && (*it)->mY == y) {
+            if (it != mStatic.end() && (*it)->mX == x && (*it)->mY == y) {
                 return *it;
             }
             return 0;
@@ -293,11 +341,11 @@ namespace MWWorld
             ESM::Land *ptr = new ESM::Land();
             ptr->load(esm);
 
-            mData.push_back(ptr);
+            mStatic.push_back(ptr);
         }
 
         void setUp() {
-            std::sort(mData.begin(), mData.end(), Compare());
+            std::sort(mStatic.begin(), mStatic.end(), Compare());
         }
     };
 
@@ -332,7 +380,7 @@ namespace MWWorld
             }
         };
 
-        std::vector<ESM::Cell>  mData;
+        std::vector<ESM::Cell>  mStatic;
         std::vector<ESM::Cell>::iterator mIntBegin, mIntEnd, mExtBegin, mExtEnd;
 
     public:
@@ -387,15 +435,15 @@ namespace MWWorld
 
         void setUp() {
             IntExtOrdering cmp;
-            std::sort(mData.begin(), mData.end(), cmp);
+            std::sort(mStatic.begin(), mStatic.end(), cmp);
 
             ESM::Cell cell;
             cell.mData.mFlags = 0;
             mExtBegin =
-                std::lower_bound(mData.begin(), mData.end(), cell, cmp);
-            mExtEnd = mData.end();
+                std::lower_bound(mStatic.begin(), mStatic.end(), cell, cmp);
+            mExtEnd = mStatic.end();
 
-            mIntBegin = mData.begin();
+            mIntBegin = mStatic.begin();
             mIntEnd = mExtBegin;
 
             std::sort(mIntBegin, mIntEnd, RecordCmp());
@@ -403,17 +451,17 @@ namespace MWWorld
         }
 
         void load(ESM::ESMReader &esm, const std::string &id) {
-            mData.push_back(ESM::Cell());
-            mData.back().mName = id;
-            mData.back().load(esm);
+            mStatic.push_back(ESM::Cell());
+            mStatic.back().mName = id;
+            mStatic.back().load(esm);
         }
 
         iterator begin() const {
-            return mData.begin();
+            return mStatic.begin();
         }
 
         iterator end() const {
-            return mData.end();
+            return mStatic.end();
         }
 
         iterator interiorsBegin() const {
@@ -453,7 +501,7 @@ namespace MWWorld
         }
 
         int getSize() const {
-            return mData.size();
+            return mStatic.size();
         }
 
         void listIdentifier(std::vector<std::string> &list) const {
@@ -471,7 +519,7 @@ namespace MWWorld
         typedef std::vector<ESM::Pathgrid>::const_iterator iterator;
 
     private:
-        std::vector<ESM::Pathgrid>  mData;
+        std::vector<ESM::Pathgrid>  mStatic;
 
         std::vector<ESM::Pathgrid>::iterator mIntBegin, mIntEnd, mExtBegin, mExtEnd;
 
@@ -500,25 +548,25 @@ namespace MWWorld
     public:
 
         void load(ESM::ESMReader &esm, const std::string &id) {
-            mData.push_back(ESM::Pathgrid());
-            mData.back().load(esm);
+            mStatic.push_back(ESM::Pathgrid());
+            mStatic.back().load(esm);
         }
 
         int getSize() const {
-            return mData.size();
+            return mStatic.size();
         }
 
         void setUp() {
             IntExtOrdering cmp;
-            std::sort(mData.begin(), mData.end(), cmp);
+            std::sort(mStatic.begin(), mStatic.end(), cmp);
 
             ESM::Pathgrid pg;
             pg.mData.mX = pg.mData.mY = 1;
             mExtBegin =
-                std::lower_bound(mData.begin(), mData.end(), pg, cmp);
-            mExtEnd = mData.end();
+                std::lower_bound(mStatic.begin(), mStatic.end(), pg, cmp);
+            mExtEnd = mStatic.end();
 
-            mIntBegin = mData.begin();
+            mIntBegin = mStatic.begin();
             mIntEnd = mExtBegin;
 
             std::sort(mIntBegin, mIntEnd, RecordCmp());
@@ -584,11 +632,11 @@ namespace MWWorld
         }
 
         iterator begin() const {
-            return mData.begin();
+            return mStatic.begin();
         }
 
         iterator end() const {
-            return mData.end();
+            return mStatic.end();
         }
 
         iterator interiorPathsBegin() const {
@@ -618,7 +666,7 @@ namespace MWWorld
             }
         };
     protected:
-        std::vector<T> mData;
+        std::vector<T> mStatic;
 
     public:
         typedef typename std::vector<T>::const_iterator iterator;
@@ -626,29 +674,29 @@ namespace MWWorld
         IndexedStore() {}
 
         IndexedStore(unsigned int size) {
-            mData.reserve(size);
+            mStatic.reserve(size);
         }
 
         iterator begin() const {
-            return mData.begin();
+            return mStatic.begin();
         }
 
         iterator end() const {
-            return mData.end();
+            return mStatic.end();
         }
 
         /// \todo refine loading order
         void load(ESM::ESMReader &esm) {
-            mData.push_back(T());
-            mData.back().load(esm);
+            mStatic.push_back(T());
+            mStatic.back().load(esm);
         }
 
         int getSize() const {
-            return mData.size();
+            return mStatic.size();
         }
 
         void setUp() {
-            std::sort(mData.begin(), mData.end(), Compare());
+            std::sort(mStatic.begin(), mStatic.end(), Compare());
         }
 
         const T *search(int index) const {
@@ -656,8 +704,8 @@ namespace MWWorld
             item.mIndex = index;
 
             iterator it =
-                std::lower_bound(mData.begin(), mData.end(), item, Compare());
-            if (it != mData.end() && it->mIndex == index) {
+                std::lower_bound(mStatic.begin(), mStatic.end(), item, Compare());
+            if (it != mStatic.end() && it->mIndex == index) {
                 return &(*it);
             }
             return 0;
@@ -695,20 +743,20 @@ namespace MWWorld
     template <>
     class Store<ESM::Attribute> : public IndexedStore<ESM::Attribute>
     {
-        std::vector<ESM::Attribute> mData;
+        std::vector<ESM::Attribute> mStatic;
 
     public:
         typedef std::vector<ESM::Attribute>::const_iterator iterator;
 
         Store() {
-            mData.reserve(ESM::Attribute::Length);
+            mStatic.reserve(ESM::Attribute::Length);
         }
 
         const ESM::Attribute *search(size_t index) const {
-            if (index >= mData.size()) {
+            if (index >= mStatic.size()) {
                 return 0;
             }
-            return &mData.at(index);
+            return &mStatic.at(index);
         }
 
         const ESM::Attribute *find(size_t index) const {
@@ -723,7 +771,7 @@ namespace MWWorld
 
         void setUp() {
             for (int i = 0; i < ESM::Attribute::Length; ++i) {
-                mData.push_back(
+                mStatic.push_back(
                     ESM::Attribute(
                         ESM::Attribute::sAttributeIds[i],
                         ESM::Attribute::sGmstAttributeIds[i],
@@ -734,15 +782,15 @@ namespace MWWorld
         }
 
         int getSize() const {
-            return mData.size();
+            return mStatic.size();
         }
 
         iterator begin() const {
-            return mData.begin();
+            return mStatic.begin();
         }
 
         iterator end() const {
-            return mData.end();
+            return mStatic.end();
         }
     };
 
