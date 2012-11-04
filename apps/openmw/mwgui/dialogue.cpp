@@ -192,8 +192,8 @@ void DialogueWindow::setKeywords(std::list<std::string> keyWords)
     if (mServices & Service_CreateSpells)
         mTopicsList->addItem(MWBase::Environment::get().getWorld()->getStore().gameSettings.find("sSpellmakingMenuTitle")->getString());
 
-    if (mServices & Service_Enchant)
-        mTopicsList->addItem(MWBase::Environment::get().getWorld()->getStore().gameSettings.find("sEnchanting")->getString());
+//    if (mServices & Service_Enchant)
+//        mTopicsList->addItem(MWBase::Environment::get().getWorld()->getStore().gameSettings.find("sEnchanting")->getString());
 
     if (mServices & Service_Training)
         mTopicsList->addItem(MWBase::Environment::get().getWorld()->getStore().gameSettings.find("sServiceTrainingTitle")->getString());
