@@ -58,7 +58,6 @@ namespace MWRender
          */
         void saveFogOfWar(MWWorld::CellStore* cell);
 
-
         /**
          * Get the interior map texture index and normalized position
          * on this texture, given a world position (in ogre coordinates)

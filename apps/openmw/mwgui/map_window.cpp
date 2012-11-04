@@ -266,13 +266,17 @@ MapWindow::MapWindow(MWBase::WindowManager& parWindowManager, const std::string&
     mGlobalMapRender = new MWRender::GlobalMap(cacheDir);
     mGlobalMapRender->render();
 
+    mGlobalMapRender->exploreCell(0,0);
+
     getWidget(mLocalMap, "LocalMap");
     getWidget(mGlobalMap, "GlobalMap");
     getWidget(mGlobalMapImage, "GlobalMapImage");
+    getWidget(mGlobalMapOverlay, "GlobalMapOverlay");
     getWidget(mPlayerArrowLocal, "CompassLocal");
     getWidget(mPlayerArrowGlobal, "CompassGlobal");
 
     mGlobalMapImage->setImageTexture("GlobalMap.png");
+    mGlobalMapOverlay->setImageTexture("GlobalMapOverlay");
 
     mGlobalMap->setVisible (false);
 
@@ -326,6 +330,11 @@ void MapWindow::addVisitedLocation(const std::string& name, int x, int y)
     markerWidget->setUserString("ToolTipType", "Layout");
     markerWidget->setUserString("ToolTipLayout", "TextToolTip");
     markerWidget->setUserString("Caption_Text", name);
+}
+
+void MapWindow::cellExplored(int x, int y)
+{
+    mGlobalMapRender->exploreCell(x,y);
 }
 
 void MapWindow::onDragStart(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id)

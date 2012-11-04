@@ -7,6 +7,7 @@
 #include <OgreColourValue.h>
 #include <OgreHardwareVertexBuffer.h>
 #include <OgreRoot.h>
+#include <OgreHardwarePixelBuffer.h>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -47,6 +48,7 @@ namespace MWRender
         mWidth = cellSize*(mMaxX-mMinX+1);
         mHeight = cellSize*(mMaxY-mMinY+1);
 
+        mExploredBuffer.resize((mMaxX-mMinX+1) * (mMaxY-mMinY+1) * 4);
 
         //if (!boost::filesystem::exists(mCacheDir + "/GlobalMap.png"))
         if (1)
@@ -179,5 +181,46 @@ namespace MWRender
         imageY = 1.f-float(y - mMinY + 1) / (mMaxY - mMinY + 1);
     }
 
+    void GlobalMap::exploreCell(int cellX, int cellY)
+    {
+        mExploredCells.push_back(std::make_pair(cellX, cellY));
+        int width = mMaxX-mMinX+1;
+        int height = mMaxY-mMinY+1;
 
+        if (mOverlayTexture.isNull())
+        {
+            mOverlayTexture = Ogre::TextureManager::getSingleton().createManual("GlobalMapOverlay", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
+                Ogre::TEX_TYPE_2D, width, height, 0, Ogre::PF_A8B8G8R8, Ogre::TU_DYNAMIC_WRITE_ONLY);
+        }
+
+        for (int x = mMinX; x <= mMaxX; ++x)
+        {
+            for (int y = mMinY; y <= mMaxY; ++y)
+            {
+                unsigned char r,g,b,a;
+                r = 0;
+                g = 0;
+                b = 0;
+                if (std::find(mExploredCells.begin(), mExploredCells.end(), std::make_pair(x, y)) != mExploredCells.end())
+                    a = 0;
+                else
+                    a = 128;
+                int texelX = (x-mMinX);
+                int texelY = (height-1) - (y-mMinY);
+
+                assert( static_cast<unsigned int>(texelY * width * 4 + texelX * 4+3) < mExploredBuffer.size());
+                mExploredBuffer[texelY * width * 4 + texelX * 4] = r;
+                mExploredBuffer[texelY * width * 4 + texelX * 4+1] = g;
+                mExploredBuffer[texelY * width * 4 + texelX * 4+2] = b;
+                mExploredBuffer[texelY * width * 4 + texelX * 4+3] = a;
+            }
+        }
+
+        Ogre::Image image;
+        image.loadDynamicImage(&mExploredBuffer[0], width, height, Ogre::PF_A8B8G8R8);
+
+        memcpy(mOverlayTexture->getBuffer()->lock(Ogre::HardwareBuffer::HBL_DISCARD),
+               &mExploredBuffer[0], width*height*4);
+        mOverlayTexture->getBuffer()->unlock();
+    }
 }
