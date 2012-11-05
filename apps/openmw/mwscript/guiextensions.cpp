@@ -108,13 +108,20 @@ namespace MWScript
                 // "Will match complete or partial cells, so ShowMap, "Vivec" will show cells Vivec and Vivec, Fred's House as well."
                 // http://www.uesp.net/wiki/Tes3Mod:ShowMap
 
-                const MWWorld::CellList::ExtCells& extCells = MWBase::Environment::get().getWorld ()->getStore ().cells.extCells;
-                for (MWWorld::CellList::ExtCells::const_iterator it = extCells.begin(); it != extCells.end(); ++it)
+                const MWWorld::Store<ESM::Cell> &cells =
+                    MWBase::Environment::get().getWorld()->getStore().get<ESM::Cell>();
+
+                MWWorld::Store<ESM::Cell>::iterator it = cells.extBegin();
+                for (; it != cells.extEnd(); ++it)
                 {
-                    std::string name = it->second->mName;
+                    std::string name = it->mName;
                     boost::algorithm::to_lower(name);
                     if (name.find(cell) != std::string::npos)
-                        MWBase::Environment::get().getWindowManager()->addVisitedLocation (it->second->mName, it->first.first, it->first.second);
+                        MWBase::Environment::get().getWindowManager()->addVisitedLocation (
+                            it->mName,
+                            it->getGridX(),
+                            it->getGridY()
+                        );
                 }
             }
         };
@@ -125,12 +132,19 @@ namespace MWScript
 
             virtual void execute (Interpreter::Runtime& runtime)
             {
-                const MWWorld::CellList::ExtCells& extCells = MWBase::Environment::get().getWorld ()->getStore ().cells.extCells;
-                for (MWWorld::CellList::ExtCells::const_iterator it = extCells.begin(); it != extCells.end(); ++it)
+                const MWWorld::Store<ESM::Cell> &cells =
+                    MWBase::Environment::get().getWorld ()->getStore().get<ESM::Cell>();
+
+                MWWorld::Store<ESM::Cell>::iterator it = cells.extBegin();
+                for (; it != cells.extEnd(); ++it)
                 {
-                    std::string name = it->second->mName;
+                    std::string name = it->mName;
                     if (name != "")
-                        MWBase::Environment::get().getWindowManager()->addVisitedLocation (name, it->first.first, it->first.second);
+                        MWBase::Environment::get().getWindowManager()->addVisitedLocation (
+                            name,
+                            it->getGridX(),
+                            it->getGridY()
+                        );
                 }
             }
         };

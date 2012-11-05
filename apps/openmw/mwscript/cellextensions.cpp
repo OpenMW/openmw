@@ -109,7 +109,7 @@ namespace MWScript
                     if (!(cell->mData.mFlags & ESM::Cell::Interior) && current.empty())
                     {
                         const ESM::Region *region =
-                            MWBase::Environment::get().getWorld()->getStore().regions.find (cell->mRegion);
+                            MWBase::Environment::get().getWorld()->getStore().get<ESM::Region>().find (cell->mRegion);
 
                         current = region->mName;
                     }

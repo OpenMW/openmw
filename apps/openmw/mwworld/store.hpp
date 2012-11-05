@@ -473,19 +473,19 @@ namespace MWWorld
             }
         }
 
-        iterator interiorsBegin() const {
+        iterator intBegin() const {
             return iterator(mSharedInt.begin());
         }
 
-        iterator interiorsEnd() const {
+        iterator intEnd() const {
             return iterator(mSharedInt.end());
         }
 
-        iterator exteriorsBegin() const {
+        iterator extBegin() const {
             return iterator(mSharedExt.begin());
         }
 
-        iterator exteriorsEnd() const {
+        iterator extEnd() const {
             return iterator(mSharedExt.end());
         }
 

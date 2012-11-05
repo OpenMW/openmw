@@ -42,26 +42,29 @@ namespace MWScript
 
     bool CompilerContext::isId (const std::string& name) const
     {
+        const MWWorld::ESMStore &store =
+            MWBase::Environment::get().getWorld()->getStore();
+
         return
-            MWBase::Environment::get().getWorld()->getStore().activators.search (name) ||
-            MWBase::Environment::get().getWorld()->getStore().potions.search (name) ||
-            MWBase::Environment::get().getWorld()->getStore().appas.search (name) ||
-            MWBase::Environment::get().getWorld()->getStore().armors.search (name) ||
-            MWBase::Environment::get().getWorld()->getStore().books.search (name) ||
-            MWBase::Environment::get().getWorld()->getStore().clothes.search (name) ||
-            MWBase::Environment::get().getWorld()->getStore().containers.search (name) ||
-            MWBase::Environment::get().getWorld()->getStore().creatures.search (name) ||
-            MWBase::Environment::get().getWorld()->getStore().doors.search (name) ||
-            MWBase::Environment::get().getWorld()->getStore().ingreds.search (name) ||
-            MWBase::Environment::get().getWorld()->getStore().creatureLists.search (name) ||
-            MWBase::Environment::get().getWorld()->getStore().itemLists.search (name) ||
-            MWBase::Environment::get().getWorld()->getStore().lights.search (name) ||
-            MWBase::Environment::get().getWorld()->getStore().lockpicks.search (name) ||
-            MWBase::Environment::get().getWorld()->getStore().miscItems.search (name) ||
-            MWBase::Environment::get().getWorld()->getStore().npcs.search (name) ||
-            MWBase::Environment::get().getWorld()->getStore().probes.search (name) ||
-            MWBase::Environment::get().getWorld()->getStore().repairs.search (name) ||
-            MWBase::Environment::get().getWorld()->getStore().statics.search (name) ||
-            MWBase::Environment::get().getWorld()->getStore().weapons.search (name);
+            store.get<ESM::Activator>().search (name) ||
+            store.get<ESM::Potion>().search (name) ||
+            store.get<ESM::Apparatus>().search (name) ||
+            store.get<ESM::Armor>().search (name) ||
+            store.get<ESM::Book>().search (name) ||
+            store.get<ESM::Cloth>().search (name) ||
+            store.get<ESM::Container>().search (name) ||
+            store.get<ESM::Creature>().search (name) ||
+            store.get<ESM::Door>().search (name) ||
+            store.get<ESM::Ingredient>().search (name) ||
+            store.get<ESM::CreatureLevList>().search (name) ||
+            store.get<ESM::ItemLevList>().search (name) ||
+            store.get<ESM::Light>().search (name) ||
+            store.get<ESM::Tool>().search (name) ||
+            store.get<ESM::Miscellaneous>().search (name) ||
+            store.get<ESM::NPC>().search (name) ||
+            store.get<ESM::Probe>().search (name) ||
+            store.get<ESM::Repair>().search (name) ||
+            store.get<ESM::Static>().search (name) ||
+            store.get<ESM::Weapon>().search (name);
     }
 }
