@@ -7,6 +7,7 @@
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
+#include "../mwbase/mechanicsmanager.hpp"
 
 #include "../mwworld/player.hpp"
 
@@ -76,7 +77,7 @@ namespace MWGui
         for (int i=0; i<3; ++i)
         {
             /// \todo mercantile skill
-            int price = pcStats.getSkill (bestSkills[i].first).getBase() * MWBase::Environment::get().getWorld ()->getStore ().gameSettings.find("iTrainingMod")->getInt ();
+            int price = MWBase::Environment::get().getMechanicsManager()->barterOffer(mPtr,pcStats.getSkill (bestSkills[i].first).getBase() * MWBase::Environment::get().getWorld ()->getStore ().gameSettings.find("iTrainingMod")->getInt (),true);
 
             std::string skin = (price > mWindowManager.getInventoryWindow ()->getPlayerGold ()) ? "SandTextGreyedOut" : "SandTextButton";
 

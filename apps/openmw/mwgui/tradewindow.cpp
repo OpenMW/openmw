@@ -6,6 +6,7 @@
 #include "../mwbase/world.hpp"
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
+#include "../mwbase/mechanicsmanager.hpp"
 
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/manualref.hpp"
@@ -318,16 +319,17 @@ namespace MWGui
     {
         /// \todo price adjustment depending on merchantile skill
 
-        mCurrentBalance -= MWWorld::Class::get(item).getValue(item) * count;
+        mCurrentBalance -= MWWorld::Class::get(item).getValue(item) * count
+            + MWBase::Environment::get().getMechanicsManager()->barterOffer(mPtr, MWWorld::Class::get(item).getValue(item) * count,false);
 
         updateLabels();
     }
 
     void TradeWindow::buyFromNpc(MWWorld::Ptr item, int count)
     {
-        /// \todo price adjustment depending on merchantile skill
 
-        mCurrentBalance += MWWorld::Class::get(item).getValue(item) * count;
+        mCurrentBalance += MWWorld::Class::get(item).getValue(item) * count 
+            -  MWBase::Environment::get().getMechanicsManager()->barterOffer(mPtr, MWWorld::Class::get(item).getValue(item) * count,true);
 
         updateLabels();
     }

@@ -8,6 +8,7 @@
 #include "../mwbase/world.hpp"
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
+#include "../mwbase/mechanicsmanager.hpp"
 
 #include "../mwworld/player.hpp"
 #include "../mwworld/manualref.hpp"
@@ -51,6 +52,7 @@ namespace MWGui
     {
         const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().spells.find(spellId);
         int price = spell->mData.mCost*MWBase::Environment::get().getWorld()->getStore().gameSettings.find("fSpellValueMult")->getFloat();
+        price = MWBase::Environment::get().getMechanicsManager()->barterOffer(mPtr,price,true);
 
         MyGUI::Button* toAdd =
             mSpellsView->createWidget<MyGUI::Button>(
