@@ -35,7 +35,8 @@ namespace MWDialogue
 
     std::string JournalEntry::idFromIndex (const std::string& topic, int index)
     {
-        const ESM::Dialogue *dialogue = MWBase::Environment::get().getWorld()->getStore().dialogs.find (topic);
+        const ESM::Dialogue *dialogue =
+            MWBase::Environment::get().getWorld()->getStore().get<ESM::Dialogue>().find (topic);
 
         for (std::vector<ESM::DialInfo>::const_iterator iter (dialogue->mInfo.begin());
             iter!=dialogue->mInfo.end(); ++iter)

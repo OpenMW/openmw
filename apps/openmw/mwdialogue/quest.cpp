@@ -18,7 +18,8 @@ namespace MWDialogue
 
     const std::string Quest::getName() const
     {
-        const ESM::Dialogue *dialogue = MWBase::Environment::get().getWorld()->getStore().dialogs.find (mTopic);
+        const ESM::Dialogue *dialogue =
+            MWBase::Environment::get().getWorld()->getStore().get<ESM::Dialogue>().find (mTopic);
 
         for (std::vector<ESM::DialInfo>::const_iterator iter (dialogue->mInfo.begin());
             iter!=dialogue->mInfo.end(); ++iter)
@@ -35,7 +36,8 @@ namespace MWDialogue
 
     void Quest::setIndex (int index)
     {
-        const ESM::Dialogue *dialogue = MWBase::Environment::get().getWorld()->getStore().dialogs.find (mTopic);
+        const ESM::Dialogue *dialogue =
+            MWBase::Environment::get().getWorld()->getStore().get<ESM::Dialogue>().find (mTopic);
 
         for (std::vector<ESM::DialInfo>::const_iterator iter (dialogue->mInfo.begin());
             iter!=dialogue->mInfo.end(); ++iter)
@@ -63,7 +65,8 @@ namespace MWDialogue
     {
         int index = -1;
 
-        const ESM::Dialogue *dialogue = MWBase::Environment::get().getWorld()->getStore().dialogs.find (entry.mTopic);
+        const ESM::Dialogue *dialogue =
+            MWBase::Environment::get().getWorld()->getStore().get<ESM::Dialogue>().find (entry.mTopic);
 
         for (std::vector<ESM::DialInfo>::const_iterator iter (dialogue->mInfo.begin());
             iter!=dialogue->mInfo.end(); ++iter)

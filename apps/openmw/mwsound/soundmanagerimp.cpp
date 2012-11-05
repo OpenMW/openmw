@@ -116,9 +116,8 @@ namespace MWSound
     std::string SoundManager::lookup(const std::string &soundId,
                        float &volume, float &min, float &max)
     {
-        const ESM::Sound *snd = MWBase::Environment::get().getWorld()->getStore().sounds.search(soundId);
-        if(snd == NULL)
-            throw std::runtime_error(std::string("Failed to lookup sound ")+soundId);
+        const ESM::Sound *snd =
+            MWBase::Environment::get().getWorld()->getStore().get<ESM::Sound>().find(soundId);
 
         volume *= pow(10.0, (snd->mData.mVolume/255.0*3348.0 - 3348.0) / 2000.0);
 
@@ -424,7 +423,9 @@ namespace MWSound
             total = 0;
         }
 
-        const ESM::Region *regn = MWBase::Environment::get().getWorld()->getStore().regions.search(regionName);
+        const ESM::Region *regn =
+            MWBase::Environment::get().getWorld()->getStore().get<ESM::Region>().search(regionName);
+
         if (regn == NULL)
             return;
 

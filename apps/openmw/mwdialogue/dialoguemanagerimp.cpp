@@ -589,10 +589,14 @@ namespace MWDialogue
         mCompilerContext.setExtensions (&extensions);
         mDialogueMap.clear();
         mActorKnownTopics.clear();
-        MWWorld::RecListCaseT<ESM::Dialogue>::MapType dialogueList = MWBase::Environment::get().getWorld()->getStore().dialogs.list;
-        for(MWWorld::RecListCaseT<ESM::Dialogue>::MapType::iterator it = dialogueList.begin(); it!=dialogueList.end();it++)
+
+        const MWWorld::Store<ESM::Dialogue> &dialogs =
+            MWBase::Environment::get().getWorld()->getStore().get<ESM::Dialogue>();
+
+        MWWorld::Store<ESM::Dialogue>::iterator it = dialogs.begin();
+        for (; it != dialogs.end(); ++it)
         {
-            mDialogueMap[toLower(it->first)] = it->second;
+            mDialogueMap[toLower(it->mId)] = *it;
         }
     }
 
@@ -641,16 +645,17 @@ namespace MWDialogue
 
         //greeting
         bool greetingFound = false;
-        //MWWorld::RecListT<ESM::Dialogue>::MapType dialogueList = MWBase::Environment::get().getWorld()->getStore().dialogs.list;
-        MWWorld::RecListCaseT<ESM::Dialogue>::MapType dialogueList = MWBase::Environment::get().getWorld()->getStore().dialogs.list;
-        for(MWWorld::RecListCaseT<ESM::Dialogue>::MapType::iterator it = dialogueList.begin(); it!=dialogueList.end();it++)
+        const MWWorld::Store<ESM::Dialogue> &dialogs =
+            MWBase::Environment::get().getWorld()->getStore().get<ESM::Dialogue>();
+
+        MWWorld::Store<ESM::Dialogue>::iterator it = dialogs.begin();
+        for (; it != dialogs.end(); ++it)
         {
-            ESM::Dialogue ndialogue = it->second;
-            if(ndialogue.mType == ESM::Dialogue::Greeting)
+            if(it->mType == ESM::Dialogue::Greeting)
             {
                 if (greetingFound) break;
-                for (std::vector<ESM::DialInfo>::const_iterator iter (it->second.mInfo.begin());
-                    iter!=it->second.mInfo.end(); ++iter)
+                for (std::vector<ESM::DialInfo>::const_iterator iter (it->mInfo.begin());
+                    iter!=it->mInfo.end(); ++iter)
                 {
                     if (isMatching (actor, *iter) && functionFilter(mActor,*iter,true))
                     {
@@ -664,7 +669,7 @@ namespace MWDialogue
                         win->addText(iter->mResponse);
                         executeScript(iter->mResultScript);
                         greetingFound = true;
-                        mLastTopic = it->first;
+                        mLastTopic = it->mId;
                         mLastDialogue = *iter;
                         break;
                     }
@@ -741,22 +746,26 @@ namespace MWDialogue
         mChoice = -1;
         mActorKnownTopics.clear();
         MWGui::DialogueWindow* win = MWBase::Environment::get().getWindowManager()->getDialogueWindow();
-        MWWorld::RecListCaseT<ESM::Dialogue>::MapType dialogueList = MWBase::Environment::get().getWorld()->getStore().dialogs.list;
-        for(MWWorld::RecListCaseT<ESM::Dialogue>::MapType::iterator it = dialogueList.begin(); it!=dialogueList.end();it++)
+
+        const MWWorld::Store<ESM::Dialogue> &dialogs =
+            MWBase::Environment::get().getWorld()->getStore().get<ESM::Dialogue>();
+
+
+        MWWordl::Store<ESM::Dialogue>::iterator it = dialogs.begin();
+        for (; it != dialogs.end(); ++it)
         {
-            ESM::Dialogue ndialogue = it->second;
-            if(ndialogue.mType == ESM::Dialogue::Topic)
+            if(it->mType == ESM::Dialogue::Topic)
             {
-                for (std::vector<ESM::DialInfo>::const_iterator iter (it->second.mInfo.begin());
-                    iter!=it->second.mInfo.end(); ++iter)
+                for (std::vector<ESM::DialInfo>::const_iterator iter (it->mInfo.begin());
+                    iter!=it->mInfo.end(); ++iter)
                 {
                     if (isMatching (mActor, *iter) && functionFilter(mActor,*iter,true))
                     {
-                        mActorKnownTopics.push_back(toLower(it->first));
+                        mActorKnownTopics.push_back(toLower(it->mId));
                         //does the player know the topic?
-                        if(mKnownTopics.find(toLower(it->first)) != mKnownTopics.end())
+                        if(mKnownTopics.find(toLower(it->mId)) != mKnownTopics.end())
                         {
-                            keywordList.push_back(it->first);
+                            keywordList.push_back(it->mId);
                             break;
                         }
                     }
