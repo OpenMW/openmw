@@ -189,11 +189,8 @@ namespace MWWorld
         mPlayer = new MWWorld::Player (mStore.npcs.find ("player"), *this);
         mRendering->attachCameraTo(mPlayer->getPlayer());
 
-        std::string playerCollisionFile = "meshes\\base_anim.nif";    //This is used to make a collision shape for our player
-                                                                      //We will need to support the 1st person file too in the future
         mPhysics->addActor(mPlayer->getPlayer());
-//        mPhysics->addActor (mPlayer->getPlayer().getRefData().getHandle(), playerCollisionFile, Ogre::Vector3 (0, 0, 0), 1, Ogre::Quaternion::ZERO);
-
+        
         // global variables
         mGlobalVariables = new Globals (mStore);
 
