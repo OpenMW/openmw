@@ -291,6 +291,7 @@ namespace MWGui
     void SpellCreationDialog::startSpellMaking (MWWorld::Ptr actor)
     {
         mPtr = actor;
+        mNameEdit->setCaption("");
 
         startEditing();
     }

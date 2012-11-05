@@ -170,7 +170,7 @@ void DialogueWindow::startDialogue(MWWorld::Ptr actor, std::string npcName)
     setTitle(npcName);
 
     mTopicsList->clear();
-    mHistory->eraseText(0,mHistory->getTextLength());
+    mHistory->setCaption("");
     updateOptions();
 }
 
