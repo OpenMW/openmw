@@ -25,7 +25,7 @@ namespace MWWorld
                 if (const T *instance = list.search (name))
                 {
                     LiveCellRef<T> ref;
-                    ref.base = instance;
+                    ref.mBase = instance;
 
                     mRef = ref;
                     mPtr = Ptr (&boost::any_cast<LiveCellRef<T>&> (mRef), 0);
@@ -42,7 +42,7 @@ namespace MWWorld
                 if (const T *instance = list.search (name))
                 {
                     LiveCellRef<T> ref;
-                    ref.base = instance;
+                    ref.mBase = instance;
 
                     mRef = ref;
                     mPtr = Ptr (&boost::any_cast<LiveCellRef<T>&> (mRef), 0);

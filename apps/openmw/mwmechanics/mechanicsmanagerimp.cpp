@@ -19,7 +19,7 @@ namespace MWMechanics
         MWMechanics::CreatureStats& creatureStats = MWWorld::Class::get (ptr).getCreatureStats (ptr);
         MWMechanics::NpcStats& npcStats = MWWorld::Class::get (ptr).getNpcStats (ptr);
 
-        const ESM::NPC *player = ptr.get<ESM::NPC>()->base;
+        const ESM::NPC *player = ptr.get<ESM::NPC>()->mBase;
 
         // reset
         creatureStats.setLevel(player->mNpdt52.mLevel);

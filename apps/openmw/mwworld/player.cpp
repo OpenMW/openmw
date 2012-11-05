@@ -17,8 +17,8 @@ namespace MWWorld
       mCellStore (0), mClass (0),
       mAutoMove (false), mForwardBackward (0)
     {
-        mPlayer.base = player;
-        mPlayer.ref.mRefID = "player";
+        mPlayer.mBase = player;
+        mPlayer.mRef.mRefID = "player";
         mName = player->mName;
         mMale = !(player->mFlags & ESM::NPC::Female);
         mRace = player->mRace;

@@ -497,7 +497,7 @@ void WeatherManager::update(float duration)
 
     if (exterior)
     {
-        std::string regionstr = MWBase::Environment::get().getWorld()->getPlayer().getPlayer().getCell()->cell->mRegion;
+        std::string regionstr = MWBase::Environment::get().getWorld()->getPlayer().getPlayer().getCell()->mCell->mRegion;
         boost::algorithm::to_lower(regionstr);
 
         if (mWeatherUpdateTime <= 0 || regionstr != mCurrentRegion)

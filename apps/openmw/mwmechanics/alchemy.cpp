@@ -38,11 +38,11 @@ std::set<MWMechanics::EffectKey> MWMechanics::Alchemy::listEffects() const
             const MWWorld::LiveCellRef<ESM::Ingredient> *ingredient = iter->get<ESM::Ingredient>();
             
             for (int i=0; i<4; ++i)
-                if (ingredient->base->mData.mEffectID[i]!=-1)
+                if (ingredient->mBase->mData.mEffectID[i]!=-1)
                 {
                     EffectKey key (
-                        ingredient->base->mData.mEffectID[i], ingredient->base->mData.mSkills[i]!=-1 ?
-                        ingredient->base->mData.mSkills[i] : ingredient->base->mData.mAttributes[i]);
+                        ingredient->mBase->mData.mEffectID[i], ingredient->mBase->mData.mSkills[i]!=-1 ?
+                        ingredient->mBase->mData.mSkills[i] : ingredient->mBase->mData.mAttributes[i]);
 
                     ++effects[key];
                 }
@@ -77,9 +77,9 @@ void MWMechanics::Alchemy::applyTools (int flags, float& value) const
     else
         return;
 
-    float toolQuality = setup==1 || setup==2 ? mTools[tool].get<ESM::Apparatus>()->base->mData.mQuality : 0;
+    float toolQuality = setup==1 || setup==2 ? mTools[tool].get<ESM::Apparatus>()->mBase->mData.mQuality : 0;
     float calcinatorQuality = setup==1 || setup==3 ?
-        mTools[ESM::Apparatus::Calcinator].get<ESM::Apparatus>()->base->mData.mQuality : 0;
+        mTools[ESM::Apparatus::Calcinator].get<ESM::Apparatus>()->mBase->mData.mQuality : 0;
 
     float quality = 1;
     
@@ -130,7 +130,7 @@ void MWMechanics::Alchemy::updateEffects()
     // general alchemy factor
     float x = getChance();
 
-    x *= mTools[ESM::Apparatus::MortarPestle].get<ESM::Apparatus>()->base->mData.mQuality;
+    x *= mTools[ESM::Apparatus::MortarPestle].get<ESM::Apparatus>()->mBase->mData.mQuality;
     x *= MWBase::Environment::get().getWorld()->getStore().gameSettings.find ("fPotionStrengthMult")->getFloat();
 
     // value
@@ -258,7 +258,7 @@ void MWMechanics::Alchemy::addPotion (const std::string& name)
         
         for (TIngredientsIterator iter (beginIngredients()); iter!=endIngredients(); ++iter)
             if (!iter->isEmpty())
-                newRecord.mData.mWeight += iter->get<ESM::Ingredient>()->base->mData.mWeight;
+                newRecord.mData.mWeight += iter->get<ESM::Ingredient>()->mBase->mData.mWeight;
             
         newRecord.mData.mWeight /= countIngredients();
         
@@ -332,13 +332,13 @@ void MWMechanics::Alchemy::setAlchemist (const MWWorld::Ptr& npc)
     {    
         MWWorld::LiveCellRef<ESM::Apparatus>* ref = iter->get<ESM::Apparatus>();
     
-        int type = ref->base->mData.mType;
+        int type = ref->mBase->mData.mType;
     
         if (type<0 || type>=static_cast<int> (mTools.size()))
             throw std::runtime_error ("invalid apparatus type");
             
         if (!mTools[type].isEmpty())
-            if (ref->base->mData.mQuality<=mTools[type].get<ESM::Apparatus>()->base->mData.mQuality)
+            if (ref->mBase->mData.mQuality<=mTools[type].get<ESM::Apparatus>()->mBase->mData.mQuality)
                 continue;
         
         mTools[type] = *iter;        

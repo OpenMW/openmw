@@ -26,19 +26,21 @@ namespace MWWorld
   template <typename X>
   struct LiveCellRef
   {
-    LiveCellRef(const ESM::CellRef& cref, const X* b = NULL) : base(b), ref(cref),
-                                                          mData(ref) {}
+    LiveCellRef(const ESM::CellRef& cref, const X* b = NULL)
+      : mBase(b), mRef(cref), mData(mRef)
+    {}
 
-
-    LiveCellRef(const X* b = NULL) : base(b), mData(ref) {}
+    LiveCellRef(const X* b = NULL)
+      : mBase(b), mData(mRef)
+    {}
 
     // The object that this instance is based on.
-    const X* base;
+    const X* mBase;
 
     /* Information about this instance, such as 3D location and
        rotation and individual type-dependent data.
     */
-    ESM::CellRef ref;
+    ESM::CellRef mRef;
 
     /// runtime-data
     RefData mData;
@@ -50,7 +52,7 @@ namespace MWWorld
   {
     typedef LiveCellRef<X> LiveRef;
     typedef std::list<LiveRef> List;
-    List list;
+    List mList;
 
     // Search for the given reference in the given reclist from
     // ESMStore. Insert the reference into the list if a match is
@@ -62,14 +64,14 @@ namespace MWWorld
       if(obj == NULL)
         throw std::runtime_error("Error resolving cell reference " + ref.mRefID);
 
-      list.push_back(LiveRef(ref, obj));
+      mList.push_back(LiveRef(ref, obj));
     }
 
     LiveRef *find (const std::string& name)
     {
-        for (typename std::list<LiveRef>::iterator iter (list.begin()); iter!=list.end(); ++iter)
+        for (typename std::list<LiveRef>::iterator iter (mList.begin()); iter!=mList.end(); ++iter)
         {
-            if (iter->mData.getCount() > 0 && iter->ref.mRefID == name)
+            if (iter->mData.getCount() > 0 && iter->mRef.mRefID == name)
                 return &*iter;
         }
 
@@ -77,8 +79,8 @@ namespace MWWorld
     }
 
     LiveRef &insert(const LiveRef &item) {
-        list.push_back(item);
-        return list.back();
+        mList.push_back(item);
+        return mList.back();
     }
   };
 
@@ -94,33 +96,33 @@ namespace MWWorld
 
     CellStore (const ESM::Cell *cell_);
 
-    const ESM::Cell *cell;
+    const ESM::Cell *mCell;
     State mState;
     std::vector<std::string> mIds;
 
     float mWaterLevel;
 
     // Lists for each individual object type
-    CellRefList<ESM::Activator>         activators;
-    CellRefList<ESM::Potion>            potions;
-    CellRefList<ESM::Apparatus>         appas;
-    CellRefList<ESM::Armor>             armors;
-    CellRefList<ESM::Book>              books;
-    CellRefList<ESM::Clothing>          clothes;
-    CellRefList<ESM::Container>         containers;
-    CellRefList<ESM::Creature>          creatures;
-    CellRefList<ESM::Door>              doors;
-    CellRefList<ESM::Ingredient>        ingreds;
-    CellRefList<ESM::CreatureLevList>   creatureLists;
-    CellRefList<ESM::ItemLevList>       itemLists;
-    CellRefList<ESM::Light>             lights;
-    CellRefList<ESM::Tool>              lockpicks;
-    CellRefList<ESM::Miscellaneous>     miscItems;
-    CellRefList<ESM::NPC>               npcs;
-    CellRefList<ESM::Probe>             probes;
-    CellRefList<ESM::Repair>            repairs;
-    CellRefList<ESM::Static>            statics;
-    CellRefList<ESM::Weapon>            weapons;
+    CellRefList<ESM::Activator>         mActivators;
+    CellRefList<ESM::Potion>            mPotions;
+    CellRefList<ESM::Apparatus>         mAppas;
+    CellRefList<ESM::Armor>             mArmors;
+    CellRefList<ESM::Book>              mBooks;
+    CellRefList<ESM::Clothing>          mClothes;
+    CellRefList<ESM::Container>         mContainers;
+    CellRefList<ESM::Creature>          mCreatures;
+    CellRefList<ESM::Door>              mDoors;
+    CellRefList<ESM::Ingredient>        mIngreds;
+    CellRefList<ESM::CreatureLevList>   mCreatureLists;
+    CellRefList<ESM::ItemLevList>       mItemLists;
+    CellRefList<ESM::Light>             mLights;
+    CellRefList<ESM::Tool>              mLockpicks;
+    CellRefList<ESM::Miscellaneous>     mMiscItems;
+    CellRefList<ESM::NPC>               mNpcs;
+    CellRefList<ESM::Probe>             mProbes;
+    CellRefList<ESM::Repair>            mRepairs;
+    CellRefList<ESM::Static>            mStatics;
+    CellRefList<ESM::Weapon>            mWeapons;
 
     void load (const ESMS::ESMStore &store, ESM::ESMReader &esm);
 
@@ -133,32 +135,32 @@ namespace MWWorld
     bool forEach (Functor& functor)
     {
         return
-            forEachImp (functor, activators) &&
-            forEachImp (functor, potions) &&
-            forEachImp (functor, appas) &&
-            forEachImp (functor, armors) &&
-            forEachImp (functor, books) &&
-            forEachImp (functor, clothes) &&
-            forEachImp (functor, containers) &&
-            forEachImp (functor, creatures) &&
-            forEachImp (functor, doors) &&
-            forEachImp (functor, ingreds) &&
-            forEachImp (functor, creatureLists) &&
-            forEachImp (functor, itemLists) &&
-            forEachImp (functor, lights) &&
-            forEachImp (functor, lockpicks) &&
-            forEachImp (functor, miscItems) &&
-            forEachImp (functor, npcs) &&
-            forEachImp (functor, probes) &&
-            forEachImp (functor, repairs) &&
-            forEachImp (functor, statics) &&
-            forEachImp (functor, weapons);
+            forEachImp (functor, mActivators) &&
+            forEachImp (functor, mPotions) &&
+            forEachImp (functor, mAppas) &&
+            forEachImp (functor, mArmors) &&
+            forEachImp (functor, mBooks) &&
+            forEachImp (functor, mClothes) &&
+            forEachImp (functor, mContainers) &&
+            forEachImp (functor, mCreatures) &&
+            forEachImp (functor, mDoors) &&
+            forEachImp (functor, mIngreds) &&
+            forEachImp (functor, mCreatureLists) &&
+            forEachImp (functor, mItemLists) &&
+            forEachImp (functor, mLights) &&
+            forEachImp (functor, mLockpicks) &&
+            forEachImp (functor, mMiscItems) &&
+            forEachImp (functor, mNpcs) &&
+            forEachImp (functor, mProbes) &&
+            forEachImp (functor, mRepairs) &&
+            forEachImp (functor, mStatics) &&
+            forEachImp (functor, mWeapons);
     }
 
     bool operator==(const CellStore &cell) {
-        return  this->cell->mName == cell.cell->mName &&
-                this->cell->mData.mX == cell.cell->mData.mX &&
-                this->cell->mData.mY == cell.cell->mData.mY;
+        return  mCell->mName == cell.mCell->mName &&
+                mCell->mData.mX == cell.mCell->mData.mX &&
+                mCell->mData.mY == cell.mCell->mData.mY;
     }
 
     bool operator!=(const CellStore &cell) {
@@ -166,7 +168,7 @@ namespace MWWorld
     }
 
     bool isExterior() const {
-        return cell->isExterior();
+        return mCell->isExterior();
     }
 
   private:
@@ -174,9 +176,9 @@ namespace MWWorld
     template<class Functor, class List>
     bool forEachImp (Functor& functor, List& list)
     {
-        for (typename List::List::iterator iter (list.list.begin()); iter!=list.list.end();
+        for (typename List::List::iterator iter (list.mList.begin()); iter!=list.mList.end();
             ++iter)
-            if (!functor (iter->ref, iter->mData))
+            if (!functor (iter->mRef, iter->mData))
                 return false;
 
         return true;

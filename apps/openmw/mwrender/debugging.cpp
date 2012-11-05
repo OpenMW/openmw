@@ -228,22 +228,22 @@ void Debugging::togglePathgrid()
 
 void Debugging::enableCellPathgrid(MWWorld::Ptr::CellStore *store)
 {
-    ESM::Pathgrid *pathgrid = MWBase::Environment::get().getWorld()->getStore().pathgrids.search(*store->cell);
+    ESM::Pathgrid *pathgrid = MWBase::Environment::get().getWorld()->getStore().pathgrids.search(*store->mCell);
     if (!pathgrid) return;
 
     Vector3 cellPathGridPos(0, 0, 0);
-    if (store->cell->isExterior())
+    if (store->mCell->isExterior())
     {
-        cellPathGridPos.x = store->cell->mData.mX * ESM::Land::REAL_SIZE;
-        cellPathGridPos.y = store->cell->mData.mY * ESM::Land::REAL_SIZE;
+        cellPathGridPos.x = store->mCell->mData.mX * ESM::Land::REAL_SIZE;
+        cellPathGridPos.y = store->mCell->mData.mY * ESM::Land::REAL_SIZE;
     }
     SceneNode *cellPathGrid = mPathGridRoot->createChildSceneNode(cellPathGridPos);
     cellPathGrid->attachObject(createPathgridLines(pathgrid));
     cellPathGrid->attachObject(createPathgridPoints(pathgrid));
 
-    if (store->cell->isExterior())
+    if (store->mCell->isExterior())
     {
-        mExteriorPathgridNodes[std::make_pair(store->cell->mData.mX, store->cell->mData.mY)] = cellPathGrid;
+        mExteriorPathgridNodes[std::make_pair(store->mCell->getGridX(), store->mCell->getGridY())] = cellPathGrid;
     }
     else
     {
@@ -254,10 +254,10 @@ void Debugging::enableCellPathgrid(MWWorld::Ptr::CellStore *store)
 
 void Debugging::disableCellPathgrid(MWWorld::Ptr::CellStore *store)
 {
-    if (store->cell->isExterior())
+    if (store->mCell->isExterior())
     {
         ExteriorPathgridNodes::iterator it =
-                mExteriorPathgridNodes.find(std::make_pair(store->cell->mData.mX, store->cell->mData.mY));
+                mExteriorPathgridNodes.find(std::make_pair(store->mCell->getGridX(), store->mCell->getGridY()));
         if (it != mExteriorPathgridNodes.end())
         {
             destroyCellPathgridNode(it->second);

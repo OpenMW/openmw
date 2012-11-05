@@ -414,13 +414,13 @@ namespace MWSound
 
         //If the region has changed
         timePassed += duration;
-        if((current->cell->mData.mFlags & current->cell->Interior) || timePassed < 10)
+        if(!current->mCell->isExterior() || timePassed < 10)
             return;
         timePassed = 0;
 
-        if(regionName != current->cell->mRegion)
+        if(regionName != current->mCell->mRegion)
         {
-            regionName = current->cell->mRegion;
+            regionName = current->mCell->mRegion;
             total = 0;
         }
 
@@ -477,7 +477,7 @@ namespace MWSound
 
         MWWorld::Ptr player =
             MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
-        const ESM::Cell *cell = player.getCell()->cell;
+        const ESM::Cell *cell = player.getCell()->mCell;
 
         Environment env = Env_Normal;
         if((cell->mData.mFlags&cell->HasWater) && mListenerPos.z < cell->mWater)

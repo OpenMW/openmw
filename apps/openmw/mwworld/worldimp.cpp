@@ -25,10 +25,10 @@ namespace
         MWWorld::Ptr::CellStore *cell)
     {
         for (typename MWWorld::CellRefList<T>::List::iterator iter (
-            cellRefList.list.begin());
-            iter!=cellRefList.list.end(); ++iter)
+            cellRefList.mList.begin());
+            iter!=cellRefList.mList.end(); ++iter)
         {
-            if (!iter->base->script.empty() && iter->mData.getCount())
+            if (!iter->mBase->script.empty() && iter->mData.getCount())
             {
                 if (const ESM::Script *script = store.scripts.find (iter->base->script))
                 {
@@ -46,7 +46,7 @@ namespace
     {
         typedef typename MWWorld::CellRefList<T>::List::iterator iterator;
 
-        for (iterator iter (refList.list.begin()); iter!=refList.list.end(); ++iter)
+        for (iterator iter (refList.mList.begin()); iter!=refList.mList.end(); ++iter)
         {
             if(iter->mData.getCount() > 0 && iter->mData.getBaseNode()){
             if (iter->mData.getHandle()==handle)
@@ -64,44 +64,44 @@ namespace MWWorld
     Ptr World::getPtrViaHandle (const std::string& handle, Ptr::CellStore& cell)
     {
         if (MWWorld::LiveCellRef<ESM::Activator> *ref =
-            searchViaHandle (handle, cell.activators))
+            searchViaHandle (handle, cell.mActivators))
             return Ptr (ref, &cell);
-        if (MWWorld::LiveCellRef<ESM::Potion> *ref = searchViaHandle (handle, cell.potions))
+        if (MWWorld::LiveCellRef<ESM::Potion> *ref = searchViaHandle (handle, cell.mPotions))
             return Ptr (ref, &cell);
-        if (MWWorld::LiveCellRef<ESM::Apparatus> *ref = searchViaHandle (handle, cell.appas))
+        if (MWWorld::LiveCellRef<ESM::Apparatus> *ref = searchViaHandle (handle, cell.mAppas))
             return Ptr (ref, &cell);
-        if (MWWorld::LiveCellRef<ESM::Armor> *ref = searchViaHandle (handle, cell.armors))
+        if (MWWorld::LiveCellRef<ESM::Armor> *ref = searchViaHandle (handle, cell.mArmors))
             return Ptr (ref, &cell);
-        if (MWWorld::LiveCellRef<ESM::Book> *ref = searchViaHandle (handle, cell.books))
+        if (MWWorld::LiveCellRef<ESM::Book> *ref = searchViaHandle (handle, cell.mBooks))
             return Ptr (ref, &cell);
-        if (MWWorld::LiveCellRef<ESM::Clothing> *ref = searchViaHandle (handle, cell.clothes))
+        if (MWWorld::LiveCellRef<ESM::Clothing> *ref = searchViaHandle (handle, cell.mClothes))
             return Ptr (ref, &cell);
         if (MWWorld::LiveCellRef<ESM::Container> *ref =
-            searchViaHandle (handle, cell.containers))
+            searchViaHandle (handle, cell.mContainers))
             return Ptr (ref, &cell);
         if (MWWorld::LiveCellRef<ESM::Creature> *ref =
-            searchViaHandle (handle, cell.creatures))
+            searchViaHandle (handle, cell.mCreatures))
             return Ptr (ref, &cell);
-        if (MWWorld::LiveCellRef<ESM::Door> *ref = searchViaHandle (handle, cell.doors))
+        if (MWWorld::LiveCellRef<ESM::Door> *ref = searchViaHandle (handle, cell.mDoors))
             return Ptr (ref, &cell);
         if (MWWorld::LiveCellRef<ESM::Ingredient> *ref =
-            searchViaHandle (handle, cell.ingreds))
+            searchViaHandle (handle, cell.mIngreds))
             return Ptr (ref, &cell);
-        if (MWWorld::LiveCellRef<ESM::Light> *ref = searchViaHandle (handle, cell.lights))
+        if (MWWorld::LiveCellRef<ESM::Light> *ref = searchViaHandle (handle, cell.mLights))
             return Ptr (ref, &cell);
-        if (MWWorld::LiveCellRef<ESM::Tool> *ref = searchViaHandle (handle, cell.lockpicks))
+        if (MWWorld::LiveCellRef<ESM::Tool> *ref = searchViaHandle (handle, cell.mLockpicks))
             return Ptr (ref, &cell);
-        if (MWWorld::LiveCellRef<ESM::Miscellaneous> *ref = searchViaHandle (handle, cell.miscItems))
+        if (MWWorld::LiveCellRef<ESM::Miscellaneous> *ref = searchViaHandle (handle, cell.mMiscItems))
             return Ptr (ref, &cell);
-        if (MWWorld::LiveCellRef<ESM::NPC> *ref = searchViaHandle (handle, cell.npcs))
+        if (MWWorld::LiveCellRef<ESM::NPC> *ref = searchViaHandle (handle, cell.mNpcs))
             return Ptr (ref, &cell);
-        if (MWWorld::LiveCellRef<ESM::Probe> *ref = searchViaHandle (handle, cell.probes))
+        if (MWWorld::LiveCellRef<ESM::Probe> *ref = searchViaHandle (handle, cell.mProbes))
             return Ptr (ref, &cell);
-        if (MWWorld::LiveCellRef<ESM::Repair> *ref = searchViaHandle (handle, cell.repairs))
+        if (MWWorld::LiveCellRef<ESM::Repair> *ref = searchViaHandle (handle, cell.mRepairs))
             return Ptr (ref, &cell);
-        if (MWWorld::LiveCellRef<ESM::Static> *ref = searchViaHandle (handle, cell.statics))
+        if (MWWorld::LiveCellRef<ESM::Static> *ref = searchViaHandle (handle, cell.mStatics))
             return Ptr (ref, &cell);
-        if (MWWorld::LiveCellRef<ESM::Weapon> *ref = searchViaHandle (handle, cell.weapons))
+        if (MWWorld::LiveCellRef<ESM::Weapon> *ref = searchViaHandle (handle, cell.mWeapons))
             return Ptr (ref, &cell);
         return Ptr();
     }
@@ -585,10 +585,10 @@ namespace MWWorld
         if (*currCell != newCell) {
             if (isPlayer) {
                 if (!newCell.isExterior()) {
-                    changeToInteriorCell(toLower(newCell.cell->mName), pos);
+                    changeToInteriorCell(toLower(newCell.mCell->mName), pos);
                 } else {
-                    int cellX = newCell.cell->mData.mX;
-                    int cellY = newCell.cell->mData.mY;
+                    int cellX = newCell.mCell->getGridX();
+                    int cellY = newCell.mCell->getGridY();
                     mWorldScene->changeCell(cellX, cellY, pos, false);
                 }
             } else {
@@ -1033,10 +1033,7 @@ namespace MWWorld
         Ptr::CellStore *currentCell = mWorldScene->getCurrentCell();
         if (currentCell)
         {
-            if (!(currentCell->cell->mData.mFlags & ESM::Cell::Interior))
-                return true;
-            else
-                return false;
+            return currentCell->mCell->isExterior();
         }
         return false;
     }
@@ -1046,7 +1043,7 @@ namespace MWWorld
         Ptr::CellStore *currentCell = mWorldScene->getCurrentCell();
         if (currentCell)
         {
-            if (!(currentCell->cell->mData.mFlags & ESM::Cell::QuasiEx))
+            if (!(currentCell->mCell->mData.mFlags & ESM::Cell::QuasiEx))
                 return false;
             else
                 return true;
@@ -1071,7 +1068,7 @@ namespace MWWorld
 
     Ogre::Vector2 World::getNorthVector (CellStore* cell)
     {
-        MWWorld::CellRefList<ESM::Static>& statics = cell->statics;
+        MWWorld::CellRefList<ESM::Static>& statics = cell->mStatics;
         MWWorld::LiveCellRef<ESM::Static>* ref = statics.find("northmarker");
         if (!ref)
             return Vector2(0, 1);
@@ -1085,27 +1082,27 @@ namespace MWWorld
     {
         std::vector<World::DoorMarker> result;
 
-        MWWorld::CellRefList<ESM::Door>& doors = cell->doors;
-        std::list< MWWorld::LiveCellRef<ESM::Door> >& refList = doors.list;
+        MWWorld::CellRefList<ESM::Door>& doors = cell->mDoors;
+        std::list< MWWorld::LiveCellRef<ESM::Door> >& refList = doors.mList;
         for (std::list< MWWorld::LiveCellRef<ESM::Door> >::iterator it = refList.begin(); it != refList.end(); ++it)
         {
             MWWorld::LiveCellRef<ESM::Door>& ref = *it;
 
-            if (ref.ref.mTeleport)
+            if (ref.mRef.mTeleport)
             {
                 World::DoorMarker newMarker;
 
                 std::string dest;
-                if (ref.ref.mDestCell != "")
+                if (ref.mRef.mDestCell != "")
                 {
                     // door leads to an interior, use interior name
-                    dest = ref.ref.mDestCell;
+                    dest = ref.mRef.mDestCell;
                 }
                 else
                 {
                     // door leads to exterior, use cell name (if any), otherwise translated region name
                     int x,y;
-                    positionToIndex (ref.ref.mDoorDest.pos[0], ref.ref.mDoorDest.pos[1], x, y);
+                    positionToIndex (ref.mRef.mDoorDest.pos[0], ref.mRef.mDoorDest.pos[1], x, y);
                     const ESM::Cell* cell = mStore.cells.findExt(x,y);
                     if (cell->mName != "")
                         dest = cell->mName;
@@ -1256,7 +1253,7 @@ namespace MWWorld
         /// \fixme should rely on object height
         pos.z += 30;
 
-        return isUnderwater(*object.getCell()->cell, pos);
+        return isUnderwater(*object.getCell()->mCell, pos);
     }
 
     bool
@@ -1292,10 +1289,10 @@ namespace MWWorld
                 mPhysics->castRay(playerPos, Ogre::Vector3(0,0,-1), 50);
         bool isOnGround = (hit.first ? (hit.second.distance (playerPos) < 25) : false);
 
-        if (!isOnGround || isUnderwater (*currentCell->cell, playerPos))
+        if (!isOnGround || isUnderwater (*currentCell->mCell, playerPos))
             return 2;
 
-        if (currentCell->cell->mData.mFlags & ESM::Cell::NoSleep)
+        if (currentCell->mCell->mData.mFlags & ESM::Cell::NoSleep)
             return 1;
 
         return 0;

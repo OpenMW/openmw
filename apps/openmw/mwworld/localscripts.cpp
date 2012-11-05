@@ -12,12 +12,12 @@ namespace
         MWWorld::CellRefList<T>& cellRefList,  MWWorld::Ptr::CellStore *cell)
     {
         for (typename MWWorld::CellRefList<T>::List::iterator iter (
-            cellRefList.list.begin());
-            iter!=cellRefList.list.end(); ++iter)
+            cellRefList.mList.begin());
+            iter!=cellRefList.mList.end(); ++iter)
         {
-            if (!iter->base->mScript.empty() && iter->mData.getCount())
+            if (!iter->mBase->mScript.empty() && iter->mData.getCount())
             {
-                localScripts.add (iter->base->mScript, MWWorld::Ptr (&*iter, cell));
+                localScripts.add (iter->mBase->mScript, MWWorld::Ptr (&*iter, cell));
             }
         }
     }
@@ -73,23 +73,23 @@ void MWWorld::LocalScripts::add (const std::string& scriptName, const Ptr& ptr)
 
 void MWWorld::LocalScripts::addCell (Ptr::CellStore *cell)
 {
-    listCellScripts (*this, cell->activators, cell);
-    listCellScripts (*this, cell->potions, cell);
-    listCellScripts (*this, cell->appas, cell);
-    listCellScripts (*this, cell->armors, cell);
-    listCellScripts (*this, cell->books, cell);
-    listCellScripts (*this, cell->clothes, cell);
-    listCellScripts (*this, cell->containers, cell);
-    listCellScripts (*this, cell->creatures, cell);
-    listCellScripts (*this, cell->doors, cell);
-    listCellScripts (*this, cell->ingreds, cell);
-    listCellScripts (*this, cell->lights, cell);
-    listCellScripts (*this, cell->lockpicks, cell);
-    listCellScripts (*this, cell->miscItems, cell);
-    listCellScripts (*this, cell->npcs, cell);
-    listCellScripts (*this, cell->probes, cell);
-    listCellScripts (*this, cell->repairs, cell);
-    listCellScripts (*this, cell->weapons, cell);
+    listCellScripts (*this, cell->mActivators, cell);
+    listCellScripts (*this, cell->mPotions, cell);
+    listCellScripts (*this, cell->mAppas, cell);
+    listCellScripts (*this, cell->mArmors, cell);
+    listCellScripts (*this, cell->mBooks, cell);
+    listCellScripts (*this, cell->mClothes, cell);
+    listCellScripts (*this, cell->mContainers, cell);
+    listCellScripts (*this, cell->mCreatures, cell);
+    listCellScripts (*this, cell->mDoors, cell);
+    listCellScripts (*this, cell->mIngreds, cell);
+    listCellScripts (*this, cell->mLights, cell);
+    listCellScripts (*this, cell->mLockpicks, cell);
+    listCellScripts (*this, cell->mMiscItems, cell);
+    listCellScripts (*this, cell->mNpcs, cell);
+    listCellScripts (*this, cell->mProbes, cell);
+    listCellScripts (*this, cell->mRepairs, cell);
+    listCellScripts (*this, cell->mWeapons, cell);
 }
 
 void MWWorld::LocalScripts::clear()

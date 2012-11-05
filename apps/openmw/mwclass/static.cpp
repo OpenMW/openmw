@@ -33,9 +33,9 @@ namespace MWClass
     {
         MWWorld::LiveCellRef<ESM::Static> *ref =
             ptr.get<ESM::Static>();
-        assert(ref->base != NULL);
+        assert(ref->mBase != NULL);
 
-        const std::string &model = ref->base->mModel;
+        const std::string &model = ref->mBase->mModel;
         if (!model.empty()) {
             return "meshes\\" + model;
         }
@@ -60,6 +60,6 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Static> *ref =
             ptr.get<ESM::Static>();
 
-        return MWWorld::Ptr(&cell.statics.insert(*ref), &cell);
+        return MWWorld::Ptr(&cell.mStatics.insert(*ref), &cell);
     }
 }
