@@ -123,11 +123,14 @@ namespace MWGui
         const ESM::Class& playerClass = MWBase::Environment::get().getWorld ()->getPlayer ().getClass ();
         // retrieve the ID to this class
         std::string classId;
-        std::map<std::string, ESM::Class> list = MWBase::Environment::get().getWorld()->getStore ().classes.list;
-        for (std::map<std::string, ESM::Class>::iterator it = list.begin(); it != list.end(); ++it)
+        const MWWorld::Store<ESM::Class> &classes =
+            MWBase::Environment::get().getWorld()->getStore().get<ESM::Class>();
+
+        MWWorld::Store<ESM::Class>::iterator it = classes.begin();
+        for (; it != classes.end(); ++it)
         {
-            if (playerClass.mName == it->second.mName)
-                classId = it->first;
+            if (playerClass.mName == it->mName)
+                classId = it->mId;
         }
         mClassImage->setImageTexture ("textures\\levelup\\" + classId + ".dds");
 

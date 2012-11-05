@@ -50,7 +50,7 @@ void GenerateClassResultDialog::setClassId(const std::string &classId)
 {
     mCurrentClassId = classId;
     mClassImage->setImageTexture(std::string("textures\\levelup\\") + mCurrentClassId + ".dds");
-    mClassName->setCaption(MWBase::Environment::get().getWorld()->getStore().classes.find(mCurrentClassId)->mName);
+    mClassName->setCaption(MWBase::Environment::get().getWorld()->getStore().get<ESM::Class>().find(mCurrentClassId)->mName);
 }
 
 // widget controls
@@ -187,18 +187,16 @@ void PickClassDialog::updateClasses()
 
     const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
 
-    MWWorld::RecListT<ESM::Class>::MapType::const_iterator it = store.classes.list.begin();
-    MWWorld::RecListT<ESM::Class>::MapType::const_iterator end = store.classes.list.end();
     int index = 0;
-    for (; it != end; ++it)
+    MWWorld::Store<ESM::Cell>::iterator it = store.get<ESM::Cell>().begin();
+    for (; it != store.get<ESM::Cell>().end(); ++it)
     {
-        const ESM::Class &klass = it->second;
-        bool playable = (klass.mData.mIsPlayable != 0);
+        bool playable = (it->mData.mIsPlayable != 0);
         if (!playable) // Only display playable classes
             continue;
 
-        const std::string &id = it->first;
-        mClassList->addItem(klass.mName, id);
+        const std::string &id = it->mId;
+        mClassList->addItem(it->mName, id);
         if (boost::iequals(id, mCurrentClassId))
             mClassList->setIndexSelected(index);
         ++index;
@@ -210,7 +208,7 @@ void PickClassDialog::updateStats()
     if (mCurrentClassId.empty())
         return;
     const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
-    const ESM::Class *klass = store.classes.search(mCurrentClassId);
+    const ESM::Class *klass = store.get<ESM::Class>().search(mCurrentClassId);
     if (!klass)
         return;
 
