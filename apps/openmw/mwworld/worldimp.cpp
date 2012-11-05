@@ -407,15 +407,15 @@ namespace MWWorld
 
     void World::setDay (int day)
     {
-        if (day<0)
-            day = 0;
+        if (day<1)
+            day = 1;
 
         int month = mGlobalVariables->getInt ("month");
 
         while (true)
         {
             int days = getDaysPerMonth (month);
-            if (day<days)
+            if (day<=days)
                 break;
 
             if (month<11)
@@ -437,8 +437,6 @@ namespace MWWorld
         mRendering->skySetDate (day, month);
 
         mWeatherManager->setDate (day, month);
-
-
     }
 
     void World::setMonth (int month)
@@ -451,8 +449,8 @@ namespace MWWorld
 
         int days = getDaysPerMonth (month);
 
-        if (mGlobalVariables->getInt ("day")>=days)
-            mGlobalVariables->setInt ("day", days-1);
+        if (mGlobalVariables->getInt ("day")>days)
+            mGlobalVariables->setInt ("day", days);
 
         mGlobalVariables->setInt ("month", month);
 

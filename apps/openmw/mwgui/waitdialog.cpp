@@ -122,7 +122,7 @@ namespace MWGui
         if (hour >= 13) hour -= 12;
 
         std::string dateTimeText =
-                boost::lexical_cast<std::string>(MWBase::Environment::get().getWorld ()->getDay ()+1) + " "
+                boost::lexical_cast<std::string>(MWBase::Environment::get().getWorld ()->getDay ()) + " "
                 + month + " (#{sDay} " + boost::lexical_cast<std::string>(MWBase::Environment::get().getWorld ()->getTimeStamp ().getDay ()+1)
                 + ") " + boost::lexical_cast<std::string>(hour) + " " + (pm ? "#{sSaveMenuHelp05}" : "#{sSaveMenuHelp04}");
 
