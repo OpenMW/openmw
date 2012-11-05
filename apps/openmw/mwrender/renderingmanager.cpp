@@ -258,39 +258,44 @@ void RenderingManager::moveObject (const MWWorld::Ptr& ptr, const Ogre::Vector3&
             setPosition (position);
 }
 
-void RenderingManager::scaleObject (const MWWorld::Ptr& ptr, const Ogre::Vector3& scale){
-
+void RenderingManager::scaleObject (const MWWorld::Ptr& ptr, const Ogre::Vector3& scale)
+{
+    ptr.getRefData().getBaseNode()->setScale(scale);
 }
 
-bool
-RenderingManager::rotateObject(
-    const MWWorld::Ptr &ptr,
-    Ogre::Vector3 &rot,
-    bool adjust)
+bool RenderingManager::rotateObject( const MWWorld::Ptr &ptr, Ogre::Vector3 &rot, bool adjust)
 {
     bool isActive = ptr.getRefData().getBaseNode() != 0;
     bool isPlayer = isActive && ptr.getRefData().getHandle() == "player";
     bool force = true;
     
-    if (isPlayer) {
+    if (isPlayer)
         force = mPlayer->rotate(rot, adjust);
-    }
+    
     MWWorld::Class::get(ptr).adjustRotation(ptr, rot.x, rot.y, rot.z);
 
-    if (adjust) {
+    if (!isPlayer && isActive)
+    {
+        Ogre::Quaternion xr(Ogre::Radian(rot.x), Ogre::Vector3::UNIT_X);
+        Ogre::Quaternion yr(Ogre::Radian(rot.y), Ogre::Vector3::UNIT_Y);
+        Ogre::Quaternion zr(Ogre::Radian(rot.z), Ogre::Vector3::UNIT_Z);
+        Ogre::Quaternion newo = adjust ? (xr * yr * zr) * ptr.getRefData().getBaseNode()->getOrientation() : xr * yr * zr;
+        rot.x = newo.x;
+        rot.y = newo.y;
+        rot.z = newo.z;
+        ptr.getRefData().getBaseNode()->setOrientation(newo);
+    }
+    else if(isPlayer)
+    {
+        rot.x = mPlayer->getPitch();
+        rot.z = mPlayer->getYaw();
+    }
+    else if (adjust)
+    {
         /// \note Stored and passed in radians
         float *f = ptr.getRefData().getPosition().rot;
         rot.x += f[0], rot.y += f[1], rot.z += f[2];
     }
-    
-    if (!isPlayer && isActive) {
-        Ogre::Quaternion xr(Ogre::Radian(rot.x), Ogre::Vector3::UNIT_X);
-        Ogre::Quaternion yr(Ogre::Radian(rot.y), Ogre::Vector3::UNIT_Y);
-        Ogre::Quaternion zr(Ogre::Radian(rot.z), Ogre::Vector3::UNIT_Z);
-        
-        ptr.getRefData().getBaseNode()->setOrientation(xr * yr * zr);
-    }
-    
     return force;
 }
 

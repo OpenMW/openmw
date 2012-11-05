@@ -657,17 +657,16 @@ namespace MWWorld
     void World::moveObject (const Ptr& ptr, float x, float y, float z)
     {
         moveObjectImp(ptr, x, y, z);
-
-        
     }
 
     void World::scaleObject (const Ptr& ptr, float scale)
     {
         MWWorld::Class::get(ptr).adjustScale(ptr,scale);
-
         ptr.getCellRef().mScale = scale;
-        //scale = scale/ptr.getRefData().getBaseNode()->getScale().x;
-        ptr.getRefData().getBaseNode()->setScale(scale,scale,scale);
+        
+        if(ptr.getRefData().getBaseNode() == 0)
+            return;
+        mRendering->scaleObject(ptr, Vector3(scale,scale,scale));
         mPhysics->scaleObject(ptr);
     }
 
@@ -678,16 +677,16 @@ namespace MWWorld
         rot.y = Ogre::Degree(y).valueRadians();
         rot.z = Ogre::Degree(z).valueRadians();
         
-        if (mRendering->rotateObject(ptr, rot, adjust)) {
-            float *objRot = ptr.getRefData().getPosition().rot;
-            objRot[0] = rot.x, objRot[1] = rot.y, objRot[2] = rot.z;
+        float *objRot = ptr.getRefData().getPosition().rot;
+        if(ptr.getRefData().getBaseNode() == 0 || !mRendering->rotateObject(ptr, rot, adjust))
+        {
+            objRot[0] = (adjust ? objRot[0] + rot.x : rot.x), objRot[1] = (adjust ? objRot[1] + rot.y : rot.y), objRot[2] = (adjust ? objRot[2] + rot.z : rot.z);
+            return;
+         }
 
-
-            if (ptr.getRefData().getBaseNode() != 0) {
-                mPhysics->rotateObject(ptr);
-            }
-        }
-
+        // do this after rendering rotated the object so it gets changed by Class->adjustRotation
+        objRot[0] = rot.x, objRot[1] = rot.y, objRot[2] = rot.z;
+        mPhysics->rotateObject(ptr);
     }
 
     void World::safePlaceObject(const MWWorld::Ptr& ptr,MWWorld::CellStore &Cell,ESM::Position pos)
