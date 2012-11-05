@@ -104,15 +104,15 @@ namespace MWGui
 
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
 
-        for(unsigned int i = 0;i<mPtr.get<ESM::NPC>()->base->mTransport.size();i++)
+        for(unsigned int i = 0;i<mPtr.get<ESM::NPC>()->mBase->mTransport.size();i++)
         {
-            std::string cellname = mPtr.get<ESM::NPC>()->base->mTransport[i].mCellName;
+            std::string cellname = mPtr.get<ESM::NPC>()->mBase->mTransport[i].mCellName;
             bool interior = true;
             int x,y;
-            MWBase::Environment::get().getWorld()->positionToIndex(mPtr.get<ESM::NPC>()->base->mTransport[i].mPos.pos[0],
-                                                                   mPtr.get<ESM::NPC>()->base->mTransport[i].mPos.pos[1],x,y);
-            if(cellname == "") {cellname = MWBase::Environment::get().getWorld()->getExterior(x,y)->cell->mName; interior=  false;}
-            addDestination(cellname,mPtr.get<ESM::NPC>()->base->mTransport[i].mPos,interior);
+            MWBase::Environment::get().getWorld()->positionToIndex(mPtr.get<ESM::NPC>()->mBase->mTransport[i].mPos.pos[0],
+                                                                   mPtr.get<ESM::NPC>()->mBase->mTransport[i].mPos.pos[1],x,y);
+            if(cellname == "") {cellname = MWBase::Environment::get().getWorld()->getExterior(x,y)->mCell->mName; interior=  false;}
+            addDestination(cellname,mPtr.get<ESM::NPC>()->mBase->mTransport[i].mPos,interior);
         }
 
         updateLabels();

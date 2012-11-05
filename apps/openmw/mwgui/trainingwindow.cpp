@@ -129,7 +129,7 @@ namespace MWGui
         // increase skill
         MWWorld::LiveCellRef<ESM::NPC> *playerRef = player.get<ESM::NPC>();
         const ESM::Class *class_ = MWBase::Environment::get().getWorld()->getStore().classes.find (
-            playerRef->base->mClass);
+            playerRef->mBase->mClass);
         pcStats.increaseSkill (skillId, *class_, true);
 
         // remove gold

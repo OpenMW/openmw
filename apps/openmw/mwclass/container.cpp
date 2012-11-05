@@ -74,9 +74,9 @@ namespace MWClass
     {
         MWWorld::LiveCellRef<ESM::Container> *ref =
             ptr.get<ESM::Container>();
-        assert(ref->base != NULL);
+        assert(ref->mBase != NULL);
 
-        const std::string &model = ref->base->mModel;
+        const std::string &model = ref->mBase->mModel;
         if (!model.empty()) {
             return "meshes\\" + model;
         }
@@ -149,7 +149,7 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Container> *ref =
             ptr.get<ESM::Container>();
 
-        return ref->base->mName;
+        return ref->mBase->mName;
     }
 
     MWWorld::ContainerStore& Container::getContainerStore (const MWWorld::Ptr& ptr)
@@ -165,7 +165,7 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Container> *ref =
             ptr.get<ESM::Container>();
 
-        return ref->base->mScript;
+        return ref->mBase->mScript;
     }
 
     void Container::registerSelf()
@@ -180,7 +180,7 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Container> *ref =
             ptr.get<ESM::Container>();
 
-        return (ref->base->mName != "");
+        return (ref->mBase->mName != "");
     }
 
     MWGui::ToolTipInfo Container::getToolTipInfo (const MWWorld::Ptr& ptr) const
@@ -189,17 +189,17 @@ namespace MWClass
             ptr.get<ESM::Container>();
 
         MWGui::ToolTipInfo info;
-        info.caption = ref->base->mName;
+        info.caption = ref->mBase->mName;
 
         std::string text;
-        if (ref->ref.mLockLevel > 0)
-            text += "\n#{sLockLevel}: " + MWGui::ToolTips::toString(ref->ref.mLockLevel);
-        if (ref->ref.mTrap != "")
+        if (ref->mRef.mLockLevel > 0)
+            text += "\n#{sLockLevel}: " + MWGui::ToolTips::toString(ref->mRef.mLockLevel);
+        if (ref->mRef.mTrap != "")
             text += "\n#{sTrapped}";
 
         if (MWBase::Environment::get().getWindowManager()->getFullHelp()) {
-            text += MWGui::ToolTips::getMiscString(ref->ref.mOwner, "Owner");
-            text += MWGui::ToolTips::getMiscString(ref->base->mScript, "Script");
+            text += MWGui::ToolTips::getMiscString(ref->mRef.mOwner, "Owner");
+            text += MWGui::ToolTips::getMiscString(ref->mBase->mScript, "Script");
         }
 
         info.text = text;
@@ -212,7 +212,7 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Container> *ref =
             ptr.get<ESM::Container>();
 
-        return ref->base->mWeight;
+        return ref->mBase->mWeight;
     }
 
     float Container::getEncumbrance (const MWWorld::Ptr& ptr) const
@@ -239,6 +239,6 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Container> *ref =
             ptr.get<ESM::Container>();
 
-        return MWWorld::Ptr(&cell.containers.insert(*ref), &cell);
+        return MWWorld::Ptr(&cell.mContainers.insert(*ref), &cell);
     }
 }

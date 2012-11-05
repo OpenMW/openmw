@@ -274,7 +274,7 @@ void ContainerBase::onContainerClicked(MyGUI::Widget* _sender)
             if (mPtr.getTypeName() == typeid(ESM::Container).name())
             {
                 MWWorld::LiveCellRef<ESM::Container>* ref = mPtr.get<ESM::Container>();
-                if (ref->base->mFlags & ESM::Container::Organic)
+                if (ref->mBase->mFlags & ESM::Container::Organic)
                 {
                     // user notification
                     MWBase::Environment::get().getWindowManager()->

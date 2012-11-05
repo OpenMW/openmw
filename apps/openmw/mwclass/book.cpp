@@ -41,9 +41,9 @@ namespace MWClass
     {
         MWWorld::LiveCellRef<ESM::Book> *ref =
             ptr.get<ESM::Book>();
-        assert(ref->base != NULL);
+        assert(ref->mBase != NULL);
 
-        const std::string &model = ref->base->mModel;
+        const std::string &model = ref->mBase->mModel;
         if (!model.empty()) {
             return "meshes\\" + model;
         }
@@ -55,7 +55,7 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Book> *ref =
             ptr.get<ESM::Book>();
 
-        return ref->base->mName;
+        return ref->mBase->mName;
     }
 
     boost::shared_ptr<MWWorld::Action> Book::activate (const MWWorld::Ptr& ptr,
@@ -70,7 +70,7 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Book> *ref =
             ptr.get<ESM::Book>();
 
-        return ref->base->mScript;
+        return ref->mBase->mScript;
     }
 
     int Book::getValue (const MWWorld::Ptr& ptr) const
@@ -78,7 +78,7 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Book> *ref =
             ptr.get<ESM::Book>();
 
-        return ref->base->mData.mValue;
+        return ref->mBase->mData.mValue;
     }
 
     void Book::registerSelf()
@@ -103,7 +103,7 @@ namespace MWClass
           MWWorld::LiveCellRef<ESM::Book> *ref =
             ptr.get<ESM::Book>();
 
-        return ref->base->mIcon;
+        return ref->mBase->mIcon;
     }
 
     bool Book::hasToolTip (const MWWorld::Ptr& ptr) const
@@ -111,7 +111,7 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Book> *ref =
             ptr.get<ESM::Book>();
 
-        return (ref->base->mName != "");
+        return (ref->mBase->mName != "");
     }
 
     MWGui::ToolTipInfo Book::getToolTipInfo (const MWWorld::Ptr& ptr) const
@@ -120,20 +120,20 @@ namespace MWClass
             ptr.get<ESM::Book>();
 
         MWGui::ToolTipInfo info;
-        info.caption = ref->base->mName + MWGui::ToolTips::getCountString(ptr.getRefData().getCount());
-        info.icon = ref->base->mIcon;
+        info.caption = ref->mBase->mName + MWGui::ToolTips::getCountString(ptr.getRefData().getCount());
+        info.icon = ref->mBase->mIcon;
 
         std::string text;
 
-        text += "\n#{sWeight}: " + MWGui::ToolTips::toString(ref->base->mData.mWeight);
-        text += MWGui::ToolTips::getValueString(ref->base->mData.mValue, "#{sValue}");
+        text += "\n#{sWeight}: " + MWGui::ToolTips::toString(ref->mBase->mData.mWeight);
+        text += MWGui::ToolTips::getValueString(ref->mBase->mData.mValue, "#{sValue}");
 
         if (MWBase::Environment::get().getWindowManager()->getFullHelp()) {
-            text += MWGui::ToolTips::getMiscString(ref->ref.mOwner, "Owner");
-            text += MWGui::ToolTips::getMiscString(ref->base->mScript, "Script");
+            text += MWGui::ToolTips::getMiscString(ref->mRef.mOwner, "Owner");
+            text += MWGui::ToolTips::getMiscString(ref->mBase->mScript, "Script");
         }
 
-        info.enchant = ref->base->mEnchant;
+        info.enchant = ref->mBase->mEnchant;
 
         info.text = text;
 
@@ -145,7 +145,7 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Book> *ref =
             ptr.get<ESM::Book>();
 
-        return ref->base->mEnchant;
+        return ref->mBase->mEnchant;
     }
 
     boost::shared_ptr<MWWorld::Action> Book::use (const MWWorld::Ptr& ptr) const
@@ -159,6 +159,6 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Book> *ref =
             ptr.get<ESM::Book>();
 
-        return MWWorld::Ptr(&cell.books.insert(*ref), &cell);
+        return MWWorld::Ptr(&cell.mBooks.insert(*ref), &cell);
     }
 }

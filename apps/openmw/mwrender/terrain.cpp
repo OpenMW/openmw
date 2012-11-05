@@ -92,8 +92,8 @@ namespace MWRender
 
     void TerrainManager::cellAdded(MWWorld::Ptr::CellStore *store)
     {
-        const int cellX = store->cell->getGridX();
-        const int cellY = store->cell->getGridY();
+        const int cellX = store->mCell->getGridX();
+        const int cellY = store->mCell->getGridY();
 
         ESM::Land* land = MWBase::Environment::get().getWorld()->getStore().lands.search(cellX, cellY);
         if (land == NULL) // no land data means we're not going to create any terrain.
@@ -188,8 +188,8 @@ namespace MWRender
         {
             for ( int y = 0; y < 2; y++ )
             {
-                int terrainX = store->cell->getGridX() * 2 + x;
-                int terrainY = store->cell->getGridY() * 2 + y;
+                int terrainX = store->mCell->getGridX() * 2 + x;
+                int terrainY = store->mCell->getGridY() * 2 + y;
                 if (mTerrainGroup.getTerrain(terrainX, terrainY) != NULL)
                     mTerrainGroup.unloadTerrain(terrainX, terrainY);
             }

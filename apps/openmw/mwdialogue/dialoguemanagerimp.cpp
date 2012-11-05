@@ -390,7 +390,7 @@ namespace MWDialogue
                 if(select.mType==ESM::VT_Int)
                 {
                     MWWorld::LiveCellRef<ESM::NPC>* npc = actor.get<ESM::NPC>();
-                    int isFaction = int(toLower(npc->base->mFaction) == toLower(name));
+                    int isFaction = int(toLower(npc->mBase->mFaction) == toLower(name));
                     if(selectCompare<int,int>(comp,!isFaction,select.mI))
                         return false;
                 }
@@ -407,7 +407,7 @@ namespace MWDialogue
                 if(select.mType==ESM::VT_Int)
                 {
                     MWWorld::LiveCellRef<ESM::NPC>* npc = actor.get<ESM::NPC>();
-                    int isClass = int(toLower(npc->base->mClass) == toLower(name));
+                    int isClass = int(toLower(npc->mBase->mClass) == toLower(name));
                     if(selectCompare<int,int>(comp,!isClass,select.mI))
                         return false;
                 }
@@ -424,7 +424,7 @@ namespace MWDialogue
                 if(select.mType==ESM::VT_Int)
                 {
                     MWWorld::LiveCellRef<ESM::NPC>* npc = actor.get<ESM::NPC>();
-                    int isRace = int(toLower(npc->base->mRace) == toLower(name));
+                    int isRace = int(toLower(npc->mBase->mRace) == toLower(name));
                     if(selectCompare<int,int>(comp,!isRace,select.mI))
                         return false;
                 }
@@ -437,7 +437,7 @@ namespace MWDialogue
             case 'B'://not Cell
                 if(select.mType==ESM::VT_Int)
                 {
-                    int isCell = int(toLower(actor.getCell()->cell->mName) == toLower(name));
+                    int isCell = int(toLower(actor.getCell()->mCell->mName) == toLower(name));
                     if(selectCompare<int,int>(comp,!isCell,select.mI))
                         return false;
                 }
@@ -495,7 +495,7 @@ namespace MWDialogue
             if (!cellRef)
                 return false;
 
-            if (toLower (info.mRace)!=toLower (cellRef->base->mRace))
+            if (toLower (info.mRace)!=toLower (cellRef->mBase->mRace))
                 return false;
         }
 
@@ -510,7 +510,7 @@ namespace MWDialogue
             if (!cellRef)
                 return false;
 
-            if (toLower (info.mClass)!=toLower (cellRef->base->mClass))
+            if (toLower (info.mClass)!=toLower (cellRef->mBase->mClass))
                 return false;
         }
 
@@ -556,7 +556,7 @@ namespace MWDialogue
         if (!isCreature)
         {
             MWWorld::LiveCellRef<ESM::NPC>* npc = actor.get<ESM::NPC>();
-            if(npc->base->mFlags & npc->base->Female)
+            if(npc->mBase->mFlags & npc->mBase->Female)
             {
                 if(static_cast<int> (info.mData.mGender)==0)  return false;
             }
@@ -568,7 +568,7 @@ namespace MWDialogue
 
         // check cell
         if (!info.mCell.empty())
-            if (MWBase::Environment::get().getWorld()->getPlayer().getPlayer().getCell()->cell->mName != info.mCell)
+            if (MWBase::Environment::get().getWorld()->getPlayer().getPlayer().getCell()->mCell->mName != info.mCell)
                 return false;
 
         // TODO check DATAstruct
@@ -769,14 +769,14 @@ namespace MWDialogue
         if (mActor.getTypeName() == typeid(ESM::NPC).name())
         {
             MWWorld::LiveCellRef<ESM::NPC>* ref = mActor.get<ESM::NPC>();
-            if (ref->base->mHasAI)
-                services = ref->base->mAiData.mServices;
+            if (ref->mBase->mHasAI)
+                services = ref->mBase->mAiData.mServices;
         }
         else if (mActor.getTypeName() == typeid(ESM::Creature).name())
         {
             MWWorld::LiveCellRef<ESM::Creature>* ref = mActor.get<ESM::Creature>();
-            if (ref->base->mHasAI)
-                services = ref->base->mAiData.mServices;
+            if (ref->mBase->mHasAI)
+                services = ref->mBase->mAiData.mServices;
         }
 
         int windowServices = 0;
@@ -794,7 +794,7 @@ namespace MWDialogue
             || services & ESM::NPC::Misc)
             windowServices |= MWGui::DialogueWindow::Service_Trade;
 
-        if( !mActor.get<ESM::NPC>()->base->mTransport.empty())
+        if( !mActor.get<ESM::NPC>()->mBase->mTransport.empty())
             windowServices |= MWGui::DialogueWindow::Service_Travel;
 
         if (services & ESM::NPC::Spells)
