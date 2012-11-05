@@ -41,6 +41,8 @@ namespace
                     {
                         rendering.addObject(ptr);
                         class_.insertObject(ptr, physics);
+                        MWBase::Environment::get().getWorld()->rotateObject(ptr, 0, 0, 0, true);
+                        MWBase::Environment::get().getWorld()->scaleObject(ptr, ptr.getCellRef().mScale);
                     }
                     catch (const std::exception& e)
                     {
@@ -417,6 +419,8 @@ namespace MWWorld
     {
         mRendering.addObject(ptr);
         MWWorld::Class::get(ptr).insertObject(ptr, *mPhysics);
+        MWBase::Environment::get().getWorld()->rotateObject(ptr, 0, 0, 0, true);
+        MWBase::Environment::get().getWorld()->scaleObject(ptr, ptr.getCellRef().mScale);
     }
 
     void Scene::removeObjectFromScene (const Ptr& ptr)
