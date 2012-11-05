@@ -131,29 +131,29 @@ void MWMechanics::Alchemy::updateEffects()
     float x = getChance();
 
     x *= mTools[ESM::Apparatus::MortarPestle].get<ESM::Apparatus>()->mBase->mData.mQuality;
-    x *= MWBase::Environment::get().getWorld()->getStore().gameSettings.find ("fPotionStrengthMult")->getFloat();
+    x *= MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find ("fPotionStrengthMult")->getFloat();
 
     // value
     mValue = static_cast<int> (
-        x * MWBase::Environment::get().getWorld()->getStore().gameSettings.find ("iAlchemyMod")->getFloat());
+        x * MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find ("iAlchemyMod")->getFloat());
 
     // build quantified effect list
     for (std::set<EffectKey>::const_iterator iter (effects.begin()); iter!=effects.end(); ++iter)
     {
         const ESM::MagicEffect *magicEffect =
-            MWBase::Environment::get().getWorld()->getStore().magicEffects.find (iter->mId);         
+            MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find (iter->mId);         
         
         if (magicEffect->mData.mBaseCost<=0)
             throw std::runtime_error ("invalid base cost for magic effect " + iter->mId);
         
         float fPotionT1MagMul =
-            MWBase::Environment::get().getWorld()->getStore().gameSettings.find ("fPotionT1MagMult")->getFloat();
+            MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find ("fPotionT1MagMult")->getFloat();
 
         if (fPotionT1MagMul<=0)
             throw std::runtime_error ("invalid gmst: fPotionT1MagMul");
         
         float fPotionT1DurMult =
-            MWBase::Environment::get().getWorld()->getStore().gameSettings.find ("fPotionT1DurMult")->getFloat();
+            MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find ("fPotionT1DurMult")->getFloat();
 
         if (fPotionT1DurMult<=0)
             throw std::runtime_error ("invalid gmst: fPotionT1DurMult");
@@ -192,18 +192,20 @@ void MWMechanics::Alchemy::updateEffects()
 
 const ESM::Potion *MWMechanics::Alchemy::getRecord() const
 {
-    for (MWWorld::RecListWithIDT<ESM::Potion>::MapType::const_iterator iter (
-        MWBase::Environment::get().getWorld()->getStore().potions.list.begin());
-        iter!=MWBase::Environment::get().getWorld()->getStore().potions.list.end(); ++iter)
+    const MWWorld::Store<ESM::Potion> &potions =
+        MWBase::Environment::get().getWorld()->getStore().get<ESM::Potion>();
+
+    MWWorld::Store<ESM::Potion>::iterator iter = potions.begin();
+    for (; iter != potions.end(); ++iter)
     {
-        if (iter->second.mEffects.mList.size()!=mEffects.size())
+        if (iter->mEffects.mList.size() != mEffects.size())
             continue;
          
         bool mismatch = false; 
 
-        for (int i=0; i<static_cast<int> (iter->second.mEffects.mList.size()); ++iter)
+        for (int i=0; i<static_cast<int> (iter->mEffects.mList.size()); ++iter)
         {
-            const ESM::ENAMstruct& first = iter->second.mEffects.mList[i];
+            const ESM::ENAMstruct& first = iter->mEffects.mList[i];
             const ESM::ENAMstruct& second = mEffects[i];
                 
             if (first.mEffectID!=second.mEffectID ||
@@ -221,7 +223,7 @@ const ESM::Potion *MWMechanics::Alchemy::getRecord() const
         }
         
         if (!mismatch)
-            return &iter->second;
+            return &(*iter);
     }
     
     return 0;

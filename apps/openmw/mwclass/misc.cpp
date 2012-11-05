@@ -101,7 +101,7 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Miscellaneous> *ref =
             ptr.get<ESM::Miscellaneous>();
 
-        if (ref->mBase->mName == MWBase::Environment::get().getWorld()->getStore().gameSettings.find("sGold")->getString())
+        if (ref->mBase->mName == MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("sGold")->getString())
         {
             return std::string("Item Gold Up");
         }
@@ -113,7 +113,7 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Miscellaneous> *ref =
             ptr.get<ESM::Miscellaneous>();
 
-        if (ref->mBase->mName == MWBase::Environment::get().getWorld()->getStore().gameSettings.find("sGold")->getString())
+        if (ref->mBase->mName == MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("sGold")->getString())
         {
             return std::string("Item Gold Down");
         }
@@ -147,7 +147,7 @@ namespace MWClass
 
         int count = ptr.getRefData().getCount();
 
-        bool isGold = (ref->mBase->mName == store.gameSettings.find("sGold")->getString());
+        bool isGold = (ref->mBase->mName == store.get<ESM::GameSetting>().find("sGold")->getString());
         if (isGold && count == 1)
             count = ref->mBase->mData.mValue;
 
@@ -162,7 +162,7 @@ namespace MWClass
 
         if (ref->mRef.mSoul != "")
         {
-            const ESM::Creature *creature = store.creatures.search(ref->mRef.mSoul);
+            const ESM::Creature *creature = store.get<ESM::Creature>().find(ref->mRef.mSoul);
             info.caption += " (" + creature->mName + ")";
         }
 
@@ -192,7 +192,7 @@ namespace MWClass
         const MWWorld::ESMStore &store =
             MWBase::Environment::get().getWorld()->getStore();
 
-        if (MWWorld::Class::get(ptr).getName(ptr) == store.gameSettings.find("sGold")->getString()) {
+        if (MWWorld::Class::get(ptr).getName(ptr) == store.get<ESM::GameSetting().find("sGold")->getString()) {
             int goldAmount = ptr.getRefData().getCount();
 
             std::string base = "Gold_001";

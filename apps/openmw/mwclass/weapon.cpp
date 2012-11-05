@@ -303,8 +303,8 @@ namespace MWClass
             std::string type = mapping[ref->mBase->mData.mType].first;
             std::string oneOrTwoHanded = mapping[ref->mBase->mData.mType].second;
 
-            text += store.gameSettings.find(type)->getString() +
-                ((oneOrTwoHanded != "") ? ", " + store.gameSettings.find(oneOrTwoHanded)->getString() : "");
+            text += store.get<ESM::GameSetting>().find(type)->getString() +
+                ((oneOrTwoHanded != "") ? ", " + store.get<ESM::GameSetting>().find(oneOrTwoHanded)->getString() : "");
 
             // weapon damage
             if (ref->mBase->mData.mType >= 9)

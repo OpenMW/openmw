@@ -220,12 +220,13 @@ namespace MWClass
                 // door leads to exterior, use cell name (if any), otherwise translated region name
                 int x,y;
                 MWBase::Environment::get().getWorld()->positionToIndex (ref->mRef.mDoorDest.pos[0], ref->mRef.mDoorDest.pos[1], x, y);
-                const ESM::Cell* cell = store.cells.findExt(x,y);
+                const ESM::Cell* cell = store.get<ESM::Cell>().find(x,y);
                 if (cell->mName != "")
                     dest = cell->mName;
                 else
                 {
-                    const ESM::Region* region = store.regions.search(cell->mRegion);
+                    const ESM::Region* region =
+                        store.get<ESM::Region>().find(cell->mRegion);
                     dest = region->mName;
                 }
             }

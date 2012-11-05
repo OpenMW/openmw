@@ -395,8 +395,10 @@ namespace MWClass
 
         MWWorld::LiveCellRef<ESM::NPC> *ref = ptr.get<ESM::NPC>();
 
-        const ESM::Class *class_ = MWBase::Environment::get().getWorld()->getStore().classes.find (
-            ref->mBase->mClass);
+        const ESM::Class *class_ =
+            MWBase::Environment::get().getWorld()->getStore().get<ESM::Class>().find (
+                ref->mBase->mClass
+            );
 
         stats.useSkill (skill, *class_, usageType);
     }

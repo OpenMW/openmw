@@ -152,13 +152,16 @@ namespace MWClass
         if (typeGmst.empty())
             return -1;
 
-        float iWeight = MWBase::Environment::get().getWorld()->getStore().gameSettings.find (typeGmst)->getInt();
+        const MWWorld::Store<ESM::GameSetting> &gmst =
+            MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
 
-        if (iWeight * MWBase::Environment::get().getWorld()->getStore().gameSettings.find ("fLightMaxMod")->getFloat()>=
+        float iWeight = gmst.find (typeGmst)->getInt();
+
+        if (iWeight * gmst.find ("fLightMaxMod")->getFloat()>=
             ref->mBase->mData.mWeight)
             return ESM::Skill::LightArmor;
 
-        if (iWeight * MWBase::Environment::get().getWorld()->getStore().gameSettings.find ("fMedMaxMod")->getFloat()>=
+        if (iWeight * gmst.get<ESM::GameSetting>().find ("fMedMaxMod")->getFloat()>=
             ref->mBase->mData.mWeight)
             return ESM::Skill::MediumArmor;
 
