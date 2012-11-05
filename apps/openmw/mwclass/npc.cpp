@@ -138,7 +138,7 @@ namespace MWClass
 
     void Npc::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics) const
     {
-        physics.insertActorPhysics(ptr, getModel(ptr));
+        physics.addActor(ptr);
         MWBase::Environment::get().getMechanicsManager()->addActor(ptr);
     }
 

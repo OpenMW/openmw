@@ -53,12 +53,11 @@ namespace MWClass
 
         const std::string &model = ref->base->mModel;
 
-        if(!model.empty()) {
-            physics.insertObjectPhysics(ptr, "meshes\\" + model);
-        }
-        if (!ref->base->mSound.empty()) {
+        if(!model.empty())
+            physics.addObject(ptr);
+        
+        if (!ref->base->mSound.empty())
             MWBase::Environment::get().getSoundManager()->playSound3D(ptr, ref->base->mSound, 1.0, 1.0, MWBase::SoundManager::Play_Loop);
-        }
     }
 
     std::string Light::getModel(const MWWorld::Ptr &ptr) const
