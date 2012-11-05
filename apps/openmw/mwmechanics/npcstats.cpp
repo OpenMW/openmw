@@ -19,7 +19,7 @@
 
 MWMechanics::NpcStats::NpcStats()
 : mMovementFlags (0), mDrawState (DrawState_Nothing)
-, mLevelProgress(0)
+, mLevelProgress(0), mDisposition(0)
 {
     mSkillIncreases.resize (ESM::Attribute::Length);
     for (int i=0; i<ESM::Attribute::Length; ++i)
@@ -34,6 +34,16 @@ MWMechanics::DrawState_ MWMechanics::NpcStats::getDrawState() const
 void MWMechanics::NpcStats::setDrawState (DrawState_ state)
 {
     mDrawState = state;
+}
+
+unsigned int MWMechanics::NpcStats::getDisposition() const
+{
+    return mDisposition;
+}
+
+void MWMechanics::NpcStats::setDisposition(unsigned int disposition)
+{
+    mDisposition = disposition;
 }
 
 bool MWMechanics::NpcStats::getMovementFlag (Flag flag) const

@@ -66,6 +66,8 @@ namespace MWGui
             price = d/MWBase::Environment::get().getWorld()->getStore().gameSettings.find("fTravelMult")->getFloat();
         }
 
+        price = MWBase::Environment::get().getMechanicsManager()->barterOffer(mPtr,price,true);
+
         MyGUI::Button* toAdd = mDestinationsView->createWidget<MyGUI::Button>((price>mWindowManager.getInventoryWindow()->getPlayerGold()) ? "SandTextGreyedOut" : "SandTextButton", 0, mCurrentY, 200, sLineHeight, MyGUI::Align::Default);
         mCurrentY += sLineHeight;
         /// \todo price adjustment depending on merchantile skill

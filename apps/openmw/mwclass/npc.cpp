@@ -94,6 +94,8 @@ namespace MWClass
                 data->mCreatureStats.getFatigue().set (ref->base->mNpdt52.mFatigue);
 
                 data->mCreatureStats.setLevel(ref->base->mNpdt52.mLevel);
+
+                data->mNpcStats.setDisposition(ref->base->mNpdt52.mDisposition);
             }
             else
             {

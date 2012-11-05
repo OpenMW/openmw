@@ -324,4 +324,56 @@ namespace MWMechanics
         buildPlayer();
         mUpdatePlayer = true;
     }
+
+    float min(float a,float b)
+    {
+        if(a<b) return a;
+        else return b;
+    }
+
+    float max(float a,float b)
+    {
+        if(a>b) return a;
+        else return b;
+    }
+
+    int MechanicsManager::disposition(const MWWorld::Ptr& ptr)
+    {
+        MWMechanics::NpcStats npcSkill = MWWorld::Class::get(ptr).getNpcStats(ptr);
+        return npcSkill.getDisposition();
+    }
+
+    int MechanicsManager::barterOffer(const MWWorld::Ptr& ptr,int basePrice, bool buying)
+    {
+        MWMechanics::NpcStats sellerSkill = MWWorld::Class::get(ptr).getNpcStats(ptr);
+        MWMechanics::CreatureStats sellerStats = MWWorld::Class::get(ptr).getCreatureStats(ptr); 
+
+        MWWorld::Ptr playerPtr = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+        MWMechanics::NpcStats playerSkill = MWWorld::Class::get(playerPtr).getNpcStats(playerPtr);
+        MWMechanics::CreatureStats playerStats = MWWorld::Class::get(playerPtr).getCreatureStats(playerPtr);
+
+        int clampedDisposition = min(disposition(ptr),100);
+        float a = min(playerSkill.getSkill(ESM::Skill::Mercantile).getModified(), 100);
+        float b = min(0.1 * playerStats.getAttribute(ESM::Attribute::Luck).getModified(), 10);
+        float c = min(0.2 * playerStats.getAttribute(ESM::Attribute::Personality).getModified(), 10);
+        float d = min(sellerSkill.getSkill(ESM::Skill::Mercantile).getModified(), 100);
+        float e = min(0.1 * sellerStats.getAttribute(ESM::Attribute::Luck).getModified(), 10);
+        float f = min(0.2 * sellerStats.getAttribute(ESM::Attribute::Personality).getModified(), 10);
+ 
+        float pcTerm = (clampedDisposition - 50 + a + b + c) * playerStats.getFatigueTerm();
+        float npcTerm = (d + e + f) * sellerStats.getFatigueTerm();
+        float buyTerm = 0.01 * (100 - 0.5 * (pcTerm - npcTerm));
+        float sellTerm = 0.01 * (50 - 0.5 * (npcTerm - pcTerm));
+
+        float x; 
+        if(buying) x = buyTerm;
+        else x = min(buyTerm, sellTerm);
+        std::cout << "x" << x;
+        int offerPrice;
+        if (x < 1) offerPrice = int(x * basePrice);
+        if (x >= 1) offerPrice = basePrice + int((x - 1) * basePrice);
+        offerPrice = max(1, offerPrice);
+        std::cout <<"barteroffer"<< offerPrice << " " << basePrice << "\n";
+        return offerPrice;
+    }
 }
