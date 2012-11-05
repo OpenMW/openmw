@@ -357,7 +357,9 @@ void CharacterCreation::onPickClassDialogDone(WindowBase* parWindow)
         const std::string &classId = mPickClassDialog->getClassId();
         if (!classId.empty())
             MWBase::Environment::get().getMechanicsManager()->setPlayerClass(classId);
-        const ESM::Class *klass = MWBase::Environment::get().getWorld()->getStore().classes.find(classId);
+
+        const ESM::Class *klass =
+            MWBase::Environment::get().getWorld()->getStore().get<ESM::Class>().find(classId);
         if (klass)
         {
             mPlayerClass = *klass;
@@ -729,7 +731,10 @@ void CharacterCreation::onGenerateClassDone(WindowBase* parWindow)
     mGenerateClassResultDialog = 0;
 
     MWBase::Environment::get().getMechanicsManager()->setPlayerClass(mGenerateClass);
-    const ESM::Class *klass = MWBase::Environment::get().getWorld()->getStore().classes.find(mGenerateClass);
+
+    const ESM::Class *klass =
+        MWBase::Environment::get().getWorld()->getStore().get<ESM::Class>().find(mGenerateClass);
+
     mPlayerClass = *klass;
     mWM->setPlayerClass(mPlayerClass);
 

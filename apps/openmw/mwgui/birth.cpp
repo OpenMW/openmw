@@ -130,19 +130,18 @@ void BirthDialog::updateBirths()
 {
     mBirthList->removeAllItems();
 
-    const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
+    const MWWorld::Store<ESM::BirthSign> &signs =
+        MWBase::Environment::get().getWorld()->getStore().get<ESM::BirthSign>();
 
-    MWWorld::RecListT<ESM::BirthSign>::MapType::const_iterator it = store.birthSigns.list.begin();
-    MWWorld::RecListT<ESM::BirthSign>::MapType::const_iterator end = store.birthSigns.list.end();
     int index = 0;
 
     // sort by name
     std::vector < std::pair<std::string, const ESM::BirthSign*> > birthSigns;
-    for (; it!=end; ++it)
+
+    MWWorld::Store<ESM::BirthSign>::iterator it = signs.begin();
+    for (; it != signs.end(); ++it)
     {
-        std::string id = it->first;
-        const ESM::BirthSign* sign = &it->second;
-        birthSigns.push_back(std::make_pair(id, sign));
+        birthSigns.push_back(std::make_pair(it->mId, &(*it)));
     }
     std::sort(birthSigns.begin(), birthSigns.end(), sortBirthSigns);
 
@@ -170,8 +169,11 @@ void BirthDialog::updateSpells()
     const int lineHeight = 18;
     MyGUI::IntCoord coord(0, 0, mSpellArea->getWidth(), 18);
 
-    const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
-    const ESM::BirthSign *birth = store.birthSigns.find(mCurrentBirthId);
+    const MWWorld::ESMStore &store =
+        MWBase::Environment::get().getWorld()->getStore();
+
+    const ESM::BirthSign *birth =
+        store.get<ESM::BirthSign>().find(mCurrentBirthId);
 
     std::string texturePath = std::string("textures\\") + birth->mTexture;
     fixTexturePath(texturePath);
@@ -200,11 +202,17 @@ void BirthDialog::updateSpells()
     }
 
     int i = 0;
-    struct{ const std::vector<std::string> &spells; const char *label; } categories[3] = {
+
+    struct {
+        const std::vector<std::string> &spells;
+        const char *label;
+    }
+    categories[3] = {
         {abilities, "sBirthsignmenu1"},
         {powers,    "sPowers"},
         {spells,    "sBirthsignmenu2"}
     };
+
     for (int category = 0; category < 3; ++category)
     {
         if (!categories[category].spells.empty())

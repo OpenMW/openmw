@@ -68,6 +68,17 @@ namespace MWWorld
         std::map<int, StoreBase *> mStores;
 
     public:
+        /// \todo replace with SharedIterator<StoreBase>
+        typedef std::map<int, StoreBase *>::const_iterator iterator;
+
+        iterator begin() const {
+            return mStores.begin();
+        }
+
+        iterator end() const {
+            return mStores.end();
+        }
+
         // Look up the given ID in 'all'. Returns 0 if not found.
         int find(const std::string &id) const
         {

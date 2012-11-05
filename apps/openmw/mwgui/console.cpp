@@ -92,10 +92,10 @@ namespace MWGui
             scanner.listKeywords (mNames);
 
             // identifier
-            const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
+            const MWWorld::ESMStore& store =
+                MWBase::Environment::get().getWorld()->getStore();
 
-            for (MWWorld::RecListList::const_iterator iter (store.recLists.begin());
-                iter!=store.recLists.end(); ++iter)
+            for (MWWorld::ESMStore::iterator it = store.begin(); it != store.end(); ++it)
             {
                 iter->second->listIdentifier (mNames);
             }

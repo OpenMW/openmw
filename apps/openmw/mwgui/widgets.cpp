@@ -228,8 +228,10 @@ void MWSpell::setSpellId(const std::string &spellId)
 
 void MWSpell::createEffectWidgets(std::vector<MyGUI::WidgetPtr> &effects, MyGUI::WidgetPtr creator, MyGUI::IntCoord &coord, int flags)
 {
-    const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
-    const ESM::Spell *spell = store.spells.search(mId);
+    const MWWorld::ESMStore &store =
+        MWBase::Environment::get().getWorld()->getStore();
+
+    const ESM::Spell *spell = store.get<ESM::Spell>().search(mId);
     MYGUI_ASSERT(spell, "spell with id '" << mId << "' not found");
 
     MWSpellEffectPtr effect = nullptr;
@@ -259,8 +261,10 @@ void MWSpell::updateWidgets()
 {
     if (mSpellNameWidget && mWindowManager)
     {
-        const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
-        const ESM::Spell *spell = store.spells.search(mId);
+        const MWWorld::ESMStore &store =
+            MWBase::Environment::get().getWorld()->getStore();
+
+        const ESM::Spell *spell = store.get<ESM::Spell>().search(mId);
         if (spell)
             static_cast<MyGUI::TextBox*>(mSpellNameWidget)->setCaption(spell->mName);
         else
@@ -389,8 +393,11 @@ void MWSpellEffect::updateWidgets()
     if (!mWindowManager)
         return;
 
-    const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
-    const ESM::MagicEffect *magicEffect = store.magicEffects.search(mEffectParams.mEffectID);
+    const MWWorld::ESMStore &store =
+        MWBase::Environment::get().getWorld()->getStore();
+
+    const ESM::MagicEffect *magicEffect =
+        store.get<ESM::MagicEffect>().search(mEffectParams.mEffectID);
 
     assert(magicEffect);
     assert(mWindowManager);

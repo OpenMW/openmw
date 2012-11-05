@@ -127,33 +127,36 @@ void DialogueWindow::onSelectTopic(std::string topic)
 {
     if (!mEnabled) return;
 
-    if (topic == MWBase::Environment::get().getWorld()->getStore().gameSettings.find("sBarter")->getString())
+    const MWWorld::Store<ESM::GameSetting> &gmst =
+        MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+
+    if (topic == gmst.find("sBarter")->getString())
     {
         /// \todo check if the player is allowed to trade with this actor (e.g. faction rank high enough)?
         mWindowManager.pushGuiMode(GM_Barter);
         mWindowManager.getTradeWindow()->startTrade(mPtr);
     }
-    else if (topic == MWBase::Environment::get().getWorld()->getStore().gameSettings.find("sSpells")->getString())
+    else if (topic == gmst.find("sSpells")->getString())
     {
         mWindowManager.pushGuiMode(GM_SpellBuying);
         mWindowManager.getSpellBuyingWindow()->startSpellBuying(mPtr);
     }
-    else if (topic == MWBase::Environment::get().getWorld()->getStore().gameSettings.find("sTravel")->getString())
+    else if (topic == gmst.find("sTravel")->getString())
     {
         mWindowManager.pushGuiMode(GM_Travel);
         mWindowManager.getTravelWindow()->startTravel(mPtr);
     }
-    else if (topic == MWBase::Environment::get().getWorld()->getStore().gameSettings.find("sSpellMakingMenuTitle")->getString())
+    else if (topic == gmst.find("sSpellMakingMenuTitle")->getString())
     {
         mWindowManager.pushGuiMode(GM_SpellCreation);
         mWindowManager.startSpellMaking (mPtr);
     }
-    else if (topic == MWBase::Environment::get().getWorld()->getStore().gameSettings.find("sEnchanting")->getString())
+    else if (topic == gmst.find("sEnchanting")->getString())
     {
         mWindowManager.pushGuiMode(GM_Enchanting);
         mWindowManager.startEnchanting (mPtr);
     }
-    else if (topic == MWBase::Environment::get().getWorld()->getStore().gameSettings.find("sServiceTrainingTitle")->getString())
+    else if (topic == gmst.find("sServiceTrainingTitle")->getString())
     {
         mWindowManager.pushGuiMode(GM_Training);
         mWindowManager.startTraining (mPtr);
@@ -180,23 +183,26 @@ void DialogueWindow::setKeywords(std::list<std::string> keyWords)
 
     bool anyService = mServices > 0;
 
+    const MWWorld::Store<ESM::GameSetting> &gmst =
+        MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+
     if (mServices & Service_Trade)
-        mTopicsList->addItem(MWBase::Environment::get().getWorld()->getStore().gameSettings.find("sBarter")->getString());
+        mTopicsList->addItem(gmst.find("sBarter")->getString());
 
     if (mServices & Service_BuySpells)
-        mTopicsList->addItem(MWBase::Environment::get().getWorld()->getStore().gameSettings.find("sSpells")->getString());
+        mTopicsList->addItem(gmst.find("sSpells")->getString());
 
     if (mServices & Service_Travel)
-        mTopicsList->addItem(MWBase::Environment::get().getWorld()->getStore().gameSettings.find("sTravel")->getString());
+        mTopicsList->addItem(gmst.find("sTravel")->getString());
 
     if (mServices & Service_CreateSpells)
-        mTopicsList->addItem(MWBase::Environment::get().getWorld()->getStore().gameSettings.find("sSpellmakingMenuTitle")->getString());
+        mTopicsList->addItem(gmst.find("sSpellmakingMenuTitle")->getString());
 
 //    if (mServices & Service_Enchant)
-//        mTopicsList->addItem(MWBase::Environment::get().getWorld()->getStore().gameSettings.find("sEnchanting")->getString());
+//        mTopicsList->addItem(gmst.find("sEnchanting")->getString());
 
     if (mServices & Service_Training)
-        mTopicsList->addItem(MWBase::Environment::get().getWorld()->getStore().gameSettings.find("sServiceTrainingTitle")->getString());
+        mTopicsList->addItem(gmst.find("sServiceTrainingTitle")->getString());
 
     if (anyService)
         mTopicsList->addSeparator();
@@ -301,7 +307,7 @@ void DialogueWindow::updateOptions()
 
 void DialogueWindow::goodbye()
 {
-    mHistory->addDialogText("\n#572D21" + MWBase::Environment::get().getWorld()->getStore().gameSettings.find("sGoodbye")->getString());
+    mHistory->addDialogText("\n#572D21" + MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("sGoodbye")->getString());
     mTopicsList->setEnabled(false);
     mEnabled = false;
 }

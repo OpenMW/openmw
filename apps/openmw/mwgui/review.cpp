@@ -108,7 +108,9 @@ void ReviewDialog::setPlayerName(const std::string &name)
 void ReviewDialog::setRace(const std::string &raceId)
 {
     mRaceId = raceId;
-    const ESM::Race *race = MWBase::Environment::get().getWorld()->getStore().races.search(mRaceId);
+
+    const ESM::Race *race =
+        MWBase::Environment::get().getWorld()->getStore().get<ESM::Race>().search(mRaceId);
     if (race)
     {
         ToolTips::createRaceToolTip(mRaceWidget, race);
@@ -126,7 +128,9 @@ void ReviewDialog::setClass(const ESM::Class& class_)
 void ReviewDialog::setBirthSign(const std::string& signId)
 {
     mBirthSignId = signId;
-    const ESM::BirthSign *sign = MWBase::Environment::get().getWorld()->getStore().birthSigns.search(mBirthSignId);
+
+    const ESM::BirthSign *sign =
+        MWBase::Environment::get().getWorld()->getStore().get<ESM::BirthSign>().search(mBirthSignId);
     if (sign)
     {
         mBirthSignWidget->setCaption(sign->mName);
