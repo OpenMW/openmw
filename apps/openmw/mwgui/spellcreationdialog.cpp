@@ -2,14 +2,13 @@
 
 #include <boost/lexical_cast.hpp>
 
-#include <components/esm_store/store.hpp>
-
 #include "../mwbase/windowmanager.hpp"
 
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwbase/soundmanager.hpp"
 
+#include "../mwworld/esmstore.hpp"
 #include "../mwworld/player.hpp"
 #include "../mwworld/class.hpp"
 

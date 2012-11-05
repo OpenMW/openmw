@@ -528,7 +528,7 @@ namespace MWWorld
       X ref;
       ref.load (esm);
 
-      std::string realId = toLower (ref.mData.mName.toString());
+      std::string realId = toLower (ref.mId);
 
       std::swap (list[realId], ref);
     }

@@ -8,8 +8,8 @@ namespace ESM
 
 struct SCHD
 {
-    NAME32      mName;
-    SCHDstruct  mData;
+    NAME32              mName;
+    Script::SCHDstruct  mData;
 };
 
 void Script::load(ESMReader &esm)

@@ -13,11 +13,11 @@
 #include <components/esm/loadgmst.hpp>
 #include <components/esm/loadmgef.hpp>
 
-#include <components/esm_store/store.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 
+#include "../mwworld/esmstore.hpp"
 #include "../mwworld/containerstore.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/cellstore.hpp"
@@ -192,7 +192,7 @@ void MWMechanics::Alchemy::updateEffects()
 
 const ESM::Potion *MWMechanics::Alchemy::getRecord() const
 {
-    for (ESMS::RecListWithIDT<ESM::Potion>::MapType::const_iterator iter (
+    for (MWWorld::RecListWithIDT<ESM::Potion>::MapType::const_iterator iter (
         MWBase::Environment::get().getWorld()->getStore().potions.list.begin());
         iter!=MWBase::Environment::get().getWorld()->getStore().potions.list.end(); ++iter)
     {
