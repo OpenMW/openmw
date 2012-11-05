@@ -6,6 +6,19 @@
 namespace MWWorld
 {
 
+static bool isCacheableRecord(int id)
+{
+    if (id == ESM::REC_ACTI || id == ESM::REC_ALCH || id == ESM::REC_APPA || id == ESM::REC_ARMO ||
+        id == ESM::REC_BOOK || id == ESM::REC_CLOT || id == ESM::REC_CONT || id == ESM::REC_CREA ||
+        id == ESM::REC_DOOR || id == ESM::REC_INGR || id == ESM::REC_LEVC || id == ESM::REC_LEVI ||
+        id == ESM::REC_LIGH || id == ESM::REC_LOCK || id == ESM::REC_MISC || id == ESM::REC_NPC_ ||
+        id == ESM::REC_PROB || id == ESM::REC_REPA || id == ESM::REC_STAT || id == ESM::REC_WEAP)
+    {
+        return true;
+    }
+    return false;
+}
+
 void ESMStore::load(ESM::ESMReader &esm)
 {
     std::set<std::string> missing;
@@ -19,85 +32,51 @@ void ESMStore::load(ESM::ESMReader &esm)
         esm.getRecHeader();
 
         // Look up the record type.
-        RecListList::iterator it = recLists.find(n.val);
+        std::map<int, StoreBase *>::iterator it = mStores.find(n.val);
 
-        if(it == recLists.end())
-        {
-            if (n.val==ESM::REC_INFO)
-            {
-                if (dialogue)
-                {
-                    ESM::DialInfo info;
-                    info.load (esm);
-
-                    dialogue->mInfo.push_back (info);
-                }
-                else
-                {
+        if (it == mStores.end()) {
+            if (n.val == ESM::REC_INFO) {
+                if (dialogue) {
+                    dialogue->mInfo.push_back(ESM::DialInfo());
+                    dialogue->mInfo.back().load(esm);
+                } else {
                     std::cerr << "error: info record without dialog" << std::endl;
                     esm.skipRecord();
                 }
-            }
-            else if (n.val==ESM::REC_MGEF)
-            {
-                magicEffects.load (esm);
-            }
-            else if (n.val==ESM::REC_SKIL)
-            {
-                skills.load (esm);
-            }
-            else
-            {
+            } else if (n.val == ESM::REC_MGEF) {
+                mMagicEffects.load (esm);
+            } else if (n.val == ESM::REC_SKIL) {
+                mSkills.load (esm);
+            } else {
                 // Not found (this would be an error later)
                 esm.skipRecord();
                 missing.insert(n.toString());
             }
-        }
-        else
-        {
+        } else {
             // Load it
             std::string id = esm.getHNOString("NAME");
             it->second->load(esm, id);
 
-            if (n.val==ESM::REC_DIAL)
-            {
-                RecListCaseT<ESM::Dialogue>& recList =
-                    static_cast<RecListCaseT<ESM::Dialogue>& > (*it->second);
-
-                ESM::Dialogue* d = recList.search (id);
-
-                assert (d != NULL);
-
-                dialogue = d;
-            }
-            else
+            if (n.val==ESM::REC_DIAL) {
+                // dirty hack, but it is better than non-const search()
+                // or friends
+                dialogue = const_cast<ESM::Dialogue *>(mDialogs.search(id));
+                assert (dialogue != NULL);
+            } else {
                 dialogue = 0;
-
+            }
             // Insert the reference into the global lookup
-            if(!id.empty() &&
-                (n.val==ESM::REC_ACTI || n.val==ESM::REC_ALCH || n.val==ESM::REC_APPA || n.val==ESM::REC_ARMO ||
-                n.val==ESM::REC_BOOK || n.val==ESM::REC_CLOT || n.val==ESM::REC_CONT || n.val==ESM::REC_CREA ||
-                n.val==ESM::REC_DOOR || n.val==ESM::REC_INGR || n.val==ESM::REC_LEVC || n.val==ESM::REC_LEVI ||
-                n.val==ESM::REC_LIGH || n.val==ESM::REC_LOCK || n.val==ESM::REC_MISC || n.val==ESM::REC_NPC_ ||
-                n.val==ESM::REC_PROB || n.val==ESM::REC_REPA || n.val==ESM::REC_STAT || n.val==ESM::REC_WEAP)
-                )
-                all[id] = n.val;
+            if (!id.empty() && isCacheableRecord(n.val)) {
+                mIds[id] = n.val;
+            }
         }
-    }
-
-    for (int i = 0; i < ESM::Attribute::Length; ++i)
-    {
-        typedef ESM::Attribute EsmAttr;
-
-        EsmAttr::AttributeID id = EsmAttr::sAttributeIds[i];
-        attributes.list.insert(std::make_pair(id, ESM::Attribute(id, EsmAttr::sGmstAttributeIds[i], EsmAttr::sGmstAttributeDescIds[i])));
     }
 
   /* This information isn't needed on screen. But keep the code around
      for debugging purposes later.
 
-  cout << "\n" << recLists.size() << " record types:\n";
-  for(RecListList::iterator it = recLists.begin(); it != recLists.end(); it++)
+  cout << "\n" << mStores.size() << " record types:\n";
+  for(RecListList::iterator it = mStores.begin(); it != mStores.end(); it++)
     cout << "  " << toStr(it->first) << ": " << it->second->getSize() << endl;
   cout << "\nNot implemented yet: ";
   for(set<string>::iterator it = missing.begin();
@@ -105,6 +84,17 @@ void ESMStore::load(ESM::ESMReader &esm)
     cout << *it << " ";
   cout << endl;
   */
+}
+
+void ESMStore::setUp()
+{
+    std::map<int, StoreBase *>::iterator it = mStores.begin();
+    for (; it != mStores.end(); ++it) {
+        it->second->setUp();
+    }
+    mSkills.setUp();
+    mMagicEffects.setUp();
+    mAttributes.setUp();
 }
 
 } // end namespace
