@@ -325,22 +325,71 @@ namespace MWMechanics
         mUpdatePlayer = true;
     }
 
-    float min(float a,float b)
+    std::string toLower (const std::string& name)
     {
-        if(a<b) return a;
-        else return b;
-    }
+        std::string lowerCase;
 
-    float max(float a,float b)
-    {
-        if(a>b) return a;
-        else return b;
+        std::transform (name.begin(), name.end(), std::back_inserter (lowerCase),
+            (int(*)(int)) std::tolower);
+
+        return lowerCase;
     }
 
     int MechanicsManager::disposition(const MWWorld::Ptr& ptr)
     {
         MWMechanics::NpcStats npcSkill = MWWorld::Class::get(ptr).getNpcStats(ptr);
-        return npcSkill.getDisposition();
+        float x = npcSkill.getDisposition();
+
+        MWWorld::LiveCellRef<ESM::NPC>* npc = ptr.get<ESM::NPC>();
+        MWWorld::Ptr playerPtr = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+        MWWorld::LiveCellRef<ESM::NPC>* player = playerPtr.get<ESM::NPC>();
+        MWMechanics::CreatureStats playerStats = MWWorld::Class::get(playerPtr).getCreatureStats(playerPtr);
+        MWMechanics::NpcStats playerSkill = MWWorld::Class::get(playerPtr).getNpcStats(playerPtr);
+
+        if (toLower(npc->base->mRace) == toLower(player->base->mRace)) x += MWBase::Environment::get().getWorld()->getStore().gameSettings.find("fDispRaceMod")->getFloat();
+
+        x += MWBase::Environment::get().getWorld()->getStore().gameSettings.find("fDispPersonalityMult")->getFloat()
+            * (playerStats.getAttribute(ESM::Attribute::Personality).getModified() - MWBase::Environment::get().getWorld()->getStore().gameSettings.find("fDispPersonalityBase")->getFloat());
+
+        float reaction = 0;
+        int rank = 0;
+        std::string npcFaction = npcSkill.getFactionRanks().begin()->first;
+        const ESMS::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
+
+        if (playerSkill.getFactionRanks().find(toLower(npcFaction)) != playerSkill.getFactionRanks().end())
+        {
+            for(std::vector<ESM::Faction::Reaction>::const_iterator it = store.factions.find(toLower(npcFaction))->mReactions.begin();it != store.factions.find(toLower(npcFaction))->mReactions.end();it++)
+            {
+                if(toLower(it->mFaction) == toLower(npcFaction)) reaction = it->mReaction;
+            }
+            rank = playerSkill.getFactionRanks().find(toLower(npcFaction))->second;
+        }
+        else if (npcFaction != "")
+        {
+            std::cout << "npc has a faction!";
+            for(std::vector<ESM::Faction::Reaction>::const_iterator it = store.factions.find(toLower(npcFaction))->mReactions.begin();it != store.factions.find(toLower(npcFaction))->mReactions.end();it++)
+            {
+                if(playerSkill.getFactionRanks().find(toLower(it->mFaction)) != playerSkill.getFactionRanks().end() )
+                {
+                    if(it->mReaction<reaction) reaction = it->mReaction;
+                }
+            }
+            rank = 0;
+        }
+        else
+        {
+            reaction = 0;
+            rank = 0;
+        }
+        x += (MWBase::Environment::get().getWorld()->getStore().gameSettings.find("fDispFactionRankMult")->getFloat() * rank 
+            + MWBase::Environment::get().getWorld()->getStore().gameSettings.find("fDispFactionRankBase")->getFloat()) 
+            * MWBase::Environment::get().getWorld()->getStore().gameSettings.find("fDispFactionMod")->getFloat() * reaction;
+        //x -= MWBase::Environment::get().getWorld()->getStore().gameSettings.find("fDispCrimeMod") * pcBounty;
+        //if (pc has a disease) x += MWBase::Environment::get().getWorld()->getStore().gameSettings.find("fDispDiseaseMod");
+        if (playerSkill.getDrawState() == MWMechanics::DrawState_::DrawState_Weapon) x += MWBase::Environment::get().getWorld()->getStore().gameSettings.find("fDispWeaponDrawn")->getFloat();
+
+        int effective_disposition = std::max(0,std::min(int(x),100));//, normally clamped to [0..100] when used
+        return effective_disposition;
     }
 
     int MechanicsManager::barterOffer(const MWWorld::Ptr& ptr,int basePrice, bool buying)
@@ -352,13 +401,13 @@ namespace MWMechanics
         MWMechanics::NpcStats playerSkill = MWWorld::Class::get(playerPtr).getNpcStats(playerPtr);
         MWMechanics::CreatureStats playerStats = MWWorld::Class::get(playerPtr).getCreatureStats(playerPtr);
 
-        int clampedDisposition = min(disposition(ptr),100);
-        float a = min(playerSkill.getSkill(ESM::Skill::Mercantile).getModified(), 100);
-        float b = min(0.1 * playerStats.getAttribute(ESM::Attribute::Luck).getModified(), 10);
-        float c = min(0.2 * playerStats.getAttribute(ESM::Attribute::Personality).getModified(), 10);
-        float d = min(sellerSkill.getSkill(ESM::Skill::Mercantile).getModified(), 100);
-        float e = min(0.1 * sellerStats.getAttribute(ESM::Attribute::Luck).getModified(), 10);
-        float f = min(0.2 * sellerStats.getAttribute(ESM::Attribute::Personality).getModified(), 10);
+        int clampedDisposition = std::min(disposition(ptr),100);
+        float a = std::min<float>(playerSkill.getSkill(ESM::Skill::Mercantile).getModified(), 100);
+        float b = std::min<float>(0.1 * playerStats.getAttribute(ESM::Attribute::Luck).getModified(), 10);
+        float c = std::min<float>(0.2 * playerStats.getAttribute(ESM::Attribute::Personality).getModified(), 10);
+        float d = std::min<float>(sellerSkill.getSkill(ESM::Skill::Mercantile).getModified(), 100);
+        float e = std::min<float>(0.1 * sellerStats.getAttribute(ESM::Attribute::Luck).getModified(), 10);
+        float f = std::min<float>(0.2 * sellerStats.getAttribute(ESM::Attribute::Personality).getModified(), 10);
  
         float pcTerm = (clampedDisposition - 50 + a + b + c) * playerStats.getFatigueTerm();
         float npcTerm = (d + e + f) * sellerStats.getFatigueTerm();
@@ -367,13 +416,13 @@ namespace MWMechanics
 
         float x; 
         if(buying) x = buyTerm;
-        else x = min(buyTerm, sellTerm);
-        std::cout << "x" << x;
+        else x = std::min(buyTerm, sellTerm);
+        //std::cout << "x" << x;
         int offerPrice;
         if (x < 1) offerPrice = int(x * basePrice);
         if (x >= 1) offerPrice = basePrice + int((x - 1) * basePrice);
-        offerPrice = max(1, offerPrice);
-        std::cout <<"barteroffer"<< offerPrice << " " << basePrice << "\n";
+        offerPrice = std::max(1, offerPrice);
+        //std::cout <<"barteroffer"<< offerPrice << " " << basePrice << "\n";
         return offerPrice;
     }
 }

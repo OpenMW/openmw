@@ -12,6 +12,7 @@
 #include "../mwbase/dialoguemanager.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"
+#include "../mwbase/mechanicsmanager.hpp"
 
 #include "dialogue_history.hpp"
 #include "widgets.hpp"
@@ -294,9 +295,9 @@ void DialogueWindow::updateOptions()
     mHistory->eraseText(0, mHistory->getTextLength());
 
     mDispositionBar->setProgressRange(100);
-    mDispositionBar->setProgressPosition(40);
+    mDispositionBar->setProgressPosition(MWBase::Environment::get().getMechanicsManager()->disposition(mPtr));
     mDispositionText->eraseText(0, mDispositionText->getTextLength());
-    mDispositionText->addText("#B29154"+std::string("40/100")+"#B29154");
+    mDispositionText->addText("#B29154"+boost::lexical_cast<std::string>(MWBase::Environment::get().getMechanicsManager()->disposition(mPtr))+std::string("/100")+"#B29154");
 }
 
 void DialogueWindow::goodbye()
