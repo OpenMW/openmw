@@ -582,6 +582,8 @@ void WindowManager::onFrame (float frameDuration)
         mDragAndDrop->mDraggedWidget->setPosition(MyGUI::InputManager::getInstance().getMousePosition());
     }
 
+    mDialogueWindow->onFrame();
+
     mInventoryWindow->onFrame();
 
     mStatsWindow->onFrame();

@@ -366,7 +366,6 @@ namespace MWMechanics
         }
         else if (npcFaction != "")
         {
-            std::cout << "npc has a faction!";
             for(std::vector<ESM::Faction::Reaction>::const_iterator it = store.factions.find(toLower(npcFaction))->mReactions.begin();it != store.factions.find(toLower(npcFaction))->mReactions.end();it++)
             {
                 if(playerSkill.getFactionRanks().find(toLower(it->mFaction)) != playerSkill.getFactionRanks().end() )
