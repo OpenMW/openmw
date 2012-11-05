@@ -132,6 +132,8 @@ namespace MWGui
         openContainer (MWBase::Environment::get().getWorld()->getPlayer().getPlayer()); // this sets mPtr
         setFilter (ContainerBase::Filter_Ingredients);
 
+        mNameEdit->setCaption("");
+
         mAlchemy.setAlchemist (mPtr);
 
         int index = 0;

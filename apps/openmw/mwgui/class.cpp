@@ -104,7 +104,7 @@ PickClassDialog::PickClassDialog(MWBase::WindowManager& parWindowManager)
     MyGUI::ButtonPtr okButton;
     getWidget(okButton, "OKButton");
     okButton->eventMouseButtonClick += MyGUI::newDelegate(this, &PickClassDialog::onOkClicked);
-    okButton->setTextColour(MyGUI::Colour(0.6f, 0.56f, 0.45f));
+    okButton->setEnabled(false);
 
     updateClasses();
     updateStats();
@@ -140,7 +140,7 @@ void PickClassDialog::setClassId(const std::string &classId)
             mClassList->setIndexSelected(i);
             MyGUI::ButtonPtr okButton;
             getWidget(okButton, "OKButton");
-            okButton->setTextColour(MyGUI::Colour(0.75f, 0.6f, 0.35f));
+            okButton->setEnabled(true);
             break;
         }
     }
@@ -169,7 +169,7 @@ void PickClassDialog::onSelectClass(MyGUI::ListBox* _sender, size_t _index)
 
     MyGUI::ButtonPtr okButton;
     getWidget(okButton, "OKButton");
-    okButton->setTextColour(MyGUI::Colour(0.75f, 0.6f, 0.35f));
+    okButton->setEnabled(true);
 
     const std::string *classId = mClassList->getItemDataAt<std::string>(_index);
     if (boost::iequals(mCurrentClassId, *classId))
