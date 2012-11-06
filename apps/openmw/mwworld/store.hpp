@@ -107,17 +107,18 @@ namespace MWWorld
             T item;
             item.mId = StringUtils::lowerCase(id);
 
-            typename Dynamic::const_iterator dit = mDynamic.find(item.mId);
-            if (dit != mDynamic.end()) {
-                return &dit->second;
-            }
-
             typename std::vector<T>::const_iterator it =
                 std::lower_bound(mStatic.begin(), mStatic.end(), item, RecordCmp());
 
             if (it != mStatic.end() && it->mId == item.mId) {
                 return &(*it);
             }
+
+            typename Dynamic::const_iterator dit = mDynamic.find(item.mId);
+            if (dit != mDynamic.end()) {
+                return &dit->second;
+            }
+
             return 0;
         }
 
@@ -388,17 +389,18 @@ namespace MWWorld
             ESM::Cell cell;
             cell.mName = StringUtils::lowerCase(id);
 
-            DynamicInt::const_iterator dit = mDynamicInt.find(cell.mName);
-            if (dit != mDynamicInt.end()) {
-                return &dit->second;
-            }
-
             std::vector<ESM::Cell>::const_iterator it =
                 std::lower_bound(mInt.begin(), mInt.end(), cell, RecordCmp());
 
             if (it != mInt.end() && StringUtils::ciEqual(it->mName, id)) {
                 return &(*it);
             }
+
+            DynamicInt::const_iterator dit = mDynamicInt.find(cell.mName);
+            if (dit != mDynamicInt.end()) {
+                return &dit->second;
+            }
+
             return 0;
         }
 
@@ -406,18 +408,19 @@ namespace MWWorld
             ESM::Cell cell;
             cell.mData.mX = x, cell.mData.mY = y;
 
-            std::pair<int, int> key(x, y);
-            DynamicExt::const_iterator dit = mDynamicExt.find(key);
-            if (dit != mDynamicExt.end()) {
-                return &dit->second;
-            }
-
             std::vector<ESM::Cell>::const_iterator it =
                 std::lower_bound(mExt.begin(), mExt.end(), cell, ExtCmp());
 
             if (it != mExt.end() && it->mData.mX == x && it->mData.mY == y) {
                 return &(*it);
             }
+
+            std::pair<int, int> key(x, y);
+            DynamicExt::const_iterator dit = mDynamicExt.find(key);
+            if (dit != mDynamicExt.end()) {
+                return &dit->second;
+            }
+
             return 0;
         }
 
