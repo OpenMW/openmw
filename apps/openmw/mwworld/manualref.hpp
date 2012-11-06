@@ -19,24 +19,7 @@ namespace MWWorld
             ManualRef& operator= (const ManualRef&);
 
             template<typename T>
-            bool create (const MWWorld::RecListT<T>& list, const std::string& name)
-            {
-                if (const T *instance = list.search (name))
-                {
-                    LiveCellRef<T> ref;
-                    ref.mBase = instance;
-
-                    mRef = ref;
-                    mPtr = Ptr (&boost::any_cast<LiveCellRef<T>&> (mRef), 0);
-
-                    return true;
-                }
-
-                return false;
-            }
-
-            template<typename T>
-            bool create (const MWWorld::RecListWithIDT<T>& list, const std::string& name)
+            bool create (const MWWorld::Store<T>& list, const std::string& name)
             {
                 if (const T *instance = list.search (name))
                 {
@@ -57,26 +40,26 @@ namespace MWWorld
             ManualRef (const MWWorld::ESMStore& store, const std::string& name)
             {
                 // create
-                if (!create (store.activators, name) &&
-                    !create (store.potions, name) &&
-                    !create (store.appas, name) &&
-                    !create (store.armors, name) &&
-                    !create (store.books, name) &&
-                    !create (store.clothes, name) &&
-                    !create (store.containers, name) &&
-                    !create (store.creatures, name) &&
-                    !create (store.doors, name) &&
-                    !create (store.ingreds, name) &&
-                    !create (store.creatureLists, name) &&
-                    !create (store.itemLists, name) &&
-                    !create (store.lights, name) &&
-                    !create (store.lockpicks, name) &&
-                    !create (store.miscItems, name) &&
-                    !create (store.npcs, name) &&
-                    !create (store.probes, name) &&
-                    !create (store.repairs, name) &&
-                    !create (store.statics, name) &&
-                    !create (store.weapons, name))
+                if (!create (store.get<ESM::Activator>(), name) &&
+                    !create (store.get<ESM::Potion>(), name) &&
+                    !create (store.get<ESM::Apparatus>(), name) &&
+                    !create (store.get<ESM::Armor>(), name) &&
+                    !create (store.get<ESM::Book>(), name) &&
+                    !create (store.get<ESM::Clothing>(), name) &&
+                    !create (store.get<ESM::Container>(), name) &&
+                    !create (store.get<ESM::Creature>(), name) &&
+                    !create (store.get<ESM::Door>(), name) &&
+                    !create (store.get<ESM::Ingredient>(), name) &&
+                    !create (store.get<ESM::CreatureLevList>(), name) &&
+                    !create (store.get<ESM::ItemLevList>(), name) &&
+                    !create (store.get<ESM::Light>(), name) &&
+                    !create (store.get<ESM::Tool>(), name) &&
+                    !create (store.get<ESM::Miscellaneous>(), name) &&
+                    !create (store.get<ESM::NPC>(), name) &&
+                    !create (store.get<ESM::Probe>(), name) &&
+                    !create (store.get<ESM::Repair>(), name) &&
+                    !create (store.get<ESM::Static>(), name) &&
+                    !create (store.get<ESM::Weapon>(), name))
                     throw std::logic_error ("failed to create manual cell ref for " + name);
 
                 // initialise

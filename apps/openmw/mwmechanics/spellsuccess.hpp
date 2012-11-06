@@ -63,7 +63,7 @@ namespace MWMechanics
     inline int getSpellSchool(const std::string& spellId, const MWWorld::Ptr& actor)
     {
         const ESM::Spell* spell =
-            MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell.().find(spellId);
+            MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find(spellId);
         return getSpellSchool(spell, actor);
     }
 

@@ -17,10 +17,12 @@ namespace MWScript
     {
         addScript ("Main");
 
-        for (MWWorld::RecListT<ESM::StartScript>::MapType::const_iterator iter
-            (store.startScripts.list.begin());
-            iter != store.startScripts.list.end(); ++iter)
-            addScript (iter->second.mScript);
+        MWWorld::Store<ESM::StartScript>::iterator iter =
+            store.get<ESM::StartScript>().begin();
+
+        for (; iter != store.get<ESM::StartScript>().end(); ++iter) {
+            addScript (iter->mScript);
+        }
     }
 
     void GlobalScripts::addScript (const std::string& name)

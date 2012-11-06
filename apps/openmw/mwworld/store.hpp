@@ -844,7 +844,7 @@ namespace MWWorld
         }
 
         const T *find(int index) const {
-            T *ptr = search(index);
+            const T *ptr = search(index);
             if (ptr == 0) {
                 std::ostringstream msg;
                 msg << "Object with index " << index << " not found";

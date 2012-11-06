@@ -73,10 +73,13 @@ namespace MWGui
         MWWorld::Ptr player = MWBase::Environment::get().getWorld ()->getPlayer ().getPlayer ();
         MWMechanics::NpcStats& pcStats = MWWorld::Class::get(player).getNpcStats (player);
 
+        const MWWorld::Store<ESM::GameSetting> &gmst =
+            MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+
         for (int i=0; i<3; ++i)
         {
             /// \todo mercantile skill
-            int price = pcStats.getSkill (bestSkills[i].first).getBase() * MWBase::Environment::get().getWorld ()->getStore ().gameSettings.find("iTrainingMod")->getInt ();
+            int price = pcStats.getSkill (bestSkills[i].first).getBase() * gmst.find("iTrainingMod")->getInt ();
 
             std::string skin = (price > mWindowManager.getInventoryWindow ()->getPlayerGold ()) ? "SandTextGreyedOut" : "SandTextButton";
 

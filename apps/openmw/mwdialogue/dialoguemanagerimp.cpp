@@ -90,7 +90,8 @@ namespace
         if (scriptName.empty())
             return false; // no script
 
-        const ESM::Script *script = store.scripts.find (scriptName);
+        const ESM::Script *script =
+            store.get<ESM::Script>().find (scriptName);
 
         int i = 0;
 
@@ -751,7 +752,7 @@ namespace MWDialogue
             MWBase::Environment::get().getWorld()->getStore().get<ESM::Dialogue>();
 
 
-        MWWordl::Store<ESM::Dialogue>::iterator it = dialogs.begin();
+        MWWorld::Store<ESM::Dialogue>::iterator it = dialogs.begin();
         for (; it != dialogs.end(); ++it)
         {
             if(it->mType == ESM::Dialogue::Topic)

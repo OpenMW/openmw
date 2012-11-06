@@ -51,7 +51,7 @@ namespace MWScript
             store.get<ESM::Apparatus>().search (name) ||
             store.get<ESM::Armor>().search (name) ||
             store.get<ESM::Book>().search (name) ||
-            store.get<ESM::Cloth>().search (name) ||
+            store.get<ESM::Clothing>().search (name) ||
             store.get<ESM::Container>().search (name) ||
             store.get<ESM::Creature>().search (name) ||
             store.get<ESM::Door>().search (name) ||

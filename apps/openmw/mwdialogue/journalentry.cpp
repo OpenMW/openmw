@@ -18,7 +18,8 @@ namespace MWDialogue
 
     std::string JournalEntry::getText (const MWWorld::ESMStore& store) const
     {
-        const ESM::Dialogue *dialogue = store.dialogs.find (mTopic);
+        const ESM::Dialogue *dialogue =
+            store.get<ESM::Dialogue>().find (mTopic);
 
         for (std::vector<ESM::DialInfo>::const_iterator iter (dialogue->mInfo.begin());
             iter!=dialogue->mInfo.end(); ++iter)

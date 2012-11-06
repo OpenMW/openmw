@@ -131,7 +131,7 @@ namespace MWScript
         const MWWorld::Store<ESM::Script>& scripts = mStore.get<ESM::Script>();
         MWWorld::Store<ESM::Script>::iterator it = scripts.begin();
 
-        for (; it != scripts.end(); ++iter, ++count)
+        for (; it != scripts.end(); ++it, ++count)
             if (compile (it->mId))
                 ++success;
 
