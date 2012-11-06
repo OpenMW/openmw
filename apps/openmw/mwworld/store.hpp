@@ -80,6 +80,8 @@ namespace MWWorld
         }
     };
 
+    class ESMStore;
+
     template <class T>
     class Store : public StoreBase
     {
@@ -88,6 +90,8 @@ namespace MWWorld
         std::map<std::string, T> mDynamic;
 
         typedef std::map<std::string, T> Dynamic;
+
+        friend class ESMStore;
 
     public:
         Store()
