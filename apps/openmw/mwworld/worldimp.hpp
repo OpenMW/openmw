@@ -60,7 +60,6 @@ namespace MWWorld
             MWWorld::Globals *mGlobalVariables;
             MWWorld::PhysicsSystem *mPhysics;
             bool mSky;
-            int mNextDynamicRecord;
 
             Cells mCells;
 

@@ -67,6 +67,8 @@ namespace MWWorld
         std::map<std::string, int> mIds;
         std::map<int, StoreBase *> mStores;
 
+        unsigned int mDynamicCount;
+
     public:
         /// \todo replace with SharedIterator<StoreBase>
         typedef std::map<int, StoreBase *>::const_iterator iterator;
@@ -90,6 +92,7 @@ namespace MWWorld
         }
 
         ESMStore()
+          : mDynamicCount(0)
         {
             mStores[ESM::REC_ACTI] = &mActivators;
             mStores[ESM::REC_ALCH] = &mPotions;
@@ -142,7 +145,31 @@ namespace MWWorld
         const Store<T> &get() const {
             throw std::runtime_error("Storage for this type not exist");
         }
+
+        template <class T>
+        T *insert(const T &x) {
+            Store<T> &store = const_cast<Store<T> &>(get<T>());
+            T record = x;
+
+            std::ostringstream id;
+            id << "$dynamic" << mDynamicCount++;
+            record.mId = id.str();
+            
+            T *ptr = store.insert(record);
+            for (iterator it = mStores.begin(); it != mStores.end(); ++it) {
+                if (it->second == &store) {
+                    mIds[ptr->mId] = it->first;
+                }
+            }
+            return ptr;
+        }
+
     };
+
+    template <>
+    inline ESM::Cell *ESMStore::insert<ESM::Cell>(const ESM::Cell &cell) {
+        return mCells.insert(cell);
+    }
 
     template <>
     inline const Store<ESM::Activator> &ESMStore::get<ESM::Activator>() const {

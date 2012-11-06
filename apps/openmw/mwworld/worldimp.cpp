@@ -170,7 +170,7 @@ namespace MWWorld
         const std::string& master, const boost::filesystem::path& resDir, const boost::filesystem::path& cacheDir, bool newGame,
         const std::string& encoding, std::map<std::string,std::string> fallbackMap)
     : mPlayer (0), mLocalScripts (mStore), mGlobalVariables (0),
-      mSky (true), mNextDynamicRecord (0), mCells (mStore, mEsm),
+      mSky (true), mCells (mStore, mEsm),
       mNumFacing(0)
     {
         mPhysics = new PhysicsSystem(renderer);
@@ -779,92 +779,25 @@ namespace MWWorld
 
     std::pair<std::string, const ESM::Potion *> World::createRecord (const ESM::Potion& record)
     {
-    /*
-        /// \todo Rewrite the ESMStore so that a dynamic 2nd ESMStore can be attached to it.
-        /// This function should then insert the record into the 2nd store (the code for this
-        /// should also be moved to the ESMStore class). It might be a good idea to review
-        /// the STL-container usage of the ESMStore before the rewrite.
-
-        std::ostringstream stream;
-        stream << "$dynamic" << mNextDynamicRecord++;
-
-        ESM::Potion record2 (record);
-        record2.mId = stream.str();
-
-        const ESM::Potion *created =
-            &mStore.potions.list.insert (std::make_pair (stream.str(), record2)).first->second;
-
-        mStore.all.insert (std::make_pair (stream.str(), ESM::REC_ALCH));
-
-        return std::make_pair (stream.str(), created);
-    */
-        std::string id = "";
-        const ESM::Potion *ptr = 0;
-        return std::make_pair(id, ptr);
+        const ESM::Potion *ptr = mStore.insert(record);
+        return std::make_pair(ptr->mId, ptr);
     }
 
     std::pair<std::string, const ESM::Class *> World::createRecord (const ESM::Class& record)
     {
-    /*
-        /// \todo See function above.
-        std::ostringstream stream;
-        stream << "$dynamic" << mNextDynamicRecord++;
-
-        const ESM::Class *created =
-            &mStore.classes.list.insert (std::make_pair (stream.str(), record)).first->second;
-
-        mStore.all.insert (std::make_pair (stream.str(), ESM::REC_CLAS));
-
-        return std::make_pair (stream.str(), created);
-    */
-        std::string id = "";
-        const ESM::Class *ptr = 0;
-        return std::make_pair(id, ptr);
+        const ESM::Class *ptr = mStore.insert(record);
+        return std::make_pair(ptr->mId, ptr);
     }
 
     std::pair<std::string, const ESM::Spell *> World::createRecord (const ESM::Spell& record)
     {
-    /*
-        /// \todo See function above.
-        std::ostringstream stream;
-        stream << "$dynamic" << mNextDynamicRecord++;
-
-        const ESM::Spell *created =
-            &mStore.spells.list.insert (std::make_pair (stream.str(), record)).first->second;
-
-        mStore.all.insert (std::make_pair (stream.str(), ESM::REC_SPEL));
-
-        return std::make_pair (stream.str(), created);
-    */
-        std::string id = "";
-        const ESM::Spell *ptr = 0;
-        return std::make_pair(id, ptr);
+        const ESM::Spell *ptr = mStore.insert(record);
+        return std::make_pair(ptr->mId, ptr);
     }
 
     const ESM::Cell *World::createRecord (const ESM::Cell& record)
     {
-    /*
-        if (record.mData.mFlags & ESM::Cell::Interior)
-        {
-            if (mStore.cells.searchInt (record.mName))
-                throw std::runtime_error ("failed creating interior cell");
-
-            ESM::Cell *cell = new ESM::Cell (record);
-            mStore.cells.intCells.insert (std::make_pair (record.mName, cell));
-            return cell;
-        }
-        else
-        {
-            if (mStore.cells.searchExt (record.mData.mX, record.mData.mY))
-                throw std::runtime_error ("failed creating exterior cell");
-
-            ESM::Cell *cell = new ESM::Cell (record);
-            mStore.cells.extCells.insert (
-                std::make_pair (std::make_pair (record.mData.mX, record.mData.mY), cell));
-            return cell;
-        }
-    */
-        return 0;
+        return mStore.insert(record);
     }
 
     void World::playAnimationGroup (const MWWorld::Ptr& ptr, const std::string& groupName, int mode,
