@@ -28,18 +28,21 @@ namespace MWRender
     {
         Ogre::TexturePtr tex;
 
+        const MWWorld::ESMStore &esmStore =
+            MWBase::Environment::get().getWorld()->getStore();
+
         // get the size of the world
-        const MWWorld::CellList::ExtCells& extCells = MWBase::Environment::get().getWorld ()->getStore ().cells.extCells;
-        for (MWWorld::CellList::ExtCells::const_iterator it = extCells.begin(); it != extCells.end(); ++it)
+        MWWorld::Store<ESM::Cell>::iterator it = esmStore.get<ESM::Cell>().extBegin();
+        for (; it != esmStore.get<ESM::Cell>().end(); ++it)
         {
-            if (it->first.first < mMinX)
-                mMinX = it->first.first;
-            if (it->first.first > mMaxX)
-                mMaxX = it->first.first;
-            if (it->first.second < mMinY)
-                mMinY = it->first.second;
-            if (it->first.second > mMaxY)
-                mMaxY = it->first.second;
+            if (it->getGridX() < mMinX)
+                mMinX = it->getGridX();
+            if (it->getGridX() > mMaxX)
+                mMaxX = it->getGridX();
+            if (it->getGridY() < mMinY)
+                mMinY = it->getGridY();
+            if (it->getGridY() > mMaxY)
+                mMaxY = it->getGridY();
         }
 
         int cellSize = 24;
@@ -58,7 +61,7 @@ namespace MWRender
             {
                 for (int y = mMinY; y <= mMaxY; ++y)
                 {
-                    ESM::Land* land = MWBase::Environment::get().getWorld ()->getStore ().lands.search (x,y);
+                    ESM::Land* land = esmStore.get<ESM::Land>().search (x,y);
 
                     if (land)
                     {

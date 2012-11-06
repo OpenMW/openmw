@@ -228,7 +228,8 @@ void Debugging::togglePathgrid()
 
 void Debugging::enableCellPathgrid(MWWorld::Ptr::CellStore *store)
 {
-    ESM::Pathgrid *pathgrid = MWBase::Environment::get().getWorld()->getStore().pathgrids.search(*store->mCell);
+    const ESM::Pathgrid *pathgrid =
+        MWBase::Environment::get().getWorld()->getStore().get<ESM::Pathgrid>().search(*store->mCell);
     if (!pathgrid) return;
 
     Vector3 cellPathGridPos(0, 0, 0);

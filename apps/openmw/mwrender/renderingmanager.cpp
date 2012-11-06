@@ -373,10 +373,14 @@ void RenderingManager::update (float duration)
     }
 }
 
-void RenderingManager::waterAdded (MWWorld::Ptr::CellStore *store){
-    if(store->mCell->mData.mFlags & store->mCell->HasWater
+void RenderingManager::waterAdded (MWWorld::Ptr::CellStore *store)
+{
+    const MWWorld::Store<ESM::Land> &lands =
+        MWBase::Environment::get().getWorld()->getStore().get<ESM::Land>();
+
+    if(store->mCell->mData.mFlags & ESM::Cell::HasWater
         || ((store->mCell->isExterior())
-            && !MWBase::Environment::get().getWorld()->getStore().lands.search(store->mCell->getGridX(),store->mCell->getGridY()) )) // always use water, if the cell does not have land.
+            && !lands.search(store->mCell->getGridX(),store->mCell->getGridY()) )) // always use water, if the cell does not have land.
     {
         if(mWater == 0)
             mWater = new MWRender::Water(mRendering.getCamera(), this, store->mCell);

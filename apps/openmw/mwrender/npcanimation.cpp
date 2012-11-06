@@ -62,13 +62,14 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node, MWWor
         mPartPriorities[init] = 0;
     }
 
-    const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
-    const ESM::Race *race = store.races.find(ref->mBase->mRace);
+    const MWWorld::ESMStore &store =
+        MWBase::Environment::get().getWorld()->getStore();
+    const ESM::Race *race = store.get<ESM::Race>().find(ref->mBase->mRace);
 
     std::string hairID = ref->mBase->mHair;
     std::string headID = ref->mBase->mHead;
-    headModel = "meshes\\" + store.bodyParts.find(headID)->mModel;
-    hairModel = "meshes\\" + store.bodyParts.find(hairID)->mModel;
+    headModel = "meshes\\" + store.get<ESM::BodyPart>().find(headID)->mModel;
+    hairModel = "meshes\\" + store.get<ESM::BodyPart>().find(hairID)->mModel;
     npcName = ref->mBase->mName;
 
     isFemale = !!(ref->mBase->mFlags&ESM::NPC::Female);
@@ -331,7 +332,7 @@ void NpcAnimation::updateParts()
             bool tryfemale = isFemale;
             int ni = 0;
             do {
-                part = store.bodyParts.search(bodyRaceID+(tryfemale?"_f_":"_m_")+PartTypeList[i].name[ni]);
+                part = store.get<ESM::BodyPart>().search(bodyRaceID+(tryfemale?"_f_":"_m_")+PartTypeList[i].name[ni]);
                 if(part) break;
 
                 ni ^= 1;
@@ -569,11 +570,14 @@ void NpcAnimation::addPartGroup(int group, int priority, std::vector<ESM::PartRe
     {
         ESM::PartReference &part = parts[i];
 
+        const MWWorld::Store<ESM::BodyPart> &parts =
+            MWBase::Environment::get().getWorld()->getStore().get<ESM::BodyPart>();
+
         const ESM::BodyPart *bodypart = 0;
         if(isFemale)
-            bodypart = MWBase::Environment::get().getWorld()->getStore().bodyParts.search(part.mFemale);
+            bodypart = parts.search(part.mFemale);
         if(!bodypart)
-            bodypart = MWBase::Environment::get().getWorld()->getStore().bodyParts.search(part.mMale);
+            bodypart = parts.search(part.mMale);
 
         if(bodypart)
             addOrReplaceIndividualPart(part.mPart, group, priority,"meshes\\" + bodypart->mModel);

@@ -95,7 +95,8 @@ namespace MWRender
         const int cellX = store->mCell->getGridX();
         const int cellY = store->mCell->getGridY();
 
-        ESM::Land* land = MWBase::Environment::get().getWorld()->getStore().lands.search(cellX, cellY);
+        ESM::Land* land =
+            MWBase::Environment::get().getWorld()->getStore().get<ESM::Land>().search(cellX, cellY);
         if (land == NULL) // no land data means we're not going to create any terrain.
             return;
 
@@ -245,7 +246,10 @@ namespace MWRender
             {
                 //NB: All vtex ids are +1 compared to the ltex ids
 
-                assert( (int)MWBase::Environment::get().getWorld()->getStore().landTexts.getSize() >= (int)ltexIndex - 1 &&
+                const MWWorld::Store<ESM::LandTexture> &ltexStore =
+                    MWBase::Environment::get().getWorld()->getStore().get<ESM::LandTexture>();
+
+                assert( (int)ltexStore.getSize() >= (int)ltexIndex - 1 &&
                        "LAND.VTEX must be within the bounds of the LTEX array");
 
                 std::string texture;
@@ -255,7 +259,7 @@ namespace MWRender
                 }
                 else
                 {
-                    texture = MWBase::Environment::get().getWorld()->getStore().landTexts.search(ltexIndex-1)->mTexture;
+                    texture = ltexStore.search(ltexIndex-1)->mTexture;
                     //TODO this is needed due to MWs messed up texture handling
                     texture = texture.substr(0, texture.rfind(".")) + ".dds";
                 }
@@ -411,7 +415,8 @@ namespace MWRender
         }
 
 
-        ESM::Land* land = MWBase::Environment::get().getWorld()->getStore().lands.search(cellX, cellY);
+        ESM::Land* land =
+            MWBase::Environment::get().getWorld()->getStore().get<ESM::Land>().search(cellX, cellY);
         if ( land != NULL )
         {
             if (!land->isDataLoaded(ESM::Land::DATA_VTEX))
