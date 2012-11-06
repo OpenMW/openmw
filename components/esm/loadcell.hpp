@@ -2,6 +2,7 @@
 #define OPENMW_ESM_CELL_H
 
 #include <string>
+#include <vector>
 
 #include "esmcommon.hpp"
 #include "defs.hpp"
@@ -120,7 +121,7 @@ struct Cell
   // Optional region name for exterior and quasi-exterior cells.
   std::string mRegion;
 
-  ESM_Context mContext; // File position
+  std::vector<ESM_Context> mContextList; // File position; multiple positions for multiple plugin support
   DATAstruct mData;
   AMBIstruct mAmbi;
   float mWater; // Water level

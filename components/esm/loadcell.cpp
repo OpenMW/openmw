@@ -2,6 +2,7 @@
 
 #include <string>
 #include <sstream>
+#include <c++/4.6/list>
 
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
@@ -111,7 +112,7 @@ void Cell::load(ESMReader &esm)
     }
 
     // Save position of the cell references and move on
-    mContext = esm.getContext();
+    mContextList.push_back(esm.getContext());
     esm.skipRecord();
 }
 
@@ -148,7 +149,8 @@ void Cell::save(ESMWriter &esm)
 
 void Cell::restore(ESMReader &esm) const
 {
-    esm.restoreContext(mContext);
+    // TODO: support all contexts in the list!
+    esm.restoreContext(mContextList[0]);
 }
 
 std::string Cell::getDescription() const
@@ -167,6 +169,12 @@ std::string Cell::getDescription() const
 
 bool Cell::getNextRef(ESMReader &esm, CellRef &ref)
 {
+    // TODO: Add support for moved references. References moved without crossing a cell boundary simply
+    //  overwrite old data. References moved across cell boundaries are using a different set of keywords,
+    //  and I'll have to think more about how this can be done.
+    // TODO: Add support for multiple plugins. This requires a tricky renaming scheme for "ref.mRefnum".
+    //  I'll probably add something to "ESMReader", we will need one per plugin anyway.
+    // TODO: Try and document reference numbering, I don't think this has been done anywhere else.
     if (!esm.hasMoreSubs())
         return false;
 

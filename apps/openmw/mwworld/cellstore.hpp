@@ -62,6 +62,10 @@ namespace MWWorld
       if(obj == NULL)
         throw std::runtime_error("Error resolving cell reference " + ref.mRefID);
 
+      // TODO: this line must be modified for multiple plugins and moved references.
+      //  This means: no simple "push back", but search for an existing reference with
+      //  this ID first! If it exists, merge data into this list instead of just adding it.
+      // I'll probably generate a separate method jist for this.
       list.push_back(LiveRef(ref, obj));
     }
 
