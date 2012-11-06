@@ -192,7 +192,7 @@ namespace MWClass
         const MWWorld::ESMStore &store =
             MWBase::Environment::get().getWorld()->getStore();
 
-        if (MWWorld::Class::get(ptr).getName(ptr) == store.get<ESM::GameSetting().find("sGold")->getString()) {
+        if (MWWorld::Class::get(ptr).getName(ptr) == store.get<ESM::GameSetting>().find("sGold")->getString()) {
             int goldAmount = ptr.getRefData().getCount();
 
             std::string base = "Gold_001";

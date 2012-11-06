@@ -161,7 +161,7 @@ namespace MWClass
             ref->mBase->mData.mWeight)
             return ESM::Skill::LightArmor;
 
-        if (iWeight * gmst.get<ESM::GameSetting>().find ("fMedMaxMod")->getFloat()>=
+        if (iWeight * gmst.find ("fMedMaxMod")->getFloat()>=
             ref->mBase->mData.mWeight)
             return ESM::Skill::MediumArmor;
 
