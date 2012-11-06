@@ -353,7 +353,8 @@ namespace MWMechanics
 
         float reaction = 0;
         int rank = 0;
-        std::string npcFaction = npcSkill.getFactionRanks().begin()->first;
+        std::string npcFaction = "";
+        if(!npcSkill.getFactionRanks().empty()) npcFaction = npcSkill.getFactionRanks().begin()->first;
         const ESMS::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
 
         if (playerSkill.getFactionRanks().find(toLower(npcFaction)) != playerSkill.getFactionRanks().end())
