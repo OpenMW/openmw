@@ -41,6 +41,8 @@ namespace
                     {
                         rendering.addObject(ptr);
                         class_.insertObject(ptr, physics);
+                        MWBase::Environment::get().getWorld()->rotateObject(ptr, 0, 0, 0, true);
+                        MWBase::Environment::get().getWorld()->scaleObject(ptr, ptr.getCellRef().mScale);
                     }
                     catch (const std::exception& e)
                     {
@@ -62,25 +64,17 @@ namespace
 namespace MWWorld
 {
 
-    void Scene::update (float duration){
-        mRendering.update (duration);
+    void Scene::update (float duration, bool paused){
+        mRendering.update (duration, paused);
     }
 
     void Scene::unloadCell (CellStoreCollection::iterator iter)
     {
         std::cout << "Unloading cell\n";
         ListHandles functor;
-
-
-
-
-
-
+	
         (*iter)->forEach<ListHandles>(functor);
-
         {
-
-
             // silence annoying g++ warning
             for (std::vector<Ogre::SceneNode*>::const_iterator iter2 (functor.mHandles.begin());
                 iter2!=functor.mHandles.end(); ++iter2){
@@ -96,27 +90,20 @@ namespace MWWorld
             }
         }
 
-		mRendering.removeCell(*iter);
-		//mPhysics->removeObject("Unnamed_43");
+        mRendering.removeCell(*iter);
+       //mPhysics->removeObject("Unnamed_43");
 
         MWBase::Environment::get().getWorld()->getLocalScripts().clearCell (*iter);
         MWBase::Environment::get().getMechanicsManager()->dropActors (*iter);
         MWBase::Environment::get().getSoundManager()->stopSound (*iter);
-		mActiveCells.erase(*iter);
-
-
-
+        mActiveCells.erase(*iter);
     }
 
     void Scene::loadCell (Ptr::CellStore *cell)
     {
         // register local scripts
         MWBase::Environment::get().getWorld()->getLocalScripts().addCell (cell);
-
-
-
-        std::pair<CellStoreCollection::iterator, bool> result =
-            mActiveCells.insert(cell);
+        std::pair<CellStoreCollection::iterator, bool> result = mActiveCells.insert(cell);
 
         if(result.second)
         {
@@ -138,16 +125,10 @@ namespace MWWorld
             mRendering.configureAmbient(*cell);
             mRendering.requestMap(cell);
             mRendering.configureAmbient(*cell);
-
         }
-
     }
 
-    void
-    Scene::playerCellChange(
-        MWWorld::CellStore *cell,
-        const ESM::Position& pos,
-        bool adjustPlayerPos)
+    void Scene::playerCellChange(MWWorld::CellStore *cell, const ESM::Position& pos, bool adjustPlayerPos)
     {
         bool hasWater = cell->cell->mData.mFlags & cell->cell->HasWater;
         mPhysics->setCurrentWater(hasWater, cell->cell->mWater);
@@ -325,9 +306,24 @@ namespace MWWorld
 
     void Scene::changeToInteriorCell (const std::string& cellName, const ESM::Position& position)
     {
-        std::cout << "Changing to interior\n";
-
         CellStore *cell = MWBase::Environment::get().getWorld()->getInterior(cellName);
+        bool loadcell = (mCurrentCell == NULL);
+        if(!loadcell)
+            loadcell = *mCurrentCell != *cell;
+        
+        if(!loadcell)
+        {
+            MWBase::World *world = MWBase::Environment::get().getWorld();
+            world->moveObject(world->getPlayer().getPlayer(), position.pos[0], position.pos[1], position.pos[2]);
+
+            float x = Ogre::Radian(position.rot[0]).valueDegrees();
+            float y = Ogre::Radian(position.rot[1]).valueDegrees();
+            float z = Ogre::Radian(position.rot[2]).valueDegrees();
+            world->rotateObject(world->getPlayer().getPlayer(), x, y, z);
+            return;
+        }
+        
+        std::cout << "Changing to interior\n";
 
         // remove active
         CellStoreCollection::iterator active = mActiveCells.begin();
@@ -352,19 +348,19 @@ namespace MWWorld
         }
 
         // Load cell.
-        std::cout << "cellName:" << cellName << std::endl;
-
+        std::cout << "cellName: " << cell->cell->mName << std::endl;
 
         MWBase::Environment::get().getWindowManager ()->setLoadingProgress ("Loading cells", 0, 0, 1);
         loadCell (cell);
 
-        // adjust player
         mCurrentCell = cell;
-        playerCellChange (cell, position);
 
         // adjust fog
         mRendering.switchToInterior();
-        mRendering.configureFog(*cell);
+        mRendering.configureFog(*mCurrentCell);
+        
+        // adjust player
+        playerCellChange (mCurrentCell, position);
 
         // Sky system
         MWBase::Environment::get().getWorld()->adjustSky();
@@ -423,6 +419,8 @@ namespace MWWorld
     {
         mRendering.addObject(ptr);
         MWWorld::Class::get(ptr).insertObject(ptr, *mPhysics);
+        MWBase::Environment::get().getWorld()->rotateObject(ptr, 0, 0, 0, true);
+        MWBase::Environment::get().getWorld()->scaleObject(ptr, ptr.getCellRef().mScale);
     }
 
     void Scene::removeObjectFromScene (const Ptr& ptr)

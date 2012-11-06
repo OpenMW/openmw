@@ -167,18 +167,8 @@ void MWWorld::ContainerStore::fill (const ESM::InventoryList& items, const ESMS:
 
 void MWWorld::ContainerStore::clear()
 {
-    potions.list.clear();
-    appas.list.clear();
-    armors.list.clear();
-    books.list.clear();
-    clothes.list.clear();
-    ingreds.list.clear();
-    lights.list.clear();
-    lockpicks.list.clear();
-    miscItems.list.clear();
-    probes.list.clear();
-    repairs.list.clear();
-    weapons.list.clear();
+    for (ContainerStoreIterator iter (begin()); iter!=end(); ++iter)
+        iter->getRefData().setCount (0);
 
     flagAsModified();
 }

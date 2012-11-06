@@ -16,7 +16,8 @@ Ogre::Resource(creator, name, handle, group, isManual, loader)
     we have none as such. Full details can be set through scripts.
     */
     Shape = NULL;
-    collide = true;
+    mCollide = true;
+    mIgnore = false;
     createParamDictionary("BulletShape");
 }
 

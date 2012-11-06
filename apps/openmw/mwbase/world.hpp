@@ -28,6 +28,7 @@ namespace ESM
     struct Cell;
     struct Class;
     struct Potion;
+    struct Spell;
 }
 
 namespace ESMS
@@ -142,6 +143,9 @@ namespace MWBase
             virtual MWWorld::Ptr getPtrViaHandle (const std::string& handle) = 0;
             ///< Return a pointer to a liveCellRef with the given Ogre handle.
 
+            virtual MWWorld::Ptr searchPtrViaHandle (const std::string& handle) = 0;
+            ///< Return a pointer to a liveCellRef with the given Ogre handle or Ptr() if not found
+
             /// \todo enable reference in the OGRE scene
             virtual void enable (const MWWorld::Ptr& ptr) = 0;
 
@@ -235,6 +239,11 @@ namespace MWBase
             ///< Create a new recrod (of type potion) in the ESM store.
             /// \return ID, pointer to created record
 
+            virtual std::pair<std::string, const ESM::Spell *> createRecord (const ESM::Spell& record)
+                = 0;
+            ///< Create a new recrod (of type spell) in the ESM store.
+            /// \return ID, pointer to created record
+
             virtual std::pair<std::string, const ESM::Class *> createRecord (const ESM::Class& record)
                 = 0;
             ///< Create a new recrod (of type class) in the ESM store.
@@ -256,7 +265,7 @@ namespace MWBase
             ///< Skip the animation for the given MW-reference for one frame. Calls to this function for
             /// references that are currently not in the rendered scene should be ignored.
 
-            virtual void update (float duration) = 0;
+            virtual void update (float duration, bool paused) = 0;
 
             virtual bool placeObject(const MWWorld::Ptr& object, float cursorX, float cursorY) = 0;
             ///< place an object into the gameworld at the specified cursor position

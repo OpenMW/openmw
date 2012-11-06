@@ -101,7 +101,7 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
             MWBase::Environment::get().getWorld()->doPhysics (movement, mEnvironment.getFrameDuration());
 
         // update world
-        MWBase::Environment::get().getWorld()->update (evt.timeSinceLastFrame);
+        MWBase::Environment::get().getWorld()->update (evt.timeSinceLastFrame, MWBase::Environment::get().getWindowManager()->isGuiMode());
 
         // update GUI
         Ogre::RenderWindow* window = mOgre->getWindow();
@@ -163,9 +163,8 @@ void OMW::Engine::loadBSA()
         std::cout << "Data dir " << dataDirectory << std::endl;
         Bsa::addDir(dataDirectory, mFSStrict);
 
-        // Workaround: Mygui does not find textures in non-BSA subfolders, _unless_ they are explicitely added like this
-        // For splash screens, this is OK to do, but eventually we will need an investigation why this is necessary
-        Bsa::addDir(dataDirectory + "/Splash", mFSStrict);
+        // Workaround until resource listing capabilities are added to DirArchive, we need those to list available splash screens
+        addResourcesDirectory (dataDirectory);
     }
 }
 
@@ -437,21 +436,10 @@ void OMW::Engine::activate()
     if (handle.empty())
         return;
 
-    // the faced handle is not updated immediately, so on a cell change it might
-    // point to an object that doesn't exist anymore
-    // therefore, we are catching the "Unknown Ogre handle" exception that occurs in this case
-    MWWorld::Ptr ptr;
-    try
-    {
-        ptr = MWBase::Environment::get().getWorld()->getPtrViaHandle (handle);
+    MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->searchPtrViaHandle (handle);
 
-        if (ptr.isEmpty())
-            return;
-    }
-    catch (std::runtime_error&)
-    {
+    if (ptr.isEmpty())
         return;
-    }
 
     MWScript::InterpreterContext interpreterContext (&ptr.getRefData().getLocals(), ptr);
 

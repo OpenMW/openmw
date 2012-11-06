@@ -71,7 +71,7 @@ void ManualBulletShapeLoader::loadResource(Ogre::Resource *resource)
 {
     cShape = static_cast<BulletShape *>(resource);
     resourceName = cShape->getName();
-    cShape->collide = false;
+    cShape->mCollide = false;
     mBoundingBox = NULL;
     cShape->boxTranslation = Ogre::Vector3(0,0,0);
     cShape->boxRotation = Ogre::Quaternion::IDENTITY;
@@ -108,7 +108,7 @@ void ManualBulletShapeLoader::loadResource(Ogre::Resource *resource)
     handleNode(node,0,NULL,hasCollisionNode,false,false);
 
     //if collide = false, then it does a second pass which create a shape for raycasting.
-    if(cShape->collide == false)
+    if(cShape->mCollide == false)
     {
         handleNode(node,0,NULL,hasCollisionNode,false,true);
     }
@@ -177,6 +177,7 @@ void ManualBulletShapeLoader::handleNode(Nif::Node *node, int flags,
     if (node->name.find("marker") != std::string::npos)
     {
         flags |= 0x800;
+        cShape->mIgnore = true;
     }
 
     // Check for extra data
@@ -254,7 +255,7 @@ void ManualBulletShapeLoader::handleNode(Nif::Node *node, int flags,
     }
     else if (node->recType == Nif::RC_NiTriShape && (isCollisionNode || !hasCollisionNode))
     {
-        cShape->collide = !(flags&0x800);
+        cShape->mCollide = !(flags&0x800);
         handleNiTriShape(dynamic_cast<Nif::NiTriShape*>(node), flags,node->trafo.rotation,node->trafo.pos,node->trafo.scale,raycastingOnly);
     }
     else if(node->recType == Nif::RC_RootCollisionNode)

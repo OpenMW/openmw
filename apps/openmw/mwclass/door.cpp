@@ -35,9 +35,8 @@ namespace MWClass
     void Door::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics) const
     {
         const std::string model = getModel(ptr);
-        if(!model.empty()) {
-            physics.insertObjectPhysics(ptr, model);
-        }
+        if(!model.empty())
+            physics.addObject(ptr);
     }
 
     std::string Door::getModel(const MWWorld::Ptr &ptr) const
@@ -81,9 +80,15 @@ namespace MWClass
         bool needKey = ptr.getCellRef().mLockLevel>0;
         bool hasKey = false;
         std::string keyName;
+
+        // make key id lowercase
+        std::string keyId = ptr.getCellRef().mKey;
+        std::transform(keyId.begin(), keyId.end(), keyId.begin(), ::tolower);
         for (MWWorld::ContainerStoreIterator it = invStore.begin(); it != invStore.end(); ++it)
         {
-            if (it->getCellRef ().mRefID == ptr.getCellRef().mKey)
+            std::string refId = it->getCellRef().mRefID;
+            std::transform(refId.begin(), refId.end(), refId.begin(), ::tolower);
+            if (refId == keyId)
             {
                 hasKey = true;
                 keyName = MWWorld::Class::get(*it).getName(*it);

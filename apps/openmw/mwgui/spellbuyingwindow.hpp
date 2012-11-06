@@ -1,10 +1,8 @@
 #ifndef MWGUI_SpellBuyingWINDOW_H
 #define MWGUI_SpellBuyingWINDOW_H
 
-#include "container.hpp"
 #include "window_base.hpp"
-
-#include "../mwworld/ptr.hpp"
+#include "referenceinterface.hpp"
 
 namespace MyGUI
 {
@@ -20,7 +18,7 @@ namespace MWGui
 
 namespace MWGui
 {
-    class SpellBuyingWindow : public ContainerBase, public WindowBase
+    class SpellBuyingWindow : public ReferenceInterface, public WindowBase
     {
         public:
             SpellBuyingWindow(MWBase::WindowManager& parWindowManager);
@@ -34,8 +32,6 @@ namespace MWGui
             MyGUI::TextBox* mSelect;
 
             MyGUI::ScrollView* mSpellsView;
-
-            MWWorld::Ptr mActor;
 
             std::map<MyGUI::Widget*, std::string> mSpellsWidgetMap;
 

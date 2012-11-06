@@ -13,6 +13,7 @@
 #include <OgreCompositionTargetPass.h>
 #include <OgreCompositionPass.h>
 #include <OgreHardwarePixelBuffer.h>
+#include <OgreControllerManager.h>
 
 #include <extern/shiny/Main/Factory.hpp>
 #include <extern/shiny/Platforms/Ogre/OgrePlatform.hpp>
@@ -67,7 +68,7 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
     // material system
     sh::OgrePlatform* platform = new sh::OgrePlatform("General", (resDir / "materials").string());
     if (!boost::filesystem::exists (cacheDir))
-        boost::filesystem::create_directory (cacheDir);
+        boost::filesystem::create_directories (cacheDir);
     platform->setCacheFolder (cacheDir.string());
     mFactory = new sh::Factory(platform);
 
@@ -180,6 +181,8 @@ RenderingManager::~RenderingManager ()
     delete mOcclusionQuery;
     delete mCompositors;
     delete mWater;
+
+    delete mFactory;
 }
 
 MWRender::SkyManager* RenderingManager::getSkyManager()
@@ -234,18 +237,12 @@ void RenderingManager::addObject (const MWWorld::Ptr& ptr){
     const MWWorld::Class& class_ =
             MWWorld::Class::get (ptr);
     class_.insertObjectRendering(ptr, *this);
-
 }
+
 void RenderingManager::removeObject (const MWWorld::Ptr& ptr)
 {
     if (!mObjects.deleteObject (ptr))
-    {
-        /// \todo delete non-object MW-references
-    }
-     if (!mActors.deleteObject (ptr))
-    {
-        /// \todo delete non-object MW-references
-    }
+        mActors.deleteObject (ptr);
 }
 
 void RenderingManager::moveObject (const MWWorld::Ptr& ptr, const Ogre::Vector3& position)
@@ -255,39 +252,46 @@ void RenderingManager::moveObject (const MWWorld::Ptr& ptr, const Ogre::Vector3&
             setPosition (position);
 }
 
-void RenderingManager::scaleObject (const MWWorld::Ptr& ptr, const Ogre::Vector3& scale){
-
+void RenderingManager::scaleObject (const MWWorld::Ptr& ptr, const Ogre::Vector3& scale)
+{
+    ptr.getRefData().getBaseNode()->setScale(scale);
 }
 
-bool
-RenderingManager::rotateObject(
-    const MWWorld::Ptr &ptr,
-    Ogre::Vector3 &rot,
-    bool adjust)
+bool RenderingManager::rotateObject( const MWWorld::Ptr &ptr, Ogre::Vector3 &rot, bool adjust)
 {
     bool isActive = ptr.getRefData().getBaseNode() != 0;
     bool isPlayer = isActive && ptr.getRefData().getHandle() == "player";
     bool force = true;
     
-    if (isPlayer) {
+    if (isPlayer)
         force = mPlayer->rotate(rot, adjust);
-    }
+    
     MWWorld::Class::get(ptr).adjustRotation(ptr, rot.x, rot.y, rot.z);
 
-    if (adjust) {
-        /// \note Stored and passed in radians
-        float *f = ptr.getRefData().getPosition().rot;
-        rot.x += f[0], rot.y += f[1], rot.z += f[2];
-    }
-    
-    if (!isPlayer && isActive) {
+    if (!isPlayer && isActive)
+    {
         Ogre::Quaternion xr(Ogre::Radian(rot.x), Ogre::Vector3::UNIT_X);
         Ogre::Quaternion yr(Ogre::Radian(rot.y), Ogre::Vector3::UNIT_Y);
         Ogre::Quaternion zr(Ogre::Radian(rot.z), Ogre::Vector3::UNIT_Z);
-        
-        ptr.getRefData().getBaseNode()->setOrientation(xr * yr * zr);
+        Ogre::Quaternion newo = adjust ? (xr * yr * zr) * ptr.getRefData().getBaseNode()->getOrientation() : xr * yr * zr;
+        rot.x = newo.x;
+        rot.y = newo.y;
+        rot.z = newo.z;
+        ptr.getRefData().getBaseNode()->setOrientation(newo);
     }
-    
+    else if(isPlayer)
+    {
+        rot.x = mPlayer->getPitch();
+        rot.z = mPlayer->getYaw();
+    }
+    else if (adjust)
+    {
+        // Stored and passed in radians
+        float *f = ptr.getRefData().getPosition().rot;
+        rot.x += f[0];
+        rot.y += f[1];
+        rot.z += f[2];
+    }
     return force;
 }
 
@@ -311,7 +315,7 @@ RenderingManager::moveObjectToCell(
     child->setPosition(pos);
 }
 
-void RenderingManager::update (float duration)
+void RenderingManager::update (float duration, bool paused)
 {
     Ogre::Vector3 orig, dest;
     mPlayer->setCameraDistance();
@@ -326,12 +330,21 @@ void RenderingManager::update (float duration)
             mPlayer->setCameraDistance(test.second * orig.distance(dest), false, false);
         }
     }
+    mOcclusionQuery->update(duration);
+    
+    if(paused)
+    {
+        Ogre::ControllerManager::getSingleton().setTimeFactor(0.f);
+        return;
+    }
+    Ogre::ControllerManager::getSingleton().setTimeFactor(
+                MWBase::Environment::get().getWorld()->getTimeScaleFactor()/30.f);
+
     mPlayer->update(duration);
 
     mActors.update (duration);
     mObjects.update (duration);
 
-    mOcclusionQuery->update(duration);
 
     mSkyManager->update(duration);
 
@@ -348,7 +361,7 @@ void RenderingManager::update (float duration)
 
     float *fpos = data.getPosition().pos;
 
-    /// \note only for LocalMap::updatePlayer()
+    // only for LocalMap::updatePlayer()
     Ogre::Vector3 pos(fpos[0], -fpos[2], -fpos[1]);
 
     Ogre::SceneNode *node = data.getBaseNode();

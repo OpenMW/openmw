@@ -42,6 +42,7 @@ namespace MWGui
     class Console;
     class SpellWindow;
     class TradeWindow;
+    class TravelWindow;
     class SpellBuyingWindow;
     class ConfirmationDialog;
     class CountDialog;
@@ -108,6 +109,7 @@ namespace MWBase
             virtual MWGui::ConfirmationDialog* getConfirmationDialog() = 0;
             virtual MWGui::TradeWindow* getTradeWindow() = 0;
             virtual MWGui::SpellBuyingWindow* getSpellBuyingWindow() = 0;
+            virtual MWGui::TravelWindow* getTravelWindow() = 0;
             virtual MWGui::SpellWindow* getSpellWindow() = 0;
             virtual MWGui::Console* getConsole() = 0;
 
@@ -227,6 +229,10 @@ namespace MWBase
 
             virtual bool getPlayerSleeping() = 0;
             virtual void wakeUpPlayer() = 0;
+
+            virtual void startSpellMaking(MWWorld::Ptr actor) = 0;
+            virtual void startEnchanting(MWWorld::Ptr actor) = 0;
+            virtual void startTraining(MWWorld::Ptr actor) = 0;
     };
 }
 

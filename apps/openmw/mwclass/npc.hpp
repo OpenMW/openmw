@@ -90,6 +90,9 @@ namespace MWClass
 
             virtual void adjustRotation(const MWWorld::Ptr& ptr,float& x,float& y,float& z) const;
 
+            virtual bool isEssential (const MWWorld::Ptr& ptr) const;
+            ///< Is \a ptr essential? (i.e. may losing \a ptr make the game unwinnable)
+            
             static void registerSelf();
 
             virtual std::string getModel(const MWWorld::Ptr &ptr) const;

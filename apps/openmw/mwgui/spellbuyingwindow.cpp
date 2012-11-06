@@ -24,7 +24,6 @@ namespace MWGui
 
     SpellBuyingWindow::SpellBuyingWindow(MWBase::WindowManager& parWindowManager) :
         WindowBase("openmw_spell_buying_window.layout", parWindowManager)
-        , ContainerBase(NULL) // no drag&drop
         , mCurrentY(0)
         , mLastPos(0)
     {
@@ -55,7 +54,7 @@ namespace MWGui
 
         MyGUI::Button* toAdd =
             mSpellsView->createWidget<MyGUI::Button>(
-                (price>mWindowManager.getInventoryWindow()->getPlayerGold()) ? "SandTextGreyedOut" : "SpellText",
+                (price>mWindowManager.getInventoryWindow()->getPlayerGold()) ? "SandTextGreyedOut" : "SandTextButton",
                 0,
                 mCurrentY,
                 200,
@@ -88,7 +87,7 @@ namespace MWGui
     void SpellBuyingWindow::startSpellBuying(const MWWorld::Ptr& actor)
     {
         center();
-        mActor = actor;
+        mPtr = actor;
         clearSpells();
 
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
@@ -125,7 +124,7 @@ namespace MWGui
             MWMechanics::Spells& spells = stats.getSpells();
             spells.add (mSpellsWidgetMap.find(_sender)->second);
             mWindowManager.getTradeWindow()->addOrRemoveGold(-price);
-            startSpellBuying(mActor);
+            startSpellBuying(mPtr);
 
             MWBase::Environment::get().getSoundManager()->playSound ("Item Gold Up", 1.0, 1.0);
         }

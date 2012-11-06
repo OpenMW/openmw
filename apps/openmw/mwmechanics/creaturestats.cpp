@@ -10,7 +10,7 @@
 namespace MWMechanics
 {  
     CreatureStats::CreatureStats()
-        : mLevelHealthBonus(0.f)
+        : mLevel (0), mHello (0), mFight (0), mFlee (0), mAlarm (0), mLevelHealthBonus(0.f), mDead (false)
     {
     }
 
@@ -118,22 +118,7 @@ namespace MWMechanics
         return mAttributes[index];
     }
 
-    DynamicStat<float> &CreatureStats::getHealth()
-    {
-        return mDynamic[0];
-    }
-
-    DynamicStat<float> &CreatureStats::getMagicka()
-    {
-        return mDynamic[1];
-    }
-
-    DynamicStat<float> &CreatureStats::getFatigue()
-    {
-        return mDynamic[2];
-    }
-
-    DynamicStat<float> &CreatureStats::getDynamic(int index)
+    const DynamicStat<float> &CreatureStats::getDynamic(int index) const
     {
         if (index < 0 || index > 2) {
             throw std::runtime_error("dynamic stat index is out of range");
@@ -171,19 +156,30 @@ namespace MWMechanics
 
     void CreatureStats::setHealth(const DynamicStat<float> &value)
     {
-        mDynamic[0] = value;
+        setDynamic (0, value);
     }
 
     void CreatureStats::setMagicka(const DynamicStat<float> &value)
     {
-        mDynamic[1] = value;
+        setDynamic (1, value);
     }
 
     void CreatureStats::setFatigue(const DynamicStat<float> &value)
     {
-        mDynamic[2] = value;
+        setDynamic (2, value);
     }
 
+    void CreatureStats::setDynamic (int index, const DynamicStat<float> &value)
+    {
+        if (index < 0 || index > 2)
+            throw std::runtime_error("dynamic stat index is out of range");
+
+        mDynamic[index] = value;
+
+        if (index==0 && mDynamic[index].getCurrent()<1)
+            mDead = true;
+    }
+    
     void CreatureStats::setLevel(int level)
     {
         mLevel = level;
@@ -218,4 +214,21 @@ namespace MWMechanics
     {
         mAlarm = value;
     }    
+    
+    bool CreatureStats::isDead() const
+    {
+        return mDead;
+    }
+    
+    void CreatureStats::resurrect()
+    {
+        if (mDead)
+        {
+            if (mDynamic[0].getCurrent()<1)
+                mDynamic[0].setCurrent (1);
+                
+            if (mDynamic[0].getCurrent()>=1)
+                mDead = false;
+        }
+    }
 }

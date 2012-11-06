@@ -141,11 +141,11 @@ void MainDialog::createPages()
 
     connect(mPlayPage->mProfilesComboBox,
             SIGNAL(currentIndexChanged(int)),
-            this, SLOT(profileChanged(int)));
+            mDataFilesPage->mProfilesComboBox, SLOT(setCurrentIndex(int)));
 
     connect(mDataFilesPage->mProfilesComboBox,
             SIGNAL(currentIndexChanged(int)),
-            this, SLOT(profileChanged(int)));
+            mPlayPage->mProfilesComboBox, SLOT(setCurrentIndex(int)));
 
 }
 
@@ -196,23 +196,6 @@ bool MainDialog::setup()
     return true;
 }
 
-void MainDialog::profileChanged(int index)
-{
-    // Just to be sure, should always have a selection
-    if (!mIconWidget->selectionModel()->hasSelection()) {
-        return;
-    }
-
-    QString currentPage = mIconWidget->currentItem()->data(Qt::DisplayRole).toString();
-    if (currentPage == QLatin1String("Play")) {
-        mDataFilesPage->mProfilesComboBox->setCurrentIndex(index);
-    }
-
-    if (currentPage == QLatin1String("Data Files")) {
-        mPlayPage->mProfilesComboBox->setCurrentIndex(index);
-    }
-}
-
 void MainDialog::changePage(QListWidgetItem *current, QListWidgetItem *previous)
 {
     if (!current)
@@ -244,10 +227,10 @@ void MainDialog::play()
     const std::string settingspath = (mCfgMgr.getUserPath() / "settings.cfg").string();
     mSettings.saveUser(settingspath);
 
-#ifdef Q_WS_WIN
+#ifdef Q_OS_WIN
     QString game = "./openmw.exe";
     QFile file(game);
-#elif defined(Q_WS_MAC)
+#elif defined(Q_OS_MAC)
     QDir dir(QCoreApplication::applicationDirPath());
     QString game = dir.absoluteFilePath("openmw");
     QFile file(game);

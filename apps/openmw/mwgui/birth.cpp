@@ -14,6 +14,16 @@
 using namespace MWGui;
 using namespace Widgets;
 
+namespace
+{
+
+bool sortBirthSigns(const std::pair<std::string, const ESM::BirthSign*>& left, const std::pair<std::string, const ESM::BirthSign*>& right)
+{
+    return left.second->mName.compare (right.second->mName) < 0;
+}
+
+}
+
 BirthDialog::BirthDialog(MWBase::WindowManager& parWindowManager)
   : WindowBase("openmw_chargen_birth.layout", parWindowManager)
 {
@@ -38,6 +48,7 @@ BirthDialog::BirthDialog(MWBase::WindowManager& parWindowManager)
     getWidget(okButton, "OKButton");
     okButton->setCaption(mWindowManager.getGameSettingString("sOK", ""));
     okButton->eventMouseButtonClick += MyGUI::newDelegate(this, &BirthDialog::onOkClicked);
+    okButton->setEnabled(false);
 
     updateBirths();
     updateSpells();
@@ -72,6 +83,9 @@ void BirthDialog::setBirthId(const std::string &birthId)
         if (boost::iequals(*mBirthList->getItemDataAt<std::string>(i), birthId))
         {
             mBirthList->setIndexSelected(i);
+            MyGUI::ButtonPtr okButton;
+            getWidget(okButton, "OKButton");
+            okButton->setEnabled(true);
             break;
         }
     }
@@ -83,6 +97,8 @@ void BirthDialog::setBirthId(const std::string &birthId)
 
 void BirthDialog::onOkClicked(MyGUI::Widget* _sender)
 {
+    if(mBirthList->getIndexSelected() == MyGUI::ITEM_NONE)
+        return;
     eventDone(this);
 }
 
@@ -95,6 +111,10 @@ void BirthDialog::onSelectBirth(MyGUI::ListBox* _sender, size_t _index)
 {
     if (_index == MyGUI::ITEM_NONE)
         return;
+
+    MyGUI::ButtonPtr okButton;
+    getWidget(okButton, "OKButton");
+    okButton->setEnabled(true);
 
     const std::string *birthId = mBirthList->getItemDataAt<std::string>(_index);
     if (boost::iequals(mCurrentBirthId, *birthId))
@@ -115,11 +135,21 @@ void BirthDialog::updateBirths()
     ESMS::RecListT<ESM::BirthSign>::MapType::const_iterator it = store.birthSigns.list.begin();
     ESMS::RecListT<ESM::BirthSign>::MapType::const_iterator end = store.birthSigns.list.end();
     int index = 0;
-    for (; it != end; ++it)
+
+    // sort by name
+    std::vector < std::pair<std::string, const ESM::BirthSign*> > birthSigns;
+    for (; it!=end; ++it)
     {
-        const ESM::BirthSign &birth = it->second;
-        mBirthList->addItem(birth.mName, it->first);
-        if (boost::iequals(it->first, mCurrentBirthId))
+        std::string id = it->first;
+        const ESM::BirthSign* sign = &it->second;
+        birthSigns.push_back(std::make_pair(id, sign));
+    }
+    std::sort(birthSigns.begin(), birthSigns.end(), sortBirthSigns);
+
+    for (std::vector < std::pair<std::string, const ESM::BirthSign*> >::const_iterator it2 = birthSigns.begin(); it2 != birthSigns.end(); ++it2)
+    {
+        mBirthList->addItem(it2->second->mName, it2->first);
+        if (boost::iequals(it2->first, mCurrentBirthId))
             mBirthList->setIndexSelected(index);
         ++index;
     }
