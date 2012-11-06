@@ -29,33 +29,34 @@ namespace MWWorld
 
     Globals::Globals (const MWWorld::ESMStore& store)
     {
-        for (MWWorld::RecListT<ESM::Global>::MapType::const_iterator iter
-            (store.globals.list.begin()); iter != store.globals.list.end(); ++iter)
+        const MWWorld::Store<ESM::Global> &globals = store.get<ESM::Global>();
+        MWWorld::Store<ESM::Global>::iterator iter = globals.begin();
+        for (; iter != globals.end(); ++iter)
         {
             char type = ' ';
             Data value;
         
-            switch (iter->second.mType)
+            switch (iter->mType)
             {
                 case ESM::VT_Short:
                     
                     type = 's';
                     value.mShort = *reinterpret_cast<const Interpreter::Type_Float *> (
-                        &iter->second.mValue);
+                        &iter->mValue);
                     break;
                     
                 case ESM::VT_Int:
                 
                     type = 'l';
                     value.mLong = *reinterpret_cast<const Interpreter::Type_Float *> (
-                        &iter->second.mValue);
+                        &iter->mValue);
                     break;
                     
                 case ESM::VT_Float:
                 
                     type = 'f';
                     value.mFloat = *reinterpret_cast<const Interpreter::Type_Float *> (
-                        &iter->second.mValue);
+                        &iter->mValue);
                     break;
                     
                 default:
@@ -63,7 +64,7 @@ namespace MWWorld
                     throw std::runtime_error ("unsupported global variable type");
             }            
 
-            mVariables.insert (std::make_pair (iter->first, std::make_pair (type, value)));
+            mVariables.insert (std::make_pair (iter->mId, std::make_pair (type, value)));
         }
         
         if (mVariables.find ("dayspassed")==mVariables.end())

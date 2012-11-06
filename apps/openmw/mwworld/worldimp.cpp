@@ -19,6 +19,9 @@ using namespace Ogre;
 
 namespace
 {
+/*  // NOTE this code is never instantiated (proper copy in localscripts.cpp),
+    //      so this commented out to not produce syntactic errors
+
     template<typename T>
     void listCellScripts (const MWWorld::ESMStore& store,
         MWWorld::CellRefList<T>& cellRefList, MWWorld::LocalScripts& localScripts,
@@ -28,18 +31,18 @@ namespace
             cellRefList.mList.begin());
             iter!=cellRefList.mList.end(); ++iter)
         {
-            if (!iter->mBase->script.empty() && iter->mData.getCount())
+            if (!iter->mBase->mScript.empty() && iter->mData.getCount())
             {
-                if (const ESM::Script *script = store.scripts.find (iter->base->script))
+                if (const ESM::Script *script = store.get<ESM::Script>().find (iter->mBase->mScript))
                 {
                     iter->mData.setLocals (*script);
 
-                    localScripts.add (iter->base->script, MWWorld::Ptr (&*iter, cell));
+                    localScripts.add (iter->mBase->mScript, MWWorld::Ptr (&*iter, cell));
                 }
             }
         }
     }
-
+*/
     template<typename T>
     MWWorld::LiveCellRef<T> *searchViaHandle (const std::string& handle,
         MWWorld::CellRefList<T>& refList)
@@ -793,10 +796,15 @@ namespace MWWorld
         mStore.all.insert (std::make_pair (stream.str(), ESM::REC_ALCH));
 
         return std::make_pair (stream.str(), created);
-    */}
+    */
+        std::string id = "";
+        const ESM::Potion *ptr = 0;
+        return std::make_pair(id, ptr);
+    }
 
     std::pair<std::string, const ESM::Class *> World::createRecord (const ESM::Class& record)
-    {/*
+    {
+    /*
         /// \todo See function above.
         std::ostringstream stream;
         stream << "$dynamic" << mNextDynamicRecord++;
@@ -807,10 +815,15 @@ namespace MWWorld
         mStore.all.insert (std::make_pair (stream.str(), ESM::REC_CLAS));
 
         return std::make_pair (stream.str(), created);
-    */}
+    */
+        std::string id = "";
+        const ESM::Class *ptr = 0;
+        return std::make_pair(id, ptr);
+    }
 
     std::pair<std::string, const ESM::Spell *> World::createRecord (const ESM::Spell& record)
-    {/*
+    {
+    /*
         /// \todo See function above.
         std::ostringstream stream;
         stream << "$dynamic" << mNextDynamicRecord++;
@@ -821,10 +834,15 @@ namespace MWWorld
         mStore.all.insert (std::make_pair (stream.str(), ESM::REC_SPEL));
 
         return std::make_pair (stream.str(), created);
-    */}
+    */
+        std::string id = "";
+        const ESM::Spell *ptr = 0;
+        return std::make_pair(id, ptr);
+    }
 
     const ESM::Cell *World::createRecord (const ESM::Cell& record)
-    {/*
+    {
+    /*
         if (record.mData.mFlags & ESM::Cell::Interior)
         {
             if (mStore.cells.searchInt (record.mName))
@@ -844,7 +862,9 @@ namespace MWWorld
                 std::make_pair (std::make_pair (record.mData.mX, record.mData.mY), cell));
             return cell;
         }
-    */}
+    */
+        return 0;
+    }
 
     void World::playAnimationGroup (const MWWorld::Ptr& ptr, const std::string& groupName, int mode,
         int number)

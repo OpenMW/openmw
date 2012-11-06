@@ -269,7 +269,7 @@ MWWorld::Ptr MWWorld::Cells::getPtr (const std::string& name)
 
     for (iter = cells.intBegin(); iter != cells.intEnd(); ++iter)
     {
-        Ptr::CellStore *cellStore = getCellStore (*iter);
+        Ptr::CellStore *cellStore = getCellStore (&(*iter));
 
         Ptr ptr = getPtrAndCache (name, *cellStore);
 
@@ -277,9 +277,9 @@ MWWorld::Ptr MWWorld::Cells::getPtr (const std::string& name)
             return ptr;
     }
 
-    for (iter = cells.extBegin(); iter != cells.extEnd(); ++it)
+    for (iter = cells.extBegin(); iter != cells.extEnd(); ++iter)
     {
-        Ptr::CellStore *cellStore = getCellStore (*iter);
+        Ptr::CellStore *cellStore = getCellStore (&(*iter));
 
         Ptr ptr = getPtrAndCache (name, *cellStore);
 
