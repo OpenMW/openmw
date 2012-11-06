@@ -98,26 +98,26 @@ namespace MWWorld
            */
           switch(rec)
             {
-            case ESM::REC_ACTI: mActivators.find(ref, store.activators); break;
-            case ESM::REC_ALCH: mPotions.find(ref, store.potions); break;
-            case ESM::REC_APPA: mAppas.find(ref, store.appas); break;
-            case ESM::REC_ARMO: mArmors.find(ref, store.armors); break;
-            case ESM::REC_BOOK: mBooks.find(ref, store.books); break;
-            case ESM::REC_CLOT: mClothes.find(ref, store.clothes); break;
-            case ESM::REC_CONT: mContainers.find(ref, store.containers); break;
-            case ESM::REC_CREA: mCreatures.find(ref, store.creatures); break;
-            case ESM::REC_DOOR: mDoors.find(ref, store.doors); break;
-            case ESM::REC_INGR: mIngreds.find(ref, store.ingreds); break;
-            case ESM::REC_LEVC: mCreatureLists.find(ref, store.creatureLists); break;
-            case ESM::REC_LEVI: mItemLists.find(ref, store.itemLists); break;
-            case ESM::REC_LIGH: mLights.find(ref, store.lights); break;
-            case ESM::REC_LOCK: mLockpicks.find(ref, store.lockpicks); break;
-            case ESM::REC_MISC: mMiscItems.find(ref, store.miscItems); break;
-            case ESM::REC_NPC_: mNpcs.find(ref, store.npcs); break;
-            case ESM::REC_PROB: mProbes.find(ref, store.probes); break;
-            case ESM::REC_REPA: mRepairs.find(ref, store.repairs); break;
-            case ESM::REC_STAT: mStatics.find(ref, store.statics); break;
-            case ESM::REC_WEAP: mWeapons.find(ref, store.weapons); break;
+            case ESM::REC_ACTI: mActivators.load(ref, store); break;
+            case ESM::REC_ALCH: mPotions.load(ref, store); break;
+            case ESM::REC_APPA: mAppas.load(ref, store); break;
+            case ESM::REC_ARMO: mArmors.load(ref, store); break;
+            case ESM::REC_BOOK: mBooks.load(ref, store); break;
+            case ESM::REC_CLOT: mClothes.load(ref, store); break;
+            case ESM::REC_CONT: mContainers.load(ref, store); break;
+            case ESM::REC_CREA: mCreatures.load(ref, store); break;
+            case ESM::REC_DOOR: mDoors.load(ref, store); break;
+            case ESM::REC_INGR: mIngreds.load(ref, store); break;
+            case ESM::REC_LEVC: mCreatureLists.load(ref, store); break;
+            case ESM::REC_LEVI: mItemLists.load(ref, store); break;
+            case ESM::REC_LIGH: mLights.load(ref, store); break;
+            case ESM::REC_LOCK: mLockpicks.load(ref, store); break;
+            case ESM::REC_MISC: mMiscItems.load(ref, store); break;
+            case ESM::REC_NPC_: mNpcs.load(ref, store); break;
+            case ESM::REC_PROB: mProbes.load(ref, store); break;
+            case ESM::REC_REPA: mRepairs.load(ref, store); break;
+            case ESM::REC_STAT: mStatics.load(ref, store); break;
+            case ESM::REC_WEAP: mWeapons.load(ref, store); break;
 
             case 0: std::cout << "Cell reference " + ref.mRefID + " not found!\n"; break;
             default:

@@ -7,6 +7,7 @@
 #include <algorithm>
 
 #include "refdata.hpp"
+#include "esmstore.hpp"
 
 namespace MWWorld
 {
@@ -50,17 +51,20 @@ namespace MWWorld
     typedef std::list<LiveRef> List;
     List mList;
 
-    // Search for the given reference in the given reclist from
-    // ESMStore. Insert the reference into the list if a match is
-    // found. If not, throw an exception.
-    template <typename Y>
-    void find(ESM::CellRef &ref, const Y& recList)
+    /// Searches for reference of appropriate type in given ESMStore.
+    /// If reference exists, loads it into container, throws an exception
+    /// on miss
+    void load(ESM::CellRef &ref, const MWWorld::ESMStore &esmStore)
     {
-      const X* obj = recList.find(ref.mRefID);
-      if(obj == NULL)
-        throw std::runtime_error("Error resolving cell reference " + ref.mRefID);
+        // for throwing exception on unhandled record type
+        const MWWorld::Store<X> &store = esmStore.get<X>();
+        const X *ptr = store.find(ref.mRefID);
 
-      mList.push_back(LiveRef(ref, obj));
+        /// \note redundant because Store<X>::find() throws exception on miss
+        if (ptr == NULL) {
+            throw std::runtime_error("Error resolving cell reference " + ref.mRefID);
+        }
+        mList.push_back(LiveRef(ref, ptr));
     }
 
     LiveRef *find (const std::string& name)
