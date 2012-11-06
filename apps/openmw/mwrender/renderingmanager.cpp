@@ -242,13 +242,7 @@ void RenderingManager::addObject (const MWWorld::Ptr& ptr){
 void RenderingManager::removeObject (const MWWorld::Ptr& ptr)
 {
     if (!mObjects.deleteObject (ptr))
-    {
-        /// \todo delete non-object MW-references
-    }
-     if (!mActors.deleteObject (ptr))
-    {
-        /// \todo delete non-object MW-references
-    }
+        mActors.deleteObject (ptr);
 }
 
 void RenderingManager::moveObject (const MWWorld::Ptr& ptr, const Ogre::Vector3& position)
@@ -292,9 +286,11 @@ bool RenderingManager::rotateObject( const MWWorld::Ptr &ptr, Ogre::Vector3 &rot
     }
     else if (adjust)
     {
-        /// \note Stored and passed in radians
+        // Stored and passed in radians
         float *f = ptr.getRefData().getPosition().rot;
-        rot.x += f[0], rot.y += f[1], rot.z += f[2];
+        rot.x += f[0];
+        rot.y += f[1];
+        rot.z += f[2];
     }
     return force;
 }
@@ -365,7 +361,7 @@ void RenderingManager::update (float duration, bool paused)
 
     float *fpos = data.getPosition().pos;
 
-    /// \note only for LocalMap::updatePlayer()
+    // only for LocalMap::updatePlayer()
     Ogre::Vector3 pos(fpos[0], -fpos[2], -fpos[1]);
 
     Ogre::SceneNode *node = data.getBaseNode();
