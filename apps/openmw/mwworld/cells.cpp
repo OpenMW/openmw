@@ -97,7 +97,7 @@ MWWorld::Ptr::CellStore *MWWorld::Cells::getExterior (int x, int y)
 
     if (result==mExteriors.end())
     {
-        const ESM::Cell *cell = mStore.cells.searchExt (x, y);
+        const ESM::Cell *cell = mStore.get<ESM::Cell>().search(x, y);
 
         if (!cell)
         {
@@ -132,7 +132,7 @@ MWWorld::Ptr::CellStore *MWWorld::Cells::getInterior (const std::string& name)
 
     if (result==mInteriors.end())
     {
-        const ESM::Cell *cell = mStore.cells.findInt (name);
+        const ESM::Cell *cell = mStore.get<ESM::Cell>().find(name);
 
         result = mInteriors.insert (std::make_pair (name, Ptr::CellStore (cell))).first;
     }
@@ -264,10 +264,12 @@ MWWorld::Ptr MWWorld::Cells::getPtr (const std::string& name)
     }
 
     // Now try the other cells
-    for (MWWorld::CellList::IntCells::const_iterator iter = mStore.cells.intCells.begin();
-        iter!=mStore.cells.intCells.end(); ++iter)
+    const MWWorld::Store<ESM::Cell> &cells = mStore.get<ESM::Cell>();
+    MWWorld::Store<ESM::Cell>::iterator iter;
+
+    for (iter = cells.intBegin(); iter != cells.intEnd(); ++iter)
     {
-        Ptr::CellStore *cellStore = getCellStore (iter->second);
+        Ptr::CellStore *cellStore = getCellStore (*iter);
 
         Ptr ptr = getPtrAndCache (name, *cellStore);
 
@@ -275,10 +277,9 @@ MWWorld::Ptr MWWorld::Cells::getPtr (const std::string& name)
             return ptr;
     }
 
-    for (MWWorld::CellList::ExtCells::const_iterator iter = mStore.cells.extCells.begin();
-        iter!=mStore.cells.extCells.end(); ++iter)
+    for (iter = cells.extBegin(); iter != cells.extEnd(); ++it)
     {
-        Ptr::CellStore *cellStore = getCellStore (iter->second);
+        Ptr::CellStore *cellStore = getCellStore (*iter);
 
         Ptr ptr = getPtrAndCache (name, *cellStore);
 

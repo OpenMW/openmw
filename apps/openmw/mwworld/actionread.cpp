@@ -42,8 +42,11 @@ namespace MWWorld
                 && !npcStats.hasBeenUsed (ref->mBase->mId))
         {
             MWWorld::LiveCellRef<ESM::NPC> *playerRef = player.get<ESM::NPC>();
-            const ESM::Class *class_ = MWBase::Environment::get().getWorld()->getStore().classes.find (
-                playerRef->mBase->mClass);
+
+            const ESM::Class *class_ =
+                MWBase::Environment::get().getWorld()->getStore().get<ESM::Class>().find (
+                    playerRef->mBase->mClass
+                );
 
             npcStats.increaseSkill (ref->mBase->mData.mSkillID, *class_, true);
 

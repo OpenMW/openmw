@@ -27,7 +27,7 @@ namespace MWWorld
         playerPos[0] = playerPos[1] = playerPos[2] = 0;
 
         /// \todo Do not make a copy of classes defined in esm/p records.
-        mClass = new ESM::Class (*world.getStore().classes.find (player->mClass));
+        mClass = new ESM::Class (*world.getStore().get<ESM::Class>().find (player->mClass));
     }
 
     Player::~Player()

@@ -83,7 +83,7 @@ namespace MWWorld
             if ((*iter)->mCell->isExterior())
             {
                 ESM::Land* land =
-                    MWBase::Environment::get().getWorld()->getStore().lands.search(
+                    MWBase::Environment::get().getWorld()->getStore().get<ESM::Land>().search(
                         (*iter)->mCell->getGridX(),
                         (*iter)->mCell->getGridY()
                     );
@@ -118,7 +118,7 @@ namespace MWWorld
             if (cell->mCell->isExterior())
             {
                 ESM::Land* land =
-                    MWBase::Environment::get().getWorld()->getStore().lands.search(
+                    MWBase::Environment::get().getWorld()->getStore().get<ESM::Land>().search(
                         cell->mCell->getGridX(),
                         cell->mCell->getGridY()
                     );

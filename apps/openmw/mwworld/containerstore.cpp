@@ -74,9 +74,12 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add (const Ptr& ptr)
 {
     int type = getType(ptr);
 
+    const MWWorld::ESMStore &esmStore =
+        MWBase::Environment::get().getWorld()->getStore();
+
     // gold needs special handling: when it is inserted into a container, the base object automatically becomes Gold_001
     // this ensures that gold piles of different sizes stack with each other (also, several scripts rely on Gold_001 for detecting player gold)
-    if (MWWorld::Class::get(ptr).getName(ptr) == MWBase::Environment::get().getWorld()->getStore().gameSettings.find("sGold")->getString())
+    if (MWWorld::Class::get(ptr).getName(ptr) == esmStore.get<ESM::GameSetting>().find("sGold")->getString())
     {
         MWWorld::LiveCellRef<ESM::Miscellaneous> *gold =
             ptr.get<ESM::Miscellaneous>();
@@ -87,7 +90,7 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add (const Ptr& ptr)
             || compare_string_ci(gold->mRef.mRefID, "gold_025")
             || compare_string_ci(gold->mRef.mRefID, "gold_100"))
         {
-            MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), "Gold_001");
+            MWWorld::ManualRef ref(esmStore, "Gold_001");
 
             int count = (ptr.getRefData().getCount() == 1) ? gold->mBase->mData.mValue : ptr.getRefData().getCount();
             ref.getPtr().getRefData().setCount(count);

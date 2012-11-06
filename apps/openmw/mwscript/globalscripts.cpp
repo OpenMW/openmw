@@ -26,7 +26,7 @@ namespace MWScript
     void GlobalScripts::addScript (const std::string& name)
     {
         if (mScripts.find (name)==mScripts.end())
-            if (const ESM::Script *script = mStore.scripts.find (name))
+            if (const ESM::Script *script = mStore.get<ESM::Script>().find (name))
             {
                 Locals locals;
 

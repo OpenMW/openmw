@@ -186,7 +186,7 @@ namespace MWWorld
         mEsm.open (masterPath.string());
         mStore.load (mEsm);
 
-        mPlayer = new MWWorld::Player (mStore.npcs.find ("player"), *this);
+        mPlayer = new MWWorld::Player (mStore.get<ESM::NPC>().find ("player"), *this);
         mRendering->attachCameraTo(mPlayer->getPlayer());
 
         std::string playerCollisionFile = "meshes\\base_anim.nif";    //This is used to make a collision shape for our player
@@ -224,21 +224,19 @@ namespace MWWorld
     const ESM::Cell *World::getExterior (const std::string& cellName) const
     {
         // first try named cells
-        if (const ESM::Cell *cell = mStore.cells.searchExtByName (cellName))
+        const ESM::Cell *cell = mStore.get<ESM::Cell>().searchExtByName (cellName);
+        if (cell != 0) {
             return cell;
+        }
 
         // didn't work -> now check for regions
-        std::string cellName2 = MWWorld::RecListT<ESM::Region>::toLower (cellName);
-
-        for (MWWorld::RecListT<ESM::Region>::MapType::const_iterator iter (mStore.regions.list.begin());
-            iter!=mStore.regions.list.end(); ++iter)
+        const MWWorld::Store<ESM::Region> &regions = mStore.get<ESM::Region>();
+        MWWorld::Store<ESM::Region>::iterator it = regions.begin();
+        for (; it != regions.end(); ++it)
         {
-            if (MWWorld::RecListT<ESM::Region>::toLower (iter->second.mName)==cellName2)
+            if (MWWorld::StringUtils::ciEqual(cellName, it->mName))
             {
-                if (const ESM::Cell *cell = mStore.cells.searchExtByRegion (iter->first))
-                    return cell;
-
-                break;
+                return mStore.get<ESM::Cell>().searchExtByRegion(it->mId);
             }
         }
 
@@ -536,7 +534,7 @@ namespace MWWorld
             std::pair<std::string, float> result = mPhysics->getFacedHandle (*this);
 
             if (result.first.empty() ||
-                    result.second>getStore().gameSettings.find ("iMaxActivateDist")->getInt())
+                    result.second>getStore().get<ESM::GameSetting>().find ("iMaxActivateDist")->getInt())
                 return "";
 
             return result.first;
@@ -1103,13 +1101,12 @@ namespace MWWorld
                     // door leads to exterior, use cell name (if any), otherwise translated region name
                     int x,y;
                     positionToIndex (ref.mRef.mDoorDest.pos[0], ref.mRef.mDoorDest.pos[1], x, y);
-                    const ESM::Cell* cell = mStore.cells.findExt(x,y);
+                    const ESM::Cell* cell = mStore.get<ESM::Cell>().find(x,y);
                     if (cell->mName != "")
                         dest = cell->mName;
                     else
                     {
-                        const ESM::Region* region = mStore.regions.search(cell->mRegion);
-                        dest = region->mName;
+                        dest = mStore.get<ESM::Region>().find(cell->mRegion)->mName;
                     }
                 }
 

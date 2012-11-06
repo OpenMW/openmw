@@ -511,7 +511,8 @@ void WeatherManager::update(float duration)
             else
             {
                 // get weather probabilities for the current region
-                const ESM::Region *region = MWBase::Environment::get().getWorld()->getStore().regions.search (regionstr);
+                const ESM::Region *region =
+                    MWBase::Environment::get().getWorld()->getStore().get<ESM::Region>().search (regionstr);
 
                 if (region != 0)
                 {

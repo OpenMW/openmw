@@ -490,7 +490,7 @@ namespace MWWorld
         }
 
         /// \todo implement appropriate index
-        const ESM::Cell *searchExteriorByName(const std::string &id) const {
+        const ESM::Cell *searchExtByName(const std::string &id) const {
             std::vector<ESM::Cell *>::const_iterator it = mSharedExt.begin();
             for (; it != mSharedExt.end(); ++it) {
                 if (StringUtils::ciEqual((*it)->mName, id)) {
@@ -501,7 +501,7 @@ namespace MWWorld
         }
 
         /// \todo implement appropriate index
-        const ESM::Cell *searchExteriorByRegion(const std::string &id) const {
+        const ESM::Cell *searchExtByRegion(const std::string &id) const {
             std::vector<ESM::Cell *>::const_iterator it = mSharedExt.begin();
             for (; it != mSharedExt.end(); ++it) {
                 if (StringUtils::ciEqual((*it)->mRegion, id)) {
