@@ -145,227 +145,227 @@ namespace MWWorld
     };
 
     template <>
-    const Store<ESM::Activator> &ESMStore::get<ESM::Activator>() const {
+    inline const Store<ESM::Activator> &ESMStore::get<ESM::Activator>() const {
         return mActivators;
     }
 
     template <>
-    const Store<ESM::Potion> &ESMStore::get<ESM::Potion>() const {
+    inline const Store<ESM::Potion> &ESMStore::get<ESM::Potion>() const {
         return mPotions;
     }
 
     template <>
-    const Store<ESM::Apparatus> &ESMStore::get<ESM::Apparatus>() const {
+    inline const Store<ESM::Apparatus> &ESMStore::get<ESM::Apparatus>() const {
         return mAppas;
     }
 
     template <>
-    const Store<ESM::Armor> &ESMStore::get<ESM::Armor>() const {
+    inline const Store<ESM::Armor> &ESMStore::get<ESM::Armor>() const {
         return mArmors;
     }
 
     template <>
-    const Store<ESM::BodyPart> &ESMStore::get<ESM::BodyPart>() const {
+    inline const Store<ESM::BodyPart> &ESMStore::get<ESM::BodyPart>() const {
         return mBodyParts;
     }
 
     template <>
-    const Store<ESM::Book> &ESMStore::get<ESM::Book>() const {
+    inline const Store<ESM::Book> &ESMStore::get<ESM::Book>() const {
         return mBooks;
     }
 
     template <>
-    const Store<ESM::BirthSign> &ESMStore::get<ESM::BirthSign>() const {
+    inline const Store<ESM::BirthSign> &ESMStore::get<ESM::BirthSign>() const {
         return mBirthSigns;
     }
 
     template <>
-    const Store<ESM::Class> &ESMStore::get<ESM::Class>() const {
+    inline const Store<ESM::Class> &ESMStore::get<ESM::Class>() const {
         return mClasses;
     }
 
     template <>
-    const Store<ESM::Clothing> &ESMStore::get<ESM::Clothing>() const {
+    inline const Store<ESM::Clothing> &ESMStore::get<ESM::Clothing>() const {
         return mClothes;
     }
 
     template <>
-    const Store<ESM::LoadCNTC> &ESMStore::get<ESM::LoadCNTC>() const {
+    inline const Store<ESM::LoadCNTC> &ESMStore::get<ESM::LoadCNTC>() const {
         return mContChange;
     }
 
     template <>
-    const Store<ESM::Container> &ESMStore::get<ESM::Container>() const {
+    inline const Store<ESM::Container> &ESMStore::get<ESM::Container>() const {
         return mContainers;
     }
 
     template <>
-    const Store<ESM::Creature> &ESMStore::get<ESM::Creature>() const {
+    inline const Store<ESM::Creature> &ESMStore::get<ESM::Creature>() const {
         return mCreatures;
     }
 
     template <>
-    const Store<ESM::LoadCREC> &ESMStore::get<ESM::LoadCREC>() const {
+    inline const Store<ESM::LoadCREC> &ESMStore::get<ESM::LoadCREC>() const {
         return mCreaChange;
     }
 
     template <>
-    const Store<ESM::Dialogue> &ESMStore::get<ESM::Dialogue>() const {
+    inline const Store<ESM::Dialogue> &ESMStore::get<ESM::Dialogue>() const {
         return mDialogs;
     }
 
     template <>
-    const Store<ESM::Door> &ESMStore::get<ESM::Door>() const {
+    inline const Store<ESM::Door> &ESMStore::get<ESM::Door>() const {
         return mDoors;
     }
 
     template <>
-    const Store<ESM::Enchantment> &ESMStore::get<ESM::Enchantment>() const {
+    inline const Store<ESM::Enchantment> &ESMStore::get<ESM::Enchantment>() const {
         return mEnchants;
     }
 
     template <>
-    const Store<ESM::Faction> &ESMStore::get<ESM::Faction>() const {
+    inline const Store<ESM::Faction> &ESMStore::get<ESM::Faction>() const {
         return mFactions;
     }
 
     template <>
-    const Store<ESM::Global> &ESMStore::get<ESM::Global>() const {
+    inline const Store<ESM::Global> &ESMStore::get<ESM::Global>() const {
         return mGlobals;
     }
 
     template <>
-    const Store<ESM::Ingredient> &ESMStore::get<ESM::Ingredient>() const {
+    inline const Store<ESM::Ingredient> &ESMStore::get<ESM::Ingredient>() const {
         return mIngreds;
     }
 
     template <>
-    const Store<ESM::CreatureLevList> &ESMStore::get<ESM::CreatureLevList>() const {
+    inline const Store<ESM::CreatureLevList> &ESMStore::get<ESM::CreatureLevList>() const {
         return mCreatureLists;
     }
 
     template <>
-    const Store<ESM::ItemLevList> &ESMStore::get<ESM::ItemLevList>() const {
+    inline const Store<ESM::ItemLevList> &ESMStore::get<ESM::ItemLevList>() const {
         return mItemLists;
     }
 
     template <>
-    const Store<ESM::Light> &ESMStore::get<ESM::Light>() const {
+    inline const Store<ESM::Light> &ESMStore::get<ESM::Light>() const {
         return mLights;
     }
 
     template <>
-    const Store<ESM::Tool> &ESMStore::get<ESM::Tool>() const {
+    inline const Store<ESM::Tool> &ESMStore::get<ESM::Tool>() const {
         return mLockpicks;
     }
 
     template <>
-    const Store<ESM::Miscellaneous> &ESMStore::get<ESM::Miscellaneous>() const {
+    inline const Store<ESM::Miscellaneous> &ESMStore::get<ESM::Miscellaneous>() const {
         return mMiscItems;
     }
 
     template <>
-    const Store<ESM::NPC> &ESMStore::get<ESM::NPC>() const {
+    inline const Store<ESM::NPC> &ESMStore::get<ESM::NPC>() const {
         return mNpcs;
     }
 
     template <>
-    const Store<ESM::LoadNPCC> &ESMStore::get<ESM::LoadNPCC>() const {
+    inline const Store<ESM::LoadNPCC> &ESMStore::get<ESM::LoadNPCC>() const {
         return mNpcChange;
     }
 
     template <>
-    const Store<ESM::Probe> &ESMStore::get<ESM::Probe>() const {
+    inline const Store<ESM::Probe> &ESMStore::get<ESM::Probe>() const {
         return mProbes;
     }
 
     template <>
-    const Store<ESM::Race> &ESMStore::get<ESM::Race>() const {
+    inline const Store<ESM::Race> &ESMStore::get<ESM::Race>() const {
         return mRaces;
     }
 
     template <>
-    const Store<ESM::Region> &ESMStore::get<ESM::Region>() const {
+    inline const Store<ESM::Region> &ESMStore::get<ESM::Region>() const {
         return mRegions;
     }
 
     template <>
-    const Store<ESM::Repair> &ESMStore::get<ESM::Repair>() const {
+    inline const Store<ESM::Repair> &ESMStore::get<ESM::Repair>() const {
         return mRepairs;
     }
 
     template <>
-    const Store<ESM::SoundGenerator> &ESMStore::get<ESM::SoundGenerator>() const {
+    inline const Store<ESM::SoundGenerator> &ESMStore::get<ESM::SoundGenerator>() const {
         return mSoundGens;
     }
 
     template <>
-    const Store<ESM::Sound> &ESMStore::get<ESM::Sound>() const {
+    inline const Store<ESM::Sound> &ESMStore::get<ESM::Sound>() const {
         return mSounds;
     }
 
     template <>
-    const Store<ESM::Spell> &ESMStore::get<ESM::Spell>() const {
+    inline const Store<ESM::Spell> &ESMStore::get<ESM::Spell>() const {
         return mSpells;
     }
 
     template <>
-    const Store<ESM::StartScript> &ESMStore::get<ESM::StartScript>() const {
+    inline const Store<ESM::StartScript> &ESMStore::get<ESM::StartScript>() const {
         return mStartScripts;
     }
 
     template <>
-    const Store<ESM::Static> &ESMStore::get<ESM::Static>() const {
+    inline const Store<ESM::Static> &ESMStore::get<ESM::Static>() const {
         return mStatics;
     }
 
     template <>
-    const Store<ESM::Weapon> &ESMStore::get<ESM::Weapon>() const {
+    inline const Store<ESM::Weapon> &ESMStore::get<ESM::Weapon>() const {
         return mWeapons;
     }
 
     template <>
-    const Store<ESM::GameSetting> &ESMStore::get<ESM::GameSetting>() const {
+    inline const Store<ESM::GameSetting> &ESMStore::get<ESM::GameSetting>() const {
         return mGameSettings;
     }
 
     template <>
-    const Store<ESM::Script> &ESMStore::get<ESM::Script>() const {
+    inline const Store<ESM::Script> &ESMStore::get<ESM::Script>() const {
         return mScripts;
     }
 
     template <>
-    const Store<ESM::Cell> &ESMStore::get<ESM::Cell>() const {
+    inline const Store<ESM::Cell> &ESMStore::get<ESM::Cell>() const {
         return mCells;
     }
 
     template <>
-    const Store<ESM::Land> &ESMStore::get<ESM::Land>() const {
+    inline const Store<ESM::Land> &ESMStore::get<ESM::Land>() const {
         return mLands;
     }
 
     template <>
-    const Store<ESM::LandTexture> &ESMStore::get<ESM::LandTexture>() const {
+    inline const Store<ESM::LandTexture> &ESMStore::get<ESM::LandTexture>() const {
         return mLandTextures;
     }
 
     template <>
-    const Store<ESM::Pathgrid> &ESMStore::get<ESM::Pathgrid>() const {
+    inline const Store<ESM::Pathgrid> &ESMStore::get<ESM::Pathgrid>() const {
         return mPathgrids;
     }
 
     template <>
-    const Store<ESM::MagicEffect> &ESMStore::get<ESM::MagicEffect>() const {
+    inline const Store<ESM::MagicEffect> &ESMStore::get<ESM::MagicEffect>() const {
         return mMagicEffects;
     }
 
     template <>
-    const Store<ESM::Skill> &ESMStore::get<ESM::Skill>() const {
+    inline const Store<ESM::Skill> &ESMStore::get<ESM::Skill>() const {
         return mSkills;
     }
 
     template <>
-    const Store<ESM::Attribute> &ESMStore::get<ESM::Attribute>() const {
+    inline const Store<ESM::Attribute> &ESMStore::get<ESM::Attribute>() const {
         return mAttributes;
     }
 }

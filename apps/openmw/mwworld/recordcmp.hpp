@@ -66,17 +66,17 @@ namespace MWWorld
     };
 
     template <>
-    bool RecordCmp::operator()<ESM::Dialogue>(const ESM::Dialogue &x, const ESM::Dialogue &y) const {
+    inline bool RecordCmp::operator()<ESM::Dialogue>(const ESM::Dialogue &x, const ESM::Dialogue &y) const {
         return StringUtils::ciLess(x.mId, y.mId);
     }
 
     template <>
-    bool RecordCmp::operator()<ESM::Cell>(const ESM::Cell &x, const ESM::Cell &y) const {
+    inline bool RecordCmp::operator()<ESM::Cell>(const ESM::Cell &x, const ESM::Cell &y) const {
         return StringUtils::ciLess(x.mName, y.mName);
     }
 
     template <>
-    bool RecordCmp::operator()<ESM::Pathgrid>(const ESM::Pathgrid &x, const ESM::Pathgrid &y) const {
+    inline bool RecordCmp::operator()<ESM::Pathgrid>(const ESM::Pathgrid &x, const ESM::Pathgrid &y) const {
         return StringUtils::ciLess(x.mCell, y.mCell);
     }
 
