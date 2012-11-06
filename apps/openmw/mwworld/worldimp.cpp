@@ -189,10 +189,8 @@ namespace MWWorld
         mPlayer = new MWWorld::Player (mStore.npcs.find ("player"), *this);
         mRendering->attachCameraTo(mPlayer->getPlayer());
 
-        std::string playerCollisionFile = "meshes\\base_anim.nif";    //This is used to make a collision shape for our player
-                                                                      //We will need to support the 1st person file too in the future
-        mPhysics->addActor (mPlayer->getPlayer().getRefData().getHandle(), playerCollisionFile, Ogre::Vector3 (0, 0, 0), 1, Ogre::Quaternion::ZERO);
-
+        mPhysics->addActor(mPlayer->getPlayer());
+        
         // global variables
         mGlobalVariables = new Globals (mStore);
 
@@ -580,39 +578,48 @@ namespace MWWorld
         CellStore *currCell = ptr.getCell();
         bool isPlayer = ptr == mPlayer->getPlayer();
         bool haveToMove = mWorldScene->isCellActive(*currCell) || isPlayer;
-        if (*currCell != newCell) {
-            if (isPlayer) {
-                if (!newCell.isExterior()) {
+        if (*currCell != newCell)
+        {
+            if (isPlayer)
+                if (!newCell.isExterior())
                     changeToInteriorCell(toLower(newCell.cell->mName), pos);
-                } else {
+                else
+                {
                     int cellX = newCell.cell->mData.mX;
                     int cellY = newCell.cell->mData.mY;
                     mWorldScene->changeCell(cellX, cellY, pos, false);
                 }
-            } else {
-                if (!mWorldScene->isCellActive(*currCell)) {
+            else {
+                if (!mWorldScene->isCellActive(*currCell))
                     copyObjectToCell(ptr, newCell, pos);
-                } else if (!mWorldScene->isCellActive(newCell)) {
+                else if (!mWorldScene->isCellActive(newCell))
+                {
                     MWWorld::Class::get(ptr).copyToCell(ptr, newCell);
                     mWorldScene->removeObjectFromScene(ptr);
                     mLocalScripts.remove(ptr);
                     haveToMove = false;
-                } else {
+                }
+                else
+                {
                     MWWorld::Ptr copy =
                         MWWorld::Class::get(ptr).copyToCell(ptr, newCell);
 
                     mRendering->moveObjectToCell(copy, vec, currCell);
 
-                    if (MWWorld::Class::get(ptr).isActor()) {
+                    if (MWWorld::Class::get(ptr).isActor())
+                    {
                         MWBase::MechanicsManager *mechMgr =
                             MWBase::Environment::get().getMechanicsManager();
 
                         mechMgr->removeActor(ptr);
                         mechMgr->addActor(copy);
-                    } else {
+                    }
+                    else
+                    {
                         std::string script =
                             MWWorld::Class::get(ptr).getScript(ptr);
-                        if (!script.empty()) {
+                        if (!script.empty())
+                        {
                             mLocalScripts.remove(ptr);
                             mLocalScripts.add(script, copy);
                         }
@@ -621,9 +628,10 @@ namespace MWWorld
                 ptr.getRefData().setCount(0);
             }
         }
-        if (haveToMove) {
+        if (haveToMove)
+        {
             mRendering->moveObject(ptr, vec);
-            mPhysics->moveObject (ptr.getRefData().getHandle(), ptr.getRefData().getBaseNode());
+            mPhysics->moveObject (ptr);
         }
     }
 
@@ -644,18 +652,17 @@ namespace MWWorld
     void World::moveObject (const Ptr& ptr, float x, float y, float z)
     {
         moveObjectImp(ptr, x, y, z);
-
-        
     }
 
     void World::scaleObject (const Ptr& ptr, float scale)
     {
         MWWorld::Class::get(ptr).adjustScale(ptr,scale);
-
         ptr.getCellRef().mScale = scale;
-        //scale = scale/ptr.getRefData().getBaseNode()->getScale().x;
-        ptr.getRefData().getBaseNode()->setScale(scale,scale,scale);
-        mPhysics->scaleObject( ptr.getRefData().getHandle(), ptr.getRefData().getBaseNode());
+        
+        if(ptr.getRefData().getBaseNode() == 0)
+            return;
+        mRendering->scaleObject(ptr, Vector3(scale,scale,scale));
+        mPhysics->scaleObject(ptr);
     }
 
     void World::rotateObject (const Ptr& ptr,float x,float y,float z, bool adjust)
@@ -665,19 +672,16 @@ namespace MWWorld
         rot.y = Ogre::Degree(y).valueRadians();
         rot.z = Ogre::Degree(z).valueRadians();
         
-        if (mRendering->rotateObject(ptr, rot, adjust)) {
-            float *objRot = ptr.getRefData().getPosition().rot;
-            objRot[0] = rot.x, objRot[1] = rot.y, objRot[2] = rot.z;
+        float *objRot = ptr.getRefData().getPosition().rot;
+        if(ptr.getRefData().getBaseNode() == 0 || !mRendering->rotateObject(ptr, rot, adjust))
+        {
+            objRot[0] = (adjust ? objRot[0] + rot.x : rot.x), objRot[1] = (adjust ? objRot[1] + rot.y : rot.y), objRot[2] = (adjust ? objRot[2] + rot.z : rot.z);
+            return;
+         }
 
-
-            if (ptr.getRefData().getBaseNode() != 0) {
-                mPhysics->rotateObject(
-                    ptr.getRefData().getHandle(),
-                    ptr.getRefData().getBaseNode()
-                );
-            }
-        }
-
+        // do this after rendering rotated the object so it gets changed by Class->adjustRotation
+        objRot[0] = rot.x, objRot[1] = rot.y, objRot[2] = rot.z;
+        mPhysics->rotateObject(ptr);
     }
 
     void World::safePlaceObject(const MWWorld::Ptr& ptr,MWWorld::CellStore &Cell,ESM::Position pos)
