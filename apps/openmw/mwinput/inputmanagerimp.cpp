@@ -9,7 +9,7 @@
 
 #include <boost/lexical_cast.hpp>
 
-#include <OIS/OISInputManager.h>
+#include <OISInputManager.h>
 
 #include <MyGUI_InputManager.h>
 #include <MyGUI_RenderManager.h>
