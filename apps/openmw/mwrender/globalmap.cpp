@@ -33,7 +33,7 @@ namespace MWRender
 
         // get the size of the world
         MWWorld::Store<ESM::Cell>::iterator it = esmStore.get<ESM::Cell>().extBegin();
-        for (; it != esmStore.get<ESM::Cell>().end(); ++it)
+        for (; it != esmStore.get<ESM::Cell>().extEnd(); ++it)
         {
             if (it->getGridX() < mMinX)
                 mMinX = it->getGridX();

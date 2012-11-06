@@ -229,7 +229,7 @@ void RaceDialog::updateRaces()
 
     
     int index = 0;
-    MWWorld::Store<ESM::Race>::iterator it = races.begin()
+    MWWorld::Store<ESM::Race>::iterator it = races.begin();
     for (; it != races.end(); ++it)
     {
         bool playable = it->mData.mFlags & ESM::Race::Playable;

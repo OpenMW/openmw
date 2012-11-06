@@ -188,8 +188,8 @@ void PickClassDialog::updateClasses()
     const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
 
     int index = 0;
-    MWWorld::Store<ESM::Cell>::iterator it = store.get<ESM::Cell>().begin();
-    for (; it != store.get<ESM::Cell>().end(); ++it)
+    MWWorld::Store<ESM::Class>::iterator it = store.get<ESM::Class>().begin();
+    for (; it != store.get<ESM::Class>().end(); ++it)
     {
         bool playable = (it->mData.mIsPlayable != 0);
         if (!playable) // Only display playable classes

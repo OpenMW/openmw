@@ -97,7 +97,7 @@ namespace MWGui
 
             for (MWWorld::ESMStore::iterator it = store.begin(); it != store.end(); ++it)
             {
-                iter->second->listIdentifier (mNames);
+                it->second->listIdentifier (mNames);
             }
 
             // sort

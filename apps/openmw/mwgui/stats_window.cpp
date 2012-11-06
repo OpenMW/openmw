@@ -456,7 +456,8 @@ void StatsWindow::updateSkillArea()
         FactionList::const_iterator end = mFactions.end();
         for (FactionList::const_iterator it = mFactions.begin(); it != end; ++it)
         {
-            const ESM::Faction *faction = store.factions.find(it->first);
+            const ESM::Faction *faction =
+                store.get<ESM::Faction>().find(it->first);
             MyGUI::Widget* w = addItem(faction->mName, coord1, coord2);
 
             std::string text;
@@ -507,7 +508,8 @@ void StatsWindow::updateSkillArea()
             addSeparator(coord1, coord2);
 
         addGroup(mWindowManager.getGameSettingString("sBirthSign", "Sign"), coord1, coord2);
-        const ESM::BirthSign *sign = store.birthSigns.find(mBirthSignId);
+        const ESM::BirthSign *sign =
+            store.get<ESM::BirthSign>().find(mBirthSignId);
         MyGUI::Widget* w = addItem(sign->mName, coord1, coord2);
 
         ToolTips::createBirthsignToolTip(w, mBirthSignId);

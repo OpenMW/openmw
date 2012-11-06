@@ -186,7 +186,7 @@ void BirthDialog::updateSpells()
     for (; it != end; ++it)
     {
         const std::string &spellId = *it;
-        const ESM::Spell *spell = store.spells.search(spellId);
+        const ESM::Spell *spell = store.get<ESM::Spell>().search(spellId);
         if (!spell)
             continue; // Skip spells which cannot be found
         ESM::Spell::SpellType type = static_cast<ESM::Spell::SpellType>(spell->mData.mType);

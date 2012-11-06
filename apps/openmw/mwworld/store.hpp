@@ -63,11 +63,11 @@ namespace MWWorld
             return iter;
         }
 
-        SharedIterator operator==(const SharedIterator &x) const {
+        bool operator==(const SharedIterator &x) const {
             return mIter == x.mIter;
         }
 
-        SharedIterator operator!=(const SharedIterator &x) const {
+        bool operator!=(const SharedIterator &x) const {
             return !(*this == x);
         }
 
@@ -314,20 +314,20 @@ namespace MWWorld
             return iterator(mStatic.end());
         }
 
-        ESM::Land *search(int x, int y) {
+        ESM::Land *search(int x, int y) const {
             ESM::Land land;
             land.mX = x, land.mY = y;
 
-            std::vector<ESM::Land *>::iterator it =
+            std::vector<ESM::Land *>::const_iterator it =
                 std::lower_bound(mStatic.begin(), mStatic.end(), &land, Compare());
 
             if (it != mStatic.end() && (*it)->mX == x && (*it)->mY == y) {
-                return *it;
+                return const_cast<ESM::Land *>(*it);
             }
             return 0;
         }
 
-        ESM::Land *find(int x, int y) {
+        ESM::Land *find(int x, int y) const{
             ESM::Land *ptr = search(x, y);
             if (ptr == 0) {
                 std::ostringstream msg;

@@ -775,6 +775,7 @@ namespace MWWorld
 
     std::pair<std::string, const ESM::Potion *> World::createRecord (const ESM::Potion& record)
     {
+    /*
         /// \todo Rewrite the ESMStore so that a dynamic 2nd ESMStore can be attached to it.
         /// This function should then insert the record into the 2nd store (the code for this
         /// should also be moved to the ESMStore class). It might be a good idea to review
@@ -792,10 +793,10 @@ namespace MWWorld
         mStore.all.insert (std::make_pair (stream.str(), ESM::REC_ALCH));
 
         return std::make_pair (stream.str(), created);
-    }
+    */}
 
     std::pair<std::string, const ESM::Class *> World::createRecord (const ESM::Class& record)
-    {
+    {/*
         /// \todo See function above.
         std::ostringstream stream;
         stream << "$dynamic" << mNextDynamicRecord++;
@@ -806,10 +807,10 @@ namespace MWWorld
         mStore.all.insert (std::make_pair (stream.str(), ESM::REC_CLAS));
 
         return std::make_pair (stream.str(), created);
-    }
+    */}
 
     std::pair<std::string, const ESM::Spell *> World::createRecord (const ESM::Spell& record)
-    {
+    {/*
         /// \todo See function above.
         std::ostringstream stream;
         stream << "$dynamic" << mNextDynamicRecord++;
@@ -820,10 +821,10 @@ namespace MWWorld
         mStore.all.insert (std::make_pair (stream.str(), ESM::REC_SPEL));
 
         return std::make_pair (stream.str(), created);
-    }
+    */}
 
     const ESM::Cell *World::createRecord (const ESM::Cell& record)
-    {
+    {/*
         if (record.mData.mFlags & ESM::Cell::Interior)
         {
             if (mStore.cells.searchInt (record.mName))
@@ -843,7 +844,7 @@ namespace MWWorld
                 std::make_pair (std::make_pair (record.mData.mX, record.mData.mY), cell));
             return cell;
         }
-    }
+    */}
 
     void World::playAnimationGroup (const MWWorld::Ptr& ptr, const std::string& groupName, int mode,
         int number)
