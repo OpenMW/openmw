@@ -1,0 +1,13 @@
+/*!
+
+	\mainpage
+
+	- \ref getting-started
+	- \ref defining-materials-shaders
+	- \ref macros
+	- \ref configurations
+	- \ref lod
+
+	- sh::Factory - the main interface class
+
+*/
