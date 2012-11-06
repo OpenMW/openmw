@@ -95,6 +95,16 @@ void ESMStore::setUp()
     mSkills.setUp();
     mMagicEffects.setUp();
     mAttributes.setUp();
+
+    ESM::NPC item;
+    item.mId = "player";
+
+    std::vector<ESM::NPC>::iterator pIt =
+        std::lower_bound(mNpcs.mStatic.begin(), mNpcs.mStatic.end(), item, RecordCmp());
+    assert(pIt != mNpcs.mStatic.end() && pIt->mId == "player");
+
+    mNpcs.insert(*pIt);
+    mNpcs.mStatic.erase(pIt);
 }
 
 } // end namespace
