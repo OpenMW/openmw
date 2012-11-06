@@ -179,7 +179,9 @@ void ToolTips::onFrame(float frameDuration)
             else if (type == "Spell")
             {
                 ToolTipInfo info;
-                const ESM::Spell *spell = MWBase::Environment::get().getWorld()->getStore().spells.find(focus->getUserString("Spell"));
+
+                const ESM::Spell *spell =
+                    MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find(focus->getUserString("Spell"));
                 info.caption = spell->mName;
                 Widgets::SpellEffectList effects;
                 std::vector<ESM::ENAMstruct>::const_iterator end = spell->mEffects.mList.end();
@@ -368,7 +370,7 @@ IntSize ToolTips::createToolTip(const MWGui::ToolTipInfo& info)
     const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
     if (info.enchant != "")
     {
-        enchant = store.enchants.search(info.enchant);
+        enchant = store.get<ESM::Enchantment>().find(info.enchant);
         if (enchant->mData.mType == ESM::Enchantment::CastOnce)
             text += "\n#{sItemCastOnce}";
         else if (enchant->mData.mType == ESM::Enchantment::WhenStrikes)
@@ -571,10 +573,15 @@ void ToolTips::createSkillToolTip(MyGUI::Widget* widget, int skillId)
     if (skillId == -1)
         return;
 
+    const MWWorld::ESMStore &store =
+        MWBase::Environment::get().getWorld()->getStore();
+
     const std::string &skillNameId = ESM::Skill::sSkillNameIds[skillId];
-    const ESM::Skill* skill = MWBase::Environment::get().getWorld()->getStore().skills.search(skillId);
+    const ESM::Skill* skill = store.get<ESM::Skill>().find(skillId);
     assert(skill);
-    const ESM::Attribute* attr = MWBase::Environment::get().getWorld()->getStore().attributes.search(skill->mData.mAttribute);
+
+    const ESM::Attribute* attr =
+        store.get<ESM::Attribute>().find(skill->mData.mAttribute);
     assert(attr);
     std::string icon = "icons\\k\\" + ESM::Skill::sIconNames[skillId];
 
@@ -607,12 +614,14 @@ void ToolTips::createSpecializationToolTip(MyGUI::Widget* widget, const std::str
     widget->setUserString("Caption_CenteredCaption", name);
     std::string specText;
     // get all skills of this specialisation
-    std::map<int, ESM::Skill> skills = MWBase::Environment::get().getWorld()->getStore().skills.list;
-    for (std::map<int, ESM::Skill>::const_iterator it = skills.begin();
-        it != skills.end(); ++it)
+    const MWWorld::Store<ESM::Skill> &skills =
+        MWBase::Environment::get().getWorld()->getStore().get<ESM::Skill>();
+
+    MWWorld::Store<ESM::Skill>::iterator it = skills.begin();
+    for (; it != skills.end(); ++it)
     {
-        if (it->second.mData.mSpecialization == specId)
-            specText += std::string("\n#{") + ESM::Skill::sSkillNameIds[it->second.mIndex] + "}";
+        if (it->mData.mSpecialization == specId)
+            specText += std::string("\n#{") + ESM::Skill::sSkillNameIds[it->mIndex] + "}";
     }
     widget->setUserString("Caption_CenteredCaptionText", specText);
     widget->setUserString("ToolTipLayout", "TextWithCenteredCaptionToolTip");
@@ -621,7 +630,10 @@ void ToolTips::createSpecializationToolTip(MyGUI::Widget* widget, const std::str
 
 void ToolTips::createBirthsignToolTip(MyGUI::Widget* widget, const std::string& birthsignId)
 {
-    const ESM::BirthSign *sign = MWBase::Environment::get().getWorld()->getStore().birthSigns.find(birthsignId);
+    const MWWorld::ESMStore &store =
+        MWBase::Environment::get().getWorld()->getStore();
+
+    const ESM::BirthSign *sign = store.get<ESM::BirthSign>().find(birthsignId);
 
     widget->setUserString("ToolTipType", "Layout");
     widget->setUserString("ToolTipLayout", "BirthSignToolTip");
@@ -640,7 +652,7 @@ void ToolTips::createBirthsignToolTip(MyGUI::Widget* widget, const std::string& 
     for (; it != end; ++it)
     {
         const std::string &spellId = *it;
-        const ESM::Spell *spell = MWBase::Environment::get().getWorld()->getStore().spells.search(spellId);
+        const ESM::Spell *spell = store.get<ESM::Spell>().search(spellId);
         if (!spell)
             continue; // Skip spells which cannot be found
         ESM::Spell::SpellType type = static_cast<ESM::Spell::SpellType>(spell->mData.mType);
@@ -655,7 +667,11 @@ void ToolTips::createBirthsignToolTip(MyGUI::Widget* widget, const std::string& 
             spells.push_back(spellId);
     }
 
-    struct{ const std::vector<std::string> &spells; std::string label; } categories[3] = {
+    struct {
+        const std::vector<std::string> &spells;
+        std::string label;
+    }
+    categories[3] = {
         {abilities, "sBirthsignmenu1"},
         {powers,    "sPowers"},
         {spells,    "sBirthsignmenu2"}
@@ -672,7 +688,7 @@ void ToolTips::createBirthsignToolTip(MyGUI::Widget* widget, const std::string& 
 
             const std::string &spellId = *it;
 
-            const ESM::Spell *spell = MWBase::Environment::get().getWorld()->getStore().spells.search(spellId);
+            const ESM::Spell *spell = store.get<ESM::Spell>().find(spellId);
             text += "\n#BF9959" + spell->mName;
         }
     }
@@ -711,7 +727,8 @@ void ToolTips::createClassToolTip(MyGUI::Widget* widget, const ESM::Class& playe
 
 void ToolTips::createMagicEffectToolTip(MyGUI::Widget* widget, short id)
 {
-    const ESM::MagicEffect* effect = MWBase::Environment::get().getWorld ()->getStore ().magicEffects.find(id);
+    const ESM::MagicEffect* effect =
+        MWBase::Environment::get().getWorld ()->getStore ().get<ESM::MagicEffect>().find(id);
     const std::string &name = ESM::MagicEffect::effectIdToString (id);
 
     std::string icon = effect->mIcon;

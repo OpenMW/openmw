@@ -57,7 +57,7 @@ StatsWindow::StatsWindow (MWBase::WindowManager& parWindowManager)
     const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
     for (int i=0; names[i][0]; ++i)
     {
-        setText (names[i][0], store.gameSettings.find (names[i][1])->getString());
+        setText (names[i][0], store.get<ESM::GameSetting>().find (names[i][1])->getString());
     }
 
     getWidget(mSkillView, "SkillView");
@@ -363,12 +363,16 @@ void StatsWindow::addSkills(const SkillList &skills, const std::string &titleId,
         float modified = stat.getModified();
         int progressPercent = (modified - float(static_cast<int>(modified))) * 100;
 
-        const ESM::Skill* skill = MWBase::Environment::get().getWorld()->getStore().skills.search(skillId);
+        const MWWorld::ESMStore &esmStore =
+            MWBase::Environment::get().getWorld()->getStore();
+
+        const ESM::Skill* skill = esmStore.get<ESM::Skill>().find(skillId);
         assert(skill);
 
         std::string icon = "icons\\k\\" + ESM::Skill::sIconNames[skillId];
 
-        const ESM::Attribute* attr = MWBase::Environment::get().getWorld()->getStore().attributes.search(skill->mData.mAttribute);
+        const ESM::Attribute* attr =
+            esmStore.get<ESM::Attribute>().find(skill->mData.mAttribute);
         assert(attr);
 
         std::string state = "normal";
@@ -425,7 +429,9 @@ void StatsWindow::updateSkillArea()
     const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
 
     // race tooltip
-    const ESM::Race* playerRace =  store.races.find (MWBase::Environment::get().getWorld()->getPlayer().getRace());
+    const ESM::Race* playerRace =
+        store.get<ESM::Race>().find (MWBase::Environment::get().getWorld()->getPlayer().getRace());
+
     MyGUI::Widget* raceWidget;
     getWidget(raceWidget, "RaceText");
     ToolTips::createRaceToolTip(raceWidget, playerRace);
@@ -464,8 +470,8 @@ void StatsWindow::updateSkillArea()
                 text += std::string("\n\n#DDC79E#{sNextRank} ") + faction->mRanks[it->second+1];
 
                 ESM::RankData rankData = faction->mData.mRankData[it->second+1];
-                const ESM::Attribute* attr1 = MWBase::Environment::get().getWorld()->getStore().attributes.search(faction->mData.mAttribute1);
-                const ESM::Attribute* attr2 = MWBase::Environment::get().getWorld()->getStore().attributes.search(faction->mData.mAttribute2);
+                const ESM::Attribute* attr1 = store.get<ESM::Attribute>().find(faction->mData.mAttribute1);
+                const ESM::Attribute* attr2 = store.get<ESM::Attribute>().find(faction->mData.mAttribute2);
                 assert(attr1 && attr2);
 
                 text += "\n#BF9959#{" + attr1->mName + "}: " + boost::lexical_cast<std::string>(rankData.mAttribute1)

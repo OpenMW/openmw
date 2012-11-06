@@ -54,16 +54,19 @@ namespace MWGui
     {
         int price = 0;
 
+        const MWWorld::Store<ESM::GameSetting> &gmst =
+            MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+
         if(interior)
         {
-            price = MWBase::Environment::get().getWorld()->getStore().gameSettings.find("fMagesGuildTravel")->getFloat();
+            price = gmst.find("fMagesGuildTravel")->getFloat();
         }
         else
         {
             MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
             ESM::Position PlayerPos = player.getRefData().getPosition();
             float d = sqrt( pow(pos.pos[0] - PlayerPos.pos[0],2) + pow(pos.pos[1] - PlayerPos.pos[1],2) + pow(pos.pos[2] - PlayerPos.pos[2],2)   );
-            price = d/MWBase::Environment::get().getWorld()->getStore().gameSettings.find("fTravelMult")->getFloat();
+            price = d/gmst.find("fTravelMult")->getFloat();
         }
 
         MyGUI::Button* toAdd = mDestinationsView->createWidget<MyGUI::Button>((price>mWindowManager.getInventoryWindow()->getPlayerGold()) ? "SandTextGreyedOut" : "SandTextButton", 0, mCurrentY, 200, sLineHeight, MyGUI::Align::Default);
@@ -142,7 +145,7 @@ namespace MWGui
             cell = MWBase::Environment::get().getWorld()->getExterior(x,y);
             ESM::Position PlayerPos = player.getRefData().getPosition();
             float d = sqrt( pow(pos.pos[0] - PlayerPos.pos[0],2) + pow(pos.pos[1] - PlayerPos.pos[1],2) + pow(pos.pos[2] - PlayerPos.pos[2],2)   );
-            int time = int(d /MWBase::Environment::get().getWorld()->getStore().gameSettings.find("fTravelTimeMult")->getFloat());
+            int time = int(d /MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fTravelTimeMult")->getFloat());
             for(int i = 0;i < time;i++)
             {
                 MWBase::Environment::get().getMechanicsManager ()->restoreDynamicStats ();

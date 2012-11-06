@@ -107,10 +107,14 @@ namespace MWGui
         bool goldFound = false;
         MWWorld::Ptr gold;
         MWWorld::ContainerStore& playerStore = mWindowManager.getInventoryWindow()->getContainerStore();
+
+        const MWWorld::Store<ESM::GameSetting> &gmst =
+            MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+
         for (MWWorld::ContainerStoreIterator it = playerStore.begin();
                 it != playerStore.end(); ++it)
         {
-            if (MWWorld::Class::get(*it).getName(*it) == MWBase::Environment::get().getWorld()->getStore().gameSettings.find("sGold")->getString())
+            if (MWWorld::Class::get(*it).getName(*it) == gmst.find("sGold")->getString())
             {
                 goldFound = true;
                 gold = *it;

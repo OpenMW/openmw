@@ -554,7 +554,9 @@ int WindowManager::readPressedButton ()
 
 std::string WindowManager::getGameSettingString(const std::string &id, const std::string &default_)
 {
-    const ESM::GameSetting *setting = MWBase::Environment::get().getWorld()->getStore().gameSettings.search(id);
+    const ESM::GameSetting *setting =
+        MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().search(id);
+
     if (setting && setting->mType == ESM::VT_String)
         return setting->getString();
     return default_;
@@ -614,7 +616,8 @@ void WindowManager::changeCell(MWWorld::Ptr::CellStore* cell)
         }
         else
         {
-            const ESM::Region* region = MWBase::Environment::get().getWorld()->getStore().regions.search(cell->mCell->mRegion);
+            const ESM::Region* region =
+                MWBase::Environment::get().getWorld()->getStore().get<ESM::Region>().search(cell->mCell->mRegion);
             if (region)
                 name = region->mName;
             else
@@ -717,7 +720,9 @@ void WindowManager::setDragDrop(bool dragDrop)
 
 void WindowManager::onRetrieveTag(const MyGUI::UString& _tag, MyGUI::UString& _result)
 {
-    const ESM::GameSetting *setting = MWBase::Environment::get().getWorld()->getStore().gameSettings.find(_tag);
+    const ESM::GameSetting *setting =
+        MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find(_tag);
+
     if (setting && setting->mType == ESM::VT_String)
         _result = setting->getString();
     else
@@ -808,7 +813,10 @@ void WindowManager::removeGuiMode(GuiMode mode)
 void WindowManager::setSelectedSpell(const std::string& spellId, int successChancePercent)
 {
     mHud->setSelectedSpell(spellId, successChancePercent);
-    const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().spells.find(spellId);
+
+    const ESM::Spell* spell =
+        MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find(spellId);
+
     mSpellWindow->setTitle(spell->mName);
 }
 
