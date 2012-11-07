@@ -83,7 +83,6 @@ WindowManager::WindowManager(
   , mSpellCreationDialog(NULL)
   , mEnchantingDialog(NULL)
   , mTrainingWindow(NULL)
-  , mPlayerClass()
   , mPlayerName()
   , mPlayerRaceId()
   , mPlayerAttributes()
@@ -499,8 +498,7 @@ void WindowManager::setValue (const std::string& id, int value)
 
 void WindowManager::setPlayerClass (const ESM::Class &class_)
 {
-    mPlayerClass = class_;
-    mStatsWindow->setValue("class", mPlayerClass.mName);
+    mStatsWindow->setValue("class", class_.mName);
 }
 
 void WindowManager::configureSkills (const SkillList& major, const SkillList& minor)

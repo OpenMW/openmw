@@ -26,20 +26,12 @@ namespace MWWorld
         float* playerPos = mPlayer.mData.getPosition().pos;
         playerPos[0] = playerPos[1] = playerPos[2] = 0;
 
-        /// \todo Do not make a copy of classes defined in esm/p records.
-        mClass = new ESM::Class (*world.getStore().get<ESM::Class>().find (player->mClass));
+        mClass = world.getStore().get<ESM::Class>().find (player->mClass);
     }
 
     Player::~Player()
     {
         delete mClass;
-    }
-
-    void Player::setClass (const ESM::Class& class_)
-    {
-        ESM::Class *new_class = new ESM::Class (class_);
-        delete mClass;
-        mClass = new_class;
     }
 
     void Player::setDrawState (MWMechanics::DrawState_ state)

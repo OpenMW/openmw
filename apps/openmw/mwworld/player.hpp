@@ -1,8 +1,6 @@
 #ifndef GAME_MWWORLD_PLAYER_H
 #define GAME_MWWORLD_PLAYER_H
 
-#include "OgreCamera.h"
-
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/refdata.hpp"
 #include "../mwworld/ptr.hpp"
@@ -27,7 +25,7 @@ namespace MWWorld
         bool mMale;
         std::string mRace;
         std::string mBirthsign;
-        ESM::Class *mClass;
+        const ESM::Class *mClass;
         bool mAutoMove;
         int mForwardBackward;
     public:
@@ -67,7 +65,9 @@ namespace MWWorld
             mBirthsign = birthsign;
         }
 
-        void setClass (const ESM::Class& class_);
+        void setClass (const ESM::Class& class_) {
+            mClass = &class_;
+        }
 
         void setDrawState (MWMechanics::DrawState_ state);
 
