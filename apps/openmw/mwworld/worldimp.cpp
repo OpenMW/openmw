@@ -1260,6 +1260,7 @@ namespace MWWorld
             break;
 
         case Player::Data_Class:
+            mStore.get<ESM::Class>().erase(player->mClass);
             player->mClass = value;
             break;
 
