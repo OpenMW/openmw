@@ -336,12 +336,12 @@ namespace MWGui
 
         MWBase::Environment::get().getSoundManager()->playSound ("Item Gold Up", 1.0, 1.0);
 
-        std::pair<std::string, const ESM::Spell*> result = MWBase::Environment::get().getWorld()->createRecord(mSpell);
+        const ESM::Spell* spell = MWBase::Environment::get().getWorld()->createRecord(mSpell);
 
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
         MWMechanics::CreatureStats& stats = MWWorld::Class::get(player).getCreatureStats(player);
         MWMechanics::Spells& spells = stats.getSpells();
-        spells.add (result.first);
+        spells.add (spell->mId);
 
         MWBase::Environment::get().getSoundManager()->playSound ("Item Gold Up", 1.0, 1.0);
 

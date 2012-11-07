@@ -327,10 +327,9 @@ namespace MWMechanics
     {
         MWBase::World *world = MWBase::Environment::get().getWorld();
 
-        std::pair<std::string, const ESM::Class *> res =
-            world->createRecord(cls);
+        const ESM::Class *ptr = world->createRecord(cls);
 
-        world->getPlayer().setClass(res.second->mId);
+        world->getPlayer().setClass(ptr->mId);
 
         mClassSelected = true;
         buildPlayer();
