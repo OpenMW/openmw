@@ -120,7 +120,7 @@ namespace MWGui
         setAttributeValues();
 
         // set class image
-        const ESM::Class& playerClass = MWBase::Environment::get().getWorld ()->getPlayer ().getClass ();
+        const ESM::Class& playerClass = *MWBase::Environment::get().getWorld ()->getPlayer ().getClass ();
         // retrieve the ID to this class
         std::string classId;
         const MWWorld::Store<ESM::Class> &classes =

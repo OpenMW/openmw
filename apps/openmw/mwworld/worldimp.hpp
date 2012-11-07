@@ -327,6 +327,12 @@ namespace MWWorld
             /// 1 - only waiting \n
             /// 2 - player is underwater \n
             /// 3 - enemies are nearby (not implemented)
+
+            /// Update player record part with given value
+            virtual void updatePlayer(int flag, const std::string &value);
+
+            /// Update player record part with given value
+            virtual void updatePlayer(int flag, bool value);
     };
 }
 

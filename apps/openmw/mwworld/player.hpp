@@ -19,20 +19,30 @@ namespace MWWorld
     /// \brief NPC object representing the player and additional player data
     class Player
     {
-        LiveCellRef<ESM::NPC> mPlayer;
-        MWWorld::CellStore *mCellStore;
-        std::string mName;
-        bool mMale;
-        std::string mRace;
-        std::string mBirthsign;
-        const ESM::Class *mClass;
-        bool mAutoMove;
-        int mForwardBackward;
+        LiveCellRef<ESM::NPC>   mPlayer;
+        MWWorld::CellStore      *mCellStore;
+
+        // cached referenced data
+        const ESM::Class        *mClass;
+        const ESM::Race         *mRace;
+        const ESM::BirthSign    *mSign;
+
+        bool                    mAutoMove;
+        int                     mForwardBackward;
+
     public:
+        enum {
+            Data_Male,
+            Data_Name,
+            Data_Race,
+            Data_Class,
+            Data_Sign,
+            Data_Model,
+            Data_Head,
+            Data_Hair
+        };
 
         Player(const ESM::NPC *player, const MWBase::World& world);
-
-        ~Player();
 
         void setCell (MWWorld::CellStore *cellStore)
         {
@@ -45,55 +55,37 @@ namespace MWWorld
             return ptr;
         }
 
-        void setName (const std::string& name)
-        {
-            mName = name;
-        }
-
-        void setGender (bool male)
-        {
-            mMale = male;
-        }
-
-        void setRace (const std::string& race)
-        {
-            mRace = race;
-        }
-
-        void setBirthsign (const std::string& birthsign)
-        {
-            mBirthsign = birthsign;
-        }
-
-        void setClass (const ESM::Class& class_) {
-            mClass = &class_;
-        }
+        void setName (const std::string& name);
+        void setGender (bool male);
+        void setRace (const std::string& race);
+        void setBirthsign (const std::string& birthsign);
+        void setClass (const std::string &cls);
 
         void setDrawState (MWMechanics::DrawState_ state);
 
         std::string getName() const
         {
-            return mName;
+            return mPlayer.mBase->mName;
         }
 
         bool isMale() const
         {
-            return mMale;
+            return (mPlayer.mBase->mFlags & 0x1) == 0;
         }
 
-        std::string getRace() const
+        const ESM::Race *getRace() const
         {
             return mRace;
         }
 
-        std::string getBirthsign() const
+        const ESM::BirthSign *getBirthsign() const
         {
-            return mBirthsign;
+            return mSign;
         }
 
-        const ESM::Class& getClass() const
+        const ESM::Class *getClass() const
         {
-            return *mClass;
+            return mClass;
         }
 
         bool getAutoMove() const

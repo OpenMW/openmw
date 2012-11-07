@@ -253,7 +253,10 @@ void StatsWindow::onFrame ()
 
     setFactions(PCstats.getFactionRanks());
 
-    setBirthSign(MWBase::Environment::get().getWorld()->getPlayer().getBirthsign());
+    const ESM::BirthSign *sign =
+        MWBase::Environment::get().getWorld()->getPlayer().getBirthsign();
+
+    setBirthSign((sign != 0) ? sign->mId : "");
 
     if (mChanged)
         updateSkillArea();
@@ -430,7 +433,7 @@ void StatsWindow::updateSkillArea()
 
     // race tooltip
     const ESM::Race* playerRace =
-        store.get<ESM::Race>().find (MWBase::Environment::get().getWorld()->getPlayer().getRace());
+        MWBase::Environment::get().getWorld()->getPlayer().getRace();
 
     MyGUI::Widget* raceWidget;
     getWidget(raceWidget, "RaceText");
@@ -440,11 +443,14 @@ void StatsWindow::updateSkillArea()
 
     // class tooltip
     MyGUI::Widget* classWidget;
-    const ESM::Class& playerClass = MWBase::Environment::get().getWorld()->getPlayer().getClass();
+
+    const ESM::Class *playerClass =
+        MWBase::Environment::get().getWorld()->getPlayer().getClass();
+
     getWidget(classWidget, "ClassText");
-    ToolTips::createClassToolTip(classWidget, playerClass);
+    ToolTips::createClassToolTip(classWidget, *playerClass);
     getWidget(classWidget, "Class_str");
-    ToolTips::createClassToolTip(classWidget, playerClass);
+    ToolTips::createClassToolTip(classWidget, *playerClass);
 
     if (!mFactions.empty())
     {

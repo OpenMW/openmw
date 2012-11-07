@@ -554,7 +554,7 @@ namespace MWWorld
             ESM::Cell *ptr = search(x, y);
             if (ptr == 0) {
                 std::ostringstream msg;
-                msg << "Exterior at (" << x << ", " << y << ") not found (non-const";
+                msg << "Exterior at (" << x << ", " << y << ") not found (non-const)";
                 throw std::runtime_error(msg.str());
             }
             return ptr;

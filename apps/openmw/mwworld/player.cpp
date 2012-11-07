@@ -13,25 +13,22 @@
 
 namespace MWWorld
 {
-    Player::Player (const ESM::NPC *player, const MWBase::World& world) :
-      mCellStore (0), mClass (0),
-      mAutoMove (false), mForwardBackward (0)
+    Player::Player (const ESM::NPC *player, const MWBase::World& world)
+      : mCellStore(0),
+        mClass(0),
+        mRace(0),
+        mSign(0),
+        mAutoMove(false),
+        mForwardBackward (0)
     {
         mPlayer.mBase = player;
         mPlayer.mRef.mRefID = "player";
-        mName = player->mName;
-        mMale = !(player->mFlags & ESM::NPC::Female);
-        mRace = player->mRace;
 
         float* playerPos = mPlayer.mData.getPosition().pos;
         playerPos[0] = playerPos[1] = playerPos[2] = 0;
 
         mClass = world.getStore().get<ESM::Class>().find (player->mClass);
-    }
-
-    Player::~Player()
-    {
-        delete mClass;
+        mRace = world.getStore().get<ESM::Race>().find(player->mRace);
     }
 
     void Player::setDrawState (MWMechanics::DrawState_ state)
@@ -95,4 +92,35 @@ namespace MWWorld
          return MWWorld::Class::get(ptr).getNpcStats(ptr).getDrawState();
     }
 
+    void Player::setName(const std::string &value)
+    {
+        MWBase::Environment::get().getWorld()->updatePlayer(Data_Name, value);
+    }
+
+    void Player::setGender(bool value)
+    {
+        MWBase::Environment::get().getWorld()->updatePlayer(Data_Male, value);
+    }
+
+    void Player::setRace(const std::string &value)
+    {
+        MWBase::World *world = MWBase::Environment::get().getWorld();
+        world->updatePlayer(Data_Race, value);
+
+        mRace = world->getStore().get<ESM::Race>().find(value);
+    }
+
+    void Player::setBirthsign(const std::string &value)
+    {
+        MWBase::World *world = MWBase::Environment::get().getWorld();
+        mSign = world->getStore().get<ESM::BirthSign>().find(value);
+    }
+
+    void Player::setClass(const std::string &value)
+    {
+        MWBase::World *world = MWBase::Environment::get().getWorld();
+        world->updatePlayer(Data_Class, value);
+
+        mClass = world->getStore().get<ESM::Class>().find(value);
+    }
 }

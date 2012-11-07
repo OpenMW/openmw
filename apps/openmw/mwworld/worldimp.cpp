@@ -1252,4 +1252,50 @@ namespace MWWorld
         return 0;
 
     }
+
+    void World::updatePlayer(int flag, const std::string &value)
+    {
+        ESM::NPC *player = mStore.get<ESM::NPC>().find("player");
+
+        switch (flag) {
+        case Player::Data_Name:
+            player->mName = value;
+            break;
+
+        case Player::Data_Class:
+            player->mClass = value;
+            break;
+
+        case Player::Data_Race:
+            player->mRace = value;
+            break;
+
+        case Player::Data_Model:
+            player->mModel = value;
+            break;
+
+        case Player::Data_Head:
+            player->mHead = value;
+            break;
+
+        case Player::Data_Hair:
+            player->mHair = value;
+            break;
+
+        default:
+            break;
+        }
+    }
+
+    void World::updatePlayer(int flag, bool value)
+    {
+        ESM::NPC *player = mStore.get<ESM::NPC>().find("player");
+
+        if (flag == Player::Data_Male) {
+            player->mFlags |= 0x1;
+            if (value) {
+                player->mFlags ^= 0x1;
+            }
+        }
+    }
 }
