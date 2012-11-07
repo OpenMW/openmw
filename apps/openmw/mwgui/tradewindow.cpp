@@ -107,10 +107,14 @@ namespace MWGui
         bool goldFound = false;
         MWWorld::Ptr gold;
         MWWorld::ContainerStore& playerStore = mWindowManager.getInventoryWindow()->getContainerStore();
+
+        const MWWorld::Store<ESM::GameSetting> &gmst =
+            MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+
         for (MWWorld::ContainerStoreIterator it = playerStore.begin();
                 it != playerStore.end(); ++it)
         {
-            if (MWWorld::Class::get(*it).getName(*it) == MWBase::Environment::get().getWorld()->getStore().gameSettings.find("sGold")->getString())
+            if (MWWorld::Class::get(*it).getName(*it) == gmst.find("sGold")->getString())
             {
                 goldFound = true;
                 gold = *it;
@@ -156,15 +160,15 @@ namespace MWGui
         if (mPtr.getTypeName() == typeid(ESM::NPC).name())
         {
             MWWorld::LiveCellRef<ESM::NPC>* ref = mPtr.get<ESM::NPC>();
-            if (ref->base->mNpdt52.mGold == -10)
-                merchantgold = ref->base->mNpdt12.mGold;
+            if (ref->mBase->mNpdt52.mGold == -10)
+                merchantgold = ref->mBase->mNpdt12.mGold;
             else
-                merchantgold = ref->base->mNpdt52.mGold;
+                merchantgold = ref->mBase->mNpdt52.mGold;
         }
         else // ESM::Creature
         {
             MWWorld::LiveCellRef<ESM::Creature>* ref = mPtr.get<ESM::Creature>();
-            merchantgold = ref->base->mData.mGold;
+            merchantgold = ref->mBase->mData.mGold;
         }
         if (mCurrentBalance > 0 && merchantgold < mCurrentBalance)
         {
@@ -217,15 +221,15 @@ namespace MWGui
         if (mPtr.getTypeName() == typeid(ESM::NPC).name())
         {
             MWWorld::LiveCellRef<ESM::NPC>* ref = mPtr.get<ESM::NPC>();
-            if (ref->base->mNpdt52.mGold == -10)
-                merchantgold = ref->base->mNpdt12.mGold;
+            if (ref->mBase->mNpdt52.mGold == -10)
+                merchantgold = ref->mBase->mNpdt12.mGold;
             else
-                merchantgold = ref->base->mNpdt52.mGold;
+                merchantgold = ref->mBase->mNpdt52.mGold;
         }
         else // ESM::Creature
         {
             MWWorld::LiveCellRef<ESM::Creature>* ref = mPtr.get<ESM::Creature>();
-            merchantgold = ref->base->mData.mGold;
+            merchantgold = ref->mBase->mData.mGold;
         }
 
         mMerchantGold->setCaptionWithReplacing("#{sSellerGold} " + boost::lexical_cast<std::string>(merchantgold));
@@ -261,14 +265,14 @@ namespace MWGui
         if (mPtr.getTypeName() == typeid(ESM::NPC).name())
         {
             MWWorld::LiveCellRef<ESM::NPC>* ref = mPtr.get<ESM::NPC>();
-            if (ref->base->mHasAI)
-                services = ref->base->mAiData.mServices;
+            if (ref->mBase->mHasAI)
+                services = ref->mBase->mAiData.mServices;
         }
         else if (mPtr.getTypeName() == typeid(ESM::Creature).name())
         {
             MWWorld::LiveCellRef<ESM::Creature>* ref = mPtr.get<ESM::Creature>();
-            if (ref->base->mHasAI)
-                services = ref->base->mAiData.mServices;
+            if (ref->mBase->mHasAI)
+                services = ref->mBase->mAiData.mServices;
         }
 
         /// \todo what about potions, there doesn't seem to be a flag for them??

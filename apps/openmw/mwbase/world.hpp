@@ -31,11 +31,6 @@ namespace ESM
     struct Spell;
 }
 
-namespace ESMS
-{
-    struct ESMStore;
-}
-
 namespace MWRender
 {
     class ExternalRendering;
@@ -48,6 +43,7 @@ namespace MWWorld
     class LocalScripts;
     class Ptr;
     class TimeStamp;
+    class ESMStore;
 }
 
 namespace MWBase
@@ -104,7 +100,7 @@ namespace MWBase
 
             virtual MWWorld::Player& getPlayer() = 0;
 
-            virtual const ESMS::ESMStore& getStore() const = 0;
+            virtual const MWWorld::ESMStore& getStore() const = 0;
 
             virtual ESM::ESMReader& getEsmReader() = 0;
 

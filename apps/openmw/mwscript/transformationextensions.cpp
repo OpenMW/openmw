@@ -3,7 +3,7 @@
 #include <OgreMath.h>
 #include <OgreSceneNode.h>
 
-#include <components/esm_store/store.hpp>
+#include "../mwworld/esmstore.hpp"
 #include <components/esm/loadcell.hpp>
 
 #include <components/compiler/extensions.hpp>

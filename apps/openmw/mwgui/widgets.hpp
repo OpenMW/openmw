@@ -1,7 +1,7 @@
 #ifndef MWGUI_WIDGETS_H
 #define MWGUI_WIDGETS_H
 
-#include <components/esm_store/store.hpp>
+#include "../mwworld/esmstore.hpp"
 
 #include <MyGUI.h>
 

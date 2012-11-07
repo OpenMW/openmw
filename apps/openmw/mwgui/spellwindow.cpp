@@ -4,7 +4,7 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/format.hpp>
 
-#include <components/esm_store/store.hpp>
+#include "../mwworld/esmstore.hpp"
 
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
@@ -26,8 +26,11 @@ namespace
 {
     bool sortSpells(const std::string& left, const std::string& right)
     {
-        const ESM::Spell* a = MWBase::Environment::get().getWorld()->getStore().spells.find(left);
-        const ESM::Spell* b = MWBase::Environment::get().getWorld()->getStore().spells.find(right);
+        const MWWorld::Store<ESM::Spell> &spells =
+            MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>();
+
+        const ESM::Spell* a = spells.find(left);
+        const ESM::Spell* b = spells.find(right);
 
         int cmp = a->mName.compare(b->mName);
         return cmp < 0;
@@ -139,11 +142,15 @@ namespace MWGui
             spellList.push_back(*it);
         }
 
+        const MWWorld::ESMStore &esmStore =
+            MWBase::Environment::get().getWorld()->getStore();
+
         std::vector<std::string> powers;
         std::vector<std::string>::iterator it = spellList.begin();
         while (it != spellList.end())
         {
-            const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().spells.find(*it);
+            const ESM::Spell* spell = esmStore.get<ESM::Spell>().find(*it);
+
             if (spell->mData.mType == ESM::Spell::ST_Power)
             {
                 powers.push_back(*it);
@@ -170,7 +177,9 @@ namespace MWGui
             if (enchantId != "")
             {
                 // only add items with "Cast once" or "Cast on use"
-                const ESM::Enchantment* enchant = MWBase::Environment::get().getWorld()->getStore().enchants.find(enchantId);
+                const ESM::Enchantment* enchant =
+                    esmStore.get<ESM::Enchantment>().find(enchantId);
+
                 int type = enchant->mData.mType;
                 if (type != ESM::Enchantment::CastOnce
                     && type != ESM::Enchantment::WhenUsed)
@@ -191,7 +200,7 @@ namespace MWGui
 
         for (std::vector<std::string>::const_iterator it = powers.begin(); it != powers.end(); ++it)
         {
-            const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().spells.find(*it);
+            const ESM::Spell* spell = esmStore.get<ESM::Spell>().find(*it);
             MyGUI::Button* t = mSpellView->createWidget<MyGUI::Button>("SpellText",
                 MyGUI::IntCoord(4, mHeight, mWidth-8, spellHeight), MyGUI::Align::Left | MyGUI::Align::Top);
             t->setCaption(spell->mName);
@@ -211,7 +220,7 @@ namespace MWGui
         addGroup("#{sSpells}", "#{sCostChance}");
         for (std::vector<std::string>::const_iterator it = spellList.begin(); it != spellList.end(); ++it)
         {
-            const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().spells.find(*it);
+            const ESM::Spell* spell = esmStore.get<ESM::Spell>().find(*it);
             MyGUI::Button* t = mSpellView->createWidget<MyGUI::Button>("SpellText",
                 MyGUI::IntCoord(4, mHeight, mWidth-8, spellHeight), MyGUI::Align::Left | MyGUI::Align::Top);
             t->setCaption(spell->mName);
@@ -244,7 +253,8 @@ namespace MWGui
         {
             MWWorld::Ptr item = *it;
 
-            const ESM::Enchantment* enchant = MWBase::Environment::get().getWorld()->getStore().enchants.find(MWWorld::Class::get(item).getEnchantment(item));
+            const ESM::Enchantment* enchant =
+                esmStore.get<ESM::Enchantment>().find(MWWorld::Class::get(item).getEnchantment(item));
 
             // check if the item is currently equipped (will display in a different color)
             bool equipped = false;
@@ -378,7 +388,9 @@ namespace MWGui
         if (MyGUI::InputManager::getInstance().isShiftPressed())
         {
             // delete spell, if allowed
-            const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().spells.find(spellId);
+            const ESM::Spell* spell =
+                MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find(spellId);
+
             if (spell->mData.mFlags & ESM::Spell::F_Always
                 || spell->mData.mType == ESM::Spell::ST_Power)
             {

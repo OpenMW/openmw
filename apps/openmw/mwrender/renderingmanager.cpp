@@ -19,7 +19,7 @@
 #include <extern/shiny/Platforms/Ogre/OgrePlatform.hpp>
 
 #include <components/esm/loadstat.hpp>
-#include <components/esm_store/store.hpp>
+#include "../mwworld/esmstore.hpp"
 #include <components/settings/settings.hpp>
 
 #include "../mwbase/world.hpp" // these includes can be removed once the static-hack is gone
@@ -207,7 +207,7 @@ void RenderingManager::removeCell (MWWorld::Ptr::CellStore *store)
     mObjects.removeCell(store);
     mActors.removeCell(store);
     mDebugging->cellRemoved(store);
-    if (store->cell->isExterior())
+    if (store->mCell->isExterior())
       mTerrainManager->cellRemoved(store);
 }
 
@@ -228,7 +228,7 @@ void RenderingManager::cellAdded (MWWorld::Ptr::CellStore *store)
 {
     mObjects.buildStaticGeometry (*store);
     mDebugging->cellAdded(store);
-    if (store->cell->isExterior())
+    if (store->mCell->isExterior())
       mTerrainManager->cellAdded(store);
     waterAdded(store);
 }
@@ -377,22 +377,26 @@ void RenderingManager::update (float duration, bool paused)
 
         mWater->updateUnderwater(
             world->isUnderwater(
-                *world->getPlayer().getPlayer().getCell()->cell,
+                *world->getPlayer().getPlayer().getCell()->mCell,
                 Ogre::Vector3(cam.x, -cam.z, cam.y))
         );
         mWater->update(duration);
     }
 }
 
-void RenderingManager::waterAdded (MWWorld::Ptr::CellStore *store){
-    if(store->cell->mData.mFlags & store->cell->HasWater
-        || ((!(store->cell->mData.mFlags & ESM::Cell::Interior))
-            && !MWBase::Environment::get().getWorld()->getStore().lands.search(store->cell->mData.mX,store->cell->mData.mY) )) // always use water, if the cell does not have land.
+void RenderingManager::waterAdded (MWWorld::Ptr::CellStore *store)
+{
+    const MWWorld::Store<ESM::Land> &lands =
+        MWBase::Environment::get().getWorld()->getStore().get<ESM::Land>();
+
+    if(store->mCell->mData.mFlags & ESM::Cell::HasWater
+        || ((store->mCell->isExterior())
+            && !lands.search(store->mCell->getGridX(),store->mCell->getGridY()) )) // always use water, if the cell does not have land.
     {
         if(mWater == 0)
-            mWater = new MWRender::Water(mRendering.getCamera(), this, store->cell);
+            mWater = new MWRender::Water(mRendering.getCamera(), this, store->mCell);
         else
-            mWater->changeCell(store->cell);
+            mWater->changeCell(store->mCell);
         mWater->setActive(true);
     }
     else
@@ -478,9 +482,9 @@ bool RenderingManager::toggleRenderMode(int mode)
 void RenderingManager::configureFog(MWWorld::Ptr::CellStore &mCell)
 {
     Ogre::ColourValue color;
-    color.setAsABGR (mCell.cell->mAmbi.mFog);
+    color.setAsABGR (mCell.mCell->mAmbi.mFog);
 
-    configureFog(mCell.cell->mAmbi.mFogDensity, color);
+    configureFog(mCell.mCell->mAmbi.mFogDensity, color);
 
     if (mWater)
         mWater->setViewportBackground (Ogre::ColourValue(0.8f, 0.9f, 1.0f));
@@ -530,7 +534,7 @@ void RenderingManager::setAmbientMode()
 
 void RenderingManager::configureAmbient(MWWorld::Ptr::CellStore &mCell)
 {
-    mAmbientColor.setAsABGR (mCell.cell->mAmbi.mAmbient);
+    mAmbientColor.setAsABGR (mCell.mCell->mAmbi.mAmbient);
     setAmbientMode();
 
     // Create a "sun" that shines light downwards. It doesn't look
@@ -540,7 +544,7 @@ void RenderingManager::configureAmbient(MWWorld::Ptr::CellStore &mCell)
         mSun = mRendering.getScene()->createLight();
     }
     Ogre::ColourValue colour;
-    colour.setAsABGR (mCell.cell->mAmbi.mSunlight);
+    colour.setAsABGR (mCell.mCell->mAmbi.mSunlight);
     mSun->setDiffuseColour (colour);
     mSun->setType(Ogre::Light::LT_DIRECTIONAL);
     mSun->setDirection(0,-1,0);
@@ -624,7 +628,7 @@ void RenderingManager::setGlare(bool glare)
 
 void RenderingManager::requestMap(MWWorld::Ptr::CellStore* cell)
 {
-    if (!(cell->cell->mData.mFlags & ESM::Cell::Interior))
+    if (cell->mCell->isExterior())
         mLocalMap->requestMap(cell);
     else
         mLocalMap->requestMap(cell, mObjects.getDimensions(cell));

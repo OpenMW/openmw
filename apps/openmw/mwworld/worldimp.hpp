@@ -1,12 +1,11 @@
 #ifndef GAME_MWWORLD_WORLDIMP_H
 #define GAME_MWWORLD_WORLDIMP_H
 
-#include <components/esm_store/store.hpp>
-
 #include "../mwrender/debugging.hpp"
 
 #include "ptr.hpp"
 #include "scene.hpp"
+#include "esmstore.hpp"
 #include "physicssystem.hpp"
 #include "cells.hpp"
 #include "localscripts.hpp"
@@ -56,12 +55,11 @@ namespace MWWorld
             MWWorld::Scene *mWorldScene;
             MWWorld::Player *mPlayer;
             ESM::ESMReader mEsm;
-            ESMS::ESMStore mStore;
+            MWWorld::ESMStore mStore;
             LocalScripts mLocalScripts;
             MWWorld::Globals *mGlobalVariables;
             MWWorld::PhysicsSystem *mPhysics;
             bool mSky;
-            int mNextDynamicRecord;
 
             Cells mCells;
 
@@ -124,7 +122,7 @@ namespace MWWorld
 
             virtual Player& getPlayer();
 
-            virtual const ESMS::ESMStore& getStore() const;
+            virtual const MWWorld::ESMStore& getStore() const;
 
             virtual ESM::ESMReader& getEsmReader();
 

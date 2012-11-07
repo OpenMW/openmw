@@ -2,7 +2,7 @@
 
 #include <algorithm>
 
-#include <components/esm_store/store.hpp>
+#include "../mwworld/esmstore.hpp"
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -41,10 +41,11 @@ namespace MWMechanics
         
         float normalised = max==0 ? 1 : std::max (0.0f, static_cast<float> (current)/max);
 
-        const ESMS::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
+        const MWWorld::Store<ESM::GameSetting> &gmst =
+            MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
          
-        return store.gameSettings.find ("fFatigueBase")->getFloat()
-            - store.gameSettings.find ("fFatigueMult")->getFloat() * (1-normalised);
+        return gmst.find ("fFatigueBase")->getFloat()
+            - gmst.find ("fFatigueMult")->getFloat() * (1-normalised);
     }
     
     const Stat<int> &CreatureStats::getAttribute(int index) const

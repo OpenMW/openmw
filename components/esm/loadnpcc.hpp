@@ -1,6 +1,8 @@
 #ifndef OPENMW_ESM_NPCC_H
 #define OPENMW_ESM_NPCC_H
 
+#include <string>
+
 // TODO: create implementation files to remove this
 #include "esmreader.hpp"
 
@@ -76,6 +78,8 @@ class ESMWriter;
 
 struct LoadNPCC
 {
+    std::string mId;
+
   void load(ESMReader &esm)
   {
     esm.skipRecord();

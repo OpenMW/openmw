@@ -64,7 +64,7 @@ struct Race
 
     RADTstruct mData;
 
-    std::string mName, mDescription;
+    std::string mId, mName, mDescription;
     SpellList mPowers;
 
     void load(ESMReader &esm);
