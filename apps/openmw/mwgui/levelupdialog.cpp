@@ -120,19 +120,10 @@ namespace MWGui
         setAttributeValues();
 
         // set class image
-        const ESM::Class& playerClass = *MWBase::Environment::get().getWorld ()->getPlayer ().getClass ();
-        // retrieve the ID to this class
-        std::string classId;
-        const MWWorld::Store<ESM::Class> &classes =
-            MWBase::Environment::get().getWorld()->getStore().get<ESM::Class>();
+        const ESM::Class *cls =
+            MWBase::Environment::get().getWorld ()->getPlayer ().getClass ();
 
-        MWWorld::Store<ESM::Class>::iterator it = classes.begin();
-        for (; it != classes.end(); ++it)
-        {
-            if (playerClass.mName == it->mName)
-                classId = it->mId;
-        }
-        mClassImage->setImageTexture ("textures\\levelup\\" + classId + ".dds");
+        mClassImage->setImageTexture ("textures\\levelup\\" + cls->mId + ".dds");
 
         /// \todo replace this with INI-imported texts
         int level = creatureStats.getLevel ()+1;
