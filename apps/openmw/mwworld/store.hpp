@@ -572,7 +572,6 @@ namespace MWWorld
             ESM::Cell *ptr;
             if (cell.isExterior()) {
                 std::pair<int, int> key(cell.getGridX(), cell.getGridY());
-                DynamicExt::iterator it = mDynamicExt.find(key);
 
                 // duplicate insertions are avoided by search(ESM::Cell &)
                 std::pair<DynamicExt::iterator, bool> result =
@@ -582,7 +581,6 @@ namespace MWWorld
                 mSharedExt.push_back(ptr);
             } else {
                 std::string key = StringUtils::lowerCase(cell.mName);
-                DynamicInt::iterator it = mDynamicInt.find(key);
 
                 // duplicate insertions are avoided by search(ESM::Cell &)
                 std::pair<DynamicInt::iterator, bool> result =
