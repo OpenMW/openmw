@@ -1058,12 +1058,12 @@ namespace MWWorld
                     // door leads to exterior, use cell name (if any), otherwise translated region name
                     int x,y;
                     positionToIndex (ref.mRef.mDoorDest.pos[0], ref.mRef.mDoorDest.pos[1], x, y);
-                    const ESM::Cell* cell = mStore.get<ESM::Cell>().find(x,y);
+                    const ESM::Cell* cell = ((const ESMStore &) mStore).get<ESM::Cell>().find(x,y);
                     if (cell->mName != "")
                         dest = cell->mName;
                     else
                     {
-                        dest = mStore.get<ESM::Region>().find(cell->mRegion)->mName;
+                        dest = ((const ESMStore &) mStore).get<ESM::Region>().find(cell->mRegion)->mName;
                     }
                 }
 
