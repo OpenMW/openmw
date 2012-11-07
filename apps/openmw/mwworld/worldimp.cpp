@@ -188,7 +188,6 @@ namespace MWWorld
         mEsm.setEncoding(encoding);
         mEsm.open (masterPath.string());
         mStore.load (mEsm);
-        mStore.setUp();
 
         mPlayer = new MWWorld::Player (mStore.get<ESM::NPC>().find ("player"), *this);
         mRendering->attachCameraTo(mPlayer->getPlayer());

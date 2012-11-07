@@ -84,6 +84,7 @@ void ESMStore::load(ESM::ESMReader &esm)
     cout << *it << " ";
   cout << endl;
   */
+    setUp();
 }
 
 void ESMStore::setUp()

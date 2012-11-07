@@ -139,7 +139,6 @@ namespace MWWorld
         }
 
         void load(ESM::ESMReader &esm);
-        void setUp();
 
         template <class T>
         const Store<T> &get() const {
@@ -164,6 +163,8 @@ namespace MWWorld
             return ptr;
         }
 
+    private:
+        void setUp();
     };
 
     template <>
