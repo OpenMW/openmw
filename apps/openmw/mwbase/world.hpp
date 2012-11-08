@@ -29,6 +29,7 @@ namespace ESM
     struct Class;
     struct Potion;
     struct Spell;
+    struct NPC;
 }
 
 namespace MWRender
@@ -249,6 +250,11 @@ namespace MWBase
             ///< Create a new recrod (of type cell) in the ESM store.
             /// \return ID, pointer to created record
 
+            virtual const ESM::NPC *createRecord(const ESM::NPC &record) = 0;
+            ///< Create a new recrod (of type npc) in the ESM store.
+            ///< \note special treatment for 'player' record
+            /// \return ID, pointer to created record
+
             virtual void playAnimationGroup (const MWWorld::Ptr& ptr, const std::string& groupName,
                 int mode, int number = 1) = 0;
             ///< Run animation for a MW-reference. Calls to this function for references that are
@@ -296,12 +302,6 @@ namespace MWBase
             /// 1 - only waiting \n
             /// 2 - player is underwater \n
             /// 3 - enemies are nearby (not implemented)
-
-            /// Update player record part with given value
-            virtual void updatePlayer(int flag, const std::string &value) = 0;
-
-            /// Update player record part with given value
-            virtual void updatePlayer(int flag, bool value) = 0;
     };
 }
 

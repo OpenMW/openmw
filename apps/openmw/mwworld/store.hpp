@@ -168,26 +168,6 @@ namespace MWWorld
             }
         }
 
-        T *search(const std::string &id) {
-            std::string key = StringUtils::lowerCase(id);
-            typename Dynamic::iterator dit = mDynamic.find(key);
-
-            if (dit != mDynamic.end()) {
-                return &dit->second;
-            }
-            return 0;
-        }
-
-        T *find(const std::string &id) {
-            T *ptr = search(id);
-            if (ptr == 0) {
-                std::ostringstream msg;
-                msg << "Object '" << id << "' not found (non-const)";
-                throw std::runtime_error(msg.str());
-            }
-            return ptr;
-        }
-
         T *insert(const T &item) {
             std::string id = StringUtils::lowerCase(item.mId);
             std::pair<typename Dynamic::iterator, bool> result =
@@ -521,43 +501,6 @@ namespace MWWorld
             for (; it != mSharedInt.end(); ++it) {
                 list.push_back((*it)->mName);
             }
-        }
-
-        ESM::Cell *search(const std::string &id) {
-            std::string key = StringUtils::lowerCase(id);
-            DynamicInt::iterator it = mDynamicInt.find(key);
-            if (it != mDynamicInt.end()) {
-                return &it->second;
-            }
-            return 0;
-        }
-
-        ESM::Cell *find(const std::string &id) {
-            ESM::Cell *ptr = search(id);
-            if (ptr == 0) {
-                std::ostringstream msg;
-                msg << "Interior '" << id << "' not found (non-const)";
-                throw std::runtime_error(msg.str());
-            }
-            return ptr;
-        }
-
-        ESM::Cell *search(int x, int y) {
-            DynamicExt::iterator it = mDynamicExt.find(std::make_pair(x, y));
-            if (it != mDynamicExt.end()) {
-                return &it->second;
-            }
-            return 0;
-        }
-
-        ESM::Cell *find(int x, int y) {
-            ESM::Cell *ptr = search(x, y);
-            if (ptr == 0) {
-                std::ostringstream msg;
-                msg << "Exterior at (" << x << ", " << y << ") not found (non-const)";
-                throw std::runtime_error(msg.str());
-            }
-            return ptr;
         }
 
         ESM::Cell *insert(const ESM::Cell &cell) {

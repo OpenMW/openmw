@@ -108,7 +108,8 @@ namespace MWGui
 
     void LevelupDialog::open()
     {
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld ()->getPlayer().getPlayer();
+        MWBase::World *world = MWBase::Environment::get().getWorld();
+        MWWorld::Ptr player = world->getPlayer().getPlayer();
         MWMechanics::CreatureStats& creatureStats = MWWorld::Class::get(player).getCreatureStats (player);
         MWMechanics::NpcStats& pcStats = MWWorld::Class::get(player).getNpcStats (player);
 
@@ -119,9 +120,11 @@ namespace MWGui
 
         setAttributeValues();
 
+        const ESM::NPC *playerData = player.get<ESM::NPC>()->mBase;
+
         // set class image
         const ESM::Class *cls =
-            MWBase::Environment::get().getWorld ()->getPlayer ().getClass ();
+            world->getStore().get<ESM::Class>().find(playerData->mClass);
 
         mClassImage->setImageTexture ("textures\\levelup\\" + cls->mId + ".dds");
 

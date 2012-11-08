@@ -799,6 +799,11 @@ namespace MWWorld
         return mStore.insert(record);
     }
 
+    const ESM::NPC *World::createRecord(const ESM::NPC &record)
+    {
+        return mStore.insert(record);
+    }
+
     void World::playAnimationGroup (const MWWorld::Ptr& ptr, const std::string& groupName, int mode,
         int number)
     {
@@ -1055,12 +1060,12 @@ namespace MWWorld
                     // door leads to exterior, use cell name (if any), otherwise translated region name
                     int x,y;
                     positionToIndex (ref.mRef.mDoorDest.pos[0], ref.mRef.mDoorDest.pos[1], x, y);
-                    const ESM::Cell* cell = ((const ESMStore &) mStore).get<ESM::Cell>().find(x,y);
+                    const ESM::Cell* cell = mStore.get<ESM::Cell>().find(x,y);
                     if (cell->mName != "")
                         dest = cell->mName;
                     else
                     {
-                        dest = ((const ESMStore &) mStore).get<ESM::Region>().find(cell->mRegion)->mName;
+                        dest = mStore.get<ESM::Region>().find(cell->mRegion)->mName;
                     }
                 }
 
@@ -1248,52 +1253,5 @@ namespace MWWorld
 
         return 0;
 
-    }
-
-    void World::updatePlayer(int flag, const std::string &value)
-    {
-        ESM::NPC *player = mStore.get<ESM::NPC>().find("player");
-
-        switch (flag) {
-        case Player::Data_Name:
-            player->mName = value;
-            break;
-
-        case Player::Data_Class:
-            mStore.get<ESM::Class>().erase(player->mClass);
-            player->mClass = value;
-            break;
-
-        case Player::Data_Race:
-            player->mRace = value;
-            break;
-
-        case Player::Data_Model:
-            player->mModel = value;
-            break;
-
-        case Player::Data_Head:
-            player->mHead = value;
-            break;
-
-        case Player::Data_Hair:
-            player->mHair = value;
-            break;
-
-        default:
-            break;
-        }
-    }
-
-    void World::updatePlayer(int flag, bool value)
-    {
-        ESM::NPC *player = mStore.get<ESM::NPC>().find("player");
-
-        if (flag == Player::Data_Male) {
-            player->mFlags |= 0x1;
-            if (value) {
-                player->mFlags ^= 0x1;
-            }
-        }
     }
 }
