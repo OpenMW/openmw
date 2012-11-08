@@ -252,24 +252,23 @@ namespace MWWorld
 
             virtual const ESM::Potion *createRecord (const ESM::Potion& record);
             ///< Create a new recrod (of type potion) in the ESM store.
-            /// \return ID, pointer to created record
+            /// \return pointer to created record
 
             virtual const ESM::Spell *createRecord (const ESM::Spell& record);
             ///< Create a new recrod (of type spell) in the ESM store.
-            /// \return ID, pointer to created record
+            /// \return pointer to created record
 
             virtual const ESM::Class *createRecord (const ESM::Class& record);
             ///< Create a new recrod (of type class) in the ESM store.
-            /// \return ID, pointer to created record
+            /// \return pointer to created record
 
             virtual const ESM::Cell *createRecord (const ESM::Cell& record);
             ///< Create a new recrod (of type cell) in the ESM store.
-            /// \return ID, pointer to created record
+            /// \return pointer to created record
 
             virtual const ESM::NPC *createRecord(const ESM::NPC &record);
             ///< Create a new recrod (of type npc) in the ESM store.
-            ///< \note special treatment for 'player' record
-            /// \return ID, pointer to created record
+            /// \return pointer to created record
 
 
             virtual void playAnimationGroup (const MWWorld::Ptr& ptr, const std::string& groupName,
