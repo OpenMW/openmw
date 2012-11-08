@@ -294,10 +294,13 @@ void DialogueWindow::updateOptions()
     mTopicsList->clear();
     mHistory->eraseText(0, mHistory->getTextLength());
 
-    mDispositionBar->setProgressRange(100);
-    mDispositionBar->setProgressPosition(MWBase::Environment::get().getMechanicsManager()->disposition(mPtr));
-    mDispositionText->eraseText(0, mDispositionText->getTextLength());
-    mDispositionText->addText("#B29154"+boost::lexical_cast<std::string>(MWBase::Environment::get().getMechanicsManager()->disposition(mPtr))+std::string("/100")+"#B29154");
+    if (mPtr.getTypeName() == typeid(ESM::NPC).name())
+    {
+        mDispositionBar->setProgressRange(100);
+        mDispositionBar->setProgressPosition(MWBase::Environment::get().getMechanicsManager()->disposition(mPtr));
+        mDispositionText->eraseText(0, mDispositionText->getTextLength());
+        mDispositionText->addText("#B29154"+boost::lexical_cast<std::string>(MWBase::Environment::get().getMechanicsManager()->disposition(mPtr))+std::string("/100")+"#B29154");
+    }
 }
 
 void DialogueWindow::goodbye()
@@ -314,7 +317,7 @@ void DialogueWindow::onReferenceUnavailable()
 
 void DialogueWindow::onFrame()
 {
-    if(mEnabled)
+    if(mEnabled && mPtr.getTypeName() == typeid(ESM::NPC).name())
     {
         mDispositionBar->setProgressRange(100);
         mDispositionBar->setProgressPosition(MWBase::Environment::get().getMechanicsManager()->disposition(mPtr));

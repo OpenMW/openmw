@@ -396,6 +396,9 @@ namespace MWMechanics
 
     int MechanicsManager::barterOffer(const MWWorld::Ptr& ptr,int basePrice, bool buying)
     {
+        if (ptr.getTypeName() == typeid(ESM::Creature).name())
+            return basePrice;
+
         MWMechanics::NpcStats sellerSkill = MWWorld::Class::get(ptr).getNpcStats(ptr);
         MWMechanics::CreatureStats sellerStats = MWWorld::Class::get(ptr).getCreatureStats(ptr); 
 
@@ -419,12 +422,10 @@ namespace MWMechanics
         float x; 
         if(buying) x = buyTerm;
         else x = std::min(buyTerm, sellTerm);
-        //std::cout << "x" << x;
         int offerPrice;
         if (x < 1) offerPrice = int(x * basePrice);
         if (x >= 1) offerPrice = basePrice + int((x - 1) * basePrice);
         offerPrice = std::max(1, offerPrice);
-        //std::cout <<"barteroffer"<< offerPrice << " " << basePrice << "\n";
         return offerPrice;
     }
 }

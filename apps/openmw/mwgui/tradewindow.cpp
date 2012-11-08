@@ -185,8 +185,13 @@ namespace MWGui
 
         if(mCurrentBalance > mCurrentMerchantOffer)
         {
-            /// \todo : if creature....
             //if npc is a creature: reject (no haggle)
+            if (mPtr.getTypeName() != typeid(ESM::NPC).name())
+            {
+                MWBase::Environment::get().getWindowManager()->
+                    messageBox("#{sNotifyMessage9}", std::vector<std::string>());
+                return;
+            }
 
             int a = abs(mCurrentMerchantOffer);
             int b = abs(mCurrentBalance);
@@ -202,12 +207,12 @@ namespace MWGui
             MWMechanics::NpcStats playerSkill = MWWorld::Class::get(playerPtr).getNpcStats(playerPtr);
             MWMechanics::CreatureStats playerStats = MWWorld::Class::get(playerPtr).getCreatureStats(playerPtr);
 
-            float a1 = std::min<float>(playerSkill.getSkill(ESM::Skill::Mercantile).getModified(), 100);
-            float b1 = std::min<float>(0.1 * playerStats.getAttribute(ESM::Attribute::Luck).getModified(), 10);
-            float c1 = std::min<float>(0.2 * playerStats.getAttribute(ESM::Attribute::Personality).getModified(), 10);
-            float d1 = std::min<float>(sellerSkill.getSkill(ESM::Skill::Mercantile).getModified(), 100);
-            float e1 = std::min<float>(0.1 * sellerStats.getAttribute(ESM::Attribute::Luck).getModified(), 10);
-            float f1 = std::min<float>(0.2 * sellerStats.getAttribute(ESM::Attribute::Personality).getModified(), 10);
+            float a1 = std::min(playerSkill.getSkill(ESM::Skill::Mercantile).getModified(), 100.f);
+            float b1 = std::min(0.1f * playerStats.getAttribute(ESM::Attribute::Luck).getModified(), 10.f);
+            float c1 = std::min(0.2f * playerStats.getAttribute(ESM::Attribute::Personality).getModified(), 10.f);
+            float d1 = std::min(sellerSkill.getSkill(ESM::Skill::Mercantile).getModified(), 100.f);
+            float e1 = std::min(0.1f * sellerStats.getAttribute(ESM::Attribute::Luck).getModified(), 10.f);
+            float f1 = std::min(0.2f * sellerStats.getAttribute(ESM::Attribute::Personality).getModified(), 10.f);
 
             float pcTerm = (clampedDisposition - 50 + a1 + b1 + c1) * playerStats.getFatigueTerm();
             float npcTerm = (d1 + e1 + f1) * sellerStats.getFatigueTerm();
