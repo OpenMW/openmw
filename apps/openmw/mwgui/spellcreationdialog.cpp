@@ -400,7 +400,6 @@ namespace MWGui
         float fSpellMakingValueMult =
             store.get<ESM::GameSetting>().find("fSpellMakingValueMult")->getFloat();
 
-        /// \todo mercantile
         int price = MWBase::Environment::get().getMechanicsManager()->barterOffer(mPtr,int(y) * fSpellMakingValueMult,true);
 
         mPriceLabel->setCaption(boost::lexical_cast<std::string>(int(price)));

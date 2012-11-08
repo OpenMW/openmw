@@ -68,7 +68,6 @@ namespace MWGui
             );
 
         mCurrentY += sLineHeight;
-        /// \todo price adjustment depending on merchantile skill
 
         toAdd->setUserData(price);
         toAdd->setCaptionWithReplacing(spell->mName+"   -   "+boost::lexical_cast<std::string>(price)+"#{sgp}");

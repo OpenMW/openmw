@@ -73,7 +73,6 @@ namespace MWGui
 
         MyGUI::Button* toAdd = mDestinationsView->createWidget<MyGUI::Button>((price>mWindowManager.getInventoryWindow()->getPlayerGold()) ? "SandTextGreyedOut" : "SandTextButton", 0, mCurrentY, 200, sLineHeight, MyGUI::Align::Default);
         mCurrentY += sLineHeight;
-        /// \todo price adjustment depending on merchantile skill
         if(interior)
             toAdd->setUserString("interior","y");
         else

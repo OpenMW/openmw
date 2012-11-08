@@ -79,7 +79,6 @@ namespace MWGui
 
         for (int i=0; i<3; ++i)
         {
-            /// \todo mercantile skill
             int price = MWBase::Environment::get().getMechanicsManager()->barterOffer
                     (mPtr,pcStats.getSkill (bestSkills[i].first).getBase() * gmst.find("iTrainingMod")->getInt (),true);
 
@@ -121,8 +120,8 @@ namespace MWGui
         const MWWorld::ESMStore &store =
             MWBase::Environment::get().getWorld()->getStore();
 
-        /// \todo mercantile skill
         int price = pcStats.getSkill (skillId).getBase() * store.get<ESM::GameSetting>().find("iTrainingMod")->getInt ();
+        price = MWBase::Environment::get().getMechanicsManager()->barterOffer(mPtr,price,true);
 
         if (mWindowManager.getInventoryWindow()->getPlayerGold()<price)
             return;
