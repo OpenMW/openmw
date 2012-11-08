@@ -50,7 +50,7 @@ namespace MWWorld
             : mContainerStore (0)
             {
                 mPtr = liveCellRef;
-                mCellRef = &liveCellRef->ref;
+                mCellRef = &liveCellRef->mRef;
                 mRefData = &liveCellRef->mData;
                 mCell = cell;
                 mTypeName = typeid (T).name();

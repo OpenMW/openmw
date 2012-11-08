@@ -6,7 +6,7 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
 
-#include <components/esm_store/store.hpp>
+#include "../mwworld/esmstore.hpp"
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -80,7 +80,7 @@ RaceDialog::RaceDialog(MWBase::WindowManager& parWindowManager)
     getWidget(okButton, "OKButton");
     okButton->setCaption(mWindowManager.getGameSettingString("sOK", ""));
     okButton->eventMouseButtonClick += MyGUI::newDelegate(this, &RaceDialog::onOkClicked);
-    okButton->setTextColour(MyGUI::Colour(0.6f, 0.56f, 0.45f));
+    okButton->setEnabled(false);
 
     updateRaces();
     updateSkills();
@@ -124,7 +124,7 @@ void RaceDialog::setRaceId(const std::string &raceId)
             mRaceList->setIndexSelected(i);
             MyGUI::ButtonPtr okButton;
             getWidget(okButton, "OKButton");
-            okButton->setTextColour(MyGUI::Colour(0.75f, 0.6f, 0.35f));
+            okButton->setEnabled(true);
             break;
         }
     }
@@ -208,7 +208,7 @@ void RaceDialog::onSelectRace(MyGUI::ListBox* _sender, size_t _index)
 
     MyGUI::ButtonPtr okButton;
     getWidget(okButton, "OKButton");
-    okButton->setTextColour(MyGUI::Colour(0.75f, 0.6f, 0.35f));
+    okButton->setEnabled(true);
     const std::string *raceId = mRaceList->getItemDataAt<std::string>(_index);
     if (boost::iequals(mCurrentRaceId, *raceId))
         return;
@@ -224,20 +224,20 @@ void RaceDialog::updateRaces()
 {
     mRaceList->removeAllItems();
 
-    const ESMS::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
+    const MWWorld::Store<ESM::Race> &races =
+        MWBase::Environment::get().getWorld()->getStore().get<ESM::Race>();
 
-    ESMS::RecListT<ESM::Race>::MapType::const_iterator it = store.races.list.begin();
-    ESMS::RecListT<ESM::Race>::MapType::const_iterator end = store.races.list.end();
+    
     int index = 0;
-    for (; it != end; ++it)
+    MWWorld::Store<ESM::Race>::iterator it = races.begin();
+    for (; it != races.end(); ++it)
     {
-        const ESM::Race &race = it->second;
-        bool playable = race.mData.mFlags & ESM::Race::Playable;
+        bool playable = it->mData.mFlags & ESM::Race::Playable;
         if (!playable) // Only display playable races
             continue;
 
-        mRaceList->addItem(race.mName, it->first);
-        if (boost::iequals(it->first, mCurrentRaceId))
+        mRaceList->addItem(it->mName, it->mId);
+        if (boost::iequals(it->mId, mCurrentRaceId))
             mRaceList->setIndexSelected(index);
         ++index;
     }
@@ -258,8 +258,8 @@ void RaceDialog::updateSkills()
     const int lineHeight = 18;
     MyGUI::IntCoord coord1(0, 0, mSkillList->getWidth(), 18);
 
-    const ESMS::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
-    const ESM::Race *race = store.races.find(mCurrentRaceId);
+    const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
+    const ESM::Race *race = store.get<ESM::Race>().find(mCurrentRaceId);
     int count = sizeof(race->mData.mBonus)/sizeof(race->mData.mBonus[0]); // TODO: Find a portable macro for this ARRAYSIZE?
     for (int i = 0; i < count; ++i)
     {
@@ -296,8 +296,8 @@ void RaceDialog::updateSpellPowers()
     const int lineHeight = 18;
     MyGUI::IntCoord coord(0, 0, mSpellPowerList->getWidth(), 18);
 
-    const ESMS::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
-    const ESM::Race *race = store.races.find(mCurrentRaceId);
+    const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
+    const ESM::Race *race = store.get<ESM::Race>().find(mCurrentRaceId);
 
     std::vector<std::string>::const_iterator it = race->mPowers.mList.begin();
     std::vector<std::string>::const_iterator end = race->mPowers.mList.end();

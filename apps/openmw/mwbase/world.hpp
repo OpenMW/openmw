@@ -31,11 +31,6 @@ namespace ESM
     struct Spell;
 }
 
-namespace ESMS
-{
-    struct ESMStore;
-}
-
 namespace MWRender
 {
     class ExternalRendering;
@@ -48,6 +43,7 @@ namespace MWWorld
     class LocalScripts;
     class Ptr;
     class TimeStamp;
+    class ESMStore;
 }
 
 namespace MWBase
@@ -104,7 +100,7 @@ namespace MWBase
 
             virtual MWWorld::Player& getPlayer() = 0;
 
-            virtual const ESMS::ESMStore& getStore() const = 0;
+            virtual const MWWorld::ESMStore& getStore() const = 0;
 
             virtual ESM::ESMReader& getEsmReader() = 0;
 
@@ -265,7 +261,7 @@ namespace MWBase
             ///< Skip the animation for the given MW-reference for one frame. Calls to this function for
             /// references that are currently not in the rendered scene should be ignored.
 
-            virtual void update (float duration) = 0;
+            virtual void update (float duration, bool paused) = 0;
 
             virtual bool placeObject(const MWWorld::Ptr& object, float cursorX, float cursorY) = 0;
             ///< place an object into the gameworld at the specified cursor position

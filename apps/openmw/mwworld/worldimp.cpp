@@ -19,34 +19,37 @@ using namespace Ogre;
 
 namespace
 {
+/*  // NOTE this code is never instantiated (proper copy in localscripts.cpp),
+    //      so this commented out to not produce syntactic errors
+
     template<typename T>
-    void listCellScripts (const ESMS::ESMStore& store,
+    void listCellScripts (const MWWorld::ESMStore& store,
         MWWorld::CellRefList<T>& cellRefList, MWWorld::LocalScripts& localScripts,
         MWWorld::Ptr::CellStore *cell)
     {
         for (typename MWWorld::CellRefList<T>::List::iterator iter (
-            cellRefList.list.begin());
-            iter!=cellRefList.list.end(); ++iter)
+            cellRefList.mList.begin());
+            iter!=cellRefList.mList.end(); ++iter)
         {
-            if (!iter->base->script.empty() && iter->mData.getCount())
+            if (!iter->mBase->mScript.empty() && iter->mData.getCount())
             {
-                if (const ESM::Script *script = store.scripts.find (iter->base->script))
+                if (const ESM::Script *script = store.get<ESM::Script>().find (iter->mBase->mScript))
                 {
                     iter->mData.setLocals (*script);
 
-                    localScripts.add (iter->base->script, MWWorld::Ptr (&*iter, cell));
+                    localScripts.add (iter->mBase->mScript, MWWorld::Ptr (&*iter, cell));
                 }
             }
         }
     }
-
+*/
     template<typename T>
     MWWorld::LiveCellRef<T> *searchViaHandle (const std::string& handle,
         MWWorld::CellRefList<T>& refList)
     {
         typedef typename MWWorld::CellRefList<T>::List::iterator iterator;
 
-        for (iterator iter (refList.list.begin()); iter!=refList.list.end(); ++iter)
+        for (iterator iter (refList.mList.begin()); iter!=refList.mList.end(); ++iter)
         {
             if(iter->mData.getCount() > 0 && iter->mData.getBaseNode()){
             if (iter->mData.getHandle()==handle)
@@ -64,44 +67,44 @@ namespace MWWorld
     Ptr World::getPtrViaHandle (const std::string& handle, Ptr::CellStore& cell)
     {
         if (MWWorld::LiveCellRef<ESM::Activator> *ref =
-            searchViaHandle (handle, cell.activators))
+            searchViaHandle (handle, cell.mActivators))
             return Ptr (ref, &cell);
-        if (MWWorld::LiveCellRef<ESM::Potion> *ref = searchViaHandle (handle, cell.potions))
+        if (MWWorld::LiveCellRef<ESM::Potion> *ref = searchViaHandle (handle, cell.mPotions))
             return Ptr (ref, &cell);
-        if (MWWorld::LiveCellRef<ESM::Apparatus> *ref = searchViaHandle (handle, cell.appas))
+        if (MWWorld::LiveCellRef<ESM::Apparatus> *ref = searchViaHandle (handle, cell.mAppas))
             return Ptr (ref, &cell);
-        if (MWWorld::LiveCellRef<ESM::Armor> *ref = searchViaHandle (handle, cell.armors))
+        if (MWWorld::LiveCellRef<ESM::Armor> *ref = searchViaHandle (handle, cell.mArmors))
             return Ptr (ref, &cell);
-        if (MWWorld::LiveCellRef<ESM::Book> *ref = searchViaHandle (handle, cell.books))
+        if (MWWorld::LiveCellRef<ESM::Book> *ref = searchViaHandle (handle, cell.mBooks))
             return Ptr (ref, &cell);
-        if (MWWorld::LiveCellRef<ESM::Clothing> *ref = searchViaHandle (handle, cell.clothes))
+        if (MWWorld::LiveCellRef<ESM::Clothing> *ref = searchViaHandle (handle, cell.mClothes))
             return Ptr (ref, &cell);
         if (MWWorld::LiveCellRef<ESM::Container> *ref =
-            searchViaHandle (handle, cell.containers))
+            searchViaHandle (handle, cell.mContainers))
             return Ptr (ref, &cell);
         if (MWWorld::LiveCellRef<ESM::Creature> *ref =
-            searchViaHandle (handle, cell.creatures))
+            searchViaHandle (handle, cell.mCreatures))
             return Ptr (ref, &cell);
-        if (MWWorld::LiveCellRef<ESM::Door> *ref = searchViaHandle (handle, cell.doors))
+        if (MWWorld::LiveCellRef<ESM::Door> *ref = searchViaHandle (handle, cell.mDoors))
             return Ptr (ref, &cell);
         if (MWWorld::LiveCellRef<ESM::Ingredient> *ref =
-            searchViaHandle (handle, cell.ingreds))
+            searchViaHandle (handle, cell.mIngreds))
             return Ptr (ref, &cell);
-        if (MWWorld::LiveCellRef<ESM::Light> *ref = searchViaHandle (handle, cell.lights))
+        if (MWWorld::LiveCellRef<ESM::Light> *ref = searchViaHandle (handle, cell.mLights))
             return Ptr (ref, &cell);
-        if (MWWorld::LiveCellRef<ESM::Tool> *ref = searchViaHandle (handle, cell.lockpicks))
+        if (MWWorld::LiveCellRef<ESM::Tool> *ref = searchViaHandle (handle, cell.mLockpicks))
             return Ptr (ref, &cell);
-        if (MWWorld::LiveCellRef<ESM::Miscellaneous> *ref = searchViaHandle (handle, cell.miscItems))
+        if (MWWorld::LiveCellRef<ESM::Miscellaneous> *ref = searchViaHandle (handle, cell.mMiscItems))
             return Ptr (ref, &cell);
-        if (MWWorld::LiveCellRef<ESM::NPC> *ref = searchViaHandle (handle, cell.npcs))
+        if (MWWorld::LiveCellRef<ESM::NPC> *ref = searchViaHandle (handle, cell.mNpcs))
             return Ptr (ref, &cell);
-        if (MWWorld::LiveCellRef<ESM::Probe> *ref = searchViaHandle (handle, cell.probes))
+        if (MWWorld::LiveCellRef<ESM::Probe> *ref = searchViaHandle (handle, cell.mProbes))
             return Ptr (ref, &cell);
-        if (MWWorld::LiveCellRef<ESM::Repair> *ref = searchViaHandle (handle, cell.repairs))
+        if (MWWorld::LiveCellRef<ESM::Repair> *ref = searchViaHandle (handle, cell.mRepairs))
             return Ptr (ref, &cell);
-        if (MWWorld::LiveCellRef<ESM::Static> *ref = searchViaHandle (handle, cell.statics))
+        if (MWWorld::LiveCellRef<ESM::Static> *ref = searchViaHandle (handle, cell.mStatics))
             return Ptr (ref, &cell);
-        if (MWWorld::LiveCellRef<ESM::Weapon> *ref = searchViaHandle (handle, cell.weapons))
+        if (MWWorld::LiveCellRef<ESM::Weapon> *ref = searchViaHandle (handle, cell.mWeapons))
             return Ptr (ref, &cell);
         return Ptr();
     }
@@ -167,7 +170,7 @@ namespace MWWorld
         const std::string& master, const boost::filesystem::path& resDir, const boost::filesystem::path& cacheDir, bool newGame,
         const std::string& encoding, std::map<std::string,std::string> fallbackMap)
     : mPlayer (0), mLocalScripts (mStore), mGlobalVariables (0),
-      mSky (true), mNextDynamicRecord (0), mCells (mStore, mEsm),
+      mSky (true), mCells (mStore, mEsm),
       mNumFacing(0)
     {
         mPhysics = new PhysicsSystem(renderer);
@@ -186,13 +189,11 @@ namespace MWWorld
         mEsm.open (masterPath.string());
         mStore.load (mEsm);
 
-        mPlayer = new MWWorld::Player (mStore.npcs.find ("player"), *this);
+        mPlayer = new MWWorld::Player (mStore.get<ESM::NPC>().find ("player"), *this);
         mRendering->attachCameraTo(mPlayer->getPlayer());
 
-        std::string playerCollisionFile = "meshes\\base_anim.nif";    //This is used to make a collision shape for our player
-                                                                      //We will need to support the 1st person file too in the future
-        mPhysics->addActor (mPlayer->getPlayer().getRefData().getHandle(), playerCollisionFile, Ogre::Vector3 (0, 0, 0), 1, Ogre::Quaternion::ZERO);
-
+        mPhysics->addActor(mPlayer->getPlayer());
+        
         // global variables
         mGlobalVariables = new Globals (mStore);
 
@@ -224,21 +225,19 @@ namespace MWWorld
     const ESM::Cell *World::getExterior (const std::string& cellName) const
     {
         // first try named cells
-        if (const ESM::Cell *cell = mStore.cells.searchExtByName (cellName))
+        const ESM::Cell *cell = mStore.get<ESM::Cell>().searchExtByName (cellName);
+        if (cell != 0) {
             return cell;
+        }
 
         // didn't work -> now check for regions
-        std::string cellName2 = ESMS::RecListT<ESM::Region>::toLower (cellName);
-
-        for (ESMS::RecListT<ESM::Region>::MapType::const_iterator iter (mStore.regions.list.begin());
-            iter!=mStore.regions.list.end(); ++iter)
+        const MWWorld::Store<ESM::Region> &regions = mStore.get<ESM::Region>();
+        MWWorld::Store<ESM::Region>::iterator it = regions.begin();
+        for (; it != regions.end(); ++it)
         {
-            if (ESMS::RecListT<ESM::Region>::toLower (iter->second.mName)==cellName2)
+            if (MWWorld::StringUtils::ciEqual(cellName, it->mName))
             {
-                if (const ESM::Cell *cell = mStore.cells.searchExtByRegion (iter->first))
-                    return cell;
-
-                break;
+                return mStore.get<ESM::Cell>().searchExtByRegion(it->mId);
             }
         }
 
@@ -260,7 +259,7 @@ namespace MWWorld
         return *mPlayer;
     }
 
-    const ESMS::ESMStore& World::getStore() const
+    const MWWorld::ESMStore& World::getStore() const
     {
         return mStore;
     }
@@ -407,15 +406,15 @@ namespace MWWorld
 
     void World::setDay (int day)
     {
-        if (day<0)
-            day = 0;
+        if (day<1)
+            day = 1;
 
         int month = mGlobalVariables->getInt ("month");
 
         while (true)
         {
             int days = getDaysPerMonth (month);
-            if (day<days)
+            if (day<=days)
                 break;
 
             if (month<11)
@@ -437,8 +436,6 @@ namespace MWWorld
         mRendering->skySetDate (day, month);
 
         mWeatherManager->setDate (day, month);
-
-
     }
 
     void World::setMonth (int month)
@@ -451,8 +448,8 @@ namespace MWWorld
 
         int days = getDaysPerMonth (month);
 
-        if (mGlobalVariables->getInt ("day")>=days)
-            mGlobalVariables->setInt ("day", days-1);
+        if (mGlobalVariables->getInt ("day")>days)
+            mGlobalVariables->setInt ("day", days);
 
         mGlobalVariables->setInt ("month", month);
 
@@ -536,7 +533,7 @@ namespace MWWorld
             std::pair<std::string, float> result = mPhysics->getFacedHandle (*this);
 
             if (result.first.empty() ||
-                    result.second>getStore().gameSettings.find ("iMaxActivateDist")->getInt())
+                    result.second>getStore().get<ESM::GameSetting>().find ("iMaxActivateDist")->getInt())
                 return "";
 
             return result.first;
@@ -582,39 +579,49 @@ namespace MWWorld
         CellStore *currCell = ptr.getCell();
         bool isPlayer = ptr == mPlayer->getPlayer();
         bool haveToMove = mWorldScene->isCellActive(*currCell) || isPlayer;
-        if (*currCell != newCell) {
-            if (isPlayer) {
-                if (!newCell.isExterior()) {
-                    changeToInteriorCell(toLower(newCell.cell->mName), pos);
-                } else {
-                    int cellX = newCell.cell->mData.mX;
-                    int cellY = newCell.cell->mData.mY;
+
+        if (*currCell != newCell)
+        {
+            if (isPlayer)
+                if (!newCell.isExterior())
+                    changeToInteriorCell(toLower(newCell.mCell->mName), pos);
+                else
+                {
+                    int cellX = newCell.mCell->getGridX();
+                    int cellY = newCell.mCell->getGridY();
                     mWorldScene->changeCell(cellX, cellY, pos, false);
                 }
-            } else {
-                if (!mWorldScene->isCellActive(*currCell)) {
+            else {
+                if (!mWorldScene->isCellActive(*currCell))
                     copyObjectToCell(ptr, newCell, pos);
-                } else if (!mWorldScene->isCellActive(newCell)) {
+                else if (!mWorldScene->isCellActive(newCell))
+                {
                     MWWorld::Class::get(ptr).copyToCell(ptr, newCell);
                     mWorldScene->removeObjectFromScene(ptr);
                     mLocalScripts.remove(ptr);
                     haveToMove = false;
-                } else {
+                }
+                else
+                {
                     MWWorld::Ptr copy =
                         MWWorld::Class::get(ptr).copyToCell(ptr, newCell);
 
                     mRendering->moveObjectToCell(copy, vec, currCell);
 
-                    if (MWWorld::Class::get(ptr).isActor()) {
+                    if (MWWorld::Class::get(ptr).isActor())
+                    {
                         MWBase::MechanicsManager *mechMgr =
                             MWBase::Environment::get().getMechanicsManager();
 
                         mechMgr->removeActor(ptr);
                         mechMgr->addActor(copy);
-                    } else {
+                    }
+                    else
+                    {
                         std::string script =
                             MWWorld::Class::get(ptr).getScript(ptr);
-                        if (!script.empty()) {
+                        if (!script.empty())
+                        {
                             mLocalScripts.remove(ptr);
                             mLocalScripts.add(script, copy);
                         }
@@ -623,9 +630,10 @@ namespace MWWorld
                 ptr.getRefData().setCount(0);
             }
         }
-        if (haveToMove) {
+        if (haveToMove)
+        {
             mRendering->moveObject(ptr, vec);
-            mPhysics->moveObject (ptr.getRefData().getHandle(), ptr.getRefData().getBaseNode());
+            mPhysics->moveObject (ptr);
         }
     }
 
@@ -646,18 +654,17 @@ namespace MWWorld
     void World::moveObject (const Ptr& ptr, float x, float y, float z)
     {
         moveObjectImp(ptr, x, y, z);
-
-        
     }
 
     void World::scaleObject (const Ptr& ptr, float scale)
     {
         MWWorld::Class::get(ptr).adjustScale(ptr,scale);
-
         ptr.getCellRef().mScale = scale;
-        //scale = scale/ptr.getRefData().getBaseNode()->getScale().x;
-        ptr.getRefData().getBaseNode()->setScale(scale,scale,scale);
-        mPhysics->scaleObject( ptr.getRefData().getHandle(), ptr.getRefData().getBaseNode());
+        
+        if(ptr.getRefData().getBaseNode() == 0)
+            return;
+        mRendering->scaleObject(ptr, Vector3(scale,scale,scale));
+        mPhysics->scaleObject(ptr);
     }
 
     void World::rotateObject (const Ptr& ptr,float x,float y,float z, bool adjust)
@@ -667,19 +674,16 @@ namespace MWWorld
         rot.y = Ogre::Degree(y).valueRadians();
         rot.z = Ogre::Degree(z).valueRadians();
         
-        if (mRendering->rotateObject(ptr, rot, adjust)) {
-            float *objRot = ptr.getRefData().getPosition().rot;
-            objRot[0] = rot.x, objRot[1] = rot.y, objRot[2] = rot.z;
+        float *objRot = ptr.getRefData().getPosition().rot;
+        if(ptr.getRefData().getBaseNode() == 0 || !mRendering->rotateObject(ptr, rot, adjust))
+        {
+            objRot[0] = (adjust ? objRot[0] + rot.x : rot.x), objRot[1] = (adjust ? objRot[1] + rot.y : rot.y), objRot[2] = (adjust ? objRot[2] + rot.z : rot.z);
+            return;
+         }
 
-
-            if (ptr.getRefData().getBaseNode() != 0) {
-                mPhysics->rotateObject(
-                    ptr.getRefData().getHandle(),
-                    ptr.getRefData().getBaseNode()
-                );
-            }
-        }
-
+        // do this after rendering rotated the object so it gets changed by Class->adjustRotation
+        objRot[0] = rot.x, objRot[1] = rot.y, objRot[2] = rot.z;
+        mPhysics->rotateObject(ptr);
     }
 
     void World::safePlaceObject(const MWWorld::Ptr& ptr,MWWorld::CellStore &Cell,ESM::Position pos)
@@ -777,74 +781,25 @@ namespace MWWorld
 
     std::pair<std::string, const ESM::Potion *> World::createRecord (const ESM::Potion& record)
     {
-        /// \todo Rewrite the ESMStore so that a dynamic 2nd ESMStore can be attached to it.
-        /// This function should then insert the record into the 2nd store (the code for this
-        /// should also be moved to the ESMStore class). It might be a good idea to review
-        /// the STL-container usage of the ESMStore before the rewrite.
-
-        std::ostringstream stream;
-        stream << "$dynamic" << mNextDynamicRecord++;
-
-        ESM::Potion record2 (record);
-        record2.mId = stream.str();
-
-        const ESM::Potion *created =
-            &mStore.potions.list.insert (std::make_pair (stream.str(), record2)).first->second;
-
-        mStore.all.insert (std::make_pair (stream.str(), ESM::REC_ALCH));
-
-        return std::make_pair (stream.str(), created);
+        const ESM::Potion *ptr = mStore.insert(record);
+        return std::make_pair(ptr->mId, ptr);
     }
 
     std::pair<std::string, const ESM::Class *> World::createRecord (const ESM::Class& record)
     {
-        /// \todo See function above.
-        std::ostringstream stream;
-        stream << "$dynamic" << mNextDynamicRecord++;
-
-        const ESM::Class *created =
-            &mStore.classes.list.insert (std::make_pair (stream.str(), record)).first->second;
-
-        mStore.all.insert (std::make_pair (stream.str(), ESM::REC_CLAS));
-
-        return std::make_pair (stream.str(), created);
+        const ESM::Class *ptr = mStore.insert(record);
+        return std::make_pair(ptr->mId, ptr);
     }
 
     std::pair<std::string, const ESM::Spell *> World::createRecord (const ESM::Spell& record)
     {
-        /// \todo See function above.
-        std::ostringstream stream;
-        stream << "$dynamic" << mNextDynamicRecord++;
-
-        const ESM::Spell *created =
-            &mStore.spells.list.insert (std::make_pair (stream.str(), record)).first->second;
-
-        mStore.all.insert (std::make_pair (stream.str(), ESM::REC_SPEL));
-
-        return std::make_pair (stream.str(), created);
+        const ESM::Spell *ptr = mStore.insert(record);
+        return std::make_pair(ptr->mId, ptr);
     }
 
     const ESM::Cell *World::createRecord (const ESM::Cell& record)
     {
-        if (record.mData.mFlags & ESM::Cell::Interior)
-        {
-            if (mStore.cells.searchInt (record.mName))
-                throw std::runtime_error ("failed creating interior cell");
-
-            ESM::Cell *cell = new ESM::Cell (record);
-            mStore.cells.intCells.insert (std::make_pair (record.mName, cell));
-            return cell;
-        }
-        else
-        {
-            if (mStore.cells.searchExt (record.mData.mX, record.mData.mY))
-                throw std::runtime_error ("failed creating exterior cell");
-
-            ESM::Cell *cell = new ESM::Cell (record);
-            mStore.cells.extCells.insert (
-                std::make_pair (std::make_pair (record.mData.mX, record.mData.mY), cell));
-            return cell;
-        }
+        return mStore.insert(record);
     }
 
     void World::playAnimationGroup (const MWWorld::Ptr& ptr, const std::string& groupName, int mode,
@@ -858,11 +813,11 @@ namespace MWWorld
         mRendering->skipAnimation (ptr);
     }
 
-    void World::update (float duration)
+    void World::update (float duration, bool paused)
     {
         /// \todo split this function up into subfunctions
 
-        mWorldScene->update (duration);
+        mWorldScene->update (duration, paused);
         
         float pitch, yaw;
         Ogre::Vector3 eyepos;
@@ -1033,10 +988,7 @@ namespace MWWorld
         Ptr::CellStore *currentCell = mWorldScene->getCurrentCell();
         if (currentCell)
         {
-            if (!(currentCell->cell->mData.mFlags & ESM::Cell::Interior))
-                return true;
-            else
-                return false;
+            return currentCell->mCell->isExterior();
         }
         return false;
     }
@@ -1046,7 +998,7 @@ namespace MWWorld
         Ptr::CellStore *currentCell = mWorldScene->getCurrentCell();
         if (currentCell)
         {
-            if (!(currentCell->cell->mData.mFlags & ESM::Cell::QuasiEx))
+            if (!(currentCell->mCell->mData.mFlags & ESM::Cell::QuasiEx))
                 return false;
             else
                 return true;
@@ -1071,7 +1023,7 @@ namespace MWWorld
 
     Ogre::Vector2 World::getNorthVector (CellStore* cell)
     {
-        MWWorld::CellRefList<ESM::Static>& statics = cell->statics;
+        MWWorld::CellRefList<ESM::Static>& statics = cell->mStatics;
         MWWorld::LiveCellRef<ESM::Static>* ref = statics.find("northmarker");
         if (!ref)
             return Vector2(0, 1);
@@ -1085,34 +1037,33 @@ namespace MWWorld
     {
         std::vector<World::DoorMarker> result;
 
-        MWWorld::CellRefList<ESM::Door>& doors = cell->doors;
-        std::list< MWWorld::LiveCellRef<ESM::Door> >& refList = doors.list;
+        MWWorld::CellRefList<ESM::Door>& doors = cell->mDoors;
+        std::list< MWWorld::LiveCellRef<ESM::Door> >& refList = doors.mList;
         for (std::list< MWWorld::LiveCellRef<ESM::Door> >::iterator it = refList.begin(); it != refList.end(); ++it)
         {
             MWWorld::LiveCellRef<ESM::Door>& ref = *it;
 
-            if (ref.ref.mTeleport)
+            if (ref.mRef.mTeleport)
             {
                 World::DoorMarker newMarker;
 
                 std::string dest;
-                if (ref.ref.mDestCell != "")
+                if (ref.mRef.mDestCell != "")
                 {
                     // door leads to an interior, use interior name
-                    dest = ref.ref.mDestCell;
+                    dest = ref.mRef.mDestCell;
                 }
                 else
                 {
                     // door leads to exterior, use cell name (if any), otherwise translated region name
                     int x,y;
-                    positionToIndex (ref.ref.mDoorDest.pos[0], ref.ref.mDoorDest.pos[1], x, y);
-                    const ESM::Cell* cell = mStore.cells.findExt(x,y);
+                    positionToIndex (ref.mRef.mDoorDest.pos[0], ref.mRef.mDoorDest.pos[1], x, y);
+                    const ESM::Cell* cell = mStore.get<ESM::Cell>().find(x,y);
                     if (cell->mName != "")
                         dest = cell->mName;
                     else
                     {
-                        const ESM::Region* region = mStore.regions.search(cell->mRegion);
-                        dest = region->mName;
+                        dest = mStore.get<ESM::Region>().find(cell->mRegion)->mName;
                     }
                 }
 
@@ -1256,7 +1207,7 @@ namespace MWWorld
         /// \fixme should rely on object height
         pos.z += 30;
 
-        return isUnderwater(*object.getCell()->cell, pos);
+        return isUnderwater(*object.getCell()->mCell, pos);
     }
 
     bool
@@ -1292,10 +1243,10 @@ namespace MWWorld
                 mPhysics->castRay(playerPos, Ogre::Vector3(0,0,-1), 50);
         bool isOnGround = (hit.first ? (hit.second.distance (playerPos) < 25) : false);
 
-        if (!isOnGround || isUnderwater (*currentCell->cell, playerPos))
+        if (!isOnGround || isUnderwater (*currentCell->mCell, playerPos))
             return 2;
 
-        if (currentCell->cell->mData.mFlags & ESM::Cell::NoSleep)
+        if (currentCell->mCell->mData.mFlags & ESM::Cell::NoSleep)
             return 1;
 
         return 0;

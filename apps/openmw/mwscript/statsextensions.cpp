@@ -7,7 +7,7 @@
 
 #include <components/esm/loadnpc.hpp>
 
-#include <components/esm_store/store.hpp>
+#include "../mwworld/esmstore.hpp"
 
 #include <components/compiler/extensions.hpp>
 
@@ -328,7 +328,7 @@ namespace MWScript
                     assert (ref);
 
                     const ESM::Class& class_ =
-                        *MWBase::Environment::get().getWorld()->getStore().classes.find (ref->base->mClass);
+                        *MWBase::Environment::get().getWorld()->getStore().get<ESM::Class>().find (ref->mBase->mClass);
 
                     float level = 0;
                     float progress = std::modf (stats.getSkill (mIndex).getBase(), &level);
@@ -390,7 +390,7 @@ namespace MWScript
                     runtime.pop();
 
                     // make sure a spell with this ID actually exists.
-                    MWBase::Environment::get().getWorld()->getStore().spells.find (id);
+                    MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find (id);
 
                     MWWorld::Class::get (ptr).getCreatureStats (ptr).getSpells().add (id);
                 }

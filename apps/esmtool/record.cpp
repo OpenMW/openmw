@@ -1213,7 +1213,7 @@ void Record<ESM::Region>::print()
 template<>
 void Record<ESM::Script>::print()
 {
-    std::cout << "  Name: " << mData.mData.mName.toString() << std::endl;
+    std::cout << "  Name: " << mData.mId << std::endl;
 
     std::cout << "  Num Shorts: " << mData.mData.mNumShorts << std::endl;
     std::cout << "  Num Longs: " << mData.mData.mNumLongs << std::endl;

@@ -11,7 +11,7 @@ class ESMWriter;
 
 struct Activator
 {
-    std::string mName, mScript, mModel;
+    std::string mId, mName, mScript, mModel;
 
     void load(ESMReader &esm);
     void save(ESMWriter &esm);

@@ -1,7 +1,7 @@
 
 #include "mechanicsmanagerimp.hpp"
 
-#include <components/esm_store/store.hpp>
+#include "../mwworld/esmstore.hpp"
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -19,7 +19,7 @@ namespace MWMechanics
         MWMechanics::CreatureStats& creatureStats = MWWorld::Class::get (ptr).getCreatureStats (ptr);
         MWMechanics::NpcStats& npcStats = MWWorld::Class::get (ptr).getNpcStats (ptr);
 
-        const ESM::NPC *player = ptr.get<ESM::NPC>()->base;
+        const ESM::NPC *player = ptr.get<ESM::NPC>()->mBase;
 
         // reset
         creatureStats.setLevel(player->mNpdt52.mLevel);
@@ -42,8 +42,9 @@ namespace MWMechanics
         if (mRaceSelected)
         {
             const ESM::Race *race =
-                MWBase::Environment::get().getWorld()->getStore().races.find (
-                MWBase::Environment::get().getWorld()->getPlayer().getRace());
+                MWBase::Environment::get().getWorld()->getStore().get<ESM::Race>().find (
+                    MWBase::Environment::get().getWorld()->getPlayer().getRace()
+                );
 
             bool male = MWBase::Environment::get().getWorld()->getPlayer().isMale();
 
@@ -91,7 +92,7 @@ namespace MWMechanics
         if (!MWBase::Environment::get().getWorld()->getPlayer().getBirthsign().empty())
         {
             const ESM::BirthSign *sign =
-                MWBase::Environment::get().getWorld()->getStore().birthSigns.find (
+                MWBase::Environment::get().getWorld()->getStore().get<ESM::BirthSign>().find (
                 MWBase::Environment::get().getWorld()->getPlayer().getBirthsign());
 
             for (std::vector<std::string>::const_iterator iter (sign->mPowers.mList.begin());
@@ -132,14 +133,15 @@ namespace MWMechanics
                 }
             }
 
-            typedef ESMS::IndexListT<ESM::Skill>::MapType ContainerType;
-            const ContainerType& skills = MWBase::Environment::get().getWorld()->getStore().skills.list;
+            const MWWorld::Store<ESM::Skill> &skills =
+                MWBase::Environment::get().getWorld()->getStore().get<ESM::Skill>();
 
-            for (ContainerType::const_iterator iter (skills.begin()); iter!=skills.end(); ++iter)
+            MWWorld::Store<ESM::Skill>::iterator iter = skills.begin();
+            for (; iter != skills.end(); ++iter)
             {
-                if (iter->second.mData.mSpecialization==class_.mData.mSpecialization)
+                if (iter->mData.mSpecialization==class_.mData.mSpecialization)
                 {
-                    int index = iter->first;
+                    int index = iter->mIndex;
 
                     if (index>=0 && index<27)
                     {
@@ -261,12 +263,16 @@ namespace MWMechanics
         if (mUpdatePlayer)
         {
             // basic player profile; should not change anymore after the creation phase is finished.
-            MWBase::Environment::get().getWindowManager()->setValue ("name", MWBase::Environment::get().getWorld()->getPlayer().getName());
-            MWBase::Environment::get().getWindowManager()->setValue ("race",
-                MWBase::Environment::get().getWorld()->getStore().races.find (MWBase::Environment::get().getWorld()->getPlayer().
-                getRace())->mName);
-            MWBase::Environment::get().getWindowManager()->setValue ("class",
-                MWBase::Environment::get().getWorld()->getPlayer().getClass().mName);
+            MWBase::WindowManager *winMgr =
+                MWBase::Environment::get().getWindowManager();
+            
+            MWBase::World   *world = MWBase::Environment::get().getWorld();
+            MWWorld::Player &player = world->getPlayer();
+
+            winMgr->setValue ("name", player.getName());
+            winMgr->setValue ("race", world->getStore().get<ESM::Race>().find (player.getRace())->mName);
+            winMgr->setValue ("class", player.getClass().mName);
+
             mUpdatePlayer = false;
 
             MWBase::WindowManager::SkillList majorSkills (5);
@@ -274,11 +280,11 @@ namespace MWMechanics
 
             for (int i=0; i<5; ++i)
             {
-                minorSkills[i] = MWBase::Environment::get().getWorld()->getPlayer().getClass().mData.mSkills[i][0];
-                majorSkills[i] = MWBase::Environment::get().getWorld()->getPlayer().getClass().mData.mSkills[i][1];
+                minorSkills[i] = player.getClass().mData.mSkills[i][0];
+                majorSkills[i] = player.getClass().mData.mSkills[i][1];
             }
 
-            MWBase::Environment::get().getWindowManager()->configureSkills (majorSkills, minorSkills);
+            winMgr->configureSkills (majorSkills, minorSkills);
         }
 
         mActors.update (movement, duration, paused);
@@ -313,7 +319,9 @@ namespace MWMechanics
 
     void MechanicsManager::setPlayerClass (const std::string& id)
     {
-        MWBase::Environment::get().getWorld()->getPlayer().setClass (*MWBase::Environment::get().getWorld()->getStore().classes.find (id));
+        MWBase::Environment::get().getWorld()->getPlayer().setClass (
+            *MWBase::Environment::get().getWorld()->getStore().get<ESM::Class>().find (id)
+        );
         mClassSelected = true;
         buildPlayer();
         mUpdatePlayer = true;

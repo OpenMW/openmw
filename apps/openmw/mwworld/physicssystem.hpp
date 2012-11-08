@@ -20,11 +20,9 @@ namespace MWWorld
             std::vector< std::pair<std::string, Ogre::Vector3> > doPhysicsFixed (const std::vector<std::pair<std::string, Ogre::Vector3> >& actors);
             ///< do physics with fixed timestep - Usage: first call doPhysics with frame dt, then call doPhysicsFixed as often as time steps have passed
 
-            void addObject (const std::string& handle, const std::string& mesh,
-                const Ogre::Quaternion& rotation, float scale, const Ogre::Vector3& position);
+            void addObject (const MWWorld::Ptr& ptr);
 
-            void addActor (const std::string& handle, const std::string& mesh,
-                const Ogre::Vector3& position, float scale, const Ogre::Quaternion& rotation);
+            void addActor (const MWWorld::Ptr& ptr);
 
             void addHeightField (float* heights,
                 int x, int y, float yoffset,
@@ -32,13 +30,14 @@ namespace MWWorld
 
             void removeHeightField (int x, int y);
 
+            // have to keep this as handle for now as unloadcell only knows scenenode names
             void removeObject (const std::string& handle);
 
-            void moveObject (const std::string& handle, Ogre::SceneNode* node);
+            void moveObject (const MWWorld::Ptr& ptr);
 
-            void rotateObject (const std::string& handle, Ogre::SceneNode* node);
+            void rotateObject (const MWWorld::Ptr& ptr);
 
-            void scaleObject (const std::string& handle, Ogre::SceneNode* node);
+            void scaleObject (const MWWorld::Ptr& ptr);
 
             bool toggleCollisionMode();
             
@@ -59,10 +58,6 @@ namespace MWWorld
 
             std::pair<bool, Ogre::Vector3> castRay(float mouseX, float mouseY);
             ///< cast ray from the mouse, return true if it hit something and the first result (in OGRE coordinates)
-
-            void insertObjectPhysics(const MWWorld::Ptr& ptr, std::string model);
-
-            void insertActorPhysics(const MWWorld::Ptr&, std::string model);
 
             OEngine::Physic::PhysicEngine* getEngine();
 
