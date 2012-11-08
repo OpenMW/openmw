@@ -53,7 +53,9 @@ MWDialogue::SelectWrapper::Type MWDialogue::SelectWrapper::getType() const
 
 bool MWDialogue::SelectWrapper::IsInverted() const
 {
-    return false;
+    char type = mSelect.mSelectRule[1];
+
+    return type=='7' || type=='8' || type=='9' || type=='A' || type=='B' || type=='C';
 }
 
 bool MWDialogue::SelectWrapper::selectCompare (int value) const
