@@ -218,6 +218,8 @@ namespace MWGui
             int roll = std::rand()%100 + 1;
             if(roll > x) //trade refused
             {
+                MWBase::Environment::get().getWindowManager()->
+                    messageBox("#{sNotifyMessage9}", std::vector<std::string>());
                 /// \todo adjust npc temporary disposition by iBarterSuccessDisposition or iBarterFailDisposition
                 return ;
             }
