@@ -34,7 +34,7 @@ add_openmw_dir (mwgui
     )
 
 add_openmw_dir (mwdialogue
-    dialoguemanagerimp journalimp journalentry quest topic
+    dialoguemanagerimp journalimp journalentry quest topic filter
     )
 
 add_openmw_dir (mwscript

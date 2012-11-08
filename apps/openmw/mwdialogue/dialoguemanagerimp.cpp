@@ -39,6 +39,8 @@
 #include "../mwclass/npc.hpp"
 #include "../mwmechanics/npcstats.hpp"
 
+#include "filter.hpp"
+
 namespace
 {
     std::string toLower (const std::string& name)
@@ -370,9 +372,7 @@ namespace MWDialogue
                 return true;
 
             case '6': // dead
-{
-std::cout<<"### "<<name<<", "<<select.mI<<", "<<MWBase::Environment::get().getMechanicsManager()->countDeaths (toLower (name))<<std::endl;
-}
+
                  return selectCompare<int,int> (comp,
                     MWBase::Environment::get().getMechanicsManager()->countDeaths (toLower (name)), select.mI);
 
@@ -653,6 +653,8 @@ std::cout<<"### "<<name<<", "<<select.mI<<", "<<MWBase::Environment::get().getMe
         const MWWorld::Store<ESM::Dialogue> &dialogs =
             MWBase::Environment::get().getWorld()->getStore().get<ESM::Dialogue>();
 
+        Filter filter (actor);
+
         MWWorld::Store<ESM::Dialogue>::iterator it = dialogs.begin();
         for (; it != dialogs.end(); ++it)
         {
@@ -662,7 +664,7 @@ std::cout<<"### "<<name<<", "<<select.mI<<", "<<MWBase::Environment::get().getMe
                 for (std::vector<ESM::DialInfo>::const_iterator iter (it->mInfo.begin());
                     iter!=it->mInfo.end(); ++iter)
                 {
-                    if (isMatching (actor, *iter) && functionFilter(mActor,*iter,true))
+                    if (filter (*iter) && isMatching (actor, *iter) && functionFilter(mActor,*iter,true))
                     {
                         if (!iter->mSound.empty())
                         {
@@ -755,6 +757,7 @@ std::cout<<"### "<<name<<", "<<select.mI<<", "<<MWBase::Environment::get().getMe
         const MWWorld::Store<ESM::Dialogue> &dialogs =
             MWBase::Environment::get().getWorld()->getStore().get<ESM::Dialogue>();
 
+        Filter filter (mActor);
 
         MWWorld::Store<ESM::Dialogue>::iterator it = dialogs.begin();
         for (; it != dialogs.end(); ++it)
@@ -764,7 +767,7 @@ std::cout<<"### "<<name<<", "<<select.mI<<", "<<MWBase::Environment::get().getMe
                 for (std::vector<ESM::DialInfo>::const_iterator iter (it->mInfo.begin());
                     iter!=it->mInfo.end(); ++iter)
                 {
-                    if (isMatching (mActor, *iter) && functionFilter(mActor,*iter,true))
+                    if (filter (*iter) && isMatching (mActor, *iter) && functionFilter(mActor,*iter,true))
                     {
                         mActorKnownTopics.push_back(toLower(it->mId));
                         //does the player know the topic?
@@ -841,10 +844,12 @@ std::cout<<"### "<<name<<", "<<select.mI<<", "<<MWBase::Environment::get().getMe
                 ESM::Dialogue ndialogue = mDialogueMap[keyword];
                 if(ndialogue.mType == ESM::Dialogue::Topic)
                 {
+                    Filter filter (mActor);
+                
                     for (std::vector<ESM::DialInfo>::const_iterator iter  = ndialogue.mInfo.begin();
                         iter!=ndialogue.mInfo.end(); ++iter)
                     {
-                        if (isMatching (mActor, *iter) && functionFilter(mActor,*iter,true))
+                        if (filter (*iter) && isMatching (mActor, *iter) && functionFilter(mActor,*iter,true))
                         {
                             std::string text = iter->mResponse;
                             std::string script = iter->mResultScript;
@@ -886,10 +891,12 @@ std::cout<<"### "<<name<<", "<<select.mI<<", "<<MWBase::Environment::get().getMe
                 ESM::Dialogue ndialogue = mDialogueMap[mLastTopic];
                 if(ndialogue.mType == ESM::Dialogue::Topic)
                 {
+                    Filter filter (mActor);
+                
                     for (std::vector<ESM::DialInfo>::const_iterator iter = ndialogue.mInfo.begin();
                         iter!=ndialogue.mInfo.end(); ++iter)
                     {
-                        if (isMatching (mActor, *iter) && functionFilter(mActor,*iter,true))
+                        if (filter (*iter) && isMatching (mActor, *iter) && functionFilter(mActor,*iter,true))
                         {
                             mChoiceMap.clear();
                             mChoice = -1;
