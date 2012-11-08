@@ -65,3 +65,8 @@ bool MWDialogue::SelectWrapper::selectCompare (float value) const
 {
     return selectCompareImp (mSelect, value)!=IsInverted(); // logic XOR
 }
+
+bool MWDialogue::SelectWrapper::selectCompare (bool value) const
+{
+    return selectCompareImp (mSelect, static_cast<int> (value))!=IsInverted(); // logic XOR
+}

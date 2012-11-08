@@ -20,7 +20,8 @@ namespace MWDialogue
             {
                 Type_None,
                 Type_Integer,
-                Type_Numeric
+                Type_Numeric,
+                Type_Boolean
             };
     
         public:
@@ -36,6 +37,8 @@ namespace MWDialogue
             bool selectCompare (int value) const;
 
             bool selectCompare (float value) const;
+            
+            bool selectCompare (bool value) const;
     };
 }
 

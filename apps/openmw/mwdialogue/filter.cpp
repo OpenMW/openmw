@@ -128,6 +128,7 @@ bool MWDialogue::Filter::testSelectStruct (const SelectWrapper& select) const
         case SelectWrapper::Type_None: return true;
         case SelectWrapper::Type_Integer: return select.selectCompare (getSelectStructInteger (select));
         case SelectWrapper::Type_Numeric: return testSelectStructNumeric (select);
+        case SelectWrapper::Type_Boolean: return select.selectCompare (getSelectStructBoolean (select));
     }
     
     return true;
@@ -150,6 +151,16 @@ int MWDialogue::Filter::getSelectStructInteger (const SelectWrapper& select) con
         default:
 
             throw std::runtime_error ("unknown integer select function");
+    }
+}
+
+bool MWDialogue::Filter::getSelectStructBoolean (const SelectWrapper& select) const
+{
+    switch (select.getFunction())
+    {
+        default:
+
+            throw std::runtime_error ("unknown boolean select function");
     }
 }
 

@@ -30,6 +30,8 @@ namespace MWDialogue
             bool testSelectStructNumeric (const SelectWrapper& select) const;
             
             int getSelectStructInteger (const SelectWrapper& select) const;
+            
+            bool getSelectStructBoolean (const SelectWrapper& select) const;
     
         public:
         
