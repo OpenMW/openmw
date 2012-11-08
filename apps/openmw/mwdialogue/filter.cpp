@@ -3,9 +3,11 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
+#include "../mwbase/journal.hpp"
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/player.hpp"
+#include "../mwworld/containerstore.hpp"
 
 #include "../mwmechanics/npcstats.hpp"
 
@@ -148,6 +150,26 @@ int MWDialogue::Filter::getSelectStructInteger (const SelectWrapper& select) con
 {
     switch (select.getFunction())
     {
+        case SelectWrapper::Function_Journal:
+        
+            return MWBase::Environment::get().getJournal()->getJournalIndex (select.getName());
+        
+        case SelectWrapper::Function_Item: 
+        {        
+            MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+            MWWorld::ContainerStore& store = MWWorld::Class::get (player).getContainerStore (player);
+
+            int sum = 0;
+
+            std::string name = select.getName();
+
+            for (MWWorld::ContainerStoreIterator iter (store.begin()); iter!=store.end(); ++iter)
+                if (toLower(iter->getCellRef().mRefID) == name)
+                    sum += iter->getRefData().getCount();
+                    
+            return sum;
+        }
+        
         default:
 
             throw std::runtime_error ("unknown integer select function");

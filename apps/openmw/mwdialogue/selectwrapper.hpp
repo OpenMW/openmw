@@ -13,7 +13,9 @@ namespace MWDialogue
         
             enum Function
             {
-                Function_None
+                Function_None,
+                Function_Journal,
+                Function_Item
             };
             
             enum Type
@@ -39,6 +41,9 @@ namespace MWDialogue
             bool selectCompare (float value) const;
             
             bool selectCompare (bool value) const;
+            
+            std::string getName() const;
+            ///< Return case-smashed name.
     };
 }
 

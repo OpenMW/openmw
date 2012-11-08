@@ -345,32 +345,6 @@ namespace MWDialogue
 
                 return true;
 
-            case '4'://journal
-                if(select.mType==ESM::VT_Int)
-                {
-                    if(!selectCompare<int,int>(comp,MWBase::Environment::get().getJournal()->getJournalIndex(toLower(name)),select.mI)) return false;
-                }
-                else
-                    throw std::runtime_error (
-                    "unsupported variable type in dialogue info select");
-
-                return true;
-
-            case '5'://item
-                {
-                MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
-                MWWorld::ContainerStore& store = MWWorld::Class::get (player).getContainerStore (player);
-
-                int sum = 0;
-
-                for (MWWorld::ContainerStoreIterator iter (store.begin()); iter!=store.end(); ++iter)
-                    if (toLower(iter->getCellRef().mRefID) == toLower(name))
-                        sum += iter->getRefData().getCount();
-                if(!selectCompare<int,int>(comp,sum,select.mI)) return false;
-                }
-
-                return true;
-
             case '6': // dead
 
                  return selectCompare<int,int> (comp,
