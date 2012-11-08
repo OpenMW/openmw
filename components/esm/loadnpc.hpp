@@ -117,6 +117,10 @@ struct NPC
     // Implementation moved to load_impl.cpp
     void load(ESMReader &esm);
     void save(ESMWriter &esm);
+
+    bool isMale() const {
+        return (mFlags & Female) == 0;
+    }
 };
 }
 #endif

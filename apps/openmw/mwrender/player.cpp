@@ -18,6 +18,7 @@ namespace MWRender
     : mCamera(camera),
       mPlayerNode(node),
       mCameraNode(mPlayerNode->createChildSceneNode()),
+      mAnimation(0),
       mFirstPersonView(true),
       mPreviewMode(false),
       mFreeLook(true),
