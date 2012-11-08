@@ -29,7 +29,6 @@ namespace MWMechanics
             bool mUpdatePlayer;
             bool mClassSelected;
             bool mRaceSelected;
-            std::string mSign;
             Actors mActors;
 
             void buildPlayer();

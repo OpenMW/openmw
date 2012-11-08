@@ -252,7 +252,7 @@ namespace MWBase
 
             virtual const ESM::NPC *createRecord(const ESM::NPC &record) = 0;
             ///< Create a new recrod (of type npc) in the ESM store.
-            ///< \note special treatment for 'player' record
+            /// \note special treatment for 'player' record
             /// \return ID, pointer to created record
 
             virtual void playAnimationGroup (const MWWorld::Ptr& ptr, const std::string& groupName,

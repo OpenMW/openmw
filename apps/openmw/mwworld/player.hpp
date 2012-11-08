@@ -21,6 +21,7 @@ namespace MWWorld
     {
         LiveCellRef<ESM::NPC>   mPlayer;
         MWWorld::CellStore      *mCellStore;
+        std::string             mSign;
 
         bool                    mAutoMove;
         int                     mForwardBackward;
@@ -38,6 +39,14 @@ namespace MWWorld
         {
             MWWorld::Ptr ptr (&mPlayer, mCellStore);
             return ptr;
+        }
+
+        void setBirthSign(const std::string &sign) {
+            mSign = sign;
+        }
+
+        const std::string &getBirthSign() const {
+            return mSign;
         }
 
         void setDrawState (MWMechanics::DrawState_ state);

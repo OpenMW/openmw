@@ -252,12 +252,12 @@ void StatsWindow::onFrame ()
     }
 
     setFactions(PCstats.getFactionRanks());
-/*
-    const ESM::BirthSign *sign =
-        MWBase::Environment::get().getWorld()->getPlayer().getBirthsign();
 
-    setBirthSign((sign != 0) ? sign->mId : "");
-*/
+    const std::string &signId =
+        MWBase::Environment::get().getWorld()->getPlayer().getBirthSign();
+
+    setBirthSign(signId);
+
     if (mChanged)
         updateSkillArea();
 }

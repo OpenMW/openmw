@@ -90,10 +90,13 @@ namespace MWMechanics
         }
 
         // birthsign
-        if (!mSign.empty())
+        const std::string &signId =
+            MWBase::Environment::get().getWorld()->getPlayer().getBirthSign();
+
+        if (!signId.empty())
         {
             const ESM::BirthSign *sign =
-                esmStore.get<ESM::BirthSign>().find(mSign);
+                esmStore.get<ESM::BirthSign>().find(signId);
 
             for (std::vector<std::string>::const_iterator iter (sign->mPowers.mList.begin());
                 iter!=sign->mPowers.mList.end(); ++iter)
@@ -338,7 +341,7 @@ namespace MWMechanics
 
     void MechanicsManager::setPlayerBirthsign (const std::string& id)
     {
-        mSign = id;
+        MWBase::Environment::get().getWorld()->getPlayer().setBirthSign(id);
         buildPlayer();
         mUpdatePlayer = true;
     }
