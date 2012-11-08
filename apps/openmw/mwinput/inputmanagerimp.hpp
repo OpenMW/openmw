@@ -42,8 +42,8 @@ namespace OIS
     class InputManager;
 }
 
-#include <OIS/OISKeyboard.h>
-#include <OIS/OISMouse.h>
+#include <OISKeyboard.h>
+#include <OISMouse.h>
 
 #include <extern/oics/ICSChannelListener.h>
 #include <extern/oics/ICSInputControlSystem.h>

@@ -5,14 +5,13 @@
 
 #include <components/esm/loadskil.hpp>
 
-#include <components/esm_store/store.hpp>
-
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/npcstats.hpp"
 
+#include "esmstore.hpp"
 #include "class.hpp"
 
 namespace MWWorld

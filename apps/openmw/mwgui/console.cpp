@@ -4,10 +4,9 @@
 #include <algorithm>
 #include <fstream>
 
-#include <components/esm_store/reclists.hpp>
-#include <components/esm_store/store.hpp>
-
 #include <components/compiler/exception.hpp>
+
+#include "../mwworld/esmstore.hpp"
 
 #include "../mwscript/extensions.hpp"
 
@@ -93,12 +92,12 @@ namespace MWGui
             scanner.listKeywords (mNames);
 
             // identifier
-            const ESMS::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
+            const MWWorld::ESMStore& store =
+                MWBase::Environment::get().getWorld()->getStore();
 
-            for (ESMS::RecListList::const_iterator iter (store.recLists.begin());
-                iter!=store.recLists.end(); ++iter)
+            for (MWWorld::ESMStore::iterator it = store.begin(); it != store.end(); ++it)
             {
-                iter->second->listIdentifier (mNames);
+                it->second->listIdentifier (mNames);
             }
 
             // sort

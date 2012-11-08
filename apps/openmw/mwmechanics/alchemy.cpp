@@ -6,17 +6,18 @@
 
 #include <algorithm>
 #include <stdexcept>
+#include <map>
 
 #include <components/esm/loadskil.hpp>
 #include <components/esm/loadappa.hpp>
 #include <components/esm/loadgmst.hpp>
 #include <components/esm/loadmgef.hpp>
 
-#include <components/esm_store/store.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 
+#include "../mwworld/esmstore.hpp"
 #include "../mwworld/containerstore.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/cellstore.hpp"
@@ -28,7 +29,7 @@
 
 std::set<MWMechanics::EffectKey> MWMechanics::Alchemy::listEffects() const
 {
-    std::set<EffectKey> effects;
+    std::map<EffectKey, int> effects;
     
     for (TIngredientsIterator iter (mIngredients.begin()); iter!=mIngredients.end(); ++iter)
     {
@@ -37,58 +38,24 @@ std::set<MWMechanics::EffectKey> MWMechanics::Alchemy::listEffects() const
             const MWWorld::LiveCellRef<ESM::Ingredient> *ingredient = iter->get<ESM::Ingredient>();
             
             for (int i=0; i<4; ++i)
-                if (ingredient->base->mData.mEffectID[i]!=-1)
-                    effects.insert (EffectKey (
-                        ingredient->base->mData.mEffectID[i], ingredient->base->mData.mSkills[i]!=-1 ?
-                        ingredient->base->mData.mSkills[i] : ingredient->base->mData.mAttributes[i]));
+                if (ingredient->mBase->mData.mEffectID[i]!=-1)
+                {
+                    EffectKey key (
+                        ingredient->mBase->mData.mEffectID[i], ingredient->mBase->mData.mSkills[i]!=-1 ?
+                        ingredient->mBase->mData.mSkills[i] : ingredient->mBase->mData.mAttributes[i]);
+
+                    ++effects[key];
+                }
         }
     }
     
-    return effects;
-}
-
-void MWMechanics::Alchemy::filterEffects (std::set<EffectKey>& effects) const
-{
-    std::set<EffectKey>::iterator iter = effects.begin();
+    std::set<EffectKey> effects2;
     
-    while (iter!=effects.end())
-    {
-        bool remove = false;
-        
-        const EffectKey& key = *iter;
-        
-        { // dodge pointless g++ warning
-            for (TIngredientsIterator iter (mIngredients.begin()); iter!=mIngredients.end(); ++iter)
-            {
-                bool found = false;
-
-                if (iter->isEmpty())
-                    continue;
-
-                const MWWorld::LiveCellRef<ESM::Ingredient> *ingredient = iter->get<ESM::Ingredient>();       
-
-                for (int i=0; i<4; ++i)
-                    if (key.mId==ingredient->base->mData.mEffectID[i] &&
-                        (key.mArg==ingredient->base->mData.mSkills[i] ||
-                        key.mArg==ingredient->base->mData.mAttributes[i]))
-                    {
-                        found = true;
-                        break;
-                    }
-            
-                if (!found)
-                {
-                    remove = true;
-                    break;
-                }
-            }
-        }       
-        
-        if (remove)
-            effects.erase (iter++);
-        else
-            ++iter;
-    }
+    for (std::map<EffectKey, int>::const_iterator iter (effects.begin()); iter!=effects.end(); ++iter)
+        if (iter->second>1)
+            effects2.insert (iter->first);
+    
+    return effects2;
 }
 
 void MWMechanics::Alchemy::applyTools (int flags, float& value) const
@@ -110,9 +77,9 @@ void MWMechanics::Alchemy::applyTools (int flags, float& value) const
     else
         return;
 
-    float toolQuality = setup==1 || setup==2 ? mTools[tool].get<ESM::Apparatus>()->base->mData.mQuality : 0;
+    float toolQuality = setup==1 || setup==2 ? mTools[tool].get<ESM::Apparatus>()->mBase->mData.mQuality : 0;
     float calcinatorQuality = setup==1 || setup==3 ?
-        mTools[ESM::Apparatus::Calcinator].get<ESM::Apparatus>()->base->mData.mQuality : 0;
+        mTools[ESM::Apparatus::Calcinator].get<ESM::Apparatus>()->mBase->mData.mQuality : 0;
 
     float quality = 1;
     
@@ -159,35 +126,34 @@ void MWMechanics::Alchemy::updateEffects()
 
     // find effects
     std::set<EffectKey> effects (listEffects());
-    filterEffects (effects);
 
     // general alchemy factor
     float x = getChance();
 
-    x *= mTools[ESM::Apparatus::MortarPestle].get<ESM::Apparatus>()->base->mData.mQuality;
-    x *= MWBase::Environment::get().getWorld()->getStore().gameSettings.find ("fPotionStrengthMult")->getFloat();
+    x *= mTools[ESM::Apparatus::MortarPestle].get<ESM::Apparatus>()->mBase->mData.mQuality;
+    x *= MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find ("fPotionStrengthMult")->getFloat();
 
     // value
     mValue = static_cast<int> (
-        x * MWBase::Environment::get().getWorld()->getStore().gameSettings.find ("iAlchemyMod")->getFloat());
+        x * MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find ("iAlchemyMod")->getFloat());
 
     // build quantified effect list
     for (std::set<EffectKey>::const_iterator iter (effects.begin()); iter!=effects.end(); ++iter)
     {
         const ESM::MagicEffect *magicEffect =
-            MWBase::Environment::get().getWorld()->getStore().magicEffects.find (iter->mId);         
+            MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find (iter->mId);         
         
         if (magicEffect->mData.mBaseCost<=0)
             throw std::runtime_error ("invalid base cost for magic effect " + iter->mId);
         
         float fPotionT1MagMul =
-            MWBase::Environment::get().getWorld()->getStore().gameSettings.find ("fPotionT1MagMult")->getFloat();
+            MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find ("fPotionT1MagMult")->getFloat();
 
         if (fPotionT1MagMul<=0)
             throw std::runtime_error ("invalid gmst: fPotionT1MagMul");
         
         float fPotionT1DurMult =
-            MWBase::Environment::get().getWorld()->getStore().gameSettings.find ("fPotionT1DurMult")->getFloat();
+            MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find ("fPotionT1DurMult")->getFloat();
 
         if (fPotionT1DurMult<=0)
             throw std::runtime_error ("invalid gmst: fPotionT1DurMult");
@@ -226,18 +192,20 @@ void MWMechanics::Alchemy::updateEffects()
 
 const ESM::Potion *MWMechanics::Alchemy::getRecord() const
 {
-    for (ESMS::RecListWithIDT<ESM::Potion>::MapType::const_iterator iter (
-        MWBase::Environment::get().getWorld()->getStore().potions.list.begin());
-        iter!=MWBase::Environment::get().getWorld()->getStore().potions.list.end(); ++iter)
+    const MWWorld::Store<ESM::Potion> &potions =
+        MWBase::Environment::get().getWorld()->getStore().get<ESM::Potion>();
+
+    MWWorld::Store<ESM::Potion>::iterator iter = potions.begin();
+    for (; iter != potions.end(); ++iter)
     {
-        if (iter->second.mEffects.mList.size()!=mEffects.size())
+        if (iter->mEffects.mList.size() != mEffects.size())
             continue;
          
         bool mismatch = false; 
 
-        for (int i=0; i<static_cast<int> (iter->second.mEffects.mList.size()); ++iter)
+        for (int i=0; i<static_cast<int> (iter->mEffects.mList.size()); ++iter)
         {
-            const ESM::ENAMstruct& first = iter->second.mEffects.mList[i];
+            const ESM::ENAMstruct& first = iter->mEffects.mList[i];
             const ESM::ENAMstruct& second = mEffects[i];
                 
             if (first.mEffectID!=second.mEffectID ||
@@ -255,7 +223,7 @@ const ESM::Potion *MWMechanics::Alchemy::getRecord() const
         }
         
         if (!mismatch)
-            return &iter->second;
+            return &(*iter);
     }
     
     return 0;
@@ -292,7 +260,7 @@ void MWMechanics::Alchemy::addPotion (const std::string& name)
         
         for (TIngredientsIterator iter (beginIngredients()); iter!=endIngredients(); ++iter)
             if (!iter->isEmpty())
-                newRecord.mData.mWeight += iter->get<ESM::Ingredient>()->base->mData.mWeight;
+                newRecord.mData.mWeight += iter->get<ESM::Ingredient>()->mBase->mData.mWeight;
             
         newRecord.mData.mWeight /= countIngredients();
         
@@ -311,7 +279,7 @@ void MWMechanics::Alchemy::addPotion (const std::string& name)
         
         newRecord.mEffects.mList = mEffects;
         
-        record = MWBase::Environment::get().getWorld()->createRecord (newRecord).second;
+        record = MWBase::Environment::get().getWorld()->createRecord (newRecord);
     }
     
     MWWorld::ManualRef ref (MWBase::Environment::get().getWorld()->getStore(), record->mId);
@@ -366,13 +334,13 @@ void MWMechanics::Alchemy::setAlchemist (const MWWorld::Ptr& npc)
     {    
         MWWorld::LiveCellRef<ESM::Apparatus>* ref = iter->get<ESM::Apparatus>();
     
-        int type = ref->base->mData.mType;
+        int type = ref->mBase->mData.mType;
     
         if (type<0 || type>=static_cast<int> (mTools.size()))
             throw std::runtime_error ("invalid apparatus type");
             
         if (!mTools[type].isEmpty())
-            if (ref->base->mData.mQuality<=mTools[type].get<ESM::Apparatus>()->base->mData.mQuality)
+            if (ref->mBase->mData.mQuality<=mTools[type].get<ESM::Apparatus>()->mBase->mData.mQuality)
                 continue;
         
         mTools[type] = *iter;        

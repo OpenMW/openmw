@@ -50,8 +50,11 @@ namespace MWGui
 
     void SpellBuyingWindow::addSpell(const std::string& spellId)
     {
-        const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().spells.find(spellId);
-        int price = spell->mData.mCost*MWBase::Environment::get().getWorld()->getStore().gameSettings.find("fSpellValueMult")->getFloat();
+        const MWWorld::ESMStore &store =
+            MWBase::Environment::get().getWorld()->getStore();
+
+        const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find(spellId);
+        int price = spell->mData.mCost*store.get<ESM::GameSetting>().find("fSpellValueMult")->getFloat();
         price = MWBase::Environment::get().getMechanicsManager()->barterOffer(mPtr,price,true);
 
         MyGUI::Button* toAdd =
@@ -99,7 +102,8 @@ namespace MWGui
          
         for (MWMechanics::Spells::TIterator iter = merchantSpells.begin(); iter!=merchantSpells.end(); ++iter)
         {
-            const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().spells.find (*iter);
+            const ESM::Spell* spell =
+                MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find (*iter);
             
             if (spell->mData.mType!=ESM::Spell::ST_Spell)
                 continue; // don't try to sell diseases, curses or powers

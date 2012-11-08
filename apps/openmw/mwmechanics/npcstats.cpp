@@ -10,7 +10,7 @@
 #include <components/esm/loadclas.hpp>
 #include <components/esm/loadgmst.hpp>
 
-#include <components/esm_store/store.hpp>
+#include "../mwworld/esmstore.hpp"
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -91,7 +91,8 @@ float MWMechanics::NpcStats::getSkillGain (int skillIndex, const ESM::Class& cla
     if (level<0)
         level = static_cast<int> (getSkill (skillIndex).getBase());
 
-    const ESM::Skill *skill = MWBase::Environment::get().getWorld()->getStore().skills.find (skillIndex);
+    const ESM::Skill *skill =
+        MWBase::Environment::get().getWorld()->getStore().get<ESM::Skill>().find (skillIndex);
 
     float skillFactor = 1;
 
@@ -106,14 +107,15 @@ float MWMechanics::NpcStats::getSkillGain (int skillIndex, const ESM::Class& cla
             throw std::runtime_error ("invalid skill gain factor");
     }
 
-    float typeFactor =
-        MWBase::Environment::get().getWorld()->getStore().gameSettings.find ("fMiscSkillBonus")->getFloat();
+    const MWWorld::Store<ESM::GameSetting> &gmst =
+        MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+
+    float typeFactor = gmst.find ("fMiscSkillBonus")->getFloat();
 
     for (int i=0; i<5; ++i)
         if (class_.mData.mSkills[i][0]==skillIndex)
         {
-            typeFactor =
-                MWBase::Environment::get().getWorld()->getStore().gameSettings.find ("fMinorSkillBonus")->getFloat();
+            typeFactor = gmst.find ("fMinorSkillBonus")->getFloat();
 
             break;
         }
@@ -121,8 +123,7 @@ float MWMechanics::NpcStats::getSkillGain (int skillIndex, const ESM::Class& cla
     for (int i=0; i<5; ++i)
         if (class_.mData.mSkills[i][1]==skillIndex)
         {
-            typeFactor =
-                MWBase::Environment::get().getWorld()->getStore().gameSettings.find ("fMajorSkillBonus")->getFloat();
+            typeFactor = gmst.find ("fMajorSkillBonus")->getFloat();
 
             break;
         }
@@ -134,8 +135,7 @@ float MWMechanics::NpcStats::getSkillGain (int skillIndex, const ESM::Class& cla
 
     if (skill->mData.mSpecialization==class_.mData.mSpecialization)
     {
-        specialisationFactor =
-            MWBase::Environment::get().getWorld()->getStore().gameSettings.find ("fSpecialSkillBonus")->getFloat();
+        specialisationFactor = gmst.find ("fSpecialSkillBonus")->getFloat();
 
         if (specialisationFactor<=0)
             throw std::runtime_error ("invalid skill specialisation factor");
@@ -188,7 +188,8 @@ void MWMechanics::NpcStats::increaseSkill(int skillIndex, const ESM::Class &clas
     mLevelProgress += levelProgress;
 
     // check the attribute this skill belongs to
-    const ESM::Skill* skill = MWBase::Environment::get().getWorld ()->getStore ().skills.find(skillIndex);
+    const ESM::Skill* skill =
+        MWBase::Environment::get().getWorld ()->getStore ().get<ESM::Skill>().find(skillIndex);
     ++mSkillIncreases[skill->mData.mAttribute];
 
     // Play sound & skill progress notification

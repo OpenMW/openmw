@@ -1,11 +1,10 @@
 #include "cells.hpp"
 
-#include <components/esm_store/store.hpp>
-
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 
 #include "class.hpp"
+#include "esmstore.hpp"
 #include "containerstore.hpp"
 
 MWWorld::Ptr::CellStore *MWWorld::Cells::getCellStore (const ESM::Cell *cell)
@@ -24,12 +23,12 @@ MWWorld::Ptr::CellStore *MWWorld::Cells::getCellStore (const ESM::Cell *cell)
     else
     {
         std::map<std::pair<int, int>, Ptr::CellStore>::iterator result =
-            mExteriors.find (std::make_pair (cell->mData.mX, cell->mData.mY));
+            mExteriors.find (std::make_pair (cell->getGridX(), cell->getGridY()));
 
         if (result==mExteriors.end())
         {
             result = mExteriors.insert (std::make_pair (
-                std::make_pair (cell->mData.mX, cell->mData.mY), Ptr::CellStore (cell))).first;
+                std::make_pair (cell->getGridX(), cell->getGridY()), Ptr::CellStore (cell))).first;
 
         }
 
@@ -40,33 +39,33 @@ MWWorld::Ptr::CellStore *MWWorld::Cells::getCellStore (const ESM::Cell *cell)
 void MWWorld::Cells::fillContainers (Ptr::CellStore& cellStore)
 {
     for (CellRefList<ESM::Container>::List::iterator iter (
-        cellStore.containers.list.begin());
-        iter!=cellStore.containers.list.end(); ++iter)
+        cellStore.mContainers.mList.begin());
+        iter!=cellStore.mContainers.mList.end(); ++iter)
     {
         Ptr container (&*iter, &cellStore);
 
         Class::get (container).getContainerStore (container).fill (
-            iter->base->mInventory, mStore);
+            iter->mBase->mInventory, mStore);
     }
 
     for (CellRefList<ESM::Creature>::List::iterator iter (
-        cellStore.creatures.list.begin());
-        iter!=cellStore.creatures.list.end(); ++iter)
+        cellStore.mCreatures.mList.begin());
+        iter!=cellStore.mCreatures.mList.end(); ++iter)
     {
         Ptr container (&*iter, &cellStore);
 
         Class::get (container).getContainerStore (container).fill (
-            iter->base->mInventory, mStore);
+            iter->mBase->mInventory, mStore);
     }
 
     for (CellRefList<ESM::NPC>::List::iterator iter (
-        cellStore.npcs.list.begin());
-        iter!=cellStore.npcs.list.end(); ++iter)
+        cellStore.mNpcs.mList.begin());
+        iter!=cellStore.mNpcs.mList.end(); ++iter)
     {
         Ptr container (&*iter, &cellStore);
 
         Class::get (container).getContainerStore (container).fill (
-            iter->base->mInventory, mStore);
+            iter->mBase->mInventory, mStore);
     }
 }
 
@@ -85,7 +84,7 @@ MWWorld::Ptr MWWorld::Cells::getPtrAndCache (const std::string& name, Ptr::CellS
     return ptr;
 }
 
-MWWorld::Cells::Cells (const ESMS::ESMStore& store, ESM::ESMReader& reader)
+MWWorld::Cells::Cells (const MWWorld::ESMStore& store, ESM::ESMReader& reader)
 : mStore (store), mReader (reader),
   mIdCache (20, std::pair<std::string, Ptr::CellStore *> ("", (Ptr::CellStore*)0)), /// \todo make cache size configurable
   mIdCacheIndex (0)
@@ -98,7 +97,7 @@ MWWorld::Ptr::CellStore *MWWorld::Cells::getExterior (int x, int y)
 
     if (result==mExteriors.end())
     {
-        const ESM::Cell *cell = mStore.cells.searchExt (x, y);
+        const ESM::Cell *cell = mStore.get<ESM::Cell>().search(x, y);
 
         if (!cell)
         {
@@ -133,7 +132,7 @@ MWWorld::Ptr::CellStore *MWWorld::Cells::getInterior (const std::string& name)
 
     if (result==mInteriors.end())
     {
-        const ESM::Cell *cell = mStore.cells.findInt (name);
+        const ESM::Cell *cell = mStore.get<ESM::Cell>().find(name);
 
         result = mInteriors.insert (std::make_pair (name, Ptr::CellStore (cell))).first;
     }
@@ -169,64 +168,64 @@ MWWorld::Ptr MWWorld::Cells::getPtr (const std::string& name, Ptr::CellStore& ce
     }
     MWWorld::Ptr ptr;
 
-    if (MWWorld::LiveCellRef<ESM::Activator> *ref = cell.activators.find (name))
+    if (MWWorld::LiveCellRef<ESM::Activator> *ref = cell.mActivators.find (name))
         ptr = Ptr (ref, &cell);
 
-    if (MWWorld::LiveCellRef<ESM::Potion> *ref = cell.potions.find (name))
+    if (MWWorld::LiveCellRef<ESM::Potion> *ref = cell.mPotions.find (name))
         ptr = Ptr (ref, &cell);
 
-    if (MWWorld::LiveCellRef<ESM::Apparatus> *ref = cell.appas.find (name))
+    if (MWWorld::LiveCellRef<ESM::Apparatus> *ref = cell.mAppas.find (name))
         ptr = Ptr (ref, &cell);
 
-    if (MWWorld::LiveCellRef<ESM::Armor> *ref = cell.armors.find (name))
+    if (MWWorld::LiveCellRef<ESM::Armor> *ref = cell.mArmors.find (name))
         ptr = Ptr (ref, &cell);
 
-    if (MWWorld::LiveCellRef<ESM::Book> *ref = cell.books.find (name))
+    if (MWWorld::LiveCellRef<ESM::Book> *ref = cell.mBooks.find (name))
         ptr = Ptr (ref, &cell);
 
-    if (MWWorld::LiveCellRef<ESM::Clothing> *ref = cell.clothes.find (name))
+    if (MWWorld::LiveCellRef<ESM::Clothing> *ref = cell.mClothes.find (name))
         ptr = Ptr (ref, &cell);
 
-    if (MWWorld::LiveCellRef<ESM::Container> *ref = cell.containers.find (name))
+    if (MWWorld::LiveCellRef<ESM::Container> *ref = cell.mContainers.find (name))
         ptr = Ptr (ref, &cell);
 
-    if (MWWorld::LiveCellRef<ESM::Creature> *ref = cell.creatures.find (name))
+    if (MWWorld::LiveCellRef<ESM::Creature> *ref = cell.mCreatures.find (name))
         ptr = Ptr (ref, &cell);
 
-    if (MWWorld::LiveCellRef<ESM::Door> *ref = cell.doors.find (name))
+    if (MWWorld::LiveCellRef<ESM::Door> *ref = cell.mDoors.find (name))
         ptr = Ptr (ref, &cell);
 
-    if (MWWorld::LiveCellRef<ESM::Ingredient> *ref = cell.ingreds.find (name))
+    if (MWWorld::LiveCellRef<ESM::Ingredient> *ref = cell.mIngreds.find (name))
         ptr = Ptr (ref, &cell);
 
-    if (MWWorld::LiveCellRef<ESM::CreatureLevList> *ref = cell.creatureLists.find (name))
+    if (MWWorld::LiveCellRef<ESM::CreatureLevList> *ref = cell.mCreatureLists.find (name))
         ptr = Ptr (ref, &cell);
 
-    if (MWWorld::LiveCellRef<ESM::ItemLevList> *ref = cell.itemLists.find (name))
+    if (MWWorld::LiveCellRef<ESM::ItemLevList> *ref = cell.mItemLists.find (name))
         ptr = Ptr (ref, &cell);
 
-    if (MWWorld::LiveCellRef<ESM::Light> *ref = cell.lights.find (name))
+    if (MWWorld::LiveCellRef<ESM::Light> *ref = cell.mLights.find (name))
         ptr = Ptr (ref, &cell);
 
-    if (MWWorld::LiveCellRef<ESM::Tool> *ref = cell.lockpicks.find (name))
+    if (MWWorld::LiveCellRef<ESM::Tool> *ref = cell.mLockpicks.find (name))
         ptr = Ptr (ref, &cell);
 
-    if (MWWorld::LiveCellRef<ESM::Miscellaneous> *ref = cell.miscItems.find (name))
+    if (MWWorld::LiveCellRef<ESM::Miscellaneous> *ref = cell.mMiscItems.find (name))
         ptr = Ptr (ref, &cell);
 
-    if (MWWorld::LiveCellRef<ESM::NPC> *ref = cell.npcs.find (name))
+    if (MWWorld::LiveCellRef<ESM::NPC> *ref = cell.mNpcs.find (name))
         ptr = Ptr (ref, &cell);
 
-    if (MWWorld::LiveCellRef<ESM::Probe> *ref = cell.probes.find (name))
+    if (MWWorld::LiveCellRef<ESM::Probe> *ref = cell.mProbes.find (name))
         ptr = Ptr (ref, &cell);
 
-    if (MWWorld::LiveCellRef<ESM::Repair> *ref = cell.repairs.find (name))
+    if (MWWorld::LiveCellRef<ESM::Repair> *ref = cell.mRepairs.find (name))
         ptr = Ptr (ref, &cell);
 
-    if (MWWorld::LiveCellRef<ESM::Static> *ref = cell.statics.find (name))
+    if (MWWorld::LiveCellRef<ESM::Static> *ref = cell.mStatics.find (name))
         ptr = Ptr (ref, &cell);
 
-    if (MWWorld::LiveCellRef<ESM::Weapon> *ref = cell.weapons.find (name))
+    if (MWWorld::LiveCellRef<ESM::Weapon> *ref = cell.mWeapons.find (name))
         ptr = Ptr (ref, &cell);
 
     if (!ptr.isEmpty() && ptr.getRefData().getCount() > 0) {
@@ -265,10 +264,12 @@ MWWorld::Ptr MWWorld::Cells::getPtr (const std::string& name)
     }
 
     // Now try the other cells
-    for (ESMS::CellList::IntCells::const_iterator iter = mStore.cells.intCells.begin();
-        iter!=mStore.cells.intCells.end(); ++iter)
+    const MWWorld::Store<ESM::Cell> &cells = mStore.get<ESM::Cell>();
+    MWWorld::Store<ESM::Cell>::iterator iter;
+
+    for (iter = cells.intBegin(); iter != cells.intEnd(); ++iter)
     {
-        Ptr::CellStore *cellStore = getCellStore (iter->second);
+        Ptr::CellStore *cellStore = getCellStore (&(*iter));
 
         Ptr ptr = getPtrAndCache (name, *cellStore);
 
@@ -276,10 +277,9 @@ MWWorld::Ptr MWWorld::Cells::getPtr (const std::string& name)
             return ptr;
     }
 
-    for (ESMS::CellList::ExtCells::const_iterator iter = mStore.cells.extCells.begin();
-        iter!=mStore.cells.extCells.end(); ++iter)
+    for (iter = cells.extBegin(); iter != cells.extEnd(); ++iter)
     {
-        Ptr::CellStore *cellStore = getCellStore (iter->second);
+        Ptr::CellStore *cellStore = getCellStore (&(*iter));
 
         Ptr ptr = getPtrAndCache (name, *cellStore);
 

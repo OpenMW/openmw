@@ -7,7 +7,7 @@
 
 #include <components/esm/loadnpc.hpp>
 
-#include <components/esm_store/store.hpp>
+#include "../mwworld/esmstore.hpp"
 
 #include <components/compiler/extensions.hpp>
 
@@ -17,6 +17,7 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/dialoguemanager.hpp"
+#include "../mwbase/mechanicsmanager.hpp"
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/player.hpp"
@@ -155,7 +156,7 @@ namespace MWScript
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
                     MWWorld::Ptr ptr = R()(runtime);
-                    Interpreter::Type_Integer value;
+                    Interpreter::Type_Float value;
 
                     if (mIndex==0 && MWWorld::Class::get (ptr).hasItemHealth (ptr))
                     {
@@ -185,13 +186,15 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    Interpreter::Type_Integer value = runtime[0].mInteger;
+                    Interpreter::Type_Float value = runtime[0].mFloat;
                     runtime.pop();
 
-                    MWWorld::Class::get(ptr)
-                        .getCreatureStats(ptr)
-                        .getDynamic(mIndex)
-                        .setModified(value, 0);
+                    MWMechanics::DynamicStat<float> stat (MWWorld::Class::get (ptr).getCreatureStats (ptr)
+                        .getDynamic (mIndex));
+
+                    stat.setModified (value, 0);
+                    
+                    MWWorld::Class::get (ptr).getCreatureStats (ptr).setDynamic (mIndex, stat);
                 }
         };
 
@@ -208,17 +211,21 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    Interpreter::Type_Integer diff = runtime[0].mInteger;
+                    Interpreter::Type_Float diff = runtime[0].mFloat;
                     runtime.pop();
 
                     MWMechanics::CreatureStats& stats = MWWorld::Class::get (ptr).getCreatureStats (ptr);
 
-                    Interpreter::Type_Integer current = stats.getDynamic(mIndex).getCurrent();
+                    Interpreter::Type_Float current = stats.getDynamic(mIndex).getCurrent();
 
-                    stats.getDynamic(mIndex).setModified(
-                        diff + stats.getDynamic(mIndex).getModified(), 0);
+                    MWMechanics::DynamicStat<float> stat (MWWorld::Class::get (ptr).getCreatureStats (ptr)
+                        .getDynamic (mIndex));
 
-                    stats.getDynamic(mIndex).setCurrent(diff + current);
+                    stat.setModified (diff + stat.getModified(), 0);
+
+                    stat.setCurrent (diff + current);
+
+                    MWWorld::Class::get (ptr).getCreatureStats (ptr).setDynamic (mIndex, stat);
                 }
         };
 
@@ -235,14 +242,19 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    Interpreter::Type_Integer diff = runtime[0].mInteger;
+                    Interpreter::Type_Float diff = runtime[0].mFloat;
                     runtime.pop();
 
                     MWMechanics::CreatureStats& stats = MWWorld::Class::get (ptr).getCreatureStats (ptr);
 
-                    Interpreter::Type_Integer current = stats.getDynamic(mIndex).getCurrent();
+                    Interpreter::Type_Float current = stats.getDynamic(mIndex).getCurrent();
 
-                    stats.getDynamic(mIndex).setCurrent (diff + current);
+                    MWMechanics::DynamicStat<float> stat (MWWorld::Class::get (ptr).getCreatureStats (ptr)
+                        .getDynamic (mIndex));
+
+                    stat.setCurrent (diff + current);
+
+                    MWWorld::Class::get (ptr).getCreatureStats (ptr).setDynamic (mIndex, stat);
                 }
         };
 
@@ -316,7 +328,7 @@ namespace MWScript
                     assert (ref);
 
                     const ESM::Class& class_ =
-                        *MWBase::Environment::get().getWorld()->getStore().classes.find (ref->base->mClass);
+                        *MWBase::Environment::get().getWorld()->getStore().get<ESM::Class>().find (ref->mBase->mClass);
 
                     float level = 0;
                     float progress = std::modf (stats.getSkill (mIndex).getBase(), &level);
@@ -378,7 +390,7 @@ namespace MWScript
                     runtime.pop();
 
                     // make sure a spell with this ID actually exists.
-                    MWBase::Environment::get().getWorld()->getStore().spells.find (id);
+                    MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find (id);
 
                     MWWorld::Class::get (ptr).getCreatureStats (ptr).getSpells().add (id);
                 }
@@ -580,6 +592,17 @@ namespace MWScript
                     /// \todo modify disposition towards the player
                 }
         };
+        
+        class OpGetDeadCount : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    std::string id = runtime.getStringLiteral (runtime[0].mInteger);
+                    runtime[0].mInteger = MWBase::Environment::get().getMechanicsManager()->countDeaths (id);
+                }
+        };        
 
 
         const int numberOfAttributes = 8;
@@ -632,6 +655,8 @@ namespace MWScript
         const int opcodeGetLevelExplicit = 0x200018d;
         const int opcodeSetLevel = 0x200018e;
         const int opcodeSetLevelExplicit = 0x200018f;
+        
+        const int opcodeGetDeadCount = 0x20001a3;
 
         void registerExtensions (Compiler::Extensions& extensions)
         {
@@ -676,16 +701,16 @@ namespace MWScript
 
             for (int i=0; i<numberOfDynamics; ++i)
             {
-                extensions.registerFunction (get + dynamics[i], 'l', "",
+                extensions.registerFunction (get + dynamics[i], 'f', "",
                     opcodeGetDynamic+i, opcodeGetDynamicExplicit+i);
 
-                extensions.registerInstruction (set + dynamics[i], "l",
+                extensions.registerInstruction (set + dynamics[i], "f",
                     opcodeSetDynamic+i, opcodeSetDynamicExplicit+i);
 
-                extensions.registerInstruction (mod + dynamics[i], "l",
+                extensions.registerInstruction (mod + dynamics[i], "f",
                     opcodeModDynamic+i, opcodeModDynamicExplicit+i);
 
-                extensions.registerInstruction (modCurrent + dynamics[i], "l",
+                extensions.registerInstruction (modCurrent + dynamics[i], "f",
                     opcodeModCurrentDynamic+i, opcodeModCurrentDynamicExplicit+i);
 
                 extensions.registerFunction (get + dynamics[i] + getRatio, 'f', "",
@@ -718,6 +743,8 @@ namespace MWScript
 
             extensions.registerInstruction("setlevel", "l", opcodeSetLevel, opcodeSetLevelExplicit);
             extensions.registerFunction("getlevel", 'l', "", opcodeGetLevel, opcodeGetLevelExplicit);
+
+            extensions.registerFunction("getdeadcount", 'l', "c", opcodeGetDeadCount);
         }
 
         void installOpcodes (Interpreter::Interpreter& interpreter)
@@ -795,6 +822,7 @@ namespace MWScript
             interpreter.installSegment5 (opcodeSetLevel, new OpSetLevel<ImplicitRef>);
             interpreter.installSegment5 (opcodeSetLevelExplicit, new OpSetLevel<ExplicitRef>);
 
+            interpreter.installSegment5 (opcodeGetDeadCount, new OpGetDeadCount);
         }
     }
 }

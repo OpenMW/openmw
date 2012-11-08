@@ -13,7 +13,7 @@ class ESMWriter;
 
 struct BirthSign
 {
-    std::string mName, mDescription, mTexture;
+    std::string mId, mName, mDescription, mTexture;
 
     // List of powers and abilities that come with this birth sign.
     SpellList mPowers;

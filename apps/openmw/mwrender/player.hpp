@@ -48,16 +48,6 @@ namespace MWRender
         /// Updates sound manager listener data
         void updateListener();
 
-        void rotateCamera(const Ogre::Vector3 &rot, bool adjust);
-
-        float getYaw();
-        void setYaw(float angle);
-
-        float getPitch();
-        void setPitch(float angle);
-
-        void compensateYaw(float diff);
-
         void setLowHeight(bool low = true);
 
     public:
@@ -69,7 +59,17 @@ namespace MWRender
         /// \param rot Rotation angles in radians
         /// \return true if player object needs to bo rotated physically
         bool rotate(const Ogre::Vector3 &rot, bool adjust);
+        
+        void rotateCamera(const Ogre::Vector3 &rot, bool adjust);
 
+        float getYaw();
+        void setYaw(float angle);
+
+        float getPitch();
+        void setPitch(float angle);
+
+        void compensateYaw(float diff);
+        
         std::string getHandle() const;
 
         /// Attach camera to object

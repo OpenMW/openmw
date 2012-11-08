@@ -1,7 +1,7 @@
 
 #include "mechanicsmanagerimp.hpp"
 
-#include <components/esm_store/store.hpp>
+#include "../mwworld/esmstore.hpp"
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -19,7 +19,7 @@ namespace MWMechanics
         MWMechanics::CreatureStats& creatureStats = MWWorld::Class::get (ptr).getCreatureStats (ptr);
         MWMechanics::NpcStats& npcStats = MWWorld::Class::get (ptr).getNpcStats (ptr);
 
-        const ESM::NPC *player = ptr.get<ESM::NPC>()->base;
+        const ESM::NPC *player = ptr.get<ESM::NPC>()->mBase;
 
         // reset
         creatureStats.setLevel(player->mNpdt52.mLevel);
@@ -37,15 +37,17 @@ namespace MWMechanics
         creatureStats.getAttribute(5).setBase (player->mNpdt52.mEndurance);
         creatureStats.getAttribute(6).setBase (player->mNpdt52.mPersonality);
         creatureStats.getAttribute(7).setBase (player->mNpdt52.mLuck);
+        
+        const MWWorld::ESMStore &esmStore =
+            MWBase::Environment::get().getWorld()->getStore();
 
         // race
         if (mRaceSelected)
         {
             const ESM::Race *race =
-                MWBase::Environment::get().getWorld()->getStore().races.find (
-                MWBase::Environment::get().getWorld()->getPlayer().getRace());
+                esmStore.get<ESM::Race>().find(player->mRace); 
 
-            bool male = MWBase::Environment::get().getWorld()->getPlayer().isMale();
+            bool male = (player->mFlags & ESM::NPC::Female) == 0;
 
             for (int i=0; i<8; ++i)
             {
@@ -88,11 +90,13 @@ namespace MWMechanics
         }
 
         // birthsign
-        if (!MWBase::Environment::get().getWorld()->getPlayer().getBirthsign().empty())
+        const std::string &signId =
+            MWBase::Environment::get().getWorld()->getPlayer().getBirthSign();
+
+        if (!signId.empty())
         {
             const ESM::BirthSign *sign =
-                MWBase::Environment::get().getWorld()->getStore().birthSigns.find (
-                MWBase::Environment::get().getWorld()->getPlayer().getBirthsign());
+                esmStore.get<ESM::BirthSign>().find(signId);
 
             for (std::vector<std::string>::const_iterator iter (sign->mPowers.mList.begin());
                 iter!=sign->mPowers.mList.end(); ++iter)
@@ -104,11 +108,12 @@ namespace MWMechanics
         // class
         if (mClassSelected)
         {
-            const ESM::Class& class_ = MWBase::Environment::get().getWorld()->getPlayer().getClass();
+            const ESM::Class *class_ =
+                esmStore.get<ESM::Class>().find(player->mClass);
 
             for (int i=0; i<2; ++i)
             {
-                int attribute = class_.mData.mAttribute[i];
+                int attribute = class_->mData.mAttribute[i];
                 if (attribute>=0 && attribute<8)
                 {
                     creatureStats.getAttribute(attribute).setBase (
@@ -122,7 +127,7 @@ namespace MWMechanics
 
                 for (int i2=0; i2<5; ++i2)
                 {
-                    int index = class_.mData.mSkills[i2][i];
+                    int index = class_->mData.mSkills[i2][i];
 
                     if (index>=0 && index<27)
                     {
@@ -132,14 +137,15 @@ namespace MWMechanics
                 }
             }
 
-            typedef ESMS::IndexListT<ESM::Skill>::MapType ContainerType;
-            const ContainerType& skills = MWBase::Environment::get().getWorld()->getStore().skills.list;
+            const MWWorld::Store<ESM::Skill> &skills =
+                esmStore.get<ESM::Skill>();
 
-            for (ContainerType::const_iterator iter (skills.begin()); iter!=skills.end(); ++iter)
+            MWWorld::Store<ESM::Skill>::iterator iter = skills.begin();
+            for (; iter != skills.end(); ++iter)
             {
-                if (iter->second.mData.mSpecialization==class_.mData.mSpecialization)
+                if (iter->mData.mSpecialization==class_->mData.mSpecialization)
                 {
-                    int index = iter->first;
+                    int index = iter->mIndex;
 
                     if (index>=0 && index<27)
                     {
@@ -153,11 +159,13 @@ namespace MWMechanics
         // forced update and current value adjustments
         mActors.updateActor (ptr, 0);
 
-        creatureStats.getHealth().setCurrent(creatureStats.getHealth().getModified());
-        creatureStats.getMagicka().setCurrent(creatureStats.getMagicka().getModified());
-        creatureStats.getFatigue().setCurrent(creatureStats.getFatigue().getModified());
+        for (int i=0; i<2; ++i)
+        {
+            DynamicStat<float> stat = creatureStats.getDynamic (i);
+            stat.setCurrent (stat.getModified());
+            creatureStats.setDynamic (i, stat);
+        }
     }
-
 
     MechanicsManager::MechanicsManager()
     : mUpdatePlayer (true), mClassSelected (false),
@@ -259,12 +267,22 @@ namespace MWMechanics
         if (mUpdatePlayer)
         {
             // basic player profile; should not change anymore after the creation phase is finished.
-            MWBase::Environment::get().getWindowManager()->setValue ("name", MWBase::Environment::get().getWorld()->getPlayer().getName());
-            MWBase::Environment::get().getWindowManager()->setValue ("race",
-                MWBase::Environment::get().getWorld()->getStore().races.find (MWBase::Environment::get().getWorld()->getPlayer().
-                getRace())->mName);
-            MWBase::Environment::get().getWindowManager()->setValue ("class",
-                MWBase::Environment::get().getWorld()->getPlayer().getClass().mName);
+            MWBase::WindowManager *winMgr =
+                MWBase::Environment::get().getWindowManager();
+           
+            MWBase::World *world = MWBase::Environment::get().getWorld();
+            const ESM::NPC *player =
+                world->getPlayer().getPlayer().get<ESM::NPC>()->mBase;
+
+            const ESM::Race *race =
+                world->getStore().get<ESM::Race>().find(player->mRace);
+            const ESM::Class *cls =
+                world->getStore().get<ESM::Class>().find(player->mClass);
+
+            winMgr->setValue ("name", player->mName);
+            winMgr->setValue ("race", race->mName);
+            winMgr->setValue ("class", cls->mName);
+
             mUpdatePlayer = false;
 
             MWBase::WindowManager::SkillList majorSkills (5);
@@ -272,11 +290,11 @@ namespace MWMechanics
 
             for (int i=0; i<5; ++i)
             {
-                minorSkills[i] = MWBase::Environment::get().getWorld()->getPlayer().getClass().mData.mSkills[i][0];
-                majorSkills[i] = MWBase::Environment::get().getWorld()->getPlayer().getClass().mData.mSkills[i][1];
+                minorSkills[i] = cls->mData.mSkills[i][0];
+                majorSkills[i] = cls->mData.mSkills[i][1];
             }
 
-            MWBase::Environment::get().getWindowManager()->configureSkills (majorSkills, minorSkills);
+            winMgr->configureSkills (majorSkills, minorSkills);
         }
 
         mActors.update (movement, duration, paused);
@@ -289,14 +307,33 @@ namespace MWMechanics
 
     void MechanicsManager::setPlayerName (const std::string& name)
     {
-        MWBase::Environment::get().getWorld()->getPlayer().setName (name);
+        MWBase::World *world = MWBase::Environment::get().getWorld();
+
+        ESM::NPC player =
+            *world->getPlayer().getPlayer().get<ESM::NPC>()->mBase;
+        player.mName = name;
+
+        world->createRecord(player);
+
         mUpdatePlayer = true;
     }
 
     void MechanicsManager::setPlayerRace (const std::string& race, bool male)
     {
-        MWBase::Environment::get().getWorld()->getPlayer().setGender (male);
-        MWBase::Environment::get().getWorld()->getPlayer().setRace (race);
+        MWBase::World *world = MWBase::Environment::get().getWorld();
+
+        ESM::NPC player =
+            *world->getPlayer().getPlayer().get<ESM::NPC>()->mBase;
+
+        player.mRace = race;
+
+        player.mFlags |= ESM::NPC::Female;
+        if (male) {
+            player.mFlags ^= ESM::NPC::Female;
+        }
+
+        world->createRecord(player);
+
         mRaceSelected = true;
         buildPlayer();
         mUpdatePlayer = true;
@@ -304,22 +341,38 @@ namespace MWMechanics
 
     void MechanicsManager::setPlayerBirthsign (const std::string& id)
     {
-        MWBase::Environment::get().getWorld()->getPlayer().setBirthsign (id);
+        MWBase::Environment::get().getWorld()->getPlayer().setBirthSign(id);
         buildPlayer();
         mUpdatePlayer = true;
     }
 
     void MechanicsManager::setPlayerClass (const std::string& id)
     {
-        MWBase::Environment::get().getWorld()->getPlayer().setClass (*MWBase::Environment::get().getWorld()->getStore().classes.find (id));
+        MWBase::World *world = MWBase::Environment::get().getWorld();
+
+        ESM::NPC player =
+            *world->getPlayer().getPlayer().get<ESM::NPC>()->mBase;
+        player.mClass = id;
+
+        world->createRecord(player);
+
         mClassSelected = true;
         buildPlayer();
         mUpdatePlayer = true;
     }
 
-    void MechanicsManager::setPlayerClass (const ESM::Class& class_)
+    void MechanicsManager::setPlayerClass (const ESM::Class &cls)
     {
-        MWBase::Environment::get().getWorld()->getPlayer().setClass (class_);
+        MWBase::World *world = MWBase::Environment::get().getWorld();
+
+        const ESM::Class *ptr = world->createRecord(cls);
+
+        ESM::NPC player =
+            *world->getPlayer().getPlayer().get<ESM::NPC>()->mBase;
+        player.mClass = ptr->mId;
+
+        world->createRecord(player);
+
         mClassSelected = true;
         buildPlayer();
         mUpdatePlayer = true;
@@ -346,20 +399,20 @@ namespace MWMechanics
         MWMechanics::CreatureStats playerStats = MWWorld::Class::get(playerPtr).getCreatureStats(playerPtr);
         MWMechanics::NpcStats playerSkill = MWWorld::Class::get(playerPtr).getNpcStats(playerPtr);
 
-        if (toLower(npc->base->mRace) == toLower(player->base->mRace)) x += MWBase::Environment::get().getWorld()->getStore().gameSettings.find("fDispRaceMod")->getFloat();
+        if (toLower(npc->mBase->mRace) == toLower(player->mBase->mRace)) x += MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fDispRaceMod")->getFloat();
 
-        x += MWBase::Environment::get().getWorld()->getStore().gameSettings.find("fDispPersonalityMult")->getFloat()
-            * (playerStats.getAttribute(ESM::Attribute::Personality).getModified() - MWBase::Environment::get().getWorld()->getStore().gameSettings.find("fDispPersonalityBase")->getFloat());
+        x += MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fDispPersonalityMult")->getFloat()
+            * (playerStats.getAttribute(ESM::Attribute::Personality).getModified() - MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fDispPersonalityBase")->getFloat());
 
         float reaction = 0;
         int rank = 0;
         std::string npcFaction = "";
         if(!npcSkill.getFactionRanks().empty()) npcFaction = npcSkill.getFactionRanks().begin()->first;
-        const ESMS::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
 
         if (playerSkill.getFactionRanks().find(toLower(npcFaction)) != playerSkill.getFactionRanks().end())
         {
-            for(std::vector<ESM::Faction::Reaction>::const_iterator it = store.factions.find(toLower(npcFaction))->mReactions.begin();it != store.factions.find(toLower(npcFaction))->mReactions.end();it++)
+            for(std::vector<ESM::Faction::Reaction>::const_iterator it = MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(toLower(npcFaction))->mReactions.begin();
+                it != MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(toLower(npcFaction))->mReactions.end(); it++)
             {
                 if(toLower(it->mFaction) == toLower(npcFaction)) reaction = it->mReaction;
             }
@@ -367,7 +420,8 @@ namespace MWMechanics
         }
         else if (npcFaction != "")
         {
-            for(std::vector<ESM::Faction::Reaction>::const_iterator it = store.factions.find(toLower(npcFaction))->mReactions.begin();it != store.factions.find(toLower(npcFaction))->mReactions.end();it++)
+            for(std::vector<ESM::Faction::Reaction>::const_iterator it = MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(toLower(npcFaction))->mReactions.begin();
+                it != MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(toLower(npcFaction))->mReactions.end();it++)
             {
                 if(playerSkill.getFactionRanks().find(toLower(it->mFaction)) != playerSkill.getFactionRanks().end() )
                 {
@@ -381,14 +435,14 @@ namespace MWMechanics
             reaction = 0;
             rank = 0;
         }
-        x += (MWBase::Environment::get().getWorld()->getStore().gameSettings.find("fDispFactionRankMult")->getFloat() * rank 
-            + MWBase::Environment::get().getWorld()->getStore().gameSettings.find("fDispFactionRankBase")->getFloat()) 
-            * MWBase::Environment::get().getWorld()->getStore().gameSettings.find("fDispFactionMod")->getFloat() * reaction;
+        x += (MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fDispFactionRankMult")->getFloat() * rank
+            + MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fDispFactionRankBase")->getFloat())
+            * MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fDispFactionMod")->getFloat() * reaction;
 
         /// \todo implement bounty and disease
-        //x -= MWBase::Environment::get().getWorld()->getStore().gameSettings.find("fDispCrimeMod") * pcBounty;
-        //if (pc has a disease) x += MWBase::Environment::get().getWorld()->getStore().gameSettings.find("fDispDiseaseMod");
-        if (playerSkill.getDrawState() == MWMechanics::DrawState_::DrawState_Weapon) x += MWBase::Environment::get().getWorld()->getStore().gameSettings.find("fDispWeaponDrawn")->getFloat();
+        //x -= MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fDispCrimeMod") * pcBounty;
+        //if (pc has a disease) x += MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fDispDiseaseMod");
+        if (playerSkill.getDrawState() == MWMechanics::DrawState_::DrawState_Weapon) x += MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fDispWeaponDrawn")->getFloat();
 
         int effective_disposition = std::max(0,std::min(int(x),100));//, normally clamped to [0..100] when used
         return effective_disposition;
@@ -427,5 +481,10 @@ namespace MWMechanics
         if (x >= 1) offerPrice = basePrice + int((x - 1) * basePrice);
         offerPrice = std::max(1, offerPrice);
         return offerPrice;
+    }
+
+    int MechanicsManager::countDeaths (const std::string& id) const
+    {
+        return mActors.countDeaths (id);
     }
 }

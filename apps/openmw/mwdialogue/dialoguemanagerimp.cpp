@@ -7,8 +7,6 @@
 
 #include <components/esm/loaddial.hpp>
 
-#include <components/esm_store/store.hpp>
-
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/scriptmanager.hpp"
@@ -19,6 +17,7 @@
 #include "../mwworld/refdata.hpp"
 #include "../mwworld/player.hpp"
 #include "../mwworld/containerstore.hpp"
+#include "../mwworld/esmstore.hpp"
 
 #include "../mwgui/dialogue.hpp"
 
@@ -84,14 +83,15 @@ namespace
 
     template<typename T>
     bool checkLocal (char comp, const std::string& name, T value, const MWWorld::Ptr& actor,
-        const ESMS::ESMStore& store)
+        const MWWorld::ESMStore& store)
     {
         std::string scriptName = MWWorld::Class::get (actor).getScript (actor);
 
         if (scriptName.empty())
             return false; // no script
 
-        const ESM::Script *script = store.scripts.find (scriptName);
+        const ESM::Script *script =
+            store.get<ESM::Script>().find (scriptName);
 
         int i = 0;
 
@@ -391,7 +391,7 @@ namespace MWDialogue
                 if(select.mType==ESM::VT_Int)
                 {
                     MWWorld::LiveCellRef<ESM::NPC>* npc = actor.get<ESM::NPC>();
-                    int isFaction = int(toLower(npc->base->mFaction) == toLower(name));
+                    int isFaction = int(toLower(npc->mBase->mFaction) == toLower(name));
                     if(selectCompare<int,int>(comp,!isFaction,select.mI))
                         return false;
                 }
@@ -408,7 +408,7 @@ namespace MWDialogue
                 if(select.mType==ESM::VT_Int)
                 {
                     MWWorld::LiveCellRef<ESM::NPC>* npc = actor.get<ESM::NPC>();
-                    int isClass = int(toLower(npc->base->mClass) == toLower(name));
+                    int isClass = int(toLower(npc->mBase->mClass) == toLower(name));
                     if(selectCompare<int,int>(comp,!isClass,select.mI))
                         return false;
                 }
@@ -425,7 +425,7 @@ namespace MWDialogue
                 if(select.mType==ESM::VT_Int)
                 {
                     MWWorld::LiveCellRef<ESM::NPC>* npc = actor.get<ESM::NPC>();
-                    int isRace = int(toLower(npc->base->mRace) == toLower(name));
+                    int isRace = int(toLower(npc->mBase->mRace) == toLower(name));
                     if(selectCompare<int,int>(comp,!isRace,select.mI))
                         return false;
                 }
@@ -438,7 +438,7 @@ namespace MWDialogue
             case 'B'://not Cell
                 if(select.mType==ESM::VT_Int)
                 {
-                    int isCell = int(toLower(actor.getCell()->cell->mName) == toLower(name));
+                    int isCell = int(toLower(actor.getCell()->mCell->mName) == toLower(name));
                     if(selectCompare<int,int>(comp,!isCell,select.mI))
                         return false;
                 }
@@ -496,7 +496,7 @@ namespace MWDialogue
             if (!cellRef)
                 return false;
 
-            if (toLower (info.mRace)!=toLower (cellRef->base->mRace))
+            if (toLower (info.mRace)!=toLower (cellRef->mBase->mRace))
                 return false;
         }
 
@@ -511,7 +511,7 @@ namespace MWDialogue
             if (!cellRef)
                 return false;
 
-            if (toLower (info.mClass)!=toLower (cellRef->base->mClass))
+            if (toLower (info.mClass)!=toLower (cellRef->mBase->mClass))
                 return false;
         }
 
@@ -557,7 +557,7 @@ namespace MWDialogue
         if (!isCreature)
         {
             MWWorld::LiveCellRef<ESM::NPC>* npc = actor.get<ESM::NPC>();
-            if(npc->base->mFlags & npc->base->Female)
+            if(npc->mBase->mFlags & npc->mBase->Female)
             {
                 if(static_cast<int> (info.mData.mGender)==0)  return false;
             }
@@ -569,7 +569,7 @@ namespace MWDialogue
 
         // check cell
         if (!info.mCell.empty())
-            if (MWBase::Environment::get().getWorld()->getPlayer().getPlayer().getCell()->cell->mName != info.mCell)
+            if (MWBase::Environment::get().getWorld()->getPlayer().getPlayer().getCell()->mCell->mName != info.mCell)
                 return false;
 
         // TODO check DATAstruct
@@ -590,10 +590,14 @@ namespace MWDialogue
         mCompilerContext.setExtensions (&extensions);
         mDialogueMap.clear();
         mActorKnownTopics.clear();
-        ESMS::RecListCaseT<ESM::Dialogue>::MapType dialogueList = MWBase::Environment::get().getWorld()->getStore().dialogs.list;
-        for(ESMS::RecListCaseT<ESM::Dialogue>::MapType::iterator it = dialogueList.begin(); it!=dialogueList.end();it++)
+
+        const MWWorld::Store<ESM::Dialogue> &dialogs =
+            MWBase::Environment::get().getWorld()->getStore().get<ESM::Dialogue>();
+
+        MWWorld::Store<ESM::Dialogue>::iterator it = dialogs.begin();
+        for (; it != dialogs.end(); ++it)
         {
-            mDialogueMap[toLower(it->first)] = it->second;
+            mDialogueMap[toLower(it->mId)] = *it;
         }
     }
 
@@ -642,16 +646,17 @@ namespace MWDialogue
 
         //greeting
         bool greetingFound = false;
-        //ESMS::RecListT<ESM::Dialogue>::MapType dialogueList = MWBase::Environment::get().getWorld()->getStore().dialogs.list;
-        ESMS::RecListCaseT<ESM::Dialogue>::MapType dialogueList = MWBase::Environment::get().getWorld()->getStore().dialogs.list;
-        for(ESMS::RecListCaseT<ESM::Dialogue>::MapType::iterator it = dialogueList.begin(); it!=dialogueList.end();it++)
+        const MWWorld::Store<ESM::Dialogue> &dialogs =
+            MWBase::Environment::get().getWorld()->getStore().get<ESM::Dialogue>();
+
+        MWWorld::Store<ESM::Dialogue>::iterator it = dialogs.begin();
+        for (; it != dialogs.end(); ++it)
         {
-            ESM::Dialogue ndialogue = it->second;
-            if(ndialogue.mType == ESM::Dialogue::Greeting)
+            if(it->mType == ESM::Dialogue::Greeting)
             {
                 if (greetingFound) break;
-                for (std::vector<ESM::DialInfo>::const_iterator iter (it->second.mInfo.begin());
-                    iter!=it->second.mInfo.end(); ++iter)
+                for (std::vector<ESM::DialInfo>::const_iterator iter (it->mInfo.begin());
+                    iter!=it->mInfo.end(); ++iter)
                 {
                     if (isMatching (actor, *iter) && functionFilter(mActor,*iter,true))
                     {
@@ -665,7 +670,7 @@ namespace MWDialogue
                         win->addText(iter->mResponse);
                         executeScript(iter->mResultScript);
                         greetingFound = true;
-                        mLastTopic = it->first;
+                        mLastTopic = it->mId;
                         mLastDialogue = *iter;
                         break;
                     }
@@ -742,22 +747,26 @@ namespace MWDialogue
         mChoice = -1;
         mActorKnownTopics.clear();
         MWGui::DialogueWindow* win = MWBase::Environment::get().getWindowManager()->getDialogueWindow();
-        ESMS::RecListCaseT<ESM::Dialogue>::MapType dialogueList = MWBase::Environment::get().getWorld()->getStore().dialogs.list;
-        for(ESMS::RecListCaseT<ESM::Dialogue>::MapType::iterator it = dialogueList.begin(); it!=dialogueList.end();it++)
+
+        const MWWorld::Store<ESM::Dialogue> &dialogs =
+            MWBase::Environment::get().getWorld()->getStore().get<ESM::Dialogue>();
+
+
+        MWWorld::Store<ESM::Dialogue>::iterator it = dialogs.begin();
+        for (; it != dialogs.end(); ++it)
         {
-            ESM::Dialogue ndialogue = it->second;
-            if(ndialogue.mType == ESM::Dialogue::Topic)
+            if(it->mType == ESM::Dialogue::Topic)
             {
-                for (std::vector<ESM::DialInfo>::const_iterator iter (it->second.mInfo.begin());
-                    iter!=it->second.mInfo.end(); ++iter)
+                for (std::vector<ESM::DialInfo>::const_iterator iter (it->mInfo.begin());
+                    iter!=it->mInfo.end(); ++iter)
                 {
                     if (isMatching (mActor, *iter) && functionFilter(mActor,*iter,true))
                     {
-                        mActorKnownTopics.push_back(toLower(it->first));
+                        mActorKnownTopics.push_back(toLower(it->mId));
                         //does the player know the topic?
-                        if(mKnownTopics.find(toLower(it->first)) != mKnownTopics.end())
+                        if(mKnownTopics.find(toLower(it->mId)) != mKnownTopics.end())
                         {
-                            keywordList.push_back(it->first);
+                            keywordList.push_back(it->mId);
                             break;
                         }
                     }
@@ -770,14 +779,14 @@ namespace MWDialogue
         if (mActor.getTypeName() == typeid(ESM::NPC).name())
         {
             MWWorld::LiveCellRef<ESM::NPC>* ref = mActor.get<ESM::NPC>();
-            if (ref->base->mHasAI)
-                services = ref->base->mAiData.mServices;
+            if (ref->mBase->mHasAI)
+                services = ref->mBase->mAiData.mServices;
         }
         else if (mActor.getTypeName() == typeid(ESM::Creature).name())
         {
             MWWorld::LiveCellRef<ESM::Creature>* ref = mActor.get<ESM::Creature>();
-            if (ref->base->mHasAI)
-                services = ref->base->mAiData.mServices;
+            if (ref->mBase->mHasAI)
+                services = ref->mBase->mAiData.mServices;
         }
 
         int windowServices = 0;
@@ -795,7 +804,7 @@ namespace MWDialogue
             || services & ESM::NPC::Misc)
             windowServices |= MWGui::DialogueWindow::Service_Trade;
 
-        if(mActor.getTypeName() == typeid(ESM::NPC).name() && !mActor.get<ESM::NPC>()->base->mTransport.empty())
+        if(mActor.getTypeName() == typeid(ESM::NPC).name() && !mActor.get<ESM::NPC>()->mBase->mTransport.empty())
             windowServices |= MWGui::DialogueWindow::Service_Travel;
 
         if (services & ESM::NPC::Spells)

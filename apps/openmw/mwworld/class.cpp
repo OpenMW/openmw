@@ -157,6 +157,11 @@ namespace MWWorld
         throw std::runtime_error ("encumbrance not supported by class");
     }
 
+    bool Class::isEssential (const MWWorld::Ptr& ptr) const
+    {
+        return false;
+    }
+
     const Class& Class::get (const std::string& key)
     {
         std::map<std::string, boost::shared_ptr<Class> >::const_iterator iter = sClasses.find (key);

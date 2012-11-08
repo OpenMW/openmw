@@ -22,7 +22,7 @@ class ESMWriter;
 
 struct Static
 {
-  std::string mModel;
+  std::string mId, mModel;
 
   void load(ESMReader &esm);
   void save(ESMWriter &esm);

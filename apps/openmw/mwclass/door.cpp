@@ -35,18 +35,17 @@ namespace MWClass
     void Door::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics) const
     {
         const std::string model = getModel(ptr);
-        if(!model.empty()) {
-            physics.insertObjectPhysics(ptr, model);
-        }
+        if(!model.empty())
+            physics.addObject(ptr);
     }
 
     std::string Door::getModel(const MWWorld::Ptr &ptr) const
     {
         MWWorld::LiveCellRef<ESM::Door> *ref =
             ptr.get<ESM::Door>();
-        assert(ref->base != NULL);
+        assert(ref->mBase != NULL);
 
-        const std::string &model = ref->base->mModel;
+        const std::string &model = ref->mBase->mModel;
         if (!model.empty()) {
             return "meshes\\" + model;
         }
@@ -58,10 +57,10 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Door> *ref =
             ptr.get<ESM::Door>();
 
-        if (ref->ref.mTeleport && !ref->ref.mDestCell.empty()) // TODO doors that lead to exteriors
-            return ref->ref.mDestCell;
+        if (ref->mRef.mTeleport && !ref->mRef.mDestCell.empty()) // TODO doors that lead to exteriors
+            return ref->mRef.mDestCell;
 
-        return ref->base->mName;
+        return ref->mBase->mName;
     }
 
     boost::shared_ptr<MWWorld::Action> Door::activate (const MWWorld::Ptr& ptr,
@@ -70,8 +69,8 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Door> *ref =
             ptr.get<ESM::Door>();
 
-        const std::string &openSound = ref->base->mOpenSound;
-        //const std::string &closeSound = ref->base->closeSound;
+        const std::string &openSound = ref->mBase->mOpenSound;
+        //const std::string &closeSound = ref->mBase->closeSound;
         const std::string lockedSound = "LockedDoor";
         const std::string trapActivationSound = "Disarm Trap Fail";
 
@@ -81,9 +80,15 @@ namespace MWClass
         bool needKey = ptr.getCellRef().mLockLevel>0;
         bool hasKey = false;
         std::string keyName;
+
+        // make key id lowercase
+        std::string keyId = ptr.getCellRef().mKey;
+        std::transform(keyId.begin(), keyId.end(), keyId.begin(), ::tolower);
         for (MWWorld::ContainerStoreIterator it = invStore.begin(); it != invStore.end(); ++it)
         {
-            if (it->getCellRef ().mRefID == ptr.getCellRef().mKey)
+            std::string refId = it->getCellRef().mRefID;
+            std::transform(refId.begin(), refId.end(), refId.begin(), ::tolower);
+            if (refId == keyId)
             {
                 hasKey = true;
                 keyName = MWWorld::Class::get(*it).getName(*it);
@@ -113,13 +118,13 @@ namespace MWClass
                 return action;
             }
 
-            if (ref->ref.mTeleport)
+            if (ref->mRef.mTeleport)
             {
                 // teleport door
                 /// \todo remove this if clause once ActionTeleport can also support other actors
                 if (MWBase::Environment::get().getWorld()->getPlayer().getPlayer()==actor)
                 {
-                    boost::shared_ptr<MWWorld::Action> action(new MWWorld::ActionTeleport (ref->ref.mDestCell, ref->ref.mDoorDest));
+                    boost::shared_ptr<MWWorld::Action> action(new MWWorld::ActionTeleport (ref->mRef.mDestCell, ref->mRef.mDoorDest));
 
                     action->setSound(openSound);
 
@@ -171,7 +176,7 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Door> *ref =
             ptr.get<ESM::Door>();
 
-        return ref->base->mScript;
+        return ref->mBase->mScript;
     }
 
     void Door::registerSelf()
@@ -186,7 +191,7 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Door> *ref =
             ptr.get<ESM::Door>();
 
-        return (ref->base->mName != "");
+        return (ref->mBase->mName != "");
     }
 
     MWGui::ToolTipInfo Door::getToolTipInfo (const MWWorld::Ptr& ptr) const
@@ -195,31 +200,32 @@ namespace MWClass
             ptr.get<ESM::Door>();
 
         MWGui::ToolTipInfo info;
-        info.caption = ref->base->mName;
+        info.caption = ref->mBase->mName;
 
         std::string text;
 
-        const ESMS::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
+        const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
 
-        if (ref->ref.mTeleport)
+        if (ref->mRef.mTeleport)
         {
             std::string dest;
-            if (ref->ref.mDestCell != "")
+            if (ref->mRef.mDestCell != "")
             {
                 // door leads to an interior, use interior name as tooltip
-                dest = ref->ref.mDestCell;
+                dest = ref->mRef.mDestCell;
             }
             else
             {
                 // door leads to exterior, use cell name (if any), otherwise translated region name
                 int x,y;
-                MWBase::Environment::get().getWorld()->positionToIndex (ref->ref.mDoorDest.pos[0], ref->ref.mDoorDest.pos[1], x, y);
-                const ESM::Cell* cell = store.cells.findExt(x,y);
+                MWBase::Environment::get().getWorld()->positionToIndex (ref->mRef.mDoorDest.pos[0], ref->mRef.mDoorDest.pos[1], x, y);
+                const ESM::Cell* cell = store.get<ESM::Cell>().find(x,y);
                 if (cell->mName != "")
                     dest = cell->mName;
                 else
                 {
-                    const ESM::Region* region = store.regions.search(cell->mRegion);
+                    const ESM::Region* region =
+                        store.get<ESM::Region>().find(cell->mRegion);
                     dest = region->mName;
                 }
             }
@@ -227,13 +233,13 @@ namespace MWClass
             text += "\n"+dest;
         }
 
-        if (ref->ref.mLockLevel > 0)
-            text += "\n#{sLockLevel}: " + MWGui::ToolTips::toString(ref->ref.mLockLevel);
-        if (ref->ref.mTrap != "")
+        if (ref->mRef.mLockLevel > 0)
+            text += "\n#{sLockLevel}: " + MWGui::ToolTips::toString(ref->mRef.mLockLevel);
+        if (ref->mRef.mTrap != "")
             text += "\n#{sTrapped}";
 
         if (MWBase::Environment::get().getWindowManager()->getFullHelp())
-            text += MWGui::ToolTips::getMiscString(ref->base->mScript, "Script");
+            text += MWGui::ToolTips::getMiscString(ref->mBase->mScript, "Script");
 
         info.text = text;
 
@@ -246,6 +252,6 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Door> *ref =
             ptr.get<ESM::Door>();
 
-        return MWWorld::Ptr(&cell.doors.insert(*ref), &cell);
+        return MWWorld::Ptr(&cell.mDoors.insert(*ref), &cell);
     }
 }

@@ -41,6 +41,8 @@ namespace MWMechanics
 
             virtual void addActor (const MWWorld::Ptr& ptr);
             ///< Register an actor for stats management
+            ///
+            /// \note Dead actors are ignored.
 
             virtual void removeActor (const MWWorld::Ptr& ptr);
             ///< Deregister an actor for stats management
@@ -82,6 +84,10 @@ namespace MWMechanics
 
             virtual int disposition(const MWWorld::Ptr& ptr);
             ///< Calculate the diposition of an NPC toward the player.
+
+            virtual int countDeaths (const std::string& id) const;
+            ///< Return the number of deaths for actors with the given ID.
+            
     };
 }
 

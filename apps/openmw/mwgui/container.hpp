@@ -1,7 +1,7 @@
 #ifndef MGUI_CONTAINER_H
 #define MGUI_CONTAINER_H
 
-#include <components/esm_store/store.hpp>
+#include "../mwworld/esmstore.hpp"
 
 #include "window_base.hpp"
 #include "referenceinterface.hpp"

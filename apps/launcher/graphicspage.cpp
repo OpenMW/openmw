@@ -9,8 +9,9 @@
 #include <components/files/ogreplugin.hpp>
 #include <components/settings/settings.hpp>
 
+#include "utils/naturalsort.hpp"
+
 #include "graphicspage.hpp"
-#include "naturalsort.hpp"
 
 QString getAspect(int x, int y)
 {
@@ -280,20 +281,18 @@ QStringList GraphicsPage::getAvailableResolutions(Ogre::RenderSystem *renderer)
             assert (tokens.size() >= 3);
             QString resolutionStr = tokens.at(0) + QString(" x ") + tokens.at(2);
 
-            // do not add duplicate resolutions
-            if (!result.contains(resolutionStr)) {
+            QString aspect = getAspect(tokens.at(0).toInt(),tokens.at(2).toInt());
 
-                QString aspect = getAspect(tokens.at(0).toInt(),tokens.at(2).toInt());
+            if (aspect == QLatin1String("16:9") || aspect == QLatin1String("16:10")) {
+                resolutionStr.append(tr("\t(Widescreen ") + aspect + ")");
 
-                if (aspect == QLatin1String("16:9") || aspect == QLatin1String("16:10")) {
-                    resolutionStr.append(tr("\t(Widescreen ") + aspect + ")");
-
-                } else if (aspect == QLatin1String("4:3")) {
-                    resolutionStr.append(tr("\t(Standard 4:3)"));
-                }
-
-                result << resolutionStr;
+            } else if (aspect == QLatin1String("4:3")) {
+                resolutionStr.append(tr("\t(Standard 4:3)"));
             }
+
+            // do not add duplicate resolutions
+            if (!result.contains(resolutionStr))
+                result << resolutionStr;
         }
     }
 

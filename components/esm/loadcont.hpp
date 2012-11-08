@@ -39,7 +39,7 @@ struct Container
         Unknown = 8
     };
 
-    std::string mName, mModel, mScript;
+    std::string mId, mName, mModel, mScript;
 
     float mWeight; // Not sure, might be max total weight allowed?
     int mFlags;
