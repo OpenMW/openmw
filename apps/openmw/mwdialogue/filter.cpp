@@ -144,6 +144,48 @@ bool MWDialogue::Filter::testSelectStructNumeric (const SelectWrapper& select) c
 {
     switch (select.getFunction())
     {
+        case SelectWrapper::Function_Global:
+        
+            // internally all globals are float :(
+            return select.selectCompare (
+                MWBase::Environment::get().getWorld()->getGlobalVariable (select.getName()).mFloat);
+        
+        case SelectWrapper::Function_Local:
+        {
+            std::string scriptName = MWWorld::Class::get (mActor).getScript (mActor);
+
+            if (scriptName.empty())
+                return false; // no script
+
+            const ESM::Script *script =
+                MWBase::Environment::get().getWorld()->getStore().get<ESM::Script>().find (scriptName);
+
+            std::string name = select.getName();
+
+            int i = 0;
+
+            for (; i<static_cast<int> (script->mVarNames.size()); ++i)
+                if (script->mVarNames[i]==name)
+                    break;
+
+            if (i>=static_cast<int> (script->mVarNames.size()))
+                return false; // script does not have a variable of this name
+
+            const MWScript::Locals& locals = mActor.getRefData().getLocals();
+
+            if (i<script->mData.mNumShorts)
+                return select.selectCompare (static_cast<int> (locals.mShorts[i]));
+                
+            i -= script->mData.mNumShorts;
+
+            if (i<script->mData.mNumLongs)
+                return select.selectCompare (locals.mLongs[i]);
+
+            i -= script->mData.mNumShorts;
+
+            return select.selectCompare (locals.mFloats.at (i));        
+        }
+        
         default:
         
             throw std::runtime_error ("unknown numeric select function");

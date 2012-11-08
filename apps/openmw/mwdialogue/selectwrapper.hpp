@@ -21,7 +21,9 @@ namespace MWDialogue
                 Function_Faction,
                 Function_Class,
                 Function_Race,
-                Function_Cell
+                Function_Cell,
+                Function_Local,
+                Function_Global
             };
             
             enum Type

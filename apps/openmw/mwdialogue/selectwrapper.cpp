@@ -60,6 +60,8 @@ MWDialogue::SelectWrapper::Function MWDialogue::SelectWrapper::getFunction() con
 
     switch (type)
     {
+        case '2': return Function_Global;
+        case '3': return Function_Local;
         case '4': return Function_Journal;
         case '5': return Function_Item;
         case '6': return Function_Dead;
@@ -68,6 +70,7 @@ MWDialogue::SelectWrapper::Function MWDialogue::SelectWrapper::getFunction() con
         case '9': return Function_Class;
         case 'A': return Function_Race;
         case 'B': return Function_Cell;
+        case 'C': return Function_Local;
     }
 
     return Function_None;
@@ -83,6 +86,7 @@ MWDialogue::SelectWrapper::Type MWDialogue::SelectWrapper::getType() const
     
     static const Function numericFunctions[] =
     {
+        Function_Global, Function_Local,
         Function_None // end marker
     };    
     
