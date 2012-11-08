@@ -110,7 +110,7 @@ namespace MWWorld
             typename std::vector<T>::const_iterator it =
                 std::lower_bound(mStatic.begin(), mStatic.end(), item, RecordCmp());
 
-            if (it != mStatic.end() && it->mId == item.mId) {
+            if (it != mStatic.end() && StringUtils::ciEqual(it->mId, id)) {
                 return &(*it);
             }
 
