@@ -15,7 +15,13 @@ namespace MWDialogue
             {
                 Function_None,
                 Function_Journal,
-                Function_Item
+                Function_Item,
+                Function_Dead,
+                Function_Id,
+                Function_Faction,
+                Function_Class,
+                Function_Race,
+                Function_Cell
             };
             
             enum Type
@@ -34,7 +40,10 @@ namespace MWDialogue
             
             Type getType() const;
             
-            bool IsInverted() const;
+            bool isInverted() const;
+            
+            bool isNpcOnly() const;
+            ///< \attention Do not call any of the select functions for this select struct!
             
             bool selectCompare (int value) const;
 

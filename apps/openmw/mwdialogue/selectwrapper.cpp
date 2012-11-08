@@ -62,6 +62,12 @@ MWDialogue::SelectWrapper::Function MWDialogue::SelectWrapper::getFunction() con
     {
         case '4': return Function_Journal;
         case '5': return Function_Item;
+        case '6': return Function_Dead;
+        case '7': return Function_Id;
+        case '8': return Function_Faction;
+        case '9': return Function_Class;
+        case 'A': return Function_Race;
+        case 'B': return Function_Cell;
     }
 
     return Function_None;
@@ -71,7 +77,7 @@ MWDialogue::SelectWrapper::Type MWDialogue::SelectWrapper::getType() const
 {
     static const Function integerFunctions[] =
     {
-        Function_Journal, Function_Item,
+        Function_Journal, Function_Item, Function_Dead,
         Function_None // end marker
     };
     
@@ -82,14 +88,12 @@ MWDialogue::SelectWrapper::Type MWDialogue::SelectWrapper::getType() const
     
     static const Function booleanFunctions[] =
     {
+        Function_Id, Function_Faction, Function_Class, Function_Race, Function_Cell,
         Function_None // end marker
     };   
     
     Function function = getFunction();
-    
-    if (function==Function_None)
-        return Type_None;
-        
+
     for (int i=0; integerFunctions[i]!=Function_None; ++i)
         if (integerFunctions[i]==function)
             return Type_Integer;
@@ -102,29 +106,46 @@ MWDialogue::SelectWrapper::Type MWDialogue::SelectWrapper::getType() const
         if (booleanFunctions[i]==function)
             return Type_Boolean;
     
-    throw std::runtime_error ("failed to determine type of select function");
+    return Type_None;
 }
 
-bool MWDialogue::SelectWrapper::IsInverted() const
+bool MWDialogue::SelectWrapper::isInverted() const
 {
     char type = mSelect.mSelectRule[1];
 
     return type=='7' || type=='8' || type=='9' || type=='A' || type=='B' || type=='C';
 }
 
+bool MWDialogue::SelectWrapper::isNpcOnly() const
+{
+    static const Function functions[] =
+    {
+        Function_Faction, SelectWrapper::Function_Class, SelectWrapper::Function_Race,
+        Function_None // end marker
+    };
+
+    Function function = getFunction();
+    
+    for (int i=0; functions[i]!=Function_None; ++i)
+        if (functions[i]==function)
+            return true;
+    
+    return false;
+}
+
 bool MWDialogue::SelectWrapper::selectCompare (int value) const
 {
-    return selectCompareImp (mSelect, value)!=IsInverted(); // logic XOR
+    return selectCompareImp (mSelect, value)!=isInverted(); // logic XOR
 }
 
 bool MWDialogue::SelectWrapper::selectCompare (float value) const
 {
-    return selectCompareImp (mSelect, value)!=IsInverted(); // logic XOR
+    return selectCompareImp (mSelect, value)!=isInverted(); // logic XOR
 }
 
 bool MWDialogue::SelectWrapper::selectCompare (bool value) const
 {
-    return selectCompareImp (mSelect, static_cast<int> (value))!=IsInverted(); // logic XOR
+    return selectCompareImp (mSelect, static_cast<int> (value))!=isInverted(); // logic XOR
 }
 
 std::string MWDialogue::SelectWrapper::getName() const

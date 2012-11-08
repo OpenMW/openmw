@@ -4,6 +4,7 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/journal.hpp"
+#include "../mwbase/mechanicsmanager.hpp"
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/player.hpp"
@@ -125,6 +126,9 @@ bool MWDialogue::Filter::testSelectStructs (const ESM::DialInfo& info) const
 
 bool MWDialogue::Filter::testSelectStruct (const SelectWrapper& select) const
 {
+    if (select.isNpcOnly() && mActor.getTypeName()!=typeid (ESM::NPC).name())
+        return select.isInverted();
+    
     switch (select.getType())
     {
         case SelectWrapper::Type_None: return true;
@@ -169,6 +173,10 @@ int MWDialogue::Filter::getSelectStructInteger (const SelectWrapper& select) con
                     
             return sum;
         }
+
+        case SelectWrapper::Function_Dead:
+
+            return MWBase::Environment::get().getMechanicsManager()->countDeaths (select.getName());
         
         default:
 
@@ -180,6 +188,26 @@ bool MWDialogue::Filter::getSelectStructBoolean (const SelectWrapper& select) co
 {
     switch (select.getFunction())
     {
+        case SelectWrapper::Function_Id:
+        
+            return select.getName()==toLower (MWWorld::Class::get (mActor).getId (mActor));
+        
+        case SelectWrapper::Function_Faction:
+
+            return toLower (mActor.get<ESM::NPC>()->mBase->mFaction)==select.getName();
+
+        case SelectWrapper::Function_Class:
+
+            return toLower (mActor.get<ESM::NPC>()->mBase->mClass)==select.getName();
+
+        case SelectWrapper::Function_Race:
+
+            return toLower (mActor.get<ESM::NPC>()->mBase->mRace)==select.getName();
+
+        case SelectWrapper::Function_Cell:
+    
+            return toLower (mActor.getCell()->mCell->mName)==select.getName();
+    
         default:
 
             throw std::runtime_error ("unknown boolean select function");

@@ -289,8 +289,6 @@ namespace MWDialogue
     bool DialogueManager::isMatching (const MWWorld::Ptr& actor,
         const ESM::DialInfo::SelectStruct& select) const
     {
-        bool isCreature = (actor.getTypeName() != typeid(ESM::NPC).name());
-
         char type = select.mSelectRule[1];
 
         if (type!='0')
@@ -343,86 +341,6 @@ namespace MWDialogue
                     throw std::runtime_error (
                     "unsupported variable type in dialogue info select");
 
-                return true;
-
-            case '6': // dead
-
-                 return selectCompare<int,int> (comp,
-                    MWBase::Environment::get().getMechanicsManager()->countDeaths (toLower (name)), select.mI);
-
-            case '7':// not ID
-                if(select.mType==ESM::VT_String ||select.mType==ESM::VT_Int)//bug in morrowind here? it's not a short, it's a string
-                {
-                    int isID = int(toLower(name)==toLower(MWWorld::Class::get (actor).getId (actor)));
-                    if (selectCompare<int,int>(comp,!isID,select.mI)) return false;
-                }
-                else
-                    throw std::runtime_error (
-                    "unsupported variable type in dialogue info select");
-
-                return true;
-
-            case '8':// not faction
-                if (isCreature)
-                    return false;
-
-                if(select.mType==ESM::VT_Int)
-                {
-                    MWWorld::LiveCellRef<ESM::NPC>* npc = actor.get<ESM::NPC>();
-                    int isFaction = int(toLower(npc->mBase->mFaction) == toLower(name));
-                    if(selectCompare<int,int>(comp,!isFaction,select.mI))
-                        return false;
-                }
-                else
-                    throw std::runtime_error (
-                    "unsupported variable type in dialogue info select");
-
-                return true;
-
-            case '9':// not class
-                if (isCreature)
-                    return false;
-
-                if(select.mType==ESM::VT_Int)
-                {
-                    MWWorld::LiveCellRef<ESM::NPC>* npc = actor.get<ESM::NPC>();
-                    int isClass = int(toLower(npc->mBase->mClass) == toLower(name));
-                    if(selectCompare<int,int>(comp,!isClass,select.mI))
-                        return false;
-                }
-                else
-                    throw std::runtime_error (
-                    "unsupported variable type in dialogue info select");
-
-                return true;
-
-            case 'A'://not Race
-                if (isCreature)
-                    return false;
-
-                if(select.mType==ESM::VT_Int)
-                {
-                    MWWorld::LiveCellRef<ESM::NPC>* npc = actor.get<ESM::NPC>();
-                    int isRace = int(toLower(npc->mBase->mRace) == toLower(name));
-                    if(selectCompare<int,int>(comp,!isRace,select.mI))
-                        return false;
-                }
-                else
-                    throw std::runtime_error (
-                    "unsupported variable type in dialogue info select");
-
-                return true;
-
-            case 'B'://not Cell
-                if(select.mType==ESM::VT_Int)
-                {
-                    int isCell = int(toLower(actor.getCell()->mCell->mName) == toLower(name));
-                    if(selectCompare<int,int>(comp,!isCell,select.mI))
-                        return false;
-                }
-                else
-                    throw std::runtime_error (
-                    "unsupported variable type in dialogue info select");
                 return true;
 
             case 'C'://not local
