@@ -384,6 +384,8 @@ namespace MWMechanics
         x += (MWBase::Environment::get().getWorld()->getStore().gameSettings.find("fDispFactionRankMult")->getFloat() * rank 
             + MWBase::Environment::get().getWorld()->getStore().gameSettings.find("fDispFactionRankBase")->getFloat()) 
             * MWBase::Environment::get().getWorld()->getStore().gameSettings.find("fDispFactionMod")->getFloat() * reaction;
+
+        /// \todo implement bounty and disease
         //x -= MWBase::Environment::get().getWorld()->getStore().gameSettings.find("fDispCrimeMod") * pcBounty;
         //if (pc has a disease) x += MWBase::Environment::get().getWorld()->getStore().gameSettings.find("fDispDiseaseMod");
         if (playerSkill.getDrawState() == MWMechanics::DrawState_::DrawState_Weapon) x += MWBase::Environment::get().getWorld()->getStore().gameSettings.find("fDispWeaponDrawn")->getFloat();

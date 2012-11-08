@@ -11,6 +11,11 @@
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/manualref.hpp"
 
+#include "../mwmechanics/creaturestats.hpp"
+#include "../mwmechanics/npcstats.hpp"
+
+#include "../mwworld/player.hpp"
+
 #include "inventorywindow.hpp"
 
 namespace MWGui
@@ -53,6 +58,8 @@ namespace MWGui
 
         mCancelButton->eventMouseButtonClick += MyGUI::newDelegate(this, &TradeWindow::onCancelButtonClicked);
         mOfferButton->eventMouseButtonClick += MyGUI::newDelegate(this, &TradeWindow::onOfferButtonClicked);
+        mIncreaseButton->eventMouseButtonClick += MyGUI::newDelegate(this, &TradeWindow::onIncreaseButtonClicked);
+        mDecreaseButton->eventMouseButtonClick += MyGUI::newDelegate(this, &TradeWindow::onDecreaseButtonClicked);
 
         setCoord(400, 0, 400, 300);
 
@@ -64,6 +71,7 @@ namespace MWGui
         setTitle(MWWorld::Class::get(actor).getName(actor));
 
         mCurrentBalance = 0;
+        mCurrentMerchantOffer = 0;
 
         mWindowManager.getInventoryWindow()->startTrade();
 
@@ -175,6 +183,49 @@ namespace MWGui
             return;
         }
 
+        if(mCurrentBalance > mCurrentMerchantOffer)
+        {
+            /// \todo : if creature....
+            //if npc is a creature: reject (no haggle)
+
+            int a = abs(mCurrentMerchantOffer);
+            int b = abs(mCurrentBalance);
+            int d = 0;
+            if (mCurrentMerchantOffer<0) d = int(100 * (a - b) / a);
+            else d = int(100 * (b - a) / a);
+
+            float clampedDisposition = std::max<int>(0,std::min<int>(int(MWBase::Environment::get().getMechanicsManager()->disposition(mPtr)),100));
+
+            MWMechanics::NpcStats sellerSkill = MWWorld::Class::get(mPtr).getNpcStats(mPtr);
+            MWMechanics::CreatureStats sellerStats = MWWorld::Class::get(mPtr).getCreatureStats(mPtr); 
+            MWWorld::Ptr playerPtr = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+            MWMechanics::NpcStats playerSkill = MWWorld::Class::get(playerPtr).getNpcStats(playerPtr);
+            MWMechanics::CreatureStats playerStats = MWWorld::Class::get(playerPtr).getCreatureStats(playerPtr);
+
+            float a1 = std::min<float>(playerSkill.getSkill(ESM::Skill::Mercantile).getModified(), 100);
+            float b1 = std::min<float>(0.1 * playerStats.getAttribute(ESM::Attribute::Luck).getModified(), 10);
+            float c1 = std::min<float>(0.2 * playerStats.getAttribute(ESM::Attribute::Personality).getModified(), 10);
+            float d1 = std::min<float>(sellerSkill.getSkill(ESM::Skill::Mercantile).getModified(), 100);
+            float e1 = std::min<float>(0.1 * sellerStats.getAttribute(ESM::Attribute::Luck).getModified(), 10);
+            float f1 = std::min<float>(0.2 * sellerStats.getAttribute(ESM::Attribute::Personality).getModified(), 10);
+
+            float pcTerm = (clampedDisposition - 50 + a1 + b1 + c1) * playerStats.getFatigueTerm();
+            float npcTerm = (d1 + e1 + f1) * sellerStats.getFatigueTerm();
+            float x = MWBase::Environment::get().getWorld()->getStore().gameSettings.find("fBargainOfferMulti")->getFloat() * d + MWBase::Environment::get().getWorld()->getStore().gameSettings.find("fBargainOfferBase")->getFloat();
+            if (mCurrentMerchantOffer<0) x += abs(int(pcTerm - npcTerm));
+            else x += abs(int(npcTerm - pcTerm));
+
+            int roll = std::rand()%100 + 1;
+            if(roll > x) //trade refused
+            {
+                /// \todo adjust npc temporary disposition by iBarterSuccessDisposition or iBarterFailDisposition
+                return ;
+            }
+        }
+
+
+/// \todo adjust npc temporary disposition by iBarterSuccessDisposition or iBarterFailDisposition
+
         // success! make the item transfer.
         transferBoughtItems();
         mWindowManager.getInventoryWindow()->transferBoughtItems();
@@ -197,6 +248,20 @@ namespace MWGui
         mWindowManager.getInventoryWindow()->returnBoughtItems(MWWorld::Class::get(mPtr).getContainerStore(mPtr));
 
         mWindowManager.removeGuiMode(GM_Barter);
+    }
+
+    void TradeWindow::onIncreaseButtonClicked(MyGUI::Widget* _sender)
+    {
+        if(mCurrentBalance<=-1) mCurrentBalance -= 1;
+        if(mCurrentBalance>=1) mCurrentBalance += 1;
+        updateLabels();
+    }
+
+    void TradeWindow::onDecreaseButtonClicked(MyGUI::Widget* _sender)
+    {
+        if(mCurrentBalance<-1) mCurrentBalance += 1;
+        if(mCurrentBalance>1) mCurrentBalance -= 1;
+        updateLabels();
     }
 
     void TradeWindow::updateLabels()
@@ -317,20 +382,17 @@ namespace MWGui
 
     void TradeWindow::sellToNpc(MWWorld::Ptr item, int count)
     {
-        /// \todo price adjustment depending on merchantile skill
 
-        mCurrentBalance -= MWWorld::Class::get(item).getValue(item) * count
-            + MWBase::Environment::get().getMechanicsManager()->barterOffer(mPtr, MWWorld::Class::get(item).getValue(item) * count,false);
-
+        mCurrentBalance -= MWBase::Environment::get().getMechanicsManager()->barterOffer(mPtr, MWWorld::Class::get(item).getValue(item) * count,true);
+        mCurrentMerchantOffer -= MWBase::Environment::get().getMechanicsManager()->barterOffer(mPtr, MWWorld::Class::get(item).getValue(item) * count,true);
         updateLabels();
     }
 
     void TradeWindow::buyFromNpc(MWWorld::Ptr item, int count)
     {
 
-        mCurrentBalance += MWWorld::Class::get(item).getValue(item) * count 
-            -  MWBase::Environment::get().getMechanicsManager()->barterOffer(mPtr, MWWorld::Class::get(item).getValue(item) * count,true);
-
+        mCurrentBalance += MWBase::Environment::get().getMechanicsManager()->barterOffer(mPtr, MWWorld::Class::get(item).getValue(item) * count,false);
+        mCurrentMerchantOffer += MWBase::Environment::get().getMechanicsManager()->barterOffer(mPtr, MWWorld::Class::get(item).getValue(item) * count,false);
         updateLabels();
     }
 
