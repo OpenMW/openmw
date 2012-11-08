@@ -251,7 +251,6 @@ namespace Physic
 
     PhysicEngine::~PhysicEngine()
     {
-
         HeightFieldContainer::iterator hf_it = mHeightFieldMap.begin();
         for (; hf_it != mHeightFieldMap.end(); ++hf_it)
         {
@@ -293,6 +292,8 @@ namespace Physic
         delete broadphase;
         delete pairCache;
         delete mShapeLoader;
+
+        delete BulletShapeManager::getSingletonPtr();
     }
 
     void PhysicEngine::addHeightField(float* heights,

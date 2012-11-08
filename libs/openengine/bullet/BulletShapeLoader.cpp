@@ -70,7 +70,6 @@ BulletShapeManager *BulletShapeManager::sThis = 0;
 
 BulletShapeManager *BulletShapeManager::getSingletonPtr()
 {
-    assert(sThis);
     return sThis;
 }
 
@@ -82,6 +81,9 @@ BulletShapeManager &BulletShapeManager::getSingleton()
 
 BulletShapeManager::BulletShapeManager()
 {
+    assert(!sThis);
+    sThis = this;
+
     mResourceType = "BulletShape";
 
     // low, because it will likely reference other resources
@@ -95,6 +97,8 @@ BulletShapeManager::~BulletShapeManager()
 {
     // and this is how we unregister it
     Ogre::ResourceGroupManager::getSingleton()._unregisterResourceManager(mResourceType);
+
+    sThis = 0;
 }
 
 BulletShapePtr BulletShapeManager::load(const Ogre::String &name, const Ogre::String &group)

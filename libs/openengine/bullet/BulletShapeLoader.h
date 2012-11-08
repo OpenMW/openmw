@@ -120,6 +120,14 @@ protected:
 
     static BulletShapeManager *sThis;
 
+private:
+    /** \brief Explicit private copy constructor. This is a forbidden operation.*/
+    BulletShapeManager(const BulletShapeManager &);
+
+    /** \brief Private operator= . This is a forbidden operation. */
+    BulletShapeManager& operator=(const BulletShapeManager &);
+
+
 public:
 
     BulletShapeManager();
