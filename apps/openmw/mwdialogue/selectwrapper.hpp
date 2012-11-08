@@ -31,6 +31,8 @@ namespace MWDialogue
             
             Type getType() const;
             
+            bool IsInverted() const;
+            
             bool selectCompare (int value) const;
 
             bool selectCompare (float value) const;

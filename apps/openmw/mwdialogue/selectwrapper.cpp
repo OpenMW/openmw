@@ -51,12 +51,17 @@ MWDialogue::SelectWrapper::Type MWDialogue::SelectWrapper::getType() const
     return Type_None;
 }
 
+bool MWDialogue::SelectWrapper::IsInverted() const
+{
+    return false;
+}
+
 bool MWDialogue::SelectWrapper::selectCompare (int value) const
 {
-    return selectCompareImp (mSelect, value);
+    return selectCompareImp (mSelect, value)!=IsInverted(); // logic XOR
 }
 
 bool MWDialogue::SelectWrapper::selectCompare (float value) const
 {
-    return selectCompareImp (mSelect, value);
+    return selectCompareImp (mSelect, value)!=IsInverted(); // logic XOR
 }
