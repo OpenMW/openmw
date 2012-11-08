@@ -14,11 +14,17 @@ namespace MWDialogue
     {
             MWWorld::Ptr mActor;
     
+            bool testActor (const ESM::DialInfo& info) const;
+            ///< Is this the right actor for this \a info?
+    
+            bool testPlayer (const ESM::DialInfo& info) const;
+            ///< Do the player and the cell the player is currently in match \a info?
+    
         public:
         
             Filter (const MWWorld::Ptr& actor);    
 
-            bool operator() (const ESM::DialInfo& dialogue);    
+            bool operator() (const ESM::DialInfo& info) const;    
             ///< \return does the dialogue match?
     };
 }
