@@ -10,6 +10,8 @@ namespace ESM
 
 namespace MWDialogue
 {
+    class SelectWrapper;
+
     class Filter
     {
             MWWorld::Ptr mActor;
@@ -19,6 +21,15 @@ namespace MWDialogue
     
             bool testPlayer (const ESM::DialInfo& info) const;
             ///< Do the player and the cell the player is currently in match \a info?
+    
+            bool testSelectStructs (const ESM::DialInfo& info) const;
+            ///< Are all select structs matching?
+    
+            bool testSelectStruct (const SelectWrapper& select) const;
+    
+            bool testSelectStructNumeric (const SelectWrapper& select) const;
+            
+            int getSelectStructInteger (const SelectWrapper& select) const;
     
         public:
         

@@ -9,6 +9,8 @@
 
 #include "../mwmechanics/npcstats.hpp"
 
+#include "selectwrapper.hpp"
+
 namespace
 {
     std::string toLower (const std::string& name)
@@ -109,9 +111,51 @@ bool MWDialogue::Filter::testPlayer (const ESM::DialInfo& info) const
     return true;
 }
 
+bool MWDialogue::Filter::testSelectStructs (const ESM::DialInfo& info) const
+{
+    for (std::vector<ESM::DialInfo::SelectStruct>::const_iterator iter (info.mSelects.begin());
+        iter != info.mSelects.end(); ++iter)
+        if (!testSelectStruct (*iter))
+            return false;
+            
+    return true;
+}
+
+bool MWDialogue::Filter::testSelectStruct (const SelectWrapper& select) const
+{
+    switch (select.getType())
+    {
+        case SelectWrapper::Type_None: return true;
+        case SelectWrapper::Type_Integer: return select.selectCompare (getSelectStructInteger (select));
+        case SelectWrapper::Type_Numeric: return testSelectStructNumeric (select);
+    }
+    
+    return true;
+}
+
+bool MWDialogue::Filter::testSelectStructNumeric (const SelectWrapper& select) const
+{
+    switch (select.getFunction())
+    {
+        default:
+        
+            throw std::runtime_error ("unknown numeric select function");
+    }
+}
+
+int MWDialogue::Filter::getSelectStructInteger (const SelectWrapper& select) const
+{
+    switch (select.getFunction())
+    {
+        default:
+
+            throw std::runtime_error ("unknown integer select function");
+    }
+}
+
 MWDialogue::Filter::Filter (const MWWorld::Ptr& actor) : mActor (actor) {}
 
 bool MWDialogue::Filter::operator() (const ESM::DialInfo& info) const
 {
-    return testActor (info) && testPlayer (info);
+    return testActor (info) && testPlayer (info) && testSelectStructs (info);
 }

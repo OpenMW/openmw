@@ -469,11 +469,6 @@ namespace MWDialogue
                     throw std::runtime_error (
                     "unsupported variable type in dialogue info select");
                 return true;
-
-
-            default:
-
-                std::cout << "unchecked select: " << type << " " << comp << " " << name << std::endl;
             }
         }
 
