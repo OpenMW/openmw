@@ -772,6 +772,13 @@ void WindowManager::pushGuiMode(GuiMode mode)
     if (mode==GM_Inventory && mAllowed==GW_None)
         return;
 
+
+    // If this mode already exists somewhere in the stack, just bring it to the front.
+    if (std::find(mGuiModes.begin(), mGuiModes.end(), mode) != mGuiModes.end())
+    {
+        mGuiModes.erase(std::find(mGuiModes.begin(), mGuiModes.end(), mode));
+    }
+
     mGuiModes.push_back(mode);
 
     bool gameMode = !isGuiMode();
