@@ -407,12 +407,12 @@ namespace MWMechanics
         MWMechanics::CreatureStats playerStats = MWWorld::Class::get(playerPtr).getCreatureStats(playerPtr);
 
         int clampedDisposition = std::min(disposition(ptr),100);
-        float a = std::min<float>(playerSkill.getSkill(ESM::Skill::Mercantile).getModified(), 100);
-        float b = std::min<float>(0.1 * playerStats.getAttribute(ESM::Attribute::Luck).getModified(), 10);
-        float c = std::min<float>(0.2 * playerStats.getAttribute(ESM::Attribute::Personality).getModified(), 10);
-        float d = std::min<float>(sellerSkill.getSkill(ESM::Skill::Mercantile).getModified(), 100);
-        float e = std::min<float>(0.1 * sellerStats.getAttribute(ESM::Attribute::Luck).getModified(), 10);
-        float f = std::min<float>(0.2 * sellerStats.getAttribute(ESM::Attribute::Personality).getModified(), 10);
+        float a = std::min(playerSkill.getSkill(ESM::Skill::Mercantile).getModified(), 100.f);
+        float b = std::min(0.1f * playerStats.getAttribute(ESM::Attribute::Luck).getModified(), 10.f);
+        float c = std::min(0.2f * playerStats.getAttribute(ESM::Attribute::Personality).getModified(), 10.f);
+        float d = std::min(sellerSkill.getSkill(ESM::Skill::Mercantile).getModified(), 100.f);
+        float e = std::min(0.1f * sellerStats.getAttribute(ESM::Attribute::Luck).getModified(), 10.f);
+        float f = std::min(0.2f * sellerStats.getAttribute(ESM::Attribute::Personality).getModified(), 10.f);
  
         float pcTerm = (clampedDisposition - 50 + a + b + c) * playerStats.getFatigueTerm();
         float npcTerm = (d + e + f) * sellerStats.getFatigueTerm();
