@@ -206,7 +206,7 @@ namespace MWGui
             if (mCurrentMerchantOffer<0) d = int(100 * (a - b) / a);
             else d = int(100 * (b - a) / a);
 
-            float clampedDisposition = std::max<int>(0,std::min<int>(int(MWBase::Environment::get().getMechanicsManager()->disposition(mPtr)),100));
+            float clampedDisposition = std::max<int>(0,std::min<int>(int(MWBase::Environment::get().getMechanicsManager()->getDerivedDisposition(mPtr)),100));
 
             MWMechanics::NpcStats sellerSkill = MWWorld::Class::get(mPtr).getNpcStats(mPtr);
             MWMechanics::CreatureStats sellerStats = MWWorld::Class::get(mPtr).getCreatureStats(mPtr); 
@@ -397,16 +397,16 @@ namespace MWGui
     void TradeWindow::sellToNpc(MWWorld::Ptr item, int count)
     {
 
-        mCurrentBalance -= MWBase::Environment::get().getMechanicsManager()->barterOffer(mPtr, MWWorld::Class::get(item).getValue(item) * count,true);
-        mCurrentMerchantOffer -= MWBase::Environment::get().getMechanicsManager()->barterOffer(mPtr, MWWorld::Class::get(item).getValue(item) * count,true);
+        mCurrentBalance -= MWBase::Environment::get().getMechanicsManager()->getBarterOffer(mPtr, MWWorld::Class::get(item).getValue(item) * count,true);
+        mCurrentMerchantOffer -= MWBase::Environment::get().getMechanicsManager()->getBarterOffer(mPtr, MWWorld::Class::get(item).getValue(item) * count,true);
         updateLabels();
     }
 
     void TradeWindow::buyFromNpc(MWWorld::Ptr item, int count)
     {
 
-        mCurrentBalance += MWBase::Environment::get().getMechanicsManager()->barterOffer(mPtr, MWWorld::Class::get(item).getValue(item) * count,false);
-        mCurrentMerchantOffer += MWBase::Environment::get().getMechanicsManager()->barterOffer(mPtr, MWWorld::Class::get(item).getValue(item) * count,false);
+        mCurrentBalance += MWBase::Environment::get().getMechanicsManager()->getBarterOffer(mPtr, MWWorld::Class::get(item).getValue(item) * count,false);
+        mCurrentMerchantOffer += MWBase::Environment::get().getMechanicsManager()->getBarterOffer(mPtr, MWWorld::Class::get(item).getValue(item) * count,false);
         updateLabels();
     }
 

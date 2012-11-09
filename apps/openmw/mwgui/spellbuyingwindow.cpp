@@ -55,7 +55,7 @@ namespace MWGui
 
         const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find(spellId);
         int price = spell->mData.mCost*store.get<ESM::GameSetting>().find("fSpellValueMult")->getFloat();
-        price = MWBase::Environment::get().getMechanicsManager()->barterOffer(mPtr,price,true);
+        price = MWBase::Environment::get().getMechanicsManager()->getBarterOffer(mPtr,price,true);
 
         MyGUI::Button* toAdd =
             mSpellsView->createWidget<MyGUI::Button>(

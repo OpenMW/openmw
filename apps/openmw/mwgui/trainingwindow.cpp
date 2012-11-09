@@ -79,7 +79,7 @@ namespace MWGui
 
         for (int i=0; i<3; ++i)
         {
-            int price = MWBase::Environment::get().getMechanicsManager()->barterOffer
+            int price = MWBase::Environment::get().getMechanicsManager()->getBarterOffer
                     (mPtr,pcStats.getSkill (bestSkills[i].first).getBase() * gmst.find("iTrainingMod")->getInt (),true);
 
             std::string skin = (price > mWindowManager.getInventoryWindow ()->getPlayerGold ()) ? "SandTextGreyedOut" : "SandTextButton";
@@ -121,7 +121,7 @@ namespace MWGui
             MWBase::Environment::get().getWorld()->getStore();
 
         int price = pcStats.getSkill (skillId).getBase() * store.get<ESM::GameSetting>().find("iTrainingMod")->getInt ();
-        price = MWBase::Environment::get().getMechanicsManager()->barterOffer(mPtr,price,true);
+        price = MWBase::Environment::get().getMechanicsManager()->getBarterOffer(mPtr,price,true);
 
         if (mWindowManager.getInventoryWindow()->getPlayerGold()<price)
             return;

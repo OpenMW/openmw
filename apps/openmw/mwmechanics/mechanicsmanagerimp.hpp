@@ -79,10 +79,10 @@ namespace MWMechanics
             virtual void restoreDynamicStats();
             ///< If the player is sleeping, this should be called every hour.
 
-            virtual int barterOffer(const MWWorld::Ptr& ptr,int basePrice, bool buying);
+            virtual int getBarterOffer(const MWWorld::Ptr& ptr,int basePrice, bool buying);
             ///< This is used by every service to determine the price of objects given the trading skills of the player and NPC.
 
-            virtual int disposition(const MWWorld::Ptr& ptr);
+            virtual int getDerivedDisposition(const MWWorld::Ptr& ptr);
             ///< Calculate the diposition of an NPC toward the player.
 
             virtual int countDeaths (const std::string& id) const;

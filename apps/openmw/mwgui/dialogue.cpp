@@ -303,9 +303,9 @@ void DialogueWindow::updateOptions()
     if (mPtr.getTypeName() == typeid(ESM::NPC).name())
     {
         mDispositionBar->setProgressRange(100);
-        mDispositionBar->setProgressPosition(MWBase::Environment::get().getMechanicsManager()->disposition(mPtr));
+        mDispositionBar->setProgressPosition(MWBase::Environment::get().getMechanicsManager()->getDerivedDisposition(mPtr));
         mDispositionText->eraseText(0, mDispositionText->getTextLength());
-        mDispositionText->addText("#B29154"+boost::lexical_cast<std::string>(MWBase::Environment::get().getMechanicsManager()->disposition(mPtr))+std::string("/100")+"#B29154");
+        mDispositionText->addText("#B29154"+boost::lexical_cast<std::string>(MWBase::Environment::get().getMechanicsManager()->getDerivedDisposition(mPtr))+std::string("/100")+"#B29154");
     }
 }
 
@@ -326,8 +326,8 @@ void DialogueWindow::onFrame()
     if(mEnabled && mPtr.getTypeName() == typeid(ESM::NPC).name())
     {
         mDispositionBar->setProgressRange(100);
-        mDispositionBar->setProgressPosition(MWBase::Environment::get().getMechanicsManager()->disposition(mPtr));
+        mDispositionBar->setProgressPosition(MWBase::Environment::get().getMechanicsManager()->getDerivedDisposition(mPtr));
         mDispositionText->eraseText(0, mDispositionText->getTextLength());
-        mDispositionText->addText("#B29154"+boost::lexical_cast<std::string>(MWBase::Environment::get().getMechanicsManager()->disposition(mPtr))+std::string("/100")+"#B29154");
+        mDispositionText->addText("#B29154"+boost::lexical_cast<std::string>(MWBase::Environment::get().getMechanicsManager()->getDerivedDisposition(mPtr))+std::string("/100")+"#B29154");
     }
 }

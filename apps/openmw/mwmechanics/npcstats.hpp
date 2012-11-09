@@ -43,7 +43,7 @@ namespace MWMechanics
             std::map<std::string, int> mFactionRank;
 
             DrawState_ mDrawState;
-            unsigned int mDisposition;
+            int mDisposition;
             unsigned int mMovementFlags;
             Stat<float> mSkill[27];
 
@@ -61,9 +61,9 @@ namespace MWMechanics
 
             void setDrawState (DrawState_ state);
 
-            unsigned int getDisposition() const;
+            int getDisposition() const;
 
-            void setDisposition(unsigned int disposition);
+            void setDisposition(int disposition);
 
             bool getMovementFlag (Flag flag) const;
 

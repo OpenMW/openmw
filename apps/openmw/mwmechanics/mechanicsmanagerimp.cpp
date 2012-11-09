@@ -388,7 +388,7 @@ namespace MWMechanics
         return lowerCase;
     }
 
-    int MechanicsManager::disposition(const MWWorld::Ptr& ptr)
+    int MechanicsManager::getDerivedDisposition(const MWWorld::Ptr& ptr)
     {
         MWMechanics::NpcStats npcSkill = MWWorld::Class::get(ptr).getNpcStats(ptr);
         float x = npcSkill.getDisposition();
@@ -448,7 +448,7 @@ namespace MWMechanics
         return effective_disposition;
     }
 
-    int MechanicsManager::barterOffer(const MWWorld::Ptr& ptr,int basePrice, bool buying)
+    int MechanicsManager::getBarterOffer(const MWWorld::Ptr& ptr,int basePrice, bool buying)
     {
         if (ptr.getTypeName() == typeid(ESM::Creature).name())
             return basePrice;
@@ -460,7 +460,7 @@ namespace MWMechanics
         MWMechanics::NpcStats playerSkill = MWWorld::Class::get(playerPtr).getNpcStats(playerPtr);
         MWMechanics::CreatureStats playerStats = MWWorld::Class::get(playerPtr).getCreatureStats(playerPtr);
 
-        int clampedDisposition = std::min(disposition(ptr),100);
+        int clampedDisposition = std::min(getDerivedDisposition(ptr),100);
         float a = std::min(playerSkill.getSkill(ESM::Skill::Mercantile).getModified(), 100.f);
         float b = std::min(0.1f * playerStats.getAttribute(ESM::Attribute::Luck).getModified(), 10.f);
         float c = std::min(0.2f * playerStats.getAttribute(ESM::Attribute::Personality).getModified(), 10.f);
