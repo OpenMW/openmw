@@ -6,6 +6,7 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"
+#include "../mwbase/dialoguemanager.hpp"
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/player.hpp"
@@ -462,7 +463,10 @@ namespace MWMechanics
         MWMechanics::NpcStats playerSkill = MWWorld::Class::get(playerPtr).getNpcStats(playerPtr);
         MWMechanics::CreatureStats playerStats = MWWorld::Class::get(playerPtr).getCreatureStats(playerPtr);
 
-        int clampedDisposition = std::min(getDerivedDisposition(ptr),100);
+        // I suppose the temporary disposition change _has_ to be considered here,
+        // otherwise one would get different prices when exiting and re-entering the dialogue window...
+        int clampedDisposition = std::max(0, std::min(getDerivedDisposition(ptr)
+            + MWBase::Environment::get().getDialogueManager()->getTemporaryDispositionChange(),100));
         float a = std::min(playerSkill.getSkill(ESM::Skill::Mercantile).getModified(), 100.f);
         float b = std::min(0.1f * playerStats.getAttribute(ESM::Attribute::Luck).getModified(), 10.f);
         float c = std::min(0.2f * playerStats.getAttribute(ESM::Attribute::Personality).getModified(), 10.f);
