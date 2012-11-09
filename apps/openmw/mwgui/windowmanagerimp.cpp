@@ -83,7 +83,6 @@ WindowManager::WindowManager(
   , mSpellCreationDialog(NULL)
   , mEnchantingDialog(NULL)
   , mTrainingWindow(NULL)
-  , mPlayerClass()
   , mPlayerName()
   , mPlayerRaceId()
   , mPlayerAttributes()
@@ -499,8 +498,7 @@ void WindowManager::setValue (const std::string& id, int value)
 
 void WindowManager::setPlayerClass (const ESM::Class &class_)
 {
-    mPlayerClass = class_;
-    mStatsWindow->setValue("class", mPlayerClass.mName);
+    mStatsWindow->setValue("class", class_.mName);
 }
 
 void WindowManager::configureSkills (const SkillList& major, const SkillList& minor)
@@ -583,6 +581,8 @@ void WindowManager::onFrame (float frameDuration)
         assert(mDragAndDrop->mDraggedWidget);
         mDragAndDrop->mDraggedWidget->setPosition(MyGUI::InputManager::getInstance().getMousePosition());
     }
+
+    mDialogueWindow->onFrame();
 
     mInventoryWindow->onFrame();
 
@@ -773,6 +773,13 @@ void WindowManager::pushGuiMode(GuiMode mode)
 {
     if (mode==GM_Inventory && mAllowed==GW_None)
         return;
+
+
+    // If this mode already exists somewhere in the stack, just bring it to the front.
+    if (std::find(mGuiModes.begin(), mGuiModes.end(), mode) != mGuiModes.end())
+    {
+        mGuiModes.erase(std::find(mGuiModes.begin(), mGuiModes.end(), mode));
+    }
 
     mGuiModes.push_back(mode);
 

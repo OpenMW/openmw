@@ -43,8 +43,10 @@ namespace MWMechanics
             std::map<std::string, int> mFactionRank;
 
             DrawState_ mDrawState;
+            int mDisposition;
             unsigned int mMovementFlags;
             Stat<float> mSkill[27];
+            int mBounty;
 
             int mLevelProgress; // 0-10
 
@@ -59,6 +61,10 @@ namespace MWMechanics
             DrawState_ getDrawState() const;
 
             void setDrawState (DrawState_ state);
+
+            int getDisposition() const;
+
+            void setDisposition(int disposition);
 
             bool getMovementFlag (Flag flag) const;
 
@@ -92,6 +98,10 @@ namespace MWMechanics
             void flagAsUsed (const std::string& id);
             
             bool hasBeenUsed (const std::string& id) const;
+            
+            int getBounty() const;
+            
+            void setBounty (int bounty);
     };
 }
 

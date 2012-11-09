@@ -47,6 +47,7 @@ namespace MWGui
         void addTitle(std::string text);
         void askQuestion(std::string question);
         void goodbye();
+        void onFrame();
 
         // make sure to call these before setKeywords()
         void setServices(int services) { mServices = services; }

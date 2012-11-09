@@ -108,7 +108,8 @@ namespace MWGui
 
     void LevelupDialog::open()
     {
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld ()->getPlayer().getPlayer();
+        MWBase::World *world = MWBase::Environment::get().getWorld();
+        MWWorld::Ptr player = world->getPlayer().getPlayer();
         MWMechanics::CreatureStats& creatureStats = MWWorld::Class::get(player).getCreatureStats (player);
         MWMechanics::NpcStats& pcStats = MWWorld::Class::get(player).getNpcStats (player);
 
@@ -119,20 +120,13 @@ namespace MWGui
 
         setAttributeValues();
 
-        // set class image
-        const ESM::Class& playerClass = MWBase::Environment::get().getWorld ()->getPlayer ().getClass ();
-        // retrieve the ID to this class
-        std::string classId;
-        const MWWorld::Store<ESM::Class> &classes =
-            MWBase::Environment::get().getWorld()->getStore().get<ESM::Class>();
+        const ESM::NPC *playerData = player.get<ESM::NPC>()->mBase;
 
-        MWWorld::Store<ESM::Class>::iterator it = classes.begin();
-        for (; it != classes.end(); ++it)
-        {
-            if (playerClass.mName == it->mName)
-                classId = it->mId;
-        }
-        mClassImage->setImageTexture ("textures\\levelup\\" + classId + ".dds");
+        // set class image
+        const ESM::Class *cls =
+            world->getStore().get<ESM::Class>().find(playerData->mClass);
+
+        mClassImage->setImageTexture ("textures\\levelup\\" + cls->mId + ".dds");
 
         /// \todo replace this with INI-imported texts
         int level = creatureStats.getLevel ()+1;

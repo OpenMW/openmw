@@ -779,25 +779,27 @@ namespace MWWorld
         return mRendering->toggleRenderMode (mode);
     }
 
-    std::pair<std::string, const ESM::Potion *> World::createRecord (const ESM::Potion& record)
+    const ESM::Potion *World::createRecord (const ESM::Potion& record)
     {
-        const ESM::Potion *ptr = mStore.insert(record);
-        return std::make_pair(ptr->mId, ptr);
+        return mStore.insert(record); 
     }
 
-    std::pair<std::string, const ESM::Class *> World::createRecord (const ESM::Class& record)
+    const ESM::Class *World::createRecord (const ESM::Class& record)
     {
-        const ESM::Class *ptr = mStore.insert(record);
-        return std::make_pair(ptr->mId, ptr);
+        return mStore.insert(record);
     }
 
-    std::pair<std::string, const ESM::Spell *> World::createRecord (const ESM::Spell& record)
+    const ESM::Spell *World::createRecord (const ESM::Spell& record)
     {
-        const ESM::Spell *ptr = mStore.insert(record);
-        return std::make_pair(ptr->mId, ptr);
+        return mStore.insert(record);
     }
 
     const ESM::Cell *World::createRecord (const ESM::Cell& record)
+    {
+        return mStore.insert(record);
+    }
+
+    const ESM::NPC *World::createRecord(const ESM::NPC &record)
     {
         return mStore.insert(record);
     }

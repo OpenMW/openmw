@@ -559,6 +559,7 @@ void CharacterCreation::onCreateClassDialogDone(WindowBase* parWindow)
             klass.mData.mSkills[i][1] = majorSkills[i];
             klass.mData.mSkills[i][0] = minorSkills[i];
         }
+
         MWBase::Environment::get().getMechanicsManager()->setPlayerClass(klass);
         mPlayerClass = klass;
         mWM->setPlayerClass(klass);

@@ -146,8 +146,13 @@ namespace MWWorld
         }
 
         template <class T>
-        T *insert(const T &x) {
+        const T *insert(const T &x) {
             Store<T> &store = const_cast<Store<T> &>(get<T>());
+            if (store.search(x.mId) != 0) {
+                std::ostringstream msg;
+                msg << "Try to override existing record '" << x.mId << "'";
+                throw std::runtime_error(msg.str());
+            }
             T record = x;
 
             std::ostringstream id;
@@ -168,8 +173,28 @@ namespace MWWorld
     };
 
     template <>
-    inline ESM::Cell *ESMStore::insert<ESM::Cell>(const ESM::Cell &cell) {
+    inline const ESM::Cell *ESMStore::insert<ESM::Cell>(const ESM::Cell &cell) {
         return mCells.insert(cell);
+    }
+
+    template <>
+    inline const ESM::NPC *ESMStore::insert<ESM::NPC>(const ESM::NPC &npc) {
+        if (StringUtils::ciEqual(npc.mId, "player")) {
+            return mNpcs.insert(npc);
+        } else if (mNpcs.search(npc.mId) != 0) {
+            std::ostringstream msg;
+            msg << "Try to override existing record '" << npc.mId << "'";
+            throw std::runtime_error(msg.str());
+        }
+        ESM::NPC record = npc;
+
+        std::ostringstream id;
+        id << "$dynamic" << mDynamicCount++;
+        record.mId = id.str();
+            
+        ESM::NPC *ptr = mNpcs.insert(record);
+        mIds[ptr->mId] = ESM::REC_NPC_;
+        return ptr;
     }
 
     template <>

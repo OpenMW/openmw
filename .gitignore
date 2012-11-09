@@ -14,3 +14,4 @@ Makefile
 makefile
 data
 *.kdev4
+CMakeLists.txt.user

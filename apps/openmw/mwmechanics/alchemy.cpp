@@ -279,7 +279,7 @@ void MWMechanics::Alchemy::addPotion (const std::string& name)
         
         newRecord.mEffects.mList = mEffects;
         
-        record = MWBase::Environment::get().getWorld()->createRecord (newRecord).second;
+        record = MWBase::Environment::get().getWorld()->createRecord (newRecord);
     }
     
     MWWorld::ManualRef ref (MWBase::Environment::get().getWorld()->getStore(), record->mId);

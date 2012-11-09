@@ -75,4 +75,32 @@ namespace MWMechanics
     {
         return mSelectedSpell;
     }
+    
+    bool Spells::hasCommonDisease() const
+    {
+        for (TIterator iter = mSpells.begin(); iter!=mSpells.end(); ++iter)
+        {
+            const ESM::Spell *spell =
+                MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find (*iter);
+        
+            if (spell->mData.mFlags & ESM::Spell::ST_Disease)
+                return true;
+        }
+        
+        return false;
+    }
+
+    bool Spells::hasBlightDisease() const
+    {
+        for (TIterator iter = mSpells.begin(); iter!=mSpells.end(); ++iter)
+        {
+            const ESM::Spell *spell =
+                MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find (*iter);
+        
+            if (spell->mData.mFlags & ESM::Spell::ST_Blight)
+                return true;
+        }
+        
+        return false;    
+    }
 }
