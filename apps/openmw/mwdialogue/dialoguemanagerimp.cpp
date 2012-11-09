@@ -873,8 +873,11 @@ namespace MWDialogue
         MWBase::Environment::get().getWindowManager()->removeGuiMode(MWGui::GM_Dialogue);
 
         // Apply disposition change to NPC's base disposition
-        MWMechanics::NpcStats npcStats = MWWorld::Class::get(mActor).getNpcStats(mActor);
-        npcStats.setBaseDisposition(npcStats.getBaseDisposition() + mPermanentDispositionChange);
+        if (mActor.getTypeName() == typeid(ESM::NPC).name())
+        {
+            MWMechanics::NpcStats npcStats = MWWorld::Class::get(mActor).getNpcStats(mActor);
+            npcStats.setBaseDisposition(npcStats.getBaseDisposition() + mPermanentDispositionChange);
+        }
         mPermanentDispositionChange = 0;
         mTemporaryDispositionChange = 0;
     }
@@ -1000,5 +1003,10 @@ namespace MWDialogue
     int DialogueManager::getTemporaryDispositionChange() const
     {
         return mTemporaryDispositionChange;
+    }
+
+    void DialogueManager::applyTemporaryDispositionChange(int delta)
+    {
+        mTemporaryDispositionChange += delta;
     }
 }

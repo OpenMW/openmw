@@ -74,6 +74,7 @@ namespace MWDialogue
 
             virtual void persuade (int type);
             virtual int getTemporaryDispositionChange () const;
+            virtual void applyTemporaryDispositionChange (int delta);
     };
 }
 
