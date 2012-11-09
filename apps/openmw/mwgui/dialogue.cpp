@@ -214,7 +214,6 @@ void DialogueWindow::onSelectTopic(std::string topic)
     }
     if (topic == gmst.find("sPersuasion")->getString())
     {
-        mPersuasionDialog.setPtr(mPtr);
         mPersuasionDialog.setVisible(true);
     }
     else if (topic == gmst.find("sSpells")->getString())

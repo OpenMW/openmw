@@ -33,8 +33,6 @@ namespace MWGui
 
         virtual void open();
 
-        void setPtr(MWWorld::Ptr ptr) { mPtr = ptr; }
-
     private:
         MyGUI::Button* mCancelButton;
         MyGUI::Button* mAdmireButton;
@@ -47,8 +45,6 @@ namespace MWGui
 
         void onCancel (MyGUI::Widget* sender);
         void onPersuade (MyGUI::Widget* sender);
-
-        MWWorld::Ptr mPtr;
     };
 
     class DialogueWindow: public WindowBase, public ReferenceInterface
