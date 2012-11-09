@@ -7,6 +7,7 @@
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
+#include "../mwbase/mechanicsmanager.hpp"
 
 #include "../mwworld/player.hpp"
 
@@ -78,8 +79,8 @@ namespace MWGui
 
         for (int i=0; i<3; ++i)
         {
-            /// \todo mercantile skill
-            int price = pcStats.getSkill (bestSkills[i].first).getBase() * gmst.find("iTrainingMod")->getInt ();
+            int price = MWBase::Environment::get().getMechanicsManager()->getBarterOffer
+                    (mPtr,pcStats.getSkill (bestSkills[i].first).getBase() * gmst.find("iTrainingMod")->getInt (),true);
 
             std::string skin = (price > mWindowManager.getInventoryWindow ()->getPlayerGold ()) ? "SandTextGreyedOut" : "SandTextButton";
 
@@ -119,8 +120,8 @@ namespace MWGui
         const MWWorld::ESMStore &store =
             MWBase::Environment::get().getWorld()->getStore();
 
-        /// \todo mercantile skill
         int price = pcStats.getSkill (skillId).getBase() * store.get<ESM::GameSetting>().find("iTrainingMod")->getInt ();
+        price = MWBase::Environment::get().getMechanicsManager()->getBarterOffer(mPtr,price,true);
 
         if (mWindowManager.getInventoryWindow()->getPlayerGold()<price)
             return;

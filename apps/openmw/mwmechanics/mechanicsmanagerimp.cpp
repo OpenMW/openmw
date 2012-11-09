@@ -378,6 +378,111 @@ namespace MWMechanics
         mUpdatePlayer = true;
     }
 
+    std::string toLower (const std::string& name)
+    {
+        std::string lowerCase;
+
+        std::transform (name.begin(), name.end(), std::back_inserter (lowerCase),
+            (int(*)(int)) std::tolower);
+
+        return lowerCase;
+    }
+
+    int MechanicsManager::getDerivedDisposition(const MWWorld::Ptr& ptr)
+    {
+        MWMechanics::NpcStats npcSkill = MWWorld::Class::get(ptr).getNpcStats(ptr);
+        float x = npcSkill.getDisposition();
+
+        MWWorld::LiveCellRef<ESM::NPC>* npc = ptr.get<ESM::NPC>();
+        MWWorld::Ptr playerPtr = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+        MWWorld::LiveCellRef<ESM::NPC>* player = playerPtr.get<ESM::NPC>();
+        MWMechanics::CreatureStats playerStats = MWWorld::Class::get(playerPtr).getCreatureStats(playerPtr);
+        MWMechanics::NpcStats playerSkill = MWWorld::Class::get(playerPtr).getNpcStats(playerPtr);
+
+        if (toLower(npc->mBase->mRace) == toLower(player->mBase->mRace)) x += MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fDispRaceMod")->getFloat();
+
+        x += MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fDispPersonalityMult")->getFloat()
+            * (playerStats.getAttribute(ESM::Attribute::Personality).getModified() - MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fDispPersonalityBase")->getFloat());
+
+        float reaction = 0;
+        int rank = 0;
+        std::string npcFaction = "";
+        if(!npcSkill.getFactionRanks().empty()) npcFaction = npcSkill.getFactionRanks().begin()->first;
+
+        if (playerSkill.getFactionRanks().find(toLower(npcFaction)) != playerSkill.getFactionRanks().end())
+        {
+            for(std::vector<ESM::Faction::Reaction>::const_iterator it = MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(toLower(npcFaction))->mReactions.begin();
+                it != MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(toLower(npcFaction))->mReactions.end(); it++)
+            {
+                if(toLower(it->mFaction) == toLower(npcFaction)) reaction = it->mReaction;
+            }
+            rank = playerSkill.getFactionRanks().find(toLower(npcFaction))->second;
+        }
+        else if (npcFaction != "")
+        {
+            for(std::vector<ESM::Faction::Reaction>::const_iterator it = MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(toLower(npcFaction))->mReactions.begin();
+                it != MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(toLower(npcFaction))->mReactions.end();it++)
+            {
+                if(playerSkill.getFactionRanks().find(toLower(it->mFaction)) != playerSkill.getFactionRanks().end() )
+                {
+                    if(it->mReaction<reaction) reaction = it->mReaction;
+                }
+            }
+            rank = 0;
+        }
+        else
+        {
+            reaction = 0;
+            rank = 0;
+        }
+        x += (MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fDispFactionRankMult")->getFloat() * rank
+            + MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fDispFactionRankBase")->getFloat())
+            * MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fDispFactionMod")->getFloat() * reaction;
+
+        /// \todo implement bounty and disease
+        //x -= MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fDispCrimeMod") * pcBounty;
+        //if (pc has a disease) x += MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fDispDiseaseMod");
+        if (playerSkill.getDrawState() == MWMechanics::DrawState_::DrawState_Weapon) x += MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fDispWeaponDrawn")->getFloat();
+
+        int effective_disposition = std::max(0,std::min(int(x),100));//, normally clamped to [0..100] when used
+        return effective_disposition;
+    }
+
+    int MechanicsManager::getBarterOffer(const MWWorld::Ptr& ptr,int basePrice, bool buying)
+    {
+        if (ptr.getTypeName() == typeid(ESM::Creature).name())
+            return basePrice;
+
+        MWMechanics::NpcStats sellerSkill = MWWorld::Class::get(ptr).getNpcStats(ptr);
+        MWMechanics::CreatureStats sellerStats = MWWorld::Class::get(ptr).getCreatureStats(ptr); 
+
+        MWWorld::Ptr playerPtr = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+        MWMechanics::NpcStats playerSkill = MWWorld::Class::get(playerPtr).getNpcStats(playerPtr);
+        MWMechanics::CreatureStats playerStats = MWWorld::Class::get(playerPtr).getCreatureStats(playerPtr);
+
+        int clampedDisposition = std::min(getDerivedDisposition(ptr),100);
+        float a = std::min(playerSkill.getSkill(ESM::Skill::Mercantile).getModified(), 100.f);
+        float b = std::min(0.1f * playerStats.getAttribute(ESM::Attribute::Luck).getModified(), 10.f);
+        float c = std::min(0.2f * playerStats.getAttribute(ESM::Attribute::Personality).getModified(), 10.f);
+        float d = std::min(sellerSkill.getSkill(ESM::Skill::Mercantile).getModified(), 100.f);
+        float e = std::min(0.1f * sellerStats.getAttribute(ESM::Attribute::Luck).getModified(), 10.f);
+        float f = std::min(0.2f * sellerStats.getAttribute(ESM::Attribute::Personality).getModified(), 10.f);
+ 
+        float pcTerm = (clampedDisposition - 50 + a + b + c) * playerStats.getFatigueTerm();
+        float npcTerm = (d + e + f) * sellerStats.getFatigueTerm();
+        float buyTerm = 0.01 * (100 - 0.5 * (pcTerm - npcTerm));
+        float sellTerm = 0.01 * (50 - 0.5 * (npcTerm - pcTerm));
+
+        float x; 
+        if(buying) x = buyTerm;
+        else x = std::min(buyTerm, sellTerm);
+        int offerPrice;
+        if (x < 1) offerPrice = int(x * basePrice);
+        if (x >= 1) offerPrice = basePrice + int((x - 1) * basePrice);
+        offerPrice = std::max(1, offerPrice);
+        return offerPrice;
+    }
+
     int MechanicsManager::countDeaths (const std::string& id) const
     {
         return mActors.countDeaths (id);

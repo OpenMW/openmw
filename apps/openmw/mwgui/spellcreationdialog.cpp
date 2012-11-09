@@ -7,6 +7,7 @@
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwbase/soundmanager.hpp"
+#include "../mwbase/mechanicsmanager.hpp"
 
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/player.hpp"
@@ -399,8 +400,7 @@ namespace MWGui
         float fSpellMakingValueMult =
             store.get<ESM::GameSetting>().find("fSpellMakingValueMult")->getFloat();
 
-        /// \todo mercantile
-        int price = int(y) * fSpellMakingValueMult;
+        int price = MWBase::Environment::get().getMechanicsManager()->getBarterOffer(mPtr,int(y) * fSpellMakingValueMult,true);
 
         mPriceLabel->setCaption(boost::lexical_cast<std::string>(int(price)));
 

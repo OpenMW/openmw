@@ -8,6 +8,7 @@
 #include "../mwbase/world.hpp"
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
+#include "../mwbase/mechanicsmanager.hpp"
 
 #include "../mwworld/player.hpp"
 #include "../mwworld/manualref.hpp"
@@ -52,9 +53,9 @@ namespace MWGui
         const MWWorld::ESMStore &store =
             MWBase::Environment::get().getWorld()->getStore();
 
-        const ESM::Spell* spell = store.get<ESM::Spell>().find(spellId);
-
+        const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find(spellId);
         int price = spell->mData.mCost*store.get<ESM::GameSetting>().find("fSpellValueMult")->getFloat();
+        price = MWBase::Environment::get().getMechanicsManager()->getBarterOffer(mPtr,price,true);
 
         MyGUI::Button* toAdd =
             mSpellsView->createWidget<MyGUI::Button>(
@@ -67,7 +68,6 @@ namespace MWGui
             );
 
         mCurrentY += sLineHeight;
-        /// \todo price adjustment depending on merchantile skill
 
         toAdd->setUserData(price);
         toAdd->setCaptionWithReplacing(spell->mName+"   -   "+boost::lexical_cast<std::string>(price)+"#{sgp}");

@@ -804,7 +804,7 @@ namespace MWDialogue
             || services & ESM::NPC::Misc)
             windowServices |= MWGui::DialogueWindow::Service_Trade;
 
-        if( !mActor.get<ESM::NPC>()->mBase->mTransport.empty())
+        if(mActor.getTypeName() == typeid(ESM::NPC).name() && !mActor.get<ESM::NPC>()->mBase->mTransport.empty())
             windowServices |= MWGui::DialogueWindow::Service_Travel;
 
         if (services & ESM::NPC::Spells)

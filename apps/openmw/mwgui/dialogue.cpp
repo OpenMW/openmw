@@ -12,6 +12,7 @@
 #include "../mwbase/dialoguemanager.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"
+#include "../mwbase/mechanicsmanager.hpp"
 
 #include "dialogue_history.hpp"
 #include "widgets.hpp"
@@ -50,7 +51,7 @@ std::string::size_type find_str_ci(const std::string& str, const std::string& su
 
 DialogueWindow::DialogueWindow(MWBase::WindowManager& parWindowManager)
     : WindowBase("openmw_dialogue_window.layout", parWindowManager)
-    , mEnabled(true)
+    , mEnabled(false)
     , mServices(0)
 {
     // Centre dialog
@@ -299,10 +300,13 @@ void DialogueWindow::updateOptions()
     mTopicsList->clear();
     mHistory->eraseText(0, mHistory->getTextLength());
 
-    mDispositionBar->setProgressRange(100);
-    mDispositionBar->setProgressPosition(40);
-    mDispositionText->eraseText(0, mDispositionText->getTextLength());
-    mDispositionText->addText("#B29154"+std::string("40/100")+"#B29154");
+    if (mPtr.getTypeName() == typeid(ESM::NPC).name())
+    {
+        mDispositionBar->setProgressRange(100);
+        mDispositionBar->setProgressPosition(MWBase::Environment::get().getMechanicsManager()->getDerivedDisposition(mPtr));
+        mDispositionText->eraseText(0, mDispositionText->getTextLength());
+        mDispositionText->addText("#B29154"+boost::lexical_cast<std::string>(MWBase::Environment::get().getMechanicsManager()->getDerivedDisposition(mPtr))+std::string("/100")+"#B29154");
+    }
 }
 
 void DialogueWindow::goodbye()
@@ -315,4 +319,15 @@ void DialogueWindow::goodbye()
 void DialogueWindow::onReferenceUnavailable()
 {
     mWindowManager.removeGuiMode(GM_Dialogue);
+}
+
+void DialogueWindow::onFrame()
+{
+    if(mEnabled && mPtr.getTypeName() == typeid(ESM::NPC).name())
+    {
+        mDispositionBar->setProgressRange(100);
+        mDispositionBar->setProgressPosition(MWBase::Environment::get().getMechanicsManager()->getDerivedDisposition(mPtr));
+        mDispositionText->eraseText(0, mDispositionText->getTextLength());
+        mDispositionText->addText("#B29154"+boost::lexical_cast<std::string>(MWBase::Environment::get().getMechanicsManager()->getDerivedDisposition(mPtr))+std::string("/100")+"#B29154");
+    }
 }
