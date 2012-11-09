@@ -96,6 +96,7 @@ namespace MWClass
 
                 data->mCreatureStats.setLevel(ref->mBase->mNpdt52.mLevel);
                 data->mNpcStats.setBaseDisposition(ref->mBase->mNpdt52.mDisposition);
+                data->mNpcStats.setReputation(ref->mBase->mNpdt52.mReputation);
             }
             else
             {

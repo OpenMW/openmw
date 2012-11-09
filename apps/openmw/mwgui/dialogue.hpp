@@ -33,9 +33,7 @@ namespace MWGui
 
         virtual void open();
 
-        typedef MyGUI::delegates::CMultiDelegate3<int, bool, float> EventHandle_Persuade;
-
-        EventHandle_Persuade eventPersuade;
+        void setPtr(MWWorld::Ptr ptr) { mPtr = ptr; }
 
     private:
         MyGUI::Button* mCancelButton;
@@ -49,6 +47,8 @@ namespace MWGui
 
         void onCancel (MyGUI::Widget* sender);
         void onPersuade (MyGUI::Widget* sender);
+
+        MWWorld::Ptr mPtr;
     };
 
     class DialogueWindow: public WindowBase, public ReferenceInterface
@@ -113,11 +113,6 @@ namespace MWGui
         MyGUI::EditPtr     mDispositionText;
 
         PersuasionDialog mPersuasionDialog;
-
-
-        float mTemporaryDispositionChange;
-
-        void onPersuade (int type, bool success, float dispositionChange);
     };
 }
 #endif

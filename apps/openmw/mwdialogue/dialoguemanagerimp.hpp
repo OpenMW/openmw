@@ -49,6 +49,9 @@ namespace MWDialogue
             ESM::DialInfo mLastDialogue;
             bool mIsInChoice;
 
+            float mTemporaryDispositionChange;
+            float mPermanentDispositionChange;
+
         public:
 
             DialogueManager (const Compiler::Extensions& extensions);
@@ -69,6 +72,8 @@ namespace MWDialogue
             virtual void goodbyeSelected();
             virtual void questionAnswered (const std::string& answer);
 
+            virtual void persuade (int type);
+            virtual int getTemporaryDispositionChange () const;
     };
 }
 

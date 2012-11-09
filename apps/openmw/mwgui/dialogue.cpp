@@ -14,6 +14,8 @@
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 
+#include "../mwmechanics/npcstats.hpp"
+
 #include "dialogue_history.hpp"
 #include "widgets.hpp"
 #include "list.hpp"
@@ -98,7 +100,8 @@ void PersuasionDialog::onPersuade(MyGUI::Widget *sender)
         type = MWBase::MechanicsManager::PT_Bribe1000;
     }
 
-    eventPersuade(type, true, 0);
+    MWBase::Environment::get().getDialogueManager()->persuade(type);
+
     setVisible(false);
 }
 
@@ -128,7 +131,6 @@ DialogueWindow::DialogueWindow(MWBase::WindowManager& parWindowManager)
     center();
 
     mPersuasionDialog.setVisible(false);
-    mPersuasionDialog.eventPersuade += MyGUI::newDelegate(this, &DialogueWindow::onPersuade);
 
     //History view
     getWidget(mHistory, "History");
@@ -212,6 +214,7 @@ void DialogueWindow::onSelectTopic(std::string topic)
     }
     if (topic == gmst.find("sPersuasion")->getString())
     {
+        mPersuasionDialog.setPtr(mPtr);
         mPersuasionDialog.setVisible(true);
     }
     else if (topic == gmst.find("sSpells")->getString())
@@ -391,8 +394,6 @@ void DialogueWindow::updateOptions()
 
 void DialogueWindow::goodbye()
 {
-    // Apply temporary disposition change to NPC's base disposition
-
     mHistory->addDialogText("\n#572D21" + MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("sGoodbye")->getString());
     mTopicsList->setEnabled(false);
     mEnabled = false;
@@ -407,30 +408,12 @@ void DialogueWindow::onFrame()
 {
     if(mEnabled && mPtr.getTypeName() == typeid(ESM::NPC).name())
     {
+        int disp = std::max(0, std::min(100,
+            MWBase::Environment::get().getMechanicsManager()->getDerivedDisposition(mPtr)
+                + MWBase::Environment::get().getDialogueManager()->getTemporaryDispositionChange()));
         mDispositionBar->setProgressRange(100);
-        mDispositionBar->setProgressPosition(MWBase::Environment::get().getMechanicsManager()->getDerivedDisposition(mPtr));
+        mDispositionBar->setProgressPosition(disp);
         mDispositionText->eraseText(0, mDispositionText->getTextLength());
-        mDispositionText->addText("#B29154"+boost::lexical_cast<std::string>(MWBase::Environment::get().getMechanicsManager()->getDerivedDisposition(mPtr))+std::string("/100")+"#B29154");
+        mDispositionText->addText("#B29154"+boost::lexical_cast<std::string>(disp)+std::string("/100")+"#B29154");
     }
-}
-
-void DialogueWindow::onPersuade(int type, bool success, float dispositionChange)
-{
-    std::string text;
-
-    if (type == MWBase::MechanicsManager::PT_Admire)
-        text = "sAdmire";
-    else if (type == MWBase::MechanicsManager::PT_Taunt)
-        text = "sTaunt";
-    else if (type == MWBase::MechanicsManager::PT_Intimidate)
-        text = "sIntimidate";
-    else
-        text = "sBribe";
-
-    text += success ? "Fail" : "Success";
-
-    mHistory->addDialogHeading( MyGUI::LanguageManager::getInstance().replaceTags("#{"+text+"}"));
-
-    /// \todo text from INFO record, how to get the ID?
-    //mHistory->addDialogText();
 }

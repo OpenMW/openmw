@@ -88,8 +88,9 @@ namespace MWMechanics
             virtual int countDeaths (const std::string& id) const;
             ///< Return the number of deaths for actors with the given ID.
             
-            virtual float getPersuasionDispositionChange (MWWorld::Ptr npc, PersuasionType type, bool& success) const;
-            ///< Get amount to adjust temporary disposition for a given persuasion action on an NPC
+            virtual void getPersuasionDispositionChange (const MWWorld::Ptr& npc, PersuasionType type,
+                float currentTemporaryDispositionDelta, bool& success, float& tempChange, float& permChange);
+            ///< Perform a persuasion action on NPC
     };
 }
 

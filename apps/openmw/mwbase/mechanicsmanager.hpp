@@ -95,8 +95,9 @@ namespace MWBase
                 PT_Bribe100,
                 PT_Bribe1000
             };
-            virtual float getPersuasionDispositionChange (MWWorld::Ptr npc, PersuasionType type, bool& success) const = 0;
-            ///< Get amount to adjust temporary disposition for a given persuasion action on an NPC
+            virtual void getPersuasionDispositionChange (const MWWorld::Ptr& npc, PersuasionType type,
+                float currentTemporaryDispositionDelta, bool& success, float& tempChange, float& permChange) = 0;
+            ///< Perform a persuasion action on NPC
     };
 }
 
