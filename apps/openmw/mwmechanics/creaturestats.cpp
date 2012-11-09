@@ -232,4 +232,14 @@ namespace MWMechanics
                 mDead = false;
         }
     }
+    
+    bool CreatureStats::hasCommonDisease() const
+    {
+        return mSpells.hasCommonDisease();
+    }
+
+    bool CreatureStats::hasBlightDisease() const
+    {
+        return mSpells.hasBlightDisease();
+    }
 }

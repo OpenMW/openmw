@@ -109,6 +109,10 @@ namespace MWMechanics
         bool isDead() const;
         
         void resurrect();
+        
+        bool hasCommonDisease() const;
+
+        bool hasBlightDisease() const;         
     };
 }
 
