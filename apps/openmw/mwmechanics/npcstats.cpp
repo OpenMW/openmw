@@ -18,7 +18,7 @@
 #include "../mwbase/soundmanager.hpp"
 
 MWMechanics::NpcStats::NpcStats()
-: mMovementFlags (0), mDrawState (DrawState_Nothing)
+: mMovementFlags (0), mDrawState (DrawState_Nothing), mBounty (0)
 , mLevelProgress(0)
 {
     mSkillIncreases.resize (ESM::Attribute::Length);
@@ -237,4 +237,14 @@ void MWMechanics::NpcStats::flagAsUsed (const std::string& id)
 bool MWMechanics::NpcStats::hasBeenUsed (const std::string& id) const
 {
     return mUsedIds.find (id)!=mUsedIds.end();
+}
+
+int MWMechanics::NpcStats::getBounty() const
+{
+    return mBounty;
+}
+
+void MWMechanics::NpcStats::setBounty (int bounty)
+{
+    mBounty = bounty;
 }
