@@ -62,9 +62,9 @@ namespace MWMechanics
 
             void setDrawState (DrawState_ state);
 
-            int getDisposition() const;
+            int getBaseDisposition() const;
 
-            void setDisposition(int disposition);
+            void setBaseDisposition(int disposition);
 
             bool getMovementFlag (Flag flag) const;
 

@@ -85,6 +85,18 @@ namespace MWBase
             
             virtual int countDeaths (const std::string& id) const = 0;
             ///< Return the number of deaths for actors with the given ID.
+
+            enum PersuasionType
+            {
+                PT_Admire,
+                PT_Intimidate,
+                PT_Taunt,
+                PT_Bribe10,
+                PT_Bribe100,
+                PT_Bribe1000
+            };
+            virtual float getPersuasionDispositionChange (MWWorld::Ptr npc, PersuasionType type, bool& success) const = 0;
+            ///< Get amount to adjust temporary disposition for a given persuasion action on an NPC
     };
 }
 

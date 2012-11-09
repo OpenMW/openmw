@@ -49,13 +49,86 @@ std::string::size_type find_str_ci(const std::string& str, const std::string& su
 }
 
 
+
+PersuasionDialog::PersuasionDialog(MWBase::WindowManager &parWindowManager)
+    : WindowModal("openmw_persuasion_dialog.layout", parWindowManager)
+{
+    getWidget(mCancelButton, "CancelButton");
+    getWidget(mAdmireButton, "AdmireButton");
+    getWidget(mIntimidateButton, "IntimidateButton");
+    getWidget(mTauntButton, "TauntButton");
+    getWidget(mBribe10Button, "Bribe10Button");
+    getWidget(mBribe100Button, "Bribe100Button");
+    getWidget(mBribe1000Button, "Bribe1000Button");
+    getWidget(mGoldLabel, "GoldLabel");
+
+    mCancelButton->eventMouseButtonClick += MyGUI::newDelegate(this, &PersuasionDialog::onCancel);
+    mAdmireButton->eventMouseButtonClick += MyGUI::newDelegate(this, &PersuasionDialog::onPersuade);
+    mIntimidateButton->eventMouseButtonClick += MyGUI::newDelegate(this, &PersuasionDialog::onPersuade);
+    mTauntButton->eventMouseButtonClick += MyGUI::newDelegate(this, &PersuasionDialog::onPersuade);
+    mBribe10Button->eventMouseButtonClick += MyGUI::newDelegate(this, &PersuasionDialog::onPersuade);
+    mBribe100Button->eventMouseButtonClick += MyGUI::newDelegate(this, &PersuasionDialog::onPersuade);
+    mBribe1000Button->eventMouseButtonClick += MyGUI::newDelegate(this, &PersuasionDialog::onPersuade);
+}
+
+void PersuasionDialog::onCancel(MyGUI::Widget *sender)
+{
+    setVisible(false);
+}
+
+void PersuasionDialog::onPersuade(MyGUI::Widget *sender)
+{
+    MWBase::MechanicsManager::PersuasionType type;
+    if (sender == mAdmireButton) type = MWBase::MechanicsManager::PT_Admire;
+    else if (sender == mIntimidateButton) type = MWBase::MechanicsManager::PT_Intimidate;
+    else if (sender == mTauntButton) type = MWBase::MechanicsManager::PT_Taunt;
+    else if (sender == mBribe10Button)
+    {
+        mWindowManager.getTradeWindow()->addOrRemoveGold(-10);
+        type = MWBase::MechanicsManager::PT_Bribe10;
+    }
+    else if (sender == mBribe100Button)
+    {
+        mWindowManager.getTradeWindow()->addOrRemoveGold(-100);
+        type = MWBase::MechanicsManager::PT_Bribe100;
+    }
+    else /*if (sender == mBribe1000Button)*/
+    {
+        mWindowManager.getTradeWindow()->addOrRemoveGold(-1000);
+        type = MWBase::MechanicsManager::PT_Bribe1000;
+    }
+
+    eventPersuade(type, true, 0);
+    setVisible(false);
+}
+
+void PersuasionDialog::open()
+{
+    WindowModal::open();
+    center();
+
+    int playerGold = mWindowManager.getInventoryWindow()->getPlayerGold();
+
+    mBribe10Button->setEnabled (playerGold >= 10);
+    mBribe100Button->setEnabled (playerGold >= 100);
+    mBribe1000Button->setEnabled (playerGold >= 1000);
+
+    mGoldLabel->setCaptionWithReplacing("#{sGold}: " + boost::lexical_cast<std::string>(playerGold));
+}
+
+// --------------------------------------------------------------------------------------------------
+
 DialogueWindow::DialogueWindow(MWBase::WindowManager& parWindowManager)
     : WindowBase("openmw_dialogue_window.layout", parWindowManager)
+    , mPersuasionDialog(parWindowManager)
     , mEnabled(false)
     , mServices(0)
 {
     // Centre dialog
     center();
+
+    mPersuasionDialog.setVisible(false);
+    mPersuasionDialog.eventPersuade += MyGUI::newDelegate(this, &DialogueWindow::onPersuade);
 
     //History view
     getWidget(mHistory, "History");
@@ -137,6 +210,10 @@ void DialogueWindow::onSelectTopic(std::string topic)
         mWindowManager.pushGuiMode(GM_Barter);
         mWindowManager.getTradeWindow()->startTrade(mPtr);
     }
+    if (topic == gmst.find("sPersuasion")->getString())
+    {
+        mPersuasionDialog.setVisible(true);
+    }
     else if (topic == gmst.find("sSpells")->getString())
     {
         mWindowManager.pushGuiMode(GM_SpellBuying);
@@ -186,6 +263,9 @@ void DialogueWindow::setKeywords(std::list<std::string> keyWords)
 
     const MWWorld::Store<ESM::GameSetting> &gmst =
         MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+
+    if (mPtr.getTypeName() == typeid(ESM::NPC).name())
+        mTopicsList->addItem(gmst.find("sPersuasion")->getString());
 
     if (mServices & Service_Trade)
         mTopicsList->addItem(gmst.find("sBarter")->getString());
@@ -311,6 +391,8 @@ void DialogueWindow::updateOptions()
 
 void DialogueWindow::goodbye()
 {
+    // Apply temporary disposition change to NPC's base disposition
+
     mHistory->addDialogText("\n#572D21" + MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("sGoodbye")->getString());
     mTopicsList->setEnabled(false);
     mEnabled = false;
@@ -330,4 +412,25 @@ void DialogueWindow::onFrame()
         mDispositionText->eraseText(0, mDispositionText->getTextLength());
         mDispositionText->addText("#B29154"+boost::lexical_cast<std::string>(MWBase::Environment::get().getMechanicsManager()->getDerivedDisposition(mPtr))+std::string("/100")+"#B29154");
     }
+}
+
+void DialogueWindow::onPersuade(int type, bool success, float dispositionChange)
+{
+    std::string text;
+
+    if (type == MWBase::MechanicsManager::PT_Admire)
+        text = "sAdmire";
+    else if (type == MWBase::MechanicsManager::PT_Taunt)
+        text = "sTaunt";
+    else if (type == MWBase::MechanicsManager::PT_Intimidate)
+        text = "sIntimidate";
+    else
+        text = "sBribe";
+
+    text += success ? "Fail" : "Success";
+
+    mHistory->addDialogHeading( MyGUI::LanguageManager::getInstance().replaceTags("#{"+text+"}"));
+
+    /// \todo text from INFO record, how to get the ID?
+    //mHistory->addDialogText();
 }

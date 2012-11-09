@@ -391,7 +391,7 @@ namespace MWMechanics
     int MechanicsManager::getDerivedDisposition(const MWWorld::Ptr& ptr)
     {
         MWMechanics::NpcStats npcSkill = MWWorld::Class::get(ptr).getNpcStats(ptr);
-        float x = npcSkill.getDisposition();
+        float x = npcSkill.getBaseDisposition();
 
         MWWorld::LiveCellRef<ESM::NPC>* npc = ptr.get<ESM::NPC>();
         MWWorld::Ptr playerPtr = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
@@ -488,5 +488,11 @@ namespace MWMechanics
     int MechanicsManager::countDeaths (const std::string& id) const
     {
         return mActors.countDeaths (id);
+    }
+
+
+    float MechanicsManager::getPersuasionDispositionChange (MWWorld::Ptr npc, PersuasionType type, bool& success) const
+    {
+        return 0.f;
     }
 }

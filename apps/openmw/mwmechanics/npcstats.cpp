@@ -37,12 +37,12 @@ void MWMechanics::NpcStats::setDrawState (DrawState_ state)
     mDrawState = state;
 }
 
-int MWMechanics::NpcStats::getDisposition() const
+int MWMechanics::NpcStats::getBaseDisposition() const
 {
     return mDisposition;
 }
 
-void MWMechanics::NpcStats::setDisposition(int disposition)
+void MWMechanics::NpcStats::setBaseDisposition(int disposition)
 {
     mDisposition = disposition;
 }
