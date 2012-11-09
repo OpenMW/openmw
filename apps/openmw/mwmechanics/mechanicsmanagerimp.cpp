@@ -397,7 +397,7 @@ namespace MWMechanics
         MWWorld::Ptr playerPtr = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
         MWWorld::LiveCellRef<ESM::NPC>* player = playerPtr.get<ESM::NPC>();
         MWMechanics::CreatureStats playerStats = MWWorld::Class::get(playerPtr).getCreatureStats(playerPtr);
-        MWMechanics::NpcStats playerSkill = MWWorld::Class::get(playerPtr).getNpcStats(playerPtr);
+        MWMechanics::NpcStats playerNpcStats = MWWorld::Class::get(playerPtr).getNpcStats(playerPtr);
 
         if (toLower(npc->mBase->mRace) == toLower(player->mBase->mRace)) x += MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fDispRaceMod")->getFloat();
 
@@ -409,21 +409,21 @@ namespace MWMechanics
         std::string npcFaction = "";
         if(!npcSkill.getFactionRanks().empty()) npcFaction = npcSkill.getFactionRanks().begin()->first;
 
-        if (playerSkill.getFactionRanks().find(toLower(npcFaction)) != playerSkill.getFactionRanks().end())
+        if (playerNpcStats.getFactionRanks().find(toLower(npcFaction)) != playerNpcStats.getFactionRanks().end())
         {
             for(std::vector<ESM::Faction::Reaction>::const_iterator it = MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(toLower(npcFaction))->mReactions.begin();
                 it != MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(toLower(npcFaction))->mReactions.end(); it++)
             {
                 if(toLower(it->mFaction) == toLower(npcFaction)) reaction = it->mReaction;
             }
-            rank = playerSkill.getFactionRanks().find(toLower(npcFaction))->second;
+            rank = playerNpcStats.getFactionRanks().find(toLower(npcFaction))->second;
         }
         else if (npcFaction != "")
         {
             for(std::vector<ESM::Faction::Reaction>::const_iterator it = MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(toLower(npcFaction))->mReactions.begin();
                 it != MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(toLower(npcFaction))->mReactions.end();it++)
             {
-                if(playerSkill.getFactionRanks().find(toLower(it->mFaction)) != playerSkill.getFactionRanks().end() )
+                if(playerNpcStats.getFactionRanks().find(toLower(it->mFaction)) != playerNpcStats.getFactionRanks().end() )
                 {
                     if(it->mReaction<reaction) reaction = it->mReaction;
                 }
@@ -439,10 +439,12 @@ namespace MWMechanics
             + MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fDispFactionRankBase")->getFloat())
             * MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fDispFactionMod")->getFloat() * reaction;
 
-        /// \todo implement bounty and disease
-        //x -= MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fDispCrimeMod") * pcBounty;
-        //if (pc has a disease) x += MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fDispDiseaseMod");
-        if (playerSkill.getDrawState() == MWMechanics::DrawState_::DrawState_Weapon) x += MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fDispWeaponDrawn")->getFloat();
+        x -= MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fDispCrimeMod")->getFloat() * playerNpcStats.getBounty();
+        if (playerStats.hasCommonDisease() || playerStats.hasBlightDisease())
+            x += MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fDispDiseaseMod")->getFloat();
+
+        if (playerNpcStats.getDrawState() == MWMechanics::DrawState_::DrawState_Weapon)
+            x += MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fDispWeaponDrawn")->getFloat();
 
         int effective_disposition = std::max(0,std::min(int(x),100));//, normally clamped to [0..100] when used
         return effective_disposition;
