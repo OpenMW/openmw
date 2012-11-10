@@ -86,6 +86,16 @@ const std::map<std::string, int>& MWMechanics::NpcStats::getFactionRanks() const
     return mFactionRank;
 }
 
+bool MWMechanics::NpcStats::isSameFaction (const NpcStats& npcStats) const
+{
+    for (std::map<std::string, int>::const_iterator iter (mFactionRank.begin()); iter!=mFactionRank.end();
+        ++iter)
+        if (npcStats.mFactionRank.find (iter->first)!=npcStats.mFactionRank.end())
+            return true;
+  
+    return false;
+}
+
 float MWMechanics::NpcStats::getSkillGain (int skillIndex, const ESM::Class& class_, int usageType,
     int level) const
 {

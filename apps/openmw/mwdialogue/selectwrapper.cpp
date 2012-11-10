@@ -5,6 +5,7 @@
 
 #include <stdexcept>
 #include <algorithm>
+#include <sstream>
 
 namespace
 {
@@ -52,6 +53,15 @@ namespace
     }
 }
 
+MWDialogue::SelectWrapper::Function MWDialogue::SelectWrapper::decodeFunction() const
+{
+    int index = 0;
+    
+    std::istringstream (mSelect.mSelectRule.substr(2,2)) >> index;
+    
+    return static_cast<Function> (index);
+}
+
 MWDialogue::SelectWrapper::SelectWrapper (const ESM::DialInfo::SelectStruct& select) : mSelect (select) {}
 
 MWDialogue::SelectWrapper::Function MWDialogue::SelectWrapper::getFunction() const
@@ -60,6 +70,7 @@ MWDialogue::SelectWrapper::Function MWDialogue::SelectWrapper::getFunction() con
 
     switch (type)
     {
+        case '1': return decodeFunction();
         case '2': return Function_Global;
         case '3': return Function_Local;
         case '4': return Function_Journal;
@@ -93,6 +104,7 @@ MWDialogue::SelectWrapper::Type MWDialogue::SelectWrapper::getType() const
     static const Function booleanFunctions[] =
     {
         Function_Id, Function_Faction, Function_Class, Function_Race, Function_Cell,
+        Function_SameFaction,
         Function_None // end marker
     };   
     
@@ -125,6 +137,7 @@ bool MWDialogue::SelectWrapper::isNpcOnly() const
     static const Function functions[] =
     {
         Function_Faction, SelectWrapper::Function_Class, SelectWrapper::Function_Race,
+        Function_SameFaction,
         Function_None // end marker
     };
 

@@ -97,8 +97,6 @@ namespace MWDialogue
 
     bool DialogueManager::functionFilter(const MWWorld::Ptr& actor, const ESM::DialInfo& info,bool choice)
     {
-        bool isCreature = (actor.getTypeName() != typeid(ESM::NPC).name());
-
         for (std::vector<ESM::DialInfo::SelectStruct>::const_iterator iter (info.mSelects.begin());
             iter != info.mSelects.end(); ++iter)
         {
@@ -129,23 +127,6 @@ namespace MWDialogue
 
                 case 43://PC Crime level
                     if(!selectCompare<int,int>(comp,0,select.mI)) return false;
-                    break;
-
-                case 46://Same faction
-                    {
-                    if (isCreature)
-                        return false;
-
-                    MWMechanics::NpcStats PCstats = MWWorld::Class::get(MWBase::Environment::get().getWorld()->getPlayer().getPlayer()).getNpcStats(MWBase::Environment::get().getWorld()->getPlayer().getPlayer());
-                    MWMechanics::NpcStats NPCstats = MWWorld::Class::get(actor).getNpcStats(actor);
-                    int sameFaction = 0;
-                    if(!NPCstats.getFactionRanks().empty())
-                    {
-                        std::string NPCFaction = NPCstats.getFactionRanks().begin()->first;
-                        if(PCstats.getFactionRanks().find(toLower(NPCFaction)) != PCstats.getFactionRanks().end()) sameFaction = 1;
-                    }
-                    if(!selectCompare<int,int>(comp,sameFaction,select.mI)) return false;
-                    }
                     break;
 
                 case 48://Detected

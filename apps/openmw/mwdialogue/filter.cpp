@@ -250,6 +250,14 @@ bool MWDialogue::Filter::getSelectStructBoolean (const SelectWrapper& select) co
     
             return toLower (mActor.getCell()->mCell->mName)==select.getName();
     
+        case SelectWrapper::Function_SameFaction:
+        {
+            MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+            
+            return MWWorld::Class::get (mActor).getNpcStats (mActor).isSameFaction (
+                MWWorld::Class::get (player).getNpcStats (player));
+        }
+    
         default:
 
             throw std::runtime_error ("unknown boolean select function");

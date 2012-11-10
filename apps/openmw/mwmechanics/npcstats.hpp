@@ -76,6 +76,9 @@ namespace MWMechanics
 
             std::map<std::string, int>& getFactionRanks();
 
+            bool isSameFaction (const NpcStats& npcStats) const;
+            ///< Do *this and \a npcStats share a faction?
+
             const std::map<std::string, int>& getFactionRanks() const;
 
             float getSkillGain (int skillIndex, const ESM::Class& class_, int usageType = -1,
