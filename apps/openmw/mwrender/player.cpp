@@ -310,6 +310,9 @@ namespace MWRender
 
     void Player::setAnimation(NpcAnimation *anim)
     {
+        if (mAnimation) {
+            delete mAnimation;
+        }
         mAnimation = anim;
     }
 

@@ -801,7 +801,21 @@ namespace MWWorld
 
     const ESM::NPC *World::createRecord(const ESM::NPC &record)
     {
-        return mStore.insert(record);
+        bool update = false;
+        if (StringUtils::ciEqual(record.mId, "player")) {
+            const ESM::NPC *player =
+                mPlayer->getPlayer().get<ESM::NPC>()->mBase;
+
+            update = record.isMale() != player->isMale() ||
+                     !StringUtils::ciEqual(record.mRace, player->mRace) ||
+                     !StringUtils::ciEqual(record.mHead, player->mHead) ||
+                     !StringUtils::ciEqual(record.mHair, player->mHair);
+        }
+        const ESM::NPC *ret = mStore.insert(record);
+        if (update) {
+            mRendering->renderPlayer(mPlayer->getPlayer());
+        }
+        return ret;
     }
 
     void World::playAnimationGroup (const MWWorld::Ptr& ptr, const std::string& groupName, int mode,
