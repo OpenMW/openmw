@@ -110,6 +110,7 @@ void RaceDialog::open()
     mPreview->update (0);
 
     setRaceId(mPreview->getPrototype().mRace);
+    recountParts();
 
     mPreviewImage->setImageTexture ("CharacterHeadPreview");
 }
@@ -146,6 +147,35 @@ int wrap(int index, int max)
         return index;
 }
 
+int countParts(const std::string &part, const std::string &race, bool male)
+{
+    const MWWorld::Store<ESM::BodyPart> &store =
+        MWBase::Environment::get().getWorld()->getStore().get<ESM::BodyPart>();
+
+    std::string prefix =
+        "b_n_" + race + ((male) ? "_m_" : "_f_") + part;
+
+    std::string suffix;
+    suffix.reserve(prefix.size() + 3);
+    
+    int count = -1;
+    do {
+        ++count;
+        suffix = "_" + (boost::format("%02d") % (count + 1)).str();
+    }
+    while (store.search(prefix + suffix) != 0);
+
+    if (count == 0 && part == "hair") {
+        count = -1;
+        do {
+            ++count;
+            suffix = (boost::format("%02d") % (count + 1)).str();
+        }
+        while (store.search(prefix + suffix) != 0);
+    }
+    return count;
+}
+
 void RaceDialog::close()
 {
     delete mPreview;
@@ -178,9 +208,7 @@ void RaceDialog::onSelectPreviousGender(MyGUI::Widget*)
 {
     mGenderIndex = wrap(mGenderIndex - 1, 2);
 
-    mFaceIndex = 0;
-    mHairIndex = 0;
-
+    recountParts();
     updatePreview();
 }
 
@@ -188,30 +216,32 @@ void RaceDialog::onSelectNextGender(MyGUI::Widget*)
 {
     mGenderIndex = wrap(mGenderIndex + 1, 2);
 
-    mFaceIndex = 0;
-    mHairIndex = 0;
-
+    recountParts();
     updatePreview();
 }
 
 void RaceDialog::onSelectPreviousFace(MyGUI::Widget*)
 {
     mFaceIndex = wrap(mFaceIndex - 1, mFaceCount);
+    updatePreview();
 }
 
 void RaceDialog::onSelectNextFace(MyGUI::Widget*)
 {
     mFaceIndex = wrap(mFaceIndex + 1, mFaceCount);
+    updatePreview();
 }
 
 void RaceDialog::onSelectPreviousHair(MyGUI::Widget*)
 {
     mHairIndex = wrap(mHairIndex - 1, mHairCount);
+    updatePreview();
 }
 
 void RaceDialog::onSelectNextHair(MyGUI::Widget*)
 {
     mHairIndex = wrap(mHairIndex - 1, mHairCount);
+    updatePreview();
 }
 
 void RaceDialog::onSelectRace(MyGUI::ListBox* _sender, size_t _index)
@@ -228,12 +258,20 @@ void RaceDialog::onSelectRace(MyGUI::ListBox* _sender, size_t _index)
 
     mCurrentRaceId = *raceId;
 
-    mFaceIndex = 0;
-    mHairIndex = 0;
+    recountParts();
 
     updatePreview();
     updateSkills();
     updateSpellPowers();
+}
+
+void RaceDialog::recountParts()
+{
+    mFaceIndex = 0;
+    mHairIndex = 0;
+
+    mFaceCount = countParts("head", mCurrentRaceId, mGenderIndex == 0);
+    mHairCount = countParts("hair", mCurrentRaceId, mGenderIndex == 0);
 }
 
 // update widget content
