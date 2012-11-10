@@ -109,8 +109,15 @@ void RaceDialog::open()
     MWBase::Environment::get().getWorld ()->setupExternalRendering (*mPreview);
     mPreview->update (0);
 
-    setRaceId(mPreview->getPrototype().mRace);
+    const ESM::NPC proto = mPreview->getPrototype();
+    setRaceId(proto.mRace);
     recountParts();
+    
+    std::string index = proto.mHead.substr(proto.mHead.size() - 2, 2);
+    mFaceIndex = boost::lexical_cast<int>(index) - 1;
+
+    index = proto.mHair.substr(proto.mHair.size() - 2, 2);
+    mHairIndex = boost::lexical_cast<int>(index) - 1;
 
     mPreviewImage->setImageTexture ("CharacterHeadPreview");
 }
@@ -240,7 +247,7 @@ void RaceDialog::onSelectPreviousHair(MyGUI::Widget*)
 
 void RaceDialog::onSelectNextHair(MyGUI::Widget*)
 {
-    mHairIndex = wrap(mHairIndex - 1, mHairCount);
+    mHairIndex = wrap(mHairIndex + 1, mHairCount);
     updatePreview();
 }
 
