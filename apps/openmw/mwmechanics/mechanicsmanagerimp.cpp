@@ -6,6 +6,7 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"
+#include "../mwbase/dialoguemanager.hpp"
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/player.hpp"
@@ -389,7 +390,7 @@ namespace MWMechanics
     int MechanicsManager::getDerivedDisposition(const MWWorld::Ptr& ptr)
     {
         MWMechanics::NpcStats npcSkill = MWWorld::Class::get(ptr).getNpcStats(ptr);
-        float x = npcSkill.getDisposition();
+        float x = npcSkill.getBaseDisposition();
 
         MWWorld::LiveCellRef<ESM::NPC>* npc = ptr.get<ESM::NPC>();
         MWWorld::Ptr playerPtr = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
@@ -460,7 +461,10 @@ namespace MWMechanics
         MWMechanics::NpcStats playerSkill = MWWorld::Class::get(playerPtr).getNpcStats(playerPtr);
         MWMechanics::CreatureStats playerStats = MWWorld::Class::get(playerPtr).getCreatureStats(playerPtr);
 
-        int clampedDisposition = std::min(getDerivedDisposition(ptr),100);
+        // I suppose the temporary disposition change _has_ to be considered here,
+        // otherwise one would get different prices when exiting and re-entering the dialogue window...
+        int clampedDisposition = std::max(0, std::min(getDerivedDisposition(ptr)
+            + MWBase::Environment::get().getDialogueManager()->getTemporaryDispositionChange(),100));
         float a = std::min(playerSkill.getSkill(ESM::Skill::Mercantile).getModified(), 100.f);
         float b = std::min(0.1f * playerStats.getAttribute(ESM::Attribute::Luck).getModified(), 10.f);
         float c = std::min(0.2f * playerStats.getAttribute(ESM::Attribute::Personality).getModified(), 10.f);
@@ -486,5 +490,153 @@ namespace MWMechanics
     int MechanicsManager::countDeaths (const std::string& id) const
     {
         return mActors.countDeaths (id);
+    }
+
+
+    void MechanicsManager::getPersuasionDispositionChange (const MWWorld::Ptr& npc, PersuasionType type,
+        float currentTemporaryDispositionDelta, bool& success, float& tempChange, float& permChange)
+    {
+        const MWWorld::Store<ESM::GameSetting> &gmst =
+            MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+
+        MWWorld::Ptr playerPtr = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+        MWMechanics::NpcStats playerSkill = MWWorld::Class::get(playerPtr).getNpcStats(playerPtr);
+        MWMechanics::CreatureStats playerStats = MWWorld::Class::get(playerPtr).getCreatureStats(playerPtr);
+
+        MWMechanics::NpcStats npcSkill = MWWorld::Class::get(npc).getNpcStats(npc);
+        MWMechanics::CreatureStats npcStats = MWWorld::Class::get(npc).getCreatureStats(npc);
+
+
+        float persTerm = playerStats.getAttribute(ESM::Attribute::Personality).getModified()
+                            / gmst.find("fPersonalityMod")->getFloat();
+
+        float luckTerm = playerStats.getAttribute(ESM::Attribute::Luck).getModified()
+                            / gmst.find("fLuckMod")->getFloat();
+
+        float repTerm = playerSkill.getReputation() * gmst.find("fReputationMod")->getFloat();
+
+        float levelTerm = playerStats.getLevel() * gmst.find("fLevelMod")->getFloat();
+
+        float fatigueTerm = playerStats.getFatigueTerm();
+
+        float playerRating1 = (repTerm + luckTerm + persTerm + playerSkill.getSkill(ESM::Skill::Speechcraft).getModified()) * fatigueTerm;
+        float playerRating2 = playerRating1 + levelTerm;
+        float playerRating3 = (playerSkill.getSkill(ESM::Skill::Mercantile).getModified() + luckTerm + persTerm) * fatigueTerm;
+
+        float npcRating1 = (repTerm + luckTerm + persTerm + playerSkill.getSkill(ESM::Skill::Speechcraft).getModified()) * fatigueTerm;
+        float npcRating2 = (levelTerm + repTerm + luckTerm + persTerm + npcSkill.getSkill(ESM::Skill::Speechcraft).getModified()) * fatigueTerm;
+        float npcRating3 = (playerSkill.getSkill(ESM::Skill::Mercantile).getModified() + repTerm + luckTerm + persTerm) * fatigueTerm;
+
+        int currentDisposition = std::min(100, std::max(0, int(getDerivedDisposition(npc) + currentTemporaryDispositionDelta)));
+
+        float d = 1 - 0.02 * abs(currentDisposition - 50);
+        float target1 = d * (playerRating1 - npcRating1 + 50);
+        float target2 = d * (playerRating2 - npcRating2 + 50);
+
+        float bribeMod;
+        if (type == PT_Bribe10) bribeMod = gmst.find("fBribe10Mod")->getFloat();
+        if (type == PT_Bribe100) bribeMod = gmst.find("fBribe100Mod")->getFloat();
+        else bribeMod = gmst.find("fBribe1000Mod")->getFloat();
+
+        float target3 = d * (playerRating3 - npcRating3 + 50) + bribeMod;
+
+        float iPerMinChance = gmst.find("iPerMinChance")->getInt();
+        float iPerMinChange = gmst.find("iPerMinChange")->getInt();
+        float fPerDieRollMult = gmst.find("fPerDieRollMult")->getFloat();
+        float fPerTempMult = gmst.find("fPerTempMult")->getFloat();
+
+        float x,y;
+
+        float roll = static_cast<float> (std::rand()) / RAND_MAX * 100;
+
+        if (type == PT_Admire)
+        {
+            target1 = std::max(iPerMinChance, target1);
+            success = (roll <= target1);
+            float c = int(fPerDieRollMult * (target1 - roll));
+            x = success ? std::max(iPerMinChange, c) : c;
+        }
+        else if (type == PT_Intimidate)
+        {
+            target2 = std::max(iPerMinChance, target2);
+
+            success =  (roll <= target2);
+
+            float r;
+            if (roll != target2)
+                r = int(target2 - roll);
+            else
+                r = 1;
+
+            if (roll <= target2)
+            {
+                float s = int(r * fPerDieRollMult * fPerTempMult);
+
+                npcStats.setFlee ( std::max(0, std::min(100, npcStats.getFlee() + int(std::max(iPerMinChange, s)))));
+                npcStats.setFight ( std::max(0, std::min(100, npcStats.getFight() + int(std::min(-iPerMinChange, -s)))));
+            }
+
+            float c = -std::abs(int(r * fPerDieRollMult));
+            if (success)
+            {
+                if (std::abs(c) < iPerMinChange)
+                {
+                    x = 0;
+                    y = -iPerMinChange;
+                }
+                else
+                {
+                    x = -int(c * fPerTempMult);
+                    y = c;
+                }
+            }
+            else
+            {
+                x = int(c * fPerTempMult);
+                y = c;
+            }
+        }
+        else if (type == PT_Taunt)
+        {
+            target1 = std::max(iPerMinChance, target1);
+            success = (roll <= target1);
+
+            float c = std::abs(int(target1 - roll));
+
+            if (roll <= target1)
+            {
+                float s = c * fPerDieRollMult * fPerTempMult;
+
+                npcStats.setFlee ( std::max(0, std::min(100, npcStats.getFlee() + std::min(-int(iPerMinChange), int(-s)))));
+                npcStats.setFight ( std::max(0, std::min(100, npcStats.getFight() + std::max(int(iPerMinChange), int(s)))));
+            }
+            x = int(-c * fPerDieRollMult);
+
+            if (success && std::abs(x) < iPerMinChange)
+                x = -iPerMinChange;
+        }
+        else // Bribe
+        {
+            target3 = std::max(iPerMinChance, target3);
+            success = (roll <= target3);
+            float c = int((target3 - roll) * fPerDieRollMult);
+
+            x = success ? std::max(iPerMinChange, c) : c;
+        }
+
+        tempChange = type == PT_Intimidate ? x : int(x * fPerTempMult);
+
+
+        float cappedDispositionChange = tempChange;
+        if (currentDisposition + tempChange > 100.f)
+            cappedDispositionChange = 100 - currentDisposition;
+        if (currentDisposition + tempChange < 0.f)
+            cappedDispositionChange = -currentDisposition;
+
+        permChange = int(cappedDispositionChange / fPerTempMult);
+        if (type == PT_Intimidate)
+        {
+            permChange = success ? -int(cappedDispositionChange/ fPerTempMult) : y;
+        }
     }
 }

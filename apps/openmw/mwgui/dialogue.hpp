@@ -26,6 +26,27 @@ namespace MWGui
 {
     class DialogueHistory;
 
+    class PersuasionDialog : public WindowModal
+    {
+    public:
+        PersuasionDialog(MWBase::WindowManager& parWindowManager);
+
+        virtual void open();
+
+    private:
+        MyGUI::Button* mCancelButton;
+        MyGUI::Button* mAdmireButton;
+        MyGUI::Button* mIntimidateButton;
+        MyGUI::Button* mTauntButton;
+        MyGUI::Button* mBribe10Button;
+        MyGUI::Button* mBribe100Button;
+        MyGUI::Button* mBribe1000Button;
+        MyGUI::TextBox* mGoldLabel;
+
+        void onCancel (MyGUI::Widget* sender);
+        void onPersuade (MyGUI::Widget* sender);
+    };
+
     class DialogueWindow: public WindowBase, public ReferenceInterface
     {
     public:
@@ -86,6 +107,8 @@ namespace MWGui
         Widgets::MWList*   mTopicsList;
         MyGUI::ProgressPtr mDispositionBar;
         MyGUI::EditPtr     mDispositionText;
+
+        PersuasionDialog mPersuasionDialog;
     };
 }
 #endif
