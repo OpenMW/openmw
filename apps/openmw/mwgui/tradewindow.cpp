@@ -7,6 +7,7 @@
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
+#include "../mwbase/dialoguemanager.hpp"
 
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/manualref.hpp"
@@ -206,7 +207,8 @@ namespace MWGui
             if (mCurrentMerchantOffer<0) d = int(100 * (a - b) / a);
             else d = int(100 * (b - a) / a);
 
-            float clampedDisposition = std::max<int>(0,std::min<int>(int(MWBase::Environment::get().getMechanicsManager()->getDerivedDisposition(mPtr)),100));
+            float clampedDisposition = std::max<int>(0,std::min<int>(int(MWBase::Environment::get().getMechanicsManager()->getDerivedDisposition(mPtr)
+                + MWBase::Environment::get().getDialogueManager()->getTemporaryDispositionChange()),100));
 
             MWMechanics::NpcStats sellerSkill = MWWorld::Class::get(mPtr).getNpcStats(mPtr);
             MWMechanics::CreatureStats sellerStats = MWWorld::Class::get(mPtr).getCreatureStats(mPtr); 
@@ -232,13 +234,15 @@ namespace MWGui
             {
                 MWBase::Environment::get().getWindowManager()->
                     messageBox("#{sNotifyMessage9}", std::vector<std::string>());
-                /// \todo adjust npc temporary disposition by iBarterSuccessDisposition or iBarterFailDisposition
-                return ;
+
+                int iBarterFailDisposition = gmst.find("iBarterFailDisposition")->getInt();
+                MWBase::Environment::get().getDialogueManager()->applyTemporaryDispositionChange(iBarterFailDisposition);
+                return;
             }
         }
 
-
-/// \todo adjust npc temporary disposition by iBarterSuccessDisposition or iBarterFailDisposition
+        int iBarterSuccessDisposition = gmst.find("iBarterSuccessDisposition")->getInt();
+        MWBase::Environment::get().getDialogueManager()->applyTemporaryDispositionChange(iBarterSuccessDisposition);
 
         // success! make the item transfer.
         transferBoughtItems();

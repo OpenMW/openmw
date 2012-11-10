@@ -28,6 +28,10 @@ namespace MWGui
 
             MWWorld::Ptr getAvatarSelectedItem(int x, int y);
 
+            void rebuildAvatar() {
+                mPreview.rebuild();
+            }
+
         protected:
             MyGUI::Widget* mAvatar;
             MyGUI::ImageBox* mAvatarImage;

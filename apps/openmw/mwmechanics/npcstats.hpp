@@ -50,6 +50,7 @@ namespace MWMechanics
             std::set<std::string> mExpelled;
             std::map<std::string, int> mFactionReputation;
             bool mVampire;
+            int mReputation;
 
             int mLevelProgress; // 0-10
 
@@ -65,9 +66,13 @@ namespace MWMechanics
 
             void setDrawState (DrawState_ state);
 
-            int getDisposition() const;
+            int getBaseDisposition() const;
 
-            void setDisposition(int disposition);
+            void setBaseDisposition(int disposition);
+
+            int getReputation() const;
+
+            void setReputation(int reputation);
 
             bool getMovementFlag (Flag flag) const;
 

@@ -40,6 +40,10 @@ namespace MWBase
             virtual void keywordSelected (const std::string& keyword) = 0;
             virtual void goodbyeSelected() = 0;
             virtual void questionAnswered (const std::string& answer) = 0;
+
+            virtual void persuade (int type) = 0;
+            virtual int getTemporaryDispositionChange () const = 0;
+            virtual void applyTemporaryDispositionChange (int delta) = 0;
     };
 }
 

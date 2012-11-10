@@ -64,7 +64,7 @@ namespace MWMechanics
             virtual void setPlayerName (const std::string& name);
             ///< Set player name.
 
-            virtual void setPlayerRace (const std::string& id, bool male);
+            virtual void setPlayerRace (const std::string& id, bool male, const std::string &head, const std::string &hair);
             ///< Set player race.
 
             virtual void setPlayerBirthsign (const std::string& id);
@@ -88,6 +88,9 @@ namespace MWMechanics
             virtual int countDeaths (const std::string& id) const;
             ///< Return the number of deaths for actors with the given ID.
             
+            virtual void getPersuasionDispositionChange (const MWWorld::Ptr& npc, PersuasionType type,
+                float currentTemporaryDispositionDelta, bool& success, float& tempChange, float& permChange);
+            ///< Perform a persuasion action on NPC
     };
 }
 

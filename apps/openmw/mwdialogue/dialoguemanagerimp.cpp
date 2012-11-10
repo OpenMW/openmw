@@ -21,10 +21,12 @@
 #include "../mwbase/world.hpp"
 #include "../mwbase/scriptmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
+#include "../mwbase/mechanicsmanager.hpp"
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/containerstore.hpp"
 #include "../mwworld/esmstore.hpp"
+#include "../mwworld/player.hpp"
 
 #include "../mwgui/dialogue.hpp"
 
@@ -33,6 +35,7 @@
 #include "../mwscript/extensions.hpp"
 
 #include "../mwmechanics/creaturestats.hpp"
+#include "../mwmechanics/npcstats.hpp"
 
 #include "filter.hpp"
 
@@ -75,6 +78,8 @@ namespace MWDialogue
     DialogueManager::DialogueManager (const Compiler::Extensions& extensions) :
       mCompilerContext (MWScript::CompilerContext::Type_Dialgoue),
         mErrorStream(std::cout.rdbuf()),mErrorHandler(mErrorStream)
+      , mTemporaryDispositionChange(0.f)
+      , mPermanentDispositionChange(0.f)
     {
         mChoice = -1;
         mIsInChoice = false;
@@ -350,6 +355,15 @@ namespace MWDialogue
     void DialogueManager::goodbyeSelected()
     {
         MWBase::Environment::get().getWindowManager()->removeGuiMode(MWGui::GM_Dialogue);
+
+        // Apply disposition change to NPC's base disposition
+        if (mActor.getTypeName() == typeid(ESM::NPC).name())
+        {
+            MWMechanics::NpcStats& npcStats = MWWorld::Class::get(mActor).getNpcStats(mActor);
+            npcStats.setBaseDisposition(npcStats.getBaseDisposition() + mPermanentDispositionChange);
+        }
+        mPermanentDispositionChange = 0;
+        mTemporaryDispositionChange = 0;
     }
 
     void DialogueManager::questionAnswered (const std::string& answer)
@@ -407,5 +421,57 @@ namespace MWDialogue
         MWGui::DialogueWindow* win = MWBase::Environment::get().getWindowManager()->getDialogueWindow();
 
         win->goodbye();
+    }
+
+    void DialogueManager::persuade(int type)
+    {
+        bool success;
+        float temp, perm;
+        MWBase::Environment::get().getMechanicsManager()->getPersuasionDispositionChange(
+                    mActor, MWBase::MechanicsManager::PersuasionType(type), mTemporaryDispositionChange,
+                    success, temp, perm);
+        mTemporaryDispositionChange += temp;
+        mPermanentDispositionChange += perm;
+
+        // change temp disposition so that final disposition is between 0...100
+        int curDisp = MWBase::Environment::get().getMechanicsManager()->getDerivedDisposition(mActor);
+        if (curDisp + mTemporaryDispositionChange < 0)
+            mTemporaryDispositionChange = -curDisp;
+        else if (curDisp + mTemporaryDispositionChange > 100)
+            mTemporaryDispositionChange = 100 - curDisp;
+
+        // practice skill
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+
+        MWWorld::Class::get(player).skillUsageSucceeded(player, ESM::Skill::Speechcraft, 0);
+
+        // add status message to dialogue window
+        std::string text;
+
+        if (type == MWBase::MechanicsManager::PT_Admire)
+            text = "sAdmire";
+        else if (type == MWBase::MechanicsManager::PT_Taunt)
+            text = "sTaunt";
+        else if (type == MWBase::MechanicsManager::PT_Intimidate)
+            text = "sIntimidate";
+        else
+            text = "sBribe";
+
+        text += (success ? "Success" : "Fail");
+
+        MWGui::DialogueWindow* win = MWBase::Environment::get().getWindowManager()->getDialogueWindow();
+        win->addTitle(MyGUI::LanguageManager::getInstance().replaceTags("#{"+text+"}"));
+
+        /// \todo text from INFO record, how to get the ID?
+    }
+
+    int DialogueManager::getTemporaryDispositionChange() const
+    {
+        return mTemporaryDispositionChange;
+    }
+
+    void DialogueManager::applyTemporaryDispositionChange(int delta)
+    {
+        mTemporaryDispositionChange += delta;
     }
 }

@@ -19,8 +19,7 @@
 
 MWMechanics::NpcStats::NpcStats()
 : mMovementFlags (0), mDrawState (DrawState_Nothing), mBounty (0)
-, mLevelProgress(0), mDisposition(0), mVampire (0)
-
+, mLevelProgress(0), mDisposition(0), mVampire (0), mReputation(0)
 {
     mSkillIncreases.resize (ESM::Attribute::Length);
     for (int i=0; i<ESM::Attribute::Length; ++i)
@@ -37,12 +36,12 @@ void MWMechanics::NpcStats::setDrawState (DrawState_ state)
     mDrawState = state;
 }
 
-int MWMechanics::NpcStats::getDisposition() const
+int MWMechanics::NpcStats::getBaseDisposition() const
 {
     return mDisposition;
 }
 
-void MWMechanics::NpcStats::setDisposition(int disposition)
+void MWMechanics::NpcStats::setBaseDisposition(int disposition)
 {
     mDisposition = disposition;
 }
@@ -298,5 +297,15 @@ bool MWMechanics::NpcStats::isVampire() const
 void MWMechanics::NpcStats::setVampire (bool set)
 {
     mVampire = set;
+}
+
+int MWMechanics::NpcStats::getReputation() const
+{
+    return mReputation;
+}
+
+void MWMechanics::NpcStats::setReputation(int reputation)
+{
+    mReputation = reputation;
 }
 
