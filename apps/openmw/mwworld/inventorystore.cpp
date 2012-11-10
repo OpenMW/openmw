@@ -6,13 +6,12 @@
 
 #include <components/esm/loadench.hpp>
 
-#include <components/esm_store/store.hpp>
-
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 
 #include "../mwmechanics/npcstats.hpp"
 
+#include "esmstore.hpp"
 #include "class.hpp"
 
 void MWWorld::InventoryStore::copySlots (const InventoryStore& store)
@@ -231,7 +230,7 @@ const MWMechanics::MagicEffects& MWWorld::InventoryStore::getMagicEffects()
                 if (!enchantmentId.empty())
                 {
                     const ESM::Enchantment& enchantment =
-                        *MWBase::Environment::get().getWorld()->getStore().enchants.find (enchantmentId);
+                        *MWBase::Environment::get().getWorld()->getStore().get<ESM::Enchantment>().find (enchantmentId);
 
                     if (enchantment.mData.mType==ESM::Enchantment::ConstantEffect)
                         mMagicEffects.add (enchantment.mEffects);

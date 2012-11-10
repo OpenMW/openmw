@@ -3,10 +3,10 @@
 
 #include <stdexcept>
 
-#include <components/esm_store/store.hpp>
-
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
+
+#include "../mwworld/esmstore.hpp"
 
 namespace MWDialogue
 {
@@ -16,9 +16,10 @@ namespace MWDialogue
     : mTopic (topic), mInfoId (infoId)
     {}
 
-    std::string JournalEntry::getText (const ESMS::ESMStore& store) const
+    std::string JournalEntry::getText (const MWWorld::ESMStore& store) const
     {
-        const ESM::Dialogue *dialogue = store.dialogs.find (mTopic);
+        const ESM::Dialogue *dialogue =
+            store.get<ESM::Dialogue>().find (mTopic);
 
         for (std::vector<ESM::DialInfo>::const_iterator iter (dialogue->mInfo.begin());
             iter!=dialogue->mInfo.end(); ++iter)
@@ -35,7 +36,8 @@ namespace MWDialogue
 
     std::string JournalEntry::idFromIndex (const std::string& topic, int index)
     {
-        const ESM::Dialogue *dialogue = MWBase::Environment::get().getWorld()->getStore().dialogs.find (topic);
+        const ESM::Dialogue *dialogue =
+            MWBase::Environment::get().getWorld()->getStore().get<ESM::Dialogue>().find (topic);
 
         for (std::vector<ESM::DialInfo>::const_iterator iter (dialogue->mInfo.begin());
             iter!=dialogue->mInfo.end(); ++iter)

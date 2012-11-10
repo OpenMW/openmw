@@ -1,6 +1,8 @@
 #ifndef OPENMW_ESM_CREC_H
 #define OPENMW_ESM_CREC_H
 
+#include <string>
+
 // TODO create implementation files and remove this one
 #include "esmreader.hpp"
 
@@ -15,6 +17,8 @@ class ESMWriter;
 /// Changes a creature
 struct LoadCREC
 {
+    std::string mId;
+
     void load(ESMReader &esm)
     {
       esm.skipRecord();
@@ -28,6 +32,8 @@ struct LoadCREC
 /// Changes an item list / container
 struct LoadCNTC
 {
+    std::string mId;
+
     void load(ESMReader &esm)
     {
       esm.skipRecord();

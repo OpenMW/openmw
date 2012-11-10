@@ -3,7 +3,7 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
 
-#include "components/esm_store/store.hpp"
+#include "../mwworld/esmstore.hpp"
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -48,6 +48,7 @@ BirthDialog::BirthDialog(MWBase::WindowManager& parWindowManager)
     getWidget(okButton, "OKButton");
     okButton->setCaption(mWindowManager.getGameSettingString("sOK", ""));
     okButton->eventMouseButtonClick += MyGUI::newDelegate(this, &BirthDialog::onOkClicked);
+    okButton->setEnabled(false);
 
     updateBirths();
     updateSpells();
@@ -82,6 +83,9 @@ void BirthDialog::setBirthId(const std::string &birthId)
         if (boost::iequals(*mBirthList->getItemDataAt<std::string>(i), birthId))
         {
             mBirthList->setIndexSelected(i);
+            MyGUI::ButtonPtr okButton;
+            getWidget(okButton, "OKButton");
+            okButton->setEnabled(true);
             break;
         }
     }
@@ -93,6 +97,8 @@ void BirthDialog::setBirthId(const std::string &birthId)
 
 void BirthDialog::onOkClicked(MyGUI::Widget* _sender)
 {
+    if(mBirthList->getIndexSelected() == MyGUI::ITEM_NONE)
+        return;
     eventDone(this);
 }
 
@@ -105,6 +111,10 @@ void BirthDialog::onSelectBirth(MyGUI::ListBox* _sender, size_t _index)
 {
     if (_index == MyGUI::ITEM_NONE)
         return;
+
+    MyGUI::ButtonPtr okButton;
+    getWidget(okButton, "OKButton");
+    okButton->setEnabled(true);
 
     const std::string *birthId = mBirthList->getItemDataAt<std::string>(_index);
     if (boost::iequals(mCurrentBirthId, *birthId))
@@ -120,19 +130,18 @@ void BirthDialog::updateBirths()
 {
     mBirthList->removeAllItems();
 
-    const ESMS::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
+    const MWWorld::Store<ESM::BirthSign> &signs =
+        MWBase::Environment::get().getWorld()->getStore().get<ESM::BirthSign>();
 
-    ESMS::RecListT<ESM::BirthSign>::MapType::const_iterator it = store.birthSigns.list.begin();
-    ESMS::RecListT<ESM::BirthSign>::MapType::const_iterator end = store.birthSigns.list.end();
     int index = 0;
 
     // sort by name
     std::vector < std::pair<std::string, const ESM::BirthSign*> > birthSigns;
-    for (; it!=end; ++it)
+
+    MWWorld::Store<ESM::BirthSign>::iterator it = signs.begin();
+    for (; it != signs.end(); ++it)
     {
-        std::string id = it->first;
-        const ESM::BirthSign* sign = &it->second;
-        birthSigns.push_back(std::make_pair(id, sign));
+        birthSigns.push_back(std::make_pair(it->mId, &(*it)));
     }
     std::sort(birthSigns.begin(), birthSigns.end(), sortBirthSigns);
 
@@ -160,8 +169,11 @@ void BirthDialog::updateSpells()
     const int lineHeight = 18;
     MyGUI::IntCoord coord(0, 0, mSpellArea->getWidth(), 18);
 
-    const ESMS::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
-    const ESM::BirthSign *birth = store.birthSigns.find(mCurrentBirthId);
+    const MWWorld::ESMStore &store =
+        MWBase::Environment::get().getWorld()->getStore();
+
+    const ESM::BirthSign *birth =
+        store.get<ESM::BirthSign>().find(mCurrentBirthId);
 
     std::string texturePath = std::string("textures\\") + birth->mTexture;
     fixTexturePath(texturePath);
@@ -174,7 +186,7 @@ void BirthDialog::updateSpells()
     for (; it != end; ++it)
     {
         const std::string &spellId = *it;
-        const ESM::Spell *spell = store.spells.search(spellId);
+        const ESM::Spell *spell = store.get<ESM::Spell>().search(spellId);
         if (!spell)
             continue; // Skip spells which cannot be found
         ESM::Spell::SpellType type = static_cast<ESM::Spell::SpellType>(spell->mData.mType);
@@ -190,11 +202,17 @@ void BirthDialog::updateSpells()
     }
 
     int i = 0;
-    struct{ const std::vector<std::string> &spells; const char *label; } categories[3] = {
+
+    struct {
+        const std::vector<std::string> &spells;
+        const char *label;
+    }
+    categories[3] = {
         {abilities, "sBirthsignmenu1"},
         {powers,    "sPowers"},
         {spells,    "sBirthsignmenu2"}
     };
+
     for (int category = 0; category < 3; ++category)
     {
         if (!categories[category].spells.empty())

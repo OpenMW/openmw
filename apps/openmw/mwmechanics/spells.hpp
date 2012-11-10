@@ -55,6 +55,10 @@ namespace MWMechanics
 
             const std::string getSelectedSpell() const;
             ///< May return an empty string.
+            
+            bool hasCommonDisease() const;
+
+            bool hasBlightDisease() const;            
     };
 }
 

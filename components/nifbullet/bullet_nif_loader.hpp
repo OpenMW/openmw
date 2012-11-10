@@ -48,7 +48,7 @@ namespace NifBullet
 /**
 *Load bulletShape from NIF files.
 */
-class ManualBulletShapeLoader : public BulletShapeLoader
+class ManualBulletShapeLoader : public OEngine::Physic::BulletShapeLoader
 {
 public:
 
@@ -104,7 +104,7 @@ private:
 
     
 
-    BulletShape* cShape;//current shape
+    OEngine::Physic::BulletShape* cShape;//current shape
     btTriangleMesh *mTriMesh;
     btBoxShape *mBoundingBox;
     btBvhTriangleMeshShape* currentShape;//the shape curently under construction

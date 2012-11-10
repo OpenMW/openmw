@@ -29,11 +29,7 @@ namespace ESM
     struct Class;
     struct Potion;
     struct Spell;
-}
-
-namespace ESMS
-{
-    struct ESMStore;
+    struct NPC;
 }
 
 namespace MWRender
@@ -48,6 +44,7 @@ namespace MWWorld
     class LocalScripts;
     class Ptr;
     class TimeStamp;
+    class ESMStore;
 }
 
 namespace MWBase
@@ -104,7 +101,7 @@ namespace MWBase
 
             virtual MWWorld::Player& getPlayer() = 0;
 
-            virtual const ESMS::ESMStore& getStore() const = 0;
+            virtual const MWWorld::ESMStore& getStore() const = 0;
 
             virtual ESM::ESMReader& getEsmReader() = 0;
 
@@ -234,24 +231,28 @@ namespace MWBase
             ///< Toggle a render mode.
             ///< \return Resulting mode
 
-            virtual std::pair<std::string, const ESM::Potion *> createRecord (const ESM::Potion& record)
+            virtual const ESM::Potion *createRecord (const ESM::Potion& record)
                 = 0;
             ///< Create a new recrod (of type potion) in the ESM store.
-            /// \return ID, pointer to created record
+            /// \return pointer to created record
 
-            virtual std::pair<std::string, const ESM::Spell *> createRecord (const ESM::Spell& record)
+            virtual const ESM::Spell *createRecord (const ESM::Spell& record)
                 = 0;
             ///< Create a new recrod (of type spell) in the ESM store.
-            /// \return ID, pointer to created record
+            /// \return pointer to created record
 
-            virtual std::pair<std::string, const ESM::Class *> createRecord (const ESM::Class& record)
+            virtual const ESM::Class *createRecord (const ESM::Class& record)
                 = 0;
             ///< Create a new recrod (of type class) in the ESM store.
-            /// \return ID, pointer to created record
+            /// \return pointer to created record
 
             virtual const ESM::Cell *createRecord (const ESM::Cell& record) = 0;
             ///< Create a new recrod (of type cell) in the ESM store.
-            /// \return ID, pointer to created record
+            /// \return pointer to created record
+
+            virtual const ESM::NPC *createRecord(const ESM::NPC &record) = 0;
+            ///< Create a new recrod (of type npc) in the ESM store.
+            /// \return pointer to created record
 
             virtual void playAnimationGroup (const MWWorld::Ptr& ptr, const std::string& groupName,
                 int mode, int number = 1) = 0;
@@ -265,7 +266,7 @@ namespace MWBase
             ///< Skip the animation for the given MW-reference for one frame. Calls to this function for
             /// references that are currently not in the rendered scene should be ignored.
 
-            virtual void update (float duration) = 0;
+            virtual void update (float duration, bool paused) = 0;
 
             virtual bool placeObject(const MWWorld::Ptr& object, float cursorX, float cursorY) = 0;
             ///< place an object into the gameworld at the specified cursor position

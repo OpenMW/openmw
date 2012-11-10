@@ -1,7 +1,7 @@
 #ifndef CHARACTER_CREATION_HPP
 #define CHARACTER_CREATION_HPP
 
-#include <components/esm_store/store.hpp>
+#include "../mwworld/esmstore.hpp"
 
 #include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"

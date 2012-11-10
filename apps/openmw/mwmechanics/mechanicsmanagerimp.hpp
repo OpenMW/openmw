@@ -64,7 +64,7 @@ namespace MWMechanics
             virtual void setPlayerName (const std::string& name);
             ///< Set player name.
 
-            virtual void setPlayerRace (const std::string& id, bool male);
+            virtual void setPlayerRace (const std::string& id, bool male, const std::string &head, const std::string &hair);
             ///< Set player race.
 
             virtual void setPlayerBirthsign (const std::string& id);
@@ -78,6 +78,12 @@ namespace MWMechanics
 
             virtual void restoreDynamicStats();
             ///< If the player is sleeping, this should be called every hour.
+
+            virtual int getBarterOffer(const MWWorld::Ptr& ptr,int basePrice, bool buying);
+            ///< This is used by every service to determine the price of objects given the trading skills of the player and NPC.
+
+            virtual int getDerivedDisposition(const MWWorld::Ptr& ptr);
+            ///< Calculate the diposition of an NPC toward the player.
 
             virtual int countDeaths (const std::string& id) const;
             ///< Return the number of deaths for actors with the given ID.
