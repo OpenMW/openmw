@@ -48,8 +48,9 @@ namespace MWRender
 
         mNode->setVisible (false);
 
-        mCamera->setPosition(mPosition);
-        mCamera->lookAt(mLookAt);
+        Ogre::Vector3 scale = mNode->getScale();
+        mCamera->setPosition(mPosition * scale);
+        mCamera->lookAt(mLookAt * scale);
 
         mCamera->setNearClipDistance (0.01);
         mCamera->setFarClipDistance (1000);
@@ -80,6 +81,22 @@ namespace MWRender
         delete mAnimation;
     }
 
+    void CharacterPreview::rebuild()
+    {
+        assert(mAnimation);
+        delete mAnimation;
+
+        mAnimation = new NpcAnimation(mCharacter, mNode,
+            MWWorld::Class::get(mCharacter).getInventoryStore (mCharacter), RV_PlayerPreview);
+
+        mNode->setVisible (false);
+
+        Ogre::Vector3 scale = mNode->getScale();
+        mCamera->setPosition(mPosition * scale);
+        mCamera->lookAt(mLookAt * scale);
+
+        onSetup();
+    }
 
     // --------------------------------------------------------------------------------------------------
 
@@ -128,8 +145,10 @@ namespace MWRender
     RaceSelectionPreview::RaceSelectionPreview()
         : CharacterPreview(MWBase::Environment::get().getWorld()->getPlayer().getPlayer(),
             512, 512, "CharacterHeadPreview", Ogre::Vector3(0, 120, -35), Ogre::Vector3(0,125,0))
+        , mRef(&mBase)
     {
-
+        mBase = *mCharacter.get<ESM::NPC>()->mBase;
+        mCharacter = MWWorld::Ptr(&mRef, mCharacter.getCell());
     }
 
     void RaceSelectionPreview::update(float angle)
@@ -141,4 +160,11 @@ namespace MWRender
         mNode->setVisible (false);
     }
 
+    void RaceSelectionPreview::setPrototype(const ESM::NPC &proto)
+    {
+        mBase = proto;
+        mBase.mId = "player";
+        rebuild();
+        update(0);
+    }
 }

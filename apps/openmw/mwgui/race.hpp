@@ -34,6 +34,7 @@ namespace MWGui
             GM_Female
         };
 
+        const ESM::NPC &getResult() const { return mPreview->getPrototype(); }
         const std::string &getRaceId() const { return mCurrentRaceId; }
         Gender getGender() const { return mGenderIndex == 0 ? GM_Male : GM_Female; }
         // getFace()

@@ -318,7 +318,7 @@ namespace MWMechanics
         mUpdatePlayer = true;
     }
 
-    void MechanicsManager::setPlayerRace (const std::string& race, bool male)
+    void MechanicsManager::setPlayerRace (const std::string& race, bool male, const std::string &head, const std::string &hair)
     {
         MWBase::World *world = MWBase::Environment::get().getWorld();
 
@@ -326,11 +326,9 @@ namespace MWMechanics
             *world->getPlayer().getPlayer().get<ESM::NPC>()->mBase;
 
         player.mRace = race;
-
-        player.mFlags |= ESM::NPC::Female;
-        if (male) {
-            player.mFlags ^= ESM::NPC::Female;
-        }
+        player.mHead = head;
+        player.mHair = hair;
+        player.setIsMale(male);
 
         world->createRecord(player);
 

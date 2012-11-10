@@ -62,7 +62,7 @@ namespace MWBase
             virtual void setPlayerName (const std::string& name) = 0;
             ///< Set player name.
 
-            virtual void setPlayerRace (const std::string& id, bool male) = 0;
+            virtual void setPlayerRace (const std::string& id, bool male, const std::string &head, const std::string &hair) = 0;
             ///< Set player race.
 
             virtual void setPlayerBirthsign (const std::string& id) = 0;

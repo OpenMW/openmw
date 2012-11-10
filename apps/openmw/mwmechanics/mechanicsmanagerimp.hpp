@@ -64,7 +64,7 @@ namespace MWMechanics
             virtual void setPlayerName (const std::string& name);
             ///< Set player name.
 
-            virtual void setPlayerRace (const std::string& id, bool male);
+            virtual void setPlayerRace (const std::string& id, bool male, const std::string &head, const std::string &hair);
             ///< Set player race.
 
             virtual void setPlayerBirthsign (const std::string& id);
