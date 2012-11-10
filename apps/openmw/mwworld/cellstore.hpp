@@ -3,7 +3,7 @@
 
 #include <components/esm/records.hpp>
 
-#include <list>
+#include <deque>
 #include <algorithm>
 
 #include "refdata.hpp"
@@ -126,9 +126,9 @@ namespace MWWorld
     CellRefList<ESM::Static>            statics;
     CellRefList<ESM::Weapon>            weapons;
 
-    void load (const ESMS::ESMStore &store, ESM::ESMReader &esm);
+    void load (const ESMS::ESMStore &store, std::vector<ESM::ESMReader> &esm);
 
-    void preload (const ESMS::ESMStore &store, ESM::ESMReader &esm);
+    void preload (const ESMS::ESMStore &store, std::vector<ESM::ESMReader> &esm);
 
     /// Call functor (ref) for each reference. functor must return a bool. Returning
     /// false will abort the iteration.
@@ -187,9 +187,9 @@ namespace MWWorld
     }
 
     /// Run through references and store IDs
-    void listRefs(const ESMS::ESMStore &store, ESM::ESMReader &esm);
+    void listRefs(const ESMS::ESMStore &store, std::vector<ESM::ESMReader> &esm);
 
-    void loadRefs(const ESMS::ESMStore &store, ESM::ESMReader &esm);
+    void loadRefs(const ESMS::ESMStore &store, std::vector<ESM::ESMReader> &esm);
   };
 }
 

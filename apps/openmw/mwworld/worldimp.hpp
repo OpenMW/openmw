@@ -55,7 +55,7 @@ namespace MWWorld
 
             MWWorld::Scene *mWorldScene;
             MWWorld::Player *mPlayer;
-            ESM::ESMReader mEsm;
+            std::vector<ESM::ESMReader> mEsm;
             ESMS::ESMStore mStore;
             LocalScripts mLocalScripts;
             MWWorld::Globals *mGlobalVariables;
@@ -127,7 +127,7 @@ namespace MWWorld
 
             virtual const ESMS::ESMStore& getStore() const;
 
-            virtual ESM::ESMReader& getEsmReader();
+            virtual std::vector<ESM::ESMReader>& getEsmReader();
 
             virtual LocalScripts& getLocalScripts();
 

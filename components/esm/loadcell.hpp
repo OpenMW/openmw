@@ -152,7 +152,7 @@ struct Cell
   // somewhere other than the file system, you need to pre-open the
   // ESMReader, and the filename must match the stored filename
   // exactly.
-  void restore(ESMReader &esm) const;
+  void restore(ESMReader &esm, int iCtx) const;
 
   std::string getDescription() const;
   ///< Return a short string describing the cell (mostly used for debugging/logging purpose)

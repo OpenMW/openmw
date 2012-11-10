@@ -496,6 +496,11 @@ namespace ESMS
     {
       count++;
 
+      // Don't automatically assume that a new cell must be spawned. Multiple plugins write to the same cell,
+      //  and we merge all this data into one Cell object. However, we can't simply search for the cell id,
+      //  as many exterior cells do not have a name. Instead, we need to search by (x,y) coordinates - and they
+      //  are not available until both cells have been loaded! So first, proceed as usual.
+      
       // All cells have a name record, even nameless exterior cells.
       ESM::Cell *cell = new ESM::Cell;
       cell->mName = id;
@@ -505,12 +510,22 @@ namespace ESMS
 
       if(cell->mData.mFlags & ESM::Cell::Interior)
         {
-          // Store interior cell by name
+          // Store interior cell by name, try to merge with existing parent data.
+          ESM::Cell *oldcell = const_cast<ESM::Cell*>(searchInt(id));
+          if (oldcell) {
+              cell->mContextList.push_back(oldcell->mContextList.at(0));
+              delete oldcell;
+          }
           intCells[id] = cell;
         }
       else
         {
-          // Store exterior cells by grid position
+          // Store exterior cells by grid position, try to merge with existing parent data.
+          ESM::Cell *oldcell = const_cast<ESM::Cell*>(searchExt(cell->getGridX(), cell->getGridY()));
+          if (oldcell) {
+              cell->mContextList.push_back(oldcell->mContextList.at(0));
+              delete oldcell;
+          }
           extCells[std::make_pair (cell->mData.mX, cell->mData.mY)] = cell;
         }
     }

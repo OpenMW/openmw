@@ -81,7 +81,7 @@ public:
   //  to the individual load() methods. This hack allows to pass this reference
   //  indirectly to the load() method.
   int idx;
-  void setIndex(const int index) {idx = index;}
+  void setIndex(const int index) {idx = index; mCtx.index = index;}
   const int getIndex() {return idx;}
 
   /*************************************************************************

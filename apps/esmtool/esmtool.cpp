@@ -220,7 +220,10 @@ void loadCell(ESM::Cell &cell, ESM::ESMReader &esm, Arguments& info)
     bool save = (info.mode == "clone");
 
     // Skip back to the beginning of the reference list
-    cell.restore(esm);
+    // FIXME: Changes to the references backend required to support multiple plugins have
+    //  almost certainly broken this following line. I'll leave it as is for now, so that
+    //  the compiler does not complain.
+    cell.restore(esm, 0);
 
     // Loop through all the references
     ESM::CellRef ref;

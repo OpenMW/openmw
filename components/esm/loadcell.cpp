@@ -113,6 +113,8 @@ void Cell::load(ESMReader &esm)
 
     // Save position of the cell references and move on
     mContextList.push_back(esm.getContext());
+    if (mContextList.size() > 1)
+        std::cout << "found two plugins" << std::endl;
     esm.skipRecord();
 }
 
@@ -147,10 +149,9 @@ void Cell::save(ESMWriter &esm)
         esm.writeHNT("NAM0", mNAM0);
 }
 
-void Cell::restore(ESMReader &esm) const
+void Cell::restore(ESMReader &esm, int iCtx) const
 {
-    // TODO: support all contexts in the list!
-    esm.restoreContext(mContextList[0]);
+    esm.restoreContext(mContextList[iCtx]);
 }
 
 std::string Cell::getDescription() const
@@ -169,15 +170,28 @@ std::string Cell::getDescription() const
 
 bool Cell::getNextRef(ESMReader &esm, CellRef &ref)
 {
-    // TODO: Add support for moved references. References moved without crossing a cell boundary simply
-    //  overwrite old data. References moved across cell boundaries are using a different set of keywords,
-    //  and I'll have to think more about how this can be done.
     // TODO: Add support for multiple plugins. This requires a tricky renaming scheme for "ref.mRefnum".
     //  I'll probably add something to "ESMReader", we will need one per plugin anyway.
     // TODO: Try and document reference numbering, I don't think this has been done anywhere else.
     if (!esm.hasMoreSubs())
         return false;
-
+    
+    if (esm.isNextSub("MVRF")) {
+        // Moved existing reference across cell boundaries, so interpret the blocks correctly.
+        // FIXME: Right now, we don't do anything with this data. This might result in weird behaviour,
+        //  where a moved reference does not appear because the owning cell (i.e. this cell) is not
+        //  loaded in memory.
+        int movedRefnum = 0;
+        int destCell[2];
+        esm.getHT(movedRefnum);
+        esm.getHNT(destCell, "CNDT");
+        // TODO: Figure out what happens when a reference has moved into an interior cell. This might
+        //  be required for NPCs following the player.
+    }
+    // If we have just parsed a MVRF entry, there should be a regular FRMR entry following right there.
+    // With the exception that this bock technically belongs to a different cell than this one.
+    // TODO: Figure out a way to handle these weird references that do not belong to this cell.
+    //  This may require some not-so-small behing-the-scenes updates.
     esm.getHNT(ref.mRefnum, "FRMR");
     ref.mRefID = esm.getHNString("NAME");
 
@@ -228,6 +242,9 @@ bool Cell::getNextRef(ESMReader &esm, CellRef &ref)
     // Number of references in the cell? Maximum once in each cell,
     // but not always at the beginning, and not always right. In other
     // words, completely useless.
+    // Update: Well, maybe not completely useless. This might actually be
+    //  number_of_references + number_of_references_moved_here_Across_boundaries,
+    //  and could be helpful for collecting these weird moved references.
     ref.mNam0 = 0;
     if (esm.isNextSub("NAM0"))
     {

@@ -179,6 +179,8 @@ namespace MWWorld
         mWeatherManager = new MWWorld::WeatherManager(mRendering);
 
         int idx = 0;
+        // NOTE: We might need to reserve one more for the running game / save.
+        mEsm.resize(master.size() + plugins.size());
         for (std::vector<std::string>::size_type i = 0; i < master.size(); i++, idx++)
         {
             boost::filesystem::path masterPath (fileCollections.getCollection (".esm").getPath (master[i]));
@@ -186,10 +188,12 @@ namespace MWWorld
             std::cout << "Loading ESM " << masterPath.string() << "\n";
 
             // This parses the ESM file
-            mEsm.setEncoding(encoding);
-            mEsm.open (masterPath.string());
-            mEsm.setIndex(idx);
-            mStore.load (mEsm);
+            ESM::ESMReader lEsm;
+            lEsm.setEncoding(encoding);
+            lEsm.open (masterPath.string());
+            lEsm.setIndex(idx);
+            mEsm[idx] = lEsm;
+            mStore.load (mEsm[idx]);
         }
  
         for (std::vector<std::string>::size_type i = 0; i < plugins.size(); i++, idx++)
@@ -199,10 +203,12 @@ namespace MWWorld
             std::cout << "Loading ESP " << pluginPath.string() << "\n";
 
             // This parses the ESP file
-            mEsm.setEncoding(encoding);
-            mEsm.open (pluginPath.string());
-            mEsm.setIndex(idx);
-            mStore.load (mEsm);
+            ESM::ESMReader lEsm;
+            lEsm.setEncoding(encoding);
+            lEsm.open (pluginPath.string());
+            lEsm.setIndex(idx);
+            mEsm[idx] = lEsm;
+            mStore.load (mEsm[idx]);
         }
 
         mPlayer = new MWWorld::Player (mStore.npcs.find ("player"), *this);
@@ -282,7 +288,7 @@ namespace MWWorld
         return mStore;
     }
 
-    ESM::ESMReader& World::getEsmReader()
+    std::vector<ESM::ESMReader>& World::getEsmReader()
     {
         return mEsm;
     }

@@ -16,7 +16,7 @@ namespace MWWorld
         mWaterLevel = cell->mWater;
     }
 
-    void CellStore::load (const ESMS::ESMStore &store, ESM::ESMReader &esm)
+    void CellStore::load (const ESMS::ESMStore &store, std::vector<ESM::ESMReader> &esm)
     {
         if (mState!=State_Loaded)
         {
@@ -31,7 +31,7 @@ namespace MWWorld
         }
     }
 
-    void CellStore::preload (const ESMS::ESMStore &store, ESM::ESMReader &esm)
+    void CellStore::preload (const ESMS::ESMStore &store, std::vector<ESM::ESMReader> &esm)
     {
         if (mState==State_Unloaded)
         {
@@ -41,7 +41,7 @@ namespace MWWorld
         }
     }
 
-    void CellStore::listRefs(const ESMS::ESMStore &store, ESM::ESMReader &esm)
+    void CellStore::listRefs(const ESMS::ESMStore &store, std::vector<ESM::ESMReader> &esm)
     {
         assert (cell);
 
@@ -49,26 +49,24 @@ namespace MWWorld
             return; // this is a dynamically generated cell -> skipping.
 
         // Load references from all plugins that do something with this cell.
-        // HACK: only use first entry for now, full support requires some more work
-        //for (int i = 0; i < cell->mContextList.size(); i++)
-        for (int i = 0; i < 1; i++)
+        for (size_t i = 0; i < cell->mContextList.size(); i++)
         {
             // Reopen the ESM reader and seek to the right position.
-            // TODO: we will need to intoduce separate "esm"s, one per plugin!
-            cell->restore (esm);
+            int index = cell->mContextList.at(i).index;
+            cell->restore (esm[index], i);
 
             ESM::CellRef ref;
 
             // Get each reference in turn
-            while (cell->getNextRef (esm, ref))
+            while (cell->getNextRef (esm[index], ref))
             {
                 std::string lowerCase;
 
                 std::transform (ref.mRefID.begin(), ref.mRefID.end(), std::back_inserter (lowerCase),
                     (int(*)(int)) std::tolower);
 
-                // TODO: support deletion / moving references out of the cell. no simple "push_back",
-                //  but see what the plugin wants to do.
+                // TODO: Fully support deletion / moving references out of the cell. no simple "push_back",
+                //  but make sure that the reference exists only once.
                 mIds.push_back (lowerCase);
             }
         }
@@ -76,7 +74,7 @@ namespace MWWorld
         std::sort (mIds.begin(), mIds.end());
     }
 
-    void CellStore::loadRefs(const ESMS::ESMStore &store, ESM::ESMReader &esm)
+    void CellStore::loadRefs(const ESMS::ESMStore &store, std::vector<ESM::ESMReader> &esm)
     {
       assert (cell);
 
@@ -84,24 +82,24 @@ namespace MWWorld
             return; // this is a dynamically generated cell -> skipping.
 
         // Load references from all plugins that do something with this cell.
-        // HACK: only use first entry for now, full support requires some more work
-        //for (int i = 0; i < cell->mContextList.size(); i++)
-        for (int i = 0; i < 1; i++)
+        for (size_t i = 0; i < cell->mContextList.size(); i++)
         {
             // Reopen the ESM reader and seek to the right position.
-            // TODO: we will need to intoduce separate "esm"s, one per plugin!
-            cell->restore(esm);
+            int index = cell->mContextList.at(i).index;
+            cell->restore (esm[index], i);
 
             ESM::CellRef ref;
 
             // Get each reference in turn
-            while(cell->getNextRef(esm, ref))
+            while(cell->getNextRef(esm[index], ref))
             {
                 std::string lowerCase;
 
                 std::transform (ref.mRefID.begin(), ref.mRefID.end(), std::back_inserter (lowerCase),
                     (int(*)(int)) std::tolower);
 
+                // TODO: Fully support deletion / moving references out of the cell. No simple loading,
+                //  but make sure that the reference exists only once. Current code clones references.
                 int rec = store.find(ref.mRefID);
 
                 ref.mRefID = lowerCase;

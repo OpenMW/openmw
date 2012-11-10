@@ -85,7 +85,7 @@ MWWorld::Ptr MWWorld::Cells::getPtrAndCache (const std::string& name, Ptr::CellS
     return ptr;
 }
 
-MWWorld::Cells::Cells (const ESMS::ESMStore& store, ESM::ESMReader& reader)
+MWWorld::Cells::Cells (const ESMS::ESMStore& store, std::vector<ESM::ESMReader>& reader)
 : mStore (store), mReader (reader),
   mIdCache (20, std::pair<std::string, Ptr::CellStore *> ("", (Ptr::CellStore*)0)), /// \todo make cache size configurable
   mIdCacheIndex (0)
@@ -120,6 +120,7 @@ MWWorld::Ptr::CellStore *MWWorld::Cells::getExterior (int x, int y)
 
     if (result->second.mState!=Ptr::CellStore::State_Loaded)
     {
+        // Multiple plugin support for landscape data is much easier than for references. The last plugin wins.
         result->second.load (mStore, mReader);
         fillContainers (result->second);
     }
