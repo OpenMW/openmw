@@ -196,6 +196,8 @@ bool MWDialogue::Filter::testSelectStructNumeric (const SelectWrapper& select) c
 
 int MWDialogue::Filter::getSelectStructInteger (const SelectWrapper& select) const
 {
+    MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+
     switch (select.getFunction())
     {
         case SelectWrapper::Function_Journal:
@@ -204,7 +206,6 @@ int MWDialogue::Filter::getSelectStructInteger (const SelectWrapper& select) con
         
         case SelectWrapper::Function_Item: 
         {        
-            MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
             MWWorld::ContainerStore& store = MWWorld::Class::get (player).getContainerStore (player);
 
             int sum = 0;
@@ -226,6 +227,10 @@ int MWDialogue::Filter::getSelectStructInteger (const SelectWrapper& select) con
         
             return mChoice;
         
+        case SelectWrapper::Function_AiSetting:
+        
+            return MWWorld::Class::get (player).getCreatureStats (player).getAiSetting (select.getArgument());
+        
         default:
 
             throw std::runtime_error ("unknown integer select function");
@@ -235,7 +240,7 @@ int MWDialogue::Filter::getSelectStructInteger (const SelectWrapper& select) con
 bool MWDialogue::Filter::getSelectStructBoolean (const SelectWrapper& select) const
 {
     MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
-        
+
     switch (select.getFunction())
     {
         case SelectWrapper::Function_Id:

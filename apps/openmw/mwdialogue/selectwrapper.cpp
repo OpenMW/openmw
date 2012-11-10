@@ -66,6 +66,7 @@ MWDialogue::SelectWrapper::Function MWDialogue::SelectWrapper::decodeFunction() 
         case 46: return Function_SameFaction;
         case 50: return Function_Choice;
         case 58: return Function_PcCorprus;
+        case 67: case 68: case 69: case 70: return Function_AiSetting;
     }
     
     return Function_None;
@@ -96,12 +97,34 @@ MWDialogue::SelectWrapper::Function MWDialogue::SelectWrapper::getFunction() con
     return Function_None;
 }
 
+int MWDialogue::SelectWrapper::getArgument() const
+{
+    if (mSelect.mSelectRule[1]!='1')
+        return 0;
+        
+    int index = 0;
+    
+    std::istringstream (mSelect.mSelectRule.substr(2,2)) >> index;
+    
+    switch (index)
+    {
+        // AI settings
+        case 67: return 1;
+        case 68: return 0;
+        case 69: return 3;
+        case 70: return 2;
+    }
+            
+    return 0;
+}
+
 MWDialogue::SelectWrapper::Type MWDialogue::SelectWrapper::getType() const
 {
     static const Function integerFunctions[] =
     {
         Function_Journal, Function_Item, Function_Dead,
         Function_Choice,
+        Function_AiSetting,
         Function_None // end marker
     };
     

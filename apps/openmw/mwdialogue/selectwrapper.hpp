@@ -26,7 +26,8 @@ namespace MWDialogue
                 Function_Global,
                 Function_SameFaction,
                 Function_Choice,
-                Function_PcCommonDisease, Function_PcBlightDisease, Function_PcCorprus
+                Function_PcCommonDisease, Function_PcBlightDisease, Function_PcCorprus,
+                Function_AiSetting
             };
             
             enum Type
@@ -46,6 +47,8 @@ namespace MWDialogue
             SelectWrapper (const ESM::DialInfo::SelectStruct& select);
             
             Function getFunction() const;
+            
+            int getArgument() const;
             
             Type getType() const;
             

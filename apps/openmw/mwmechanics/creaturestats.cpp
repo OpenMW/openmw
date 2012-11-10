@@ -10,8 +10,10 @@
 namespace MWMechanics
 {  
     CreatureStats::CreatureStats()
-        : mLevel (0), mHello (0), mFight (0), mFlee (0), mAlarm (0), mLevelHealthBonus(0.f), mDead (false)
+        : mLevel (0), mLevelHealthBonus(0.f), mDead (false)
     {
+        for (int i=0; i<4; ++i)
+            mAiSettings[i] = 0;
     }
 
     void CreatureStats::increaseLevelHealthBonus (float value)
@@ -90,27 +92,13 @@ namespace MWMechanics
     {
         return mLevel;
     }
+    
+    int CreatureStats::getAiSetting (int index) const
+    {
+        assert (index>=0 && index<4);
+        return mAiSettings[index];
+    }
    
-    int CreatureStats::getHello() const
-    {
-        return mHello;
-    }
-
-    int CreatureStats::getFight() const
-    {
-        return mFight;
-    }
-
-    int CreatureStats::getFlee() const
-    {
-        return mFlee;
-    }
-
-    int CreatureStats::getAlarm() const
-    {
-        return mAlarm;
-    }
-
     Stat<int> &CreatureStats::getAttribute(int index)
     {
         if (index < 0 || index > 7) {
@@ -196,25 +184,11 @@ namespace MWMechanics
         mMagicEffects = effects;
     }
 
-    void CreatureStats::setHello(int value)
+    void CreatureStats::setAiSetting (int index, int value)
     {
-        mHello = value;
+        assert (index>=0 && index<4);
+        mAiSettings[index] = value;
     }
-
-    void CreatureStats::setFight(int value)
-    {
-        mFight = value;
-    }
-
-    void CreatureStats::setFlee(int value)
-    {
-        mFlee = value;
-    }
-
-    void CreatureStats::setAlarm(int value)
-    {
-        mAlarm = value;
-    }    
     
     bool CreatureStats::isDead() const
     {

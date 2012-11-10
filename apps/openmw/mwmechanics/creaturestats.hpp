@@ -24,10 +24,7 @@ namespace MWMechanics
         Spells mSpells;
         ActiveSpells mActiveSpells;
         MagicEffects mMagicEffects;
-        int mHello;
-        int mFight;
-        int mFlee;
-        int mAlarm;
+        int mAiSettings[4];
         AiSequence mAiSequence;
         float mLevelHealthBonus;
         bool mDead;        
@@ -53,13 +50,8 @@ namespace MWMechanics
 
         int getLevel() const;
 
-        int getHello() const;
-
-        int getFight() const;
-
-        int getFlee() const;
-
-        int getAlarm() const;
+        int getAiSetting (int index) const;
+        ///< 0: hello, 1 fight, 2 flee, 3 alarm
 
         Stat<int> & getAttribute(int index);
 
@@ -87,14 +79,9 @@ namespace MWMechanics
 
         void setLevel(int level);
 
-        void setHello(int value);
-
-        void setFight(int value);
-
-        void setFlee(int value);
-
-        void setAlarm(int value);
-        
+        void setAiSetting (int index, int value);
+        ///< 0: hello, 1 fight, 2 flee, 3 alarm
+                
         const AiSequence& getAiSequence() const;
         
         AiSequence& getAiSequence();

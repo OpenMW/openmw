@@ -157,22 +157,6 @@ namespace MWDialogue
                     if(!selectCompare<int,int>(comp,0,select.mI)) return false;
                     break;
 
-                case 67://Fight
-                    if(!selectCompare<int,int>(comp,0,select.mI)) return false;
-                    break;
-
-                case 68://Hello????
-                    if(!selectCompare<int,int>(comp,0,select.mI)) return false;
-                    break;
-
-                case 69://Alarm
-                    if(!selectCompare<int,int>(comp,0,select.mI)) return false;
-                    break;
-
-                case 70://Flee
-                    if(!selectCompare<int,int>(comp,0,select.mI)) return false;
-                    break;
-
                 case 71://Should Attack
                     if(!selectCompare<int,int>(comp,0,select.mI)) return false;
                     break;
@@ -184,7 +168,7 @@ namespace MWDialogue
             }
         }
 
-        return true;
+        return false;
     }
 
     bool DialogueManager::isMatching (const MWWorld::Ptr& actor,
