@@ -243,6 +243,10 @@ bool MWDialogue::Filter::getSelectStructBoolean (const SelectWrapper& select) co
 
     switch (select.getFunction())
     {
+        case SelectWrapper::Function_False:
+        
+            return false;
+            
         case SelectWrapper::Function_Id:
         
             return select.getName()==toLower (MWWorld::Class::get (mActor).getId (mActor));

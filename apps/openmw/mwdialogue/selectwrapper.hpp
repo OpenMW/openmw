@@ -13,7 +13,7 @@ namespace MWDialogue
         
             enum Function
             {
-                Function_None,
+                Function_None, Function_False,
                 Function_Journal,
                 Function_Item,
                 Function_Dead,

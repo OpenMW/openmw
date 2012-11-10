@@ -69,7 +69,7 @@ MWDialogue::SelectWrapper::Function MWDialogue::SelectWrapper::decodeFunction() 
         case 67: case 68: case 69: case 70: return Function_AiSetting;
     }
     
-    return Function_None;
+    return Function_False;
 }
 
 MWDialogue::SelectWrapper::SelectWrapper (const ESM::DialInfo::SelectStruct& select) : mSelect (select) {}
@@ -136,6 +136,7 @@ MWDialogue::SelectWrapper::Type MWDialogue::SelectWrapper::getType() const
     
     static const Function booleanFunctions[] =
     {
+        Function_False,
         Function_Id, Function_Faction, Function_Class, Function_Race, Function_Cell,
         Function_SameFaction,
         Function_PcCommonDisease, Function_PcBlightDisease, Function_PcCorprus,

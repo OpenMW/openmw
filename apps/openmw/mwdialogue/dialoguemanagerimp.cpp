@@ -168,7 +168,7 @@ namespace MWDialogue
             }
         }
 
-        return false;
+        return true;
     }
 
     bool DialogueManager::isMatching (const MWWorld::Ptr& actor,
