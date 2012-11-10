@@ -461,10 +461,10 @@ void CharacterCreation::onRaceDialogBack()
     if (mRaceDialog)
     {
         const ESM::NPC &data = mRaceDialog->getResult();
-        mPlayerRaceId = data.mId;
+        mPlayerRaceId = data.mRace;
         if (!mPlayerRaceId.empty()) {
             MWBase::Environment::get().getMechanicsManager()->setPlayerRace(
-                data.mId,
+                data.mRace,
                 data.isMale(),
                 data.mHead,
                 data.mHair
