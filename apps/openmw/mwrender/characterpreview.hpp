@@ -4,6 +4,7 @@
 #include <OgreRenderTarget.h>
 #include <OgreMaterialManager.h>
 
+#include <components/esm/loadnpc.hpp>
 
 #include "externalrendering.hpp"
 
@@ -32,6 +33,7 @@ namespace MWRender
         virtual void setup (Ogre::SceneManager *sceneManager);
         virtual void onSetup();
 
+        virtual void rebuild();
 
     protected:
         Ogre::TexturePtr mTexture;
@@ -77,10 +79,19 @@ namespace MWRender
 
     class RaceSelectionPreview : public CharacterPreview
     {
+        ESM::NPC                        mBase;
+        MWWorld::LiveCellRef<ESM::NPC>  mRef;
+
     public:
         RaceSelectionPreview();
 
         void update(float angle);
+
+        const ESM::NPC &getPrototype() const {
+            return mBase;
+        }
+
+        void setPrototype(const ESM::NPC &proto);
     };
 
 }

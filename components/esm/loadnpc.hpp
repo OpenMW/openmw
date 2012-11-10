@@ -121,6 +121,13 @@ struct NPC
     bool isMale() const {
         return (mFlags & Female) == 0;
     }
+
+    void setIsMale(bool value) {
+        mFlags |= Female;
+        if (value) {
+            mFlags ^= Female;
+        }
+    }
 };
 }
 #endif

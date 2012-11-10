@@ -7,6 +7,7 @@
 #include "review.hpp"
 #include "dialogue.hpp"
 #include "mode.hpp"
+#include "inventorywindow.hpp"
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/soundmanager.hpp"
@@ -459,9 +460,16 @@ void CharacterCreation::onRaceDialogBack()
 {
     if (mRaceDialog)
     {
-        mPlayerRaceId = mRaceDialog->getRaceId();
-        if (!mPlayerRaceId.empty())
-            MWBase::Environment::get().getMechanicsManager()->setPlayerRace(mPlayerRaceId, mRaceDialog->getGender() == RaceDialog::GM_Male);
+        const ESM::NPC &data = mRaceDialog->getResult();
+        mPlayerRaceId = data.mId;
+        if (!mPlayerRaceId.empty()) {
+            MWBase::Environment::get().getMechanicsManager()->setPlayerRace(
+                data.mId,
+                data.isMale(),
+                data.mHead,
+                data.mHair
+            );
+        }
         mWM->removeDialog(mRaceDialog);
         mRaceDialog = 0;
     }
@@ -474,10 +482,18 @@ void CharacterCreation::onRaceDialogDone(WindowBase* parWindow)
 {
     if (mRaceDialog)
     {
-        mPlayerRaceId = mRaceDialog->getRaceId();
-        mWM->setValue("race", mPlayerRaceId);
-        if (!mPlayerRaceId.empty())
-            MWBase::Environment::get().getMechanicsManager()->setPlayerRace(mPlayerRaceId, mRaceDialog->getGender() == RaceDialog::GM_Male);
+        const ESM::NPC &data = mRaceDialog->getResult();
+        mPlayerRaceId = data.mRace;
+        if (!mPlayerRaceId.empty()) {
+            MWBase::Environment::get().getMechanicsManager()->setPlayerRace(
+                data.mRace,
+                data.isMale(),
+                data.mHead,
+                data.mHair
+            );
+        }
+        mWM->getInventoryWindow()->rebuildAvatar();
+
         mWM->removeDialog(mRaceDialog);
         mRaceDialog = 0;
     }

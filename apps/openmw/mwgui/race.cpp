@@ -214,6 +214,29 @@ void RaceDialog::onSelectRace(MyGUI::ListBox* _sender, size_t _index)
         return;
 
     mCurrentRaceId = *raceId;
+
+    ESM::NPC record = mPreview->getPrototype();
+    record.mRace = mCurrentRaceId;
+    record.setIsMale(mGenderIndex == 0);
+
+    std::string prefix =
+        "b_n_" + mCurrentRaceId + ((record.isMale()) ? "_m_" : "_f_");
+
+    record.mHead = prefix + "head_01";
+    record.mHair = prefix + "hair_01";
+
+    const MWWorld::Store<ESM::BodyPart> &parts =
+        MWBase::Environment::get().getWorld()->getStore().get<ESM::BodyPart>();
+
+    if (parts.search(record.mHair) == 0) {
+        record.mHair = prefix + "hair01";
+    }
+
+    mFaceIndex = 0;
+    mHairIndex = 0;
+
+    mPreview->setPrototype(record);
+
     updateSkills();
     updateSpellPowers();
 }
