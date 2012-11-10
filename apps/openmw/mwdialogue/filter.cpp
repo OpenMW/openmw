@@ -390,3 +390,14 @@ bool MWDialogue::Filter::operator() (const ESM::DialInfo& info) const
 {
     return testActor (info) && testPlayer (info) && testSelectStructs (info);
 }
+
+const ESM::DialInfo *MWDialogue::Filter::search (const ESM::Dialogue& dialogue) const
+{
+    for (std::vector<ESM::DialInfo>::const_iterator iter = dialogue.mInfo.begin();
+        iter!=dialogue.mInfo.end(); ++iter)
+        if ((*this) (*iter))
+            return &*iter;
+
+    return 0;
+}
+

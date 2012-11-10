@@ -140,37 +140,28 @@ namespace MWDialogue
         updateTopics();
 
         //greeting
-        bool greetingFound = false;
         const MWWorld::Store<ESM::Dialogue> &dialogs =
             MWBase::Environment::get().getWorld()->getStore().get<ESM::Dialogue>();
 
         Filter filter (actor, mChoice, mTalkedTo);
 
-        MWWorld::Store<ESM::Dialogue>::iterator it = dialogs.begin();
-        for (; it != dialogs.end(); ++it)
+        for (MWWorld::Store<ESM::Dialogue>::iterator it = dialogs.begin(); it != dialogs.end(); ++it)
         {
             if(it->mType == ESM::Dialogue::Greeting)
             {
-                if (greetingFound) break;
-                for (std::vector<ESM::DialInfo>::const_iterator iter (it->mInfo.begin());
-                    iter!=it->mInfo.end(); ++iter)
+                if (const ESM::DialInfo *info = filter.search (*it))
                 {
-                    if (filter (*iter))
+                    if (!info->mSound.empty())
                     {
-                        if (!iter->mSound.empty())
-                        {
-                            // TODO play sound
-                        }
-
-                        std::string text = iter->mResponse;
-                        parseText(text);
-                        win->addText(iter->mResponse);
-                        executeScript(iter->mResultScript);
-                        greetingFound = true;
-                        mLastTopic = it->mId;
-                        mLastDialogue = *iter;
-                        break;
+                        // TODO play sound
                     }
+
+                    parseText (info->mResponse);
+                    win->addText (info->mResponse);
+                    executeScript (info->mResultScript);
+                    mLastTopic = it->mId;
+                    mLastDialogue = *info;
+                    break;
                 }
             }
         }
@@ -243,30 +234,24 @@ namespace MWDialogue
         int choice = mChoice;
         mChoice = -1;
         mActorKnownTopics.clear();
-        MWGui::DialogueWindow* win = MWBase::Environment::get().getWindowManager()->getDialogueWindow();
 
         const MWWorld::Store<ESM::Dialogue> &dialogs =
             MWBase::Environment::get().getWorld()->getStore().get<ESM::Dialogue>();
 
         Filter filter (mActor, mChoice, mTalkedTo);
 
-        MWWorld::Store<ESM::Dialogue>::iterator it = dialogs.begin();
-        for (; it != dialogs.end(); ++it)
+        for (MWWorld::Store<ESM::Dialogue>::iterator iter = dialogs.begin(); iter != dialogs.end(); ++iter)
         {
-            if(it->mType == ESM::Dialogue::Topic)
+            if (iter->mType == ESM::Dialogue::Topic)
             {
-                for (std::vector<ESM::DialInfo>::const_iterator iter (it->mInfo.begin());
-                    iter!=it->mInfo.end(); ++iter)
+                if (filter.search (*iter))
                 {
-                    if (filter (*iter))
+                    mActorKnownTopics.push_back (toLower (iter->mId));
+                    
+                    //does the player know the topic?
+                    if (mKnownTopics.find (toLower (iter->mId)) != mKnownTopics.end())
                     {
-                        mActorKnownTopics.push_back(toLower(it->mId));
-                        //does the player know the topic?
-                        if(mKnownTopics.find(toLower(it->mId)) != mKnownTopics.end())
-                        {
-                            keywordList.push_back(it->mId);
-                            break;
-                        }
+                        keywordList.push_back (iter->mId);
                     }
                 }
             }
@@ -317,6 +302,8 @@ namespace MWDialogue
         if (services & ESM::NPC::Enchanting)
             windowServices |= MWGui::DialogueWindow::Service_Enchant;
 
+        MWGui::DialogueWindow* win = MWBase::Environment::get().getWindowManager()->getDialogueWindow();
+
         win->setServices (windowServices);
 
         // sort again, because the previous sort was case-sensitive
@@ -333,30 +320,25 @@ namespace MWDialogue
             if(mDialogueMap.find(keyword) != mDialogueMap.end())
             {
                 ESM::Dialogue ndialogue = mDialogueMap[keyword];
-                if(ndialogue.mType == ESM::Dialogue::Topic)
+                if (mDialogueMap[keyword].mType == ESM::Dialogue::Topic)
                 {
                     Filter filter (mActor, mChoice, mTalkedTo);
                 
-                    for (std::vector<ESM::DialInfo>::const_iterator iter  = ndialogue.mInfo.begin();
-                        iter!=ndialogue.mInfo.end(); ++iter)
+                    if (const ESM::DialInfo *info = filter.search (mDialogueMap[keyword]))            
                     {
-                        if (filter (*iter))
-                        {
-                            std::string text = iter->mResponse;
-                            std::string script = iter->mResultScript;
+                        std::string text = info->mResponse;
+                        std::string script = info->mResultScript;
 
-                            parseText(text);
+                        parseText (text);
 
-                            MWGui::DialogueWindow* win = MWBase::Environment::get().getWindowManager()->getDialogueWindow();
-                            win->addTitle(keyword);
-                            win->addText(iter->mResponse);
+                        MWGui::DialogueWindow* win = MWBase::Environment::get().getWindowManager()->getDialogueWindow();
+                        win->addTitle (keyword);
+                        win->addText (info->mResponse);
 
-                            executeScript(script);
+                        executeScript (script);
 
-                            mLastTopic = keyword;
-                            mLastDialogue = *iter;
-                            break;
-                        }
+                        mLastTopic = keyword;
+                        mLastDialogue = *info;
                     }
                 }
             }
@@ -372,38 +354,31 @@ namespace MWDialogue
 
     void DialogueManager::questionAnswered (const std::string& answer)
     {
-        if(mChoiceMap.find(answer) != mChoiceMap.end())
+        if (mChoiceMap.find(answer) != mChoiceMap.end())
         {
             mChoice = mChoiceMap[answer];
 
-            std::vector<ESM::DialInfo>::const_iterator iter;
-            if(mDialogueMap.find(mLastTopic) != mDialogueMap.end())
+            if (mDialogueMap.find(mLastTopic) != mDialogueMap.end())
             {
-                ESM::Dialogue ndialogue = mDialogueMap[mLastTopic];
-                if(ndialogue.mType == ESM::Dialogue::Topic)
+                if (mDialogueMap[mLastTopic].mType == ESM::Dialogue::Topic)
                 {
                     Filter filter (mActor, mChoice, mTalkedTo);
                 
-                    for (std::vector<ESM::DialInfo>::const_iterator iter = ndialogue.mInfo.begin();
-                        iter!=ndialogue.mInfo.end(); ++iter)
+                    if (const ESM::DialInfo *info = filter.search (mDialogueMap[mLastTopic]))
                     {
-                        if (filter (*iter))
-                        {
-                            mChoiceMap.clear();
-                            mChoice = -1;
-                            mIsInChoice = false;
-                            MWGui::DialogueWindow* win = MWBase::Environment::get().getWindowManager()->getDialogueWindow();
-                            std::string text = iter->mResponse;
-                            parseText(text);
-                            win->addText(text);
-                            executeScript(iter->mResultScript);
-                            mLastTopic = mLastTopic;
-                            mLastDialogue = *iter;
-                            break;
-                        }
+                        mChoiceMap.clear();
+                        mChoice = -1;
+                        mIsInChoice = false;
+                        std::string text = info->mResponse;
+                        parseText (text);
+                        MWBase::Environment::get().getWindowManager()->getDialogueWindow()->addText (text);
+                        executeScript (info->mResultScript);
+                        mLastTopic = mLastTopic;
+                        mLastDialogue = *info;
                     }
                 }
             }
+            
             updateTopics();
         }
     }

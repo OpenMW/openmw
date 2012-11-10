@@ -6,6 +6,7 @@
 namespace ESM
 {
     struct DialInfo;
+    struct Dialogue;
 }
 
 namespace MWDialogue
@@ -41,6 +42,8 @@ namespace MWDialogue
 
             bool operator() (const ESM::DialInfo& info) const;    
             ///< \return does the dialogue match?
+            
+            const ESM::DialInfo *search (const ESM::Dialogue& dialogue) const;
     };
 }
 
