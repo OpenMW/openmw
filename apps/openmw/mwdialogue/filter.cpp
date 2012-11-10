@@ -321,7 +321,7 @@ bool MWDialogue::Filter::getSelectStructBoolean (const SelectWrapper& select) co
         
         case SelectWrapper::Function_TalkedToPc:
         
-            return MWWorld::Class::get (mActor).getCreatureStats (mActor).hasTalkedToPlayer();
+            return mTalkedToPlayer;
     
         default:
 
@@ -329,7 +329,9 @@ bool MWDialogue::Filter::getSelectStructBoolean (const SelectWrapper& select) co
     }
 }
 
-MWDialogue::Filter::Filter (const MWWorld::Ptr& actor, int choice) : mActor (actor), mChoice (choice) {}
+MWDialogue::Filter::Filter (const MWWorld::Ptr& actor, int choice, bool talkedToPlayer)
+: mActor (actor), mChoice (choice), mTalkedToPlayer (talkedToPlayer)
+{}
 
 bool MWDialogue::Filter::operator() (const ESM::DialInfo& info) const
 {

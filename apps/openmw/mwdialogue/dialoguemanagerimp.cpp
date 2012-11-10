@@ -38,6 +38,7 @@
 
 #include "../mwclass/npc.hpp"
 #include "../mwmechanics/npcstats.hpp"
+#include "../mwmechanics/creaturestats.hpp"
 
 #include "filter.hpp"
 
@@ -224,6 +225,10 @@ namespace MWDialogue
         mIsInChoice = false;
 
         mActor = actor;
+        
+        MWMechanics::CreatureStats& creatureStats = MWWorld::Class::get (actor).getCreatureStats (actor);
+        mTalkedTo = creatureStats.hasTalkedToPlayer();
+        creatureStats.talkedToPlayer();
 
         mActorKnownTopics.clear();
 
@@ -240,7 +245,7 @@ namespace MWDialogue
         const MWWorld::Store<ESM::Dialogue> &dialogs =
             MWBase::Environment::get().getWorld()->getStore().get<ESM::Dialogue>();
 
-        Filter filter (actor, mChoice);
+        Filter filter (actor, mChoice, mTalkedTo);
 
         MWWorld::Store<ESM::Dialogue>::iterator it = dialogs.begin();
         for (; it != dialogs.end(); ++it)
@@ -344,7 +349,7 @@ namespace MWDialogue
         const MWWorld::Store<ESM::Dialogue> &dialogs =
             MWBase::Environment::get().getWorld()->getStore().get<ESM::Dialogue>();
 
-        Filter filter (mActor, mChoice);
+        Filter filter (mActor, mChoice, mTalkedTo);
 
         MWWorld::Store<ESM::Dialogue>::iterator it = dialogs.begin();
         for (; it != dialogs.end(); ++it)
@@ -431,7 +436,7 @@ namespace MWDialogue
                 ESM::Dialogue ndialogue = mDialogueMap[keyword];
                 if(ndialogue.mType == ESM::Dialogue::Topic)
                 {
-                    Filter filter (mActor, mChoice);
+                    Filter filter (mActor, mChoice, mTalkedTo);
                 
                     for (std::vector<ESM::DialInfo>::const_iterator iter  = ndialogue.mInfo.begin();
                         iter!=ndialogue.mInfo.end(); ++iter)
@@ -478,7 +483,7 @@ namespace MWDialogue
                 ESM::Dialogue ndialogue = mDialogueMap[mLastTopic];
                 if(ndialogue.mType == ESM::Dialogue::Topic)
                 {
-                    Filter filter (mActor, mChoice);
+                    Filter filter (mActor, mChoice, mTalkedTo);
                 
                     for (std::vector<ESM::DialInfo>::const_iterator iter = ndialogue.mInfo.begin();
                         iter!=ndialogue.mInfo.end(); ++iter)

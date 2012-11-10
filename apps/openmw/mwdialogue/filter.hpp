@@ -16,6 +16,7 @@ namespace MWDialogue
     {
             MWWorld::Ptr mActor;
             int mChoice;
+            bool mTalkedToPlayer;
     
             bool testActor (const ESM::DialInfo& info) const;
             ///< Is this the right actor for this \a info?
@@ -36,7 +37,7 @@ namespace MWDialogue
     
         public:
         
-            Filter (const MWWorld::Ptr& actor, int choice);    
+            Filter (const MWWorld::Ptr& actor, int choice, bool talkedToPlayer);    
 
             bool operator() (const ESM::DialInfo& info) const;    
             ///< \return does the dialogue match?

@@ -40,6 +40,7 @@ namespace MWDialogue
             bool compile (const std::string& cmd,std::vector<Interpreter::Type_Code>& code);
             void executeScript(std::string script);
             MWWorld::Ptr mActor;
+            bool mTalkedTo;
 
             void printError(std::string error);
 
