@@ -80,6 +80,7 @@ set(MYGUI_FILES
     openmw_enchanting_dialog.layout
     openmw_trainingwindow.layout
     openmw_travel_window.layout
+    openmw_persuasion_dialog.layout
     smallbars.png
     VeraMono.ttf
     markers.png

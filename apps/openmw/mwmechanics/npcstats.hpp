@@ -47,6 +47,7 @@ namespace MWMechanics
             unsigned int mMovementFlags;
             Stat<float> mSkill[27];
             int mBounty;
+            int mReputation;
 
             int mLevelProgress; // 0-10
 
@@ -62,9 +63,13 @@ namespace MWMechanics
 
             void setDrawState (DrawState_ state);
 
-            int getDisposition() const;
+            int getBaseDisposition() const;
 
-            void setDisposition(int disposition);
+            void setBaseDisposition(int disposition);
+
+            int getReputation() const;
+
+            void setReputation(int reputation);
 
             bool getMovementFlag (Flag flag) const;
 

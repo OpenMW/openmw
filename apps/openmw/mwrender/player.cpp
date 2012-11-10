@@ -24,7 +24,8 @@ namespace MWRender
       mFreeLook(true),
       mHeight(128.f),
       mCameraDistance(300.f),
-      mDistanceAdjusted(false)
+      mDistanceAdjusted(false),
+      mAnimation(NULL)
     {
         mVanity.enabled = false;
         mVanity.allowed = true;
