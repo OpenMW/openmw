@@ -241,6 +241,13 @@ int MWDialogue::Filter::getSelectStructInteger (const SelectWrapper& select) con
             return static_cast<int> (MWWorld::Class::get (player).
                 getNpcStats (player).getSkill (select.getArgument()).getModified());
         
+        case SelectWrapper::Function_FriendlyHit:
+        {
+            int hits = MWWorld::Class::get (mActor).getCreatureStats (mActor).getFriendlyHits();
+
+            return hits>4 ? 4 : hits;            
+        }
+        
         default:
 
             throw std::runtime_error ("unknown integer select function");
@@ -307,6 +314,14 @@ bool MWDialogue::Filter::getSelectStructBoolean (const SelectWrapper& select) co
             
             return expelled.find (faction)!=expelled.end();
         }
+        
+        case SelectWrapper::Function_PcVampire:
+        
+            return MWWorld::Class::get (player).getNpcStats (player).isVampire();
+        
+        case SelectWrapper::Function_TalkedToPc:
+        
+            return MWWorld::Class::get (mActor).getCreatureStats (mActor).hasTalkedToPlayer();
     
         default:
 

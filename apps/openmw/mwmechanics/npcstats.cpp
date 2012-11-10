@@ -19,7 +19,7 @@
 
 MWMechanics::NpcStats::NpcStats()
 : mMovementFlags (0), mDrawState (DrawState_Nothing), mBounty (0)
-, mLevelProgress(0), mDisposition(0)
+, mLevelProgress(0), mDisposition(0), mVampire (0)
 
 {
     mSkillIncreases.resize (ESM::Attribute::Length);
@@ -274,3 +274,29 @@ void MWMechanics::NpcStats::setBounty (int bounty)
 {
     mBounty = bounty;
 }
+
+int MWMechanics::NpcStats::getFactionReputation (const std::string& faction) const
+{
+    std::map<std::string, int>::const_iterator iter = mFactionReputation.find (faction);
+    
+    if (iter==mFactionReputation.end())
+        return 0;
+        
+    return iter->second;
+}
+
+void MWMechanics::NpcStats::setFactionReputation (const std::string& faction, int value)
+{
+    mFactionReputation[faction] = value;
+}
+
+bool MWMechanics::NpcStats::isVampire() const
+{
+    return mVampire;
+}
+
+void MWMechanics::NpcStats::setVampire (bool set)
+{
+    mVampire = set;
+}
+

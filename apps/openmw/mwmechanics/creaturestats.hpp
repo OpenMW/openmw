@@ -27,7 +27,9 @@ namespace MWMechanics
         int mAiSettings[4];
         AiSequence mAiSequence;
         float mLevelHealthBonus;
-        bool mDead;        
+        bool mDead;
+        int mFriendlyHits;
+        bool mTalkedTo;
 
     public:
         CreatureStats();
@@ -99,7 +101,18 @@ namespace MWMechanics
         
         bool hasCommonDisease() const;
 
-        bool hasBlightDisease() const;         
+        bool hasBlightDisease() const;
+        
+        int getFriendlyHits() const;
+        ///< Number of friendly hits received.
+        
+        void friendlyHit();
+        ///< Increase number of friendly hits by one.
+        
+        bool hasTalkedToPlayer() const;
+        ///< Has this creature talked with the player before?
+        
+        void talkedToPlayer();
     };
 }
 

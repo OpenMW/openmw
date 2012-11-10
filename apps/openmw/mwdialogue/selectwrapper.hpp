@@ -29,7 +29,10 @@ namespace MWDialogue
                 Function_PcCommonDisease, Function_PcBlightDisease, Function_PcCorprus,
                 Function_AiSetting,
                 Function_PcAttribute, Function_PcSkill,
-                Function_PcExpelled
+                Function_PcExpelled,
+                Function_PcVampire,
+                Function_FriendlyHit,
+                Function_TalkedToPc
             };
             
             enum Type

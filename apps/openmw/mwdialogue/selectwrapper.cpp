@@ -76,7 +76,12 @@ MWDialogue::SelectWrapper::Function MWDialogue::SelectWrapper::decodeFunction() 
         case 50: return Function_Choice;
         case 51: case 52: case 53: case 54: case 55: case 56: case 57: return Function_PcAttribute;
         case 58: return Function_PcCorprus;
-        // 59-66
+        // 59
+        case 60: return Function_PcVampire;
+        // 61, 62
+        case 63: return Function_TalkedToPc;
+        // 64, 65
+        case 66: return Function_FriendlyHit;
         case 67: case 68: case 69: case 70: return Function_AiSetting;
         // 71-77
     }
@@ -177,6 +182,7 @@ MWDialogue::SelectWrapper::Type MWDialogue::SelectWrapper::getType() const
         Function_Choice,
         Function_AiSetting,
         Function_PcAttribute, Function_PcSkill,
+        Function_FriendlyHit,
         Function_None // end marker
     };
     
@@ -193,6 +199,7 @@ MWDialogue::SelectWrapper::Type MWDialogue::SelectWrapper::getType() const
         Function_SameFaction,
         Function_PcCommonDisease, Function_PcBlightDisease, Function_PcCorprus,
         Function_PcExpelled,
+        Function_PcVampire, Function_TalkedToPc,
         Function_None // end marker
     };   
     

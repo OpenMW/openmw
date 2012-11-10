@@ -10,7 +10,7 @@
 namespace MWMechanics
 {  
     CreatureStats::CreatureStats()
-        : mLevel (0), mLevelHealthBonus(0.f), mDead (false)
+        : mLevel (0), mLevelHealthBonus(0.f), mDead (false), mFriendlyHits (0), mTalkedTo (false)
     {
         for (int i=0; i<4; ++i)
             mAiSettings[i] = 0;
@@ -215,5 +215,25 @@ namespace MWMechanics
     bool CreatureStats::hasBlightDisease() const
     {
         return mSpells.hasBlightDisease();
+    }
+    
+    int CreatureStats::getFriendlyHits() const
+    {
+        return mFriendlyHits;
+    }
+    
+    void CreatureStats::friendlyHit()
+    {
+        ++mFriendlyHits;
+    }
+    
+    bool CreatureStats::hasTalkedToPlayer() const
+    {
+        return mTalkedTo;
+    }
+    
+    void CreatureStats::talkedToPlayer()
+    {
+        mTalkedTo = true;
     }
 }

@@ -125,10 +125,6 @@ namespace MWDialogue
                     if(!selectCompare<int,int>(comp,0,select.mI)) return false;
                     break;
 
-                case 60://PC Vampire
-                    if(!selectCompare<int,int>(comp,0,select.mI)) return false;
-                    break;
-
                 case 61://Level
                     if(!selectCompare<int,int>(comp,1,select.mI)) return false;
                     break;
@@ -137,19 +133,11 @@ namespace MWDialogue
                     if(!selectCompare<int,int>(comp,0,select.mI)) return false;
                     break;
 
-                case 63://Talked to PC
-                    if(!selectCompare<int,int>(comp,0,select.mI)) return false;
-                    break;
-
                 case 64://PC Health
                     if(!selectCompare<int,int>(comp,50,select.mI)) return false;
                     break;
 
                 case 65://Creature target
-                    if(!selectCompare<int,int>(comp,0,select.mI)) return false;
-                    break;
-
-                case 66://Friend hit
                     if(!selectCompare<int,int>(comp,0,select.mI)) return false;
                     break;
 
