@@ -11,6 +11,8 @@
 #include "../mwworld/containerstore.hpp"
 
 #include "../mwmechanics/npcstats.hpp"
+#include "../mwmechanics/creaturestats.hpp"
+#include "../mwmechanics/magiceffects.hpp"
 
 #include "selectwrapper.hpp"
 
@@ -232,6 +234,8 @@ int MWDialogue::Filter::getSelectStructInteger (const SelectWrapper& select) con
 
 bool MWDialogue::Filter::getSelectStructBoolean (const SelectWrapper& select) const
 {
+    MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+        
     switch (select.getFunction())
     {
         case SelectWrapper::Function_Id:
@@ -255,12 +259,22 @@ bool MWDialogue::Filter::getSelectStructBoolean (const SelectWrapper& select) co
             return toLower (mActor.getCell()->mCell->mName)==select.getName();
     
         case SelectWrapper::Function_SameFaction:
-        {
-            MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
-            
+
             return MWWorld::Class::get (mActor).getNpcStats (mActor).isSameFaction (
                 MWWorld::Class::get (player).getNpcStats (player));
-        }
+        
+        case SelectWrapper::Function_PcCommonDisease:
+
+            return MWWorld::Class::get (player).getCreatureStats (player).hasCommonDisease();
+        
+        case SelectWrapper::Function_PcBlightDisease:
+
+            return MWWorld::Class::get (player).getCreatureStats (player).hasBlightDisease();
+    
+        case SelectWrapper::Function_PcCorprus:
+        
+            return MWWorld::Class::get (player).getCreatureStats (player).
+                getMagicEffects().get (132).mMagnitude!=0;
     
         default:
 

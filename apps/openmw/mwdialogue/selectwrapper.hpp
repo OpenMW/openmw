@@ -25,7 +25,8 @@ namespace MWDialogue
                 Function_Local,
                 Function_Global,
                 Function_SameFaction,
-                Function_Choice
+                Function_Choice,
+                Function_PcCommonDisease, Function_PcBlightDisease, Function_PcCorprus
             };
             
             enum Type

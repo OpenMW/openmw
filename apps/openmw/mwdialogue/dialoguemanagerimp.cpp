@@ -117,14 +117,6 @@ namespace MWDialogue
                     if(!selectCompare<int,int>(comp,0,select.mI)) return false;
                     break;
 
-                case 40://PC Common Disease
-                    if(!selectCompare<int,int>(comp,0,select.mI)) return false;
-                    break;
-
-                case 41://PC Blight Disease
-                    if(!selectCompare<int,int>(comp,0,select.mI)) return false;
-                    break;
-
                 case 43://PC Crime level
                     if(!selectCompare<int,int>(comp,0,select.mI)) return false;
                     break;

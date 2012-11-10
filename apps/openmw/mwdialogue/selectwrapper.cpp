@@ -61,8 +61,11 @@ MWDialogue::SelectWrapper::Function MWDialogue::SelectWrapper::decodeFunction() 
     
     switch (index)
     {
+        case 40: return Function_PcCommonDisease;
+        case 41: return Function_PcBlightDisease;
         case 46: return Function_SameFaction;
         case 50: return Function_Choice;
+        case 58: return Function_PcCorprus;
     }
     
     return Function_None;
@@ -112,6 +115,7 @@ MWDialogue::SelectWrapper::Type MWDialogue::SelectWrapper::getType() const
     {
         Function_Id, Function_Faction, Function_Class, Function_Race, Function_Cell,
         Function_SameFaction,
+        Function_PcCommonDisease, Function_PcBlightDisease, Function_PcCorprus,
         Function_None // end marker
     };   
     
