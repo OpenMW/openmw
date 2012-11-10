@@ -58,15 +58,26 @@ MWDialogue::SelectWrapper::Function MWDialogue::SelectWrapper::decodeFunction() 
     int index = 0;
     
     std::istringstream (mSelect.mSelectRule.substr(2,2)) >> index;
-    
+
     switch (index)
     {
+        // 0-9
+        case 10: return Function_PcAttribute;
+        case 11: case 12: case 13: case 14: case 15: case 16: case 17: case 18: case 19: case 20:
+        case 21: case 22: case 23: case 24: case 25: case 26: case 27: case 28: case 29: case 30:
+        case 31: case 32: case 33: case 34: case 35: case 36: case 37: return Function_PcSkill;
+        // 38, 39
         case 40: return Function_PcCommonDisease;
         case 41: return Function_PcBlightDisease;
+        // 42-45
         case 46: return Function_SameFaction;
+        // 47-49
         case 50: return Function_Choice;
+        case 51: case 52: case 53: case 54: case 55: case 56: case 57: return Function_PcAttribute;
         case 58: return Function_PcCorprus;
+        // 59-66
         case 67: case 68: case 69: case 70: return Function_AiSetting;
+        // 71-77
     }
     
     return Function_False;
@@ -113,6 +124,45 @@ int MWDialogue::SelectWrapper::getArgument() const
         case 68: return 0;
         case 69: return 3;
         case 70: return 2;
+        
+        // attributes
+        case 10: return 0;
+        case 51: return 1;
+        case 52: return 2;
+        case 53: return 3;
+        case 54: return 4;
+        case 55: return 5;
+        case 56: return 6;
+        case 57: return 7;
+        
+        // skills
+        case 11: return 0;
+        case 12: return 1;
+        case 13: return 2;
+        case 14: return 3;
+        case 15: return 4;
+        case 16: return 5;
+        case 17: return 6;
+        case 18: return 7;
+        case 19: return 8;
+        case 20: return 9;
+        case 21: return 10;
+        case 22: return 11;
+        case 23: return 12;
+        case 24: return 13;
+        case 25: return 14;
+        case 26: return 15;
+        case 27: return 16;
+        case 28: return 17;
+        case 29: return 18;
+        case 30: return 19;
+        case 31: return 20;
+        case 32: return 21;
+        case 33: return 22;
+        case 34: return 23;
+        case 35: return 24;
+        case 36: return 25;
+        case 37: return 26;
     }
             
     return 0;
@@ -125,6 +175,7 @@ MWDialogue::SelectWrapper::Type MWDialogue::SelectWrapper::getType() const
         Function_Journal, Function_Item, Function_Dead,
         Function_Choice,
         Function_AiSetting,
+        Function_PcAttribute, Function_PcSkill,
         Function_None // end marker
     };
     

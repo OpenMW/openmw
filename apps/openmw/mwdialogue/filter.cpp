@@ -231,6 +231,16 @@ int MWDialogue::Filter::getSelectStructInteger (const SelectWrapper& select) con
         
             return MWWorld::Class::get (player).getCreatureStats (player).getAiSetting (select.getArgument());
         
+        case SelectWrapper::Function_PcAttribute:
+        
+            return MWWorld::Class::get (player).getCreatureStats (player).
+                getAttribute (select.getArgument()).getModified();
+
+        case SelectWrapper::Function_PcSkill:
+        
+            return static_cast<int> (MWWorld::Class::get (player).
+                getNpcStats (player).getSkill (select.getArgument()).getModified());
+        
         default:
 
             throw std::runtime_error ("unknown integer select function");
