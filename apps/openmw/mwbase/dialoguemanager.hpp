@@ -33,8 +33,8 @@ namespace MWBase
 
             virtual void goodbye() = 0;
 
-            ///get the faction of the actor you are talking with
-            virtual std::string getFaction() const = 0;
+            virtual MWWorld::Ptr getActor() const = 0;
+            ///< Return the actor the player is currently talking to.
 
             //calbacks for the GUI
             virtual void keywordSelected (const std::string& keyword) = 0;

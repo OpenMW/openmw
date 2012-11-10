@@ -6,23 +6,7 @@
 #include <iterator>
 
 #include <components/esm/loaddial.hpp>
-
-#include "../mwbase/environment.hpp"
-#include "../mwbase/world.hpp"
-#include "../mwbase/scriptmanager.hpp"
-#include "../mwbase/journal.hpp"
-#include "../mwbase/windowmanager.hpp"
-#include "../mwbase/mechanicsmanager.hpp"
-
-#include "../mwworld/class.hpp"
-#include "../mwworld/refdata.hpp"
-#include "../mwworld/player.hpp"
-#include "../mwworld/containerstore.hpp"
-#include "../mwworld/esmstore.hpp"
-
-#include "../mwgui/dialogue.hpp"
-
-#include <iostream>
+#include <components/esm/loadinfo.hpp>
 
 #include <components/compiler/exception.hpp>
 #include <components/compiler/errorhandler.hpp>
@@ -30,14 +14,24 @@
 #include <components/compiler/locals.hpp>
 #include <components/compiler/output.hpp>
 #include <components/compiler/scriptparser.hpp>
+
 #include <components/interpreter/interpreter.hpp>
+
+#include "../mwbase/environment.hpp"
+#include "../mwbase/world.hpp"
+#include "../mwbase/scriptmanager.hpp"
+#include "../mwbase/windowmanager.hpp"
+
+#include "../mwworld/class.hpp"
+#include "../mwworld/containerstore.hpp"
+#include "../mwworld/esmstore.hpp"
+
+#include "../mwgui/dialogue.hpp"
 
 #include "../mwscript/compilercontext.hpp"
 #include "../mwscript/interpretercontext.hpp"
 #include "../mwscript/extensions.hpp"
 
-#include "../mwclass/npc.hpp"
-#include "../mwmechanics/npcstats.hpp"
 #include "../mwmechanics/creaturestats.hpp"
 
 #include "filter.hpp"
@@ -69,22 +63,6 @@ namespace
             return false;
     }
 
-    template<typename T1, typename T2>
-    bool selectCompare (char comp, T1 value1, T2 value2)
-    {
-        switch (comp)
-        {
-        case '0': return value1==value2;
-        case '1': return value1!=value2;
-        case '2': return value1>value2;
-        case '3': return value1>=value2;
-        case '4': return value1<value2;
-        case '5': return value1<=value2;
-        }
-
-        throw std::runtime_error ("unknown compare type in dialogue info select");
-    }
-
     //helper function
     std::string::size_type find_str_ci(const std::string& str, const std::string& substr,size_t pos)
     {
@@ -94,77 +72,6 @@ namespace
 
 namespace MWDialogue
 {
-
-
-    bool DialogueManager::functionFilter(const MWWorld::Ptr& actor, const ESM::DialInfo& info,bool choice)
-    {
-        for (std::vector<ESM::DialInfo::SelectStruct>::const_iterator iter (info.mSelects.begin());
-            iter != info.mSelects.end(); ++iter)
-        {
-            ESM::DialInfo::SelectStruct select = *iter;
-            char type = select.mSelectRule[1];
-            if(type == '1')
-            {
-                char comp = select.mSelectRule[4];
-                std::string name = select.mSelectRule.substr (5);
-                std::string function = select.mSelectRule.substr(2,2);
-
-                int ifunction;
-                std::istringstream iss(function);
-                iss >> ifunction;
-                switch(ifunction)
-                {
-                case 48://Detected
-                    if(!selectCompare<int,int>(comp,1,select.mI)) return false;
-                    break;
-
-                case 49://Alarmed
-                    if(!selectCompare<int,int>(comp,0,select.mI)) return false;
-                    break;
-
-                case 61://Level
-                    if(!selectCompare<int,int>(comp,1,select.mI)) return false;
-                    break;
-
-                case 62://Attacked
-                    if(!selectCompare<int,int>(comp,0,select.mI)) return false;
-                    break;
-
-                case 65://Creature target
-                    if(!selectCompare<int,int>(comp,0,select.mI)) return false;
-                    break;
-
-                case 71://Should Attack
-                    if(!selectCompare<int,int>(comp,0,select.mI)) return false;
-                    break;
-
-                default:
-                    break;
-
-                }
-            }
-        }
-
-        return true;
-    }
-
-    bool DialogueManager::isMatching (const MWWorld::Ptr& actor,
-        const ESM::DialInfo::SelectStruct& select) const
-    {
-        return true;
-    }
-
-    bool DialogueManager::isMatching (const MWWorld::Ptr& actor, const ESM::DialInfo& info) const
-    {
-        // check DATAstruct
-        for (std::vector<ESM::DialInfo::SelectStruct>::const_iterator iter (info.mSelects.begin());
-            iter != info.mSelects.end(); ++iter)
-            if (!isMatching (actor, *iter))
-                return false;
-
-        return true;
-    }
-
     DialogueManager::DialogueManager (const Compiler::Extensions& extensions) :
       mCompilerContext (MWScript::CompilerContext::Type_Dialgoue),
         mErrorStream(std::cout.rdbuf()),mErrorHandler(mErrorStream)
@@ -190,7 +97,7 @@ namespace MWDialogue
         mKnownTopics[toLower(topic)] = true;
     }
 
-    void DialogueManager::parseText (std::string text)
+    void DialogueManager::parseText (const std::string& text)
     {
         std::list<std::string>::iterator it;
         for(it = mActorKnownTopics.begin();it != mActorKnownTopics.end();++it)
@@ -248,7 +155,7 @@ namespace MWDialogue
                 for (std::vector<ESM::DialInfo>::const_iterator iter (it->mInfo.begin());
                     iter!=it->mInfo.end(); ++iter)
                 {
-                    if (filter (*iter) && isMatching (actor, *iter) && functionFilter(mActor,*iter,true))
+                    if (filter (*iter))
                     {
                         if (!iter->mSound.empty())
                         {
@@ -311,7 +218,7 @@ namespace MWDialogue
         return false;
     }
 
-    void DialogueManager::executeScript(std::string script)
+    void DialogueManager::executeScript (const std::string& script)
     {
         std::vector<Interpreter::Type_Code> code;
         if(compile(script,code))
@@ -351,7 +258,7 @@ namespace MWDialogue
                 for (std::vector<ESM::DialInfo>::const_iterator iter (it->mInfo.begin());
                     iter!=it->mInfo.end(); ++iter)
                 {
-                    if (filter (*iter) && isMatching (mActor, *iter) && functionFilter(mActor,*iter,true))
+                    if (filter (*iter))
                     {
                         mActorKnownTopics.push_back(toLower(it->mId));
                         //does the player know the topic?
@@ -433,7 +340,7 @@ namespace MWDialogue
                     for (std::vector<ESM::DialInfo>::const_iterator iter  = ndialogue.mInfo.begin();
                         iter!=ndialogue.mInfo.end(); ++iter)
                     {
-                        if (filter (*iter) && isMatching (mActor, *iter) && functionFilter(mActor,*iter,true))
+                        if (filter (*iter))
                         {
                             std::string text = iter->mResponse;
                             std::string script = iter->mResultScript;
@@ -480,7 +387,7 @@ namespace MWDialogue
                     for (std::vector<ESM::DialInfo>::const_iterator iter = ndialogue.mInfo.begin();
                         iter!=ndialogue.mInfo.end(); ++iter)
                     {
-                        if (filter (*iter) && isMatching (mActor, *iter) && functionFilter(mActor,*iter,true))
+                        if (filter (*iter))
                         {
                             mChoiceMap.clear();
                             mChoice = -1;
@@ -501,7 +408,7 @@ namespace MWDialogue
         }
     }
 
-    void DialogueManager::printError (std::string error)
+    void DialogueManager::printError (const std::string& error)
     {
         MWGui::DialogueWindow* win = MWBase::Environment::get().getWindowManager()->getDialogueWindow();
         win->addText(error);
@@ -515,22 +422,9 @@ namespace MWDialogue
         mIsInChoice = true;
     }
 
-    std::string DialogueManager::getFaction() const
+    MWWorld::Ptr DialogueManager::getActor() const
     {
-        if (mActor.getTypeName() != typeid(ESM::NPC).name())
-            return "";
-
-        std::string factionID("");
-        MWMechanics::NpcStats stats = MWWorld::Class::get(mActor).getNpcStats(mActor);
-        if(stats.getFactionRanks().empty())
-        {
-            std::cout << "No faction for this actor!";
-        }
-        else
-        {
-            factionID = stats.getFactionRanks().begin()->first;
-        }
-        return factionID;
+        return mActor;
     }
 
     void DialogueManager::goodbye()
