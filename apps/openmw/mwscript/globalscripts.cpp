@@ -3,8 +3,7 @@
 
 #include <cassert>
 
-#include <components/esm_store/reclists.hpp>
-#include <components/esm_store/store.hpp>
+#include "../mwworld/esmstore.hpp"
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/scriptmanager.hpp"
@@ -13,21 +12,23 @@
 
 namespace MWScript
 {
-    GlobalScripts::GlobalScripts (const ESMS::ESMStore& store)
+    GlobalScripts::GlobalScripts (const MWWorld::ESMStore& store)
     : mStore (store)
     {
         addScript ("Main");
 
-        for (ESMS::RecListT<ESM::StartScript>::MapType::const_iterator iter
-            (store.startScripts.list.begin());
-            iter != store.startScripts.list.end(); ++iter)
-            addScript (iter->second.mScript);
+        MWWorld::Store<ESM::StartScript>::iterator iter =
+            store.get<ESM::StartScript>().begin();
+
+        for (; iter != store.get<ESM::StartScript>().end(); ++iter) {
+            addScript (iter->mScript);
+        }
     }
 
     void GlobalScripts::addScript (const std::string& name)
     {
         if (mScripts.find (name)==mScripts.end())
-            if (const ESM::Script *script = mStore.scripts.find (name))
+            if (const ESM::Script *script = mStore.get<ESM::Script>().find (name))
             {
                 Locals locals;
 

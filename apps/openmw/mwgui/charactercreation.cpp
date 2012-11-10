@@ -7,6 +7,7 @@
 #include "review.hpp"
 #include "dialogue.hpp"
 #include "mode.hpp"
+#include "inventorywindow.hpp"
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/soundmanager.hpp"
@@ -357,7 +358,9 @@ void CharacterCreation::onPickClassDialogDone(WindowBase* parWindow)
         const std::string &classId = mPickClassDialog->getClassId();
         if (!classId.empty())
             MWBase::Environment::get().getMechanicsManager()->setPlayerClass(classId);
-        const ESM::Class *klass = MWBase::Environment::get().getWorld()->getStore().classes.find(classId);
+
+        const ESM::Class *klass =
+            MWBase::Environment::get().getWorld()->getStore().get<ESM::Class>().find(classId);
         if (klass)
         {
             mPlayerClass = *klass;
@@ -457,9 +460,16 @@ void CharacterCreation::onRaceDialogBack()
 {
     if (mRaceDialog)
     {
-        mPlayerRaceId = mRaceDialog->getRaceId();
-        if (!mPlayerRaceId.empty())
-            MWBase::Environment::get().getMechanicsManager()->setPlayerRace(mPlayerRaceId, mRaceDialog->getGender() == RaceDialog::GM_Male);
+        const ESM::NPC &data = mRaceDialog->getResult();
+        mPlayerRaceId = data.mId;
+        if (!mPlayerRaceId.empty()) {
+            MWBase::Environment::get().getMechanicsManager()->setPlayerRace(
+                data.mId,
+                data.isMale(),
+                data.mHead,
+                data.mHair
+            );
+        }
         mWM->removeDialog(mRaceDialog);
         mRaceDialog = 0;
     }
@@ -472,10 +482,18 @@ void CharacterCreation::onRaceDialogDone(WindowBase* parWindow)
 {
     if (mRaceDialog)
     {
-        mPlayerRaceId = mRaceDialog->getRaceId();
-        mWM->setValue("race", mPlayerRaceId);
-        if (!mPlayerRaceId.empty())
-            MWBase::Environment::get().getMechanicsManager()->setPlayerRace(mPlayerRaceId, mRaceDialog->getGender() == RaceDialog::GM_Male);
+        const ESM::NPC &data = mRaceDialog->getResult();
+        mPlayerRaceId = data.mRace;
+        if (!mPlayerRaceId.empty()) {
+            MWBase::Environment::get().getMechanicsManager()->setPlayerRace(
+                data.mRace,
+                data.isMale(),
+                data.mHead,
+                data.mHair
+            );
+        }
+        mWM->getInventoryWindow()->rebuildAvatar();
+
         mWM->removeDialog(mRaceDialog);
         mRaceDialog = 0;
     }
@@ -557,6 +575,7 @@ void CharacterCreation::onCreateClassDialogDone(WindowBase* parWindow)
             klass.mData.mSkills[i][1] = majorSkills[i];
             klass.mData.mSkills[i][0] = minorSkills[i];
         }
+
         MWBase::Environment::get().getMechanicsManager()->setPlayerClass(klass);
         mPlayerClass = klass;
         mWM->setPlayerClass(klass);
@@ -729,7 +748,10 @@ void CharacterCreation::onGenerateClassDone(WindowBase* parWindow)
     mGenerateClassResultDialog = 0;
 
     MWBase::Environment::get().getMechanicsManager()->setPlayerClass(mGenerateClass);
-    const ESM::Class *klass = MWBase::Environment::get().getWorld()->getStore().classes.find(mGenerateClass);
+
+    const ESM::Class *klass =
+        MWBase::Environment::get().getWorld()->getStore().get<ESM::Class>().find(mGenerateClass);
+
     mPlayerClass = *klass;
     mWM->setPlayerClass(mPlayerClass);
 

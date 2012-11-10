@@ -24,18 +24,17 @@ namespace MWClass
     void Static::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics) const
     {
         const std::string model = getModel(ptr);
-        if(!model.empty()) {
-            physics.insertObjectPhysics(ptr, model);
-        }
+        if(!model.empty())
+            physics.addObject(ptr);
     }
     
     std::string Static::getModel(const MWWorld::Ptr &ptr) const
     {
         MWWorld::LiveCellRef<ESM::Static> *ref =
             ptr.get<ESM::Static>();
-        assert(ref->base != NULL);
+        assert(ref->mBase != NULL);
 
-        const std::string &model = ref->base->mModel;
+        const std::string &model = ref->mBase->mModel;
         if (!model.empty()) {
             return "meshes\\" + model;
         }
@@ -60,6 +59,6 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Static> *ref =
             ptr.get<ESM::Static>();
 
-        return MWWorld::Ptr(&cell.statics.insert(*ref), &cell);
+        return MWWorld::Ptr(&cell.mStatics.insert(*ref), &cell);
     }
 }

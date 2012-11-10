@@ -34,18 +34,17 @@ namespace MWClass
     void Clothing::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics) const
     {
         const std::string model = getModel(ptr);
-        if(!model.empty()) {
-            physics.insertObjectPhysics(ptr, model);
-        }
+        if(!model.empty())
+            physics.addObject(ptr);
     }
 
     std::string Clothing::getModel(const MWWorld::Ptr &ptr) const
     {
         MWWorld::LiveCellRef<ESM::Clothing> *ref =
             ptr.get<ESM::Clothing>();
-        assert(ref->base != NULL);
+        assert(ref->mBase != NULL);
 
-        const std::string &model = ref->base->mModel;
+        const std::string &model = ref->mBase->mModel;
         if (!model.empty()) {
             return "meshes\\" + model;
         }
@@ -57,7 +56,7 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Clothing> *ref =
             ptr.get<ESM::Clothing>();
 
-        return ref->base->mName;
+        return ref->mBase->mName;
     }
 
     boost::shared_ptr<MWWorld::Action> Clothing::activate (const MWWorld::Ptr& ptr,
@@ -75,7 +74,7 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Clothing> *ref =
             ptr.get<ESM::Clothing>();
 
-        return ref->base->mScript;
+        return ref->mBase->mScript;
     }
 
     std::pair<std::vector<int>, bool> Clothing::getEquipmentSlots (const MWWorld::Ptr& ptr) const
@@ -85,7 +84,7 @@ namespace MWClass
 
         std::vector<int> slots;
 
-        if (ref->base->mData.mType==ESM::Clothing::Ring)
+        if (ref->mBase->mData.mType==ESM::Clothing::Ring)
         {
             slots.push_back (int (MWWorld::InventoryStore::Slot_LeftRing));
             slots.push_back (int (MWWorld::InventoryStore::Slot_RightRing));
@@ -108,7 +107,7 @@ namespace MWClass
             };
 
             for (int i=0; i<size; ++i)
-                if (sMapping[i][0]==ref->base->mData.mType)
+                if (sMapping[i][0]==ref->mBase->mData.mType)
                 {
                     slots.push_back (int (sMapping[i][1]));
                     break;
@@ -123,7 +122,7 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Clothing> *ref =
             ptr.get<ESM::Clothing>();
 
-        if (ref->base->mData.mType==ESM::Clothing::Shoes)
+        if (ref->mBase->mData.mType==ESM::Clothing::Shoes)
             return ESM::Skill::Unarmored;
 
         return -1;
@@ -134,7 +133,7 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Clothing> *ref =
             ptr.get<ESM::Clothing>();
 
-        return ref->base->mData.mValue;
+        return ref->mBase->mData.mValue;
     }
 
     void Clothing::registerSelf()
@@ -149,7 +148,7 @@ namespace MWClass
          MWWorld::LiveCellRef<ESM::Clothing> *ref =
             ptr.get<ESM::Clothing>();
 
-        if (ref->base->mData.mType == 8)
+        if (ref->mBase->mData.mType == 8)
         {
             return std::string("Item Ring Up");
         }
@@ -161,7 +160,7 @@ namespace MWClass
          MWWorld::LiveCellRef<ESM::Clothing> *ref =
             ptr.get<ESM::Clothing>();
 
-        if (ref->base->mData.mType == 8)
+        if (ref->mBase->mData.mType == 8)
         {
             return std::string("Item Ring Down");
         }
@@ -173,7 +172,7 @@ namespace MWClass
           MWWorld::LiveCellRef<ESM::Clothing> *ref =
             ptr.get<ESM::Clothing>();
 
-        return ref->base->mIcon;
+        return ref->mBase->mIcon;
     }
 
     bool Clothing::hasToolTip (const MWWorld::Ptr& ptr) const
@@ -181,7 +180,7 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Clothing> *ref =
             ptr.get<ESM::Clothing>();
 
-        return (ref->base->mName != "");
+        return (ref->mBase->mName != "");
     }
 
     MWGui::ToolTipInfo Clothing::getToolTipInfo (const MWWorld::Ptr& ptr) const
@@ -190,20 +189,20 @@ namespace MWClass
             ptr.get<ESM::Clothing>();
 
         MWGui::ToolTipInfo info;
-        info.caption = ref->base->mName + MWGui::ToolTips::getCountString(ptr.getRefData().getCount());
-        info.icon = ref->base->mIcon;
+        info.caption = ref->mBase->mName + MWGui::ToolTips::getCountString(ptr.getRefData().getCount());
+        info.icon = ref->mBase->mIcon;
 
         std::string text;
 
-        text += "\n#{sWeight}: " + MWGui::ToolTips::toString(ref->base->mData.mWeight);
-        text += MWGui::ToolTips::getValueString(ref->base->mData.mValue, "#{sValue}");
+        text += "\n#{sWeight}: " + MWGui::ToolTips::toString(ref->mBase->mData.mWeight);
+        text += MWGui::ToolTips::getValueString(ref->mBase->mData.mValue, "#{sValue}");
 
         if (MWBase::Environment::get().getWindowManager()->getFullHelp()) {
-            text += MWGui::ToolTips::getMiscString(ref->ref.mOwner, "Owner");
-            text += MWGui::ToolTips::getMiscString(ref->base->mScript, "Script");
+            text += MWGui::ToolTips::getMiscString(ref->mRef.mOwner, "Owner");
+            text += MWGui::ToolTips::getMiscString(ref->mBase->mScript, "Script");
         }
 
-        info.enchant = ref->base->mEnchant;
+        info.enchant = ref->mBase->mEnchant;
 
         info.text = text;
 
@@ -215,7 +214,7 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Clothing> *ref =
             ptr.get<ESM::Clothing>();
 
-        return ref->base->mEnchant;
+        return ref->mBase->mEnchant;
     }
 
     boost::shared_ptr<MWWorld::Action> Clothing::use (const MWWorld::Ptr& ptr) const
@@ -233,6 +232,6 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Clothing> *ref =
             ptr.get<ESM::Clothing>();
 
-        return MWWorld::Ptr(&cell.clothes.insert(*ref), &cell);
+        return MWWorld::Ptr(&cell.mClothes.insert(*ref), &cell);
     }
 }

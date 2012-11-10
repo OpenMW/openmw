@@ -8,13 +8,11 @@
 
 #include "../mwworld/player.hpp"
 #include "../mwworld/class.hpp"
+#include "../mwworld/esmstore.hpp"
 
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/npcstats.hpp"
 #include "../mwmechanics/stat.hpp"
-
-#include <components/esm_store/reclists.hpp>
-#include <components/esm_store/store.hpp>
 
 namespace MWGui
 {
@@ -110,7 +108,8 @@ namespace MWGui
 
     void LevelupDialog::open()
     {
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld ()->getPlayer().getPlayer();
+        MWBase::World *world = MWBase::Environment::get().getWorld();
+        MWWorld::Ptr player = world->getPlayer().getPlayer();
         MWMechanics::CreatureStats& creatureStats = MWWorld::Class::get(player).getCreatureStats (player);
         MWMechanics::NpcStats& pcStats = MWWorld::Class::get(player).getNpcStats (player);
 
@@ -121,17 +120,13 @@ namespace MWGui
 
         setAttributeValues();
 
+        const ESM::NPC *playerData = player.get<ESM::NPC>()->mBase;
+
         // set class image
-        const ESM::Class& playerClass = MWBase::Environment::get().getWorld ()->getPlayer ().getClass ();
-        // retrieve the ID to this class
-        std::string classId;
-        std::map<std::string, ESM::Class> list = MWBase::Environment::get().getWorld()->getStore ().classes.list;
-        for (std::map<std::string, ESM::Class>::iterator it = list.begin(); it != list.end(); ++it)
-        {
-            if (playerClass.mName == it->second.mName)
-                classId = it->first;
-        }
-        mClassImage->setImageTexture ("textures\\levelup\\" + classId + ".dds");
+        const ESM::Class *cls =
+            world->getStore().get<ESM::Class>().find(playerData->mClass);
+
+        mClassImage->setImageTexture ("textures\\levelup\\" + cls->mId + ".dds");
 
         /// \todo replace this with INI-imported texts
         int level = creatureStats.getLevel ()+1;

@@ -2,6 +2,8 @@
 
 #include <stdexcept>
 
+#include <boost/algorithm/string.hpp>
+
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 
@@ -12,9 +14,9 @@ namespace ESM
 /// working properly in its current state and I doubt it can be fixed without breaking other stuff.
 
 // Some handy macros
-#define cI(s,x) { if(mId == (s)) return (mI == (x)); }
-#define cF(s,x) { if(mId == (s)) return (mF == (x)); }
-#define cS(s,x) { if(mId == (s)) return (mStr == (x)); }
+#define cI(s,x) { label = (s); boost::algorithm::to_lower(label); if (mId == label) return (mI == (x)); }
+#define cF(s,x) { label = (s); boost::algorithm::to_lower(label); if (mId == label) return (mF == (x)); }
+#define cS(s,x) { label = (s); boost::algorithm::to_lower(label); if (mId == label) return (mStr == (x)); }
 
 bool GameSetting::isDirtyTribunal()
 {
@@ -28,6 +30,7 @@ bool GameSetting::isDirtyTribunal()
      from other mods.
      */
 
+    std::string label;
     // Strings
     cS("sProfitValue", "Profit Value"); // 'Profit:'
     cS("sEditNote", "Edit Note"); // same
@@ -51,13 +54,14 @@ bool GameSetting::isDirtyTribunal()
     // [The difference here is "Profit Value" -> "Profit"]
 
     // Strings that matches the mId
-    cS("sEffectSummonFabricant", mId);// 'Summon Fabricant'
+    cS("sEffectSummonFabricant", "sEffectSummonFabricant");// 'Summon Fabricant'
     return false;
 }
 
 // Bloodmoon variant
 bool GameSetting::isDirtyBloodmoon()
 {
+    std::string label;
     // Strings
     cS("sWerewolfPopup", "Werewolf"); // same
     cS("sWerewolfRestMessage",
@@ -69,16 +73,16 @@ bool GameSetting::isDirtyBloodmoon()
     // 'You have been detected as a known werewolf.'
 
     // Strings that matches the mId
-    cS("sMagicCreature01ID", mId); // 'BM_wolf_grey_summon'
-    cS("sMagicCreature02ID", mId); // 'BM_bear_black_summon'
-    cS("sMagicCreature03ID", mId); // 'BM_wolf_bone_summon'
-    cS("sMagicCreature04ID", mId); // same
-    cS("sMagicCreature05ID", mId); // same
-    cS("sEffectSummonCreature01", mId); // 'Calf Wolf'
-    cS("sEffectSummonCreature02", mId); // 'Calf Bear'
-    cS("sEffectSummonCreature03", mId); // 'Summon Bonewolf'
-    cS("sEffectSummonCreature04", mId); // same
-    cS("sEffectSummonCreature05", mId); // same
+    cS("sMagicCreature01ID", "sMagicCreature01ID"); // 'BM_wolf_grey_summon'
+    cS("sMagicCreature02ID", "sMagicCreature02ID"); // 'BM_bear_black_summon'
+    cS("sMagicCreature03ID", "sMagicCreature03ID"); // 'BM_wolf_bone_summon'
+    cS("sMagicCreature04ID", "sMagicCreature04ID"); // same
+    cS("sMagicCreature05ID", "sMagicCreature05ID"); // same
+    cS("sEffectSummonCreature01", "sEffectSummonCreature01"); // 'Calf Wolf'
+    cS("sEffectSummonCreature02", "sEffectSummonCreature02"); // 'Calf Bear'
+    cS("sEffectSummonCreature03", "sEffectSummonCreature03"); // 'Summon Bonewolf'
+    cS("sEffectSummonCreature04", "sEffectSummonCreature04"); // same
+    cS("sEffectSummonCreature05", "sEffectSummonCreature05"); // same
 
     // Integers
     cI("iWereWolfBounty", 10000); // 1000

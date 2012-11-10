@@ -6,9 +6,18 @@
 namespace ESM
 {
 
+struct SCHD
+{
+    NAME32              mName;
+    Script::SCHDstruct  mData;
+};
+
 void Script::load(ESMReader &esm)
 {
-    esm.getHNT(mData, "SCHD", 52);
+    SCHD data;
+    esm.getHNT(data, "SCHD", 52);
+    mData = data.mData;
+    mId = data.mName.toString();
 
     // List of local variables
     if (esm.isNextSub("SCVR"))
@@ -48,7 +57,13 @@ void Script::save(ESMWriter &esm)
         for (std::vector<std::string>::iterator it = mVarNames.begin(); it != mVarNames.end(); ++it)
             varNameString.append(*it);
 
-    esm.writeHNT("SCHD", mData, 52);
+    SCHD data;
+    memset(&data, 0, sizeof(data));
+
+    data.mData = mData;
+    memcpy(data.mName.name, mId.c_str(), mId.size());
+
+    esm.writeHNT("SCHD", data, 52);
     
     if (!mVarNames.empty())
     {

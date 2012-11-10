@@ -1,6 +1,8 @@
 #include "BulletShapeLoader.h"
 
-
+namespace OEngine {
+namespace Physic
+{
 
 BulletShape::BulletShape(Ogre::ResourceManager* creator, const Ogre::String &name,
     Ogre::ResourceHandle handle, const Ogre::String &group, bool isManual,
@@ -64,21 +66,24 @@ size_t BulletShape::calculateSize() const
 
 
 //=============================================================================================================
-template<> BulletShapeManager *Ogre::Singleton<BulletShapeManager>::msSingleton = 0;
+BulletShapeManager *BulletShapeManager::sThis = 0;
 
 BulletShapeManager *BulletShapeManager::getSingletonPtr()
 {
-    return msSingleton;
+    return sThis;
 }
 
 BulletShapeManager &BulletShapeManager::getSingleton()
 {
-    assert(msSingleton);
-    return(*msSingleton);
+    assert(sThis);
+    return(*sThis);
 }
 
 BulletShapeManager::BulletShapeManager()
 {
+    assert(!sThis);
+    sThis = this;
+
     mResourceType = "BulletShape";
 
     // low, because it will likely reference other resources
@@ -92,6 +97,8 @@ BulletShapeManager::~BulletShapeManager()
 {
     // and this is how we unregister it
     Ogre::ResourceGroupManager::getSingleton()._unregisterResourceManager(mResourceType);
+
+    sThis = 0;
 }
 
 BulletShapePtr BulletShapeManager::load(const Ogre::String &name, const Ogre::String &group)
@@ -124,3 +131,6 @@ void BulletShapeLoader::loadResource(Ogre::Resource *resource)
 
 void BulletShapeLoader::load(const std::string &name,const std::string &group)
 {}
+
+}
+}

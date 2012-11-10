@@ -83,7 +83,6 @@ WindowManager::WindowManager(
   , mSpellCreationDialog(NULL)
   , mEnchantingDialog(NULL)
   , mTrainingWindow(NULL)
-  , mPlayerClass()
   , mPlayerName()
   , mPlayerRaceId()
   , mPlayerAttributes()
@@ -499,8 +498,7 @@ void WindowManager::setValue (const std::string& id, int value)
 
 void WindowManager::setPlayerClass (const ESM::Class &class_)
 {
-    mPlayerClass = class_;
-    mStatsWindow->setValue("class", mPlayerClass.mName);
+    mStatsWindow->setValue("class", class_.mName);
 }
 
 void WindowManager::configureSkills (const SkillList& major, const SkillList& minor)
@@ -554,7 +552,9 @@ int WindowManager::readPressedButton ()
 
 std::string WindowManager::getGameSettingString(const std::string &id, const std::string &default_)
 {
-    const ESM::GameSetting *setting = MWBase::Environment::get().getWorld()->getStore().gameSettings.search(id);
+    const ESM::GameSetting *setting =
+        MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().search(id);
+
     if (setting && setting->mType == ESM::VT_String)
         return setting->getString();
     return default_;
@@ -582,6 +582,8 @@ void WindowManager::onFrame (float frameDuration)
         mDragAndDrop->mDraggedWidget->setPosition(MyGUI::InputManager::getInstance().getMousePosition());
     }
 
+    mDialogueWindow->onFrame();
+
     mInventoryWindow->onFrame();
 
     mStatsWindow->onFrame();
@@ -604,17 +606,18 @@ void WindowManager::onFrame (float frameDuration)
 
 void WindowManager::changeCell(MWWorld::Ptr::CellStore* cell)
 {
-    if (!(cell->cell->mData.mFlags & ESM::Cell::Interior))
+    if (cell->mCell->isExterior())
     {
         std::string name;
-        if (cell->cell->mName != "")
+        if (cell->mCell->mName != "")
         {
-            name = cell->cell->mName;
-            mMap->addVisitedLocation (name, cell->cell->getGridX (), cell->cell->getGridY ());
+            name = cell->mCell->mName;
+            mMap->addVisitedLocation (name, cell->mCell->getGridX (), cell->mCell->getGridY ());
         }
         else
         {
-            const ESM::Region* region = MWBase::Environment::get().getWorld()->getStore().regions.search(cell->cell->mRegion);
+            const ESM::Region* region =
+                MWBase::Environment::get().getWorld()->getStore().get<ESM::Region>().search(cell->mCell->mRegion);
             if (region)
                 name = region->mName;
             else
@@ -626,15 +629,15 @@ void WindowManager::changeCell(MWWorld::Ptr::CellStore* cell)
 
         mMap->setCellPrefix("Cell");
         mHud->setCellPrefix("Cell");
-        mMap->setActiveCell( cell->cell->mData.mX, cell->cell->mData.mY );
-        mHud->setActiveCell( cell->cell->mData.mX, cell->cell->mData.mY );
+        mMap->setActiveCell( cell->mCell->getGridX(), cell->mCell->getGridY() );
+        mHud->setActiveCell( cell->mCell->getGridX(), cell->mCell->getGridY() );
     }
     else
     {
-        mMap->setCellName( cell->cell->mName );
-        mHud->setCellName( cell->cell->mName );
-        mMap->setCellPrefix( cell->cell->mName );
-        mHud->setCellPrefix( cell->cell->mName );
+        mMap->setCellName( cell->mCell->mName );
+        mHud->setCellName( cell->mCell->mName );
+        mMap->setCellPrefix( cell->mCell->mName );
+        mHud->setCellPrefix( cell->mCell->mName );
     }
 
 }
@@ -717,7 +720,9 @@ void WindowManager::setDragDrop(bool dragDrop)
 
 void WindowManager::onRetrieveTag(const MyGUI::UString& _tag, MyGUI::UString& _result)
 {
-    const ESM::GameSetting *setting = MWBase::Environment::get().getWorld()->getStore().gameSettings.find(_tag);
+    const ESM::GameSetting *setting =
+        MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find(_tag);
+
     if (setting && setting->mType == ESM::VT_String)
         _result = setting->getString();
     else
@@ -769,6 +774,13 @@ void WindowManager::pushGuiMode(GuiMode mode)
     if (mode==GM_Inventory && mAllowed==GW_None)
         return;
 
+
+    // If this mode already exists somewhere in the stack, just bring it to the front.
+    if (std::find(mGuiModes.begin(), mGuiModes.end(), mode) != mGuiModes.end())
+    {
+        mGuiModes.erase(std::find(mGuiModes.begin(), mGuiModes.end(), mode));
+    }
+
     mGuiModes.push_back(mode);
 
     bool gameMode = !isGuiMode();
@@ -808,7 +820,10 @@ void WindowManager::removeGuiMode(GuiMode mode)
 void WindowManager::setSelectedSpell(const std::string& spellId, int successChancePercent)
 {
     mHud->setSelectedSpell(spellId, successChancePercent);
-    const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().spells.find(spellId);
+
+    const ESM::Spell* spell =
+        MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find(spellId);
+
     mSpellWindow->setTitle(spell->mName);
 }
 
