@@ -32,7 +32,9 @@ namespace MWDialogue
                 Function_PcExpelled,
                 Function_PcVampire,
                 Function_FriendlyHit,
-                Function_TalkedToPc
+                Function_TalkedToPc,
+                Function_PcLevel, Function_PcHealthPercent, Function_PcDynamicStat,
+                Function_PcGender, Function_PcClothingModifier, Function_PcCrimeLevel
             };
             
             enum Type

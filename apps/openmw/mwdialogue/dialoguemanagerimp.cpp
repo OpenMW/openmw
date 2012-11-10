@@ -114,10 +114,6 @@ namespace MWDialogue
                 iss >> ifunction;
                 switch(ifunction)
                 {
-                case 43://PC Crime level
-                    if(!selectCompare<int,int>(comp,0,select.mI)) return false;
-                    break;
-
                 case 48://Detected
                     if(!selectCompare<int,int>(comp,1,select.mI)) return false;
                     break;
@@ -132,10 +128,6 @@ namespace MWDialogue
 
                 case 62://Attacked
                     if(!selectCompare<int,int>(comp,0,select.mI)) return false;
-                    break;
-
-                case 64://PC Health
-                    if(!selectCompare<int,int>(comp,50,select.mI)) return false;
                     break;
 
                 case 65://Creature target

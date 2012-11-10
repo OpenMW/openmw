@@ -9,6 +9,7 @@
 #include "../mwworld/class.hpp"
 #include "../mwworld/player.hpp"
 #include "../mwworld/containerstore.hpp"
+#include "../mwworld/inventorystore.hpp"
 
 #include "../mwmechanics/npcstats.hpp"
 #include "../mwmechanics/creaturestats.hpp"
@@ -188,6 +189,26 @@ bool MWDialogue::Filter::testSelectStructNumeric (const SelectWrapper& select) c
             return select.selectCompare (locals.mFloats.at (i));        
         }
         
+        case SelectWrapper::Function_PcHealthPercent:
+        {
+            MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+        
+            float ratio = MWWorld::Class::get (player).getCreatureStats (player).getHealth().getCurrent() / 
+                MWWorld::Class::get (player).getCreatureStats (player).getHealth().getModified();
+                
+            return select.selectCompare (ratio);
+        }
+            
+        case SelectWrapper::Function_PcDynamicStat:
+        {
+            MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+        
+            float value = MWWorld::Class::get (player).getCreatureStats (player).
+                getDynamic (select.getArgument()).getCurrent();       
+                
+            return select.selectCompare (value);
+        }
+
         default:
         
             throw std::runtime_error ("unknown numeric select function");
@@ -247,7 +268,39 @@ int MWDialogue::Filter::getSelectStructInteger (const SelectWrapper& select) con
 
             return hits>4 ? 4 : hits;            
         }
+    
+        case SelectWrapper::Function_PcLevel:
+
+            return MWWorld::Class::get (player).getCreatureStats (player).getLevel();
+
+        case SelectWrapper::Function_PcGender:
+        {
+            MWWorld::LiveCellRef<ESM::NPC> *cellRef = player.get<ESM::NPC>();
         
+            return cellRef->mBase->Female ? 0 : 1;
+        }
+            
+        case SelectWrapper::Function_PcClothingModifier:
+        {
+            MWWorld::InventoryStore& store = MWWorld::Class::get (player).getInventoryStore (player);
+
+            int value = 0;
+        
+            for (int i=0; i<=15; ++i) // everything except thigns held in hands and amunition
+            {
+                MWWorld::ContainerStoreIterator slot = store.getSlot (i);
+                
+                if (slot!=store.end())
+                    value += MWWorld::Class::get (*slot).getValue (*slot);
+            }
+        
+            return value;
+        }
+            
+        case SelectWrapper::Function_PcCrimeLevel:
+        
+            return MWWorld::Class::get (player).getNpcStats (player).getBounty();
+            
         default:
 
             throw std::runtime_error ("unknown integer select function");
@@ -322,7 +375,7 @@ bool MWDialogue::Filter::getSelectStructBoolean (const SelectWrapper& select) co
         case SelectWrapper::Function_TalkedToPc:
         
             return mTalkedToPlayer;
-    
+
         default:
 
             throw std::runtime_error ("unknown boolean select function");
