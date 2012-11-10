@@ -28,7 +28,8 @@ namespace MWDialogue
                 Function_Choice,
                 Function_PcCommonDisease, Function_PcBlightDisease, Function_PcCorprus,
                 Function_AiSetting,
-                Function_PcAttribute, Function_PcSkill
+                Function_PcAttribute, Function_PcSkill,
+                Function_PcExpelled
             };
             
             enum Type

@@ -81,6 +81,11 @@ std::map<std::string, int>& MWMechanics::NpcStats::getFactionRanks()
     return mFactionRank;
 }
 
+std::set<std::string>& MWMechanics::NpcStats::getExpelled()
+{
+    return mExpelled;
+}
+
 const std::map<std::string, int>& MWMechanics::NpcStats::getFactionRanks() const
 {
     return mFactionRank;

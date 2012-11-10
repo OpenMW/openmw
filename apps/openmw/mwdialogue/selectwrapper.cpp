@@ -66,7 +66,8 @@ MWDialogue::SelectWrapper::Function MWDialogue::SelectWrapper::decodeFunction() 
         case 11: case 12: case 13: case 14: case 15: case 16: case 17: case 18: case 19: case 20:
         case 21: case 22: case 23: case 24: case 25: case 26: case 27: case 28: case 29: case 30:
         case 31: case 32: case 33: case 34: case 35: case 36: case 37: return Function_PcSkill;
-        // 38, 39
+        // 38
+        case 39: return Function_PcExpelled;
         case 40: return Function_PcCommonDisease;
         case 41: return Function_PcBlightDisease;
         // 42-45
@@ -191,6 +192,7 @@ MWDialogue::SelectWrapper::Type MWDialogue::SelectWrapper::getType() const
         Function_Id, Function_Faction, Function_Class, Function_Race, Function_Cell,
         Function_SameFaction,
         Function_PcCommonDisease, Function_PcBlightDisease, Function_PcCorprus,
+        Function_PcExpelled,
         Function_None // end marker
     };   
     

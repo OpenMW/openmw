@@ -47,6 +47,7 @@ namespace MWMechanics
             unsigned int mMovementFlags;
             Stat<float> mSkill[27];
             int mBounty;
+            std::set<std::string> mExpelled;
 
             int mLevelProgress; // 0-10
 
@@ -75,6 +76,8 @@ namespace MWMechanics
             Stat<float>& getSkill (int index);
 
             std::map<std::string, int>& getFactionRanks();
+            
+            std::set<std::string>& getExpelled();
 
             bool isSameFaction (const NpcStats& npcStats) const;
             ///< Do *this and \a npcStats share a faction?

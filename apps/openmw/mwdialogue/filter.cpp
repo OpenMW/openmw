@@ -295,6 +295,19 @@ bool MWDialogue::Filter::getSelectStructBoolean (const SelectWrapper& select) co
             return MWWorld::Class::get (player).getCreatureStats (player).
                 getMagicEffects().get (132).mMagnitude!=0;
     
+        case SelectWrapper::Function_PcExpelled:
+        {
+            if (MWWorld::Class::get (mActor).getNpcStats (mActor).getFactionRanks().empty())
+                return false;
+                
+            std::string faction =
+                MWWorld::Class::get (mActor).getNpcStats (mActor).getFactionRanks().begin()->first;
+            
+            std::set<std::string>& expelled = MWWorld::Class::get (player).getNpcStats (player).getExpelled();
+            
+            return expelled.find (faction)!=expelled.end();
+        }
+    
         default:
 
             throw std::runtime_error ("unknown boolean select function");

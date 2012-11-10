@@ -113,10 +113,6 @@ namespace MWDialogue
                 iss >> ifunction;
                 switch(ifunction)
                 {
-                case 39://PC Expelled
-                    if(!selectCompare<int,int>(comp,0,select.mI)) return false;
-                    break;
-
                 case 43://PC Crime level
                     if(!selectCompare<int,int>(comp,0,select.mI)) return false;
                     break;
