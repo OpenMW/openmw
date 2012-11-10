@@ -13,7 +13,7 @@ namespace MWDialogue
         
             enum Function
             {
-                Function_None = 0,
+                Function_None,
                 Function_Journal,
                 Function_Item,
                 Function_Dead,
@@ -24,7 +24,8 @@ namespace MWDialogue
                 Function_Cell,
                 Function_Local,
                 Function_Global,
-                Function_SameFaction
+                Function_SameFaction,
+                Function_Choice
             };
             
             enum Type

@@ -59,7 +59,13 @@ MWDialogue::SelectWrapper::Function MWDialogue::SelectWrapper::decodeFunction() 
     
     std::istringstream (mSelect.mSelectRule.substr(2,2)) >> index;
     
-    return static_cast<Function> (index);
+    switch (index)
+    {
+        case 46: return Function_SameFaction;
+        case 50: return Function_Choice;
+    }
+    
+    return Function_None;
 }
 
 MWDialogue::SelectWrapper::SelectWrapper (const ESM::DialInfo::SelectStruct& select) : mSelect (select) {}
@@ -92,6 +98,7 @@ MWDialogue::SelectWrapper::Type MWDialogue::SelectWrapper::getType() const
     static const Function integerFunctions[] =
     {
         Function_Journal, Function_Item, Function_Dead,
+        Function_Choice,
         Function_None // end marker
     };
     

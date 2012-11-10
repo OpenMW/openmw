@@ -220,6 +220,10 @@ int MWDialogue::Filter::getSelectStructInteger (const SelectWrapper& select) con
 
             return MWBase::Environment::get().getMechanicsManager()->countDeaths (select.getName());
         
+        case SelectWrapper::Function_Choice:
+        
+            return mChoice;
+        
         default:
 
             throw std::runtime_error ("unknown integer select function");
@@ -264,7 +268,7 @@ bool MWDialogue::Filter::getSelectStructBoolean (const SelectWrapper& select) co
     }
 }
 
-MWDialogue::Filter::Filter (const MWWorld::Ptr& actor) : mActor (actor) {}
+MWDialogue::Filter::Filter (const MWWorld::Ptr& actor, int choice) : mActor (actor), mChoice (choice) {}
 
 bool MWDialogue::Filter::operator() (const ESM::DialInfo& info) const
 {

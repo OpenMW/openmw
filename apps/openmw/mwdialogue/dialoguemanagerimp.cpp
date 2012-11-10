@@ -137,13 +137,6 @@ namespace MWDialogue
                     if(!selectCompare<int,int>(comp,0,select.mI)) return false;
                     break;
 
-                case 50://choice
-                    if(choice)
-                    {
-                        if(!selectCompare<int,int>(comp,mChoice,select.mI)) return false;
-                    }
-                    break;
-
                 case 60://PC Vampire
                     if(!selectCompare<int,int>(comp,0,select.mI)) return false;
                     break;
@@ -287,7 +280,7 @@ namespace MWDialogue
         const MWWorld::Store<ESM::Dialogue> &dialogs =
             MWBase::Environment::get().getWorld()->getStore().get<ESM::Dialogue>();
 
-        Filter filter (actor);
+        Filter filter (actor, mChoice);
 
         MWWorld::Store<ESM::Dialogue>::iterator it = dialogs.begin();
         for (; it != dialogs.end(); ++it)
@@ -391,7 +384,7 @@ namespace MWDialogue
         const MWWorld::Store<ESM::Dialogue> &dialogs =
             MWBase::Environment::get().getWorld()->getStore().get<ESM::Dialogue>();
 
-        Filter filter (mActor);
+        Filter filter (mActor, mChoice);
 
         MWWorld::Store<ESM::Dialogue>::iterator it = dialogs.begin();
         for (; it != dialogs.end(); ++it)
@@ -478,7 +471,7 @@ namespace MWDialogue
                 ESM::Dialogue ndialogue = mDialogueMap[keyword];
                 if(ndialogue.mType == ESM::Dialogue::Topic)
                 {
-                    Filter filter (mActor);
+                    Filter filter (mActor, mChoice);
                 
                     for (std::vector<ESM::DialInfo>::const_iterator iter  = ndialogue.mInfo.begin();
                         iter!=ndialogue.mInfo.end(); ++iter)
@@ -525,7 +518,7 @@ namespace MWDialogue
                 ESM::Dialogue ndialogue = mDialogueMap[mLastTopic];
                 if(ndialogue.mType == ESM::Dialogue::Topic)
                 {
-                    Filter filter (mActor);
+                    Filter filter (mActor, mChoice);
                 
                     for (std::vector<ESM::DialInfo>::const_iterator iter = ndialogue.mInfo.begin();
                         iter!=ndialogue.mInfo.end(); ++iter)
