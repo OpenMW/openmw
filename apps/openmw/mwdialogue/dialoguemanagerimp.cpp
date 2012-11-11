@@ -977,7 +977,8 @@ namespace MWDialogue
         // practice skill
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
 
-        MWWorld::Class::get(player).skillUsageSucceeded(player, ESM::Skill::Speechcraft, 0);
+        if (success)
+            MWWorld::Class::get(player).skillUsageSucceeded(player, ESM::Skill::Speechcraft, 0);
 
 
         // add status message to dialogue window
