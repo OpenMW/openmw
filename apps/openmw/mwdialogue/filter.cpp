@@ -334,6 +334,10 @@ int MWDialogue::Filter::getSelectStructInteger (const SelectWrapper& select) con
         
             return MWWorld::Class::get (mActor).getCreatureStats (mActor).getLevel();
         
+        case SelectWrapper::Function_PCReputation:
+        
+            return MWWorld::Class::get (player).getNpcStats (player).getReputation();        
+        
         default:
 
             throw std::runtime_error ("unknown integer select function");

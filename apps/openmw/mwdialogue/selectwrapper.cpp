@@ -65,7 +65,7 @@ MWDialogue::SelectWrapper::Function MWDialogue::SelectWrapper::decodeFunction() 
         case  2: return Function_RankRequirement;
         // 3
         case  4: return Function_HealthPercent;
-        // 5
+        case  5: return Function_PCReputation;
         case  6: return Function_PcLevel;
         case  7: return Function_PcHealthPercent;
         case  8: case  9: return Function_PcDynamicStat;
@@ -203,7 +203,7 @@ MWDialogue::SelectWrapper::Type MWDialogue::SelectWrapper::getType() const
         Function_PcLevel, Function_PcGender, Function_PcClothingModifier,
         Function_PcCrimeLevel,
         Function_RankRequirement,
-        Function_Level,
+        Function_Level, Function_PCReputation,
         Function_None // end marker
     };
     
