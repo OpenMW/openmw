@@ -208,6 +208,14 @@ bool MWDialogue::Filter::testSelectStructNumeric (const SelectWrapper& select) c
                 
             return select.selectCompare (value);
         }
+        
+        case SelectWrapper::Function_HealthPercent:
+        {
+            float ratio = MWWorld::Class::get (mActor).getCreatureStats (mActor).getHealth().getCurrent() / 
+                MWWorld::Class::get (mActor).getCreatureStats (mActor).getHealth().getModified();
+                
+            return select.selectCompare (ratio);
+        }
 
         default:
         
@@ -250,7 +258,7 @@ int MWDialogue::Filter::getSelectStructInteger (const SelectWrapper& select) con
         
         case SelectWrapper::Function_AiSetting:
         
-            return MWWorld::Class::get (player).getCreatureStats (player).getAiSetting (select.getArgument());
+            return MWWorld::Class::get (mActor).getCreatureStats (mActor).getAiSetting (select.getArgument());
         
         case SelectWrapper::Function_PcAttribute:
         
@@ -274,11 +282,8 @@ int MWDialogue::Filter::getSelectStructInteger (const SelectWrapper& select) con
             return MWWorld::Class::get (player).getCreatureStats (player).getLevel();
 
         case SelectWrapper::Function_PcGender:
-        {
-            MWWorld::LiveCellRef<ESM::NPC> *cellRef = player.get<ESM::NPC>();
-        
-            return cellRef->mBase->Female ? 0 : 1;
-        }
+
+            return player.get<ESM::NPC>()->mBase->mFlags & ESM::NPC::Female ? 0 : 1;
             
         case SelectWrapper::Function_PcClothingModifier:
         {
@@ -324,7 +329,11 @@ int MWDialogue::Filter::getSelectStructInteger (const SelectWrapper& select) con
 
             return result;
         }       
-            
+        
+        case SelectWrapper::Function_Level:
+        
+            return MWWorld::Class::get (mActor).getCreatureStats (mActor).getLevel();
+        
         default:
 
             throw std::runtime_error ("unknown integer select function");
@@ -361,6 +370,16 @@ bool MWDialogue::Filter::getSelectStructBoolean (const SelectWrapper& select) co
     
             return toLower (mActor.getCell()->mCell->mName)==select.getName();
     
+        case SelectWrapper::Function_SameGender:
+
+            return (player.get<ESM::NPC>()->mBase->mFlags & ESM::NPC::Female)==
+                (mActor.get<ESM::NPC>()->mBase->mFlags & ESM::NPC::Female);
+
+        case SelectWrapper::Function_SameRace:
+
+            return toLower (mActor.get<ESM::NPC>()->mBase->mRace)!=
+                toLower (player.get<ESM::NPC>()->mBase->mRace);
+        
         case SelectWrapper::Function_SameFaction:
 
             return MWWorld::Class::get (mActor).getNpcStats (mActor).isSameFaction (

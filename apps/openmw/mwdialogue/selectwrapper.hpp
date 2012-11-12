@@ -24,7 +24,7 @@ namespace MWDialogue
                 Function_Cell,
                 Function_Local,
                 Function_Global,
-                Function_SameFaction,
+                Function_SameGender, Function_SameRace, Function_SameFaction,
                 Function_Choice,
                 Function_PcCommonDisease, Function_PcBlightDisease, Function_PcCorprus,
                 Function_AiSetting,
@@ -35,9 +35,10 @@ namespace MWDialogue
                 Function_TalkedToPc,
                 Function_PcLevel, Function_PcHealthPercent, Function_PcDynamicStat,
                 Function_PcGender, Function_PcClothingModifier, Function_PcCrimeLevel,
-                Function_RankRequirement
+                Function_RankRequirement,
+                Function_HealthPercent, Function_Level
             };
-            
+
             enum Type
             {
                 Type_None,

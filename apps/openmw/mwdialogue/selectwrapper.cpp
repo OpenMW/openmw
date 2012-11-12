@@ -63,7 +63,9 @@ MWDialogue::SelectWrapper::Function MWDialogue::SelectWrapper::decodeFunction() 
     {
         // 0, 1
         case  2: return Function_RankRequirement;
-        // 3-5
+        // 3
+        case  4: return Function_HealthPercent;
+        // 5
         case  6: return Function_PcLevel;
         case  7: return Function_PcHealthPercent;
         case  8: case  9: return Function_PcDynamicStat;
@@ -75,10 +77,10 @@ MWDialogue::SelectWrapper::Function MWDialogue::SelectWrapper::decodeFunction() 
         case 39: return Function_PcExpelled;
         case 40: return Function_PcCommonDisease;
         case 41: return Function_PcBlightDisease;
-        // 42
         case 42: return Function_PcClothingModifier;
         case 43: return Function_PcCrimeLevel;
-        // 44-45
+        case 44: return Function_SameGender;
+        case 45: return Function_SameRace;
         case 46: return Function_SameFaction;
         // 47-49
         case 50: return Function_Choice;
@@ -86,13 +88,14 @@ MWDialogue::SelectWrapper::Function MWDialogue::SelectWrapper::decodeFunction() 
         case 58: return Function_PcCorprus;
         // 59
         case 60: return Function_PcVampire;
-        // 61, 62
+        case 61: return Function_Level;
+        // 62
         case 63: return Function_TalkedToPc;
         case 64: return Function_PcDynamicStat;
         // 65
         case 66: return Function_FriendlyHit;
         case 67: case 68: case 69: case 70: return Function_AiSetting;
-        // 71-77
+        // 71
     }
     
     return Function_False;
@@ -199,7 +202,8 @@ MWDialogue::SelectWrapper::Type MWDialogue::SelectWrapper::getType() const
         Function_FriendlyHit,
         Function_PcLevel, Function_PcGender, Function_PcClothingModifier,
         Function_PcCrimeLevel,
-        Function_RankRequirement,        
+        Function_RankRequirement,
+        Function_Level,
         Function_None // end marker
     };
     
@@ -207,6 +211,7 @@ MWDialogue::SelectWrapper::Type MWDialogue::SelectWrapper::getType() const
     {
         Function_Global, Function_Local,
         Function_PcDynamicStat, Function_PcHealthPercent,
+        Function_HealthPercent,
         Function_None // end marker
     };    
     
@@ -214,7 +219,7 @@ MWDialogue::SelectWrapper::Type MWDialogue::SelectWrapper::getType() const
     {
         Function_False,
         Function_Id, Function_Faction, Function_Class, Function_Race, Function_Cell,
-        Function_SameFaction,
+        Function_SameGender, Function_SameRace, Function_SameFaction,
         Function_PcCommonDisease, Function_PcBlightDisease, Function_PcCorprus,
         Function_PcExpelled,
         Function_PcVampire, Function_TalkedToPc,
@@ -250,7 +255,7 @@ bool MWDialogue::SelectWrapper::isNpcOnly() const
     static const Function functions[] =
     {
         Function_Faction, SelectWrapper::Function_Class, SelectWrapper::Function_Race,
-        Function_SameFaction,
+        Function_SameGender, Function_SameRace, Function_SameFaction,
         Function_PcSkill,
         Function_PcExpelled,
         Function_PcVampire,
