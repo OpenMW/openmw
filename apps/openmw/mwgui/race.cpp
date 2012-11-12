@@ -5,6 +5,7 @@
 
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
+#include <boost/format.hpp>
 
 #include "../mwworld/esmstore.hpp"
 
@@ -108,6 +109,16 @@ void RaceDialog::open()
     MWBase::Environment::get().getWorld ()->setupExternalRendering (*mPreview);
     mPreview->update (0);
 
+    const ESM::NPC proto = mPreview->getPrototype();
+    setRaceId(proto.mRace);
+    recountParts();
+    
+    std::string index = proto.mHead.substr(proto.mHead.size() - 2, 2);
+    mFaceIndex = boost::lexical_cast<int>(index) - 1;
+
+    index = proto.mHair.substr(proto.mHair.size() - 2, 2);
+    mHairIndex = boost::lexical_cast<int>(index) - 1;
+
     mPreviewImage->setImageTexture ("CharacterHeadPreview");
 }
 
@@ -143,6 +154,35 @@ int wrap(int index, int max)
         return index;
 }
 
+int countParts(const std::string &part, const std::string &race, bool male)
+{
+    const MWWorld::Store<ESM::BodyPart> &store =
+        MWBase::Environment::get().getWorld()->getStore().get<ESM::BodyPart>();
+
+    std::string prefix =
+        "b_n_" + race + ((male) ? "_m_" : "_f_") + part;
+
+    std::string suffix;
+    suffix.reserve(prefix.size() + 3);
+    
+    int count = -1;
+    do {
+        ++count;
+        suffix = "_" + (boost::format("%02d") % (count + 1)).str();
+    }
+    while (store.search(prefix + suffix) != 0);
+
+    if (count == 0 && part == "hair") {
+        count = -1;
+        do {
+            ++count;
+            suffix = (boost::format("%02d") % (count + 1)).str();
+        }
+        while (store.search(prefix + suffix) != 0);
+    }
+    return count;
+}
+
 void RaceDialog::close()
 {
     delete mPreview;
@@ -174,31 +214,41 @@ void RaceDialog::onHeadRotate(MyGUI::ScrollBar*, size_t _position)
 void RaceDialog::onSelectPreviousGender(MyGUI::Widget*)
 {
     mGenderIndex = wrap(mGenderIndex - 1, 2);
+
+    recountParts();
+    updatePreview();
 }
 
 void RaceDialog::onSelectNextGender(MyGUI::Widget*)
 {
     mGenderIndex = wrap(mGenderIndex + 1, 2);
+
+    recountParts();
+    updatePreview();
 }
 
 void RaceDialog::onSelectPreviousFace(MyGUI::Widget*)
 {
     mFaceIndex = wrap(mFaceIndex - 1, mFaceCount);
+    updatePreview();
 }
 
 void RaceDialog::onSelectNextFace(MyGUI::Widget*)
 {
     mFaceIndex = wrap(mFaceIndex + 1, mFaceCount);
+    updatePreview();
 }
 
 void RaceDialog::onSelectPreviousHair(MyGUI::Widget*)
 {
     mHairIndex = wrap(mHairIndex - 1, mHairCount);
+    updatePreview();
 }
 
 void RaceDialog::onSelectNextHair(MyGUI::Widget*)
 {
-    mHairIndex = wrap(mHairIndex - 1, mHairCount);
+    mHairIndex = wrap(mHairIndex + 1, mHairCount);
+    updatePreview();
 }
 
 void RaceDialog::onSelectRace(MyGUI::ListBox* _sender, size_t _index)
@@ -215,6 +265,26 @@ void RaceDialog::onSelectRace(MyGUI::ListBox* _sender, size_t _index)
 
     mCurrentRaceId = *raceId;
 
+    recountParts();
+
+    updatePreview();
+    updateSkills();
+    updateSpellPowers();
+}
+
+void RaceDialog::recountParts()
+{
+    mFaceIndex = 0;
+    mHairIndex = 0;
+
+    mFaceCount = countParts("head", mCurrentRaceId, mGenderIndex == 0);
+    mHairCount = countParts("hair", mCurrentRaceId, mGenderIndex == 0);
+}
+
+// update widget content
+
+void RaceDialog::updatePreview()
+{
     ESM::NPC record = mPreview->getPrototype();
     record.mRace = mCurrentRaceId;
     record.setIsMale(mGenderIndex == 0);
@@ -222,26 +292,20 @@ void RaceDialog::onSelectRace(MyGUI::ListBox* _sender, size_t _index)
     std::string prefix =
         "b_n_" + mCurrentRaceId + ((record.isMale()) ? "_m_" : "_f_");
 
-    record.mHead = prefix + "head_01";
-    record.mHair = prefix + "hair_01";
+    std::string headIndex = (boost::format("%02d") % (mFaceIndex + 1)).str();
+    std::string hairIndex = (boost::format("%02d") % (mHairIndex + 1)).str();
+
+    record.mHead = prefix + "head_" + headIndex;
+    record.mHair = prefix + "hair_" + hairIndex;
 
     const MWWorld::Store<ESM::BodyPart> &parts =
         MWBase::Environment::get().getWorld()->getStore().get<ESM::BodyPart>();
 
     if (parts.search(record.mHair) == 0) {
-        record.mHair = prefix + "hair01";
+        record.mHair = prefix + "hair" + hairIndex;
     }
-
-    mFaceIndex = 0;
-    mHairIndex = 0;
-
     mPreview->setPrototype(record);
-
-    updateSkills();
-    updateSpellPowers();
 }
-
-// update widget content
 
 void RaceDialog::updateRaces()
 {
