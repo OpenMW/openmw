@@ -300,6 +300,30 @@ int MWDialogue::Filter::getSelectStructInteger (const SelectWrapper& select) con
         case SelectWrapper::Function_PcCrimeLevel:
         
             return MWWorld::Class::get (player).getNpcStats (player).getBounty();
+
+        case SelectWrapper::Function_RankRequirement:
+        {
+            if (MWWorld::Class::get (mActor).getNpcStats (mActor).getFactionRanks().empty())
+                return 0;
+
+            std::string faction =
+                MWWorld::Class::get (mActor).getNpcStats (mActor).getFactionRanks().begin()->first;
+            
+            int rank = getFactionRank (player, faction);
+           
+            if (rank>=9)
+                return 0; // max rank
+           
+            int result = 0;
+
+            if (hasFactionRankSkillRequirements (player, faction, rank+1))
+                result += 1;
+
+            if (hasFactionRankReputationRequirements (player, faction, rank+1))
+                result += 2;
+
+            return result;
+        }       
             
         default:
 
@@ -380,6 +404,50 @@ bool MWDialogue::Filter::getSelectStructBoolean (const SelectWrapper& select) co
 
             throw std::runtime_error ("unknown boolean select function");
     }
+}
+
+int MWDialogue::Filter::getFactionRank (const MWWorld::Ptr& actor, const std::string& factionId) const
+{
+    MWMechanics::NpcStats& stats = MWWorld::Class::get (actor).getNpcStats (actor);
+    
+    std::map<std::string, int>::const_iterator iter = stats.getFactionRanks().find (factionId);
+    
+    if (iter==stats.getFactionRanks().end())
+        return -1;
+        
+    return iter->second;
+}
+
+bool MWDialogue::Filter::hasFactionRankSkillRequirements (const MWWorld::Ptr& actor,
+    const std::string& factionId, int rank) const
+{
+    if (rank<0 || rank>=10)
+        throw std::runtime_error ("rank index out of range");
+
+    if (!MWWorld::Class::get (actor).getNpcStats (actor).hasSkillsForRank (factionId, rank))
+        return false;
+
+    const ESM::Faction& faction =
+        *MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find (factionId);
+
+    MWMechanics::CreatureStats& stats = MWWorld::Class::get (actor).getCreatureStats (actor);
+
+    return stats.getAttribute (faction.mData.mAttribute1).getBase()>=faction.mData.mRankData[rank].mAttribute1 &&
+        stats.getAttribute (faction.mData.mAttribute2).getBase()>=faction.mData.mRankData[rank].mAttribute2;
+}
+
+bool MWDialogue::Filter::hasFactionRankReputationRequirements (const MWWorld::Ptr& actor,
+    const std::string& factionId, int rank) const
+{
+    if (rank<0 || rank>=10)
+        throw std::runtime_error ("rank index out of range");
+
+    MWMechanics::NpcStats& stats = MWWorld::Class::get (actor).getNpcStats (actor);
+
+    const ESM::Faction& faction =
+        *MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find (factionId);
+
+    return stats.getFactionReputation (factionId)>=faction.mData.mRankData[rank].mFactReaction;
 }
 
 MWDialogue::Filter::Filter (const MWWorld::Ptr& actor, int choice, bool talkedToPlayer)

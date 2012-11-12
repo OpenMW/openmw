@@ -3,12 +3,15 @@
 
 #include <cmath>
 #include <stdexcept>
+#include <vector>
+#include <algorithm>
 
 #include <boost/format.hpp>
 
 #include <components/esm/loadskil.hpp>
 #include <components/esm/loadclas.hpp>
 #include <components/esm/loadgmst.hpp>
+#include <components/esm/loadfact.hpp>
 
 #include "../mwworld/esmstore.hpp"
 
@@ -307,5 +310,30 @@ int MWMechanics::NpcStats::getReputation() const
 void MWMechanics::NpcStats::setReputation(int reputation)
 {
     mReputation = reputation;
+}
+
+bool MWMechanics::NpcStats::hasSkillsForRank (const std::string& factionId, int rank) const
+{
+    if (rank<0 || rank>=10)
+        throw std::runtime_error ("rank index out of range");
+
+    const ESM::Faction& faction =
+        *MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find (factionId);
+
+    std::vector<int> skills;
+    
+    for (int i=0; i<6; ++i)
+        skills.push_back (static_cast<int> (getSkill (faction.mData.mSkillID[i]).getModified()));
+        
+    std::sort (skills.begin(), skills.end());
+    
+    std::vector<int>::const_reverse_iterator iter = skills.rbegin();
+    
+    const ESM::RankData& rankData = faction.mData.mRankData[rank];
+    
+    if (*iter<rankData.mSkill1)
+        return false;
+        
+    return *++iter>=rankData.mSkill2;
 }
 

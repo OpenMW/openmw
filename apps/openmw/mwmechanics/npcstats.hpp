@@ -123,6 +123,8 @@ namespace MWMechanics
             bool isVampire() const;
             
             void setVampire (bool set);
+            
+            bool hasSkillsForRank (const std::string& factionId, int rank) const;
     };
 }
 

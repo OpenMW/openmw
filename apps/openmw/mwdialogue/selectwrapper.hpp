@@ -34,7 +34,8 @@ namespace MWDialogue
                 Function_FriendlyHit,
                 Function_TalkedToPc,
                 Function_PcLevel, Function_PcHealthPercent, Function_PcDynamicStat,
-                Function_PcGender, Function_PcClothingModifier, Function_PcCrimeLevel
+                Function_PcGender, Function_PcClothingModifier, Function_PcCrimeLevel,
+                Function_RankRequirement
             };
             
             enum Type

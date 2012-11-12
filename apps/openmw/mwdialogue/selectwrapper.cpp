@@ -61,7 +61,9 @@ MWDialogue::SelectWrapper::Function MWDialogue::SelectWrapper::decodeFunction() 
 
     switch (index)
     {
-        // 0-5
+        // 0, 1
+        case  2: return Function_RankRequirement;
+        // 3-5
         case  6: return Function_PcLevel;
         case  7: return Function_PcHealthPercent;
         case  8: case  9: return Function_PcDynamicStat;
@@ -76,6 +78,7 @@ MWDialogue::SelectWrapper::Function MWDialogue::SelectWrapper::decodeFunction() 
         // 42
         case 42: return Function_PcClothingModifier;
         case 43: return Function_PcCrimeLevel;
+        // 44-45
         case 46: return Function_SameFaction;
         // 47-49
         case 50: return Function_Choice;
@@ -196,6 +199,7 @@ MWDialogue::SelectWrapper::Type MWDialogue::SelectWrapper::getType() const
         Function_FriendlyHit,
         Function_PcLevel, Function_PcGender, Function_PcClothingModifier,
         Function_PcCrimeLevel,
+        Function_RankRequirement,        
         Function_None // end marker
     };
     
@@ -250,7 +254,8 @@ bool MWDialogue::SelectWrapper::isNpcOnly() const
         Function_PcSkill,
         Function_PcExpelled,
         Function_PcVampire,
-        Function_PcCrimeLevel, 
+        Function_PcCrimeLevel,
+        Function_RankRequirement,
         Function_None // end marker
     };
 
