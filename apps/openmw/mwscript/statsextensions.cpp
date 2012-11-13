@@ -33,13 +33,13 @@ namespace
     std::string getDialogueActorFaction()
     {
         MWWorld::Ptr actor = MWBase::Environment::get().getDialogueManager()->getActor();
-        
+
         MWMechanics::NpcStats stats = MWWorld::Class::get (actor).getNpcStats (actor);
-        
+
         if (stats.getFactionRanks().empty())
             throw std::runtime_error (
                 "failed to determine dialogue actors faction (because actor is factionless)");
-        
+
         return stats.getFactionRanks().begin()->first;
     }
 }
@@ -208,7 +208,7 @@ namespace MWScript
                         .getDynamic (mIndex));
 
                     stat.setModified (value, 0);
-                    
+
                     MWWorld::Class::get (ptr).getCreatureStats (ptr).setDynamic (mIndex, stat);
                 }
         };
@@ -565,7 +565,7 @@ namespace MWScript
                     {
                         if(MWWorld::Class::get(ptr).getNpcStats(ptr).getFactionRanks().empty())
                         {
-                            factionID = -1;
+                            factionID = "";
                         }
                         else
                         {
@@ -623,7 +623,7 @@ namespace MWScript
 
                     MWWorld::Class::get (ptr).getNpcStats (ptr).setBaseDisposition (value);
                 }
-        };        
+        };
 
         template<class R>
         class OpGetDisposition : public Interpreter::Opcode0
@@ -636,8 +636,8 @@ namespace MWScript
 
                     runtime.push (MWWorld::Class::get (ptr).getNpcStats (ptr).getBaseDisposition());
                 }
-        };        
-        
+        };
+
         class OpGetDeadCount : public Interpreter::Opcode0
         {
             public:
@@ -647,7 +647,112 @@ namespace MWScript
                     std::string id = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime[0].mInteger = MWBase::Environment::get().getMechanicsManager()->countDeaths (id);
                 }
-        };        
+        };
+
+        template<class R>
+        class OpGetPCFacRep : public Interpreter::Opcode1
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime, unsigned int arg0)
+                {
+                    std::string factionId;
+
+                    if (arg0==1)
+                    {
+                        factionId = runtime.getStringLiteral (runtime[0].mInteger);
+                        runtime.pop();
+                    }
+                    else
+                    {
+                        MWWorld::Ptr ptr = R()(runtime);
+
+                        if (!MWWorld::Class::get (ptr).getNpcStats (ptr).getFactionRanks().empty())
+                            factionId = MWWorld::Class::get (ptr).getNpcStats (ptr).getFactionRanks().begin()->first;
+                    }
+
+                    if (factionId.empty())
+                        throw std::runtime_error ("failed to determine faction");
+
+                    boost::algorithm::to_lower (factionId);
+
+                    MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+                    runtime.push (
+                        MWWorld::Class::get (player).getNpcStats (player).getFactionReputation (factionId));
+                }
+        };
+
+        template<class R>
+        class OpSetPCFacRep : public Interpreter::Opcode1
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime, unsigned int arg0)
+                {
+                    Interpreter::Type_Integer value = runtime[0].mInteger;
+                    runtime.pop();
+
+                    std::string factionId;
+
+                    if (arg0==1)
+                    {
+                        factionId = runtime.getStringLiteral (runtime[0].mInteger);
+                        runtime.pop();
+                    }
+                    else
+                    {
+                        MWWorld::Ptr ptr = R()(runtime);
+
+                        if (!MWWorld::Class::get (ptr).getNpcStats (ptr).getFactionRanks().empty())
+                            factionId = MWWorld::Class::get (ptr).getNpcStats (ptr).getFactionRanks().begin()->first;
+                    }
+
+                    if (factionId.empty())
+                        throw std::runtime_error ("failed to determine faction");
+
+                    boost::algorithm::to_lower (factionId);
+
+                    MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+                    MWWorld::Class::get (player).getNpcStats (player).setFactionReputation (factionId, value);
+                }
+        };
+
+        template<class R>
+        class OpModPCFacRep : public Interpreter::Opcode1
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime, unsigned int arg0)
+                {
+                    Interpreter::Type_Integer value = runtime[0].mInteger;
+                    runtime.pop();
+
+                    std::string factionId;
+
+                    if (arg0==1)
+                    {
+                        factionId = runtime.getStringLiteral (runtime[0].mInteger);
+                        runtime.pop();
+                    }
+                    else
+                    {
+                        MWWorld::Ptr ptr = R()(runtime);
+
+                        if (!MWWorld::Class::get (ptr).getNpcStats (ptr).getFactionRanks().empty())
+                            factionId = MWWorld::Class::get (ptr).getNpcStats (ptr).getFactionRanks().begin()->first;
+                    }
+
+                    if (factionId.empty())
+                        throw std::runtime_error ("failed to determine faction");
+
+                    boost::algorithm::to_lower (factionId);
+
+                    MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+                    MWWorld::Class::get (player).getNpcStats (player).setFactionReputation (factionId,
+                        MWWorld::Class::get (player).getNpcStats (player).getFactionReputation (factionId)+
+                        value);
+                }
+        };
 
 
         const int numberOfAttributes = 8;
@@ -704,8 +809,16 @@ namespace MWScript
         const int opcodeGetLevelExplicit = 0x200018d;
         const int opcodeSetLevel = 0x200018e;
         const int opcodeSetLevelExplicit = 0x200018f;
-        
+
         const int opcodeGetDeadCount = 0x20001a3;
+
+        const int opcodeGetPCFacRep = 0x20012;
+        const int opcodeGetPCFacRepExplicit = 0x20013;
+        const int opcodeSetPCFacRep = 0x20014;
+        const int opcodeSetPCFacRepExplicit = 0x20015;
+        const int opcodeModPCFacRep = 0x20016;
+        const int opcodeModPCFacRepExplicit = 0x20017;
+
 
         void registerExtensions (Compiler::Extensions& extensions)
         {
@@ -797,7 +910,11 @@ namespace MWScript
             extensions.registerInstruction("setlevel", "l", opcodeSetLevel, opcodeSetLevelExplicit);
             extensions.registerFunction("getlevel", 'l', "", opcodeGetLevel, opcodeGetLevelExplicit);
 
-            extensions.registerFunction("getdeadcount", 'l', "c", opcodeGetDeadCount);
+            extensions.registerFunction ("getdeadcount", 'l', "c", opcodeGetDeadCount);
+
+            extensions.registerFunction ("getpcfacrep", 'l', "/c", opcodeGetPCFacRep, opcodeGetPCFacRepExplicit);
+            extensions.registerInstruction ("setpcfacrep", "/lc", opcodeSetPCFacRep, opcodeSetPCFacRepExplicit);
+            extensions.registerInstruction ("modpcfacrep", "/lc", opcodeModPCFacRep, opcodeModPCFacRepExplicit);
         }
 
         void installOpcodes (Interpreter::Interpreter& interpreter)
@@ -874,13 +991,20 @@ namespace MWScript
             interpreter.installSegment5(opcodeSetDispositionExplicit,new OpSetDisposition<ExplicitRef>);
             interpreter.installSegment5(opcodeGetDisposition,new OpGetDisposition<ImplicitRef>);
             interpreter.installSegment5(opcodeGetDispositionExplicit,new OpGetDisposition<ExplicitRef>);
-            
+
             interpreter.installSegment5 (opcodeGetLevel, new OpGetLevel<ImplicitRef>);
             interpreter.installSegment5 (opcodeGetLevelExplicit, new OpGetLevel<ExplicitRef>);
             interpreter.installSegment5 (opcodeSetLevel, new OpSetLevel<ImplicitRef>);
             interpreter.installSegment5 (opcodeSetLevelExplicit, new OpSetLevel<ExplicitRef>);
 
             interpreter.installSegment5 (opcodeGetDeadCount, new OpGetDeadCount);
+
+            interpreter.installSegment3 (opcodeGetPCFacRep, new OpGetPCFacRep<ImplicitRef>);
+            interpreter.installSegment3 (opcodeGetPCFacRepExplicit, new OpGetPCFacRep<ExplicitRef>);
+            interpreter.installSegment3 (opcodeSetPCFacRep, new OpSetPCFacRep<ImplicitRef>);
+            interpreter.installSegment3 (opcodeSetPCFacRepExplicit, new OpSetPCFacRep<ExplicitRef>);
+            interpreter.installSegment3 (opcodeModPCFacRep, new OpModPCFacRep<ImplicitRef>);
+            interpreter.installSegment3 (opcodeModPCFacRepExplicit, new OpModPCFacRep<ExplicitRef>);
         }
     }
 }
