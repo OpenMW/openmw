@@ -42,7 +42,7 @@ struct Region
 
     // sleepList refers to a eveled list of creatures you can meet if
     // you sleep outside in this region.
-    std::string mName, mSleepList;
+    std::string mId, mName, mSleepList;
 
     std::vector<SoundRef> mSoundList;
 

@@ -7,7 +7,7 @@
 
 #include <components/esm/loadnpc.hpp>
 
-#include <components/esm_store/store.hpp>
+#include "../mwworld/esmstore.hpp"
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/inventorystore.hpp"
@@ -101,11 +101,11 @@ namespace MWMechanics
             health.setCurrent (health.getCurrent() + 0.1 * endurance);
             stats.setHealth (health);
 
-            const ESMS::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
+            const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
 
-            float fFatigueReturnBase = store.gameSettings.find("fFatigueReturnBase")->getFloat ();
-            float fFatigueReturnMult = store.gameSettings.find("fFatigueReturnMult")->getFloat ();
-            float fEndFatigueMult = store.gameSettings.find("fEndFatigueMult")->getFloat ();
+            float fFatigueReturnBase = store.get<ESM::GameSetting>().find("fFatigueReturnBase")->getFloat ();
+            float fFatigueReturnMult = store.get<ESM::GameSetting>().find("fFatigueReturnMult")->getFloat ();
+            float fEndFatigueMult = store.get<ESM::GameSetting>().find("fEndFatigueMult")->getFloat ();
 
             float capacity = MWWorld::Class::get(ptr).getCapacity(ptr);
             float encumbrance = MWWorld::Class::get(ptr).getEncumbrance(ptr);
@@ -122,7 +122,7 @@ namespace MWMechanics
             
             if (!stunted)
             {
-                float fRestMagicMult = store.gameSettings.find("fRestMagicMult")->getFloat ();
+                float fRestMagicMult = store.get<ESM::GameSetting>().find("fRestMagicMult")->getFloat ();
                 
                 DynamicStat<float> magicka = stats.getMagicka();
                 magicka.setCurrent (magicka.getCurrent()

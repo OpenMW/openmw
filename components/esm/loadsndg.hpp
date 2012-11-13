@@ -30,7 +30,7 @@ struct SoundGenerator
     // Type
     int mType;
 
-    std::string mCreature, mSound;
+    std::string mId, mCreature, mSound;
 
     void load(ESMReader &esm);
     void save(ESMWriter &esm);

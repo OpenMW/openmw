@@ -62,7 +62,7 @@ namespace MWBase
             virtual void setPlayerName (const std::string& name) = 0;
             ///< Set player name.
 
-            virtual void setPlayerRace (const std::string& id, bool male) = 0;
+            virtual void setPlayerRace (const std::string& id, bool male, const std::string &head, const std::string &hair) = 0;
             ///< Set player race.
 
             virtual void setPlayerBirthsign (const std::string& id) = 0;
@@ -76,9 +76,28 @@ namespace MWBase
 
             virtual void restoreDynamicStats() = 0;
             ///< If the player is sleeping, this should be called every hour.
+
+            virtual int getBarterOffer(const MWWorld::Ptr& ptr,int basePrice, bool buying) = 0;
+            ///< This is used by every service to determine the price of objects given the trading skills of the player and NPC.
+
+            virtual int getDerivedDisposition(const MWWorld::Ptr& ptr) = 0;
+            ///< Calculate the diposition of an NPC toward the player.
             
             virtual int countDeaths (const std::string& id) const = 0;
             ///< Return the number of deaths for actors with the given ID.
+
+            enum PersuasionType
+            {
+                PT_Admire,
+                PT_Intimidate,
+                PT_Taunt,
+                PT_Bribe10,
+                PT_Bribe100,
+                PT_Bribe1000
+            };
+            virtual void getPersuasionDispositionChange (const MWWorld::Ptr& npc, PersuasionType type,
+                float currentTemporaryDispositionDelta, bool& success, float& tempChange, float& permChange) = 0;
+            ///< Perform a persuasion action on NPC
     };
 }
 

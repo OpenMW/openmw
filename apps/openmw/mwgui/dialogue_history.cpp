@@ -3,7 +3,8 @@
 #include "../mwbase/windowmanager.hpp"
 
 #include "widgets.hpp"
-#include "components/esm_store/store.hpp"
+
+#include "../mwworld/esmstore.hpp"
 
 #include <iostream>
 #include <iterator>

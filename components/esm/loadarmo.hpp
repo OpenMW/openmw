@@ -84,7 +84,7 @@ struct Armor
     AODTstruct mData;
     PartReferenceList mParts;
 
-    std::string mName, mModel, mIcon, mScript, mEnchant;
+    std::string mId, mName, mModel, mIcon, mScript, mEnchant;
 
     void load(ESMReader &esm);
     void save(ESMWriter &esm);

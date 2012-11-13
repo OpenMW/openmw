@@ -6,7 +6,7 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
 
-#include <components/esm_store/store.hpp>
+#include "../mwworld/esmstore.hpp"
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -214,6 +214,29 @@ void RaceDialog::onSelectRace(MyGUI::ListBox* _sender, size_t _index)
         return;
 
     mCurrentRaceId = *raceId;
+
+    ESM::NPC record = mPreview->getPrototype();
+    record.mRace = mCurrentRaceId;
+    record.setIsMale(mGenderIndex == 0);
+
+    std::string prefix =
+        "b_n_" + mCurrentRaceId + ((record.isMale()) ? "_m_" : "_f_");
+
+    record.mHead = prefix + "head_01";
+    record.mHair = prefix + "hair_01";
+
+    const MWWorld::Store<ESM::BodyPart> &parts =
+        MWBase::Environment::get().getWorld()->getStore().get<ESM::BodyPart>();
+
+    if (parts.search(record.mHair) == 0) {
+        record.mHair = prefix + "hair01";
+    }
+
+    mFaceIndex = 0;
+    mHairIndex = 0;
+
+    mPreview->setPrototype(record);
+
     updateSkills();
     updateSpellPowers();
 }
@@ -224,20 +247,20 @@ void RaceDialog::updateRaces()
 {
     mRaceList->removeAllItems();
 
-    const ESMS::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
+    const MWWorld::Store<ESM::Race> &races =
+        MWBase::Environment::get().getWorld()->getStore().get<ESM::Race>();
 
-    ESMS::RecListT<ESM::Race>::MapType::const_iterator it = store.races.list.begin();
-    ESMS::RecListT<ESM::Race>::MapType::const_iterator end = store.races.list.end();
+    
     int index = 0;
-    for (; it != end; ++it)
+    MWWorld::Store<ESM::Race>::iterator it = races.begin();
+    for (; it != races.end(); ++it)
     {
-        const ESM::Race &race = it->second;
-        bool playable = race.mData.mFlags & ESM::Race::Playable;
+        bool playable = it->mData.mFlags & ESM::Race::Playable;
         if (!playable) // Only display playable races
             continue;
 
-        mRaceList->addItem(race.mName, it->first);
-        if (boost::iequals(it->first, mCurrentRaceId))
+        mRaceList->addItem(it->mName, it->mId);
+        if (boost::iequals(it->mId, mCurrentRaceId))
             mRaceList->setIndexSelected(index);
         ++index;
     }
@@ -258,8 +281,8 @@ void RaceDialog::updateSkills()
     const int lineHeight = 18;
     MyGUI::IntCoord coord1(0, 0, mSkillList->getWidth(), 18);
 
-    const ESMS::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
-    const ESM::Race *race = store.races.find(mCurrentRaceId);
+    const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
+    const ESM::Race *race = store.get<ESM::Race>().find(mCurrentRaceId);
     int count = sizeof(race->mData.mBonus)/sizeof(race->mData.mBonus[0]); // TODO: Find a portable macro for this ARRAYSIZE?
     for (int i = 0; i < count; ++i)
     {
@@ -296,8 +319,8 @@ void RaceDialog::updateSpellPowers()
     const int lineHeight = 18;
     MyGUI::IntCoord coord(0, 0, mSpellPowerList->getWidth(), 18);
 
-    const ESMS::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
-    const ESM::Race *race = store.races.find(mCurrentRaceId);
+    const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
+    const ESM::Race *race = store.get<ESM::Race>().find(mCurrentRaceId);
 
     std::vector<std::string>::const_iterator it = race->mPowers.mList.begin();
     std::vector<std::string>::const_iterator end = race->mPowers.mList.end();

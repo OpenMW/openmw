@@ -21,10 +21,10 @@ CreatureAnimation::CreatureAnimation(const MWWorld::Ptr& ptr): Animation()
     mInsert = ptr.getRefData().getBaseNode();
     MWWorld::LiveCellRef<ESM::Creature> *ref = ptr.get<ESM::Creature>();
 
-    assert (ref->base != NULL);
-    if(!ref->base->mModel.empty())
+    assert (ref->mBase != NULL);
+    if(!ref->mBase->mModel.empty())
     {
-        std::string mesh = "meshes\\" + ref->base->mModel;
+        std::string mesh = "meshes\\" + ref->mBase->mModel;
 
         mEntityList = NifOgre::NIFLoader::createEntities(mInsert, &mTextKeys, mesh);
         for(size_t i = 0;i < mEntityList.mEntities.size();i++)

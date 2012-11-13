@@ -56,7 +56,7 @@ struct Weapon
 
     WPDTstruct mData;
 
-    std::string mName, mModel, mIcon, mEnchant, mScript;
+    std::string mId, mName, mModel, mIcon, mEnchant, mScript;
 
     void load(ESMReader &esm);
     void save(ESMWriter &esm);

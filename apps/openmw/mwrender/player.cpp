@@ -18,6 +18,7 @@ namespace MWRender
     : mCamera(camera),
       mPlayerNode(node),
       mCameraNode(mPlayerNode->createChildSceneNode()),
+      mAnimation(0),
       mFirstPersonView(true),
       mPreviewMode(false),
       mFreeLook(true),
@@ -309,6 +310,9 @@ namespace MWRender
 
     void Player::setAnimation(NpcAnimation *anim)
     {
+        if (mAnimation) {
+            delete mAnimation;
+        }
         mAnimation = anim;
     }
 
