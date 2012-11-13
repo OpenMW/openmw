@@ -572,8 +572,8 @@ namespace MWMechanics
             {
                 float s = int(r * fPerDieRollMult * fPerTempMult);
 
-                npcStats.setFlee ( std::max(0, std::min(100, npcStats.getFlee() + int(std::max(iPerMinChange, s)))));
-                npcStats.setFight ( std::max(0, std::min(100, npcStats.getFight() + int(std::min(-iPerMinChange, -s)))));
+                npcStats.setAiSetting (2, std::max(0, std::min(100, npcStats.getAiSetting (2) + int(std::max(iPerMinChange, s)))));
+                npcStats.setAiSetting (1, std::max(0, std::min(100, npcStats.getAiSetting (1) + int(std::min(-iPerMinChange, -s)))));
             }
 
             float c = -std::abs(int(r * fPerDieRollMult));
@@ -607,8 +607,8 @@ namespace MWMechanics
             {
                 float s = c * fPerDieRollMult * fPerTempMult;
 
-                npcStats.setFlee ( std::max(0, std::min(100, npcStats.getFlee() + std::min(-int(iPerMinChange), int(-s)))));
-                npcStats.setFight ( std::max(0, std::min(100, npcStats.getFight() + std::max(int(iPerMinChange), int(s)))));
+                npcStats.setAiSetting (2, std::max(0, std::min(100, npcStats.getAiSetting (2) + std::min(-int(iPerMinChange), int(-s)))));
+                npcStats.setAiSetting (1, std::max(0, std::min(100, npcStats.getAiSetting (1) + std::max(int(iPerMinChange), int(s)))));
             }
             x = int(-c * fPerDieRollMult);
 

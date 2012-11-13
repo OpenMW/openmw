@@ -28,6 +28,21 @@
 #include "interpretercontext.hpp"
 #include "ref.hpp"
 
+namespace
+{
+    std::string getDialogueActorFaction()
+    {
+        MWWorld::Ptr actor = MWBase::Environment::get().getDialogueManager()->getActor();
+        
+        MWMechanics::NpcStats stats = MWWorld::Class::get (actor).getNpcStats (actor);
+        
+        if (stats.getFactionRanks().empty())
+            throw std::runtime_error (
+                "failed to determine dialogue actors faction (because actor is factionless)");
+        
+        return stats.getFactionRanks().begin()->first;
+    }
+}
 
 namespace MWScript
 {
@@ -450,7 +465,7 @@ namespace MWScript
 
                     if(arg0==0)
                     {
-                        factionID = MWBase::Environment::get().getDialogueManager()->getFaction();
+                        factionID = getDialogueActorFaction();
                     }
                     else
                     {
@@ -479,7 +494,7 @@ namespace MWScript
 
                     if(arg0==0)
                     {
-                        factionID = MWBase::Environment::get().getDialogueManager()->getFaction();
+                        factionID = getDialogueActorFaction();
                     }
                     else
                     {
@@ -512,7 +527,7 @@ namespace MWScript
 
                     if(arg0==0)
                     {
-                        factionID = MWBase::Environment::get().getDialogueManager()->getFaction();
+                        factionID = getDialogueActorFaction();
                     }
                     else
                     {

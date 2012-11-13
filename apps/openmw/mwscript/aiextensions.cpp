@@ -130,7 +130,7 @@ namespace MWScript
                     Interpreter::Type_Integer value = runtime[0].mInteger;
                     runtime.pop();
 
-                    MWWorld::Class::get (ptr).getCreatureStats (ptr).setHello(value);
+                    MWWorld::Class::get (ptr).getCreatureStats (ptr).setAiSetting (0, value);
                 }
         };
 
@@ -146,7 +146,7 @@ namespace MWScript
                     Interpreter::Type_Integer value = runtime[0].mInteger;
                     runtime.pop();
 
-                    MWWorld::Class::get (ptr).getCreatureStats (ptr).setFight(value);
+                    MWWorld::Class::get (ptr).getCreatureStats (ptr).setAiSetting (1, value);
                 }
         };
 
@@ -162,7 +162,7 @@ namespace MWScript
                     Interpreter::Type_Integer value = runtime[0].mInteger;
                     runtime.pop();
 
-                    MWWorld::Class::get (ptr).getCreatureStats (ptr).setFlee(value);
+                    MWWorld::Class::get (ptr).getCreatureStats (ptr).setAiSetting (2, value);
                 }
         };
 
@@ -178,7 +178,7 @@ namespace MWScript
                     Interpreter::Type_Integer value = runtime[0].mInteger;
                     runtime.pop();
 
-                    MWWorld::Class::get (ptr).getCreatureStats (ptr).setAlarm(value);
+                    MWWorld::Class::get (ptr).getCreatureStats (ptr).setAiSetting (3, value);
                 }
         };
 

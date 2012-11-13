@@ -110,10 +110,10 @@ namespace MWClass
                 data->mCreatureStats.setLevel (1);
             }
 
-            data->mCreatureStats.setHello(ref->mBase->mAiData.mHello);
-            data->mCreatureStats.setFight(ref->mBase->mAiData.mFight);
-            data->mCreatureStats.setFlee(ref->mBase->mAiData.mFlee);
-            data->mCreatureStats.setAlarm(ref->mBase->mAiData.mAlarm);
+            data->mCreatureStats.setAiSetting (0, ref->mBase->mAiData.mHello);
+            data->mCreatureStats.setAiSetting (1, ref->mBase->mAiData.mFight);
+            data->mCreatureStats.setAiSetting (2, ref->mBase->mAiData.mFlee);
+            data->mCreatureStats.setAiSetting (3, ref->mBase->mAiData.mAlarm);
 
             // spells
             for (std::vector<std::string>::const_iterator iter (ref->mBase->mSpells.mList.begin());
