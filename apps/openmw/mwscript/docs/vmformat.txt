@@ -207,5 +207,9 @@ op 0x20001a0: ShowMap
 op 0x20001a1: FillMap
 op 0x20001a2: WakeUpPc
 op 0x20001a3: GetDeadCount
-opcodes 0x20001a4-0x3ffffff unused
+op 0x20001a4: SetDisposition
+op 0x20001a5: SetDisposition, Explicit
+op 0x20001a6: GetDisposition
+op 0x20001a7: GetDisposition, Explicit
+opcodes 0x20001a8-0x3ffffff unused
 
