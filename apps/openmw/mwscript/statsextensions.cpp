@@ -565,7 +565,7 @@ namespace MWScript
                     {
                         if(MWWorld::Class::get(ptr).getNpcStats(ptr).getFactionRanks().empty())
                         {
-                            //throw exception?
+                            factionID = -1;
                         }
                         else
                         {
@@ -601,10 +601,11 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-//                    Interpreter::Type_Integer value = runtime[0].mInteger;
+                    Interpreter::Type_Integer value = runtime[0].mInteger;
                     runtime.pop();
 
-                    /// \todo modify disposition towards the player
+                    MWWorld::Class::get (ptr).getNpcStats (ptr).setBaseDisposition
+                        (MWWorld::Class::get (ptr).getNpcStats (ptr).getBaseDisposition() + value);
                 }
         };
         
