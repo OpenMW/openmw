@@ -1,7 +1,12 @@
 #ifdef OPENMW_USE_FFMPEG
 
+
 #include "ffmpeg_decoder.hpp"
 
+// auto_ptr
+#include <memory>
+
+#include <stdexcept>
 
 namespace MWSound
 {
