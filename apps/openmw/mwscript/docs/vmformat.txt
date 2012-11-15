@@ -31,7 +31,13 @@ op 0x2000e: PCGetRank implicit
 op 0x2000f: PCGetRank explicit
 op 0x20010: AiWander
 op 0x20011: AiWander, explicit reference
-op s 0x20012-0x3ffff unused
+op 0x20012: GetPCFacRep
+op 0x20013: GetPCFacRep, explicit reference
+op 0x20014: SetPCFacRep
+op 0x20015: SetPCFacRep, explicit reference
+op 0x20016: ModPCFacRep
+op 0x20017: ModPCFacRep, explicit reference
+op s 0x20018-0x3ffff unused
 
 Segment 4:
 (not implemented yet)
@@ -207,5 +213,9 @@ op 0x20001a0: ShowMap
 op 0x20001a1: FillMap
 op 0x20001a2: WakeUpPc
 op 0x20001a3: GetDeadCount
-opcodes 0x20001a4-0x3ffffff unused
+op 0x20001a4: SetDisposition
+op 0x20001a5: SetDisposition, Explicit
+op 0x20001a6: GetDisposition
+op 0x20001a7: GetDisposition, Explicit
+opcodes 0x20001a8-0x3ffffff unused
 

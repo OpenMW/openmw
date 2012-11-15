@@ -75,11 +75,11 @@ namespace
 
 namespace MWDialogue
 {
-    DialogueManager::DialogueManager (const Compiler::Extensions& extensions) :
+    DialogueManager::DialogueManager (const Compiler::Extensions& extensions, bool scriptVerbose) :
       mCompilerContext (MWScript::CompilerContext::Type_Dialgoue),
         mErrorStream(std::cout.rdbuf()),mErrorHandler(mErrorStream)
       , mTemporaryDispositionChange(0.f)
-      , mPermanentDispositionChange(0.f)
+      , mPermanentDispositionChange(0.f), mScriptVerbose (scriptVerbose)
     {
         mChoice = -1;
         mIsInChoice = false;
@@ -174,6 +174,8 @@ namespace MWDialogue
 
     bool DialogueManager::compile (const std::string& cmd,std::vector<Interpreter::Type_Code>& code)
     {
+        bool success = true;
+    
         try
         {
             mErrorHandler.reset();
@@ -195,23 +197,33 @@ namespace MWDialogue
             Compiler::ScriptParser parser(mErrorHandler,mCompilerContext, locals, false);
 
             scanner.scan (parser);
-            if(mErrorHandler.isGood())
-            {
-                parser.getCode(code);
-                return true;
-            }
-            return false;
+            
+            if (!mErrorHandler.isGood())
+                success = false;
+
+            if (success)
+                parser.getCode (code);                
         }
         catch (const Compiler::SourceException& /* error */)
         {
             // error has already been reported via error handler
+            success = false;
         }
         catch (const std::exception& error)
         {
             printError (std::string ("An exception has been thrown: ") + error.what());
+            success = false;
         }
 
-        return false;
+        if (!success && mScriptVerbose)
+        {
+            std::cerr
+                << "compiling failed (dialogue script)" << std::endl
+                << cmd
+                << std::endl << std::endl;
+        }
+
+        return success;
     }
 
     void DialogueManager::executeScript (const std::string& script)
