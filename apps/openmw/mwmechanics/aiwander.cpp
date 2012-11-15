@@ -1,12 +1,9 @@
 #include "aiwander.hpp"
+#include <iostream>
 
-MWMechanics::AiWander::AiWander(int distance, int duration, int timeOfDay,std::vector<int> Idle,bool reset)
+MWMechanics::AiWander::AiWander(int distance, int duration, int timeOfDay,std::vector<int> Idle):
+    mDistance(distance), mDuration(duration), mTimeOfDay(timeOfDay), mIdle(Idle)
 {
-    mDistance = distance;
-    mDuration = duration;
-    mTimeOfDay = timeOfDay;
-    mIdle = Idle;
-    mReset = reset;
 }
 
 int MWMechanics::AiWander::getDistance() const
@@ -24,11 +21,6 @@ int MWMechanics::AiWander::getTimeOfDay() const
     return mTimeOfDay;
 }
 
-bool MWMechanics::AiWander::getReset() const
-{
-    return mReset;
-}
-
 MWMechanics::AiPackage * MWMechanics::AiWander::clone() const
 {
     return new AiWander(*this);
@@ -36,7 +28,7 @@ MWMechanics::AiPackage * MWMechanics::AiWander::clone() const
 
 bool MWMechanics::AiWander::execute (const MWWorld::Ptr& actor)
 {
-    std::cout << "AiWadner complited. \n";
+    std::cout << "AiWadner completed.\n";
     return true;
 }
 

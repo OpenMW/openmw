@@ -1,25 +1,18 @@
 #include "aiescort.hpp"
+#include <iostream>
 
-
-MWMechanics::AiEscort::AiEscort(std::string ActorID,int Duration, float X, float Y, float Z, bool Reset)
+MWMechanics::AiEscort::AiEscort(const std::string &ActorID,int Duration, float X, float Y, float Z):
+mActorID(ActorID), mDuration(Duration), mX(X), mY(Y), mZ(Z)
 {
-    mActorID = ActorID;
-    mDuration = Duration;
-    mX = X;
-    mY = Y;
-    mZ = Z;
-    mReset = Reset;
-
 }
 MWMechanics::AiEscort *MWMechanics::AiEscort::clone() const
 {
-    AiEscort * temp = new AiEscort(*this);
-    return temp;
+    return new AiEscort(*this);
 }
 
 bool MWMechanics::AiEscort::execute (const MWWorld::Ptr& actor)
 {
-    std::cout << "AiEscort complted. \n";
+    std::cout << "AiEscort completed. \n";
     return true;
 }
 
@@ -39,10 +32,6 @@ float MWMechanics::AiEscort::getY()
 float MWMechanics::AiEscort::getZ()
 {
     return mZ;
-}
-bool MWMechanics::AiEscort::getReset()
-{
-    return mReset;
 }
 
 std::string MWMechanics::AiEscort::getActorID()

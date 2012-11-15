@@ -1,14 +1,8 @@
-#ifndef AIWANDER_H
-#define AIWANDER_H
+#ifndef GAME_MWMECHANICS_AIWANDER_H
+#define GAME_MWMECHANICS_AIWANDER_H
 
 #include "aipackage.hpp"
-#include <iostream>
 #include <vector>
-
-namespace MWWorld
-{
-class Ptr;
-}
 
 namespace MWMechanics
 {
@@ -17,7 +11,7 @@ class AiWander : public AiPackage
 {
 public:
 
-    AiWander(int distance, int duration, int timeOfDay,std::vector<int> Idle,bool reset=false);
+    AiWander(int distance, int duration, int timeOfDay,std::vector<int> Idle);
     virtual AiPackage *clone() const;
     virtual bool execute (const MWWorld::Ptr& actor);
     ///< \return Package completed?
@@ -27,7 +21,6 @@ public:
     int getDistance() const;
     int getDuration()const;
     int getTimeOfDay()const;
-    bool getReset()const;
     int getIdle(int index) const;
 
 private:
@@ -35,7 +28,6 @@ private:
     int mDuration;
     int	mTimeOfDay;
     std::vector<int> mIdle;
-    bool mReset;
 };
 }
 

@@ -1,20 +1,14 @@
-#ifndef AITRAVEL_HPP_INCLUDED
-#define AITRAVEL_HPP_INCLUDED
+#ifndef GAME_MWMECHANICS_AITRAVEL_H
+#define GAME_MWMECHANICS_AITRAVEL_H
 
 #include "aipackage.hpp"
-#include <iostream>
-
-namespace MWWorld
-{
-class Ptr;
-}
 
 namespace MWMechanics
 {
 class AiTravel : public AiPackage
 {
     public:
-    AiTravel(float x, float y, float z, bool reset = false);
+    AiTravel(float x, float y, float z);
     virtual AiTravel *clone() const;
 
     virtual bool execute (const MWWorld::Ptr& actor);
@@ -24,14 +18,14 @@ class AiTravel : public AiPackage
     float getX();
     float getY();
     float getZ();
-    bool getReset();
+
 
     private:
     float mX;
     float mY;
     float mZ;
-    bool mReset;
+
 };
 }
 
-#endif // AITRAVEL_HPP_INCLUDED
+#endif

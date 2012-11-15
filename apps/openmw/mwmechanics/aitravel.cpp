@@ -1,22 +1,22 @@
 #include "aitravel.hpp"
+#include <iostream>
 
-MWMechanics::AiTravel::AiTravel(float x, float y, float z, bool reset)
+MWMechanics::AiTravel::AiTravel(float x, float y, float z):
+mX(x),mY(y),mZ(z)
 {
-    mX = x;
-    mY = y;
-    mZ = z;
-    mReset = reset;
 }
+
 MWMechanics::AiTravel * MWMechanics::AiTravel::clone() const
 {
-    AiTravel * temp = new AiTravel(*this);
-    return temp;
+    return new AiTravel(*this);
 }
+
 bool MWMechanics::AiTravel::execute (const MWWorld::Ptr& actor)
 {
-    std::cout << "AiTravel complited. \n";
+    std::cout << "AiTravel completed.\n";
     return true;
 }
+
 int MWMechanics::AiTravel::getTypeId() const
 {
     return 1;
@@ -26,7 +26,6 @@ float MWMechanics::AiTravel::getX()
 {
     return mX;
 }
-
 
 float MWMechanics::AiTravel::getY()
 {
@@ -38,7 +37,3 @@ float MWMechanics::AiTravel::getZ()
     return mZ;
 }
 
-bool MWMechanics::AiTravel::getReset()
-{
-    return mReset;
-}

@@ -1,21 +1,15 @@
-#ifndef AIESCORT_H
-#define AIESCORT_H
+#ifndef GAME_MWMECHANICS_AIESCORT_H
+#define GAME_MWMECHANICS_AIESCORT_H
 
 #include "aipackage.hpp"
-#include <iostream>
-#include <vector>
-
-namespace MWWorld
-{
-class Ptr;
-}
+#include <string>
 
 namespace MWMechanics
 {
 class AiEscort : public AiPackage
 {
     public:
-     AiEscort(std::string ActorID,int Duration, float X, float Y, float Z, bool Reset = false);
+    AiEscort(const std::string &ActorID,int Duration, float X, float Y, float Z);
     virtual AiEscort *clone() const;
 
     virtual bool execute (const MWWorld::Ptr& actor);
@@ -25,7 +19,6 @@ class AiEscort : public AiPackage
     float getX();
     float getY();
     float getZ();
-    bool getReset();
     std::string getActorID();
     int getDuration();
 
@@ -35,7 +28,7 @@ class AiEscort : public AiPackage
     float mY;
     float mZ;
     int mDuration;
-    bool mReset;
+
 };
 }
-#endif // AIESCORT_H
+#endif
