@@ -41,7 +41,5 @@ int MWMechanics::AiWander::getIdle(int index) const
 {
     if(index < 0 || (uint)index > mIdle.size())
         return -1;
-    int temp;
-    temp = mIdle.at(index);
-    return temp;
+    return mIdle.at(index);
 }
