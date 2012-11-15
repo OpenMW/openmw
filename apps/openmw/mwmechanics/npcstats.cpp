@@ -3,12 +3,15 @@
 
 #include <cmath>
 #include <stdexcept>
+#include <vector>
+#include <algorithm>
 
 #include <boost/format.hpp>
 
 #include <components/esm/loadskil.hpp>
 #include <components/esm/loadclas.hpp>
 #include <components/esm/loadgmst.hpp>
+#include <components/esm/loadfact.hpp>
 
 #include "../mwworld/esmstore.hpp"
 
@@ -19,8 +22,7 @@
 
 MWMechanics::NpcStats::NpcStats()
 : mMovementFlags (0), mDrawState (DrawState_Nothing), mBounty (0)
-, mLevelProgress(0), mDisposition(0), mReputation(0)
-
+, mLevelProgress(0), mDisposition(0), mVampire (0), mReputation(0)
 {
     mSkillIncreases.resize (ESM::Attribute::Length);
     for (int i=0; i<ESM::Attribute::Length; ++i)
@@ -81,9 +83,24 @@ std::map<std::string, int>& MWMechanics::NpcStats::getFactionRanks()
     return mFactionRank;
 }
 
+std::set<std::string>& MWMechanics::NpcStats::getExpelled()
+{
+    return mExpelled;
+}
+
 const std::map<std::string, int>& MWMechanics::NpcStats::getFactionRanks() const
 {
     return mFactionRank;
+}
+
+bool MWMechanics::NpcStats::isSameFaction (const NpcStats& npcStats) const
+{
+    for (std::map<std::string, int>::const_iterator iter (mFactionRank.begin()); iter!=mFactionRank.end();
+        ++iter)
+        if (npcStats.mFactionRank.find (iter->first)!=npcStats.mFactionRank.end())
+            return true;
+  
+    return false;
 }
 
 float MWMechanics::NpcStats::getSkillGain (int skillIndex, const ESM::Class& class_, int usageType,
@@ -260,6 +277,31 @@ void MWMechanics::NpcStats::setBounty (int bounty)
     mBounty = bounty;
 }
 
+int MWMechanics::NpcStats::getFactionReputation (const std::string& faction) const
+{
+    std::map<std::string, int>::const_iterator iter = mFactionReputation.find (faction);
+    
+    if (iter==mFactionReputation.end())
+        return 0;
+        
+    return iter->second;
+}
+
+void MWMechanics::NpcStats::setFactionReputation (const std::string& faction, int value)
+{
+    mFactionReputation[faction] = value;
+}
+
+bool MWMechanics::NpcStats::isVampire() const
+{
+    return mVampire;
+}
+
+void MWMechanics::NpcStats::setVampire (bool set)
+{
+    mVampire = set;
+}
+
 int MWMechanics::NpcStats::getReputation() const
 {
     return mReputation;
@@ -269,3 +311,29 @@ void MWMechanics::NpcStats::setReputation(int reputation)
 {
     mReputation = reputation;
 }
+
+bool MWMechanics::NpcStats::hasSkillsForRank (const std::string& factionId, int rank) const
+{
+    if (rank<0 || rank>=10)
+        throw std::runtime_error ("rank index out of range");
+
+    const ESM::Faction& faction =
+        *MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find (factionId);
+
+    std::vector<int> skills;
+    
+    for (int i=0; i<6; ++i)
+        skills.push_back (static_cast<int> (getSkill (faction.mData.mSkillID[i]).getModified()));
+        
+    std::sort (skills.begin(), skills.end());
+    
+    std::vector<int>::const_reverse_iterator iter = skills.rbegin();
+    
+    const ESM::RankData& rankData = faction.mData.mRankData[rank];
+    
+    if (*iter<rankData.mSkill1)
+        return false;
+        
+    return *++iter>=rankData.mSkill2;
+}
+

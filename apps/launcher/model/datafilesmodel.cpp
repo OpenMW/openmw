@@ -2,6 +2,8 @@
 #include <QFileInfo>
 #include <QDir>
 
+#include <stdexcept>
+
 #include <components/esm/esmreader.hpp>
 
 #include "esm/esmfile.hpp"

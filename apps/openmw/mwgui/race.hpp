@@ -78,6 +78,8 @@ namespace MWGui
         void updateRaces();
         void updateSkills();
         void updateSpellPowers();
+        void updatePreview();
+        void recountParts();
 
         MyGUI::ImageBox*  mPreviewImage;
         MyGUI::ListBox*   mRaceList;

@@ -47,6 +47,9 @@ namespace MWMechanics
             unsigned int mMovementFlags;
             Stat<float> mSkill[27];
             int mBounty;
+            std::set<std::string> mExpelled;
+            std::map<std::string, int> mFactionReputation;
+            bool mVampire;
             int mReputation;
 
             int mLevelProgress; // 0-10
@@ -80,6 +83,11 @@ namespace MWMechanics
             Stat<float>& getSkill (int index);
 
             std::map<std::string, int>& getFactionRanks();
+            
+            std::set<std::string>& getExpelled();
+
+            bool isSameFaction (const NpcStats& npcStats) const;
+            ///< Do *this and \a npcStats share a faction?
 
             const std::map<std::string, int>& getFactionRanks() const;
 
@@ -107,6 +115,16 @@ namespace MWMechanics
             int getBounty() const;
             
             void setBounty (int bounty);
+            
+            int getFactionReputation (const std::string& faction) const;
+            
+            void setFactionReputation (const std::string& faction, int value);
+            
+            bool isVampire() const;
+            
+            void setVampire (bool set);
+            
+            bool hasSkillsForRank (const std::string& factionId, int rank) const;
     };
 }
 

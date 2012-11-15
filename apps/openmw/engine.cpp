@@ -20,6 +20,7 @@
 
 #include "mwscript/scriptmanagerimp.hpp"
 #include "mwscript/extensions.hpp"
+#include "mwscript/interpretercontext.hpp"
 
 #include "mwsound/soundmanagerimp.hpp"
 
