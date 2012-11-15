@@ -34,7 +34,7 @@ namespace
 
         throw std::runtime_error ("unknown compare type in dialogue info select");
     }
-    
+
     template<typename T>
     bool selectCompareImp (const ESM::DialInfo::SelectStruct& select, T value1)
     {
@@ -49,21 +49,22 @@ namespace
         }
         else
             throw std::runtime_error (
-                "unsupported variable type in dialogue info select");        
+                "unsupported variable type in dialogue info select");
     }
 }
 
 MWDialogue::SelectWrapper::Function MWDialogue::SelectWrapper::decodeFunction() const
 {
     int index = 0;
-    
+
     std::istringstream (mSelect.mSelectRule.substr(2,2)) >> index;
 
     switch (index)
     {
-        // 0, 1
+        case  0: return Function_RankLow;
+        case  1: return Function_RankHigh;
         case  2: return Function_RankRequirement;
-        // 3
+        case  3: return Function_Reputation;
         case  4: return Function_HealthPercent;
         case  5: return Function_PCReputation;
         case  6: return Function_PcLevel;
@@ -82,22 +83,26 @@ MWDialogue::SelectWrapper::Function MWDialogue::SelectWrapper::decodeFunction() 
         case 44: return Function_SameGender;
         case 45: return Function_SameRace;
         case 46: return Function_SameFaction;
-        // 47-49
+        case 47: return Function_FactionRankDiff;
+        case 48: return Function_Detected;
+        case 49: return Function_Alarmed;
         case 50: return Function_Choice;
         case 51: case 52: case 53: case 54: case 55: case 56: case 57: return Function_PcAttribute;
         case 58: return Function_PcCorprus;
-        // 59
+        case 59: return Function_Weather;
         case 60: return Function_PcVampire;
         case 61: return Function_Level;
-        // 62
+        case 62: return Function_Attacked;
         case 63: return Function_TalkedToPc;
         case 64: return Function_PcDynamicStat;
-        // 65
+        case 65: return Function_CreatureTargetted;
         case 66: return Function_FriendlyHit;
         case 67: case 68: case 69: case 70: return Function_AiSetting;
-        // 71
+        case 71: return Function_ShouldAttack;
+        case 72: return Function_PCWerewolf;
+        case 73: return Function_WerewolfKills;
     }
-    
+
     return Function_False;
 }
 
@@ -130,11 +135,11 @@ int MWDialogue::SelectWrapper::getArgument() const
 {
     if (mSelect.mSelectRule[1]!='1')
         return 0;
-        
+
     int index = 0;
-    
+
     std::istringstream (mSelect.mSelectRule.substr(2,2)) >> index;
-    
+
     switch (index)
     {
         // AI settings
@@ -142,7 +147,7 @@ int MWDialogue::SelectWrapper::getArgument() const
         case 68: return 0;
         case 69: return 3;
         case 70: return 2;
-        
+
         // attributes
         case 10: return 0;
         case 51: return 1;
@@ -152,7 +157,7 @@ int MWDialogue::SelectWrapper::getArgument() const
         case 55: return 5;
         case 56: return 6;
         case 57: return 7;
-        
+
         // skills
         case 11: return 0;
         case 12: return 1;
@@ -181,13 +186,13 @@ int MWDialogue::SelectWrapper::getArgument() const
         case 35: return 24;
         case 36: return 25;
         case 37: return 26;
-        
+
         // dynamic stats
         case  8: return 1;
         case  9: return 2;
         case 64: return 0;
     }
-            
+
     return 0;
 }
 
@@ -204,17 +209,21 @@ MWDialogue::SelectWrapper::Type MWDialogue::SelectWrapper::getType() const
         Function_PcCrimeLevel,
         Function_RankRequirement,
         Function_Level, Function_PCReputation,
+        Function_Weather,
+        Function_Reputation, Function_FactionRankDiff,
+        Function_WerewolfKills,
+        Function_RankLow, Function_RankHigh,
         Function_None // end marker
     };
-    
+
     static const Function numericFunctions[] =
     {
         Function_Global, Function_Local,
         Function_PcDynamicStat, Function_PcHealthPercent,
         Function_HealthPercent,
         Function_None // end marker
-    };    
-    
+    };
+
     static const Function booleanFunctions[] =
     {
         Function_False,
@@ -223,15 +232,19 @@ MWDialogue::SelectWrapper::Type MWDialogue::SelectWrapper::getType() const
         Function_PcCommonDisease, Function_PcBlightDisease, Function_PcCorprus,
         Function_PcExpelled,
         Function_PcVampire, Function_TalkedToPc,
+        Function_Alarmed, Function_Detected,
+        Function_Attacked, Function_ShouldAttack,
+        Function_CreatureTargetted,
+        Function_PCWerewolf,
         Function_None // end marker
-    };   
-    
+    };
+
     Function function = getFunction();
 
     for (int i=0; integerFunctions[i]!=Function_None; ++i)
         if (integerFunctions[i]==function)
             return Type_Integer;
-    
+
     for (int i=0; numericFunctions[i]!=Function_None; ++i)
         if (numericFunctions[i]==function)
             return Type_Numeric;
@@ -239,7 +252,7 @@ MWDialogue::SelectWrapper::Type MWDialogue::SelectWrapper::getType() const
     for (int i=0; booleanFunctions[i]!=Function_None; ++i)
         if (booleanFunctions[i]==function)
             return Type_Boolean;
-    
+
     return Type_None;
 }
 
@@ -261,15 +274,18 @@ bool MWDialogue::SelectWrapper::isNpcOnly() const
         Function_PcVampire,
         Function_PcCrimeLevel,
         Function_RankRequirement,
+        Function_Reputation, Function_FactionRankDiff,
+        Function_PCWerewolf, Function_WerewolfKills,
+        Function_RankLow, Function_RankHigh,
         Function_None // end marker
     };
 
     Function function = getFunction();
-    
+
     for (int i=0; functions[i]!=Function_None; ++i)
         if (functions[i]==function)
             return true;
-    
+
     return false;
 }
 
