@@ -913,8 +913,8 @@ namespace MWScript
             extensions.registerFunction ("getdeadcount", 'l', "c", opcodeGetDeadCount);
 
             extensions.registerFunction ("getpcfacrep", 'l', "/c", opcodeGetPCFacRep, opcodeGetPCFacRepExplicit);
-            extensions.registerInstruction ("setpcfacrep", "/lc", opcodeSetPCFacRep, opcodeSetPCFacRepExplicit);
-            extensions.registerInstruction ("modpcfacrep", "/lc", opcodeModPCFacRep, opcodeModPCFacRepExplicit);
+            extensions.registerInstruction ("setpcfacrep", "l/c", opcodeSetPCFacRep, opcodeSetPCFacRepExplicit);
+            extensions.registerInstruction ("modpcfacrep", "l/c", opcodeModPCFacRep, opcodeModPCFacRepExplicit);
         }
 
         void installOpcodes (Interpreter::Interpreter& interpreter)
