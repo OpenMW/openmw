@@ -1,5 +1,6 @@
 #include "esmreader.hpp"
 #include <stdexcept>
+#include <boost/filesystem/v3/operations.hpp>
 
 namespace ESM
 {
@@ -61,6 +62,7 @@ void ESMReader::openRaw(Ogre::DataStreamPtr _esm, const std::string &name)
 void ESMReader::open(Ogre::DataStreamPtr _esm, const std::string &name)
 {
     openRaw(_esm, name);
+    std::string fname = boost::filesystem::path(name).filename().string();
 
     if (getRecName() != "TES3")
         fail("Not a valid Morrowind file");
@@ -78,6 +80,29 @@ void ESMReader::open(Ogre::DataStreamPtr _esm, const std::string &name)
         MasterData m;
         m.name = getHString();
         m.size = getHNLong("DATA");
+        // Cache parent esX files by tracking their indices in the global list of
+        //  all files/readers used by the engine. This will greaty help to accelerate
+        //  parsing of reference IDs.
+        size_t index = ~0;
+        // TODO: check for case mismatch, it might be required on Windows.
+        size_t i = 0;
+        // FIXME: This is ugly! Make it nicer!
+        for (; i < idx; i++) {
+            const std::string &candidate = mGlobalReaderList->at(i).getContext().filename;
+            std::string fnamecandidate = boost::filesystem::path(candidate).filename().string();
+            if (m.name == fnamecandidate) {
+                index = i;
+                break;
+            }
+        }
+        if (index == (size_t)~0) {
+            // Tried to load a parent file that has not been loaded yet. This is bad,
+            //  the launcher should have taken care of this.
+            std::string fstring = "File " + fname + " asks for parent file " + m.name
+              + ", but it has not been loaded yet. Please check your load order.";
+            fail(fstring);
+        }
+        m.index = index;
         mMasters.push_back(m);
     }
 

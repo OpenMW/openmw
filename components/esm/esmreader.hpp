@@ -83,6 +83,8 @@ public:
   int idx;
   void setIndex(const int index) {idx = index; mCtx.index = index;}
   const int getIndex() {return idx;}
+  
+  void setGlobalReaderList(std::vector<ESMReader> *list) {mGlobalReaderList = list;}
 
   /*************************************************************************
    *
@@ -254,6 +256,7 @@ private:
 
   SaveData mSaveData;
   MasterList mMasters;
+  std::vector<ESMReader> *mGlobalReaderList;
   ToUTF8::FromType mEncoding;
 };
 }

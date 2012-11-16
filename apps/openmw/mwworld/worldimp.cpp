@@ -190,8 +190,9 @@ namespace MWWorld
             // This parses the ESM file
             ESM::ESMReader lEsm;
             lEsm.setEncoding(encoding);
-            lEsm.open (masterPath.string());
             lEsm.setIndex(idx);
+            lEsm.setGlobalReaderList(&mEsm);
+            lEsm.open (masterPath.string());
             mEsm[idx] = lEsm;
             mStore.load (mEsm[idx]);
         }
@@ -205,8 +206,9 @@ namespace MWWorld
             // This parses the ESP file
             ESM::ESMReader lEsm;
             lEsm.setEncoding(encoding);
-            lEsm.open (pluginPath.string());
             lEsm.setIndex(idx);
+            lEsm.setGlobalReaderList(&mEsm);
+            lEsm.open (pluginPath.string());
             mEsm[idx] = lEsm;
             mStore.load (mEsm[idx]);
         }

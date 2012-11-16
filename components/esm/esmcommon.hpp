@@ -89,6 +89,7 @@ struct MasterData
 {
   std::string name;
   uint64_t size;
+  int index; // Position of the parent file in the global list of loaded files
 };
 
 // Data that is only present in save game files

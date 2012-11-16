@@ -170,8 +170,6 @@ std::string Cell::getDescription() const
 
 bool Cell::getNextRef(ESMReader &esm, CellRef &ref)
 {
-    // TODO: Add support for multiple plugins. This requires a tricky renaming scheme for "ref.mRefnum".
-    //  I'll probably add something to "ESMReader", we will need one per plugin anyway.
     // TODO: Try and document reference numbering, I don't think this has been done anywhere else.
     if (!esm.hasMoreSubs())
         return false;
@@ -194,6 +192,26 @@ bool Cell::getNextRef(ESMReader &esm, CellRef &ref)
     //  This may require some not-so-small behing-the-scenes updates.
     esm.getHNT(ref.mRefnum, "FRMR");
     ref.mRefID = esm.getHNString("NAME");
+    
+    // Identify references belonging to a parent file and adapt the ID accordingly.
+    int local = (ref.mRefnum & 0xff000000) >> 24;
+    size_t global = esm.getIndex() + 1;
+    if (local)
+    {
+        // If the most significant 8 bits are used, then this reference already exists.
+        // In this case, do not spawn a new reference, but overwrite the old one.
+        ref.mRefnum &= 0x00ffffff; // delete old plugin ID
+        const ESM::ESMReader::MasterList &masters = esm.getMasters();
+        // TODO: Test how Morrowind does it! Maybe the first entry in the list should be "1"...
+        global = masters[local-1].index + 1;
+        ref.mRefnum |= global << 24; // insert global plugin ID
+        std::cout << "Refnum_old = " << ref.mRefnum << " " << local << " " << global << std::endl;
+    }
+    else
+    {
+        // This is an addition by the present plugin. Set the corresponding plugin index.
+        ref.mRefnum |= global << 24; // insert global plugin ID
+    }
 
     // getHNOT will not change the existing value if the subrecord is
     // missing
