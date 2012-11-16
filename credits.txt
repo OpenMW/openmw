@@ -27,6 +27,7 @@ Jason Hooks (jhooks)
 Karl-Felix Glatzer (k1ll)
 Leon Saunders (emoose)
 Lukasz Gromanowski (lgro)
+Marcin Hulist (Gohan)
 Michael Mc Donnell
 Michael Papageorgiou (werdanith)
 Nikolay Kasyanov (corristo)
