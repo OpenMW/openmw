@@ -1,6 +1,7 @@
 #include "globalmap.hpp"
 
 #include <boost/filesystem.hpp>
+#include <boost/lexical_cast.hpp>
 
 #include <OgreImage.h>
 #include <OgreTextureManager.h>
@@ -159,13 +160,30 @@ namespace MWRender
             //image.save (mCacheDir + "/GlobalMap.png");
 
             tex = Ogre::TextureManager::getSingleton ().createManual ("GlobalMap.png", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
-                Ogre::TEX_TYPE_2D, mWidth, mHeight, 0, Ogre::PF_B8G8R8, Ogre::TU_DEFAULT);
+                Ogre::TEX_TYPE_2D, mWidth, mHeight, 0, Ogre::PF_B8G8R8, Ogre::TU_STATIC);
             tex->loadImage(image);
         }
         else
             tex = Ogre::TextureManager::getSingleton ().getByName ("GlobalMap.png");
 
         tex->load();
+
+
+
+
+        mOverlayTexture = Ogre::TextureManager::getSingleton().createManual("GlobalMapOverlay", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
+            Ogre::TEX_TYPE_2D, mWidth, mHeight, 0, Ogre::PF_A8B8G8R8, Ogre::TU_DYNAMIC_WRITE_ONLY);
+
+
+        std::vector<Ogre::uint32> buffer;
+        buffer.resize(mWidth * mHeight);
+
+        // initialize to (0, 0, 0, 0)
+        for (int p=0; p<mWidth * mHeight; ++p)
+            buffer[p] = 0;
+
+        memcpy(mOverlayTexture->getBuffer()->lock(Ogre::HardwareBuffer::HBL_DISCARD), &buffer[0], mWidth*mHeight*4);
+        mOverlayTexture->getBuffer()->unlock();
     }
 
     void GlobalMap::worldPosToImageSpace(float x, float z, float& imageX, float& imageY)
@@ -185,44 +203,18 @@ namespace MWRender
 
     void GlobalMap::exploreCell(int cellX, int cellY)
     {
-        mExploredCells.push_back(std::make_pair(cellX, cellY));
-        int width = mMaxX-mMinX+1;
-        int height = mMaxY-mMinY+1;
+        float originX = (cellX - mMinX) * 24;
+        // NB y + 1, because we want the top left corner, not bottom left where the origin of the cell is
+        float originY = mHeight - (cellY+1 - mMinY) * 24;
 
-        if (mOverlayTexture.isNull())
-        {
-            mOverlayTexture = Ogre::TextureManager::getSingleton().createManual("GlobalMapOverlay", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
-                Ogre::TEX_TYPE_2D, width, height, 0, Ogre::PF_A8B8G8R8, Ogre::TU_DYNAMIC_WRITE_ONLY);
-        }
+        if (cellX > mMaxX || cellX < mMinX || cellY > mMaxY || cellY < mMinY)
+            return;
 
-        for (int x = mMinX; x <= mMaxX; ++x)
-        {
-            for (int y = mMinY; y <= mMaxY; ++y)
-            {
-                unsigned char r,g,b,a;
-                r = 0;
-                g = 0;
-                b = 0;
-                if (std::find(mExploredCells.begin(), mExploredCells.end(), std::make_pair(x, y)) != mExploredCells.end())
-                    a = 0;
-                else
-                    a = 128;
-                int texelX = (x-mMinX);
-                int texelY = (height-1) - (y-mMinY);
+        Ogre::TexturePtr localMapTexture = Ogre::TextureManager::getSingleton().getByName("Cell_"
+            + boost::lexical_cast<std::string>(cellX) + "_" + boost::lexical_cast<std::string>(cellY));
 
-                assert( static_cast<unsigned int>(texelY * width * 4 + texelX * 4+3) < mExploredBuffer.size());
-                mExploredBuffer[texelY * width * 4 + texelX * 4] = r;
-                mExploredBuffer[texelY * width * 4 + texelX * 4+1] = g;
-                mExploredBuffer[texelY * width * 4 + texelX * 4+2] = b;
-                mExploredBuffer[texelY * width * 4 + texelX * 4+3] = a;
-            }
-        }
-
-        Ogre::Image image;
-        image.loadDynamicImage(&mExploredBuffer[0], width, height, Ogre::PF_A8B8G8R8);
-
-        memcpy(mOverlayTexture->getBuffer()->lock(Ogre::HardwareBuffer::HBL_DISCARD),
-               &mExploredBuffer[0], width*height*4);
-        mOverlayTexture->getBuffer()->unlock();
+        if (!localMapTexture.isNull())
+            mOverlayTexture->getBuffer()->blit(localMapTexture->getBuffer(), Ogre::Image::Box(0,0,1024, 1024),
+                         Ogre::Image::Box(originX,originY,originX+24,originY+24));
     }
 }
