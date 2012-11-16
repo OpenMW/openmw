@@ -204,9 +204,9 @@ op 0x2000197: Position Explicit
 op 0x2000198: PositionCell
 op 0x2000199: PositionCell Explicit
 op 0x200019a: PlaceItemCell
-op 0x200019b: PlaceItem 
+op 0x200019b: PlaceItem
 op 0x200019c: PlaceAtPc
-op 0x200019d: PlaceAtMe 
+op 0x200019d: PlaceAtMe
 op 0x200019e: PlaceAtMe Explicit
 op 0x200019f: GetPcSleep
 op 0x20001a0: ShowMap
@@ -217,5 +217,9 @@ op 0x20001a4: SetDisposition
 op 0x20001a5: SetDisposition, Explicit
 op 0x20001a6: GetDisposition
 op 0x20001a7: GetDisposition, Explicit
-opcodes 0x20001a8-0x3ffffff unused
+op 0x20001a8: CommonDisease
+op 0x20001a9: CommonDisease, explicit reference
+op 0x20001aa: BlightDisease
+op 0x20001ab: BlightDisease, explicit reference
+opcodes 0x20001ac-0x3ffffff unused
 

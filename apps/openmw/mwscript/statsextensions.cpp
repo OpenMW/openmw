@@ -754,6 +754,32 @@ namespace MWScript
                 }
         };
 
+        template<class R>
+        class OpGetCommonDisease : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWWorld::Ptr ptr = R()(runtime);
+
+                    runtime.push (MWWorld::Class::get (ptr).getCreatureStats (ptr).hasCommonDisease());
+                }
+        };
+
+        template<class R>
+        class OpGetBlightDisease : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWWorld::Ptr ptr = R()(runtime);
+
+                    runtime.push (MWWorld::Class::get (ptr).getCreatureStats (ptr).hasBlightDisease());
+                }
+        };
+
 
         const int numberOfAttributes = 8;
 
@@ -819,6 +845,10 @@ namespace MWScript
         const int opcodeModPCFacRep = 0x20016;
         const int opcodeModPCFacRepExplicit = 0x20017;
 
+        const int opcodeGetCommonDisease = 0x20001a8;
+        const int opcodeGetCommonDiseaseExplicit = 0x20001a9;
+        const int opcodeGetBlightDisease = 0x20001aa;
+        const int opcodeGetBlightDiseaseExplicit = 0x20001ab;
 
         void registerExtensions (Compiler::Extensions& extensions)
         {
@@ -915,6 +945,11 @@ namespace MWScript
             extensions.registerFunction ("getpcfacrep", 'l', "/c", opcodeGetPCFacRep, opcodeGetPCFacRepExplicit);
             extensions.registerInstruction ("setpcfacrep", "l/c", opcodeSetPCFacRep, opcodeSetPCFacRepExplicit);
             extensions.registerInstruction ("modpcfacrep", "l/c", opcodeModPCFacRep, opcodeModPCFacRepExplicit);
+
+            extensions.registerFunction ("getcommondisease", 'l', "", opcodeGetCommonDisease,
+                opcodeGetCommonDiseaseExplicit);
+            extensions.registerFunction ("getblightdisease", 'l', "", opcodeGetBlightDisease,
+                opcodeGetBlightDiseaseExplicit);
         }
 
         void installOpcodes (Interpreter::Interpreter& interpreter)
@@ -1005,6 +1040,11 @@ namespace MWScript
             interpreter.installSegment3 (opcodeSetPCFacRepExplicit, new OpSetPCFacRep<ExplicitRef>);
             interpreter.installSegment3 (opcodeModPCFacRep, new OpModPCFacRep<ImplicitRef>);
             interpreter.installSegment3 (opcodeModPCFacRepExplicit, new OpModPCFacRep<ExplicitRef>);
+
+            interpreter.installSegment5 (opcodeGetCommonDisease, new OpGetCommonDisease<ImplicitRef>);
+            interpreter.installSegment5 (opcodeGetCommonDiseaseExplicit, new OpGetCommonDisease<ExplicitRef>);
+            interpreter.installSegment5 (opcodeGetBlightDisease, new OpGetBlightDisease<ImplicitRef>);
+            interpreter.installSegment5 (opcodeGetBlightDiseaseExplicit, new OpGetBlightDisease<ExplicitRef>);
         }
     }
 }
