@@ -74,7 +74,7 @@ namespace MWRender
         MWRender::RenderingManager* mRenderingManager;
 
         // 1024*1024 pixels for a cell
-        static const int sMapResolution = 1024;
+        static const int sMapResolution = 512;
 
         // the dynamic texture is a bottleneck, so don't set this too high
         static const int sFogOfWarResolution = 32;

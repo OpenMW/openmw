@@ -213,8 +213,20 @@ namespace MWRender
         Ogre::TexturePtr localMapTexture = Ogre::TextureManager::getSingleton().getByName("Cell_"
             + boost::lexical_cast<std::string>(cellX) + "_" + boost::lexical_cast<std::string>(cellY));
 
-        if (!localMapTexture.isNull())
-            mOverlayTexture->getBuffer()->blit(localMapTexture->getBuffer(), Ogre::Image::Box(0,0,1024, 1024),
+        // mipmap version - can't get ogre to generate automips..
+        /*if (!localMapTexture.isNull())
+        {
+            assert(localMapTexture->getBuffer(0, 4)->getWidth() == 64); // 1024 / 2^4
+
+            mOverlayTexture->getBuffer()->blit(localMapTexture->getBuffer(0, 4), Ogre::Image::Box(0,0,64, 64),
                          Ogre::Image::Box(originX,originY,originX+24,originY+24));
+        }*/
+
+        if (!localMapTexture.isNull())
+        {
+
+            mOverlayTexture->getBuffer()->blit(localMapTexture->getBuffer(), Ogre::Image::Box(0,0,512,512),
+                         Ogre::Image::Box(originX,originY,originX+24,originY+24));
+        }
     }
 }
