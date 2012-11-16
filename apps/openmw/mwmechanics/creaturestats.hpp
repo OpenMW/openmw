@@ -30,6 +30,9 @@ namespace MWMechanics
         bool mDead;
         int mFriendlyHits;
         bool mTalkedTo;
+        bool mAlarmed;
+        bool mAttacked;
+        bool mHostile;
 
     public:
         CreatureStats();
@@ -83,11 +86,11 @@ namespace MWMechanics
 
         void setAiSetting (int index, int value);
         ///< 0: hello, 1 fight, 2 flee, 3 alarm
-                
+
         const AiSequence& getAiSequence() const;
-        
+
         AiSequence& getAiSequence();
-   
+
         float getFatigueTerm() const;
         ///< Return effective fatigue
 
@@ -96,23 +99,37 @@ namespace MWMechanics
         float getLevelHealthBonus() const;
 
         bool isDead() const;
-        
+
         void resurrect();
-        
+
         bool hasCommonDisease() const;
 
         bool hasBlightDisease() const;
-        
+
         int getFriendlyHits() const;
         ///< Number of friendly hits received.
-        
+
         void friendlyHit();
         ///< Increase number of friendly hits by one.
-        
+
         bool hasTalkedToPlayer() const;
         ///< Has this creature talked with the player before?
-        
+
         void talkedToPlayer();
+
+        bool isAlarmed() const;
+
+        void setAlarmed (bool alarmed);
+
+        bool getAttacked() const;
+
+        void setAttacked (bool attacked);
+
+        bool isHostile() const;
+
+        void setHostile (bool hostile);
+
+        bool getCreatureTargetted() const;
     };
 }
 

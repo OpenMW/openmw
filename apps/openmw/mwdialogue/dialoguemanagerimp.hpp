@@ -35,6 +35,7 @@ namespace MWDialogue
 
             float mTemporaryDispositionChange;
             float mPermanentDispositionChange;
+            bool mScriptVerbose;
 
             void parseText (const std::string& text);
 
@@ -47,7 +48,7 @@ namespace MWDialogue
 
         public:
 
-            DialogueManager (const Compiler::Extensions& extensions);
+            DialogueManager (const Compiler::Extensions& extensions, bool scriptVerbose);
 
             virtual void startDialogue (const MWWorld::Ptr& actor);
 

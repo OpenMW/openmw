@@ -8,9 +8,9 @@ namespace MWDialogue
     class SelectWrapper
     {
             const ESM::DialInfo::SelectStruct& mSelect;
-    
+
         public:
-        
+
             enum Function
             {
                 Function_None, Function_False,
@@ -36,7 +36,13 @@ namespace MWDialogue
                 Function_PcLevel, Function_PcHealthPercent, Function_PcDynamicStat,
                 Function_PcGender, Function_PcClothingModifier, Function_PcCrimeLevel,
                 Function_RankRequirement,
-                Function_HealthPercent, Function_Level, Function_PCReputation
+                Function_HealthPercent, Function_Level, Function_PCReputation,
+                Function_Weather,
+                Function_Reputation, Function_Alarmed, Function_FactionRankDiff, Function_Detected,
+                Function_Attacked, Function_ShouldAttack,
+                Function_CreatureTargetted,
+                Function_PCWerewolf, Function_WerewolfKills,
+                Function_RankLow, Function_RankHigh
             };
 
             enum Type
@@ -46,32 +52,32 @@ namespace MWDialogue
                 Type_Numeric,
                 Type_Boolean
             };
-            
+
         private:
-        
+
             Function decodeFunction() const;
-    
+
         public:
-        
+
             SelectWrapper (const ESM::DialInfo::SelectStruct& select);
-            
+
             Function getFunction() const;
-            
+
             int getArgument() const;
-            
+
             Type getType() const;
-            
+
             bool isInverted() const;
-            
+
             bool isNpcOnly() const;
             ///< \attention Do not call any of the select functions for this select struct!
-            
+
             bool selectCompare (int value) const;
 
             bool selectCompare (float value) const;
-            
+
             bool selectCompare (bool value) const;
-            
+
             std::string getName() const;
             ///< Return case-smashed name.
     };
