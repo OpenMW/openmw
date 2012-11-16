@@ -1,8 +1,8 @@
 #include "aiescort.hpp"
 #include <iostream>
 
-MWMechanics::AiEscort::AiEscort(const std::string &ActorID,int Duration, float X, float Y, float Z):
-mActorID(ActorID), mDuration(Duration), mX(X), mY(Y), mZ(Z)
+MWMechanics::AiEscort::AiEscort(const std::string &actorID,int duration, float x, float y, float z):
+mActorID(actorID), mDuration(duration), mX(x), mY(y), mZ(z)
 {
 }
 MWMechanics::AiEscort *MWMechanics::AiEscort::clone() const

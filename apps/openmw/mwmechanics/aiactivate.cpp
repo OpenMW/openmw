@@ -1,9 +1,9 @@
 #include "aiactivate.hpp"
 #include <iostream>
 
-MWMechanics::AiActivate::AiActivate(const MWWorld::Ptr& object)
+MWMechanics::AiActivate::AiActivate(const std::string &objectID):
+mObjectID(objectID)
 {
-    mObject = &object;
 }
 MWMechanics::AiActivate *MWMechanics::AiActivate::clone() const
 {

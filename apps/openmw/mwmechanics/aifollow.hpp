@@ -7,21 +7,21 @@
 namespace MWMechanics
 {
 
-class AiFollow : AiPackage
-{
-    public:
-    AiFollow(const std::string &ActorID,float duration, float X, float Y, float Z);
-    virtual AiFollow *clone() const;
-    virtual bool execute (const MWWorld::Ptr& actor);
-            ///< \return Package completed?
-    virtual int getTypeId() const;
+    class AiFollow : AiPackage
+    {
+        public:
+            AiFollow(const std::string &ActorID,float duration, float X, float Y, float Z);
+            virtual AiFollow *clone() const;
+            virtual bool execute (const MWWorld::Ptr& actor);
+                    ///< \return Package completed?
+            virtual int getTypeId() const;
 
-    private:
-    float mDuration;
-    float mX;
-    float mY;
-    float mZ;
-    std::string mActorID;
-};
+        private:
+            float mDuration;
+            float mX;
+            float mY;
+            float mZ;
+            std::string mActorID;
+    };
 }
 #endif

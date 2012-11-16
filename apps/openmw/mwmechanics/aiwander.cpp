@@ -1,8 +1,8 @@
 #include "aiwander.hpp"
 #include <iostream>
 
-MWMechanics::AiWander::AiWander(int distance, int duration, int timeOfDay,std::vector<int> Idle):
-    mDistance(distance), mDuration(duration), mTimeOfDay(timeOfDay), mIdle(Idle)
+MWMechanics::AiWander::AiWander(int distance, int duration, int timeOfDay,std::vector<int> idle):
+    mDistance(distance), mDuration(duration), mTimeOfDay(timeOfDay), mIdle(idle)
 {
 }
 
@@ -39,7 +39,5 @@ int MWMechanics::AiWander::getTypeId() const
 
 int MWMechanics::AiWander::getIdle(int index) const
 {
-    if(index < 0 || (uint)index > mIdle.size())
-        return -1;
     return mIdle.at(index);
 }
