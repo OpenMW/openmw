@@ -129,7 +129,7 @@ namespace MWDialogue
         mIsInChoice = false;
 
         mActor = actor;
-        
+
         MWMechanics::CreatureStats& creatureStats = MWWorld::Class::get (actor).getCreatureStats (actor);
         mTalkedTo = creatureStats.hasTalkedToPlayer();
         creatureStats.talkedToPlayer();
@@ -175,7 +175,7 @@ namespace MWDialogue
     bool DialogueManager::compile (const std::string& cmd,std::vector<Interpreter::Type_Code>& code)
     {
         bool success = true;
-    
+
         try
         {
             mErrorHandler.reset();
@@ -197,12 +197,12 @@ namespace MWDialogue
             Compiler::ScriptParser parser(mErrorHandler,mCompilerContext, locals, false);
 
             scanner.scan (parser);
-            
+
             if (!mErrorHandler.isGood())
                 success = false;
 
             if (success)
-                parser.getCode (code);                
+                parser.getCode (code);
         }
         catch (const Compiler::SourceException& /* error */)
         {
@@ -211,7 +211,7 @@ namespace MWDialogue
         }
         catch (const std::exception& error)
         {
-            printError (std::string ("An exception has been thrown: ") + error.what());
+            std::cerr << std::string ("Dialogue error: An exception has been thrown: ") + error.what() << std::endl;
             success = false;
         }
 
@@ -240,7 +240,7 @@ namespace MWDialogue
             }
             catch (const std::exception& error)
             {
-                printError (std::string ("An exception has been thrown: ") + error.what());
+                std::cerr << std::string ("Dialogue error: An exception has been thrown: ") + error.what();
             }
         }
     }
@@ -264,7 +264,7 @@ namespace MWDialogue
                 if (filter.search (*iter))
                 {
                     mActorKnownTopics.push_back (toLower (iter->mId));
-                    
+
                     //does the player know the topic?
                     if (mKnownTopics.find (toLower (iter->mId)) != mKnownTopics.end())
                     {
@@ -340,8 +340,8 @@ namespace MWDialogue
                 if (mDialogueMap[keyword].mType == ESM::Dialogue::Topic)
                 {
                     Filter filter (mActor, mChoice, mTalkedTo);
-                
-                    if (const ESM::DialInfo *info = filter.search (mDialogueMap[keyword]))            
+
+                    if (const ESM::DialInfo *info = filter.search (mDialogueMap[keyword]))
                     {
                         std::string text = info->mResponse;
                         std::string script = info->mResultScript;
@@ -389,7 +389,7 @@ namespace MWDialogue
                 if (mDialogueMap[mLastTopic].mType == ESM::Dialogue::Topic)
                 {
                     Filter filter (mActor, mChoice, mTalkedTo);
-                
+
                     if (const ESM::DialInfo *info = filter.search (mDialogueMap[mLastTopic]))
                     {
                         mChoiceMap.clear();
@@ -404,7 +404,7 @@ namespace MWDialogue
                     }
                 }
             }
-            
+
             updateTopics();
         }
     }
