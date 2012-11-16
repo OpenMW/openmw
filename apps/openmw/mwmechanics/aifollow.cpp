@@ -1,8 +1,8 @@
 #include "aifollow.hpp"
 #include <iostream>
 
-MWMechanics::AiFollow::AiFollow(const std::string &actorID,float duration, float x, float y, float z):
-mActorID(actorID), mDuration(duration), mX(x), mY(y), mZ(z)
+MWMechanics::AiFollow::AiFollow(const std::string &actorId,float duration, float x, float y, float z)
+: mDuration(duration), mX(x), mY(y), mZ(z), mActorId(actorId)
 {
 }
 MWMechanics::AiFollow *MWMechanics::AiFollow::clone() const

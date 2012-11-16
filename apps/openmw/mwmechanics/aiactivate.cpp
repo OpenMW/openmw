@@ -1,8 +1,8 @@
 #include "aiactivate.hpp"
 #include <iostream>
 
-MWMechanics::AiActivate::AiActivate(const std::string &objectID):
-mObjectID(objectID)
+MWMechanics::AiActivate::AiActivate(const std::string &objectId)
+: mObjectId(objectId)
 {
 }
 MWMechanics::AiActivate *MWMechanics::AiActivate::clone() const

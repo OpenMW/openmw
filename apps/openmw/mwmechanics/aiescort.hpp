@@ -9,21 +9,16 @@ namespace MWMechanics
     class AiEscort : public AiPackage
     {
         public:
-            AiEscort(const std::string &actorID,int duration, float x, float y, float z);
+            AiEscort(const std::string &actorId,int duration, float x, float y, float z);
             virtual AiEscort *clone() const;
 
             virtual bool execute (const MWWorld::Ptr& actor);
-                    ///< \return Package completed?
+            ///< \return Package completed?
 
             virtual int getTypeId() const;
-            float getX();
-            float getY();
-            float getZ();
-            std::string getActorID();
-            int getDuration();
 
         private:
-            std::string mActorID;
+            std::string mActorId;
             float mX;
             float mY;
             float mZ;

@@ -15,10 +15,6 @@ namespace MWMechanics
                     ///< \return Package completed?
 
             virtual int getTypeId() const;
-            float getX();
-            float getY();
-            float getZ();
-
 
         private:
             float mX;

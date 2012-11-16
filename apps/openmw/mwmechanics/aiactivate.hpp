@@ -7,17 +7,17 @@
 namespace MWMechanics
 {
 
-    class AiActivate : AiPackage
+    class AiActivate : public AiPackage
     {
         public:
-            AiActivate(const std::string &objectID);
+            AiActivate(const std::string &objectId);
             virtual AiActivate *clone() const;
             virtual bool execute (const MWWorld::Ptr& actor);
                     ///< \return Package completed?
             virtual int getTypeId() const;
 
         private:
-            std::string mObjectID;
+            std::string mObjectId;
     };
 }
 #endif // GAME_MWMECHANICS_AIACTIVATE_H

@@ -1,8 +1,8 @@
 #include "aitravel.hpp"
 #include <iostream>
 
-MWMechanics::AiTravel::AiTravel(float x, float y, float z):
-mX(x),mY(y),mZ(z)
+MWMechanics::AiTravel::AiTravel(float x, float y, float z)
+: mX(x),mY(y),mZ(z)
 {
 }
 
@@ -22,18 +22,4 @@ int MWMechanics::AiTravel::getTypeId() const
     return 1;
 }
 
-float MWMechanics::AiTravel::getX()
-{
-    return mX;
-}
-
-float MWMechanics::AiTravel::getY()
-{
-    return mY;
-}
-
-float MWMechanics::AiTravel::getZ()
-{
-    return mZ;
-}
 
