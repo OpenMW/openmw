@@ -12,6 +12,7 @@
 #include "../mwworld/actiontake.hpp"
 #include "../mwworld/actionequip.hpp"
 #include "../mwworld/nullaction.hpp"
+#include "../mwworld/failedaction.hpp"
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/physicssystem.hpp"
@@ -92,7 +93,7 @@ namespace MWClass
             ptr.get<ESM::Light>();
 
         if (!(ref->base->mData.mFlags & ESM::Light::Carry))
-            return boost::shared_ptr<MWWorld::Action> (new MWWorld::NullAction);
+            return boost::shared_ptr<MWWorld::Action> (new MWWorld::FailedAction());
 
         boost::shared_ptr<MWWorld::Action> action(new MWWorld::ActionTake (ptr));
 
