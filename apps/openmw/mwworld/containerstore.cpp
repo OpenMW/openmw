@@ -19,11 +19,11 @@
 namespace
 {
     template<typename T>
-    float getTotalWeight (const MWWorld::CellRefList<T>& cellRefList)
+    float getTotalWeight (const MWWorld::ContainerRefList<T>& cellRefList)
     {
         float sum = 0;
 
-        for (typename MWWorld::CellRefList<T>::List::const_iterator iter (
+        for (typename MWWorld::ContainerRefList<T>::List::const_iterator iter (
             cellRefList.list.begin());
             iter!=cellRefList.list.end();
             ++iter)
@@ -270,29 +270,29 @@ MWWorld::ContainerStoreIterator::ContainerStoreIterator (int mask, ContainerStor
     ++*this;
 }
 
-MWWorld::ContainerStoreIterator::ContainerStoreIterator (ContainerStore *container, MWWorld::CellRefList<ESM::Potion>::List::iterator iterator)
+MWWorld::ContainerStoreIterator::ContainerStoreIterator (ContainerStore *container, MWWorld::ContainerRefList<ESM::Potion>::List::iterator iterator)
     : mType(MWWorld::ContainerStore::Type_Potion), mMask(MWWorld::ContainerStore::Type_All), mContainer(container), mPotion(iterator){}
-MWWorld::ContainerStoreIterator::ContainerStoreIterator (ContainerStore *container, MWWorld::CellRefList<ESM::Apparatus>::List::iterator iterator)
+MWWorld::ContainerStoreIterator::ContainerStoreIterator (ContainerStore *container, MWWorld::ContainerRefList<ESM::Apparatus>::List::iterator iterator)
     : mType(MWWorld::ContainerStore::Type_Apparatus), mMask(MWWorld::ContainerStore::Type_All), mContainer(container), mApparatus(iterator){}
-MWWorld::ContainerStoreIterator::ContainerStoreIterator (ContainerStore *container, MWWorld::CellRefList<ESM::Armor>::List::iterator iterator)
+MWWorld::ContainerStoreIterator::ContainerStoreIterator (ContainerStore *container, MWWorld::ContainerRefList<ESM::Armor>::List::iterator iterator)
     : mType(MWWorld::ContainerStore::Type_Armor), mMask(MWWorld::ContainerStore::Type_All), mContainer(container), mArmor(iterator){}
-MWWorld::ContainerStoreIterator::ContainerStoreIterator (ContainerStore *container, MWWorld::CellRefList<ESM::Book>::List::iterator iterator)
+MWWorld::ContainerStoreIterator::ContainerStoreIterator (ContainerStore *container, MWWorld::ContainerRefList<ESM::Book>::List::iterator iterator)
     : mType(MWWorld::ContainerStore::Type_Book), mMask(MWWorld::ContainerStore::Type_All), mContainer(container), mBook(iterator){}
-MWWorld::ContainerStoreIterator::ContainerStoreIterator (ContainerStore *container, MWWorld::CellRefList<ESM::Clothing>::List::iterator iterator)
+MWWorld::ContainerStoreIterator::ContainerStoreIterator (ContainerStore *container, MWWorld::ContainerRefList<ESM::Clothing>::List::iterator iterator)
     : mType(MWWorld::ContainerStore::Type_Clothing), mMask(MWWorld::ContainerStore::Type_All), mContainer(container), mClothing(iterator){}
-MWWorld::ContainerStoreIterator::ContainerStoreIterator (ContainerStore *container, MWWorld::CellRefList<ESM::Ingredient>::List::iterator iterator)
+MWWorld::ContainerStoreIterator::ContainerStoreIterator (ContainerStore *container, MWWorld::ContainerRefList<ESM::Ingredient>::List::iterator iterator)
     : mType(MWWorld::ContainerStore::Type_Ingredient), mMask(MWWorld::ContainerStore::Type_All), mContainer(container), mIngredient(iterator){}
-MWWorld::ContainerStoreIterator::ContainerStoreIterator (ContainerStore *container, MWWorld::CellRefList<ESM::Light>::List::iterator iterator)
+MWWorld::ContainerStoreIterator::ContainerStoreIterator (ContainerStore *container, MWWorld::ContainerRefList<ESM::Light>::List::iterator iterator)
     : mType(MWWorld::ContainerStore::Type_Light), mMask(MWWorld::ContainerStore::Type_All), mContainer(container), mLight(iterator){}
-MWWorld::ContainerStoreIterator::ContainerStoreIterator (ContainerStore *container, MWWorld::CellRefList<ESM::Tool>::List::iterator iterator)
+MWWorld::ContainerStoreIterator::ContainerStoreIterator (ContainerStore *container, MWWorld::ContainerRefList<ESM::Tool>::List::iterator iterator)
     : mType(MWWorld::ContainerStore::Type_Lockpick), mMask(MWWorld::ContainerStore::Type_All), mContainer(container), mLockpick(iterator){}
-MWWorld::ContainerStoreIterator::ContainerStoreIterator (ContainerStore *container, MWWorld::CellRefList<ESM::Miscellaneous>::List::iterator iterator)
+MWWorld::ContainerStoreIterator::ContainerStoreIterator (ContainerStore *container, MWWorld::ContainerRefList<ESM::Miscellaneous>::List::iterator iterator)
     : mType(MWWorld::ContainerStore::Type_Miscellaneous), mMask(MWWorld::ContainerStore::Type_All), mContainer(container), mMiscellaneous(iterator){}
-MWWorld::ContainerStoreIterator::ContainerStoreIterator (ContainerStore *container, MWWorld::CellRefList<ESM::Probe>::List::iterator iterator)
+MWWorld::ContainerStoreIterator::ContainerStoreIterator (ContainerStore *container, MWWorld::ContainerRefList<ESM::Probe>::List::iterator iterator)
     : mType(MWWorld::ContainerStore::Type_Probe), mMask(MWWorld::ContainerStore::Type_All), mContainer(container), mProbe(iterator){}
-MWWorld::ContainerStoreIterator::ContainerStoreIterator (ContainerStore *container, MWWorld::CellRefList<ESM::Repair>::List::iterator iterator)
+MWWorld::ContainerStoreIterator::ContainerStoreIterator (ContainerStore *container, MWWorld::ContainerRefList<ESM::Repair>::List::iterator iterator)
     : mType(MWWorld::ContainerStore::Type_Repair), mMask(MWWorld::ContainerStore::Type_All), mContainer(container), mRepair(iterator){}
-MWWorld::ContainerStoreIterator::ContainerStoreIterator (ContainerStore *container, MWWorld::CellRefList<ESM::Weapon>::List::iterator iterator)
+MWWorld::ContainerStoreIterator::ContainerStoreIterator (ContainerStore *container, MWWorld::ContainerRefList<ESM::Weapon>::List::iterator iterator)
     : mType(MWWorld::ContainerStore::Type_Weapon), mMask(MWWorld::ContainerStore::Type_All), mContainer(container), mWeapon(iterator){}
 
 void MWWorld::ContainerStoreIterator::incType()

@@ -23,7 +23,7 @@ namespace
         if (!cellRefList.list.empty())
         {
             const MWWorld::Class& class_ =
-                MWWorld::Class::get (MWWorld::Ptr (&*cellRefList.list.begin(), &cell));
+                MWWorld::Class::get (MWWorld::Ptr (&cellRefList.list.begin()->second, &cell));
 
             int numRefs = cellRefList.list.size();
             int current = 0;
@@ -33,9 +33,9 @@ namespace
                 MWBase::Environment::get().getWindowManager ()->setLoadingProgress ("Loading cells", 1, current, numRefs);
                 ++current;
 
-                if (it->mData.getCount() || it->mData.isEnabled())
+                if (it->second.mData.getCount() || it->second.mData.isEnabled())
                 {
-                    MWWorld::Ptr ptr (&*it, &cell);
+                    MWWorld::Ptr ptr (&it->second, &cell);
 
                     try
                     {

@@ -65,8 +65,7 @@ namespace MWWorld
                 std::transform (ref.mRefID.begin(), ref.mRefID.end(), std::back_inserter (lowerCase),
                     (int(*)(int)) std::tolower);
 
-                // TODO: Fully support deletion / moving references out of the cell. no simple "push_back",
-                //  but make sure that the reference exists only once.
+                // TODO: Fully support deletion of references.
                 mIds.push_back (lowerCase);
             }
         }
@@ -98,8 +97,7 @@ namespace MWWorld
                 std::transform (ref.mRefID.begin(), ref.mRefID.end(), std::back_inserter (lowerCase),
                     (int(*)(int)) std::tolower);
 
-                // TODO: Fully support deletion / moving references out of the cell. No simple loading,
-                //  but make sure that the reference exists only once. Current code clones references.
+                // TODO: Fully support deletion of references.
                 int rec = store.find(ref.mRefID);
 
                 ref.mRefID = lowerCase;

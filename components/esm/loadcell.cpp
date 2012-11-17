@@ -113,8 +113,6 @@ void Cell::load(ESMReader &esm)
 
     // Save position of the cell references and move on
     mContextList.push_back(esm.getContext());
-    if (mContextList.size() > 1)
-        std::cout << "found two plugins" << std::endl;
     esm.skipRecord();
 }
 
@@ -202,10 +200,8 @@ bool Cell::getNextRef(ESMReader &esm, CellRef &ref)
         // In this case, do not spawn a new reference, but overwrite the old one.
         ref.mRefnum &= 0x00ffffff; // delete old plugin ID
         const ESM::ESMReader::MasterList &masters = esm.getMasters();
-        // TODO: Test how Morrowind does it! Maybe the first entry in the list should be "1"...
         global = masters[local-1].index + 1;
         ref.mRefnum |= global << 24; // insert global plugin ID
-        std::cout << "Refnum_old = " << ref.mRefnum << " " << local << " " << global << std::endl;
     }
     else
     {
@@ -256,7 +252,7 @@ bool Cell::getNextRef(ESMReader &esm, CellRef &ref)
     esm.getHNOT(ref.mFltv, "FLTV");
 
     esm.getHNT(ref.mPos, "DATA", 24);
-
+    
     // Number of references in the cell? Maximum once in each cell,
     // but not always at the beginning, and not always right. In other
     // words, completely useless.

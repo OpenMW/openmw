@@ -28,13 +28,13 @@ namespace
             cellRefList.list.begin());
             iter!=cellRefList.list.end(); ++iter)
         {
-            if (!iter->base->script.empty() && iter->mData.getCount())
+            if (!iter->second->base->script.empty() && iter->second->mData.getCount())
             {
-                if (const ESM::Script *script = store.scripts.find (iter->base->script))
+                if (const ESM::Script *script = store.scripts.find (iter->second->base->script))
                 {
                     iter->mData.setLocals (*script);
 
-                    localScripts.add (iter->base->script, MWWorld::Ptr (&*iter, cell));
+                    localScripts.add (iter->base->script, MWWorld::Ptr (&iter->second, cell));
                 }
             }
         }
@@ -48,10 +48,10 @@ namespace
 
         for (iterator iter (refList.list.begin()); iter!=refList.list.end(); ++iter)
         {
-            if(iter->mData.getCount() > 0 && iter->mData.getBaseNode()){
-            if (iter->mData.getHandle()==handle)
+            if (iter->second.mData.getCount() > 0 && iter->second.mData.getBaseNode()){
+            if (iter->second.mData.getHandle()==handle)
             {
-                return &*iter;
+                return &iter->second;
             }
             }
         }
@@ -1115,10 +1115,10 @@ namespace MWWorld
         std::vector<World::DoorMarker> result;
 
         MWWorld::CellRefList<ESM::Door>& doors = cell->doors;
-        std::list< MWWorld::LiveCellRef<ESM::Door> >& refList = doors.list;
-        for (std::list< MWWorld::LiveCellRef<ESM::Door> >::iterator it = refList.begin(); it != refList.end(); ++it)
+        std::map<int, MWWorld::LiveCellRef<ESM::Door> >& refList = doors.list;
+        for (std::map<int, MWWorld::LiveCellRef<ESM::Door> >::iterator it = refList.begin(); it != refList.end(); ++it)
         {
-            MWWorld::LiveCellRef<ESM::Door>& ref = *it;
+            MWWorld::LiveCellRef<ESM::Door>& ref = it->second;
 
             if (ref.ref.mTeleport)
             {

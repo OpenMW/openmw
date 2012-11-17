@@ -523,7 +523,10 @@ namespace ESMS
           // Store exterior cells by grid position, try to merge with existing parent data.
           ESM::Cell *oldcell = const_cast<ESM::Cell*>(searchExt(cell->getGridX(), cell->getGridY()));
           if (oldcell) {
-              cell->mContextList.push_back(oldcell->mContextList.at(0));
+              // The load order is important. Push the new source context on the *back* of the existing list,
+              //  and then move the list to the new cell. 
+              oldcell->mContextList.push_back(cell->mContextList.at(0));
+              cell->mContextList = oldcell->mContextList;
               delete oldcell;
           }
           extCells[std::make_pair (cell->mData.mX, cell->mData.mY)] = cell;

@@ -15,9 +15,9 @@ namespace
             cellRefList.list.begin());
             iter!=cellRefList.list.end(); ++iter)
         {
-            if (!iter->base->mScript.empty() && iter->mData.getCount())
+            if (!iter->second.base->mScript.empty() && iter->second.mData.getCount())
             {
-                localScripts.add (iter->base->mScript, MWWorld::Ptr (&*iter, cell));
+                localScripts.add (iter->second.base->mScript, MWWorld::Ptr (&iter->second, cell));
             }
         }
     }

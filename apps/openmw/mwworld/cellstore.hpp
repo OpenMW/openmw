@@ -49,6 +49,47 @@ namespace MWWorld
   struct CellRefList
   {
     typedef LiveCellRef<X> LiveRef;
+    typedef std::map<int,LiveRef> List;
+    List list;
+
+    // Search for the given reference in the given reclist from
+    // ESMStore. Insert the reference into the list if a match is
+    // found. If not, throw an exception.
+    template <typename Y>
+    void find(ESM::CellRef &ref, const Y& recList)
+    {
+      const X* obj = recList.find(ref.mRefID);
+      if(obj == NULL)
+        throw std::runtime_error("Error resolving cell reference " + ref.mRefID);
+
+      list[ref.mRefnum] = LiveRef(ref, obj);
+    }
+
+    LiveRef *find (const std::string& name)
+    {
+        for (typename std::map<int,LiveRef>::iterator iter (list.begin()); iter!=list.end(); ++iter)
+        {
+            if (iter->second.mData.getCount() > 0 && iter->second.ref.mRefID == name)
+                return &iter->second;
+        }
+
+        return 0;
+    }
+
+    LiveRef &insert(const LiveRef &item) {
+        list[item.ref.mRefnum] = item;
+        return list[item.ref.mRefnum];
+    }
+  };
+
+  /// A list of container references. These references do not track their mRefnumber.
+  /// Otherwise, taking 1 of 20 instances of an object would produce multiple objects
+  /// with the same reference.
+  // TODO: Check how Morrowind does this! Maybe auto-generate references on drop.
+  template <typename X>
+  struct ContainerRefList
+  {
+    typedef LiveCellRef<X> LiveRef;
     typedef std::list<LiveRef> List;
     List list;
 
@@ -62,10 +103,6 @@ namespace MWWorld
       if(obj == NULL)
         throw std::runtime_error("Error resolving cell reference " + ref.mRefID);
 
-      // TODO: this line must be modified for multiple plugins and moved references.
-      //  This means: no simple "push back", but search for an existing reference with
-      //  this ID first! If it exists, merge data into this list instead of just adding it.
-      // I'll probably generate a separate method jist for this.
       list.push_back(LiveRef(ref, obj));
     }
 
@@ -180,7 +217,7 @@ namespace MWWorld
     {
         for (typename List::List::iterator iter (list.list.begin()); iter!=list.list.end();
             ++iter)
-            if (!functor (iter->ref, iter->mData))
+            if (!functor (iter->second.ref, iter->second.mData))
                 return false;
 
         return true;
