@@ -8,7 +8,7 @@
 #include "../mwbase/windowmanager.hpp"
 
 #include "../mwworld/ptr.hpp"
-#include "../mwworld/nullaction.hpp"
+#include "../mwworld/failedaction.hpp"
 #include "../mwworld/containerstore.hpp"
 #include "../mwworld/customdata.hpp"
 #include "../mwworld/cellstore.hpp"
@@ -129,7 +129,7 @@ namespace MWClass
             {
                 // Trap activation goes here
                 std::cout << "Activated trap: " << ptr.getCellRef().mTrap << std::endl;
-                boost::shared_ptr<MWWorld::Action> action(new MWWorld::NullAction);
+                boost::shared_ptr<MWWorld::Action> action(new MWWorld::FailedAction);
                 action->setSound(trapActivationSound);
                 ptr.getCellRef().mTrap = "";
                 return action;
@@ -137,7 +137,7 @@ namespace MWClass
         }
         else
         {
-            boost::shared_ptr<MWWorld::Action> action(new MWWorld::NullAction);
+            boost::shared_ptr<MWWorld::Action> action(new MWWorld::FailedAction);
             action->setSound(lockedSound);
             return action;
         }
