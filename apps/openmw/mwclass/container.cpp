@@ -130,7 +130,7 @@ namespace MWClass
             {
                 // Trap activation goes here
                 std::cout << "Activated trap: " << ptr.getCellRef().mTrap << std::endl;
-                boost::shared_ptr<MWWorld::Action> action(new MWWorld::FailedAction());
+                boost::shared_ptr<MWWorld::Action> action(new MWWorld::FailedAction);
                 action->setSound(trapActivationSound);
                 ptr.getCellRef().mTrap = "";
                 return action;
@@ -138,7 +138,7 @@ namespace MWClass
         }
         else
         {
-            boost::shared_ptr<MWWorld::Action> action(new MWWorld::FailedAction());
+            boost::shared_ptr<MWWorld::Action> action(new MWWorld::FailedAction);
             action->setSound(lockedSound);
             return action;
         }

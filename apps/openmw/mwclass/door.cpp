@@ -112,7 +112,7 @@ namespace MWClass
                 // Trap activation
                 std::cout << "Activated trap: " << ptr.getCellRef().mTrap << std::endl;
 
-                boost::shared_ptr<MWWorld::Action> action(new MWWorld::FailedAction());
+                boost::shared_ptr<MWWorld::Action> action(new MWWorld::FailedAction);
                 action->setSound(trapActivationSound);
                 ptr.getCellRef().mTrap = "";
 
@@ -134,7 +134,7 @@ namespace MWClass
                 else
                 {
                     // another NPC or a creature is using the door
-                    return boost::shared_ptr<MWWorld::Action> (new MWWorld::FailedAction());
+                    return boost::shared_ptr<MWWorld::Action> (new MWWorld::FailedAction);
                 }
             }
             else
@@ -153,7 +153,7 @@ namespace MWClass
         else
         {
             // locked, and we can't open.
-            boost::shared_ptr<MWWorld::Action> action(new MWWorld::FailedAction());
+            boost::shared_ptr<MWWorld::Action> action(new MWWorld::FailedAction);
             action->setSound(lockedSound);
             return action;
         }

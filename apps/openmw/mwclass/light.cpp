@@ -93,7 +93,7 @@ namespace MWClass
             ptr.get<ESM::Light>();
 
         if (!(ref->base->mData.mFlags & ESM::Light::Carry))
-            return boost::shared_ptr<MWWorld::Action> (new MWWorld::FailedAction());
+            return boost::shared_ptr<MWWorld::Action> (new MWWorld::FailedAction);
 
         boost::shared_ptr<MWWorld::Action> action(new MWWorld::ActionTake (ptr));
 
