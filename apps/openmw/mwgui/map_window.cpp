@@ -266,8 +266,6 @@ MapWindow::MapWindow(MWBase::WindowManager& parWindowManager, const std::string&
     mGlobalMapRender = new MWRender::GlobalMap(cacheDir);
     mGlobalMapRender->render();
 
-    mGlobalMapRender->exploreCell(0,0);
-
     getWidget(mLocalMap, "LocalMap");
     getWidget(mGlobalMap, "GlobalMap");
     getWidget(mGlobalMapImage, "GlobalMapImage");

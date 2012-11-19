@@ -72,6 +72,8 @@ namespace sh
 			allowFixedFunction = retrieveValue<BooleanValue>(getProperty("allow_fixed_function"), NULL).get();
 		}
 
+		bool useShaders = mShadersEnabled || !allowFixedFunction;
+
 		// get passes of the top-most parent
 		PassVector passes = getPasses();
 		if (passes.size() == 0)
@@ -91,7 +93,7 @@ namespace sh
 			// create or retrieve shaders
 			bool hasVertex = it->hasProperty("vertex_program");
 			bool hasFragment = it->hasProperty("fragment_program");
-			if (mShadersEnabled || !allowFixedFunction)
+			if (useShaders)
 			{
 				it->setContext(context);
 				it->mShaderProperties.setContext(context);
@@ -144,7 +146,7 @@ namespace sh
 				bool foundVertex = std::find(usedTextureSamplersVertex.begin(), usedTextureSamplersVertex.end(), texIt->getName()) != usedTextureSamplersVertex.end();
 				bool foundFragment = std::find(usedTextureSamplersFragment.begin(), usedTextureSamplersFragment.end(), texIt->getName()) != usedTextureSamplersFragment.end();
 				if (  (foundVertex || foundFragment)
-						|| (((!mShadersEnabled || (!hasVertex || !hasFragment)) && allowFixedFunction) && texIt->hasProperty("create_in_ffp") && retrieveValue<BooleanValue>(texIt->getProperty("create_in_ffp"), this).get()))
+						|| (((!useShaders || (!hasVertex || !hasFragment)) && allowFixedFunction) && texIt->hasProperty("create_in_ffp") && retrieveValue<BooleanValue>(texIt->getProperty("create_in_ffp"), this).get()))
 				{
 					boost::shared_ptr<TextureUnitState> texUnit = pass->createTextureUnitState ();
 					texIt->copyAll (texUnit.get(), context);
@@ -152,7 +154,7 @@ namespace sh
 					mTexUnits.push_back(texUnit);
 
 					// set texture unit indices (required by GLSL)
-					if (mShadersEnabled && ((hasVertex && foundVertex) || (hasFragment && foundFragment)) && mFactory->getCurrentLanguage () == Language_GLSL)
+					if (useShaders && ((hasVertex && foundVertex) || (hasFragment && foundFragment)) && mFactory->getCurrentLanguage () == Language_GLSL)
 					{
 						pass->setTextureUnitIndex (foundVertex ? GPT_Vertex : GPT_Fragment, texIt->getName(), i);
 
