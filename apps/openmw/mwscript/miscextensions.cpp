@@ -132,6 +132,24 @@ namespace MWScript
                 }
         };
 
+
+        class OpToggleCollisionBoxes : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    InterpreterContext& context =
+                        static_cast<InterpreterContext&> (runtime.getContext());
+
+                    bool enabled =
+                        MWBase::Environment::get().getWorld()->toggleRenderMode (MWBase::World::Render_BoundingBoxes);
+
+                    context.report (enabled ?
+                        "Bounding Box Rendering -> On" : "Bounding Box Rendering -> Off");
+                }
+        };
+
         class OpToggleWireframe : public Interpreter::Opcode0
         {
             public:
@@ -262,6 +280,7 @@ namespace MWScript
         const int opcodeUnlock = 0x200008c;
         const int opcodeUnlockExplicit = 0x200008d;
         const int opcodeToggleCollisionDebug = 0x2000132;
+        const int opcodeToggleCollisionBoxes = 0x20001ac;
         const int opcodeToggleWireframe = 0x200013b;
         const int opcodeFadeIn = 0x200013c;
         const int opcodeFadeOut = 0x200013d;
@@ -280,9 +299,9 @@ namespace MWScript
             extensions.registerInstruction ("activate", "", opcodeActivate);
             extensions.registerInstruction ("lock", "/l", opcodeLock, opcodeLockExplicit);
             extensions.registerInstruction ("unlock", "", opcodeUnlock, opcodeUnlockExplicit);
-            extensions.registerInstruction ("togglecollisionboxes", "", opcodeToggleCollisionDebug);
+            extensions.registerInstruction ("togglecollisionboxes", "", opcodeToggleCollisionBoxes);
             extensions.registerInstruction ("togglecollisiongrid", "", opcodeToggleCollisionDebug);
-            extensions.registerInstruction ("tcb", "", opcodeToggleCollisionDebug);
+            extensions.registerInstruction ("tcb", "", opcodeToggleCollisionBoxes);
             extensions.registerInstruction ("tcg", "", opcodeToggleCollisionDebug);
             extensions.registerInstruction ("twf", "", opcodeToggleWireframe);
             extensions.registerInstruction ("togglewireframe", "", opcodeToggleWireframe);
@@ -310,6 +329,7 @@ namespace MWScript
             interpreter.installSegment5 (opcodeUnlock, new OpUnlock<ImplicitRef>);
             interpreter.installSegment5 (opcodeUnlockExplicit, new OpUnlock<ExplicitRef>);
             interpreter.installSegment5 (opcodeToggleCollisionDebug, new OpToggleCollisionDebug);
+            interpreter.installSegment5 (opcodeToggleCollisionBoxes, new OpToggleCollisionBoxes);
             interpreter.installSegment5 (opcodeToggleWireframe, new OpToggleWireframe);
             interpreter.installSegment5 (opcodeFadeIn, new OpFadeIn);
             interpreter.installSegment5 (opcodeFadeOut, new OpFadeOut);

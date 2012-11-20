@@ -221,5 +221,6 @@ op 0x20001a8: CommonDisease
 op 0x20001a9: CommonDisease, explicit reference
 op 0x20001aa: BlightDisease
 op 0x20001ab: BlightDisease, explicit reference
+op 0x20001ac: ToggleCollisionBoxes
 opcodes 0x20001ac-0x3ffffff unused
 

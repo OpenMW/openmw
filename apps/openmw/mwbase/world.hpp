@@ -65,7 +65,8 @@ namespace MWBase
                 Render_CollisionDebug,
                 Render_Wireframe,
                 Render_Pathgrid,
-                Render_Compositors
+                Render_Compositors,
+                Render_BoundingBoxes
             };
 
             struct DoorMarker

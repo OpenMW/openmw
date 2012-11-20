@@ -473,7 +473,13 @@ bool RenderingManager::toggleRenderMode(int mode)
             return false;
         }
     }
-    else //if (mode == MWWorld::World::Render_Compositors)
+    else if (mode == MWBase::World::Render_BoundingBoxes)
+    {
+        bool show = !mRendering.getScene()->getShowBoundingBoxes();
+        mRendering.getScene()->showBoundingBoxes(show);
+        return show;
+    }
+    else //if (mode == MWBase::World::Render_Compositors)
     {
         return mCompositors->toggle();
     }
