@@ -31,6 +31,7 @@ option(OGRE_STATIC "Link static build of Ogre and Ogre Plugins into the binaries
 option(BUILD_ESMTOOL "build ESM inspector" ON)
 option(BUILD_LAUNCHER "build Launcher" ON)
 option(BUILD_MWINIIMPORTER "build MWiniImporter" ON)
+option(BUILD_OPENCS "build OpenMW Construction Set" ON)
 option(BUILD_WITH_CODE_COVERAGE "Enable code coverage with gconv" OFF)
 option(BUILD_UNITTESTS "Enable Unittests with Google C++ Unittest ang GMock frameworks" OFF)
 
@@ -244,7 +245,7 @@ if (APPLE)
     else ()
         set(OGRE_PLUGIN_DIR ${OGRE_PLUGIN_DIR_DBG})
     endif ()
-    
+
     #set(OGRE_PLUGIN_DIR "${OGRE_PLUGIN_DIR}/")
 
     configure_file(${OpenMW_SOURCE_DIR}/files/mac/Info.plist
@@ -460,6 +461,10 @@ endif()
 
 if (BUILD_MWINIIMPORTER)
    add_subdirectory( apps/mwiniimporter )
+endif()
+
+if (BUILD_OPENCS)
+   add_subdirectory (apps/opencs)
 endif()
 
 # UnitTests
