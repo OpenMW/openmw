@@ -6,6 +6,7 @@
 namespace CSMDoc
 {
     class Document;
+    class DocumentManager;
 }
 
 namespace CSVDoc
@@ -14,7 +15,9 @@ namespace CSVDoc
 
     class ViewManager
     {
+            CSMDoc::DocumentManager& mDocumentManager;
             std::vector<View *> mViews;
+            std::vector<View *> mClosed;
 
             // not implemented
             ViewManager (const ViewManager&);
@@ -22,12 +25,17 @@ namespace CSVDoc
 
         public:
 
-            ViewManager();
+            ViewManager (CSMDoc::DocumentManager& documentManager);
 
             ~ViewManager();
 
             View *addView (CSMDoc::Document *document);
             ///< The ownership of the returned view is not transferred.
+
+            int countViews (const CSMDoc::Document *document) const;
+            ///< Return number of views for \a document.
+
+            bool closeRequest (View *view);
 
 
 

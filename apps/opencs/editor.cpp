@@ -3,7 +3,7 @@
 
 #include <QtGui/QApplication>
 
-CS::Editor::Editor()
+CS::Editor::Editor() : mViewManager (mDocumentManager)
 {
 }
 
