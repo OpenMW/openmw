@@ -6,6 +6,7 @@
 #include <stdexcept>
 #include <algorithm>
 #include <sstream>
+#include <iterator>
 
 namespace
 {
