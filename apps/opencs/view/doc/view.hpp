@@ -20,6 +20,8 @@ namespace CSVDoc
 
             ViewManager& mViewManager;
             CSMDoc::Document *mDocument;
+            int mViewIndex;
+            int mViewTotal;
 
             // not implemented
             View (const View&);
@@ -31,14 +33,18 @@ namespace CSVDoc
 
             void setupUi();
 
+            void updateTitle();
+
         public:
 
-            View (ViewManager& viewManager, CSMDoc::Document *document);
+            View (ViewManager& viewManager, CSMDoc::Document *document, int totalViews);
             ///< The ownership of \a document is not transferred to *this.
 
             const CSMDoc::Document *getDocument() const;
 
             CSMDoc::Document *getDocument();
+
+            void setIndex (int viewIndex, int totalViews);
 
         private slots:
 

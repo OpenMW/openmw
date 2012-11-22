@@ -23,6 +23,8 @@ namespace CSVDoc
             ViewManager (const ViewManager&);
             ViewManager& operator= (const ViewManager&);
 
+            void updateIndices();
+
         public:
 
             ViewManager (CSMDoc::DocumentManager& documentManager);
