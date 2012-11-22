@@ -23,24 +23,26 @@ void CSVDoc::View::setupFileMenu()
     QAction *save = new QAction (tr ("&Save"), this);
     connect (save, SIGNAL (triggered()), this, SLOT (save()));
     file->addAction (save);
+    mEditingActions.push_back (save);
 }
 
 void CSVDoc::View::setupEditMenu()
 {
     QMenu *edit = menuBar()->addMenu (tr ("&Edit"));
 
-    QAction *undo = mDocument->getUndoStack().createUndoAction (this, tr("&Undo"));
-    undo->setShortcuts (QKeySequence::Undo);
-    edit->addAction (undo);
+    mUndo = mDocument->getUndoStack().createUndoAction (this, tr("&Undo"));
+    mUndo->setShortcuts (QKeySequence::Undo);
+    edit->addAction (mUndo);
 
-    QAction *redo = mDocument->getUndoStack().createRedoAction (this, tr("&Redo"));
-    redo->setShortcuts (QKeySequence::Redo);
-    edit->addAction (redo);
+    mRedo= mDocument->getUndoStack().createRedoAction (this, tr("&Redo"));
+    mRedo->setShortcuts (QKeySequence::Redo);
+    edit->addAction (mRedo);
 
     // test
     QAction *test = new QAction (tr ("&Test Command"), this);
     connect (test, SIGNAL (triggered()), this, SLOT (test()));
     edit->addAction (test);
+    mEditingActions.push_back (test);
 }
 
 void CSVDoc::View::setupViewMenu()
@@ -74,6 +76,17 @@ void CSVDoc::View::updateTitle()
     setWindowTitle (stream.str().c_str());
 }
 
+void CSVDoc::View::updateActions()
+{
+    bool editing = !(mDocument->getState() & CSMDoc::Document::State_Locked);
+
+    for (std::vector<QAction *>::iterator iter (mEditingActions.begin()); iter!=mEditingActions.end(); ++iter)
+        (*iter)->setEnabled (editing);
+
+    mUndo->setEnabled (editing & mDocument->getUndoStack().canUndo());
+    mRedo->setEnabled (editing & mDocument->getUndoStack().canRedo());
+}
+
 CSVDoc::View::View (ViewManager& viewManager, CSMDoc::Document *document, int totalViews)
 : mViewManager (viewManager), mDocument (document), mViewIndex (totalViews-1), mViewTotal (totalViews)
 {
@@ -105,6 +118,7 @@ void CSVDoc::View::setIndex (int viewIndex, int totalViews)
 void CSVDoc::View::updateDocumentState()
 {
     updateTitle();
+    updateActions();
 }
 
 void CSVDoc::View::newView()

@@ -1,6 +1,8 @@
 #ifndef CSV_DOC_VIEW_H
 #define CSV_DOC_VIEW_H
 
+#include <vector>
+
 #include <QMainWindow>
 
 class QAction;
@@ -22,6 +24,9 @@ namespace CSVDoc
             CSMDoc::Document *mDocument;
             int mViewIndex;
             int mViewTotal;
+            QAction *mUndo;
+            QAction *mRedo;
+            std::vector<QAction *> mEditingActions;
 
             // not implemented
             View (const View&);
@@ -40,6 +45,8 @@ namespace CSVDoc
             void setupUi();
 
             void updateTitle();
+
+            void updateActions();
 
         public:
 

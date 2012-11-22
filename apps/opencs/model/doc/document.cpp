@@ -32,11 +32,13 @@ void CSMDoc::Document::save()
 {
     mSaveCount = 1;
     mSaveTimer.start (500);
+    emit stateChanged (getState(), this);
 }
 
 void CSMDoc::Document::abortSave()
 {
     mSaveTimer.stop();
+    emit stateChanged (getState(), this);
 }
 
 void CSMDoc::Document::modificationStateChanged (bool clean)
@@ -53,5 +55,6 @@ void CSMDoc::Document::saving()
             mSaveCount = 0;
             mSaveTimer.stop();
             mUndoStack.setClean();
+            emit stateChanged (getState(), this);
     }
 }
