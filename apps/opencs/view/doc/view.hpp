@@ -1,7 +1,9 @@
 #ifndef CSV_DOC_VIEW_H
 #define CSV_DOC_VIEW_H
 
-#include <QWidget>
+#include <QMainWindow>
+
+class QAction;
 
 namespace CSMDoc
 {
@@ -12,7 +14,7 @@ namespace CSVDoc
 {
     class ViewManager;
 
-    class View : public QWidget
+    class View : public QMainWindow
     {
             Q_OBJECT
 
@@ -27,6 +29,8 @@ namespace CSVDoc
 
             void closeEvent (QCloseEvent *event);
 
+            void setupUi();
+
         public:
 
             View (ViewManager& viewManager, CSMDoc::Document *document);
@@ -35,6 +39,10 @@ namespace CSVDoc
             const CSMDoc::Document *getDocument() const;
 
             CSMDoc::Document *getDocument();
+
+        private slots:
+
+            void newView();
     };
 }
 
