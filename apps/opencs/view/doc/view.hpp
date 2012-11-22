@@ -31,6 +31,10 @@ namespace CSVDoc
 
             void closeEvent (QCloseEvent *event);
 
+            void setupEditMenu();
+
+            void setupViewMenu();
+
             void setupUi();
 
             void updateTitle();

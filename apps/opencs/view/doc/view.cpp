@@ -6,6 +6,8 @@
 #include <QCloseEvent>
 #include <QMenuBar>
 
+#include "../../model/doc/document.hpp"
+
 #include "viewmanager.hpp"
 
 void CSVDoc::View::closeEvent (QCloseEvent *event)
@@ -14,15 +16,32 @@ void CSVDoc::View::closeEvent (QCloseEvent *event)
         event->ignore();
 }
 
-void CSVDoc::View::setupUi()
+void CSVDoc::View::setupEditMenu()
 {
-    // view menu
+    QMenu *edit = menuBar()->addMenu (tr ("&Edit"));
+
+    QAction *undo = mDocument->getUndoStack().createUndoAction (this, tr("&Undo"));
+    undo->setShortcuts (QKeySequence::Undo);
+    edit->addAction (undo);
+
+    QAction *redo = mDocument->getUndoStack().createRedoAction (this, tr("&Redo"));
+    redo->setShortcuts (QKeySequence::Redo);
+    edit->addAction (redo);
+}
+
+void CSVDoc::View::setupViewMenu()
+{
     QMenu *view = menuBar()->addMenu (tr ("&View"));
 
     QAction *newWindow = new QAction (tr ("&New View"), this);
     connect (newWindow, SIGNAL (triggered()), this, SLOT (newView()));
-
     view->addAction (newWindow);
+}
+
+void CSVDoc::View::setupUi()
+{
+    setupEditMenu();
+    setupViewMenu();
 }
 
 void CSVDoc::View::updateTitle()
