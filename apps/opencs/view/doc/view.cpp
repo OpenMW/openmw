@@ -27,6 +27,11 @@ void CSVDoc::View::setupEditMenu()
     QAction *redo = mDocument->getUndoStack().createRedoAction (this, tr("&Redo"));
     redo->setShortcuts (QKeySequence::Redo);
     edit->addAction (redo);
+
+    // test
+    QAction *test = new QAction (tr ("&Test Command"), this);
+    connect (test, SIGNAL (triggered()), this, SLOT (test()));
+    edit->addAction (test);
 }
 
 void CSVDoc::View::setupViewMenu()
@@ -87,4 +92,9 @@ void CSVDoc::View::setIndex (int viewIndex, int totalViews)
 void CSVDoc::View::newView()
 {
     mViewManager.addView (mDocument);
+}
+
+void CSVDoc::View::test()
+{
+    mDocument->getUndoStack().push (new QUndoCommand());
 }

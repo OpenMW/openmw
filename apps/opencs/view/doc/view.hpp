@@ -53,6 +53,8 @@ namespace CSVDoc
         private slots:
 
             void newView();
+
+            void test();
     };
 }
 
