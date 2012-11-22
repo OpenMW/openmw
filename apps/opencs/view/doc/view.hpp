@@ -31,6 +31,8 @@ namespace CSVDoc
 
             void closeEvent (QCloseEvent *event);
 
+            void setupFileMenu();
+
             void setupEditMenu();
 
             void setupViewMenu();
@@ -57,6 +59,8 @@ namespace CSVDoc
             void newView();
 
             void test();
+
+            void save();
     };
 }
 

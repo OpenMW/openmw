@@ -3,6 +3,7 @@
 
 #include <QUndoStack>
 #include <QObject>
+#include <QTimer>
 
 namespace CSMDoc
 {
@@ -14,10 +15,15 @@ namespace CSMDoc
 
             enum State
             {
-                    State_Modified = 1
+                    State_Modified = 1,
+                    State_Locked = 2,
+                    State_Saving = 4
             };
 
             QUndoStack mUndoStack;
+
+            int mSaveCount; ///< dummy implementation -> remove when proper save is implemented.
+            QTimer mSaveTimer; ///< dummy implementation -> remove when proper save is implemented.
 
             // not implemented
             Document (const Document&);
@@ -31,6 +37,10 @@ namespace CSMDoc
 
             int getState() const;
 
+            void save();
+
+            void abortSave();
+
         signals:
 
             void stateChanged (int state, CSMDoc::Document *document);
@@ -38,6 +48,9 @@ namespace CSMDoc
         private slots:
 
             void modificationStateChanged (bool clean);
+
+            void saving();
+            ///< dummy implementation -> remove when proper save is implemented.
     };
 }
 

@@ -16,6 +16,15 @@ void CSVDoc::View::closeEvent (QCloseEvent *event)
         event->ignore();
 }
 
+void CSVDoc::View::setupFileMenu()
+{
+    QMenu *file = menuBar()->addMenu (tr ("&File"));
+
+    QAction *save = new QAction (tr ("&Save"), this);
+    connect (save, SIGNAL (triggered()), this, SLOT (save()));
+    file->addAction (save);
+}
+
 void CSVDoc::View::setupEditMenu()
 {
     QMenu *edit = menuBar()->addMenu (tr ("&Edit"));
@@ -45,6 +54,7 @@ void CSVDoc::View::setupViewMenu()
 
 void CSVDoc::View::setupUi()
 {
+    setupFileMenu();
     setupEditMenu();
     setupViewMenu();
 }
@@ -105,4 +115,9 @@ void CSVDoc::View::newView()
 void CSVDoc::View::test()
 {
     mDocument->getUndoStack().push (new QUndoCommand());
+}
+
+void CSVDoc::View::save()
+{
+    mDocument->save();
 }
