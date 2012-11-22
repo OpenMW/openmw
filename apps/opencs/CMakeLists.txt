@@ -1,12 +1,18 @@
 
 set (OPENCS_SRC
-    main.cpp
+    main.cpp editor.cpp
 
     model/doc/documentmanager.cpp model/doc/document.cpp
+
+    view/doc/viewmanager.cpp view/doc/view.cpp
     )
 
 set (OPENCS_HDR
+    editor.hpp
+
     model/doc/documentmanager.hpp model/doc/document.hpp
+
+    view/doc/viewmanager.hpp view/doc/view.hpp
     )
 
 set (OPENCS_US

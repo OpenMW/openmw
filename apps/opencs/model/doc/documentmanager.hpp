@@ -1,5 +1,5 @@
-#ifndef CSM_DOCUMENTMGR_H
-#define CSM_DOCUMENTMGR_H
+#ifndef CSM_DOC_DOCUMENTMGR_H
+#define CSM_DOC_DOCUMENTMGR_H
 
 #include <vector>
 
