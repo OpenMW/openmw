@@ -2,11 +2,21 @@
 #define CSM_DOC_DOCUMENT_H
 
 #include <QUndoStack>
+#include <QObject>
 
 namespace CSMDoc
 {
-    class Document
+    class Document : public QObject
     {
+            Q_OBJECT
+
+        public:
+
+            enum State
+            {
+                    State_Modified = 1
+            };
+
             QUndoStack mUndoStack;
 
             // not implemented
@@ -18,6 +28,16 @@ namespace CSMDoc
             Document();
 
             QUndoStack& getUndoStack();
+
+            int getState() const;
+
+        signals:
+
+            void stateChanged (int state, CSMDoc::Document *document);
+
+        private slots:
+
+            void modificationStateChanged (bool clean);
     };
 }
 

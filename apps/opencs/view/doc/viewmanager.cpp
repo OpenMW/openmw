@@ -4,6 +4,7 @@
 #include <map>
 
 #include "../../model/doc/documentmanager.hpp"
+#include "../../model/doc/document.hpp"
 
 #include "view.hpp"
 
@@ -42,6 +43,13 @@ CSVDoc::ViewManager::~ViewManager()
 
 CSVDoc::View *CSVDoc::ViewManager::addView (CSMDoc::Document *document)
 {
+    if (countViews (document)==0)
+    {
+        // new document
+        connect (document, SIGNAL (stateChanged (int, CSMDoc::Document *)),
+            this, SLOT (documentStateChanged (int, CSMDoc::Document *)));
+    }
+
     View *view = new View (*this, document, countViews (document)+1);
 
     mViews.push_back (view);
@@ -84,4 +92,11 @@ bool CSVDoc::ViewManager::closeRequest (View *view)
     }
 
     return true;
+}
+
+void CSVDoc::ViewManager::documentStateChanged (int state, CSMDoc::Document *document)
+{
+    for (std::vector<View *>::const_iterator iter (mViews.begin()); iter!=mViews.end(); ++iter)
+            if ((*iter)->getDocument()==document)
+                (*iter)->updateDocumentState();
 }

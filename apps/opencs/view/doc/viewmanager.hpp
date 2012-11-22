@@ -3,6 +3,8 @@
 
 #include <vector>
 
+#include <QObject>
+
 namespace CSMDoc
 {
     class Document;
@@ -13,8 +15,10 @@ namespace CSVDoc
 {
     class View;
 
-    class ViewManager
+    class ViewManager : public QObject
     {
+            Q_OBJECT
+
             CSMDoc::DocumentManager& mDocumentManager;
             std::vector<View *> mViews;
             std::vector<View *> mClosed;
@@ -29,7 +33,7 @@ namespace CSVDoc
 
             ViewManager (CSMDoc::DocumentManager& documentManager);
 
-            ~ViewManager();
+            virtual ~ViewManager();
 
             View *addView (CSMDoc::Document *document);
             ///< The ownership of the returned view is not transferred.
@@ -39,8 +43,9 @@ namespace CSVDoc
 
             bool closeRequest (View *view);
 
+        private slots:
 
-
+            void documentStateChanged (int state, CSMDoc::Document *document);
     };
 
 }

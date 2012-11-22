@@ -50,6 +50,8 @@ namespace CSVDoc
 
             void setIndex (int viewIndex, int totalViews);
 
+            void updateDocumentState();
+
         private slots:
 
             void newView();

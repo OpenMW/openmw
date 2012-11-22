@@ -55,6 +55,9 @@ void CSVDoc::View::updateTitle()
 
     stream << "New Document ";
 
+    if (mDocument->getState() & CSMDoc::Document::State_Modified)
+            stream << " *";
+
     if (mViewTotal>1)
         stream << " [" << (mViewIndex+1) << "/" << mViewTotal << "]";
 
@@ -86,6 +89,11 @@ void CSVDoc::View::setIndex (int viewIndex, int totalViews)
 {
     mViewIndex = viewIndex;
     mViewTotal = totalViews;
+    updateTitle();
+}
+
+void CSVDoc::View::updateDocumentState()
+{
     updateTitle();
 }
 
