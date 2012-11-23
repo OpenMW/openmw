@@ -110,14 +110,7 @@ namespace MWDialogue
             size_t pos = find_str_ci(text,*it,0);
             if(pos !=std::string::npos)
             {
-                if(pos==0)
-                {
-                    mKnownTopics[*it] = true;
-                }
-                else if(text.substr(pos -1,1) == " ")
-                {
-                    mKnownTopics[*it] = true;
-                }
+                mKnownTopics[*it] = true;
             }
         }
         updateTopics();
