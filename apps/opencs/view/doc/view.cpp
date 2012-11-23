@@ -9,6 +9,7 @@
 #include "../../model/doc/document.hpp"
 
 #include "viewmanager.hpp"
+#include "operations.hpp"
 
 void CSVDoc::View::closeEvent (QCloseEvent *event)
 {
@@ -94,6 +95,9 @@ CSVDoc::View::View (ViewManager& viewManager, CSMDoc::Document *document, int to
     setCentralWidget (new QWidget);
     resize (200, 200);
 
+    mOperations = new Operations;
+    addDockWidget (Qt::BottomDockWidgetArea, mOperations);
+
     updateTitle();
 
     setupUi();
@@ -120,11 +124,23 @@ void CSVDoc::View::updateDocumentState()
 {
     updateTitle();
     updateActions();
+
+    static const int operations[] =
+    {
+        CSMDoc::Document::State_Saving,
+        -1 // end marker
+    };
+
+    int state = mDocument->getState() ;
+
+    for (int i=0; operations[i]!=-1; ++i)
+        if (!(state & operations[i]))
+            mOperations->quitOperation (operations[i]);
 }
 
-void CSVDoc::View::updateProgress (int current, int max, int type)
+void CSVDoc::View::updateProgress (int current, int max, int type, int threads)
 {
-
+    mOperations->setProgress (current, max, type, threads);
 }
 
 void CSVDoc::View::newView()

@@ -15,6 +15,7 @@ namespace CSMDoc
 namespace CSVDoc
 {
     class ViewManager;
+    class Operations;
 
     class View : public QMainWindow
     {
@@ -28,6 +29,7 @@ namespace CSVDoc
             QAction *mRedo;
             QAction *mSave;
             std::vector<QAction *> mEditingActions;
+            Operations *mOperations;
 
             // not implemented
             View (const View&);
@@ -62,7 +64,7 @@ namespace CSVDoc
 
             void updateDocumentState();
 
-            void updateProgress (int current, int max, int type);
+            void updateProgress (int current, int max, int type, int threads);
 
         private slots:
 

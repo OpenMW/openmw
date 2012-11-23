@@ -39,13 +39,13 @@ namespace CSMDoc
 
             void save();
 
-            void abortSave();
+            void abortOperation (int type);
 
         signals:
 
             void stateChanged (int state, CSMDoc::Document *document);
 
-            void progress (int current, int max, int type, CSMDoc::Document *document);
+            void progress (int current, int max, int type, int threads, CSMDoc::Document *document);
 
         private slots:
 

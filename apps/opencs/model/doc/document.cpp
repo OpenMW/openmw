@@ -33,13 +33,16 @@ void CSMDoc::Document::save()
     mSaveCount = 1;
     mSaveTimer.start (500);
     emit stateChanged (getState(), this);
-    emit progress (1, 16, State_Saving, this);
+    emit progress (1, 16, State_Saving, 1, this);
 }
 
-void CSMDoc::Document::abortSave()
+void CSMDoc::Document::abortOperation (int type)
 {
-    mSaveTimer.stop();
-    emit stateChanged (getState(), this);
+    if (type==State_Saving)
+    {
+        mSaveTimer.stop();
+        emit stateChanged (getState(), this);
+    }
 }
 
 void CSMDoc::Document::modificationStateChanged (bool clean)
@@ -51,7 +54,7 @@ void CSMDoc::Document::saving()
 {
     ++mSaveCount;
 
-    emit progress (mSaveCount, 16, State_Saving, this);
+    emit progress (mSaveCount, 16, State_Saving, 1, this);
 
     if (mSaveCount>15)
     {
