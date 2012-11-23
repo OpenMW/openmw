@@ -14,6 +14,8 @@
 #include "../mwworld/manualref.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/containerstore.hpp"
+#include "../mwworld/actionequip.hpp"
+#include "../mwworld/inventorystore.hpp"
 
 #include "interpretercontext.hpp"
 #include "ref.hpp"
@@ -128,12 +130,41 @@ namespace MWScript
                 }
         };
 
+        template <class R>
+        class OpEquip : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute(Interpreter::Runtime &runtime)
+                {
+                    MWWorld::Ptr ptr = R()(runtime);
+
+                    std::string item = runtime.getStringLiteral (runtime[0].mInteger);
+                    runtime.pop();
+
+                    MWWorld::InventoryStore& invStore = MWWorld::Class::get(ptr).getInventoryStore (ptr);
+                    MWWorld::ContainerStoreIterator it = invStore.begin();
+                    for (; it != invStore.end(); ++it)
+                    {
+                        if (toLower(it->getCellRef().mRefID) == toLower(item))
+                            break;
+                    }
+                    if (it == invStore.end())
+                        throw std::runtime_error("Item to equip not found");
+
+                    MWWorld::ActionEquip action (*it);
+                    action.execute(ptr);
+                }
+        };
+
         const int opcodeAddItem = 0x2000076;
         const int opcodeAddItemExplicit = 0x2000077;
         const int opcodeGetItemCount = 0x2000078;
         const int opcodeGetItemCountExplicit = 0x2000079;
         const int opcodeRemoveItem = 0x200007a;
         const int opcodeRemoveItemExplicit = 0x200007b;
+        const int opcodeEquip = 0x20001b3;
+        const int opcodeEquipExplicit = 0x20001b4;
 
         void registerExtensions (Compiler::Extensions& extensions)
         {
@@ -142,6 +173,7 @@ namespace MWScript
                 opcodeGetItemCountExplicit);
             extensions.registerInstruction ("removeitem", "cl", opcodeRemoveItem,
                 opcodeRemoveItemExplicit);
+            extensions.registerInstruction ("equip", "c", opcodeEquip, opcodeEquipExplicit);
         }
 
         void installOpcodes (Interpreter::Interpreter& interpreter)
@@ -152,6 +184,8 @@ namespace MWScript
              interpreter.installSegment5 (opcodeGetItemCountExplicit, new OpGetItemCount<ExplicitRef>);
              interpreter.installSegment5 (opcodeRemoveItem, new OpRemoveItem<ImplicitRef>);
              interpreter.installSegment5 (opcodeRemoveItemExplicit, new OpRemoveItem<ExplicitRef>);
+             interpreter.installSegment5 (opcodeEquip, new OpEquip<ImplicitRef>);
+             interpreter.installSegment5 (opcodeEquipExplicit, new OpEquip<ExplicitRef>);
         }
     }
 }
