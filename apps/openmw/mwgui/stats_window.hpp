@@ -38,8 +38,8 @@ namespace MWGui
             void setValue(const ESM::Skill::SkillEnum parSkill, const MWMechanics::Stat<float>& value);
 
             void configureSkills (const SkillList& major, const SkillList& minor);
-            void setReputation (int reputation) { this->mReputation = reputation; }
-            void setBounty (int bounty) { this->mBounty = bounty; }
+            void setReputation (int reputation) { if (reputation != mReputation) mChanged = true; this->mReputation = reputation; }
+            void setBounty (int bounty) { if (bounty != mBounty) mChanged = true; this->mBounty = bounty; }
             void updateSkillArea();
 
         private:
