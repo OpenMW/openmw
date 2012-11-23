@@ -14,9 +14,9 @@ CSMDoc::DocumentManager::~DocumentManager()
         delete *iter;
 }
 
-CSMDoc::Document *CSMDoc::DocumentManager::addDocument()
+CSMDoc::Document *CSMDoc::DocumentManager::addDocument (const std::string& name)
 {
-    Document *document = new Document;
+    Document *document = new Document (name);
 
     mDocuments.push_back (document);
 

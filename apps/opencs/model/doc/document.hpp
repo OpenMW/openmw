@@ -1,6 +1,8 @@
 #ifndef CSM_DOC_DOCUMENT_H
 #define CSM_DOC_DOCUMENT_H
 
+#include <string>
+
 #include <QUndoStack>
 #include <QObject>
 #include <QTimer>
@@ -21,6 +23,7 @@ namespace CSMDoc
                     State_Verifying = 8
             };
 
+            std::string mName; ///< \todo replace name with ESX list
             QUndoStack mUndoStack;
 
             int mSaveCount; ///< dummy implementation -> remove when proper save is implemented.
@@ -35,11 +38,15 @@ namespace CSMDoc
 
         public:
 
-            Document();
+            Document (const std::string& name);
+            ///< \todo replace name with ESX list
 
             QUndoStack& getUndoStack();
 
             int getState() const;
+
+            const std::string& getName() const;
+            ///< \todo replace with ESX list
 
             void save();
 

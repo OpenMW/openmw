@@ -1,8 +1,10 @@
 
 #include "document.hpp"
 
-CSMDoc::Document::Document()
+CSMDoc::Document::Document (const std::string& name)
 {
+    mName = name; ///< \todo replace with ESX list
+
     connect (&mUndoStack, SIGNAL (cleanChanged (bool)), this, SLOT (modificationStateChanged (bool)));
 
      // dummy implementation -> remove when proper save is implemented.
@@ -33,6 +35,11 @@ int CSMDoc::Document::getState() const
         state |= State_Locked | State_Verifying;
 
     return state;
+}
+
+const std::string& CSMDoc::Document::getName() const
+{
+    return mName;
 }
 
 void CSMDoc::Document::save()

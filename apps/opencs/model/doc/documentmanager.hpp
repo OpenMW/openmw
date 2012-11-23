@@ -2,6 +2,7 @@
 #define CSM_DOC_DOCUMENTMGR_H
 
 #include <vector>
+#include <string>
 
 namespace CSMDoc
 {
@@ -20,7 +21,7 @@ namespace CSMDoc
 
             ~DocumentManager();
 
-            Document *addDocument();
+            Document *addDocument (const std::string& name);
             ///< The ownership of the returned document is not transferred to the caller.
 
             bool removeDocument (Document *document);

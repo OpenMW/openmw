@@ -42,6 +42,10 @@ namespace CSVDoc
 
             bool closeRequest (View *view);
 
+        signals:
+
+            void newDocumentRequest();
+
         private slots:
 
             void documentStateChanged (int state, CSMDoc::Document *document);

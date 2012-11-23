@@ -21,6 +21,10 @@ void CSVDoc::View::setupFileMenu()
 {
     QMenu *file = menuBar()->addMenu (tr ("&File"));
 
+    QAction *new_ = new QAction (tr ("New"), this);
+    connect (new_, SIGNAL (triggered()), this, SIGNAL (newDocumentRequest()));
+    file->addAction (new_);
+
     mSave = new QAction (tr ("&Save"), this);
     connect (mSave, SIGNAL (triggered()), this, SLOT (save()));
     file->addAction (mSave);
@@ -75,7 +79,7 @@ void CSVDoc::View::updateTitle()
 {
     std::ostringstream stream;
 
-    stream << "New Document ";
+    stream << mDocument->getName();
 
     if (mDocument->getState() & CSMDoc::Document::State_Modified)
             stream << " *";
@@ -104,7 +108,7 @@ CSVDoc::View::View (ViewManager& viewManager, CSMDoc::Document *document, int to
 : mViewManager (viewManager), mDocument (document), mViewIndex (totalViews-1), mViewTotal (totalViews)
 {
     setCentralWidget (new QWidget);
-    resize (200, 200);
+    resize (200, 200); /// \todo get default size from settings and set reasonable minimal size
 
     mOperations = new Operations;
     addDockWidget (Qt::BottomDockWidgetArea, mOperations);

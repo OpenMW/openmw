@@ -56,6 +56,8 @@ CSVDoc::View *CSVDoc::ViewManager::addView (CSMDoc::Document *document)
 
     view->show();
 
+    connect (view, SIGNAL (newDocumentRequest ()), this, SIGNAL (newDocumentRequest()));
+
     updateIndices();
 
     return view;
