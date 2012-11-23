@@ -232,5 +232,21 @@ op 0x20001b3: Equip
 op 0x20001b4: Equip, explicit
 op 0x20001b5: SameFaction
 op 0x20001b6: SameFaction, explicit
-opcodes 0x20001b7-0x3ffffff unused
+op 0x20001b7: ModHello
+op 0x20001b8: ModHello, explicit reference
+op 0x20001b9: ModFight
+op 0x20001ba: ModFight, explicit reference
+op 0x20001bb: ModFlee
+op 0x20001bc: ModFlee, explicit reference
+op 0x20001bd: ModAlarm
+op 0x20001be: ModAlarm, explicit reference
+op 0x20001bf: GetHello
+op 0x20001c0: GetHello, explicit reference
+op 0x20001c1: GetFight
+op 0x20001c2: GetFight, explicit reference
+op 0x20001c3: GetFlee
+op 0x20001c4: GetFlee, explicit reference
+op 0x20001c5: GetAlarm
+op 0x20001c6: GetAlarm, explicit reference
+opcodes 0x20001c7-0x3ffffff unused
 
