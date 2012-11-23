@@ -230,5 +230,7 @@ op 0x20001b1: GetReputation
 op 0x20001b2: GetReputation, explicit
 op 0x20001b3: Equip
 op 0x20001b4: Equip, explicit
-opcodes 0x20001b5-0x3ffffff unused
+op 0x20001b5: SameFaction
+op 0x20001b6: SameFaction, explicit
+opcodes 0x20001b7-0x3ffffff unused
 

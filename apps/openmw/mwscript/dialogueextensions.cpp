@@ -12,6 +12,7 @@
 #include "../mwbase/journal.hpp"
 
 #include "../mwworld/class.hpp"
+#include "../mwworld/player.hpp"
 #include "../mwmechanics/npcstats.hpp"
 
 #include "interpretercontext.hpp"
@@ -172,6 +173,21 @@ namespace MWScript
                 }
         };
 
+        template<class R>
+        class OpSameFaction : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWWorld::Ptr ptr = R()(runtime);
+
+                    MWWorld::Ptr player = MWBase::Environment::get().getWorld ()->getPlayer ().getPlayer();
+
+                    runtime.push (MWWorld::Class::get(ptr).getNpcStats (ptr).isSameFaction (MWWorld::Class::get(player).getNpcStats (player)));
+                }
+        };
+
         const int opcodeJournal = 0x2000133;
         const int opcodeSetJournalIndex = 0x2000134;
         const int opcodeGetJournalIndex = 0x2000135;
@@ -186,6 +202,8 @@ namespace MWScript
         const int opcodeModReputationExplicit = 0x20001b0;
         const int opcodeGetReputation = 0x20001b1;
         const int opcodeGetReputationExplicit = 0x20001b2;
+        const int opcodeSameFaction = 0x20001b5;
+        const int opcodeSameFactionExplicit = 0x20001b6;
 
         void registerExtensions (Compiler::Extensions& extensions)
         {
@@ -204,6 +222,8 @@ namespace MWScript
                 opcodeModReputationExplicit);
             extensions.registerFunction("getreputation", 'l', "", opcodeGetReputation,
                 opcodeGetReputationExplicit);
+            extensions.registerFunction("samefaction", 'l', "", opcodeSameFaction,
+                opcodeSameFactionExplicit);
         }
 
         void installOpcodes (Interpreter::Interpreter& interpreter)
@@ -222,6 +242,8 @@ namespace MWScript
             interpreter.installSegment5 (opcodeSetReputationExplicit, new OpSetReputation<ExplicitRef>);
             interpreter.installSegment5 (opcodeModReputationExplicit, new OpModReputation<ExplicitRef>);
             interpreter.installSegment5 (opcodeGetReputationExplicit, new OpGetReputation<ExplicitRef>);
+            interpreter.installSegment5 (opcodeSameFaction, new OpSameFaction<ImplicitRef>);
+            interpreter.installSegment5 (opcodeSameFactionExplicit, new OpSameFaction<ExplicitRef>);
         }
     }
 
