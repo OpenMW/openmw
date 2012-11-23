@@ -46,7 +46,7 @@ namespace CSVDoc
 
             void documentStateChanged (int state, CSMDoc::Document *document);
 
-            void progress (int current, int max, CSMDoc::Document *document);
+            void progress (int current, int max, int type, CSMDoc::Document *document);
     };
 
 }

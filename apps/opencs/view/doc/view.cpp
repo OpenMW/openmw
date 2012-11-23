@@ -20,10 +20,9 @@ void CSVDoc::View::setupFileMenu()
 {
     QMenu *file = menuBar()->addMenu (tr ("&File"));
 
-    QAction *save = new QAction (tr ("&Save"), this);
-    connect (save, SIGNAL (triggered()), this, SLOT (save()));
-    file->addAction (save);
-    mEditingActions.push_back (save);
+    mSave = new QAction (tr ("&Save"), this);
+    connect (mSave, SIGNAL (triggered()), this, SLOT (save()));
+    file->addAction (mSave);
 }
 
 void CSVDoc::View::setupEditMenu()
@@ -85,6 +84,8 @@ void CSVDoc::View::updateActions()
 
     mUndo->setEnabled (editing & mDocument->getUndoStack().canUndo());
     mRedo->setEnabled (editing & mDocument->getUndoStack().canRedo());
+
+    mSave->setEnabled (!(mDocument->getState() & CSMDoc::Document::State_Saving));
 }
 
 CSVDoc::View::View (ViewManager& viewManager, CSMDoc::Document *document, int totalViews)
@@ -121,7 +122,7 @@ void CSVDoc::View::updateDocumentState()
     updateActions();
 }
 
-void CSVDoc::View::updateProgress (int current, int max)
+void CSVDoc::View::updateProgress (int current, int max, int type)
 {
 
 }

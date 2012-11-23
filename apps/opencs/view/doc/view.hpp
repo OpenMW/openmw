@@ -26,6 +26,7 @@ namespace CSVDoc
             int mViewTotal;
             QAction *mUndo;
             QAction *mRedo;
+            QAction *mSave;
             std::vector<QAction *> mEditingActions;
 
             // not implemented
@@ -61,7 +62,7 @@ namespace CSVDoc
 
             void updateDocumentState();
 
-            void updateProgress (int current, int max);
+            void updateProgress (int current, int max, int type);
 
         private slots:
 

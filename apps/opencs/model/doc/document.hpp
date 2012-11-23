@@ -17,8 +17,7 @@ namespace CSMDoc
             {
                     State_Modified = 1,
                     State_Locked = 2,
-                    State_Saving = 4,
-                    State_Progress = 8
+                    State_Saving = 4
             };
 
             QUndoStack mUndoStack;
@@ -46,7 +45,7 @@ namespace CSMDoc
 
             void stateChanged (int state, CSMDoc::Document *document);
 
-            void progress (int current, int max, CSMDoc::Document *document);
+            void progress (int current, int max, int type, CSMDoc::Document *document);
 
         private slots:
 

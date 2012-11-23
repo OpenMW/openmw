@@ -23,7 +23,7 @@ int CSMDoc::Document::getState() const
         state |= State_Modified;
 
     if (mSaveCount)
-        state |= State_Locked | State_Saving | State_Progress;
+        state |= State_Locked | State_Saving;
 
     return state;
 }
@@ -33,7 +33,7 @@ void CSMDoc::Document::save()
     mSaveCount = 1;
     mSaveTimer.start (500);
     emit stateChanged (getState(), this);
-    emit progress (1, 16, this);
+    emit progress (1, 16, State_Saving, this);
 }
 
 void CSMDoc::Document::abortSave()
@@ -51,7 +51,7 @@ void CSMDoc::Document::saving()
 {
     ++mSaveCount;
 
-    emit progress (mSaveCount, 16, this);
+    emit progress (mSaveCount, 16, State_Saving, this);
 
     if (mSaveCount>15)
     {

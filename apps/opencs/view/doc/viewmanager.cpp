@@ -46,8 +46,8 @@ CSVDoc::View *CSVDoc::ViewManager::addView (CSMDoc::Document *document)
         connect (document, SIGNAL (stateChanged (int, CSMDoc::Document *)),
             this, SLOT (documentStateChanged (int, CSMDoc::Document *)));
 
-        connect (document, SIGNAL (progress (int, int, CSMDoc::Document *)),
-            this, SLOT (progress (int, int, CSMDoc::Document *)));
+        connect (document, SIGNAL (progress (int, int, int, CSMDoc::Document *)),
+            this, SLOT (progress (int, int, int, CSMDoc::Document *)));
     }
 
     View *view = new View (*this, document, countViews (document)+1);
@@ -102,9 +102,9 @@ void CSVDoc::ViewManager::documentStateChanged (int state, CSMDoc::Document *doc
                 (*iter)->updateDocumentState();
 }
 
-void CSVDoc::ViewManager::progress (int current, int max, CSMDoc::Document *document)
+void CSVDoc::ViewManager::progress (int current, int max, int type, CSMDoc::Document *document)
 {
     for (std::vector<View *>::const_iterator iter (mViews.begin()); iter!=mViews.end(); ++iter)
             if ((*iter)->getDocument()==document)
-                (*iter)->updateProgress (current, max);
+                (*iter)->updateProgress (current, max, type);
 }
