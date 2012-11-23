@@ -159,6 +159,18 @@ namespace MWScript
                 }
         };
 
+        template<class R>
+        class OpGetReputation : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWWorld::Ptr ptr = R()(runtime);
+
+                    runtime.push (MWWorld::Class::get(ptr).getNpcStats (ptr).getReputation ());
+                }
+        };
 
         const int opcodeJournal = 0x2000133;
         const int opcodeSetJournalIndex = 0x2000134;
@@ -172,6 +184,8 @@ namespace MWScript
         const int opcodeModReputation = 0x20001ae;
         const int opcodeSetReputationExplicit = 0x20001af;
         const int opcodeModReputationExplicit = 0x20001b0;
+        const int opcodeGetReputation = 0x20001b1;
+        const int opcodeGetReputationExplicit = 0x20001b2;
 
         void registerExtensions (Compiler::Extensions& extensions)
         {
@@ -188,6 +202,8 @@ namespace MWScript
                 opcodeSetReputationExplicit);
             extensions.registerInstruction("modreputation", "l", opcodeModReputation,
                 opcodeModReputationExplicit);
+            extensions.registerFunction("getreputation", 'l', "", opcodeGetReputation,
+                opcodeGetReputationExplicit);
         }
 
         void installOpcodes (Interpreter::Interpreter& interpreter)
@@ -200,10 +216,12 @@ namespace MWScript
             interpreter.installSegment5 (opcodeForceGreeting, new OpForceGreeting<ImplicitRef>);
             interpreter.installSegment5 (opcodeForceGreetingExplicit, new OpForceGreeting<ExplicitRef>);
             interpreter.installSegment5 (opcodeGoodbye, new OpGoodbye);
+            interpreter.installSegment5 (opcodeGetReputation, new OpGetReputation<ImplicitRef>);
             interpreter.installSegment5 (opcodeSetReputation, new OpSetReputation<ImplicitRef>);
             interpreter.installSegment5 (opcodeModReputation, new OpModReputation<ImplicitRef>);
             interpreter.installSegment5 (opcodeSetReputationExplicit, new OpSetReputation<ExplicitRef>);
             interpreter.installSegment5 (opcodeModReputationExplicit, new OpModReputation<ExplicitRef>);
+            interpreter.installSegment5 (opcodeGetReputationExplicit, new OpGetReputation<ExplicitRef>);
         }
     }
 

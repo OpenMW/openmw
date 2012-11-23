@@ -226,5 +226,7 @@ op 0x20001ad: SetReputation
 op 0x20001ae: ModReputation
 op 0x20001af: SetReputation, explicit
 op 0x20001b0: ModReputation, explicit
+op 0x20001b1: GetReputation
+op 0x20001b2: GetReputation, explicit
 opcodes 0x20001b1-0x3ffffff unused
 
