@@ -332,6 +332,8 @@ void RenderingManager::update (float duration, bool paused)
     }
     mOcclusionQuery->update(duration);
     
+    mRendering.update(duration);
+
     if(paused)
     {
         Ogre::ControllerManager::getSingleton().setTimeFactor(0.f);
@@ -349,8 +351,6 @@ void RenderingManager::update (float duration, bool paused)
     mSkyManager->update(duration);
 
     mSkyManager->setGlare(mOcclusionQuery->getSunVisibility());
-
-    mRendering.update(duration);
 
     MWWorld::RefData &data = 
         MWBase::Environment::get()
