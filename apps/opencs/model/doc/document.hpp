@@ -17,13 +17,17 @@ namespace CSMDoc
             {
                     State_Modified = 1,
                     State_Locked = 2,
-                    State_Saving = 4
+                    State_Saving = 4,
+                    State_Verifying = 8
             };
 
             QUndoStack mUndoStack;
 
             int mSaveCount; ///< dummy implementation -> remove when proper save is implemented.
             QTimer mSaveTimer; ///< dummy implementation -> remove when proper save is implemented.
+
+            int mVerifyCount; ///< dummy implementation -> remove when proper verify is implemented.
+            QTimer mVerifyTimer; ///< dummy implementation -> remove when proper verify is implemented.
 
             // not implemented
             Document (const Document&);
@@ -39,6 +43,8 @@ namespace CSMDoc
 
             void save();
 
+            void verify();
+
             void abortOperation (int type);
 
         signals:
@@ -53,6 +59,9 @@ namespace CSMDoc
 
             void saving();
             ///< dummy implementation -> remove when proper save is implemented.
+
+            void verifying();
+            ///< dummy implementation -> remove when proper verify is implemented.
     };
 }
 

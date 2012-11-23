@@ -28,6 +28,7 @@ namespace CSVDoc
             QAction *mUndo;
             QAction *mRedo;
             QAction *mSave;
+            QAction *mVerify;
             std::vector<QAction *> mEditingActions;
             Operations *mOperations;
 
@@ -44,6 +45,8 @@ namespace CSVDoc
             void setupEditMenu();
 
             void setupViewMenu();
+
+            void setupWorldMenu();
 
             void setupUi();
 
@@ -73,6 +76,8 @@ namespace CSVDoc
             void test();
 
             void save();
+
+            void verify();
     };
 }
 

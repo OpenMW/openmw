@@ -54,11 +54,21 @@ void CSVDoc::View::setupViewMenu()
     view->addAction (newWindow);
 }
 
+void CSVDoc::View::setupWorldMenu()
+{
+    QMenu *world = menuBar()->addMenu (tr ("&World"));
+
+    mVerify = new QAction (tr ("&Verify"), this);
+    connect (mVerify, SIGNAL (triggered()), this, SLOT (verify()));
+    world->addAction (mVerify);
+}
+
 void CSVDoc::View::setupUi()
 {
     setupFileMenu();
     setupEditMenu();
     setupViewMenu();
+    setupWorldMenu();
 }
 
 void CSVDoc::View::updateTitle()
@@ -87,6 +97,7 @@ void CSVDoc::View::updateActions()
     mRedo->setEnabled (editing & mDocument->getUndoStack().canRedo());
 
     mSave->setEnabled (!(mDocument->getState() & CSMDoc::Document::State_Saving));
+    mVerify->setEnabled (!(mDocument->getState() & CSMDoc::Document::State_Verifying));
 }
 
 CSVDoc::View::View (ViewManager& viewManager, CSMDoc::Document *document, int totalViews)
@@ -127,7 +138,7 @@ void CSVDoc::View::updateDocumentState()
 
     static const int operations[] =
     {
-        CSMDoc::Document::State_Saving,
+        CSMDoc::Document::State_Saving, CSMDoc::Document::State_Verifying,
         -1 // end marker
     };
 
@@ -156,4 +167,9 @@ void CSVDoc::View::test()
 void CSVDoc::View::save()
 {
     mDocument->save();
+}
+
+void CSVDoc::View::verify()
+{
+    mDocument->verify();
 }

@@ -14,6 +14,7 @@ void CSVDoc::Operation::updateLabel (int threads)
         switch (mType)
         {
             case CSMDoc::Document::State_Saving: name = "saving"; break;
+            case CSMDoc::Document::State_Verifying: name = "verifying"; break;
         }
 
         std::ostringstream stream;
@@ -34,6 +35,8 @@ void CSVDoc::Operation::updateLabel (int threads)
 CSVDoc::Operation::Operation (int type) : mType (type), mStalling (false)
 {
     updateLabel();
+
+    /// \todo assign different progress bar colours to allow the user to distinguish easily between operation types
 }
 
 void CSVDoc::Operation::setProgress (int current, int max, int threads)
