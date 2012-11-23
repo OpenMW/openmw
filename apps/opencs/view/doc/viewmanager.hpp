@@ -46,6 +46,8 @@ namespace CSVDoc
         private slots:
 
             void documentStateChanged (int state, CSMDoc::Document *document);
+
+            void progress (int current, int max, CSMDoc::Document *document);
     };
 
 }

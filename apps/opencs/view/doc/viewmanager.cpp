@@ -48,6 +48,9 @@ CSVDoc::View *CSVDoc::ViewManager::addView (CSMDoc::Document *document)
         // new document
         connect (document, SIGNAL (stateChanged (int, CSMDoc::Document *)),
             this, SLOT (documentStateChanged (int, CSMDoc::Document *)));
+
+        connect (document, SIGNAL (progress (int, int, CSMDoc::Document *)),
+            this, SLOT (progress (int, int, CSMDoc::Document *)));
     }
 
     View *view = new View (*this, document, countViews (document)+1);
@@ -80,6 +83,7 @@ bool CSVDoc::ViewManager::closeRequest (View *view)
     {
         bool last = countViews (view->getDocument())<=1;
 
+        /// \todo check if save is in progress  -> warn user about possible data loss
         /// \todo check if document has not been saved -> return false and start close dialogue
 
         mViews.erase (iter);
@@ -99,4 +103,11 @@ void CSVDoc::ViewManager::documentStateChanged (int state, CSMDoc::Document *doc
     for (std::vector<View *>::const_iterator iter (mViews.begin()); iter!=mViews.end(); ++iter)
             if ((*iter)->getDocument()==document)
                 (*iter)->updateDocumentState();
+}
+
+void CSVDoc::ViewManager::progress (int current, int max, CSMDoc::Document *document)
+{
+    for (std::vector<View *>::const_iterator iter (mViews.begin()); iter!=mViews.end(); ++iter)
+            if ((*iter)->getDocument()==document)
+                (*iter)->updateProgress (current, max);
 }

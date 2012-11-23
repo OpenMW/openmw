@@ -61,6 +61,8 @@ namespace CSVDoc
 
             void updateDocumentState();
 
+            void updateProgress (int current, int max);
+
         private slots:
 
             void newView();

@@ -121,6 +121,11 @@ void CSVDoc::View::updateDocumentState()
     updateActions();
 }
 
+void CSVDoc::View::updateProgress (int current, int max)
+{
+
+}
+
 void CSVDoc::View::newView()
 {
     mViewManager.addView (mDocument);
