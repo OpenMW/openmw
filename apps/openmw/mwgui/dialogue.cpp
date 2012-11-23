@@ -333,9 +333,9 @@ std::string DialogueWindow::parseText(std::string text)
     for(unsigned int i = 0;i<mTopicsList->getItemCount();i++)
     {
         std::string keyWord = mTopicsList->getItemNameAt(i);
-        if (separatorReached && keyWord != "")
+        if (separatorReached)
             topics.push_back(keyWord);
-        else
+        else if (keyWord == "")
             separatorReached = true;
     }
 
