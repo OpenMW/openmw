@@ -272,6 +272,19 @@ namespace MWScript
         };
         bool OpToggleVanityMode::sActivate = true;
 
+        template <class R>
+        class OpGetLocked : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWWorld::Ptr ptr = R()(runtime);
+
+                    runtime.push (ptr.getCellRef ().mLockLevel > 0);
+                }
+        };
+
         const int opcodeXBox = 0x200000c;
         const int opcodeOnActivate = 0x200000d;
         const int opcodeActivate = 0x2000075;
@@ -291,6 +304,8 @@ namespace MWScript
         const int opcodeToggleVanityMode = 0x2000174;
         const int opcodeGetPcSleep = 0x200019f;
         const int opcodeWakeUpPc = 0x20001a2;
+        const int opcodeGetLocked = 0x20001c7;
+        const int opcodeGetLockedExplicit = 0x20001c8;
 
         void registerExtensions (Compiler::Extensions& extensions)
         {
@@ -317,6 +332,7 @@ namespace MWScript
             extensions.registerInstruction ("tvm", "", opcodeToggleVanityMode);
             extensions.registerFunction ("getpcsleep", 'l', "", opcodeGetPcSleep);
             extensions.registerInstruction ("wakeuppc", "", opcodeWakeUpPc);
+            extensions.registerFunction ("getlocked", 'l', "", opcodeGetLocked, opcodeGetLockedExplicit);
         }
 
         void installOpcodes (Interpreter::Interpreter& interpreter)
@@ -340,6 +356,8 @@ namespace MWScript
             interpreter.installSegment5 (opcodeToggleVanityMode, new OpToggleVanityMode);
             interpreter.installSegment5 (opcodeGetPcSleep, new OpGetPcSleep);
             interpreter.installSegment5 (opcodeWakeUpPc, new OpWakeUpPc);
+            interpreter.installSegment5 (opcodeGetLocked, new OpGetLocked<ImplicitRef>);
+            interpreter.installSegment5 (opcodeGetLockedExplicit, new OpGetLocked<ExplicitRef>);
         }
     }
 }

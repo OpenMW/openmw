@@ -248,5 +248,7 @@ op 0x20001c3: GetFlee
 op 0x20001c4: GetFlee, explicit reference
 op 0x20001c5: GetAlarm
 op 0x20001c6: GetAlarm, explicit reference
+op 0x20001c7: GetLocked
+op 0x20001c8: GetLocked, explicit reference
 opcodes 0x20001c7-0x3ffffff unused
 
