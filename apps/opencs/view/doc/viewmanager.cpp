@@ -36,9 +36,6 @@ CSVDoc::ViewManager::~ViewManager()
 {
     for (std::vector<View *>::iterator iter (mViews.begin()); iter!=mViews.end(); ++iter)
         delete *iter;
-
-    for (std::vector<View *>::iterator iter (mClosed.begin()); iter!=mClosed.end(); ++iter)
-        delete *iter;
 }
 
 CSVDoc::View *CSVDoc::ViewManager::addView (CSMDoc::Document *document)
@@ -87,7 +84,7 @@ bool CSVDoc::ViewManager::closeRequest (View *view)
         /// \todo check if document has not been saved -> return false and start close dialogue
 
         mViews.erase (iter);
-        mClosed.push_back (view);
+        view->deleteLater();
 
         if (last)
             mDocumentManager.removeDocument (view->getDocument());

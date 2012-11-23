@@ -21,7 +21,6 @@ namespace CSVDoc
 
             CSMDoc::DocumentManager& mDocumentManager;
             std::vector<View *> mViews;
-            std::vector<View *> mClosed;
 
             // not implemented
             ViewManager (const ViewManager&);
