@@ -66,6 +66,7 @@ namespace MWWorld
         void setUpDown(int value);
 
         void toggleRunning();
+        void getRunning();
     };
 }
 #endif

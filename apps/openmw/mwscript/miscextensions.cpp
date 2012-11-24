@@ -13,6 +13,10 @@
 #include "../mwbase/windowmanager.hpp"
 
 #include "../mwworld/class.hpp"
+#include "../mwworld/player.hpp"
+
+#include "../mwmechanics/npcstats.hpp"
+#include "../mwmechanics/creaturestats.hpp"
 
 #include "interpretercontext.hpp"
 #include "ref.hpp"
@@ -272,6 +276,62 @@ namespace MWScript
         };
         bool OpToggleVanityMode::sActivate = true;
 
+        template <class R>
+        class OpGetLocked : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWWorld::Ptr ptr = R()(runtime);
+
+                    runtime.push (ptr.getCellRef ().mLockLevel > 0);
+                }
+        };
+
+        template <class R>
+        class OpGetEffect : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWWorld::Ptr ptr = R()(runtime);
+
+                    int key = runtime[0].mInteger;
+                    runtime.pop();
+
+                    runtime.push (MWWorld::Class::get(ptr).getCreatureStats (ptr).getMagicEffects ().get (
+                                      MWMechanics::EffectKey(key)).mMagnitude > 0);
+                }
+        };
+
+        template <class R>
+        class OpGetAttacked : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWWorld::Ptr ptr = R()(runtime);
+
+                    runtime.push(MWWorld::Class::get(ptr).getCreatureStats (ptr).getAttacked ());
+                }
+        };
+
+        template <class R>
+        class OpGetWeaponDrawn : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWWorld::Ptr ptr = R()(runtime);
+
+                    runtime.push(MWWorld::Class::get(ptr).getNpcStats (ptr).getDrawState () == MWMechanics::DrawState_Weapon);
+                }
+        };
+
         const int opcodeXBox = 0x200000c;
         const int opcodeOnActivate = 0x200000d;
         const int opcodeActivate = 0x2000075;
@@ -291,6 +351,14 @@ namespace MWScript
         const int opcodeToggleVanityMode = 0x2000174;
         const int opcodeGetPcSleep = 0x200019f;
         const int opcodeWakeUpPc = 0x20001a2;
+        const int opcodeGetLocked = 0x20001c7;
+        const int opcodeGetLockedExplicit = 0x20001c8;
+        const int opcodeGetEffect = 0x20001cf;
+        const int opcodeGetEffectExplicit = 0x20001d0;
+        const int opcodeGetAttacked = 0x20001d3;
+        const int opcodeGetAttackedExplicit = 0x20001d4;
+        const int opcodeGetWeaponDrawn = 0x20001d7;
+        const int opcodeGetWeaponDrawnExplicit = 0x20001d8;
 
         void registerExtensions (Compiler::Extensions& extensions)
         {
@@ -317,6 +385,10 @@ namespace MWScript
             extensions.registerInstruction ("tvm", "", opcodeToggleVanityMode);
             extensions.registerFunction ("getpcsleep", 'l', "", opcodeGetPcSleep);
             extensions.registerInstruction ("wakeuppc", "", opcodeWakeUpPc);
+            extensions.registerFunction ("getlocked", 'l', "", opcodeGetLocked, opcodeGetLockedExplicit);
+            extensions.registerFunction ("geteffect", 'l', "l", opcodeGetEffect, opcodeGetEffectExplicit);
+            extensions.registerFunction ("getattacked", 'l', "", opcodeGetAttacked, opcodeGetAttackedExplicit);
+            extensions.registerFunction ("getweapondrawn", 'l', "", opcodeGetWeaponDrawn, opcodeGetWeaponDrawnExplicit);
         }
 
         void installOpcodes (Interpreter::Interpreter& interpreter)
@@ -340,6 +412,14 @@ namespace MWScript
             interpreter.installSegment5 (opcodeToggleVanityMode, new OpToggleVanityMode);
             interpreter.installSegment5 (opcodeGetPcSleep, new OpGetPcSleep);
             interpreter.installSegment5 (opcodeWakeUpPc, new OpWakeUpPc);
+            interpreter.installSegment5 (opcodeGetLocked, new OpGetLocked<ImplicitRef>);
+            interpreter.installSegment5 (opcodeGetLockedExplicit, new OpGetLocked<ExplicitRef>);
+            interpreter.installSegment5 (opcodeGetEffect, new OpGetEffect<ImplicitRef>);
+            interpreter.installSegment5 (opcodeGetEffectExplicit, new OpGetEffect<ExplicitRef>);
+            interpreter.installSegment5 (opcodeGetAttacked, new OpGetAttacked<ImplicitRef>);
+            interpreter.installSegment5 (opcodeGetAttackedExplicit, new OpGetAttacked<ExplicitRef>);
+            interpreter.installSegment5 (opcodeGetWeaponDrawnExplicit, new OpGetWeaponDrawn<ExplicitRef>);
+            interpreter.installSegment5 (opcodeGetWeaponDrawnExplicit, new OpGetWeaponDrawn<ExplicitRef>);
         }
     }
 }
