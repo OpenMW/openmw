@@ -7,6 +7,8 @@ set (OPENCS_SRC
     model/world/universalid.cpp
 
     view/doc/viewmanager.cpp view/doc/view.cpp view/doc/operations.cpp view/doc/operation.cpp
+
+    view/world/subview.cpp
     )
 
 set (OPENCS_HDR
@@ -17,6 +19,8 @@ set (OPENCS_HDR
     model/world/universalid.hpp
 
     view/doc/viewmanager.hpp view/doc/view.hpp view/doc/operations.hpp view/doc/operation.hpp
+
+    view/world/subview.hpp
     )
 
 set (OPENCS_US

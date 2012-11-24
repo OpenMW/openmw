@@ -12,6 +12,11 @@ namespace CSMDoc
     class Document;
 }
 
+namespace CSMWorld
+{
+    class UniversalId;
+}
+
 namespace CSVDoc
 {
     class ViewManager;
@@ -69,6 +74,8 @@ namespace CSVDoc
 
             void updateProgress (int current, int max, int type, int threads);
 
+            void addSubView (const CSMWorld::UniversalId& id);
+
         signals:
 
             void newDocumentRequest();
@@ -82,6 +89,8 @@ namespace CSVDoc
             void save();
 
             void verify();
+
+            void addTestSubView(); ///< \todo remove
     };
 }
 

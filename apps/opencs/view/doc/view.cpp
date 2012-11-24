@@ -5,8 +5,11 @@
 
 #include <QCloseEvent>
 #include <QMenuBar>
+#include <QMdiArea>
 
 #include "../../model/doc/document.hpp"
+
+#include "../world/subview.hpp"
 
 #include "viewmanager.hpp"
 #include "operations.hpp"
@@ -56,6 +59,10 @@ void CSVDoc::View::setupViewMenu()
     QAction *newWindow = new QAction (tr ("&New View"), this);
     connect (newWindow, SIGNAL (triggered()), this, SLOT (newView()));
     view->addAction (newWindow);
+
+    QAction *test = new QAction (tr ("Add test Subview"), this);
+    connect (test, SIGNAL (triggered()), this, SLOT (addTestSubView()));
+    view->addAction (test);
 }
 
 void CSVDoc::View::setupWorldMenu()
@@ -107,8 +114,9 @@ void CSVDoc::View::updateActions()
 CSVDoc::View::View (ViewManager& viewManager, CSMDoc::Document *document, int totalViews)
 : mViewManager (viewManager), mDocument (document), mViewIndex (totalViews-1), mViewTotal (totalViews)
 {
-    setCentralWidget (new QWidget);
-    resize (200, 200); /// \todo get default size from settings and set reasonable minimal size
+    setDockOptions (QMainWindow::AllowNestedDocks);
+
+    resize (300, 300); /// \todo get default size from settings and set reasonable minimal size
 
     mOperations = new Operations;
     addDockWidget (Qt::BottomDockWidgetArea, mOperations);
@@ -158,6 +166,21 @@ void CSVDoc::View::updateProgress (int current, int max, int type, int threads)
     mOperations->setProgress (current, max, type, threads);
 }
 
+void CSVDoc::View::addSubView (const CSMWorld::UniversalId& id)
+{
+    /// \todo add an user setting for limiting the number of sub views per top level view. Automatically open a new top level view if this
+    /// number is exceeded
+
+    /// \todo if the sub view limit setting is one, the sub view title bar should be hidden and the text in the main title bar adjusted
+    /// accordingly
+
+    /// \todo add an user setting to reuse sub views (on a per document basis or on a per top level view basis)
+
+    CSVWorld::SubView *view = new CSVWorld::SubView (id);
+    addDockWidget (Qt::RightDockWidgetArea, view);
+    view->show();
+}
+
 void CSVDoc::View::newView()
 {
     mViewManager.addView (mDocument);
@@ -176,4 +199,9 @@ void CSVDoc::View::save()
 void CSVDoc::View::verify()
 {
     mDocument->verify();
+}
+
+void CSVDoc::View::addTestSubView()
+{
+    addSubView (CSMWorld::UniversalId::Type_None);
 }
