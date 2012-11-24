@@ -290,58 +290,6 @@ namespace MWScript
         };
 
         template <class R>
-        class OpGetForceRun : public Interpreter::Opcode0
-        {
-            public:
-
-                virtual void execute (Interpreter::Runtime& runtime)
-                {
-                    MWWorld::Ptr ptr = R()(runtime);
-
-                    MWMechanics::NpcStats& npcStats = MWWorld::Class::get(ptr).getNpcStats (ptr);
-
-                    runtime.push (npcStats.getMovementFlag (MWMechanics::NpcStats::Flag_ForceRun));
-                }
-        };
-
-        template <class R>
-        class OpGetForceSneak : public Interpreter::Opcode0
-        {
-            public:
-
-                virtual void execute (Interpreter::Runtime& runtime)
-                {
-                    MWWorld::Ptr ptr = R()(runtime);
-
-                    MWMechanics::NpcStats& npcStats = MWWorld::Class::get(ptr).getNpcStats (ptr);
-
-                    runtime.push (npcStats.getMovementFlag (MWMechanics::NpcStats::Flag_ForceSneak));
-                }
-        };
-
-        class OpGetPcRunning : public Interpreter::Opcode0
-        {
-            public:
-
-                virtual void execute (Interpreter::Runtime& runtime)
-                {
-                    MWWorld::Ptr ptr = MWBase::Environment::get().getWorld ()->getPlayer ().getPlayer();
-                    runtime.push (MWWorld::Class::get(ptr).getStance (ptr, MWWorld::Class::Run));
-                }
-        };
-
-        class OpGetPcSneaking : public Interpreter::Opcode0
-        {
-            public:
-
-                virtual void execute (Interpreter::Runtime& runtime)
-                {
-                    MWWorld::Ptr ptr = MWBase::Environment::get().getWorld ()->getPlayer ().getPlayer();
-                    runtime.push (MWWorld::Class::get(ptr).getStance (ptr, MWWorld::Class::Sneak));
-                }
-        };
-
-        template <class R>
         class OpGetEffect : public Interpreter::Opcode0
         {
             public:
@@ -379,12 +327,6 @@ namespace MWScript
         const int opcodeWakeUpPc = 0x20001a2;
         const int opcodeGetLocked = 0x20001c7;
         const int opcodeGetLockedExplicit = 0x20001c8;
-        const int opcodeGetPcRunning = 0x20001c9;
-        const int opcodeGetPcSneaking = 0x20001ca;
-        const int opcodeGetForceRun = 0x20001cb;
-        const int opcodeGetForceSneak = 0x20001cc;
-        const int opcodeGetForceRunExplicit = 0x20001cd;
-        const int opcodeGetForceSneakExplicit = 0x20001ce;
         const int opcodeGetEffect = 0x20001cf;
         const int opcodeGetEffectExplicit = 0x20001d0;
 
@@ -414,10 +356,6 @@ namespace MWScript
             extensions.registerFunction ("getpcsleep", 'l', "", opcodeGetPcSleep);
             extensions.registerInstruction ("wakeuppc", "", opcodeWakeUpPc);
             extensions.registerFunction ("getlocked", 'l', "", opcodeGetLocked, opcodeGetLockedExplicit);
-            extensions.registerFunction ("getpcrunning", 'l', "", opcodeGetPcRunning);
-            extensions.registerFunction ("getpcsneaking", 'l', "", opcodeGetPcSneaking);
-            extensions.registerFunction ("getforcerun", 'l', "", opcodeGetForceRun, opcodeGetForceRunExplicit);
-            extensions.registerFunction ("getforcesneak", 'l', "", opcodeGetForceSneak, opcodeGetForceSneakExplicit);
             extensions.registerFunction ("geteffect", 'l', "l", opcodeGetEffect, opcodeGetEffectExplicit);
         }
 
@@ -444,12 +382,6 @@ namespace MWScript
             interpreter.installSegment5 (opcodeWakeUpPc, new OpWakeUpPc);
             interpreter.installSegment5 (opcodeGetLocked, new OpGetLocked<ImplicitRef>);
             interpreter.installSegment5 (opcodeGetLockedExplicit, new OpGetLocked<ExplicitRef>);
-            interpreter.installSegment5 (opcodeGetPcRunning, new OpGetPcRunning);
-            interpreter.installSegment5 (opcodeGetPcSneaking, new OpGetPcSneaking);
-            interpreter.installSegment5 (opcodeGetForceRun, new OpGetForceRun<ImplicitRef>);
-            interpreter.installSegment5 (opcodeGetForceRunExplicit, new OpGetForceRun<ExplicitRef>);
-            interpreter.installSegment5 (opcodeGetForceSneak, new OpGetForceSneak<ImplicitRef>);
-            interpreter.installSegment5 (opcodeGetForceSneakExplicit, new OpGetForceSneak<ExplicitRef>);
             interpreter.installSegment5 (opcodeGetEffect, new OpGetEffect<ImplicitRef>);
             interpreter.installSegment5 (opcodeGetEffectExplicit, new OpGetEffect<ExplicitRef>);
         }
