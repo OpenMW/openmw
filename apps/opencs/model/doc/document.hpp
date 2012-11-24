@@ -20,7 +20,9 @@ namespace CSMDoc
                     State_Modified = 1,
                     State_Locked = 2,
                     State_Saving = 4,
-                    State_Verifying = 8
+                    State_Verifying = 8,
+                    State_Compiling = 16, // not implemented yet
+                    State_Searching = 32 // not implemented yet
             };
 
             std::string mName; ///< \todo replace name with ESX list

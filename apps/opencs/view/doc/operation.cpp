@@ -34,6 +34,8 @@ void CSVDoc::Operation::updateLabel (int threads)
 
 CSVDoc::Operation::Operation (int type) : mType (type), mStalling (false)
 {
+    /// \todo Add a cancel button or a pop up menu with a cancel item
+
     updateLabel();
 
     /// \todo assign different progress bar colours to allow the user to distinguish easily between operation types
