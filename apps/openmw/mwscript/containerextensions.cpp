@@ -157,6 +157,79 @@ namespace MWScript
                 }
         };
 
+        template <class R>
+        class OpGetArmorType : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute(Interpreter::Runtime &runtime)
+                {
+                    MWWorld::Ptr ptr = R()(runtime);
+
+                    Interpreter::Type_Integer location = runtime[0].mInteger;
+                    runtime.pop();
+
+                    int slot;
+                    switch (location)
+                    {
+                        case 0:
+                            slot = MWWorld::InventoryStore::Slot_Helmet;
+                            break;
+                        case 1:
+                            slot = MWWorld::InventoryStore::Slot_Cuirass;
+                            break;
+                        case 2:
+                            slot = MWWorld::InventoryStore::Slot_LeftPauldron;
+                            break;
+                        case 3:
+                            slot = MWWorld::InventoryStore::Slot_RightPauldron;
+                            break;
+                        case 4:
+                            slot = MWWorld::InventoryStore::Slot_Greaves;
+                            break;
+                        case 5:
+                            slot = MWWorld::InventoryStore::Slot_Boots;
+                            break;
+                        case 6:
+                            slot = MWWorld::InventoryStore::Slot_LeftGauntlet;
+                            break;
+                        case 7:
+                            slot = MWWorld::InventoryStore::Slot_RightGauntlet;
+                            break;
+                        case 8:
+                            slot = MWWorld::InventoryStore::Slot_CarriedLeft; // shield
+                            break;
+                        case 9:
+                            slot = MWWorld::InventoryStore::Slot_LeftGauntlet;
+                            break;
+                        case 10:
+                            slot = MWWorld::InventoryStore::Slot_RightGauntlet;
+                            break;
+                        default:
+                            throw std::runtime_error ("armor index out of range");
+                    }
+
+                    MWWorld::InventoryStore& invStore = MWWorld::Class::get(ptr).getInventoryStore (ptr);
+
+                    MWWorld::ContainerStoreIterator it = invStore.getSlot (slot);
+                    if (it == invStore.end())
+                    {
+                        runtime.push(-1);
+                        return;
+                    }
+
+                    int skill = MWWorld::Class::get(*it).getEquipmentSkill (*it) ;
+                    if (skill == ESM::Skill::HeavyArmor)
+                        runtime.push(2);
+                    else if (skill == ESM::Skill::MediumArmor)
+                        runtime.push(1);
+                    else if (skill == ESM::Skill::LightArmor)
+                        runtime.push(0);
+                    else
+                        runtime.push(-1);
+            }
+        };
+
         const int opcodeAddItem = 0x2000076;
         const int opcodeAddItemExplicit = 0x2000077;
         const int opcodeGetItemCount = 0x2000078;
@@ -165,6 +238,8 @@ namespace MWScript
         const int opcodeRemoveItemExplicit = 0x200007b;
         const int opcodeEquip = 0x20001b3;
         const int opcodeEquipExplicit = 0x20001b4;
+        const int opcodeGetArmorType = 0x20001d1;
+        const int opcodeGetArmorTypeExplicit = 0x20001d2;
 
         void registerExtensions (Compiler::Extensions& extensions)
         {
@@ -174,6 +249,7 @@ namespace MWScript
             extensions.registerInstruction ("removeitem", "cl", opcodeRemoveItem,
                 opcodeRemoveItemExplicit);
             extensions.registerInstruction ("equip", "c", opcodeEquip, opcodeEquipExplicit);
+            extensions.registerFunction ("getarmortype", 'l', "l", opcodeGetArmorType, opcodeGetArmorTypeExplicit);
         }
 
         void installOpcodes (Interpreter::Interpreter& interpreter)
@@ -186,6 +262,9 @@ namespace MWScript
              interpreter.installSegment5 (opcodeRemoveItemExplicit, new OpRemoveItem<ExplicitRef>);
              interpreter.installSegment5 (opcodeEquip, new OpEquip<ImplicitRef>);
              interpreter.installSegment5 (opcodeEquipExplicit, new OpEquip<ExplicitRef>);
+             interpreter.installSegment5 (opcodeGetArmorType, new OpGetArmorType<ImplicitRef>);
+             interpreter.installSegment5 (opcodeGetArmorTypeExplicit, new OpGetArmorType<ExplicitRef>);
+
         }
     }
 }
