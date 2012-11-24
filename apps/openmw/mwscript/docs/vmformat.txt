@@ -262,5 +262,7 @@ op 0x20001d1: GetArmorType
 op 0x20001d2: GetArmorType, explicit
 op 0x20001d3: GetAttacked
 op 0x20001d4: GetAttacked, explicit
+op 0x20001d5: HasItemEquipped
+op 0x20001d6: HasItemEquipped, explicit
 opcodes 0x20001d5-0x3ffffff unused
 

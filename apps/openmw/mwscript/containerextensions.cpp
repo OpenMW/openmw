@@ -230,6 +230,32 @@ namespace MWScript
             }
         };
 
+        template <class R>
+        class OpHasItemEquipped : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute(Interpreter::Runtime &runtime)
+                {
+                    MWWorld::Ptr ptr = R()(runtime);
+
+                    std::string item = runtime.getStringLiteral (runtime[0].mInteger);
+                    runtime.pop();
+
+                    MWWorld::InventoryStore& invStore = MWWorld::Class::get(ptr).getInventoryStore (ptr);
+                    for (int slot = 0; slot < MWWorld::InventoryStore::Slots; ++slot)
+                    {
+                        MWWorld::ContainerStoreIterator it = invStore.getSlot (slot);
+                        if (it != invStore.end() && toLower(it->getCellRef().mRefID) == toLower(item))
+                        {
+                            runtime.push(1);
+                            return;
+                        }
+                    }
+                    runtime.push(0);
+                }
+        };
+
         const int opcodeAddItem = 0x2000076;
         const int opcodeAddItemExplicit = 0x2000077;
         const int opcodeGetItemCount = 0x2000078;
@@ -240,6 +266,8 @@ namespace MWScript
         const int opcodeEquipExplicit = 0x20001b4;
         const int opcodeGetArmorType = 0x20001d1;
         const int opcodeGetArmorTypeExplicit = 0x20001d2;
+        const int opcodeHasItemEquipped = 0x20001d5;
+        const int opcodeHasItemEquippedExplicit = 0x20001d6;
 
         void registerExtensions (Compiler::Extensions& extensions)
         {
@@ -250,6 +278,7 @@ namespace MWScript
                 opcodeRemoveItemExplicit);
             extensions.registerInstruction ("equip", "c", opcodeEquip, opcodeEquipExplicit);
             extensions.registerFunction ("getarmortype", 'l', "l", opcodeGetArmorType, opcodeGetArmorTypeExplicit);
+            extensions.registerFunction ("hasitemequipped", 'l', "c", opcodeHasItemEquipped, opcodeHasItemEquippedExplicit);
         }
 
         void installOpcodes (Interpreter::Interpreter& interpreter)
@@ -264,6 +293,8 @@ namespace MWScript
              interpreter.installSegment5 (opcodeEquipExplicit, new OpEquip<ExplicitRef>);
              interpreter.installSegment5 (opcodeGetArmorType, new OpGetArmorType<ImplicitRef>);
              interpreter.installSegment5 (opcodeGetArmorTypeExplicit, new OpGetArmorType<ExplicitRef>);
+             interpreter.installSegment5 (opcodeHasItemEquipped, new OpHasItemEquipped<ExplicitRef>);
+             interpreter.installSegment5 (opcodeHasItemEquippedExplicit, new OpHasItemEquipped<ExplicitRef>);
 
         }
     }
