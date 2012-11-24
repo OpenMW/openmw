@@ -260,5 +260,7 @@ op 0x20001cf: GetEffect
 op 0x20001d0: GetEffect, explicit
 op 0x20001d1: GetArmorType
 op 0x20001d2: GetArmorType, explicit
-opcodes 0x20001d3-0x3ffffff unused
+op 0x20001d3: GetAttacked
+op 0x20001d4: GetAttacked, explicit
+opcodes 0x20001d5-0x3ffffff unused
 
