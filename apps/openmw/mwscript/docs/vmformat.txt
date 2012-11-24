@@ -256,5 +256,7 @@ op 0x20001cb: GetForceRun
 op 0x20001cc: GetForceSneak
 op 0x20001cd: GetForceRun, explicit
 op 0x20001ce: GetForceSneak, explicit
-opcodes 0x20001cd-0x3ffffff unused
+op 0x20001cf: GetEffect
+op 0x20001d0: GetEffect, explicit
+opcodes 0x20001d1-0x3ffffff unused
 

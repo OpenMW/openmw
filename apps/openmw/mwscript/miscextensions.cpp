@@ -16,6 +16,7 @@
 #include "../mwworld/player.hpp"
 
 #include "../mwmechanics/npcstats.hpp"
+#include "../mwmechanics/creaturestats.hpp"
 
 #include "interpretercontext.hpp"
 #include "ref.hpp"
@@ -340,6 +341,23 @@ namespace MWScript
                 }
         };
 
+        template <class R>
+        class OpGetEffect : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWWorld::Ptr ptr = R()(runtime);
+
+                    int key = runtime[0].mInteger;
+                    runtime.pop();
+
+                    runtime.push (MWWorld::Class::get(ptr).getCreatureStats (ptr).getMagicEffects ().get (
+                                      MWMechanics::EffectKey(key)).mMagnitude > 0);
+                }
+        };
+
         const int opcodeXBox = 0x200000c;
         const int opcodeOnActivate = 0x200000d;
         const int opcodeActivate = 0x2000075;
@@ -367,6 +385,8 @@ namespace MWScript
         const int opcodeGetForceSneak = 0x20001cc;
         const int opcodeGetForceRunExplicit = 0x20001cd;
         const int opcodeGetForceSneakExplicit = 0x20001ce;
+        const int opcodeGetEffect = 0x20001cf;
+        const int opcodeGetEffectExplicit = 0x20001d0;
 
         void registerExtensions (Compiler::Extensions& extensions)
         {
@@ -398,6 +418,7 @@ namespace MWScript
             extensions.registerFunction ("getpcsneaking", 'l', "", opcodeGetPcSneaking);
             extensions.registerFunction ("getforcerun", 'l', "", opcodeGetForceRun, opcodeGetForceRunExplicit);
             extensions.registerFunction ("getforcesneak", 'l', "", opcodeGetForceSneak, opcodeGetForceSneakExplicit);
+            extensions.registerFunction ("geteffect", 'l', "l", opcodeGetEffect, opcodeGetEffectExplicit);
         }
 
         void installOpcodes (Interpreter::Interpreter& interpreter)
@@ -429,6 +450,8 @@ namespace MWScript
             interpreter.installSegment5 (opcodeGetForceRunExplicit, new OpGetForceRun<ExplicitRef>);
             interpreter.installSegment5 (opcodeGetForceSneak, new OpGetForceSneak<ImplicitRef>);
             interpreter.installSegment5 (opcodeGetForceSneakExplicit, new OpGetForceSneak<ExplicitRef>);
+            interpreter.installSegment5 (opcodeGetEffect, new OpGetEffect<ImplicitRef>);
+            interpreter.installSegment5 (opcodeGetEffectExplicit, new OpGetEffect<ExplicitRef>);
         }
     }
 }
