@@ -250,5 +250,11 @@ op 0x20001c5: GetAlarm
 op 0x20001c6: GetAlarm, explicit reference
 op 0x20001c7: GetLocked
 op 0x20001c8: GetLocked, explicit reference
-opcodes 0x20001c7-0x3ffffff unused
+op 0x20001c9: GetPcRunning
+op 0x20001ca: GetPcSneaking
+op 0x20001cb: GetForceRun
+op 0x20001cc: GetForceSneak
+op 0x20001cd: GetForceRun, explicit
+op 0x20001ce: GetForceSneak, explicit
+opcodes 0x20001cd-0x3ffffff unused
 
