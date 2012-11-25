@@ -219,24 +219,31 @@ namespace MWWorld
     template <>
     class Store<ESM::LandTexture> : public StoreBase
     {
-        std::vector<ESM::LandTexture> mStatic;
+        // For multiple ESM/ESP files we need one list per file.
+        typedef std::vector<ESM::LandTexture> LandTextureList;
+        std::vector<LandTextureList> mStatic;
 
     public:
         Store<ESM::LandTexture>() {
-            mStatic.reserve(128);
+            mStatic.push_back(LandTextureList());
+            LandTextureList &ltexl = mStatic[0];
+            // More than enough to hold Morrowind.esm. Extra lists for plugins will we
+            //  added on-the-fly in a different method.
+            ltexl.reserve(128);
         }
 
         typedef std::vector<ESM::LandTexture>::const_iterator iterator;
 
-        const ESM::LandTexture *search(size_t index) const {
-            if (index < mStatic.size()) {
-                return &mStatic.at(index);
-            }
-            return 0;
+        const ESM::LandTexture *search(size_t index, size_t plugin) const {
+            assert(plugin < mStatic.size());
+            const LandTextureList &ltexl = mStatic[plugin];
+
+            assert(index < ltexl.size());
+            return &ltexl.at(index);
         }
 
-        const ESM::LandTexture *find(size_t index) const {
-            const ESM::LandTexture *ptr = search(index);
+        const ESM::LandTexture *find(size_t index, size_t plugin) const {
+            const ESM::LandTexture *ptr = search(index, plugin);
             if (ptr == 0) {
                 std::ostringstream msg;
                 msg << "Land texture with index " << index << " not found";
@@ -249,23 +256,40 @@ namespace MWWorld
             return mStatic.size();
         }
 
-        void load(ESM::ESMReader &esm, const std::string &id) {
-            ESM::LandTexture ltex;
-            ltex.load(esm);
+        int getSize(size_t plugin) const {
+            assert(plugin < mStatic.size());
+            return mStatic[plugin].size();
+        }
 
-            if (ltex.mIndex >= (int) mStatic.size()) {
-                mStatic.resize(ltex.mIndex + 1);
+        void load(ESM::ESMReader &esm, const std::string &id, size_t plugin) {
+            ESM::LandTexture lt;
+            lt.load(esm);
+            lt.mId = id;
+
+            // Make sure we have room for the structure
+            if (plugin >= mStatic.size()) {
+                mStatic.resize(plugin+1);
             }
-            mStatic[ltex.mIndex] = ltex;
-            mStatic[ltex.mIndex].mId = id;
+            LandTextureList &ltexl = mStatic[plugin];
+            if(lt.mIndex + 1 > (int)ltexl.size())
+                ltexl.resize(lt.mIndex+1);
+
+            // Store it
+            ltexl[lt.mIndex] = lt;
         }
 
-        iterator begin() const {
-            return mStatic.begin();
+        void load(ESM::ESMReader &esm, const std::string &id) {
+            load(esm, id, esm.getIndex());
         }
 
-        iterator end() const {
-            return mStatic.end();
+        iterator begin(size_t plugin) const {
+            assert(plugin < mStatic.size());
+            return mStatic[plugin].begin();
+        }
+
+        iterator end(size_t plugin) const {
+            assert(plugin < mStatic.size());
+            return mStatic[plugin].end();
         }
     };
 

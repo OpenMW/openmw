@@ -85,6 +85,7 @@ public:
   const int getIndex() {return idx;}
   
   void setGlobalReaderList(std::vector<ESMReader> *list) {mGlobalReaderList = list;}
+  std::vector<ESMReader> *getGlobalReaderList() {return mGlobalReaderList;}
 
   /*************************************************************************
    *

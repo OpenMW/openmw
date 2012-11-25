@@ -1081,8 +1081,8 @@ namespace MWWorld
         std::vector<World::DoorMarker> result;
 
         MWWorld::CellRefList<ESM::Door>& doors = cell->mDoors;
-        std::map< MWWorld::LiveCellRef<ESM::Door> >& refList = doors.mList;
-        for (std::map<int, MWWorld::LiveCellRef<ESM::Door> >::iterator it = refList.begin(); it != refList.end(); ++it)
+        CellRefList<ESM::Door>::List& refList = doors.mList;
+        for (CellRefList<ESM::Door>::List::iterator it = refList.begin(); it != refList.end(); ++it)
         {
             MWWorld::LiveCellRef<ESM::Door>& ref = it->second;
 

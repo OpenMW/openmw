@@ -49,26 +49,32 @@ namespace MWWorld
   {
     typedef LiveCellRef<X> LiveRef;
     typedef std::map<int,LiveRef> List;
-    List list;
+    List mList;
 
     // Search for the given reference in the given reclist from
     // ESMStore. Insert the reference into the list if a match is
     // found. If not, throw an exception.
-    template <typename Y>
-    void find(ESM::CellRef &ref, const Y& recList)
+    /// Searches for reference of appropriate type in given ESMStore.
+    /// If reference exists, loads it into container, throws an exception
+    /// on miss
+    void load(ESM::CellRef &ref, const MWWorld::ESMStore &esmStore)
     {
-      const X* obj = recList.find(ref.mRefID);
-      if(obj == NULL)
-        throw std::runtime_error("Error resolving cell reference " + ref.mRefID);
+        // for throwing exception on unhandled record type
+        const MWWorld::Store<X> &store = esmStore.get<X>();
+        const X *ptr = store.find(ref.mRefID);
 
-      list[ref.mRefnum] = LiveRef(ref, obj);
+        /// \note redundant because Store<X>::find() throws exception on miss
+        if (ptr == NULL) {
+            throw std::runtime_error("Error resolving cell reference " + ref.mRefID);
+        }
+        mList[ref.mRefnum] = LiveRef(ref, ptr);
     }
 
     LiveRef *find (const std::string& name)
     {
-        for (typename std::map<int,LiveRef>::iterator iter (list.begin()); iter!=list.end(); ++iter)
+        for (typename std::map<int,LiveRef>::iterator iter (mList.begin()); iter!=mList.end(); ++iter)
         {
-            if (iter->second.mData.getCount() > 0 && iter->second.ref.mRefID == name)
+            if (iter->second.mData.getCount() > 0 && iter->second.mRef.mRefID == name)
                 return &iter->second;
         }
 
@@ -76,8 +82,8 @@ namespace MWWorld
     }
 
     LiveRef &insert(const LiveRef &item) {
-        list[item.ref.mRefnum] = item;
-        return list[item.ref.mRefnum];
+        mList[item.mRef.mRefnum] = item;
+        return mList[item.mRef.mRefnum];
     }
   };
 

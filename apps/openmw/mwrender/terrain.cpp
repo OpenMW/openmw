@@ -221,7 +221,7 @@ namespace MWRender
         //
         //If we don't sort the ltex indexes, the splatting order may differ between
         //cells which may lead to inconsistent results when shading between cells
-        int num = MWBase::Environment::get().getWorld()->getStore().landTexts.getSizePlugin(plugin);
+        int num = MWBase::Environment::get().getWorld()->getStore().get<ESM::LandTexture>().getSize(plugin);
         std::set<uint16_t> ltexIndexes;
         for ( int y = fromY - 1; y < fromY + size + 1; y++ )
         {

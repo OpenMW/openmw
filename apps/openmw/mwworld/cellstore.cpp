@@ -49,10 +49,10 @@ namespace MWWorld
             return; // this is a dynamically generated cell -> skipping.
 
         // Load references from all plugins that do something with this cell.
-        for (size_t i = 0; i < cell->mContextList.size(); i++)
+        for (size_t i = 0; i < mCell->mContextList.size(); i++)
         {
             // Reopen the ESM reader and seek to the right position.
-            int index = cell->mContextList.at(i).index;
+            int index = mCell->mContextList.at(i).index;
             mCell->restore (esm[index], i);
 
             ESM::CellRef ref;
@@ -81,10 +81,10 @@ namespace MWWorld
             return; // this is a dynamically generated cell -> skipping.
 
         // Load references from all plugins that do something with this cell.
-        for (size_t i = 0; i < cell->mContextList.size(); i++)
+        for (size_t i = 0; i < mCell->mContextList.size(); i++)
         {
             // Reopen the ESM reader and seek to the right position.
-            int index = cell->mContextList.at(i).index;
+            int index = mCell->mContextList.at(i).index;
             mCell->restore (esm[index], i);
 
             ESM::CellRef ref;
