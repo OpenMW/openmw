@@ -48,6 +48,11 @@ std::string::size_type find_str_ci(const std::string& str, const std::string& su
     return lower_string(str).find(lower_string(substr),pos);
 }
 
+bool sortByLength (const std::string& left, const std::string& right)
+{
+    return left.size() > right.size();
+}
+
 }
 
 
@@ -287,7 +292,7 @@ void DialogueWindow::setKeywords(std::list<std::string> keyWords)
     if (mServices & Service_Training)
         mTopicsList->addItem(gmst.find("sServiceTrainingTitle")->getString());
 
-    if (anyService)
+    if (anyService || mPtr.getTypeName() == typeid(ESM::NPC).name())
         mTopicsList->addSeparator();
 
     for(std::list<std::string>::iterator it = keyWords.begin(); it != keyWords.end(); ++it)
@@ -311,42 +316,35 @@ void addColorInString(std::string& str, const std::string& keyword,std::string c
     size_t pos = 0;
     while((pos = find_str_ci(str,keyword, pos)) != std::string::npos)
     {
-        if(pos==0)
-        {
-            str.insert(pos,color1);
-            pos += color1.length();
-            pos += keyword.length();
-            str.insert(pos,color2);
-            pos+= color2.length();
-        }
-        else
-        {
-            if(str.substr(pos -1,1) == " ")
-            {
-                str.insert(pos,color1);
-                pos += color1.length();
-                pos += keyword.length();
-                str.insert(pos,color2);
-                pos+= color2.length();
-            }
-            else
-            {
-                pos += keyword.length();
-            }
-        }
+        str.insert(pos,color1);
+        pos += color1.length();
+        pos += keyword.length();
+        str.insert(pos,color2);
+        pos+= color2.length();
     }
 }
 
 std::string DialogueWindow::parseText(std::string text)
 {
     bool separatorReached = false; // only parse topics that are below the separator (this prevents actions like "Barter" that are not topics from getting blue-colored)
+
+    std::vector<std::string> topics;
+
     for(unsigned int i = 0;i<mTopicsList->getItemCount();i++)
     {
         std::string keyWord = mTopicsList->getItemNameAt(i);
-        if (separatorReached && keyWord != "")
-            addColorInString(text,keyWord,"#686EBA","#B29154");
-        else
+        if (separatorReached)
+            topics.push_back(keyWord);
+        else if (keyWord == "")
             separatorReached = true;
+    }
+
+    // sort by length to make sure longer topics are replaced first
+    std::sort(topics.begin(), topics.end(), sortByLength);
+
+    for(std::vector<std::string>::const_iterator it = topics.begin(); it != topics.end(); ++it)
+    {
+        addColorInString(text,*it,"#686EBA","#B29154");
     }
     return text;
 }

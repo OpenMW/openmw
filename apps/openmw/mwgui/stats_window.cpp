@@ -257,6 +257,8 @@ void StatsWindow::onFrame ()
         MWBase::Environment::get().getWorld()->getPlayer().getBirthSign();
 
     setBirthSign(signId);
+    setReputation (PCstats.getReputation ());
+    setBounty (PCstats.getBounty ());
 
     if (mChanged)
         updateSkillArea();

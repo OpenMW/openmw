@@ -222,5 +222,9 @@ op 0x20001a9: CommonDisease, explicit reference
 op 0x20001aa: BlightDisease
 op 0x20001ab: BlightDisease, explicit reference
 op 0x20001ac: ToggleCollisionBoxes
-opcodes 0x20001ac-0x3ffffff unused
+op 0x20001ad: SetReputation
+op 0x20001ae: ModReputation
+op 0x20001af: SetReputation, explicit
+op 0x20001b0: ModReputation, explicit
+opcodes 0x20001b1-0x3ffffff unused
 

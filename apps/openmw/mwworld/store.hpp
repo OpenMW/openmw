@@ -203,10 +203,18 @@ namespace MWWorld
     };
 
     template <>
-    void Store<ESM::Dialogue>::load(ESM::ESMReader &esm, const std::string &id);
+    inline void Store<ESM::Dialogue>::load(ESM::ESMReader &esm, const std::string &id) {
+        mStatic.push_back(ESM::Dialogue());
+        mStatic.back().mId = id;
+        mStatic.back().load(esm);
+    }
 
     template <>
-    void Store<ESM::Script>::load(ESM::ESMReader &esm, const std::string &id);
+    inline void Store<ESM::Script>::load(ESM::ESMReader &esm, const std::string &id) {
+        mStatic.push_back(ESM::Script());
+        mStatic.back().load(esm);
+        StringUtils::toLower(mStatic.back().mId);
+    }
 
     template <>
     class Store<ESM::LandTexture> : public StoreBase
@@ -347,7 +355,7 @@ namespace MWWorld
 
         typedef std::map<std::string, ESM::Cell>            DynamicInt;
         typedef std::map<std::pair<int, int>, ESM::Cell>    DynamicExt;
-        
+
         DynamicInt mDynamicInt;
         DynamicExt mDynamicExt;
 
