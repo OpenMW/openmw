@@ -42,12 +42,12 @@ public:
          approach though.
          */
 
-        NAME32 mName;
-
         // These describe the sizes we need to allocate for the script
         // data.
         int mNumShorts, mNumLongs, mNumFloats, mScriptDataSize, mStringTableSize;
     }; // 52 bytes
+
+    std::string mId;
 
     SCHDstruct mData;
 

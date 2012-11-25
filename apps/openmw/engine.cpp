@@ -20,6 +20,7 @@
 
 #include "mwscript/scriptmanagerimp.hpp"
 #include "mwscript/extensions.hpp"
+#include "mwscript/interpretercontext.hpp"
 
 #include "mwsound/soundmanagerimp.hpp"
 
@@ -368,7 +369,7 @@ void OMW::Engine::go()
 
     // Create dialog system
     mEnvironment.setJournal (new MWDialogue::Journal);
-    mEnvironment.setDialogueManager (new MWDialogue::DialogueManager (mExtensions));
+    mEnvironment.setDialogueManager (new MWDialogue::DialogueManager (mExtensions, mVerboseScripts));
 
     // Sets up the input system
     mEnvironment.setInputManager (new MWInput::InputManager (*mOgre,

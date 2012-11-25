@@ -6,13 +6,10 @@
 
 #include <components/interpreter/types.hpp>
 
-namespace ESMS
-{
-    struct ESMStore;
-}
-
 namespace MWWorld
 {
+    class ESMStore;
+
     class Globals
     {
         public:
@@ -36,7 +33,7 @@ namespace MWWorld
         
         public:
         
-            Globals (const ESMS::ESMStore& store);
+            Globals (const MWWorld::ESMStore& store);
         
             const Data& operator[] (const std::string& name) const;
 

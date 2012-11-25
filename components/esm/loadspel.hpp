@@ -38,7 +38,7 @@ struct Spell
     };
 
     SPDTstruct mData;
-    std::string mName;
+    std::string mId, mName;
     EffectList mEffects;
 
     void load(ESMReader &esm);

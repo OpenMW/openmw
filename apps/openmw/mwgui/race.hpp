@@ -4,7 +4,7 @@
 
 #include <boost/array.hpp>
 
-#include <components/esm_store/store.hpp>
+#include "../mwworld/esmstore.hpp"
 
 #include "../mwrender/characterpreview.hpp"
 
@@ -34,6 +34,7 @@ namespace MWGui
             GM_Female
         };
 
+        const ESM::NPC &getResult() const { return mPreview->getPrototype(); }
         const std::string &getRaceId() const { return mCurrentRaceId; }
         Gender getGender() const { return mGenderIndex == 0 ? GM_Male : GM_Female; }
         // getFace()
@@ -77,6 +78,8 @@ namespace MWGui
         void updateRaces();
         void updateSkills();
         void updateSpellPowers();
+        void updatePreview();
+        void recountParts();
 
         MyGUI::ImageBox*  mPreviewImage;
         MyGUI::ListBox*   mRaceList;

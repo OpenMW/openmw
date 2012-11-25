@@ -2,14 +2,14 @@
 
 #include <boost/lexical_cast.hpp>
 
-#include <components/esm_store/store.hpp>
-
 #include "../mwbase/windowmanager.hpp"
 
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwbase/soundmanager.hpp"
+#include "../mwbase/mechanicsmanager.hpp"
 
+#include "../mwworld/esmstore.hpp"
 #include "../mwworld/player.hpp"
 #include "../mwworld/class.hpp"
 
@@ -29,8 +29,11 @@ namespace
 
     bool sortMagicEffects (short id1, short id2)
     {
-        return MWBase::Environment::get().getWorld ()->getStore ().gameSettings.find(ESM::MagicEffect::effectIdToString (id1))->getString()
-                < MWBase::Environment::get().getWorld ()->getStore ().gameSettings.find(ESM::MagicEffect::effectIdToString  (id2))->getString();
+        const MWWorld::Store<ESM::GameSetting> &gmst =
+            MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+
+        return gmst.find(ESM::MagicEffect::effectIdToString (id1))->getString()
+                < gmst.find(ESM::MagicEffect::effectIdToString  (id2))->getString();
     }
 }
 
@@ -106,7 +109,8 @@ namespace MWGui
 
     void EditEffectDialog::editEffect (ESM::ENAMstruct effect)
     {
-        const ESM::MagicEffect* magicEffect =  MWBase::Environment::get().getWorld()->getStore().magicEffects.find(effect.mEffectID);
+        const ESM::MagicEffect* magicEffect =
+            MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(effect.mEffectID);
 
         setMagicEffect(magicEffect);
 
@@ -333,12 +337,12 @@ namespace MWGui
 
         MWBase::Environment::get().getSoundManager()->playSound ("Item Gold Up", 1.0, 1.0);
 
-        std::pair<std::string, const ESM::Spell*> result = MWBase::Environment::get().getWorld()->createRecord(mSpell);
+        const ESM::Spell* spell = MWBase::Environment::get().getWorld()->createRecord(mSpell);
 
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
         MWMechanics::CreatureStats& stats = MWWorld::Class::get(player).getCreatureStats(player);
         MWMechanics::Spells& spells = stats.getSpells();
-        spells.add (result.first);
+        spells.add (spell->mId);
 
         MWBase::Environment::get().getSoundManager()->playSound ("Item Gold Up", 1.0, 1.0);
 
@@ -360,16 +364,23 @@ namespace MWGui
     {
         float y = 0;
 
+        const MWWorld::ESMStore &store =
+            MWBase::Environment::get().getWorld()->getStore();
+
         for (std::vector<ESM::ENAMstruct>::const_iterator it = mEffects.begin(); it != mEffects.end(); ++it)
         {
             float x = 0.5 * it->mMagnMin + it->mMagnMax;
 
-            const ESM::MagicEffect* effect = MWBase::Environment::get().getWorld()->getStore().magicEffects.find(it->mEffectID);
+            const ESM::MagicEffect* effect =
+                store.get<ESM::MagicEffect>().find(it->mEffectID);
+
             x *= 0.1 * effect->mData.mBaseCost;
             x *= 1 + it->mDuration;
             x += 0.05 * std::max(1, it->mArea) * effect->mData.mBaseCost;
 
-            float fEffectCostMult = MWBase::Environment::get().getWorld()->getStore().gameSettings.find("fEffectCostMult")->getFloat();
+            float fEffectCostMult =
+                store.get<ESM::GameSetting>().find("fEffectCostMult")->getFloat();
+
             y += x * fEffectCostMult;
             y = std::max(1.f,y);
 
@@ -386,10 +397,10 @@ namespace MWGui
 
         mMagickaCost->setCaption(boost::lexical_cast<std::string>(int(y)));
 
-        float fSpellMakingValueMult = MWBase::Environment::get().getWorld()->getStore().gameSettings.find("fSpellMakingValueMult")->getFloat();
+        float fSpellMakingValueMult =
+            store.get<ESM::GameSetting>().find("fSpellMakingValueMult")->getFloat();
 
-        /// \todo mercantile
-        int price = int(y) * fSpellMakingValueMult;
+        int price = MWBase::Environment::get().getMechanicsManager()->getBarterOffer(mPtr,int(y) * fSpellMakingValueMult,true);
 
         mPriceLabel->setCaption(boost::lexical_cast<std::string>(int(price)));
 
@@ -424,7 +435,8 @@ namespace MWGui
 
         for (MWMechanics::Spells::TIterator it = spells.begin(); it != spells.end(); ++it)
         {
-            const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().spells.find(*it);
+            const ESM::Spell* spell =
+                MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find(*it);
 
             // only normal spells count
             if (spell->mData.mType != ESM::Spell::ST_Spell)
@@ -444,14 +456,14 @@ namespace MWGui
 
         for (std::vector<short>::const_iterator it = knownEffects.begin(); it != knownEffects.end(); ++it)
         {
-            mAvailableEffectsList->addItem(MWBase::Environment::get().getWorld ()->getStore ().gameSettings.find(
+            mAvailableEffectsList->addItem(MWBase::Environment::get().getWorld ()->getStore ().get<ESM::GameSetting>().find(
                                                ESM::MagicEffect::effectIdToString  (*it))->getString());
         }
         mAvailableEffectsList->adjustSize ();
 
         for (std::vector<short>::const_iterator it = knownEffects.begin(); it != knownEffects.end(); ++it)
         {
-            std::string name = MWBase::Environment::get().getWorld ()->getStore ().gameSettings.find(
+            std::string name = MWBase::Environment::get().getWorld ()->getStore ().get<ESM::GameSetting>().find(
                                                ESM::MagicEffect::effectIdToString  (*it))->getString();
             MyGUI::Widget* w = mAvailableEffectsList->getItemWidget(name);
             w->setUserData(*it);
@@ -517,7 +529,8 @@ namespace MWGui
             }
         }
 
-        const ESM::MagicEffect* effect = MWBase::Environment::get().getWorld()->getStore().magicEffects.find(effectId);
+        const ESM::MagicEffect* effect =
+            MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(effectId);
 
         mAddEffectDialog.newEffect (effect);
 

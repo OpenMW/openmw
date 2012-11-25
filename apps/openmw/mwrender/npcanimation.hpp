@@ -8,6 +8,11 @@
 #include "../mwclass/npc.hpp"
 #include "../mwworld/containerstore.hpp"
 
+namespace ESM
+{
+    struct NPC;
+}
+
 namespace MWRender{
 
 class NpcAnimation: public Animation{
@@ -19,57 +24,57 @@ private:
     int mPartPriorities[27];
 
     //Bounded Parts
-    NifOgre::EntityList lclavicle;
-    NifOgre::EntityList rclavicle;
-    NifOgre::EntityList rupperArm;
-    NifOgre::EntityList lupperArm;
-    NifOgre::EntityList rUpperLeg;
-    NifOgre::EntityList lUpperLeg;
-    NifOgre::EntityList lForearm;
-    NifOgre::EntityList rForearm;
-    NifOgre::EntityList lWrist;
-    NifOgre::EntityList rWrist;
-    NifOgre::EntityList rKnee;
-    NifOgre::EntityList lKnee;
-    NifOgre::EntityList neck;
-    NifOgre::EntityList rAnkle;
-    NifOgre::EntityList lAnkle;
-    NifOgre::EntityList groin;
-    NifOgre::EntityList skirt;
-    NifOgre::EntityList lfoot;
-    NifOgre::EntityList rfoot;
-    NifOgre::EntityList hair;
-    NifOgre::EntityList rHand;
-    NifOgre::EntityList lHand;
-    NifOgre::EntityList head;
-    NifOgre::EntityList chest;
-    NifOgre::EntityList tail;
+    NifOgre::EntityList mClavicleL;
+    NifOgre::EntityList mClavicleR;
+    NifOgre::EntityList mUpperArmL;
+    NifOgre::EntityList mUpperArmR;
+    NifOgre::EntityList mUpperLegL;
+    NifOgre::EntityList mUpperLegR;
+    NifOgre::EntityList mForearmL;
+    NifOgre::EntityList mForearmR;
+    NifOgre::EntityList mWristL;
+    NifOgre::EntityList mWristR;
+    NifOgre::EntityList mKneeR;
+    NifOgre::EntityList mKneeL;
+    NifOgre::EntityList mNeck;
+    NifOgre::EntityList mAnkleL;
+    NifOgre::EntityList mAnkleR;
+    NifOgre::EntityList mGroin;
+    NifOgre::EntityList mSkirt;
+    NifOgre::EntityList mFootL;
+    NifOgre::EntityList mFootR;
+    NifOgre::EntityList mHair;
+    NifOgre::EntityList mHandL;
+    NifOgre::EntityList mHandR;
+    NifOgre::EntityList mHead;
+    NifOgre::EntityList mChest;
+    NifOgre::EntityList mTail;
 
-    bool isBeast;
-    bool isFemale;
-    std::string headModel;
-    std::string hairModel;
-    std::string npcName;
-    std::string bodyRaceID;
-    float timeToChange;
-    MWWorld::ContainerStoreIterator robe;
-    MWWorld::ContainerStoreIterator helmet;
-    MWWorld::ContainerStoreIterator shirt;
-    MWWorld::ContainerStoreIterator cuirass;
-    MWWorld::ContainerStoreIterator greaves;
-    MWWorld::ContainerStoreIterator leftpauldron;
-    MWWorld::ContainerStoreIterator rightpauldron;
-    MWWorld::ContainerStoreIterator boots;
-    MWWorld::ContainerStoreIterator pants;
-    MWWorld::ContainerStoreIterator leftglove;
-    MWWorld::ContainerStoreIterator rightglove;
-    MWWorld::ContainerStoreIterator skirtiter;
+    const ESM::NPC  *mNpc;
+    std::string     mHeadModel;
+    std::string     mHairModel;
+    std::string     mBodyPrefix;
+
+
+    float mTimeToChange;
+    MWWorld::ContainerStoreIterator mRobe;
+    MWWorld::ContainerStoreIterator mHelmet;
+    MWWorld::ContainerStoreIterator mShirt;
+    MWWorld::ContainerStoreIterator mCuirass;
+    MWWorld::ContainerStoreIterator mGreaves;
+    MWWorld::ContainerStoreIterator mPauldronL;
+    MWWorld::ContainerStoreIterator mPauldronR;
+    MWWorld::ContainerStoreIterator mBoots;
+    MWWorld::ContainerStoreIterator mPants;
+    MWWorld::ContainerStoreIterator mGloveL;
+    MWWorld::ContainerStoreIterator mGloveR;
+    MWWorld::ContainerStoreIterator mSkirtIter;
 
     int mVisibilityFlags;
 
 public:
     NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node,
-                 MWWorld::InventoryStore& _inv, int visibilityFlags);
+                 MWWorld::InventoryStore& inv, int visibilityFlags);
     virtual ~NpcAnimation();
     NifOgre::EntityList insertBoundedPart(const std::string &mesh, int group, const std::string &bonename);
     virtual void runAnimation(float timepassed);

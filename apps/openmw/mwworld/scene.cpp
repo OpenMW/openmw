@@ -1,6 +1,5 @@
 #include "scene.hpp"
 
-#include <components/esm_store/store.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp" /// FIXME
@@ -10,6 +9,7 @@
 
 #include "player.hpp"
 #include "localscripts.hpp"
+#include "esmstore.hpp"
 
 #include "cellfunctors.hpp"
 
@@ -20,15 +20,15 @@ namespace
     void insertCellRefList(MWRender::RenderingManager& rendering,
         T& cellRefList, MWWorld::CellStore &cell, MWWorld::PhysicsSystem& physics)
     {
-        if (!cellRefList.list.empty())
+        if (!cellRefList.mList.empty())
         {
             const MWWorld::Class& class_ =
-                MWWorld::Class::get (MWWorld::Ptr (&cellRefList.list.begin()->second, &cell));
+                MWWorld::Class::get (MWWorld::Ptr (&cellRefList.mList.begin()->second, &cell));
 
-            int numRefs = cellRefList.list.size();
+            int numRefs = cellRefList.mList.size();
             int current = 0;
-            for (typename T::List::iterator it = cellRefList.list.begin();
-                it != cellRefList.list.end(); it++)
+            for (typename T::List::iterator it = cellRefList.mList.begin();
+                it != cellRefList.mList.end(); it++)
             {
                 MWBase::Environment::get().getWindowManager ()->setLoadingProgress ("Loading cells", 1, current, numRefs);
                 ++current;
@@ -82,11 +82,15 @@ namespace MWWorld
                 mPhysics->removeObject (node->getName());
             }
 
-            if (!((*iter)->cell->mData.mFlags & ESM::Cell::Interior))
+            if ((*iter)->mCell->isExterior())
             {
-                ESM::Land* land = MWBase::Environment::get().getWorld()->getStore().lands.search((*iter)->cell->mData.mX,(*iter)->cell->mData.mY);
+                ESM::Land* land =
+                    MWBase::Environment::get().getWorld()->getStore().get<ESM::Land>().search(
+                        (*iter)->mCell->getGridX(),
+                        (*iter)->mCell->getGridY()
+                    );
                 if (land)
-                    mPhysics->removeHeightField( (*iter)->cell->mData.mX, (*iter)->cell->mData.mY );
+                    mPhysics->removeHeightField( (*iter)->mCell->getGridX(), (*iter)->mCell->getGridY() );
             }
         }
 
@@ -113,13 +117,23 @@ namespace MWWorld
             float verts = ESM::Land::LAND_SIZE;
             float worldsize = ESM::Land::REAL_SIZE;
 
-            if (!(cell->cell->mData.mFlags & ESM::Cell::Interior))
+            if (cell->mCell->isExterior())
             {
-                ESM::Land* land = MWBase::Environment::get().getWorld()->getStore().lands.search(cell->cell->mData.mX,cell->cell->mData.mY);
-                if (land)
-                    mPhysics->addHeightField (land->mLandData->mHeights,
-                        cell->cell->mData.mX, cell->cell->mData.mY,
-                        0, ( worldsize/(verts-1) ), verts);
+                ESM::Land* land =
+                    MWBase::Environment::get().getWorld()->getStore().get<ESM::Land>().search(
+                        cell->mCell->getGridX(),
+                        cell->mCell->getGridY()
+                    );
+                if (land) {
+                    mPhysics->addHeightField (
+                        land->mLandData->mHeights,
+                        cell->mCell->getGridX(),
+                        cell->mCell->getGridY(),
+                        0,
+                        worldsize / (verts-1),
+                        verts)
+                    ;
+                }
             }
 
             mRendering.configureAmbient(*cell);
@@ -130,8 +144,8 @@ namespace MWWorld
 
     void Scene::playerCellChange(MWWorld::CellStore *cell, const ESM::Position& pos, bool adjustPlayerPos)
     {
-        bool hasWater = cell->cell->mData.mFlags & cell->cell->HasWater;
-        mPhysics->setCurrentWater(hasWater, cell->cell->mWater);
+        bool hasWater = cell->mCell->mData.mFlags & ESM::Cell::HasWater;
+        mPhysics->setCurrentWater(hasWater, cell->mCell->mWater);
 
         MWBase::World *world = MWBase::Environment::get().getWorld();
         world->getPlayer().setCell(cell);
@@ -169,10 +183,10 @@ namespace MWWorld
         int numUnload = 0;
         while (active!=mActiveCells.end())
         {
-            if (!((*active)->cell->mData.mFlags & ESM::Cell::Interior))
+            if ((*active)->mCell->isExterior())
             {
-                if (std::abs (X-(*active)->cell->mData.mX)<=1 &&
-                    std::abs (Y-(*active)->cell->mData.mY)<=1)
+                if (std::abs (X-(*active)->mCell->getGridX())<=1 &&
+                    std::abs (Y-(*active)->mCell->getGridY())<=1)
                 {
                     // keep cells within the new 3x3 grid
                     ++active;
@@ -187,10 +201,10 @@ namespace MWWorld
         active = mActiveCells.begin();
         while (active!=mActiveCells.end())
         {
-            if (!((*active)->cell->mData.mFlags & ESM::Cell::Interior))
+            if ((*active)->mCell->isExterior())
             {
-                if (std::abs (X-(*active)->cell->mData.mX)<=1 &&
-                    std::abs (Y-(*active)->cell->mData.mY)<=1)
+                if (std::abs (X-(*active)->mCell->getGridX())<=1 &&
+                    std::abs (Y-(*active)->mCell->getGridY())<=1)
                 {
                     // keep cells within the new 3x3 grid
                     ++active;
@@ -212,10 +226,10 @@ namespace MWWorld
 
                 while (iter!=mActiveCells.end())
                 {
-                    assert (!((*iter)->cell->mData.mFlags & ESM::Cell::Interior));
+                    assert ((*iter)->mCell->isExterior());
 
-                    if (x==(*iter)->cell->mData.mX &&
-                        y==(*iter)->cell->mData.mY)
+                    if (x==(*iter)->mCell->getGridX() &&
+                        y==(*iter)->mCell->getGridY())
                         break;
 
                     ++iter;
@@ -234,10 +248,10 @@ namespace MWWorld
 
                 while (iter!=mActiveCells.end())
                 {
-                    assert (!((*iter)->cell->mData.mFlags & ESM::Cell::Interior));
+                    assert ((*iter)->mCell->isExterior());
 
-                    if (x==(*iter)->cell->mData.mX &&
-                        y==(*iter)->cell->mData.mY)
+                    if (x==(*iter)->mCell->getGridX() &&
+                        y==(*iter)->mCell->getGridY())
                         break;
 
                     ++iter;
@@ -258,10 +272,10 @@ namespace MWWorld
 
         while (iter!=mActiveCells.end())
         {
-            assert (!((*iter)->cell->mData.mFlags & ESM::Cell::Interior));
+            assert ((*iter)->mCell->isExterior());
 
-            if (X==(*iter)->cell->mData.mX &&
-                Y==(*iter)->cell->mData.mY)
+            if (X==(*iter)->mCell->getGridX() &&
+                Y==(*iter)->mCell->getGridY())
                 break;
 
             ++iter;
@@ -348,7 +362,7 @@ namespace MWWorld
         }
 
         // Load cell.
-        std::cout << "cellName: " << cell->cell->mName << std::endl;
+        std::cout << "cellName: " << cell->mCell->mName << std::endl;
 
         MWBase::Environment::get().getWindowManager ()->setLoadingProgress ("Loading cells", 0, 0, 1);
         loadCell (cell);
@@ -393,26 +407,26 @@ namespace MWWorld
     void Scene::insertCell (Ptr::CellStore &cell)
     {
         // Loop through all references in the cell
-        insertCellRefList(mRendering, cell.activators, cell, *mPhysics);
-        insertCellRefList(mRendering, cell.potions, cell, *mPhysics);
-        insertCellRefList(mRendering, cell.appas, cell, *mPhysics);
-        insertCellRefList(mRendering, cell.armors, cell, *mPhysics);
-        insertCellRefList(mRendering, cell.books, cell, *mPhysics);
-        insertCellRefList(mRendering, cell.clothes, cell, *mPhysics);
-        insertCellRefList(mRendering, cell.containers, cell, *mPhysics);
-        insertCellRefList(mRendering, cell.creatures, cell, *mPhysics);
-        insertCellRefList(mRendering, cell.doors, cell, *mPhysics);
-        insertCellRefList(mRendering, cell.ingreds, cell, *mPhysics);
-        insertCellRefList(mRendering, cell.creatureLists, cell, *mPhysics);
-        insertCellRefList(mRendering, cell.itemLists, cell, *mPhysics);
-        insertCellRefList(mRendering, cell.lights, cell, *mPhysics);
-        insertCellRefList(mRendering, cell.lockpicks, cell, *mPhysics);
-        insertCellRefList(mRendering, cell.miscItems, cell, *mPhysics);
-        insertCellRefList(mRendering, cell.npcs, cell, *mPhysics);
-        insertCellRefList(mRendering, cell.probes, cell, *mPhysics);
-        insertCellRefList(mRendering, cell.repairs, cell, *mPhysics);
-        insertCellRefList(mRendering, cell.statics, cell, *mPhysics);
-        insertCellRefList(mRendering, cell.weapons, cell, *mPhysics);
+        insertCellRefList(mRendering, cell.mActivators, cell, *mPhysics);
+        insertCellRefList(mRendering, cell.mPotions, cell, *mPhysics);
+        insertCellRefList(mRendering, cell.mAppas, cell, *mPhysics);
+        insertCellRefList(mRendering, cell.mArmors, cell, *mPhysics);
+        insertCellRefList(mRendering, cell.mBooks, cell, *mPhysics);
+        insertCellRefList(mRendering, cell.mClothes, cell, *mPhysics);
+        insertCellRefList(mRendering, cell.mContainers, cell, *mPhysics);
+        insertCellRefList(mRendering, cell.mCreatures, cell, *mPhysics);
+        insertCellRefList(mRendering, cell.mDoors, cell, *mPhysics);
+        insertCellRefList(mRendering, cell.mIngreds, cell, *mPhysics);
+        insertCellRefList(mRendering, cell.mCreatureLists, cell, *mPhysics);
+        insertCellRefList(mRendering, cell.mItemLists, cell, *mPhysics);
+        insertCellRefList(mRendering, cell.mLights, cell, *mPhysics);
+        insertCellRefList(mRendering, cell.mLockpicks, cell, *mPhysics);
+        insertCellRefList(mRendering, cell.mMiscItems, cell, *mPhysics);
+        insertCellRefList(mRendering, cell.mNpcs, cell, *mPhysics);
+        insertCellRefList(mRendering, cell.mProbes, cell, *mPhysics);
+        insertCellRefList(mRendering, cell.mRepairs, cell, *mPhysics);
+        insertCellRefList(mRendering, cell.mStatics, cell, *mPhysics);
+        insertCellRefList(mRendering, cell.mWeapons, cell, *mPhysics);
     }
 
     void Scene::addObjectToScene (const Ptr& ptr)

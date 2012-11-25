@@ -52,7 +52,7 @@ struct BodyPart
     };
 
     BYDTstruct mData;
-    std::string mModel, mName;
+    std::string mId, mModel, mName;
 
     void load(ESMReader &esm);
     void save(ESMWriter &esm);

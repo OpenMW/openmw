@@ -4,7 +4,7 @@
 #include <OgreTerrainGroup.h>
 #include <OgreHardwarePixelBuffer.h>
 
-#include <components/esm_store/store.hpp>
+#include "../mwworld/esmstore.hpp"
 
 #include <components/settings/settings.hpp>
 
@@ -92,10 +92,11 @@ namespace MWRender
 
     void TerrainManager::cellAdded(MWWorld::Ptr::CellStore *store)
     {
-        const int cellX = store->cell->getGridX();
-        const int cellY = store->cell->getGridY();
+        const int cellX = store->mCell->getGridX();
+        const int cellY = store->mCell->getGridY();
 
-        ESM::Land* land = MWBase::Environment::get().getWorld()->getStore().lands.search(cellX, cellY);
+        ESM::Land* land =
+            MWBase::Environment::get().getWorld()->getStore().get<ESM::Land>().search(cellX, cellY);
         if (land == NULL) // no land data means we're not going to create any terrain.
             return;
 
@@ -188,8 +189,8 @@ namespace MWRender
         {
             for ( int y = 0; y < 2; y++ )
             {
-                int terrainX = store->cell->getGridX() * 2 + x;
-                int terrainY = store->cell->getGridY() * 2 + y;
+                int terrainX = store->mCell->getGridX() * 2 + x;
+                int terrainY = store->mCell->getGridY() * 2 + y;
                 if (mTerrainGroup.getTerrain(terrainX, terrainY) != NULL)
                     mTerrainGroup.unloadTerrain(terrainX, terrainY);
             }
@@ -258,11 +259,13 @@ namespace MWRender
             {
                 //NB: All vtex ids are +1 compared to the ltex ids
 
+                const MWWorld::Store<ESM::LandTexture> &ltexStore =
+                    MWBase::Environment::get().getWorld()->getStore().get<ESM::LandTexture>();
+
                 // NOTE: using the quick hack above, we should no longer end up with textures indices
                 //  that are out of bounds. However, I haven't updated the test to a multi-palette
                 //  system yet. We probably need more work here, so we skip it for now.
-                
-                //assert( (int)MWBase::Environment::get().getWorld()->getStore().landTexts.getSize() >= (int)ltexIndex - 1 &&
+                //assert( (int)ltexStore.getSize() >= (int)ltexIndex - 1 &&
                        //"LAND.VTEX must be within the bounds of the LTEX array");
 
                 std::string texture;
@@ -272,7 +275,7 @@ namespace MWRender
                 }
                 else
                 {
-                    texture = MWBase::Environment::get().getWorld()->getStore().landTexts.search(ltexIndex-1, plugin)->mTexture;
+                    texture = ltexStore.search(ltexIndex-1, plugin)->mTexture;
                     //TODO this is needed due to MWs messed up texture handling
                     texture = texture.substr(0, texture.rfind(".")) + ".dds";
                 }
@@ -428,7 +431,8 @@ namespace MWRender
         }
 
 
-        ESM::Land* land = MWBase::Environment::get().getWorld()->getStore().lands.search(cellX, cellY);
+        ESM::Land* land =
+            MWBase::Environment::get().getWorld()->getStore().get<ESM::Land>().search(cellX, cellY);
         if ( land != NULL )
         {
             if (!land->isDataLoaded(ESM::Land::DATA_VTEX))

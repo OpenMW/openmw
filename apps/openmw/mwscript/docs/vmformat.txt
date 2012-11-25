@@ -31,7 +31,13 @@ op 0x2000e: PCGetRank implicit
 op 0x2000f: PCGetRank explicit
 op 0x20010: AiWander
 op 0x20011: AiWander, explicit reference
-op s 0x20012-0x3ffff unused
+op 0x20012: GetPCFacRep
+op 0x20013: GetPCFacRep, explicit reference
+op 0x20014: SetPCFacRep
+op 0x20015: SetPCFacRep, explicit reference
+op 0x20016: ModPCFacRep
+op 0x20017: ModPCFacRep, explicit reference
+op s 0x20018-0x3ffff unused
 
 Segment 4:
 (not implemented yet)
@@ -198,14 +204,27 @@ op 0x2000197: Position Explicit
 op 0x2000198: PositionCell
 op 0x2000199: PositionCell Explicit
 op 0x200019a: PlaceItemCell
-op 0x200019b: PlaceItem 
+op 0x200019b: PlaceItem
 op 0x200019c: PlaceAtPc
-op 0x200019d: PlaceAtMe 
+op 0x200019d: PlaceAtMe
 op 0x200019e: PlaceAtMe Explicit
 op 0x200019f: GetPcSleep
 op 0x20001a0: ShowMap
 op 0x20001a1: FillMap
 op 0x20001a2: WakeUpPc
 op 0x20001a3: GetDeadCount
-opcodes 0x20001a4-0x3ffffff unused
+op 0x20001a4: SetDisposition
+op 0x20001a5: SetDisposition, Explicit
+op 0x20001a6: GetDisposition
+op 0x20001a7: GetDisposition, Explicit
+op 0x20001a8: CommonDisease
+op 0x20001a9: CommonDisease, explicit reference
+op 0x20001aa: BlightDisease
+op 0x20001ab: BlightDisease, explicit reference
+op 0x20001ac: ToggleCollisionBoxes
+op 0x20001ad: SetReputation
+op 0x20001ae: ModReputation
+op 0x20001af: SetReputation, explicit
+op 0x20001b0: ModReputation, explicit
+opcodes 0x20001b1-0x3ffffff unused
 

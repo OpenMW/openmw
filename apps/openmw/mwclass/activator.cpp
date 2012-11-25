@@ -38,9 +38,9 @@ namespace MWClass
     {
         MWWorld::LiveCellRef<ESM::Activator> *ref =
             ptr.get<ESM::Activator>();
-        assert(ref->base != NULL);
+        assert(ref->mBase != NULL);
 
-        const std::string &model = ref->base->mModel;
+        const std::string &model = ref->mBase->mModel;
         if (!model.empty()) {
             return "meshes\\" + model;
         }
@@ -52,7 +52,7 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Activator> *ref =
             ptr.get<ESM::Activator>();
 
-        return ref->base->mName;
+        return ref->mBase->mName;
     }
 
     std::string Activator::getScript (const MWWorld::Ptr& ptr) const
@@ -60,7 +60,7 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Activator> *ref =
             ptr.get<ESM::Activator>();
 
-        return ref->base->mScript;
+        return ref->mBase->mScript;
     }
 
     void Activator::registerSelf()
@@ -75,7 +75,7 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Activator> *ref =
             ptr.get<ESM::Activator>();
 
-        return (ref->base->mName != "");
+        return (ref->mBase->mName != "");
     }
 
     MWGui::ToolTipInfo Activator::getToolTipInfo (const MWWorld::Ptr& ptr) const
@@ -84,11 +84,11 @@ namespace MWClass
             ptr.get<ESM::Activator>();
 
         MWGui::ToolTipInfo info;
-        info.caption = ref->base->mName + MWGui::ToolTips::getCountString(ptr.getRefData().getCount());
+        info.caption = ref->mBase->mName + MWGui::ToolTips::getCountString(ptr.getRefData().getCount());
 
         std::string text;
         if (MWBase::Environment::get().getWindowManager()->getFullHelp())
-            text += MWGui::ToolTips::getMiscString(ref->base->mScript, "Script");
+            text += MWGui::ToolTips::getMiscString(ref->mBase->mScript, "Script");
         info.text = text;
 
         return info;
@@ -100,6 +100,6 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Activator> *ref =
             ptr.get<ESM::Activator>();
 
-        return MWWorld::Ptr(&cell.activators.insert(*ref), &cell);
+        return MWWorld::Ptr(&cell.mActivators.insert(*ref), &cell);
     }
 }

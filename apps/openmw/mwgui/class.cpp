@@ -5,7 +5,7 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
 
-#include <components/esm_store/store.hpp>
+#include "../mwworld/esmstore.hpp"
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -50,7 +50,7 @@ void GenerateClassResultDialog::setClassId(const std::string &classId)
 {
     mCurrentClassId = classId;
     mClassImage->setImageTexture(std::string("textures\\levelup\\") + mCurrentClassId + ".dds");
-    mClassName->setCaption(MWBase::Environment::get().getWorld()->getStore().classes.find(mCurrentClassId)->mName);
+    mClassName->setCaption(MWBase::Environment::get().getWorld()->getStore().get<ESM::Class>().find(mCurrentClassId)->mName);
 }
 
 // widget controls
@@ -185,20 +185,18 @@ void PickClassDialog::updateClasses()
 {
     mClassList->removeAllItems();
 
-    const ESMS::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
+    const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
 
-    ESMS::RecListT<ESM::Class>::MapType::const_iterator it = store.classes.list.begin();
-    ESMS::RecListT<ESM::Class>::MapType::const_iterator end = store.classes.list.end();
     int index = 0;
-    for (; it != end; ++it)
+    MWWorld::Store<ESM::Class>::iterator it = store.get<ESM::Class>().begin();
+    for (; it != store.get<ESM::Class>().end(); ++it)
     {
-        const ESM::Class &klass = it->second;
-        bool playable = (klass.mData.mIsPlayable != 0);
+        bool playable = (it->mData.mIsPlayable != 0);
         if (!playable) // Only display playable classes
             continue;
 
-        const std::string &id = it->first;
-        mClassList->addItem(klass.mName, id);
+        const std::string &id = it->mId;
+        mClassList->addItem(it->mName, id);
         if (boost::iequals(id, mCurrentClassId))
             mClassList->setIndexSelected(index);
         ++index;
@@ -209,8 +207,8 @@ void PickClassDialog::updateStats()
 {
     if (mCurrentClassId.empty())
         return;
-    const ESMS::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
-    const ESM::Class *klass = store.classes.search(mCurrentClassId);
+    const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
+    const ESM::Class *klass = store.get<ESM::Class>().search(mCurrentClassId);
     if (!klass)
         return;
 

@@ -25,7 +25,7 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Ingredient> *ref =
             ptr.get<ESM::Ingredient>();
 
-        return ref->base->mId;
+        return ref->mBase->mId;
     }
     
     void Ingredient::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const
@@ -49,9 +49,9 @@ namespace MWClass
     {
         MWWorld::LiveCellRef<ESM::Ingredient> *ref =
             ptr.get<ESM::Ingredient>();
-        assert(ref->base != NULL);
+        assert(ref->mBase != NULL);
 
-        const std::string &model = ref->base->mModel;
+        const std::string &model = ref->mBase->mModel;
         if (!model.empty()) {
             return "meshes\\" + model;
         }
@@ -63,7 +63,7 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Ingredient> *ref =
             ptr.get<ESM::Ingredient>();
 
-        return ref->base->mName;
+        return ref->mBase->mName;
     }
 
     boost::shared_ptr<MWWorld::Action> Ingredient::activate (const MWWorld::Ptr& ptr,
@@ -81,7 +81,7 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Ingredient> *ref =
             ptr.get<ESM::Ingredient>();
 
-        return ref->base->mScript;
+        return ref->mBase->mScript;
     }
 
     int Ingredient::getValue (const MWWorld::Ptr& ptr) const
@@ -89,7 +89,7 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Ingredient> *ref =
             ptr.get<ESM::Ingredient>();
 
-        return ref->base->mData.mValue;
+        return ref->mBase->mData.mValue;
     }
 
    
@@ -124,7 +124,7 @@ namespace MWClass
           MWWorld::LiveCellRef<ESM::Ingredient> *ref =
             ptr.get<ESM::Ingredient>();
 
-        return ref->base->mIcon;
+        return ref->mBase->mIcon;
     }
 
     bool Ingredient::hasToolTip (const MWWorld::Ptr& ptr) const
@@ -132,7 +132,7 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Ingredient> *ref =
             ptr.get<ESM::Ingredient>();
 
-        return (ref->base->mName != "");
+        return (ref->mBase->mName != "");
     }
 
     MWGui::ToolTipInfo Ingredient::getToolTipInfo (const MWWorld::Ptr& ptr) const
@@ -141,28 +141,28 @@ namespace MWClass
             ptr.get<ESM::Ingredient>();
 
         MWGui::ToolTipInfo info;
-        info.caption = ref->base->mName + MWGui::ToolTips::getCountString(ptr.getRefData().getCount());
-        info.icon = ref->base->mIcon;
+        info.caption = ref->mBase->mName + MWGui::ToolTips::getCountString(ptr.getRefData().getCount());
+        info.icon = ref->mBase->mIcon;
 
         std::string text;
 
-        text += "\n#{sWeight}: " + MWGui::ToolTips::toString(ref->base->mData.mWeight);
-        text += MWGui::ToolTips::getValueString(ref->base->mData.mValue, "#{sValue}");
+        text += "\n#{sWeight}: " + MWGui::ToolTips::toString(ref->mBase->mData.mWeight);
+        text += MWGui::ToolTips::getValueString(ref->mBase->mData.mValue, "#{sValue}");
 
         if (MWBase::Environment::get().getWindowManager()->getFullHelp()) {
-            text += MWGui::ToolTips::getMiscString(ref->ref.mOwner, "Owner");
-            text += MWGui::ToolTips::getMiscString(ref->base->mScript, "Script");
+            text += MWGui::ToolTips::getMiscString(ref->mRef.mOwner, "Owner");
+            text += MWGui::ToolTips::getMiscString(ref->mBase->mScript, "Script");
         }
 
         MWGui::Widgets::SpellEffectList list;
         for (int i=0; i<4; ++i)
         {
-            if (ref->base->mData.mEffectID[i] < 0)
+            if (ref->mBase->mData.mEffectID[i] < 0)
                 continue;
             MWGui::Widgets::SpellEffectParams params;
-            params.mEffectID = ref->base->mData.mEffectID[i];
-            params.mAttribute = ref->base->mData.mAttributes[i];
-            params.mSkill = ref->base->mData.mSkills[i];
+            params.mEffectID = ref->mBase->mData.mEffectID[i];
+            params.mAttribute = ref->mBase->mData.mAttributes[i];
+            params.mSkill = ref->mBase->mData.mSkills[i];
             list.push_back(params);
         }
         info.effects = list;
@@ -178,6 +178,6 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Ingredient> *ref =
             ptr.get<ESM::Ingredient>();
 
-        return MWWorld::Ptr(&cell.ingreds.insert(*ref), &cell);
+        return MWWorld::Ptr(&cell.mIngreds.insert(*ref), &cell);
     }
 }
