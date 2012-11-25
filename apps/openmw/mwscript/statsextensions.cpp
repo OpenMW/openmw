@@ -780,6 +780,25 @@ namespace MWScript
                 }
         };
 
+        template<class R>
+        class OpGetRace : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWWorld::Ptr ptr = R()(runtime);
+
+                    std::string race = runtime.getStringLiteral(runtime[0].mInteger);
+                    boost::algorithm::to_lower(race);
+                    runtime.pop();
+
+                    std::string npcRace = ptr.get<ESM::NPC>()->mBase->mRace;
+                    boost::algorithm::to_lower(npcRace);
+
+                    runtime.push (npcRace == race);
+            }
+        };
 
         const int numberOfAttributes = 8;
 
@@ -849,6 +868,9 @@ namespace MWScript
         const int opcodeGetCommonDiseaseExplicit = 0x20001a9;
         const int opcodeGetBlightDisease = 0x20001aa;
         const int opcodeGetBlightDiseaseExplicit = 0x20001ab;
+
+        const int opcodeGetRace = 0x20001d9;
+        const int opcodeGetRaceExplicit = 0x20001da;
 
         void registerExtensions (Compiler::Extensions& extensions)
         {
@@ -950,6 +972,9 @@ namespace MWScript
                 opcodeGetCommonDiseaseExplicit);
             extensions.registerFunction ("getblightdisease", 'l', "", opcodeGetBlightDisease,
                 opcodeGetBlightDiseaseExplicit);
+
+            extensions.registerFunction ("getrace", 'l', "c", opcodeGetRace,
+                opcodeGetRaceExplicit);
         }
 
         void installOpcodes (Interpreter::Interpreter& interpreter)
@@ -1045,6 +1070,9 @@ namespace MWScript
             interpreter.installSegment5 (opcodeGetCommonDiseaseExplicit, new OpGetCommonDisease<ExplicitRef>);
             interpreter.installSegment5 (opcodeGetBlightDisease, new OpGetBlightDisease<ImplicitRef>);
             interpreter.installSegment5 (opcodeGetBlightDiseaseExplicit, new OpGetBlightDisease<ExplicitRef>);
+
+            interpreter.installSegment5 (opcodeGetRace, new OpGetRace<ImplicitRef>);
+            interpreter.installSegment5 (opcodeGetRaceExplicit, new OpGetRace<ExplicitRef>);
         }
     }
 }

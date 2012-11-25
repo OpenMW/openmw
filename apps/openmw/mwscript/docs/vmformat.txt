@@ -266,5 +266,9 @@ op 0x20001d5: HasItemEquipped
 op 0x20001d6: HasItemEquipped, explicit
 op 0x20001d7: GetWeaponDrawn
 op 0x20001d8: GetWeaponDrawn, explicit
-opcodes 0x20001d9-0x3ffffff unused
+op 0x20001d9: GetRace
+op 0x20001da: GetRace, explicit
+op 0x20001db: GetSpellEffects
+op 0x20001dc: GetSpellEffects, explicit
+opcodes 0x20001dd-0x3ffffff unused
 

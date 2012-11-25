@@ -332,6 +332,21 @@ namespace MWScript
                 }
         };
 
+        template <class R>
+        class OpGetSpellEffects : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWWorld::Ptr ptr = R()(runtime);
+                    std::string id = runtime.getStringLiteral(runtime[0].mInteger);
+                    runtime.pop();
+
+                    runtime.push(MWWorld::Class::get(ptr).getCreatureStats(ptr).getActiveSpells().isSpellActive(id));
+                }
+        };
+
         const int opcodeXBox = 0x200000c;
         const int opcodeOnActivate = 0x200000d;
         const int opcodeActivate = 0x2000075;
@@ -359,6 +374,8 @@ namespace MWScript
         const int opcodeGetAttackedExplicit = 0x20001d4;
         const int opcodeGetWeaponDrawn = 0x20001d7;
         const int opcodeGetWeaponDrawnExplicit = 0x20001d8;
+        const int opcodeGetSpellEffects = 0x20001db;
+        const int opcodeGetSpellEffectsExplicit = 0x20001dc;
 
         void registerExtensions (Compiler::Extensions& extensions)
         {
@@ -389,6 +406,7 @@ namespace MWScript
             extensions.registerFunction ("geteffect", 'l', "l", opcodeGetEffect, opcodeGetEffectExplicit);
             extensions.registerFunction ("getattacked", 'l', "", opcodeGetAttacked, opcodeGetAttackedExplicit);
             extensions.registerFunction ("getweapondrawn", 'l', "", opcodeGetWeaponDrawn, opcodeGetWeaponDrawnExplicit);
+            extensions.registerFunction ("getspelleffects", 'l', "c", opcodeGetSpellEffects, opcodeGetSpellEffectsExplicit);
         }
 
         void installOpcodes (Interpreter::Interpreter& interpreter)
@@ -418,8 +436,10 @@ namespace MWScript
             interpreter.installSegment5 (opcodeGetEffectExplicit, new OpGetEffect<ExplicitRef>);
             interpreter.installSegment5 (opcodeGetAttacked, new OpGetAttacked<ImplicitRef>);
             interpreter.installSegment5 (opcodeGetAttackedExplicit, new OpGetAttacked<ExplicitRef>);
+            interpreter.installSegment5 (opcodeGetWeaponDrawn, new OpGetWeaponDrawn<ImplicitRef>);
             interpreter.installSegment5 (opcodeGetWeaponDrawnExplicit, new OpGetWeaponDrawn<ExplicitRef>);
-            interpreter.installSegment5 (opcodeGetWeaponDrawnExplicit, new OpGetWeaponDrawn<ExplicitRef>);
+            interpreter.installSegment5 (opcodeGetSpellEffects, new OpGetSpellEffects<ImplicitRef>);
+            interpreter.installSegment5 (opcodeGetSpellEffectsExplicit, new OpGetSpellEffects<ExplicitRef>);
         }
     }
 }
