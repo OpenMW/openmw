@@ -283,6 +283,27 @@ namespace MWScript
                 }
         };
 
+        template <class R>
+        class OpGetWeaponType : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute(Interpreter::Runtime &runtime)
+                {
+                    MWWorld::Ptr ptr = R()(runtime);
+
+                    MWWorld::InventoryStore& invStore = MWWorld::Class::get(ptr).getInventoryStore (ptr);
+                    MWWorld::ContainerStoreIterator it = invStore.getSlot (MWWorld::InventoryStore::Slot_CarriedRight);
+                    if (it == invStore.end())
+                    {
+                        runtime.push(-1);
+                        return;
+                    }
+
+                    runtime.push(it->get<ESM::Weapon>()->mBase->mData.mType);
+                }
+        };
+
         const int opcodeAddItem = 0x2000076;
         const int opcodeAddItemExplicit = 0x2000077;
         const int opcodeGetItemCount = 0x2000078;
@@ -297,6 +318,8 @@ namespace MWScript
         const int opcodeHasItemEquippedExplicit = 0x20001d6;
         const int opcodeHasSoulGem = 0x20001de;
         const int opcodeHasSoulGemExplicit = 0x20001df;
+        const int opcodeGetWeaponType = 0x20001e0;
+        const int opcodeGetWeaponTypeExplicit = 0x20001e1;
 
         void registerExtensions (Compiler::Extensions& extensions)
         {
@@ -309,6 +332,7 @@ namespace MWScript
             extensions.registerFunction ("getarmortype", 'l', "l", opcodeGetArmorType, opcodeGetArmorTypeExplicit);
             extensions.registerFunction ("hasitemequipped", 'l', "c", opcodeHasItemEquipped, opcodeHasItemEquippedExplicit);
             extensions.registerFunction ("hassoulgem", 'l', "c", opcodeHasSoulGem, opcodeHasSoulGemExplicit);
+            extensions.registerFunction ("getweapontype", 'l', "", opcodeGetWeaponType, opcodeGetWeaponTypeExplicit);
         }
 
         void installOpcodes (Interpreter::Interpreter& interpreter)
@@ -327,6 +351,8 @@ namespace MWScript
              interpreter.installSegment5 (opcodeHasItemEquippedExplicit, new OpHasItemEquipped<ExplicitRef>);
              interpreter.installSegment5 (opcodeHasSoulGem, new OpHasSoulGem<ImplicitRef>);
              interpreter.installSegment5 (opcodeHasSoulGemExplicit, new OpHasSoulGem<ExplicitRef>);
+             interpreter.installSegment5 (opcodeGetWeaponType, new OpGetWeaponType<ImplicitRef>);
+             interpreter.installSegment5 (opcodeGetWeaponTypeExplicit, new OpGetWeaponType<ExplicitRef>);
         }
     }
 }

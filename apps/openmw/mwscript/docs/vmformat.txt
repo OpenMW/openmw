@@ -273,5 +273,9 @@ op 0x20001dc: GetSpellEffects, explicit
 op 0x20001dd: GetCurrentTime
 op 0x20001de: HasSoulGem
 op 0x20001df: HasSoulGem, explicit
-opcodes 0x20001e0-0x3ffffff unused
+op 0x20001e0: GetWeaponType
+op 0x20001e1: GetWeaponType, explicit
+opcodes 0x20001e2-0x3ffffff unused
+
+
 
