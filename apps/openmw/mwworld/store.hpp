@@ -473,14 +473,48 @@ namespace MWWorld
         }
 
         void load(ESM::ESMReader &esm, const std::string &id) {
-            ESM::Cell cell;
-            cell.mName = id;
-            cell.load(esm);
+            // Don't automatically assume that a new cell must be spawned. Multiple plugins write to the same cell,
+            //  and we merge all this data into one Cell object. However, we can't simply search for the cell id,
+            //  as many exterior cells do not have a name. Instead, we need to search by (x,y) coordinates - and they
+            //  are not available until both cells have been loaded! So first, proceed as usual.
+            
+            // All cells have a name record, even nameless exterior cells.
+            ESM::Cell *cell = new ESM::Cell;
+            cell->mName = id;
 
-            if (cell.isExterior()) {
-                mExt.push_back(cell);
-            } else {
-                mInt.push_back(cell);
+            // The cell itself takes care of all the hairy details
+            cell->load(esm);
+
+            if(cell->mData.mFlags & ESM::Cell::Interior)
+            {
+                // Store interior cell by name, try to merge with existing parent data.
+                ESM::Cell *oldcell = const_cast<ESM::Cell*>(search(id));
+                if (oldcell) {
+                    // push the new references on the list of references to manage
+                    oldcell->mContextList.push_back(cell->mContextList.at(0));
+                    // copy list into new cell
+                    cell->mContextList = oldcell->mContextList;
+                    // have new cell replace old cell
+                    *oldcell = *cell;
+                } else
+                    mInt.push_back(*cell);
+                delete cell;
+            }
+            else
+            {
+                // Store exterior cells by grid position, try to merge with existing parent data.
+                ESM::Cell *oldcell = const_cast<ESM::Cell*>(search(cell->getGridX(), cell->getGridY()));
+                std::cout << "setup - " << oldcell << " " << cell->getGridX() << " " << cell->getGridY() << std::endl;
+                if (oldcell) {
+                    // push the new references on the list of references to manage
+                    oldcell->mContextList.push_back(cell->mContextList.at(0));
+                    // copy list into new cell
+                    cell->mContextList = oldcell->mContextList;
+                    // have new cell replace old cell
+                    *oldcell = *cell;
+                } else
+                    mExt.push_back(*cell);
+                delete cell;
             }
         }
 

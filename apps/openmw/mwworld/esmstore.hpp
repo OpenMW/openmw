@@ -168,7 +168,8 @@ namespace MWWorld
             return ptr;
         }
 
-    private:
+        // This method must be called once, after loading all master/plugin files. This can only be done
+        //  from the outside, so it must be public.
         void setUp();
     };
 

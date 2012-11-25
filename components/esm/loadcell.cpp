@@ -201,6 +201,7 @@ bool Cell::getNextRef(ESMReader &esm, CellRef &ref)
         ref.mRefnum &= 0x00ffffff; // delete old plugin ID
         const ESM::ESMReader::MasterList &masters = esm.getMasters();
         global = masters[local-1].index + 1;
+        std::cout << "moved ref: " << local << " " << global << std::endl;
         ref.mRefnum |= global << 24; // insert global plugin ID
     }
     else

@@ -83,6 +83,8 @@ namespace MWWorld
         // Load references from all plugins that do something with this cell.
         for (size_t i = 0; i < mCell->mContextList.size(); i++)
         {
+            if (mCell->mContextList.size() > 1)
+                std::cout << "number of lists " << mCell->mContextList.size() << std::endl;
             // Reopen the ESM reader and seek to the right position.
             int index = mCell->mContextList.at(i).index;
             mCell->restore (esm[index], i);

@@ -215,6 +215,8 @@ namespace MWWorld
             mEsm[idx] = lEsm;
             mStore.load (mEsm[idx]);
         }
+        
+        mStore.setUp();
 
         mPlayer = new MWWorld::Player (mStore.get<ESM::NPC>().find ("player"), *this);
         mRendering->attachCameraTo(mPlayer->getPlayer());
