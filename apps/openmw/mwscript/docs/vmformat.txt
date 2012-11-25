@@ -270,5 +270,8 @@ op 0x20001d9: GetRace
 op 0x20001da: GetRace, explicit
 op 0x20001db: GetSpellEffects
 op 0x20001dc: GetSpellEffects, explicit
-opcodes 0x20001dd-0x3ffffff unused
+op 0x20001dd: GetCurrentTime
+op 0x20001de: HasSoulGem
+op 0x20001df: HasSoulGem, explicit
+opcodes 0x20001e0-0x3ffffff unused
 

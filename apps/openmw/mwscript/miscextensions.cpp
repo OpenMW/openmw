@@ -347,6 +347,16 @@ namespace MWScript
                 }
         };
 
+        class OpGetCurrentTime : public Interpreter::Opcode0
+        {
+        public:
+
+            virtual void execute (Interpreter::Runtime& runtime)
+            {
+                runtime.push(MWBase::Environment::get().getWorld()->getTimeStamp().getHour());
+            }
+        };
+
         const int opcodeXBox = 0x200000c;
         const int opcodeOnActivate = 0x200000d;
         const int opcodeActivate = 0x2000075;
@@ -376,6 +386,7 @@ namespace MWScript
         const int opcodeGetWeaponDrawnExplicit = 0x20001d8;
         const int opcodeGetSpellEffects = 0x20001db;
         const int opcodeGetSpellEffectsExplicit = 0x20001dc;
+        const int opcodeGetCurrentTime = 0x20001dd;
 
         void registerExtensions (Compiler::Extensions& extensions)
         {
@@ -407,6 +418,7 @@ namespace MWScript
             extensions.registerFunction ("getattacked", 'l', "", opcodeGetAttacked, opcodeGetAttackedExplicit);
             extensions.registerFunction ("getweapondrawn", 'l', "", opcodeGetWeaponDrawn, opcodeGetWeaponDrawnExplicit);
             extensions.registerFunction ("getspelleffects", 'l', "c", opcodeGetSpellEffects, opcodeGetSpellEffectsExplicit);
+            extensions.registerFunction ("getcurrenttime", 'f', "", opcodeGetCurrentTime);
         }
 
         void installOpcodes (Interpreter::Interpreter& interpreter)
@@ -440,6 +452,7 @@ namespace MWScript
             interpreter.installSegment5 (opcodeGetWeaponDrawnExplicit, new OpGetWeaponDrawn<ExplicitRef>);
             interpreter.installSegment5 (opcodeGetSpellEffects, new OpGetSpellEffects<ImplicitRef>);
             interpreter.installSegment5 (opcodeGetSpellEffectsExplicit, new OpGetSpellEffects<ExplicitRef>);
+            interpreter.installSegment5 (opcodeGetCurrentTime, new OpGetCurrentTime);
         }
     }
 }

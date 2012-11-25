@@ -256,6 +256,33 @@ namespace MWScript
                 }
         };
 
+        template <class R>
+        class OpHasSoulGem : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute(Interpreter::Runtime &runtime)
+                {
+                    MWWorld::Ptr ptr = R()(runtime);
+
+                    std::string creatureName = toLower (runtime.getStringLiteral (runtime[0].mInteger));
+                    runtime.pop();
+
+                    MWWorld::InventoryStore& invStore = MWWorld::Class::get(ptr).getInventoryStore (ptr);
+                    for (MWWorld::ContainerStoreIterator it = invStore.begin(MWWorld::ContainerStore::Type_Miscellaneous);
+                         it != invStore.end(); ++it)
+                    {
+
+                        if (toLower(it->getCellRef().mSoul) == toLower(creatureName))
+                        {
+                            runtime.push(1);
+                            return;
+                        }
+                    }
+                    runtime.push(0);
+                }
+        };
+
         const int opcodeAddItem = 0x2000076;
         const int opcodeAddItemExplicit = 0x2000077;
         const int opcodeGetItemCount = 0x2000078;
@@ -268,6 +295,8 @@ namespace MWScript
         const int opcodeGetArmorTypeExplicit = 0x20001d2;
         const int opcodeHasItemEquipped = 0x20001d5;
         const int opcodeHasItemEquippedExplicit = 0x20001d6;
+        const int opcodeHasSoulGem = 0x20001de;
+        const int opcodeHasSoulGemExplicit = 0x20001df;
 
         void registerExtensions (Compiler::Extensions& extensions)
         {
@@ -279,6 +308,7 @@ namespace MWScript
             extensions.registerInstruction ("equip", "c", opcodeEquip, opcodeEquipExplicit);
             extensions.registerFunction ("getarmortype", 'l', "l", opcodeGetArmorType, opcodeGetArmorTypeExplicit);
             extensions.registerFunction ("hasitemequipped", 'l', "c", opcodeHasItemEquipped, opcodeHasItemEquippedExplicit);
+            extensions.registerFunction ("hassoulgem", 'l', "c", opcodeHasSoulGem, opcodeHasSoulGemExplicit);
         }
 
         void installOpcodes (Interpreter::Interpreter& interpreter)
@@ -293,9 +323,10 @@ namespace MWScript
              interpreter.installSegment5 (opcodeEquipExplicit, new OpEquip<ExplicitRef>);
              interpreter.installSegment5 (opcodeGetArmorType, new OpGetArmorType<ImplicitRef>);
              interpreter.installSegment5 (opcodeGetArmorTypeExplicit, new OpGetArmorType<ExplicitRef>);
-             interpreter.installSegment5 (opcodeHasItemEquipped, new OpHasItemEquipped<ExplicitRef>);
+             interpreter.installSegment5 (opcodeHasItemEquipped, new OpHasItemEquipped<ImplicitRef>);
              interpreter.installSegment5 (opcodeHasItemEquippedExplicit, new OpHasItemEquipped<ExplicitRef>);
-
+             interpreter.installSegment5 (opcodeHasSoulGem, new OpHasSoulGem<ImplicitRef>);
+             interpreter.installSegment5 (opcodeHasSoulGemExplicit, new OpHasSoulGem<ExplicitRef>);
         }
     }
 }
