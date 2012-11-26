@@ -4,11 +4,11 @@ set (OPENCS_SRC
 
     model/doc/documentmanager.cpp model/doc/document.cpp
 
-    model/world/universalid.cpp
+    model/world/universalid.cpp model/world/idcollection.cpp model/world/data.cpp model/world/idtable.cpp
 
     view/doc/viewmanager.cpp view/doc/view.cpp view/doc/operations.cpp view/doc/operation.cpp
 
-    view/world/subview.cpp
+    view/world/subview.cpp view/world/globals.cpp
     )
 
 set (OPENCS_HDR
@@ -16,11 +16,12 @@ set (OPENCS_HDR
 
     model/doc/documentmanager.hpp model/doc/document.hpp
 
-    model/world/universalid.hpp
+    model/world/universalid.hpp model/world/record.hpp model/world/idcollection.hpp model/world/data.hpp
+    model/world/idtable.hpp model/world/columns.hpp
 
     view/doc/viewmanager.hpp view/doc/view.hpp view/doc/operations.hpp view/doc/operation.hpp
 
-    view/world/subview.hpp
+    view/world/subview.hpp view/world/globals.hpp
     )
 
 set (OPENCS_US

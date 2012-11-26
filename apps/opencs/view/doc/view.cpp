@@ -2,6 +2,7 @@
 #include "view.hpp"
 
 #include <sstream>
+#include <stdexcept>
 
 #include <QCloseEvent>
 #include <QMenuBar>
@@ -10,6 +11,7 @@
 #include "../../model/doc/document.hpp"
 
 #include "../world/subview.hpp"
+#include "../world/globals.hpp"
 
 #include "viewmanager.hpp"
 #include "operations.hpp"
@@ -59,15 +61,15 @@ void CSVDoc::View::setupViewMenu()
     QAction *newWindow = new QAction (tr ("&New View"), this);
     connect (newWindow, SIGNAL (triggered()), this, SLOT (newView()));
     view->addAction (newWindow);
-
-    QAction *test = new QAction (tr ("Add test Subview"), this);
-    connect (test, SIGNAL (triggered()), this, SLOT (addTestSubView()));
-    view->addAction (test);
 }
 
 void CSVDoc::View::setupWorldMenu()
 {
     QMenu *world = menuBar()->addMenu (tr ("&World"));
+
+    QAction *globals = new QAction (tr ("Globals"), this);
+    connect (globals, SIGNAL (triggered()), this, SLOT (addGlobalsSubView()));
+    world->addAction (globals);
 
     mVerify = new QAction (tr ("&Verify"), this);
     connect (mVerify, SIGNAL (triggered()), this, SLOT (verify()));
@@ -124,6 +126,16 @@ CSVDoc::View::View (ViewManager& viewManager, CSMDoc::Document *document, int to
     updateTitle();
 
     setupUi();
+
+    mSubViewFactories.insert (std::make_pair (CSMWorld::UniversalId (CSMWorld::UniversalId::Type_Globals),
+        new CSVWorld::SubViewFactory<CSVWorld::Globals>()));
+}
+
+CSVDoc::View::~View()
+{
+    for (std::map<CSMWorld::UniversalId, CSVWorld::SubViewFactoryBase *>::iterator iter (mSubViewFactories.begin());
+        iter!=mSubViewFactories.end(); ++iter)
+        delete iter->second;
 }
 
 const CSMDoc::Document *CSVDoc::View::getDocument() const
@@ -176,8 +188,13 @@ void CSVDoc::View::addSubView (const CSMWorld::UniversalId& id)
 
     /// \todo add an user setting to reuse sub views (on a per document basis or on a per top level view basis)
 
-    CSVWorld::SubView *view = new CSVWorld::SubView (id);
-    addDockWidget (Qt::RightDockWidgetArea, view);
+    std::map<CSMWorld::UniversalId, CSVWorld::SubViewFactoryBase *>::iterator iter = mSubViewFactories.find (id);
+
+    if (iter==mSubViewFactories.end())
+        throw std::logic_error ("can't create subview for " + id.toString());
+
+    CSVWorld::SubView *view = iter->second->makeSubView (id, mDocument->getData());
+    addDockWidget (Qt::TopDockWidgetArea, view);
     view->show();
 }
 
@@ -201,7 +218,7 @@ void CSVDoc::View::verify()
     mDocument->verify();
 }
 
-void CSVDoc::View::addTestSubView()
+void CSVDoc::View::addGlobalsSubView()
 {
-    addSubView (CSMWorld::UniversalId::Type_None);
+    addSubView (CSMWorld::UniversalId::Type_Globals);
 }

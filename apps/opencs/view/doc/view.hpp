@@ -2,6 +2,7 @@
 #define CSV_DOC_VIEW_H
 
 #include <vector>
+#include <map>
 
 #include <QMainWindow>
 
@@ -15,6 +16,11 @@ namespace CSMDoc
 namespace CSMWorld
 {
     class UniversalId;
+}
+
+namespace CSVWorld
+{
+    struct SubViewFactoryBase;
 }
 
 namespace CSVDoc
@@ -36,6 +42,7 @@ namespace CSVDoc
             QAction *mVerify;
             std::vector<QAction *> mEditingActions;
             Operations *mOperations;
+            std::map<CSMWorld::UniversalId, CSVWorld::SubViewFactoryBase *> mSubViewFactories;
 
             // not implemented
             View (const View&);
@@ -64,6 +71,8 @@ namespace CSVDoc
             View (ViewManager& viewManager, CSMDoc::Document *document, int totalViews);
             ///< The ownership of \a document is not transferred to *this.
 
+            virtual ~View();
+
             const CSMDoc::Document *getDocument() const;
 
             CSMDoc::Document *getDocument();
@@ -90,7 +99,7 @@ namespace CSVDoc
 
             void verify();
 
-            void addTestSubView(); ///< \todo remove
+            void addGlobalsSubView();
     };
 }
 

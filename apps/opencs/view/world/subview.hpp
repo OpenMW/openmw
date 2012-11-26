@@ -5,6 +5,11 @@
 
 #include <QDockWidget>
 
+namespace CSMWorld
+{
+    class Data;
+}
+
 namespace CSVWorld
 {
     class SubView : public QDockWidget
@@ -23,6 +28,23 @@ namespace CSVWorld
 
             CSMWorld::UniversalId getUniversalId() const;
     };
+
+    struct SubViewFactoryBase
+    {
+        virtual SubView *makeSubView (const CSMWorld::UniversalId& id, CSMWorld::Data& data) = 0;
+    };
+
+    template<class SubViewT>
+    struct SubViewFactory : public SubViewFactoryBase
+    {
+        virtual SubView *makeSubView (const CSMWorld::UniversalId& id, CSMWorld::Data& data);
+    };
+
+    template<class SubViewT>
+    SubView *SubViewFactory<SubViewT>::makeSubView (const CSMWorld::UniversalId& id, CSMWorld::Data& data)
+    {
+        return new SubViewT (id, data);
+    }
 }
 
 #endif

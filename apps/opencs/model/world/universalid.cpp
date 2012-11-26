@@ -17,6 +17,7 @@ namespace
     static const TypeData sNoArg[] =
     {
         { CSMWorld::UniversalId::Class_None, CSMWorld::UniversalId::Type_None, "empty" },
+        { CSMWorld::UniversalId::Class_RecordList, CSMWorld::UniversalId::Type_Globals, "Global Variables" },
 
         { CSMWorld::UniversalId::Class_None, CSMWorld::UniversalId::Type_None, 0 } // end marker
     };
@@ -117,6 +118,23 @@ bool CSMWorld::UniversalId::isEqual (const UniversalId& universalId) const
     }
 }
 
+bool CSMWorld::UniversalId::isLess (const UniversalId& universalId) const
+{
+    if (mType<universalId.mType)
+        return true;
+
+    if (mType>universalId.mType)
+        return false;
+
+    switch (mArgumentType)
+    {
+        case ArgumentType_Id: return mId<universalId.mId;
+        case ArgumentType_Index: return mIndex<universalId.mIndex;
+
+        default: return false;
+    }
+}
+
 std::string CSMWorld::UniversalId::getTypeName() const
 {
     const TypeData *typeData = mArgumentType==ArgumentType_None ? sNoArg :
@@ -145,17 +163,22 @@ std::string CSMWorld::UniversalId::toString() const
     return stream.str();
 }
 
-bool operator== (const CSMWorld::UniversalId& left, const CSMWorld::UniversalId& right)
+bool CSMWorld::operator== (const CSMWorld::UniversalId& left, const CSMWorld::UniversalId& right)
 {
     return left.isEqual (right);
 }
 
-bool operator!= (const CSMWorld::UniversalId& left, const CSMWorld::UniversalId& right)
+bool CSMWorld::operator!= (const CSMWorld::UniversalId& left, const CSMWorld::UniversalId& right)
 {
     return !left.isEqual (right);
 }
 
-std::ostream& operator< (std::ostream& stream, const CSMWorld::UniversalId& universalId)
+bool CSMWorld::operator< (const UniversalId& left, const UniversalId& right)
+{
+    return left.isLess (right);
+}
+
+std::ostream& CSMWorld::operator< (std::ostream& stream, const CSMWorld::UniversalId& universalId)
 {
     return stream << universalId.toString();
 }

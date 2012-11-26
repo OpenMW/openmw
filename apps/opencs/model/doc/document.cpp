@@ -105,3 +105,13 @@ void CSMDoc::Document::verifying()
             emit stateChanged (getState(), this);
     }
 }
+
+const CSMWorld::Data& CSMDoc::Document::getData() const
+{
+    return mData;
+}
+
+CSMWorld::Data& CSMDoc::Document::getData()
+{
+    return mData;
+}

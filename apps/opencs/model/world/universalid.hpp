@@ -30,7 +30,8 @@ namespace CSMWorld
 
             enum Type
             {
-                Type_None
+                Type_None,
+                Type_Globals
             };
 
         private:
@@ -66,6 +67,8 @@ namespace CSMWorld
 
             bool isEqual (const UniversalId& universalId) const;
 
+            bool isLess (const UniversalId& universalId) const;
+
             std::string getTypeName() const;
 
             std::string toString() const;
@@ -73,6 +76,8 @@ namespace CSMWorld
 
     bool operator== (const UniversalId& left, const UniversalId& right);
     bool operator!= (const UniversalId& left, const UniversalId& right);
+
+    bool operator< (const UniversalId& left, const UniversalId& right);
 
     std::ostream& operator< (std::ostream& stream, const UniversalId& universalId);
 }

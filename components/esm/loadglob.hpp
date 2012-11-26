@@ -18,7 +18,7 @@ class ESMWriter;
 struct Global
 {
     std::string mId;
-    unsigned mValue;
+    float mValue;
     VarType mType;
 
     void load(ESMReader &esm);
