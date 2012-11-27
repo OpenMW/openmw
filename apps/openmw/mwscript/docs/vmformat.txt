@@ -275,7 +275,13 @@ op 0x20001de: HasSoulGem
 op 0x20001df: HasSoulGem, explicit
 op 0x20001e0: GetWeaponType
 op 0x20001e1: GetWeaponType, explicit
-opcodes 0x20001e2-0x3ffffff unused
+op 0x20001e2: GetWerewolfKills
+op 0x20001e3: ModScale
+op 0x20001e4: ModScale, explicit
+op 0x20001e5: SetDelete
+op 0x20001e6: SetDelete, explicit
+op 0x20001e7: GetSquareRoot
+opcodes 0x20001e3-0x3ffffff unused
 
 
 

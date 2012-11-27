@@ -357,6 +357,31 @@ namespace MWScript
             }
         };
 
+        template <class R>
+        class OpSetDelete : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWWorld::Ptr ptr = R()(runtime);
+                    MWBase::Environment::get().getWorld()->deleteObject (ptr);
+                }
+        };
+
+        class OpGetSquareRoot : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    float param = runtime[0].mFloat;
+                    runtime.pop();
+
+                    runtime.push(std::sqrt (param));
+                }
+        };
+
         const int opcodeXBox = 0x200000c;
         const int opcodeOnActivate = 0x200000d;
         const int opcodeActivate = 0x2000075;
@@ -387,6 +412,9 @@ namespace MWScript
         const int opcodeGetSpellEffects = 0x20001db;
         const int opcodeGetSpellEffectsExplicit = 0x20001dc;
         const int opcodeGetCurrentTime = 0x20001dd;
+        const int opcodeSetDelete = 0x20001e5;
+        const int opcodeSetDeleteExplicit = 0x20001e6;
+        const int opcodeGetSquareRoot = 0x20001e7;
 
         void registerExtensions (Compiler::Extensions& extensions)
         {
@@ -419,6 +447,8 @@ namespace MWScript
             extensions.registerFunction ("getweapondrawn", 'l', "", opcodeGetWeaponDrawn, opcodeGetWeaponDrawnExplicit);
             extensions.registerFunction ("getspelleffects", 'l', "c", opcodeGetSpellEffects, opcodeGetSpellEffectsExplicit);
             extensions.registerFunction ("getcurrenttime", 'f', "", opcodeGetCurrentTime);
+            extensions.registerInstruction ("setdelete", "", opcodeSetDelete, opcodeSetDeleteExplicit);
+            extensions.registerFunction ("getsquareroot", 'f', "f", opcodeGetSquareRoot);
         }
 
         void installOpcodes (Interpreter::Interpreter& interpreter)
@@ -453,6 +483,9 @@ namespace MWScript
             interpreter.installSegment5 (opcodeGetSpellEffects, new OpGetSpellEffects<ImplicitRef>);
             interpreter.installSegment5 (opcodeGetSpellEffectsExplicit, new OpGetSpellEffects<ExplicitRef>);
             interpreter.installSegment5 (opcodeGetCurrentTime, new OpGetCurrentTime);
+            interpreter.installSegment5 (opcodeSetDelete, new OpSetDelete<ImplicitRef>);
+            interpreter.installSegment5 (opcodeSetDeleteExplicit, new OpSetDelete<ExplicitRef>);
+            interpreter.installSegment5 (opcodeGetSquareRoot, new OpGetSquareRoot);
         }
     }
 }

@@ -54,6 +54,23 @@ namespace MWScript
         };
 
         template<class R>
+        class OpModScale : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWWorld::Ptr ptr = R()(runtime);
+
+                    Interpreter::Type_Float scale = runtime[0].mFloat;
+                    runtime.pop();
+
+                    // add the parameter to the object's scale.
+                    MWBase::Environment::get().getWorld()->scaleObject(ptr,ptr.getCellRef().mScale + scale);
+                }
+        };
+
+        template<class R>
         class OpSetAngle : public Interpreter::Opcode0
         {
             public:
@@ -532,6 +549,8 @@ namespace MWScript
         const int opcodePlaceAtPc = 0x200019c;  
         const int opcodePlaceAtMe = 0x200019d;
         const int opcodePlaceAtMeExplicit = 0x200019e;
+        const int opcodeModScale = 0x20001e3;
+        const int opcodeModScaleExplicit = 0x20001e4;
 
         void registerExtensions (Compiler::Extensions& extensions)
         {
@@ -548,6 +567,7 @@ namespace MWScript
             extensions.registerInstruction("placeitem","cffff",opcodePlaceItem);
             extensions.registerInstruction("placeatpc","clfl",opcodePlaceAtPc);
             extensions.registerInstruction("placeatme","clfl",opcodePlaceAtMe,opcodePlaceAtMeExplicit);
+            extensions.registerInstruction("modscale","f",opcodeModScale,opcodeModScaleExplicit);
         }
 
         void installOpcodes (Interpreter::Interpreter& interpreter)
@@ -574,7 +594,9 @@ namespace MWScript
             interpreter.installSegment5(opcodePlaceItem,new OpPlaceItem<ImplicitRef>);            
             interpreter.installSegment5(opcodePlaceAtPc,new OpPlaceAtPc<ImplicitRef>);   
             interpreter.installSegment5(opcodePlaceAtMe,new OpPlaceAtMe<ImplicitRef>);   
-            interpreter.installSegment5(opcodePlaceAtMeExplicit,new OpPlaceAtMe<ExplicitRef>); 
+            interpreter.installSegment5(opcodePlaceAtMeExplicit,new OpPlaceAtMe<ExplicitRef>);
+            interpreter.installSegment5(opcodeModScale,new OpModScale<ImplicitRef>);
+            interpreter.installSegment5(opcodeModScaleExplicit,new OpModScale<ExplicitRef>);
         }
     }
 }

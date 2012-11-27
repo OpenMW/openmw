@@ -800,6 +800,18 @@ namespace MWScript
             }
         };
 
+        class OpGetWerewolfKills : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWWorld::Ptr ptr = MWBase::Environment::get().getWorld ()->getPlayer ().getPlayer ();
+
+                    runtime.push (MWWorld::Class::get(ptr).getNpcStats (ptr).getWerewolfKills ());
+                }
+        };
+
         const int numberOfAttributes = 8;
 
         const int opcodeGetAttribute = 0x2000027;
@@ -871,6 +883,8 @@ namespace MWScript
 
         const int opcodeGetRace = 0x20001d9;
         const int opcodeGetRaceExplicit = 0x20001da;
+
+        const int opcodeGetWerewolfKills = 0x20001e2;
 
         void registerExtensions (Compiler::Extensions& extensions)
         {
@@ -975,6 +989,7 @@ namespace MWScript
 
             extensions.registerFunction ("getrace", 'l', "c", opcodeGetRace,
                 opcodeGetRaceExplicit);
+            extensions.registerFunction ("getwerewolfkills", 'f', "", opcodeGetWerewolfKills);
         }
 
         void installOpcodes (Interpreter::Interpreter& interpreter)
@@ -1073,6 +1088,7 @@ namespace MWScript
 
             interpreter.installSegment5 (opcodeGetRace, new OpGetRace<ImplicitRef>);
             interpreter.installSegment5 (opcodeGetRaceExplicit, new OpGetRace<ExplicitRef>);
+            interpreter.installSegment5 (opcodeGetWerewolfKills, new OpGetWerewolfKills);
         }
     }
 }
