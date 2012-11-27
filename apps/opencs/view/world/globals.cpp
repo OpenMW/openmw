@@ -21,6 +21,8 @@ CSVWorld::Globals::Globals (const CSMWorld::UniversalId& id, CSMWorld::Data& dat
     table->horizontalHeader()->setResizeMode (QHeaderView::Interactive);
     table->verticalHeader()->hide();
     table->setSortingEnabled (true);
+    table->setSelectionBehavior (QAbstractItemView::SelectRows);
+    table->setSelectionMode (QAbstractItemView::ExtendedSelection);
 
     /// \todo make initial layout fill the whole width of the table
 }
