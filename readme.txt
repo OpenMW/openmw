@@ -69,12 +69,9 @@ Allowed options:
   --script-all [=arg(=1)] (=0)     compile all scripts (excluding dialogue scri
                                    pts) at startup
   --script-console [=arg(=1)] (=0) enable console-only script functionality
-  --script-run arg                 select a file that is executed in the consol
-                                   e on startup
+  --script-run arg                 select a file containing a list of console
+                                   commands that is executed on startup
 
-                                   Note: The file contains a list of script
-                                   lines, but not a complete scripts. That mean
-                                   s no begin/end and no variable declarations.
   --new-game [=arg(=1)] (=0)       activate char gen/new game mechanics
   --fs-strict [=arg(=1)] (=0)      strict file system handling (no case folding
                                    )
