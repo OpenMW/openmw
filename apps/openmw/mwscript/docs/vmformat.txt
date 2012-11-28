@@ -37,7 +37,13 @@ op 0x20014: SetPCFacRep
 op 0x20015: SetPCFacRep, explicit reference
 op 0x20016: ModPCFacRep
 op 0x20017: ModPCFacRep, explicit reference
-op s 0x20018-0x3ffff unused
+op 0x20018: PcExpelled
+op 0x20019: PcExpelled, explicit
+op 0x2001a: PcExpell
+op 0x2001b: PcExpell, explicit
+op 0x2001c: PcClearExpelled
+op 0x2001d: PcClearExpelled, explicit
+op s 0x2001e-0x3ffff unused
 
 Segment 4:
 (not implemented yet)
@@ -281,7 +287,12 @@ op 0x20001e4: ModScale, explicit
 op 0x20001e5: SetDelete
 op 0x20001e6: SetDelete, explicit
 op 0x20001e7: GetSquareRoot
-opcodes 0x20001e3-0x3ffffff unused
+op 0x20001e8: RaiseRank
+op 0x20001e9: RaiseRank, explicit
+op 0x20001ea: LowerRank
+op 0x20001eb: LowerRank, explicit
+
+opcodes 0x20001ec-0x3ffffff unused
 
 
 
