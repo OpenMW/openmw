@@ -212,7 +212,7 @@ namespace MWScript
                     MWWorld::InventoryStore& invStore = MWWorld::Class::get(ptr).getInventoryStore (ptr);
 
                     MWWorld::ContainerStoreIterator it = invStore.getSlot (slot);
-                    if (it == invStore.end())
+                    if (it == invStore.end() || it->getTypeName () != typeid(ESM::Armor).name())
                     {
                         runtime.push(-1);
                         return;
