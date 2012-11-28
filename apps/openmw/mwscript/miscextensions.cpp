@@ -365,7 +365,16 @@ namespace MWScript
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
                     MWWorld::Ptr ptr = R()(runtime);
-                    MWBase::Environment::get().getWorld()->deleteObject (ptr);
+                    int parameter = runtime[0].mInteger;
+                    runtime.pop();
+
+                    if (parameter == 1)
+                    {
+                        if (ptr.isInCell())
+                            MWBase::Environment::get().getWorld()->deleteObject (ptr);
+                        else
+                            ptr.getRefData().setCount(0);
+                    }
                 }
         };
 
@@ -447,7 +456,7 @@ namespace MWScript
             extensions.registerFunction ("getweapondrawn", 'l', "", opcodeGetWeaponDrawn, opcodeGetWeaponDrawnExplicit);
             extensions.registerFunction ("getspelleffects", 'l', "c", opcodeGetSpellEffects, opcodeGetSpellEffectsExplicit);
             extensions.registerFunction ("getcurrenttime", 'f', "", opcodeGetCurrentTime);
-            extensions.registerInstruction ("setdelete", "", opcodeSetDelete, opcodeSetDeleteExplicit);
+            extensions.registerInstruction ("setdelete", "l", opcodeSetDelete, opcodeSetDeleteExplicit);
             extensions.registerFunction ("getsquareroot", 'f', "f", opcodeGetSquareRoot);
         }
 
