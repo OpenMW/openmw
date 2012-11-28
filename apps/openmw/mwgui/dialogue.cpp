@@ -316,6 +316,22 @@ void addColorInString(std::string& str, const std::string& keyword,std::string c
     size_t pos = 0;
     while((pos = find_str_ci(str,keyword, pos)) != std::string::npos)
     {
+        // do not add color if this portion of text is already colored.
+        {
+            MyGUI::TextIterator iterator (str);
+            MyGUI::UString colour;
+            while(iterator.moveNext())
+            {
+                size_t iteratorPos = iterator.getPosition();
+                iterator.getTagColour(colour);
+                if (iteratorPos == pos)
+                    break;
+            }
+
+            if (colour == color1)
+                return;
+        }
+
         str.insert(pos,color1);
         pos += color1.length();
         pos += keyword.length();
