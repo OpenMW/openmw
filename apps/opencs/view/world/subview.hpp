@@ -5,6 +5,8 @@
 
 #include <QDockWidget>
 
+class QUndoStack;
+
 namespace CSMWorld
 {
     class Data;
@@ -31,19 +33,21 @@ namespace CSVWorld
 
     struct SubViewFactoryBase
     {
-        virtual SubView *makeSubView (const CSMWorld::UniversalId& id, CSMWorld::Data& data) = 0;
+        virtual SubView *makeSubView (const CSMWorld::UniversalId& id, CSMWorld::Data& data, QUndoStack& undoStack)
+            = 0;
     };
 
     template<class SubViewT>
     struct SubViewFactory : public SubViewFactoryBase
     {
-        virtual SubView *makeSubView (const CSMWorld::UniversalId& id, CSMWorld::Data& data);
+        virtual SubView *makeSubView (const CSMWorld::UniversalId& id, CSMWorld::Data& data, QUndoStack& undoStack);
     };
 
     template<class SubViewT>
-    SubView *SubViewFactory<SubViewT>::makeSubView (const CSMWorld::UniversalId& id, CSMWorld::Data& data)
+    SubView *SubViewFactory<SubViewT>::makeSubView (const CSMWorld::UniversalId& id, CSMWorld::Data& data,
+        QUndoStack& undoStack)
     {
-        return new SubViewT (id, data);
+        return new SubViewT (id, data, undoStack);
     }
 }
 

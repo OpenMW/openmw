@@ -193,7 +193,7 @@ void CSVDoc::View::addSubView (const CSMWorld::UniversalId& id)
     if (iter==mSubViewFactories.end())
         throw std::logic_error ("can't create subview for " + id.toString());
 
-    CSVWorld::SubView *view = iter->second->makeSubView (id, mDocument->getData());
+    CSVWorld::SubView *view = iter->second->makeSubView (id, mDocument->getData(), mDocument->getUndoStack());
     addDockWidget (Qt::TopDockWidgetArea, view);
     view->show();
 }
