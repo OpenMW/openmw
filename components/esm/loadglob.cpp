@@ -44,4 +44,8 @@ void Global::save(ESMWriter &esm)
     esm.writeHNT("FLTV", mValue);
 }
 
+    bool operator== (const Global& left, const Global& right)
+    {
+        return left.mId==right.mId && left.mValue==right.mValue && left.mType==right.mType;
+    }
 }

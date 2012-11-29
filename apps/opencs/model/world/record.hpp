@@ -8,7 +8,7 @@ namespace CSMWorld
     template <typename ESXRecordT>
     struct Record
     {
-        enum state
+        enum State
         {
             State_BaseOnly, // defined in base only
             State_Modified, // exists in base, but has been modified
@@ -18,7 +18,7 @@ namespace CSMWorld
 
         ESXRecordT mBase;
         ESXRecordT mModified;
-        state mState;
+        State mState;
 
         bool isDeleted() const;
 
@@ -27,10 +27,11 @@ namespace CSMWorld
         const ESXRecordT& get() const;
         ///< Throws an exception, if the record is deleted.
 
-        ESXRecordT& get();
-        ///< Throws an exception, if the record is deleted.
+        const ESXRecordT& getBase() const;
+        ///< Throws an exception, if the record is deleted. Returns modified, if there is no base.
 
         void setModified (const ESXRecordT& modified);
+        ///< Throws an exception, if the record is deleted.
     };
 
     template <typename ESXRecordT>
@@ -55,21 +56,24 @@ namespace CSMWorld
     }
 
     template <typename ESXRecordT>
-    ESXRecordT& Record<ESXRecordT>::get()
+    const ESXRecordT& Record<ESXRecordT>::getBase() const
     {
         if (isDeleted())
             throw std::logic_error ("attempt to access a deleted record");
 
-        return mState==State_BaseOnly ? mBase : mModified;
+        return mState==State_ModifiedOnly ? mModified : mBase;
     }
 
     template <typename ESXRecordT>
     void Record<ESXRecordT>::setModified (const ESXRecordT& modified)
     {
+        if (isDeleted())
+            throw std::logic_error ("attempt to modify a deleted record");
+
         mModified = modified;
 
         if (mState!=State_ModifiedOnly)
-            mState = State_Modified;
+            mState = mBase==mModified ? State_BaseOnly : State_Modified;
     }
 }
 

@@ -24,5 +24,8 @@ struct Global
     void load(ESMReader &esm);
     void save(ESMWriter &esm);
 };
+
+bool operator== (const Global& left, const Global& right);
+
 }
 #endif

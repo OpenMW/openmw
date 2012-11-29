@@ -14,6 +14,18 @@ namespace CSMWorld
         {
             return record.get().mValue;
         }
+
+        virtual void set (Record<ESXRecordT>& record, const QVariant& data)
+        {
+            ESXRecordT base = record.getBase();
+            base.mValue = data.toFloat();
+            record.setModified (base);
+        }
+
+        virtual bool isEditable() const
+        {
+            return true;
+        }
     };
 
 }

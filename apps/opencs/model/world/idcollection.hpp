@@ -23,6 +23,10 @@ namespace CSMWorld
         virtual ~Column() {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const = 0;
+
+        virtual void set (Record<ESXRecordT>& record, const QVariant& data) = 0;
+
+        virtual bool isEditable() const = 0;
     };
 
     class IdCollectionBase
@@ -46,6 +50,10 @@ namespace CSMWorld
             virtual std::string getTitle (int column) const = 0;
 
             virtual QVariant getData (int index, int column) const = 0;
+
+            virtual void setData (int index, int column, const QVariant& data) = 0;
+
+            virtual bool isEditable (int column) const = 0;
     };
 
     ///< \brief Collection of ID-based records
@@ -77,9 +85,13 @@ namespace CSMWorld
 
             virtual QVariant getData (int index, int column) const;
 
+            virtual void setData (int index, int column, const QVariant& data);
+
             virtual std::string getTitle (int column) const;
 
-            virtual void addColumn (Column<ESXRecordT> *column);
+            virtual bool isEditable (int column) const;
+
+            void addColumn (Column<ESXRecordT> *column);
     };
 
     template<typename ESXRecordT>
@@ -143,9 +155,21 @@ namespace CSMWorld
     }
 
     template<typename ESXRecordT>
+    void IdCollection<ESXRecordT>::setData (int index, int column, const QVariant& data)
+    {
+        return mColumns.at (column)->set (mRecords.at (index), data);
+    }
+
+    template<typename ESXRecordT>
     std::string IdCollection<ESXRecordT>::getTitle (int column) const
     {
         return mColumns.at (column)->mTitle;
+    }
+
+    template<typename ESXRecordT>
+    bool IdCollection<ESXRecordT>::isEditable (int column) const
+    {
+        return mColumns.at (column)->isEditable();
     }
 
     template<typename ESXRecordT>
