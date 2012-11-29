@@ -6,6 +6,7 @@
 #include <string>
 #include <algorithm>
 #include <cctype>
+#include <stdexcept>
 
 #include <QVariant>
 
@@ -24,7 +25,10 @@ namespace CSMWorld
 
         virtual QVariant get (const Record<ESXRecordT>& record) const = 0;
 
-        virtual void set (Record<ESXRecordT>& record, const QVariant& data) = 0;
+        virtual void set (Record<ESXRecordT>& record, const QVariant& data)
+        {
+            throw std::logic_error ("Column " + mTitle + " is not editable");
+        }
 
         virtual bool isEditable() const = 0;
     };

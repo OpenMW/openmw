@@ -28,6 +28,22 @@ namespace CSMWorld
         }
     };
 
+    template<typename ESXRecordT>
+    struct StringIdColumn : public Column<ESXRecordT>
+    {
+        StringIdColumn() : Column<ESXRecordT> ("ID") {}
+
+        virtual QVariant get (const Record<ESXRecordT>& record) const
+        {
+            return record.get().mId.c_str();
+        }
+
+        virtual bool isEditable() const
+        {
+            return false;
+        }
+    };
+
 }
 
 #endif

@@ -63,7 +63,7 @@ CSVWorld::Globals::Globals (const CSMWorld::UniversalId& id, CSMWorld::Data& dat
 
     int columns = model->columnCount();
 
-    for (int i=1; i<columns; ++i)
+    for (int i=0; i<columns; ++i)
     {
         CommandDelegate *delegate = new CommandDelegate (undoStack, table);
         table->setItemDelegateForColumn (i, delegate);
