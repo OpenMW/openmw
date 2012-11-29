@@ -93,8 +93,6 @@ namespace CSVDoc
 
             void newView();
 
-            void test();
-
             void save();
 
             void verify();
