@@ -39,12 +39,15 @@ namespace CSVWorld
     class CommandDelegate : public QStyledItemDelegate
     {
             QUndoStack& mUndoStack;
+            bool mEditLock;
 
         public:
 
             CommandDelegate (QUndoStack& undoStack, QObject *parent);
 
             void setModelData (QWidget *editor, QAbstractItemModel *model, const QModelIndex& index) const;
+
+            void setEditLock (bool locked);
     };
 
 }
@@ -80,15 +83,24 @@ QVariant CSVWorld::NastyTableModelHack::getData() const
 }
 
 CSVWorld::CommandDelegate::CommandDelegate (QUndoStack& undoStack, QObject *parent)
-: QStyledItemDelegate (parent), mUndoStack (undoStack)
+: QStyledItemDelegate (parent), mUndoStack (undoStack), mEditLock (false)
 {}
 
 void CSVWorld::CommandDelegate::setModelData (QWidget *editor, QAbstractItemModel *model,
         const QModelIndex& index) const
 {
-    NastyTableModelHack hack (*model);
-    QStyledItemDelegate::setModelData (editor, &hack, index);
-    mUndoStack.push (new CSMWorld::ModifyCommand (*model, index, hack.getData()));
+    if (!mEditLock)
+    {
+        NastyTableModelHack hack (*model);
+        QStyledItemDelegate::setModelData (editor, &hack, index);
+        mUndoStack.push (new CSMWorld::ModifyCommand (*model, index, hack.getData()));
+    }
+    ///< \todo provide some kind of feedback to the user, indicating that editing is currently not possible.
+}
+
+void  CSVWorld::CommandDelegate::setEditLock (bool locked)
+{
+    mEditLock = locked;
 }
 
 
@@ -101,6 +113,7 @@ CSVWorld::Table::Table (const CSMWorld::UniversalId& id, CSMWorld::Data& data, Q
     for (int i=0; i<columns; ++i)
     {
         CommandDelegate *delegate = new CommandDelegate (undoStack, this);
+        mDelegates.push_back (delegate);
         setItemDelegateForColumn (i, delegate);
     }
 
@@ -115,4 +128,10 @@ CSVWorld::Table::Table (const CSMWorld::UniversalId& id, CSMWorld::Data& data, Q
     setSelectionMode (QAbstractItemView::ExtendedSelection);
 
     /// \todo make initial layout fill the whole width of the table
+}
+
+void CSVWorld::Table::setEditLock (bool locked)
+{
+    for (std::vector<CommandDelegate *>::iterator iter (mDelegates.begin()); iter!=mDelegates.end(); ++iter)
+        (*iter)->setEditLock (locked);
 }

@@ -6,7 +6,10 @@
 CSVWorld::Globals::Globals (const CSMWorld::UniversalId& id, CSMWorld::Data& data, QUndoStack& undoStack)
 : SubView (id)
 {
-    QTableView *table = new Table (id, data, undoStack);
+    setWidget (mTable = new Table (id, data, undoStack));
+}
 
-    setWidget (table);
+void CSVWorld::Globals::setEditLock (bool locked)
+{
+    mTable->setEditLock (locked);
 }

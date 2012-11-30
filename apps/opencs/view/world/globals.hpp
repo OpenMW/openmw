@@ -7,11 +7,17 @@ class QUndoStack;
 
 namespace CSVWorld
 {
+    class Table;
+
     class Globals : public SubView
     {
+            Table *mTable;
+
         public:
 
             Globals (const CSMWorld::UniversalId& id, CSMWorld::Data& data, QUndoStack& undoStack);
+
+            virtual void setEditLock (bool locked);
     };
 }
 

@@ -29,6 +29,8 @@ namespace CSVWorld
             SubView (const CSMWorld::UniversalId& id);
 
             CSMWorld::UniversalId getUniversalId() const;
+
+            virtual void setEditLock (bool locked) = 0;
     };
 
     struct SubViewFactoryBase

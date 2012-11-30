@@ -165,6 +165,11 @@ void CSVDoc::View::updateDocumentState()
     for (int i=0; operations[i]!=-1; ++i)
         if (!(state & operations[i]))
             mOperations->quitOperation (operations[i]);
+
+    QList<CSVWorld::SubView *> subViews = findChildren<CSVWorld::SubView *>();
+
+    for (QList<CSVWorld::SubView *>::iterator iter (subViews.begin()); iter!=subViews.end(); ++iter)
+        (*iter)->setEditLock (state && CSMDoc::Document::State_Locked);
 }
 
 void CSVDoc::View::updateProgress (int current, int max, int type, int threads)
