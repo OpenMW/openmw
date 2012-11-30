@@ -5,6 +5,11 @@ MWMechanics::AiFollow::AiFollow(const std::string &actorId,float duration, float
 : mDuration(duration), mX(x), mY(y), mZ(z), mActorId(actorId)
 {
 }
+MWMechanics::AiFollow::AiFollow(const std::string &actorId,const std::string &cellId,float duration, float x, float y, float z)
+: mDuration(duration), mX(x), mY(y), mZ(z), mActorId(actorId), mCellId(cellId)
+{
+}
+
 MWMechanics::AiFollow *MWMechanics::AiFollow::clone() const
 {
     return new AiFollow(*this);

@@ -37,7 +37,15 @@ op 0x20014: SetPCFacRep
 op 0x20015: SetPCFacRep, explicit reference
 op 0x20016: ModPCFacRep
 op 0x20017: ModPCFacRep, explicit reference
-op s 0x20018-0x3ffff unused
+op 0x20018: AIActivate
+op 0x20019: AIActivate, explicit reference
+op 0x2001a: AiEscortCell
+op 0x2001b: AiEscortCell, explicit reference
+op 0x2001c: AiFollow
+op 0x2001d: AiFollow, explicit reference
+op 0x2001e: AiFollowCell
+op 0x2001f: AiFollowCell, explicit reference
+op s 0x20020-0x3ffff unused
 
 Segment 4:
 (not implemented yet)
@@ -226,5 +234,9 @@ op 0x20001ad: SetReputation
 op 0x20001ae: ModReputation
 op 0x20001af: SetReputation, explicit
 op 0x20001b0: ModReputation, explicit
-opcodes 0x20001b1-0x3ffffff unused
+op 0x20001b1: GetCurrentAIPackage
+op 0x20001b2: GetCurrentAIPackage, explicit reference
+op 0x20001b3: GetDetected
+op 0x20001b4: GetDetected, explicit reference
+opcodes 0x20001b5-0x3ffffff unused
 
