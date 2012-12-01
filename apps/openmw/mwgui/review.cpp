@@ -5,7 +5,7 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
 
-#include <components/esm_store/store.hpp>
+#include "../mwworld/esmstore.hpp"
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -108,7 +108,9 @@ void ReviewDialog::setPlayerName(const std::string &name)
 void ReviewDialog::setRace(const std::string &raceId)
 {
     mRaceId = raceId;
-    const ESM::Race *race = MWBase::Environment::get().getWorld()->getStore().races.search(mRaceId);
+
+    const ESM::Race *race =
+        MWBase::Environment::get().getWorld()->getStore().get<ESM::Race>().search(mRaceId);
     if (race)
     {
         ToolTips::createRaceToolTip(mRaceWidget, race);
@@ -126,7 +128,9 @@ void ReviewDialog::setClass(const ESM::Class& class_)
 void ReviewDialog::setBirthSign(const std::string& signId)
 {
     mBirthSignId = signId;
-    const ESM::BirthSign *sign = MWBase::Environment::get().getWorld()->getStore().birthSigns.search(mBirthSignId);
+
+    const ESM::BirthSign *sign =
+        MWBase::Environment::get().getWorld()->getStore().get<ESM::BirthSign>().search(mBirthSignId);
     if (sign)
     {
         mBirthSignWidget->setCaption(sign->mName);
@@ -281,7 +285,7 @@ void ReviewDialog::addSkills(const SkillList &skills, const std::string &titleId
         if (skillId < 0 || skillId > ESM::Skill::Length) // Skip unknown skill indexes
             continue;
         assert(skillId >= 0 && skillId < ESM::Skill::Length);
-        const std::string &skillNameId = ESMS::Skill::sSkillNameIds[skillId];
+        const std::string &skillNameId = ESM::Skill::sSkillNameIds[skillId];
         const MWMechanics::Stat<float> &stat = mSkillValues.find(skillId)->second;
         float base = stat.getBase();
         float modified = stat.getModified();

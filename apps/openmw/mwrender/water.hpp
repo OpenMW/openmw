@@ -23,7 +23,7 @@ namespace Ogre
     class Entity;
     class Vector3;
     struct RenderTargetEvent;
-};
+}
 
 namespace MWRender {
 

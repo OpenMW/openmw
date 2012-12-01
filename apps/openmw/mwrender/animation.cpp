@@ -7,7 +7,6 @@
 #include <OgreSubMesh.h>
 #include <OgreSceneManager.h>
 
-
 namespace MWRender
 {
 

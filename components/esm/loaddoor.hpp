@@ -11,7 +11,7 @@ class ESMWriter;
 
 struct Door
 {
-    std::string mName, mModel, mScript, mOpenSound, mCloseSound;
+    std::string mId, mName, mModel, mScript, mOpenSound, mCloseSound;
 
     void load(ESMReader &esm);
     void save(ESMWriter &esm);

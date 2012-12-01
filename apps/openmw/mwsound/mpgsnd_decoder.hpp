@@ -52,6 +52,6 @@ namespace MWSound
 #ifndef DEFAULT_DECODER
 #define DEFAULT_DECODER (::MWSound::MpgSnd_Decoder)
 #endif
-};
+}
 
 #endif

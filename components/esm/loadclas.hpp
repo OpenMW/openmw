@@ -60,7 +60,7 @@ struct Class
         int mCalc;
     }; // 60 bytes
 
-    std::string mName, mDescription;
+    std::string mId, mName, mDescription;
     CLDTstruct mData;
 
     void load(ESMReader &esm);

@@ -23,7 +23,8 @@ namespace MWRender
       mFreeLook(true),
       mHeight(128.f),
       mCameraDistance(300.f),
-      mDistanceAdjusted(false)
+      mDistanceAdjusted(false),
+      mAnimation(NULL)
     {
         mVanity.enabled = false;
         mVanity.allowed = true;
@@ -309,7 +310,13 @@ namespace MWRender
 
     void Player::setAnimation(NpcAnimation *anim)
     {
+        delete mAnimation;
         mAnimation = anim;
+
+        mPlayerNode->setVisible(
+            mVanity.enabled || mPreviewMode || !mFirstPersonView,
+            false
+        );
     }
 
     void Player::setHeight(float height)

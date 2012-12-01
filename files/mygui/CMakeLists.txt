@@ -75,6 +75,12 @@ set(MYGUI_FILES
     openmw_levelup_dialog.layout
     openmw_wait_dialog.layout
     openmw_wait_dialog_progressbar.layout
+    openmw_spellcreation_dialog.layout
+    openmw_edit_effect.layout
+    openmw_enchanting_dialog.layout
+    openmw_trainingwindow.layout
+    openmw_travel_window.layout
+    openmw_persuasion_dialog.layout
     smallbars.png
     VeraMono.ttf
     markers.png

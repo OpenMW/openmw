@@ -3,6 +3,8 @@
 
 #include <string>
 
+#include <OgreTexture.h>
+
 namespace MWRender
 {
 
@@ -22,8 +24,15 @@ namespace MWRender
 
         void cellTopLeftCornerToImageSpace(int x, int y, float& imageX, float& imageY);
 
+        void exploreCell (int cellX, int cellY);
+
     private:
         std::string mCacheDir;
+
+        std::vector< std::pair<int,int> > mExploredCells;
+
+        Ogre::TexturePtr mOverlayTexture;
+        std::vector<Ogre::uchar> mExploredBuffer;
 
         int mWidth;
         int mHeight;

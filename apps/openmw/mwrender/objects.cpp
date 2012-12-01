@@ -219,18 +219,18 @@ void Objects::insertLight (const MWWorld::Ptr& ptr, float r, float g, float b, f
     info.radius = radius;
     info.colour = Ogre::ColourValue(r, g, b);
 
-    if (ref->base->mData.mFlags & ESM::Light::Negative)
+    if (ref->mBase->mData.mFlags & ESM::Light::Negative)
         info.colour *= -1;
 
-    info.interior = (ptr.getCell()->cell->mData.mFlags & ESM::Cell::Interior);
+    info.interior = !ptr.getCell()->mCell->isExterior();
 
-    if (ref->base->mData.mFlags & ESM::Light::Flicker)
+    if (ref->mBase->mData.mFlags & ESM::Light::Flicker)
         info.type = LT_Flicker;
-    else if (ref->base->mData.mFlags & ESM::Light::FlickerSlow)
+    else if (ref->mBase->mData.mFlags & ESM::Light::FlickerSlow)
         info.type = LT_FlickerSlow;
-    else if (ref->base->mData.mFlags & ESM::Light::Pulse)
+    else if (ref->mBase->mData.mFlags & ESM::Light::Pulse)
         info.type = LT_Pulse;
-    else if (ref->base->mData.mFlags & ESM::Light::PulseSlow)
+    else if (ref->mBase->mData.mFlags & ESM::Light::PulseSlow)
         info.type = LT_PulseSlow;
     else
         info.type = LT_Normal;

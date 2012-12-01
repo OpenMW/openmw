@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<MyGUI type="Layout">
+    <Widget type="Window" skin="MW_Dialog" layer="Windows" position="0 0 362 310" name="_Main">
+
+        <Widget type="ImageBox" skin="ImageBox" position="8 12 16 16" name="EffectImage">
+        </Widget>
+
+        <Widget type="TextBox" skin="NormalText" position="36 8 400 24" name="EffectName">
+            <Property key="TextAlign" value="Left HCenter"/>
+        </Widget>
+
+
+        <!-- Range -->
+        <Widget type="TextBox" skin="NormalText" position="8 36 400 24">
+            <Property key="Caption" value="#{sRange}"/>
+            <Property key="TextAlign" value="Left HCenter"/>
+        </Widget>
+        <Widget type="AutoSizedButton" skin="MW_Button" position="130 36 0 24" name="RangeButton">
+            <Property key="Caption" value="#{sRangeTouch}"/>
+        </Widget>
+
+        <!-- Magnitude -->
+        <Widget type="Widget" position="8 80 400 70" name="MagnitudeBox">
+            <Widget type="TextBox" skin="NormalText" position="0 0 400 24">
+                <Property key="Caption" value="#{sMagnitude}"/>
+                <Property key="TextAlign" value="Left HCenter"/>
+            </Widget>
+
+            <Widget type="TextBox" skin="SandText" position="122 0 210 20" name="MagnitudeMinValue">
+                <Property key="TextAlign" value="Center"/>
+                <Property key="Caption" value="0"/>
+            </Widget>
+            <Widget type="ScrollBar" skin="MW_HSlider" position="122 20 210 13" name="MagnitudeMinSlider">
+                <Property key="Range" value="100"/>
+            </Widget>
+
+            <Widget type="TextBox" skin="SandText" position="122 32 210 20" name="MagnitudeMaxValue">
+                <Property key="TextAlign" value="Center"/>
+                <Property key="Caption" value="0"/>
+            </Widget>
+            <Widget type="ScrollBar" skin="MW_HSlider" position="122 52 210 13" name="MagnitudeMaxSlider">
+                <Property key="Range" value="100"/>
+            </Widget>
+        </Widget>
+
+
+        <!-- Duration -->
+        <Widget type="Widget" position="8 153 400 40" name="DurationBox">
+            <Widget type="TextBox" skin="NormalText" position="0 20 400 24">
+                <Property key="Caption" value="#{sDuration}"/>
+                <Property key="TextAlign" value="Left Top"/>
+            </Widget>
+
+            <Widget type="TextBox" skin="SandText" position="122 0 210 20" name="DurationValue">
+                <Property key="TextAlign" value="Center"/>
+                <Property key="Caption" value="0"/>
+            </Widget>
+            <Widget type="ScrollBar" skin="MW_HSlider" position="122 20 210 13" name="DurationSlider">
+                <Property key="Range" value="1440"/>
+            </Widget>
+        </Widget>
+
+        <!-- Area -->
+        <Widget type="Widget" position="8 197 400 40" name="AreaBox">
+            <Widget type="TextBox" skin="NormalText" position="0 20 400 24" name="AreaText">
+                <Property key="Caption" value="#{sArea}"/>
+                <Property key="TextAlign" value="Left Top"/>
+            </Widget>
+
+            <Widget type="TextBox" skin="SandText" position="122 0 210 20" name="AreaValue">
+                <Property key="TextAlign" value="Center"/>
+                <Property key="Caption" value="0"/>
+            </Widget>
+            <Widget type="ScrollBar" skin="MW_HSlider" position="122 20 210 13" name="AreaSlider">
+                <Property key="Range" value="51"/>
+            </Widget>
+        </Widget>
+
+        <Widget type="HBox" position="8 266 336 24">
+            <Widget type="Widget">
+                <UserString key="HStretch" value="true"/>
+            </Widget>
+
+            <Widget type="AutoSizedButton" skin="MW_Button" name="DeleteButton">
+                <Property key="Caption" value="#{sDelete}"/>
+            </Widget>
+
+            <Widget type="AutoSizedButton" skin="MW_Button" name="OkButton">
+                <Property key="Caption" value="#{sOk}"/>
+            </Widget>
+
+            <Widget type="AutoSizedButton" skin="MW_Button" name="CancelButton">
+                <Property key="Caption" value="#{sCancel}"/>
+            </Widget>
+        </Widget>
+
+    </Widget>
+</MyGUI>

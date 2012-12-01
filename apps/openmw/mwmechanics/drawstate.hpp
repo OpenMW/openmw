@@ -8,7 +8,7 @@ namespace MWMechanics
     {
         DrawState_Weapon = 0,
         DrawState_Spell = 1,
-        DrawState_Nothing = 2,
+        DrawState_Nothing = 2
     };
 }
 

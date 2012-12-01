@@ -6,12 +6,15 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
 
-#include <components/esm_store/store.hpp>
+#include "../mwworld/esmstore.hpp"
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/dialoguemanager.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"
+#include "../mwbase/mechanicsmanager.hpp"
+
+#include "../mwmechanics/npcstats.hpp"
 
 #include "dialogue_history.hpp"
 #include "widgets.hpp"
@@ -19,6 +22,7 @@
 #include "tradewindow.hpp"
 #include "spellbuyingwindow.hpp"
 #include "inventorywindow.hpp"
+#include "travelwindow.hpp"
 
 using namespace MWGui;
 using namespace Widgets;
@@ -26,6 +30,8 @@ using namespace Widgets;
 /**
 *Copied from the internet.
 */
+
+namespace {
 
 std::string lower_string(const std::string& str)
 {
@@ -42,15 +48,89 @@ std::string::size_type find_str_ci(const std::string& str, const std::string& su
     return lower_string(str).find(lower_string(substr),pos);
 }
 
+}
+
+
+
+PersuasionDialog::PersuasionDialog(MWBase::WindowManager &parWindowManager)
+    : WindowModal("openmw_persuasion_dialog.layout", parWindowManager)
+{
+    getWidget(mCancelButton, "CancelButton");
+    getWidget(mAdmireButton, "AdmireButton");
+    getWidget(mIntimidateButton, "IntimidateButton");
+    getWidget(mTauntButton, "TauntButton");
+    getWidget(mBribe10Button, "Bribe10Button");
+    getWidget(mBribe100Button, "Bribe100Button");
+    getWidget(mBribe1000Button, "Bribe1000Button");
+    getWidget(mGoldLabel, "GoldLabel");
+
+    mCancelButton->eventMouseButtonClick += MyGUI::newDelegate(this, &PersuasionDialog::onCancel);
+    mAdmireButton->eventMouseButtonClick += MyGUI::newDelegate(this, &PersuasionDialog::onPersuade);
+    mIntimidateButton->eventMouseButtonClick += MyGUI::newDelegate(this, &PersuasionDialog::onPersuade);
+    mTauntButton->eventMouseButtonClick += MyGUI::newDelegate(this, &PersuasionDialog::onPersuade);
+    mBribe10Button->eventMouseButtonClick += MyGUI::newDelegate(this, &PersuasionDialog::onPersuade);
+    mBribe100Button->eventMouseButtonClick += MyGUI::newDelegate(this, &PersuasionDialog::onPersuade);
+    mBribe1000Button->eventMouseButtonClick += MyGUI::newDelegate(this, &PersuasionDialog::onPersuade);
+}
+
+void PersuasionDialog::onCancel(MyGUI::Widget *sender)
+{
+    setVisible(false);
+}
+
+void PersuasionDialog::onPersuade(MyGUI::Widget *sender)
+{
+    MWBase::MechanicsManager::PersuasionType type;
+    if (sender == mAdmireButton) type = MWBase::MechanicsManager::PT_Admire;
+    else if (sender == mIntimidateButton) type = MWBase::MechanicsManager::PT_Intimidate;
+    else if (sender == mTauntButton) type = MWBase::MechanicsManager::PT_Taunt;
+    else if (sender == mBribe10Button)
+    {
+        mWindowManager.getTradeWindow()->addOrRemoveGold(-10);
+        type = MWBase::MechanicsManager::PT_Bribe10;
+    }
+    else if (sender == mBribe100Button)
+    {
+        mWindowManager.getTradeWindow()->addOrRemoveGold(-100);
+        type = MWBase::MechanicsManager::PT_Bribe100;
+    }
+    else /*if (sender == mBribe1000Button)*/
+    {
+        mWindowManager.getTradeWindow()->addOrRemoveGold(-1000);
+        type = MWBase::MechanicsManager::PT_Bribe1000;
+    }
+
+    MWBase::Environment::get().getDialogueManager()->persuade(type);
+
+    setVisible(false);
+}
+
+void PersuasionDialog::open()
+{
+    WindowModal::open();
+    center();
+
+    int playerGold = mWindowManager.getInventoryWindow()->getPlayerGold();
+
+    mBribe10Button->setEnabled (playerGold >= 10);
+    mBribe100Button->setEnabled (playerGold >= 100);
+    mBribe1000Button->setEnabled (playerGold >= 1000);
+
+    mGoldLabel->setCaptionWithReplacing("#{sGold}: " + boost::lexical_cast<std::string>(playerGold));
+}
+
+// --------------------------------------------------------------------------------------------------
 
 DialogueWindow::DialogueWindow(MWBase::WindowManager& parWindowManager)
     : WindowBase("openmw_dialogue_window.layout", parWindowManager)
-    , mEnabled(true)
-    , mShowTrade(false)
-    , mShowSpells(false)
+    , mPersuasionDialog(parWindowManager)
+    , mEnabled(false)
+    , mServices(0)
 {
     // Centre dialog
     center();
+
+    mPersuasionDialog.setVisible(false);
 
     //History view
     getWidget(mHistory, "History");
@@ -123,18 +203,44 @@ void DialogueWindow::onSelectTopic(std::string topic)
 {
     if (!mEnabled) return;
 
-    if (topic == MWBase::Environment::get().getWorld()->getStore().gameSettings.find("sBarter")->getString())
+    const MWWorld::Store<ESM::GameSetting> &gmst =
+        MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+
+    if (topic == gmst.find("sBarter")->getString())
     {
         /// \todo check if the player is allowed to trade with this actor (e.g. faction rank high enough)?
         mWindowManager.pushGuiMode(GM_Barter);
         mWindowManager.getTradeWindow()->startTrade(mPtr);
     }
-    else if (topic == MWBase::Environment::get().getWorld()->getStore().gameSettings.find("sSpells")->getString())
+    if (topic == gmst.find("sPersuasion")->getString())
+    {
+        mPersuasionDialog.setVisible(true);
+    }
+    else if (topic == gmst.find("sSpells")->getString())
     {
         mWindowManager.pushGuiMode(GM_SpellBuying);
         mWindowManager.getSpellBuyingWindow()->startSpellBuying(mPtr);
     }
-
+    else if (topic == gmst.find("sTravel")->getString())
+    {
+        mWindowManager.pushGuiMode(GM_Travel);
+        mWindowManager.getTravelWindow()->startTravel(mPtr);
+    }
+    else if (topic == gmst.find("sSpellMakingMenuTitle")->getString())
+    {
+        mWindowManager.pushGuiMode(GM_SpellCreation);
+        mWindowManager.startSpellMaking (mPtr);
+    }
+    else if (topic == gmst.find("sEnchanting")->getString())
+    {
+        mWindowManager.pushGuiMode(GM_Enchanting);
+        mWindowManager.startEnchanting (mPtr);
+    }
+    else if (topic == gmst.find("sServiceTrainingTitle")->getString())
+    {
+        mWindowManager.pushGuiMode(GM_Training);
+        mWindowManager.startTraining (mPtr);
+    }
     else
         MWBase::Environment::get().getDialogueManager()->keywordSelected(lower_string(topic));
 }
@@ -147,7 +253,7 @@ void DialogueWindow::startDialogue(MWWorld::Ptr actor, std::string npcName)
     setTitle(npcName);
 
     mTopicsList->clear();
-    mHistory->eraseText(0,mHistory->getTextLength());
+    mHistory->setCaption("");
     updateOptions();
 }
 
@@ -155,13 +261,31 @@ void DialogueWindow::setKeywords(std::list<std::string> keyWords)
 {
     mTopicsList->clear();
 
-    bool anyService = mShowTrade||mShowSpells;
+    bool anyService = mServices > 0;
 
-    if (mShowTrade)
-        mTopicsList->addItem(MWBase::Environment::get().getWorld()->getStore().gameSettings.find("sBarter")->getString());
+    const MWWorld::Store<ESM::GameSetting> &gmst =
+        MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
 
-    if (mShowSpells)
-        mTopicsList->addItem(MWBase::Environment::get().getWorld()->getStore().gameSettings.find("sSpells")->getString());
+    if (mPtr.getTypeName() == typeid(ESM::NPC).name())
+        mTopicsList->addItem(gmst.find("sPersuasion")->getString());
+
+    if (mServices & Service_Trade)
+        mTopicsList->addItem(gmst.find("sBarter")->getString());
+
+    if (mServices & Service_BuySpells)
+        mTopicsList->addItem(gmst.find("sSpells")->getString());
+
+    if (mServices & Service_Travel)
+        mTopicsList->addItem(gmst.find("sTravel")->getString());
+
+    if (mServices & Service_CreateSpells)
+        mTopicsList->addItem(gmst.find("sSpellmakingMenuTitle")->getString());
+
+//    if (mServices & Service_Enchant)
+//        mTopicsList->addItem(gmst.find("sEnchanting")->getString());
+
+    if (mServices & Service_Training)
+        mTopicsList->addItem(gmst.find("sServiceTrainingTitle")->getString());
 
     if (anyService)
         mTopicsList->addSeparator();
@@ -258,15 +382,18 @@ void DialogueWindow::updateOptions()
     mTopicsList->clear();
     mHistory->eraseText(0, mHistory->getTextLength());
 
-    mDispositionBar->setProgressRange(100);
-    mDispositionBar->setProgressPosition(40);
-    mDispositionText->eraseText(0, mDispositionText->getTextLength());
-    mDispositionText->addText("#B29154"+std::string("40/100")+"#B29154");
+    if (mPtr.getTypeName() == typeid(ESM::NPC).name())
+    {
+        mDispositionBar->setProgressRange(100);
+        mDispositionBar->setProgressPosition(MWBase::Environment::get().getMechanicsManager()->getDerivedDisposition(mPtr));
+        mDispositionText->eraseText(0, mDispositionText->getTextLength());
+        mDispositionText->addText("#B29154"+boost::lexical_cast<std::string>(MWBase::Environment::get().getMechanicsManager()->getDerivedDisposition(mPtr))+std::string("/100")+"#B29154");
+    }
 }
 
 void DialogueWindow::goodbye()
 {
-    mHistory->addDialogText("\n#572D21" + MWBase::Environment::get().getWorld()->getStore().gameSettings.find("sGoodbye")->getString());
+    mHistory->addDialogText("\n#572D21" + MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("sGoodbye")->getString());
     mTopicsList->setEnabled(false);
     mEnabled = false;
 }
@@ -274,4 +401,18 @@ void DialogueWindow::goodbye()
 void DialogueWindow::onReferenceUnavailable()
 {
     mWindowManager.removeGuiMode(GM_Dialogue);
+}
+
+void DialogueWindow::onFrame()
+{
+    if(mEnabled && mPtr.getTypeName() == typeid(ESM::NPC).name())
+    {
+        int disp = std::max(0, std::min(100,
+            MWBase::Environment::get().getMechanicsManager()->getDerivedDisposition(mPtr)
+                + MWBase::Environment::get().getDialogueManager()->getTemporaryDispositionChange()));
+        mDispositionBar->setProgressRange(100);
+        mDispositionBar->setProgressPosition(disp);
+        mDispositionText->eraseText(0, mDispositionText->getTextLength());
+        mDispositionText->addText("#B29154"+boost::lexical_cast<std::string>(disp)+std::string("/100")+"#B29154");
+    }
 }

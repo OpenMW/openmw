@@ -233,7 +233,17 @@ namespace MWRender
             mVideoCodecContext->width, mVideoCodecContext->height,
             0,
             Ogre::PF_BYTE_RGBA,
-            Ogre::TU_DEFAULT);
+            Ogre::TU_DYNAMIC_WRITE_ONLY_DISCARDABLE);
+
+        // initialize to (0, 0, 0, 1)
+        std::vector<Ogre::uint32> buffer;
+        buffer.resize(mVideoCodecContext->width * mVideoCodecContext->height);
+        for (int p=0; p<mVideoCodecContext->width * mVideoCodecContext->height; ++p)
+        {
+            buffer[p] = (255 << 24);
+        }
+        memcpy(mVideoTexture->getBuffer()->lock(Ogre::HardwareBuffer::HBL_DISCARD), &buffer[0], mVideoCodecContext->width*mVideoCodecContext->height*4);
+        mVideoTexture->getBuffer()->unlock();
 
         mTextureUnit->setTextureName ("VideoTexture");
 

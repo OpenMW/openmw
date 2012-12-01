@@ -71,6 +71,7 @@ namespace MWGui
         static void createBirthsignToolTip(MyGUI::Widget* widget, const std::string& birthsignId);
         static void createRaceToolTip(MyGUI::Widget* widget, const ESM::Race* playerRace);
         static void createClassToolTip(MyGUI::Widget* widget, const ESM::Class& playerClass);
+        static void createMagicEffectToolTip(MyGUI::Widget* widget, short id);
 
     private:
         MyGUI::Widget* mDynamicToolTipBox;

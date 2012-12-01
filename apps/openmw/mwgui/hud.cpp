@@ -245,15 +245,7 @@ void HUD::onWorldClicked(MyGUI::Widget* _sender)
             return;
 
         std::string handle = MWBase::Environment::get().getWorld()->getFacedHandle();
-        MWWorld::Ptr object;
-        try
-        {
-            object = MWBase::Environment::get().getWorld()->getPtrViaHandle(handle);
-        }
-        catch (std::exception& /* e */)
-        {
-            return;
-        }
+        MWWorld::Ptr object = MWBase::Environment::get().getWorld()->searchPtrViaHandle(handle);
 
         if (mode == GM_Console)
             MWBase::Environment::get().getWindowManager()->getConsole()->setSelectedObject(object);
@@ -349,7 +341,9 @@ void HUD::onResChange(int width, int height)
 
 void HUD::setSelectedSpell(const std::string& spellId, int successChancePercent)
 {
-    const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().spells.find(spellId);
+    const ESM::Spell* spell =
+        MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find(spellId);
+
     std::string spellName = spell->mName;
     if (spellName != mSpellName && mSpellVisible)
     {
@@ -369,7 +363,9 @@ void HUD::setSelectedSpell(const std::string& spellId, int successChancePercent)
     mSpellBox->setUserString("Spell", spellId);
 
     // use the icon of the first effect
-    const ESM::MagicEffect* effect = MWBase::Environment::get().getWorld()->getStore().magicEffects.find(spell->mEffects.mList.front().mEffectID);
+    const ESM::MagicEffect* effect =
+        MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(spell->mEffects.mList.front().mEffectID);
+
     std::string icon = effect->mIcon;
     int slashPos = icon.find("\\");
     icon.insert(slashPos+1, "b_");

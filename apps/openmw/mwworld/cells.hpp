@@ -11,17 +11,14 @@ namespace ESM
     class ESMReader;
 }
 
-namespace ESM
-{
-    class ESMStore;
-}
-
 namespace MWWorld
 {
+    class ESMStore;
+
     /// \brief Cell container
     class Cells
     {
-            const ESMS::ESMStore& mStore;
+            const MWWorld::ESMStore& mStore;
             ESM::ESMReader& mReader;
             std::map<std::string, CellStore> mInteriors;
             std::map<std::pair<int, int>, CellStore> mExteriors;
@@ -39,7 +36,7 @@ namespace MWWorld
 
         public:
 
-            Cells (const ESMS::ESMStore& store, ESM::ESMReader& reader);
+            Cells (const MWWorld::ESMStore& store, ESM::ESMReader& reader);
             ///< \todo pass the dynamic part of the ESMStore isntead (once it is written) of the whole
             /// world
 

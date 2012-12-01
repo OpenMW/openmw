@@ -5,8 +5,10 @@
 #include <OgreResourceManager.h>
 #include <btBulletCollisionCommon.h>
 #include <OgreVector3.h>
-//For some reason, Ogre Singleton  cannot be used in another namespace, that's why there is no namespace here.
-//But the risk of name collision seems pretty low here.
+
+namespace OEngine {
+namespace Physic
+{
 
 /**
 *Define a new resource which describe a Shape usable by bullet.See BulletShapeManager for how to get/use them.
@@ -34,7 +36,9 @@ public:
     Ogre::Vector3 boxTranslation;
     Ogre::Quaternion boxRotation;
     //this flag indicate if the shape is used for collision or if it's for raycasting only.
-    bool collide;
+    bool mCollide;
+
+    bool mIgnore;
 };
 
 /**
@@ -105,7 +109,7 @@ public:
 *Important Note: i have no idea of what happen if you try to load two time the same resource without unloading.
 *It won't crash, but it might lead to memory leaks(I don't know how Ogre handle this). So don't do it!
 */
-class BulletShapeManager : public Ogre::ResourceManager, public Ogre::Singleton<BulletShapeManager>
+class BulletShapeManager : public Ogre::ResourceManager
 {
 protected:
 
@@ -113,6 +117,16 @@ protected:
     Ogre::Resource *createImpl(const Ogre::String &name, Ogre::ResourceHandle handle,
         const Ogre::String &group, bool isManual, Ogre::ManualResourceLoader *loader,
         const Ogre::NameValuePairList *createParams);
+
+    static BulletShapeManager *sThis;
+
+private:
+    /** \brief Explicit private copy constructor. This is a forbidden operation.*/
+    BulletShapeManager(const BulletShapeManager &);
+
+    /** \brief Private operator= . This is a forbidden operation. */
+    BulletShapeManager& operator=(const BulletShapeManager &);
+
 
 public:
 
@@ -136,5 +150,8 @@ public:
 
     virtual void load(const std::string &name,const std::string &group);
 };
+
+}
+}
 
 #endif

@@ -2,16 +2,19 @@
 
 #include <algorithm>
 
-#include <components/esm_store/store.hpp>
+#include "../mwworld/esmstore.hpp"
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 
 namespace MWMechanics
-{  
+{
     CreatureStats::CreatureStats()
-        : mLevelHealthBonus(0.f)
+        : mLevel (0), mLevelHealthBonus(0.f), mDead (false), mFriendlyHits (0), mTalkedTo (false), mAlarmed (false),
+          mAttacked (false), mHostile (false)
     {
+        for (int i=0; i<4; ++i)
+            mAiSettings[i] = 0;
     }
 
     void CreatureStats::increaseLevelHealthBonus (float value)
@@ -28,25 +31,26 @@ namespace MWMechanics
     {
         return mAiSequence;
     }
-    
+
     AiSequence& CreatureStats::getAiSequence()
     {
-        return mAiSequence;   
+        return mAiSequence;
     }
-    
-    float CreatureStats::getFatigueTerm() const  
+
+    float CreatureStats::getFatigueTerm() const
     {
         int max = getFatigue().getModified();
         int current = getFatigue().getCurrent();
-        
+
         float normalised = max==0 ? 1 : std::max (0.0f, static_cast<float> (current)/max);
 
-        const ESMS::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
-         
-        return store.gameSettings.find ("fFatigueBase")->getFloat()
-            - store.gameSettings.find ("fFatigueMult")->getFloat() * (1-normalised);
+        const MWWorld::Store<ESM::GameSetting> &gmst =
+            MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+
+        return gmst.find ("fFatigueBase")->getFloat()
+            - gmst.find ("fFatigueMult")->getFloat() * (1-normalised);
     }
-    
+
     const Stat<int> &CreatureStats::getAttribute(int index) const
     {
         if (index < 0 || index > 7) {
@@ -89,25 +93,11 @@ namespace MWMechanics
     {
         return mLevel;
     }
-   
-    int CreatureStats::getHello() const
-    {
-        return mHello;
-    }
 
-    int CreatureStats::getFight() const
+    int CreatureStats::getAiSetting (int index) const
     {
-        return mFight;
-    }
-
-    int CreatureStats::getFlee() const
-    {
-        return mFlee;
-    }
-
-    int CreatureStats::getAlarm() const
-    {
-        return mAlarm;
+        assert (index>=0 && index<4);
+        return mAiSettings[index];
     }
 
     Stat<int> &CreatureStats::getAttribute(int index)
@@ -118,22 +108,7 @@ namespace MWMechanics
         return mAttributes[index];
     }
 
-    DynamicStat<float> &CreatureStats::getHealth()
-    {
-        return mDynamic[0];
-    }
-
-    DynamicStat<float> &CreatureStats::getMagicka()
-    {
-        return mDynamic[1];
-    }
-
-    DynamicStat<float> &CreatureStats::getFatigue()
-    {
-        return mDynamic[2];
-    }
-
-    DynamicStat<float> &CreatureStats::getDynamic(int index)
+    const DynamicStat<float> &CreatureStats::getDynamic(int index) const
     {
         if (index < 0 || index > 2) {
             throw std::runtime_error("dynamic stat index is out of range");
@@ -171,17 +146,28 @@ namespace MWMechanics
 
     void CreatureStats::setHealth(const DynamicStat<float> &value)
     {
-        mDynamic[0] = value;
+        setDynamic (0, value);
     }
 
     void CreatureStats::setMagicka(const DynamicStat<float> &value)
     {
-        mDynamic[1] = value;
+        setDynamic (1, value);
     }
 
     void CreatureStats::setFatigue(const DynamicStat<float> &value)
     {
-        mDynamic[2] = value;
+        setDynamic (2, value);
+    }
+
+    void CreatureStats::setDynamic (int index, const DynamicStat<float> &value)
+    {
+        if (index < 0 || index > 2)
+            throw std::runtime_error("dynamic stat index is out of range");
+
+        mDynamic[index] = value;
+
+        if (index==0 && mDynamic[index].getCurrent()<1)
+            mDead = true;
     }
 
     void CreatureStats::setLevel(int level)
@@ -199,23 +185,91 @@ namespace MWMechanics
         mMagicEffects = effects;
     }
 
-    void CreatureStats::setHello(int value)
+    void CreatureStats::setAiSetting (int index, int value)
     {
-        mHello = value;
+        assert (index>=0 && index<4);
+        mAiSettings[index] = value;
     }
 
-    void CreatureStats::setFight(int value)
+    bool CreatureStats::isDead() const
     {
-        mFight = value;
+        return mDead;
     }
 
-    void CreatureStats::setFlee(int value)
+    void CreatureStats::resurrect()
     {
-        mFlee = value;
+        if (mDead)
+        {
+            if (mDynamic[0].getCurrent()<1)
+                mDynamic[0].setCurrent (1);
+
+            if (mDynamic[0].getCurrent()>=1)
+                mDead = false;
+        }
     }
 
-    void CreatureStats::setAlarm(int value)
+    bool CreatureStats::hasCommonDisease() const
     {
-        mAlarm = value;
-    }    
+        return mSpells.hasCommonDisease();
+    }
+
+    bool CreatureStats::hasBlightDisease() const
+    {
+        return mSpells.hasBlightDisease();
+    }
+
+    int CreatureStats::getFriendlyHits() const
+    {
+        return mFriendlyHits;
+    }
+
+    void CreatureStats::friendlyHit()
+    {
+        ++mFriendlyHits;
+    }
+
+    bool CreatureStats::hasTalkedToPlayer() const
+    {
+        return mTalkedTo;
+    }
+
+    void CreatureStats::talkedToPlayer()
+    {
+        mTalkedTo = true;
+    }
+
+    bool CreatureStats::isAlarmed() const
+    {
+        return mAlarmed;
+    }
+
+    void CreatureStats::setAlarmed (bool alarmed)
+    {
+        mAlarmed = alarmed;
+    }
+
+    bool CreatureStats::getAttacked() const
+    {
+        return mAttacked;
+    }
+
+    void CreatureStats::setAttacked (bool attacked)
+    {
+        mAttacked = attacked;
+    }
+
+    bool CreatureStats::isHostile() const
+    {
+        return mHostile;
+    }
+
+    void CreatureStats::setHostile (bool hostile)
+    {
+        mHostile = hostile;
+    }
+
+    bool CreatureStats::getCreatureTargetted() const
+    {
+        return false;
+    }
 }

@@ -5,8 +5,6 @@
 
 #include <boost/algorithm/string.hpp>
 
-#include <components/esm_store/store.hpp>
-
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/soundmanager.hpp"
@@ -14,6 +12,7 @@
 #include "../mwrender/renderingmanager.hpp"
 
 #include "player.hpp"
+#include "esmstore.hpp"
 
 using namespace Ogre;
 using namespace MWWorld;
@@ -497,7 +496,7 @@ void WeatherManager::update(float duration)
 
     if (exterior)
     {
-        std::string regionstr = MWBase::Environment::get().getWorld()->getPlayer().getPlayer().getCell()->cell->mRegion;
+        std::string regionstr = MWBase::Environment::get().getWorld()->getPlayer().getPlayer().getCell()->mCell->mRegion;
         boost::algorithm::to_lower(regionstr);
 
         if (mWeatherUpdateTime <= 0 || regionstr != mCurrentRegion)
@@ -512,7 +511,8 @@ void WeatherManager::update(float duration)
             else
             {
                 // get weather probabilities for the current region
-                const ESM::Region *region = MWBase::Environment::get().getWorld()->getStore().regions.search (regionstr);
+                const ESM::Region *region =
+                    MWBase::Environment::get().getWorld()->getStore().get<ESM::Region>().search (regionstr);
 
                 if (region != 0)
                 {

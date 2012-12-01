@@ -83,7 +83,7 @@ namespace MWWorld
 
         public:
 
-            void fill (const ESM::InventoryList& items, const ESMS::ESMStore& store);
+            void fill (const ESM::InventoryList& items, const MWWorld::ESMStore& store);
             ///< Insert items into *this.
 
             void clear();

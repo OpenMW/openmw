@@ -24,13 +24,15 @@ namespace MWMechanics
         Spells mSpells;
         ActiveSpells mActiveSpells;
         MagicEffects mMagicEffects;
-        int mHello;
-        int mFight;
-        int mFlee;
-        int mAlarm;
+        int mAiSettings[4];
         AiSequence mAiSequence;
-
         float mLevelHealthBonus;
+        bool mDead;
+        int mFriendlyHits;
+        bool mTalkedTo;
+        bool mAlarmed;
+        bool mAttacked;
+        bool mHostile;
 
     public:
         CreatureStats();
@@ -43,6 +45,8 @@ namespace MWMechanics
 
         const DynamicStat<float> & getFatigue() const;
 
+        const DynamicStat<float> & getDynamic (int index) const;
+
         const Spells & getSpells() const;
 
         const ActiveSpells & getActiveSpells() const;
@@ -51,31 +55,16 @@ namespace MWMechanics
 
         int getLevel() const;
 
-        int getHello() const;
-
-        int getFight() const;
-
-        int getFlee() const;
-
-        int getAlarm() const;
-
+        int getAiSetting (int index) const;
+        ///< 0: hello, 1 fight, 2 flee, 3 alarm
 
         Stat<int> & getAttribute(int index);
-
-        DynamicStat<float> & getHealth();
-
-        DynamicStat<float> & getMagicka();
-
-        DynamicStat<float> & getFatigue();
-
-        DynamicStat<float> & getDynamic(int index);
 
         Spells & getSpells();
 
         ActiveSpells & getActiveSpells();
 
         MagicEffects & getMagicEffects();
-
 
         void setAttribute(int index, const Stat<int> &value);
 
@@ -85,6 +74,8 @@ namespace MWMechanics
 
         void setFatigue(const DynamicStat<float> &value);
 
+        void setDynamic (int index, const DynamicStat<float> &value);
+
         void setSpells(const Spells &spells);
 
         void setActiveSpells(const ActiveSpells &active);
@@ -93,24 +84,52 @@ namespace MWMechanics
 
         void setLevel(int level);
 
-        void setHello(int value);
+        void setAiSetting (int index, int value);
+        ///< 0: hello, 1 fight, 2 flee, 3 alarm
 
-        void setFight(int value);
-
-        void setFlee(int value);
-
-        void setAlarm(int value);
-        
         const AiSequence& getAiSequence() const;
-        
+
         AiSequence& getAiSequence();
-   
+
         float getFatigueTerm() const;
         ///< Return effective fatigue
 
         // small hack to allow the fact that Health permanently increases by 10% of endurance on each level up
         void increaseLevelHealthBonus(float value);
         float getLevelHealthBonus() const;
+
+        bool isDead() const;
+
+        void resurrect();
+
+        bool hasCommonDisease() const;
+
+        bool hasBlightDisease() const;
+
+        int getFriendlyHits() const;
+        ///< Number of friendly hits received.
+
+        void friendlyHit();
+        ///< Increase number of friendly hits by one.
+
+        bool hasTalkedToPlayer() const;
+        ///< Has this creature talked with the player before?
+
+        void talkedToPlayer();
+
+        bool isAlarmed() const;
+
+        void setAlarmed (bool alarmed);
+
+        bool getAttacked() const;
+
+        void setAttacked (bool attacked);
+
+        bool isHostile() const;
+
+        void setHostile (bool hostile);
+
+        bool getCreatureTargetted() const;
     };
 }
 

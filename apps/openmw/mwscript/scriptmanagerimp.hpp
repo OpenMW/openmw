@@ -14,7 +14,7 @@
 
 #include "globalscripts.hpp"
 
-namespace ESMS
+namespace MWWorld
 {
     struct ESMStore;
 }
@@ -35,7 +35,7 @@ namespace MWScript
     class ScriptManager : public MWBase::ScriptManager
     {
             Compiler::StreamErrorHandler mErrorHandler;
-            const ESMS::ESMStore& mStore;
+            const MWWorld::ESMStore& mStore;
             bool mVerbose;
             Compiler::Context& mCompilerContext;
             Compiler::FileParser mParser;
@@ -50,7 +50,7 @@ namespace MWScript
 
         public:
 
-            ScriptManager (const ESMS::ESMStore& store, bool verbose,
+            ScriptManager (const MWWorld::ESMStore& store, bool verbose,
                 Compiler::Context& compilerContext);
 
             virtual void run (const std::string& name, Interpreter::Context& interpreterContext);
@@ -74,6 +74,6 @@ namespace MWScript
             ///< Return index of the variable of the given name and type in the given script. Will
             /// throw an exception, if there is no such script or variable or the type does not match.
     };
-};
+}
 
 #endif

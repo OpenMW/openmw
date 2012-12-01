@@ -58,7 +58,6 @@ namespace MWRender
          */
         void saveFogOfWar(MWWorld::CellStore* cell);
 
-
         /**
          * Get the interior map texture index and normalized position
          * on this texture, given a world position (in ogre coordinates)
@@ -75,7 +74,7 @@ namespace MWRender
         MWRender::RenderingManager* mRenderingManager;
 
         // 1024*1024 pixels for a cell
-        static const int sMapResolution = 1024;
+        static const int sMapResolution = 512;
 
         // the dynamic texture is a bottleneck, so don't set this too high
         static const int sFogOfWarResolution = 32;

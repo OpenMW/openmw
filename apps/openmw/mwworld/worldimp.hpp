@@ -1,12 +1,11 @@
 #ifndef GAME_MWWORLD_WORLDIMP_H
 #define GAME_MWWORLD_WORLDIMP_H
 
-#include <components/esm_store/store.hpp>
-
 #include "../mwrender/debugging.hpp"
 
 #include "ptr.hpp"
 #include "scene.hpp"
+#include "esmstore.hpp"
 #include "physicssystem.hpp"
 #include "cells.hpp"
 #include "localscripts.hpp"
@@ -56,12 +55,11 @@ namespace MWWorld
             MWWorld::Scene *mWorldScene;
             MWWorld::Player *mPlayer;
             ESM::ESMReader mEsm;
-            ESMS::ESMStore mStore;
+            MWWorld::ESMStore mStore;
             LocalScripts mLocalScripts;
             MWWorld::Globals *mGlobalVariables;
             MWWorld::PhysicsSystem *mPhysics;
             bool mSky;
-            int mNextDynamicRecord;
 
             Cells mCells;
 
@@ -124,7 +122,7 @@ namespace MWWorld
 
             virtual Player& getPlayer();
 
-            virtual const ESMS::ESMStore& getStore() const;
+            virtual const MWWorld::ESMStore& getStore() const;
 
             virtual ESM::ESMReader& getEsmReader();
 
@@ -162,6 +160,9 @@ namespace MWWorld
 
             virtual Ptr getPtrViaHandle (const std::string& handle);
             ///< Return a pointer to a liveCellRef with the given Ogre handle.
+
+            virtual Ptr searchPtrViaHandle (const std::string& handle);
+            ///< Return a pointer to a liveCellRef with the given Ogre handle or Ptr() if not found
 
             virtual void enable (const Ptr& ptr);
 
@@ -249,17 +250,26 @@ namespace MWWorld
             ///< Toggle a render mode.
             ///< \return Resulting mode
 
-            virtual std::pair<std::string, const ESM::Potion *> createRecord (const ESM::Potion& record);
+            virtual const ESM::Potion *createRecord (const ESM::Potion& record);
             ///< Create a new recrod (of type potion) in the ESM store.
-            /// \return ID, pointer to created record
+            /// \return pointer to created record
 
-            virtual std::pair<std::string, const ESM::Class *> createRecord (const ESM::Class& record);
+            virtual const ESM::Spell *createRecord (const ESM::Spell& record);
+            ///< Create a new recrod (of type spell) in the ESM store.
+            /// \return pointer to created record
+
+            virtual const ESM::Class *createRecord (const ESM::Class& record);
             ///< Create a new recrod (of type class) in the ESM store.
-            /// \return ID, pointer to created record
+            /// \return pointer to created record
 
             virtual const ESM::Cell *createRecord (const ESM::Cell& record);
             ///< Create a new recrod (of type cell) in the ESM store.
-            /// \return ID, pointer to created record
+            /// \return pointer to created record
+
+            virtual const ESM::NPC *createRecord(const ESM::NPC &record);
+            ///< Create a new recrod (of type npc) in the ESM store.
+            /// \return pointer to created record
+
 
             virtual void playAnimationGroup (const MWWorld::Ptr& ptr, const std::string& groupName,
                 int mode, int number = 1);
@@ -273,7 +283,7 @@ namespace MWWorld
             ///< Skip the animation for the given MW-reference for one frame. Calls to this function for
             /// references that are currently not in the rendered scene should be ignored.
 
-            virtual void update (float duration);
+            virtual void update (float duration, bool paused);
 
             virtual bool placeObject (const Ptr& object, float cursorX, float cursorY);
             ///< place an object into the gameworld at the specified cursor position

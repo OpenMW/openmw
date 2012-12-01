@@ -3,7 +3,7 @@
     <MyGUI type="List">
         <List file="core.skin" />
         <List file="openmw_resources.xml" />
-        <List file="openmw.font.xml" />
+        <List file="openmw_font.xml"/>
         <List file="openmw_text.skin.xml" />
         <List file="openmw_windows.skin.xml" />
         <List file="openmw_button.skin.xml" />

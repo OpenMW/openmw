@@ -18,8 +18,6 @@ namespace ESM
     {
         // These are probabilities
         char mHello, mU1, mFight, mFlee, mAlarm, mU2, mU3, mU4;
-        // The last u's might be the skills that this NPC can train you
-        // in?
         int mServices; // See the Services enum
     }; // 12 bytes
 
@@ -60,7 +58,7 @@ namespace ESM
         AI_Travel = 0x545f4941,
         AI_Follow = 0x465f4941,
         AI_Escort = 0x455f4941,
-        AI_Activate = 0x415f4941,
+        AI_Activate = 0x415f4941
     };
 
     /// \note Used for storaging packages in a single container

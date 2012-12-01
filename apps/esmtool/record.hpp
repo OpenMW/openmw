@@ -20,7 +20,7 @@ namespace EsmTool
     protected:
         std::string mId;
         int mFlags;
-        int mType;
+        ESM::NAME mType;
 
     public:
         RecordBase () {}
@@ -42,7 +42,7 @@ namespace EsmTool
             mFlags = flags;
         }
 
-        int getType() const {
+        ESM::NAME getType() const {
             return mType;
         }
 
@@ -50,7 +50,7 @@ namespace EsmTool
         virtual void save(ESM::ESMWriter &esm) = 0;
         virtual void print() = 0;
 
-        static RecordBase *create(int type);
+        static RecordBase *create(ESM::NAME type);
 
         // just make it a bit shorter
         template <class T>

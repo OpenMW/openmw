@@ -64,6 +64,9 @@ namespace MWGui
   class LoadingScreen;
   class LevelupDialog;
   class WaitDialog;
+  class SpellCreationDialog;
+  class EnchantingDialog;
+  class TrainingWindow;
 
   class WindowManager : public MWBase::WindowManager
   {
@@ -111,6 +114,7 @@ namespace MWGui
     virtual MWGui::ConfirmationDialog* getConfirmationDialog();
     virtual MWGui::TradeWindow* getTradeWindow();
     virtual MWGui::SpellBuyingWindow* getSpellBuyingWindow();
+    virtual MWGui::TravelWindow* getTravelWindow();
     virtual MWGui::SpellWindow* getSpellWindow();
     virtual MWGui::Console* getConsole();
 
@@ -211,6 +215,10 @@ namespace MWGui
     virtual bool getPlayerSleeping();
     virtual void wakeUpPlayer();
 
+    virtual void startSpellMaking(MWWorld::Ptr actor);
+    virtual void startEnchanting(MWWorld::Ptr actor);
+    virtual void startTraining(MWWorld::Ptr actor);
+
   private:
     OEngine::GUI::MyGUIManager *mGuiManager;
     HUD *mHud;
@@ -230,6 +238,7 @@ namespace MWGui
     CountDialog* mCountDialog;
     TradeWindow* mTradeWindow;
     SpellBuyingWindow* mSpellBuyingWindow;
+    TravelWindow* mTravelWindow;
     SettingsWindow* mSettingsWindow;
     ConfirmationDialog* mConfirmationDialog;
     AlchemyWindow* mAlchemyWindow;
@@ -238,6 +247,9 @@ namespace MWGui
     LoadingScreen* mLoadingScreen;
     LevelupDialog* mLevelupDialog;
     WaitDialog* mWaitDialog;
+    SpellCreationDialog* mSpellCreationDialog;
+    EnchantingDialog* mEnchantingDialog;
+    TrainingWindow* mTrainingWindow;
 
     CharacterCreation* mCharGen;
 
@@ -249,7 +261,6 @@ namespace MWGui
 
     /// \todo get rid of this stuff. Move it to the respective UI element classes, if needed.
     // Various stats about player as needed by window manager
-    ESM::Class mPlayerClass;
     std::string mPlayerName;
     std::string mPlayerRaceId;
     std::map<int, MWMechanics::Stat<int> > mPlayerAttributes;

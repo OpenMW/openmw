@@ -3,7 +3,7 @@ OpenMW: A reimplementation of The Elder Scrolls III: Morrowind
 OpenMW is an attempt at recreating the engine for the popular role-playing game
 Morrowind by Bethesda Softworks. You need to own and install the original game for OpenMW to work.
 
-Version: 0.18.0
+Version: 0.19.0
 License: GPL (see GPL3.txt for more information)
 Website: http://www.openmw.org
 
@@ -96,6 +96,32 @@ Allowed options:
 
 
 CHANGELOG
+
+0.19.0
+
+Bug #374: Character shakes in 3rd person mode near the origin
+Bug #404: Gamma correct rendering
+Bug #407: Shoes of St. Rilm do not work
+Bug #408: Rugs has collision even if they are not supposed to
+Bug #412: Birthsign menu sorted incorrectly
+Bug #413: Resolutions presented multiple times in launcher
+Bug #414: launcher.cfg file stored in wrong directory
+Bug #415: Wrong esm order in openmw.cfg
+Bug #418: Sound listener position updates incorrectly
+Bug #423: wrong usage of "Version" entry in openmw.desktop
+Bug #426: Do not use hardcoded splash images
+Bug #431: Don't use markers for raycast
+Bug #432: Crash after picking up items from an NPC
+Feature #21/#95: Sleeping/resting
+Feature #61: Alchemy Skill
+Feature #68: Death
+Feature #69/#86: Spell Creation
+Feature #72/#84: Travel
+Feature #76: Global Map, 1st Layer
+Feature #120: Trainer Window
+Feature #152: Skill Increase from Skill Books
+Feature #160: Record Saving
+Task #400: Review GMST access
 
 0.18.0
 
