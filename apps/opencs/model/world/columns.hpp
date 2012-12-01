@@ -44,6 +44,21 @@ namespace CSMWorld
         }
     };
 
+    template<typename ESXRecordT>
+    struct RecordStateColumn : public Column<ESXRecordT>
+    {
+        RecordStateColumn() : Column<ESXRecordT> ("*") {}
+
+        virtual QVariant get (const Record<ESXRecordT>& record) const
+        {
+            return static_cast<int> (record.mState);
+        }
+
+        virtual bool isEditable() const
+        {
+            return false;
+        }
+    };
 }
 
 #endif

@@ -13,6 +13,7 @@
 CSMWorld::Data::Data()
 {
     mGlobals.addColumn (new StringIdColumn<ESM::Global>);
+    mGlobals.addColumn (new RecordStateColumn<ESM::Global>);
     mGlobals.addColumn (new FloatValueColumn<ESM::Global>);
 
     mModels.insert (std::make_pair (
