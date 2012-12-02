@@ -149,6 +149,7 @@ namespace MWGui
         mCurHour = 0;
         mRemainingTime = 0.05;
         mProgressBar.setProgress (0, mHours);
+        mWindowManager.popGuiMode ();
     }
 
     void WaitDialog::onCancelButtonClicked(MyGUI::Widget* sender)
