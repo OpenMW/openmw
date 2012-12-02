@@ -506,14 +506,14 @@ IntSize ToolTips::createToolTip(const MWGui::ToolTipInfo& info)
     if (captionSize.width > maximumWidth){
       mHorizontalScrollIndex = mHorizontalScrollIndex + 2;
       if (mHorizontalScrollIndex > captionSize.width){
-	  mHorizontalScrollIndex = -totalSize.width;
+        mHorizontalScrollIndex = -totalSize.width;
       }      
       int horizontal_scroll = mHorizontalScrollIndex;
       if (horizontal_scroll < 40){
        horizontal_scroll = 40;	
       }else{
-	horizontal_scroll = 80 - mHorizontalScrollIndex;
-      }	
+        horizontal_scroll = 80 - mHorizontalScrollIndex;
+      }
       captionWidget->setPosition (IntPoint(horizontal_scroll, captionWidget->getPosition().top + padding.top));
     } else {
       captionWidget->setPosition (captionWidget->getPosition() + padding);
