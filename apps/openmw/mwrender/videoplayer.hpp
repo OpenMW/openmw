@@ -25,9 +25,30 @@ struct AVStream;
 struct AVFrame;
 struct SwsContext;
 struct AVPacket;
+struct AVPacketList;
 
 namespace MWRender
 {
+
+    /// A simple queue used to queue raw audio and video data.
+    class AVPacketQueue
+    {
+    public:
+        AVPacketQueue();
+        int put(AVPacket* pkt);
+        int get(AVPacket* pkt, int block);
+
+        bool isEmpty() const { return mNumPackets == 0; }
+        int getNumPackets() const { return mNumPackets; }
+        int getSize() const { return mSize; }
+
+    private:
+        AVPacketList*   mFirstPacket;
+        AVPacketList*   mLastPacket;
+        int             mNumPackets;
+        int             mSize;
+    };
+
 
     class VideoPlayer
     {
@@ -52,9 +73,6 @@ namespace MWRender
 
         AVFormatContext* mAvContext;
 
-
-        bool mEOF;
-
         Ogre::Timer mTimer;
 
         AVCodec* mVideoCodec;
@@ -68,24 +86,27 @@ namespace MWRender
         AVFrame* mRawFrame;
         AVFrame* mRGBAFrame;
         SwsContext* mSwsContext;
-        float mWantedFrameTime;
-        float mDecodingTime;
-        std::queue <AVPacket *> mVideoPacketQueue;
 
+        double mClock;
+        double mVideoClock;
+        double mAudioClock;
 
-        int mDisplayedFrameCount;
+        AVPacketQueue mVideoPacketQueue;
+        AVPacketQueue mAudioPacketQueue;
 
-
-        bool readFrameAndQueue();
-        bool saveFrame(AVPacket* frame);
-
-        void decodeFrontFrame();
 
         void close();
         void deleteContext();
 
 
         void throwError(int error);
+
+
+
+
+        bool addToBuffer(); ///< try to add the next audio or video packet into the queue.
+
+        void decodeNextVideoFrame(); ///< decode the next video frame in the queue and display it.
     };
 
 }

@@ -19,6 +19,9 @@ extern "C"
 #include "../mwbase/environment.hpp"
 
 
+#define MIN_QUEUED_PACKETS 30
+
+
 namespace MWRender
 {
 
@@ -69,10 +72,76 @@ namespace MWRender
         return stream->tell();
     }
 
+    //-------------------------------------------------------------------------------------------
+
+    AVPacketQueue::AVPacketQueue():
+    mFirstPacket(NULL), mLastPacket(NULL), mNumPackets(0), mSize(0)
+
+    {
+    }
+
+    int AVPacketQueue::put(AVPacket* pkt)
+    {
+        if(av_dup_packet(pkt) < 0)
+        {
+            return -1;
+        }
+
+        AVPacketList* pkt1;
+        pkt1 = (AVPacketList*)av_malloc(sizeof(AVPacketList));
+        if (pkt1 == NULL) return -1;
+        pkt1->pkt = *pkt;
+        pkt1->next = NULL;
+
+        if (mLastPacket == NULL) mFirstPacket = pkt1;
+        else mLastPacket->next = pkt1;
+
+        mLastPacket = pkt1;
+        mNumPackets++;
+        mSize += pkt1->pkt.size;
+
+        return 0;
+    }
+
+    int AVPacketQueue::get(AVPacket* pkt, int block)
+    {
+        AVPacketList* pkt1;
+
+        while (true)
+        {
+            pkt1 = mFirstPacket;
+            if (pkt1 != NULL)
+            {
+                mFirstPacket = pkt1->next;
+
+                if (mFirstPacket == NULL) mLastPacket = NULL;
+
+                mNumPackets--;
+                mSize -= pkt1->pkt.size;
+                *pkt = pkt1->pkt;
+                av_free(pkt1);
+                return 1;
+            }
+            else if (block == 0)
+            {
+                return 0;
+            }
+            else
+            {
+                return -1;
+            }
+        }
+    }
+
+    //-------------------------------------------------------------------------------------------
+
     VideoPlayer::VideoPlayer(Ogre::SceneManager *sceneMgr)
         : mAvContext(NULL)
         , mVideoStreamId(-1)
         , mAudioStreamId(-1)
+        , mVideoClock(0)
+        , mAudioClock(0)
+        , mClock(0)
     {
         Ogre::MaterialPtr videoMaterial = Ogre::MaterialManager::getSingleton ().create("VideoMaterial", "General");
         videoMaterial->getTechnique(0)->getPass(0)->setDepthWriteEnabled(false);
@@ -110,8 +179,11 @@ namespace MWRender
 
         mVideoStreamId = -1;
         mAudioStreamId = -1;
-        mEOF = false;
-        mDisplayedFrameCount = 0;
+        mAudioStream = NULL;
+        mVideoStream = NULL;
+        mVideoClock = 0;
+        mAudioClock = 0;
+        mClock = 0;
 
         // if something is already playing, close it
         if (mAvContext)
@@ -189,20 +261,20 @@ namespace MWRender
             }
         }
 
-        if (-1 == mAudioStreamId)
-            throw std::runtime_error("No audio stream found in the video");
-
-        // Get the audio decoder
-        mAudioCodec = avcodec_find_decoder(mAudioStream->codec->codec_id);
-        if (mAudioCodec == NULL)
+        if (mAudioStreamId >= 0)
         {
-            throw std::runtime_error("Stream doesn't have an audio codec");
-        }
+            // Get the audio decoder
+            mAudioCodec = avcodec_find_decoder(mAudioStream->codec->codec_id);
+            if (mAudioCodec == NULL)
+            {
+                throw std::runtime_error("Stream doesn't have an audio codec");
+            }
 
-        // Load the audio codec
-        err = avcodec_open2(mAudioStream->codec, mAudioCodec, 0);
-        if (err < 0)
-            throwError (err);
+            // Load the audio codec
+            err = avcodec_open2(mAudioStream->codec, mAudioCodec, 0);
+            if (err < 0)
+                throwError (err);
+        }
 
 
 
@@ -228,24 +300,6 @@ namespace MWRender
             SWS_BICUBIC, NULL, NULL, NULL);
         if (!mSwsContext)
             throw std::runtime_error("Can't create SWS Context");
-
-        // Get the frame time we need for this video
-        AVRational r = mVideoStream->avg_frame_rate;
-        AVRational r2 = mVideoStream->r_frame_rate;
-        if ((!r.num || !r.den) &&
-            (!r2.num || !r2.den))
-        {
-            std::cerr << "Warning - unable to get the video frame rate. Using standard NTSC frame rate : 29.97 fps." << std::endl;
-            mWantedFrameTime = 1.f / 29.97f;
-        }
-        else
-        {
-            if (r.num && r.den)
-                mWantedFrameTime = 1.f/((float)r.num / r.den);
-            else
-                mWantedFrameTime = 1.f/((float)r2.num / r2.den);
-        }
-
 
         mTextureUnit->setTextureName ("");
 
@@ -273,8 +327,23 @@ namespace MWRender
 
         mTextureUnit->setTextureName ("VideoTexture");
 
-        mTimer.reset();
 
+        // Queue up some packets
+        while(
+            mVideoPacketQueue.getNumPackets()<MIN_QUEUED_PACKETS ||
+            (mAudioStream && mAudioPacketQueue.getNumPackets()<MIN_QUEUED_PACKETS)
+            )
+        {
+            //Keep adding until we have 30 video and audio packets.
+            bool addedPacket = addToBuffer();
+            if(!addedPacket)
+            {
+                //No more packets
+                break;
+            }
+        }
+
+        mTimer.reset();
     }
 
     void VideoPlayer::throwError(int error)
@@ -292,102 +361,66 @@ namespace MWRender
             throw std::runtime_error("Unknown FFMPEG error");
     }
 
-    bool VideoPlayer::readFrameAndQueue ()
-    {
-        bool ret = true;
-        AVPacket *pkt = NULL;
-
-        // check we're not at eof
-        if (mEOF)
-            ret = false;
-        else
-        {
-            // read frame
-            pkt = (AVPacket *)av_malloc(sizeof(*pkt));
-            int res = av_read_frame(mAvContext, pkt);
-
-            // check we didn't reach eof right now
-            if (res < 0)
-            {
-                mEOF = true;
-                ret = false;
-                av_free(pkt);
-            }
-            else
-            {
-                // When a frame has been read, save it
-                if (!saveFrame(pkt))
-                {
-                    // we failed to save it, which means it was unknown type of frame - delete it here
-                    av_free_packet(pkt);
-                    av_free(pkt);
-                }
-            }
-        }
-
-        return ret;
-    }
-
-    bool VideoPlayer::saveFrame(AVPacket* frame)
-    {
-        bool saved = false;
-
-        if (frame->stream_index == mVideoStreamId)
-        {
-            // If it was a video frame...
-            mVideoPacketQueue.push(frame);
-            saved = true;
-        }
-
-        return saved;
-
-    }
-
     void VideoPlayer::update()
     {
         if (!mAvContext)
             return;
 
-        // Time elapsed since the video started
-        float realTime = mTimer.getMilliseconds ()/1000.f;
+        double dt = mTimer.getMilliseconds () / 1000.f;
+        mTimer.reset ();
 
-        // Here is the time we're at in the video
-        float movieTime = mDisplayedFrameCount * mWantedFrameTime;
-
-        if (movieTime >= realTime)
-            return;
-
-        if (!mVideoPacketQueue.size() && mEOF)
-            close();
-
-        Ogre::Timer timer;
-
-        if (!mVideoPacketQueue.size())
+        //UpdateAudio(fTime);
+        std::cout << "num packets: " << mVideoPacketQueue.getNumPackets() << " clocks: " << mVideoClock << " , " << mClock << std::endl;
+        while (!mVideoPacketQueue.isEmpty() && mVideoClock < mClock)
         {
-            if (readFrameAndQueue())
-                decodeFrontFrame();
-        }
-        else
-            decodeFrontFrame();
+            while(
+                mVideoPacketQueue.getNumPackets()<MIN_QUEUED_PACKETS ||
+                (mAudioStream && mAudioPacketQueue.getNumPackets()<MIN_QUEUED_PACKETS)
+                )
+            {
+                //Keep adding until we have 30 video and audio packets.
+                bool addedPacket = addToBuffer();
 
-        mDecodingTime = timer.getMilliseconds ()/1000.f;
+                if(!addedPacket)
+                {
+                    //No more packets
+                    break;
+                }
+            }
+
+            if (mVideoPacketQueue.getNumPackets ())
+                decodeNextVideoFrame();
+        }
+
+        mClock += dt;
+
+        //curTime += fTime;
+
+        if(mVideoPacketQueue.getNumPackets()==0 /* && mAudioPacketQueue.getNumPackets()==0 */)
+            close();
     }
 
-    void VideoPlayer::decodeFrontFrame ()
+    void VideoPlayer::decodeNextVideoFrame ()
     {
-        int didDecodeFrame = 0;
-
         // Make sure there is something to decode
-        if (!mVideoPacketQueue.size())
-            return;
+        assert (mVideoPacketQueue.getNumPackets ());
 
         // Get the front frame and decode it
-        AVPacket *videoPacket = mVideoPacketQueue.front();
+        AVPacket packet;
+        mVideoPacketQueue.get(&packet, 1);
+
         int res;
-        res = avcodec_decode_video2(mVideoStream->codec, mRawFrame, &didDecodeFrame, videoPacket);
+        int didDecodeFrame = 0;
+        res = avcodec_decode_video2(mVideoStream->codec, mRawFrame, &didDecodeFrame, &packet);
 
         if (res < 0 || !didDecodeFrame)
             throw std::runtime_error ("an error occured while decoding the video frame");
+
+        // Set video clock to the PTS of this packet (presentation timestamp)
+        double pts = 0;
+        if (packet.pts != -1.0)  pts = packet.pts;
+        pts *= av_q2d(mVideoStream->time_base);
+        mVideoClock = pts;
 
         // Convert the frame to RGB
         sws_scale(mSwsContext,
@@ -400,11 +433,7 @@ namespace MWRender
         Ogre::PixelBox pb(mVideoStream->codec->width, mVideoStream->codec->height, 1, Ogre::PF_BYTE_RGBA, mRGBAFrame->data[0]);
         pixelBuffer->blitFromMemory(pb);
 
-        av_free_packet(mVideoPacketQueue.front());
-        av_free(mVideoPacketQueue.front());
-        mVideoPacketQueue.pop();
-
-        ++mDisplayedFrameCount;
+        if (packet.data != NULL) av_free_packet(&packet);
     }
 
     void VideoPlayer::close ()
@@ -416,11 +445,17 @@ namespace MWRender
 
     void VideoPlayer::deleteContext()
     {
-        while (mVideoPacketQueue.size())
+        while (mVideoPacketQueue.getNumPackets ())
         {
-            av_free_packet(mVideoPacketQueue.front());
-            av_free(mVideoPacketQueue.front());
-            mVideoPacketQueue.pop();
+            AVPacket packet;
+            mVideoPacketQueue.get(&packet, 1);
+            if (packet.data != NULL) av_free_packet(&packet);
+        }
+        while (mAudioPacketQueue.getNumPackets ())
+        {
+            AVPacket packet;
+            mAudioPacketQueue.get(&packet, 1);
+            if (packet.data != NULL) av_free_packet(&packet);
         }
 
         if (mVideoStream && mVideoStream->codec != NULL) avcodec_close(mVideoStream->codec);
@@ -438,6 +473,46 @@ namespace MWRender
         avformat_close_input(&mAvContext);
 
         mAvContext = NULL;
+    }
+
+
+
+    bool VideoPlayer::addToBuffer()
+    {
+        if(mAvContext)
+        {
+            AVPacket packet;
+            if (av_read_frame(mAvContext, &packet) >= 0)
+            {
+                if (packet.stream_index == mVideoStreamId)
+                {
+                    /*
+                    if(curTime==0)
+                    {
+                        curTime = packet.dts;
+                        curTime *= av_q2d(m_pVideoSt->time_base);
+                        std::cout << "Initializing curtime to: " << curTime << std::endl;
+                    }
+                    */
+
+                    mVideoPacketQueue.put(&packet);
+
+                    return true;
+                }
+                else if (packet.stream_index == mAudioStreamId && mAudioStream)
+                {
+                    mAudioPacketQueue.put(&packet);
+                    return true;
+                }
+                else
+                {
+                    av_free_packet(&packet);
+                    return false;
+                }
+            }
+        }
+
+        return false;
     }
 }
 
