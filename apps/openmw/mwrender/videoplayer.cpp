@@ -370,7 +370,7 @@ namespace MWRender
         mTimer.reset ();
 
         //UpdateAudio(fTime);
-        std::cout << "num packets: " << mVideoPacketQueue.getNumPackets() << " clocks: " << mVideoClock << " , " << mClock << std::endl;
+        //std::cout << "num packets: " << mVideoPacketQueue.getNumPackets() << " clocks: " << mVideoClock << " , " << mClock << std::endl;
         while (!mVideoPacketQueue.isEmpty() && mVideoClock < mClock)
         {
             while(
@@ -486,12 +486,13 @@ namespace MWRender
             {
                 if (packet.stream_index == mVideoStreamId)
                 {
+                    // I don't believe this is necessary.
                     /*
-                    if(curTime==0)
+                    if(mClock==0)
                     {
-                        curTime = packet.dts;
-                        curTime *= av_q2d(m_pVideoSt->time_base);
-                        std::cout << "Initializing curtime to: " << curTime << std::endl;
+                        mClock = packet.dts;
+                        mClock *= av_q2d(mVideoStream->time_base);
+                        std::cout << "Initializing clock to: " << mClock << std::endl;
                     }
                     */
 
