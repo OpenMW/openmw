@@ -169,7 +169,7 @@ void CSVDoc::View::updateDocumentState()
     QList<CSVWorld::SubView *> subViews = findChildren<CSVWorld::SubView *>();
 
     for (QList<CSVWorld::SubView *>::iterator iter (subViews.begin()); iter!=subViews.end(); ++iter)
-        (*iter)->setEditLock (state && CSMDoc::Document::State_Locked);
+        (*iter)->setEditLock (state & CSMDoc::Document::State_Locked);
 }
 
 void CSVDoc::View::updateProgress (int current, int max, int type, int threads)
