@@ -51,6 +51,29 @@ namespace CSVWorld
     {
         return new SubViewT (id, data, undoStack);
     }
+
+    template<class SubViewT>
+    struct SubViewFactoryWithCreateFlag : public SubViewFactoryBase
+    {
+        bool mCreateAndDelete;
+
+        SubViewFactoryWithCreateFlag (bool createAndDelete);
+
+        virtual SubView *makeSubView (const CSMWorld::UniversalId& id, CSMWorld::Data& data, QUndoStack& undoStack);
+    };
+
+    template<class SubViewT>
+    SubViewFactoryWithCreateFlag<SubViewT>::SubViewFactoryWithCreateFlag (bool createAndDelete)
+    : mCreateAndDelete (createAndDelete)
+    {}
+
+    template<class SubViewT>
+    SubView *SubViewFactoryWithCreateFlag<SubViewT>::makeSubView (const CSMWorld::UniversalId& id,
+        CSMWorld::Data& data,
+        QUndoStack& undoStack)
+    {
+        return new SubViewT (id, data, undoStack, mCreateAndDelete);
+    }
 }
 
 #endif

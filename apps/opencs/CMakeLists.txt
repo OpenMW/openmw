@@ -9,7 +9,7 @@ set (OPENCS_SRC
 
     view/doc/viewmanager.cpp view/doc/view.cpp view/doc/operations.cpp view/doc/operation.cpp
 
-    view/world/subview.cpp view/world/table.cpp view/world/globals.cpp
+    view/world/subview.cpp view/world/table.cpp view/world/tablesubview.cpp
     )
 
 set (OPENCS_HDR
@@ -23,7 +23,7 @@ set (OPENCS_HDR
 
     view/doc/viewmanager.hpp view/doc/view.hpp view/doc/operations.hpp view/doc/operation.hpp
 
-    view/world/subview.hpp view/world/table.hpp view/world/globals.hpp
+    view/world/subview.hpp view/world/table.hpp view/world/tablesubview.hpp
     )
 
 set (OPENCS_US

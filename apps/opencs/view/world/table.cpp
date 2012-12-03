@@ -145,7 +145,7 @@ CSVWorld::Table::Table (const CSMWorld::UniversalId& id, CSMWorld::Data& data, Q
 
     if (createAndDelete)
     {
-        mCreateAction = new QAction (tr ("CreateRecord"), this);
+        mCreateAction = new QAction (tr ("Add Record"), this);
         connect (mCreateAction, SIGNAL (triggered()), this, SLOT (createRecord()));
         addAction (mCreateAction);
     }

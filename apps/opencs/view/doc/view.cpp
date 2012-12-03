@@ -10,8 +10,7 @@
 
 #include "../../model/doc/document.hpp"
 
-#include "../world/subview.hpp"
-#include "../world/globals.hpp"
+#include "../world/tablesubview.hpp"
 
 #include "viewmanager.hpp"
 #include "operations.hpp"
@@ -122,7 +121,7 @@ CSVDoc::View::View (ViewManager& viewManager, CSMDoc::Document *document, int to
     setupUi();
 
     mSubViewFactories.insert (std::make_pair (CSMWorld::UniversalId (CSMWorld::UniversalId::Type_Globals),
-        new CSVWorld::SubViewFactory<CSVWorld::Globals>()));
+        new CSVWorld::SubViewFactoryWithCreateFlag<CSVWorld::TableSubView> (true)));
 }
 
 CSVDoc::View::~View()
