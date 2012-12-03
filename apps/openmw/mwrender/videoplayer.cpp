@@ -72,6 +72,7 @@ namespace MWRender
     VideoPlayer::VideoPlayer(Ogre::SceneManager *sceneMgr)
         : mAvContext(NULL)
         , mVideoStreamId(-1)
+        , mAudioStreamId(-1)
     {
         Ogre::MaterialPtr videoMaterial = Ogre::MaterialManager::getSingleton ().create("VideoMaterial", "General");
         videoMaterial->getTechnique(0)->getPass(0)->setDepthWriteEnabled(false);
@@ -108,6 +109,7 @@ namespace MWRender
 
 
         mVideoStreamId = -1;
+        mAudioStreamId = -1;
         mEOF = false;
         mDisplayedFrameCount = 0;
 
@@ -150,35 +152,59 @@ namespace MWRender
 
 
 
-        // INIT VIDEO
-
         // Find the video stream among the different streams
         for (unsigned int i = 0; i < mAvContext->nb_streams; i++)
         {
             if (mAvContext->streams[i]->codec->codec_type == AVMEDIA_TYPE_VIDEO)
             {
                 mVideoStreamId = i;
+                mVideoStream = mAvContext->streams[i];
                 break;
             }
         }
 
-        if (-1 == mVideoStreamId)
+        if (mVideoStreamId < 0)
             throw std::runtime_error("No video stream found in the video");
 
-        // Get the video codec
-        mVideoCodecContext = mAvContext->streams[mVideoStreamId]->codec;
-        if (!mVideoCodecContext)
-            throw std::runtime_error("Stream doesn't have a codec");
-
         // Get the video decoder
-        mVideoCodec = avcodec_find_decoder(mVideoCodecContext->codec_id);
+        mVideoCodec = avcodec_find_decoder(mVideoStream->codec->codec_id);
         if (NULL == mVideoCodec)
-            throw std::runtime_error("No decoder found");
+            throw std::runtime_error("No video decoder found");
 
         // Load the video codec
-        err = avcodec_open2(mVideoCodecContext, mVideoCodec, 0);
+        err = avcodec_open2(mVideoStream->codec, mVideoCodec, 0);
         if (err < 0)
             throwError (err);
+
+
+
+        // Find the audio stream among the different streams
+        for (unsigned int i = 0; i < mAvContext->nb_streams; i++)
+        {
+            if (mAvContext->streams[i]->codec->codec_type == AVMEDIA_TYPE_AUDIO)
+            {
+                mAudioStreamId = i;
+                mAudioStream = mAvContext->streams[i];
+                break;
+            }
+        }
+
+        if (-1 == mAudioStreamId)
+            throw std::runtime_error("No audio stream found in the video");
+
+        // Get the audio decoder
+        mAudioCodec = avcodec_find_decoder(mAudioStream->codec->codec_id);
+        if (mAudioCodec == NULL)
+        {
+            throw std::runtime_error("Stream doesn't have an audio codec");
+        }
+
+        // Load the audio codec
+        err = avcodec_open2(mAudioStream->codec, mAudioCodec, 0);
+        if (err < 0)
+            throwError (err);
+
+
 
         // Create the frame buffers
         mRawFrame = avcodec_alloc_frame();
@@ -189,23 +215,23 @@ namespace MWRender
         }
 
 
-        avpicture_alloc ((AVPicture *)mRGBAFrame, PIX_FMT_RGBA, mVideoCodecContext->width, mVideoCodecContext->height);
+        avpicture_alloc ((AVPicture *)mRGBAFrame, PIX_FMT_RGBA, mVideoStream->codec->width, mVideoStream->codec->height);
 
 
         // Setup the image scaler
         // All this does is convert from YUV to RGB - note it would be faster to do this in a shader,
         // but i'm not worried about performance just yet
-        mSwsContext = sws_getContext(mVideoCodecContext->width, mVideoCodecContext->height,
-            mVideoCodecContext->pix_fmt,
-            mVideoCodecContext->width, mVideoCodecContext->height,
+        mSwsContext = sws_getContext(mVideoStream->codec->width, mVideoStream->codec->height,
+            mVideoStream->codec->pix_fmt,
+            mVideoStream->codec->width, mVideoStream->codec->height,
             PIX_FMT_RGBA,
             SWS_BICUBIC, NULL, NULL, NULL);
         if (!mSwsContext)
             throw std::runtime_error("Can't create SWS Context");
 
         // Get the frame time we need for this video
-        AVRational r = mAvContext->streams[mVideoStreamId]->avg_frame_rate;
-        AVRational r2 = mAvContext->streams[mVideoStreamId]->r_frame_rate;
+        AVRational r = mVideoStream->avg_frame_rate;
+        AVRational r2 = mVideoStream->r_frame_rate;
         if ((!r.num || !r.den) &&
             (!r2.num || !r2.den))
         {
@@ -230,19 +256,19 @@ namespace MWRender
                     "VideoTexture",
             Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
             Ogre::TEX_TYPE_2D,
-            mVideoCodecContext->width, mVideoCodecContext->height,
+            mVideoStream->codec->width, mVideoStream->codec->height,
             0,
             Ogre::PF_BYTE_RGBA,
             Ogre::TU_DYNAMIC_WRITE_ONLY_DISCARDABLE);
 
         // initialize to (0, 0, 0, 1)
         std::vector<Ogre::uint32> buffer;
-        buffer.resize(mVideoCodecContext->width * mVideoCodecContext->height);
-        for (int p=0; p<mVideoCodecContext->width * mVideoCodecContext->height; ++p)
+        buffer.resize(mVideoStream->codec->width * mVideoStream->codec->height);
+        for (int p=0; p<mVideoStream->codec->width * mVideoStream->codec->height; ++p)
         {
             buffer[p] = (255 << 24);
         }
-        memcpy(mVideoTexture->getBuffer()->lock(Ogre::HardwareBuffer::HBL_DISCARD), &buffer[0], mVideoCodecContext->width*mVideoCodecContext->height*4);
+        memcpy(mVideoTexture->getBuffer()->lock(Ogre::HardwareBuffer::HBL_DISCARD), &buffer[0], mVideoStream->codec->width*mVideoStream->codec->height*4);
         mVideoTexture->getBuffer()->unlock();
 
         mTextureUnit->setTextureName ("VideoTexture");
@@ -358,7 +384,7 @@ namespace MWRender
         // Get the front frame and decode it
         AVPacket *videoPacket = mVideoPacketQueue.front();
         int res;
-        res = avcodec_decode_video2(mVideoCodecContext, mRawFrame, &didDecodeFrame, videoPacket);
+        res = avcodec_decode_video2(mVideoStream->codec, mRawFrame, &didDecodeFrame, videoPacket);
 
         if (res < 0 || !didDecodeFrame)
             throw std::runtime_error ("an error occured while decoding the video frame");
@@ -366,12 +392,12 @@ namespace MWRender
         // Convert the frame to RGB
         sws_scale(mSwsContext,
             mRawFrame->data, mRawFrame->linesize,
-            0, mVideoCodecContext->height,
+            0, mVideoStream->codec->height,
             mRGBAFrame->data, mRGBAFrame->linesize);
 
 
         Ogre::HardwarePixelBufferSharedPtr pixelBuffer = mVideoTexture->getBuffer();
-        Ogre::PixelBox pb(mVideoCodecContext->width, mVideoCodecContext->height, 1, Ogre::PF_BYTE_RGBA, mRGBAFrame->data[0]);
+        Ogre::PixelBox pb(mVideoStream->codec->width, mVideoStream->codec->height, 1, Ogre::PF_BYTE_RGBA, mRGBAFrame->data[0]);
         pixelBuffer->blitFromMemory(pb);
 
         av_free_packet(mVideoPacketQueue.front());
@@ -397,7 +423,8 @@ namespace MWRender
             mVideoPacketQueue.pop();
         }
 
-        avcodec_close(mVideoCodecContext);
+        if (mVideoStream && mVideoStream->codec != NULL) avcodec_close(mVideoStream->codec);
+        if (mAudioStream && mAudioStream->codec != NULL) avcodec_close(mAudioStream->codec);
 
         avpicture_free((AVPicture *)mRGBAFrame);
 

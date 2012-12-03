@@ -21,6 +21,7 @@ namespace Ogre
 struct AVFormatContext;
 struct AVCodecContext;
 struct AVCodec;
+struct AVStream;
 struct AVFrame;
 struct SwsContext;
 struct AVPacket;
@@ -56,16 +57,21 @@ namespace MWRender
 
         Ogre::Timer mTimer;
 
-        // VIDEO
-        AVCodecContext* mVideoCodecContext;
         AVCodec* mVideoCodec;
-        int mVideoStreamId;
+        AVCodec* mAudioCodec;
+
+        AVStream*           mVideoStream;
+        AVStream*           mAudioStream;
+        int                 mVideoStreamId;      ///< ID of the first video stream
+        int                 mAudioStreamId;      ///< ID of the first audio stream
+
         AVFrame* mRawFrame;
         AVFrame* mRGBAFrame;
         SwsContext* mSwsContext;
         float mWantedFrameTime;
         float mDecodingTime;
         std::queue <AVPacket *> mVideoPacketQueue;
+
 
         int mDisplayedFrameCount;
 
