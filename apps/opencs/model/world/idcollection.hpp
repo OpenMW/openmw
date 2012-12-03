@@ -265,6 +265,7 @@ namespace CSMWorld
     {
         ESXRecordT record;
         record.mId = id;
+        record.blank();
         add (record);
     }
 }

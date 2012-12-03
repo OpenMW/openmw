@@ -44,6 +44,12 @@ void Global::save(ESMWriter &esm)
     esm.writeHNT("FLTV", mValue);
 }
 
+    void Global::blank()
+    {
+        mValue = 0;
+        mType = VT_Float;
+    }
+
     bool operator== (const Global& left, const Global& right)
     {
         return left.mId==right.mId && left.mValue==right.mValue && left.mType==right.mType;

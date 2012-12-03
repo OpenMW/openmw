@@ -23,6 +23,9 @@ struct Global
 
     void load(ESMReader &esm);
     void save(ESMWriter &esm);
+
+    void blank();
+    ///< Set record to default state (does not touch the ID).
 };
 
 bool operator== (const Global& left, const Global& right);
