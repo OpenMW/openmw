@@ -5,7 +5,7 @@ set (OPENCS_SRC
     model/doc/documentmanager.cpp model/doc/document.cpp
 
     model/world/universalid.cpp model/world/idcollection.cpp model/world/data.cpp model/world/idtable.cpp
-    model/world/commands.cpp
+    model/world/commands.cpp model/world/idtableproxymodel.cpp
 
     view/doc/viewmanager.cpp view/doc/view.cpp view/doc/operations.cpp view/doc/operation.cpp
 
@@ -18,10 +18,10 @@ set (OPENCS_HDR
     model/doc/documentmanager.hpp model/doc/document.hpp
 
     model/world/universalid.hpp model/world/record.hpp model/world/idcollection.hpp model/world/data.hpp
-    model/world/idtable.hpp model/world/columns.hpp
+    model/world/idtable.hpp model/world/columns.hpp model/world/idtableproxymodel.hpp
+    model/world/commands.hpp
 
     view/doc/viewmanager.hpp view/doc/view.hpp view/doc/operations.hpp view/doc/operation.hpp
-    model/world/commands.hpp
 
     view/world/subview.hpp view/world/table.hpp view/world/globals.hpp
     )

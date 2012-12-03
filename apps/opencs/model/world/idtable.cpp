@@ -72,3 +72,33 @@ Qt::ItemFlags CSMWorld::IdTable::flags (const QModelIndex & index) const
 
     return flags;
 }
+
+bool CSMWorld::IdTable::removeRows (int row, int count, const QModelIndex& parent)
+{
+    if (parent.isValid())
+        return false;
+
+    beginRemoveRows (parent, row, row+count-1);
+
+    mIdCollection->removeRows (row, count);
+
+    endRemoveRows();
+
+    return true;
+}
+
+void CSMWorld::IdTable::addRecord (const std::string& id)
+{
+    int index = mIdCollection->getSize();
+
+    beginInsertRows (QModelIndex(), index, index);
+
+    mIdCollection->appendBlankRecord (id);
+
+    endInsertRows();
+}
+
+QModelIndex CSMWorld::IdTable::getModelIndex (const std::string& id, int column) const
+{
+    return index (mIdCollection->getIndex (id), column);
+}

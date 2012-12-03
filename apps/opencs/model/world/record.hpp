@@ -5,18 +5,21 @@
 
 namespace CSMWorld
 {
-    template <typename ESXRecordT>
-    struct Record
+    struct RecordBase
     {
         enum State
         {
-            State_BaseOnly, // defined in base only
-            State_Modified, // exists in base, but has been modified
-            State_ModifiedOnly, // newly created in modified
-            State_Deleted, // exists in base, but has been deleted
-            State_Erased // does not exist at all (we mostly treat that the same way as deleted)
+            State_BaseOnly = 0, // defined in base only
+            State_Modified = 1, // exists in base, but has been modified
+            State_ModifiedOnly = 2, // newly created in modified
+            State_Deleted = 3, // exists in base, but has been deleted
+            State_Erased = 4 // does not exist at all (we mostly treat that the same way as deleted)
         };
+    };
 
+    template <typename ESXRecordT>
+    struct Record : public RecordBase
+    {
         ESXRecordT mBase;
         ESXRecordT mModified;
         State mState;

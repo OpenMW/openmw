@@ -3,6 +3,8 @@
 
 #include "record.hpp"
 
+#include <string>
+
 #include <QVariant>
 #include <QUndoCommand>
 #include <QModelIndex>
@@ -12,6 +14,8 @@ class QAbstractItemModel;
 
 namespace CSMWorld
 {
+    class IdTableProxyModel;
+
     class ModifyCommand : public QUndoCommand
     {
             QAbstractItemModel& mModel;
@@ -23,6 +27,20 @@ namespace CSMWorld
 
             ModifyCommand (QAbstractItemModel& model, const QModelIndex& index, const QVariant& new_,
                 QUndoCommand *parent = 0);
+
+            virtual void redo();
+
+            virtual void undo();
+    };
+
+    class CreateCommand : public QUndoCommand
+    {
+            IdTableProxyModel& mModel;
+            std::string mId;
+
+        public:
+
+            CreateCommand (IdTableProxyModel& model, const std::string& id, QUndoCommand *parent = 0);
 
             virtual void redo();
 

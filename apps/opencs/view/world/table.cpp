@@ -3,12 +3,14 @@
 
 #include <QStyledItemDelegate>
 #include <QHeaderView>
-#include <QSortFilterProxyModel>
 #include <QUndoStack>
+#include <QAction>
+#include <QMenu>
+#include <QContextMenuEvent>
 
 #include "../../model/world/data.hpp"
-
 #include "../../model/world/commands.hpp"
+#include "../../model/world/idtableproxymodel.hpp"
 
 namespace CSVWorld
 {
@@ -104,7 +106,19 @@ void  CSVWorld::CommandDelegate::setEditLock (bool locked)
 }
 
 
-CSVWorld::Table::Table (const CSMWorld::UniversalId& id, CSMWorld::Data& data, QUndoStack& undoStack)
+ void CSVWorld::Table::contextMenuEvent (QContextMenuEvent *event)
+{
+     QMenu menu (this);
+
+    if (mCreateAction)
+        menu.addAction (mCreateAction);
+
+    menu.exec (event->globalPos());
+}
+
+CSVWorld::Table::Table (const CSMWorld::UniversalId& id, CSMWorld::Data& data, QUndoStack& undoStack,
+    bool createAndDelete)
+: mUndoStack (undoStack), mCreateAction (0)
 {
     QAbstractTableModel *model = data.getTableModel (id);
 
@@ -117,10 +131,10 @@ CSVWorld::Table::Table (const CSMWorld::UniversalId& id, CSMWorld::Data& data, Q
         setItemDelegateForColumn (i, delegate);
     }
 
-    QSortFilterProxyModel *proxyModel = new QSortFilterProxyModel (this);
-    proxyModel->setSourceModel (model);
+    mModel = new CSMWorld::IdTableProxyModel (this);
+    mModel->setSourceModel (model);
 
-    setModel (proxyModel);
+    setModel (mModel);
     horizontalHeader()->setResizeMode (QHeaderView::Interactive);
     verticalHeader()->hide();
     setSortingEnabled (true);
@@ -128,10 +142,29 @@ CSVWorld::Table::Table (const CSMWorld::UniversalId& id, CSMWorld::Data& data, Q
     setSelectionMode (QAbstractItemView::ExtendedSelection);
 
     /// \todo make initial layout fill the whole width of the table
+
+    if (createAndDelete)
+    {
+        mCreateAction = new QAction (tr ("CreateRecord"), this);
+        connect (mCreateAction, SIGNAL (triggered()), this, SLOT (createRecord()));
+        addAction (mCreateAction);
+    }
 }
 
 void CSVWorld::Table::setEditLock (bool locked)
 {
     for (std::vector<CommandDelegate *>::iterator iter (mDelegates.begin()); iter!=mDelegates.end(); ++iter)
         (*iter)->setEditLock (locked);
+}
+
+#include <sstream> /// \todo remove
+void CSVWorld::Table::createRecord()
+{
+    /// \todo ask the user for an ID instead.
+    static int index = 0;
+
+    std::ostringstream stream;
+    stream << "id" << index++;
+
+    mUndoStack.push (new CSMWorld::CreateCommand (*mModel, stream.str()));
 }

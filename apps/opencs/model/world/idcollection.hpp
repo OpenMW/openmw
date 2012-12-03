@@ -50,6 +50,8 @@ namespace CSMWorld
 
             virtual std::string getId (int index) const = 0;
 
+            virtual int getIndex (const std::string& id) const = 0;
+
             virtual int getColumns() const = 0;
 
             virtual std::string getTitle (int column) const = 0;
@@ -65,6 +67,10 @@ namespace CSMWorld
 
             virtual void purge() = 0;
             ///< Remove records that are flagged as erased.
+
+            virtual void removeRows (int index, int count) = 0;
+
+            virtual void appendBlankRecord (const std::string& id) = 0;
     };
 
     ///< \brief Collection of ID-based records
@@ -92,6 +98,8 @@ namespace CSMWorld
 
             virtual std::string getId (int index) const;
 
+            virtual int getIndex (const std::string& id) const;
+
             virtual int getColumns() const;
 
             virtual QVariant getData (int index, int column) const;
@@ -107,6 +115,10 @@ namespace CSMWorld
 
             virtual void purge();
             ///< Remove records that are flagged as erased.
+
+            virtual void removeRows (int index, int count) ;
+
+            virtual void appendBlankRecord (const std::string& id);
 
             void addColumn (Column<ESXRecordT> *column);
     };
@@ -160,6 +172,17 @@ namespace CSMWorld
     }
 
     template<typename ESXRecordT>
+    int  IdCollection<ESXRecordT>::getIndex (const std::string& id) const
+    {
+        std::map<std::string, int>::const_iterator iter = mIndex.find (id);
+
+        if (iter==mIndex.end())
+            throw std::runtime_error ("invalid ID: " + id);
+
+        return iter->second;
+    }
+
+    template<typename ESXRecordT>
     int IdCollection<ESXRecordT>::getColumns() const
     {
         return mColumns.size();
@@ -210,6 +233,39 @@ namespace CSMWorld
         mRecords.erase (std::remove_if (mRecords.begin(), mRecords.end(),
             std::mem_fun_ref (&Record<ESXRecordT>::isErased) // I want lambda :(
             ), mRecords.end());
+    }
+
+    template<typename ESXRecordT>
+    void IdCollection<ESXRecordT>::removeRows (int index, int count)
+    {
+        mRecords.erase (mRecords.begin()+index, mRecords.begin()+index+count);
+
+        typename std::map<std::string, int>::iterator iter = mIndex.begin();
+
+        while (iter!=mIndex.end())
+        {
+            if (iter->second>=index)
+            {
+                if (iter->second>=index+count)
+                {
+                    iter->second -= count;
+                }
+                else
+                {
+                    mIndex.erase (iter++);
+                }
+            }
+
+            ++iter;
+        }
+    }
+
+    template<typename ESXRecordT>
+    void  IdCollection<ESXRecordT>::appendBlankRecord (const std::string& id)
+    {
+        ESXRecordT record;
+        record.mId = id;
+        add (record);
     }
 }
 
