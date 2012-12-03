@@ -35,6 +35,8 @@ void CS::Editor::createDocument()
         document->getData().getGlobals().add (record);
     }
 
+    document->getData().merge(); /// \todo remove once proper ESX loading is implemented
+
     mViewManager.addView (document);
 }
 

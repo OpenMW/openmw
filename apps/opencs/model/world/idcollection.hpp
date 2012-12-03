@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <cctype>
 #include <stdexcept>
+#include <functional>
 
 #include <QVariant>
 
@@ -58,6 +59,12 @@ namespace CSMWorld
             virtual void setData (int index, int column, const QVariant& data) = 0;
 
             virtual bool isEditable (int column) const = 0;
+
+            virtual void merge() = 0;
+            ///< Merge modified into base.
+
+            virtual void purge() = 0;
+            ///< Remove records that are flagged as erased.
     };
 
     ///< \brief Collection of ID-based records
@@ -94,6 +101,12 @@ namespace CSMWorld
             virtual std::string getTitle (int column) const;
 
             virtual bool isEditable (int column) const;
+
+            virtual void merge();
+            ///< Merge modified into base.
+
+            virtual void purge();
+            ///< Remove records that are flagged as erased.
 
             void addColumn (Column<ESXRecordT> *column);
     };
@@ -180,6 +193,23 @@ namespace CSMWorld
     void IdCollection<ESXRecordT>::addColumn (Column<ESXRecordT> *column)
     {
         mColumns.push_back (column);
+    }
+
+    template<typename ESXRecordT>
+    void IdCollection<ESXRecordT>::merge()
+    {
+        for (typename std::vector<Record<ESXRecordT> >::iterator iter (mRecords.begin()); iter!=mRecords.end(); ++iter)
+            iter->merge();
+
+        purge();
+    }
+
+    template<typename ESXRecordT>
+    void  IdCollection<ESXRecordT>::purge()
+    {
+        mRecords.erase (std::remove_if (mRecords.begin(), mRecords.end(),
+            std::mem_fun_ref (&Record<ESXRecordT>::isErased) // I want lambda :(
+            ), mRecords.end());
     }
 }
 

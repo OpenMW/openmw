@@ -51,6 +51,9 @@ namespace CSMWorld
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
         {
+            if (record.mState==Record<ESXRecordT>::State_Erased)
+                return static_cast<int> (Record<ESXRecordT>::State_Deleted);
+
             return static_cast<int> (record.mState);
         }
 

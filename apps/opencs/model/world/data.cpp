@@ -47,3 +47,8 @@ QAbstractTableModel *CSMWorld::Data::getTableModel (const UniversalId& id)
 
     return iter->second;
 }
+
+void CSMWorld::Data::merge()
+{
+    mGlobals.merge();
+}

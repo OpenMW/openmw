@@ -13,7 +13,8 @@ namespace CSMWorld
             State_BaseOnly, // defined in base only
             State_Modified, // exists in base, but has been modified
             State_ModifiedOnly, // newly created in modified
-            State_Deleted // exists in base, but has been deleted
+            State_Deleted, // exists in base, but has been deleted
+            State_Erased // does not exist at all (we mostly treat that the same way as deleted)
         };
 
         ESXRecordT mBase;
@@ -21,6 +22,8 @@ namespace CSMWorld
         State mState;
 
         bool isDeleted() const;
+
+        bool isErased() const;
 
         bool isModified() const;
 
@@ -32,12 +35,21 @@ namespace CSMWorld
 
         void setModified (const ESXRecordT& modified);
         ///< Throws an exception, if the record is deleted.
+
+        void merge();
+        ///< Merge modified into base.
     };
 
     template <typename ESXRecordT>
     bool Record<ESXRecordT>::isDeleted() const
     {
-        return mState==State_Deleted;
+        return mState==State_Deleted || mState==State_Erased;
+    }
+
+    template <typename ESXRecordT>
+    bool Record<ESXRecordT>::isErased() const
+    {
+        return mState==State_Erased;
     }
 
     template <typename ESXRecordT>
@@ -74,6 +86,20 @@ namespace CSMWorld
 
         if (mState!=State_ModifiedOnly)
             mState = mBase==mModified ? State_BaseOnly : State_Modified;
+    }
+
+    template <typename ESXRecordT>
+    void Record<ESXRecordT>::merge()
+    {
+        if (isModified())
+        {
+            mBase = mModified;
+            mState = State_BaseOnly;
+        }
+        else if (mState==State_Deleted)
+        {
+            mState = State_Erased;
+        }
     }
 }
 

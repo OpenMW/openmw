@@ -33,6 +33,9 @@ namespace CSMWorld
 
             QAbstractTableModel *getTableModel (const UniversalId& id);
             ///< If no table model is available for \æ id, an exception is thrown.
+
+            void merge();
+            ///< Merge modified into base.
     };
 }
 
