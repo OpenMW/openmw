@@ -1090,7 +1090,7 @@ namespace MWScript
                 "alteration", "illusion", "conjuration", "mysticism",
                 "restoration", "alchemy", "unarmored", "security", "sneak",
                 "acrobatics", "lightarmor", "shortblade", "marksman",
-                "merchantile", "speechcraft", "handtohand"
+                "mercantile", "speechcraft", "handtohand"
             };
 
             std::string get ("get");
