@@ -193,7 +193,7 @@ namespace MWWorld
         mRendering->attachCameraTo(mPlayer->getPlayer());
 
         mPhysics->addActor(mPlayer->getPlayer());
-        
+
         // global variables
         mGlobalVariables = new Globals (mStore);
 
@@ -202,6 +202,8 @@ namespace MWWorld
             // set new game mark
             mGlobalVariables->setInt ("chargenstate", 1);
         }
+
+        mGlobalVariables->setInt ("pcrace", 3);
 
         mWorldScene = new Scene(*mRendering, mPhysics);
 
@@ -660,7 +662,7 @@ namespace MWWorld
     {
         MWWorld::Class::get(ptr).adjustScale(ptr,scale);
         ptr.getCellRef().mScale = scale;
-        
+
         if(ptr.getRefData().getBaseNode() == 0)
             return;
         mRendering->scaleObject(ptr, Vector3(scale,scale,scale));
@@ -673,7 +675,7 @@ namespace MWWorld
         rot.x = Ogre::Degree(x).valueRadians();
         rot.y = Ogre::Degree(y).valueRadians();
         rot.z = Ogre::Degree(z).valueRadians();
-        
+
         float *objRot = ptr.getRefData().getPosition().rot;
         if(ptr.getRefData().getBaseNode() == 0 || !mRendering->rotateObject(ptr, rot, adjust))
         {
@@ -781,7 +783,7 @@ namespace MWWorld
 
     const ESM::Potion *World::createRecord (const ESM::Potion& record)
     {
-        return mStore.insert(record); 
+        return mStore.insert(record);
     }
 
     const ESM::Class *World::createRecord (const ESM::Class& record)
@@ -802,7 +804,23 @@ namespace MWWorld
     const ESM::NPC *World::createRecord(const ESM::NPC &record)
     {
         bool update = false;
-        if (StringUtils::ciEqual(record.mId, "player")) {
+
+        if (StringUtils::ciEqual(record.mId, "player"))
+        {
+            static const char *sRaces[] =
+            {
+                "Argonian", "Breton", "Dark Elf", "High Elf", "Imperial", "Khajiit", "Nord", "Orc", "Redguard",
+                "Woodelf",  0
+            };
+
+            int i=0;
+
+            for (; sRaces[i]; ++i)
+                if (StringUtils::ciEqual (sRaces[i], record.mRace))
+                    break;
+
+            mGlobalVariables->setInt ("pcrace", sRaces[i] ? i+1 : 0);
+
             const ESM::NPC *player =
                 mPlayer->getPlayer().get<ESM::NPC>()->mBase;
 
@@ -834,7 +852,7 @@ namespace MWWorld
         /// \todo split this function up into subfunctions
 
         mWorldScene->update (duration, paused);
-        
+
         float pitch, yaw;
         Ogre::Vector3 eyepos;
         mRendering->getPlayerData(eyepos, pitch, yaw);
