@@ -461,9 +461,9 @@ namespace MWDialogue
 	}
 	
 	if (skillincrease){
-	  // practice skill, it doesn't need to be a success to use skill
+	  // practice skill
 	  MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
-	  MWWorld::Class::get(player).skillUsageSucceeded(player, ESM::Skill::Speechcraft, 0);
+	  MWWorld::Class::get(player).skillUsageSucceeded(player, ESM::Skill::Speechcraft, -1);
 	}
 
         text += (success ? "Success" : "Fail");
