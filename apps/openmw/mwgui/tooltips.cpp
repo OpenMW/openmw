@@ -31,6 +31,7 @@ ToolTips::ToolTips(MWBase::WindowManager* windowManager) :
     , mRemainingDelay(0.0)
     , mLastMouseX(0)
     , mLastMouseY(0)
+    , mHorizontalScrollIndex(0)
 {
     getWidget(mDynamicToolTipBox, "DynamicToolTipBox");
 
@@ -52,6 +53,7 @@ void ToolTips::setEnabled(bool enabled)
 
 void ToolTips::onFrame(float frameDuration)
 {
+
     while (mDynamicToolTipBox->getChildCount())
     {
         MyGUI::Gui::getInstance().destroyWidget(mDynamicToolTipBox->getChildAt(0));
@@ -103,7 +105,7 @@ void ToolTips::onFrame(float frameDuration)
 
         else
         {
-            const MyGUI::IntPoint& lastPressed = InputManager::getInstance().getLastPressedPosition(MyGUI::MouseButton::Left);
+	    const MyGUI::IntPoint& lastPressed = InputManager::getInstance().getLastPressedPosition(MyGUI::MouseButton::Left);
 
             if (mousePos == lastPressed) // mouseclick makes tooltip disappear
                 return;
@@ -114,11 +116,13 @@ void ToolTips::onFrame(float frameDuration)
             }
             else
             {
+		mHorizontalScrollIndex = 0;
                 mRemainingDelay = mDelay;
             }
             mLastMouseX = mousePos.left;
             mLastMouseY = mousePos.top;
 
+	    
             if (mRemainingDelay > 0)
                 return;
 
@@ -148,7 +152,8 @@ void ToolTips::onFrame(float frameDuration)
             {
                 return;
             }
-
+	    
+	
             // special handling for markers on the local map: the tooltip should only be visible
             // if the marker is not hidden due to the fog of war.
             if (focus->getUserString ("IsMarker") == "true")
@@ -354,7 +359,7 @@ void ToolTips::findImageExtension(std::string& image)
 }
 
 IntSize ToolTips::createToolTip(const MWGui::ToolTipInfo& info)
-{
+{    
     mDynamicToolTipBox->setVisible(true);
 
     std::string caption = info.caption;
@@ -388,6 +393,8 @@ IntSize ToolTips::createToolTip(const MWGui::ToolTipInfo& info)
     setCoord(0, 0, 300, 300);
 
     const IntPoint padding(8, 8);
+    
+    const int maximumWidth = 500;
 
     const int imageCaptionHPadding = (caption != "" ? 8 : 0);
     const int imageCaptionVPadding = (caption != "" ? 4 : 0);
@@ -411,7 +418,7 @@ IntSize ToolTips::createToolTip(const MWGui::ToolTipInfo& info)
     IntSize textSize = textWidget->getTextSize();
 
     captionSize += IntSize(imageSize, 0); // adjust for image
-    IntSize totalSize = IntSize( std::max(textSize.width, captionSize.width + ((image != "") ? imageCaptionHPadding : 0)),
+    IntSize totalSize = IntSize( std::min(std::max(textSize.width,captionSize.width + ((image != "") ? imageCaptionHPadding : 0)),maximumWidth),
         ((text != "") ? textSize.height + imageCaptionVPadding : 0) + captionHeight );
 
     if (!info.effects.empty())
@@ -499,8 +506,24 @@ IntSize ToolTips::createToolTip(const MWGui::ToolTipInfo& info)
         (captionHeight-captionSize.height)/2,
         captionSize.width-imageSize,
         captionSize.height);
+    
+     //if its too long we do hscroll with the caption
+    if (captionSize.width > maximumWidth){
+      mHorizontalScrollIndex = mHorizontalScrollIndex + 2;
+      if (mHorizontalScrollIndex > captionSize.width){
+        mHorizontalScrollIndex = -totalSize.width;
+      }      
+      int horizontal_scroll = mHorizontalScrollIndex;
+      if (horizontal_scroll < 40){
+       horizontal_scroll = 40;	
+      }else{
+        horizontal_scroll = 80 - mHorizontalScrollIndex;
+      }
+      captionWidget->setPosition (IntPoint(horizontal_scroll, captionWidget->getPosition().top + padding.top));
+    } else {
+      captionWidget->setPosition (captionWidget->getPosition() + padding);
+    }
 
-    captionWidget->setPosition (captionWidget->getPosition() + padding);
     textWidget->setPosition (textWidget->getPosition() + IntPoint(0, padding.top)); // only apply vertical padding, the horizontal works automatically due to Align::HCenter
 
     if (image != "")

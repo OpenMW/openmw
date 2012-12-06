@@ -3,6 +3,8 @@
 
 #include <cstdlib>
 
+#include <boost/algorithm/string.hpp>
+
 #include <components/esm/loadalch.hpp>
 #include <components/esm/loadspel.hpp>
 #include <components/esm/loadingr.hpp>
@@ -257,5 +259,19 @@ namespace MWMechanics
             return 0;
 
         return scaledDuration-usedUp;
+    }
+
+    bool ActiveSpells::isSpellActive(std::string id) const
+    {
+        boost::algorithm::to_lower(id);
+        for (TContainer::iterator iter = mSpells.begin(); iter != mSpells.end(); ++iter)
+        {
+            std::string left = iter->first;
+            boost::algorithm::to_lower(left);
+
+            if (iter->first == id)
+                return true;
+        }
+        return false;
     }
 }

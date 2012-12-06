@@ -131,9 +131,7 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
             ->default_value(false), "enable console-only script functionality")
 
         ("script-run", bpo::value<std::string>()->default_value(""),
-            "select a file that is executed in the console on startup\n\n"
-            "Note: The file contains a list of script lines, but not a complete scripts. "
-            "That means no begin/end and no variable declarations.")
+            "select a file containing a list of console commands that is executed on startup")
 
         ("new-game", bpo::value<bool>()->implicit_value(true)
             ->default_value(false), "activate char gen/new game mechanics")

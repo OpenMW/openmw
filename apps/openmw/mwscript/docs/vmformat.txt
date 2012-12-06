@@ -37,7 +37,13 @@ op 0x20014: SetPCFacRep
 op 0x20015: SetPCFacRep, explicit reference
 op 0x20016: ModPCFacRep
 op 0x20017: ModPCFacRep, explicit reference
-op s 0x20018-0x3ffff unused
+op 0x20018: PcExpelled
+op 0x20019: PcExpelled, explicit
+op 0x2001a: PcExpell
+op 0x2001b: PcExpell, explicit
+op 0x2001c: PcClearExpelled
+op 0x2001d: PcClearExpelled, explicit
+op s 0x2001e-0x3ffff unused
 
 Segment 4:
 (not implemented yet)
@@ -226,5 +232,67 @@ op 0x20001ad: SetReputation
 op 0x20001ae: ModReputation
 op 0x20001af: SetReputation, explicit
 op 0x20001b0: ModReputation, explicit
-opcodes 0x20001b1-0x3ffffff unused
+op 0x20001b1: GetReputation
+op 0x20001b2: GetReputation, explicit
+op 0x20001b3: Equip
+op 0x20001b4: Equip, explicit
+op 0x20001b5: SameFaction
+op 0x20001b6: SameFaction, explicit
+op 0x20001b7: ModHello
+op 0x20001b8: ModHello, explicit reference
+op 0x20001b9: ModFight
+op 0x20001ba: ModFight, explicit reference
+op 0x20001bb: ModFlee
+op 0x20001bc: ModFlee, explicit reference
+op 0x20001bd: ModAlarm
+op 0x20001be: ModAlarm, explicit reference
+op 0x20001bf: GetHello
+op 0x20001c0: GetHello, explicit reference
+op 0x20001c1: GetFight
+op 0x20001c2: GetFight, explicit reference
+op 0x20001c3: GetFlee
+op 0x20001c4: GetFlee, explicit reference
+op 0x20001c5: GetAlarm
+op 0x20001c6: GetAlarm, explicit reference
+op 0x20001c7: GetLocked
+op 0x20001c8: GetLocked, explicit reference
+op 0x20001c9: GetPcRunning
+op 0x20001ca: GetPcSneaking
+op 0x20001cb: GetForceRun
+op 0x20001cc: GetForceSneak
+op 0x20001cd: GetForceRun, explicit
+op 0x20001ce: GetForceSneak, explicit
+op 0x20001cf: GetEffect
+op 0x20001d0: GetEffect, explicit
+op 0x20001d1: GetArmorType
+op 0x20001d2: GetArmorType, explicit
+op 0x20001d3: GetAttacked
+op 0x20001d4: GetAttacked, explicit
+op 0x20001d5: HasItemEquipped
+op 0x20001d6: HasItemEquipped, explicit
+op 0x20001d7: GetWeaponDrawn
+op 0x20001d8: GetWeaponDrawn, explicit
+op 0x20001d9: GetRace
+op 0x20001da: GetRace, explicit
+op 0x20001db: GetSpellEffects
+op 0x20001dc: GetSpellEffects, explicit
+op 0x20001dd: GetCurrentTime
+op 0x20001de: HasSoulGem
+op 0x20001df: HasSoulGem, explicit
+op 0x20001e0: GetWeaponType
+op 0x20001e1: GetWeaponType, explicit
+op 0x20001e2: GetWerewolfKills
+op 0x20001e3: ModScale
+op 0x20001e4: ModScale, explicit
+op 0x20001e5: SetDelete
+op 0x20001e6: SetDelete, explicit
+op 0x20001e7: GetSquareRoot
+op 0x20001e8: RaiseRank
+op 0x20001e9: RaiseRank, explicit
+op 0x20001ea: LowerRank
+op 0x20001eb: LowerRank, explicit
+
+opcodes 0x20001ec-0x3ffffff unused
+
+
 

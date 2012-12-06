@@ -14,6 +14,8 @@
 #include "../mwworld/manualref.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/containerstore.hpp"
+#include "../mwworld/actionequip.hpp"
+#include "../mwworld/inventorystore.hpp"
 
 #include "interpretercontext.hpp"
 #include "ref.hpp"
@@ -128,12 +130,196 @@ namespace MWScript
                 }
         };
 
+        template <class R>
+        class OpEquip : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute(Interpreter::Runtime &runtime)
+                {
+                    MWWorld::Ptr ptr = R()(runtime);
+
+                    std::string item = runtime.getStringLiteral (runtime[0].mInteger);
+                    runtime.pop();
+
+                    MWWorld::InventoryStore& invStore = MWWorld::Class::get(ptr).getInventoryStore (ptr);
+                    MWWorld::ContainerStoreIterator it = invStore.begin();
+                    for (; it != invStore.end(); ++it)
+                    {
+                        if (toLower(it->getCellRef().mRefID) == toLower(item))
+                            break;
+                    }
+                    if (it == invStore.end())
+                        throw std::runtime_error("Item to equip not found");
+
+                    MWWorld::ActionEquip action (*it);
+                    action.execute(ptr);
+                }
+        };
+
+        template <class R>
+        class OpGetArmorType : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute(Interpreter::Runtime &runtime)
+                {
+                    MWWorld::Ptr ptr = R()(runtime);
+
+                    Interpreter::Type_Integer location = runtime[0].mInteger;
+                    runtime.pop();
+
+                    int slot;
+                    switch (location)
+                    {
+                        case 0:
+                            slot = MWWorld::InventoryStore::Slot_Helmet;
+                            break;
+                        case 1:
+                            slot = MWWorld::InventoryStore::Slot_Cuirass;
+                            break;
+                        case 2:
+                            slot = MWWorld::InventoryStore::Slot_LeftPauldron;
+                            break;
+                        case 3:
+                            slot = MWWorld::InventoryStore::Slot_RightPauldron;
+                            break;
+                        case 4:
+                            slot = MWWorld::InventoryStore::Slot_Greaves;
+                            break;
+                        case 5:
+                            slot = MWWorld::InventoryStore::Slot_Boots;
+                            break;
+                        case 6:
+                            slot = MWWorld::InventoryStore::Slot_LeftGauntlet;
+                            break;
+                        case 7:
+                            slot = MWWorld::InventoryStore::Slot_RightGauntlet;
+                            break;
+                        case 8:
+                            slot = MWWorld::InventoryStore::Slot_CarriedLeft; // shield
+                            break;
+                        case 9:
+                            slot = MWWorld::InventoryStore::Slot_LeftGauntlet;
+                            break;
+                        case 10:
+                            slot = MWWorld::InventoryStore::Slot_RightGauntlet;
+                            break;
+                        default:
+                            throw std::runtime_error ("armor index out of range");
+                    }
+
+                    MWWorld::InventoryStore& invStore = MWWorld::Class::get(ptr).getInventoryStore (ptr);
+
+                    MWWorld::ContainerStoreIterator it = invStore.getSlot (slot);
+                    if (it == invStore.end() || it->getTypeName () != typeid(ESM::Armor).name())
+                    {
+                        runtime.push(-1);
+                        return;
+                    }
+
+                    int skill = MWWorld::Class::get(*it).getEquipmentSkill (*it) ;
+                    if (skill == ESM::Skill::HeavyArmor)
+                        runtime.push(2);
+                    else if (skill == ESM::Skill::MediumArmor)
+                        runtime.push(1);
+                    else if (skill == ESM::Skill::LightArmor)
+                        runtime.push(0);
+                    else
+                        runtime.push(-1);
+            }
+        };
+
+        template <class R>
+        class OpHasItemEquipped : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute(Interpreter::Runtime &runtime)
+                {
+                    MWWorld::Ptr ptr = R()(runtime);
+
+                    std::string item = runtime.getStringLiteral (runtime[0].mInteger);
+                    runtime.pop();
+
+                    MWWorld::InventoryStore& invStore = MWWorld::Class::get(ptr).getInventoryStore (ptr);
+                    for (int slot = 0; slot < MWWorld::InventoryStore::Slots; ++slot)
+                    {
+                        MWWorld::ContainerStoreIterator it = invStore.getSlot (slot);
+                        if (it != invStore.end() && toLower(it->getCellRef().mRefID) == toLower(item))
+                        {
+                            runtime.push(1);
+                            return;
+                        }
+                    }
+                    runtime.push(0);
+                }
+        };
+
+        template <class R>
+        class OpHasSoulGem : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute(Interpreter::Runtime &runtime)
+                {
+                    MWWorld::Ptr ptr = R()(runtime);
+
+                    std::string creatureName = toLower (runtime.getStringLiteral (runtime[0].mInteger));
+                    runtime.pop();
+
+                    MWWorld::InventoryStore& invStore = MWWorld::Class::get(ptr).getInventoryStore (ptr);
+                    for (MWWorld::ContainerStoreIterator it = invStore.begin(MWWorld::ContainerStore::Type_Miscellaneous);
+                         it != invStore.end(); ++it)
+                    {
+
+                        if (toLower(it->getCellRef().mSoul) == toLower(creatureName))
+                        {
+                            runtime.push(1);
+                            return;
+                        }
+                    }
+                    runtime.push(0);
+                }
+        };
+
+        template <class R>
+        class OpGetWeaponType : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute(Interpreter::Runtime &runtime)
+                {
+                    MWWorld::Ptr ptr = R()(runtime);
+
+                    MWWorld::InventoryStore& invStore = MWWorld::Class::get(ptr).getInventoryStore (ptr);
+                    MWWorld::ContainerStoreIterator it = invStore.getSlot (MWWorld::InventoryStore::Slot_CarriedRight);
+                    if (it == invStore.end() || it->getTypeName () != typeid(ESM::Weapon).name())
+                    {
+                        runtime.push(-1);
+                        return;
+                    }
+
+                    runtime.push(it->get<ESM::Weapon>()->mBase->mData.mType);
+                }
+        };
+
         const int opcodeAddItem = 0x2000076;
         const int opcodeAddItemExplicit = 0x2000077;
         const int opcodeGetItemCount = 0x2000078;
         const int opcodeGetItemCountExplicit = 0x2000079;
         const int opcodeRemoveItem = 0x200007a;
         const int opcodeRemoveItemExplicit = 0x200007b;
+        const int opcodeEquip = 0x20001b3;
+        const int opcodeEquipExplicit = 0x20001b4;
+        const int opcodeGetArmorType = 0x20001d1;
+        const int opcodeGetArmorTypeExplicit = 0x20001d2;
+        const int opcodeHasItemEquipped = 0x20001d5;
+        const int opcodeHasItemEquippedExplicit = 0x20001d6;
+        const int opcodeHasSoulGem = 0x20001de;
+        const int opcodeHasSoulGemExplicit = 0x20001df;
+        const int opcodeGetWeaponType = 0x20001e0;
+        const int opcodeGetWeaponTypeExplicit = 0x20001e1;
 
         void registerExtensions (Compiler::Extensions& extensions)
         {
@@ -142,6 +328,11 @@ namespace MWScript
                 opcodeGetItemCountExplicit);
             extensions.registerInstruction ("removeitem", "cl", opcodeRemoveItem,
                 opcodeRemoveItemExplicit);
+            extensions.registerInstruction ("equip", "c", opcodeEquip, opcodeEquipExplicit);
+            extensions.registerFunction ("getarmortype", 'l', "l", opcodeGetArmorType, opcodeGetArmorTypeExplicit);
+            extensions.registerFunction ("hasitemequipped", 'l', "c", opcodeHasItemEquipped, opcodeHasItemEquippedExplicit);
+            extensions.registerFunction ("hassoulgem", 'l', "c", opcodeHasSoulGem, opcodeHasSoulGemExplicit);
+            extensions.registerFunction ("getweapontype", 'l', "", opcodeGetWeaponType, opcodeGetWeaponTypeExplicit);
         }
 
         void installOpcodes (Interpreter::Interpreter& interpreter)
@@ -152,6 +343,16 @@ namespace MWScript
              interpreter.installSegment5 (opcodeGetItemCountExplicit, new OpGetItemCount<ExplicitRef>);
              interpreter.installSegment5 (opcodeRemoveItem, new OpRemoveItem<ImplicitRef>);
              interpreter.installSegment5 (opcodeRemoveItemExplicit, new OpRemoveItem<ExplicitRef>);
+             interpreter.installSegment5 (opcodeEquip, new OpEquip<ImplicitRef>);
+             interpreter.installSegment5 (opcodeEquipExplicit, new OpEquip<ExplicitRef>);
+             interpreter.installSegment5 (opcodeGetArmorType, new OpGetArmorType<ImplicitRef>);
+             interpreter.installSegment5 (opcodeGetArmorTypeExplicit, new OpGetArmorType<ExplicitRef>);
+             interpreter.installSegment5 (opcodeHasItemEquipped, new OpHasItemEquipped<ImplicitRef>);
+             interpreter.installSegment5 (opcodeHasItemEquippedExplicit, new OpHasItemEquipped<ExplicitRef>);
+             interpreter.installSegment5 (opcodeHasSoulGem, new OpHasSoulGem<ImplicitRef>);
+             interpreter.installSegment5 (opcodeHasSoulGemExplicit, new OpHasSoulGem<ExplicitRef>);
+             interpreter.installSegment5 (opcodeGetWeaponType, new OpGetWeaponType<ImplicitRef>);
+             interpreter.installSegment5 (opcodeGetWeaponTypeExplicit, new OpGetWeaponType<ExplicitRef>);
         }
     }
 }
