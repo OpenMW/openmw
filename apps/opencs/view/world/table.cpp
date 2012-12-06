@@ -107,8 +107,7 @@ void  CSVWorld::CommandDelegate::setEditLock (bool locked)
     mEditLock = locked;
 }
 
-
- void CSVWorld::Table::contextMenuEvent (QContextMenuEvent *event)
+void CSVWorld::Table::contextMenuEvent (QContextMenuEvent *event)
 {
     QModelIndexList selectedRows = selectionModel()->selectedRows();
 
@@ -117,13 +116,53 @@ void  CSVWorld::CommandDelegate::setEditLock (bool locked)
     if (mCreateAction)
         menu.addAction (mCreateAction);
 
-    if (selectedRows.size()>0)
+    if (listRevertableSelectedIds().size()>0)
         menu.addAction (mRevertAction);
 
-    if (selectedRows.size()>0)
+    if (listDeletableSelectedIds().size()>0)
         menu.addAction (mDeleteAction);
 
     menu.exec (event->globalPos());
+}
+
+std::vector<std::string> CSVWorld::Table::listRevertableSelectedIds() const
+{
+    QModelIndexList selectedRows = selectionModel()->selectedRows();
+
+    std::vector<std::string> revertableIds;
+
+    for (QModelIndexList::const_iterator iter (selectedRows.begin()); iter!=selectedRows.end(); ++iter)
+    {
+        std::string id = mProxyModel->data (*iter).toString().toStdString();
+
+        CSMWorld::RecordBase::State state =
+            static_cast<CSMWorld::RecordBase::State> (mModel->data (mModel->getModelIndex (id, 1)).toInt());
+
+        if (state!=CSMWorld::RecordBase::State_BaseOnly)
+            revertableIds.push_back (id);
+    }
+
+    return revertableIds;
+}
+
+std::vector<std::string> CSVWorld::Table::listDeletableSelectedIds() const
+{
+    QModelIndexList selectedRows = selectionModel()->selectedRows();
+
+    std::vector<std::string> deletableIds;
+
+    for (QModelIndexList::const_iterator iter (selectedRows.begin()); iter!=selectedRows.end(); ++iter)
+    {
+        std::string id = mProxyModel->data (*iter).toString().toStdString();
+
+        CSMWorld::RecordBase::State state =
+            static_cast<CSMWorld::RecordBase::State> (mModel->data (mModel->getModelIndex (id, 1)).toInt());
+
+        if (state!=CSMWorld::RecordBase::State_Deleted)
+            deletableIds.push_back (id);
+    }
+
+    return deletableIds;
 }
 
 CSVWorld::Table::Table (const CSMWorld::UniversalId& id, CSMWorld::Data& data, QUndoStack& undoStack,
@@ -189,20 +228,7 @@ void CSVWorld::Table::createRecord()
 
 void CSVWorld::Table::revertRecord()
 {
-    QModelIndexList selectedRows = selectionModel()->selectedRows();
-
-    std::vector<std::string> revertableIds;
-
-    for (QModelIndexList::const_iterator iter (selectedRows.begin()); iter!=selectedRows.end(); ++iter)
-    {
-        std::string id = mProxyModel->data (*iter).toString().toStdString();
-
-        CSMWorld::RecordBase::State state =
-            static_cast<CSMWorld::RecordBase::State> (mModel->data (mModel->getModelIndex (id, 1)).toInt());
-
-        if (state!=CSMWorld::RecordBase::State_BaseOnly)
-            revertableIds.push_back (id);
-    }
+    std::vector<std::string> revertableIds = listRevertableSelectedIds();
 
     if (revertableIds.size()>0)
     {
@@ -219,30 +245,17 @@ void CSVWorld::Table::revertRecord()
 
 void CSVWorld::Table::deleteRecord()
 {
-    QModelIndexList selectedRows = selectionModel()->selectedRows();
+    std::vector<std::string> deletableIds = listDeletableSelectedIds();
 
-    std::vector<std::string> revertableIds;
-
-    for (QModelIndexList::const_iterator iter (selectedRows.begin()); iter!=selectedRows.end(); ++iter)
+    if (deletableIds.size()>0)
     {
-        std::string id = mProxyModel->data (*iter).toString().toStdString();
-
-        CSMWorld::RecordBase::State state =
-            static_cast<CSMWorld::RecordBase::State> (mModel->data (mModel->getModelIndex (id, 1)).toInt());
-
-        if (state!=CSMWorld::RecordBase::State_Deleted)
-            revertableIds.push_back (id);
-    }
-
-    if (revertableIds.size()>0)
-    {
-        if (revertableIds.size()>1)
+        if (deletableIds.size()>1)
             mUndoStack.beginMacro (tr ("Delete multiple records"));
 
-        for (std::vector<std::string>::const_iterator iter (revertableIds.begin()); iter!=revertableIds.end(); ++iter)
+        for (std::vector<std::string>::const_iterator iter (deletableIds.begin()); iter!=deletableIds.end(); ++iter)
             mUndoStack.push (new CSMWorld::DeleteCommand (*mModel, *iter));
 
-        if (revertableIds.size()>1)
+        if (deletableIds.size()>1)
             mUndoStack.endMacro();
     }
 }

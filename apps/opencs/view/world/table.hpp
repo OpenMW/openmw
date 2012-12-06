@@ -2,6 +2,7 @@
 #define CSV_WORLD_TABLE_H
 
 #include <vector>
+#include <string>
 
 #include <QTableView>
 
@@ -36,6 +37,10 @@ namespace CSVWorld
         private:
 
             void contextMenuEvent (QContextMenuEvent *event);
+
+            std::vector<std::string> listRevertableSelectedIds() const;
+
+            std::vector<std::string> listDeletableSelectedIds() const;
 
         public:
 
