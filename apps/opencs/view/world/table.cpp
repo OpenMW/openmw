@@ -120,6 +120,9 @@ void  CSVWorld::CommandDelegate::setEditLock (bool locked)
     if (selectedRows.size()>0)
         menu.addAction (mRevertAction);
 
+    if (selectedRows.size()>0)
+        menu.addAction (mDeleteAction);
+
     menu.exec (event->globalPos());
 }
 
@@ -160,6 +163,10 @@ CSVWorld::Table::Table (const CSMWorld::UniversalId& id, CSMWorld::Data& data, Q
     mRevertAction = new QAction (tr ("Revert Record"), this);
     connect (mRevertAction, SIGNAL (triggered()), this, SLOT (revertRecord()));
     addAction (mRevertAction);
+
+    mDeleteAction = new QAction (tr ("Delete Record"), this);
+    connect (mDeleteAction, SIGNAL (triggered()), this, SLOT (deleteRecord()));
+    addAction (mDeleteAction);
 }
 
 void CSVWorld::Table::setEditLock (bool locked)
@@ -204,6 +211,36 @@ void CSVWorld::Table::revertRecord()
 
         for (std::vector<std::string>::const_iterator iter (revertableIds.begin()); iter!=revertableIds.end(); ++iter)
             mUndoStack.push (new CSMWorld::RevertCommand (*mModel, *iter));
+
+        if (revertableIds.size()>1)
+            mUndoStack.endMacro();
+    }
+}
+
+void CSVWorld::Table::deleteRecord()
+{
+    QModelIndexList selectedRows = selectionModel()->selectedRows();
+
+    std::vector<std::string> revertableIds;
+
+    for (QModelIndexList::const_iterator iter (selectedRows.begin()); iter!=selectedRows.end(); ++iter)
+    {
+        std::string id = mProxyModel->data (*iter).toString().toStdString();
+
+        CSMWorld::RecordBase::State state =
+            static_cast<CSMWorld::RecordBase::State> (mModel->data (mModel->getModelIndex (id, 1)).toInt());
+
+        if (state!=CSMWorld::RecordBase::State_Deleted)
+            revertableIds.push_back (id);
+    }
+
+    if (revertableIds.size()>0)
+    {
+        if (revertableIds.size()>1)
+            mUndoStack.beginMacro (tr ("Delete multiple records"));
+
+        for (std::vector<std::string>::const_iterator iter (revertableIds.begin()); iter!=revertableIds.end(); ++iter)
+            mUndoStack.push (new CSMWorld::DeleteCommand (*mModel, *iter));
 
         if (revertableIds.size()>1)
             mUndoStack.endMacro();

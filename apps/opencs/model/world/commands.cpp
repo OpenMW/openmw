@@ -73,3 +73,36 @@ void CSMWorld::RevertCommand::undo()
 {
     mModel.setRecord (*mOld);
 }
+
+CSMWorld::DeleteCommand::DeleteCommand (IdTable& model, const std::string& id, QUndoCommand *parent)
+: QUndoCommand (parent), mModel (model), mId (id), mOld (0)
+{
+    setText (("Delete record " + id).c_str());
+
+    mOld = model.getRecord (id).clone();
+}
+
+CSMWorld::DeleteCommand::~DeleteCommand()
+{
+    delete mOld;
+}
+
+void CSMWorld::DeleteCommand::redo()
+{
+    QModelIndex index = mModel.getModelIndex (mId, 1);
+    RecordBase::State state = static_cast<RecordBase::State> (mModel.data (index).toInt());
+
+    if (state==RecordBase::State_ModifiedOnly)
+    {
+        mModel.removeRows (index.row(), 1);
+    }
+    else
+    {
+        mModel.setData (index, static_cast<int> (RecordBase::State_Deleted));
+    }
+}
+
+void CSMWorld::DeleteCommand::undo()
+{
+    mModel.setRecord (*mOld);
+}

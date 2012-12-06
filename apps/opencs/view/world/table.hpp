@@ -29,6 +29,7 @@ namespace CSVWorld
             QUndoStack& mUndoStack;
             QAction *mCreateAction;
             QAction *mRevertAction;
+            QAction *mDeleteAction;
             CSMWorld::IdTableProxyModel *mProxyModel;
             CSMWorld::IdTable *mModel;
 
@@ -48,6 +49,8 @@ namespace CSVWorld
             void createRecord();
 
             void revertRecord();
+
+            void deleteRecord();
     };
 }
 

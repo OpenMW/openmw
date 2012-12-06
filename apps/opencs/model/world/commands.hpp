@@ -69,6 +69,27 @@ namespace CSMWorld
 
             virtual void undo();
     };
+
+    class DeleteCommand : public QUndoCommand
+    {
+            IdTable& mModel;
+            std::string mId;
+            RecordBase *mOld;
+
+            // not implemented
+            DeleteCommand (const DeleteCommand&);
+            DeleteCommand& operator= (const DeleteCommand&);
+
+        public:
+
+            DeleteCommand (IdTable& model, const std::string& id, QUndoCommand *parent = 0);
+
+            virtual ~DeleteCommand();
+
+            virtual void redo();
+
+            virtual void undo();
+    };
 }
 
 #endif
