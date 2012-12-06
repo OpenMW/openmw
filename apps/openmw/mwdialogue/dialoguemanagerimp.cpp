@@ -445,11 +445,9 @@ namespace MWDialogue
         else if (curDisp + mTemporaryDispositionChange > 100)
             mTemporaryDispositionChange = 100 - curDisp;
 
-        // practice skill
+        // practice skill, it doesn't need to be a success to use skill
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
-
-        if (success)
-            MWWorld::Class::get(player).skillUsageSucceeded(player, ESM::Skill::Speechcraft, 0);
+	MWWorld::Class::get(player).skillUsageSucceeded(player, ESM::Skill::Speechcraft, 0);
 
         // add status message to dialogue window
         std::string text;
