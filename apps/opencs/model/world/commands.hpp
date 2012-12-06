@@ -15,6 +15,8 @@ class QAbstractItemModel;
 namespace CSMWorld
 {
     class IdTableProxyModel;
+    class IdTable;
+    class RecordBase;
 
     class ModifyCommand : public QUndoCommand
     {
@@ -41,6 +43,27 @@ namespace CSMWorld
         public:
 
             CreateCommand (IdTableProxyModel& model, const std::string& id, QUndoCommand *parent = 0);
+
+            virtual void redo();
+
+            virtual void undo();
+    };
+
+    class RevertCommand : public QUndoCommand
+    {
+            IdTable& mModel;
+            std::string mId;
+            RecordBase *mOld;
+
+            // not implemented
+            RevertCommand (const RevertCommand&);
+            RevertCommand& operator= (const RevertCommand&);
+
+        public:
+
+            RevertCommand (IdTable& model, const std::string& id, QUndoCommand *parent = 0);
+
+            virtual ~RevertCommand();
 
             virtual void redo();
 

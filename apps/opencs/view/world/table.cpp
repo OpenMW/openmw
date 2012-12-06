@@ -11,6 +11,8 @@
 #include "../../model/world/data.hpp"
 #include "../../model/world/commands.hpp"
 #include "../../model/world/idtableproxymodel.hpp"
+#include "../../model/world/idtable.hpp"
+#include "../../model/world/record.hpp"
 
 namespace CSVWorld
 {
@@ -108,10 +110,15 @@ void  CSVWorld::CommandDelegate::setEditLock (bool locked)
 
  void CSVWorld::Table::contextMenuEvent (QContextMenuEvent *event)
 {
-     QMenu menu (this);
+    QModelIndexList selectedRows = selectionModel()->selectedRows();
+
+    QMenu menu (this);
 
     if (mCreateAction)
         menu.addAction (mCreateAction);
+
+    if (selectedRows.size()>0)
+        menu.addAction (mRevertAction);
 
     menu.exec (event->globalPos());
 }
@@ -120,9 +127,9 @@ CSVWorld::Table::Table (const CSMWorld::UniversalId& id, CSMWorld::Data& data, Q
     bool createAndDelete)
 : mUndoStack (undoStack), mCreateAction (0)
 {
-    QAbstractTableModel *model = data.getTableModel (id);
+    mModel = &dynamic_cast<CSMWorld::IdTable&> (*data.getTableModel (id));
 
-    int columns = model->columnCount();
+    int columns = mModel->columnCount();
 
     for (int i=0; i<columns; ++i)
     {
@@ -131,10 +138,10 @@ CSVWorld::Table::Table (const CSMWorld::UniversalId& id, CSMWorld::Data& data, Q
         setItemDelegateForColumn (i, delegate);
     }
 
-    mModel = new CSMWorld::IdTableProxyModel (this);
-    mModel->setSourceModel (model);
+    mProxyModel = new CSMWorld::IdTableProxyModel (this);
+    mProxyModel->setSourceModel (mModel);
 
-    setModel (mModel);
+    setModel (mProxyModel);
     horizontalHeader()->setResizeMode (QHeaderView::Interactive);
     verticalHeader()->hide();
     setSortingEnabled (true);
@@ -149,6 +156,10 @@ CSVWorld::Table::Table (const CSMWorld::UniversalId& id, CSMWorld::Data& data, Q
         connect (mCreateAction, SIGNAL (triggered()), this, SLOT (createRecord()));
         addAction (mCreateAction);
     }
+
+    mRevertAction = new QAction (tr ("Revert Record"), this);
+    connect (mRevertAction, SIGNAL (triggered()), this, SLOT (revertRecord()));
+    addAction (mRevertAction);
 }
 
 void CSVWorld::Table::setEditLock (bool locked)
@@ -166,5 +177,35 @@ void CSVWorld::Table::createRecord()
     std::ostringstream stream;
     stream << "id" << index++;
 
-    mUndoStack.push (new CSMWorld::CreateCommand (*mModel, stream.str()));
+    mUndoStack.push (new CSMWorld::CreateCommand (*mProxyModel, stream.str()));
+}
+
+void CSVWorld::Table::revertRecord()
+{
+    QModelIndexList selectedRows = selectionModel()->selectedRows();
+
+    std::vector<std::string> revertableIds;
+
+    for (QModelIndexList::const_iterator iter (selectedRows.begin()); iter!=selectedRows.end(); ++iter)
+    {
+        std::string id = mProxyModel->data (*iter).toString().toStdString();
+
+        CSMWorld::RecordBase::State state =
+            static_cast<CSMWorld::RecordBase::State> (mModel->data (mModel->getModelIndex (id, 1)).toInt());
+
+        if (state!=CSMWorld::RecordBase::State_BaseOnly)
+            revertableIds.push_back (id);
+    }
+
+    if (revertableIds.size()>0)
+    {
+        if (revertableIds.size()>1)
+            mUndoStack.beginMacro (tr ("Revert multiple records"));
+
+        for (std::vector<std::string>::const_iterator iter (revertableIds.begin()); iter!=revertableIds.end(); ++iter)
+            mUndoStack.push (new CSMWorld::RevertCommand (*mModel, *iter));
+
+        if (revertableIds.size()>1)
+            mUndoStack.endMacro();
+    }
 }

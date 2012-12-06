@@ -15,6 +15,18 @@ namespace CSMWorld
             State_Deleted = 3, // exists in base, but has been deleted
             State_Erased = 4 // does not exist at all (we mostly treat that the same way as deleted)
         };
+
+        State mState;
+
+        virtual ~RecordBase();
+
+        virtual RecordBase *clone() const = 0;
+
+        bool isDeleted() const;
+
+        bool isErased() const;
+
+        bool isModified() const;
     };
 
     template <typename ESXRecordT>
@@ -22,13 +34,8 @@ namespace CSMWorld
     {
         ESXRecordT mBase;
         ESXRecordT mModified;
-        State mState;
 
-        bool isDeleted() const;
-
-        bool isErased() const;
-
-        bool isModified() const;
+        virtual RecordBase *clone() const;
 
         const ESXRecordT& get() const;
         ///< Throws an exception, if the record is deleted.
@@ -44,21 +51,9 @@ namespace CSMWorld
     };
 
     template <typename ESXRecordT>
-    bool Record<ESXRecordT>::isDeleted() const
+    RecordBase *Record<ESXRecordT>::clone() const
     {
-        return mState==State_Deleted || mState==State_Erased;
-    }
-
-    template <typename ESXRecordT>
-    bool Record<ESXRecordT>::isErased() const
-    {
-        return mState==State_Erased;
-    }
-
-    template <typename ESXRecordT>
-    bool Record<ESXRecordT>::isModified() const
-    {
-        return mState==State_Modified || mState==State_ModifiedOnly;
+        return new Record<ESXRecordT> (*this);
     }
 
     template <typename ESXRecordT>

@@ -5,7 +5,7 @@ set (OPENCS_SRC
     model/doc/documentmanager.cpp model/doc/document.cpp
 
     model/world/universalid.cpp model/world/idcollection.cpp model/world/data.cpp model/world/idtable.cpp
-    model/world/commands.cpp model/world/idtableproxymodel.cpp
+    model/world/commands.cpp model/world/idtableproxymodel.cpp model/world/record.cpp
 
     view/doc/viewmanager.cpp view/doc/view.cpp view/doc/operations.cpp view/doc/operation.cpp
 

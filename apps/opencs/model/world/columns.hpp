@@ -57,9 +57,14 @@ namespace CSMWorld
             return static_cast<int> (record.mState);
         }
 
+        virtual void set (Record<ESXRecordT>& record, const QVariant& data)
+        {
+            record.mState = static_cast<RecordBase::State> (data.toInt());
+        }
+
         virtual bool isEditable() const
         {
-            return false;
+            return true;
         }
     };
 }

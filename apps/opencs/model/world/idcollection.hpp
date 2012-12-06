@@ -71,6 +71,25 @@ namespace CSMWorld
             virtual void removeRows (int index, int count) = 0;
 
             virtual void appendBlankRecord (const std::string& id) = 0;
+
+            virtual int searchId (const std::string& id) const = 0;
+            ////< Search record with \a id.
+            /// \return index of record (if found) or -1 (not found)
+
+            virtual void replace (int index, const RecordBase& record) = 0;
+            ///< If the record type does not match, an exception is thrown.
+            ///
+            /// \attention \a record must not change the ID.
+
+            virtual void appendRecord (const RecordBase& record) = 0;
+            ///< If the record type does not match, an exception is thrown.
+
+            virtual std::string getId (const RecordBase& record) const = 0;
+            ///< Return ID for \a record.
+            ///
+            /// \attention Throw san exception, if the type of \a record does not match.
+
+            virtual const RecordBase& getRecord (const std::string& id) const = 0;
     };
 
     ///< \brief Collection of ID-based records
@@ -119,6 +138,25 @@ namespace CSMWorld
             virtual void removeRows (int index, int count) ;
 
             virtual void appendBlankRecord (const std::string& id);
+
+            virtual int searchId (const std::string& id) const;
+            ////< Search record with \a id.
+            /// \return index of record (if found) or -1 (not found)
+
+            virtual void replace (int index, const RecordBase& record);
+            ///< If the record type does not match, an exception is thrown.
+            ///
+            /// \attention \a record must not change the ID.
+
+            virtual void appendRecord (const RecordBase& record);
+            ///< If the record type does not match, an exception is thrown.
+
+            virtual std::string getId (const RecordBase& record) const;
+            ///< Return ID for \a record.
+            ///
+            /// \attention Throw san exception, if the type of \a record does not match.
+
+            virtual const RecordBase& getRecord (const std::string& id) const;
 
             void addColumn (Column<ESXRecordT> *column);
     };
@@ -174,12 +212,12 @@ namespace CSMWorld
     template<typename ESXRecordT>
     int  IdCollection<ESXRecordT>::getIndex (const std::string& id) const
     {
-        std::map<std::string, int>::const_iterator iter = mIndex.find (id);
+        int index = searchId (id);
 
-        if (iter==mIndex.end())
+        if (index==-1)
             throw std::runtime_error ("invalid ID: " + id);
 
-        return iter->second;
+        return index;
     }
 
     template<typename ESXRecordT>
@@ -267,6 +305,49 @@ namespace CSMWorld
         record.mId = id;
         record.blank();
         add (record);
+    }
+
+    template<typename ESXRecordT>
+    int IdCollection<ESXRecordT>::searchId (const std::string& id) const
+    {
+        std::string id2;
+
+        std::transform (id.begin(), id.end(), std::back_inserter (id2),
+            (int(*)(int)) std::tolower);
+
+        std::map<std::string, int>::const_iterator iter = mIndex.find (id2);
+
+        if (iter==mIndex.end())
+            return -1;
+
+        return iter->second;
+    }
+
+    template<typename ESXRecordT>
+    void IdCollection<ESXRecordT>::replace (int index, const RecordBase& record)
+    {
+        mRecords.at (index) = dynamic_cast<const Record<ESXRecordT>&> (record);
+    }
+
+    template<typename ESXRecordT>
+    void IdCollection<ESXRecordT>::appendRecord (const RecordBase& record)
+    {
+        mRecords.push_back (dynamic_cast<const Record<ESXRecordT>&> (record));
+        mIndex.insert (std::make_pair (getId (record), mRecords.size()-1));
+    }
+
+    template<typename ESXRecordT>
+    std::string IdCollection<ESXRecordT>::getId (const RecordBase& record) const
+    {
+        const Record<ESXRecordT>& record2 = dynamic_cast<const Record<ESXRecordT>&> (record);
+        return (record2.isModified() ? record2.mModified : record2.mBase).mId;
+    }
+
+    template<typename ESXRecordT>
+    const RecordBase& IdCollection<ESXRecordT>::getRecord (const std::string& id) const
+    {
+        int index = getIndex (id);
+        return mRecords.at (index);
     }
 }
 

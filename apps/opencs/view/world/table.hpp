@@ -13,6 +13,7 @@ namespace CSMWorld
     class Data;
     class UniversalId;
     class IdTableProxyModel;
+    class IdTable;
 }
 
 namespace CSVWorld
@@ -27,7 +28,9 @@ namespace CSVWorld
             std::vector<CommandDelegate *> mDelegates;
             QUndoStack& mUndoStack;
             QAction *mCreateAction;
-            CSMWorld::IdTableProxyModel *mModel;
+            QAction *mRevertAction;
+            CSMWorld::IdTableProxyModel *mProxyModel;
+            CSMWorld::IdTable *mModel;
 
         private:
 
@@ -43,6 +46,8 @@ namespace CSVWorld
         private slots:
 
             void createRecord();
+
+            void revertRecord();
     };
 }
 

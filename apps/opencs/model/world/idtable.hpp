@@ -6,6 +6,7 @@
 namespace CSMWorld
 {
     class IdCollectionBase;
+    class RecordBase;
 
     class IdTable : public QAbstractTableModel
     {
@@ -41,6 +42,11 @@ namespace CSMWorld
             void addRecord (const std::string& id);
 
             QModelIndex getModelIndex (const std::string& id, int column) const;
+
+            void setRecord (const RecordBase& record);
+            ///< Add record or overwrite existing recrod.
+
+            const RecordBase& getRecord (const std::string& id) const;
     };
 }
 
