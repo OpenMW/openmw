@@ -7,13 +7,16 @@ CSMDoc::Document::Document (const std::string& name)
 
     connect (&mUndoStack, SIGNAL (cleanChanged (bool)), this, SLOT (modificationStateChanged (bool)));
 
+    connect (&mTools, SIGNAL (progress (int, int, int)), this, SLOT (progress (int, int, int)));
+    connect (&mTools, SIGNAL (done (int)), this, SLOT (operationDone (int)));
+
      // dummy implementation -> remove when proper save is implemented.
     mSaveCount = 0;
     connect (&mSaveTimer, SIGNAL(timeout()), this, SLOT (saving()));
 
      // dummy implementation -> remove when proper verify is implemented.
     mVerifyCount = 0;
-    connect (&mVerifyTimer, SIGNAL(timeout()), this, SLOT (verifying()));
+
 }
 
 QUndoStack& CSMDoc::Document::getUndoStack()
@@ -53,27 +56,31 @@ void CSMDoc::Document::save()
 void CSMDoc::Document::verify()
 {
     mVerifyCount = 1;
-    mVerifyTimer.start (500);
     emit stateChanged (getState(), this);
-    emit progress (1, 20, State_Verifying, 1, this);
+    mTools.runVerifier();
 }
 
 void CSMDoc::Document::abortOperation (int type)
 {
+    mTools.abortOperation (type);
+
     if (type==State_Saving)
     {
         mSaveTimer.stop();
-        emit stateChanged (getState(), this);
-    }
-    else if (type==State_Verifying)
-    {
-        mVerifyTimer.stop();
         emit stateChanged (getState(), this);
     }
 }
 
 void CSMDoc::Document::modificationStateChanged (bool clean)
 {
+    emit stateChanged (getState(), this);
+}
+
+void CSMDoc::Document::operationDone (int type)
+{
+    if (type==State_Verifying)
+        mVerifyCount = 0;
+
     emit stateChanged (getState(), this);
 }
 
@@ -92,20 +99,6 @@ void CSMDoc::Document::saving()
     }
 }
 
-void CSMDoc::Document::verifying()
-{
-    ++mVerifyCount;
-
-    emit progress (mVerifyCount, 20, State_Verifying, 1, this);
-
-    if (mVerifyCount>19)
-    {
-            mVerifyCount = 0;
-            mVerifyTimer.stop();
-            emit stateChanged (getState(), this);
-    }
-}
-
 const CSMWorld::Data& CSMDoc::Document::getData() const
 {
     return mData;
@@ -114,4 +107,9 @@ const CSMWorld::Data& CSMDoc::Document::getData() const
 CSMWorld::Data& CSMDoc::Document::getData()
 {
     return mData;
+}
+
+void CSMDoc::Document::progress (int current, int max, int type)
+{
+    emit progress (current, max, type, 1, this);
 }

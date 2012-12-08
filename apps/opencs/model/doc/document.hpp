@@ -9,6 +9,8 @@
 
 #include "../world/data.hpp"
 
+#include "../tools/tools.hpp"
+
 namespace CSMDoc
 {
     class Document : public QObject
@@ -32,12 +34,12 @@ namespace CSMDoc
             std::string mName; ///< \todo replace name with ESX list
             QUndoStack mUndoStack;
             CSMWorld::Data mData;
+            CSMTools::Tools mTools;
 
             int mSaveCount; ///< dummy implementation -> remove when proper save is implemented.
             QTimer mSaveTimer; ///< dummy implementation -> remove when proper save is implemented.
 
             int mVerifyCount; ///< dummy implementation -> remove when proper verify is implemented.
-            QTimer mVerifyTimer; ///< dummy implementation -> remove when proper verify is implemented.
 
             // not implemented
             Document (const Document&);
@@ -75,11 +77,14 @@ namespace CSMDoc
 
             void modificationStateChanged (bool clean);
 
+            void operationDone (int type);
+
             void saving();
             ///< dummy implementation -> remove when proper save is implemented.
 
-            void verifying();
-            ///< dummy implementation -> remove when proper verify is implemented.
+        public slots:
+
+            void progress (int current, int max, int type);
     };
 }
 
