@@ -117,12 +117,15 @@ float MWMechanics::NpcStats::getSkillGain (int skillIndex, const ESM::Class& cla
     if (usageType>=4)
         throw std::runtime_error ("skill usage type out of range");
 
-    if (usageType>0)
+    if (usageType>=0)
     {
         skillFactor = skill->mData.mUseValue[usageType];
 
         if (skillFactor<0)
             throw std::runtime_error ("invalid skill gain factor");
+
+        if (skillFactor==0)
+            return 0;
     }
 
     const MWWorld::Store<ESM::GameSetting> &gmst =
