@@ -121,7 +121,7 @@ float MWMechanics::NpcStats::getSkillGain (int skillIndex, const ESM::Class& cla
     {
         skillFactor = skill->mData.mUseValue[usageType];
 
-        if (skillFactor<=0)
+        if (skillFactor<0)
             throw std::runtime_error ("invalid skill gain factor");
     }
 
