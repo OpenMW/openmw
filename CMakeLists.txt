@@ -15,7 +15,7 @@ include (OpenMWMacros)
 # Version
 
 set (OPENMW_VERSION_MAJOR 0)
-set (OPENMW_VERSION_MINOR 19)
+set (OPENMW_VERSION_MINOR 20)
 set (OPENMW_VERSION_RELEASE 0)
 
 set (OPENMW_VERSION "${OPENMW_VERSION_MAJOR}.${OPENMW_VERSION_MINOR}.${OPENMW_VERSION_RELEASE}")
@@ -244,7 +244,7 @@ if (APPLE)
     else ()
         set(OGRE_PLUGIN_DIR ${OGRE_PLUGIN_DIR_DBG})
     endif ()
-    
+
     #set(OGRE_PLUGIN_DIR "${OGRE_PLUGIN_DIR}/")
 
     configure_file(${OpenMW_SOURCE_DIR}/files/mac/Info.plist
