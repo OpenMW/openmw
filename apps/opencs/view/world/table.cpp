@@ -113,14 +113,19 @@ void CSVWorld::Table::contextMenuEvent (QContextMenuEvent *event)
 
     QMenu menu (this);
 
-    if (mCreateAction)
-        menu.addAction (mCreateAction);
+    ///  \todo add menu items for select all and clear selection
 
-    if (listRevertableSelectedIds().size()>0)
-        menu.addAction (mRevertAction);
+    if (!mEditLock)
+    {
+        if (mCreateAction)
+            menu.addAction (mCreateAction);
 
-    if (listDeletableSelectedIds().size()>0)
-        menu.addAction (mDeleteAction);
+        if (listRevertableSelectedIds().size()>0)
+            menu.addAction (mRevertAction);
+
+        if (listDeletableSelectedIds().size()>0)
+            menu.addAction (mDeleteAction);
+    }
 
     menu.exec (event->globalPos());
 }
@@ -167,7 +172,7 @@ std::vector<std::string> CSVWorld::Table::listDeletableSelectedIds() const
 
 CSVWorld::Table::Table (const CSMWorld::UniversalId& id, CSMWorld::Data& data, QUndoStack& undoStack,
     bool createAndDelete)
-: mUndoStack (undoStack), mCreateAction (0)
+: mUndoStack (undoStack), mCreateAction (0), mEditLock (false)
 {
     mModel = &dynamic_cast<CSMWorld::IdTable&> (*data.getTableModel (id));
 
@@ -212,50 +217,61 @@ void CSVWorld::Table::setEditLock (bool locked)
 {
     for (std::vector<CommandDelegate *>::iterator iter (mDelegates.begin()); iter!=mDelegates.end(); ++iter)
         (*iter)->setEditLock (locked);
+
+    mEditLock = locked;
 }
 
 #include <sstream> /// \todo remove
 void CSVWorld::Table::createRecord()
 {
-    /// \todo ask the user for an ID instead.
-    static int index = 0;
+    if (!mEditLock)
+    {
+        /// \todo ask the user for an ID instead.
+        static int index = 0;
 
-    std::ostringstream stream;
-    stream << "id" << index++;
+        std::ostringstream stream;
+        stream << "id" << index++;
 
-    mUndoStack.push (new CSMWorld::CreateCommand (*mProxyModel, stream.str()));
+        mUndoStack.push (new CSMWorld::CreateCommand (*mProxyModel, stream.str()));
+    }
 }
 
 void CSVWorld::Table::revertRecord()
 {
-    std::vector<std::string> revertableIds = listRevertableSelectedIds();
-
-    if (revertableIds.size()>0)
+    if (!mEditLock)
     {
-        if (revertableIds.size()>1)
-            mUndoStack.beginMacro (tr ("Revert multiple records"));
+        std::vector<std::string> revertableIds = listRevertableSelectedIds();
 
-        for (std::vector<std::string>::const_iterator iter (revertableIds.begin()); iter!=revertableIds.end(); ++iter)
-            mUndoStack.push (new CSMWorld::RevertCommand (*mModel, *iter));
+        if (revertableIds.size()>0)
+        {
+            if (revertableIds.size()>1)
+                mUndoStack.beginMacro (tr ("Revert multiple records"));
 
-        if (revertableIds.size()>1)
-            mUndoStack.endMacro();
+            for (std::vector<std::string>::const_iterator iter (revertableIds.begin()); iter!=revertableIds.end(); ++iter)
+                mUndoStack.push (new CSMWorld::RevertCommand (*mModel, *iter));
+
+            if (revertableIds.size()>1)
+                mUndoStack.endMacro();
+        }
     }
 }
 
 void CSVWorld::Table::deleteRecord()
 {
-    std::vector<std::string> deletableIds = listDeletableSelectedIds();
-
-    if (deletableIds.size()>0)
+    if (!mEditLock)
     {
-        if (deletableIds.size()>1)
-            mUndoStack.beginMacro (tr ("Delete multiple records"));
+        std::vector<std::string> deletableIds = listDeletableSelectedIds();
 
-        for (std::vector<std::string>::const_iterator iter (deletableIds.begin()); iter!=deletableIds.end(); ++iter)
-            mUndoStack.push (new CSMWorld::DeleteCommand (*mModel, *iter));
+        if (deletableIds.size()>0)
+        {
+            if (deletableIds.size()>1)
+                mUndoStack.beginMacro (tr ("Delete multiple records"));
 
-        if (deletableIds.size()>1)
-            mUndoStack.endMacro();
+            for (std::vector<std::string>::const_iterator iter (deletableIds.begin()); iter!=deletableIds.end(); ++iter)
+                mUndoStack.push (new CSMWorld::DeleteCommand (*mModel, *iter));
+
+            if (deletableIds.size()>1)
+                mUndoStack.endMacro();
+        }
     }
 }

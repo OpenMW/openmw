@@ -33,6 +33,7 @@ namespace CSVWorld
             QAction *mDeleteAction;
             CSMWorld::IdTableProxyModel *mProxyModel;
             CSMWorld::IdTable *mModel;
+            bool mEditLock;
 
         private:
 
