@@ -7,6 +7,10 @@
 
 #include "../doc/state.hpp"
 
+#include "../world/data.hpp"
+
+#include "mandatoryid.hpp"
+
 CSMTools::Operation *CSMTools::Tools::get (int type)
 {
     switch (type)
@@ -32,12 +36,25 @@ CSMTools::Verifier *CSMTools::Tools::getVerifier()
         connect (mVerifier, SIGNAL (finished()), this, SLOT (verifierDone()));
         connect (mVerifier, SIGNAL (reportMessage (const QString&, int)),
             this, SLOT (verifierMessage (const QString&, int)));
+
+        std::vector<std::string> mandatoryIds; //  I want C++11, damn it!
+        mandatoryIds.push_back ("Day");
+        mandatoryIds.push_back ("DaysPassed");
+        mandatoryIds.push_back ("GameHour");
+        mandatoryIds.push_back ("Month");
+        mandatoryIds.push_back ("PCRace");
+        mandatoryIds.push_back ("PCVampire");
+        mandatoryIds.push_back ("PCWerewolf");
+        mandatoryIds.push_back ("PCYear");
+
+        mVerifier->appendStage (new MandatoryIdStage (mData.getGlobals(),
+            CSMWorld::UniversalId (CSMWorld::UniversalId::Type_Globals), mandatoryIds));
     }
 
     return mVerifier;
 }
 
-CSMTools::Tools::Tools() : mVerifier (0)
+CSMTools::Tools::Tools (CSMWorld::Data& data) : mData (data), mVerifier (0)
 {
 
 }

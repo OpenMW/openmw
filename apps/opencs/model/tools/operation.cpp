@@ -19,8 +19,8 @@ void CSMTools::Operation::prepareStages()
 
     for (std::vector<std::pair<Stage *, int> >::iterator iter (mStages.begin()); iter!=mStages.end(); ++iter)
     {
-        iter->second = mTotalSteps;
-        mTotalSteps += iter->first->setup();
+        iter->second = iter->first->setup();
+        mTotalSteps += iter->second;
     }
 }
 

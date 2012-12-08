@@ -3,6 +3,11 @@
 
 #include <QObject>
 
+namespace CSMWorld
+{
+    class Data;
+}
+
 namespace CSMTools
 {
     class Verifier;
@@ -12,6 +17,7 @@ namespace CSMTools
     {
             Q_OBJECT
 
+            CSMWorld::Data& mData;
             Verifier *mVerifier;
 
             // not implemented
@@ -28,7 +34,7 @@ namespace CSMTools
 
         public:
 
-            Tools();
+            Tools (CSMWorld::Data& data);
 
             virtual ~Tools();
 

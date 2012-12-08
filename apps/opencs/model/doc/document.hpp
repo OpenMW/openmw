@@ -22,9 +22,12 @@ namespace CSMDoc
         private:
 
             std::string mName; ///< \todo replace name with ESX list
-            QUndoStack mUndoStack;
             CSMWorld::Data mData;
             CSMTools::Tools mTools;
+
+            // It is important that the undo stack is declared last, because on desctruction it fires a signal, that is connected to a slot, that is
+            // using other member variables.  Unfortunately this connection is cut only in the QObject destructor, which is way too late.
+            QUndoStack mUndoStack;
 
             int mSaveCount; ///< dummy implementation -> remove when proper save is implemented.
             QTimer mSaveTimer; ///< dummy implementation -> remove when proper save is implemented.

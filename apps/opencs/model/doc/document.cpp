@@ -2,6 +2,7 @@
 #include "document.hpp"
 
 CSMDoc::Document::Document (const std::string& name)
+: mTools (mData)
 {
     mName = name; ///< \todo replace with ESX list
 

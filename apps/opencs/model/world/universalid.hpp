@@ -44,6 +44,8 @@ namespace CSMWorld
 
         public:
 
+            UniversalId (const std::string& universalId);
+
             UniversalId (Type type = Type_None);
             ///< Using a type for a non-argument-less UniversalId will throw an exception.
 
