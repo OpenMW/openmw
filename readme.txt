@@ -94,6 +94,36 @@ Allowed options:
 
 CHANGELOG
 
+0.20.0
+
+Bug #366: Changing the player's race during character creation does not change the look of the player character
+Bug #430: Teleporting and using loading doors linking within the same cell reloads the cell
+Bug #437: Stop animations when paused
+Bug #438: Time displays as "0 a.m." when it should be "12 a.m."
+Bug #439: Text in "name" field of potion/spell creation window is persistent
+Bug #440: Starting date at a new game is off by one day
+Bug #442: Console window doesn't close properly sometimes
+Bug #448: Do not break container window formatting when item names are very long
+Bug #458: Topics sometimes not automatically added to known topic list
+Bug #476: Auto-Moving allows player movement after using DisablePlayerControls
+Bug #478: After sleeping in a bed the rest dialogue window opens automtically again
+Bug #492: On creating potions the ingredients are removed twice
+Feature #63: Mercantile skill
+Feature #82: Persuasion Dialogue
+Feature #219: Missing dialogue filters/functions
+Feature #369: Add a FailedAction
+Feature #377: Select head/hair on character creation
+Feature #391: Dummy AI package classes
+Feature #435: Global Map, 2nd Layer
+Feature #450: Persuasion
+Feature #457: Add more script instructions
+Feature #474: update the global variable pcrace when the player's race is changed
+Task #158: Move dynamically generated classes from Player class to World Class
+Task #159: ESMStore rework and cleanup
+Task #163: More Component Namespace Cleanup
+Task #402: Move player data from MWWorld::Player to the player's NPC record
+Task #446: Fix no namespace in BulletShapeLoader
+
 0.19.0
 
 Bug #374: Character shakes in 3rd person mode near the origin
