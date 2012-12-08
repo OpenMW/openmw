@@ -43,6 +43,8 @@ namespace CSMTools
 
             void verifierDone();
 
+            void verifierMessage (const QString& message, int type);
+
         signals:
 
             void progress (int current, int max, int type);

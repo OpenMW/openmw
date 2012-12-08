@@ -30,6 +30,8 @@ CSMTools::Verifier *CSMTools::Tools::getVerifier()
 
         connect (mVerifier, SIGNAL (progress (int, int, int)), this, SIGNAL (progress (int, int, int)));
         connect (mVerifier, SIGNAL (finished()), this, SLOT (verifierDone()));
+        connect (mVerifier, SIGNAL (reportMessage (const QString&, int)),
+            this, SLOT (verifierMessage (const QString&, int)));
     }
 
     return mVerifier;
@@ -77,4 +79,12 @@ int CSMTools::Tools::getRunningOperations() const
 void CSMTools::Tools::verifierDone()
 {
     emit done (CSMDoc::State_Verifying);
+}
+
+#include <iostream>
+void CSMTools::Tools::verifierMessage (const QString& message, int type)
+{
+    /// \todo store it in a result model instead
+
+    std::cout << message.toStdString() << std::endl;
 }

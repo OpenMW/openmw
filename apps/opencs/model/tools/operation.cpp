@@ -1,6 +1,9 @@
 
 #include "operation.hpp"
 
+#include <string>
+#include <vector>
+
 #include <QTimer>
 
 #include "../doc/state.hpp"
@@ -54,6 +57,8 @@ void CSMTools::Operation::abort()
 
 void CSMTools::Operation::verify()
 {
+    std::vector<std::string> messages;
+
     while (mCurrentStage!=mStages.end())
     {
         if (mCurrentStep>=mCurrentStage->second)
@@ -63,13 +68,16 @@ void CSMTools::Operation::verify()
         }
         else
         {
-            mCurrentStage->first->perform (mCurrentStep++);
+            mCurrentStage->first->perform (mCurrentStep++, messages);
             ++mCurrentStepTotal;
             break;
         }
     }
 
     emit progress (mCurrentStepTotal, mTotalSteps ? mTotalSteps : 1, mType);
+
+    for (std::vector<std::string>::const_iterator iter (messages.begin()); iter!=messages.end(); ++iter)
+        emit reportMessage (iter->c_str(), mType);
 
     if (mCurrentStage==mStages.end())
         exit();

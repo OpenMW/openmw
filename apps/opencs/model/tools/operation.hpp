@@ -39,6 +39,8 @@ namespace CSMTools
 
             void progress (int current, int max, int type);
 
+            void reportMessage (const QString& message, int type);
+
         public slots:
 
             void abort();
