@@ -16,7 +16,6 @@ CSMDoc::Document::Document (const std::string& name)
 
      // dummy implementation -> remove when proper verify is implemented.
     mVerifyCount = 0;
-
 }
 
 QUndoStack& CSMDoc::Document::getUndoStack()
@@ -32,10 +31,10 @@ int CSMDoc::Document::getState() const
         state |= State_Modified;
 
     if (mSaveCount)
-        state |= State_Locked | State_Saving;
+        state |= State_Locked | State_Saving | State_Operation;
 
     if (mVerifyCount)
-        state |= State_Locked | State_Verifying;
+        state |= State_Locked | State_Verifying | State_Operation;
 
     return state;
 }

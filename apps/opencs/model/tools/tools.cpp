@@ -5,7 +5,7 @@
 
 #include "verifier.hpp"
 
-#include "../doc/document.hpp"
+#include "../doc/state.hpp"
 
 CSMTools::Verifier *CSMTools::Tools::getVerifier()
 {
@@ -42,5 +42,5 @@ void CSMTools::Tools::abortOperation (int type)
 
 void CSMTools::Tools::verifierDone()
 {
-    emit done (CSMDoc::Document::State_Verifying);
+    emit done (CSMDoc::State_Verifying);
 }

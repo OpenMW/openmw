@@ -3,7 +3,7 @@
 
 #include <QTimer>
 
-#include "../doc/document.hpp"
+#include "../doc/state.hpp"
 
 void CSMTools::Verifier::run()
 {
@@ -26,7 +26,7 @@ void CSMTools::Verifier::abort()
 void CSMTools::Verifier::verify()
 {
     ++mStep;
-    emit progress (mStep, 1000, CSMDoc::Document::State_Verifying);
+    emit progress (mStep, 1000, CSMDoc::State_Verifying);
 
     if (mStep>=1000)
         exit();

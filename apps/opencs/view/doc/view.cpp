@@ -83,7 +83,7 @@ void CSVDoc::View::updateTitle()
 
     stream << mDocument->getName();
 
-    if (mDocument->getState() & CSMDoc::Document::State_Modified)
+    if (mDocument->getState() & CSMDoc::State_Modified)
             stream << " *";
 
     if (mViewTotal>1)
@@ -94,7 +94,7 @@ void CSVDoc::View::updateTitle()
 
 void CSVDoc::View::updateActions()
 {
-    bool editing = !(mDocument->getState() & CSMDoc::Document::State_Locked);
+    bool editing = !(mDocument->getState() & CSMDoc::State_Locked);
 
     for (std::vector<QAction *>::iterator iter (mEditingActions.begin()); iter!=mEditingActions.end(); ++iter)
         (*iter)->setEnabled (editing);
@@ -102,8 +102,8 @@ void CSVDoc::View::updateActions()
     mUndo->setEnabled (editing & mDocument->getUndoStack().canUndo());
     mRedo->setEnabled (editing & mDocument->getUndoStack().canRedo());
 
-    mSave->setEnabled (!(mDocument->getState() & CSMDoc::Document::State_Saving));
-    mVerify->setEnabled (!(mDocument->getState() & CSMDoc::Document::State_Verifying));
+    mSave->setEnabled (!(mDocument->getState() & CSMDoc::State_Saving));
+    mVerify->setEnabled (!(mDocument->getState() & CSMDoc::State_Verifying));
 }
 
 CSVDoc::View::View (ViewManager& viewManager, CSMDoc::Document *document, int totalViews)
@@ -155,7 +155,7 @@ void CSVDoc::View::updateDocumentState()
 
     static const int operations[] =
     {
-        CSMDoc::Document::State_Saving, CSMDoc::Document::State_Verifying,
+        CSMDoc::State_Saving, CSMDoc::State_Verifying,
         -1 // end marker
     };
 
@@ -168,7 +168,7 @@ void CSVDoc::View::updateDocumentState()
     QList<CSVWorld::SubView *> subViews = findChildren<CSVWorld::SubView *>();
 
     for (QList<CSVWorld::SubView *>::iterator iter (subViews.begin()); iter!=subViews.end(); ++iter)
-        (*iter)->setEditLock (state & CSMDoc::Document::State_Locked);
+        (*iter)->setEditLock (state & CSMDoc::State_Locked);
 }
 
 void CSVDoc::View::updateProgress (int current, int max, int type, int threads)

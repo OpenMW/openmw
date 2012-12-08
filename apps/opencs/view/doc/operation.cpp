@@ -13,8 +13,8 @@ void CSVDoc::Operation::updateLabel (int threads)
 
         switch (mType)
         {
-            case CSMDoc::Document::State_Saving: name = "saving"; break;
-            case CSMDoc::Document::State_Verifying: name = "verifying"; break;
+            case CSMDoc::State_Saving: name = "saving"; break;
+            case CSMDoc::State_Verifying: name = "verifying"; break;
         }
 
         std::ostringstream stream;

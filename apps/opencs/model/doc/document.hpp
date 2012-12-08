@@ -11,23 +11,13 @@
 
 #include "../tools/tools.hpp"
 
+#include "state.hpp"
+
 namespace CSMDoc
 {
     class Document : public QObject
     {
             Q_OBJECT
-
-        public:
-
-            enum State
-            {
-                    State_Modified = 1,
-                    State_Locked = 2,
-                    State_Saving = 4,
-                    State_Verifying = 8,
-                    State_Compiling = 16, // not implemented yet
-                    State_Searching = 32 // not implemented yet
-            };
 
         private:
 

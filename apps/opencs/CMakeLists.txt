@@ -17,7 +17,7 @@ set (OPENCS_SRC
 set (OPENCS_HDR
     editor.hpp
 
-    model/doc/documentmanager.hpp model/doc/document.hpp
+    model/doc/documentmanager.hpp model/doc/document.hpp model/doc/state.hpp
 
     model/world/universalid.hpp model/world/record.hpp model/world/idcollection.hpp model/world/data.hpp
     model/world/idtable.hpp model/world/columns.hpp model/world/idtableproxymodel.hpp
