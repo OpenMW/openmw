@@ -13,9 +13,6 @@ CSMDoc::Document::Document (const std::string& name)
      // dummy implementation -> remove when proper save is implemented.
     mSaveCount = 0;
     connect (&mSaveTimer, SIGNAL(timeout()), this, SLOT (saving()));
-
-     // dummy implementation -> remove when proper verify is implemented.
-    mVerifyCount = 0;
 }
 
 QUndoStack& CSMDoc::Document::getUndoStack()
@@ -33,8 +30,8 @@ int CSMDoc::Document::getState() const
     if (mSaveCount)
         state |= State_Locked | State_Saving | State_Operation;
 
-    if (mVerifyCount)
-        state |= State_Locked | State_Verifying | State_Operation;
+    if (int operations = mTools.getRunningOperations())
+        state |= State_Locked | State_Operation | operations;
 
     return state;
 }
@@ -54,9 +51,8 @@ void CSMDoc::Document::save()
 
 void CSMDoc::Document::verify()
 {
-    mVerifyCount = 1;
-    emit stateChanged (getState(), this);
     mTools.runVerifier();
+    emit stateChanged (getState(), this);
 }
 
 void CSMDoc::Document::abortOperation (int type)
@@ -77,9 +73,6 @@ void CSMDoc::Document::modificationStateChanged (bool clean)
 
 void CSMDoc::Document::operationDone (int type)
 {
-    if (type==State_Verifying)
-        mVerifyCount = 0;
-
     emit stateChanged (getState(), this);
 }
 

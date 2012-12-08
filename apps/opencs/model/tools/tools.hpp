@@ -6,6 +6,7 @@
 namespace CSMTools
 {
     class Verifier;
+    class Operation;
 
     class Tools : public QObject
     {
@@ -19,6 +20,12 @@ namespace CSMTools
 
             Verifier *getVerifier();
 
+            Operation *get (int type);
+            ///< Returns a 0-pointer, if operation hasn't been used yet.
+
+            const Operation *get (int type) const;
+            ///< Returns a 0-pointer, if operation hasn't been used yet.
+
         public:
 
             Tools();
@@ -29,6 +36,8 @@ namespace CSMTools
 
             void abortOperation (int type);
             ///< \attention The operation is not aborted immediately.
+
+            int getRunningOperations() const;
 
         private slots:
 

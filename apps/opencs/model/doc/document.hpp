@@ -29,8 +29,6 @@ namespace CSMDoc
             int mSaveCount; ///< dummy implementation -> remove when proper save is implemented.
             QTimer mSaveTimer; ///< dummy implementation -> remove when proper save is implemented.
 
-            int mVerifyCount; ///< dummy implementation -> remove when proper verify is implemented.
-
             // not implemented
             Document (const Document&);
             Document& operator= (const Document&);
