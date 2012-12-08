@@ -1,33 +1,17 @@
 #ifndef CSM_TOOLS_VERIFIER_H
 #define CSM_TOOLS_VERIFIER_H
 
-#include <QThread>
+#include "operation.hpp"
 
 namespace CSMTools
 {
-    class Verifier : public QThread
+    class Verifier : public Operation
     {
-            Q_OBJECT
-
-            int mStep;
-
         public:
 
-            virtual void run();
+            Verifier();
 
-        signals:
-
-            void progress (int current, int max, int type);
-
-        public slots:
-
-            void abort();
-
-        private slots:
-
-            void verify();
     };
-
 }
 
 #endif
