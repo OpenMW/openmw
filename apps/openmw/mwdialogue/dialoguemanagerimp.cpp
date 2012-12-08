@@ -238,6 +238,44 @@ namespace MWDialogue
         }
     }
 
+    void DialogueManager::executeTopic (const std::string& topic)
+    {
+        Filter filter (mActor, mChoice, mTalkedTo);
+
+        const MWWorld::Store<ESM::Dialogue> &dialogues =
+            MWBase::Environment::get().getWorld()->getStore().get<ESM::Dialogue>();
+
+        const ESM::Dialogue& dialogue = *dialogues.find (topic);
+
+        if (const ESM::DialInfo *info = filter.search (dialogue))
+        {
+            parseText (info->mResponse);
+
+            MWGui::DialogueWindow* win = MWBase::Environment::get().getWindowManager()->getDialogueWindow();
+
+            if (dialogue.mType==ESM::Dialogue::Persuasion)
+            {
+                std::string modifiedTopic = "s" + topic;
+
+                modifiedTopic.erase (std::remove (modifiedTopic.begin(), modifiedTopic.end(), ' '), modifiedTopic.end());
+
+                const MWWorld::Store<ESM::GameSetting>& gmsts =
+                    MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+
+                win->addTitle (gmsts.find (modifiedTopic)->getString());
+            }
+            else
+                win->addTitle (topic);
+
+            win->addText (info->mResponse);
+
+            executeScript (info->mResultScript);
+
+            mLastTopic = topic;
+            mLastDialogue = *info;
+        }
+    }
+
     void DialogueManager::updateTopics()
     {
         std::list<std::string> keywordList;
@@ -332,24 +370,7 @@ namespace MWDialogue
                 ESM::Dialogue ndialogue = mDialogueMap[keyword];
                 if (mDialogueMap[keyword].mType == ESM::Dialogue::Topic)
                 {
-                    Filter filter (mActor, mChoice, mTalkedTo);
-
-                    if (const ESM::DialInfo *info = filter.search (mDialogueMap[keyword]))
-                    {
-                        std::string text = info->mResponse;
-                        std::string script = info->mResultScript;
-
-                        parseText (text);
-
-                        MWGui::DialogueWindow* win = MWBase::Environment::get().getWindowManager()->getDialogueWindow();
-                        win->addTitle (keyword);
-                        win->addText (info->mResponse);
-
-                        executeScript (script);
-
-                        mLastTopic = keyword;
-                        mLastDialogue = *info;
-                    }
+                    executeTopic (keyword);
                 }
             }
         }
@@ -445,28 +466,22 @@ namespace MWDialogue
         else if (curDisp + mTemporaryDispositionChange > 100)
             mTemporaryDispositionChange = 100 - curDisp;
 
-        // add status message to dialogue window
-        std::string text;
-
-        if (type == MWBase::MechanicsManager::PT_Admire)
-            text = "sAdmire";
-        else if (type == MWBase::MechanicsManager::PT_Taunt)
-            text = "sTaunt";
-        else if (type == MWBase::MechanicsManager::PT_Intimidate)
-            text = "sIntimidate";
-        else{
-            text = "sBribe";
-        }
-
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
         MWWorld::Class::get(player).skillUsageSucceeded(player, ESM::Skill::Speechcraft, success ? 0 : 1);
 
-        text += (success ? "Success" : "Fail");
+        std::string text;
 
-        MWGui::DialogueWindow* win = MWBase::Environment::get().getWindowManager()->getDialogueWindow();
-        win->addTitle(MyGUI::LanguageManager::getInstance().replaceTags("#{"+text+"}"));
+        if (type == MWBase::MechanicsManager::PT_Admire)
+            text = "Admire";
+        else if (type == MWBase::MechanicsManager::PT_Taunt)
+            text = "Taunt";
+        else if (type == MWBase::MechanicsManager::PT_Intimidate)
+            text = "Intimidate";
+        else{
+            text = "Bribe";
+        }
 
-        /// \todo text from INFO record, how to get the ID?
+        executeTopic (text + (success ? " Success" : " Fail"));
     }
 
     int DialogueManager::getTemporaryDispositionChange() const
