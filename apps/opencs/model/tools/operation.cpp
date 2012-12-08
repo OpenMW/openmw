@@ -5,11 +5,33 @@
 
 #include "../doc/state.hpp"
 
+#include "stage.hpp"
+
+void CSMTools::Operation::prepareStages()
+{
+    mCurrentStage = mStages.begin();
+    mCurrentStep = 0;
+    mCurrentStepTotal = 0;
+    mTotalSteps = 0;
+
+    for (std::vector<std::pair<Stage *, int> >::iterator iter (mStages.begin()); iter!=mStages.end(); ++iter)
+    {
+        iter->second = mTotalSteps;
+        mTotalSteps += iter->first->setup();
+    }
+}
+
 CSMTools::Operation::Operation (int type) : mType (type) {}
+
+CSMTools::Operation::~Operation()
+{
+    for (std::vector<std::pair<Stage *, int> >::iterator iter (mStages.begin()); iter!=mStages.end(); ++iter)
+        delete iter->first;
+}
 
 void CSMTools::Operation::run()
 {
-    mStep = 0;
+    prepareStages();
 
     QTimer timer;
 
@@ -20,6 +42,11 @@ void CSMTools::Operation::run()
     exec();
 }
 
+void CSMTools::Operation::appendStage (Stage *stage)
+{
+    mStages.push_back (std::make_pair (stage, 0));
+}
+
 void CSMTools::Operation::abort()
 {
     exit();
@@ -27,9 +54,23 @@ void CSMTools::Operation::abort()
 
 void CSMTools::Operation::verify()
 {
-    ++mStep;
-    emit progress (mStep, 1000, mType);
+    while (mCurrentStage!=mStages.end())
+    {
+        if (mCurrentStep>=mCurrentStage->second)
+        {
+            mCurrentStep = 0;
+            ++mCurrentStage;
+        }
+        else
+        {
+            mCurrentStage->first->perform (mCurrentStep++);
+            ++mCurrentStepTotal;
+            break;
+        }
+    }
 
-    if (mStep>=1000)
+    emit progress (mCurrentStepTotal, mTotalSteps ? mTotalSteps : 1, mType);
+
+    if (mCurrentStage==mStages.end())
         exit();
 }
