@@ -17,5 +17,5 @@ void CSMTools::MandatoryIdStage::perform (int stage, std::vector<std::string>& m
 {
     if (mIdCollection.searchId (mIds.at (stage))==-1 ||
         mIdCollection.getRecord (mIds.at (stage)).isDeleted())
-        messages.push_back (mCollectionId.toString() + " Missing mandatory record: " + mIds.at (stage));
+        messages.push_back (mCollectionId.toString() + "|Missing mandatory record: " + mIds.at (stage));
 }

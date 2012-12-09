@@ -43,39 +43,44 @@ CSMWorld::UniversalId::UniversalId (const std::string& universalId)
     {
         std::string type = universalId.substr (0, index);
 
-        for (int i=0; sNoArg[i].mName; ++i)
-            if (type==sNoArg[i].mName)
-            {
-                mArgumentType = ArgumentType_None;
-                mType = sNoArg[i].mType;
-                mClass = sNoArg[i].mClass;
-                return;
-            }
-
-        for (int i=0; sIdArg[i].mName; ++i)
-            if (type==sIdArg[i].mName)
-            {
-                mArgumentType = ArgumentType_Id;
-                mType = sIdArg[i].mType;
-                mClass = sIdArg[i].mClass;
-                mId = universalId.substr (0, index);
-                return;
-            }
-
-        for (int i=0; sIndexArg[i].mName; ++i)
-            if (type==sIndexArg[i].mName)
-            {
-                mArgumentType = ArgumentType_Index;
-                mType = sIndexArg[i].mType;
-                mClass = sIndexArg[i].mClass;
-
-                std::istringstream stream (universalId.substr (0, index));
-
-                if (stream >> mIndex)
+        if (index==std::string::npos)
+        {
+            for (int i=0; sNoArg[i].mName; ++i)
+                if (type==sNoArg[i].mName)
+                {
+                    mArgumentType = ArgumentType_None;
+                    mType = sNoArg[i].mType;
+                    mClass = sNoArg[i].mClass;
                     return;
+                }
+        }
+        else
+        {
+            for (int i=0; sIdArg[i].mName; ++i)
+                if (type==sIdArg[i].mName)
+                {
+                    mArgumentType = ArgumentType_Id;
+                    mType = sIdArg[i].mType;
+                    mClass = sIdArg[i].mClass;
+                    mId = universalId.substr (0, index);
+                    return;
+                }
 
-                break;
-            }
+            for (int i=0; sIndexArg[i].mName; ++i)
+                if (type==sIndexArg[i].mName)
+                {
+                    mArgumentType = ArgumentType_Index;
+                    mType = sIndexArg[i].mType;
+                    mClass = sIndexArg[i].mClass;
+
+                    std::istringstream stream (universalId.substr (0, index));
+
+                    if (stream >> mIndex)
+                        return;
+
+                    break;
+                }
+        }
     }
 
     throw std::runtime_error ("invalid UniversalId: " + universalId);
@@ -197,13 +202,13 @@ std::string CSMWorld::UniversalId::toString() const
 {
     std::ostringstream stream;
 
-    stream << getTypeName() << ":";
+    stream << getTypeName();
 
     switch (mArgumentType)
     {
         case ArgumentType_None: break;
-        case ArgumentType_Id: stream << " " << mId;
-        case ArgumentType_Index: stream << " " << mIndex;
+        case ArgumentType_Id: stream << ": " << mId;
+        case ArgumentType_Index: stream << ": " << mIndex;
     }
 
     return stream.str();
