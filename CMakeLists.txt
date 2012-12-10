@@ -25,7 +25,8 @@ set (OPENMW_VERSION "${OPENMW_VERSION_MAJOR}.${OPENMW_VERSION_MINOR}.${OPENMW_VE
 configure_file ("${OpenMW_SOURCE_DIR}/Docs/mainpage.hpp.cmake" "${OpenMW_SOURCE_DIR}/Docs/mainpage.hpp")
 
 option(MYGUI_STATIC "Link static build of Mygui into the binaries" FALSE)
-option(OGRE_STATIC "Link static build of Ogre and Ogre Plugins into the binaries" FALSE)
+option(OGRE_STATIC  "Link static build of Ogre and Ogre Plugins into the binaries" FALSE)
+option(BOOST_STATIC "Link static build of Boost into the binaries" FALSE)
 
 # Apps and tools
 option(BUILD_ESMTOOL "build ESM inspector" ON)
@@ -167,9 +168,9 @@ if (WIN32)
     set(PLATFORM_INCLUDE_DIR "platform")
     add_definitions(-DBOOST_ALL_NO_LIB)
 else (WIN32)
-set(PLATFORM_INCLUDE_DIR "")
-find_path (UUID_INCLUDE_DIR uuid/uuid.h)
-include_directories(${UUID_INCLUDE_DIR})
+    set(PLATFORM_INCLUDE_DIR "")
+    find_path (UUID_INCLUDE_DIR uuid/uuid.h)
+    include_directories(${UUID_INCLUDE_DIR})
 endif (WIN32)
 if (MSVC10)
     set(PLATFORM_INCLUDE_DIR "")
@@ -183,7 +184,7 @@ endif (APPLE)
 
 # Fix for not visible pthreads functions for linker with glibc 2.15
 if (UNIX AND NOT APPLE)
-find_package (Threads)
+    find_package (Threads)
 endif()
 
 # find boost without components so we can use Boost_VERSION
@@ -194,6 +195,10 @@ set(BOOST_COMPONENTS system filesystem program_options thread)
 if (Boost_VERSION LESS 104900)
     set(SHINY_USE_WAVE_SYSTEM_INSTALL "TRUE")
     set(BOOST_COMPONENTS ${BOOST_COMPONENTS} wave)
+endif()
+
+IF(BOOST_STATIC)
+    set(Boost_USE_STATIC_LIBS   ON)
 endif()
 
 find_package(OGRE REQUIRED)
