@@ -12,6 +12,8 @@
 
 #include "../world/subviews.hpp"
 
+#include "../tools/subviews.hpp"
+
 #include "viewmanager.hpp"
 #include "operations.hpp"
 #include "subview.hpp"
@@ -122,6 +124,7 @@ CSVDoc::View::View (ViewManager& viewManager, CSMDoc::Document *document, int to
     setupUi();
 
     CSVWorld::addSubViewFactories (mSubViewFactory);
+    CSVTools::addSubViewFactories (mSubViewFactory);
 }
 
 CSVDoc::View::~View()
@@ -200,7 +203,7 @@ void CSVDoc::View::save()
 
 void CSVDoc::View::verify()
 {
-    mDocument->verify();
+    addSubView (mDocument->verify());
 }
 
 void CSVDoc::View::addGlobalsSubView()

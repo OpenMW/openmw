@@ -30,6 +30,7 @@ namespace
 
     static const TypeData sIndexArg[] =
     {
+        { CSMWorld::UniversalId::Class_Transient, CSMWorld::UniversalId::Type_VerificationResults, "Verification Results" },
 
         { CSMWorld::UniversalId::Class_None, CSMWorld::UniversalId::Type_None, 0 } // end marker
     };
@@ -39,7 +40,7 @@ CSMWorld::UniversalId::UniversalId (const std::string& universalId)
 {
     std::string::size_type index = universalId.find (':');
 
-    if (index!=std::string::npos)
+    if (index==std::string::npos)
     {
         std::string type = universalId.substr (0, index);
 

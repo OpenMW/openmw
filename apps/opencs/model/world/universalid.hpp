@@ -31,7 +31,10 @@ namespace CSMWorld
             enum Type
             {
                 Type_None,
-                Type_Globals
+
+                Type_Globals,
+
+                Type_VerificationResults
             };
 
         private:

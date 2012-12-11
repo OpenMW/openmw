@@ -35,7 +35,7 @@ QVariant CSMWorld::IdTable::data  (const QModelIndex & index, int role) const
         return QVariant();
 
     if (role==Qt::EditRole && !mIdCollection->isEditable (index.column()))
-            return QVariant();
+        return QVariant();
 
     return mIdCollection->getData (index.row(), index.column());
 }

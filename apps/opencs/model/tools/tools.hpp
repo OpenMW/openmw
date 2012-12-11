@@ -3,15 +3,19 @@
 
 #include <QObject>
 
+#include <map>
+
 namespace CSMWorld
 {
     class Data;
+    class UniversalId;
 }
 
 namespace CSMTools
 {
     class Verifier;
     class Operation;
+    class ReportModel;
 
     class Tools : public QObject
     {
@@ -19,6 +23,9 @@ namespace CSMTools
 
             CSMWorld::Data& mData;
             Verifier *mVerifier;
+            std::map<int, ReportModel *> mReports;
+            int mNextReportNumber;
+            std::map<int, int> mActiveReports; // type, report number
 
             // not implemented
             Tools (const Tools&);
@@ -38,12 +45,16 @@ namespace CSMTools
 
             virtual ~Tools();
 
-            void runVerifier();
+            CSMWorld::UniversalId runVerifier();
+            ///< \return ID of the report for this verification run
 
             void abortOperation (int type);
             ///< \attention The operation is not aborted immediately.
 
             int getRunningOperations() const;
+
+            ReportModel *getReport (const CSMWorld::UniversalId& id);
+            ///< The ownership of the returned report is not transferred.
 
         private slots:
 

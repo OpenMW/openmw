@@ -8,12 +8,14 @@ set (OPENCS_SRC
     model/world/commands.cpp model/world/idtableproxymodel.cpp model/world/record.cpp
 
     model/tools/tools.cpp model/tools/operation.cpp model/tools/stage.cpp model/tools/verifier.cpp
-    model/tools/mandatoryid.cpp
+    model/tools/mandatoryid.cpp model/tools/reportmodel.cpp
 
     view/doc/viewmanager.cpp view/doc/view.cpp view/doc/operations.cpp view/doc/operation.cpp view/doc/subviewfactory.cpp
     view/doc/subview.cpp
 
     view/world/table.cpp view/world/tablesubview.cpp view/world/subviews.cpp
+
+    view/tools/reportsubview.cpp view/tools/subviews.cpp
     )
 
 set (OPENCS_HDR
@@ -26,12 +28,14 @@ set (OPENCS_HDR
     model/world/commands.hpp
 
     model/tools/tools.hpp model/tools/operation.hpp model/tools/stage.hpp model/tools/verifier.hpp
-    model/tools/mandatoryid.hpp
+    model/tools/mandatoryid.hpp model/tools/reportmodel.hpp
 
     view/doc/viewmanager.hpp view/doc/view.hpp view/doc/operations.hpp view/doc/operation.hpp view/doc/subviewfactory.hpp
     view/doc/subview.hpp view/doc/subviewfactoryimp.hpp
 
     view/world/table.hpp view/world/tablesubview.hpp view/world/subviews.hpp
+
+    view/tools/reportsubview.hpp view/tools/subviews.hpp
     )
 
 set (OPENCS_US

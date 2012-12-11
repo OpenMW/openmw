@@ -13,6 +13,8 @@
 
 #include "state.hpp"
 
+class QAbstractItemModel;
+
 namespace CSMDoc
 {
     class Document : public QObject
@@ -50,13 +52,16 @@ namespace CSMDoc
 
             void save();
 
-            void verify();
+            CSMWorld::UniversalId verify();
 
             void abortOperation (int type);
 
             const CSMWorld::Data& getData() const;
 
             CSMWorld::Data& getData();
+
+            CSMTools::ReportModel *getReport (const CSMWorld::UniversalId& id);
+            ///< The ownership of the returned report is not transferred.
 
         signals:
 

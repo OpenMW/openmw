@@ -8,7 +8,9 @@
 #include "../doc/state.hpp"
 
 #include "../world/data.hpp"
+#include "../world/universalid.hpp"
 
+#include "reportmodel.hpp"
 #include "mandatoryid.hpp"
 
 CSMTools::Operation *CSMTools::Tools::get (int type)
@@ -54,9 +56,10 @@ CSMTools::Verifier *CSMTools::Tools::getVerifier()
     return mVerifier;
 }
 
-CSMTools::Tools::Tools (CSMWorld::Data& data) : mData (data), mVerifier (0)
+CSMTools::Tools::Tools (CSMWorld::Data& data) : mData (data), mVerifier (0), mNextReportNumber (0)
 {
-
+    for (std::map<int, ReportModel *>::iterator iter (mReports.begin()); iter!=mReports.end(); ++iter)
+        delete iter->second;
 }
 
 CSMTools::Tools::~Tools()
@@ -64,9 +67,14 @@ CSMTools::Tools::~Tools()
     delete mVerifier;
 }
 
-void CSMTools::Tools::runVerifier()
+CSMWorld::UniversalId CSMTools::Tools::runVerifier()
 {
+    mReports.insert (std::make_pair (mNextReportNumber++, new ReportModel));
+    mActiveReports[CSMDoc::State_Verifying] = mNextReportNumber-1;
+
     getVerifier()->start();
+
+    return CSMWorld::UniversalId (CSMWorld::UniversalId::Type_VerificationResults, mNextReportNumber-1);
 }
 
 void CSMTools::Tools::abortOperation (int type)
@@ -93,15 +101,23 @@ int CSMTools::Tools::getRunningOperations() const
     return result;
 }
 
+CSMTools::ReportModel *CSMTools::Tools::getReport (const CSMWorld::UniversalId& id)
+{
+    if (id.getType()!=CSMWorld::UniversalId::Type_VerificationResults)
+        throw std::logic_error ("invalid request for report model: " + id.toString());
+
+    return mReports.at (id.getIndex());
+}
+
 void CSMTools::Tools::verifierDone()
 {
     emit done (CSMDoc::State_Verifying);
 }
 
-#include <iostream>
 void CSMTools::Tools::verifierMessage (const QString& message, int type)
 {
-    /// \todo store it in a result model instead
+    std::map<int, int>::iterator iter = mActiveReports.find (type);
 
-    std::cout << message.toStdString() << std::endl;
+    if (iter!=mActiveReports.end())
+        mReports[iter->second]->add (message.toStdString());
 }

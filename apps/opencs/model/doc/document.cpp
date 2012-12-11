@@ -50,10 +50,11 @@ void CSMDoc::Document::save()
     emit progress (1, 16, State_Saving, 1, this);
 }
 
-void CSMDoc::Document::verify()
+CSMWorld::UniversalId CSMDoc::Document::verify()
 {
-    mTools.runVerifier();
+    CSMWorld::UniversalId id = mTools.runVerifier();
     emit stateChanged (getState(), this);
+    return id;
 }
 
 void CSMDoc::Document::abortOperation (int type)
@@ -100,6 +101,11 @@ const CSMWorld::Data& CSMDoc::Document::getData() const
 CSMWorld::Data& CSMDoc::Document::getData()
 {
     return mData;
+}
+
+CSMTools::ReportModel *CSMDoc::Document::getReport (const CSMWorld::UniversalId& id)
+{
+    return mTools.getReport (id);
 }
 
 void CSMDoc::Document::progress (int current, int max, int type)
