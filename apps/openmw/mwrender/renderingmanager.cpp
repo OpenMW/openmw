@@ -928,7 +928,7 @@ void RenderingManager::setupExternalRendering (MWRender::ExternalRendering& rend
 
 void RenderingManager::playVideo(const std::string& name)
 {
-    mVideoPlayer->play ("video/" + name);
+    mVideoPlayer->playVideo ("video/" + name);
 }
 
 } // namespace
