@@ -1,7 +1,7 @@
 
 #include "subview.hpp"
 
-CSVWorld::SubView::SubView (const CSMWorld::UniversalId& id) : mUniversalId (id)
+CSVDoc::SubView::SubView (const CSMWorld::UniversalId& id) : mUniversalId (id)
 {
     /// \todo  add a button to the title bar that clones this sub view
 
@@ -12,7 +12,7 @@ CSVWorld::SubView::SubView (const CSMWorld::UniversalId& id) : mUniversalId (id)
     setMinimumHeight (60);
 }
 
-CSMWorld::UniversalId CSVWorld::SubView::getUniversalId() const
+CSMWorld::UniversalId CSVDoc::SubView::getUniversalId() const
 {
     return mUniversalId;
 }

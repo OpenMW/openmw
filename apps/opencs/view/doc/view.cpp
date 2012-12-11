@@ -10,10 +10,11 @@
 
 #include "../../model/doc/document.hpp"
 
-#include "../world/tablesubview.hpp"
+#include "../world/subviews.hpp"
 
 #include "viewmanager.hpp"
 #include "operations.hpp"
+#include "subview.hpp"
 
 void CSVDoc::View::closeEvent (QCloseEvent *event)
 {
@@ -120,15 +121,11 @@ CSVDoc::View::View (ViewManager& viewManager, CSMDoc::Document *document, int to
 
     setupUi();
 
-    mSubViewFactories.insert (std::make_pair (CSMWorld::UniversalId (CSMWorld::UniversalId::Type_Globals),
-        new CSVWorld::SubViewFactoryWithCreateFlag<CSVWorld::TableSubView> (true)));
+    CSVWorld::addSubViewFactories (mSubViewFactory);
 }
 
 CSVDoc::View::~View()
 {
-    for (std::map<CSMWorld::UniversalId, CSVWorld::SubViewFactoryBase *>::iterator iter (mSubViewFactories.begin());
-        iter!=mSubViewFactories.end(); ++iter)
-        delete iter->second;
 }
 
 const CSMDoc::Document *CSVDoc::View::getDocument() const
@@ -165,9 +162,9 @@ void CSVDoc::View::updateDocumentState()
         if (!(state & operations[i]))
             mOperations->quitOperation (operations[i]);
 
-    QList<CSVWorld::SubView *> subViews = findChildren<CSVWorld::SubView *>();
+    QList<CSVDoc::SubView *> subViews = findChildren<CSVDoc::SubView *>();
 
-    for (QList<CSVWorld::SubView *>::iterator iter (subViews.begin()); iter!=subViews.end(); ++iter)
+    for (QList<CSVDoc::SubView *>::iterator iter (subViews.begin()); iter!=subViews.end(); ++iter)
         (*iter)->setEditLock (state & CSMDoc::State_Locked);
 }
 
@@ -186,12 +183,7 @@ void CSVDoc::View::addSubView (const CSMWorld::UniversalId& id)
 
     /// \todo add an user setting to reuse sub views (on a per document basis or on a per top level view basis)
 
-    std::map<CSMWorld::UniversalId, CSVWorld::SubViewFactoryBase *>::iterator iter = mSubViewFactories.find (id);
-
-    if (iter==mSubViewFactories.end())
-        throw std::logic_error ("can't create subview for " + id.toString());
-
-    CSVWorld::SubView *view = iter->second->makeSubView (id, *mDocument);
+    SubView *view = mSubViewFactory.makeSubView (id, *mDocument);
     addDockWidget (Qt::TopDockWidgetArea, view);
     view->show();
 }

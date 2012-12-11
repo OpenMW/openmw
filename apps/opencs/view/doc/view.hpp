@@ -6,6 +6,8 @@
 
 #include <QMainWindow>
 
+#include "subviewfactory.hpp"
+
 class QAction;
 
 namespace CSMDoc
@@ -16,11 +18,6 @@ namespace CSMDoc
 namespace CSMWorld
 {
     class UniversalId;
-}
-
-namespace CSVWorld
-{
-    struct SubViewFactoryBase;
 }
 
 namespace CSVDoc
@@ -42,7 +39,7 @@ namespace CSVDoc
             QAction *mVerify;
             std::vector<QAction *> mEditingActions;
             Operations *mOperations;
-            std::map<CSMWorld::UniversalId, CSVWorld::SubViewFactoryBase *> mSubViewFactories;
+            SubViewFactoryManager mSubViewFactory;
 
             // not implemented
             View (const View&);

@@ -10,9 +10,10 @@ set (OPENCS_SRC
     model/tools/tools.cpp model/tools/operation.cpp model/tools/stage.cpp model/tools/verifier.cpp
     model/tools/mandatoryid.cpp
 
-    view/doc/viewmanager.cpp view/doc/view.cpp view/doc/operations.cpp view/doc/operation.cpp
+    view/doc/viewmanager.cpp view/doc/view.cpp view/doc/operations.cpp view/doc/operation.cpp view/doc/subviewfactory.cpp
+    view/doc/subview.cpp
 
-    view/world/subview.cpp view/world/table.cpp view/world/tablesubview.cpp
+    view/world/table.cpp view/world/tablesubview.cpp view/world/subviews.cpp
     )
 
 set (OPENCS_HDR
@@ -27,9 +28,10 @@ set (OPENCS_HDR
     model/tools/tools.hpp model/tools/operation.hpp model/tools/stage.hpp model/tools/verifier.hpp
     model/tools/mandatoryid.hpp
 
-    view/doc/viewmanager.hpp view/doc/view.hpp view/doc/operations.hpp view/doc/operation.hpp
+    view/doc/viewmanager.hpp view/doc/view.hpp view/doc/operations.hpp view/doc/operation.hpp view/doc/subviewfactory.hpp
+    view/doc/subview.hpp view/doc/subviewfactoryimp.hpp
 
-    view/world/subview.hpp view/world/table.hpp view/world/tablesubview.hpp
+    view/world/table.hpp view/world/tablesubview.hpp view/world/subviews.hpp
     )
 
 set (OPENCS_US
