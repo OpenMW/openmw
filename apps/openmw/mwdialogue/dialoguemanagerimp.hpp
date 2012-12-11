@@ -23,7 +23,7 @@ namespace MWDialogue
             MWScript::CompilerContext mCompilerContext;
             std::ostream mErrorStream;
             Compiler::StreamErrorHandler mErrorHandler;
-            
+
             MWWorld::Ptr mActor;
             bool mTalkedTo;
 
@@ -45,6 +45,8 @@ namespace MWDialogue
             void executeScript (const std::string& script);
 
             void printError (const std::string& error);
+
+            void executeTopic (const std::string& topic);
 
         public:
 

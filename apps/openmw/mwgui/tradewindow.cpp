@@ -211,7 +211,7 @@ namespace MWGui
                 + MWBase::Environment::get().getDialogueManager()->getTemporaryDispositionChange()),100));
 
             MWMechanics::NpcStats sellerSkill = MWWorld::Class::get(mPtr).getNpcStats(mPtr);
-            MWMechanics::CreatureStats sellerStats = MWWorld::Class::get(mPtr).getCreatureStats(mPtr); 
+            MWMechanics::CreatureStats sellerStats = MWWorld::Class::get(mPtr).getCreatureStats(mPtr);
             MWWorld::Ptr playerPtr = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
             MWMechanics::NpcStats playerSkill = MWWorld::Class::get(playerPtr).getNpcStats(playerPtr);
             MWMechanics::CreatureStats playerStats = MWWorld::Class::get(playerPtr).getCreatureStats(playerPtr);
@@ -239,7 +239,10 @@ namespace MWGui
                 MWBase::Environment::get().getDialogueManager()->applyTemporaryDispositionChange(iBarterFailDisposition);
                 return;
             }
-        }
+
+            //skill use!
+            MWWorld::Class::get(playerPtr).skillUsageSucceeded(playerPtr, ESM::Skill::Mercantile, 0);
+	}
 
         int iBarterSuccessDisposition = gmst.find("iBarterSuccessDisposition")->getInt();
         MWBase::Environment::get().getDialogueManager()->applyTemporaryDispositionChange(iBarterSuccessDisposition);
