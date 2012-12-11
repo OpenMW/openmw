@@ -108,6 +108,8 @@ namespace MWRender
         AVStream                *video_st;
         PacketQueue      videoq;
 
+        Ogre::DataStreamPtr stream;
+
         SwsContext* sws_context;
 
         VideoPicture        pictq[VIDEO_PICTURE_QUEUE_SIZE];

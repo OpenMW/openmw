@@ -11,49 +11,49 @@ namespace MWRender
 
     int OgreResource_Read(void *opaque, uint8_t *buf, int buf_size)
     {
-            Ogre::DataStreamPtr stream = *((Ogre::DataStreamPtr*)opaque);
+        Ogre::DataStreamPtr stream = static_cast<VideoState*>(opaque)->stream;
 
-            int num_read = stream->size() - stream->tell();
+        int num_read = stream->size() - stream->tell();
 
-            if (num_read > buf_size)
-                    num_read = buf_size;
+        if (num_read > buf_size)
+            num_read = buf_size;
 
-            stream->read(buf, num_read);
-            return num_read;
+        stream->read(buf, num_read);
+        return num_read;
     }
 
     int OgreResource_Write(void *opaque, uint8_t *buf, int buf_size)
     {
-            Ogre::DataStreamPtr stream = *((Ogre::DataStreamPtr*)opaque);
+        Ogre::DataStreamPtr stream = static_cast<VideoState*>(opaque)->stream;
 
-            int num_write = stream->size() - stream->tell();
+        int num_write = stream->size() - stream->tell();
 
-            if (num_write > buf_size)
-                    num_write = buf_size;
+        if (num_write > buf_size)
+            num_write = buf_size;
 
-            stream->write (buf, num_write);
-            return num_write;
+        stream->write (buf, num_write);
+        return num_write;
     }
 
     int64_t OgreResource_Seek(void *opaque, int64_t offset, int whence)
     {
-            Ogre::DataStreamPtr stream = *((Ogre::DataStreamPtr*)opaque);
+        Ogre::DataStreamPtr stream = static_cast<VideoState*>(opaque)->stream;
 
-            switch (whence)
-            {
+        switch (whence)
+        {
             case SEEK_SET:
-                    stream->seek(offset);
+                stream->seek(offset);
             case SEEK_CUR:
-                    stream->seek(stream->tell() + offset);
+                stream->seek(stream->tell() + offset);
             case SEEK_END:
-                    stream->seek(stream->size() + offset);
+                stream->seek(stream->size() + offset);
             case AVSEEK_SIZE:
-                    return stream->size();
+                return stream->size();
             default:
-                    return -1;
-            }
+                return -1;
+        }
 
-            return stream->tell();
+        return stream->tell();
     }
 
 
@@ -107,7 +107,7 @@ namespace MWRender
             if (pkt1) {
                 q->first_pkt = pkt1->next;
                 if (!q->first_pkt)
-        q->last_pkt = NULL;
+                    q->last_pkt = NULL;
                 q->nb_packets--;
                 q->size -= pkt1->pkt.size;
                 *pkt = pkt1->pkt;
@@ -247,21 +247,21 @@ namespace MWRender
 
 
                 if(len1 < 0) {
-        /* if error, skip frame */
-        is->audio_pkt_size = 0;
-        break;
+                    /* if error, skip frame */
+                    is->audio_pkt_size = 0;
+                    break;
                 }
                 is->audio_pkt_data += len1;
                 is->audio_pkt_size -= len1;
                 if(data_size <= 0) {
         /* No data yet, get more frames */
-        continue;
+                    continue;
                 }
                 pts = is->audio_clock;
                 *pts_ptr = pts;
                 n = 2 * is->audio_st->codec->channels;
                 is->audio_clock += (double)data_size /
-        (double)(n * is->audio_st->codec->sample_rate);
+                    (double)(n * is->audio_st->codec->sample_rate);
 
                 /* We have data, return it and come back for more later */
                 return data_size;
@@ -295,13 +295,13 @@ namespace MWRender
                 /* We have already sent all our data; get more */
                 audio_size = audio_decode_frame(is, is->audio_buf, sizeof(is->audio_buf), &pts);
                 if(audio_size < 0) {
-        /* If error, output silence */
-        is->audio_buf_size = 1024;
-        memset(is->audio_buf, 0, is->audio_buf_size);
+                    /* If error, output silence */
+                    is->audio_buf_size = 1024;
+                    memset(is->audio_buf, 0, is->audio_buf_size);
                 } else {
-        audio_size = synchronize_audio(is, (int16_t *)is->audio_buf,
-                                 audio_size, pts);
-        is->audio_buf_size = audio_size;
+                    audio_size = synchronize_audio(is, (int16_t *)is->audio_buf,
+                                             audio_size, pts);
+                    is->audio_buf_size = audio_size;
                 }
                 is->audio_buf_index = 0;
             }
@@ -387,8 +387,8 @@ namespace MWRender
 
                 delay = vp->pts - is->frame_last_pts; /* the pts from last time */
                 if(delay <= 0 || delay >= 1.0) {
-        /* if incorrect delay, use previous one */
-        delay = is->frame_last_delay;
+                    /* if incorrect delay, use previous one */
+                    delay = is->frame_last_delay;
                 }
                 /* save for next time */
                 is->frame_last_delay = delay;
@@ -396,27 +396,27 @@ namespace MWRender
 
                 /* update delay to sync to audio if not master source */
                 if(is->av_sync_type != AV_SYNC_VIDEO_MASTER) {
-        ref_clock = get_master_clock(is);
-        diff = vp->pts - ref_clock;
+                    ref_clock = get_master_clock(is);
+                    diff = vp->pts - ref_clock;
 
-        /* Skip or repeat the frame. Take delay into account
-             FFPlay still doesn't "know if this is the best guess." */
-        sync_threshold = (delay > AV_SYNC_THRESHOLD) ? delay : AV_SYNC_THRESHOLD;
-        if(fabs(diff) < AV_NOSYNC_THRESHOLD) {
-            if(diff <= -sync_threshold) {
-                delay = 0;
-            } else if(diff >= sync_threshold) {
-                delay = 2 * delay;
-            }
-        }
+                    /* Skip or repeat the frame. Take delay into account
+                         FFPlay still doesn't "know if this is the best guess." */
+                    sync_threshold = (delay > AV_SYNC_THRESHOLD) ? delay : AV_SYNC_THRESHOLD;
+                    if(fabs(diff) < AV_NOSYNC_THRESHOLD) {
+                        if(diff <= -sync_threshold) {
+                            delay = 0;
+                        } else if(diff >= sync_threshold) {
+                            delay = 2 * delay;
+                        }
+                    }
                 }
 
                 is->frame_timer += delay;
                 /* computer the REAL delay */
                 actual_delay = is->frame_timer - (av_gettime() / 1000000.0);
                 if(actual_delay < 0.010) {
-        /* Really it should skip the picture instead */
-        actual_delay = 0.010;
+                    /* Really it should skip the picture instead */
+                    actual_delay = 0.010;
                 }
                 schedule_refresh(is, (int)(actual_delay * 1000 + 0.5));
 
@@ -425,14 +425,15 @@ namespace MWRender
 
                 /* update queue for next picture! */
                 if(++is->pictq_rindex == VIDEO_PICTURE_QUEUE_SIZE) {
-        is->pictq_rindex = 0;
+                    is->pictq_rindex = 0;
                 }
                 is->pictq_mutex.lock();
                 is->pictq_size--;
                 is->pictq_cond.notify_one ();
                 is->pictq_mutex.unlock ();
             }
-        } else {
+        }
+        else {
             schedule_refresh(is, 100);
         }
     }
@@ -563,7 +564,7 @@ namespace MWRender
             if(frameFinished) {
                 pts = synchronize_video(is, pFrame, pts);
                 if(queue_picture(is, pFrame, pts) < 0) {
-        break;
+                    break;
                 }
             }
             av_free_packet(packet);
@@ -673,10 +674,11 @@ namespace MWRender
         Ogre::DataStreamPtr stream = Ogre::ResourceGroupManager::getSingleton ().openResource (is->resourceName);
         if(stream.isNull ())
             throw std::runtime_error("Failed to open video resource");
+        is->stream = stream;
 
         AVIOContext  *ioContext = 0;
 
-        ioContext = avio_alloc_context(NULL, 0, 0, &stream, OgreResource_Read, OgreResource_Write, OgreResource_Seek);
+        ioContext = avio_alloc_context(NULL, 0, 0, is, OgreResource_Read, OgreResource_Write, OgreResource_Seek);
         if (!ioContext)
             throw std::runtime_error("Failed to allocate ioContext ");
 
@@ -845,7 +847,7 @@ namespace MWRender
         }
 
         if (!Ogre::TextureManager::getSingleton ().getByName ("VideoTexture").isNull ())
-          mVideoMaterial->getTechnique(0)->getPass(0)->getTextureUnitState (0)->setTextureName ("VideoTexture");
+            mVideoMaterial->getTechnique(0)->getPass(0)->getTextureUnitState (0)->setTextureName ("VideoTexture");
     }
 
     void VideoPlayer::close()
