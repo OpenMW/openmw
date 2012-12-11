@@ -1,6 +1,8 @@
 #ifndef CSV_WORLD_SUBVIEW_H
 #define CSV_WORLD_SUBVIEW_H
 
+#include "../../model/doc/document.hpp"
+
 #include "../../model/world/universalid.hpp"
 
 #include <QDockWidget>
@@ -35,21 +37,20 @@ namespace CSVWorld
 
     struct SubViewFactoryBase
     {
-        virtual SubView *makeSubView (const CSMWorld::UniversalId& id, CSMWorld::Data& data, QUndoStack& undoStack)
+        virtual SubView *makeSubView (const CSMWorld::UniversalId& id, CSMDoc::Document& document)
             = 0;
     };
 
     template<class SubViewT>
     struct SubViewFactory : public SubViewFactoryBase
     {
-        virtual SubView *makeSubView (const CSMWorld::UniversalId& id, CSMWorld::Data& data, QUndoStack& undoStack);
+        virtual SubView *makeSubView (const CSMWorld::UniversalId& id, CSMDoc::Document& document);
     };
 
     template<class SubViewT>
-    SubView *SubViewFactory<SubViewT>::makeSubView (const CSMWorld::UniversalId& id, CSMWorld::Data& data,
-        QUndoStack& undoStack)
+    SubView *SubViewFactory<SubViewT>::makeSubView (const CSMWorld::UniversalId& id, CSMDoc::Document& document)
     {
-        return new SubViewT (id, data, undoStack);
+        return new SubViewT (id, document.getData(), document.getUndoStack());
     }
 
     template<class SubViewT>
@@ -59,7 +60,7 @@ namespace CSVWorld
 
         SubViewFactoryWithCreateFlag (bool createAndDelete);
 
-        virtual SubView *makeSubView (const CSMWorld::UniversalId& id, CSMWorld::Data& data, QUndoStack& undoStack);
+        virtual SubView *makeSubView (const CSMWorld::UniversalId& id, CSMDoc::Document& document);
     };
 
     template<class SubViewT>
@@ -69,10 +70,9 @@ namespace CSVWorld
 
     template<class SubViewT>
     SubView *SubViewFactoryWithCreateFlag<SubViewT>::makeSubView (const CSMWorld::UniversalId& id,
-        CSMWorld::Data& data,
-        QUndoStack& undoStack)
+        CSMDoc::Document& document)
     {
-        return new SubViewT (id, data, undoStack, mCreateAndDelete);
+        return new SubViewT (id, document.getData(), document.getUndoStack(), mCreateAndDelete);
     }
 }
 
