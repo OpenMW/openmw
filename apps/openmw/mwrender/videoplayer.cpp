@@ -646,7 +646,7 @@ namespace MWRender
             break;
         }
 
-
+        return 0;
     }
 
     int decode_interrupt_cb(void) {
