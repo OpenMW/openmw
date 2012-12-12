@@ -287,6 +287,16 @@ namespace MWWorld
     public:
         typedef SharedIterator<ESM::Land> iterator;
 
+        virtual ~Store<ESM::Land>()
+        {
+            for (std::vector<ESM::Land *>::const_iterator it =
+                             mStatic.begin(); it != mStatic.end(); ++it)
+            {
+                delete *it;
+            }
+
+        }
+
         int getSize() const {
             return mStatic.size();
         }

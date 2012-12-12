@@ -220,7 +220,7 @@ void MWMechanics::NpcStats::increaseSkill(int skillIndex, const ESM::Class &clas
     std::stringstream message;
     message << boost::format(MWBase::Environment::get().getWindowManager ()->getGameSettingString ("sNotifyMessage39", ""))
                % std::string("#{" + ESM::Skill::sSkillNameIds[skillIndex] + "}")
-               % base;
+               % static_cast<int> (base);
     MWBase::Environment::get().getWindowManager ()->messageBox(message.str(), std::vector<std::string>());
 
     if (mLevelProgress >= 10)
