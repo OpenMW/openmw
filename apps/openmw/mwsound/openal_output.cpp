@@ -504,8 +504,9 @@ void OpenAL_Output::init(const std::string &devname)
             ALuint src = 0;
             alGenSources(1, &src);
             throwALerror();
-            mFreeSources.push_back(src);
+            mSources.push_back(src);
         }
+        mFreeSources.insert(mFreeSources.begin(), mSources.begin(), mSources.end());
     }
     catch(std::exception &e)
     {
@@ -521,11 +522,10 @@ void OpenAL_Output::deinit()
 {
     mStreamThread->removeAll();
 
-    while(!mFreeSources.empty())
-    {
-        alDeleteSources(1, &mFreeSources.front());
-        mFreeSources.pop_front();
-    }
+    mFreeSources.clear();
+    if(mSources.size() > 0)
+        alDeleteSources(mSources.size(), &mSources[0]);
+    mSources.clear();
 
     mBufferRefs.clear();
     mUnusedBuffers.clear();
