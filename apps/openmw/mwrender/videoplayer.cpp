@@ -3,6 +3,7 @@
 
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/environment.hpp"
+#include "../mwbase/soundmanager.hpp"
 
 
 
@@ -821,6 +822,7 @@ namespace MWRender
         // Register all formats and codecs
         av_register_all();
 
+        MWBase::Environment::get().getSoundManager()->pauseAllSounds();
         if(SDL_Init(SDL_INIT_AUDIO)) {
             throw std::runtime_error("Failed to initialize SDL");
         }
@@ -860,6 +862,7 @@ namespace MWRender
         mState = NULL;
 
         SDL_CloseAudio();
+        MWBase::Environment::get().getSoundManager()->resumeAllSounds();
 
         mRectangle->setVisible (false);
         MWBase::Environment::get().getWindowManager ()->removeGuiMode (MWGui::GM_Video);

@@ -404,6 +404,19 @@ namespace MWSound
     }
 
 
+    void SoundManager::pauseAllSounds()
+    {
+        if(mOutput->isInitialized())
+            mOutput->pauseAllSounds();
+    }
+
+    void SoundManager::resumeAllSounds()
+    {
+        if(mOutput->isInitialized())
+            mOutput->resumeAllSounds();
+    }
+
+
     void SoundManager::updateRegionSound(float duration)
     {
         MWWorld::Ptr::CellStore *current = MWBase::Environment::get().getWorld()->getPlayer().getPlayer().getCell();

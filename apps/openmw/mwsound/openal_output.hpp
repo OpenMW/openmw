@@ -52,6 +52,9 @@ namespace MWSound
 
         virtual void updateListener(const Ogre::Vector3 &pos, const Ogre::Vector3 &atdir, const Ogre::Vector3 &updir, Environment env);
 
+        virtual void pauseAllSounds();
+        virtual void resumeAllSounds();
+
         OpenAL_Output& operator=(const OpenAL_Output &rhs);
         OpenAL_Output(const OpenAL_Output &rhs);
 

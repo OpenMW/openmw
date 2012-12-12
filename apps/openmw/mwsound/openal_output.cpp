@@ -814,6 +814,33 @@ void OpenAL_Output::updateListener(const Ogre::Vector3 &pos, const Ogre::Vector3
 }
 
 
+void OpenAL_Output::pauseAllSounds()
+{
+    IDVec sources = mSources;
+    IDDq::const_iterator iter = mFreeSources.begin();
+    while(iter != mFreeSources.end())
+    {
+        sources.erase(std::find(sources.begin(), sources.end(), *iter));
+        iter++;
+    }
+    if(sources.size() > 0)
+        alSourcePausev(sources.size(), &sources[0]);
+}
+
+void OpenAL_Output::resumeAllSounds()
+{
+    IDVec sources = mSources;
+    IDDq::const_iterator iter = mFreeSources.begin();
+    while(iter != mFreeSources.end())
+    {
+        sources.erase(std::find(sources.begin(), sources.end(), *iter));
+        iter++;
+    }
+    if(sources.size() > 0)
+        alSourcePlayv(sources.size(), &sources[0]);
+}
+
+
 OpenAL_Output::OpenAL_Output(SoundManager &mgr)
   : Sound_Output(mgr), mDevice(0), mContext(0), mBufferCacheMemSize(0),
     mLastEnvironment(Env_Normal), mStreamThread(new StreamThread)
