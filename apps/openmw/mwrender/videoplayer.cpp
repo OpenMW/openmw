@@ -816,6 +816,17 @@ namespace MWRender
 
         MWBase::Environment::get().getWindowManager ()->pushGuiMode (MWGui::GM_Video);
 
+        // Turn off rendering except the GUI
+        mSceneMgr->clearSpecialCaseRenderQueues();
+        // SCRQM_INCLUDE with RENDER_QUEUE_OVERLAY does not work.
+        for (int i = 0; i < Ogre::RENDER_QUEUE_MAX; ++i)
+        {
+            if (i > 0 && i < 96)
+                mSceneMgr->addSpecialCaseRenderQueue(i);
+        }
+        mSceneMgr->setSpecialCaseRenderQueueMode(Ogre::SceneManager::SCRQM_EXCLUDE);
+
+
         mState = new VideoState;
 
         // Register all formats and codecs
@@ -861,6 +872,9 @@ namespace MWRender
 
         mRectangle->setVisible (false);
         MWBase::Environment::get().getWindowManager ()->removeGuiMode (MWGui::GM_Video);
+
+        mSceneMgr->clearSpecialCaseRenderQueues();
+        mSceneMgr->setSpecialCaseRenderQueueMode(Ogre::SceneManager::SCRQM_EXCLUDE);
     }
 
     bool VideoPlayer::isPlaying ()
