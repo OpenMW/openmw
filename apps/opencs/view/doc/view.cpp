@@ -188,6 +188,10 @@ void CSVDoc::View::addSubView (const CSMWorld::UniversalId& id)
 
     SubView *view = mSubViewFactory.makeSubView (id, *mDocument);
     addDockWidget (Qt::TopDockWidgetArea, view);
+
+    connect (view, SIGNAL (focusId (const CSMWorld::UniversalId&)), this,
+        SLOT (addSubView (const CSMWorld::UniversalId&)));
+
     view->show();
 }
 

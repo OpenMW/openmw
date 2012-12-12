@@ -29,6 +29,8 @@ namespace CSMTools
             virtual bool removeRows (int row, int count, const QModelIndex& parent = QModelIndex());
 
             void add (const std::string& row);
+
+            const CSMWorld::UniversalId& getUniversalId (int row) const;
     };
 }
 

@@ -4,6 +4,8 @@
 #include <string>
 #include <iosfwd>
 
+#include <QMetaType>
+
 namespace CSMWorld
 {
     class UniversalId
@@ -86,5 +88,7 @@ namespace CSMWorld
 
     std::ostream& operator< (std::ostream& stream, const UniversalId& universalId);
 }
+
+Q_DECLARE_METATYPE (CSMWorld::UniversalId)
 
 #endif

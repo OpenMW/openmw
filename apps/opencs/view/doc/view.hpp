@@ -80,11 +80,13 @@ namespace CSVDoc
 
             void updateProgress (int current, int max, int type, int threads);
 
-            void addSubView (const CSMWorld::UniversalId& id);
-
         signals:
 
             void newDocumentRequest();
+
+        public slots:
+
+            void addSubView (const CSMWorld::UniversalId& id);
 
         private slots:
 

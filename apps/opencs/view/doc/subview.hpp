@@ -35,6 +35,10 @@ namespace CSVDoc
             CSMWorld::UniversalId getUniversalId() const;
 
             virtual void setEditLock (bool locked) = 0;
+
+        signals:
+
+            void focusId (const CSMWorld::UniversalId& universalId);
     };
 }
 

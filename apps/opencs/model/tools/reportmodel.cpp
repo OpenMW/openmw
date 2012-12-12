@@ -64,3 +64,8 @@ void CSMTools::ReportModel::add (const std::string& row)
 
     endInsertRows();
 }
+
+const CSMWorld::UniversalId& CSMTools::ReportModel::getUniversalId (int row) const
+{
+    return mRows.at (row).first;
+}
