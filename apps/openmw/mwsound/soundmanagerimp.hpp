@@ -127,6 +127,12 @@ namespace MWSound
         virtual bool getSoundPlaying(MWWorld::Ptr reference, const std::string& soundId) const;
         ///< Is the given sound currently playing on the given object?
 
+        virtual void pauseAllSounds();
+        ///< Pauses all currently playing sounds, including music.
+
+        virtual void resumeAllSounds();
+        ///< Resumes all previously paused sounds.
+
         virtual void update(float duration);
 
         virtual void setListenerPosDir(const Ogre::Vector3 &pos, const Ogre::Vector3 &dir, const Ogre::Vector3 &up);

@@ -21,6 +21,9 @@ namespace MWSound
         ALCdevice *mDevice;
         ALCcontext *mContext;
 
+        typedef std::vector<ALuint> IDVec;
+        IDVec mSources;
+
         typedef std::deque<ALuint> IDDq;
         IDDq mFreeSources;
         IDDq mUnusedBuffers;
@@ -48,6 +51,9 @@ namespace MWSound
         virtual MWBase::SoundPtr streamSound(const std::string &fname, float volume, float pitch, int flags);
 
         virtual void updateListener(const Ogre::Vector3 &pos, const Ogre::Vector3 &atdir, const Ogre::Vector3 &updir, Environment env);
+
+        virtual void pauseAllSounds();
+        virtual void resumeAllSounds();
 
         OpenAL_Output& operator=(const OpenAL_Output &rhs);
         OpenAL_Output(const OpenAL_Output &rhs);

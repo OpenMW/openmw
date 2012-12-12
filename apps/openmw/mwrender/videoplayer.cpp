@@ -3,6 +3,7 @@
 
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/environment.hpp"
+#include "../mwbase/soundmanager.hpp"
 
 
 
@@ -144,16 +145,12 @@ namespace MWRender
 
     double get_audio_clock(VideoState *is) {
         double pts;
-        int hw_buf_size, bytes_per_sec, n;
 
         pts = is->audio_clock; /* maintained in the audio thread */
-        hw_buf_size = is->audio_buf_size - is->audio_buf_index;
-        bytes_per_sec = 0;
-        n = is->audio_st->codec->channels * 2;
         if(is->audio_st) {
-            bytes_per_sec = is->audio_st->codec->sample_rate * n;
-        }
-        if(bytes_per_sec) {
+            int n = is->audio_st->codec->channels * 2;
+            int bytes_per_sec = is->audio_st->codec->sample_rate * n;
+            int hw_buf_size = is->audio_buf_size - is->audio_buf_index;
             pts -= (double)hw_buf_size / bytes_per_sec;
         }
         return pts;
@@ -194,39 +191,39 @@ namespace MWRender
             diff = get_audio_clock(is) - ref_clock;
             if(diff < AV_NOSYNC_THRESHOLD) {
                 // accumulate the diffs
-                is->audio_diff_cum = diff + is->audio_diff_avg_coef
-        * is->audio_diff_cum;
+                is->audio_diff_cum = diff + is->audio_diff_avg_coef *
+                                            is->audio_diff_cum;
                 if(is->audio_diff_avg_count < AUDIO_DIFF_AVG_NB) {
-        is->audio_diff_avg_count++;
+                    is->audio_diff_avg_count++;
                 } else {
-        avg_diff = is->audio_diff_cum * (1.0 - is->audio_diff_avg_coef);
-        if(fabs(avg_diff) >= is->audio_diff_threshold) {
-            wanted_size = samples_size + ((int)(diff * is->audio_st->codec->sample_rate) * n);
-            min_size = samples_size * ((100 - SAMPLE_CORRECTION_PERCENT_MAX) / 100);
-            max_size = samples_size * ((100 + SAMPLE_CORRECTION_PERCENT_MAX) / 100);
-            if(wanted_size < min_size) {
-                wanted_size = min_size;
-            } else if (wanted_size > max_size) {
-                wanted_size = max_size;
-            }
-            if(wanted_size < samples_size) {
-                /* remove samples */
-                samples_size = wanted_size;
-            } else if(wanted_size > samples_size) {
-                uint8_t *samples_end, *q;
-                int nb;
-                /* add samples by copying final sample*/
-                nb = (samples_size - wanted_size);
-                samples_end = (uint8_t *)samples + samples_size - n;
-                q = samples_end + n;
-                while(nb > 0) {
-                    memcpy(q, samples_end, n);
-                    q += n;
-                    nb -= n;
-                }
-                samples_size = wanted_size;
-            }
-        }
+                    avg_diff = is->audio_diff_cum * (1.0 - is->audio_diff_avg_coef);
+                    if(fabs(avg_diff) >= is->audio_diff_threshold) {
+                        wanted_size = samples_size + ((int)(diff * is->audio_st->codec->sample_rate) * n);
+                        min_size = samples_size * ((100 - SAMPLE_CORRECTION_PERCENT_MAX) / 100);
+                        max_size = samples_size * ((100 + SAMPLE_CORRECTION_PERCENT_MAX) / 100);
+                        if(wanted_size < min_size) {
+                            wanted_size = min_size;
+                        } else if (wanted_size > max_size) {
+                            wanted_size = max_size;
+                        }
+                        if(wanted_size < samples_size) {
+                            /* remove samples */
+                            samples_size = wanted_size;
+                        } else if(wanted_size > samples_size) {
+                            uint8_t *samples_end, *q;
+                            int nb;
+                            /* add samples by copying final sample*/
+                            nb = (samples_size - wanted_size);
+                            samples_end = (uint8_t *)samples + samples_size - n;
+                            q = samples_end + n;
+                            while(nb > 0) {
+                                memcpy(q, samples_end, n);
+                                q += n;
+                                nb -= n;
+                            }
+                            samples_size = wanted_size;
+                        }
+                    }
                 }
             } else {
                 /* difference is TOO big; reset diff stuff */
@@ -245,7 +242,7 @@ namespace MWRender
             while(is->audio_pkt_size > 0) {
                 data_size = buf_size;
                 len1 = avcodec_decode_audio3(is->audio_st->codec,
-                                                                                            (int16_t *)audio_buf, &data_size,   pkt);
+                                             (int16_t*)audio_buf, &data_size, pkt);
 
 
                 if(len1 < 0) {
@@ -256,14 +253,14 @@ namespace MWRender
                 is->audio_pkt_data += len1;
                 is->audio_pkt_size -= len1;
                 if(data_size <= 0) {
-        /* No data yet, get more frames */
+                    /* No data yet, get more frames */
                     continue;
                 }
                 pts = is->audio_clock;
                 *pts_ptr = pts;
                 n = 2 * is->audio_st->codec->channels;
                 is->audio_clock += (double)data_size /
-                    (double)(n * is->audio_st->codec->sample_rate);
+                                   (double)(n * is->audio_st->codec->sample_rate);
 
                 /* We have data, return it and come back for more later */
                 return data_size;
@@ -302,7 +299,7 @@ namespace MWRender
                     memset(is->audio_buf, 0, is->audio_buf_size);
                 } else {
                     audio_size = synchronize_audio(is, (int16_t *)is->audio_buf,
-                                             audio_size, pts);
+                                                   audio_size, pts);
                     is->audio_buf_size = audio_size;
                 }
                 is->audio_buf_index = 0;
@@ -327,9 +324,9 @@ namespace MWRender
     }
     */
 
-    void timer_callback (int delay, VideoState* is)
+    void timer_callback (boost::system_time t, VideoState* is)
     {
-        boost::this_thread::sleep (boost::posix_time::milliseconds(delay));
+        boost::this_thread::sleep (t);
         is->refresh++;
     }
 
@@ -338,8 +335,8 @@ namespace MWRender
     {
         //SDL_AddTimer(delay, sdl_refresh_timer_cb, is);
         //is->refresh_queue.push_back (delay);
-
-        boost::thread (boost::bind(&timer_callback, delay, is));
+        boost::system_time t = boost::get_system_time() + boost::posix_time::milliseconds(delay);
+        boost::thread (boost::bind(&timer_callback, t, is));
     }
 
     void video_display(VideoState *is)
@@ -351,7 +348,8 @@ namespace MWRender
         if (is->video_st->codec->width != 0 && is->video_st->codec->height != 0)
         {
             Ogre::TexturePtr texture = Ogre::TextureManager::getSingleton ().getByName("VideoTexture");
-            if (texture.isNull () || static_cast<int>(texture->getWidth()) != is->video_st->codec->width || static_cast<int>(texture->getHeight()) != is->video_st->codec->height)
+            if (texture.isNull () || static_cast<int>(texture->getWidth()) != is->video_st->codec->width
+                    || static_cast<int>(texture->getHeight()) != is->video_st->codec->height)
             {
                 Ogre::TextureManager::getSingleton ().remove ("VideoTexture");
                 texture = Ogre::TextureManager::getSingleton().createManual(
@@ -403,7 +401,7 @@ namespace MWRender
                     diff = vp->pts - ref_clock;
 
                     /* Skip or repeat the frame. Take delay into account
-                         FFPlay still doesn't "know if this is the best guess." */
+                       FFPlay still doesn't "know if this is the best guess." */
                     sync_threshold = (delay > AV_SYNC_THRESHOLD) ? delay : AV_SYNC_THRESHOLD;
                     if(fabs(diff) < AV_NOSYNC_THRESHOLD) {
                         if(diff <= -sync_threshold) {
@@ -448,8 +446,7 @@ namespace MWRender
         /* wait until we have a new pic */
         {
             boost::unique_lock<boost::mutex> lock(is->pictq_mutex);
-            while(is->pictq_size >= VIDEO_PICTURE_QUEUE_SIZE &&
-            !is->quit) {
+            while(is->pictq_size >= VIDEO_PICTURE_QUEUE_SIZE && !is->quit) {
                 is->pictq_cond.timed_wait(lock, boost::posix_time::milliseconds(1));
             }
         }
@@ -464,9 +461,9 @@ namespace MWRender
         if(is->sws_context == NULL) {
             int w = is->video_st->codec->width;
             int h = is->video_st->codec->height;
-            is->sws_context = sws_getContext(w, h,
-                             is->video_st->codec->pix_fmt, w, h,
-                                             PIX_FMT_RGBA, SWS_BICUBIC, NULL, NULL, NULL);
+            is->sws_context = sws_getContext(w, h, is->video_st->codec->pix_fmt,
+                                             w, h, PIX_FMT_RGBA, SWS_BICUBIC,
+                                             NULL, NULL, NULL);
             if(is->sws_context == NULL)
                 throw std::runtime_error("Cannot initialize the conversion context!\n");
         }
@@ -474,7 +471,7 @@ namespace MWRender
         vp->data =(uint8_t*) malloc(is->video_st->codec->width * is->video_st->codec->height * 4);
 
         sws_scale(is->sws_context, pFrame->data, pFrame->linesize,
-                            0, is->video_st->codec->height, &vp->data, is->rgbaFrame->linesize);
+                  0, is->video_st->codec->height, &vp->data, is->rgbaFrame->linesize);
 
 
         vp->pts = pts;
@@ -575,8 +572,6 @@ namespace MWRender
             }
             av_free_packet(packet);
         }
-
-        SDL_CloseAudio();
 
         av_free(pFrame);
 
@@ -852,6 +847,7 @@ namespace MWRender
         // Register all formats and codecs
         av_register_all();
 
+        MWBase::Environment::get().getSoundManager()->pauseAllSounds();
         if(SDL_Init(SDL_INIT_AUDIO)) {
             throw std::runtime_error("Failed to initialize SDL");
         }
@@ -891,6 +887,9 @@ namespace MWRender
 
         delete mState;
         mState = NULL;
+
+        SDL_CloseAudio();
+        MWBase::Environment::get().getSoundManager()->resumeAllSounds();
 
         mRectangle->setVisible (false);
         MWBase::Environment::get().getWindowManager ()->removeGuiMode (MWGui::GM_Video);

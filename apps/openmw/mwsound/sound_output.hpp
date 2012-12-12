@@ -31,6 +31,9 @@ namespace MWSound
 
         virtual void updateListener(const Ogre::Vector3 &pos, const Ogre::Vector3 &atdir, const Ogre::Vector3 &updir, Environment env) = 0;
 
+        virtual void pauseAllSounds() = 0;
+        virtual void resumeAllSounds() = 0;
+
         Sound_Output& operator=(const Sound_Output &rhs);
         Sound_Output(const Sound_Output &rhs);
 

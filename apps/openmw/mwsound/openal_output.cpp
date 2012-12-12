@@ -254,7 +254,7 @@ bool OpenAL_SoundStream::isPlaying()
     alGetSourcei(mSource, AL_SOURCE_STATE, &state);
     throwALerror();
 
-    if(state == AL_PLAYING)
+    if(state == AL_PLAYING || state == AL_PAUSED)
         return true;
     return !mIsFinished;
 }
@@ -393,7 +393,7 @@ bool OpenAL_Sound::isPlaying()
     alGetSourcei(mSource, AL_SOURCE_STATE, &state);
     throwALerror();
 
-    return state==AL_PLAYING;
+    return state==AL_PLAYING || state==AL_PAUSED;
 }
 
 void OpenAL_Sound::update()
@@ -504,8 +504,9 @@ void OpenAL_Output::init(const std::string &devname)
             ALuint src = 0;
             alGenSources(1, &src);
             throwALerror();
-            mFreeSources.push_back(src);
+            mSources.push_back(src);
         }
+        mFreeSources.insert(mFreeSources.begin(), mSources.begin(), mSources.end());
     }
     catch(std::exception &e)
     {
@@ -521,11 +522,10 @@ void OpenAL_Output::deinit()
 {
     mStreamThread->removeAll();
 
-    while(!mFreeSources.empty())
-    {
-        alDeleteSources(1, &mFreeSources.front());
-        mFreeSources.pop_front();
-    }
+    mFreeSources.clear();
+    if(mSources.size() > 0)
+        alDeleteSources(mSources.size(), &mSources[0]);
+    mSources.clear();
 
     mBufferRefs.clear();
     mUnusedBuffers.clear();
@@ -811,6 +811,33 @@ void OpenAL_Output::updateListener(const Ogre::Vector3 &pos, const Ogre::Vector3
         alListenerfv(AL_ORIENTATION, orient);
         throwALerror();
     }
+}
+
+
+void OpenAL_Output::pauseAllSounds()
+{
+    IDVec sources = mSources;
+    IDDq::const_iterator iter = mFreeSources.begin();
+    while(iter != mFreeSources.end())
+    {
+        sources.erase(std::find(sources.begin(), sources.end(), *iter));
+        iter++;
+    }
+    if(sources.size() > 0)
+        alSourcePausev(sources.size(), &sources[0]);
+}
+
+void OpenAL_Output::resumeAllSounds()
+{
+    IDVec sources = mSources;
+    IDDq::const_iterator iter = mFreeSources.begin();
+    while(iter != mFreeSources.end())
+    {
+        sources.erase(std::find(sources.begin(), sources.end(), *iter));
+        iter++;
+    }
+    if(sources.size() > 0)
+        alSourcePlayv(sources.size(), &sources[0]);
 }
 
 
