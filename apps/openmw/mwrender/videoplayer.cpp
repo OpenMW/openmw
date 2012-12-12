@@ -275,7 +275,7 @@ namespace MWRender
             is->audio_pkt_data = pkt->data;
             is->audio_pkt_size = pkt->size;
             /* if update, update the audio clock w/pts */
-            if(pkt->pts != AV_NOPTS_VALUE) {
+            if(pkt->pts != (int64_t)AV_NOPTS_VALUE) {
                 is->audio_clock = av_q2d(is->audio_st->time_base)*pkt->pts;
             }
         }
@@ -345,7 +345,8 @@ namespace MWRender
         if (is->video_st->codec->width != 0 && is->video_st->codec->height != 0)
         {
             Ogre::TexturePtr texture = Ogre::TextureManager::getSingleton ().getByName("VideoTexture");
-            if (texture.isNull () || texture->getWidth() != is->video_st->codec->width || texture->getHeight() != is->video_st->codec->height)
+            if (texture.isNull () || texture->getWidth() != (size_t)is->video_st->codec->width ||
+                                     texture->getHeight() != (size_t)is->video_st->codec->height)
             {
                 Ogre::TextureManager::getSingleton ().remove ("VideoTexture");
                 texture = Ogre::TextureManager::getSingleton().createManual(
@@ -545,10 +546,10 @@ namespace MWRender
             // Decode video frame
             len1 = avcodec_decode_video2(is->video_st->codec, pFrame, &frameFinished,
                     packet);
-            if(packet->dts == AV_NOPTS_VALUE
+            if(packet->dts == (int64_t)AV_NOPTS_VALUE
                  && pFrame->opaque && *(uint64_t*)pFrame->opaque != AV_NOPTS_VALUE) {
                 pts = *(uint64_t *)pFrame->opaque;
-            } else if(packet->dts != AV_NOPTS_VALUE) {
+            } else if(packet->dts != (int64_t)AV_NOPTS_VALUE) {
                 pts = packet->dts;
             } else {
                 pts = 0;
@@ -582,7 +583,7 @@ namespace MWRender
         AVCodec *codec;
         SDL_AudioSpec wanted_spec, spec;
 
-        if(stream_index < 0 || stream_index >= pFormatCtx->nb_streams) {
+        if(stream_index < 0 || (unsigned int)stream_index >= pFormatCtx->nb_streams) {
             return -1;
         }
 
@@ -661,7 +662,7 @@ namespace MWRender
 
         int video_index = -1;
         int audio_index = -1;
-        int i;
+        unsigned int i;
 
         is->videoStream=-1;
         is->audioStream=-1;
