@@ -321,9 +321,9 @@ namespace MWRender
     }
     */
 
-    void timer_callback (int delay, VideoState* is)
+    void timer_callback (boost::system_time t, VideoState* is)
     {
-        boost::this_thread::sleep (boost::posix_time::milliseconds(delay));
+        boost::this_thread::sleep (t);
         is->refresh++;
     }
 
@@ -332,8 +332,8 @@ namespace MWRender
     {
         //SDL_AddTimer(delay, sdl_refresh_timer_cb, is);
         //is->refresh_queue.push_back (delay);
-
-        boost::thread (boost::bind(&timer_callback, delay, is));
+        boost::system_time t = boost::get_system_time() + boost::posix_time::milliseconds(delay);
+        boost::thread (boost::bind(&timer_callback, t, is));
     }
 
     void video_display(VideoState *is)
