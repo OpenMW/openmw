@@ -197,6 +197,7 @@ class RenderingManager: private RenderingInterface, public Ogre::WindowEventList
     void setupExternalRendering (MWRender::ExternalRendering& rendering);
 
     void playVideo(const std::string& name);
+    void stopVideo();
 
   protected:
 	virtual void windowResized(Ogre::RenderWindow* rw);

@@ -1291,4 +1291,9 @@ namespace MWWorld
     {
         mRendering->playVideo(name);
     }
+
+    void World::stopVideo ()
+    {
+        mRendering->stopVideo();
+    }
 }

@@ -931,4 +931,9 @@ void RenderingManager::playVideo(const std::string& name)
     mVideoPlayer->playVideo ("video/" + name);
 }
 
+void RenderingManager::stopVideo()
+{
+    mVideoPlayer->close ();
+}
+
 } // namespace

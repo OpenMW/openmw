@@ -335,6 +335,7 @@ namespace MWWorld
 
             /// \todo this does not belong here
             virtual void playVideo(const std::string& name);
+            virtual void stopVideo();
     };
 }
 

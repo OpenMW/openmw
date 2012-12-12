@@ -508,6 +508,8 @@ namespace MWInput
     {
         if (mWindows.isGuiMode () && (mWindows.getMode () == MWGui::GM_MainMenu || mWindows.getMode () == MWGui::GM_Settings))
             mWindows.popGuiMode();
+        else if (mWindows.isGuiMode () && mWindows.getMode () == MWGui::GM_Video)
+            MWBase::Environment::get().getWorld ()->stopVideo ();
         else
             mWindows.pushGuiMode (MWGui::GM_MainMenu);
     }
