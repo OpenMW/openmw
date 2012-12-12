@@ -565,8 +565,6 @@ namespace MWRender
             av_free_packet(packet);
         }
 
-        SDL_CloseAudio();
-
         av_free(pFrame);
 
         avpicture_free((AVPicture *)is->rgbaFrame);
@@ -860,6 +858,8 @@ namespace MWRender
 
         delete mState;
         mState = NULL;
+
+        SDL_CloseAudio();
 
         mRectangle->setVisible (false);
         MWBase::Environment::get().getWindowManager ()->removeGuiMode (MWGui::GM_Video);
