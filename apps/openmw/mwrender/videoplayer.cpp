@@ -125,21 +125,23 @@ namespace MWRender
         }
         return ret;
     }
-    static void packet_queue_flush(PacketQueue *q) {
+
+    void PacketQueue::flush() {
         AVPacketList *pkt, *pkt1;
 
-        q->mutex.lock();
-        for(pkt = q->first_pkt; pkt != NULL; pkt = pkt1) {
+        this->mutex.lock();
+        for(pkt = this->first_pkt; pkt != NULL; pkt = pkt1) {
             pkt1 = pkt->next;
             av_free_packet(&pkt->pkt);
             av_freep(&pkt);
         }
-        q->last_pkt = NULL;
-        q->first_pkt = NULL;
-        q->nb_packets = 0;
-        q->size = 0;
-        q->mutex.unlock ();
+        this->last_pkt = NULL;
+        this->first_pkt = NULL;
+        this->nb_packets = 0;
+        this->size = 0;
+        this->mutex.unlock ();
     }
+
     double get_audio_clock(VideoState *is) {
         double pts;
         int hw_buf_size, bytes_per_sec, n;
@@ -279,7 +281,7 @@ namespace MWRender
             is->audio_pkt_data = pkt->data;
             is->audio_pkt_size = pkt->size;
             /* if update, update the audio clock w/pts */
-            if(pkt->pts != AV_NOPTS_VALUE) {
+            if((uint64_t)pkt->pts != AV_NOPTS_VALUE) {
                 is->audio_clock = av_q2d(is->audio_st->time_base)*pkt->pts;
             }
         }
@@ -349,7 +351,7 @@ namespace MWRender
         if (is->video_st->codec->width != 0 && is->video_st->codec->height != 0)
         {
             Ogre::TexturePtr texture = Ogre::TextureManager::getSingleton ().getByName("VideoTexture");
-            if (texture.isNull () || texture->getWidth() != is->video_st->codec->width || texture->getHeight() != is->video_st->codec->height)
+            if (texture.isNull () || static_cast<int>(texture->getWidth()) != is->video_st->codec->width || static_cast<int>(texture->getHeight()) != is->video_st->codec->height)
             {
                 Ogre::TextureManager::getSingleton ().remove ("VideoTexture");
                 texture = Ogre::TextureManager::getSingleton().createManual(
@@ -364,6 +366,7 @@ namespace MWRender
             Ogre::PixelBox pb(is->video_st->codec->width, is->video_st->codec->height, 1, Ogre::PF_BYTE_RGBA, vp->data);
             Ogre::HardwarePixelBufferSharedPtr buffer = texture->getBuffer();
             buffer->blitFromMemory(pb);
+            is->display_ready = 1;
         }
 
         free(vp->data);
@@ -527,7 +530,7 @@ namespace MWRender
     int video_thread(void *arg) {
         VideoState *is = (VideoState *)arg;
         AVPacket pkt1, *packet = &pkt1;
-        int len1, frameFinished;
+        int frameFinished;
         AVFrame *pFrame;
         double pts;
 
@@ -547,12 +550,15 @@ namespace MWRender
             // Save global pts to be stored in pFrame
             global_video_pkt_pts = packet->pts;
             // Decode video frame
-            len1 = avcodec_decode_video2(is->video_st->codec, pFrame, &frameFinished,
-                    packet);
-            if(packet->dts == AV_NOPTS_VALUE
+            if (avcodec_decode_video2(is->video_st->codec, pFrame, &frameFinished,
+                    packet) < 0)
+            {
+                throw std::runtime_error("Error decoding video frame");
+            }
+            if((uint64_t)packet->dts == AV_NOPTS_VALUE
                  && pFrame->opaque && *(uint64_t*)pFrame->opaque != AV_NOPTS_VALUE) {
                 pts = *(uint64_t *)pFrame->opaque;
-            } else if(packet->dts != AV_NOPTS_VALUE) {
+            } else if((uint64_t)packet->dts != AV_NOPTS_VALUE) {
                 pts = packet->dts;
             } else {
                 pts = 0;
@@ -586,7 +592,7 @@ namespace MWRender
         AVCodec *codec;
         SDL_AudioSpec wanted_spec, spec;
 
-        if(stream_index < 0 || stream_index >= pFormatCtx->nb_streams) {
+        if(stream_index < 0 || stream_index >= static_cast<int>(pFormatCtx->nb_streams)) {
             return -1;
         }
 
@@ -650,127 +656,141 @@ namespace MWRender
             break;
         }
 
-
+        return 0;
     }
 
     int decode_interrupt_cb(void) {
         return (global_video_state && global_video_state->quit);
     }
 
-    int decode_thread(void *arg) {
-
+    int decode_thread(void *arg)
+    {
         VideoState *is = (VideoState *)arg;
-        AVFormatContext *pFormatCtx = avformat_alloc_context ();
-        AVPacket pkt1, *packet = &pkt1;
-
-        int video_index = -1;
-        int audio_index = -1;
-        int i;
-
-        is->videoStream=-1;
-        is->audioStream=-1;
-        is->quit = 0;
-
-        Ogre::DataStreamPtr stream = Ogre::ResourceGroupManager::getSingleton ().openResource (is->resourceName);
-        if(stream.isNull ())
-            throw std::runtime_error("Failed to open video resource");
-        is->stream = stream;
-
-        AVIOContext  *ioContext = 0;
-
-        ioContext = avio_alloc_context(NULL, 0, 0, is, OgreResource_Read, OgreResource_Write, OgreResource_Seek);
-        if (!ioContext)
-            throw std::runtime_error("Failed to allocate ioContext ");
-
-        pFormatCtx->pb = ioContext;
-
-        global_video_state = is;
-        // will interrupt blocking functions if we quit!
-        //url_set_interrupt_cb(decode_interrupt_cb);
-
-        // Open video file
-        /// \todo leak here, ffmpeg or valgrind bug ?
-        if (avformat_open_input(&pFormatCtx, is->resourceName.c_str(), NULL, NULL))
-            throw std::runtime_error("Failed to open video input");
-
-        // Retrieve stream information
-        if(avformat_find_stream_info(pFormatCtx, NULL)<0)
-            throw std::runtime_error("Failed to retrieve stream information");
-
-        // Dump information about file onto standard error
-        av_dump_format(pFormatCtx, 0, is->resourceName.c_str(), 0);
-
-        for(i=0; i<pFormatCtx->nb_streams; i++) {
-            if(pFormatCtx->streams[i]->codec->codec_type==AVMEDIA_TYPE_VIDEO &&
-                 video_index < 0) {
-                video_index=i;
-            }
-            if(pFormatCtx->streams[i]->codec->codec_type==AVMEDIA_TYPE_AUDIO &&
-                 audio_index < 0) {
-                audio_index=i;
-            }
-        }
-
-        if(audio_index >= 0) {
-            stream_component_open(is, audio_index, pFormatCtx);
-        }
-        if(video_index >= 0) {
-            stream_component_open(is, video_index, pFormatCtx);
-        }
-
-        if(is->videoStream >= 0 /*|| is->audioStream < 0*/)
+        try
         {
+            AVFormatContext *pFormatCtx = avformat_alloc_context ();
+            AVPacket pkt1, *packet = &pkt1;
 
-            // main decode loop
+            int video_index = -1;
+            int audio_index = -1;
+            unsigned int i;
 
-            for(;;) {
-                if(is->quit) {
-                    break;
+            is->videoStream=-1;
+            is->audioStream=-1;
+            is->quit = 0;
+
+            Ogre::DataStreamPtr stream = Ogre::ResourceGroupManager::getSingleton ().openResource (is->resourceName);
+            if(stream.isNull ())
+                throw std::runtime_error("Failed to open video resource");
+            is->stream = stream;
+
+            AVIOContext  *ioContext = 0;
+
+            ioContext = avio_alloc_context(NULL, 0, 0, is, OgreResource_Read, OgreResource_Write, OgreResource_Seek);
+            if (!ioContext)
+                throw std::runtime_error("Failed to allocate ioContext ");
+
+            pFormatCtx->pb = ioContext;
+
+            global_video_state = is;
+            // will interrupt blocking functions if we quit!
+            //url_set_interrupt_cb(decode_interrupt_cb);
+
+            // Open video file
+            /// \todo leak here, ffmpeg or valgrind bug ?
+            if (avformat_open_input(&pFormatCtx, is->resourceName.c_str(), NULL, NULL))
+                throw std::runtime_error("Failed to open video input");
+
+            // Retrieve stream information
+            if(avformat_find_stream_info(pFormatCtx, NULL)<0)
+                throw std::runtime_error("Failed to retrieve stream information");
+
+            // Dump information about file onto standard error
+            av_dump_format(pFormatCtx, 0, is->resourceName.c_str(), 0);
+
+            for(i=0; i<pFormatCtx->nb_streams; i++) {
+                if(pFormatCtx->streams[i]->codec->codec_type==AVMEDIA_TYPE_VIDEO &&
+                     video_index < 0) {
+                    video_index=i;
                 }
-                if( (is->audioStream >= 0 && is->audioq.size > MAX_AUDIOQ_SIZE) ||
-                     is->videoq.size > MAX_VIDEOQ_SIZE) {
-                    boost::this_thread::sleep(boost::posix_time::milliseconds(10));
-                    continue;
-                }
-                if(av_read_frame(pFormatCtx, packet) < 0) {
-                    break;
-                }
-                // Is this a packet from the video stream?
-                if(packet->stream_index == is->videoStream) {
-                    packet_queue_put(&is->videoq, packet);
-                } else if(packet->stream_index == is->audioStream) {
-                    packet_queue_put(&is->audioq, packet);
-                } else {
-                    av_free_packet(packet);
+                if(pFormatCtx->streams[i]->codec->codec_type==AVMEDIA_TYPE_AUDIO &&
+                     audio_index < 0) {
+                    audio_index=i;
                 }
             }
-            /* all done - wait for it */
-            while(!is->quit) {
-                // EOF reached, all packets processed, we can exit now
-                if (is->audioq.nb_packets == 0 && is->videoq.nb_packets == 0)
-                    break;
-                boost::this_thread::sleep(boost::posix_time::milliseconds(100));
+
+            if(audio_index >= 0) {
+                stream_component_open(is, audio_index, pFormatCtx);
             }
+            if(video_index >= 0) {
+                stream_component_open(is, video_index, pFormatCtx);
+            }
+
+            if(is->videoStream >= 0 /*|| is->audioStream < 0*/)
+            {
+
+                // main decode loop
+
+                for(;;) {
+                    if(is->quit) {
+                        break;
+                    }
+                    if( (is->audioStream >= 0 && is->audioq.size > MAX_AUDIOQ_SIZE) ||
+                         is->videoq.size > MAX_VIDEOQ_SIZE) {
+                        boost::this_thread::sleep(boost::posix_time::milliseconds(10));
+                        continue;
+                    }
+                    if(av_read_frame(pFormatCtx, packet) < 0) {
+                        break;
+                    }
+                    // Is this a packet from the video stream?
+                    if(packet->stream_index == is->videoStream) {
+                        packet_queue_put(&is->videoq, packet);
+                    } else if(packet->stream_index == is->audioStream) {
+                        packet_queue_put(&is->audioq, packet);
+                    } else {
+                        av_free_packet(packet);
+                    }
+                }
+                /* all done - wait for it */
+                while(!is->quit) {
+                    // EOF reached, all packets processed, we can exit now
+                    if (is->audioq.nb_packets == 0 && is->videoq.nb_packets == 0)
+                        break;
+                    boost::this_thread::sleep(boost::posix_time::milliseconds(100));
+                }
+            }
+
+
+            is->quit = 1;
+
+            is->audioq.cond.notify_one ();
+            is->videoq.cond.notify_one ();
+
+            is->video_thread.join();
+
+            if (is->audioStream >= 0)
+                avcodec_close(is->audio_st->codec);
+            if (is->videoStream >= 0)
+                avcodec_close(is->video_st->codec);
+
+            sws_freeContext (is->sws_context);
+
+            avformat_close_input(&pFormatCtx);
+            pFormatCtx = NULL;
+
+            av_free(ioContext);
         }
-
-        is->quit = 1;
-
-        is->audioq.cond.notify_one ();
-        is->videoq.cond.notify_one ();
-
-        is->video_thread.join();
-
-        if (is->audioStream >= 0)
-            avcodec_close(is->audio_st->codec);
-        if (is->videoStream >= 0)
-            avcodec_close(is->video_st->codec);
-
-        sws_freeContext (is->sws_context);
-
-        av_close_input_file(pFormatCtx);
-        pFormatCtx = NULL;
-
-        av_free(ioContext);
+        catch (std::runtime_error& e)
+        {
+            std::cerr << "An error occured playing the video: " << e.what () << std::endl;
+            is->quit = 1;
+        }
+        catch (Ogre::Exception& e)
+        {
+            std::cerr << "An error occured playing the video: " << e.getFullDescription () << std::endl;
+            is->quit = 1;
+        }
 
         return 0;
     }
@@ -857,8 +877,10 @@ namespace MWRender
             close();
         }
 
-        if (!Ogre::TextureManager::getSingleton ().getByName ("VideoTexture").isNull ())
+        if (mState && mState->display_ready && !Ogre::TextureManager::getSingleton ().getByName ("VideoTexture").isNull ())
             mVideoMaterial->getTechnique(0)->getPass(0)->getTextureUnitState (0)->setTextureName ("VideoTexture");
+        else
+            mVideoMaterial->getTechnique(0)->getPass(0)->getTextureUnitState (0)->setTextureName ("black.png");
     }
 
     void VideoPlayer::close()

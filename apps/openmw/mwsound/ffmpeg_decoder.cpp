@@ -277,7 +277,7 @@ void FFmpeg_Decoder::open(const std::string &fname)
                     ss << stream->mCodecCtx->codec_id;
                     fail(ss.str());
                 }
-                if(avcodec_open(stream->mCodecCtx, codec) < 0)
+                if(avcodec_open2(stream->mCodecCtx, codec, NULL) < 0)
                     fail("Failed to open audio codec " + std::string(codec->long_name));
 
                 stream->mDecodedData = (char*)av_malloc(AVCODEC_MAX_AUDIO_FRAME_SIZE);
@@ -293,7 +293,7 @@ void FFmpeg_Decoder::open(const std::string &fname)
     }
     catch(std::exception &e)
     {
-        av_close_input_file(mFormatCtx);
+        avformat_close_input(&mFormatCtx);
         mFormatCtx = NULL;
         throw;
     }
@@ -317,7 +317,7 @@ void FFmpeg_Decoder::close()
         AVIOContext* context = mFormatCtx->pb;
         av_free(context);
         mFormatCtx->pb = NULL;
-        av_close_input_file(mFormatCtx);
+        avformat_close_input(&mFormatCtx);
     }
     mFormatCtx = NULL;
 
