@@ -142,16 +142,12 @@ namespace MWRender
     }
     double get_audio_clock(VideoState *is) {
         double pts;
-        int hw_buf_size, bytes_per_sec, n;
 
         pts = is->audio_clock; /* maintained in the audio thread */
-        hw_buf_size = is->audio_buf_size - is->audio_buf_index;
-        bytes_per_sec = 0;
-        n = is->audio_st->codec->channels * 2;
         if(is->audio_st) {
-            bytes_per_sec = is->audio_st->codec->sample_rate * n;
-        }
-        if(bytes_per_sec) {
+            int n = is->audio_st->codec->channels * 2;
+            int bytes_per_sec = is->audio_st->codec->sample_rate * n;
+            int hw_buf_size = is->audio_buf_size - is->audio_buf_index;
             pts -= (double)hw_buf_size / bytes_per_sec;
         }
         return pts;
