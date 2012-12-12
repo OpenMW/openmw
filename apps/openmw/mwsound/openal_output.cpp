@@ -254,7 +254,7 @@ bool OpenAL_SoundStream::isPlaying()
     alGetSourcei(mSource, AL_SOURCE_STATE, &state);
     throwALerror();
 
-    if(state == AL_PLAYING)
+    if(state == AL_PLAYING || state == AL_PAUSED)
         return true;
     return !mIsFinished;
 }
@@ -393,7 +393,7 @@ bool OpenAL_Sound::isPlaying()
     alGetSourcei(mSource, AL_SOURCE_STATE, &state);
     throwALerror();
 
-    return state==AL_PLAYING;
+    return state==AL_PLAYING || state==AL_PAUSED;
 }
 
 void OpenAL_Sound::update()
