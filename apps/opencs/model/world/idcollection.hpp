@@ -15,21 +15,25 @@
 
 namespace CSMWorld
 {
-    template<typename ESXRecordT>
-    struct Column
+    struct ColumnBase
     {
-        std::string mTitle;
-
-        Column (const std::string& title) : mTitle (title) {}
-
-        virtual ~Column() {}
-
-        virtual QVariant get (const Record<ESXRecordT>& record) const = 0;
-
-        virtual void set (Record<ESXRecordT>& record, const QVariant& data)
+        enum Roles
         {
-            throw std::logic_error ("Column " + mTitle + " is not editable");
-        }
+                Role_Flags = Qt::UserRole
+        };
+
+        enum Flags
+        {
+            Flag_Table = 1, // column should be displayed in table view
+            Flag_Dialogue = 2 // column should be displayed in dialogue view
+        };
+
+        std::string mTitle;
+        int mFlags;
+
+        ColumnBase (const std::string& title, int flag);
+
+        virtual ~ColumnBase();
 
         virtual bool isEditable() const = 0;
 
@@ -38,10 +42,21 @@ namespace CSMWorld
     };
 
     template<typename ESXRecordT>
-    bool Column<ESXRecordT>::isUserEditable() const
+    struct Column : public ColumnBase
     {
-        return isEditable();
-    }
+        std::string mTitle;
+        int mFlags;
+
+        Column (const std::string& title, int flags = Flag_Table | Flag_Dialogue)
+        : ColumnBase (title, flags) {}
+
+        virtual QVariant get (const Record<ESXRecordT>& record) const = 0;
+
+        virtual void set (Record<ESXRecordT>& record, const QVariant& data)
+        {
+            throw std::logic_error ("Column " + mTitle + " is not editable");
+        }
+    };
 
     class IdCollectionBase
     {
@@ -63,15 +78,11 @@ namespace CSMWorld
 
             virtual int getColumns() const = 0;
 
-            virtual std::string getTitle (int column) const = 0;
+            virtual const ColumnBase& getColumn (int column) const = 0;
 
             virtual QVariant getData (int index, int column) const = 0;
 
             virtual void setData (int index, int column, const QVariant& data) = 0;
-
-            virtual bool isEditable (int column) const = 0;
-
-            virtual bool isUserEditable (int column) const = 0;
 
             virtual void merge() = 0;
             ///< Merge modified into base.
@@ -136,11 +147,7 @@ namespace CSMWorld
 
             virtual void setData (int index, int column, const QVariant& data);
 
-            virtual std::string getTitle (int column) const;
-
-            virtual bool isEditable (int column) const;
-
-            virtual bool isUserEditable (int column) const;
+            virtual const ColumnBase& getColumn (int column) const;
 
             virtual void merge();
             ///< Merge modified into base.
@@ -252,21 +259,9 @@ namespace CSMWorld
     }
 
     template<typename ESXRecordT>
-    std::string IdCollection<ESXRecordT>::getTitle (int column) const
+    const ColumnBase& IdCollection<ESXRecordT>::getColumn (int column) const
     {
-        return mColumns.at (column)->mTitle;
-    }
-
-    template<typename ESXRecordT>
-    bool IdCollection<ESXRecordT>::isEditable (int column) const
-    {
-        return mColumns.at (column)->isEditable();
-    }
-
-    template<typename ESXRecordT>
-    bool IdCollection<ESXRecordT>::isUserEditable (int column) const
-    {
-        return mColumns.at (column)->isUserEditable();
+        return *mColumns.at (column);
     }
 
     template<typename ESXRecordT>
