@@ -26,6 +26,7 @@ namespace MWSound
     public:
         virtual void stop() = 0;
         virtual bool isPlaying() = 0;
+        virtual double getTimeOffset() = 0;
         void setPosition(const Ogre::Vector3 &pos) { mPos = pos; }
         void setVolume(float volume) { mVolume = volume; }
 

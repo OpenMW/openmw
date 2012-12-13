@@ -95,6 +95,7 @@ public:
 
     virtual void stop();
     virtual bool isPlaying();
+    virtual double getTimeOffset();
     virtual void update();
 
     void play();
@@ -259,6 +260,11 @@ bool OpenAL_SoundStream::isPlaying()
     return !mIsFinished;
 }
 
+double OpenAL_SoundStream::getTimeOffset()
+{
+    return 0.0;
+}
+
 void OpenAL_SoundStream::update()
 {
     ALfloat gain = mVolume*mBaseVolume;
@@ -348,6 +354,7 @@ public:
 
     virtual void stop();
     virtual bool isPlaying();
+    virtual double getTimeOffset();
     virtual void update();
 };
 
@@ -394,6 +401,16 @@ bool OpenAL_Sound::isPlaying()
     throwALerror();
 
     return state==AL_PLAYING || state==AL_PAUSED;
+}
+
+double OpenAL_Sound::getTimeOffset()
+{
+    ALfloat t;
+
+    alGetSourcef(mSource, AL_SEC_OFFSET, &t);
+    throwALerror();
+
+    return t;
 }
 
 void OpenAL_Sound::update()
