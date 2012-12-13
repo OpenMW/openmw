@@ -230,29 +230,18 @@ OpenAL_SoundStream::~OpenAL_SoundStream()
 
 void OpenAL_SoundStream::play()
 {
-    std::vector<char> data(mBufferSize);
-    ALuint count = 0;
-
     alSourceStop(mSource);
     alSourcei(mSource, AL_BUFFER, 0);
     throwALerror();
-
     mSamplesQueued = 0;
+
     for(ALuint i = 0;i < sNumBuffers;i++)
-    {
-        size_t got;
-        got = mDecoder->read(&data[0], data.size());
-        alBufferData(mBuffers[i], mFormat, &data[0], got, mSampleRate);
-        count += getBufferSampleCount(mBuffers[i]);
-    }
+        alBufferData(mBuffers[i], mFormat, this, 0, mSampleRate);
     throwALerror();
 
     alSourceQueueBuffers(mSource, sNumBuffers, mBuffers);
     alSourcePlay(mSource);
     throwALerror();
-
-    mSamplesTotal += count;
-    mSamplesQueued = count;
 
     mIsFinished = false;
     mOutput.mStreamThread->add(this);
