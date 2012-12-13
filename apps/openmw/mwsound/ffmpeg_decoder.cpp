@@ -324,6 +324,11 @@ void FFmpeg_Decoder::close()
     mDataStream.setNull();
 }
 
+std::string FFmpeg_Decoder::getName()
+{
+    return mFormatCtx->filename;
+}
+
 void FFmpeg_Decoder::getInfo(int *samplerate, ChannelConfig *chans, SampleType *type)
 {
     if(mStreams.empty())

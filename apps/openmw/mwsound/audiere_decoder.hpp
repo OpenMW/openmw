@@ -12,6 +12,7 @@ namespace MWSound
 {
     class Audiere_Decoder : public Sound_Decoder
     {
+        audiere::FilePtr mSoundFile;
         audiere::SampleSourcePtr mSoundSource;
         int mSampleRate;
         SampleType mSampleType;

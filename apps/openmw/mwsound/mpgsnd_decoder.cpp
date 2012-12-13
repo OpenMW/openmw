@@ -155,6 +155,11 @@ void MpgSnd_Decoder::close()
     mDataStream.setNull();
 }
 
+std::string MpgSnd_Decoder::getName()
+{
+    return mDataStream->getName();
+}
+
 void MpgSnd_Decoder::getInfo(int *samplerate, ChannelConfig *chans, SampleType *type)
 {
     if(!mSndFile && !mMpgFile)

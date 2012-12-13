@@ -36,6 +36,7 @@ namespace MWSound
         virtual void open(const std::string &fname);
         virtual void close();
 
+        virtual std::string getName();
         virtual void getInfo(int *samplerate, ChannelConfig *chans, SampleType *type);
 
         virtual size_t read(char *buffer, size_t bytes);
