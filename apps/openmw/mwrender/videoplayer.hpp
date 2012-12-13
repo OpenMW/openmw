@@ -62,7 +62,7 @@ namespace MWRender
             audio_pkt_data(NULL), audio_pkt_size(0), audio_diff_cum(0), audio_diff_avg_coef(0),
             audio_diff_threshold(0), audio_diff_avg_count(0), frame_timer(0), frame_last_pts(0), frame_last_delay(0),
             video_clock(0), video_current_pts(0), video_current_pts_time(0), video_st(NULL), rgbaFrame(NULL), pictq_size(0),
-            pictq_rindex(0), pictq_windex(0), quit(false), refresh(0), sws_context(NULL), display_ready(0)
+            pictq_rindex(0), pictq_windex(0), quit(false), refresh(0), format_ctx(0), sws_context(NULL), display_ready(0)
         {}
 
 
@@ -108,6 +108,7 @@ namespace MWRender
 
         MWBase::SoundPtr AudioTrack;
 
+        AVFormatContext* format_ctx;
         SwsContext* sws_context;
 
         VideoPicture pictq[VIDEO_PICTURE_QUEUE_SIZE];
