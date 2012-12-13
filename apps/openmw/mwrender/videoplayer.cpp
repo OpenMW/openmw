@@ -11,53 +11,36 @@
 namespace MWRender
 {
 
-    int OgreResource_Read(void *opaque, uint8_t *buf, int buf_size)
+    int OgreResource_Read(void *user_data, uint8_t *buf, int buf_size)
     {
-        Ogre::DataStreamPtr stream = static_cast<VideoState*>(opaque)->stream;
-
-        int num_read = stream->size() - stream->tell();
-
-        if (num_read > buf_size)
-            num_read = buf_size;
-
-        stream->read(buf, num_read);
-        return num_read;
+        Ogre::DataStreamPtr stream = static_cast<VideoState*>(user_data)->stream;
+        return stream->read(buf, buf_size);
     }
 
-    int OgreResource_Write(void *opaque, uint8_t *buf, int buf_size)
+    int OgreResource_Write(void *user_data, uint8_t *buf, int buf_size)
     {
-        Ogre::DataStreamPtr stream = static_cast<VideoState*>(opaque)->stream;
-
-        int num_write = stream->size() - stream->tell();
-
-        if (num_write > buf_size)
-            num_write = buf_size;
-
-        stream->write (buf, num_write);
-        return num_write;
+        Ogre::DataStreamPtr stream = static_cast<VideoState*>(user_data)->stream;
+        return stream->write(buf, buf_size);
     }
 
-    int64_t OgreResource_Seek(void *opaque, int64_t offset, int whence)
+    int64_t OgreResource_Seek(void *user_data, int64_t offset, int whence)
     {
-        Ogre::DataStreamPtr stream = static_cast<VideoState*>(opaque)->stream;
+        Ogre::DataStreamPtr stream = static_cast<VideoState*>(user_data)->stream;
 
-        switch (whence)
-        {
-            case SEEK_SET:
-                stream->seek(offset);
-            case SEEK_CUR:
-                stream->seek(stream->tell() + offset);
-            case SEEK_END:
-                stream->seek(stream->size() + offset);
-            case AVSEEK_SIZE:
-                return stream->size();
-            default:
-                return -1;
-        }
+        whence &= ~AVSEEK_FORCE;
+        if(whence == AVSEEK_SIZE)
+            return stream->size();
+        if(whence == SEEK_SET)
+            stream->seek(offset);
+        else if(whence == SEEK_CUR)
+            stream->seek(stream->tell()+offset);
+        else if(whence == SEEK_END)
+            stream->seek(stream->size()+offset);
+        else
+            return -1;
 
         return stream->tell();
     }
-
 
     void packet_queue_init(PacketQueue *q)
     { memset(q, 0, sizeof(PacketQueue)); }
