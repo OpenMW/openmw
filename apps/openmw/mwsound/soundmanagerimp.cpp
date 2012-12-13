@@ -167,7 +167,11 @@ namespace MWSound
         {
             float basevol = mMasterVolume * mMusicVolume;
             stopMusic();
-            mMusic = mOutput->streamSound(filename, basevol, 1.0f, Play_NoEnv);
+
+            DecoderPtr decoder = getDecoder();
+            decoder->open(filename);
+
+            mMusic = mOutput->streamSound(decoder, basevol, 1.0f, Play_NoEnv);
             mMusic->mBaseVolume = basevol;
             mMusic->mFlags = Play_NoEnv;
         }

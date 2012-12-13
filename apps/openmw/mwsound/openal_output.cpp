@@ -764,7 +764,7 @@ MWBase::SoundPtr OpenAL_Output::playSound3D(const std::string &fname, const Ogre
 }
 
 
-MWBase::SoundPtr OpenAL_Output::streamSound(const std::string &fname, float volume, float pitch, int flags)
+MWBase::SoundPtr OpenAL_Output::streamSound(DecoderPtr decoder, float volume, float pitch, int flags)
 {
     boost::shared_ptr<OpenAL_SoundStream> sound;
     ALuint src;
@@ -774,12 +774,10 @@ MWBase::SoundPtr OpenAL_Output::streamSound(const std::string &fname, float volu
     src = mFreeSources.front();
     mFreeSources.pop_front();
 
+    if((flags&MWBase::SoundManager::Play_Loop))
+        std::cout <<"Warning: cannot loop stream \""<<decoder->getName()<<"\""<< std::endl;
     try
     {
-        if((flags&MWBase::SoundManager::Play_Loop))
-            std::cout <<"Warning: cannot loop stream "<<fname<< std::endl;
-        DecoderPtr decoder = mManager.getDecoder();
-        decoder->open(fname);
         sound.reset(new OpenAL_SoundStream(*this, src, decoder));
     }
     catch(std::exception &e)
