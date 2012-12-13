@@ -65,6 +65,18 @@ static ALenum getALFormat(ChannelConfig chans, SampleType type)
     return AL_NONE;
 }
 
+static ALint getBufferSampleCount(ALuint buf)
+{
+    ALint size, bits, channels;
+
+    alGetBufferi(buf, AL_SIZE, &size);
+    alGetBufferi(buf, AL_BITS, &bits);
+    alGetBufferi(buf, AL_CHANNELS, &channels);
+    throwALerror();
+
+    return size / channels * 8 / bits;
+}
+
 //
 // A streaming OpenAL sound.
 //
@@ -81,6 +93,9 @@ class OpenAL_SoundStream : public Sound
     ALenum mFormat;
     ALsizei mSampleRate;
     ALuint mBufferSize;
+
+    ALuint mSamplesTotal;
+    ALuint mSamplesQueued;
 
     DecoderPtr mDecoder;
 
@@ -172,7 +187,8 @@ private:
 
 
 OpenAL_SoundStream::OpenAL_SoundStream(OpenAL_Output &output, ALuint src, DecoderPtr decoder)
-  : mOutput(output), mSource(src), mDecoder(decoder), mIsFinished(true)
+  : mOutput(output), mSource(src), mSamplesTotal(0), mSamplesQueued(0),
+    mDecoder(decoder), mIsFinished(true)
 {
     throwALerror();
 
@@ -215,22 +231,28 @@ OpenAL_SoundStream::~OpenAL_SoundStream()
 void OpenAL_SoundStream::play()
 {
     std::vector<char> data(mBufferSize);
+    ALuint count = 0;
 
     alSourceStop(mSource);
     alSourcei(mSource, AL_BUFFER, 0);
     throwALerror();
 
+    mSamplesQueued = 0;
     for(ALuint i = 0;i < sNumBuffers;i++)
     {
         size_t got;
         got = mDecoder->read(&data[0], data.size());
         alBufferData(mBuffers[i], mFormat, &data[0], got, mSampleRate);
+        count += getBufferSampleCount(mBuffers[i]);
     }
     throwALerror();
 
     alSourceQueueBuffers(mSource, sNumBuffers, mBuffers);
     alSourcePlay(mSource);
     throwALerror();
+
+    mSamplesTotal += count;
+    mSamplesQueued = count;
 
     mIsFinished = false;
     mOutput.mStreamThread->add(this);
@@ -244,8 +266,10 @@ void OpenAL_SoundStream::stop()
     alSourceStop(mSource);
     alSourcei(mSource, AL_BUFFER, 0);
     throwALerror();
+    mSamplesQueued = 0;
 
     mDecoder->rewind();
+    mSamplesTotal = 0;
 }
 
 bool OpenAL_SoundStream::isPlaying()
@@ -262,7 +286,21 @@ bool OpenAL_SoundStream::isPlaying()
 
 double OpenAL_SoundStream::getTimeOffset()
 {
-    return 0.0;
+    ALint state = AL_STOPPED;
+    ALfloat offset = 0.0f;
+    double t;
+
+    mOutput.mStreamThread->mMutex.lock();
+    alGetSourcef(mSource, AL_SEC_OFFSET, &offset);
+    alGetSourcei(mSource, AL_SOURCE_STATE, &state);
+    if(state == AL_PLAYING || state == AL_PAUSED)
+        t = (double)(mSamplesTotal - mSamplesQueued)/(double)mSampleRate + offset;
+    else
+        t = (double)mSamplesTotal / (double)mSampleRate;
+    mOutput.mStreamThread->mMutex.unlock();
+
+    throwALerror();
+    return t;
 }
 
 void OpenAL_SoundStream::update()
@@ -285,52 +323,64 @@ void OpenAL_SoundStream::update()
 
 bool OpenAL_SoundStream::process()
 {
-    bool finished = mIsFinished;
-    ALint processed, state;
+    try {
+        bool finished = mIsFinished;
+        ALint samples_unqueued = 0;
+        ALint samples_queued = 0;
+        ALint processed, state;
 
-    alGetSourcei(mSource, AL_SOURCE_STATE, &state);
-    alGetSourcei(mSource, AL_BUFFERS_PROCESSED, &processed);
-    throwALerror();
-
-    if(processed > 0)
-    {
-        std::vector<char> data(mBufferSize);
-        do {
-            ALuint bufid;
-            size_t got;
-
-            alSourceUnqueueBuffers(mSource, 1, &bufid);
-            processed--;
-
-            if(finished)
-                continue;
-
-            got = mDecoder->read(&data[0], data.size());
-            finished = (got < data.size());
-            if(got > 0)
-            {
-                alBufferData(bufid, mFormat, &data[0], got, mSampleRate);
-                alSourceQueueBuffers(mSource, 1, &bufid);
-            }
-        } while(processed > 0);
+        alGetSourcei(mSource, AL_SOURCE_STATE, &state);
+        alGetSourcei(mSource, AL_BUFFERS_PROCESSED, &processed);
         throwALerror();
-    }
 
-    if(state != AL_PLAYING && state != AL_PAUSED)
-    {
-        ALint queued;
-
-        alGetSourcei(mSource, AL_BUFFERS_QUEUED, &queued);
-        throwALerror();
-        if(queued > 0)
+        if(processed > 0)
         {
-            alSourcePlay(mSource);
+            std::vector<char> data(mBufferSize);
+            do {
+                ALuint bufid = 0;
+                size_t got;
+
+                alSourceUnqueueBuffers(mSource, 1, &bufid);
+                samples_unqueued += getBufferSampleCount(bufid);
+                processed--;
+
+                if(finished)
+                    continue;
+
+                got = mDecoder->read(&data[0], data.size());
+                finished = (got < data.size());
+                if(got > 0)
+                {
+                    alBufferData(bufid, mFormat, &data[0], got, mSampleRate);
+                    alSourceQueueBuffers(mSource, 1, &bufid);
+                    samples_queued += getBufferSampleCount(bufid);
+                }
+            } while(processed > 0);
             throwALerror();
         }
-    }
 
-    mIsFinished = finished;
-    return !finished;
+        if(state != AL_PLAYING && state != AL_PAUSED)
+        {
+            ALint queued = 0;
+
+            alGetSourcei(mSource, AL_BUFFERS_QUEUED, &queued);
+            if(queued > 0)
+                alSourcePlay(mSource);
+            throwALerror();
+        }
+
+        mSamplesQueued -= samples_unqueued;
+        mSamplesQueued += samples_queued;
+        mSamplesTotal += samples_queued;
+        mIsFinished = finished;
+    }
+    catch(std::exception &e) {
+        std::cout<< "Error updating stream \""<<mDecoder->getName()<<"\"" <<std::endl;
+        mSamplesQueued = 0;
+        mSamplesTotal = 0;
+        mIsFinished = true;
+    }
+    return !mIsFinished;
 }
 
 //
