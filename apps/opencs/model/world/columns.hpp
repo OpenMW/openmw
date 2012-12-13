@@ -66,6 +66,11 @@ namespace CSMWorld
         {
             return true;
         }
+
+        virtual bool isUserEditable() const
+        {
+            return false;
+        }
     };
 
     template<typename ESXRecordT>

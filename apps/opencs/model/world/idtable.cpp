@@ -70,7 +70,7 @@ Qt::ItemFlags CSMWorld::IdTable::flags (const QModelIndex & index) const
 {
     Qt::ItemFlags flags = Qt::ItemIsSelectable | Qt::ItemIsEnabled;
 
-    if (mIdCollection->isEditable (index.column()))
+    if (mIdCollection->isUserEditable (index.column()))
         flags |= Qt::ItemIsEditable;
 
     return flags;

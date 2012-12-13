@@ -32,7 +32,16 @@ namespace CSMWorld
         }
 
         virtual bool isEditable() const = 0;
+
+        virtual bool isUserEditable() const;
+        ///< Can this column be edited directly by the user?
     };
+
+    template<typename ESXRecordT>
+    bool Column<ESXRecordT>::isUserEditable() const
+    {
+        return isEditable();
+    }
 
     class IdCollectionBase
     {
@@ -61,6 +70,8 @@ namespace CSMWorld
             virtual void setData (int index, int column, const QVariant& data) = 0;
 
             virtual bool isEditable (int column) const = 0;
+
+            virtual bool isUserEditable (int column) const = 0;
 
             virtual void merge() = 0;
             ///< Merge modified into base.
@@ -128,6 +139,8 @@ namespace CSMWorld
             virtual std::string getTitle (int column) const;
 
             virtual bool isEditable (int column) const;
+
+            virtual bool isUserEditable (int column) const;
 
             virtual void merge();
             ///< Merge modified into base.
@@ -248,6 +261,12 @@ namespace CSMWorld
     bool IdCollection<ESXRecordT>::isEditable (int column) const
     {
         return mColumns.at (column)->isEditable();
+    }
+
+    template<typename ESXRecordT>
+    bool IdCollection<ESXRecordT>::isUserEditable (int column) const
+    {
+        return mColumns.at (column)->isUserEditable();
     }
 
     template<typename ESXRecordT>
