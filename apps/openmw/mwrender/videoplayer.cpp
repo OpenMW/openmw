@@ -791,8 +791,11 @@ public:
         int audio_index = -1;
         unsigned int i;
 
+        is->av_sync_type = DEFAULT_AV_SYNC_TYPE;
+        is->format_ctx = avformat_alloc_context();
         is->videoStream = -1;
         is->audioStream = -1;
+        is->refresh = 0;
         is->quit = 0;
 
         is->stream = Ogre::ResourceGroupManager::getSingleton ().openResource(resourceName);
@@ -886,6 +889,9 @@ public:
 
     void VideoPlayer::playVideo (const std::string &resourceName)
     {
+        // Register all formats and codecs
+        av_register_all();
+
         if (mState)
             close();
 
@@ -907,17 +913,9 @@ public:
 
         mState = new VideoState;
 
-        // Register all formats and codecs
-        av_register_all();
-
-        mState->refresh = 0;
-        mState->resourceName = resourceName;
-        mState->av_sync_type = DEFAULT_AV_SYNC_TYPE;
-        mState->format_ctx = avformat_alloc_context();
+        init_state(mState, resourceName);
 
         schedule_refresh(mState, 40);
-
-        init_state(mState, resourceName);
         mState->parse_thread = boost::thread(decode_thread, mState);
     }
 

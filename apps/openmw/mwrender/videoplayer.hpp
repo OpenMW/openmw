@@ -121,8 +121,7 @@ namespace MWRender
         boost::thread parse_thread;
         boost::thread video_thread;
 
-        std::string resourceName;
-        int quit;
+        volatile int quit;
 
         int refresh;
         int display_ready;
