@@ -347,6 +347,12 @@ void FFmpeg_Decoder::getInfo(int *samplerate, ChannelConfig *chans, SampleType *
         *chans = ChannelConfig_Mono;
     else if(stream->mCodecCtx->channel_layout == AV_CH_LAYOUT_STEREO)
         *chans = ChannelConfig_Stereo;
+    else if(stream->mCodecCtx->channel_layout == AV_CH_LAYOUT_QUAD)
+        *chans = ChannelConfig_Quad;
+    else if(stream->mCodecCtx->channel_layout == AV_CH_LAYOUT_5POINT1)
+        *chans = ChannelConfig_5point1;
+    else if(stream->mCodecCtx->channel_layout == AV_CH_LAYOUT_7POINT1)
+        *chans = ChannelConfig_7point1;
     else if(stream->mCodecCtx->channel_layout == 0)
     {
         /* Unknown channel layout. Try to guess. */

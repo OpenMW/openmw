@@ -15,7 +15,10 @@ namespace MWSound
 
     enum ChannelConfig {
         ChannelConfig_Mono,
-        ChannelConfig_Stereo
+        ChannelConfig_Stereo,
+        ChannelConfig_Quad,
+        ChannelConfig_5point1,
+        ChannelConfig_7point1
     };
     const char *getChannelConfigName(ChannelConfig config);
 

@@ -61,6 +61,34 @@ static ALenum getALFormat(ChannelConfig chans, SampleType type)
         if(fmtlist[i].chans == chans && fmtlist[i].type == type)
             return fmtlist[i].format;
     }
+
+    if(alIsExtensionPresent("AL_EXT_MCFORMATS"))
+    {
+        static const struct {
+            char name[32];
+            ChannelConfig chans;
+            SampleType type;
+        } mcfmtlist[] = {
+            { "AL_FORMAT_QUAD16",   ChannelConfig_Quad,    SampleType_Int16 },
+            { "AL_FORMAT_QUAD8",    ChannelConfig_Quad,    SampleType_UInt8 },
+            { "AL_FORMAT_51CHN16",  ChannelConfig_5point1, SampleType_Int16 },
+            { "AL_FORMAT_51CHN8",   ChannelConfig_5point1, SampleType_UInt8 },
+            { "AL_FORMAT_71CHN16",  ChannelConfig_7point1, SampleType_Int16 },
+            { "AL_FORMAT_71CHN8",   ChannelConfig_7point1, SampleType_UInt8 },
+        };
+        static const size_t mcfmtlistsize = sizeof(mcfmtlist)/sizeof(mcfmtlist[0]);
+
+        for(size_t i = 0;i < mcfmtlistsize;i++)
+        {
+            if(mcfmtlist[i].chans == chans && mcfmtlist[i].type == type)
+            {
+                ALenum format = alGetEnumValue(mcfmtlist[i].name);
+                if(format != 0 && format != -1)
+                    return format;
+            }
+        }
+    }
+
     fail(std::string("Unsupported sound format (")+getChannelConfigName(chans)+", "+getSampleTypeName(type)+")");
     return AL_NONE;
 }

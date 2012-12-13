@@ -333,6 +333,12 @@ public:
             *chans = MWSound::ChannelConfig_Mono;
         else if(is->audio_st->codec->channel_layout == AV_CH_LAYOUT_STEREO)
             *chans = MWSound::ChannelConfig_Stereo;
+        else if(is->audio_st->codec->channel_layout == AV_CH_LAYOUT_QUAD)
+            *chans = MWSound::ChannelConfig_Quad;
+        else if(is->audio_st->codec->channel_layout == AV_CH_LAYOUT_5POINT1)
+            *chans = MWSound::ChannelConfig_5point1;
+        else if(is->audio_st->codec->channel_layout == AV_CH_LAYOUT_7POINT1)
+            *chans = MWSound::ChannelConfig_7point1;
         else if(is->audio_st->codec->channel_layout == 0)
         {
             /* Unknown channel layout. Try to guess. */

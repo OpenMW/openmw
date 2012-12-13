@@ -622,8 +622,11 @@ namespace MWSound
     {
         switch(config)
         {
-            case ChannelConfig_Mono:   return "Mono";
-            case ChannelConfig_Stereo: return "Stereo";
+            case ChannelConfig_Mono:    return "Mono";
+            case ChannelConfig_Stereo:  return "Stereo";
+            case ChannelConfig_Quad:    return "Quad";
+            case ChannelConfig_5point1: return "5.1 Surround";
+            case ChannelConfig_7point1: return "7.1 Surround";
         }
         return "(unknown channel config)";
     }
@@ -632,8 +635,11 @@ namespace MWSound
     {
         switch(config)
         {
-            case ChannelConfig_Mono:   frames *= 1; break;
-            case ChannelConfig_Stereo: frames *= 2; break;
+            case ChannelConfig_Mono:    frames *= 1; break;
+            case ChannelConfig_Stereo:  frames *= 2; break;
+            case ChannelConfig_Quad:    frames *= 4; break;
+            case ChannelConfig_5point1: frames *= 6; break;
+            case ChannelConfig_7point1: frames *= 8; break;
         }
         switch(type)
         {
