@@ -59,15 +59,9 @@ namespace MWRender
     }
 
 
+    void packet_queue_init(PacketQueue *q)
+    { memset(q, 0, sizeof(PacketQueue)); }
 
-
-    /* Since we only have one decoding thread, the Big Struct
-         can be global in case we need it. */
-    VideoState *global_video_state;
-
-    void packet_queue_init(PacketQueue *q) {
-        memset(q, 0, sizeof(PacketQueue));
-    }
     int packet_queue_put(PacketQueue *q, AVPacket *pkt)
     {
         AVPacketList *pkt1;
@@ -92,7 +86,8 @@ namespace MWRender
         q->mutex.unlock ();
         return 0;
     }
-    static int packet_queue_get(PacketQueue *q, AVPacket *pkt, int block)
+
+    static int packet_queue_get(PacketQueue *q, AVPacket *pkt, VideoState *is, int block)
     {
         AVPacketList *pkt1;
         int ret;
@@ -101,7 +96,7 @@ namespace MWRender
 
         for(;;)
         {
-            if(global_video_state->quit)
+            if(is->quit)
             {
                 ret = -1;
                 break;
@@ -133,7 +128,8 @@ namespace MWRender
         return ret;
     }
 
-    void PacketQueue::flush() {
+    void PacketQueue::flush()
+    {
         AVPacketList *pkt, *pkt1;
 
         this->mutex.lock();
@@ -149,6 +145,7 @@ namespace MWRender
         this->mutex.unlock ();
     }
 
+
     double get_audio_clock(VideoState *is)
     {
         return is->AudioTrack->getTimeOffset();
@@ -161,17 +158,19 @@ namespace MWRender
         delta = (av_gettime() - is->video_current_pts_time) / 1000000.0;
         return is->video_current_pts + delta;
     }
-    double get_external_clock(VideoState *is) {
+
+    double get_external_clock(VideoState *is)
+    {
         return av_gettime() / 1000000.0;
     }
-    double get_master_clock(VideoState *is) {
-        if(is->av_sync_type == AV_SYNC_VIDEO_MASTER) {
+
+    double get_master_clock(VideoState *is)
+    {
+        if(is->av_sync_type == AV_SYNC_VIDEO_MASTER)
             return get_video_clock(is);
-        } else if(is->av_sync_type == AV_SYNC_AUDIO_MASTER) {
+        if(is->av_sync_type == AV_SYNC_AUDIO_MASTER)
             return get_audio_clock(is);
-        } else {
-            return get_external_clock(is);
-        }
+        return get_external_clock(is);
     }
 
 class MovieAudioDecoder : public MWSound::Sound_Decoder
@@ -296,7 +295,7 @@ class MovieAudioDecoder : public MWSound::Sound_Decoder
                 return -1;
 
             /* next packet */
-            if(packet_queue_get(&is->audioq, pkt, 1) < 0)
+            if(packet_queue_get(&is->audioq, pkt, is, 1) < 0)
                 return -1;
 
             is->audio_pkt_data = pkt->data;
@@ -328,7 +327,7 @@ public:
             *type = MWSound::SampleType_Int16;
         else
             fail(std::string("Unsupported sample format: ")+
-                av_get_sample_fmt_name(is->audio_st->codec->sample_fmt));
+                 av_get_sample_fmt_name(is->audio_st->codec->sample_fmt));
 
         if(is->audio_st->codec->channel_layout == AV_CH_LAYOUT_MONO)
             *chans = MWSound::ChannelConfig_Mono;
@@ -382,8 +381,8 @@ public:
                 is->audio_buf_index = 0;
             }
 
-            size_t len1 = std::min(is->audio_buf_size - is->audio_buf_index,
-                                   len - total);
+            size_t len1 = std::min<size_t>(is->audio_buf_size - is->audio_buf_index,
+                                           len - total);
             memcpy(stream, (uint8_t*)is->audio_buf + is->audio_buf_index, len1);
 
             total += len1;
@@ -398,7 +397,7 @@ public:
 
     void timer_callback (boost::system_time t, VideoState* is)
     {
-        boost::this_thread::sleep (t);
+        boost::this_thread::sleep(t);
         is->refresh++;
     }
 
@@ -406,7 +405,7 @@ public:
     static void schedule_refresh(VideoState *is, int delay)
     {
         boost::system_time t = boost::get_system_time() + boost::posix_time::milliseconds(delay);
-        boost::thread (boost::bind(&timer_callback, t, is)).detach();
+        boost::thread(boost::bind(&timer_callback, t, is)).detach();
     }
 
     void video_display(VideoState *is)
@@ -613,7 +612,7 @@ public:
 
         for(;;)
         {
-            if(packet_queue_get(&is->videoq, packet, 1) < 0)
+            if(packet_queue_get(&is->videoq, packet, is, 1) < 0)
             {
                 // means we quit getting packets
                 break;
@@ -721,10 +720,6 @@ public:
         return 0;
     }
 
-    int decode_interrupt_cb(void) {
-        return (global_video_state && global_video_state->quit);
-    }
-
     int decode_thread(void *arg)
     {
         VideoState *is = (VideoState *)arg;
@@ -805,10 +800,6 @@ public:
         is->format_ctx->pb = avio_alloc_context(NULL, 0, 0, is, OgreResource_Read, OgreResource_Write, OgreResource_Seek);
         if(!is->format_ctx->pb)
             throw std::runtime_error("Failed to allocate ioContext ");
-
-        global_video_state = is;
-        // will interrupt blocking functions if we quit!
-        //url_set_interrupt_cb(decode_interrupt_cb);
 
         // Open video file
         /// \todo leak here, ffmpeg or valgrind bug ?
