@@ -393,19 +393,8 @@ public:
 
         return total;
     }
-
 };
 
-
-    /*
-    static Uint32 sdl_refresh_timer_cb(Uint32 interval, void *opaque) {
-        SDL_Event event;
-        event.type = FF_REFRESH_EVENT;
-        event.user.data1 = opaque;
-        SDL_PushEvent(&event);
-        return 0; // 0 means stop timer
-    }
-    */
 
     void timer_callback (boost::system_time t, VideoState* is)
     {
@@ -416,8 +405,6 @@ public:
     /* schedule a video refresh in 'delay' ms */
     static void schedule_refresh(VideoState *is, int delay)
     {
-        //SDL_AddTimer(delay, sdl_refresh_timer_cb, is);
-        //is->refresh_queue.push_back (delay);
         boost::system_time t = boost::get_system_time() + boost::posix_time::milliseconds(delay);
         boost::thread (boost::bind(&timer_callback, t, is)).detach();
     }
@@ -460,10 +447,12 @@ public:
         VideoPicture *vp;
         double actual_delay, delay, sync_threshold, ref_clock, diff;
 
-        if(is->video_st) {
-            if(is->pictq_size == 0) {
+        if(is->video_st)
+        {
+            if(is->pictq_size == 0)
                 schedule_refresh(is, 1);
-            } else {
+            else
+            {
                 vp = &is->pictq[is->pictq_rindex];
 
                 is->video_current_pts = vp->pts;
@@ -479,26 +468,28 @@ public:
                 is->frame_last_pts = vp->pts;
 
                 /* update delay to sync to audio if not master source */
-                if(is->av_sync_type != AV_SYNC_VIDEO_MASTER) {
+                if(is->av_sync_type != AV_SYNC_VIDEO_MASTER)
+                {
                     ref_clock = get_master_clock(is);
                     diff = vp->pts - ref_clock;
 
                     /* Skip or repeat the frame. Take delay into account
                        FFPlay still doesn't "know if this is the best guess." */
                     sync_threshold = (delay > AV_SYNC_THRESHOLD) ? delay : AV_SYNC_THRESHOLD;
-                    if(fabs(diff) < AV_NOSYNC_THRESHOLD) {
-                        if(diff <= -sync_threshold) {
+                    if(fabs(diff) < AV_NOSYNC_THRESHOLD)
+                    {
+                        if(diff <= -sync_threshold)
                             delay = 0;
-                        } else if(diff >= sync_threshold) {
+                        else if(diff >= sync_threshold)
                             delay = 2 * delay;
-                        }
                     }
                 }
 
                 is->frame_timer += delay;
                 /* computer the REAL delay */
                 actual_delay = is->frame_timer - (av_gettime() / 1000000.0);
-                if(actual_delay < 0.010) {
+                if(actual_delay < 0.010)
+                {
                     /* Really it should skip the picture instead */
                     actual_delay = 0.010;
                 }
@@ -508,18 +499,16 @@ public:
                 video_display(is);
 
                 /* update queue for next picture! */
-                if(++is->pictq_rindex == VIDEO_PICTURE_QUEUE_SIZE) {
+                if(++is->pictq_rindex == VIDEO_PICTURE_QUEUE_SIZE)
                     is->pictq_rindex = 0;
-                }
                 is->pictq_mutex.lock();
                 is->pictq_size--;
                 is->pictq_cond.notify_one ();
                 is->pictq_mutex.unlock ();
             }
         }
-        else {
+        else
             schedule_refresh(is, 100);
-        }
     }
 
     int queue_picture(VideoState *is, AVFrame *pFrame, double pts)
@@ -529,9 +518,8 @@ public:
         /* wait until we have a new pic */
         {
             boost::unique_lock<boost::mutex> lock(is->pictq_mutex);
-            while(is->pictq_size >= VIDEO_PICTURE_QUEUE_SIZE && !is->quit) {
+            while(is->pictq_size >= VIDEO_PICTURE_QUEUE_SIZE && !is->quit)
                 is->pictq_cond.timed_wait(lock, boost::posix_time::milliseconds(1));
-            }
         }
 
         if(is->quit)
@@ -541,7 +529,8 @@ public:
         vp = &is->pictq[is->pictq_windex];
 
         // Convert the image into YUV format that SDL uses
-        if(is->sws_context == NULL) {
+        if(is->sws_context == NULL)
+        {
             int w = is->video_st->codec->width;
             int h = is->video_st->codec->height;
             is->sws_context = sws_getContext(w, h, is->video_st->codec->pix_fmt,
@@ -556,13 +545,11 @@ public:
         sws_scale(is->sws_context, pFrame->data, pFrame->linesize,
                   0, is->video_st->codec->height, &vp->data, is->rgbaFrame->linesize);
 
-
         vp->pts = pts;
 
         // now we inform our display thread that we have a pic ready
-        if(++is->pictq_windex == VIDEO_PICTURE_QUEUE_SIZE) {
+        if(++is->pictq_windex == VIDEO_PICTURE_QUEUE_SIZE)
             is->pictq_windex = 0;
-        }
         is->pictq_mutex.lock();
         is->pictq_size++;
         is->pictq_mutex.unlock();
@@ -574,10 +561,13 @@ public:
     {
         double frame_delay;
 
-        if(pts != 0) {
+        if(pts != 0)
+        {
             /* if we have pts, set video clock to it */
             is->video_clock = pts;
-        } else {
+        }
+        else
+        {
             /* if we aren't given a pts, set it to the clock */
             pts = is->video_clock;
         }
@@ -619,11 +609,12 @@ public:
         pFrame = avcodec_alloc_frame();
 
         is->rgbaFrame = avcodec_alloc_frame();
-        avpicture_alloc ((AVPicture *)is->rgbaFrame, PIX_FMT_RGBA, is->video_st->codec->width, is->video_st->codec->height);
+        avpicture_alloc((AVPicture*)is->rgbaFrame, PIX_FMT_RGBA, is->video_st->codec->width, is->video_st->codec->height);
 
-
-        for(;;) {
-            if(packet_queue_get(&is->videoq, packet, 1) < 0) {
+        for(;;)
+        {
+            if(packet_queue_get(&is->videoq, packet, 1) < 0)
+            {
                 // means we quit getting packets
                 break;
             }
@@ -632,28 +623,24 @@ public:
             // Save global pts to be stored in pFrame
             global_video_pkt_pts = packet->pts;
             // Decode video frame
-            if (avcodec_decode_video2(is->video_st->codec, pFrame, &frameFinished,
-                    packet) < 0)
-            {
+            if (avcodec_decode_video2(is->video_st->codec, pFrame, &frameFinished, packet) < 0)
                 throw std::runtime_error("Error decoding video frame");
-            }
-            if((uint64_t)packet->dts == AV_NOPTS_VALUE
-                 && pFrame->opaque && *(uint64_t*)pFrame->opaque != AV_NOPTS_VALUE) {
+
+            if((uint64_t)packet->dts == AV_NOPTS_VALUE &&
+               pFrame->opaque && *(uint64_t*)pFrame->opaque != AV_NOPTS_VALUE)
                 pts = *(uint64_t *)pFrame->opaque;
-            } else if((uint64_t)packet->dts != AV_NOPTS_VALUE) {
+            else if((uint64_t)packet->dts != AV_NOPTS_VALUE)
                 pts = packet->dts;
-            } else {
+            else
                 pts = 0;
-            }
             pts *= av_q2d(is->video_st->time_base);
 
-
             // Did we get a video frame?
-            if(frameFinished) {
+            if(frameFinished)
+            {
                 pts = synchronize_video(is, pFrame, pts);
-                if(queue_picture(is, pFrame, pts) < 0) {
+                if(queue_picture(is, pFrame, pts) < 0)
                     break;
-                }
             }
             av_free_packet(packet);
         }
@@ -672,9 +659,8 @@ public:
         AVCodecContext *codecCtx;
         AVCodec *codec;
 
-        if(stream_index < 0 || stream_index >= static_cast<int>(pFormatCtx->nb_streams)) {
+        if(stream_index < 0 || stream_index >= static_cast<int>(pFormatCtx->nb_streams))
             return -1;
-        }
 
         // Get a pointer to the codec context for the video stream
         codecCtx = pFormatCtx->streams[stream_index]->codec;
