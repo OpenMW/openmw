@@ -609,7 +609,8 @@ public:
         avcodec_default_release_buffer(c, pic);
     }
 
-    int video_thread(void *arg) {
+    int video_thread(void *arg)
+    {
         VideoState *is = (VideoState *)arg;
         AVPacket pkt1, *packet = &pkt1;
         int frameFinished;
