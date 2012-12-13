@@ -125,7 +125,7 @@ const ALfloat OpenAL_SoundStream::sBufferLength = 0.125f;
 struct OpenAL_Output::StreamThread {
     typedef std::vector<OpenAL_SoundStream*> StreamVec;
     StreamVec mStreams;
-    boost::mutex mMutex;
+    boost::recursive_mutex mMutex;
     boost::thread mThread;
 
     StreamThread()
