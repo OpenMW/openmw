@@ -218,6 +218,11 @@ void MpgSnd_Decoder::rewind()
     }
 }
 
+size_t MpgSnd_Decoder::getSampleOffset()
+{
+    return 0;
+}
+
 MpgSnd_Decoder::MpgSnd_Decoder()
     : mSndInfo()
     , mSndFile(NULL)

@@ -117,6 +117,11 @@ void Audiere_Decoder::rewind()
     mSoundSource->reset();
 }
 
+size_t Audiere_Decoder::getSampleOffset()
+{
+    return 0;
+}
+
 Audiere_Decoder::Audiere_Decoder()
 {
 }

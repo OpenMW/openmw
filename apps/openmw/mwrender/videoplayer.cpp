@@ -398,6 +398,11 @@ public:
 
         return total;
     }
+
+    size_t getSampleOffset()
+    {
+        return (size_t)(is->audio_clock*is->audio_st->codec->sample_rate);
+    }
 };
 
 

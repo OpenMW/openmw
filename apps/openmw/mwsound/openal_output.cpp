@@ -122,7 +122,6 @@ class OpenAL_SoundStream : public Sound
     ALsizei mSampleRate;
     ALuint mBufferSize;
 
-    ALuint mSamplesTotal;
     ALuint mSamplesQueued;
 
     DecoderPtr mDecoder;
@@ -215,8 +214,7 @@ private:
 
 
 OpenAL_SoundStream::OpenAL_SoundStream(OpenAL_Output &output, ALuint src, DecoderPtr decoder)
-  : mOutput(output), mSource(src), mSamplesTotal(0), mSamplesQueued(0),
-    mDecoder(decoder), mIsFinished(true)
+  : mOutput(output), mSource(src), mSamplesQueued(0), mDecoder(decoder), mIsFinished(true)
 {
     throwALerror();
 
@@ -286,7 +284,6 @@ void OpenAL_SoundStream::stop()
     mSamplesQueued = 0;
 
     mDecoder->rewind();
-    mSamplesTotal = 0;
 }
 
 bool OpenAL_SoundStream::isPlaying()
@@ -311,9 +308,9 @@ double OpenAL_SoundStream::getTimeOffset()
     alGetSourcef(mSource, AL_SEC_OFFSET, &offset);
     alGetSourcei(mSource, AL_SOURCE_STATE, &state);
     if(state == AL_PLAYING || state == AL_PAUSED)
-        t = (double)(mSamplesTotal - mSamplesQueued)/(double)mSampleRate + offset;
+        t = (double)(mDecoder->getSampleOffset() - mSamplesQueued)/(double)mSampleRate + offset;
     else
-        t = (double)mSamplesTotal / (double)mSampleRate;
+        t = (double)mDecoder->getSampleOffset() / (double)mSampleRate;
     mOutput.mStreamThread->mMutex.unlock();
 
     throwALerror();
@@ -388,13 +385,11 @@ bool OpenAL_SoundStream::process()
 
         mSamplesQueued -= samples_unqueued;
         mSamplesQueued += samples_queued;
-        mSamplesTotal += samples_queued;
         mIsFinished = finished;
     }
     catch(std::exception &e) {
         std::cout<< "Error updating stream \""<<mDecoder->getName()<<"\"" <<std::endl;
         mSamplesQueued = 0;
-        mSamplesTotal = 0;
         mIsFinished = true;
     }
     return !mIsFinished;

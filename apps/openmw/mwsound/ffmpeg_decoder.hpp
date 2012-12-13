@@ -25,6 +25,7 @@ namespace MWSound
 
         struct MyStream;
         std::vector<MyStream*> mStreams;
+        size_t mSamplesRead;
 
         bool getNextPacket(int streamidx);
 
@@ -42,6 +43,7 @@ namespace MWSound
         virtual size_t read(char *buffer, size_t bytes);
         virtual void readAll(std::vector<char> &output);
         virtual void rewind();
+        virtual size_t getSampleOffset();
 
         FFmpeg_Decoder& operator=(const FFmpeg_Decoder &rhs);
         FFmpeg_Decoder(const FFmpeg_Decoder &rhs);

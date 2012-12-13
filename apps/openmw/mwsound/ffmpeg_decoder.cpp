@@ -383,7 +383,11 @@ size_t FFmpeg_Decoder::read(char *buffer, size_t bytes)
     if(mStreams.empty())
         fail("No audio streams");
 
-    return mStreams.front()->readAVAudioData(buffer, bytes);
+    MyStream *stream = mStreams.front();
+    size_t got = stream->readAVAudioData(buffer, bytes);
+    mSamplesRead += got / av_samples_get_buffer_size(NULL, stream->mCodecCtx->channels, 1,
+                                                     stream->mCodecCtx->sample_fmt, 1);
+    return got;
 }
 
 void FFmpeg_Decoder::readAll(std::vector<char> &output)
@@ -402,9 +406,15 @@ void FFmpeg_Decoder::rewind()
 {
     av_seek_frame(mFormatCtx, -1, 0, 0);
     std::for_each(mStreams.begin(), mStreams.end(), std::mem_fun(&MyStream::clearPackets));
+    mSamplesRead = 0;
 }
 
-FFmpeg_Decoder::FFmpeg_Decoder() : mFormatCtx(NULL)
+size_t FFmpeg_Decoder::getSampleOffset()
+{
+    return mSamplesRead;
+}
+
+FFmpeg_Decoder::FFmpeg_Decoder() : mFormatCtx(NULL), mSamplesRead(0)
 {
     static bool done_init = false;
 

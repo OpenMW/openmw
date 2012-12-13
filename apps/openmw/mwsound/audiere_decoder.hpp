@@ -25,6 +25,7 @@ namespace MWSound
 
         virtual size_t read(char *buffer, size_t bytes);
         virtual void rewind();
+        virtual size_t getSampleOffset();
 
         Audiere_Decoder& operator=(const Audiere_Decoder &rhs);
         Audiere_Decoder(const Audiere_Decoder &rhs);
