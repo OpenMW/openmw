@@ -1,7 +1,6 @@
 
 #include "table.hpp"
 
-#include <QStyledItemDelegate>
 #include <QHeaderView>
 #include <QUndoStack>
 #include <QAction>
@@ -14,98 +13,7 @@
 #include "../../model/world/idtable.hpp"
 #include "../../model/world/record.hpp"
 
-namespace CSVWorld
-{
-    ///< \brief Getting the data out of an editor widget
-    ///
-    /// Really, Qt? Really?
-    class NastyTableModelHack : public QAbstractTableModel
-    {
-            QAbstractItemModel& mModel;
-            QVariant mData;
-
-        public:
-
-            NastyTableModelHack (QAbstractItemModel& model);
-
-            int rowCount (const QModelIndex & parent = QModelIndex()) const;
-
-            int columnCount (const QModelIndex & parent = QModelIndex()) const;
-
-            QVariant data  (const QModelIndex & index, int role = Qt::DisplayRole) const;
-
-            bool setData (const QModelIndex &index, const QVariant &value, int role = Qt::EditRole);
-
-            QVariant getData() const;
-    };
-
-    ///< \brief Use commands instead of manipulating the model directly
-    class CommandDelegate : public QStyledItemDelegate
-    {
-            QUndoStack& mUndoStack;
-            bool mEditLock;
-
-        public:
-
-            CommandDelegate (QUndoStack& undoStack, QObject *parent);
-
-            void setModelData (QWidget *editor, QAbstractItemModel *model, const QModelIndex& index) const;
-
-            void setEditLock (bool locked);
-    };
-
-}
-
-CSVWorld::NastyTableModelHack::NastyTableModelHack (QAbstractItemModel& model)
-: mModel (model)
-{}
-
-int CSVWorld::NastyTableModelHack::rowCount (const QModelIndex & parent) const
-{
-    return mModel.rowCount (parent);
-}
-
-int CSVWorld::NastyTableModelHack::columnCount (const QModelIndex & parent) const
-{
-    return mModel.columnCount (parent);
-}
-
-QVariant CSVWorld::NastyTableModelHack::data  (const QModelIndex & index, int role) const
-{
-    return mModel.data (index, role);
-}
-
-bool CSVWorld::NastyTableModelHack::setData ( const QModelIndex &index, const QVariant &value, int role)
-{
-    mData = value;
-    return true;
-}
-
-QVariant CSVWorld::NastyTableModelHack::getData() const
-{
-    return mData;
-}
-
-CSVWorld::CommandDelegate::CommandDelegate (QUndoStack& undoStack, QObject *parent)
-: QStyledItemDelegate (parent), mUndoStack (undoStack), mEditLock (false)
-{}
-
-void CSVWorld::CommandDelegate::setModelData (QWidget *editor, QAbstractItemModel *model,
-        const QModelIndex& index) const
-{
-    if (!mEditLock)
-    {
-        NastyTableModelHack hack (*model);
-        QStyledItemDelegate::setModelData (editor, &hack, index);
-        mUndoStack.push (new CSMWorld::ModifyCommand (*model, index, hack.getData()));
-    }
-    ///< \todo provide some kind of feedback to the user, indicating that editing is currently not possible.
-}
-
-void  CSVWorld::CommandDelegate::setEditLock (bool locked)
-{
-    mEditLock = locked;
-}
+#include "util.hpp"
 
 void CSVWorld::Table::contextMenuEvent (QContextMenuEvent *event)
 {
