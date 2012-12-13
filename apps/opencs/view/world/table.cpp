@@ -84,15 +84,6 @@ CSVWorld::Table::Table (const CSMWorld::UniversalId& id, CSMWorld::Data& data, Q
 {
     mModel = &dynamic_cast<CSMWorld::IdTable&> (*data.getTableModel (id));
 
-    int columns = mModel->columnCount();
-
-    for (int i=0; i<columns; ++i)
-    {
-        CommandDelegate *delegate = new CommandDelegate (undoStack, this);
-        mDelegates.push_back (delegate);
-        setItemDelegateForColumn (i, delegate);
-    }
-
     mProxyModel = new CSMWorld::IdTableProxyModel (this);
     mProxyModel->setSourceModel (mModel);
 
@@ -102,6 +93,22 @@ CSVWorld::Table::Table (const CSMWorld::UniversalId& id, CSMWorld::Data& data, Q
     setSortingEnabled (true);
     setSelectionBehavior (QAbstractItemView::SelectRows);
     setSelectionMode (QAbstractItemView::ExtendedSelection);
+
+    int columns = mModel->columnCount();
+
+    for (int i=0; i<columns; ++i)
+    {
+        int flags = mModel->headerData (i, Qt::Horizontal, CSMWorld::ColumnBase::Role_Flags).toInt();
+
+        if (flags & CSMWorld::ColumnBase::Flag_Table)
+        {
+            CommandDelegate *delegate = new CommandDelegate (undoStack, this);
+            mDelegates.push_back (delegate);
+            setItemDelegateForColumn (i, delegate);
+        }
+        else
+            hideColumn (i);
+    }
 
     /// \todo make initial layout fill the whole width of the table
 

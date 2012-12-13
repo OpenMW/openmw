@@ -78,7 +78,7 @@ namespace CSMWorld
     {
         int mType;
 
-        FixedRecordTypeColumn (int type) : Column<ESXRecordT> ("Type"), mType (type) {}
+        FixedRecordTypeColumn (int type) : Column<ESXRecordT> ("Type", 0), mType (type) {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
         {
