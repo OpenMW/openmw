@@ -275,6 +275,26 @@ namespace MWSound
     }
 
 
+    MWBase::SoundPtr SoundManager::playTrack(const DecoderPtr& decoder)
+    {
+        MWBase::SoundPtr track;
+        if(!mOutput->isInitialized())
+            return track;
+        try
+        {
+            float basevol = mMasterVolume;
+
+            track = mOutput->streamSound(decoder, basevol, 1.0f, Play_NoEnv);
+            track->mBaseVolume = basevol;
+            track->mFlags = Play_NoEnv;
+        }
+        catch(std::exception &e)
+        {
+            std::cout <<"Sound Error: "<<e.what()<< std::endl;
+        }
+        return track;
+    }
+
 
     MWBase::SoundPtr SoundManager::playSound(const std::string& soundId, float volume, float pitch, int mode)
     {

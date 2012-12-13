@@ -22,6 +22,8 @@ namespace MWWorld
 namespace MWSound
 {
     class Sound;
+    class Sound_Decoder;
+    typedef boost::shared_ptr<Sound_Decoder> DecoderPtr;
 }
 
 namespace MWBase
@@ -88,6 +90,9 @@ namespace MWBase
 
             virtual void stopSay(MWWorld::Ptr reference=MWWorld::Ptr()) = 0;
             ///< Stop an actor speaking
+
+            virtual SoundPtr playTrack(const MWSound::DecoderPtr& decoder) = 0;
+            ///< Play a 2D audio track, using a custom decoder
 
             virtual SoundPtr playSound(const std::string& soundId, float volume, float pitch,
                 int mode=Play_Normal) = 0;

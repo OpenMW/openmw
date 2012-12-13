@@ -22,8 +22,6 @@ namespace MWSound
     struct Sound_Decoder;
     class Sound;
 
-    typedef boost::shared_ptr<Sound_Decoder> DecoderPtr;
-
     enum Environment {
         Env_Normal,
         Env_Underwater
@@ -104,6 +102,9 @@ namespace MWSound
 
         virtual void stopSay(MWWorld::Ptr reference=MWWorld::Ptr());
         ///< Stop an actor speaking
+
+        virtual MWBase::SoundPtr playTrack(const DecoderPtr& decoder);
+        ///< Play a 2D audio track, using a custom decoder
 
         virtual MWBase::SoundPtr playSound(const std::string& soundId, float volume, float pitch, int mode=Play_Normal);
         ///< Play a sound, independently of 3D-position
