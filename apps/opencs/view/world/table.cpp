@@ -2,7 +2,7 @@
 #include "table.hpp"
 
 #include <QHeaderView>
-#include <QUndoStack>
+
 #include <QAction>
 #include <QMenu>
 #include <QContextMenuEvent>
@@ -127,6 +127,13 @@ void CSVWorld::Table::setEditLock (bool locked)
         (*iter)->setEditLock (locked);
 
     mEditLock = locked;
+}
+
+CSMWorld::UniversalId CSVWorld::Table::getUniversalId (int row) const
+{
+    return CSMWorld::UniversalId (
+        static_cast<CSMWorld::UniversalId::Type> (mProxyModel->data (mProxyModel->index (row, 2)).toInt()),
+        mProxyModel->data (mProxyModel->index (row, 0)).toString().toStdString());
 }
 
 #include <sstream> /// \todo remove

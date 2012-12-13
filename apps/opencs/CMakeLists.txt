@@ -14,6 +14,7 @@ set (OPENCS_SRC
     view/doc/subview.cpp
 
     view/world/table.cpp view/world/tablesubview.cpp view/world/subviews.cpp view/world/util.cpp
+    view/world/dialoguesubview.cpp
 
     view/tools/reportsubview.cpp view/tools/subviews.cpp
     )
@@ -34,6 +35,7 @@ set (OPENCS_HDR
     view/doc/subview.hpp view/doc/subviewfactoryimp.hpp
 
     view/world/table.hpp view/world/tablesubview.hpp view/world/subviews.hpp view/world/util.hpp
+    view/world/dialoguesubview.hpp
 
     view/tools/reportsubview.hpp view/tools/subviews.hpp
     )

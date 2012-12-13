@@ -24,6 +24,7 @@ namespace
 
     static const TypeData sIdArg[] =
     {
+        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Global, "Global Variable" },
 
         { CSMWorld::UniversalId::Class_None, CSMWorld::UniversalId::Type_None, 0 } // end marker
     };
@@ -208,8 +209,8 @@ std::string CSMWorld::UniversalId::toString() const
     switch (mArgumentType)
     {
         case ArgumentType_None: break;
-        case ArgumentType_Id: stream << ": " << mId;
-        case ArgumentType_Index: stream << ": " << mIndex;
+        case ArgumentType_Id: stream << ": " << mId; break;
+        case ArgumentType_Index: stream << ": " << mIndex; break;
     }
 
     return stream.str();
