@@ -4,7 +4,8 @@
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwbase/soundmanager.hpp"
-
+#include "../mwsound/sound_decoder.hpp"
+#include "../mwsound/sound.hpp"
 
 
 namespace MWRender
@@ -143,19 +144,13 @@ namespace MWRender
         this->mutex.unlock ();
     }
 
-    double get_audio_clock(VideoState *is) {
-        double pts;
-
-        pts = is->audio_clock; /* maintained in the audio thread */
-        if(is->audio_st) {
-            int n = is->audio_st->codec->channels * 2;
-            int bytes_per_sec = is->audio_st->codec->sample_rate * n;
-            int hw_buf_size = is->audio_buf_size - is->audio_buf_index;
-            pts -= (double)hw_buf_size / bytes_per_sec;
-        }
-        return pts;
+    double get_audio_clock(VideoState *is)
+    {
+        return is->AudioTrack->getTimeOffset();
     }
-    double get_video_clock(VideoState *is) {
+
+    double get_video_clock(VideoState *is)
+    {
         double delta;
 
         delta = (av_gettime() - is->video_current_pts_time) / 1000000.0;
@@ -173,86 +168,110 @@ namespace MWRender
             return get_external_clock(is);
         }
     }
+
+class MovieAudioDecoder : public MWSound::Sound_Decoder
+{
+    static void fail(const std::string &str)
+    {
+        throw std::runtime_error(str);
+    }
+
+    VideoState *is;
+
     /* Add or subtract samples to get a better sync, return new
-         audio buffer size */
-    int synchronize_audio(VideoState *is, short *samples,
-                        int samples_size, double pts) {
-        int n;
-        double ref_clock;
+     * audio buffer size */
+    int synchronize_audio(uint8_t *samples, int samples_size, double pts)
+    {
+        if(is->av_sync_type == AV_SYNC_AUDIO_MASTER)
+            return samples_size;
+
+        double diff, avg_diff, ref_clock;
+        int wanted_size, min_size, max_size, n;
+        // int nb_samples;
 
         n = 2 * is->audio_st->codec->channels;
 
-        if(is->av_sync_type != AV_SYNC_AUDIO_MASTER) {
-            double diff, avg_diff;
-            int wanted_size, min_size, max_size;
-            // int nb_samples;
+        ref_clock = get_master_clock(is);
+        diff = get_audio_clock(is) - ref_clock;
+        if(diff < AV_NOSYNC_THRESHOLD)
+        {
+            // accumulate the diffs
+            is->audio_diff_cum = diff + is->audio_diff_avg_coef *
+                                        is->audio_diff_cum;
+            if(is->audio_diff_avg_count < AUDIO_DIFF_AVG_NB)
+                is->audio_diff_avg_count++;
+            else
+            {
+                avg_diff = is->audio_diff_cum * (1.0 - is->audio_diff_avg_coef);
+                if(fabs(avg_diff) >= is->audio_diff_threshold)
+                {
+                    wanted_size = samples_size + ((int)(diff * is->audio_st->codec->sample_rate) * n);
+                    min_size = samples_size * ((100 - SAMPLE_CORRECTION_PERCENT_MAX) / 100);
+                    max_size = samples_size * ((100 + SAMPLE_CORRECTION_PERCENT_MAX) / 100);
 
-            ref_clock = get_master_clock(is);
-            diff = get_audio_clock(is) - ref_clock;
-            if(diff < AV_NOSYNC_THRESHOLD) {
-                // accumulate the diffs
-                is->audio_diff_cum = diff + is->audio_diff_avg_coef *
-                                            is->audio_diff_cum;
-                if(is->audio_diff_avg_count < AUDIO_DIFF_AVG_NB) {
-                    is->audio_diff_avg_count++;
-                } else {
-                    avg_diff = is->audio_diff_cum * (1.0 - is->audio_diff_avg_coef);
-                    if(fabs(avg_diff) >= is->audio_diff_threshold) {
-                        wanted_size = samples_size + ((int)(diff * is->audio_st->codec->sample_rate) * n);
-                        min_size = samples_size * ((100 - SAMPLE_CORRECTION_PERCENT_MAX) / 100);
-                        max_size = samples_size * ((100 + SAMPLE_CORRECTION_PERCENT_MAX) / 100);
-                        if(wanted_size < min_size) {
-                            wanted_size = min_size;
-                        } else if (wanted_size > max_size) {
-                            wanted_size = max_size;
+                    if(wanted_size < min_size)
+                        wanted_size = min_size;
+                    else if (wanted_size > max_size)
+                        wanted_size = max_size;
+
+                    if(wanted_size < samples_size)
+                    {
+                        /* remove samples */
+                        samples_size = wanted_size;
+                    }
+                    else if(wanted_size > samples_size)
+                    {
+                        uint8_t *samples_end, *q;
+                        int nb;
+                        /* add samples by copying final sample*/
+                        nb = (samples_size - wanted_size);
+                        samples_end = samples + samples_size - n;
+                        q = samples_end + n;
+                        while(nb > 0)
+                        {
+                            memcpy(q, samples_end, n);
+                            q += n;
+                            nb -= n;
                         }
-                        if(wanted_size < samples_size) {
-                            /* remove samples */
-                            samples_size = wanted_size;
-                        } else if(wanted_size > samples_size) {
-                            uint8_t *samples_end, *q;
-                            int nb;
-                            /* add samples by copying final sample*/
-                            nb = (samples_size - wanted_size);
-                            samples_end = (uint8_t *)samples + samples_size - n;
-                            q = samples_end + n;
-                            while(nb > 0) {
-                                memcpy(q, samples_end, n);
-                                q += n;
-                                nb -= n;
-                            }
-                            samples_size = wanted_size;
-                        }
+                        samples_size = wanted_size;
                     }
                 }
-            } else {
-                /* difference is TOO big; reset diff stuff */
-                is->audio_diff_avg_count = 0;
-                is->audio_diff_cum = 0;
             }
         }
+        else
+        {
+            /* difference is TOO big; reset diff stuff */
+            is->audio_diff_avg_count = 0;
+            is->audio_diff_cum = 0;
+        }
+
         return samples_size;
     }
-    int audio_decode_frame(VideoState *is, uint8_t *audio_buf, int buf_size, double *pts_ptr) {
-        int len1, data_size, n;
+
+    int audio_decode_frame(uint8_t *audio_buf, int buf_size, double *pts_ptr)
+    {
         AVPacket *pkt = &is->audio_pkt;
+        int len1, data_size, n;
         double pts;
 
-        for(;;) {
-            while(is->audio_pkt_size > 0) {
+        for(;;)
+        {
+            while(is->audio_pkt_size > 0)
+            {
                 data_size = buf_size;
+
                 len1 = avcodec_decode_audio3(is->audio_st->codec,
                                              (int16_t*)audio_buf, &data_size, pkt);
-
-
-                if(len1 < 0) {
+                if(len1 < 0)
+                {
                     /* if error, skip frame */
                     is->audio_pkt_size = 0;
                     break;
                 }
                 is->audio_pkt_data += len1;
                 is->audio_pkt_size -= len1;
-                if(data_size <= 0) {
+                if(data_size <= 0)
+                {
                     /* No data yet, get more frames */
                     continue;
                 }
@@ -268,51 +287,110 @@ namespace MWRender
             if(pkt->data)
                 av_free_packet(pkt);
 
-            if(is->quit) {
+            if(is->quit)
                 return -1;
-            }
+
             /* next packet */
-            if(packet_queue_get(&is->audioq, pkt, 1) < 0) {
+            if(packet_queue_get(&is->audioq, pkt, 1) < 0)
                 return -1;
-            }
+
             is->audio_pkt_data = pkt->data;
             is->audio_pkt_size = pkt->size;
             /* if update, update the audio clock w/pts */
-            if((uint64_t)pkt->pts != AV_NOPTS_VALUE) {
+            if((uint64_t)pkt->pts != AV_NOPTS_VALUE)
                 is->audio_clock = av_q2d(is->audio_st->time_base)*pkt->pts;
-            }
         }
     }
 
-    void audio_callback(void *userdata, Uint8 *stream, int len) {
-        VideoState *is = (VideoState *)userdata;
-        int len1, audio_size;
-        double pts;
+    void open(const std::string&)
+    { fail(std::string("Invalid call to ")+__PRETTY_FUNCTION__); }
 
-        while(len > 0) {
-            if(is->audio_buf_index >= is->audio_buf_size) {
+    void close() { }
+
+    std::string getName()
+    { return is->stream->getName(); }
+
+    void rewind() { }
+
+public:
+    MovieAudioDecoder(VideoState *_is) : is(_is) { }
+
+    void getInfo(int *samplerate, MWSound::ChannelConfig *chans, MWSound::SampleType * type)
+    {
+        if(is->audio_st->codec->sample_fmt == AV_SAMPLE_FMT_U8)
+            *type = MWSound::SampleType_UInt8;
+        else if(is->audio_st->codec->sample_fmt == AV_SAMPLE_FMT_S16)
+            *type = MWSound::SampleType_Int16;
+        else
+            fail(std::string("Unsupported sample format: ")+
+                av_get_sample_fmt_name(is->audio_st->codec->sample_fmt));
+
+        if(is->audio_st->codec->channel_layout == AV_CH_LAYOUT_MONO)
+            *chans = MWSound::ChannelConfig_Mono;
+        else if(is->audio_st->codec->channel_layout == AV_CH_LAYOUT_STEREO)
+            *chans = MWSound::ChannelConfig_Stereo;
+        else if(is->audio_st->codec->channel_layout == 0)
+        {
+            /* Unknown channel layout. Try to guess. */
+            if(is->audio_st->codec->channels == 1)
+                *chans = MWSound::ChannelConfig_Mono;
+            else if(is->audio_st->codec->channels == 2)
+                *chans = MWSound::ChannelConfig_Stereo;
+            else
+            {
+                std::stringstream sstr("Unsupported raw channel count: ");
+                sstr << is->audio_st->codec->channels;
+                fail(sstr.str());
+            }
+        }
+        else
+        {
+            char str[1024];
+            av_get_channel_layout_string(str, sizeof(str), is->audio_st->codec->channels,
+                                         is->audio_st->codec->channel_layout);
+            fail(std::string("Unsupported channel layout: ")+str);
+        }
+
+        *samplerate = is->audio_st->codec->sample_rate;
+    }
+
+    size_t read(char *stream, size_t len)
+    {
+        size_t total = 0;
+
+        while(total < len)
+        {
+            if(is->audio_buf_index >= is->audio_buf_size)
+            {
+                int audio_size;
+                double pts;
                 /* We have already sent all our data; get more */
-                audio_size = audio_decode_frame(is, is->audio_buf, sizeof(is->audio_buf), &pts);
-                if(audio_size < 0) {
-                    /* If error, output silence */
-                    is->audio_buf_size = 1024;
-                    memset(is->audio_buf, 0, is->audio_buf_size);
-                } else {
-                    audio_size = synchronize_audio(is, (int16_t *)is->audio_buf,
-                                                   audio_size, pts);
-                    is->audio_buf_size = audio_size;
+                audio_size = audio_decode_frame(is->audio_buf, sizeof(is->audio_buf), &pts);
+                if(audio_size < 0)
+                {
+                    /* If error, we're done */
+                    break;
                 }
+
+                audio_size = synchronize_audio(is->audio_buf, audio_size, pts);
+                is->audio_buf_size = audio_size;
                 is->audio_buf_index = 0;
             }
-            len1 = is->audio_buf_size - is->audio_buf_index;
-            if(len1 > len)
-                len1 = len;
-            memcpy(stream, (uint8_t *)is->audio_buf + is->audio_buf_index, len1);
-            len -= len1;
+
+            size_t len1 = std::min(is->audio_buf_size - is->audio_buf_index,
+                                   len - total);
+            memcpy(stream, (uint8_t*)is->audio_buf + is->audio_buf_index, len1);
+
+            total += len1;
             stream += len1;
             is->audio_buf_index += len1;
         }
+
+        return total;
     }
+
+};
+
 
     /*
     static Uint32 sdl_refresh_timer_cb(Uint32 interval, void *opaque) {
@@ -371,8 +449,8 @@ namespace MWRender
     }
 
 
-    void video_refresh_timer(void *userdata) {
-
+    void video_refresh_timer(void *userdata)
+    {
         VideoState *is = (VideoState *)userdata;
         VideoPicture *vp;
         double actual_delay, delay, sync_threshold, ref_clock, diff;
@@ -439,8 +517,8 @@ namespace MWRender
         }
     }
 
-    int queue_picture(VideoState *is, AVFrame *pFrame, double pts) {
-
+    int queue_picture(VideoState *is, AVFrame *pFrame, double pts)
+    {
         VideoPicture *vp;
 
         /* wait until we have a new pic */
@@ -487,8 +565,8 @@ namespace MWRender
         return 0;
     }
 
-    double synchronize_video(VideoState *is, AVFrame *src_frame, double pts) {
-
+    double synchronize_video(VideoState *is, AVFrame *src_frame, double pts)
+    {
         double frame_delay;
 
         if(pts != 0) {
@@ -512,14 +590,16 @@ namespace MWRender
      * buffer. We use this to store the global_pts in
      * a frame at the time it is allocated.
      */
-    int our_get_buffer(struct AVCodecContext *c, AVFrame *pic) {
+    int our_get_buffer(struct AVCodecContext *c, AVFrame *pic)
+    {
         int ret = avcodec_default_get_buffer(c, pic);
         uint64_t *pts = (uint64_t*)av_malloc(sizeof(uint64_t));
         *pts = global_video_pkt_pts;
         pic->opaque = pts;
         return ret;
     }
-    void our_release_buffer(struct AVCodecContext *c, AVFrame *pic) {
+    void our_release_buffer(struct AVCodecContext *c, AVFrame *pic)
+    {
         if(pic) av_freep(&pic->opaque);
         avcodec_default_release_buffer(c, pic);
     }
@@ -583,9 +663,9 @@ namespace MWRender
 
     int stream_component_open(VideoState *is, int stream_index, AVFormatContext *pFormatCtx)
     {
+        MWSound::DecoderPtr decoder;
         AVCodecContext *codecCtx;
         AVCodec *codec;
-        SDL_AudioSpec wanted_spec, spec;
 
         if(stream_index < 0 || stream_index >= static_cast<int>(pFormatCtx->nb_streams)) {
             return -1;
@@ -594,22 +674,9 @@ namespace MWRender
         // Get a pointer to the codec context for the video stream
         codecCtx = pFormatCtx->streams[stream_index]->codec;
 
-        if(codecCtx->codec_type == AVMEDIA_TYPE_AUDIO) {
-            // Set audio settings from codec info
-            wanted_spec.freq = codecCtx->sample_rate;
-            wanted_spec.format = AUDIO_S16SYS;
-            wanted_spec.channels = codecCtx->channels;
-            wanted_spec.silence = 0;
-            wanted_spec.samples = SDL_AUDIO_BUFFER_SIZE;
-            wanted_spec.callback = audio_callback;
-            wanted_spec.userdata = is;
+        if(codecCtx->codec_type == AVMEDIA_TYPE_AUDIO)
+            return -1;
 
-            if(SDL_OpenAudio(&wanted_spec, &spec) < 0) {
-                fprintf(stderr, "SDL_OpenAudio: %s\n", SDL_GetError());
-                return -1;
-            }
-            is->audio_hw_buf_size = spec.size;
-        }
         codec = avcodec_find_decoder(codecCtx->codec_id);
         if(!codec || (avcodec_open2(codecCtx, codec, NULL) < 0)) {
             fprintf(stderr, "Unsupported codec!\n");
@@ -627,11 +694,13 @@ namespace MWRender
             is->audio_diff_avg_coef = exp(log(0.01 / AUDIO_DIFF_AVG_NB));
             is->audio_diff_avg_count = 0;
             /* Correct audio only if larger error than this */
-            is->audio_diff_threshold = 2.0 * SDL_AUDIO_BUFFER_SIZE / codecCtx->sample_rate;
+            is->audio_diff_threshold = 2.0 * 0.1/* 100 ms */;
 
             memset(&is->audio_pkt, 0, sizeof(is->audio_pkt));
             packet_queue_init(&is->audioq);
-            SDL_PauseAudio(0);
+
+            decoder.reset(new MovieAudioDecoder(is));
+            is->AudioTrack = MWBase::Environment::get().getSoundManager()->playTrack(decoder);
             break;
         case AVMEDIA_TYPE_VIDEO:
             is->videoStream = stream_index;
@@ -841,16 +910,12 @@ namespace MWRender
         }
         mSceneMgr->setSpecialCaseRenderQueueMode(Ogre::SceneManager::SCRQM_EXCLUDE);
 
+        MWBase::Environment::get().getSoundManager()->pauseAllSounds();
 
         mState = new VideoState;
 
         // Register all formats and codecs
         av_register_all();
-
-        MWBase::Environment::get().getSoundManager()->pauseAllSounds();
-        if(SDL_Init(SDL_INIT_AUDIO)) {
-            throw std::runtime_error("Failed to initialize SDL");
-        }
 
         mState->refresh = 0;
         mState->resourceName = resourceName;
@@ -869,9 +934,7 @@ namespace MWRender
             mState->refresh--;
         }
         if (mState && mState->quit)
-        {
             close();
-        }
 
         if (mState && mState->display_ready && !Ogre::TextureManager::getSingleton ().getByName ("VideoTexture").isNull ())
             mVideoMaterial->getTechnique(0)->getPass(0)->getTextureUnitState (0)->setTextureName ("VideoTexture");
@@ -888,7 +951,6 @@ namespace MWRender
         delete mState;
         mState = NULL;
 
-        SDL_CloseAudio();
         MWBase::Environment::get().getSoundManager()->resumeAllSounds();
 
         mRectangle->setVisible (false);
