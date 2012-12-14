@@ -11,122 +11,90 @@
 namespace MWRender
 {
 
-    int OgreResource_Read(void *user_data, uint8_t *buf, int buf_size)
+void PacketQueue::put(AVPacket *pkt)
+{
+    AVPacketList *pkt1;
+    if(av_dup_packet(pkt) < 0)
+        throw std::runtime_error("Failed to duplicate packet");
+
+    pkt1 = (AVPacketList*)av_malloc(sizeof(AVPacketList));
+    if(!pkt1) throw std::bad_alloc();
+    pkt1->pkt = *pkt;
+    pkt1->next = NULL;
+
+    this->mutex.lock ();
+
+    if(!last_pkt)
+        this->first_pkt = pkt1;
+    else
+        this->last_pkt->next = pkt1;
+    this->last_pkt = pkt1;
+    this->nb_packets++;
+    this->size += pkt1->pkt.size;
+    this->cond.notify_one();
+
+    this->mutex.unlock();
+}
+
+int PacketQueue::get(AVPacket *pkt, VideoState *is, int block)
+{
+    AVPacketList *pkt1;
+    int ret;
+
+    boost::unique_lock<boost::mutex> lock(this->mutex);
+    for(;;)
     {
-        Ogre::DataStreamPtr stream = static_cast<VideoState*>(user_data)->stream;
-        return stream->read(buf, buf_size);
-    }
-
-    int OgreResource_Write(void *user_data, uint8_t *buf, int buf_size)
-    {
-        Ogre::DataStreamPtr stream = static_cast<VideoState*>(user_data)->stream;
-        return stream->write(buf, buf_size);
-    }
-
-    int64_t OgreResource_Seek(void *user_data, int64_t offset, int whence)
-    {
-        Ogre::DataStreamPtr stream = static_cast<VideoState*>(user_data)->stream;
-
-        whence &= ~AVSEEK_FORCE;
-        if(whence == AVSEEK_SIZE)
-            return stream->size();
-        if(whence == SEEK_SET)
-            stream->seek(offset);
-        else if(whence == SEEK_CUR)
-            stream->seek(stream->tell()+offset);
-        else if(whence == SEEK_END)
-            stream->seek(stream->size()+offset);
-        else
-            return -1;
-
-        return stream->tell();
-    }
-
-
-    void PacketQueue::put(AVPacket *pkt)
-    {
-        AVPacketList *pkt1;
-        if(av_dup_packet(pkt) < 0)
-            throw std::runtime_error("Failed to duplicate packet");
-
-        pkt1 = (AVPacketList*)av_malloc(sizeof(AVPacketList));
-        if(!pkt1) throw std::bad_alloc();
-        pkt1->pkt = *pkt;
-        pkt1->next = NULL;
-
-        this->mutex.lock ();
-
-        if(!last_pkt)
-            this->first_pkt = pkt1;
-        else
-            this->last_pkt->next = pkt1;
-        this->last_pkt = pkt1;
-        this->nb_packets++;
-        this->size += pkt1->pkt.size;
-        this->cond.notify_one();
-
-        this->mutex.unlock();
-    }
-
-    int PacketQueue::get(AVPacket *pkt, VideoState *is, int block)
-    {
-        AVPacketList *pkt1;
-        int ret;
-
-        boost::unique_lock<boost::mutex> lock(this->mutex);
-        for(;;)
+        if(is->quit)
         {
-            if(is->quit)
-            {
-                ret = -1;
-                break;
-            }
-
-            pkt1 = this->first_pkt;
-            if(pkt1)
-            {
-                this->first_pkt = pkt1->next;
-                if(!this->first_pkt)
-                    this->last_pkt = NULL;
-                this->nb_packets--;
-                this->size -= pkt1->pkt.size;
-
-                *pkt = pkt1->pkt;
-                av_free(pkt1);
-
-                ret = 1;
-                break;
-            }
-
-            if (!block)
-            {
-                ret = 0;
-                break;
-            }
-
-            this->cond.wait(lock);
+            ret = -1;
+            break;
         }
 
-        return ret;
-    }
-
-    void PacketQueue::flush()
-    {
-        AVPacketList *pkt, *pkt1;
-
-        this->mutex.lock();
-        for(pkt = this->first_pkt; pkt != NULL; pkt = pkt1)
+        pkt1 = this->first_pkt;
+        if(pkt1)
         {
-            pkt1 = pkt->next;
-            av_free_packet(&pkt->pkt);
-            av_freep(&pkt);
+            this->first_pkt = pkt1->next;
+            if(!this->first_pkt)
+                this->last_pkt = NULL;
+            this->nb_packets--;
+            this->size -= pkt1->pkt.size;
+
+            *pkt = pkt1->pkt;
+            av_free(pkt1);
+
+            ret = 1;
+            break;
         }
-        this->last_pkt = NULL;
-        this->first_pkt = NULL;
-        this->nb_packets = 0;
-        this->size = 0;
-        this->mutex.unlock ();
+
+        if (!block)
+        {
+            ret = 0;
+            break;
+        }
+
+        this->cond.wait(lock);
     }
+
+    return ret;
+}
+
+void PacketQueue::flush()
+{
+    AVPacketList *pkt, *pkt1;
+
+    this->mutex.lock();
+    for(pkt = this->first_pkt; pkt != NULL; pkt = pkt1)
+    {
+        pkt1 = pkt->next;
+        av_free_packet(&pkt->pkt);
+        av_freep(&pkt);
+    }
+    this->last_pkt = NULL;
+    this->first_pkt = NULL;
+    this->nb_packets = 0;
+    this->size = 0;
+    this->mutex.unlock ();
+}
 
 
     double get_audio_clock(VideoState *is)
@@ -409,6 +377,38 @@ public:
         return (size_t)(is->audio_clock*is->audio_st->codec->sample_rate);
     }
 };
+
+
+int VideoState::OgreResource_Read(void *user_data, uint8_t *buf, int buf_size)
+{
+    Ogre::DataStreamPtr stream = static_cast<VideoState*>(user_data)->stream;
+    return stream->read(buf, buf_size);
+}
+
+int VideoState::OgreResource_Write(void *user_data, uint8_t *buf, int buf_size)
+{
+    Ogre::DataStreamPtr stream = static_cast<VideoState*>(user_data)->stream;
+    return stream->write(buf, buf_size);
+}
+
+int64_t VideoState::OgreResource_Seek(void *user_data, int64_t offset, int whence)
+{
+    Ogre::DataStreamPtr stream = static_cast<VideoState*>(user_data)->stream;
+
+    whence &= ~AVSEEK_FORCE;
+    if(whence == AVSEEK_SIZE)
+        return stream->size();
+    if(whence == SEEK_SET)
+        stream->seek(offset);
+    else if(whence == SEEK_CUR)
+        stream->seek(stream->tell()+offset);
+    else if(whence == SEEK_END)
+        stream->seek(stream->size()+offset);
+    else
+        return -1;
+
+    return stream->tell();
+}
 
 
     void timer_callback(boost::system_time t, VideoState* is)
@@ -793,7 +793,7 @@ public:
         return 0;
     }
 
-    void init_state(VideoState *is, const std::string& resourceName)
+    void VideoState::init(const std::string& resourceName)
     {
         try
         {
@@ -801,89 +801,89 @@ public:
             int audio_index = -1;
             unsigned int i;
 
-            is->av_sync_type = DEFAULT_AV_SYNC_TYPE;
-            is->videoStream = -1;
-            is->audioStream = -1;
-            is->refresh = false;
-            is->quit = 0;
+            this->av_sync_type = DEFAULT_AV_SYNC_TYPE;
+            this->videoStream = -1;
+            this->audioStream = -1;
+            this->refresh = false;
+            this->quit = 0;
 
-            is->stream = Ogre::ResourceGroupManager::getSingleton ().openResource(resourceName);
-            if(is->stream.isNull())
+            this->stream = Ogre::ResourceGroupManager::getSingleton().openResource(resourceName);
+            if(this->stream.isNull())
                 throw std::runtime_error("Failed to open video resource");
 
-            is->format_ctx = avformat_alloc_context();
-
-            is->format_ctx->pb = avio_alloc_context(NULL, 0, 0, is, OgreResource_Read, OgreResource_Write, OgreResource_Seek);
-            if(!is->format_ctx->pb)
+            this->format_ctx = avformat_alloc_context();
+            this->format_ctx->pb = avio_alloc_context(NULL, 0, 0, this, OgreResource_Read, OgreResource_Write, OgreResource_Seek);
+            if(!this->format_ctx->pb)
             {
-                avformat_free_context(is->format_ctx);
+                avformat_free_context(this->format_ctx);
                 throw std::runtime_error("Failed to allocate ioContext ");
             }
 
             // Open video file
             /// \todo leak here, ffmpeg or valgrind bug ?
-            if (avformat_open_input(&is->format_ctx, resourceName.c_str(), NULL, NULL))
+            if (avformat_open_input(&this->format_ctx, resourceName.c_str(), NULL, NULL))
             {
                 // "Note that a user-supplied AVFormatContext will be freed on failure."
-                is->format_ctx = NULL;
+                this->format_ctx = NULL;
                 throw std::runtime_error("Failed to open video input");
             }
 
             // Retrieve stream information
-            if(avformat_find_stream_info(is->format_ctx, NULL) < 0)
+            if(avformat_find_stream_info(this->format_ctx, NULL) < 0)
                 throw std::runtime_error("Failed to retrieve stream information");
 
             // Dump information about file onto standard error
-            av_dump_format(is->format_ctx, 0, resourceName.c_str(), 0);
+            av_dump_format(this->format_ctx, 0, resourceName.c_str(), 0);
 
-            for(i = 0;i < is->format_ctx->nb_streams;i++)
+            for(i = 0;i < this->format_ctx->nb_streams;i++)
             {
-                if(is->format_ctx->streams[i]->codec->codec_type == AVMEDIA_TYPE_VIDEO && video_index < 0)
+                if(this->format_ctx->streams[i]->codec->codec_type == AVMEDIA_TYPE_VIDEO && video_index < 0)
                     video_index = i;
-                if(is->format_ctx->streams[i]->codec->codec_type == AVMEDIA_TYPE_AUDIO && audio_index < 0)
+                if(this->format_ctx->streams[i]->codec->codec_type == AVMEDIA_TYPE_AUDIO && audio_index < 0)
                     audio_index = i;
             }
 
             if(audio_index >= 0)
-                stream_component_open(is, audio_index, is->format_ctx);
+                stream_component_open(this, audio_index, this->format_ctx);
             if(video_index >= 0)
-                stream_component_open(is, video_index, is->format_ctx);
+                stream_component_open(this, video_index, this->format_ctx);
         }
-        catch (std::runtime_error& e)
+        catch(std::runtime_error& e)
         {
-            is->quit = 1;
+            this->quit = 1;
             throw;
         }
-        catch (Ogre::Exception& e)
+        catch(Ogre::Exception& e)
         {
-            is->quit = 1;
+            this->quit = 1;
             throw;
         }
     }
 
-    void deinit_state(VideoState *is)
+    void VideoState::deinit()
     {
-        is->audioq.cond.notify_one ();
-        is->videoq.cond.notify_one ();
+        this->audioq.cond.notify_one();
+        this->videoq.cond.notify_one();
 
-        is->parse_thread.join();
-        is->video_thread.join();
+        this->parse_thread.join();
+        this->video_thread.join();
 
-        if(is->audioStream >= 0)
-            avcodec_close(is->audio_st->codec);
-        if(is->videoStream >= 0)
-            avcodec_close(is->video_st->codec);
+        if(this->audioStream >= 0)
+            avcodec_close(this->audio_st->codec);
+        if(this->videoStream >= 0)
+            avcodec_close(this->video_st->codec);
 
-        if (is->sws_context)
-            sws_freeContext(is->sws_context);
+        if(this->sws_context)
+            sws_freeContext(this->sws_context);
 
-        if (is->format_ctx)
+        if(this->format_ctx)
         {
-            AVIOContext *ioContext = is->format_ctx->pb;
-            avformat_close_input(&is->format_ctx);
+            AVIOContext *ioContext = this->format_ctx->pb;
+            avformat_close_input(&this->format_ctx);
             av_free(ioContext);
         }
     }
+
 
     VideoPlayer::VideoPlayer(Ogre::SceneManager* sceneMgr)
         : mState(NULL)
@@ -941,8 +941,7 @@ public:
         MWBase::Environment::get().getSoundManager()->pauseAllSounds();
 
         mState = new VideoState;
-
-        init_state(mState, resourceName);
+        mState->init(resourceName);
 
         schedule_refresh(mState, 40);
         mState->parse_thread = boost::thread(decode_thread, mState);
@@ -970,7 +969,7 @@ public:
     void VideoPlayer::close()
     {
         mState->quit = 1;
-        deinit_state(mState);
+        mState->deinit();
 
         delete mState;
         mState = NULL;

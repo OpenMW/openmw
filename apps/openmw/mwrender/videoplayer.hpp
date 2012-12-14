@@ -71,7 +71,6 @@ namespace MWRender
             pictq_windex(0), quit(false), refresh(0), format_ctx(0), sws_context(NULL), display_ready(0)
         {}
 
-
         ~VideoState()
         {
             audioq.flush();
@@ -80,6 +79,13 @@ namespace MWRender
             if(pictq_size >= 1)
                 free(pictq[0].data);
         }
+
+        void init(const std::string& resourceName);
+        void deinit();
+
+        static int OgreResource_Read(void *user_data, uint8_t *buf, int buf_size);
+        static int OgreResource_Write(void *user_data, uint8_t *buf, int buf_size);
+        static int64_t OgreResource_Seek(void *user_data, int64_t offset, int whence);
 
         int videoStream, audioStream;
 
