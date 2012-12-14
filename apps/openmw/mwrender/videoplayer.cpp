@@ -620,12 +620,11 @@ public:
             if (avcodec_decode_video2(is->video_st->codec, pFrame, &frameFinished, packet) < 0)
                 throw std::runtime_error("Error decoding video frame");
 
-            if((uint64_t)pFrame->pts != AV_NOPTS_VALUE)
-                pts = pFrame->pts;
-            else if((uint64_t)packet->pts != AV_NOPTS_VALUE)
-                pts = packet->pts;
-            else if(pFrame->opaque && *(uint64_t*)pFrame->opaque != AV_NOPTS_VALUE)
+            if((uint64_t)packet->dts == AV_NOPTS_VALUE &&
+               pFrame->opaque && *(uint64_t*)pFrame->opaque != AV_NOPTS_VALUE)
                 pts = *(uint64_t *)pFrame->opaque;
+            else if((uint64_t)packet->dts != AV_NOPTS_VALUE)
+                pts = packet->dts;
             else
                 pts = 0;
             pts *= av_q2d(is->video_st->time_base);
