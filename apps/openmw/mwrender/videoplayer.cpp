@@ -178,13 +178,10 @@ class MovieAudioDecoder : public MWSound::Sound_Decoder
                     int n = av_samples_get_buffer_size(NULL, is->audio_st->codec->channels, 1,
                                                        is->audio_st->codec->sample_fmt, 1);
                     int wanted_size = samples_size + ((int)(diff * is->audio_st->codec->sample_rate) * n);
-                    int min_size = samples_size/n * (100-SAMPLE_CORRECTION_PERCENT_MAX) / 100 * n;
                     int max_size = samples_size/n * (100+SAMPLE_CORRECTION_PERCENT_MAX) / 100 * n;
 
-                    if(wanted_size < min_size)
-                        wanted_size = min_size;
-                    else if (wanted_size > max_size)
-                        wanted_size = max_size;
+                    wanted_size = std::max(0, wanted_size);
+                    wanted_size = std::min(wanted_size, max_size);
 
                     if(wanted_size < samples_size)
                     {
