@@ -13,6 +13,7 @@
 #define AV_SYNC_THRESHOLD 0.01
 #define SAMPLE_CORRECTION_PERCENT_MAX 10
 #define AUDIO_DIFF_AVG_NB 20
+#define VIDEO_PICTURE_QUEUE_SIZE 1
 
 
 namespace MWRender
@@ -25,6 +26,135 @@ enum {
 
     AV_SYNC_DEFAULT = AV_SYNC_EXTERNAL_MASTER
 };
+
+struct PacketQueue {
+    PacketQueue()
+      : first_pkt(NULL), last_pkt(NULL), nb_packets(0), size(0)
+    { }
+    ~PacketQueue()
+    { flush(); }
+
+    AVPacketList *first_pkt, *last_pkt;
+    int nb_packets;
+    int size;
+
+    boost::mutex mutex;
+    boost::condition_variable cond;
+
+    void put(AVPacket *pkt);
+    int get(AVPacket *pkt, VideoState *is, int block);
+
+    void flush();
+};
+
+struct VideoPicture {
+    VideoPicture() : pts(0.0)
+    { }
+
+    std::vector<uint8_t> data;
+    double pts;
+};
+
+struct VideoState {
+    VideoState()
+      : videoStream(-1), audioStream(-1), av_sync_type(0), external_clock_base(0),
+        audio_clock(0), audio_st(NULL), audio_diff_cum(0), audio_diff_avg_coef(0),
+        audio_diff_threshold(0), audio_diff_avg_count(0), frame_timer(0), frame_last_pts(0),
+        frame_last_delay(0), video_clock(0), video_current_pts(0), video_st(NULL),
+        rgbaFrame(NULL), pictq_size(0), pictq_rindex(0), pictq_windex(0), quit(false),
+        refresh(0), format_ctx(0), sws_context(NULL), display_ready(0)
+    { }
+
+    ~VideoState()
+    { }
+
+    void init(const std::string& resourceName);
+    void deinit();
+
+    int stream_open(int stream_index, AVFormatContext *pFormatCtx);
+
+    static void video_thread_loop(VideoState *is);
+    static void decode_thread_loop(VideoState *is);
+
+    void video_display();
+    void video_refresh_timer();
+
+    int queue_picture(AVFrame *pFrame, double pts);
+    double synchronize_video(AVFrame *src_frame, double pts);
+
+    static void timer_callback(VideoState* is, boost::system_time t);
+    void schedule_refresh(int delay);
+
+
+    double get_audio_clock()
+    { return this->AudioTrack->getTimeOffset(); }
+
+    double get_video_clock()
+    { return this->video_current_pts; }
+
+    double get_external_clock()
+    { return ((uint64_t)av_gettime()-this->external_clock_base) / 1000000.0; }
+
+    double get_master_clock()
+    {
+        if(this->av_sync_type == AV_SYNC_VIDEO_MASTER)
+            return this->get_video_clock();
+        if(this->av_sync_type == AV_SYNC_AUDIO_MASTER)
+            return this->get_audio_clock();
+        return this->get_external_clock();
+    }
+
+
+    static int OgreResource_Read(void *user_data, uint8_t *buf, int buf_size);
+    static int OgreResource_Write(void *user_data, uint8_t *buf, int buf_size);
+    static int64_t OgreResource_Seek(void *user_data, int64_t offset, int whence);
+
+
+    int videoStream, audioStream;
+
+    int av_sync_type;
+    uint64_t external_clock_base;
+
+    double      audio_clock;
+    AVStream   *audio_st;
+    PacketQueue audioq;
+    AVPacket audio_pkt;
+    double audio_diff_cum; /* used for AV difference average computation */
+    double audio_diff_avg_coef;
+    double audio_diff_threshold;
+    int    audio_diff_avg_count;
+
+    double      frame_timer;
+    double      frame_last_pts;
+    double      frame_last_delay;
+    double      video_clock; ///<pts of last decoded frame / predicted pts of next decoded frame
+    double      video_current_pts; ///<current displayed pts (different from video_clock if frame fifos are used)
+    AVStream    *video_st;
+    PacketQueue videoq;
+
+    Ogre::DataStreamPtr stream;
+
+    MWBase::SoundPtr AudioTrack;
+
+    AVFormatContext* format_ctx;
+    SwsContext* sws_context;
+
+    VideoPicture pictq[VIDEO_PICTURE_QUEUE_SIZE];
+    AVFrame*     rgbaFrame; // used as buffer for the frame converted from its native format to RGBA
+    int          pictq_size, pictq_rindex, pictq_windex;
+
+    boost::mutex pictq_mutex;
+    boost::condition_variable pictq_cond;
+
+    boost::thread parse_thread;
+    boost::thread video_thread;
+
+    volatile int quit;
+    volatile bool refresh;
+
+    int display_ready;
+};
+
 
 void PacketQueue::put(AVPacket *pkt)
 {
@@ -112,31 +242,6 @@ void PacketQueue::flush()
 }
 
 
-static double get_audio_clock(VideoState *is)
-{
-    return is->AudioTrack->getTimeOffset();
-}
-
-static double get_video_clock(VideoState *is)
-{
-    return is->video_current_pts;
-}
-
-static double get_external_clock(VideoState *is)
-{
-    return ((uint64_t)av_gettime()-is->external_clock_base) / 1000000.0;
-}
-
-static double get_master_clock(VideoState *is)
-{
-    if(is->av_sync_type == AV_SYNC_VIDEO_MASTER)
-        return get_video_clock(is);
-    if(is->av_sync_type == AV_SYNC_AUDIO_MASTER)
-        return get_audio_clock(is);
-    return get_external_clock(is);
-}
-
-
 class MovieAudioDecoder : public MWSound::Sound_Decoder
 {
     static void fail(const std::string &str)
@@ -158,7 +263,7 @@ class MovieAudioDecoder : public MWSound::Sound_Decoder
             return samples_size;
 
         // accumulate the clock difference
-        double diff = get_audio_clock(is) - get_master_clock(is);
+        double diff = is->get_audio_clock() - is->get_master_clock();
         is->audio_diff_cum = diff + is->audio_diff_avg_coef *
                                     is->audio_diff_cum;
         if(is->audio_diff_avg_count < AUDIO_DIFF_AVG_NB)
@@ -441,7 +546,7 @@ void VideoState::video_display()
                                     Ogre::PF_BYTE_RGBA,
                                     Ogre::TU_DYNAMIC_WRITE_ONLY_DISCARDABLE);
         }
-        Ogre::PixelBox pb(this->video_st->codec->width, this->video_st->codec->height, 1, Ogre::PF_BYTE_RGBA, vp->data);
+        Ogre::PixelBox pb(this->video_st->codec->width, this->video_st->codec->height, 1, Ogre::PF_BYTE_RGBA, &vp->data[0]);
         Ogre::HardwarePixelBufferSharedPtr buffer = texture->getBuffer();
         buffer->blitFromMemory(pb);
         this->display_ready = 1;
@@ -451,7 +556,7 @@ void VideoState::video_display()
 void VideoState::video_refresh_timer()
 {
     VideoPicture *vp;
-    double actual_delay, delay, sync_threshold, ref_clock, diff;
+    double actual_delay, delay;
 
     if(!this->video_st)
     {
@@ -480,12 +585,11 @@ void VideoState::video_refresh_timer()
     /* update delay to sync to audio if not master source */
     if(this->av_sync_type != AV_SYNC_VIDEO_MASTER)
     {
-        ref_clock = get_master_clock(this);
-        diff = vp->pts - ref_clock;
+        double diff = this->get_video_clock() - this->get_master_clock();
 
         /* Skip or repeat the frame. Take delay into account
          * FFPlay still doesn't "know if this is the best guess." */
-        sync_threshold = std::max(delay, AV_SYNC_THRESHOLD);
+        double sync_threshold = std::max(delay, AV_SYNC_THRESHOLD);
         if(diff <= -sync_threshold)
             delay = 0;
         else if(diff >= sync_threshold)
@@ -506,9 +610,6 @@ void VideoState::video_refresh_timer()
         /* show the picture! */
         this->video_display();
     }
-
-    free(vp->data);
-    vp->data = NULL;
 
     /* update queue for next picture! */
     this->pictq_rindex = (this->pictq_rindex+1) % VIDEO_PICTURE_QUEUE_SIZE;
@@ -548,10 +649,11 @@ int VideoState::queue_picture(AVFrame *pFrame, double pts)
     }
 
     vp->pts = pts;
-    vp->data = (uint8_t*)malloc(this->video_st->codec->width * this->video_st->codec->height * 4);
+    vp->data.resize(this->video_st->codec->width * this->video_st->codec->height * 4);
 
+    uint8_t *dst = &vp->data[0];
     sws_scale(this->sws_context, pFrame->data, pFrame->linesize,
-              0, this->video_st->codec->height, &vp->data, this->rgbaFrame->linesize);
+              0, this->video_st->codec->height, &dst, this->rgbaFrame->linesize);
 
     // now we inform our display thread that we have a pic ready
     this->pictq_windex = (this->pictq_windex+1) % VIDEO_PICTURE_QUEUE_SIZE;
