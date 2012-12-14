@@ -58,11 +58,11 @@ namespace MWRender
     struct VideoState {
         VideoState () :
             videoStream(-1), audioStream(-1), av_sync_type(0), external_clock(0),
-            external_clock_time(0), audio_clock(0), audio_st(NULL), audio_buf_size(0),
-            audio_pkt_data(NULL), audio_pkt_size(0), audio_diff_cum(0), audio_diff_avg_coef(0),
-            audio_diff_threshold(0), audio_diff_avg_count(0), frame_timer(0), frame_last_pts(0), frame_last_delay(0),
-            video_clock(0), video_current_pts(0), video_current_pts_time(0), video_st(NULL), rgbaFrame(NULL), pictq_size(0),
-            pictq_rindex(0), pictq_windex(0), quit(false), refresh(0), format_ctx(0), sws_context(NULL), display_ready(0)
+            external_clock_time(0), audio_clock(0), audio_st(NULL), audio_diff_cum(0),
+            audio_diff_avg_coef(0), audio_diff_threshold(0), audio_diff_avg_count(0), frame_timer(0),
+            frame_last_pts(0), frame_last_delay(0), video_clock(0), video_current_pts(0),
+            video_current_pts_time(0), video_st(NULL), rgbaFrame(NULL), pictq_size(0), pictq_rindex(0),
+            pictq_windex(0), quit(false), refresh(0), format_ctx(0), sws_context(NULL), display_ready(0)
         {}
 
 
@@ -84,12 +84,7 @@ namespace MWRender
         double      audio_clock;
         AVStream    *audio_st;
         PacketQueue audioq;
-        DECLARE_ALIGNED(16, uint8_t, audio_buf[(AVCODEC_MAX_AUDIO_FRAME_SIZE * 3) / 2]);
-        unsigned int audio_buf_size;
-        unsigned int audio_buf_index;
         AVPacket audio_pkt;
-        uint8_t  *audio_pkt_data;
-        int audio_pkt_size;
         double audio_diff_cum; /* used for AV difference average computation */
         double audio_diff_avg_coef;
         double audio_diff_threshold;

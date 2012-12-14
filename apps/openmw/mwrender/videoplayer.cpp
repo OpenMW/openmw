@@ -165,6 +165,10 @@ class MovieAudioDecoder : public MWSound::Sound_Decoder
 
     VideoState *is;
 
+    AVFrame *mFrame;
+    size_t mFramePos;
+    size_t mFrameSize;
+
     /* Add or subtract samples to get a better sync, return new
      * audio buffer size */
     int synchronize_audio(uint8_t *samples, int samples_size, double pts)
@@ -210,16 +214,19 @@ class MovieAudioDecoder : public MWSound::Sound_Decoder
                     {
                         uint8_t *samples_end, *q;
                         int nb;
+
                         /* add samples by copying final sample*/
                         nb = (samples_size - wanted_size);
                         samples_end = samples + samples_size - n;
                         q = samples_end + n;
+
                         while(nb > 0)
                         {
                             memcpy(q, samples_end, n);
                             q += n;
                             nb -= n;
                         }
+
                         samples_size = wanted_size;
                     }
                 }
@@ -235,38 +242,47 @@ class MovieAudioDecoder : public MWSound::Sound_Decoder
         return samples_size;
     }
 
-    int audio_decode_frame(uint8_t *audio_buf, int buf_size, double *pts_ptr)
+    int audio_decode_frame(AVFrame *frame, double *pts_ptr)
     {
         AVPacket *pkt = &is->audio_pkt;
-        int len1, data_size, n;
-        double pts;
+        int len1, data_size;
 
         for(;;)
         {
-            while(is->audio_pkt_size > 0)
+            while(pkt->size > 0)
             {
-                data_size = buf_size;
+                int got_frame;
 
-                len1 = avcodec_decode_audio3(is->audio_st->codec,
-                                             (int16_t*)audio_buf, &data_size, pkt);
-                if(len1 < 0)
+                len1 = avcodec_decode_audio4(is->audio_st->codec, frame, &got_frame, pkt);
+                if(len1 < 0 || len1 > pkt->size)
                 {
-                    /* if error, skip frame */
-                    is->audio_pkt_size = 0;
+                    /* if error, skip packet */
                     break;
                 }
-                is->audio_pkt_data += len1;
-                is->audio_pkt_size -= len1;
+
+                if(len1 <= pkt->size)
+                {
+                    /* Move the unread data to the front and clear the end bits */
+                    int remaining = pkt->size - len1;
+                    memmove(pkt->data, &pkt->data[len1], remaining);
+                    memset(&pkt->data[remaining], 0, pkt->size - remaining);
+                    pkt->size -= len1;
+                }
+                if(!got_frame)
+                    continue;
+
+                int smp_size = av_samples_get_buffer_size(NULL, is->audio_st->codec->channels, 1,
+                                                          is->audio_st->codec->sample_fmt, 1);
+                data_size = frame->nb_samples * smp_size;
                 if(data_size <= 0)
                 {
                     /* No data yet, get more frames */
                     continue;
                 }
-                pts = is->audio_clock;
-                *pts_ptr = pts;
-                n = 2 * is->audio_st->codec->channels;
-                is->audio_clock += (double)data_size /
-                                   (double)(n * is->audio_st->codec->sample_rate);
+
+                *pts_ptr = is->audio_clock;
+                is->audio_clock += (double)(data_size/smp_size) /
+                                   (double)is->audio_st->codec->sample_rate;
 
                 /* We have data, return it and come back for more later */
                 return data_size;
@@ -281,8 +297,6 @@ class MovieAudioDecoder : public MWSound::Sound_Decoder
             if(packet_queue_get(&is->audioq, pkt, is, 1) < 0)
                 return -1;
 
-            is->audio_pkt_data = pkt->data;
-            is->audio_pkt_size = pkt->size;
             /* if update, update the audio clock w/pts */
             if((uint64_t)pkt->pts != AV_NOPTS_VALUE)
                 is->audio_clock = av_q2d(is->audio_st->time_base)*pkt->pts;
@@ -300,7 +314,16 @@ class MovieAudioDecoder : public MWSound::Sound_Decoder
     void rewind() { }
 
 public:
-    MovieAudioDecoder(VideoState *_is) : is(_is) { }
+    MovieAudioDecoder(VideoState *_is)
+      : is(_is)
+      , mFrame(avcodec_alloc_frame())
+      , mFramePos(0)
+      , mFrameSize(0)
+    { }
+    virtual ~MovieAudioDecoder()
+    {
+        av_freep(&mFrame);
+    }
 
     void getInfo(int *samplerate, MWSound::ChannelConfig *chans, MWSound::SampleType * type)
     {
@@ -353,30 +376,29 @@ public:
 
         while(total < len)
         {
-            if(is->audio_buf_index >= is->audio_buf_size)
+            if(mFramePos >= mFrameSize)
             {
                 int audio_size;
                 double pts;
+
                 /* We have already sent all our data; get more */
-                audio_size = audio_decode_frame(is->audio_buf, sizeof(is->audio_buf), &pts);
+                audio_size = audio_decode_frame(mFrame, &pts);
                 if(audio_size < 0)
                 {
                     /* If error, we're done */
                     break;
                 }
 
-                audio_size = synchronize_audio(is->audio_buf, audio_size, pts);
-                is->audio_buf_size = audio_size;
-                is->audio_buf_index = 0;
+                mFrameSize = synchronize_audio(mFrame->data[0], audio_size, pts);
+                mFramePos = 0;
             }
 
-            size_t len1 = std::min<size_t>(is->audio_buf_size - is->audio_buf_index,
-                                           len - total);
-            memcpy(stream, (uint8_t*)is->audio_buf + is->audio_buf_index, len1);
+            size_t len1 = std::min<size_t>(len - total, mFrameSize-mFramePos);
+            memcpy(stream, mFrame->data[0]+mFramePos, len1);
 
             total += len1;
             stream += len1;
-            is->audio_buf_index += len1;
+            mFramePos += len1;
         }
 
         return total;
@@ -670,8 +692,6 @@ public:
         case AVMEDIA_TYPE_AUDIO:
             is->audioStream = stream_index;
             is->audio_st = pFormatCtx->streams[stream_index];
-            is->audio_buf_size = 0;
-            is->audio_buf_index = 0;
 
             /* averaging filter for audio sync */
             is->audio_diff_avg_coef = exp(log(0.01 / AUDIO_DIFF_AVG_NB));
