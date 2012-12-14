@@ -42,41 +42,38 @@ namespace MWRender
         return stream->tell();
     }
 
-    void packet_queue_init(PacketQueue *q)
-    { memset(q, 0, sizeof(PacketQueue)); }
 
-    int packet_queue_put(PacketQueue *q, AVPacket *pkt)
+    void PacketQueue::put(AVPacket *pkt)
     {
         AVPacketList *pkt1;
         if(av_dup_packet(pkt) < 0)
-            return -1;
+            throw std::runtime_error("Failed to duplicate packet");
 
         pkt1 = (AVPacketList*)av_malloc(sizeof(AVPacketList));
-        if(!pkt1) return -1;
+        if(!pkt1) throw std::bad_alloc();
         pkt1->pkt = *pkt;
         pkt1->next = NULL;
 
-        q->mutex.lock ();
+        this->mutex.lock ();
 
-        if (!q->last_pkt)
-            q->first_pkt = pkt1;
+        if(!last_pkt)
+            this->first_pkt = pkt1;
         else
-            q->last_pkt->next = pkt1;
-        q->last_pkt = pkt1;
-        q->nb_packets++;
-        q->size += pkt1->pkt.size;
-        q->cond.notify_one();
-        q->mutex.unlock ();
-        return 0;
+            this->last_pkt->next = pkt1;
+        this->last_pkt = pkt1;
+        this->nb_packets++;
+        this->size += pkt1->pkt.size;
+        this->cond.notify_one();
+
+        this->mutex.unlock();
     }
 
-    static int packet_queue_get(PacketQueue *q, AVPacket *pkt, VideoState *is, int block)
+    int PacketQueue::get(AVPacket *pkt, VideoState *is, int block)
     {
         AVPacketList *pkt1;
         int ret;
 
-        boost::unique_lock<boost::mutex> lock(q->mutex);
-
+        boost::unique_lock<boost::mutex> lock(this->mutex);
         for(;;)
         {
             if(is->quit)
@@ -85,16 +82,18 @@ namespace MWRender
                 break;
             }
 
-            pkt1 = q->first_pkt;
-            if (pkt1)
+            pkt1 = this->first_pkt;
+            if(pkt1)
             {
-                q->first_pkt = pkt1->next;
-                if (!q->first_pkt)
-                    q->last_pkt = NULL;
-                q->nb_packets--;
-                q->size -= pkt1->pkt.size;
+                this->first_pkt = pkt1->next;
+                if(!this->first_pkt)
+                    this->last_pkt = NULL;
+                this->nb_packets--;
+                this->size -= pkt1->pkt.size;
+
                 *pkt = pkt1->pkt;
                 av_free(pkt1);
+
                 ret = 1;
                 break;
             }
@@ -105,7 +104,7 @@ namespace MWRender
                 break;
             }
 
-            q->cond.wait(lock);
+            this->cond.wait(lock);
         }
 
         return ret;
@@ -116,7 +115,8 @@ namespace MWRender
         AVPacketList *pkt, *pkt1;
 
         this->mutex.lock();
-        for(pkt = this->first_pkt; pkt != NULL; pkt = pkt1) {
+        for(pkt = this->first_pkt; pkt != NULL; pkt = pkt1)
+        {
             pkt1 = pkt->next;
             av_free_packet(&pkt->pkt);
             av_freep(&pkt);
@@ -294,7 +294,7 @@ class MovieAudioDecoder : public MWSound::Sound_Decoder
                 return -1;
 
             /* next packet */
-            if(packet_queue_get(&is->audioq, pkt, is, 1) < 0)
+            if(is->audioq.get(pkt, is, 1) < 0)
                 return -1;
 
             /* if update, update the audio clock w/pts */
@@ -630,7 +630,7 @@ public:
 
         for(;;)
         {
-            if(packet_queue_get(&is->videoq, packet, is, 1) < 0)
+            if(is->videoq.get(packet, is, 1) < 0)
             {
                 // means we quit getting packets
                 break;
@@ -701,7 +701,6 @@ public:
             is->audio_diff_threshold = 2.0 * 0.1/* 100 ms */;
 
             memset(&is->audio_pkt, 0, sizeof(is->audio_pkt));
-            packet_queue_init(&is->audioq);
 
             decoder.reset(new MovieAudioDecoder(is));
             is->AudioTrack = MWBase::Environment::get().getSoundManager()->playTrack(decoder);
@@ -721,8 +720,6 @@ public:
             is->frame_timer = (double)av_gettime() / 1000000.0;
             is->frame_last_delay = 40e-3;
             is->video_current_pts_time = av_gettime();
-
-            packet_queue_init(&is->videoq);
 
             codecCtx->get_buffer = our_get_buffer;
             codecCtx->release_buffer = our_release_buffer;
@@ -764,9 +761,9 @@ public:
 
                     // Is this a packet from the video stream?
                     if(packet->stream_index == is->videoStream)
-                        packet_queue_put(&is->videoq, packet);
+                        is->videoq.put(packet);
                     else if(packet->stream_index == is->audioStream)
-                        packet_queue_put(&is->audioq, packet);
+                        is->audioq.put(packet);
                     else
                         av_free_packet(packet);
                 }

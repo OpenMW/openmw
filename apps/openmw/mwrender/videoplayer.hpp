@@ -33,10 +33,13 @@ extern "C"
 
 namespace MWRender
 {
+    struct VideoState;
+
     struct PacketQueue {
-        PacketQueue () :
-            first_pkt(NULL), last_pkt(NULL), nb_packets(0), size(0)
-        {}
+        PacketQueue()
+          : first_pkt(NULL), last_pkt(NULL), nb_packets(0), size(0)
+        { }
+
         AVPacketList *first_pkt, *last_pkt;
         int nb_packets;
         int size;
@@ -44,20 +47,23 @@ namespace MWRender
         boost::mutex mutex;
         boost::condition_variable cond;
 
-        void flush ();
-    };
-    struct VideoPicture {
-        VideoPicture () :
-            data(NULL), pts(0)
-        {}
-        uint8_t* data;
+        void put(AVPacket *pkt);
+        int get(AVPacket *pkt, VideoState *is, int block);
 
+        void flush();
+    };
+
+    struct VideoPicture {
+        VideoPicture () : data(NULL), pts(0)
+        { }
+
+        uint8_t *data;
         double pts;
     };
 
     struct VideoState {
-        VideoState () :
-            videoStream(-1), audioStream(-1), av_sync_type(0), external_clock(0),
+        VideoState ()
+          : videoStream(-1), audioStream(-1), av_sync_type(0), external_clock(0),
             external_clock_time(0), audio_clock(0), audio_st(NULL), audio_diff_cum(0),
             audio_diff_avg_coef(0), audio_diff_threshold(0), audio_diff_avg_count(0), frame_timer(0),
             frame_last_pts(0), frame_last_delay(0), video_clock(0), video_current_pts(0),
@@ -68,11 +74,11 @@ namespace MWRender
 
         ~VideoState()
         {
-            audioq.flush ();
+            audioq.flush();
             videoq.flush();
 
-            if (pictq_size >= 1)
-                free (pictq[0].data);
+            if(pictq_size >= 1)
+                free(pictq[0].data);
         }
 
         int videoStream, audioStream;
@@ -82,7 +88,7 @@ namespace MWRender
         int64_t external_clock_time;
 
         double      audio_clock;
-        AVStream    *audio_st;
+        AVStream   *audio_st;
         PacketQueue audioq;
         AVPacket audio_pkt;
         double audio_diff_cum; /* used for AV difference average computation */
