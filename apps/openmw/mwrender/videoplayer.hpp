@@ -83,6 +83,20 @@ namespace MWRender
         void init(const std::string& resourceName);
         void deinit();
 
+        int stream_open(int stream_index, AVFormatContext *pFormatCtx);
+
+        static void video_thread_loop(VideoState *is);
+        static void decode_thread_loop(VideoState *is);
+
+        void video_display();
+        void video_refresh_timer();
+
+        int queue_picture(AVFrame *pFrame, double pts);
+        double synchronize_video(AVFrame *src_frame, double pts);
+
+        static void timer_callback(VideoState* is, boost::system_time t);
+        void schedule_refresh(int delay);
+
         static int OgreResource_Read(void *user_data, uint8_t *buf, int buf_size);
         static int OgreResource_Write(void *user_data, uint8_t *buf, int buf_size);
         static int64_t OgreResource_Seek(void *user_data, int64_t offset, int whence);
