@@ -117,8 +117,8 @@ namespace MWRender
         boost::thread video_thread;
 
         volatile int quit;
+        volatile bool refresh;
 
-        int refresh;
         int display_ready;
     };
     enum {

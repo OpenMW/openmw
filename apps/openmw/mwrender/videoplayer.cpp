@@ -411,10 +411,10 @@ public:
 };
 
 
-    void timer_callback (boost::system_time t, VideoState* is)
+    void timer_callback(boost::system_time t, VideoState* is)
     {
         boost::this_thread::sleep(t);
-        is->refresh++;
+        is->refresh = true;
     }
 
     /* schedule a video refresh in 'delay' ms */
@@ -469,7 +469,7 @@ public:
         }
         if(is->pictq_size == 0)
         {
-            schedule_refresh(is, 1);
+            is->refresh = true;
             return;
         }
 
@@ -807,7 +807,7 @@ public:
             is->av_sync_type = DEFAULT_AV_SYNC_TYPE;
             is->videoStream = -1;
             is->audioStream = -1;
-            is->refresh = 0;
+            is->refresh = false;
             is->quit = 0;
 
             is->stream = Ogre::ResourceGroupManager::getSingleton ().openResource(resourceName);
@@ -959,8 +959,8 @@ public:
                 close();
             else if(mState->refresh)
             {
+                mState->refresh = false;
                 video_refresh_timer(mState);
-                mState->refresh--;
             }
         }
 
