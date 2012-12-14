@@ -447,8 +447,6 @@ void VideoState::video_display()
         buffer->blitFromMemory(pb);
         this->display_ready = 1;
     }
-
-    free(vp->data);
 }
 
 void VideoState::video_refresh_timer()
@@ -504,17 +502,21 @@ void VideoState::video_refresh_timer()
     actual_delay = this->frame_timer - (av_gettime() / 1000000.0);
     if(actual_delay < 0.010)
     {
-        /* Really it should skip the picture instead */
-        actual_delay = 0.010;
+        /* Skip this picture */
+        this->refresh = true;
     }
-    this->schedule_refresh((int)(actual_delay * 1000 + 0.5));
+    else
+    {
+        this->schedule_refresh((int)(actual_delay * 1000 + 0.5));
+        /* show the picture! */
+        this->video_display();
+    }
 
-    /* show the picture! */
-    this->video_display();
+    free(vp->data);
+    vp->data = NULL;
 
     /* update queue for next picture! */
-    if(++this->pictq_rindex == VIDEO_PICTURE_QUEUE_SIZE)
-        this->pictq_rindex = 0;
+    this->pictq_rindex = (this->pictq_rindex+1) % VIDEO_PICTURE_QUEUE_SIZE;
     this->pictq_mutex.lock();
     this->pictq_size--;
     this->pictq_cond.notify_one();
@@ -550,12 +552,11 @@ int VideoState::queue_picture(AVFrame *pFrame, double pts)
             throw std::runtime_error("Cannot initialize the conversion context!\n");
     }
 
+    vp->pts = pts;
     vp->data = (uint8_t*)malloc(this->video_st->codec->width * this->video_st->codec->height * 4);
 
     sws_scale(this->sws_context, pFrame->data, pFrame->linesize,
               0, this->video_st->codec->height, &vp->data, this->rgbaFrame->linesize);
-
-    vp->pts = pts;
 
     // now we inform our display thread that we have a pic ready
     this->pictq_windex = (this->pictq_windex+1) % VIDEO_PICTURE_QUEUE_SIZE;
