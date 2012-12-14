@@ -199,20 +199,15 @@ class MovieAudioDecoder : public MWSound::Sound_Decoder
     int audio_decode_frame(AVFrame *frame, double *pts_ptr)
     {
         AVPacket *pkt = &is->audio_pkt;
-        int len1, data_size;
 
         for(;;)
         {
             while(pkt->size > 0)
             {
-                int got_frame;
+                int len1, got_frame;
 
                 len1 = avcodec_decode_audio4(is->audio_st->codec, frame, &got_frame, pkt);
-                if(len1 < 0 || len1 > pkt->size)
-                {
-                    /* if error, skip packet */
-                    break;
-                }
+                if(len1 < 0) break;
 
                 if(len1 <= pkt->size)
                 {
@@ -222,24 +217,18 @@ class MovieAudioDecoder : public MWSound::Sound_Decoder
                     memset(&pkt->data[remaining], 0, pkt->size - remaining);
                     pkt->size -= len1;
                 }
-                if(!got_frame)
-                    continue;
 
-                int smp_size = av_get_bytes_per_sample(is->audio_st->codec->sample_fmt) *
-                               is->audio_st->codec->channels;
-                data_size = frame->nb_samples * smp_size;
-                if(data_size <= 0)
-                {
-                    /* No data yet, get more frames */
+                /* No data yet? Look for more frames */
+                if(!got_frame || frame->nb_samples <= 0)
                     continue;
-                }
 
                 *pts_ptr = is->audio_clock;
-                is->audio_clock += (double)(data_size/smp_size) /
+                is->audio_clock += (double)frame->nb_samples /
                                    (double)is->audio_st->codec->sample_rate;
 
                 /* We have data, return it and come back for more later */
-                return data_size;
+                return frame->nb_samples * av_get_bytes_per_sample(is->audio_st->codec->sample_fmt) *
+                       is->audio_st->codec->channels;
             }
             if(pkt->data)
                 av_free_packet(pkt);
