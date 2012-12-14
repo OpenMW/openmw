@@ -662,11 +662,8 @@ void VideoState::decode_thread_loop(VideoState *self)
             throw std::runtime_error("No streams to decode");
 
         // main decode loop
-        for(;;)
+        while(!self->quit)
         {
-            if(self->quit)
-                break;
-
             if((self->audioStream >= 0 && self->audioq.size > MAX_AUDIOQ_SIZE) ||
                (self->videoStream >= 0 && self->videoq.size > MAX_VIDEOQ_SIZE))
             {
