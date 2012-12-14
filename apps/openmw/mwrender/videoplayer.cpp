@@ -8,8 +8,24 @@
 #include "../mwsound/sound.hpp"
 
 
+#define MAX_AUDIOQ_SIZE (5 * 16 * 1024)
+#define MAX_VIDEOQ_SIZE (5 * 256 * 1024)
+#define AV_SYNC_THRESHOLD 0.01
+#define AV_NOSYNC_THRESHOLD 10.0
+#define SAMPLE_CORRECTION_PERCENT_MAX 10
+#define AUDIO_DIFF_AVG_NB 20
+
+
 namespace MWRender
 {
+
+enum {
+    AV_SYNC_AUDIO_MASTER,
+    AV_SYNC_VIDEO_MASTER,
+    AV_SYNC_EXTERNAL_MASTER,
+
+    AV_SYNC_DEFAULT = AV_SYNC_EXTERNAL_MASTER
+};
 
 void PacketQueue::put(AVPacket *pkt)
 {
@@ -773,7 +789,7 @@ void VideoState::init(const std::string& resourceName)
         int audio_index = -1;
         unsigned int i;
 
-        this->av_sync_type = DEFAULT_AV_SYNC_TYPE;
+        this->av_sync_type = AV_SYNC_DEFAULT;
         this->videoStream = -1;
         this->audioStream = -1;
         this->refresh = false;
