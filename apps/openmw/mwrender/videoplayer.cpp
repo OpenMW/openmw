@@ -197,8 +197,8 @@ class MovieAudioDecoder : public MWSound::Sound_Decoder
                 if(fabs(avg_diff) >= is->audio_diff_threshold)
                 {
                     wanted_size = samples_size + ((int)(diff * is->audio_st->codec->sample_rate) * n);
-                    min_size = samples_size * ((100 - SAMPLE_CORRECTION_PERCENT_MAX) / 100);
-                    max_size = samples_size * ((100 + SAMPLE_CORRECTION_PERCENT_MAX) / 100);
+                    min_size = samples_size/n * (100-SAMPLE_CORRECTION_PERCENT_MAX) / 100 * n;
+                    max_size = samples_size/n * (100+SAMPLE_CORRECTION_PERCENT_MAX) / 100 * n;
 
                     if(wanted_size < min_size)
                         wanted_size = min_size;
