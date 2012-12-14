@@ -151,8 +151,8 @@ class MovieAudioDecoder : public MWSound::Sound_Decoder
     VideoState *is;
 
     AVFrame *mFrame;
-    size_t mFramePos;
-    size_t mFrameSize;
+    ssize_t mFramePos;
+    ssize_t mFrameSize;
 
     /* Add or subtract samples to get a better sync, return new
      * audio buffer size */
@@ -175,38 +175,14 @@ class MovieAudioDecoder : public MWSound::Sound_Decoder
                 double avg_diff = is->audio_diff_cum * (1.0 - is->audio_diff_avg_coef);
                 if(fabs(avg_diff) >= is->audio_diff_threshold)
                 {
-                    int n = av_samples_get_buffer_size(NULL, is->audio_st->codec->channels, 1,
-                                                       is->audio_st->codec->sample_fmt, 1);
+                    int n = av_get_bytes_per_sample(is->audio_st->codec->sample_fmt) *
+                            is->audio_st->codec->channels;
                     int wanted_size = samples_size + ((int)(diff * is->audio_st->codec->sample_rate) * n);
-                    int max_size = samples_size/n * (100+SAMPLE_CORRECTION_PERCENT_MAX) / 100 * n;
 
                     wanted_size = std::max(0, wanted_size);
-                    wanted_size = std::min(wanted_size, max_size);
+                    wanted_size = std::min(wanted_size, samples_size*2);
 
-                    if(wanted_size < samples_size)
-                    {
-                        /* remove samples */
-                        samples_size = wanted_size;
-                    }
-                    else if(wanted_size > samples_size)
-                    {
-                        uint8_t *samples_end, *q;
-                        int nb;
-
-                        /* add samples by copying final sample*/
-                        nb = (samples_size - wanted_size);
-                        samples_end = samples + samples_size - n;
-                        q = samples_end + n;
-
-                        while(nb > 0)
-                        {
-                            memcpy(q, samples_end, n);
-                            q += n;
-                            nb -= n;
-                        }
-
-                        samples_size = wanted_size;
-                    }
+                    samples_size = wanted_size;
                 }
             }
         }
@@ -249,8 +225,8 @@ class MovieAudioDecoder : public MWSound::Sound_Decoder
                 if(!got_frame)
                     continue;
 
-                int smp_size = av_samples_get_buffer_size(NULL, is->audio_st->codec->channels, 1,
-                                                          is->audio_st->codec->sample_fmt, 1);
+                int smp_size = av_get_bytes_per_sample(is->audio_st->codec->sample_fmt) *
+                               is->audio_st->codec->channels;
                 data_size = frame->nb_samples * smp_size;
                 if(data_size <= 0)
                 {
@@ -360,19 +336,54 @@ public:
                 double pts;
 
                 /* We have already sent all our data; get more */
-                audio_size = audio_decode_frame(mFrame, &pts);
-                if(audio_size < 0)
+                mFrameSize = audio_decode_frame(mFrame, &pts);
+                if(mFrameSize < 0)
                 {
                     /* If error, we're done */
                     break;
                 }
 
-                mFrameSize = synchronize_audio(mFrame->data[0], audio_size, pts);
-                mFramePos = 0;
+                audio_size = synchronize_audio(mFrame->data[0], mFrameSize, pts);
+                mFramePos = mFrameSize - audio_size;
             }
 
-            size_t len1 = std::min<size_t>(len - total, mFrameSize-mFramePos);
-            memcpy(stream, mFrame->data[0]+mFramePos, len1);
+            size_t len1 = len - total;
+            if(mFramePos >= 0)
+            {
+                len1 = std::min<size_t>(len1, mFrameSize-mFramePos);
+                memcpy(stream, mFrame->data[0]+mFramePos, len1);
+            }
+            else
+            {
+                len1 = std::min<size_t>(len1, -mFramePos);
+
+                int n = av_get_bytes_per_sample(is->audio_st->codec->sample_fmt) *
+                        is->audio_st->codec->channels;
+
+                /* add samples by copying the first sample*/
+                if(n == 1)
+                    memset(stream, *mFrame->data[0], len1);
+                else if(n == 2)
+                {
+                    for(size_t nb = 0;nb < len1;nb += n)
+                        *((int16_t*)(stream+nb)) = *((int16_t*)mFrame->data[0]);
+                }
+                else if(n == 4)
+                {
+                    for(size_t nb = 0;nb < len1;nb += n)
+                        *((int32_t*)(stream+nb)) = *((int32_t*)mFrame->data[0]);
+                }
+                else if(n == 8)
+                {
+                    for(size_t nb = 0;nb < len1;nb += n)
+                        *((int64_t*)(stream+nb)) = *((int64_t*)mFrame->data[0]);
+                }
+                else
+                {
+                    for(size_t nb = 0;nb < len1;nb += n)
+                        memcpy(stream+nb, mFrame->data[0], n);
+                }
+            }
 
             total += len1;
             stream += len1;
