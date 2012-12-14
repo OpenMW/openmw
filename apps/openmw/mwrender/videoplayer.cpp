@@ -11,7 +11,6 @@
 #define MAX_AUDIOQ_SIZE (5 * 16 * 1024)
 #define MAX_VIDEOQ_SIZE (5 * 256 * 1024)
 #define AV_SYNC_THRESHOLD 0.01
-#define AV_NOSYNC_THRESHOLD 10.0
 #define SAMPLE_CORRECTION_PERCENT_MAX 10
 #define AUDIO_DIFF_AVG_NB 20
 
@@ -161,36 +160,26 @@ class MovieAudioDecoder : public MWSound::Sound_Decoder
         if(is->av_sync_type == AV_SYNC_AUDIO_MASTER)
             return samples_size;
 
-        double ref_clock = get_master_clock(is);
-        double diff = get_audio_clock(is) - ref_clock;
-        if(diff < AV_NOSYNC_THRESHOLD)
-        {
-            // accumulate the diffs
-            is->audio_diff_cum = diff + is->audio_diff_avg_coef *
-                                        is->audio_diff_cum;
-            if(is->audio_diff_avg_count < AUDIO_DIFF_AVG_NB)
-                is->audio_diff_avg_count++;
-            else
-            {
-                double avg_diff = is->audio_diff_cum * (1.0 - is->audio_diff_avg_coef);
-                if(fabs(avg_diff) >= is->audio_diff_threshold)
-                {
-                    int n = av_get_bytes_per_sample(is->audio_st->codec->sample_fmt) *
-                            is->audio_st->codec->channels;
-                    int wanted_size = samples_size + ((int)(diff * is->audio_st->codec->sample_rate) * n);
-
-                    wanted_size = std::max(0, wanted_size);
-                    wanted_size = std::min(wanted_size, samples_size*2);
-
-                    samples_size = wanted_size;
-                }
-            }
-        }
+        // accumulate the clock difference
+        double diff = get_audio_clock(is) - get_master_clock(is);
+        is->audio_diff_cum = diff + is->audio_diff_avg_coef *
+                                    is->audio_diff_cum;
+        if(is->audio_diff_avg_count < AUDIO_DIFF_AVG_NB)
+            is->audio_diff_avg_count++;
         else
         {
-            /* difference is TOO big; reset diff stuff */
-            is->audio_diff_avg_count = 0;
-            is->audio_diff_cum = 0;
+            double avg_diff = is->audio_diff_cum * (1.0 - is->audio_diff_avg_coef);
+            if(fabs(avg_diff) >= is->audio_diff_threshold)
+            {
+                int n = av_get_bytes_per_sample(is->audio_st->codec->sample_fmt) *
+                        is->audio_st->codec->channels;
+                int wanted_size = samples_size + ((int)(diff * is->audio_st->codec->sample_rate) * n);
+
+                wanted_size = std::max(0, wanted_size);
+                wanted_size = std::min(wanted_size, samples_size*2);
+
+                samples_size = wanted_size;
+            }
         }
 
         return samples_size;
@@ -499,15 +488,12 @@ void VideoState::video_refresh_timer()
         diff = vp->pts - ref_clock;
 
         /* Skip or repeat the frame. Take delay into account
-            FFPlay still doesn't "know if this is the best guess." */
-        sync_threshold = (delay > AV_SYNC_THRESHOLD) ? delay : AV_SYNC_THRESHOLD;
-        if(fabs(diff) < AV_NOSYNC_THRESHOLD)
-        {
-            if(diff <= -sync_threshold)
-                delay = 0;
-            else if(diff >= sync_threshold)
-                delay = 2 * delay;
-        }
+         * FFPlay still doesn't "know if this is the best guess." */
+        sync_threshold = std::max(delay, AV_SYNC_THRESHOLD);
+        if(diff <= -sync_threshold)
+            delay = 0;
+        else if(diff >= sync_threshold)
+            delay = 2 * delay;
     }
     this->frame_timer += delay;
 
