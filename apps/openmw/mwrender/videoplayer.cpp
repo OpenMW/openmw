@@ -777,49 +777,70 @@ public:
 
     void init_state(VideoState *is, const std::string& resourceName)
     {
-        int video_index = -1;
-        int audio_index = -1;
-        unsigned int i;
-
-        is->av_sync_type = DEFAULT_AV_SYNC_TYPE;
-        is->format_ctx = avformat_alloc_context();
-        is->videoStream = -1;
-        is->audioStream = -1;
-        is->refresh = 0;
-        is->quit = 0;
-
-        is->stream = Ogre::ResourceGroupManager::getSingleton ().openResource(resourceName);
-        if(is->stream.isNull())
-            throw std::runtime_error("Failed to open video resource");
-
-        is->format_ctx->pb = avio_alloc_context(NULL, 0, 0, is, OgreResource_Read, OgreResource_Write, OgreResource_Seek);
-        if(!is->format_ctx->pb)
-            throw std::runtime_error("Failed to allocate ioContext ");
-
-        // Open video file
-        /// \todo leak here, ffmpeg or valgrind bug ?
-        if (avformat_open_input(&is->format_ctx, resourceName.c_str(), NULL, NULL))
-            throw std::runtime_error("Failed to open video input");
-
-        // Retrieve stream information
-        if(avformat_find_stream_info(is->format_ctx, NULL) < 0)
-            throw std::runtime_error("Failed to retrieve stream information");
-
-        // Dump information about file onto standard error
-        av_dump_format(is->format_ctx, 0, resourceName.c_str(), 0);
-
-        for(i = 0;i < is->format_ctx->nb_streams;i++)
+        try
         {
-            if(is->format_ctx->streams[i]->codec->codec_type == AVMEDIA_TYPE_VIDEO && video_index < 0)
-                video_index = i;
-            if(is->format_ctx->streams[i]->codec->codec_type == AVMEDIA_TYPE_AUDIO && audio_index < 0)
-                audio_index = i;
-        }
+            int video_index = -1;
+            int audio_index = -1;
+            unsigned int i;
 
-        if(audio_index >= 0)
-            stream_component_open(is, audio_index, is->format_ctx);
-        if(video_index >= 0)
-            stream_component_open(is, video_index, is->format_ctx);
+            is->av_sync_type = DEFAULT_AV_SYNC_TYPE;
+            is->videoStream = -1;
+            is->audioStream = -1;
+            is->refresh = 0;
+            is->quit = 0;
+
+            is->stream = Ogre::ResourceGroupManager::getSingleton ().openResource(resourceName);
+            if(is->stream.isNull())
+                throw std::runtime_error("Failed to open video resource");
+
+            is->format_ctx = avformat_alloc_context();
+
+            is->format_ctx->pb = avio_alloc_context(NULL, 0, 0, is, OgreResource_Read, OgreResource_Write, OgreResource_Seek);
+            if(!is->format_ctx->pb)
+            {
+                avformat_free_context(is->format_ctx);
+                throw std::runtime_error("Failed to allocate ioContext ");
+            }
+
+            // Open video file
+            /// \todo leak here, ffmpeg or valgrind bug ?
+            if (avformat_open_input(&is->format_ctx, resourceName.c_str(), NULL, NULL))
+            {
+                // "Note that a user-supplied AVFormatContext will be freed on failure."
+                is->format_ctx = NULL;
+                throw std::runtime_error("Failed to open video input");
+            }
+
+            // Retrieve stream information
+            if(avformat_find_stream_info(is->format_ctx, NULL) < 0)
+                throw std::runtime_error("Failed to retrieve stream information");
+
+            // Dump information about file onto standard error
+            av_dump_format(is->format_ctx, 0, resourceName.c_str(), 0);
+
+            for(i = 0;i < is->format_ctx->nb_streams;i++)
+            {
+                if(is->format_ctx->streams[i]->codec->codec_type == AVMEDIA_TYPE_VIDEO && video_index < 0)
+                    video_index = i;
+                if(is->format_ctx->streams[i]->codec->codec_type == AVMEDIA_TYPE_AUDIO && audio_index < 0)
+                    audio_index = i;
+            }
+
+            if(audio_index >= 0)
+                stream_component_open(is, audio_index, is->format_ctx);
+            if(video_index >= 0)
+                stream_component_open(is, video_index, is->format_ctx);
+        }
+        catch (std::runtime_error& e)
+        {
+            is->quit = 1;
+            throw;
+        }
+        catch (Ogre::Exception& e)
+        {
+            is->quit = 1;
+            throw;
+        }
     }
 
     void deinit_state(VideoState *is)
@@ -835,11 +856,15 @@ public:
         if(is->videoStream >= 0)
             avcodec_close(is->video_st->codec);
 
-        sws_freeContext(is->sws_context);
+        if (is->sws_context)
+            sws_freeContext(is->sws_context);
 
-        AVIOContext *ioContext = is->format_ctx->pb;
-        avformat_close_input(&is->format_ctx);
-        av_free(ioContext);
+        if (is->format_ctx)
+        {
+            AVIOContext *ioContext = is->format_ctx->pb;
+            avformat_close_input(&is->format_ctx);
+            av_free(ioContext);
+        }
     }
 
     VideoPlayer::VideoPlayer(Ogre::SceneManager* sceneMgr)
