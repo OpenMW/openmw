@@ -119,10 +119,7 @@ static double get_audio_clock(VideoState *is)
 
 static double get_video_clock(VideoState *is)
 {
-    double delta;
-
-    delta = (av_gettime() - is->video_current_pts_time) / 1000000.0;
-    return is->video_current_pts + delta;
+    return is->video_current_pts;
 }
 
 static double get_external_clock(VideoState *is)
@@ -469,9 +466,6 @@ void VideoState::video_refresh_timer()
 
     vp = &this->pictq[this->pictq_rindex];
 
-    this->video_current_pts = vp->pts;
-    this->video_current_pts_time = av_gettime();
-
     delay = vp->pts - this->frame_last_pts; /* the pts from last time */
     if(delay <= 0 || delay >= 1.0) {
         /* if incorrect delay, use previous one */
@@ -480,6 +474,8 @@ void VideoState::video_refresh_timer()
     /* save for next time */
     this->frame_last_delay = delay;
     this->frame_last_pts = vp->pts;
+
+    this->video_current_pts = vp->pts;
 
     /* update delay to sync to audio if not master source */
     if(this->av_sync_type != AV_SYNC_VIDEO_MASTER)
@@ -750,7 +746,6 @@ int VideoState::stream_open(int stream_index, AVFormatContext *pFormatCtx)
 
         this->frame_timer = (double)av_gettime() / 1000000.0;
         this->frame_last_delay = 40e-3;
-        this->video_current_pts_time = av_gettime();
 
         codecCtx->get_buffer = our_get_buffer;
         codecCtx->release_buffer = our_release_buffer;

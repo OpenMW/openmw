@@ -58,9 +58,9 @@ namespace MWRender
           : videoStream(-1), audioStream(-1), av_sync_type(0), external_clock_base(0),
             audio_clock(0), audio_st(NULL), audio_diff_cum(0), audio_diff_avg_coef(0),
             audio_diff_threshold(0), audio_diff_avg_count(0), frame_timer(0), frame_last_pts(0),
-            frame_last_delay(0), video_clock(0), video_current_pts(0), video_current_pts_time(0),
-            video_st(NULL), rgbaFrame(NULL), pictq_size(0), pictq_rindex(0), pictq_windex(0),
-            quit(false), refresh(0), format_ctx(0), sws_context(NULL), display_ready(0)
+            frame_last_delay(0), video_clock(0), video_current_pts(0), video_st(NULL),
+            rgbaFrame(NULL), pictq_size(0), pictq_rindex(0), pictq_windex(0), quit(false),
+            refresh(0), format_ctx(0), sws_context(NULL), display_ready(0)
         {}
 
         ~VideoState()
@@ -68,8 +68,8 @@ namespace MWRender
             audioq.flush();
             videoq.flush();
 
-            if(pictq_size >= 1)
-                free(pictq[0].data);
+            for(int i = 0;i < VIDEO_PICTURE_QUEUE_SIZE;i++)
+                free(pictq[i].data);
         }
 
         void init(const std::string& resourceName);
@@ -112,7 +112,6 @@ namespace MWRender
         double      frame_last_delay;
         double      video_clock; ///<pts of last decoded frame / predicted pts of next decoded frame
         double      video_current_pts; ///<current displayed pts (different from video_clock if frame fifos are used)
-        int64_t     video_current_pts_time;    ///<time (av_gettime) at which we updated video_current_pts - used to have running video pts
         AVStream    *video_st;
         PacketQueue videoq;
 
