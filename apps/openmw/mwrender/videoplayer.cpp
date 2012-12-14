@@ -733,7 +733,7 @@ int VideoState::stream_open(int stream_index, AVFormatContext *pFormatCtx)
         this->audio_diff_avg_coef = exp(log(0.01 / AUDIO_DIFF_AVG_NB));
         this->audio_diff_avg_count = 0;
         /* Correct audio only if larger error than this */
-        this->audio_diff_threshold = 2.0 * 0.1/* 100 ms */;
+        this->audio_diff_threshold = 2.0 * 0.025/* 25 ms */;
 
         memset(&this->audio_pkt, 0, sizeof(this->audio_pkt));
 
