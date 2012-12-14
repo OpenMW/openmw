@@ -145,14 +145,8 @@ class MovieAudioDecoder : public MWSound::Sound_Decoder
         if(is->av_sync_type == AV_SYNC_AUDIO_MASTER)
             return samples_size;
 
-        double diff, avg_diff, ref_clock;
-        int wanted_size, min_size, max_size, n;
-        // int nb_samples;
-
-        n = 2 * is->audio_st->codec->channels;
-
-        ref_clock = get_master_clock(is);
-        diff = get_audio_clock(is) - ref_clock;
+        double ref_clock = get_master_clock(is);
+        double diff = get_audio_clock(is) - ref_clock;
         if(diff < AV_NOSYNC_THRESHOLD)
         {
             // accumulate the diffs
@@ -162,12 +156,14 @@ class MovieAudioDecoder : public MWSound::Sound_Decoder
                 is->audio_diff_avg_count++;
             else
             {
-                avg_diff = is->audio_diff_cum * (1.0 - is->audio_diff_avg_coef);
+                double avg_diff = is->audio_diff_cum * (1.0 - is->audio_diff_avg_coef);
                 if(fabs(avg_diff) >= is->audio_diff_threshold)
                 {
-                    wanted_size = samples_size + ((int)(diff * is->audio_st->codec->sample_rate) * n);
-                    min_size = samples_size/n * (100-SAMPLE_CORRECTION_PERCENT_MAX) / 100 * n;
-                    max_size = samples_size/n * (100+SAMPLE_CORRECTION_PERCENT_MAX) / 100 * n;
+                    int n = av_samples_get_buffer_size(NULL, is->audio_st->codec->channels, 1,
+                                                       is->audio_st->codec->sample_fmt, 1);
+                    int wanted_size = samples_size + ((int)(diff * is->audio_st->codec->sample_rate) * n);
+                    int min_size = samples_size/n * (100-SAMPLE_CORRECTION_PERCENT_MAX) / 100 * n;
+                    int max_size = samples_size/n * (100+SAMPLE_CORRECTION_PERCENT_MAX) / 100 * n;
 
                     if(wanted_size < min_size)
                         wanted_size = min_size;
