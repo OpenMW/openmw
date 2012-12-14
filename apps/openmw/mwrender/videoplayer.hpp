@@ -55,12 +55,12 @@ namespace MWRender
 
     struct VideoState {
         VideoState ()
-          : videoStream(-1), audioStream(-1), av_sync_type(0), external_clock(0),
-            external_clock_time(0), audio_clock(0), audio_st(NULL), audio_diff_cum(0),
-            audio_diff_avg_coef(0), audio_diff_threshold(0), audio_diff_avg_count(0), frame_timer(0),
-            frame_last_pts(0), frame_last_delay(0), video_clock(0), video_current_pts(0),
-            video_current_pts_time(0), video_st(NULL), rgbaFrame(NULL), pictq_size(0), pictq_rindex(0),
-            pictq_windex(0), quit(false), refresh(0), format_ctx(0), sws_context(NULL), display_ready(0)
+          : videoStream(-1), audioStream(-1), av_sync_type(0), external_clock_base(0),
+            audio_clock(0), audio_st(NULL), audio_diff_cum(0), audio_diff_avg_coef(0),
+            audio_diff_threshold(0), audio_diff_avg_count(0), frame_timer(0), frame_last_pts(0),
+            frame_last_delay(0), video_clock(0), video_current_pts(0), video_current_pts_time(0),
+            video_st(NULL), rgbaFrame(NULL), pictq_size(0), pictq_rindex(0), pictq_windex(0),
+            quit(false), refresh(0), format_ctx(0), sws_context(NULL), display_ready(0)
         {}
 
         ~VideoState()
@@ -95,9 +95,8 @@ namespace MWRender
 
         int videoStream, audioStream;
 
-        int     av_sync_type;
-        double  external_clock; /* external clock base */
-        int64_t external_clock_time;
+        int av_sync_type;
+        uint64_t external_clock_base;
 
         double      audio_clock;
         AVStream   *audio_st;

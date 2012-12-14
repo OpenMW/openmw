@@ -128,7 +128,7 @@ static double get_video_clock(VideoState *is)
 
 static double get_external_clock(VideoState *is)
 {
-    return av_gettime() / 1000000.0;
+    return ((uint64_t)av_gettime()-is->external_clock_base) / 1000000.0;
 }
 
 static double get_master_clock(VideoState *is)
@@ -746,7 +746,7 @@ int VideoState::stream_open(int stream_index, AVFormatContext *pFormatCtx)
         this->audio_diff_avg_coef = exp(log(0.01 / AUDIO_DIFF_AVG_NB));
         this->audio_diff_avg_count = 0;
         /* Correct audio only if larger error than this */
-        this->audio_diff_threshold = 2.0 * 0.025/* 25 ms */;
+        this->audio_diff_threshold = 2.0 * 0.050/* 50 ms */;
 
         memset(&this->audio_pkt, 0, sizeof(this->audio_pkt));
 
@@ -831,6 +831,7 @@ void VideoState::init(const std::string& resourceName)
                 audio_index = i;
         }
 
+        this->external_clock_base = av_gettime();
         if(audio_index >= 0)
             this->stream_open(audio_index, this->format_ctx);
         if(video_index >= 0)
