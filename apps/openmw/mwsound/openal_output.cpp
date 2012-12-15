@@ -339,8 +339,6 @@ bool OpenAL_SoundStream::process()
 {
     try {
         bool finished = mIsFinished;
-        ALint samples_unqueued = 0;
-        ALint samples_queued = 0;
         ALint processed, state;
 
         alGetSourcei(mSource, AL_SOURCE_STATE, &state);
@@ -355,7 +353,7 @@ bool OpenAL_SoundStream::process()
                 size_t got;
 
                 alSourceUnqueueBuffers(mSource, 1, &bufid);
-                samples_unqueued += getBufferSampleCount(bufid);
+                mSamplesQueued -= getBufferSampleCount(bufid);
                 processed--;
 
                 if(finished)
@@ -367,7 +365,7 @@ bool OpenAL_SoundStream::process()
                 {
                     alBufferData(bufid, mFormat, &data[0], got, mSampleRate);
                     alSourceQueueBuffers(mSource, 1, &bufid);
-                    samples_queued += getBufferSampleCount(bufid);
+                    mSamplesQueued += getBufferSampleCount(bufid);
                 }
             } while(processed > 0);
             throwALerror();
@@ -383,8 +381,6 @@ bool OpenAL_SoundStream::process()
             throwALerror();
         }
 
-        mSamplesQueued -= samples_unqueued;
-        mSamplesQueued += samples_queued;
         mIsFinished = finished;
     }
     catch(std::exception &e) {
