@@ -407,7 +407,7 @@ public:
                     break;
                 }
 
-                mFramePos = std::min(mFrameSize, sample_skip);
+                mFramePos = std::min(static_cast<int>(mFrameSize), sample_skip);
                 sample_skip -= mFramePos;
             }
 
@@ -949,14 +949,16 @@ VideoPlayer::VideoPlayer(Ogre::SceneManager* sceneMgr)
     , mRectangle(NULL)
     , mNode(NULL)
 {
-    mVideoMaterial = Ogre::MaterialManager::getSingleton().create("VideoMaterial", "General");
-    mVideoMaterial->getTechnique(0)->getPass(0)->setDepthWriteEnabled(false);
-    mVideoMaterial->getTechnique(0)->getPass(0)->setDepthCheckEnabled(false);
-    mVideoMaterial->getTechnique(0)->getPass(0)->setLightingEnabled(false);
-    if(mVideoMaterial->getTechnique(0)->getPass(0)->getNumTextureUnitStates() == 0)
+    mVideoMaterial = Ogre::MaterialManager::getSingleton().getByName("VideoMaterial", "General");
+    if (mVideoMaterial.isNull ())
+    {
+        mVideoMaterial = Ogre::MaterialManager::getSingleton().create("VideoMaterial", "General");
+        mVideoMaterial->getTechnique(0)->getPass(0)->setDepthWriteEnabled(false);
+        mVideoMaterial->getTechnique(0)->getPass(0)->setDepthCheckEnabled(false);
+        mVideoMaterial->getTechnique(0)->getPass(0)->setLightingEnabled(false);
         mVideoMaterial->getTechnique(0)->getPass(0)->createTextureUnitState()->setTextureName("black.png");
-    else
-        mVideoMaterial->getTechnique(0)->getPass(0)->getTextureUnitState(0)->setTextureName("black.png");
+    }
+    mVideoMaterial->getTechnique(0)->getPass(0)->getTextureUnitState(0)->setTextureName("black.png");
 
     mRectangle = new Ogre::Rectangle2D(true);
     mRectangle->setCorners(-1.0, 1.0, 1.0, -1.0);
@@ -1016,6 +1018,8 @@ void VideoPlayer::playVideo(const std::string &resourceName)
 
     mState = new VideoState;
     mState->init(resourceName);
+
+    mVideoMaterial->getTechnique(0)->getPass(0)->getTextureUnitState(0)->setTextureName("black.png");
 }
 
 void VideoPlayer::update ()
