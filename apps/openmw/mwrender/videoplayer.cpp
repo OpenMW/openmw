@@ -854,20 +854,20 @@ void VideoState::init(const std::string& resourceName)
         if(this->stream.isNull())
             throw std::runtime_error("Failed to open video resource");
 
+        AVIOContext *ioCtx = avio_alloc_context(NULL, 0, 0, this, OgreResource_Read, OgreResource_Write, OgreResource_Seek);
+        if(!ioCtx) throw std::runtime_error("Failed to allocate AVIOContext");
+
         this->format_ctx = avformat_alloc_context();
-        this->format_ctx->pb = avio_alloc_context(NULL, 0, 0, this, OgreResource_Read, OgreResource_Write, OgreResource_Seek);
-        if(!this->format_ctx->pb)
-        {
-            avformat_free_context(this->format_ctx);
-            throw std::runtime_error("Failed to allocate ioContext ");
-        }
+        if(this->format_ctx)
+            this->format_ctx->pb = ioCtx;
 
         // Open video file
         /// \todo leak here, ffmpeg or valgrind bug ?
-        if (avformat_open_input(&this->format_ctx, resourceName.c_str(), NULL, NULL))
+        if(!this->format_ctx || avformat_open_input(&this->format_ctx, resourceName.c_str(), NULL, NULL))
         {
             // "Note that a user-supplied AVFormatContext will be freed on failure."
             this->format_ctx = NULL;
+            av_free(ioCtx);
             throw std::runtime_error("Failed to open video input");
         }
 
