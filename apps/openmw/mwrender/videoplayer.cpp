@@ -158,13 +158,20 @@ struct VideoState {
 void PacketQueue::put(AVPacket *pkt)
 {
     AVPacketList *pkt1;
-    if(av_dup_packet(pkt) < 0)
-        throw std::runtime_error("Failed to duplicate packet");
-
     pkt1 = (AVPacketList*)av_malloc(sizeof(AVPacketList));
     if(!pkt1) throw std::bad_alloc();
     pkt1->pkt = *pkt;
     pkt1->next = NULL;
+
+    if(pkt1->pkt.destruct == NULL)
+    {
+        if(av_dup_packet(&pkt1->pkt) < 0)
+        {
+            av_free(pkt1);
+            throw std::runtime_error("Failed to duplicate packet");
+        }
+        av_free_packet(pkt);
+    }
 
     this->mutex.lock ();
 
