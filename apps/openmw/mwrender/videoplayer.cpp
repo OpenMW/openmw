@@ -59,7 +59,7 @@ struct VideoState {
     VideoState()
       : videoStream(-1), audioStream(-1), av_sync_type(0), external_clock_base(0),
         audio_clock(0), audio_st(NULL), audio_diff_cum(0), audio_diff_avg_coef(0),
-        audio_diff_threshold(0), audio_diff_avg_count(0), frame_timer(0), frame_last_pts(0),
+        audio_diff_threshold(0), audio_diff_avg_count(0), frame_last_pts(0),
         frame_last_delay(0), video_clock(0), video_st(NULL), rgbaFrame(NULL), pictq_size(0),
         pictq_rindex(0), pictq_windex(0), quit(false), refresh(0), format_ctx(0),
         sws_context(NULL), display_ready(0)
@@ -82,8 +82,7 @@ struct VideoState {
     int queue_picture(AVFrame *pFrame, double pts);
     double synchronize_video(AVFrame *src_frame, double pts);
 
-    static void timer_callback(VideoState* is, boost::system_time t);
-    void schedule_refresh(int delay);
+    static void video_refresh(VideoState *is);
 
 
     double get_audio_clock()
@@ -123,7 +122,6 @@ struct VideoState {
     double audio_diff_threshold;
     int    audio_diff_avg_count;
 
-    double      frame_timer;
     double      frame_last_pts;
     double      frame_last_delay;
     double      video_clock; ///<pts of last decoded frame / predicted pts of next decoded frame
@@ -147,8 +145,11 @@ struct VideoState {
     boost::thread parse_thread;
     boost::thread video_thread;
 
-    volatile int quit;
+    boost::thread refresh_thread;
+    volatile int refresh_rate_ms;
+
     volatile bool refresh;
+    volatile int quit;
 
     int display_ready;
 };
@@ -507,17 +508,15 @@ int64_t VideoState::OgreResource_Seek(void *user_data, int64_t offset, int whenc
 }
 
 
-void VideoState::timer_callback(VideoState* is, boost::system_time t)
+void VideoState::video_refresh(VideoState* is)
 {
-    boost::this_thread::sleep(t);
-    is->refresh = true;
-}
-
-/* schedule a video refresh in 'delay' ms */
-void VideoState::schedule_refresh(int delay)
-{
-    boost::system_time t = boost::get_system_time() + boost::posix_time::milliseconds(delay);
-    boost::thread(boost::bind(&timer_callback, this, t)).detach();
+    boost::system_time t = boost::get_system_time();
+    while(!is->quit)
+    {
+        t += boost::posix_time::milliseconds(is->refresh_rate_ms);
+        boost::this_thread::sleep(t);
+        is->refresh = true;
+    }
 }
 
 
@@ -551,18 +550,10 @@ void VideoState::video_display()
 void VideoState::video_refresh_timer()
 {
     VideoPicture *vp;
-    double actual_delay, delay;
+    double delay;
 
-    if(!this->video_st)
-    {
-        this->schedule_refresh(100);
-        return;
-    }
     if(this->pictq_size == 0)
-    {
-        this->refresh = true;
         return;
-    }
 
     vp = &this->pictq[this->pictq_rindex];
 
@@ -575,6 +566,8 @@ void VideoState::video_refresh_timer()
     this->frame_last_delay = delay;
     this->frame_last_pts = vp->pts;
 
+    /* FIXME: Syncing should be done in the decoding stage, where frames can be
+     * skipped or duplicated as needed. */
     /* update delay to sync to audio if not master source */
     if(this->av_sync_type != AV_SYNC_VIDEO_MASTER)
     {
@@ -588,21 +581,10 @@ void VideoState::video_refresh_timer()
         else if(diff >= sync_threshold)
             delay = 2 * delay;
     }
-    this->frame_timer += delay;
 
-    /* compute the REAL delay */
-    actual_delay = this->frame_timer - (av_gettime() / 1000000.0);
-    if(actual_delay < 0.010)
-    {
-        /* Skip this picture */
-        this->refresh = true;
-    }
-    else
-    {
-        this->schedule_refresh((int)(actual_delay * 1000 + 0.5));
-        /* show the picture! */
-        this->video_display();
-    }
+    this->refresh_rate_ms = std::max<int>(1, (int)(delay*1000.0));
+    /* show the picture! */
+    this->video_display();
 
     /* update queue for next picture! */
     this->pictq_rindex = (this->pictq_rindex+1) % VIDEO_PICTURE_QUEUE_SIZE;
@@ -838,12 +820,12 @@ int VideoState::stream_open(int stream_index, AVFormatContext *pFormatCtx)
         this->videoStream = stream_index;
         this->video_st = pFormatCtx->streams[stream_index];
 
-        this->frame_timer = (double)av_gettime() / 1000000.0;
         this->frame_last_delay = 40e-3;
 
         codecCtx->get_buffer = our_get_buffer;
         codecCtx->release_buffer = our_release_buffer;
         this->video_thread = boost::thread(video_thread_loop, this);
+        this->refresh_thread = boost::thread(video_refresh, this);
         break;
 
     default:
@@ -864,6 +846,7 @@ void VideoState::init(const std::string& resourceName)
         this->av_sync_type = AV_SYNC_DEFAULT;
         this->videoStream = -1;
         this->audioStream = -1;
+        this->refresh_rate_ms = 10;
         this->refresh = false;
         this->quit = 0;
 
@@ -909,7 +892,6 @@ void VideoState::init(const std::string& resourceName)
         if(video_index >= 0)
             this->stream_open(video_index, this->format_ctx);
 
-        this->schedule_refresh(40);
         this->parse_thread = boost::thread(decode_thread_loop, this);
     }
     catch(std::runtime_error& e)
@@ -931,6 +913,7 @@ void VideoState::deinit()
 
     this->parse_thread.join();
     this->video_thread.join();
+    this->refresh_thread.join();
 
     if(this->audioStream >= 0)
         avcodec_close(this->audio_st->codec);
