@@ -1045,15 +1045,16 @@ void VideoPlayer::update ()
                 mVideoMaterial->getTechnique(0)->getPass(0)->getTextureUnitState(0)->setTextureName("VideoTexture");
 
             // Correct aspect ratio by adding black bars
-            int width = (mState->video_st->codec->width);
-            int height = (mState->video_st->codec->height);
+            double videoaspect = static_cast<double>(mState->video_st->codec->width) / mState->video_st->codec->height;
 
-            float screenaspect = static_cast<float>(mWidth) / mHeight;
-            float videoaspect = static_cast<float>(width) / height;
-            float aspect_correction = videoaspect / screenaspect;
+            if (av_q2d(mState->video_st->codec->sample_aspect_ratio) != 0)
+                videoaspect *= av_q2d(mState->video_st->codec->sample_aspect_ratio);
 
-            mRectangle->setCorners (std::max(-1.f, -1.f * aspect_correction), std::min(1.f, 1.f / aspect_correction),
-                                    std::min(1.f, 1.f * aspect_correction), std::max(-1.f, -1.f / aspect_correction));
+            double screenaspect = static_cast<double>(mWidth) / mHeight;
+            double aspect_correction = videoaspect / screenaspect;
+
+            mRectangle->setCorners (std::max(-1.0, -1.0 * aspect_correction), std::min(1.0, 1.0 / aspect_correction),
+                                    std::min(1.0, 1.0 * aspect_correction), std::max(-1.0, -1.0 / aspect_correction));
         }
     }
 }
