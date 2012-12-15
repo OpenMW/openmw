@@ -45,8 +45,9 @@ namespace MWRender
         VideoState* mState;
 
         Ogre::SceneManager* mSceneMgr;
-        Ogre::Rectangle2D* mRectangle;
         Ogre::MaterialPtr mVideoMaterial;
+        Ogre::Rectangle2D* mRectangle;
+        Ogre::SceneNode* mNode;
     };
 }
 

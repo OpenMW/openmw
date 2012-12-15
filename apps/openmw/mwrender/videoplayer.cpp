@@ -938,103 +938,116 @@ void VideoState::deinit()
 }
 
 
-    VideoPlayer::VideoPlayer(Ogre::SceneManager* sceneMgr)
-        : mState(NULL)
-        , mSceneMgr(sceneMgr)
-    {
-        mVideoMaterial = Ogre::MaterialManager::getSingleton ().create("VideoMaterial", "General");
-        mVideoMaterial->getTechnique(0)->getPass(0)->setDepthWriteEnabled(false);
-        mVideoMaterial->getTechnique(0)->getPass(0)->setDepthCheckEnabled(false);
-        mVideoMaterial->getTechnique(0)->getPass(0)->setLightingEnabled(false);
-        mVideoMaterial->getTechnique(0)->getPass(0)->createTextureUnitState();
+VideoPlayer::VideoPlayer(Ogre::SceneManager* sceneMgr)
+    : mState(NULL)
+    , mSceneMgr(sceneMgr)
+    , mVideoMaterial(NULL)
+    , mRectangle(NULL)
+    , mNode(NULL)
+{
+    mVideoMaterial = Ogre::MaterialManager::getSingleton().create("VideoMaterial", "General");
+    mVideoMaterial->getTechnique(0)->getPass(0)->setDepthWriteEnabled(false);
+    mVideoMaterial->getTechnique(0)->getPass(0)->setDepthCheckEnabled(false);
+    mVideoMaterial->getTechnique(0)->getPass(0)->setLightingEnabled(false);
+    mVideoMaterial->getTechnique(0)->getPass(0)->createTextureUnitState()->setTextureName("black.png");
 
-        mRectangle = new Ogre::Rectangle2D(true);
-        mRectangle->setCorners(-1.0, 1.0, 1.0, -1.0);
-        mRectangle->setMaterial("VideoMaterial");
-        mRectangle->setRenderQueueGroup(Ogre::RENDER_QUEUE_OVERLAY+1);
-        // Use infinite AAB to always stay visible
-        Ogre::AxisAlignedBox aabInf;
-        aabInf.setInfinite();
-        mRectangle->setBoundingBox(aabInf);
-        // Attach background to the scene
-        Ogre::SceneNode* node = sceneMgr->getRootSceneNode()->createChildSceneNode();
-        node->attachObject(mRectangle);
-        mRectangle->setVisible(false);
-        mRectangle->setVisibilityFlags (0x1);
+    mRectangle = new Ogre::Rectangle2D(true);
+    mRectangle->setCorners(-1.0, 1.0, 1.0, -1.0);
+    mRectangle->setMaterial("VideoMaterial");
+    mRectangle->setRenderQueueGroup(Ogre::RENDER_QUEUE_OVERLAY+1);
+
+    // Use infinite AAB to always stay visible
+    Ogre::AxisAlignedBox aabInf;
+    aabInf.setInfinite();
+    mRectangle->setBoundingBox(aabInf);
+
+    // Attach background to the scene
+    mNode = sceneMgr->getRootSceneNode()->createChildSceneNode();
+    mNode->attachObject(mRectangle);
+
+    mRectangle->setVisible(false);
+    mRectangle->setVisibilityFlags(0x1);
+}
+
+VideoPlayer::~VideoPlayer()
+{
+    if(mState)
+        close();
+
+    if(mNode)
+        mSceneMgr->destroySceneNode(mNode);
+    mNode = NULL;
+
+    if(mRectangle)
+        delete mRectangle;
+    mRectangle = NULL;
+}
+
+void VideoPlayer::playVideo(const std::string &resourceName)
+{
+    // Register all formats and codecs
+    av_register_all();
+
+    if(mState)
+        close();
+
+    mRectangle->setVisible(true);
+
+    MWBase::Environment::get().getWindowManager()->pushGuiMode(MWGui::GM_Video);
+
+    // Turn off rendering except the GUI
+    mSceneMgr->clearSpecialCaseRenderQueues();
+    // SCRQM_INCLUDE with RENDER_QUEUE_OVERLAY does not work.
+    for(int i = 0;i < Ogre::RENDER_QUEUE_MAX;++i)
+    {
+        if(i > 0 && i < 96)
+            mSceneMgr->addSpecialCaseRenderQueue(i);
     }
+    mSceneMgr->setSpecialCaseRenderQueueMode(Ogre::SceneManager::SCRQM_EXCLUDE);
 
-    VideoPlayer::~VideoPlayer ()
+    MWBase::Environment::get().getSoundManager()->pauseAllSounds();
+
+    mState = new VideoState;
+    mState->init(resourceName);
+}
+
+void VideoPlayer::update ()
+{
+    if(mState)
     {
-        if (mState)
+        if(mState->quit)
             close();
-    }
-
-    void VideoPlayer::playVideo (const std::string &resourceName)
-    {
-        // Register all formats and codecs
-        av_register_all();
-
-        if (mState)
-            close();
-
-        mRectangle->setVisible(true);
-
-        MWBase::Environment::get().getWindowManager ()->pushGuiMode (MWGui::GM_Video);
-
-        // Turn off rendering except the GUI
-        mSceneMgr->clearSpecialCaseRenderQueues();
-        // SCRQM_INCLUDE with RENDER_QUEUE_OVERLAY does not work.
-        for (int i = 0; i < Ogre::RENDER_QUEUE_MAX; ++i)
+        else if(mState->refresh)
         {
-            if (i > 0 && i < 96)
-                mSceneMgr->addSpecialCaseRenderQueue(i);
+            mState->refresh = false;
+            mState->video_refresh_timer();
+            // Would be nice not to do this all the time...
+            if(mState->display_ready)
+                mVideoMaterial->getTechnique(0)->getPass(0)->getTextureUnitState(0)->setTextureName("VideoTexture");
         }
-        mSceneMgr->setSpecialCaseRenderQueueMode(Ogre::SceneManager::SCRQM_EXCLUDE);
-
-        MWBase::Environment::get().getSoundManager()->pauseAllSounds();
-
-        mState = new VideoState;
-        mState->init(resourceName);
     }
+}
 
-    void VideoPlayer::update ()
-    {
-        if(mState)
-        {
-            if(mState->quit)
-                close();
-            else if(mState->refresh)
-            {
-                mState->refresh = false;
-                mState->video_refresh_timer();
-            }
-        }
+void VideoPlayer::close()
+{
+    mState->quit = 1;
+    mState->deinit();
 
-        if (mState && mState->display_ready && !Ogre::TextureManager::getSingleton ().getByName ("VideoTexture").isNull ())
-            mVideoMaterial->getTechnique(0)->getPass(0)->getTextureUnitState (0)->setTextureName ("VideoTexture");
-        else
-            mVideoMaterial->getTechnique(0)->getPass(0)->getTextureUnitState (0)->setTextureName ("black.png");
-    }
+    delete mState;
+    mState = NULL;
 
-    void VideoPlayer::close()
-    {
-        mState->quit = 1;
-        mState->deinit();
+    MWBase::Environment::get().getSoundManager()->resumeAllSounds();
 
-        delete mState;
-        mState = NULL;
+    mRectangle->setVisible(false);
+    MWBase::Environment::get().getWindowManager()->removeGuiMode(MWGui::GM_Video);
 
-        MWBase::Environment::get().getSoundManager()->resumeAllSounds();
+    mSceneMgr->clearSpecialCaseRenderQueues();
+    mSceneMgr->setSpecialCaseRenderQueueMode(Ogre::SceneManager::SCRQM_EXCLUDE);
+}
 
-        mRectangle->setVisible (false);
-        MWBase::Environment::get().getWindowManager ()->removeGuiMode (MWGui::GM_Video);
+bool VideoPlayer::isPlaying ()
+{
+    return mState != NULL;
+}
 
-        mSceneMgr->clearSpecialCaseRenderQueues();
-        mSceneMgr->setSpecialCaseRenderQueueMode(Ogre::SceneManager::SCRQM_EXCLUDE);
-    }
-
-    bool VideoPlayer::isPlaying ()
-    {
-        return mState != NULL;
-    }
 }
