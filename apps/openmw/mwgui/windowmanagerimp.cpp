@@ -225,6 +225,8 @@ WindowManager::~WindowManager()
     delete mSpellCreationDialog;
     delete mEnchantingDialog;
     delete mTrainingWindow;
+    delete mCountDialog;
+    delete mQuickKeysMenu;
 
     cleanupGarbage();
 
