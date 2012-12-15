@@ -128,12 +128,6 @@ float MWBase::Environment::getFrameDuration() const
 
 void MWBase::Environment::cleanup()
 {
-    delete mInputManager;
-    mInputManager = 0;
-
-    delete mSoundManager;
-    mSoundManager = 0;
-
     delete mMechanicsManager;
     mMechanicsManager = 0;
 
@@ -146,11 +140,17 @@ void MWBase::Environment::cleanup()
     delete mScriptManager;
     mScriptManager = 0;
 
+    delete mWorld;
+    mWorld = 0;
+
+    delete mSoundManager;
+    mSoundManager = 0;
+
     delete mWindowManager;
     mWindowManager = 0;
 
-    delete mWorld;
-    mWorld = 0;
+    delete mInputManager;
+    mInputManager = 0;
 }
 
 const MWBase::Environment& MWBase::Environment::get()
