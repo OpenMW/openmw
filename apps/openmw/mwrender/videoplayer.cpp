@@ -255,15 +255,17 @@ class MovieAudioDecoder : public MWSound::Sound_Decoder
     ssize_t mFramePos;
     ssize_t mFrameSize;
 
-    /* Add or subtract samples to get a better sync, return new
-     * audio buffer size */
-    int synchronize_audio(uint8_t *samples, int samples_size, double pts)
+    /* Add or subtract samples to get a better sync, return number of bytes to
+     * skip (negative means to duplicate). */
+    int synchronize_audio()
     {
         if(is->av_sync_type == AV_SYNC_AUDIO_MASTER)
-            return samples_size;
+            return 0;
+
+        int sample_skip = 0;
 
         // accumulate the clock difference
-        double diff = is->get_audio_clock() - is->get_master_clock();
+        double diff = is->get_master_clock() - is->get_audio_clock();
         is->audio_diff_cum = diff + is->audio_diff_avg_coef *
                                     is->audio_diff_cum;
         if(is->audio_diff_avg_count < AUDIO_DIFF_AVG_NB)
@@ -275,19 +277,14 @@ class MovieAudioDecoder : public MWSound::Sound_Decoder
             {
                 int n = av_get_bytes_per_sample(is->audio_st->codec->sample_fmt) *
                         is->audio_st->codec->channels;
-                int wanted_size = samples_size + ((int)(diff * is->audio_st->codec->sample_rate) * n);
-
-                wanted_size = std::max(0, wanted_size);
-                wanted_size = std::min(wanted_size, samples_size*2);
-
-                samples_size = wanted_size;
+                sample_skip = ((int)(diff * is->audio_st->codec->sample_rate) * n);
             }
         }
 
-        return samples_size;
+        return sample_skip;
     }
 
-    int audio_decode_frame(AVFrame *frame, double *pts_ptr)
+    int audio_decode_frame(AVFrame *frame)
     {
         AVPacket *pkt = &is->audio_pkt;
 
@@ -313,7 +310,6 @@ class MovieAudioDecoder : public MWSound::Sound_Decoder
                 if(!got_frame || frame->nb_samples <= 0)
                     continue;
 
-                *pts_ptr = is->audio_clock;
                 is->audio_clock += (double)frame->nb_samples /
                                    (double)is->audio_st->codec->sample_rate;
 
@@ -406,25 +402,23 @@ public:
 
     size_t read(char *stream, size_t len)
     {
+        int sample_skip = synchronize_audio();
         size_t total = 0;
 
         while(total < len)
         {
-            if(mFramePos >= mFrameSize)
+            while(mFramePos >= mFrameSize)
             {
-                int audio_size;
-                double pts;
-
                 /* We have already sent all our data; get more */
-                mFrameSize = audio_decode_frame(mFrame, &pts);
+                mFrameSize = audio_decode_frame(mFrame);
                 if(mFrameSize < 0)
                 {
                     /* If error, we're done */
                     break;
                 }
 
-                audio_size = synchronize_audio(mFrame->data[0], mFrameSize, pts);
-                mFramePos = mFrameSize - audio_size;
+                mFramePos = std::min(mFrameSize, sample_skip);
+                sample_skip -= mFramePos;
             }
 
             size_t len1 = len - total;
