@@ -40,6 +40,8 @@ namespace MWRender
 
         bool isPlaying();
 
+        void setResolution (int w, int h) { mWidth = w; mHeight = h; }
+
 
     private:
         VideoState* mState;
@@ -47,7 +49,12 @@ namespace MWRender
         Ogre::SceneManager* mSceneMgr;
         Ogre::MaterialPtr mVideoMaterial;
         Ogre::Rectangle2D* mRectangle;
+        Ogre::Rectangle2D* mBackgroundRectangle;
         Ogre::SceneNode* mNode;
+        Ogre::SceneNode* mBackgroundNode;
+
+        int mWidth;
+        int mHeight;
     };
 }
 

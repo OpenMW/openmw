@@ -162,6 +162,7 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
     mOcclusionQuery = new OcclusionQuery(&mRendering, mSkyManager->getSunNode());
 
     mVideoPlayer = new VideoPlayer(mRendering.getScene ());
+    mVideoPlayer->setResolution (Settings::Manager::getInt ("resolution x", "Video"), Settings::Manager::getInt ("resolution y", "Video"));
 
     mSun = 0;
 
@@ -842,6 +843,8 @@ void RenderingManager::windowResized(Ogre::RenderWindow* rw)
     mRendering.adjustViewport();
     mCompositors->recreate();
     mWater->assignTextures();
+
+    mVideoPlayer->setResolution (rw->getWidth(), rw->getHeight());
 
     const Settings::CategorySettingVector& changed = Settings::Manager::apply();
     MWBase::Environment::get().getInputManager()->processChangedSettings(changed); //FIXME

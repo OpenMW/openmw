@@ -950,22 +950,41 @@ VideoPlayer::VideoPlayer(Ogre::SceneManager* sceneMgr)
     }
     mVideoMaterial->getTechnique(0)->getPass(0)->getTextureUnitState(0)->setTextureName("black.png");
 
+    Ogre::MaterialPtr blackMaterial = Ogre::MaterialManager::getSingleton().getByName("BlackBarsMaterial", "General");
+    if (blackMaterial.isNull ())
+    {
+        blackMaterial = Ogre::MaterialManager::getSingleton().create("BlackBarsMaterial", "General");
+        blackMaterial->getTechnique(0)->getPass(0)->setDepthWriteEnabled(false);
+        blackMaterial->getTechnique(0)->getPass(0)->setDepthCheckEnabled(false);
+        blackMaterial->getTechnique(0)->getPass(0)->setLightingEnabled(false);
+        blackMaterial->getTechnique(0)->getPass(0)->createTextureUnitState()->setTextureName("black.png");
+    }
+
     mRectangle = new Ogre::Rectangle2D(true);
     mRectangle->setCorners(-1.0, 1.0, 1.0, -1.0);
     mRectangle->setMaterial("VideoMaterial");
-    mRectangle->setRenderQueueGroup(Ogre::RENDER_QUEUE_OVERLAY+1);
+    mRectangle->setRenderQueueGroup(Ogre::RENDER_QUEUE_OVERLAY+2);
+    mBackgroundRectangle = new Ogre::Rectangle2D(true);
+    mBackgroundRectangle->setCorners(-1.0, 1.0, 1.0, -1.0);
+    mBackgroundRectangle->setMaterial("BlackBarsMaterial");
+    mBackgroundRectangle->setRenderQueueGroup(Ogre::RENDER_QUEUE_OVERLAY+1);
 
     // Use infinite AAB to always stay visible
     Ogre::AxisAlignedBox aabInf;
     aabInf.setInfinite();
     mRectangle->setBoundingBox(aabInf);
+    mBackgroundRectangle->setBoundingBox(aabInf);
 
     // Attach background to the scene
     mNode = sceneMgr->getRootSceneNode()->createChildSceneNode();
     mNode->attachObject(mRectangle);
+    mBackgroundNode = sceneMgr->getRootSceneNode()->createChildSceneNode();
+    mBackgroundNode->attachObject(mBackgroundRectangle);
 
     mRectangle->setVisible(false);
     mRectangle->setVisibilityFlags(0x1);
+    mBackgroundRectangle->setVisible(false);
+    mBackgroundRectangle->setVisibilityFlags(0x1);
 }
 
 VideoPlayer::~VideoPlayer()
@@ -973,13 +992,11 @@ VideoPlayer::~VideoPlayer()
     if(mState)
         close();
 
-    if(mNode)
-        mSceneMgr->destroySceneNode(mNode);
-    mNode = NULL;
+    mSceneMgr->destroySceneNode(mNode);
+    mSceneMgr->destroySceneNode(mBackgroundNode);
 
-    if(mRectangle)
-        delete mRectangle;
-    mRectangle = NULL;
+    delete mRectangle;
+    delete mBackgroundRectangle;
 }
 
 void VideoPlayer::playVideo(const std::string &resourceName)
@@ -991,6 +1008,7 @@ void VideoPlayer::playVideo(const std::string &resourceName)
         close();
 
     mRectangle->setVisible(true);
+    mBackgroundRectangle->setVisible(true);
 
     MWBase::Environment::get().getWindowManager()->pushGuiMode(MWGui::GM_Video);
 
@@ -1025,6 +1043,17 @@ void VideoPlayer::update ()
             // Would be nice not to do this all the time...
             if(mState->display_ready)
                 mVideoMaterial->getTechnique(0)->getPass(0)->getTextureUnitState(0)->setTextureName("VideoTexture");
+
+            // Correct aspect ratio by adding black bars
+            int width = (mState->video_st->codec->width);
+            int height = (mState->video_st->codec->height);
+
+            float screenaspect = static_cast<float>(mWidth) / mHeight;
+            float videoaspect = static_cast<float>(width) / height;
+            float aspect_correction = videoaspect / screenaspect;
+
+            mRectangle->setCorners (std::max(-1.f, -1.f * aspect_correction), std::min(1.f, 1.f / aspect_correction),
+                                    std::min(1.f, 1.f * aspect_correction), std::max(-1.f, -1.f / aspect_correction));
         }
     }
 }
@@ -1040,6 +1069,7 @@ void VideoPlayer::close()
     MWBase::Environment::get().getSoundManager()->resumeAllSounds();
 
     mRectangle->setVisible(false);
+    mBackgroundRectangle->setVisible(false);
     MWBase::Environment::get().getWindowManager()->removeGuiMode(MWGui::GM_Video);
 
     mSceneMgr->clearSpecialCaseRenderQueues();
