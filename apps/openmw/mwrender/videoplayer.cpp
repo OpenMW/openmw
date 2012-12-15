@@ -118,7 +118,6 @@ struct VideoState {
     double      audio_clock;
     AVStream   *audio_st;
     PacketQueue audioq;
-    AVPacket audio_pkt;
     double audio_diff_cum; /* used for AV difference average computation */
     double audio_diff_avg_coef;
     double audio_diff_threshold;
@@ -239,8 +238,19 @@ class MovieAudioDecoder : public MWSound::Sound_Decoder
         throw std::runtime_error(str);
     }
 
+    struct AutoAVPacket : public AVPacket {
+        AutoAVPacket(int size=0)
+        {
+            if(av_new_packet(this, size) < 0)
+                throw std::bad_alloc();
+        }
+        ~AutoAVPacket()
+        { av_free_packet(this); }
+    };
+
     VideoState *is;
 
+    AutoAVPacket mPacket;
     AVFrame *mFrame;
     ssize_t mFramePos;
     ssize_t mFrameSize;
@@ -276,7 +286,7 @@ class MovieAudioDecoder : public MWSound::Sound_Decoder
 
     int audio_decode_frame(AVFrame *frame)
     {
-        AVPacket *pkt = &is->audio_pkt;
+        AVPacket *pkt = &mPacket;
 
         for(;;)
         {
@@ -292,8 +302,7 @@ class MovieAudioDecoder : public MWSound::Sound_Decoder
                     /* Move the unread data to the front and clear the end bits */
                     int remaining = pkt->size - len1;
                     memmove(pkt->data, &pkt->data[len1], remaining);
-                    memset(&pkt->data[remaining], 0, pkt->size - remaining);
-                    pkt->size -= len1;
+                    av_shrink_packet(pkt, remaining);
                 }
 
                 /* No data yet? Look for more frames */
@@ -307,8 +316,7 @@ class MovieAudioDecoder : public MWSound::Sound_Decoder
                 return frame->nb_samples * av_get_bytes_per_sample(is->audio_st->codec->sample_fmt) *
                        is->audio_st->codec->channels;
             }
-            if(pkt->data)
-                av_free_packet(pkt);
+            av_free_packet(pkt);
 
             if(is->quit)
                 return -1;
@@ -717,6 +725,8 @@ void VideoState::video_thread_loop(VideoState *self)
             pts = *(uint64_t*)pFrame->opaque;
         pts *= av_q2d(self->video_st->time_base);
 
+        av_free_packet(packet);
+
         // Did we get a video frame?
         if(frameFinished)
         {
@@ -724,7 +734,6 @@ void VideoState::video_thread_loop(VideoState *self)
             if(self->queue_picture(pFrame, pts) < 0)
                 break;
         }
-        av_free_packet(packet);
     }
 
     av_free(pFrame);
@@ -813,8 +822,6 @@ int VideoState::stream_open(int stream_index, AVFormatContext *pFormatCtx)
         this->audio_diff_avg_count = 0;
         /* Correct audio only if larger error than this */
         this->audio_diff_threshold = 2.0 * 0.050/* 50 ms */;
-
-        memset(&this->audio_pkt, 0, sizeof(this->audio_pkt));
 
         decoder.reset(new MovieAudioDecoder(this));
         this->AudioTrack = MWBase::Environment::get().getSoundManager()->playTrack(decoder);
