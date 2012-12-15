@@ -439,18 +439,21 @@ public:
                     memset(stream, *mFrame->data[0], len1);
                 else if(n == 2)
                 {
+                    const int16_t val = *((int16_t*)mFrame->data[0]);
                     for(size_t nb = 0;nb < len1;nb += n)
-                        *((int16_t*)(stream+nb)) = *((int16_t*)mFrame->data[0]);
+                        *((int16_t*)(stream+nb)) = val;
                 }
                 else if(n == 4)
                 {
+                    const int32_t val = *((int32_t*)mFrame->data[0]);
                     for(size_t nb = 0;nb < len1;nb += n)
-                        *((int32_t*)(stream+nb)) = *((int32_t*)mFrame->data[0]);
+                        *((int32_t*)(stream+nb)) = val;
                 }
                 else if(n == 8)
                 {
+                    const int64_t val = *((int64_t*)mFrame->data[0]);
                     for(size_t nb = 0;nb < len1;nb += n)
-                        *((int64_t*)(stream+nb)) = *((int64_t*)mFrame->data[0]);
+                        *((int64_t*)(stream+nb)) = val;
                 }
                 else
                 {
