@@ -42,7 +42,7 @@ struct PacketQueue {
     boost::condition_variable cond;
 
     void put(AVPacket *pkt);
-    int get(AVPacket *pkt, VideoState *is, int block);
+    int get(AVPacket *pkt, VideoState *is);
 
     void flush();
 };
@@ -181,21 +181,12 @@ void PacketQueue::put(AVPacket *pkt)
     this->mutex.unlock();
 }
 
-int PacketQueue::get(AVPacket *pkt, VideoState *is, int block)
+int PacketQueue::get(AVPacket *pkt, VideoState *is)
 {
-    AVPacketList *pkt1;
-    int ret;
-
     boost::unique_lock<boost::mutex> lock(this->mutex);
-    for(;;)
+    while(!is->quit)
     {
-        if(is->quit)
-        {
-            ret = -1;
-            break;
-        }
-
-        pkt1 = this->first_pkt;
+        AVPacketList *pkt1 = this->first_pkt;
         if(pkt1)
         {
             this->first_pkt = pkt1->next;
@@ -207,20 +198,13 @@ int PacketQueue::get(AVPacket *pkt, VideoState *is, int block)
             *pkt = pkt1->pkt;
             av_free(pkt1);
 
-            ret = 1;
-            break;
-        }
-
-        if (!block)
-        {
-            ret = 0;
-            break;
+            return 1;
         }
 
         this->cond.wait(lock);
     }
 
-    return ret;
+    return -1;
 }
 
 void PacketQueue::flush()
@@ -324,7 +308,7 @@ class MovieAudioDecoder : public MWSound::Sound_Decoder
                 return -1;
 
             /* next packet */
-            if(is->audioq.get(pkt, is, 1) < 0)
+            if(is->audioq.get(pkt, is) < 0)
                 return -1;
 
             /* if update, update the audio clock w/pts */
@@ -714,7 +698,7 @@ void VideoState::video_thread_loop(VideoState *self)
     self->rgbaFrame = avcodec_alloc_frame();
     avpicture_alloc((AVPicture*)self->rgbaFrame, PIX_FMT_RGBA, self->video_st->codec->width, self->video_st->codec->height);
 
-    while(self->videoq.get(packet, self, 1) >= 0)
+    while(self->videoq.get(packet, self) >= 0)
     {
         // Save global pts to be stored in pFrame
         global_video_pkt_pts = packet->pts;
