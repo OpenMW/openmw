@@ -949,7 +949,10 @@ VideoPlayer::VideoPlayer(Ogre::SceneManager* sceneMgr)
     mVideoMaterial->getTechnique(0)->getPass(0)->setDepthWriteEnabled(false);
     mVideoMaterial->getTechnique(0)->getPass(0)->setDepthCheckEnabled(false);
     mVideoMaterial->getTechnique(0)->getPass(0)->setLightingEnabled(false);
-    mVideoMaterial->getTechnique(0)->getPass(0)->createTextureUnitState()->setTextureName("black.png");
+    if(mVideoMaterial->getTechnique(0)->getPass(0)->getNumTextureUnitStates() == 0)
+        mVideoMaterial->getTechnique(0)->getPass(0)->createTextureUnitState()->setTextureName("black.png");
+    else
+        mVideoMaterial->getTechnique(0)->getPass(0)->getTextureUnitState(0)->setTextureName("black.png");
 
     mRectangle = new Ogre::Rectangle2D(true);
     mRectangle->setCorners(-1.0, 1.0, 1.0, -1.0);
