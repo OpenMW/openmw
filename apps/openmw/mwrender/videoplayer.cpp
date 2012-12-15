@@ -60,9 +60,9 @@ struct VideoState {
       : videoStream(-1), audioStream(-1), av_sync_type(0), external_clock_base(0),
         audio_clock(0), audio_st(NULL), audio_diff_cum(0), audio_diff_avg_coef(0),
         audio_diff_threshold(0), audio_diff_avg_count(0), frame_timer(0), frame_last_pts(0),
-        frame_last_delay(0), video_clock(0), video_current_pts(0), video_st(NULL),
-        rgbaFrame(NULL), pictq_size(0), pictq_rindex(0), pictq_windex(0), quit(false),
-        refresh(0), format_ctx(0), sws_context(NULL), display_ready(0)
+        frame_last_delay(0), video_clock(0), video_st(NULL), rgbaFrame(NULL), pictq_size(0),
+        pictq_rindex(0), pictq_windex(0), quit(false), refresh(0), format_ctx(0),
+        sws_context(NULL), display_ready(0)
     { }
 
     ~VideoState()
@@ -90,7 +90,7 @@ struct VideoState {
     { return this->AudioTrack->getTimeOffset(); }
 
     double get_video_clock()
-    { return this->video_current_pts; }
+    { return this->frame_last_pts; }
 
     double get_external_clock()
     { return ((uint64_t)av_gettime()-this->external_clock_base) / 1000000.0; }
@@ -128,7 +128,6 @@ struct VideoState {
     double      frame_last_pts;
     double      frame_last_delay;
     double      video_clock; ///<pts of last decoded frame / predicted pts of next decoded frame
-    double      video_current_pts; ///<current displayed pts (different from video_clock if frame fifos are used)
     AVStream    *video_st;
     PacketQueue videoq;
 
@@ -560,8 +559,6 @@ void VideoState::video_refresh_timer()
     /* save for next time */
     this->frame_last_delay = delay;
     this->frame_last_pts = vp->pts;
-
-    this->video_current_pts = vp->pts;
 
     /* update delay to sync to audio if not master source */
     if(this->av_sync_type != AV_SYNC_VIDEO_MASTER)
