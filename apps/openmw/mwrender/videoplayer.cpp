@@ -61,8 +61,7 @@ struct VideoState {
     VideoState()
       : format_ctx(NULL), av_sync_type(AV_SYNC_DEFAULT)
       , external_clock_base(0.0)
-      , audio_st(NULL), audio_diff_cum(0.0), audio_diff_avg_coef(0.0),
-        audio_diff_threshold(0.0), audio_diff_avg_count(0)
+      , audio_st(NULL)
       , video_st(NULL), frame_last_pts(0.0), frame_last_delay(0.0),
         video_clock(0.0), sws_context(NULL), rgbaFrame(NULL), pictq_size(0),
         pictq_rindex(0), pictq_windex(0)
@@ -121,10 +120,6 @@ struct VideoState {
 
     AVStream**  audio_st;
     PacketQueue audioq;
-    double audio_diff_cum; /* used for AV difference average computation */
-    double audio_diff_avg_coef;
-    double audio_diff_threshold;
-    int    audio_diff_avg_count;
     MWBase::SoundPtr AudioTrack;
 
     AVStream**  video_st;
@@ -261,7 +256,13 @@ class MovieAudioDecoder : public MWSound::Sound_Decoder
     ssize_t mFramePos;
     ssize_t mFrameSize;
 
-    double audio_clock;
+    double mAudioClock;
+
+    /* averaging filter for audio sync */
+    double mAudioDiffAccum;
+    double mAudioDiffAvgCoef;
+    double mAudioDiffThreshold;
+    int    mAudioDiffAvgCount;
 
     /* Add or subtract samples to get a better sync, return number of bytes to
      * skip (negative means to duplicate). */
@@ -274,14 +275,13 @@ class MovieAudioDecoder : public MWSound::Sound_Decoder
 
         // accumulate the clock difference
         double diff = is->get_master_clock() - is->get_audio_clock();
-        is->audio_diff_cum = diff + is->audio_diff_avg_coef *
-                                    is->audio_diff_cum;
-        if(is->audio_diff_avg_count < AUDIO_DIFF_AVG_NB)
-            is->audio_diff_avg_count++;
+        mAudioDiffAccum = diff + mAudioDiffAvgCoef * mAudioDiffAccum;
+        if(mAudioDiffAvgCount < AUDIO_DIFF_AVG_NB)
+            mAudioDiffAvgCount++;
         else
         {
-            double avg_diff = is->audio_diff_cum * (1.0 - is->audio_diff_avg_coef);
-            if(fabs(avg_diff) >= is->audio_diff_threshold)
+            double avg_diff = mAudioDiffAccum * (1.0 - mAudioDiffAvgCoef);
+            if(fabs(avg_diff) >= mAudioDiffThreshold)
             {
                 int n = av_get_bytes_per_sample((*is->audio_st)->codec->sample_fmt) *
                         (*is->audio_st)->codec->channels;
@@ -317,8 +317,8 @@ class MovieAudioDecoder : public MWSound::Sound_Decoder
                 if(!got_frame || frame->nb_samples <= 0)
                     continue;
 
-                this->audio_clock += (double)frame->nb_samples /
-                                     (double)(*is->audio_st)->codec->sample_rate;
+                mAudioClock += (double)frame->nb_samples /
+                               (double)(*is->audio_st)->codec->sample_rate;
 
                 /* We have data, return it and come back for more later */
                 return frame->nb_samples * av_get_bytes_per_sample((*is->audio_st)->codec->sample_fmt) *
@@ -332,7 +332,7 @@ class MovieAudioDecoder : public MWSound::Sound_Decoder
 
             /* if update, update the audio clock w/pts */
             if((uint64_t)pkt->pts != AV_NOPTS_VALUE)
-                this->audio_clock = av_q2d((*is->audio_st)->time_base)*pkt->pts;
+                mAudioClock = av_q2d((*is->audio_st)->time_base)*pkt->pts;
         }
     }
 
@@ -352,7 +352,12 @@ public:
       , mFrame(avcodec_alloc_frame())
       , mFramePos(0)
       , mFrameSize(0)
-      , audio_clock(0.0)
+      , mAudioClock(0.0)
+      , mAudioDiffAccum(0.0)
+      , mAudioDiffAvgCoef(exp(log(0.01 / AUDIO_DIFF_AVG_NB)))
+      /* Correct audio only if larger error than this */
+      , mAudioDiffThreshold(2.0 * 0.050/* 50 ms */)
+      , mAudioDiffAvgCount(0)
     { }
     virtual ~MovieAudioDecoder()
     {
@@ -479,7 +484,7 @@ public:
     {
         ssize_t clock_delay = (mFrameSize-mFramePos) / (*is->audio_st)->codec->channels /
                               av_get_bytes_per_sample((*is->audio_st)->codec->sample_fmt);
-        return (size_t)(this->audio_clock*(*is->audio_st)->codec->sample_rate) - clock_delay;
+        return (size_t)(mAudioClock*(*is->audio_st)->codec->sample_rate) - clock_delay;
     }
 };
 
@@ -808,12 +813,6 @@ int VideoState::stream_open(int stream_index, AVFormatContext *pFormatCtx)
     {
     case AVMEDIA_TYPE_AUDIO:
         this->audio_st = pFormatCtx->streams + stream_index;
-
-        /* averaging filter for audio sync */
-        this->audio_diff_avg_coef = exp(log(0.01 / AUDIO_DIFF_AVG_NB));
-        this->audio_diff_avg_count = 0;
-        /* Correct audio only if larger error than this */
-        this->audio_diff_threshold = 2.0 * 0.050/* 50 ms */;
 
         decoder.reset(new MovieAudioDecoder(this));
         this->AudioTrack = MWBase::Environment::get().getSoundManager()->playTrack(decoder);
