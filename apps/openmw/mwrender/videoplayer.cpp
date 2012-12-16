@@ -316,9 +316,6 @@ class MovieAudioDecoder : public MWSound::Sound_Decoder
             }
             av_free_packet(pkt);
 
-            if(is->quit)
-                return -1;
-
             /* next packet */
             if(is->audioq.get(pkt, is) < 0)
                 return -1;
