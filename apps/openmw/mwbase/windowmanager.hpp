@@ -79,6 +79,8 @@ namespace MWBase
              */
             virtual void update() = 0;
 
+            virtual void newGame() = 0;
+
             virtual void pushGuiMode (MWGui::GuiMode mode) = 0;
             virtual void popGuiMode() = 0;
 

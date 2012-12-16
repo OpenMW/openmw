@@ -125,7 +125,6 @@ OMW::Engine::Engine(Files::ConfigurationManager& configurationManager)
   , mFpsLevel(0)
   , mDebug (false)
   , mVerboseScripts (false)
-  , mNewGame (false)
   , mUseSound (true)
   , mCompileAll (false)
   , mScriptContext (0)
@@ -237,11 +236,6 @@ void OMW::Engine::setScriptsVerbosity(bool scriptsVerbosity)
     mVerboseScripts = scriptsVerbosity;
 }
 
-void OMW::Engine::setNewGame(bool newGame)
-{
-    mNewGame = newGame;
-}
-
 // Initialise and enter main loop.
 
 void OMW::Engine::go()
@@ -332,13 +326,13 @@ void OMW::Engine::go()
 
     // Create the world
     mEnvironment.setWorld (new MWWorld::World (*mOgre, mFileCollections, mMaster,
-        mResDir, mCfgMgr.getCachePath(), mNewGame, mEncoding, mFallbackMap));
+        mResDir, mCfgMgr.getCachePath(), mEncoding, mFallbackMap));
 
     // Create window manager - this manages all the MW-specific GUI windows
     MWScript::registerExtensions (mExtensions);
 
     mEnvironment.setWindowManager (new MWGui::WindowManager(
-        mExtensions, mFpsLevel, mNewGame, mOgre, mCfgMgr.getLogPath().string() + std::string("/"),
+        mExtensions, mFpsLevel, mOgre, mCfgMgr.getLogPath().string() + std::string("/"),
         mCfgMgr.getCachePath ().string(), mScriptConsoleMode));
 
     // Create sound system

@@ -68,7 +68,6 @@ namespace OMW
             int mFpsLevel;
             bool mDebug;
             bool mVerboseScripts;
-            bool mNewGame;
             bool mUseSound;
             bool mCompileAll;
             std::string mFocusName;
@@ -137,9 +136,6 @@ namespace OMW
 
             /// Disable or enable all sounds
             void setSoundUsage(bool soundUsage);
-
-            /// Start as a new game.
-            void setNewGame(bool newGame);
 
             /// Initialise and enter main loop.
             void go();
