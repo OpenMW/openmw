@@ -58,11 +58,10 @@ struct VideoPicture {
 struct VideoState {
     VideoState()
       : videoStream(-1), audioStream(-1), av_sync_type(0), external_clock_base(0),
-        audio_clock(0), audio_st(NULL), audio_diff_cum(0), audio_diff_avg_coef(0),
-        audio_diff_threshold(0), audio_diff_avg_count(0), frame_last_pts(0),
-        frame_last_delay(0), video_clock(0), video_st(NULL), rgbaFrame(NULL), pictq_size(0),
-        pictq_rindex(0), pictq_windex(0), quit(false), refresh(0), format_ctx(0),
-        sws_context(NULL), display_ready(0)
+        audio_st(NULL), audio_diff_cum(0), audio_diff_avg_coef(0), audio_diff_threshold(0),
+        audio_diff_avg_count(0), frame_last_pts(0), frame_last_delay(0), video_clock(0),
+        video_st(NULL), rgbaFrame(NULL), pictq_size(0), pictq_rindex(0), pictq_windex(0),
+        quit(false), refresh(0), format_ctx(0), sws_context(NULL), display_ready(0)
     { }
 
     ~VideoState()
@@ -114,7 +113,6 @@ struct VideoState {
     int av_sync_type;
     uint64_t external_clock_base;
 
-    double      audio_clock;
     AVStream   *audio_st;
     PacketQueue audioq;
     double audio_diff_cum; /* used for AV difference average computation */
@@ -256,6 +254,8 @@ class MovieAudioDecoder : public MWSound::Sound_Decoder
     ssize_t mFramePos;
     ssize_t mFrameSize;
 
+    double audio_clock;
+
     /* Add or subtract samples to get a better sync, return number of bytes to
      * skip (negative means to duplicate). */
     int synchronize_audio()
@@ -310,8 +310,8 @@ class MovieAudioDecoder : public MWSound::Sound_Decoder
                 if(!got_frame || frame->nb_samples <= 0)
                     continue;
 
-                is->audio_clock += (double)frame->nb_samples /
-                                   (double)is->audio_st->codec->sample_rate;
+                this->audio_clock += (double)frame->nb_samples /
+                                     (double)is->audio_st->codec->sample_rate;
 
                 /* We have data, return it and come back for more later */
                 return frame->nb_samples * av_get_bytes_per_sample(is->audio_st->codec->sample_fmt) *
@@ -328,7 +328,7 @@ class MovieAudioDecoder : public MWSound::Sound_Decoder
 
             /* if update, update the audio clock w/pts */
             if((uint64_t)pkt->pts != AV_NOPTS_VALUE)
-                is->audio_clock = av_q2d(is->audio_st->time_base)*pkt->pts;
+                this->audio_clock = av_q2d(is->audio_st->time_base)*pkt->pts;
         }
     }
 
@@ -348,6 +348,7 @@ public:
       , mFrame(avcodec_alloc_frame())
       , mFramePos(0)
       , mFrameSize(0)
+      , audio_clock(0.0)
     { }
     virtual ~MovieAudioDecoder()
     {
@@ -473,7 +474,7 @@ public:
     {
         ssize_t clock_delay = (mFrameSize-mFramePos) / is->audio_st->codec->channels /
                               av_get_bytes_per_sample(is->audio_st->codec->sample_fmt);
-        return (size_t)(is->audio_clock*is->audio_st->codec->sample_rate) - clock_delay;
+        return (size_t)(this->audio_clock*is->audio_st->codec->sample_rate) - clock_delay;
     }
 };
 
