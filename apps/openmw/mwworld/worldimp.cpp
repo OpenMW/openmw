@@ -167,10 +167,10 @@ namespace MWWorld
 
     World::World (OEngine::Render::OgreRenderer& renderer,
         const Files::Collections& fileCollections,
-        const std::string& master, const boost::filesystem::path& resDir, const boost::filesystem::path& cacheDir, bool newGame,
+        const std::string& master, const boost::filesystem::path& resDir, const boost::filesystem::path& cacheDir,
         const std::string& encoding, std::map<std::string,std::string> fallbackMap)
     : mPlayer (0), mLocalScripts (mStore), mGlobalVariables (0),
-      mSky (true), mCells (mStore, mEsm),
+      mSky (true), mCells (mStore, mEsm), mNewGameStarted(false),
       mNumFacing(0)
     {
         mPhysics = new PhysicsSystem(renderer);
@@ -196,12 +196,6 @@ namespace MWWorld
 
         // global variables
         mGlobalVariables = new Globals (mStore);
-
-        if (newGame)
-        {
-            // set new game mark
-            mGlobalVariables->setInt ("chargenstate", 1);
-        }
 
         mGlobalVariables->setInt ("pcrace", 3);
 
@@ -1015,6 +1009,12 @@ namespace MWWorld
                 }
             }
         }
+
+        if (mNewGameStarted)
+        {
+            playVideo ("mw_intro.bik");
+            mNewGameStarted = false;
+        }
     }
 
     bool World::isCellExterior() const
@@ -1295,5 +1295,12 @@ namespace MWWorld
     void World::stopVideo ()
     {
         mRendering->stopVideo();
+    }
+
+    void World::newGame ()
+    {
+        // set new game mark
+        mGlobalVariables->setInt ("chargenstate", 1);
+        mNewGameStarted = true; // in order to play the intro video at the end of the next frame
     }
 }

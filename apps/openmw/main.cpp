@@ -133,9 +133,6 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
         ("script-run", bpo::value<std::string>()->default_value(""),
             "select a file containing a list of console commands that is executed on startup")
 
-        ("new-game", bpo::value<bool>()->implicit_value(true)
-            ->default_value(false), "activate char gen/new game mechanics")
-
         ("fs-strict", bpo::value<bool>()->implicit_value(true)
             ->default_value(false), "strict file system handling (no case folding)")
 
@@ -238,7 +235,6 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
 
     // startup-settings
     engine.setCell(variables["start"].as<std::string>());
-    engine.setNewGame(variables["new-game"].as<bool>());
 
     // other settings
     engine.setDebugMode(variables["debug"].as<bool>());

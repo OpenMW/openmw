@@ -60,6 +60,7 @@ namespace MWWorld
             MWWorld::Globals *mGlobalVariables;
             MWWorld::PhysicsSystem *mPhysics;
             bool mSky;
+            bool mNewGameStarted;
 
             Cells mCells;
 
@@ -94,13 +95,15 @@ namespace MWWorld
 
             World (OEngine::Render::OgreRenderer& renderer,
                 const Files::Collections& fileCollections,
-                const std::string& master, const boost::filesystem::path& resDir, const boost::filesystem::path& cacheDir, bool newGame,
+                const std::string& master, const boost::filesystem::path& resDir, const boost::filesystem::path& cacheDir,
                 const std::string& encoding, std::map<std::string,std::string> fallbackMap);
 
             virtual ~World();
 
             virtual OEngine::Render::Fader* getFader();
             ///< \ŧodo remove this function. Rendering details should not be exposed.
+
+            virtual void newGame();
 
             virtual CellStore *getExterior (int x, int y);
 

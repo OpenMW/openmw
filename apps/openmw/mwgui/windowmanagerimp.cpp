@@ -54,7 +54,7 @@
 using namespace MWGui;
 
 WindowManager::WindowManager(
-    const Compiler::Extensions& extensions, int fpsLevel, bool newGame, OEngine::Render::OgreRenderer *mOgre,
+    const Compiler::Extensions& extensions, int fpsLevel, OEngine::Render::OgreRenderer *mOgre,
         const std::string& logpath, const std::string& cacheDir, bool consoleOnlyScripts)
   : mGuiManager(NULL)
   , mHud(NULL)
@@ -95,8 +95,8 @@ WindowManager::WindowManager(
   , mGui(NULL)
   , mGarbageDialogs()
   , mShown(GW_ALL)
-  , mAllowed(newGame ? GW_None : GW_ALL)
-  , mRestAllowed(newGame ? false : true)
+  , mAllowed(GW_ALL)
+  , mRestAllowed(true)
   , mShowFPSLevel(fpsLevel)
   , mFPS(0.0f)
   , mTriangleCount(0)
@@ -139,7 +139,7 @@ WindowManager::WindowManager(
     mDragAndDrop->mDraggedWidget = 0;
     mDragAndDrop->mDragAndDropWidget = dragAndDropWidget;
 
-    mMenu = new MainMenu(w,h);
+    mMenu = new MainMenu(*this, w,h);
     mMap = new MapWindow(*this, cacheDir);
     mStatsWindow = new StatsWindow(*this);
     mConsole = new Console(w,h, consoleOnlyScripts);
@@ -1040,4 +1040,10 @@ void WindowManager::startEnchanting (MWWorld::Ptr actor)
 void WindowManager::startTraining(MWWorld::Ptr actor)
 {
     mTrainingWindow->startTraining(actor);
+}
+
+void WindowManager::newGame ()
+{
+    mAllowed = GW_None;
+    mRestAllowed = false;
 }
