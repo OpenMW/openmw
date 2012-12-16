@@ -57,11 +57,14 @@ struct VideoPicture {
 
 struct VideoState {
     VideoState()
-      : videoStream(-1), audioStream(-1), av_sync_type(0), external_clock_base(0),
-        audio_st(NULL), audio_diff_cum(0), audio_diff_avg_coef(0), audio_diff_threshold(0),
-        audio_diff_avg_count(0), frame_last_pts(0), frame_last_delay(0), video_clock(0),
-        video_st(NULL), rgbaFrame(NULL), pictq_size(0), pictq_rindex(0), pictq_windex(0),
-        quit(false), refresh(0), format_ctx(0), sws_context(NULL), display_ready(0)
+      : format_ctx(NULL), av_sync_type(AV_SYNC_DEFAULT)
+      , external_clock_base(0.0)
+      , audio_st(NULL), audio_diff_cum(0.0), audio_diff_avg_coef(0.0),
+        audio_diff_threshold(0.0), audio_diff_avg_count(0)
+      , video_st(NULL), frame_last_pts(0.0), frame_last_delay(0.0),
+        video_clock(0.0), sws_context(NULL), rgbaFrame(NULL), pictq_size(0),
+        pictq_rindex(0), pictq_windex(0)
+      , refresh_rate_ms(10), refresh(false), quit(false), display_ready(false)
     { }
 
     ~VideoState()
@@ -108,37 +111,32 @@ struct VideoState {
     static int64_t OgreResource_Seek(void *user_data, int64_t offset, int whence);
 
 
-    int videoStream, audioStream;
+    Ogre::DataStreamPtr stream;
+    AVFormatContext* format_ctx;
 
     int av_sync_type;
     uint64_t external_clock_base;
 
-    AVStream   *audio_st;
+    AVStream**  audio_st;
     PacketQueue audioq;
     double audio_diff_cum; /* used for AV difference average computation */
     double audio_diff_avg_coef;
     double audio_diff_threshold;
     int    audio_diff_avg_count;
+    MWBase::SoundPtr AudioTrack;
 
+    AVStream**  video_st;
     double      frame_last_pts;
     double      frame_last_delay;
     double      video_clock; ///<pts of last decoded frame / predicted pts of next decoded frame
-    AVStream    *video_st;
     PacketQueue videoq;
-
-    Ogre::DataStreamPtr stream;
-
-    MWBase::SoundPtr AudioTrack;
-
-    AVFormatContext* format_ctx;
-    SwsContext* sws_context;
-
+    SwsContext*  sws_context;
     VideoPicture pictq[VIDEO_PICTURE_QUEUE_SIZE];
     AVFrame*     rgbaFrame; // used as buffer for the frame converted from its native format to RGBA
     int          pictq_size, pictq_rindex, pictq_windex;
-
     boost::mutex pictq_mutex;
     boost::condition_variable pictq_cond;
+
 
     boost::thread parse_thread;
     boost::thread video_thread;
@@ -147,9 +145,8 @@ struct VideoState {
     volatile int refresh_rate_ms;
 
     volatile bool refresh;
-    volatile int quit;
-
-    int display_ready;
+    volatile bool quit;
+    volatile bool display_ready;
 };
 
 
@@ -276,9 +273,9 @@ class MovieAudioDecoder : public MWSound::Sound_Decoder
             double avg_diff = is->audio_diff_cum * (1.0 - is->audio_diff_avg_coef);
             if(fabs(avg_diff) >= is->audio_diff_threshold)
             {
-                int n = av_get_bytes_per_sample(is->audio_st->codec->sample_fmt) *
-                        is->audio_st->codec->channels;
-                sample_skip = ((int)(diff * is->audio_st->codec->sample_rate) * n);
+                int n = av_get_bytes_per_sample((*is->audio_st)->codec->sample_fmt) *
+                        (*is->audio_st)->codec->channels;
+                sample_skip = ((int)(diff * (*is->audio_st)->codec->sample_rate) * n);
             }
         }
 
@@ -295,7 +292,7 @@ class MovieAudioDecoder : public MWSound::Sound_Decoder
             {
                 int len1, got_frame;
 
-                len1 = avcodec_decode_audio4(is->audio_st->codec, frame, &got_frame, pkt);
+                len1 = avcodec_decode_audio4((*is->audio_st)->codec, frame, &got_frame, pkt);
                 if(len1 < 0) break;
 
                 if(len1 <= pkt->size)
@@ -311,11 +308,11 @@ class MovieAudioDecoder : public MWSound::Sound_Decoder
                     continue;
 
                 this->audio_clock += (double)frame->nb_samples /
-                                     (double)is->audio_st->codec->sample_rate;
+                                     (double)(*is->audio_st)->codec->sample_rate;
 
                 /* We have data, return it and come back for more later */
-                return frame->nb_samples * av_get_bytes_per_sample(is->audio_st->codec->sample_fmt) *
-                       is->audio_st->codec->channels;
+                return frame->nb_samples * av_get_bytes_per_sample((*is->audio_st)->codec->sample_fmt) *
+                       (*is->audio_st)->codec->channels;
             }
             av_free_packet(pkt);
 
@@ -328,7 +325,7 @@ class MovieAudioDecoder : public MWSound::Sound_Decoder
 
             /* if update, update the audio clock w/pts */
             if((uint64_t)pkt->pts != AV_NOPTS_VALUE)
-                this->audio_clock = av_q2d(is->audio_st->time_base)*pkt->pts;
+                this->audio_clock = av_q2d((*is->audio_st)->time_base)*pkt->pts;
         }
     }
 
@@ -357,47 +354,47 @@ public:
 
     void getInfo(int *samplerate, MWSound::ChannelConfig *chans, MWSound::SampleType * type)
     {
-        if(is->audio_st->codec->sample_fmt == AV_SAMPLE_FMT_U8)
+        if((*is->audio_st)->codec->sample_fmt == AV_SAMPLE_FMT_U8)
             *type = MWSound::SampleType_UInt8;
-        else if(is->audio_st->codec->sample_fmt == AV_SAMPLE_FMT_S16)
+        else if((*is->audio_st)->codec->sample_fmt == AV_SAMPLE_FMT_S16)
             *type = MWSound::SampleType_Int16;
         else
             fail(std::string("Unsupported sample format: ")+
-                 av_get_sample_fmt_name(is->audio_st->codec->sample_fmt));
+                 av_get_sample_fmt_name((*is->audio_st)->codec->sample_fmt));
 
-        if(is->audio_st->codec->channel_layout == AV_CH_LAYOUT_MONO)
+        if((*is->audio_st)->codec->channel_layout == AV_CH_LAYOUT_MONO)
             *chans = MWSound::ChannelConfig_Mono;
-        else if(is->audio_st->codec->channel_layout == AV_CH_LAYOUT_STEREO)
+        else if((*is->audio_st)->codec->channel_layout == AV_CH_LAYOUT_STEREO)
             *chans = MWSound::ChannelConfig_Stereo;
-        else if(is->audio_st->codec->channel_layout == AV_CH_LAYOUT_QUAD)
+        else if((*is->audio_st)->codec->channel_layout == AV_CH_LAYOUT_QUAD)
             *chans = MWSound::ChannelConfig_Quad;
-        else if(is->audio_st->codec->channel_layout == AV_CH_LAYOUT_5POINT1)
+        else if((*is->audio_st)->codec->channel_layout == AV_CH_LAYOUT_5POINT1)
             *chans = MWSound::ChannelConfig_5point1;
-        else if(is->audio_st->codec->channel_layout == AV_CH_LAYOUT_7POINT1)
+        else if((*is->audio_st)->codec->channel_layout == AV_CH_LAYOUT_7POINT1)
             *chans = MWSound::ChannelConfig_7point1;
-        else if(is->audio_st->codec->channel_layout == 0)
+        else if((*is->audio_st)->codec->channel_layout == 0)
         {
             /* Unknown channel layout. Try to guess. */
-            if(is->audio_st->codec->channels == 1)
+            if((*is->audio_st)->codec->channels == 1)
                 *chans = MWSound::ChannelConfig_Mono;
-            else if(is->audio_st->codec->channels == 2)
+            else if((*is->audio_st)->codec->channels == 2)
                 *chans = MWSound::ChannelConfig_Stereo;
             else
             {
                 std::stringstream sstr("Unsupported raw channel count: ");
-                sstr << is->audio_st->codec->channels;
+                sstr << (*is->audio_st)->codec->channels;
                 fail(sstr.str());
             }
         }
         else
         {
             char str[1024];
-            av_get_channel_layout_string(str, sizeof(str), is->audio_st->codec->channels,
-                                         is->audio_st->codec->channel_layout);
+            av_get_channel_layout_string(str, sizeof(str), (*is->audio_st)->codec->channels,
+                                         (*is->audio_st)->codec->channel_layout);
             fail(std::string("Unsupported channel layout: ")+str);
         }
 
-        *samplerate = is->audio_st->codec->sample_rate;
+        *samplerate = (*is->audio_st)->codec->sample_rate;
     }
 
     size_t read(char *stream, size_t len)
@@ -431,8 +428,8 @@ public:
             {
                 len1 = std::min<size_t>(len1, -mFramePos);
 
-                int n = av_get_bytes_per_sample(is->audio_st->codec->sample_fmt) *
-                        is->audio_st->codec->channels;
+                int n = av_get_bytes_per_sample((*is->audio_st)->codec->sample_fmt) *
+                        (*is->audio_st)->codec->channels;
 
                 /* add samples by copying the first sample*/
                 if(n == 1)
@@ -472,9 +469,9 @@ public:
 
     size_t getSampleOffset()
     {
-        ssize_t clock_delay = (mFrameSize-mFramePos) / is->audio_st->codec->channels /
-                              av_get_bytes_per_sample(is->audio_st->codec->sample_fmt);
-        return (size_t)(this->audio_clock*is->audio_st->codec->sample_rate) - clock_delay;
+        ssize_t clock_delay = (mFrameSize-mFramePos) / (*is->audio_st)->codec->channels /
+                              av_get_bytes_per_sample((*is->audio_st)->codec->sample_fmt);
+        return (size_t)(this->audio_clock*(*is->audio_st)->codec->sample_rate) - clock_delay;
     }
 };
 
@@ -527,26 +524,26 @@ void VideoState::video_display()
 {
     VideoPicture *vp = &this->pictq[this->pictq_rindex];
 
-    if(this->video_st->codec->width != 0 && this->video_st->codec->height != 0)
+    if((*this->video_st)->codec->width != 0 && (*this->video_st)->codec->height != 0)
     {
         Ogre::TexturePtr texture = Ogre::TextureManager::getSingleton().getByName("VideoTexture");
-        if(texture.isNull () || static_cast<int>(texture->getWidth()) != this->video_st->codec->width
-                             || static_cast<int>(texture->getHeight()) != this->video_st->codec->height)
+        if(texture.isNull() || static_cast<int>(texture->getWidth()) != (*this->video_st)->codec->width
+                            || static_cast<int>(texture->getHeight()) != (*this->video_st)->codec->height)
         {
             Ogre::TextureManager::getSingleton ().remove ("VideoTexture");
             texture = Ogre::TextureManager::getSingleton().createManual(
                                     "VideoTexture",
                                     Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
                                     Ogre::TEX_TYPE_2D,
-                                    this->video_st->codec->width, this->video_st->codec->height,
+                                    (*this->video_st)->codec->width, (*this->video_st)->codec->height,
                                     0,
                                     Ogre::PF_BYTE_RGBA,
                                     Ogre::TU_DYNAMIC_WRITE_ONLY_DISCARDABLE);
         }
-        Ogre::PixelBox pb(this->video_st->codec->width, this->video_st->codec->height, 1, Ogre::PF_BYTE_RGBA, &vp->data[0]);
+        Ogre::PixelBox pb((*this->video_st)->codec->width, (*this->video_st)->codec->height, 1, Ogre::PF_BYTE_RGBA, &vp->data[0]);
         Ogre::HardwarePixelBufferSharedPtr buffer = texture->getBuffer();
         buffer->blitFromMemory(pb);
-        this->display_ready = 1;
+        this->display_ready = true;
     }
 }
 
@@ -617,9 +614,9 @@ int VideoState::queue_picture(AVFrame *pFrame, double pts)
     // Convert the image into RGBA format for Ogre
     if(this->sws_context == NULL)
     {
-        int w = this->video_st->codec->width;
-        int h = this->video_st->codec->height;
-        this->sws_context = sws_getContext(w, h, this->video_st->codec->pix_fmt,
+        int w = (*this->video_st)->codec->width;
+        int h = (*this->video_st)->codec->height;
+        this->sws_context = sws_getContext(w, h, (*this->video_st)->codec->pix_fmt,
                                            w, h, PIX_FMT_RGBA, SWS_BICUBIC,
                                            NULL, NULL, NULL);
         if(this->sws_context == NULL)
@@ -627,11 +624,11 @@ int VideoState::queue_picture(AVFrame *pFrame, double pts)
     }
 
     vp->pts = pts;
-    vp->data.resize(this->video_st->codec->width * this->video_st->codec->height * 4);
+    vp->data.resize((*this->video_st)->codec->width * (*this->video_st)->codec->height * 4);
 
     uint8_t *dst = &vp->data[0];
     sws_scale(this->sws_context, pFrame->data, pFrame->linesize,
-              0, this->video_st->codec->height, &dst, this->rgbaFrame->linesize);
+              0, (*this->video_st)->codec->height, &dst, this->rgbaFrame->linesize);
 
     // now we inform our display thread that we have a pic ready
     this->pictq_windex = (this->pictq_windex+1) % VIDEO_PICTURE_QUEUE_SIZE;
@@ -653,7 +650,7 @@ double VideoState::synchronize_video(AVFrame *src_frame, double pts)
         pts = this->video_clock;
 
     /* update the video clock */
-    frame_delay = av_q2d(this->video_st->codec->time_base);
+    frame_delay = av_q2d((*this->video_st)->codec->time_base);
 
     /* if we are repeating a frame, adjust clock accordingly */
     frame_delay += src_frame->repeat_pict * (frame_delay * 0.5);
@@ -693,14 +690,14 @@ void VideoState::video_thread_loop(VideoState *self)
     pFrame = avcodec_alloc_frame();
 
     self->rgbaFrame = avcodec_alloc_frame();
-    avpicture_alloc((AVPicture*)self->rgbaFrame, PIX_FMT_RGBA, self->video_st->codec->width, self->video_st->codec->height);
+    avpicture_alloc((AVPicture*)self->rgbaFrame, PIX_FMT_RGBA, (*self->video_st)->codec->width, (*self->video_st)->codec->height);
 
     while(self->videoq.get(packet, self) >= 0)
     {
         // Save global pts to be stored in pFrame
         global_video_pkt_pts = packet->pts;
         // Decode video frame
-        if(avcodec_decode_video2(self->video_st->codec, pFrame, &frameFinished, packet) < 0)
+        if(avcodec_decode_video2((*self->video_st)->codec, pFrame, &frameFinished, packet) < 0)
             throw std::runtime_error("Error decoding video frame");
 
         pts = 0;
@@ -708,7 +705,7 @@ void VideoState::video_thread_loop(VideoState *self)
             pts = packet->dts;
         else if(pFrame->opaque && *(uint64_t*)pFrame->opaque != AV_NOPTS_VALUE)
             pts = *(uint64_t*)pFrame->opaque;
-        pts *= av_q2d(self->video_st->time_base);
+        pts *= av_q2d((*self->video_st)->time_base);
 
         av_free_packet(packet);
 
@@ -734,14 +731,14 @@ void VideoState::decode_thread_loop(VideoState *self)
 
     try
     {
-        if(self->videoStream < 0 && self->audioStream < 0)
+        if(!self->video_st && !self->audio_st < 0)
             throw std::runtime_error("No streams to decode");
 
         // main decode loop
         while(!self->quit)
         {
-            if((self->audioStream >= 0 && self->audioq.size > MAX_AUDIOQ_SIZE) ||
-               (self->videoStream >= 0 && self->videoq.size > MAX_VIDEOQ_SIZE))
+            if((self->audio_st >= 0 && self->audioq.size > MAX_AUDIOQ_SIZE) ||
+               (self->video_st >= 0 && self->videoq.size > MAX_VIDEOQ_SIZE))
             {
                 boost::this_thread::sleep(boost::posix_time::milliseconds(10));
                 continue;
@@ -751,9 +748,9 @@ void VideoState::decode_thread_loop(VideoState *self)
                 break;
 
             // Is this a packet from the video stream?
-            if(packet->stream_index == self->videoStream)
+            if(self->video_st && packet->stream_index == self->video_st-pFormatCtx->streams)
                 self->videoq.put(packet);
-            else if(packet->stream_index == self->audioStream)
+            else if(self->audio_st && packet->stream_index == self->audio_st-pFormatCtx->streams)
                 self->audioq.put(packet);
             else
                 av_free_packet(packet);
@@ -774,7 +771,7 @@ void VideoState::decode_thread_loop(VideoState *self)
         std::cerr << "An error occured playing the video: " << e.getFullDescription () << std::endl;
     }
 
-    self->quit = 1;
+    self->quit = true;
 }
 
 
@@ -799,8 +796,7 @@ int VideoState::stream_open(int stream_index, AVFormatContext *pFormatCtx)
     switch(codecCtx->codec_type)
     {
     case AVMEDIA_TYPE_AUDIO:
-        this->audioStream = stream_index;
-        this->audio_st = pFormatCtx->streams[stream_index];
+        this->audio_st = pFormatCtx->streams + stream_index;
 
         /* averaging filter for audio sync */
         this->audio_diff_avg_coef = exp(log(0.01 / AUDIO_DIFF_AVG_NB));
@@ -812,16 +808,14 @@ int VideoState::stream_open(int stream_index, AVFormatContext *pFormatCtx)
         this->AudioTrack = MWBase::Environment::get().getSoundManager()->playTrack(decoder);
         if(!this->AudioTrack)
         {
-            this->audioStream = -1;
-            avcodec_close(this->audio_st->codec);
+            avcodec_close((*this->audio_st)->codec);
             this->audio_st = NULL;
             return -1;
         }
         break;
 
     case AVMEDIA_TYPE_VIDEO:
-        this->videoStream = stream_index;
-        this->video_st = pFormatCtx->streams[stream_index];
+        this->video_st = pFormatCtx->streams + stream_index;
 
         this->frame_last_delay = 40e-3;
 
@@ -847,11 +841,9 @@ void VideoState::init(const std::string& resourceName)
         unsigned int i;
 
         this->av_sync_type = AV_SYNC_DEFAULT;
-        this->videoStream = -1;
-        this->audioStream = -1;
         this->refresh_rate_ms = 10;
         this->refresh = false;
-        this->quit = 0;
+        this->quit = false;
 
         this->stream = Ogre::ResourceGroupManager::getSingleton().openResource(resourceName);
         if(this->stream.isNull())
@@ -899,12 +891,12 @@ void VideoState::init(const std::string& resourceName)
     }
     catch(std::runtime_error& e)
     {
-        this->quit = 1;
+        this->quit = true;
         throw;
     }
     catch(Ogre::Exception& e)
     {
-        this->quit = 1;
+        this->quit = true;
         throw;
     }
 }
@@ -918,13 +910,16 @@ void VideoState::deinit()
     this->video_thread.join();
     this->refresh_thread.join();
 
-    if(this->audioStream >= 0)
-        avcodec_close(this->audio_st->codec);
-    if(this->videoStream >= 0)
-        avcodec_close(this->video_st->codec);
+    if(this->audio_st)
+        avcodec_close((*this->audio_st)->codec);
+    this->audio_st = NULL;
+    if(this->video_st)
+        avcodec_close((*this->video_st)->codec);
+    this->video_st = NULL;
 
     if(this->sws_context)
         sws_freeContext(this->sws_context);
+    this->sws_context = NULL;
 
     if(this->format_ctx)
     {
@@ -1012,6 +1007,7 @@ void VideoPlayer::playVideo(const std::string &resourceName)
 
     mRectangle->setVisible(true);
     mBackgroundRectangle->setVisible(true);
+    mVideoMaterial->getTechnique(0)->getPass(0)->getTextureUnitState(0)->setTextureName("black.png");
 
     MWBase::Environment::get().getWindowManager()->pushGuiMode(MWGui::GM_Video);
 
@@ -1029,8 +1025,6 @@ void VideoPlayer::playVideo(const std::string &resourceName)
 
     mState = new VideoState;
     mState->init(resourceName);
-
-    mVideoMaterial->getTechnique(0)->getPass(0)->getTextureUnitState(0)->setTextureName("black.png");
 }
 
 void VideoPlayer::update ()
@@ -1048,23 +1042,23 @@ void VideoPlayer::update ()
                 mVideoMaterial->getTechnique(0)->getPass(0)->getTextureUnitState(0)->setTextureName("VideoTexture");
 
             // Correct aspect ratio by adding black bars
-            double videoaspect = static_cast<double>(mState->video_st->codec->width) / mState->video_st->codec->height;
-
-            if (av_q2d(mState->video_st->codec->sample_aspect_ratio) != 0)
-                videoaspect *= av_q2d(mState->video_st->codec->sample_aspect_ratio);
+            double videoaspect = av_q2d((*mState->video_st)->codec->sample_aspect_ratio);
+            if(videoaspect == 0.0)
+                videoaspect = 1.0;
+            videoaspect *= static_cast<double>((*mState->video_st)->codec->width) / (*mState->video_st)->codec->height;
 
             double screenaspect = static_cast<double>(mWidth) / mHeight;
             double aspect_correction = videoaspect / screenaspect;
 
-            mRectangle->setCorners (std::max(-1.0, -1.0 * aspect_correction), std::min(1.0, 1.0 / aspect_correction),
-                                    std::min(1.0, 1.0 * aspect_correction), std::max(-1.0, -1.0 / aspect_correction));
+            mRectangle->setCorners(std::max(-1.0, -1.0 * aspect_correction), std::min( 1.0,  1.0 / aspect_correction),
+                                   std::min( 1.0,  1.0 * aspect_correction), std::max(-1.0, -1.0 / aspect_correction));
         }
     }
 }
 
 void VideoPlayer::close()
 {
-    mState->quit = 1;
+    mState->quit = true;
     mState->deinit();
 
     delete mState;
