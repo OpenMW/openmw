@@ -21,11 +21,15 @@ namespace MWSound
 {
     class FFmpeg_Decoder : public Sound_Decoder
     {
-        struct MyStream;
-
         AVFormatContext *mFormatCtx;
+        AVStream **mStream;
 
-        std::auto_ptr<MyStream> mStream;
+        AVPacket mPacket;
+        AVFrame *mFrame;
+
+        int mFrameSize;
+        int mFramePos;
+
         size_t mSamplesRead;
 
         bool getNextPacket();
@@ -34,6 +38,9 @@ namespace MWSound
         static int readPacket(void *user_data, uint8_t *buf, int buf_size);
         static int writePacket(void *user_data, uint8_t *buf, int buf_size);
         static int64_t seek(void *user_data, int64_t offset, int whence);
+
+        bool getAVAudioData();
+        size_t readAVAudioData(void *data, size_t length);
 
         virtual void open(const std::string &fname);
         virtual void close();

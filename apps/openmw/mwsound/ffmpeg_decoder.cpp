@@ -15,23 +15,6 @@ static void fail(const std::string &msg)
 { throw std::runtime_error("FFmpeg exception: "+msg); }
 
 
-struct FFmpeg_Decoder::MyStream {
-    AVCodecContext *mCodecCtx;
-    int mStreamIdx;
-
-    AVPacket mPacket;
-    AVFrame *mFrame;
-
-    int mFrameSize;
-    int mFramePos;
-
-    FFmpeg_Decoder *mParent;
-
-    bool getAVAudioData();
-    size_t readAVAudioData(void *data, size_t length);
-};
-
-
 int FFmpeg_Decoder::readPacket(void *user_data, uint8_t *buf, int buf_size)
 {
     Ogre::DataStreamPtr stream = static_cast<FFmpeg_Decoder*>(user_data)->mDataStream;
@@ -69,35 +52,36 @@ int64_t FFmpeg_Decoder::seek(void *user_data, int64_t offset, int whence)
  * handle for. */
 bool FFmpeg_Decoder::getNextPacket()
 {
-    if(!mStream.get())
+    if(!mStream)
         return false;
 
-    while(av_read_frame(mFormatCtx, &mStream->mPacket) >= 0)
+    int stream_idx = mStream - mFormatCtx->streams;
+    while(av_read_frame(mFormatCtx, &mPacket) >= 0)
     {
         /* Check if the packet belongs to this stream */
-        if(mStream->mStreamIdx == mStream->mPacket.stream_index)
+        if(stream_idx == mPacket.stream_index)
             return true;
 
         /* Free the packet and look for another */
-        av_free_packet(&mStream->mPacket);
+        av_free_packet(&mPacket);
     }
 
     return false;
 }
 
-bool FFmpeg_Decoder::MyStream::getAVAudioData()
+bool FFmpeg_Decoder::getAVAudioData()
 {
     int got_frame, len;
 
-    if(mCodecCtx->codec_type != AVMEDIA_TYPE_AUDIO)
+    if((*mStream)->codec->codec_type != AVMEDIA_TYPE_AUDIO)
         return false;
 
     do {
-        if(mPacket.size == 0 && !mParent->getNextPacket())
+        if(mPacket.size == 0 && !getNextPacket())
             return false;
 
         /* Decode some data, and check for errors */
-        if((len=avcodec_decode_audio4(mCodecCtx, mFrame, &got_frame, &mPacket)) < 0)
+        if((len=avcodec_decode_audio4((*mStream)->codec, mFrame, &got_frame, &mPacket)) < 0)
             return false;
 
         /* Move the unread data to the front and clear the end bits */
@@ -114,7 +98,7 @@ bool FFmpeg_Decoder::MyStream::getAVAudioData()
     return true;
 }
 
-size_t FFmpeg_Decoder::MyStream::readAVAudioData(void *data, size_t length)
+size_t FFmpeg_Decoder::readAVAudioData(void *data, size_t length)
 {
     size_t dec = 0;
 
@@ -126,8 +110,8 @@ size_t FFmpeg_Decoder::MyStream::readAVAudioData(void *data, size_t length)
             if(!getAVAudioData())
                 break;
             mFramePos = 0;
-            mFrameSize = mFrame->nb_samples * mCodecCtx->channels *
-                         av_get_bytes_per_sample(mCodecCtx->sample_fmt);
+            mFrameSize = mFrame->nb_samples * (*mStream)->codec->channels *
+                         av_get_bytes_per_sample((*mStream)->codec->sample_fmt);
         }
 
         /* Get the amount of bytes remaining to be written, and clamp to
@@ -167,55 +151,46 @@ void FFmpeg_Decoder::open(const std::string &fname)
         if(avformat_find_stream_info(mFormatCtx, NULL) < 0)
             fail("Failed to find stream info in "+fname);
 
-        int audio_idx = -1;
         for(size_t j = 0;j < mFormatCtx->nb_streams;j++)
         {
             if(mFormatCtx->streams[j]->codec->codec_type == AVMEDIA_TYPE_AUDIO)
             {
-                audio_idx = j;
+                mStream = &mFormatCtx->streams[j];
                 break;
             }
         }
-        if(audio_idx == -1)
+        if(!mStream)
             fail("No audio streams in "+fname);
 
-        std::auto_ptr<MyStream> stream(new MyStream);
-        stream->mCodecCtx = mFormatCtx->streams[audio_idx]->codec;
-        stream->mStreamIdx = audio_idx;
-        memset(&stream->mPacket, 0, sizeof(stream->mPacket));
+        memset(&mPacket, 0, sizeof(mPacket));
 
-        AVCodec *codec = avcodec_find_decoder(stream->mCodecCtx->codec_id);
+        AVCodec *codec = avcodec_find_decoder((*mStream)->codec->codec_id);
         if(!codec)
         {
             std::stringstream ss("No codec found for id ");
-            ss << stream->mCodecCtx->codec_id;
+            ss << (*mStream)->codec->codec_id;
             fail(ss.str());
         }
-        if(avcodec_open2(stream->mCodecCtx, codec, NULL) < 0)
+        if(avcodec_open2((*mStream)->codec, codec, NULL) < 0)
             fail("Failed to open audio codec " + std::string(codec->long_name));
 
-        stream->mFrame = avcodec_alloc_frame();
-
-        stream->mParent = this;
-        mStream = stream;
+        mFrame = avcodec_alloc_frame();
     }
     catch(std::exception &e)
     {
         avformat_close_input(&mFormatCtx);
-        mFormatCtx = NULL;
         throw;
     }
 }
 
 void FFmpeg_Decoder::close()
 {
-    if(mStream.get())
-    {
-        av_free_packet(&mStream->mPacket);
-        avcodec_close(mStream->mCodecCtx);
-        av_free(mStream->mFrame);
-    }
-    mStream.reset();
+    if(mStream)
+        avcodec_close((*mStream)->codec);
+    mStream = NULL;
+
+    av_free_packet(&mPacket);
+    av_freep(&mFrame);
 
     if(mFormatCtx)
     {
@@ -223,7 +198,6 @@ void FFmpeg_Decoder::close()
         avformat_close_input(&mFormatCtx);
         av_free(context);
     }
-    mFormatCtx = NULL;
 
     mDataStream.setNull();
 }
@@ -235,83 +209,82 @@ std::string FFmpeg_Decoder::getName()
 
 void FFmpeg_Decoder::getInfo(int *samplerate, ChannelConfig *chans, SampleType *type)
 {
-    if(!mStream.get())
+    if(!mStream)
         fail("No audio stream info");
 
-    if(mStream->mCodecCtx->sample_fmt == AV_SAMPLE_FMT_U8)
+    if((*mStream)->codec->sample_fmt == AV_SAMPLE_FMT_U8)
         *type = SampleType_UInt8;
-    else if(mStream->mCodecCtx->sample_fmt == AV_SAMPLE_FMT_S16)
+    else if((*mStream)->codec->sample_fmt == AV_SAMPLE_FMT_S16)
         *type = SampleType_Int16;
     else
         fail(std::string("Unsupported sample format: ")+
-             av_get_sample_fmt_name(mStream->mCodecCtx->sample_fmt));
+             av_get_sample_fmt_name((*mStream)->codec->sample_fmt));
 
-    if(mStream->mCodecCtx->channel_layout == AV_CH_LAYOUT_MONO)
+    if((*mStream)->codec->channel_layout == AV_CH_LAYOUT_MONO)
         *chans = ChannelConfig_Mono;
-    else if(mStream->mCodecCtx->channel_layout == AV_CH_LAYOUT_STEREO)
+    else if((*mStream)->codec->channel_layout == AV_CH_LAYOUT_STEREO)
         *chans = ChannelConfig_Stereo;
-    else if(mStream->mCodecCtx->channel_layout == AV_CH_LAYOUT_QUAD)
+    else if((*mStream)->codec->channel_layout == AV_CH_LAYOUT_QUAD)
         *chans = ChannelConfig_Quad;
-    else if(mStream->mCodecCtx->channel_layout == AV_CH_LAYOUT_5POINT1)
+    else if((*mStream)->codec->channel_layout == AV_CH_LAYOUT_5POINT1)
         *chans = ChannelConfig_5point1;
-    else if(mStream->mCodecCtx->channel_layout == AV_CH_LAYOUT_7POINT1)
+    else if((*mStream)->codec->channel_layout == AV_CH_LAYOUT_7POINT1)
         *chans = ChannelConfig_7point1;
-    else if(mStream->mCodecCtx->channel_layout == 0)
+    else if((*mStream)->codec->channel_layout == 0)
     {
         /* Unknown channel layout. Try to guess. */
-        if(mStream->mCodecCtx->channels == 1)
+        if((*mStream)->codec->channels == 1)
             *chans = ChannelConfig_Mono;
-        else if(mStream->mCodecCtx->channels == 2)
+        else if((*mStream)->codec->channels == 2)
             *chans = ChannelConfig_Stereo;
         else
         {
             std::stringstream sstr("Unsupported raw channel count: ");
-            sstr << mStream->mCodecCtx->channels;
+            sstr << (*mStream)->codec->channels;
             fail(sstr.str());
         }
     }
     else
     {
         char str[1024];
-        av_get_channel_layout_string(str, sizeof(str), mStream->mCodecCtx->channels,
-                                     mStream->mCodecCtx->channel_layout);
+        av_get_channel_layout_string(str, sizeof(str), (*mStream)->codec->channels,
+                                     (*mStream)->codec->channel_layout);
         fail(std::string("Unsupported channel layout: ")+str);
     }
 
-    *samplerate = mStream->mCodecCtx->sample_rate;
+    *samplerate = (*mStream)->codec->sample_rate;
 }
 
 size_t FFmpeg_Decoder::read(char *buffer, size_t bytes)
 {
-    if(!mStream.get())
+    if(!mStream)
         fail("No audio stream");
 
-    size_t got = mStream->readAVAudioData(buffer, bytes);
-    mSamplesRead += got / mStream->mCodecCtx->channels /
-                    av_get_bytes_per_sample(mStream->mCodecCtx->sample_fmt);
+    size_t got = readAVAudioData(buffer, bytes);
+    mSamplesRead += got / (*mStream)->codec->channels /
+                    av_get_bytes_per_sample((*mStream)->codec->sample_fmt);
     return got;
 }
 
 void FFmpeg_Decoder::readAll(std::vector<char> &output)
 {
-    if(!mStream.get())
+    if(!mStream)
         fail("No audio stream");
 
-    while(mStream->getAVAudioData())
+    while(getAVAudioData())
     {
-        size_t got = mStream->mFrame->nb_samples * mStream->mCodecCtx->channels *
-                     av_get_bytes_per_sample(mStream->mCodecCtx->sample_fmt);
-        const char *inbuf = reinterpret_cast<char*>(mStream->mFrame->data[0]);
+        size_t got = mFrame->nb_samples * (*mStream)->codec->channels *
+                     av_get_bytes_per_sample((*mStream)->codec->sample_fmt);
+        const char *inbuf = reinterpret_cast<char*>(mFrame->data[0]);
         output.insert(output.end(), inbuf, inbuf+got);
-        mSamplesRead += mStream->mFrame->nb_samples;
+        mSamplesRead += mFrame->nb_samples;
     }
 }
 
 void FFmpeg_Decoder::rewind()
 {
     av_seek_frame(mFormatCtx, -1, 0, 0);
-    if(mStream.get())
-        av_free_packet(&mStream->mPacket);
+    av_free_packet(&mPacket);
     mSamplesRead = 0;
 }
 
@@ -320,12 +293,19 @@ size_t FFmpeg_Decoder::getSampleOffset()
     return mSamplesRead;
 }
 
-FFmpeg_Decoder::FFmpeg_Decoder() : mFormatCtx(NULL), mSamplesRead(0)
+FFmpeg_Decoder::FFmpeg_Decoder()
+  : mFormatCtx(NULL)
+  , mStream(NULL)
+  , mFrame(NULL)
+  , mFrameSize(0)
+  , mFramePos(0)
+  , mSamplesRead(0)
 {
-    static bool done_init = false;
+    memset(&mPacket, 0, sizeof(mPacket));
 
     /* We need to make sure ffmpeg is initialized. Optionally silence warning
      * output from the lib */
+    static bool done_init = false;
     if(!done_init)
     {
         av_register_all();
