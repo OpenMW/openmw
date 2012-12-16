@@ -20,13 +20,14 @@ struct FFmpeg_Decoder::MyStream {
     int mStreamIdx;
 
     AVPacket mPacket;
+    AVFrame *mFrame;
 
-    char *mDecodedData;
-    size_t mDecodedDataSize;
+    int mFrameSize;
+    int mFramePos;
 
     FFmpeg_Decoder *mParent;
 
-    void *getAVAudioData(size_t *length);
+    bool getAVAudioData();
     size_t readAVAudioData(void *data, size_t length);
 };
 
@@ -84,23 +85,20 @@ bool FFmpeg_Decoder::getNextPacket()
     return false;
 }
 
-void *FFmpeg_Decoder::MyStream::getAVAudioData(size_t *length)
+bool FFmpeg_Decoder::MyStream::getAVAudioData()
 {
-    int size, len;
+    int got_frame, len;
 
-    if(length) *length = 0;
     if(mCodecCtx->codec_type != AVMEDIA_TYPE_AUDIO)
-        return NULL;
+        return false;
 
-    mDecodedDataSize = 0;
     do {
         if(mPacket.size == 0 && !mParent->getNextPacket())
-            return NULL;
+            return false;
 
         /* Decode some data, and check for errors */
-        size = AVCODEC_MAX_AUDIO_FRAME_SIZE;
-        if((len=avcodec_decode_audio3(mCodecCtx, (int16_t*)mDecodedData, &size, &mPacket)) < 0)
-            return NULL;
+        if((len=avcodec_decode_audio4(mCodecCtx, mFrame, &got_frame, &mPacket)) < 0)
+            return false;
 
         /* Move the unread data to the front and clear the end bits */
         int remaining = mPacket.size - len;
@@ -111,13 +109,9 @@ void *FFmpeg_Decoder::MyStream::getAVAudioData(size_t *length)
             memmove(mPacket.data, &mPacket.data[len], remaining);
             av_shrink_packet(&mPacket, remaining);
         }
-    } while(size == 0);
+    } while(got_frame == 0 || mFrame->nb_samples == 0);
 
-    /* Set the output buffer size */
-    mDecodedDataSize = size;
-    if(length) *length = mDecodedDataSize;
-
-    return mDecodedData;
+    return true;
 }
 
 size_t FFmpeg_Decoder::MyStream::readAVAudioData(void *data, size_t length)
@@ -127,40 +121,29 @@ size_t FFmpeg_Decoder::MyStream::readAVAudioData(void *data, size_t length)
     while(dec < length)
     {
         /* If there's no decoded data, find some */
-        if(mDecodedDataSize == 0)
+        if(mFramePos >= mFrameSize)
         {
-            if(getAVAudioData(NULL) == NULL)
+            if(!getAVAudioData())
                 break;
+            mFramePos = 0;
+            mFrameSize = mFrame->nb_samples * mCodecCtx->channels *
+                         av_get_bytes_per_sample(mCodecCtx->sample_fmt);
         }
 
-        if(mDecodedDataSize > 0)
-        {
-            /* Get the amount of bytes remaining to be written, and clamp to
-             * the amount of decoded data we have */
-            size_t rem = length-dec;
-            if(rem > mDecodedDataSize)
-                rem = mDecodedDataSize;
+        /* Get the amount of bytes remaining to be written, and clamp to
+         * the amount of decoded data we have */
+        size_t rem = std::min<size_t>(length-dec, mFrameSize-mFramePos);
 
-            /* Copy the data to the app's buffer and increment */
-            if(data != NULL)
-            {
-                memcpy(data, mDecodedData, rem);
-                data = (char*)data + rem;
-            }
-            dec += rem;
-
-            /* If there's any decoded data left, move it to the front of the
-             * buffer for next time */
-            if(rem < mDecodedDataSize)
-                memmove(mDecodedData, &mDecodedData[rem], mDecodedDataSize - rem);
-            mDecodedDataSize -= rem;
-        }
+        /* Copy the data to the app's buffer and increment */
+        memcpy(data, mFrame->data[0]+mFramePos, rem);
+        data = (char*)data + rem;
+        dec += rem;
+        mFramePos += rem;
     }
 
     /* Return the number of bytes we were able to get */
     return dec;
 }
-
 
 
 void FFmpeg_Decoder::open(const std::string &fname)
@@ -211,8 +194,7 @@ void FFmpeg_Decoder::open(const std::string &fname)
         if(avcodec_open2(stream->mCodecCtx, codec, NULL) < 0)
             fail("Failed to open audio codec " + std::string(codec->long_name));
 
-        stream->mDecodedData = (char*)av_malloc(AVCODEC_MAX_AUDIO_FRAME_SIZE);
-        stream->mDecodedDataSize = 0;
+        stream->mFrame = avcodec_alloc_frame();
 
         stream->mParent = this;
         mStream = stream;
@@ -231,7 +213,7 @@ void FFmpeg_Decoder::close()
     {
         av_free_packet(&mStream->mPacket);
         avcodec_close(mStream->mCodecCtx);
-        av_free(mStream->mDecodedData);
+        av_free(mStream->mFrame);
     }
     mStream.reset();
 
@@ -315,13 +297,13 @@ void FFmpeg_Decoder::readAll(std::vector<char> &output)
     if(!mStream.get())
         fail("No audio stream");
 
-    char *inbuf;
-    size_t got;
-    while((inbuf=(char*)mStream->getAVAudioData(&got)) != NULL && got > 0)
+    while(mStream->getAVAudioData())
     {
+        size_t got = mStream->mFrame->nb_samples * mStream->mCodecCtx->channels *
+                     av_get_bytes_per_sample(mStream->mCodecCtx->sample_fmt);
+        const char *inbuf = reinterpret_cast<char*>(mStream->mFrame->data[0]);
         output.insert(output.end(), inbuf, inbuf+got);
-        mSamplesRead += got / mStream->mCodecCtx->channels /
-                        av_get_bytes_per_sample(mStream->mCodecCtx->sample_fmt);
+        mSamplesRead += mStream->mFrame->nb_samples;
     }
 }
 
