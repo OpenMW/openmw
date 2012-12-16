@@ -72,39 +72,26 @@ int64_t FFmpeg_Decoder::seek(void *user_data, int64_t offset, int whence)
 /* Used by getAV*Data to search for more compressed data, and buffer it in the
  * correct stream. It won't buffer data for streams that the app doesn't have a
  * handle for. */
-bool FFmpeg_Decoder::getNextPacket(int streamidx)
+bool FFmpeg_Decoder::getNextPacket()
 {
-    PacketList *packet;
+    if(!mStream.get())
+        return false;
 
-    packet = (PacketList*)av_malloc(sizeof(*packet));
+    PacketList *packet = (PacketList*)av_malloc(sizeof(*packet));
     packet->next = NULL;
-
-next_packet:
     while(av_read_frame(mFormatCtx, &packet->pkt) >= 0)
     {
-        std::vector<MyStream*>::iterator iter = mStreams.begin();
-
-        /* Check each stream the user has a handle for, looking for the one
-         * this packet belongs to */
-        while(iter != mStreams.end())
+        /* Check if the packet belongs to this stream */
+        if(mStream->mStreamIdx == packet->pkt.stream_index)
         {
-            if((*iter)->mStreamIdx == packet->pkt.stream_index)
-            {
-                PacketList **last;
+            PacketList **last;
 
-                last = &(*iter)->mPackets;
-                while(*last != NULL)
-                    last = &(*last)->next;
+            last = &mStream->mPackets;
+            while(*last != NULL)
+                last = &(*last)->next;
 
-                *last = packet;
-                if((*iter)->mStreamIdx == streamidx)
-                    return true;
-
-                packet = (PacketList*)av_malloc(sizeof(*packet));
-                packet->next = NULL;
-                goto next_packet;
-            }
-            iter++;
+            *last = packet;
+            return true;
         }
         /* Free the packet and look for another */
         av_free_packet(&packet->pkt);
@@ -138,7 +125,7 @@ void *FFmpeg_Decoder::MyStream::getAVAudioData(size_t *length)
     mDecodedDataSize = 0;
 
 next_packet:
-    if(!mPackets && !mParent->getNextPacket(mStreamIdx))
+    if(!mPackets && !mParent->getNextPacket())
         return NULL;
 
     /* Decode some data, and check for errors */
@@ -173,8 +160,7 @@ next_packet:
         /* Move the unread data to the front and clear the end bits */
         int remaining = mPackets->pkt.size - len;
         memmove(mPackets->pkt.data, &mPackets->pkt.data[len], remaining);
-        memset(&mPackets->pkt.data[remaining], 0, mPackets->pkt.size - remaining);
-        mPackets->pkt.size -= len;
+        av_shrink_packet(&mPackets->pkt, remaining);
     }
     else
     {
@@ -261,35 +247,38 @@ void FFmpeg_Decoder::open(const std::string &fname)
         if(avformat_find_stream_info(mFormatCtx, NULL) < 0)
             fail("Failed to find stream info in "+fname);
 
+        int audio_idx = -1;
         for(size_t j = 0;j < mFormatCtx->nb_streams;j++)
         {
             if(mFormatCtx->streams[j]->codec->codec_type == AVMEDIA_TYPE_AUDIO)
             {
-                std::auto_ptr<MyStream> stream(new MyStream);
-                stream->mCodecCtx = mFormatCtx->streams[j]->codec;
-                stream->mStreamIdx = j;
-                stream->mPackets = NULL;
-
-                AVCodec *codec = avcodec_find_decoder(stream->mCodecCtx->codec_id);
-                if(!codec)
-                {
-                    std::stringstream ss("No codec found for id ");
-                    ss << stream->mCodecCtx->codec_id;
-                    fail(ss.str());
-                }
-                if(avcodec_open2(stream->mCodecCtx, codec, NULL) < 0)
-                    fail("Failed to open audio codec " + std::string(codec->long_name));
-
-                stream->mDecodedData = (char*)av_malloc(AVCODEC_MAX_AUDIO_FRAME_SIZE);
-                stream->mDecodedDataSize = 0;
-
-                stream->mParent = this;
-                mStreams.push_back(stream.release());
+                audio_idx = j;
                 break;
             }
         }
-        if(mStreams.empty())
+        if(audio_idx == -1)
             fail("No audio streams in "+fname);
+
+        std::auto_ptr<MyStream> stream(new MyStream);
+        stream->mCodecCtx = mFormatCtx->streams[audio_idx]->codec;
+        stream->mStreamIdx = audio_idx;
+        stream->mPackets = NULL;
+
+        AVCodec *codec = avcodec_find_decoder(stream->mCodecCtx->codec_id);
+        if(!codec)
+        {
+            std::stringstream ss("No codec found for id ");
+            ss << stream->mCodecCtx->codec_id;
+            fail(ss.str());
+        }
+        if(avcodec_open2(stream->mCodecCtx, codec, NULL) < 0)
+            fail("Failed to open audio codec " + std::string(codec->long_name));
+
+        stream->mDecodedData = (char*)av_malloc(AVCODEC_MAX_AUDIO_FRAME_SIZE);
+        stream->mDecodedDataSize = 0;
+
+        stream->mParent = this;
+        mStream = stream;
     }
     catch(std::exception &e)
     {
@@ -301,23 +290,19 @@ void FFmpeg_Decoder::open(const std::string &fname)
 
 void FFmpeg_Decoder::close()
 {
-    while(!mStreams.empty())
+    if(mStream.get())
     {
-        MyStream *stream = mStreams.front();
-
-        stream->clearPackets();
-        avcodec_close(stream->mCodecCtx);
-        av_free(stream->mDecodedData);
-        delete stream;
-
-        mStreams.erase(mStreams.begin());
+        mStream->clearPackets();
+        avcodec_close(mStream->mCodecCtx);
+        av_free(mStream->mDecodedData);
     }
+    mStream.reset();
+
     if(mFormatCtx)
     {
         AVIOContext* context = mFormatCtx->pb;
-        av_free(context);
-        mFormatCtx->pb = NULL;
         avformat_close_input(&mFormatCtx);
+        av_free(context);
     }
     mFormatCtx = NULL;
 
@@ -331,81 +316,83 @@ std::string FFmpeg_Decoder::getName()
 
 void FFmpeg_Decoder::getInfo(int *samplerate, ChannelConfig *chans, SampleType *type)
 {
-    if(mStreams.empty())
+    if(!mStream.get())
         fail("No audio stream info");
 
-    MyStream *stream = mStreams[0];
-    if(stream->mCodecCtx->sample_fmt == AV_SAMPLE_FMT_U8)
+    if(mStream->mCodecCtx->sample_fmt == AV_SAMPLE_FMT_U8)
         *type = SampleType_UInt8;
-    else if(stream->mCodecCtx->sample_fmt == AV_SAMPLE_FMT_S16)
+    else if(mStream->mCodecCtx->sample_fmt == AV_SAMPLE_FMT_S16)
         *type = SampleType_Int16;
     else
         fail(std::string("Unsupported sample format: ")+
-             av_get_sample_fmt_name(stream->mCodecCtx->sample_fmt));
+             av_get_sample_fmt_name(mStream->mCodecCtx->sample_fmt));
 
-    if(stream->mCodecCtx->channel_layout == AV_CH_LAYOUT_MONO)
+    if(mStream->mCodecCtx->channel_layout == AV_CH_LAYOUT_MONO)
         *chans = ChannelConfig_Mono;
-    else if(stream->mCodecCtx->channel_layout == AV_CH_LAYOUT_STEREO)
+    else if(mStream->mCodecCtx->channel_layout == AV_CH_LAYOUT_STEREO)
         *chans = ChannelConfig_Stereo;
-    else if(stream->mCodecCtx->channel_layout == AV_CH_LAYOUT_QUAD)
+    else if(mStream->mCodecCtx->channel_layout == AV_CH_LAYOUT_QUAD)
         *chans = ChannelConfig_Quad;
-    else if(stream->mCodecCtx->channel_layout == AV_CH_LAYOUT_5POINT1)
+    else if(mStream->mCodecCtx->channel_layout == AV_CH_LAYOUT_5POINT1)
         *chans = ChannelConfig_5point1;
-    else if(stream->mCodecCtx->channel_layout == AV_CH_LAYOUT_7POINT1)
+    else if(mStream->mCodecCtx->channel_layout == AV_CH_LAYOUT_7POINT1)
         *chans = ChannelConfig_7point1;
-    else if(stream->mCodecCtx->channel_layout == 0)
+    else if(mStream->mCodecCtx->channel_layout == 0)
     {
         /* Unknown channel layout. Try to guess. */
-        if(stream->mCodecCtx->channels == 1)
+        if(mStream->mCodecCtx->channels == 1)
             *chans = ChannelConfig_Mono;
-        else if(stream->mCodecCtx->channels == 2)
+        else if(mStream->mCodecCtx->channels == 2)
             *chans = ChannelConfig_Stereo;
         else
         {
             std::stringstream sstr("Unsupported raw channel count: ");
-            sstr << stream->mCodecCtx->channels;
+            sstr << mStream->mCodecCtx->channels;
             fail(sstr.str());
         }
     }
     else
     {
         char str[1024];
-        av_get_channel_layout_string(str, sizeof(str), stream->mCodecCtx->channels,
-                                     stream->mCodecCtx->channel_layout);
+        av_get_channel_layout_string(str, sizeof(str), mStream->mCodecCtx->channels,
+                                     mStream->mCodecCtx->channel_layout);
         fail(std::string("Unsupported channel layout: ")+str);
     }
 
-    *samplerate = stream->mCodecCtx->sample_rate;
+    *samplerate = mStream->mCodecCtx->sample_rate;
 }
 
 size_t FFmpeg_Decoder::read(char *buffer, size_t bytes)
 {
-    if(mStreams.empty())
-        fail("No audio streams");
+    if(!mStream.get())
+        fail("No audio stream");
 
-    MyStream *stream = mStreams.front();
-    size_t got = stream->readAVAudioData(buffer, bytes);
-    mSamplesRead += got / av_samples_get_buffer_size(NULL, stream->mCodecCtx->channels, 1,
-                                                     stream->mCodecCtx->sample_fmt, 1);
+    size_t got = mStream->readAVAudioData(buffer, bytes);
+    mSamplesRead += got / mStream->mCodecCtx->channels /
+                    av_get_bytes_per_sample(mStream->mCodecCtx->sample_fmt);
     return got;
 }
 
 void FFmpeg_Decoder::readAll(std::vector<char> &output)
 {
-    if(mStreams.empty())
-        fail("No audio streams");
-    MyStream *stream = mStreams.front();
+    if(!mStream.get())
+        fail("No audio stream");
+
     char *inbuf;
     size_t got;
-
-    while((inbuf=(char*)stream->getAVAudioData(&got)) != NULL && got > 0)
+    while((inbuf=(char*)mStream->getAVAudioData(&got)) != NULL && got > 0)
+    {
         output.insert(output.end(), inbuf, inbuf+got);
+        mSamplesRead += got / mStream->mCodecCtx->channels /
+                        av_get_bytes_per_sample(mStream->mCodecCtx->sample_fmt);
+    }
 }
 
 void FFmpeg_Decoder::rewind()
 {
     av_seek_frame(mFormatCtx, -1, 0, 0);
-    std::for_each(mStreams.begin(), mStreams.end(), std::mem_fun(&MyStream::clearPackets));
+    if(mStream.get())
+        mStream->clearPackets();
     mSamplesRead = 0;
 }
 

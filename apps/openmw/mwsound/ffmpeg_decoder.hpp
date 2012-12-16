@@ -21,13 +21,14 @@ namespace MWSound
 {
     class FFmpeg_Decoder : public Sound_Decoder
     {
+        struct MyStream;
+
         AVFormatContext *mFormatCtx;
 
-        struct MyStream;
-        std::vector<MyStream*> mStreams;
+        std::auto_ptr<MyStream> mStream;
         size_t mSamplesRead;
 
-        bool getNextPacket(int streamidx);
+        bool getNextPacket();
 
         Ogre::DataStreamPtr mDataStream;
         static int readPacket(void *user_data, uint8_t *buf, int buf_size);
