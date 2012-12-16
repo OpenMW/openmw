@@ -60,6 +60,7 @@ namespace MWWorld
             MWWorld::Globals *mGlobalVariables;
             MWWorld::PhysicsSystem *mPhysics;
             bool mSky;
+            bool mNewGameStarted;
 
             Cells mCells;
 
@@ -101,6 +102,8 @@ namespace MWWorld
 
             virtual OEngine::Render::Fader* getFader();
             ///< \ŧodo remove this function. Rendering details should not be exposed.
+
+            virtual void newGame();
 
             virtual CellStore *getExterior (int x, int y);
 

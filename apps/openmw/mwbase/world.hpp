@@ -82,6 +82,8 @@ namespace MWBase
             virtual OEngine::Render::Fader* getFader() = 0;
             ///< \ŧodo remove this function. Rendering details should not be exposed.
 
+            virtual void newGame() = 0;
+
             virtual MWWorld::CellStore *getExterior (int x, int y) = 0;
 
             virtual MWWorld::CellStore *getInterior (const std::string& name) = 0;
