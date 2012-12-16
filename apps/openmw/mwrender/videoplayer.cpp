@@ -416,7 +416,7 @@ public:
                     break;
                 }
 
-                mFramePos = std::min(static_cast<int>(mFrameSize), sample_skip);
+                mFramePos = std::min<ssize_t>(mFrameSize, sample_skip);
                 sample_skip -= mFramePos;
             }
 
@@ -471,7 +471,9 @@ public:
 
     size_t getSampleOffset()
     {
-        return (size_t)(is->audio_clock*is->audio_st->codec->sample_rate);
+        ssize_t clock_delay = (mFrameSize-mFramePos) / is->audio_st->codec->channels /
+                              av_get_bytes_per_sample(is->audio_st->codec->sample_fmt);
+        return (size_t)(is->audio_clock*is->audio_st->codec->sample_rate) - clock_delay;
     }
 };
 
