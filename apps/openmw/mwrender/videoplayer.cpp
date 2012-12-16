@@ -949,7 +949,7 @@ VideoPlayer::VideoPlayer(Ogre::SceneManager* sceneMgr)
         mVideoMaterial->getTechnique(0)->getPass(0)->setDepthWriteEnabled(false);
         mVideoMaterial->getTechnique(0)->getPass(0)->setDepthCheckEnabled(false);
         mVideoMaterial->getTechnique(0)->getPass(0)->setLightingEnabled(false);
-        mVideoMaterial->getTechnique(0)->getPass(0)->createTextureUnitState()->setTextureName("black.png");
+        mVideoMaterial->getTechnique(0)->getPass(0)->createTextureUnitState();
     }
     mVideoMaterial->getTechnique(0)->getPass(0)->getTextureUnitState(0)->setTextureName("black.png");
 
