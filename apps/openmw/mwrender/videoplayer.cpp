@@ -401,7 +401,7 @@ public:
 
         while(total < len)
         {
-            while(mFramePos >= mFrameSize)
+            if(mFramePos >= mFrameSize)
             {
                 /* We have already sent all our data; get more */
                 mFrameSize = audio_decode_frame(mFrame);
@@ -413,6 +413,7 @@ public:
 
                 mFramePos = std::min<ssize_t>(mFrameSize, sample_skip);
                 sample_skip -= mFramePos;
+                continue;
             }
 
             size_t len1 = len - total;
