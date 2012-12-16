@@ -29,12 +29,13 @@ enum {
 
 struct PacketQueue {
     PacketQueue()
-      : first_pkt(NULL), last_pkt(NULL), nb_packets(0), size(0)
+      : first_pkt(NULL), last_pkt(NULL), flushing(false), nb_packets(0), size(0)
     { }
     ~PacketQueue()
-    { flush(); }
+    { clear(); }
 
     AVPacketList *first_pkt, *last_pkt;
+    volatile bool flushing;
     int nb_packets;
     int size;
 
@@ -45,6 +46,7 @@ struct PacketQueue {
     int get(AVPacket *pkt, VideoState *is);
 
     void flush();
+    void clear();
 };
 
 struct VideoPicture {
@@ -202,6 +204,8 @@ int PacketQueue::get(AVPacket *pkt, VideoState *is)
             return 1;
         }
 
+        if(this->flushing)
+            break;
         this->cond.wait(lock);
     }
 
@@ -209,6 +213,12 @@ int PacketQueue::get(AVPacket *pkt, VideoState *is)
 }
 
 void PacketQueue::flush()
+{
+    this->flushing = true;
+    this->cond.notify_one();
+}
+
+void PacketQueue::clear()
 {
     AVPacketList *pkt, *pkt1;
 
@@ -401,7 +411,7 @@ public:
 
         while(total < len)
         {
-            while(mFramePos >= mFrameSize)
+            if(mFramePos >= mFrameSize)
             {
                 /* We have already sent all our data; get more */
                 mFrameSize = audio_decode_frame(mFrame);
@@ -413,6 +423,7 @@ public:
 
                 mFramePos = std::min<ssize_t>(mFrameSize, sample_skip);
                 sample_skip -= mFramePos;
+                continue;
             }
 
             size_t len1 = len - total;
@@ -752,7 +763,10 @@ void VideoState::decode_thread_loop(VideoState *self)
             else
                 av_free_packet(packet);
         }
+
         /* all done - wait for it */
+        self->videoq.flush();
+        self->audioq.flush();
         while(!self->quit)
         {
             // EOF reached, all packets processed, we can exit now
