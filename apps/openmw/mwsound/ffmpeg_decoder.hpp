@@ -30,7 +30,7 @@ namespace MWSound
         int mFrameSize;
         int mFramePos;
 
-        size_t mSamplesRead;
+        double mNextPts;
 
         bool getNextPacket();
 

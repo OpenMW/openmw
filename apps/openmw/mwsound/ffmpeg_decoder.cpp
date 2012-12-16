@@ -60,7 +60,11 @@ bool FFmpeg_Decoder::getNextPacket()
     {
         /* Check if the packet belongs to this stream */
         if(stream_idx == mPacket.stream_index)
+        {
+            if((uint64_t)mPacket.pts != AV_NOPTS_VALUE)
+                mNextPts = av_q2d((*mStream)->time_base)*mPacket.pts;
             return true;
+        }
 
         /* Free the packet and look for another */
         av_free_packet(&mPacket);
@@ -94,6 +98,7 @@ bool FFmpeg_Decoder::getAVAudioData()
             av_shrink_packet(&mPacket, remaining);
         }
     } while(got_frame == 0 || mFrame->nb_samples == 0);
+    mNextPts += (double)mFrame->nb_samples / (double)(*mStream)->codec->sample_rate;
 
     return true;
 }
@@ -161,8 +166,6 @@ void FFmpeg_Decoder::open(const std::string &fname)
         }
         if(!mStream)
             fail("No audio streams in "+fname);
-
-        memset(&mPacket, 0, sizeof(mPacket));
 
         AVCodec *codec = avcodec_find_decoder((*mStream)->codec->codec_id);
         if(!codec)
@@ -259,11 +262,7 @@ size_t FFmpeg_Decoder::read(char *buffer, size_t bytes)
 {
     if(!mStream)
         fail("No audio stream");
-
-    size_t got = readAVAudioData(buffer, bytes);
-    mSamplesRead += got / (*mStream)->codec->channels /
-                    av_get_bytes_per_sample((*mStream)->codec->sample_fmt);
-    return got;
+    return readAVAudioData(buffer, bytes);
 }
 
 void FFmpeg_Decoder::readAll(std::vector<char> &output)
@@ -277,20 +276,24 @@ void FFmpeg_Decoder::readAll(std::vector<char> &output)
                      av_get_bytes_per_sample((*mStream)->codec->sample_fmt);
         const char *inbuf = reinterpret_cast<char*>(mFrame->data[0]);
         output.insert(output.end(), inbuf, inbuf+got);
-        mSamplesRead += mFrame->nb_samples;
     }
 }
 
 void FFmpeg_Decoder::rewind()
 {
-    av_seek_frame(mFormatCtx, -1, 0, 0);
+    int stream_idx = mStream - mFormatCtx->streams;
+    if(av_seek_frame(mFormatCtx, stream_idx, 0, 0) < 0)
+        fail("Failed to seek in audio stream");
     av_free_packet(&mPacket);
-    mSamplesRead = 0;
+    mFrameSize = mFramePos = 0;
+    mNextPts = 0.0;
 }
 
 size_t FFmpeg_Decoder::getSampleOffset()
 {
-    return mSamplesRead;
+    int delay = (mFrameSize-mFramePos) / (*mStream)->codec->channels /
+                av_get_bytes_per_sample((*mStream)->codec->sample_fmt);
+    return (int)(mNextPts*(*mStream)->codec->sample_rate) - delay;
 }
 
 FFmpeg_Decoder::FFmpeg_Decoder()
@@ -299,7 +302,7 @@ FFmpeg_Decoder::FFmpeg_Decoder()
   , mFrame(NULL)
   , mFrameSize(0)
   , mFramePos(0)
-  , mSamplesRead(0)
+  , mNextPts(0.0)
 {
     memset(&mPacket, 0, sizeof(mPacket));
 
