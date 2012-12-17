@@ -272,7 +272,8 @@ class MovieAudioDecoder : public MWSound::Sound_Decoder
         { av_free_packet(this); }
     };
 
-    VideoState *is;
+    VideoState *mVideoState;
+    AVStream *mAVStream;
 
     AutoAVPacket mPacket;
     AVFrame *mFrame;
@@ -291,13 +292,13 @@ class MovieAudioDecoder : public MWSound::Sound_Decoder
      * skip (negative means to duplicate). */
     int synchronize_audio()
     {
-        if(is->av_sync_type == AV_SYNC_AUDIO_MASTER)
+        if(mVideoState->av_sync_type == AV_SYNC_AUDIO_MASTER)
             return 0;
 
         int sample_skip = 0;
 
         // accumulate the clock difference
-        double diff = is->get_master_clock() - is->get_audio_clock();
+        double diff = mVideoState->get_master_clock() - mVideoState->get_audio_clock();
         mAudioDiffAccum = diff + mAudioDiffAvgCoef * mAudioDiffAccum;
         if(mAudioDiffAvgCount < AUDIO_DIFF_AVG_NB)
             mAudioDiffAvgCount++;
@@ -306,9 +307,9 @@ class MovieAudioDecoder : public MWSound::Sound_Decoder
             double avg_diff = mAudioDiffAccum * (1.0 - mAudioDiffAvgCoef);
             if(fabs(avg_diff) >= mAudioDiffThreshold)
             {
-                int n = av_get_bytes_per_sample((*is->audio_st)->codec->sample_fmt) *
-                        (*is->audio_st)->codec->channels;
-                sample_skip = ((int)(diff * (*is->audio_st)->codec->sample_rate) * n);
+                int n = av_get_bytes_per_sample(mAVStream->codec->sample_fmt) *
+                        mAVStream->codec->channels;
+                sample_skip = ((int)(diff * mAVStream->codec->sample_rate) * n);
             }
         }
 
@@ -325,7 +326,7 @@ class MovieAudioDecoder : public MWSound::Sound_Decoder
             {
                 int len1, got_frame;
 
-                len1 = avcodec_decode_audio4((*is->audio_st)->codec, frame, &got_frame, pkt);
+                len1 = avcodec_decode_audio4(mAVStream->codec, frame, &got_frame, pkt);
                 if(len1 < 0) break;
 
                 if(len1 <= pkt->size)
@@ -341,21 +342,21 @@ class MovieAudioDecoder : public MWSound::Sound_Decoder
                     continue;
 
                 mAudioClock += (double)frame->nb_samples /
-                               (double)(*is->audio_st)->codec->sample_rate;
+                               (double)mAVStream->codec->sample_rate;
 
                 /* We have data, return it and come back for more later */
-                return frame->nb_samples * av_get_bytes_per_sample((*is->audio_st)->codec->sample_fmt) *
-                       (*is->audio_st)->codec->channels;
+                return frame->nb_samples * mAVStream->codec->channels *
+                       av_get_bytes_per_sample(mAVStream->codec->sample_fmt);
             }
             av_free_packet(pkt);
 
             /* next packet */
-            if(is->audioq.get(pkt, is) < 0)
+            if(mVideoState->audioq.get(pkt, mVideoState) < 0)
                 return -1;
 
             /* if update, update the audio clock w/pts */
             if((uint64_t)pkt->pts != AV_NOPTS_VALUE)
-                mAudioClock = av_q2d((*is->audio_st)->time_base)*pkt->pts;
+                mAudioClock = av_q2d(mAVStream->time_base)*pkt->pts;
         }
     }
 
@@ -365,13 +366,14 @@ class MovieAudioDecoder : public MWSound::Sound_Decoder
     void close() { }
 
     std::string getName()
-    { return is->stream->getName(); }
+    { return mVideoState->stream->getName(); }
 
     void rewind() { }
 
 public:
-    MovieAudioDecoder(VideoState *_is)
-      : is(_is)
+    MovieAudioDecoder(VideoState *is)
+      : mVideoState(is)
+      , mAVStream(*is->audio_st)
       , mFrame(avcodec_alloc_frame())
       , mFramePos(0)
       , mFrameSize(0)
@@ -389,47 +391,47 @@ public:
 
     void getInfo(int *samplerate, MWSound::ChannelConfig *chans, MWSound::SampleType * type)
     {
-        if((*is->audio_st)->codec->sample_fmt == AV_SAMPLE_FMT_U8)
+        if(mAVStream->codec->sample_fmt == AV_SAMPLE_FMT_U8)
             *type = MWSound::SampleType_UInt8;
-        else if((*is->audio_st)->codec->sample_fmt == AV_SAMPLE_FMT_S16)
+        else if(mAVStream->codec->sample_fmt == AV_SAMPLE_FMT_S16)
             *type = MWSound::SampleType_Int16;
         else
             fail(std::string("Unsupported sample format: ")+
-                 av_get_sample_fmt_name((*is->audio_st)->codec->sample_fmt));
+                 av_get_sample_fmt_name(mAVStream->codec->sample_fmt));
 
-        if((*is->audio_st)->codec->channel_layout == AV_CH_LAYOUT_MONO)
+        if(mAVStream->codec->channel_layout == AV_CH_LAYOUT_MONO)
             *chans = MWSound::ChannelConfig_Mono;
-        else if((*is->audio_st)->codec->channel_layout == AV_CH_LAYOUT_STEREO)
+        else if(mAVStream->codec->channel_layout == AV_CH_LAYOUT_STEREO)
             *chans = MWSound::ChannelConfig_Stereo;
-        else if((*is->audio_st)->codec->channel_layout == AV_CH_LAYOUT_QUAD)
+        else if(mAVStream->codec->channel_layout == AV_CH_LAYOUT_QUAD)
             *chans = MWSound::ChannelConfig_Quad;
-        else if((*is->audio_st)->codec->channel_layout == AV_CH_LAYOUT_5POINT1)
+        else if(mAVStream->codec->channel_layout == AV_CH_LAYOUT_5POINT1)
             *chans = MWSound::ChannelConfig_5point1;
-        else if((*is->audio_st)->codec->channel_layout == AV_CH_LAYOUT_7POINT1)
+        else if(mAVStream->codec->channel_layout == AV_CH_LAYOUT_7POINT1)
             *chans = MWSound::ChannelConfig_7point1;
-        else if((*is->audio_st)->codec->channel_layout == 0)
+        else if(mAVStream->codec->channel_layout == 0)
         {
             /* Unknown channel layout. Try to guess. */
-            if((*is->audio_st)->codec->channels == 1)
+            if(mAVStream->codec->channels == 1)
                 *chans = MWSound::ChannelConfig_Mono;
-            else if((*is->audio_st)->codec->channels == 2)
+            else if(mAVStream->codec->channels == 2)
                 *chans = MWSound::ChannelConfig_Stereo;
             else
             {
                 std::stringstream sstr("Unsupported raw channel count: ");
-                sstr << (*is->audio_st)->codec->channels;
+                sstr << mAVStream->codec->channels;
                 fail(sstr.str());
             }
         }
         else
         {
             char str[1024];
-            av_get_channel_layout_string(str, sizeof(str), (*is->audio_st)->codec->channels,
-                                         (*is->audio_st)->codec->channel_layout);
+            av_get_channel_layout_string(str, sizeof(str), mAVStream->codec->channels,
+                                         mAVStream->codec->channel_layout);
             fail(std::string("Unsupported channel layout: ")+str);
         }
 
-        *samplerate = (*is->audio_st)->codec->sample_rate;
+        *samplerate = mAVStream->codec->sample_rate;
     }
 
     size_t read(char *stream, size_t len)
@@ -464,8 +466,8 @@ public:
             {
                 len1 = std::min<size_t>(len1, -mFramePos);
 
-                int n = av_get_bytes_per_sample((*is->audio_st)->codec->sample_fmt) *
-                        (*is->audio_st)->codec->channels;
+                int n = av_get_bytes_per_sample(mAVStream->codec->sample_fmt) *
+                        mAVStream->codec->channels;
 
                 /* add samples by copying the first sample*/
                 if(n == 1)
@@ -505,9 +507,9 @@ public:
 
     size_t getSampleOffset()
     {
-        ssize_t clock_delay = (mFrameSize-mFramePos) / (*is->audio_st)->codec->channels /
-                              av_get_bytes_per_sample((*is->audio_st)->codec->sample_fmt);
-        return (size_t)(mAudioClock*(*is->audio_st)->codec->sample_rate) - clock_delay;
+        ssize_t clock_delay = (mFrameSize-mFramePos) / mAVStream->codec->channels /
+                              av_get_bytes_per_sample(mAVStream->codec->sample_fmt);
+        return (size_t)(mAudioClock*mAVStream->codec->sample_rate) - clock_delay;
     }
 };
 
