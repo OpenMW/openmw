@@ -1,5 +1,15 @@
 #include "videoplayer.hpp"
 
+#define __STDC_CONSTANT_MACROS
+#include <stdint.h>
+
+#include <cstdio>
+#include <cmath>
+
+#include <OgreRoot.h>
+#include <OgreHardwarePixelBuffer.h>
+
+#include <boost/thread.hpp>
 
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/environment.hpp"
@@ -8,16 +18,23 @@
 #include "../mwsound/sound.hpp"
 
 
+namespace MWRender
+{
+
+#ifdef OPENMW_USE_FFMPEG
+
+extern "C"
+{
+#include <libavcodec/avcodec.h>
+#include <libavformat/avformat.h>
+#include <libswscale/swscale.h>
+}
+
 #define MAX_AUDIOQ_SIZE (5 * 16 * 1024)
 #define MAX_VIDEOQ_SIZE (5 * 256 * 1024)
 #define AV_SYNC_THRESHOLD 0.01
-#define SAMPLE_CORRECTION_PERCENT_MAX 10
 #define AUDIO_DIFF_AVG_NB 20
 #define VIDEO_PICTURE_QUEUE_SIZE 1
-
-
-namespace MWRender
-{
 
 enum {
     AV_SYNC_AUDIO_MASTER,
@@ -26,6 +43,7 @@ enum {
 
     AV_SYNC_DEFAULT = AV_SYNC_EXTERNAL_MASTER
 };
+
 
 struct PacketQueue {
     PacketQueue()
@@ -66,15 +84,20 @@ struct VideoState {
         video_clock(0.0), sws_context(NULL), rgbaFrame(NULL), pictq_size(0),
         pictq_rindex(0), pictq_windex(0)
       , refresh_rate_ms(10), refresh(false), quit(false), display_ready(false)
-    { }
+    {
+        // Register all formats and codecs
+        av_register_all();
+    }
 
     ~VideoState()
-    { }
+    { deinit(); }
 
     void init(const std::string& resourceName);
     void deinit();
 
     int stream_open(int stream_index, AVFormatContext *pFormatCtx);
+
+    bool update(Ogre::MaterialPtr &mat, Ogre::Rectangle2D *rect, int screen_width, int screen_height);
 
     static void video_thread_loop(VideoState *is);
     static void decode_thread_loop(VideoState *is);
@@ -791,6 +814,35 @@ void VideoState::decode_thread_loop(VideoState *self)
 }
 
 
+bool VideoState::update(Ogre::MaterialPtr &mat, Ogre::Rectangle2D *rect, int screen_width, int screen_height)
+{
+    if(this->quit)
+        return false;
+
+    if(this->refresh)
+    {
+        this->refresh = false;
+        this->video_refresh_timer();
+        // Would be nice not to do this all the time...
+        if(this->display_ready)
+            mat->getTechnique(0)->getPass(0)->getTextureUnitState(0)->setTextureName("VideoTexture");
+
+        // Correct aspect ratio by adding black bars
+        double videoaspect = av_q2d((*this->video_st)->codec->sample_aspect_ratio);
+        if(videoaspect == 0.0)
+            videoaspect = 1.0;
+        videoaspect *= static_cast<double>((*this->video_st)->codec->width) / (*this->video_st)->codec->height;
+
+        double screenaspect = static_cast<double>(screen_width) / screen_height;
+        double aspect_correction = videoaspect / screenaspect;
+
+        rect->setCorners(std::max(-1.0, -1.0 * aspect_correction), std::min( 1.0,  1.0 / aspect_correction),
+                         std::min( 1.0,  1.0 * aspect_correction), std::max(-1.0, -1.0 / aspect_correction));
+    }
+    return true;
+}
+
+
 int VideoState::stream_open(int stream_index, AVFormatContext *pFormatCtx)
 {
     MWSound::DecoderPtr decoder;
@@ -899,12 +951,7 @@ void VideoState::init(const std::string& resourceName)
 
         this->parse_thread = boost::thread(decode_thread_loop, this);
     }
-    catch(std::runtime_error& e)
-    {
-        this->quit = true;
-        throw;
-    }
-    catch(Ogre::Exception& e)
+    catch(...)
     {
         this->quit = true;
         throw;
@@ -913,6 +960,8 @@ void VideoState::init(const std::string& resourceName)
 
 void VideoState::deinit()
 {
+    this->quit = true;
+
     this->audioq.cond.notify_one();
     this->videoq.cond.notify_one();
 
@@ -938,6 +987,27 @@ void VideoState::deinit()
         av_free(ioContext);
     }
 }
+
+#else // defined OPENMW_USE_FFMPEG
+
+class VideoState
+{
+public:
+    VideoState() { }
+
+    void init(const std::string& resourceName)
+    {
+        throw std::runtime_error("FFmpeg not supported, cannot play video \""+resourceName+"\"");
+    }
+    void deinit() { }
+
+    void close() { }
+
+    bool update(Ogre::MaterialPtr &mat, Ogre::Rectangle2D *rect, int screen_width, int screen_height)
+    { return false; }
+};
+
+#endif // defined OPENMW_USE_FFMPEG
 
 
 VideoPlayer::VideoPlayer(Ogre::SceneManager* sceneMgr)
@@ -1009,9 +1079,6 @@ VideoPlayer::~VideoPlayer()
 
 void VideoPlayer::playVideo(const std::string &resourceName)
 {
-    // Register all formats and codecs
-    av_register_all();
-
     if(mState)
         close();
 
@@ -1041,34 +1108,13 @@ void VideoPlayer::update ()
 {
     if(mState)
     {
-        if(mState->quit)
+        if(!mState->update(mVideoMaterial, mRectangle, mWidth, mHeight))
             close();
-        else if(mState->refresh)
-        {
-            mState->refresh = false;
-            mState->video_refresh_timer();
-            // Would be nice not to do this all the time...
-            if(mState->display_ready)
-                mVideoMaterial->getTechnique(0)->getPass(0)->getTextureUnitState(0)->setTextureName("VideoTexture");
-
-            // Correct aspect ratio by adding black bars
-            double videoaspect = av_q2d((*mState->video_st)->codec->sample_aspect_ratio);
-            if(videoaspect == 0.0)
-                videoaspect = 1.0;
-            videoaspect *= static_cast<double>((*mState->video_st)->codec->width) / (*mState->video_st)->codec->height;
-
-            double screenaspect = static_cast<double>(mWidth) / mHeight;
-            double aspect_correction = videoaspect / screenaspect;
-
-            mRectangle->setCorners(std::max(-1.0, -1.0 * aspect_correction), std::min( 1.0,  1.0 / aspect_correction),
-                                   std::min( 1.0,  1.0 * aspect_correction), std::max(-1.0, -1.0 / aspect_correction));
-        }
     }
 }
 
 void VideoPlayer::close()
 {
-    mState->quit = true;
     mState->deinit();
 
     delete mState;

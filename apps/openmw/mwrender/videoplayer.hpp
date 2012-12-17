@@ -1,26 +1,14 @@
 #ifndef VIDEOPLAYER_H
 #define VIDEOPLAYER_H
 
-#include <OgreRoot.h>
-#include <OgreHardwarePixelBuffer.h>
+#include <OgreMaterial.h>
 
-#include <boost/thread.hpp>
-
-
-#define __STDC_CONSTANT_MACROS
-#include <stdint.h>
-extern "C"
+namespace Ogre
 {
-#include <libavcodec/avcodec.h>
-#include <libavformat/avformat.h>
-#include <libswscale/swscale.h>
+    class SceneManager;
+    class SceneNode;
+    class Rectangle2D;
 }
-
-#include <cstdio>
-#include <cmath>
-
-#include "../mwbase/soundmanager.hpp"
-
 
 namespace MWRender
 {
