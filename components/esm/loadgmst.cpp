@@ -2,8 +2,6 @@
 
 #include <stdexcept>
 
-#include <boost/algorithm/string.hpp>
-
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 
