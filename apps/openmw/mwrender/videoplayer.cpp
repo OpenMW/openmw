@@ -896,66 +896,58 @@ int VideoState::stream_open(int stream_index, AVFormatContext *pFormatCtx)
 
 void VideoState::init(const std::string& resourceName)
 {
-    try
+    int video_index = -1;
+    int audio_index = -1;
+    unsigned int i;
+
+    this->av_sync_type = AV_SYNC_DEFAULT;
+    this->refresh_rate_ms = 10;
+    this->refresh = false;
+    this->quit = false;
+
+    this->stream = Ogre::ResourceGroupManager::getSingleton().openResource(resourceName);
+    if(this->stream.isNull())
+        throw std::runtime_error("Failed to open video resource");
+
+    AVIOContext *ioCtx = avio_alloc_context(NULL, 0, 0, this, OgreResource_Read, OgreResource_Write, OgreResource_Seek);
+    if(!ioCtx) throw std::runtime_error("Failed to allocate AVIOContext");
+
+    this->format_ctx = avformat_alloc_context();
+    if(this->format_ctx)
+        this->format_ctx->pb = ioCtx;
+
+    // Open video file
+    /// \todo leak here, ffmpeg or valgrind bug ?
+    if(!this->format_ctx || avformat_open_input(&this->format_ctx, resourceName.c_str(), NULL, NULL))
     {
-        int video_index = -1;
-        int audio_index = -1;
-        unsigned int i;
-
-        this->av_sync_type = AV_SYNC_DEFAULT;
-        this->refresh_rate_ms = 10;
-        this->refresh = false;
-        this->quit = false;
-
-        this->stream = Ogre::ResourceGroupManager::getSingleton().openResource(resourceName);
-        if(this->stream.isNull())
-            throw std::runtime_error("Failed to open video resource");
-
-        AVIOContext *ioCtx = avio_alloc_context(NULL, 0, 0, this, OgreResource_Read, OgreResource_Write, OgreResource_Seek);
-        if(!ioCtx) throw std::runtime_error("Failed to allocate AVIOContext");
-
-        this->format_ctx = avformat_alloc_context();
-        if(this->format_ctx)
-            this->format_ctx->pb = ioCtx;
-
-        // Open video file
-        /// \todo leak here, ffmpeg or valgrind bug ?
-        if(!this->format_ctx || avformat_open_input(&this->format_ctx, resourceName.c_str(), NULL, NULL))
-        {
-            // "Note that a user-supplied AVFormatContext will be freed on failure."
-            this->format_ctx = NULL;
-            av_free(ioCtx);
-            throw std::runtime_error("Failed to open video input");
-        }
-
-        // Retrieve stream information
-        if(avformat_find_stream_info(this->format_ctx, NULL) < 0)
-            throw std::runtime_error("Failed to retrieve stream information");
-
-        // Dump information about file onto standard error
-        av_dump_format(this->format_ctx, 0, resourceName.c_str(), 0);
-
-        for(i = 0;i < this->format_ctx->nb_streams;i++)
-        {
-            if(this->format_ctx->streams[i]->codec->codec_type == AVMEDIA_TYPE_VIDEO && video_index < 0)
-                video_index = i;
-            if(this->format_ctx->streams[i]->codec->codec_type == AVMEDIA_TYPE_AUDIO && audio_index < 0)
-                audio_index = i;
-        }
-
-        this->external_clock_base = av_gettime();
-        if(audio_index >= 0)
-            this->stream_open(audio_index, this->format_ctx);
-        if(video_index >= 0)
-            this->stream_open(video_index, this->format_ctx);
-
-        this->parse_thread = boost::thread(decode_thread_loop, this);
+        // "Note that a user-supplied AVFormatContext will be freed on failure."
+        this->format_ctx = NULL;
+        av_free(ioCtx);
+        throw std::runtime_error("Failed to open video input");
     }
-    catch(...)
+
+    // Retrieve stream information
+    if(avformat_find_stream_info(this->format_ctx, NULL) < 0)
+        throw std::runtime_error("Failed to retrieve stream information");
+
+    // Dump information about file onto standard error
+    av_dump_format(this->format_ctx, 0, resourceName.c_str(), 0);
+
+    for(i = 0;i < this->format_ctx->nb_streams;i++)
     {
-        this->quit = true;
-        throw;
+        if(this->format_ctx->streams[i]->codec->codec_type == AVMEDIA_TYPE_VIDEO && video_index < 0)
+            video_index = i;
+        if(this->format_ctx->streams[i]->codec->codec_type == AVMEDIA_TYPE_AUDIO && audio_index < 0)
+            audio_index = i;
     }
+
+    this->external_clock_base = av_gettime();
+    if(audio_index >= 0)
+        this->stream_open(audio_index, this->format_ctx);
+    if(video_index >= 0)
+        this->stream_open(video_index, this->format_ctx);
+
+    this->parse_thread = boost::thread(decode_thread_loop, this);
 }
 
 void VideoState::deinit()
@@ -997,7 +989,7 @@ public:
 
     void init(const std::string& resourceName)
     {
-        throw std::runtime_error("FFmpeg not supported, cannot play video \""+resourceName+"\"");
+        throw std::runtime_error("FFmpeg not supported, cannot play \""+resourceName+"\"");
     }
     void deinit() { }
 
@@ -1100,8 +1092,14 @@ void VideoPlayer::playVideo(const std::string &resourceName)
 
     MWBase::Environment::get().getSoundManager()->pauseAllSounds();
 
-    mState = new VideoState;
-    mState->init(resourceName);
+    try {
+        mState = new VideoState;
+        mState->init(resourceName);
+    }
+    catch(std::exception& e) {
+        std::cerr<< "Failed to play video: "<<e.what() <<std::endl;
+        close();
+    }
 }
 
 void VideoPlayer::update ()
@@ -1115,10 +1113,13 @@ void VideoPlayer::update ()
 
 void VideoPlayer::close()
 {
-    mState->deinit();
+    if(mState)
+    {
+        mState->deinit();
 
-    delete mState;
-    mState = NULL;
+        delete mState;
+        mState = NULL;
+    }
 
     MWBase::Environment::get().getSoundManager()->resumeAllSounds();
 
