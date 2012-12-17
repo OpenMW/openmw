@@ -283,9 +283,9 @@ class MovieAudioDecoder : public MWSound::Sound_Decoder
 
     /* averaging filter for audio sync */
     double mAudioDiffAccum;
-    double mAudioDiffAvgCoef;
-    double mAudioDiffThreshold;
-    int    mAudioDiffAvgCount;
+    const double mAudioDiffAvgCoef;
+    const double mAudioDiffThreshold;
+    int mAudioDiffAvgCount;
 
     /* Add or subtract samples to get a better sync, return number of bytes to
      * skip (negative means to duplicate). */
