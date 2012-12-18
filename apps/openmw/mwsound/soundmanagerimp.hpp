@@ -52,6 +52,8 @@ namespace MWSound
         Ogre::Vector3 mListenerDir;
         Ogre::Vector3 mListenerUp;
 
+        int mPausedSoundTypes;
+
         std::string lookup(const std::string &soundId,
                   float &volume, float &min, float &max);
         void streamMusicFull(const std::string& filename);

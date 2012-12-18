@@ -52,6 +52,7 @@ namespace MWSound
         , mMusicVolume(1.0f)
         , mFootstepsVolume(1.0f)
         , mVoiceVolume(1.0f)
+        , mPausedSoundTypes(0)
     {
         if(!useSound)
             return;
@@ -426,13 +427,21 @@ namespace MWSound
     void SoundManager::pauseSounds(int types)
     {
         if(mOutput->isInitialized())
+        {
+            types &= Play_TypeMask;
             mOutput->pauseSounds(types);
+            mPausedSoundTypes |= types;
+        }
     }
 
     void SoundManager::resumeSounds(int types)
     {
         if(mOutput->isInitialized())
+        {
+            types &= types&Play_TypeMask&mPausedSoundTypes;
             mOutput->resumeSounds(types);
+            mPausedSoundTypes &= ~types;
+        }
     }
 
 
