@@ -21,9 +21,6 @@ namespace MWSound
         ALCdevice *mDevice;
         ALCcontext *mContext;
 
-        typedef std::vector<ALuint> IDVec;
-        IDVec mSources;
-
         typedef std::deque<ALuint> IDDq;
         IDDq mFreeSources;
         IDDq mUnusedBuffers;

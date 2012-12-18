@@ -637,9 +637,8 @@ void OpenAL_Output::init(const std::string &devname)
             ALuint src = 0;
             alGenSources(1, &src);
             throwALerror();
-            mSources.push_back(src);
+            mFreeSources.push_back(src);
         }
-        mFreeSources.insert(mFreeSources.begin(), mSources.begin(), mSources.end());
     }
     catch(std::exception &e)
     {
@@ -655,11 +654,9 @@ void OpenAL_Output::deinit()
 {
     mStreamThread->removeAll();
 
-    std::cerr<< "There are "<<mActiveSounds.size()<<" active sources at close" <<std::endl;
+    for(size_t i = 0;i < mFreeSources.size();i++)
+        alDeleteSources(1, &mFreeSources[i]);
     mFreeSources.clear();
-    if(mSources.size() > 0)
-        alDeleteSources(mSources.size(), &mSources[0]);
-    mSources.clear();
 
     mBufferRefs.clear();
     mUnusedBuffers.clear();
@@ -893,7 +890,7 @@ void OpenAL_Output::updateListener(const Ogre::Vector3 &pos, const Ogre::Vector3
 
 void OpenAL_Output::pauseSounds(int types)
 {
-    IDVec sources;
+    std::vector<ALuint> sources;
     SoundVec::const_iterator iter = mActiveSounds.begin();
     while(iter != mActiveSounds.end())
     {
@@ -912,12 +909,15 @@ void OpenAL_Output::pauseSounds(int types)
         iter++;
     }
     if(sources.size() > 0)
+    {
         alSourcePausev(sources.size(), &sources[0]);
+        throwALerror();
+    }
 }
 
 void OpenAL_Output::resumeSounds(int types)
 {
-    IDVec sources;
+    std::vector<ALuint> sources;
     SoundVec::const_iterator iter = mActiveSounds.begin();
     while(iter != mActiveSounds.end())
     {
@@ -936,7 +936,10 @@ void OpenAL_Output::resumeSounds(int types)
         iter++;
     }
     if(sources.size() > 0)
+    {
         alSourcePlayv(sources.size(), &sources[0]);
+        throwALerror();
+    }
 }
 
 
