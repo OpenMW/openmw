@@ -139,7 +139,7 @@ WindowManager::WindowManager(
     mDragAndDrop->mDraggedWidget = 0;
     mDragAndDrop->mDragAndDropWidget = dragAndDropWidget;
 
-    mMenu = new MainMenu(*this, w,h);
+    mMenu = new MainMenu(w,h);
     mMap = new MapWindow(*this, cacheDir);
     mStatsWindow = new StatsWindow(*this);
     mConsole = new Console(w,h, consoleOnlyScripts);

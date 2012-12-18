@@ -6,15 +6,12 @@
 #include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"
 
-#include "confirmationdialog.hpp"
-
 namespace MWGui
 {
 
-    MainMenu::MainMenu(MWBase::WindowManager& parWindowManager, int w, int h)
+    MainMenu::MainMenu(int w, int h)
         : OEngine::GUI::Layout("openmw_mainmenu.layout")
         , mButtonBox(0)
-        , mDialog(parWindowManager)
     {
         onResChange(w,h);
     }
@@ -23,7 +20,7 @@ namespace MWGui
     {
         setCoord(0,0,w,h);
 
-        int height = 64 * 4;
+        int height = 64 * 3;
 
         if (mButtonBox)
             MyGUI::Gui::getInstance ().destroyWidget(mButtonBox);
@@ -36,11 +33,12 @@ namespace MWGui
         mReturn->eventMouseButtonClick += MyGUI::newDelegate(this, &MainMenu::returnToGame);
         curH += 64;
 
+
+        /*
         mNewGame = mButtonBox->createWidget<MyGUI::Button> ("ButtonImage", MyGUI::IntCoord(0, curH, 128, 64), MyGUI::Align::Default);
-        mNewGame->eventMouseButtonClick += MyGUI::newDelegate(this, &MainMenu::newGame);
         mNewGame->setImageResource ("Menu_NewGame");
         curH += 64;
-/*
+
         mLoadGame = mButtonBox->createWidget<MyGUI::Button> ("ButtonImage", MyGUI::IntCoord(0, curH, 128, 64), MyGUI::Align::Default);
         mLoadGame->setImageResource ("Menu_LoadGame");
         curH += 64;
@@ -83,17 +81,4 @@ namespace MWGui
         Ogre::Root::getSingleton ().queueEndRendering ();
     }
 
-    void MainMenu::newGame(MyGUI::Widget* sender)
-    {
-        mDialog.open ("#{sNotifyMessage54}");
-        mDialog.eventOkClicked.clear();
-        mDialog.eventCancelClicked.clear();
-        mDialog.eventOkClicked += MyGUI::newDelegate(this, &MainMenu::newGameConfirmed);
-    }
-
-    void MainMenu::newGameConfirmed()
-    {
-        MWBase::Environment::get().getWindowManager ()->removeGuiMode (GM_MainMenu);
-        MWBase::Environment::get().getWorld ()->newGame();
-    }
 }

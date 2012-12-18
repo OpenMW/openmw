@@ -1,14 +1,12 @@
 #include <openengine/gui/layout.hpp>
 
-#include "confirmationdialog.hpp"
-
 namespace MWGui
 {
 
     class MainMenu : public OEngine::GUI::Layout
     {
     public:
-        MainMenu(MWBase::WindowManager& parWindowManager, int w, int h);
+        MainMenu(int w, int h);
 
         void onResChange(int w, int h);
 
@@ -26,10 +24,6 @@ namespace MWGui
         void returnToGame(MyGUI::Widget* sender);
         void showOptions(MyGUI::Widget* sender);
         void exitGame(MyGUI::Widget* sender);
-        void newGame(MyGUI::Widget* sender);
-        void newGameConfirmed();
-
-        ConfirmationDialog mDialog;
     };
 
 }
