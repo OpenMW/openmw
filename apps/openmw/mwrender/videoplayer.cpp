@@ -1092,7 +1092,7 @@ void VideoPlayer::playVideo(const std::string &resourceName)
     }
     mSceneMgr->setSpecialCaseRenderQueueMode(Ogre::SceneManager::SCRQM_EXCLUDE);
 
-    MWBase::Environment::get().getSoundManager()->pauseAllSounds();
+    MWBase::Environment::get().getSoundManager()->pauseSounds();
 
     try {
         mState = new VideoState;
@@ -1123,7 +1123,7 @@ void VideoPlayer::close()
         mState = NULL;
     }
 
-    MWBase::Environment::get().getSoundManager()->resumeAllSounds();
+    MWBase::Environment::get().getSoundManager()->resumeSounds();
 
     mRectangle->setVisible(false);
     mBackgroundRectangle->setVisible(false);

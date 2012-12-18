@@ -130,10 +130,10 @@ namespace MWSound
         virtual bool getSoundPlaying(MWWorld::Ptr reference, const std::string& soundId) const;
         ///< Is the given sound currently playing on the given object?
 
-        virtual void pauseAllSounds();
+        virtual void pauseSounds(int types=Play_TypeMask);
         ///< Pauses all currently playing sounds, including music.
 
-        virtual void resumeAllSounds();
+        virtual void resumeSounds(int types=Play_TypeMask);
         ///< Resumes all previously paused sounds.
 
         virtual void update(float duration);

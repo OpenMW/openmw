@@ -891,7 +891,7 @@ void OpenAL_Output::updateListener(const Ogre::Vector3 &pos, const Ogre::Vector3
 }
 
 
-void OpenAL_Output::pauseAllSounds()
+void OpenAL_Output::pauseSounds(int types)
 {
     IDVec sources;
     SoundVec::const_iterator iter = mActiveSounds.begin();
@@ -900,13 +900,13 @@ void OpenAL_Output::pauseAllSounds()
         const OpenAL_SoundStream *stream = dynamic_cast<OpenAL_SoundStream*>(*iter);
         if(stream)
         {
-            if(stream->mSource)
+            if(stream->mSource && (stream->getPlayType()&types))
                 sources.push_back(stream->mSource);
         }
         else
         {
             const OpenAL_Sound *sound = dynamic_cast<OpenAL_Sound*>(*iter);
-            if(sound && sound->mSource)
+            if(sound && sound->mSource && (sound->getPlayType()&types))
                 sources.push_back(sound->mSource);
         }
         iter++;
@@ -915,7 +915,7 @@ void OpenAL_Output::pauseAllSounds()
         alSourcePausev(sources.size(), &sources[0]);
 }
 
-void OpenAL_Output::resumeAllSounds()
+void OpenAL_Output::resumeSounds(int types)
 {
     IDVec sources;
     SoundVec::const_iterator iter = mActiveSounds.begin();
@@ -924,13 +924,13 @@ void OpenAL_Output::resumeAllSounds()
         const OpenAL_SoundStream *stream = dynamic_cast<OpenAL_SoundStream*>(*iter);
         if(stream)
         {
-            if(stream->mSource)
+            if(stream->mSource && (stream->getPlayType()&types))
                 sources.push_back(stream->mSource);
         }
         else
         {
             const OpenAL_Sound *sound = dynamic_cast<OpenAL_Sound*>(*iter);
-            if(sound && sound->mSource)
+            if(sound && sound->mSource && (sound->getPlayType()&types))
                 sources.push_back(sound->mSource);
         }
         iter++;

@@ -313,11 +313,11 @@ namespace MWSound
             return sound;
         try
         {
-            float basevol = volumeFromType((PlayType)(mode&Play_TypeMask));
+            float basevol = volumeFromType(Play_TypeSfx);
             float min, max;
             std::string file = lookup(soundId, volume, min, max);
 
-            sound = mOutput->playSound(file, volume, basevol, pitch, mode);
+            sound = mOutput->playSound(file, volume, basevol, pitch, mode|Play_TypeSfx);
             mActiveSounds[sound] = std::make_pair(MWWorld::Ptr(), soundId);
         }
         catch(std::exception &e)
@@ -336,13 +336,13 @@ namespace MWSound
         try
         {
             // Look up the sound in the ESM data
-            float basevol = volumeFromType((PlayType)(mode&Play_TypeMask));
+            float basevol = volumeFromType(Play_TypeSfx);
             float min, max;
             std::string file = lookup(soundId, volume, min, max);
             const ESM::Position &pos = ptr.getRefData().getPosition();;
             const Ogre::Vector3 objpos(pos.pos[0], pos.pos[1], pos.pos[2]);
 
-            sound = mOutput->playSound3D(file, objpos, volume, basevol, pitch, min, max, mode);
+            sound = mOutput->playSound3D(file, objpos, volume, basevol, pitch, min, max, mode|Play_TypeSfx);
             if((mode&Play_NoTrack))
                 mActiveSounds[sound] = std::make_pair(MWWorld::Ptr(), soundId);
             else
@@ -423,16 +423,16 @@ namespace MWSound
     }
 
 
-    void SoundManager::pauseAllSounds()
+    void SoundManager::pauseSounds(int types)
     {
         if(mOutput->isInitialized())
-            mOutput->pauseAllSounds();
+            mOutput->pauseSounds(types);
     }
 
-    void SoundManager::resumeAllSounds()
+    void SoundManager::resumeSounds(int types)
     {
         if(mOutput->isInitialized())
-            mOutput->resumeAllSounds();
+            mOutput->resumeSounds(types);
     }
 
 

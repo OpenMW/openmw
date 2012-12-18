@@ -44,10 +44,10 @@ namespace MWBase
                                       * the object and will not stop when the object is deleted. */
             };
             enum PlayType {
-                Play_TypeSfx   = 0,    /* Normal SFX sound */
-                Play_TypeVoice = 1<<3, /* Voice sound */
-                Play_TypeMusic = 1<<4, /* Music track */
-                Play_TypeMovie = 1<<5, /* Movie audio track */
+                Play_TypeSfx   = 1<<3, /* Normal SFX sound */
+                Play_TypeVoice = 1<<4, /* Voice sound */
+                Play_TypeMusic = 1<<5, /* Music track */
+                Play_TypeMovie = 1<<6, /* Movie audio track */
                 Play_TypeMask  = Play_TypeSfx|Play_TypeVoice|Play_TypeMusic|Play_TypeMovie
             };
 
@@ -124,10 +124,10 @@ namespace MWBase
             virtual bool getSoundPlaying(MWWorld::Ptr reference, const std::string& soundId) const = 0;
             ///< Is the given sound currently playing on the given object?
 
-            virtual void pauseAllSounds() = 0;
+            virtual void pauseSounds(int types=Play_TypeMask) = 0;
             ///< Pauses all currently playing sounds, including music.
 
-            virtual void resumeAllSounds() = 0;
+            virtual void resumeSounds(int types=Play_TypeMask) = 0;
             ///< Resumes all previously paused sounds.
 
             virtual void update(float duration) = 0;
@@ -138,6 +138,11 @@ namespace MWBase
     inline int operator|(SoundManager::PlayMode a, SoundManager::PlayMode b)
     { return static_cast<int> (a) | static_cast<int> (b); }
     inline int operator&(SoundManager::PlayMode a, SoundManager::PlayMode b)
+    { return static_cast<int> (a) & static_cast<int> (b); }
+
+    inline int operator|(SoundManager::PlayType a, SoundManager::PlayType b)
+    { return static_cast<int> (a) | static_cast<int> (b); }
+    inline int operator&(SoundManager::PlayType a, SoundManager::PlayType b)
     { return static_cast<int> (a) & static_cast<int> (b); }
 }
 
