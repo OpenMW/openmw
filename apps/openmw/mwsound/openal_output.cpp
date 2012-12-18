@@ -131,6 +131,8 @@ class OpenAL_SoundStream : public Sound
     OpenAL_SoundStream(const OpenAL_SoundStream &rhs);
     OpenAL_SoundStream& operator=(const OpenAL_SoundStream &rhs);
 
+    friend class OpenAL_Output;
+
 public:
     OpenAL_SoundStream(OpenAL_Output &output, ALuint src, DecoderPtr decoder);
     virtual ~OpenAL_SoundStream();
@@ -232,6 +234,8 @@ OpenAL_SoundStream::OpenAL_SoundStream(OpenAL_Output &output, ALuint src, Decode
 
         mBufferSize = static_cast<ALuint>(sBufferLength*srate);
         mBufferSize = framesToBytes(mBufferSize, chans, type);
+
+        mOutput.mActiveSounds.push_back(this);
     }
     catch(std::exception &e)
     {
@@ -252,6 +256,9 @@ OpenAL_SoundStream::~OpenAL_SoundStream()
     alGetError();
 
     mDecoder->close();
+
+    mOutput.mActiveSounds.erase(std::find(mOutput.mActiveSounds.begin(),
+                                          mOutput.mActiveSounds.end(), this));
 }
 
 void OpenAL_SoundStream::play()
@@ -402,6 +409,8 @@ protected:
     ALuint mSource;
     ALuint mBuffer;
 
+    friend class OpenAL_Output;
+
 private:
     OpenAL_Sound(const OpenAL_Sound &rhs);
     OpenAL_Sound& operator=(const OpenAL_Sound &rhs);
@@ -435,6 +444,7 @@ public:
 OpenAL_Sound::OpenAL_Sound(OpenAL_Output &output, ALuint src, ALuint buf)
   : mOutput(output), mSource(src), mBuffer(buf)
 {
+    mOutput.mActiveSounds.push_back(this);
 }
 OpenAL_Sound::~OpenAL_Sound()
 {
@@ -443,6 +453,9 @@ OpenAL_Sound::~OpenAL_Sound()
 
     mOutput.mFreeSources.push_back(mSource);
     mOutput.bufferFinished(mBuffer);
+
+    mOutput.mActiveSounds.erase(std::find(mOutput.mActiveSounds.begin(),
+                                          mOutput.mActiveSounds.end(), this));
 }
 
 void OpenAL_Sound::stop()
@@ -597,6 +610,7 @@ void OpenAL_Output::deinit()
 {
     mStreamThread->removeAll();
 
+    std::cerr<< "There are "<<mActiveSounds.size()<<" active sources at close" <<std::endl;
     mFreeSources.clear();
     if(mSources.size() > 0)
         alDeleteSources(mSources.size(), &mSources[0]);
@@ -889,11 +903,22 @@ void OpenAL_Output::updateListener(const Ogre::Vector3 &pos, const Ogre::Vector3
 
 void OpenAL_Output::pauseAllSounds()
 {
-    IDVec sources = mSources;
-    IDDq::const_iterator iter = mFreeSources.begin();
-    while(iter != mFreeSources.end())
+    IDVec sources;
+    SoundVec::const_iterator iter = mActiveSounds.begin();
+    while(iter != mActiveSounds.end())
     {
-        sources.erase(std::find(sources.begin(), sources.end(), *iter));
+        const OpenAL_SoundStream *stream = dynamic_cast<OpenAL_SoundStream*>(*iter);
+        if(stream)
+        {
+            if(stream->mSource)
+                sources.push_back(stream->mSource);
+        }
+        else
+        {
+            const OpenAL_Sound *sound = dynamic_cast<OpenAL_Sound*>(*iter);
+            if(sound && sound->mSource)
+                sources.push_back(sound->mSource);
+        }
         iter++;
     }
     if(sources.size() > 0)
@@ -902,11 +927,22 @@ void OpenAL_Output::pauseAllSounds()
 
 void OpenAL_Output::resumeAllSounds()
 {
-    IDVec sources = mSources;
-    IDDq::const_iterator iter = mFreeSources.begin();
-    while(iter != mFreeSources.end())
+    IDVec sources;
+    SoundVec::const_iterator iter = mActiveSounds.begin();
+    while(iter != mActiveSounds.end())
     {
-        sources.erase(std::find(sources.begin(), sources.end(), *iter));
+        const OpenAL_SoundStream *stream = dynamic_cast<OpenAL_SoundStream*>(*iter);
+        if(stream)
+        {
+            if(stream->mSource)
+                sources.push_back(stream->mSource);
+        }
+        else
+        {
+            const OpenAL_Sound *sound = dynamic_cast<OpenAL_Sound*>(*iter);
+            if(sound && sound->mSource)
+                sources.push_back(sound->mSource);
+        }
         iter++;
     }
     if(sources.size() > 0)

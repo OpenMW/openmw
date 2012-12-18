@@ -36,6 +36,9 @@ namespace MWSound
 
         uint64_t mBufferCacheMemSize;
 
+        typedef std::vector<Sound*> SoundVec;
+        SoundVec mActiveSounds;
+
         ALuint getBuffer(const std::string &fname);
         void bufferFinished(ALuint buffer);
 
