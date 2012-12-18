@@ -94,7 +94,6 @@ namespace MWGui
     void MainMenu::newGameConfirmed()
     {
         MWBase::Environment::get().getWindowManager ()->removeGuiMode (GM_MainMenu);
-        MWBase::Environment::get().getWindowManager ()->newGame ();
         MWBase::Environment::get().getWorld ()->newGame();
     }
 }
