@@ -102,11 +102,11 @@ namespace MWBase
             ///< Play a 2D audio track, using a custom decoder
 
             virtual SoundPtr playSound(const std::string& soundId, float volume, float pitch,
-                int mode=Play_Normal) = 0;
+                                       PlayMode mode=Play_Normal) = 0;
             ///< Play a sound, independently of 3D-position
 
             virtual SoundPtr playSound3D(MWWorld::Ptr reference, const std::string& soundId,
-                                 float volume, float pitch, int mode=Play_Normal) = 0;
+                                         float volume, float pitch, PlayMode mode=Play_Normal) = 0;
             ///< Play a sound from an object
 
             virtual void stopSound3D(MWWorld::Ptr reference, const std::string& soundId) = 0;
@@ -134,16 +134,6 @@ namespace MWBase
 
             virtual void setListenerPosDir(const Ogre::Vector3 &pos, const Ogre::Vector3 &dir, const Ogre::Vector3 &up) = 0;
     };
-
-    inline int operator|(SoundManager::PlayMode a, SoundManager::PlayMode b)
-    { return static_cast<int> (a) | static_cast<int> (b); }
-    inline int operator&(SoundManager::PlayMode a, SoundManager::PlayMode b)
-    { return static_cast<int> (a) & static_cast<int> (b); }
-
-    inline int operator|(SoundManager::PlayType a, SoundManager::PlayType b)
-    { return static_cast<int> (a) | static_cast<int> (b); }
-    inline int operator&(SoundManager::PlayType a, SoundManager::PlayType b)
-    { return static_cast<int> (a) & static_cast<int> (b); }
 }
 
 #endif

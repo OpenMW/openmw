@@ -110,11 +110,11 @@ namespace MWSound
         virtual MWBase::SoundPtr playTrack(const DecoderPtr& decoder, PlayType type);
         ///< Play a 2D audio track, using a custom decoder
 
-        virtual MWBase::SoundPtr playSound(const std::string& soundId, float volume, float pitch, int mode=Play_Normal);
+        virtual MWBase::SoundPtr playSound(const std::string& soundId, float volume, float pitch, PlayMode mode=Play_Normal);
         ///< Play a sound, independently of 3D-position
 
         virtual MWBase::SoundPtr playSound3D(MWWorld::Ptr reference, const std::string& soundId,
-                             float volume, float pitch, int mode=Play_Normal);
+                                             float volume, float pitch, PlayMode mode=Play_Normal);
         ///< Play a sound from an object
 
         virtual void stopSound3D(MWWorld::Ptr reference, const std::string& soundId);

@@ -307,7 +307,7 @@ namespace MWSound
     }
 
 
-    MWBase::SoundPtr SoundManager::playSound(const std::string& soundId, float volume, float pitch, int mode)
+    MWBase::SoundPtr SoundManager::playSound(const std::string& soundId, float volume, float pitch, PlayMode mode)
     {
         MWBase::SoundPtr sound;
         if(!mOutput->isInitialized())
@@ -329,7 +329,7 @@ namespace MWSound
     }
 
     MWBase::SoundPtr SoundManager::playSound3D(MWWorld::Ptr ptr, const std::string& soundId,
-                                               float volume, float pitch, int mode)
+                                               float volume, float pitch, PlayMode mode)
     {
         MWBase::SoundPtr sound;
         if(!mOutput->isInitialized())

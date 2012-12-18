@@ -738,7 +738,7 @@ void WeatherManager::update(float duration)
         if (std::find(mSoundsPlaying.begin(), mSoundsPlaying.end(), ambientSnd) == mSoundsPlaying.end())
         {
             mSoundsPlaying.push_back(ambientSnd);
-            MWBase::Environment::get().getSoundManager()->playSound(ambientSnd, 1.0, 1.0, true);
+            MWBase::Environment::get().getSoundManager()->playSound(ambientSnd, 1.0, 1.0, MWBase::SoundManager::Play_Loop);
         }
     }
 
@@ -749,7 +749,7 @@ void WeatherManager::update(float duration)
         if (std::find(mSoundsPlaying.begin(), mSoundsPlaying.end(), rainSnd) == mSoundsPlaying.end())
         {
             mSoundsPlaying.push_back(rainSnd);
-            MWBase::Environment::get().getSoundManager()->playSound(rainSnd, 1.0, 1.0, true);
+            MWBase::Environment::get().getSoundManager()->playSound(rainSnd, 1.0, 1.0, MWBase::SoundManager::Play_Loop);
         }
     }
 
