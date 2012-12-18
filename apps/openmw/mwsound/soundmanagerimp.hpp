@@ -103,7 +103,7 @@ namespace MWSound
         virtual void stopSay(MWWorld::Ptr reference=MWWorld::Ptr());
         ///< Stop an actor speaking
 
-        virtual MWBase::SoundPtr playTrack(const DecoderPtr& decoder);
+        virtual MWBase::SoundPtr playTrack(const DecoderPtr& decoder, PlayType type);
         ///< Play a 2D audio track, using a custom decoder
 
         virtual MWBase::SoundPtr playSound(const std::string& soundId, float volume, float pitch, int mode=Play_Normal);

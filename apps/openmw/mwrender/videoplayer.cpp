@@ -869,7 +869,7 @@ int VideoState::stream_open(int stream_index, AVFormatContext *pFormatCtx)
         this->audio_st = pFormatCtx->streams + stream_index;
 
         decoder.reset(new MovieAudioDecoder(this));
-        this->AudioTrack = MWBase::Environment::get().getSoundManager()->playTrack(decoder);
+        this->AudioTrack = MWBase::Environment::get().getSoundManager()->playTrack(decoder, MWBase::SoundManager::Play_TypeMovie);
         if(!this->AudioTrack)
         {
             avcodec_close((*this->audio_st)->codec);

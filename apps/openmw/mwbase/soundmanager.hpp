@@ -34,15 +34,16 @@ namespace MWBase
     class SoundManager
     {
         public:
-
+            /* These must all fit together */
             enum PlayMode {
                 Play_Normal  = 0, /* tracked, non-looping, multi-instance, environment */
                 Play_Loop    = 1<<0, /* Sound will continually loop until explicitly stopped */
                 Play_NoEnv   = 1<<1, /* Do not apply environment effects (eg, underwater filters) */
-                Play_NoTrack = 1<<2, /* (3D only) Play the sound at the given object's position
+                Play_NoTrack = 1<<2  /* (3D only) Play the sound at the given object's position
                                       * but do not keep it updated (the sound will not move with
                                       * the object and will not stop when the object is deleted. */
-
+            };
+            enum PlayType {
                 Play_TypeSfx   = 0,    /* Normal SFX sound */
                 Play_TypeVoice = 1<<3, /* Voice sound */
                 Play_TypeMusic = 1<<4, /* Music track */
@@ -97,7 +98,7 @@ namespace MWBase
             virtual void stopSay(MWWorld::Ptr reference=MWWorld::Ptr()) = 0;
             ///< Stop an actor speaking
 
-            virtual SoundPtr playTrack(const MWSound::DecoderPtr& decoder) = 0;
+            virtual SoundPtr playTrack(const MWSound::DecoderPtr& decoder, PlayType type) = 0;
             ///< Play a 2D audio track, using a custom decoder
 
             virtual SoundPtr playSound(const std::string& soundId, float volume, float pitch,

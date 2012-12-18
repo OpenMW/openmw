@@ -268,14 +268,14 @@ namespace MWSound
     }
 
 
-    MWBase::SoundPtr SoundManager::playTrack(const DecoderPtr& decoder)
+    MWBase::SoundPtr SoundManager::playTrack(const DecoderPtr& decoder, PlayType type)
     {
         MWBase::SoundPtr track;
         if(!mOutput->isInitialized())
             return track;
         try
         {
-            track = mOutput->streamSound(decoder, mMasterVolume, 1.0f, Play_NoEnv|Play_TypeMovie);
+            track = mOutput->streamSound(decoder, mMasterVolume, 1.0f, Play_NoEnv|type);
         }
         catch(std::exception &e)
         {
