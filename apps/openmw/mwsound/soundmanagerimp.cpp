@@ -221,11 +221,8 @@ namespace MWSound
             const ESM::Position &pos = ptr.getRefData().getPosition();
             const Ogre::Vector3 objpos(pos.pos[0], pos.pos[1], pos.pos[2]);
 
-            MWBase::SoundPtr sound = mOutput->playSound3D(filePath, objpos, basevol, 1.0f,
-                                                  20.0f, 12750.0f, Play_Normal);
-            sound->mPos = objpos;
-            sound->mBaseVolume = basevol;
-
+            MWBase::SoundPtr sound = mOutput->playSound3D(filePath, objpos, 1.0f, basevol, 1.0f,
+                                                          20.0f, 12750.0f, Play_Normal);
             mActiveSounds[sound] = std::make_pair(ptr, std::string("_say_sound"));
         }
         catch(std::exception &e)
@@ -243,9 +240,7 @@ namespace MWSound
             float basevol = mMasterVolume * mVoiceVolume;
             std::string filePath = "Sound/"+filename;
 
-            MWBase::SoundPtr sound = mOutput->playSound(filePath, basevol, 1.0f, Play_Normal);
-            sound->mBaseVolume = basevol;
-
+            MWBase::SoundPtr sound = mOutput->playSound(filePath, 1.0f, basevol, 1.0f, Play_Normal);
             mActiveSounds[sound] = std::make_pair(MWWorld::Ptr(), std::string("_say_sound"));
         }
         catch(std::exception &e)
@@ -282,11 +277,7 @@ namespace MWSound
             return track;
         try
         {
-            float basevol = mMasterVolume;
-
-            track = mOutput->streamSound(decoder, basevol, 1.0f, Play_NoEnv);
-            track->mBaseVolume = basevol;
-            track->mFlags = Play_NoEnv;
+            track = mOutput->streamSound(decoder, mMasterVolume, 1.0f, Play_NoEnv);
         }
         catch(std::exception &e)
         {
@@ -307,14 +298,7 @@ namespace MWSound
             float min, max;
             std::string file = lookup(soundId, basevol, min, max);
 
-            sound = mOutput->playSound(file, volume*basevol, pitch, mode);
-            sound->mVolume = volume;
-            sound->mBaseVolume = basevol;
-            sound->mPitch = pitch;
-            sound->mMinDistance = min;
-            sound->mMaxDistance = max;
-            sound->mFlags = mode;
-
+            sound = mOutput->playSound(file, volume, basevol, pitch, mode);
             mActiveSounds[sound] = std::make_pair(MWWorld::Ptr(), soundId);
         }
         catch(std::exception &e)
@@ -339,15 +323,7 @@ namespace MWSound
             const ESM::Position &pos = ptr.getRefData().getPosition();;
             const Ogre::Vector3 objpos(pos.pos[0], pos.pos[1], pos.pos[2]);
 
-            sound = mOutput->playSound3D(file, objpos, volume*basevol, pitch, min, max, mode);
-            sound->mPos = objpos;
-            sound->mVolume = volume;
-            sound->mBaseVolume = basevol;
-            sound->mPitch = pitch;
-            sound->mMinDistance = min;
-            sound->mMaxDistance = max;
-            sound->mFlags = mode;
-
+            sound = mOutput->playSound3D(file, objpos, volume, basevol, pitch, min, max, mode);
             if((mode&Play_NoTrack))
                 mActiveSounds[sound] = std::make_pair(MWWorld::Ptr(), soundId);
             else

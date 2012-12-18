@@ -128,13 +128,15 @@ class OpenAL_SoundStream : public Sound
 
     volatile bool mIsFinished;
 
+    void updateAll(bool local);
+
     OpenAL_SoundStream(const OpenAL_SoundStream &rhs);
     OpenAL_SoundStream& operator=(const OpenAL_SoundStream &rhs);
 
     friend class OpenAL_Output;
 
 public:
-    OpenAL_SoundStream(OpenAL_Output &output, ALuint src, DecoderPtr decoder);
+    OpenAL_SoundStream(OpenAL_Output &output, ALuint src, DecoderPtr decoder, float basevol, float pitch, int flags);
     virtual ~OpenAL_SoundStream();
 
     virtual void stop();
@@ -215,8 +217,9 @@ private:
 };
 
 
-OpenAL_SoundStream::OpenAL_SoundStream(OpenAL_Output &output, ALuint src, DecoderPtr decoder)
-  : mOutput(output), mSource(src), mSamplesQueued(0), mDecoder(decoder), mIsFinished(true)
+OpenAL_SoundStream::OpenAL_SoundStream(OpenAL_Output &output, ALuint src, DecoderPtr decoder, float basevol, float pitch, int flags)
+  : Sound(Ogre::Vector3(0.0f), 1.0f, basevol, pitch, 1.0f, 1000.0f, flags)
+  , mOutput(output), mSource(src), mSamplesQueued(0), mDecoder(decoder), mIsFinished(true)
 {
     throwALerror();
 
@@ -324,6 +327,25 @@ double OpenAL_SoundStream::getTimeOffset()
     return t;
 }
 
+void OpenAL_SoundStream::updateAll(bool local)
+{
+    alSourcef(mSource, AL_REFERENCE_DISTANCE, mMinDistance);
+    alSourcef(mSource, AL_MAX_DISTANCE, mMaxDistance);
+    if(local)
+    {
+        alSourcef(mSource, AL_ROLLOFF_FACTOR, 0.0f);
+        alSourcei(mSource, AL_SOURCE_RELATIVE, AL_TRUE);
+    }
+    else
+    {
+        alSourcef(mSource, AL_ROLLOFF_FACTOR, 1.0f);
+        alSourcei(mSource, AL_SOURCE_RELATIVE, AL_FALSE);
+    }
+    alSourcei(mSource, AL_LOOPING, AL_FALSE);
+
+    update();
+}
+
 void OpenAL_SoundStream::update()
 {
     ALfloat gain = mVolume*mBaseVolume;
@@ -411,12 +433,14 @@ protected:
 
     friend class OpenAL_Output;
 
+    void updateAll(bool local);
+
 private:
     OpenAL_Sound(const OpenAL_Sound &rhs);
     OpenAL_Sound& operator=(const OpenAL_Sound &rhs);
 
 public:
-    OpenAL_Sound(OpenAL_Output &output, ALuint src, ALuint buf);
+    OpenAL_Sound(OpenAL_Output &output, ALuint src, ALuint buf, const Ogre::Vector3& pos, float vol, float basevol, float pitch, float mindist, float maxdist, int flags);
     virtual ~OpenAL_Sound();
 
     virtual void stop();
@@ -434,15 +458,16 @@ class OpenAL_Sound3D : public OpenAL_Sound
     OpenAL_Sound3D& operator=(const OpenAL_Sound &rhs);
 
 public:
-    OpenAL_Sound3D(OpenAL_Output &output, ALuint src, ALuint buf)
-      : OpenAL_Sound(output, src, buf)
+    OpenAL_Sound3D(OpenAL_Output &output, ALuint src, ALuint buf, const Ogre::Vector3& pos, float vol, float basevol, float pitch, float mindist, float maxdist, int flags)
+      : OpenAL_Sound(output, src, buf, pos, vol, basevol, pitch, mindist, maxdist, flags)
     { }
 
     virtual void update();
 };
 
-OpenAL_Sound::OpenAL_Sound(OpenAL_Output &output, ALuint src, ALuint buf)
-  : mOutput(output), mSource(src), mBuffer(buf)
+OpenAL_Sound::OpenAL_Sound(OpenAL_Output &output, ALuint src, ALuint buf, const Ogre::Vector3& pos, float vol, float basevol, float pitch, float mindist, float maxdist, int flags)
+  : Sound(pos, vol, basevol, pitch, mindist, maxdist, flags)
+  , mOutput(output), mSource(src), mBuffer(buf)
 {
     mOutput.mActiveSounds.push_back(this);
 }
@@ -484,10 +509,30 @@ double OpenAL_Sound::getTimeOffset()
     return t;
 }
 
+void OpenAL_Sound::updateAll(bool local)
+{
+    alSourcef(mSource, AL_REFERENCE_DISTANCE, mMinDistance);
+    alSourcef(mSource, AL_MAX_DISTANCE, mMaxDistance);
+    if(local)
+    {
+        alSourcef(mSource, AL_ROLLOFF_FACTOR, 0.0f);
+        alSourcei(mSource, AL_SOURCE_RELATIVE, AL_TRUE);
+    }
+    else
+    {
+        alSourcef(mSource, AL_ROLLOFF_FACTOR, 1.0f);
+        alSourcei(mSource, AL_SOURCE_RELATIVE, AL_FALSE);
+    }
+    alSourcei(mSource, AL_LOOPING, (mFlags&MWBase::SoundManager::Play_Loop) ? AL_TRUE : AL_FALSE);
+
+    update();
+}
+
 void OpenAL_Sound::update()
 {
     ALfloat gain = mVolume*mBaseVolume;
     ALfloat pitch = mPitch;
+
     if(!(mFlags&MWBase::SoundManager::Play_NoEnv) && mOutput.mLastEnvironment == Env_Underwater)
     {
         gain *= 0.9f;
@@ -731,7 +776,7 @@ void OpenAL_Output::bufferFinished(ALuint buf)
 }
 
 
-MWBase::SoundPtr OpenAL_Output::playSound(const std::string &fname, float volume, float pitch, int flags)
+MWBase::SoundPtr OpenAL_Output::playSound(const std::string &fname, float vol, float basevol, float pitch, int flags)
 {
     boost::shared_ptr<OpenAL_Sound> sound;
     ALuint src=0, buf=0;
@@ -744,7 +789,7 @@ MWBase::SoundPtr OpenAL_Output::playSound(const std::string &fname, float volume
     try
     {
         buf = getBuffer(fname);
-        sound.reset(new OpenAL_Sound(*this, src, buf));
+        sound.reset(new OpenAL_Sound(*this, src, buf, Ogre::Vector3(0.0f), vol, basevol, pitch, 1.0f, 1000.0f, flags));
     }
     catch(std::exception &e)
     {
@@ -755,25 +800,7 @@ MWBase::SoundPtr OpenAL_Output::playSound(const std::string &fname, float volume
         throw;
     }
 
-    alSource3f(src, AL_POSITION, 0.0f, 0.0f, 0.0f);
-    alSource3f(src, AL_DIRECTION, 0.0f, 0.0f, 0.0f);
-    alSource3f(src, AL_VELOCITY, 0.0f, 0.0f, 0.0f);
-
-    alSourcef(src, AL_REFERENCE_DISTANCE, 1.0f);
-    alSourcef(src, AL_MAX_DISTANCE, 1000.0f);
-    alSourcef(src, AL_ROLLOFF_FACTOR, 0.0f);
-
-    if(!(flags&MWBase::SoundManager::Play_NoEnv) && mLastEnvironment == Env_Underwater)
-    {
-        volume *= 0.9f;
-        pitch *= 0.7f;
-    }
-    alSourcef(src, AL_GAIN, volume);
-    alSourcef(src, AL_PITCH, pitch);
-
-    alSourcei(src, AL_SOURCE_RELATIVE, AL_TRUE);
-    alSourcei(src, AL_LOOPING, (flags&MWBase::SoundManager::Play_Loop) ? AL_TRUE : AL_FALSE);
-    throwALerror();
+    sound->updateAll(true);
 
     alSourcei(src, AL_BUFFER, buf);
     alSourcePlay(src);
@@ -782,8 +809,8 @@ MWBase::SoundPtr OpenAL_Output::playSound(const std::string &fname, float volume
     return sound;
 }
 
-MWBase::SoundPtr OpenAL_Output::playSound3D(const std::string &fname, const Ogre::Vector3 &pos, float volume, float pitch,
-                                    float min, float max, int flags)
+MWBase::SoundPtr OpenAL_Output::playSound3D(const std::string &fname, const Ogre::Vector3 &pos, float vol, float basevol, float pitch,
+                                            float min, float max, int flags)
 {
     boost::shared_ptr<OpenAL_Sound> sound;
     ALuint src=0, buf=0;
@@ -796,7 +823,7 @@ MWBase::SoundPtr OpenAL_Output::playSound3D(const std::string &fname, const Ogre
     try
     {
         buf = getBuffer(fname);
-        sound.reset(new OpenAL_Sound3D(*this, src, buf));
+        sound.reset(new OpenAL_Sound3D(*this, src, buf, pos, vol, basevol, pitch, min, max, flags));
     }
     catch(std::exception &e)
     {
@@ -807,26 +834,7 @@ MWBase::SoundPtr OpenAL_Output::playSound3D(const std::string &fname, const Ogre
         throw;
     }
 
-    alSource3f(src, AL_POSITION, pos.x, pos.z, -pos.y);
-    alSource3f(src, AL_DIRECTION, 0.0f, 0.0f, 0.0f);
-    alSource3f(src, AL_VELOCITY, 0.0f, 0.0f, 0.0f);
-
-    alSourcef(src, AL_REFERENCE_DISTANCE, min);
-    alSourcef(src, AL_MAX_DISTANCE, max);
-    alSourcef(src, AL_ROLLOFF_FACTOR, 1.0f);
-
-    if(!(flags&MWBase::SoundManager::Play_NoEnv) && mLastEnvironment == Env_Underwater)
-    {
-        volume *= 0.9f;
-        pitch *= 0.7f;
-    }
-    alSourcef(src, AL_GAIN, (pos.squaredDistance(mPos) > max*max) ?
-                             0.0f : volume);
-    alSourcef(src, AL_PITCH, pitch);
-
-    alSourcei(src, AL_SOURCE_RELATIVE, AL_FALSE);
-    alSourcei(src, AL_LOOPING, (flags&MWBase::SoundManager::Play_Loop) ? AL_TRUE : AL_FALSE);
-    throwALerror();
+    sound->updateAll(false);
 
     alSourcei(src, AL_BUFFER, buf);
     alSourcePlay(src);
@@ -850,7 +858,7 @@ MWBase::SoundPtr OpenAL_Output::streamSound(DecoderPtr decoder, float volume, fl
         std::cout <<"Warning: cannot loop stream \""<<decoder->getName()<<"\""<< std::endl;
     try
     {
-        sound.reset(new OpenAL_SoundStream(*this, src, decoder));
+        sound.reset(new OpenAL_SoundStream(*this, src, decoder, volume, pitch, flags));
     }
     catch(std::exception &e)
     {
@@ -858,25 +866,7 @@ MWBase::SoundPtr OpenAL_Output::streamSound(DecoderPtr decoder, float volume, fl
         throw;
     }
 
-    alSource3f(src, AL_POSITION, 0.0f, 0.0f, 0.0f);
-    alSource3f(src, AL_DIRECTION, 0.0f, 0.0f, 0.0f);
-    alSource3f(src, AL_VELOCITY, 0.0f, 0.0f, 0.0f);
-
-    alSourcef(src, AL_REFERENCE_DISTANCE, 1.0f);
-    alSourcef(src, AL_MAX_DISTANCE, 1000.0f);
-    alSourcef(src, AL_ROLLOFF_FACTOR, 0.0f);
-
-    if(!(flags&MWBase::SoundManager::Play_NoEnv) && mLastEnvironment == Env_Underwater)
-    {
-        volume *= 0.9f;
-        pitch *= 0.7f;
-    }
-    alSourcef(src, AL_GAIN, volume);
-    alSourcef(src, AL_PITCH, pitch);
-
-    alSourcei(src, AL_SOURCE_RELATIVE, AL_TRUE);
-    alSourcei(src, AL_LOOPING, AL_FALSE);
-    throwALerror();
+    sound->updateAll(true);
 
     sound->play();
     return sound;
