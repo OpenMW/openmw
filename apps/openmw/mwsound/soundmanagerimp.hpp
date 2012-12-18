@@ -59,6 +59,8 @@ namespace MWSound
         void updateSounds(float duration);
         void updateRegionSound(float duration);
 
+        float volumeFromType(PlayType type) const;
+
         SoundManager(const SoundManager &rhs);
         SoundManager& operator=(const SoundManager &rhs);
 

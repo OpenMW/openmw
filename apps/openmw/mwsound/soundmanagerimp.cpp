@@ -137,6 +137,27 @@ namespace MWSound
         return "Sound/"+snd->mSound;
     }
 
+    // Gets the combined volume settings for the given sound type
+    float SoundManager::volumeFromType(PlayType type) const
+    {
+        float volume = mMasterVolume;
+        switch(type)
+        {
+            case Play_TypeSfx:
+                volume *= mSFXVolume;
+                break;
+            case Play_TypeVoice:
+                volume *= mVoiceVolume;
+                break;
+            case Play_TypeMusic:
+            case Play_TypeMovie:
+                volume *= mMusicVolume;
+                break;
+            case Play_TypeMask:
+                break;
+        }
+        return volume;
+    }
 
     bool SoundManager::isPlaying(MWWorld::Ptr ptr, const std::string &id) const
     {
@@ -165,13 +186,13 @@ namespace MWSound
         std::cout <<"Playing "<<filename<< std::endl;
         try
         {
-            float basevol = mMasterVolume * mMusicVolume;
             stopMusic();
 
             DecoderPtr decoder = getDecoder();
             decoder->open(filename);
 
-            mMusic = mOutput->streamSound(decoder, basevol, 1.0f, Play_NoEnv|Play_TypeMusic);
+            mMusic = mOutput->streamSound(decoder, volumeFromType(Play_TypeMusic),
+                                          1.0f, Play_NoEnv|Play_TypeMusic);
         }
         catch(std::exception &e)
         {
@@ -214,7 +235,7 @@ namespace MWSound
         try
         {
             // The range values are not tested
-            float basevol = mMasterVolume * mVoiceVolume;
+            float basevol = volumeFromType(Play_TypeVoice);
             std::string filePath = "Sound/"+filename;
             const ESM::Position &pos = ptr.getRefData().getPosition();
             const Ogre::Vector3 objpos(pos.pos[0], pos.pos[1], pos.pos[2]);
@@ -235,7 +256,7 @@ namespace MWSound
             return;
         try
         {
-            float basevol = mMasterVolume * mVoiceVolume;
+            float basevol = volumeFromType(Play_TypeVoice);
             std::string filePath = "Sound/"+filename;
 
             MWBase::SoundPtr sound = mOutput->playSound(filePath, 1.0f, basevol, 1.0f, Play_Normal|Play_TypeVoice);
@@ -275,7 +296,7 @@ namespace MWSound
             return track;
         try
         {
-            track = mOutput->streamSound(decoder, mMasterVolume, 1.0f, Play_NoEnv|type);
+            track = mOutput->streamSound(decoder, volumeFromType(type), 1.0f, Play_NoEnv|type);
         }
         catch(std::exception &e)
         {
@@ -292,7 +313,7 @@ namespace MWSound
             return sound;
         try
         {
-            float basevol = mMasterVolume * mSFXVolume;
+            float basevol = volumeFromType((PlayType)(mode&Play_TypeMask));
             float min, max;
             std::string file = lookup(soundId, volume, min, max);
 
@@ -315,7 +336,7 @@ namespace MWSound
         try
         {
             // Look up the sound in the ESM data
-            float basevol = mMasterVolume * mSFXVolume;
+            float basevol = volumeFromType((PlayType)(mode&Play_TypeMask));
             float min, max;
             std::string file = lookup(soundId, volume, min, max);
             const ESM::Position &pos = ptr.getRefData().getPosition();;
@@ -536,16 +557,13 @@ namespace MWSound
         SoundMap::iterator snditer = mActiveSounds.begin();
         while(snditer != mActiveSounds.end())
         {
-            if((snditer->first->mFlags&MWBase::SoundManager::Play_TypeVoice))
-                snditer->first->mBaseVolume = mMasterVolume * mVoiceVolume;
-            else
-                snditer->first->mBaseVolume = mMasterVolume * mSFXVolume;
+            snditer->first->mBaseVolume = volumeFromType(snditer->first->getPlayType());
             snditer->first->update();
             snditer++;
         }
         if(mMusic)
         {
-            mMusic->mBaseVolume = mMasterVolume * mMusicVolume;
+            mMusic->mBaseVolume = volumeFromType(mMusic->getPlayType());
             mMusic->update();
         }
     }

@@ -30,6 +30,10 @@ namespace MWSound
         void setPosition(const Ogre::Vector3 &pos) { mPos = pos; }
         void setVolume(float volume) { mVolume = volume; }
 
+        MWBase::SoundManager::PlayType getPlayType() const
+        { return (MWBase::SoundManager::PlayType)(mFlags&MWBase::SoundManager::Play_TypeMask); }
+
+
         Sound(const Ogre::Vector3& pos, float vol, float basevol, float pitch, float mindist, float maxdist, int flags)
           : mPos(pos)
           , mVolume(vol)
