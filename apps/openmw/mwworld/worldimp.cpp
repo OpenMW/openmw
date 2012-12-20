@@ -296,6 +296,11 @@ namespace MWWorld
         return mGlobalVariables->getType (name);
     }
 
+    std::vector<std::string> World::getGlobals () const
+    {
+        return mGlobalVariables->getGlobals();
+    }
+
     Ptr World::getPtr (const std::string& name, bool activeOnly)
     {
         // the player is always in an active cell.

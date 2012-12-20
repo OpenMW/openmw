@@ -16,6 +16,7 @@
 #include <components/compiler/scriptparser.hpp>
 
 #include <components/interpreter/interpreter.hpp>
+#include <components/interpreter/defines.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -155,7 +156,9 @@ namespace MWDialogue
                     }
 
                     parseText (info->mResponse);
-                    win->addText (info->mResponse);
+                    
+                    MWScript::InterpreterContext interpreterContext(&mActor.getRefData().getLocals(),mActor);
+                    win->addText (Interpreter::fixDefinesDialog(info->mResponse, interpreterContext));
                     executeScript (info->mResultScript);
                     mLastTopic = it->mId;
                     mLastDialogue = *info;
@@ -267,7 +270,8 @@ namespace MWDialogue
             else
                 win->addTitle (topic);
 
-            win->addText (info->mResponse);
+            MWScript::InterpreterContext interpreterContext(&mActor.getRefData().getLocals(),mActor);
+            win->addText (Interpreter::fixDefinesDialog(info->mResponse, interpreterContext));
 
             executeScript (info->mResultScript);
 
@@ -411,7 +415,9 @@ namespace MWDialogue
                         mIsInChoice = false;
                         std::string text = info->mResponse;
                         parseText (text);
-                        MWBase::Environment::get().getWindowManager()->getDialogueWindow()->addText (text);
+                        
+                        MWScript::InterpreterContext interpreterContext(&mActor.getRefData().getLocals(),mActor);
+                        MWBase::Environment::get().getWindowManager()->getDialogueWindow()->addText (Interpreter::fixDefinesDialog(text, interpreterContext));
                         executeScript (info->mResultScript);
                         mLastTopic = mLastTopic;
                         mLastDialogue = *info;

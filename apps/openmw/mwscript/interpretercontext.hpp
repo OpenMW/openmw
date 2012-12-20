@@ -75,6 +75,10 @@ namespace MWScript
             virtual void setGlobalLong (const std::string& name, int value);
 
             virtual void setGlobalFloat (const std::string& name, float value);
+            
+            virtual std::vector<std::string> getGlobals () const;
+
+            virtual char getGlobalType (const std::string& name) const;
 
             virtual bool isScriptRunning (const std::string& name) const;
 

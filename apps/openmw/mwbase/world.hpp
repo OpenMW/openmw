@@ -133,6 +133,8 @@ namespace MWBase
 
             virtual char getGlobalVariableType (const std::string& name) const = 0;
             ///< Return ' ', if there is no global variable with this name.
+            
+            virtual std::vector<std::string> getGlobals () const = 0;
 
             virtual MWWorld::Ptr getPtr (const std::string& name, bool activeOnly) = 0;
             ///< Return a pointer to a liveCellRef with the given name.

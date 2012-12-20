@@ -174,6 +174,20 @@ namespace MWScript
             MWBase::Environment::get().getWorld()->getGlobalVariable (name).mFloat = value;
     }
 
+    std::vector<std::string> InterpreterContext::getGlobals () const
+    {
+        MWBase::World *world = MWBase::Environment::get().getWorld();    
+        return world->getGlobals();
+
+    }
+    
+    char InterpreterContext::getGlobalType (const std::string& name) const
+    {
+        MWBase::World *world = MWBase::Environment::get().getWorld();    
+        return world->getGlobalVariableType(name);
+    }
+
+
     bool InterpreterContext::isScriptRunning (const std::string& name) const
     {
         return MWBase::Environment::get().getScriptManager()->getGlobalScripts().isRunning (name);

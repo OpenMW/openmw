@@ -49,6 +49,10 @@ namespace Interpreter
 
             virtual void setGlobalFloat (const std::string& name, float value) = 0;
 
+            virtual std::vector<std::string> getGlobals () const = 0;
+            
+            virtual char getGlobalType (const std::string& name) const = 0;
+
             virtual bool isScriptRunning (const std::string& name) const = 0;
 
             virtual void startScript (const std::string& name) = 0;
