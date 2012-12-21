@@ -1,5 +1,5 @@
-#ifndef GAME_MWMECHANICS_DEFINES_H
-#define GAME_MWMECHANICS_DEFINES_H
+#ifndef INTERPRETER_DEFINES_H_INCLUDED
+#define INTERPRETER_DEFINES_H_INCLUDED
 
 #include <string>
 #include "context.hpp"

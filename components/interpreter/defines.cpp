@@ -35,10 +35,10 @@ namespace Interpreter{
                 bool found;
             
                 if(     (found = Check(temp, "actionslideright", &i, &start))){
-                    retval += "PLACEHOLDER_ACTION_SLIDE_RIGHT";
+                    retval += context.getActionBinding("#{sRight}");
                 }
                 else if((found = Check(temp, "actionreadymagic", &i, &start))){
-                    retval += "PLACEHOLDER_ACTION_READY_MAGIC";
+                    retval += context.getActionBinding("#{sReady_Magic}");
                 }
                 else if((found = Check(temp, "actionprevweapon", &i, &start))){
                     retval += "PLACEHOLDER_ACTION_PREV_WEAPON";
@@ -47,13 +47,13 @@ namespace Interpreter{
                     retval += "PLACEHOLDER_ACTION_PREV_WEAPON";
                 }
                 else if((found = Check(temp, "actiontogglerun", &i, &start))){
-                    retval += "PLACEHOLDER_ACTION_TOGGLE_RUN";
+                    retval += context.getActionBinding("#{sAuto_Run}");
                 }
                 else if((found = Check(temp, "actionslideleft", &i, &start))){
-                    retval += "PLACEHOLDER_ACTION_TOGGLE_RUN";
+                    retval += context.getActionBinding("#{sLeft}");
                 }
                 else if((found = Check(temp, "actionreadyitem", &i, &start))){
-                    retval += "PLACEHOLDER_ACTION_READY_ITEM";
+                    retval += context.getActionBinding("#{sReady_Weapon}");
                 }
                 else if((found = Check(temp, "actionprevspell", &i, &start))){
                     retval += "PLACEHOLDER_ACTION_PREV_SPELL";
@@ -62,31 +62,31 @@ namespace Interpreter{
                     retval += "PLACEHOLDER_ACTION_NEXT_SPELL";
                 }
                 else if((found = Check(temp, "actionrestmenu", &i, &start))){
-                    retval += "PLACEHOLDER_ACTION_REST_MENU";
+                    retval += context.getActionBinding("#{sRestKey}");
                 }
                 else if((found = Check(temp, "actionmenumode", &i, &start))){
-                    retval += "PLACEHOLDER_ACTION_MENU_MODE";
+                    retval += context.getActionBinding("#{sJournal}");
                 }
                 else if((found = Check(temp, "actionactivate", &i, &start))){
-                    retval += "PLACEHOLDER_ACTION_ACTIVATE";
+                    retval += context.getActionBinding("#{sActivate}");
                 }
                 else if((found = Check(temp, "actionjournal", &i, &start))){
-                    retval += "PLACEHOLDER_ACTION_JOURNAL";
+                    retval += context.getActionBinding("#{sJournal}");
                 }
                 else if((found = Check(temp, "actionforward", &i, &start))){
-                    retval += "PLACEHOLDER_ACTION_FORWARD";
+                    retval += context.getActionBinding("#{sForward}");
                 }
                 else if((found = Check(temp, "pccrimelevel", &i, &start))){
-                    retval += "PLACEHOLDER_PC_CRIME_LEVEL";
+                    retval += std::to_string(context.getPCBounty());
                 }
                 else if((found = Check(temp, "actioncrouch", &i, &start))){
-                    retval += "PLACEHOLDER_ACTION_CROUCH";
+                    retval += context.getActionBinding("#{sCrouch_Sneak}");
                 }
                 else if((found = Check(temp, "actionjump", &i, &start))){
-                    retval += "PLACEHOLDER_ACTION_JUMP";
+                    retval += context.getActionBinding("#{sJump}");
                 }
                 else if((found = Check(temp, "actionback", &i, &start))){
-                    retval += "PLACEHOLDER_ACTION_BACK";
+                    retval += context.getActionBinding("#{sBack}");
                 }
                 else if((found = Check(temp, "actionuse", &i, &start))){
                     retval += "PLACEHOLDER_ACTION_USE";
@@ -95,43 +95,43 @@ namespace Interpreter{
                     retval += "PLACEHOLDER_ACTION_RUN";
                 }
                 else if((found = Check(temp, "pcclass", &i, &start))){
-                    retval += "PLACEHOLDER_PC_CLASS";
+                    retval += context.getPCClass();
                 }
                 else if((found = Check(temp, "pcrace", &i, &start))){
-                    retval += "PLACEHOLDER_PC_RACE";
+                    retval += context.getPCRace();
                 }
                 else if((found = Check(temp, "pcname", &i, &start))){
-                    retval += "PLACEHOLDER_PC_NAME";    
+                    retval += context.getPCName();
                 }
                 else if((found = Check(temp, "cell", &i, &start))){
-                    retval += "PLACEHOLDER_CELL";
+                    retval += context.getCurrentCellName();
                 }
 
                 else if(eschar == '%'){ // In Dialogue, not messagebox
                     if(     (found = Check(temp, "faction", &i, &start))){
-                        retval += "PLACEHOLDER_FACTION";
+                        retval += context.getNPCFaction();
                     }
                     else if((found = Check(temp, "nextpcrank", &i, &start))){
-                        retval += "PLACEHOLDER_NEXT_PC_RANK";
+                        retval += context.getPCNextRank();
                     }
                     else if((found = Check(temp, "pcnextrank", &i, &start))){
-                        retval += "PLACEHOLDER_PC_NEXT_RANK";
+                        retval += context.getPCNextRank();
                     }
                     else if((found = Check(temp, "pcrank", &i, &start))){
-                        retval += "PLACEHOLDER_PC_RANK";
+                        retval += context.getPCRank();
                     }
                     else if((found = Check(temp, "rank", &i, &start))){
-                        retval += "PLACEHOLDER_RANK";
+                        retval += context.getNPCRank();
                     }
                     
                     else if((found = Check(temp, "class", &i, &start))){
-                        retval += "PLACEHOLDER_CLASS";
+                        retval += context.getNPCClass();
                     }
                     else if((found = Check(temp, "race", &i, &start))){
-                        retval += "PLACEHOLDER_RACE";
+                        retval += context.getNPCRace();
                     }
                     else if((found = Check(temp, "name", &i, &start))){
-                        retval += "PLACEHOLDER_NAME";
+                        retval += context.getNPCName();
                     }
                 }
                 else if(eschar == '^') { // In messagebox, not dialogue
@@ -145,13 +145,13 @@ namespace Interpreter{
                     
                     /* uses pc in messageboxes */
                     else if((found = Check(temp, "class", &i, &start))){
-                        retval += "PLACEHOLDER_CLASS";
+                        retval += context.getPCClass();
                     }
                     else if((found = Check(temp, "race", &i, &start))){
-                        retval += "PLACEHOLDER_RACE";
+                        retval += context.getPCRace();
                     }
                     else if((found = Check(temp, "name", &i, &start))){
-                        retval += "PLACEHOLDER_NAME";
+                        retval += context.getPCName();
                     }
                 }
                 

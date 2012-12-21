@@ -300,6 +300,44 @@ namespace MWWorld
     {
         return mGlobalVariables->getGlobals();
     }
+    
+    std::string World::getCurrentCellName () const
+    {
+        std::string name;
+
+        Ptr::CellStore *cell = mWorldScene->getCurrentCell();
+        if (cell->mCell->isExterior())
+        {    
+            if (cell->mCell->mName != "")
+            {    
+                name = cell->mCell->mName;
+            }    
+            else 
+            {    
+                const ESM::Region* region =
+                    MWBase::Environment::get().getWorld()->getStore().get<ESM::Region>().search(cell->mCell->mRegion);
+                if (region)
+                    name = region->mName;
+                else
+                { 
+                    const ESM::GameSetting *setting =
+                        MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().search("sDefaultCellname");
+
+                    if (setting && setting->mType == ESM::VT_String)
+                        name = setting->getString();
+                    else
+                        name = "Wilderness";
+                }
+
+            }    
+        }    
+        else 
+        {    
+            name = cell->mCell->mName;
+        }    
+        
+        return name;
+    }
 
     Ptr World::getPtr (const std::string& name, bool activeOnly)
     {

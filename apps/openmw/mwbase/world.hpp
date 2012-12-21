@@ -136,6 +136,8 @@ namespace MWBase
             
             virtual std::vector<std::string> getGlobals () const = 0;
 
+            virtual std::string getCurrentCellName() const = 0;
+
             virtual MWWorld::Ptr getPtr (const std::string& name, bool activeOnly) = 0;
             ///< Return a pointer to a liveCellRef with the given name.
             /// \param activeOnly do non search inactive cells.

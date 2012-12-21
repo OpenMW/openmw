@@ -155,6 +155,8 @@ namespace MWWorld
             ///< Return ' ', if there is no global variable with this name.
             
             virtual std::vector<std::string> getGlobals () const;
+            
+            virtual std::string getCurrentCellName () const;
 
             virtual Ptr getPtr (const std::string& name, bool activeOnly);
             ///< Return a pointer to a liveCellRef with the given name.
