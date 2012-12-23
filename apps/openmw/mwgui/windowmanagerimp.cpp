@@ -55,7 +55,8 @@ using namespace MWGui;
 
 WindowManager::WindowManager(
     const Compiler::Extensions& extensions, int fpsLevel, bool newGame, OEngine::Render::OgreRenderer *mOgre,
-        const std::string& logpath, const std::string& cacheDir, bool consoleOnlyScripts)
+        const std::string& logpath, const std::string& cacheDir, bool consoleOnlyScripts,
+        TranslationData::Storage* pTranslationDataStorage)
   : mGuiManager(NULL)
   , mHud(NULL)
   , mMap(NULL)
@@ -104,6 +105,7 @@ WindowManager::WindowManager(
   , mCrosshairEnabled(Settings::Manager::getBool ("crosshair", "HUD"))
   , mSubtitlesEnabled(Settings::Manager::getBool ("subtitles", "GUI"))
   , mHudEnabled(true)
+  , mTranslationDataStorage(pTranslationDataStorage)
 {
 
     // Set up the GUI system
@@ -612,7 +614,7 @@ void WindowManager::changeCell(MWWorld::Ptr::CellStore* cell)
         if (cell->mCell->mName != "")
         {
             name = cell->mCell->mName;
-            mMap->addVisitedLocation (name, cell->mCell->getGridX (), cell->mCell->getGridY ());
+            mMap->addVisitedLocation ("#{sCell=" + name + "}", cell->mCell->getGridX (), cell->mCell->getGridY ());
         }
         else
         {
@@ -722,13 +724,25 @@ void WindowManager::setDragDrop(bool dragDrop)
 
 void WindowManager::onRetrieveTag(const MyGUI::UString& _tag, MyGUI::UString& _result)
 {
-    const ESM::GameSetting *setting =
-        MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find(_tag);
+    std::string tag(_tag);
 
-    if (setting && setting->mType == ESM::VT_String)
-        _result = setting->getString();
+    std::string tokenToFind = "sCell=";
+    size_t tokenLength = tokenToFind.length();
+
+    if (tag.substr(0, tokenLength) == tokenToFind)
+    {
+        _result = mTranslationDataStorage->translateCellName(tag.substr(tokenLength));
+    }
     else
-        _result = _tag;
+    {
+        const ESM::GameSetting *setting =
+            MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find(tag);
+
+        if (setting && setting->mType == ESM::VT_String)
+            _result = setting->getString();
+        else
+            _result = tag;
+    }
 }
 
 void WindowManager::processChangedSettings(const Settings::CategorySettingVector& changed)

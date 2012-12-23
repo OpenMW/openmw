@@ -95,7 +95,7 @@ namespace MWWorld
             World (OEngine::Render::OgreRenderer& renderer,
                 const Files::Collections& fileCollections,
                 const std::string& master, const boost::filesystem::path& resDir, const boost::filesystem::path& cacheDir, bool newGame,
-                const std::string& encoding, std::map<std::string,std::string> fallbackMap);
+                const ToUTF8::FromType& encoding, std::map<std::string,std::string> fallbackMap);
 
             virtual ~World();
 
@@ -228,7 +228,7 @@ namespace MWWorld
             virtual void rotateObject (const Ptr& ptr,float x,float y,float z, bool adjust = false);
 
             virtual void safePlaceObject(const MWWorld::Ptr& ptr,MWWorld::CellStore &Cell,ESM::Position pos);
-            ///< place an object in a "safe" location (ie not in the void, etc). Makes a copy of the Ptr. 
+            ///< place an object in a "safe" location (ie not in the void, etc). Makes a copy of the Ptr.
 
             virtual void indexToPosition (int cellX, int cellY, float &x, float &y, bool centre = false)
                 const;
@@ -323,7 +323,7 @@ namespace MWWorld
             }
 
             virtual void renderPlayer();
-            
+
             virtual void setupExternalRendering (MWRender::ExternalRendering& rendering);
 
             virtual int canRest();

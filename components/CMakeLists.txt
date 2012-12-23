@@ -62,6 +62,10 @@ add_component_dir (interpreter
     miscopcodes opcodes runtime scriptopcodes spatialopcodes types
     )
 
+add_component_dir (translation_data
+    translation_data
+    )
+
 include_directories(${BULLET_INCLUDE_DIRS})
 
 add_library(components STATIC ${COMPONENT_FILES})

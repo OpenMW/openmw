@@ -347,21 +347,9 @@ void ESMReader::fail(const std::string &msg)
     throw std::runtime_error(ss.str());
 }
 
-void ESMReader::setEncoding(const std::string& encoding)
+void ESMReader::setEncoding(const ToUTF8::FromType& encoding)
 {
-  if (encoding == "win1250")
-  {
-    mEncoding = ToUTF8::WINDOWS_1250;
-  }
-  else if (encoding == "win1251")
-  {
-    mEncoding = ToUTF8::WINDOWS_1251;
-  }
-  else
-  {
-    // Default Latin encoding
-    mEncoding = ToUTF8::WINDOWS_1252;
-  }
+  mEncoding = encoding;
 }
 
 }

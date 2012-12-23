@@ -6,7 +6,7 @@
 #include <components/esm/records.hpp>
 #include "store.hpp"
 
-namespace MWWorld 
+namespace MWWorld
 {
     class ESMStore
     {
@@ -158,7 +158,7 @@ namespace MWWorld
             std::ostringstream id;
             id << "$dynamic" << mDynamicCount++;
             record.mId = id.str();
-            
+
             T *ptr = store.insert(record);
             for (iterator it = mStores.begin(); it != mStores.end(); ++it) {
                 if (it->second == &store) {
@@ -179,7 +179,7 @@ namespace MWWorld
 
     template <>
     inline const ESM::NPC *ESMStore::insert<ESM::NPC>(const ESM::NPC &npc) {
-        if (StringUtils::ciEqual(npc.mId, "player")) {
+        if (Misc::StringUtils::ciEqual(npc.mId, "player")) {
             return mNpcs.insert(npc);
         } else if (mNpcs.search(npc.mId) != 0) {
             std::ostringstream msg;
@@ -191,7 +191,7 @@ namespace MWWorld
         std::ostringstream id;
         id << "$dynamic" << mDynamicCount++;
         record.mId = id.str();
-            
+
         ESM::NPC *ptr = mNpcs.insert(record);
         mIds[ptr->mId] = ESM::REC_NPC_;
         return ptr;

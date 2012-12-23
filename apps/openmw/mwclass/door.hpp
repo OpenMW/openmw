@@ -31,6 +31,9 @@ namespace MWClass
             virtual MWGui::ToolTipInfo getToolTipInfo (const MWWorld::Ptr& ptr) const;
             ///< @return the content of the tool tip to be displayed. raises exception if the object has no tooltip.
 
+            static std::string getDestination (const MWWorld::LiveCellRef<ESM::Door>& door);
+            ///< @return destination cell name or token
+
             virtual void lock (const MWWorld::Ptr& ptr, int lockLevel) const;
             ///< Lock object
 

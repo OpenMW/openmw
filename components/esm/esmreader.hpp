@@ -234,7 +234,7 @@ public:
   void fail(const std::string &msg);
 
   /// Sets font encoding for ESM strings
-  void setEncoding(const std::string& encoding);
+  void setEncoding(const ToUTF8::FromType& encoding);
 
 private:
   Ogre::DataStreamPtr mEsm;

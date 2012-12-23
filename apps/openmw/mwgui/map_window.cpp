@@ -299,7 +299,7 @@ MapWindow::~MapWindow()
 
 void MapWindow::setCellName(const std::string& cellName)
 {
-    setTitle(cellName);
+    setTitle("#{sCell=" + cellName + "}");
 }
 
 void MapWindow::addVisitedLocation(const std::string& name, int x, int y)
