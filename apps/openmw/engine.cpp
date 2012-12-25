@@ -8,7 +8,7 @@
 
 #include <components/bsa/bsa_archive.hpp>
 #include <components/files/configurationmanager.hpp>
-#include <components/translation_data/translation_data.hpp>
+#include <components/translation/translation.hpp>
 #include <components/nifoverrides/nifoverrides.hpp>
 
 #include <components/nifbullet/bullet_nif_loader.hpp>
@@ -336,7 +336,7 @@ void OMW::Engine::go()
         mResDir, mCfgMgr.getCachePath(), mNewGame, mEncoding, mFallbackMap));
 
     //Load translation data
-    std::unique_ptr<TranslationData::Storage> translationDataStorage(new TranslationData::Storage(mEncoding));
+    std::auto_ptr<TranslationData::Storage> translationDataStorage(new TranslationData::Storage(mEncoding));
     translationDataStorage->loadTranslationData(mFileCollections, mMaster);
 
     // Create window manager - this manages all the MW-specific GUI windows

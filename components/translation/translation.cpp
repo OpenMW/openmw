@@ -1,4 +1,4 @@
-#include "translation_data.hpp"
+#include "translation.hpp"
 #include <components/misc/stringops.hpp>
 
 #include <fstream>
@@ -74,7 +74,8 @@ namespace TranslationData
 
     std::string Storage::translateCellName(const std::string& cellName) const
     {
-        auto entry = mCellNamesTranslations.find(cellName);
+        std::map<std::string, std::string>::const_iterator entry =
+            mCellNamesTranslations.find(cellName);
 
         if (entry == mCellNamesTranslations.end())
             return cellName;
@@ -87,7 +88,9 @@ namespace TranslationData
         std::string result;
 
         //seeking for the standard phrase form
-        auto phraseFormsIterator = mPhraseForms.find(phrase);
+        std::map<std::string, std::string>::const_iterator phraseFormsIterator =
+            mPhraseForms.find(phrase);
+
         if (phraseFormsIterator != mPhraseForms.end())
             result = phraseFormsIterator->second;
         else
@@ -95,7 +98,9 @@ namespace TranslationData
 
 
         //seeking for the topic ID
-        auto topicIDIterator = mTopicIDs.find(result);
+        std::map<std::string, std::string>::const_iterator topicIDIterator =
+            mTopicIDs.find(result);
+
         if (topicIDIterator != mTopicIDs.end())
             result = topicIDIterator->second;
 

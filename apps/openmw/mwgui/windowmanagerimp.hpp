@@ -14,7 +14,7 @@
 #include <string>
 
 #include <components/esm/loadclas.hpp>
-#include <components/translation_data/translation_data.hpp>
+#include <components/translation/translation.hpp>
 
 #include "../mwbase/windowmanager.hpp"
 
@@ -252,7 +252,7 @@ namespace MWGui
     SpellCreationDialog* mSpellCreationDialog;
     EnchantingDialog* mEnchantingDialog;
     TrainingWindow* mTrainingWindow;
-    std::unique_ptr<TranslationData::Storage> mTranslationDataStorage;
+    std::auto_ptr<TranslationData::Storage> mTranslationDataStorage;
 
     CharacterCreation* mCharGen;
 
