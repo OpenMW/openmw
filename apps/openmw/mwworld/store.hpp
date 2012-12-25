@@ -371,14 +371,14 @@ namespace MWWorld
             }
         };
 
-        std::vector<ESM::Cell>      mInt;
-        std::vector<ESM::Cell>      mExt;
+        typedef std::map<std::string, ESM::Cell>            DynamicInt;
+        typedef std::map<std::pair<int, int>, ESM::Cell>    DynamicExt;
+
+        DynamicInt      mInt;
+        DynamicExt      mExt;
 
         std::vector<ESM::Cell *>    mSharedInt;
         std::vector<ESM::Cell *>    mSharedExt;
-
-        typedef std::map<std::string, ESM::Cell>            DynamicInt;
-        typedef std::map<std::pair<int, int>, ESM::Cell>    DynamicExt;
 
         DynamicInt mDynamicInt;
         DynamicExt mDynamicExt;
@@ -401,11 +401,10 @@ namespace MWWorld
             ESM::Cell cell;
             cell.mName = StringUtils::lowerCase(id);
 
-            std::vector<ESM::Cell>::const_iterator it =
-                std::lower_bound(mInt.begin(), mInt.end(), cell, RecordCmp());
+            std::map<std::string, ESM::Cell>::const_iterator it = mInt.find(cell.mName);
 
-            if (it != mInt.end() && StringUtils::ciEqual(it->mName, id)) {
-                return &(*it);
+            if (it != mInt.end() && StringUtils::ciEqual(it->second.mName, id)) {
+                return &(it->second);
             }
 
             DynamicInt::const_iterator dit = mDynamicInt.find(cell.mName);
@@ -420,14 +419,12 @@ namespace MWWorld
             ESM::Cell cell;
             cell.mData.mX = x, cell.mData.mY = y;
 
-            std::vector<ESM::Cell>::const_iterator it =
-                std::lower_bound(mExt.begin(), mExt.end(), cell, ExtCmp());
-
-            if (it != mExt.end() && it->mData.mX == x && it->mData.mY == y) {
-                return &(*it);
+            std::pair<int, int> key(x, y);
+            std::map<std::pair<int, int>, ESM::Cell>::const_iterator it = mExt.find(key);
+            if (it != mExt.end()) {
+                return &(it->second);
             }
 
-            std::pair<int, int> key(x, y);
             DynamicExt::const_iterator dit = mDynamicExt.find(key);
             if (dit != mDynamicExt.end()) {
                 return &dit->second;
@@ -457,18 +454,20 @@ namespace MWWorld
         }
 
         void setUp() {
-            typedef std::vector<ESM::Cell>::iterator Iterator;
+            //typedef std::vector<ESM::Cell>::iterator Iterator;
+            typedef std::map<std::pair<int, int>, ESM::Cell>::iterator ExtIterator;
+            typedef std::map<std::string, ESM::Cell>::iterator IntIterator;
 
-            std::sort(mInt.begin(), mInt.end(), RecordCmp());
+            //std::sort(mInt.begin(), mInt.end(), RecordCmp());
             mSharedInt.reserve(mInt.size());
-            for (Iterator it = mInt.begin(); it != mInt.end(); ++it) {
-                mSharedInt.push_back(&(*it));
+            for (IntIterator it = mInt.begin(); it != mInt.end(); ++it) {
+                mSharedInt.push_back(&(it->second));
             }
 
-            std::sort(mExt.begin(), mExt.end(), ExtCmp());
+            //std::sort(mExt.begin(), mExt.end(), ExtCmp());
             mSharedExt.reserve(mExt.size());
-            for (Iterator it = mExt.begin(); it != mExt.end(); ++it) {
-                mSharedExt.push_back(&(*it));
+            for (ExtIterator it = mExt.begin(); it != mExt.end(); ++it) {
+                mSharedExt.push_back(&(it->second));
             }
         }
 
@@ -497,14 +496,13 @@ namespace MWWorld
                     // have new cell replace old cell
                     *oldcell = *cell;
                 } else
-                    mInt.push_back(*cell);
+                    mInt[cell->mName] = *cell;
                 delete cell;
             }
             else
             {
                 // Store exterior cells by grid position, try to merge with existing parent data.
                 ESM::Cell *oldcell = const_cast<ESM::Cell*>(search(cell->getGridX(), cell->getGridY()));
-                std::cout << "setup - " << oldcell << " " << cell->getGridX() << " " << cell->getGridY() << std::endl;
                 if (oldcell) {
                     // push the new references on the list of references to manage
                     oldcell->mContextList.push_back(cell->mContextList.at(0));
@@ -513,7 +511,7 @@ namespace MWWorld
                     // have new cell replace old cell
                     *oldcell = *cell;
                 } else
-                    mExt.push_back(*cell);
+                    mExt[std::make_pair(cell->mData.mX, cell->mData.mY)] = *cell;
                 delete cell;
             }
         }

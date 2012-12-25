@@ -87,12 +87,14 @@ void ESMStore::load(ESM::ESMReader &esm)
             // ... unless it got deleted! This means that the following record
             //  has been deleted, and trying to load it using standard assumptions
             //  on the structure will (probably) fail.
+            /*
             if (esm.isNextSub("DELE")) {
               esm.skipRecord();
               all.erase(id);
               it->second->remove(id);
               continue;
             }
+            */
             it->second->load(esm, id);
 
             if (n.val==ESM::REC_DIAL) {
