@@ -9,6 +9,7 @@
 #include <openengine/gui/manager.hpp>
 
 #include <components/settings/settings.hpp>
+#include <components/translation/translation.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
@@ -56,7 +57,7 @@ using namespace MWGui;
 WindowManager::WindowManager(
     const Compiler::Extensions& extensions, int fpsLevel, bool newGame, OEngine::Render::OgreRenderer *mOgre,
         const std::string& logpath, const std::string& cacheDir, bool consoleOnlyScripts,
-        TranslationData::Storage& translationDataStorage)
+        Translation::Storage& translationDataStorage)
   : mGuiManager(NULL)
   , mHud(NULL)
   , mMap(NULL)

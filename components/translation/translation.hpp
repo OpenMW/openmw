@@ -4,7 +4,7 @@
 #include <components/to_utf8/to_utf8.hpp>
 #include <components/files/collections.hpp>
 
-namespace TranslationData
+namespace Translation
 {
     class Storage
     {

@@ -82,7 +82,7 @@ namespace OMW
 
             Files::Collections mFileCollections;
             bool mFSStrict;
-            TranslationData::Storage mTranslationDataStorage;
+            Translation::Storage mTranslationDataStorage;
 
             // not implemented
             Engine (const Engine&);

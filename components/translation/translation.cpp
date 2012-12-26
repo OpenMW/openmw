@@ -3,7 +3,7 @@
 
 #include <fstream>
 
-namespace TranslationData
+namespace Translation
 {
     void Storage::loadTranslationData(const Files::Collections& dataFileCollections,
                                       const std::string& esmFileName)

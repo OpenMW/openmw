@@ -14,7 +14,6 @@
 #include <string>
 
 #include <components/esm/loadclas.hpp>
-#include <components/translation/translation.hpp>
 
 #include "../mwbase/windowmanager.hpp"
 
@@ -28,6 +27,11 @@ namespace MyGUI
 namespace Compiler
 {
     class Extensions;
+}
+
+namespace Translation
+{
+    class Storage;
 }
 
 namespace OEngine
@@ -78,7 +82,7 @@ namespace MWGui
     WindowManager(const Compiler::Extensions& extensions, int fpsLevel, bool newGame,
                   OEngine::Render::OgreRenderer *mOgre, const std::string& logpath,
                   const std::string& cacheDir, bool consoleOnlyScripts,
-                  TranslationData::Storage& translationDataStorage);
+                  Translation::Storage& translationDataStorage);
     virtual ~WindowManager();
 
     /**
@@ -252,7 +256,7 @@ namespace MWGui
     SpellCreationDialog* mSpellCreationDialog;
     EnchantingDialog* mEnchantingDialog;
     TrainingWindow* mTrainingWindow;
-    TranslationData::Storage& mTranslationDataStorage;
+    Translation::Storage& mTranslationDataStorage;
 
     CharacterCreation* mCharGen;
 
