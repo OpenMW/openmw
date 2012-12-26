@@ -1,6 +1,5 @@
 #include "defines.hpp"
 
-#include <iostream>
 #include <algorithm>
 #include <string>
 #include <vector>
@@ -22,7 +21,7 @@ namespace Interpreter{
         return a.length() > b.length();
     }
 
-    std::string fixDefinesReal(std::string text, char eschar, Context& context){
+    std::string fixDefinesReal(std::string text, char eschar, bool isBook, Context& context){
 
         unsigned int start = 0;
         std::string retval = "";
@@ -107,7 +106,7 @@ namespace Interpreter{
                     retval += context.getCurrentCellName();
                 }
 
-                else if(eschar == '%'){ // In Dialogue, not messagebox
+                else if(eschar == '%' && !isBook) { // In Dialogue, not messagebox
                     if(     (found = Check(temp, "faction", &i, &start))){
                         retval += context.getNPCFaction();
                     }
@@ -134,9 +133,9 @@ namespace Interpreter{
                         retval += context.getNPCName();
                     }
                 }
-                else if(eschar == '^') { // In messagebox, not dialogue
+                else { // In messagebox or book, not dialogue
 
-                    /* empty in messageboxes */
+                    /* empty outside dialogue */
                     if(     (found = Check(temp, "faction", &i, &start)));
                     else if((found = Check(temp, "nextpcrank", &i, &start)));
                     else if((found = Check(temp, "pcnextrank", &i, &start)));
@@ -164,6 +163,11 @@ namespace Interpreter{
                     }
 
                     for(unsigned int j = 0; j < globals.size(); j++){
+                        if(globals[j].length() > temp.length()){ // Just in case there's a global with a huuuge name
+                            std::string temp = text.substr(i+1, globals[j].length());
+                            transform(temp.begin(), temp.end(), temp.begin(), ::tolower);
+                        }
+
                         if((found = Check(temp, globals[j], &i, &start))){
                             char type = context.getGlobalType(globals[j]);
 
@@ -191,10 +195,14 @@ namespace Interpreter{
     }
 
     std::string fixDefinesDialog(std::string text, Context& context){
-        return fixDefinesReal(text, '%', context);
+        return fixDefinesReal(text, '%', false, context);
     }
 
     std::string fixDefinesMsgBox(std::string text, Context& context){
-        return fixDefinesReal(text, '^', context);
+        return fixDefinesReal(text, '^', false, context);
+    }
+
+    std::string fixDefinesBook(std::string text, Context& context){
+        return fixDefinesReal(text, '%', true, context);
     }
 }

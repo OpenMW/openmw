@@ -74,7 +74,7 @@ std::vector<std::string> BookTextParser::split(std::string text, const int width
     std::vector<std::string> result;
 
     MWScript::InterpreterContext interpreterContext(NULL, MWWorld::Ptr()); // empty arguments, because there is no locals or actor
-    text = Interpreter::fixDefinesDialog(text, interpreterContext);
+    text = Interpreter::fixDefinesBook(text, interpreterContext);
 
     boost::algorithm::replace_all(text, "<BR>", "\n");
     boost::algorithm::replace_all(text, "<P>", "\n\n");
@@ -176,7 +176,7 @@ std::vector<std::string> BookTextParser::split(std::string text, const int width
 MyGUI::IntSize BookTextParser::parse(std::string text, MyGUI::Widget* parent, const int width)
 {
     MWScript::InterpreterContext interpreterContext(NULL, MWWorld::Ptr()); // empty arguments, because there is no locals or actor
-    text = Interpreter::fixDefinesDialog(text, interpreterContext);
+    text = Interpreter::fixDefinesBook(text, interpreterContext);
 
 
     mParent = parent;
