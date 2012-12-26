@@ -262,7 +262,7 @@ void printRaw(ESM::ESMReader &esm)
 int load(Arguments& info)
 {
     ESM::ESMReader& esm = info.reader;
-    esm.setEncoding(ToUTF8::CalculateEncoding(info.encoding));
+    esm.setEncoding(ToUTF8::calculateEncoding(info.encoding));
 
     std::string filename = info.filename;
     std::cout << "Loading file: " << filename << std::endl;

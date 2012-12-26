@@ -181,8 +181,8 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
 
     // Font encoding settings
     std::string encoding(variables["encoding"].as<std::string>());
-    std::cout << ToUTF8::EncodingUsingMessage(encoding) << std::endl;
-    engine.setEncoding(ToUTF8::CalculateEncoding(encoding));
+    std::cout << ToUTF8::encodingUsingMessage(encoding) << std::endl;
+    engine.setEncoding(ToUTF8::calculateEncoding(encoding));
 
     // directory settings
     engine.enableFSStrict(variables["fs-strict"].as<bool>());
