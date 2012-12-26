@@ -10,6 +10,7 @@
 #include <components/interpreter/opcodes.hpp>
 
 #include "../mwbase/environment.hpp"
+#include "../mwbase/windowmanager.hpp"
 
 #include "../mwworld/manualref.hpp"
 #include "../mwworld/class.hpp"
@@ -106,12 +107,41 @@ namespace MWScript
                         throw std::runtime_error ("second argument for RemoveItem must be non-negative");
 
                     MWWorld::ContainerStore& store = MWWorld::Class::get (ptr).getContainerStore (ptr);
+                    
+                    std::string itemName = "";
 
                     for (MWWorld::ContainerStoreIterator iter (store.begin()); iter!=store.end() && count;
                         ++iter)
                     {
                         if (toLower(iter->getCellRef().mRefID) == toLower(item))
                         {
+                            switch(iter.getType()){
+                                case MWWorld::ContainerStore::Type_Potion:
+                                    itemName = iter->get<ESM::Potion>()->mBase->mName; break;
+                                case MWWorld::ContainerStore::Type_Apparatus:
+                                    itemName = iter->get<ESM::Apparatus>()->mBase->mName; break;
+                                case MWWorld::ContainerStore::Type_Armor:
+                                    itemName = iter->get<ESM::Armor>()->mBase->mName; break;
+                                case MWWorld::ContainerStore::Type_Book:
+                                    itemName = iter->get<ESM::Book>()->mBase->mName; break;
+                                case MWWorld::ContainerStore::Type_Clothing:
+                                    itemName = iter->get<ESM::Clothing>()->mBase->mName; break;
+                                case MWWorld::ContainerStore::Type_Ingredient:
+                                    itemName = iter->get<ESM::Ingredient>()->mBase->mName; break;
+                                case MWWorld::ContainerStore::Type_Light:
+                                    itemName = iter->get<ESM::Light>()->mBase->mName; break;
+                                case MWWorld::ContainerStore::Type_Lockpick:
+                                    itemName = iter->get<ESM::Tool>()->mBase->mName; break;
+                                case MWWorld::ContainerStore::Type_Miscellaneous:
+                                    itemName = iter->get<ESM::Miscellaneous>()->mBase->mName; break;
+                                case MWWorld::ContainerStore::Type_Probe:
+                                    itemName = iter->get<ESM::Probe>()->mBase->mName; break;
+                                case MWWorld::ContainerStore::Type_Repair:
+                                    itemName = iter->get<ESM::Repair>()->mBase->mName; break;
+                                case MWWorld::ContainerStore::Type_Weapon:
+                                    itemName = iter->get<ESM::Weapon>()->mBase->mName; break;
+                            }
+                            
                             if (iter->getRefData().getCount()<=count)
                             {
                                 count -= iter->getRefData().getCount();
@@ -124,6 +154,8 @@ namespace MWScript
                             }
                         }
                     }
+                    
+                    MWBase::Environment::get().getWindowManager()->messageBox(itemName + " has been removed from your inventory.", std::vector<std::string>());
 
                     // To be fully compatible with original Morrowind, we would need to check if
                     // count is >= 0 here and throw an exception. But let's be tollerant instead.

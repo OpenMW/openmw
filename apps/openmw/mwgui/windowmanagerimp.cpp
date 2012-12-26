@@ -537,14 +537,20 @@ void WindowManager::removeDialog(OEngine::GUI::Layout*dialog)
 
 void WindowManager::messageBox (const std::string& message, const std::vector<std::string>& buttons)
 {
-    if (buttons.empty())
-    {
-        mMessageBoxManager->createMessageBox(message);
-    }
-    else
-    {
-        mMessageBoxManager->createInteractiveMessageBox(message, buttons);
-        pushGuiMode(GM_InterMessageBox);
+    /* If there are no buttons, and there is a dialogue window open, messagebox goes to the dialogue window */
+    if(buttons.empty() && std::find(mGuiModes.begin(), mGuiModes.end(), GM_Dialogue) != mGuiModes.end())
+       mDialogueWindow->addMessageBox(MyGUI::LanguageManager::getInstance().replaceTags(message));
+    
+    else{
+        if (buttons.empty())
+        {
+            mMessageBoxManager->createMessageBox(message);
+        }
+        else
+        {
+            mMessageBoxManager->createInteractiveMessageBox(message, buttons);
+            pushGuiMode(GM_InterMessageBox);
+        }
     }
 }
 

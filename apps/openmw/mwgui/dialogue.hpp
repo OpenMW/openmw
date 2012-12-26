@@ -65,6 +65,7 @@ namespace MWGui
         void setKeywords(std::list<std::string> keyWord);
         void removeKeyword(std::string keyWord);
         void addText(std::string text);
+        void addMessageBox(std::string text);
         void addTitle(std::string text);
         void askQuestion(std::string question);
         void goodbye();
