@@ -87,20 +87,18 @@ void ESMStore::load(ESM::ESMReader &esm)
             // ... unless it got deleted! This means that the following record
             //  has been deleted, and trying to load it using standard assumptions
             //  on the structure will (probably) fail.
-            /*
             if (esm.isNextSub("DELE")) {
               esm.skipRecord();
-              all.erase(id);
-              it->second->remove(id);
+              it->second->eraseStatic(id);
               continue;
             }
-            */
             it->second->load(esm, id);
 
             if (n.val==ESM::REC_DIAL) {
                 // dirty hack, but it is better than non-const search()
                 // or friends
-                dialogue = &mDialogs.mStatic.back();
+                //dialogue = &mDialogs.mStatic.back();
+                dialogue = const_cast<ESM::Dialogue*>(mDialogs.find(id));
                 assert (dialogue->mId == id);
             } else {
                 dialogue = 0;
@@ -140,12 +138,11 @@ void ESMStore::setUp()
     ESM::NPC item;
     item.mId = "player";
 
-    std::vector<ESM::NPC>::iterator pIt =
-        std::lower_bound(mNpcs.mStatic.begin(), mNpcs.mStatic.end(), item, RecordCmp());
-    assert(pIt != mNpcs.mStatic.end() && pIt->mId == "player");
+    const ESM::NPC *pIt = mNpcs.find("player");
+    assert(pIt != NULL);
 
     mNpcs.insert(*pIt);
-    mNpcs.mStatic.erase(pIt);
+    mNpcs.eraseStatic(pIt->mId);
 }
 
 } // end namespace

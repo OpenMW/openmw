@@ -19,6 +19,8 @@ namespace MWWorld
 
         virtual int getSize() const = 0;
         virtual void load(ESM::ESMReader &esm, const std::string &id) = 0;
+        
+        virtual bool eraseStatic(const std::string &id) {return false;}
     };
 
     template <class T>
@@ -85,7 +87,7 @@ namespace MWWorld
     template <class T>
     class Store : public StoreBase
     {
-        std::vector<T>      mStatic;
+        std::map<std::string, T>      mStatic;
         std::vector<T *>    mShared;
         std::map<std::string, T> mDynamic;
 
@@ -107,11 +109,10 @@ namespace MWWorld
             T item;
             item.mId = StringUtils::lowerCase(id);
 
-            typename std::vector<T>::const_iterator it =
-                std::lower_bound(mStatic.begin(), mStatic.end(), item, RecordCmp());
-
-            if (it != mStatic.end() && StringUtils::ciEqual(it->mId, id)) {
-                return &(*it);
+            typename std::map<std::string, T>::const_iterator it = mStatic.find(item.mId);
+            
+            if (it != mStatic.end() && StringUtils::ciEqual(it->second.mId, id)) {
+                return &(it->second);
             }
 
             typename Dynamic::const_iterator dit = mDynamic.find(item.mId);
@@ -133,18 +134,19 @@ namespace MWWorld
         }
 
         void load(ESM::ESMReader &esm, const std::string &id) {
-            mStatic.push_back(T());
-            mStatic.back().mId = StringUtils::lowerCase(id);
-            mStatic.back().load(esm);
+            std::string idLower = StringUtils::lowerCase(id);
+            mStatic[idLower] = T();
+            mStatic[idLower].mId = idLower;
+            mStatic[idLower].load(esm);
         }
 
         void setUp() {
-            std::sort(mStatic.begin(), mStatic.end(), RecordCmp());
+            //std::sort(mStatic.begin(), mStatic.end(), RecordCmp());
 
             mShared.reserve(mStatic.size());
-            typename std::vector<T>::iterator it = mStatic.begin();
+            typename std::map<std::string, T>::iterator it = mStatic.begin();
             for (; it != mStatic.end(); ++it) {
-                mShared.push_back(&(*it));
+                mShared.push_back(&(it->second));
             }
         }
 
@@ -181,6 +183,19 @@ namespace MWWorld
             return ptr;
         }
 
+        bool eraseStatic(const std::string &id) {
+            T item;
+            item.mId = StringUtils::lowerCase(id);
+
+            typename std::map<std::string, T>::const_iterator it = mStatic.find(item.mId);
+            
+            if (it != mStatic.end() && StringUtils::ciEqual(it->second.mId, id)) {
+                mStatic.erase(it);
+            }
+
+            return true;
+        }
+        
         bool erase(const std::string &id) {
             std::string key = StringUtils::lowerCase(id);
             typename Dynamic::iterator it = mDynamic.find(key);
@@ -204,16 +219,18 @@ namespace MWWorld
 
     template <>
     inline void Store<ESM::Dialogue>::load(ESM::ESMReader &esm, const std::string &id) {
-        mStatic.push_back(ESM::Dialogue());
-        mStatic.back().mId = id;
-        mStatic.back().load(esm);
+        std::string idLower = StringUtils::lowerCase(id);
+        mStatic[idLower] = ESM::Dialogue();
+        mStatic[idLower].mId = id; // don't smash case here, as this line is printed... I think
+        mStatic[idLower].load(esm);
     }
 
     template <>
     inline void Store<ESM::Script>::load(ESM::ESMReader &esm, const std::string &id) {
-        mStatic.push_back(ESM::Script());
-        mStatic.back().load(esm);
-        StringUtils::toLower(mStatic.back().mId);
+        ESM::Script scpt;
+        scpt.load(esm);
+        StringUtils::toLower(scpt.mId);
+        mStatic[scpt.mId] = scpt;
     }
 
     template <>
@@ -478,6 +495,7 @@ namespace MWWorld
             //  are not available until both cells have been loaded! So first, proceed as usual.
             
             // All cells have a name record, even nameless exterior cells.
+            std::string idLower = StringUtils::lowerCase(id);
             ESM::Cell *cell = new ESM::Cell;
             cell->mName = id;
 
@@ -487,7 +505,7 @@ namespace MWWorld
             if(cell->mData.mFlags & ESM::Cell::Interior)
             {
                 // Store interior cell by name, try to merge with existing parent data.
-                ESM::Cell *oldcell = const_cast<ESM::Cell*>(search(id));
+                ESM::Cell *oldcell = const_cast<ESM::Cell*>(search(idLower));
                 if (oldcell) {
                     // push the new references on the list of references to manage
                     oldcell->mContextList.push_back(cell->mContextList.at(0));
@@ -496,7 +514,7 @@ namespace MWWorld
                     // have new cell replace old cell
                     *oldcell = *cell;
                 } else
-                    mInt[cell->mName] = *cell;
+                    mInt[idLower] = *cell;
                 delete cell;
             }
             else

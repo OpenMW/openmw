@@ -61,13 +61,14 @@ namespace MWWorld
     {
         // for throwing exception on unhandled record type
         const MWWorld::Store<X> &store = esmStore.get<X>();
-        const X *ptr = store.find(ref.mRefID);
+        const X *ptr = store.search(ref.mRefID);
 
-        /// \note redundant because Store<X>::find() throws exception on miss
+        /// \note no longer redundant - changed to Store<X>::search(), don't throw
+        ///  an exception on miss, try to continue (that's how MW does it, anyway)
         if (ptr == NULL) {
-            throw std::runtime_error("Error resolving cell reference " + ref.mRefID);
-        }
-        mList[ref.mRefnum] = LiveRef(ref, ptr);
+            std::cout << "Warning: could not resolve cell reference " << ref.mRefID << ", trying to continue anyway" << std::endl;
+        } else
+          mList[ref.mRefnum] = LiveRef(ref, ptr);
     }
 
     LiveRef *find (const std::string& name)
