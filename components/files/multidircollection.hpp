@@ -73,6 +73,9 @@ namespace Files
             /// If the file does not exist, an exception is thrown. \a file must include
             /// the extension.
 
+            bool doesExist (const std::string& file) const;
+            ///< \return Does a file with the given name exist?
+
             TIter begin() const;
             ///< Return iterator pointing to the first file.
 

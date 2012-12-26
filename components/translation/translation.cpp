@@ -24,22 +24,18 @@ namespace Translation
                            const std::string& extension,
                            const Files::Collections& dataFileCollections)
     {
-        std::string path;
-        try
-        {
-            path = dataFileCollections.getCollection(extension).getPath(fileNameNoExtension + extension).string();
-        }
-        catch(...)
-        {
-            //no file
-            return;
-        }
+        std::string fileName = fileNameNoExtension + extension;
 
-        std::ifstream stream(path);
-        if (stream.is_open())
+        if (dataFileCollections.getCollection (extension).doesExist (fileName))
         {
+            std::string path = dataFileCollections.getCollection (extension).getPath (fileName).string();
+
+            std::ifstream stream (path);
+
+            if (!stream.is_open())
+                throw std::runtime_error ("failed to open translation file: " + fileName);
+
             loadDataFromStream(container, stream);
-            stream.close();
         }
     }
 
