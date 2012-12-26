@@ -59,7 +59,7 @@ namespace OMW
     class Engine : private Ogre::FrameListener
     {
             MWBase::Environment mEnvironment;
-            std::string mEncoding;
+            ToUTF8::FromType mEncoding;
             Files::PathContainer mDataDirs;
             boost::filesystem::path mResDir;
             OEngine::Render::OgreRenderer *mOgre;
@@ -154,7 +154,7 @@ namespace OMW
             void setCompileAll (bool all);
 
             /// Font encoding
-            void setEncoding(const std::string& encoding);
+            void setEncoding(const ToUTF8::FromType& encoding);
 
             void setAnimationVerbose(bool animverbose);
 

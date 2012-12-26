@@ -357,3 +357,23 @@ std::string ToUTF8::getLegacyEnc(ToUTF8::FromType to)
   // Return a string
   return std::string(&output[0], outlen);
 }
+
+ToUTF8::FromType ToUTF8::CalculateEncoding(const std::string& encodingName)
+{
+  if (encodingName == "win1250")
+    return ToUTF8::WINDOWS_1250;
+  else if (encodingName == "win1251")
+    return ToUTF8::WINDOWS_1251;
+  else
+    return ToUTF8::WINDOWS_1252;
+}
+
+std::string ToUTF8::EncodingUsingMessage(const std::string& encodingName)
+{
+  if (encodingName == "win1250")
+    return "Using Central and Eastern European font encoding.";
+  else if (encodingName == "win1251")
+    return "Using Cyrillic font encoding.";
+  else
+    return "Using default (English) font encoding.";
+}
