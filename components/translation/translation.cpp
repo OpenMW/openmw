@@ -106,4 +106,9 @@ namespace TranslationData
 
         return result;
     }
+
+    void Storage::setEncoding (const ToUTF8::FromType& encoding)
+    {
+        mEncoding = encoding;
+    }
 }

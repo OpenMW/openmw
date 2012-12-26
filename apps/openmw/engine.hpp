@@ -5,6 +5,7 @@
 
 #include <components/compiler/extensions.hpp>
 #include <components/files/collections.hpp>
+#include <components/translation/translation.hpp>
 
 #include "mwbase/environment.hpp"
 
@@ -79,9 +80,9 @@ namespace OMW
             Compiler::Extensions mExtensions;
             Compiler::Context *mScriptContext;
 
-
             Files::Collections mFileCollections;
             bool mFSStrict;
+            TranslationData::Storage mTranslationDataStorage;
 
             // not implemented
             Engine (const Engine&);

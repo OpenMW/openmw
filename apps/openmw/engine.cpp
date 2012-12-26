@@ -336,15 +336,14 @@ void OMW::Engine::go()
         mResDir, mCfgMgr.getCachePath(), mNewGame, mEncoding, mFallbackMap));
 
     //Load translation data
-    std::auto_ptr<TranslationData::Storage> translationDataStorage(new TranslationData::Storage(mEncoding));
-    translationDataStorage->loadTranslationData(mFileCollections, mMaster);
+    mTranslationDataStorage.loadTranslationData(mFileCollections, mMaster);
 
     // Create window manager - this manages all the MW-specific GUI windows
     MWScript::registerExtensions (mExtensions);
 
     mEnvironment.setWindowManager (new MWGui::WindowManager(
         mExtensions, mFpsLevel, mNewGame, mOgre, mCfgMgr.getLogPath().string() + std::string("/"),
-        mCfgMgr.getCachePath ().string(), mScriptConsoleMode, translationDataStorage.release()));
+        mCfgMgr.getCachePath ().string(), mScriptConsoleMode, mTranslationDataStorage));
 
     // Create sound system
     mEnvironment.setSoundManager (new MWSound::SoundManager(mUseSound));
@@ -495,6 +494,7 @@ void OMW::Engine::showFPS(int level)
 void OMW::Engine::setEncoding(const ToUTF8::FromType& encoding)
 {
     mEncoding = encoding;
+    mTranslationDataStorage.setEncoding (encoding);
 }
 
 void OMW::Engine::setFallbackValues(std::map<std::string,std::string> fallbackMap)

@@ -78,7 +78,7 @@ namespace MWGui
     WindowManager(const Compiler::Extensions& extensions, int fpsLevel, bool newGame,
                   OEngine::Render::OgreRenderer *mOgre, const std::string& logpath,
                   const std::string& cacheDir, bool consoleOnlyScripts,
-                  TranslationData::Storage* pTranslationDataStorage);
+                  TranslationData::Storage& translationDataStorage);
     virtual ~WindowManager();
 
     /**
@@ -252,7 +252,7 @@ namespace MWGui
     SpellCreationDialog* mSpellCreationDialog;
     EnchantingDialog* mEnchantingDialog;
     TrainingWindow* mTrainingWindow;
-    std::auto_ptr<TranslationData::Storage> mTranslationDataStorage;
+    TranslationData::Storage& mTranslationDataStorage;
 
     CharacterCreation* mCharGen;
 

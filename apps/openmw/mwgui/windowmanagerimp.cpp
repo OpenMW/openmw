@@ -56,7 +56,7 @@ using namespace MWGui;
 WindowManager::WindowManager(
     const Compiler::Extensions& extensions, int fpsLevel, bool newGame, OEngine::Render::OgreRenderer *mOgre,
         const std::string& logpath, const std::string& cacheDir, bool consoleOnlyScripts,
-        TranslationData::Storage* pTranslationDataStorage)
+        TranslationData::Storage& translationDataStorage)
   : mGuiManager(NULL)
   , mHud(NULL)
   , mMap(NULL)
@@ -105,7 +105,7 @@ WindowManager::WindowManager(
   , mCrosshairEnabled(Settings::Manager::getBool ("crosshair", "HUD"))
   , mSubtitlesEnabled(Settings::Manager::getBool ("subtitles", "GUI"))
   , mHudEnabled(true)
-  , mTranslationDataStorage(pTranslationDataStorage)
+  , mTranslationDataStorage (translationDataStorage)
 {
 
     // Set up the GUI system
@@ -731,7 +731,7 @@ void WindowManager::onRetrieveTag(const MyGUI::UString& _tag, MyGUI::UString& _r
 
     if (tag.substr(0, tokenLength) == tokenToFind)
     {
-        _result = mTranslationDataStorage->translateCellName(tag.substr(tokenLength));
+        _result = mTranslationDataStorage.translateCellName(tag.substr(tokenLength));
     }
     else
     {

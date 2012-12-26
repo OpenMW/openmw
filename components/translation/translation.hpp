@@ -9,13 +9,14 @@ namespace TranslationData
     class Storage
     {
     public:
-        Storage(const ToUTF8::FromType& encoding) : mEncoding(encoding) {}
 
         void loadTranslationData(const Files::Collections& dataFileCollections,
                                  const std::string& esmFileName);
 
         std::string translateCellName(const std::string& cellName) const;
         std::string topicID(const std::string& phrase) const;
+
+        void setEncoding (const ToUTF8::FromType& encoding);
 
     private:
         typedef std::map<std::string, std::string> ContainerType;
