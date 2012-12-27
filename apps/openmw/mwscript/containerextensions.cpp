@@ -115,32 +115,7 @@ namespace MWScript
                     {
                         if (toLower(iter->getCellRef().mRefID) == toLower(item))
                         {
-                            switch(iter.getType()){
-                                case MWWorld::ContainerStore::Type_Potion:
-                                    itemName = iter->get<ESM::Potion>()->mBase->mName; break;
-                                case MWWorld::ContainerStore::Type_Apparatus:
-                                    itemName = iter->get<ESM::Apparatus>()->mBase->mName; break;
-                                case MWWorld::ContainerStore::Type_Armor:
-                                    itemName = iter->get<ESM::Armor>()->mBase->mName; break;
-                                case MWWorld::ContainerStore::Type_Book:
-                                    itemName = iter->get<ESM::Book>()->mBase->mName; break;
-                                case MWWorld::ContainerStore::Type_Clothing:
-                                    itemName = iter->get<ESM::Clothing>()->mBase->mName; break;
-                                case MWWorld::ContainerStore::Type_Ingredient:
-                                    itemName = iter->get<ESM::Ingredient>()->mBase->mName; break;
-                                case MWWorld::ContainerStore::Type_Light:
-                                    itemName = iter->get<ESM::Light>()->mBase->mName; break;
-                                case MWWorld::ContainerStore::Type_Lockpick:
-                                    itemName = iter->get<ESM::Tool>()->mBase->mName; break;
-                                case MWWorld::ContainerStore::Type_Miscellaneous:
-                                    itemName = iter->get<ESM::Miscellaneous>()->mBase->mName; break;
-                                case MWWorld::ContainerStore::Type_Probe:
-                                    itemName = iter->get<ESM::Probe>()->mBase->mName; break;
-                                case MWWorld::ContainerStore::Type_Repair:
-                                    itemName = iter->get<ESM::Repair>()->mBase->mName; break;
-                                case MWWorld::ContainerStore::Type_Weapon:
-                                    itemName = iter->get<ESM::Weapon>()->mBase->mName; break;
-                            }
+                            itemName = MWWorld::Class::get(*iter).getName(*iter);
                             
                             if (iter->getRefData().getCount()<=count)
                             {
