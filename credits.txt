@@ -26,6 +26,7 @@ Jacob Essex (Yacoby)
 Jannik Heller (scrawl)
 Jason Hooks (jhooks)
 Karl-Felix Glatzer (k1ll)
+lazydev
 Leon Saunders (emoose)
 Lukasz Gromanowski (lgro)
 Marcin Hulist (Gohan)
