@@ -370,6 +370,11 @@ void DialogueWindow::addText(std::string text)
     mHistory->addDialogText("#B29154"+parseText(text)+"#B29154");
 }
 
+void DialogueWindow::addMessageBox(const std::string& text)
+{
+    mHistory->addDialogText("\n#FFFFFF"+text+"#B29154");
+}
+
 void DialogueWindow::addTitle(std::string text)
 {
     // This is called from the dialogue manager, so text is

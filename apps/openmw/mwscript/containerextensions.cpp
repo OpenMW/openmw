@@ -3,6 +3,10 @@
 
 #include <stdexcept>
 
+#include <boost/format.hpp>
+
+#include <MyGUI_LanguageManager.h>
+
 #include <components/compiler/extensions.hpp>
 
 #include <components/interpreter/interpreter.hpp>
@@ -10,6 +14,7 @@
 #include <components/interpreter/opcodes.hpp>
 
 #include "../mwbase/environment.hpp"
+#include "../mwbase/windowmanager.hpp"
 
 #include "../mwworld/manualref.hpp"
 #include "../mwworld/class.hpp"
@@ -101,17 +106,22 @@ namespace MWScript
 
                     Interpreter::Type_Integer count = runtime[0].mInteger;
                     runtime.pop();
-
+                    
                     if (count<0)
                         throw std::runtime_error ("second argument for RemoveItem must be non-negative");
 
                     MWWorld::ContainerStore& store = MWWorld::Class::get (ptr).getContainerStore (ptr);
+                    
+                    std::string itemName = "";
+                    Interpreter::Type_Integer originalCount = count;
 
                     for (MWWorld::ContainerStoreIterator iter (store.begin()); iter!=store.end() && count;
                         ++iter)
                     {
                         if (toLower(iter->getCellRef().mRefID) == toLower(item))
                         {
+                            itemName = MWWorld::Class::get(*iter).getName(*iter);
+                            
                             if (iter->getRefData().getCount()<=count)
                             {
                                 count -= iter->getRefData().getCount();
@@ -124,6 +134,26 @@ namespace MWScript
                             }
                         }
                     }
+                  
+                    /* The two GMST entries below expand to strings informing the player of what, and how many of it has been removed from their inventory */
+                    std::string msgBox;
+                    if(originalCount - count > 1)
+                    {
+                        msgBox = MyGUI::LanguageManager::getInstance().replaceTags("#{sNotifyMessage63}");
+                        std::stringstream temp;
+                        temp << boost::format(msgBox) % (originalCount - count) % itemName;
+                        msgBox = temp.str();
+                    }
+                    else
+                    {
+                        msgBox = MyGUI::LanguageManager::getInstance().replaceTags("#{sNotifyMessage62}");
+                        std::stringstream temp;
+                        temp << boost::format(msgBox) % itemName;
+                        msgBox = temp.str();
+                    }
+                    
+                    if(originalCount - count > 0)
+                        MWBase::Environment::get().getWindowManager()->messageBox(msgBox, std::vector<std::string>());
 
                     // To be fully compatible with original Morrowind, we would need to check if
                     // count is >= 0 here and throw an exception. But let's be tollerant instead.
