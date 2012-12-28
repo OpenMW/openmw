@@ -66,6 +66,29 @@ namespace CSMWorld
         {
             return true;
         }
+
+        virtual bool isUserEditable() const
+        {
+            return false;
+        }
+    };
+
+    template<typename ESXRecordT>
+    struct FixedRecordTypeColumn : public Column<ESXRecordT>
+    {
+        int mType;
+
+        FixedRecordTypeColumn (int type) : Column<ESXRecordT> ("Type", 0), mType (type) {}
+
+        virtual QVariant get (const Record<ESXRecordT>& record) const
+        {
+            return mType;
+        }
+
+        virtual bool isEditable() const
+        {
+            return false;
+        }
     };
 }
 

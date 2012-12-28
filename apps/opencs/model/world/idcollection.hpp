@@ -11,29 +11,10 @@
 
 #include <QVariant>
 
-#include "record.hpp"
+#include "columnbase.hpp"
 
 namespace CSMWorld
 {
-    template<typename ESXRecordT>
-    struct Column
-    {
-        std::string mTitle;
-
-        Column (const std::string& title) : mTitle (title) {}
-
-        virtual ~Column() {}
-
-        virtual QVariant get (const Record<ESXRecordT>& record) const = 0;
-
-        virtual void set (Record<ESXRecordT>& record, const QVariant& data)
-        {
-            throw std::logic_error ("Column " + mTitle + " is not editable");
-        }
-
-        virtual bool isEditable() const = 0;
-    };
-
     class IdCollectionBase
     {
             // not implemented
@@ -54,13 +35,11 @@ namespace CSMWorld
 
             virtual int getColumns() const = 0;
 
-            virtual std::string getTitle (int column) const = 0;
+            virtual const ColumnBase& getColumn (int column) const = 0;
 
             virtual QVariant getData (int index, int column) const = 0;
 
             virtual void setData (int index, int column, const QVariant& data) = 0;
-
-            virtual bool isEditable (int column) const = 0;
 
             virtual void merge() = 0;
             ///< Merge modified into base.
@@ -125,9 +104,7 @@ namespace CSMWorld
 
             virtual void setData (int index, int column, const QVariant& data);
 
-            virtual std::string getTitle (int column) const;
-
-            virtual bool isEditable (int column) const;
+            virtual const ColumnBase& getColumn (int column) const;
 
             virtual void merge();
             ///< Merge modified into base.
@@ -239,15 +216,9 @@ namespace CSMWorld
     }
 
     template<typename ESXRecordT>
-    std::string IdCollection<ESXRecordT>::getTitle (int column) const
+    const ColumnBase& IdCollection<ESXRecordT>::getColumn (int column) const
     {
-        return mColumns.at (column)->mTitle;
-    }
-
-    template<typename ESXRecordT>
-    bool IdCollection<ESXRecordT>::isEditable (int column) const
-    {
-        return mColumns.at (column)->isEditable();
+        return *mColumns.at (column);
     }
 
     template<typename ESXRecordT>

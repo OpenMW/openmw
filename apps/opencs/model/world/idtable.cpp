@@ -34,7 +34,7 @@ QVariant CSMWorld::IdTable::data  (const QModelIndex & index, int role) const
     if (role!=Qt::DisplayRole && role!=Qt::EditRole)
         return QVariant();
 
-    if (role==Qt::EditRole && !mIdCollection->isEditable (index.column()))
+    if (role==Qt::EditRole && !mIdCollection->getColumn (index.column()).isEditable())
         return QVariant();
 
     return mIdCollection->getData (index.row(), index.column());
@@ -42,18 +42,21 @@ QVariant CSMWorld::IdTable::data  (const QModelIndex & index, int role) const
 
 QVariant CSMWorld::IdTable::headerData (int section, Qt::Orientation orientation, int role) const
 {
-    if (role!=Qt::DisplayRole)
-        return QVariant();
-
     if (orientation==Qt::Vertical)
         return QVariant();
 
-    return tr (mIdCollection->getTitle (section).c_str());
+    if (role==Qt::DisplayRole)
+        return tr (mIdCollection->getColumn (section).mTitle.c_str());
+
+    if (role==ColumnBase::Role_Flags)
+        return mIdCollection->getColumn (section).mFlags;
+
+    return QVariant();
 }
 
 bool CSMWorld::IdTable::setData ( const QModelIndex &index, const QVariant &value, int role)
 {
-    if (mIdCollection->isEditable (index.column()) && role==Qt::EditRole)
+    if (mIdCollection->getColumn (index.column()).isEditable() && role==Qt::EditRole)
     {
         mIdCollection->setData (index.row(), index.column(), value);
 
@@ -70,7 +73,7 @@ Qt::ItemFlags CSMWorld::IdTable::flags (const QModelIndex & index) const
 {
     Qt::ItemFlags flags = Qt::ItemIsSelectable | Qt::ItemIsEnabled;
 
-    if (mIdCollection->isEditable (index.column()))
+    if (mIdCollection->getColumn (index.column()).isUserEditable())
         flags |= Qt::ItemIsEditable;
 
     return flags;

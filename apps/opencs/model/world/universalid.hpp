@@ -36,6 +36,8 @@ namespace CSMWorld
 
                 Type_Globals,
 
+                Type_Global,
+
                 Type_VerificationResults
             };
 

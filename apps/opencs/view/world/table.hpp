@@ -50,6 +50,8 @@ namespace CSVWorld
 
             void setEditLock (bool locked);
 
+            CSMWorld::UniversalId getUniversalId (int row) const;
+
         private slots:
 
             void createRecord();

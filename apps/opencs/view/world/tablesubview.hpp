@@ -3,7 +3,7 @@
 
 #include "../doc/subview.hpp"
 
-class QUndoStack;
+class QModelIndex;
 
 namespace CSMDoc
 {
@@ -16,6 +16,8 @@ namespace CSVWorld
 
     class TableSubView : public CSVDoc::SubView
     {
+            Q_OBJECT
+
             Table *mTable;
 
         public:
@@ -23,6 +25,10 @@ namespace CSVWorld
             TableSubView (const CSMWorld::UniversalId& id, CSMDoc::Document& document, bool createAndDelete);
 
             virtual void setEditLock (bool locked);
+
+        private slots:
+
+            void rowActivated (const QModelIndex& index);
     };
 }
 
