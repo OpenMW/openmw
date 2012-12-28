@@ -34,12 +34,6 @@ namespace
 
         return sum;
     }
-
-    bool compare_string_ci(std::string str1, std::string str2)
-    {
-        boost::algorithm::to_lower(str1);
-        return str1 == str2;
-    }
 }
 
 MWWorld::ContainerStore::ContainerStore() : mStateId (0), mCachedWeight (0), mWeightUpToDate (false) {}
@@ -81,11 +75,11 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add (const Ptr& ptr)
         MWWorld::LiveCellRef<ESM::Miscellaneous> *gold =
             ptr.get<ESM::Miscellaneous>();
 
-        if (compare_string_ci(gold->ref.mRefID, "gold_001")
-            || compare_string_ci(gold->ref.mRefID, "gold_005")
-            || compare_string_ci(gold->ref.mRefID, "gold_010")
-            || compare_string_ci(gold->ref.mRefID, "gold_025")
-            || compare_string_ci(gold->ref.mRefID, "gold_100"))
+        if (Misc::compare_string_ci(gold->ref.mRefID, "gold_001")
+            || Misc::compare_string_ci(gold->ref.mRefID, "gold_005")
+            || Misc::compare_string_ci(gold->ref.mRefID, "gold_010")
+            || Misc::compare_string_ci(gold->ref.mRefID, "gold_025")
+            || Misc::compare_string_ci(gold->ref.mRefID, "gold_100"))
         {
             MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), "Gold_001");
 
@@ -93,7 +87,7 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add (const Ptr& ptr)
             ref.getPtr().getRefData().setCount(count);
             for (MWWorld::ContainerStoreIterator iter (begin(type)); iter!=end(); ++iter)
             {
-                if (compare_string_ci((*iter).get<ESM::Miscellaneous>()->ref.mRefID, "gold_001"))
+                if (Misc::compare_string_ci((*iter).get<ESM::Miscellaneous>()->ref.mRefID, "gold_001"))
                 {
                     (*iter).getRefData().setCount( (*iter).getRefData().getCount() + count);
                     flagAsModified();

@@ -228,12 +228,12 @@ namespace MWWorld
             return cell;
 
         // didn't work -> now check for regions
-        std::string cellName2 = ESMS::RecListT<ESM::Region>::toLower (cellName);
+        std::string cellName2 = Misc::toLower (cellName);
 
         for (ESMS::RecListT<ESM::Region>::MapType::const_iterator iter (mStore.regions.list.begin());
             iter!=mStore.regions.list.end(); ++iter)
         {
-            if (ESMS::RecListT<ESM::Region>::toLower (iter->second.mName)==cellName2)
+            if (Misc::toLower (iter->second.mName)==cellName2)
             {
                 if (const ESM::Cell *cell = mStore.cells.searchExtByRegion (iter->first))
                     return cell;
@@ -563,16 +563,6 @@ namespace MWWorld
         }
     }
 
-    std::string toLower (const std::string& name)
-    {
-        std::string lowerCase;
-
-        std::transform (name.begin(), name.end(), std::back_inserter (lowerCase),
-            (int(*)(int)) std::tolower);
-
-        return lowerCase;
-    }
-
     void World::moveObject(const Ptr &ptr, CellStore &newCell, float x, float y, float z)
     {
         ESM::Position &pos = ptr.getRefData().getPosition();
@@ -585,7 +575,7 @@ namespace MWWorld
         if (*currCell != newCell) {
             if (isPlayer) {
                 if (!newCell.isExterior()) {
-                    changeToInteriorCell(toLower(newCell.cell->mName), pos);
+                    changeToInteriorCell(Misc::toLower(newCell.cell->mName), pos);
                 } else {
                     int cellX = newCell.cell->mData.mX;
                     int cellY = newCell.cell->mData.mY;

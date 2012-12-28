@@ -28,15 +28,6 @@ namespace ESMS
     virtual int getSize() = 0;
     virtual void listIdentifier (std::vector<std::string>& identifier) const = 0;
 
-    static std::string toLower (const std::string& name)
-    {
-        std::string lowerCase;
-
-        std::transform (name.begin(), name.end(), std::back_inserter (lowerCase),
-            (int(*)(int)) std::tolower);
-
-        return lowerCase;
-    }
   };
 
   typedef std::map<int,RecList*> RecListList;
@@ -53,14 +44,14 @@ namespace ESMS
     // Load one object of this type
     void load(ESMReader &esm, const std::string &id)
     {
-      std::string id2 = toLower (id);
+      std::string id2 = Misc::toLower (id);
       list[id2].load(esm);
     }
 
     // Find the given object ID, or return NULL if not found.
     const X* search(const std::string &id) const
     {
-        std::string id2 = toLower (id);
+        std::string id2 = Misc::toLower (id);
 
         typename MapType::const_iterator iter = list.find (id2);
 
@@ -104,7 +95,7 @@ namespace ESMS
     // Load one object of this type
     void load(ESMReader &esm, const std::string &id)
     {
-        //std::string id2 = toLower (id);
+        //std::string id2 = Misc::toLower (id);
 
         list[id].load(esm);
     }
@@ -112,12 +103,12 @@ namespace ESMS
     // Find the given object ID, or return NULL if not found.
     const X* search(const std::string &id) const
     {
-        std::string id2 = toLower (id);
+        std::string id2 = Misc::toLower (id);
 
         for (typename MapType::const_iterator iter = list.begin();
             iter != list.end(); ++iter)
         {
-            if (toLower(iter->first) == id2)
+            if (Misc::toLower(iter->first) == id2)
                 return &iter->second;
         }
 
@@ -127,12 +118,12 @@ namespace ESMS
     // non-const version
     X* search(const std::string &id)
     {
-        std::string id2 = toLower (id);
+        std::string id2 = Misc::toLower (id);
 
         for (typename MapType::iterator iter = list.begin();
             iter != list.end(); ++iter)
         {
-            if (toLower(iter->first) == id2)
+            if (Misc::toLower(iter->first) == id2)
                 return &iter->second;
         }
 
@@ -172,7 +163,7 @@ namespace ESMS
     // Load one object of this type
     void load(ESMReader &esm, const std::string &id)
     {
-      std::string id2 = toLower (id);
+      std::string id2 = Misc::toLower (id);
       list[id2].mId = id2;
       list[id2].load(esm);
     }
@@ -180,7 +171,7 @@ namespace ESMS
     // Find the given object ID, or return NULL if not found.
     const X* search(const std::string &id) const
     {
-        std::string id2 = toLower (id);
+        std::string id2 = Misc::toLower (id);
 
         typename MapType::const_iterator iter = list.find (id2);
 
@@ -223,7 +214,7 @@ namespace ESMS
 
     void load(ESMReader &esm, const std::string &id)
     {
-      std::string id2 = toLower (id);
+      std::string id2 = Misc::toLower (id);
       X& ref = list[id2];
 
       ref.mId = id;
@@ -233,7 +224,7 @@ namespace ESMS
     // Find the given object ID, or return NULL if not found.
     const X* search(const std::string &id) const
     {
-        std::string id2 = toLower (id);
+        std::string id2 = Misc::toLower (id);
 
         typename MapType::const_iterator iter = list.find (id2);
 
@@ -440,7 +431,7 @@ namespace ESMS
     {
         for (ExtCells::const_iterator iter = extCells.begin(); iter!=extCells.end(); ++iter)
         {
-            if (toLower (iter->second->mName) == toLower (id))
+            if (Misc::toLower (iter->second->mName) == Misc::toLower (id))
                 return iter->second;
         }
 
@@ -449,10 +440,10 @@ namespace ESMS
 
     const ESM::Cell *searchExtByRegion (const std::string& id) const
     {
-        std::string id2 = toLower (id);
+        std::string id2 = Misc::toLower (id);
 
         for (ExtCells::const_iterator iter = extCells.begin(); iter!=extCells.end(); ++iter)
-            if (toLower (iter->second->mRegion)==id)
+            if (Misc::toLower (iter->second->mRegion)==id)
                 return iter->second;
 
         return 0;
@@ -586,7 +577,7 @@ namespace ESMS
       X ref;
       ref.load (esm);
 
-      std::string realId = toLower (ref.mData.mName.toString());
+      std::string realId = Misc::toLower (ref.mData.mName.toString());
 
       std::swap (list[realId], ref);
     }
@@ -594,7 +585,7 @@ namespace ESMS
     // Find the given object ID, or return NULL if not found.
     const X* search(const std::string &id) const
     {
-        std::string id2 = toLower (id);
+        std::string id2 = Misc::toLower (id);
 
         typename MapType::const_iterator iter = list.find (id2);
 
