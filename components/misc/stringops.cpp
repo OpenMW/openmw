@@ -6,7 +6,6 @@
 
 #include <string.h>
 #include <libs/platform/strings.h>
-#include <boost/algorithm/string.hpp>
 
 
 
@@ -92,10 +91,6 @@ bool stringCompareNoCase (std::string first, std::string second)
         else
             return false;
 }
-bool compare_string_ci(std::string str1, std::string str2)
-{
-        boost::algorithm::to_lower(str1);
-        return str1 == str2;
-}
+
 
 }

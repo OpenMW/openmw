@@ -18,12 +18,11 @@ bool ibegins(const char* str1, const char* str2);
 /// Case insensitive, returns true if str1 ends with substring str2
 bool iends(const char* str1, const char* str2);
 
-
+/// 
 std::string toLower (const std::string& name);
 
+/// Case fold compare 
 bool stringCompareNoCase (std::string first, std::string second);
-
-bool compare_string_ci (std::string first, std::string second);
 
 }
 
