@@ -6,6 +6,7 @@ set (OPENCS_SRC
 
     model/world/universalid.cpp model/world/idcollection.cpp model/world/data.cpp model/world/idtable.cpp
     model/world/commands.cpp model/world/idtableproxymodel.cpp model/world/record.cpp
+    model/world/columnbase.cpp
 
     model/tools/tools.cpp model/tools/operation.cpp model/tools/stage.cpp model/tools/verifier.cpp
     model/tools/mandatoryid.cpp model/tools/reportmodel.cpp
@@ -26,7 +27,7 @@ set (OPENCS_HDR
 
     model/world/universalid.hpp model/world/record.hpp model/world/idcollection.hpp model/world/data.hpp
     model/world/idtable.hpp model/world/columns.hpp model/world/idtableproxymodel.hpp
-    model/world/commands.hpp
+    model/world/commands.hpp model/world/columnbase.hpp
 
     model/tools/tools.hpp model/tools/operation.hpp model/tools/stage.hpp model/tools/verifier.hpp
     model/tools/mandatoryid.hpp model/tools/reportmodel.hpp
