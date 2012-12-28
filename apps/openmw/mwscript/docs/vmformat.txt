@@ -291,8 +291,11 @@ op 0x20001e8: RaiseRank
 op 0x20001e9: RaiseRank, explicit
 op 0x20001ea: LowerRank
 op 0x20001eb: LowerRank, explicit
+op 0x20001ec: GetPCCrimeLevel
+op 0x20001ed: SetPCCrimeLevel
+op 0x20001ee: SetPCCrimeLevel
 
-opcodes 0x20001ec-0x3ffffff unused
+opcodes 0x20001ef-0x3ffffff unused
 
 
 
