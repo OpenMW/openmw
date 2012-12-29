@@ -618,7 +618,7 @@ MwIniImporter::multistrmap MwIniImporter::loadIniFile(std::string filename) {
 
         if(line[0] == '[') {
             if(line.length() > 2) {
-                section = line.substr(1, line.length()-3);
+                section = line.substr(1, line.length()-2);
             }
             continue;
         }
@@ -711,7 +711,7 @@ void MwIniImporter::mergeFallback(multistrmap &cfg, multistrmap &ini) {
                 std::string value(*it);
                 std::replace( value.begin(), value.end(), ' ', '_' );
                 std::replace( value.begin(), value.end(), ':', '_' );
-                value.append(",").append(vc->substr(0,vc->length()-1));
+                value.append(",").append(vc->substr(0,vc->length()));
                 insertMultistrmap(cfg, "fallback", value);
             }
         }
