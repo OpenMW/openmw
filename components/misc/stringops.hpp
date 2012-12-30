@@ -2,10 +2,7 @@
 #define MISC_STRINGOPS_H
 
 #include <string>
-<<<<<<< HEAD
-=======
 #include <algorithm>
->>>>>>> 92623921add0d6e16a34973dcf6f2ee1f52dbbe7
 
 namespace Misc
 {

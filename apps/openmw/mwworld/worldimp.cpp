@@ -235,20 +235,11 @@ namespace MWWorld
         }
 
         // didn't work -> now check for regions
-<<<<<<< HEAD
-        std::string cellName2 = Misc::toLower (cellName);
-
-        for (ESMS::RecListT<ESM::Region>::MapType::const_iterator iter (mStore.regions.list.begin());
-            iter!=mStore.regions.list.end(); ++iter)
-        {
-            if (Misc::toLower (iter->second.mName)==cellName2)
-=======
         const MWWorld::Store<ESM::Region> &regions = mStore.get<ESM::Region>();
         MWWorld::Store<ESM::Region>::iterator it = regions.begin();
         for (; it != regions.end(); ++it)
         {
             if (Misc::StringUtils::ciEqual(cellName, it->mName))
->>>>>>> 92623921add0d6e16a34973dcf6f2ee1f52dbbe7
             {
                 return mStore.get<ESM::Cell>().searchExtByRegion(it->mId);
             }
@@ -625,26 +616,16 @@ namespace MWWorld
         CellStore *currCell = ptr.getCell();
         bool isPlayer = ptr == mPlayer->getPlayer();
         bool haveToMove = mWorldScene->isCellActive(*currCell) || isPlayer;
-<<<<<<< HEAD
-        if (*currCell != newCell) {
-            if (isPlayer) {
-                if (!newCell.isExterior()) {
-                    changeToInteriorCell(Misc::toLower(newCell.cell->mName), pos);
-                } else {
-                    int cellX = newCell.cell->mData.mX;
-                    int cellY = newCell.cell->mData.mY;
-=======
 
         if (*currCell != newCell)
         {
             if (isPlayer)
                 if (!newCell.isExterior())
-                    changeToInteriorCell(toLower(newCell.mCell->mName), pos);
+                    changeToInteriorCell(Misc::toLower(newCell.mCell->mName), pos);
                 else
                 {
                     int cellX = newCell.mCell->getGridX();
                     int cellY = newCell.mCell->getGridY();
->>>>>>> 92623921add0d6e16a34973dcf6f2ee1f52dbbe7
                     mWorldScene->changeCell(cellX, cellY, pos, false);
                 }
             else {
