@@ -42,35 +42,11 @@
 
 namespace
 {
-    std::string toLower (const std::string& name)
-    {
-        std::string lowerCase;
-
-        std::transform (name.begin(), name.end(), std::back_inserter (lowerCase),
-            (int(*)(int)) std::tolower);
-
-        return lowerCase;
-    }
-
-    bool stringCompareNoCase (std::string first, std::string second)
-    {
-        unsigned int i=0;
-        while ( (i<first.length()) && (i<second.length()) )
-        {
-            if (tolower(first[i])<tolower(second[i])) return true;
-            else if (tolower(first[i])>tolower(second[i])) return false;
-            ++i;
-        }
-        if (first.length()<second.length())
-            return true;
-        else
-            return false;
-    }
 
     //helper function
     std::string::size_type find_str_ci(const std::string& str, const std::string& substr,size_t pos)
-    {
-        return toLower(str).find(toLower(substr),pos);
+    {	
+        return Misc::StringUtils::toLower(const_cast<std::string &>(str)).find(Misc::StringUtils::toLower(const_cast<std::string &>(substr)).c_str(),pos);
     }
 }
 
@@ -94,13 +70,13 @@ namespace MWDialogue
         MWWorld::Store<ESM::Dialogue>::iterator it = dialogs.begin();
         for (; it != dialogs.end(); ++it)
         {
-            mDialogueMap[toLower(it->mId)] = *it;
+            mDialogueMap[Misc::StringUtils::toLower(const_cast<std::string &>(it->mId))] = *it;
         }
     }
 
     void DialogueManager::addTopic (const std::string& topic)
     {
-        mKnownTopics[toLower(topic)] = true;
+        mKnownTopics[Misc::StringUtils::toLower(const_cast<std::string &>(topic))] = true;
     }
 
     void DialogueManager::parseText (const std::string& text)
@@ -298,10 +274,10 @@ namespace MWDialogue
             {
                 if (filter.search (*iter))
                 {
-                    mActorKnownTopics.push_back (toLower (iter->mId));
+                    mActorKnownTopics.push_back ( Misc::StringUtils::toLower(const_cast<std::string &>(iter->mId)));
 
                     //does the player know the topic?
-                    if (mKnownTopics.find (toLower (iter->mId)) != mKnownTopics.end())
+                    if (mKnownTopics.find ( Misc::StringUtils::toLower(const_cast<std::string &>(iter->mId))) != mKnownTopics.end())
                     {
                         keywordList.push_back (iter->mId);
                     }
@@ -359,7 +335,7 @@ namespace MWDialogue
         win->setServices (windowServices);
 
         // sort again, because the previous sort was case-sensitive
-        keywordList.sort(stringCompareNoCase);
+        keywordList.sort(Misc::StringUtils::ciEqual);
         win->setKeywords(keywordList);
 
         mChoice = choice;
@@ -439,7 +415,7 @@ namespace MWDialogue
     {
         MWGui::DialogueWindow* win = MWBase::Environment::get().getWindowManager()->getDialogueWindow();
         win->askQuestion(question);
-        mChoiceMap[toLower(question)] = choice;
+        mChoiceMap[Misc::StringUtils::toLower(const_cast<std::string &>(question))] = choice;
         mIsInChoice = true;
     }
 

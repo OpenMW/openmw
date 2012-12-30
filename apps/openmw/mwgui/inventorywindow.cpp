@@ -24,19 +24,6 @@
 #include "scrollwindow.hpp"
 #include "spellwindow.hpp"
 
-namespace
-{
-    std::string toLower (const std::string& name)
-    {
-        std::string lowerCase;
-
-        std::transform (name.begin(), name.end(), std::back_inserter (lowerCase),
-            (int(*)(int)) std::tolower);
-
-        return lowerCase;
-    }
-}
-
 namespace MWGui
 {
 
@@ -284,7 +271,7 @@ namespace MWGui
         for (MWWorld::ContainerStoreIterator it = invStore.begin();
                 it != invStore.end(); ++it)
         {
-            if (toLower(it->getCellRef().mRefID) == "gold_001")
+            if (Misc::StringUtils::toLower(it->getCellRef().mRefID) == "gold_001")
                 return it->getRefData().getCount();
         }
         return 0;

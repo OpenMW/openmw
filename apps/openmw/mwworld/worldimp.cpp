@@ -607,16 +607,6 @@ namespace MWWorld
         }
     }
 
-    std::string toLower (const std::string& name)
-    {
-        std::string lowerCase;
-
-        std::transform (name.begin(), name.end(), std::back_inserter (lowerCase),
-            (int(*)(int)) std::tolower);
-
-        return lowerCase;
-    }
-
     void World::moveObject(const Ptr &ptr, CellStore &newCell, float x, float y, float z)
     {
         ESM::Position &pos = ptr.getRefData().getPosition();
@@ -631,7 +621,7 @@ namespace MWWorld
         {
             if (isPlayer)
                 if (!newCell.isExterior())
-                    changeToInteriorCell(toLower(newCell.mCell->mName), pos);
+                    changeToInteriorCell(Misc::StringUtils::toLower(const_cast<std::string &> (newCell.mCell->mName)), pos);
                 else
                 {
                     int cellX = newCell.mCell->getGridX();
