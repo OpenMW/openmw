@@ -1,7 +1,8 @@
-#ifndef CSM_WOLRD_IDLIST_H
-#define CSM_WOLRD_IDLIST_H
+#ifndef CSM_WOLRD_DATA_H
+#define CSM_WOLRD_DATA_H
 
 #include <map>
+#include <vector>
 
 #include <components/esm/loadglob.hpp>
 
@@ -15,11 +16,15 @@ namespace CSMWorld
     class Data
     {
             IdCollection<ESM::Global> mGlobals;
-            std::map<UniversalId, QAbstractTableModel *> mModels;
+            std::vector<QAbstractTableModel *> mModels;
+            std::map<UniversalId::Type, QAbstractTableModel *> mModelIndex;
 
             // not implemented
             Data (const Data&);
             Data& operator= (const Data&);
+
+            void addModel (QAbstractTableModel *model, UniversalId::Type type1,
+                UniversalId::Type type2 = UniversalId::Type_None);
 
         public:
 
@@ -32,7 +37,10 @@ namespace CSMWorld
             IdCollection<ESM::Global>& getGlobals();
 
             QAbstractTableModel *getTableModel (const UniversalId& id);
-            ///< If no table model is available for \æ id, an exception is thrown.
+            ///< If no table model is available for \a id, an exception is thrown.
+            ///
+            /// \note The returned table may either be the model for the ID itself or the model that
+            /// contains the record specified by the ID.
 
             void merge();
             ///< Merge modified into base.

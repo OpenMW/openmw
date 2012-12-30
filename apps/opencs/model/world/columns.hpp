@@ -1,7 +1,7 @@
 #ifndef CSM_WOLRD_COLUMNS_H
 #define CSM_WOLRD_COLUMNS_H
 
-#include "idcollection.hpp"
+#include "columnbase.hpp"
 
 namespace CSMWorld
 {
