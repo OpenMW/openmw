@@ -19,13 +19,17 @@ BrotherBrick
 Cory F. Cohen (cfcohen)
 Cris Mihalache (Mirceam)
 Douglas Diniz (Dgdiniz)
+Eduard Cot (trombonecot)
 Eli2
 gugus / gus
 Jacob Essex (Yacoby)
 Jannik Heller (scrawl)
 Jason Hooks (jhooks)
 Karl-Felix Glatzer (k1ll)
+lazydev
+Leon Saunders (emoose)
 Lukasz Gromanowski (lgro)
+Marcin Hulist (Gohan)
 Michael Mc Donnell
 Michael Papageorgiou (werdanith)
 Nikolay Kasyanov (corristo)
@@ -33,7 +37,7 @@ Pieter van der Kloet (pvdk)
 Roman Melnik (Kromgart)
 Sebastian Wick (swick)
 Sylvain T. (Garvek)
-
+Tom Mason (wheybags)
 
 Packagers:
 Alexander Olofsson (Ace) - Windows

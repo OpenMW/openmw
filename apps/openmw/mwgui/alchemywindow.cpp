@@ -63,7 +63,7 @@ namespace MWGui
     void AlchemyWindow::onCancelButtonClicked(MyGUI::Widget* _sender)
     {
         mAlchemy.clear();
-        
+
         mWindowManager.removeGuiMode(GM_Alchemy);
         mWindowManager.removeGuiMode(GM_Inventory);
     }
@@ -119,7 +119,6 @@ namespace MWGui
             if (mIngredients[i]->isUserString("ToolTipType"))
             {
                 MWWorld::Ptr ingred = *mIngredients[i]->getUserData<MWWorld::Ptr>();
-                ingred.getRefData().setCount(ingred.getRefData().getCount()-1);
                 if (ingred.getRefData().getCount() == 0)
                     removeIngredient(mIngredients[i]);
         }
@@ -131,6 +130,8 @@ namespace MWGui
     {
         openContainer (MWBase::Environment::get().getWorld()->getPlayer().getPlayer()); // this sets mPtr
         setFilter (ContainerBase::Filter_Ingredients);
+
+        mNameEdit->setCaption("");
 
         mAlchemy.setAlchemist (mPtr);
 

@@ -191,6 +191,11 @@ namespace MWWorld
             ///
             /// (default implementation: return false)
 
+            virtual bool hasDetected (const MWWorld::Ptr& ptr, const MWWorld::Ptr& ptr2) const;
+            ///< Has \æ ptr detected \a ptr2?
+            ///
+            /// (default implementation: return false)
+
             static const Class& get (const std::string& key);
             ///< If there is no class for this \a key, an exception is thrown.
 

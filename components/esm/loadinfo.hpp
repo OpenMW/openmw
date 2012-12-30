@@ -32,10 +32,10 @@ struct DialInfo
     {
         int mUnknown1;
         int mDisposition;
-        char mRank; // Rank of NPC
-        char mGender; // See Gender enum
-        char mPCrank; // Player rank
-        char mUnknown2;
+        signed char mRank; // Rank of NPC
+        signed char mGender; // See Gender enum
+        signed char mPCrank; // Player rank
+        signed char mUnknown2;
     }; // 12 bytes
     DATAstruct mData;
 

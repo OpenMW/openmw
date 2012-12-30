@@ -31,6 +31,7 @@ ToolTips::ToolTips(MWBase::WindowManager* windowManager) :
     , mRemainingDelay(0.0)
     , mLastMouseX(0)
     , mLastMouseY(0)
+    , mHorizontalScrollIndex(0)
 {
     getWidget(mDynamicToolTipBox, "DynamicToolTipBox");
 
@@ -52,6 +53,7 @@ void ToolTips::setEnabled(bool enabled)
 
 void ToolTips::onFrame(float frameDuration)
 {
+
     while (mDynamicToolTipBox->getChildCount())
     {
         MyGUI::Gui::getInstance().destroyWidget(mDynamicToolTipBox->getChildAt(0));
@@ -103,7 +105,7 @@ void ToolTips::onFrame(float frameDuration)
 
         else
         {
-            const MyGUI::IntPoint& lastPressed = InputManager::getInstance().getLastPressedPosition(MyGUI::MouseButton::Left);
+	    const MyGUI::IntPoint& lastPressed = InputManager::getInstance().getLastPressedPosition(MyGUI::MouseButton::Left);
 
             if (mousePos == lastPressed) // mouseclick makes tooltip disappear
                 return;
@@ -114,11 +116,13 @@ void ToolTips::onFrame(float frameDuration)
             }
             else
             {
+		mHorizontalScrollIndex = 0;
                 mRemainingDelay = mDelay;
             }
             mLastMouseX = mousePos.left;
             mLastMouseY = mousePos.top;
 
+	    
             if (mRemainingDelay > 0)
                 return;
 
@@ -148,7 +152,8 @@ void ToolTips::onFrame(float frameDuration)
             {
                 return;
             }
-
+	    
+	
             // special handling for markers on the local map: the tooltip should only be visible
             // if the marker is not hidden due to the fog of war.
             if (focus->getUserString ("IsMarker") == "true")
@@ -179,7 +184,9 @@ void ToolTips::onFrame(float frameDuration)
             else if (type == "Spell")
             {
                 ToolTipInfo info;
-                const ESM::Spell *spell = MWBase::Environment::get().getWorld()->getStore().spells.find(focus->getUserString("Spell"));
+
+                const ESM::Spell *spell =
+                    MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find(focus->getUserString("Spell"));
                 info.caption = spell->mName;
                 Widgets::SpellEffectList effects;
                 std::vector<ESM::ENAMstruct>::const_iterator end = spell->mEffects.mList.end();
@@ -352,7 +359,7 @@ void ToolTips::findImageExtension(std::string& image)
 }
 
 IntSize ToolTips::createToolTip(const MWGui::ToolTipInfo& info)
-{
+{    
     mDynamicToolTipBox->setVisible(true);
 
     std::string caption = info.caption;
@@ -364,11 +371,14 @@ IntSize ToolTips::createToolTip(const MWGui::ToolTipInfo& info)
     if (text.size() > 0 && text[0] == '\n')
         text.erase(0, 1);
 
+    if(caption.size() > 0 && isalnum(caption[0]))
+        caption[0] = toupper(caption[0]);
+
     const ESM::Enchantment* enchant = 0;
-    const ESMS::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
+    const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
     if (info.enchant != "")
     {
-        enchant = store.enchants.search(info.enchant);
+        enchant = store.get<ESM::Enchantment>().find(info.enchant);
         if (enchant->mData.mType == ESM::Enchantment::CastOnce)
             text += "\n#{sItemCastOnce}";
         else if (enchant->mData.mType == ESM::Enchantment::WhenStrikes)
@@ -383,6 +393,8 @@ IntSize ToolTips::createToolTip(const MWGui::ToolTipInfo& info)
     setCoord(0, 0, 300, 300);
 
     const IntPoint padding(8, 8);
+    
+    const int maximumWidth = 500;
 
     const int imageCaptionHPadding = (caption != "" ? 8 : 0);
     const int imageCaptionVPadding = (caption != "" ? 4 : 0);
@@ -406,7 +418,7 @@ IntSize ToolTips::createToolTip(const MWGui::ToolTipInfo& info)
     IntSize textSize = textWidget->getTextSize();
 
     captionSize += IntSize(imageSize, 0); // adjust for image
-    IntSize totalSize = IntSize( std::max(textSize.width, captionSize.width + ((image != "") ? imageCaptionHPadding : 0)),
+    IntSize totalSize = IntSize( std::min(std::max(textSize.width,captionSize.width + ((image != "") ? imageCaptionHPadding : 0)),maximumWidth),
         ((text != "") ? textSize.height + imageCaptionVPadding : 0) + captionHeight );
 
     if (!info.effects.empty())
@@ -494,8 +506,24 @@ IntSize ToolTips::createToolTip(const MWGui::ToolTipInfo& info)
         (captionHeight-captionSize.height)/2,
         captionSize.width-imageSize,
         captionSize.height);
+    
+     //if its too long we do hscroll with the caption
+    if (captionSize.width > maximumWidth){
+      mHorizontalScrollIndex = mHorizontalScrollIndex + 2;
+      if (mHorizontalScrollIndex > captionSize.width){
+        mHorizontalScrollIndex = -totalSize.width;
+      }      
+      int horizontal_scroll = mHorizontalScrollIndex;
+      if (horizontal_scroll < 40){
+       horizontal_scroll = 40;	
+      }else{
+        horizontal_scroll = 80 - mHorizontalScrollIndex;
+      }
+      captionWidget->setPosition (IntPoint(horizontal_scroll, captionWidget->getPosition().top + padding.top));
+    } else {
+      captionWidget->setPosition (captionWidget->getPosition() + padding);
+    }
 
-    captionWidget->setPosition (captionWidget->getPosition() + padding);
     textWidget->setPosition (textWidget->getPosition() + IntPoint(0, padding.top)); // only apply vertical padding, the horizontal works automatically due to Align::HCenter
 
     if (image != "")
@@ -571,10 +599,15 @@ void ToolTips::createSkillToolTip(MyGUI::Widget* widget, int skillId)
     if (skillId == -1)
         return;
 
-    const std::string &skillNameId = ESMS::Skill::sSkillNameIds[skillId];
-    const ESM::Skill* skill = MWBase::Environment::get().getWorld()->getStore().skills.search(skillId);
+    const MWWorld::ESMStore &store =
+        MWBase::Environment::get().getWorld()->getStore();
+
+    const std::string &skillNameId = ESM::Skill::sSkillNameIds[skillId];
+    const ESM::Skill* skill = store.get<ESM::Skill>().find(skillId);
     assert(skill);
-    const ESM::Attribute* attr = MWBase::Environment::get().getWorld()->getStore().attributes.search(skill->mData.mAttribute);
+
+    const ESM::Attribute* attr =
+        store.get<ESM::Attribute>().find(skill->mData.mAttribute);
     assert(attr);
     std::string icon = "icons\\k\\" + ESM::Skill::sIconNames[skillId];
 
@@ -607,12 +640,14 @@ void ToolTips::createSpecializationToolTip(MyGUI::Widget* widget, const std::str
     widget->setUserString("Caption_CenteredCaption", name);
     std::string specText;
     // get all skills of this specialisation
-    std::map<int, ESM::Skill> skills = MWBase::Environment::get().getWorld()->getStore().skills.list;
-    for (std::map<int, ESM::Skill>::const_iterator it = skills.begin();
-        it != skills.end(); ++it)
+    const MWWorld::Store<ESM::Skill> &skills =
+        MWBase::Environment::get().getWorld()->getStore().get<ESM::Skill>();
+
+    MWWorld::Store<ESM::Skill>::iterator it = skills.begin();
+    for (; it != skills.end(); ++it)
     {
-        if (it->second.mData.mSpecialization == specId)
-            specText += std::string("\n#{") + ESM::Skill::sSkillNameIds[it->second.mIndex] + "}";
+        if (it->mData.mSpecialization == specId)
+            specText += std::string("\n#{") + ESM::Skill::sSkillNameIds[it->mIndex] + "}";
     }
     widget->setUserString("Caption_CenteredCaptionText", specText);
     widget->setUserString("ToolTipLayout", "TextWithCenteredCaptionToolTip");
@@ -621,7 +656,10 @@ void ToolTips::createSpecializationToolTip(MyGUI::Widget* widget, const std::str
 
 void ToolTips::createBirthsignToolTip(MyGUI::Widget* widget, const std::string& birthsignId)
 {
-    const ESM::BirthSign *sign = MWBase::Environment::get().getWorld()->getStore().birthSigns.find(birthsignId);
+    const MWWorld::ESMStore &store =
+        MWBase::Environment::get().getWorld()->getStore();
+
+    const ESM::BirthSign *sign = store.get<ESM::BirthSign>().find(birthsignId);
 
     widget->setUserString("ToolTipType", "Layout");
     widget->setUserString("ToolTipLayout", "BirthSignToolTip");
@@ -640,7 +678,7 @@ void ToolTips::createBirthsignToolTip(MyGUI::Widget* widget, const std::string& 
     for (; it != end; ++it)
     {
         const std::string &spellId = *it;
-        const ESM::Spell *spell = MWBase::Environment::get().getWorld()->getStore().spells.search(spellId);
+        const ESM::Spell *spell = store.get<ESM::Spell>().search(spellId);
         if (!spell)
             continue; // Skip spells which cannot be found
         ESM::Spell::SpellType type = static_cast<ESM::Spell::SpellType>(spell->mData.mType);
@@ -655,7 +693,11 @@ void ToolTips::createBirthsignToolTip(MyGUI::Widget* widget, const std::string& 
             spells.push_back(spellId);
     }
 
-    struct{ const std::vector<std::string> &spells; std::string label; } categories[3] = {
+    struct {
+        const std::vector<std::string> &spells;
+        std::string label;
+    }
+    categories[3] = {
         {abilities, "sBirthsignmenu1"},
         {powers,    "sPowers"},
         {spells,    "sBirthsignmenu2"}
@@ -672,7 +714,7 @@ void ToolTips::createBirthsignToolTip(MyGUI::Widget* widget, const std::string& 
 
             const std::string &spellId = *it;
 
-            const ESM::Spell *spell = MWBase::Environment::get().getWorld()->getStore().spells.search(spellId);
+            const ESM::Spell *spell = store.get<ESM::Spell>().find(spellId);
             text += "\n#BF9959" + spell->mName;
         }
     }
@@ -711,7 +753,8 @@ void ToolTips::createClassToolTip(MyGUI::Widget* widget, const ESM::Class& playe
 
 void ToolTips::createMagicEffectToolTip(MyGUI::Widget* widget, short id)
 {
-    const ESM::MagicEffect* effect = MWBase::Environment::get().getWorld ()->getStore ().magicEffects.find(id);
+    const ESM::MagicEffect* effect =
+        MWBase::Environment::get().getWorld ()->getStore ().get<ESM::MagicEffect>().find(id);
     const std::string &name = ESM::MagicEffect::effectIdToString (id);
 
     std::string icon = effect->mIcon;

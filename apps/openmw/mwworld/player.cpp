@@ -1,7 +1,6 @@
 
 #include "player.hpp"
 
-#include <components/esm_store/store.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -9,37 +8,21 @@
 #include "../mwmechanics/movement.hpp"
 #include "../mwmechanics/npcstats.hpp"
 
+#include "esmstore.hpp"
 #include "class.hpp"
 
 namespace MWWorld
 {
-    Player::Player (const ESM::NPC *player, const MWBase::World& world) :
-      mCellStore (0), mClass (0),
-      mAutoMove (false), mForwardBackward (0)
+    Player::Player (const ESM::NPC *player, const MWBase::World& world)
+      : mCellStore(0),
+        mAutoMove(false),
+        mForwardBackward (0)
     {
-        mPlayer.base = player;
-        mPlayer.ref.mRefID = "player";
-        mName = player->mName;
-        mMale = !(player->mFlags & ESM::NPC::Female);
-        mRace = player->mRace;
+        mPlayer.mBase = player;
+        mPlayer.mRef.mRefID = "player";
 
         float* playerPos = mPlayer.mData.getPosition().pos;
         playerPos[0] = playerPos[1] = playerPos[2] = 0;
-
-        /// \todo Do not make a copy of classes defined in esm/p records.
-        mClass = new ESM::Class (*world.getStore().classes.find (player->mClass));
-    }
-
-    Player::~Player()
-    {
-        delete mClass;
-    }
-
-    void Player::setClass (const ESM::Class& class_)
-    {
-        ESM::Class *new_class = new ESM::Class (class_);
-        delete mClass;
-        mClass = new_class;
     }
 
     void Player::setDrawState (MWMechanics::DrawState_ state)
@@ -102,5 +85,4 @@ namespace MWWorld
          MWWorld::Ptr ptr = getPlayer();
          return MWWorld::Class::get(ptr).getNpcStats(ptr).getDrawState();
     }
-
 }

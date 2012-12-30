@@ -19,6 +19,7 @@
             <Property key="CanvasSize" value="1536 1536"/>
 
             <Widget type="ImageBox" skin="ImageBox" position_real="0 0 1 1" align="Stretch" name="GlobalMapImage">
+                <Widget type="ImageBox" skin="ImageBox" position_real="0 0 1 1" align="Stretch" name="GlobalMapOverlay"/>
             </Widget>
 
             <Widget type="ImageBox" skin="RotatingSkin" position="0 0 32 32" align="ALIGN_TOP ALIGN_LEFT" name="CompassGlobal">

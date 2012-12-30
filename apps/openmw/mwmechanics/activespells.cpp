@@ -3,13 +3,15 @@
 
 #include <cstdlib>
 
+#include <boost/algorithm/string.hpp>
+
 #include <components/esm/loadalch.hpp>
 #include <components/esm/loadspel.hpp>
 #include <components/esm/loadingr.hpp>
 #include <components/esm/loadmgef.hpp>
 #include <components/esm/loadskil.hpp>
 
-#include <components/esm_store/store.hpp>
+#include "../mwworld/esmstore.hpp"
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -86,7 +88,7 @@ namespace MWMechanics
                         if (effects.second)
                         {
                             const ESM::MagicEffect *magicEffect =
-                                MWBase::Environment::get().getWorld()->getStore().magicEffects.find (
+                                MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find (
                                 iter->mEffectID);                            
                                 
                             if (iter->mDuration==0)
@@ -114,18 +116,18 @@ namespace MWMechanics
     std::pair<ESM::EffectList, bool> ActiveSpells::getEffectList (const std::string& id) const
     {
         if (const ESM::Spell *spell =
-            MWBase::Environment::get().getWorld()->getStore().spells.search (id))
+            MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().search (id))
             return std::make_pair (spell->mEffects, false);
 
         if (const ESM::Potion *potion =
-            MWBase::Environment::get().getWorld()->getStore().potions.search (id))
+            MWBase::Environment::get().getWorld()->getStore().get<ESM::Potion>().search (id))
             return std::make_pair (potion->mEffects, false);
 
         if (const ESM::Ingredient *ingredient =
-            MWBase::Environment::get().getWorld()->getStore().ingreds.search (id))
+            MWBase::Environment::get().getWorld()->getStore().get<ESM::Ingredient>().search (id))
         {
             const ESM::MagicEffect *magicEffect =
-                MWBase::Environment::get().getWorld()->getStore().magicEffects.find (
+                MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find (
                 ingredient->mData.mEffectID[0]);
         
             ESM::ENAMstruct effect;
@@ -257,5 +259,19 @@ namespace MWMechanics
             return 0;
 
         return scaledDuration-usedUp;
+    }
+
+    bool ActiveSpells::isSpellActive(std::string id) const
+    {
+        boost::algorithm::to_lower(id);
+        for (TContainer::iterator iter = mSpells.begin(); iter != mSpells.end(); ++iter)
+        {
+            std::string left = iter->first;
+            boost::algorithm::to_lower(left);
+
+            if (iter->first == id)
+                return true;
+        }
+        return false;
     }
 }

@@ -131,9 +131,7 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
             ->default_value(false), "enable console-only script functionality")
 
         ("script-run", bpo::value<std::string>()->default_value(""),
-            "select a file that is executed in the console on startup\n\n"
-            "Note: The file contains a list of script lines, but not a complete scripts. "
-            "That means no begin/end and no variable declarations.")
+            "select a file containing a list of console commands that is executed on startup")
 
         ("new-game", bpo::value<bool>()->implicit_value(true)
             ->default_value(false), "activate char gen/new game mechanics")
@@ -183,21 +181,8 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
 
     // Font encoding settings
     std::string encoding(variables["encoding"].as<std::string>());
-    if (encoding == "win1250")
-    {
-      std::cout << "Using Central and Eastern European font encoding." << std::endl;
-      engine.setEncoding(encoding);
-    }
-    else if (encoding == "win1251")
-    {
-      std::cout << "Using Cyrillic font encoding." << std::endl;
-      engine.setEncoding(encoding);
-    }
-    else
-    {
-      std::cout << "Using default (English) font encoding." << std::endl;
-      engine.setEncoding("win1252");
-    }
+    std::cout << ToUTF8::encodingUsingMessage(encoding) << std::endl;
+    engine.setEncoding(ToUTF8::calculateEncoding(encoding));
 
     // directory settings
     engine.enableFSStrict(variables["fs-strict"].as<bool>());

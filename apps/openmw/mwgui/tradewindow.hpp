@@ -55,11 +55,14 @@ namespace MWGui
             MyGUI::TextBox* mMerchantGold;
 
             int mCurrentBalance;
+            int mCurrentMerchantOffer;
 
             void onWindowResize(MyGUI::Window* _sender);
             void onFilterChanged(MyGUI::Widget* _sender);
             void onOfferButtonClicked(MyGUI::Widget* _sender);
             void onCancelButtonClicked(MyGUI::Widget* _sender);
+            void onIncreaseButtonClicked(MyGUI::Widget* _sender);
+            void onDecreaseButtonClicked(MyGUI::Widget* _sender);
 
             // don't show items that the NPC has equipped in his trade-window.
             virtual bool ignoreEquippedItems() { return true; }

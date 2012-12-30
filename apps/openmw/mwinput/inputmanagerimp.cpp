@@ -9,7 +9,7 @@
 
 #include <boost/lexical_cast.hpp>
 
-#include <OIS/OISInputManager.h>
+#include <OISInputManager.h>
 
 #include <MyGUI_InputManager.h>
 #include <MyGUI_RenderManager.h>
@@ -624,7 +624,9 @@ namespace MWInput
     void InputManager::toggleAutoMove()
     {
         if (mWindows.isGuiMode()) return;
-        mPlayer.setAutoMove (!mPlayer.getAutoMove());
+
+        if (mControlSwitch["playercontrols"])
+            mPlayer.setAutoMove (!mPlayer.getAutoMove());
     }
 
     void InputManager::toggleWalking()

@@ -1,6 +1,8 @@
 #ifndef OPENMW_ESM_ENCH_H
 #define OPENMW_ESM_ENCH_H
 
+#include <string>
+
 #include "effectlist.hpp"
 
 namespace ESM
@@ -32,6 +34,7 @@ struct Enchantment
         // calculate
     };
 
+    std::string mId;
     ENDTstruct mData;
     EffectList mEffects;
 

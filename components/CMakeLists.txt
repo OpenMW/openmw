@@ -34,10 +34,6 @@ add_component_dir (file_finder
     file_finder filename_less search
     )
 
-add_component_dir (esm_store
-    reclists store
-    )
-
 add_component_dir (esm
     attr defs esmcommon esmreader esmwriter loadacti loadalch loadappa loadarmo loadbody loadbook loadbsgn loadcell
     loadclas loadclot loadcont loadcrea loadcrec loaddial loaddoor loadench loadfact loadglob loadgmst
@@ -63,7 +59,11 @@ add_component_dir (compiler
 
 add_component_dir (interpreter
     context controlopcodes genericopcodes installopcodes interpreter localopcodes mathopcodes
-    miscopcodes opcodes runtime scriptopcodes spatialopcodes types
+    miscopcodes opcodes runtime scriptopcodes spatialopcodes types defines
+    )
+
+add_component_dir (translation
+    translation
     )
 
 include_directories(${BULLET_INCLUDE_DIRS})

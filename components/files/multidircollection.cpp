@@ -95,6 +95,11 @@ namespace Files
         return iter->second;
     }
 
+    bool MultiDirCollection::doesExist (const std::string& file) const
+    {
+        return mFiles.find (file)!=mFiles.end();
+    }
+
     MultiDirCollection::TIter MultiDirCollection::begin() const
     {
         return mFiles.begin();

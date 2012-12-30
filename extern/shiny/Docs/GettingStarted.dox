@@ -1,0 +1,65 @@
+/*!
+	\page getting-started Getting started
+
+	\section download Download the source
+
+	\code
+	git clone git@github.com:scrawl/shiny.git
+	\endcode
+
+	\section building Build the source
+
+	The source files you want to build are:
+	 - Main/*.cpp
+	 - Preprocessor/*.cpp (unless you are using the system install of boost::wave, more below)
+	 - Platforms/Ogre/*.cpp
+
+	You can either build the sources as a static library, or simply add the sources to the source tree of your project.
+
+	If you use CMake, you might find the included CMakeLists.txt useful. It builds static libraries with the names "shiny" and "shiny.OgrePlatform".
+
+	\note The CMakeLists.txt is not intended as a stand-alone build system! Instead, you should include this from the main CMakeLists of your project.
+
+	Make sure to link against OGRE and the boost filesystem library.
+
+	If your boost version is older than 1.49, you must set the SHINY_USE_WAVE_SYSTEM_INSTALL variable and additionally link against the boost wave library.
+
+	\code
+	set(SHINY_USE_WAVE_SYSTEM_INSTALL "TRUE")
+	\endcode
+
+	\section code Basic initialisation code
+
+	Add the following code to your application:
+
+	\code{cpp}
+
+	#include <shiny/Main/Factory.hpp>
+	#include <shiny/Platforms/OgrePlatform/OgrePlatform.hpp>
+
+	....
+
+	sh::OgrePlatform* platform = new sh::OgrePlatform(
+		"General",                                      // OGRE Resource group to use for creating materials.
+		myApplication.getDataPath() + "/" + "materials"  // Path to look for materials and shaders. NOTE: This does NOT use the Ogre resource system, so you have to specify an absolute path.
+	);
+
+	sh::Factory* factory = new sh::Factory(platform);
+
+	// Set a language. Valid options: CG, HLSL, GLSL
+	factory->setCurrentLanguage(sh::Language_GLSL);
+
+	factory->loadAllFiles();
+
+	....
+	your application runs here
+	....
+
+	// don't forget to delete on exit
+	delete factory;
+
+	\endcode
+
+	That's it! Now you can start defining materials. Refer to the page \ref defining-materials-shaders .
+
+*/

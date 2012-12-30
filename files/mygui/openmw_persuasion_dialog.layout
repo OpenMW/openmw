@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<MyGUI type="Layout">
+    <Widget type="Window" skin="MW_Dialog" layer="Windows" position="0 0 220 194" name="_Main">
+
+        <Widget type="TextBox" skin="NormalText" position="0 6 220 24">
+            <Property key="Caption" value="#{sPersuasionMenuTitle}"/>
+            <Property key="TextAlign" value="Center"/>
+        </Widget>
+
+        <Widget type="TextBox" skin="SandText" position="8 156 208 24" name="GoldLabel">
+            <Property key="TextAlign" value="Left VCenter"/>
+        </Widget>
+
+        <Widget type="Widget" skin="MW_Box" position="8 32 196 115">
+            <Widget type="AutoSizedButton" skin="SandTextButton" position="4 0 0 18" name="AdmireButton">
+                <Property key="Caption" value="#{sAdmire}"/>
+                <Property key="TextAlign" value="Left"/>
+            </Widget>
+            <Widget type="AutoSizedButton" skin="SandTextButton" position="4 18 0 18" name="IntimidateButton">
+                <Property key="Caption" value="#{sIntimidate}"/>
+                <Property key="TextAlign" value="Left"/>
+            </Widget>
+            <Widget type="AutoSizedButton" skin="SandTextButton" position="4 36 0 18" name="TauntButton">
+                <Property key="Caption" value="#{sTaunt}"/>
+                <Property key="TextAlign" value="Left"/>
+            </Widget>
+            <Widget type="AutoSizedButton" skin="SandTextButton" position="4 54 0 18" name="Bribe10Button">
+                <Property key="Caption" value="#{sBribe 10 Gold}"/>
+                <Property key="TextAlign" value="Left"/>
+            </Widget>
+            <Widget type="AutoSizedButton" skin="SandTextButton" position="4 72 0 18" name="Bribe100Button">
+                <Property key="Caption" value="#{sBribe 100 Gold}"/>
+                <Property key="TextAlign" value="Left"/>
+            </Widget>
+            <Widget type="AutoSizedButton" skin="SandTextButton" position="4 90 0 18" name="Bribe1000Button">
+                <Property key="Caption" value="#{sBribe 1000 Gold}"/>
+                <Property key="TextAlign" value="Left"/>
+            </Widget>
+        </Widget>
+
+        <Widget type="AutoSizedButton" skin="MW_Button" position="204 156 0 24" name="CancelButton">
+            <Property key="ExpandDirection" value="Left"/>
+            <Property key="Caption" value="#{sCancel}"/>
+        </Widget>
+
+    </Widget>
+
+</MyGUI>

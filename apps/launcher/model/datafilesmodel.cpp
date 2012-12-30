@@ -2,6 +2,8 @@
 #include <QFileInfo>
 #include <QDir>
 
+#include <stdexcept>
+
 #include <components/esm/esmreader.hpp>
 
 #include "esm/esmfile.hpp"
@@ -270,7 +272,7 @@ void DataFilesModel::addMasters(const QString &path)
     foreach (const QString &path, dir.entryList()) {
         try {
             ESM::ESMReader fileReader;
-            fileReader.setEncoding(mEncoding.toStdString());
+            fileReader.setEncoding(ToUTF8::calculateEncoding(mEncoding.toStdString()));
             fileReader.open(dir.absoluteFilePath(path).toStdString());
 
             ESM::ESMReader::MasterList mlist = fileReader.getMasters();
@@ -333,7 +335,7 @@ void DataFilesModel::addPlugins(const QString &path)
 
         try {
             ESM::ESMReader fileReader;
-            fileReader.setEncoding(mEncoding.toStdString());
+            fileReader.setEncoding(ToUTF8::calculateEncoding(mEncoding.toStdString()));
             fileReader.open(dir.absoluteFilePath(path).toStdString());
 
             ESM::ESMReader::MasterList mlist = fileReader.getMasters();

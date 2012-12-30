@@ -32,7 +32,7 @@ struct Apparatus
     };
 
     AADTstruct mData;
-    std::string mModel, mIcon, mScript, mName;
+    std::string mId, mModel, mIcon, mScript, mName;
 
     void load(ESMReader &esm);
     void save(ESMWriter &esm);

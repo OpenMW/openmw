@@ -5,15 +5,18 @@
 #include <stdexcept>
 
 #include <components/interpreter/types.hpp>
-#include <components/esm_store/store.hpp>
+#include "../mwworld/esmstore.hpp"
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/scriptmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
+#include "../mwbase/inputmanager.hpp"
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/player.hpp"
+
+#include "../mwmechanics/npcstats.hpp"
 
 #include "locals.hpp"
 #include "globalscripts.hpp"
@@ -174,6 +177,146 @@ namespace MWScript
             MWBase::Environment::get().getWorld()->getGlobalVariable (name).mFloat = value;
     }
 
+    std::vector<std::string> InterpreterContext::getGlobals () const
+    {
+        MWBase::World *world = MWBase::Environment::get().getWorld();    
+        return world->getGlobals();
+
+    }
+    
+    char InterpreterContext::getGlobalType (const std::string& name) const
+    {
+        MWBase::World *world = MWBase::Environment::get().getWorld();    
+        return world->getGlobalVariableType(name);
+    }
+    
+    std::string InterpreterContext::getActionBinding(const std::string& action) const
+    {
+        std::vector<int> actions = MWBase::Environment::get().getInputManager()->getActionSorting ();
+        for (std::vector<int>::const_iterator it = actions.begin(); it != actions.end(); ++it)
+        {
+            std::string desc = MWBase::Environment::get().getInputManager()->getActionDescription (*it);
+            if(desc == "")
+                continue;
+
+            if(desc == action)
+                return MWBase::Environment::get().getInputManager()->getActionBindingName (*it);
+        }
+
+        return "None";
+    }
+    
+    std::string InterpreterContext::getNPCName() const
+    {
+        ESM::NPC npc = *mReference.get<ESM::NPC>()->mBase;
+        return npc.mName;
+    }
+    
+    std::string InterpreterContext::getNPCRace() const
+    {
+        ESM::NPC npc = *mReference.get<ESM::NPC>()->mBase;
+        return npc.mRace;
+    }
+    
+    std::string InterpreterContext::getNPCClass() const
+    {
+        ESM::NPC npc = *mReference.get<ESM::NPC>()->mBase;
+        return npc.mClass;
+    }
+
+    std::string InterpreterContext::getNPCFaction() const
+    {
+        ESM::NPC npc = *mReference.get<ESM::NPC>()->mBase;
+        return npc.mFaction;
+    }
+
+    std::string InterpreterContext::getNPCRank() const
+    {
+        std::map<std::string, int> ranks = MWWorld::Class::get (mReference).getNpcStats (mReference).getFactionRanks();
+        std::map<std::string, int>::const_iterator it = ranks.begin();
+
+        MWBase::World *world = MWBase::Environment::get().getWorld();
+        const MWWorld::ESMStore &store = world->getStore();
+        const ESM::Faction *faction = store.get<ESM::Faction>().find(it->first);
+    
+        return faction->mRanks[it->second];
+    }
+
+    std::string InterpreterContext::getPCName() const
+    {
+        MWBase::World *world = MWBase::Environment::get().getWorld();
+        ESM::NPC player = *world->getPlayer().getPlayer().get<ESM::NPC>()->mBase;
+        return player.mName;
+    }
+
+    std::string InterpreterContext::getPCRace() const
+    {
+        MWBase::World *world = MWBase::Environment::get().getWorld();
+        ESM::NPC player = *world->getPlayer().getPlayer().get<ESM::NPC>()->mBase;
+        return player.mRace;
+    }
+
+    std::string InterpreterContext::getPCClass() const
+    {
+        MWBase::World *world = MWBase::Environment::get().getWorld();
+        ESM::NPC player = *world->getPlayer().getPlayer().get<ESM::NPC>()->mBase;
+        return player.mClass;
+    }
+    
+    std::string InterpreterContext::getPCRank() const
+    {
+        MWBase::World *world = MWBase::Environment::get().getWorld();
+        MWWorld::Ptr player = world->getPlayer().getPlayer();
+        
+        std::string factionId = MWWorld::Class::get (mReference).getNpcStats (mReference).getFactionRanks().begin()->first;
+        
+        std::map<std::string, int> ranks = MWWorld::Class::get (player).getNpcStats (player).getFactionRanks();
+        std::map<std::string, int>::const_iterator it = ranks.begin();
+
+        const MWWorld::ESMStore &store = world->getStore();
+        const ESM::Faction *faction = store.get<ESM::Faction>().find(factionId);
+        
+        if(it->second < 0 || it->second > 9) // there are only 10 ranks
+            return "";
+    
+        return faction->mRanks[it->second];
+    }  
+
+    std::string InterpreterContext::getPCNextRank() const
+    {
+        MWBase::World *world = MWBase::Environment::get().getWorld();
+        MWWorld::Ptr player = world->getPlayer().getPlayer();
+        
+        std::string factionId = MWWorld::Class::get (mReference).getNpcStats (mReference).getFactionRanks().begin()->first;
+        
+        std::map<std::string, int> ranks = MWWorld::Class::get (player).getNpcStats (player).getFactionRanks();
+        std::map<std::string, int>::const_iterator it = ranks.begin();
+
+        const MWWorld::ESMStore &store = world->getStore();
+        const ESM::Faction *faction = store.get<ESM::Faction>().find(factionId);
+        
+        if(it->second < 0 || it->second > 9)
+            return "";
+         
+        if(it->second <= 8) // If player is at max rank, there is no next rank
+            return faction->mRanks[it->second + 1];
+        else
+            return faction->mRanks[it->second];
+    }
+    
+    int InterpreterContext::getPCBounty() const
+    {
+        MWBase::World *world = MWBase::Environment::get().getWorld();
+        MWWorld::Ptr player = world->getPlayer().getPlayer();
+        return MWWorld::Class::get (player).getNpcStats (player).getBounty();
+    }
+ 
+    std::string InterpreterContext::getCurrentCellName() const
+    {
+        MWBase::World *world = MWBase::Environment::get().getWorld();
+        return world->getCurrentCellName();
+    }
+
     bool InterpreterContext::isScriptRunning (const std::string& name) const
     {
         return MWBase::Environment::get().getScriptManager()->getGlobalScripts().isRunning (name);
@@ -278,7 +421,7 @@ namespace MWScript
         int index = MWBase::Environment::get().getScriptManager()->getLocalIndex (scriptId, name, 's');
 
         ptr.getRefData().setLocals (
-            *MWBase::Environment::get().getWorld()->getStore().scripts.find (scriptId));
+            *MWBase::Environment::get().getWorld()->getStore().get<ESM::Script>().find (scriptId));
         return ptr.getRefData().getLocals().mShorts[index];
     }
 
@@ -291,7 +434,7 @@ namespace MWScript
         int index = MWBase::Environment::get().getScriptManager()->getLocalIndex (scriptId, name, 'l');
 
         ptr.getRefData().setLocals (
-            *MWBase::Environment::get().getWorld()->getStore().scripts.find (scriptId));
+            *MWBase::Environment::get().getWorld()->getStore().get<ESM::Script>().find (scriptId));
         return ptr.getRefData().getLocals().mLongs[index];
     }
 
@@ -304,7 +447,7 @@ namespace MWScript
         int index = MWBase::Environment::get().getScriptManager()->getLocalIndex (scriptId, name, 'f');
 
         ptr.getRefData().setLocals (
-            *MWBase::Environment::get().getWorld()->getStore().scripts.find (scriptId));
+            *MWBase::Environment::get().getWorld()->getStore().get<ESM::Script>().find (scriptId));
         return ptr.getRefData().getLocals().mFloats[index];
     }
 
@@ -317,7 +460,7 @@ namespace MWScript
         int index = MWBase::Environment::get().getScriptManager()->getLocalIndex (scriptId, name, 's');
 
         ptr.getRefData().setLocals (
-            *MWBase::Environment::get().getWorld()->getStore().scripts.find (scriptId));
+            *MWBase::Environment::get().getWorld()->getStore().get<ESM::Script>().find (scriptId));
         ptr.getRefData().getLocals().mShorts[index] = value;
     }
 
@@ -330,7 +473,7 @@ namespace MWScript
         int index = MWBase::Environment::get().getScriptManager()->getLocalIndex (scriptId, name, 'l');
 
         ptr.getRefData().setLocals (
-            *MWBase::Environment::get().getWorld()->getStore().scripts.find (scriptId));
+            *MWBase::Environment::get().getWorld()->getStore().get<ESM::Script>().find (scriptId));
         ptr.getRefData().getLocals().mLongs[index] = value;
     }
 
@@ -343,7 +486,7 @@ namespace MWScript
         int index = MWBase::Environment::get().getScriptManager()->getLocalIndex (scriptId, name, 'f');
 
         ptr.getRefData().setLocals (
-            *MWBase::Environment::get().getWorld()->getStore().scripts.find (scriptId));
+            *MWBase::Environment::get().getWorld()->getStore().get<ESM::Script>().find (scriptId));
         ptr.getRefData().getLocals().mFloats[index] = value;
     }
 

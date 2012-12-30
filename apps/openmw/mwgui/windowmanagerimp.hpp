@@ -29,6 +29,11 @@ namespace Compiler
     class Extensions;
 }
 
+namespace Translation
+{
+    class Storage;
+}
+
 namespace OEngine
 {
     namespace GUI
@@ -76,7 +81,8 @@ namespace MWGui
 
     WindowManager(const Compiler::Extensions& extensions, int fpsLevel, bool newGame,
                   OEngine::Render::OgreRenderer *mOgre, const std::string& logpath,
-                  const std::string& cacheDir, bool consoleOnlyScripts);
+                  const std::string& cacheDir, bool consoleOnlyScripts,
+                  Translation::Storage& translationDataStorage);
     virtual ~WindowManager();
 
     /**
@@ -250,6 +256,7 @@ namespace MWGui
     SpellCreationDialog* mSpellCreationDialog;
     EnchantingDialog* mEnchantingDialog;
     TrainingWindow* mTrainingWindow;
+    Translation::Storage& mTranslationDataStorage;
 
     CharacterCreation* mCharGen;
 
@@ -261,7 +268,6 @@ namespace MWGui
 
     /// \todo get rid of this stuff. Move it to the respective UI element classes, if needed.
     // Various stats about player as needed by window manager
-    ESM::Class mPlayerClass;
     std::string mPlayerName;
     std::string mPlayerRaceId;
     std::map<int, MWMechanics::Stat<int> > mPlayerAttributes;

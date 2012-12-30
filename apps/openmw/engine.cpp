@@ -8,6 +8,7 @@
 
 #include <components/bsa/bsa_archive.hpp>
 #include <components/files/configurationmanager.hpp>
+#include <components/translation/translation.hpp>
 #include <components/nifoverrides/nifoverrides.hpp>
 
 #include <components/nifbullet/bullet_nif_loader.hpp>
@@ -20,6 +21,7 @@
 
 #include "mwscript/scriptmanagerimp.hpp"
 #include "mwscript/extensions.hpp"
+#include "mwscript/interpretercontext.hpp"
 
 #include "mwsound/soundmanagerimp.hpp"
 
@@ -101,7 +103,7 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
             MWBase::Environment::get().getWorld()->doPhysics (movement, mEnvironment.getFrameDuration());
 
         // update world
-        MWBase::Environment::get().getWorld()->update (evt.timeSinceLastFrame);
+        MWBase::Environment::get().getWorld()->update (evt.timeSinceLastFrame, MWBase::Environment::get().getWindowManager()->isGuiMode());
 
         // update GUI
         Ogre::RenderWindow* window = mOgre->getWindow();
@@ -333,12 +335,15 @@ void OMW::Engine::go()
     mEnvironment.setWorld (new MWWorld::World (*mOgre, mFileCollections, mMaster,
         mResDir, mCfgMgr.getCachePath(), mNewGame, mEncoding, mFallbackMap));
 
+    //Load translation data
+    mTranslationDataStorage.loadTranslationData(mFileCollections, mMaster);
+
     // Create window manager - this manages all the MW-specific GUI windows
     MWScript::registerExtensions (mExtensions);
 
     mEnvironment.setWindowManager (new MWGui::WindowManager(
         mExtensions, mFpsLevel, mNewGame, mOgre, mCfgMgr.getLogPath().string() + std::string("/"),
-        mCfgMgr.getCachePath ().string(), mScriptConsoleMode));
+        mCfgMgr.getCachePath ().string(), mScriptConsoleMode, mTranslationDataStorage));
 
     // Create sound system
     mEnvironment.setSoundManager (new MWSound::SoundManager(mUseSound));
@@ -355,7 +360,7 @@ void OMW::Engine::go()
 
     // Create dialog system
     mEnvironment.setJournal (new MWDialogue::Journal);
-    mEnvironment.setDialogueManager (new MWDialogue::DialogueManager (mExtensions));
+    mEnvironment.setDialogueManager (new MWDialogue::DialogueManager (mExtensions, mVerboseScripts));
 
     // Sets up the input system
     mEnvironment.setInputManager (new MWInput::InputManager (*mOgre,
@@ -486,9 +491,10 @@ void OMW::Engine::showFPS(int level)
     mFpsLevel = level;
 }
 
-void OMW::Engine::setEncoding(const std::string& encoding)
+void OMW::Engine::setEncoding(const ToUTF8::FromType& encoding)
 {
     mEncoding = encoding;
+    mTranslationDataStorage.setEncoding (encoding);
 }
 
 void OMW::Engine::setFallbackValues(std::map<std::string,std::string> fallbackMap)

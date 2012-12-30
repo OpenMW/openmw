@@ -34,7 +34,7 @@ add_openmw_dir (mwgui
     )
 
 add_openmw_dir (mwdialogue
-    dialoguemanagerimp journalimp journalentry quest topic
+    dialoguemanagerimp journalimp journalentry quest topic filter selectwrapper
     )
 
 add_openmw_dir (mwscript
@@ -53,6 +53,7 @@ add_openmw_dir (mwworld
     containerstore actiontalk actiontake manualref player cellfunctors failedaction
     cells localscripts customdata weather inventorystore ptr actionopen actionread
     actionequip timestamp actionalchemy cellstore actionapply actioneat
+    esmstore store recordcmp
     )
 
 add_openmw_dir (mwclass
@@ -62,7 +63,7 @@ add_openmw_dir (mwclass
 
 add_openmw_dir (mwmechanics
     mechanicsmanagerimp stat creaturestats magiceffects movement actors drawstate spells
-    activespells npcstats aipackage aisequence alchemy
+    activespells npcstats aipackage aisequence alchemy aiwander aitravel aifollow aiescort aiactivate
     )
 
 add_openmw_dir (mwbase

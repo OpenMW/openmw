@@ -5,6 +5,7 @@
 
 #include <components/compiler/extensions.hpp>
 #include <components/files/collections.hpp>
+#include <components/translation/translation.hpp>
 
 #include "mwbase/environment.hpp"
 
@@ -59,7 +60,7 @@ namespace OMW
     class Engine : private Ogre::FrameListener
     {
             MWBase::Environment mEnvironment;
-            std::string mEncoding;
+            ToUTF8::FromType mEncoding;
             Files::PathContainer mDataDirs;
             boost::filesystem::path mResDir;
             OEngine::Render::OgreRenderer *mOgre;
@@ -79,9 +80,9 @@ namespace OMW
             Compiler::Extensions mExtensions;
             Compiler::Context *mScriptContext;
 
-
             Files::Collections mFileCollections;
             bool mFSStrict;
+            Translation::Storage mTranslationDataStorage;
 
             // not implemented
             Engine (const Engine&);
@@ -154,7 +155,7 @@ namespace OMW
             void setCompileAll (bool all);
 
             /// Font encoding
-            void setEncoding(const std::string& encoding);
+            void setEncoding(const ToUTF8::FromType& encoding);
 
             void setAnimationVerbose(bool animverbose);
 

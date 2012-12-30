@@ -226,9 +226,14 @@ namespace MWGui
             if (start == "splash")
                 splash.push_back (*it);
         }
-        std::string randomSplash = splash[rand() % splash.size()];
+        if (splash.size())
+        {
+            std::string randomSplash = splash[rand() % splash.size()];
 
-        Ogre::TexturePtr tex = Ogre::TextureManager::getSingleton ().load (randomSplash, "General");
-        mBackgroundImage->setImageTexture (randomSplash);
+            Ogre::TexturePtr tex = Ogre::TextureManager::getSingleton ().load (randomSplash, "General");
+            mBackgroundImage->setImageTexture (randomSplash);
+        }
+        else
+            std::cerr << "No loading screens found!" << std::endl;
     }
 }

@@ -36,7 +36,7 @@ struct Tool
 
     Data mData;
     Type mType;
-    std::string mName, mModel, mIcon, mScript;
+    std::string mId, mName, mModel, mIcon, mScript;
 
     void load(ESMReader &esm);
     void save(ESMWriter &esm);

@@ -88,7 +88,7 @@ namespace MWWorld
 
             void insertCell (Ptr::CellStore &cell);
 
-            void update (float duration);
+            void update (float duration, bool paused);
 
             void addObjectToScene (const Ptr& ptr);
             ///< Add an object that already exists in the world model to the scene.

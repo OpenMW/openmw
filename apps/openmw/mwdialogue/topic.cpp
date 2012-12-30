@@ -1,7 +1,7 @@
 
 #include "topic.hpp"
 
-#include <components/esm_store/store.hpp>
+#include "../mwworld/esmstore.hpp"
 
 namespace MWDialogue
 {

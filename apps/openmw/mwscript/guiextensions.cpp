@@ -9,8 +9,7 @@
 #include <components/interpreter/runtime.hpp>
 #include <components/interpreter/opcodes.hpp>
 
-#include <components/esm_store/store.hpp>
-#include <components/esm_store/reclists.hpp>
+#include "../mwworld/esmstore.hpp"
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
@@ -109,13 +108,20 @@ namespace MWScript
                 // "Will match complete or partial cells, so ShowMap, "Vivec" will show cells Vivec and Vivec, Fred's House as well."
                 // http://www.uesp.net/wiki/Tes3Mod:ShowMap
 
-                const ESMS::CellList::ExtCells& extCells = MWBase::Environment::get().getWorld ()->getStore ().cells.extCells;
-                for (ESMS::CellList::ExtCells::const_iterator it = extCells.begin(); it != extCells.end(); ++it)
+                const MWWorld::Store<ESM::Cell> &cells =
+                    MWBase::Environment::get().getWorld()->getStore().get<ESM::Cell>();
+
+                MWWorld::Store<ESM::Cell>::iterator it = cells.extBegin();
+                for (; it != cells.extEnd(); ++it)
                 {
-                    std::string name = it->second->mName;
+                    std::string name = it->mName;
                     boost::algorithm::to_lower(name);
                     if (name.find(cell) != std::string::npos)
-                        MWBase::Environment::get().getWindowManager()->addVisitedLocation (it->second->mName, it->first.first, it->first.second);
+                        MWBase::Environment::get().getWindowManager()->addVisitedLocation (
+                            it->mName,
+                            it->getGridX(),
+                            it->getGridY()
+                        );
                 }
             }
         };
@@ -126,12 +132,19 @@ namespace MWScript
 
             virtual void execute (Interpreter::Runtime& runtime)
             {
-                const ESMS::CellList::ExtCells& extCells = MWBase::Environment::get().getWorld ()->getStore ().cells.extCells;
-                for (ESMS::CellList::ExtCells::const_iterator it = extCells.begin(); it != extCells.end(); ++it)
+                const MWWorld::Store<ESM::Cell> &cells =
+                    MWBase::Environment::get().getWorld ()->getStore().get<ESM::Cell>();
+
+                MWWorld::Store<ESM::Cell>::iterator it = cells.extBegin();
+                for (; it != cells.extEnd(); ++it)
                 {
-                    std::string name = it->second->mName;
+                    std::string name = it->mName;
                     if (name != "")
-                        MWBase::Environment::get().getWindowManager()->addVisitedLocation (name, it->first.first, it->first.second);
+                        MWBase::Environment::get().getWindowManager()->addVisitedLocation (
+                            name,
+                            it->getGridX(),
+                            it->getGridY()
+                        );
                 }
             }
         };
@@ -168,7 +181,7 @@ opcodeEnableStatsReviewMenu);
             extensions.registerInstruction ("enablemapmenu", "", opcodeEnableMapMenu);
             extensions.registerInstruction ("enablestatsmenu", "", opcodeEnableStatsMenu);
 
-            extensions.registerInstruction ("enablerestmenu", "", opcodeEnableRest);
+            extensions.registerInstruction ("enablerest", "", opcodeEnableRest);
             extensions.registerInstruction ("enablelevelupmenu", "", opcodeEnableRest);
 
             extensions.registerInstruction ("showrestmenu", "", opcodeShowRestMenu);

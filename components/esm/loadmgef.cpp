@@ -1,5 +1,7 @@
 #include "loadmgef.hpp"
 
+#include <stdexcept>
+
 #include <boost/lexical_cast.hpp>
 
 #include "esmreader.hpp"

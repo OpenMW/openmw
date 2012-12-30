@@ -7,6 +7,7 @@
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
+#include "../mwbase/mechanicsmanager.hpp"
 
 #include "../mwworld/player.hpp"
 
@@ -73,10 +74,13 @@ namespace MWGui
         MWWorld::Ptr player = MWBase::Environment::get().getWorld ()->getPlayer ().getPlayer ();
         MWMechanics::NpcStats& pcStats = MWWorld::Class::get(player).getNpcStats (player);
 
+        const MWWorld::Store<ESM::GameSetting> &gmst =
+            MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+
         for (int i=0; i<3; ++i)
         {
-            /// \todo mercantile skill
-            int price = pcStats.getSkill (bestSkills[i].first).getBase() * MWBase::Environment::get().getWorld ()->getStore ().gameSettings.find("iTrainingMod")->getInt ();
+            int price = MWBase::Environment::get().getMechanicsManager()->getBarterOffer
+                    (mPtr,pcStats.getSkill (bestSkills[i].first).getBase() * gmst.find("iTrainingMod")->getInt (),true);
 
             std::string skin = (price > mWindowManager.getInventoryWindow ()->getPlayerGold ()) ? "SandTextGreyedOut" : "SandTextButton";
 
@@ -113,8 +117,11 @@ namespace MWGui
         MWWorld::Ptr player = MWBase::Environment::get().getWorld ()->getPlayer ().getPlayer ();
         MWMechanics::NpcStats& pcStats = MWWorld::Class::get(player).getNpcStats (player);
 
-        /// \todo mercantile skill
-        int price = pcStats.getSkill (skillId).getBase() * MWBase::Environment::get().getWorld ()->getStore ().gameSettings.find("iTrainingMod")->getInt ();
+        const MWWorld::ESMStore &store =
+            MWBase::Environment::get().getWorld()->getStore();
+
+        int price = pcStats.getSkill (skillId).getBase() * store.get<ESM::GameSetting>().find("iTrainingMod")->getInt ();
+        price = MWBase::Environment::get().getMechanicsManager()->getBarterOffer(mPtr,price,true);
 
         if (mWindowManager.getInventoryWindow()->getPlayerGold()<price)
             return;
@@ -128,8 +135,9 @@ namespace MWGui
 
         // increase skill
         MWWorld::LiveCellRef<ESM::NPC> *playerRef = player.get<ESM::NPC>();
-        const ESM::Class *class_ = MWBase::Environment::get().getWorld()->getStore().classes.find (
-            playerRef->base->mClass);
+
+        const ESM::Class *class_ =
+            store.get<ESM::Class>().find(playerRef->mBase->mClass);
         pcStats.increaseSkill (skillId, *class_, true);
 
         // remove gold

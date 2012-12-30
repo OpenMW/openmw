@@ -41,7 +41,7 @@ struct Light
 
     LHDTstruct mData;
 
-    std::string mSound, mScript, mModel, mIcon, mName;
+    std::string mSound, mScript, mModel, mIcon, mName, mId;
 
     void load(ESMReader &esm);
     void save(ESMWriter &esm);

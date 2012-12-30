@@ -1,7 +1,12 @@
 #ifdef OPENMW_USE_FFMPEG
 
+
 #include "ffmpeg_decoder.hpp"
 
+// auto_ptr
+#include <memory>
+
+#include <stdexcept>
 
 namespace MWSound
 {
@@ -308,7 +313,12 @@ void FFmpeg_Decoder::close()
         mStreams.erase(mStreams.begin());
     }
     if(mFormatCtx)
+    {
+        AVIOContext* context = mFormatCtx->pb;
+        av_free(context);
+        mFormatCtx->pb = NULL;
         av_close_input_file(mFormatCtx);
+    }
     mFormatCtx = NULL;
 
     mDataStream.setNull();

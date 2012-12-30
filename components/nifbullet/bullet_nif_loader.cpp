@@ -69,7 +69,7 @@ btVector3 ManualBulletShapeLoader::getbtVector(Ogre::Vector3 &v)
 
 void ManualBulletShapeLoader::loadResource(Ogre::Resource *resource)
 {
-    cShape = static_cast<BulletShape *>(resource);
+    cShape = static_cast<OEngine::Physic::BulletShape *>(resource);
     resourceName = cShape->getName();
     cShape->mCollide = false;
     mBoundingBox = NULL;
@@ -314,8 +314,8 @@ void ManualBulletShapeLoader::handleNiTriShape(Nif::NiTriShape *shape, int flags
 void ManualBulletShapeLoader::load(const std::string &name,const std::string &group)
 {
     // Check if the resource already exists
-    Ogre::ResourcePtr ptr = BulletShapeManager::getSingleton().getByName(name, group);
+    Ogre::ResourcePtr ptr = OEngine::Physic::BulletShapeManager::getSingleton().getByName(name, group);
     if (!ptr.isNull())
         return;
-    BulletShapeManager::getSingleton().create(name,group,true,this);
+    OEngine::Physic::BulletShapeManager::getSingleton().create(name,group,true,this);
 }

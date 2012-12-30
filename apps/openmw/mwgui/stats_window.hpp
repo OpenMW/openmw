@@ -1,7 +1,7 @@
 #ifndef MWGUI_STATS_WINDOW_H
 #define MWGUI_STATS_WINDOW_H
 
-#include <components/esm_store/store.hpp>
+#include "../mwworld/esmstore.hpp"
 
 #include <sstream>
 #include <set>
@@ -38,8 +38,8 @@ namespace MWGui
             void setValue(const ESM::Skill::SkillEnum parSkill, const MWMechanics::Stat<float>& value);
 
             void configureSkills (const SkillList& major, const SkillList& minor);
-            void setReputation (int reputation) { this->mReputation = reputation; }
-            void setBounty (int bounty) { this->mBounty = bounty; }
+            void setReputation (int reputation) { if (reputation != mReputation) mChanged = true; this->mReputation = reputation; }
+            void setBounty (int bounty) { if (bounty != mBounty) mChanged = true; this->mBounty = bounty; }
             void updateSkillArea();
 
         private:
@@ -50,6 +50,7 @@ namespace MWGui
             MyGUI::Widget* addItem(const std::string& text, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
 
             void setFactions (const FactionList& factions);
+            void setExpelled (const std::set<std::string>& expelled);
             void setBirthSign (const std::string &signId);
 
             void onWindowResize(MyGUI::Window* window);
@@ -71,6 +72,7 @@ namespace MWGui
             std::string mBirthSignId;
             int mReputation, mBounty;
             std::vector<MyGUI::WidgetPtr> mSkillWidgets; //< Skills and other information
+            std::set<std::string> mExpelled;
 
             bool mChanged;
 

@@ -120,9 +120,10 @@ namespace MWGui
         int hour = MWBase::Environment::get().getWorld ()->getTimeStamp ().getHour ();
         bool pm = hour >= 12;
         if (hour >= 13) hour -= 12;
+        if (hour == 0) hour = 12;
 
         std::string dateTimeText =
-                boost::lexical_cast<std::string>(MWBase::Environment::get().getWorld ()->getDay ()+1) + " "
+                boost::lexical_cast<std::string>(MWBase::Environment::get().getWorld ()->getDay ()) + " "
                 + month + " (#{sDay} " + boost::lexical_cast<std::string>(MWBase::Environment::get().getWorld ()->getTimeStamp ().getDay ()+1)
                 + ") " + boost::lexical_cast<std::string>(hour) + " " + (pm ? "#{sSaveMenuHelp05}" : "#{sSaveMenuHelp04}");
 
@@ -203,6 +204,7 @@ namespace MWGui
         MWBase::Environment::get().getWorld ()->getFader ()->fadeIn(0.2);
         mProgressBar.setVisible (false);
         mWindowManager.removeGuiMode (GM_Rest);
+        mWindowManager.removeGuiMode (GM_RestBed);
         mWaiting = false;
 
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();

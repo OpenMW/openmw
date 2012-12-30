@@ -17,7 +17,7 @@ struct SOUNstruct
 struct Sound
 {
     SOUNstruct mData;
-    std::string mSound;
+    std::string mId, mSound;
 
     void load(ESMReader &esm);
     void save(ESMWriter &esm);

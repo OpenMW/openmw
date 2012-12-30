@@ -162,6 +162,11 @@ namespace MWWorld
         return false;
     }
 
+     bool Class::hasDetected (const MWWorld::Ptr& ptr, const MWWorld::Ptr& ptr2) const
+    {
+        return false;
+    }
+
     const Class& Class::get (const std::string& key)
     {
         std::map<std::string, boost::shared_ptr<Class> >::const_iterator iter = sClasses.find (key);
