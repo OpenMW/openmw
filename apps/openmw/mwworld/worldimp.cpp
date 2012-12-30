@@ -621,7 +621,7 @@ namespace MWWorld
         {
             if (isPlayer)
                 if (!newCell.isExterior())
-                    changeToInteriorCell(Misc::toLower(newCell.mCell->mName), pos);
+                    changeToInteriorCell(Misc::StringUtils::toLower(const_cast<std::string &> (newCell.mCell->mName)), pos);
                 else
                 {
                     int cellX = newCell.mCell->getGridX();

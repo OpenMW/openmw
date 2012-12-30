@@ -72,7 +72,7 @@ namespace MWScript
                     Interpreter::Type_Integer sum = 0;
 
                     for (MWWorld::ContainerStoreIterator iter (store.begin()); iter!=store.end(); ++iter)
-                        if (Misc::toLower(iter->getCellRef().mRefID) == Misc::toLower(item))
+                        if (Misc::StringUtils::toLower(iter->getCellRef().mRefID) == Misc::StringUtils::toLower(item))
                             sum += iter->getRefData().getCount();
 
                     runtime.push (sum);
@@ -105,7 +105,7 @@ namespace MWScript
                     for (MWWorld::ContainerStoreIterator iter (store.begin()); iter!=store.end() && count;
                         ++iter)
                     {
-                        if (Misc::toLower(iter->getCellRef().mRefID) == Misc::toLower(item))
+                        if (Misc::StringUtils::toLower(iter->getCellRef().mRefID) == Misc::StringUtils::toLower(item))
                         {
                             itemName = MWWorld::Class::get(*iter).getName(*iter);
                             
@@ -163,7 +163,7 @@ namespace MWScript
                     MWWorld::ContainerStoreIterator it = invStore.begin();
                     for (; it != invStore.end(); ++it)
                     {
-                        if (toLower(it->getCellRef().mRefID) == toLower(item))
+                        if (Misc::StringUtils::toLower(it->getCellRef().mRefID) == Misc::StringUtils::toLower(item))
                             break;
                     }
                     if (it == invStore.end())
@@ -263,7 +263,7 @@ namespace MWScript
                     for (int slot = 0; slot < MWWorld::InventoryStore::Slots; ++slot)
                     {
                         MWWorld::ContainerStoreIterator it = invStore.getSlot (slot);
-                        if (it != invStore.end() && toLower(it->getCellRef().mRefID) == toLower(item))
+                        if (it != invStore.end() && Misc::StringUtils::toLower(it->getCellRef().mRefID) == Misc::StringUtils::toLower(item))
                         {
                             runtime.push(1);
                             return;
@@ -281,8 +281,9 @@ namespace MWScript
                 virtual void execute(Interpreter::Runtime &runtime)
                 {
                     MWWorld::Ptr ptr = R()(runtime);
-
-                    std::string creatureName = toLower (runtime.getStringLiteral (runtime[0].mInteger));
+      
+		     const std::string &name = runtime.getStringLiteral (runtime[0].mInteger);
+                    std::string creatureName = Misc::StringUtils::toLower (const_cast<std::string &>(name));
                     runtime.pop();
 
                     MWWorld::InventoryStore& invStore = MWWorld::Class::get(ptr).getInventoryStore (ptr);
@@ -290,7 +291,7 @@ namespace MWScript
                          it != invStore.end(); ++it)
                     {
 
-                        if (toLower(it->getCellRef().mSoul) == toLower(creatureName))
+                        if (Misc::StringUtils::toLower(it->getCellRef().mSoul) == Misc::StringUtils::toLower(creatureName))
                         {
                             runtime.push(1);
                             return;

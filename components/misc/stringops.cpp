@@ -67,30 +67,4 @@ bool iends(const char* str1, const char* str2)
   return strcasecmp(str2, str1+len1-len2) == 0;
 }
 
-std::string toLower (const std::string& name)
-{
-        std::string lowerCase;
-
-        std::transform (name.begin(), name.end(), std::back_inserter (lowerCase),
-            (int(*)(int)) std::tolower);
-
-        return lowerCase;
-}
-
-bool stringCompareNoCase (std::string first, std::string second)
-{
-        unsigned int i=0;
-        while ( (i<first.length()) && (i<second.length()) )
-        {
-            if (tolower(first[i])<tolower(second[i])) return true;
-            else if (tolower(first[i])>tolower(second[i])) return false;
-            ++i;
-        }
-        if (first.length()<second.length())
-            return true;
-        else
-            return false;
-}
-
-
 }
