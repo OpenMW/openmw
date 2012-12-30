@@ -15,8 +15,7 @@ namespace MWGui
         public:
             JournalWindow(MWBase::WindowManager& parWindowManager);
             virtual void open();
-
-            virtual void setVisible(bool visible); // only used to play close sound
+            virtual void close();
 
         private:
             void displayLeftText(std::string text);
@@ -41,7 +40,6 @@ namespace MWGui
             std::vector<std::string> mLeftPages;
             std::vector<std::string> mRightPages;
             int mPageNumber; //store the number of the current left page
-            bool mVisible;
     };
 
 }
