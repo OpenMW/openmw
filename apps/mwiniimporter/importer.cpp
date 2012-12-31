@@ -146,13 +146,6 @@ MwIniImporter::MwIniImporter()
         "FontColor:color_negative",
         "FontColor:color_count",
 
-        // cursors
-        "Cursors:Cursor 0",
-        "Cursors:Cursor 1",
-        "Cursors:Cursor 2",
-        "Cursors:Cursor 3",
-        "Cursors:Cursor 4",
-
         // level up messages
         "Level Up:Level2",
         "Level Up:Level3",
