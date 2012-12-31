@@ -660,10 +660,19 @@ MwIniImporter::multistrmap MwIniImporter::loadIniFile(std::string filename) {
     std::string line;
     while (std::getline(file, line)) {
 
+        // unify Unix-style and Windows file ending
+        if (!(line.empty()) && (line[line.length()-1]) == '\r') {
+            line = line.substr(0, line.length()-1);
+        }
+
         if(line[0] == '[') {
-            if(line.length() > 2) {
-                section = line.substr(1, line.length()-2);
+            int pos = line.find(']');
+            if(pos < 2) {
+                std::cout << "Warning: ini file wrongly formatted (" << line << "). Line ignored." << std::endl;
+                continue;
             }
+
+            section = line.substr(1, line.find(']')-1);
             continue;
         }
 
