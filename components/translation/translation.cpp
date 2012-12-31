@@ -81,17 +81,7 @@ namespace Translation
 
     std::string Storage::topicID(const std::string& phrase) const
     {
-        std::string result;
-
-        //seeking for the standard phrase form
-        std::map<std::string, std::string>::const_iterator phraseFormsIterator =
-            mPhraseForms.find(phrase);
-
-        if (phraseFormsIterator != mPhraseForms.end())
-            result = phraseFormsIterator->second;
-        else
-            result = phrase;
-
+        std::string result = topicStandardForm(phrase);
 
         //seeking for the topic ID
         std::map<std::string, std::string>::const_iterator topicIDIterator =
@@ -103,8 +93,26 @@ namespace Translation
         return result;
     }
 
+    std::string Storage::topicStandardForm(const std::string& phrase) const
+    {
+        std::map<std::string, std::string>::const_iterator phraseFormsIterator =
+            mPhraseForms.find(phrase);
+
+        if (phraseFormsIterator != mPhraseForms.end())
+            return phraseFormsIterator->second;
+        else
+            return phrase;
+    }
+
     void Storage::setEncoding (const ToUTF8::FromType& encoding)
     {
         mEncoding = encoding;
+    }
+
+    bool Storage::hasTranslation() const
+    {
+        return !mCellNamesTranslations.empty() ||
+               !mTopicIDs.empty() ||
+               !mPhraseForms.empty();
     }
 }

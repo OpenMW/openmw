@@ -16,7 +16,12 @@ namespace Translation
         std::string translateCellName(const std::string& cellName) const;
         std::string topicID(const std::string& phrase) const;
 
+        // Standard form usually means nominative case
+        std::string topicStandardForm(const std::string& phrase) const;
+
         void setEncoding (const ToUTF8::FromType& encoding);
+
+        bool hasTranslation() const;
 
     private:
         typedef std::map<std::string, std::string> ContainerType;
@@ -30,7 +35,7 @@ namespace Translation
 
 
         ToUTF8::FromType mEncoding;
-        std::map<std::string, std::string> mCellNamesTranslations, mTopicIDs, mPhraseForms;
+        ContainerType mCellNamesTranslations, mTopicIDs, mPhraseForms;
     };
 }
 
