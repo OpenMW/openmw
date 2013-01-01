@@ -360,7 +360,7 @@ void OMW::Engine::go()
 
     // Create dialog system
     mEnvironment.setJournal (new MWDialogue::Journal);
-    mEnvironment.setDialogueManager (new MWDialogue::DialogueManager (mExtensions, mVerboseScripts));
+    mEnvironment.setDialogueManager (new MWDialogue::DialogueManager (mExtensions, mVerboseScripts, mTranslationDataStorage));
 
     // Sets up the input system
     mEnvironment.setInputManager (new MWInput::InputManager (*mOgre,

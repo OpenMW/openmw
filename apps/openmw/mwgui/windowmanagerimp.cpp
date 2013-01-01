@@ -1055,3 +1055,8 @@ void WindowManager::startTraining(MWWorld::Ptr actor)
 {
     mTrainingWindow->startTraining(actor);
 }
+
+const Translation::Storage& WindowManager::getTranslationDataStorage() const
+{
+    return mTranslationDataStorage;
+}

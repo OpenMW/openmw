@@ -225,6 +225,8 @@ namespace MWGui
     virtual void startEnchanting(MWWorld::Ptr actor);
     virtual void startTraining(MWWorld::Ptr actor);
 
+    virtual const Translation::Storage& getTranslationDataStorage() const;
+
   private:
     OEngine::GUI::MyGUIManager *mGuiManager;
     HUD *mHud;

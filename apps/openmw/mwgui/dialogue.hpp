@@ -93,12 +93,18 @@ namespace MWGui
 
         virtual void onReferenceUnavailable();
 
+        struct HyperLink
+        {
+            size_t mLength;
+            std::string mTrueValue;
+        };
+
     private:
         void updateOptions();
         /**
         *Helper function that add topic keyword in blue in a text.
         */
-        std::string parseText(std::string text);
+        std::string parseText(const std::string& text);
 
         int mServices;
 
@@ -110,6 +116,8 @@ namespace MWGui
         MyGUI::EditPtr     mDispositionText;
 
         PersuasionDialog mPersuasionDialog;
+
+        std::map<size_t, HyperLink> mHyperLinks;
     };
 }
 #endif
