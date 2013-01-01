@@ -132,7 +132,6 @@ DialogueWindow::DialogueWindow(MWBase::WindowManager& parWindowManager)
     , mPersuasionDialog(parWindowManager)
     , mEnabled(false)
     , mServices(0)
-    , mWindowManager(parWindowManager)
 {
     // Centre dialog
     center();
@@ -402,7 +401,8 @@ std::string DialogueWindow::parseText(const std::string& text)
                 standardForm.append("*");
 
             standardForm =
-              mWindowManager.getTranslationDataStorage().topicStandardForm(standardForm);
+                MWBase::Environment::get().getWindowManager()->
+                getTranslationDataStorage().topicStandardForm(standardForm);
 
             if( std::find(topics.begin(), topics.end(), std::string(standardForm) ) != topics.end() )
             {
@@ -436,6 +436,11 @@ std::string DialogueWindow::parseText(const std::string& text)
 void DialogueWindow::addText(std::string text)
 {
     mHistory->addDialogText("#B29154"+parseText(text)+"#B29154");
+}
+
+void DialogueWindow::addMessageBox(const std::string& text)
+{
+    mHistory->addDialogText("\n#FFFFFF"+text+"#B29154");
 }
 
 void DialogueWindow::addTitle(std::string text)

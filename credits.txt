@@ -37,7 +37,7 @@ Pieter van der Kloet (pvdk)
 Roman Melnik (Kromgart)
 Sebastian Wick (swick)
 Sylvain T. (Garvek)
-
+Tom Mason (wheybags)
 
 Packagers:
 Alexander Olofsson (Ace) - Windows

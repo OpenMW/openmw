@@ -32,6 +32,7 @@ option(BOOST_STATIC "Link static build of Boost into the binaries" FALSE)
 option(BUILD_ESMTOOL "build ESM inspector" ON)
 option(BUILD_LAUNCHER "build Launcher" ON)
 option(BUILD_MWINIIMPORTER "build MWiniImporter" ON)
+option(BUILD_OPENCS "build OpenMW Construction Set" ON)
 option(BUILD_WITH_CODE_COVERAGE "Enable code coverage with gconv" OFF)
 option(BUILD_UNITTESTS "Enable Unittests with Google C++ Unittest ang GMock frameworks" OFF)
 
@@ -465,6 +466,10 @@ endif()
 
 if (BUILD_MWINIIMPORTER)
    add_subdirectory( apps/mwiniimporter )
+endif()
+
+if (BUILD_OPENCS)
+   add_subdirectory (apps/opencs)
 endif()
 
 # UnitTests

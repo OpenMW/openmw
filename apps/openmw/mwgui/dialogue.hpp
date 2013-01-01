@@ -65,6 +65,7 @@ namespace MWGui
         void setKeywords(std::list<std::string> keyWord);
         void removeKeyword(std::string keyWord);
         void addText(std::string text);
+        void addMessageBox(const std::string& text);
         void addTitle(std::string text);
         void askQuestion(std::string question);
         void goodbye();
@@ -115,8 +116,6 @@ namespace MWGui
         MyGUI::EditPtr     mDispositionText;
 
         PersuasionDialog mPersuasionDialog;
-
-        MWBase::WindowManager& mWindowManager;
 
         std::map<size_t, HyperLink> mHyperLinks;
     };
