@@ -1,6 +1,8 @@
 #include "esmreader.hpp"
 #include <stdexcept>
 
+#include "../files/constrainedfiledatastream.hpp"
+
 namespace ESM
 {
 
@@ -108,16 +110,12 @@ void ESMReader::open(Ogre::DataStreamPtr _esm, const std::string &name)
 
 void ESMReader::open(const std::string &file)
 {
-    std::ifstream *stream = OGRE_NEW_T(std::ifstream, Ogre::MEMCATEGORY_GENERAL)(file.c_str(), std::ios_base::binary);
-    // Ogre will delete the stream for us
-    open(Ogre::DataStreamPtr(new Ogre::FileStreamDataStream(stream)), file);
+    open (openConstrainedFileDataStream (file.c_str ()), file);
 }
 
 void ESMReader::openRaw(const std::string &file)
 {
-    std::ifstream *stream = OGRE_NEW_T(std::ifstream, Ogre::MEMCATEGORY_GENERAL)(file.c_str(), std::ios_base::binary);
-    // Ogre will delete the stream for us
-    openRaw(Ogre::DataStreamPtr(new Ogre::FileStreamDataStream(stream)), file);
+    openRaw (openConstrainedFileDataStream (file.c_str ()), file);
 }
 
 int64_t ESMReader::getHNLong(const char *name)
