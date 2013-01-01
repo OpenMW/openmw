@@ -23,93 +23,14 @@
 
 #include "bsa_file.hpp"
 
-#include <stdexcept>
-#include <cstdlib>
-#include <cassert>
+//#include <stdexcept>
+//#include <cstdlib>
+//#include <cassert>
 
-#include <OgreDataStream.h>
+#include "../files/constrainedfiledatastream.hpp"
 
 using namespace std;
 using namespace Bsa;
-
-class ConstrainedDataStream : public Ogre::DataStream {
-    std::ifstream mStream;
-    const size_t mStart;
-    size_t mPos;
-    bool mIsEOF;
-
-public:
-    ConstrainedDataStream(const Ogre::String &fname, size_t start, size_t length)
-      : mStream(fname.c_str(), std::ios_base::binary), mStart(start), mPos(0), mIsEOF(false)
-    {
-        mSize = length;
-        if(!mStream.seekg(mStart, std::ios_base::beg))
-            throw std::runtime_error("Error seeking to start of BSA entry");
-    }
-
-    ConstrainedDataStream(const Ogre::String &name, const Ogre::String &fname,
-                          size_t start, size_t length)
-      : Ogre::DataStream(name), mStream(fname.c_str(), std::ios_base::binary),
-        mStart(start), mPos(0), mIsEOF(false)
-    {
-        mSize = length;
-        if(!mStream.seekg(mStart, std::ios_base::beg))
-            throw std::runtime_error("Error seeking to start of BSA entry");
-    }
-
-
-    virtual size_t read(void *buf, size_t count)
-    {
-        mStream.clear();
-
-        if(count > mSize-mPos)
-        {
-            count = mSize-mPos;
-            mIsEOF = true;
-        }
-        mStream.read(reinterpret_cast<char*>(buf), count);
-
-        count = mStream.gcount();
-        mPos += count;
-        return count;
-    }
-
-    virtual void skip(long count)
-    {
-        if((count >= 0 && (size_t)count <= mSize-mPos) ||
-           (count < 0 && (size_t)-count <= mPos))
-        {
-            mStream.clear();
-            if(mStream.seekg(count, std::ios_base::cur))
-            {
-                mPos += count;
-                mIsEOF = false;
-            }
-        }
-    }
-
-    virtual void seek(size_t pos)
-    {
-        if(pos < mSize)
-        {
-            mStream.clear();
-            if(mStream.seekg(pos+mStart, std::ios_base::beg))
-            {
-                mPos = pos;
-                mIsEOF = false;
-            }
-        }
-    }
-
-    virtual size_t tell() const
-    { return mPos; }
-
-    virtual bool eof() const
-    { return mIsEOF; }
-
-    virtual void close()
-    { mStream.close(); }
-};
 
 
 /// Error handling
@@ -253,5 +174,5 @@ Ogre::DataStreamPtr BSAFile::getFile(const char *file)
         fail("File not found: " + string(file));
 
     const FileStruct &fs = files[i];
-    return Ogre::DataStreamPtr(new ConstrainedDataStream(filename, fs.offset, fs.fileSize));
+	return openConstrainedFileDataStream (filename.c_str (), fs.offset, fs.fileSize);
 }
