@@ -2,29 +2,66 @@
 #define COMPONENTS_TOUTF8_H
 
 #include <string>
+#include <cstring>
+#include <vector>
 
 namespace ToUTF8
 {
-  // These are all the currently supported code pages
-  enum FromType
+    // These are all the currently supported code pages
+    enum FromType
     {
-      WINDOWS_1250,      // Central ane Eastern European languages
-      WINDOWS_1251,      // Cyrillic languages
-      WINDOWS_1252       // Used by English version of Morrowind (and
-                         // probably others)
+        WINDOWS_1250,      // Central ane Eastern European languages
+        WINDOWS_1251,      // Cyrillic languages
+        WINDOWS_1252       // Used by English version of Morrowind (and
+            // probably others)
     };
 
-  // Return a writable buffer of at least 'size' bytes. The buffer
-  // does not have to be freed.
-  char* getBuffer(int size);
+    // Return a writable buffer of at least 'size' bytes. The buffer
+    // does not have to be freed.
+    char* getBuffer(int size);
 
-  // Convert the previously written buffer to UTF8 from the given code
-  // page.
-  std::string getUtf8(FromType from);
-  std::string getLegacyEnc(FromType to);
+    // Convert the previously written buffer to UTF8 from the given code
+    // page.
+    std::string getUtf8(FromType from);
+    std::string getLegacyEnc(FromType to);
 
-  FromType calculateEncoding(const std::string& encodingName);
-  std::string encodingUsingMessage(const std::string& encodingName);
+    FromType calculateEncoding(const std::string& encodingName);
+    std::string encodingUsingMessage(const std::string& encodingName);
+
+    // class
+
+    class Utf8Encoder
+    {
+        public:
+            Utf8Encoder(void);
+
+            void setEncoding(const FromType sourceEncoding);
+
+            // Convert to UTF8 from the previously given code page.
+            std::string getUtf8(const char *input, int size);
+            inline std::string getUtf8(const std::string &str)
+            {
+                return getUtf8(str.c_str(), str.size());
+            }
+
+            std::string getLegacyEnc(const char *input, int size);
+            inline std::string getLegacyEnc(const std::string &str)
+            {
+                return getLegacyEnc(str.c_str(), str.size());
+            }
+
+        private:
+            void resize(size_t size);
+            size_t getLength(const char* input, bool &ascii);
+            void copyFromArray(unsigned char chp, char* &out);
+            size_t getLength2(const char* input, bool &ascii);
+            void copyFromArray2(const char*& chp, char* &out);
+
+            FromType mEncoding;
+            std::vector<char> mOutput;
+            int mSize;
+            char* translationArray;
+    };
 }
 
 #endif
