@@ -539,9 +539,8 @@ void WindowManager::messageBox (const std::string& message, const std::vector<st
 {
     if(buttons.empty()){
         /* If there are no buttons, and there is a dialogue window open, messagebox goes to the dialogue window */
-        if(std::find(mGuiModes.begin(), mGuiModes.end(), GM_Dialogue) != mGuiModes.end())
+        if(!mGuiModes.empty() && mGuiModes.back() == GM_Dialogue)
             mDialogueWindow->addMessageBox(MyGUI::LanguageManager::getInstance().replaceTags(message));
-    
         else
             mMessageBoxManager->createMessageBox(message);
     }
