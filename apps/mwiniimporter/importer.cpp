@@ -146,13 +146,6 @@ MwIniImporter::MwIniImporter()
         "FontColor:color_negative",
         "FontColor:color_count",
 
-        // cursors
-        "Cursors:Cursor 0",
-        "Cursors:Cursor 1",
-        "Cursors:Cursor 2",
-        "Cursors:Cursor 3",
-        "Cursors:Cursor 4",
-
         // level up messages
         "Level Up:Level2",
         "Level Up:Level3",
@@ -660,10 +653,21 @@ MwIniImporter::multistrmap MwIniImporter::loadIniFile(std::string filename) {
     std::string line;
     while (std::getline(file, line)) {
 
+        line = toUTF8(line);
+
+        // unify Unix-style and Windows file ending
+        if (!(line.empty()) && (line[line.length()-1]) == '\r') {
+            line = line.substr(0, line.length()-1);
+        }
+
         if(line[0] == '[') {
-            if(line.length() > 2) {
-                section = line.substr(1, line.length()-2);
+            int pos = line.find(']');
+            if(pos < 2) {
+                std::cout << "Warning: ini file wrongly formatted (" << line << "). Line ignored." << std::endl;
+                continue;
             }
+
+            section = line.substr(1, line.find(']')-1);
             continue;
         }
 
@@ -823,4 +827,17 @@ void MwIniImporter::writeToFile(boost::iostreams::stream<boost::iostreams::file_
             out << (it->first) << "=" << (*entry) << std::endl;
         }
     }
+}
+
+std::string MwIniImporter::toUTF8(const std::string &str) {
+    char *ptr = ToUTF8::getBuffer(str.length());
+    strncpy(ptr, str.c_str(), str.length());
+
+    // Convert to UTF8 and return
+    return ToUTF8::getUtf8(mEncoding);
+}
+
+void MwIniImporter::setInputEncoding(const ToUTF8::FromType &encoding)
+{
+  mEncoding = encoding;
 }
