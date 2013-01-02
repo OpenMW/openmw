@@ -32,6 +32,7 @@ Lukasz Gromanowski (lgro)
 Marcin Hulist (Gohan)
 Michael Mc Donnell
 Michael Papageorgiou (werdanith)
+Nathan Jeffords (blunted2night)
 Nikolay Kasyanov (corristo)
 Pieter van der Kloet (pvdk)
 Roman Melnik (Kromgart)
