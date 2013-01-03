@@ -50,10 +50,7 @@ namespace Translation
 
             if (!line.empty())
             {
-                char* buffer = ToUTF8::getBuffer(line.size() + 1);
-                //buffer has at least line.size() + 1 bytes, so it must be safe
-                strcpy(buffer, line.c_str());
-                line = ToUTF8::getUtf8(mEncoding);
+                line = mEncoder.getUtf8(line);
 
                 size_t tab_pos = line.find('\t');
                 if (tab_pos != std::string::npos && tab_pos > 0 && tab_pos < line.size() - 1)
@@ -107,6 +104,7 @@ namespace Translation
     void Storage::setEncoding (const ToUTF8::FromType& encoding)
     {
         mEncoding = encoding;
+        mEncoder.setEncoding(encoding);
     }
 
     bool Storage::hasTranslation() const

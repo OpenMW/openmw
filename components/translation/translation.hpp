@@ -35,6 +35,7 @@ namespace Translation
 
 
         ToUTF8::FromType mEncoding;
+        ToUTF8::Utf8Encoder mEncoder;
         ContainerType mCellNamesTranslations, mTopicIDs, mPhraseForms;
     };
 }
