@@ -16,15 +16,6 @@ namespace ToUTF8
             // probably others)
     };
 
-    // Return a writable buffer of at least 'size' bytes. The buffer
-    // does not have to be freed.
-    char* getBuffer(int size);
-
-    // Convert the previously written buffer to UTF8 from the given code
-    // page.
-    std::string getUtf8(FromType from);
-    std::string getLegacyEnc(FromType to);
-
     FromType calculateEncoding(const std::string& encodingName);
     std::string encodingUsingMessage(const std::string& encodingName);
 
