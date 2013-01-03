@@ -59,7 +59,7 @@ struct Arguments
     std::string outname;
 
     std::vector<std::string> types;
-  
+
     ESMData data;
     ESM::ESMReader reader;
     ESM::ESMWriter writer;
@@ -74,7 +74,7 @@ bool parseOptions (int argc, char** argv, Arguments &info)
         ("version,v", "print version information and quit.")
         ("raw,r", "Show an unformatted list of all records and subrecords.")
         // The intention is that this option would interact better
-        // with other modes including clone, dump, and raw. 
+        // with other modes including clone, dump, and raw.
         ("type,t", bpo::value< std::vector<std::string> >(),
          "Show only records of this type (four character record code).  May "
          "be specified multiple times.  Only affects dump mode.")
@@ -262,7 +262,7 @@ void printRaw(ESM::ESMReader &esm)
 int load(Arguments& info)
 {
     ESM::ESMReader& esm = info.reader;
-    esm.setEncoding(info.encoding);
+    esm.setEncoding(ToUTF8::calculateEncoding(info.encoding));
 
     std::string filename = info.filename;
     std::cout << "Loading file: " << filename << std::endl;
@@ -321,7 +321,7 @@ int load(Arguments& info)
             if (info.types.size() > 0)
             {
                 std::vector<std::string>::iterator match;
-                match = std::find(info.types.begin(), info.types.end(), 
+                match = std::find(info.types.begin(), info.types.end(),
                                   n.toString());
                 if (match == info.types.end()) interested = false;
             }
@@ -425,7 +425,7 @@ int clone(Arguments& info)
         if (++i % 3 == 0)
             std::cout << std::endl;
     }
-    
+
     if (i % 3 != 0)
         std::cout << std::endl;
 
@@ -450,7 +450,7 @@ int clone(Arguments& info)
     for (Records::iterator it = records.begin(); it != records.end() && i > 0; ++it)
     {
         EsmTool::RecordBase *record = *it;
-        
+
         name.val = record->getType().val;
 
         esm.startRecord(name.toString(), record->getFlags());
@@ -485,7 +485,7 @@ int clone(Arguments& info)
             std::cerr << "\r" << perc << "%";
         }
     }
-    
+
     std::cout << "\rDone!" << std::endl;
 
     esm.close();
@@ -513,7 +513,7 @@ int comp(Arguments& info)
 
     fileOne.encoding = info.encoding;
     fileTwo.encoding = info.encoding;
-    
+
     fileOne.filename = info.filename;
     fileTwo.filename = info.outname;
 
@@ -534,9 +534,9 @@ int comp(Arguments& info)
         std::cout << "Not equal, different amount of records." << std::endl;
         return 1;
     }
-    
-    
-    
+
+
+
 
     return 0;
 }

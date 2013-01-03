@@ -29,6 +29,11 @@ namespace Compiler
     class Extensions;
 }
 
+namespace Translation
+{
+    class Storage;
+}
+
 namespace OEngine
 {
     namespace GUI
@@ -76,7 +81,8 @@ namespace MWGui
 
     WindowManager(const Compiler::Extensions& extensions, int fpsLevel, bool newGame,
                   OEngine::Render::OgreRenderer *mOgre, const std::string& logpath,
-                  const std::string& cacheDir, bool consoleOnlyScripts);
+                  const std::string& cacheDir, bool consoleOnlyScripts,
+                  Translation::Storage& translationDataStorage);
     virtual ~WindowManager();
 
     /**
@@ -219,6 +225,8 @@ namespace MWGui
     virtual void startEnchanting(MWWorld::Ptr actor);
     virtual void startTraining(MWWorld::Ptr actor);
 
+    virtual const Translation::Storage& getTranslationDataStorage() const;
+
   private:
     OEngine::GUI::MyGUIManager *mGuiManager;
     HUD *mHud;
@@ -250,6 +258,7 @@ namespace MWGui
     SpellCreationDialog* mSpellCreationDialog;
     EnchantingDialog* mEnchantingDialog;
     TrainingWindow* mTrainingWindow;
+    Translation::Storage& mTranslationDataStorage;
 
     CharacterCreation* mCharGen;
 

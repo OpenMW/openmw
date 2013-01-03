@@ -105,12 +105,12 @@ namespace MWWorld
 
         const T *search(const std::string &id) const {
             T item;
-            item.mId = StringUtils::lowerCase(id);
+            item.mId = Misc::StringUtils::lowerCase(id);
 
             typename std::vector<T>::const_iterator it =
                 std::lower_bound(mStatic.begin(), mStatic.end(), item, RecordCmp());
 
-            if (it != mStatic.end() && StringUtils::ciEqual(it->mId, id)) {
+            if (it != mStatic.end() && Misc::StringUtils::ciEqual(it->mId, id)) {
                 return &(*it);
             }
 
@@ -134,7 +134,7 @@ namespace MWWorld
 
         void load(ESM::ESMReader &esm, const std::string &id) {
             mStatic.push_back(T());
-            mStatic.back().mId = StringUtils::lowerCase(id);
+            mStatic.back().mId = Misc::StringUtils::lowerCase(id);
             mStatic.back().load(esm);
         }
 
@@ -169,7 +169,7 @@ namespace MWWorld
         }
 
         T *insert(const T &item) {
-            std::string id = StringUtils::lowerCase(item.mId);
+            std::string id = Misc::StringUtils::lowerCase(item.mId);
             std::pair<typename Dynamic::iterator, bool> result =
                 mDynamic.insert(std::pair<std::string, T>(id, item));
             T *ptr = &result.first->second;
@@ -182,7 +182,7 @@ namespace MWWorld
         }
 
         bool erase(const std::string &id) {
-            std::string key = StringUtils::lowerCase(id);
+            std::string key = Misc::StringUtils::lowerCase(id);
             typename Dynamic::iterator it = mDynamic.find(key);
             if (it == mDynamic.end()) {
                 return false;
@@ -213,7 +213,7 @@ namespace MWWorld
     inline void Store<ESM::Script>::load(ESM::ESMReader &esm, const std::string &id) {
         mStatic.push_back(ESM::Script());
         mStatic.back().load(esm);
-        StringUtils::toLower(mStatic.back().mId);
+        Misc::StringUtils::toLower(mStatic.back().mId);
     }
 
     template <>
@@ -286,6 +286,16 @@ namespace MWWorld
 
     public:
         typedef SharedIterator<ESM::Land> iterator;
+
+        virtual ~Store<ESM::Land>()
+        {
+            for (std::vector<ESM::Land *>::const_iterator it =
+                             mStatic.begin(); it != mStatic.end(); ++it)
+            {
+                delete *it;
+            }
+
+        }
 
         int getSize() const {
             return mStatic.size();
@@ -375,12 +385,12 @@ namespace MWWorld
 
         const ESM::Cell *search(const std::string &id) const {
             ESM::Cell cell;
-            cell.mName = StringUtils::lowerCase(id);
+            cell.mName = Misc::StringUtils::lowerCase(id);
 
             std::vector<ESM::Cell>::const_iterator it =
                 std::lower_bound(mInt.begin(), mInt.end(), cell, RecordCmp());
 
-            if (it != mInt.end() && StringUtils::ciEqual(it->mName, id)) {
+            if (it != mInt.end() && Misc::StringUtils::ciEqual(it->mName, id)) {
                 return &(*it);
             }
 
@@ -480,7 +490,7 @@ namespace MWWorld
         const ESM::Cell *searchExtByName(const std::string &id) const {
             std::vector<ESM::Cell *>::const_iterator it = mSharedExt.begin();
             for (; it != mSharedExt.end(); ++it) {
-                if (StringUtils::ciEqual((*it)->mName, id)) {
+                if (Misc::StringUtils::ciEqual((*it)->mName, id)) {
                     return *it;
                 }
             }
@@ -491,7 +501,7 @@ namespace MWWorld
         const ESM::Cell *searchExtByRegion(const std::string &id) const {
             std::vector<ESM::Cell *>::const_iterator it = mSharedExt.begin();
             for (; it != mSharedExt.end(); ++it) {
-                if (StringUtils::ciEqual((*it)->mRegion, id)) {
+                if (Misc::StringUtils::ciEqual((*it)->mRegion, id)) {
                     return *it;
                 }
             }
@@ -531,7 +541,7 @@ namespace MWWorld
                 ptr = &result.first->second;
                 mSharedExt.push_back(ptr);
             } else {
-                std::string key = StringUtils::lowerCase(cell.mName);
+                std::string key = Misc::StringUtils::lowerCase(cell.mName);
 
                 // duplicate insertions are avoided by search(ESM::Cell &)
                 std::pair<DynamicInt::iterator, bool> result =
@@ -551,7 +561,7 @@ namespace MWWorld
         }
 
         bool erase(const std::string &id) {
-            std::string key = StringUtils::lowerCase(id);
+            std::string key = Misc::StringUtils::lowerCase(id);
             DynamicInt::iterator it = mDynamicInt.find(key);
 
             if (it == mDynamicInt.end()) {
@@ -681,7 +691,7 @@ namespace MWWorld
             pg.mCell = name;
 
             iterator it = std::lower_bound(mIntBegin, mIntEnd, pg, RecordCmp());
-            if (it != mIntEnd && StringUtils::ciEqual(it->mCell, name)) {
+            if (it != mIntEnd && Misc::StringUtils::ciEqual(it->mCell, name)) {
                 return &(*it);
             }
             return 0;

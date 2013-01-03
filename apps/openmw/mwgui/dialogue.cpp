@@ -16,6 +16,8 @@
 
 #include "../mwmechanics/npcstats.hpp"
 
+#include "../mwdialogue/dialoguemanagerimp.hpp"
+
 #include "dialogue_history.hpp"
 #include "widgets.hpp"
 #include "list.hpp"
@@ -52,7 +54,6 @@ bool sortByLength (const std::string& left, const std::string& right)
 {
     return left.size() > right.size();
 }
-
 }
 
 
@@ -180,9 +181,30 @@ void DialogueWindow::onHistoryClicked(MyGUI::Widget* _sender)
     if(color != "#B29154")
     {
         MyGUI::UString key = mHistory->getColorTextAt(cursorPosition);
-        if(color == "#686EBA") MWBase::Environment::get().getDialogueManager()->keywordSelected(lower_string(key));
 
-        if(color == "#572D21") MWBase::Environment::get().getDialogueManager()->questionAnswered(lower_string(key));
+        if(color == "#686EBA")
+        {
+            std::map<size_t, HyperLink>::iterator i = mHyperLinks.upper_bound(cursorPosition);
+            if( !mHyperLinks.empty() )
+            {
+                --i;
+
+                if( i->first + i->second.mLength > cursorPosition)
+                {
+                    MWBase::Environment::get().getDialogueManager()->keywordSelected(i->second.mTrueValue);
+                }
+            }
+            else
+            {
+                // the link was colored, but it is not in  mHyperLinks.
+                // It means that those liunks are not marked with @# and found
+                // by topic name search
+                MWBase::Environment::get().getDialogueManager()->keywordSelected(lower_string(key));
+            }
+        }
+
+        if(color == "#572D21")
+            MWBase::Environment::get().getDialogueManager()->questionAnswered(lower_string(key));
     }
 }
 
@@ -258,6 +280,7 @@ void DialogueWindow::startDialogue(MWWorld::Ptr actor, std::string npcName)
     setTitle(npcName);
 
     mTopicsList->clear();
+    mHyperLinks.clear();
     mHistory->setCaption("");
     updateOptions();
 }
@@ -316,6 +339,22 @@ void addColorInString(std::string& str, const std::string& keyword,std::string c
     size_t pos = 0;
     while((pos = find_str_ci(str,keyword, pos)) != std::string::npos)
     {
+        // do not add color if this portion of text is already colored.
+        {
+            MyGUI::TextIterator iterator (str);
+            MyGUI::UString colour;
+            while(iterator.moveNext())
+            {
+                size_t iteratorPos = iterator.getPosition();
+                iterator.getTagColour(colour);
+                if (iteratorPos == pos)
+                    break;
+            }
+
+            if (colour == color1)
+                return;
+        }
+
         str.insert(pos,color1);
         pos += color1.length();
         pos += keyword.length();
@@ -324,7 +363,7 @@ void addColorInString(std::string& str, const std::string& keyword,std::string c
     }
 }
 
-std::string DialogueWindow::parseText(std::string text)
+std::string DialogueWindow::parseText(const std::string& text)
 {
     bool separatorReached = false; // only parse topics that are below the separator (this prevents actions like "Barter" that are not topics from getting blue-colored)
 
@@ -342,16 +381,66 @@ std::string DialogueWindow::parseText(std::string text)
     // sort by length to make sure longer topics are replaced first
     std::sort(topics.begin(), topics.end(), sortByLength);
 
-    for(std::vector<std::string>::const_iterator it = topics.begin(); it != topics.end(); ++it)
+    std::vector<MWDialogue::HyperTextToken> hypertext = MWDialogue::ParseHyperText(text);
+
+    size_t historySize = 0;
+    if(mHistory->getClient()->getSubWidgetText() != nullptr)
     {
-        addColorInString(text,*it,"#686EBA","#B29154");
+        historySize = mHistory->getOnlyText().size();
     }
-    return text;
+
+    std::string result;
+    size_t hypertextPos = 0;
+    for (size_t i = 0; i < hypertext.size(); ++i)
+    {
+        if (hypertext[i].mLink)
+        {
+            size_t asterisk_count = MWDialogue::RemovePseudoAsterisks(hypertext[i].mText);
+            std::string standardForm = hypertext[i].mText;
+            for(; asterisk_count > 0; --asterisk_count)
+                standardForm.append("*");
+
+            standardForm =
+                MWBase::Environment::get().getWindowManager()->
+                getTranslationDataStorage().topicStandardForm(standardForm);
+
+            if( std::find(topics.begin(), topics.end(), std::string(standardForm) ) != topics.end() )
+            {
+                result.append("#686EBA").append(hypertext[i].mText).append("#B29154");
+
+                mHyperLinks[historySize+hypertextPos].mLength = MyGUI::UString(hypertext[i].mText).length();
+                mHyperLinks[historySize+hypertextPos].mTrueValue = lower_string(standardForm);
+            }
+            else
+                result += hypertext[i].mText;
+        }
+        else
+        {
+            if( !mWindowManager.getTranslationDataStorage().hasTranslation() )
+            {
+                for(std::vector<std::string>::const_iterator it = topics.begin(); it != topics.end(); ++it)
+                {
+                    addColorInString(hypertext[i].mText, *it, "#686EBA", "#B29154");
+                }
+            }
+
+            result += hypertext[i].mText;
+        }
+
+        hypertextPos += MyGUI::UString(hypertext[i].mText).length();
+    }
+
+    return result;
 }
 
 void DialogueWindow::addText(std::string text)
 {
     mHistory->addDialogText("#B29154"+parseText(text)+"#B29154");
+}
+
+void DialogueWindow::addMessageBox(const std::string& text)
+{
+    mHistory->addDialogText("\n#FFFFFF"+text+"#B29154");
 }
 
 void DialogueWindow::addTitle(std::string text)
@@ -378,6 +467,7 @@ void DialogueWindow::updateOptions()
 {
     //Clear the list of topics
     mTopicsList->clear();
+    mHyperLinks.clear();
     mHistory->eraseText(0, mHistory->getTextLength());
 
     if (mPtr.getTypeName() == typeid(ESM::NPC).name())

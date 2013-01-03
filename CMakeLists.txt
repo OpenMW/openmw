@@ -15,7 +15,7 @@ include (OpenMWMacros)
 # Version
 
 set (OPENMW_VERSION_MAJOR 0)
-set (OPENMW_VERSION_MINOR 19)
+set (OPENMW_VERSION_MINOR 20)
 set (OPENMW_VERSION_RELEASE 0)
 
 set (OPENMW_VERSION "${OPENMW_VERSION_MAJOR}.${OPENMW_VERSION_MINOR}.${OPENMW_VERSION_RELEASE}")
@@ -25,12 +25,14 @@ set (OPENMW_VERSION "${OPENMW_VERSION_MAJOR}.${OPENMW_VERSION_MINOR}.${OPENMW_VE
 configure_file ("${OpenMW_SOURCE_DIR}/Docs/mainpage.hpp.cmake" "${OpenMW_SOURCE_DIR}/Docs/mainpage.hpp")
 
 option(MYGUI_STATIC "Link static build of Mygui into the binaries" FALSE)
-option(OGRE_STATIC "Link static build of Ogre and Ogre Plugins into the binaries" FALSE)
+option(OGRE_STATIC  "Link static build of Ogre and Ogre Plugins into the binaries" FALSE)
+option(BOOST_STATIC "Link static build of Boost into the binaries" FALSE)
 
 # Apps and tools
 option(BUILD_ESMTOOL "build ESM inspector" ON)
 option(BUILD_LAUNCHER "build Launcher" ON)
 option(BUILD_MWINIIMPORTER "build MWiniImporter" ON)
+option(BUILD_OPENCS "build OpenMW Construction Set" ON)
 option(BUILD_WITH_CODE_COVERAGE "Enable code coverage with gconv" OFF)
 option(BUILD_UNITTESTS "Enable Unittests with Google C++ Unittest ang GMock frameworks" OFF)
 
@@ -167,9 +169,9 @@ if (WIN32)
     set(PLATFORM_INCLUDE_DIR "platform")
     add_definitions(-DBOOST_ALL_NO_LIB)
 else (WIN32)
-set(PLATFORM_INCLUDE_DIR "")
-find_path (UUID_INCLUDE_DIR uuid/uuid.h)
-include_directories(${UUID_INCLUDE_DIR})
+    set(PLATFORM_INCLUDE_DIR "")
+    find_path (UUID_INCLUDE_DIR uuid/uuid.h)
+    include_directories(${UUID_INCLUDE_DIR})
 endif (WIN32)
 if (MSVC10)
     set(PLATFORM_INCLUDE_DIR "")
@@ -183,7 +185,7 @@ endif (APPLE)
 
 # Fix for not visible pthreads functions for linker with glibc 2.15
 if (UNIX AND NOT APPLE)
-find_package (Threads)
+    find_package (Threads)
 endif()
 
 # find boost without components so we can use Boost_VERSION
@@ -194,6 +196,10 @@ set(BOOST_COMPONENTS system filesystem program_options thread)
 if (Boost_VERSION LESS 104900)
     set(SHINY_USE_WAVE_SYSTEM_INSTALL "TRUE")
     set(BOOST_COMPONENTS ${BOOST_COMPONENTS} wave)
+endif()
+
+IF(BOOST_STATIC)
+    set(Boost_USE_STATIC_LIBS   ON)
 endif()
 
 find_package(OGRE REQUIRED)
@@ -244,7 +250,7 @@ if (APPLE)
     else ()
         set(OGRE_PLUGIN_DIR ${OGRE_PLUGIN_DIR_DBG})
     endif ()
-    
+
     #set(OGRE_PLUGIN_DIR "${OGRE_PLUGIN_DIR}/")
 
     configure_file(${OpenMW_SOURCE_DIR}/files/mac/Info.plist
@@ -356,7 +362,7 @@ if(DPKG_PROGRAM)
     SET(CPACK_DEBIAN_PACKAGE_NAME "openmw")
     SET(CPACK_DEBIAN_PACKAGE_VERSION "${VERSION_STRING}")
     SET(CPACK_PACKAGE_EXECUTABLES "openmw;OpenMW esmtool;Esmtool omwlauncher;OMWLauncher mwiniimporter;MWiniImporter")
-    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libboost-filesystem1.46.1 (>= 1.46.1), libboost-program-options1.46.1 (>= 1.46.1), libboost-system1.46.1 (>= 1.46.1), libboost-thread1.46.1 (>= 1.46.1), libc6 (>= 2.11.2), libfreetype6 (>= 2.2.1), libgcc1 (>= 1:4.1.1), libmpg123-0 (>= 1.12.1), libois-1.3.0 (>= 1.3.0), libopenal1 (>= 1:1.12.854), libsndfile1 (>= 1.0.23), libstdc++6 (>= 4.4.5), libuuid1 (>= 2.17.2), libqtgui4 (>= 4.7.0)")
+    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libc6 (>= 2.11.2), libfreetype6 (>= 2.2.1), libgcc1 (>= 1:4.1.1), libmpg123-0 (>= 1.12.1), libois-1.3.0 (>= 1.3.0), libopenal1 (>= 1:1.12.854), libsndfile1 (>= 1.0.23), libstdc++6 (>= 4.4.5), libuuid1 (>= 2.17.2), libqtgui4 (>= 4.7.0)")
 
     SET(CPACK_DEBIAN_PACKAGE_SECTION "Games")
 
@@ -460,6 +466,10 @@ endif()
 
 if (BUILD_MWINIIMPORTER)
    add_subdirectory( apps/mwiniimporter )
+endif()
+
+if (BUILD_OPENCS)
+   add_subdirectory (apps/opencs)
 endif()
 
 # UnitTests

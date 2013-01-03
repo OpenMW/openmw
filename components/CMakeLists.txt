@@ -59,7 +59,11 @@ add_component_dir (compiler
 
 add_component_dir (interpreter
     context controlopcodes genericopcodes installopcodes interpreter localopcodes mathopcodes
-    miscopcodes opcodes runtime scriptopcodes spatialopcodes types
+    miscopcodes opcodes runtime scriptopcodes spatialopcodes types defines
+    )
+
+add_component_dir (translation
+    translation
     )
 
 include_directories(${BULLET_INCLUDE_DIRS})

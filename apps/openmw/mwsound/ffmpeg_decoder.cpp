@@ -313,7 +313,12 @@ void FFmpeg_Decoder::close()
         mStreams.erase(mStreams.begin());
     }
     if(mFormatCtx)
+    {
+        AVIOContext* context = mFormatCtx->pb;
+        av_free(context);
+        mFormatCtx->pb = NULL;
         av_close_input_file(mFormatCtx);
+    }
     mFormatCtx = NULL;
 
     mDataStream.setNull();

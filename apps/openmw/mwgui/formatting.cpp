@@ -1,5 +1,10 @@
 #include "formatting.hpp"
 
+#include <components/interpreter/defines.hpp>
+
+#include "../mwscript/interpretercontext.hpp"
+#include "../mwworld/ptr.hpp"
+
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/lexical_cast.hpp>
 
@@ -67,6 +72,9 @@ namespace
 std::vector<std::string> BookTextParser::split(std::string text, const int width, const int height)
 {
     std::vector<std::string> result;
+
+    MWScript::InterpreterContext interpreterContext(NULL, MWWorld::Ptr()); // empty arguments, because there is no locals or actor
+    text = Interpreter::fixDefinesBook(text, interpreterContext);
 
     boost::algorithm::replace_all(text, "<BR>", "\n");
     boost::algorithm::replace_all(text, "<P>", "\n\n");
@@ -167,6 +175,10 @@ std::vector<std::string> BookTextParser::split(std::string text, const int width
 
 MyGUI::IntSize BookTextParser::parse(std::string text, MyGUI::Widget* parent, const int width)
 {
+    MWScript::InterpreterContext interpreterContext(NULL, MWWorld::Ptr()); // empty arguments, because there is no locals or actor
+    text = Interpreter::fixDefinesBook(text, interpreterContext);
+
+
     mParent = parent;
     mWidth = width;
     mHeight = 0;

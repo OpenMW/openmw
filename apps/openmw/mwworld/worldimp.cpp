@@ -11,6 +11,8 @@
 #include "../mwrender/sky.hpp"
 #include "../mwrender/player.hpp"
 
+#include "../mwclass/door.hpp"
+
 #include "player.hpp"
 #include "manualref.hpp"
 #include "cellfunctors.hpp"
@@ -168,7 +170,7 @@ namespace MWWorld
     World::World (OEngine::Render::OgreRenderer& renderer,
         const Files::Collections& fileCollections,
         const std::string& master, const boost::filesystem::path& resDir, const boost::filesystem::path& cacheDir, bool newGame,
-        const std::string& encoding, std::map<std::string,std::string> fallbackMap)
+        const ToUTF8::FromType& encoding, std::map<std::string,std::string> fallbackMap)
     : mPlayer (0), mLocalScripts (mStore), mGlobalVariables (0),
       mSky (true), mCells (mStore, mEsm),
       mNumFacing(0)
@@ -193,7 +195,7 @@ namespace MWWorld
         mRendering->attachCameraTo(mPlayer->getPlayer());
 
         mPhysics->addActor(mPlayer->getPlayer());
-        
+
         // global variables
         mGlobalVariables = new Globals (mStore);
 
@@ -202,6 +204,8 @@ namespace MWWorld
             // set new game mark
             mGlobalVariables->setInt ("chargenstate", 1);
         }
+
+        mGlobalVariables->setInt ("pcrace", 3);
 
         mWorldScene = new Scene(*mRendering, mPhysics);
 
@@ -235,7 +239,7 @@ namespace MWWorld
         MWWorld::Store<ESM::Region>::iterator it = regions.begin();
         for (; it != regions.end(); ++it)
         {
-            if (MWWorld::StringUtils::ciEqual(cellName, it->mName))
+            if (Misc::StringUtils::ciEqual(cellName, it->mName))
             {
                 return mStore.get<ESM::Cell>().searchExtByRegion(it->mId);
             }
@@ -292,6 +296,49 @@ namespace MWWorld
     char World::getGlobalVariableType (const std::string& name) const
     {
         return mGlobalVariables->getType (name);
+    }
+
+    std::vector<std::string> World::getGlobals () const
+    {
+        return mGlobalVariables->getGlobals();
+    }
+    
+    std::string World::getCurrentCellName () const
+    {
+        std::string name;
+
+        Ptr::CellStore *cell = mWorldScene->getCurrentCell();
+        if (cell->mCell->isExterior())
+        {    
+            if (cell->mCell->mName != "")
+            {    
+                name = cell->mCell->mName;
+            }    
+            else 
+            {    
+                const ESM::Region* region =
+                    MWBase::Environment::get().getWorld()->getStore().get<ESM::Region>().search(cell->mCell->mRegion);
+                if (region)
+                    name = region->mName;
+                else
+                { 
+                    const ESM::GameSetting *setting =
+                        MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().search("sDefaultCellname");
+
+                    if (setting && setting->mType == ESM::VT_String)
+                        name = setting->getString();
+                    else
+                        name = "Wilderness";
+                }
+
+            }    
+        }    
+        else 
+        {    
+            name = cell->mCell->mName;
+        }    
+        
+        return name;
     }
 
     Ptr World::getPtr (const std::string& name, bool activeOnly)
@@ -560,16 +607,6 @@ namespace MWWorld
         }
     }
 
-    std::string toLower (const std::string& name)
-    {
-        std::string lowerCase;
-
-        std::transform (name.begin(), name.end(), std::back_inserter (lowerCase),
-            (int(*)(int)) std::tolower);
-
-        return lowerCase;
-    }
-
     void World::moveObject(const Ptr &ptr, CellStore &newCell, float x, float y, float z)
     {
         ESM::Position &pos = ptr.getRefData().getPosition();
@@ -584,7 +621,7 @@ namespace MWWorld
         {
             if (isPlayer)
                 if (!newCell.isExterior())
-                    changeToInteriorCell(toLower(newCell.mCell->mName), pos);
+                    changeToInteriorCell(Misc::StringUtils::lowerCase(newCell.mCell->mName), pos);
                 else
                 {
                     int cellX = newCell.mCell->getGridX();
@@ -660,7 +697,7 @@ namespace MWWorld
     {
         MWWorld::Class::get(ptr).adjustScale(ptr,scale);
         ptr.getCellRef().mScale = scale;
-        
+
         if(ptr.getRefData().getBaseNode() == 0)
             return;
         mRendering->scaleObject(ptr, Vector3(scale,scale,scale));
@@ -673,7 +710,7 @@ namespace MWWorld
         rot.x = Ogre::Degree(x).valueRadians();
         rot.y = Ogre::Degree(y).valueRadians();
         rot.z = Ogre::Degree(z).valueRadians();
-        
+
         float *objRot = ptr.getRefData().getPosition().rot;
         if(ptr.getRefData().getBaseNode() == 0 || !mRendering->rotateObject(ptr, rot, adjust))
         {
@@ -781,7 +818,7 @@ namespace MWWorld
 
     const ESM::Potion *World::createRecord (const ESM::Potion& record)
     {
-        return mStore.insert(record); 
+        return mStore.insert(record);
     }
 
     const ESM::Class *World::createRecord (const ESM::Class& record)
@@ -802,14 +839,30 @@ namespace MWWorld
     const ESM::NPC *World::createRecord(const ESM::NPC &record)
     {
         bool update = false;
-        if (StringUtils::ciEqual(record.mId, "player")) {
+
+        if (Misc::StringUtils::ciEqual(record.mId, "player"))
+        {
+            static const char *sRaces[] =
+            {
+                "Argonian", "Breton", "Dark Elf", "High Elf", "Imperial", "Khajiit", "Nord", "Orc", "Redguard",
+                "Woodelf",  0
+            };
+
+            int i=0;
+
+            for (; sRaces[i]; ++i)
+                if (Misc::StringUtils::ciEqual (sRaces[i], record.mRace))
+                    break;
+
+            mGlobalVariables->setInt ("pcrace", sRaces[i] ? i+1 : 0);
+
             const ESM::NPC *player =
                 mPlayer->getPlayer().get<ESM::NPC>()->mBase;
 
             update = record.isMale() != player->isMale() ||
-                     !StringUtils::ciEqual(record.mRace, player->mRace) ||
-                     !StringUtils::ciEqual(record.mHead, player->mHead) ||
-                     !StringUtils::ciEqual(record.mHair, player->mHair);
+                     !Misc::StringUtils::ciEqual(record.mRace, player->mRace) ||
+                     !Misc::StringUtils::ciEqual(record.mHead, player->mHead) ||
+                     !Misc::StringUtils::ciEqual(record.mHair, player->mHair);
         }
         const ESM::NPC *ret = mStore.insert(record);
         if (update) {
@@ -834,7 +887,7 @@ namespace MWWorld
         /// \todo split this function up into subfunctions
 
         mWorldScene->update (duration, paused);
-        
+
         float pitch, yaw;
         Ogre::Vector3 eyepos;
         mRendering->getPlayerData(eyepos, pitch, yaw);
@@ -1062,28 +1115,7 @@ namespace MWWorld
             if (ref.mRef.mTeleport)
             {
                 World::DoorMarker newMarker;
-
-                std::string dest;
-                if (ref.mRef.mDestCell != "")
-                {
-                    // door leads to an interior, use interior name
-                    dest = ref.mRef.mDestCell;
-                }
-                else
-                {
-                    // door leads to exterior, use cell name (if any), otherwise translated region name
-                    int x,y;
-                    positionToIndex (ref.mRef.mDoorDest.pos[0], ref.mRef.mDoorDest.pos[1], x, y);
-                    const ESM::Cell* cell = mStore.get<ESM::Cell>().find(x,y);
-                    if (cell->mName != "")
-                        dest = cell->mName;
-                    else
-                    {
-                        dest = mStore.get<ESM::Region>().find(cell->mRegion)->mName;
-                    }
-                }
-
-                newMarker.name = dest;
+                newMarker.name = MWClass::Door::getDestination(ref);
 
                 ESM::Position pos = ref.mData.getPosition ();
 

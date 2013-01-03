@@ -58,6 +58,9 @@ namespace MWMechanics
 
             void removeSpell (const std::string& id);
 
+            bool isSpellActive (std::string id) const;
+            ///< case insensitive
+
             const MagicEffects& getMagicEffects() const;
 
             TIterator begin() const;

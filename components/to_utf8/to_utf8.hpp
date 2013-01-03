@@ -22,6 +22,9 @@ namespace ToUTF8
   // page.
   std::string getUtf8(FromType from);
   std::string getLegacyEnc(FromType to);
+
+  FromType calculateEncoding(const std::string& encodingName);
+  std::string encodingUsingMessage(const std::string& encodingName);
 }
 
 #endif
