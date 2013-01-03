@@ -10,6 +10,10 @@ namespace MWMechanics
     {
         public:
             AiEscort(const std::string &actorId,int duration, float x, float y, float z);
+            ///< \implement AiEscort
+            AiEscort(const std::string &actorId,const std::string &cellId,int duration, float x, float y, float z);
+            ///< \implement AiEscortCell
+
             virtual AiEscort *clone() const;
 
             virtual bool execute (const MWWorld::Ptr& actor);
@@ -19,6 +23,7 @@ namespace MWMechanics
 
         private:
             std::string mActorId;
+            std::string mCellId;
             float mX;
             float mY;
             float mZ;

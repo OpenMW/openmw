@@ -10,6 +10,11 @@
 #include "../mwworld/class.hpp"
 
 #include "../mwmechanics/creaturestats.hpp"
+#include "../mwmechanics/aiactivate.hpp"
+#include "../mwmechanics/aiescort.hpp"
+#include "../mwmechanics/aifollow.hpp"
+#include "../mwmechanics/aitravel.hpp"
+#include "../mwmechanics/aiwander.hpp"
 
 #include "interpretercontext.hpp"
 #include "ref.hpp"
@@ -20,6 +25,27 @@ namespace MWScript
 {
     namespace Ai
     {
+        template<class R>
+        class OpAiActivate : public Interpreter::Opcode1
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime, unsigned int arg0)
+                {
+                    MWWorld::Ptr ptr = R()(runtime);
+
+                    std::string objectID = runtime.getStringLiteral (runtime[0].mInteger);
+                    runtime.pop();
+
+                    // discard additional arguments (reset), because we have no idea what they mean.
+                    for (unsigned int i=0; i<arg0; ++i) runtime.pop();
+
+                    MWMechanics::AiActivate activatePackage(objectID);
+                    MWWorld::Class::get (ptr).getCreatureStats (ptr).getAiSequence().stack(activatePackage);
+                    std::cout << "AiActivate" << std::endl;
+                }
+        };
+
         template<class R>
         class OpAiTravel : public Interpreter::Opcode1
         {
@@ -41,6 +67,9 @@ namespace MWScript
                     // discard additional arguments (reset), because we have no idea what they mean.
                     for (unsigned int i=0; i<arg0; ++i) runtime.pop();
 
+                    MWMechanics::AiTravel travelPackage(x, y, z);
+                    MWWorld::Class::get (ptr).getCreatureStats (ptr).getAiSequence().stack(travelPackage);
+
                     std::cout << "AiTravel: " << x << ", " << y << ", " << z << std::endl;
                 }
         };
@@ -54,7 +83,7 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    std::string actor = runtime.getStringLiteral (runtime[0].mInteger);
+                    std::string actorID = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
 
                     Interpreter::Type_Float duration = runtime[0].mFloat;
@@ -72,6 +101,47 @@ namespace MWScript
                     // discard additional arguments (reset), because we have no idea what they mean.
                     for (unsigned int i=0; i<arg0; ++i) runtime.pop();
 
+                    MWMechanics::AiEscort escortPackage(actorID, duration, x, y, z);
+                    MWWorld::Class::get (ptr).getCreatureStats (ptr).getAiSequence().stack(escortPackage);
+
+                    std::cout << "AiEscort: " << x << ", " << y << ", " << z << ", " << duration
+                        << std::endl;
+                }
+        };
+
+        template<class R>
+        class OpAiEscortCell : public Interpreter::Opcode1
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime, unsigned int arg0)
+                {
+                    MWWorld::Ptr ptr = R()(runtime);
+
+                    std::string actorID = runtime.getStringLiteral (runtime[0].mInteger);
+                    runtime.pop();
+
+                    std::string cellID = runtime.getStringLiteral (runtime[0].mInteger);
+                    runtime.pop();
+
+                    Interpreter::Type_Float duration = runtime[0].mFloat;
+                    runtime.pop();
+
+                    Interpreter::Type_Float x = runtime[0].mFloat;
+                    runtime.pop();
+
+                    Interpreter::Type_Float y = runtime[0].mFloat;
+                    runtime.pop();
+
+                    Interpreter::Type_Float z = runtime[0].mFloat;
+                    runtime.pop();
+
+                    // discard additional arguments (reset), because we have no idea what they mean.
+                    for (unsigned int i=0; i<arg0; ++i) runtime.pop();
+
+                    MWMechanics::AiEscort escortPackage(actorID, cellID, duration, x, y, z);
+                    MWWorld::Class::get (ptr).getCreatureStats (ptr).getAiSequence().stack(escortPackage);
+
                     std::cout << "AiEscort: " << x << ", " << y << ", " << z << ", " << duration
                         << std::endl;
                 }
@@ -86,7 +156,7 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    Interpreter::Type_Integer value = 0;
+                    Interpreter::Type_Integer value = MWWorld::Class::get (ptr).getCreatureStats (ptr).getAiSequence().isPackageDone();
 
                     runtime.push (value);
                 }
@@ -101,18 +171,27 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-//                    Interpreter::Type_Float range = runtime[0].mFloat;
+                    Interpreter::Type_Integer range = runtime[0].mFloat;
                     runtime.pop();
 
-//                    Interpreter::Type_Float duration = runtime[0].mFloat;
+                    Interpreter::Type_Integer duration = runtime[0].mFloat;
                     runtime.pop();
 
-//                    Interpreter::Type_Float time = runtime[0].mFloat;
+                    Interpreter::Type_Integer time = runtime[0].mFloat;
                     runtime.pop();
 
-                    // discard additional idle arguments for now
+                    std::vector<int> idleList;
+                    for (unsigned int i=0; i<arg0; ++i) {
+                        Interpreter::Type_Integer idleValue = runtime[0].mFloat;
+                        idleList.push_back(idleValue);
+                        runtime.pop();
+                    }
+
                     // discard additional arguments (reset), because we have no idea what they mean.
                     for (unsigned int i=0; i<arg0; ++i) runtime.pop();
+
+                    MWMechanics::AiWander wanderPackage(range, duration, time, idleList);
+                    MWWorld::Class::get (ptr).getCreatureStats (ptr).getAiSequence().stack(wanderPackage);
 
                     std::cout << "AiWander" << std::endl;
                 }
@@ -167,6 +246,113 @@ namespace MWScript
                 }
         };
 
+        template<class R>
+        class OpAiFollow : public Interpreter::Opcode1
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime, unsigned int arg0)
+                {
+                    MWWorld::Ptr ptr = R()(runtime);
+
+                    std::string actorID = runtime.getStringLiteral (runtime[0].mInteger);
+                    runtime.pop();
+
+                    Interpreter::Type_Float duration = runtime[0].mFloat;
+                    runtime.pop();
+
+                    Interpreter::Type_Float x = runtime[0].mFloat;
+                    runtime.pop();
+
+                    Interpreter::Type_Float y = runtime[0].mFloat;
+                    runtime.pop();
+
+                    Interpreter::Type_Float z = runtime[0].mFloat;
+                    runtime.pop();
+
+                    // discard additional arguments (reset), because we have no idea what they mean.
+                    for (unsigned int i=0; i<arg0; ++i) runtime.pop();
+
+                    MWMechanics::AiFollow followPackage(actorID, duration, x, y ,z);
+                    MWWorld::Class::get (ptr).getCreatureStats (ptr).getAiSequence().stack(followPackage);
+
+                    std::cout << "AiFollow: " << actorID << ", " << x << ", " << y << ", " << z << ", " << duration
+                        << std::endl;
+                }
+        };
+
+        template<class R>
+        class OpAiFollowCell : public Interpreter::Opcode1
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime, unsigned int arg0)
+                {
+                    MWWorld::Ptr ptr = R()(runtime);
+
+                    std::string actorID = runtime.getStringLiteral (runtime[0].mInteger);
+                    runtime.pop();
+
+                    std::string cellID = runtime.getStringLiteral (runtime[0].mInteger);
+                    runtime.pop();
+
+                    Interpreter::Type_Float duration = runtime[0].mFloat;
+                    runtime.pop();
+
+                    Interpreter::Type_Float x = runtime[0].mFloat;
+                    runtime.pop();
+
+                    Interpreter::Type_Float y = runtime[0].mFloat;
+                    runtime.pop();
+
+                    Interpreter::Type_Float z = runtime[0].mFloat;
+                    runtime.pop();
+
+                    // discard additional arguments (reset), because we have no idea what they mean.
+                    for (unsigned int i=0; i<arg0; ++i) runtime.pop();
+
+                    MWMechanics::AiFollow followPackage(actorID, cellID, duration, x, y ,z);
+                    MWWorld::Class::get (ptr).getCreatureStats (ptr).getAiSequence().stack(followPackage);
+                    std::cout << "AiFollow: " << actorID << ", " << x << ", " << y << ", " << z << ", " << duration
+                        << std::endl;
+                }
+        };
+
+        template<class R>
+        class OpGetCurrentAIPackage : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWWorld::Ptr ptr = R()(runtime);
+
+                    Interpreter::Type_Integer value = MWWorld::Class::get (ptr).getCreatureStats (ptr).getAiSequence().getTypeId ();
+
+                    runtime.push (value);
+                }
+        };
+
+        template<class R>
+        class OpGetDetected : public Interpreter::Opcode1
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime, unsigned int arg0)
+                {
+                    MWWorld::Ptr ptr = R()(runtime);
+
+                    std::string actorID = runtime.getStringLiteral (runtime[0].mInteger);
+                    runtime.pop();
+
+                    Interpreter::Type_Integer value = false; // TODO replace with implementation
+
+                    std::cout << "AiGetDetected: " << actorID << ", " << value << std::endl;
+
+                    runtime.push (value);
+                }
+        };
+
 
         const int opcodeAiTravel = 0x20000;
         const int opcodeAiTravelExplicit = 0x20001;
@@ -174,8 +360,20 @@ namespace MWScript
         const int opcodeAiEscortExplicit = 0x20003;
         const int opcodeGetAiPackageDone = 0x200007c;
         const int opcodeGetAiPackageDoneExplicit = 0x200007d;
+        const int opcodeGetCurrentAiPackage = 0x20001ef;
+        const int opcodeGetCurrentAiPackageExplicit = 0x20001f0;
+        const int opcodeGetDetected = 0x20001f1;
+        const int opcodeGetDetectedExplicit = 0x20001f2;
         const int opcodeAiWander = 0x20010;
         const int opcodeAiWanderExplicit = 0x20011;
+        const int opcodeAIActivate = 0x2001e;
+        const int opcodeAIActivateExplicit = 0x2001f;
+        const int opcodeAiEscortCell = 0x20020;
+        const int opcodeAiEscortCellExplicit = 0x20021;
+        const int opcodeAiFollow = 0x20022;
+        const int opcodeAiFollowExplicit = 0x20023;
+        const int opcodeAiFollowCell = 0x20024;
+        const int opcodeAiFollowCellExplicit = 0x20025;
         const int opcodeSetHello = 0x200015e;
         const int opcodeSetHelloExplicit = 0x200015d;
         const int opcodeSetFight = 0x200015e;
@@ -203,16 +401,26 @@ namespace MWScript
 
         void registerExtensions (Compiler::Extensions& extensions)
         {
+            extensions.registerInstruction ("aiactivate", "c/l", opcodeAIActivate,
+                opcodeAIActivateExplicit);
             extensions.registerInstruction ("aitravel", "fff/l", opcodeAiTravel,
                 opcodeAiTravelExplicit);
             extensions.registerInstruction ("aiescort", "cffff/l", opcodeAiEscort,
                 opcodeAiEscortExplicit);
+            extensions.registerInstruction ("aiescortcell", "ccffff/l", opcodeAiEscortCell,
+                opcodeAiEscortCellExplicit);
             extensions.registerInstruction ("aiwander", "fff/llllllllll", opcodeAiWander,
                 opcodeAiWanderExplicit);
-
+            extensions.registerInstruction ("aifollow", "cffff/l", opcodeAiFollow,
+                opcodeAiFollowExplicit);
+            extensions.registerInstruction ("aifollowcell", "ccffff/l", opcodeAiFollowCell,
+                opcodeAiFollowCellExplicit);
             extensions.registerFunction ("getaipackagedone", 'l', "", opcodeGetAiPackageDone,
                 opcodeGetAiPackageDoneExplicit);
-
+            extensions.registerFunction ("getcurrentaipackage", 'l', "", opcodeGetCurrentAiPackage,
+                opcodeGetAiPackageDoneExplicit);
+            extensions.registerFunction ("getdetected", 'l', "c", opcodeGetDetected,
+                opcodeGetDetectedExplicit);
             extensions.registerInstruction ("sethello", "l", opcodeSetHello, opcodeSetHelloExplicit);
             extensions.registerInstruction ("setfight", "l", opcodeSetFight, opcodeSetFightExplicit);
             extensions.registerInstruction ("setflee", "l", opcodeSetFlee, opcodeSetFleeExplicit);
@@ -229,15 +437,28 @@ namespace MWScript
 
         void installOpcodes (Interpreter::Interpreter& interpreter)
         {
+            interpreter.installSegment3 (opcodeAIActivate, new OpAiActivate<ImplicitRef>);
+            interpreter.installSegment3 (opcodeAIActivateExplicit, new OpAiActivate<ExplicitRef>);
             interpreter.installSegment3 (opcodeAiTravel, new OpAiTravel<ImplicitRef>);
             interpreter.installSegment3 (opcodeAiTravelExplicit, new OpAiTravel<ExplicitRef>);
             interpreter.installSegment3 (opcodeAiEscort, new OpAiEscort<ImplicitRef>);
             interpreter.installSegment3 (opcodeAiEscortExplicit, new OpAiEscort<ExplicitRef>);
+            interpreter.installSegment3 (opcodeAiEscortCell, new OpAiEscortCell<ImplicitRef>);
+            interpreter.installSegment3 (opcodeAiEscortCellExplicit, new OpAiEscortCell<ExplicitRef>);
             interpreter.installSegment3 (opcodeAiWander, new OpAiWander<ImplicitRef>);
             interpreter.installSegment3 (opcodeAiWanderExplicit, new OpAiWander<ExplicitRef>);
+            interpreter.installSegment3 (opcodeAiFollow, new OpAiFollow<ImplicitRef>);
+            interpreter.installSegment3 (opcodeAiFollowExplicit, new OpAiFollow<ExplicitRef>);
+            interpreter.installSegment3 (opcodeAiFollowCell, new OpAiFollowCell<ImplicitRef>);
+            interpreter.installSegment3 (opcodeAiFollowCellExplicit, new OpAiFollowCell<ExplicitRef>);
             interpreter.installSegment5 (opcodeGetAiPackageDone, new OpGetAiPackageDone<ImplicitRef>);
+
             interpreter.installSegment5 (opcodeGetAiPackageDoneExplicit,
                 new OpGetAiPackageDone<ExplicitRef>);
+            interpreter.installSegment5 (opcodeGetCurrentAiPackage, new OpGetCurrentAIPackage<ImplicitRef>);
+            interpreter.installSegment5 (opcodeGetCurrentAiPackageExplicit, new OpGetCurrentAIPackage<ExplicitRef>);
+            interpreter.installSegment3 (opcodeGetDetected, new OpGetDetected<ImplicitRef>);
+            interpreter.installSegment3 (opcodeGetDetectedExplicit, new OpGetDetected<ExplicitRef>);
             interpreter.installSegment5 (opcodeSetHello, new OpSetAiSetting<ImplicitRef>(0));
             interpreter.installSegment5 (opcodeSetHelloExplicit, new OpSetAiSetting<ExplicitRef>(0));
             interpreter.installSegment5 (opcodeSetFight, new OpSetAiSetting<ImplicitRef>(1));
