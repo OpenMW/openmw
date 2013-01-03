@@ -51,6 +51,7 @@
 #include "spellcreationdialog.hpp"
 #include "enchantingdialog.hpp"
 #include "trainingwindow.hpp"
+#include "imagebutton.hpp"
 
 using namespace MWGui;
 
@@ -126,6 +127,7 @@ WindowManager::WindowManager(
     MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::VBox>("Widget");
     MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::AutoSizedTextBox>("Widget");
     MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::AutoSizedButton>("Widget");
+    MyGUI::FactoryManager::getInstance().registerFactory<MWGui::ImageButton>("Widget");
 
     MyGUI::LanguageManager::getInstance().eventRequestTag = MyGUI::newDelegate(this, &WindowManager::onRetrieveTag);
 

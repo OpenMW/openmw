@@ -1,34 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <MyGUI type="Skin">
-    <Skin name="ReturnButton" size="128 64" texture="textures\menu_return.dds">
-        <BasisSkin type="MainSkin" offset = "0 0 128 64">
-            <State name="normal" offset = "0 0 128 64"/>
-        </BasisSkin>
-    </Skin>
-    <Skin name="NewButton" size="128 64" texture="textures\menu_newgame.dds">
-        <BasisSkin type="MainSkin" offset = "0 0 128 64">
-            <State name="normal" offset = "0 0 128 64"/>
-        </BasisSkin>
-    </Skin>
-    <Skin name="SaveButton" size="128 64" texture="textures\menu_savegame.dds">
-        <BasisSkin type="MainSkin" offset = "0 0 128 64">
-            <State name="normal" offset = "0 0 128 64"/>
-        </BasisSkin>
-    </Skin>
-    <Skin name="LoadButton" size="128 64" texture="textures\menu_loadgame.dds">
-        <BasisSkin type="MainSkin" offset = "0 0 128 64">
-            <State name="normal" offset = "0 0 128 64"/>
-        </BasisSkin>
-    </Skin>
-    <Skin name="OptionsButton" size="128 64" texture="textures\menu_options.dds">
-        <BasisSkin type="MainSkin" offset = "0 0 128 64">
-            <State name="normal" offset = "0 0 128 64"/>
-        </BasisSkin>
-    </Skin>
-    <Skin name="ExitButton" size="128 64" texture="textures\menu_exitgame.dds">
-        <BasisSkin type="MainSkin" offset = "0 0 128 64">
-            <State name="normal" offset = "0 0 128 64"/>
-        </BasisSkin>
-    </Skin>
 </MyGUI>
