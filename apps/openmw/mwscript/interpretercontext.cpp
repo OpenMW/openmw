@@ -252,15 +252,17 @@ namespace MWScript
     std::string InterpreterContext::getPCRace() const
     {
         MWBase::World *world = MWBase::Environment::get().getWorld();
-        ESM::NPC player = *world->getPlayer().getPlayer().get<ESM::NPC>()->mBase;
-        return player.mRace;
+        std::string race = world->getPlayer().getPlayer().get<ESM::NPC>()->mBase->mRace;
+        const ESM::Race* _race = world->getStore().get<ESM::Race>().find(race);
+        return _race->mName;
     }
 
     std::string InterpreterContext::getPCClass() const
     {
         MWBase::World *world = MWBase::Environment::get().getWorld();
-        ESM::NPC player = *world->getPlayer().getPlayer().get<ESM::NPC>()->mBase;
-        return player.mClass;
+        std::string _class = world->getPlayer().getPlayer().get<ESM::NPC>()->mBase->mClass;
+        const ESM::Class* __class = world->getStore().get<ESM::Class>().find(_class);
+        return __class->mName;
     }
     
     std::string InterpreterContext::getPCRank() const
