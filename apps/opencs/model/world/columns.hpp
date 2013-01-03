@@ -8,7 +8,7 @@ namespace CSMWorld
     template<typename ESXRecordT>
     struct FloatValueColumn : public Column<ESXRecordT>
     {
-        FloatValueColumn() : Column<ESXRecordT> ("Value") {}
+        FloatValueColumn() : Column<ESXRecordT> ("Value", ColumnBase::Display_Float) {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
         {
@@ -31,7 +31,7 @@ namespace CSMWorld
     template<typename ESXRecordT>
     struct StringIdColumn : public Column<ESXRecordT>
     {
-        StringIdColumn() : Column<ESXRecordT> ("ID") {}
+        StringIdColumn() : Column<ESXRecordT> ("ID", ColumnBase::Display_String) {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
         {
@@ -47,7 +47,7 @@ namespace CSMWorld
     template<typename ESXRecordT>
     struct RecordStateColumn : public Column<ESXRecordT>
     {
-        RecordStateColumn() : Column<ESXRecordT> ("*") {}
+        RecordStateColumn() : Column<ESXRecordT> ("*", ColumnBase::Display_Integer) {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
         {
@@ -78,7 +78,8 @@ namespace CSMWorld
     {
         int mType;
 
-        FixedRecordTypeColumn (int type) : Column<ESXRecordT> ("Type", 0), mType (type) {}
+        FixedRecordTypeColumn (int type)
+        : Column<ESXRecordT> ("Type", ColumnBase::Display_Integer, 0), mType (type) {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
         {

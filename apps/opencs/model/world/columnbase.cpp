@@ -1,8 +1,8 @@
 
 #include "columnbase.hpp"
 
-CSMWorld::ColumnBase::ColumnBase (const std::string& title, int flags)
-: mTitle (title), mFlags (flags)
+CSMWorld::ColumnBase::ColumnBase (const std::string& title, Display displayType, int flags)
+: mTitle (title), mDisplayType (displayType), mFlags (flags)
 {}
 
 CSMWorld::ColumnBase::~ColumnBase() {}
