@@ -165,7 +165,7 @@ bool ManualBulletShapeLoader::hasRootCollisionNode(Nif::Node* node)
 }
 
 void ManualBulletShapeLoader::handleNode(Nif::Node *node, int flags,
-   const Nif::Transformation *trafo,bool hasCollisionNode,bool isCollisionNode,bool raycastingOnly)
+   const Nif::Transformation *parentTrafo,bool hasCollisionNode,bool isCollisionNode,bool raycastingOnly)
 {
 
     // Accumulate the flags from all the child nodes. This works for all
@@ -208,23 +208,23 @@ void ManualBulletShapeLoader::handleNode(Nif::Node *node, int flags,
         }
     }
 
+    Nif::Transformation childTrafo = node->trafo;
 
-    if (trafo)
+    if (parentTrafo)
     {
 
         // Get a non-const reference to the node's data, since we're
         // overwriting it. TODO: Is this necessary?
-        Nif::Transformation &final = node->trafo;
 
         // For both position and rotation we have that:
         // final_vector = old_vector + old_rotation*new_vector*old_scale
-        final.pos = trafo->pos + trafo->rotation*final.pos*trafo->scale;
+        childTrafo.pos = parentTrafo->pos + parentTrafo->rotation*childTrafo.pos*parentTrafo->scale;
 
         // Merge the rotations together
-        final.rotation = trafo->rotation * final.rotation;
+        childTrafo.rotation = parentTrafo->rotation * childTrafo.rotation;
 
         // Scale
-        final.scale *= trafo->scale;
+        childTrafo.scale *= parentTrafo->scale;
 
     }
 
@@ -249,14 +249,14 @@ void ManualBulletShapeLoader::handleNode(Nif::Node *node, int flags,
         {
             if (!list[i].empty())
             {
-                handleNode(list[i].getPtr(), flags,&node->trafo,hasCollisionNode,isCollisionNode,raycastingOnly);
+                handleNode(list[i].getPtr(), flags,&childTrafo,hasCollisionNode,isCollisionNode,raycastingOnly);
             }
         }
     }
     else if (node->recType == Nif::RC_NiTriShape && (isCollisionNode || !hasCollisionNode))
     {
         cShape->mCollide = !(flags&0x800);
-        handleNiTriShape(dynamic_cast<Nif::NiTriShape*>(node), flags,node->trafo.rotation,node->trafo.pos,node->trafo.scale,raycastingOnly);
+        handleNiTriShape(dynamic_cast<Nif::NiTriShape *>(node), flags,childTrafo.rotation,childTrafo.pos,childTrafo.scale,raycastingOnly);
     }
     else if(node->recType == Nif::RC_RootCollisionNode)
     {
@@ -265,7 +265,7 @@ void ManualBulletShapeLoader::handleNode(Nif::Node *node, int flags,
         for (int i=0; i<n; i++)
         {
             if (!list[i].empty())
-                handleNode(list[i].getPtr(), flags,&node->trafo, hasCollisionNode,true,raycastingOnly);
+                handleNode(list[i].getPtr(), flags,&childTrafo, hasCollisionNode,true,raycastingOnly);
         }
     }
 }
