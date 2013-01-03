@@ -119,6 +119,14 @@ public:
       getHT(x);
   }
 
+  template <typename X>
+  void getHNOT(X &x, const char* name, int size)
+  {
+      assert(sizeof(X) == size);
+      if(isNextSub(name))
+          getHT(x);
+  }
+
   int64_t getHNLong(const char *name);
 
   // Get data of a given type/size, including subrecord header

@@ -70,6 +70,9 @@ public:
 
   // No idea - occurs ONCE in Morrowind.esm, for an activator
   char mUnam;
+  
+  // Track deleted references. 0 - not deleted, 1 - deleted, but respawns, 2 - deleted and does not respawn.
+  int mDeleted;
 
   // Occurs in Tribunal.esm, eg. in the cell "Mournhold, Plaza
   // Brindisi Dorom", where it has the value 100. Also only for

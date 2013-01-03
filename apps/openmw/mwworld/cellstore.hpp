@@ -59,6 +59,13 @@ namespace MWWorld
     /// on miss
     void load(ESM::CellRef &ref, const MWWorld::ESMStore &esmStore)
     {
+        // Skip this when reference was deleted.
+        // TODO: Support respawning references, in this case, we need to track it somehow.
+        if (ref.mDeleted) {
+            mList.erase(ref.mRefnum);
+            return;
+        }
+        
         // for throwing exception on unhandled record type
         const MWWorld::Store<X> &store = esmStore.get<X>();
         const X *ptr = store.search(ref.mRefID);

@@ -213,7 +213,24 @@ bool Cell::getNextRef(ESMReader &esm, CellRef &ref)
     // missing
     ref.mScale = 1.0;
     esm.getHNOT(ref.mScale, "XSCL");
-
+    
+    // TODO: support loading references from saves, there are tons of keys not recognized yet.
+    // The following is just an incomplete list.
+    if (esm.isNextSub("ACTN"))
+        esm.skipHSub();
+    if (esm.isNextSub("STPR"))
+        esm.skipHSub();
+    if (esm.isNextSub("ACDT"))
+        esm.skipHSub();
+    if (esm.isNextSub("ACSC"))
+        esm.skipHSub();
+    if (esm.isNextSub("ACSL"))
+        esm.skipHSub();
+    if (esm.isNextSub("CHRD"))
+        esm.skipHSub();
+    else if (esm.isNextSub("CRED")) // ???
+        esm.skipHSub();
+    
     ref.mOwner = esm.getHNOString("ANAM");
     ref.mGlob = esm.getHNOString("BNAM");
     ref.mSoul = esm.getHNOString("XSOL");
@@ -251,7 +268,7 @@ bool Cell::getNextRef(ESMReader &esm, CellRef &ref)
     esm.getHNOT(ref.mUnam, "UNAM");
     esm.getHNOT(ref.mFltv, "FLTV");
 
-    esm.getHNT(ref.mPos, "DATA", 24);
+    esm.getHNOT(ref.mPos, "DATA", 24);
     
     // Number of references in the cell? Maximum once in each cell,
     // but not always at the beginning, and not always right. In other
@@ -265,6 +282,13 @@ bool Cell::getNextRef(ESMReader &esm, CellRef &ref)
         esm.getHT(ref.mNam0);
         //esm.getHNOT(NAM0, "NAM0");
     }
+    
+    if (esm.isNextSub("DELE")) {
+        esm.skipHSub();
+        ref.mDeleted = 2; // Deleted, will not respawn.
+        // TODO: find out when references do respawn.
+    } else
+        ref.mDeleted = 0;
 
     return true;
 }

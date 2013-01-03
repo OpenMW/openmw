@@ -61,11 +61,15 @@ namespace MWWorld
             while (mCell->getNextRef (esm[index], ref))
             {
                 std::string lowerCase;
+                if (ref.mDeleted) {
+                    // Right now, don't do anything. Wehere is "listRefs" actually used, anyway?
+                    //  Skipping for now...
+                    continue;
+                }
 
                 std::transform (ref.mRefID.begin(), ref.mRefID.end(), std::back_inserter (lowerCase),
                     (int(*)(int)) std::tolower);
 
-                // TODO: Fully support deletion of references.
                 mIds.push_back (lowerCase);
             }
         }
@@ -97,7 +101,6 @@ namespace MWWorld
                 std::transform (ref.mRefID.begin(), ref.mRefID.end(), std::back_inserter (lowerCase),
                     (int(*)(int)) std::tolower);
 
-                // TODO: Fully support deletion of references.
                 int rec = store.find(ref.mRefID);
 
                 ref.mRefID = lowerCase;
