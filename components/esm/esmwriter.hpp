@@ -95,6 +95,7 @@ private:
     std::ostream* m_stream;
     std::streampos m_headerPos;
     ToUTF8::FromType m_encoding;
+    ToUTF8::Utf8Encoder m_encoder;
     int m_recordCount;
 
     HEDRstruct m_header;

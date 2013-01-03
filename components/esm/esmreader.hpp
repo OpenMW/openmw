@@ -20,6 +20,8 @@ class ESMReader
 {
 public:
 
+  ESMReader(void);
+
   /*************************************************************************
    *
    *  Public type definitions
@@ -244,9 +246,13 @@ private:
   // Special file signifier (see SpecialFile enum above)
   int mSpf;
 
+  // Buffer for ESM strings
+  std::vector<char> mBuffer;
+
   SaveData mSaveData;
   MasterList mMasters;
   ToUTF8::FromType mEncoding;
+  ToUTF8::Utf8Encoder mEncoder;
 };
 }
 #endif
