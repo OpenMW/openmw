@@ -51,7 +51,7 @@ ManualBulletShapeLoader::~ManualBulletShapeLoader()
 }
 
 
-btQuaternion ManualBulletShapeLoader::getbtQuat(Ogre::Matrix3 &m)
+btQuaternion ManualBulletShapeLoader::getbtQuat(Ogre::Matrix3 const &m)
 {
     Ogre::Quaternion oquat(m);
     btQuaternion quat;
@@ -62,7 +62,7 @@ btQuaternion ManualBulletShapeLoader::getbtQuat(Ogre::Matrix3 &m)
     return quat;
 }
 
-btVector3 ManualBulletShapeLoader::getbtVector(Ogre::Vector3 &v)
+btVector3 ManualBulletShapeLoader::getbtVector(Ogre::Vector3 const &v)
 {
     return btVector3(v[0], v[1], v[2]);
 }
@@ -138,7 +138,7 @@ void ManualBulletShapeLoader::loadResource(Ogre::Resource *resource)
     }
 }
 
-bool ManualBulletShapeLoader::hasRootCollisionNode(Nif::Node* node)
+bool ManualBulletShapeLoader::hasRootCollisionNode(Nif::Node const * node)
 {
     if (node->recType == Nif::RC_NiNode)
     {
@@ -164,7 +164,7 @@ bool ManualBulletShapeLoader::hasRootCollisionNode(Nif::Node* node)
     return false;
 }
 
-void ManualBulletShapeLoader::handleNode(Nif::Node *node, int flags,
+void ManualBulletShapeLoader::handleNode(Nif::Node const *node, int flags,
    const Nif::Transformation *parentTrafo,bool hasCollisionNode,bool isCollisionNode,bool raycastingOnly)
 {
 
@@ -181,7 +181,7 @@ void ManualBulletShapeLoader::handleNode(Nif::Node *node, int flags,
     }
 
     // Check for extra data
-    Nif::Extra *e = node;
+    Nif::Extra const *e = node;
     while (!e->extra.empty())
     {
         // Get the next extra data in the list
@@ -232,7 +232,7 @@ void ManualBulletShapeLoader::handleNode(Nif::Node *node, int flags,
     {
 
         
-        btVector3 boxsize = getbtVector((node->boundXYZ));
+        btVector3 boxsize = getbtVector(node->boundXYZ);
         cShape->boxTranslation = node->boundPos;
         cShape->boxRotation = node->boundRot;
 
@@ -243,7 +243,7 @@ void ManualBulletShapeLoader::handleNode(Nif::Node *node, int flags,
     // For NiNodes, loop through children
     if (node->recType == Nif::RC_NiNode)
     {
-        Nif::NodeList &list = ((Nif::NiNode*)node)->children;
+        Nif::NodeList const &list = ((Nif::NiNode const *)node)->children;
         int n = list.length();
         for (int i=0; i<n; i++)
         {
@@ -256,7 +256,7 @@ void ManualBulletShapeLoader::handleNode(Nif::Node *node, int flags,
     else if (node->recType == Nif::RC_NiTriShape && (isCollisionNode || !hasCollisionNode))
     {
         cShape->mCollide = !(flags&0x800);
-        handleNiTriShape(dynamic_cast<Nif::NiTriShape *>(node), flags,childTrafo.rotation,childTrafo.pos,childTrafo.scale,raycastingOnly);
+        handleNiTriShape(dynamic_cast<Nif::NiTriShape const *>(node), flags,childTrafo.rotation,childTrafo.pos,childTrafo.scale,raycastingOnly);
     }
     else if(node->recType == Nif::RC_RootCollisionNode)
     {
@@ -270,7 +270,7 @@ void ManualBulletShapeLoader::handleNode(Nif::Node *node, int flags,
     }
 }
 
-void ManualBulletShapeLoader::handleNiTriShape(Nif::NiTriShape *shape, int flags,Ogre::Matrix3 parentRot,Ogre::Vector3 parentPos,float parentScale,
+void ManualBulletShapeLoader::handleNiTriShape(Nif::NiTriShape const *shape, int flags,Ogre::Matrix3 parentRot,Ogre::Vector3 parentPos,float parentScale,
     bool raycastingOnly)
 {
     assert(shape != NULL);
