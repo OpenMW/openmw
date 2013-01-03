@@ -83,7 +83,6 @@ book formatText(std::string text,book mBook,int maxLine, int lineSize)
 
 MWGui::JournalWindow::JournalWindow (MWBase::WindowManager& parWindowManager)
     : WindowBase("openmw_journal.layout", parWindowManager)
-    , mLastPos(0)
     , mPageNumber(0)
 {
     mMainWidget->setVisible(false);
@@ -177,7 +176,7 @@ void MWGui::JournalWindow::displayRightText(std::string text)
 }
 
 
-void MWGui::JournalWindow::notifyNextPage(MyGUI::WidgetPtr _sender)
+void MWGui::JournalWindow::notifyNextPage(MyGUI::Widget* _sender)
 {
     if(mPageNumber < int(mLeftPages.size())-1)
     {
@@ -189,7 +188,7 @@ void MWGui::JournalWindow::notifyNextPage(MyGUI::WidgetPtr _sender)
     }
 }
 
-void MWGui::JournalWindow::notifyPrevPage(MyGUI::WidgetPtr _sender)
+void MWGui::JournalWindow::notifyPrevPage(MyGUI::Widget* _sender)
 {
     if(mPageNumber > 0)
     {
