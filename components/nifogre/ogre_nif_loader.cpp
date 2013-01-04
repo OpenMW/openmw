@@ -536,11 +536,23 @@ static Ogre::String getMaterial(const NiTriShape *shape, const Ogre::String &nam
              * textures from tga to dds for increased load speed, but all
              * texture file name references were kept as .tga.
              */
-            texName = "textures\\" + st->filename;
-            if(!Ogre::ResourceGroupManager::getSingleton().resourceExistsInAnyGroup(texName))
+
+            static const char * path = "textures\\";
+
+            texName = path + st->filename;
+            
+            Ogre::String::size_type pos = texName.rfind('.');
+
+            if (texName.compare (pos, texName.size () - pos, ".dds") != 0)
             {
-                Ogre::String::size_type pos = texName.rfind('.');
+                // since we know all (GOTY edition or less) textures end
+                // in .dds, we change the extension
                 texName.replace(pos, texName.length(), ".dds");
+
+                // if it turns out that the above wasn't true in all cases (not for vanilla, but maybe mods)
+                // verify, and revert if false (this call succeeds quickly, but fails slowly)
+                if(!Ogre::ResourceGroupManager::getSingleton().resourceExistsInAnyGroup(texName))
+                    texName = path + st->filename;
             }
         }
         else warn("Found internal texture, ignoring.");
