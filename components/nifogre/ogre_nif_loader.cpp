@@ -49,10 +49,21 @@
 
 typedef unsigned char ubyte;
 
-using namespace std;
-using namespace Nif;
-using namespace NifOgre;
+namespace Nif
+{
 
+// These operators allow the Nif extra data types to be stored in an Ogre::Any
+// object, which can then be stored in user object bindings on the nodes
+
+// TODO: Do something useful
+std::ostream& operator<<(std::ostream &o, const Nif::NiTextKeyExtraData&)
+{ return o; }
+
+} // namespace Nif
+
+
+namespace NifOgre
+{
 
 // Helper class that computes the bounding box and of a mesh
 class BoundsFinder
@@ -63,7 +74,7 @@ class BoundsFinder
 
         MaxMinFinder()
         {
-            min = numeric_limits<float>::infinity();
+            min = std::numeric_limits<float>::infinity();
             max = -min;
         }
 
@@ -198,6 +209,17 @@ void buildBones(Ogre::Skeleton *skel, const Nif::Node *node, std::vector<Nif::Ni
         ctrl = ctrl->next;
     }
 
+    Nif::ExtraPtr e = node->extra;
+    while(!e.empty())
+    {
+        if(e->recType == Nif::RC_NiTextKeyExtraData)
+        {
+            const Nif::NiTextKeyExtraData *tk = static_cast<const Nif::NiTextKeyExtraData*>(e.getPtr());
+            bone->getUserObjectBindings().setUserAny(tk->recName, Ogre::Any(*tk));
+        }
+        e = e->extra;
+    }
+
     const Nif::NiNode *ninode = dynamic_cast<const Nif::NiNode*>(node);
     if(ninode)
     {
@@ -270,16 +292,16 @@ void loadResource(Ogre::Resource *resource)
         Nif::NiKeyframeData *kf = kfc->data.getPtr();
 
         /* Get the keyframes and make sure they're sorted first to last */
-        QuaternionKeyList quatkeys = kf->mRotations;
-        Vector3KeyList trankeys = kf->mTranslations;
-        FloatKeyList scalekeys = kf->mScales;
+        Nif::QuaternionKeyList quatkeys = kf->mRotations;
+        Nif::Vector3KeyList trankeys = kf->mTranslations;
+        Nif::FloatKeyList scalekeys = kf->mScales;
         std::sort(quatkeys.mKeys.begin(), quatkeys.mKeys.end(), KeyTimeSort<Ogre::Quaternion>());
         std::sort(trankeys.mKeys.begin(), trankeys.mKeys.end(), KeyTimeSort<Ogre::Vector3>());
         std::sort(scalekeys.mKeys.begin(), scalekeys.mKeys.end(), KeyTimeSort<float>());
 
-        QuaternionKeyList::VecType::const_iterator quatiter = quatkeys.mKeys.begin();
-        Vector3KeyList::VecType::const_iterator traniter = trankeys.mKeys.begin();
-        FloatKeyList::VecType::const_iterator scaleiter = scalekeys.mKeys.begin();
+        Nif::QuaternionKeyList::VecType::const_iterator quatiter = quatkeys.mKeys.begin();
+        Nif::Vector3KeyList::VecType::const_iterator traniter = trankeys.mKeys.begin();
+        Nif::FloatKeyList::VecType::const_iterator scaleiter = scalekeys.mKeys.begin();
 
         Ogre::Bone *bone = skel->getBone(targets[i]);
         const Ogre::Quaternion startquat = bone->getInitialOrientation();
@@ -347,7 +369,7 @@ void loadResource(Ogre::Resource *resource)
                 kframe->setRotation(curquat);
             else
             {
-                QuaternionKeyList::VecType::const_iterator last = quatiter-1;
+                Nif::QuaternionKeyList::VecType::const_iterator last = quatiter-1;
                 float diff = (curtime-last->mTime) / (quatiter->mTime-last->mTime);
                 kframe->setRotation(Ogre::Quaternion::nlerp(diff, lastquat, curquat));
             }
@@ -355,7 +377,7 @@ void loadResource(Ogre::Resource *resource)
                 kframe->setTranslate(curtrans);
             else
             {
-                Vector3KeyList::VecType::const_iterator last = traniter-1;
+                Nif::Vector3KeyList::VecType::const_iterator last = traniter-1;
                 float diff = (curtime-last->mTime) / (traniter->mTime-last->mTime);
                 kframe->setTranslate(lasttrans + ((curtrans-lasttrans)*diff));
             }
@@ -363,7 +385,7 @@ void loadResource(Ogre::Resource *resource)
                 kframe->setScale(curscale);
             else
             {
-                FloatKeyList::VecType::const_iterator last = scaleiter-1;
+                Nif::FloatKeyList::VecType::const_iterator last = scaleiter-1;
                 float diff = (curtime-last->mTime) / (scaleiter->mTime-last->mTime);
                 kframe->setScale(lastscale + ((curscale-lastscale)*diff));
             }
@@ -485,7 +507,7 @@ static void fail(const std::string &msg)
 
 
 public:
-static Ogre::String getMaterial(const NiTriShape *shape, const Ogre::String &name, const Ogre::String &group)
+static Ogre::String getMaterial(const Nif::NiTriShape *shape, const Ogre::String &name, const Ogre::String &group)
 {
     Ogre::MaterialManager &matMgr = Ogre::MaterialManager::getSingleton();
     Ogre::MaterialPtr material = matMgr.getByName(name);
@@ -505,24 +527,24 @@ static Ogre::String getMaterial(const NiTriShape *shape, const Ogre::String &nam
     bool vertexColour = (shape->data->colors.size() != 0);
 
     // These are set below if present
-    const NiTexturingProperty *t = NULL;
-    const NiMaterialProperty *m = NULL;
-    const NiAlphaProperty *a = NULL;
+    const Nif::NiTexturingProperty *t = NULL;
+    const Nif::NiMaterialProperty *m = NULL;
+    const Nif::NiAlphaProperty *a = NULL;
 
     // Scan the property list for material information
-    const PropertyList &list = shape->props;
+    const Nif::PropertyList &list = shape->props;
     for (size_t i = 0;i < list.length();i++)
     {
         // Entries may be empty
         if (list[i].empty()) continue;
 
-        const Property *pr = list[i].getPtr();
-        if (pr->recType == RC_NiTexturingProperty)
-            t = static_cast<const NiTexturingProperty*>(pr);
-        else if (pr->recType == RC_NiMaterialProperty)
-            m = static_cast<const NiMaterialProperty*>(pr);
-        else if (pr->recType == RC_NiAlphaProperty)
-            a = static_cast<const NiAlphaProperty*>(pr);
+        const Nif::Property *pr = list[i].getPtr();
+        if (pr->recType == Nif::RC_NiTexturingProperty)
+            t = static_cast<const Nif::NiTexturingProperty*>(pr);
+        else if (pr->recType == Nif::RC_NiMaterialProperty)
+            m = static_cast<const Nif::NiMaterialProperty*>(pr);
+        else if (pr->recType == Nif::RC_NiAlphaProperty)
+            a = static_cast<const Nif::NiAlphaProperty*>(pr);
         else
             warn("Skipped property type: "+pr->recName);
     }
@@ -530,7 +552,7 @@ static Ogre::String getMaterial(const NiTriShape *shape, const Ogre::String &nam
     // Texture
     if (t && t->textures[0].inUse)
     {
-        NiSourceTexture *st = t->textures[0].texture.getPtr();
+        Nif::NiSourceTexture *st = t->textures[0].texture.getPtr();
         if (st->external)
         {
             /* Bethesda at some at some point converted all their BSA
@@ -991,7 +1013,7 @@ public:
 
         if(node->recType == Nif::RC_NiTriShape)
         {
-            const NiTriShape *shape = dynamic_cast<const NiTriShape*>(node);
+            const Nif::NiTriShape *shape = dynamic_cast<const Nif::NiTriShape*>(node);
 
             Ogre::MeshManager &meshMgr = Ogre::MeshManager::getSingleton();
             std::string fullname = mName+"@shape="+shape->name;
@@ -1220,3 +1242,5 @@ extern "C" void ogre_insertTexture(char* name, uint32_t width, uint32_t height, 
 
 
 */
+
+} // nsmaepace NifOgre
