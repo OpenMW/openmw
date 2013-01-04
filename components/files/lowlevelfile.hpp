@@ -3,6 +3,8 @@
 
 #include <OgrePlatform.h>
 
+#include <cstdlib>
+
 #define FILE_API_STDIO	0
 #define FILE_API_POSIX	1
 #define FILE_API_WIN32	2
