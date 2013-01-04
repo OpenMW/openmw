@@ -52,9 +52,8 @@ struct EntityList {
 };
 
 
-/** This holds a list of meshes along with the names of their parent nodes
- */
-typedef std::vector< std::pair<Ogre::MeshPtr,std::string> > MeshPairList;
+/** This holds a list of mesh names along with the names of their parent nodes */
+typedef std::vector< std::pair<std::string,std::string> > MeshPairList;
 
 /** Manual resource loader for NIF meshes. This is the main class
     responsible for translating the internal NIF mesh structure into

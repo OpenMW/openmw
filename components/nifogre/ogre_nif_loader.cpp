@@ -1005,7 +1005,7 @@ public:
                 mesh->setAutoBuildEdgeLists(false);
             }
 
-            meshes.push_back(std::make_pair(mesh, shape->name));
+            meshes.push_back(std::make_pair(mesh->getName(), shape->name));
         }
         else if(node->recType != Nif::RC_NiNode && node->recType != Nif::RC_RootCollisionNode &&
                 node->recType != Nif::RC_NiRotatingParticles)
@@ -1072,7 +1072,7 @@ EntityList NIFLoader::createEntities(Ogre::SceneNode *parent, TextKeyMap *textke
     Ogre::SceneManager *sceneMgr = parent->getCreator();
     for(size_t i = 0;i < meshes.size();i++)
     {
-        entitylist.mEntities.push_back(sceneMgr->createEntity(meshes[i].first->getName()));
+        entitylist.mEntities.push_back(sceneMgr->createEntity(meshes[i].first));
         Ogre::Entity *entity = entitylist.mEntities.back();
         if(!entitylist.mSkelBase && entity->hasSkeleton())
             entitylist.mSkelBase = entity;
@@ -1118,7 +1118,7 @@ EntityList NIFLoader::createEntities(Ogre::Entity *parent, const std::string &bo
     std::transform(filter.begin()+4, filter.end(), filter.begin()+4, ::tolower);
     for(size_t i = 0;i < meshes.size();i++)
     {
-        Ogre::Entity *ent = sceneMgr->createEntity(meshes[i].first->getName());
+        Ogre::Entity *ent = sceneMgr->createEntity(meshes[i].first);
         if(ent->hasSkeleton())
         {
             std::transform(meshes[i].second.begin(), meshes[i].second.end(), meshes[i].second.begin(), ::tolower);
