@@ -43,6 +43,7 @@
 
 #include <extern/shiny/Main/Factory.hpp>
 
+#include <components/nif/node.hpp>
 #include <components/settings/settings.hpp>
 #include <components/nifoverrides/nifoverrides.hpp>
 
@@ -219,7 +220,7 @@ struct KeyTimeSort
 };
 
 
-typedef std::map<std::string,NIFSkeletonLoader,ciLessBoost> LoaderMap;
+typedef std::map<std::string,NIFSkeletonLoader> LoaderMap;
 static LoaderMap sLoaders;
 
 public:
@@ -918,7 +919,7 @@ class NIFMeshLoader : Ogre::ManualResourceLoader
     }
 
 
-    typedef std::map<std::string,NIFMeshLoader,ciLessBoost> LoaderMap;
+    typedef std::map<std::string,NIFMeshLoader> LoaderMap;
     static LoaderMap sLoaders;
 
 public:
@@ -1101,13 +1102,6 @@ EntityList NIFLoader::createEntities(Ogre::SceneNode *parent, TextKeyMap *textke
     return entitylist;
 }
 
-struct checklow {
-    bool operator()(const char &a, const char &b) const
-    {
-        return ::tolower(a) == ::tolower(b);
-    }
-};
-
 EntityList NIFLoader::createEntities(Ogre::Entity *parent, const std::string &bonename,
                                      Ogre::SceneNode *parentNode,
                                      const std::string &name,
@@ -1120,18 +1114,19 @@ EntityList NIFLoader::createEntities(Ogre::Entity *parent, const std::string &bo
         return entitylist;
 
     Ogre::SceneManager *sceneMgr = parentNode->getCreator();
-    std::string filter = "Tri "+bonename;
+    std::string filter = "tri "+bonename;
+    std::transform(filter.begin()+4, filter.end(), filter.begin()+4, ::tolower);
     for(size_t i = 0;i < meshes.size();i++)
     {
         Ogre::Entity *ent = sceneMgr->createEntity(meshes[i].first->getName());
         if(ent->hasSkeleton())
         {
+            std::transform(meshes[i].second.begin(), meshes[i].second.end(), meshes[i].second.begin(), ::tolower);
+
             if(meshes[i].second.length() < filter.length() ||
-               std::mismatch(filter.begin(), filter.end(), meshes[i].second.begin(), checklow()).first != filter.end())
+               meshes[i].second.compare(0, filter.length(), filter) != 0)
             {
                 sceneMgr->destroyEntity(ent);
-                meshes.erase(meshes.begin()+i);
-                i--;
                 continue;
             }
             if(!entitylist.mSkelBase)

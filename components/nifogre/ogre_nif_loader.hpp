@@ -30,23 +30,6 @@
 
 #include <vector>
 #include <string>
-#include <cassert>
-#include <boost/algorithm/string.hpp>
-
-#include "../nif/node.hpp"
-
-#include <libs/platform/strings.h>
-
-class BoundsFinder;
-
-struct ciLessBoost : std::binary_function<std::string, std::string, bool>
-{
-    bool operator() (const std::string & s1, const std::string & s2) const
-    {
-        //case insensitive version of is_less
-        return boost::algorithm::lexicographical_compare(s1, s2, boost::algorithm::is_iless());
-    }
-};
 
 namespace Nif
 {
