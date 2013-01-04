@@ -249,6 +249,13 @@ public:
     //std::cout << "find(" << pattern << ", " << recursive
     //          << ", " << dirs << ")\n";
     StringVectorPtr ptr = StringVectorPtr(new StringVector());
+
+    BSAFile::FileList const & files = arc.getList ();
+
+    if (pattern == "*")
+        for (BSAFile::FileList::const_iterator i = files.begin (); i != files.end (); ++i)
+            ptr->push_back (i->name);
+
     return ptr;
   }
 
