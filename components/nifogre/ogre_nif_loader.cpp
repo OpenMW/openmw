@@ -537,14 +537,11 @@ static Ogre::String getMaterial(const NiTriShape *shape, const Ogre::String &nam
              * textures from tga to dds for increased load speed, but all
              * texture file name references were kept as .tga.
              */
-
-            static const char * path = "textures\\";
+            static const char path[] = "textures\\";
 
             texName = path + st->filename;
-            
             Ogre::String::size_type pos = texName.rfind('.');
-
-            if (texName.compare (pos, texName.size () - pos, ".dds") != 0)
+            if(pos != Ogre::String::npos && texName.compare(pos, texName.length() - pos, ".dds") != 0)
             {
                 // since we know all (GOTY edition or less) textures end
                 // in .dds, we change the extension
