@@ -42,6 +42,7 @@ namespace MWGui
         Ogre::Rectangle2D* mRectangle;
         Ogre::MaterialPtr mBackgroundMaterial;
 
+        Ogre::StringVectorPtr mResources;
 
         bool mLoadingOn;
 
