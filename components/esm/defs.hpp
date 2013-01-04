@@ -1,6 +1,16 @@
 #ifndef OPENMW_ESM_DEFS_H
 #define OPENMW_ESM_DEFS_H
 
+#if _MSC_VER >= 1600
+#define OPENMW_ESM_ENABLE_CPP11_MOVE
+#define OPENMW_ESM_DEFINE_CPP11_MOVE_OPS(Class)	\
+	Class () {} \
+	Class (Class const & that) { copy (*this, that); } \
+	Class (Class && that) { move (*this, that); } \
+	Class & operator = (Class const & that) { copy (*this, that); return *this; } \
+	Class & operator = (Class && that) { move (*this, that); return *this; }
+#endif
+
 #include <libs/platform/stdint.h>
 
 namespace ESM
