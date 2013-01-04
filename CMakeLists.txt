@@ -534,7 +534,9 @@ if (WIN32)
 		set_target_properties(omwlauncher PROPERTIES COMPILE_FLAGS ${WARNINGS})
 	endif (BUILD_LAUNCHER)
     set_target_properties(openmw PROPERTIES COMPILE_FLAGS ${WARNINGS})
-	set_target_properties(esmtool PROPERTIES COMPILE_FLAGS ${WARNINGS})
+    if (BUILD_ESMTOOL)
+        set_target_properties(esmtool PROPERTIES COMPILE_FLAGS ${WARNINGS})
+    endif (BUILD_ESMTOOL)
   endif(MSVC)
 
   # Same for MinGW
