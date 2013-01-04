@@ -2,7 +2,6 @@
 #include <fstream>
 #include <cassert>
 #include <stdexcept>
-#include <typeinfo>
 
 #include "../to_utf8.hpp"
 
@@ -55,7 +54,7 @@ std::string getFirstLine(const std::string &filename)
 
 int main()
 {
-    testEncoder(ToUTF8::WINDOWS_1251, "data/russian-win1251.txt", "data/russian-utf8.txt");
-    testEncoder(ToUTF8::WINDOWS_1252, "data/french-win1252.txt", "data/french-utf8.txt");
+    testEncoder(ToUTF8::WINDOWS_1251, "test_data/russian-win1251.txt", "test_data/russian-utf8.txt");
+    testEncoder(ToUTF8::WINDOWS_1252, "test_data/french-win1252.txt", "test_data/french-utf8.txt");
     return 0;
 }
