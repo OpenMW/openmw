@@ -14,6 +14,7 @@ Animation::Animation()
     : mInsert(NULL)
     , mTime(0.0f)
     , mSkipFrame(false)
+    , mAnimState(NULL)
 {
 }
 
@@ -45,6 +46,8 @@ void Animation::createEntityList(Ogre::SceneNode *node, const std::string &model
             Ogre::AnimationState *state = as.getNext();
             state->setEnabled(true);
             state->setLoop(false);
+            if(!mAnimState)
+                mAnimState = state;
         }
     }
 }
@@ -155,16 +158,8 @@ void Animation::runAnimation(float timepassed)
             }
         }
 
-        if(mEntityList.mSkelBase)
-        {
-            Ogre::AnimationStateSet *aset = mEntityList.mSkelBase->getAllAnimationStates();
-            Ogre::AnimationStateIterator as = aset->getAnimationStateIterator();
-            while(as.hasMoreElements())
-            {
-                Ogre::AnimationState *state = as.getNext();
-                state->setTimePosition(mTime);
-            }
-        }
+        if(mAnimState)
+            mAnimState->setTimePosition(mTime);
     }
     mSkipFrame = false;
 }

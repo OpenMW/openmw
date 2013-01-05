@@ -40,6 +40,7 @@ protected:
 
     NifOgre::EntityList mEntityList;
     NifOgre::TextKeyMap mTextKeys;
+    Ogre::AnimationState *mAnimState;
 
     bool findGroupTimes(const std::string &groupname, GroupTimes *times);
 
