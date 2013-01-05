@@ -43,6 +43,7 @@ namespace NifOgre
 
 // FIXME: These should not be in NifOgre, it works agnostic of what model format is used
 typedef std::multimap<float,std::string> TextKeyMap;
+static const char sTextKeyExtraDataID[] = "TextKeyExtraData";
 struct EntityList {
     std::vector<Ogre::Entity*> mEntities;
     Ogre::Entity *mSkelBase;
@@ -77,8 +78,7 @@ public:
                                      const std::string &name,
                                      const std::string &group="General");
 
-    static EntityList createEntities(Ogre::SceneNode *parent,
-                                     TextKeyMap *textkeys,
+    static EntityList createEntities(Ogre::SceneNode *parentNode,
                                      const std::string &name,
                                      const std::string &group="General");
 };

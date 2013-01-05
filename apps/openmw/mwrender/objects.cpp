@@ -94,7 +94,7 @@ void Objects::insertMesh (const MWWorld::Ptr& ptr, const std::string& mesh)
     assert(insert);
 
     Ogre::AxisAlignedBox bounds = Ogre::AxisAlignedBox::BOX_NULL;
-    NifOgre::EntityList entities = NifOgre::NIFLoader::createEntities(insert, NULL, mesh);
+    NifOgre::EntityList entities = NifOgre::NIFLoader::createEntities(insert, mesh);
     for(size_t i = 0;i < entities.mEntities.size();i++)
     {
         const Ogre::AxisAlignedBox &tmp = entities.mEntities[i]->getBoundingBox();

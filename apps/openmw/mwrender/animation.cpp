@@ -1,6 +1,6 @@
 #include "animation.hpp"
 
-#include <OgreHardwarePixelBuffer.h>
+#include <OgreSkeletonManager.h>
 #include <OgreSkeletonInstance.h>
 #include <OgreEntity.h>
 #include <OgreBone.h>
@@ -36,7 +36,7 @@ void Animation::createEntityList(Ogre::SceneNode *node, const std::string &model
     mInsert = node;
     assert(mInsert);
 
-    mEntityList = NifOgre::NIFLoader::createEntities(mInsert, &mTextKeys, model);
+    mEntityList = NifOgre::NIFLoader::createEntities(mInsert, model);
     if(mEntityList.mSkelBase)
     {
         Ogre::AnimationStateSet *aset = mEntityList.mSkelBase->getAllAnimationStates();
@@ -48,6 +48,21 @@ void Animation::createEntityList(Ogre::SceneNode *node, const std::string &model
             state->setLoop(false);
             if(!mAnimState)
                 mAnimState = state;
+        }
+
+        // Would be nice if Ogre::SkeletonInstance allowed access to the 'master' Ogre::SkeletonPtr.
+        Ogre::SkeletonManager &skelMgr = Ogre::SkeletonManager::getSingleton();
+        Ogre::SkeletonPtr skel = skelMgr.getByName(mEntityList.mSkelBase->getSkeleton()->getName());
+        Ogre::Skeleton::BoneIterator iter = skel->getBoneIterator();
+        while(iter.hasMoreElements())
+        {
+            Ogre::Bone *bone = iter.getNext();
+            const Ogre::Any &data = bone->getUserObjectBindings().getUserAny(NifOgre::sTextKeyExtraDataID);
+            if(!data.isEmpty())
+            {
+                mTextKeys = Ogre::any_cast<NifOgre::TextKeyMap>(data);
+                break;
+            }
         }
     }
 }

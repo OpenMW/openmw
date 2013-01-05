@@ -329,7 +329,7 @@ void buildBones(Ogre::Skeleton *skel, const Nif::Node *node, std::vector<Nif::Ni
         if(e->recType == Nif::RC_NiTextKeyExtraData)
         {
             const Nif::NiTextKeyExtraData *tk = static_cast<const Nif::NiTextKeyExtraData*>(e.getPtr());
-            bone->getUserObjectBindings().setUserAny("TextKeyExtraData", Ogre::Any(extractTextKeys(tk)));
+            bone->getUserObjectBindings().setUserAny(sTextKeyExtraDataID, Ogre::Any(extractTextKeys(tk)));
         }
         e = e->extra;
     }
@@ -1083,7 +1083,7 @@ MeshPairList NIFLoader::load(std::string name, std::string skelName, const std::
     return meshes;
 }
 
-EntityList NIFLoader::createEntities(Ogre::SceneNode *parent, TextKeyMap *textkeys, const std::string &name, const std::string &group)
+EntityList NIFLoader::createEntities(Ogre::SceneNode *parentNode, const std::string &name, const std::string &group)
 {
     EntityList entitylist;
 
@@ -1091,7 +1091,7 @@ EntityList NIFLoader::createEntities(Ogre::SceneNode *parent, TextKeyMap *textke
     if(meshes.size() == 0)
         return entitylist;
 
-    Ogre::SceneManager *sceneMgr = parent->getCreator();
+    Ogre::SceneManager *sceneMgr = parentNode->getCreator();
     for(size_t i = 0;i < meshes.size();i++)
     {
         entitylist.mEntities.push_back(sceneMgr->createEntity(meshes[i].first));
@@ -1100,34 +1100,16 @@ EntityList NIFLoader::createEntities(Ogre::SceneNode *parent, TextKeyMap *textke
             entitylist.mSkelBase = entity;
     }
 
-    if(entitylist.mSkelBase && textkeys)
-    {
-        // Would be nice if Ogre::SkeletonInstance allowed access to the 'master' Ogre::SkeletonPtr.
-        Ogre::SkeletonManager &skelMgr = Ogre::SkeletonManager::getSingleton();
-        Ogre::SkeletonPtr skel = skelMgr.getByName(entitylist.mSkelBase->getSkeleton()->getName());
-        Ogre::Skeleton::BoneIterator iter = skel->getBoneIterator();
-        while(iter.hasMoreElements())
-        {
-            Ogre::Bone *bone = iter.getNext();
-            const Ogre::Any &data = bone->getUserObjectBindings().getUserAny("TextKeyExtraData");
-            if(!data.isEmpty())
-            {
-                *textkeys = Ogre::any_cast<TextKeyMap>(data);
-                break;
-            }
-        }
-    }
-
     if(entitylist.mSkelBase)
     {
-        parent->attachObject(entitylist.mSkelBase);
+        parentNode->attachObject(entitylist.mSkelBase);
         for(size_t i = 0;i < entitylist.mEntities.size();i++)
         {
             Ogre::Entity *entity = entitylist.mEntities[i];
             if(entity != entitylist.mSkelBase && entity->hasSkeleton())
             {
                 entity->shareSkeletonInstanceWith(entitylist.mSkelBase);
-                parent->attachObject(entity);
+                parentNode->attachObject(entity);
             }
             else if(entity != entitylist.mSkelBase)
                 entitylist.mSkelBase->attachObjectToBone(meshes[i].second, entity);
@@ -1136,7 +1118,7 @@ EntityList NIFLoader::createEntities(Ogre::SceneNode *parent, TextKeyMap *textke
     else
     {
         for(size_t i = 0;i < entitylist.mEntities.size();i++)
-            parent->attachObject(entitylist.mEntities[i]);
+            parentNode->attachObject(entitylist.mEntities[i]);
     }
 
     return entitylist;
