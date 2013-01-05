@@ -40,14 +40,14 @@ class Extra : public Record
 public:
     ExtraPtr extra;
 
-    void read(NIFFile *nif) { extra.read(nif); }
+    void read(NIFStream *nif) { extra.read(nif); }
     void post(NIFFile *nif) { extra.post(nif); }
 };
 
 class NiVertWeightsExtraData : public Extra
 {
 public:
-    void read(NIFFile *nif)
+    void read(NIFStream *nif)
     {
         Extra::read(nif);
 
@@ -70,7 +70,7 @@ public:
     };
     std::vector<TextKey> list;
 
-    void read(NIFFile *nif)
+    void read(NIFStream *nif)
     {
         Extra::read(nif);
 
@@ -95,7 +95,7 @@ public:
     */
     std::string string;
 
-    void read(NIFFile *nif)
+    void read(NIFStream *nif)
     {
         Extra::read(nif);
 

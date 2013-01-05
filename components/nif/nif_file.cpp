@@ -174,10 +174,7 @@ NIFFile::ptr NIFFile::create (const std::string &name) { return LoadedCache::cre
 NIFFile::NIFFile(const std::string &name, psudo_private_modifier)
     : filename(name)
 {
-    inp = Ogre::ResourceGroupManager::getSingleton().openResource(name);
     parse();
-    // Make sure to close the file after it was loaded into memory
-    inp.setNull();
 }
 
 NIFFile::~NIFFile()
@@ -195,18 +192,20 @@ NIFFile::~NIFFile()
 
 void NIFFile::parse()
 {
+    NIFStream nif (this, Ogre::ResourceGroupManager::getSingleton().openResource(filename));
+
   // Check the header string
-  std::string head = getString(40);
+  std::string head = nif.getString(40);
   if(head.compare(0, 22, "NetImmerse File Format") != 0)
     fail("Invalid NIF header");
 
   // Get BCD version
-  ver = getInt();
+  ver = nif.getInt();
   if(ver != VER_MW)
     fail("Unsupported NIF version");
 
   // Number of records
-  size_t recNum = getInt();
+  size_t recNum = nif.getInt();
   records.resize(recNum);
 
   /* The format for 10.0.1.0 seems to be a bit different. After the
@@ -222,7 +221,7 @@ void NIFFile::parse()
     {
       Record *r = NULL;
 
-      std::string rec = getString();
+      std::string rec = nif.getString();
 
       /* These are all the record types we know how to read.
 
@@ -312,7 +311,7 @@ void NIFFile::parse()
       r->recName = rec;
       r->recIndex = i;
       records[i] = r;
-      r->read(this);
+      r->read(&nif);
 
       // Discard tranformations for the root node, otherwise some meshes
       // occasionally get wrong orientation. Only for NiNode-s for now, but
