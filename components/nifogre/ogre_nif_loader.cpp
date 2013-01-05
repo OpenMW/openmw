@@ -165,11 +165,6 @@ static void fail(const std::string &msg)
 static void buildAnimation(Ogre::Skeleton *skel, const std::string &name, const std::vector<Nif::NiKeyframeController*> &ctrls, const std::vector<std::string> &targets, float startTime, float stopTime)
 {
     Ogre::Animation *anim = skel->createAnimation(name, stopTime);
-    /* HACK: Pre-create the node tracks by matching the track IDs with the
-     * bone IDs. Otherwise, Ogre animates the wrong bones. */
-    size_t bonecount = skel->getNumBones();
-    for(size_t i = 0;i < bonecount;i++)
-        anim->createNodeTrack(i, skel->getBone(i));
 
     for(size_t i = 0;i < ctrls.size();i++)
     {
@@ -186,10 +181,12 @@ static void buildAnimation(Ogre::Skeleton *skel, const std::string &name, const 
         Nif::FloatKeyList::VecType::const_iterator scaleiter = scalekeys.mKeys.begin();
 
         Ogre::Bone *bone = skel->getBone(targets[i]);
-        Ogre::NodeAnimationTrack *nodetrack = anim->getNodeTrack(bone->getHandle());
-        const Ogre::Quaternion startquat = bone->getInitialOrientation();
-        const Ogre::Vector3 starttrans = bone->getInitialPosition();
-        const Ogre::Vector3 startscale = bone->getInitialScale();
+        // NOTE: For some reason, Ogre doesn't like the node track ID being different from
+        // the bone ID
+        Ogre::NodeAnimationTrack *nodetrack = anim->createNodeTrack(bone->getHandle(), bone);
+        const Ogre::Quaternion &startquat = bone->getInitialOrientation();
+        const Ogre::Vector3 &starttrans = bone->getInitialPosition();
+        const Ogre::Vector3 &startscale = bone->getInitialScale();
 
         Ogre::Quaternion lastquat, curquat;
         Ogre::Vector3 lasttrans(0.0f), curtrans(0.0f);
