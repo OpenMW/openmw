@@ -3,7 +3,7 @@
 
 #include <stdexcept>
 #include <cassert>
-#include <stdint.h>
+#include <cstdint>
 
 namespace {
 
