@@ -252,7 +252,8 @@ void loadResource(Ogre::Resource *resource)
     Ogre::Skeleton *skel = dynamic_cast<Ogre::Skeleton*>(resource);
     OgreAssert(skel, "Attempting to load a skeleton into a non-skeleton resource!");
 
-    Nif::NIFFile nif(skel->getName());
+    Nif::NIFFile::ptr pnif(Nif::NIFFile::create (skel->getName()));
+    Nif::NIFFile & nif = *pnif.get ();
     const Nif::Node *node = dynamic_cast<const Nif::Node*>(nif.getRecord(0));
 
     std::vector<Nif::NiKeyframeController const*> ctrls;
@@ -956,8 +957,8 @@ public:
             return;
         }
 
-        Nif::NIFFile nif(mName);
-        Nif::Node const *node = dynamic_cast<Nif::Node const *>(nif.getRecord(0));
+        Nif::NIFFile::ptr nif = Nif::NIFFile::create (mName);
+        Nif::Node const *node = dynamic_cast<Nif::Node const *>(nif->getRecord(0));
         findTriShape(mesh, node);
     }
 
@@ -1054,7 +1055,8 @@ MeshPairList NIFLoader::load(std::string name, std::string skelName, const std::
         return meshiter->second;
 
     MeshPairList &meshes = sMeshPairMap[name+"@skel="+skelName];
-    Nif::NIFFile nif(name);
+    Nif::NIFFile::ptr pnif = Nif::NIFFile::create (name);
+    Nif::NIFFile &nif = *pnif.get ();
     if (nif.numRecords() < 1)
     {
         nif.warn("Found no records in NIF.");

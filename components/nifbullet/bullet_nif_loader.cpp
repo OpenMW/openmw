@@ -82,7 +82,8 @@ void ManualBulletShapeLoader::loadResource(Ogre::Resource *resource)
     // of the early stages of development. Right now we WANT to catch
     // every error as early and intrusively as possible, as it's most
     // likely a sign of incomplete code rather than faulty input.
-    Nif::NIFFile nif(resourceName.substr(0, resourceName.length()-7));
+    Nif::NIFFile::ptr pnif (Nif::NIFFile::create (resourceName.substr(0, resourceName.length()-7)));
+    Nif::NIFFile & nif = *pnif.get ();
     if (nif.numRecords() < 1)
     {
         warn("Found no records in NIF.");
