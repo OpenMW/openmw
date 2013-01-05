@@ -1040,13 +1040,19 @@ public:
 NIFMeshLoader::LoaderMap NIFMeshLoader::sLoaders;
 
 
+typedef std::map<std::string,MeshPairList> MeshPairMap;
+static MeshPairMap sMeshPairMap;
+
 MeshPairList NIFLoader::load(std::string name, std::string skelName, const std::string &group)
 {
-    MeshPairList meshes;
-
     std::transform(name.begin(), name.end(), name.begin(), ::tolower);
     std::transform(skelName.begin(), skelName.end(), skelName.begin(), ::tolower);
 
+    MeshPairMap::const_iterator meshiter = sMeshPairMap.find(name+"@skel="+skelName);
+    if(meshiter != sMeshPairMap.end())
+        return meshiter->second;
+
+    MeshPairList &meshes = sMeshPairMap[name+"@skel="+skelName];
     Nif::NIFFile nif(name);
     if (nif.numRecords() < 1)
     {
@@ -1067,7 +1073,7 @@ MeshPairList NIFLoader::load(std::string name, std::string skelName, const std::
     }
 
     NIFSkeletonLoader skelldr;
-    bool hasSkel = skelldr.createSkeleton(skelName, group, node);
+    bool hasSkel = skelldr.createSkeleton(name, group, node);
 
     NIFMeshLoader meshldr(name, group, (hasSkel ? skelName : std::string()));
     meshldr.createMeshes(node, meshes);
