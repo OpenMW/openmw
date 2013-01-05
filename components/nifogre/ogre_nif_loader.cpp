@@ -49,22 +49,20 @@
 
 typedef unsigned char ubyte;
 
-namespace Nif
+namespace std
 {
 
-// These operators allow the Nif extra data types to be stored in an Ogre::Any
+// These operators allow extra data types to be stored in an Ogre::Any
 // object, which can then be stored in user object bindings on the nodes
 
 // TODO: Do something useful
-std::ostream& operator<<(std::ostream &o, const Nif::NiTextKeyExtraData&)
+ostream& operator<<(ostream &o, const NifOgre::TextKeyMap&)
 { return o; }
 
-} // namespace Nif
-
+}
 
 namespace NifOgre
 {
-
 // Helper class that computes the bounding box and of a mesh
 class BoundsFinder
 {
@@ -164,8 +162,9 @@ static void fail(const std::string &msg)
 }
 
 
-static void insertTextKeys(const Nif::NiTextKeyExtraData *tk, TextKeyMap *textkeys)
+static TextKeyMap extractTextKeys(const Nif::NiTextKeyExtraData *tk)
 {
+    TextKeyMap textkeys;
     for(size_t i = 0;i < tk->list.size();i++)
     {
         const std::string &str = tk->list[i].text;
@@ -178,11 +177,12 @@ static void insertTextKeys(const Nif::NiTextKeyExtraData *tk, TextKeyMap *textke
                 break;
 
             std::string::size_type nextpos = std::min(str.find('\r', pos), str.find('\n', pos));
-            textkeys->insert(std::make_pair(tk->list[i].time, str.substr(pos, nextpos-pos)));
+            textkeys.insert(std::make_pair(tk->list[i].time, str.substr(pos, nextpos-pos)));
 
             pos = nextpos;
         }
     }
+    return textkeys;
 }
 
 
@@ -215,7 +215,7 @@ void buildBones(Ogre::Skeleton *skel, const Nif::Node *node, std::vector<Nif::Ni
         if(e->recType == Nif::RC_NiTextKeyExtraData)
         {
             const Nif::NiTextKeyExtraData *tk = static_cast<const Nif::NiTextKeyExtraData*>(e.getPtr());
-            bone->getUserObjectBindings().setUserAny(tk->recName, Ogre::Any(*tk));
+            bone->getUserObjectBindings().setUserAny("TextKeyExtraData", Ogre::Any(extractTextKeys(tk)));
         }
         e = e->extra;
     }
@@ -394,35 +394,18 @@ void loadResource(Ogre::Resource *resource)
     anim->optimise();
 }
 
-bool createSkeleton(const std::string &name, const std::string &group, TextKeyMap *textkeys, const Nif::Node *node)
+bool createSkeleton(const std::string &name, const std::string &group, const Nif::Node *node)
 {
-    if(textkeys)
-    {
-        Nif::ExtraPtr e = node->extra;
-        while(!e.empty())
-        {
-            if(e->recType == Nif::RC_NiTextKeyExtraData)
-            {
-                const Nif::NiTextKeyExtraData *tk = static_cast<const Nif::NiTextKeyExtraData*>(e.getPtr());
-                insertTextKeys(tk, textkeys);
-            }
-            e = e->extra;
-        }
-    }
-
     if(node->boneTrafo != NULL)
     {
         Ogre::SkeletonManager &skelMgr = Ogre::SkeletonManager::getSingleton();
-
         Ogre::SkeletonPtr skel = skelMgr.getByName(name);
         if(skel.isNull())
         {
             NIFSkeletonLoader *loader = &sLoaders[name];
             skel = skelMgr.create(name, group, true, loader);
         }
-
-        if(!textkeys || textkeys->size() > 0)
-            return true;
+        return true;
     }
 
     const Nif::NiNode *ninode = dynamic_cast<const Nif::NiNode*>(node);
@@ -433,7 +416,7 @@ bool createSkeleton(const std::string &name, const std::string &group, TextKeyMa
         {
             if(!children[i].empty())
             {
-                if(createSkeleton(name, group, textkeys, children[i].getPtr()))
+                if(createSkeleton(name, group, children[i].getPtr()))
                     return true;
             }
         }
@@ -1057,7 +1040,7 @@ public:
 NIFMeshLoader::LoaderMap NIFMeshLoader::sLoaders;
 
 
-MeshPairList NIFLoader::load(std::string name, std::string skelName, TextKeyMap *textkeys, const std::string &group)
+MeshPairList NIFLoader::load(std::string name, std::string skelName, const std::string &group)
 {
     MeshPairList meshes;
 
@@ -1084,7 +1067,7 @@ MeshPairList NIFLoader::load(std::string name, std::string skelName, TextKeyMap 
     }
 
     NIFSkeletonLoader skelldr;
-    bool hasSkel = skelldr.createSkeleton(skelName, group, textkeys, node);
+    bool hasSkel = skelldr.createSkeleton(skelName, group, node);
 
     NIFMeshLoader meshldr(name, group, (hasSkel ? skelName : std::string()));
     meshldr.createMeshes(node, meshes);
@@ -1096,7 +1079,7 @@ EntityList NIFLoader::createEntities(Ogre::SceneNode *parent, TextKeyMap *textke
 {
     EntityList entitylist;
 
-    MeshPairList meshes = load(name, name, textkeys, group);
+    MeshPairList meshes = load(name, name, group);
     if(meshes.size() == 0)
         return entitylist;
 
@@ -1107,6 +1090,24 @@ EntityList NIFLoader::createEntities(Ogre::SceneNode *parent, TextKeyMap *textke
         Ogre::Entity *entity = entitylist.mEntities.back();
         if(!entitylist.mSkelBase && entity->hasSkeleton())
             entitylist.mSkelBase = entity;
+    }
+
+    if(entitylist.mSkelBase)
+    {
+        // Would be nice if Ogre::SkeletonInstance allowed access to the 'master' Ogre::SkeletonPtr.
+        Ogre::SkeletonManager &skelMgr = Ogre::SkeletonManager::getSingleton();
+        Ogre::SkeletonPtr skel = skelMgr.getByName(entitylist.mSkelBase->getSkeleton()->getName());
+        Ogre::Skeleton::BoneIterator iter = skel->getBoneIterator();
+        while(iter.hasMoreElements())
+        {
+            Ogre::Bone *bone = iter.getNext();
+            const Ogre::Any &data = bone->getUserObjectBindings().getUserAny("TextKeyExtraData");
+            if(!data.isEmpty())
+            {
+                *textkeys = Ogre::any_cast<TextKeyMap>(data);
+                break;
+            }
+        }
     }
 
     if(entitylist.mSkelBase)
@@ -1140,7 +1141,7 @@ EntityList NIFLoader::createEntities(Ogre::Entity *parent, const std::string &bo
 {
     EntityList entitylist;
 
-    MeshPairList meshes = load(name, parent->getMesh()->getSkeletonName(), NULL, group);
+    MeshPairList meshes = load(name, parent->getMesh()->getSkeletonName(), group);
     if(meshes.size() == 0)
         return entitylist;
 
