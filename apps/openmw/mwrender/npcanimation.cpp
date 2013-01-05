@@ -82,13 +82,10 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node, MWWor
     mBodyPrefix = "b_n_" + mNpc->mRace;
     std::transform(mBodyPrefix.begin(), mBodyPrefix.end(), mBodyPrefix.begin(), ::tolower);
 
-    mInsert = node;
-    assert(mInsert);
-
     bool isBeast = (race->mData.mFlags & ESM::Race::Beast) != 0;
     std::string smodel = (!isBeast ? "meshes\\base_anim.nif" : "meshes\\base_animkna.nif");
 
-    mEntityList = NifOgre::NIFLoader::createEntities(mInsert, &mTextKeys, smodel);
+    createEntityList(node, smodel);
     for(size_t i = 0;i < mEntityList.mEntities.size();i++)
     {
         Ogre::Entity *base = mEntityList.mEntities[i];
@@ -114,18 +111,6 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node, MWWor
             }
         }
         base->setRenderQueueGroup(transparent ? RQG_Alpha : RQG_Main);
-    }
-
-    if(mEntityList.mSkelBase)
-    {
-        Ogre::AnimationStateSet *aset = mEntityList.mSkelBase->getAllAnimationStates();
-        Ogre::AnimationStateIterator as = aset->getAnimationStateIterator();
-        while(as.hasMoreElements())
-        {
-            Ogre::AnimationState *state = as.getNext();
-            state->setEnabled(true);
-            state->setLoop(false);
-        }
     }
 
     float scale = race->mData.mHeight.mMale;

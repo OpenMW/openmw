@@ -43,6 +43,8 @@ protected:
 
     bool findGroupTimes(const std::string &groupname, GroupTimes *times);
 
+    void createEntityList(Ogre::SceneNode *node, const std::string &model);
+
 public:
     Animation();
     virtual ~Animation();

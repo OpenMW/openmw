@@ -19,10 +19,34 @@ Animation::Animation()
 
 Animation::~Animation()
 {
-    Ogre::SceneManager *sceneMgr = mInsert->getCreator();
-    for(size_t i = 0;i < mEntityList.mEntities.size();i++)
-        sceneMgr->destroyEntity(mEntityList.mEntities[i]);
+    if(mInsert)
+    {
+        Ogre::SceneManager *sceneMgr = mInsert->getCreator();
+        for(size_t i = 0;i < mEntityList.mEntities.size();i++)
+            sceneMgr->destroyEntity(mEntityList.mEntities[i]);
+    }
     mEntityList.mEntities.clear();
+    mEntityList.mSkelBase = NULL;
+}
+
+
+void Animation::createEntityList(Ogre::SceneNode *node, const std::string &model)
+{
+    mInsert = node;
+    assert(mInsert);
+
+    mEntityList = NifOgre::NIFLoader::createEntities(mInsert, &mTextKeys, model);
+    if(mEntityList.mSkelBase)
+    {
+        Ogre::AnimationStateSet *aset = mEntityList.mSkelBase->getAllAnimationStates();
+        Ogre::AnimationStateIterator as = aset->getAnimationStateIterator();
+        while(as.hasMoreElements())
+        {
+            Ogre::AnimationState *state = as.getNext();
+            state->setEnabled(true);
+            state->setLoop(false);
+        }
+    }
 }
 
 

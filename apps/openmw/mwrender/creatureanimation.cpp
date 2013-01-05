@@ -18,7 +18,6 @@ CreatureAnimation::~CreatureAnimation()
 
 CreatureAnimation::CreatureAnimation(const MWWorld::Ptr& ptr): Animation()
 {
-    mInsert = ptr.getRefData().getBaseNode();
     MWWorld::LiveCellRef<ESM::Creature> *ref = ptr.get<ESM::Creature>();
 
     assert (ref->mBase != NULL);
@@ -26,7 +25,7 @@ CreatureAnimation::CreatureAnimation(const MWWorld::Ptr& ptr): Animation()
     {
         std::string mesh = "meshes\\" + ref->mBase->mModel;
 
-        mEntityList = NifOgre::NIFLoader::createEntities(mInsert, &mTextKeys, mesh);
+        createEntityList(ptr.getRefData().getBaseNode(), mesh);
         for(size_t i = 0;i < mEntityList.mEntities.size();i++)
         {
             Ogre::Entity *ent = mEntityList.mEntities[i];
@@ -51,18 +50,6 @@ CreatureAnimation::CreatureAnimation(const MWWorld::Ptr& ptr): Animation()
                 }
             }
             ent->setRenderQueueGroup(transparent ? RQG_Alpha : RQG_Main);
-        }
-
-        if(mEntityList.mSkelBase)
-        {
-            Ogre::AnimationStateSet *aset = mEntityList.mSkelBase->getAllAnimationStates();
-            Ogre::AnimationStateIterator as = aset->getAnimationStateIterator();
-            while(as.hasMoreElements())
-            {
-                Ogre::AnimationState *state = as.getNext();
-                state->setEnabled(true);
-                state->setLoop(false);
-            }
         }
     }
 }
