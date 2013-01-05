@@ -1092,7 +1092,7 @@ EntityList NIFLoader::createEntities(Ogre::SceneNode *parent, TextKeyMap *textke
             entitylist.mSkelBase = entity;
     }
 
-    if(entitylist.mSkelBase)
+    if(entitylist.mSkelBase && textkeys)
     {
         // Would be nice if Ogre::SkeletonInstance allowed access to the 'master' Ogre::SkeletonPtr.
         Ogre::SkeletonManager &skelMgr = Ogre::SkeletonManager::getSingleton();
