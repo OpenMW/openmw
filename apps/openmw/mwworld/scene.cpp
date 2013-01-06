@@ -10,6 +10,7 @@
 #include "player.hpp"
 #include "localscripts.hpp"
 #include "esmstore.hpp"
+#include "class.hpp"
 
 #include "cellfunctors.hpp"
 

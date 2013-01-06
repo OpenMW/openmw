@@ -3,9 +3,7 @@
 
 #include "animation.hpp"
 
-#include "components/nifogre/ogre_nif_loader.hpp"
 #include "../mwworld/inventorystore.hpp"
-#include "../mwclass/npc.hpp"
 #include "../mwworld/containerstore.hpp"
 
 namespace ESM
@@ -13,9 +11,11 @@ namespace ESM
     struct NPC;
 }
 
-namespace MWRender{
+namespace MWRender
+{
 
-class NpcAnimation: public Animation{
+class NpcAnimation : public Animation
+{
 private:
     MWWorld::InventoryStore& mInv;
     int mStateID;
@@ -91,4 +91,5 @@ public:
 };
 
 }
+
 #endif

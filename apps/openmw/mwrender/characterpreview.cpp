@@ -10,6 +10,7 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwworld/player.hpp"
+#include "../mwworld/class.hpp"
 
 #include "renderconst.hpp"
 #include "npcanimation.hpp"

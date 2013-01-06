@@ -1,20 +1,13 @@
 #ifndef _GAME_RENDER_ANIMATION_H
 #define _GAME_RENDER_ANIMATION_H
 
-#include <vector>
-
 #include <components/nifogre/ogre_nif_loader.hpp>
-#include <openengine/ogre/renderer.hpp>
-#include "../mwworld/actiontalk.hpp"
-#include <components/nif/node.hpp>
-#include <openengine/bullet/physic.hpp>
 
+namespace MWRender
+{
 
-
-
-namespace MWRender {
-
-class Animation {
+class Animation
+{
     struct GroupTimes {
         float mStart;
         float mStop;

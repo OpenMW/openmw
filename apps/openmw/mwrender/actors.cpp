@@ -3,15 +3,20 @@
 #include <OgreSceneNode.h>
 #include <OgreSceneManager.h>
 
+#include "../mwworld/ptr.hpp"
+
+#include "animation.hpp"
+#include "creatureanimation.hpp"
+#include "npcanimation.hpp"
+
 #include "renderconst.hpp"
 
 
+namespace MWRender
+{
 using namespace Ogre;
-using namespace MWRender;
-using namespace NifOgre;
 
 Actors::~Actors(){
-
     std::map<MWWorld::Ptr, Animation*>::iterator it = mAllActors.begin();
     for (; it != mAllActors.end(); ++it) {
         delete it->second;
@@ -155,4 +160,6 @@ Actors::updateObjectCell(const MWWorld::Ptr &ptr)
         mAllActors.erase(ptr);
         mAllActors[ptr] = anim;
     }
+}
+
 }

@@ -1,25 +1,27 @@
 #ifndef _GAME_RENDER_ACTORS_H
 #define _GAME_RENDER_ACTORS_H
 
-#include "npcanimation.hpp"
-#include "creatureanimation.hpp"
+#include <openengine/ogre/renderer.hpp>
 
 namespace MWWorld
 {
     class Ptr;
     class CellStore;
+    class InventoryStore;
 }
 
-namespace MWRender{
-    class Actors{
+namespace MWRender
+{
+    class Animation;
+
+    class Actors
+    {
         OEngine::Render::OgreRenderer &mRend;
         std::map<MWWorld::CellStore *, Ogre::SceneNode *> mCellSceneNodes;
         Ogre::SceneNode* mMwRoot;
         std::map<MWWorld::Ptr, Animation*> mAllActors;
 
-
-
-        public:
+    public:
         Actors(OEngine::Render::OgreRenderer& _rend): mRend(_rend) {}
         ~Actors();
         void setMwRoot(Ogre::SceneNode* root);

@@ -18,6 +18,7 @@
 #include "../mwworld/physicssystem.hpp"
 
 #include "../mwrender/renderinginterface.hpp"
+#include "../mwrender/actors.hpp"
 
 #include "../mwgui/tooltips.hpp"
 

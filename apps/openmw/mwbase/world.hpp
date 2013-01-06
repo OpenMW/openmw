@@ -6,6 +6,7 @@
 #include <components/settings/settings.hpp>
 
 #include "../mwworld/globals.hpp"
+#include "../mwworld/ptr.hpp"
 
 namespace Ogre
 {
@@ -42,7 +43,6 @@ namespace MWWorld
     class CellStore;
     class Player;
     class LocalScripts;
-    class Ptr;
     class TimeStamp;
     class ESMStore;
 }

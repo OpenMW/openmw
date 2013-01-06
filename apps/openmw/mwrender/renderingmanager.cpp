@@ -19,8 +19,9 @@
 #include <extern/shiny/Platforms/Ogre/OgrePlatform.hpp>
 
 #include <components/esm/loadstat.hpp>
-#include "../mwworld/esmstore.hpp"
 #include <components/settings/settings.hpp>
+#include "../mwworld/esmstore.hpp"
+#include "../mwworld/class.hpp"
 
 #include "../mwbase/world.hpp" // these includes can be removed once the static-hack is gone
 #include "../mwbase/environment.hpp"
