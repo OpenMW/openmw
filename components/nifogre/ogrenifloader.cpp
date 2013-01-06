@@ -166,9 +166,9 @@ public:
     class Value : public NodeTargetValue<Ogre::Real>
     {
     private:
-        Nif::QuaternionKeyList mRotations;
-        Nif::Vector3KeyList mTranslations;
-        Nif::FloatKeyList mScales;
+        Nif::QuaternionCurve mRotations;
+        Nif::Vector3Curve mTranslations;
+        Nif::FloatCurve mScales;
 
     public:
         Value(Ogre::Node *target, const Nif::NiKeyframeData *data)
@@ -186,68 +186,16 @@ public:
 
         virtual void setValue(Ogre::Real time)
         {
-            if(mRotations.mKeys.size() > 0)
-            {
-                if(time <= mRotations.mKeys.front().mTime)
-                    mNode->setOrientation(mRotations.mKeys.front().mValue);
-                else if(time >= mRotations.mKeys.back().mTime)
-                    mNode->setOrientation(mRotations.mKeys.back().mValue);
-                else
-                {
-                    Nif::QuaternionKeyList::VecType::const_iterator iter(mRotations.mKeys.begin()+1);
-                    for(;iter != mRotations.mKeys.end();iter++)
-                    {
-                        if(iter->mTime < time)
-                            continue;
+            if(mRotations)
+                mNode->setOrientation(mRotations.sample (time));
 
-                        Nif::QuaternionKeyList::VecType::const_iterator last(iter-1);
-                        float a = (time-last->mTime) / (iter->mTime-last->mTime);
-                        mNode->setOrientation(Ogre::Quaternion::nlerp(a, last->mValue, iter->mValue));
-                        break;
-                    }
-                }
-            }
-            if(mTranslations.mKeys.size() > 0)
-            {
-                if(time <= mTranslations.mKeys.front().mTime)
-                    mNode->setPosition(mTranslations.mKeys.front().mValue);
-                else if(time >= mTranslations.mKeys.back().mTime)
-                    mNode->setPosition(mTranslations.mKeys.back().mValue);
-                else
-                {
-                    Nif::Vector3KeyList::VecType::const_iterator iter(mTranslations.mKeys.begin()+1);
-                    for(;iter != mTranslations.mKeys.end();iter++)
-                    {
-                        if(iter->mTime < time)
-                            continue;
+            if(mTranslations)
+                mNode->setPosition(mTranslations.sample (time));
 
-                        Nif::Vector3KeyList::VecType::const_iterator last(iter-1);
-                        float a = (time-last->mTime) / (iter->mTime-last->mTime);
-                        mNode->setPosition(last->mValue + ((iter->mValue - last->mValue)*a));
-                        break;
-                    }
-                }
-            }
-            if(mScales.mKeys.size() > 0)
+            if(mScales)
             {
-                if(time <= mScales.mKeys.front().mTime)
-                    mNode->setScale(Ogre::Vector3(mScales.mKeys.front().mValue));
-                else if(time >= mScales.mKeys.back().mTime)
-                    mNode->setScale(Ogre::Vector3(mScales.mKeys.back().mValue));
-                else
-                {
-                    Nif::FloatKeyList::VecType::const_iterator iter(mScales.mKeys.begin()+1);
-                    for(;iter != mScales.mKeys.end();iter++)
-                    {
-                        if(iter->mTime < time)
-                            continue;
-
-                        Nif::FloatKeyList::VecType::const_iterator last(iter-1);
-                        float a = (time-last->mTime) / (iter->mTime-last->mTime);
-                        mNode->setScale(Ogre::Vector3(last->mValue + ((iter->mValue - last->mValue)*a)));
-                        break;
-                    }
-                }
+                float s = mScales.sample (time);
+                mNode->setScale(s, s, s);
             }
         }
     };
@@ -262,30 +210,14 @@ public:
     {
     private:
         Ogre::MaterialPtr mMaterial;
-        Nif::FloatKeyList mUTrans;
-        Nif::FloatKeyList mVTrans;
-        Nif::FloatKeyList mUScale;
-        Nif::FloatKeyList mVScale;
+        Nif::FloatCurve mUTrans;
+        Nif::FloatCurve mVTrans;
+        Nif::FloatCurve mUScale;
+        Nif::FloatCurve mVScale;
 
-        static float lookupValue(const Nif::FloatKeyList &keys, float time, float def)
+        static float lookupValue(const Nif::FloatCurve &keys, float time, float def)
         {
-            if(keys.mKeys.size() == 0)
-                return def;
-
-            if(time <= keys.mKeys.front().mTime)
-                return keys.mKeys.front().mValue;
-
-            Nif::FloatKeyList::VecType::const_iterator iter(keys.mKeys.begin()+1);
-            for(;iter != keys.mKeys.end();iter++)
-            {
-                if(iter->mTime < time)
-                    continue;
-
-                Nif::FloatKeyList::VecType::const_iterator last(iter-1);
-                float a = (time-last->mTime) / (iter->mTime-last->mTime);
-                return last->mValue + ((iter->mValue - last->mValue)*a);
-            }
-            return keys.mKeys.back().mValue;
+            return keys ? keys.sample (time) : def;
         }
 
     public:
@@ -392,18 +324,19 @@ class NIFObjectLoader
                 const Nif::NiColorData *clrdata = cl->data.getPtr();
 
                 Ogre::ParticleAffector *affector = partsys->addAffector("ColourInterpolator");
-                size_t num_colors = std::min<size_t>(6, clrdata->mKeyList.mKeys.size());
+                size_t num_colors = std::min<size_t>(6, clrdata->mKeyList.mSize);
                 for(size_t i = 0;i < num_colors;i++)
                 {
+                    Nif::Vector4Curve::BaseKey const * Key = clrdata->mKeyList.keyAtIndex (i);
                     Ogre::ColourValue color;
-                    color.r = clrdata->mKeyList.mKeys[i].mValue[0];
-                    color.g = clrdata->mKeyList.mKeys[i].mValue[1];
-                    color.b = clrdata->mKeyList.mKeys[i].mValue[2];
-                    color.a = clrdata->mKeyList.mKeys[i].mValue[3];
+                    color.r = Key->mValue[0];
+                    color.g = Key->mValue[1];
+                    color.b = Key->mValue[2];
+                    color.a = Key->mValue[3];
                     affector->setParameter("colour"+Ogre::StringConverter::toString(i),
                                            Ogre::StringConverter::toString(color));
                     affector->setParameter("time"+Ogre::StringConverter::toString(i),
-                                           Ogre::StringConverter::toString(clrdata->mKeyList.mKeys[i].mTime));
+                                           Ogre::StringConverter::toString(Key->mTime));
                 }
             }
             else if(e->recType == Nif::RC_NiParticleRotation)

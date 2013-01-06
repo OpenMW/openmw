@@ -25,6 +25,7 @@
 #define OPENMW_COMPONENTS_NIF_DATA_HPP
 
 #include "controlled.hpp"
+#include "curve.hpp"
 
 #include <OgreQuaternion.h>
 #include <OgreVector3.h>
@@ -211,7 +212,7 @@ public:
 class NiPosData : public Record
 {
 public:
-    Vector3KeyList mKeyList;
+    Vector3Curve mKeyList;
 
     void read(NIFStream *nif)
     {
@@ -222,7 +223,7 @@ public:
 class NiUVData : public Record
 {
 public:
-    FloatKeyList mKeyList[4];
+    FloatCurve mKeyList[4];
 
     void read(NIFStream *nif)
     {
@@ -234,7 +235,7 @@ public:
 class NiFloatData : public Record
 {
 public:
-    FloatKeyList mKeyList;
+    FloatCurve mKeyList;
 
     void read(NIFStream *nif)
     {
@@ -284,7 +285,7 @@ public:
 class NiColorData : public Record
 {
 public:
-    Vector4KeyList mKeyList;
+    Vector4Curve mKeyList;
 
     void read(NIFStream *nif)
     {
@@ -389,7 +390,7 @@ public:
 struct NiMorphData : public Record
 {
     struct MorphData {
-        FloatKeyList mData;
+        FloatCurve mData;
         std::vector<Ogre::Vector3> mVertices;
     };
     std::vector<MorphData> mMorphs;
@@ -412,9 +413,9 @@ struct NiMorphData : public Record
 
 struct NiKeyframeData : public Record
 {
-    QuaternionKeyList mRotations;
-    Vector3KeyList mTranslations;
-    FloatKeyList mScales;
+    QuaternionCurve mRotations;
+    Vector3Curve mTranslations;
+    FloatCurve mScales;
 
     void read(NIFStream *nif)
     {
