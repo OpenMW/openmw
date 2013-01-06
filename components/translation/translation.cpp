@@ -30,7 +30,7 @@ namespace Translation
         {
             std::string path = dataFileCollections.getCollection (extension).getPath (fileName).string();
 
-            std::ifstream stream (path);
+            std::ifstream stream (path.c_str());
 
             if (!stream.is_open())
                 throw std::runtime_error ("failed to open translation file: " + fileName);
