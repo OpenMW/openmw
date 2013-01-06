@@ -306,11 +306,12 @@ void buildBones(Ogre::Skeleton *skel, const Nif::Node *node, std::vector<Nif::Ni
         bone = skel->createBone();
     if(parent) parent->addChild(bone);
 
+    if(!node->boneTrafo)
+        bone->setManuallyControlled(true);
     bone->setOrientation(node->trafo.rotation);
     bone->setPosition(node->trafo.pos);
     bone->setScale(Ogre::Vector3(node->trafo.scale));
     bone->setBindingPose();
-    bone->setInitialState();
 
     Nif::ControllerPtr ctrl = node->controller;
     while(!ctrl.empty())
