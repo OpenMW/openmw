@@ -1043,11 +1043,8 @@ NIFMeshLoader::LoaderMap NIFMeshLoader::sLoaders;
 typedef std::map<std::string,MeshPairList> MeshPairMap;
 static MeshPairMap sMeshPairMap;
 
-MeshPairList NIFLoader::load(std::string name, std::string skelName, const std::string &group)
+MeshPairList NIFLoader::load(const std::string &name, const std::string &skelName, const std::string &group)
 {
-    std::transform(name.begin(), name.end(), name.begin(), ::tolower);
-    std::transform(skelName.begin(), skelName.end(), skelName.begin(), ::tolower);
-
     MeshPairMap::const_iterator meshiter = sMeshPairMap.find(name+"@skel="+skelName);
     if(meshiter != sMeshPairMap.end())
         return meshiter->second;
@@ -1081,10 +1078,11 @@ MeshPairList NIFLoader::load(std::string name, std::string skelName, const std::
     return meshes;
 }
 
-EntityList NIFLoader::createEntities(Ogre::SceneNode *parentNode, const std::string &name, const std::string &group)
+EntityList NIFLoader::createEntities(Ogre::SceneNode *parentNode, std::string name, const std::string &group)
 {
     EntityList entitylist;
 
+    std::transform(name.begin(), name.end(), name.begin(), ::tolower);
     MeshPairList meshes = load(name, name, group);
     if(meshes.size() == 0)
         return entitylist;
@@ -1124,11 +1122,11 @@ EntityList NIFLoader::createEntities(Ogre::SceneNode *parentNode, const std::str
 
 EntityList NIFLoader::createEntities(Ogre::Entity *parent, const std::string &bonename,
                                      Ogre::SceneNode *parentNode,
-                                     const std::string &name,
-                                     const std::string &group)
+                                     std::string name, const std::string &group)
 {
     EntityList entitylist;
 
+    std::transform(name.begin(), name.end(), name.begin(), ::tolower);
     MeshPairList meshes = load(name, parent->getMesh()->getSkeletonName(), group);
     if(meshes.size() == 0)
         return entitylist;
