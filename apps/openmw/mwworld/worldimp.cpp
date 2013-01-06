@@ -170,7 +170,7 @@ namespace MWWorld
     World::World (OEngine::Render::OgreRenderer& renderer,
         const Files::Collections& fileCollections,
         const std::string& master, const boost::filesystem::path& resDir, const boost::filesystem::path& cacheDir, bool newGame,
-        const ToUTF8::FromType& encoding, std::map<std::string,std::string> fallbackMap)
+        ToUTF8::Utf8Encoder* encoder, std::map<std::string,std::string> fallbackMap)
     : mPlayer (0), mLocalScripts (mStore), mGlobalVariables (0),
       mSky (true), mCells (mStore, mEsm),
       mNumFacing(0)
@@ -187,7 +187,7 @@ namespace MWWorld
         std::cout << "Loading ESM " << masterPath.string() << "\n";
 
         // This parses the ESM file and loads a sample cell
-        mEsm.setEncoding(encoding);
+        mEsm.setEncoder(encoder);
         mEsm.open (masterPath.string());
         mStore.load (mEsm);
 
