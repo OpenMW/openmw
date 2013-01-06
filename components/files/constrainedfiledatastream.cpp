@@ -3,7 +3,11 @@
 
 #include <stdexcept>
 #include <cassert>
+#ifndef __clang__
 #include <cstdint>
+#else
+#include <tr1/cstdint>
+#endif
 
 namespace {
 
