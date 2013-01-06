@@ -14,22 +14,21 @@ namespace ESM
 namespace MWRender
 {
 
-class NpcAnimation;
-
+class NpcAnimation : public Animation
+{
+public:
 struct PartInfo {
     ESM::PartReferenceType type;
     NifOgre::EntityList NpcAnimation::*ents;
     const char name[32];
 };
 
-class NpcAnimation : public Animation
-{
 private:
+    static const size_t sPartListSize = 27;
+    static const PartInfo sPartList[sPartListSize];
+
     MWWorld::InventoryStore& mInv;
     int mStateID;
-
-    int mPartslots[27];  //Each part slot is taken by clothing, armor, or is empty
-    int mPartPriorities[27];
 
     //Bounded Parts
     NifOgre::EntityList mClavicleL;
@@ -54,6 +53,8 @@ private:
     NifOgre::EntityList mHair;
     NifOgre::EntityList mHandL;
     NifOgre::EntityList mHandR;
+    NifOgre::EntityList mShield;
+    NifOgre::EntityList mWeapon;
     NifOgre::EntityList mHead;
     NifOgre::EntityList mChest;
     NifOgre::EntityList mTail;
@@ -79,8 +80,8 @@ private:
 
     int mVisibilityFlags;
 
-    static const size_t sPartListSize = 27;
-    static const PartInfo sPartList[sPartListSize];
+    int mPartslots[sPartListSize];  //Each part slot is taken by clothing, armor, or is empty
+    int mPartPriorities[sPartListSize];
 
 public:
     NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node,

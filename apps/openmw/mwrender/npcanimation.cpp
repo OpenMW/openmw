@@ -17,7 +17,7 @@ using namespace NifOgre;
 namespace MWRender
 {
 
-const PartInfo NpcAnimation::sPartList[NpcAnimation::sPartListSize] = {
+const NpcAnimation::PartInfo NpcAnimation::sPartList[NpcAnimation::sPartListSize] = {
     { ESM::PRT_Head, &NpcAnimation::mHead, "Head" },
     { ESM::PRT_Hair, &NpcAnimation::mHair, "Head" },
     { ESM::PRT_Neck, &NpcAnimation::mNeck, "Neck" },
@@ -28,7 +28,7 @@ const PartInfo NpcAnimation::sPartList[NpcAnimation::sPartListSize] = {
     { ESM::PRT_LHand, &NpcAnimation::mHandL, "Left Hand" },
     { ESM::PRT_RWrist, &NpcAnimation::mWristR, "Right Wrist" },
     { ESM::PRT_LWrist, &NpcAnimation::mWristL, "Left Wrist" },
-    { ESM::PRT_Shield, NULL, "" },
+    { ESM::PRT_Shield, &NpcAnimation::mShield, "Shield" },
     { ESM::PRT_RForearm, &NpcAnimation::mForearmR, "Right Forearm" },
     { ESM::PRT_LForearm, &NpcAnimation::mForearmL, "Left Forearm" },
     { ESM::PRT_RUpperarm, &NpcAnimation::mUpperArmR, "Right Upper Arm" },
@@ -43,24 +43,21 @@ const PartInfo NpcAnimation::sPartList[NpcAnimation::sPartListSize] = {
     { ESM::PRT_LLeg, &NpcAnimation::mUpperLegL, "Left Upper Leg" },
     { ESM::PRT_RPauldron, &NpcAnimation::mClavicleR, "Right Clavicle" },
     { ESM::PRT_LPauldron, &NpcAnimation::mClavicleL, "Left Clavicle" },
-    { ESM::PRT_Weapon, NULL, "" },
+    { ESM::PRT_Weapon, &NpcAnimation::mWeapon, "Weapon" },
     { ESM::PRT_Tail, &NpcAnimation::mTail, "Tail" }
 };
 
 NpcAnimation::~NpcAnimation()
 {
     for(size_t i = 0;i < sPartListSize;i++)
-    {
-        if(sPartList[i].ents)
-            removeEntities(this->*sPartList[i].ents);
-    }
+        removeEntities(this->*sPartList[i].ents);
 }
 
 
 NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node, MWWorld::InventoryStore& inv, int visibilityFlags)
   : Animation(),
-    mStateID(-1),
     mInv(inv),
+    mStateID(-1),
     mTimeToChange(0),
     mVisibilityFlags(visibilityFlags),
     mRobe(mInv.end()),
@@ -78,10 +75,10 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node, MWWor
 {
     mNpc = ptr.get<ESM::NPC>()->mBase;
 
-    for (int init = 0; init < 27; init++)
+    for(size_t i = 0;i < sPartListSize;i++)
     {
-        mPartslots[init] = -1;  //each slot is empty
-        mPartPriorities[init] = 0;
+        mPartslots[i] = -1;  //each slot is empty
+        mPartPriorities[i] = 0;
     }
 
     const MWWorld::ESMStore &store =
@@ -397,8 +394,7 @@ void NpcAnimation::removeIndividualPart(int type)
     {
         if(type == sPartList[i].type)
         {
-            if(sPartList[i].ents)
-                removeEntities(this->*sPartList[i].ents);
+            removeEntities(this->*sPartList[i].ents);
             break;
         }
     }
@@ -436,8 +432,7 @@ bool NpcAnimation::addOrReplaceIndividualPart(int type, int group, int priority,
     {
         if(type == sPartList[i].type)
         {
-            if(sPartList[i].ents)
-                this->*sPartList[i].ents = insertBoundedPart(mesh, group, sPartList[i].name);
+            this->*sPartList[i].ents = insertBoundedPart(mesh, group, sPartList[i].name);
             break;
         }
     }
