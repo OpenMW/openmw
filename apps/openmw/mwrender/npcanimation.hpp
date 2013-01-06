@@ -14,6 +14,14 @@ namespace ESM
 namespace MWRender
 {
 
+class NpcAnimation;
+
+struct PartInfo {
+    ESM::PartReferenceType type;
+    NifOgre::EntityList NpcAnimation::*ents;
+    const char name[32];
+};
+
 class NpcAnimation : public Animation
 {
 private:
@@ -55,7 +63,6 @@ private:
     std::string     mHairModel;
     std::string     mBodyPrefix;
 
-
     float mTimeToChange;
     MWWorld::ContainerStoreIterator mRobe;
     MWWorld::ContainerStoreIterator mHelmet;
@@ -71,6 +78,9 @@ private:
     MWWorld::ContainerStoreIterator mSkirtIter;
 
     int mVisibilityFlags;
+
+    static const size_t sPartListSize = 27;
+    static const PartInfo sPartList[sPartListSize];
 
 public:
     NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node,
