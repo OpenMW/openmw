@@ -50,7 +50,7 @@ namespace Translation
 
             if (!line.empty())
             {
-                line = mEncoder.getUtf8(line);
+                line = mEncoder->getUtf8(line);
 
                 size_t tab_pos = line.find('\t');
                 if (tab_pos != std::string::npos && tab_pos > 0 && tab_pos < line.size() - 1)
@@ -101,10 +101,9 @@ namespace Translation
             return phrase;
     }
 
-    void Storage::setEncoding (const ToUTF8::FromType& encoding)
+    void Storage::setEncoder(ToUTF8::Utf8Encoder* encoder)
     {
-        mEncoding = encoding;
-        mEncoder.setEncoding(encoding);
+        mEncoder = encoder;
     }
 
     bool Storage::hasTranslation() const

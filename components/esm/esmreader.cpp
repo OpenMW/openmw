@@ -344,7 +344,7 @@ std::string ESMReader::getString(int size)
     getExact(ptr, size);
 
     // Convert to UTF8 and return
-    return mEncoder.getUtf8(ptr, size);
+    return mEncoder->getUtf8(ptr, size);
 }
 
 void ESMReader::fail(const std::string &msg)
@@ -362,10 +362,9 @@ void ESMReader::fail(const std::string &msg)
     throw std::runtime_error(ss.str());
 }
 
-void ESMReader::setEncoding(const ToUTF8::FromType& encoding)
+void ESMReader::setEncoder(ToUTF8::Utf8Encoder* encoder)
 {
-  mEncoding = encoding;
-  mEncoder.setEncoding(encoding);
+    mEncoder = encoder;
 }
 
 }

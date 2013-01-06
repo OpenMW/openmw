@@ -43,16 +43,10 @@
 
 using namespace ToUTF8;
 
-Utf8Encoder::Utf8Encoder(void):
+Utf8Encoder::Utf8Encoder(const FromType sourceEncoding):
     mOutput(50*1024)
 {
-}
-
-void Utf8Encoder::setEncoding(const FromType sourceEncoding)
-{
-    mEncoding = sourceEncoding;
-
-    switch (mEncoding)
+    switch (sourceEncoding)
     {
         case ToUTF8::WINDOWS_1252:
         {

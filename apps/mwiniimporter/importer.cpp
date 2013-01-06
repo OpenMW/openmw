@@ -649,8 +649,7 @@ MwIniImporter::multistrmap MwIniImporter::loadIniFile(std::string filename) {
     std::string section("");
     MwIniImporter::multistrmap map;
     boost::iostreams::stream<boost::iostreams::file_source>file(filename.c_str());
-    ToUTF8::Utf8Encoder encoder;
-    encoder.setEncoding(mEncoding);
+    ToUTF8::Utf8Encoder encoder(mEncoding);
 
     std::string line;
     while (std::getline(file, line)) {

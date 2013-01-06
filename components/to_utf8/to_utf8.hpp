@@ -24,9 +24,7 @@ namespace ToUTF8
     class Utf8Encoder
     {
         public:
-            Utf8Encoder(void);
-
-            void setEncoding(const FromType sourceEncoding);
+            Utf8Encoder(FromType sourceEncoding);
 
             // Convert to UTF8 from the previously given code page.
             std::string getUtf8(const char *input, int size);
@@ -48,9 +46,7 @@ namespace ToUTF8
             size_t getLength2(const char* input, bool &ascii);
             void copyFromArray2(const char*& chp, char* &out);
 
-            FromType mEncoding;
             std::vector<char> mOutput;
-            int mSize;
             char* translationArray;
     };
 }

@@ -235,8 +235,8 @@ public:
   /// Used for error handling
   void fail(const std::string &msg);
 
-  /// Sets font encoding for ESM strings
-  void setEncoding(const ToUTF8::FromType& encoding);
+  /// Sets font encoder for ESM strings
+  void setEncoder(ToUTF8::Utf8Encoder* encoder);
 
 private:
   Ogre::DataStreamPtr mEsm;
@@ -251,8 +251,7 @@ private:
 
   SaveData mSaveData;
   MasterList mMasters;
-  ToUTF8::FromType mEncoding;
-  ToUTF8::Utf8Encoder mEncoder;
+  ToUTF8::Utf8Encoder* mEncoder;
 };
 }
 #endif

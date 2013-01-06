@@ -331,11 +331,15 @@ void OMW::Engine::go()
     // cursor replacer (converts the cursor from the bsa so they can be used by mygui)
     MWGui::CursorReplace replacer;
 
+    // Create encoder
+    ToUTF8::Utf8Encoder encoder (mEncoding);
+
     // Create the world
     mEnvironment.setWorld (new MWWorld::World (*mOgre, mFileCollections, mMaster,
-        mResDir, mCfgMgr.getCachePath(), mNewGame, mEncoding, mFallbackMap));
+        mResDir, mCfgMgr.getCachePath(), mNewGame, &encoder, mFallbackMap));
 
     //Load translation data
+    mTranslationDataStorage.setEncoder(&encoder);
     mTranslationDataStorage.loadTranslationData(mFileCollections, mMaster);
 
     // Create window manager - this manages all the MW-specific GUI windows
@@ -494,7 +498,6 @@ void OMW::Engine::showFPS(int level)
 void OMW::Engine::setEncoding(const ToUTF8::FromType& encoding)
 {
     mEncoding = encoding;
-    mTranslationDataStorage.setEncoding (encoding);
 }
 
 void OMW::Engine::setFallbackValues(std::map<std::string,std::string> fallbackMap)
