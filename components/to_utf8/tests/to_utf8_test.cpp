@@ -18,8 +18,7 @@ void testEncoder(ToUTF8::FromType encoding, const std::string &legacyEncFile,
     std::string utf8Line = getFirstLine(utf8File);
 
     // create an encoder for specified character encoding
-    ToUTF8::Utf8Encoder encoder;
-    encoder.setEncoding(encoding);
+    ToUTF8::Utf8Encoder encoder (encoding);
 
     // convert text to UTF-8
     std::string convertedUtf8Line = encoder.getUtf8(legacyEncLine);
