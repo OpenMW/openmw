@@ -70,7 +70,7 @@ namespace MWSound
         friend class SoundManager;
     };
 #ifndef DEFAULT_OUTPUT
-#define DEFAULT_OUTPUT (::MWSound::OpenAL_Output)
+#define DEFAULT_OUTPUT(x) ::MWSound::OpenAL_Output((x))
 #endif
 }
 

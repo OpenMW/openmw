@@ -1020,7 +1020,8 @@ VideoPlayer::VideoPlayer(Ogre::SceneManager* sceneMgr)
         mVideoMaterial->getTechnique(0)->getPass(0)->setDepthCheckEnabled(false);
         mVideoMaterial->getTechnique(0)->getPass(0)->setLightingEnabled(false);
         mVideoMaterial->getTechnique(0)->getPass(0)->createTextureUnitState();
-    }
+        mVideoMaterial->getTechnique(0)->getPass(0)->getTextureUnitState(0)->setTextureAddressingMode(Ogre::TextureUnitState::TAM_CLAMP);
+            }
     mVideoMaterial->getTechnique(0)->getPass(0)->getTextureUnitState(0)->setTextureName("black.png");
 
     Ogre::MaterialPtr blackMaterial = Ogre::MaterialManager::getSingleton().getByName("BlackBarsMaterial", "General");
