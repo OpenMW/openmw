@@ -17,7 +17,7 @@
 
 using namespace MWRender;
 
-// These are the Morrowind.ini defaults
+/// \todo Replace these, once fallback values from the ini file are available.
 float Objects::lightLinearValue = 3;
 float Objects::lightLinearRadiusMult = 1;
 
@@ -31,7 +31,6 @@ int Objects::uniqueID = 0;
 
 void Objects::clearSceneNode (Ogre::SceneNode *node)
 {
-    /// \todo This should probably be moved into OpenEngine at some point.
     for (int i=node->numAttachedObjects()-1; i>=0; --i)
     {
         Ogre::MovableObject *object = node->getAttachedObject (i);
@@ -374,45 +373,43 @@ void Objects::disableLights()
     }
 }
 
-namespace pulse
+namespace MWRender
 {
-    static float frequency (float x)
+    namespace Pulse
     {
-        return x;
+        static float amplitude (float phase)
+        {
+            return sin (phase);
+        }
     }
 
-    static float amplitude (float phase)
+    namespace Flicker
     {
-        return sin (phase);
-    }
-}
+        static const float fa = 0.785398f;
+        static const float fb = 1.17024f;
 
-namespace flicker
-{
-    static const float fa = 0.785398f;
-    static const float fb = 1.17024f;
+        static const float tdo = 0.94f;
+        static const float tdm = 2.48f;
 
-    static const float tdo = 0.94f;
-    static const float tdm = 2.48f;
+        static const float f [3] = { 1.5708f,   4.18774f, 5.19934f };
+        static const float o [3] = { 0.804248f, 2.11115f, 3.46832f };
+        static const float m [3] = { 1.0f,      0.785f,   0.876f   };
+        static const float s = 0.394f;
 
-    static const float f [3] = { 1.5708f,   4.18774f, 5.19934f };
-    static const float o [3] = { 0.804248f, 2.11115f, 3.46832f };
-    static const float m [3] = { 1.0f,      0.785f,   0.876f   };
-    static const float s = 0.394f;
+        static const float phase_wavelength = 120.0f * 3.14159265359f / fa;
 
-    static const float phase_wavelength = 120.0f * 3.14159265359f / fa;
+        static float frequency (float x)
+        {
+            return tdo + tdm * sin (fa * x);
+        }
 
-    static float frequency (float x)
-    {
-        return tdo + tdm * sin (fa * x);
-    }
-
-    static float amplitude (float x)
-    {
-        float v = 0.0f;
-        for (int i = 0; i < 3; ++i)
-            v += sin (fb*x*f[i] + o[1])*m[i];
-        return v * s;
+        static float amplitude (float x)
+        {
+            float v = 0.0f;
+            for (int i = 0; i < 3; ++i)
+                v += sin (fb*x*f[i] + o[1])*m[i];
+            return v * s;
+        }
     }
 }
 
@@ -424,7 +421,6 @@ void Objects::update(const float dt)
         if (mMwRoot->getCreator()->hasLight(it->name))
         {
             Ogre::Light* light = mMwRoot->getCreator()->getLight(it->name);
-
 
             float brightness;
             float cycle_time;
@@ -438,8 +434,8 @@ void Objects::update(const float dt)
             else
             {
                 cycle_time = 500.0f;
-                it->phase = fmod (it->phase + dt, flicker::phase_wavelength);
-                time_distortion = flicker::frequency (it->phase);
+                it->phase = fmod (it->phase + dt, Flicker::phase_wavelength);
+                time_distortion = Flicker::frequency (it->phase);
             }
 
             it->time += it->dir*dt*time_distortion;
@@ -461,23 +457,23 @@ void Objects::update(const float dt)
             if (it->type == LT_Normal)
             {
                 // Less than 1/255 light modifier for a constant light:
-                brightness = (const float)(1.0 + flicker::amplitude(it->time*slow) / 255.0 );
+                brightness = (const float)(1.0 + Flicker::amplitude(it->time*slow) / 255.0 );
             }
             else if (it->type == LT_Flicker)
             {
-                brightness = (const float)(0.75 + flicker::amplitude(it->time*fast) * 0.25);
+                brightness = (const float)(0.75 + Flicker::amplitude(it->time*fast) * 0.25);
             }
             else if (it->type == LT_FlickerSlow)
             {
-                brightness = (const float)(0.75 + flicker::amplitude(it->time*slow) * 0.25);
+                brightness = (const float)(0.75 + Flicker::amplitude(it->time*slow) * 0.25);
             }
             else if (it->type == LT_Pulse)
             {
-                brightness = (const float)(1.0 + pulse::amplitude (it->time*fast) * 0.25);
+                brightness = (const float)(1.0 + Pulse::amplitude (it->time*fast) * 0.25);
             }
             else if (it->type == LT_PulseSlow)
             {
-                brightness = (const float)(1.0 + pulse::amplitude (it->time*slow) * 0.25);
+                brightness = (const float)(1.0 + Pulse::amplitude (it->time*slow) * 0.25);
             }
             else
                 assert(0 && "Invalid light type");
@@ -506,8 +502,7 @@ void Objects::rebuildStaticGeometry()
     }
 }
 
-void
-Objects::updateObjectCell(const MWWorld::Ptr &ptr)
+void Objects::updateObjectCell(const MWWorld::Ptr &ptr)
 {
     Ogre::SceneNode *node;
     MWWorld::CellStore *newCell = ptr.getCell();
