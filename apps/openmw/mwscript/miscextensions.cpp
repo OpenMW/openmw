@@ -34,7 +34,10 @@ namespace MWScript
                 std::string name = runtime.getStringLiteral (runtime[0].mInteger);
                 runtime.pop();
 
-                MWBase::Environment::get().getWorld ()->playVideo (name);
+                bool allowSkipping = runtime[0].mInteger;
+                runtime.pop();
+
+                MWBase::Environment::get().getWorld ()->playVideo (name, allowSkipping);
             }
         };
 
@@ -465,7 +468,7 @@ namespace MWScript
             extensions.registerInstruction ("tvm", "", opcodeToggleVanityMode);
             extensions.registerFunction ("getpcsleep", 'l', "", opcodeGetPcSleep);
             extensions.registerInstruction ("wakeuppc", "", opcodeWakeUpPc);
-            extensions.registerInstruction ("playbink", "S", opcodePlayBink);
+            extensions.registerInstruction ("playbink", "Sl", opcodePlayBink);
             extensions.registerFunction ("getlocked", 'l', "", opcodeGetLocked, opcodeGetLockedExplicit);
             extensions.registerFunction ("geteffect", 'l', "l", opcodeGetEffect, opcodeGetEffectExplicit);
             extensions.registerFunction ("getattacked", 'l', "", opcodeGetAttacked, opcodeGetAttackedExplicit);

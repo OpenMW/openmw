@@ -1010,6 +1010,7 @@ VideoPlayer::VideoPlayer(Ogre::SceneManager* sceneMgr)
     , mVideoMaterial(NULL)
     , mRectangle(NULL)
     , mNode(NULL)
+    , mAllowSkipping(false)
 {
     mVideoMaterial = Ogre::MaterialManager::getSingleton().getByName("VideoMaterial", "General");
     if (mVideoMaterial.isNull ())
@@ -1071,8 +1072,10 @@ VideoPlayer::~VideoPlayer()
     delete mBackgroundRectangle;
 }
 
-void VideoPlayer::playVideo(const std::string &resourceName)
+void VideoPlayer::playVideo(const std::string &resourceName, bool allowSkipping)
 {
+    mAllowSkipping = allowSkipping;
+
     if(mState)
         close();
 
@@ -1111,6 +1114,12 @@ void VideoPlayer::update ()
         if(!mState->update(mVideoMaterial, mRectangle, mWidth, mHeight))
             close();
     }
+}
+
+void VideoPlayer::stopVideo ()
+{
+    if (mAllowSkipping)
+        close();
 }
 
 void VideoPlayer::close()

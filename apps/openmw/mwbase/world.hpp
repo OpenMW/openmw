@@ -305,7 +305,7 @@ namespace MWBase
 
 
             /// \todo this does not belong here
-            virtual void playVideo(const std::string& name) = 0;
+            virtual void playVideo(const std::string& name, bool allowSkipping) = 0;
             virtual void stopVideo() = 0;
     };
 }

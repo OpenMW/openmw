@@ -196,7 +196,7 @@ class RenderingManager: private RenderingInterface, public Ogre::WindowEventList
 
     void setupExternalRendering (MWRender::ExternalRendering& rendering);
 
-    void playVideo(const std::string& name);
+    void playVideo(const std::string& name, bool allowSkipping);
     void stopVideo();
 
   protected:

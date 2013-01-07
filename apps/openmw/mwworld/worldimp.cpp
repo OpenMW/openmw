@@ -1287,9 +1287,9 @@ namespace MWWorld
 
     }
 
-    void World::playVideo (const std::string &name)
+    void World::playVideo (const std::string &name, bool allowSkipping)
     {
-        mRendering->playVideo(name);
+        mRendering->playVideo(name, allowSkipping);
     }
 
     void World::stopVideo ()

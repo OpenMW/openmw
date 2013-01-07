@@ -929,14 +929,14 @@ void RenderingManager::setupExternalRendering (MWRender::ExternalRendering& rend
     rendering.setup (mRendering.getScene());
 }
 
-void RenderingManager::playVideo(const std::string& name)
+void RenderingManager::playVideo(const std::string& name, bool allowSkipping)
 {
-    mVideoPlayer->playVideo ("video/" + name);
+    mVideoPlayer->playVideo ("video/" + name, allowSkipping);
 }
 
 void RenderingManager::stopVideo()
 {
-    mVideoPlayer->close ();
+    mVideoPlayer->stopVideo ();
 }
 
 } // namespace

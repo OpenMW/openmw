@@ -334,7 +334,7 @@ namespace MWWorld
             /// 3 - enemies are nearby (not implemented)
 
             /// \todo this does not belong here
-            virtual void playVideo(const std::string& name);
+            virtual void playVideo(const std::string& name, bool allowSkipping);
             virtual void stopVideo();
     };
 }

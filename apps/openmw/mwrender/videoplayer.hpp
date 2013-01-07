@@ -20,11 +20,12 @@ namespace MWRender
         VideoPlayer(Ogre::SceneManager* sceneMgr);
         ~VideoPlayer();
 
-        void playVideo (const std::string& resourceName);
+        void playVideo (const std::string& resourceName, bool allowSkipping);
 
         void update();
 
         void close();
+        void stopVideo();
 
         bool isPlaying();
 
@@ -33,6 +34,8 @@ namespace MWRender
 
     private:
         VideoState* mState;
+
+        bool mAllowSkipping;
 
         Ogre::SceneManager* mSceneMgr;
         Ogre::MaterialPtr mVideoMaterial;
