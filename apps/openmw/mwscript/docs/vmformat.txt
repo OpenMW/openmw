@@ -306,5 +306,7 @@ op 0x20001ef: GetCurrentAIPackage
 op 0x20001f0: GetCurrentAIPackage, explicit reference
 op 0x20001f1: GetDetected
 op 0x20001f2: GetDetected, explicit reference
+op 0x20001f3: AddSoulGem
+op 0x20001f4: AddSoulGem, explicit reference
 
-opcodes 0x20001f3-0x3ffffff unused
+opcodes 0x20001f5-0x3ffffff unused
