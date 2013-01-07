@@ -301,7 +301,7 @@ op 0x20001ea: LowerRank
 op 0x20001eb: LowerRank, explicit
 op 0x20001ec: GetPCCrimeLevel
 op 0x20001ed: SetPCCrimeLevel
-op 0x20001ee: SetPCCrimeLevel
+op 0x20001ee: ModPCCrimeLevel
 op 0x20001ef: GetCurrentAIPackage
 op 0x20001f0: GetCurrentAIPackage, explicit reference
 op 0x20001f1: GetDetected
