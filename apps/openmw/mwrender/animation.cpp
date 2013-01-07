@@ -82,6 +82,13 @@ void Animation::createEntityList(Ogre::SceneNode *node, const std::string &model
                 break;
             }
         }
+
+        NifOgre::TextKeyMap::iterator keyiter;
+        for(keyiter = mTextKeys.begin();keyiter != mTextKeys.end();keyiter++)
+        {
+            std::transform(keyiter->second.begin(), keyiter->second.end(),
+                           keyiter->second.begin(), ::tolower);
+        }
     }
 }
 
@@ -124,19 +131,12 @@ void Animation::resetPosition(float time)
 }
 
 
-struct checklow {
-    bool operator()(const char &a, const char &b) const
-    {
-        return ::tolower(a) == ::tolower(b);
-    }
-};
-
 bool Animation::findGroupTimes(const std::string &groupname, Animation::GroupTimes *times)
 {
-    const std::string &start = groupname+": start";
-    const std::string &startloop = groupname+": loop start";
-    const std::string &stop = groupname+": stop";
-    const std::string &stoploop = groupname+": loop stop";
+    const std::string start = groupname+": start";
+    const std::string startloop = groupname+": loop start";
+    const std::string stop = groupname+": stop";
+    const std::string stoploop = groupname+": loop stop";
 
     NifOgre::TextKeyMap::const_iterator iter;
     for(iter = mTextKeys.begin();iter != mTextKeys.end();iter++)
@@ -144,24 +144,20 @@ bool Animation::findGroupTimes(const std::string &groupname, Animation::GroupTim
         if(times->mStart >= 0.0f && times->mLoopStart >= 0.0f && times->mLoopStop >= 0.0f && times->mStop >= 0.0f)
             return true;
 
-        std::string::const_iterator strpos = iter->second.begin();
-        std::string::const_iterator strend = iter->second.end();
-        size_t strlen = strend-strpos;
-
-        if(start.size() <= strlen && std::mismatch(strpos, strend, start.begin(), checklow()).first == strend)
+        if(start == iter->second)
         {
             times->mStart = iter->first;
             times->mLoopStart = iter->first;
         }
-        else if(startloop.size() <= strlen && std::mismatch(strpos, strend, startloop.begin(), checklow()).first == strend)
+        else if(startloop == iter->second)
         {
             times->mLoopStart = iter->first;
         }
-        else if(stoploop.size() <= strlen && std::mismatch(strpos, strend, stoploop.begin(), checklow()).first == strend)
+        else if(stoploop == iter->second)
         {
             times->mLoopStop = iter->first;
         }
-        else if(stop.size() <= strlen && std::mismatch(strpos, strend, stop.begin(), checklow()).first == strend)
+        else if(stop == iter->second)
         {
             times->mStop = iter->first;
             if(times->mLoopStop < 0.0f)
@@ -179,6 +175,7 @@ void Animation::playGroup(std::string groupname, int mode, int loops)
     GroupTimes times;
     times.mLoops = loops;
 
+    std::transform(groupname.begin(), groupname.end(), groupname.begin(), ::tolower);
     if(groupname == "all")
     {
         times.mStart = times.mLoopStart = 0.0f;
