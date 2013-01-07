@@ -169,6 +169,8 @@ static void buildAnimation(Ogre::Skeleton *skel, const std::string &name, const 
     for(size_t i = 0;i < ctrls.size();i++)
     {
         Nif::NiKeyframeController *kfc = ctrls[i];
+        if(kfc->data.empty())
+            continue;
         Nif::NiKeyframeData *kf = kfc->data.getPtr();
 
         /* Get the keyframes and make sure they're sorted first to last */
@@ -183,7 +185,9 @@ static void buildAnimation(Ogre::Skeleton *skel, const std::string &name, const 
         Ogre::Bone *bone = skel->getBone(targets[i]);
         // NOTE: For some reason, Ogre doesn't like the node track ID being different from
         // the bone ID
-        Ogre::NodeAnimationTrack *nodetrack = anim->createNodeTrack(bone->getHandle(), bone);
+        Ogre::NodeAnimationTrack *nodetrack = anim->hasNodeTrack(bone->getHandle()) ?
+                                              anim->getNodeTrack(bone->getHandle()) :
+                                              anim->createNodeTrack(bone->getHandle(), bone);
         const Ogre::Quaternion &startquat = bone->getInitialOrientation();
         const Ogre::Vector3 &starttrans = bone->getInitialPosition();
         const Ogre::Vector3 &startscale = bone->getInitialScale();
@@ -299,6 +303,9 @@ static TextKeyMap extractTextKeys(const Nif::NiTextKeyExtraData *tk)
 
 void buildBones(Ogre::Skeleton *skel, const Nif::Node *node, std::vector<Nif::NiKeyframeController*> &ctrls, Ogre::Bone *parent=NULL)
 {
+    if(node->recType == Nif::RC_NiTriShape)
+        return;
+
     Ogre::Bone *bone;
     if(!skel->hasBone(node->name))
         bone = skel->createBone(node->name);
@@ -403,6 +410,9 @@ void loadResource(Ogre::Resource *resource)
 
 bool createSkeleton(const std::string &name, const std::string &group, const Nif::Node *node)
 {
+    if(node->recType == Nif::RC_NiTriShape)
+        return false;
+
     if(node->boneTrafo != NULL)
     {
         Ogre::SkeletonManager &skelMgr = Ogre::SkeletonManager::getSingleton();
@@ -733,7 +743,6 @@ class NIFMeshLoader : Ogre::ManualResourceLoader
             // Get the skeleton resource, so vertices can be transformed into the bones' initial state.
             Ogre::SkeletonManager *skelMgr = Ogre::SkeletonManager::getSingletonPtr();
             skel = skelMgr->getByName(mSkelName);
-            skel->touch();
 
             // Convert vertices and normals to bone space from bind position. It would be
             // better to transform the bones into bind position, but there doesn't seem to
@@ -967,7 +976,7 @@ public:
         findTriShape(mesh, node);
     }
 
-    void createMeshes(const Nif::Node *node, MeshPairList &meshes, int flags=0)
+    void createMeshes(const Nif::Node *node, MeshInfoList &meshes, int flags=0)
     {
         flags |= node->flags;
 
@@ -1026,7 +1035,8 @@ public:
                 mesh->setAutoBuildEdgeLists(false);
             }
 
-            meshes.push_back(std::make_pair(mesh->getName(), shape->name));
+            meshes.push_back(MeshInfo(mesh->getName(), (shape->parent ? shape->parent->name : shape->name),
+                                      shape->trafo.pos, shape->trafo.rotation, shape->trafo.scale));
         }
         else if(node->recType != Nif::RC_NiNode && node->recType != Nif::RC_RootCollisionNode &&
                 node->recType != Nif::RC_NiRotatingParticles)
@@ -1047,16 +1057,16 @@ public:
 NIFMeshLoader::LoaderMap NIFMeshLoader::sLoaders;
 
 
-typedef std::map<std::string,MeshPairList> MeshPairMap;
-static MeshPairMap sMeshPairMap;
+typedef std::map<std::string,MeshInfoList> MeshInfoMap;
+static MeshInfoMap sMeshInfoMap;
 
-MeshPairList NIFLoader::load(const std::string &name, const std::string &skelName, const std::string &group)
+MeshInfoList NIFLoader::load(const std::string &name, const std::string &skelName, const std::string &group)
 {
-    MeshPairMap::const_iterator meshiter = sMeshPairMap.find(name+"@skel="+skelName);
-    if(meshiter != sMeshPairMap.end())
+    MeshInfoMap::const_iterator meshiter = sMeshInfoMap.find(name+"@skel="+skelName);
+    if(meshiter != sMeshInfoMap.end())
         return meshiter->second;
 
-    MeshPairList &meshes = sMeshPairMap[name+"@skel="+skelName];
+    MeshInfoList &meshes = sMeshInfoMap[name+"@skel="+skelName];
     Nif::NIFFile nif(name);
     if (nif.numRecords() < 1)
     {
@@ -1090,14 +1100,14 @@ EntityList NIFLoader::createEntities(Ogre::SceneNode *parentNode, std::string na
     EntityList entitylist;
 
     std::transform(name.begin(), name.end(), name.begin(), ::tolower);
-    MeshPairList meshes = load(name, name, group);
+    MeshInfoList meshes = load(name, name, group);
     if(meshes.size() == 0)
         return entitylist;
 
     Ogre::SceneManager *sceneMgr = parentNode->getCreator();
     for(size_t i = 0;i < meshes.size();i++)
     {
-        entitylist.mEntities.push_back(sceneMgr->createEntity(meshes[i].first));
+        entitylist.mEntities.push_back(sceneMgr->createEntity(meshes[i].mMeshName));
         Ogre::Entity *entity = entitylist.mEntities.back();
         if(!entitylist.mSkelBase && entity->hasSkeleton())
             entitylist.mSkelBase = entity;
@@ -1115,7 +1125,12 @@ EntityList NIFLoader::createEntities(Ogre::SceneNode *parentNode, std::string na
                 parentNode->attachObject(entity);
             }
             else if(entity != entitylist.mSkelBase)
-                entitylist.mSkelBase->attachObjectToBone(meshes[i].second, entity);
+            {
+                Ogre::TagPoint *tag = entitylist.mSkelBase->attachObjectToBone(meshes[i].mTargetNode, entity);
+                tag->setPosition(meshes[i].mPos);
+                tag->setOrientation(meshes[i].mRot);
+                tag->setScale(Ogre::Vector3(meshes[i].mScale));
+            }
         }
     }
     else
@@ -1134,22 +1149,22 @@ EntityList NIFLoader::createEntities(Ogre::Entity *parent, const std::string &bo
     EntityList entitylist;
 
     std::transform(name.begin(), name.end(), name.begin(), ::tolower);
-    MeshPairList meshes = load(name, parent->getMesh()->getSkeletonName(), group);
+    MeshInfoList meshes = load(name, parent->getMesh()->getSkeletonName(), group);
     if(meshes.size() == 0)
         return entitylist;
 
     Ogre::SceneManager *sceneMgr = parentNode->getCreator();
-    std::string filter = "tri "+bonename;
-    std::transform(filter.begin()+4, filter.end(), filter.begin()+4, ::tolower);
+    std::string filter = bonename;
+    std::transform(filter.begin(), filter.end(), filter.begin(), ::tolower);
     for(size_t i = 0;i < meshes.size();i++)
     {
-        Ogre::Entity *ent = sceneMgr->createEntity(meshes[i].first);
+        Ogre::Entity *ent = sceneMgr->createEntity(meshes[i].mMeshName);
         if(ent->hasSkeleton())
         {
-            std::transform(meshes[i].second.begin(), meshes[i].second.end(), meshes[i].second.begin(), ::tolower);
+            std::transform(meshes[i].mTargetNode.begin(), meshes[i].mTargetNode.end(),
+                           meshes[i].mTargetNode.begin(), ::tolower);
 
-            if(meshes[i].second.length() < filter.length() ||
-               meshes[i].second.compare(0, filter.length(), filter) != 0)
+            if(meshes[i].mMeshName.find("@shape=tri "+filter) == std::string::npos)
             {
                 sceneMgr->destroyEntity(ent);
                 continue;

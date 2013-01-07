@@ -53,8 +53,21 @@ struct EntityList {
 };
 
 
-/** This holds a list of mesh names along with the names of their parent nodes */
-typedef std::vector< std::pair<std::string,std::string> > MeshPairList;
+/* This holds a list of mesh names, the names of their parent nodes, and the offset
+ * from their parent nodes. */
+struct MeshInfo {
+    std::string mMeshName;
+    std::string mTargetNode;
+    Ogre::Vector3 mPos;
+    Ogre::Matrix3 mRot;
+    float mScale;
+
+    MeshInfo(const std::string &name, const std::string &target,
+             const Ogre::Vector3 &pos, const Ogre::Matrix3 &rot, float scale)
+      : mMeshName(name), mTargetNode(target), mPos(pos), mRot(rot), mScale(scale)
+    { }
+};
+typedef std::vector<MeshInfo> MeshInfoList;
 
 /** Manual resource loader for NIF meshes. This is the main class
     responsible for translating the internal NIF mesh structure into
@@ -70,7 +83,7 @@ typedef std::vector< std::pair<std::string,std::string> > MeshPairList;
  */
 class NIFLoader
 {
-    static MeshPairList load(const std::string &name, const std::string &skelName, const std::string &group);
+    static MeshInfoList load(const std::string &name, const std::string &skelName, const std::string &group);
 
 public:
     static EntityList createEntities(Ogre::Entity *parent, const std::string &bonename,
