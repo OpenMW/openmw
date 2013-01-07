@@ -110,11 +110,6 @@ target_link_libraries(openmw
     components
 )
 
-if (USE_FFMPEG)
-    target_link_libraries(openmw
-    "swscale")
-endif()
-
 # Fix for not visible pthreads functions for linker with glibc 2.15
 if (UNIX AND NOT APPLE)
 target_link_libraries(openmw ${CMAKE_THREAD_LIBS_INIT})
