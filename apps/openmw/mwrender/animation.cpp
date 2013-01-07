@@ -7,6 +7,9 @@
 #include <OgreSubMesh.h>
 #include <OgreSceneManager.h>
 
+#include "../mwbase/environment.hpp"
+#include "../mwbase/world.hpp"
+
 namespace MWRender
 {
 
@@ -16,8 +19,14 @@ Animation::Animation(const MWWorld::Ptr &ptr)
     , mTime(0.0f)
     , mAnimState(NULL)
     , mSkipFrame(false)
+    , mAccumRoot(NULL)
     , mNonAccumRoot(NULL)
+    , mLastPosition(0.0f)
 {
+    mCurGroup.mStart = mCurGroup.mLoopStart = 0.0f;
+    mCurGroup.mLoopStop = mCurGroup.mStop = 0.0f;
+    mNextGroup.mStart = mNextGroup.mLoopStart = 0.0f;
+    mNextGroup.mLoopStop = mNextGroup.mStop = 0.0f;
 }
 
 Animation::~Animation()
@@ -52,9 +61,10 @@ void Animation::createEntityList(Ogre::SceneNode *node, const std::string &model
                 mAnimState = state;
         }
 
+        Ogre::SkeletonInstance *skelinst = mEntityList.mSkelBase->getSkeleton();
         // Would be nice if Ogre::SkeletonInstance allowed access to the 'master' Ogre::SkeletonPtr.
         Ogre::SkeletonManager &skelMgr = Ogre::SkeletonManager::getSingleton();
-        Ogre::SkeletonPtr skel = skelMgr.getByName(mEntityList.mSkelBase->getSkeleton()->getName());
+        Ogre::SkeletonPtr skel = skelMgr.getByName(skelinst->getName());
         Ogre::Skeleton::BoneIterator iter = skel->getBoneIterator();
         while(iter.hasMoreElements())
         {
@@ -63,10 +73,50 @@ void Animation::createEntityList(Ogre::SceneNode *node, const std::string &model
             if(!data.isEmpty())
             {
                 mTextKeys = Ogre::any_cast<NifOgre::TextKeyMap>(data);
-                mNonAccumRoot = mEntityList.mSkelBase->getSkeleton()->getBone(bone->getHandle());
+                mAccumRoot = skelinst->getRootBone();
+                mAccumRoot->setManuallyControlled(true);
+                mNonAccumRoot = skelinst->getBone(bone->getHandle());
+                mLastPosition = mNonAccumRoot->getPosition();
                 break;
             }
         }
+    }
+}
+
+
+void Animation::updatePosition(float time)
+{
+    mAnimState->setTimePosition(time);
+    if(mNonAccumRoot)
+    {
+        /* Update the animation and get the non-accumulation root's difference from the
+         * last update. */
+        mEntityList.mSkelBase->getSkeleton()->setAnimationState(*mAnimState->getParent());
+        Ogre::Vector3 posdiff = mNonAccumRoot->getPosition() - mLastPosition;
+
+        /* Translate the accumulation root back to compensate for the move. */
+        mAccumRoot->translate(-posdiff);
+        mLastPosition += posdiff;
+
+        /* Finally, move the object based on how much the non-accumulation root moved. */
+        Ogre::Vector3 newpos(mPtr.getRefData().getPosition().pos);
+        newpos += mInsert->getOrientation() * posdiff;
+
+        MWBase::World *world = MWBase::Environment::get().getWorld();
+        world->moveObject(mPtr, newpos.x, newpos.y, newpos.z);
+    }
+}
+
+void Animation::resetPosition(float time)
+{
+    mAnimState->setTimePosition(time);
+    if(mNonAccumRoot)
+    {
+        mEntityList.mSkelBase->getSkeleton()->setAnimationState(*mAnimState->getParent());
+        mLastPosition = mNonAccumRoot->getPosition();
+        /* FIXME: This should be set to -mLastPosition, but without proper collision the
+         * model gets placed halfway into the ground. */
+        mAccumRoot->setPosition(0.0f, 0.0f, 0.0f);
     }
 }
 
@@ -145,6 +195,7 @@ void Animation::playGroup(std::string groupname, int mode, int loops)
         mCurGroup = times;
         mNextGroup = GroupTimes();
         mTime = ((mode==2) ? mCurGroup.mLoopStart : mCurGroup.mStart);
+        resetPosition(mTime);
     }
 }
 
@@ -155,29 +206,36 @@ void Animation::skipAnim()
 
 void Animation::runAnimation(float timepassed)
 {
-    if(mCurGroup.mLoops > 0 && !mSkipFrame)
+    if(mAnimState && !mSkipFrame)
     {
         mTime += timepassed;
+    recheck:
         if(mTime >= mCurGroup.mLoopStop)
         {
             if(mCurGroup.mLoops > 1)
             {
                 mCurGroup.mLoops--;
+                updatePosition(mCurGroup.mLoopStop);
                 mTime = mTime - mCurGroup.mLoopStop + mCurGroup.mLoopStart;
+                resetPosition(mCurGroup.mLoopStart);
+                goto recheck;
             }
             else if(mTime >= mCurGroup.mStop)
             {
                 if(mNextGroup.mLoops > 0)
+                {
+                    updatePosition(mCurGroup.mStop);
                     mTime = mTime - mCurGroup.mStop + mNextGroup.mStart;
-                else
-                    mTime = mCurGroup.mStop;
-                mCurGroup = mNextGroup;
-                mNextGroup = GroupTimes();
+                    resetPosition(mNextGroup.mStart);
+                    mCurGroup = mNextGroup;
+                    mNextGroup = GroupTimes();
+                    goto recheck;
+                }
+                mTime = mCurGroup.mStop;
             }
         }
 
-        if(mAnimState)
-            mAnimState->setTimePosition(mTime);
+        updatePosition(mTime);
     }
     mSkipFrame = false;
 }

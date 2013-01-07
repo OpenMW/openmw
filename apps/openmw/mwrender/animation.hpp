@@ -37,7 +37,16 @@ protected:
 
     NifOgre::EntityList mEntityList;
     NifOgre::TextKeyMap mTextKeys;
-    Ogre::Node *mNonAccumRoot;
+    Ogre::Bone *mAccumRoot;
+    Ogre::Bone *mNonAccumRoot;
+    Ogre::Vector3 mLastPosition;
+
+    /* Updates the animation to the specified time, and moves the mPtr object
+     * based on the change since the last update or reset. */
+    void updatePosition(float time);
+    /* Updates the animation to the specified time, without moving the mPtr
+     * object. */
+    void resetPosition(float time);
 
     bool findGroupTimes(const std::string &groupname, GroupTimes *times);
 
