@@ -322,6 +322,9 @@ namespace MWScript
                     
                     std::string gem = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
+                    
+                    const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
+                    store.get<ESM::Creature>().find(creature); // This line throws an exception if it can't find the creature
 
                     MWWorld::ManualRef ref (MWBase::Environment::get().getWorld()->getStore(), gem);
 
@@ -331,6 +334,36 @@ namespace MWScript
 
                     MWWorld::Class::get (ptr).getContainerStore (ptr).add (ref.getPtr());
 
+                }   
+        };
+
+        template<class R>
+        class OpRemoveSoulGem : public Interpreter::Opcode0
+        {   
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {   
+                   
+                    MWWorld::Ptr ptr = R()(runtime);
+
+                    std::string soul = runtime.getStringLiteral (runtime[0].mInteger);
+                    runtime.pop();
+
+                    MWWorld::ContainerStore& store = MWWorld::Class::get (ptr).getContainerStore (ptr);
+                    
+
+                    for (MWWorld::ContainerStoreIterator iter (store.begin()); iter!=store.end(); ++iter)
+                    {
+                        if (::Misc::StringUtils::ciEqual(iter->getCellRef().mSoul, soul))
+                        {
+                            if (iter->getRefData().getCount() <= 1)
+                                iter->getRefData().setCount (0);
+                            else
+                                iter->getRefData().setCount (iter->getRefData().getCount() - 1);
+                            break;
+                        }
+                    }
                 }   
         };
 
@@ -444,6 +477,8 @@ namespace MWScript
         const int opcodeGetEffectExplicit = 0x20001d0;
         const int opcodeAddSoulGem = 0x20001f3;
         const int opcodeAddSoulGemExplicit = 0x20001f4;
+        const int opcodeRemoveSoulGem = 0x20001f5;
+        const int opcodeRemoveSoulGemExplicit = 0x20001f6;
         const int opcodeGetAttacked = 0x20001d3;
         const int opcodeGetAttackedExplicit = 0x20001d4;
         const int opcodeGetWeaponDrawn = 0x20001d7;
@@ -483,6 +518,7 @@ namespace MWScript
             extensions.registerFunction ("getlocked", 'l', "", opcodeGetLocked, opcodeGetLockedExplicit);
             extensions.registerFunction ("geteffect", 'l', "l", opcodeGetEffect, opcodeGetEffectExplicit);
             extensions.registerInstruction ("addsoulgem", "cc", opcodeAddSoulGem, opcodeAddSoulGemExplicit);
+            extensions.registerInstruction ("removesoulgem", "c", opcodeRemoveSoulGem, opcodeRemoveSoulGemExplicit);
             extensions.registerFunction ("getattacked", 'l', "", opcodeGetAttacked, opcodeGetAttackedExplicit);
             extensions.registerFunction ("getweapondrawn", 'l', "", opcodeGetWeaponDrawn, opcodeGetWeaponDrawnExplicit);
             extensions.registerFunction ("getspelleffects", 'l', "c", opcodeGetSpellEffects, opcodeGetSpellEffectsExplicit);
@@ -518,6 +554,8 @@ namespace MWScript
             interpreter.installSegment5 (opcodeGetEffectExplicit, new OpGetEffect<ExplicitRef>);
             interpreter.installSegment5 (opcodeAddSoulGem, new OpAddSoulGem<ImplicitRef>);
             interpreter.installSegment5 (opcodeAddSoulGemExplicit, new OpAddSoulGem<ExplicitRef>);
+            interpreter.installSegment5 (opcodeRemoveSoulGem, new OpRemoveSoulGem<ImplicitRef>);
+            interpreter.installSegment5 (opcodeRemoveSoulGemExplicit, new OpRemoveSoulGem<ExplicitRef>);
             interpreter.installSegment5 (opcodeGetAttacked, new OpGetAttacked<ImplicitRef>);
             interpreter.installSegment5 (opcodeGetAttackedExplicit, new OpGetAttacked<ExplicitRef>);
             interpreter.installSegment5 (opcodeGetWeaponDrawn, new OpGetWeaponDrawn<ImplicitRef>);
