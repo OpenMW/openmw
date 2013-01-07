@@ -16,16 +16,17 @@ CreatureAnimation::~CreatureAnimation()
 {
 }
 
-CreatureAnimation::CreatureAnimation(const MWWorld::Ptr& ptr): Animation()
+CreatureAnimation::CreatureAnimation(const MWWorld::Ptr &ptr)
+  : Animation(ptr)
 {
-    MWWorld::LiveCellRef<ESM::Creature> *ref = ptr.get<ESM::Creature>();
+    MWWorld::LiveCellRef<ESM::Creature> *ref = mPtr.get<ESM::Creature>();
 
     assert (ref->mBase != NULL);
     if(!ref->mBase->mModel.empty())
     {
         std::string mesh = "meshes\\" + ref->mBase->mModel;
 
-        createEntityList(ptr.getRefData().getBaseNode(), mesh);
+        createEntityList(mPtr.getRefData().getBaseNode(), mesh);
         for(size_t i = 0;i < mEntityList.mEntities.size();i++)
         {
             Ogre::Entity *ent = mEntityList.mEntities[i];

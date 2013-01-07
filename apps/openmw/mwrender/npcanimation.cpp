@@ -55,7 +55,7 @@ NpcAnimation::~NpcAnimation()
 
 
 NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node, MWWorld::InventoryStore& inv, int visibilityFlags)
-  : Animation(),
+  : Animation(ptr),
     mInv(inv),
     mStateID(-1),
     mTimeToChange(0),
@@ -73,7 +73,7 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node, MWWor
     mGloveR(mInv.end()),
     mSkirtIter(mInv.end())
 {
-    mNpc = ptr.get<ESM::NPC>()->mBase;
+    mNpc = mPtr.get<ESM::NPC>()->mBase;
 
     for(size_t i = 0;i < sPartListSize;i++)
     {

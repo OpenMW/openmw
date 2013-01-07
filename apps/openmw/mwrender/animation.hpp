@@ -3,6 +3,8 @@
 
 #include <components/nifogre/ogre_nif_loader.hpp>
 
+#include "../mwworld/ptr.hpp"
+
 namespace MWRender
 {
 
@@ -23,6 +25,7 @@ class Animation
     };
 
 protected:
+    MWWorld::Ptr mPtr;
     Ogre::SceneNode* mInsert;
 
     float mTime;
@@ -40,7 +43,7 @@ protected:
     void createEntityList(Ogre::SceneNode *node, const std::string &model);
 
 public:
-    Animation();
+    Animation(const MWWorld::Ptr &ptr);
     virtual ~Animation();
 
     void playGroup(std::string groupname, int mode, int loops);

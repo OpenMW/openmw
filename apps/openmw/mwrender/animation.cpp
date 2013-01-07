@@ -10,8 +10,9 @@
 namespace MWRender
 {
 
-Animation::Animation()
-    : mInsert(NULL)
+Animation::Animation(const MWWorld::Ptr &ptr)
+    : mPtr(ptr)
+    , mInsert(NULL)
     , mTime(0.0f)
     , mSkipFrame(false)
     , mAnimState(NULL)
