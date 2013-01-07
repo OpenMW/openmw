@@ -16,6 +16,8 @@ void ImageRotate::rotate(const std::string& sourceImage, const std::string& dest
 {
     Root* root = Ogre::Root::getSingletonPtr();
 
+    std::string destImageRot = std::string(destImage) + std::string("_rot");
+
     SceneManager* sceneMgr = root->createSceneManager(ST_GENERIC);
     Camera* camera = sceneMgr->createCamera("ImageRotateCamera");
 
@@ -48,8 +50,8 @@ void ImageRotate::rotate(const std::string& sourceImage, const std::string& dest
     unsigned int width = sourceTexture->getWidth();
     unsigned int height = sourceTexture->getHeight();
 
-    TexturePtr destTexture = TextureManager::getSingleton().createManual(
-                    destImage,
+    TexturePtr destTextureRot = TextureManager::getSingleton().createManual(
+                    destImageRot,
                     ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
                     TEX_TYPE_2D,
                     width, height,
@@ -57,7 +59,7 @@ void ImageRotate::rotate(const std::string& sourceImage, const std::string& dest
                     PF_FLOAT16_RGBA,
                     TU_RENDERTARGET);
 
-    RenderTarget* rtt = destTexture->getBuffer()->getRenderTarget();
+    RenderTarget* rtt = destTextureRot->getBuffer()->getRenderTarget();
     rtt->setAutoUpdated(false);
     Viewport* vp = rtt->addViewport(camera);
     vp->setOverlaysEnabled(false);
@@ -66,7 +68,20 @@ void ImageRotate::rotate(const std::string& sourceImage, const std::string& dest
 
     rtt->update();
 
+    //copy the rotated image to a static texture
+    TexturePtr destTexture = TextureManager::getSingleton().createManual(
+            destImage,
+            ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
+            TEX_TYPE_2D,
+            width, height,
+            0,
+            PF_FLOAT16_RGBA,
+            Ogre::TU_STATIC);
+
+    destTexture->getBuffer()->blit(destTextureRot->getBuffer());
+
     // remove all the junk we've created
+    TextureManager::getSingleton().remove(destImageRot);
     MaterialManager::getSingleton().remove("ImageRotateMaterial");
     root->destroySceneManager(sceneMgr);
     delete rect;

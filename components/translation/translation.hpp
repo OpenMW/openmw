@@ -19,7 +19,7 @@ namespace Translation
         // Standard form usually means nominative case
         std::string topicStandardForm(const std::string& phrase) const;
 
-        void setEncoding (const ToUTF8::FromType& encoding);
+        void setEncoder(ToUTF8::Utf8Encoder* encoder);
 
         bool hasTranslation() const;
 
@@ -34,7 +34,7 @@ namespace Translation
         void loadDataFromStream(ContainerType& container, std::istream& stream);
 
 
-        ToUTF8::FromType mEncoding;
+        ToUTF8::Utf8Encoder* mEncoder;
         ContainerType mCellNamesTranslations, mTopicIDs, mPhraseForms;
     };
 }

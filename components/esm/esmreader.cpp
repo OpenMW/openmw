@@ -15,6 +15,11 @@ ESM_Context ESMReader::getContext()
     return mCtx;
 }
 
+ESMReader::ESMReader(void):
+    mBuffer(50*1024)
+{
+}
+
 void ESMReader::restoreContext(const ESM_Context &rc)
 {
     // Reopen the file if necessary
@@ -323,11 +328,21 @@ void ESMReader::getExact(void*x, int size)
 
 std::string ESMReader::getString(int size)
 {
-    char *ptr = ToUTF8::getBuffer(size);
-    mEsm->read(ptr, size);
+    size_t s = size;
+    if (mBuffer.size() <= s)
+        // Add some extra padding to reduce the chance of having to resize
+        // again later.
+        mBuffer.resize(3*s);
+
+    // And make sure the string is zero terminated
+    mBuffer[s] = 0;
+
+    // read ESM data
+    char *ptr = &mBuffer[0];
+    getExact(ptr, size);
 
     // Convert to UTF8 and return
-    return ToUTF8::getUtf8(mEncoding);
+    return mEncoder->getUtf8(ptr, size);
 }
 
 void ESMReader::fail(const std::string &msg)
@@ -345,9 +360,9 @@ void ESMReader::fail(const std::string &msg)
     throw std::runtime_error(ss.str());
 }
 
-void ESMReader::setEncoding(const ToUTF8::FromType& encoding)
+void ESMReader::setEncoder(ToUTF8::Utf8Encoder* encoder)
 {
-  mEncoding = encoding;
+    mEncoder = encoder;
 }
 
 }
