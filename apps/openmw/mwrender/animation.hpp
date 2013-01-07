@@ -11,15 +11,15 @@ namespace MWRender
 class Animation
 {
     struct GroupTimes {
-        float mStart;
-        float mStop;
-        float mLoopStart;
-        float mLoopStop;
+        NifOgre::TextKeyMap::const_iterator mStart;
+        NifOgre::TextKeyMap::const_iterator mStop;
+        NifOgre::TextKeyMap::const_iterator mLoopStart;
+        NifOgre::TextKeyMap::const_iterator mLoopStop;
 
         size_t mLoops;
 
-        GroupTimes()
-          : mStart(-1.0f), mStop(-1.0f), mLoopStart(-1.0f), mLoopStop(-1.0f),
+        GroupTimes(NifOgre::TextKeyMap::const_iterator iter)
+          : mStart(iter), mStop(iter), mLoopStart(iter), mLoopStop(iter),
             mLoops(0)
         { }
     };
@@ -28,19 +28,19 @@ protected:
     MWWorld::Ptr mPtr;
     Ogre::SceneNode* mInsert;
 
-    float mTime;
-    GroupTimes mCurGroup;
-    GroupTimes mNextGroup;
-    Ogre::AnimationState *mAnimState;
-
-    bool mSkipFrame;
-
     NifOgre::EntityList mEntityList;
     NifOgre::TextKeyMap mTextKeys;
     Ogre::Bone *mAccumRoot;
     Ogre::Bone *mNonAccumRoot;
     Ogre::Vector3 mStartPosition;
     Ogre::Vector3 mLastPosition;
+
+    float mTime;
+    GroupTimes mCurGroup;
+    GroupTimes mNextGroup;
+    Ogre::AnimationState *mAnimState;
+
+    bool mSkipFrame;
 
     /* Updates the animation to the specified time, and moves the mPtr object
      * based on the change since the last update or reset. */

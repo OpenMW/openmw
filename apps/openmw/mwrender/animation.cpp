@@ -16,18 +16,16 @@ namespace MWRender
 Animation::Animation(const MWWorld::Ptr &ptr)
     : mPtr(ptr)
     , mInsert(NULL)
-    , mTime(0.0f)
-    , mAnimState(NULL)
-    , mSkipFrame(false)
     , mAccumRoot(NULL)
     , mNonAccumRoot(NULL)
     , mStartPosition(0.0f)
     , mLastPosition(0.0f)
+    , mTime(0.0f)
+    , mCurGroup(mTextKeys.end())
+    , mNextGroup(mTextKeys.end())
+    , mAnimState(NULL)
+    , mSkipFrame(false)
 {
-    mCurGroup.mStart = mCurGroup.mLoopStart = 0.0f;
-    mCurGroup.mLoopStop = mCurGroup.mStop = 0.0f;
-    mNextGroup.mStart = mNextGroup.mLoopStart = 0.0f;
-    mNextGroup.mLoopStop = mNextGroup.mStop = 0.0f;
 }
 
 Animation::~Animation()
@@ -74,9 +72,12 @@ void Animation::createEntityList(Ogre::SceneNode *node, const std::string &model
             if(!data.isEmpty())
             {
                 mTextKeys = Ogre::any_cast<NifOgre::TextKeyMap>(data);
+                mNextGroup = mCurGroup = GroupTimes(mTextKeys.end());
+
                 mAccumRoot = skelinst->getRootBone();
                 mAccumRoot->setManuallyControlled(true);
                 mNonAccumRoot = skelinst->getBone(bone->getHandle());
+
                 mStartPosition = mNonAccumRoot->getPosition();
                 mLastPosition = mStartPosition;
                 break;
@@ -141,60 +142,57 @@ bool Animation::findGroupTimes(const std::string &groupname, Animation::GroupTim
     NifOgre::TextKeyMap::const_iterator iter;
     for(iter = mTextKeys.begin();iter != mTextKeys.end();iter++)
     {
-        if(times->mStart >= 0.0f && times->mLoopStart >= 0.0f && times->mLoopStop >= 0.0f && times->mStop >= 0.0f)
-            return true;
-
         if(start == iter->second)
         {
-            times->mStart = iter->first;
-            times->mLoopStart = iter->first;
+            times->mStart = iter;
+            times->mLoopStart = iter;
         }
         else if(startloop == iter->second)
-        {
-            times->mLoopStart = iter->first;
-        }
+            times->mLoopStart = iter;
         else if(stoploop == iter->second)
-        {
-            times->mLoopStop = iter->first;
-        }
+            times->mLoopStop = iter;
         else if(stop == iter->second)
         {
-            times->mStop = iter->first;
-            if(times->mLoopStop < 0.0f)
-                times->mLoopStop = iter->first;
-            break;
+            times->mStop = iter;
+            if(times->mLoopStop == mTextKeys.end())
+                times->mLoopStop = iter;
+            return (times->mStart != mTextKeys.end());
         }
     }
 
-    return (times->mStart >= 0.0f && times->mLoopStart >= 0.0f && times->mLoopStop >= 0.0f && times->mStop >= 0.0f);
+    return false;
 }
 
 
 void Animation::playGroup(std::string groupname, int mode, int loops)
 {
-    GroupTimes times;
+    if(mTextKeys.size() == 0)
+    {
+        std::cerr<< "Trying to animate an unanimate object" <<std::endl;
+        return;
+    }
+    GroupTimes times(mTextKeys.end());
     times.mLoops = loops;
 
     std::transform(groupname.begin(), groupname.end(), groupname.begin(), ::tolower);
     if(groupname == "all")
     {
-        times.mStart = times.mLoopStart = 0.0f;
-        times.mLoopStop = times.mStop = 0.0f;
-
-        NifOgre::TextKeyMap::const_reverse_iterator iter = mTextKeys.rbegin();
-        if(iter != mTextKeys.rend())
-            times.mLoopStop = times.mStop = iter->first;
+        times.mStart = times.mLoopStart = mTextKeys.begin();
+        times.mLoopStop = times.mStop = mTextKeys.end();
     }
     else if(!findGroupTimes(groupname, &times))
-        throw std::runtime_error("Failed to find animation group "+groupname);
+    {
+        std::cerr<< "Failed to find animation group "<<groupname <<std::endl;
+        return;
+    }
 
     if(mode == 0 && mCurGroup.mLoops > 0)
         mNextGroup = times;
     else
     {
         mCurGroup = times;
-        mNextGroup = GroupTimes();
-        mTime = ((mode==2) ? mCurGroup.mLoopStart : mCurGroup.mStart);
+        mNextGroup = GroupTimes(mTextKeys.end());
+        mTime = ((mode==2) ? mCurGroup.mLoopStart : mCurGroup.mStart)->first;
         resetPosition(mTime);
     }
 }
@@ -210,28 +208,28 @@ void Animation::runAnimation(float timepassed)
     {
         mTime += timepassed;
     recheck:
-        if(mTime >= mCurGroup.mLoopStop)
+        if(mTime >= mCurGroup.mLoopStop->first)
         {
             if(mCurGroup.mLoops > 1)
             {
                 mCurGroup.mLoops--;
-                updatePosition(mCurGroup.mLoopStop);
-                mTime = mTime - mCurGroup.mLoopStop + mCurGroup.mLoopStart;
-                resetPosition(mCurGroup.mLoopStart);
+                updatePosition(mCurGroup.mLoopStop->first);
+                mTime = mTime - mCurGroup.mLoopStop->first + mCurGroup.mLoopStart->first;
+                resetPosition(mCurGroup.mLoopStart->first);
                 goto recheck;
             }
-            else if(mTime >= mCurGroup.mStop)
+            else if(mTime >= mCurGroup.mStop->first)
             {
                 if(mNextGroup.mLoops > 0)
                 {
-                    updatePosition(mCurGroup.mStop);
-                    mTime = mTime - mCurGroup.mStop + mNextGroup.mStart;
-                    resetPosition(mNextGroup.mStart);
+                    updatePosition(mCurGroup.mStop->first);
+                    mTime = mTime - mCurGroup.mStop->first + mNextGroup.mStart->first;
+                    resetPosition(mNextGroup.mStart->first);
                     mCurGroup = mNextGroup;
-                    mNextGroup = GroupTimes();
+                    mNextGroup = GroupTimes(mTextKeys.end());
                     goto recheck;
                 }
-                mTime = mCurGroup.mStop;
+                mTime = mCurGroup.mStop->first;
             }
         }
 
