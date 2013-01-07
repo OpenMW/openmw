@@ -20,6 +20,8 @@ class ESMReader
 {
 public:
 
+  ESMReader(void);
+
   /*************************************************************************
    *
    *  Public type definitions
@@ -233,8 +235,8 @@ public:
   /// Used for error handling
   void fail(const std::string &msg);
 
-  /// Sets font encoding for ESM strings
-  void setEncoding(const std::string& encoding);
+  /// Sets font encoder for ESM strings
+  void setEncoder(ToUTF8::Utf8Encoder* encoder);
 
 private:
   Ogre::DataStreamPtr mEsm;
@@ -244,9 +246,12 @@ private:
   // Special file signifier (see SpecialFile enum above)
   int mSpf;
 
+  // Buffer for ESM strings
+  std::vector<char> mBuffer;
+
   SaveData mSaveData;
   MasterList mMasters;
-  ToUTF8::FromType mEncoding;
+  ToUTF8::Utf8Encoder* mEncoder;
 };
 }
 #endif

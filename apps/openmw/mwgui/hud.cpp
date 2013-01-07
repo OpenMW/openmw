@@ -319,7 +319,7 @@ void HUD::setCellName(const std::string& cellName)
         mCellNameTimer = 5.0f;
         mCellName = cellName;
 
-        mCellNameBox->setCaption(mCellName);
+        mCellNameBox->setCaptionWithReplacing("#{sCell=" + mCellName + "}");
         mCellNameBox->setVisible(mMapVisible);
     }
 }

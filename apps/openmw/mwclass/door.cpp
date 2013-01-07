@@ -204,33 +204,10 @@ namespace MWClass
 
         std::string text;
 
-        const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
-
         if (ref->mRef.mTeleport)
         {
-            std::string dest;
-            if (ref->mRef.mDestCell != "")
-            {
-                // door leads to an interior, use interior name as tooltip
-                dest = ref->mRef.mDestCell;
-            }
-            else
-            {
-                // door leads to exterior, use cell name (if any), otherwise translated region name
-                int x,y;
-                MWBase::Environment::get().getWorld()->positionToIndex (ref->mRef.mDoorDest.pos[0], ref->mRef.mDoorDest.pos[1], x, y);
-                const ESM::Cell* cell = store.get<ESM::Cell>().find(x,y);
-                if (cell->mName != "")
-                    dest = cell->mName;
-                else
-                {
-                    const ESM::Region* region =
-                        store.get<ESM::Region>().find(cell->mRegion);
-                    dest = region->mName;
-                }
-            }
             text += "\n#{sTo}";
-            text += "\n"+dest;
+            text += "\n" + getDestination(*ref);
         }
 
         if (ref->mRef.mLockLevel > 0)
@@ -244,6 +221,37 @@ namespace MWClass
         info.text = text;
 
         return info;
+    }
+
+    std::string Door::getDestination (const MWWorld::LiveCellRef<ESM::Door>& door)
+    {
+        const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
+
+        std::string dest;
+        if (door.mRef.mDestCell != "")
+        {
+            // door leads to an interior, use interior name as tooltip
+            dest = door.mRef.mDestCell;
+        }
+        else
+        {
+            // door leads to exterior, use cell name (if any), otherwise translated region name
+            int x,y;
+            MWBase::Environment::get().getWorld()->positionToIndex (door.mRef.mDoorDest.pos[0], door.mRef.mDoorDest.pos[1], x, y);
+            const ESM::Cell* cell = store.get<ESM::Cell>().find(x,y);
+            if (cell->mName != "")
+                dest = cell->mName;
+            else
+            {
+                const ESM::Region* region =
+                    store.get<ESM::Region>().find(cell->mRegion);
+
+                //name as is, not a token
+                return region->mName;
+            }
+        }
+
+        return "#{sCell=" + dest + "}";
     }
 
     MWWorld::Ptr

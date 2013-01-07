@@ -1,6 +1,8 @@
 #include "esmreader.hpp"
 #include <stdexcept>
 
+#include "../files/constrainedfiledatastream.hpp"
+
 namespace ESM
 {
 
@@ -11,6 +13,11 @@ ESM_Context ESMReader::getContext()
     // Update the file position before returning
     mCtx.filePos = mEsm->tell();
     return mCtx;
+}
+
+ESMReader::ESMReader(void):
+    mBuffer(50*1024)
+{
 }
 
 void ESMReader::restoreContext(const ESM_Context &rc)
@@ -108,16 +115,12 @@ void ESMReader::open(Ogre::DataStreamPtr _esm, const std::string &name)
 
 void ESMReader::open(const std::string &file)
 {
-    std::ifstream *stream = OGRE_NEW_T(std::ifstream, Ogre::MEMCATEGORY_GENERAL)(file.c_str(), std::ios_base::binary);
-    // Ogre will delete the stream for us
-    open(Ogre::DataStreamPtr(new Ogre::FileStreamDataStream(stream)), file);
+    open (openConstrainedFileDataStream (file.c_str ()), file);
 }
 
 void ESMReader::openRaw(const std::string &file)
 {
-    std::ifstream *stream = OGRE_NEW_T(std::ifstream, Ogre::MEMCATEGORY_GENERAL)(file.c_str(), std::ios_base::binary);
-    // Ogre will delete the stream for us
-    openRaw(Ogre::DataStreamPtr(new Ogre::FileStreamDataStream(stream)), file);
+    openRaw (openConstrainedFileDataStream (file.c_str ()), file);
 }
 
 int64_t ESMReader::getHNLong(const char *name)
@@ -325,11 +328,21 @@ void ESMReader::getExact(void*x, int size)
 
 std::string ESMReader::getString(int size)
 {
-    char *ptr = ToUTF8::getBuffer(size);
-    mEsm->read(ptr, size);
+    size_t s = size;
+    if (mBuffer.size() <= s)
+        // Add some extra padding to reduce the chance of having to resize
+        // again later.
+        mBuffer.resize(3*s);
+
+    // And make sure the string is zero terminated
+    mBuffer[s] = 0;
+
+    // read ESM data
+    char *ptr = &mBuffer[0];
+    getExact(ptr, size);
 
     // Convert to UTF8 and return
-    return ToUTF8::getUtf8(mEncoding);
+    return mEncoder->getUtf8(ptr, size);
 }
 
 void ESMReader::fail(const std::string &msg)
@@ -347,21 +360,9 @@ void ESMReader::fail(const std::string &msg)
     throw std::runtime_error(ss.str());
 }
 
-void ESMReader::setEncoding(const std::string& encoding)
+void ESMReader::setEncoder(ToUTF8::Utf8Encoder* encoder)
 {
-  if (encoding == "win1250")
-  {
-    mEncoding = ToUTF8::WINDOWS_1250;
-  }
-  else if (encoding == "win1251")
-  {
-    mEncoding = ToUTF8::WINDOWS_1251;
-  }
-  else
-  {
-    // Default Latin encoding
-    mEncoding = ToUTF8::WINDOWS_1252;
-  }
+    mEncoder = encoder;
 }
 
 }

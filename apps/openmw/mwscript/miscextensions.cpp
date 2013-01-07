@@ -441,7 +441,7 @@ namespace MWScript
         const int opcodeSetDeleteExplicit = 0x20001e6;
         const int opcodeGetSquareRoot = 0x20001e7;
 
-        const int opcodePlayBink = 0x20001ec;
+        const int opcodePlayBink = 0x20001f3;
 
         void registerExtensions (Compiler::Extensions& extensions)
         {

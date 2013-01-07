@@ -181,7 +181,7 @@ opcodeEnableStatsReviewMenu);
             extensions.registerInstruction ("enablemapmenu", "", opcodeEnableMapMenu);
             extensions.registerInstruction ("enablestatsmenu", "", opcodeEnableStatsMenu);
 
-            extensions.registerInstruction ("enablerestmenu", "", opcodeEnableRest);
+            extensions.registerInstruction ("enablerest", "", opcodeEnableRest);
             extensions.registerInstruction ("enablelevelupmenu", "", opcodeEnableRest);
 
             extensions.registerInstruction ("showrestmenu", "", opcodeShowRestMenu);

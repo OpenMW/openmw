@@ -18,6 +18,11 @@ int main(int argc, char *argv[]) {
         ("cfg,c", bpo::value<std::string>(), "openmw.cfg file")
         ("output,o", bpo::value<std::string>()->default_value(""), "openmw.cfg file")
         ("game-files,g", "import esm and esp files")
+        ("encoding,e", bpo::value<std::string>()-> default_value("win1252"),
+            "Character encoding used in OpenMW game messages:\n"
+            "\n\twin1250 - Central and Eastern European such as Polish, Czech, Slovak, Hungarian, Slovene, Bosnian, Croatian, Serbian (Latin script), Romanian and Albanian languages\n"
+            "\n\twin1251 - Cyrillic alphabet such as Russian, Bulgarian, Serbian Cyrillic and other languages\n"
+            "\n\twin1252 - Western European (Latin) alphabet, used by default")
         ;
     p_desc.add("ini", 1).add("cfg", 1);
 
@@ -56,6 +61,10 @@ int main(int argc, char *argv[]) {
 
     MwIniImporter importer;
     importer.setVerbose(vm.count("verbose"));
+
+    // Font encoding settings
+    std::string encoding(vm["encoding"].as<std::string>());
+    importer.setInputEncoding(ToUTF8::calculateEncoding(encoding));
 
     MwIniImporter::multistrmap ini = importer.loadIniFile(iniFile);
     MwIniImporter::multistrmap cfg = importer.loadCfgFile(cfgFile);

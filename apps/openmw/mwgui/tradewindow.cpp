@@ -401,19 +401,23 @@ namespace MWGui
         return items;
     }
 
-    void TradeWindow::sellToNpc(MWWorld::Ptr item, int count)
+    void TradeWindow::sellToNpc(MWWorld::Ptr item, int count, bool boughtItem)
     {
+        int diff = MWBase::Environment::get().getMechanicsManager()->getBarterOffer(mPtr, MWWorld::Class::get(item).getValue(item) * count, boughtItem);
 
-        mCurrentBalance -= MWBase::Environment::get().getMechanicsManager()->getBarterOffer(mPtr, MWWorld::Class::get(item).getValue(item) * count,true);
-        mCurrentMerchantOffer -= MWBase::Environment::get().getMechanicsManager()->getBarterOffer(mPtr, MWWorld::Class::get(item).getValue(item) * count,true);
+        mCurrentBalance += diff;
+        mCurrentMerchantOffer += diff;
+
         updateLabels();
     }
 
-    void TradeWindow::buyFromNpc(MWWorld::Ptr item, int count)
+    void TradeWindow::buyFromNpc(MWWorld::Ptr item, int count, bool soldItem)
     {
+        int diff = MWBase::Environment::get().getMechanicsManager()->getBarterOffer(mPtr, MWWorld::Class::get(item).getValue(item) * count, !soldItem);
 
-        mCurrentBalance += MWBase::Environment::get().getMechanicsManager()->getBarterOffer(mPtr, MWWorld::Class::get(item).getValue(item) * count,false);
-        mCurrentMerchantOffer += MWBase::Environment::get().getMechanicsManager()->getBarterOffer(mPtr, MWWorld::Class::get(item).getValue(item) * count,false);
+        mCurrentBalance -= diff;
+        mCurrentMerchantOffer -= diff;
+
         updateLabels();
     }
 

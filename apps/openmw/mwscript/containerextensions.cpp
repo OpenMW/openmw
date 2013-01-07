@@ -3,6 +3,10 @@
 
 #include <stdexcept>
 
+#include <boost/format.hpp>
+
+#include <MyGUI_LanguageManager.h>
+
 #include <components/compiler/extensions.hpp>
 
 #include <components/interpreter/interpreter.hpp>
@@ -10,6 +14,7 @@
 #include <components/interpreter/opcodes.hpp>
 
 #include "../mwbase/environment.hpp"
+#include "../mwbase/windowmanager.hpp"
 
 #include "../mwworld/manualref.hpp"
 #include "../mwworld/class.hpp"
@@ -19,19 +24,6 @@
 
 #include "interpretercontext.hpp"
 #include "ref.hpp"
-
-namespace
-{
-    std::string toLower (const std::string& name)
-    {
-        std::string lowerCase;
-
-        std::transform (name.begin(), name.end(), std::back_inserter (lowerCase),
-            (int(*)(int)) std::tolower);
-
-        return lowerCase;
-    }
-}
 
 namespace MWScript
 {
@@ -80,7 +72,7 @@ namespace MWScript
                     Interpreter::Type_Integer sum = 0;
 
                     for (MWWorld::ContainerStoreIterator iter (store.begin()); iter!=store.end(); ++iter)
-                        if (toLower(iter->getCellRef().mRefID) == toLower(item))
+                        if (Misc::StringUtils::ciEqual(iter->getCellRef().mRefID, item))
                             sum += iter->getRefData().getCount();
 
                     runtime.push (sum);
@@ -101,17 +93,22 @@ namespace MWScript
 
                     Interpreter::Type_Integer count = runtime[0].mInteger;
                     runtime.pop();
-
+                    
                     if (count<0)
                         throw std::runtime_error ("second argument for RemoveItem must be non-negative");
 
                     MWWorld::ContainerStore& store = MWWorld::Class::get (ptr).getContainerStore (ptr);
+                    
+                    std::string itemName = "";
+                    Interpreter::Type_Integer originalCount = count;
 
                     for (MWWorld::ContainerStoreIterator iter (store.begin()); iter!=store.end() && count;
                         ++iter)
                     {
-                        if (toLower(iter->getCellRef().mRefID) == toLower(item))
+                        if (Misc::StringUtils::ciEqual(iter->getCellRef().mRefID, item))
                         {
+                            itemName = MWWorld::Class::get(*iter).getName(*iter);
+                            
                             if (iter->getRefData().getCount()<=count)
                             {
                                 count -= iter->getRefData().getCount();
@@ -124,6 +121,26 @@ namespace MWScript
                             }
                         }
                     }
+                  
+                    /* The two GMST entries below expand to strings informing the player of what, and how many of it has been removed from their inventory */
+                    std::string msgBox;
+                    if(originalCount - count > 1)
+                    {
+                        msgBox = MyGUI::LanguageManager::getInstance().replaceTags("#{sNotifyMessage63}");
+                        std::stringstream temp;
+                        temp << boost::format(msgBox) % (originalCount - count) % itemName;
+                        msgBox = temp.str();
+                    }
+                    else
+                    {
+                        msgBox = MyGUI::LanguageManager::getInstance().replaceTags("#{sNotifyMessage62}");
+                        std::stringstream temp;
+                        temp << boost::format(msgBox) % itemName;
+                        msgBox = temp.str();
+                    }
+                    
+                    if(originalCount - count > 0)
+                        MWBase::Environment::get().getWindowManager()->messageBox(msgBox, std::vector<std::string>());
 
                     // To be fully compatible with original Morrowind, we would need to check if
                     // count is >= 0 here and throw an exception. But let's be tollerant instead.
@@ -146,7 +163,7 @@ namespace MWScript
                     MWWorld::ContainerStoreIterator it = invStore.begin();
                     for (; it != invStore.end(); ++it)
                     {
-                        if (toLower(it->getCellRef().mRefID) == toLower(item))
+                        if (Misc::StringUtils::ciEqual(it->getCellRef().mRefID, item))
                             break;
                     }
                     if (it == invStore.end())
@@ -246,7 +263,7 @@ namespace MWScript
                     for (int slot = 0; slot < MWWorld::InventoryStore::Slots; ++slot)
                     {
                         MWWorld::ContainerStoreIterator it = invStore.getSlot (slot);
-                        if (it != invStore.end() && toLower(it->getCellRef().mRefID) == toLower(item))
+                        if (it != invStore.end() && Misc::StringUtils::ciEqual(it->getCellRef().mRefID, item))
                         {
                             runtime.push(1);
                             return;
@@ -264,8 +281,8 @@ namespace MWScript
                 virtual void execute(Interpreter::Runtime &runtime)
                 {
                     MWWorld::Ptr ptr = R()(runtime);
-
-                    std::string creatureName = toLower (runtime.getStringLiteral (runtime[0].mInteger));
+      
+		    const std::string &name = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
 
                     MWWorld::InventoryStore& invStore = MWWorld::Class::get(ptr).getInventoryStore (ptr);
@@ -273,7 +290,7 @@ namespace MWScript
                          it != invStore.end(); ++it)
                     {
 
-                        if (toLower(it->getCellRef().mSoul) == toLower(creatureName))
+                        if (Misc::StringUtils::ciEqual(it->getCellRef().mSoul, name))
                         {
                             runtime.push(1);
                             return;

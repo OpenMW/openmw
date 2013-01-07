@@ -59,7 +59,7 @@ struct Arguments
     std::string outname;
 
     std::vector<std::string> types;
-  
+
     ESMData data;
     ESM::ESMReader reader;
     ESM::ESMWriter writer;
@@ -74,7 +74,7 @@ bool parseOptions (int argc, char** argv, Arguments &info)
         ("version,v", "print version information and quit.")
         ("raw,r", "Show an unformatted list of all records and subrecords.")
         // The intention is that this option would interact better
-        // with other modes including clone, dump, and raw. 
+        // with other modes including clone, dump, and raw.
         ("type,t", bpo::value< std::vector<std::string> >(),
          "Show only records of this type (four character record code).  May "
          "be specified multiple times.  Only affects dump mode.")
@@ -165,23 +165,12 @@ bool parseOptions (int argc, char** argv, Arguments &info)
 
     // Font encoding settings
     info.encoding = variables["encoding"].as<std::string>();
-    if (info.encoding == "win1250")
+    if(info.encoding != "win1250" && info.encoding != "win1251" && info.encoding != "win1252")
     {
-        std::cout << "Using Central and Eastern European font encoding." << std::endl;
+        std::cout << info.encoding << " is not a valid encoding option." << std::endl;
+        info.encoding = "win1252";
     }
-    else if (info.encoding == "win1251")
-    {
-        std::cout << "Using Cyrillic font encoding." << std::endl;
-    }
-    else
-    {
-        if(info.encoding != "win1252")
-        {
-            std::cout << info.encoding << " is not a valid encoding option." << std::endl;
-            info.encoding = "win1252";
-        }
-        std::cout << "Using default (English) font encoding." << std::endl;
-    }
+    std::cout << ToUTF8::encodingUsingMessage(info.encoding) << std::endl;
 
     return true;
 }
@@ -262,7 +251,8 @@ void printRaw(ESM::ESMReader &esm)
 int load(Arguments& info)
 {
     ESM::ESMReader& esm = info.reader;
-    esm.setEncoding(info.encoding);
+    ToUTF8::Utf8Encoder encoder (ToUTF8::calculateEncoding(info.encoding));
+    esm.setEncoder(&encoder);
 
     std::string filename = info.filename;
     std::cout << "Loading file: " << filename << std::endl;
@@ -321,7 +311,7 @@ int load(Arguments& info)
             if (info.types.size() > 0)
             {
                 std::vector<std::string>::iterator match;
-                match = std::find(info.types.begin(), info.types.end(), 
+                match = std::find(info.types.begin(), info.types.end(),
                                   n.toString());
                 if (match == info.types.end()) interested = false;
             }
@@ -425,14 +415,15 @@ int clone(Arguments& info)
         if (++i % 3 == 0)
             std::cout << std::endl;
     }
-    
+
     if (i % 3 != 0)
         std::cout << std::endl;
 
     std::cout << std::endl << "Saving records to: " << info.outname << "..." << std::endl;
 
     ESM::ESMWriter& esm = info.writer;
-    esm.setEncoding(info.encoding);
+    ToUTF8::Utf8Encoder encoder (ToUTF8::calculateEncoding(info.encoding));
+    esm.setEncoder(&encoder);
     esm.setAuthor(info.data.author);
     esm.setDescription(info.data.description);
     esm.setVersion(info.data.version);
@@ -450,7 +441,7 @@ int clone(Arguments& info)
     for (Records::iterator it = records.begin(); it != records.end() && i > 0; ++it)
     {
         EsmTool::RecordBase *record = *it;
-        
+
         name.val = record->getType().val;
 
         esm.startRecord(name.toString(), record->getFlags());
@@ -485,7 +476,7 @@ int clone(Arguments& info)
             std::cerr << "\r" << perc << "%";
         }
     }
-    
+
     std::cout << "\rDone!" << std::endl;
 
     esm.close();
@@ -513,7 +504,7 @@ int comp(Arguments& info)
 
     fileOne.encoding = info.encoding;
     fileTwo.encoding = info.encoding;
-    
+
     fileOne.filename = info.filename;
     fileTwo.filename = info.outname;
 
@@ -534,9 +525,9 @@ int comp(Arguments& info)
         std::cout << "Not equal, different amount of records." << std::endl;
         return 1;
     }
-    
-    
-    
+
+
+
 
     return 0;
 }

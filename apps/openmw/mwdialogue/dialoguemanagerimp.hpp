@@ -7,6 +7,7 @@
 #include <list>
 
 #include <components/compiler/streamerrorhandler.hpp>
+#include <components/translation/translation.hpp>
 
 #include "../mwworld/ptr.hpp"
 
@@ -20,6 +21,7 @@ namespace MWDialogue
             std::map<std::string, bool> mKnownTopics;// Those are the topics the player knows.
             std::list<std::string> mActorKnownTopics;
 
+            Translation::Storage& mTranslationDataStorage;
             MWScript::CompilerContext mCompilerContext;
             std::ostream mErrorStream;
             Compiler::StreamErrorHandler mErrorHandler;
@@ -50,7 +52,7 @@ namespace MWDialogue
 
         public:
 
-            DialogueManager (const Compiler::Extensions& extensions, bool scriptVerbose);
+            DialogueManager (const Compiler::Extensions& extensions, bool scriptVerbose, Translation::Storage& translationDataStorage);
 
             virtual void startDialogue (const MWWorld::Ptr& actor);
 
@@ -72,6 +74,21 @@ namespace MWDialogue
             virtual int getTemporaryDispositionChange () const;
             virtual void applyTemporaryDispositionChange (int delta);
     };
+
+
+    struct HyperTextToken
+    {
+        HyperTextToken(const std::string& text, bool link) : mText(text), mLink(link) {}
+
+        std::string mText;
+        bool mLink;
+    };
+
+    // In translations (at least Russian) the links are marked with @#, so
+    // it should be a function to parse it
+    std::vector<HyperTextToken> ParseHyperText(const std::string& text);
+
+    size_t RemovePseudoAsterisks(std::string& phrase);
 }
 
 #endif

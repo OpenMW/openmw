@@ -122,8 +122,13 @@ namespace Physic
          */
         void runPmove();
 
-        
-
+//HACK: in Visual Studio 2010 and presumably above, this structures alignment
+//		must be 16, but the built in operator new & delete don't properly
+//		perform this alignment.
+#if _MSC_VER >= 1600
+		void * operator new (size_t Size) { return _aligned_malloc (Size, 16); }
+		void operator delete (void * Data) { _aligned_free (Data); }
+#endif
 
     private:
         

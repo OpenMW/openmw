@@ -8,6 +8,7 @@
 
 #include <components/bsa/bsa_archive.hpp>
 #include <components/files/configurationmanager.hpp>
+#include <components/translation/translation.hpp>
 #include <components/nifoverrides/nifoverrides.hpp>
 
 #include <components/nifbullet/bullet_nif_loader.hpp>
@@ -330,16 +331,23 @@ void OMW::Engine::go()
     // cursor replacer (converts the cursor from the bsa so they can be used by mygui)
     MWGui::CursorReplace replacer;
 
+    // Create encoder
+    ToUTF8::Utf8Encoder encoder (mEncoding);
+
     // Create the world
     mEnvironment.setWorld (new MWWorld::World (*mOgre, mFileCollections, mMaster,
-        mResDir, mCfgMgr.getCachePath(), mNewGame, mEncoding, mFallbackMap));
+        mResDir, mCfgMgr.getCachePath(), mNewGame, &encoder, mFallbackMap));
+
+    //Load translation data
+    mTranslationDataStorage.setEncoder(&encoder);
+    mTranslationDataStorage.loadTranslationData(mFileCollections, mMaster);
 
     // Create window manager - this manages all the MW-specific GUI windows
     MWScript::registerExtensions (mExtensions);
 
     mEnvironment.setWindowManager (new MWGui::WindowManager(
         mExtensions, mFpsLevel, mNewGame, mOgre, mCfgMgr.getLogPath().string() + std::string("/"),
-        mCfgMgr.getCachePath ().string(), mScriptConsoleMode));
+        mCfgMgr.getCachePath ().string(), mScriptConsoleMode, mTranslationDataStorage));
 
     // Create sound system
     mEnvironment.setSoundManager (new MWSound::SoundManager(mUseSound));
@@ -356,7 +364,7 @@ void OMW::Engine::go()
 
     // Create dialog system
     mEnvironment.setJournal (new MWDialogue::Journal);
-    mEnvironment.setDialogueManager (new MWDialogue::DialogueManager (mExtensions, mVerboseScripts));
+    mEnvironment.setDialogueManager (new MWDialogue::DialogueManager (mExtensions, mVerboseScripts, mTranslationDataStorage));
 
     // Sets up the input system
     mEnvironment.setInputManager (new MWInput::InputManager (*mOgre,
@@ -487,7 +495,7 @@ void OMW::Engine::showFPS(int level)
     mFpsLevel = level;
 }
 
-void OMW::Engine::setEncoding(const std::string& encoding)
+void OMW::Engine::setEncoding(const ToUTF8::FromType& encoding)
 {
     mEncoding = encoding;
 }

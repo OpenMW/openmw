@@ -20,65 +20,57 @@ namespace MWGui
     {
         setCoord(0,0,w,h);
 
-        int height = 64 * 3;
 
         if (mButtonBox)
             MyGUI::Gui::getInstance ().destroyWidget(mButtonBox);
 
-        mButtonBox = mMainWidget->createWidget<MyGUI::Widget>("", MyGUI::IntCoord(w/2 - 64, h/2 - height/2, 128, height), MyGUI::Align::Default);
+        mButtonBox = mMainWidget->createWidget<MyGUI::Widget>("", MyGUI::IntCoord(0, 0, 0, 0), MyGUI::Align::Default);
         int curH = 0;
 
-        mReturn = mButtonBox->createWidget<MyGUI::Button> ("ButtonImage", MyGUI::IntCoord(0, curH, 128, 64), MyGUI::Align::Default);
-        mReturn->setImageResource ("Menu_Return");
-        mReturn->eventMouseButtonClick += MyGUI::newDelegate(this, &MainMenu::returnToGame);
-        curH += 64;
+        std::vector<std::string> buttons;
+        buttons.push_back("return");
+        //buttons.push_back("newgame");
+        //buttons.push_back("loadgame");
+        //buttons.push_back("savegame");
+        buttons.push_back("options");
+        //buttons.push_back("credits");
+        buttons.push_back("exitgame");
 
+        int maxwidth = 0;
 
-        /*
-        mNewGame = mButtonBox->createWidget<MyGUI::Button> ("ButtonImage", MyGUI::IntCoord(0, curH, 128, 64), MyGUI::Align::Default);
-        mNewGame->setImageResource ("Menu_NewGame");
-        curH += 64;
+        mButtons.clear();
+        for (std::vector<std::string>::iterator it = buttons.begin(); it != buttons.end(); ++it)
+        {
+            MWGui::ImageButton* button = mButtonBox->createWidget<MWGui::ImageButton>
+                    ("ImageBox", MyGUI::IntCoord(0, curH, 0, 0), MyGUI::Align::Default);
+            button->setProperty("ImageHighlighted", "textures\\menu_" + *it + "_over.dds");
+            button->setProperty("ImageNormal", "textures\\menu_" + *it + ".dds");
+            button->setProperty("ImagePushed", "textures\\menu_" + *it + "_pressed.dds");
+            MyGUI::IntSize requested = button->getRequestedSize();
+            button->eventMouseButtonClick += MyGUI::newDelegate(this, &MainMenu::onButtonClicked);
+            mButtons[*it] = button;
+            curH += requested.height;
 
-        mLoadGame = mButtonBox->createWidget<MyGUI::Button> ("ButtonImage", MyGUI::IntCoord(0, curH, 128, 64), MyGUI::Align::Default);
-        mLoadGame->setImageResource ("Menu_LoadGame");
-        curH += 64;
+            if (requested.width > maxwidth)
+                maxwidth = requested.width;
+        }
+        for (std::map<std::string, MWGui::ImageButton*>::iterator it = mButtons.begin(); it != mButtons.end(); ++it)
+        {
+            MyGUI::IntSize requested = it->second->getRequestedSize();
+            it->second->setCoord((maxwidth-requested.width) / 2, it->second->getTop(), requested.width, requested.height);
+        }
 
-
-        mSaveGame = mButtonBox->createWidget<MyGUI::Button> ("ButtonImage", MyGUI::IntCoord(0, curH, 128, 64), MyGUI::Align::Default);
-        mSaveGame->setImageResource ("Menu_SaveGame");
-        curH += 64;
-        */
-
-        mOptions = mButtonBox->createWidget<MyGUI::Button> ("ButtonImage", MyGUI::IntCoord(0, curH, 128, 64), MyGUI::Align::Default);
-        mOptions->setImageResource ("Menu_Options");
-        mOptions->eventMouseButtonClick += MyGUI::newDelegate(this, &MainMenu::showOptions);
-        curH += 64;
-
-        /*
-        mCredits = mButtonBox->createWidget<MyGUI::Button> ("ButtonImage", MyGUI::IntCoord(0, curH, 128, 64), MyGUI::Align::Default);
-        mCredits->setImageResource ("Menu_Credits");
-        curH += 64;
-        */
-
-        mExitGame = mButtonBox->createWidget<MyGUI::Button> ("ButtonImage", MyGUI::IntCoord(0, curH, 128, 64), MyGUI::Align::Default);
-        mExitGame->setImageResource ("Menu_ExitGame");
-        mExitGame->eventMouseButtonClick += MyGUI::newDelegate(this, &MainMenu::exitGame);
-        curH += 64;
+        mButtonBox->setCoord (w/2 - maxwidth/2, h/2 - curH/2, maxwidth, curH);
     }
 
-    void MainMenu::returnToGame(MyGUI::Widget* sender)
+    void MainMenu::onButtonClicked(MyGUI::Widget *sender)
     {
-        MWBase::Environment::get().getWindowManager ()->removeGuiMode (GM_MainMenu);
-    }
-
-    void MainMenu::showOptions(MyGUI::Widget* sender)
-    {
-        MWBase::Environment::get().getWindowManager ()->pushGuiMode (GM_Settings);
-    }
-
-    void MainMenu::exitGame(MyGUI::Widget* sender)
-    {
-        Ogre::Root::getSingleton ().queueEndRendering ();
+        if (sender == mButtons["return"])
+            MWBase::Environment::get().getWindowManager ()->removeGuiMode (GM_MainMenu);
+        else if (sender == mButtons["options"])
+            MWBase::Environment::get().getWindowManager ()->pushGuiMode (GM_Settings);
+        else if (sender == mButtons["exitgame"])
+            Ogre::Root::getSingleton ().queueEndRendering ();
     }
 
 }

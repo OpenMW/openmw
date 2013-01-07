@@ -272,7 +272,8 @@ void DataFilesModel::addMasters(const QString &path)
     foreach (const QString &path, dir.entryList()) {
         try {
             ESM::ESMReader fileReader;
-            fileReader.setEncoding(mEncoding.toStdString());
+            ToUTF8::Utf8Encoder encoder (ToUTF8::calculateEncoding(mEncoding.toStdString()));
+            fileReader.setEncoder(&encoder);
             fileReader.open(dir.absoluteFilePath(path).toStdString());
 
             ESM::ESMReader::MasterList mlist = fileReader.getMasters();
@@ -335,7 +336,8 @@ void DataFilesModel::addPlugins(const QString &path)
 
         try {
             ESM::ESMReader fileReader;
-            fileReader.setEncoding(mEncoding.toStdString());
+            ToUTF8::Utf8Encoder encoder (ToUTF8::calculateEncoding(mEncoding.toStdString()));
+            fileReader.setEncoder(&encoder);
             fileReader.open(dir.absoluteFilePath(path).toStdString());
 
             ESM::ESMReader::MasterList mlist = fileReader.getMasters();

@@ -147,6 +147,7 @@ namespace MWInput
 
         float mMouseX;
         float mMouseY;
+        int mMouseWheel;
 
         std::map<std::string, bool> mControlSwitch;
 

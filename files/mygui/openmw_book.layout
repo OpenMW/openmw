@@ -7,17 +7,25 @@
     <Widget type="ImageBox" skin="ImageBox" position_real="0 0 1 1" align="Top|Right" name="BookImage">     
         <Property key="ImageTexture" value="textures\tx_menubook.dds"/>
 
-        <Widget type="Button" skin="ButtonImage" position="251 220 57 24" name="NextPageBTN">
-            <Property key="ImageResource" value="MenuBook_Next"/>
+        <Widget type="ImageButton" skin="ImageBox" position="251 220 128 32" name="NextPageBTN">
+            <Property key="ImageHighlighted" value="textures\tx_menubook_next_over.dds"/>
+	    <Property key="ImageNormal" value="textures\tx_menubook_next_idle.dds"/>
+            <Property key="ImagePushed" value="textures\tx_menubook_next_pressed.dds"/>
         </Widget>
-        <Widget type="Button" skin="ButtonImage" position="165 220 96 24" name="PrevPageBTN">
-            <Property key="ImageResource" value="MenuBook_Prev"/>
+        <Widget type="ImageButton" skin="ImageBox" position="165 220 128 32" name="PrevPageBTN">
+            <Property key="ImageHighlighted" value="textures\tx_menubook_prev_over.dds"/>
+            <Property key="ImageNormal" value="textures\tx_menubook_prev_idle.dds"/>
+            <Property key="ImagePushed" value="textures\tx_menubook_prev_pressed.dds"/>
         </Widget>
-        <Widget type="Button" skin="ButtonImage" position="75 220 96 24" name="TakeButton">
-            <Property key="ImageResource" value="MenuBook_Take"/>
+        <Widget type="ImageButton" skin="ImageBox" position="75 220 128 32" name="TakeButton">
+            <Property key="ImageHighlighted" value="textures\tx_menubook_take_over.dds"/>
+            <Property key="ImageNormal" value="textures\tx_menubook_take_idle.dds"/>
+            <Property key="ImagePushed" value="textures\tx_menubook_take_pressed.dds"/>
         </Widget>
-        <Widget type="Button" skin="ButtonImage" position="360 220 96 24" name="CloseButton">
-            <Property key="ImageResource" value="MenuBook_Close"/>
+        <Widget type="ImageButton" skin="ImageBox" position="360 220 128 32" name="CloseButton">
+            <Property key="ImageHighlighted" value="textures\tx_menubook_close_over.dds"/>
+            <Property key="ImageNormal" value="textures\tx_menubook_close_idle.dds"/>
+            <Property key="ImagePushed" value="textures\tx_menubook_close_pressed.dds"/>
         </Widget>
 
         <Widget type="TextBox" skin="NormalText" position="155 215 24 24" name="LeftPageNumber">
