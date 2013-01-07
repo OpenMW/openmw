@@ -14,8 +14,9 @@ Animation::Animation(const MWWorld::Ptr &ptr)
     : mPtr(ptr)
     , mInsert(NULL)
     , mTime(0.0f)
-    , mSkipFrame(false)
     , mAnimState(NULL)
+    , mSkipFrame(false)
+    , mNonAccumRoot(NULL)
 {
 }
 
@@ -62,6 +63,7 @@ void Animation::createEntityList(Ogre::SceneNode *node, const std::string &model
             if(!data.isEmpty())
             {
                 mTextKeys = Ogre::any_cast<NifOgre::TextKeyMap>(data);
+                mNonAccumRoot = mEntityList.mSkelBase->getSkeleton()->getBone(bone->getHandle());
                 break;
             }
         }

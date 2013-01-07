@@ -31,12 +31,13 @@ protected:
     float mTime;
     GroupTimes mCurGroup;
     GroupTimes mNextGroup;
+    Ogre::AnimationState *mAnimState;
 
     bool mSkipFrame;
 
     NifOgre::EntityList mEntityList;
     NifOgre::TextKeyMap mTextKeys;
-    Ogre::AnimationState *mAnimState;
+    Ogre::Node *mNonAccumRoot;
 
     bool findGroupTimes(const std::string &groupname, GroupTimes *times);
 
