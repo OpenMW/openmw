@@ -249,8 +249,7 @@ void RenderingManager::removeObject (const MWWorld::Ptr& ptr)
 void RenderingManager::moveObject (const MWWorld::Ptr& ptr, const Ogre::Vector3& position)
 {
     /// \todo move this to the rendering-subsystems
-    mRendering.getScene()->getSceneNode (ptr.getRefData().getHandle())->
-            setPosition (position);
+    ptr.getRefData().getBaseNode()->setPosition(position);
 }
 
 void RenderingManager::scaleObject (const MWWorld::Ptr& ptr, const Ogre::Vector3& scale)
