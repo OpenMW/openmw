@@ -21,6 +21,7 @@ Animation::Animation(const MWWorld::Ptr &ptr)
     , mSkipFrame(false)
     , mAccumRoot(NULL)
     , mNonAccumRoot(NULL)
+    , mStartPosition(0.0f)
     , mLastPosition(0.0f)
 {
     mCurGroup.mStart = mCurGroup.mLoopStart = 0.0f;
@@ -76,7 +77,8 @@ void Animation::createEntityList(Ogre::SceneNode *node, const std::string &model
                 mAccumRoot = skelinst->getRootBone();
                 mAccumRoot->setManuallyControlled(true);
                 mNonAccumRoot = skelinst->getBone(bone->getHandle());
-                mLastPosition = mNonAccumRoot->getPosition();
+                mStartPosition = mNonAccumRoot->getPosition();
+                mLastPosition = mStartPosition;
                 break;
             }
         }
@@ -117,9 +119,7 @@ void Animation::resetPosition(float time)
     {
         mEntityList.mSkelBase->getSkeleton()->setAnimationState(*mAnimState->getParent());
         mLastPosition = mNonAccumRoot->getPosition();
-        /* FIXME: This should be set to -mLastPosition, but without proper collision the
-         * model gets placed halfway into the ground. */
-        mAccumRoot->setPosition(0.0f, 0.0f, 0.0f);
+        mAccumRoot->setPosition(mStartPosition - mLastPosition);
     }
 }
 

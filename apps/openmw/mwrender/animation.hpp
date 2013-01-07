@@ -39,6 +39,7 @@ protected:
     NifOgre::TextKeyMap mTextKeys;
     Ogre::Bone *mAccumRoot;
     Ogre::Bone *mNonAccumRoot;
+    Ogre::Vector3 mStartPosition;
     Ogre::Vector3 mLastPosition;
 
     /* Updates the animation to the specified time, and moves the mPtr object
