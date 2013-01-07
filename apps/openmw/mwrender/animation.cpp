@@ -98,12 +98,15 @@ void Animation::updatePosition(float time)
         mAccumRoot->translate(-posdiff);
         mLastPosition += posdiff;
 
-        /* Finally, move the object based on how much the non-accumulation root moved. */
-        Ogre::Vector3 newpos(mPtr.getRefData().getPosition().pos);
-        newpos += mInsert->getOrientation() * posdiff;
+        if(mPtr.isInCell())
+        {
+            /* Finally, move the object based on how much the non-accumulation root moved. */
+            Ogre::Vector3 newpos(mPtr.getRefData().getPosition().pos);
+            newpos += mInsert->getOrientation() * posdiff;
 
-        MWBase::World *world = MWBase::Environment::get().getWorld();
-        world->moveObject(mPtr, newpos.x, newpos.y, newpos.z);
+            MWBase::World *world = MWBase::Environment::get().getWorld();
+            world->moveObject(mPtr, newpos.x, newpos.y, newpos.z);
+        }
     }
 }
 
