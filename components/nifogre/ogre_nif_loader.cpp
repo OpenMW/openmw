@@ -367,7 +367,14 @@ void loadResource(Ogre::Resource *resource)
     const Nif::Node *node = dynamic_cast<const Nif::Node*>(nif.getRecord(0));
 
     std::vector<Nif::NiKeyframeController*> ctrls;
-    buildBones(skel, node, ctrls);
+    try {
+        buildBones(skel, node, ctrls);
+    }
+    catch(std::exception &e) {
+        std::cerr<< "Exception while loading "<<skel->getName() <<std::endl;
+        std::cerr<< e.what() <<std::endl;
+        return;
+    }
 
     std::vector<std::string> targets;
     // TODO: If ctrls.size() == 0, check for a .kf file sharing the name of the .nif file
