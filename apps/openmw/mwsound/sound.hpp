@@ -26,16 +26,22 @@ namespace MWSound
     public:
         virtual void stop() = 0;
         virtual bool isPlaying() = 0;
+        virtual double getTimeOffset() = 0;
         void setPosition(const Ogre::Vector3 &pos) { mPos = pos; }
         void setVolume(float volume) { mVolume = volume; }
 
-        Sound() : mPos(0.0f, 0.0f, 0.0f)
-                , mVolume(1.0f)
-                , mBaseVolume(1.0f)
-                , mPitch(1.0f)
-                , mMinDistance(20.0f) /* 1 * min_range_scale */
-                , mMaxDistance(12750.0f) /* 255 * max_range_scale */
-                , mFlags(MWBase::SoundManager::Play_Normal)
+        MWBase::SoundManager::PlayType getPlayType() const
+        { return (MWBase::SoundManager::PlayType)(mFlags&MWBase::SoundManager::Play_TypeMask); }
+
+
+        Sound(const Ogre::Vector3& pos, float vol, float basevol, float pitch, float mindist, float maxdist, int flags)
+          : mPos(pos)
+          , mVolume(vol)
+          , mBaseVolume(basevol)
+          , mPitch(pitch)
+          , mMinDistance(mindist)
+          , mMaxDistance(maxdist)
+          , mFlags(flags)
         { }
         virtual ~Sound() { }
 

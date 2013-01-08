@@ -22,6 +22,8 @@ namespace MWWorld
 namespace MWSound
 {
     class Sound;
+    class Sound_Decoder;
+    typedef boost::shared_ptr<Sound_Decoder> DecoderPtr;
 }
 
 namespace MWBase
@@ -32,7 +34,7 @@ namespace MWBase
     class SoundManager
     {
         public:
-
+            /* These must all fit together */
             enum PlayMode {
                 Play_Normal  = 0, /* tracked, non-looping, multi-instance, environment */
                 Play_Loop    = 1<<0, /* Sound will continually loop until explicitly stopped */
@@ -40,6 +42,13 @@ namespace MWBase
                 Play_NoTrack = 1<<2  /* (3D only) Play the sound at the given object's position
                                       * but do not keep it updated (the sound will not move with
                                       * the object and will not stop when the object is deleted. */
+            };
+            enum PlayType {
+                Play_TypeSfx   = 1<<3, /* Normal SFX sound */
+                Play_TypeVoice = 1<<4, /* Voice sound */
+                Play_TypeMusic = 1<<5, /* Music track */
+                Play_TypeMovie = 1<<6, /* Movie audio track */
+                Play_TypeMask  = Play_TypeSfx|Play_TypeVoice|Play_TypeMusic|Play_TypeMovie
             };
 
         private:
@@ -89,12 +98,15 @@ namespace MWBase
             virtual void stopSay(MWWorld::Ptr reference=MWWorld::Ptr()) = 0;
             ///< Stop an actor speaking
 
+            virtual SoundPtr playTrack(const MWSound::DecoderPtr& decoder, PlayType type) = 0;
+            ///< Play a 2D audio track, using a custom decoder
+
             virtual SoundPtr playSound(const std::string& soundId, float volume, float pitch,
-                int mode=Play_Normal) = 0;
+                                       PlayMode mode=Play_Normal) = 0;
             ///< Play a sound, independently of 3D-position
 
             virtual SoundPtr playSound3D(MWWorld::Ptr reference, const std::string& soundId,
-                                 float volume, float pitch, int mode=Play_Normal) = 0;
+                                         float volume, float pitch, PlayMode mode=Play_Normal) = 0;
             ///< Play a sound from an object
 
             virtual void stopSound3D(MWWorld::Ptr reference, const std::string& soundId) = 0;
@@ -112,15 +124,16 @@ namespace MWBase
             virtual bool getSoundPlaying(MWWorld::Ptr reference, const std::string& soundId) const = 0;
             ///< Is the given sound currently playing on the given object?
 
+            virtual void pauseSounds(int types=Play_TypeMask) = 0;
+            ///< Pauses all currently playing sounds, including music.
+
+            virtual void resumeSounds(int types=Play_TypeMask) = 0;
+            ///< Resumes all previously paused sounds.
+
             virtual void update(float duration) = 0;
 
             virtual void setListenerPosDir(const Ogre::Vector3 &pos, const Ogre::Vector3 &dir, const Ogre::Vector3 &up) = 0;
     };
-
-    inline int operator|(SoundManager::PlayMode a, SoundManager::PlayMode b)
-    { return static_cast<int> (a) | static_cast<int> (b); }
-    inline int operator&(SoundManager::PlayMode a, SoundManager::PlayMode b)
-    { return static_cast<int> (a) & static_cast<int> (b); }
 }
 
 #endif

@@ -24,12 +24,15 @@ namespace MWSound
         virtual void init(const std::string &devname="") = 0;
         virtual void deinit() = 0;
 
-        virtual MWBase::SoundPtr playSound(const std::string &fname, float volume, float pitch, int flags) = 0;
+        virtual MWBase::SoundPtr playSound(const std::string &fname, float vol, float basevol, float pitch, int flags) = 0;
         virtual MWBase::SoundPtr playSound3D(const std::string &fname, const Ogre::Vector3 &pos,
-                                     float volume, float pitch, float min, float max, int flags) = 0;
-        virtual MWBase::SoundPtr streamSound(const std::string &fname, float volume, float pitch, int flags) = 0;
+                                             float vol, float basevol, float pitch, float min, float max, int flags) = 0;
+        virtual MWBase::SoundPtr streamSound(DecoderPtr decoder, float volume, float pitch, int flags) = 0;
 
         virtual void updateListener(const Ogre::Vector3 &pos, const Ogre::Vector3 &atdir, const Ogre::Vector3 &updir, Environment env) = 0;
+
+        virtual void pauseSounds(int types) = 0;
+        virtual void resumeSounds(int types) = 0;
 
         Sound_Output& operator=(const Sound_Output &rhs);
         Sound_Output(const Sound_Output &rhs);

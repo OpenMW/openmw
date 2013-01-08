@@ -155,6 +155,11 @@ void MpgSnd_Decoder::close()
     mDataStream.setNull();
 }
 
+std::string MpgSnd_Decoder::getName()
+{
+    return mDataStream->getName();
+}
+
 void MpgSnd_Decoder::getInfo(int *samplerate, ChannelConfig *chans, SampleType *type)
 {
     if(!mSndFile && !mMpgFile)
@@ -211,6 +216,11 @@ void MpgSnd_Decoder::rewind()
         if(mpg123_seek(mMpgFile, 0, SEEK_SET) < 0)
             fail("seek failed");
     }
+}
+
+size_t MpgSnd_Decoder::getSampleOffset()
+{
+    return 0;
 }
 
 MpgSnd_Decoder::MpgSnd_Decoder()

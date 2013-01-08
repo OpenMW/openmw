@@ -22,8 +22,6 @@ namespace MWSound
     struct Sound_Decoder;
     class Sound;
 
-    typedef boost::shared_ptr<Sound_Decoder> DecoderPtr;
-
     enum Environment {
         Env_Normal,
         Env_Underwater
@@ -54,12 +52,16 @@ namespace MWSound
         Ogre::Vector3 mListenerDir;
         Ogre::Vector3 mListenerUp;
 
+        int mPausedSoundTypes;
+
         std::string lookup(const std::string &soundId,
                   float &volume, float &min, float &max);
         void streamMusicFull(const std::string& filename);
         bool isPlaying(MWWorld::Ptr ptr, const std::string &id) const;
         void updateSounds(float duration);
         void updateRegionSound(float duration);
+
+        float volumeFromType(PlayType type) const;
 
         SoundManager(const SoundManager &rhs);
         SoundManager& operator=(const SoundManager &rhs);
@@ -105,11 +107,14 @@ namespace MWSound
         virtual void stopSay(MWWorld::Ptr reference=MWWorld::Ptr());
         ///< Stop an actor speaking
 
-        virtual MWBase::SoundPtr playSound(const std::string& soundId, float volume, float pitch, int mode=Play_Normal);
+        virtual MWBase::SoundPtr playTrack(const DecoderPtr& decoder, PlayType type);
+        ///< Play a 2D audio track, using a custom decoder
+
+        virtual MWBase::SoundPtr playSound(const std::string& soundId, float volume, float pitch, PlayMode mode=Play_Normal);
         ///< Play a sound, independently of 3D-position
 
         virtual MWBase::SoundPtr playSound3D(MWWorld::Ptr reference, const std::string& soundId,
-                             float volume, float pitch, int mode=Play_Normal);
+                                             float volume, float pitch, PlayMode mode=Play_Normal);
         ///< Play a sound from an object
 
         virtual void stopSound3D(MWWorld::Ptr reference, const std::string& soundId);
@@ -126,6 +131,12 @@ namespace MWSound
 
         virtual bool getSoundPlaying(MWWorld::Ptr reference, const std::string& soundId) const;
         ///< Is the given sound currently playing on the given object?
+
+        virtual void pauseSounds(int types=Play_TypeMask);
+        ///< Pauses all currently playing sounds, including music.
+
+        virtual void resumeSounds(int types=Play_TypeMask);
+        ///< Resumes all previously paused sounds.
 
         virtual void update(float duration);
 

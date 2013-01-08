@@ -27,6 +27,22 @@ namespace MWScript
 {
     namespace Misc
     {
+        class OpPlayBink : public Interpreter::Opcode0
+        {
+        public:
+
+            virtual void execute (Interpreter::Runtime& runtime)
+            {
+                std::string name = runtime.getStringLiteral (runtime[0].mInteger);
+                runtime.pop();
+
+                bool allowSkipping = runtime[0].mInteger;
+                runtime.pop();
+
+                MWBase::Environment::get().getWorld ()->playVideo (name, allowSkipping);
+            }
+        };
+
         class OpGetPcSleep : public Interpreter::Opcode0
         {
         public:
@@ -257,7 +273,7 @@ namespace MWScript
             static bool sActivate;
 
         public:
-        
+
             virtual void execute(Interpreter::Runtime &runtime)
             {
                 InterpreterContext& context =
@@ -307,51 +323,51 @@ namespace MWScript
                                       MWMechanics::EffectKey(key)).mMagnitude > 0);
                 }
         };
-        
+
         template<class R>
         class OpAddSoulGem : public Interpreter::Opcode0
-        {   
+        {
             public:
 
                 virtual void execute (Interpreter::Runtime& runtime)
-                {   
+                {
                     MWWorld::Ptr ptr = R()(runtime);
 
                     std::string creature = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
-                    
+
                     std::string gem = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
-                    
+
                     const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
                     store.get<ESM::Creature>().find(creature); // This line throws an exception if it can't find the creature
 
                     MWWorld::ManualRef ref (MWBase::Environment::get().getWorld()->getStore(), gem);
 
                     ref.getPtr().getRefData().setCount (1);
-                    
+
                     ref.getPtr().getCellRef().mSoul = creature;
 
                     MWWorld::Class::get (ptr).getContainerStore (ptr).add (ref.getPtr());
 
-                }   
+                }
         };
 
         template<class R>
         class OpRemoveSoulGem : public Interpreter::Opcode0
-        {   
+        {
             public:
 
                 virtual void execute (Interpreter::Runtime& runtime)
-                {   
-                   
+                {
+
                     MWWorld::Ptr ptr = R()(runtime);
 
                     std::string soul = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
 
                     MWWorld::ContainerStore& store = MWWorld::Class::get (ptr).getContainerStore (ptr);
-                    
+
 
                     for (MWWorld::ContainerStoreIterator iter (store.begin()); iter!=store.end(); ++iter)
                     {
@@ -364,7 +380,7 @@ namespace MWScript
                             break;
                         }
                     }
-                }   
+                }
         };
 
         template <class R>
@@ -490,6 +506,8 @@ namespace MWScript
         const int opcodeSetDeleteExplicit = 0x20001e6;
         const int opcodeGetSquareRoot = 0x20001e7;
 
+        const int opcodePlayBink = 0x20001f7;
+
         void registerExtensions (Compiler::Extensions& extensions)
         {
             extensions.registerFunction ("xbox", 'l', "", opcodeXBox);
@@ -515,6 +533,7 @@ namespace MWScript
             extensions.registerInstruction ("tvm", "", opcodeToggleVanityMode);
             extensions.registerFunction ("getpcsleep", 'l', "", opcodeGetPcSleep);
             extensions.registerInstruction ("wakeuppc", "", opcodeWakeUpPc);
+            extensions.registerInstruction ("playbink", "Sl", opcodePlayBink);
             extensions.registerFunction ("getlocked", 'l', "", opcodeGetLocked, opcodeGetLockedExplicit);
             extensions.registerFunction ("geteffect", 'l', "l", opcodeGetEffect, opcodeGetEffectExplicit);
             extensions.registerInstruction ("addsoulgem", "cc", opcodeAddSoulGem, opcodeAddSoulGemExplicit);
@@ -548,6 +567,7 @@ namespace MWScript
             interpreter.installSegment5 (opcodeToggleVanityMode, new OpToggleVanityMode);
             interpreter.installSegment5 (opcodeGetPcSleep, new OpGetPcSleep);
             interpreter.installSegment5 (opcodeWakeUpPc, new OpWakeUpPc);
+            interpreter.installSegment5 (opcodePlayBink, new OpPlayBink);
             interpreter.installSegment5 (opcodeGetLocked, new OpGetLocked<ImplicitRef>);
             interpreter.installSegment5 (opcodeGetLockedExplicit, new OpGetLocked<ExplicitRef>);
             interpreter.installSegment5 (opcodeGetEffect, new OpGetEffect<ImplicitRef>);

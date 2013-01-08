@@ -230,6 +230,8 @@ WindowManager::~WindowManager()
     delete mSpellCreationDialog;
     delete mEnchantingDialog;
     delete mTrainingWindow;
+    delete mCountDialog;
+    delete mQuickKeysMenu;
 
     cleanupGarbage();
 
@@ -406,6 +408,10 @@ void WindowManager::updateVisible()
             break;
         case GM_Loading:
             MyGUI::PointerManager::getInstance().setVisible(false);
+            break;
+        case GM_Video:
+            MyGUI::PointerManager::getInstance().setVisible(false);
+            mHud->setVisible(false);
             break;
         default:
             // Unsupported mode, switch back to game
