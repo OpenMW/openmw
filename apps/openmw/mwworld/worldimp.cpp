@@ -577,13 +577,13 @@ namespace MWWorld
     {
         if (!mRendering->occlusionQuerySupported())
         {
-            std::pair<std::string, float> result = mPhysics->getFacedHandle (*this);
+            std::pair<float, std::string> result = mPhysics->getFacedHandle (*this, 500);
 
-            if (result.first.empty() ||
-                    result.second>getStore().get<ESM::GameSetting>().find ("iMaxActivateDist")->getInt())
+            if (result.second.empty() ||
+                    result.first>getStore().get<ESM::GameSetting>().find ("iMaxActivateDist")->getInt())
                 return "";
 
-            return result.first;
+            return result.second;
         }
         else
         {
@@ -979,11 +979,11 @@ namespace MWWorld
         {
             float x, y;
             MWBase::Environment::get().getWindowManager()->getMousePosition(x, y);
-            results = mPhysics->getFacedObjects(x, y);
+            results = mPhysics->getFacedHandles(x, y, 500);
         }
         else
         {
-            results = mPhysics->getFacedObjects();
+            results = mPhysics->getFacedHandles(500);
         }
 
         // ignore the player and other things we're not interested in
