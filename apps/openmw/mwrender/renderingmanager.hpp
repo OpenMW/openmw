@@ -45,6 +45,7 @@ namespace MWRender
     class Compositors;
     class ExternalRendering;
     class GlobalMap;
+    class VideoPlayer;
 
 class RenderingManager: private RenderingInterface, public Ogre::WindowEventListener {
 
@@ -195,6 +196,9 @@ class RenderingManager: private RenderingInterface, public Ogre::WindowEventList
 
     void setupExternalRendering (MWRender::ExternalRendering& rendering);
 
+    void playVideo(const std::string& name, bool allowSkipping);
+    void stopVideo();
+
   protected:
 	virtual void windowResized(Ogre::RenderWindow* rw);
     virtual void windowClosed(Ogre::RenderWindow* rw);
@@ -248,6 +252,8 @@ class RenderingManager: private RenderingInterface, public Ogre::WindowEventList
     MWRender::Shadows* mShadows;
 
     MWRender::Compositors* mCompositors;
+
+    VideoPlayer* mVideoPlayer;
 };
 
 }

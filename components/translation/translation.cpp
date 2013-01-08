@@ -30,7 +30,7 @@ namespace Translation
         {
             std::string path = dataFileCollections.getCollection (extension).getPath (fileName).string();
 
-            std::ifstream stream (path);
+            std::ifstream stream (path.c_str());
 
             if (!stream.is_open())
                 throw std::runtime_error ("failed to open translation file: " + fileName);
@@ -50,10 +50,7 @@ namespace Translation
 
             if (!line.empty())
             {
-                char* buffer = ToUTF8::getBuffer(line.size() + 1);
-                //buffer has at least line.size() + 1 bytes, so it must be safe
-                strcpy(buffer, line.c_str());
-                line = ToUTF8::getUtf8(mEncoding);
+                line = mEncoder->getUtf8(line);
 
                 size_t tab_pos = line.find('\t');
                 if (tab_pos != std::string::npos && tab_pos > 0 && tab_pos < line.size() - 1)
@@ -104,9 +101,9 @@ namespace Translation
             return phrase;
     }
 
-    void Storage::setEncoding (const ToUTF8::FromType& encoding)
+    void Storage::setEncoder(ToUTF8::Utf8Encoder* encoder)
     {
-        mEncoding = encoding;
+        mEncoder = encoder;
     }
 
     bool Storage::hasTranslation() const

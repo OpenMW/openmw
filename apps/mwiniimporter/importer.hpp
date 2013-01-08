@@ -8,7 +8,7 @@
 #include <vector>
 #include <exception>
 
-#include "../../components/to_utf8/to_utf8.hpp"
+#include <components/to_utf8/to_utf8.hpp>
 
 class MwIniImporter {
   public:

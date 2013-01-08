@@ -34,11 +34,13 @@ namespace MWSound
         virtual void open(const std::string &fname);
         virtual void close();
 
+        virtual std::string getName();
         virtual void getInfo(int *samplerate, ChannelConfig *chans, SampleType *type);
 
         virtual size_t read(char *buffer, size_t bytes);
         virtual void readAll(std::vector<char> &output);
         virtual void rewind();
+        virtual size_t getSampleOffset();
 
         MpgSnd_Decoder& operator=(const MpgSnd_Decoder &rhs);
         MpgSnd_Decoder(const MpgSnd_Decoder &rhs);

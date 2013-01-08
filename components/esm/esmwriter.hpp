@@ -6,7 +6,7 @@
 #include <assert.h>
 
 #include "esmcommon.hpp"
-#include "../to_utf8/to_utf8.hpp"
+#include <components/to_utf8/to_utf8.hpp>
 
 namespace ESM {
 
@@ -24,7 +24,7 @@ public:
     void setVersion(int ver);
     int getType();
     void setType(int type);
-    void setEncoding(const std::string& encoding); // Write strings as UTF-8?
+    void setEncoder(ToUTF8::Utf8Encoder *encoding); // Write strings as UTF-8?
     void setAuthor(const std::string& author);
     void setDescription(const std::string& desc);
 
@@ -94,11 +94,10 @@ private:
     std::list<RecordData> m_records;
     std::ostream* m_stream;
     std::streampos m_headerPos;
-    ToUTF8::FromType m_encoding;
+    ToUTF8::Utf8Encoder* m_encoder;
     int m_recordCount;
 
     HEDRstruct m_header;
-    SaveData m_saveData;
 };
 
 }

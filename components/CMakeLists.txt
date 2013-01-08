@@ -48,7 +48,7 @@ add_component_dir (misc
 
 add_component_dir (files
     linuxpath windowspath macospath fixedpath multidircollection collections fileops configurationmanager
-    filelibrary ogreplugin
+    filelibrary ogreplugin constrainedfiledatastream lowlevelfile
     )
 
 add_component_dir (compiler

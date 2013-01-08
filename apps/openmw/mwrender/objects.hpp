@@ -34,16 +34,13 @@ struct LightInfo
     LightType type;
 
     // Runtime variables
-	float flickerVariation; // 25% flicker variation, reset once every 0.5 seconds
-	float flickerSlowVariation; // 25% flicker variation, reset once every 1.0 seconds
-	float resetTime;
-    long double time;
-
+    float dir;   // direction time is running...
+    float time;  // current time
+    float phase; // current phase
 
     LightInfo() :
-        flickerVariation(0), resetTime(0.5),
-        flickerSlowVariation(0), time(0), interior(true),
-        type(LT_Normal), radius(1.0)
+        dir(1.0f), time(0.0f), phase (0.0f),
+        interior(true), type(LT_Normal), radius(1.0)
     {
     }
 };

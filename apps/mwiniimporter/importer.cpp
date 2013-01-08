@@ -649,11 +649,12 @@ MwIniImporter::multistrmap MwIniImporter::loadIniFile(std::string filename) {
     std::string section("");
     MwIniImporter::multistrmap map;
     boost::iostreams::stream<boost::iostreams::file_source>file(filename.c_str());
+    ToUTF8::Utf8Encoder encoder(mEncoding);
 
     std::string line;
     while (std::getline(file, line)) {
 
-        line = toUTF8(line);
+        line = encoder.getUtf8(line);
 
         // unify Unix-style and Windows file ending
         if (!(line.empty()) && (line[line.length()-1]) == '\r') {
@@ -827,14 +828,6 @@ void MwIniImporter::writeToFile(boost::iostreams::stream<boost::iostreams::file_
             out << (it->first) << "=" << (*entry) << std::endl;
         }
     }
-}
-
-std::string MwIniImporter::toUTF8(const std::string &str) {
-    char *ptr = ToUTF8::getBuffer(str.length());
-    strncpy(ptr, str.c_str(), str.length());
-
-    // Convert to UTF8 and return
-    return ToUTF8::getUtf8(mEncoding);
 }
 
 void MwIniImporter::setInputEncoding(const ToUTF8::FromType &encoding)

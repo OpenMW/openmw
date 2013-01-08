@@ -165,23 +165,12 @@ bool parseOptions (int argc, char** argv, Arguments &info)
 
     // Font encoding settings
     info.encoding = variables["encoding"].as<std::string>();
-    if (info.encoding == "win1250")
+    if(info.encoding != "win1250" && info.encoding != "win1251" && info.encoding != "win1252")
     {
-        std::cout << "Using Central and Eastern European font encoding." << std::endl;
+        std::cout << info.encoding << " is not a valid encoding option." << std::endl;
+        info.encoding = "win1252";
     }
-    else if (info.encoding == "win1251")
-    {
-        std::cout << "Using Cyrillic font encoding." << std::endl;
-    }
-    else
-    {
-        if(info.encoding != "win1252")
-        {
-            std::cout << info.encoding << " is not a valid encoding option." << std::endl;
-            info.encoding = "win1252";
-        }
-        std::cout << "Using default (English) font encoding." << std::endl;
-    }
+    std::cout << ToUTF8::encodingUsingMessage(info.encoding) << std::endl;
 
     return true;
 }
@@ -262,7 +251,8 @@ void printRaw(ESM::ESMReader &esm)
 int load(Arguments& info)
 {
     ESM::ESMReader& esm = info.reader;
-    esm.setEncoding(ToUTF8::calculateEncoding(info.encoding));
+    ToUTF8::Utf8Encoder encoder (ToUTF8::calculateEncoding(info.encoding));
+    esm.setEncoder(&encoder);
 
     std::string filename = info.filename;
     std::cout << "Loading file: " << filename << std::endl;
@@ -432,7 +422,8 @@ int clone(Arguments& info)
     std::cout << std::endl << "Saving records to: " << info.outname << "..." << std::endl;
 
     ESM::ESMWriter& esm = info.writer;
-    esm.setEncoding(info.encoding);
+    ToUTF8::Utf8Encoder encoder (ToUTF8::calculateEncoding(info.encoding));
+    esm.setEncoder(&encoder);
     esm.setAuthor(info.data.author);
     esm.setDescription(info.data.description);
     esm.setVersion(info.data.version);
