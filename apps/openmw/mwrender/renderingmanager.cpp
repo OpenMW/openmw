@@ -38,6 +38,7 @@
 #include "npcanimation.hpp"
 #include "externalrendering.hpp"
 #include "globalmap.hpp"
+#include "videoplayer.hpp"
 
 using namespace MWRender;
 using namespace Ogre;
@@ -161,6 +162,9 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
 
     mOcclusionQuery = new OcclusionQuery(&mRendering, mSkyManager->getSunNode());
 
+    mVideoPlayer = new VideoPlayer(mRendering.getScene ());
+    mVideoPlayer->setResolution (Settings::Manager::getInt ("resolution x", "Video"), Settings::Manager::getInt ("resolution y", "Video"));
+
     mSun = 0;
 
     mDebugging = new Debugging(mMwRoot, engine);
@@ -182,7 +186,7 @@ RenderingManager::~RenderingManager ()
     delete mOcclusionQuery;
     delete mCompositors;
     delete mWater;
-
+    delete mVideoPlayer;
     delete mFactory;
 }
 
@@ -332,6 +336,8 @@ void RenderingManager::update (float duration, bool paused)
     }
     mOcclusionQuery->update(duration);
     
+    mVideoPlayer->update ();
+
     mRendering.update(duration);
 
     if(paused)
@@ -838,6 +844,8 @@ void RenderingManager::windowResized(Ogre::RenderWindow* rw)
     mCompositors->recreate();
     mWater->assignTextures();
 
+    mVideoPlayer->setResolution (rw->getWidth(), rw->getHeight());
+
     const Settings::CategorySettingVector& changed = Settings::Manager::apply();
     MWBase::Environment::get().getInputManager()->processChangedSettings(changed); //FIXME
     MWBase::Environment::get().getWindowManager()->processChangedSettings(changed); // FIXME
@@ -919,6 +927,16 @@ bool RenderingManager::isPositionExplored (float nX, float nY, int x, int y, boo
 void RenderingManager::setupExternalRendering (MWRender::ExternalRendering& rendering)
 {
     rendering.setup (mRendering.getScene());
+}
+
+void RenderingManager::playVideo(const std::string& name, bool allowSkipping)
+{
+    mVideoPlayer->playVideo ("video/" + name, allowSkipping);
+}
+
+void RenderingManager::stopVideo()
+{
+    mVideoPlayer->stopVideo ();
 }
 
 } // namespace
