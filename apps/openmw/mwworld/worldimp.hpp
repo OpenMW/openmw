@@ -72,10 +72,13 @@ namespace MWWorld
             Ptr getPtrViaHandle (const std::string& handle, Ptr::CellStore& cellStore);
 
             std::string mFacedHandle;
+            float mFacedDistance;
             Ptr mFaced1;
             Ptr mFaced2;
             std::string mFaced1Name;
             std::string mFaced2Name;
+            float mFaced1Distance;
+            float mFaced2Distance;
             int mNumFacing;
             std::map<std::string,std::string> mFallback;
 

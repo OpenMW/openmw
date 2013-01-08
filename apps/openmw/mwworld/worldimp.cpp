@@ -587,6 +587,9 @@ namespace MWWorld
         }
         else
         {
+            if (mFacedDistance > result.first>getStore().get<ESM::GameSetting>().find ("iMaxActivateDist")->getInt())
+                return "";
+
             // updated every few frames in update()
             return mFacedHandle;
         }
@@ -957,16 +960,19 @@ namespace MWWorld
         if (mNumFacing == 0)
         {
             mFacedHandle = "";
+            mFacedDistance = FLT_MAX;
         }
         else if (mNumFacing == 1)
         {
             bool result = query->getTestResult();
             mFacedHandle = result ? mFaced1Name : "";
+            mFacedDistance = result ? mFaced1Distance : FLT_MAX;
         }
         else if (mNumFacing == 2)
         {
             bool result = query->getTestResult();
             mFacedHandle = result ? mFaced2Name : mFaced1Name;
+            mFacedDistance = result ? mFaced1Distance : mFaced1Distance;
         }
     }
 
@@ -1017,6 +1023,7 @@ namespace MWWorld
     {
         mFaced1 = getPtrViaHandle(results.front().second);
         mFaced1Name = results.front().second;
+        mFaced1Distance = results.front().first;
         mNumFacing = 1;
 
         btVector3 p;
@@ -1041,6 +1048,8 @@ namespace MWWorld
     {
         mFaced1Name = results.at (0).second;
         mFaced2Name = results.at (1).second;
+        mFaced1Distance = results.at (0).first;
+        mFaced2Distance = results.at (1).first;
         mFaced1 = getPtrViaHandle(results.at (0).second);
         mFaced2 = getPtrViaHandle(results.at (1).second);
         mNumFacing = 2;
@@ -1062,6 +1071,7 @@ namespace MWWorld
         if (!query->isPotentialOccluder(node1) && (mFaced1.getTypeName().find("Static") == std::string::npos))
         {
             mFacedHandle = mFaced1Name;
+            mFacedDistance = mFaced1Distance;
             //std::cout << "node1 Not an occluder" << std::endl;
             return;
         }
@@ -1070,6 +1080,7 @@ namespace MWWorld
         if (mFaced2.getTypeName().find("Static") != std::string::npos)
         {
             mFacedHandle = mFaced1Name;
+            mFacedDistance = mFaced1Distance;
             return;
         }
 
@@ -1078,6 +1089,7 @@ namespace MWWorld
             && mFaced2.getTypeName().find("Door") != std::string::npos)
         {
             mFacedHandle = mFaced2Name;
+            mFacedDistance = mFaced2Distance;
             return;
         }
 
