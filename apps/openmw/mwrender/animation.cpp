@@ -49,17 +49,6 @@ void Animation::createEntityList(Ogre::SceneNode *node, const std::string &model
     mEntityList = NifOgre::NIFLoader::createEntities(mInsert, model);
     if(mEntityList.mSkelBase)
     {
-        Ogre::AnimationStateSet *aset = mEntityList.mSkelBase->getAllAnimationStates();
-        Ogre::AnimationStateIterator as = aset->getAnimationStateIterator();
-        while(as.hasMoreElements())
-        {
-            Ogre::AnimationState *state = as.getNext();
-            state->setEnabled(true);
-            state->setLoop(false);
-            if(!mAnimState)
-                mAnimState = state;
-        }
-
         Ogre::SkeletonInstance *skelinst = mEntityList.mSkelBase->getSkeleton();
         // Would be nice if Ogre::SkeletonInstance allowed access to the 'master' Ogre::SkeletonPtr.
         Ogre::SkeletonManager &skelMgr = Ogre::SkeletonManager::getSingleton();
@@ -72,7 +61,7 @@ void Animation::createEntityList(Ogre::SceneNode *node, const std::string &model
             if(!data.isEmpty())
             {
                 mTextKeys = Ogre::any_cast<NifOgre::TextKeyMap>(data);
-                mNextGroup = mCurGroup = GroupTimes(mTextKeys.end());
+                mNextGroup = mCurGroup = GroupTimes(mTextKeys.begin());
 
                 mAccumRoot = skelinst->getRootBone();
                 mAccumRoot->setManuallyControlled(true);
@@ -84,11 +73,23 @@ void Animation::createEntityList(Ogre::SceneNode *node, const std::string &model
             }
         }
 
-        NifOgre::TextKeyMap::iterator keyiter;
-        for(keyiter = mTextKeys.begin();keyiter != mTextKeys.end();keyiter++)
+        if(mTextKeys.size() > 0)
         {
-            std::transform(keyiter->second.begin(), keyiter->second.end(),
-                           keyiter->second.begin(), ::tolower);
+            NifOgre::TextKeyMap::iterator keyiter;
+            for(keyiter = mTextKeys.begin();keyiter != mTextKeys.end();keyiter++)
+                std::transform(keyiter->second.begin(), keyiter->second.end(),
+                               keyiter->second.begin(), ::tolower);
+
+            Ogre::AnimationStateSet *aset = mEntityList.mSkelBase->getAllAnimationStates();
+            Ogre::AnimationStateIterator as = aset->getAnimationStateIterator();
+            while(as.hasMoreElements())
+            {
+                Ogre::AnimationState *state = as.getNext();
+                state->setEnabled(true);
+                state->setLoop(false);
+                if(!mAnimState)
+                    mAnimState = state;
+            }
         }
     }
 }
@@ -179,6 +180,7 @@ void Animation::playGroup(std::string groupname, int mode, int loops)
     {
         times.mStart = times.mLoopStart = mTextKeys.begin();
         times.mLoopStop = times.mStop = mTextKeys.end();
+        times.mLoopStop--; times.mStop--;
     }
     else if(!findGroupTimes(groupname, &times))
     {
