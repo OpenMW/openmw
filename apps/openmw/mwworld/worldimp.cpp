@@ -1300,4 +1300,14 @@ namespace MWWorld
         return 0;
 
     }
+
+    void World::playVideo (const std::string &name, bool allowSkipping)
+    {
+        mRendering->playVideo(name, allowSkipping);
+    }
+
+    void World::stopVideo ()
+    {
+        mRendering->stopVideo();
+    }
 }

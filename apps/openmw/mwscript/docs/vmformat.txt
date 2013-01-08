@@ -301,10 +301,14 @@ op 0x20001ea: LowerRank
 op 0x20001eb: LowerRank, explicit
 op 0x20001ec: GetPCCrimeLevel
 op 0x20001ed: SetPCCrimeLevel
-op 0x20001ee: SetPCCrimeLevel
+op 0x20001ee: ModPCCrimeLevel
 op 0x20001ef: GetCurrentAIPackage
 op 0x20001f0: GetCurrentAIPackage, explicit reference
 op 0x20001f1: GetDetected
 op 0x20001f2: GetDetected, explicit reference
-
-opcodes 0x20001f3-0x3ffffff unused
+op 0x20001f3: AddSoulGem
+op 0x20001f4: AddSoulGem, explicit reference
+op 0x20001f5: RemoveSoulGem
+op 0x20001f6: RemoveSoulGem, explicit reference
+op 0x20001f7: PlayBink
+opcodes 0x20001f8-0x3ffffff unused

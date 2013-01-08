@@ -336,6 +336,10 @@ namespace MWWorld
             /// 1 - only waiting \n
             /// 2 - player is underwater \n
             /// 3 - enemies are nearby (not implemented)
+
+            /// \todo this does not belong here
+            virtual void playVideo(const std::string& name, bool allowSkipping);
+            virtual void stopVideo();
     };
 }
 
