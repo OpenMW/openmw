@@ -427,12 +427,7 @@ void OMW::Engine::activate()
     if (MWBase::Environment::get().getWindowManager()->isGuiMode())
         return;
 
-    std::string handle = MWBase::Environment::get().getWorld()->getFacedHandle();
-
-    if (handle.empty())
-        return;
-
-    MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->searchPtrViaHandle (handle);
+    MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->getFacedObject();
 
     if (ptr.isEmpty())
         return;

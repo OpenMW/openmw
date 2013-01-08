@@ -573,26 +573,24 @@ namespace MWWorld
         return mWorldScene->markCellAsUnchanged();
     }
 
-    std::string World::getFacedHandle()
+    MWWorld::Ptr World::getFacedObject()
     {
+        std::pair<float, std::string> result;
+
         if (!mRendering->occlusionQuerySupported())
-        {
-            std::pair<float, std::string> result = mPhysics->getFacedHandle (*this, 500);
-
-            if (result.second.empty() ||
-                    result.first>getStore().get<ESM::GameSetting>().find ("iMaxActivateDist")->getInt())
-                return "";
-
-            return result.second;
-        }
+            result = mPhysics->getFacedHandle (*this, 500);
         else
-        {
-            if (mFacedDistance > result.first>getStore().get<ESM::GameSetting>().find ("iMaxActivateDist")->getInt())
-                return "";
+            result = std::make_pair (mFacedDistance, mFacedHandle);
 
-            // updated every few frames in update()
-            return mFacedHandle;
-        }
+        if (result.second.empty())
+            return MWWorld::Ptr ();
+
+        float ActivationDistance = getStore().get<ESM::GameSetting>().find ("iMaxActivateDist")->getInt();
+
+        if (result.first > ActivationDistance)
+            return MWWorld::Ptr ();
+
+        return  searchPtrViaHandle (result.second);
     }
 
     void World::deleteObject (const Ptr& ptr)
@@ -904,7 +902,7 @@ namespace MWWorld
     void World::updateWindowManager ()
     {
         // inform the GUI about focused object
-        MWWorld::Ptr object = searchPtrViaHandle(mFacedHandle);
+        MWWorld::Ptr object = getFacedObject ();
 
         MWBase::Environment::get().getWindowManager()->setFocusObject(object);
 

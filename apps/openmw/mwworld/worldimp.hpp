@@ -227,8 +227,8 @@ namespace MWWorld
 
             virtual void markCellAsUnchanged();
 
-            virtual std::string getFacedHandle();
-            ///< Return handle of the object the player is looking at
+            virtual MWWorld::Ptr getFacedObject();
+            ///< Return pointer to the object the player is looking at, if it is within activation range
 
             virtual void deleteObject (const Ptr& ptr);
 
