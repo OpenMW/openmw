@@ -6,6 +6,7 @@
 #include <components/settings/settings.hpp>
 
 #include "../mwbase/inputmanager.hpp"
+#include "sdlinputwrapper.hpp"
 
 namespace OEngine
 {
@@ -35,18 +36,9 @@ namespace ICS
     class InputControlSystem;
 }
 
-namespace OIS
-{
-    class Keyboard;
-    class Mouse;
-    class InputManager;
-}
-
-#include <OISKeyboard.h>
-#include <OISMouse.h>
-
 #include <extern/oics/ICSChannelListener.h>
 #include <extern/oics/ICSInputControlSystem.h>
+#include <extern/oics/OISCompat.h>
 
 namespace MWInput
 {
@@ -54,7 +46,12 @@ namespace MWInput
     /**
     * @brief Class that handles all input and key bindings for OpenMW.
     */
-    class InputManager : public MWBase::InputManager, public OIS::KeyListener, public OIS::MouseListener, public ICS::ChannelListener, public ICS::DetectingBindingListener
+    class InputManager :
+            public MWBase::InputManager,
+            public ICS::MWSDLKeyListener,
+            public ICS::MWSDLMouseListener,
+            public ICS::ChannelListener,
+            public ICS::DetectingBindingListener
     {
     public:
         InputManager(OEngine::Render::OgreRenderer &_ogre,
@@ -85,12 +82,12 @@ namespace MWInput
         virtual void resetToDefaultBindings();
 
     public:
-        virtual bool keyPressed( const OIS::KeyEvent &arg );
-        virtual bool keyReleased( const OIS::KeyEvent &arg );
+        virtual bool keyPressed(const SDL_KeyboardEvent &arg );
+        virtual bool keyReleased( const SDL_KeyboardEvent &arg );
 
-        virtual bool mousePressed( const OIS::MouseEvent &arg, OIS::MouseButtonID id );
-        virtual bool mouseReleased( const OIS::MouseEvent &arg, OIS::MouseButtonID id );
-        virtual bool mouseMoved( const OIS::MouseEvent &arg );
+        virtual bool mousePressed( const SDL_MouseButtonEvent &arg, Uint8 id );
+        virtual bool mouseReleased( const SDL_MouseButtonEvent &arg, Uint8 id );
+        virtual bool mouseMoved( const ICS::MWSDLMouseMotionEvent &arg );
 
         virtual void channelChanged(ICS::Channel* channel, float currentValue, float previousValue);
 
@@ -98,7 +95,7 @@ namespace MWInput
             , ICS::InputControlSystem::NamedAxis axis, ICS::Control::ControlChangingDirection direction);
 
         virtual void keyBindingDetected(ICS::InputControlSystem* ICS, ICS::Control* control
-            , OIS::KeyCode key, ICS::Control::ControlChangingDirection direction);
+            , SDL_Keycode key, ICS::Control::ControlChangingDirection direction);
 
         virtual void mouseButtonBindingDetected(ICS::InputControlSystem* ICS, ICS::Control* control
             , unsigned int button, ICS::Control::ControlChangingDirection direction);
@@ -125,9 +122,8 @@ namespace MWInput
 
         ICS::InputControlSystem* mInputCtrl;
 
-        OIS::Keyboard* mKeyboard;
-        OIS::Mouse* mMouse;
-        OIS::InputManager* mInputManager;
+
+        MWSDLInputWrapper* mInputManager;
 
         std::string mUserFile;
 

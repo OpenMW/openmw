@@ -204,7 +204,7 @@ endif()
 find_package(OGRE REQUIRED)
 find_package(MyGUI REQUIRED)
 find_package(Boost REQUIRED COMPONENTS ${BOOST_COMPONENTS})
-find_package(OIS REQUIRED)
+find_package(SDL2 REQUIRED)
 find_package(OpenAL REQUIRED)
 find_package(Bullet REQUIRED)
 IF(OGRE_STATIC)
@@ -218,7 +218,8 @@ ENDIF(OGRE_STATIC)
 include_directories("."
     ${OGRE_INCLUDE_DIR} ${OGRE_INCLUDE_DIR}/Ogre ${OGRE_INCLUDE_DIR}/OGRE ${OGRE_PLUGIN_INCLUDE_DIRS}
     ${OGRE_Terrain_INCLUDE_DIR}
-    ${OIS_INCLUDE_DIRS} ${Boost_INCLUDE_DIR}
+    ${SDL2_INCLUDE_DIR}
+    ${Boost_INCLUDE_DIR}
     ${PLATFORM_INCLUDE_DIR}
     ${MYGUI_INCLUDE_DIRS}
     ${MYGUI_PLATFORM_INCLUDE_DIRS}
@@ -227,7 +228,7 @@ include_directories("."
     ${LIBDIR}
 )
 
-link_directories(${Boost_LIBRARY_DIRS} ${OGRE_LIB_DIR} ${MYGUI_LIB_DIR})
+link_directories(${SDL2_LIBRARY_DIRS} ${Boost_LIBRARY_DIRS} ${OGRE_LIB_DIR} ${MYGUI_LIB_DIR})
 
 if (APPLE)
     # List used Ogre plugins
@@ -361,6 +362,7 @@ if(DPKG_PROGRAM)
     SET(CPACK_DEBIAN_PACKAGE_NAME "openmw")
     SET(CPACK_DEBIAN_PACKAGE_VERSION "${VERSION_STRING}")
     SET(CPACK_PACKAGE_EXECUTABLES "openmw;OpenMW esmtool;Esmtool omwlauncher;OMWLauncher mwiniimporter;MWiniImporter")
+    #TODO: should SDL2 be mentioned in here somewhere?
     SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libc6 (>= 2.11.2), libfreetype6 (>= 2.2.1), libgcc1 (>= 1:4.1.1), libmpg123-0 (>= 1.12.1), libois-1.3.0 (>= 1.3.0), libopenal1 (>= 1:1.12.854), libsndfile1 (>= 1.0.23), libstdc++6 (>= 4.4.5), libuuid1 (>= 2.17.2), libqtgui4 (>= 4.7.0)")
 
     SET(CPACK_DEBIAN_PACKAGE_SECTION "Games")

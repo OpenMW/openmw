@@ -20,7 +20,7 @@ add_openmw_dir (mwrender
     )
 
 add_openmw_dir (mwinput
-    inputmanagerimp
+    inputmanagerimp sdlinputwrapper
     )
 
 add_openmw_dir (mwgui
@@ -103,6 +103,7 @@ target_link_libraries(openmw
     ${SOUND_INPUT_LIBRARY}
     ${BULLET_LIBRARIES}
     ${MYGUI_LIBRARIES}
+    ${SDL2_LIBRARY}
     ${MYGUI_PLATFORM_LIBRARIES}
     "shiny"
     "shiny.OgrePlatform"
