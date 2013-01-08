@@ -224,7 +224,7 @@ namespace sh
 				if (!mShadersEnabled)
 					newInstance.setShadersEnabled (false);
 
-				newInstance.setSourceFile (it->second->m_fileName);
+				newInstance.setSourceFile (it->second->mFileName);
 
 				std::vector<ScriptNode*> props = it->second->getChildren();
 				for (std::vector<ScriptNode*>::const_iterator propIt = props.begin(); propIt != props.end(); ++propIt)
