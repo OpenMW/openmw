@@ -6,6 +6,7 @@
 #include <components/compiler/extensions.hpp>
 #include <components/files/collections.hpp>
 #include <components/translation/translation.hpp>
+#include <components/settings/settings.hpp>
 
 #include "mwbase/environment.hpp"
 
@@ -102,6 +103,12 @@ namespace OMW
             void executeLocalScripts();
 
             virtual bool frameRenderingQueued (const Ogre::FrameEvent& evt);
+
+            /// Load settings from various files, returns the path to the user settings file
+            std::string loadSettings (Settings::Manager & settings);
+
+            /// Prepare engine for game play
+            void prepareEngine (Settings::Manager & settings);
 
         public:
             Engine(Files::ConfigurationManager& configurationManager);
