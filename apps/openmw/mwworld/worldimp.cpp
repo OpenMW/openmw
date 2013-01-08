@@ -573,24 +573,46 @@ namespace MWWorld
         return mWorldScene->markCellAsUnchanged();
     }
 
+    float World::getMaxActivationDistance ()
+    {
+        return (std::max) (getNpcActivationDistance (), getObjectActivationDistance ());
+    }
+
+    float World::getNpcActivationDistance ()
+    {
+        return getStore().get<ESM::GameSetting>().find ("iMaxActivateDist")->getInt()*5/4;
+    }
+
+    float World::getObjectActivationDistance ()
+    {
+        return getStore().get<ESM::GameSetting>().find ("iMaxActivateDist")->getInt();
+    }
+
     MWWorld::Ptr World::getFacedObject()
     {
         std::pair<float, std::string> result;
 
         if (!mRendering->occlusionQuerySupported())
-            result = mPhysics->getFacedHandle (*this, 500);
+            result = mPhysics->getFacedHandle (*this, getMaxActivationDistance ());
         else
             result = std::make_pair (mFacedDistance, mFacedHandle);
 
         if (result.second.empty())
             return MWWorld::Ptr ();
 
-        float ActivationDistance = getStore().get<ESM::GameSetting>().find ("iMaxActivateDist")->getInt();
+        MWWorld::Ptr object = searchPtrViaHandle (result.second);
+
+        float ActivationDistance;
+
+        if (object.getTypeName ().find("NPC") != std::string::npos)
+            ActivationDistance = getNpcActivationDistance ();
+        else
+            ActivationDistance = getObjectActivationDistance ();
 
         if (result.first > ActivationDistance)
             return MWWorld::Ptr ();
 
-        return  searchPtrViaHandle (result.second);
+        return object;
     }
 
     void World::deleteObject (const Ptr& ptr)
@@ -983,11 +1005,11 @@ namespace MWWorld
         {
             float x, y;
             MWBase::Environment::get().getWindowManager()->getMousePosition(x, y);
-            results = mPhysics->getFacedHandles(x, y, 500);
+            results = mPhysics->getFacedHandles(x, y, getMaxActivationDistance ());
         }
         else
         {
-            results = mPhysics->getFacedHandles(500);
+            results = mPhysics->getFacedHandles(getMaxActivationDistance ());
         }
 
         // ignore the player and other things we're not interested in

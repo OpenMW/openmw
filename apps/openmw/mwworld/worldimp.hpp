@@ -100,6 +100,10 @@ namespace MWWorld
             void beginSingleFacedQueryProcess (MWRender::OcclusionQuery* query, std::vector < std::pair < float, std::string > > const & results);
             void beginDoubleFacedQueryProcess (MWRender::OcclusionQuery* query, std::vector < std::pair < float, std::string > > const & results);
 
+            float getMaxActivationDistance ();
+            float getNpcActivationDistance ();
+            float getObjectActivationDistance ();
+
         public:
 
             World (OEngine::Render::OgreRenderer& renderer,
