@@ -90,6 +90,13 @@ namespace MWWorld
             virtual void
             copyObjectToCell(const Ptr &ptr, CellStore &cell, const ESM::Position &pos);
 
+            void updateWindowManager ();
+            void performUpdateSceneQueries ();
+            void processFacedQueryResults (MWRender::OcclusionQuery* query);
+            void beginFacedQueryProcess (MWRender::OcclusionQuery* query);
+            void beginSingleFacedQueryProcess (MWRender::OcclusionQuery* query, std::vector < std::pair < float, std::string > > const & results);
+            void beginDoubleFacedQueryProcess (MWRender::OcclusionQuery* query, std::vector < std::pair < float, std::string > > const & results);
+
         public:
 
             World (OEngine::Render::OgreRenderer& renderer,

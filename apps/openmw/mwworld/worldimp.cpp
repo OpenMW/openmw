@@ -884,8 +884,6 @@ namespace MWWorld
 
     void World::update (float duration, bool paused)
     {
-        /// \todo split this function up into subfunctions
-
         mWorldScene->update (duration, paused);
 
         float pitch, yaw;
@@ -895,6 +893,13 @@ namespace MWWorld
 
         mWeatherManager->update (duration);
 
+        performUpdateSceneQueries ();
+
+        updateWindowManager ();
+    }
+
+    void World::updateWindowManager ()
+    {
         // inform the GUI about focused object
         MWWorld::Ptr object = searchPtrViaHandle(mFacedHandle);
 
@@ -918,7 +923,10 @@ namespace MWWorld
                     screenCoords[0], screenCoords[1], screenCoords[2], screenCoords[3]);
             }
         }
+    }
 
+    void World::performUpdateSceneQueries ()
+    {
         if (!mRendering->occlusionQuerySupported())
         {
             // cast a ray from player to sun to detect if the sun is visible
@@ -937,119 +945,143 @@ namespace MWWorld
             MWRender::OcclusionQuery* query = mRendering->getOcclusionQuery();
             if (!query->occlusionTestPending())
             {
-                // get result of last query
-                if (mNumFacing == 0) mFacedHandle = "";
-                else if (mNumFacing == 1)
-                {
-                    bool result = query->getTestResult();
-                    mFacedHandle = result ? mFaced1Name : "";
-                }
-                else if (mNumFacing == 2)
-                {
-                    bool result = query->getTestResult();
-                    mFacedHandle = result ? mFaced2Name : mFaced1Name;
-                }
-
-                // send new query
-                // figure out which object we want to test against
-                std::vector < std::pair < float, std::string > > results;
-                if (MWBase::Environment::get().getWindowManager()->isGuiMode())
-                {
-                    float x, y;
-                    MWBase::Environment::get().getWindowManager()->getMousePosition(x, y);
-                    results = mPhysics->getFacedObjects(x, y);
-                }
-                else
-                    results = mPhysics->getFacedObjects();
-
-                // ignore the player and other things we're not interested in
-                std::vector < std::pair < float, std::string > >::iterator it = results.begin();
-                while (it != results.end())
-                {
-                    if ( (*it).second.find("HeightField") != std::string::npos // not interested in terrain
-                    || getPtrViaHandle((*it).second) == mPlayer->getPlayer() ) // not interested in player (unless you want to talk to yourself)
-                    {
-                        it = results.erase(it);
-                    }
-                    else
-                        ++it;
-                }
-
-                if (results.size() == 0)
-                {
-                    mNumFacing = 0;
-                }
-                else if (results.size() == 1)
-                {
-                    mFaced1 = getPtrViaHandle(results.front().second);
-                    mFaced1Name = results.front().second;
-                    mNumFacing = 1;
-
-                    btVector3 p;
-                    if (MWBase::Environment::get().getWindowManager()->isGuiMode())
-                    {
-                        float x, y;
-                        MWBase::Environment::get().getWindowManager()->getMousePosition(x, y);
-                        p = mPhysics->getRayPoint(results.front().first, x, y);
-                    }
-                    else
-                        p = mPhysics->getRayPoint(results.front().first);
-                    Ogre::Vector3 pos(p.x(), p.z(), -p.y());
-                    Ogre::SceneNode* node = mFaced1.getRefData().getBaseNode();
-
-                    //std::cout << "Num facing 1 : " << mFaced1Name <<  std::endl;
-                    //std::cout << "Type 1 " << mFaced1.getTypeName() <<  std::endl;
-
-                    query->occlusionTest(pos, node);
-                }
-                else
-                {
-                    mFaced1Name = results.front().second;
-                    mFaced2Name = results[1].second;
-                    mFaced1 = getPtrViaHandle(results.front().second);
-                    mFaced2 = getPtrViaHandle(results[1].second);
-                    mNumFacing = 2;
-
-                    btVector3 p;
-                    if (MWBase::Environment::get().getWindowManager()->isGuiMode())
-                    {
-                        float x, y;
-                        MWBase::Environment::get().getWindowManager()->getMousePosition(x, y);
-                        p = mPhysics->getRayPoint(results[1].first, x, y);
-                    }
-                    else
-                        p = mPhysics->getRayPoint(results[1].first);
-                    Ogre::Vector3 pos(p.x(), p.z(), -p.y());
-                    Ogre::SceneNode* node1 = mFaced1.getRefData().getBaseNode();
-                    Ogre::SceneNode* node2 = mFaced2.getRefData().getBaseNode();
-
-                    // no need to test if the first node is not occluder
-                    if (!query->isPotentialOccluder(node1) && (mFaced1.getTypeName().find("Static") == std::string::npos))
-                    {
-                        mFacedHandle = mFaced1Name;
-                        //std::cout << "node1 Not an occluder" << std::endl;
-                        return;
-                    }
-
-                    // no need to test if the second object is static (thus cannot be activated)
-                    if (mFaced2.getTypeName().find("Static") != std::string::npos)
-                    {
-                        mFacedHandle = mFaced1Name;
-                        return;
-                    }
-
-                    // work around door problems
-                    if (mFaced1.getTypeName().find("Static") != std::string::npos
-                        && mFaced2.getTypeName().find("Door") != std::string::npos)
-                    {
-                        mFacedHandle = mFaced2Name;
-                        return;
-                    }
-
-                    query->occlusionTest(pos, node2);
-                }
+                processFacedQueryResults (query);
+                beginFacedQueryProcess (query);
             }
         }
+    }
+
+    void World::processFacedQueryResults (MWRender::OcclusionQuery* query)
+    {
+        // get result of last query
+        if (mNumFacing == 0)
+        {
+            mFacedHandle = "";
+        }
+        else if (mNumFacing == 1)
+        {
+            bool result = query->getTestResult();
+            mFacedHandle = result ? mFaced1Name : "";
+        }
+        else if (mNumFacing == 2)
+        {
+            bool result = query->getTestResult();
+            mFacedHandle = result ? mFaced2Name : mFaced1Name;
+        }
+    }
+
+    void World::beginFacedQueryProcess (MWRender::OcclusionQuery* query)
+    {
+        // send new query
+        // figure out which object we want to test against
+        std::vector < std::pair < float, std::string > > results;
+        if (MWBase::Environment::get().getWindowManager()->isGuiMode())
+        {
+            float x, y;
+            MWBase::Environment::get().getWindowManager()->getMousePosition(x, y);
+            results = mPhysics->getFacedObjects(x, y);
+        }
+        else
+        {
+            results = mPhysics->getFacedObjects();
+        }
+
+        // ignore the player and other things we're not interested in
+        std::vector < std::pair < float, std::string > >::iterator it = results.begin();
+        while (it != results.end())
+        {
+            if ( (*it).second.find("HeightField") != std::string::npos // not interested in terrain
+            || getPtrViaHandle((*it).second) == mPlayer->getPlayer() ) // not interested in player (unless you want to talk to yourself)
+            {
+                it = results.erase(it);
+            }
+            else
+                ++it;
+        }
+
+        if (results.size() == 0)
+        {
+            mNumFacing = 0;
+        }
+        else if (results.size() == 1)
+        {
+            beginSingleFacedQueryProcess (query, results);
+        }
+        else
+        {
+            beginDoubleFacedQueryProcess (query, results);
+        }
+    }
+
+    void World::beginSingleFacedQueryProcess (MWRender::OcclusionQuery* query, std::vector < std::pair < float, std::string > > const & results)
+    {
+        mFaced1 = getPtrViaHandle(results.front().second);
+        mFaced1Name = results.front().second;
+        mNumFacing = 1;
+
+        btVector3 p;
+        if (MWBase::Environment::get().getWindowManager()->isGuiMode())
+        {
+            float x, y;
+            MWBase::Environment::get().getWindowManager()->getMousePosition(x, y);
+            p = mPhysics->getRayPoint(results.front().first, x, y);
+        }
+        else
+            p = mPhysics->getRayPoint(results.front().first);
+        Ogre::Vector3 pos(p.x(), p.z(), -p.y());
+        Ogre::SceneNode* node = mFaced1.getRefData().getBaseNode();
+
+        //std::cout << "Num facing 1 : " << mFaced1Name <<  std::endl;
+        //std::cout << "Type 1 " << mFaced1.getTypeName() <<  std::endl;
+
+        query->occlusionTest(pos, node);
+    }
+
+    void World::beginDoubleFacedQueryProcess (MWRender::OcclusionQuery* query, std::vector < std::pair < float, std::string > > const & results)
+    {
+        mFaced1Name = results.at (0).second;
+        mFaced2Name = results.at (1).second;
+        mFaced1 = getPtrViaHandle(results.at (0).second);
+        mFaced2 = getPtrViaHandle(results.at (1).second);
+        mNumFacing = 2;
+
+        btVector3 p;
+        if (MWBase::Environment::get().getWindowManager()->isGuiMode())
+        {
+            float x, y;
+            MWBase::Environment::get().getWindowManager()->getMousePosition(x, y);
+            p = mPhysics->getRayPoint(results.at (1).first, x, y);
+        }
+        else
+            p = mPhysics->getRayPoint(results.at (1).first);
+        Ogre::Vector3 pos(p.x(), p.z(), -p.y());
+        Ogre::SceneNode* node1 = mFaced1.getRefData().getBaseNode();
+        Ogre::SceneNode* node2 = mFaced2.getRefData().getBaseNode();
+
+        // no need to test if the first node is not occluder
+        if (!query->isPotentialOccluder(node1) && (mFaced1.getTypeName().find("Static") == std::string::npos))
+        {
+            mFacedHandle = mFaced1Name;
+            //std::cout << "node1 Not an occluder" << std::endl;
+            return;
+        }
+
+        // no need to test if the second object is static (thus cannot be activated)
+        if (mFaced2.getTypeName().find("Static") != std::string::npos)
+        {
+            mFacedHandle = mFaced1Name;
+            return;
+        }
+
+        // work around door problems
+        if (mFaced1.getTypeName().find("Static") != std::string::npos
+            && mFaced2.getTypeName().find("Door") != std::string::npos)
+        {
+            mFacedHandle = mFaced2Name;
+            return;
+        }
+
+        query->occlusionTest(pos, node2);
     }
 
     bool World::isCellExterior() const
