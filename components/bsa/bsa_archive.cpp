@@ -29,6 +29,8 @@
 #include <OgreArchiveManager.h>
 #include "bsa_file.hpp"
 
+#include "../files/constrainedfiledatastream.hpp"
+
 namespace
 {
 
@@ -60,104 +62,64 @@ public:
 static bool fsstrict = false;
 
 /// An OGRE Archive wrapping a BSAFile archive
-class DirArchive: public Ogre::FileSystemArchive
+class DirArchive: public Ogre::Archive
 {
-    boost::filesystem::path currentdir;
-    std::map<std::string, std::vector<std::string>, ciLessBoost> m;
-    unsigned int cutoff;
+    typedef std::map <std::string, std::string> index;
 
-    bool findFile(const String& filename, std::string& copy) const
+    index mIndex;
+
+    static char strict_normalize_char(char ch)
     {
-        copy = filename;
-        std::replace(copy.begin(), copy.end(), '\\', '/');
-
-        if(copy.at(0) == '/')
-            copy.erase(0, 1);
-
-        if(fsstrict == true)
-            return true;
-
-        std::string folder;
-        //int delimiter = 0;
-        size_t lastSlash = copy.rfind('/');
-        if (lastSlash != std::string::npos)
-        {
-            folder = copy.substr(0, lastSlash);
-            //delimiter = lastSlash+1;
-        }
-
-        std::vector<std::string> current;
-        {
-            std::map<std::string,std::vector<std::string>,ciLessBoost>::const_iterator found = m.find(folder);
-
-            if (found == m.end())
-            {
-                return false;
-            }
-            else
-                current = found->second;
-        }
-
-        std::vector<std::string>::iterator find = std::lower_bound(current.begin(), current.end(), copy, ciLessBoost());
-        if (find != current.end() && !ciLessBoost()(copy, current.front()))
-        {
-            if (!boost::iequals(copy, *find))
-                if ((find = std::find_if(current.begin(), current.end(), pathComparer(copy))) == current.end()) //\todo Check if this line is actually needed
-                    return false;
-
-            copy = *find;
-            return true;
-        }
-
-        return false;
+        return ch == '\\' ? '/' : ch;
     }
 
-    public:
+    static char nonstrict_normalize_char(char ch)
+    {
+        return ch == '\\' ? '/' : std::tolower (ch);
+    }
+
+    static std::string normalize_path (std::string::const_iterator begin, std::string::const_iterator end)
+    {
+        std::string normalized;
+        normalized.reserve (end-begin);
+        char (*normalize_char) (char) = fsstrict ? &strict_normalize_char : &nonstrict_normalize_char;
+        std::transform (begin, end, std::back_inserter (normalized), normalize_char);
+        return normalized;
+    }
+
+    index::const_iterator lookup_filename (std::string const & filename) const
+    {
+        std::string normalized = normalize_path (filename.begin (), filename.end ());
+
+        return mIndex.find (normalized);
+    }
+
+public:
 
     DirArchive(const String& name)
-    : FileSystemArchive(name, "Dir"), currentdir (name)
+        : Archive(name, "Dir")
     {
-        mType = "Dir";
-        std::string s = name;
-        cutoff = s.size() + 1;
-        if(fsstrict == false)
-            populateMap(currentdir);
+        typedef boost::filesystem::recursive_directory_iterator directory_iterator;
 
-  }
-  void populateMap(boost::filesystem::path d){
-     //need to cut off first
-      boost::filesystem::directory_iterator dir_iter(d), dir_end;
-      std::vector<std::string> filesind;
-      for(;dir_iter != dir_end; dir_iter++)
-    {
-        if(boost::filesystem::is_directory(*dir_iter))
-            populateMap(*dir_iter);
-        else
+        directory_iterator end;
+
+        size_t prefix = name.size ();
+
+        if (name.size () > 0 && name [prefix - 1] != '\\' && name [prefix - 1] != '/')
+            ++prefix;
+
+        for (directory_iterator i (name); i != end; ++i)
         {
-            std::string s = dir_iter->path().string();
-            std::replace(s.begin(), s.end(), '\\', '/');
+            if(boost::filesystem::is_directory (*i))
+                continue;
 
-            std::string small;
-            if(cutoff < s.size())
-                small = s.substr(cutoff, s.size() - cutoff);
-            else
-                small = s.substr(cutoff - 1, s.size() - cutoff);
+            std::string proper = i->path ().string ();
 
-            filesind.push_back(small);
+            std::string searchable = normalize_path (proper.begin () + prefix, proper.end ());
+
+            mIndex.insert (std::make_pair (std::move (searchable), std::move (proper)));
         }
     }
-    std::sort(filesind.begin(), filesind.end(), ciLessBoost());
-
-    std::string small;
-    std::string original = d.string();
-    std::replace(original.begin(), original.end(), '\\', '/');
-    if(cutoff < original.size())
-        small = original.substr(cutoff, original.size() - cutoff);
-    else
-        small = original.substr(cutoff - 1, original.size() - cutoff);
-
-    m[small] = filesind;
-  }
 
     bool isCaseSensitive() const { return fsstrict; }
 
@@ -165,26 +127,76 @@ class DirArchive: public Ogre::FileSystemArchive
     void load() {}
     void unload() {}
 
-     bool exists(const String& filename) {
-        std::string copy;
-
-        if (findFile(filename, copy))
-            return FileSystemArchive::exists(copy);
-
-      return false;
-     }
-
     DataStreamPtr open(const String& filename, bool readonly = true) const
-  {
-        std::string copy;
+    {
+        index::const_iterator i = lookup_filename (filename);
 
-        if (findFile(filename, copy))
-            return FileSystemArchive::open(copy, readonly);
+        if (i == mIndex.end ())
+        {
+            std::ostringstream os;
+            os << "The file '" << filename << "' could not be found.";
+            throw std::runtime_error (os.str ());
+        }
 
-        DataStreamPtr p;
-      return p;
-  }
+        return openConstrainedFileDataStream (i->second.c_str ());
+    }
 
+    StringVectorPtr list(bool recursive = true, bool dirs = false)
+    {
+        StringVectorPtr ptr = StringVectorPtr(new StringVector());
+        std::cout << "DirArchive<" << getName () << ">::list" << std::endl;
+        return ptr;
+    }
+
+    FileInfoListPtr listFileInfo(bool recursive = true, bool dirs = false)
+    {
+        FileInfoListPtr ptr = FileInfoListPtr(new FileInfoList());
+        std::cout << "DirArchive<" << getName () << ">::listFileInfo" << std::endl;
+        return ptr;
+    }
+
+    StringVectorPtr find(const String& pattern, bool recursive = true,
+                        bool dirs = false)
+    {
+        StringVectorPtr ptr = StringVectorPtr(new StringVector());
+
+        if (pattern == "*")
+            for (index::const_iterator i = mIndex.begin (); i != mIndex.end (); ++i)
+                ptr->push_back (i->first);
+
+        return ptr;
+    }
+
+    bool exists(const String& filename)
+    {
+        return lookup_filename (filename) != mIndex.end ();
+    }
+
+    time_t getModifiedTime(const String&) { return 0; }
+
+    FileInfoListPtr findFileInfo(const String& pattern, bool recursive = true,
+                            bool dirs = false) const
+    {
+        FileInfoListPtr ptr = FileInfoListPtr(new FileInfoList());
+
+        index::const_iterator i = lookup_filename (pattern);
+
+        if (i != mIndex.end ())
+        {
+            FileInfo fi;
+
+            std::size_t npos = i->first.rfind ('/');
+
+            fi.archive = this;
+            fi.filename = npos != -1 ? i->first.substr (npos) : i->first;
+            fi.path = npos != -1 ? i->first.substr (0, npos) : "";
+            fi.compressedSize = fi.uncompressedSize = 0;
+
+            ptr->push_back(fi);
+        }
+
+        return ptr;
+    }
 };
 
 class BSAArchive : public Archive
@@ -249,6 +261,13 @@ public:
     //std::cout << "find(" << pattern << ", " << recursive
     //          << ", " << dirs << ")\n";
     StringVectorPtr ptr = StringVectorPtr(new StringVector());
+
+    BSAFile::FileList const & files = arc.getList ();
+
+    if (pattern == "*")
+        for (BSAFile::FileList::const_iterator i = files.begin (); i != files.end (); ++i)
+            ptr->push_back (i->name);
+
     return ptr;
   }
 
