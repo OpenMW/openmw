@@ -40,7 +40,7 @@ namespace MWWorld
             slot!=slots.first.end(); ++slot)
         {
 
-            // Beast races cannot equip shoes / boots
+            // Beast races cannot equip shoes / boots, or full helms (head part vs hair part)
             if(npcRace == "argonian" || npcRace == "khajiit")
             {
                 if(*slot == MWWorld::InventoryStore::Slot_Helmet){ 
@@ -56,7 +56,9 @@ namespace MWWorld
                     {
                         if((*itr).mPart == ESM::PartReferenceType::PRT_Head)
                         {
-                            MWBase::Environment::get().getWindowManager()->messageBox ("#{sNotifyMessage13}", std::vector<std::string>());
+                            if(actor == MWBase::Environment::get().getWorld()->getPlayer().getPlayer() )
+                                MWBase::Environment::get().getWindowManager()->messageBox ("#{sNotifyMessage13}", std::vector<std::string>());
+                        
                             allow = false;
                             break;
                         }
