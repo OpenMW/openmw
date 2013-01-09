@@ -424,7 +424,7 @@ void loadResource(Ogre::Resource *resource)
         boneiter.moveNext();
     }
 
-    buildAnimation(skel, "all", ctrls, targets, 0.0f, std::numeric_limits<float>::max());
+    buildAnimation(skel, "all", ctrls, targets, 0.0f, maxtime);
 
     std::string currentgroup;
     TextKeyMap::const_iterator keyiter = textkeys.begin();
