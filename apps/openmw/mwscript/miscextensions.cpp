@@ -396,6 +396,9 @@ namespace MWScript
                     std::string item = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
 
+                    Interpreter::Type_Integer amount = runtime[0].mInteger;
+                    runtime.pop();
+
                     MWWorld::ContainerStore& store = MWWorld::Class::get (ptr).getContainerStore (ptr);
 
 
@@ -403,7 +406,19 @@ namespace MWScript
                     {
                         if (::Misc::StringUtils::ciEqual(iter->getCellRef().mRefID, item))
                         {
-                            MWBase::Environment::get().getWorld()->dropObjectOnGround(ptr, *iter);
+                            if(iter->getRefData().getCount() <= amount)
+                            {
+                                MWBase::Environment::get().getWorld()->dropObjectOnGround(ptr, *iter);
+                                iter->getRefData().setCount(0);
+                            }
+                            else
+                            {
+                                int original = iter->getRefData().getCount();
+                                iter->getRefData().setCount(amount);
+                                MWBase::Environment::get().getWorld()->dropObjectOnGround(ptr, *iter);
+                                iter->getRefData().setCount(original - amount);
+                            }
+
                             break;
                         }
                     }
@@ -430,7 +445,20 @@ namespace MWScript
                     {
                         if (::Misc::StringUtils::ciEqual(iter->getCellRef().mSoul, soul))
                         {
-                            MWBase::Environment::get().getWorld()->dropObjectOnGround(ptr, *iter);
+
+                            if(iter->getRefData().getCount() <= 1)
+                            {
+                                MWBase::Environment::get().getWorld()->dropObjectOnGround(ptr, *iter);
+                                iter->getRefData().setCount(0);
+                            }
+                            else
+                            {
+                                int original = iter->getRefData().getCount();
+                                iter->getRefData().setCount(1);
+                                MWBase::Environment::get().getWorld()->dropObjectOnGround(ptr, *iter);
+                                iter->getRefData().setCount(original - 1);
+                            }
+
                             break;
                         }
                     }
@@ -596,7 +624,7 @@ namespace MWScript
             extensions.registerFunction ("geteffect", 'l', "l", opcodeGetEffect, opcodeGetEffectExplicit);
             extensions.registerInstruction ("addsoulgem", "cc", opcodeAddSoulGem, opcodeAddSoulGemExplicit);
             extensions.registerInstruction ("removesoulgem", "c", opcodeRemoveSoulGem, opcodeRemoveSoulGemExplicit);
-            extensions.registerInstruction ("drop", "c", opcodeDrop, opcodeDropExplicit);
+            extensions.registerInstruction ("drop", "cl", opcodeDrop, opcodeDropExplicit);
             extensions.registerInstruction ("dropsoulgem", "c", opcodeDropSoulGem, opcodeDropSoulGemExplicit);
             extensions.registerFunction ("getattacked", 'l', "", opcodeGetAttacked, opcodeGetAttackedExplicit);
             extensions.registerFunction ("getweapondrawn", 'l', "", opcodeGetWeaponDrawn, opcodeGetWeaponDrawnExplicit);
