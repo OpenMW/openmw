@@ -33,8 +33,7 @@ struct MWSDLMouseMotionEvent : SDL_MouseMotionEvent {
         state = evt.state;
     }
 
-    MWSDLMouseMotionEvent (const SDL_MouseWheelEvent& evt) :
-        MWSDLMouseMotionEvent()
+    MWSDLMouseMotionEvent (const SDL_MouseWheelEvent& evt)
     {
         _init();
         zrel = evt.y;
