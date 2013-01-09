@@ -238,17 +238,16 @@ void Objects::insertLight (const MWWorld::Ptr& ptr, float r, float g, float b, f
     info.time = Ogre::Math::RangeRandom(-500, +500);
     info.phase = Ogre::Math::RangeRandom(-500, +500);
 
-    // adjust the lights depending if we're in an interior or exterior cell
-    // quadratic means the light intensity falls off quite fast, resulting in a
-    // dark, atmospheric environment (perfect for exteriors)
-    // for interiors, we want more "warm" lights, so use linear attenuation.
+    // changed to linear to look like morrowind
     bool quadratic = false;
+    /*
     if (!lightOutQuadInLin)
         quadratic = lightQuadratic;
     else
     {
         quadratic = !info.interior;
     }
+    */
 
     if (!quadratic)
     {

@@ -315,7 +315,7 @@ void Water::applyRTT()
         vp->setOverlaysEnabled(false);
         vp->setBackgroundColour(ColourValue(0.8f, 0.9f, 1.0f));
         vp->setShadowsEnabled(false);
-        // use fallback techniques without shadows and without mrt (currently not implemented for sky and terrain)
+        // use fallback techniques without shadows and without mrt
         vp->setMaterialScheme("water_reflection");
         rtt->addListener(this);
         rtt->setActive(true);
