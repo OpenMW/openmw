@@ -170,10 +170,10 @@ namespace MWWorld
     World::World (OEngine::Render::OgreRenderer& renderer,
         const Files::Collections& fileCollections,
         const std::string& master, const boost::filesystem::path& resDir, const boost::filesystem::path& cacheDir, bool newGame,
-        ToUTF8::Utf8Encoder* encoder, std::map<std::string,std::string> fallbackMap)
+        ToUTF8::Utf8Encoder* encoder, std::map<std::string,std::string> fallbackMap, int mActivationDistanceOverride)
     : mPlayer (0), mLocalScripts (mStore), mGlobalVariables (0),
       mSky (true), mCells (mStore, mEsm),
-      mNumFacing(0)
+      mNumFacing(0), mActivationDistanceOverride (mActivationDistanceOverride)
     {
         mPhysics = new PhysicsSystem(renderer);
         mPhysEngine = mPhysics->getEngine();
@@ -575,16 +575,25 @@ namespace MWWorld
 
     float World::getMaxActivationDistance ()
     {
+        if (mActivationDistanceOverride >= 0)
+            return mActivationDistanceOverride;
+
         return (std::max) (getNpcActivationDistance (), getObjectActivationDistance ());
     }
 
     float World::getNpcActivationDistance ()
     {
+        if (mActivationDistanceOverride >= 0)
+            return mActivationDistanceOverride;
+
         return getStore().get<ESM::GameSetting>().find ("iMaxActivateDist")->getInt()*5/4;
     }
 
     float World::getObjectActivationDistance ()
     {
+        if (mActivationDistanceOverride >= 0)
+            return mActivationDistanceOverride;
+
         return getStore().get<ESM::GameSetting>().find ("iMaxActivateDist")->getInt();
     }
 

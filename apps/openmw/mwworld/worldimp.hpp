@@ -71,6 +71,7 @@ namespace MWWorld
 
             Ptr getPtrViaHandle (const std::string& handle, Ptr::CellStore& cellStore);
 
+            int mActivationDistanceOverride;
             std::string mFacedHandle;
             float mFacedDistance;
             Ptr mFaced1;
@@ -109,7 +110,7 @@ namespace MWWorld
             World (OEngine::Render::OgreRenderer& renderer,
                 const Files::Collections& fileCollections,
                 const std::string& master, const boost::filesystem::path& resDir, const boost::filesystem::path& cacheDir, bool newGame,
-                ToUTF8::Utf8Encoder* encoder, std::map<std::string,std::string> fallbackMap);
+                ToUTF8::Utf8Encoder* encoder, std::map<std::string,std::string> fallbackMap, int mActivationDistanceOverride);
 
             virtual ~World();
 

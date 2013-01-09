@@ -336,7 +336,8 @@ void OMW::Engine::go()
 
     // Create the world
     mEnvironment.setWorld (new MWWorld::World (*mOgre, mFileCollections, mMaster,
-        mResDir, mCfgMgr.getCachePath(), mNewGame, &encoder, mFallbackMap));
+        mResDir, mCfgMgr.getCachePath(), mNewGame, &encoder, mFallbackMap,
+        mActivationDistanceOverride));
 
     //Load translation data
     mTranslationDataStorage.setEncoder(&encoder);
@@ -508,4 +509,10 @@ void OMW::Engine::setScriptConsoleMode (bool enabled)
 void OMW::Engine::setStartupScript (const std::string& path)
 {
     mStartupScript = path;
+}
+
+
+void OMW::Engine::setActivationDistanceOverride (int distance)
+{
+    mActivationDistanceOverride = distance;
 }

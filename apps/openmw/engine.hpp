@@ -76,6 +76,7 @@ namespace OMW
             std::map<std::string,std::string> mFallbackMap;
             bool mScriptConsoleMode;
             std::string mStartupScript;
+            int mActivationDistanceOverride;
 
             Compiler::Extensions mExtensions;
             Compiler::Context *mScriptContext;
@@ -166,6 +167,9 @@ namespace OMW
 
             /// Set path for a script that is run on startup in the console.
             void setStartupScript (const std::string& path);
+
+            /// Override the game setting specified activation distance.
+            void setActivationDistanceOverride (int distance);
 
         private:
             Files::ConfigurationManager& mCfgMgr;
