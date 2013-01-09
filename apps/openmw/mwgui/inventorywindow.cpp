@@ -67,7 +67,7 @@ namespace MWGui
 
         setCoord(0, 342, 498, 258);
 
-        MWBase::Environment::get().getWorld ()->setupExternalRendering (mPreview);
+        mPreview.setup();
 
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
         openContainer(player);
