@@ -164,7 +164,7 @@ static void fail(const std::string &msg)
 
 static void buildAnimation(Ogre::Skeleton *skel, const std::string &name, const std::vector<Nif::NiKeyframeController*> &ctrls, const std::vector<std::string> &targets, float startTime, float stopTime)
 {
-    Ogre::Animation *anim = skel->createAnimation(name, stopTime);
+    Ogre::Animation *anim = skel->createAnimation(name, stopTime-startTime);
 
     for(size_t i = 0;i < ctrls.size();i++)
     {
@@ -246,7 +246,7 @@ static void buildAnimation(Ogre::Skeleton *skel, const std::string &name, const 
             }
 
             Ogre::TransformKeyFrame *kframe;
-            kframe = nodetrack->createNodeKeyFrame(curtime);
+            kframe = nodetrack->createNodeKeyFrame(curtime-startTime);
             if(quatiter == quatkeys.mKeys.end() || quatiter == quatkeys.mKeys.begin())
                 kframe->setRotation(curquat);
             else
@@ -450,8 +450,12 @@ void loadResource(Ogre::Resource *resource)
 
         buildAnimation(skel, currentgroup, ctrls, targets, keyiter->first, lastkeyiter->first);
 
+        TextKeyMap::const_iterator insiter = keyiter;
         TextKeyMap groupkeys;
-        groupkeys.insert(keyiter, ++lastkeyiter);
+        do {
+            groupkeys.insert(std::make_pair(insiter->first - keyiter->first, insiter->second));
+        } while(insiter++ != lastkeyiter);
+
         Ogre::UserObjectBindings &bindings = boneiter.peekNext()->getUserObjectBindings();
         bindings.setUserAny(std::string(sTextKeyExtraDataID)+"@"+currentgroup, Ogre::Any(groupkeys));
     }
