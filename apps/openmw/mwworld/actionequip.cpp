@@ -15,8 +15,7 @@ namespace MWWorld
 
     void ActionEquip::executeImp (const Ptr& actor)
     {
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
-        MWWorld::InventoryStore& invStore = MWWorld::Class::get(player).getInventoryStore(player);
+        MWWorld::InventoryStore& invStore = MWWorld::Class::get(actor).getInventoryStore(actor);
 
         // slots that this item can be equipped in
         std::pair<std::vector<int>, bool> slots = MWWorld::Class::get(getTarget()).getEquipmentSlots(getTarget());
