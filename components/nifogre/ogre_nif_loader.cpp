@@ -656,6 +656,8 @@ static Ogre::String getMaterial(const Nif::NiTriShape *shape, const Ogre::String
     else
         instance->getMaterial ()->setShadowCasterMaterial ("openmw_shadowcaster_noalpha");
 
+    sh::Factory::getInstance ()._ensureMaterial (matname, "Default");
+
     // As of yet UNTESTED code from Chris:
     /*pass->setTextureFiltering(Ogre::TFO_ANISOTROPIC);
     pass->setDepthFunction(Ogre::CMPF_LESS_EQUAL);
