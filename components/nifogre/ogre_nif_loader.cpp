@@ -1008,7 +1008,7 @@ public:
     virtual void loadResource(Ogre::Resource *resource)
     {
         Ogre::Mesh *mesh = dynamic_cast<Ogre::Mesh*>(resource);
-        assert(mesh && "Attempting to load a mesh into a non-mesh resource!");
+        OgreAssert(mesh, "Attempting to load a mesh into a non-mesh resource!");
 
         if(!mShapeName.length())
         {
@@ -1116,7 +1116,7 @@ MeshInfoList NIFLoader::load(const std::string &name, const std::string &skelNam
     Nif::NIFFile nif(name);
     if (nif.numRecords() < 1)
     {
-        nif.warn("Found no records in NIF.");
+        nif.warn("Found no NIF records in "+name+".");
         return meshes;
     }
 
@@ -1127,8 +1127,8 @@ MeshInfoList NIFLoader::load(const std::string &name, const std::string &skelNam
     Nif::Node *node = dynamic_cast<Nif::Node*>(r);
     if(node == NULL)
     {
-        nif.warn("First record in file was not a node, but a "+
-                 r->recName+". Skipping file.");
+        nif.warn("First record in "+name+" was not a node, but a "+
+                 r->recName+".");
         return meshes;
     }
 
@@ -1204,16 +1204,13 @@ EntityList NIFLoader::createEntities(Ogre::Entity *parent, const std::string &bo
         return entitylist;
 
     Ogre::SceneManager *sceneMgr = parentNode->getCreator();
-    std::string filter = bonename;
-    std::transform(filter.begin(), filter.end(), filter.begin(), ::tolower);
+    std::string filter; filter.resize(bonename.length());
+    std::transform(bonename.begin(), bonename.end(), filter.begin(), ::tolower);
     for(size_t i = 0;i < meshes.size();i++)
     {
         Ogre::Entity *ent = sceneMgr->createEntity(meshes[i].mMeshName);
         if(ent->hasSkeleton())
         {
-            std::transform(meshes[i].mTargetNode.begin(), meshes[i].mTargetNode.end(),
-                           meshes[i].mTargetNode.begin(), ::tolower);
-
             if(meshes[i].mMeshName.find("@shape=tri "+filter) == std::string::npos)
             {
                 sceneMgr->destroyEntity(ent);
