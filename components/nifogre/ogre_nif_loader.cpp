@@ -803,12 +803,10 @@ class NIFMeshLoader : Ogre::ManualResourceLoader
             for(size_t b = 0;b < bones.length();b++)
             {
                 Ogre::Bone *bone = skel->getBone(bones[b]->name);
-                Ogre::Matrix4 mat, mat2;
+                Ogre::Matrix4 mat;
                 mat.makeTransform(data->bones[b].trafo.trans, Ogre::Vector3(data->bones[b].trafo.scale),
                                   Ogre::Quaternion(data->bones[b].trafo.rotation));
-                mat2.makeTransform(bone->_getDerivedPosition(), bone->_getDerivedScale(),
-                                   bone->_getDerivedOrientation());
-                mat = mat2 * mat;
+                mat = bone->_getFullTransform() * mat;
 
                 const std::vector<Nif::NiSkinData::VertWeight> &weights = data->bones[b].weights;
                 for(size_t i = 0;i < weights.size();i++)
