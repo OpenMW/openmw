@@ -512,7 +512,7 @@ namespace MWScript
                         factionID = runtime.getStringLiteral (runtime[0].mInteger);
                         runtime.pop();
                     }
-                    boost::algorithm::to_lower(factionID);
+                    Misc::StringUtils::toLower(factionID);
                     if(factionID != "")
                     {
                         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
@@ -541,7 +541,7 @@ namespace MWScript
                         factionID = runtime.getStringLiteral (runtime[0].mInteger);
                         runtime.pop();
                     }
-                    boost::algorithm::to_lower(factionID);
+                    Misc::StringUtils::toLower(factionID);
                     if(factionID != "")
                     {
                         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
@@ -574,7 +574,7 @@ namespace MWScript
                         factionID = runtime.getStringLiteral (runtime[0].mInteger);
                         runtime.pop();
                     }
-                    boost::algorithm::to_lower(factionID);
+                    Misc::StringUtils::toLower(factionID);
                     if(factionID != "")
                     {
                         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
@@ -612,7 +612,7 @@ namespace MWScript
                             factionID = MWWorld::Class::get(ptr).getNpcStats(ptr).getFactionRanks().begin()->first;
                         }
                     }
-                    boost::algorithm::to_lower(factionID);
+                    Misc::StringUtils::toLower(factionID);
                     MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
                     if(factionID!="")
                     {
@@ -714,7 +714,7 @@ namespace MWScript
                     if (factionId.empty())
                         throw std::runtime_error ("failed to determine faction");
 
-                    boost::algorithm::to_lower (factionId);
+                    Misc::StringUtils::toLower (factionId);
 
                     MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
                     runtime.push (
@@ -750,7 +750,7 @@ namespace MWScript
                     if (factionId.empty())
                         throw std::runtime_error ("failed to determine faction");
 
-                    boost::algorithm::to_lower (factionId);
+                    Misc::StringUtils::toLower (factionId);
 
                     MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
                     MWWorld::Class::get (player).getNpcStats (player).setFactionReputation (factionId, value);
@@ -785,7 +785,7 @@ namespace MWScript
                     if (factionId.empty())
                         throw std::runtime_error ("failed to determine faction");
 
-                    boost::algorithm::to_lower (factionId);
+                    Misc::StringUtils::toLower (factionId);
 
                     MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
                     MWWorld::Class::get (player).getNpcStats (player).setFactionReputation (factionId,
@@ -830,11 +830,11 @@ namespace MWScript
                     MWWorld::Ptr ptr = R()(runtime);
 
                     std::string race = runtime.getStringLiteral(runtime[0].mInteger);
-                    boost::algorithm::to_lower(race);
+                    Misc::StringUtils::toLower(race);
                     runtime.pop();
 
                     std::string npcRace = ptr.get<ESM::NPC>()->mBase->mRace;
-                    boost::algorithm::to_lower(npcRace);
+                    Misc::StringUtils::toLower(npcRace);
 
                     runtime.push (npcRace == race);
             }
@@ -878,7 +878,7 @@ namespace MWScript
                             factionID = MWWorld::Class::get(ptr).getNpcStats(ptr).getFactionRanks().begin()->first;
                         }
                     }
-                    boost::algorithm::to_lower(factionID);
+                    Misc::StringUtils::toLower(factionID);
                     MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
                     if(factionID!="")
                     {
@@ -929,7 +929,7 @@ namespace MWScript
                     if(factionID!="")
                     {
                         std::set<std::string>& expelled = MWWorld::Class::get(player).getNpcStats(player).getExpelled ();
-                        boost::algorithm::to_lower(factionID);
+                        Misc::StringUtils::toLower(factionID);
                         expelled.insert(factionID);
                     }
                 }
@@ -965,7 +965,7 @@ namespace MWScript
                     if(factionID!="")
                     {
                         std::set<std::string>& expelled = MWWorld::Class::get(player).getNpcStats(player).getExpelled ();
-                        boost::algorithm::to_lower(factionID);
+                        Misc::StringUtils::toLower(factionID);
                         expelled.erase (factionID);
                     }
                 }

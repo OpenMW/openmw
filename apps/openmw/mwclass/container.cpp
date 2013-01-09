@@ -97,11 +97,11 @@ namespace MWClass
 
         // make key id lowercase
         std::string keyId = ptr.getCellRef().mKey;
-        std::transform(keyId.begin(), keyId.end(), keyId.begin(), ::tolower);
+        Misc::StringUtils::toLower(keyId);
         for (MWWorld::ContainerStoreIterator it = invStore.begin(); it != invStore.end(); ++it)
         {
             std::string refId = it->getCellRef().mRefID;
-            std::transform(refId.begin(), refId.end(), refId.begin(), ::tolower);
+            Misc::StringUtils::toLower(refId);
             if (refId == keyId)
             {
                 hasKey = true;

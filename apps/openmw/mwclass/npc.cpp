@@ -65,7 +65,7 @@ namespace MWClass
             if (!ref->mBase->mFaction.empty())
             {
                 std::string faction = ref->mBase->mFaction;
-                boost::algorithm::to_lower(faction);
+                Misc::StringUtils::toLower(faction);
                 if(ref->mBase->mNpdt52.mGold != -10)
                 {
                     data->mNpcStats.getFactionRanks()[faction] = (int)ref->mBase->mNpdt52.mRank;

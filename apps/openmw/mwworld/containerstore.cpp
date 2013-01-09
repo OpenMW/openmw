@@ -37,7 +37,7 @@ namespace
 
     bool compare_string_ci(std::string str1, std::string str2)
     {
-        boost::algorithm::to_lower(str1);
+        Misc::StringUtils::toLower(str1);
         return str1 == str2;
     }
 }

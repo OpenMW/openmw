@@ -6,6 +6,7 @@
 
 #include "scanner.hpp"
 #include "generator.hpp"
+#include <components/misc/stringops.hpp>
 
 namespace Compiler
 {
@@ -22,7 +23,7 @@ namespace Compiler
         {
             start();
             if (mSmashCase)
-                Generator::pushString (mCode, mLiterals, toLower (name));
+                Generator::pushString (mCode, mLiterals, Misc::StringUtils::lowerCase (name));
             else
                 Generator::pushString (mCode, mLiterals, name);
 

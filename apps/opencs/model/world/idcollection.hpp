@@ -12,6 +12,7 @@
 #include <QVariant>
 
 #include "columnbase.hpp"
+#include <components/misc/stringops.hpp>
 
 namespace CSMWorld
 {
@@ -152,10 +153,7 @@ namespace CSMWorld
     template<typename ESXRecordT>
     void IdCollection<ESXRecordT>::add (const ESXRecordT& record)
     {
-        std::string id;
-
-        std::transform (record.mId.begin(), record.mId.end(), std::back_inserter (id),
-            (int(*)(int)) std::tolower);
+        std::string id = Misc::StringUtils::lowerCase(record.mId);
 
         std::map<std::string, int>::iterator iter = mIndex.find (id);
 
@@ -281,10 +279,7 @@ namespace CSMWorld
     template<typename ESXRecordT>
     int IdCollection<ESXRecordT>::searchId (const std::string& id) const
     {
-        std::string id2;
-
-        std::transform (id.begin(), id.end(), std::back_inserter (id2),
-            (int(*)(int)) std::tolower);
+        std::string id2 = Misc::StringUtils::lowerCase(id);
 
         std::map<std::string, int>::const_iterator iter = mIndex.find (id2);
 

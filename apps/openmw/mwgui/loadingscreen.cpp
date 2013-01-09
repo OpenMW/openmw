@@ -6,6 +6,7 @@
 #include <OgreCompositorChain.h>
 #include <OgreMaterial.h>
 
+
 #include <boost/algorithm/string.hpp>
 
 #include <openengine/ogre/fader.hpp>
@@ -15,6 +16,9 @@
 #include "../mwbase/world.hpp"
 
 #include "../mwbase/windowmanager.hpp"
+
+#include <components/esm/records.hpp>
+
 
 namespace MWGui
 {
@@ -215,6 +219,7 @@ namespace MWGui
     {
         if (mResources.isNull ())
             mResources = Ogre::ResourceGroupManager::getSingleton ().findResourceNames ("General", "Splash_*.tga");
+
 
         if (mResources->size())
         {
