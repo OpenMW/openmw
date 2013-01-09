@@ -37,27 +37,141 @@ namespace
 using namespace Ogre;
 using namespace Bsa;
 
-struct ciLessBoost : std::binary_function<std::string, std::string, bool>
+struct PathPatternMatcher
 {
-    bool operator() (const std::string & s1, const std::string & s2) const {
-                                               //case insensitive version of is_less
-        return boost::ilexicographical_compare(s1, s2);
-    }
-};
-
-struct pathComparer
-{
-private:
-    std::string find;
-
-public:
-    pathComparer(const std::string& toFind) : find(toFind) { }
-
-    bool operator() (const std::string& other)
+    PathPatternMatcher (char const * pattern) : pattern (pattern)
     {
-        return boost::iequals(find, other);
+    }
+
+    bool operator () (char const * input)
+    {
+        char const * p = pattern;
+        char const * i = input;
+
+        while (*p && *i)
+        {
+            if (*p == '*')
+            {
+                ++p;
+
+                while (*i && *i != *p && *i != '/' && *i != '\\')
+                    ++i;
+            }
+            else
+            if (*p == '?')
+            {
+                if (*i == '/' || *i == '\\')
+                    break;
+
+                ++i, ++p;
+            }
+            if (*p == '/' || *p == '\\')
+            {
+                if (*i != '/' && *i != '\\')
+                    break;
+
+                ++i, ++p;
+            }
+            else
+            {
+                if (*i != *p)
+                    break;
+
+                ++i, ++p;
+            }
+        }
+
+        return *p == 0 && *i == 0;
+    }
+
+private:
+    char const * pattern;
+};
+
+struct FileNameGatherer
+{
+    StringVectorPtr ptr;
+
+    FileNameGatherer (StringVectorPtr ptr) : ptr (ptr)
+    {
+    }
+
+    void operator () (std::string const & filename) const
+    {
+        ptr->push_back (filename);
     }
 };
+
+struct FileInfoGatherer
+{
+    Archive const * archive;
+    FileInfoListPtr ptr;
+
+    FileInfoGatherer (Archive const * archive, FileInfoListPtr ptr) :
+        archive (archive), ptr (ptr)
+    {
+    }
+
+    void operator () (std::string filename) const
+    {
+        FileInfo fi;
+
+        std::size_t pt = filename.rfind ('/');
+        if (pt == std::string::npos)
+            pt = 0;
+
+        fi.archive = const_cast <Archive *> (archive);
+        fi.path = filename.substr (0, pt);
+        fi.filename = filename.substr (pt);
+        fi.compressedSize = fi.uncompressedSize = 0;
+
+        ptr->push_back(fi);
+    }
+};
+
+template <typename file_iterator, typename filename_extractor, typename match_handler>
+void matchFiles (bool recursive, std::string const & pattern, file_iterator begin, file_iterator end, filename_extractor filenameExtractor, match_handler matchHandler)
+{
+    if (recursive && pattern == "*")
+    {
+        for (file_iterator  i = begin; i != end; ++i)
+            matchHandler (filenameExtractor (*i));
+    }
+    else
+    {
+        PathPatternMatcher matcher (pattern.c_str ());
+
+        if (recursive)
+        {
+            for (file_iterator  i = begin; i != end; ++i)
+            {
+                char const * filename = filenameExtractor (*i);
+                char const * matchable_part = filename;
+
+                for (char const * j = matchable_part; *j; ++j)
+                {
+                    if (*j == '/' || *j == '\\')
+                        matchable_part = j + 1;
+                }
+
+                if (matcher (matchable_part))
+                    matchHandler (filename);
+            }
+        }
+        else
+        {
+            for (file_iterator  i = begin; i != end; ++i)
+            {
+                char const * filename = filenameExtractor (*i);
+
+                if (matcher (filename))
+                    matchHandler (filename);
+            }
+        }
+    }
+}
+
+
 
 static bool fsstrict = false;
 
@@ -92,6 +206,11 @@ class DirArchive: public Ogre::Archive
         std::string normalized = normalize_path (filename.begin (), filename.end ());
 
         return mIndex.find (normalized);
+    }
+
+    static char const * extractFilename (index::value_type const & entry)
+    {
+        return entry.first.c_str ();
     }
 
 public:
@@ -143,27 +262,20 @@ public:
 
     StringVectorPtr list(bool recursive = true, bool dirs = false)
     {
-        StringVectorPtr ptr = StringVectorPtr(new StringVector());
-        std::cout << "DirArchive<" << getName () << ">::list" << std::endl;
-        return ptr;
+        return find ("*", recursive, dirs);
     }
 
     FileInfoListPtr listFileInfo(bool recursive = true, bool dirs = false)
     {
-        FileInfoListPtr ptr = FileInfoListPtr(new FileInfoList());
-        std::cout << "DirArchive<" << getName () << ">::listFileInfo" << std::endl;
-        return ptr;
+        return findFileInfo ("*", recursive, dirs);
     }
 
     StringVectorPtr find(const String& pattern, bool recursive = true,
                         bool dirs = false)
     {
+        std::string normalizedPattern = normalize_path (pattern.begin (), pattern.end ());
         StringVectorPtr ptr = StringVectorPtr(new StringVector());
-
-        if (pattern == "*")
-            for (index::const_iterator i = mIndex.begin (); i != mIndex.end (); ++i)
-                ptr->push_back (i->first);
-
+        matchFiles (recursive, normalizedPattern, mIndex.begin (), mIndex.end (), extractFilename, FileNameGatherer (ptr));
         return ptr;
     }
 
@@ -178,21 +290,20 @@ public:
                             bool dirs = false) const
     {
         FileInfoListPtr ptr = FileInfoListPtr(new FileInfoList());
+        FileInfoGatherer gatherer (this, ptr);
 
-        index::const_iterator i = lookup_filename (pattern);
+        std::string normalizedPattern = normalize_path (pattern.begin (), pattern.end ());
+
+        index::const_iterator i = mIndex.find (normalizedPattern);
 
         if (i != mIndex.end ())
         {
-            FileInfo fi;
+            gatherer (i->first);
+        }
+        else
+        {
 
-            std::size_t npos = i->first.rfind ('/');
-
-            fi.archive = this;
-            fi.filename = npos != std::string::npos ? i->first.substr (npos) : i->first;
-            fi.path = npos != std::string::npos ? i->first.substr (0, npos) : "";
-            fi.compressedSize = fi.uncompressedSize = 0;
-
-            ptr->push_back(fi);
+            matchFiles (recursive, normalizedPattern, mIndex.begin (), mIndex.end (), extractFilename, gatherer);
         }
 
         return ptr;
@@ -202,6 +313,11 @@ public:
 class BSAArchive : public Archive
 {
   BSAFile arc;
+
+  static char const * extractFilename (BSAFile::FileStruct const & entry)
+  {
+      return entry.name;
+  }
 
 public:
   BSAArchive(const String& name)
@@ -230,26 +346,18 @@ public:
     return arc.exists(filename.c_str());
   }
 
-  bool cexists(const String& filename) const {
-    return arc.exists(filename.c_str());
-  }
-
   time_t getModifiedTime(const String&) { return 0; }
 
   // This is never called as far as I can see.
   StringVectorPtr list(bool recursive = true, bool dirs = false)
   {
-    //std::cout << "list(" << recursive << ", " << dirs << ")\n";
-    StringVectorPtr ptr = StringVectorPtr(new StringVector());
-    return ptr;
+    return find ("*", recursive, dirs);
   }
 
   // Also never called.
   FileInfoListPtr listFileInfo(bool recursive = true, bool dirs = false)
   {
-    //std::cout << "listFileInfo(" << recursive << ", " << dirs << ")\n";
-    FileInfoListPtr ptr = FileInfoListPtr(new FileInfoList());
-    return ptr;
+    return findFileInfo ("*", recursive, dirs);
   }
 
   // After load() is called, find("*") is called once. It doesn't seem
@@ -258,17 +366,9 @@ public:
   StringVectorPtr find(const String& pattern, bool recursive = true,
                        bool dirs = false)
   {
-    //std::cout << "find(" << pattern << ", " << recursive
-    //          << ", " << dirs << ")\n";
-    StringVectorPtr ptr = StringVectorPtr(new StringVector());
-
-    BSAFile::FileList const & files = arc.getList ();
-
-    if (pattern == "*")
-        for (BSAFile::FileList::const_iterator i = files.begin (); i != files.end (); ++i)
-            ptr->push_back (i->name);
-
-    return ptr;
+        StringVectorPtr ptr = StringVectorPtr(new StringVector());
+        matchFiles (recursive, pattern, arc.getList ().begin (), arc.getList ().end (), extractFilename, FileNameGatherer (ptr));
+        return ptr;
   }
 
   /* Gets called once for each of the ogre formats, *.program,
@@ -282,46 +382,8 @@ public:
   FileInfoListPtr findFileInfo(const String& pattern, bool recursive = true,
                                bool dirs = false) const
   {
-      FileInfoListPtr ptr = FileInfoListPtr(new FileInfoList());
-
-    // Check if the file exists (only works for single files - wild
-    // cards and recursive search isn't implemented.)
-    if(cexists(pattern))
-      {
-        FileInfo fi;
-        fi.archive = this;
-        fi.filename = pattern;
-        // It apparently doesn't matter that we return bogus
-        // information
-        fi.path = "";
-        fi.compressedSize = fi.uncompressedSize = 0;
-
-        ptr->push_back(fi);
-      }
-
-    return ptr;
-  }
-
-  FileInfoListPtr findFileInfo(const String& pattern, bool recursive = true,
-                               bool dirs = false)
-  {
     FileInfoListPtr ptr = FileInfoListPtr(new FileInfoList());
-
-    // Check if the file exists (only works for single files - wild
-    // cards and recursive search isn't implemented.)
-    if(cexists(pattern))
-      {
-        FileInfo fi;
-        fi.archive = this;
-        fi.filename = pattern;
-        // It apparently doesn't matter that we return bogus
-        // information
-        fi.path = "";
-        fi.compressedSize = fi.uncompressedSize = 0;
-
-        ptr->push_back(fi);
-      }
-
+    matchFiles (recursive, pattern, arc.getList ().begin (), arc.getList ().end (), extractFilename, FileInfoGatherer (this, ptr));
     return ptr;
   }
 };
