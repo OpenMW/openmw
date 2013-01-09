@@ -137,7 +137,7 @@
 
         shSampler2D(normalMap) // global normal map
         
-        shUniform(float, gammaCorrection) @shSharedParameter(gammaCorrection, gammaCorrection)
+        //shUniform(float, gammaCorrection) @shSharedParameter(gammaCorrection, gammaCorrection)
 
 
 @shForeach(@shPropertyString(num_blendmaps))

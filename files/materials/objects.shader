@@ -112,7 +112,7 @@
         shUniform(float, far) @shAutoConstant(far, far_clip_distance)
 #endif
 
-        shUniform(float, gammaCorrection) @shSharedParameter(gammaCorrection, gammaCorrection)
+        //shUniform(float, gammaCorrection) @shSharedParameter(gammaCorrection, gammaCorrection)
 
 #if LIGHTING
         shInput(float3, normalPassthrough)
