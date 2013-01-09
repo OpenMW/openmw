@@ -431,23 +431,29 @@ void loadResource(Ogre::Resource *resource)
     for(keyiter = textkeys.begin();keyiter != textkeys.end();keyiter++)
     {
         std::string::size_type sep = keyiter->second.find(':');
-        if(sep == currentgroup.length() && keyiter->second.compare(0, sep, currentgroup) == 0)
+        if((sep == currentgroup.length() && keyiter->second.compare(0, sep, currentgroup) == 0) ||
+           (sep == sizeof("soundgen")-1 && keyiter->second.compare(0, sep, "soundgen") == 0) ||
+           (sep == sizeof("sound")-1 && keyiter->second.compare(0, sep, "sound") == 0))
             continue;
         currentgroup = keyiter->second.substr(0, sep);
 
         if(skel->hasAnimation(currentgroup))
             continue;
 
-        TextKeyMap::const_reverse_iterator lastkeyiter = textkeys.rbegin();
-        while(lastkeyiter->first > keyiter->first)
+        TextKeyMap::const_iterator lastkeyiter = textkeys.end();
+        while((--lastkeyiter)->first > keyiter->first)
         {
             if(lastkeyiter->second.find(':') == currentgroup.length() &&
                lastkeyiter->second.compare(0, currentgroup.length(), currentgroup) == 0)
                 break;
-            lastkeyiter++;
         }
 
         buildAnimation(skel, currentgroup, ctrls, targets, keyiter->first, lastkeyiter->first);
+
+        TextKeyMap groupkeys;
+        groupkeys.insert(keyiter, ++lastkeyiter);
+        Ogre::UserObjectBindings &bindings = boneiter.peekNext()->getUserObjectBindings();
+        bindings.setUserAny(std::string(sTextKeyExtraDataID)+"@"+currentgroup, Ogre::Any(groupkeys));
     }
 }
 
@@ -459,12 +465,7 @@ bool createSkeleton(const std::string &name, const std::string &group, const Nif
     if(node->boneTrafo != NULL)
     {
         Ogre::SkeletonManager &skelMgr = Ogre::SkeletonManager::getSingleton();
-        Ogre::SkeletonPtr skel = skelMgr.getByName(name);
-        if(skel.isNull())
-        {
-            NIFSkeletonLoader *loader = &sLoaders[name];
-            skel = skelMgr.create(name, group, true, loader);
-        }
+        skelMgr.create(name, group, true, &sLoaders[name]);
         return true;
     }
 
@@ -1129,8 +1130,12 @@ MeshInfoList NIFLoader::load(const std::string &name, const std::string &skelNam
         return meshes;
     }
 
-    NIFSkeletonLoader skelldr;
-    bool hasSkel = skelldr.createSkeleton(name, group, node);
+    bool hasSkel = Ogre::SkeletonManager::getSingleton().resourceExists(name);
+    if(!hasSkel)
+    {
+        NIFSkeletonLoader skelldr;
+        hasSkel = skelldr.createSkeleton(name, group, node);
+    }
 
     NIFMeshLoader meshldr(name, group, (hasSkel ? skelName : std::string()));
     meshldr.createMeshes(node, meshes);
