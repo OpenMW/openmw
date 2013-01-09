@@ -188,8 +188,8 @@ public:
             std::size_t npos = i->first.rfind ('/');
 
             fi.archive = this;
-            fi.filename = npos != -1 ? i->first.substr (npos) : i->first;
-            fi.path = npos != -1 ? i->first.substr (0, npos) : "";
+            fi.filename = npos != std::string::npos ? i->first.substr (npos) : i->first;
+            fi.path = npos != std::string::npos ? i->first.substr (0, npos) : "";
             fi.compressedSize = fi.uncompressedSize = 0;
 
             ptr->push_back(fi);
