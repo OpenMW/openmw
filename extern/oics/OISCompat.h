@@ -20,17 +20,12 @@ struct MWSDLMouseMotionEvent : SDL_MouseMotionEvent {
 
     MWSDLMouseMotionEvent()
     {
-        x = 0;
-        y = 0;
-        xrel = 0;
-        yrel = 0;
-        state = 0;
-        zrel = 0;
+        _init();
     }
 
-    MWSDLMouseMotionEvent( const SDL_MouseMotionEvent& evt) :
-        MWSDLMouseMotionEvent()
+    MWSDLMouseMotionEvent( const SDL_MouseMotionEvent& evt)
     {
+        _init();
         x = evt.x;
         y = evt.y;
         xrel = evt.xrel;
@@ -41,7 +36,18 @@ struct MWSDLMouseMotionEvent : SDL_MouseMotionEvent {
     MWSDLMouseMotionEvent (const SDL_MouseWheelEvent& evt) :
         MWSDLMouseMotionEvent()
     {
+        _init();
         zrel = evt.y;
+    }
+
+    void _init()
+    {
+        x = 0;
+        y = 0;
+        xrel = 0;
+        yrel = 0;
+        state = 0;
+        zrel = 0;
     }
 };
 
