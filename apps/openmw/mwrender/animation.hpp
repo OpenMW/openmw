@@ -19,9 +19,8 @@ class Animation
         Ogre::AnimationState *mAnimState;
         size_t mLoops;
 
-        GroupTimes(NifOgre::TextKeyMap::const_iterator iter)
-          : mStart(iter), mStop(iter), mLoopStart(iter), mLoopStop(iter),
-            mAnimState(NULL), mLoops(0)
+        GroupTimes()
+          : mAnimState(NULL), mLoops(0)
         { }
     };
 
@@ -30,7 +29,7 @@ protected:
     Ogre::SceneNode* mInsert;
 
     NifOgre::EntityList mEntityList;
-    NifOgre::TextKeyMap mTextKeys;
+    std::map<std::string,NifOgre::TextKeyMap> mTextKeys;
     Ogre::Bone *mAccumRoot;
     Ogre::Bone *mNonAccumRoot;
     Ogre::Vector3 mStartPosition;

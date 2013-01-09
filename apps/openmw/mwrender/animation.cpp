@@ -21,8 +21,6 @@ Animation::Animation(const MWWorld::Ptr &ptr)
     , mStartPosition(0.0f)
     , mLastPosition(0.0f)
     , mTime(0.0f)
-    , mCurGroup(mTextKeys.end())
-    , mNextGroup(mTextKeys.end())
     , mSkipFrame(false)
 {
 }
@@ -48,19 +46,27 @@ void Animation::createEntityList(Ogre::SceneNode *node, const std::string &model
     mEntityList = NifOgre::NIFLoader::createEntities(mInsert, model);
     if(mEntityList.mSkelBase)
     {
+        Ogre::AnimationStateSet *aset = mEntityList.mSkelBase->getAllAnimationStates();
+        Ogre::AnimationStateIterator asiter = aset->getAnimationStateIterator();
+        while(asiter.hasMoreElements())
+        {
+            Ogre::AnimationState *state = asiter.getNext();
+            state->setEnabled(false);
+            state->setLoop(false);
+        }
+
         Ogre::SkeletonInstance *skelinst = mEntityList.mSkelBase->getSkeleton();
         // Would be nice if Ogre::SkeletonInstance allowed access to the 'master' Ogre::SkeletonPtr.
         Ogre::SkeletonManager &skelMgr = Ogre::SkeletonManager::getSingleton();
         Ogre::SkeletonPtr skel = skelMgr.getByName(skelinst->getName());
-        Ogre::Skeleton::BoneIterator iter = skel->getBoneIterator();
-        while(iter.hasMoreElements())
+        Ogre::Skeleton::BoneIterator boneiter = skel->getBoneIterator();
+        while(boneiter.hasMoreElements())
         {
-            Ogre::Bone *bone = iter.getNext();
+            Ogre::Bone *bone = boneiter.peekNext();
             const Ogre::Any &data = bone->getUserObjectBindings().getUserAny(NifOgre::sTextKeyExtraDataID);
             if(!data.isEmpty())
             {
-                mTextKeys = Ogre::any_cast<NifOgre::TextKeyMap>(data);
-                mNextGroup = mCurGroup = GroupTimes(mTextKeys.begin());
+                mTextKeys["all"] = Ogre::any_cast<NifOgre::TextKeyMap>(data);
 
                 mAccumRoot = skelinst->getRootBone();
                 mAccumRoot->setManuallyControlled(true);
@@ -70,17 +76,19 @@ void Animation::createEntityList(Ogre::SceneNode *node, const std::string &model
                 mLastPosition = mStartPosition;
                 break;
             }
+            boneiter.moveNext();
         }
 
-        if(mTextKeys.size() > 0)
+        if(boneiter.hasMoreElements())
         {
-            Ogre::AnimationStateSet *aset = mEntityList.mSkelBase->getAllAnimationStates();
-            Ogre::AnimationStateIterator as = aset->getAnimationStateIterator();
-            while(as.hasMoreElements())
+            asiter = aset->getAnimationStateIterator();
+            while(asiter.hasMoreElements())
             {
-                Ogre::AnimationState *state = as.getNext();
-                state->setEnabled(false);
-                state->setLoop(false);
+                Ogre::AnimationState *state = asiter.getNext();
+                Ogre::UserObjectBindings &bindings = boneiter.peekNext()->getUserObjectBindings();
+                const Ogre::Any &data = bindings.getUserAny(std::string(NifOgre::sTextKeyExtraDataID)+"@"+state->getAnimationName());
+                if(!data.isEmpty())
+                    mTextKeys[state->getAnimationName()] = Ogre::any_cast<NifOgre::TextKeyMap>(data);
             }
         }
     }
@@ -127,13 +135,28 @@ void Animation::resetPosition(float time)
 
 bool Animation::findGroupTimes(const std::string &groupname, Animation::GroupTimes *times)
 {
+    const NifOgre::TextKeyMap &textkeys = mTextKeys[groupname];
+    if(textkeys.size() == 0)
+        return false;
+
+    if(groupname == "all")
+    {
+        times->mStart = times->mLoopStart = textkeys.begin();
+        times->mLoopStop = times->mStop = textkeys.end();
+        times->mLoopStop--; times->mStop--;
+        return true;
+    }
+
     const std::string start = groupname+": start";
     const std::string startloop = groupname+": loop start";
     const std::string stop = groupname+": stop";
     const std::string stoploop = groupname+": loop stop";
 
+    times->mStart = times->mLoopStart =
+    times->mStop = times->mLoopStop = textkeys.end();
+
     NifOgre::TextKeyMap::const_iterator iter;
-    for(iter = mTextKeys.begin();iter != mTextKeys.end();iter++)
+    for(iter = textkeys.begin();iter != textkeys.end();iter++)
     {
         if(start == iter->second)
         {
@@ -147,9 +170,9 @@ bool Animation::findGroupTimes(const std::string &groupname, Animation::GroupTim
         else if(stop == iter->second)
         {
             times->mStop = iter;
-            if(times->mLoopStop == mTextKeys.end())
+            if(times->mLoopStop == textkeys.end())
                 times->mLoopStop = iter;
-            return (times->mStart != mTextKeys.end());
+            return (times->mStart != textkeys.end());
         }
     }
 
@@ -159,23 +182,14 @@ bool Animation::findGroupTimes(const std::string &groupname, Animation::GroupTim
 
 void Animation::playGroup(std::string groupname, int mode, int loops)
 {
-    GroupTimes times(mTextKeys.end());
+    GroupTimes times;
 
     try {
-        if(mTextKeys.size() == 0)
-            throw std::runtime_error("Trying to animate an unanimate object");
-
         std::transform(groupname.begin(), groupname.end(), groupname.begin(), ::tolower);
         times.mAnimState = mEntityList.mSkelBase->getAnimationState(groupname);
         times.mLoops = loops;
 
-        if(groupname == "all")
-        {
-            times.mStart = times.mLoopStart = mTextKeys.begin();
-            times.mLoopStop = times.mStop = mTextKeys.end();
-            times.mLoopStop--; times.mStop--;
-        }
-        else if(!findGroupTimes(groupname, &times))
+        if(!findGroupTimes(groupname, &times))
             throw std::runtime_error("Failed to find animation group "+groupname);
     }
     catch(std::exception &e) {
@@ -190,7 +204,7 @@ void Animation::playGroup(std::string groupname, int mode, int loops)
         if(mCurGroup.mAnimState)
             mCurGroup.mAnimState->setEnabled(false);
         mCurGroup = times;
-        mNextGroup = GroupTimes(mTextKeys.end());
+        mNextGroup = GroupTimes();
         mTime = ((mode==2) ? mCurGroup.mLoopStart : mCurGroup.mStart)->first;
         mCurGroup.mAnimState->setEnabled(true);
         resetPosition(mTime);
@@ -226,9 +240,9 @@ void Animation::runAnimation(float timepassed)
                     mTime = mTime - mCurGroup.mStop->first + mNextGroup.mStart->first;
                     mCurGroup.mAnimState->setEnabled(false);
                     mCurGroup = mNextGroup;
-                    mNextGroup = GroupTimes(mTextKeys.end());
+                    mNextGroup = GroupTimes();
                     mCurGroup.mAnimState->setEnabled(true);
-                    resetPosition(mNextGroup.mStart->first);
+                    resetPosition(mCurGroup.mStart->first);
                     goto recheck;
                 }
                 mTime = mCurGroup.mStop->first;
