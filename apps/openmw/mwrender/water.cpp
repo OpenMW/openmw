@@ -48,7 +48,6 @@ Water::Water (Ogre::Camera *camera, RenderingManager* rend, const ESM::Cell* cel
 
     mWater = mSceneManager->createEntity("water");
     mWater->setVisibilityFlags(RV_Water);
-    mWater->setRenderQueueGroup(RQG_Water);
     mWater->setCastShadows(false);
 
     mWaterNode = mSceneManager->getRootSceneNode()->createChildSceneNode();
@@ -324,7 +323,11 @@ void Water::applyRTT()
         mReflectionTarget = rtt;
 
         sh::Factory::getInstance ().setTextureAlias ("WaterReflection", mReflectionTexture->getName());
+
+        mWater->setRenderQueueGroup(RQG_Water);
     }
+    else
+        mWater->setRenderQueueGroup(RQG_Alpha);
 }
 
 void Water::applyVisibilityMask()
