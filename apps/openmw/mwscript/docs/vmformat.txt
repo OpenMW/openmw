@@ -311,4 +311,9 @@ op 0x20001f4: AddSoulGem, explicit reference
 op 0x20001f5: RemoveSoulGem
 op 0x20001f6: RemoveSoulGem, explicit reference
 op 0x20001f7: PlayBink
-opcodes 0x20001f8-0x3ffffff unused
+op 0x20001f8: Drop
+op 0x20001f9: Drop, explicit reference
+op 0x20001fa: DropSoulGem
+op 0x20001fb: DropSoulGem, explicit reference
+
+opcodes 0x20001fa-0x3ffffff unused
