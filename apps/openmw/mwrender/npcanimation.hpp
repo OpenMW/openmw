@@ -91,7 +91,7 @@ private:
 
     bool addOrReplaceIndividualPart(int type, int group, int priority, const std::string &mesh);
     void removePartGroup(int group);
-    void addPartGroup(int group, int priority, std::vector<ESM::PartReference>& parts);
+    void addPartGroup(int group, int priority, const std::vector<ESM::PartReference> &parts);
 
 public:
     NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node,

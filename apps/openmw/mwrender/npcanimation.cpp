@@ -228,15 +228,13 @@ void NpcAnimation::updateParts()
         {
             prio = ((slotlist[i].numReserveParts+1)<<1) + 0;
             const ESM::Clothing *clothes = store->get<ESM::Clothing>()->mBase;
-            std::vector<ESM::PartReference> parts = clothes->mParts.mParts;
-            addPartGroup(slotlist[i].slot, prio, parts);
+            addPartGroup(slotlist[i].slot, prio, clothes->mParts.mParts);
         }
         else if(store->getTypeName() == typeid(ESM::Armor).name())
         {
             prio = ((slotlist[i].numReserveParts+1)<<1) + 1;
             const ESM::Armor *armor = store->get<ESM::Armor>()->mBase;
-            std::vector<ESM::PartReference> parts = armor->mParts.mParts;
-            addPartGroup(slotlist[i].slot, prio, parts);
+            addPartGroup(slotlist[i].slot, prio, armor->mParts.mParts);
         }
 
         for(int res = 0;res < slotlist[i].numReserveParts;res++)
@@ -392,11 +390,11 @@ bool NpcAnimation::addOrReplaceIndividualPart(int type, int group, int priority,
     return true;
 }
 
-void NpcAnimation::addPartGroup(int group, int priority, std::vector<ESM::PartReference> &parts)
+void NpcAnimation::addPartGroup(int group, int priority, const std::vector<ESM::PartReference> &parts)
 {
     for(std::size_t i = 0; i < parts.size(); i++)
     {
-        ESM::PartReference &part = parts[i];
+        const ESM::PartReference &part = parts[i];
 
         const MWWorld::Store<ESM::BodyPart> &partStore =
             MWBase::Environment::get().getWorld()->getStore().get<ESM::BodyPart>();
