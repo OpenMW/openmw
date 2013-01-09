@@ -30,6 +30,8 @@ namespace MWInput
         bool _handleWarpMotion(const SDL_MouseMotionEvent& evt);
         void _wrapMousePointer(const SDL_MouseMotionEvent &evt);
 
+        void _handleKeyPress(SDL_KeyboardEvent& evt);
+
         bool _start();
 
         ICS::MWSDLMouseListener* mMouseListener;

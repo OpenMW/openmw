@@ -413,6 +413,7 @@ namespace MWInput
         }
 #endif
         */
+
         MyGUI::InputManager::getInstance().injectKeyPress(MyGUI::KeyCode::Enum(arg.keysym.sym), text);
 
         return true;

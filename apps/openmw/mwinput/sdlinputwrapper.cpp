@@ -27,8 +27,10 @@ namespace MWInput
 
     MWSDLInputWrapper::~MWSDLInputWrapper()
     {
-        SDL_DestroyWindow(mSDLWindow);
+        if(mSDLWindow != NULL)
+            SDL_DestroyWindow(mSDLWindow);
         mSDLWindow = NULL;
+        SDL_StopTextInput();
         SDL_Quit();
     }
 
@@ -51,6 +53,8 @@ namespace MWInput
 
             if(mSDLWindow == NULL)
                 return false;
+
+            SDL_StartTextInput();
 
 #if OGRE_PLATFORM == OGRE_PLATFORM_LINUX
             //linux-specific event-handling fixups
@@ -119,7 +123,7 @@ namespace MWInput
                     break;
 
                 case SDL_KEYDOWN:
-                    mKeyboardListener->keyPressed(evt.key);
+                    _handleKeyPress(evt.key);
                     break;
                 case SDL_KEYUP:
                     mKeyboardListener->keyReleased(evt.key);
@@ -227,5 +231,24 @@ namespace MWInput
         {
             warpMouse(width / 2, height / 2);
         }
+    }
+
+    void MWSDLInputWrapper::_handleKeyPress(SDL_KeyboardEvent &evt)
+    {
+        //SDL keyboard events are followed by the actual text those keys would generate
+        //to account for languages that require multiple keystrokes to produce a key.
+        //Look for an event immediately following ours, assuming each key produces exactly
+        //one character.
+
+        //TODO: This won't work for multibyte characters, but MyGUI is the only consumer
+        //of these, does it even support multibyte characters?
+
+        SDL_Event text_evts[1];
+        if(SDL_PeepEvents(text_evts, 1, SDL_GETEVENT, SDL_TEXTINPUT, SDL_TEXTINPUT) != 0)
+        {
+            evt.keysym.unicode = text_evts[0].text.text[0];
+        }
+
+        mKeyboardListener->keyPressed(evt);
     }
 }
