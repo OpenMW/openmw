@@ -71,11 +71,15 @@ namespace MWWorld
 
             Ptr getPtrViaHandle (const std::string& handle, Ptr::CellStore& cellStore);
 
+            int mActivationDistanceOverride;
             std::string mFacedHandle;
+            float mFacedDistance;
             Ptr mFaced1;
             Ptr mFaced2;
             std::string mFaced1Name;
             std::string mFaced2Name;
+            float mFaced1Distance;
+            float mFaced2Distance;
             int mNumFacing;
             std::map<std::string,std::string> mFallback;
 
@@ -90,12 +94,23 @@ namespace MWWorld
             virtual void
             copyObjectToCell(const Ptr &ptr, CellStore &cell, const ESM::Position &pos);
 
+            void updateWindowManager ();
+            void performUpdateSceneQueries ();
+            void processFacedQueryResults (MWRender::OcclusionQuery* query);
+            void beginFacedQueryProcess (MWRender::OcclusionQuery* query);
+            void beginSingleFacedQueryProcess (MWRender::OcclusionQuery* query, std::vector < std::pair < float, std::string > > const & results);
+            void beginDoubleFacedQueryProcess (MWRender::OcclusionQuery* query, std::vector < std::pair < float, std::string > > const & results);
+
+            float getMaxActivationDistance ();
+            float getNpcActivationDistance ();
+            float getObjectActivationDistance ();
+
         public:
 
             World (OEngine::Render::OgreRenderer& renderer,
                 const Files::Collections& fileCollections,
                 const std::string& master, const boost::filesystem::path& resDir, const boost::filesystem::path& cacheDir, bool newGame,
-                ToUTF8::Utf8Encoder* encoder, std::map<std::string,std::string> fallbackMap);
+                ToUTF8::Utf8Encoder* encoder, std::map<std::string,std::string> fallbackMap, int mActivationDistanceOverride);
 
             virtual ~World();
 
@@ -217,8 +232,8 @@ namespace MWWorld
 
             virtual void markCellAsUnchanged();
 
-            virtual std::string getFacedHandle();
-            ///< Return handle of the object the player is looking at
+            virtual MWWorld::Ptr getFacedObject();
+            ///< Return pointer to the object the player is looking at, if it is within activation range
 
             virtual void deleteObject (const Ptr& ptr);
 

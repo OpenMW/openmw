@@ -14,9 +14,9 @@ namespace sh
 		for ( boost::filesystem::recursive_directory_iterator end, dir(path); dir != end; ++dir )
 		{
 			boost::filesystem::path p(*dir);
-			if(p.extension() == c->m_fileEnding)
+			if(p.extension() == c->mFileEnding)
 			{
-				c->m_currentFileName = (*dir).path().string();
+				c->mCurrentFileName = (*dir).path().string();
 				std::ifstream in((*dir).path().string().c_str(), std::ios::binary);
 				c->parseScript(in);
 			}
@@ -25,7 +25,7 @@ namespace sh
 
 	ScriptLoader::ScriptLoader(const std::string& fileEnding)
 	{
-		m_fileEnding = fileEnding;
+		mFileEnding = fileEnding;
 	}
 
 	ScriptLoader::~ScriptLoader()
@@ -70,7 +70,7 @@ namespace sh
 	{
 		//Get first token
 		_nextToken(stream);
-		if (tok == TOKEN_EOF)
+		if (mToken == TOKEN_EOF)
 		{
 			stream.close();
 			return;
@@ -87,7 +87,7 @@ namespace sh
 		//EOF token
 		if (!stream.good())
 		{
-			tok = TOKEN_EOF;
+			mToken = TOKEN_EOF;
 			return;
 		}
 
@@ -101,7 +101,7 @@ namespace sh
 
 		if (!stream.good())
 		{
-			tok = TOKEN_EOF;
+			mToken = TOKEN_EOF;
 			return;
 		}
 
@@ -115,21 +115,21 @@ namespace sh
 
 			stream.unget();
 
-			tok = TOKEN_NewLine;
+			mToken = TOKEN_NewLine;
 			return;
 		}
 
 		//Open brace token
 		else if (ch == '{')
 		{
-			tok = TOKEN_OpenBrace;
+			mToken = TOKEN_OpenBrace;
 			return;
 		}
 
 		//Close brace token
 		else if (ch == '}')
 		{
-			tok = TOKEN_CloseBrace;
+			mToken = TOKEN_CloseBrace;
 			return;
 		}
 
@@ -139,8 +139,8 @@ namespace sh
 			throw std::runtime_error("Parse Error: Invalid character, ConfigLoader::load()");
 		}
 
-		tokVal = "";
-		tok = TOKEN_Text;
+		mTokenValue = "";
+		mToken = TOKEN_Text;
 		do
 		{
 			//Skip comments
@@ -157,13 +157,13 @@ namespace sh
 						ch = stream.get();
 					} while (ch != '\r' && ch != '\n' && !stream.eof());
 
-					tok = TOKEN_NewLine;
+					mToken = TOKEN_NewLine;
 					return;
 				}
 			}
 
 			//Add valid char to tokVal
-			tokVal += (char)ch;
+			mTokenValue += (char)ch;
 
 			//Next char
 			ch = stream.get();
@@ -177,7 +177,7 @@ namespace sh
 
 	void ScriptLoader::_skipNewLines(std::ifstream &stream)
 	{
-		while (tok == TOKEN_NewLine)
+		while (mToken == TOKEN_NewLine)
 		{
 			_nextToken(stream);
 		}
@@ -189,7 +189,7 @@ namespace sh
 
 		while (true)
 		{
-			switch (tok)
+			switch (mToken)
 			{
 				//Node
 				case TOKEN_Text:
@@ -198,23 +198,23 @@ namespace sh
 					ScriptNode *newNode;
 					if (parent)
 					{
-						newNode = parent->addChild(tokVal);
+						newNode = parent->addChild(mTokenValue);
 					}
 					else
 					{
-						newNode = new ScriptNode(0, tokVal);
+						newNode = new ScriptNode(0, mTokenValue);
 					}
 
 					//Get values
 					_nextToken(stream);
 					std::string valueStr;
 					int i=0;
-					while (tok == TOKEN_Text)
+					while (mToken == TOKEN_Text)
 					{
 						if (i == 0)
-							valueStr += tokVal;
+							valueStr += mTokenValue;
 						else
-							valueStr += " " + tokVal;
+							valueStr += " " + mTokenValue;
 						_nextToken(stream);
 						++i;
 					}
@@ -235,13 +235,13 @@ namespace sh
 					_skipNewLines(stream);
 
 					//Add any sub-nodes
-					if (tok == TOKEN_OpenBrace)
+					if (mToken == TOKEN_OpenBrace)
 					{
 						//Parse nodes
 						_nextToken(stream);
 						_parseNodes(stream, newNode);
 						//Check for matching closing brace
-						if (tok != TOKEN_CloseBrace)
+						if (mToken != TOKEN_CloseBrace)
 						{
 							throw std::runtime_error("Parse Error: Expecting closing brace");
 						}
@@ -249,7 +249,7 @@ namespace sh
 						_skipNewLines(stream);
 					}
 
-					newNode->m_fileName = m_currentFileName;
+					newNode->mFileName = mCurrentFileName;
 
 					break;
 				}
@@ -276,16 +276,16 @@ namespace sh
 
 	ScriptNode::ScriptNode(ScriptNode *parent, const std::string &name)
 	{
-		m_name = name;
-		m_parent = parent;
-		_removeSelf = true;    //For proper destruction
-		m_lastChildFound = -1;
+		mName = name;
+		mParent = parent;
+		mRemoveSelf = true;    //For proper destruction
+		mLastChildFound = -1;
 
 		//Add self to parent's child list (unless this is the root node being created)
 		if (parent != NULL)
 		{
-			m_parent->m_children.push_back(this);
-			_iter = --(m_parent->m_children.end());
+			mParent->mChildren.push_back(this);
+			mIter = --(mParent->mChildren.end());
 		}
 	}
 
@@ -293,18 +293,18 @@ namespace sh
 	{
 		//Delete all children
 		std::vector<ScriptNode*>::iterator i;
-		for (i = m_children.begin(); i != m_children.end(); i++)
+		for (i = mChildren.begin(); i != mChildren.end(); i++)
 		{
 			ScriptNode *node = *i;
-			node->_removeSelf = false;
+			node->mRemoveSelf = false;
 			delete node;
 		}
-		m_children.clear();
+		mChildren.clear();
 
 		//Remove self from parent's child list
-		if (_removeSelf && m_parent != NULL)
+		if (mRemoveSelf && mParent != NULL)
 		{
-			m_parent->m_children.erase(_iter);
+			mParent->mChildren.erase(mIter);
 		}
 	}
 
@@ -324,20 +324,20 @@ namespace sh
 	ScriptNode *ScriptNode::findChild(const std::string &name, bool recursive)
 	{
 		int indx, prevC, nextC;
-		int childCount = (int)m_children.size();
+		int childCount = (int)mChildren.size();
 
-		if (m_lastChildFound != -1)
+		if (mLastChildFound != -1)
 		{
 			//If possible, try checking the nodes neighboring the last successful search
 			//(often nodes searched for in sequence, so this will boost search speeds).
-			prevC = m_lastChildFound-1; if (prevC < 0) prevC = 0; else if (prevC >= childCount) prevC = childCount-1;
-			nextC = m_lastChildFound+1; if (nextC < 0) nextC = 0; else if (nextC >= childCount) nextC = childCount-1;
+			prevC = mLastChildFound-1; if (prevC < 0) prevC = 0; else if (prevC >= childCount) prevC = childCount-1;
+			nextC = mLastChildFound+1; if (nextC < 0) nextC = 0; else if (nextC >= childCount) nextC = childCount-1;
 			for (indx = prevC; indx <= nextC; ++indx)
 			{
-				ScriptNode *node = m_children[indx];
-				if (node->m_name == name)
+				ScriptNode *node = mChildren[indx];
+				if (node->mName == name)
 				{
-					m_lastChildFound = indx;
+					mLastChildFound = indx;
 					return node;
 				}
 			}
@@ -346,17 +346,17 @@ namespace sh
 			//already searched area above.
 			for (indx = nextC + 1; indx < childCount; ++indx)
 			{
-				ScriptNode *node = m_children[indx];
-				if (node->m_name == name) {
-					m_lastChildFound = indx;
+				ScriptNode *node = mChildren[indx];
+				if (node->mName == name) {
+					mLastChildFound = indx;
 					return node;
 				}
 			}
 			for (indx = 0; indx < prevC; ++indx)
 			{
-				ScriptNode *node = m_children[indx];
-				if (node->m_name == name) {
-					m_lastChildFound = indx;
+				ScriptNode *node = mChildren[indx];
+				if (node->mName == name) {
+					mLastChildFound = indx;
 					return node;
 				}
 			}
@@ -365,9 +365,9 @@ namespace sh
 		{
 			//Search for the node from start to finish
 			for (indx = 0; indx < childCount; ++indx){
-				ScriptNode *node = m_children[indx];
-				if (node->m_name == name) {
-					m_lastChildFound = indx;
+				ScriptNode *node = mChildren[indx];
+				if (node->mName == name) {
+					mLastChildFound = indx;
 					return node;
 				}
 			}
@@ -378,7 +378,7 @@ namespace sh
 		{
 			for (indx = 0; indx < childCount; ++indx)
 			{
-				m_children[indx]->findChild(name, recursive);
+				mChildren[indx]->findChild(name, recursive);
 			}
 		}
 
@@ -389,13 +389,13 @@ namespace sh
 	void ScriptNode::setParent(ScriptNode *newParent)
 	{
 		//Remove self from current parent
-		m_parent->m_children.erase(_iter);
+		mParent->mChildren.erase(mIter);
 
 		//Set new parent
-		m_parent = newParent;
+		mParent = newParent;
 
 		//Add self to new parent
-		m_parent->m_children.push_back(this);
-		_iter = --(m_parent->m_children.end());
+		mParent->mChildren.push_back(this);
+		mIter = --(mParent->mChildren.end());
 	}
 }

@@ -43,7 +43,7 @@ namespace MWWorld
         return mEngine;
     }
 
-    std::pair<std::string, float> PhysicsSystem::getFacedHandle (MWWorld::World& world)
+    std::pair<float, std::string> PhysicsSystem::getFacedHandle (MWWorld::World& world, float queryDistance)
     {
         btVector3 dir(0, 1, 0);
         dir = dir.rotate(btVector3(1, 0, 0), mPlayerData.pitch);
@@ -56,11 +56,14 @@ namespace MWWorld
             mPlayerData.eyepos.z);
         origin += dir * 5;
 
-        btVector3 dest = origin + dir * 500;
-        return mEngine->rayTest(origin, dest);
+        btVector3 dest = origin + dir * queryDistance;
+        std::pair <std::string, float> result;
+        /*auto*/ result = mEngine->rayTest(origin, dest);
+        result.second *= queryDistance;
+        return std::make_pair (result.second, result.first);
     }
 
-    std::vector < std::pair <float, std::string> > PhysicsSystem::getFacedObjects ()
+    std::vector < std::pair <float, std::string> > PhysicsSystem::getFacedHandles (float queryDistance)
     {
         btVector3 dir(0, 1, 0);
         dir = dir.rotate(btVector3(1, 0, 0), mPlayerData.pitch);
@@ -73,22 +76,32 @@ namespace MWWorld
             mPlayerData.eyepos.z);
         origin += dir * 5;
 
-        btVector3 dest = origin + dir * 500;
-        return mEngine->rayTest2(origin, dest);
+        btVector3 dest = origin + dir * queryDistance;
+        std::vector < std::pair <float, std::string> > results;
+        /* auto */ results = mEngine->rayTest2(origin, dest);
+        std::vector < std::pair <float, std::string> >::iterator i;
+        for (/* auto */ i = results.begin (); i != results.end (); ++i)
+            i->first *= queryDistance;
+        return results;
     }
 
-    std::vector < std::pair <float, std::string> > PhysicsSystem::getFacedObjects (float mouseX, float mouseY)
+    std::vector < std::pair <float, std::string> > PhysicsSystem::getFacedHandles (float mouseX, float mouseY, float queryDistance)
     {
         Ray ray = mRender.getCamera()->getCameraToViewportRay(mouseX, mouseY);
         Ogre::Vector3 from = ray.getOrigin();
-        Ogre::Vector3 to = ray.getPoint(500); /// \todo make this distance (ray length) configurable
+        Ogre::Vector3 to = ray.getPoint(queryDistance);
 
         btVector3 _from, _to;
         // OGRE to MW coordinates
         _from = btVector3(from.x, -from.z, from.y);
         _to = btVector3(to.x, -to.z, to.y);
 
-        return mEngine->rayTest2(_from,_to);
+        std::vector < std::pair <float, std::string> > results;
+        /* auto */ results = mEngine->rayTest2(_from,_to);
+        std::vector < std::pair <float, std::string> >::iterator i;
+        for (/* auto */ i = results.begin (); i != results.end (); ++i)
+            i->first *= queryDistance;
+        return results;
     }
 
     void PhysicsSystem::setCurrentWater(bool hasWater, int waterHeight)
@@ -110,7 +123,7 @@ namespace MWWorld
         Ray centerRay = mRender.getCamera()->getCameraToViewportRay(
         mRender.getViewport()->getWidth()/2,
         mRender.getViewport()->getHeight()/2);
-        btVector3 result(centerRay.getPoint(500*extent).x,-centerRay.getPoint(500*extent).z,centerRay.getPoint(500*extent).y); /// \todo make this distance (ray length) configurable
+        btVector3 result(centerRay.getPoint(extent).x,-centerRay.getPoint(extent).z,centerRay.getPoint(extent).y);
         return result;
     }
 
@@ -118,7 +131,7 @@ namespace MWWorld
     {
         //get a ray pointing to the center of the viewport
         Ray centerRay = mRender.getCamera()->getCameraToViewportRay(mouseX, mouseY);
-        btVector3 result(centerRay.getPoint(500*extent).x,-centerRay.getPoint(500*extent).z,centerRay.getPoint(500*extent).y); /// \todo make this distance (ray length) configurable
+        btVector3 result(centerRay.getPoint(extent).x,-centerRay.getPoint(extent).z,centerRay.getPoint(extent).y);
         return result;
     }
 

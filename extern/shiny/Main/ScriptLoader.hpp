@@ -23,7 +23,7 @@ namespace sh
 		ScriptLoader(const std::string& fileEnding);
 		virtual ~ScriptLoader();
 
-		std::string m_fileEnding;
+		std::string mFileEnding;
 
 		// For a line like
 		// entity animals/dog
@@ -38,11 +38,11 @@ namespace sh
 
 		void parseScript(std::ifstream &stream);
 
-		std::string m_currentFileName;
+		std::string mCurrentFileName;
 
 	protected:
 
-		float m_LoadOrder;
+		float mLoadOrder;
 		// like "*.object"
 
 		std::map <std::string, ScriptNode*> m_scriptList;
@@ -56,8 +56,8 @@ namespace sh
 			TOKEN_EOF
 		};
 
-		Token tok, lastTok;
-		std::string tokVal;
+		Token mToken, mLastToken;
+		std::string mTokenValue;
 
 		void _parseNodes(std::ifstream &stream, ScriptNode *parent);
 		void _nextToken(std::ifstream &stream);
@@ -74,22 +74,22 @@ namespace sh
 
 		inline void setName(const std::string &name)
 		{
-			this->m_name = name;
+			this->mName = name;
 		}
 
 		inline std::string &getName()
 		{
-			return m_name;
+			return mName;
 		}
 
 		inline void setValue(const std::string &value)
 		{
-			m_value = value;
+			mValue = value;
 		}
 
 		inline std::string &getValue()
 		{
-			return m_value;
+			return mValue;
 		}
 
 		ScriptNode *addChild(const std::string &name = "untitled", bool replaceExisting = false);
@@ -97,36 +97,36 @@ namespace sh
 
 		inline std::vector<ScriptNode*> &getChildren()
 		{
-			return m_children;
+			return mChildren;
 		}
 
 		inline ScriptNode *getChild(unsigned int index = 0)
 		{
-			assert(index < m_children.size());
-			return m_children[index];
+			assert(index < mChildren.size());
+			return mChildren[index];
 		}
 
 		void setParent(ScriptNode *newParent);
  
 		inline ScriptNode *getParent()
 		{
-			return m_parent;
+			return mParent;
 		}
 
-		std::string m_fileName;
+		std::string mFileName;
 
 
 	private:
-		std::string m_name;
-		std::string m_value;
-		std::vector<ScriptNode*> m_children;
-		ScriptNode *m_parent;
+		std::string mName;
+		std::string mValue;
+		std::vector<ScriptNode*> mChildren;
+		ScriptNode *mParent;
 
 
-		int m_lastChildFound;  //The last child node's index found with a call to findChild()
+		int mLastChildFound;  //The last child node's index found with a call to findChild()
 
-		std::vector<ScriptNode*>::iterator _iter;
-		bool _removeSelf;
+		std::vector<ScriptNode*>::iterator mIter;
+		bool mRemoveSelf;
 	};
  
 }
