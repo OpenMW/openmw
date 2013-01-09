@@ -6,6 +6,7 @@
 #include <OgreCompositorChain.h>
 #include <OgreMaterial.h>
 
+
 #include <boost/algorithm/string.hpp>
 
 #include <openengine/ogre/fader.hpp>
@@ -15,6 +16,9 @@
 #include "../mwbase/world.hpp"
 
 #include "../mwbase/windowmanager.hpp"
+
+#include <components/esm/records.hpp>
+
 
 namespace MWGui
 {
@@ -223,7 +227,7 @@ namespace MWGui
                 if (it->size() < 6)
                     continue;
                 std::string start = it->substr(0, 6);
-                boost::to_lower(start);
+                Misc::StringUtils::toLower(start);
 
                 if (start == "splash")
                     mResources->push_back (*it);

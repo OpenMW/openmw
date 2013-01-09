@@ -11,6 +11,8 @@
 #include "parser.hpp"
 #include "extensions.hpp"
 
+#include <components/misc/stringops.hpp>
+
 namespace Compiler
 {
     bool Scanner::get (char& c)
@@ -268,11 +270,7 @@ namespace Compiler
 
         int i = 0;
 
-        std::string lowerCase;
-        lowerCase.reserve (name.size());
-
-        std::transform (name.begin(), name.end(), std::back_inserter (lowerCase),
-            (int(*)(int)) std::tolower);
+        std::string lowerCase = Misc::StringUtils::lowerCase(name);
 
         for (; keywords[i]; ++i)
             if (lowerCase==keywords[i])
