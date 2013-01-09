@@ -39,6 +39,15 @@ namespace MWRender
     void CharacterPreview::setup ()
     {
         mSceneMgr = Ogre::Root::getSingleton().createSceneManager(Ogre::ST_GENERIC);
+
+        /// \todo Read the fallback values from INIImporter (Inventory:Directional*)
+        Ogre::Light* l = mSceneMgr->createLight();
+        l->setType (Ogre::Light::LT_DIRECTIONAL);
+        l->setDirection (Ogre::Vector3(0.3, -0.7, 0.3));
+        l->setDiffuseColour (Ogre::ColourValue(1,1,1));
+
+        mSceneMgr->setAmbientLight (Ogre::ColourValue(0.5, 0.5, 0.5));
+
         mCamera = mSceneMgr->createCamera (mName);
         mCamera->setAspectRatio (float(mSizeX) / float(mSizeY));
 
@@ -72,7 +81,6 @@ namespace MWRender
         mViewport->setOverlaysEnabled(false);
         mViewport->setBackgroundColour(Ogre::ColourValue(0, 0, 0, 0));
         mViewport->setShadowsEnabled(false);
-        mViewport->setMaterialScheme("local_map");
         mViewport->setVisibilityMask (RV_PlayerPreview);
         mRenderTarget->setActive(true);
         mRenderTarget->setAutoUpdated (false);
