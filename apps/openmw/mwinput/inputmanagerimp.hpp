@@ -36,6 +36,11 @@ namespace ICS
     class InputControlSystem;
 }
 
+namespace MyGUI
+{
+    class MouseButton;
+}
+
 #include <extern/oics/ICSChannelListener.h>
 #include <extern/oics/ICSInputControlSystem.h>
 #include <extern/oics/OISCompat.h>
@@ -149,6 +154,7 @@ namespace MWInput
 
     private:
         void adjustMouseRegion(int width, int height);
+        MyGUI::MouseButton sdlButtonToMyGUI(Uint8 button);
 
         void resetIdleTime();
         void updateIdleTime(float dt);

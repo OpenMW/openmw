@@ -450,7 +450,7 @@ namespace MWInput
     {
         mInputCtrl->mousePressed (arg, id);
 
-        MyGUI::InputManager::getInstance().injectMousePress(mMouseX, mMouseY, MyGUI::MouseButton::Enum(id));
+        MyGUI::InputManager::getInstance().injectMousePress(mMouseX, mMouseY, sdlButtonToMyGUI(id));
 
         if (MyGUI::InputManager::getInstance ().getMouseFocusWidget () != 0)
         {
@@ -468,7 +468,7 @@ namespace MWInput
     {
         mInputCtrl->mouseReleased (arg, id);
 
-        MyGUI::InputManager::getInstance().injectMouseRelease(mMouseX, mMouseY, MyGUI::MouseButton::Enum(id));
+        MyGUI::InputManager::getInstance().injectMouseRelease(mMouseX, mMouseY, sdlButtonToMyGUI(id));
 
         return true;
     }
@@ -904,5 +904,17 @@ namespace MWInput
     void InputManager::resetToDefaultBindings()
     {
         loadKeyDefaults(true);
+    }
+
+    MyGUI::MouseButton InputManager::sdlButtonToMyGUI(Uint8 button)
+    {
+        //The right button is the second button, according to MyGUI
+        if(button == SDL_BUTTON_RIGHT)
+            button = SDL_BUTTON_MIDDLE;
+        else if(button == SDL_BUTTON_MIDDLE)
+            button = SDL_BUTTON_RIGHT;
+
+        //MyGUI's buttons are 0 indexed
+        return MyGUI::MouseButton::Enum(button - 1);
     }
 }
