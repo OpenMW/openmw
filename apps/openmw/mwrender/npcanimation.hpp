@@ -83,12 +83,7 @@ private:
     int mPartslots[sPartListSize];  //Each part slot is taken by clothing, armor, or is empty
     int mPartPriorities[sPartListSize];
 
-public:
-    NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node,
-                 MWWorld::InventoryStore& inv, int visibilityFlags);
-    virtual ~NpcAnimation();
     NifOgre::EntityList insertBoundedPart(const std::string &mesh, int group, const std::string &bonename);
-    virtual void runAnimation(float timepassed);
     void updateParts();
     void removeEntities(NifOgre::EntityList &entities);
     void removeIndividualPart(int type);
@@ -97,6 +92,13 @@ public:
     bool addOrReplaceIndividualPart(int type, int group, int priority, const std::string &mesh);
     void removePartGroup(int group);
     void addPartGroup(int group, int priority, std::vector<ESM::PartReference>& parts);
+
+public:
+    NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node,
+                 MWWorld::InventoryStore& inv, int visibilityFlags);
+    virtual ~NpcAnimation();
+
+    virtual void runAnimation(float timepassed);
 
     void forceUpdate();
 };
