@@ -41,14 +41,13 @@ namespace MWWorld
 
             bool toggleCollisionMode();
             
-            std::pair<std::string, float> getFacedHandle (MWWorld::World& world);
+            std::pair<float, std::string> getFacedHandle (MWWorld::World& world, float queryDistance);
+            std::vector < std::pair <float, std::string> > getFacedHandles (float queryDistance);
+            std::vector < std::pair <float, std::string> > getFacedHandles (float mouseX, float mouseY, float queryDistance);
 
             btVector3 getRayPoint(float extent);
             btVector3 getRayPoint(float extent, float mouseX, float mouseY);
 
-            std::vector < std::pair <float, std::string> > getFacedObjects ();
-
-            std::vector < std::pair <float, std::string> > getFacedObjects (float mouseX, float mouseY);
 
             // cast ray, return true if it hit something
             bool castRay(const Ogre::Vector3& from, const Ogre::Vector3& to);
