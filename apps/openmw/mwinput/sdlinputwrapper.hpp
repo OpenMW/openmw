@@ -21,7 +21,8 @@ namespace MWInput
         void capture();
         bool isModifierHeld(int mod);
 
-        void setWrapPointer(bool wrap) { mWrapPointer = wrap; }
+        void setMouseRelative(bool relative);
+        bool getMouseRelative() { return mMouseRelative; }
         void setGrabPointer(bool grab);
 
         void warpMouse(int x, int y);
@@ -38,6 +39,7 @@ namespace MWInput
         Uint16 mWarpX;
         Uint16 mWarpY;
         bool mWarpCompensate;
+        bool mMouseRelative;
         bool mWrapPointer;
         bool mGrabPointer;
 

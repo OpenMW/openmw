@@ -18,8 +18,9 @@ namespace MWInput
         mWindow(window),
         mSDLWindow(NULL),
         mWarpCompensate(false),
-        mWrapPointer(false),
-        mGrabPointer(false)
+        mMouseRelative(false),
+        mGrabPointer(false),
+        mWrapPointer(false)
     {
         _start();
     }
@@ -166,9 +167,34 @@ namespace MWInput
         SDL_SetWindowGrab(mSDLWindow, sdlGrab);
     }
 
+    void MWSDLInputWrapper::setMouseRelative(bool relative)
+    {
+        if(mMouseRelative == relative)
+            return;
+
+        mMouseRelative = relative;
+
+        mWrapPointer = false;
+
+        //eep, wrap the pointer manually if the input driver doesn't support
+        //relative positioning natively
+        if(SDL_SetRelativeMouseMode(relative ? SDL_TRUE : SDL_FALSE) == -1)
+        {
+            if(relative)
+                mWrapPointer = true;
+        }
+
+        //now remove all mouse events using the old setting from the queue
+        SDL_PumpEvents();
+
+        SDL_Event dummy[20];
+        SDL_PeepEvents(dummy, 20, SDL_GETEVENT, SDL_MOUSEMOTION, SDL_MOUSEMOTION);
+    }
+
     bool MWSDLInputWrapper::_handleWarpMotion(const SDL_MouseMotionEvent& evt)
     {
-        if(!mWarpCompensate) return false;
+        if(!mWarpCompensate)
+            return false;
 
         //this was a warp event, signal the caller to eat it.
         if(evt.x == mWarpX && evt.y == mWarpY)
@@ -182,7 +208,10 @@ namespace MWInput
 
     void MWSDLInputWrapper::_wrapMousePointer(const SDL_MouseMotionEvent& evt)
     {
-        if(!mWrapPointer || !mGrabPointer) return;
+        //don't wrap if we don't want relative movements, support relative
+        //movements natively, or aren't grabbing anyways
+        if(!mMouseRelative || !mWrapPointer || !mGrabPointer)
+            return;
 
         int width = 0;
         int height = 0;

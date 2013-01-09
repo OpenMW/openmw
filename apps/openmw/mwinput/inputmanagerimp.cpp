@@ -218,11 +218,23 @@ namespace MWInput
 
         if(!mDebug)
         {
-            //don't keep the pointer away from the window edge in GUI mode
-            mInputManager->setWrapPointer(!mWindows.isGuiMode());
+            bool main_menu = mWindows.containsMode(MWGui::GM_MainMenu);
+
+            bool was_relative = mInputManager->getMouseRelative();
+            bool is_relative = !main_menu;
+
+            //don't keep the pointer away from the window edge in the main menu
+            mInputManager->setMouseRelative(is_relative);
+
+            //we switched to non-relative mode, move our cursor to where the in-game
+            //cursor is
+            if( !is_relative && was_relative != is_relative )
+            {
+                mInputManager->warpMouse(mMouseX, mMouseY);
+            }
 
             //we let the mouse escape in the main menu
-            mInputManager->setGrabPointer(!mWindows.containsMode(MWGui::GM_MainMenu));
+            mInputManager->setGrabPointer(!main_menu);
         }
 
         // Disable movement in Gui mode
@@ -454,8 +466,19 @@ namespace MWInput
 
             // We keep track of our own mouse position, so that moving the mouse while in
             // game mode does not move the position of the GUI cursor
-            mMouseX += float(arg.xrel) * mUISensitivity;
-            mMouseY += float(arg.yrel) * mUISensitivity * mUIYMultiplier;
+
+            //FIXME: Except in the main menu, since we let the pointer escape
+            if(!mWindows.containsMode(MWGui::GM_MainMenu))
+            {
+                mMouseX += float(arg.xrel) * mUISensitivity;
+                mMouseY += float(arg.yrel) * mUISensitivity * mUIYMultiplier;
+            }
+            else
+            {
+                mMouseX = arg.x;
+                mMouseY = arg.y;
+            }
+
             mMouseX = std::max(0.f, std::min(mMouseX, float(viewSize.width)));
             mMouseY = std::max(0.f, std::min(mMouseY, float(viewSize.height)));
 
@@ -499,10 +522,11 @@ namespace MWInput
 
     void InputManager::toggleMainMenu()
     {
-        if (mWindows.isGuiMode () && (mWindows.getMode () == MWGui::GM_MainMenu || mWindows.getMode () == MWGui::GM_Settings))
-            mWindows.popGuiMode();
-        else if (mWindows.isGuiMode () && mWindows.getMode () == MWGui::GM_Video)
+        //TODO: should this be here?
+        if (mWindows.isGuiMode () && mWindows.getMode () == MWGui::GM_Video)
             MWBase::Environment::get().getWorld ()->stopVideo ();
+        else if (mWindows.containsMode(MWGui::GM_MainMenu))
+            mWindows.popGuiMode();
         else
             mWindows.pushGuiMode (MWGui::GM_MainMenu);
     }
