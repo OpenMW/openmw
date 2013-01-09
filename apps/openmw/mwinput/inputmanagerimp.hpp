@@ -55,6 +55,7 @@ namespace MWInput
             public MWBase::InputManager,
             public ICS::MWSDLKeyListener,
             public ICS::MWSDLMouseListener,
+            public ICS::MWSDLWindowListener,
             public ICS::ChannelListener,
             public ICS::DetectingBindingListener
     {
@@ -93,6 +94,9 @@ namespace MWInput
         virtual bool mousePressed( const SDL_MouseButtonEvent &arg, Uint8 id );
         virtual bool mouseReleased( const SDL_MouseButtonEvent &arg, Uint8 id );
         virtual bool mouseMoved( const ICS::MWSDLMouseMotionEvent &arg );
+
+        virtual bool windowVisibilityChange( bool visible );
+        virtual bool windowFocusChange( bool have_focus );
 
         virtual void channelChanged(ICS::Channel* channel, float currentValue, float previousValue);
 
@@ -145,6 +149,7 @@ namespace MWInput
 
         bool mMouseLookEnabled;
         bool mGuiCursorEnabled;
+        bool mDebug;
 
         float mMouseX;
         float mMouseY;

@@ -44,6 +44,7 @@ namespace MWInput
         , mUserFile(userFile)
         , mDragDrop(false)
         , mGuiCursorEnabled(false)
+        , mDebug(debug)
         , mInvertY (Settings::Manager::getBool("invert y axis", "Input"))
         , mCameraSensitivity (Settings::Manager::getFloat("camera sensitivity", "Input"))
         , mUISensitivity (Settings::Manager::getFloat("ui sensitivity", "Input"))
@@ -52,50 +53,6 @@ namespace MWInput
         , mPreviewPOVDelay(0.f)
         , mTimeIdle(0.f)
     {
-        Ogre::RenderWindow* window = ogre.getWindow ();
-        size_t windowHnd;
-
-        resetIdleTime();
-
-        window->getCustomAttribute("WINDOW", &windowHnd);
-
-
-        // Set non-exclusive mouse and keyboard input if the user requested
-        // it.
-
-        //TODO: re-enable this and make it work with SDL
-        /*
-
-        std::ostringstream windowHndStr;
-        OIS::ParamList pl;
-
-        windowHndStr << windowHnd;
-        pl.insert(std::make_pair(std::string("WINDOW"), windowHndStr.str()));
-
-        if (debug)
-        {
-            #if defined OIS_WIN32_PLATFORM
-            pl.insert(std::make_pair(std::string("w32_mouse"),
-                std::string("DISCL_FOREGROUND" )));
-            pl.insert(std::make_pair(std::string("w32_mouse"),
-                std::string("DISCL_NONEXCLUSIVE")));
-            pl.insert(std::make_pair(std::string("w32_keyboard"),
-                std::string("DISCL_FOREGROUND")));
-            pl.insert(std::make_pair(std::string("w32_keyboard"),
-                std::string("DISCL_NONEXCLUSIVE")));
-            #elif defined OIS_LINUX_PLATFORM
-            pl.insert(std::make_pair(std::string("x11_mouse_grab"),
-                std::string("false")));
-            pl.insert(std::make_pair(std::string("x11_mouse_hide"),
-                std::string("false")));
-            pl.insert(std::make_pair(std::string("x11_keyboard_grab"),
-                std::string("false")));
-            pl.insert(std::make_pair(std::string("XAutoRepeatOn"),
-                std::string("true")));
-            #endif
-        }
-        */
-
 #if defined(__APPLE__) && !defined(__LP64__)
         // Give the application window focus to receive input events
         ProcessSerialNumber psn = { 0, kCurrentProcess };
@@ -103,9 +60,12 @@ namespace MWInput
         SetFrontProcess(&psn);
 #endif
 
+        Ogre::RenderWindow* window = ogre.getWindow ();
+
         mInputManager = new MWSDLInputWrapper(window);
         mInputManager->setMouseEventCallback (this);
         mInputManager->setKeyboardEventCallback (this);
+        mInputManager->setWindowEventCallback(this);
 
         std::string file = userFileExists ? userFile : "";
         mInputCtrl = new ICS::InputControlSystem(file, true, this, NULL, A_Last);
@@ -255,6 +215,15 @@ namespace MWInput
         // avoiding that window/gui changes does not happen in
         // event callbacks (which may crash)
         mWindows.update();
+
+        if(!mDebug)
+        {
+            //don't keep the pointer away from the window edge in GUI mode
+            mInputManager->setWrapPointer(!mWindows.isGuiMode());
+
+            //we let the mouse escape in the main menu
+            mInputManager->setGrabPointer(!mWindows.containsMode(MWGui::GM_MainMenu));
+        }
 
         // Disable movement in Gui mode
         if (mWindows.isGuiMode()) return;
@@ -507,6 +476,24 @@ namespace MWInput
             world->rotateObject(world->getPlayer().getPlayer(), -y, 0.f, x, true);
         }
 
+        return true;
+    }
+
+    bool InputManager::windowFocusChange(bool have_focus)
+    {
+        if(!mDebug)
+        {
+
+        }
+        return true;
+    }
+
+    bool InputManager::windowVisibilityChange(bool visible)
+    {
+        if(!mDebug)
+        {
+            //TODO: Pause game?
+        }
         return true;
     }
 

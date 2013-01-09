@@ -91,5 +91,17 @@ public:
     virtual bool povMoved( const SDL_JoyHatEvent &arg, int index) {return true;}
 };
 
+class MWSDLWindowListener
+{
+public:
+    virtual ~MWSDLWindowListener() {}
+
+    /** @remarks The window's visibility changed */
+    virtual bool windowVisibilityChange( bool visible ) = 0;
+
+    /** @remarks The window got / lost input focus */
+    virtual bool windowFocusChange( bool have_focus ) = 0;
+};
+
 }
 #endif

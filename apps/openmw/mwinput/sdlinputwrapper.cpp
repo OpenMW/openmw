@@ -3,6 +3,7 @@
 #include <SDL2/SDL_syswm.h>
 
 #include <OgrePlatform.h>
+#include <OgreRoot.h>
 
 #if OGRE_PLATFORM == OGRE_PLATFORM_LINUX
 #   include <X11/Xlib.h>
@@ -14,7 +15,11 @@
 namespace MWInput
 {
     MWSDLInputWrapper::MWSDLInputWrapper(Ogre::RenderWindow *window) :
-        mWindow(window), mStarted(false), mSDLWindow(NULL)
+        mWindow(window),
+        mSDLWindow(NULL),
+        mWarpCompensate(false),
+        mWrapPointer(false),
+        mGrabPointer(false)
     {
         _start();
     }
@@ -26,44 +31,7 @@ namespace MWInput
         SDL_Quit();
     }
 
-    void MWSDLInputWrapper::capture()
-    {
-        _start();
-
-        SDL_Event evt;
-        while(SDL_PollEvent(&evt))
-        {
-            switch(evt.type)
-            {
-                case SDL_MOUSEMOTION:
-                    mMouseListener->mouseMoved(ICS::MWSDLMouseMotionEvent(evt.motion));
-                    break;
-                case SDL_MOUSEWHEEL:
-                    mMouseListener->mouseMoved(ICS::MWSDLMouseMotionEvent(evt.wheel));
-                    break;
-                case SDL_MOUSEBUTTONDOWN:
-                    mMouseListener->mousePressed(evt.button, evt.button.button);
-                    break;
-                case SDL_MOUSEBUTTONUP:
-                    mMouseListener->mouseReleased(evt.button, evt.button.button);
-                    break;
-
-                case SDL_KEYDOWN:
-                    mKeyboardListener->keyPressed(evt.key);
-                    break;
-                case SDL_KEYUP:
-                    mKeyboardListener->keyReleased(evt.key);
-                    break;
-            }
-        }
-    }
-
-    bool MWSDLInputWrapper::isModifierHeld(int mod)
-    {
-        return SDL_GetModState() & mod;
-    }
-
-    void MWSDLInputWrapper::_start()
+    bool MWSDLInputWrapper::_start()
     {
         Uint32 flags = SDL_INIT_VIDEO;
         if(SDL_WasInit(flags) == 0)
@@ -74,10 +42,14 @@ namespace MWInput
 
             //kindly ask SDL not to trash our OGL context
             SDL_SetHint(SDL_HINT_RENDER_DRIVER, "software");
-            SDL_Init(SDL_INIT_VIDEO);
+            if(SDL_Init(SDL_INIT_VIDEO) != 0)
+                return false;
 
             //wrap our own event handler around ogre's
             mSDLWindow = SDL_CreateWindowFrom((void*)windowHnd);
+
+            if(mSDLWindow == NULL)
+                return false;
 
 #if OGRE_PLATFORM == OGRE_PLATFORM_LINUX
             //linux-specific event-handling fixups
@@ -86,8 +58,6 @@ namespace MWInput
 
             if(SDL_GetWindowWMInfo(mSDLWindow,&wm_info))
             {
-                printf("SDL version %d.%d.%d\n", wm_info.version.major, wm_info.version.minor, wm_info.version.patch);
-
                 Display* display = wm_info.info.x11.display;
                 Window w = wm_info.info.x11.window;
 
@@ -111,6 +81,122 @@ namespace MWInput
                 XFlush(display);
             }
 #endif
+            SDL_ShowCursor(SDL_FALSE);
+        }
+
+        return true;
+    }
+
+    void MWSDLInputWrapper::capture()
+    {
+        if(!_start())
+            throw std::runtime_error(SDL_GetError());
+
+        SDL_Event evt;
+        while(SDL_PollEvent(&evt))
+        {
+            switch(evt.type)
+            {
+                case SDL_MOUSEMOTION:
+                    //ignore this if it happened due to a warp
+                    if(!_handleWarpMotion(evt.motion))
+                    {
+                        mMouseListener->mouseMoved(ICS::MWSDLMouseMotionEvent(evt.motion));
+
+                        //try to keep the mouse inside the window
+                        _wrapMousePointer(evt.motion);
+                    }
+                    break;
+                case SDL_MOUSEWHEEL:
+                    mMouseListener->mouseMoved(ICS::MWSDLMouseMotionEvent(evt.wheel));
+                    break;
+                case SDL_MOUSEBUTTONDOWN:
+                    mMouseListener->mousePressed(evt.button, evt.button.button);
+                    break;
+                case SDL_MOUSEBUTTONUP:
+                    mMouseListener->mouseReleased(evt.button, evt.button.button);
+                    break;
+
+                case SDL_KEYDOWN:
+                    mKeyboardListener->keyPressed(evt.key);
+                    break;
+                case SDL_KEYUP:
+                    mKeyboardListener->keyReleased(evt.key);
+                    break;
+
+                case SDL_WINDOWEVENT_FOCUS_GAINED:
+                    mWindowListener->windowFocusChange(true);
+                    break;
+                case SDL_WINDOWEVENT_FOCUS_LOST:
+                    mWindowListener->windowFocusChange(false);
+                    break;
+                case SDL_WINDOWEVENT_EXPOSED:
+                    mWindowListener->windowVisibilityChange(true);
+                    break;
+                case SDL_WINDOWEVENT_HIDDEN:
+                    mWindowListener->windowVisibilityChange(false);
+                    break;
+
+                //SDL traps ^C signals, pass it to OGRE.
+                case SDL_QUIT:
+                    Ogre::Root::getSingleton().queueEndRendering();
+                    break;
+            }
+        }
+    }
+
+    bool MWSDLInputWrapper::isModifierHeld(int mod)
+    {
+        return SDL_GetModState() & mod;
+    }
+
+    void MWSDLInputWrapper::warpMouse(int x, int y)
+    {
+        SDL_WarpMouseInWindow(mSDLWindow, x, y);
+        mWarpCompensate = true;
+        mWarpX = x;
+        mWarpY = y;
+    }
+
+    void MWSDLInputWrapper::setGrabPointer(bool grab)
+    {
+        SDL_bool sdlGrab = grab ? SDL_TRUE : SDL_FALSE;
+
+        mGrabPointer = grab;
+        SDL_SetWindowGrab(mSDLWindow, sdlGrab);
+    }
+
+    bool MWSDLInputWrapper::_handleWarpMotion(const SDL_MouseMotionEvent& evt)
+    {
+        if(!mWarpCompensate) return false;
+
+        //this was a warp event, signal the caller to eat it.
+        if(evt.x == mWarpX && evt.y == mWarpY)
+        {
+            mWarpCompensate = false;
+            return true;
+        }
+
+        return false;
+    }
+
+    void MWSDLInputWrapper::_wrapMousePointer(const SDL_MouseMotionEvent& evt)
+    {
+        if(!mWrapPointer || !mGrabPointer) return;
+
+        int width = 0;
+        int height = 0;
+
+        SDL_GetWindowSize(mSDLWindow, &width, &height);
+
+        const int FUDGE_FACTOR_X = width / 4;
+        const int FUDGE_FACTOR_Y = height / 4;
+
+        //warp the mouse if it's about to go outside the window
+        if(evt.x - FUDGE_FACTOR_X < 0  || evt.x + FUDGE_FACTOR_X > width
+                || evt.y - FUDGE_FACTOR_Y < 0 || evt.y + FUDGE_FACTOR_Y > height)
+        {
+            warpMouse(width / 2, height / 2);
         }
     }
 }
