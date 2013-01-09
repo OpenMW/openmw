@@ -286,13 +286,18 @@ static TextKeyMap extractTextKeys(const Nif::NiTextKeyExtraData *tk)
         std::string::size_type pos = 0;
         while(pos < str.length())
         {
-            while(pos < str.length() && ::isspace(str[pos]))
+            if(::isspace(str[pos]))
+            {
                 pos++;
-            if(pos >= str.length())
-                break;
+                continue;
+            }
 
             std::string::size_type nextpos = std::min(str.find('\r', pos), str.find('\n', pos));
-            textkeys.insert(std::make_pair(tk->list[i].time, str.substr(pos, nextpos-pos)));
+            std::string result;
+            result.reserve(str.length());
+            std::transform(str.begin()+pos, str.begin()+std::min(str.length(), nextpos),
+                           std::back_inserter(result), ::tolower);
+            textkeys.insert(std::make_pair(tk->list[i].time, result));
 
             pos = nextpos;
         }

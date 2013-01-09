@@ -75,11 +75,6 @@ void Animation::createEntityList(Ogre::SceneNode *node, const std::string &model
 
         if(mTextKeys.size() > 0)
         {
-            NifOgre::TextKeyMap::iterator keyiter;
-            for(keyiter = mTextKeys.begin();keyiter != mTextKeys.end();keyiter++)
-                std::transform(keyiter->second.begin(), keyiter->second.end(),
-                               keyiter->second.begin(), ::tolower);
-
             Ogre::AnimationStateSet *aset = mEntityList.mSkelBase->getAllAnimationStates();
             Ogre::AnimationStateIterator as = aset->getAnimationStateIterator();
             while(as.hasMoreElements())
