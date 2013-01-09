@@ -280,7 +280,7 @@ namespace MWBase
             /// @param cursor Y (relative 0-1)
             /// @return true if the object was placed, or false if it was rejected because the position is too far away
 
-            virtual void dropObjectOnGround (const MWWorld::Ptr& object) = 0;
+            virtual void dropObjectOnGround (const MWWorld::Ptr& actor, const MWWorld::Ptr& object) = 0;
 
             virtual bool canPlaceObject (float cursorX, float cursorY) = 0;
             ///< @return true if it is possible to place on object at specified cursor location

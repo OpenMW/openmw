@@ -1286,7 +1286,7 @@ namespace MWWorld
         }
     }
 
-    void World::dropObjectOnGround (const Ptr& object)
+    void World::dropObjectOnGround (const Ptr& actor, const Ptr& object)
     {
         MWWorld::Ptr::CellStore* cell = getPlayer().getPlayer().getCell();
 
