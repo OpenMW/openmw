@@ -965,6 +965,14 @@ MWGui::GuiMode WindowManager::getMode() const
     return mGuiModes.back();
 }
 
+bool WindowManager::containsMode(GuiMode mode) const
+{
+    if(mGuiModes.empty())
+        return false;
+
+    return std::find(mGuiModes.begin(), mGuiModes.end(), mode) != mGuiModes.end();
+}
+
 std::map<int, MWMechanics::Stat<float> > WindowManager::getPlayerSkillValues()
 {
     return mPlayerSkillValues;

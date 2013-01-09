@@ -88,6 +88,7 @@ namespace MWBase
             ///< can be anywhere in the stack
 
             virtual MWGui::GuiMode getMode() const = 0;
+            virtual bool containsMode(MWGui::GuiMode) const = 0;
 
             virtual bool isGuiMode() const = 0;
 

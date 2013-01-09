@@ -97,6 +97,7 @@ namespace MWGui
     virtual void removeGuiMode(GuiMode mode); ///< can be anywhere in the stack
 
     virtual GuiMode getMode() const;
+    virtual bool containsMode(GuiMode mode) const;
 
     virtual bool isGuiMode() const;
 
