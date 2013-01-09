@@ -2,6 +2,7 @@
 
 
 #include <OgreSceneManager.h>
+#include <OgreRoot.h>
 #include <OgreHardwarePixelBuffer.h>
 
 #include <libs/openengine/ogre/selectionbuffer.hpp>
@@ -35,13 +36,18 @@ namespace MWRender
 
     }
 
-    void CharacterPreview::setup (Ogre::SceneManager *sceneManager)
+    void CharacterPreview::setup ()
     {
-        mSceneMgr = sceneManager;
+        mSceneMgr = Ogre::Root::getSingleton().createSceneManager(Ogre::ST_GENERIC);
         mCamera = mSceneMgr->createCamera (mName);
         mCamera->setAspectRatio (float(mSizeX) / float(mSizeY));
 
-        mNode = static_cast<Ogre::SceneNode*>(mSceneMgr->getRootSceneNode()->getChild("mwRoot"))->createChildSceneNode ();
+        Ogre::SceneNode* renderRoot = mSceneMgr->getRootSceneNode()->createChildSceneNode("renderRoot");
+
+        //we do this with mwRoot in renderingManager, do it here too.
+        renderRoot->pitch(Ogre::Degree(-90));
+
+        mNode = renderRoot->createChildSceneNode();
 
         mAnimation = new NpcAnimation(mCharacter, mNode,
             MWWorld::Class::get(mCharacter).getInventoryStore (mCharacter), RV_PlayerPreview);
@@ -79,6 +85,7 @@ namespace MWRender
         //Ogre::TextureManager::getSingleton().remove(mName);
         mSceneMgr->destroyCamera (mName);
         delete mAnimation;
+        Ogre::Root::getSingleton().destroySceneManager(mSceneMgr);
     }
 
     void CharacterPreview::rebuild()
