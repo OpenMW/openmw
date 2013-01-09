@@ -16,11 +16,12 @@ class Animation
         NifOgre::TextKeyMap::const_iterator mLoopStart;
         NifOgre::TextKeyMap::const_iterator mLoopStop;
 
+        Ogre::AnimationState *mAnimState;
         size_t mLoops;
 
         GroupTimes(NifOgre::TextKeyMap::const_iterator iter)
           : mStart(iter), mStop(iter), mLoopStart(iter), mLoopStop(iter),
-            mLoops(0)
+            mAnimState(NULL), mLoops(0)
         { }
     };
 
@@ -38,7 +39,6 @@ protected:
     float mTime;
     GroupTimes mCurGroup;
     GroupTimes mNextGroup;
-    Ogre::AnimationState *mAnimState;
 
     bool mSkipFrame;
 

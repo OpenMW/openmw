@@ -410,7 +410,45 @@ void loadResource(Ogre::Resource *resource)
         return;
     }
 
+    TextKeyMap textkeys;
+    Ogre::Skeleton::BoneIterator boneiter = skel->getBoneIterator();
+    while(boneiter.hasMoreElements())
+    {
+        Ogre::Bone *bone = boneiter.peekNext();
+        const Ogre::Any &data = bone->getUserObjectBindings().getUserAny(sTextKeyExtraDataID);
+        if(!data.isEmpty())
+        {
+            textkeys = Ogre::any_cast<NifOgre::TextKeyMap>(data);
+            break;
+        }
+        boneiter.moveNext();
+    }
+
     buildAnimation(skel, "all", ctrls, targets, 0.0f, std::numeric_limits<float>::max());
+
+    std::string currentgroup;
+    TextKeyMap::const_iterator keyiter = textkeys.begin();
+    for(keyiter = textkeys.begin();keyiter != textkeys.end();keyiter++)
+    {
+        std::string::size_type sep = keyiter->second.find(':');
+        if(sep == currentgroup.length() && keyiter->second.compare(0, sep, currentgroup) == 0)
+            continue;
+        currentgroup = keyiter->second.substr(0, sep);
+
+        if(skel->hasAnimation(currentgroup))
+            continue;
+
+        TextKeyMap::const_reverse_iterator lastkeyiter = textkeys.rbegin();
+        while(lastkeyiter->first > keyiter->first)
+        {
+            if(lastkeyiter->second.find(':') == currentgroup.length() &&
+               lastkeyiter->second.compare(0, currentgroup.length(), currentgroup) == 0)
+                break;
+            lastkeyiter++;
+        }
+
+        buildAnimation(skel, currentgroup, ctrls, targets, keyiter->first, lastkeyiter->first);
+    }
 }
 
 bool createSkeleton(const std::string &name, const std::string &group, const Nif::Node *node)

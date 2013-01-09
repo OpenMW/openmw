@@ -23,7 +23,6 @@ Animation::Animation(const MWWorld::Ptr &ptr)
     , mTime(0.0f)
     , mCurGroup(mTextKeys.end())
     , mNextGroup(mTextKeys.end())
-    , mAnimState(NULL)
     , mSkipFrame(false)
 {
 }
@@ -80,10 +79,8 @@ void Animation::createEntityList(Ogre::SceneNode *node, const std::string &model
             while(as.hasMoreElements())
             {
                 Ogre::AnimationState *state = as.getNext();
-                state->setEnabled(true);
+                state->setEnabled(false);
                 state->setLoop(false);
-                if(!mAnimState)
-                    mAnimState = state;
             }
         }
     }
@@ -92,12 +89,12 @@ void Animation::createEntityList(Ogre::SceneNode *node, const std::string &model
 
 void Animation::updatePosition(float time)
 {
-    mAnimState->setTimePosition(time);
+    mCurGroup.mAnimState->setTimePosition(time);
     if(mNonAccumRoot)
     {
         /* Update the animation and get the non-accumulation root's difference from the
          * last update. */
-        mEntityList.mSkelBase->getSkeleton()->setAnimationState(*mAnimState->getParent());
+        mEntityList.mSkelBase->getSkeleton()->setAnimationState(*mCurGroup.mAnimState->getParent());
         Ogre::Vector3 posdiff = mNonAccumRoot->getPosition() - mLastPosition;
 
         /* Translate the accumulation root back to compensate for the move. */
@@ -118,10 +115,10 @@ void Animation::updatePosition(float time)
 
 void Animation::resetPosition(float time)
 {
-    mAnimState->setTimePosition(time);
+    mCurGroup.mAnimState->setTimePosition(time);
     if(mNonAccumRoot)
     {
-        mEntityList.mSkelBase->getSkeleton()->setAnimationState(*mAnimState->getParent());
+        mEntityList.mSkelBase->getSkeleton()->setAnimationState(*mCurGroup.mAnimState->getParent());
         mLastPosition = mNonAccumRoot->getPosition();
         mAccumRoot->setPosition(mStartPosition - mLastPosition);
     }
@@ -162,24 +159,27 @@ bool Animation::findGroupTimes(const std::string &groupname, Animation::GroupTim
 
 void Animation::playGroup(std::string groupname, int mode, int loops)
 {
-    if(mTextKeys.size() == 0)
-    {
-        std::cerr<< "Trying to animate an unanimate object" <<std::endl;
-        return;
-    }
     GroupTimes times(mTextKeys.end());
-    times.mLoops = loops;
 
-    std::transform(groupname.begin(), groupname.end(), groupname.begin(), ::tolower);
-    if(groupname == "all")
-    {
-        times.mStart = times.mLoopStart = mTextKeys.begin();
-        times.mLoopStop = times.mStop = mTextKeys.end();
-        times.mLoopStop--; times.mStop--;
+    try {
+        if(mTextKeys.size() == 0)
+            throw std::runtime_error("Trying to animate an unanimate object");
+
+        std::transform(groupname.begin(), groupname.end(), groupname.begin(), ::tolower);
+        times.mAnimState = mEntityList.mSkelBase->getAnimationState(groupname);
+        times.mLoops = loops;
+
+        if(groupname == "all")
+        {
+            times.mStart = times.mLoopStart = mTextKeys.begin();
+            times.mLoopStop = times.mStop = mTextKeys.end();
+            times.mLoopStop--; times.mStop--;
+        }
+        else if(!findGroupTimes(groupname, &times))
+            throw std::runtime_error("Failed to find animation group "+groupname);
     }
-    else if(!findGroupTimes(groupname, &times))
-    {
-        std::cerr<< "Failed to find animation group "<<groupname <<std::endl;
+    catch(std::exception &e) {
+        std::cerr<< e.what() <<std::endl;
         return;
     }
 
@@ -187,9 +187,12 @@ void Animation::playGroup(std::string groupname, int mode, int loops)
         mNextGroup = times;
     else
     {
+        if(mCurGroup.mAnimState)
+            mCurGroup.mAnimState->setEnabled(false);
         mCurGroup = times;
         mNextGroup = GroupTimes(mTextKeys.end());
         mTime = ((mode==2) ? mCurGroup.mLoopStart : mCurGroup.mStart)->first;
+        mCurGroup.mAnimState->setEnabled(true);
         resetPosition(mTime);
     }
 }
@@ -201,7 +204,7 @@ void Animation::skipAnim()
 
 void Animation::runAnimation(float timepassed)
 {
-    if(mAnimState && !mSkipFrame)
+    if(mCurGroup.mAnimState && !mSkipFrame)
     {
         mTime += timepassed;
     recheck:
@@ -221,9 +224,11 @@ void Animation::runAnimation(float timepassed)
                 {
                     updatePosition(mCurGroup.mStop->first);
                     mTime = mTime - mCurGroup.mStop->first + mNextGroup.mStart->first;
-                    resetPosition(mNextGroup.mStart->first);
+                    mCurGroup.mAnimState->setEnabled(false);
                     mCurGroup = mNextGroup;
                     mNextGroup = GroupTimes(mTextKeys.end());
+                    mCurGroup.mAnimState->setEnabled(true);
+                    resetPosition(mNextGroup.mStart->first);
                     goto recheck;
                 }
                 mTime = mCurGroup.mStop->first;
