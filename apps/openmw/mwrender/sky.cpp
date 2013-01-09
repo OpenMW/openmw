@@ -324,7 +324,7 @@ void SkyManager::create()
 
     // Stars
     mAtmosphereNight = mRootNode->createChildSceneNode();
-    NifOgre::EntityList entities = NifOgre::NIFLoader::createEntities(mAtmosphereNight, "meshes\\sky_night_01.nif");
+    NifOgre::EntityList entities = NifOgre::Loader::createEntities(mAtmosphereNight, "meshes\\sky_night_01.nif");
     for(size_t i = 0, matidx = 0;i < entities.mEntities.size();i++)
     {
         Entity* night1_ent = entities.mEntities[i];
@@ -349,7 +349,7 @@ void SkyManager::create()
 
     // Atmosphere (day)
     mAtmosphereDay = mRootNode->createChildSceneNode();
-    entities = NifOgre::NIFLoader::createEntities(mAtmosphereDay, "meshes\\sky_atmosphere.nif");
+    entities = NifOgre::Loader::createEntities(mAtmosphereDay, "meshes\\sky_atmosphere.nif");
     for(size_t i = 0;i < entities.mEntities.size();i++)
     {
         Entity* atmosphere_ent = entities.mEntities[i];
@@ -363,7 +363,7 @@ void SkyManager::create()
 
     // Clouds
     SceneNode* clouds_node = mRootNode->createChildSceneNode();
-    entities = NifOgre::NIFLoader::createEntities(clouds_node, "meshes\\sky_clouds_01.nif");
+    entities = NifOgre::Loader::createEntities(clouds_node, "meshes\\sky_clouds_01.nif");
     for(size_t i = 0;i < entities.mEntities.size();i++)
     {
         Entity* clouds_ent = entities.mEntities[i];

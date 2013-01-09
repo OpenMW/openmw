@@ -11,8 +11,6 @@
 
 #include "renderconst.hpp"
 
-using namespace Ogre;
-using namespace NifOgre;
 
 namespace MWRender
 {
@@ -299,8 +297,8 @@ void NpcAnimation::updateParts()
 
 NifOgre::EntityList NpcAnimation::insertBoundedPart(const std::string &mesh, int group, const std::string &bonename)
 {
-    NifOgre::EntityList entities = NIFLoader::createEntities(mEntityList.mSkelBase, bonename,
-                                                             mInsert, mesh);
+    NifOgre::EntityList entities = NifOgre::Loader::createEntities(mEntityList.mSkelBase, bonename,
+                                                                   mInsert, mesh);
     std::vector<Ogre::Entity*> &parts = entities.mEntities;
     for(size_t i = 0;i < parts.size();i++)
     {

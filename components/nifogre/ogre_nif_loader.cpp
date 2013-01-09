@@ -148,8 +148,12 @@ public:
 };
 
 
-class NIFSkeletonLoader : public Ogre::ManualResourceLoader {
-
+/** Manual resource loader for NIF skeletons. This is the main class
+    responsible for translating the internal NIF skeleton structure into
+    something Ogre can use (includes animations and node TextKeyData).
+ */
+class NIFSkeletonLoader : public Ogre::ManualResourceLoader
+{
 static void warn(const std::string &msg)
 {
     std::cerr << "NIFSkeletonLoader: Warn: " << msg << std::endl;
@@ -754,6 +758,10 @@ static Ogre::String getMaterial(const Nif::NiTriShape *shape, const Ogre::String
 std::map<size_t,std::string> NIFMaterialLoader::MaterialMap;
 
 
+/** Manual resource loader for NIF meshes. This is the main class
+    responsible for translating the internal NIF mesh structure into
+    something Ogre can use.
+ */
 class NIFMeshLoader : Ogre::ManualResourceLoader
 {
     std::string mName;
@@ -1106,7 +1114,7 @@ NIFMeshLoader::LoaderMap NIFMeshLoader::sLoaders;
 typedef std::map<std::string,MeshInfoList> MeshInfoMap;
 static MeshInfoMap sMeshInfoMap;
 
-MeshInfoList NIFLoader::load(const std::string &name, const std::string &skelName, const std::string &group)
+MeshInfoList Loader::load(const std::string &name, const std::string &skelName, const std::string &group)
 {
     MeshInfoMap::const_iterator meshiter = sMeshInfoMap.find(name+"@skel="+skelName);
     if(meshiter != sMeshInfoMap.end())
@@ -1145,7 +1153,7 @@ MeshInfoList NIFLoader::load(const std::string &name, const std::string &skelNam
     return meshes;
 }
 
-EntityList NIFLoader::createEntities(Ogre::SceneNode *parentNode, std::string name, const std::string &group)
+EntityList Loader::createEntities(Ogre::SceneNode *parentNode, std::string name, const std::string &group)
 {
     EntityList entitylist;
 
@@ -1192,9 +1200,9 @@ EntityList NIFLoader::createEntities(Ogre::SceneNode *parentNode, std::string na
     return entitylist;
 }
 
-EntityList NIFLoader::createEntities(Ogre::Entity *parent, const std::string &bonename,
-                                     Ogre::SceneNode *parentNode,
-                                     std::string name, const std::string &group)
+EntityList Loader::createEntities(Ogre::Entity *parent, const std::string &bonename,
+                                  Ogre::SceneNode *parentNode,
+                                  std::string name, const std::string &group)
 {
     EntityList entitylist;
 

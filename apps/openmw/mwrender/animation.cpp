@@ -43,7 +43,7 @@ void Animation::createEntityList(Ogre::SceneNode *node, const std::string &model
     mInsert = node;
     assert(mInsert);
 
-    mEntityList = NifOgre::NIFLoader::createEntities(mInsert, model);
+    mEntityList = NifOgre::Loader::createEntities(mInsert, model);
     if(mEntityList.mSkelBase)
     {
         Ogre::AnimationStateSet *aset = mEntityList.mSkelBase->getAllAnimationStates();

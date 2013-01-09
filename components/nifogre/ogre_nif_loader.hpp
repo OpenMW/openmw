@@ -31,17 +31,12 @@
 #include <vector>
 #include <string>
 
-namespace Nif
-{
-    class Node;
-    class Transformation;
-    class NiTriShape;
-}
 
+// FIXME: This namespace really doesn't do anything Nif-specific. Any supportable
+// model format should go through this.
 namespace NifOgre
 {
 
-// FIXME: These should not be in NifOgre, it works agnostic of what model format is used
 typedef std::multimap<float,std::string> TextKeyMap;
 static const char sTextKeyExtraDataID[] = "TextKeyExtraData";
 struct EntityList {
@@ -69,19 +64,7 @@ struct MeshInfo {
 };
 typedef std::vector<MeshInfo> MeshInfoList;
 
-/** Manual resource loader for NIF meshes. This is the main class
-    responsible for translating the internal NIF mesh structure into
-    something Ogre can use.
-
-    You have to insert meshes manually into Ogre like this:
-
-    NIFLoader::load("somemesh.nif");
-
-    This returns a list of meshes used by the model, as well as the names of
-    their parent nodes (as they pertain to the skeleton, which is optionally
-    returned in the second argument if it exists).
- */
-class NIFLoader
+class Loader
 {
     static MeshInfoList load(const std::string &name, const std::string &skelName, const std::string &group);
 
