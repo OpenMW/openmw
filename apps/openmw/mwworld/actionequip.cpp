@@ -2,6 +2,7 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
+#include "../mwbase/windowmanager.hpp"
 
 #include "inventorystore.hpp"
 #include "player.hpp"
@@ -31,11 +32,36 @@ namespace MWWorld
         }
 
         assert(it != invStore.end());
+        
+        std::string npcRace = actor.get<ESM::NPC>()->mBase->mRace;
 
         // equip the item in the first free slot
         for (std::vector<int>::const_iterator slot=slots.first.begin();
             slot!=slots.first.end(); ++slot)
         {
+
+            // Beast races cannot equip shoes / boots
+            if(npcRace == "argonian" || npcRace == "khajiit")
+            {
+                if (*slot == MWWorld::InventoryStore::Slot_Boots)
+                {  
+                        // Only notify the player, not npcs
+                        if(actor == MWBase::Environment::get().getWorld()->getPlayer().getPlayer() )
+                        {
+                            if(it.getType() == MWWorld::ContainerStore::Type_Clothing){ // It's shoes
+                                MWBase::Environment::get().getWindowManager()->messageBox ("#{sNotifyMessage15}", std::vector<std::string>());
+                            }
+
+                            else // It's boots
+                            {
+                                MWBase::Environment::get().getWindowManager()->messageBox ("#{sNotifyMessage14}", std::vector<std::string>());
+                            }
+                        }
+                }
+
+                break;
+            }
+
             // if all slots are occupied, replace the last slot
             if (slot == --slots.first.end())
             {
