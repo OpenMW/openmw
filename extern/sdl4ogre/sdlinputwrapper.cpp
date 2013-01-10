@@ -288,7 +288,7 @@ namespace SFO
         }
         else if(evt.type == SDL_MOUSEWHEEL)
         {
-            mMouseZ += pack_evt.zrel = evt.wheel.y;
+            mMouseZ += pack_evt.zrel = (evt.wheel.y * 120);
             pack_evt.z = mMouseZ;
         }
         else

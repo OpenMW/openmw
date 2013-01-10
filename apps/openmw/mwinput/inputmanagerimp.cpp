@@ -487,8 +487,7 @@ namespace MWInput
             mMouseX = std::max(0.f, std::min(mMouseX, float(viewSize.width)));
             mMouseY = std::max(0.f, std::min(mMouseY, float(viewSize.height)));
 
-            //there's no such thing as an absolute z position, so let's keep track of it ourselves
-            mMouseWheel += arg.zrel;
+            mMouseWheel = int(arg.z);
 
             MyGUI::InputManager::getInstance().injectMouseMove( int(mMouseX), int(mMouseY), mMouseWheel);
         }
