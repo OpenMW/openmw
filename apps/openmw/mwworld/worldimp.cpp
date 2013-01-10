@@ -1286,12 +1286,12 @@ namespace MWWorld
         }
     }
 
-    void World::dropObjectOnGround (const Ptr& object)
+    void World::dropObjectOnGround (const Ptr& actor, const Ptr& object)
     {
-        MWWorld::Ptr::CellStore* cell = getPlayer().getPlayer().getCell();
+        MWWorld::Ptr::CellStore* cell = actor.getCell();
 
         ESM::Position pos =
-            getPlayer().getPlayer().getRefData().getPosition();
+            actor.getRefData().getPosition();
 
         Ogre::Vector3 orig =
             Ogre::Vector3(pos.pos[0], pos.pos[1], pos.pos[2]);

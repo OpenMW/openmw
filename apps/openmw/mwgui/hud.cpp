@@ -220,7 +220,7 @@ void HUD::onWorldClicked(MyGUI::Widget* _sender)
         if (world->canPlaceObject(mouseX, mouseY))
             world->placeObject(object, mouseX, mouseY);
         else
-            world->dropObjectOnGround(object);
+            world->dropObjectOnGround(world->getPlayer().getPlayer(), object);
 
         MyGUI::PointerManager::getInstance().setPointer("arrow");
 
