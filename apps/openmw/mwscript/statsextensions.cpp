@@ -674,7 +674,7 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    runtime.push (MWWorld::Class::get (ptr).getNpcStats (ptr).getBaseDisposition());
+                    runtime.push (MWBase::Environment::get().getMechanicsManager()->getDerivedDisposition(ptr));
                 }
         };
 
