@@ -149,6 +149,8 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
         ("fallback", bpo::value<FallbackMap>()->default_value(FallbackMap(), "")
             ->multitoken()->composing(), "fallback values")
 
+        ("activate-dist", bpo::value <int> ()->default_value (-1), "activation distance override");
+
         ;
 
     bpo::parsed_options valid_opts = bpo::command_line_parser(argc, argv)
@@ -236,6 +238,7 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
     engine.setFallbackValues(variables["fallback"].as<FallbackMap>().mMap);
     engine.setScriptConsoleMode (variables["script-console"].as<bool>());
     engine.setStartupScript (variables["script-run"].as<std::string>());
+    engine.setActivationDistanceOverride (variables["activate-dist"].as<int>());
 
     return true;
 }

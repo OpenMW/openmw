@@ -80,7 +80,7 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node, MWWor
     mHairModel = "meshes\\" + store.get<ESM::BodyPart>().find(mNpc->mHair)->mModel;
 
     mBodyPrefix = "b_n_" + mNpc->mRace;
-    std::transform(mBodyPrefix.begin(), mBodyPrefix.end(), mBodyPrefix.begin(), ::tolower);
+    Misc::StringUtils::toLower(mBodyPrefix);
 
     mInsert = node;
     assert(mInsert);

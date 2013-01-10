@@ -56,10 +56,7 @@ namespace MWWorld
         // Get each reference in turn
         while (mCell->getNextRef (esm, ref))
         {
-            std::string lowerCase;
-
-            std::transform (ref.mRefID.begin(), ref.mRefID.end(), std::back_inserter (lowerCase),
-                (int(*)(int)) std::tolower);
+            std::string lowerCase = Misc::StringUtils::lowerCase (ref.mRefID);
 
             mIds.push_back (lowerCase);
         }
@@ -82,10 +79,7 @@ namespace MWWorld
       // Get each reference in turn
       while(mCell->getNextRef(esm, ref))
         {
-            std::string lowerCase;
-
-            std::transform (ref.mRefID.begin(), ref.mRefID.end(), std::back_inserter (lowerCase),
-                (int(*)(int)) std::tolower);
+            std::string lowerCase = Misc::StringUtils::lowerCase(ref.mRefID);
 
             int rec = store.find(ref.mRefID);
 

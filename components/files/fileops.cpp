@@ -4,6 +4,7 @@
 
 #include <boost/filesystem.hpp>
 #include <boost/algorithm/string.hpp>
+#include <../components/misc/stringops.hpp>
 
 namespace Files
 {
@@ -87,7 +88,7 @@ bool isFile(const char *name)
 
         if (!strict)
         {
-            boost::algorithm::to_lower(toFindStr);
+            Misc::StringUtils::toLower(toFindStr);
         }
 
         for (Files::PathContainer::const_iterator it = list.begin(); it != list.end(); ++it)
@@ -99,7 +100,7 @@ bool isFile(const char *name)
 
             if (!strict)
             {
-                boost::algorithm::to_lower(fullPath);
+                Misc::StringUtils::toLower(fullPath);
             }
             if(endingMatches(fullPath, toFindStr))
             {
