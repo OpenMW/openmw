@@ -474,6 +474,7 @@ endif(WIN32)
 # Extern
 add_subdirectory (extern/shiny)
 add_subdirectory (extern/oics)
+add_subdirectory (extern/sdl4ogre)
 
 # Components
 add_subdirectory (components)

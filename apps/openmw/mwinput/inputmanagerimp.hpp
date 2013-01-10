@@ -6,7 +6,7 @@
 #include <components/settings/settings.hpp>
 
 #include "../mwbase/inputmanager.hpp"
-#include "sdlinputwrapper.hpp"
+#include <extern/sdl4ogre/sdlinputwrapper.hpp>
 
 namespace OEngine
 {
@@ -43,7 +43,6 @@ namespace MyGUI
 
 #include <extern/oics/ICSChannelListener.h>
 #include <extern/oics/ICSInputControlSystem.h>
-#include <extern/oics/OISCompat.h>
 
 namespace MWInput
 {
@@ -53,9 +52,9 @@ namespace MWInput
     */
     class InputManager :
             public MWBase::InputManager,
-            public ICS::MWSDLKeyListener,
-            public ICS::MWSDLMouseListener,
-            public ICS::MWSDLWindowListener,
+            public SFO::KeyListener,
+            public SFO::MouseListener,
+            public SFO::WindowListener,
             public ICS::ChannelListener,
             public ICS::DetectingBindingListener
     {
@@ -93,7 +92,7 @@ namespace MWInput
 
         virtual bool mousePressed( const SDL_MouseButtonEvent &arg, Uint8 id );
         virtual bool mouseReleased( const SDL_MouseButtonEvent &arg, Uint8 id );
-        virtual bool mouseMoved( const ICS::MWSDLMouseMotionEvent &arg );
+        virtual bool mouseMoved( const SFO::MouseMotionEvent &arg );
 
         virtual bool windowVisibilityChange( bool visible );
         virtual bool windowFocusChange( bool have_focus );
@@ -129,10 +128,10 @@ namespace MWInput
         MWBase::WindowManager &mWindows;
         OMW::Engine& mEngine;
 
-        ICS::InputControlSystem* mInputCtrl;
+        ICS::InputControlSystem* mInputBinder;
 
 
-        MWSDLInputWrapper* mInputManager;
+        SFO::InputWrapper* mInputManager;
 
         std::string mUserFile;
 

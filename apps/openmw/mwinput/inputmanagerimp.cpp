@@ -62,13 +62,13 @@ namespace MWInput
 
         Ogre::RenderWindow* window = ogre.getWindow ();
 
-        mInputManager = new MWSDLInputWrapper(window);
+        mInputManager = new SFO::InputWrapper(window);
         mInputManager->setMouseEventCallback (this);
         mInputManager->setKeyboardEventCallback (this);
         mInputManager->setWindowEventCallback(this);
 
         std::string file = userFileExists ? userFile : "";
-        mInputCtrl = new ICS::InputControlSystem(file, true, this, NULL, A_Last);
+        mInputBinder = new ICS::InputControlSystem(file, true, this, NULL, A_Last);
 
         adjustMouseRegion (window->getWidth(), window->getHeight());
 
@@ -78,7 +78,7 @@ namespace MWInput
 
         for (int i = 0; i < A_Last; ++i)
         {
-            mInputCtrl->getChannel (i)->addListener (this);
+            mInputBinder->getChannel (i)->addListener (this);
         }
 
         mControlSwitch["playercontrols"]      = true;
@@ -94,9 +94,9 @@ namespace MWInput
 
     InputManager::~InputManager()
     {
-        mInputCtrl->save (mUserFile);
+        mInputBinder->save (mUserFile);
 
-        delete mInputCtrl;
+        delete mInputBinder;
 
         delete mInputManager;
     }
@@ -206,7 +206,7 @@ namespace MWInput
 
         // update values of channels (as a result of pressed keys)
         if (!loading)
-            mInputCtrl->update(dt);
+            mInputBinder->update(dt);
 
         // Update windows/gui as a result of input events
         // For instance this could mean opening a new window/dialog,
@@ -396,12 +396,12 @@ namespace MWInput
 
     void InputManager::adjustMouseRegion(int width, int height)
     {
-        mInputCtrl->adjustMouseRegion(width, height);
+        mInputBinder->adjustMouseRegion(width, height);
     }
 
     bool InputManager::keyPressed( const SDL_KeyboardEvent &arg )
     {
-        mInputCtrl->keyPressed (arg);
+        mInputBinder->keyPressed (arg);
         unsigned int text = arg.keysym.unicode;
 
         //TODO: Check if we need this with SDL
@@ -414,23 +414,27 @@ namespace MWInput
 #endif
         */
 
-        MyGUI::InputManager::getInstance().injectKeyPress(MyGUI::KeyCode::Enum(arg.keysym.sym), text);
+        OIS::KeyCode kc = mInputManager->sdl2OISKeyCode(arg.keysym.sym);
+
+        MyGUI::InputManager::getInstance().injectKeyPress(MyGUI::KeyCode::Enum(kc), text);
 
         return true;
     }
 
     bool InputManager::keyReleased(const SDL_KeyboardEvent &arg )
     {
-        mInputCtrl->keyReleased (arg);
+        mInputBinder->keyReleased (arg);
 
-        MyGUI::InputManager::getInstance().injectKeyRelease(MyGUI::KeyCode::Enum(arg.keysym.sym));
+        OIS::KeyCode kc = mInputManager->sdl2OISKeyCode(arg.keysym.sym);
+
+        MyGUI::InputManager::getInstance().injectKeyRelease(MyGUI::KeyCode::Enum(kc));
 
         return true;
     }
 
     bool InputManager::mousePressed( const SDL_MouseButtonEvent &arg, Uint8 id )
     {
-        mInputCtrl->mousePressed (arg, id);
+        mInputBinder->mousePressed (arg, id);
 
         MyGUI::InputManager::getInstance().injectMousePress(mMouseX, mMouseY, sdlButtonToMyGUI(id));
 
@@ -448,16 +452,16 @@ namespace MWInput
 
     bool InputManager::mouseReleased( const SDL_MouseButtonEvent &arg, Uint8 id )
     {
-        mInputCtrl->mouseReleased (arg, id);
+        mInputBinder->mouseReleased (arg, id);
 
         MyGUI::InputManager::getInstance().injectMouseRelease(mMouseX, mMouseY, sdlButtonToMyGUI(id));
 
         return true;
     }
 
-    bool InputManager::mouseMoved( const ICS::MWSDLMouseMotionEvent &arg )
+    bool InputManager::mouseMoved(const SFO::MouseMotionEvent &arg )
     {
-        mInputCtrl->mouseMoved (arg);
+        mInputBinder->mouseMoved (arg);
 
         resetIdleTime ();
 
@@ -683,7 +687,7 @@ namespace MWInput
 
     bool InputManager::actionIsActive (int id)
     {
-        return mInputCtrl->getChannel (id)->getValue () == 1;
+        return mInputBinder->getChannel (id)->getValue () == 1;
     }
 
     void InputManager::loadKeyDefaults (bool force)
@@ -728,29 +732,29 @@ namespace MWInput
         for (int i = 0; i < A_Last; ++i)
         {
             ICS::Control* control;
-            bool controlExists = mInputCtrl->getChannel(i)->getControlsCount () != 0;
+            bool controlExists = mInputBinder->getChannel(i)->getControlsCount () != 0;
             if (!controlExists)
             {
                 control = new ICS::Control(boost::lexical_cast<std::string>(i), false, true, 0, ICS::ICS_MAX, ICS::ICS_MAX);
-                mInputCtrl->addControl(control);
-                control->attachChannel(mInputCtrl->getChannel(i), ICS::Channel::DIRECT);
+                mInputBinder->addControl(control);
+                control->attachChannel(mInputBinder->getChannel(i), ICS::Channel::DIRECT);
             }
             else
             {
-                control = mInputCtrl->getChannel(i)->getAttachedControls ().front().control;
+                control = mInputBinder->getChannel(i)->getAttachedControls ().front().control;
             }
 
             if (!controlExists || force ||
-                    ( mInputCtrl->getKeyBinding (control, ICS::Control::INCREASE) == SDLK_UNKNOWN
-                      && mInputCtrl->getMouseButtonBinding (control, ICS::Control::INCREASE) == ICS_MAX_DEVICE_BUTTONS
+                    ( mInputBinder->getKeyBinding (control, ICS::Control::INCREASE) == SDLK_UNKNOWN
+                      && mInputBinder->getMouseButtonBinding (control, ICS::Control::INCREASE) == ICS_MAX_DEVICE_BUTTONS
                       ))
             {
                 clearAllBindings (control);
 
                 if (defaultKeyBindings.find(i) != defaultKeyBindings.end())
-                    mInputCtrl->addKeyBinding(control, static_cast<SDL_Keycode>(defaultKeyBindings[i]), ICS::Control::INCREASE);
+                    mInputBinder->addKeyBinding(control, static_cast<SDL_Keycode>(defaultKeyBindings[i]), ICS::Control::INCREASE);
                 else if (defaultMouseButtonBindings.find(i) != defaultMouseButtonBindings.end())
-                    mInputCtrl->addMouseButtonBinding (control, defaultMouseButtonBindings[i], ICS::Control::INCREASE);
+                    mInputBinder->addMouseButtonBinding (control, defaultMouseButtonBindings[i], ICS::Control::INCREASE);
             }
         }
     }
@@ -794,15 +798,15 @@ namespace MWInput
 
     std::string InputManager::getActionBindingName (int action)
     {
-        if (mInputCtrl->getChannel (action)->getControlsCount () == 0)
+        if (mInputBinder->getChannel (action)->getControlsCount () == 0)
             return "#{sNone}";
 
-        ICS::Control* c = mInputCtrl->getChannel (action)->getAttachedControls ().front().control;
+        ICS::Control* c = mInputBinder->getChannel (action)->getAttachedControls ().front().control;
 
-        if (mInputCtrl->getKeyBinding (c, ICS::Control::INCREASE) != SDLK_UNKNOWN)
-            return mInputCtrl->keyCodeToString (mInputCtrl->getKeyBinding (c, ICS::Control::INCREASE));
-        else if (mInputCtrl->getMouseButtonBinding (c, ICS::Control::INCREASE) != ICS_MAX_DEVICE_BUTTONS)
-            return "#{sMouse} " + boost::lexical_cast<std::string>(mInputCtrl->getMouseButtonBinding (c, ICS::Control::INCREASE));
+        if (mInputBinder->getKeyBinding (c, ICS::Control::INCREASE) != SDLK_UNKNOWN)
+            return mInputBinder->keyCodeToString (mInputBinder->getKeyBinding (c, ICS::Control::INCREASE));
+        else if (mInputBinder->getMouseButtonBinding (c, ICS::Control::INCREASE) != ICS_MAX_DEVICE_BUTTONS)
+            return "#{sMouse} " + boost::lexical_cast<std::string>(mInputBinder->getMouseButtonBinding (c, ICS::Control::INCREASE));
         else
             return "#{sNone}";
     }
@@ -842,9 +846,9 @@ namespace MWInput
 
     void InputManager::enableDetectingBindingMode (int action)
     {
-        ICS::Control* c = mInputCtrl->getChannel (action)->getAttachedControls ().front().control;
+        ICS::Control* c = mInputBinder->getChannel (action)->getAttachedControls ().front().control;
 
-        mInputCtrl->enableDetectingBindingState (c, ICS::Control::INCREASE);
+        mInputBinder->enableDetectingBindingState (c, ICS::Control::INCREASE);
     }
 
     void InputManager::mouseAxisBindingDetected(ICS::InputControlSystem* ICS, ICS::Control* control
@@ -905,10 +909,10 @@ namespace MWInput
     void InputManager::clearAllBindings (ICS::Control* control)
     {
         // right now we don't really need multiple bindings for the same action, so remove all others first
-        if (mInputCtrl->getKeyBinding (control, ICS::Control::INCREASE) != SDLK_UNKNOWN)
-            mInputCtrl->removeKeyBinding (mInputCtrl->getKeyBinding (control, ICS::Control::INCREASE));
-        if (mInputCtrl->getMouseButtonBinding (control, ICS::Control::INCREASE) != ICS_MAX_DEVICE_BUTTONS)
-            mInputCtrl->removeMouseButtonBinding (mInputCtrl->getMouseButtonBinding (control, ICS::Control::INCREASE));
+        if (mInputBinder->getKeyBinding (control, ICS::Control::INCREASE) != SDLK_UNKNOWN)
+            mInputBinder->removeKeyBinding (mInputBinder->getKeyBinding (control, ICS::Control::INCREASE));
+        if (mInputBinder->getMouseButtonBinding (control, ICS::Control::INCREASE) != ICS_MAX_DEVICE_BUTTONS)
+            mInputBinder->removeMouseButtonBinding (mInputBinder->getMouseButtonBinding (control, ICS::Control::INCREASE));
 
         /// \todo add joysticks here once they are added
     }

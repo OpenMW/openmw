@@ -219,7 +219,7 @@ namespace ICS
 	}
 
 	// mouse Listeners
-	bool InputControlSystem::mouseMoved(const MWSDLMouseMotionEvent& evt)
+	bool InputControlSystem::mouseMoved(const SFO::MouseMotionEvent& evt)
 	{
 		if(mActive)
 		{

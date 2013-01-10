@@ -20,7 +20,7 @@ add_openmw_dir (mwrender
     )
 
 add_openmw_dir (mwinput
-    inputmanagerimp sdlinputwrapper
+    inputmanagerimp
     )
 
 add_openmw_dir (mwgui
@@ -108,6 +108,7 @@ target_link_libraries(openmw
     "shiny"
     "shiny.OgrePlatform"
     "oics"
+    "sdl4ogre"
     components
 )
 

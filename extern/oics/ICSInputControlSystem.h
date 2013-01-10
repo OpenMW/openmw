@@ -32,7 +32,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "ICSControl.h"
 #include "ICSChannel.h"
 
-#include "OISCompat.h"
+#include "../sdl4ogre/events.h"
 
 #define ICS_LOG(text) if(mLog) mLog->logMessage( ("ICS: " + std::string(text)).c_str() );
 #define ICS_MAX_JOYSTICK_AXIS 16
@@ -50,9 +50,9 @@ namespace ICS
 	};
 
 	class DllExport InputControlSystem : 
-		public MWSDLMouseListener,
-		public MWSDLKeyListener,
-        public MWSDLJoyStickListener
+		public SFO::MouseListener,
+		public SFO::KeyListener,
+        public SFO::JoyListener
 	{
 
 	public:
@@ -102,7 +102,7 @@ namespace ICS
 		JoystickIDList& getJoystickIdList(){ return mJoystickIDList; };
 		
 		// MouseListener
-		bool mouseMoved(const MWSDLMouseMotionEvent &evt);
+		bool mouseMoved(const SFO::MouseMotionEvent &evt);
 		bool mousePressed(const SDL_MouseButtonEvent &evt, Uint8);
 		bool mouseReleased(const SDL_MouseButtonEvent &evt, Uint8);
 		

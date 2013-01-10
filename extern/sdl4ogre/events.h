@@ -1,53 +1,20 @@
-#ifndef _OIS_SDL_COMPAT_H
-#define _OIS_SDL_COMPAT_H
+#ifndef _SFO_EVENTS_H
+#define _SFO_EVENTS_H
 
-#include <SDL2/SDL_events.h>
-#include <SDL2/SDL_types.h>
+#include <SDL2/SDL.h>
 
-//TODO: Remove this. Right now we want to remain as close to OIS as possible
-//So we can easily test the SDL backend
 
 ////////////
 // Events //
 ////////////
 
-namespace ICS {
+namespace SFO {
 
 /** Extended mouse event struct where we treat the wheel like an axis, like everyone expects */
-struct MWSDLMouseMotionEvent : SDL_MouseMotionEvent {
+struct MouseMotionEvent : SDL_MouseMotionEvent {
 
-    Sint16 zrel;
-
-    MWSDLMouseMotionEvent()
-    {
-        _init();
-    }
-
-    MWSDLMouseMotionEvent( const SDL_MouseMotionEvent& evt)
-    {
-        _init();
-        x = evt.x;
-        y = evt.y;
-        xrel = evt.xrel;
-        yrel = evt.yrel;
-        state = evt.state;
-    }
-
-    MWSDLMouseMotionEvent (const SDL_MouseWheelEvent& evt)
-    {
-        _init();
-        zrel = evt.y;
-    }
-
-    void _init()
-    {
-        x = 0;
-        y = 0;
-        xrel = 0;
-        yrel = 0;
-        state = 0;
-        zrel = 0;
-    }
+    Sint32 zrel;
+    Sint32 z;
 };
 
 
@@ -55,27 +22,27 @@ struct MWSDLMouseMotionEvent : SDL_MouseMotionEvent {
 // Listeners //
 ///////////////
 
-class MWSDLMouseListener
+class MouseListener
 {
 public:
-    virtual ~MWSDLMouseListener() {}
-    virtual bool mouseMoved( const MWSDLMouseMotionEvent &arg ) = 0;
+    virtual ~MouseListener() {}
+    virtual bool mouseMoved( const MouseMotionEvent &arg ) = 0;
     virtual bool mousePressed( const SDL_MouseButtonEvent &arg, Uint8 id ) = 0;
     virtual bool mouseReleased( const SDL_MouseButtonEvent &arg, Uint8 id ) = 0;
 };
 
-class MWSDLKeyListener
+class KeyListener
 {
 public:
-    virtual ~MWSDLKeyListener() {}
+    virtual ~KeyListener() {}
     virtual bool keyPressed(const SDL_KeyboardEvent &arg) = 0;
     virtual bool keyReleased(const SDL_KeyboardEvent &arg) = 0;
 };
 
-class MWSDLJoyStickListener
+class JoyListener
 {
 public:
-    virtual ~MWSDLJoyStickListener() {}
+    virtual ~JoyListener() {}
     /** @remarks Joystick button down event */
     virtual bool buttonPressed( const SDL_JoyButtonEvent &evt, int button ) = 0;
 
@@ -91,10 +58,10 @@ public:
     virtual bool povMoved( const SDL_JoyHatEvent &arg, int index) {return true;}
 };
 
-class MWSDLWindowListener
+class WindowListener
 {
 public:
-    virtual ~MWSDLWindowListener() {}
+    virtual ~WindowListener() {}
 
     /** @remarks The window's visibility changed */
     virtual bool windowVisibilityChange( bool visible ) = 0;
@@ -104,4 +71,5 @@ public:
 };
 
 }
+
 #endif
