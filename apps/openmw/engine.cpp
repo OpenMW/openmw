@@ -164,9 +164,6 @@ void OMW::Engine::loadBSA()
         dataDirectory = iter->string();
         std::cout << "Data dir " << dataDirectory << std::endl;
         Bsa::addDir(dataDirectory, mFSStrict);
-
-        // Workaround until resource listing capabilities are added to DirArchive, we need those to list available splash screens
-        addResourcesDirectory (dataDirectory);
     }
 }
 

@@ -6,6 +6,7 @@
 #include <OgreCompositorChain.h>
 #include <OgreMaterial.h>
 
+
 #include <boost/algorithm/string.hpp>
 
 #include <openengine/ogre/fader.hpp>
@@ -15,6 +16,9 @@
 #include "../mwbase/world.hpp"
 
 #include "../mwbase/windowmanager.hpp"
+
+#include <components/esm/records.hpp>
+
 
 namespace MWGui
 {
@@ -214,27 +218,15 @@ namespace MWGui
     void LoadingScreen::changeWallpaper ()
     {
         if (mResources.isNull ())
-        {
-            mResources = Ogre::StringVectorPtr (new Ogre::StringVector);
+            mResources = Ogre::ResourceGroupManager::getSingleton ().findResourceNames ("General", "Splash_*.tga");
 
-            Ogre::StringVectorPtr resources = Ogre::ResourceGroupManager::getSingleton ().listResourceNames ("General", false);
-            for (Ogre::StringVector::const_iterator it = resources->begin(); it != resources->end(); ++it)
-            {
-                if (it->size() < 6)
-                    continue;
-                std::string start = it->substr(0, 6);
-                boost::to_lower(start);
-
-                if (start == "splash")
-                    mResources->push_back (*it);
-            }
-        }
 
         if (mResources->size())
         {
-            std::string randomSplash = mResources->at (rand() % mResources->size());
+            std::string const & randomSplash = mResources->at (rand() % mResources->size());
 
             Ogre::TexturePtr tex = Ogre::TextureManager::getSingleton ().load (randomSplash, "General");
+
             mBackgroundImage->setImageTexture (randomSplash);
         }
         else

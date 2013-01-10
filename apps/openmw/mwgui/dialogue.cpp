@@ -37,10 +37,7 @@ namespace {
 
 std::string lower_string(const std::string& str)
 {
-        std::string lowerCase;
-
-        std::transform (str.begin(), str.end(), std::back_inserter (lowerCase),
-            (int(*)(int)) std::tolower);
+        std::string lowerCase = Misc::StringUtils::lowerCase (str);
 
         return lowerCase;
 }

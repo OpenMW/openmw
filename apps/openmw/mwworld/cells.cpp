@@ -153,10 +153,7 @@ MWWorld::Ptr MWWorld::Cells::getPtr (const std::string& name, Ptr::CellStore& ce
 
     if (cell.mState==Ptr::CellStore::State_Preloaded)
     {
-        std::string lowerCase;
-
-        std::transform (name.begin(), name.end(), std::back_inserter (lowerCase),
-            (int(*)(int)) std::tolower);
+        std::string lowerCase = Misc::StringUtils::lowerCase(name);
 
         if (std::binary_search (cell.mIds.begin(), cell.mIds.end(), lowerCase))
         {

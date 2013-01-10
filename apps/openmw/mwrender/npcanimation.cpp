@@ -87,7 +87,7 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node, MWWor
     mHairModel = "meshes\\" + store.get<ESM::BodyPart>().find(mNpc->mHair)->mModel;
 
     mBodyPrefix = "b_n_" + mNpc->mRace;
-    std::transform(mBodyPrefix.begin(), mBodyPrefix.end(), mBodyPrefix.begin(), ::tolower);
+    Misc::StringUtils::toLower(mBodyPrefix);
 
     bool isBeast = (race->mData.mFlags & ESM::Race::Beast) != 0;
     std::string smodel = (!isBeast ? "meshes\\base_anim.nif" : "meshes\\base_animkna.nif");

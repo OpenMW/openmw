@@ -44,6 +44,7 @@
 #include <extern/shiny/Main/Factory.hpp>
 
 #include <components/nif/node.hpp>
+#include <components/misc/stringops.hpp>
 #include <components/settings/settings.hpp>
 #include <components/nifoverrides/nifoverrides.hpp>
 
@@ -297,11 +298,8 @@ static TextKeyMap extractTextKeys(const Nif::NiTextKeyExtraData *tk)
             }
 
             std::string::size_type nextpos = std::min(str.find('\r', pos), str.find('\n', pos));
-            std::string result;
-            result.reserve(str.length());
-            std::transform(str.begin()+pos, str.begin()+std::min(str.length(), nextpos),
-                           std::back_inserter(result), ::tolower);
-            textkeys.insert(std::make_pair(tk->list[i].time, result));
+            std::string result = str.substr(pos, nextpos-pos);
+            textkeys.insert(std::make_pair(tk->list[i].time, Misc::StringUtils::toLower(result)));
 
             pos = nextpos;
         }
@@ -1073,7 +1071,7 @@ public:
             if(mSkelName.length() > 0 && mName != mSkelName)
                 fullname += "@skel="+mSkelName;
 
-            std::transform(fullname.begin(), fullname.end(), fullname.begin(), ::tolower);
+            Misc::StringUtils::toLower(fullname);
             Ogre::MeshPtr mesh = meshMgr.getByName(fullname);
             if(mesh.isNull())
             {
@@ -1157,7 +1155,7 @@ EntityList Loader::createEntities(Ogre::SceneNode *parentNode, std::string name,
 {
     EntityList entitylist;
 
-    std::transform(name.begin(), name.end(), name.begin(), ::tolower);
+    Misc::StringUtils::toLower(name);
     MeshInfoList meshes = load(name, name, group);
     if(meshes.size() == 0)
         return entitylist;
@@ -1206,14 +1204,14 @@ EntityList Loader::createEntities(Ogre::Entity *parent, const std::string &bonen
 {
     EntityList entitylist;
 
-    std::transform(name.begin(), name.end(), name.begin(), ::tolower);
+    Misc::StringUtils::toLower(name);
     MeshInfoList meshes = load(name, parent->getMesh()->getSkeletonName(), group);
     if(meshes.size() == 0)
         return entitylist;
 
     Ogre::SceneManager *sceneMgr = parentNode->getCreator();
-    std::string filter; filter.resize(bonename.length());
-    std::transform(bonename.begin(), bonename.end(), filter.begin(), ::tolower);
+    std::string filter = bonename;
+    Misc::StringUtils::toLower(filter);
     for(size_t i = 0;i < meshes.size();i++)
     {
         Ogre::Entity *ent = sceneMgr->createEntity(meshes[i].mMeshName);
