@@ -391,8 +391,6 @@ void OMW::Engine::go()
         MWBase::Environment::get().getWorld()->changeToInteriorCell (mCellName, pos);
     }
 
-    std::cout << "\nPress Q/ESC or close window to exit.\n";
-
     mOgre->getRoot()->addFrameListener (this);
 
     // Play some good 'ol tunes
@@ -420,7 +418,7 @@ void OMW::Engine::go()
     // Save user settings
     settings.saveUser(settingspath);
 
-    std::cout << "Quitting peacefully.\n";
+    std::cout << "Quitting peacefully." << std::endl;
 }
 
 void OMW::Engine::activate()

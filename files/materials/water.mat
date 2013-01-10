@@ -2,7 +2,7 @@ material Water
 {
     pass
     {
-        emissive 0.6 0.7 1.0
+        emissive 1.0 1.0 1.0
         ambient 0 0 0
         diffuse 0 0 0 1
         specular 0 0 0 32

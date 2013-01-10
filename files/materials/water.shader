@@ -42,7 +42,7 @@
 
     SH_START_PROGRAM
     {
-        shOutputColour(0).xyz = shSample(animatedTexture, UV * 15).xyz * float3(0.6, 0.7, 1.0);
+        shOutputColour(0).xyz = shSample(animatedTexture, UV * 15).xyz * float3(1.0, 1.0, 1.0);
         shOutputColour(0).w = 0.7;
         
         float fogValue = shSaturate((depth - fogParams.y) * fogParams.w);
