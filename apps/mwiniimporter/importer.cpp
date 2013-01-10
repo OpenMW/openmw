@@ -7,6 +7,8 @@
 #include <vector>
 #include <algorithm>
 #include <sstream>
+#include <components/misc/stringops.hpp>
+
 
 MwIniImporter::MwIniImporter()
     : mVerbose(false)
@@ -793,7 +795,7 @@ void MwIniImporter::importGameFiles(multistrmap &cfg, multistrmap &ini) {
 
         for(std::vector<std::string>::iterator entry = it->second.begin(); entry!=it->second.end(); ++entry) {
             std::string filetype(entry->substr(entry->length()-4, 3));
-            std::transform(filetype.begin(), filetype.end(), filetype.begin(), ::tolower);
+            Misc::StringUtils::toLower(filetype);
 
             if(filetype.compare("esm") == 0) {
                 esmFiles.push_back(*entry);

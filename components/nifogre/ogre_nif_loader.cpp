@@ -44,6 +44,7 @@
 #include <extern/shiny/Main/Factory.hpp>
 
 #include <components/nif/node.hpp>
+#include <components/misc/stringops.hpp>
 #include <components/settings/settings.hpp>
 #include <components/nifoverrides/nifoverrides.hpp>
 
@@ -1005,7 +1006,7 @@ public:
             if(mSkelName.length() > 0 && mName != mSkelName)
                 fullname += "@skel="+mSkelName;
 
-            std::transform(fullname.begin(), fullname.end(), fullname.begin(), ::tolower);
+            Misc::StringUtils::toLower(fullname);
             Ogre::MeshPtr mesh = meshMgr.getByName(fullname);
             if(mesh.isNull())
             {
@@ -1047,8 +1048,8 @@ static MeshPairMap sMeshPairMap;
 
 MeshPairList NIFLoader::load(std::string name, std::string skelName, const std::string &group)
 {
-    std::transform(name.begin(), name.end(), name.begin(), ::tolower);
-    std::transform(skelName.begin(), skelName.end(), skelName.begin(), ::tolower);
+    Misc::StringUtils::toLower(name);
+     Misc::StringUtils::toLower(skelName);
 
     MeshPairMap::const_iterator meshiter = sMeshPairMap.find(name+"@skel="+skelName);
     if(meshiter != sMeshPairMap.end())
@@ -1161,7 +1162,7 @@ EntityList NIFLoader::createEntities(Ogre::Entity *parent, const std::string &bo
         Ogre::Entity *ent = sceneMgr->createEntity(meshes[i].first);
         if(ent->hasSkeleton())
         {
-            std::transform(meshes[i].second.begin(), meshes[i].second.end(), meshes[i].second.begin(), ::tolower);
+             Misc::StringUtils::toLower(meshes[i].second);
 
             if(meshes[i].second.length() < filter.length() ||
                meshes[i].second.compare(0, filter.length(), filter) != 0)

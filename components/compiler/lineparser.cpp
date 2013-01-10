@@ -8,6 +8,7 @@
 #include "locals.hpp"
 #include "generator.hpp"
 #include "extensions.hpp"
+#include <components/misc/stringops.hpp>
 
 namespace Compiler
 {
@@ -91,13 +92,13 @@ namespace Compiler
                 return false;
             }
 
-            std::string name2 = toLower (name);
+            std::string name2 = Misc::StringUtils::lowerCase (name);
 
             char type = mLocals.getType (name2);
 
             if (type!=' ')
             {
-                getErrorHandler().error ("can't re-declare local variable", loc);
+                getErrorHandler().error ("catoLowern't re-declare local variable", loc);
                 SkipParser skip (getErrorHandler(), getContext());
                 scanner.scan (skip);
                 return false;
@@ -112,7 +113,7 @@ namespace Compiler
 
         if (mState==SetState)
         {
-            std::string name2 = toLower (name);
+            std::string name2 = Misc::StringUtils::lowerCase (name);
             mName = name2;
 
             // local variable?
@@ -138,7 +139,7 @@ namespace Compiler
 
         if (mState==SetMemberVarState)
         {
-            mMemberName = toLower (name);
+            mMemberName = Misc::StringUtils::lowerCase (name);
             char type = getContext().getMemberType (mMemberName, mName);
 
             if (type!=' ')
@@ -205,13 +206,13 @@ namespace Compiler
         if (mState==BeginState && getContext().isId (name))
         {
             mState = PotentialExplicitState;
-            mExplicit = toLower (name);
+            mExplicit = Misc::StringUtils::lowerCase (name);
             return true;
         }
 
         if (mState==BeginState && mAllowExpression)
         {
-            std::string name2 = toLower (name);
+            std::string name2 = Misc::StringUtils::lowerCase (name);
 
             char type = mLocals.getType (name2);
 
