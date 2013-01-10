@@ -25,7 +25,7 @@ namespace MWRender
         Actors(OEngine::Render::OgreRenderer& _rend): mRend(_rend) {}
         ~Actors();
         void setMwRoot(Ogre::SceneNode* root);
-        void insertBegin (const MWWorld::Ptr& ptr, bool enabled, bool static_);
+        void insertBegin (const MWWorld::Ptr& ptr);
         void insertCreature (const MWWorld::Ptr& ptr);
         void insertNPC(const MWWorld::Ptr& ptr, MWWorld::InventoryStore& inv);
          bool deleteObject (const MWWorld::Ptr& ptr);

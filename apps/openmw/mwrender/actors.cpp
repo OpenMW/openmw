@@ -27,14 +27,9 @@ Actors::~Actors(){
 void Actors::setMwRoot(Ogre::SceneNode* root){
     mMwRoot = root;
 }
-void Actors::insertNPC(const MWWorld::Ptr& ptr, MWWorld::InventoryStore& inv){
 
-    insertBegin(ptr, true, true);
-    NpcAnimation* anim = new MWRender::NpcAnimation(ptr, ptr.getRefData ().getBaseNode (), inv, RV_Actors);
-
-    mAllActors[ptr] = anim;
-}
-void Actors::insertBegin (const MWWorld::Ptr& ptr, bool enabled, bool static_){
+void Actors::insertBegin (const MWWorld::Ptr& ptr)
+{
     Ogre::SceneNode* cellnode;
     if(mCellSceneNodes.find(ptr.getCell()) == mCellSceneNodes.end())
     {
@@ -66,26 +61,28 @@ void Actors::insertBegin (const MWWorld::Ptr& ptr, bool enabled, bool static_){
 
    // Rotates first around z, then y, then x
     insert->setOrientation(xr*yr*zr);
-    if (!enabled)
-         insert->setVisible (false);
     ptr.getRefData().setBaseNode(insert);
-
-
 }
-void Actors::insertCreature (const MWWorld::Ptr& ptr){
 
-    insertBegin(ptr, true, true);
-    CreatureAnimation* anim = new MWRender::CreatureAnimation(ptr);
-    //mAllActors.insert(std::pair<MWWorld::Ptr, Animation*>(ptr,anim));
+void Actors::insertNPC(const MWWorld::Ptr& ptr, MWWorld::InventoryStore& inv)
+{
+    insertBegin(ptr);
+    NpcAnimation* anim = new NpcAnimation(ptr, ptr.getRefData().getBaseNode(), inv, RV_Actors);
     delete mAllActors[ptr];
     mAllActors[ptr] = anim;
-   //mAllActors.push_back(&anim);*/
+}
+void Actors::insertCreature (const MWWorld::Ptr& ptr)
+{
+    insertBegin(ptr);
+    CreatureAnimation* anim = new CreatureAnimation(ptr);
+    delete mAllActors[ptr];
+    mAllActors[ptr] = anim;
 }
 
 bool Actors::deleteObject (const MWWorld::Ptr& ptr)
 {
-	delete mAllActors[ptr];
-	mAllActors.erase(ptr);
+    delete mAllActors[ptr];
+    mAllActors.erase(ptr);
     if (Ogre::SceneNode *base = ptr.getRefData().getBaseNode())
     {
 
