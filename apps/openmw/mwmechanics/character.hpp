@@ -1,0 +1,9 @@
+#ifndef GAME_MWMECHANICS_CHARACTER_HPP
+#define GAME_MWMECHANICS_CHARACTER_HPP
+
+namespace MWMechanics
+{
+
+}
+
+#endif /* GAME_MWMECHANICS_CHARACTER_HPP */
