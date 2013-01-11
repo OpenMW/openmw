@@ -3,7 +3,6 @@
 
 #include <OgrePlatform.h>
 #include <OgreRoot.h>
-#include <boost/locale.hpp>
 
 #if OGRE_PLATFORM == OGRE_PLATFORM_LINUX
 #   include <X11/Xlib.h>
@@ -239,36 +238,6 @@ namespace SFO
         }
     }
 
-    void InputWrapper::_handleKeyPress(SDL_KeyboardEvent &evt)
-    {
-        //SDL keyboard events are followed by the actual text those keys would generate
-        //to account for languages that require multiple keystrokes to produce a key.
-        //Look for an event immediately following ours, assuming each key produces exactly
-        //one character or none at all.
-
-        //TODO: Check if this works properly for multibyte symbols
-        //do we have to worry about endian-ness?
-        //for that matter, check if we even need to do any of this.
-
-        SDL_Event text_evts[1];
-        if(SDL_PeepEvents(text_evts, 1, SDL_GETEVENT, SDL_TEXTINPUT, SDL_TEXTINPUT) != 0)
-        {
-            const char* symbol = text_evts[0].text.text;
-
-            Uint32 num_bytes = strlen(symbol);
-
-            //no valid character is more than 4 bytes
-            if(num_bytes > 0 && num_bytes <= 4)
-            {
-                Uint32 u32_symbol = boost::locale::conv::utf_to_utf<Uint32>(symbol)[0];
-
-                evt.keysym.unicode = u32_symbol;
-            }
-        }
-
-        mKeyboardListener->keyPressed(evt);
-    }
-
     MouseMotionEvent InputWrapper::_packageMouseMotion(const SDL_Event &evt)
     {
         MouseMotionEvent pack_evt;
@@ -299,6 +268,74 @@ namespace SFO
         return pack_evt;
     }
 
+    void InputWrapper::_handleKeyPress(SDL_KeyboardEvent &evt)
+    {
+        //SDL keyboard events are followed by the actual text those keys would generate
+        //to account for languages that require multiple keystrokes to produce a key.
+        //Look for an event immediately following ours, assuming each key produces exactly
+        //one character or none at all.
+
+        //TODO: Check if this works properly for multibyte symbols
+        //do we have to worry about endian-ness?
+        //for that matter, check if we even need to do any of this.
+
+        SDL_Event text_evts[1];
+        if(SDL_PeepEvents(text_evts, 1, SDL_GETEVENT, SDL_TEXTINPUT, SDL_TEXTINPUT) != 0)
+        {
+            if(strlen(text_evts[0].text.text) != 0)
+            {
+                const unsigned char* symbol = reinterpret_cast<unsigned char*>(&(text_evts[0].text.text[0]));
+                evt.keysym.unicode = _UTF8ToUTF32(symbol);
+            }
+        }
+
+        mKeyboardListener->keyPressed(evt);
+    }
+
+    //Lifted from OIS' LinuxKeyboard.cpp
+    Uint32 InputWrapper::_UTF8ToUTF32(const unsigned char *buf)
+    {
+        unsigned char FirstChar = buf[0];
+
+        //it's an ascii char, bail out early.
+        if(FirstChar < 128)
+            return FirstChar;
+
+        Uint32 val = 0;
+        Sint32 len = 0;
+
+        if((FirstChar & 0xE0) == 0xC0) //2 Chars
+        {
+            len = 2;
+            val = FirstChar & 0x1F;
+        }
+        else if((FirstChar & 0xF0) == 0xE0) //3 Chars
+        {
+            len = 3;
+            val = FirstChar & 0x0F;
+        }
+        else if((FirstChar & 0xF8) == 0xF0) //4 Chars
+        {
+            len = 4;
+            val = FirstChar & 0x07;
+        }
+        else if((FirstChar & 0xFC) == 0xF8) //5 Chars
+        {
+            len = 5;
+            val = FirstChar & 0x03;
+        }
+        else // if((FirstChar & 0xFE) == 0xFC) //6 Chars
+        {
+            len = 6;
+            val = FirstChar & 0x01;
+        }
+
+        for(int i = 1; i < len; i++)
+            val = (val << 6) | (buf[i] & 0x3F);
+
+        return val;
+    }
+
     OIS::KeyCode InputWrapper::sdl2OISKeyCode(SDL_Keycode code)
     {
         OIS::KeyCode kc = OIS::KC_UNASSIGNED;
@@ -307,6 +344,8 @@ namespace SFO
 
         if(ois_equiv != mKeyMap.end())
             kc = ois_equiv->second;
+        else
+            std::cerr << "Couldn't find OIS key for " << SDLK_SYSREQ << std::endl;
 
         return kc;
     }
@@ -314,6 +353,10 @@ namespace SFO
     void InputWrapper::_setupOISKeys()
     {
         //lifted from OIS's SDLKeyboard.cpp
+
+        //TODO: Consider switching to scancodes so we
+        //can properly support international keyboards
+        //look at SDL_GetKeyFromScancode and SDL_GetKeyName
         mKeyMap.insert( KeyMap::value_type(SDLK_UNKNOWN, OIS::KC_UNASSIGNED));
         mKeyMap.insert( KeyMap::value_type(SDLK_ESCAPE, OIS::KC_ESCAPE) );
         mKeyMap.insert( KeyMap::value_type(SDLK_1, OIS::KC_1) );

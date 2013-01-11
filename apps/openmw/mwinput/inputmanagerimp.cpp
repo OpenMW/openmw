@@ -221,9 +221,10 @@ namespace MWInput
             bool main_menu = mWindows.containsMode(MWGui::GM_MainMenu);
 
             bool was_relative = mInputManager->getMouseRelative();
-            bool is_relative = !main_menu;
+            bool is_relative = !mWindows.isGuiMode();
 
-            //don't keep the pointer away from the window edge in the main menu
+            // don't keep the pointer away from the window edge in gui mode
+            // stop using raw mouse motions and switch to system cursor movements
             mInputManager->setMouseRelative(is_relative);
 
             //we switched to non-relative mode, move our cursor to where the in-game
@@ -472,17 +473,11 @@ namespace MWInput
             // We keep track of our own mouse position, so that moving the mouse while in
             // game mode does not move the position of the GUI cursor
 
-            //FIXME: Except in the main menu, since we let the pointer escape
-            if(!mWindows.containsMode(MWGui::GM_MainMenu))
-            {
-                mMouseX += float(arg.xrel) * mUISensitivity;
-                mMouseY += float(arg.yrel) * mUISensitivity * mUIYMultiplier;
-            }
-            else
-            {
-                mMouseX = arg.x;
-                mMouseY = arg.y;
-            }
+            // Don't support the UI sensitivity slider to reduce headache
+            // related to when the mouse can leave the window, and what to
+            // do when it re-enters
+            mMouseX = arg.x;
+            mMouseY = arg.y;
 
             mMouseX = std::max(0.f, std::min(mMouseX, float(viewSize.width)));
             mMouseY = std::max(0.f, std::min(mMouseY, float(viewSize.height)));
