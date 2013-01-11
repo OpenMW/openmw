@@ -46,7 +46,7 @@ namespace SFO
         SFO::KeyListener* mKeyboardListener;
         SFO::WindowListener* mWindowListener;
 
-        typedef boost::unordered::unordered_map<SDL_Keycode, OIS::KeyCode> KeyMap;
+        typedef boost::unordered_map<SDL_Keycode, OIS::KeyCode> KeyMap;
         KeyMap mKeyMap;
 
         Uint16 mWarpX;
