@@ -37,6 +37,17 @@ namespace SFO
         if(mSDLWindow != NULL)
             SDL_DestroyWindow(mSDLWindow);
         mSDLWindow = NULL;
+
+        CursorMap::const_iterator curs_iter = mCursorMap.begin();
+
+        while(curs_iter != mCursorMap.end())
+        {
+            SDL_FreeCursor(curs_iter->second);
+            ++curs_iter;
+        }
+
+        mCursorMap.clear();
+
         SDL_StopTextInput();
         SDL_Quit();
     }
