@@ -79,25 +79,25 @@ public:
     void load(const std::string &name,const std::string &group);
 
 private:
-    btQuaternion getbtQuat(Ogre::Matrix3 &m);
+    btQuaternion getbtQuat(Ogre::Matrix3 const &m);
 
-    btVector3 getbtVector(Ogre::Vector3 &v);
+    btVector3 getbtVector(Ogre::Vector3 const &v);
 
     /**
     *Parse a node.
     */
-    void handleNode(Nif::Node *node, int flags,
+    void handleNode(Nif::Node const *node, int flags,
         const Nif::Transformation *trafo, bool hasCollisionNode,bool isCollisionNode,bool raycastingOnly);
 
     /**
     *Helper function
     */
-    bool hasRootCollisionNode(Nif::Node* node);
+    bool hasRootCollisionNode(Nif::Node const * node);
 
     /**
     *convert a NiTriShape to a bullet trishape.
     */
-    void handleNiTriShape(Nif::NiTriShape *shape, int flags,Ogre::Matrix3 parentRot,Ogre::Vector3 parentPos,float parentScales,bool raycastingOnly);
+    void handleNiTriShape(Nif::NiTriShape const *shape, int flags,Ogre::Matrix3 parentRot,Ogre::Vector3 parentPos,float parentScales,bool raycastingOnly);
 
     std::string resourceName;
     std::string resourceGroup;

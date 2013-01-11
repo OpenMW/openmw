@@ -111,8 +111,8 @@ public:
         boneIndex = ind;
     }
 
-    Ogre::Matrix4 getLocalTransform();
-    Ogre::Matrix4 getWorldTransform();
+    Ogre::Matrix4 getLocalTransform() const;
+    Ogre::Matrix4 getWorldTransform() const;
 };
 
 struct NiNode : Node
