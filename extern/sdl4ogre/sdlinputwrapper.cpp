@@ -228,6 +228,11 @@ namespace SFO
         }
     }
 
+    void InputWrapper::cursorVisible(bool visible)
+    {
+        SDL_ShowCursor(visible ? SDL_TRUE : SDL_FALSE);
+    }
+
     void InputWrapper::receiveCursorInfo(const std::string& name, Ogre::TexturePtr tex, Uint8 size_x, Uint8 size_y, Uint8 hotspot_x, Uint8 hotspot_y)
     {
         _createCursorFromResource(name, tex, size_x, size_y, hotspot_x, hotspot_y);
@@ -264,7 +269,7 @@ namespace SFO
         Ogre::PixelBox& pixels = const_cast<Ogre::PixelBox&>(new_buffer->lock(box, Ogre::HardwarePixelBuffer::HBL_READ_ONLY));
 
 
-        SDL_Surface* surf = SDL_CreateRGBSurface(0,size_x,size_y,32,0,0,0,0);
+        SDL_Surface* surf = SDL_CreateRGBSurface(0,size_x,size_y,32,0xFF000000,0x00FF0000,0x0000FF00,0x000000FF);
 
 
         //copy the Ogre texture to an SDL surface
@@ -275,7 +280,7 @@ namespace SFO
                 Ogre::ColourValue clr = pixels.getColourAt(x, y, 0);
 
                 //set the pixel on the SDL surface to the same value as the Ogre texture's
-                _putPixel(surf, x, y, SDL_MapRGBA(surf->format, clr.r, clr.g, clr.b, clr.a));
+                _putPixel(surf, x, y, SDL_MapRGBA(surf->format, clr.r*255, clr.g*255, clr.b*255, clr.a*255));
             }
         }
 

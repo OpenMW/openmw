@@ -154,7 +154,7 @@ namespace MWGui
     virtual void setFocusObject(const MWWorld::Ptr& focus);
     virtual void setFocusObjectScreenCoords(float min_x, float min_y, float max_x, float max_y);
 
-    virtual void setMouseVisible(bool visible);
+    virtual void setCursorVisible(bool visible);
     virtual void getMousePosition(int &x, int &y);
     virtual void getMousePosition(float &x, float &y);
     virtual void setDragDrop(bool dragDrop);
@@ -275,6 +275,7 @@ namespace MWGui
     bool mCrosshairEnabled;
     bool mSubtitlesEnabled;
     bool mHudEnabled;
+    bool mCursorVisible;
 
     /// \todo get rid of this stuff. Move it to the respective UI element classes, if needed.
     // Various stats about player as needed by window manager

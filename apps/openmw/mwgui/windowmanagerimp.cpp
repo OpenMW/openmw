@@ -190,6 +190,9 @@ WindowManager::WindowManager(
 
     mInputBlocker = mGui->createWidget<MyGUI::Widget>("",0,0,w,h,MyGUI::Align::Default,"Windows","");
 
+    //make sure the cursor in the GL context isn't visible
+    MyGUI::PointerManager::getInstance().setVisible(false);
+
     // The HUD is always on
     mHud->setVisible(true);
 
@@ -302,7 +305,7 @@ void WindowManager::updateVisible()
     mHud->setVisible(true);
 
     // Mouse is visible whenever we're not in game mode
-    MyGUI::PointerManager::getInstance().setVisible(isGuiMode());
+    setCursorVisible(isGuiMode());
 
     bool gameMode = !isGuiMode();
 
@@ -417,13 +420,13 @@ void WindowManager::updateVisible()
             break;
         case GM_LoadingWallpaper:
             mHud->setVisible(false);
-            MyGUI::PointerManager::getInstance().setVisible(false);
+            setCursorVisible(false);
             break;
         case GM_Loading:
-            MyGUI::PointerManager::getInstance().setVisible(false);
+            setCursorVisible(false);
             break;
         case GM_Video:
-            MyGUI::PointerManager::getInstance().setVisible(false);
+            setCursorVisible(false);
             mHud->setVisible(false);
             break;
         default:
@@ -737,9 +740,15 @@ void WindowManager::setSpellVisibility(bool visible)
     mHud->setEffectVisible (visible);
 }
 
-void WindowManager::setMouseVisible(bool visible)
+void WindowManager::setCursorVisible(bool visible)
 {
-    MyGUI::PointerManager::getInstance().setVisible(visible);
+    if(visible == mCursorVisible)
+        return;
+
+    mCursorVisible = visible;
+
+    if(mCursorChangeClient != NULL)
+        mCursorChangeClient->cursorVisible(visible);
 }
 
 void WindowManager::setDragDrop(bool dragDrop)
@@ -775,6 +784,7 @@ void WindowManager::onRetrieveTag(const MyGUI::UString& _tag, MyGUI::UString& _r
  {
      mCursorChangeClient = client;
      onCursorChange(PointerManager::getInstance().getDefaultPointer());
+     client->cursorVisible(mCursorVisible);
  }
 
 void WindowManager::onCursorChange(const std::string &name)

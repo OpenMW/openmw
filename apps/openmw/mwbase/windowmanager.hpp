@@ -159,7 +159,7 @@ namespace MWBase
             virtual void setFocusObject(const MWWorld::Ptr& focus) = 0;
             virtual void setFocusObjectScreenCoords(float min_x, float min_y, float max_x, float max_y) = 0;
 
-            virtual void setMouseVisible(bool visible) = 0;
+            virtual void setCursorVisible(bool visible) = 0;
             virtual void getMousePosition(int &x, int &y) = 0;
             virtual void getMousePosition(float &x, float &y) = 0;
             virtual void setDragDrop(bool dragDrop) = 0;

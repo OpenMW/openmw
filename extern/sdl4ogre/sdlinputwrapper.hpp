@@ -28,6 +28,9 @@ namespace SFO
 
         /// \brief Follow up a cursorChanged() call with enough info to create an SDL cursor.
         virtual void receiveCursorInfo(const std::string &name, Ogre::TexturePtr tex, Uint8 size_x, Uint8 size_y, Uint8 hotspot_x, Uint8 hotspot_y) = 0;
+
+        /// \brief Tell the client when the cursor visibility changed
+        virtual void cursorVisible(bool visible) = 0;
     };
 
     class InputWrapper :
@@ -50,6 +53,7 @@ namespace SFO
 
         virtual bool cursorChanged(const std::string &name);
         virtual void receiveCursorInfo(const std::string &name, Ogre::TexturePtr tex, Uint8 size_x, Uint8 size_y, Uint8 hotspot_x, Uint8 hotspot_y);
+        virtual void cursorVisible(bool visible);
 
         OIS::KeyCode sdl2OISKeyCode(SDL_Keycode code);
 
