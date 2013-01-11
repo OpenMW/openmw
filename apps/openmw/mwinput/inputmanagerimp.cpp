@@ -716,7 +716,7 @@ namespace MWInput
         defaultKeyBindings[A_QuickKey8] = SDLK_8;
         defaultKeyBindings[A_QuickKey9] = SDLK_9;
         defaultKeyBindings[A_QuickKey10] = SDLK_0;
-        defaultKeyBindings[A_Screenshot] = SDLK_SYSREQ;
+        defaultKeyBindings[A_Screenshot] = SDLK_PRINTSCREEN;
         defaultKeyBindings[A_ToggleHUD] = SDLK_F12;
 
         std::map<int, int> defaultMouseButtonBindings;

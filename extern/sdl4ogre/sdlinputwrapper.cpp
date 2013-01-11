@@ -345,7 +345,7 @@ namespace SFO
         if(ois_equiv != mKeyMap.end())
             kc = ois_equiv->second;
         else
-            std::cerr << "Couldn't find OIS key for " << SDLK_SYSREQ << std::endl;
+            std::cerr << "Couldn't find OIS key for " << code << std::endl;
 
         return kc;
     }

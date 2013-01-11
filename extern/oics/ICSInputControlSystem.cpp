@@ -892,6 +892,7 @@ namespace ICS
 		mKeys["RCONTROL"]= SDLK_RCTRL;
 		mKeys["DIVIDE"]= SDLK_SLASH;
 		mKeys["SYSRQ"]= SDLK_SYSREQ;
+		mKeys["PRNTSCRN"] = SDLK_PRINTSCREEN;
 		mKeys["RMENU"]= SDLK_RALT;
 		mKeys["PAUSE"]= SDLK_PAUSE;
 		mKeys["HOME"]= SDLK_HOME;
