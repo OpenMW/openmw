@@ -3,6 +3,8 @@
 
 #include <OgrePlatform.h>
 #include <OgreRoot.h>
+#include <OgreHardwarePixelBuffer.h>
+#include <cstdint>
 
 #if OGRE_PLATFORM == OGRE_PLATFORM_LINUX
 #   include <X11/Xlib.h>
@@ -13,6 +15,8 @@
 
 namespace SFO
 {
+    /// \brief General purpose wrapper for OGRE applications around SDL's event
+    ///        queue, mostly used for handling input-related events.
     InputWrapper::InputWrapper(Ogre::RenderWindow *window) :
         mWindow(window),
         mSDLWindow(NULL),
@@ -58,6 +62,11 @@ namespace SFO
             if(mSDLWindow == NULL)
                 return false;
 
+            //without this SDL will take ownership of the window and iconify it when
+            //we alt-tab away.
+            SDL_SetWindowFullscreen(mSDLWindow, 0);
+
+            //translate our keypresses into text
             SDL_StartTextInput();
 
 #if OGRE_PLATFORM == OGRE_PLATFORM_LINUX
@@ -160,6 +169,7 @@ namespace SFO
         return SDL_GetModState() & mod;
     }
 
+    /// \brief Moves the mouse to the specified point within the viewport
     void InputWrapper::warpMouse(int x, int y)
     {
         SDL_WarpMouseInWindow(mSDLWindow, x, y);
@@ -168,14 +178,15 @@ namespace SFO
         mWarpY = y;
     }
 
+    /// \brief Locks the pointer to the window
     void InputWrapper::setGrabPointer(bool grab)
     {
-        SDL_bool sdlGrab = grab ? SDL_TRUE : SDL_FALSE;
-
         mGrabPointer = grab;
-        SDL_SetWindowGrab(mSDLWindow, sdlGrab);
+        SDL_SetWindowGrab(mSDLWindow, grab ? SDL_TRUE : SDL_FALSE);
     }
 
+    /// \brief Set the mouse to relative positioning. Doesn't move the cursor
+    ///        and disables mouse acceleration.
     void InputWrapper::setMouseRelative(bool relative)
     {
         if(mMouseRelative == relative)
@@ -200,6 +211,121 @@ namespace SFO
         SDL_PeepEvents(dummy, 20, SDL_GETEVENT, SDL_MOUSEMOTION, SDL_MOUSEMOTION);
     }
 
+    bool InputWrapper::cursorChanged(const std::string &name)
+    {
+        CursorMap::const_iterator curs_iter = mCursorMap.find(name);
+
+        //we have this cursor
+        if(curs_iter != mCursorMap.end())
+        {
+            SDL_SetCursor(curs_iter->second);
+            return false;
+        }
+        else
+        {
+            //they should get back to use with more info
+            return true;
+        }
+    }
+
+    void InputWrapper::receiveCursorInfo(const std::string& name, Ogre::TexturePtr tex, Uint8 size_x, Uint8 size_y, Uint8 hotspot_x, Uint8 hotspot_y)
+    {
+        _createCursorFromResource(name, tex, size_x, size_y, hotspot_x, hotspot_y);
+    }
+
+    /// \brief creates an SDL cursor from an Ogre texture
+    void InputWrapper::_createCursorFromResource(const std::string& name, Ogre::TexturePtr tex, Uint8 size_x, Uint8 size_y, Uint8 hotspot_x, Uint8 hotspot_y)
+    {
+        Ogre::Image::Box box;
+        box.right = size_x;
+        box.bottom = size_y;
+
+        //get the surfaces set up
+        Ogre::HardwarePixelBufferSharedPtr buffer = tex.get()->getBuffer();
+        buffer.get()->lock(box, Ogre::HardwarePixelBuffer::HBL_READ_ONLY);
+
+        std::string tempName = "_" + name + "_processing";
+
+        //we need to copy this to a temporary texture since Ogre doesn't like us using getColourAt
+        Ogre::TexturePtr tempTexture = Ogre::TextureManager::getSingleton().createManual(
+                tempName,
+                Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
+                Ogre::TEX_TYPE_2D,
+                size_x, size_y,
+                0,
+                Ogre::PF_FLOAT16_RGBA,
+                Ogre::TU_STATIC);
+
+        tempTexture->getBuffer()->blit(buffer);
+        buffer->unlock();
+
+        Ogre::HardwarePixelBufferSharedPtr new_buffer = tempTexture.get()->getBuffer();
+        //FIXME: Casting away constness is almost certainly the wrong thing to do here
+        Ogre::PixelBox& pixels = const_cast<Ogre::PixelBox&>(new_buffer->lock(box, Ogre::HardwarePixelBuffer::HBL_READ_ONLY));
+
+
+        SDL_Surface* surf = SDL_CreateRGBSurface(0,size_x,size_y,32,0,0,0,0);
+
+
+        //copy the Ogre texture to an SDL surface
+        for(size_t x = 0; x < size_x; ++x)
+        {
+            for(size_t y = 0; y < size_y; ++y)
+            {
+                Ogre::ColourValue clr = pixels.getColourAt(x, y, 0);
+
+                //set the pixel on the SDL surface to the same value as the Ogre texture's
+                _putPixel(surf, x, y, SDL_MapRGBA(surf->format, clr.r, clr.g, clr.b, clr.a));
+            }
+        }
+
+        //set the cursor and store it for later
+        SDL_Cursor* curs = SDL_CreateColorCursor(surf, hotspot_x, hotspot_y);
+        SDL_SetCursor(curs);
+        mCursorMap.insert(CursorMap::value_type(std::string(name), curs));
+
+        new_buffer->unlock();
+
+        //clean up
+        SDL_FreeSurface(surf);
+        Ogre::TextureManager::getSingleton().remove(tempName);
+    }
+
+    void InputWrapper::_putPixel(SDL_Surface *surface, int x, int y, Uint32 pixel)
+    {
+        int bpp = surface->format->BytesPerPixel;
+        /* Here p is the address to the pixel we want to set */
+        Uint8 *p = (Uint8 *)surface->pixels + y * surface->pitch + x * bpp;
+
+        switch(bpp) {
+        case 1:
+            *p = pixel;
+            break;
+
+        case 2:
+            *(Uint16 *)p = pixel;
+            break;
+
+        case 3:
+            if(SDL_BYTEORDER == SDL_BIG_ENDIAN) {
+                p[0] = (pixel >> 16) & 0xff;
+                p[1] = (pixel >> 8) & 0xff;
+                p[2] = pixel & 0xff;
+            } else {
+                p[0] = pixel & 0xff;
+                p[1] = (pixel >> 8) & 0xff;
+                p[2] = (pixel >> 16) & 0xff;
+            }
+            break;
+
+        case 4:
+            *(Uint32 *)p = pixel;
+            break;
+        }
+    }
+
+    /// \brief Internal method for ignoring relative motions as a side effect
+    ///        of warpMouse()
     bool InputWrapper::_handleWarpMotion(const SDL_MouseMotionEvent& evt)
     {
         if(!mWarpCompensate)
@@ -215,6 +341,7 @@ namespace SFO
         return false;
     }
 
+    /// \brief Wrap the mouse to the viewport
     void InputWrapper::_wrapMousePointer(const SDL_MouseMotionEvent& evt)
     {
         //don't wrap if we don't want relative movements, support relative
@@ -238,6 +365,7 @@ namespace SFO
         }
     }
 
+    /// \brief Package mouse and mousewheel motions into a single event
     MouseMotionEvent InputWrapper::_packageMouseMotion(const SDL_Event &evt)
     {
         MouseMotionEvent pack_evt;

@@ -55,6 +55,11 @@ namespace MWGui
     class DialogueWindow;
 }
 
+namespace SFO
+{
+    class CursorChangeClient;
+}
+
 namespace MWBase
 {
     /// \brief Interface for widnow manager (implemented in MWGui)
@@ -238,6 +243,8 @@ namespace MWBase
             virtual void startTraining(MWWorld::Ptr actor) = 0;
 
             virtual const Translation::Storage& getTranslationDataStorage() const = 0;
+
+            virtual void setCursorChangeClient(SFO::CursorChangeClient* client) = 0;
     };
 }
 

@@ -48,6 +48,11 @@ namespace OEngine
     }
 }
 
+namespace SFO
+{
+    class CursorChangeClient;
+}
+
 namespace MWGui
 {
   class WindowBase;
@@ -228,6 +233,8 @@ namespace MWGui
 
     virtual const Translation::Storage& getTranslationDataStorage() const;
 
+    virtual void setCursorChangeClient(SFO::CursorChangeClient* client);
+
   private:
     OEngine::GUI::MyGUIManager *mGuiManager;
     HUD *mHud;
@@ -282,6 +289,8 @@ namespace MWGui
     MyGUI::Gui *mGui; // Gui
     std::vector<GuiMode> mGuiModes;
 
+    SFO::CursorChangeClient* mCursorChangeClient;
+
     std::vector<OEngine::GUI::Layout*> mGarbageDialogs;
     void cleanupGarbage();
 
@@ -310,6 +319,8 @@ namespace MWGui
      * so this method will retrieve the GMST with the name \a _tag and place the result in \a _result
      */
     void onRetrieveTag(const MyGUI::UString& _tag, MyGUI::UString& _result);
+
+    void onCursorChange(const std::string& name);
   };
 }
 

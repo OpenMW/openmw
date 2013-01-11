@@ -67,6 +67,8 @@ namespace MWInput
         mInputManager->setKeyboardEventCallback (this);
         mInputManager->setWindowEventCallback(this);
 
+        mWindows.setCursorChangeClient(mInputManager);
+
         std::string file = userFileExists ? userFile : "";
         mInputBinder = new ICS::InputControlSystem(file, true, this, NULL, A_Last);
 

@@ -9,13 +9,33 @@
 #include "events.h"
 
 
+namespace Ogre
+{
+    class Texture;
+}
+
 namespace SFO
 {
-    class InputWrapper
+
+
+    class CursorChangeClient
+    {
+    public:
+        /// \brief Tell the client that the cursor has changed, giving the
+        ///        name of the cursor we changed to ("arrow", "ibeam", etc)
+        /// \return Whether the client is interested in more information about the cursor
+        virtual bool cursorChanged(const std::string &name) = 0;
+
+        /// \brief Follow up a cursorChanged() call with enough info to create an SDL cursor.
+        virtual void receiveCursorInfo(const std::string &name, Ogre::TexturePtr tex, Uint8 size_x, Uint8 size_y, Uint8 hotspot_x, Uint8 hotspot_y) = 0;
+    };
+
+    class InputWrapper :
+            public CursorChangeClient
     {
     public:
         InputWrapper(Ogre::RenderWindow* window);
-        ~InputWrapper();
+        virtual ~InputWrapper();
 
         void setMouseEventCallback(MouseListener* listen) { mMouseListener = listen; }
         void setKeyboardEventCallback(KeyListener* listen) { mKeyboardListener = listen; }
@@ -28,15 +48,22 @@ namespace SFO
         bool getMouseRelative() { return mMouseRelative; }
         void setGrabPointer(bool grab);
 
+        virtual bool cursorChanged(const std::string &name);
+        virtual void receiveCursorInfo(const std::string &name, Ogre::TexturePtr tex, Uint8 size_x, Uint8 size_y, Uint8 hotspot_x, Uint8 hotspot_y);
+
         OIS::KeyCode sdl2OISKeyCode(SDL_Keycode code);
 
         void warpMouse(int x, int y);
+
     private:
         bool _start();
 
         bool _handleWarpMotion(const SDL_MouseMotionEvent& evt);
         void _wrapMousePointer(const SDL_MouseMotionEvent &evt);
         MouseMotionEvent _packageMouseMotion(const SDL_Event& evt);
+
+        void _createCursorFromResource(const std::string &name, Ogre::TexturePtr tex, Uint8 size_x, Uint8 size_y, Uint8 hotspot_x, Uint8 hotspot_y);
+        void _putPixel(SDL_Surface *surface, int x, int y, Uint32 pixel);
 
         void _handleKeyPress(SDL_KeyboardEvent& evt);
         Uint32 _UTF8ToUTF32(const unsigned char *buf);
@@ -48,6 +75,9 @@ namespace SFO
 
         typedef boost::unordered_map<SDL_Keycode, OIS::KeyCode> KeyMap;
         KeyMap mKeyMap;
+
+        typedef std::map<std::string, SDL_Cursor*> CursorMap;
+        CursorMap mCursorMap;
 
         Uint16 mWarpX;
         Uint16 mWarpY;
@@ -63,6 +93,7 @@ namespace SFO
         Ogre::RenderWindow* mWindow;
         SDL_Window* mSDLWindow;
     };
+
 }
 
 #endif

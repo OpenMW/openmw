@@ -4,9 +4,14 @@
 #include <iterator>
 
 #include "MyGUI_UString.h"
+#include "MYGUI/MyGUI_IPointer.h"
+#include "MYGUI/MyGUI_ResourceImageSetPointer.h"
+#include "MyGUI_TextureUtility.h"
 
 #include <openengine/ogre/renderer.hpp>
 #include <openengine/gui/manager.hpp>
+
+#include <extern/sdl4ogre/sdlinputwrapper.hpp>
 
 #include <components/settings/settings.hpp>
 #include <components/translation/translation.hpp>
@@ -52,6 +57,8 @@
 #include "enchantingdialog.hpp"
 #include "trainingwindow.hpp"
 #include "imagebutton.hpp"
+
+#include "cursorreplace.hpp"
 
 using namespace MWGui;
 
@@ -108,11 +115,16 @@ WindowManager::WindowManager(
   , mSubtitlesEnabled(Settings::Manager::getBool ("subtitles", "GUI"))
   , mHudEnabled(true)
   , mTranslationDataStorage (translationDataStorage)
+  , mCursorChangeClient(NULL)
 {
 
     // Set up the GUI system
     mGuiManager = new OEngine::GUI::MyGUIManager(mOgre->getWindow(), mOgre->getScene(), false, logpath);
     mGui = mGuiManager->getGui();
+
+    //Use our own ResourceImageSetPointer class so we can get the texture and hotspot for a pointer
+    MyGUI::FactoryManager::getInstance().registerFactory<ResourceImageSetPointerFix>("Resource", "ResourceImageSetPointer");
+    MyGUI::ResourceManager::getInstance().load("core.xml");
 
     //Register own widgets with MyGUI
     MyGUI::FactoryManager::getInstance().registerFactory<DialogueHistory>("Widget");
@@ -130,6 +142,7 @@ WindowManager::WindowManager(
     MyGUI::FactoryManager::getInstance().registerFactory<MWGui::ImageButton>("Widget");
 
     MyGUI::LanguageManager::getInstance().eventRequestTag = MyGUI::newDelegate(this, &WindowManager::onRetrieveTag);
+    MyGUI::PointerManager::getInstance().eventChangeMousePointer += MyGUI::newDelegate(this, &WindowManager::onCursorChange);
 
     // Get size info from the Gui object
     assert(mGui);
@@ -755,6 +768,44 @@ void WindowManager::onRetrieveTag(const MyGUI::UString& _tag, MyGUI::UString& _r
             _result = setting->getString();
         else
             _result = tag;
+    }
+}
+
+ void WindowManager::setCursorChangeClient(SFO::CursorChangeClient* client)
+ {
+     mCursorChangeClient = client;
+     onCursorChange(PointerManager::getInstance().getDefaultPointer());
+ }
+
+void WindowManager::onCursorChange(const std::string &name)
+{
+    //we have no client, don't care.
+    if(!mCursorChangeClient)
+        return;
+
+    //the client doesn't want any more info about this cursor
+    if(!mCursorChangeClient->cursorChanged(name))
+        return;
+    //See if we can get the information we need out of the cursor resource
+    ResourceImageSetPointerFix* imgSetPtr = dynamic_cast<ResourceImageSetPointerFix*>(MyGUI::PointerManager::getInstance().getByName(name));
+    if(imgSetPtr != NULL)
+    {
+        MyGUI::ResourceImageSet* imgSet = imgSetPtr->getImageSet();
+
+        std::string tex_name = imgSet->getIndexInfo(0,0).texture;
+
+        Ogre::TexturePtr tex = Ogre::TextureManager::getSingleton().getByName(tex_name);
+
+        //everything looks good, send it to the client
+        if(!tex.isNull())
+        {
+            Uint8 size_x = imgSetPtr->getSize().width;
+            Uint8 size_y = imgSetPtr->getSize().height;
+            Uint8 hotspot_x = imgSetPtr->getHotSpot().left;
+            Uint8 hotspot_y = imgSetPtr->getHotSpot().top;
+
+            mCursorChangeClient->receiveCursorInfo(name, tex, size_x, size_y, hotspot_x, hotspot_y);
+        }
     }
 }
 
