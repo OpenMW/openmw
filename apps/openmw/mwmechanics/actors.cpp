@@ -166,7 +166,7 @@ namespace MWMechanics
     void Actors::addActor (const MWWorld::Ptr& ptr)
     {
         if (!MWWorld::Class::get (ptr).getCreatureStats (ptr).isDead())
-            mActors[ptr] = CharacterController();
+            mActors.insert(std::make_pair(ptr, CharacterController(ptr)));
         else
             MWBase::Environment::get().getWorld()->playAnimationGroup (ptr, "death1", 2);
     }
