@@ -252,17 +252,14 @@ namespace SFO
     /// \brief creates an SDL cursor from an Ogre texture
     void InputWrapper::_createCursorFromResource(const std::string& name, Ogre::TexturePtr tex, Uint8 size_x, Uint8 size_y, Uint8 hotspot_x, Uint8 hotspot_y)
     {
-        Ogre::Image::Box box;
-        box.right = size_x;
-        box.bottom = size_y;
-
         //get the surfaces set up
         Ogre::HardwarePixelBufferSharedPtr buffer = tex.get()->getBuffer();
-        buffer.get()->lock(box, Ogre::HardwarePixelBuffer::HBL_READ_ONLY);
+        buffer.get()->lock(Ogre::HardwarePixelBuffer::HBL_READ_ONLY);
 
         std::string tempName = "_" + name + "_processing";
 
-        //we need to copy this to a temporary texture since Ogre doesn't like us using getColourAt
+        //we need to copy this to a temporary texture first because the cursors might be in DDS format,
+        //and Ogre doesn't have an interface to read DDS
         Ogre::TexturePtr tempTexture = Ogre::TextureManager::getSingleton().createManual(
                 tempName,
                 Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
@@ -275,10 +272,9 @@ namespace SFO
         tempTexture->getBuffer()->blit(buffer);
         buffer->unlock();
 
-        Ogre::HardwarePixelBufferSharedPtr new_buffer = tempTexture.get()->getBuffer();
-        //FIXME: Casting away constness is almost certainly the wrong thing to do here
-        Ogre::PixelBox& pixels = const_cast<Ogre::PixelBox&>(new_buffer->lock(box, Ogre::HardwarePixelBuffer::HBL_READ_ONLY));
-
+        // now blit to memory
+        Ogre::Image destImage;
+        tempTexture->convertToImage(destImage);
 
         SDL_Surface* surf = SDL_CreateRGBSurface(0,size_x,size_y,32,0xFF000000,0x00FF0000,0x0000FF00,0x000000FF);
 
@@ -288,7 +284,7 @@ namespace SFO
         {
             for(size_t y = 0; y < size_y; ++y)
             {
-                Ogre::ColourValue clr = pixels.getColourAt(x, y, 0);
+                Ogre::ColourValue clr = destImage.getColourAt(x, y, 0);
 
                 //set the pixel on the SDL surface to the same value as the Ogre texture's
                 _putPixel(surf, x, y, SDL_MapRGBA(surf->format, clr.r*255, clr.g*255, clr.b*255, clr.a*255));
@@ -299,8 +295,6 @@ namespace SFO
         SDL_Cursor* curs = SDL_CreateColorCursor(surf, hotspot_x, hotspot_y);
         SDL_SetCursor(curs);
         mCursorMap.insert(CursorMap::value_type(std::string(name), curs));
-
-        new_buffer->unlock();
 
         //clean up
         SDL_FreeSurface(surf);
