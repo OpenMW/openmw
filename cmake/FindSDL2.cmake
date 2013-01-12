@@ -166,6 +166,10 @@ IF(SDL2_LIBRARY_TEMP)
   IF(MINGW)
     SET(SDL2_LIBRARY_TEMP ${MINGW32_LIBRARY} ${SDL2_LIBRARY_TEMP})
   ENDIF(MINGW)
+  
+  IF(WIN32)
+    SET(SDL2_LIBRARY_TEMP winmm imm32 version msimg32 ${SDL2_LIBRARY_TEMP})
+  ENDIF(WIN32)
 
   # Set the final string here so the GUI reflects the final state.
   SET(SDL2_LIBRARY ${SDL2_LIBRARY_TEMP} CACHE STRING "Where the SDL2 Library can be found")
