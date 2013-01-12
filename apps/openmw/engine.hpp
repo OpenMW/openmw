@@ -62,6 +62,7 @@ namespace OMW
     {
             MWBase::Environment mEnvironment;
             ToUTF8::FromType mEncoding;
+            ToUTF8::Utf8Encoder* mEncoder;
             Files::PathContainer mDataDirs;
             boost::filesystem::path mResDir;
             OEngine::Render::OgreRenderer *mOgre;
