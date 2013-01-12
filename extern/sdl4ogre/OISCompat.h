@@ -1,8 +1,8 @@
 #ifndef _OIS_SDL_COMPAT_H
 #define _OIS_SDL_COMPAT_H
 
-#include <SDL2/SDL_events.h>
-#include <SDL2/SDL_types.h>
+#include <SDL_events.h>
+#include <SDL_types.h>
 
 namespace OIS
 {

@@ -1,4 +1,7 @@
 #include "engine.hpp"
+
+#include <SDL.h>
+
 #include "components/esm/loadcell.hpp"
 
 #include <OgreRoot.h>
@@ -36,7 +39,6 @@
 
 #include "mwmechanics/mechanicsmanagerimp.hpp"
 
-#include "SDL2/SDL.h"
 
 
 void OMW::Engine::executeLocalScripts()

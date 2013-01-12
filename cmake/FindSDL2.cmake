@@ -70,6 +70,7 @@
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
+
 FIND_PATH(SDL2_INCLUDE_DIR SDL.h
   HINTS
   $ENV{SDL2DIR}

@@ -1,7 +1,7 @@
 #ifndef _SDL4OGRE_CURSORMANAGER_H
 #define _SDL4OGRE_CURSORMANAGER_H
 
-#include "SDL.h"
+#include <SDL.h>
 
 #include "cursormanager.hpp"
 #include <map>

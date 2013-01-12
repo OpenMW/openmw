@@ -1,9 +1,9 @@
 #ifndef _SDL4OGRE_SDLINPUTWRAPPER_H
 #define _SDL4OGRE_SDLINPUTWRAPPER_H
 
-#include "SDL2/SDL_events.h"
+#include <SDL_events.h>
 
-#include <OGRE/OgreRenderWindow.h>
+#include <OgreRenderWindow.h>
 #include <boost/unordered_map.hpp>
 
 #include "OISCompat.h"

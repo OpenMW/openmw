@@ -4,8 +4,8 @@
 #include <iterator>
 
 #include "MyGUI_UString.h"
-#include "MYGUI/MyGUI_IPointer.h"
-#include "MYGUI/MyGUI_ResourceImageSetPointer.h"
+#include "MyGUI_IPointer.h"
+#include "MyGUI_ResourceImageSetPointer.h"
 #include "MyGUI_TextureUtility.h"
 
 #include <openengine/ogre/renderer.hpp>

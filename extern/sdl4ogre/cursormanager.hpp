@@ -1,7 +1,7 @@
 #ifndef _SDL4OGRE_CURSOR_MANAGER_H
 #define _SDL4OGRE_CURSOR_MANAGER_H
 
-#include "SDL2/SDL_types.h"
+#include <SDL_types.h>
 #include <string>
 
 namespace Ogre

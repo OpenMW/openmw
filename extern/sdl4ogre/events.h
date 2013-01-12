@@ -1,7 +1,7 @@
 #ifndef _SFO_EVENTS_H
 #define _SFO_EVENTS_H
 
-#include <SDL2/SDL.h>
+#include <SDL.h>
 
 
 ////////////
