@@ -35,7 +35,6 @@ namespace SFO
         void warpMouse(int x, int y);
 
     private:
-        bool _start();
 
         bool _handleWarpMotion(const SDL_MouseMotionEvent& evt);
         void _wrapMousePointer(const SDL_MouseMotionEvent &evt);

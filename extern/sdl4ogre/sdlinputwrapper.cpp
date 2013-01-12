@@ -28,21 +28,7 @@ namespace SFO
         mMouseX(0)
     {
         _setupOISKeys();
-        _start();
-    }
 
-    InputWrapper::~InputWrapper()
-    {
-        if(mSDLWindow != NULL)
-            SDL_DestroyWindow(mSDLWindow);
-        mSDLWindow = NULL;
-
-        SDL_StopTextInput();
-        SDL_Quit();
-    }
-
-    bool InputWrapper::_start()
-    {
         //get the HWND from ogre's renderwindow
         size_t windowHnd;
         mWindow->getCustomAttribute("WINDOW", &windowHnd);
@@ -50,12 +36,11 @@ namespace SFO
         //wrap our own event handler around ogre's
         mSDLWindow = SDL_CreateWindowFrom((void*)windowHnd);
 
-        if(mSDLWindow == NULL)
-            return false;
+        assert(mSDLWindow != NULL);
 
         //without this SDL will take ownership of the window and iconify it when
         //we alt-tab away.
-        SDL_SetWindowFullscreen(mSDLWindow, 0);
+        //SDL_SetWindowFullscreen(mSDLWindow, 0);
 
         //translate our keypresses into text
         SDL_StartTextInput();
@@ -91,14 +76,20 @@ namespace SFO
             XFlush(display);
         }
 #endif
-        return true;
+    }
+
+    InputWrapper::~InputWrapper()
+    {
+        if(mSDLWindow != NULL)
+            SDL_DestroyWindow(mSDLWindow);
+        mSDLWindow = NULL;
+
+        SDL_StopTextInput();
+        SDL_Quit();
     }
 
     void InputWrapper::capture()
     {
-        if(!_start())
-            throw std::runtime_error(SDL_GetError());
-
         SDL_Event evt;
         while(SDL_PollEvent(&evt))
         {
