@@ -36,6 +36,8 @@
 
 #include "mwmechanics/mechanicsmanagerimp.hpp"
 
+#include "SDL2/SDL.h"
+
 
 void OMW::Engine::executeLocalScripts()
 {
@@ -272,6 +274,9 @@ std::string OMW::Engine::loadSettings (Settings::Manager & settings)
     else if (boost::filesystem::exists(mCfgMgr.getGlobalPath().string() + "/transparency-overrides.cfg"))
         nifOverrides.loadTransparencyOverrides(mCfgMgr.getGlobalPath().string() + "/transparency-overrides.cfg");
 
+    settings.setBool("hardware cursors", "GUI", true);
+    settings.setBool("debug", "Engine", mDebug);
+
     return settingspath;
 }
 
@@ -321,6 +326,16 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     mOgre->createWindow("OpenMW", windowSettings);
 
     loadBSA();
+
+    Uint32 flags = SDL_INIT_VIDEO|SDL_INIT_NOPARACHUTE;
+    if(SDL_WasInit(flags) == 0)
+    {
+        //kindly ask SDL not to trash our OGL context
+        //might this be related to http://bugzilla.libsdl.org/show_bug.cgi?id=748 ?
+        SDL_SetHint(SDL_HINT_RENDER_DRIVER, "software");
+        if(SDL_Init(flags) != 0)
+            throw std::runtime_error("Couldn't initialize SDL!");
+    }
 
     // cursor replacer (converts the cursor from the bsa so they can be used by mygui)
     MWGui::CursorReplace replacer;

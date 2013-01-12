@@ -13,6 +13,7 @@
 #include <MyGUI_RenderManager.h>
 #include <MyGUI_Widget.h>
 #include <MyGUI_Button.h>
+#include <MyGUI_PointerManager.h>
 
 #include <openengine/ogre/renderer.hpp>
 
@@ -66,8 +67,6 @@ namespace MWInput
         mInputManager->setMouseEventCallback (this);
         mInputManager->setKeyboardEventCallback (this);
         mInputManager->setWindowEventCallback(this);
-
-        mWindows.setCursorChangeClient(mInputManager);
 
         std::string file = userFileExists ? userFile : "";
         mInputBinder = new ICS::InputControlSystem(file, true, this, NULL, A_Last);
@@ -225,6 +224,9 @@ namespace MWInput
             bool was_relative = mInputManager->getMouseRelative();
             bool is_relative = !mWindows.isGuiMode();
 
+            //we let the mouse escape in the main menu
+            mInputManager->setGrabPointer(!main_menu);
+
             // don't keep the pointer away from the window edge in gui mode
             // stop using raw mouse motions and switch to system cursor movements
             mInputManager->setMouseRelative(is_relative);
@@ -235,9 +237,6 @@ namespace MWInput
             {
                 mInputManager->warpMouse(mMouseX, mMouseY);
             }
-
-            //we let the mouse escape in the main menu
-            mInputManager->setGrabPointer(!main_menu);
         }
 
         // Disable movement in Gui mode

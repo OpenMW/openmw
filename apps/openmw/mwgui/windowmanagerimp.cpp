@@ -11,7 +11,7 @@
 #include <openengine/ogre/renderer.hpp>
 #include <openengine/gui/manager.hpp>
 
-#include <extern/sdl4ogre/sdlinputwrapper.hpp>
+#include <extern/sdl4ogre/sdlcursormanager.hpp>
 
 #include <components/settings/settings.hpp>
 #include <components/translation/translation.hpp>
@@ -115,7 +115,8 @@ WindowManager::WindowManager(
   , mSubtitlesEnabled(Settings::Manager::getBool ("subtitles", "GUI"))
   , mHudEnabled(true)
   , mTranslationDataStorage (translationDataStorage)
-  , mCursorChangeClient(NULL)
+  , mCursorManager(NULL)
+  , mUseHardwareCursors(Settings::Manager::getBool("hardware cursors", "GUI"))
 {
 
     // Set up the GUI system
@@ -190,9 +191,6 @@ WindowManager::WindowManager(
 
     mInputBlocker = mGui->createWidget<MyGUI::Widget>("",0,0,w,h,MyGUI::Align::Default,"Windows","");
 
-    //make sure the cursor in the GL context isn't visible
-    MyGUI::PointerManager::getInstance().setVisible(false);
-
     // The HUD is always on
     mHud->setVisible(true);
 
@@ -211,6 +209,13 @@ WindowManager::WindowManager(
 
     unsetSelectedSpell();
     unsetSelectedWeapon();
+
+    //set up the hardware cursor manager
+    mCursorManager = new SFO::SDLCursorManager(Settings::Manager::getBool("debug", "Engine"));
+
+    setUseHardwareCursors(mUseHardwareCursors);
+    onCursorChange(PointerManager::getInstance().getDefaultPointer());
+    mCursorManager->cursorVisibilityChange(false);
 
     // Set up visibility
     updateVisible();
@@ -252,6 +257,7 @@ WindowManager::~WindowManager()
     cleanupGarbage();
 
     delete mGuiManager;
+    delete mCursorManager;
 }
 
 void WindowManager::cleanupGarbage()
@@ -740,15 +746,30 @@ void WindowManager::setSpellVisibility(bool visible)
     mHud->setEffectVisible (visible);
 }
 
+void WindowManager::setUseHardwareCursors(bool use)
+{
+    mCursorManager->setEnabled(use);
+
+    if(!use)
+    {
+        MyGUI::PointerManager::getInstance().setVisible(false);
+    }
+    else
+    {
+        MyGUI::PointerManager::getInstance().setVisible(mCursorVisible);
+    }
+}
+
 void WindowManager::setCursorVisible(bool visible)
 {
-    if(visible == mCursorVisible)
+    if(mCursorVisible == visible)
         return;
 
     mCursorVisible = visible;
+    mCursorManager->cursorVisibilityChange(visible);
 
-    if(mCursorChangeClient != NULL)
-        mCursorChangeClient->cursorVisible(visible);
+    if(!mUseHardwareCursors)
+        MyGUI::PointerManager::getInstance().setVisible(visible);
 }
 
 void WindowManager::setDragDrop(bool dragDrop)
@@ -780,21 +801,10 @@ void WindowManager::onRetrieveTag(const MyGUI::UString& _tag, MyGUI::UString& _r
     }
 }
 
- void WindowManager::setCursorChangeClient(SFO::CursorChangeClient* client)
- {
-     mCursorChangeClient = client;
-     onCursorChange(PointerManager::getInstance().getDefaultPointer());
-     client->cursorVisible(mCursorVisible);
- }
-
 void WindowManager::onCursorChange(const std::string &name)
 {
-    //we have no client, don't care.
-    if(!mCursorChangeClient)
-        return;
-
-    //the client doesn't want any more info about this cursor
-    if(!mCursorChangeClient->cursorChanged(name))
+    //the cursor manager doesn't want any more info about this cursor
+    if(!mCursorManager->cursorChanged(name))
         return;
     //See if we can get the information we need out of the cursor resource
     ResourceImageSetPointerFix* imgSetPtr = dynamic_cast<ResourceImageSetPointerFix*>(MyGUI::PointerManager::getInstance().getByName(name));
@@ -806,7 +816,7 @@ void WindowManager::onCursorChange(const std::string &name)
 
         Ogre::TexturePtr tex = Ogre::TextureManager::getSingleton().getByName(tex_name);
 
-        //everything looks good, send it to the client
+        //everything looks good, send it to the cursor manager
         if(!tex.isNull())
         {
             Uint8 size_x = imgSetPtr->getSize().width;
@@ -814,7 +824,7 @@ void WindowManager::onCursorChange(const std::string &name)
             Uint8 hotspot_x = imgSetPtr->getHotSpot().left;
             Uint8 hotspot_y = imgSetPtr->getHotSpot().top;
 
-            mCursorChangeClient->receiveCursorInfo(name, tex, size_x, size_y, hotspot_x, hotspot_y);
+            mCursorManager->receiveCursorInfo(name, tex, size_x, size_y, hotspot_x, hotspot_y);
         }
     }
 }
@@ -823,6 +833,7 @@ void WindowManager::processChangedSettings(const Settings::CategorySettingVector
 {
     mHud->setFpsLevel(Settings::Manager::getInt("fps", "HUD"));
     mToolTips->setDelay(Settings::Manager::getFloat("tooltip delay", "GUI"));
+    setUseHardwareCursors(Settings::Manager::getBool("hardware cursors", "GUI"));
 
     bool changeRes = false;
     for (Settings::CategorySettingVector::const_iterator it = changed.begin();

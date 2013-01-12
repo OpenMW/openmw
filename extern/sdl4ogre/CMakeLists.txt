@@ -4,9 +4,15 @@ set(SDL4OGRE_LIBRARY "sdl4ogre")
 
 set(SDL4OGRE_SOURCE_FILES
 	sdlinputwrapper.cpp
+	sdlcursormanager.cpp
 )
 
-add_library(${SDL4OGRE_LIBRARY} STATIC ${SDL4OGRE_SOURCE_FILES})
+set(SDL4OGRE_HEADER_FILES
+	OISCompat.h
+	cursormanager.hpp
+)
+
+add_library(${SDL4OGRE_LIBRARY} STATIC ${SDL4OGRE_SOURCE_FILES} ${SDL4OGRE_HEADER_FILES})
 
 link_directories(${CMAKE_CURRENT_BINARY_DIR})
 

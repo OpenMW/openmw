@@ -3,7 +3,6 @@
 
 #include <OgrePlatform.h>
 #include <OgreRoot.h>
-#include <OgreHardwarePixelBuffer.h>
 #include <cstdint>
 
 #if OGRE_PLATFORM == OGRE_PLATFORM_LINUX
@@ -28,8 +27,8 @@ namespace SFO
         mMouseY(0),
         mMouseX(0)
     {
-        _start();
         _setupOISKeys();
+        _start();
     }
 
     InputWrapper::~InputWrapper()
@@ -38,82 +37,60 @@ namespace SFO
             SDL_DestroyWindow(mSDLWindow);
         mSDLWindow = NULL;
 
-        CursorMap::const_iterator curs_iter = mCursorMap.begin();
-
-        while(curs_iter != mCursorMap.end())
-        {
-            SDL_FreeCursor(curs_iter->second);
-            ++curs_iter;
-        }
-
-        mCursorMap.clear();
-
         SDL_StopTextInput();
         SDL_Quit();
     }
 
     bool InputWrapper::_start()
     {
-        Uint32 flags = SDL_INIT_VIDEO;
-        if(SDL_WasInit(flags) == 0)
-        {
-            //get the HWND from ogre's renderwindow
-            size_t windowHnd;
-            mWindow->getCustomAttribute("WINDOW", &windowHnd);
+        //get the HWND from ogre's renderwindow
+        size_t windowHnd;
+        mWindow->getCustomAttribute("WINDOW", &windowHnd);
 
-            //kindly ask SDL not to trash our OGL context
-            //might this be related to http://bugzilla.libsdl.org/show_bug.cgi?id=748 ?
-            SDL_SetHint(SDL_HINT_RENDER_DRIVER, "software");
-            if(SDL_Init(SDL_INIT_VIDEO) != 0)
-                return false;
+        //wrap our own event handler around ogre's
+        mSDLWindow = SDL_CreateWindowFrom((void*)windowHnd);
 
-            //wrap our own event handler around ogre's
-            mSDLWindow = SDL_CreateWindowFrom((void*)windowHnd);
+        if(mSDLWindow == NULL)
+            return false;
 
-            if(mSDLWindow == NULL)
-                return false;
+        //without this SDL will take ownership of the window and iconify it when
+        //we alt-tab away.
+        SDL_SetWindowFullscreen(mSDLWindow, 0);
 
-            //without this SDL will take ownership of the window and iconify it when
-            //we alt-tab away.
-            SDL_SetWindowFullscreen(mSDLWindow, 0);
-
-            //translate our keypresses into text
-            SDL_StartTextInput();
+        //translate our keypresses into text
+        SDL_StartTextInput();
 
 #if OGRE_PLATFORM == OGRE_PLATFORM_LINUX
-            //linux-specific event-handling fixups
-            //see http://bugzilla.libsdl.org/show_bug.cgi?id=730
-            SDL_SysWMinfo wm_info;
-            SDL_VERSION(&wm_info.version);
+        //linux-specific event-handling fixups
+        //see http://bugzilla.libsdl.org/show_bug.cgi?id=730
+        SDL_SysWMinfo wm_info;
+        SDL_VERSION(&wm_info.version);
 
-            if(SDL_GetWindowWMInfo(mSDLWindow,&wm_info))
-            {
-                Display* display = wm_info.info.x11.display;
-                Window w = wm_info.info.x11.window;
+        if(SDL_GetWindowWMInfo(mSDLWindow,&wm_info))
+        {
+            Display* display = wm_info.info.x11.display;
+            Window w = wm_info.info.x11.window;
 
-                // Set the input hints so we get keyboard input
-                XWMHints *wmhints = XAllocWMHints();
-                if (wmhints) {
-                    wmhints->input = True;
-                    wmhints->flags = InputHint;
-                    XSetWMHints(display, w, wmhints);
-                    XFree(wmhints);
-                }
-
-                //make sure to subscribe to XLib's events
-                XSelectInput(display, w,
-                             (FocusChangeMask | EnterWindowMask | LeaveWindowMask |
-                             ExposureMask | ButtonPressMask | ButtonReleaseMask |
-                             PointerMotionMask | KeyPressMask | KeyReleaseMask |
-                             PropertyChangeMask | StructureNotifyMask |
-                             KeymapStateMask));
-
-                XFlush(display);
+            // Set the input hints so we get keyboard input
+            XWMHints *wmhints = XAllocWMHints();
+            if (wmhints) {
+                wmhints->input = True;
+                wmhints->flags = InputHint;
+                XSetWMHints(display, w, wmhints);
+                XFree(wmhints);
             }
-#endif
-            SDL_ShowCursor(SDL_FALSE);
-        }
 
+            //make sure to subscribe to XLib's events
+            XSelectInput(display, w,
+                         (FocusChangeMask | EnterWindowMask | LeaveWindowMask |
+                         ExposureMask | ButtonPressMask | ButtonReleaseMask |
+                         PointerMotionMask | KeyPressMask | KeyReleaseMask |
+                         PropertyChangeMask | StructureNotifyMask |
+                         KeymapStateMask));
+
+            XFlush(display);
+        }
+#endif
         return true;
     }
 
@@ -209,10 +186,11 @@ namespace SFO
 
         //eep, wrap the pointer manually if the input driver doesn't support
         //relative positioning natively
-        if(SDL_SetRelativeMouseMode(relative ? SDL_TRUE : SDL_FALSE) == -1)
+        SDL_SetRelativeMouseMode(relative ? SDL_TRUE : SDL_FALSE);
+
+        if(relative)
         {
-            if(relative)
-                mWrapPointer = true;
+             mWrapPointer = true;
         }
 
         //now remove all mouse events using the old setting from the queue
@@ -220,118 +198,6 @@ namespace SFO
 
         SDL_Event dummy[20];
         SDL_PeepEvents(dummy, 20, SDL_GETEVENT, SDL_MOUSEMOTION, SDL_MOUSEMOTION);
-    }
-
-    bool InputWrapper::cursorChanged(const std::string &name)
-    {
-        CursorMap::const_iterator curs_iter = mCursorMap.find(name);
-
-        //we have this cursor
-        if(curs_iter != mCursorMap.end())
-        {
-            SDL_SetCursor(curs_iter->second);
-            return false;
-        }
-        else
-        {
-            //they should get back to use with more info
-            return true;
-        }
-    }
-
-    void InputWrapper::cursorVisible(bool visible)
-    {
-        SDL_ShowCursor(visible ? SDL_TRUE : SDL_FALSE);
-    }
-
-    void InputWrapper::receiveCursorInfo(const std::string& name, Ogre::TexturePtr tex, Uint8 size_x, Uint8 size_y, Uint8 hotspot_x, Uint8 hotspot_y)
-    {
-        _createCursorFromResource(name, tex, size_x, size_y, hotspot_x, hotspot_y);
-    }
-
-    /// \brief creates an SDL cursor from an Ogre texture
-    void InputWrapper::_createCursorFromResource(const std::string& name, Ogre::TexturePtr tex, Uint8 size_x, Uint8 size_y, Uint8 hotspot_x, Uint8 hotspot_y)
-    {
-        //get the surfaces set up
-        Ogre::HardwarePixelBufferSharedPtr buffer = tex.get()->getBuffer();
-        buffer.get()->lock(Ogre::HardwarePixelBuffer::HBL_READ_ONLY);
-
-        std::string tempName = "_" + name + "_processing";
-
-        //we need to copy this to a temporary texture first because the cursors might be in DDS format,
-        //and Ogre doesn't have an interface to read DDS
-        Ogre::TexturePtr tempTexture = Ogre::TextureManager::getSingleton().createManual(
-                tempName,
-                Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
-                Ogre::TEX_TYPE_2D,
-                size_x, size_y,
-                0,
-                Ogre::PF_FLOAT16_RGBA,
-                Ogre::TU_STATIC);
-
-        tempTexture->getBuffer()->blit(buffer);
-        buffer->unlock();
-
-        // now blit to memory
-        Ogre::Image destImage;
-        tempTexture->convertToImage(destImage);
-
-        SDL_Surface* surf = SDL_CreateRGBSurface(0,size_x,size_y,32,0xFF000000,0x00FF0000,0x0000FF00,0x000000FF);
-
-
-        //copy the Ogre texture to an SDL surface
-        for(size_t x = 0; x < size_x; ++x)
-        {
-            for(size_t y = 0; y < size_y; ++y)
-            {
-                Ogre::ColourValue clr = destImage.getColourAt(x, y, 0);
-
-                //set the pixel on the SDL surface to the same value as the Ogre texture's
-                _putPixel(surf, x, y, SDL_MapRGBA(surf->format, clr.r*255, clr.g*255, clr.b*255, clr.a*255));
-            }
-        }
-
-        //set the cursor and store it for later
-        SDL_Cursor* curs = SDL_CreateColorCursor(surf, hotspot_x, hotspot_y);
-        SDL_SetCursor(curs);
-        mCursorMap.insert(CursorMap::value_type(std::string(name), curs));
-
-        //clean up
-        SDL_FreeSurface(surf);
-        Ogre::TextureManager::getSingleton().remove(tempName);
-    }
-
-    void InputWrapper::_putPixel(SDL_Surface *surface, int x, int y, Uint32 pixel)
-    {
-        int bpp = surface->format->BytesPerPixel;
-        /* Here p is the address to the pixel we want to set */
-        Uint8 *p = (Uint8 *)surface->pixels + y * surface->pitch + x * bpp;
-
-        switch(bpp) {
-        case 1:
-            *p = pixel;
-            break;
-
-        case 2:
-            *(Uint16 *)p = pixel;
-            break;
-
-        case 3:
-            if(SDL_BYTEORDER == SDL_BIG_ENDIAN) {
-                p[0] = (pixel >> 16) & 0xff;
-                p[1] = (pixel >> 8) & 0xff;
-                p[2] = pixel & 0xff;
-            } else {
-                p[0] = pixel & 0xff;
-                p[1] = (pixel >> 8) & 0xff;
-                p[2] = (pixel >> 16) & 0xff;
-            }
-            break;
-
-        case 4:
-            *(Uint32 *)p = pixel;
-            break;
-        }
     }
 
     /// \brief Internal method for ignoring relative motions as a side effect

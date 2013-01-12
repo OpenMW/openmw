@@ -57,7 +57,7 @@ namespace MWGui
 
 namespace SFO
 {
-    class CursorChangeClient;
+    class CursorManager;
 }
 
 namespace MWBase
@@ -243,8 +243,6 @@ namespace MWBase
             virtual void startTraining(MWWorld::Ptr actor) = 0;
 
             virtual const Translation::Storage& getTranslationDataStorage() const = 0;
-
-            virtual void setCursorChangeClient(SFO::CursorChangeClient* client) = 0;
     };
 }
 

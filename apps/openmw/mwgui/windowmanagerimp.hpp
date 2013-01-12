@@ -50,7 +50,7 @@ namespace OEngine
 
 namespace SFO
 {
-    class CursorChangeClient;
+    class CursorManager;
 }
 
 namespace MWGui
@@ -233,8 +233,6 @@ namespace MWGui
 
     virtual const Translation::Storage& getTranslationDataStorage() const;
 
-    virtual void setCursorChangeClient(SFO::CursorChangeClient* client);
-
   private:
     OEngine::GUI::MyGUIManager *mGuiManager;
     HUD *mHud;
@@ -290,7 +288,7 @@ namespace MWGui
     MyGUI::Gui *mGui; // Gui
     std::vector<GuiMode> mGuiModes;
 
-    SFO::CursorChangeClient* mCursorChangeClient;
+    SFO::CursorManager* mCursorManager;
 
     std::vector<OEngine::GUI::Layout*> mGarbageDialogs;
     void cleanupGarbage();
@@ -314,6 +312,9 @@ namespace MWGui
     unsigned int mBatchCount;
 
     void onDialogueWindowBye();
+
+    bool mUseHardwareCursors;
+    void setUseHardwareCursors(bool use);
 
     /**
      * Called when MyGUI tries to retrieve a tag. This usually corresponds to a GMST string,
