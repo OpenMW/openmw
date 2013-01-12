@@ -177,6 +177,8 @@ NIFFile::NIFFile(const std::string &name, psudo_private_modifier)
 {
     inp = Ogre::ResourceGroupManager::getSingleton().openResource(name);
     parse();
+    // Make sure to close the file after it was loaded into memory
+    inp.setNull();
 }
 
 NIFFile::~NIFFile()
