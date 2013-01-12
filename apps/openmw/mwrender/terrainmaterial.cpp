@@ -153,7 +153,8 @@ namespace MWRender
         --freeTextureUnits;
         // colourmap
         --freeTextureUnits;
-        freeTextureUnits -= 3; // shadow PSSM
+        // shadow
+        --freeTextureUnits;
 
         --freeTextureUnits; // caustics
 
