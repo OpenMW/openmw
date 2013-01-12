@@ -37,6 +37,11 @@
 #include <vector>
 #include <cassert>
 
+#include <boost/weak_ptr.hpp>
+#include <boost/shared_ptr.hpp>
+#include <boost/make_shared.hpp>
+#include <boost/detail/endian.hpp>
+
 #include <libs/platform/stdint.h>
 
 #include "record.hpp"
@@ -93,6 +98,14 @@ class NIFFile
         return u.f;
     }
 
+    class LoadedCache;
+    friend class LoadedCache;
+
+    // attempt to protect NIFFile from misuse...
+    struct psudo_private_modifier {}; // this dirty little trick should optimize out
+    NIFFile (NIFFile const &);
+    void operator = (NIFFile const &);
+
 public:
     /// Used for error handling
     void fail(const std::string &msg)
@@ -108,19 +121,21 @@ public:
                  << "File: "<<filename <<std::endl;
     }
 
-    /// Open a NIF stream. The name is used for error messages.
-    NIFFile(const std::string &name)
-      : filename(name)
-    {
-        inp = Ogre::ResourceGroupManager::getSingleton().openResource(name);
-        parse();
-    }
+    typedef boost::shared_ptr <NIFFile> ptr;
 
-    ~NIFFile()
+    /// Open a NIF stream. The name is used for error messages.
+    NIFFile(const std::string &name, psudo_private_modifier);
+    ~NIFFile();
+
+    static ptr create (const std::string &name);
+    static void lockCache ();
+    static void unlockCache ();
+
+    struct CacheLock
     {
-        for(std::size_t i=0; i<records.size(); i++)
-            delete records[i];
-    }
+        CacheLock () { lockCache (); }
+        ~CacheLock () { unlockCache (); }
+    };
 
     /// Get a given record
     Record *getRecord(size_t index)

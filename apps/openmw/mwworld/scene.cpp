@@ -172,6 +172,8 @@ namespace MWWorld
 
     void Scene::changeCell (int X, int Y, const ESM::Position& position, bool adjustPlayerPos)
     {
+        Nif::NIFFile::CacheLock cachelock;
+
         mRendering.preCellChange(mCurrentCell);
 
         // remove active
