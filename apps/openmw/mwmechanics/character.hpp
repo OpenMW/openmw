@@ -4,6 +4,11 @@
 namespace MWMechanics
 {
 
+class CharacterController
+{
+
+};
+
 }
 
 #endif /* GAME_MWMECHANICS_CHARACTER_HPP */

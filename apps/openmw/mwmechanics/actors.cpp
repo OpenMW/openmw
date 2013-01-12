@@ -166,30 +166,28 @@ namespace MWMechanics
     void Actors::addActor (const MWWorld::Ptr& ptr)
     {
         if (!MWWorld::Class::get (ptr).getCreatureStats (ptr).isDead())
-            mActors.insert (ptr);
+            mActors[ptr] = CharacterController();
         else
             MWBase::Environment::get().getWorld()->playAnimationGroup (ptr, "death1", 2);
     }
 
     void Actors::removeActor (const MWWorld::Ptr& ptr)
     {
-        std::set<MWWorld::Ptr>::iterator iter = mActors.find (ptr);
-
-        if (iter!=mActors.end())
-            mActors.erase (iter);
+        PtrControllerMap::iterator iter = mActors.find(ptr);
+        if(iter != mActors.end())
+            mActors.erase(iter);
     }
 
     void Actors::dropActors (const MWWorld::Ptr::CellStore *cellStore)
     {
-        std::set<MWWorld::Ptr>::iterator iter = mActors.begin();
-
-        while (iter!=mActors.end())
-            if (iter->getCell()==cellStore)
-            {
-                mActors.erase (iter++);
-            }
+        PtrControllerMap::iterator iter = mActors.begin();
+        while(iter != mActors.end())
+        {
+            if(iter->first.getCell()==cellStore)
+                mActors.erase(iter++);
             else
                 ++iter;
+        }
     }
 
     void Actors::update (std::vector<std::pair<std::string, Ogre::Vector3> >& movement, float duration,
@@ -201,79 +199,72 @@ namespace MWMechanics
         {
             float totalDuration = mDuration;
             mDuration = 0;
-            
-            std::set<MWWorld::Ptr>::iterator iter (mActors.begin());
 
-            while (iter!=mActors.end())
+            PtrControllerMap::iterator iter(mActors.begin());
+            while(iter != mActors.end())
             {
-                if (!MWWorld::Class::get (*iter).getCreatureStats (*iter).isDead())
+                if(!MWWorld::Class::get(iter->first).getCreatureStats(iter->first).isDead())
                 {
-                    updateActor (*iter, totalDuration);
+                    updateActor(iter->first, totalDuration);
+                    if(iter->first.getTypeName() == typeid(ESM::NPC).name())
+                        updateNpc(iter->first, totalDuration, paused);
 
-                    if (iter->getTypeName()==typeid (ESM::NPC).name())
-                        updateNpc (*iter, totalDuration, paused);
-                }
-
-                if (MWWorld::Class::get (*iter).getCreatureStats (*iter).isDead())
-                {
-                    // workaround: always keep player alive for now
-                    // \todo remove workaround, once player death can be handled
-                    if (iter->getRefData().getHandle()=="player")
+                    if(!MWWorld::Class::get(iter->first).getCreatureStats(iter->first).isDead())
                     {
-                        MWMechanics::DynamicStat<float> stat (
-                            MWWorld::Class::get (*iter).getCreatureStats (*iter).getHealth());
-                            
-                        if (stat.getModified()<1)
-                        {
-                            stat.setModified (1, 0);
-                            MWWorld::Class::get (*iter).getCreatureStats (*iter).setHealth (stat);
-                        }
-
-                        MWWorld::Class::get (*iter).getCreatureStats (*iter).resurrect();
-                        ++iter;
+                        iter++;
                         continue;
                     }
-
-                    ++mDeathCount[MWWorld::Class::get (*iter).getId (*iter)];
-
-                    MWBase::Environment::get().getWorld()->playAnimationGroup (*iter, "death1", 0);
-
-                    if (MWWorld::Class::get (*iter).isEssential (*iter))
-                        MWBase::Environment::get().getWindowManager()->messageBox (
-                            "#{sKilledEssential}", std::vector<std::string>());
-
-                    mActors.erase (iter++);
                 }
-                else
+
+                // workaround: always keep player alive for now
+                // \todo remove workaround, once player death can be handled
+                if(iter->first.getRefData().getHandle()=="player")
+                {
+                    MWMechanics::DynamicStat<float> stat (
+                        MWWorld::Class::get(iter->first).getCreatureStats(iter->first).getHealth());
+
+                    if (stat.getModified()<1)
+                    {
+                        stat.setModified (1, 0);
+                        MWWorld::Class::get(iter->first).getCreatureStats(iter->first).setHealth(stat);
+                    }
+
+                    MWWorld::Class::get(iter->first).getCreatureStats(iter->first).resurrect();
                     ++iter;
+                    continue;
+                }
+
+                ++mDeathCount[MWWorld::Class::get(iter->first).getId(iter->first)];
+
+                MWBase::Environment::get().getWorld()->playAnimationGroup(iter->first, "death1", 0);
+
+                if(MWWorld::Class::get(iter->first).isEssential(iter->first))
+                    MWBase::Environment::get().getWindowManager()->messageBox(
+                        "#{sKilledEssential}", std::vector<std::string>());
+
+                mActors.erase(iter++);
             }
         }
 
-        for (std::set<MWWorld::Ptr>::iterator iter (mActors.begin()); iter!=mActors.end();
-            ++iter)
+        for(PtrControllerMap::iterator iter(mActors.begin());iter != mActors.end();++iter)
         {
-            Ogre::Vector3 vector = MWWorld::Class::get (*iter).getMovementVector (*iter);
-
-            if (vector!=Ogre::Vector3::ZERO)
-                movement.push_back (std::make_pair (iter->getRefData().getHandle(), vector));
+            Ogre::Vector3 vector = MWWorld::Class::get(iter->first).getMovementVector(iter->first);
+            if(vector!=Ogre::Vector3::ZERO)
+                movement.push_back(std::make_pair(iter->first.getRefData().getHandle(), vector));
         }
     }
 
     void Actors::restoreDynamicStats()
     {
-        for (std::set<MWWorld::Ptr>::iterator iter (mActors.begin()); iter!=mActors.end(); ++iter)
-        {
-            calculateRestoration (*iter, 3600);
-        }
+        for(PtrControllerMap::iterator iter(mActors.begin());iter != mActors.end();++iter)
+            calculateRestoration(iter->first, 3600);
     }
     
     int Actors::countDeaths (const std::string& id) const
     {
-        std::map<std::string, int>::const_iterator iter = mDeathCount.find (id);
-
-        if (iter!=mDeathCount.end())
+        std::map<std::string, int>::const_iterator iter = mDeathCount.find(id);
+        if(iter != mDeathCount.end())
             return iter->second;
-
         return 0;
     }
 }

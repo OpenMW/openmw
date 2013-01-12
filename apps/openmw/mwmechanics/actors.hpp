@@ -6,6 +6,8 @@
 #include <string>
 #include <map>
 
+#include "character.hpp"
+
 namespace Ogre
 {
     class Vector3;
@@ -21,9 +23,10 @@ namespace MWMechanics
 {
     class Actors
     {
-            std::set<MWWorld::Ptr> mActors;
-            float mDuration;
-            std::map<std::string, int> mDeathCount;
+        typedef std::map<MWWorld::Ptr,CharacterController> PtrControllerMap;
+        PtrControllerMap mActors;
+        float mDuration;
+        std::map<std::string, int> mDeathCount;
 
             void updateNpc (const MWWorld::Ptr& ptr, float duration, bool paused);
 
