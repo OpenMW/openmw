@@ -177,8 +177,7 @@ WindowManager::WindowManager(
 
     mInputBlocker = mGui->createWidget<MyGUI::Widget>("",0,0,w,h,MyGUI::Align::Default,"Windows","");
 
-    // The HUD is always on
-    mHud->setVisible(true);
+    mHud->setVisible(mHudEnabled);
 
     mCharGen = new CharacterCreation(this);
 
@@ -1000,7 +999,6 @@ void WindowManager::notifyInputActionBound ()
     mSettingsWindow->updateControlsBox ();
     allowMouse();
 }
-
 
 void WindowManager::showCrosshair (bool show)
 {

@@ -109,6 +109,7 @@ namespace MWGui
         getWidget(mReflectActorsButton, "ReflectActorsButton");
         getWidget(mReflectTerrainButton, "ReflectTerrainButton");
         getWidget(mShadersButton, "ShadersButton");
+        getWidget(mShaderModeButton, "ShaderModeButton");
         getWidget(mShadowsEnabledButton, "ShadowsEnabledButton");
         getWidget(mShadowsLargeDistance, "ShadowsLargeDistance");
         getWidget(mShadowsTextureSize, "ShadowsTextureSize");
@@ -122,7 +123,6 @@ namespace MWGui
         getWidget(mInvertYButton, "InvertYButton");
         getWidget(mUISensitivitySlider, "UISensitivitySlider");
         getWidget(mCameraSensitivitySlider, "CameraSensitivitySlider");
-        getWidget(mGammaSlider, "GammaSlider");
 
         mSubtitlesButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onButtonToggled);
         mCrosshairButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onButtonToggled);
@@ -130,6 +130,7 @@ namespace MWGui
         mOkButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onOkButtonClicked);
         mUnderwaterButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onButtonToggled);
         mShadersButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onShadersToggled);
+        mShaderModeButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onShaderModeToggled);
         mFullscreenButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onButtonToggled);
         mWaterShaderButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onButtonToggled);
         mReflectObjectsButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onButtonToggled);
@@ -144,7 +145,6 @@ namespace MWGui
         mViewDistanceSlider->eventScrollChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onSliderChangePosition);
         mResolutionList->eventListChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onResolutionSelected);
         mAnisotropySlider->eventScrollChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onSliderChangePosition);
-        mGammaSlider->eventScrollChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onSliderChangePosition);
 
         mShadowsEnabledButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onButtonToggled);
         mShadowsLargeDistance->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onButtonToggled);
@@ -202,14 +202,6 @@ namespace MWGui
         getWidget(fovText, "FovText");
         fovText->setCaption("Field of View (" + boost::lexical_cast<std::string>(int(Settings::Manager::getFloat("field of view", "General"))) + ")");
 
-        float gammaVal = (Settings::Manager::getFloat("gamma", "Video")-0.1f)/(3.f-0.1f);
-        mGammaSlider->setScrollPosition(gammaVal * (mGammaSlider->getScrollRange()-1));
-        MyGUI::TextBox* gammaText;
-        getWidget(gammaText, "GammaText");
-        std::stringstream gamma;
-        gamma << std::setprecision (2) << Settings::Manager::getFloat("gamma", "Video");
-        gammaText->setCaption("Gamma (" + gamma.str() + ")");
-
         float anisotropyVal = Settings::Manager::getInt("anisotropy", "General") / 16.0;
         mAnisotropySlider->setScrollPosition(anisotropyVal * (mAnisotropySlider->getScrollRange()-1));
         std::string tf = Settings::Manager::getString("texture filtering", "General");
@@ -250,14 +242,8 @@ namespace MWGui
 
         mInvertYButton->setCaptionWithReplacing(Settings::Manager::getBool("invert y axis", "Input") ? "#{sOn}" : "#{sOff}");
 
-        std::string shaders;
-        if (!Settings::Manager::getBool("shaders", "Objects"))
-            shaders = "off";
-        else
-        {
-            shaders = Settings::Manager::getString("shader mode", "General");
-        }
-        mShadersButton->setCaption (shaders);
+        mShadersButton->setCaption (Settings::Manager::getBool("shaders", "Objects") ? "on" : "off");
+        mShaderModeButton->setCaption (Settings::Manager::getString("shader mode", "General"));
 
         if (!MWRender::RenderingManager::waterShaderSupported())
         {
@@ -267,7 +253,7 @@ namespace MWGui
             mReflectTerrainButton->setEnabled(false);
         }
 
-        if (shaders == "off")
+        if (!Settings::Manager::getBool("shaders", "Objects"))
         {
             mUnderwaterButton->setEnabled (false);
             mShadowsEnabledButton->setEnabled(false);
@@ -424,19 +410,31 @@ namespace MWGui
         }
     }
 
+    void SettingsWindow::onShaderModeToggled(MyGUI::Widget* _sender)
+    {
+        std::string val = static_cast<MyGUI::Button*>(_sender)->getCaption();
+        if (val == "cg")
+        {
+            val = hlslGlsl();
+        }
+        else
+            val = "cg";
+
+        static_cast<MyGUI::Button*>(_sender)->setCaption(val);
+
+        Settings::Manager::setString("shader mode", "General", val);
+
+        apply();
+    }
+
     void SettingsWindow::onShadersToggled(MyGUI::Widget* _sender)
     {
         std::string val = static_cast<MyGUI::Button*>(_sender)->getCaption();
         if (val == "off")
-        {
-            val = hlslGlsl();
-        }
-        else if (val == hlslGlsl())
-            val = "cg";
+            val = "on";
         else
             val = "off";
-
-        static_cast<MyGUI::Button*>(_sender)->setCaption(val);
+        static_cast<MyGUI::Button*>(_sender)->setCaption (val);
 
         if (val == "off")
         {
@@ -461,7 +459,6 @@ namespace MWGui
         else
         {
             Settings::Manager::setBool("shaders", "Objects", true);
-            Settings::Manager::setString("shader mode", "General", val);
 
             // re-enable
             if (MWRender::RenderingManager::waterShaderSupported())
@@ -520,15 +517,6 @@ namespace MWGui
             getWidget(fovText, "FovText");
             fovText->setCaption("Field of View (" + boost::lexical_cast<std::string>(int((1-val) * sFovMin + val * sFovMax)) + ")");
             Settings::Manager::setFloat("field of view", "General", (1-val) * sFovMin + val * sFovMax);
-        }
-        else if (scroller == mGammaSlider)
-        {
-            Settings::Manager::setFloat("gamma", "Video", (1-val) * 0.1f + val * 3.f);
-            MyGUI::TextBox* gammaText;
-            getWidget(gammaText, "GammaText");
-            std::stringstream gamma;
-            gamma << std::setprecision (2) << Settings::Manager::getFloat("gamma", "Video");
-            gammaText->setCaption("Gamma (" + gamma.str() + ")");
         }
         else if (scroller == mAnisotropySlider)
         {
