@@ -1,6 +1,5 @@
 #include "localmap.hpp"
 
-#include <OgreOverlayManager.h>
 #include <OgreMaterialManager.h>
 #include <OgreHardwarePixelBuffer.h>
 

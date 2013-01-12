@@ -8,9 +8,6 @@
 #include <OgreCompositorInstance.h>
 #include <OgreCompositorChain.h>
 #include <OgreRoot.h>
-#include <OgreOverlayManager.h>
-#include <OgreOverlayContainer.h>
-#include <OgreOverlayElement.h>
 
 #include "sky.hpp"
 #include "renderingmanager.hpp"

@@ -9,9 +9,6 @@
 #include <OgreShadowCameraSetupPSSM.h>
 #include <OgreHardwarePixelBuffer.h>
 
-#include <OgreOverlayContainer.h>
-#include <OgreOverlayManager.h>
-
 #include <extern/shiny/Main/Factory.hpp>
 
 #include "renderconst.hpp"
@@ -125,6 +122,7 @@ void Shadows::recreate()
     // --------------------------------------------------------------------------------------------------------------------
     // --------------------------- Debug overlays to display the content of shadow maps -----------------------------------
     // --------------------------------------------------------------------------------------------------------------------
+    /*
     if (Settings::Manager::getBool("debug", "Shadows"))
     {
         OverlayManager& mgr = OverlayManager::getSingleton();
@@ -181,6 +179,7 @@ void Shadows::recreate()
         if ((overlay = mgr.getByName("DebugOverlay")))
             mgr.destroy(overlay);
     }
+    */
 }
 
 PSSMShadowCameraSetup* Shadows::getPSSMSetup()

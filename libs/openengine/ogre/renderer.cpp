@@ -192,6 +192,7 @@ void OgreRenderer::configure(const std::string &logPath,
     pluginDir = absPluginPath.string();
 
     Files::loadOgrePlugin(pluginDir, "RenderSystem_GL", *mRoot);
+    Files::loadOgrePlugin(pluginDir, "RenderSystem_GL3Plus", *mRoot);
     Files::loadOgrePlugin(pluginDir, "RenderSystem_Direct3D9", *mRoot);
     Files::loadOgrePlugin(pluginDir, "Plugin_CgProgramManager", *mRoot);
 
