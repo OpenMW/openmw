@@ -165,10 +165,13 @@ namespace MWMechanics
 
     void Actors::addActor (const MWWorld::Ptr& ptr)
     {
-        if (!MWWorld::Class::get (ptr).getCreatureStats (ptr).isDead())
-            mActors.insert(std::make_pair(ptr, CharacterController(ptr)));
+        if(!MWWorld::Class::get(ptr).getCreatureStats(ptr).isDead())
+            mActors.insert(std::make_pair(ptr, CharacterController(ptr, CharState_Idle)));
         else
+        {
+            mActors.insert(std::make_pair(ptr, CharacterController(ptr, CharState_Dead)));
             MWBase::Environment::get().getWorld()->playAnimationGroup (ptr, "death1", 2);
+        }
     }
 
     void Actors::removeActor (const MWWorld::Ptr& ptr)
@@ -205,6 +208,9 @@ namespace MWMechanics
             {
                 if(!MWWorld::Class::get(iter->first).getCreatureStats(iter->first).isDead())
                 {
+                    if(iter->second.getState() == CharState_Dead)
+                        iter->second.setState(CharState_Idle);
+
                     updateActor(iter->first, totalDuration);
                     if(iter->first.getTypeName() == typeid(ESM::NPC).name())
                         updateNpc(iter->first, totalDuration, paused);
@@ -234,15 +240,20 @@ namespace MWMechanics
                     continue;
                 }
 
-                ++mDeathCount[MWWorld::Class::get(iter->first).getId(iter->first)];
+                if(iter->second.getState() == CharState_Dead)
+                {
+                    iter++;
+                    continue;
+                }
 
+                iter->second.setState(CharState_Dead);
                 MWBase::Environment::get().getWorld()->playAnimationGroup(iter->first, "death1", 0);
+
+                ++mDeathCount[MWWorld::Class::get(iter->first).getId(iter->first)];
 
                 if(MWWorld::Class::get(iter->first).isEssential(iter->first))
                     MWBase::Environment::get().getWindowManager()->messageBox(
                         "#{sKilledEssential}", std::vector<std::string>());
-
-                mActors.erase(iter++);
             }
         }
 

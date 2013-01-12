@@ -6,14 +6,27 @@
 namespace MWMechanics
 {
 
+enum CharacterState {
+    CharState_Idle,
+    CharState_Dead
+};
+
 class CharacterController
 {
     MWWorld::Ptr mPtr;
 
+    CharacterState mState;
+
 public:
-    CharacterController(const MWWorld::Ptr &ptr)
-      : mPtr(ptr)
+    CharacterController(const MWWorld::Ptr &ptr, CharacterState state)
+      : mPtr(ptr), mState(state)
     { }
+
+    CharacterState getState() const
+    { return mState; }
+
+    void setState(CharacterState state)
+    { mState = state; }
 };
 
 }
