@@ -98,19 +98,19 @@ namespace MWGui
 
         MWMechanics::Spells& playerSpells = MWWorld::Class::get (player).getCreatureStats (player).getSpells();
         MWMechanics::Spells& merchantSpells = MWWorld::Class::get (actor).getCreatureStats (actor).getSpells();
-         
+
         for (MWMechanics::Spells::TIterator iter = merchantSpells.begin(); iter!=merchantSpells.end(); ++iter)
         {
             const ESM::Spell* spell =
-                MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find (*iter);
-            
+                MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find (iter->first);
+
             if (spell->mData.mType!=ESM::Spell::ST_Spell)
                 continue; // don't try to sell diseases, curses or powers
-            
+
             if (std::find (playerSpells.begin(), playerSpells.end(), *iter)!=playerSpells.end())
                 continue; // we have that spell already
-            
-            addSpell (*iter);
+
+            addSpell (iter->first);
         }
 
         updateLabels();

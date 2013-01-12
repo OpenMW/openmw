@@ -485,7 +485,7 @@ namespace MWScript
                     for (MWMechanics::Spells::TIterator iter (
                         MWWorld::Class::get (ptr).getCreatureStats (ptr).getSpells().begin());
                         iter!=MWWorld::Class::get (ptr).getCreatureStats (ptr).getSpells().end(); ++iter)
-                        if (*iter==id)
+                        if (iter->first==id)
                         {
                             value = 1;
                             break;
@@ -1188,7 +1188,7 @@ namespace MWScript
             extensions.registerFunction ("getpccrimelevel", 'f', "", opcodeGetPCCrimeLevel);
             extensions.registerInstruction ("setpccrimelevel", "f", opcodeSetPCCrimeLevel);
             extensions.registerInstruction ("modpccrimelevel", "f", opcodeModPCCrimeLevel);
- 
+
             extensions.registerInstruction ("addspell", "c", opcodeAddSpell, opcodeAddSpellExplicit);
             extensions.registerInstruction ("removespell", "c", opcodeRemoveSpell,
                 opcodeRemoveSpellExplicit);
@@ -1286,7 +1286,7 @@ namespace MWScript
             interpreter.installSegment5 (opcodeGetPCCrimeLevel, new OpGetPCCrimeLevel);
             interpreter.installSegment5 (opcodeSetPCCrimeLevel, new OpSetPCCrimeLevel);
             interpreter.installSegment5 (opcodeModPCCrimeLevel, new OpModPCCrimeLevel);
- 
+
             interpreter.installSegment5 (opcodeAddSpell, new OpAddSpell<ImplicitRef>);
             interpreter.installSegment5 (opcodeAddSpellExplicit, new OpAddSpell<ExplicitRef>);
             interpreter.installSegment5 (opcodeRemoveSpell, new OpRemoveSpell<ImplicitRef>);

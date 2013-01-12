@@ -1,7 +1,7 @@
 #ifndef GAME_MWMECHANICS_SPELLS_H
 #define GAME_MWMECHANICS_SPELLS_H
 
-#include <vector>
+#include <map>
 #include <string>
 
 namespace ESM
@@ -21,12 +21,12 @@ namespace MWMechanics
     {
         public:
 
-            typedef std::vector<std::string> TContainer;
+            typedef std::map<std::string, float> TContainer; // ID, magnitude
             typedef TContainer::const_iterator TIterator;
 
         private:
 
-            std::vector<std::string> mSpells;
+            TContainer mSpells;
             std::string mSelectedSpell;
 
             void addSpell (const ESM::Spell *, MagicEffects& effects) const;
@@ -55,10 +55,10 @@ namespace MWMechanics
 
             const std::string getSelectedSpell() const;
             ///< May return an empty string.
-            
+
             bool hasCommonDisease() const;
 
-            bool hasBlightDisease() const;            
+            bool hasBlightDisease() const;
     };
 }
 

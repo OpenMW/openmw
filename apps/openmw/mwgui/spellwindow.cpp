@@ -139,7 +139,7 @@ namespace MWGui
 
         for (MWMechanics::Spells::TIterator it = spells.begin(); it != spells.end(); ++it)
         {
-            spellList.push_back(*it);
+            spellList.push_back (it->first);
         }
 
         const MWWorld::ESMStore &esmStore =
