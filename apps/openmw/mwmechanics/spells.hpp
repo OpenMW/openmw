@@ -21,15 +21,13 @@ namespace MWMechanics
     {
         public:
 
-            typedef std::map<std::string, float> TContainer; // ID, magnitude
+            typedef std::map<std::string, float> TContainer; // ID, normalised magnitude
             typedef TContainer::const_iterator TIterator;
 
         private:
 
             TContainer mSpells;
             std::string mSelectedSpell;
-
-            void addSpell (const ESM::Spell *, MagicEffects& effects) const;
 
         public:
 

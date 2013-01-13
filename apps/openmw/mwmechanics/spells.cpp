@@ -1,22 +1,19 @@
 
 #include "spells.hpp"
 
-#include "../mwworld/esmstore.hpp"
+#include <cstdlib>
 
 #include <components/esm/loadspel.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 
+#include "../mwworld/esmstore.hpp"
+
 #include "magiceffects.hpp"
 
 namespace MWMechanics
 {
-    void Spells::addSpell (const ESM::Spell *spell, MagicEffects& effects) const
-    {
-        effects.add (spell->mEffects);
-    }
-
     Spells::TIterator Spells::begin() const
     {
         return mSpells.begin();
@@ -30,7 +27,7 @@ namespace MWMechanics
     void Spells::add (const std::string& spellId)
     {
         if (mSpells.find (spellId)==mSpells.end())
-            mSpells.insert (std::make_pair (spellId, -1));
+            mSpells.insert (std::make_pair (spellId, static_cast<float> (std::rand()) / RAND_MAX));
     }
 
     void Spells::remove (const std::string& spellId)
@@ -55,7 +52,7 @@ namespace MWMechanics
 
             if (spell->mData.mType==ESM::Spell::ST_Ability || spell->mData.mType==ESM::Spell::ST_Blight ||
                 spell->mData.mType==ESM::Spell::ST_Disease || spell->mData.mType==ESM::Spell::ST_Curse)
-                addSpell (spell, effects);
+                effects.add (spell->mEffects, iter->second);
         }
 
         return effects;
