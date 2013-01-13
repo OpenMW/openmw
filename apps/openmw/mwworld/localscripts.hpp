@@ -10,6 +10,7 @@ namespace MWWorld
 {
     struct ESMStore;
     class CellStore;
+    class RefData;
 
     /// \brief List of active local scripts
     class LocalScripts
@@ -47,6 +48,8 @@ namespace MWWorld
 
             void clearCell (CellStore *cell);
             ///< Remove all scripts belonging to \a cell.
+            
+            void remove (RefData *ref);
 
             void remove (const Ptr& ptr);
             ///< Remove script for given reference (ignored if reference does not have a scirpt listed).

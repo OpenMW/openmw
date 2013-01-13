@@ -341,6 +341,11 @@ namespace MWWorld
         return name;
     }
 
+    void World::removeRefScript (MWWorld::RefData *ref)
+    {
+        mLocalScripts.remove (ref);
+    }
+
     Ptr World::getPtr (const std::string& name, bool activeOnly)
     {
         // the player is always in an active cell.

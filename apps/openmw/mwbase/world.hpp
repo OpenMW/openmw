@@ -45,6 +45,7 @@ namespace MWWorld
     class Ptr;
     class TimeStamp;
     class ESMStore;
+    class RefData;
 }
 
 namespace MWBase
@@ -137,6 +138,9 @@ namespace MWBase
             virtual std::vector<std::string> getGlobals () const = 0;
 
             virtual std::string getCurrentCellName() const = 0;
+
+            virtual void removeRefScript (MWWorld::RefData *ref) = 0;
+            //< Remove the script attached to ref from mLocalScripts
 
             virtual MWWorld::Ptr getPtr (const std::string& name, bool activeOnly) = 0;
             ///< Return a pointer to a liveCellRef with the given name.

@@ -146,6 +146,20 @@ void MWWorld::LocalScripts::clearCell (Ptr::CellStore *cell)
     }
 }
 
+void MWWorld::LocalScripts::remove (RefData *ref)
+{
+    for (std::list<std::pair<std::string, Ptr> >::iterator iter = mScripts.begin();
+        iter!=mScripts.end(); ++iter)
+        if (&(iter->second.getRefData()) == ref)
+        {
+            if (iter==mIter)
+                ++mIter;
+
+            mScripts.erase (iter);
+            break;
+        }
+}
+
 void MWWorld::LocalScripts::remove (const Ptr& ptr)
 {
     for (std::list<std::pair<std::string, Ptr> >::iterator iter = mScripts.begin();
