@@ -39,9 +39,8 @@
 //#include <boost/mutex.hpp>
 //#include <boost/thread/locks.hpp>
 
-using namespace std;
-using namespace Nif;
-using namespace Misc;
+namespace Nif
+{
 
 class NIFFile::LoadedCache
 {
@@ -177,6 +176,8 @@ NIFFile::NIFFile(const std::string &name, psudo_private_modifier)
 {
     inp = Ogre::ResourceGroupManager::getSingleton().openResource(name);
     parse();
+    // Make sure to close the file after it was loaded into memory
+    inp.setNull();
 }
 
 NIFFile::~NIFFile()
@@ -205,7 +206,7 @@ void NIFFile::parse()
     fail("Unsupported NIF version");
 
   // Number of records
-  int recNum = getInt();
+  size_t recNum = getInt();
   records.resize(recNum);
 
   /* The format for 10.0.1.0 seems to be a bit different. After the
@@ -217,7 +218,7 @@ void NIFFile::parse()
      we do not support or plan to support other versions yet.
   */
 
-  for(int i=0;i<recNum;i++)
+  for(size_t i = 0;i < recNum;i++)
     {
       std::string rec = getString();
       //cout << i << ": " << rec.toString() << endl;
@@ -309,6 +310,7 @@ void NIFFile::parse()
       assert(r != NULL);
       assert(r->recType != RC_MISSING);
       r->recName = rec;
+      r->recIndex = i;
       records[i] = r;
       r->read(this);
 
@@ -327,11 +329,8 @@ void NIFFile::parse()
      tree, but for the moment we ignore it.
    */
 
-  // TODO: Set up kf file here first, if applicable. It needs its own
-  // code to link it up with the main NIF structure.
-
   // Once parsing is done, do post-processing.
-  for(int i=0; i<recNum; i++)
+  for(size_t i=0; i<recNum; i++)
     records[i]->post(this);
 }
 
@@ -372,4 +371,6 @@ Ogre::Matrix4 Node::getWorldTransform() const
     if(parent != NULL)
         return parent->getWorldTransform() * getLocalTransform();
     return getLocalTransform();
+}
+
 }

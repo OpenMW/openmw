@@ -1,22 +1,19 @@
 
 #include "spells.hpp"
 
-#include "../mwworld/esmstore.hpp"
+#include <cstdlib>
 
 #include <components/esm/loadspel.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 
+#include "../mwworld/esmstore.hpp"
+
 #include "magiceffects.hpp"
 
 namespace MWMechanics
 {
-    void Spells::addSpell (const ESM::Spell *spell, MagicEffects& effects) const
-    {
-        effects.add (spell->mEffects);
-    }
-
     Spells::TIterator Spells::begin() const
     {
         return mSpells.begin();
@@ -29,13 +26,13 @@ namespace MWMechanics
 
     void Spells::add (const std::string& spellId)
     {
-        if (std::find (mSpells.begin(), mSpells.end(), spellId)==mSpells.end())
-            mSpells.push_back (spellId);
+        if (mSpells.find (spellId)==mSpells.end())
+            mSpells.insert (std::make_pair (spellId, static_cast<float> (std::rand()) / RAND_MAX));
     }
 
     void Spells::remove (const std::string& spellId)
     {
-        TContainer::iterator iter = std::find (mSpells.begin(), mSpells.end(), spellId);
+        TContainer::iterator iter = mSpells.find (spellId);
 
         if (iter!=mSpells.end())
             mSpells.erase (iter);
@@ -51,11 +48,11 @@ namespace MWMechanics
         for (TIterator iter = mSpells.begin(); iter!=mSpells.end(); ++iter)
         {
             const ESM::Spell *spell =
-                MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find (*iter);
+                MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find (iter->first);
 
             if (spell->mData.mType==ESM::Spell::ST_Ability || spell->mData.mType==ESM::Spell::ST_Blight ||
                 spell->mData.mType==ESM::Spell::ST_Disease || spell->mData.mType==ESM::Spell::ST_Curse)
-                addSpell (spell, effects);
+                effects.add (spell->mEffects, iter->second);
         }
 
         return effects;
@@ -75,18 +72,18 @@ namespace MWMechanics
     {
         return mSelectedSpell;
     }
-    
+
     bool Spells::hasCommonDisease() const
     {
         for (TIterator iter = mSpells.begin(); iter!=mSpells.end(); ++iter)
         {
             const ESM::Spell *spell =
-                MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find (*iter);
-        
+                MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find (iter->first);
+
             if (spell->mData.mFlags & ESM::Spell::ST_Disease)
                 return true;
         }
-        
+
         return false;
     }
 
@@ -95,12 +92,12 @@ namespace MWMechanics
         for (TIterator iter = mSpells.begin(); iter!=mSpells.end(); ++iter)
         {
             const ESM::Spell *spell =
-                MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find (*iter);
-        
+                MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find (iter->first);
+
             if (spell->mData.mFlags & ESM::Spell::ST_Blight)
                 return true;
         }
-        
-        return false;    
+
+        return false;
     }
 }

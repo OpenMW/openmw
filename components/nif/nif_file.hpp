@@ -146,7 +146,7 @@ public:
     }
 
     /// Number of records
-    int numRecords() { return records.size(); }
+    size_t numRecords() { return records.size(); }
 
     /*************************************************
                Parser functions
