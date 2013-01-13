@@ -695,9 +695,10 @@ class NIFMeshLoader : Ogre::ManualResourceLoader
 {
     std::string mName;
     std::string mGroup;
-    std::string mShapeName;
-    std::string mMaterialName;
+    size_t mShapeIndex;
     std::string mSkelName;
+    std::string mMaterialName;
+    std::string mShapeName;
 
     void warn(const std::string &msg)
     {
@@ -805,7 +806,8 @@ class NIFMeshLoader : Ogre::ManualResourceLoader
         Ogre::VertexDeclaration *decl;
         int nextBuf = 0;
 
-        Ogre::SubMesh *sub = mesh->createSubMesh(shape->name);
+        Ogre::SubMesh *sub = ((mShapeName.length() > 0) ? mesh->createSubMesh(mShapeName) :
+                                                          mesh->createSubMesh());
 
         // Add vertices
         sub->useSharedVertices = false;
@@ -912,13 +914,13 @@ class NIFMeshLoader : Ogre::ManualResourceLoader
 
     bool findTriShape(Ogre::Mesh *mesh, Nif::Node const *node)
     {
-        if(node->recType == Nif::RC_NiTriShape && mShapeName == node->name)
+        if(node->recType == Nif::RC_NiTriShape && mShapeIndex == node->recIndex)
         {
-            handleNiTriShape(mesh, dynamic_cast<Nif::NiTriShape const *>(node));
+            handleNiTriShape(mesh, dynamic_cast<const Nif::NiTriShape*>(node));
             return true;
         }
 
-        Nif::NiNode const *ninode = dynamic_cast<Nif::NiNode const *>(node);
+        const Nif::NiNode *ninode = dynamic_cast<const Nif::NiNode*>(node);
         if(ninode)
         {
             Nif::NodeList const &children = ninode->children;
@@ -942,7 +944,7 @@ public:
     NIFMeshLoader()
     { }
     NIFMeshLoader(const std::string &name, const std::string &group, const std::string skelName)
-      : mName(name), mGroup(group), mSkelName(skelName)
+      : mName(name), mGroup(group), mShapeIndex(~(size_t)0), mSkelName(skelName)
     { }
 
     virtual void loadResource(Ogre::Resource *resource)
@@ -950,15 +952,14 @@ public:
         Ogre::Mesh *mesh = dynamic_cast<Ogre::Mesh*>(resource);
         assert(mesh && "Attempting to load a mesh into a non-mesh resource!");
 
-        if(!mShapeName.length())
+        Nif::NIFFile::ptr nif = Nif::NIFFile::create(mName);
+        if(mShapeIndex >= nif->numRecords())
         {
-            if(mSkelName.length() > 0)
-                mesh->setSkeletonName(mSkelName);
+            mesh->setSkeletonName(mSkelName);
             return;
         }
 
-        Nif::NIFFile::ptr nif = Nif::NIFFile::create (mName);
-        Nif::Node const *node = dynamic_cast<Nif::Node const *>(nif->getRecord(0));
+        Nif::Node const *node = dynamic_cast<const Nif::Node*>(nif->getRecord(mShapeIndex));
         findTriShape(mesh, node);
     }
 
@@ -999,9 +1000,12 @@ public:
         if(node->recType == Nif::RC_NiTriShape)
         {
             const Nif::NiTriShape *shape = dynamic_cast<const Nif::NiTriShape*>(node);
+            mShapeName = shape->name;
 
             Ogre::MeshManager &meshMgr = Ogre::MeshManager::getSingleton();
-            std::string fullname = mName+"@shape="+shape->name;
+            std::string fullname = mName+"@index="+Ogre::StringConverter::toString(shape->recIndex);
+            if(mShapeName.length() > 0)
+                fullname += "@shape="+mShapeName;
             if(mSkelName.length() > 0 && mName != mSkelName)
                 fullname += "@skel="+mSkelName;
 
@@ -1013,7 +1017,7 @@ public:
                 *loader = *this;
                 if(!(flags&0x01)) // Not hidden
                 {
-                    loader->mShapeName = shape->name;
+                    loader->mShapeIndex = shape->recIndex;
                     loader->mMaterialName = NIFMaterialLoader::getMaterial(shape, fullname, mGroup);
                 }
 
