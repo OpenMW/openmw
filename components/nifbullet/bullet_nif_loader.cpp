@@ -51,7 +51,7 @@ ManualBulletShapeLoader::~ManualBulletShapeLoader()
 }
 
 
-btQuaternion ManualBulletShapeLoader::getbtQuat(Ogre::Matrix3 &m)
+btQuaternion ManualBulletShapeLoader::getbtQuat(Ogre::Matrix3 const &m)
 {
     Ogre::Quaternion oquat(m);
     btQuaternion quat;
@@ -62,7 +62,7 @@ btQuaternion ManualBulletShapeLoader::getbtQuat(Ogre::Matrix3 &m)
     return quat;
 }
 
-btVector3 ManualBulletShapeLoader::getbtVector(Ogre::Vector3 &v)
+btVector3 ManualBulletShapeLoader::getbtVector(Ogre::Vector3 const &v)
 {
     return btVector3(v[0], v[1], v[2]);
 }
@@ -82,7 +82,8 @@ void ManualBulletShapeLoader::loadResource(Ogre::Resource *resource)
     // of the early stages of development. Right now we WANT to catch
     // every error as early and intrusively as possible, as it's most
     // likely a sign of incomplete code rather than faulty input.
-    Nif::NIFFile nif(resourceName.substr(0, resourceName.length()-7));
+    Nif::NIFFile::ptr pnif (Nif::NIFFile::create (resourceName.substr(0, resourceName.length()-7)));
+    Nif::NIFFile & nif = *pnif.get ();
     if (nif.numRecords() < 1)
     {
         warn("Found no records in NIF.");
@@ -138,7 +139,7 @@ void ManualBulletShapeLoader::loadResource(Ogre::Resource *resource)
     }
 }
 
-bool ManualBulletShapeLoader::hasRootCollisionNode(Nif::Node* node)
+bool ManualBulletShapeLoader::hasRootCollisionNode(Nif::Node const * node)
 {
     if (node->recType == Nif::RC_NiNode)
     {
@@ -164,8 +165,8 @@ bool ManualBulletShapeLoader::hasRootCollisionNode(Nif::Node* node)
     return false;
 }
 
-void ManualBulletShapeLoader::handleNode(Nif::Node *node, int flags,
-   const Nif::Transformation *trafo,bool hasCollisionNode,bool isCollisionNode,bool raycastingOnly)
+void ManualBulletShapeLoader::handleNode(Nif::Node const *node, int flags,
+   const Nif::Transformation *parentTrafo,bool hasCollisionNode,bool isCollisionNode,bool raycastingOnly)
 {
 
     // Accumulate the flags from all the child nodes. This works for all
@@ -181,7 +182,7 @@ void ManualBulletShapeLoader::handleNode(Nif::Node *node, int flags,
     }
 
     // Check for extra data
-    Nif::Extra *e = node;
+    Nif::Extra const *e = node;
     while (!e->extra.empty())
     {
         // Get the next extra data in the list
@@ -208,23 +209,23 @@ void ManualBulletShapeLoader::handleNode(Nif::Node *node, int flags,
         }
     }
 
+    Nif::Transformation childTrafo = node->trafo;
 
-    if (trafo)
+    if (parentTrafo)
     {
 
         // Get a non-const reference to the node's data, since we're
         // overwriting it. TODO: Is this necessary?
-        Nif::Transformation &final = node->trafo;
 
         // For both position and rotation we have that:
         // final_vector = old_vector + old_rotation*new_vector*old_scale
-        final.pos = trafo->pos + trafo->rotation*final.pos*trafo->scale;
+        childTrafo.pos = parentTrafo->pos + parentTrafo->rotation*childTrafo.pos*parentTrafo->scale;
 
         // Merge the rotations together
-        final.rotation = trafo->rotation * final.rotation;
+        childTrafo.rotation = parentTrafo->rotation * childTrafo.rotation;
 
         // Scale
-        final.scale *= trafo->scale;
+        childTrafo.scale *= parentTrafo->scale;
 
     }
 
@@ -232,7 +233,7 @@ void ManualBulletShapeLoader::handleNode(Nif::Node *node, int flags,
     {
 
         
-        btVector3 boxsize = getbtVector((node->boundXYZ));
+        btVector3 boxsize = getbtVector(node->boundXYZ);
         cShape->boxTranslation = node->boundPos;
         cShape->boxRotation = node->boundRot;
 
@@ -243,20 +244,20 @@ void ManualBulletShapeLoader::handleNode(Nif::Node *node, int flags,
     // For NiNodes, loop through children
     if (node->recType == Nif::RC_NiNode)
     {
-        Nif::NodeList &list = ((Nif::NiNode*)node)->children;
+        Nif::NodeList const &list = ((Nif::NiNode const *)node)->children;
         int n = list.length();
         for (int i=0; i<n; i++)
         {
             if (!list[i].empty())
             {
-                handleNode(list[i].getPtr(), flags,&node->trafo,hasCollisionNode,isCollisionNode,raycastingOnly);
+                handleNode(list[i].getPtr(), flags,&childTrafo,hasCollisionNode,isCollisionNode,raycastingOnly);
             }
         }
     }
     else if (node->recType == Nif::RC_NiTriShape && (isCollisionNode || !hasCollisionNode))
     {
         cShape->mCollide = !(flags&0x800);
-        handleNiTriShape(dynamic_cast<Nif::NiTriShape*>(node), flags,node->trafo.rotation,node->trafo.pos,node->trafo.scale,raycastingOnly);
+        handleNiTriShape(dynamic_cast<Nif::NiTriShape const *>(node), flags,childTrafo.rotation,childTrafo.pos,childTrafo.scale,raycastingOnly);
     }
     else if(node->recType == Nif::RC_RootCollisionNode)
     {
@@ -265,12 +266,12 @@ void ManualBulletShapeLoader::handleNode(Nif::Node *node, int flags,
         for (int i=0; i<n; i++)
         {
             if (!list[i].empty())
-                handleNode(list[i].getPtr(), flags,&node->trafo, hasCollisionNode,true,raycastingOnly);
+                handleNode(list[i].getPtr(), flags,&childTrafo, hasCollisionNode,true,raycastingOnly);
         }
     }
 }
 
-void ManualBulletShapeLoader::handleNiTriShape(Nif::NiTriShape *shape, int flags,Ogre::Matrix3 parentRot,Ogre::Vector3 parentPos,float parentScale,
+void ManualBulletShapeLoader::handleNiTriShape(Nif::NiTriShape const *shape, int flags,Ogre::Matrix3 parentRot,Ogre::Vector3 parentPos,float parentScale,
     bool raycastingOnly)
 {
     assert(shape != NULL);
