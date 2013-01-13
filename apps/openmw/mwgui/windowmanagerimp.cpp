@@ -145,7 +145,7 @@ namespace MWGui
         mMap = new MapWindow(cacheDir);
         mStatsWindow = new StatsWindow();
         mConsole = new Console(w,h, consoleOnlyScripts);
-        mJournal = new JournalWindow();
+        mJournal = IJournalWindow::create();
         mMessageBoxManager = new MessageBoxManager();
         mInventoryWindow = new InventoryWindow(mDragAndDrop);
         mTradeWindow = new TradeWindow();

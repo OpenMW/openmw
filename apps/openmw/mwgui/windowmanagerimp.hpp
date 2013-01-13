@@ -51,7 +51,7 @@ namespace MWGui
   class MainMenu;
   class StatsWindow;
   class InventoryWindow;
-  class JournalWindow;
+  class IJournalWindow;
   class CharacterCreation;
   class DragAndDrop;
   class ToolTips;
@@ -253,7 +253,7 @@ namespace MWGui
     StatsWindow *mStatsWindow;
     MessageBoxManager *mMessageBoxManager;
     Console *mConsole;
-    JournalWindow* mJournal;
+    IJournalWindow* mJournal;
     DialogueWindow *mDialogueWindow;
     ContainerWindow *mContainerWindow;
     DragAndDrop* mDragAndDrop;
