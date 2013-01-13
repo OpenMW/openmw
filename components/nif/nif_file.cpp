@@ -39,9 +39,8 @@
 //#include <boost/mutex.hpp>
 //#include <boost/thread/locks.hpp>
 
-using namespace std;
-using namespace Nif;
-using namespace Misc;
+namespace Nif
+{
 
 class NIFFile::LoadedCache
 {
@@ -311,6 +310,7 @@ void NIFFile::parse()
       assert(r != NULL);
       assert(r->recType != RC_MISSING);
       r->recName = rec;
+      r->recIndex = i;
       records[i] = r;
       r->read(this);
 
@@ -328,9 +328,6 @@ void NIFFile::parse()
      ints following it. This might be a list of the root nodes in the
      tree, but for the moment we ignore it.
    */
-
-  // TODO: Set up kf file here first, if applicable. It needs its own
-  // code to link it up with the main NIF structure.
 
   // Once parsing is done, do post-processing.
   for(int i=0; i<recNum; i++)
@@ -374,4 +371,6 @@ Ogre::Matrix4 Node::getWorldTransform() const
     if(parent != NULL)
         return parent->getWorldTransform() * getLocalTransform();
     return getLocalTransform();
+}
+
 }
