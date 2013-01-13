@@ -206,7 +206,7 @@ void NIFFile::parse()
     fail("Unsupported NIF version");
 
   // Number of records
-  int recNum = getInt();
+  size_t recNum = getInt();
   records.resize(recNum);
 
   /* The format for 10.0.1.0 seems to be a bit different. After the
@@ -218,7 +218,7 @@ void NIFFile::parse()
      we do not support or plan to support other versions yet.
   */
 
-  for(int i=0;i<recNum;i++)
+  for(size_t i = 0;i < recNum;i++)
     {
       std::string rec = getString();
       //cout << i << ": " << rec.toString() << endl;
@@ -330,7 +330,7 @@ void NIFFile::parse()
    */
 
   // Once parsing is done, do post-processing.
-  for(int i=0; i<recNum; i++)
+  for(size_t i=0; i<recNum; i++)
     records[i]->post(this);
 }
 
