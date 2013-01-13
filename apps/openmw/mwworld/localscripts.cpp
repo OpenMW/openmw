@@ -134,7 +134,7 @@ void MWWorld::LocalScripts::clearCell (Ptr::CellStore *cell)
 
     while (iter!=mScripts.end())
     {
-        if (iter->second.getCell()==cell)
+        if (iter->second.mCell==cell)
         {
             if (iter==mIter)
                ++mIter;

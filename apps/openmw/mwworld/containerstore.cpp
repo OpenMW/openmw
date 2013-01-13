@@ -15,6 +15,8 @@
 #include "manualref.hpp"
 #include "refdata.hpp"
 #include "class.hpp"
+#include "localscripts.hpp"
+#include "player.hpp"
 
 namespace
 {
@@ -71,6 +73,30 @@ bool MWWorld::ContainerStore::stacks(const Ptr& ptr1, const Ptr& ptr2)
 }
 
 MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add (const Ptr& ptr)
+{
+    MWWorld::ContainerStoreIterator it = realAdd(ptr);
+    MWWorld::Ptr item = *it;
+
+    std::string script = MWWorld::Class::get(item).getScript(item);
+    if(script != "")
+    {
+        CellStore *cell;
+
+        Ptr player = MWBase::Environment::get().getWorld ()->getPlayer().getPlayer();
+        // Items in players inventory have cell set to 0, so their scripts will never be removed
+        if(&(MWWorld::Class::get (player).getContainerStore (player)) == this)
+            cell = 0;
+        else
+            cell = player.getCell();
+
+        item.mCell = cell;
+        MWBase::Environment::get().getWorld()->getLocalScripts().add(script, item);
+    }
+
+    return it;
+}
+
+MWWorld::ContainerStoreIterator MWWorld::ContainerStore::realAdd (const Ptr& ptr)
 {
     int type = getType(ptr);
 
@@ -162,7 +188,7 @@ void MWWorld::ContainerStore::fill (const ESM::InventoryList& items, const MWWor
         }
 
         ref.getPtr().getRefData().setCount (std::abs(iter->mCount)); /// \todo implement item restocking (indicated by negative count)
-        add (ref.getPtr());
+        realAdd (ref.getPtr());
     }
 
     flagAsModified();
