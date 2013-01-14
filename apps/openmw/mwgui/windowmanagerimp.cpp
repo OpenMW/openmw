@@ -750,7 +750,7 @@ void WindowManager::setUseHardwareCursors(bool use)
 {
     mCursorManager->setEnabled(use);
 
-    if(!use)
+    if(use)
     {
         MyGUI::PointerManager::getInstance().setVisible(false);
     }

@@ -138,7 +138,7 @@ void OMW::Engine::handleSDLMessages()
     SDL_PumpEvents();
     int num_events = SDL_PeepEvents(events, max_events, SDL_PEEKEVENT, SDL_WINDOWEVENT, SDL_WINDOWEVENT);
 
-    bool move_or_resize = false;
+    bool resize = false;
 
     unsigned int size_x = 0;
     unsigned int size_y = 0;
@@ -150,9 +150,8 @@ void OMW::Engine::handleSDLMessages()
             switch(events[i].window.event)
             {
             case SDL_WINDOWEVENT_RESIZED:
-            case SDL_WINDOWEVENT_MOVED:
                 printf("Resizing window!\n");
-                move_or_resize = true;
+                resize = true;
                 size_x = events[i].window.data1;
                 size_y = events[i].window.data2;
                 break;
@@ -161,23 +160,13 @@ void OMW::Engine::handleSDLMessages()
     }
 
     //handle window movements
-    if(move_or_resize)
+    if(resize)
     {
-        mOgre->adjustViewport();
         if(!mOgre->getWindow()->isFullScreen())
         {
-            SDL_DisplayMode dispMode;
-            SDL_Window* sdlWindow = mOgre->getSDLWindow();
-
-            SDL_GetWindowDisplayMode(sdlWindow, &dispMode);
-
-            dispMode.w = size_x;
-            dispMode.h = size_y;
-
-            SDL_SetWindowDisplayMode(sdlWindow, &dispMode);
-
             mOgre->getWindow()->windowMovedOrResized();
             mOgre->getWindow()->resize(size_x, size_y);
+            mOgre->adjustViewport();
         }
     }
 
