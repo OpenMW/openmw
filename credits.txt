@@ -118,5 +118,5 @@ for the open-source EB Garamond fontface.
 Thanks to Dongle,
 for his Daedric fontface, see Daedric Font License.txt for his license terms.
 
-Thanks to Bitstream Inc.
-for their Bitstream Vera fontface, see Bitstream Vera License.txt for their license terms.
+Thanks to DejaVu team,
+for their DejaVuLGCSansMono fontface, see Dejavu_lgc_font_license.txt for their license terms.

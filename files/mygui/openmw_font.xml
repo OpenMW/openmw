@@ -35,7 +35,7 @@
     </Resource>
 
    <Resource type="ResourceTrueTypeFont" name="MonoFont">
-       <Property key="Source" value="VeraMono.ttf"/>
+       <Property key="Source" value="DejaVuLGCSansMono.ttf"/>
        <Property key="Size" value="18"/>
        <Property key="Resolution" value="50"/>
        <Property key="Antialias" value="false"/>
