@@ -1,6 +1,9 @@
 #include "renderer.hpp"
 #include "fader.hpp"
 
+#include <SDL.h>
+#include <SDL_syswm.h>
+
 #include "OgreRoot.h"
 #include "OgreRenderWindow.h"
 #include "OgreLogManager.h"
@@ -47,11 +50,16 @@ void OgreRenderer::cleanup()
     delete mRoot;
     mRoot = NULL;
 
+    SDL_DestroyWindow(mSDLWindow);
+    mSDLWindow = NULL;
+
     unloadPlugins();
 }
 
 void OgreRenderer::start()
 {
+    //TODO: Check if we still need to do this if we're using SDL's
+    //message pump
 #if defined(__APPLE__) && !defined(__LP64__)
     // OSX Carbon Message Pump
     do {
@@ -214,6 +222,56 @@ void OgreRenderer::createWindow(const std::string &title, const WindowSettings& 
     params.insert(std::make_pair("FSAA", settings.fsaa));
     params.insert(std::make_pair("vsync", settings.vsync ? "true" : "false"));
 
+    // Create an application window with the following settings:
+    SDL_Window *window = SDL_CreateWindow(
+      "OpenMW",                  //    window title
+      SDL_WINDOWPOS_UNDEFINED,           //    initial x position
+      SDL_WINDOWPOS_UNDEFINED,           //    initial y position
+      settings.window_x,                               //    width, in pixels
+      settings.window_y,                               //    height, in pixels
+      SDL_WINDOW_SHOWN|SDL_WINDOW_RESIZABLE
+        | (settings.fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0)
+    );
+
+
+    //get the native whnd
+    struct SDL_SysWMinfo wmInfo;
+    SDL_VERSION(&wmInfo.version);
+
+    if(-1 == SDL_GetWindowWMInfo(window, &wmInfo))
+        throw std::runtime_error("Couldn't get WM Info!");
+
+    Ogre::String winHandle;
+
+    switch(wmInfo.subsystem)
+    {
+#ifdef WIN32
+    case SDL_SYSWM_WINDOWS:
+        // Windows code
+        winHandle = Ogre::StringConverter::toString((unsigned long)wmInfo.info.win.window);
+        break;
+#elif MACOS
+    case SDL_SYSWM_COCOA:
+        //required to make OGRE play nice with our window
+        params.insert(std::make_pair("macAPI", "cocoa"));
+        params.insert(std::make_pair("macAPICocoaUseNSView", "true"));
+
+        winHandle  = Ogre::StringConverter::toString((unsigned long)wmInfo.info.cocoa.window);
+        break;
+#else
+    case SDL_SYSWM_X11:
+        winHandle = Ogre::StringConverter::toString((unsigned long)wmInfo.info.x11.display);
+        winHandle += ":0:";
+        winHandle += Ogre::StringConverter::toString((unsigned long)wmInfo.info.x11.window);
+        break;
+#endif
+    default:
+        throw std::runtime_error("Unexpected WM!");
+        break;
+    }
+
+    params.insert(std::make_pair("externalWindowHandle",  winHandle));
+
     mWindow = mRoot->createRenderWindow(title, settings.window_x, settings.window_y, settings.fullscreen, &params);
 
     // create the semi-transparent black background texture used by the GUI.
@@ -253,7 +311,11 @@ void OgreRenderer::createScene(const std::string& camName, float fov, float near
 void OgreRenderer::adjustViewport()
 {
     // Alter the camera aspect ratio to match the viewport
-    mCamera->setAspectRatio(Real(mView->getActualWidth()) / Real(mView->getActualHeight()));
+    if(mCamera != NULL)
+    {
+        mView->setDimensions(0, 0, 1, 1);
+        mCamera->setAspectRatio(Real(mView->getActualWidth()) / Real(mView->getActualHeight()));
+    }
 }
 
 void OgreRenderer::setWindowEventListener(Ogre::WindowEventListener* listener)

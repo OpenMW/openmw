@@ -31,6 +31,8 @@
 #include <OgreRoot.h>
 #endif
 
+struct SDL_Window;
+
 namespace Ogre
 {
 #if !defined(__APPLE__) || defined(__LP64__)
@@ -74,6 +76,7 @@ namespace OEngine
             Ogre::Root *mRoot;
 #endif
             Ogre::RenderWindow *mWindow;
+            SDL_Window *mSDLWindow;
             Ogre::SceneManager *mScene;
             Ogre::Camera *mCamera;
             Ogre::Viewport *mView;
@@ -99,6 +102,7 @@ namespace OEngine
             OgreRenderer()
             : mRoot(NULL)
             , mWindow(NULL)
+            , mSDLWindow(NULL)
             , mScene(NULL)
             , mCamera(NULL)
             , mView(NULL)
@@ -168,6 +172,9 @@ namespace OEngine
 
             /// Get the rendering window
             Ogre::RenderWindow *getWindow() { return mWindow; }
+
+            /// Get the SDL Window
+            SDL_Window *getSDLWindow() { return mSDLWindow; }
 
             /// Get the scene manager
             Ogre::SceneManager *getScene() { return mScene; }

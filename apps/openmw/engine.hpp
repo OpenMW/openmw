@@ -103,6 +103,8 @@ namespace OMW
 
             void executeLocalScripts();
 
+            void handleSDLMessages();
+
             virtual bool frameRenderingQueued (const Ogre::FrameEvent& evt);
 
             /// Load settings from various files, returns the path to the user settings file

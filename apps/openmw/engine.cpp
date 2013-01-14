@@ -1,7 +1,5 @@
 #include "engine.hpp"
 
-#include <SDL.h>
-
 #include "components/esm/loadcell.hpp"
 
 #include <OgreRoot.h>
@@ -40,6 +38,7 @@
 #include "mwmechanics/mechanicsmanagerimp.hpp"
 
 
+#include <SDL.h>
 
 void OMW::Engine::executeLocalScripts()
 {
@@ -70,6 +69,8 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
 {
     try
     {
+        handleSDLMessages();
+
         mEnvironment.setFrameDuration (evt.timeSinceLastFrame);
 
         // update input
@@ -116,6 +117,9 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
         MWBase::Environment::get().getWindowManager()->wmUpdateFps(window->getLastFPS(), tri, batch);
 
         MWBase::Environment::get().getWindowManager()->onFrame(evt.timeSinceLastFrame);
+
+        //Flush any events that weren't handled this frame
+        SDL_FlushEvents(0x0, 0xFFFFFFFF);
     }
     catch (const std::exception& e)
     {
@@ -123,6 +127,65 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
     }
 
     return true;
+}
+
+void OMW::Engine::handleSDLMessages()
+{
+    //Pump messages since the last frame
+    const int max_events = 20;
+    SDL_Event events[max_events];
+
+    SDL_PumpEvents();
+    int num_events = SDL_PeepEvents(events, max_events, SDL_PEEKEVENT, SDL_WINDOWEVENT, SDL_WINDOWEVENT);
+
+    bool move_or_resize = false;
+
+    unsigned int size_x = 0;
+    unsigned int size_y = 0;
+
+    if(num_events != 0)
+    {
+        for(int i=0; i < num_events; ++i)
+        {
+            switch(events[i].window.event)
+            {
+            case SDL_WINDOWEVENT_RESIZED:
+            case SDL_WINDOWEVENT_MOVED:
+                printf("Resizing window!\n");
+                move_or_resize = true;
+                size_x = events[i].window.data1;
+                size_y = events[i].window.data2;
+                break;
+            }
+        }
+    }
+
+    //handle window movements
+    if(move_or_resize)
+    {
+        mOgre->adjustViewport();
+        if(!mOgre->getWindow()->isFullScreen())
+        {
+            SDL_DisplayMode dispMode;
+            SDL_Window* sdlWindow = mOgre->getSDLWindow();
+
+            SDL_GetWindowDisplayMode(sdlWindow, &dispMode);
+
+            dispMode.w = size_x;
+            dispMode.h = size_y;
+
+            SDL_SetWindowDisplayMode(sdlWindow, &dispMode);
+
+            mOgre->getWindow()->windowMovedOrResized();
+            mOgre->getWindow()->resize(size_x, size_y);
+        }
+    }
+
+    if(SDL_PeepEvents(NULL, 1, SDL_PEEKEVENT, SDL_QUIT, SDL_QUIT) != 0)
+    {
+        //user requested a quit, break out.
+        mOgre->getRoot()->queueEndRendering();
+    }
 }
 
 OMW::Engine::Engine(Files::ConfigurationManager& configurationManager)
@@ -140,6 +203,16 @@ OMW::Engine::Engine(Files::ConfigurationManager& configurationManager)
 {
     std::srand ( std::time(NULL) );
     MWClass::registerClasses();
+
+    Uint32 flags = SDL_INIT_VIDEO|SDL_INIT_NOPARACHUTE;
+    if(SDL_WasInit(flags) == 0)
+    {
+        //kindly ask SDL not to trash our OGL context
+        //might this be related to http://bugzilla.libsdl.org/show_bug.cgi?id=748 ?
+        SDL_SetHint(SDL_HINT_RENDER_DRIVER, "software");
+        if(SDL_Init(flags) != 0)
+            throw std::runtime_error("Couldn't initialize SDL!");
+    }
 }
 
 OMW::Engine::~Engine()
@@ -147,6 +220,7 @@ OMW::Engine::~Engine()
     mEnvironment.cleanup();
     delete mScriptContext;
     delete mOgre;
+    SDL_Quit();
 }
 
 // Load all BSA files in data directory.
@@ -317,7 +391,6 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     addResourcesDirectory(mResDir / "shadows");
     addZipResource(mResDir / "mygui" / "Obliviontt.zip");
 
-    // Create the window
     OEngine::Render::WindowSettings windowSettings;
     windowSettings.fullscreen = settings.getBool("fullscreen", "Video");
     windowSettings.window_x = settings.getInt("resolution x", "Video");
@@ -325,19 +398,10 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     windowSettings.vsync = settings.getBool("vsync", "Video");
     std::string aa = settings.getString("antialiasing", "Video");
     windowSettings.fsaa = (aa.substr(0, 4) == "MSAA") ? aa.substr(5, aa.size()-5) : "0";
+
     mOgre->createWindow("OpenMW", windowSettings);
 
     loadBSA();
-
-    Uint32 flags = SDL_INIT_VIDEO|SDL_INIT_NOPARACHUTE;
-    if(SDL_WasInit(flags) == 0)
-    {
-        //kindly ask SDL not to trash our OGL context
-        //might this be related to http://bugzilla.libsdl.org/show_bug.cgi?id=748 ?
-        SDL_SetHint(SDL_HINT_RENDER_DRIVER, "software");
-        if(SDL_Init(flags) != 0)
-            throw std::runtime_error("Couldn't initialize SDL!");
-    }
 
     // cursor replacer (converts the cursor from the bsa so they can be used by mygui)
     MWGui::CursorReplace replacer;

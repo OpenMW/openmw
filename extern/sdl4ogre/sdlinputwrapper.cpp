@@ -85,7 +85,6 @@ namespace SFO
         mSDLWindow = NULL;
 
         SDL_StopTextInput();
-        SDL_Quit();
     }
 
     void InputWrapper::capture()
@@ -120,24 +119,6 @@ namespace SFO
                     break;
                 case SDL_KEYUP:
                     mKeyboardListener->keyReleased(evt.key);
-                    break;
-
-                case SDL_WINDOWEVENT_FOCUS_GAINED:
-                    mWindowListener->windowFocusChange(true);
-                    break;
-                case SDL_WINDOWEVENT_FOCUS_LOST:
-                    mWindowListener->windowFocusChange(false);
-                    break;
-                case SDL_WINDOWEVENT_EXPOSED:
-                    mWindowListener->windowVisibilityChange(true);
-                    break;
-                case SDL_WINDOWEVENT_HIDDEN:
-                    mWindowListener->windowVisibilityChange(false);
-                    break;
-
-                //SDL traps ^C signals, pass it to OGRE.
-                case SDL_QUIT:
-                    Ogre::Root::getSingleton().queueEndRendering();
                     break;
             }
         }
@@ -186,9 +167,7 @@ namespace SFO
 
         //now remove all mouse events using the old setting from the queue
         SDL_PumpEvents();
-
-        SDL_Event dummy[20];
-        SDL_PeepEvents(dummy, 20, SDL_GETEVENT, SDL_MOUSEMOTION, SDL_MOUSEMOTION);
+        SDL_FlushEvent(SDL_MOUSEMOTION);
     }
 
     /// \brief Internal method for ignoring relative motions as a side effect
