@@ -839,7 +839,6 @@ void RenderingManager::windowResized(Ogre::RenderWindow* rw)
     Settings::Manager::setInt("resolution x", "Video", rw->getWidth());
     Settings::Manager::setInt("resolution y", "Video", rw->getHeight());
 
-
     mRendering.adjustViewport();
     mCompositors->recreate();
     mWater->assignTextures();

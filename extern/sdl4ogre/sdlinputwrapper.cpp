@@ -16,9 +16,9 @@ namespace SFO
 {
     /// \brief General purpose wrapper for OGRE applications around SDL's event
     ///        queue, mostly used for handling input-related events.
-    InputWrapper::InputWrapper(Ogre::RenderWindow *window) :
-        mWindow(window),
-        mSDLWindow(NULL),
+    InputWrapper::InputWrapper(SDL_Window* window) :
+        mSDLWindow(window),
+        mOwnWindow(false),
         mWarpCompensate(false),
         mMouseRelative(false),
         mGrabPointer(false),
@@ -29,9 +29,27 @@ namespace SFO
     {
         _setupOISKeys();
 
+        SDL_StartTextInput();
+    }
+
+    InputWrapper::~InputWrapper()
+    {
+        if(mSDLWindow != NULL && mOwnWindow)
+            SDL_DestroyWindow(mSDLWindow);
+        mSDLWindow = NULL;
+
+        SDL_StopTextInput();
+    }
+
+    void InputWrapper::initFromRenderWindow(Ogre::RenderWindow *win)
+    {
+        assert(mSDLWindow == NULL);
+
+        mOwnWindow = true;
+
         //get the HWND from ogre's renderwindow
         size_t windowHnd;
-        mWindow->getCustomAttribute("WINDOW", &windowHnd);
+        win->getCustomAttribute("WINDOW", &windowHnd);
 
         //wrap our own event handler around ogre's
         mSDLWindow = SDL_CreateWindowFrom((void*)windowHnd);
@@ -41,9 +59,6 @@ namespace SFO
         //without this SDL will take ownership of the window and iconify it when
         //we alt-tab away.
         //SDL_SetWindowFullscreen(mSDLWindow, 0);
-
-        //translate our keypresses into text
-        SDL_StartTextInput();
 
 #if OGRE_PLATFORM == OGRE_PLATFORM_LINUX
         //linux-specific event-handling fixups
@@ -76,15 +91,6 @@ namespace SFO
             XFlush(display);
         }
 #endif
-    }
-
-    InputWrapper::~InputWrapper()
-    {
-        if(mSDLWindow != NULL)
-            SDL_DestroyWindow(mSDLWindow);
-        mSDLWindow = NULL;
-
-        SDL_StopTextInput();
     }
 
     void InputWrapper::capture()
@@ -158,11 +164,14 @@ namespace SFO
 
         //eep, wrap the pointer manually if the input driver doesn't support
         //relative positioning natively
-        SDL_SetRelativeMouseMode(relative ? SDL_TRUE : SDL_FALSE);
+        int success = SDL_SetRelativeMouseMode(relative ? SDL_TRUE : SDL_FALSE);
 
         if(relative)
         {
-             mWrapPointer = true;
+            if(success != 0)
+            {
+                mWrapPointer = true;
+            }
         }
 
         //now remove all mouse events using the old setting from the queue
@@ -200,8 +209,8 @@ namespace SFO
 
         SDL_GetWindowSize(mSDLWindow, &width, &height);
 
-        const int FUDGE_FACTOR_X = width / 4;
-        const int FUDGE_FACTOR_Y = height / 4;
+        const int FUDGE_FACTOR_X = width / 8;
+        const int FUDGE_FACTOR_Y = height / 8;
 
         //warp the mouse if it's about to go outside the window
         if(evt.x - FUDGE_FACTOR_X < 0  || evt.x + FUDGE_FACTOR_X > width

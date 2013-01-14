@@ -31,7 +31,6 @@ namespace MWInput
     InputManager::InputManager(OEngine::Render::OgreRenderer &ogre,
             MWWorld::Player &player,
             MWBase::WindowManager &windows,
-            bool debug,
             OMW::Engine& engine,
             const std::string& userFile, bool userFileExists)
         : mOgre(ogre)
@@ -45,7 +44,7 @@ namespace MWInput
         , mUserFile(userFile)
         , mDragDrop(false)
         , mGuiCursorEnabled(false)
-        , mDebug(debug)
+        , mDebug(Settings::Manager::getBool("debug", "Engine"))
         , mInvertY (Settings::Manager::getBool("invert y axis", "Input"))
         , mCameraSensitivity (Settings::Manager::getFloat("camera sensitivity", "Input"))
         , mUISensitivity (Settings::Manager::getFloat("ui sensitivity", "Input"))
@@ -63,7 +62,7 @@ namespace MWInput
 
         Ogre::RenderWindow* window = ogre.getWindow ();
 
-        mInputManager = new SFO::InputWrapper(window);
+        mInputManager = new SFO::InputWrapper(mOgre.getSDLWindow());
         mInputManager->setMouseEventCallback (this);
         mInputManager->setKeyboardEventCallback (this);
         mInputManager->setWindowEventCallback(this);

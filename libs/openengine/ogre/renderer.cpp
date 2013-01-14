@@ -223,7 +223,7 @@ void OgreRenderer::createWindow(const std::string &title, const WindowSettings& 
     params.insert(std::make_pair("vsync", settings.vsync ? "true" : "false"));
 
     // Create an application window with the following settings:
-    SDL_Window *window = SDL_CreateWindow(
+    mSDLWindow = SDL_CreateWindow(
       "OpenMW",                  //    window title
       SDL_WINDOWPOS_UNDEFINED,           //    initial x position
       SDL_WINDOWPOS_UNDEFINED,           //    initial y position
@@ -238,7 +238,7 @@ void OgreRenderer::createWindow(const std::string &title, const WindowSettings& 
     struct SDL_SysWMinfo wmInfo;
     SDL_VERSION(&wmInfo.version);
 
-    if(-1 == SDL_GetWindowWMInfo(window, &wmInfo))
+    if(-1 == SDL_GetWindowWMInfo(mSDLWindow, &wmInfo))
         throw std::runtime_error("Couldn't get WM Info!");
 
     Ogre::String winHandle;

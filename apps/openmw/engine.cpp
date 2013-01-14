@@ -150,7 +150,6 @@ void OMW::Engine::handleSDLMessages()
             switch(events[i].window.event)
             {
             case SDL_WINDOWEVENT_RESIZED:
-                printf("Resizing window!\n");
                 resize = true;
                 size_x = events[i].window.data1;
                 size_y = events[i].window.data2;
@@ -162,12 +161,7 @@ void OMW::Engine::handleSDLMessages()
     //handle window movements
     if(resize)
     {
-        if(!mOgre->getWindow()->isFullScreen())
-        {
-            mOgre->getWindow()->windowMovedOrResized();
-            mOgre->getWindow()->resize(size_x, size_y);
-            mOgre->adjustViewport();
-        }
+        mOgre->getWindow()->resize(size_x, size_y);
     }
 
     if(SDL_PeepEvents(NULL, 1, SDL_PEEKEVENT, SDL_QUIT, SDL_QUIT) != 0)
@@ -436,7 +430,7 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
 
     mEnvironment.setInputManager (new MWInput::InputManager (*mOgre,
         MWBase::Environment::get().getWorld()->getPlayer(),
-         *MWBase::Environment::get().getWindowManager(), mDebug, *this, keybinderUser, keybinderUserExists));
+         *MWBase::Environment::get().getWindowManager(), *this, keybinderUser, keybinderUserExists));
 
     // load cell
     ESM::Position pos;

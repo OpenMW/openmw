@@ -62,7 +62,6 @@ namespace MWInput
         InputManager(OEngine::Render::OgreRenderer &_ogre,
             MWWorld::Player&_player,
             MWBase::WindowManager &_windows,
-            bool debug,
             OMW::Engine& engine,
             const std::string& userFile, bool userFileExists);
 
