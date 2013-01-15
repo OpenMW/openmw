@@ -181,10 +181,14 @@ namespace MWScript
                     runtime.pop();
 
                     std::vector<int> idleList;
-                    for (unsigned int i=0; i<arg0; ++i) {
+                    idleList.push_back (0); // why MW, why?
+
+                    for (int i=2; i<10 && arg0; ++i)
+                    {
                         Interpreter::Type_Integer idleValue = runtime[0].mFloat;
                         idleList.push_back(idleValue);
                         runtime.pop();
+                        --arg0;
                     }
 
                     // discard additional arguments (reset), because we have no idea what they mean.
