@@ -383,6 +383,88 @@ namespace MWScript
                 }
         };
 
+        template<class R>
+        class OpDrop : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+
+                    MWWorld::Ptr ptr = R()(runtime);
+
+                    std::string item = runtime.getStringLiteral (runtime[0].mInteger);
+                    runtime.pop();
+
+                    Interpreter::Type_Integer amount = runtime[0].mInteger;
+                    runtime.pop();
+
+                    MWWorld::ContainerStore& store = MWWorld::Class::get (ptr).getContainerStore (ptr);
+
+
+                    for (MWWorld::ContainerStoreIterator iter (store.begin()); iter!=store.end(); ++iter)
+                    {
+                        if (::Misc::StringUtils::ciEqual(iter->getCellRef().mRefID, item))
+                        {
+                            if(iter->getRefData().getCount() <= amount)
+                            {
+                                MWBase::Environment::get().getWorld()->dropObjectOnGround(ptr, *iter);
+                                iter->getRefData().setCount(0);
+                            }
+                            else
+                            {
+                                int original = iter->getRefData().getCount();
+                                iter->getRefData().setCount(amount);
+                                MWBase::Environment::get().getWorld()->dropObjectOnGround(ptr, *iter);
+                                iter->getRefData().setCount(original - amount);
+                            }
+
+                            break;
+                        }
+                    }
+                }
+        };
+
+        template<class R>
+        class OpDropSoulGem : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+
+                    MWWorld::Ptr ptr = R()(runtime);
+
+                    std::string soul = runtime.getStringLiteral (runtime[0].mInteger);
+                    runtime.pop();
+
+                    MWWorld::ContainerStore& store = MWWorld::Class::get (ptr).getContainerStore (ptr);
+
+
+                    for (MWWorld::ContainerStoreIterator iter (store.begin()); iter!=store.end(); ++iter)
+                    {
+                        if (::Misc::StringUtils::ciEqual(iter->getCellRef().mSoul, soul))
+                        {
+
+                            if(iter->getRefData().getCount() <= 1)
+                            {
+                                MWBase::Environment::get().getWorld()->dropObjectOnGround(ptr, *iter);
+                                iter->getRefData().setCount(0);
+                            }
+                            else
+                            {
+                                int original = iter->getRefData().getCount();
+                                iter->getRefData().setCount(1);
+                                MWBase::Environment::get().getWorld()->dropObjectOnGround(ptr, *iter);
+                                iter->getRefData().setCount(original - 1);
+                            }
+
+                            break;
+                        }
+                    }
+                }
+        };
+
         template <class R>
         class OpGetAttacked : public Interpreter::Opcode0
         {
@@ -495,6 +577,10 @@ namespace MWScript
         const int opcodeAddSoulGemExplicit = 0x20001f4;
         const int opcodeRemoveSoulGem = 0x20001f5;
         const int opcodeRemoveSoulGemExplicit = 0x20001f6;
+        const int opcodeDrop = 0x20001f8;
+        const int opcodeDropExplicit = 0x20001f9;
+        const int opcodeDropSoulGem = 0x20001fa;
+        const int opcodeDropSoulGemExplicit = 0x20001fb;
         const int opcodeGetAttacked = 0x20001d3;
         const int opcodeGetAttackedExplicit = 0x20001d4;
         const int opcodeGetWeaponDrawn = 0x20001d7;
@@ -538,6 +624,8 @@ namespace MWScript
             extensions.registerFunction ("geteffect", 'l', "l", opcodeGetEffect, opcodeGetEffectExplicit);
             extensions.registerInstruction ("addsoulgem", "cc", opcodeAddSoulGem, opcodeAddSoulGemExplicit);
             extensions.registerInstruction ("removesoulgem", "c", opcodeRemoveSoulGem, opcodeRemoveSoulGemExplicit);
+            extensions.registerInstruction ("drop", "cl", opcodeDrop, opcodeDropExplicit);
+            extensions.registerInstruction ("dropsoulgem", "c", opcodeDropSoulGem, opcodeDropSoulGemExplicit);
             extensions.registerFunction ("getattacked", 'l', "", opcodeGetAttacked, opcodeGetAttackedExplicit);
             extensions.registerFunction ("getweapondrawn", 'l', "", opcodeGetWeaponDrawn, opcodeGetWeaponDrawnExplicit);
             extensions.registerFunction ("getspelleffects", 'l', "c", opcodeGetSpellEffects, opcodeGetSpellEffectsExplicit);
@@ -576,6 +664,10 @@ namespace MWScript
             interpreter.installSegment5 (opcodeAddSoulGemExplicit, new OpAddSoulGem<ExplicitRef>);
             interpreter.installSegment5 (opcodeRemoveSoulGem, new OpRemoveSoulGem<ImplicitRef>);
             interpreter.installSegment5 (opcodeRemoveSoulGemExplicit, new OpRemoveSoulGem<ExplicitRef>);
+            interpreter.installSegment5 (opcodeDrop, new OpDrop<ImplicitRef>);
+            interpreter.installSegment5 (opcodeDropExplicit, new OpDrop<ExplicitRef>);
+            interpreter.installSegment5 (opcodeDropSoulGem, new OpDropSoulGem<ImplicitRef>);
+            interpreter.installSegment5 (opcodeDropSoulGemExplicit, new OpDropSoulGem<ExplicitRef>);
             interpreter.installSegment5 (opcodeGetAttacked, new OpGetAttacked<ImplicitRef>);
             interpreter.installSegment5 (opcodeGetAttackedExplicit, new OpGetAttacked<ExplicitRef>);
             interpreter.installSegment5 (opcodeGetWeaponDrawn, new OpGetWeaponDrawn<ImplicitRef>);

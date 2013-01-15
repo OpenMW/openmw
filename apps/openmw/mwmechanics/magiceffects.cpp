@@ -68,7 +68,7 @@ namespace MWMechanics
         }
     }
 
-    void MagicEffects::add (const ESM::EffectList& list)
+    void MagicEffects::add (const ESM::EffectList& list, float magnitude)
     {
         for (std::vector<ESM::ENAMstruct>::const_iterator iter (list.mList.begin()); iter!=list.mList.end();
             ++iter)
@@ -78,9 +78,13 @@ namespace MWMechanics
             if (iter->mMagnMin>=iter->mMagnMax)
                 param.mMagnitude = iter->mMagnMin;
             else
+            {
+                if (magnitude==-1)
+                    magnitude = static_cast<float> (std::rand()) / RAND_MAX;
+
                 param.mMagnitude = static_cast<int> (
-                    (iter->mMagnMax-iter->mMagnMin+1)*
-                    (static_cast<float> (std::rand()) / RAND_MAX) + iter->mMagnMin);
+                    (iter->mMagnMax-iter->mMagnMin+1)*magnitude + iter->mMagnMin);
+            }
 
             add (*iter, param);
         }

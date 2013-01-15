@@ -390,8 +390,13 @@ void MWSpellEffect::setSpellEffect(const SpellEffectParams& params)
 
 void MWSpellEffect::updateWidgets()
 {
-    if (!mWindowManager)
+    if (!mEffectParams.mKnown)
+    {
+        mTextWidget->setCaption ("?");
+        mRequestedWidth = mTextWidget->getTextSize().width + 24;
+        mImageWidget->setImageTexture ("");
         return;
+    }
 
     const MWWorld::ESMStore &store =
         MWBase::Environment::get().getWorld()->getStore();
@@ -400,7 +405,6 @@ void MWSpellEffect::updateWidgets()
         store.get<ESM::MagicEffect>().search(mEffectParams.mEffectID);
 
     assert(magicEffect);
-    assert(mWindowManager);
 
     std::string pt =  mWindowManager->getGameSettingString("spoint", "");
     std::string pts =  mWindowManager->getGameSettingString("spoints", "");
