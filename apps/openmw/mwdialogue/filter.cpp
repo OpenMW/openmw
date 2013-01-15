@@ -19,12 +19,19 @@
 
 bool MWDialogue::Filter::testActor (const ESM::DialInfo& info) const
 {
+    bool isCreature = (mActor.getTypeName() != typeid (ESM::NPC).name());
+
     // actor id
     if (!info.mActor.empty())
+    {
         if ( Misc::StringUtils::lowerCase (info.mActor)!=MWWorld::Class::get (mActor).getId (mActor))
             return false;
-
-    bool isCreature = (mActor.getTypeName() != typeid (ESM::NPC).name());
+    }
+    else if (isCreature)
+    {
+        // Creatures must not have topics aside of those specific to their id
+        return false;
+    }
 
     // NPC race
     if (!info.mRace.empty())
