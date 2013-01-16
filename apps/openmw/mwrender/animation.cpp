@@ -98,6 +98,23 @@ void Animation::createEntityList(Ogre::SceneNode *node, const std::string &model
 }
 
 
+int Animation::getAnimationCount()
+{
+    int num = 0;
+    if(mEntityList.mSkelBase)
+    {
+        Ogre::AnimationStateSet *as = mEntityList.mSkelBase->getAllAnimationStates();
+        Ogre::AnimationStateIterator ai = as->getAnimationStateIterator();
+        while(ai.hasMoreElements())
+        {
+            num++;
+            ai.moveNext();
+        }
+    }
+    return num;
+}
+
+
 void Animation::setController(MWMechanics::CharacterController *controller)
 {
     mController = controller;

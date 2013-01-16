@@ -66,6 +66,8 @@ public:
     virtual ~Animation();
 
     void setController(MWMechanics::CharacterController *controller);
+    int getAnimationCount();
+
     void playGroup(std::string groupname, int mode, int loops);
     void skipAnim();
     virtual void runAnimation(float timepassed);
