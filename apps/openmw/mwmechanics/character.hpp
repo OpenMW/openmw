@@ -24,15 +24,11 @@ class CharacterController
     CharacterState mState;
 
 public:
-    CharacterController(const MWWorld::Ptr &ptr, MWRender::Animation *anim, CharacterState state)
-      : mPtr(ptr), mAnimation(anim), mState(state)
-    { }
+    CharacterController(const MWWorld::Ptr &ptr, MWRender::Animation *anim, CharacterState state);
 
+    void setState(CharacterState state);
     CharacterState getState() const
     { return mState; }
-
-    void setState(CharacterState state)
-    { mState = state; }
 };
 
 }

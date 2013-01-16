@@ -169,10 +169,7 @@ namespace MWMechanics
         if(!MWWorld::Class::get(ptr).getCreatureStats(ptr).isDead())
             mActors.insert(std::make_pair(ptr, CharacterController(ptr, anim, CharState_Idle)));
         else
-        {
             mActors.insert(std::make_pair(ptr, CharacterController(ptr, anim, CharState_Dead)));
-            MWBase::Environment::get().getWorld()->playAnimationGroup (ptr, "death1", 2);
-        }
     }
 
     void Actors::removeActor (const MWWorld::Ptr& ptr)
@@ -247,7 +244,6 @@ namespace MWMechanics
                 }
 
                 iter->second.setState(CharState_Dead);
-                MWBase::Environment::get().getWorld()->playAnimationGroup(iter->first, "death1", 0);
 
                 ++mDeathCount[MWWorld::Class::get(iter->first).getId(iter->first)];
 
