@@ -21,6 +21,7 @@
 
 #include "../mwrender/animation.hpp"
 
+
 namespace MWMechanics
 {
 
@@ -39,6 +40,26 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
         case CharState_Dead:
             mAnimation->playGroup("death1", 1, 1);
             break;
+    }
+}
+
+CharacterController::CharacterController(const CharacterController &rhs)
+  : mPtr(rhs.mPtr), mAnimation(rhs.mAnimation), mState(rhs.mState)
+{
+    if(!mAnimation)
+        return;
+    /* We've been copied. Update the animation with the new controller. */
+    mAnimation->setController(this);
+}
+
+
+void CharacterController::markerEvent(const std::string &evt)
+{
+    std::string::size_type gp = evt.find(':');
+    if(gp >= evt.length()-2)
+    {
+        std::cerr<< "Unexpected animation marker: \""<<evt<<"\"" <<std::endl;
+        return;
     }
 }
 

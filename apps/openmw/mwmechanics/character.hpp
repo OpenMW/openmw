@@ -23,8 +23,15 @@ class CharacterController
 
     CharacterState mState;
 
+protected:
+    /* Called by the animation whenever a new text key is reached. */
+    void markerEvent(const std::string &evt);
+
+    friend class MWRender::Animation;
+
 public:
     CharacterController(const MWWorld::Ptr &ptr, MWRender::Animation *anim, CharacterState state);
+    CharacterController(const CharacterController &rhs);
 
     void setState(CharacterState state);
     CharacterState getState() const

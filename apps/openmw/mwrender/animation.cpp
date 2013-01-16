@@ -10,11 +10,14 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 
+#include "../mwmechanics/character.hpp"
+
 namespace MWRender
 {
 
 Animation::Animation(const MWWorld::Ptr &ptr)
     : mPtr(ptr)
+    , mController(NULL)
     , mInsert(NULL)
     , mAccumRoot(NULL)
     , mNonAccumRoot(NULL)
@@ -240,6 +243,8 @@ void Animation::runAnimation(float timepassed)
             while(mCurGroup.mNext != mCurGroup.mTextKeys->end() &&
                   mCurGroup.mNext->first <= mCurGroup.mLoopStop->first)
             {
+                if(mController)
+                    mController->markerEvent(mCurGroup.mNext->second);
                 mCurGroup.mNext++;
             }
 
@@ -256,6 +261,8 @@ void Animation::runAnimation(float timepassed)
                 while(mCurGroup.mNext != mCurGroup.mTextKeys->end() &&
                       mCurGroup.mNext->first <= mCurGroup.mStop->first)
                 {
+                    if(mController)
+                        mController->markerEvent(mCurGroup.mNext->second);
                     mCurGroup.mNext++;
                 }
                 if(mNextGroup.mLoops > 0)
@@ -275,6 +282,8 @@ void Animation::runAnimation(float timepassed)
         while(mCurGroup.mNext != mCurGroup.mTextKeys->end() &&
               mCurGroup.mNext->first <= mTime)
         {
+            if(mController)
+                mController->markerEvent(mCurGroup.mNext->second);
             mCurGroup.mNext++;
         }
 
