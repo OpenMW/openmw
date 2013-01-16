@@ -1374,6 +1374,11 @@ namespace MWWorld
 
     }
 
+    MWRender::Animation* World::getAnimation(const MWWorld::Ptr &ptr)
+    {
+        return mRendering->getAnimation(ptr);
+    }
+
     void World::playVideo (const std::string &name, bool allowSkipping)
     {
         mRendering->playVideo(name, allowSkipping);

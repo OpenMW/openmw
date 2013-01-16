@@ -36,6 +36,7 @@ namespace ESM
 namespace MWRender
 {
     class ExternalRendering;
+    class Animation;
 }
 
 namespace MWWorld
@@ -307,6 +308,9 @@ namespace MWBase
             /// 2 - player is underwater \n
             /// 3 - enemies are nearby (not implemented)
 
+
+            /// \todo Probably shouldn't be here
+            virtual MWRender::Animation* getAnimation(const MWWorld::Ptr &ptr) = 0;
 
             /// \todo this does not belong here
             virtual void playVideo(const std::string& name, bool allowSkipping) = 0;

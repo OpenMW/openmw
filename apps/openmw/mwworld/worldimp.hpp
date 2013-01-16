@@ -37,6 +37,7 @@ namespace MWRender
 {
     class SkyManager;
     class CellRender;
+    class Animation;
 }
 
 namespace MWWorld
@@ -351,6 +352,9 @@ namespace MWWorld
             /// 1 - only waiting \n
             /// 2 - player is underwater \n
             /// 3 - enemies are nearby (not implemented)
+
+            /// \todo Probably shouldn't be here
+            virtual MWRender::Animation* getAnimation(const MWWorld::Ptr &ptr);
 
             /// \todo this does not belong here
             virtual void playVideo(const std::string& name, bool allowSkipping);

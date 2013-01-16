@@ -929,6 +929,14 @@ void RenderingManager::setupExternalRendering (MWRender::ExternalRendering& rend
     rendering.setup (mRendering.getScene());
 }
 
+Animation* RenderingManager::getAnimation(const MWWorld::Ptr &ptr)
+{
+    Animation *anim = mActors.getAnimation(ptr);
+    // TODO: Check mObjects too.
+    return anim;
+}
+
+
 void RenderingManager::playVideo(const std::string& name, bool allowSkipping)
 {
     mVideoPlayer->playVideo ("video/" + name, allowSkipping);

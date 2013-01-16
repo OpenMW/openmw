@@ -145,6 +145,14 @@ void Actors::update (float duration)
         iter->second->runAnimation(duration);
 }
 
+Animation* Actors::getAnimation(const MWWorld::Ptr &ptr)
+{
+    PtrAnimationMap::const_iterator iter = mAllActors.find(ptr);
+    if(iter != mAllActors.end())
+        return iter->second;
+    return NULL;
+}
+
 void Actors::updateObjectCell(const MWWorld::Ptr &ptr)
 {
     Ogre::SceneNode *node;

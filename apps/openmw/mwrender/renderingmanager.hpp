@@ -46,6 +46,7 @@ namespace MWRender
     class ExternalRendering;
     class GlobalMap;
     class VideoPlayer;
+    class Animation;
 
 class RenderingManager: private RenderingInterface, public Ogre::WindowEventListener {
 
@@ -195,6 +196,8 @@ class RenderingManager: private RenderingInterface, public Ogre::WindowEventList
     ///< see MWRender::LocalMap::isPositionExplored
 
     void setupExternalRendering (MWRender::ExternalRendering& rendering);
+
+    Animation* getAnimation(const MWWorld::Ptr &ptr);
 
     void playVideo(const std::string& name, bool allowSkipping);
     void stopVideo();

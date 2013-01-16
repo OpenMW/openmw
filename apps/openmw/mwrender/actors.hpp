@@ -54,6 +54,8 @@ namespace MWRender
 
         /// Updates containing cell for object rendering data
         void updateObjectCell(const MWWorld::Ptr &ptr);
+
+        Animation* getAnimation(const MWWorld::Ptr &ptr);
     };
 }
 #endif
