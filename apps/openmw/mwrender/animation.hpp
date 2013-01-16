@@ -16,16 +16,19 @@ namespace MWRender
 class Animation
 {
     struct GroupTimes {
+        NifOgre::TextKeyMap *mTextKeys;
+
         NifOgre::TextKeyMap::const_iterator mStart;
         NifOgre::TextKeyMap::const_iterator mStop;
         NifOgre::TextKeyMap::const_iterator mLoopStart;
         NifOgre::TextKeyMap::const_iterator mLoopStop;
 
+        NifOgre::TextKeyMap::const_iterator mNext;
+
         Ogre::AnimationState *mAnimState;
         size_t mLoops;
 
-        GroupTimes()
-          : mAnimState(NULL), mLoops(0)
+        GroupTimes() : mTextKeys(NULL), mAnimState(NULL), mLoops(0)
         { }
     };
 

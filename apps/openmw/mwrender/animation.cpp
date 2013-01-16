@@ -130,6 +130,11 @@ void Animation::updatePosition(float time)
 void Animation::resetPosition(float time)
 {
     mCurGroup.mAnimState->setTimePosition(time);
+
+    mCurGroup.mNext = mCurGroup.mStart;
+    while(mCurGroup.mNext->first < time)
+        mCurGroup.mNext++;
+
     if(mNonAccumRoot)
     {
         mEntityList.mSkelBase->getSkeleton()->setAnimationState(*mCurGroup.mAnimState->getParent());
@@ -141,7 +146,8 @@ void Animation::resetPosition(float time)
 
 bool Animation::findGroupTimes(const std::string &groupname, Animation::GroupTimes *times)
 {
-    const NifOgre::TextKeyMap &textkeys = mTextKeys[groupname];
+    times->mTextKeys = &mTextKeys[groupname];
+    const NifOgre::TextKeyMap &textkeys = *times->mTextKeys;
     if(textkeys.size() == 0)
         return false;
 
@@ -202,6 +208,7 @@ void Animation::playGroup(std::string groupname, int mode, int loops)
         std::cerr<< e.what() <<std::endl;
         return;
     }
+    times.mNext = ((mode==2) ? times.mLoopStart : times.mStart);
 
     if(mode == 0 && mCurGroup.mLoops > 0)
         mNextGroup = times;
@@ -211,7 +218,7 @@ void Animation::playGroup(std::string groupname, int mode, int loops)
             mCurGroup.mAnimState->setEnabled(false);
         mCurGroup = times;
         mNextGroup = GroupTimes();
-        mTime = ((mode==2) ? mCurGroup.mLoopStart : mCurGroup.mStart)->first;
+        mTime = mCurGroup.mNext->first;
         mCurGroup.mAnimState->setEnabled(true);
         resetPosition(mTime);
     }
@@ -230,6 +237,12 @@ void Animation::runAnimation(float timepassed)
     recheck:
         if(mTime >= mCurGroup.mLoopStop->first)
         {
+            while(mCurGroup.mNext != mCurGroup.mTextKeys->end() &&
+                  mCurGroup.mNext->first <= mCurGroup.mLoopStop->first)
+            {
+                mCurGroup.mNext++;
+            }
+
             if(mCurGroup.mLoops > 1)
             {
                 mCurGroup.mLoops--;
@@ -240,6 +253,11 @@ void Animation::runAnimation(float timepassed)
             }
             else if(mTime >= mCurGroup.mStop->first)
             {
+                while(mCurGroup.mNext != mCurGroup.mTextKeys->end() &&
+                      mCurGroup.mNext->first <= mCurGroup.mStop->first)
+                {
+                    mCurGroup.mNext++;
+                }
                 if(mNextGroup.mLoops > 0)
                 {
                     updatePosition(mCurGroup.mStop->first);
@@ -253,6 +271,11 @@ void Animation::runAnimation(float timepassed)
                 }
                 mTime = mCurGroup.mStop->first;
             }
+        }
+        while(mCurGroup.mNext != mCurGroup.mTextKeys->end() &&
+              mCurGroup.mNext->first <= mTime)
+        {
+            mCurGroup.mNext++;
         }
 
         updatePosition(mTime);
