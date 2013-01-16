@@ -21,6 +21,9 @@
 
 #include "../mwrender/animation.hpp"
 
+#include "../mwbase/environment.hpp"
+#include "../mwbase/soundmanager.hpp"
+
 #include "../mwworld/class.hpp"
 
 namespace MWMechanics
@@ -56,11 +59,10 @@ CharacterController::CharacterController(const CharacterController &rhs)
 
 void CharacterController::markerEvent(const std::string &evt)
 {
-    std::string::size_type gp = evt.find(':');
-    if(gp >= evt.length()-2)
+    if(evt.compare(0, 6, "sound:") == 0)
     {
-        std::cerr<< "Unexpected animation marker: \""<<evt<<"\"" <<std::endl;
-        return;
+        MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
+        sndMgr->playSound3D(mPtr, evt.substr(7), 1.0f, 1.0f);
     }
 }
 
