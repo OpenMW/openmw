@@ -30,6 +30,7 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
     if(!mAnimation)
         return;
 
+    mAnimation->setController(this);
     switch(mState)
     {
         case CharState_Idle:

@@ -95,6 +95,12 @@ void Animation::createEntityList(Ogre::SceneNode *node, const std::string &model
 }
 
 
+void Animation::setController(MWMechanics::CharacterController *controller)
+{
+    mController = controller;
+}
+
+
 void Animation::updatePosition(float time)
 {
     mCurGroup.mAnimState->setTimePosition(time);

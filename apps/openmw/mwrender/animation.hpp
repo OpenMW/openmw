@@ -5,6 +5,11 @@
 
 #include "../mwworld/ptr.hpp"
 
+namespace MWMechanics
+{
+    class CharacterController;
+}
+
 namespace MWRender
 {
 
@@ -26,8 +31,9 @@ class Animation
 
 protected:
     MWWorld::Ptr mPtr;
-    Ogre::SceneNode* mInsert;
+    MWMechanics::CharacterController *mController;
 
+    Ogre::SceneNode* mInsert;
     NifOgre::EntityList mEntityList;
     std::map<std::string,NifOgre::TextKeyMap> mTextKeys;
     Ogre::Bone *mAccumRoot;
@@ -56,6 +62,7 @@ public:
     Animation(const MWWorld::Ptr &ptr);
     virtual ~Animation();
 
+    void setController(MWMechanics::CharacterController *controller);
     void playGroup(std::string groupname, int mode, int loops);
     void skipAnim();
     virtual void runAnimation(float timepassed);
