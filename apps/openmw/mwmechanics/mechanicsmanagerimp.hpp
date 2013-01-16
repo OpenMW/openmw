@@ -41,8 +41,6 @@ namespace MWMechanics
 
             virtual void addActor (const MWWorld::Ptr& ptr);
             ///< Register an actor for stats management
-            ///
-            /// \note Dead actors are ignored.
 
             virtual void removeActor (const MWWorld::Ptr& ptr);
             ///< Deregister an actor for stats management
