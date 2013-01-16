@@ -24,12 +24,163 @@ using namespace Ogre;
 namespace MWRender
 {
 
+CubeReflection::CubeReflection(Ogre::SceneManager* sceneManager)
+    : Reflection(sceneManager)
+{
+    Ogre::TexturePtr texture = Ogre::TextureManager::getSingleton ().createManual("CubeReflection",
+                ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, TEX_TYPE_CUBE_MAP,
+                512,512, 0, PF_R8G8B8, TU_RENDERTARGET);
+
+    mCamera = mSceneMgr->createCamera ("CubeCamera");
+    mCamera->setNearClipDistance (5);
+    mCamera->setFarClipDistance (1000);
+
+    for (int face = 0; face < 6; ++face)
+    {
+        mRenderTargets[face] = texture->getBuffer (face)->getRenderTarget();
+        mRenderTargets[face]->removeAllViewports ();
+        Viewport* vp = mRenderTargets[face]->addViewport (mCamera);
+        vp->setOverlaysEnabled(false);
+        vp->setShadowsEnabled(false);
+        vp->setMaterialScheme ("water_reflection");
+        mRenderTargets[face]->setAutoUpdated(false);
+
+        /*
+        Vector3 lookAt(0,0,0), up(0,0,0), right(0,0,0);
+        switch(face)
+        {
+            case 0:  lookAt.x =-1;  up.y = 1;  right.z = 1;  break;  // +X
+            case 1:  lookAt.x = 1;  up.y = 1;  right.z =-1;  break;	 // -X
+            case 2:  lookAt.y =-1;  up.z = 1;  right.x = 1;  break;	 // +Y
+            case 3:  lookAt.y = 1;  up.z =-1;  right.x = 1;  break;	 // -Y
+            case 4:  lookAt.z = 1;  up.y = 1;  right.x =-1;  break;	 // +Z
+            case 5:  lookAt.z =-1;  up.y = 1;  right.x =-1;  break;	 // -Z
+        }
+        Quaternion orient(right, up, lookAt);
+        mCamera->setOrientation(orient);
+        */
+    }
+}
+
+CubeReflection::~CubeReflection ()
+{
+    Ogre::TextureManager::getSingleton ().remove("CubeReflection");
+    mSceneMgr->destroyCamera (mCamera);
+}
+
+void CubeReflection::update ()
+{
+    mParentCamera->getParentSceneNode ()->needUpdate ();
+    mCamera->setPosition(mParentCamera->getDerivedPosition());
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+PlaneReflection::PlaneReflection(Ogre::SceneManager* sceneManager, SkyManager* sky)
+    : Reflection(sceneManager)
+    , mSky(sky)
+{
+    mCamera = mSceneMgr->createCamera ("PlaneReflectionCamera");
+    mSceneMgr->addRenderQueueListener(this);
+
+    mTexture = TextureManager::getSingleton().createManual("WaterReflection",
+        ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, TEX_TYPE_2D, 512, 512, 0, PF_A8R8G8B8, TU_RENDERTARGET);
+
+    mRenderTarget = mTexture->getBuffer()->getRenderTarget();
+    Viewport* vp = mRenderTarget->addViewport(mCamera);
+    vp->setOverlaysEnabled(false);
+    vp->setBackgroundColour(ColourValue(0.8f, 0.9f, 1.0f));
+    vp->setShadowsEnabled(false);
+    // use fallback techniques without shadows and without mrt
+    vp->setMaterialScheme("water_reflection");
+    mRenderTarget->addListener(this);
+    mRenderTarget->setActive(true);
+
+    sh::Factory::getInstance ().setTextureAlias ("WaterReflection", mTexture->getName());
+}
+
+PlaneReflection::~PlaneReflection ()
+{
+    mRenderTarget->removeListener (this);
+    mSceneMgr->destroyCamera (mCamera);
+    TextureManager::getSingleton ().remove("WaterReflection");
+}
+
+void PlaneReflection::renderQueueStarted (Ogre::uint8 queueGroupId, const Ogre::String &invocation, bool &skipThisInvocation)
+{
+    // We don't want the sky to get clipped by custom near clip plane (the water plane)
+    if (queueGroupId < 20 && mRenderActive)
+    {
+        mCamera->disableCustomNearClipPlane();
+        Root::getSingleton().getRenderSystem()->_setProjectionMatrix(mCamera->getProjectionMatrixRS());
+    }
+}
+
+void PlaneReflection::renderQueueEnded (Ogre::uint8 queueGroupId, const Ogre::String &invocation, bool &repeatThisInvocation)
+{
+    if (queueGroupId < 20 && mRenderActive)
+    {
+        if (!mIsUnderwater)
+            mCamera->enableCustomNearClipPlane(mErrorPlane);
+        Root::getSingleton().getRenderSystem()->_setProjectionMatrix(mCamera->getProjectionMatrixRS());
+    }
+}
+
+void PlaneReflection::preRenderTargetUpdate(const RenderTargetEvent& evt)
+{
+    mParentCamera->getParentSceneNode ()->needUpdate ();
+    mCamera->setOrientation(mParentCamera->getDerivedOrientation());
+    mCamera->setPosition(mParentCamera->getDerivedPosition());
+    mCamera->setNearClipDistance(mParentCamera->getNearClipDistance());
+    mCamera->setFarClipDistance(mParentCamera->getFarClipDistance());
+    mCamera->setAspectRatio(mParentCamera->getAspectRatio());
+    mCamera->setFOVy(mParentCamera->getFOVy());
+    mRenderActive = true;
+
+    Vector3 pos = mParentCamera->getRealPosition();
+    pos.y = (mWaterPlane).d*2 - pos.y;
+    mSky->setSkyPosition(pos);
+    mCamera->enableReflection(mWaterPlane);
+}
+
+void PlaneReflection::postRenderTargetUpdate(const RenderTargetEvent& evt)
+{
+    mSky->resetSkyPosition();
+    mCamera->disableReflection();
+    mCamera->disableCustomNearClipPlane();
+    mRenderActive = false;
+}
+
+void PlaneReflection::setWaterPlane (Plane plane)
+{
+    mWaterPlane = plane;
+    mErrorPlane = Plane(plane.normal, mWaterPlane.d - 5);
+}
+
+void PlaneReflection::setActive (bool active)
+{
+    mRenderTarget->setActive(active);
+}
+
+void PlaneReflection::setViewportBackground(Ogre::ColourValue colour)
+{
+    mRenderTarget->getViewport (0)->setBackgroundColour (colour);
+}
+
+void PlaneReflection::setVisibilityMask (int flags)
+{
+    mRenderTarget->getViewport (0)->setVisibilityMask (flags);
+}
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
 Water::Water (Ogre::Camera *camera, RenderingManager* rend, const ESM::Cell* cell) :
-    mCamera (camera), mSceneManager (camera->getSceneManager()),
+    mCamera (camera), mSceneMgr (camera->getSceneManager()),
     mIsUnderwater(false), mVisibilityFlags(0),
-    mReflectionTarget(0), mActive(1), mToggled(1),
-    mReflectionRenderActive(false), mRendering(rend),
-    mWaterTimer(0.f)
+    mActive(1), mToggled(1),
+    mRendering(rend),
+    mWaterTimer(0.f),
+    mReflection(NULL)
 {
     mSky = rend->getSkyManager();
 
@@ -43,13 +194,11 @@ Water::Water (Ogre::Camera *camera, RenderingManager* rend, const ESM::Cell* cel
 
     MeshManager::getSingleton().createPlane("water", ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,  mWaterPlane, CELL_SIZE*5, CELL_SIZE * 5, 10, 10, true, 1, 3,3, Vector3::UNIT_Z);
 
-    mWater = mSceneManager->createEntity("water");
+    mWater = mSceneMgr->createEntity("water");
     mWater->setVisibilityFlags(RV_Water);
     mWater->setCastShadows(false);
 
-    mWaterNode = mSceneManager->getRootSceneNode()->createChildSceneNode();
-
-    mReflectionCamera = mSceneManager->createCamera("ReflectionCamera");
+    mWaterNode = mSceneMgr->getRootSceneNode()->createChildSceneNode();
 
     if(!(cell->mData.mFlags & cell->Interior))
     {
@@ -71,8 +220,6 @@ Water::Water (Ogre::Camera *camera, RenderingManager* rend, const ESM::Cell* cel
     mUnderwaterDome->setVisible(false);
     underwaterDome->setMaterialName("Underwater_Dome");
     */
-
-    mSceneManager->addRenderQueueListener(this);
 
     assignTextures();
 
@@ -142,12 +289,9 @@ Water::~Water()
 {
     MeshManager::getSingleton().remove("water");
 
-    if (mReflectionTarget)
-        mReflectionTexture->getBuffer()->getRenderTarget()->removeListener(this);
-
     mWaterNode->detachObject(mWater);
-    mSceneManager->destroyEntity(mWater);
-    mSceneManager->destroySceneNode(mWaterNode);
+    mSceneMgr->destroyEntity(mWater);
+    mSceneMgr->destroySceneNode(mWaterNode);
 }
 
 void Water::changeCell(const ESM::Cell* cell)
@@ -166,8 +310,8 @@ void Water::setHeight(const float height)
 
     mWaterPlane = Plane(Vector3::UNIT_Y, height);
 
-    // small error due to reflection texture size & reflection distortion
-    mErrorPlane = Plane(Vector3::UNIT_Y, height - 5);
+    if (mReflection)
+        mReflection->setWaterPlane(mWaterPlane);
 
     mWaterNode->setPosition(0, height, 0);
     sh::Factory::getInstance ().setSharedParameter ("waterLevel", sh::makeProperty<sh::FloatValue>(new sh::FloatValue(height)));
@@ -190,43 +334,15 @@ Water::updateUnderwater(bool underwater)
         mWater->isVisible() &&
         mCamera->getPolygonMode() == Ogre::PM_SOLID;
 
+    if (mReflection)
+        mReflection->setUnderwater (mIsUnderwater);
+
     updateVisible();
 }
 
 Vector3 Water::getSceneNodeCoordinates(int gridX, int gridY)
 {
     return Vector3(gridX * CELL_SIZE + (CELL_SIZE / 2), mTop, -gridY * CELL_SIZE - (CELL_SIZE / 2));
-}
-
-void Water::preRenderTargetUpdate(const RenderTargetEvent& evt)
-{
-    if (evt.source == mReflectionTarget)
-    {
-        mCamera->getParentSceneNode ()->needUpdate ();
-        mReflectionCamera->setOrientation(mCamera->getDerivedOrientation());
-        mReflectionCamera->setPosition(mCamera->getDerivedPosition());
-        mReflectionCamera->setNearClipDistance(mCamera->getNearClipDistance());
-        mReflectionCamera->setFarClipDistance(mCamera->getFarClipDistance());
-        mReflectionCamera->setAspectRatio(mCamera->getAspectRatio());
-        mReflectionCamera->setFOVy(mCamera->getFOVy());
-        mReflectionRenderActive = true;
-
-        Vector3 pos = mCamera->getRealPosition();
-        pos.y = mTop*2 - pos.y;
-        mSky->setSkyPosition(pos);
-        mReflectionCamera->enableReflection(mWaterPlane);
-    }
-}
-
-void Water::postRenderTargetUpdate(const RenderTargetEvent& evt)
-{
-    if (evt.source == mReflectionTarget)
-    {
-        mSky->resetSkyPosition();
-        mReflectionCamera->disableReflection();
-        mReflectionCamera->disableCustomNearClipPlane();
-        mReflectionRenderActive = false;
-    }
 }
 
 void Water::assignTextures()
@@ -246,34 +362,16 @@ void Water::assignTextures()
 
 void Water::setViewportBackground(const ColourValue& bg)
 {
-    if (mReflectionTarget)
-        mReflectionTarget->getViewport(0)->setBackgroundColour(bg);
+    if (mReflection)
+        mReflection->setViewportBackground(bg);
 }
 
 void Water::updateVisible()
 {
     mWater->setVisible(mToggled && mActive);
-    if (mReflectionTarget)
-        mReflectionTarget->setActive(mToggled && mActive);
-}
-
-void Water::renderQueueStarted (Ogre::uint8 queueGroupId, const Ogre::String &invocation, bool &skipThisInvocation)
-{
-    // We don't want the sky to get clipped by custom near clip plane (the water plane)
-    if (queueGroupId < 20 && mReflectionRenderActive)
+    if (mReflection)
     {
-        mReflectionCamera->disableCustomNearClipPlane();
-        Root::getSingleton().getRenderSystem()->_setProjectionMatrix(mReflectionCamera->getProjectionMatrixRS());
-    }
-}
-
-void Water::renderQueueEnded (Ogre::uint8 queueGroupId, const Ogre::String &invocation, bool &repeatThisInvocation)
-{
-    if (queueGroupId < 20 && mReflectionRenderActive)
-    {
-        if (!mIsUnderwater)
-            mReflectionCamera->enableCustomNearClipPlane(mErrorPlane);
-        Root::getSingleton().getRenderSystem()->_setProjectionMatrix(mReflectionCamera->getProjectionMatrixRS());
+        mReflection->setActive(mToggled && mActive);
     }
 }
 
@@ -293,10 +391,10 @@ void Water::update(float dt)
 
 void Water::applyRTT()
 {
-    if (mReflectionTarget)
+    if (mReflection)
     {
-        TextureManager::getSingleton().remove("WaterReflection");
-        mReflectionTarget = 0;
+        delete mReflection;
+        mReflection = NULL;
     }
 
     // Create rendertarget for reflection
@@ -304,23 +402,9 @@ void Water::applyRTT()
 
     if (Settings::Manager::getBool("shader", "Water"))
     {
-        mReflectionTexture = TextureManager::getSingleton().createManual("WaterReflection",
-            ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, TEX_TYPE_2D, rttsize, rttsize, 0, PF_A8R8G8B8, TU_RENDERTARGET);
-
-        RenderTarget* rtt = mReflectionTexture->getBuffer()->getRenderTarget();
-        Viewport* vp = rtt->addViewport(mReflectionCamera);
-        vp->setOverlaysEnabled(false);
-        vp->setBackgroundColour(ColourValue(0.8f, 0.9f, 1.0f));
-        vp->setShadowsEnabled(false);
-        // use fallback techniques without shadows and without mrt
-        vp->setMaterialScheme("water_reflection");
-        rtt->addListener(this);
-        rtt->setActive(true);
-
-        mReflectionTarget = rtt;
-
-        sh::Factory::getInstance ().setTextureAlias ("WaterReflection", mReflectionTexture->getName());
-
+        mReflection = new PlaneReflection(mSceneMgr, mSky);
+        mReflection->setParentCamera (mCamera);
+        mReflection->setWaterPlane(mWaterPlane);
         mWater->setRenderQueueGroup(RQG_Water);
     }
     else
@@ -336,10 +420,8 @@ void Water::applyVisibilityMask()
                         + RV_Misc * Settings::Manager::getBool("reflect misc", "Water")
                         + RV_Sky;
 
-    if (mReflectionTarget)
-    {
-        mReflectionTexture->getBuffer()->getRenderTarget()->getViewport(0)->setVisibilityMask(mVisibilityFlags);
-    }
+    if (mReflection)
+        mReflection->setVisibilityMask(mVisibilityFlags);
 }
 
 void Water::processChangedSettings(const Settings::CategorySettingVector& settings)

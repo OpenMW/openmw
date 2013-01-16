@@ -30,15 +30,73 @@ namespace MWRender {
     class SkyManager;
     class RenderingManager;
 
+    class Reflection
+    {
+    public:
+        Reflection(Ogre::SceneManager* sceneManager)
+            :   mSceneMgr(sceneManager) {}
+
+        virtual void setWaterPlane (Ogre::Plane plane) {}
+        virtual void setParentCamera (Ogre::Camera* parent) { mParentCamera = parent; }
+        void setUnderwater(bool underwater) { mIsUnderwater = underwater; }
+        virtual void setActive (bool active) {}
+        virtual void setViewportBackground(Ogre::ColourValue colour) {}
+        virtual void update() {}
+        virtual void setVisibilityMask (int flags) {}
+
+    protected:
+        Ogre::Camera* mCamera;
+        Ogre::Camera* mParentCamera;
+        Ogre::TexturePtr mTexture;
+        Ogre::SceneManager* mSceneMgr;
+        bool mIsUnderwater;
+    };
+
+    class CubeReflection : public Reflection
+    {
+    public:
+        CubeReflection(Ogre::SceneManager* sceneManager);
+        virtual ~CubeReflection();
+
+        virtual void update();
+    protected:
+        Ogre::RenderTarget* mRenderTargets[6];
+    };
+
+    class PlaneReflection : public Reflection, public Ogre::RenderQueueListener, public Ogre::RenderTargetListener
+    {
+    public:
+        PlaneReflection(Ogre::SceneManager* sceneManager, SkyManager* sky);
+        virtual ~PlaneReflection();
+
+        virtual void setWaterPlane (Ogre::Plane plane);
+        virtual void setActive (bool active);
+        virtual void setVisibilityMask (int flags);
+
+        void preRenderTargetUpdate(const Ogre::RenderTargetEvent& evt);
+        void postRenderTargetUpdate(const Ogre::RenderTargetEvent& evt);
+
+        void renderQueueStarted (Ogre::uint8 queueGroupId, const Ogre::String &invocation, bool &skipThisInvocation);
+        void renderQueueEnded (Ogre::uint8 queueGroupId, const Ogre::String &invocation, bool &repeatThisInvocation);
+
+        virtual void setViewportBackground(Ogre::ColourValue colour);
+
+    protected:
+        Ogre::RenderTarget* mRenderTarget;
+        SkyManager* mSky;
+        Ogre::Plane mWaterPlane;
+        Ogre::Plane mErrorPlane;
+        bool mRenderActive;
+    };
+
     /// Water rendering
     class Water : public Ogre::RenderTargetListener, public Ogre::RenderQueueListener, public sh::MaterialInstanceListener
     {
         static const int CELL_SIZE = 8192;
         Ogre::Camera *mCamera;
-        Ogre::SceneManager *mSceneManager;
+        Ogre::SceneManager *mSceneMgr;
 
         Ogre::Plane mWaterPlane;
-        Ogre::Plane mErrorPlane;
 
         Ogre::SceneNode *mWaterNode;
         Ogre::Entity *mWater;
@@ -52,17 +110,9 @@ namespace MWRender {
 
         float mWaterTimer;
 
-        bool mReflectionRenderActive;
-
         Ogre::Vector3 getSceneNodeCoordinates(int gridX, int gridY);
 
     protected:
-        void preRenderTargetUpdate(const Ogre::RenderTargetEvent& evt);
-        void postRenderTargetUpdate(const Ogre::RenderTargetEvent& evt);
-
-        void renderQueueStarted (Ogre::uint8 queueGroupId, const Ogre::String &invocation, bool &skipThisInvocation);
-        void renderQueueEnded (Ogre::uint8 queueGroupId, const Ogre::String &invocation, bool &repeatThisInvocation);
-
         void applyRTT();
         void applyVisibilityMask();
 
@@ -75,13 +125,10 @@ namespace MWRender {
 
         Ogre::MaterialPtr mMaterial;
 
-        Ogre::Camera* mReflectionCamera;
-
-        Ogre::TexturePtr mReflectionTexture;
-        Ogre::RenderTarget* mReflectionTarget;
-
         bool mUnderwaterEffect;
         int mVisibilityFlags;
+
+        Reflection* mReflection;
 
     public:
         Water (Ogre::Camera *camera, RenderingManager* rend, const ESM::Cell* cell);
