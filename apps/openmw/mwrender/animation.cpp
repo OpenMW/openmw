@@ -200,6 +200,9 @@ void Animation::playGroup(std::string groupname, int mode, int loops)
     GroupTimes times;
 
     try {
+        if(!mEntityList.mSkelBase)
+            throw std::runtime_error("Attempting to animate an inanimate object");
+
         std::transform(groupname.begin(), groupname.end(), groupname.begin(), ::tolower);
         times.mAnimState = mEntityList.mSkelBase->getAnimationState(groupname);
         times.mLoops = loops;

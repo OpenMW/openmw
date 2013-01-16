@@ -6,6 +6,7 @@
 #include "../mwworld/ptr.hpp"
 
 #include "animation.hpp"
+#include "activatoranimation.hpp"
 #include "creatureanimation.hpp"
 #include "npcanimation.hpp"
 
@@ -75,6 +76,13 @@ void Actors::insertCreature (const MWWorld::Ptr& ptr)
 {
     insertBegin(ptr);
     CreatureAnimation* anim = new CreatureAnimation(ptr);
+    delete mAllActors[ptr];
+    mAllActors[ptr] = anim;
+}
+void Actors::insertActivator (const MWWorld::Ptr& ptr)
+{
+    insertBegin(ptr);
+    ActivatorAnimation* anim = new ActivatorAnimation(ptr);
     delete mAllActors[ptr];
     mAllActors[ptr] = anim;
 }

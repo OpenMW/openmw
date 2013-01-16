@@ -31,8 +31,9 @@ namespace MWRender
 
         void setMwRoot(Ogre::SceneNode* root);
         void insertBegin (const MWWorld::Ptr& ptr);
-        void insertCreature (const MWWorld::Ptr& ptr);
         void insertNPC(const MWWorld::Ptr& ptr, MWWorld::InventoryStore& inv);
+        void insertCreature (const MWWorld::Ptr& ptr);
+        void insertActivator (const MWWorld::Ptr& ptr);
          bool deleteObject (const MWWorld::Ptr& ptr);
         ///< \return found?
 

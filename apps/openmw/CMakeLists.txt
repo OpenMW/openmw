@@ -14,8 +14,8 @@ set(GAME_HEADER
 source_group(game FILES ${GAME} ${GAME_HEADER})
 
 add_openmw_dir (mwrender
-    renderingmanager debugging sky player animation npcanimation creatureanimation actors objects
-    renderinginterface localmap occlusionquery terrain terrainmaterial water shadows
+    renderingmanager debugging sky player animation npcanimation creatureanimation activatoranimation
+    actors objects renderinginterface localmap occlusionquery terrain terrainmaterial water shadows
     compositors characterpreview externalrendering globalmap videoplayer
     )
 

@@ -21,6 +21,7 @@
 
 #include "../mwrender/animation.hpp"
 
+#include "../mwworld/class.hpp"
 
 namespace MWMechanics
 {
