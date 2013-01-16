@@ -96,12 +96,8 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
             MWBase::Environment::get().getWorld()->markCellAsUnchanged();
 
         // update actors
-        std::vector<std::pair<std::string, Ogre::Vector3> > movement;
-        MWBase::Environment::get().getMechanicsManager()->update (movement, mEnvironment.getFrameDuration(),
+        MWBase::Environment::get().getMechanicsManager()->update(mEnvironment.getFrameDuration(),
             MWBase::Environment::get().getWindowManager()->isGuiMode());
-
-        if (!MWBase::Environment::get().getWindowManager()->isGuiMode())
-            MWBase::Environment::get().getWorld()->doPhysics (movement, mEnvironment.getFrameDuration());
 
         // update world
         MWBase::Environment::get().getWorld()->update (evt.timeSinceLastFrame, MWBase::Environment::get().getWindowManager()->isGuiMode());

@@ -193,8 +193,7 @@ namespace MWMechanics
         }
     }
 
-    void Actors::update (std::vector<std::pair<std::string, Ogre::Vector3> >& movement, float duration,
-        bool paused)
+    void Actors::update (float duration, bool paused)
     {
         mDuration += duration;
 
@@ -257,12 +256,15 @@ namespace MWMechanics
             }
         }
 
+        std::vector<std::pair<std::string, Ogre::Vector3> > movement;
         for(PtrControllerMap::iterator iter(mActors.begin());iter != mActors.end();++iter)
         {
             Ogre::Vector3 vector = MWWorld::Class::get(iter->first).getMovementVector(iter->first);
             if(vector!=Ogre::Vector3::ZERO)
                 movement.push_back(std::make_pair(iter->first.getRefData().getHandle(), vector));
         }
+        if (!paused)
+            MWBase::Environment::get().getWorld()->doPhysics (movement, duration);
     }
 
     void Actors::restoreDynamicStats()

@@ -54,8 +54,7 @@ namespace MWMechanics
             ///< On each update look for changes in a previously registered actor and update the
             /// GUI accordingly.
 
-            virtual void update (std::vector<std::pair<std::string, Ogre::Vector3> >& movement,
-                float duration, bool paused);
+            virtual void update (float duration, bool paused);
             ///< Update actor stats and store desired velocity vectors in \a movement
             ///
             /// \param paused In game type does not currently advance (this usually means some GUI

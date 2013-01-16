@@ -56,8 +56,7 @@ namespace MWMechanics
             void dropActors (const MWWorld::CellStore *cellStore);
             ///< Deregister all actors in the given cell.
 
-            void update (std::vector<std::pair<std::string, Ogre::Vector3> >& movement,
-                float duration, bool paused);
+            void update (float duration, bool paused);
             ///< Update actor stats and store desired velocity vectors in \a movement
 
             void updateActor (const MWWorld::Ptr& ptr, float duration);

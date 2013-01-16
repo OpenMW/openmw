@@ -201,8 +201,7 @@ namespace MWMechanics
         mWatched = ptr;
     }
 
-    void MechanicsManager::update (std::vector<std::pair<std::string, Ogre::Vector3> >& movement,
-        float duration, bool paused)
+    void MechanicsManager::update (float duration, bool paused)
     {
         if (!mWatched.isEmpty())
         {
@@ -298,7 +297,7 @@ namespace MWMechanics
             winMgr->configureSkills (majorSkills, minorSkills);
         }
 
-        mActors.update (movement, duration, paused);
+        mActors.update (duration, paused);
     }
 
     void MechanicsManager::restoreDynamicStats()
