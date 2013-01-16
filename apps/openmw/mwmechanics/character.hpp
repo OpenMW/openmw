@@ -3,6 +3,11 @@
 
 #include "../mwworld/ptr.hpp"
 
+namespace MWRender
+{
+    class Animation;
+}
+
 namespace MWMechanics
 {
 
@@ -14,12 +19,13 @@ enum CharacterState {
 class CharacterController
 {
     MWWorld::Ptr mPtr;
+    MWRender::Animation *mAnimation;
 
     CharacterState mState;
 
 public:
-    CharacterController(const MWWorld::Ptr &ptr, CharacterState state)
-      : mPtr(ptr), mState(state)
+    CharacterController(const MWWorld::Ptr &ptr, MWRender::Animation *anim, CharacterState state)
+      : mPtr(ptr), mAnimation(anim), mState(state)
     { }
 
     CharacterState getState() const
