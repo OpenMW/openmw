@@ -16,14 +16,19 @@ namespace MWRender
 
     class Actors
     {
+        typedef std::map<MWWorld::CellStore*,Ogre::SceneNode*> CellSceneNodeMap;
+        typedef std::map<MWWorld::Ptr,Animation*> PtrAnimationMap;
+
         OEngine::Render::OgreRenderer &mRend;
-        std::map<MWWorld::CellStore *, Ogre::SceneNode *> mCellSceneNodes;
         Ogre::SceneNode* mMwRoot;
-        std::map<MWWorld::Ptr, Animation*> mAllActors;
+
+        CellSceneNodeMap mCellSceneNodes;
+        PtrAnimationMap mAllActors;
 
     public:
         Actors(OEngine::Render::OgreRenderer& _rend): mRend(_rend) {}
         ~Actors();
+
         void setMwRoot(Ogre::SceneNode* root);
         void insertBegin (const MWWorld::Ptr& ptr);
         void insertCreature (const MWWorld::Ptr& ptr);

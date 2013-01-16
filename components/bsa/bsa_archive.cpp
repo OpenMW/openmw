@@ -31,149 +31,29 @@
 
 #include "../files/constrainedfiledatastream.hpp"
 
-namespace
-{
-
 using namespace Ogre;
-using namespace Bsa;
-
-struct PathPatternMatcher
-{
-    PathPatternMatcher (char const * pattern) : pattern (pattern)
-    {
-    }
-
-    bool operator () (char const * input)
-    {
-        char const * p = pattern;
-        char const * i = input;
-
-        while (*p && *i)
-        {
-            if (*p == '*')
-            {
-                ++p;
-
-                while (*i && *i != *p && *i != '/' && *i != '\\')
-                    ++i;
-            }
-            else
-            if (*p == '?')
-            {
-                if (*i == '/' || *i == '\\')
-                    break;
-
-                ++i, ++p;
-            }
-            if (*p == '/' || *p == '\\')
-            {
-                if (*i != '/' && *i != '\\')
-                    break;
-
-                ++i, ++p;
-            }
-            else
-            {
-                if (*i != *p)
-                    break;
-
-                ++i, ++p;
-            }
-        }
-
-        return *p == 0 && *i == 0;
-    }
-
-private:
-    char const * pattern;
-};
-
-struct FileNameGatherer
-{
-    StringVectorPtr ptr;
-
-    FileNameGatherer (StringVectorPtr ptr) : ptr (ptr)
-    {
-    }
-
-    void operator () (std::string const & filename) const
-    {
-        ptr->push_back (filename);
-    }
-};
-
-struct FileInfoGatherer
-{
-    Archive const * archive;
-    FileInfoListPtr ptr;
-
-    FileInfoGatherer (Archive const * archive, FileInfoListPtr ptr) :
-        archive (archive), ptr (ptr)
-    {
-    }
-
-    void operator () (std::string filename) const
-    {
-        FileInfo fi;
-
-        std::size_t pt = filename.rfind ('/');
-        if (pt == std::string::npos)
-            pt = 0;
-
-        fi.archive = const_cast <Archive *> (archive);
-        fi.path = filename.substr (0, pt);
-        fi.filename = filename.substr (pt);
-        fi.compressedSize = fi.uncompressedSize = 0;
-
-        ptr->push_back(fi);
-    }
-};
-
-template <typename file_iterator, typename filename_extractor, typename match_handler>
-void matchFiles (bool recursive, std::string const & pattern, file_iterator begin, file_iterator end, filename_extractor filenameExtractor, match_handler matchHandler)
-{
-    if (recursive && pattern == "*")
-    {
-        for (file_iterator  i = begin; i != end; ++i)
-            matchHandler (filenameExtractor (*i));
-    }
-    else
-    {
-        PathPatternMatcher matcher (pattern.c_str ());
-
-        if (recursive)
-        {
-            for (file_iterator  i = begin; i != end; ++i)
-            {
-                char const * filename = filenameExtractor (*i);
-                char const * matchable_part = filename;
-
-                for (char const * j = matchable_part; *j; ++j)
-                {
-                    if (*j == '/' || *j == '\\')
-                        matchable_part = j + 1;
-                }
-
-                if (matcher (matchable_part))
-                    matchHandler (filename);
-            }
-        }
-        else
-        {
-            for (file_iterator  i = begin; i != end; ++i)
-            {
-                char const * filename = filenameExtractor (*i);
-
-                if (matcher (filename))
-                    matchHandler (filename);
-            }
-        }
-    }
-}
-
-
 
 static bool fsstrict = false;
+
+static char strict_normalize_char(char ch)
+{
+    return ch == '\\' ? '/' : ch;
+}
+
+static char nonstrict_normalize_char(char ch)
+{
+    return ch == '\\' ? '/' : std::tolower(ch);
+}
+
+template<typename T1, typename T2>
+static std::string normalize_path(T1 begin, T2 end)
+{
+    std::string normalized;
+    normalized.reserve(std::distance(begin, end));
+    char (*normalize_char)(char) = fsstrict ? &strict_normalize_char : &nonstrict_normalize_char;
+    std::transform(begin, end, std::back_inserter(normalized), normalize_char);
+    return normalized;
+}
 
 /// An OGRE Archive wrapping a BSAFile archive
 class DirArchive: public Ogre::Archive
@@ -182,35 +62,10 @@ class DirArchive: public Ogre::Archive
 
     index mIndex;
 
-    static char strict_normalize_char(char ch)
-    {
-        return ch == '\\' ? '/' : ch;
-    }
-
-    static char nonstrict_normalize_char(char ch)
-    {
-        return ch == '\\' ? '/' : std::tolower (ch);
-    }
-
-    static std::string normalize_path (std::string::const_iterator begin, std::string::const_iterator end)
-    {
-        std::string normalized;
-        normalized.reserve (end-begin);
-        char (*normalize_char) (char) = fsstrict ? &strict_normalize_char : &nonstrict_normalize_char;
-        std::transform (begin, end, std::back_inserter (normalized), normalize_char);
-        return normalized;
-    }
-
     index::const_iterator lookup_filename (std::string const & filename) const
     {
         std::string normalized = normalize_path (filename.begin (), filename.end ());
-
         return mIndex.find (normalized);
-    }
-
-    static char const * extractFilename (index::value_type const & entry)
-    {
-        return entry.first.c_str ();
     }
 
 public:
@@ -273,15 +128,20 @@ public:
     StringVectorPtr find(const String& pattern, bool recursive = true,
                         bool dirs = false)
     {
-        std::string normalizedPattern = normalize_path (pattern.begin (), pattern.end ());
+        std::string normalizedPattern = normalize_path(pattern.begin(), pattern.end());
         StringVectorPtr ptr = StringVectorPtr(new StringVector());
-        matchFiles (recursive, normalizedPattern, mIndex.begin (), mIndex.end (), extractFilename, FileNameGatherer (ptr));
+        for(index::const_iterator iter = mIndex.begin();iter != mIndex.end();iter++)
+        {
+            if(Ogre::StringUtil::match(iter->first, normalizedPattern) ||
+               (recursive && Ogre::StringUtil::match(iter->first, "*/"+normalizedPattern)))
+                ptr->push_back(iter->first);
+        }
         return ptr;
     }
 
     bool exists(const String& filename)
     {
-        return lookup_filename (filename) != mIndex.end ();
+        return lookup_filename(filename) != mIndex.end ();
     }
 
     time_t getModifiedTime(const String&) { return 0; }
@@ -289,21 +149,44 @@ public:
     FileInfoListPtr findFileInfo(const String& pattern, bool recursive = true,
                             bool dirs = false) const
     {
+        std::string normalizedPattern = normalize_path(pattern.begin(), pattern.end());
         FileInfoListPtr ptr = FileInfoListPtr(new FileInfoList());
-        FileInfoGatherer gatherer (this, ptr);
 
-        std::string normalizedPattern = normalize_path (pattern.begin (), pattern.end ());
-
-        index::const_iterator i = mIndex.find (normalizedPattern);
-
-        if (i != mIndex.end ())
+        index::const_iterator i = mIndex.find(normalizedPattern);
+        if(i != mIndex.end())
         {
-            gatherer (i->first);
+            std::string::size_type pt = i->first.rfind('/');
+            if(pt == std::string::npos)
+                pt = 0;
+
+            FileInfo fi;
+            fi.archive = const_cast<DirArchive*>(this);
+            fi.path = i->first.substr(0, pt);
+            fi.filename = i->first.substr((i->first[pt]=='/') ? pt+1 : pt);
+            fi.compressedSize = fi.uncompressedSize = 0;
+
+            ptr->push_back(fi);
         }
         else
         {
+            for(index::const_iterator iter = mIndex.begin();iter != mIndex.end();iter++)
+            {
+                if(Ogre::StringUtil::match(iter->first, normalizedPattern) ||
+                   (recursive && Ogre::StringUtil::match(iter->first, "*/"+normalizedPattern)))
+                {
+                    std::string::size_type pt = iter->first.rfind('/');
+                    if(pt == std::string::npos)
+                        pt = 0;
 
-            matchFiles (recursive, normalizedPattern, mIndex.begin (), mIndex.end (), extractFilename, gatherer);
+                    FileInfo fi;
+                    fi.archive = const_cast<DirArchive*>(this);
+                    fi.path = iter->first.substr(0, pt);
+                    fi.filename = iter->first.substr((iter->first[pt]=='/') ? pt+1 : pt);
+                    fi.compressedSize = fi.uncompressedSize = 0;
+
+                    ptr->push_back(fi);
+                }
+            }
         }
 
         return ptr;
@@ -312,9 +195,9 @@ public:
 
 class BSAArchive : public Archive
 {
-  BSAFile arc;
+  Bsa::BSAFile arc;
 
-  static char const * extractFilename (BSAFile::FileStruct const & entry)
+  static const char *extractFilename(const Bsa::BSAFile::FileStruct &entry)
   {
       return entry.name;
   }
@@ -330,13 +213,13 @@ public:
   void load() {}
   void unload() {}
 
-  DataStreamPtr open(const String& filename, bool recursive = true) const
+  DataStreamPtr open(const String& filename, bool readonly = true) const
   {
     // Get a non-const reference to arc. This is a hack and it's all
     // OGRE's fault. You should NOT expect an open() command not to
     // have any side effects on the archive, and hence this function
     // should not have been declared const in the first place.
-    BSAFile *narc = const_cast<BSAFile*>(&arc);
+    Bsa::BSAFile *narc = const_cast<Bsa::BSAFile*>(&arc);
 
     // Open the file
     return narc->getFile(filename.c_str());
@@ -360,32 +243,51 @@ public:
     return findFileInfo ("*", recursive, dirs);
   }
 
-  // After load() is called, find("*") is called once. It doesn't seem
-  // to matter that we return an empty list, exists() gets called on
-  // the correct files anyway.
-  StringVectorPtr find(const String& pattern, bool recursive = true,
-                       bool dirs = false)
-  {
+    StringVectorPtr find(const String& pattern, bool recursive = true,
+                         bool dirs = false)
+    {
+        std::string normalizedPattern = normalize_path(pattern.begin(), pattern.end());
+        const Bsa::BSAFile::FileList &filelist = arc.getList();
         StringVectorPtr ptr = StringVectorPtr(new StringVector());
-        matchFiles (recursive, pattern, arc.getList ().begin (), arc.getList ().end (), extractFilename, FileNameGatherer (ptr));
+        for(Bsa::BSAFile::FileList::const_iterator iter = filelist.begin();iter != filelist.end();iter++)
+        {
+            std::string ent = normalize_path(iter->name, iter->name+std::strlen(iter->name));
+            if(Ogre::StringUtil::match(ent, normalizedPattern) ||
+               (recursive && Ogre::StringUtil::match(ent, "*/"+normalizedPattern)))
+                ptr->push_back(iter->name);
+        }
         return ptr;
-  }
+    }
 
-  /* Gets called once for each of the ogre formats, *.program,
-     *.material etc. We ignore all these.
+    FileInfoListPtr findFileInfo(const String& pattern, bool recursive = true,
+                                bool dirs = false) const
+    {
+        std::string normalizedPattern = normalize_path(pattern.begin(), pattern.end());
+        FileInfoListPtr ptr = FileInfoListPtr(new FileInfoList());
+        const Bsa::BSAFile::FileList &filelist = arc.getList();
 
-     However, it's also called by MyGUI to find individual textures,
-     and we can't ignore these since many of the GUI textures are
-     located in BSAs. So instead we channel it through exists() and
-     set up a single-element result list if the file is found.
-  */
-  FileInfoListPtr findFileInfo(const String& pattern, bool recursive = true,
-                               bool dirs = false) const
-  {
-    FileInfoListPtr ptr = FileInfoListPtr(new FileInfoList());
-    matchFiles (recursive, pattern, arc.getList ().begin (), arc.getList ().end (), extractFilename, FileInfoGatherer (this, ptr));
-    return ptr;
-  }
+        for(Bsa::BSAFile::FileList::const_iterator iter = filelist.begin();iter != filelist.end();iter++)
+        {
+            std::string ent = normalize_path(iter->name, iter->name+std::strlen(iter->name));
+            if(Ogre::StringUtil::match(ent, normalizedPattern) ||
+                (recursive && Ogre::StringUtil::match(ent, "*/"+normalizedPattern)))
+            {
+                std::string::size_type pt = ent.rfind('/');
+                if(pt == std::string::npos)
+                    pt = 0;
+
+                FileInfo fi;
+                fi.archive = const_cast<BSAArchive*>(this);
+                fi.path = std::string(iter->name, pt);
+                fi.filename = std::string(iter->name + ((ent[pt]=='/') ? pt+1 : pt));
+                fi.compressedSize = fi.uncompressedSize = iter->fileSize;
+
+                ptr->push_back(fi);
+            }
+        }
+
+        return ptr;
+    }
 };
 
 // An archive factory for BSA archives
@@ -445,7 +347,6 @@ static void insertDirFactory()
     }
 }
 
-}
 
 namespace Bsa
 {

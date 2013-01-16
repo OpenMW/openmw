@@ -84,7 +84,7 @@ namespace MWBase
             ///< Start playing music from the selected folder
             /// \param name of the folder that contains the playlist
 
-            virtual void say(MWWorld::Ptr reference, const std::string& filename) = 0;
+            virtual void say(const MWWorld::Ptr &reference, const std::string& filename) = 0;
             ///< Make an actor say some text.
             /// \param filename name of a sound file in "Sound/" in the data directory.
 
@@ -92,10 +92,10 @@ namespace MWBase
             ///< Say some text, without an actor ref
             /// \param filename name of a sound file in "Sound/" in the data directory.
 
-            virtual bool sayDone(MWWorld::Ptr reference=MWWorld::Ptr()) const = 0;
+            virtual bool sayDone(const MWWorld::Ptr &reference=MWWorld::Ptr()) const = 0;
             ///< Is actor not speaking?
 
-            virtual void stopSay(MWWorld::Ptr reference=MWWorld::Ptr()) = 0;
+            virtual void stopSay(const MWWorld::Ptr &reference=MWWorld::Ptr()) = 0;
             ///< Stop an actor speaking
 
             virtual SoundPtr playTrack(const MWSound::DecoderPtr& decoder, PlayType type) = 0;
@@ -105,14 +105,14 @@ namespace MWBase
                                        PlayMode mode=Play_Normal) = 0;
             ///< Play a sound, independently of 3D-position
 
-            virtual SoundPtr playSound3D(MWWorld::Ptr reference, const std::string& soundId,
+            virtual SoundPtr playSound3D(const MWWorld::Ptr &reference, const std::string& soundId,
                                          float volume, float pitch, PlayMode mode=Play_Normal) = 0;
             ///< Play a sound from an object
 
-            virtual void stopSound3D(MWWorld::Ptr reference, const std::string& soundId) = 0;
+            virtual void stopSound3D(const MWWorld::Ptr &reference, const std::string& soundId) = 0;
             ///< Stop the given object from playing the given sound,
 
-            virtual void stopSound3D(MWWorld::Ptr reference) = 0;
+            virtual void stopSound3D(const MWWorld::Ptr &reference) = 0;
             ///< Stop the given object from playing all sounds.
 
             virtual void stopSound(const MWWorld::CellStore *cell) = 0;
@@ -121,7 +121,7 @@ namespace MWBase
             virtual void stopSound(const std::string& soundId) = 0;
             ///< Stop a non-3d looping sound
 
-            virtual bool getSoundPlaying(MWWorld::Ptr reference, const std::string& soundId) const = 0;
+            virtual bool getSoundPlaying(const MWWorld::Ptr &reference, const std::string& soundId) const = 0;
             ///< Is the given sound currently playing on the given object?
 
             virtual void pauseSounds(int types=Play_TypeMask) = 0;
