@@ -35,6 +35,9 @@ public:
 
     void update(float duration);
 
+    void playGroup(const std::string &groupname, int mode, int count);
+    void skipAnim();
+
     void setState(CharacterState state);
     CharacterState getState() const
     { return mState; }

@@ -167,18 +167,6 @@ class RenderingManager: private RenderingInterface, public Ogre::WindowEventList
     /// configure fog manually
     void configureFog(const float density, const Ogre::ColourValue& colour);
 
-    void playAnimationGroup (const MWWorld::Ptr& ptr, const std::string& groupName, int mode,
-        int number = 1);
-    ///< Run animation for a MW-reference. Calls to this function for references that are currently not
-    /// in the rendered scene should be ignored.
-    ///
-    /// \param mode: 0 normal, 1 immediate start, 2 immediate loop
-    /// \param number How offen the animation should be run
-
-    void skipAnimation (const MWWorld::Ptr& ptr);
-    ///< Skip the animation for the given MW-reference for one frame. Calls to this function for
-    /// references that are currently not in the rendered scene should be ignored.
-
     Ogre::Vector4 boundingBoxToScreen(Ogre::AxisAlignedBox bounds);
     ///< transform the specified bounding box (in world coordinates) into screen coordinates.
     /// @return packed vector4 (min_x, min_y, max_x, max_y)

@@ -288,4 +288,17 @@ namespace MWMechanics
             return iter->second;
         return 0;
     }
+
+    void Actors::playAnimationGroup(const MWWorld::Ptr& ptr, const std::string& groupName, int mode, int number)
+    {
+        PtrControllerMap::iterator iter = mActors.find(ptr);
+        if(iter != mActors.end())
+            iter->second.playGroup(groupName, mode, number);
+    }
+    void Actors::skipAnimation(const MWWorld::Ptr& ptr)
+    {
+        PtrControllerMap::iterator iter = mActors.find(ptr);
+        if(iter != mActors.end())
+            iter->second.skipAnim();
+    }
 }

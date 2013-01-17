@@ -903,17 +903,6 @@ namespace MWWorld
         return ret;
     }
 
-    void World::playAnimationGroup (const MWWorld::Ptr& ptr, const std::string& groupName, int mode,
-        int number)
-    {
-        mRendering->playAnimationGroup (ptr, groupName, mode, number);
-    }
-
-    void World::skipAnimation (const MWWorld::Ptr& ptr)
-    {
-        mRendering->skipAnimation (ptr);
-    }
-
     void World::update (float duration, bool paused)
     {
         mWorldScene->update (duration, paused);

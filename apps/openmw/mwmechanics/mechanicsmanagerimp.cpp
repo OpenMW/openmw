@@ -628,4 +628,14 @@ namespace MWMechanics
             permChange = success ? -int(cappedDispositionChange/ fPerTempMult) : y;
         }
     }
+
+    void MechanicsManager::playAnimationGroup(const MWWorld::Ptr& ptr, const std::string& groupName, int mode, int number)
+    {
+        mActors.playAnimationGroup(ptr, groupName, mode, number);
+    }
+    void MechanicsManager::skipAnimation(const MWWorld::Ptr& ptr)
+    {
+        mActors.skipAnimation(ptr);
+    }
+
 }

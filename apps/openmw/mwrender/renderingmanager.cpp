@@ -580,17 +580,6 @@ void RenderingManager::toggleLight()
     setAmbientMode();
 }
 
-void RenderingManager::playAnimationGroup (const MWWorld::Ptr& ptr, const std::string& groupName,
-     int mode, int number)
-{
-    mActors.playAnimationGroup(ptr, groupName, mode, number);
-}
-
-void RenderingManager::skipAnimation (const MWWorld::Ptr& ptr)
-{
-    mActors.skipAnimation(ptr);
-}
-
 void RenderingManager::setSunColour(const Ogre::ColourValue& colour)
 {
     if (!mSunEnabled) return;

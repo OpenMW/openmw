@@ -76,6 +76,20 @@ void CharacterController::update(float duration)
 }
 
 
+void CharacterController::playGroup(const std::string &groupname, int mode, int count)
+{
+    // set mState = CharState_Idle?
+    if(mAnimation)
+        mAnimation->playGroup(groupname, mode, count);
+}
+
+void CharacterController::skipAnim()
+{
+    if(mAnimation)
+        mAnimation->skipAnim();
+}
+
+
 void CharacterController::setState(CharacterState state)
 {
     mState = state;

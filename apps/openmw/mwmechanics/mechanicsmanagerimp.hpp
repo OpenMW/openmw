@@ -89,6 +89,9 @@ namespace MWMechanics
                 float currentTemporaryDispositionDelta, bool& success, float& tempChange, float& permChange);
             void toLower(std::string npcFaction);
             ///< Perform a persuasion action on NPC
+
+        virtual void playAnimationGroup(const MWWorld::Ptr& ptr, const std::string& groupName, int mode, int number);
+        virtual void skipAnimation(const MWWorld::Ptr& ptr);
     };
 }
 

@@ -95,6 +95,17 @@ namespace MWBase
             virtual void getPersuasionDispositionChange (const MWWorld::Ptr& npc, PersuasionType type,
                 float currentTemporaryDispositionDelta, bool& success, float& tempChange, float& permChange) = 0;
             ///< Perform a persuasion action on NPC
+
+        virtual void playAnimationGroup(const MWWorld::Ptr& ptr, const std::string& groupName, int mode, int number=1) = 0;
+        ///< Run animation for a MW-reference. Calls to this function for references that are currently not
+        /// in the scene should be ignored.
+        ///
+        /// \param mode 0 normal, 1 immediate start, 2 immediate loop
+        /// \param count How many times the animation should be run
+
+        virtual void skipAnimation(const MWWorld::Ptr& ptr) = 0;
+        ///< Skip the animation for the given MW-reference for one frame. Calls to this function for
+        /// references that are currently not in the scene should be ignored.
     };
 }
 

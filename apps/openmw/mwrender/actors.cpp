@@ -135,18 +135,6 @@ void Actors::removeCell(MWWorld::Ptr::CellStore* store)
     }
 }
 
-void Actors::playAnimationGroup (const MWWorld::Ptr& ptr, const std::string& groupName, int mode, int number)
-{
-    PtrAnimationMap::const_iterator iter = mAllActors.find(ptr);
-    if(iter != mAllActors.end())
-        iter->second->playGroup(groupName, mode, number);
-}
-void Actors::skipAnimation (const MWWorld::Ptr& ptr)
-{
-    PtrAnimationMap::const_iterator iter = mAllActors.find(ptr);
-    if(iter != mAllActors.end())
-        iter->second->skipAnim();
-}
 void Actors::update (float duration)
 {
     // Nothing to do
