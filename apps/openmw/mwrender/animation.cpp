@@ -119,6 +119,8 @@ void Animation::setController(MWMechanics::CharacterController *controller)
 
 void Animation::updatePosition(float time)
 {
+    if(time == mTime)
+        return;
     mCurGroup.mAnimState->setTimePosition(time);
     mTime = time;
 
