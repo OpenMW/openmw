@@ -15,23 +15,6 @@ namespace MWRender
 
 class Animation
 {
-    struct GroupTimes {
-        NifOgre::TextKeyMap *mTextKeys;
-
-        NifOgre::TextKeyMap::const_iterator mStart;
-        NifOgre::TextKeyMap::const_iterator mStop;
-        NifOgre::TextKeyMap::const_iterator mLoopStart;
-        NifOgre::TextKeyMap::const_iterator mLoopStop;
-
-        NifOgre::TextKeyMap::const_iterator mNext;
-
-        Ogre::AnimationState *mAnimState;
-        size_t mLoops;
-
-        GroupTimes() : mTextKeys(NULL), mAnimState(NULL), mLoops(0)
-        { }
-    };
-
 protected:
     MWWorld::Ptr mPtr;
     MWMechanics::CharacterController *mController;
@@ -44,9 +27,10 @@ protected:
     Ogre::Vector3 mStartPosition;
     Ogre::Vector3 mLastPosition;
 
+    NifOgre::TextKeyMap *mCurrentKeys;
+    NifOgre::TextKeyMap::const_iterator mNextKey;
+    Ogre::AnimationState *mAnimState;
     float mTime;
-    GroupTimes mCurGroup;
-    GroupTimes mNextGroup;
 
     /* Updates the animation to the specified time, and moves the mPtr object
      * based on the change since the last update or reset. */
@@ -55,7 +39,7 @@ protected:
      * object. */
     void resetPosition(float time);
 
-    bool findGroupTimes(const std::string &groupname, GroupTimes *times);
+    float findStart(const std::string &groupname, const std::string &start);
 
     void createEntityList(Ogre::SceneNode *node, const std::string &model);
 
@@ -66,7 +50,7 @@ public:
     void setController(MWMechanics::CharacterController *controller);
     std::vector<std::string> getAnimationNames();
 
-    void playGroup(std::string groupname, int mode, int loops);
+    void play(const std::string &groupname, const std::string &start);
     virtual void runAnimation(float timepassed);
 };
 

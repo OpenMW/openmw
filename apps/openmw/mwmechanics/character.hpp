@@ -23,6 +23,9 @@ class CharacterController
 
     std::vector<std::string> mAnimNames;
 
+    typedef std::deque<std::string> AnimationQueue;
+    AnimationQueue mAnimQueue;
+
     std::string mCurrentGroup;
     CharacterState mState;
     bool mSkipAnim;

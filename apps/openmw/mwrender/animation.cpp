@@ -23,6 +23,8 @@ Animation::Animation(const MWWorld::Ptr &ptr)
     , mNonAccumRoot(NULL)
     , mStartPosition(0.0f)
     , mLastPosition(0.0f)
+    , mCurrentKeys(NULL)
+    , mAnimState(NULL)
     , mTime(0.0f)
 {
 }
@@ -121,14 +123,14 @@ void Animation::updatePosition(float time)
 {
     if(time == mTime)
         return;
-    mCurGroup.mAnimState->setTimePosition(time);
+    mAnimState->setTimePosition(time);
     mTime = time;
 
     if(mNonAccumRoot)
     {
         /* Update the animation and get the non-accumulation root's difference from the
          * last update. */
-        mEntityList.mSkelBase->getSkeleton()->setAnimationState(*mCurGroup.mAnimState->getParent());
+        mEntityList.mSkelBase->getSkeleton()->setAnimationState(*mAnimState->getParent());
         Ogre::Vector3 posdiff = mNonAccumRoot->getPosition() - mLastPosition;
 
         /* Translate the accumulation root back to compensate for the move. */
@@ -149,136 +151,81 @@ void Animation::updatePosition(float time)
 
 void Animation::resetPosition(float time)
 {
-    mCurGroup.mAnimState->setTimePosition(time);
+    mAnimState->setTimePosition(time);
     mTime = time;
 
-    mCurGroup.mNext = mCurGroup.mStart;
-    while(mCurGroup.mNext != mCurGroup.mTextKeys->end() && mCurGroup.mNext->first < time)
-        mCurGroup.mNext++;
+    mNextKey = mCurrentKeys->begin();
+    while(mNextKey != mCurrentKeys->end() && mNextKey->first < time)
+        mNextKey++;
 
     if(mNonAccumRoot)
     {
-        mEntityList.mSkelBase->getSkeleton()->setAnimationState(*mCurGroup.mAnimState->getParent());
+        mEntityList.mSkelBase->getSkeleton()->setAnimationState(*mAnimState->getParent());
         mLastPosition = mNonAccumRoot->getPosition();
         mAccumRoot->setPosition(mStartPosition - mLastPosition);
     }
 }
 
 
-bool Animation::findGroupTimes(const std::string &groupname, Animation::GroupTimes *times)
+float Animation::findStart(const std::string &groupname, const std::string &start)
 {
-    times->mTextKeys = &mTextKeys[groupname];
-    const NifOgre::TextKeyMap &textkeys = *times->mTextKeys;
-    if(textkeys.size() == 0)
-        return false;
+    mNextKey = mCurrentKeys->end();
+    if(mCurrentKeys->size() == 0)
+        return 0.0f;
 
     if(groupname == "all")
     {
-        times->mStart = times->mLoopStart = textkeys.begin();
-        times->mLoopStop = times->mStop = textkeys.end();
-        times->mLoopStop--; times->mStop--;
-        return true;
+        mNextKey = mCurrentKeys->begin();
+        return 0.0f;
     }
 
-    const std::string start = groupname+": start";
-    const std::string startloop = groupname+": loop start";
-    const std::string stop = groupname+": stop";
-    const std::string stoploop = groupname+": loop stop";
-
-    times->mStart = times->mLoopStart =
-    times->mStop = times->mLoopStop = textkeys.end();
-
+    std::string startmarker = groupname+": "+start;
     NifOgre::TextKeyMap::const_iterator iter;
-    for(iter = textkeys.begin();iter != textkeys.end();iter++)
+    for(iter = mCurrentKeys->begin();iter != mCurrentKeys->end();iter++)
     {
-        if(start == iter->second)
-        {
-            times->mStart = iter;
-            times->mLoopStart = iter;
-        }
-        else if(startloop == iter->second)
-            times->mLoopStart = iter;
-        else if(stoploop == iter->second)
-            times->mLoopStop = iter;
-        else if(stop == iter->second)
-        {
-            times->mStop = iter;
-            if(times->mLoopStop == textkeys.end())
-                times->mLoopStop = iter;
-            return (times->mStart != textkeys.end());
-        }
+        if(iter->second == startmarker)
+            return iter->first;
     }
-
-    return false;
+    return 0.0f;
 }
 
 
-void Animation::playGroup(std::string groupname, int mode, int loops)
+void Animation::play(const std::string &groupname, const std::string &start)
 {
-    GroupTimes times;
-
+    float time = 0.0f;
     try {
         if(!mEntityList.mSkelBase)
             throw std::runtime_error("Attempting to animate an inanimate object");
 
-        std::transform(groupname.begin(), groupname.end(), groupname.begin(), ::tolower);
-        times.mAnimState = mEntityList.mSkelBase->getAnimationState(groupname);
-        times.mLoops = loops;
+        if(mAnimState)
+            mAnimState->setEnabled(false);
+        mAnimState = mEntityList.mSkelBase->getAnimationState(groupname);
+        mCurrentKeys = &mTextKeys[groupname];
+        mAnimState->setEnabled(true);
 
-        if(!findGroupTimes(groupname, &times))
-            throw std::runtime_error("Failed to find animation group "+groupname);
+        time = findStart(groupname, start);
     }
     catch(std::exception &e) {
         std::cerr<< e.what() <<std::endl;
-        return;
     }
-    times.mNext = ((mode==2) ? times.mLoopStart : times.mStart);
 
-    if(mode == 0 && mCurGroup.mAnimState)
-        mNextGroup = times;
-    else
-    {
-        if(mCurGroup.mAnimState)
-            mCurGroup.mAnimState->setEnabled(false);
-        mCurGroup = times;
-        mNextGroup = GroupTimes();
-        mCurGroup.mAnimState->setEnabled(true);
-        resetPosition(mCurGroup.mNext->first);
-    }
+    resetPosition(time);
 }
 
 void Animation::runAnimation(float timepassed)
 {
-    while(mCurGroup.mAnimState && timepassed > 0.0f)
+    while(mAnimState && timepassed > 0.0f)
     {
         float targetTime = mTime + timepassed;
-        if(mCurGroup.mNext != mCurGroup.mTextKeys->end() &&
-           mCurGroup.mNext->first <= targetTime)
+        if(mNextKey != mCurrentKeys->end() && mNextKey->first <= targetTime)
         {
-            updatePosition(mCurGroup.mNext->first);
+            const std::string &evt = mNextKey->second;
+            updatePosition(mNextKey->first);
+            mNextKey++;
             timepassed = targetTime - mTime;
 
             if(mController)
-                mController->markerEvent(mCurGroup.mNext->second);
-            if(mCurGroup.mNext == mCurGroup.mLoopStop && mCurGroup.mLoops > 1)
-            {
-                mCurGroup.mLoops--;
-                resetPosition(mCurGroup.mLoopStart->first);
-                continue;
-            }
-            else if(mCurGroup.mNext == mCurGroup.mStop)
-            {
-                if(!mNextGroup.mAnimState)
-                    break;
-
-                mCurGroup.mAnimState->setEnabled(false);
-                mCurGroup = mNextGroup;
-                mNextGroup = GroupTimes();
-                mCurGroup.mAnimState->setEnabled(true);
-                resetPosition(mCurGroup.mStart->first);
-                continue;
-            }
-            mCurGroup.mNext++;
+                mController->markerEvent(evt);
             continue;
         }
 

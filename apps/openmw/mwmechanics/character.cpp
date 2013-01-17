@@ -45,18 +45,19 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
     {
         case CharState_Idle:
             mCurrentGroup = "idle";
-            mAnimation->playGroup(mCurrentGroup, 1, 1);
+            mAnimation->play(mCurrentGroup, "start");
             break;
         case CharState_Dead:
             mCurrentGroup = "death1";
-            mAnimation->playGroup(mCurrentGroup, 1, 1);
+            mAnimation->play(mCurrentGroup, "stop");
             break;
     }
 }
 
 CharacterController::CharacterController(const CharacterController &rhs)
   : mPtr(rhs.mPtr), mAnimation(rhs.mAnimation), mAnimNames(rhs.mAnimNames)
-  , mCurrentGroup(rhs.mCurrentGroup), mState(rhs.mState), mSkipAnim(rhs.mSkipAnim)
+  , mAnimQueue(rhs.mAnimQueue), mCurrentGroup(rhs.mCurrentGroup)
+  , mState(rhs.mState), mSkipAnim(rhs.mSkipAnim)
 {
     if(mAnimNames.size() == 0)
         return;
@@ -79,11 +80,32 @@ void CharacterController::markerEvent(const std::string &evt)
         // to this actor type
         return;
     }
-    if(evt.length() <= mCurrentGroup.length()+2 || evt.compare(0, mCurrentGroup.length(), mCurrentGroup) != 0 ||
-       evt.compare(mCurrentGroup.length(), 2, ": ") != 0)
+    std::string::size_type ms = mCurrentGroup.length()+2;
+    if(evt.length() <= ms || evt.compare(0, ms-2, mCurrentGroup) != 0 || evt.compare(ms-2, 2, ": ") != 0)
     {
         std::cerr<< "Event \""<<evt<<"\" does not belong to group \""<<mCurrentGroup<<"\"" <<std::endl;
         return;
+    }
+
+    if(mAnimQueue.size() >= 2 && mAnimQueue[0] == mAnimQueue[1])
+    {
+        if(evt.compare(ms, evt.length()-ms, "loop stop") == 0 || evt.compare(ms, evt.length()-ms, "stop") == 0)
+        {
+            mAnimQueue.pop_front();
+            mAnimation->play(mCurrentGroup, "loop start");
+        }
+    }
+    else if(mAnimQueue.size() > 0)
+    {
+        if(evt.compare(ms, evt.length()-ms, "stop") == 0)
+        {
+            mAnimQueue.pop_front();
+            if(mAnimQueue.size() > 0)
+            {
+                mCurrentGroup = mAnimQueue.front();
+                mAnimation->play(mCurrentGroup, "start");
+            }
+        }
     }
 }
 
@@ -101,7 +123,23 @@ void CharacterController::playGroup(const std::string &groupname, int mode, int 
 {
     // set mState = CharState_Idle?
     if(std::find(mAnimNames.begin(), mAnimNames.end(), groupname) != mAnimNames.end())
-        mAnimation->playGroup(groupname, mode, count);
+    {
+        count = std::max(count, 1);
+        if(mode != 0 || mAnimQueue.size() == 0)
+        {
+            mAnimQueue.clear();
+            while(count-- > 0)
+                mAnimQueue.push_back(groupname);
+            mCurrentGroup = groupname;
+            mAnimation->play(mCurrentGroup, ((mode==2) ? "loop start" : "start"));
+        }
+        else if(mode == 0)
+        {
+            mAnimQueue.resize(1);
+            while(count-- > 0)
+                mAnimQueue.push_back(groupname);
+        }
+    }
 }
 
 void CharacterController::skipAnim()
@@ -116,15 +154,16 @@ void CharacterController::setState(CharacterState state)
 
     if(mAnimNames.size() == 0)
         return;
+    mAnimQueue.clear();
     switch(mState)
     {
         case CharState_Idle:
             mCurrentGroup = "idle";
-            mAnimation->playGroup(mCurrentGroup, 1, 1);
+            mAnimation->play(mCurrentGroup, "start");
             break;
         case CharState_Dead:
             mCurrentGroup = "death1";
-            mAnimation->playGroup(mCurrentGroup, 1, 1);
+            mAnimation->play(mCurrentGroup, "start");
             break;
     }
 }
