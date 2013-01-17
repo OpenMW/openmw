@@ -122,14 +122,8 @@ namespace MWDialogue
 
         MWMechanics::CreatureStats& creatureStats = MWWorld::Class::get (actor).getCreatureStats (actor);
         mTalkedTo = creatureStats.hasTalkedToPlayer();
-        creatureStats.talkedToPlayer();
 
         mActorKnownTopics.clear();
-
-        //initialise the GUI
-        MWBase::Environment::get().getWindowManager()->pushGuiMode(MWGui::GM_Dialogue);
-        MWGui::DialogueWindow* win = MWBase::Environment::get().getWindowManager()->getDialogueWindow();
-        win->startDialogue(actor, MWWorld::Class::get (actor).getName (actor));
 
         //setup the list of topics known by the actor. Topics who are also on the knownTopics list will be added to the GUI
         updateTopics();
@@ -146,6 +140,13 @@ namespace MWDialogue
             {
                 if (const ESM::DialInfo *info = filter.search (*it))
                 {
+                    //initialise the GUI
+                    MWBase::Environment::get().getWindowManager()->pushGuiMode(MWGui::GM_Dialogue);
+                    MWGui::DialogueWindow* win = MWBase::Environment::get().getWindowManager()->getDialogueWindow();
+                    win->startDialogue(actor, MWWorld::Class::get (actor).getName (actor));
+
+                    creatureStats.talkedToPlayer();
+
                     if (!info->mSound.empty())
                     {
                         // TODO play sound
