@@ -187,24 +187,22 @@ float Animation::findStart(const std::string &groupname, const std::string &star
 
 void Animation::play(const std::string &groupname, const std::string &start)
 {
-    float time = 0.0f;
     try {
         if(!mEntityList.mSkelBase)
             throw std::runtime_error("Attempting to animate an inanimate object");
 
+        Ogre::AnimationState *newstate = mEntityList.mSkelBase->getAnimationState(groupname);
         if(mAnimState)
             mAnimState->setEnabled(false);
-        mAnimState = mEntityList.mSkelBase->getAnimationState(groupname);
-        mCurrentKeys = &mTextKeys[groupname];
+        mAnimState = newstate;
         mAnimState->setEnabled(true);
+        mCurrentKeys = &mTextKeys[groupname];
 
-        time = findStart(groupname, start);
+        resetPosition(findStart(groupname, start));
     }
     catch(std::exception &e) {
         std::cerr<< e.what() <<std::endl;
     }
-
-    resetPosition(time);
 }
 
 void Animation::runAnimation(float timepassed)
