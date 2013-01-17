@@ -124,6 +124,8 @@ void Animation::setController(MWMechanics::CharacterController *controller)
 void Animation::updatePosition(float time)
 {
     mCurGroup.mAnimState->setTimePosition(time);
+    mTime = time;
+
     if(mNonAccumRoot)
     {
         /* Update the animation and get the non-accumulation root's difference from the
@@ -150,9 +152,10 @@ void Animation::updatePosition(float time)
 void Animation::resetPosition(float time)
 {
     mCurGroup.mAnimState->setTimePosition(time);
+    mTime = time;
 
     mCurGroup.mNext = mCurGroup.mStart;
-    while(mCurGroup.mNext->first < time)
+    while(mCurGroup.mNext != mCurGroup.mTextKeys->end() && mCurGroup.mNext->first < time)
         mCurGroup.mNext++;
 
     if(mNonAccumRoot)
@@ -233,7 +236,7 @@ void Animation::playGroup(std::string groupname, int mode, int loops)
     }
     times.mNext = ((mode==2) ? times.mLoopStart : times.mStart);
 
-    if(mode == 0 && mCurGroup.mLoops > 0)
+    if(mode == 0 && mCurGroup.mAnimState)
         mNextGroup = times;
     else
     {
@@ -241,9 +244,8 @@ void Animation::playGroup(std::string groupname, int mode, int loops)
             mCurGroup.mAnimState->setEnabled(false);
         mCurGroup = times;
         mNextGroup = GroupTimes();
-        mTime = mCurGroup.mNext->first;
         mCurGroup.mAnimState->setEnabled(true);
-        resetPosition(mTime);
+        resetPosition(mCurGroup.mNext->first);
     }
 }
 
@@ -254,62 +256,46 @@ void Animation::skipAnim()
 
 void Animation::runAnimation(float timepassed)
 {
-    if(mCurGroup.mAnimState && !mSkipFrame)
-    {
-        mTime += timepassed;
-    recheck:
-        if(mTime >= mCurGroup.mLoopStop->first)
-        {
-            while(mCurGroup.mNext != mCurGroup.mTextKeys->end() &&
-                  mCurGroup.mNext->first <= mCurGroup.mLoopStop->first)
-            {
-                if(mController)
-                    mController->markerEvent(mCurGroup.mNext->second);
-                mCurGroup.mNext++;
-            }
+    if(mSkipFrame)
+        timepassed = 0.0f;
+    mSkipFrame = false;
 
-            if(mCurGroup.mLoops > 1)
-            {
-                mCurGroup.mLoops--;
-                updatePosition(mCurGroup.mLoopStop->first);
-                mTime = mTime - mCurGroup.mLoopStop->first + mCurGroup.mLoopStart->first;
-                resetPosition(mCurGroup.mLoopStart->first);
-                goto recheck;
-            }
-            else if(mTime >= mCurGroup.mStop->first)
-            {
-                while(mCurGroup.mNext != mCurGroup.mTextKeys->end() &&
-                      mCurGroup.mNext->first <= mCurGroup.mStop->first)
-                {
-                    if(mController)
-                        mController->markerEvent(mCurGroup.mNext->second);
-                    mCurGroup.mNext++;
-                }
-                if(mNextGroup.mLoops > 0)
-                {
-                    updatePosition(mCurGroup.mStop->first);
-                    mTime = mTime - mCurGroup.mStop->first + mNextGroup.mStart->first;
-                    mCurGroup.mAnimState->setEnabled(false);
-                    mCurGroup = mNextGroup;
-                    mNextGroup = GroupTimes();
-                    mCurGroup.mAnimState->setEnabled(true);
-                    resetPosition(mCurGroup.mStart->first);
-                    goto recheck;
-                }
-                mTime = mCurGroup.mStop->first;
-            }
-        }
-        while(mCurGroup.mNext != mCurGroup.mTextKeys->end() &&
-              mCurGroup.mNext->first <= mTime)
+    while(mCurGroup.mAnimState && timepassed > 0.0f)
+    {
+        float targetTime = mTime + timepassed;
+        if(mCurGroup.mNext != mCurGroup.mTextKeys->end() &&
+           mCurGroup.mNext->first <= targetTime)
         {
+            updatePosition(mCurGroup.mNext->first);
+            timepassed = targetTime - mTime;
+
             if(mController)
                 mController->markerEvent(mCurGroup.mNext->second);
+            if(mCurGroup.mNext == mCurGroup.mLoopStop && mCurGroup.mLoops > 1)
+            {
+                mCurGroup.mLoops--;
+                resetPosition(mCurGroup.mLoopStart->first);
+                continue;
+            }
+            else if(mCurGroup.mNext == mCurGroup.mStop)
+            {
+                if(!mNextGroup.mAnimState)
+                    break;
+
+                mCurGroup.mAnimState->setEnabled(false);
+                mCurGroup = mNextGroup;
+                mNextGroup = GroupTimes();
+                mCurGroup.mAnimState->setEnabled(true);
+                resetPosition(mCurGroup.mStart->first);
+                continue;
+            }
             mCurGroup.mNext++;
+            continue;
         }
 
-        updatePosition(mTime);
+        updatePosition(targetTime);
+        timepassed = targetTime - mTime;
     }
-    mSkipFrame = false;
 }
 
 }
