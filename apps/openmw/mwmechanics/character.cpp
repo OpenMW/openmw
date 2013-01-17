@@ -67,10 +67,17 @@ CharacterController::CharacterController(const CharacterController &rhs)
 
 void CharacterController::markerEvent(const std::string &evt)
 {
-    if(evt.compare(0, 6, "sound:") == 0)
+    if(evt.compare(0, 7, "sound: ") == 0)
     {
         MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
         sndMgr->playSound3D(mPtr, evt.substr(7), 1.0f, 1.0f);
+        return;
+    }
+    if(evt.compare(0, 10, "soundgen: ") == 0)
+    {
+        // FIXME: Lookup the SoundGen (SNDG) for the specified sound that corresponds
+        // to this actor type
+        return;
     }
 }
 
