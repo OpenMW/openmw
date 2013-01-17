@@ -921,7 +921,7 @@ void RenderingManager::setupExternalRendering (MWRender::ExternalRendering& rend
 Animation* RenderingManager::getAnimation(const MWWorld::Ptr &ptr)
 {
     Animation *anim = mActors.getAnimation(ptr);
-    // TODO: Check mObjects too.
+    if(!anim) anim = mPlayer->getAnimation();
     return anim;
 }
 
