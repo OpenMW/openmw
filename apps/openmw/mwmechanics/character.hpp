@@ -33,6 +33,8 @@ public:
     CharacterController(const MWWorld::Ptr &ptr, MWRender::Animation *anim, CharacterState state);
     CharacterController(const CharacterController &rhs);
 
+    void update(float duration);
+
     void setState(CharacterState state);
     CharacterState getState() const
     { return mState; }

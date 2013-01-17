@@ -32,7 +32,9 @@ namespace MWMechanics
 CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Animation *anim, CharacterState state)
   : mPtr(ptr), mAnimation(anim), mState(state)
 {
-    if(!mAnimation || mAnimation->getAnimationCount() == 0)
+    if(mAnimation && mAnimation->getAnimationCount() == 0)
+        mAnimation = NULL;
+    if(!mAnimation)
         return;
 
     mAnimation->setController(this);
@@ -50,7 +52,7 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
 CharacterController::CharacterController(const CharacterController &rhs)
   : mPtr(rhs.mPtr), mAnimation(rhs.mAnimation), mState(rhs.mState)
 {
-    if(!mAnimation || mAnimation->getAnimationCount() == 0)
+    if(!mAnimation)
         return;
     /* We've been copied. Update the animation with the new controller. */
     mAnimation->setController(this);
@@ -67,11 +69,18 @@ void CharacterController::markerEvent(const std::string &evt)
 }
 
 
+void CharacterController::update(float duration)
+{
+    if(mAnimation)
+        mAnimation->runAnimation(duration);
+}
+
+
 void CharacterController::setState(CharacterState state)
 {
     mState = state;
 
-    if(!mAnimation || mAnimation->getAnimationCount() == 0)
+    if(!mAnimation)
         return;
     switch(mState)
     {

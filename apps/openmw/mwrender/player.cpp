@@ -129,9 +129,6 @@ namespace MWRender
         MWBase::Environment::get().getWindowManager ()->showCrosshair
                 (!MWBase::Environment::get().getWindowManager ()->isGuiMode () && (mFirstPersonView && !mVanity.enabled && !mPreviewMode));
 
-        if (mAnimation) {
-            mAnimation->runAnimation(duration);
-        }
         mPlayerNode->setVisible(
             mVanity.enabled || mPreviewMode || !mFirstPersonView,
             false

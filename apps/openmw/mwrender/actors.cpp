@@ -149,8 +149,7 @@ void Actors::skipAnimation (const MWWorld::Ptr& ptr)
 }
 void Actors::update (float duration)
 {
-    for(PtrAnimationMap::const_iterator iter = mAllActors.begin();iter != mAllActors.end();iter++)
-        iter->second->runAnimation(duration);
+    // Nothing to do
 }
 
 Animation* Actors::getAnimation(const MWWorld::Ptr &ptr)

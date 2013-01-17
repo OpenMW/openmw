@@ -263,6 +263,7 @@ namespace MWMechanics
         std::vector<std::pair<std::string, Ogre::Vector3> > movement;
         for(PtrControllerMap::iterator iter(mActors.begin());iter != mActors.end();++iter)
         {
+            iter->second.update(duration);
             Ogre::Vector3 vector = MWWorld::Class::get(iter->first).getMovementVector(iter->first);
             if(vector!=Ogre::Vector3::ZERO)
                 movement.push_back(std::make_pair(iter->first.getRefData().getHandle(), vector));
