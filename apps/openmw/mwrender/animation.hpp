@@ -66,7 +66,7 @@ public:
     virtual ~Animation();
 
     void setController(MWMechanics::CharacterController *controller);
-    int getAnimationCount();
+    std::vector<std::string> getAnimationNames();
 
     void playGroup(std::string groupname, int mode, int loops);
     void skipAnim();

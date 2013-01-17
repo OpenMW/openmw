@@ -98,20 +98,17 @@ void Animation::createEntityList(Ogre::SceneNode *node, const std::string &model
 }
 
 
-int Animation::getAnimationCount()
+std::vector<std::string> Animation::getAnimationNames()
 {
-    int num = 0;
+    std::vector<std::string> anims;
     if(mEntityList.mSkelBase)
     {
         Ogre::AnimationStateSet *as = mEntityList.mSkelBase->getAllAnimationStates();
         Ogre::AnimationStateIterator ai = as->getAnimationStateIterator();
         while(ai.hasMoreElements())
-        {
-            num++;
-            ai.moveNext();
-        }
+            anims.push_back(ai.getNext()->getAnimationName());
     }
-    return num;
+    return anims;
 }
 
 

@@ -32,10 +32,13 @@ namespace MWMechanics
 CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Animation *anim, CharacterState state)
   : mPtr(ptr), mAnimation(anim), mState(state)
 {
-    if(mAnimation && mAnimation->getAnimationCount() == 0)
+    if(mAnimation)
+        mAnimNames = mAnimation->getAnimationNames();
+    if(mAnimNames.size() == 0)
+    {
         mAnimation = NULL;
-    if(!mAnimation)
         return;
+    }
 
     mAnimation->setController(this);
     switch(mState)
@@ -52,9 +55,10 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
 }
 
 CharacterController::CharacterController(const CharacterController &rhs)
-  : mPtr(rhs.mPtr), mAnimation(rhs.mAnimation), mState(rhs.mState)
+  : mPtr(rhs.mPtr), mAnimation(rhs.mAnimation), mAnimNames(rhs.mAnimNames)
+  , mState(rhs.mState)
 {
-    if(!mAnimation)
+    if(mAnimNames.size() == 0)
         return;
     /* We've been copied. Update the animation with the new controller. */
     mAnimation->setController(this);
@@ -82,7 +86,7 @@ Ogre::Vector3 CharacterController::update(float duration)
 void CharacterController::playGroup(const std::string &groupname, int mode, int count)
 {
     // set mState = CharState_Idle?
-    if(mAnimation)
+    if(std::find(mAnimNames.begin(), mAnimNames.end(), groupname) != mAnimNames.end())
         mAnimation->playGroup(groupname, mode, count);
 }
 
@@ -97,7 +101,7 @@ void CharacterController::setState(CharacterState state)
 {
     mState = state;
 
-    if(!mAnimation)
+    if(mAnimNames.size() == 0)
         return;
     switch(mState)
     {
