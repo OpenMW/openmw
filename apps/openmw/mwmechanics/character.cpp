@@ -69,10 +69,11 @@ void CharacterController::markerEvent(const std::string &evt)
 }
 
 
-void CharacterController::update(float duration)
+Ogre::Vector3 CharacterController::update(float duration)
 {
     if(mAnimation)
         mAnimation->runAnimation(duration);
+    return MWWorld::Class::get(mPtr).getMovementVector(mPtr);
 }
 
 

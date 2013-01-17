@@ -33,7 +33,7 @@ public:
     CharacterController(const MWWorld::Ptr &ptr, MWRender::Animation *anim, CharacterState state);
     CharacterController(const CharacterController &rhs);
 
-    void update(float duration);
+    Ogre::Vector3 update(float duration);
 
     void playGroup(const std::string &groupname, int mode, int count);
     void skipAnim();
