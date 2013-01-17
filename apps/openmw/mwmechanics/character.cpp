@@ -56,7 +56,7 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
 
 CharacterController::CharacterController(const CharacterController &rhs)
   : mPtr(rhs.mPtr), mAnimation(rhs.mAnimation), mAnimNames(rhs.mAnimNames)
-  , mState(rhs.mState), mSkipAnim(rhs.mSkipAnim)
+  , mCurrentGroup(rhs.mCurrentGroup), mState(rhs.mState), mSkipAnim(rhs.mSkipAnim)
 {
     if(mAnimNames.size() == 0)
         return;
@@ -77,6 +77,12 @@ void CharacterController::markerEvent(const std::string &evt)
     {
         // FIXME: Lookup the SoundGen (SNDG) for the specified sound that corresponds
         // to this actor type
+        return;
+    }
+    if(evt.length() <= mCurrentGroup.length()+2 || evt.compare(0, mCurrentGroup.length(), mCurrentGroup) != 0 ||
+       evt.compare(mCurrentGroup.length(), 2, ": ") != 0)
+    {
+        std::cerr<< "Event \""<<evt<<"\" does not belong to group \""<<mCurrentGroup<<"\"" <<std::endl;
         return;
     }
 }
