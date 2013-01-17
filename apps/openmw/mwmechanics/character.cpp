@@ -41,10 +41,12 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
     switch(mState)
     {
         case CharState_Idle:
-            mAnimation->playGroup("idle", 1, 1);
+            mCurrentGroup = "idle";
+            mAnimation->playGroup(mCurrentGroup, 1, 1);
             break;
         case CharState_Dead:
-            mAnimation->playGroup("death1", 1, 1);
+            mCurrentGroup = "death1";
+            mAnimation->playGroup(mCurrentGroup, 1, 1);
             break;
     }
 }
@@ -100,10 +102,12 @@ void CharacterController::setState(CharacterState state)
     switch(mState)
     {
         case CharState_Idle:
-            mAnimation->playGroup("idle", 1, 1);
+            mCurrentGroup = "idle";
+            mAnimation->playGroup(mCurrentGroup, 1, 1);
             break;
         case CharState_Dead:
-            mAnimation->playGroup("death1", 1, 1);
+            mCurrentGroup = "death1";
+            mAnimation->playGroup(mCurrentGroup, 1, 1);
             break;
     }
 }

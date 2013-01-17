@@ -21,6 +21,7 @@ class CharacterController
     MWWorld::Ptr mPtr;
     MWRender::Animation *mAnimation;
 
+    std::string mCurrentGroup;
     CharacterState mState;
 
 protected:
