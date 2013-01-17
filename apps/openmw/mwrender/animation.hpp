@@ -30,7 +30,6 @@ protected:
     NifOgre::TextKeyMap *mCurrentKeys;
     NifOgre::TextKeyMap::const_iterator mNextKey;
     Ogre::AnimationState *mAnimState;
-    float mTime;
 
     /* Updates the animation to the specified time, and moves the mPtr object
      * based on the change since the last update or reset. */

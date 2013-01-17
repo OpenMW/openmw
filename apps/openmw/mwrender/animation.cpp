@@ -25,7 +25,6 @@ Animation::Animation(const MWWorld::Ptr &ptr)
     , mLastPosition(0.0f)
     , mCurrentKeys(NULL)
     , mAnimState(NULL)
-    , mTime(0.0f)
 {
 }
 
@@ -121,10 +120,7 @@ void Animation::setController(MWMechanics::CharacterController *controller)
 
 void Animation::updatePosition(float time)
 {
-    if(time == mTime)
-        return;
     mAnimState->setTimePosition(time);
-    mTime = time;
 
     if(mNonAccumRoot)
     {
@@ -152,7 +148,6 @@ void Animation::updatePosition(float time)
 void Animation::resetPosition(float time)
 {
     mAnimState->setTimePosition(time);
-    mTime = time;
 
     mNextKey = mCurrentKeys->begin();
     while(mNextKey != mCurrentKeys->end() && mNextKey->first < time)
@@ -216,21 +211,20 @@ void Animation::runAnimation(float timepassed)
 {
     while(mAnimState && timepassed > 0.0f)
     {
-        float targetTime = mTime + timepassed;
-        if(mNextKey != mCurrentKeys->end() && mNextKey->first <= targetTime)
+        float targetTime = mAnimState->getTimePosition() + timepassed;
+        if(mNextKey == mCurrentKeys->end() || mNextKey->first > targetTime)
         {
-            const std::string &evt = mNextKey->second;
-            updatePosition(mNextKey->first);
-            mNextKey++;
-            timepassed = targetTime - mTime;
-
-            if(mController)
-                mController->markerEvent(evt);
-            continue;
+            updatePosition(targetTime);
+            break;
         }
 
-        updatePosition(targetTime);
-        timepassed = targetTime - mTime;
+        const std::string &evt = mNextKey->second;
+        updatePosition(mNextKey->first);
+        timepassed = targetTime - mNextKey->first;
+        mNextKey++;
+
+        if(mController)
+            mController->markerEvent(evt);
     }
 }
 
