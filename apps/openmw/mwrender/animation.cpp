@@ -24,7 +24,6 @@ Animation::Animation(const MWWorld::Ptr &ptr)
     , mStartPosition(0.0f)
     , mLastPosition(0.0f)
     , mTime(0.0f)
-    , mSkipFrame(false)
 {
 }
 
@@ -246,17 +245,8 @@ void Animation::playGroup(std::string groupname, int mode, int loops)
     }
 }
 
-void Animation::skipAnim()
-{
-    mSkipFrame = true;
-}
-
 void Animation::runAnimation(float timepassed)
 {
-    if(mSkipFrame)
-        timepassed = 0.0f;
-    mSkipFrame = false;
-
     while(mCurGroup.mAnimState && timepassed > 0.0f)
     {
         float targetTime = mTime + timepassed;

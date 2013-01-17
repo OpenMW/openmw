@@ -25,6 +25,7 @@ class CharacterController
 
     std::string mCurrentGroup;
     CharacterState mState;
+    bool mSkipAnim;
 
 protected:
     /* Called by the animation whenever a new text key is reached. */

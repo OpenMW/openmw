@@ -48,8 +48,6 @@ protected:
     GroupTimes mCurGroup;
     GroupTimes mNextGroup;
 
-    bool mSkipFrame;
-
     /* Updates the animation to the specified time, and moves the mPtr object
      * based on the change since the last update or reset. */
     void updatePosition(float time);
@@ -69,7 +67,6 @@ public:
     std::vector<std::string> getAnimationNames();
 
     void playGroup(std::string groupname, int mode, int loops);
-    void skipAnim();
     virtual void runAnimation(float timepassed);
 };
 

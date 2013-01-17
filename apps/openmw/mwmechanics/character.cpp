@@ -30,7 +30,7 @@ namespace MWMechanics
 {
 
 CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Animation *anim, CharacterState state)
-  : mPtr(ptr), mAnimation(anim), mState(state)
+  : mPtr(ptr), mAnimation(anim), mState(state), mSkipAnim(false)
 {
     if(mAnimation)
         mAnimNames = mAnimation->getAnimationNames();
@@ -56,7 +56,7 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
 
 CharacterController::CharacterController(const CharacterController &rhs)
   : mPtr(rhs.mPtr), mAnimation(rhs.mAnimation), mAnimNames(rhs.mAnimNames)
-  , mState(rhs.mState)
+  , mState(rhs.mState), mSkipAnim(rhs.mSkipAnim)
 {
     if(mAnimNames.size() == 0)
         return;
@@ -77,8 +77,9 @@ void CharacterController::markerEvent(const std::string &evt)
 
 Ogre::Vector3 CharacterController::update(float duration)
 {
-    if(mAnimation)
+    if(mAnimation && !mSkipAnim)
         mAnimation->runAnimation(duration);
+    mSkipAnim = false;
     return MWWorld::Class::get(mPtr).getMovementVector(mPtr);
 }
 
@@ -92,8 +93,7 @@ void CharacterController::playGroup(const std::string &groupname, int mode, int 
 
 void CharacterController::skipAnim()
 {
-    if(mAnimation)
-        mAnimation->skipAnim();
+    mSkipAnim = true;
 }
 
 
