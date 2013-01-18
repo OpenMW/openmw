@@ -12,7 +12,7 @@ namespace MWMechanics
 {
 
 enum CharacterState {
-    CharState_Idle,
+    CharState_Alive,
     CharState_Dead
 };
 

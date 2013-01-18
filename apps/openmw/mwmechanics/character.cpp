@@ -43,7 +43,7 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
     mAnimation->setController(this);
     switch(mState)
     {
-        case CharState_Idle:
+        case CharState_Alive:
             mCurrentGroup = "idle";
             mAnimation->play(mCurrentGroup, "start");
             break;
@@ -121,7 +121,6 @@ Ogre::Vector3 CharacterController::update(float duration)
 
 void CharacterController::playGroup(const std::string &groupname, int mode, int count)
 {
-    // set mState = CharState_Idle?
     if(std::find(mAnimNames.begin(), mAnimNames.end(), groupname) != mAnimNames.end())
     {
         count = std::max(count, 1);
@@ -159,7 +158,7 @@ void CharacterController::setState(CharacterState state)
     mAnimQueue.clear();
     switch(mState)
     {
-        case CharState_Idle:
+        case CharState_Alive:
             mCurrentGroup = "idle";
             mAnimation->play(mCurrentGroup, "start");
             break;
