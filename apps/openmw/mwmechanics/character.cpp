@@ -107,11 +107,6 @@ void CharacterController::markerEvent(const std::string &evt)
             }
         }
     }
-    else
-    {
-        if(evt.compare(ms, evt.length()-ms, "loop stop") == 0 || evt.compare(ms, evt.length()-ms, "stop") == 0)
-            mAnimation->play(mCurrentGroup, "loop start");
-    }
 }
 
 
