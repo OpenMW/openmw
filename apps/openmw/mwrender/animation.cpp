@@ -21,6 +21,7 @@ Animation::Animation(const MWWorld::Ptr &ptr)
     , mInsert(NULL)
     , mAccumRoot(NULL)
     , mNonAccumRoot(NULL)
+    , mAccumulate(Ogre::Vector3::ZERO)
     , mStartPosition(0.0f)
     , mLastPosition(0.0f)
     , mCurrentKeys(NULL)
@@ -118,6 +119,12 @@ void Animation::setController(MWMechanics::CharacterController *controller)
 }
 
 
+void Animation::setAccumulation(const Ogre::Vector3 &accum)
+{
+    mAccumulate = accum;
+}
+
+
 void Animation::updatePosition(float time)
 {
     mAnimState->setTimePosition(time);
@@ -127,7 +134,7 @@ void Animation::updatePosition(float time)
         /* Update the animation and get the non-accumulation root's difference from the
          * last update. */
         mEntityList.mSkelBase->getSkeleton()->setAnimationState(*mAnimState->getParent());
-        Ogre::Vector3 posdiff = mNonAccumRoot->getPosition() - mLastPosition;
+        Ogre::Vector3 posdiff = (mNonAccumRoot->getPosition() - mLastPosition) * mAccumulate;
 
         /* Translate the accumulation root back to compensate for the move. */
         mAccumRoot->translate(-posdiff);

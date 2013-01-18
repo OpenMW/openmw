@@ -41,17 +41,7 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
     }
 
     mAnimation->setController(this);
-    switch(mState)
-    {
-        case CharState_Idle:
-            mCurrentGroup = "idle";
-            mAnimation->play(mCurrentGroup, "start");
-            break;
-        case CharState_Dead:
-            mCurrentGroup = "death1";
-            mAnimation->play(mCurrentGroup, "stop");
-            break;
-    }
+    setState(mState);
 }
 
 CharacterController::CharacterController(const CharacterController &rhs)
@@ -138,6 +128,7 @@ void CharacterController::playGroup(const std::string &groupname, int mode, int 
             while(count-- > 0)
                 mAnimQueue.push_back(groupname);
             mCurrentGroup = groupname;
+            mAnimation->setAccumulation(Ogre::Vector3::ZERO);
             mAnimation->play(mCurrentGroup, ((mode==2) ? "loop start" : "start"));
         }
         else if(mode == 0)
@@ -166,10 +157,12 @@ void CharacterController::setState(CharacterState state)
     {
         case CharState_Idle:
             mCurrentGroup = "idle";
+            mAnimation->setAccumulation(Ogre::Vector3::ZERO);
             mAnimation->play(mCurrentGroup, "start");
             break;
         case CharState_Dead:
             mCurrentGroup = "death1";
+            mAnimation->setAccumulation(Ogre::Vector3(1.0f, 1.0f, 0.0f));
             mAnimation->play(mCurrentGroup, "start");
             break;
     }

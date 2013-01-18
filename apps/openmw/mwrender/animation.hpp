@@ -24,6 +24,7 @@ protected:
     std::map<std::string,NifOgre::TextKeyMap> mTextKeys;
     Ogre::Bone *mAccumRoot;
     Ogre::Bone *mNonAccumRoot;
+    Ogre::Vector3 mAccumulate;
     Ogre::Vector3 mStartPosition;
     Ogre::Vector3 mLastPosition;
 
@@ -48,6 +49,11 @@ public:
 
     void setController(MWMechanics::CharacterController *controller);
     std::vector<std::string> getAnimationNames();
+
+    // Specifies the axis' to accumulate on. Non-accumulated axis will just
+    // move visually, but not affect the actual movement. Each x/y/z value
+    // should be on the scale of 0 to 1.
+    void setAccumulation(const Ogre::Vector3 &accum);
 
     void play(const std::string &groupname, const std::string &start);
     virtual void runAnimation(float timepassed);
