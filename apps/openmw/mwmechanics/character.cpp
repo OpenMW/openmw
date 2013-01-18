@@ -107,6 +107,11 @@ void CharacterController::markerEvent(const std::string &evt)
             }
         }
     }
+    else
+    {
+        if(evt.compare(ms, evt.length()-ms, "loop stop") == 0 || evt.compare(ms, evt.length()-ms, "stop") == 0)
+            mAnimation->play(mCurrentGroup, "loop start");
+    }
 }
 
 
@@ -130,6 +135,7 @@ void CharacterController::playGroup(const std::string &groupname, int mode, int 
             mAnimQueue.clear();
             while(count-- > 0)
                 mAnimQueue.push_back(groupname);
+            mAnimQueue.push_back("idle");
             mCurrentGroup = groupname;
             mAnimation->play(mCurrentGroup, ((mode==2) ? "loop start" : "start"));
         }
@@ -138,6 +144,7 @@ void CharacterController::playGroup(const std::string &groupname, int mode, int 
             mAnimQueue.resize(1);
             while(count-- > 0)
                 mAnimQueue.push_back(groupname);
+            mAnimQueue.push_back("idle");
         }
     }
 }
