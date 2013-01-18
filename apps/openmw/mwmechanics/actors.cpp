@@ -169,7 +169,7 @@ namespace MWMechanics
         /* Kind of a hack. Activators need a character controller to manage an idle state. */
         if(ptr.getTypeName() == typeid(ESM::Activator).name() ||
            !MWWorld::Class::get(ptr).getCreatureStats(ptr).isDead())
-            mActors.insert(std::make_pair(ptr, CharacterController(ptr, anim, CharState_Alive)));
+            mActors.insert(std::make_pair(ptr, CharacterController(ptr, anim, CharState_Idle)));
         else
             mActors.insert(std::make_pair(ptr, CharacterController(ptr, anim, CharState_Dead)));
     }
@@ -213,7 +213,7 @@ namespace MWMechanics
                 if(!MWWorld::Class::get(iter->first).getCreatureStats(iter->first).isDead())
                 {
                     if(iter->second.getState() == CharState_Dead)
-                        iter->second.setState(CharState_Alive);
+                        iter->second.setState(CharState_Idle);
 
                     updateActor(iter->first, totalDuration);
                     if(iter->first.getTypeName() == typeid(ESM::NPC).name())

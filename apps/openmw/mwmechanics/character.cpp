@@ -43,7 +43,7 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
     mAnimation->setController(this);
     switch(mState)
     {
-        case CharState_Alive:
+        case CharState_Idle:
             mCurrentGroup = "idle";
             mAnimation->play(mCurrentGroup, "start");
             break;
@@ -164,7 +164,7 @@ void CharacterController::setState(CharacterState state)
     mAnimQueue.clear();
     switch(mState)
     {
-        case CharState_Alive:
+        case CharState_Idle:
             mCurrentGroup = "idle";
             mAnimation->play(mCurrentGroup, "start");
             break;
