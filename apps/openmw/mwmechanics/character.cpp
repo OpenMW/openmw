@@ -79,7 +79,12 @@ void CharacterController::markerEvent(float time, const std::string &evt)
 
     if(evt.compare(ms, evt.length()-ms, "loop stop") == 0)
     {
-        if(mAnimQueue.size() >= 2 && mAnimQueue[0] == mAnimQueue[1])
+        if(mAnimQueue.size() == 0)
+        {
+            if(time > 0.0f && mState != CharState_Dead)
+                mAnimation->play(mCurrentGroup, "loop start");
+        }
+        else if(mAnimQueue.size() >= 2 && mAnimQueue[0] == mAnimQueue[1])
         {
             mAnimQueue.pop_front();
             mAnimation->play(mCurrentGroup, "loop start");
@@ -89,7 +94,12 @@ void CharacterController::markerEvent(float time, const std::string &evt)
 
     if(evt.compare(ms, evt.length()-ms, "stop") == 0)
     {
-        if(mAnimQueue.size() >= 2 && mAnimQueue[0] == mAnimQueue[1])
+        if(mAnimQueue.size() == 0)
+        {
+            if(time > 0.0f && mState != CharState_Dead)
+                mAnimation->play(mCurrentGroup, "loop start");
+        }
+        else if(mAnimQueue.size() >= 2 && mAnimQueue[0] == mAnimQueue[1])
         {
             mAnimQueue.pop_front();
             mAnimation->play(mCurrentGroup, "loop start");
