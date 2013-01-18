@@ -12,6 +12,7 @@ namespace MWMechanics
 {
 
 enum CharacterState {
+    CharState_SpecialIdle, /* When running a PlayGroup/LoopGroup animation. */
     CharState_Idle,
     CharState_Dead
 };

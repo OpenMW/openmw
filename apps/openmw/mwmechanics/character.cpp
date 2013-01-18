@@ -138,6 +138,7 @@ void CharacterController::playGroup(const std::string &groupname, int mode, int 
             while(count-- > 0)
                 mAnimQueue.push_back(groupname);
             mCurrentGroup = groupname;
+            mState = CharState_SpecialIdle;
             mAnimation->setAccumulation(Ogre::Vector3::ZERO);
             mAnimation->play(mCurrentGroup, ((mode==2) ? "loop start" : "start"));
         }
@@ -165,6 +166,8 @@ void CharacterController::setState(CharacterState state)
     mAnimQueue.clear();
     switch(mState)
     {
+        case CharState_SpecialIdle:
+            break;
         case CharState_Idle:
             mCurrentGroup = "idle";
             mAnimation->setAccumulation(Ogre::Vector3::ZERO);
