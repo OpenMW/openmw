@@ -32,7 +32,7 @@ class CharacterController
 
 protected:
     /* Called by the animation whenever a new text key is reached. */
-    void markerEvent(const std::string &evt);
+    void markerEvent(float time, const std::string &evt);
 
     friend class MWRender::Animation;
 

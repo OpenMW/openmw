@@ -56,7 +56,7 @@ CharacterController::CharacterController(const CharacterController &rhs)
 }
 
 
-void CharacterController::markerEvent(const std::string &evt)
+void CharacterController::markerEvent(float time, const std::string &evt)
 {
     if(evt.compare(0, 7, "sound: ") == 0)
     {

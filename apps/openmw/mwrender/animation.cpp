@@ -223,13 +223,15 @@ void Animation::runAnimation(float timepassed)
             break;
         }
 
+        float time = mNextKey->first;
         const std::string &evt = mNextKey->second;
-        updatePosition(mNextKey->first);
-        timepassed = targetTime - mNextKey->first;
         mNextKey++;
 
+        updatePosition(time);
+        timepassed = targetTime - time;
+
         if(mController)
-            mController->markerEvent(evt);
+            mController->markerEvent(time, evt);
     }
 }
 
