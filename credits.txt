@@ -119,4 +119,4 @@ Thanks to Dongle,
 for his Daedric fontface, see Daedric Font License.txt for his license terms.
 
 Thanks to DejaVu team,
-for their DejaVuLGCSansMono fontface, see Dejavu_lgc_font_license.txt for their license terms.
+for their DejaVuLGCSansMono fontface, see DejaVu Font License.txt for their license terms.

@@ -490,7 +490,7 @@ void DialogueWindow::onReferenceUnavailable()
 
 void DialogueWindow::onFrame()
 {
-    if(mEnabled && mPtr.getTypeName() == typeid(ESM::NPC).name())
+    if(mMainWidget->getVisible() && mEnabled && mPtr.getTypeName() == typeid(ESM::NPC).name())
     {
         int disp = std::max(0, std::min(100,
             MWBase::Environment::get().getMechanicsManager()->getDerivedDisposition(mPtr)
