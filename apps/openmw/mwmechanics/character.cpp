@@ -87,17 +87,24 @@ void CharacterController::markerEvent(const std::string &evt)
         return;
     }
 
-    if(mAnimQueue.size() >= 2 && mAnimQueue[0] == mAnimQueue[1])
+    if(evt.compare(ms, evt.length()-ms, "loop stop") == 0)
     {
-        if(evt.compare(ms, evt.length()-ms, "loop stop") == 0 || evt.compare(ms, evt.length()-ms, "stop") == 0)
+        if(mAnimQueue.size() >= 2 && mAnimQueue[0] == mAnimQueue[1])
         {
             mAnimQueue.pop_front();
             mAnimation->play(mCurrentGroup, "loop start");
         }
+        return;
     }
-    else if(mAnimQueue.size() > 0)
+
+    if(evt.compare(ms, evt.length()-ms, "stop") == 0)
     {
-        if(evt.compare(ms, evt.length()-ms, "stop") == 0)
+        if(mAnimQueue.size() >= 2 && mAnimQueue[0] == mAnimQueue[1])
+        {
+            mAnimQueue.pop_front();
+            mAnimation->play(mCurrentGroup, "loop start");
+        }
+        else if(mAnimQueue.size() > 0)
         {
             mAnimQueue.pop_front();
             if(mAnimQueue.size() > 0)
@@ -106,6 +113,7 @@ void CharacterController::markerEvent(const std::string &evt)
                 mAnimation->play(mCurrentGroup, "start");
             }
         }
+        return;
     }
 }
 
@@ -129,7 +137,6 @@ void CharacterController::playGroup(const std::string &groupname, int mode, int 
             mAnimQueue.clear();
             while(count-- > 0)
                 mAnimQueue.push_back(groupname);
-            mAnimQueue.push_back("idle");
             mCurrentGroup = groupname;
             mAnimation->play(mCurrentGroup, ((mode==2) ? "loop start" : "start"));
         }
@@ -138,7 +145,6 @@ void CharacterController::playGroup(const std::string &groupname, int mode, int 
             mAnimQueue.resize(1);
             while(count-- > 0)
                 mAnimQueue.push_back(groupname);
-            mAnimQueue.push_back("idle");
         }
     }
 }
