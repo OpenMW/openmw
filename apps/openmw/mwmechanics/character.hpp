@@ -1,6 +1,8 @@
 #ifndef GAME_MWMECHANICS_CHARACTER_HPP
 #define GAME_MWMECHANICS_CHARACTER_HPP
 
+#include <OgreVector3.h>
+
 #include "../mwworld/ptr.hpp"
 
 namespace MWRender
@@ -27,6 +29,8 @@ class CharacterController
     typedef std::deque<std::string> AnimationQueue;
     AnimationQueue mAnimQueue;
 
+    Ogre::Vector3 mDirection;
+
     std::string mCurrentGroup;
     CharacterState mState;
     bool mSkipAnim;
@@ -45,6 +49,9 @@ public:
 
     void playGroup(const std::string &groupname, int mode, int count);
     void skipAnim();
+
+    void setDirection(const Ogre::Vector3 &dir)
+    { mDirection = dir; }
 
     void setState(CharacterState state);
     CharacterState getState() const

@@ -262,6 +262,12 @@ namespace MWMechanics
 
         if(!paused)
         {
+            for(PtrControllerMap::iterator iter(mActors.begin());iter != mActors.end();++iter)
+            {
+                Ogre::Vector3 dir = MWWorld::Class::get(iter->first).getMovementVector(iter->first);
+                iter->second.setDirection(dir);
+            }
+
             std::vector<std::pair<std::string, Ogre::Vector3> > movement;
             for(PtrControllerMap::iterator iter(mActors.begin());iter != mActors.end();++iter)
             {

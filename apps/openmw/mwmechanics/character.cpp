@@ -123,7 +123,7 @@ Ogre::Vector3 CharacterController::update(float duration)
     if(mAnimation && !mSkipAnim)
         mAnimation->runAnimation(duration);
     mSkipAnim = false;
-    return MWWorld::Class::get(mPtr).getMovementVector(mPtr);
+    return mDirection;
 }
 
 
