@@ -140,16 +140,6 @@ Ogre::Vector3 Animation::updatePosition(float time)
         /* Translate the accumulation root back to compensate for the move. */
         mAccumRoot->translate(-posdiff);
         mLastPosition += posdiff;
-
-        if(mPtr.isInCell())
-        {
-            /* Finally, move the object based on how much the non-accumulation root moved. */
-            Ogre::Vector3 newpos(mPtr.getRefData().getPosition().pos);
-            newpos += mInsert->getOrientation() * posdiff;
-
-            MWBase::World *world = MWBase::Environment::get().getWorld();
-            world->moveObject(mPtr, newpos.x, newpos.y, newpos.z);
-        }
     }
     return posdiff;
 }

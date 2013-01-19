@@ -120,10 +120,25 @@ void CharacterController::markerEvent(float time, const std::string &evt)
 
 Ogre::Vector3 CharacterController::update(float duration)
 {
+    Ogre::Vector3 movement = Ogre::Vector3::ZERO;
     if(mAnimation && !mSkipAnim)
-        mAnimation->runAnimation(duration);
+        movement += mAnimation->runAnimation(duration);
     mSkipAnim = false;
-    return mDirection;
+
+    if(getState() == CharState_SpecialIdle || getState() == CharState_Idle ||
+       getState() == CharState_Dead)
+    {
+        // FIXME: mDirection shouldn't influence the movement here.
+        movement += mDirection;
+    }
+    else
+    {
+        // FIXME: mDirection should be normalized after setting the speed of
+        // the animation in setDirection, rather than here.
+        movement = mDirection.normalisedCopy() * movement.length();
+    }
+
+    return movement;
 }
 
 

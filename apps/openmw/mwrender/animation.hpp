@@ -32,11 +32,10 @@ protected:
     NifOgre::TextKeyMap::const_iterator mNextKey;
     Ogre::AnimationState *mAnimState;
 
-    /* Updates the animation to the specified time, and moves the mPtr object
-     * based on the change since the last update or reset. */
+    /* Updates the animation to the specified time, and returns the movement
+     * vector since the last update or reset. */
     Ogre::Vector3 updatePosition(float time);
-    /* Updates the animation to the specified time, without moving the mPtr
-     * object. */
+    /* Updates the animation to the specified time, without moving anything. */
     void resetPosition(float time);
 
     float findStart(const std::string &groupname, const std::string &start);
