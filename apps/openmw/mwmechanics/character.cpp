@@ -215,8 +215,18 @@ void CharacterController::skipAnim()
 
 void CharacterController::setState(CharacterState state, bool loop)
 {
-    mState = state;
-    mLoop = loop;
+    if(mState == state)
+    {
+        // If setting the same state again, only reset the animation if looping
+        // is being turned on.
+        if(mLoop == loop || !(mLoop=loop))
+            return;
+    }
+    else
+    {
+        mState = state;
+        mLoop = loop;
+    }
 
     if(mAnimNames.size() == 0)
         return;

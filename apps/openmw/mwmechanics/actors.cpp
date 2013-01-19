@@ -279,8 +279,7 @@ namespace MWMechanics
                         newstate = CharState_WalkForward;
                 }
 
-                if(iter->second.getState() != newstate)
-                    iter->second.setState(newstate, true);
+                iter->second.setState(newstate, true);
                 iter->second.setDirection(dir);
             }
 
