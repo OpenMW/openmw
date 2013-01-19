@@ -15,8 +15,6 @@ namespace MWRender
     public:
         ActivatorAnimation(const MWWorld::Ptr& ptr);
         virtual ~ActivatorAnimation();
-
-        virtual void runAnimation(float timepassed);
     };
 }
 

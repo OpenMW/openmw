@@ -125,16 +125,17 @@ void Animation::setAccumulation(const Ogre::Vector3 &accum)
 }
 
 
-void Animation::updatePosition(float time)
+Ogre::Vector3 Animation::updatePosition(float time)
 {
     mAnimState->setTimePosition(time);
 
+    Ogre::Vector3 posdiff = Ogre::Vector3::ZERO;
     if(mNonAccumRoot)
     {
         /* Update the animation and get the non-accumulation root's difference from the
          * last update. */
         mEntityList.mSkelBase->getSkeleton()->setAnimationState(*mAnimState->getParent());
-        Ogre::Vector3 posdiff = (mNonAccumRoot->getPosition() - mLastPosition) * mAccumulate;
+        posdiff = (mNonAccumRoot->getPosition() - mLastPosition) * mAccumulate;
 
         /* Translate the accumulation root back to compensate for the move. */
         mAccumRoot->translate(-posdiff);
@@ -150,6 +151,7 @@ void Animation::updatePosition(float time)
             world->moveObject(mPtr, newpos.x, newpos.y, newpos.z);
         }
     }
+    return posdiff;
 }
 
 void Animation::resetPosition(float time)
@@ -212,14 +214,15 @@ void Animation::play(const std::string &groupname, const std::string &start)
     }
 }
 
-void Animation::runAnimation(float timepassed)
+Ogre::Vector3 Animation::runAnimation(float timepassed)
 {
+    Ogre::Vector3 movement = Ogre::Vector3::ZERO;
     while(mAnimState && timepassed > 0.0f)
     {
         float targetTime = mAnimState->getTimePosition() + timepassed;
         if(mNextKey == mCurrentKeys->end() || mNextKey->first > targetTime)
         {
-            updatePosition(targetTime);
+            movement += updatePosition(targetTime);
             break;
         }
 
@@ -227,12 +230,13 @@ void Animation::runAnimation(float timepassed)
         const std::string &evt = mNextKey->second;
         mNextKey++;
 
-        updatePosition(time);
+        movement += updatePosition(time);
         timepassed = targetTime - time;
 
         if(mController)
             mController->markerEvent(time, evt);
     }
+    return movement;
 }
 
 }

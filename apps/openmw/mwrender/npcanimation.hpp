@@ -98,7 +98,7 @@ public:
                  MWWorld::InventoryStore& inv, int visibilityFlags);
     virtual ~NpcAnimation();
 
-    virtual void runAnimation(float timepassed);
+    virtual Ogre::Vector3 runAnimation(float timepassed);
 
     void forceUpdate();
 };

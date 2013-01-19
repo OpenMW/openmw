@@ -15,8 +15,6 @@ namespace MWRender
     public:
         CreatureAnimation(const MWWorld::Ptr& ptr);
         virtual ~CreatureAnimation();
-
-        virtual void runAnimation(float timepassed);
     };
 }
 

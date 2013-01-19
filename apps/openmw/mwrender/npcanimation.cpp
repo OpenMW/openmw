@@ -308,7 +308,7 @@ NifOgre::EntityList NpcAnimation::insertBoundedPart(const std::string &mesh, int
     return entities;
 }
 
-void NpcAnimation::runAnimation(float timepassed)
+Ogre::Vector3 NpcAnimation::runAnimation(float timepassed)
 {
     if(mTimeToChange > .2)
     {
@@ -317,7 +317,7 @@ void NpcAnimation::runAnimation(float timepassed)
     }
     mTimeToChange += timepassed;
 
-    Animation::runAnimation(timepassed);
+    return Animation::runAnimation(timepassed);
 }
 
 void NpcAnimation::removeEntities(NifOgre::EntityList &entities)

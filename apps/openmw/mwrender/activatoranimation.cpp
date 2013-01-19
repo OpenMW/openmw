@@ -54,11 +54,4 @@ ActivatorAnimation::ActivatorAnimation(const MWWorld::Ptr &ptr)
     }
 }
 
-void ActivatorAnimation::runAnimation(float timepassed)
-{
-    // Placeholder
-
-    Animation::runAnimation(timepassed);
-}
-
 }

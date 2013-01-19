@@ -8,9 +8,8 @@
 
 #include "../mwbase/world.hpp"
 
-using namespace Ogre;
-using namespace NifOgre;
-namespace MWRender{
+namespace MWRender
+{
 
 CreatureAnimation::~CreatureAnimation()
 {
@@ -53,13 +52,6 @@ CreatureAnimation::CreatureAnimation(const MWWorld::Ptr &ptr)
             ent->setRenderQueueGroup(transparent ? RQG_Alpha : RQG_Main);
         }
     }
-}
-
-void CreatureAnimation::runAnimation(float timepassed)
-{
-    // Placeholder
-
-    Animation::runAnimation(timepassed);
 }
 
 }
