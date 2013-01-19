@@ -38,6 +38,7 @@ class CharacterController
     std::string mCurrentGroup;
     CharacterState mState;
     bool mSkipAnim;
+    bool mLoop;
 
 protected:
     /* Called by the animation whenever a new text key is reached. */
@@ -46,7 +47,7 @@ protected:
     friend class MWRender::Animation;
 
 public:
-    CharacterController(const MWWorld::Ptr &ptr, MWRender::Animation *anim, CharacterState state);
+    CharacterController(const MWWorld::Ptr &ptr, MWRender::Animation *anim, CharacterState state, bool loop);
     CharacterController(const CharacterController &rhs);
 
     Ogre::Vector3 update(float duration);
@@ -56,7 +57,7 @@ public:
 
     void setDirection(const Ogre::Vector3 &dir);
 
-    void setState(CharacterState state);
+    void setState(CharacterState state, bool loop);
     CharacterState getState() const
     { return mState; }
 };

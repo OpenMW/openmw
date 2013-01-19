@@ -29,8 +29,8 @@
 namespace MWMechanics
 {
 
-CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Animation *anim, CharacterState state)
-  : mPtr(ptr), mAnimation(anim), mDirection(Ogre::Vector3::ZERO), mState(state), mSkipAnim(false)
+CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Animation *anim, CharacterState state, bool loop)
+  : mPtr(ptr), mAnimation(anim), mDirection(Ogre::Vector3::ZERO), mState(state), mSkipAnim(false), mLoop(loop)
 {
     if(mAnimation)
         mAnimNames = mAnimation->getAnimationNames();
@@ -41,13 +41,14 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
     }
 
     mAnimation->setController(this);
-    setState(mState);
+    setState(mState, loop);
 }
 
 CharacterController::CharacterController(const CharacterController &rhs)
   : mPtr(rhs.mPtr), mAnimation(rhs.mAnimation), mAnimNames(rhs.mAnimNames)
   , mAnimQueue(rhs.mAnimQueue), mCurrentGroup(rhs.mCurrentGroup)
   , mDirection(rhs.mDirection), mState(rhs.mState), mSkipAnim(rhs.mSkipAnim)
+  , mLoop(rhs.mLoop)
 {
     if(mAnimNames.size() == 0)
         return;
@@ -81,7 +82,7 @@ void CharacterController::markerEvent(float time, const std::string &evt)
     {
         if(mAnimQueue.size() == 0)
         {
-            if(time > 0.0f && mState != CharState_Dead)
+            if(time > 0.0f && mLoop)
                 mAnimation->play(mCurrentGroup, "loop start");
         }
         else if(mAnimQueue.size() >= 2 && mAnimQueue[0] == mAnimQueue[1])
@@ -96,7 +97,7 @@ void CharacterController::markerEvent(float time, const std::string &evt)
     {
         if(mAnimQueue.size() == 0)
         {
-            if(time > 0.0f && mState != CharState_Dead)
+            if(time > 0.0f && mLoop)
                 mAnimation->play(mCurrentGroup, "loop start");
         }
         else if(mAnimQueue.size() >= 2 && mAnimQueue[0] == mAnimQueue[1])
@@ -158,6 +159,7 @@ void CharacterController::playGroup(const std::string &groupname, int mode, int 
                 mAnimQueue.push_back(groupname);
             mCurrentGroup = groupname;
             mState = CharState_SpecialIdle;
+            mLoop = false;
             mAnimation->setAccumulation(Ogre::Vector3::ZERO);
             mAnimation->play(mCurrentGroup, ((mode==2) ? "loop start" : "start"));
         }
@@ -176,9 +178,10 @@ void CharacterController::skipAnim()
 }
 
 
-void CharacterController::setState(CharacterState state)
+void CharacterController::setState(CharacterState state, bool loop)
 {
     mState = state;
+    mLoop = loop;
 
     if(mAnimNames.size() == 0)
         return;
