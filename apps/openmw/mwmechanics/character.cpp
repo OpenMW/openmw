@@ -19,6 +19,8 @@
 
 #include "character.hpp"
 
+#include <OgreStringConverter.h>
+
 #include "../mwrender/animation.hpp"
 
 #include "../mwbase/environment.hpp"
@@ -28,6 +30,35 @@
 
 namespace MWMechanics
 {
+
+static const struct {
+    CharacterState state;
+    const char groupname[32];
+    Ogre::Vector3 accumulate;
+} sStateList[] = {
+    { CharState_SpecialIdle, "idle", Ogre::Vector3(1.0f, 1.0f, 0.0f) },
+    { CharState_Idle, "idle", Ogre::Vector3::ZERO },
+
+    { CharState_WalkForward, "walkforward", Ogre::Vector3(0.0f, 1.0f, 0.0f) },
+    { CharState_WalkBack, "walkback", Ogre::Vector3(0.0f, 1.0f, 0.0f) },
+
+    { CharState_Dead, "death1", Ogre::Vector3(1.0f, 1.0f, 0.0f) },
+};
+static const size_t sStateListSize = sizeof(sStateList)/sizeof(sStateList[0]);
+
+static void getStateInfo(CharacterState state, std::string *group, Ogre::Vector3 *accum)
+{
+    for(size_t i = 0;i < sStateListSize;i++)
+    {
+        if(sStateList[i].state == state)
+        {
+            *group = sStateList[i].groupname;
+            *accum = sStateList[i].accumulate;
+            return;
+        }
+    }
+    throw std::runtime_error("Failed to find character state "+Ogre::StringConverter::toString(state));
+}
 
 CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Animation *anim, CharacterState state, bool loop)
   : mPtr(ptr), mAnimation(anim), mDirection(Ogre::Vector3::ZERO), mState(state), mSkipAnim(false), mLoop(loop)
@@ -41,7 +72,11 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
     }
 
     mAnimation->setController(this);
-    setState(mState, loop);
+
+    Ogre::Vector3 accum;
+    getStateInfo(mState, &mCurrentGroup, &accum);
+    mAnimation->setAccumulation(accum);
+    mAnimation->play(mCurrentGroup, "stop");
 }
 
 CharacterController::CharacterController(const CharacterController &rhs)
@@ -186,33 +221,11 @@ void CharacterController::setState(CharacterState state, bool loop)
     if(mAnimNames.size() == 0)
         return;
     mAnimQueue.clear();
-    switch(mState)
-    {
-        case CharState_SpecialIdle:
-            break;
-        case CharState_Idle:
-            mCurrentGroup = "idle";
-            mAnimation->setAccumulation(Ogre::Vector3::ZERO);
-            mAnimation->play(mCurrentGroup, "start");
-            break;
 
-        case CharState_WalkForward:
-            mCurrentGroup = "walkforward";
-            mAnimation->setAccumulation(Ogre::Vector3(0.0f, 1.0f, 0.0f));
-            mAnimation->play(mCurrentGroup, "start");
-            break;
-        case CharState_WalkBack:
-            mCurrentGroup = "walkback";
-            mAnimation->setAccumulation(Ogre::Vector3(0.0f, 1.0f, 0.0f));
-            mAnimation->play(mCurrentGroup, "start");
-            break;
-
-        case CharState_Dead:
-            mCurrentGroup = "death1";
-            mAnimation->setAccumulation(Ogre::Vector3(1.0f, 1.0f, 0.0f));
-            mAnimation->play(mCurrentGroup, "start");
-            break;
-    }
+    Ogre::Vector3 accum;
+    getStateInfo(mState, &mCurrentGroup, &accum);
+    mAnimation->setAccumulation(accum);
+    mAnimation->play(mCurrentGroup, "start");
 }
 
 }
