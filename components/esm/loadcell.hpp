@@ -6,6 +6,14 @@
 
 #include "esmcommon.hpp"
 #include "defs.hpp"
+#include <apps/openmw/mwbase/world.hpp>
+
+/*
+namespace MWWorld {
+  class ESMStore;
+  class CellStore;
+}
+*/
 
 namespace ESM
 {
@@ -86,6 +94,26 @@ public:
   void save(ESMWriter &esm);
 };
 
+/* Moved cell reference tracking object. This mainly stores the target cell
+   of the reference, so we can easily know where it has been moved when another
+   plugin tries to move it independently.
+ */
+class MovedCellRef
+{
+public:
+  int mRefnum;
+  
+  // Target cell (if exterior)
+  int mTarget[2];
+  
+  // TODO: Support moving references between exterior and interior cells!
+  //  This may happen in saves, when an NPC follows the player. Tribunal
+  //  introduces a henchman (which no one uses), so we may need this as well.
+};
+
+typedef std::map<int, MovedCellRef> MovedCellRefTracker;
+typedef std::map<int, CellRef> CellRefTracker;
+
 /* Cells hold data about objects, creatures, statics (rocks, walls,
    buildings) and landscape (for exterior cells). Cells frequently
    also has other associated LAND and PGRD records. Combined, all this
@@ -131,8 +159,17 @@ struct Cell
   bool mWaterInt;
   int mMapColor;
   int mNAM0;
-
-  void load(ESMReader &esm);
+  
+  // References "leased" from another cell (i.e. a different cell
+  //  introduced this ref, and it has been moved here by a plugin)
+  CellRefTracker mLeasedRefs;
+  MovedCellRefTracker mMovedRefs;
+  
+  void load(ESMReader &esm, MWWorld::ESMStore &store);
+  
+  // This method is left in for compatibility with esmtool. Parsing moved references currently requires
+  //  passing ESMStore, bit it does not know about this parameter, so we do it this way.
+  void load(ESMReader &esm) {};
   void save(ESMWriter &esm);
 
   bool isExterior() const
@@ -167,6 +204,11 @@ struct Cell
      reuse one memory location without blanking it between calls.
   */
   static bool getNextRef(ESMReader &esm, CellRef &ref);
+  
+  /* This fetches an MVRF record, which is used to track moved references.
+   * Since they are comparably rare, we use a separate method for this.
+   */
+  static bool getNextMVRF(ESMReader &esm, MovedCellRef &mref);
 };
 }
 #endif

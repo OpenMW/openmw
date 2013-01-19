@@ -399,8 +399,7 @@ namespace MWWorld
 
         DynamicInt mDynamicInt;
         DynamicExt mDynamicExt;
-
-
+        
         const ESM::Cell *search(const ESM::Cell &cell) const {
             if (cell.isExterior()) {
                 return search(cell.getGridX(), cell.getGridY());
@@ -409,6 +408,8 @@ namespace MWWorld
         }
 
     public:
+        ESMStore *mEsmStore;
+
         typedef SharedIterator<ESM::Cell> iterator;
 
         Store<ESM::Cell>()
@@ -448,6 +449,30 @@ namespace MWWorld
             }
 
             return 0;
+        }
+
+        const ESM::Cell *searchOrCreate(int x, int y) {
+            ESM::Cell cell;
+            cell.mData.mX = x, cell.mData.mY = y;
+
+            std::pair<int, int> key(x, y);
+            std::map<std::pair<int, int>, ESM::Cell>::const_iterator it = mExt.find(key);
+            if (it != mExt.end()) {
+                return &(it->second);
+            }
+
+            DynamicExt::const_iterator dit = mDynamicExt.find(key);
+            if (dit != mDynamicExt.end()) {
+                return &dit->second;
+            }
+
+            ESM::Cell *newCell = new ESM::Cell;
+            newCell->mData.mX = x;
+            newCell->mData.mY = y;
+            mExt[std::make_pair(x, y)] = *newCell;
+            delete newCell;
+            
+            return &mExt[std::make_pair(x, y)];
         }
 
         const ESM::Cell *find(const std::string &id) const {
@@ -500,7 +525,7 @@ namespace MWWorld
             cell->mName = id;
 
             // The cell itself takes care of all the hairy details
-            cell->load(esm);
+            cell->load(esm, *mEsmStore);
 
             if(cell->mData.mFlags & ESM::Cell::Interior)
             {
@@ -515,7 +540,6 @@ namespace MWWorld
                     *oldcell = *cell;
                 } else
                     mInt[idLower] = *cell;
-                delete cell;
             }
             else
             {
@@ -526,12 +550,23 @@ namespace MWWorld
                     oldcell->mContextList.push_back(cell->mContextList.at(0));
                     // copy list into new cell
                     cell->mContextList = oldcell->mContextList;
+                    // merge lists of leased references, use newer data in case of conflict
+                    for (ESM::MovedCellRefTracker::const_iterator it = cell->mMovedRefs.begin(); it != cell->mMovedRefs.end(); it++) {
+                        // remove reference from current leased ref tracker and add it to new cell
+                        if (oldcell->mMovedRefs.find(it->second.mRefnum) != oldcell->mMovedRefs.end()) {
+                            ESM::MovedCellRef target0 = oldcell->mMovedRefs[it->second.mRefnum];
+                            ESM::Cell *wipecell = const_cast<ESM::Cell*>(search(target0.mTarget[0], target0.mTarget[1]));
+                            wipecell->mLeasedRefs.erase(it->second.mRefnum);
+                        }
+                        oldcell->mMovedRefs[it->second.mRefnum] = it->second;
+                    }
+                    cell->mMovedRefs = oldcell->mMovedRefs;
                     // have new cell replace old cell
                     *oldcell = *cell;
                 } else
                     mExt[std::make_pair(cell->mData.mX, cell->mData.mY)] = *cell;
-                delete cell;
             }
+            delete cell;
         }
 
         iterator intBegin() const {

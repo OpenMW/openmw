@@ -96,6 +96,11 @@ namespace MWWorld
             // Get each reference in turn
             while(mCell->getNextRef(esm[index], ref))
             {
+                // Don't load reference if it was moved to a different cell.
+                if (mCell->mMovedRefs.find(ref.mRefnum) != mCell->mMovedRefs.end()) {
+                    continue;
+                }
+                    
                 std::string lowerCase;
 
                 std::transform (ref.mRefID.begin(), ref.mRefID.end(), std::back_inserter (lowerCase),
@@ -138,6 +143,57 @@ namespace MWWorld
                 std::cout << "WARNING: Ignoring reference '" << ref.mRefID << "' of unhandled type\n";
                 }
             }
+        }
+
+        // Load moved references, from separately tracked list.
+        for (ESM::CellRefTracker::const_iterator it = mCell->mLeasedRefs.begin(); it != mCell->mLeasedRefs.end(); it++)
+        {
+            // Doesn't seem to work in one line... huh? Too sleepy to check...
+            //const ESM::CellRef &ref0 = it->second;
+            ESM::CellRef &ref = const_cast<ESM::CellRef&>(it->second);
+
+            std::string lowerCase;
+
+            std::transform (ref.mRefID.begin(), ref.mRefID.end(), std::back_inserter (lowerCase),
+                (int(*)(int)) std::tolower);
+
+            int rec = store.find(ref.mRefID);
+            
+            ref.mRefID = lowerCase;
+
+            /* We can optimize this further by storing the pointer to the
+                record itself in store.all, so that we don't need to look it
+                up again here. However, never optimize. There are infinite
+                opportunities to do that later.
+            */
+            switch(rec)
+                {
+            case ESM::REC_ACTI: mActivators.load(ref, store); break;
+            case ESM::REC_ALCH: mPotions.load(ref, store); break;
+            case ESM::REC_APPA: mAppas.load(ref, store); break;
+            case ESM::REC_ARMO: mArmors.load(ref, store); break;
+            case ESM::REC_BOOK: mBooks.load(ref, store); break;
+            case ESM::REC_CLOT: mClothes.load(ref, store); break;
+            case ESM::REC_CONT: mContainers.load(ref, store); break;
+            case ESM::REC_CREA: mCreatures.load(ref, store); break;
+            case ESM::REC_DOOR: mDoors.load(ref, store); break;
+            case ESM::REC_INGR: mIngreds.load(ref, store); break;
+            case ESM::REC_LEVC: mCreatureLists.load(ref, store); break;
+            case ESM::REC_LEVI: mItemLists.load(ref, store); break;
+            case ESM::REC_LIGH: mLights.load(ref, store); break;
+            case ESM::REC_LOCK: mLockpicks.load(ref, store); break;
+            case ESM::REC_MISC: mMiscItems.load(ref, store); break;
+            case ESM::REC_NPC_: mNpcs.load(ref, store); break;
+            case ESM::REC_PROB: mProbes.load(ref, store); break;
+            case ESM::REC_REPA: mRepairs.load(ref, store); break;
+            case ESM::REC_STAT: mStatics.load(ref, store); break;
+            case ESM::REC_WEAP: mWeapons.load(ref, store); break;
+
+                case 0: std::cout << "Cell reference " + ref.mRefID + " not found!\n"; break;
+                default:
+                std::cout << "WARNING: Ignoring reference '" << ref.mRefID << "' of unhandled type\n";
+                }
+            
         }
     }
 }

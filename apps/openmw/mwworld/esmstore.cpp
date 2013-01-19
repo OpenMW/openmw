@@ -30,13 +30,13 @@ void ESMStore::load(ESM::ESMReader &esm)
     // Cache parent esX files by tracking their indices in the global list of
     //  all files/readers used by the engine. This will greaty help to accelerate
     //  parsing of reference IDs.
-    size_t index = ~0;
+    int index = ~0;
     const ESM::ESMReader::MasterList &masters = esm.getMasters();
     std::vector<ESM::ESMReader> *allPlugins = esm.getGlobalReaderList();
     for (size_t j = 0; j < masters.size(); j++) {
         ESM::MasterData &mast = const_cast<ESM::MasterData&>(masters[j]);
         std::string fname = mast.name;
-        for (size_t i = 0; i < esm.getIndex(); i++) {
+        for (int i = 0; i < esm.getIndex(); i++) {
             const std::string &candidate = allPlugins->at(i).getContext().filename;
             std::string fnamecandidate = boost::filesystem::path(candidate).filename().string();
             if (fname == fnamecandidate) {
@@ -44,7 +44,7 @@ void ESMStore::load(ESM::ESMReader &esm)
                 break;
             }
         }
-        if (index == (size_t)~0) {
+        if (index == (int)~0) {
             // Tried to load a parent file that has not been loaded yet. This is bad,
             //  the launcher should have taken care of this.
             std::string fstring = "File " + fname + " asks for parent file " + masters[j].name

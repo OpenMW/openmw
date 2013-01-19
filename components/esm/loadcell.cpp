@@ -2,10 +2,14 @@
 
 #include <string>
 #include <sstream>
-#include <c++/4.6/list>
+#include <list>
+#include <boost/concept_check.hpp>
 
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
+
+#include <apps/openmw/mwworld/store.hpp>
+#include <apps/openmw/mwworld/cellstore.hpp>
 
 namespace ESM
 {
@@ -64,10 +68,11 @@ void CellRef::save(ESMWriter &esm)
     }
 }
 
-void Cell::load(ESMReader &esm)
+void Cell::load(ESMReader &esm, MWWorld::ESMStore &store)
 {
     // Ignore this for now, it might mean we should delete the entire
     // cell?
+    // TODO: treat the special case "another plugin moved this ref, but we want to delete it"!
     if (esm.isNextSub("DELE")) {
         esm.skipHSub();
     }
@@ -109,6 +114,33 @@ void Cell::load(ESMReader &esm)
     }
     if (esm.isNextSub("NAM0")) {
         esm.getHT(mNAM0);
+    }
+    
+    // preload moved references
+    while (esm.isNextSub("MVRF")) {
+        CellRef ref;
+        MovedCellRef cMRef;
+        getNextMVRF(esm, cMRef);
+
+        MWWorld::Store<ESM::Cell> &cStore = const_cast<MWWorld::Store<ESM::Cell>&>(store.get<ESM::Cell>());
+        ESM::Cell *cellAlt = const_cast<ESM::Cell*>(cStore.searchOrCreate(cMRef.mTarget[0], cMRef.mTarget[1]));
+        
+        // Get regular moved reference data. Adapted from CellStore::loadRefs. Maybe we can optimize the following
+        //  implementation when the oher implementation works as well.
+        getNextRef(esm, ref);
+        std::string lowerCase;
+
+        std::transform (ref.mRefID.begin(), ref.mRefID.end(), std::back_inserter (lowerCase),
+            (int(*)(int)) std::tolower);
+                
+        // Add data required to make reference appear in the correct cell.
+        /*
+        std::cout << "Moving refnumber! First cell: " << mData.mX << " " << mData.mY << std::endl;
+        std::cout << "  New cell: " << cMRef.mTarget[0] << " " << cMRef.mTarget[0] << std::endl;
+        std::cout << "Refnumber (MVRF): " << cMRef.mRefnum << " (FRMR) " << ref.mRefnum << std::endl;
+        */
+        mMovedRefs[cMRef.mRefnum] = cMRef;
+        cellAlt->mLeasedRefs[ref.mRefnum] = ref;
     }
 
     // Save position of the cell references and move on
@@ -171,23 +203,15 @@ bool Cell::getNextRef(ESMReader &esm, CellRef &ref)
     // TODO: Try and document reference numbering, I don't think this has been done anywhere else.
     if (!esm.hasMoreSubs())
         return false;
-    
+
+    // NOTE: We should not need this check. It is a safety check until we have checked
+    // more plugins, and how they treat these moved references.
     if (esm.isNextSub("MVRF")) {
-        // Moved existing reference across cell boundaries, so interpret the blocks correctly.
-        // FIXME: Right now, we don't do anything with this data. This might result in weird behaviour,
-        //  where a moved reference does not appear because the owning cell (i.e. this cell) is not
-        //  loaded in memory.
-        int movedRefnum = 0;
-        int destCell[2];
-        esm.getHT(movedRefnum);
-        esm.getHNT(destCell, "CNDT");
-        // TODO: Figure out what happens when a reference has moved into an interior cell. This might
-        //  be required for NPCs following the player.
+        esm.skipRecord(); // skip MVRF
+        esm.skipRecord(); // skip CNDT
+        // That should be it, I haven't seen any other fields yet.
     }
-    // If we have just parsed a MVRF entry, there should be a regular FRMR entry following right there.
-    // With the exception that this bock technically belongs to a different cell than this one.
-    // TODO: Figure out a way to handle these weird references that do not belong to this cell.
-    //  This may require some not-so-small behing-the-scenes updates.
+
     esm.getHNT(ref.mRefnum, "FRMR");
     ref.mRefID = esm.getHNString("NAME");
     
@@ -289,6 +313,22 @@ bool Cell::getNextRef(ESMReader &esm, CellRef &ref)
         // TODO: find out when references do respawn.
     } else
         ref.mDeleted = 0;
+
+    return true;
+}
+
+bool Cell::getNextMVRF(ESMReader &esm, MovedCellRef &mref)
+{
+    esm.getHT(mref.mRefnum);
+    esm.getHNOT(mref.mTarget, "CNDT");
+    
+    // Identify references belonging to a parent file and adapt the ID accordingly.
+    int local = (mref.mRefnum & 0xff000000) >> 24;
+    size_t global = esm.getIndex() + 1;
+    mref.mRefnum &= 0x00ffffff; // delete old plugin ID
+    const ESM::ESMReader::MasterList &masters = esm.getMasters();
+    global = masters[local-1].index + 1;
+    mref.mRefnum |= global << 24; // insert global plugin ID
 
     return true;
 }
