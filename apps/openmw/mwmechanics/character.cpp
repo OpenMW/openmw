@@ -30,7 +30,7 @@ namespace MWMechanics
 {
 
 CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Animation *anim, CharacterState state)
-  : mPtr(ptr), mAnimation(anim), mState(state), mSkipAnim(false)
+  : mPtr(ptr), mAnimation(anim), mDirection(Ogre::Vector3::ZERO), mState(state), mSkipAnim(false)
 {
     if(mAnimation)
         mAnimNames = mAnimation->getAnimationNames();
@@ -47,7 +47,7 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
 CharacterController::CharacterController(const CharacterController &rhs)
   : mPtr(rhs.mPtr), mAnimation(rhs.mAnimation), mAnimNames(rhs.mAnimNames)
   , mAnimQueue(rhs.mAnimQueue), mCurrentGroup(rhs.mCurrentGroup)
-  , mState(rhs.mState), mSkipAnim(rhs.mSkipAnim)
+  , mDirection(rhs.mDirection), mState(rhs.mState), mSkipAnim(rhs.mSkipAnim)
 {
     if(mAnimNames.size() == 0)
         return;
