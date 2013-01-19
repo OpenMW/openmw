@@ -10,6 +10,7 @@
 #include <QDataWidgetMapper>
 
 #include "../../model/world/columnbase.hpp"
+#include "../../model/world/idtable.hpp"
 
 CSVWorld::DialogueSubView::DialogueSubView (const CSMWorld::UniversalId& id, CSMDoc::Document& document,
     bool createAndDelete)
@@ -83,7 +84,8 @@ CSVWorld::DialogueSubView::DialogueSubView (const CSMWorld::UniversalId& id, CSM
         }
     }
 
-    mWidgetMapper->toFirst(); /// \todo use the correct row instead
+    mWidgetMapper->setCurrentModelIndex (
+        dynamic_cast<CSMWorld::IdTable&> (*model).getModelIndex (id.getId(), 0));
 }
 
 void CSVWorld::DialogueSubView::setEditLock (bool locked)
