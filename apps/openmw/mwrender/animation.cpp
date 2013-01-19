@@ -26,6 +26,7 @@ Animation::Animation(const MWWorld::Ptr &ptr)
     , mLastPosition(0.0f)
     , mCurrentKeys(NULL)
     , mAnimState(NULL)
+    , mAnimSpeedMult(1.0f)
 {
 }
 
@@ -207,6 +208,7 @@ void Animation::play(const std::string &groupname, const std::string &start)
 Ogre::Vector3 Animation::runAnimation(float timepassed)
 {
     Ogre::Vector3 movement = Ogre::Vector3::ZERO;
+    timepassed *= mAnimSpeedMult;
     while(mAnimState && timepassed > 0.0f)
     {
         float targetTime = mAnimState->getTimePosition() + timepassed;

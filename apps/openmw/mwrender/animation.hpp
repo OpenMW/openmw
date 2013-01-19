@@ -31,6 +31,7 @@ protected:
     NifOgre::TextKeyMap *mCurrentKeys;
     NifOgre::TextKeyMap::const_iterator mNextKey;
     Ogre::AnimationState *mAnimState;
+    float mAnimSpeedMult;
 
     /* Updates the animation to the specified time, and returns the movement
      * vector since the last update or reset. */
@@ -53,6 +54,9 @@ public:
     // move visually, but not affect the actual movement. Each x/y/z value
     // should be on the scale of 0 to 1.
     void setAccumulation(const Ogre::Vector3 &accum);
+
+    void setSpeedMult(float speedmult)
+    { mAnimSpeedMult = speedmult; }
 
     void play(const std::string &groupname, const std::string &start);
     virtual Ogre::Vector3 runAnimation(float timepassed);

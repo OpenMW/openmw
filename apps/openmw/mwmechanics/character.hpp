@@ -54,8 +54,7 @@ public:
     void playGroup(const std::string &groupname, int mode, int count);
     void skipAnim();
 
-    void setDirection(const Ogre::Vector3 &dir)
-    { mDirection = dir; }
+    void setDirection(const Ogre::Vector3 &dir);
 
     void setState(CharacterState state);
     CharacterState getState() const

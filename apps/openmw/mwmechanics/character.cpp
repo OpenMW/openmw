@@ -118,6 +118,17 @@ void CharacterController::markerEvent(float time, const std::string &evt)
 }
 
 
+void CharacterController::setDirection(const Ogre::Vector3 &dir)
+{
+    // HACK: The direction length we get is too large.
+    float mult = dir.length() / 32.0f;
+    mult = std::max(1.0f, mult);
+    if(mAnimation)
+        mAnimation->setSpeedMult(mult);
+    mDirection = dir.normalisedCopy();
+}
+
+
 Ogre::Vector3 CharacterController::update(float duration)
 {
     Ogre::Vector3 movement = Ogre::Vector3::ZERO;
@@ -125,17 +136,10 @@ Ogre::Vector3 CharacterController::update(float duration)
         movement += mAnimation->runAnimation(duration);
     mSkipAnim = false;
 
-    if(getState() == CharState_SpecialIdle || getState() == CharState_Idle ||
-       getState() == CharState_Dead)
+    if(!(getState() == CharState_SpecialIdle || getState() == CharState_Idle ||
+         getState() == CharState_Dead))
     {
-        // FIXME: mDirection shouldn't influence the movement here.
-        movement += mDirection;
-    }
-    else
-    {
-        // FIXME: mDirection should be normalized after setting the speed of
-        // the animation in setDirection, rather than here.
-        movement = mDirection.normalisedCopy() * movement.length();
+        movement = mDirection * movement.length();
     }
 
     return movement;
