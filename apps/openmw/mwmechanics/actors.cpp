@@ -251,6 +251,7 @@ namespace MWMechanics
                 }
 
                 iter->second.setState(CharState_Dead);
+                iter->second.setDirection(Ogre::Vector3::ZERO);
 
                 ++mDeathCount[MWWorld::Class::get(iter->first).getId(iter->first)];
 
@@ -264,7 +265,22 @@ namespace MWMechanics
         {
             for(PtrControllerMap::iterator iter(mActors.begin());iter != mActors.end();++iter)
             {
+                if(iter->second.getState() == CharState_Dead)
+                    continue;
+
                 Ogre::Vector3 dir = MWWorld::Class::get(iter->first).getMovementVector(iter->first);
+                CharacterState newstate = CharState_Idle;
+
+                if(dir.length() >= 0.1f)
+                {
+                    if(dir.y < 0.0f)
+                        newstate = CharState_WalkBack;
+                    else
+                        newstate = CharState_WalkForward;
+                }
+
+                if(iter->second.getState() != newstate)
+                    iter->second.setState(newstate);
                 iter->second.setDirection(dir);
             }
 

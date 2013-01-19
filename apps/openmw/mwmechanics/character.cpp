@@ -188,6 +188,18 @@ void CharacterController::setState(CharacterState state)
             mAnimation->setAccumulation(Ogre::Vector3::ZERO);
             mAnimation->play(mCurrentGroup, "start");
             break;
+
+        case CharState_WalkForward:
+            mCurrentGroup = "walkforward";
+            mAnimation->setAccumulation(Ogre::Vector3(0.0f, 1.0f, 0.0f));
+            mAnimation->play(mCurrentGroup, "start");
+            break;
+        case CharState_WalkBack:
+            mCurrentGroup = "walkback";
+            mAnimation->setAccumulation(Ogre::Vector3(0.0f, 1.0f, 0.0f));
+            mAnimation->play(mCurrentGroup, "start");
+            break;
+
         case CharState_Dead:
             mCurrentGroup = "death1";
             mAnimation->setAccumulation(Ogre::Vector3(1.0f, 1.0f, 0.0f));
