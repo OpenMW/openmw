@@ -685,6 +685,7 @@ namespace MWWorld
             {
                 mWorldScene->removeObjectFromScene (ptr);
                 mLocalScripts.remove (ptr);
+                removeContainerScripts (ptr);
             }
         }
     }
@@ -698,6 +699,8 @@ namespace MWWorld
         CellStore *currCell = ptr.getCell();
         bool isPlayer = ptr == mPlayer->getPlayer();
         bool haveToMove = mWorldScene->isCellActive(*currCell) || isPlayer;
+        
+        removeContainerScripts(ptr);
 
         if (*currCell != newCell)
         {
@@ -724,6 +727,8 @@ namespace MWWorld
                 {
                     MWWorld::Ptr copy =
                         MWWorld::Class::get(ptr).copyToCell(ptr, newCell);
+
+                    addContainerScripts(copy, &newCell);
 
                     mRendering->moveObjectToCell(copy, vec, currCell);
 
@@ -1333,6 +1338,7 @@ namespace MWWorld
             if (!script.empty()) {
                 mLocalScripts.add(script, dropped);
             }
+            addContainerScripts(dropped, &cell);
         }
     }
 
