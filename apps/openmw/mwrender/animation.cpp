@@ -67,34 +67,32 @@ void Animation::createEntityList(Ogre::SceneNode *node, const std::string &model
         Ogre::Skeleton::BoneIterator boneiter = skel->getBoneIterator();
         while(boneiter.hasMoreElements())
         {
-            Ogre::Bone *bone = boneiter.peekNext();
-            const Ogre::Any &data = bone->getUserObjectBindings().getUserAny(NifOgre::sTextKeyExtraDataID);
-            if(!data.isEmpty())
-            {
-                mTextKeys["all"] = Ogre::any_cast<NifOgre::TextKeyMap>(data);
+            Ogre::Bone *bone = boneiter.getNext();
+            Ogre::UserObjectBindings &bindings = bone->getUserObjectBindings();
+            const Ogre::Any &data = bindings.getUserAny(NifOgre::sTextKeyExtraDataID);
+            if(data.isEmpty())
+                continue;
 
-                mAccumRoot = skelinst->getRootBone();
-                mAccumRoot->setManuallyControlled(true);
-                mNonAccumRoot = skelinst->getBone(bone->getHandle());
+            mTextKeys["all"] = Ogre::any_cast<NifOgre::TextKeyMap>(data);
 
-                mStartPosition = mNonAccumRoot->getPosition();
-                mLastPosition = mStartPosition;
-                break;
-            }
-            boneiter.moveNext();
-        }
+            mAccumRoot = skelinst->getRootBone();
+            mAccumRoot->setManuallyControlled(true);
+            mNonAccumRoot = skelinst->getBone(bone->getHandle());
 
-        if(boneiter.hasMoreElements())
-        {
+            mStartPosition = mNonAccumRoot->getPosition();
+            mLastPosition = mStartPosition;
+
             asiter = aset->getAnimationStateIterator();
             while(asiter.hasMoreElements())
             {
                 Ogre::AnimationState *state = asiter.getNext();
-                Ogre::UserObjectBindings &bindings = boneiter.peekNext()->getUserObjectBindings();
-                const Ogre::Any &data = bindings.getUserAny(std::string(NifOgre::sTextKeyExtraDataID)+"@"+state->getAnimationName());
-                if(!data.isEmpty())
-                    mTextKeys[state->getAnimationName()] = Ogre::any_cast<NifOgre::TextKeyMap>(data);
+                const Ogre::Any &groupdata = bindings.getUserAny(std::string(NifOgre::sTextKeyExtraDataID)+
+                                                                 "@"+state->getAnimationName());
+                if(!groupdata.isEmpty())
+                    mTextKeys[state->getAnimationName()] = Ogre::any_cast<NifOgre::TextKeyMap>(groupdata);
             }
+
+            break;
         }
     }
 }
