@@ -20,6 +20,7 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
+#include "../mwbase/journal.hpp"
 #include "../mwbase/scriptmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
@@ -269,6 +270,7 @@ namespace MWDialogue
 
             MWScript::InterpreterContext interpreterContext(&mActor.getRefData().getLocals(),mActor);
             win->addText (Interpreter::fixDefinesDialog(info->mResponse, interpreterContext));
+            MWBase::Environment::get().getJournal()->addTopic (topic, info->mId);
 
             executeScript (info->mResultScript);
 
@@ -420,6 +422,7 @@ namespace MWDialogue
 
                         MWScript::InterpreterContext interpreterContext(&mActor.getRefData().getLocals(),mActor);
                         MWBase::Environment::get().getWindowManager()->getDialogueWindow()->addText (Interpreter::fixDefinesDialog(text, interpreterContext));
+                        MWBase::Environment::get().getJournal()->addTopic (mLastTopic, info->mId);
                         executeScript (info->mResultScript);
                         mLastTopic = mLastTopic;
                         mLastDialogue = *info;
