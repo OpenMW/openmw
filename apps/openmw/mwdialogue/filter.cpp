@@ -554,7 +554,7 @@ MWDialogue::Filter::Filter (const MWWorld::Ptr& actor, int choice, bool talkedTo
 : mActor (actor), mChoice (choice), mTalkedToPlayer (talkedToPlayer)
 {}
 
-const ESM::DialInfo *MWDialogue::Filter::search (const ESM::Dialogue& dialogue) const
+const ESM::DialInfo *MWDialogue::Filter::search (const ESM::Dialogue& dialogue, const bool fallbackToInfoRefusal) const
 {
     bool infoRefusal = false;
 
@@ -571,7 +571,7 @@ const ESM::DialInfo *MWDialogue::Filter::search (const ESM::Dialogue& dialogue) 
         }
     }
 
-    if (infoRefusal)
+    if (infoRefusal && fallbackToInfoRefusal)
     {
         // No response is valid because of low NPC disposition,
         // search a response in the topic "Info Refusal"
@@ -590,3 +590,14 @@ const ESM::DialInfo *MWDialogue::Filter::search (const ESM::Dialogue& dialogue) 
     return 0;
 }
 
+bool MWDialogue::Filter::responseAvailable (const ESM::Dialogue& dialogue) const
+{
+    for (std::vector<ESM::DialInfo>::const_iterator iter = dialogue.mInfo.begin();
+        iter!=dialogue.mInfo.end(); ++iter)
+    {
+        if (testActor (*iter) && testPlayer (*iter) && testSelectStructs (*iter))
+            return true;
+    }
+
+    return false;
+}

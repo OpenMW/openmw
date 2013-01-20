@@ -139,7 +139,8 @@ namespace MWDialogue
         {
             if(it->mType == ESM::Dialogue::Greeting)
             {
-                if (const ESM::DialInfo *info = filter.search (*it))
+                // Search a response (we do not accept a fallback to "Info refusal" here)
+                if (const ESM::DialInfo *info = filter.search (*it, false))
                 {
                     //initialise the GUI
                     MWBase::Environment::get().getWindowManager()->pushGuiMode(MWGui::GM_Dialogue);
@@ -248,7 +249,7 @@ namespace MWDialogue
 
         const ESM::Dialogue& dialogue = *dialogues.find (topic);
 
-        if (const ESM::DialInfo *info = filter.search (dialogue))
+        if (const ESM::DialInfo *info = filter.search (dialogue, true))
         {
             parseText (info->mResponse);
 
@@ -295,7 +296,7 @@ namespace MWDialogue
         {
             if (iter->mType == ESM::Dialogue::Topic)
             {
-                if (filter.search (*iter))
+                if (filter.responseAvailable (*iter))
                 {
                     std::string lower = Misc::StringUtils::lowerCase(iter->mId);
                     mActorKnownTopics.push_back (lower);
@@ -412,7 +413,7 @@ namespace MWDialogue
                 {
                     Filter filter (mActor, mChoice, mTalkedTo);
 
-                    if (const ESM::DialInfo *info = filter.search (mDialogueMap[mLastTopic]))
+                    if (const ESM::DialInfo *info = filter.search (mDialogueMap[mLastTopic], true))
                     {
                         mChoiceMap.clear();
                         mChoice = -1;
