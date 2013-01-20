@@ -105,6 +105,9 @@ namespace MWWorld
             float getNpcActivationDistance ();
             float getObjectActivationDistance ();
 
+            void removeContainerScripts(const Ptr& reference);
+            void addContainerScripts(const Ptr& reference, Ptr::CellStore* cell);
+
         public:
 
             World (OEngine::Render::OgreRenderer& renderer,
