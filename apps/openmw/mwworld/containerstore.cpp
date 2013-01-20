@@ -74,7 +74,7 @@ bool MWWorld::ContainerStore::stacks(const Ptr& ptr1, const Ptr& ptr2)
 
 MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add (const Ptr& ptr)
 {
-    MWWorld::ContainerStoreIterator it = realAdd(ptr);
+    MWWorld::ContainerStoreIterator it = addImp(ptr);
     MWWorld::Ptr item = *it;
 
     std::string script = MWWorld::Class::get(item).getScript(item);
@@ -97,7 +97,7 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add (const Ptr& ptr)
     return it;
 }
 
-MWWorld::ContainerStoreIterator MWWorld::ContainerStore::realAdd (const Ptr& ptr)
+MWWorld::ContainerStoreIterator MWWorld::ContainerStore::addImp (const Ptr& ptr)
 {
     int type = getType(ptr);
 
@@ -189,7 +189,7 @@ void MWWorld::ContainerStore::fill (const ESM::InventoryList& items, const MWWor
         }
 
         ref.getPtr().getRefData().setCount (std::abs(iter->mCount)); /// \todo implement item restocking (indicated by negative count)
-        realAdd (ref.getPtr());
+        addImp (ref.getPtr());
     }
 
     flagAsModified();
