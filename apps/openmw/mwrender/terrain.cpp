@@ -143,7 +143,7 @@ namespace MWRender
                 std::map<uint16_t, int> indexes;
                 initTerrainTextures(&terrainData, cellX, cellY,
                                     x * numTextures, y * numTextures,
-                                    numTextures, indexes, land->plugin);
+                                    numTextures, indexes, land->mPlugin);
 
                 if (mTerrainGroup.getTerrain(terrainX, terrainY) == NULL)
                 {

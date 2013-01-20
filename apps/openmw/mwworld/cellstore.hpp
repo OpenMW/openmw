@@ -98,7 +98,10 @@ namespace MWWorld
   /// A list of container references. These references do not track their mRefnumber.
   /// Otherwise, taking 1 of 20 instances of an object would produce multiple objects
   /// with the same reference.
-  // TODO: Check how Morrowind does this! Maybe auto-generate references on drop.
+  /// Unfortunately, this also means that we need a different STL container.
+  ///  (cells use CellRefList, where refs can be located according to their refnumner,
+  ///   which uses a map; container items do not make use of the refnumber, so we
+  ///   can't use a map with refnumber keys.)
   template <typename X>
   struct ContainerRefList
   {
