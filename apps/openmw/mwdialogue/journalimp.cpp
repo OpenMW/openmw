@@ -32,8 +32,8 @@ namespace MWDialogue
     void Journal::addEntry (const std::string& id, int index)
     {
         // bail out of we already have heard this...
-        auto infoId = JournalEntry::idFromIndex (id, index);
-        for (auto i = mJournal.begin (); i != mJournal.end (); ++i)
+        std::string infoId = JournalEntry::idFromIndex (id, index);
+        for (TEntryIter i = mJournal.begin (); i != mJournal.end (); ++i)
             if (i->mTopic == id && i->mInfoId == infoId)
                 return;
 
