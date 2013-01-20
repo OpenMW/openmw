@@ -406,6 +406,24 @@ namespace MWWorld
         if (!reference.getRefData().isEnabled())
         {
             reference.getRefData().enable();
+            
+            /* run scripts on container contents */
+            if( reference.getTypeName()==typeid (ESM::Container).name() ||
+                reference.getTypeName()==typeid (ESM::NPC).name() ||
+                reference.getTypeName()==typeid (ESM::Creature).name())
+            {
+                MWWorld::ContainerStore& container = MWWorld::Class::get(reference).getContainerStore(reference);
+                for(MWWorld::ContainerStoreIterator it = container.begin(); it != container.end(); ++it)
+                {
+                    std::string script = MWWorld::Class::get(*it).getScript(*it);
+                    if(script != "")
+                    {
+                        MWWorld::Ptr item = *it;
+                        item.mCell = reference.getCell();
+                        mLocalScripts.add (script, item);
+                    }
+                }
+            }
 
             if(mWorldScene->getActiveCells().find (reference.getCell()) != mWorldScene->getActiveCells().end() && reference.getRefData().getCount())
                 mWorldScene->addObjectToScene (reference);
@@ -417,6 +435,23 @@ namespace MWWorld
         if (reference.getRefData().isEnabled())
         {
             reference.getRefData().disable();
+            
+            /* remove scripts on container contents */
+            if( reference.getTypeName()==typeid (ESM::Container).name() ||
+                reference.getTypeName()==typeid (ESM::NPC).name() ||
+                reference.getTypeName()==typeid (ESM::Creature).name())
+            {
+                MWWorld::ContainerStore& container = MWWorld::Class::get(reference).getContainerStore(reference);
+                for(MWWorld::ContainerStoreIterator it = container.begin(); it != container.end(); ++it)
+                {
+                    std::string script = MWWorld::Class::get(*it).getScript(*it);
+                    if(script != "")
+                    {
+                        MWWorld::Ptr item = *it;
+                        mLocalScripts.remove (item);
+                    }
+                }
+            }
 
             if(mWorldScene->getActiveCells().find (reference.getCell())!=mWorldScene->getActiveCells().end() && reference.getRefData().getCount())
                 mWorldScene->removeObjectFromScene (reference);
