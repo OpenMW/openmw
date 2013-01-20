@@ -48,7 +48,8 @@ public:
     virtual ~Animation();
 
     void setController(MWMechanics::CharacterController *controller);
-    std::vector<std::string> getAnimationNames();
+
+    bool hasAnimation(const std::string &anim);
 
     // Specifies the axis' to accumulate on. Non-accumulated axis will just
     // move visually, but not affect the actual movement. Each x/y/z value

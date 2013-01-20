@@ -30,8 +30,6 @@ class CharacterController
     MWWorld::Ptr mPtr;
     MWRender::Animation *mAnimation;
 
-    std::vector<std::string> mAnimNames;
-
     typedef std::deque<std::string> AnimationQueue;
     AnimationQueue mAnimQueue;
 

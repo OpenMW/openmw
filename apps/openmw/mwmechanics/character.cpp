@@ -65,29 +65,24 @@ static void getStateInfo(CharacterState state, std::string *group, Ogre::Vector3
 CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Animation *anim, CharacterState state, bool loop)
   : mPtr(ptr), mAnimation(anim), mDirection(Ogre::Vector3::ZERO), mState(state), mSkipAnim(false), mLoop(loop)
 {
-    if(mAnimation)
-        mAnimNames = mAnimation->getAnimationNames();
-    if(mAnimNames.size() == 0)
-    {
-        mAnimation = NULL;
+    if(!mAnimation)
         return;
-    }
 
     mAnimation->setController(this);
 
     Ogre::Vector3 accum;
     getStateInfo(mState, &mCurrentGroup, &accum);
     mAnimation->setAccumulation(accum);
-    mAnimation->play(mCurrentGroup, "stop");
+    if(mAnimation->hasAnimation(mCurrentGroup))
+        mAnimation->play(mCurrentGroup, "stop");
 }
 
 CharacterController::CharacterController(const CharacterController &rhs)
-  : mPtr(rhs.mPtr), mAnimation(rhs.mAnimation), mAnimNames(rhs.mAnimNames)
-  , mAnimQueue(rhs.mAnimQueue), mCurrentGroup(rhs.mCurrentGroup)
-  , mDirection(rhs.mDirection), mState(rhs.mState), mSkipAnim(rhs.mSkipAnim)
-  , mLoop(rhs.mLoop)
+  : mPtr(rhs.mPtr), mAnimation(rhs.mAnimation), mAnimQueue(rhs.mAnimQueue)
+  , mCurrentGroup(rhs.mCurrentGroup), mDirection(rhs.mDirection)
+  , mState(rhs.mState), mSkipAnim(rhs.mSkipAnim), mLoop(rhs.mLoop)
 {
-    if(mAnimNames.size() == 0)
+    if(!mAnimation)
         return;
     /* We've been copied. Update the animation with the new controller. */
     mAnimation->setController(this);
@@ -186,7 +181,7 @@ Ogre::Vector3 CharacterController::update(float duration)
 
 void CharacterController::playGroup(const std::string &groupname, int mode, int count)
 {
-    if(std::find(mAnimNames.begin(), mAnimNames.end(), groupname) != mAnimNames.end())
+    if(mAnimation && mAnimation->hasAnimation(groupname))
     {
         count = std::max(count, 1);
         if(mode != 0 || mAnimQueue.size() == 0)
@@ -230,14 +225,19 @@ void CharacterController::setState(CharacterState state, bool loop)
         mLoop = loop;
     }
 
-    if(mAnimNames.size() == 0)
+    if(!mAnimation)
         return;
     mAnimQueue.clear();
 
+    std::string anim;
     Ogre::Vector3 accum;
-    getStateInfo(mState, &mCurrentGroup, &accum);
-    mAnimation->setAccumulation(accum);
-    mAnimation->play(mCurrentGroup, "start");
+    getStateInfo(mState, &anim, &accum);
+    if(mAnimation->hasAnimation(anim))
+    {
+        mCurrentGroup = anim;
+        mAnimation->setAccumulation(accum);
+        mAnimation->play(mCurrentGroup, "start");
+    }
 }
 
 }

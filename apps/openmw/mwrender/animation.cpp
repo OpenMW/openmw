@@ -100,17 +100,9 @@ void Animation::createEntityList(Ogre::SceneNode *node, const std::string &model
 }
 
 
-std::vector<std::string> Animation::getAnimationNames()
+bool Animation::hasAnimation(const std::string &anim)
 {
-    std::vector<std::string> anims;
-    if(mEntityList.mSkelBase)
-    {
-        Ogre::AnimationStateSet *as = mEntityList.mSkelBase->getAllAnimationStates();
-        Ogre::AnimationStateIterator ai = as->getAnimationStateIterator();
-        while(ai.hasMoreElements())
-            anims.push_back(ai.getNext()->getAnimationName());
-    }
-    return anims;
+    return mEntityList.mSkelBase && mEntityList.mSkelBase->hasAnimationState(anim);
 }
 
 
@@ -188,13 +180,9 @@ float Animation::findStart(const std::string &groupname, const std::string &star
 void Animation::play(const std::string &groupname, const std::string &start)
 {
     try {
-        if(!mEntityList.mSkelBase)
-            throw std::runtime_error("Attempting to animate an inanimate object");
-
-        Ogre::AnimationState *newstate = mEntityList.mSkelBase->getAnimationState(groupname);
         if(mAnimState)
             mAnimState->setEnabled(false);
-        mAnimState = newstate;
+        mAnimState = mEntityList.mSkelBase->getAnimationState(groupname);
         mAnimState->setEnabled(true);
         mCurrentKeys = &mTextKeys[groupname];
 
