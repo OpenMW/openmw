@@ -41,6 +41,8 @@ static const struct {
 
     { CharState_WalkForward, "walkforward", Ogre::Vector3(0.0f, 1.0f, 0.0f) },
     { CharState_WalkBack, "walkback", Ogre::Vector3(0.0f, 1.0f, 0.0f) },
+    { CharState_WalkLeft, "walkleft", Ogre::Vector3(1.0f, 0.0f, 0.0f) },
+    { CharState_WalkRight, "walkright", Ogre::Vector3(1.0f, 0.0f, 0.0f) },
 
     { CharState_Dead, "death1", Ogre::Vector3(1.0f, 1.0f, 0.0f) },
 };

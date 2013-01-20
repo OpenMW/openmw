@@ -19,6 +19,8 @@ enum CharacterState {
 
     CharState_WalkForward,
     CharState_WalkBack,
+    CharState_WalkLeft,
+    CharState_WalkRight,
 
     CharState_Dead
 };

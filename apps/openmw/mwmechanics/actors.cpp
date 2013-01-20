@@ -273,7 +273,14 @@ namespace MWMechanics
 
                 if(dir.length() >= 0.1f)
                 {
-                    if(dir.y < 0.0f)
+                    if(std::abs(dir.x/2.0f) > std::abs(dir.y))
+                    {
+                        if(dir.x > 0.0f)
+                            newstate = CharState_WalkRight;
+                        else if(dir.x < 0.0f)
+                            newstate = CharState_WalkLeft;
+                    }
+                    else if(dir.y < 0.0f)
                         newstate = CharState_WalkBack;
                     else
                         newstate = CharState_WalkForward;
