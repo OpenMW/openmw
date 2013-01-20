@@ -249,11 +249,11 @@ namespace MWDialogue
 
         const ESM::Dialogue& dialogue = *dialogues.find (topic);
 
+        MWGui::DialogueWindow* win = MWBase::Environment::get().getWindowManager()->getDialogueWindow();
+
         if (const ESM::DialInfo *info = filter.search (dialogue, true))
         {
             parseText (info->mResponse);
-
-            MWGui::DialogueWindow* win = MWBase::Environment::get().getWindowManager()->getDialogueWindow();
 
             if (dialogue.mType==ESM::Dialogue::Persuasion)
             {
@@ -277,6 +277,13 @@ namespace MWDialogue
 
             mLastTopic = topic;
             mLastDialogue = *info;
+        }
+        else
+        {
+            // no response found, print a fallback text
+            win->addTitle (topic);
+            win->addText ("…");
+
         }
     }
 
