@@ -308,7 +308,7 @@ static TextKeyMap extractTextKeys(const Nif::NiTextKeyExtraData *tk)
 }
 
 
-void buildBones(Ogre::Skeleton *skel, const Nif::Node *node, std::vector<Nif::NiKeyframeController const*> &ctrls, Ogre::Bone *parent=NULL)
+void buildBones(Ogre::Skeleton *skel, const Nif::Node *node, Ogre::Bone *&nonaccum, TextKeyMap &textkeys, std::vector<Nif::NiKeyframeController const*> &ctrls, Ogre::Bone *parent=NULL)
 {
     if(node->recType == Nif::RC_NiTriShape)
         return;
@@ -341,7 +341,8 @@ void buildBones(Ogre::Skeleton *skel, const Nif::Node *node, std::vector<Nif::Ni
         if(e->recType == Nif::RC_NiTextKeyExtraData)
         {
             const Nif::NiTextKeyExtraData *tk = static_cast<const Nif::NiTextKeyExtraData*>(e.getPtr());
-            bone->getUserObjectBindings().setUserAny(sTextKeyExtraDataID, Ogre::Any(extractTextKeys(tk)));
+            textkeys = extractTextKeys(tk);
+            nonaccum = bone;
         }
         e = e->extra;
     }
@@ -353,7 +354,7 @@ void buildBones(Ogre::Skeleton *skel, const Nif::Node *node, std::vector<Nif::Ni
         for(size_t i = 0;i < children.length();i++)
         {
             if(!children[i].empty())
-                buildBones(skel, children[i].getPtr(), ctrls, bone);
+                buildBones(skel, children[i].getPtr(), nonaccum, textkeys, ctrls, bone);
         }
     }
 }
@@ -382,8 +383,10 @@ void loadResource(Ogre::Resource *resource)
     const Nif::Node *node = dynamic_cast<const Nif::Node*>(nif.getRecord(0));
 
     std::vector<const Nif::NiKeyframeController*> ctrls;
+    Ogre::Bone *nonaccum = NULL;
+    TextKeyMap textkeys;
     try {
-        buildBones(skel, node, ctrls);
+        buildBones(skel, node, nonaccum, textkeys, ctrls);
     }
     catch(std::exception &e) {
         std::cerr<< "Exception while loading "<<skel->getName() <<std::endl;
@@ -413,21 +416,8 @@ void loadResource(Ogre::Resource *resource)
         return;
     }
 
-    TextKeyMap textkeys;
-    Ogre::Skeleton::BoneIterator boneiter = skel->getBoneIterator();
-    while(boneiter.hasMoreElements())
-    {
-        Ogre::Bone *bone = boneiter.peekNext();
-        const Ogre::Any &data = bone->getUserObjectBindings().getUserAny(sTextKeyExtraDataID);
-        if(!data.isEmpty())
-        {
-            textkeys = Ogre::any_cast<NifOgre::TextKeyMap>(data);
-            break;
-        }
-        boneiter.moveNext();
-    }
-
-    buildAnimation(skel, "all", ctrls, targets, 0.0f, maxtime);
+    Ogre::UserObjectBindings &bindings = nonaccum->getUserObjectBindings();
+    bindings.setUserAny(sTextKeyExtraDataID, Ogre::Any(true));
 
     std::string currentgroup;
     TextKeyMap::const_iterator keyiter = textkeys.begin();
@@ -459,7 +449,6 @@ void loadResource(Ogre::Resource *resource)
             groupkeys.insert(std::make_pair(insiter->first - keyiter->first, insiter->second));
         } while(insiter++ != lastkeyiter);
 
-        Ogre::UserObjectBindings &bindings = boneiter.peekNext()->getUserObjectBindings();
         bindings.setUserAny(std::string(sTextKeyExtraDataID)+"@"+currentgroup, Ogre::Any(groupkeys));
     }
 }

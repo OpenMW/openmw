@@ -70,10 +70,8 @@ void Animation::createEntityList(Ogre::SceneNode *node, const std::string &model
             Ogre::Bone *bone = boneiter.getNext();
             Ogre::UserObjectBindings &bindings = bone->getUserObjectBindings();
             const Ogre::Any &data = bindings.getUserAny(NifOgre::sTextKeyExtraDataID);
-            if(data.isEmpty())
+            if(data.isEmpty() || !Ogre::any_cast<bool>(data))
                 continue;
-
-            mTextKeys["all"] = Ogre::any_cast<NifOgre::TextKeyMap>(data);
 
             mAccumRoot = skelinst->getRootBone();
             mAccumRoot->setManuallyControlled(true);
