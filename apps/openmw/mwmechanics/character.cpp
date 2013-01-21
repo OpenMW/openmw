@@ -103,14 +103,8 @@ void CharacterController::markerEvent(float time, const std::string &evt)
         // to this actor type
         return;
     }
-    std::string::size_type ms = mCurrentGroup.length()+2;
-    if(evt.length() <= ms || evt.compare(0, ms-2, mCurrentGroup) != 0 || evt.compare(ms-2, 2, ": ") != 0)
-    {
-        std::cerr<< "Event \""<<evt<<"\" does not belong to group \""<<mCurrentGroup<<"\"" <<std::endl;
-        return;
-    }
 
-    if(evt.compare(ms, evt.length()-ms, "loop stop") == 0)
+    if(evt == "loop stop")
     {
         if(mAnimQueue.size() == 0)
         {
@@ -125,7 +119,7 @@ void CharacterController::markerEvent(float time, const std::string &evt)
         return;
     }
 
-    if(evt.compare(ms, evt.length()-ms, "stop") == 0)
+    if(evt == "stop")
     {
         if(mAnimQueue.size() == 0)
         {

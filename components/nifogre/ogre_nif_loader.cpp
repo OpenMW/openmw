@@ -444,7 +444,13 @@ void loadResource(Ogre::Resource *resource)
         TextKeyMap::const_iterator insiter = keyiter;
         TextKeyMap groupkeys;
         do {
-            groupkeys.insert(std::make_pair(insiter->first - keyiter->first, insiter->second));
+            sep = insiter->second.find(':');
+            if(sep == currentgroup.length() && insiter->second.compare(0, sep, currentgroup) == 0)
+                groupkeys.insert(std::make_pair(insiter->first - keyiter->first,
+                                                insiter->second.substr(sep+2)));
+            else if((sep == sizeof("soundgen")-1 && insiter->second.compare(0, sep, "soundgen") == 0) ||
+                    (sep == sizeof("sound")-1 && insiter->second.compare(0, sep, "sound") == 0))
+                groupkeys.insert(std::make_pair(insiter->first - keyiter->first, insiter->second));
         } while(insiter++ != lastkeyiter);
 
         bindings.setUserAny(std::string(sTextKeyExtraDataID)+"@"+currentgroup, Ogre::Any(groupkeys));
