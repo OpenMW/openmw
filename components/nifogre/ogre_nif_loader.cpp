@@ -320,8 +320,6 @@ void buildBones(Ogre::Skeleton *skel, const Nif::Node *node, Ogre::Bone *&nonacc
         bone = skel->createBone();
     if(parent) parent->addChild(bone);
 
-    if(!node->boneTrafo)
-        bone->setManuallyControlled(true);
     bone->setOrientation(node->trafo.rotation);
     bone->setPosition(node->trafo.pos);
     bone->setScale(Ogre::Vector3(node->trafo.scale));
@@ -338,7 +336,7 @@ void buildBones(Ogre::Skeleton *skel, const Nif::Node *node, Ogre::Bone *&nonacc
     Nif::ExtraPtr e = node->extra;
     while(!e.empty())
     {
-        if(e->recType == Nif::RC_NiTextKeyExtraData)
+        if(e->recType == Nif::RC_NiTextKeyExtraData && !nonaccum)
         {
             const Nif::NiTextKeyExtraData *tk = static_cast<const Nif::NiTextKeyExtraData*>(e.getPtr());
             textkeys = extractTextKeys(tk);
