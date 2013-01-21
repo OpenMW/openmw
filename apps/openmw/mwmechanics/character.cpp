@@ -36,8 +36,7 @@ static const struct {
     const char groupname[32];
     Ogre::Vector3 accumulate;
 } sStateList[] = {
-    { CharState_SpecialIdle, "idle", Ogre::Vector3(1.0f, 1.0f, 0.0f) },
-    { CharState_Idle, "idle", Ogre::Vector3::ZERO },
+    { CharState_Idle, "idle", Ogre::Vector3(1.0f, 1.0f, 0.0f) },
 
     { CharState_WalkForward, "walkforward", Ogre::Vector3(0.0f, 1.0f, 0.0f) },
     { CharState_WalkBack, "walkback", Ogre::Vector3(0.0f, 1.0f, 0.0f) },
@@ -163,8 +162,7 @@ Ogre::Vector3 CharacterController::update(float duration)
         movement += mAnimation->runAnimation(duration);
     mSkipAnim = false;
 
-    if(!(getState() == CharState_SpecialIdle || getState() == CharState_Idle ||
-         getState() == CharState_Dead))
+    if(!(getState() == CharState_Idle || getState() == CharState_Dead))
     {
         movement = mDirection * movement.length();
     }
@@ -175,7 +173,9 @@ Ogre::Vector3 CharacterController::update(float duration)
 
 void CharacterController::playGroup(const std::string &groupname, int mode, int count)
 {
-    if(mAnimation && mAnimation->hasAnimation(groupname))
+    if(!mAnimation || !mAnimation->hasAnimation(groupname))
+        std::cerr<< "Animation "<<groupname<<" not found" <<std::endl;
+    else
     {
         count = std::max(count, 1);
         if(mode != 0 || mAnimQueue.size() == 0)
@@ -184,7 +184,7 @@ void CharacterController::playGroup(const std::string &groupname, int mode, int 
             while(count-- > 0)
                 mAnimQueue.push_back(groupname);
             mCurrentGroup = groupname;
-            mState = CharState_SpecialIdle;
+            mState = CharState_Idle;
             mLoop = false;
             mAnimation->setAccumulation(Ogre::Vector3::ZERO);
             mAnimation->play(mCurrentGroup, ((mode==2) ? "loop start" : "start"));
@@ -207,12 +207,7 @@ void CharacterController::skipAnim()
 void CharacterController::setState(CharacterState state, bool loop)
 {
     if(mState == state)
-    {
-        // If setting the same state again, only reset the animation if looping
-        // is being turned on.
-        if(mLoop == loop || !(mLoop=loop))
-            return;
-    }
+        return;
     else
     {
         mState = state;
