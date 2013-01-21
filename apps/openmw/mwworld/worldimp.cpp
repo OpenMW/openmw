@@ -427,8 +427,6 @@ namespace MWWorld
         {
             reference.getRefData().enable();
             
-            addContainerScripts(reference, reference.getCell());
-
             if(mWorldScene->getActiveCells().find (reference.getCell()) != mWorldScene->getActiveCells().end() && reference.getRefData().getCount())
                 mWorldScene->addObjectToScene (reference);
         }
@@ -459,10 +457,6 @@ namespace MWWorld
         {
             reference.getRefData().disable();
             
-            removeContainerScripts(reference);        
-            if(MWWorld::Class::get(reference).getScript(reference) != "")
-                mLocalScripts.remove(reference);
-
             if(mWorldScene->getActiveCells().find (reference.getCell())!=mWorldScene->getActiveCells().end() && reference.getRefData().getCount())
                 mWorldScene->removeObjectFromScene (reference);
         }
