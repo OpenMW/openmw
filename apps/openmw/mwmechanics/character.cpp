@@ -61,8 +61,9 @@ static void getStateInfo(CharacterState state, std::string *group, Ogre::Vector3
     throw std::runtime_error("Failed to find character state "+Ogre::StringConverter::toString(state));
 }
 
+
 CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Animation *anim, CharacterState state, bool loop)
-  : mPtr(ptr), mAnimation(anim), mDirection(Ogre::Vector3::ZERO), mState(state), mSkipAnim(false), mLoop(loop)
+  : mPtr(ptr), mAnimation(anim), mDirection(Ogre::Vector3::ZERO), mState(state), mSkipAnim(false)
 {
     if(!mAnimation)
         return;
@@ -73,13 +74,13 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
     getStateInfo(mState, &mCurrentGroup, &accum);
     mAnimation->setAccumulation(accum);
     if(mAnimation->hasAnimation(mCurrentGroup))
-        mAnimation->play(mCurrentGroup, "stop");
+        mAnimation->play(mCurrentGroup, "stop", loop);
 }
 
 CharacterController::CharacterController(const CharacterController &rhs)
   : mPtr(rhs.mPtr), mAnimation(rhs.mAnimation), mAnimQueue(rhs.mAnimQueue)
   , mCurrentGroup(rhs.mCurrentGroup), mDirection(rhs.mDirection)
-  , mState(rhs.mState), mSkipAnim(rhs.mSkipAnim), mLoop(rhs.mLoop)
+  , mState(rhs.mState), mSkipAnim(rhs.mSkipAnim)
 {
     if(!mAnimation)
         return;
@@ -103,32 +104,12 @@ void CharacterController::markerEvent(float time, const std::string &evt)
         return;
     }
 
-    if(evt == "loop stop")
-    {
-        if(mAnimQueue.size() == 0)
-        {
-            if(time > 0.0f && mLoop)
-                mAnimation->play(mCurrentGroup, "loop start");
-        }
-        else if(mAnimQueue.size() >= 2 && mAnimQueue[0] == mAnimQueue[1])
-        {
-            mAnimQueue.pop_front();
-            mAnimation->play(mCurrentGroup, "loop start");
-        }
-        return;
-    }
-
     if(evt == "stop")
     {
-        if(mAnimQueue.size() == 0)
-        {
-            if(time > 0.0f && mLoop)
-                mAnimation->play(mCurrentGroup, "loop start");
-        }
-        else if(mAnimQueue.size() >= 2 && mAnimQueue[0] == mAnimQueue[1])
+        if(mAnimQueue.size() >= 2 && mAnimQueue[0] == mAnimQueue[1])
         {
             mAnimQueue.pop_front();
-            mAnimation->play(mCurrentGroup, "loop start");
+            mAnimation->play(mCurrentGroup, "loop start", false);
         }
         else if(mAnimQueue.size() > 0)
         {
@@ -136,7 +117,7 @@ void CharacterController::markerEvent(float time, const std::string &evt)
             if(mAnimQueue.size() > 0)
             {
                 mCurrentGroup = mAnimQueue.front();
-                mAnimation->play(mCurrentGroup, "start");
+                mAnimation->play(mCurrentGroup, "start", false);
             }
         }
         return;
@@ -185,9 +166,8 @@ void CharacterController::playGroup(const std::string &groupname, int mode, int 
                 mAnimQueue.push_back(groupname);
             mCurrentGroup = groupname;
             mState = CharState_Idle;
-            mLoop = false;
             mAnimation->setAccumulation(Ogre::Vector3::ZERO);
-            mAnimation->play(mCurrentGroup, ((mode==2) ? "loop start" : "start"));
+            mAnimation->play(mCurrentGroup, ((mode==2) ? "loop start" : "start"), false);
         }
         else if(mode == 0)
         {
@@ -208,11 +188,7 @@ void CharacterController::setState(CharacterState state, bool loop)
 {
     if(mState == state)
         return;
-    else
-    {
-        mState = state;
-        mLoop = loop;
-    }
+    mState = state;
 
     if(!mAnimation)
         return;
@@ -225,7 +201,7 @@ void CharacterController::setState(CharacterState state, bool loop)
     {
         mCurrentGroup = anim;
         mAnimation->setAccumulation(accum);
-        mAnimation->play(mCurrentGroup, "start");
+        mAnimation->play(mCurrentGroup, "start", loop);
     }
 }
 

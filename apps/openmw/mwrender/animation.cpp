@@ -26,6 +26,7 @@ Animation::Animation(const MWWorld::Ptr &ptr)
     , mLastPosition(0.0f)
     , mCurrentKeys(NULL)
     , mAnimState(NULL)
+    , mLooping(false)
     , mAnimSpeedMult(1.0f)
 {
 }
@@ -173,7 +174,7 @@ float Animation::findStart(const std::string &groupname, const std::string &star
 }
 
 
-void Animation::play(const std::string &groupname, const std::string &start)
+void Animation::play(const std::string &groupname, const std::string &start, bool loop)
 {
     try {
         if(mAnimState)
@@ -181,6 +182,7 @@ void Animation::play(const std::string &groupname, const std::string &start)
         mAnimState = mEntityList.mSkelBase->getAnimationState(groupname);
         mAnimState->setEnabled(true);
         mCurrentKeys = &mTextKeys[groupname];
+        mLooping = loop;
 
         resetPosition(findStart(groupname, start));
     }
@@ -209,6 +211,33 @@ Ogre::Vector3 Animation::runAnimation(float timepassed)
         movement += updatePosition(time);
         timepassed = targetTime - time;
 
+        if(evt == "start" || evt == "loop start")
+        {
+            /* Do nothing */
+            continue;
+        }
+        if(evt == "loop stop")
+        {
+            if(mLooping)
+            {
+                resetPosition(findStart(mAnimState->getAnimationName(), "loop start"));
+                if(mAnimState->getTimePosition() >= time)
+                    break;
+            }
+            continue;
+        }
+        if(evt == "stop")
+        {
+            if(mLooping)
+            {
+                resetPosition(findStart(mAnimState->getAnimationName(), "loop start"));
+                if(mAnimState->getTimePosition() >= time)
+                    break;
+            }
+            else if(mController)
+                mController->markerEvent(time, evt);
+            continue;
+        }
         if(mController)
             mController->markerEvent(time, evt);
     }
