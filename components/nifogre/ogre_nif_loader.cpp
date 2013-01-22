@@ -414,6 +414,13 @@ void loadResource(Ogre::Resource *resource)
         return;
     }
 
+    if(!nonaccum)
+    {
+        warn(Ogre::StringConverter::toString(ctrls.size())+" animated node(s) in "+
+             skel->getName()+", but no text keys. Uses NiBSAnimationNode?");
+        return;
+    }
+
     Ogre::UserObjectBindings &bindings = nonaccum->getUserObjectBindings();
     bindings.setUserAny(sTextKeyExtraDataID, Ogre::Any(true));
 
