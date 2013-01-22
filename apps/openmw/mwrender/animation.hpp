@@ -38,10 +38,10 @@ protected:
     /* Updates the animation to the specified time, and returns the movement
      * vector since the last update or reset. */
     Ogre::Vector3 updatePosition(float time);
-    /* Updates the animation to the specified time, without moving anything. */
-    void resetPosition(float time);
 
-    float findStart(const std::string &groupname, const std::string &start);
+    /* Resets the animation to the time of the specified marker, without moving
+     * anything. If the marker is not found, it resets to the beginning. */
+    void reset(const std::string &marker);
 
     void createEntityList(Ogre::SceneNode *node, const std::string &model);
 

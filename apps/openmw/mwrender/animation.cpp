@@ -134,13 +134,19 @@ Ogre::Vector3 Animation::updatePosition(float time)
     return posdiff;
 }
 
-void Animation::resetPosition(float time)
+void Animation::reset(const std::string &marker)
 {
-    mAnimState->setTimePosition(time);
-
     mNextKey = mCurrentKeys->begin();
-    while(mNextKey != mCurrentKeys->end() && mNextKey->first < time)
+    while(mNextKey != mCurrentKeys->end() && mNextKey->second != marker)
         mNextKey++;
+
+    if(mNextKey != mCurrentKeys->end())
+        mAnimState->setTimePosition(mNextKey->first);
+    else
+    {
+        mNextKey = mCurrentKeys->begin();
+        mAnimState->setTimePosition(0.0f);
+    }
 
     if(mNonAccumRoot)
     {
@@ -151,29 +157,6 @@ void Animation::resetPosition(float time)
 }
 
 
-float Animation::findStart(const std::string &groupname, const std::string &start)
-{
-    mNextKey = mCurrentKeys->end();
-    if(mCurrentKeys->size() == 0)
-        return 0.0f;
-
-    if(groupname == "all")
-    {
-        mNextKey = mCurrentKeys->begin();
-        return 0.0f;
-    }
-
-    std::string startmarker = groupname+": "+start;
-    NifOgre::TextKeyMap::const_iterator iter;
-    for(iter = mCurrentKeys->begin();iter != mCurrentKeys->end();iter++)
-    {
-        if(iter->second == startmarker)
-            return iter->first;
-    }
-    return 0.0f;
-}
-
-
 void Animation::play(const std::string &groupname, const std::string &start, bool loop)
 {
     try {
@@ -181,10 +164,10 @@ void Animation::play(const std::string &groupname, const std::string &start, boo
             mAnimState->setEnabled(false);
         mAnimState = mEntityList.mSkelBase->getAnimationState(groupname);
         mAnimState->setEnabled(true);
+
         mCurrentKeys = &mTextKeys[groupname];
         mLooping = loop;
-
-        resetPosition(findStart(groupname, start));
+        reset(start);
     }
     catch(std::exception &e) {
         std::cerr<< e.what() <<std::endl;
@@ -220,7 +203,7 @@ Ogre::Vector3 Animation::runAnimation(float timepassed)
         {
             if(mLooping)
             {
-                resetPosition(findStart(mAnimState->getAnimationName(), "loop start"));
+                reset("loop start");
                 if(mAnimState->getTimePosition() >= time)
                     break;
             }
@@ -230,7 +213,7 @@ Ogre::Vector3 Animation::runAnimation(float timepassed)
         {
             if(mLooping)
             {
-                resetPosition(findStart(mAnimState->getAnimationName(), "loop start"));
+                reset("loop start");
                 if(mAnimState->getTimePosition() >= time)
                     break;
             }
