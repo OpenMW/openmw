@@ -169,7 +169,7 @@ bool MWDialogue::Filter::testSelectStructNumeric (const SelectWrapper& select) c
             int i = 0;
 
             for (; i<static_cast<int> (script->mVarNames.size()); ++i)
-                if (script->mVarNames[i]==name)
+                if (Misc::StringUtils::lowerCase(script->mVarNames[i]) == name)
                     break;
 
             if (i>=static_cast<int> (script->mVarNames.size()))
