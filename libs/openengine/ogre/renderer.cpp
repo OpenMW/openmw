@@ -226,7 +226,7 @@ void OgreRenderer::createWindow(const std::string &title, const WindowSettings& 
                     1, 1,
                     0,
                     Ogre::PF_A8R8G8B8,
-                    Ogre::TU_DYNAMIC_WRITE_ONLY);
+                    Ogre::TU_WRITE_ONLY);
 }
 
 void OgreRenderer::createScene(const std::string& camName, float fov, float nearClip)

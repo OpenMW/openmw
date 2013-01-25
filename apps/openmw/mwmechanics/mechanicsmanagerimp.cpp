@@ -38,7 +38,7 @@ namespace MWMechanics
         creatureStats.getAttribute(5).setBase (player->mNpdt52.mEndurance);
         creatureStats.getAttribute(6).setBase (player->mNpdt52.mPersonality);
         creatureStats.getAttribute(7).setBase (player->mNpdt52.mLuck);
-        
+
         const MWWorld::ESMStore &esmStore =
             MWBase::Environment::get().getWorld()->getStore();
 
@@ -46,7 +46,7 @@ namespace MWMechanics
         if (mRaceSelected)
         {
             const ESM::Race *race =
-                esmStore.get<ESM::Race>().find(player->mRace); 
+                esmStore.get<ESM::Race>().find(player->mRace);
 
             bool male = (player->mFlags & ESM::NPC::Female) == 0;
 
@@ -72,14 +72,14 @@ namespace MWMechanics
             for (int i=0; i<27; ++i)
             {
                 int bonus = 0;
-                
+
                 for (int i2=0; i2<7; ++i2)
                     if (race->mData.mBonus[i2].mSkill==i)
                     {
                         bonus = race->mData.mBonus[i2].mBonus;
                         break;
                     }
-            
+
                 npcStats.getSkill (i).setBase (5 + bonus);
             }
 
@@ -270,7 +270,7 @@ namespace MWMechanics
             // basic player profile; should not change anymore after the creation phase is finished.
             MWBase::WindowManager *winMgr =
                 MWBase::Environment::get().getWindowManager();
-           
+
             MWBase::World *world = MWBase::Environment::get().getWorld();
             const ESM::NPC *player =
                 world->getPlayer().getPlayer().get<ESM::NPC>()->mBase;
@@ -377,16 +377,6 @@ namespace MWMechanics
         mUpdatePlayer = true;
     }
 
-    std::string toLower (const std::string& name)
-    {
-        std::string lowerCase;
-
-        std::transform (name.begin(), name.end(), std::back_inserter (lowerCase),
-            (int(*)(int)) std::tolower);
-
-        return lowerCase;
-    }
-
     int MechanicsManager::getDerivedDisposition(const MWWorld::Ptr& ptr)
     {
         MWMechanics::NpcStats npcSkill = MWWorld::Class::get(ptr).getNpcStats(ptr);
@@ -398,7 +388,7 @@ namespace MWMechanics
         MWMechanics::CreatureStats playerStats = MWWorld::Class::get(playerPtr).getCreatureStats(playerPtr);
         MWMechanics::NpcStats playerNpcStats = MWWorld::Class::get(playerPtr).getNpcStats(playerPtr);
 
-        if (toLower(npc->mBase->mRace) == toLower(player->mBase->mRace)) x += MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fDispRaceMod")->getFloat();
+        if (Misc::StringUtils::lowerCase(npc->mBase->mRace) == Misc::StringUtils::lowerCase(player->mBase->mRace)) x += MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fDispRaceMod")->getFloat();
 
         x += MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fDispPersonalityMult")->getFloat()
             * (playerStats.getAttribute(ESM::Attribute::Personality).getModified() - MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fDispPersonalityBase")->getFloat());
@@ -408,21 +398,21 @@ namespace MWMechanics
         std::string npcFaction = "";
         if(!npcSkill.getFactionRanks().empty()) npcFaction = npcSkill.getFactionRanks().begin()->first;
 
-        if (playerNpcStats.getFactionRanks().find(toLower(npcFaction)) != playerNpcStats.getFactionRanks().end())
+        if (playerNpcStats.getFactionRanks().find(Misc::StringUtils::lowerCase(npcFaction)) != playerNpcStats.getFactionRanks().end())
         {
-            for(std::vector<ESM::Faction::Reaction>::const_iterator it = MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(toLower(npcFaction))->mReactions.begin();
-                it != MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(toLower(npcFaction))->mReactions.end(); it++)
+            for(std::vector<ESM::Faction::Reaction>::const_iterator it = MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(Misc::StringUtils::lowerCase(npcFaction))->mReactions.begin();
+                it != MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(Misc::StringUtils::lowerCase(npcFaction))->mReactions.end(); it++)
             {
-                if(toLower(it->mFaction) == toLower(npcFaction)) reaction = it->mReaction;
+                if(Misc::StringUtils::lowerCase(it->mFaction) == Misc::StringUtils::lowerCase(npcFaction)) reaction = it->mReaction;
             }
-            rank = playerNpcStats.getFactionRanks().find(toLower(npcFaction))->second;
+            rank = playerNpcStats.getFactionRanks().find(Misc::StringUtils::lowerCase(npcFaction))->second;
         }
         else if (npcFaction != "")
         {
-            for(std::vector<ESM::Faction::Reaction>::const_iterator it = MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(toLower(npcFaction))->mReactions.begin();
-                it != MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(toLower(npcFaction))->mReactions.end();it++)
+            for(std::vector<ESM::Faction::Reaction>::const_iterator it = MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(Misc::StringUtils::lowerCase(npcFaction))->mReactions.begin();
+                it != MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(Misc::StringUtils::lowerCase(npcFaction))->mReactions.end();it++)
             {
-                if(playerNpcStats.getFactionRanks().find(toLower(it->mFaction)) != playerNpcStats.getFactionRanks().end() )
+                if(playerNpcStats.getFactionRanks().find(Misc::StringUtils::lowerCase(it->mFaction)) != playerNpcStats.getFactionRanks().end() )
                 {
                     if(it->mReaction<reaction) reaction = it->mReaction;
                 }
@@ -442,7 +432,7 @@ namespace MWMechanics
         if (playerStats.hasCommonDisease() || playerStats.hasBlightDisease())
             x += MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fDispDiseaseMod")->getFloat();
 
-        if (playerNpcStats.getDrawState() == MWMechanics::DrawState_::DrawState_Weapon)
+        if (playerNpcStats.getDrawState() == MWMechanics::DrawState_Weapon)
             x += MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fDispWeaponDrawn")->getFloat();
 
         int effective_disposition = std::max(0,std::min(int(x),100));//, normally clamped to [0..100] when used
@@ -455,7 +445,7 @@ namespace MWMechanics
             return basePrice;
 
         MWMechanics::NpcStats sellerSkill = MWWorld::Class::get(ptr).getNpcStats(ptr);
-        MWMechanics::CreatureStats sellerStats = MWWorld::Class::get(ptr).getCreatureStats(ptr); 
+        MWMechanics::CreatureStats sellerStats = MWWorld::Class::get(ptr).getCreatureStats(ptr);
 
         MWWorld::Ptr playerPtr = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
         MWMechanics::NpcStats playerSkill = MWWorld::Class::get(playerPtr).getNpcStats(playerPtr);
@@ -471,13 +461,13 @@ namespace MWMechanics
         float d = std::min(sellerSkill.getSkill(ESM::Skill::Mercantile).getModified(), 100.f);
         float e = std::min(0.1f * sellerStats.getAttribute(ESM::Attribute::Luck).getModified(), 10.f);
         float f = std::min(0.2f * sellerStats.getAttribute(ESM::Attribute::Personality).getModified(), 10.f);
- 
+
         float pcTerm = (clampedDisposition - 50 + a + b + c) * playerStats.getFatigueTerm();
         float npcTerm = (d + e + f) * sellerStats.getFatigueTerm();
         float buyTerm = 0.01 * (100 - 0.5 * (pcTerm - npcTerm));
         float sellTerm = 0.01 * (50 - 0.5 * (npcTerm - pcTerm));
 
-        float x; 
+        float x;
         if(buying) x = buyTerm;
         else x = std::min(buyTerm, sellTerm);
         int offerPrice;

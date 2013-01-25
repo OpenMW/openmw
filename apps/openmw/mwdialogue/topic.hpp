@@ -34,13 +34,15 @@ namespace MWDialogue
             ///
             /// \note Redundant entries are ignored.
 
-            TEntryIter begin();
+            std::string const & getName () const { return mTopic; }
+
+            TEntryIter begin() const;
             ///< Iterator pointing to the begin of the journal for this topic.
 
-            TEntryIter end();
+            TEntryIter end() const;
             ///< Iterator pointing past the end of the journal for this topic.
 
-            JournalEntry getEntry (const std::string& infoId);
+            JournalEntry getEntry (const std::string& infoId) const;
     };
 }
 

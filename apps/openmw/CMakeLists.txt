@@ -16,7 +16,7 @@ source_group(game FILES ${GAME} ${GAME_HEADER})
 add_openmw_dir (mwrender
     renderingmanager debugging sky player animation npcanimation creatureanimation actors objects
     renderinginterface localmap occlusionquery terrain terrainmaterial water shadows
-    compositors characterpreview externalrendering globalmap
+    compositors characterpreview externalrendering globalmap videoplayer
     )
 
 add_openmw_dir (mwinput
@@ -30,7 +30,7 @@ add_openmw_dir (mwgui
     formatting inventorywindow container hud countdialog tradewindow settingswindow
     confirmationdialog alchemywindow referenceinterface spellwindow mainmenu quickkeysmenu
     itemselection spellbuyingwindow loadingscreen levelupdialog waitdialog spellcreationdialog
-    enchantingdialog trainingwindow travelwindow
+    enchantingdialog trainingwindow travelwindow imagebutton
     )
 
 add_openmw_dir (mwdialogue

@@ -204,6 +204,7 @@ namespace MWGui
         MWBase::Environment::get().getWorld ()->getFader ()->fadeIn(0.2);
         mProgressBar.setVisible (false);
         mWindowManager.removeGuiMode (GM_Rest);
+        mWindowManager.removeGuiMode (GM_RestBed);
         mWaiting = false;
 
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();

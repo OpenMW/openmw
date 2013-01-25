@@ -65,7 +65,7 @@ namespace MWClass
             if (!ref->mBase->mFaction.empty())
             {
                 std::string faction = ref->mBase->mFaction;
-                boost::algorithm::to_lower(faction);
+                Misc::StringUtils::toLower(faction);
                 if(ref->mBase->mNpdt52.mGold != -10)
                 {
                     data->mNpcStats.getFactionRanks()[faction] = (int)ref->mBase->mNpdt52.mRank;
@@ -100,14 +100,15 @@ namespace MWClass
             }
             else
             {
-                /// \todo do something with mNpdt12 maybe:p
                 for (int i=0; i<8; ++i)
                     data->mCreatureStats.getAttribute (i).set (10);
 
                 for (int i=0; i<3; ++i)
                     data->mCreatureStats.setDynamic (i, 10);
 
-                data->mCreatureStats.setLevel (1);
+                data->mCreatureStats.setLevel(ref->mBase->mNpdt12.mLevel);
+                data->mNpcStats.setBaseDisposition(ref->mBase->mNpdt12.mDisposition);
+                data->mNpcStats.setReputation(ref->mBase->mNpdt12.mReputation);
             }
 
             data->mCreatureStats.setAiSetting (0, ref->mBase->mAiData.mHello);

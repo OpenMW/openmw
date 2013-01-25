@@ -7,6 +7,8 @@
 
 #include <components/settings/settings.hpp>
 
+#include <components/translation/translation.hpp>
+
 #include "../mwmechanics/stat.hpp"
 
 #include "../mwgui/mode.hpp"
@@ -233,6 +235,8 @@ namespace MWBase
             virtual void startSpellMaking(MWWorld::Ptr actor) = 0;
             virtual void startEnchanting(MWWorld::Ptr actor) = 0;
             virtual void startTraining(MWWorld::Ptr actor) = 0;
+
+            virtual const Translation::Storage& getTranslationDataStorage() const = 0;
     };
 }
 

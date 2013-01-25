@@ -8,18 +8,10 @@
 #include <sstream>
 #include <iterator>
 
+#include <components/misc/stringops.hpp>
+
 namespace
 {
-    std::string toLower (const std::string& name)
-    {
-        std::string lowerCase;
-
-        std::transform (name.begin(), name.end(), std::back_inserter (lowerCase),
-            (int(*)(int)) std::tolower);
-
-        return lowerCase;
-    }
-
     template<typename T1, typename T2>
     bool selectCompareImp (char comp, T1 value1, T2 value2)
     {
@@ -307,5 +299,5 @@ bool MWDialogue::SelectWrapper::selectCompare (bool value) const
 
 std::string MWDialogue::SelectWrapper::getName() const
 {
-    return toLower (mSelect.mSelectRule.substr (5));
+    return Misc::StringUtils::lowerCase (mSelect.mSelectRule.substr (5));
 }

@@ -9,6 +9,8 @@
 #include "exception.hpp"
 #include "scanner.hpp"
 
+#include <components/misc/stringops.hpp>
+
 namespace Compiler
 {
     // Report the error and throw an exception.
@@ -57,10 +59,7 @@ namespace Compiler
 
     std::string Parser::toLower (const std::string& name)
     {
-        std::string lowerCase;
-
-        std::transform (name.begin(), name.end(), std::back_inserter (lowerCase),
-            (int(*)(int)) std::tolower);
+        std::string lowerCase = Misc::StringUtils::lowerCase(name);
 
         return lowerCase;
     }

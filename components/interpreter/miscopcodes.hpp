@@ -10,6 +10,7 @@
 
 #include "opcodes.hpp"
 #include "runtime.hpp"
+#include "defines.hpp"
 
 namespace Interpreter
 {
@@ -69,7 +70,8 @@ namespace Interpreter
                 }
             }
         }
-
+        
+        formattedMessage = fixDefinesMsgBox(formattedMessage, runtime.getContext());
         return formattedMessage;
     }
 

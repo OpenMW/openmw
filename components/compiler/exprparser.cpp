@@ -14,6 +14,7 @@
 #include "stringparser.hpp"
 #include "extensions.hpp"
 #include "context.hpp"
+#include <components/misc/stringops.hpp>
 
 namespace Compiler
 {
@@ -199,8 +200,8 @@ namespace Compiler
     {
         mMemberOp = false;
 
-        std::string name2 = toLower (name);
-        std::string id = toLower (mExplicit);
+        std::string name2 = Misc::StringUtils::lowerCase (name);
+        std::string id = Misc::StringUtils::lowerCase (mExplicit);
 
         char type = getContext().getMemberType (name2, id);
 
@@ -285,7 +286,7 @@ namespace Compiler
         {
             start();
 
-            std::string name2 = toLower (name);
+            std::string name2 = Misc::StringUtils::lowerCase (name);
 
             char type = mLocals.getType (name2);
 

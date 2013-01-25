@@ -157,12 +157,8 @@ void ESMWriter::writeHString(const std::string& data)
         write("\0", 1);
     else
     {
-        char *ptr = ToUTF8::getBuffer(data.size()+1);
-        strncpy(ptr, &data[0], data.size());
-        ptr[data.size()] = '\0';
-
         // Convert to UTF8 and return
-        std::string ascii = ToUTF8::getLegacyEnc(m_encoding);
+        std::string ascii = m_encoder->getLegacyEnc(data);
 
         write(ascii.c_str(), ascii.size());
     }
@@ -192,21 +188,9 @@ void ESMWriter::write(const char* data, int size)
     m_stream->write(data, size);
 }
 
-void ESMWriter::setEncoding(const std::string& encoding)
+void ESMWriter::setEncoder(ToUTF8::Utf8Encoder* encoder)
 {
-    if (encoding == "win1250")
-    {
-        m_encoding = ToUTF8::WINDOWS_1250;
-    }
-    else if (encoding == "win1251")
-    {
-        m_encoding = ToUTF8::WINDOWS_1251;
-    }
-    else
-    {
-        // Default Latin encoding
-        m_encoding = ToUTF8::WINDOWS_1252;
-    }
+    m_encoder = encoder;
 }
 
 }

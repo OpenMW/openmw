@@ -71,11 +71,15 @@ namespace MWWorld
 
             Ptr getPtrViaHandle (const std::string& handle, Ptr::CellStore& cellStore);
 
+            int mActivationDistanceOverride;
             std::string mFacedHandle;
+            float mFacedDistance;
             Ptr mFaced1;
             Ptr mFaced2;
             std::string mFaced1Name;
             std::string mFaced2Name;
+            float mFaced1Distance;
+            float mFaced2Distance;
             int mNumFacing;
             std::map<std::string,std::string> mFallback;
 
@@ -90,13 +94,27 @@ namespace MWWorld
             virtual void
             copyObjectToCell(const Ptr &ptr, CellStore &cell, const ESM::Position &pos);
 
+            void updateWindowManager ();
+            void performUpdateSceneQueries ();
+            void processFacedQueryResults (MWRender::OcclusionQuery* query);
+            void beginFacedQueryProcess (MWRender::OcclusionQuery* query);
+            void beginSingleFacedQueryProcess (MWRender::OcclusionQuery* query, std::vector < std::pair < float, std::string > > const & results);
+            void beginDoubleFacedQueryProcess (MWRender::OcclusionQuery* query, std::vector < std::pair < float, std::string > > const & results);
+
+            float getMaxActivationDistance ();
+            float getNpcActivationDistance ();
+            float getObjectActivationDistance ();
+
+            void removeContainerScripts(const Ptr& reference);
+            void addContainerScripts(const Ptr& reference, Ptr::CellStore* cell);
+
         public:
 
             World (OEngine::Render::OgreRenderer& renderer,
                 const Files::Collections& fileCollections,
                 const std::vector<std::string>& master, const std::vector<std::string>& plugins,
         	const boost::filesystem::path& resDir, const boost::filesystem::path& cacheDir, bool newGame,
-                const std::string& encoding, std::map<std::string,std::string> fallbackMap);
+                ToUTF8::Utf8Encoder* encoder, std::map<std::string,std::string> fallbackMap, int mActivationDistanceOverride);
 
             virtual ~World();
 
@@ -154,6 +172,13 @@ namespace MWWorld
 
             virtual char getGlobalVariableType (const std::string& name) const;
             ///< Return ' ', if there is no global variable with this name.
+            
+            virtual std::vector<std::string> getGlobals () const;
+            
+            virtual std::string getCurrentCellName () const;
+            
+            virtual void removeRefScript (MWWorld::RefData *ref);
+            //< Remove the script attached to ref from mLocalScripts
 
             virtual Ptr getPtr (const std::string& name, bool activeOnly);
             ///< Return a pointer to a liveCellRef with the given name.
@@ -214,8 +239,8 @@ namespace MWWorld
 
             virtual void markCellAsUnchanged();
 
-            virtual std::string getFacedHandle();
-            ///< Return handle of the object the player is looking at
+            virtual MWWorld::Ptr getFacedObject();
+            ///< Return pointer to the object the player is looking at, if it is within activation range
 
             virtual void deleteObject (const Ptr& ptr);
 
@@ -229,7 +254,7 @@ namespace MWWorld
             virtual void rotateObject (const Ptr& ptr,float x,float y,float z, bool adjust = false);
 
             virtual void safePlaceObject(const MWWorld::Ptr& ptr,MWWorld::CellStore &Cell,ESM::Position pos);
-            ///< place an object in a "safe" location (ie not in the void, etc). Makes a copy of the Ptr. 
+            ///< place an object in a "safe" location (ie not in the void, etc). Makes a copy of the Ptr.
 
             virtual void indexToPosition (int cellX, int cellY, float &x, float &y, bool centre = false)
                 const;
@@ -293,7 +318,7 @@ namespace MWWorld
             /// @param cursor Y (relative 0-1)
             /// @return true if the object was placed, or false if it was rejected because the position is too far away
 
-            virtual void dropObjectOnGround (const Ptr& object);
+            virtual void dropObjectOnGround (const Ptr& actor, const Ptr& object);
 
             virtual bool canPlaceObject(float cursorX, float cursorY);
             ///< @return true if it is possible to place on object at specified cursor location
@@ -324,7 +349,7 @@ namespace MWWorld
             }
 
             virtual void renderPlayer();
-            
+
             virtual void setupExternalRendering (MWRender::ExternalRendering& rendering);
 
             virtual int canRest();
@@ -333,6 +358,10 @@ namespace MWWorld
             /// 1 - only waiting \n
             /// 2 - player is underwater \n
             /// 3 - enemies are nearby (not implemented)
+
+            /// \todo this does not belong here
+            virtual void playVideo(const std::string& name, bool allowSkipping);
+            virtual void stopVideo();
     };
 }
 

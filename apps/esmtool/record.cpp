@@ -738,7 +738,6 @@ void Record<ESM::GameSetting>::print()
     default:
         std::cout << "unknown type";
     }
-    std::cout << "\n  Dirty: " << mData.mDirty << std::endl;
 }
 
 template<>

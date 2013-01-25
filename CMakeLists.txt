@@ -15,7 +15,7 @@ include (OpenMWMacros)
 # Version
 
 set (OPENMW_VERSION_MAJOR 0)
-set (OPENMW_VERSION_MINOR 19)
+set (OPENMW_VERSION_MINOR 20)
 set (OPENMW_VERSION_RELEASE 0)
 
 set (OPENMW_VERSION "${OPENMW_VERSION_MAJOR}.${OPENMW_VERSION_MINOR}.${OPENMW_VERSION_RELEASE}")
@@ -25,18 +25,20 @@ set (OPENMW_VERSION "${OPENMW_VERSION_MAJOR}.${OPENMW_VERSION_MINOR}.${OPENMW_VE
 configure_file ("${OpenMW_SOURCE_DIR}/Docs/mainpage.hpp.cmake" "${OpenMW_SOURCE_DIR}/Docs/mainpage.hpp")
 
 option(MYGUI_STATIC "Link static build of Mygui into the binaries" FALSE)
-option(OGRE_STATIC "Link static build of Ogre and Ogre Plugins into the binaries" FALSE)
+option(OGRE_STATIC  "Link static build of Ogre and Ogre Plugins into the binaries" FALSE)
+option(BOOST_STATIC "Link static build of Boost into the binaries" FALSE)
 
 # Apps and tools
 option(BUILD_ESMTOOL "build ESM inspector" ON)
 option(BUILD_LAUNCHER "build Launcher" ON)
 option(BUILD_MWINIIMPORTER "build MWiniImporter" ON)
+option(BUILD_OPENCS "build OpenMW Construction Set" ON)
 option(BUILD_WITH_CODE_COVERAGE "Enable code coverage with gconv" OFF)
 option(BUILD_UNITTESTS "Enable Unittests with Google C++ Unittest ang GMock frameworks" OFF)
 
 # Sound source selection
-option(USE_FFMPEG "use ffmpeg for sound" OFF)
-option(USE_AUDIERE "use audiere for sound" OFF)
+option(USE_FFMPEG "use ffmpeg for sound" ON)
+option(USE_AUDIERE "use audiere for sound" ON)
 option(USE_MPG123 "use mpg123 + libsndfile for sound" ON)
 
 # OS X deployment
@@ -65,35 +67,6 @@ endif()
 # We probably support older versions than this.
 cmake_minimum_required(VERSION 2.6)
 
-#
-# Pre-built binaries being used?
-#
-IF(EXISTS "${CMAKE_SOURCE_DIR}/prebuilt/vc100-mt-gd/ogre_1_7_1")
-    set(PREBUILT_DIR "${CMAKE_SOURCE_DIR}/prebuilt/vc100-mt-gd")
-    message (STATUS "OpenMW pre-built binaries found at ${PREBUILT_DIR}.")
-
-    SET(ENV{OGRE_HOME} "${PREBUILT_DIR}/ogre_1_7_1")
-
-    SET(ENV{BOOST_ROOT} "${PREBUILT_DIR}/boost_1_42_0")
-    set(Boost_USE_STATIC_LIBS   ON)
-    set(Boost_USE_MULTITHREADED ON)
-    set(ENV{BOOST_INCLUDEDIR} "${BOOST_ROOT}/include")
-    set(ENV{BOOST_LIBRARYDIR} "${BOOST_ROOT}/lib")
-
-    set(ENV{FREETYPE_DIR} "${PREBUILT_DIR}/freetype-2.3.5-1")
-
-    set(USE_MPG123 OFF)
-    set(USE_AUDIERE ON)
-    set(AUDIERE_INCLUDE_DIR "${PREBUILT_DIR}/audiere-1.9.4/include")
-    set(AUDIERE_LIBRARY "${PREBUILT_DIR}/audiere-1.9.4/lib/audiere.lib")
-
-    set(ENV{OPENALDIR} "${PREBUILT_DIR}/OpenAL 1.1 SDK")
-
-    set(BULLET_ROOT "${PREBUILT_DIR}/bullet")
-ELSE()
-    message (STATUS "OpenMW pre-built binaries not found.  Using standard locations.")
-ENDIF()
-
 # source directory: libs
 
 set(LIBDIR ${CMAKE_SOURCE_DIR}/libs)
@@ -102,7 +75,6 @@ set(OENGINE_OGRE
   ${LIBDIR}/openengine/ogre/renderer.cpp
   ${LIBDIR}/openengine/ogre/fader.cpp
   ${LIBDIR}/openengine/ogre/imagerotate.cpp
-  ${LIBDIR}/openengine/ogre/atlas.cpp
   ${LIBDIR}/openengine/ogre/selectionbuffer.cpp
 )
 set(OENGINE_GUI
@@ -136,30 +108,54 @@ set(OPENMW_LIBS ${OENGINE_ALL})
 set(OPENMW_LIBS_HEADER)
 
 # Sound setup
+set(GOT_SOUND_INPUT 0)
 set(SOUND_INPUT_INCLUDES "")
 set(SOUND_INPUT_LIBRARY "")
 set(SOUND_DEFINE "")
 if (USE_FFMPEG)
-    find_package(FFMPEG REQUIRED)
-    set(SOUND_INPUT_INCLUDES ${SOUND_INPUT_INCLUDES} ${FFMPEG_INCLUDE_DIR})
-    set(SOUND_INPUT_LIBRARY ${SOUND_INPUT_LIBRARY} ${FFMPEG_LIBRARIES})
-    set(SOUND_DEFINE ${SOUND_DEFINE} -DOPENMW_USE_FFMPEG)
+    set(FFmpeg_FIND_COMPONENTS AVCODEC AVFORMAT AVUTIL SWSCALE)
+    find_package(FFmpeg)
+    if (FFMPEG_FOUND)
+        set(SOUND_INPUT_INCLUDES ${SOUND_INPUT_INCLUDES} ${FFMPEG_INCLUDE_DIRS})
+        set(SOUND_INPUT_LIBRARY ${SOUND_INPUT_LIBRARY} ${FFMPEG_LIBRARIES} ${SWSCALE_LIBRARIES})
+        set(SOUND_DEFINE ${SOUND_DEFINE} -DOPENMW_USE_FFMPEG)
+        set(GOT_SOUND_INPUT 1)
+    endif (FFMPEG_FOUND)
 endif (USE_FFMPEG)
 
-if (USE_AUDIERE)
-    find_package(Audiere REQUIRED)
-    set(SOUND_INPUT_INCLUDES ${SOUND_INPUT_INCLUDES} ${AUDIERE_INCLUDE_DIR})
-    set(SOUND_INPUT_LIBRARY ${SOUND_INPUT_LIBRARY} ${AUDIERE_LIBRARY})
-    set(SOUND_DEFINE ${SOUND_DEFINE} -DOPENMW_USE_AUDIERE)
-endif (USE_AUDIERE)
+if (USE_AUDIERE AND NOT GOT_SOUND_INPUT)
+    find_package(Audiere)
+    if (AUDIERE_FOUND)
+        set(SOUND_INPUT_INCLUDES ${SOUND_INPUT_INCLUDES} ${AUDIERE_INCLUDE_DIR})
+        set(SOUND_INPUT_LIBRARY ${SOUND_INPUT_LIBRARY} ${AUDIERE_LIBRARY})
+        set(SOUND_DEFINE ${SOUND_DEFINE} -DOPENMW_USE_AUDIERE)
+        set(GOT_SOUND_INPUT 1)
+    endif (AUDIERE_FOUND)
+endif (USE_AUDIERE AND NOT GOT_SOUND_INPUT)
 
-if (USE_MPG123)
+if (USE_MPG123 AND NOT GOT_SOUND_INPUT)
     find_package(MPG123 REQUIRED)
     find_package(SNDFILE REQUIRED)
-    set(SOUND_INPUT_INCLUDES ${SOUND_INPUT_INCLUDES} ${MPG123_INCLUDE_DIR} ${SNDFILE_INCLUDE_DIR})
-    set(SOUND_INPUT_LIBRARY ${SOUND_INPUT_LIBRARY} ${MPG123_LIBRARY} ${SNDFILE_LIBRARY})
-    set(SOUND_DEFINE ${SOUND_DEFINE} -DOPENMW_USE_MPG123)
-endif (USE_MPG123)
+    if (MPG123_FOUND AND SNDFILE_FOUND)
+        set(SOUND_INPUT_INCLUDES ${SOUND_INPUT_INCLUDES} ${MPG123_INCLUDE_DIR} ${SNDFILE_INCLUDE_DIR})
+        set(SOUND_INPUT_LIBRARY ${SOUND_INPUT_LIBRARY} ${MPG123_LIBRARY} ${SNDFILE_LIBRARY})
+        set(SOUND_DEFINE ${SOUND_DEFINE} -DOPENMW_USE_MPG123)
+        set(GOT_SOUND_INPUT 1)
+    endif (MPG123_FOUND AND SNDFILE_FOUND)
+endif (USE_MPG123 AND NOT GOT_SOUND_INPUT)
+
+if (NOT GOT_SOUND_INPUT)
+    message(WARNING "--------------------")
+    message(WARNING "Failed to find any sound input packages")
+    message(WARNING "--------------------")
+endif (NOT GOT_SOUND_INPUT)
+
+if (NOT FFMPEG_FOUND)
+    message(WARNING "--------------------")
+    message(WARNING "FFmpeg not found, video playback will be disabled")
+    message(WARNING "--------------------")
+endif (NOT FFMPEG_FOUND)
+
 
 # Platform specific
 if (WIN32)
@@ -167,9 +163,9 @@ if (WIN32)
     set(PLATFORM_INCLUDE_DIR "platform")
     add_definitions(-DBOOST_ALL_NO_LIB)
 else (WIN32)
-set(PLATFORM_INCLUDE_DIR "")
-find_path (UUID_INCLUDE_DIR uuid/uuid.h)
-include_directories(${UUID_INCLUDE_DIR})
+    set(PLATFORM_INCLUDE_DIR "")
+    find_path (UUID_INCLUDE_DIR uuid/uuid.h)
+    include_directories(${UUID_INCLUDE_DIR})
 endif (WIN32)
 if (MSVC10)
     set(PLATFORM_INCLUDE_DIR "")
@@ -183,7 +179,7 @@ endif (APPLE)
 
 # Fix for not visible pthreads functions for linker with glibc 2.15
 if (UNIX AND NOT APPLE)
-find_package (Threads)
+    find_package (Threads)
 endif()
 
 # find boost without components so we can use Boost_VERSION
@@ -194,6 +190,10 @@ set(BOOST_COMPONENTS system filesystem program_options thread)
 if (Boost_VERSION LESS 104900)
     set(SHINY_USE_WAVE_SYSTEM_INSTALL "TRUE")
     set(BOOST_COMPONENTS ${BOOST_COMPONENTS} wave)
+endif()
+
+IF(BOOST_STATIC)
+    set(Boost_USE_STATIC_LIBS   ON)
 endif()
 
 find_package(OGRE REQUIRED)
@@ -244,7 +244,7 @@ if (APPLE)
     else ()
         set(OGRE_PLUGIN_DIR ${OGRE_PLUGIN_DIR_DBG})
     endif ()
-    
+
     #set(OGRE_PLUGIN_DIR "${OGRE_PLUGIN_DIR}/")
 
     configure_file(${OpenMW_SOURCE_DIR}/files/mac/Info.plist
@@ -356,7 +356,7 @@ if(DPKG_PROGRAM)
     SET(CPACK_DEBIAN_PACKAGE_NAME "openmw")
     SET(CPACK_DEBIAN_PACKAGE_VERSION "${VERSION_STRING}")
     SET(CPACK_PACKAGE_EXECUTABLES "openmw;OpenMW esmtool;Esmtool omwlauncher;OMWLauncher mwiniimporter;MWiniImporter")
-    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libboost-filesystem1.46.1 (>= 1.46.1), libboost-program-options1.46.1 (>= 1.46.1), libboost-system1.46.1 (>= 1.46.1), libboost-thread1.46.1 (>= 1.46.1), libc6 (>= 2.11.2), libfreetype6 (>= 2.2.1), libgcc1 (>= 1:4.1.1), libmpg123-0 (>= 1.12.1), libois-1.3.0 (>= 1.3.0), libopenal1 (>= 1:1.12.854), libsndfile1 (>= 1.0.23), libstdc++6 (>= 4.4.5), libuuid1 (>= 2.17.2), libqtgui4 (>= 4.7.0)")
+    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libc6 (>= 2.11.2), libfreetype6 (>= 2.2.1), libgcc1 (>= 1:4.1.1), libmpg123-0 (>= 1.12.1), libois-1.3.0 (>= 1.3.0), libopenal1 (>= 1:1.12.854), libsndfile1 (>= 1.0.23), libstdc++6 (>= 4.4.5), libuuid1 (>= 2.17.2), libqtgui4 (>= 4.7.0)")
 
     SET(CPACK_DEBIAN_PACKAGE_SECTION "Games")
 
@@ -462,6 +462,10 @@ if (BUILD_MWINIIMPORTER)
    add_subdirectory( apps/mwiniimporter )
 endif()
 
+if (BUILD_OPENCS)
+   add_subdirectory (apps/opencs)
+endif()
+
 # UnitTests
 if (BUILD_UNITTESTS)
   add_subdirectory( apps/openmw_test_suite )
@@ -525,7 +529,9 @@ if (WIN32)
 		set_target_properties(omwlauncher PROPERTIES COMPILE_FLAGS ${WARNINGS})
 	endif (BUILD_LAUNCHER)
     set_target_properties(openmw PROPERTIES COMPILE_FLAGS ${WARNINGS})
-	set_target_properties(esmtool PROPERTIES COMPILE_FLAGS ${WARNINGS})
+    if (BUILD_ESMTOOL)
+        set_target_properties(esmtool PROPERTIES COMPILE_FLAGS ${WARNINGS})
+    endif (BUILD_ESMTOOL)
   endif(MSVC)
 
   # Same for MinGW

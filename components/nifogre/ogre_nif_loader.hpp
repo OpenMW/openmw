@@ -30,23 +30,6 @@
 
 #include <vector>
 #include <string>
-#include <cassert>
-#include <boost/algorithm/string.hpp>
-
-#include "../nif/node.hpp"
-
-#include <libs/platform/strings.h>
-
-class BoundsFinder;
-
-struct ciLessBoost : std::binary_function<std::string, std::string, bool>
-{
-    bool operator() (const std::string & s1, const std::string & s2) const
-    {
-        //case insensitive version of is_less
-        return boost::algorithm::lexicographical_compare(s1, s2, boost::algorithm::is_iless());
-    }
-};
 
 namespace Nif
 {
@@ -69,9 +52,8 @@ struct EntityList {
 };
 
 
-/** This holds a list of meshes along with the names of their parent nodes
- */
-typedef std::vector< std::pair<Ogre::MeshPtr,std::string> > MeshPairList;
+/** This holds a list of mesh names along with the names of their parent nodes */
+typedef std::vector< std::pair<std::string,std::string> > MeshPairList;
 
 /** Manual resource loader for NIF meshes. This is the main class
     responsible for translating the internal NIF mesh structure into
@@ -87,7 +69,7 @@ typedef std::vector< std::pair<Ogre::MeshPtr,std::string> > MeshPairList;
  */
 class NIFLoader
 {
-    static MeshPairList load(std::string name, std::string skelName, TextKeyMap *textkeys, const std::string &group);
+    static MeshPairList load(std::string name, std::string skelName, const std::string &group);
 
 public:
     static EntityList createEntities(Ogre::Entity *parent, const std::string &bonename,

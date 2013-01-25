@@ -52,6 +52,7 @@ namespace MWWorld
             int mStateId;
             mutable float mCachedWeight;
             mutable bool mWeightUpToDate;
+            ContainerStoreIterator addImp (const Ptr& ptr);
 
         public:
 

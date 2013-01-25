@@ -8,6 +8,7 @@
 
 #include <components/bsa/bsa_archive.hpp>
 #include <components/files/configurationmanager.hpp>
+#include <components/translation/translation.hpp>
 #include <components/nifoverrides/nifoverrides.hpp>
 
 #include <components/nifbullet/bullet_nif_loader.hpp>
@@ -163,9 +164,6 @@ void OMW::Engine::loadBSA()
         dataDirectory = iter->string();
         std::cout << "Data dir " << dataDirectory << std::endl;
         Bsa::addDir(dataDirectory, mFSStrict);
-
-        // Workaround until resource listing capabilities are added to DirArchive, we need those to list available splash screens
-        addResourcesDirectory (dataDirectory);
     }
 }
 
@@ -255,18 +253,9 @@ void OMW::Engine::setNewGame(bool newGame)
     mNewGame = newGame;
 }
 
-// Initialise and enter main loop.
-
-void OMW::Engine::go()
+std::string OMW::Engine::loadSettings (Settings::Manager & settings)
 {
-    assert (!mCellName.empty());
-    assert (!mMaster.empty());
-    assert (!mOgre);
-
-    mOgre = new OEngine::Render::OgreRenderer;
-
     // Create the settings manager and load default settings file
-    Settings::Manager settings;
     const std::string localdefault = mCfgMgr.getLocalPath().string() + "/settings-default.cfg";
     const std::string globaldefault = mCfgMgr.getGlobalPath().string() + "/settings-default.cfg";
 
@@ -287,10 +276,6 @@ void OMW::Engine::go()
     else if (boost::filesystem::exists(globaldefault))
         settings.loadUser(globaldefault);
 
-    // Get the path for the keybinder xml file
-    std::string keybinderUser = (mCfgMgr.getUserPath() / "input.xml").string();
-    bool keybinderUserExists = boost::filesystem::exists(keybinderUser);
-
     mFpsLevel = settings.getInt("fps", "HUD");
 
     // load nif overrides
@@ -299,6 +284,13 @@ void OMW::Engine::go()
         nifOverrides.loadTransparencyOverrides(mCfgMgr.getLocalPath().string() + "/transparency-overrides.cfg");
     else if (boost::filesystem::exists(mCfgMgr.getGlobalPath().string() + "/transparency-overrides.cfg"))
         nifOverrides.loadTransparencyOverrides(mCfgMgr.getGlobalPath().string() + "/transparency-overrides.cfg");
+
+    return settingspath;
+}
+
+void OMW::Engine::prepareEngine (Settings::Manager & settings)
+{
+    Nif::NIFFile::CacheLock cachelock;
 
     std::string renderSystem = settings.getString("render system", "Video");
     if (renderSystem == "")
@@ -309,6 +301,9 @@ void OMW::Engine::go()
         renderSystem = "OpenGL Rendering Subsystem";
 #endif
     }
+
+    mOgre = new OEngine::Render::OgreRenderer;
+    
     mOgre->configure(
         mCfgMgr.getLogPath().string(),
         renderSystem,
@@ -345,14 +340,19 @@ void OMW::Engine::go()
 
     // Create the world
     mEnvironment.setWorld( new MWWorld::World (*mOgre, mFileCollections, mMaster, mPlugins,
-        mResDir, mCfgMgr.getCachePath(), mNewGame, mEncoding, mFallbackMap) );
+        mResDir, mCfgMgr.getCachePath(), mNewGame, mEncoder, mFallbackMap,
+        mActivationDistanceOverride));
+
+    //Load translation data
+    mTranslationDataStorage.setEncoder(mEncoder);
+    mTranslationDataStorage.loadTranslationData(mFileCollections, mMaster[0]);
 
     // Create window manager - this manages all the MW-specific GUI windows
     MWScript::registerExtensions (mExtensions);
 
     mEnvironment.setWindowManager (new MWGui::WindowManager(
         mExtensions, mFpsLevel, mNewGame, mOgre, mCfgMgr.getLogPath().string() + std::string("/"),
-        mCfgMgr.getCachePath ().string(), mScriptConsoleMode));
+        mCfgMgr.getCachePath ().string(), mScriptConsoleMode, mTranslationDataStorage));
 
     // Create sound system
     mEnvironment.setSoundManager (new MWSound::SoundManager(mUseSound));
@@ -369,9 +369,14 @@ void OMW::Engine::go()
 
     // Create dialog system
     mEnvironment.setJournal (new MWDialogue::Journal);
-    mEnvironment.setDialogueManager (new MWDialogue::DialogueManager (mExtensions, mVerboseScripts));
+    mEnvironment.setDialogueManager (new MWDialogue::DialogueManager (mExtensions, mVerboseScripts, mTranslationDataStorage));
 
     // Sets up the input system
+
+    // Get the path for the keybinder xml file
+    std::string keybinderUser = (mCfgMgr.getUserPath() / "input.xml").string();
+    bool keybinderUserExists = boost::filesystem::exists(keybinderUser);
+
     mEnvironment.setInputManager (new MWInput::InputManager (*mOgre,
         MWBase::Environment::get().getWorld()->getPlayer(),
          *MWBase::Environment::get().getWindowManager(), mDebug, *this, keybinderUser, keybinderUserExists));
@@ -395,12 +400,7 @@ void OMW::Engine::go()
         MWBase::Environment::get().getWorld()->changeToInteriorCell (mCellName, pos);
     }
 
-    std::cout << "\nPress Q/ESC or close window to exit.\n";
-
     mOgre->getRoot()->addFrameListener (this);
-
-    // Play some good 'ol tunes
-    MWBase::Environment::get().getSoundManager()->playPlaylist(std::string("Explore"));
 
     // scripts
     if (mCompileAll)
@@ -414,9 +414,34 @@ void OMW::Engine::go()
                 << "%)"
                 << std::endl;
     }
+}
+
+// Initialise and enter main loop.
+
+void OMW::Engine::go()
+{
+    assert (!mCellName.empty());
+    assert (!mMaster.empty());
+    assert (!mOgre);
+
+    Settings::Manager settings;
+	std::string settingspath;
+
+    settingspath = loadSettings (settings);
+
+    // Create encoder
+    ToUTF8::Utf8Encoder encoder (mEncoding);
+    mEncoder = &encoder;
+
+    prepareEngine (settings);
+
+    // Play some good 'ol tunes
+    MWBase::Environment::get().getSoundManager()->playPlaylist(std::string("Explore"));
 
     if (!mStartupScript.empty())
         MWBase::Environment::get().getWindowManager()->executeInConsole (mStartupScript);
+
+    std::cout << "\nPress Q/ESC or close window to exit.\n";
 
     // Start the main rendering loop
     mOgre->start();
@@ -432,12 +457,7 @@ void OMW::Engine::activate()
     if (MWBase::Environment::get().getWindowManager()->isGuiMode())
         return;
 
-    std::string handle = MWBase::Environment::get().getWorld()->getFacedHandle();
-
-    if (handle.empty())
-        return;
-
-    MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->searchPtrViaHandle (handle);
+    MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->getFacedObject();
 
     if (ptr.isEmpty())
         return;
@@ -500,7 +520,7 @@ void OMW::Engine::showFPS(int level)
     mFpsLevel = level;
 }
 
-void OMW::Engine::setEncoding(const std::string& encoding)
+void OMW::Engine::setEncoding(const ToUTF8::FromType& encoding)
 {
     mEncoding = encoding;
 }
@@ -518,4 +538,10 @@ void OMW::Engine::setScriptConsoleMode (bool enabled)
 void OMW::Engine::setStartupScript (const std::string& path)
 {
     mStartupScript = path;
+}
+
+
+void OMW::Engine::setActivationDistanceOverride (int distance)
+{
+    mActivationDistanceOverride = distance;
 }

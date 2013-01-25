@@ -82,7 +82,7 @@ namespace MWGui
         oss << price;
         toAdd->setUserString("price",oss.str());
 
-        toAdd->setCaptionWithReplacing(travelId+"   -   "+boost::lexical_cast<std::string>(price)+"#{sgp}");
+        toAdd->setCaptionWithReplacing("#{sCell=" + travelId + "}   -   " + boost::lexical_cast<std::string>(price)+"#{sgp}");
         toAdd->setSize(toAdd->getTextSize().width,sLineHeight);
         toAdd->eventMouseWheel += MyGUI::newDelegate(this, &TravelWindow::onMouseWheel);
         toAdd->setUserString("Destination", travelId);

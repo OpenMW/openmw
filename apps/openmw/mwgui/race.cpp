@@ -106,7 +106,7 @@ void RaceDialog::open()
     updateSpellPowers();
 
     mPreview = new MWRender::RaceSelectionPreview();
-    MWBase::Environment::get().getWorld ()->setupExternalRendering (*mPreview);
+    mPreview->setup();
     mPreview->update (0);
 
     const ESM::NPC proto = mPreview->getPrototype();

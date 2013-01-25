@@ -252,6 +252,7 @@ void StatsWindow::onFrame ()
     }
 
     setFactions(PCstats.getFactionRanks());
+    setExpelled(PCstats.getExpelled ());
 
     const std::string &signId =
         MWBase::Environment::get().getWorld()->getPlayer().getBirthSign();
@@ -269,6 +270,15 @@ void StatsWindow::setFactions (const FactionList& factions)
     if (mFactions != factions)
     {
         mFactions = factions;
+        mChanged = true;
+    }
+}
+
+void StatsWindow::setExpelled (const std::set<std::string>& expelled)
+{
+    if (mExpelled != expelled)
+    {
+        mExpelled = expelled;
         mChanged = true;
     }
 }
@@ -462,6 +472,10 @@ void StatsWindow::updateSkillArea()
         if (!mSkillWidgets.empty())
             addSeparator(coord1, coord2);
 
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+        MWMechanics::NpcStats PCstats = MWWorld::Class::get(player).getNpcStats(player);
+        std::set<std::string>& expelled = PCstats.getExpelled ();
+
         addGroup(mWindowManager.getGameSettingString("sFaction", "Faction"), coord1, coord2);
         FactionList::const_iterator end = mFactions.end();
         for (FactionList::const_iterator it = mFactions.begin(); it != end; ++it)
@@ -473,36 +487,42 @@ void StatsWindow::updateSkillArea()
             std::string text;
 
             text += std::string("#DDC79E") + faction->mName;
-            text += std::string("\n#BF9959") + faction->mRanks[it->second];
 
-            if (it->second < 9)
+            if (expelled.find(it->first) != expelled.end())
+                text += "\n#{sExpelled}";
+            else
             {
-                // player doesn't have max rank yet
-                text += std::string("\n\n#DDC79E#{sNextRank} ") + faction->mRanks[it->second+1];
+                text += std::string("\n#BF9959") + faction->mRanks[it->second];
 
-                ESM::RankData rankData = faction->mData.mRankData[it->second+1];
-                const ESM::Attribute* attr1 = store.get<ESM::Attribute>().find(faction->mData.mAttribute1);
-                const ESM::Attribute* attr2 = store.get<ESM::Attribute>().find(faction->mData.mAttribute2);
-                assert(attr1 && attr2);
-
-                text += "\n#BF9959#{" + attr1->mName + "}: " + boost::lexical_cast<std::string>(rankData.mAttribute1)
-                        + ", #{" + attr2->mName + "}: " + boost::lexical_cast<std::string>(rankData.mAttribute2);
-
-                text += "\n\n#DDC79E#{sFavoriteSkills}";
-                text += "\n#BF9959";
-                for (int i=0; i<6; ++i)
+                if (it->second < 9)
                 {
-                    text += "#{"+ESM::Skill::sSkillNameIds[faction->mData.mSkillID[i]]+"}";
-                    if (i<5)
-                        text += ", ";
+                    // player doesn't have max rank yet
+                    text += std::string("\n\n#DDC79E#{sNextRank} ") + faction->mRanks[it->second+1];
+
+                    ESM::RankData rankData = faction->mData.mRankData[it->second+1];
+                    const ESM::Attribute* attr1 = store.get<ESM::Attribute>().find(faction->mData.mAttribute1);
+                    const ESM::Attribute* attr2 = store.get<ESM::Attribute>().find(faction->mData.mAttribute2);
+                    assert(attr1 && attr2);
+
+                    text += "\n#BF9959#{" + attr1->mName + "}: " + boost::lexical_cast<std::string>(rankData.mAttribute1)
+                            + ", #{" + attr2->mName + "}: " + boost::lexical_cast<std::string>(rankData.mAttribute2);
+
+                    text += "\n\n#DDC79E#{sFavoriteSkills}";
+                    text += "\n#BF9959";
+                    for (int i=0; i<6; ++i)
+                    {
+                        text += "#{"+ESM::Skill::sSkillNameIds[faction->mData.mSkillID[i]]+"}";
+                        if (i<5)
+                            text += ", ";
+                    }
+
+                    text += "\n";
+
+                    if (rankData.mSkill1 > 0)
+                        text += "\n#{sNeedOneSkill} " + boost::lexical_cast<std::string>(rankData.mSkill1);
+                    if (rankData.mSkill2 > 0)
+                        text += "\n#{sNeedTwoSkills} " + boost::lexical_cast<std::string>(rankData.mSkill2);
                 }
-
-                text += "\n";
-
-                if (rankData.mSkill1 > 0)
-                    text += "\n#{sNeedOneSkill} " + boost::lexical_cast<std::string>(rankData.mSkill1);
-                if (rankData.mSkill2 > 0)
-                    text += "\n#{sNeedTwoSkills} " + boost::lexical_cast<std::string>(rankData.mSkill2);
             }
 
             w->setUserString("ToolTipType", "Layout");

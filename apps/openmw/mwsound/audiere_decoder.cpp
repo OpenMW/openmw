@@ -53,6 +53,9 @@ public:
       : mStream(stream), refs(1)
     { }
     virtual ~OgreFile() { }
+
+    Ogre::String getName()
+    { return mStream->getName(); }
 };
 
 
@@ -60,8 +63,9 @@ void Audiere_Decoder::open(const std::string &fname)
 {
     close();
 
-    audiere::FilePtr file(new OgreFile(mResourceMgr.openResource(fname)));
-    mSoundSource = audiere::OpenSampleSource(file);
+    mSoundFile = audiere::FilePtr(new OgreFile(mResourceMgr.openResource(fname)));
+    mSoundSource = audiere::OpenSampleSource(mSoundFile);
+    mSoundFileName = fname;
 
     int channels, srate;
     audiere::SampleFormat format;
@@ -86,7 +90,13 @@ void Audiere_Decoder::open(const std::string &fname)
 
 void Audiere_Decoder::close()
 {
+    mSoundFile = NULL;
     mSoundSource = NULL;
+}
+
+std::string Audiere_Decoder::getName()
+{
+    return mSoundFileName;
 }
 
 void Audiere_Decoder::getInfo(int *samplerate, ChannelConfig *chans, SampleType *type)
@@ -106,6 +116,11 @@ size_t Audiere_Decoder::read(char *buffer, size_t bytes)
 void Audiere_Decoder::rewind()
 {
     mSoundSource->reset();
+}
+
+size_t Audiere_Decoder::getSampleOffset()
+{
+    return 0;
 }
 
 Audiere_Decoder::Audiere_Decoder()

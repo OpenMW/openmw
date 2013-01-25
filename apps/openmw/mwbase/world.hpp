@@ -45,6 +45,7 @@ namespace MWWorld
     class Ptr;
     class TimeStamp;
     class ESMStore;
+    class RefData;
 }
 
 namespace MWBase
@@ -133,6 +134,13 @@ namespace MWBase
 
             virtual char getGlobalVariableType (const std::string& name) const = 0;
             ///< Return ' ', if there is no global variable with this name.
+            
+            virtual std::vector<std::string> getGlobals () const = 0;
+
+            virtual std::string getCurrentCellName() const = 0;
+
+            virtual void removeRefScript (MWWorld::RefData *ref) = 0;
+            //< Remove the script attached to ref from mLocalScripts
 
             virtual MWWorld::Ptr getPtr (const std::string& name, bool activeOnly) = 0;
             ///< Return a pointer to a liveCellRef with the given name.
@@ -195,8 +203,8 @@ namespace MWBase
 
             virtual void markCellAsUnchanged() = 0;
 
-            virtual std::string getFacedHandle() = 0;
-            ///< Return handle of the object the player is looking at
+            virtual MWWorld::Ptr  getFacedObject() = 0;
+            ///< Return pointer to the object the player is looking at, if it is within activation range
 
             virtual void deleteObject (const MWWorld::Ptr& ptr) = 0;
 
@@ -276,7 +284,7 @@ namespace MWBase
             /// @param cursor Y (relative 0-1)
             /// @return true if the object was placed, or false if it was rejected because the position is too far away
 
-            virtual void dropObjectOnGround (const MWWorld::Ptr& object) = 0;
+            virtual void dropObjectOnGround (const MWWorld::Ptr& actor, const MWWorld::Ptr& object) = 0;
 
             virtual bool canPlaceObject (float cursorX, float cursorY) = 0;
             ///< @return true if it is possible to place on object at specified cursor location
@@ -302,6 +310,11 @@ namespace MWBase
             /// 1 - only waiting \n
             /// 2 - player is underwater \n
             /// 3 - enemies are nearby (not implemented)
+
+
+            /// \todo this does not belong here
+            virtual void playVideo(const std::string& name, bool allowSkipping) = 0;
+            virtual void stopVideo() = 0;
     };
 }
 

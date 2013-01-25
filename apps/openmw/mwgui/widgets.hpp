@@ -37,11 +37,14 @@ namespace MWGui
                 , mEffectID(-1)
                 , mNoTarget(false)
                 , mIsConstant(false)
+                , mKnown(true)
             {
             }
 
             bool mNoTarget; // potion effects for example have no target (target is always the player)
             bool mIsConstant; // constant effect means that duration will not be displayed
+
+            bool mKnown; // is this effect known to the player? (If not, will display as a question mark instead)
 
             // value of -1 here means the effect is unknown to the player
             short mEffectID;

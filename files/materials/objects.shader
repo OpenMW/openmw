@@ -227,7 +227,7 @@
     float4 worldNormal = shMatrixMult(worldMatrix, float4(normal.xyz, 0));
     waterEyePos = intercept(worldPos, cameraPos.xyz - worldPos, float3(0,1,0), waterLevel);
     caustics = getCaustics(causticMap, worldPos, waterEyePos.xyz, worldNormal.xyz, lightDirectionWS0.xyz, waterLevel, waterTimer, windDir_windSpeed);
-    if (worldPos.y >= waterLevel || waterEnabled != 1)
+    if (worldPos.y >= waterLevel || waterEnabled != 1.f)
         caustics = float3(1,1,1);
 #endif
 
@@ -269,7 +269,7 @@
         
         #if UNDERWATER
         // regular fog only if fragment is above water
-        if (worldPos.y > waterLevel)
+        if (worldPos.y > waterLevel || waterEnabled != 1.f)
         #endif
         shOutputColour(0).xyz = shLerp (shOutputColour(0).xyz, gammaCorrectRead(fogColour), fogValue);
 #endif

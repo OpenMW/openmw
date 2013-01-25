@@ -90,6 +90,7 @@ namespace MWMechanics
             
             virtual void getPersuasionDispositionChange (const MWWorld::Ptr& npc, PersuasionType type,
                 float currentTemporaryDispositionDelta, bool& success, float& tempChange, float& permChange);
+            void toLower(std::string npcFaction);
             ///< Perform a persuasion action on NPC
     };
 }

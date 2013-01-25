@@ -60,15 +60,12 @@ namespace MWWorld
             // Get each reference in turn
             while (mCell->getNextRef (esm[index], ref))
             {
-                std::string lowerCase;
+                std::string lowerCase = Misc::StringUtils::lowerCase (ref.mRefID);
                 if (ref.mDeleted) {
-                    // Right now, don't do anything. Wehere is "listRefs" actually used, anyway?
+                    // Right now, don't do anything. Where is "listRefs" actually used, anyway?
                     //  Skipping for now...
                     continue;
                 }
-
-                std::transform (ref.mRefID.begin(), ref.mRefID.end(), std::back_inserter (lowerCase),
-                    (int(*)(int)) std::tolower);
 
                 mIds.push_back (lowerCase);
             }
@@ -97,15 +94,10 @@ namespace MWWorld
             while(mCell->getNextRef(esm[index], ref))
             {
                 // Don't load reference if it was moved to a different cell.
+                std::string lowerCase = Misc::StringUtils::lowerCase(ref.mRefID);
                 if (mCell->mMovedRefs.find(ref.mRefnum) != mCell->mMovedRefs.end()) {
                     continue;
-                }
-                    
-                std::string lowerCase;
-
-                std::transform (ref.mRefID.begin(), ref.mRefID.end(), std::back_inserter (lowerCase),
-                    (int(*)(int)) std::tolower);
-
+                }                    
                 int rec = store.find(ref.mRefID);
 
                 ref.mRefID = lowerCase;

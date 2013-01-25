@@ -4,8 +4,6 @@ set(SDIR ${CMAKE_CURRENT_SOURCE_DIR})
 set(DDIR ${OpenMW_BINARY_DIR}/resources/mygui)
 
 set(MYGUI_FILES
-    atlas1.cfg
-    mainmenu.cfg
     bigbars.png
     black.png
     core.skin
@@ -82,7 +80,7 @@ set(MYGUI_FILES
     openmw_travel_window.layout
     openmw_persuasion_dialog.layout
     smallbars.png
-    VeraMono.ttf
+    DejaVuLGCSansMono.ttf
     markers.png
 )
 

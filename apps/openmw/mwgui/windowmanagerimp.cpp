@@ -9,6 +9,7 @@
 #include <openengine/gui/manager.hpp>
 
 #include <components/settings/settings.hpp>
+#include <components/translation/translation.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
@@ -50,12 +51,14 @@
 #include "spellcreationdialog.hpp"
 #include "enchantingdialog.hpp"
 #include "trainingwindow.hpp"
+#include "imagebutton.hpp"
 
 using namespace MWGui;
 
 WindowManager::WindowManager(
     const Compiler::Extensions& extensions, int fpsLevel, bool newGame, OEngine::Render::OgreRenderer *mOgre,
-        const std::string& logpath, const std::string& cacheDir, bool consoleOnlyScripts)
+        const std::string& logpath, const std::string& cacheDir, bool consoleOnlyScripts,
+        Translation::Storage& translationDataStorage)
   : mGuiManager(NULL)
   , mHud(NULL)
   , mMap(NULL)
@@ -104,6 +107,7 @@ WindowManager::WindowManager(
   , mCrosshairEnabled(Settings::Manager::getBool ("crosshair", "HUD"))
   , mSubtitlesEnabled(Settings::Manager::getBool ("subtitles", "GUI"))
   , mHudEnabled(true)
+  , mTranslationDataStorage (translationDataStorage)
 {
 
     // Set up the GUI system
@@ -123,6 +127,7 @@ WindowManager::WindowManager(
     MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::VBox>("Widget");
     MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::AutoSizedTextBox>("Widget");
     MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::AutoSizedButton>("Widget");
+    MyGUI::FactoryManager::getInstance().registerFactory<MWGui::ImageButton>("Widget");
 
     MyGUI::LanguageManager::getInstance().eventRequestTag = MyGUI::newDelegate(this, &WindowManager::onRetrieveTag);
 
@@ -225,6 +230,8 @@ WindowManager::~WindowManager()
     delete mSpellCreationDialog;
     delete mEnchantingDialog;
     delete mTrainingWindow;
+    delete mCountDialog;
+    delete mQuickKeysMenu;
 
     cleanupGarbage();
 
@@ -402,6 +409,10 @@ void WindowManager::updateVisible()
         case GM_Loading:
             MyGUI::PointerManager::getInstance().setVisible(false);
             break;
+        case GM_Video:
+            MyGUI::PointerManager::getInstance().setVisible(false);
+            mHud->setVisible(false);
+            break;
         default:
             // Unsupported mode, switch back to game
             break;
@@ -534,10 +545,14 @@ void WindowManager::removeDialog(OEngine::GUI::Layout*dialog)
 
 void WindowManager::messageBox (const std::string& message, const std::vector<std::string>& buttons)
 {
-    if (buttons.empty())
-    {
-        mMessageBoxManager->createMessageBox(message);
+    if(buttons.empty()){
+        /* If there are no buttons, and there is a dialogue window open, messagebox goes to the dialogue window */
+        if(!mGuiModes.empty() && mGuiModes.back() == GM_Dialogue)
+            mDialogueWindow->addMessageBox(MyGUI::LanguageManager::getInstance().replaceTags(message));
+        else
+            mMessageBoxManager->createMessageBox(message);
     }
+    
     else
     {
         mMessageBoxManager->createInteractiveMessageBox(message, buttons);
@@ -612,7 +627,7 @@ void WindowManager::changeCell(MWWorld::Ptr::CellStore* cell)
         if (cell->mCell->mName != "")
         {
             name = cell->mCell->mName;
-            mMap->addVisitedLocation (name, cell->mCell->getGridX (), cell->mCell->getGridY ());
+            mMap->addVisitedLocation ("#{sCell=" + name + "}", cell->mCell->getGridX (), cell->mCell->getGridY ());
         }
         else
         {
@@ -722,13 +737,25 @@ void WindowManager::setDragDrop(bool dragDrop)
 
 void WindowManager::onRetrieveTag(const MyGUI::UString& _tag, MyGUI::UString& _result)
 {
-    const ESM::GameSetting *setting =
-        MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find(_tag);
+    std::string tag(_tag);
 
-    if (setting && setting->mType == ESM::VT_String)
-        _result = setting->getString();
+    std::string tokenToFind = "sCell=";
+    size_t tokenLength = tokenToFind.length();
+
+    if (tag.substr(0, tokenLength) == tokenToFind)
+    {
+        _result = mTranslationDataStorage.translateCellName(tag.substr(tokenLength));
+    }
     else
-        _result = _tag;
+    {
+        const ESM::GameSetting *setting =
+            MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find(tag);
+
+        if (setting && setting->mType == ESM::VT_String)
+            _result = setting->getString();
+        else
+            _result = tag;
+    }
 }
 
 void WindowManager::processChangedSettings(const Settings::CategorySettingVector& changed)
@@ -1034,4 +1061,9 @@ void WindowManager::startEnchanting (MWWorld::Ptr actor)
 void WindowManager::startTraining(MWWorld::Ptr actor)
 {
     mTrainingWindow->startTraining(actor);
+}
+
+const Translation::Storage& WindowManager::getTranslationDataStorage() const
+{
+    return mTranslationDataStorage;
 }

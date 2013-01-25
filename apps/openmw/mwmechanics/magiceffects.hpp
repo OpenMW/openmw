@@ -67,7 +67,8 @@ namespace MWMechanics
 
             void add (const EffectKey& key, const EffectParam& param);
 
-            void add (const ESM::EffectList& list);
+            void add (const ESM::EffectList& list, float magnitude = -1);
+            ///< \param magnitude normalised magnitude (-1: random)
 
             MagicEffects& operator+= (const MagicEffects& effects);
 

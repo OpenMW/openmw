@@ -17,27 +17,21 @@
 
 #include "selectwrapper.hpp"
 
-namespace
-{
-    std::string toLower (const std::string& name)
-    {
-        std::string lowerCase;
-
-        std::transform (name.begin(), name.end(), std::back_inserter (lowerCase),
-            (int(*)(int)) std::tolower);
-
-        return lowerCase;
-    }
-}
-
 bool MWDialogue::Filter::testActor (const ESM::DialInfo& info) const
 {
+    bool isCreature = (mActor.getTypeName() != typeid (ESM::NPC).name());
+
     // actor id
     if (!info.mActor.empty())
-        if (toLower (info.mActor)!=MWWorld::Class::get (mActor).getId (mActor))
+    {
+        if ( Misc::StringUtils::lowerCase (info.mActor)!=MWWorld::Class::get (mActor).getId (mActor))
             return false;
-
-    bool isCreature = (mActor.getTypeName() != typeid (ESM::NPC).name());
+    }
+    else if (isCreature)
+    {
+        // Creatures must not have topics aside of those specific to their id
+        return false;
+    }
 
     // NPC race
     if (!info.mRace.empty())
@@ -47,7 +41,7 @@ bool MWDialogue::Filter::testActor (const ESM::DialInfo& info) const
 
         MWWorld::LiveCellRef<ESM::NPC> *cellRef = mActor.get<ESM::NPC>();
 
-        if (toLower (info.mRace)!=toLower (cellRef->mBase->mRace))
+        if (Misc::StringUtils::lowerCase (info.mRace)!= Misc::StringUtils::lowerCase (cellRef->mBase->mRace))
             return false;
     }
 
@@ -59,7 +53,7 @@ bool MWDialogue::Filter::testActor (const ESM::DialInfo& info) const
 
         MWWorld::LiveCellRef<ESM::NPC> *cellRef = mActor.get<ESM::NPC>();
 
-        if (toLower (info.mClass)!=toLower (cellRef->mBase->mClass))
+        if ( Misc::StringUtils::lowerCase (info.mClass)!= Misc::StringUtils::lowerCase (cellRef->mBase->mClass))
             return false;
     }
 
@@ -70,7 +64,7 @@ bool MWDialogue::Filter::testActor (const ESM::DialInfo& info) const
             return false;
 
         MWMechanics::NpcStats& stats = MWWorld::Class::get (mActor).getNpcStats (mActor);
-        std::map<std::string, int>::iterator iter = stats.getFactionRanks().find (toLower (info.mNpcFaction));
+        std::map<std::string, int>::iterator iter = stats.getFactionRanks().find ( Misc::StringUtils::lowerCase (info.mNpcFaction));
 
         if (iter==stats.getFactionRanks().end())
             return false;
@@ -99,7 +93,7 @@ bool MWDialogue::Filter::testPlayer (const ESM::DialInfo& info) const
     if (!info.mPcFaction.empty())
     {
         MWMechanics::NpcStats& stats = MWWorld::Class::get (player).getNpcStats (player);
-        std::map<std::string,int>::iterator iter = stats.getFactionRanks().find (toLower (info.mPcFaction));
+        std::map<std::string,int>::iterator iter = stats.getFactionRanks().find (Misc::StringUtils::lowerCase (info.mPcFaction));
 
         if(iter==stats.getFactionRanks().end())
             return false;
@@ -111,7 +105,7 @@ bool MWDialogue::Filter::testPlayer (const ESM::DialInfo& info) const
 
     // check cell
     if (!info.mCell.empty())
-        if (toLower (player.getCell()->mCell->mName) != toLower (info.mCell))
+        if (Misc::StringUtils::lowerCase (player.getCell()->mCell->mName) != Misc::StringUtils::lowerCase (info.mCell))
             return false;
 
     return true;
@@ -125,6 +119,18 @@ bool MWDialogue::Filter::testSelectStructs (const ESM::DialInfo& info) const
             return false;
 
     return true;
+}
+
+bool MWDialogue::Filter::testDisposition (const ESM::DialInfo& info) const
+{
+    bool isCreature = (mActor.getTypeName() != typeid (ESM::NPC).name());
+
+    if (isCreature)
+        return true;
+
+    int actorDisposition = MWBase::Environment::get().getMechanicsManager()->getDerivedDisposition(mActor);
+
+    return actorDisposition >= info.mData.mDisposition;
 }
 
 bool MWDialogue::Filter::testSelectStruct (const SelectWrapper& select) const
@@ -168,7 +174,7 @@ bool MWDialogue::Filter::testSelectStructNumeric (const SelectWrapper& select) c
             int i = 0;
 
             for (; i<static_cast<int> (script->mVarNames.size()); ++i)
-                if (script->mVarNames[i]==name)
+                if (Misc::StringUtils::lowerCase(script->mVarNames[i]) == name)
                     break;
 
             if (i>=static_cast<int> (script->mVarNames.size()))
@@ -242,7 +248,7 @@ int MWDialogue::Filter::getSelectStructInteger (const SelectWrapper& select) con
             std::string name = select.getName();
 
             for (MWWorld::ContainerStoreIterator iter (store.begin()); iter!=store.end(); ++iter)
-                if (toLower(iter->getCellRef().mRefID) == name)
+                if (Misc::StringUtils::lowerCase(iter->getCellRef().mRefID) == name)
                     sum += iter->getRefData().getCount();
 
             return sum;
@@ -408,23 +414,23 @@ bool MWDialogue::Filter::getSelectStructBoolean (const SelectWrapper& select) co
 
         case SelectWrapper::Function_Id:
 
-            return select.getName()==toLower (MWWorld::Class::get (mActor).getId (mActor));
+            return select.getName()==Misc::StringUtils::lowerCase (MWWorld::Class::get (mActor).getId (mActor));
 
         case SelectWrapper::Function_Faction:
 
-            return toLower (mActor.get<ESM::NPC>()->mBase->mFaction)==select.getName();
+            return Misc::StringUtils::lowerCase (mActor.get<ESM::NPC>()->mBase->mFaction)==select.getName();
 
         case SelectWrapper::Function_Class:
 
-            return toLower (mActor.get<ESM::NPC>()->mBase->mClass)==select.getName();
+            return Misc::StringUtils::lowerCase (mActor.get<ESM::NPC>()->mBase->mClass)==select.getName();
 
         case SelectWrapper::Function_Race:
 
-            return toLower (mActor.get<ESM::NPC>()->mBase->mRace)==select.getName();
+            return Misc::StringUtils::lowerCase (mActor.get<ESM::NPC>()->mBase->mRace)==select.getName();
 
         case SelectWrapper::Function_Cell:
 
-            return toLower (mActor.getCell()->mCell->mName)==select.getName();
+            return Misc::StringUtils::lowerCase (mActor.getCell()->mCell->mName)==select.getName();
 
         case SelectWrapper::Function_SameGender:
 
@@ -433,8 +439,8 @@ bool MWDialogue::Filter::getSelectStructBoolean (const SelectWrapper& select) co
 
         case SelectWrapper::Function_SameRace:
 
-            return toLower (mActor.get<ESM::NPC>()->mBase->mRace)!=
-                toLower (player.get<ESM::NPC>()->mBase->mRace);
+            return Misc::StringUtils::lowerCase (mActor.get<ESM::NPC>()->mBase->mRace)!=
+                Misc::StringUtils::lowerCase (player.get<ESM::NPC>()->mBase->mRace);
 
         case SelectWrapper::Function_SameFaction:
 
@@ -553,18 +559,50 @@ MWDialogue::Filter::Filter (const MWWorld::Ptr& actor, int choice, bool talkedTo
 : mActor (actor), mChoice (choice), mTalkedToPlayer (talkedToPlayer)
 {}
 
-bool MWDialogue::Filter::operator() (const ESM::DialInfo& info) const
+const ESM::DialInfo *MWDialogue::Filter::search (const ESM::Dialogue& dialogue, const bool fallbackToInfoRefusal) const
 {
-    return testActor (info) && testPlayer (info) && testSelectStructs (info);
-}
+    bool infoRefusal = false;
 
-const ESM::DialInfo *MWDialogue::Filter::search (const ESM::Dialogue& dialogue) const
-{
+    // Iterate over topic responses to find a matching one
     for (std::vector<ESM::DialInfo>::const_iterator iter = dialogue.mInfo.begin();
         iter!=dialogue.mInfo.end(); ++iter)
-        if ((*this) (*iter))
-            return &*iter;
+    {
+        if (testActor (*iter) && testPlayer (*iter) && testSelectStructs (*iter))
+        {
+            if (testDisposition (*iter))
+                return &*iter;
+            else
+                infoRefusal = true;
+        }
+    }
+
+    if (infoRefusal && fallbackToInfoRefusal)
+    {
+        // No response is valid because of low NPC disposition,
+        // search a response in the topic "Info Refusal"
+
+        const MWWorld::Store<ESM::Dialogue> &dialogues =
+            MWBase::Environment::get().getWorld()->getStore().get<ESM::Dialogue>();
+
+        const ESM::Dialogue& infoRefusalDialogue = *dialogues.find ("Info Refusal");
+
+        for (std::vector<ESM::DialInfo>::const_iterator iter = infoRefusalDialogue.mInfo.begin();
+            iter!=infoRefusalDialogue.mInfo.end(); ++iter)
+            if (testActor (*iter) && testPlayer (*iter) && testSelectStructs (*iter) && testDisposition(*iter))
+                return &*iter;
+    }
 
     return 0;
 }
 
+bool MWDialogue::Filter::responseAvailable (const ESM::Dialogue& dialogue) const
+{
+    for (std::vector<ESM::DialInfo>::const_iterator iter = dialogue.mInfo.begin();
+        iter!=dialogue.mInfo.end(); ++iter)
+    {
+        if (testActor (*iter) && testPlayer (*iter) && testSelectStructs (*iter))
+            return true;
+    }
+
+    return false;
+}

@@ -107,11 +107,11 @@ namespace MWWorld
 
         const T *search(const std::string &id) const {
             T item;
-            item.mId = StringUtils::lowerCase(id);
+            item.mId = Misc::StringUtils::lowerCase(id);
 
             typename std::map<std::string, T>::const_iterator it = mStatic.find(item.mId);
             
-            if (it != mStatic.end() && StringUtils::ciEqual(it->second.mId, id)) {
+            if (it != mStatic.end() && Misc::StringUtils::ciEqual(it->second.mId, id)) {
                 return &(it->second);
             }
 
@@ -134,7 +134,7 @@ namespace MWWorld
         }
 
         void load(ESM::ESMReader &esm, const std::string &id) {
-            std::string idLower = StringUtils::lowerCase(id);
+            std::string idLower = Misc::StringUtils::lowerCase(id);
             mStatic[idLower] = T();
             mStatic[idLower].mId = idLower;
             mStatic[idLower].load(esm);
@@ -171,7 +171,7 @@ namespace MWWorld
         }
 
         T *insert(const T &item) {
-            std::string id = StringUtils::lowerCase(item.mId);
+            std::string id = Misc::StringUtils::lowerCase(item.mId);
             std::pair<typename Dynamic::iterator, bool> result =
                 mDynamic.insert(std::pair<std::string, T>(id, item));
             T *ptr = &result.first->second;
@@ -185,11 +185,11 @@ namespace MWWorld
 
         bool eraseStatic(const std::string &id) {
             T item;
-            item.mId = StringUtils::lowerCase(id);
+            item.mId = Misc::StringUtils::lowerCase(id);
 
             typename std::map<std::string, T>::const_iterator it = mStatic.find(item.mId);
             
-            if (it != mStatic.end() && StringUtils::ciEqual(it->second.mId, id)) {
+            if (it != mStatic.end() && Misc::StringUtils::ciEqual(it->second.mId, id)) {
                 mStatic.erase(it);
             }
 
@@ -197,7 +197,7 @@ namespace MWWorld
         }
         
         bool erase(const std::string &id) {
-            std::string key = StringUtils::lowerCase(id);
+            std::string key = Misc::StringUtils::lowerCase(id);
             typename Dynamic::iterator it = mDynamic.find(key);
             if (it == mDynamic.end()) {
                 return false;
@@ -219,7 +219,7 @@ namespace MWWorld
 
     template <>
     inline void Store<ESM::Dialogue>::load(ESM::ESMReader &esm, const std::string &id) {
-        std::string idLower = StringUtils::lowerCase(id);
+        std::string idLower = Misc::StringUtils::lowerCase(id);
         mStatic[idLower] = ESM::Dialogue();
         mStatic[idLower].mId = id; // don't smash case here, as this line is printed... I think
         mStatic[idLower].load(esm);
@@ -229,7 +229,7 @@ namespace MWWorld
     inline void Store<ESM::Script>::load(ESM::ESMReader &esm, const std::string &id) {
         ESM::Script scpt;
         scpt.load(esm);
-        StringUtils::toLower(scpt.mId);
+        Misc::StringUtils::toLower(scpt.mId);
         mStatic[scpt.mId] = scpt;
     }
 
@@ -328,6 +328,16 @@ namespace MWWorld
     public:
         typedef SharedIterator<ESM::Land> iterator;
 
+        virtual ~Store<ESM::Land>()
+        {
+            for (std::vector<ESM::Land *>::const_iterator it =
+                             mStatic.begin(); it != mStatic.end(); ++it)
+            {
+                delete *it;
+            }
+
+        }
+
         int getSize() const {
             return mStatic.size();
         }
@@ -417,11 +427,11 @@ namespace MWWorld
 
         const ESM::Cell *search(const std::string &id) const {
             ESM::Cell cell;
-            cell.mName = StringUtils::lowerCase(id);
+            cell.mName = Misc::StringUtils::lowerCase(id);
 
             std::map<std::string, ESM::Cell>::const_iterator it = mInt.find(cell.mName);
 
-            if (it != mInt.end() && StringUtils::ciEqual(it->second.mName, id)) {
+            if (it != mInt.end() && Misc::StringUtils::ciEqual(it->second.mName, id)) {
                 return &(it->second);
             }
 
@@ -520,7 +530,7 @@ namespace MWWorld
             //  are not available until both cells have been loaded! So first, proceed as usual.
             
             // All cells have a name record, even nameless exterior cells.
-            std::string idLower = StringUtils::lowerCase(id);
+            std::string idLower = Misc::StringUtils::lowerCase(id);
             ESM::Cell *cell = new ESM::Cell;
             cell->mName = id;
 
@@ -589,7 +599,7 @@ namespace MWWorld
         const ESM::Cell *searchExtByName(const std::string &id) const {
             std::vector<ESM::Cell *>::const_iterator it = mSharedExt.begin();
             for (; it != mSharedExt.end(); ++it) {
-                if (StringUtils::ciEqual((*it)->mName, id)) {
+                if (Misc::StringUtils::ciEqual((*it)->mName, id)) {
                     return *it;
                 }
             }
@@ -600,7 +610,7 @@ namespace MWWorld
         const ESM::Cell *searchExtByRegion(const std::string &id) const {
             std::vector<ESM::Cell *>::const_iterator it = mSharedExt.begin();
             for (; it != mSharedExt.end(); ++it) {
-                if (StringUtils::ciEqual((*it)->mRegion, id)) {
+                if (Misc::StringUtils::ciEqual((*it)->mRegion, id)) {
                     return *it;
                 }
             }
@@ -640,7 +650,7 @@ namespace MWWorld
                 ptr = &result.first->second;
                 mSharedExt.push_back(ptr);
             } else {
-                std::string key = StringUtils::lowerCase(cell.mName);
+                std::string key = Misc::StringUtils::lowerCase(cell.mName);
 
                 // duplicate insertions are avoided by search(ESM::Cell &)
                 std::pair<DynamicInt::iterator, bool> result =
@@ -660,7 +670,7 @@ namespace MWWorld
         }
 
         bool erase(const std::string &id) {
-            std::string key = StringUtils::lowerCase(id);
+            std::string key = Misc::StringUtils::lowerCase(id);
             DynamicInt::iterator it = mDynamicInt.find(key);
 
             if (it == mDynamicInt.end()) {
@@ -790,7 +800,7 @@ namespace MWWorld
             pg.mCell = name;
 
             iterator it = std::lower_bound(mIntBegin, mIntEnd, pg, RecordCmp());
-            if (it != mIntEnd && StringUtils::ciEqual(it->mCell, name)) {
+            if (it != mIntEnd && Misc::StringUtils::ciEqual(it->mCell, name)) {
                 return &(*it);
             }
             return 0;

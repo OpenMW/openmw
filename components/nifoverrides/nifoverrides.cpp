@@ -2,7 +2,8 @@
 
 #include <OgreStringConverter.h>
 
-#include <boost/algorithm/string.hpp>
+#include <../components/misc/stringops.hpp>
+
 
 using namespace NifOverrides;
 
@@ -19,7 +20,7 @@ TransparencyResult Overrides::getTransparencyOverride(const std::string& texture
     result.first = false;
 
     std::string tex = texture;
-    boost::to_lower(tex);
+    Misc::StringUtils::toLower(tex);
 
     Ogre::ConfigFile::SectionIterator seci = mTransparencyOverrides.getSectionIterator();
     while (seci.hasMoreElements())

@@ -90,6 +90,9 @@ namespace MWGui
 
         float mFocusToolTipX;
         float mFocusToolTipY;
+	
+	int mHorizontalScrollIndex;
+	
 
         float mDelay;
         float mRemainingDelay; // remaining time until tooltip will show

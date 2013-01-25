@@ -15,7 +15,10 @@ namespace MWSound
 
     enum ChannelConfig {
         ChannelConfig_Mono,
-        ChannelConfig_Stereo
+        ChannelConfig_Stereo,
+        ChannelConfig_Quad,
+        ChannelConfig_5point1,
+        ChannelConfig_7point1
     };
     const char *getChannelConfigName(ChannelConfig config);
 
@@ -29,11 +32,13 @@ namespace MWSound
         virtual void open(const std::string &fname) = 0;
         virtual void close() = 0;
 
+        virtual std::string getName() = 0;
         virtual void getInfo(int *samplerate, ChannelConfig *chans, SampleType *type) = 0;
 
         virtual size_t read(char *buffer, size_t bytes) = 0;
         virtual void readAll(std::vector<char> &output);
         virtual void rewind() = 0;
+        virtual size_t getSampleOffset() = 0;
 
         Sound_Decoder() : mResourceMgr(Ogre::ResourceGroupManager::getSingleton())
         { }

@@ -220,7 +220,7 @@ void HUD::onWorldClicked(MyGUI::Widget* _sender)
         if (world->canPlaceObject(mouseX, mouseY))
             world->placeObject(object, mouseX, mouseY);
         else
-            world->dropObjectOnGround(object);
+            world->dropObjectOnGround(world->getPlayer().getPlayer(), object);
 
         MyGUI::PointerManager::getInstance().setPointer("arrow");
 
@@ -244,8 +244,7 @@ void HUD::onWorldClicked(MyGUI::Widget* _sender)
         if ( (mode != GM_Console) && (mode != GM_Container) && (mode != GM_Inventory) )
             return;
 
-        std::string handle = MWBase::Environment::get().getWorld()->getFacedHandle();
-        MWWorld::Ptr object = MWBase::Environment::get().getWorld()->searchPtrViaHandle(handle);
+        MWWorld::Ptr object = MWBase::Environment::get().getWorld()->getFacedObject();
 
         if (mode == GM_Console)
             MWBase::Environment::get().getWindowManager()->getConsole()->setSelectedObject(object);
@@ -319,7 +318,7 @@ void HUD::setCellName(const std::string& cellName)
         mCellNameTimer = 5.0f;
         mCellName = cellName;
 
-        mCellNameBox->setCaption(mCellName);
+        mCellNameBox->setCaptionWithReplacing("#{sCell=" + mCellName + "}");
         mCellNameBox->setVisible(mMapVisible);
     }
 }

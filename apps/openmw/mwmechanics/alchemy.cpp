@@ -203,7 +203,7 @@ const ESM::Potion *MWMechanics::Alchemy::getRecord() const
          
         bool mismatch = false; 
 
-        for (int i=0; i<static_cast<int> (iter->mEffects.mList.size()); ++iter)
+        for (int i=0; i<static_cast<int> (iter->mEffects.mList.size()); ++i)
         {
             const ESM::ENAMstruct& first = iter->mEffects.mList[i];
             const ESM::ENAMstruct& second = mEffects[i];
