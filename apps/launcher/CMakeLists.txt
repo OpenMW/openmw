@@ -9,6 +9,9 @@ set(LAUNCHER
     model/modelitem.cpp
     model/esm/esmfile.cpp
 
+    settings/gamesettings.cpp
+    settings/graphicssettings.cpp
+
     utils/filedialog.cpp
     utils/naturalsort.cpp
     utils/lineedit.cpp
@@ -27,6 +30,10 @@ set(LAUNCHER_HEADER
     model/datafilesmodel.hpp
     model/modelitem.hpp
     model/esm/esmfile.hpp
+
+    settings/gamesettings.hpp
+    settings/graphicssettings.hpp
+    settings/settingsbase.hpp
 
     utils/lineedit.hpp
     utils/filedialog.hpp
