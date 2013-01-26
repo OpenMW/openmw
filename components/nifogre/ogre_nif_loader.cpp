@@ -193,19 +193,16 @@ static void buildAnimation(Ogre::Skeleton *skel, const std::string &name, const 
         Ogre::NodeAnimationTrack *nodetrack = anim->hasNodeTrack(bone->getHandle()) ?
                                               anim->getNodeTrack(bone->getHandle()) :
                                               anim->createNodeTrack(bone->getHandle(), bone);
-        const Ogre::Quaternion &startquat = bone->getInitialOrientation();
-        const Ogre::Vector3 &starttrans = bone->getInitialPosition();
-        const Ogre::Vector3 &startscale = bone->getInitialScale();
 
         Ogre::Quaternion lastquat, curquat;
         Ogre::Vector3 lasttrans(0.0f), curtrans(0.0f);
         Ogre::Vector3 lastscale(1.0f), curscale(1.0f);
         if(quatiter != quatkeys.mKeys.end())
-            lastquat = curquat = startquat.Inverse() * quatiter->mValue;
+            lastquat = curquat = quatiter->mValue;
         if(traniter != trankeys.mKeys.end())
-            lasttrans = curtrans = traniter->mValue - starttrans;
+            lasttrans = curtrans = traniter->mValue;
         if(scaleiter != scalekeys.mKeys.end())
-            lastscale = curscale = Ogre::Vector3(scaleiter->mValue) / startscale;
+            lastscale = curscale = Ogre::Vector3(scaleiter->mValue);
         float begTime = std::max(kfc->timeStart, startTime);
         float endTime = std::min(kfc->timeStop, stopTime);
         bool didlast = false;
@@ -235,19 +232,19 @@ static void buildAnimation(Ogre::Skeleton *skel, const std::string &name, const 
             {
                 lastquat = curquat;
                 if(++quatiter != quatkeys.mKeys.end())
-                    curquat = startquat.Inverse() * quatiter->mValue;
+                    curquat = quatiter->mValue;
             }
             while(traniter != trankeys.mKeys.end() && curtime >= traniter->mTime)
             {
                 lasttrans = curtrans;
                 if(++traniter != trankeys.mKeys.end())
-                    curtrans = traniter->mValue - starttrans;
+                    curtrans = traniter->mValue;
             }
             while(scaleiter != scalekeys.mKeys.end() && curtime >= scaleiter->mTime)
             {
                 lastscale = curscale;
                 if(++scaleiter != scalekeys.mKeys.end())
-                    curscale = Ogre::Vector3(scaleiter->mValue) / startscale;
+                    curscale = Ogre::Vector3(scaleiter->mValue);
             }
 
             Ogre::TransformKeyFrame *kframe;

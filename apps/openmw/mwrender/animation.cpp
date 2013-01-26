@@ -78,7 +78,7 @@ void Animation::createEntityList(Ogre::SceneNode *node, const std::string &model
             mAccumRoot->setManuallyControlled(true);
             mNonAccumRoot = skelinst->getBone(bone->getHandle());
 
-            mStartPosition = mNonAccumRoot->getPosition();
+            mStartPosition = mNonAccumRoot->getInitialPosition();
             mLastPosition = mStartPosition;
 
             asiter = aset->getAnimationStateIterator();
@@ -92,6 +92,26 @@ void Animation::createEntityList(Ogre::SceneNode *node, const std::string &model
             }
 
             break;
+        }
+
+        // Reset initial state of bones that are animated, so the animation correctly applies.
+        if(skelinst->getNumAnimations() > 0)
+        {
+            Ogre::Animation *anim = skelinst->getAnimation(0);
+            Ogre::Animation::NodeTrackIterator trackiter = anim->getNodeTrackIterator();
+            while(trackiter.hasMoreElements())
+            {
+                const Ogre::Node *srcnode = trackiter.getNext()->getAssociatedNode();
+                const Ogre::Node *srcbone = dynamic_cast<const Ogre::Bone*>(srcnode);
+                if(!srcbone || !skelinst->hasBone(srcbone->getName()))
+                    continue;
+
+                Ogre::Bone *bone = skelinst->getBone(srcbone->getName());
+                bone->setOrientation(Ogre::Quaternion::IDENTITY);
+                bone->setPosition(Ogre::Vector3::ZERO);
+                bone->setScale(Ogre::Vector3(1.0f));
+                bone->setInitialState();
+            }
         }
     }
 }
