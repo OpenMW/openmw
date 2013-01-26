@@ -20,6 +20,7 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
+#include "../mwbase/journal.hpp"
 #include "../mwbase/scriptmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
@@ -138,7 +139,8 @@ namespace MWDialogue
         {
             if(it->mType == ESM::Dialogue::Greeting)
             {
-                if (const ESM::DialInfo *info = filter.search (*it))
+                // Search a response (we do not accept a fallback to "Info refusal" here)
+                if (const ESM::DialInfo *info = filter.search (*it, false))
                 {
                     //initialise the GUI
                     MWBase::Environment::get().getWindowManager()->pushGuiMode(MWGui::GM_Dialogue);
@@ -247,11 +249,11 @@ namespace MWDialogue
 
         const ESM::Dialogue& dialogue = *dialogues.find (topic);
 
-        if (const ESM::DialInfo *info = filter.search (dialogue))
+        MWGui::DialogueWindow* win = MWBase::Environment::get().getWindowManager()->getDialogueWindow();
+
+        if (const ESM::DialInfo *info = filter.search (dialogue, true))
         {
             parseText (info->mResponse);
-
-            MWGui::DialogueWindow* win = MWBase::Environment::get().getWindowManager()->getDialogueWindow();
 
             if (dialogue.mType==ESM::Dialogue::Persuasion)
             {
@@ -269,11 +271,19 @@ namespace MWDialogue
 
             MWScript::InterpreterContext interpreterContext(&mActor.getRefData().getLocals(),mActor);
             win->addText (Interpreter::fixDefinesDialog(info->mResponse, interpreterContext));
+            MWBase::Environment::get().getJournal()->addTopic (topic, info->mId);
 
             executeScript (info->mResultScript);
 
             mLastTopic = topic;
             mLastDialogue = *info;
+        }
+        else
+        {
+            // no response found, print a fallback text
+            win->addTitle (topic);
+            win->addText ("…");
+
         }
     }
 
@@ -293,7 +303,7 @@ namespace MWDialogue
         {
             if (iter->mType == ESM::Dialogue::Topic)
             {
-                if (filter.search (*iter))
+                if (filter.responseAvailable (*iter))
                 {
                     std::string lower = Misc::StringUtils::lowerCase(iter->mId);
                     mActorKnownTopics.push_back (lower);
@@ -410,7 +420,7 @@ namespace MWDialogue
                 {
                     Filter filter (mActor, mChoice, mTalkedTo);
 
-                    if (const ESM::DialInfo *info = filter.search (mDialogueMap[mLastTopic]))
+                    if (const ESM::DialInfo *info = filter.search (mDialogueMap[mLastTopic], true))
                     {
                         mChoiceMap.clear();
                         mChoice = -1;
@@ -420,6 +430,7 @@ namespace MWDialogue
 
                         MWScript::InterpreterContext interpreterContext(&mActor.getRefData().getLocals(),mActor);
                         MWBase::Environment::get().getWindowManager()->getDialogueWindow()->addText (Interpreter::fixDefinesDialog(text, interpreterContext));
+                        MWBase::Environment::get().getJournal()->addTopic (mLastTopic, info->mId);
                         executeScript (info->mResultScript);
                         mLastTopic = mLastTopic;
                         mLastDialogue = *info;

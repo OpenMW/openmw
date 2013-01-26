@@ -106,6 +106,9 @@ namespace MWWorld
             float getNpcActivationDistance ();
             float getObjectActivationDistance ();
 
+            void removeContainerScripts(const Ptr& reference);
+            void addContainerScripts(const Ptr& reference, Ptr::CellStore* cell);
+
         public:
 
             World (OEngine::Render::OgreRenderer& renderer,
@@ -173,6 +176,9 @@ namespace MWWorld
             virtual std::vector<std::string> getGlobals () const;
             
             virtual std::string getCurrentCellName () const;
+            
+            virtual void removeRefScript (MWWorld::RefData *ref);
+            //< Remove the script attached to ref from mLocalScripts
 
             virtual Ptr getPtr (const std::string& name, bool activeOnly);
             ///< Return a pointer to a liveCellRef with the given name.

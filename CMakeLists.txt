@@ -67,35 +67,6 @@ endif()
 # We probably support older versions than this.
 cmake_minimum_required(VERSION 2.6)
 
-#
-# Pre-built binaries being used?
-#
-IF(EXISTS "${CMAKE_SOURCE_DIR}/prebuilt/vc100-mt-gd/ogre_1_7_1")
-    set(PREBUILT_DIR "${CMAKE_SOURCE_DIR}/prebuilt/vc100-mt-gd")
-    message (STATUS "OpenMW pre-built binaries found at ${PREBUILT_DIR}.")
-
-    SET(ENV{OGRE_HOME} "${PREBUILT_DIR}/ogre_1_7_1")
-
-    SET(ENV{BOOST_ROOT} "${PREBUILT_DIR}/boost_1_42_0")
-    set(Boost_USE_STATIC_LIBS   ON)
-    set(Boost_USE_MULTITHREADED ON)
-    set(ENV{BOOST_INCLUDEDIR} "${BOOST_ROOT}/include")
-    set(ENV{BOOST_LIBRARYDIR} "${BOOST_ROOT}/lib")
-
-    set(ENV{FREETYPE_DIR} "${PREBUILT_DIR}/freetype-2.3.5-1")
-
-    set(USE_MPG123 OFF)
-    set(USE_AUDIERE ON)
-    set(AUDIERE_INCLUDE_DIR "${PREBUILT_DIR}/audiere-1.9.4/include")
-    set(AUDIERE_LIBRARY "${PREBUILT_DIR}/audiere-1.9.4/lib/audiere.lib")
-
-    set(ENV{OPENALDIR} "${PREBUILT_DIR}/OpenAL 1.1 SDK")
-
-    set(BULLET_ROOT "${PREBUILT_DIR}/bullet")
-ELSE()
-    message (STATUS "OpenMW pre-built binaries not found.  Using standard locations.")
-ENDIF()
-
 # source directory: libs
 
 set(LIBDIR ${CMAKE_SOURCE_DIR}/libs)
