@@ -38,6 +38,7 @@
 #include "soulgemdialog.hpp"
 #include "companionwindow.hpp"
 #include "inventorywindow.hpp"
+#include "bookpage.hpp"
 
 namespace MWGui
 {
@@ -122,6 +123,7 @@ namespace MWGui
         MyGUI::FactoryManager::getInstance().registerFactory<MWGui::ImageButton>("Widget");
         MyGUI::FactoryManager::getInstance().registerFactory<MWGui::ExposedWindow>("Widget");
         MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWScrollView>("Widget");
+        BookPage::registerMyGUIComponents ();
 
         MyGUI::FactoryManager::getInstance().registerFactory<ResourceImageSetPointerFix>("Resource", "ResourceImageSetPointer");
         MyGUI::ResourceManager::getInstance().load("core.xml");
