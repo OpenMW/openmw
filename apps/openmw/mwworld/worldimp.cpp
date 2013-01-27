@@ -16,6 +16,7 @@
 #include "player.hpp"
 #include "manualref.hpp"
 #include "cellfunctors.hpp"
+#include "containerstore.hpp"
 
 using namespace Ogre;
 
