@@ -10,8 +10,6 @@
         </Skin>
 
         <Skin name="MW_BookPage" size="0 0 50 50">
-                <Property key="WordWrap" value = "true" />
-                <Child type="TextBox" skin="MW_BookClient" offset="0 0 35 10" align = "ALIGN_STRETCH" name = "Client"/>
-                <!--Child type="ScrollBar" skin="VScroll" offset = "35 0 15 50" align = "Right VStretch" name = "VScroll"/-->
+                <BasisSkin type="PageDisplay"/>
         </Skin>
 </MyGUI>

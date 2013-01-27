@@ -1,174 +1,175 @@
 #include "journalwindow.hpp"
 
 #include "../mwbase/environment.hpp"
-#include "../mwbase/world.hpp"
-#include "../mwbase/journal.hpp"
 #include "../mwbase/soundmanager.hpp"
+#include "../mwbase/windowmanager.hpp"
+#include "list.hpp"
 
 #include <sstream>
 #include <set>
+#include <stack>
 #include <string>
 #include <utility>
+#include "boost/lexical_cast.hpp"
 
+#include "bookpage.hpp"
 #include "windowbase.hpp"
 #include "imagebutton.hpp"
+#include "journalviewmodel.hpp"
+#include "journalbooks.hpp"
 
+using namespace MyGUI;
 using namespace MWGui;
 
 namespace
 {
-    struct book
+#define CONTROL_ID(name)    \
+    static char const name [] = #name;
+
+    CONTROL_ID(OptionsOverlay)
+
+    CONTROL_ID(OptionsBTN)
+    CONTROL_ID(PrevPageBTN);
+    CONTROL_ID(NextPageBTN);
+    CONTROL_ID(CloseBTN);
+    CONTROL_ID(JournalBTN);
+    CONTROL_ID(TopicsBTN);
+    CONTROL_ID(QuestsBTN);
+    CONTROL_ID(CancelBTN);
+    CONTROL_ID(ShowAllBTN);
+    CONTROL_ID(ShowActiveBTN);
+    CONTROL_ID(PageOneNum)
+    CONTROL_ID(PageTwoNum)
+    CONTROL_ID(TopicsList);
+    CONTROL_ID(TopicsPage);
+    CONTROL_ID(QuestsList);
+    CONTROL_ID(QuestsPage);
+    CONTROL_ID(LeftBookPage);
+    CONTROL_ID(RightBookPage);
+    CONTROL_ID(LeftTopicIndex);
+    CONTROL_ID(RightTopicIndex);
+
+    struct JournalWindow : WindowBase, JournalBooks, IJournalWindow
     {
-        int endLine;
-        std::list<std::string> pages;
-    };
-}
-
-book formatText(std::string text,book mBook,int maxLine, int lineSize)
-{
-    //stringList.push_back("");
-
-    int cLineSize = 0;
-    int cLine = mBook.endLine +1;
-    std::string cString;
-
-    if(mBook.pages.empty())
-    {
-        cString = "";
-        cLine = 0;
-    }
-    else
-    {
-        cString = mBook.pages.back() + std::string("\n");
-        mBook.pages.pop_back();
-    }
-
-    //std::string::iterator wordBegin = text.begin();
-    //std::string::iterator wordEnd;
-
-    std::string cText = text;
-
-    while(cText.length() != 0)
-    {
-        size_t firstSpace = cText.find_first_of(' ');
-        if(firstSpace == std::string::npos)
+        struct display_state
         {
-            cString = cString + cText;
-            mBook.pages.push_back(cString);
-            //TODO:finnish this
-            break;
-        }
-        if(static_cast<int> (firstSpace) + cLineSize <= lineSize)
-        {
-            cLineSize = firstSpace + cLineSize;
-            cString = cString + cText.substr(0,firstSpace +1);
-        }
-        else
-        {
-            cLineSize = firstSpace;
-            if(cLine +1 <= maxLine)
-            {
-                cLine = cLine + 1;
-                cString = cString + std::string("\n") + cText.substr(0,firstSpace +1);
-            }
-            else
-            {
-                cLine = 0;
-                mBook.pages.push_back(cString);
-                cString = cText.substr(0,firstSpace +1);
-            }
-        }
-        //std::cout << cText << "\n";
-        //std::cout << cText.length();
-        cText = cText.substr(firstSpace +1,cText.length() - firstSpace -1);
-    }
-    mBook.endLine = cLine;
-    return mBook;
-    //std::string
-}
+            int mPage;
+            book mBook;
+        };
 
-namespace
-{
-    struct JournalWindow : WindowBase, IJournalWindow
-    {
-        MyGUI::EditPtr mLeftTextWidget;
-        MyGUI::EditPtr mRightTextWidget;
-        MWGui::ImageButton* mPrevBtn;
-        MWGui::ImageButton* mNextBtn;
-        std::vector<std::string> mLeftPages;
-        std::vector<std::string> mRightPages;
-        int mPageNumber; //store the number of the current left page
+        typedef std::stack <display_state> display_state_stack;
 
-        JournalWindow ()
-            : WindowBase("openmw_journal.layout")
-            , mPageNumber(0)
+        display_state_stack mStates;
+        book mTopicIndexBook;
+        bool mQuestMode;
+        bool mAllQuests;
+
+        template <typename widget_type>
+        widget_type * getWidget (char const * name)
+        {
+            widget_type * widget;
+            WindowBase::getWidget (widget, name);
+            return widget;
+        }
+
+        template <typename value_type>
+        void setText (char const * name, value_type const & value)
+        {
+            getWidget <TextBox> (name) ->
+                setCaption (boost::lexical_cast <std::string> (value));
+        }
+
+        void setVisible (char const * name, bool visible)
+        {
+            getWidget <Widget> (name) ->
+                setVisible (visible);
+        }
+
+        void adviseButtonClick (char const * name, void (JournalWindow::*Handler) (Widget* _sender))
+        {
+            getWidget <MWGui::ImageButton> (name) ->
+                eventMouseButtonClick += newDelegate(this, Handler);
+        }
+
+        MWGui::IBookPage* getPage (char const * name)
+        {
+            return getWidget <MWGui::IBookPage> (name);
+        }
+
+        JournalWindow (IJournalViewModel::ptr Model)
+            : WindowBase("openmw_journal.layout"), JournalBooks (Model)
         {
             mMainWidget->setVisible(false);
-            //setCoord(0,0,498, 342);
             center();
 
-            getWidget(mLeftTextWidget, "LeftText");
-            getWidget(mRightTextWidget, "RightText");
-            getWidget(mPrevBtn, "PrevPageBTN");
-            mPrevBtn->eventMouseButtonClick += MyGUI::newDelegate(this,&JournalWindow::notifyPrevPage);
-            getWidget(mNextBtn, "NextPageBTN");
-            mNextBtn->eventMouseButtonClick += MyGUI::newDelegate(this,&JournalWindow::notifyNextPage);
+            adviseButtonClick (OptionsBTN,    &JournalWindow::notifyOptions   );
+            adviseButtonClick (PrevPageBTN,   &JournalWindow::notifyPrevPage  );
+            adviseButtonClick (NextPageBTN,   &JournalWindow::notifyNextPage  );
+            adviseButtonClick (CloseBTN,      &JournalWindow::notifyClose     );
+            adviseButtonClick (JournalBTN,    &JournalWindow::notifyJournal   );
 
+            adviseButtonClick (TopicsBTN,     &JournalWindow::notifyTopics    );
+            adviseButtonClick (QuestsBTN,     &JournalWindow::notifyQuests    );
+            adviseButtonClick (CancelBTN,     &JournalWindow::notifyCancel    );
 
+            adviseButtonClick (ShowAllBTN,    &JournalWindow::notifyShowAll   );
+            adviseButtonClick (ShowActiveBTN, &JournalWindow::notifyShowActive);
 
-            mLeftTextWidget->setEditReadOnly(true);
-            mRightTextWidget->setEditReadOnly(true);
-            mRightTextWidget->setEditStatic(true);
-            mLeftTextWidget->setEditStatic(true);
-        }
+            {
+                auto callback = std::bind (&JournalWindow::notifyTopicClicked, this, std::placeholders::_1);
 
-        void close()
-        {
-            MWBase::Environment::get().getSoundManager()->playSound ("book close", 1.0, 1.0);
+                getPage (TopicsPage)->adviseLinkClicked (callback);
+                getPage (LeftBookPage)->adviseLinkClicked (callback);
+                getPage (RightBookPage)->adviseLinkClicked (callback);
+            }
+
+            {
+                auto callback = std::bind (&JournalWindow::notifyIndexLinkClicked, this, std::placeholders::_1);
+
+                getPage (LeftTopicIndex)->adviseLinkClicked (callback);
+                getPage (RightTopicIndex)->adviseLinkClicked (callback);
+            }
+
+            {
+                auto callback = std::bind (&JournalWindow::notifyQuestClicked, this, std::placeholders::_1);
+
+                getPage (QuestsPage)->adviseLinkClicked (callback);
+            }
+
+            mQuestMode = false;
+            mAllQuests = false;
         }
 
         void open()
         {
-            mPageNumber = 0;
+            Model->load ();
+
+            setBookMode ();
+
             MWBase::Environment::get().getSoundManager()->playSound ("book open", 1.0, 1.0);
-            if(MWBase::Environment::get().getJournal()->begin()!=MWBase::Environment::get().getJournal()->end())
-            {
-                book journal;
-                journal.endLine = 0;
 
-                for(std::deque<MWDialogue::StampedJournalEntry>::const_iterator it = MWBase::Environment::get().getJournal()->begin();it!=MWBase::Environment::get().getJournal()->end();++it)
-                {
-                    std::string a = it->getText(MWBase::Environment::get().getWorld()->getStore());
-                    journal = formatText(a,journal,10,17);
-                    journal.endLine = journal.endLine +1;
-                    journal.pages.back() = journal.pages.back() + std::string("\n");
-                }
-                //std::string a = MWBase::Environment::get().getJournal()->begin()->getText(MWBase::Environment::get().getWorld()->getStore());
-                //std::list<std::string> journal = formatText(a,10,20,1);
-                bool left = true;
-                for(std::list<std::string>::iterator it = journal.pages.begin(); it != journal.pages.end();++it)
-                {
-                    if(left)
-                    {
-                        mLeftPages.push_back(*it);
-                    }
-                    else
-                    {
-                        mRightPages.push_back(*it);
-                    }
-                    left = !left;
-                }
-                if(!left) mRightPages.push_back("");
-
-                mPageNumber = mLeftPages.size()-1;
-                displayLeftText(mLeftPages[mPageNumber]);
-                displayRightText(mRightPages[mPageNumber]);
-
-            }
+            book journalBook;
+            if (Model->is_empty ())
+                journalBook = createEmptyJournalBook ();
             else
-            {
-                //std::cout << MWBase::Environment::get().getJournal()->begin()->getText(MWBase::Environment::get().getWorld()->getStore());
-            }
+                journalBook = createJournalBook ();
+
+            pushBook (journalBook, 0);
+        }
+
+        void close()
+        {
+            Model->unload ();
+
+            getPage (LeftBookPage)->showPage (book (), 0);
+            getPage (RightBookPage)->showPage (book (), 0);
+
+            decltype (mStates) clr;
+            mStates.swap (clr);
+
+            mTopicIndexBook.reset ();
+
+            MWBase::Environment::get().getSoundManager()->playSound ("book close", 1.0, 1.0);
         }
 
         void setVisible (bool newValue)
@@ -176,46 +177,246 @@ namespace
             WindowBase::setVisible (newValue);
         }
 
-
-        void displayLeftText(std::string text)
+        void setBookMode ()
         {
-            mLeftTextWidget->eraseText(0,mLeftTextWidget->getTextLength());
-            mLeftTextWidget->addText(text);
+            setVisible (OptionsBTN, true);
+            setVisible (OptionsOverlay, false);
+
+            updateShowingPages ();
+            updateCloseJournalButton ();
         }
 
-        void displayRightText(std::string text)
+        void setOptionsMode ()
         {
-            mRightTextWidget->eraseText(0,mRightTextWidget->getTextLength());
-            mRightTextWidget->addText(text);
+            setVisible (OptionsBTN, false);
+            setVisible (OptionsOverlay, true);
+
+            setVisible (PrevPageBTN, false);
+            setVisible (NextPageBTN, false);
+            setVisible (CloseBTN, false);
+            setVisible (JournalBTN, false);
+
+            setVisible (TopicsList, false);
+            setVisible (QuestsList, mQuestMode);
+            setVisible (LeftTopicIndex, !mQuestMode);
+            setVisible (RightTopicIndex, !mQuestMode);
+            setVisible (ShowAllBTN, mQuestMode && !mAllQuests);
+            setVisible (ShowActiveBTN, mQuestMode && mAllQuests);
+
+            //TODO: figure out how to make "options" page overlay book page
+            //      correctly, so that text may show underneath
+            getPage (RightBookPage)->showPage (book (), 0);
         }
 
-
-
-        void notifyNextPage(MyGUI::Widget* _sender)
+        void pushBook (book Book, int Page)
         {
-            if(mPageNumber < int(mLeftPages.size())-1)
+            display_state bs;
+            bs.mPage = Page;
+            bs.mBook = Book;
+            mStates.push (bs);
+            updateShowingPages ();
+            updateCloseJournalButton ();
+        }
+
+        void replaceBook (book Book, int Page)
+        {
+            assert (!mStates.empty ());
+            mStates.top ().mBook = Book;
+            mStates.top ().mPage = Page;
+            updateShowingPages ();
+        }
+
+        void popBook ()
+        {
+            mStates.pop ();
+            updateShowingPages ();
+            updateCloseJournalButton ();
+        }
+
+        void updateCloseJournalButton ()
+        {
+            setVisible (CloseBTN, mStates.size () < 2);
+            setVisible (JournalBTN, mStates.size () >= 2);
+        }
+
+        void updateShowingPages ()
+        {
+            book Book;
+            int Page;
+            int relPages;
+
+            if (!mStates.empty ())
             {
-                std::string nextSound = "book page2";
-                MWBase::Environment::get().getSoundManager()->playSound (nextSound, 1.0, 1.0);
-                mPageNumber = mPageNumber + 1;
-                displayLeftText(mLeftPages[mPageNumber]);
-                displayRightText(mRightPages[mPageNumber]);
+                Book = mStates.top ().mBook;
+                Page = mStates.top ().mPage;
+                relPages = Book->pageCount () - Page;
+            }
+            else
+            {
+                Page = 0;
+                relPages = 0;
+            }
+
+            setVisible (PrevPageBTN, Page > 0);
+            setVisible (NextPageBTN, relPages > 2);
+
+            setVisible (PageOneNum, relPages > 0);
+            setVisible (PageTwoNum, relPages > 1);
+
+            getPage (LeftBookPage)->showPage ((relPages > 0) ? Book : book (), Page+0);
+            getPage (RightBookPage)->showPage ((relPages > 0) ? Book : book (), Page+1);
+
+            setText (PageOneNum, Page + 1);
+            setText (PageTwoNum, Page + 2);
+        }
+
+        void notifyTopicClicked (intptr_t linkId)
+        {
+            auto topicBook = createTopicBook (linkId);
+
+            if (mStates.size () > 1)
+                replaceBook (topicBook, 0);
+            else
+                pushBook (topicBook, 0);
+
+            setVisible (OptionsOverlay, false);
+            setVisible (OptionsBTN, true);
+            setVisible (JournalBTN, true);
+        }
+
+        void notifyQuestClicked (intptr_t questId)
+        {
+            auto Book = createQuestBook (questId);
+
+            if (mStates.size () > 1)
+                replaceBook (Book, 0);
+            else
+                pushBook (Book, 0);
+
+            setVisible (OptionsOverlay, false);
+            setVisible (OptionsBTN, true);
+            setVisible (JournalBTN, true);
+        }
+
+        void notifyOptions(Widget* _sender)
+        {
+            setOptionsMode ();
+
+            if (!mTopicIndexBook)
+                mTopicIndexBook = createTopicIndexBook ();
+
+            getPage (LeftTopicIndex)->showPage (mTopicIndexBook, 0);
+            getPage (RightTopicIndex)->showPage (mTopicIndexBook, 1);
+        }
+
+        void notifyJournal(Widget* _sender)
+        {
+            assert (mStates.size () > 1);
+            popBook ();
+        }
+
+        void showList (char const * ListId, char const * PageId, book book)
+        {
+            auto size = book->getSize ();
+
+            getPage (PageId)->showPage (book, 0);
+
+            getWidget <ScrollView> (ListId)->setCanvasSize (size.first, size.second);
+        }
+
+        void notifyIndexLinkClicked (ITypesetBook::interactive_id character)
+        {
+            setVisible (LeftTopicIndex, false);
+            setVisible (RightTopicIndex, false);
+            setVisible (TopicsList, true);
+
+            showList (TopicsList, TopicsPage, createTopicIndexBook ((char)character));
+        }
+
+        void notifyTopics(Widget* _sender)
+        {
+            mQuestMode = false;
+            setVisible (LeftTopicIndex, true);
+            setVisible (RightTopicIndex, true);
+            setVisible (TopicsList, false);
+            setVisible (QuestsList, false);
+            setVisible (ShowAllBTN, false);
+            setVisible (ShowActiveBTN, false);
+        }
+
+        void notifyQuests(Widget* _sender)
+        {
+            mQuestMode = true;
+            setVisible (LeftTopicIndex, false);
+            setVisible (RightTopicIndex, false);
+            setVisible (TopicsList, false);
+            setVisible (QuestsList, true);
+            setVisible (ShowAllBTN, !mAllQuests);
+            setVisible (ShowActiveBTN, mAllQuests);
+
+            showList (QuestsList, QuestsPage, createQuestIndexBook (!mAllQuests));
+        }
+
+        void notifyShowAll(Widget* _sender)
+        {
+            mAllQuests = true;
+            setVisible (ShowAllBTN, !mAllQuests);
+            setVisible (ShowActiveBTN, mAllQuests);
+            showList (QuestsList, QuestsPage, createQuestIndexBook (!mAllQuests));
+        }
+
+        void notifyShowActive(Widget* _sender)
+        {
+            mAllQuests = false;
+            setVisible (ShowAllBTN, !mAllQuests);
+            setVisible (ShowActiveBTN, mAllQuests);
+            showList (QuestsList, QuestsPage, createQuestIndexBook (!mAllQuests));
+        }
+
+        void notifyCancel(Widget* _sender)
+        {
+            setBookMode ();
+        }
+
+        void notifyClose(Widget* _sender)
+        {
+
+            MWBase::Environment::get().getWindowManager ()->popGuiMode ();
+        }
+
+        void notifyNextPage(Widget* _sender)
+        {
+            if (!mStates.empty ())
+            {
+                auto & Page = mStates.top ().mPage;
+                auto   Book = mStates.top ().mBook;
+
+                if (Page < Book->pageCount () - 2)
+                {
+                    Page += 2;
+                    updateShowingPages ();
+                }
             }
         }
 
-        void notifyPrevPage(MyGUI::Widget* _sender)
+        void notifyPrevPage(Widget* _sender)
         {
-            if(mPageNumber > 0)
+            if (!mStates.empty ())
             {
-                std::string prevSound = "book page";
-                MWBase::Environment::get().getSoundManager()->playSound (prevSound, 1.0, 1.0);
-                mPageNumber = mPageNumber - 1;
-                displayLeftText(mLeftPages[mPageNumber]);
-                displayRightText(mRightPages[mPageNumber]);
+                auto & Page = mStates.top ().mPage;
+
+                if(Page > 0)
+                {
+                    Page -= 2;
+                    updateShowingPages ();
+                }
             }
         }
     };
 }
 
 // glue the implementation to the interface
-IJournalWindow * MWGui::IJournalWindow::create () { return new JournalWindow (); }
+IJournalWindow * MWGui::IJournalWindow::create (IJournalViewModel::ptr Model)
+{
+    return new JournalWindow (Model);
+}

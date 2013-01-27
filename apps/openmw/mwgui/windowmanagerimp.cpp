@@ -7,6 +7,7 @@
 
 #include "console.hpp"
 #include "journalwindow.hpp"
+#include "journalviewmodel.hpp"
 #include "charactercreation.hpp"
 #include "dialogue.hpp"
 #include "dialoguehistory.hpp"
@@ -147,7 +148,7 @@ namespace MWGui
         mMap = new MapWindow(cacheDir);
         mStatsWindow = new StatsWindow();
         mConsole = new Console(w,h, consoleOnlyScripts);
-        mJournal = IJournalWindow::create();
+        mJournal = IJournalWindow::create(IJournalViewModel::create ());
         mMessageBoxManager = new MessageBoxManager();
         mInventoryWindow = new InventoryWindow(mDragAndDrop);
         mTradeWindow = new TradeWindow();
