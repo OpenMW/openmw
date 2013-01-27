@@ -3,9 +3,6 @@
 
 #include <QWidget>
 #include <QModelIndex>
-#include "utils/profilescombobox.hpp"
-#include <components/files/collections.hpp>
-
 
 class QTableView;
 class QSortFilterProxyModel;
@@ -17,6 +14,8 @@ class ProfilesComboBox;
 class DataFilesModel;
 
 class TextInputDialog;
+class ProfilesComboBox;
+class GameSettings;
 
 namespace Files { struct ConfigurationManager; }
 
@@ -25,13 +24,11 @@ class DataFilesPage : public QWidget
     Q_OBJECT
 
 public:
-    DataFilesPage(Files::ConfigurationManager& cfg, QWidget *parent = 0);
+    DataFilesPage(Files::ConfigurationManager &cfg, GameSettings &gameSettings, QWidget *parent = 0);
 
     ProfilesComboBox *mProfilesComboBox;
 
     void writeConfig(QString profile = QString());
-    bool showDataFilesWarning();
-    bool setupDataFiles();
 
 public slots:
     void setCheckState(QModelIndex index);
@@ -76,10 +73,9 @@ private:
     QAction *mUncheckAction;
 
     Files::ConfigurationManager &mCfgMgr;
-    Files::PathContainer mDataDirs;
-    Files::PathContainer mDataLocal;
 
     QSettings *mLauncherConfig;
+    GameSettings &mGameSettings;
 
     TextInputDialog *mNewProfileDialog;
 
@@ -87,6 +83,7 @@ private:
 //    const QStringList selectedMasters();
 
     void createActions();
+    void setupDataFiles();
     void setupConfig();
     void readConfig();
 

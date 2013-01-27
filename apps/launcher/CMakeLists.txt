@@ -12,7 +12,6 @@ set(LAUNCHER
     settings/gamesettings.cpp
     settings/graphicssettings.cpp
 
-    utils/filedialog.cpp
     utils/naturalsort.cpp
     utils/lineedit.cpp
     utils/profilescombobox.cpp
@@ -36,7 +35,6 @@ set(LAUNCHER_HEADER
     settings/settingsbase.hpp
 
     utils/lineedit.hpp
-    utils/filedialog.hpp
     utils/naturalsort.hpp
     utils/profilescombobox.hpp
     utils/textinputdialog.hpp
@@ -55,7 +53,6 @@ set(LAUNCHER_HEADER_MOC
     model/esm/esmfile.hpp
 
     utils/lineedit.hpp
-    utils/filedialog.hpp
     utils/profilescombobox.hpp
     utils/textinputdialog.hpp
 )

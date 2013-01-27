@@ -3,12 +3,12 @@
 #include <cstdlib>
 
 #include <boost/math/common_factor.hpp>
-#include <boost/filesystem.hpp>
 
 #include <components/files/configurationmanager.hpp>
 #include <components/files/ogreplugin.hpp>
-#include <components/settings/settings.hpp>
+//#include <components/settings/settings.hpp>
 
+#include "settings/graphicssettings.hpp"
 #include "utils/naturalsort.hpp"
 
 #include "graphicspage.hpp"
@@ -25,9 +25,10 @@ QString getAspect(int x, int y)
     return QString(QString::number(xaspect) + ":" + QString::number(yaspect));
 }
 
-GraphicsPage::GraphicsPage(Files::ConfigurationManager &cfg, QWidget *parent)
-    : QWidget(parent)
-    , mCfgMgr(cfg)
+GraphicsPage::GraphicsPage(Files::ConfigurationManager &cfg, GraphicsSettings &graphicsSetting, QWidget *parent)
+    : mCfgMgr(cfg)
+    , mGraphicsSettings(graphicsSetting)
+    , QWidget(parent)
 {
     QGroupBox *rendererGroup = new QGroupBox(tr("Renderer"), this);
 
@@ -117,9 +118,8 @@ bool GraphicsPage::setupOgre()
 #endif
     }
 
-    boost::filesystem::path absPluginPath = boost::filesystem::absolute(boost::filesystem::path(pluginDir));
-
-    pluginDir = absPluginPath.string();
+    QDir dir(QString::fromStdString(pluginDir));
+    pluginDir = dir.absolutePath().toStdString();
 
     Files::loadOgrePlugin(pluginDir, "RenderSystem_GL", *mOgre);
     Files::loadOgrePlugin(pluginDir, "RenderSystem_Direct3D9", *mOgre);
@@ -154,20 +154,16 @@ bool GraphicsPage::setupOgre()
         msgBox.setIcon(QMessageBox::Critical);
         msgBox.setStandardButtons(QMessageBox::Ok);
         msgBox.setText(tr("<br><b>Could not select a valid render system</b><br><br> \
-        Please make sure the plugins.cfg file exists and contains a valid rendering plugin.<br>"));
+                          Please make sure the plugins.cfg file exists and contains a valid rendering plugin.<br>"));
         msgBox.exec();
-
         return false;
     }
 
     // Now fill the GUI elements
-    int index = mRendererComboBox->findText(QString::fromStdString(Settings::Manager::getString("render system", "Video")));
-
+    int index = mRendererComboBox->findText(mGraphicsSettings.value(QString("Video/render system")));
     if ( index != -1) {
         mRendererComboBox->setCurrentIndex(index);
-    }
-    else
-    {
+    } else {
 #if OGRE_PLATFORM == OGRE_PLATFORM_WIN32
         mRendererComboBox->setCurrentIndex(mRendererComboBox->findText(direct3DName));
 #else
@@ -180,45 +176,49 @@ bool GraphicsPage::setupOgre()
     mAntiAliasingComboBox->addItems(getAvailableOptions(QString("FSAA"), mSelectedRenderSystem));
     mResolutionComboBox->addItems(getAvailableResolutions(mSelectedRenderSystem));
 
-    readConfig();
+    // Load the rest of the values
+    loadSettings();
     return true;
 }
 
-void GraphicsPage::readConfig()
+void GraphicsPage::loadSettings()
 {
-    if (Settings::Manager::getBool("vsync", "Video"))
-        mVSyncCheckBox->setCheckState(Qt::Checked);
+    if (mGraphicsSettings.value(QString("Video/vsync")) == QLatin1String("true"))
+         mVSyncCheckBox->setCheckState(Qt::Checked);
 
-    if (Settings::Manager::getBool("fullscreen", "Video"))
-        mFullScreenCheckBox->setCheckState(Qt::Checked);
+     if (mGraphicsSettings.value(QString("Video/fullscreen")) == QLatin1String("true"))
+         mFullScreenCheckBox->setCheckState(Qt::Checked);
 
-    int aaIndex = mAntiAliasingComboBox->findText(QString::fromStdString(Settings::Manager::getString("antialiasing", "Video")));
-    if (aaIndex != -1)
-        mAntiAliasingComboBox->setCurrentIndex(aaIndex);
+     int aaIndex = mAntiAliasingComboBox->findText(mGraphicsSettings.value(QString("Video/antialiasing")));
+     if (aaIndex != -1)
+             mAntiAliasingComboBox->setCurrentIndex(aaIndex);
 
-    QString resolution = QString::number(Settings::Manager::getInt("resolution x", "Video"));
-    resolution.append(" x " + QString::number(Settings::Manager::getInt("resolution y", "Video")));
+     QString resolution = mGraphicsSettings.value(QString("Video/resolution x"));
+     resolution.append(QString(" x ") + mGraphicsSettings.value(QString("Video/resolution y")));
 
-    int resIndex = mResolutionComboBox->findText(resolution, Qt::MatchStartsWith);
-    if (resIndex != -1)
-        mResolutionComboBox->setCurrentIndex(resIndex);
+     int resIndex = mResolutionComboBox->findText(resolution, Qt::MatchStartsWith);
+     qDebug() << "resolution from file: " << resolution;
+     if (resIndex != -1)
+             mResolutionComboBox->setCurrentIndex(resIndex);
 }
 
-void GraphicsPage::writeConfig()
+void GraphicsPage::saveSettings()
 {
-    Settings::Manager::setBool("vsync", "Video", mVSyncCheckBox->checkState());
-    Settings::Manager::setBool("fullscreen", "Video", mFullScreenCheckBox->checkState());
-    Settings::Manager::setString("antialiasing", "Video", mAntiAliasingComboBox->currentText().toStdString());
-    Settings::Manager::setString("render system", "Video", mRendererComboBox->currentText().toStdString());
+    mVSyncCheckBox->checkState() ? mGraphicsSettings.setValue(QString("Video/vsync"), QString("true"))
+                                 : mGraphicsSettings.setValue(QString("Video/vsync"), QString("false"));
 
-    // Get the current resolution, but with the tabs replaced with a single space
-    QString resolution = mResolutionComboBox->currentText().simplified();
-    QStringList tokens = resolution.split(" ", QString::SkipEmptyParts);
+    mFullScreenCheckBox->checkState() ? mGraphicsSettings.setValue(QString("Video/fullscreen"), QString("true"))
+                                      : mGraphicsSettings.setValue(QString("Video/fullscreen"), QString("false"));
 
-    int resX = tokens.at(0).toInt();
-    int resY = tokens.at(2).toInt();
-    Settings::Manager::setInt("resolution x", "Video", resX);
-    Settings::Manager::setInt("resolution y", "Video", resY);
+    mGraphicsSettings.setValue(QString("Video/antialiasing"), mAntiAliasingComboBox->currentText());
+    mGraphicsSettings.setValue(QString("Video/render system"), mRendererComboBox->currentText());
+
+    QRegExp resolutionRe(QString("(\\d+) x (\\d+).*"));
+
+    if (resolutionRe.exactMatch(mResolutionComboBox->currentText().simplified())) {
+         mGraphicsSettings.setValue(QString("Video/resolution x"), resolutionRe.cap(1));
+         mGraphicsSettings.setValue(QString("Video/resolution y"), resolutionRe.cap(2));
+    }
 }
 
 QStringList GraphicsPage::getAvailableOptions(const QString &key, Ogre::RenderSystem *renderer)
@@ -232,16 +232,14 @@ QStringList GraphicsPage::getAvailableOptions(const QString &key, Ogre::RenderSy
     {
         Ogre::StringVector::iterator opt_it;
         uint idx = 0;
-        for (opt_it = i->second.possibleValues.begin ();
-        opt_it != i->second.possibleValues.end (); opt_it++, idx++)
-        {
 
-            if (strcmp (key.toStdString().c_str(), i->first.c_str()) == 0)
-            {
+        for (opt_it = i->second.possibleValues.begin();
+             opt_it != i->second.possibleValues.end(); opt_it++, idx++)
+        {
+            if (strcmp (key.toStdString().c_str(), i->first.c_str()) == 0) {
                 result << ((key == "FSAA") ? QString("MSAA ") : QString("")) + QString::fromStdString((*opt_it).c_str()).simplified();
             }
         }
-
     }
 
     // Sort ascending
@@ -258,7 +256,7 @@ QStringList GraphicsPage::getAvailableOptions(const QString &key, Ogre::RenderSy
 
 QStringList GraphicsPage::getAvailableResolutions(Ogre::RenderSystem *renderer)
 {
-    QString key ("Video Mode");
+    QString key("Video Mode");
     QStringList result;
 
     uint row = 0;

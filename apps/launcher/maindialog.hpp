@@ -17,12 +17,15 @@ class PlayPage;
 class GraphicsPage;
 class DataFilesPage;
 
+class GameSettings;
+class GraphicsSettings;
+
 class MainDialog : public QMainWindow
 {
     Q_OBJECT
 
 public:
-    MainDialog();
+    MainDialog(GameSettings &gameSettings, GraphicsSettings &GraphicsSettings);
 
 public slots:
     void changePage(QListWidgetItem *current, QListWidgetItem *previous);
@@ -43,6 +46,10 @@ private:
 
     Files::ConfigurationManager mCfgMgr;
     Settings::Manager mSettings;
+
+    GameSettings &mGameSettings;
+    GraphicsSettings &mGraphicsSettings;
+
 };
 
 #endif

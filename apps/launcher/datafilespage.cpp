@@ -6,8 +6,9 @@
 #include "model/datafilesmodel.hpp"
 #include "model/esm/esmfile.hpp"
 
+#include "settings/gamesettings.hpp"
+
 #include "utils/profilescombobox.hpp"
-#include "utils/filedialog.hpp"
 #include "utils/lineedit.hpp"
 #include "utils/naturalsort.hpp"
 #include "utils/textinputdialog.hpp"
@@ -46,9 +47,10 @@ bool rowSmallerThan(const QModelIndex &index1, const QModelIndex &index2)
     return index1.row() <= index2.row();
 }
 
-DataFilesPage::DataFilesPage(Files::ConfigurationManager &cfg, QWidget *parent)
-    : QWidget(parent)
-    , mCfgMgr(cfg)
+DataFilesPage::DataFilesPage(Files::ConfigurationManager &cfg, GameSettings &gameSettings, QWidget *parent)
+    : mCfgMgr(cfg)
+    , mGameSettings(gameSettings)
+    , QWidget(parent)
 {
     // Models
     mMastersModel = new DataFilesModel(this);
@@ -178,6 +180,7 @@ DataFilesPage::DataFilesPage(Files::ConfigurationManager &cfg, QWidget *parent)
 
     createActions();
     setupConfig();
+    setupDataFiles();
 }
 
 void DataFilesPage::createActions()
@@ -340,269 +343,176 @@ void DataFilesPage::readConfig()
 
 }
 
-bool DataFilesPage::showDataFilesWarning()
+void DataFilesPage::setupDataFiles()
 {
+    // Set the encoding to the one found in openmw.cfg or the default
+    mMastersModel->setEncoding(mGameSettings.value(QString("encoding"), QString("win1252")));
+    mPluginsModel->setEncoding(mGameSettings.value(QString("encoding"), QString("win1252")));
 
-    QMessageBox msgBox;
-    msgBox.setWindowTitle("Error detecting Morrowind installation");
-    msgBox.setIcon(QMessageBox::Warning);
-    msgBox.setStandardButtons(QMessageBox::Cancel);
-    msgBox.setText(tr("<br><b>Could not find the Data Files location</b><br><br> \
-                      The directory containing the data files was not found.<br><br> \
-                      Press \"Browse...\" to specify the location manually.<br>"));
+    QStringList paths = mGameSettings.getDataDirs();
 
-    QAbstractButton *dirSelectButton =
-            msgBox.addButton(tr("B&rowse..."), QMessageBox::ActionRole);
-
-    msgBox.exec();
-
-    if (msgBox.clickedButton() == dirSelectButton) {
-
-        // Show a custom dir selection dialog which only accepts valid dirs
-        QString selectedDir = FileDialog::getExistingDirectory(
-                    this, tr("Select Data Files Directory"),
-                    QDir::currentPath(),
-                    QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
-
-        // Add the user selected data directory
-        if (!selectedDir.isEmpty()) {
-            mDataDirs.push_back(Files::PathContainer::value_type(selectedDir.toStdString()));
-            mCfgMgr.processPaths(mDataDirs);
-        } else {
-            // Cancel from within the dir selection dialog
-            return false;
-        }
-
-    } else {
-        // Cancel
-        return false;
-    }
-
-    return true;
-}
-
-bool DataFilesPage::setupDataFiles()
-{
-    // We use the Configuration Manager to retrieve the configuration values
-    boost::program_options::variables_map variables;
-    boost::program_options::options_description desc;
-
-    desc.add_options()
-        ("data", boost::program_options::value<Files::PathContainer>()->default_value(Files::PathContainer(), "data")->multitoken())
-        ("data-local", boost::program_options::value<std::string>()->default_value(""))
-        ("fs-strict", boost::program_options::value<bool>()->implicit_value(true)->default_value(false))
-        ("encoding", boost::program_options::value<std::string>()->default_value("win1252"));
-
-    boost::program_options::notify(variables);
-
-    mCfgMgr.readConfiguration(variables, desc);
-
-    if (variables["data"].empty()) {
-        if (!showDataFilesWarning())
-           return false;
-    } else {
-        mDataDirs = Files::PathContainer(variables["data"].as<Files::PathContainer>());
-    }
-
-     std::string local = variables["data-local"].as<std::string>();
-     if (!local.empty()) {
-         mDataLocal.push_back(Files::PathContainer::value_type(local));
-     }
-
-    mCfgMgr.processPaths(mDataDirs);
-    mCfgMgr.processPaths(mDataLocal);
-
-    // Second chance to display the warning, the data= entries are invalid
-    while (mDataDirs.empty()) {
-        if (!showDataFilesWarning())
-            return false;
-    }
-
-    // Set the charset for reading the esm/esp files
-    QString encoding = QString::fromStdString(variables["encoding"].as<std::string>());
-    if (!encoding.isEmpty() && encoding != QLatin1String("win1252")) {
-        mMastersModel->setEncoding(encoding);
-        mPluginsModel->setEncoding(encoding);
-    }
-
-    // Add the paths to the respective models
-    for (Files::PathContainer::iterator it = mDataDirs.begin(); it != mDataDirs.end(); ++it) {
-        QString path = QString::fromStdString(it->string());
-        path.remove(QChar('\"'));
+    foreach (const QString &path, paths) {
         mMastersModel->addMasters(path);
         mPluginsModel->addPlugins(path);
     }
 
-    // Same for the data-local paths
-    for (Files::PathContainer::iterator it = mDataLocal.begin(); it != mDataLocal.end(); ++it) {
-        QString path = QString::fromStdString(it->string());
-        path.remove(QChar('\"'));
-        mMastersModel->addMasters(path);
-        mPluginsModel->addPlugins(path);
+    QString dataLocal = mGameSettings.getDataLocal();
+    if (!dataLocal.isEmpty()) {
+        mMastersModel->addMasters(dataLocal);
+        mPluginsModel->addPlugins(dataLocal);
     }
 
-    mMastersModel->sort(0);
-    mPluginsModel->sort(0);
-//    mMastersTable->sortByColumn(3, Qt::AscendingOrder);
-//    mPluginsTable->sortByColumn(3, Qt::AscendingOrder);
-
-
-    readConfig();
-    return true;
 }
 
 void DataFilesPage::writeConfig(QString profile)
 {
-    // Don't overwrite the config if no masters are found
-    if (mMastersModel->rowCount() < 1)
-        return;
+//    // Don't overwrite the config if no masters are found
+//    if (mMastersModel->rowCount() < 1)
+//        return;
 
-    QString pathStr = QString::fromStdString(mCfgMgr.getUserPath().string());
-    QDir userPath(pathStr);
+//    QString pathStr = QString::fromStdString(mCfgMgr.getUserPath().string());
+//    QDir userPath(pathStr);
 
-    if (!userPath.exists()) {
-        if (!userPath.mkpath(pathStr)) {
-            QMessageBox msgBox;
-            msgBox.setWindowTitle("Error creating OpenMW configuration directory");
-            msgBox.setIcon(QMessageBox::Critical);
-            msgBox.setStandardButtons(QMessageBox::Ok);
-            msgBox.setText(tr("<br><b>Could not create %0</b><br><br> \
-                              Please make sure you have the right permissions and try again.<br>").arg(pathStr));
-            msgBox.exec();
+//    if (!userPath.exists()) {
+//        if (!userPath.mkpath(pathStr)) {
+//            QMessageBox msgBox;
+//            msgBox.setWindowTitle("Error creating OpenMW configuration directory");
+//            msgBox.setIcon(QMessageBox::Critical);
+//            msgBox.setStandardButtons(QMessageBox::Ok);
+//            msgBox.setText(tr("<br><b>Could not create %0</b><br><br> \
+//                              Please make sure you have the right permissions and try again.<br>").arg(pathStr));
+//            msgBox.exec();
 
-            qApp->quit();
-            return;
-        }
-    }
-    // Open the OpenMW config as a QFile
-    QFile file(pathStr.append("openmw.cfg"));
+//            qApp->quit();
+//            return;
+//        }
+//    }
+//    // Open the OpenMW config as a QFile
+//    QFile file(pathStr.append("openmw.cfg"));
 
-    if (!file.open(QIODevice::ReadWrite | QIODevice::Text)) {
-        // File cannot be opened or created
-        QMessageBox msgBox;
-        msgBox.setWindowTitle("Error writing OpenMW configuration file");
-        msgBox.setIcon(QMessageBox::Critical);
-        msgBox.setStandardButtons(QMessageBox::Ok);
-        msgBox.setText(tr("<br><b>Could not open or create %0</b><br><br> \
-                          Please make sure you have the right permissions and try again.<br>").arg(file.fileName()));
-        msgBox.exec();
+//    if (!file.open(QIODevice::ReadWrite | QIODevice::Text)) {
+//        // File cannot be opened or created
+//        QMessageBox msgBox;
+//        msgBox.setWindowTitle("Error writing OpenMW configuration file");
+//        msgBox.setIcon(QMessageBox::Critical);
+//        msgBox.setStandardButtons(QMessageBox::Ok);
+//        msgBox.setText(tr("<br><b>Could not open or create %0</b><br><br> \
+//                          Please make sure you have the right permissions and try again.<br>").arg(file.fileName()));
+//        msgBox.exec();
 
-        qApp->quit();
-        return;
-    }
+//        qApp->quit();
+//        return;
+//    }
 
-    QTextStream in(&file);
-    QByteArray buffer;
+//    QTextStream in(&file);
+//    QByteArray buffer;
 
-    // Remove all previous entries from config
-    while (!in.atEnd()) {
-        QString line = in.readLine();
-        if (!line.startsWith("master") &&
-            !line.startsWith("plugin") &&
-            !line.startsWith("data") &&
-            !line.startsWith("data-local"))
-        {
-            buffer += line += "\n";
-        }
-    }
+//    // Remove all previous entries from config
+//    while (!in.atEnd()) {
+//        QString line = in.readLine();
+//        if (!line.startsWith("master") &&
+//            !line.startsWith("plugin") &&
+//            !line.startsWith("data") &&
+//            !line.startsWith("data-local"))
+//        {
+//            buffer += line += "\n";
+//        }
+//    }
 
-    file.close();
+//    file.close();
 
-    // Now we write back the other config entries
-    if (!file.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate)) {
-        QMessageBox msgBox;
-        msgBox.setWindowTitle("Error writing OpenMW configuration file");
-        msgBox.setIcon(QMessageBox::Critical);
-        msgBox.setStandardButtons(QMessageBox::Ok);
-        msgBox.setText(tr("<br><b>Could not write to %0</b><br><br> \
-                          Please make sure you have the right permissions and try again.<br>").arg(file.fileName()));
-        msgBox.exec();
+//    // Now we write back the other config entries
+//    if (!file.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate)) {
+//        QMessageBox msgBox;
+//        msgBox.setWindowTitle("Error writing OpenMW configuration file");
+//        msgBox.setIcon(QMessageBox::Critical);
+//        msgBox.setStandardButtons(QMessageBox::Ok);
+//        msgBox.setText(tr("<br><b>Could not write to %0</b><br><br> \
+//                          Please make sure you have the right permissions and try again.<br>").arg(file.fileName()));
+//        msgBox.exec();
 
-        qApp->quit();
-        return;
-    }
+//        qApp->quit();
+//        return;
+//    }
 
-    if (!buffer.isEmpty()) {
-        file.write(buffer);
-    }
+//    if (!buffer.isEmpty()) {
+//        file.write(buffer);
+//    }
 
-    QTextStream gameConfig(&file);
-
-    // First write the list of data dirs
-    mCfgMgr.processPaths(mDataDirs);
-    mCfgMgr.processPaths(mDataLocal);
-
-    QString path;
-
-    // data= directories
-    for (Files::PathContainer::iterator it = mDataDirs.begin(); it != mDataDirs.end(); ++it) {
-        path = QString::fromStdString(it->string());
-        path.remove(QChar('\"'));
-
-        // Make sure the string is quoted when it contains spaces
-        if (path.contains(" ")) {
-            gameConfig << "data=\"" << path << "\"" << endl;
-        } else {
-            gameConfig << "data=" << path << endl;
-        }
-    }
-
-    // data-local directory
-    if (!mDataLocal.empty()) {
-        path = QString::fromStdString(mDataLocal.front().string());
-        path.remove(QChar('\"'));
-
-        if (path.contains(" ")) {
-            gameConfig << "data-local=\"" << path << "\"" << endl;
-        } else {
-            gameConfig << "data-local=" << path << endl;
-        }
-    }
+//    QTextStream gameConfig(&file);
 
 
-    if (profile.isEmpty())
-        profile = mProfilesComboBox->currentText();
+//    QString path;
 
-    if (profile.isEmpty())
-        return;
+//    // data= directories
+//    for (Files::PathContainer::iterator it = mDataDirs.begin(); it != mDataDirs.end(); ++it) {
+//        path = QString::fromStdString(it->string());
+//        path.remove(QChar('\"'));
 
-    // Make sure we have no groups open
-    while (!mLauncherConfig->group().isEmpty()) {
-        mLauncherConfig->endGroup();
-    }
+//        // Make sure the string is quoted when it contains spaces
+//        if (path.contains(" ")) {
+//            gameConfig << "data=\"" << path << "\"" << endl;
+//        } else {
+//            gameConfig << "data=" << path << endl;
+//        }
+//    }
 
-    mLauncherConfig->beginGroup("Profiles");
-    mLauncherConfig->setValue("CurrentProfile", profile);
+//    // data-local directory
+//    if (!mDataLocal.empty()) {
+//        path = QString::fromStdString(mDataLocal.front().string());
+//        path.remove(QChar('\"'));
 
-    // Open the profile-name subgroup
-    mLauncherConfig->beginGroup(profile);
-    mLauncherConfig->remove(""); // Clear the subgroup
+//        if (path.contains(" ")) {
+//            gameConfig << "data-local=\"" << path << "\"" << endl;
+//        } else {
+//            gameConfig << "data-local=" << path << endl;
+//        }
+//    }
 
-    // Now write the masters to the configs
-    const QStringList masters = mMastersModel->checkedItems();
 
-    // We don't use foreach because we need i
-    for (int i = 0; i < masters.size(); ++i) {
-        const QString currentMaster = masters.at(i);
+//    if (profile.isEmpty())
+//        profile = mProfilesComboBox->currentText();
 
-        mLauncherConfig->setValue(QString("Master%0").arg(i), currentMaster);
-        gameConfig << "master=" << currentMaster << endl;
+//    if (profile.isEmpty())
+//        return;
 
-    }
+//    // Make sure we have no groups open
+//    while (!mLauncherConfig->group().isEmpty()) {
+//        mLauncherConfig->endGroup();
+//    }
 
-    // And finally write all checked plugins
-    const QStringList plugins = mPluginsModel->checkedItems();
+//    mLauncherConfig->beginGroup("Profiles");
+//    mLauncherConfig->setValue("CurrentProfile", profile);
 
-    for (int i = 0; i < plugins.size(); ++i) {
-        const QString currentPlugin = plugins.at(i);
-        mLauncherConfig->setValue(QString("Plugin%1").arg(i), currentPlugin);
-        gameConfig << "plugin=" << currentPlugin << endl;
-    }
+//    // Open the profile-name subgroup
+//    mLauncherConfig->beginGroup(profile);
+//    mLauncherConfig->remove(""); // Clear the subgroup
 
-    file.close();
-    mLauncherConfig->endGroup();
-    mLauncherConfig->endGroup();
-    mLauncherConfig->sync();
+//    // Now write the masters to the configs
+//    const QStringList masters = mMastersModel->checkedItems();
+
+//    // We don't use foreach because we need i
+//    for (int i = 0; i < masters.size(); ++i) {
+//        const QString currentMaster = masters.at(i);
+
+//        mLauncherConfig->setValue(QString("Master%0").arg(i), currentMaster);
+//        gameConfig << "master=" << currentMaster << endl;
+
+//    }
+
+//    // And finally write all checked plugins
+//    const QStringList plugins = mPluginsModel->checkedItems();
+
+//    for (int i = 0; i < plugins.size(); ++i) {
+//        const QString currentPlugin = plugins.at(i);
+//        mLauncherConfig->setValue(QString("Plugin%1").arg(i), currentPlugin);
+//        gameConfig << "plugin=" << currentPlugin << endl;
+//    }
+
+//    file.close();
+//    mLauncherConfig->endGroup();
+//    mLauncherConfig->endGroup();
+//    mLauncherConfig->sync();
 }
 
 

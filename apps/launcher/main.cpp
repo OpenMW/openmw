@@ -138,9 +138,7 @@ int main(int argc, char *argv[])
     paths.clear();
     paths.append(globalPath + QString("settings-default.cfg"));
     paths.append(QString("settings-default.cfg"));
-
     paths.append(userPath + QString("settings.cfg"));
-    paths.append(QString("settings.cfg"));
 
     foreach (const QString &path, paths) {
         qDebug() << "Loading: " << path;
@@ -166,14 +164,14 @@ int main(int argc, char *argv[])
     }
 
 
-    MainDialog mainWin;
-    mainWin.setup();
+    MainDialog mainWin(gameSettings, graphicsSettings);
 
-    mainWin.show();
-    QCoreApplication::processEvents();
+    if (mainWin.setup()) {
+        mainWin.show();
+    } else {
+        return 0;
+    }
+
     return app.exec();
-
-
-    return 0;
 }
 

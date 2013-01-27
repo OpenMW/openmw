@@ -5,8 +5,8 @@
 
 #include <OgreRoot.h>
 #include <OgreRenderSystem.h>
-#include <OgreConfigFile.h>
-#include <OgreConfigDialog.h>
+//#include <OgreConfigFile.h>
+//#include <OgreConfigDialog.h>
 
 // Static plugin headers
 #ifdef ENABLE_PLUGIN_GL
@@ -21,6 +21,8 @@ class QCheckBox;
 class QStackedWidget;
 class QSettings;
 
+class GraphicsSettings;
+
 namespace Files { struct ConfigurationManager; }
 
 class GraphicsPage : public QWidget
@@ -28,10 +30,10 @@ class GraphicsPage : public QWidget
     Q_OBJECT
 
 public:
-    GraphicsPage(Files::ConfigurationManager &cfg, QWidget *parent = 0);
+    GraphicsPage(Files::ConfigurationManager &cfg, GraphicsSettings &graphicsSettings, QWidget *parent = 0);
 
+    void saveSettings();
     bool setupOgre();
-    void writeConfig();
 
 public slots:
     void rendererChanged(const QString &renderer);
@@ -58,12 +60,14 @@ private:
     QCheckBox *mFullScreenCheckBox;
 
     Files::ConfigurationManager &mCfgMgr;
+    GraphicsSettings &mGraphicsSettings;
 
     QStringList getAvailableOptions(const QString &key, Ogre::RenderSystem *renderer);
     QStringList getAvailableResolutions(Ogre::RenderSystem *renderer);
 
     void createPages();
-    void readConfig();
+    void loadSettings();
+
 };
 
 #endif

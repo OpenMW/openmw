@@ -1,11 +1,20 @@
 #include <QtGui>
 
+#include "settings/gamesettings.hpp"
+#include "settings/graphicssettings.hpp"
+
+#include "utils/profilescombobox.hpp"
+
 #include "maindialog.hpp"
 #include "playpage.hpp"
 #include "graphicspage.hpp"
 #include "datafilespage.hpp"
 
-MainDialog::MainDialog()
+MainDialog::MainDialog(GameSettings &gameSettings,
+                       GraphicsSettings &graphicsSettings)
+    : mGameSettings(gameSettings)
+    , mGraphicsSettings(graphicsSettings)
+
 {
     QWidget *centralWidget = new QWidget(this);
     setCentralWidget(centralWidget);
@@ -122,8 +131,8 @@ void MainDialog::createIcons()
 void MainDialog::createPages()
 {
     mPlayPage = new PlayPage(this);
-    mGraphicsPage = new GraphicsPage(mCfgMgr, this);
-    mDataFilesPage = new DataFilesPage(mCfgMgr, this);
+    mGraphicsPage = new GraphicsPage(mCfgMgr, mGraphicsSettings, this);
+    mDataFilesPage = new DataFilesPage(mCfgMgr, mGameSettings, this);
 
     // Set the combobox of the play page to imitate the combobox on the datafilespage
     mPlayPage->mProfilesComboBox->setModel(mDataFilesPage->mProfilesComboBox->model());
@@ -152,46 +161,17 @@ void MainDialog::createPages()
 
 bool MainDialog::setup()
 {
-    // Create the settings manager and load default settings file
-    const std::string localdefault = (mCfgMgr.getLocalPath() / "settings-default.cfg").string();
-    const std::string globaldefault = (mCfgMgr.getGlobalPath() / "settings-default.cfg").string();
-
-    // prefer local
-    if (boost::filesystem::exists(localdefault)) {
-        mSettings.loadDefault(localdefault);
-    } else if (boost::filesystem::exists(globaldefault)) {
-        mSettings.loadDefault(globaldefault);
-    } else {
-        QMessageBox msgBox;
-        msgBox.setWindowTitle("Error reading OpenMW configuration file");
-        msgBox.setIcon(QMessageBox::Critical);
-        msgBox.setStandardButtons(QMessageBox::Ok);
-        msgBox.setText(tr("<br><b>Could not find %0</b><br><br> \
-                          The problem may be due to an incomplete installation of OpenMW.<br> \
-                          Reinstalling OpenMW may resolve the problem.").arg(QString::fromStdString(globaldefault)));
-        msgBox.exec();
-        return false;
-    }
-
-    // load user settings if they exist, otherwise just load the default settings as user settings
-    const std::string settingspath = (mCfgMgr.getUserPath() / "settings.cfg").string();
-
-    if (boost::filesystem::exists(settingspath))
-        mSettings.loadUser(settingspath);
-    else if (boost::filesystem::exists(localdefault))
-        mSettings.loadUser(localdefault);
-    else if (boost::filesystem::exists(globaldefault))
-        mSettings.loadUser(globaldefault);
-
     // Setup the Graphics page
     if (!mGraphicsPage->setupOgre()) {
         return false;
     }
 
     // Setup the Data Files page
+    /*
     if (!mDataFilesPage->setupDataFiles()) {
         return false;
-    }
+    }*/
+
 
     return true;
 }
@@ -208,11 +188,67 @@ void MainDialog::closeEvent(QCloseEvent *event)
 {
     // Now write all config files
     mDataFilesPage->writeConfig();
-    mGraphicsPage->writeConfig();
+    mGraphicsPage->saveSettings();
 
-    // Save user settings
-    const std::string settingspath = (mCfgMgr.getUserPath() / "settings.cfg").string();
-    mSettings.saveUser(settingspath);
+    QString userPath = QString::fromStdString(mCfgMgr.getUserPath().string());
+    QDir dir(userPath);
+
+    if (!dir.exists()) {
+        if (!dir.mkpath(userPath)) {
+            QMessageBox msgBox;
+            msgBox.setWindowTitle("Error creating OpenMW configuration directory");
+            msgBox.setIcon(QMessageBox::Critical);
+            msgBox.setStandardButtons(QMessageBox::Ok);
+            msgBox.setText(tr("<br><b>Could not create %0</b><br><br> \
+                              Please make sure you have the right permissions \
+                              and try again.<br>").arg(userPath));
+            msgBox.exec();
+            event->accept();
+        }
+    }
+
+    // Game settings
+    QFile file(userPath + QString("openmw.cfg"));
+
+    if (!file.open(QIODevice::ReadWrite | QIODevice::Text | QIODevice::Truncate)) {
+        // File cannot be opened or created
+        QMessageBox msgBox;
+        msgBox.setWindowTitle("Error writing OpenMW configuration file");
+        msgBox.setIcon(QMessageBox::Critical);
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.setText(tr("<br><b>Could not open or create %0 for writing</b><br><br> \
+                          Please make sure you have the right permissions \
+                          and try again.<br>").arg(file.fileName()));
+        msgBox.exec();
+        event->accept();
+    }
+
+    QTextStream stream(&file);
+    stream.setCodec(QTextCodec::codecForName("UTF-8"));
+
+    mGameSettings.writeFile(stream);
+    file.close();
+
+    // Graphics settings
+    file.setFileName(userPath + QString("settings.cfg"));
+
+    if (!file.open(QIODevice::ReadWrite | QIODevice::Text | QIODevice::Truncate)) {
+        // File cannot be opened or created
+        QMessageBox msgBox;
+        msgBox.setWindowTitle("Error writing OpenMW configuration file");
+        msgBox.setIcon(QMessageBox::Critical);
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.setText(tr("<br><b>Could not open or create %0 for writing</b><br><br> \
+                          Please make sure you have the right permissions \
+                          and try again.<br>").arg(file.fileName()));
+        msgBox.exec();
+        event->accept();
+    }
+
+    stream.setDevice(&file);
+    stream.setCodec(QTextCodec::codecForName("UTF-8"));
+
+    mGraphicsSettings.writeFile(stream);
 
     event->accept();
 }
@@ -221,7 +257,7 @@ void MainDialog::play()
 {
     // First do a write of all the configs, just to be sure
     mDataFilesPage->writeConfig();
-    mGraphicsPage->writeConfig();
+    //mGraphicsPage->writeConfig();
 
     // Save user settings
     const std::string settingspath = (mCfgMgr.getUserPath() / "settings.cfg").string();
