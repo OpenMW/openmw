@@ -31,7 +31,7 @@ add_openmw_dir (mwgui
     confirmationdialog alchemywindow referenceinterface spellwindow mainmenu quickkeysmenu
     itemselection spellbuyingwindow loadingscreen levelupdialog waitdialog spellcreationdialog
     enchantingdialog trainingwindow travelwindow imagebutton exposedwindow cursor spellicons
-    merchantrepair repair soulgemdialog companionwindow bookpage journalviewmodel
+    merchantrepair repair soulgemdialog companionwindow bookpage journalviewmodel journalbooks
     )
 
 add_openmw_dir (mwdialogue
