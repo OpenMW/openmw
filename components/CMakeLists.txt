@@ -66,9 +66,19 @@ add_component_dir (translation
     translation
     )
 
+add_component_qt_dir (file_order_list
+    datafilespage model/modelitem model/datafilesmodel model/esm/esmfile
+    utils/filedialog utils/lineedit utils/profilescombobox utils/textinputdialog utils/naturalsort
+    )
+
+find_package(Qt4 COMPONENTS QtCore QtGUI REQUIRED)
+include(${QT_USE_FILE})
+
+QT4_WRAP_CPP(MOC_SRCS ${COMPONENT_MOC_FILES})
+
 include_directories(${BULLET_INCLUDE_DIRS})
 
-add_library(components STATIC ${COMPONENT_FILES})
+add_library(components STATIC ${COMPONENT_FILES} ${MOC_SRCS})
 
 target_link_libraries(components ${Boost_LIBRARIES} ${OGRE_LIBRARIES})
 

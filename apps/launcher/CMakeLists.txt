@@ -1,56 +1,23 @@
 set(LAUNCHER
-    datafilespage.cpp
     graphicspage.cpp
     main.cpp
     maindialog.cpp
     playpage.cpp
 
-    model/datafilesmodel.cpp
-    model/modelitem.cpp
-    model/esm/esmfile.cpp
-
-    utils/filedialog.cpp
-    utils/naturalsort.cpp
-    utils/lineedit.cpp
-    utils/profilescombobox.cpp
-    utils/textinputdialog.cpp
-
     launcher.rc
 )
 
 set(LAUNCHER_HEADER
-    datafilespage.hpp
     graphicspage.hpp
     maindialog.hpp
     playpage.hpp
-
-    model/datafilesmodel.hpp
-    model/modelitem.hpp
-    model/esm/esmfile.hpp
-
-    utils/lineedit.hpp
-    utils/filedialog.hpp
-    utils/naturalsort.hpp
-    utils/profilescombobox.hpp
-    utils/textinputdialog.hpp
-
 )
 
 # Headers that must be pre-processed
 set(LAUNCHER_HEADER_MOC
-    datafilespage.hpp
     graphicspage.hpp
     maindialog.hpp
     playpage.hpp
-
-    model/datafilesmodel.hpp
-    model/modelitem.hpp
-    model/esm/esmfile.hpp
-
-    utils/lineedit.hpp
-    utils/filedialog.hpp
-    utils/profilescombobox.hpp
-    utils/textinputdialog.hpp
 )
 
 source_group(launcher FILES ${LAUNCHER} ${LAUNCHER_HEADER} ${LAUNCHER_HEADER_MOC})

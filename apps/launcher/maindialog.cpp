@@ -1,9 +1,10 @@
 #include <QtGui>
 
+#include <components/file_order_list/datafilespage.hpp>
+
 #include "maindialog.hpp"
 #include "playpage.hpp"
 #include "graphicspage.hpp"
-#include "datafilespage.hpp"
 
 MainDialog::MainDialog()
 {
