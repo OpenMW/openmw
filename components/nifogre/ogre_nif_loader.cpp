@@ -355,15 +355,6 @@ void buildBones(Ogre::Skeleton *skel, const Nif::Node *node, Ogre::Bone *&nonacc
 }
 
 
-/* Comparitor to help sort Key<> vectors */
-template<class T>
-struct KeyTimeSort
-{
-    bool operator()(const Nif::KeyT<T> &lhs, const Nif::KeyT<T> &rhs) const
-    { return lhs.mTime < rhs.mTime; }
-};
-
-
 typedef std::map<std::string,NIFSkeletonLoader> LoaderMap;
 static LoaderMap sLoaders;
 
