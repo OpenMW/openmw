@@ -32,7 +32,6 @@ protected:
     NifOgre::TextKeyMap::const_iterator mNextKey;
     Ogre::AnimationState *mAnimState;
     bool mPlaying;
-    bool mLooping;
 
     float mAnimSpeedMult;
 

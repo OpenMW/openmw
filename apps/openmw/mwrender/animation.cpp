@@ -27,7 +27,6 @@ Animation::Animation(const MWWorld::Ptr &ptr)
     , mCurrentKeys(NULL)
     , mAnimState(NULL)
     , mPlaying(false)
-    , mLooping(false)
     , mAnimSpeedMult(1.0f)
 {
 }
@@ -187,7 +186,6 @@ void Animation::play(const std::string &groupname, const std::string &start, boo
         mAnimState->setLoop(loop);
 
         mCurrentKeys = &mTextKeys[groupname];
-        mLooping = loop;
         reset(start);
         mPlaying = true;
     }
@@ -206,7 +204,7 @@ Ogre::Vector3 Animation::runAnimation(float timepassed)
         if(mNextKey == mCurrentKeys->end() || mNextKey->first > targetTime)
         {
             movement += updatePosition(targetTime);
-            mPlaying = (targetTime < mAnimState->getLength() || mLooping);
+            mPlaying = (mAnimState->getLoop() || mAnimState->getLength() >= targetTime);
             break;
         }
 
@@ -224,7 +222,7 @@ Ogre::Vector3 Animation::runAnimation(float timepassed)
         }
         if(evt == "loop stop")
         {
-            if(mLooping)
+            if(mAnimState->getLoop())
             {
                 reset("loop start");
                 if(mAnimState->getTimePosition() >= time)
@@ -234,7 +232,7 @@ Ogre::Vector3 Animation::runAnimation(float timepassed)
         }
         if(evt == "stop")
         {
-            if(mLooping)
+            if(mAnimState->getLoop())
             {
                 reset("loop start");
                 if(mAnimState->getTimePosition() >= time)
