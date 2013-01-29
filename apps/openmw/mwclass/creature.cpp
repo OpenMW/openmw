@@ -97,7 +97,7 @@ namespace MWClass
         const std::string model = getModel(ptr);
         if(!model.empty())
             physics.addActor(ptr);
-        MWBase::Environment::get().getMechanicsManager()->addActor (ptr);
+        MWBase::Environment::get().getMechanicsManager()->add(ptr);
     }
 
     std::string Creature::getModel(const MWWorld::Ptr &ptr) const

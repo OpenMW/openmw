@@ -700,6 +700,7 @@ namespace MWWorld
         if (*currCell != newCell)
         {
             if (isPlayer)
+            {
                 if (!newCell.isExterior())
                     changeToInteriorCell(Misc::StringUtils::lowerCase(newCell.mCell->mName), pos);
                 else
@@ -708,7 +709,9 @@ namespace MWWorld
                     int cellY = newCell.mCell->getGridY();
                     mWorldScene->changeCell(cellX, cellY, pos, false);
                 }
-            else {
+            }
+            else
+            {
                 if (!mWorldScene->isCellActive(*currCell))
                     copyObjectToCell(ptr, newCell, pos);
                 else if (!mWorldScene->isCellActive(newCell))
@@ -732,8 +735,8 @@ namespace MWWorld
                         MWBase::MechanicsManager *mechMgr =
                             MWBase::Environment::get().getMechanicsManager();
 
-                        mechMgr->removeActor(ptr);
-                        mechMgr->addActor(copy);
+                        mechMgr->remove(ptr);
+                        mechMgr->add(copy);
                     }
                     else
                     {

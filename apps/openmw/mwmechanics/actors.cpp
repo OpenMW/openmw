@@ -166,9 +166,7 @@ namespace MWMechanics
     void Actors::addActor (const MWWorld::Ptr& ptr)
     {
         MWRender::Animation *anim = MWBase::Environment::get().getWorld()->getAnimation(ptr);
-        /* Kind of a hack. Activators need a character controller to manage an idle state. */
-        if(ptr.getTypeName() == typeid(ESM::Activator).name() ||
-           !MWWorld::Class::get(ptr).getCreatureStats(ptr).isDead())
+        if(!MWWorld::Class::get(ptr).getCreatureStats(ptr).isDead())
             mActors.insert(std::make_pair(ptr, CharacterController(ptr, anim, CharState_Idle, true)));
         else
             mActors.insert(std::make_pair(ptr, CharacterController(ptr, anim, CharState_Dead, false)));
@@ -205,11 +203,6 @@ namespace MWMechanics
             PtrControllerMap::iterator iter(mActors.begin());
             while(iter != mActors.end())
             {
-                if(iter->first.getTypeName() == typeid(ESM::Activator).name())
-                {
-                    iter++;
-                    continue;
-                }
                 if(!MWWorld::Class::get(iter->first).getCreatureStats(iter->first).isDead())
                 {
                     if(iter->second.getState() == CharState_Dead)
@@ -304,10 +297,7 @@ namespace MWMechanics
     void Actors::restoreDynamicStats()
     {
         for(PtrControllerMap::iterator iter(mActors.begin());iter != mActors.end();++iter)
-        {
-            if(iter->first.getTypeName() != typeid(ESM::Activator).name())
-                calculateRestoration(iter->first, 3600);
-        }
+            calculateRestoration(iter->first, 3600);
     }
     
     int Actors::countDeaths (const std::string& id) const

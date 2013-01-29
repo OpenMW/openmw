@@ -142,7 +142,7 @@ namespace MWClass
     void Npc::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics) const
     {
         physics.addActor(ptr);
-        MWBase::Environment::get().getMechanicsManager()->addActor(ptr);
+        MWBase::Environment::get().getMechanicsManager()->add(ptr);
     }
 
     std::string Npc::getModel(const MWWorld::Ptr &ptr) const

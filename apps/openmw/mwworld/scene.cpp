@@ -100,7 +100,7 @@ namespace MWWorld
        //mPhysics->removeObject("Unnamed_43");
 
         MWBase::Environment::get().getWorld()->getLocalScripts().clearCell (*iter);
-        MWBase::Environment::get().getMechanicsManager()->dropActors (*iter);
+        MWBase::Environment::get().getMechanicsManager()->drop (*iter);
         MWBase::Environment::get().getSoundManager()->stopSound (*iter);
         mActiveCells.erase(*iter);
     }
@@ -166,7 +166,7 @@ namespace MWWorld
         MWBase::MechanicsManager *mechMgr =
             MWBase::Environment::get().getMechanicsManager();
 
-        mechMgr->addActor(player);
+        mechMgr->add(player);
         mechMgr->watchActor(player);
 
         MWBase::Environment::get().getWindowManager()->changeCell(mCurrentCell);
@@ -179,7 +179,7 @@ namespace MWWorld
         mRendering.preCellChange(mCurrentCell);
 
         // remove active
-        MWBase::Environment::get().getMechanicsManager()->removeActor (MWBase::Environment::get().getWorld()->getPlayer().getPlayer());
+        MWBase::Environment::get().getMechanicsManager()->remove(MWBase::Environment::get().getWorld()->getPlayer().getPlayer());
 
         CellStoreCollection::iterator active = mActiveCells.begin();
 
@@ -443,7 +443,7 @@ namespace MWWorld
 
     void Scene::removeObjectFromScene (const Ptr& ptr)
     {
-        MWBase::Environment::get().getMechanicsManager()->removeActor (ptr);
+        MWBase::Environment::get().getMechanicsManager()->remove (ptr);
         MWBase::Environment::get().getSoundManager()->stopSound3D (ptr);
         mPhysics->removeObject (ptr.getRefData().getHandle());
         mRendering.removeObject (ptr);
