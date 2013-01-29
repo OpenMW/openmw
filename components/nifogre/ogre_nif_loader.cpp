@@ -1204,14 +1204,14 @@ EntityList Loader::createEntities(Ogre::Entity *parent, const std::string &bonen
         return entitylist;
 
     Ogre::SceneManager *sceneMgr = parentNode->getCreator();
-    std::string filter = bonename;
+    std::string filter = "@shape=tri "+bonename;
     Misc::StringUtils::toLower(filter);
     for(size_t i = 0;i < meshes.size();i++)
     {
         Ogre::Entity *ent = sceneMgr->createEntity(meshes[i].mMeshName);
         if(ent->hasSkeleton())
         {
-            if(meshes[i].mMeshName.find("@shape=tri "+filter) == std::string::npos)
+            if(meshes[i].mMeshName.find(filter) == std::string::npos)
             {
                 sceneMgr->destroyEntity(ent);
                 continue;
