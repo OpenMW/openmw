@@ -122,6 +122,8 @@ void CharacterController::markerEvent(float time, const std::string &evt)
         }
         return;
     }
+
+    std::cerr<< "Unhandled animation event: "<<evt <<std::endl;
 }
 
 
