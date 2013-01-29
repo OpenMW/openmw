@@ -184,6 +184,7 @@ void Animation::play(const std::string &groupname, const std::string &start, boo
             mAnimState->setEnabled(false);
         mAnimState = mEntityList.mSkelBase->getAnimationState(groupname);
         mAnimState->setEnabled(true);
+        mAnimState->setLoop(loop);
 
         mCurrentKeys = &mTextKeys[groupname];
         mLooping = loop;
