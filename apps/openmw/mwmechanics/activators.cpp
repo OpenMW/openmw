@@ -25,6 +25,17 @@ void Activators::removeActivator (const MWWorld::Ptr& ptr)
         mActivators.erase(iter);
 }
 
+void Activators::updateActivatorCell(const MWWorld::Ptr &ptr)
+{
+    PtrControllerMap::iterator iter = mActivators.find(ptr);
+    if(iter != mActivators.end())
+    {
+        CharacterController ctrl = iter->second;
+        mActivators.erase(iter);
+        mActivators.insert(std::make_pair(ptr, ctrl));
+    }
+}
+
 void Activators::dropActivators (const MWWorld::Ptr::CellStore *cellStore)
 {
     PtrControllerMap::iterator iter = mActivators.begin();

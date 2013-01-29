@@ -48,6 +48,9 @@ namespace MWMechanics
             virtual void remove (const MWWorld::Ptr& ptr);
             ///< Deregister an object for management
 
+            virtual void updateCell(const MWWorld::Ptr &ptr);
+            ///< Moves an object to a new cell
+
             virtual void drop(const MWWorld::CellStore *cellStore);
             ///< Deregister all objects in the given cell.
 

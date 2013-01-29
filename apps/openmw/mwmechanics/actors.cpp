@@ -179,6 +179,17 @@ namespace MWMechanics
             mActors.erase(iter);
     }
 
+    void Actors::updateActorCell(const MWWorld::Ptr &ptr)
+    {
+        PtrControllerMap::iterator iter = mActors.find(ptr);
+        if(iter != mActors.end())
+        {
+            CharacterController ctrl = iter->second;
+            mActors.erase(iter);
+            mActors.insert(std::make_pair(ptr, ctrl));
+        }
+    }
+
     void Actors::dropActors (const MWWorld::Ptr::CellStore *cellStore)
     {
         PtrControllerMap::iterator iter = mActors.begin();

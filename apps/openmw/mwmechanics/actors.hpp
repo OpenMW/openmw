@@ -53,6 +53,9 @@ namespace MWMechanics
             ///
             /// \note Ignored, if \a ptr is not a registered actor.
 
+            void updateActorCell(const MWWorld::Ptr& ptr);
+            ///< Updates an actor with a new cell store
+
             void dropActors (const MWWorld::CellStore *cellStore);
             ///< Deregister all actors in the given cell.
 

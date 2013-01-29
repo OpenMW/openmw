@@ -190,6 +190,15 @@ namespace MWMechanics
         mActors.removeActor(ptr);
     }
 
+    void MechanicsManager::updateCell(const MWWorld::Ptr &ptr)
+    {
+        if(ptr.getTypeName() == typeid(ESM::Activator).name())
+            mActivators.updateActivatorCell(ptr);
+        else
+            mActors.updateActorCell(ptr);
+    }
+
+
     void MechanicsManager::drop(const MWWorld::CellStore *cellStore)
     {
         if(!mWatched.isEmpty() && mWatched.getCell() == cellStore)

@@ -729,24 +729,14 @@ namespace MWWorld
                     addContainerScripts(copy, &newCell);
 
                     mRendering->moveObjectToCell(copy, vec, currCell);
+                    MWBase::MechanicsManager *mechMgr = MWBase::Environment::get().getMechanicsManager();
+                    mechMgr->updateCell(copy);
 
-                    if (MWWorld::Class::get(ptr).isActor())
+                    std::string script = MWWorld::Class::get(ptr).getScript(ptr);
+                    if(!script.empty())
                     {
-                        MWBase::MechanicsManager *mechMgr =
-                            MWBase::Environment::get().getMechanicsManager();
-
-                        mechMgr->remove(ptr);
-                        mechMgr->add(copy);
-                    }
-                    else
-                    {
-                        std::string script =
-                            MWWorld::Class::get(ptr).getScript(ptr);
-                        if (!script.empty())
-                        {
-                            mLocalScripts.remove(ptr);
-                            mLocalScripts.add(script, copy);
-                        }
+                        mLocalScripts.remove(ptr);
+                        mLocalScripts.add(script, copy);
                     }
                 }
                 ptr.getRefData().setCount(0);

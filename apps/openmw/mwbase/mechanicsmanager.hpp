@@ -43,6 +43,9 @@ namespace MWBase
             virtual void remove (const MWWorld::Ptr& ptr) = 0;
             ///< Deregister an object for management
 
+            virtual void updateCell(const MWWorld::Ptr &ptr) = 0;
+            ///< Moves an object to a new cell
+
             virtual void drop (const MWWorld::CellStore *cellStore) = 0;
             ///< Deregister all objects in the given cell.
 

@@ -28,6 +28,9 @@ namespace MWMechanics
         void removeActivator (const MWWorld::Ptr& ptr);
         ///< Deregister an activator
 
+        void updateActivatorCell(const MWWorld::Ptr& ptr);
+        ///< Updates an activator with a new cell store
+
         void dropActivators (const MWWorld::CellStore *cellStore);
         ///< Deregister all activators in the given cell.
 
