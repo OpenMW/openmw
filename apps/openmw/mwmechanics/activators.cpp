@@ -12,10 +12,11 @@ Activators::Activators()
 {
 }
 
-void Activators::addActivator (const MWWorld::Ptr& ptr)
+void Activators::addActivator(const MWWorld::Ptr& ptr)
 {
     MWRender::Animation *anim = MWBase::Environment::get().getWorld()->getAnimation(ptr);
-    mActivators.insert(std::make_pair(ptr, CharacterController(ptr, anim, CharState_Idle, true)));
+    if(anim != NULL)
+        mActivators.insert(std::make_pair(ptr, CharacterController(ptr, anim, CharState_Idle, true)));
 }
 
 void Activators::removeActivator (const MWWorld::Ptr& ptr)

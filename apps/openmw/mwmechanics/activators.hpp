@@ -23,7 +23,7 @@ namespace MWMechanics
         Activators();
 
         void addActivator (const MWWorld::Ptr& ptr);
-        ///< Register an activator
+        ///< Register an animated activator
 
         void removeActivator (const MWWorld::Ptr& ptr);
         ///< Deregister an activator
