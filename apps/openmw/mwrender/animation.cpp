@@ -102,11 +102,10 @@ void Animation::createEntityList(Ogre::SceneNode *node, const std::string &model
             while(trackiter.hasMoreElements())
             {
                 const Ogre::Node *srcnode = trackiter.getNext()->getAssociatedNode();
-                const Ogre::Node *srcbone = dynamic_cast<const Ogre::Bone*>(srcnode);
-                if(!srcbone || !skelinst->hasBone(srcbone->getName()))
+                if(!skelinst->hasBone(srcnode->getName()))
                     continue;
 
-                Ogre::Bone *bone = skelinst->getBone(srcbone->getName());
+                Ogre::Bone *bone = skelinst->getBone(srcnode->getName());
                 bone->setOrientation(Ogre::Quaternion::IDENTITY);
                 bone->setPosition(Ogre::Vector3::ZERO);
                 bone->setScale(Ogre::Vector3(1.0f));
