@@ -305,7 +305,7 @@ static TextKeyMap extractTextKeys(const Nif::NiTextKeyExtraData *tk)
 }
 
 
-void buildBones(Ogre::Skeleton *skel, const Nif::Node *node, Ogre::Bone *&nonaccum, TextKeyMap &textkeys, std::vector<Nif::NiKeyframeController const*> &ctrls, Ogre::Bone *parent=NULL)
+void buildBones(Ogre::Skeleton *skel, const Nif::Node *node, Ogre::Bone *&animroot, TextKeyMap &textkeys, std::vector<Nif::NiKeyframeController const*> &ctrls, Ogre::Bone *parent=NULL)
 {
     if(node->recType == Nif::RC_NiTriShape)
         return;
@@ -326,18 +326,18 @@ void buildBones(Ogre::Skeleton *skel, const Nif::Node *node, Ogre::Bone *&nonacc
     while(!ctrl.empty())
     {
         if(ctrl->recType == Nif::RC_NiKeyframeController)
-            ctrls.push_back(static_cast<Nif::NiKeyframeController*>(ctrl.getPtr()));
+            ctrls.push_back(static_cast<const Nif::NiKeyframeController*>(ctrl.getPtr()));
         ctrl = ctrl->next;
     }
 
     Nif::ExtraPtr e = node->extra;
     while(!e.empty())
     {
-        if(e->recType == Nif::RC_NiTextKeyExtraData && !nonaccum)
+        if(e->recType == Nif::RC_NiTextKeyExtraData && !animroot)
         {
             const Nif::NiTextKeyExtraData *tk = static_cast<const Nif::NiTextKeyExtraData*>(e.getPtr());
             textkeys = extractTextKeys(tk);
-            nonaccum = bone;
+            animroot = bone;
         }
         e = e->extra;
     }
@@ -349,7 +349,7 @@ void buildBones(Ogre::Skeleton *skel, const Nif::Node *node, Ogre::Bone *&nonacc
         for(size_t i = 0;i < children.length();i++)
         {
             if(!children[i].empty())
-                buildBones(skel, children[i].getPtr(), nonaccum, textkeys, ctrls, bone);
+                buildBones(skel, children[i].getPtr(), animroot, textkeys, ctrls, bone);
         }
     }
 }
@@ -369,10 +369,10 @@ void loadResource(Ogre::Resource *resource)
     const Nif::Node *node = dynamic_cast<const Nif::Node*>(nif.getRecord(0));
 
     std::vector<const Nif::NiKeyframeController*> ctrls;
-    Ogre::Bone *nonaccum = NULL;
+    Ogre::Bone *animroot = NULL;
     TextKeyMap textkeys;
     try {
-        buildBones(skel, node, nonaccum, textkeys, ctrls);
+        buildBones(skel, node, animroot, textkeys, ctrls);
     }
     catch(std::exception &e) {
         std::cerr<< "Exception while loading "<<skel->getName() <<std::endl;
@@ -402,14 +402,14 @@ void loadResource(Ogre::Resource *resource)
         return;
     }
 
-    if(!nonaccum)
+    if(!animroot)
     {
         warn(Ogre::StringConverter::toString(ctrls.size())+" animated node(s) in "+
              skel->getName()+", but no text keys. Uses NiBSAnimationNode?");
         return;
     }
 
-    Ogre::UserObjectBindings &bindings = nonaccum->getUserObjectBindings();
+    Ogre::UserObjectBindings &bindings = animroot->getUserObjectBindings();
     bindings.setUserAny(sTextKeyExtraDataID, Ogre::Any(true));
 
     std::string currentgroup;
