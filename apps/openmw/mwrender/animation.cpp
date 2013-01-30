@@ -94,24 +94,12 @@ void Animation::createEntityList(Ogre::SceneNode *node, const std::string &model
             break;
         }
 
-        // Reset initial state of bones that are animated, so the animation correctly applies.
-        if(skelinst->getNumAnimations() > 0)
-        {
-            Ogre::Animation *anim = skelinst->getAnimation(0);
-            Ogre::Animation::NodeTrackIterator trackiter = anim->getNodeTrackIterator();
-            while(trackiter.hasMoreElements())
-            {
-                const Ogre::Node *srcnode = trackiter.getNext()->getAssociatedNode();
-                if(!skelinst->hasBone(srcnode->getName()))
-                    continue;
-
-                Ogre::Bone *bone = skelinst->getBone(srcnode->getName());
-                bone->setOrientation(Ogre::Quaternion::IDENTITY);
-                bone->setPosition(Ogre::Vector3::ZERO);
-                bone->setScale(Ogre::Vector3(1.0f));
-                bone->setInitialState();
-            }
-        }
+        // Set the bones as manually controlled since we're applying the
+        // transformations manually (needed if we want to apply an animation
+        // from one skeleton onto another).
+        boneiter = skelinst->getBoneIterator();
+        while(boneiter.hasMoreElements())
+            boneiter.getNext()->setManuallyControlled(true);
     }
 }
 
@@ -134,16 +122,39 @@ void Animation::setAccumulation(const Ogre::Vector3 &accum)
 }
 
 
+void Animation::applyAnimation(const Ogre::Animation *anim, float time, Ogre::SkeletonInstance *skel)
+{
+    Ogre::TimeIndex timeindex = anim->_getTimeIndex(time);
+    Ogre::Animation::NodeTrackIterator tracks = anim->getNodeTrackIterator();
+    while(tracks.hasMoreElements())
+    {
+        Ogre::NodeAnimationTrack *track = tracks.getNext();
+        const Ogre::String &targetname = track->getAssociatedNode()->getName();
+        if(!skel->hasBone(targetname))
+            continue;
+        Ogre::Bone *bone = skel->getBone(targetname);
+        bone->setOrientation(Ogre::Quaternion::IDENTITY);
+        bone->setPosition(Ogre::Vector3::ZERO);
+        bone->setScale(Ogre::Vector3::UNIT_SCALE);
+        track->applyToNode(bone, timeindex);
+    }
+
+    // HACK: Dirty the animation state set so that Ogre will apply the
+    // transformations to entities this skeleton instance is shared with.
+    mEntityList.mSkelBase->getAllAnimationStates()->_notifyDirty();
+}
+
+
 Ogre::Vector3 Animation::updatePosition(float time)
 {
+    Ogre::SkeletonInstance *skel = mEntityList.mSkelBase->getSkeleton();
     mAnimState->setTimePosition(time);
+    applyAnimation(skel->getAnimation(mAnimState->getAnimationName()), mAnimState->getTimePosition(), skel);
 
     Ogre::Vector3 posdiff = Ogre::Vector3::ZERO;
     if(mNonAccumRoot)
     {
-        /* Update the animation and get the non-accumulation root's difference from the
-         * last update. */
-        mEntityList.mSkelBase->getSkeleton()->setAnimationState(*mAnimState->getParent());
+        /* Get the non-accumulation root's difference from the last update. */
         posdiff = (mNonAccumRoot->getPosition() - mLastPosition) * mAccumulate;
 
         /* Translate the accumulation root back to compensate for the move. */
@@ -159,6 +170,7 @@ void Animation::reset(const std::string &marker)
     while(mNextKey != mCurrentKeys->end() && mNextKey->second != marker)
         mNextKey++;
 
+    Ogre::SkeletonInstance *skel = mEntityList.mSkelBase->getSkeleton();
     if(mNextKey != mCurrentKeys->end())
         mAnimState->setTimePosition(mNextKey->first);
     else
@@ -166,10 +178,10 @@ void Animation::reset(const std::string &marker)
         mNextKey = mCurrentKeys->begin();
         mAnimState->setTimePosition(0.0f);
     }
+    applyAnimation(skel->getAnimation(mAnimState->getAnimationName()), mAnimState->getTimePosition(), skel);
 
     if(mNonAccumRoot)
     {
-        mEntityList.mSkelBase->getSkeleton()->setAnimationState(*mAnimState->getParent());
         mLastPosition = mNonAccumRoot->getPosition();
         mAccumRoot->setPosition(mStartPosition - mLastPosition);
     }
@@ -179,10 +191,7 @@ void Animation::reset(const std::string &marker)
 void Animation::play(const std::string &groupname, const std::string &start, bool loop)
 {
     try {
-        if(mAnimState)
-            mAnimState->setEnabled(false);
         mAnimState = mEntityList.mSkelBase->getAnimationState(groupname);
-        mAnimState->setEnabled(true);
         mAnimState->setLoop(loop);
 
         mCurrentKeys = &mTextKeys[groupname];
@@ -197,6 +206,7 @@ void Animation::play(const std::string &groupname, const std::string &start, boo
 Ogre::Vector3 Animation::runAnimation(float timepassed)
 {
     Ogre::Vector3 movement = Ogre::Vector3::ZERO;
+
     timepassed *= mAnimSpeedMult;
     while(mAnimState && mPlaying && timepassed > 0.0f)
     {
@@ -249,6 +259,7 @@ Ogre::Vector3 Animation::runAnimation(float timepassed)
         if(mController)
             mController->markerEvent(time, evt);
     }
+
     return movement;
 }
 

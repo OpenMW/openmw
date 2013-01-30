@@ -35,6 +35,8 @@ protected:
 
     float mAnimSpeedMult;
 
+    void applyAnimation(const Ogre::Animation *anim, float time, Ogre::SkeletonInstance *skel);
+
     /* Updates the animation to the specified time, and returns the movement
      * vector since the last update or reset. */
     Ogre::Vector3 updatePosition(float time);
