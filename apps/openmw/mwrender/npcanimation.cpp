@@ -305,6 +305,21 @@ NifOgre::EntityList NpcAnimation::insertBoundedPart(const std::string &mesh, int
         parts[i]->setVisibilityFlags(mVisibilityFlags);
         parts[i]->getUserObjectBindings().setUserAny(Ogre::Any(group));
     }
+    if(entities.mSkelBase)
+    {
+        Ogre::AnimationStateSet *aset = entities.mSkelBase->getAllAnimationStates();
+        Ogre::AnimationStateIterator asiter = aset->getAnimationStateIterator();
+        while(asiter.hasMoreElements())
+        {
+            Ogre::AnimationState *state = asiter.getNext();
+            state->setEnabled(false);
+            state->setLoop(false);
+        }
+        Ogre::SkeletonInstance *skelinst = entities.mSkelBase->getSkeleton();
+        Ogre::Skeleton::BoneIterator boneiter = skelinst->getBoneIterator();
+        while(boneiter.hasMoreElements())
+            boneiter.getNext()->setManuallyControlled(true);
+    }
     return entities;
 }
 
@@ -317,7 +332,16 @@ Ogre::Vector3 NpcAnimation::runAnimation(float timepassed)
     }
     mTimeToChange += timepassed;
 
-    return Animation::runAnimation(timepassed);
+    Ogre::Vector3 ret = Animation::runAnimation(timepassed);
+    const Ogre::SkeletonInstance *skelsrc = mEntityList.mSkelBase->getSkeleton();
+    for(size_t i = 0;i < sPartListSize;i++)
+    {
+        Ogre::Entity *ent = (this->*sPartList[i].ents).mSkelBase;
+        if(!ent) continue;
+        updateSkeletonInstance(skelsrc, ent->getSkeleton());
+        ent->getAllAnimationStates()->_notifyDirty();
+    }
+    return ret;
 }
 
 void NpcAnimation::removeEntities(NifOgre::EntityList &entities)

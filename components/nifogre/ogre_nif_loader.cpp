@@ -1228,19 +1228,18 @@ EntityList Loader::createEntities(Ogre::Entity *parent, const std::string &bonen
 
     if(entitylist.mSkelBase)
     {
-        entitylist.mSkelBase->shareSkeletonInstanceWith(parent);
         parentNode->attachObject(entitylist.mSkelBase);
         for(size_t i = 0;i < entitylist.mEntities.size();i++)
         {
             Ogre::Entity *entity = entitylist.mEntities[i];
             if(entity != entitylist.mSkelBase && entity->hasSkeleton())
             {
-                entity->shareSkeletonInstanceWith(parent);
+                entity->shareSkeletonInstanceWith(entitylist.mSkelBase);
                 parentNode->attachObject(entity);
             }
             else if(entity != entitylist.mSkelBase)
             {
-                Ogre::TagPoint *tag = parent->attachObjectToBone(bonename, entity);
+                Ogre::TagPoint *tag = entitylist.mSkelBase->attachObjectToBone(bonename, entity);
                 tag->setScale(scale);
             }
         }

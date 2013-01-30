@@ -146,6 +146,21 @@ void Animation::applyAnimation(const Ogre::Animation *anim, float time, Ogre::Sk
     mEntityList.mSkelBase->getAllAnimationStates()->_notifyDirty();
 }
 
+void Animation::updateSkeletonInstance(const Ogre::SkeletonInstance *skelsrc, Ogre::SkeletonInstance *skel)
+{
+    Ogre::Skeleton::BoneIterator boneiter = skel->getBoneIterator();
+    while(boneiter.hasMoreElements())
+    {
+        Ogre::Bone *bone = boneiter.getNext();
+        if(!skelsrc->hasBone(bone->getName()))
+            continue;
+        Ogre::Bone *srcbone = skelsrc->getBone(bone->getName());
+        bone->setOrientation(srcbone->getOrientation());
+        bone->setPosition(srcbone->getPosition());
+        bone->setScale(srcbone->getScale());
+    }
+}
+
 
 Ogre::Vector3 Animation::updatePosition(float time)
 {

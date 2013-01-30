@@ -37,7 +37,12 @@ protected:
 
     float mAnimSpeedMult;
 
+    /* Applies the given animation to the given skeleton instance, using the specified time. */
     void applyAnimation(const Ogre::Animation *anim, float time, Ogre::SkeletonInstance *skel);
+
+    /* Updates a skeleton instance so that all bones matching the source skeleton (based on
+     * bone names) are positioned identically. */
+    void updateSkeletonInstance(const Ogre::SkeletonInstance *skelsrc, Ogre::SkeletonInstance *skel);
 
     /* Updates the animation to the specified time, and returns the movement
      * vector since the last update or reset. */
