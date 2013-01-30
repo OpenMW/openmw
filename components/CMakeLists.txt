@@ -67,7 +67,7 @@ add_component_dir (translation
     )
 
 add_component_qt_dir (file_order_list
-    datafilespage model/modelitem model/datafilesmodel model/esm/esmfile
+    datafileslist model/modelitem model/datafilesmodel model/esm/esmfile
     utils/filedialog utils/lineedit utils/profilescombobox utils/textinputdialog utils/naturalsort
     )
 

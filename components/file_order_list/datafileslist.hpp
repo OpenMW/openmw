@@ -1,5 +1,5 @@
-#ifndef DATAFILESPAGE_H
-#define DATAFILESPAGE_H
+#ifndef DATAFILESLIST_H
+#define DATAFILESLIST_H
 
 #include <QWidget>
 #include <QModelIndex>
@@ -20,12 +20,12 @@ class TextInputDialog;
 
 namespace Files { struct ConfigurationManager; }
 
-class DataFilesPage : public QWidget
+class DataFilesList : public QWidget
 {
     Q_OBJECT
 
 public:
-    DataFilesPage(Files::ConfigurationManager& cfg, QWidget *parent = 0);
+    DataFilesList(Files::ConfigurationManager& cfg, QWidget *parent = 0);
 
     ProfilesComboBox *mProfilesComboBox;
 

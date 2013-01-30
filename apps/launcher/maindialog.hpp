@@ -15,7 +15,7 @@ class QString;
 
 class PlayPage;
 class GraphicsPage;
-class DataFilesPage;
+class DataFilesList;
 
 class MainDialog : public QMainWindow
 {
@@ -39,7 +39,7 @@ private:
 
     PlayPage *mPlayPage;
     GraphicsPage *mGraphicsPage;
-    DataFilesPage *mDataFilesPage;
+    DataFilesList *mDataFilesList;
 
     Files::ConfigurationManager mCfgMgr;
     Settings::Manager mSettings;

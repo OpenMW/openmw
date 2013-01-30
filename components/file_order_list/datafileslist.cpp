@@ -12,7 +12,7 @@
 #include "utils/naturalsort.hpp"
 #include "utils/textinputdialog.hpp"
 
-#include "datafilespage.hpp"
+#include "datafileslist.hpp"
 
 #include <boost/version.hpp>
 /**
@@ -46,7 +46,7 @@ bool rowSmallerThan(const QModelIndex &index1, const QModelIndex &index2)
     return index1.row() <= index2.row();
 }
 
-DataFilesPage::DataFilesPage(Files::ConfigurationManager &cfg, QWidget *parent)
+DataFilesList::DataFilesList(Files::ConfigurationManager &cfg, QWidget *parent)
     : QWidget(parent)
     , mCfgMgr(cfg)
 {
@@ -180,7 +180,7 @@ DataFilesPage::DataFilesPage(Files::ConfigurationManager &cfg, QWidget *parent)
     setupConfig();
 }
 
-void DataFilesPage::createActions()
+void DataFilesList::createActions()
 {
     // Refresh the plugins
     QAction *refreshAction = new QAction(tr("Refresh"), this);
@@ -218,7 +218,7 @@ void DataFilesPage::createActions()
 
 }
 
-void DataFilesPage::setupConfig()
+void DataFilesList::setupConfig()
 {
     // Open our config file
     QString config = QString::fromStdString((mCfgMgr.getUserPath() / "launcher.cfg").string());
@@ -265,7 +265,7 @@ void DataFilesPage::setupConfig()
 }
 
 
-void DataFilesPage::readConfig()
+void DataFilesList::readConfig()
 {
     // Don't read the config if no masters are found
     if (mMastersModel->rowCount() < 1)
@@ -340,7 +340,7 @@ void DataFilesPage::readConfig()
 
 }
 
-bool DataFilesPage::showDataFilesWarning()
+bool DataFilesList::showDataFilesWarning()
 {
 
     QMessageBox msgBox;
@@ -381,7 +381,7 @@ bool DataFilesPage::showDataFilesWarning()
     return true;
 }
 
-bool DataFilesPage::setupDataFiles()
+bool DataFilesList::setupDataFiles()
 {
     // We use the Configuration Manager to retrieve the configuration values
     boost::program_options::variables_map variables;
@@ -451,7 +451,7 @@ bool DataFilesPage::setupDataFiles()
     return true;
 }
 
-void DataFilesPage::writeConfig(QString profile)
+void DataFilesList::writeConfig(QString profile)
 {
     // Don't overwrite the config if no masters are found
     if (mMastersModel->rowCount() < 1)
@@ -606,7 +606,7 @@ void DataFilesPage::writeConfig(QString profile)
 }
 
 
-void DataFilesPage::newProfile()
+void DataFilesList::newProfile()
 {
     if (mNewProfileDialog->exec() == QDialog::Accepted) {
 
@@ -621,7 +621,7 @@ void DataFilesPage::newProfile()
     }
 }
 
-void DataFilesPage::updateOkButton(const QString &text)
+void DataFilesList::updateOkButton(const QString &text)
 {
     if (text.isEmpty()) {
          mNewProfileDialog->setOkButtonEnabled(false);
@@ -633,7 +633,7 @@ void DataFilesPage::updateOkButton(const QString &text)
             : mNewProfileDialog->setOkButtonEnabled(false);
 }
 
-void DataFilesPage::deleteProfile()
+void DataFilesList::deleteProfile()
 {
     QString profile = mProfilesComboBox->currentText();
 
@@ -670,7 +670,7 @@ void DataFilesPage::deleteProfile()
     }
 }
 
-void DataFilesPage::check()
+void DataFilesList::check()
 {
     // Check the current selection
     if (!mPluginsTable->selectionModel()->hasSelection()) {
@@ -690,7 +690,7 @@ void DataFilesPage::check()
     }
 }
 
-void DataFilesPage::uncheck()
+void DataFilesList::uncheck()
 {
     // uncheck the current selection
     if (!mPluginsTable->selectionModel()->hasSelection()) {
@@ -710,7 +710,7 @@ void DataFilesPage::uncheck()
     }
 }
 
-void DataFilesPage::refresh()
+void DataFilesList::refresh()
 {
     mPluginsModel->sort(0);
 
@@ -722,7 +722,7 @@ void DataFilesPage::refresh()
 }
 
 
-void DataFilesPage::setCheckState(QModelIndex index)
+void DataFilesList::setCheckState(QModelIndex index)
 {
     if (!index.isValid())
         return;
@@ -751,13 +751,13 @@ void DataFilesPage::setCheckState(QModelIndex index)
 
 }
 
-void DataFilesPage::filterChanged(const QString filter)
+void DataFilesList::filterChanged(const QString filter)
 {
     QRegExp regExp(filter, Qt::CaseInsensitive, QRegExp::FixedString);
     mPluginsProxyModel->setFilterRegExp(regExp);
 }
 
-void DataFilesPage::profileChanged(const QString &previous, const QString &current)
+void DataFilesList::profileChanged(const QString &previous, const QString &current)
 {
     qDebug() << "Profile is changed from: " << previous << " to " << current;
     // Prevent the deletion of the default profile
@@ -785,7 +785,7 @@ void DataFilesPage::profileChanged(const QString &previous, const QString &curre
     readConfig();
 }
 
-void DataFilesPage::profileRenamed(const QString &previous, const QString &current)
+void DataFilesList::profileRenamed(const QString &previous, const QString &current)
 {
     if (previous.isEmpty())
         return;
@@ -815,7 +815,7 @@ void DataFilesPage::profileRenamed(const QString &previous, const QString &curre
      readConfig();
 }
 
-void DataFilesPage::showContextMenu(const QPoint &point)
+void DataFilesList::showContextMenu(const QPoint &point)
 {
     // Make sure there are plugins in the view
     if (!mPluginsTable->selectionModel()->hasSelection()) {
