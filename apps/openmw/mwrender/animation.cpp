@@ -25,8 +25,10 @@ Animation::Animation(const MWWorld::Ptr &ptr)
     , mStartPosition(0.0f)
     , mLastPosition(0.0f)
     , mCurrentKeys(NULL)
-    , mAnimState(NULL)
+    , mCurrentAnim(NULL)
+    , mCurrentTime(0.0f)
     , mPlaying(false)
+    , mLooping(false)
     , mAnimSpeedMult(1.0f)
 {
 }
@@ -106,7 +108,7 @@ void Animation::createEntityList(Ogre::SceneNode *node, const std::string &model
 
 bool Animation::hasAnimation(const std::string &anim)
 {
-    return mEntityList.mSkelBase && mEntityList.mSkelBase->hasAnimationState(anim);
+    return mEntityList.mSkelBase && mEntityList.mSkelBase->getSkeleton()->hasAnimation(anim);
 }
 
 
@@ -147,9 +149,11 @@ void Animation::applyAnimation(const Ogre::Animation *anim, float time, Ogre::Sk
 
 Ogre::Vector3 Animation::updatePosition(float time)
 {
-    Ogre::SkeletonInstance *skel = mEntityList.mSkelBase->getSkeleton();
-    mAnimState->setTimePosition(time);
-    applyAnimation(skel->getAnimation(mAnimState->getAnimationName()), mAnimState->getTimePosition(), skel);
+    if(mLooping)
+        mCurrentTime = std::fmod(std::max(time, 0.0f), mCurrentAnim->getLength());
+    else
+        mCurrentTime = std::min(mCurrentAnim->getLength(), std::max(time, 0.0f));
+    applyAnimation(mCurrentAnim, mCurrentTime, mEntityList.mSkelBase->getSkeleton());
 
     Ogre::Vector3 posdiff = Ogre::Vector3::ZERO;
     if(mNonAccumRoot)
@@ -170,15 +174,14 @@ void Animation::reset(const std::string &marker)
     while(mNextKey != mCurrentKeys->end() && mNextKey->second != marker)
         mNextKey++;
 
-    Ogre::SkeletonInstance *skel = mEntityList.mSkelBase->getSkeleton();
     if(mNextKey != mCurrentKeys->end())
-        mAnimState->setTimePosition(mNextKey->first);
+        mCurrentTime = mNextKey->first;
     else
     {
         mNextKey = mCurrentKeys->begin();
-        mAnimState->setTimePosition(0.0f);
+        mCurrentTime = 0.0f;
     }
-    applyAnimation(skel->getAnimation(mAnimState->getAnimationName()), mAnimState->getTimePosition(), skel);
+    applyAnimation(mCurrentAnim, mCurrentTime, mEntityList.mSkelBase->getSkeleton());
 
     if(mNonAccumRoot)
     {
@@ -191,12 +194,12 @@ void Animation::reset(const std::string &marker)
 void Animation::play(const std::string &groupname, const std::string &start, bool loop)
 {
     try {
-        mAnimState = mEntityList.mSkelBase->getAnimationState(groupname);
-        mAnimState->setLoop(loop);
-
+        mCurrentAnim = mEntityList.mSkelBase->getSkeleton()->getAnimation(groupname);
         mCurrentKeys = &mTextKeys[groupname];
+
         reset(start);
         mPlaying = true;
+        mLooping = loop;
     }
     catch(std::exception &e) {
         std::cerr<< e.what() <<std::endl;
@@ -208,13 +211,13 @@ Ogre::Vector3 Animation::runAnimation(float timepassed)
     Ogre::Vector3 movement = Ogre::Vector3::ZERO;
 
     timepassed *= mAnimSpeedMult;
-    while(mAnimState && mPlaying && timepassed > 0.0f)
+    while(mCurrentAnim && mPlaying && timepassed > 0.0f)
     {
-        float targetTime = mAnimState->getTimePosition() + timepassed;
+        float targetTime = mCurrentTime + timepassed;
         if(mNextKey == mCurrentKeys->end() || mNextKey->first > targetTime)
         {
             movement += updatePosition(targetTime);
-            mPlaying = (mAnimState->getLoop() || mAnimState->getLength() >= targetTime);
+            mPlaying = (mLooping || mCurrentAnim->getLength() >= targetTime);
             break;
         }
 
@@ -232,20 +235,20 @@ Ogre::Vector3 Animation::runAnimation(float timepassed)
         }
         if(evt == "loop stop")
         {
-            if(mAnimState->getLoop())
+            if(mLooping)
             {
                 reset("loop start");
-                if(mAnimState->getTimePosition() >= time)
+                if(mCurrentTime >= time)
                     break;
             }
             continue;
         }
         if(evt == "stop")
         {
-            if(mAnimState->getLoop())
+            if(mLooping)
             {
                 reset("loop start");
-                if(mAnimState->getTimePosition() >= time)
+                if(mCurrentTime >= time)
                     break;
             }
             else

@@ -30,8 +30,10 @@ protected:
 
     NifOgre::TextKeyMap *mCurrentKeys;
     NifOgre::TextKeyMap::const_iterator mNextKey;
-    Ogre::AnimationState *mAnimState;
+    Ogre::Animation *mCurrentAnim;
+    float mCurrentTime;
     bool mPlaying;
+    bool mLooping;
 
     float mAnimSpeedMult;
 
