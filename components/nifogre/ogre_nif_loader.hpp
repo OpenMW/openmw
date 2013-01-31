@@ -66,7 +66,7 @@ typedef std::vector<MeshInfo> MeshInfoList;
 
 class Loader
 {
-    static MeshInfoList load(const std::string &name, const std::string &skelName, const std::string &group);
+    static MeshInfoList load(const std::string &name, const std::string &group);
 
 public:
     static EntityList createEntities(Ogre::Entity *parent, const std::string &bonename,

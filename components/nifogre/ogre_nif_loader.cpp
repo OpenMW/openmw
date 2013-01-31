@@ -754,7 +754,6 @@ class NIFMeshLoader : Ogre::ManualResourceLoader
     std::string mName;
     std::string mGroup;
     size_t mShapeIndex;
-    std::string mSkelName;
     std::string mMaterialName;
     std::string mShapeName;
 
@@ -782,11 +781,11 @@ class NIFMeshLoader : Ogre::ManualResourceLoader
         {
             // Only set a skeleton when skinning. Unskinned meshes with a skeleton will be
             // explicitly attached later.
-            mesh->setSkeletonName(mSkelName);
+            mesh->setSkeletonName(mName);
 
             // Get the skeleton resource, so vertices can be transformed into the bones' initial state.
             Ogre::SkeletonManager *skelMgr = Ogre::SkeletonManager::getSingletonPtr();
-            skel = skelMgr->getByName(mSkelName);
+            skel = skelMgr->getByName(mName);
 
             // Convert vertices and normals to bone space from bind position. It would be
             // better to transform the bones into bind position, but there doesn't seem to
@@ -823,22 +822,26 @@ class NIFMeshLoader : Ogre::ManualResourceLoader
             srcVerts = newVerts;
             srcNorms = newNorms;
         }
-        else if(mSkelName.length() == 0)
+        else
         {
-            // No skinning and no skeleton, so just transform the vertices and
-            // normals into position.
-            Ogre::Matrix4 mat4 = shape->getWorldTransform();
-            for(size_t i = 0;i < srcVerts.size();i++)
+            Ogre::SkeletonManager *skelMgr = Ogre::SkeletonManager::getSingletonPtr();
+            if(skelMgr->getByName(mName).isNull())
             {
-                Ogre::Vector4 vec4(srcVerts[i].x, srcVerts[i].y, srcVerts[i].z, 1.0f);
-                vec4 = mat4*vec4;
-                srcVerts[i] = Ogre::Vector3(&vec4[0]);
-            }
-            for(size_t i = 0;i < srcNorms.size();i++)
-            {
-                Ogre::Vector4 vec4(srcNorms[i].x, srcNorms[i].y, srcNorms[i].z, 0.0f);
-                vec4 = mat4*vec4;
-                srcNorms[i] = Ogre::Vector3(&vec4[0]);
+                // No skinning and no skeleton, so just transform the vertices and
+                // normals into position.
+                Ogre::Matrix4 mat4 = shape->getWorldTransform();
+                for(size_t i = 0;i < srcVerts.size();i++)
+                {
+                    Ogre::Vector4 vec4(srcVerts[i].x, srcVerts[i].y, srcVerts[i].z, 1.0f);
+                    vec4 = mat4*vec4;
+                    srcVerts[i] = Ogre::Vector3(&vec4[0]);
+                }
+                for(size_t i = 0;i < srcNorms.size();i++)
+                {
+                    Ogre::Vector4 vec4(srcNorms[i].x, srcNorms[i].y, srcNorms[i].z, 0.0f);
+                    vec4 = mat4*vec4;
+                    srcNorms[i] = Ogre::Vector3(&vec4[0]);
+                }
             }
         }
 
@@ -998,8 +1001,8 @@ class NIFMeshLoader : Ogre::ManualResourceLoader
 public:
     NIFMeshLoader()
     { }
-    NIFMeshLoader(const std::string &name, const std::string &group, const std::string skelName)
-      : mName(name), mGroup(group), mShapeIndex(~(size_t)0), mSkelName(skelName)
+    NIFMeshLoader(const std::string &name, const std::string &group)
+      : mName(name), mGroup(group), mShapeIndex(~(size_t)0)
     { }
 
     virtual void loadResource(Ogre::Resource *resource)
@@ -1010,7 +1013,9 @@ public:
         Nif::NIFFile::ptr nif = Nif::NIFFile::create(mName);
         if(mShapeIndex >= nif->numRecords())
         {
-            mesh->setSkeletonName(mSkelName);
+            Ogre::SkeletonManager *skelMgr = Ogre::SkeletonManager::getSingletonPtr();
+            if(!skelMgr->getByName(mName).isNull())
+                mesh->setSkeletonName(mName);
             return;
         }
 
@@ -1061,8 +1066,6 @@ public:
             std::string fullname = mName+"@index="+Ogre::StringConverter::toString(shape->recIndex);
             if(mShapeName.length() > 0)
                 fullname += "@shape="+mShapeName;
-            if(mSkelName.length() > 0 && mName != mSkelName)
-                fullname += "@skel="+mSkelName;
 
             Misc::StringUtils::toLower(fullname);
             Ogre::MeshPtr mesh = meshMgr.getByName(fullname);
@@ -1105,13 +1108,13 @@ NIFMeshLoader::LoaderMap NIFMeshLoader::sLoaders;
 typedef std::map<std::string,MeshInfoList> MeshInfoMap;
 static MeshInfoMap sMeshInfoMap;
 
-MeshInfoList Loader::load(const std::string &name, const std::string &skelName, const std::string &group)
+MeshInfoList Loader::load(const std::string &name, const std::string &group)
 {
-    MeshInfoMap::const_iterator meshiter = sMeshInfoMap.find(name+"@skel="+skelName);
+    MeshInfoMap::const_iterator meshiter = sMeshInfoMap.find(name);
     if(meshiter != sMeshInfoMap.end())
         return meshiter->second;
 
-    MeshInfoList &meshes = sMeshInfoMap[name+"@skel="+skelName];
+    MeshInfoList &meshes = sMeshInfoMap[name];
     Nif::NIFFile::ptr pnif = Nif::NIFFile::create(name);
     Nif::NIFFile &nif = *pnif.get();
     if(nif.numRecords() < 1)
@@ -1139,7 +1142,7 @@ MeshInfoList Loader::load(const std::string &name, const std::string &skelName, 
         hasSkel = skelldr.createSkeleton(name, group, node);
     }
 
-    NIFMeshLoader meshldr(name, group, (hasSkel ? skelName : std::string()));
+    NIFMeshLoader meshldr(name, group);
     meshldr.createMeshes(node, meshes);
 
     return meshes;
@@ -1150,7 +1153,7 @@ EntityList Loader::createEntities(Ogre::SceneNode *parentNode, std::string name,
     EntityList entitylist;
 
     Misc::StringUtils::toLower(name);
-    MeshInfoList meshes = load(name, name, group);
+    MeshInfoList meshes = load(name, group);
     if(meshes.size() == 0)
         return entitylist;
 
@@ -1199,7 +1202,7 @@ EntityList Loader::createEntities(Ogre::Entity *parent, const std::string &bonen
     EntityList entitylist;
 
     Misc::StringUtils::toLower(name);
-    MeshInfoList meshes = load(name, parent->getMesh()->getSkeletonName(), group);
+    MeshInfoList meshes = load(name, group);
     if(meshes.size() == 0)
         return entitylist;
 
