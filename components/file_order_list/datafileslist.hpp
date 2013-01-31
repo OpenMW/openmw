@@ -32,6 +32,7 @@ public:
     void writeConfig(QString profile = QString());
     bool showDataFilesWarning();
     bool setupDataFiles();
+    void getSelectedFiles(std::vector<boost::filesystem::path>& paths);
 
 public slots:
     void setCheckState(QModelIndex index);

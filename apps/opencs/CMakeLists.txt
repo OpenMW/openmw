@@ -17,7 +17,7 @@ set (OPENCS_SRC
     view/world/table.cpp view/world/tablesubview.cpp view/world/subviews.cpp view/world/util.cpp
     view/world/dialoguesubview.cpp
 
-    view/tools/reportsubview.cpp view/tools/subviews.cpp
+    view/tools/reportsubview.cpp view/tools/subviews.cpp view/tools/opendialog.cpp
     )
 
 set (OPENCS_HDR
@@ -38,7 +38,7 @@ set (OPENCS_HDR
     view/world/table.hpp view/world/tablesubview.hpp view/world/subviews.hpp view/world/util.hpp
     view/world/dialoguesubview.hpp
 
-    view/tools/reportsubview.hpp view/tools/subviews.hpp
+    view/tools/reportsubview.hpp view/tools/subviews.hpp view/tools/opendialog.hpp
     )
 
 set (OPENCS_US

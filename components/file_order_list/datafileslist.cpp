@@ -451,6 +451,22 @@ bool DataFilesList::setupDataFiles()
     return true;
 }
 
+void DataFilesList::getSelectedFiles(std::vector<boost::filesystem::path>& paths)
+{
+    QStringList masterPaths = mMastersModel->checkedItemsPaths();
+    foreach (const QString &path, masterPaths)
+    {
+        paths.push_back(path.toStdString());
+        cerr << path.toStdString() << endl;
+    }
+    QStringList pluginPaths = mPluginsModel->checkedItemsPaths();
+    foreach (const QString &path, pluginPaths)
+    {
+        paths.push_back(path.toStdString());
+        cerr << path.toStdString() << endl;
+    }
+}
+
 void DataFilesList::writeConfig(QString profile)
 {
     // Don't overwrite the config if no masters are found

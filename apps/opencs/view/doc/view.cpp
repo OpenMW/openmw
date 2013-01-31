@@ -14,6 +14,8 @@
 
 #include "../tools/subviews.hpp"
 
+#include "../tools/opendialog.hpp"
+
 #include "viewmanager.hpp"
 #include "operations.hpp"
 #include "subview.hpp"
@@ -31,6 +33,10 @@ void CSVDoc::View::setupFileMenu()
     QAction *new_ = new QAction (tr ("New"), this);
     connect (new_, SIGNAL (triggered()), this, SIGNAL (newDocumentRequest()));
     file->addAction (new_);
+    
+    mLoad = new QAction(tr ("&Load"), this);
+    connect (mLoad, SIGNAL (triggered()), this, SLOT (load()));
+    file->addAction (mLoad);
 
     mSave = new QAction (tr ("&Save"), this);
     connect (mSave, SIGNAL (triggered()), this, SLOT (save()));
@@ -110,7 +116,7 @@ void CSVDoc::View::updateActions()
 }
 
 CSVDoc::View::View (ViewManager& viewManager, CSMDoc::Document *document, int totalViews)
-: mViewManager (viewManager), mDocument (document), mViewIndex (totalViews-1), mViewTotal (totalViews)
+: mViewManager (viewManager), mDocument (document), mViewIndex (totalViews-1), mViewTotal (totalViews), mOpenDialog(0)
 {
     setDockOptions (QMainWindow::AllowNestedDocks);
 
@@ -203,6 +209,27 @@ void CSVDoc::View::newView()
 void CSVDoc::View::save()
 {
     mDocument->save();
+}
+
+void CSVDoc::View::load()
+{
+    if (!mOpenDialog) {
+        mOpenDialog = new OpenDialog(this);
+        connect(mOpenDialog, SIGNAL(accepted()), this, SLOT(loadNewFiles()));
+    }
+    
+    mOpenDialog->show();
+    mOpenDialog->raise();
+    mOpenDialog->activateWindow();
+}
+
+void CSVDoc::View::loadNewFiles()
+{
+    //FIXME close old files
+    std::vector<boost::filesystem::path> paths;
+    mOpenDialog->getFileList(paths);
+    //FIXME load new files
+    
 }
 
 void CSVDoc::View::verify()
