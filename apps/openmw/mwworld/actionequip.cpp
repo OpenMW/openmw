@@ -3,6 +3,9 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"
+#include "../mwbase/scriptmanager.hpp"
+
+#include <components/compiler/locals.hpp>
 
 #include "inventorystore.hpp"
 #include "player.hpp"
@@ -34,6 +37,8 @@ namespace MWWorld
         assert(it != invStore.end());
         
         std::string npcRace = actor.get<ESM::NPC>()->mBase->mRace;
+
+        bool equipped = false;
 
         // equip the item in the first free slot
         for (std::vector<int>::const_iterator slot=slots.first.begin();
@@ -91,6 +96,7 @@ namespace MWWorld
             if (slot == --slots.first.end())
             {
                 invStore.equip(*slot, it);
+                equipped = true;
                 break;
             }
 
@@ -98,8 +104,16 @@ namespace MWWorld
             {
                 // slot is not occupied
                 invStore.equip(*slot, it);
+                equipped = true;
                 break;
             }
+        }
+
+        /* Set OnPCEquip Variable on item's script, if it has a script with that variable declared */
+        if(equipped && actor == MWBase::Environment::get().getWorld()->getPlayer().getPlayer() && MWWorld::Class::get(*it).getScript(*it) != ""){
+            int index = MWBase::Environment::get().getScriptManager()->getLocals(MWWorld::Class::get(*it).getScript(*it)).getIndex("onpcequip");
+            if(index != -1)
+                (*it).mRefData->getLocals().mShorts.at (index) = 1;
         }
     }
 }
