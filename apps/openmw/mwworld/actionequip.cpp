@@ -109,11 +109,28 @@ namespace MWWorld
             }
         }
 
-        /* Set OnPCEquip Variable on item's script, if it has a script with that variable declared */
-        if(equipped && actor == MWBase::Environment::get().getWorld()->getPlayer().getPlayer() && MWWorld::Class::get(*it).getScript(*it) != ""){
-            int index = MWBase::Environment::get().getScriptManager()->getLocals(MWWorld::Class::get(*it).getScript(*it)).getIndex("onpcequip");
+        std::string script = MWWorld::Class::get(*it).getScript(*it);
+        
+        /* Set OnPCEquip Variable on item's script, if the player is equipping it, and it has a script with that variable declared */
+        if(equipped && actor == MWBase::Environment::get().getWorld()->getPlayer().getPlayer() && script != "")
+        {
+            Compiler::Locals locals = MWBase::Environment::get().getScriptManager()->getLocals(script);
+            int index = locals.getIndex("onpcequip");
+            char type = locals.getType("onpcequip");
             if(index != -1)
-                (*it).mRefData->getLocals().mShorts.at (index) = 1;
+            {
+                switch(type)
+                {
+                    case 's':
+                        (*it).mRefData->getLocals().mShorts.at (index) = 1; break;
+                    
+                    case 'l':
+                        (*it).mRefData->getLocals().mLongs.at (index) = 1; break;
+                    
+                    case 'f':
+                        (*it).mRefData->getLocals().mFloats.at (index) = 1.0; break;
+                }
+            }
         }
     }
 }
