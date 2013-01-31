@@ -694,10 +694,11 @@ namespace MWWorld
         bool isPlayer = ptr == mPlayer->getPlayer();
         bool haveToMove = mWorldScene->isCellActive(*currCell) || isPlayer;
         
-        removeContainerScripts(ptr);
 
         if (*currCell != newCell)
         {
+        removeContainerScripts(ptr);
+
             if (isPlayer)
                 if (!newCell.isExterior())
                     changeToInteriorCell(Misc::StringUtils::lowerCase(newCell.mCell->mName), pos);
