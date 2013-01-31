@@ -7,10 +7,13 @@
 
 #include <boost/lexical_cast.hpp>
 
+#include <components/compiler/locals.hpp>
+
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
+#include "../mwbase/scriptmanager.hpp"
 
 #include "../mwworld/containerstore.hpp"
 #include "../mwworld/class.hpp"
@@ -240,6 +243,29 @@ namespace MWGui
             if (it != invStore.end() && *it == item)
             {
                 invStore.equip(slot, invStore.end());
+                std::string script = MWWorld::Class::get(*it).getScript(*it);
+                
+                /* Unset OnPCEquip Variable on item's script, if it has a script with that variable declared */
+                if(script != "")
+                {
+                    Compiler::Locals locals = MWBase::Environment::get().getScriptManager()->getLocals(script);
+                    int index = locals.getIndex("onpcequip");
+                    char type = locals.getType("onpcequip");
+                    if(index != -1)
+                    {
+                        switch(type)
+                        {
+                            case 's':
+                                (*it).mRefData->getLocals().mShorts.at (index) = 0; break;
+                            
+                            case 'l':
+                                (*it).mRefData->getLocals().mLongs.at (index) = 0; break;
+                            
+                            case 'f':
+                                (*it).mRefData->getLocals().mFloats.at (index) = 0.0; break;
+                        }
+                    }
+                }
                 return;
             }
         }
