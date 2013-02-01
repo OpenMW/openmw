@@ -341,6 +341,11 @@ namespace MWWorld
         return name;
     }
 
+    void World::removeRefScript (MWWorld::RefData *ref)
+    {
+        mLocalScripts.remove (ref);
+    }
+
     Ptr World::getPtr (const std::string& name, bool activeOnly)
     {
         // the player is always in an active cell.
@@ -396,14 +401,53 @@ namespace MWWorld
         return MWWorld::Ptr();
     }
 
+    void World::addContainerScripts(const Ptr& reference, Ptr::CellStore * cell)
+    {
+        if( reference.getTypeName()==typeid (ESM::Container).name() ||
+            reference.getTypeName()==typeid (ESM::NPC).name() ||
+            reference.getTypeName()==typeid (ESM::Creature).name())
+        {
+            MWWorld::ContainerStore& container = MWWorld::Class::get(reference).getContainerStore(reference);
+            for(MWWorld::ContainerStoreIterator it = container.begin(); it != container.end(); ++it)
+            {
+                std::string script = MWWorld::Class::get(*it).getScript(*it);
+                if(script != "")
+                {
+                    MWWorld::Ptr item = *it;
+                    item.mCell = cell;
+                    mLocalScripts.add (script, item);
+                }
+            }
+        }
+    }
+
     void World::enable (const Ptr& reference)
     {
         if (!reference.getRefData().isEnabled())
         {
             reference.getRefData().enable();
-
+            
             if(mWorldScene->getActiveCells().find (reference.getCell()) != mWorldScene->getActiveCells().end() && reference.getRefData().getCount())
                 mWorldScene->addObjectToScene (reference);
+        }
+    }
+    
+    void World::removeContainerScripts(const Ptr& reference)
+    {
+        if( reference.getTypeName()==typeid (ESM::Container).name() ||
+            reference.getTypeName()==typeid (ESM::NPC).name() ||
+            reference.getTypeName()==typeid (ESM::Creature).name())
+        {
+            MWWorld::ContainerStore& container = MWWorld::Class::get(reference).getContainerStore(reference);
+            for(MWWorld::ContainerStoreIterator it = container.begin(); it != container.end(); ++it)
+            {
+                std::string script = MWWorld::Class::get(*it).getScript(*it);
+                if(script != "")
+                {
+                    MWWorld::Ptr item = *it;
+                    mLocalScripts.remove (item);
+                }
+            }
         }
     }
 
@@ -412,7 +456,7 @@ namespace MWWorld
         if (reference.getRefData().isEnabled())
         {
             reference.getRefData().disable();
-
+            
             if(mWorldScene->getActiveCells().find (reference.getCell())!=mWorldScene->getActiveCells().end() && reference.getRefData().getCount())
                 mWorldScene->removeObjectFromScene (reference);
         }
@@ -635,6 +679,7 @@ namespace MWWorld
             {
                 mWorldScene->removeObjectFromScene (ptr);
                 mLocalScripts.remove (ptr);
+                removeContainerScripts (ptr);
             }
         }
     }
@@ -648,6 +693,8 @@ namespace MWWorld
         CellStore *currCell = ptr.getCell();
         bool isPlayer = ptr == mPlayer->getPlayer();
         bool haveToMove = mWorldScene->isCellActive(*currCell) || isPlayer;
+        
+        removeContainerScripts(ptr);
 
         if (*currCell != newCell)
         {
@@ -674,6 +721,8 @@ namespace MWWorld
                 {
                     MWWorld::Ptr copy =
                         MWWorld::Class::get(ptr).copyToCell(ptr, newCell);
+
+                    addContainerScripts(copy, &newCell);
 
                     mRendering->moveObjectToCell(copy, vec, currCell);
 
@@ -1283,6 +1332,7 @@ namespace MWWorld
             if (!script.empty()) {
                 mLocalScripts.add(script, dropped);
             }
+            addContainerScripts(dropped, &cell);
         }
     }
 

@@ -80,7 +80,7 @@ set(MYGUI_FILES
     openmw_travel_window.layout
     openmw_persuasion_dialog.layout
     smallbars.png
-    VeraMono.ttf
+    DejaVuLGCSansMono.ttf
     markers.png
 )
 

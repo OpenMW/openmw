@@ -3,6 +3,8 @@
 
 #include "../doc/subview.hpp"
 
+class QDataWidgetMapper;
+
 namespace CSMDoc
 {
     class Document;
@@ -12,6 +14,7 @@ namespace CSVWorld
 {
     class DialogueSubView : public CSVDoc::SubView
     {
+            QDataWidgetMapper *mWidgetMapper;
 
         public:
 

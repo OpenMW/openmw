@@ -19,12 +19,19 @@
 
 bool MWDialogue::Filter::testActor (const ESM::DialInfo& info) const
 {
+    bool isCreature = (mActor.getTypeName() != typeid (ESM::NPC).name());
+
     // actor id
     if (!info.mActor.empty())
+    {
         if ( Misc::StringUtils::lowerCase (info.mActor)!=MWWorld::Class::get (mActor).getId (mActor))
             return false;
-
-    bool isCreature = (mActor.getTypeName() != typeid (ESM::NPC).name());
+    }
+    else if (isCreature)
+    {
+        // Creatures must not have topics aside of those specific to their id
+        return false;
+    }
 
     // NPC race
     if (!info.mRace.empty())
@@ -114,6 +121,18 @@ bool MWDialogue::Filter::testSelectStructs (const ESM::DialInfo& info) const
     return true;
 }
 
+bool MWDialogue::Filter::testDisposition (const ESM::DialInfo& info) const
+{
+    bool isCreature = (mActor.getTypeName() != typeid (ESM::NPC).name());
+
+    if (isCreature)
+        return true;
+
+    int actorDisposition = MWBase::Environment::get().getMechanicsManager()->getDerivedDisposition(mActor);
+
+    return actorDisposition >= info.mData.mDisposition;
+}
+
 bool MWDialogue::Filter::testSelectStruct (const SelectWrapper& select) const
 {
     if (select.isNpcOnly() && mActor.getTypeName()!=typeid (ESM::NPC).name())
@@ -155,7 +174,7 @@ bool MWDialogue::Filter::testSelectStructNumeric (const SelectWrapper& select) c
             int i = 0;
 
             for (; i<static_cast<int> (script->mVarNames.size()); ++i)
-                if (script->mVarNames[i]==name)
+                if (Misc::StringUtils::lowerCase(script->mVarNames[i]) == name)
                     break;
 
             if (i>=static_cast<int> (script->mVarNames.size()))
@@ -540,18 +559,50 @@ MWDialogue::Filter::Filter (const MWWorld::Ptr& actor, int choice, bool talkedTo
 : mActor (actor), mChoice (choice), mTalkedToPlayer (talkedToPlayer)
 {}
 
-bool MWDialogue::Filter::operator() (const ESM::DialInfo& info) const
+const ESM::DialInfo *MWDialogue::Filter::search (const ESM::Dialogue& dialogue, const bool fallbackToInfoRefusal) const
 {
-    return testActor (info) && testPlayer (info) && testSelectStructs (info);
-}
+    bool infoRefusal = false;
 
-const ESM::DialInfo *MWDialogue::Filter::search (const ESM::Dialogue& dialogue) const
-{
+    // Iterate over topic responses to find a matching one
     for (std::vector<ESM::DialInfo>::const_iterator iter = dialogue.mInfo.begin();
         iter!=dialogue.mInfo.end(); ++iter)
-        if ((*this) (*iter))
-            return &*iter;
+    {
+        if (testActor (*iter) && testPlayer (*iter) && testSelectStructs (*iter))
+        {
+            if (testDisposition (*iter))
+                return &*iter;
+            else
+                infoRefusal = true;
+        }
+    }
+
+    if (infoRefusal && fallbackToInfoRefusal)
+    {
+        // No response is valid because of low NPC disposition,
+        // search a response in the topic "Info Refusal"
+
+        const MWWorld::Store<ESM::Dialogue> &dialogues =
+            MWBase::Environment::get().getWorld()->getStore().get<ESM::Dialogue>();
+
+        const ESM::Dialogue& infoRefusalDialogue = *dialogues.find ("Info Refusal");
+
+        for (std::vector<ESM::DialInfo>::const_iterator iter = infoRefusalDialogue.mInfo.begin();
+            iter!=infoRefusalDialogue.mInfo.end(); ++iter)
+            if (testActor (*iter) && testPlayer (*iter) && testSelectStructs (*iter) && testDisposition(*iter))
+                return &*iter;
+    }
 
     return 0;
 }
 
+bool MWDialogue::Filter::responseAvailable (const ESM::Dialogue& dialogue) const
+{
+    for (std::vector<ESM::DialInfo>::const_iterator iter = dialogue.mInfo.begin();
+        iter!=dialogue.mInfo.end(); ++iter)
+    {
+        if (testActor (*iter) && testPlayer (*iter) && testSelectStructs (*iter))
+            return true;
+    }
+
+    return false;
+}

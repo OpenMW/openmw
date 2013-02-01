@@ -27,17 +27,17 @@ namespace MWDialogue
         mEntries.push_back (entry.mInfoId);
     }
 
-    Topic::TEntryIter Topic::begin()
+    Topic::TEntryIter Topic::begin() const
     {
         return mEntries.begin();
     }
 
-    Topic::TEntryIter Topic::end()
+    Topic::TEntryIter Topic::end() const
     {
         return mEntries.end();
     }
 
-    JournalEntry Topic::getEntry (const std::string& infoId)
+    JournalEntry Topic::getEntry (const std::string& infoId) const
     {
         return JournalEntry (mTopic, infoId);
     }
