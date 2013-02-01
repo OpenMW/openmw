@@ -22,7 +22,7 @@ protected:
     Ogre::SceneNode* mInsert;
     NifOgre::EntityList mEntityList;
     std::map<std::string,NifOgre::TextKeyMap> mTextKeys;
-    Ogre::Node *mAccumRoot;
+    Ogre::Bone *mAccumRoot;
     Ogre::Bone *mNonAccumRoot;
     Ogre::Vector3 mAccumulate;
     Ogre::Vector3 mStartPosition;
