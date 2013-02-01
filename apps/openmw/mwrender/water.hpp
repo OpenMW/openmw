@@ -29,6 +29,7 @@ namespace MWRender {
 
     class SkyManager;
     class RenderingManager;
+    class RippleSimulation;
 
     class Reflection
     {
@@ -110,6 +111,8 @@ namespace MWRender {
 
         float mWaterTimer;
 
+        RippleSimulation* mSimulation;
+
         Ogre::Vector3 getSceneNodeCoordinates(int gridX, int gridY);
 
     protected:
@@ -137,7 +140,7 @@ namespace MWRender {
         void setActive(bool active);
 
         void toggle();
-        void update(float dt);
+        void update(float dt, Ogre::Vector3 player);
 
         void assignTextures();
 

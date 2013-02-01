@@ -3,6 +3,7 @@ project(resources)
 set(WATER_FILES
     underwater_dome.mesh
     water_nm.png
+    circle.png
 )
 
 set(GBUFFER_FILES
@@ -43,6 +44,12 @@ set(MATERIAL_FILES
     selection.mat
     selection.shader
     selection.shaderset
+    watersim_heightmap.shader
+    watersim_addimpulse.shader
+    watersim_heighttonormal.shader
+    watersim_common.h
+    watersim.mat
+    watersim.shaderset
 )
 
 copy_all_files(${CMAKE_CURRENT_SOURCE_DIR}/water "${OpenMW_BINARY_DIR}/resources/water/" "${WATER_FILES}")

@@ -1,4 +1,4 @@
-shader_set quad_vertex
+shader_set transform_vertex
 {
     source quad.shader
     type vertex

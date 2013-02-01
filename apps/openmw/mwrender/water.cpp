@@ -12,6 +12,7 @@
 #include "sky.hpp"
 #include "renderingmanager.hpp"
 #include "compositors.hpp"
+#include "ripplesimulation.hpp"
 
 #include <extern/shiny/Main/Factory.hpp>
 #include <extern/shiny/Platforms/Ogre/OgreMaterial.hpp>
@@ -180,8 +181,11 @@ Water::Water (Ogre::Camera *camera, RenderingManager* rend, const ESM::Cell* cel
     mActive(1), mToggled(1),
     mRendering(rend),
     mWaterTimer(0.f),
-    mReflection(NULL)
+    mReflection(NULL),
+    mSimulation(NULL)
 {
+    mSimulation = new RippleSimulation(mSceneMgr);
+
     mSky = rend->getSkyManager();
 
     mMaterial = MaterialManager::getSingleton().getByName("Water");
@@ -375,7 +379,7 @@ void Water::updateVisible()
     }
 }
 
-void Water::update(float dt)
+void Water::update(float dt, Ogre::Vector3 player)
 {
     /*
     Ogre::Vector3 pos = mCamera->getDerivedPosition ();
@@ -387,6 +391,12 @@ void Water::update(float dt)
     sh::Factory::getInstance ().setSharedParameter ("waterTimer", sh::makeProperty<sh::FloatValue>(new sh::FloatValue(mWaterTimer)));
 
     mRendering->getSkyManager ()->setGlareEnabled (!mIsUnderwater);
+
+    //if (player.y <= mTop)
+    {
+        mSimulation->addImpulse(Ogre::Vector2(player.x, player.z));
+    }
+    mSimulation->update(dt, Ogre::Vector2(player.x, player.z));
 }
 
 void Water::applyRTT()

@@ -4,7 +4,7 @@ material quad
     
     pass
     {
-        vertex_program quad_vertex
+        vertex_program transform_vertex
         fragment_program quad_fragment
         
         depth_write $depth_write

@@ -28,6 +28,8 @@
     #define shNormalInput(type) , in type normal : NORMAL
     
     #define shColourInput(type) , in type colour : COLOR
+    
+    #define shFract(val) frac(val)
 
     #ifdef SH_VERTEX_SHADER
 
@@ -63,6 +65,8 @@
 #endif
 
 #if SH_GLSL == 1
+
+	#define shFract(val) fract(val)
 
     @version 120
 

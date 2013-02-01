@@ -61,7 +61,7 @@
 
 // Inspired by Blender GLSL Water by martinsh ( http://devlog-martinsh.blogspot.de/2012/07/waterundewater-shader-wip.html )
 
-
+#define RIPPLES 1
 
 #ifdef SH_VERTEX_SHADER
 
@@ -119,8 +119,8 @@
         #define WAVE_SCALE 75                      // overall wave scale
 
         #define BUMP 1.5                            // overall water surface bumpiness
-        #define REFL_BUMP 0.08                      // reflection distortion amount
-        #define REFR_BUMP 0.06                      // refraction distortion amount
+        #define REFL_BUMP 0.16                      // reflection distortion amount
+        #define REFR_BUMP 0.12                      // refraction distortion amount
 
         #define SCATTER_AMOUNT 3.0                  // amount of sunlight scattering
         #define SCATTER_COLOUR gammaCorrectRead(float3(0.0,1.0,0.95)) // colour of sunlight scattering
@@ -159,6 +159,11 @@
 		shInput(float3, screenCoordsPassthrough)
 		shInput(float4, position)
 		shInput(float, depthPassthrough)
+
+            #if RIPPLES
+                shUniform(float3, rippleCenter) @shSharedParameter(rippleCenter, rippleCenter)
+                shUniform(float, rippleAreaLength) @shSharedParameter(rippleAreaLength, rippleAreaLength)
+            #endif
 		
 		shUniform(float, far) @shAutoConstant(far, far_clip_distance)
 	
@@ -166,6 +171,11 @@
 		shSampler2D(refractionMap)
 		shSampler2D(depthMap)
 		shSampler2D(normalMap)
+
+            #if RIPPLES
+                shSampler2D(rippleNormalMap)
+                shUniform(float4x4, wMat) @shAutoConstant(wMat, world_matrix)
+            #endif
 		
 		shUniform(float3, windDir_windSpeed) @shSharedParameter(windDir_windSpeed)
 		#define WIND_SPEED windDir_windSpeed.z
@@ -220,8 +230,14 @@
 	    float3 normal = (normal0 * BIG_WAVES_X + normal1 * BIG_WAVES_Y +
                                 normal2 * MID_WAVES_X + normal3 * MID_WAVES_Y +
 						        normal4 * SMALL_WAVES_X + normal5 * SMALL_WAVES_Y).xzy;
-        
-        normal = normalize(float3(normal.x * BUMP, normal.y, normal.z * BUMP));
+
+        float4 worldPosition = shMatrixMult(wMat, float4(position.xyz, 1));
+        float2 relPos = (worldPosition.xz - rippleCenter.xy) / rippleAreaLength + 0.5;
+        float3 normal_ripple = normalize(shSample(rippleNormalMap, relPos.xy).xyz * 2 - 1);
+        normal_ripple = normal_ripple.xzy;
+
+        normal = normalize(normal + normal_ripple);
+
 	    
 	    // normal for sunlight scattering			        
 		float3 lNormal = (normal0 * BIG_WAVES_X*0.5 + normal1 * BIG_WAVES_Y*0.5 +
@@ -303,7 +319,7 @@
         }
 
         shOutputColour(0).xyz = gammaCorrectOutput(shOutputColour(0).xyz);
-
+        //shOutputColour(0).xyz = float3(relPos.x, relPos.y, 0);
 		shOutputColour(0).w = 1;
     }
 

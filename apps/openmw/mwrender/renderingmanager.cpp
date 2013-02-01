@@ -386,7 +386,10 @@ void RenderingManager::update (float duration, bool paused)
                 *world->getPlayer().getPlayer().getCell()->mCell,
                 Ogre::Vector3(cam.x, -cam.z, cam.y))
         );
-        mWater->update(duration);
+
+        // MW to ogre coordinates
+        orig = Ogre::Vector3(orig.x, orig.z, -orig.y);
+        mWater->update(duration, orig);
     }
 }
 

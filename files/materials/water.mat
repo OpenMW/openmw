@@ -34,7 +34,13 @@ material Water
         {
             direct_texture water_nm.png
         }
-        
+
+        texture_unit rippleNormalMap
+        {
+            direct_texture RippleNormal
+            tex_address_mode border
+            tex_border_colour 0.5 0.5 1.0
+        }
         
         // for simple_water
         texture_unit animatedTexture
