@@ -306,7 +306,7 @@ endif()
 
 # Compiler settings
 if (CMAKE_COMPILER_IS_GNUCC)
-    add_definitions (-Wall -Wextra -Wno-unused-parameter -Wno-reorder -std=c++0x -pedantic)
+    add_definitions (-Wall -Wextra -Wno-unused-parameter -Wno-reorder -std=c++03 -pedantic -Wno-long-long)
 
     # Silence warnings in OGRE headers. Remove once OGRE got fixed!
     add_definitions (-Wno-ignored-qualifiers)
@@ -506,7 +506,7 @@ if (WIN32)
         4738 # Storing 32-bit float result in memory, possible loss of performance
         4986 # Undocumented warning that occurs in the crtdbg.h file
         4996 # Function was declared deprecated
-		
+
 		# cause by ogre extensivly
 		4193 # #pragma warning(pop) : no matching '#pragma warning(push)'
 		4251 # class 'XXXX' needs to have dll-interface to be used by clients of class 'YYYY'
