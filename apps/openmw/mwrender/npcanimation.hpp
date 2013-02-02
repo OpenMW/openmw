@@ -19,7 +19,6 @@ class NpcAnimation : public Animation
 public:
 struct PartInfo {
     ESM::PartReferenceType type;
-    NifOgre::EntityList NpcAnimation::*ents;
     const char name[32];
 };
 
@@ -30,34 +29,8 @@ private:
     MWWorld::InventoryStore& mInv;
     int mStateID;
 
-    //Bounded Parts
-    NifOgre::EntityList mClavicleL;
-    NifOgre::EntityList mClavicleR;
-    NifOgre::EntityList mUpperArmL;
-    NifOgre::EntityList mUpperArmR;
-    NifOgre::EntityList mUpperLegL;
-    NifOgre::EntityList mUpperLegR;
-    NifOgre::EntityList mForearmL;
-    NifOgre::EntityList mForearmR;
-    NifOgre::EntityList mWristL;
-    NifOgre::EntityList mWristR;
-    NifOgre::EntityList mKneeR;
-    NifOgre::EntityList mKneeL;
-    NifOgre::EntityList mNeck;
-    NifOgre::EntityList mAnkleL;
-    NifOgre::EntityList mAnkleR;
-    NifOgre::EntityList mGroin;
-    NifOgre::EntityList mSkirt;
-    NifOgre::EntityList mFootL;
-    NifOgre::EntityList mFootR;
-    NifOgre::EntityList mHair;
-    NifOgre::EntityList mHandL;
-    NifOgre::EntityList mHandR;
-    NifOgre::EntityList mShield;
-    NifOgre::EntityList mWeapon;
-    NifOgre::EntityList mHead;
-    NifOgre::EntityList mChest;
-    NifOgre::EntityList mTail;
+    // Bounded Parts
+    NifOgre::EntityList mEntityParts[sPartListSize];
 
     const ESM::NPC  *mNpc;
     std::string     mHeadModel;

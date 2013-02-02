@@ -16,39 +16,39 @@ namespace MWRender
 {
 
 const NpcAnimation::PartInfo NpcAnimation::sPartList[NpcAnimation::sPartListSize] = {
-    { ESM::PRT_Head, &NpcAnimation::mHead, "Head" },
-    { ESM::PRT_Hair, &NpcAnimation::mHair, "Head" },
-    { ESM::PRT_Neck, &NpcAnimation::mNeck, "Neck" },
-    { ESM::PRT_Cuirass, &NpcAnimation::mChest, "Chest" },
-    { ESM::PRT_Groin, &NpcAnimation::mGroin, "Groin" },
-    { ESM::PRT_Skirt, &NpcAnimation::mSkirt, "Groin" },
-    { ESM::PRT_RHand, &NpcAnimation::mHandR, "Right Hand" },
-    { ESM::PRT_LHand, &NpcAnimation::mHandL, "Left Hand" },
-    { ESM::PRT_RWrist, &NpcAnimation::mWristR, "Right Wrist" },
-    { ESM::PRT_LWrist, &NpcAnimation::mWristL, "Left Wrist" },
-    { ESM::PRT_Shield, &NpcAnimation::mShield, "Shield" },
-    { ESM::PRT_RForearm, &NpcAnimation::mForearmR, "Right Forearm" },
-    { ESM::PRT_LForearm, &NpcAnimation::mForearmL, "Left Forearm" },
-    { ESM::PRT_RUpperarm, &NpcAnimation::mUpperArmR, "Right Upper Arm" },
-    { ESM::PRT_LUpperarm, &NpcAnimation::mUpperArmL, "Left Upper Arm" },
-    { ESM::PRT_RFoot, &NpcAnimation::mFootR, "Right Foot" },
-    { ESM::PRT_LFoot, &NpcAnimation::mFootL, "Left Foot" },
-    { ESM::PRT_RAnkle, &NpcAnimation::mAnkleR, "Right Ankle" },
-    { ESM::PRT_LAnkle, &NpcAnimation::mAnkleL, "Left Ankle" },
-    { ESM::PRT_RKnee, &NpcAnimation::mKneeR, "Right Knee" },
-    { ESM::PRT_LKnee, &NpcAnimation::mKneeL, "Left Knee" },
-    { ESM::PRT_RLeg, &NpcAnimation::mUpperLegR, "Right Upper Leg" },
-    { ESM::PRT_LLeg, &NpcAnimation::mUpperLegL, "Left Upper Leg" },
-    { ESM::PRT_RPauldron, &NpcAnimation::mClavicleR, "Right Clavicle" },
-    { ESM::PRT_LPauldron, &NpcAnimation::mClavicleL, "Left Clavicle" },
-    { ESM::PRT_Weapon, &NpcAnimation::mWeapon, "Weapon" },
-    { ESM::PRT_Tail, &NpcAnimation::mTail, "Tail" }
+    { ESM::PRT_Head, "Head" },
+    { ESM::PRT_Hair, "Head" },
+    { ESM::PRT_Neck, "Neck" },
+    { ESM::PRT_Cuirass, "Chest" },
+    { ESM::PRT_Groin, "Groin" },
+    { ESM::PRT_Skirt, "Groin" },
+    { ESM::PRT_RHand, "Right Hand" },
+    { ESM::PRT_LHand, "Left Hand" },
+    { ESM::PRT_RWrist, "Right Wrist" },
+    { ESM::PRT_LWrist, "Left Wrist" },
+    { ESM::PRT_Shield, "Shield" },
+    { ESM::PRT_RForearm, "Right Forearm" },
+    { ESM::PRT_LForearm, "Left Forearm" },
+    { ESM::PRT_RUpperarm, "Right Upper Arm" },
+    { ESM::PRT_LUpperarm, "Left Upper Arm" },
+    { ESM::PRT_RFoot, "Right Foot" },
+    { ESM::PRT_LFoot, "Left Foot" },
+    { ESM::PRT_RAnkle, "Right Ankle" },
+    { ESM::PRT_LAnkle, "Left Ankle" },
+    { ESM::PRT_RKnee, "Right Knee" },
+    { ESM::PRT_LKnee, "Left Knee" },
+    { ESM::PRT_RLeg, "Right Upper Leg" },
+    { ESM::PRT_LLeg, "Left Upper Leg" },
+    { ESM::PRT_RPauldron, "Right Clavicle" },
+    { ESM::PRT_LPauldron, "Left Clavicle" },
+    { ESM::PRT_Weapon, "Weapon" },
+    { ESM::PRT_Tail, "Tail" }
 };
 
 NpcAnimation::~NpcAnimation()
 {
     for(size_t i = 0;i < sPartListSize;i++)
-        removeEntities(this->*sPartList[i].ents);
+        removeEntities(mEntityParts[i]);
 }
 
 
@@ -336,7 +336,7 @@ Ogre::Vector3 NpcAnimation::runAnimation(float timepassed)
     const Ogre::SkeletonInstance *skelsrc = mEntityList.mSkelBase->getSkeleton();
     for(size_t i = 0;i < sPartListSize;i++)
     {
-        Ogre::Entity *ent = (this->*sPartList[i].ents).mSkelBase;
+        Ogre::Entity *ent = mEntityParts[i].mSkelBase;
         if(!ent) continue;
         updateSkeletonInstance(skelsrc, ent->getSkeleton());
         ent->getAllAnimationStates()->_notifyDirty();
@@ -367,7 +367,7 @@ void NpcAnimation::removeIndividualPart(int type)
     {
         if(type == sPartList[i].type)
         {
-            removeEntities(this->*sPartList[i].ents);
+            removeEntities(mEntityParts[i]);
             break;
         }
     }
@@ -405,7 +405,7 @@ bool NpcAnimation::addOrReplaceIndividualPart(int type, int group, int priority,
     {
         if(type == sPartList[i].type)
         {
-            this->*sPartList[i].ents = insertBoundedPart(mesh, group, sPartList[i].name);
+            mEntityParts[i] = insertBoundedPart(mesh, group, sPartList[i].name);
             break;
         }
     }
