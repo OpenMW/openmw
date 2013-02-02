@@ -35,6 +35,7 @@
 #include <OgreSubMesh.h>
 #include <OgreRoot.h>
 #include <OgreEntity.h>
+#include <OgreSubEntity.h>
 #include <OgreTagPoint.h>
 
 #include <boost/lexical_cast.hpp>
@@ -1212,16 +1213,8 @@ EntityList Loader::createEntities(Ogre::Entity *parent, const std::string &bonen
     for(size_t i = 0;i < meshes.size();i++)
     {
         Ogre::Entity *ent = sceneMgr->createEntity(meshes[i].mMeshName);
-        if(ent->hasSkeleton())
-        {
-            if(meshes[i].mMeshName.find(filter) == std::string::npos)
-            {
-                sceneMgr->destroyEntity(ent);
-                continue;
-            }
-            if(!entitylist.mSkelBase)
-                entitylist.mSkelBase = ent;
-        }
+        if(!entitylist.mSkelBase && ent->hasSkeleton())
+            entitylist.mSkelBase = ent;
         entitylist.mEntities.push_back(ent);
     }
 
@@ -1231,19 +1224,25 @@ EntityList Loader::createEntities(Ogre::Entity *parent, const std::string &bonen
 
     if(entitylist.mSkelBase)
     {
-        parentNode->attachObject(entitylist.mSkelBase);
         for(size_t i = 0;i < entitylist.mEntities.size();i++)
         {
             Ogre::Entity *entity = entitylist.mEntities[i];
-            if(entity != entitylist.mSkelBase && entity->hasSkeleton())
+            if(entity->hasSkeleton())
             {
-                entity->shareSkeletonInstanceWith(entitylist.mSkelBase);
-                parentNode->attachObject(entity);
+                if(entity != entitylist.mSkelBase)
+                    entity->shareSkeletonInstanceWith(entitylist.mSkelBase);
+                if(entity->getMesh()->getName().find(filter) != std::string::npos)
+                    parentNode->attachObject(entity);
             }
-            else if(entity != entitylist.mSkelBase)
+            else
             {
-                Ogre::TagPoint *tag = entitylist.mSkelBase->attachObjectToBone(bonename, entity);
-                tag->setScale(scale);
+                if(entity->getMesh()->getName().find(filter) != std::string::npos)
+                {
+                    Ogre::TagPoint *tag = entitylist.mSkelBase->attachObjectToBone(meshes[i].mTargetNode, entity);
+                    tag->setPosition(meshes[i].mPos);
+                    tag->setOrientation(meshes[i].mRot);
+                    tag->setScale(Ogre::Vector3(meshes[i].mScale));
+                }
             }
         }
     }
