@@ -10,7 +10,8 @@ public:
     typedef uint32_t unicode_char;
     typedef unsigned char const * point;
 
-    static const unicode_char sBadChar = 0xFFFFFFFF;
+    //static const unicode_char sBadChar = 0xFFFFFFFF; gcc can't handle this
+    static unicode_char sBadChar () { return unicode_char (0xFFFFFFFF); }
 
     utf8_stream (point begin, point end) :
         cur (begin), nxt (begin), end (end)
@@ -62,17 +63,17 @@ public:
         boost::tie (octets, chr) = octet_count (*cur++);
 
         if (octets > 5)
-            return std::make_pair (sBadChar, cur);
+            return std::make_pair (sBadChar(), cur);
 
         auto eoc = cur + octets;
 
         if (eoc > end)
-            return std::make_pair (sBadChar, cur);
+            return std::make_pair (sBadChar(), cur);
 
         while (cur != eoc)
         {
             if ((*cur & 0xC0) != 0x80) // check continuation mark
-                return std::make_pair (sBadChar, cur);;
+                return std::make_pair (sBadChar(), cur);;
 
             chr = (chr << 6) | unicode_char ((*cur++) & 0x3F);
         }
