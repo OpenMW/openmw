@@ -48,7 +48,7 @@ Animation::~Animation()
 
 void Animation::createEntityList(Ogre::SceneNode *node, const std::string &model)
 {
-    mInsert = node;
+    mInsert = node->createChildSceneNode();
     assert(mInsert);
 
     mEntityList = NifOgre::Loader::createEntities(mInsert, model);
@@ -76,8 +76,7 @@ void Animation::createEntityList(Ogre::SceneNode *node, const std::string &model
             if(data.isEmpty() || !Ogre::any_cast<bool>(data))
                 continue;
 
-            mAccumRoot = skelinst->getRootBone();
-            mAccumRoot->setManuallyControlled(true);
+            mAccumRoot = mInsert;
             mNonAccumRoot = skelinst->getBone(bone->getHandle());
 
             mStartPosition = mNonAccumRoot->getInitialPosition();
