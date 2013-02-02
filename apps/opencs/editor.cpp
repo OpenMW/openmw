@@ -11,10 +11,19 @@
 CS::Editor::Editor() : mViewManager (mDocumentManager), mNewDocumentIndex (0)
 {
     connect (&mViewManager, SIGNAL (newDocumentRequest ()), this, SLOT (createDocument ()));
+    connect (&mViewManager, SIGNAL (loadDocumentRequest ()), this, SLOT (loadDocument ()));
+
+    connect (&mStartup, SIGNAL (createDocument()), this, SLOT (createDocument ()));
+    connect (&mStartup, SIGNAL (loadDocument()), this, SLOT (loadDocument ()));
 }
 
 void CS::Editor::createDocument()
 {
+    mStartup.hide();
+
+    /// \todo open the ESX picker instead
+    /// \todo remove the following code for creating initial records into the document manager
+
     std::ostringstream stream;
 
     stream << "NewDocument" << (++mNewDocumentIndex);
@@ -23,7 +32,39 @@ void CS::Editor::createDocument()
 
     static const char *sGlobals[] =
     {
-            "Day", "DaysPassed", "GameHour", "Month", "PCRace", "PCVampire", "PCWerewolf", "PCYear", 0
+        "Day", "DaysPassed", "GameHour", "Month", "PCRace", "PCVampire", "PCWerewolf", "PCYear", 0
+    };
+
+    for (int i=0; sGlobals[i]; ++i)
+    {
+        ESM::Global record;
+        record.mId = sGlobals[i];
+        record.mValue = i==0 ? 1 : 0;
+        record.mType = ESM::VT_Float;
+        document->getData().getGlobals().add (record);
+    }
+
+    document->getData().merge(); /// \todo remove once proper ESX loading is implemented
+
+    mViewManager.addView (document);
+}
+
+void CS::Editor::loadDocument()
+{
+    mStartup.hide();
+
+    /// \todo open the ESX picker instead
+    /// \todo replace the manual record creation and load the ESX files instead
+
+    std::ostringstream stream;
+
+    stream << "Document" << (++mNewDocumentIndex);
+
+    CSMDoc::Document *document = mDocumentManager.addDocument (stream.str());
+
+    static const char *sGlobals[] =
+    {
+        "Day", "DaysPassed", "GameHour", "Month", "PCRace", "PCVampire", "PCWerewolf", "PCYear", 0
     };
 
     for (int i=0; sGlobals[i]; ++i)
@@ -42,8 +83,7 @@ void CS::Editor::createDocument()
 
 int CS::Editor::run()
 {
-    /// \todo Instead of creating an empty document, open a small welcome dialogue window with buttons for new/load/recent projects
-    createDocument();
+    mStartup.show();
 
     return QApplication::exec();
 }
