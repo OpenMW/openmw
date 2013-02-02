@@ -16,7 +16,7 @@
 #include <iostream>
 #include <boost/format.hpp>
 
-std::string bodyPartLabel(char idx)
+std::string bodyPartLabel(signed char idx)
 {
     const char *bodyPartLabels[] =  {
         "Head",
@@ -47,14 +47,14 @@ std::string bodyPartLabel(char idx)
         "Weapon",
         "Tail"
     };
-    
+
     if ((int)idx >= 0 && (int)(idx) <= 26)
         return bodyPartLabels[(int)(idx)];
     else
         return "Invalid";
 }
 
-std::string meshPartLabel(char idx)
+std::string meshPartLabel(signed char idx)
 {
     const char *meshPartLabels[] =  {
         "Head",
@@ -73,25 +73,25 @@ std::string meshPartLabel(char idx)
         "Clavicle",
         "Tail"
     };
-    
+
     if ((int)(idx) >= 0 && (int)(idx) <= ESM::BodyPart::MP_Tail)
         return meshPartLabels[(int)(idx)];
     else
         return "Invalid";
 }
 
-std::string meshTypeLabel(char idx)
+std::string meshTypeLabel(signed char idx)
 {
     const char *meshTypeLabels[] =  {
         "Skin",
         "Clothing",
         "Armor"
     };
-    
+
     if ((int)(idx) >= 0 && (int)(idx) <= ESM::BodyPart::MT_Armor)
         return meshTypeLabels[(int)(idx)];
     else
-        return "Invalid";   
+        return "Invalid";
 }
 
 std::string clothingTypeLabel(int idx)
@@ -108,7 +108,7 @@ std::string clothingTypeLabel(int idx)
         "Ring",
         "Amulet"
     };
-    
+
     if (idx >= 0 && idx <= 9)
         return clothingTypeLabels[idx];
     else

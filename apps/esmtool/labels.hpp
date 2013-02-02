@@ -3,9 +3,9 @@
 
 #include <string>
 
-std::string bodyPartLabel(char idx);
-std::string meshPartLabel(char idx);
-std::string meshTypeLabel(char idx);
+std::string bodyPartLabel(signed char idx);
+std::string meshPartLabel(signed char idx);
+std::string meshTypeLabel(signed char idx);
 std::string clothingTypeLabel(int idx);
 std::string armorTypeLabel(int idx);
 std::string dialogTypeLabel(int idx);
