@@ -37,7 +37,7 @@ namespace CSVDoc
             QAction *mUndo;
             QAction *mRedo;
             QAction *mSave;
-            QAction *mLoad;
+            QAction *mOpen;
             QAction *mVerify;
             std::vector<QAction *> mEditingActions;
             Operations *mOperations;
@@ -95,8 +95,8 @@ namespace CSVDoc
 
             void newView();
 
-            void load();
-            void loadNewFiles();
+            void open();
+            void openNewFiles();
             void save();
 
             void verify();

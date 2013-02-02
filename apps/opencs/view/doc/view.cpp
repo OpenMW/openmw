@@ -14,8 +14,7 @@
 
 #include "../tools/subviews.hpp"
 
-#include "../tools/opendialog.hpp"
-
+#include "opendialog.hpp"
 #include "viewmanager.hpp"
 #include "operations.hpp"
 #include "subview.hpp"
@@ -34,9 +33,9 @@ void CSVDoc::View::setupFileMenu()
     connect (new_, SIGNAL (triggered()), this, SIGNAL (newDocumentRequest()));
     file->addAction (new_);
     
-    mLoad = new QAction(tr ("&Load"), this);
-    connect (mLoad, SIGNAL (triggered()), this, SLOT (load()));
-    file->addAction (mLoad);
+    mOpen = new QAction(tr ("&Open"), this);
+    connect (mOpen, SIGNAL (triggered()), this, SLOT (open()));
+    file->addAction (mOpen);
 
     mSave = new QAction (tr ("&Save"), this);
     connect (mSave, SIGNAL (triggered()), this, SLOT (save()));
@@ -211,11 +210,11 @@ void CSVDoc::View::save()
     mDocument->save();
 }
 
-void CSVDoc::View::load()
+void CSVDoc::View::open()
 {
     if (!mOpenDialog) {
         mOpenDialog = new OpenDialog(this);
-        connect(mOpenDialog, SIGNAL(accepted()), this, SLOT(loadNewFiles()));
+        connect(mOpenDialog, SIGNAL(accepted()), this, SLOT(openNewFiles()));
     }
     
     mOpenDialog->show();
@@ -223,9 +222,8 @@ void CSVDoc::View::load()
     mOpenDialog->activateWindow();
 }
 
-void CSVDoc::View::loadNewFiles()
+void CSVDoc::View::openNewFiles()
 {
-    //FIXME close old files
     std::vector<boost::filesystem::path> paths;
     mOpenDialog->getFileList(paths);
     //FIXME load new files

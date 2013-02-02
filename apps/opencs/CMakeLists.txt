@@ -12,12 +12,12 @@ set (OPENCS_SRC
     model/tools/mandatoryid.cpp model/tools/reportmodel.cpp
 
     view/doc/viewmanager.cpp view/doc/view.cpp view/doc/operations.cpp view/doc/operation.cpp view/doc/subviewfactory.cpp
-    view/doc/subview.cpp
+    view/doc/subview.cpp view/doc/opendialog.cpp
 
     view/world/table.cpp view/world/tablesubview.cpp view/world/subviews.cpp view/world/util.cpp
     view/world/dialoguesubview.cpp
 
-    view/tools/reportsubview.cpp view/tools/subviews.cpp view/tools/opendialog.cpp
+    view/tools/reportsubview.cpp view/tools/subviews.cpp
     )
 
 set (OPENCS_HDR
@@ -33,12 +33,12 @@ set (OPENCS_HDR
     model/tools/mandatoryid.hpp model/tools/reportmodel.hpp
 
     view/doc/viewmanager.hpp view/doc/view.hpp view/doc/operations.hpp view/doc/operation.hpp view/doc/subviewfactory.hpp
-    view/doc/subview.hpp view/doc/subviewfactoryimp.hpp
+    view/doc/subview.hpp view/doc/subviewfactoryimp.hpp view/doc/opendialog.hpp
 
     view/world/table.hpp view/world/tablesubview.hpp view/world/subviews.hpp view/world/util.hpp
     view/world/dialoguesubview.hpp
 
-    view/tools/reportsubview.hpp view/tools/subviews.hpp view/tools/opendialog.hpp
+    view/tools/reportsubview.hpp view/tools/subviews.hpp
     )
 
 set (OPENCS_US

@@ -1,6 +1,6 @@
 #include <QtGui>
 
-#include <components/file_order_list/datafileslist.hpp>
+#include <components/fileorderlist/datafileslist.hpp>
 
 #include "maindialog.hpp"
 #include "playpage.hpp"
