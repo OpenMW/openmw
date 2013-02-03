@@ -334,8 +334,13 @@ void RenderingManager::update (float duration, bool paused)
             mPlayer->setCameraDistance(test.second * orig.distance(dest), false, false);
         }
     }
+
     mOcclusionQuery->update(duration);
-    
+
+    // deactivate queries to make sure we aren't getting false results from several misc render targets
+    // (will be reactivated at the bottom of this method)
+    mOcclusionQuery->setActive(false);
+
     mVideoPlayer->update ();
 
     mRendering.update(duration);
@@ -391,6 +396,8 @@ void RenderingManager::update (float duration, bool paused)
         orig = Ogre::Vector3(orig.x, orig.z, -orig.y);
         mWater->update(duration, orig);
     }
+
+    mOcclusionQuery->setActive(true);
 }
 
 void RenderingManager::waterAdded (MWWorld::Ptr::CellStore *store)
@@ -608,22 +615,28 @@ void RenderingManager::setAmbientColour(const Ogre::ColourValue& colour)
     mTerrainManager->setAmbient(colour);
 }
 
-void RenderingManager::sunEnable()
+void RenderingManager::sunEnable(bool real)
 {
-    // Don't disable the light, as the shaders assume the first light to be directional.
-    //if (mSun) mSun->setVisible(true);
-    mSunEnabled = true;
+    if (real && mSun) mSun->setVisible(true);
+    else
+    {
+        // Don't disable the light, as the shaders assume the first light to be directional.
+        mSunEnabled = true;
+    }
 }
 
-void RenderingManager::sunDisable()
+void RenderingManager::sunDisable(bool real)
 {
-    // Don't disable the light, as the shaders assume the first light to be directional.
-    //if (mSun) mSun->setVisible(false);
-    mSunEnabled = false;
-    if (mSun)
+    if (real && mSun) mSun->setVisible(false);
+    else
     {
-        mSun->setDiffuseColour(ColourValue(0,0,0));
-        mSun->setSpecularColour(ColourValue(0,0,0));
+        // Don't disable the light, as the shaders assume the first light to be directional.
+        mSunEnabled = false;
+        if (mSun)
+        {
+            mSun->setDiffuseColour(ColourValue(0,0,0));
+            mSun->setSpecularColour(ColourValue(0,0,0));
+        }
     }
 }
 
@@ -654,16 +667,16 @@ void RenderingManager::preCellChange(MWWorld::Ptr::CellStore* cell)
     mLocalMap->saveFogOfWar(cell);
 }
 
-void RenderingManager::disableLights()
+void RenderingManager::disableLights(bool sun)
 {
     mObjects.disableLights();
-    sunDisable();
+    sunDisable(sun);
 }
 
-void RenderingManager::enableLights()
+void RenderingManager::enableLights(bool sun)
 {
     mObjects.enableLights();
-    sunEnable();
+    sunEnable(sun);
 }
 
 const bool RenderingManager::useMRT()
@@ -867,14 +880,16 @@ void RenderingManager::applyCompositors()
     mCompositors->removeAll();
     if (useMRT())
     {
+        /*
         mCompositors->addCompositor("gbuffer", 0);
         mCompositors->setCompositorEnabled("gbuffer", true);
         mCompositors->addCompositor("gbufferFinalizer", 2);
         mCompositors->setCompositorEnabled("gbufferFinalizer", true);
-    }
+        */
+}
 
-    if (mWater)
-        mWater->assignTextures();
+    //if (mWater)
+        //mWater->assignTextures();
 }
 
 void RenderingManager::getTriangleBatchCount(unsigned int &triangles, unsigned int &batches)

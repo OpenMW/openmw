@@ -4,6 +4,7 @@
 #include <openengine/ogre/renderer.hpp>
 
 #include <OgreAxisAlignedBox.h>
+#include <OgreRenderTargetListener.h>
 
 namespace MWWorld
 {
@@ -17,7 +18,7 @@ namespace MWRender
     ///
     /// \brief Local map rendering
     ///
-    class LocalMap
+    class LocalMap : public Ogre::RenderTargetListener
     {
     public:
         LocalMap(OEngine::Render::OgreRenderer*, MWRender::RenderingManager* rendering);
@@ -69,6 +70,9 @@ namespace MWRender
          */
         bool isPositionExplored (float nX, float nY, int x, int y, bool interior);
 
+        void preRenderTargetUpdate(const Ogre::RenderTargetEvent& evt);
+        void postRenderTargetUpdate(const Ogre::RenderTargetEvent& evt);
+
     private:
         OEngine::Render::OgreRenderer* mRendering;
         MWRender::RenderingManager* mRenderingManager;
@@ -89,6 +93,9 @@ namespace MWRender
         Ogre::SceneNode* mCameraNode;
         Ogre::SceneNode* mCameraPosNode;
         Ogre::SceneNode* mCameraRotNode;
+
+        // directional light from a fixed angle
+        Ogre::Light* mLight;
 
         float mAngle;
         const Ogre::Vector2 rotatePoint(const Ogre::Vector2& p, const Ogre::Vector2& c, const float angle);

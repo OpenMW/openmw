@@ -219,8 +219,6 @@ namespace sh
 					break;
 				}
 
-                std::cout << "loading " << it->first << std::endl;
-
 				MaterialInstance newInstance(it->first, this);
 				newInstance.create(mPlatform);
 				if (!mShadersEnabled)

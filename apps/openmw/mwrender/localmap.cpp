@@ -32,6 +32,12 @@ LocalMap::LocalMap(OEngine::Render::OgreRenderer* rend, MWRender::RenderingManag
     mCellCamera->setOrientation(Quaternion(sqrt0pt5, -sqrt0pt5, 0, 0));
 
     mCameraNode->attachObject(mCellCamera);
+
+    mLight = mRendering->getScene()->createLight();
+    mLight->setType (Ogre::Light::LT_DIRECTIONAL);
+    mLight->setDirection (Ogre::Vector3(0.3, -0.7, 0.3));
+    mLight->setVisible (false);
+    mLight->setDiffuseColour (ColourValue(0.7,0.7,0.7));
 }
 
 LocalMap::~LocalMap()
@@ -181,17 +187,14 @@ void LocalMap::render(const float x, const float y,
                     const float zlow, const float zhigh,
                     const float xw, const float yw, const std::string& texture)
 {
-    // disable fog
-    // changing FOG_MODE is not a solution when using shaders, thus we have to push linear start/end
+    // disable fog (only necessary for fixed function, the shader based
+    // materials already do this through local_map material configuration)
     const float fStart = mRendering->getScene()->getFogStart();
     const float fEnd = mRendering->getScene()->getFogEnd();
     const ColourValue& clr = mRendering->getScene()->getFogColour();
-    mRendering->getScene()->setFog(FOG_LINEAR, clr, 0, 1000000, 10000000);
+    mRendering->getScene()->setFog(FOG_NONE);
 
     // make everything visible
-    mRendering->getScene()->setAmbientLight(ColourValue(1,1,1));
-    mRenderingManager->disableLights();
-
     mCameraNode->setPosition(Vector3(x, zhigh+100000, y));
     //mCellCamera->setFarClipDistance( (zhigh-zlow) * 1.1 );
     mCellCamera->setFarClipDistance(0); // infinite
@@ -231,7 +234,8 @@ void LocalMap::render(const float x, const float y,
             // use fallback techniques without shadows and without mrt
             vp->setMaterialScheme("local_map");
 
-            rtt->update();
+            rtt->setAutoUpdated(true);
+            rtt->addListener(this);
 
             // create "fog of war" texture
             TexturePtr tex2 = TextureManager::getSingleton().createManual(
@@ -263,10 +267,22 @@ void LocalMap::render(const float x, const float y,
         }
     }
 
-    mRenderingManager->enableLights();
-
     // re-enable fog
     mRendering->getScene()->setFog(FOG_LINEAR, clr, 0, fStart, fEnd);
+}
+
+void LocalMap::preRenderTargetUpdate(const Ogre::RenderTargetEvent& evt)
+{
+    mRenderingManager->disableLights(true);
+    mLight->setVisible(true);
+    evt.source->setAutoUpdated(false);
+}
+
+void LocalMap::postRenderTargetUpdate(const Ogre::RenderTargetEvent& evt)
+{
+    mRenderingManager->enableLights(true);
+    mLight->setVisible(false);
+    evt.source->removeListener(this);
 }
 
 void LocalMap::getInteriorMapPosition (Ogre::Vector2 pos, float& nX, float& nY, int& x, int& y)

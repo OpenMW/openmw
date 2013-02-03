@@ -167,6 +167,7 @@ namespace MWRender
 
         void setLightningStrength(const float factor);
         void setLightningDirection(const Ogre::Vector3& dir);
+        void setLightningEnabled(bool enabled); ///< disable prior to map render
 
         void setGlare(const float glare);
         void setGlareEnabled(bool enabled);

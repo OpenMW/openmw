@@ -13,6 +13,7 @@
 #include "renderingmanager.hpp"
 #include "compositors.hpp"
 #include "ripplesimulation.hpp"
+#include "refraction.hpp"
 
 #include <extern/shiny/Main/Factory.hpp>
 #include <extern/shiny/Platforms/Ogre/OgreMaterial.hpp>
@@ -85,7 +86,7 @@ PlaneReflection::PlaneReflection(Ogre::SceneManager* sceneManager, SkyManager* s
     mSceneMgr->addRenderQueueListener(this);
 
     mTexture = TextureManager::getSingleton().createManual("WaterReflection",
-        ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, TEX_TYPE_2D, 512, 512, 0, PF_A8R8G8B8, TU_RENDERTARGET);
+        ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, TEX_TYPE_2D, 512, 512, 0, PF_R8G8B8, TU_RENDERTARGET);
 
     mRenderTarget = mTexture->getBuffer()->getRenderTarget();
     Viewport* vp = mRenderTarget->addViewport(mCamera);
@@ -96,6 +97,7 @@ PlaneReflection::PlaneReflection(Ogre::SceneManager* sceneManager, SkyManager* s
     vp->setMaterialScheme("water_reflection");
     mRenderTarget->addListener(this);
     mRenderTarget->setActive(true);
+    mRenderTarget->setAutoUpdated(true);
 
     sh::Factory::getInstance ().setTextureAlias ("WaterReflection", mTexture->getName());
 }
@@ -104,6 +106,7 @@ PlaneReflection::~PlaneReflection ()
 {
     mRenderTarget->removeListener (this);
     mSceneMgr->destroyCamera (mCamera);
+    mSceneMgr->removeRenderQueueListener(this);
     TextureManager::getSingleton ().remove("WaterReflection");
 }
 
@@ -127,7 +130,7 @@ void PlaneReflection::renderQueueEnded (Ogre::uint8 queueGroupId, const Ogre::St
     }
 }
 
-void PlaneReflection::preRenderTargetUpdate(const RenderTargetEvent& evt)
+void PlaneReflection::preRenderTargetUpdate(const Ogre::RenderTargetEvent& evt)
 {
     mParentCamera->getParentSceneNode ()->needUpdate ();
     mCamera->setOrientation(mParentCamera->getDerivedOrientation());
@@ -144,7 +147,7 @@ void PlaneReflection::preRenderTargetUpdate(const RenderTargetEvent& evt)
     mCamera->enableReflection(mWaterPlane);
 }
 
-void PlaneReflection::postRenderTargetUpdate(const RenderTargetEvent& evt)
+void PlaneReflection::postRenderTargetUpdate(const Ogre::RenderTargetEvent& evt)
 {
     mSky->resetSkyPosition();
     mCamera->disableReflection();
@@ -232,7 +235,6 @@ Water::Water (Ogre::Camera *camera, RenderingManager* rend, const ESM::Cell* cel
     sh::MaterialInstance* m = sh::Factory::getInstance ().getMaterialInstance ("Water");
     m->setListener (this);
 
-
     // ----------------------------------------------------------------------------------------------
     // ---------------------------------- reflection debug overlay ----------------------------------
     // ----------------------------------------------------------------------------------------------
@@ -296,6 +298,9 @@ Water::~Water()
     mWaterNode->detachObject(mWater);
     mSceneMgr->destroyEntity(mWater);
     mSceneMgr->destroySceneNode(mWaterNode);
+
+    delete mReflection;
+    delete mRefraction;
 }
 
 void Water::changeCell(const ESM::Cell* cell)
@@ -316,6 +321,8 @@ void Water::setHeight(const float height)
 
     if (mReflection)
         mReflection->setWaterPlane(mWaterPlane);
+    if (mRefraction)
+        mRefraction->setWaterPlane(mWaterPlane);
 
     mWaterNode->setPosition(0, height, 0);
     sh::Factory::getInstance ().setSharedParameter ("waterLevel", sh::makeProperty<sh::FloatValue>(new sh::FloatValue(height)));
@@ -353,7 +360,7 @@ void Water::assignTextures()
 {
     if (Settings::Manager::getBool("shader", "Water"))
     {
-
+/*
         CompositorInstance* compositor = CompositorManager::getSingleton().getCompositorChain(mRendering->getViewport())->getCompositor("gbuffer");
 
         TexturePtr colorTexture = compositor->getTextureInstance("mrt_output", 0);
@@ -361,6 +368,7 @@ void Water::assignTextures()
 
         TexturePtr depthTexture = compositor->getTextureInstance("mrt_output", 1);
         sh::Factory::getInstance ().setTextureAlias ("SceneDepth", depthTexture->getName());
+        */
     }
 }
 
@@ -397,15 +405,15 @@ void Water::update(float dt, Ogre::Vector3 player)
         mSimulation->addImpulse(Ogre::Vector2(player.x, player.z));
     }
     mSimulation->update(dt, Ogre::Vector2(player.x, player.z));
+
+    if (mReflection)
+        mReflection->update();
 }
 
 void Water::applyRTT()
 {
-    if (mReflection)
-    {
-        delete mReflection;
-        mReflection = NULL;
-    }
+    delete mReflection;
+    mReflection = NULL;
 
     // Create rendertarget for reflection
     int rttsize = Settings::Manager::getInt("rtt size", "Water");
@@ -419,6 +427,12 @@ void Water::applyRTT()
     }
     else
         mWater->setRenderQueueGroup(RQG_Alpha);
+
+
+    delete mRefraction;
+    mRefraction = NULL;
+
+    mRefraction = new Refraction(mCamera);
 }
 
 void Water::applyVisibilityMask()

@@ -20,7 +20,7 @@ material Water
         
         texture_unit refractionMap
         {
-            texture_alias WaterRefraction
+            direct_texture WaterRefraction
             tex_address_mode clamp
         }
         

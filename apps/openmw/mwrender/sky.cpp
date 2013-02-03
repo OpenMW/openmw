@@ -628,6 +628,10 @@ void SkyManager::setLightningStrength(const float factor)
     else
         mLightning->setVisible(false);
 }
+void SkyManager::setLightningEnabled(bool enabled)
+{
+    /// \todo
+}
 
 void SkyManager::setLightningDirection(const Ogre::Vector3& dir)
 {

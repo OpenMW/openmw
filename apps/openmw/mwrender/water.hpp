@@ -30,12 +30,14 @@ namespace MWRender {
     class SkyManager;
     class RenderingManager;
     class RippleSimulation;
+    class Refraction;
 
     class Reflection
     {
     public:
         Reflection(Ogre::SceneManager* sceneManager)
             :   mSceneMgr(sceneManager) {}
+        virtual ~Reflection() {}
 
         virtual void setWaterPlane (Ogre::Plane plane) {}
         virtual void setParentCamera (Ogre::Camera* parent) { mParentCamera = parent; }
@@ -111,7 +113,6 @@ namespace MWRender {
 
         float mWaterTimer;
 
-        RippleSimulation* mSimulation;
 
         Ogre::Vector3 getSceneNodeCoordinates(int gridX, int gridY);
 
@@ -132,6 +133,8 @@ namespace MWRender {
         int mVisibilityFlags;
 
         Reflection* mReflection;
+        Refraction* mRefraction;
+        RippleSimulation* mSimulation;
 
     public:
         Water (Ogre::Camera *camera, RenderingManager* rend, const ESM::Cell* cell);

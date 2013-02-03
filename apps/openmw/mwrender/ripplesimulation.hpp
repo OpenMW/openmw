@@ -43,9 +43,6 @@ private:
     // scenemanager to create the debug overlays on
     Ogre::SceneManager* mMainSceneMgr;
 
-    Ogre::MaterialPtr mHeightmapMaterial;
-    Ogre::MaterialPtr mHeightToNormalMapMaterial;
-
     static const int TEX_NORMAL = 3;
 
     Ogre::Rectangle2D* mImpulse;

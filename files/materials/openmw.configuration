@@ -10,7 +10,6 @@ configuration local_map
 {
     fog false
     mrt_output false
-    lighting false
     shadows false
     shadows_pssm false
     simple_water true

@@ -95,7 +95,8 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node, MWWor
 
         base->getUserObjectBindings ().setUserAny (Ogre::Any(-1));
 
-        base->setVisibilityFlags(mVisibilityFlags);
+        if (mVisibilityFlags != 0)
+            base->setVisibilityFlags(mVisibilityFlags);
         bool transparent = false;
         for(unsigned int j=0;j < base->getNumSubEntities();++j)
         {
@@ -362,7 +363,8 @@ NifOgre::EntityList NpcAnimation::insertBoundedPart(const std::string &mesh, int
     std::vector<Ogre::Entity*> &parts = entities.mEntities;
     for(size_t i = 0;i < parts.size();i++)
     {
-        parts[i]->setVisibilityFlags(mVisibilityFlags);
+        if (mVisibilityFlags != 0)
+            parts[i]->setVisibilityFlags(mVisibilityFlags);
         parts[i]->getUserObjectBindings ().setUserAny (Ogre::Any(group));
     }
     return entities;

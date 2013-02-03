@@ -30,6 +30,12 @@ namespace MWRender
         bool supported();
 
         /**
+         * make sure to disable occlusion queries before updating unrelated render targets
+         * @param active
+         */
+        void setActive (bool active) { mActive = active; }
+
+        /**
          * per-frame update
          */
         void update(float duration);
@@ -84,6 +90,8 @@ namespace MWRender
         bool mObjectWasVisible;
 
         bool mTestResult;
+
+        bool mActive;
 
         bool mSupported;
         bool mDoQuery;

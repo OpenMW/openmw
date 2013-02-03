@@ -131,11 +131,11 @@ class RenderingManager: private RenderingInterface, public Ogre::WindowEventList
     void setAmbientColour(const Ogre::ColourValue& colour);
     void setSunColour(const Ogre::ColourValue& colour);
     void setSunDirection(const Ogre::Vector3& direction);
-    void sunEnable();
-    void sunDisable();
+    void sunEnable(bool real); ///< @param real whether or not to really disable the sunlight (otherwise just set diffuse to 0)
+    void sunDisable(bool real);
 
-    void disableLights();
-    void enableLights();
+    void disableLights(bool sun); ///< @param sun whether or not to really disable the sunlight (otherwise just set diffuse to 0)
+    void enableLights(bool sun);
 
     bool occlusionQuerySupported() { return mOcclusionQuery->supported(); }
     OcclusionQuery* getOcclusionQuery() { return mOcclusionQuery; }

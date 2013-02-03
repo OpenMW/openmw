@@ -201,12 +201,8 @@
 
     SH_START_PROGRAM
     {
-
         float2 screenCoords = screenCoordsPassthrough.xy / screenCoordsPassthrough.z;
         screenCoords.y = (1-shSaturate(renderTargetFlipping))+renderTargetFlipping*screenCoords.y;
-
-        float depth = shSample(depthMap, screenCoords).x * far - depthPassthrough;
-        float shoreFade = shSaturate(depth / 50.0);
 
 	    float2 nCoord = float2(0,0);
 
@@ -272,14 +268,8 @@
 		
 		// refraction
         float3 R = reflect(vVec, normal);
-        
-        // check the depth at the refracted coords, and don't do any normal distortion for the refraction if the object to refract
-        // is actually above the water (objectDepth < waterDepth)
-        // this solves silhouettes around objects above the water
-        float refractDepth = shSample(depthMap, screenCoords-(shoreFade * normal.xz*REFR_BUMP)).x * far - depthPassthrough;
-        float doRefraction = (refractDepth < 0) ? 0.f : 1.f;
-		
-        float3 refraction = gammaCorrectRead(shSample(refractionMap, (screenCoords-(shoreFade * normal.xz*REFR_BUMP * doRefraction))*1.0).rgb);
+
+        float3 refraction = gammaCorrectRead(shSample(refractionMap, (screenCoords-(normal.xz*REFR_BUMP))*1.0).rgb);
         
          // brighten up the refraction underwater
         refraction = (cameraPos.y < 0) ? shSaturate(refraction * 1.5) : refraction;
@@ -288,10 +278,7 @@
         float specular = pow(max(dot(R, lVec), 0.0),SPEC_HARDNESS);
 
         shOutputColour(0).xyz = shLerp(  shLerp(refraction, scatterColour, lightScatter), reflection, fresnel) + specular * sunSpecular.xyz;
-        
-        // smooth transition to shore (above water only)
-        shOutputColour(0).xyz = shLerp(shOutputColour(0).xyz, refraction, (1-shoreFade) * (1-isUnderwater)); 
-       
+
         // fog
         if (isUnderwater == 1)
         {
@@ -319,8 +306,7 @@
         }
 
         shOutputColour(0).xyz = gammaCorrectOutput(shOutputColour(0).xyz);
-        //shOutputColour(0).xyz = float3(relPos.x, relPos.y, 0);
-		shOutputColour(0).w = 1;
+                shOutputColour(0).w = 1;
     }
 
 #endif

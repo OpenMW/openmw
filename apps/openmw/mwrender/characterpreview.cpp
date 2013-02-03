@@ -59,7 +59,7 @@ namespace MWRender
         mNode = renderRoot->createChildSceneNode();
 
         mAnimation = new NpcAnimation(mCharacter, mNode,
-            MWWorld::Class::get(mCharacter).getInventoryStore (mCharacter), RV_PlayerPreview);
+            MWWorld::Class::get(mCharacter).getInventoryStore (mCharacter), 0);
 
         mNode->setVisible (false);
 
@@ -81,7 +81,6 @@ namespace MWRender
         mViewport->setOverlaysEnabled(false);
         mViewport->setBackgroundColour(Ogre::ColourValue(0, 0, 0, 0));
         mViewport->setShadowsEnabled(false);
-        mViewport->setVisibilityMask (RV_PlayerPreview);
         mRenderTarget->setActive(true);
         mRenderTarget->setAutoUpdated (false);
 
@@ -102,7 +101,7 @@ namespace MWRender
         delete mAnimation;
 
         mAnimation = new NpcAnimation(mCharacter, mNode,
-            MWWorld::Class::get(mCharacter).getInventoryStore (mCharacter), RV_PlayerPreview);
+            MWWorld::Class::get(mCharacter).getInventoryStore (mCharacter), 0);
 
         mNode->setVisible (false);
 
@@ -118,6 +117,7 @@ namespace MWRender
 
     InventoryPreview::InventoryPreview(MWWorld::Ptr character)
         : CharacterPreview(character, 512, 1024, "CharacterPreview", Ogre::Vector3(0, 65, -180), Ogre::Vector3(0,65,0))
+        , mSelectionBuffer(NULL)
     {
     }
 
@@ -149,7 +149,8 @@ namespace MWRender
 
     void InventoryPreview::onSetup ()
     {
-        mSelectionBuffer = new OEngine::Render::SelectionBuffer(mCamera, 512, 1024, RV_PlayerPreview);
+        if (!mSelectionBuffer)
+            mSelectionBuffer = new OEngine::Render::SelectionBuffer(mCamera, 512, 1024, 0);
 
         mAnimation->playGroup ("inventoryhandtohand", 0, 1);
         mAnimation->runAnimation (0);

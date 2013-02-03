@@ -25,10 +25,6 @@ RippleSimulation::RippleSimulation(Ogre::SceneManager* mainSceneManager)
     Ogre::AxisAlignedBox aabInf;
     aabInf.setInfinite();
 
-
-    mHeightToNormalMapMaterial = Ogre::MaterialManager::getSingleton().getByName("HeightToNormalMap");
-    mHeightmapMaterial = Ogre::MaterialManager::getSingleton().getByName("HeightmapSimulation");
-
     mSceneMgr = Ogre::Root::getSingleton().createSceneManager(Ogre::ST_GENERIC);
 
     mCamera = mSceneMgr->createCamera("RippleCamera");
@@ -46,7 +42,7 @@ RippleSimulation::RippleSimulation(Ogre::SceneManager* mainSceneManager)
     Ogre::SceneNode* impulseNode = mSceneMgr->getRootSceneNode()->createChildSceneNode();
     impulseNode->attachObject(mImpulse);
 
-    float w=0.05;
+    //float w=0.05;
     for (int i=0; i<4; ++i)
     {
         Ogre::TexturePtr texture;
@@ -65,11 +61,11 @@ RippleSimulation::RippleSimulation(Ogre::SceneManager* mainSceneManager)
         rt->getViewport(0)->setClearEveryFrame(false);
 
         // debug overlay
+        /*
         Ogre::Rectangle2D* debugOverlay = new Ogre::Rectangle2D(true);
         debugOverlay->setCorners(w*2-1, 0.9, (w+0.18)*2-1, 0.4, false);
         w += 0.2;
         debugOverlay->setBoundingBox(aabInf);
-
         Ogre::SceneNode* debugNode = mMainSceneMgr->getRootSceneNode()->createChildSceneNode();
         debugNode->attachObject(debugOverlay);
 
@@ -83,6 +79,7 @@ RippleSimulation::RippleSimulation(Ogre::SceneManager* mainSceneManager)
         debugMaterial->getTechnique(0)->getPass(0)->setLightingEnabled(false);
 
         debugOverlay->setMaterial("RippleDebug" + Ogre::StringConverter::toString(i));
+        */
 
         mRenderTargets[i] = rt;
         mTextures[i] = texture;
@@ -125,8 +122,6 @@ void RippleSimulation::update(float dt, Ogre::Vector2 position)
 
         // texture coordinate space
         mCurrentFrameOffset /= mRippleAreaLength;
-
-        std::cout << "Offset " << mCurrentFrameOffset << std::endl;
 
         mRippleCenter = position;
 

@@ -150,7 +150,7 @@ namespace MWGui
                 if (!mFirstLoad)
                 {
                     mBackgroundMaterial->getTechnique(0)->getPass(0)->getTextureUnitState(0)->setTextureName(chain->getCompositor ("gbufferFinalizer")->getTextureInstance ("no_mrt_output", 0)->getName());
-                    mRectangle->setVisible(true);
+                    //mRectangle->setVisible(true);
                 }
 
                 for (unsigned int i = 0; i<chain->getNumCompositors(); ++i)
