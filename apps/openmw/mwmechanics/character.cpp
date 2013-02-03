@@ -37,13 +37,25 @@ static const struct {
     Ogre::Vector3 accumulate;
 } sStateList[] = {
     { CharState_Idle, "idle", Ogre::Vector3(1.0f, 1.0f, 0.0f) },
+    { CharState_Idle2, "idle2", Ogre::Vector3(1.0f, 1.0f, 0.0f) },
+    { CharState_Idle3, "idle3", Ogre::Vector3(1.0f, 1.0f, 0.0f) },
+    { CharState_Idle4, "idle4", Ogre::Vector3(1.0f, 1.0f, 0.0f) },
+    { CharState_Idle5, "idle5", Ogre::Vector3(1.0f, 1.0f, 0.0f) },
+    { CharState_Idle6, "idle6", Ogre::Vector3(1.0f, 1.0f, 0.0f) },
+    { CharState_Idle7, "idle7", Ogre::Vector3(1.0f, 1.0f, 0.0f) },
+    { CharState_Idle8, "idle8", Ogre::Vector3(1.0f, 1.0f, 0.0f) },
+    { CharState_Idle9, "idle9", Ogre::Vector3(1.0f, 1.0f, 0.0f) },
 
     { CharState_WalkForward, "walkforward", Ogre::Vector3(0.0f, 1.0f, 0.0f) },
     { CharState_WalkBack, "walkback", Ogre::Vector3(0.0f, 1.0f, 0.0f) },
     { CharState_WalkLeft, "walkleft", Ogre::Vector3(1.0f, 0.0f, 0.0f) },
     { CharState_WalkRight, "walkright", Ogre::Vector3(1.0f, 0.0f, 0.0f) },
 
-    { CharState_Dead, "death1", Ogre::Vector3(1.0f, 1.0f, 0.0f) },
+    { CharState_Death1, "death1", Ogre::Vector3(1.0f, 1.0f, 0.0f) },
+    { CharState_Death2, "death2", Ogre::Vector3(1.0f, 1.0f, 0.0f) },
+    { CharState_Death3, "death3", Ogre::Vector3(1.0f, 1.0f, 0.0f) },
+    { CharState_Death4, "death4", Ogre::Vector3(1.0f, 1.0f, 0.0f) },
+    { CharState_Death5, "death5", Ogre::Vector3(1.0f, 1.0f, 0.0f) },
 };
 static const size_t sStateListSize = sizeof(sStateList)/sizeof(sStateList[0]);
 
@@ -162,7 +174,7 @@ Ogre::Vector3 CharacterController::update(float duration)
         movement += mAnimation->runAnimation(duration);
     mSkipAnim = false;
 
-    if(!(getState() == CharState_Idle || getState() == CharState_Dead))
+    if(!(getState() == CharState_Idle || getState() >= CharState_Death1))
     {
         movement = mDirection * movement.length();
     }

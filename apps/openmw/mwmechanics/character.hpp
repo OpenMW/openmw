@@ -15,13 +15,26 @@ namespace MWMechanics
 
 enum CharacterState {
     CharState_Idle,
+    CharState_Idle2,
+    CharState_Idle3,
+    CharState_Idle4,
+    CharState_Idle5,
+    CharState_Idle6,
+    CharState_Idle7,
+    CharState_Idle8,
+    CharState_Idle9,
 
     CharState_WalkForward,
     CharState_WalkBack,
     CharState_WalkLeft,
     CharState_WalkRight,
 
-    CharState_Dead
+    /* Must be last! */
+    CharState_Death1,
+    CharState_Death2,
+    CharState_Death3,
+    CharState_Death4,
+    CharState_Death5
 };
 
 class CharacterController
