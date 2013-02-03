@@ -94,6 +94,38 @@ Allowed options:
 
 CHANGELOG
 
+0.21.0
+
+Bug #253: Dialogs don't work for Russian version of Morrowind
+Bug #267: Activating creatures without dialogue can still activate the dialogue GUI
+Bug #354: True flickering lights
+Bug #386: The main menu's first entry is wrong (in french)
+Bug #479: Adding the spell "Ash Woe Blight" to the player causes strange attribute oscillations
+Bug #495: Activation Range
+Bug #497: Failed Disposition check doesn't stop a dialogue entry from being returned
+Bug #498: Failing a disposition check shouldn't eliminate topics from the the list of those available
+Bug #500: Disposition for most NPCs is 0/100
+Bug #501: Getdisposition command wrongly returns base disposition
+Bug #506: Journal UI doesn't update anymore
+Bug #507: EnableRestMenu is not a valid command - change it to EnableRest
+Bug #508: Crash in Ald Daedroth Shrine
+Bug #517: Wrong price calculation when untrading an item
+Bug #521: MWGui::InventoryWindow creates a duplicate player actor at the origin
+Bug #524: Beast races are able to wear shoes
+Bug #527: Background music fails to play
+Bug #533: The arch at Gnisis entrance is not displayed
+Bug #536: The same entry can be added multiple times to the journal
+Bug #539: Race selection is broken
+Feature #39: Video Playback
+Feature #151: ^-escape sequences in text output
+Feature #392: Add AI related script functions
+Feature #456: Determine required ini fallback values and adjust the ini importer accordingly
+Feature #460: Experimental DirArchives improvements
+Feature #540: Execute scripts of objects in containers/inventories in active cells
+Task #401: Review GMST fixing
+Task #453: Unify case smashing/folding
+Task #512: Rewrite utf8 component
+
 0.20.0
 
 Bug #366: Changing the player's race during character creation does not change the look of the player character
