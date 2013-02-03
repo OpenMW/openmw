@@ -123,6 +123,7 @@ namespace MWRender
         std::string mInteriorName;
 
         Ogre::ColourValue mOldFogClr;
+        Ogre::ColourValue mOldAmbient;
         float mOldFogStart;
         float mOldFogEnd;
 

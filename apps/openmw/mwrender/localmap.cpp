@@ -271,6 +271,9 @@ void LocalMap::preRenderTargetUpdate(const Ogre::RenderTargetEvent& evt)
     mOldFogClr = mRendering->getScene()->getFogColour();
     mRendering->getScene()->setFog(FOG_NONE);
 
+    mOldAmbient = mRendering->getScene()->getAmbientLight();
+    mRendering->getScene()->setAmbientLight(Ogre::ColourValue(0.3, 0.3, 0.3));
+
     mCellCamera->setPosition(mCameraSettings[evt.source]);
 
     mRenderingManager->disableLights(true);
@@ -286,6 +289,7 @@ void LocalMap::postRenderTargetUpdate(const Ogre::RenderTargetEvent& evt)
 
     // re-enable fog
     mRendering->getScene()->setFog(FOG_LINEAR, mOldFogClr, 0, mOldFogStart, mOldFogEnd);
+    mRendering->getScene()->setAmbientLight(mOldAmbient);
 }
 
 void LocalMap::getInteriorMapPosition (Ogre::Vector2 pos, float& nX, float& nY, int& x, int& y)
