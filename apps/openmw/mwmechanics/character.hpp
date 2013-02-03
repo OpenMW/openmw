@@ -66,8 +66,6 @@ public:
     void playGroup(const std::string &groupname, int mode, int count);
     void skipAnim();
 
-    void setMovementVector(const Ogre::Vector3 &vec);
-
     void setState(CharacterState state, bool loop);
     CharacterState getState() const
     { return mState; }

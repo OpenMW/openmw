@@ -246,7 +246,6 @@ namespace MWMechanics
                 if(iter->second.getState() >= CharState_Death1)
                     continue;
 
-                iter->second.setMovementVector(Ogre::Vector3::ZERO);
                 iter->second.setState(CharState_Death1, false);
 
                 ++mDeathCount[MWWorld::Class::get(iter->first).getId(iter->first)];
@@ -259,15 +258,6 @@ namespace MWMechanics
 
         if(!paused)
         {
-            for(PtrControllerMap::iterator iter(mActors.begin());iter != mActors.end();++iter)
-            {
-                if(iter->second.getState() >= CharState_Death1)
-                    continue;
-
-                Ogre::Vector3 movement = MWWorld::Class::get(iter->first).getMovementVector(iter->first);
-                iter->second.setMovementVector(movement);
-            }
-
             std::vector<std::pair<std::string, Ogre::Vector3> > movement;
             for(PtrControllerMap::iterator iter(mActors.begin());iter != mActors.end();++iter)
             {

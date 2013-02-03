@@ -139,36 +139,35 @@ void CharacterController::markerEvent(float time, const std::string &evt)
 }
 
 
-void CharacterController::setMovementVector(const Ogre::Vector3 &vec)
+Ogre::Vector3 CharacterController::update(float duration)
 {
+    const MWWorld::Class &cls = MWWorld::Class::get(mPtr);
+    const Ogre::Vector3 &vec = cls.getMovementVector(mPtr);
+
     // HACK: The length we get is too large.
     float speed = std::max(1.0f, vec.length() / 32.0f);
 
-    if(vec.length() >= 0.1f)
+    if(std::abs(vec.x/2.0f) > std::abs(vec.y))
     {
-        if(std::abs(vec.x/2.0f) > std::abs(vec.y))
-        {
-            if(vec.x > 0.0f)
-                setState(CharState_WalkRight, true);
-            else if(vec.x < 0.0f)
-                setState(CharState_WalkLeft, true);
-        }
-        else if(vec.y < 0.0f)
-            setState(CharState_WalkBack, true);
-        else
-            setState(CharState_WalkForward, true);
+        if(vec.x > 0.0f)
+            setState(CharState_WalkRight, true);
+        else if(vec.x < 0.0f)
+            setState(CharState_WalkLeft, true);
     }
+    else if(vec.y > 0.0f)
+        setState(CharState_WalkForward, true);
+    else if(vec.y < 0.0f)
+        setState(CharState_WalkBack, true);
     else
-        setState(CharState_Idle, true);
+    {
+        if(!(getState() >= CharState_Death1))
+            setState(CharState_Idle, true);
+    }
 
     if(mAnimation)
         mAnimation->setSpeedMult(speed);
     mDirection = vec.normalisedCopy();
-}
 
-
-Ogre::Vector3 CharacterController::update(float duration)
-{
     Ogre::Vector3 movement = Ogre::Vector3::ZERO;
     if(mAnimation && !mSkipAnim)
         movement += mAnimation->runAnimation(duration);
