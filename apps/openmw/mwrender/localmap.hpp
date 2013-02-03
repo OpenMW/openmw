@@ -4,6 +4,7 @@
 #include <openengine/ogre/renderer.hpp>
 
 #include <OgreAxisAlignedBox.h>
+#include <OgreColourValue.h>
 #include <OgreRenderTargetListener.h>
 
 namespace MWWorld
@@ -120,6 +121,13 @@ namespace MWRender
         int mCellX, mCellY;
         Ogre::AxisAlignedBox mBounds;
         std::string mInteriorName;
+
+        Ogre::ColourValue mOldFogClr;
+        float mOldFogStart;
+        float mOldFogEnd;
+
+        // maps texture name to according camera settings
+        std::map<Ogre::RenderTarget*, Ogre::Vector3> mCameraSettings;
     };
 
 }

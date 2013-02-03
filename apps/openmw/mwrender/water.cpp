@@ -401,7 +401,7 @@ void Water::update(float dt, Ogre::Vector3 player)
 
     mRendering->getSkyManager ()->setGlareEnabled (!mIsUnderwater);
 
-    //if (player.y <= mTop)
+    if (player.y <= mTop)
     {
         mSimulation->addImpulse(Ogre::Vector2(player.x, player.z));
     }
