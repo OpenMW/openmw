@@ -867,8 +867,8 @@ void RenderingManager::windowResized(Ogre::RenderWindow* rw)
     mVideoPlayer->setResolution (rw->getWidth(), rw->getHeight());
 
     const Settings::CategorySettingVector& changed = Settings::Manager::apply();
-    MWBase::Environment::get().getInputManager()->processChangedSettings(changed); //FIXME
-    MWBase::Environment::get().getWindowManager()->processChangedSettings(changed); // FIXME
+    MWBase::Environment::get().getInputManager()->processChangedSettings(changed);
+    MWBase::Environment::get().getWindowManager()->processChangedSettings(changed);
 }
 
 void RenderingManager::windowClosed(Ogre::RenderWindow* rw)
@@ -878,9 +878,9 @@ void RenderingManager::windowClosed(Ogre::RenderWindow* rw)
 
 bool RenderingManager::waterShaderSupported()
 {
-    const RenderSystemCapabilities* caps = Root::getSingleton().getRenderSystem()->getCapabilities();
-    if (caps->getNumMultiRenderTargets() < 2 || !Settings::Manager::getBool("shaders", "Objects"))
-        return false;
+    //const RenderSystemCapabilities* caps = Root::getSingleton().getRenderSystem()->getCapabilities();
+    //if (caps->getNumMultiRenderTargets() < 2 || !Settings::Manager::getBool("shaders", "Objects"))
+        //return false;
     return true;
 }
 

@@ -424,11 +424,8 @@ void Water::applyRTT()
         mReflection = new PlaneReflection(mSceneMgr, mSky);
         mReflection->setParentCamera (mCamera);
         mReflection->setHeight(mTop);
-        mWater->setRenderQueueGroup(RQG_Water);
     }
-    else
-        mWater->setRenderQueueGroup(RQG_Alpha);
-
+    mWater->setRenderQueueGroup(RQG_Alpha);
 
     delete mRefraction;
     mRefraction = NULL;
