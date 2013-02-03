@@ -127,14 +127,31 @@ void CharacterController::markerEvent(float time, const std::string &evt)
 }
 
 
-void CharacterController::setDirection(const Ogre::Vector3 &dir)
+void CharacterController::setMovementVector(const Ogre::Vector3 &vec)
 {
-    // HACK: The direction length we get is too large.
-    float mult = dir.length() / 32.0f;
-    mult = std::max(1.0f, mult);
+    // HACK: The length we get is too large.
+    float speed = std::max(1.0f, vec.length() / 32.0f);
+
+    if(vec.length() >= 0.1f)
+    {
+        if(std::abs(vec.x/2.0f) > std::abs(vec.y))
+        {
+            if(vec.x > 0.0f)
+                setState(CharState_WalkRight, true);
+            else if(vec.x < 0.0f)
+                setState(CharState_WalkLeft, true);
+        }
+        else if(vec.y < 0.0f)
+            setState(CharState_WalkBack, true);
+        else
+            setState(CharState_WalkForward, true);
+    }
+    else
+        setState(CharState_Idle, true);
+
     if(mAnimation)
-        mAnimation->setSpeedMult(mult);
-    mDirection = dir.normalisedCopy();
+        mAnimation->setSpeedMult(speed);
+    mDirection = vec.normalisedCopy();
 }
 
 

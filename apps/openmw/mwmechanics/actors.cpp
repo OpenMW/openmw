@@ -211,8 +211,7 @@ namespace MWMechanics
             float totalDuration = mDuration;
             mDuration = 0;
 
-            PtrControllerMap::iterator iter(mActors.begin());
-            while(iter != mActors.end())
+            for(PtrControllerMap::iterator iter(mActors.begin());iter != mActors.end();iter++)
             {
                 if(!MWWorld::Class::get(iter->first).getCreatureStats(iter->first).isDead())
                 {
@@ -224,10 +223,7 @@ namespace MWMechanics
                         updateNpc(iter->first, totalDuration, paused);
 
                     if(!MWWorld::Class::get(iter->first).getCreatureStats(iter->first).isDead())
-                    {
-                        iter++;
                         continue;
-                    }
                 }
 
                 // workaround: always keep player alive for now
@@ -244,18 +240,14 @@ namespace MWMechanics
                     }
 
                     MWWorld::Class::get(iter->first).getCreatureStats(iter->first).resurrect();
-                    ++iter;
                     continue;
                 }
 
                 if(iter->second.getState() == CharState_Dead)
-                {
-                    iter++;
                     continue;
-                }
 
+                iter->second.setMovementVector(Ogre::Vector3::ZERO);
                 iter->second.setState(CharState_Dead, false);
-                iter->second.setDirection(Ogre::Vector3::ZERO);
 
                 ++mDeathCount[MWWorld::Class::get(iter->first).getId(iter->first)];
 
@@ -272,26 +264,8 @@ namespace MWMechanics
                 if(iter->second.getState() == CharState_Dead)
                     continue;
 
-                Ogre::Vector3 dir = MWWorld::Class::get(iter->first).getMovementVector(iter->first);
-                CharacterState newstate = CharState_Idle;
-
-                if(dir.length() >= 0.1f)
-                {
-                    if(std::abs(dir.x/2.0f) > std::abs(dir.y))
-                    {
-                        if(dir.x > 0.0f)
-                            newstate = CharState_WalkRight;
-                        else if(dir.x < 0.0f)
-                            newstate = CharState_WalkLeft;
-                    }
-                    else if(dir.y < 0.0f)
-                        newstate = CharState_WalkBack;
-                    else
-                        newstate = CharState_WalkForward;
-                }
-
-                iter->second.setState(newstate, true);
-                iter->second.setDirection(dir);
+                Ogre::Vector3 movement = MWWorld::Class::get(iter->first).getMovementVector(iter->first);
+                iter->second.setMovementVector(movement);
             }
 
             std::vector<std::pair<std::string, Ogre::Vector3> > movement;
