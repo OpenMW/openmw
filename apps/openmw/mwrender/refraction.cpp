@@ -25,6 +25,7 @@ namespace MWRender
         vp->setOverlaysEnabled(false);
         vp->setShadowsEnabled(false);
         vp->setVisibilityMask(RV_Actors + RV_Misc + RV_Statics + RV_StaticsSmall + RV_Terrain);
+        vp->setMaterialScheme("water_reflection");
         mRenderTarget->setAutoUpdated(true);
         mRenderTarget->addListener(this);
     }
@@ -54,10 +55,9 @@ namespace MWRender
 
     }
 
-    void Refraction::setWaterPlane(Ogre::Plane plane)
+    void Refraction::setHeight(float height)
     {
-        /// \todo
-        mNearClipPlane = Ogre::Plane( -Ogre::Vector3(0,1,0), 0);
+        mNearClipPlane = Ogre::Plane( -Ogre::Vector3(0,1,0), -(height + 5));
     }
 
 }

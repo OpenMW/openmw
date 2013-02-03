@@ -155,10 +155,10 @@ void PlaneReflection::postRenderTargetUpdate(const Ogre::RenderTargetEvent& evt)
     mRenderActive = false;
 }
 
-void PlaneReflection::setWaterPlane (Plane plane)
+void PlaneReflection::setHeight (float height)
 {
-    mWaterPlane = plane;
-    mErrorPlane = Plane(plane.normal, mWaterPlane.d - 5);
+    mWaterPlane = Plane(Ogre::Vector3(0,1,0), height);
+    mErrorPlane = Plane(Ogre::Vector3(0,1,0), height - 5);
 }
 
 void PlaneReflection::setActive (bool active)
@@ -321,9 +321,9 @@ void Water::setHeight(const float height)
     mWaterPlane = Plane(Vector3::UNIT_Y, -height);
 
     if (mReflection)
-        mReflection->setWaterPlane(mWaterPlane);
+        mReflection->setHeight(height);
     if (mRefraction)
-        mRefraction->setWaterPlane(mWaterPlane);
+        mRefraction->setHeight(height);
 
     mWaterNode->setPosition(0, height, 0);
     sh::Factory::getInstance ().setSharedParameter ("waterLevel", sh::makeProperty<sh::FloatValue>(new sh::FloatValue(height)));
@@ -423,7 +423,7 @@ void Water::applyRTT()
     {
         mReflection = new PlaneReflection(mSceneMgr, mSky);
         mReflection->setParentCamera (mCamera);
-        mReflection->setWaterPlane(mWaterPlane);
+        mReflection->setHeight(mTop);
         mWater->setRenderQueueGroup(RQG_Water);
     }
     else
@@ -434,6 +434,7 @@ void Water::applyRTT()
     mRefraction = NULL;
 
     mRefraction = new Refraction(mCamera);
+    mRefraction->setHeight(mTop);
 }
 
 void Water::applyVisibilityMask()

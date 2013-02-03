@@ -39,7 +39,7 @@ namespace MWRender {
             :   mSceneMgr(sceneManager) {}
         virtual ~Reflection() {}
 
-        virtual void setWaterPlane (Ogre::Plane plane) {}
+        virtual void setHeight (float height) {}
         virtual void setParentCamera (Ogre::Camera* parent) { mParentCamera = parent; }
         void setUnderwater(bool underwater) { mIsUnderwater = underwater; }
         virtual void setActive (bool active) {}
@@ -72,7 +72,7 @@ namespace MWRender {
         PlaneReflection(Ogre::SceneManager* sceneManager, SkyManager* sky);
         virtual ~PlaneReflection();
 
-        virtual void setWaterPlane (Ogre::Plane plane);
+        virtual void setHeight (float height);
         virtual void setActive (bool active);
         virtual void setVisibilityMask (int flags);
 

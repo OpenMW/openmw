@@ -20,7 +20,7 @@ namespace MWRender
         Refraction(Ogre::Camera* parentCamera);
         ~Refraction();
 
-        void setWaterPlane (Ogre::Plane plane);
+        void setHeight (float height);
         void preRenderTargetUpdate(const Ogre::RenderTargetEvent& evt);
         void postRenderTargetUpdate(const Ogre::RenderTargetEvent& evt);
 
