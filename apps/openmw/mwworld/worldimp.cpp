@@ -1277,27 +1277,9 @@ namespace MWWorld
     {
         std::string script = MWWorld::Class::get(item).getScript(item);
         
-        /* Set OnPCDrop Variable on item's script, if it has a script with that variable declared */
+        // Set OnPCDrop Variable on item's script, if it has a script with that variable declared 
         if(script != "")
-        {
-            Compiler::Locals locals = MWBase::Environment::get().getScriptManager()->getLocals(script);
-            int index = locals.getIndex("onpcdrop");
-            char type = locals.getType("onpcdrop");
-            if(index != -1)
-            {
-                switch(type)
-                {
-                    case 's':
-                        item.mRefData->getLocals().mShorts.at (index) = 1; break;
-                    
-                    case 'l':
-                        item.mRefData->getLocals().mLongs.at (index) = 1; break;
-                    
-                    case 'f':
-                        item.mRefData->getLocals().mFloats.at (index) = 1.0; break;
-                }
-            }
-        }
+            item.mRefData->getLocals().setVarByInt(script, "onpcdrop", 1);
     }
 
     bool World::placeObject (const Ptr& object, float cursorX, float cursorY)

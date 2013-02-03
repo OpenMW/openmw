@@ -3,7 +3,6 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"
-#include "../mwbase/scriptmanager.hpp"
 
 #include <components/compiler/locals.hpp>
 
@@ -113,24 +112,6 @@ namespace MWWorld
         
         /* Set OnPCEquip Variable on item's script, if the player is equipping it, and it has a script with that variable declared */
         if(equipped && actor == MWBase::Environment::get().getWorld()->getPlayer().getPlayer() && script != "")
-        {
-            Compiler::Locals locals = MWBase::Environment::get().getScriptManager()->getLocals(script);
-            int index = locals.getIndex("onpcequip");
-            char type = locals.getType("onpcequip");
-            if(index != -1)
-            {
-                switch(type)
-                {
-                    case 's':
-                        (*it).mRefData->getLocals().mShorts.at (index) = 1; break;
-                    
-                    case 'l':
-                        (*it).mRefData->getLocals().mLongs.at (index) = 1; break;
-                    
-                    case 'f':
-                        (*it).mRefData->getLocals().mFloats.at (index) = 1.0; break;
-                }
-            }
-        }
+            (*it).mRefData->getLocals().setVarByInt(script, "onpcequip", 1);
     }
 }

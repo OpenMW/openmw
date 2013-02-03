@@ -88,27 +88,10 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add (const Ptr& ptr)
         
         if(&(MWWorld::Class::get (player).getContainerStore (player)) == this)
         {
-            cell = 0; // Items in players inventory have cell set to 0, so their scripts will never be removed
+            cell = 0; // Items in player's inventory have cell set to 0, so their scripts will never be removed
            
             // Set OnPCAdd special variable, if it is declared 
-            Compiler::Locals locals = MWBase::Environment::get().getScriptManager()->getLocals(script);
-            int index = locals.getIndex("onpcadd");
-            char type = locals.getType("onpcadd");
-            
-            if(index != -1)
-            {
-                switch(type)
-                {
-                    case 's':
-                        item.mRefData->getLocals().mShorts.at (index) = 1; break;
-                    
-                    case 'l':
-                        item.mRefData->getLocals().mLongs.at (index) = 1; break;
-                    
-                    case 'f':
-                        item.mRefData->getLocals().mFloats.at (index) = 1.0; break;
-                }
-            }
+            item.mRefData->getLocals().setVarByInt(script, "onpcadd", 1);
         }
         else
             cell = player.getCell();
