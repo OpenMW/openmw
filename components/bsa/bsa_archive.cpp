@@ -91,7 +91,7 @@ public:
 
             std::string searchable = normalize_path (proper.begin () + prefix, proper.end ());
 
-            mIndex.insert (std::make_pair (std::move (searchable), std::move (proper)));
+            mIndex.insert (std::make_pair (searchable, proper));
         }
     }
 
