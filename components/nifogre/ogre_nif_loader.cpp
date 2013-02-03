@@ -328,8 +328,13 @@ void buildBones(Ogre::Skeleton *skel, const Nif::Node *node, Ogre::Bone *&animro
     {
         if(ctrl->recType == Nif::RC_NiKeyframeController)
             ctrls.push_back(static_cast<const Nif::NiKeyframeController*>(ctrl.getPtr()));
+        else
+            warn("Unhandled "+ctrl->recName+" from node "+node->name+" in "+skel->getName());
         ctrl = ctrl->next;
     }
+
+    if(!(node->recType == Nif::RC_NiNode))
+        warn("Unhandled "+node->recName+" "+node->name+" in "+skel->getName());
 
     Nif::ExtraPtr e = node->extra;
     while(!e.empty())
@@ -365,9 +370,8 @@ void loadResource(Ogre::Resource *resource)
     Ogre::Skeleton *skel = dynamic_cast<Ogre::Skeleton*>(resource);
     OgreAssert(skel, "Attempting to load a skeleton into a non-skeleton resource!");
 
-    Nif::NIFFile::ptr pnif(Nif::NIFFile::create (skel->getName()));
-    Nif::NIFFile & nif = *pnif.get ();
-    const Nif::Node *node = dynamic_cast<const Nif::Node*>(nif.getRecord(0));
+    Nif::NIFFile::ptr nif(Nif::NIFFile::create(skel->getName()));
+    const Nif::Node *node = static_cast<const Nif::Node*>(nif->getRecord(0));
 
     std::vector<const Nif::NiKeyframeController*> ctrls;
     Ogre::Bone *animroot = NULL;
@@ -406,7 +410,7 @@ void loadResource(Ogre::Resource *resource)
     if(!animroot)
     {
         warn(Ogre::StringConverter::toString(ctrls.size())+" animated node(s) in "+
-             skel->getName()+", but no text keys. Uses NiBSAnimationNode?");
+             skel->getName()+", but no text keys.");
         return;
     }
 
@@ -1037,7 +1041,6 @@ public:
         while(!e.empty())
         {
             Nif::NiStringExtraData *sd;
-            Nif::NiTextKeyExtraData *td;
             if((sd=dynamic_cast<Nif::NiStringExtraData*>(e.getPtr())) != NULL)
             {
                 // String markers may contain important information
@@ -1049,12 +1052,6 @@ public:
                     flags |= 0x01;
                 }
             }
-            else if((td=dynamic_cast<Nif::NiTextKeyExtraData*>(e.getPtr())) != NULL)
-            {
-                // TODO: Read and store text keys somewhere
-            }
-            else
-                warn("Unhandled extra data type "+e->recName);
             e = e->extra;
         }
 
@@ -1087,9 +1084,6 @@ public:
             meshes.push_back(MeshInfo(mesh->getName(), (shape->parent ? shape->parent->name : shape->name),
                                       shape->trafo.pos, shape->trafo.rotation, shape->trafo.scale));
         }
-        else if(node->recType != Nif::RC_NiNode && node->recType != Nif::RC_RootCollisionNode &&
-                node->recType != Nif::RC_NiRotatingParticles)
-            warn("Unhandled mesh node type: "+node->recName);
 
         const Nif::NiNode *ninode = dynamic_cast<const Nif::NiNode*>(node);
         if(ninode)
