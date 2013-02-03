@@ -3,11 +3,8 @@
 
 #include <stdexcept>
 #include <cassert>
-#ifndef __clang__
-#include <cstdint>
-#else
-#include <tr1/cstdint>
-#endif
+
+#include <libs/platform/stdint.h>
 
 namespace {
 
@@ -29,7 +26,7 @@ public:
 		mBufferOrigin = 0;
 		mBufferExtent = 0;
 	}
-		
+
 
 	size_t read(void* buf, size_t count)
 	{
