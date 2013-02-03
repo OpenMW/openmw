@@ -45,8 +45,6 @@ class CharacterController
     typedef std::deque<std::string> AnimationQueue;
     AnimationQueue mAnimQueue;
 
-    Ogre::Vector3 mDirection;
-
     std::string mCurrentGroup;
     CharacterState mState;
     bool mSkipAnim;

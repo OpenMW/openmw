@@ -34,39 +34,37 @@ namespace MWMechanics
 static const struct {
     CharacterState state;
     const char groupname[32];
-    Ogre::Vector3 accumulate;
 } sStateList[] = {
-    { CharState_Idle, "idle", Ogre::Vector3(1.0f, 1.0f, 0.0f) },
-    { CharState_Idle2, "idle2", Ogre::Vector3(1.0f, 1.0f, 0.0f) },
-    { CharState_Idle3, "idle3", Ogre::Vector3(1.0f, 1.0f, 0.0f) },
-    { CharState_Idle4, "idle4", Ogre::Vector3(1.0f, 1.0f, 0.0f) },
-    { CharState_Idle5, "idle5", Ogre::Vector3(1.0f, 1.0f, 0.0f) },
-    { CharState_Idle6, "idle6", Ogre::Vector3(1.0f, 1.0f, 0.0f) },
-    { CharState_Idle7, "idle7", Ogre::Vector3(1.0f, 1.0f, 0.0f) },
-    { CharState_Idle8, "idle8", Ogre::Vector3(1.0f, 1.0f, 0.0f) },
-    { CharState_Idle9, "idle9", Ogre::Vector3(1.0f, 1.0f, 0.0f) },
+    { CharState_Idle, "idle" },
+    { CharState_Idle2, "idle2" },
+    { CharState_Idle3, "idle3" },
+    { CharState_Idle4, "idle4" },
+    { CharState_Idle5, "idle5" },
+    { CharState_Idle6, "idle6" },
+    { CharState_Idle7, "idle7" },
+    { CharState_Idle8, "idle8" },
+    { CharState_Idle9, "idle9" },
 
-    { CharState_WalkForward, "walkforward", Ogre::Vector3(0.0f, 1.0f, 0.0f) },
-    { CharState_WalkBack, "walkback", Ogre::Vector3(0.0f, 1.0f, 0.0f) },
-    { CharState_WalkLeft, "walkleft", Ogre::Vector3(1.0f, 0.0f, 0.0f) },
-    { CharState_WalkRight, "walkright", Ogre::Vector3(1.0f, 0.0f, 0.0f) },
+    { CharState_WalkForward, "walkforward" },
+    { CharState_WalkBack, "walkback" },
+    { CharState_WalkLeft, "walkleft" },
+    { CharState_WalkRight, "walkright" },
 
-    { CharState_Death1, "death1", Ogre::Vector3(1.0f, 1.0f, 0.0f) },
-    { CharState_Death2, "death2", Ogre::Vector3(1.0f, 1.0f, 0.0f) },
-    { CharState_Death3, "death3", Ogre::Vector3(1.0f, 1.0f, 0.0f) },
-    { CharState_Death4, "death4", Ogre::Vector3(1.0f, 1.0f, 0.0f) },
-    { CharState_Death5, "death5", Ogre::Vector3(1.0f, 1.0f, 0.0f) },
+    { CharState_Death1, "death1" },
+    { CharState_Death2, "death2" },
+    { CharState_Death3, "death3" },
+    { CharState_Death4, "death4" },
+    { CharState_Death5, "death5" },
 };
 static const size_t sStateListSize = sizeof(sStateList)/sizeof(sStateList[0]);
 
-static void getStateInfo(CharacterState state, std::string *group, Ogre::Vector3 *accum)
+static void getStateInfo(CharacterState state, std::string *group)
 {
     for(size_t i = 0;i < sStateListSize;i++)
     {
         if(sStateList[i].state == state)
         {
             *group = sStateList[i].groupname;
-            *accum = sStateList[i].accumulate;
             return;
         }
     }
@@ -75,24 +73,25 @@ static void getStateInfo(CharacterState state, std::string *group, Ogre::Vector3
 
 
 CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Animation *anim, CharacterState state, bool loop)
-  : mPtr(ptr), mAnimation(anim), mDirection(Ogre::Vector3::ZERO), mState(state), mSkipAnim(false)
+  : mPtr(ptr), mAnimation(anim), mState(state), mSkipAnim(false)
 {
     if(!mAnimation)
         return;
 
     mAnimation->setController(this);
 
-    Ogre::Vector3 accum;
-    getStateInfo(mState, &mCurrentGroup, &accum);
-    mAnimation->setAccumulation(accum);
+    getStateInfo(mState, &mCurrentGroup);
+    /* Accumulate along X/Y only for now, until we can figure out how we should
+     * handle knockout and death which moves the character down. */
+    mAnimation->setAccumulation(Ogre::Vector3(1.0f, 1.0f, 0.0f));
     if(mAnimation->hasAnimation(mCurrentGroup))
         mAnimation->play(mCurrentGroup, "stop", loop);
 }
 
 CharacterController::CharacterController(const CharacterController &rhs)
   : mPtr(rhs.mPtr), mAnimation(rhs.mAnimation), mAnimQueue(rhs.mAnimQueue)
-  , mCurrentGroup(rhs.mCurrentGroup), mDirection(rhs.mDirection)
-  , mState(rhs.mState), mSkipAnim(rhs.mSkipAnim)
+  , mCurrentGroup(rhs.mCurrentGroup), mState(rhs.mState)
+  , mSkipAnim(rhs.mSkipAnim)
 {
     if(!mAnimation)
         return;
@@ -144,9 +143,6 @@ Ogre::Vector3 CharacterController::update(float duration)
     const MWWorld::Class &cls = MWWorld::Class::get(mPtr);
     const Ogre::Vector3 &vec = cls.getMovementVector(mPtr);
 
-    // HACK: The length we get is too large.
-    float speed = std::max(1.0f, vec.length() / 32.0f);
-
     if(std::abs(vec.x/2.0f) > std::abs(vec.y))
     {
         if(vec.x > 0.0f)
@@ -164,19 +160,16 @@ Ogre::Vector3 CharacterController::update(float duration)
             setState(CharState_Idle, true);
     }
 
+    // FIXME: The speed should actually be determined by the character's stance
+    // (running, sneaking, etc) and stats, rather than the length of the vector.
+    float speed = std::max(1.0f, vec.length() / 32.0f);
     if(mAnimation)
         mAnimation->setSpeedMult(speed);
-    mDirection = vec.normalisedCopy();
 
     Ogre::Vector3 movement = Ogre::Vector3::ZERO;
     if(mAnimation && !mSkipAnim)
         movement += mAnimation->runAnimation(duration);
     mSkipAnim = false;
-
-    if(!(getState() == CharState_Idle || getState() >= CharState_Death1))
-    {
-        movement = mDirection * movement.length();
-    }
 
     return movement;
 }
@@ -196,7 +189,6 @@ void CharacterController::playGroup(const std::string &groupname, int mode, int 
                 mAnimQueue.push_back(groupname);
             mCurrentGroup = groupname;
             mState = CharState_Idle;
-            mAnimation->setAccumulation(Ogre::Vector3::ZERO);
             mAnimation->play(mCurrentGroup, ((mode==2) ? "loop start" : "start"), false);
         }
         else if(mode == 0)
@@ -225,12 +217,10 @@ void CharacterController::setState(CharacterState state, bool loop)
     mAnimQueue.clear();
 
     std::string anim;
-    Ogre::Vector3 accum;
-    getStateInfo(mState, &anim, &accum);
+    getStateInfo(mState, &anim);
     if(mAnimation->hasAnimation(anim))
     {
         mCurrentGroup = anim;
-        mAnimation->setAccumulation(accum);
         mAnimation->play(mCurrentGroup, "start", loop);
     }
 }
