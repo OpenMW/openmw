@@ -62,6 +62,8 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
     mRendering.createScene("PlayerCam", Settings::Manager::getFloat("field of view", "General"), 5);
     mRendering.setWindowEventListener(this);
 
+    mRendering.getWindow()->addListener(this);
+
     mCompositors = new Compositors(mRendering.getViewport());
 
     mWater = 0;
@@ -174,6 +176,7 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
 
 RenderingManager::~RenderingManager ()
 {
+    mRendering.getWindow()->removeListener(this);
     mRendering.removeWindowEventListener(this);
 
     delete mPlayer;
@@ -337,10 +340,6 @@ void RenderingManager::update (float duration, bool paused)
 
     mOcclusionQuery->update(duration);
 
-    // deactivate queries to make sure we aren't getting false results from several misc render targets
-    // (will be reactivated at the bottom of this method)
-    mOcclusionQuery->setActive(false);
-
     mVideoPlayer->update ();
 
     mRendering.update(duration);
@@ -396,8 +395,18 @@ void RenderingManager::update (float duration, bool paused)
         orig = Ogre::Vector3(orig.x, orig.z, -orig.y);
         mWater->update(duration, orig);
     }
+}
 
+void RenderingManager::preRenderTargetUpdate(const RenderTargetEvent &evt)
+{
     mOcclusionQuery->setActive(true);
+}
+
+void RenderingManager::postRenderTargetUpdate(const RenderTargetEvent &evt)
+{
+    // deactivate queries to make sure we aren't getting false results from several misc render targets
+    // (will be reactivated at the bottom of this method)
+    mOcclusionQuery->setActive(false);
 }
 
 void RenderingManager::waterAdded (MWWorld::Ptr::CellStore *store)
@@ -886,7 +895,7 @@ void RenderingManager::applyCompositors()
         mCompositors->addCompositor("gbufferFinalizer", 2);
         mCompositors->setCompositorEnabled("gbufferFinalizer", true);
         */
-}
+    }
 
     //if (mWater)
         //mWater->assignTextures();

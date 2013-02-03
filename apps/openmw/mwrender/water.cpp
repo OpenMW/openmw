@@ -185,6 +185,7 @@ Water::Water (Ogre::Camera *camera, RenderingManager* rend, const ESM::Cell* cel
     mRendering(rend),
     mWaterTimer(0.f),
     mReflection(NULL),
+    mRefraction(NULL),
     mSimulation(NULL)
 {
     mSimulation = new RippleSimulation(mSceneMgr);
@@ -317,7 +318,7 @@ void Water::setHeight(const float height)
 {
     mTop = height;
 
-    mWaterPlane = Plane(Vector3::UNIT_Y, height);
+    mWaterPlane = Plane(Vector3::UNIT_Y, -height);
 
     if (mReflection)
         mReflection->setWaterPlane(mWaterPlane);

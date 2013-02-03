@@ -11,6 +11,8 @@
 
 #include <boost/filesystem.hpp>
 
+#include <OgreRenderTargetListener.h>
+
 #include "renderinginterface.hpp"
 
 #include "objects.hpp"
@@ -47,7 +49,7 @@ namespace MWRender
     class GlobalMap;
     class VideoPlayer;
 
-class RenderingManager: private RenderingInterface, public Ogre::WindowEventListener {
+class RenderingManager: private RenderingInterface, public Ogre::WindowEventListener, public Ogre::RenderTargetListener {
 
   private:
 
@@ -136,6 +138,10 @@ class RenderingManager: private RenderingInterface, public Ogre::WindowEventList
 
     void disableLights(bool sun); ///< @param sun whether or not to really disable the sunlight (otherwise just set diffuse to 0)
     void enableLights(bool sun);
+
+
+    void preRenderTargetUpdate(const Ogre::RenderTargetEvent& evt);
+    void postRenderTargetUpdate(const Ogre::RenderTargetEvent& evt);
 
     bool occlusionQuerySupported() { return mOcclusionQuery->supported(); }
     OcclusionQuery* getOcclusionQuery() { return mOcclusionQuery; }

@@ -211,7 +211,6 @@ void OgreRenderer::createWindow(const std::string &title, const WindowSettings& 
     mRoot->initialise(false);
 
     // create a hidden 1x1 background window to keep resources when recreating the secondary (real) window
-    /// \todo Why does this break occlusion queries? :(
     /*
     NameValuePairList params_;
     params_.insert(std::make_pair("title", title));

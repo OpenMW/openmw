@@ -31,9 +31,9 @@ namespace MWRender
 
     Refraction::~Refraction()
     {
+        mRenderTarget->removeListener(this);
         Ogre::TextureManager::getSingleton().remove("WaterRefraction");
         mParentCamera->getSceneManager()->destroyCamera(mCamera);
-        mRenderTarget->removeListener(this);
     }
 
     void Refraction::preRenderTargetUpdate(const Ogre::RenderTargetEvent& evt)
@@ -56,7 +56,8 @@ namespace MWRender
 
     void Refraction::setWaterPlane(Ogre::Plane plane)
     {
-        mNearClipPlane = Ogre::Plane(-plane.normal, - (plane.d + 5) );
+        /// \todo
+        mNearClipPlane = Ogre::Plane( -Ogre::Vector3(0,1,0), 0);
     }
 
 }
