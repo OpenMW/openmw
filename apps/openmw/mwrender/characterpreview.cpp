@@ -121,7 +121,8 @@ namespace MWRender
 
     void InventoryPreview::update(int sizeX, int sizeY)
     {
-        mAnimation->forceUpdate ();
+        mAnimation->runAnimation(0.0f);
+        mAnimation->forceUpdate();
 
         mViewport->setDimensions (0, 0, std::min(1.f, float(sizeX) / float(512)), std::min(1.f, float(sizeY) / float(1024)));
 
@@ -145,7 +146,6 @@ namespace MWRender
         mSelectionBuffer = new OEngine::Render::SelectionBuffer(mCamera, 512, 1024, RV_PlayerPreview);
 
         mAnimation->play("inventoryhandtohand", "start", false);
-        mAnimation->runAnimation(0.0f);
     }
 
     // --------------------------------------------------------------------------------------------------
