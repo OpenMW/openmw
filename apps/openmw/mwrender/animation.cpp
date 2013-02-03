@@ -225,7 +225,7 @@ Ogre::Vector3 Animation::runAnimation(float timepassed)
     Ogre::Vector3 movement = Ogre::Vector3::ZERO;
 
     timepassed *= mAnimSpeedMult;
-    while(mCurrentAnim && mPlaying && timepassed > 0.0f)
+    while(mCurrentAnim && mPlaying)
     {
         float targetTime = mCurrentTime + timepassed;
         if(mNextKey == mCurrentKeys->end() || mNextKey->first > targetTime)

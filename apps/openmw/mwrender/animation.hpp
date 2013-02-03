@@ -44,6 +44,7 @@ protected:
      * bone names) are positioned identically. */
     void updateSkeletonInstance(const Ogre::SkeletonInstance *skelsrc, Ogre::SkeletonInstance *skel);
 
+
     /* Updates the animation to the specified time, and returns the movement
      * vector since the last update or reset. */
     Ogre::Vector3 updatePosition(float time);
@@ -51,6 +52,7 @@ protected:
     /* Resets the animation to the time of the specified marker, without moving
      * anything. If the marker is not found, it resets to the beginning. */
     void reset(const std::string &marker);
+
 
     void createEntityList(Ogre::SceneNode *node, const std::string &model);
 
