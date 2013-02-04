@@ -22,7 +22,6 @@ void CS::Editor::createDocument()
     mStartup.hide();
 
     /// \todo open the ESX picker instead
-    /// \todo move the following code for creating initial records into the document manager
 
     std::ostringstream stream;
 
@@ -33,22 +32,6 @@ void CS::Editor::createDocument()
 
     CSMDoc::Document *document = mDocumentManager.addDocument (files, true);
 
-    static const char *sGlobals[] =
-    {
-        "Day", "DaysPassed", "GameHour", "Month", "PCRace", "PCVampire", "PCWerewolf", "PCYear", 0
-    };
-
-    for (int i=0; sGlobals[i]; ++i)
-    {
-        ESM::Global record;
-        record.mId = sGlobals[i];
-        record.mValue = i==0 ? 1 : 0;
-        record.mType = ESM::VT_Float;
-        document->getData().getGlobals().add (record);
-    }
-
-    document->getData().merge(); /// \todo remove once proper ESX loading is implemented
-
     mViewManager.addView (document);
 }
 
@@ -57,7 +40,7 @@ void CS::Editor::loadDocument()
     mStartup.hide();
 
     /// \todo open the ESX picker instead
-    /// \todo replace the manual record creation and load the ESX files instead
+    /// \todo remove the manual record creation and load the ESX files instead
 
     std::ostringstream stream;
 

@@ -14,9 +14,19 @@ void CSMDoc::Document::load (const std::vector<boost::filesystem::path>::const_i
 
 void CSMDoc::Document::createBase()
 {
-    std::cout << "pretending to create base file records" << std::endl;
+    static const char *sGlobals[] =
+    {
+        "Day", "DaysPassed", "GameHour", "Month", "PCRace", "PCVampire", "PCWerewolf", "PCYear", 0
+    };
 
-    /// \todo create mandatory records for base content file
+    for (int i=0; sGlobals[i]; ++i)
+    {
+        ESM::Global record;
+        record.mId = sGlobals[i];
+        record.mValue = i==0 ? 1 : 0;
+        record.mType = ESM::VT_Float;
+        getData().getGlobals().add (record);
+    }
 }
 
 CSMDoc::Document::Document (const std::vector<boost::filesystem::path>& files, bool new_)
