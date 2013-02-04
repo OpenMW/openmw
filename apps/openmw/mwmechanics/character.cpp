@@ -183,7 +183,7 @@ Ogre::Vector3 CharacterController::update(float duration)
 
     if(duration > 0.0f)
     {
-        Ogre::Vector3 pos(mPtr.getCellRef().mPos.pos);
+        Ogre::Vector3 pos(mPtr.getRefData().getPosition().pos);
         // FIXME: Get the actual radius for the object. Maybe this should go into mwworld to replace pmove?
         Ogre::Vector3 res = mMovementSolver->move(pos, movement, duration, Ogre::Vector3(15,15,30));
         MWBase::Environment::get().getWorld()->moveObject(mPtr, res.x, res.y, res.z);
