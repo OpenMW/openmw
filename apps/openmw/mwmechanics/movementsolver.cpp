@@ -9,6 +9,7 @@ namespace MWMechanics
 MovementSolver::MovementSolver(const MWWorld::Ptr &ptr)
   : mPtr(ptr)
   , mEngine(MWBase::Environment::get().getWorld()->getPhysicEngine())
+  , verticalVelocity(0.0f)
 {
 }
 
@@ -71,11 +72,10 @@ float MovementSolver::getSlope(const Ogre::Vector3 &normal)
 
 Ogre::Vector3 MovementSolver::move(const Ogre::Vector3 &position, const Ogre::Vector3 &movement, float time, const Ogre::Vector3 &halfExtents)
 {
-    mPhysicActor = mEngine->getCharacter(mPtr.getRefData().getHandle());
-
     /* Anything to collide with? */
-    if(1 || !mPhysicActor || !mPhysicActor->getCollisionMode())
-        return position+movement;
+    mPhysicActor = mEngine->getCharacter(mPtr.getRefData().getHandle());
+    if(!mPhysicActor || !mPhysicActor->getCollisionMode())
+        return position + movement;
 
     traceResults trace; //no initialization needed
     int iterations=0, maxIterations=50; //arbitrary number. To prevent infinite loops. They shouldn't happen but it's good to be prepared.
