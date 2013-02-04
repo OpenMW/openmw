@@ -7,19 +7,18 @@
     SH_BEGIN_PROGRAM
         shUniform(float4x4, wvp) @shAutoConstant(wvp, worldviewproj_matrix)
 
-        shColourInput(float4)
-        shOutput(float4, colourPassthrough)
+        shOutput(float, alphaFade)
 
     SH_START_PROGRAM
     {
 	    shOutputPosition = shMatrixMult(wvp, shInputPosition);
-	    colourPassthrough = colour;
+            alphaFade = shInputPosition.z < 150.0 ? 0.0 : 1.0;
     }
 
 #else
 
     SH_BEGIN_PROGRAM
-		shInput(float4, colourPassthrough)
+                shInput(float, alphaFade)
 #if MRT
         shDeclareMrtOutput(1)
 #endif
@@ -27,7 +26,7 @@
 
     SH_START_PROGRAM
     {
-        shOutputColour(0) = colourPassthrough * atmosphereColour;
+        shOutputColour(0) = atmosphereColour * float4(1,1,1,alphaFade);
 
 #if MRT
         shOutputColour(1) = float4(1,1,1,1);

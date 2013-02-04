@@ -30,9 +30,6 @@ namespace sh
 		/// so it does not matter if you pass any extra properties that the shader does not care about.
 		ShaderInstance* getInstance (PropertySetGet* properties);
 
-		void markDirty() { mIsDirty = true; }
-		///< Signals that the cache is out of date, and thus should not be used this time
-
 	private:
 		PropertySetGet* getCurrentGlobalSettings() const;
 		std::string getBasePath() const;
@@ -41,11 +38,7 @@ namespace sh
 		std::string getHlslProfile() const;
 		int getType() const;
 
-		bool isDirty() { return mIsDirty; }
-
 		friend class ShaderInstance;
-
-		bool mIsDirty;
 
 	private:
 		GpuProgramType mType;

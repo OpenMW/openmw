@@ -203,48 +203,6 @@ unsigned int Moon::getPhaseInt() const
     return 0;
 }
 
-void SkyManager::ModVertexAlpha(Entity* ent, unsigned int meshType)
-{
-    // Get the vertex colour buffer of this mesh
-    const Ogre::VertexElement* ves_diffuse = ent->getMesh()->getSubMesh(0)->vertexData->vertexDeclaration->findElementBySemantic( Ogre::VES_DIFFUSE );
-    HardwareVertexBufferSharedPtr colourBuffer = ent->getMesh()->getSubMesh(0)->vertexData->vertexBufferBinding->getBuffer(ves_diffuse->getSource());
-
-    // Lock
-    void* pData = colourBuffer->lock(HardwareBuffer::HBL_NORMAL);
-
-    // Iterate over all vertices
-    int vertex_size = colourBuffer->getVertexSize();
-    float * currentVertex = NULL;
-    for (unsigned int i=0; i<colourBuffer->getNumVertices(); ++i)
-    {
-        // Get a pointer to the vertex colour
-        ves_diffuse->baseVertexPointerToElement( pData, &currentVertex );
-
-        unsigned char alpha=0;
-        if (meshType == 0) alpha = i%2 ? 0 : 255; // this is a cylinder, so every second vertex belongs to the bottom-most row
-        else if (meshType == 1)
-        {
-            if (i>= 49 && i <= 64) alpha = 0; // bottom-most row
-            else if (i>= 33 && i <= 48) alpha = 64; // second bottom-most row
-            else alpha = 255;
-        }
-        // NB we would have to swap R and B depending on rendersystem specific VertexElementType, but doesn't matter since they are both 1
-        uint8 tmpR = static_cast<uint8>(255);
-        uint8 tmpG = static_cast<uint8>(255);
-        uint8 tmpB = static_cast<uint8>(255);
-        uint8 tmpA = static_cast<uint8>(alpha);
-
-        // Modify
-        *((uint32*)currentVertex) = tmpR | (tmpG << 8) | (tmpB << 16) | (tmpA << 24);
-
-        // Move to the next vertex
-        pData = static_cast<unsigned char *> (pData) + vertex_size;
-    }
-
-    // Unlock
-    ent->getMesh()->getSubMesh(0)->vertexData->vertexBufferBinding->getBuffer(ves_diffuse->getSource())->unlock();
-}
-
 SkyManager::SkyManager (SceneNode* pMwRoot, Camera* pCamera)
     : mHour(0.0f)
     , mDay(0)
@@ -357,7 +315,6 @@ void SkyManager::create()
         atmosphere_ent->setRenderQueueGroup(RQG_SkiesEarly);
         atmosphere_ent->setVisibilityFlags(RV_Sky);
         atmosphere_ent->getSubEntity (0)->setMaterialName ("openmw_atmosphere");
-        ModVertexAlpha(atmosphere_ent, 0);
     }
 
 
@@ -371,8 +328,6 @@ void SkyManager::create()
         clouds_ent->setRenderQueueGroup(RQG_SkiesEarly+5);
         clouds_ent->getSubEntity(0)->setMaterialName ("openmw_clouds");
         clouds_ent->setCastShadows(false);
-
-        ModVertexAlpha(clouds_ent, 1);
     }
 
     mCreated = true;

@@ -191,14 +191,47 @@ namespace sh
 								  &mGlobalSettings);
 
 				int lastModified = boost::filesystem::last_write_time (boost::filesystem::path(sourceFile));
+				mShadersLastModifiedNew[sourceFile] = lastModified;
 				if (mShadersLastModified.find(sourceFile) != mShadersLastModified.end()
 						&& mShadersLastModified[sourceFile] != lastModified)
 				{
-					newSet.markDirty ();
+					// delete any outdated shaders based on this shader set.
+					if ( boost::filesystem::exists(mPlatform->getCacheFolder())
+						 && boost::filesystem::is_directory(mPlatform->getCacheFolder()))
+					{
+						boost::filesystem::directory_iterator end_iter;
+						for( boost::filesystem::directory_iterator dir_iter(mPlatform->getCacheFolder()) ; dir_iter != end_iter ; ++dir_iter)
+						{
+							if (boost::filesystem::is_regular_file(dir_iter->status()) )
+							{
+								boost::filesystem::path file = dir_iter->path();
+
+								std::string pathname = file.filename().string();
+
+								// get first part of filename, e.g. main_fragment_546457654 -> main_fragment
+								// there is probably a better method for this...
+								std::vector<std::string> tokens;
+								boost::split(tokens, pathname, boost::is_any_of("_"));
+								tokens.erase(--tokens.end());
+								std::string shaderName;
+								for (std::vector<std::string>::const_iterator vector_iter = tokens.begin(); vector_iter != tokens.end();)
+								{
+									shaderName += *(vector_iter++);
+									if (vector_iter != tokens.end())
+										shaderName += "_";
+								}
+
+								if (shaderName == it->first)
+								{
+									boost::filesystem::remove(file);
+									std::cout << "Removing outdated file: " << file << std::endl;
+								}
+							}
+						}
+					}
+
 					anyShaderDirty = true;
 				}
-
-				mShadersLastModified[sourceFile] = lastModified;
 
 				mShaderSets.insert(std::make_pair(it->first, newSet));
 			}
@@ -313,11 +346,11 @@ namespace sh
 
 		if (mReadSourceCache)
 		{
-			// save the last modified time of shader sources
+			// save the last modified time of shader sources (as of when they were loaded)
 			std::ofstream file;
 			file.open(std::string(mPlatform->getCacheFolder () + "/lastModified.txt").c_str());
 
-			for (LastModifiedMap::const_iterator it = mShadersLastModified.begin(); it != mShadersLastModified.end(); ++it)
+			for (LastModifiedMap::const_iterator it = mShadersLastModifiedNew.begin(); it != mShadersLastModifiedNew.end(); ++it)
 			{
 				file << it->first << "\n" << it->second << std::endl;
 			}
