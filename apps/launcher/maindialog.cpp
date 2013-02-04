@@ -1,10 +1,9 @@
 #include <QtGui>
 
-#include <components/fileorderlist/datafileslist.hpp>
-
 #include "maindialog.hpp"
 #include "playpage.hpp"
 #include "graphicspage.hpp"
+#include "datafilespage.hpp"
 
 MainDialog::MainDialog()
 {
@@ -124,16 +123,16 @@ void MainDialog::createPages()
 {
     mPlayPage = new PlayPage(this);
     mGraphicsPage = new GraphicsPage(mCfgMgr, this);
-    mDataFilesList = new DataFilesList(mCfgMgr, this);
+    mDataFilesPage = new DataFilesPage(mCfgMgr, this);
 
     // Set the combobox of the play page to imitate the combobox on the datafilespage
-    mPlayPage->mProfilesComboBox->setModel(mDataFilesList->mProfilesComboBox->model());
-    mPlayPage->mProfilesComboBox->setCurrentIndex(mDataFilesList->mProfilesComboBox->currentIndex());
+    mPlayPage->mProfilesComboBox->setModel(mDataFilesPage->mProfilesComboBox->model());
+    mPlayPage->mProfilesComboBox->setCurrentIndex(mDataFilesPage->mProfilesComboBox->currentIndex());
 
     // Add the pages to the stacked widget
     mPagesWidget->addWidget(mPlayPage);
     mPagesWidget->addWidget(mGraphicsPage);
-    mPagesWidget->addWidget(mDataFilesList);
+    mPagesWidget->addWidget(mDataFilesPage);
 
     // Select the first page
     mIconWidget->setCurrentItem(mIconWidget->item(0), QItemSelectionModel::Select);
@@ -142,9 +141,9 @@ void MainDialog::createPages()
 
     connect(mPlayPage->mProfilesComboBox,
             SIGNAL(currentIndexChanged(int)),
-            mDataFilesList->mProfilesComboBox, SLOT(setCurrentIndex(int)));
+            mDataFilesPage->mProfilesComboBox, SLOT(setCurrentIndex(int)));
 
-    connect(mDataFilesList->mProfilesComboBox,
+    connect(mDataFilesPage->mProfilesComboBox,
             SIGNAL(currentIndexChanged(int)),
             mPlayPage->mProfilesComboBox, SLOT(setCurrentIndex(int)));
 
@@ -190,7 +189,7 @@ bool MainDialog::setup()
     }
 
     // Setup the Data Files page
-    if (!mDataFilesList->setupDataFiles()) {
+    if (!mDataFilesPage->setupDataFiles()) {
         return false;
     }
 
@@ -208,7 +207,7 @@ void MainDialog::changePage(QListWidgetItem *current, QListWidgetItem *previous)
 void MainDialog::closeEvent(QCloseEvent *event)
 {
     // Now write all config files
-    mDataFilesList->writeConfig();
+    mDataFilesPage->writeConfig();
     mGraphicsPage->writeConfig();
 
     // Save user settings
@@ -221,7 +220,7 @@ void MainDialog::closeEvent(QCloseEvent *event)
 void MainDialog::play()
 {
     // First do a write of all the configs, just to be sure
-    mDataFilesList->writeConfig();
+    mDataFilesPage->writeConfig();
     mGraphicsPage->writeConfig();
 
     // Save user settings

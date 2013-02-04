@@ -3,6 +3,9 @@ set(LAUNCHER
     main.cpp
     maindialog.cpp
     playpage.cpp
+    datafilespage.cpp
+    utils/profilescombobox.cpp
+    utils/textinputdialog.cpp
 
     launcher.rc
 )
@@ -11,6 +14,9 @@ set(LAUNCHER_HEADER
     graphicspage.hpp
     maindialog.hpp
     playpage.hpp
+    datafilespage.hpp
+    utils/profilescombobox.hpp
+    utils/textinputdialog.hpp
 )
 
 # Headers that must be pre-processed
@@ -18,6 +24,9 @@ set(LAUNCHER_HEADER_MOC
     graphicspage.hpp
     maindialog.hpp
     playpage.hpp
+    datafilespage.hpp
+    utils/profilescombobox.hpp
+    utils/textinputdialog.hpp
 )
 
 source_group(launcher FILES ${LAUNCHER} ${LAUNCHER_HEADER} ${LAUNCHER_HEADER_MOC})

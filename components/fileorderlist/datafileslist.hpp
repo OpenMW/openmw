@@ -3,7 +3,6 @@
 
 #include <QWidget>
 #include <QModelIndex>
-#include "utils/profilescombobox.hpp"
 #include <components/files/collections.hpp>
 
 
@@ -27,25 +26,20 @@ class DataFilesList : public QWidget
 public:
     DataFilesList(Files::ConfigurationManager& cfg, QWidget *parent = 0);
 
-    ProfilesComboBox *mProfilesComboBox;
-
-    void writeConfig(QString profile = QString());
-    bool showDataFilesWarning();
-    bool setupDataFiles();
-    void getSelectedFiles(std::vector<boost::filesystem::path>& paths);
+    bool setupDataFiles(Files::PathContainer dataDirs, const QString encoding);
+    void selectedFiles(std::vector<boost::filesystem::path>& paths);
+    void uncheckAll();
+    QStringList checkedFiles();
+    void setCheckState(const QString& element, Qt::CheckState);
+    
 
 public slots:
     void setCheckState(QModelIndex index);
 
     void filterChanged(const QString filter);
     void showContextMenu(const QPoint &point);
-    void profileChanged(const QString &previous, const QString &current);
-    void profileRenamed(const QString &previous, const QString &current);
-    void updateOkButton(const QString &text);
 
     // Action slots
-    void newProfile();
-    void deleteProfile();
 //    void moveUp();
 //    void moveDown();
 //    void moveTop();
@@ -63,11 +57,7 @@ private:
     QTableView *mMastersTable;
     QTableView *mPluginsTable;
 
-    QToolBar *mProfileToolBar;
     QMenu *mContextMenu;
-
-    QAction *mNewProfileAction;
-    QAction *mDeleteProfileAction;
 
 //    QAction *mMoveUpAction;
 //    QAction *mMoveDownAction;
@@ -77,20 +67,11 @@ private:
     QAction *mUncheckAction;
 
     Files::ConfigurationManager &mCfgMgr;
-    Files::PathContainer mDataDirs;
-    Files::PathContainer mDataLocal;
-
-    QSettings *mLauncherConfig;
-
-    TextInputDialog *mNewProfileDialog;
 
 //    const QStringList checkedPlugins();
 //    const QStringList selectedMasters();
 
     void createActions();
-    void setupConfig();
-    void readConfig();
-
 };
 
 #endif

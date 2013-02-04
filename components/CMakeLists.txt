@@ -71,7 +71,7 @@ find_package(Qt4 COMPONENTS QtCore QtGui)
 if(QT_QTGUI_LIBRARY AND QT_QTCORE_LIBRARY)
    add_component_qt_dir (fileorderlist
        datafileslist model/modelitem model/datafilesmodel model/esm/esmfile
-       utils/filedialog utils/lineedit utils/profilescombobox utils/textinputdialog utils/naturalsort
+       utils/filedialog utils/lineedit utils/naturalsort
        )
 
    include(${QT_USE_FILE})
