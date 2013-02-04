@@ -81,4 +81,14 @@ public:
 
 }
 
+namespace std
+{
+
+// These operators allow extra data types to be stored in an Ogre::Any
+// object, which can then be stored in user object bindings on the nodes
+
+ostream& operator<<(ostream &o, const NifOgre::TextKeyMap&);
+
+}
+
 #endif
