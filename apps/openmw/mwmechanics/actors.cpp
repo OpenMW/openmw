@@ -258,14 +258,19 @@ namespace MWMechanics
 
         if(!paused)
         {
-            std::vector<std::pair<std::string, Ogre::Vector3> > movement;
+            PtrControllerMap::iterator player(mActors.end());
             for(PtrControllerMap::iterator iter(mActors.begin());iter != mActors.end();++iter)
             {
-                Ogre::Vector3 vector = iter->second.update(duration);
-                if(vector!=Ogre::Vector3::ZERO)
-                    movement.push_back(std::make_pair(iter->first.getRefData().getHandle(), vector));
+                if(iter->first.getRefData().getHandle() == "player")
+                {
+                    /* Make sure player updates last (in case a cell transition occurs) */
+                    player = iter;
+                    continue;
+                }
+                iter->second.update(duration);
             }
-            MWBase::Environment::get().getWorld()->doPhysics (movement, duration);
+            if(player != mActors.end())
+                player->second.update(duration);
         }
     }
 
