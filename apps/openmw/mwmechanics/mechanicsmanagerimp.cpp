@@ -188,6 +188,7 @@ namespace MWMechanics
         if(ptr == mWatched)
             mWatched = MWWorld::Ptr();
         mActors.removeActor(ptr);
+        mActivators.removeActivator(ptr);
     }
 
     void MechanicsManager::updateCell(const MWWorld::Ptr &ptr)
