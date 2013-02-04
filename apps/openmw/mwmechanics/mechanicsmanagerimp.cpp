@@ -309,6 +309,12 @@ namespace MWMechanics
             }
 
             winMgr->configureSkills (majorSkills, minorSkills);
+
+            // HACK? The player has been changed, so a new Animation object may
+            // have been made for them. Make sure they're properly updated.
+            MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+            mActors.removeActor(ptr);
+            mActors.addActor(ptr);
         }
 
         mActors.update(duration, paused);
