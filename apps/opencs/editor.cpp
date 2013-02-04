@@ -22,13 +22,16 @@ void CS::Editor::createDocument()
     mStartup.hide();
 
     /// \todo open the ESX picker instead
-    /// \todo remove the following code for creating initial records into the document manager
+    /// \todo move the following code for creating initial records into the document manager
 
     std::ostringstream stream;
 
     stream << "NewDocument" << (++mNewDocumentIndex);
 
-    CSMDoc::Document *document = mDocumentManager.addDocument (stream.str());
+    std::vector<boost::filesystem::path> files;
+    files.push_back (stream.str());
+
+    CSMDoc::Document *document = mDocumentManager.addDocument (files, true);
 
     static const char *sGlobals[] =
     {
@@ -60,7 +63,10 @@ void CS::Editor::loadDocument()
 
     stream << "Document" << (++mNewDocumentIndex);
 
-    CSMDoc::Document *document = mDocumentManager.addDocument (stream.str());
+    std::vector<boost::filesystem::path> files;
+    files.push_back (stream.str());
+
+    CSMDoc::Document *document = mDocumentManager.addDocument (files, false);
 
     static const char *sGlobals[] =
     {
