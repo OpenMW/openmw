@@ -14,7 +14,7 @@
     {
 	    shOutputPosition = shMatrixMult(wvp, shInputPosition);
 	    UV = uv0;
-            alphaFade = shInputPosition.z < 100.f ? 0 : 1;
+            alphaFade = (shInputPosition.z <= 200.f) ? ((shInputPosition.z <= 100.f) ? 0.0 : 0.25) : 1.0;
     }
 
 #else
