@@ -1,14 +1,20 @@
 #include "movementsolver.hpp"
 
+#include "libs/openengine/bullet/trace.h"
+#include "libs/openengine/bullet/physic.hpp"
+
+#include "../mwworld/ptr.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
+
+#include <cmath>
+
 
 namespace MWMechanics
 {
 
-MovementSolver::MovementSolver(const MWWorld::Ptr &ptr)
-  : mPtr(ptr)
-  , mEngine(MWBase::Environment::get().getWorld()->getPhysicEngine())
+MovementSolver::MovementSolver()
+  : mEngine(MWBase::Environment::get().getWorld()->getPhysicEngine())
   , verticalVelocity(0.0f)
 {
 }
@@ -70,10 +76,12 @@ float MovementSolver::getSlope(const Ogre::Vector3 &normal)
 }
 
 
-Ogre::Vector3 MovementSolver::move(const Ogre::Vector3 &position, const Ogre::Vector3 &movement, float time, const Ogre::Vector3 &halfExtents)
+Ogre::Vector3 MovementSolver::move(const MWWorld::Ptr &ptr, const Ogre::Vector3 &movement, float time, const Ogre::Vector3 &halfExtents)
 {
+    Ogre::Vector3 position(ptr.getRefData().getPosition().pos);
+
     /* Anything to collide with? */
-    mPhysicActor = mEngine->getCharacter(mPtr.getRefData().getHandle());
+    mPhysicActor = mEngine->getCharacter(ptr.getRefData().getHandle());
     if(!mPhysicActor || !mPhysicActor->getCollisionMode())
         return position + movement;
 
@@ -86,7 +94,7 @@ Ogre::Vector3 MovementSolver::move(const Ogre::Vector3 &position, const Ogre::Ve
     Ogre::Vector3 clippedVelocity(horizontalVelocity.x, horizontalVelocity.y, verticalVelocity);
 
     float remainingTime = time;
-    bool isInterior = !mPtr.getCell()->isExterior();
+    bool isInterior = !ptr.getCell()->isExterior();
     float verticalRotation = mPhysicActor->getRotation().getYaw().valueDegrees();
 
     Ogre::Vector3 lastNormal(0.0f);

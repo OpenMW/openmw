@@ -1,22 +1,31 @@
 #ifndef  GAME_MWMECHANICS_MOVEMENTSOLVER_H
 #define  GAME_MWMECHANICS_MOVEMENTSOLVER_H
 
-#include "libs/openengine/bullet/trace.h"
-#include "libs/openengine/bullet/physic.hpp"
+#include <OgreVector3.h>
 
-#include "../mwworld/ptr.hpp"
+namespace MWWorld
+{
+    class Ptr;
+}
 
-#include <cmath>
+namespace OEngine
+{
+    namespace Physic
+    {
+        class PhysicEngine;
+        class PhysicActor;
+    }
+}
 
 namespace MWMechanics
 {
     class MovementSolver
     {
         public:
-            MovementSolver(const MWWorld::Ptr &ptr);
+            MovementSolver();
             virtual ~MovementSolver();
 
-            Ogre::Vector3 move(const Ogre::Vector3 &position, const Ogre::Vector3 &movement, float time, const Ogre::Vector3 &halfExtents);
+            Ogre::Vector3 move(const MWWorld::Ptr &ptr, const Ogre::Vector3 &movement, float time, const Ogre::Vector3 &halfExtents);
 
         private:
             bool stepMove(Ogre::Vector3& position, const Ogre::Vector3 &velocity, float remainingTime, float verticalRotation, const Ogre::Vector3 &halfExtents, bool isInterior);
@@ -26,7 +35,6 @@ namespace MWMechanics
 
             float getSlope(const Ogre::Vector3 &normal);
 
-            MWWorld::Ptr mPtr;
             OEngine::Physic::PhysicEngine *mEngine;
             OEngine::Physic::PhysicActor *mPhysicActor;
 

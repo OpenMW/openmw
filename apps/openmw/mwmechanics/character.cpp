@@ -79,7 +79,7 @@ static void getStateInfo(CharacterState state, std::string *group)
 CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Animation *anim, CharacterState state, bool loop)
   : mPtr(ptr), mAnimation(anim), mState(state), mSkipAnim(false)
 {
-    mMovementSolver = new MovementSolver(mPtr);
+    mMovementSolver = new MovementSolver();
     if(!mAnimation)
         return;
 
@@ -98,7 +98,7 @@ CharacterController::CharacterController(const CharacterController &rhs)
   , mCurrentGroup(rhs.mCurrentGroup), mState(rhs.mState)
   , mSkipAnim(rhs.mSkipAnim)
 {
-    mMovementSolver = new MovementSolver(mPtr);
+    mMovementSolver = new MovementSolver();
     if(!mAnimation)
         return;
     /* We've been copied. Update the animation with the new controller. */
@@ -191,10 +191,8 @@ Ogre::Vector3 CharacterController::update(float duration)
                     Ogre::Quaternion(Ogre::Radian(-refpos.rot[2]), Ogre::Vector3::UNIT_Z)) *
                    movement;
 
-        Ogre::Vector3 pos(refpos.pos);
-
         // FIXME: Get the actual radius for the object. Maybe this should go into mwworld to replace pmove?
-        Ogre::Vector3 res = mMovementSolver->move(pos, movement, duration, Ogre::Vector3(15,15,30));
+        Ogre::Vector3 res = mMovementSolver->move(mPtr, movement, duration, Ogre::Vector3(15,15,30));
         MWBase::Environment::get().getWorld()->moveObject(mPtr, res.x, res.y, res.z);
     }
 
