@@ -5,7 +5,6 @@
 
 #include <OgreAxisAlignedBox.h>
 #include <OgreColourValue.h>
-#include <OgreRenderTargetListener.h>
 
 namespace MWWorld
 {
@@ -19,7 +18,7 @@ namespace MWRender
     ///
     /// \brief Local map rendering
     ///
-    class LocalMap : public Ogre::RenderTargetListener
+    class LocalMap
     {
     public:
         LocalMap(OEngine::Render::OgreRenderer*, MWRender::RenderingManager* rendering);
@@ -71,9 +70,6 @@ namespace MWRender
          */
         bool isPositionExplored (float nX, float nY, int x, int y, bool interior);
 
-        void preRenderTargetUpdate(const Ogre::RenderTargetEvent& evt);
-        void postRenderTargetUpdate(const Ogre::RenderTargetEvent& evt);
-
     private:
         OEngine::Render::OgreRenderer* mRendering;
         MWRender::RenderingManager* mRenderingManager;
@@ -121,11 +117,6 @@ namespace MWRender
         int mCellX, mCellY;
         Ogre::AxisAlignedBox mBounds;
         std::string mInteriorName;
-
-        Ogre::ColourValue mOldFogClr;
-        Ogre::ColourValue mOldAmbient;
-        float mOldFogStart;
-        float mOldFogEnd;
 
         // maps texture name to according camera settings
         std::map<Ogre::RenderTarget*, Ogre::Vector3> mCameraSettings;

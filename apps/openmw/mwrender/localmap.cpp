@@ -191,6 +191,20 @@ void LocalMap::render(const float x, const float y,
     mCellCamera->setFarClipDistance(0); // infinite
 
     mCellCamera->setOrthoWindow(xw, yw);
+    mCellCamera->setPosition(Vector3(x, zhigh+100000, y));
+
+    // disable fog (only necessary for fixed function, the shader based
+    // materials already do this through local_map material configuration)
+    float oldFogStart = mRendering->getScene()->getFogStart();
+    float oldFogEnd = mRendering->getScene()->getFogEnd();
+    Ogre::ColourValue oldFogColour = mRendering->getScene()->getFogColour();
+    mRendering->getScene()->setFog(FOG_NONE);
+
+    // set up lighting
+    Ogre::ColourValue oldAmbient = mRendering->getScene()->getAmbientLight();
+    mRendering->getScene()->setAmbientLight(Ogre::ColourValue(0.3, 0.3, 0.3));
+    mRenderingManager->disableLights(true);
+    mLight->setVisible(true);
 
     TexturePtr tex;
     // try loading from memory
@@ -216,8 +230,6 @@ void LocalMap::render(const float x, const float y,
 
             RenderTarget* rtt = tex->getBuffer()->getRenderTarget();
 
-            mCameraSettings[rtt] = Vector3(x, zhigh+100000, y);
-
             rtt->setAutoUpdated(false);
             Viewport* vp = rtt->addViewport(mCellCamera);
             vp->setOverlaysEnabled(false);
@@ -228,8 +240,7 @@ void LocalMap::render(const float x, const float y,
             // use fallback techniques without shadows and without mrt
             vp->setMaterialScheme("local_map");
 
-            rtt->setAutoUpdated(true);
-            rtt->addListener(this);
+            rtt->update();
 
             // create "fog of war" texture
             TexturePtr tex2 = TextureManager::getSingleton().createManual(
@@ -260,36 +271,12 @@ void LocalMap::render(const float x, const float y,
             //rtt->writeContentsToFile("./" + texture + ".jpg");
         }
     }
-}
-
-void LocalMap::preRenderTargetUpdate(const Ogre::RenderTargetEvent& evt)
-{
-    // disable fog (only necessary for fixed function, the shader based
-    // materials already do this through local_map material configuration)
-    mOldFogStart = mRendering->getScene()->getFogStart();
-    mOldFogEnd = mRendering->getScene()->getFogEnd();
-    mOldFogClr = mRendering->getScene()->getFogColour();
-    mRendering->getScene()->setFog(FOG_NONE);
-
-    mOldAmbient = mRendering->getScene()->getAmbientLight();
-    mRendering->getScene()->setAmbientLight(Ogre::ColourValue(0.3, 0.3, 0.3));
-
-    mCellCamera->setPosition(mCameraSettings[evt.source]);
-
-    mRenderingManager->disableLights(true);
-    mLight->setVisible(true);
-    evt.source->setAutoUpdated(false);
-}
-
-void LocalMap::postRenderTargetUpdate(const Ogre::RenderTargetEvent& evt)
-{
     mRenderingManager->enableLights(true);
     mLight->setVisible(false);
-    evt.source->removeListener(this);
 
     // re-enable fog
-    mRendering->getScene()->setFog(FOG_LINEAR, mOldFogClr, 0, mOldFogStart, mOldFogEnd);
-    mRendering->getScene()->setAmbientLight(mOldAmbient);
+    mRendering->getScene()->setFog(FOG_LINEAR, oldFogColour, 0, oldFogStart, oldFogEnd);
+    mRendering->getScene()->setAmbientLight(oldAmbient);
 }
 
 void LocalMap::getInteriorMapPosition (Ogre::Vector2 pos, float& nX, float& nY, int& x, int& y)
