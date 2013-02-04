@@ -20,6 +20,11 @@ namespace OEngine
     {
         class Fader;
     }
+
+    namespace Physic
+    {
+        class PhysicEngine;
+    }
 }
 
 namespace ESM
@@ -300,6 +305,8 @@ namespace MWBase
             /// 2 - player is underwater \n
             /// 3 - enemies are nearby (not implemented)
 
+            /// \todo Probably shouldn't be here
+            virtual OEngine::Physic::PhysicEngine* getPhysicEngine() const = 0;
 
             /// \todo Probably shouldn't be here
             virtual MWRender::Animation* getAnimation(const MWWorld::Ptr &ptr) = 0;

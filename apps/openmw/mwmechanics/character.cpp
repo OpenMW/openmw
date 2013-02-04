@@ -25,8 +25,12 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/soundmanager.hpp"
+#include "../mwbase/world.hpp"
 
 #include "../mwworld/class.hpp"
+
+#include "movementsolver.hpp"
+
 
 namespace MWMechanics
 {
@@ -75,6 +79,7 @@ static void getStateInfo(CharacterState state, std::string *group)
 CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Animation *anim, CharacterState state, bool loop)
   : mPtr(ptr), mAnimation(anim), mState(state), mSkipAnim(false)
 {
+    mMovementSolver = new MovementSolver(mPtr);
     if(!mAnimation)
         return;
 
@@ -93,10 +98,16 @@ CharacterController::CharacterController(const CharacterController &rhs)
   , mCurrentGroup(rhs.mCurrentGroup), mState(rhs.mState)
   , mSkipAnim(rhs.mSkipAnim)
 {
+    mMovementSolver = new MovementSolver(mPtr);
     if(!mAnimation)
         return;
     /* We've been copied. Update the animation with the new controller. */
     mAnimation->setController(this);
+}
+
+CharacterController::~CharacterController()
+{
+    delete mMovementSolver;
 }
 
 
@@ -160,18 +171,25 @@ Ogre::Vector3 CharacterController::update(float duration)
             setState(CharState_Idle, true);
     }
 
-    // FIXME: The speed should actually be determined by the character's stance
-    // (running, sneaking, etc) and stats, rather than the length of the vector.
-    float speed = std::max(1.0f, vec.length() / 32.0f);
-    if(mAnimation)
-        mAnimation->setSpeedMult(speed);
-
     Ogre::Vector3 movement = Ogre::Vector3::ZERO;
     if(mAnimation && !mSkipAnim)
+    {
+        // FIXME: The speed should actually be determined by the character's
+        // stance (running, sneaking, etc) and stats
+        mAnimation->setSpeedMult(1.0f);
         movement += mAnimation->runAnimation(duration);
+    }
     mSkipAnim = false;
 
-    return movement;
+    if(duration > 0.0f)
+    {
+        Ogre::Vector3 pos(mPtr.getCellRef().mPos.pos);
+        // FIXME: Get the actual radius for the object. Maybe this should go into mwworld to replace pmove?
+        Ogre::Vector3 res = mMovementSolver->move(pos, movement, duration, Ogre::Vector3(15,15,30));
+        MWBase::Environment::get().getWorld()->moveObject(mPtr, res.x, res.y, res.z);
+    }
+
+    return Ogre::Vector3(0.0f);
 }
 
 
