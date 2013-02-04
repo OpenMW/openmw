@@ -24,13 +24,6 @@ set(SOURCE_FILES
     Main/ShaderSet.cpp
 )
 
-# In Debug mode, write the shader sources to the current directory
-if (DEFINED CMAKE_BUILD_TYPE)
-    if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-        add_definitions(-DSHINY_WRITE_SHADER_DEBUG)
-    endif()
-endif()
-
 if (DEFINED SHINY_USE_WAVE_SYSTEM_INSTALL)
     # use system install
 else()

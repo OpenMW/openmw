@@ -363,12 +363,12 @@ namespace sh
 
 			if (Factory::getInstance ().getShaderDebugOutputEnabled ())
 				writeDebugFile(source, name + ".pre");
-			else
-			{
-	#ifdef SHINY_WRITE_SHADER_DEBUG
-				writeDebugFile(source, name + ".pre");
-	#endif
-			}
+            else
+            {
+    #ifdef SHINY_WRITE_SHADER_DEBUG
+                writeDebugFile(source, name + ".pre");
+    #endif
+            }
 
 			// why do we need our own preprocessor? there are several custom commands available in the shader files
 			// (for example for binding uniforms to properties or auto constants) - more below. it is important that these
@@ -648,12 +648,12 @@ namespace sh
 
 		if (Factory::getInstance ().getShaderDebugOutputEnabled ())
 			writeDebugFile(source, name);
-		else
-		{
+        else
+        {
 #ifdef SHINY_WRITE_SHADER_DEBUG
-			writeDebugFile(source, name);
+            writeDebugFile(source, name);
 #endif
-		}
+        }
 
 		if (!mProgram->getSupported())
 		{
