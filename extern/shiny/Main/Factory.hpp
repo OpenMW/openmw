@@ -185,6 +185,7 @@ namespace sh
 		ConfigurationMap mConfigurations;
 		LodConfigurationMap mLodConfigurations;
 		LastModifiedMap mShadersLastModified;
+		LastModifiedMap mShadersLastModifiedNew;
 
 		PropertySetGet mGlobalSettings;
 

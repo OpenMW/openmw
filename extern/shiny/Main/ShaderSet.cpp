@@ -17,7 +17,6 @@ namespace sh
 		, mName(name)
 		, mCgProfile(cgProfile)
 		, mHlslProfile(hlslProfile)
-		, mIsDirty(false)
 	{
 		if (type == "vertex")
 			mType = GPT_Vertex;

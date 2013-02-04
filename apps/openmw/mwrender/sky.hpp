@@ -219,8 +219,6 @@ namespace MWRender
         float mGlare; // target
         float mGlareFade; // actual
 
-        void ModVertexAlpha(Ogre::Entity* ent, unsigned int meshType);
-
         bool mEnabled;
         bool mSunEnabled;
         bool mMasserEnabled;
