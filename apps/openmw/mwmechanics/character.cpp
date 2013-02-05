@@ -83,9 +83,17 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
     mAnimation->setController(this);
 
     getStateInfo(mState, &mCurrentGroup);
-    /* Accumulate along X/Y only for now, until we can figure out how we should
-     * handle knockout and death which moves the character down. */
-    mAnimation->setAccumulation(Ogre::Vector3(1.0f, 1.0f, 0.0f));
+    if(ptr.getTypeName() == typeid(ESM::Activator).name())
+    {
+        /* Don't accumulate with activators (they don't get moved). */
+        mAnimation->setAccumulation(Ogre::Vector3::ZERO);
+    }
+    else
+    {
+        /* Accumulate along X/Y only for now, until we can figure out how we should
+         * handle knockout and death which moves the character down. */
+        mAnimation->setAccumulation(Ogre::Vector3(1.0f, 1.0f, 0.0f));
+    }
     if(mAnimation->hasAnimation(mCurrentGroup))
         mAnimation->play(mCurrentGroup, "stop", loop);
 }
