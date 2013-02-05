@@ -123,6 +123,16 @@ namespace Physic
         Ogre::Vector3 getHalfExtents() const;
 
         /**
+         * Sets the current amount of vertical force (gravity) affecting this physic actor
+         */
+        void setVerticalForce(float force);
+
+        /**
+         * Gets the current amount of vertical force (gravity) affecting this physic actor
+         */
+        float getVerticalForce() const;
+
+        /**
          * Runs pmove for this PhysicActor
          */
         void runPmove();
@@ -141,6 +151,7 @@ namespace Physic
         Ogre::Vector3 mBoxScaledTranslation;
         btQuaternion mBoxRotationInverse;
         Ogre::Quaternion mBoxRotation;
+        float verticalForce;
         bool collisionMode;
         std::string mMesh;
         PhysicEngine* mEngine;

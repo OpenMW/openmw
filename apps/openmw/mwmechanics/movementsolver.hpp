@@ -37,8 +37,6 @@ namespace MWMechanics
 
             OEngine::Physic::PhysicEngine *mEngine;
             OEngine::Physic::PhysicActor *mPhysicActor;
-
-            float verticalVelocity;
     };
 }
 

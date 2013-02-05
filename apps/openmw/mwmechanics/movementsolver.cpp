@@ -15,7 +15,6 @@ namespace MWMechanics
 
 MovementSolver::MovementSolver()
   : mEngine(MWBase::Environment::get().getWorld()->getPhysicEngine())
-  , verticalVelocity(0.0f)
 {
 }
 
@@ -89,6 +88,7 @@ Ogre::Vector3 MovementSolver::move(const MWWorld::Ptr &ptr, const Ogre::Vector3 
     int iterations=0, maxIterations=50; //arbitrary number. To prevent infinite loops. They shouldn't happen but it's good to be prepared.
     float maxslope=45;
 
+    float verticalVelocity = mPhysicActor->getVerticalForce();
     Ogre::Vector3 horizontalVelocity = movement/time;
     Ogre::Vector3 velocity(horizontalVelocity.x, horizontalVelocity.y, verticalVelocity); // we need a copy of the velocity before we start clipping it for steps
     Ogre::Vector3 clippedVelocity(horizontalVelocity.x, horizontalVelocity.y, verticalVelocity);
@@ -156,6 +156,7 @@ Ogre::Vector3 MovementSolver::move(const MWWorld::Ptr &ptr, const Ogre::Vector3 
 
     verticalVelocity = clippedVelocity.z;
     verticalVelocity -= time*400;
+    mPhysicActor->setVerticalForce(verticalVelocity);
 
     return newPosition;
 }
