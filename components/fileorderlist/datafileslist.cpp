@@ -204,13 +204,11 @@ void DataFilesList::selectedFiles(std::vector<boost::filesystem::path>& paths)
     foreach (const QString &path, masterPaths)
     {
         paths.push_back(path.toStdString());
-        cerr << path.toStdString() << endl;
     }
     QStringList pluginPaths = mPluginsModel->checkedItemsPaths();
     foreach (const QString &path, pluginPaths)
     {
         paths.push_back(path.toStdString());
-        cerr << path.toStdString() << endl;
     }
 }
 

@@ -9,7 +9,6 @@
 #include "subviewfactory.hpp"
 
 class QAction;
-class OpenDialog;
 
 namespace CSMDoc
 {
@@ -37,12 +36,10 @@ namespace CSVDoc
             QAction *mUndo;
             QAction *mRedo;
             QAction *mSave;
-            QAction *mOpen;
             QAction *mVerify;
             std::vector<QAction *> mEditingActions;
             Operations *mOperations;
             SubViewFactoryManager mSubViewFactory;
-            OpenDialog * mOpenDialog;
 
             // not implemented
             View (const View&);
@@ -97,8 +94,6 @@ namespace CSVDoc
 
             void newView();
 
-            void open();
-            void openNewFiles();
             void save();
 
             void verify();
