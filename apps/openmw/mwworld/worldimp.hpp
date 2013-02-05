@@ -91,8 +91,8 @@ namespace MWWorld
             bool moveObjectImp (const Ptr& ptr, float x, float y, float z);
             ///< @return true if the active cell (cell player is in) changed
 
-            virtual void
-            copyObjectToCell(const Ptr &ptr, CellStore &cell, const ESM::Position &pos);
+            
+            Ptr copyObjectToCell(const Ptr &ptr, CellStore &cell, const ESM::Position &pos);
 
             void updateWindowManager ();
             void performUpdateSceneQueries ();
@@ -107,6 +107,7 @@ namespace MWWorld
 
             void removeContainerScripts(const Ptr& reference);
             void addContainerScripts(const Ptr& reference, Ptr::CellStore* cell);
+            void PCDropped (const Ptr& item);
 
         public:
 

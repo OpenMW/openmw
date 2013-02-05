@@ -50,6 +50,14 @@ namespace MWScript
                     MWWorld::ManualRef ref (MWBase::Environment::get().getWorld()->getStore(), item);
 
                     ref.getPtr().getRefData().setCount (count);
+                    
+                    // Configure item's script variables
+                    std::string script = MWWorld::Class::get(ref.getPtr()).getScript(ref.getPtr());
+                    if (script != "")
+                    {
+                        const ESM::Script *esmscript = MWBase::Environment::get().getWorld()->getStore().get<ESM::Script>().find (script);
+                        ref.getPtr().getRefData().setLocals(*esmscript);
+                    }
 
                     MWWorld::Class::get (ptr).getContainerStore (ptr).add (ref.getPtr());
                 }

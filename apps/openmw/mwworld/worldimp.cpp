@@ -2,11 +2,13 @@
 
 #include <components/bsa/bsa_archive.hpp>
 #include <components/files/collections.hpp>
+#include <components/compiler/locals.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
+#include "../mwbase/scriptmanager.hpp"
 
 #include "../mwrender/sky.hpp"
 #include "../mwrender/player.hpp"
@@ -694,10 +696,11 @@ namespace MWWorld
         bool isPlayer = ptr == mPlayer->getPlayer();
         bool haveToMove = mWorldScene->isCellActive(*currCell) || isPlayer;
         
-        removeContainerScripts(ptr);
 
         if (*currCell != newCell)
         {
+        removeContainerScripts(ptr);
+
             if (isPlayer)
                 if (!newCell.isExterior())
                     changeToInteriorCell(Misc::StringUtils::lowerCase(newCell.mCell->mName), pos);
@@ -1270,6 +1273,15 @@ namespace MWWorld
         mRendering->toggleWater();
     }
 
+    void World::PCDropped (const Ptr& item)
+    {
+        std::string script = MWWorld::Class::get(item).getScript(item);
+        
+        // Set OnPCDrop Variable on item's script, if it has a script with that variable declared 
+        if(script != "")
+            item.mRefData->getLocals().setVarByInt(script, "onpcdrop", 1);
+    }
+
     bool World::placeObject (const Ptr& object, float cursorX, float cursorY)
     {
         std::pair<bool, Ogre::Vector3> result = mPhysics->castRay(cursorX, cursorY);
@@ -1292,9 +1304,10 @@ namespace MWWorld
         pos.pos[1] = -result.second[2];
         pos.pos[2] = result.second[1];
 
-        copyObjectToCell(object, *cell, pos);
+        Ptr dropped = copyObjectToCell(object, *cell, pos);
+        PCDropped(dropped);
         object.getRefData().setCount(0);
-
+        
         return true;
     }
 
@@ -1309,8 +1322,8 @@ namespace MWWorld
         return true;
     }
 
-    void
-    World::copyObjectToCell(const Ptr &object, CellStore &cell, const ESM::Position &pos)
+    
+    Ptr World::copyObjectToCell(const Ptr &object, CellStore &cell, const ESM::Position &pos)
     {
         /// \todo add searching correct cell for position specified
         MWWorld::Ptr dropped =
@@ -1334,6 +1347,8 @@ namespace MWWorld
             }
             addContainerScripts(dropped, &cell);
         }
+
+        return dropped;
     }
 
     void World::dropObjectOnGround (const Ptr& actor, const Ptr& object)
@@ -1354,7 +1369,9 @@ namespace MWWorld
             mPhysics->castRay(orig, dir, len);
         pos.pos[2] = hit.second.z;
 
-        copyObjectToCell(object, *cell, pos);
+        Ptr dropped = copyObjectToCell(object, *cell, pos);
+        if(actor == mPlayer->getPlayer()) // Only call if dropped by player
+            PCDropped(dropped);
         object.getRefData().setCount(0);
     }
 
