@@ -143,9 +143,7 @@ namespace MWWorld
                     //std::cout<<"angle: "<<getSlope(trace.planenormal)<<"\n";
                     if(getSlope(currentNormal) > sMaxSlope || currentNormal == lastNormal)
                     {
-                        if(stepMove(newPosition, velocity, remainingTime, verticalRotation, halfExtents, isInterior, engine))
-                            std::cout<< "stepped" <<std::endl;
-                        else
+                        if(!stepMove(newPosition, velocity, remainingTime, verticalRotation, halfExtents, isInterior, engine))
                         {
                             Ogre::Vector3 resultantDirection = currentNormal.crossProduct(up);
                             resultantDirection.normalise();
@@ -154,8 +152,10 @@ namespace MWWorld
 
                             // just this isn't enough sometimes. It's the same problem that causes steps to be necessary on even uphill terrain.
                             clippedVelocity += currentNormal*clippedVelocity.length()/50.0f;
-                            std::cout<< "clipped velocity: "<<clippedVelocity <<std::endl;
+                            //std::cout<< "clipped velocity: "<<clippedVelocity <<std::endl;
                         }
+                        //else
+                        //    std::cout<< "stepped" <<std::endl;
                     }
                     else
                         clipVelocity(clippedVelocity, currentNormal, clippedVelocity, 1.0f);
