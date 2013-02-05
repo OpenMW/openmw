@@ -20,7 +20,8 @@ RippleSimulation::RippleSimulation(Ogre::SceneManager* mainSceneManager)
       mTextureSize(512),
       mRippleAreaLength(1000),
       mImpulseSize(20),
-      mTexelOffset(0,0)
+      mTexelOffset(0,0),
+      mFirstUpdate(true)
 {
     Ogre::AxisAlignedBox aabInf;
     aabInf.setInfinite();
@@ -106,7 +107,7 @@ void RippleSimulation::update(float dt, Ogre::Vector2 position)
     // try to keep 20 fps
     mTime += dt;
 
-    while (mTime >= 1/20.0)
+    while (mTime >= 1/20.0 || mFirstUpdate)
     {
         mPreviousFrameOffset = mCurrentFrameOffset;
 
@@ -130,7 +131,10 @@ void RippleSimulation::update(float dt, Ogre::Vector2 position)
         heightMapToNormalMap();
 
         swapHeightMaps();
-        mTime -= 1/20.0;
+        if (!mFirstUpdate)
+            mTime -= 1/20.0;
+        else
+            mFirstUpdate = false;
     }
 
     sh::Factory::getInstance().setSharedParameter("rippleCenter", sh::makeProperty<sh::Vector3>(

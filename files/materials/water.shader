@@ -120,8 +120,8 @@
         #define WAVE_SCALE 75                      // overall wave scale
 
         #define BUMP 1.5                            // overall water surface bumpiness
-        #define REFL_BUMP 0.16                      // reflection distortion amount
-        #define REFR_BUMP 0.12                      // refraction distortion amount
+        #define REFL_BUMP 0.08                      // reflection distortion amount
+        #define REFR_BUMP 0.06                      // refraction distortion amount
 
         #define SCATTER_AMOUNT 3.0                  // amount of sunlight scattering
         #define SCATTER_COLOUR float3(0.0,1.0,0.95) // colour of sunlight scattering
@@ -232,7 +232,8 @@
         float3 normal_ripple = normalize(shSample(rippleNormalMap, relPos.xy).xyz * 2 - 1);
         normal_ripple = normal_ripple.xzy;
 
-        normal = normalize(normal + normal_ripple);
+        //normal = normalize(normal + normal_ripple);
+        normal = normalize(float3(normal.x + normal_ripple.x, normal.y, normal.z + normal_ripple.z));
 
 	    
 	    // normal for sunlight scattering			        

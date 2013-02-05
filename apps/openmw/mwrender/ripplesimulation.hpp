@@ -34,6 +34,8 @@ private:
     float mRippleAreaLength;
     float mImpulseSize;
 
+    bool mFirstUpdate;
+
     Ogre::Camera* mCamera;
 
     // own scenemanager to render our simulation
