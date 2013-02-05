@@ -1,10 +1,58 @@
 
 #include "document.hpp"
 
-CSMDoc::Document::Document (const std::string& name)
+#include <iostream>
+
+void CSMDoc::Document::load (const std::vector<boost::filesystem::path>::const_iterator& begin,
+    const std::vector<boost::filesystem::path>::const_iterator& end)
+{
+    for (std::vector<boost::filesystem::path>::const_iterator iter (begin); iter!=end; ++iter)
+        std::cout << "pretending to load " << iter->string() << std::endl;
+
+    /// \todo load content files
+}
+
+void CSMDoc::Document::createBase()
+{
+    static const char *sGlobals[] =
+    {
+        "Day", "DaysPassed", "GameHour", "Month", "PCRace", "PCVampire", "PCWerewolf", "PCYear", 0
+    };
+
+    for (int i=0; sGlobals[i]; ++i)
+    {
+        ESM::Global record;
+        record.mId = sGlobals[i];
+        record.mValue = i==0 ? 1 : 0;
+        record.mType = ESM::VT_Float;
+        getData().getGlobals().add (record);
+    }
+}
+
+CSMDoc::Document::Document (const std::vector<boost::filesystem::path>& files, bool new_)
 : mTools (mData)
 {
-    mName = name; ///< \todo replace with ESX list
+    if (files.empty())
+        throw std::runtime_error ("Empty content file sequence");
+
+    /// \todo adjust last file name:
+    /// \li make sure it is located in the data-local directory (adjust path if necessary)
+    /// \li make sure the extension matches the new scheme (change it if necesarry)
+
+    mName = files.back().filename().string();
+
+    if (files.size()>1 || !new_)
+    {
+        std::vector<boost::filesystem::path>::const_iterator end = files.end();
+
+        if (new_)
+            --end;
+
+        load (files.begin(), end);
+    }
+
+    if (new_ && files.size()==1)
+        createBase();
 
     connect (&mUndoStack, SIGNAL (cleanChanged (bool)), this, SLOT (modificationStateChanged (bool)));
 

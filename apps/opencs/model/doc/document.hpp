@@ -3,6 +3,8 @@
 
 #include <string>
 
+#include <boost/filesystem/path.hpp>
+
 #include <QUndoStack>
 #include <QObject>
 #include <QTimer>
@@ -38,10 +40,14 @@ namespace CSMDoc
             Document (const Document&);
             Document& operator= (const Document&);
 
+            void load (const std::vector<boost::filesystem::path>::const_iterator& begin,
+                const std::vector<boost::filesystem::path>::const_iterator& end);
+
+            void createBase();
+
         public:
 
-            Document (const std::string& name);
-            ///< \todo replace name with ESX list
+            Document (const std::vector<boost::filesystem::path>& files, bool new_);
 
             QUndoStack& getUndoStack();
 

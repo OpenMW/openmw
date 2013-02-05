@@ -15,7 +15,7 @@ include (OpenMWMacros)
 # Version
 
 set (OPENMW_VERSION_MAJOR 0)
-set (OPENMW_VERSION_MINOR 20)
+set (OPENMW_VERSION_MINOR 21)
 set (OPENMW_VERSION_RELEASE 0)
 
 set (OPENMW_VERSION "${OPENMW_VERSION_MAJOR}.${OPENMW_VERSION_MINOR}.${OPENMW_VERSION_RELEASE}")
@@ -306,7 +306,7 @@ endif()
 
 # Compiler settings
 if (CMAKE_COMPILER_IS_GNUCC)
-    add_definitions (-Wall -Wextra -Wno-unused-parameter -Wno-reorder -std=c++0x -pedantic)
+    add_definitions (-Wall -Wextra -Wno-unused-parameter -Wno-reorder -std=c++03 -pedantic -Wno-long-long)
 
     # Silence warnings in OGRE headers. Remove once OGRE got fixed!
     add_definitions (-Wno-ignored-qualifiers)
@@ -496,7 +496,7 @@ if (WIN32)
         # Warnings that aren't enabled normally and don't need to be enabled
         # They're unneeded and sometimes completely retarded warnings that /Wall enables
         # Not going to bother commenting them as they tend to warn on every standard library files
-        4061 4263 4264 4266 4350 4514 4548 4571 4610 4619 4623 4625 4626 4628 4640 4668 4710 4711 4820 4826 4917 4946
+        4061 4263 4264 4266 4350 4371 4514 4548 4571 4610 4619 4623 4625 4626 4628 4640 4668 4710 4711 4820 4826 4917 4946
 
         # Warnings that are thrown on standard libraries and not OpenMW
         4347 # Non-template function with same name and parameter count as template function
@@ -506,6 +506,11 @@ if (WIN32)
         4738 # Storing 32-bit float result in memory, possible loss of performance
         4986 # Undocumented warning that occurs in the crtdbg.h file
         4996 # Function was declared deprecated
+
+		# cause by ogre extensivly
+		4193 # #pragma warning(pop) : no matching '#pragma warning(push)'
+		4251 # class 'XXXX' needs to have dll-interface to be used by clients of class 'YYYY'
+		4275 # non dll-interface struct 'XXXX' used as base for dll-interface class 'YYYY'
 
         # OpenMW specific warnings
         4099 # Type mismatch, declared class or struct is defined with other type

@@ -11,19 +11,49 @@
 CS::Editor::Editor() : mViewManager (mDocumentManager), mNewDocumentIndex (0)
 {
     connect (&mViewManager, SIGNAL (newDocumentRequest ()), this, SLOT (createDocument ()));
+    connect (&mViewManager, SIGNAL (loadDocumentRequest ()), this, SLOT (loadDocument ()));
+
+    connect (&mStartup, SIGNAL (createDocument()), this, SLOT (createDocument ()));
+    connect (&mStartup, SIGNAL (loadDocument()), this, SLOT (loadDocument ()));
 }
 
 void CS::Editor::createDocument()
 {
+    mStartup.hide();
+
+    /// \todo open the ESX picker instead
+
     std::ostringstream stream;
 
     stream << "NewDocument" << (++mNewDocumentIndex);
 
-    CSMDoc::Document *document = mDocumentManager.addDocument (stream.str());
+    std::vector<boost::filesystem::path> files;
+    files.push_back (stream.str());
+
+    CSMDoc::Document *document = mDocumentManager.addDocument (files, true);
+
+    mViewManager.addView (document);
+}
+
+void CS::Editor::loadDocument()
+{
+    mStartup.hide();
+
+    /// \todo open the ESX picker instead
+    /// \todo remove the manual record creation and load the ESX files instead
+
+    std::ostringstream stream;
+
+    stream << "Document" << (++mNewDocumentIndex);
+
+    std::vector<boost::filesystem::path> files;
+    files.push_back (stream.str());
+
+    CSMDoc::Document *document = mDocumentManager.addDocument (files, false);
 
     static const char *sGlobals[] =
     {
-            "Day", "DaysPassed", "GameHour", "Month", "PCRace", "PCVampire", "PCWerewolf", "PCYear", 0
+        "Day", "DaysPassed", "GameHour", "Month", "PCRace", "PCVampire", "PCWerewolf", "PCYear", 0
     };
 
     for (int i=0; sGlobals[i]; ++i)
@@ -42,8 +72,7 @@ void CS::Editor::createDocument()
 
 int CS::Editor::run()
 {
-    /// \todo Instead of creating an empty document, open a small welcome dialogue window with buttons for new/load/recent projects
-    createDocument();
+    mStartup.show();
 
     return QApplication::exec();
 }

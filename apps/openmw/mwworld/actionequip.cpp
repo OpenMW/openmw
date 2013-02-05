@@ -32,7 +32,7 @@ namespace MWWorld
         }
 
         assert(it != invStore.end());
-        
+
         std::string npcRace = actor.get<ESM::NPC>()->mBase->mRace;
 
         // equip the item in the first free slot
@@ -43,7 +43,7 @@ namespace MWWorld
             // Beast races cannot equip shoes / boots, or full helms (head part vs hair part)
             if(npcRace == "argonian" || npcRace == "khajiit")
             {
-                if(*slot == MWWorld::InventoryStore::Slot_Helmet){ 
+                if(*slot == MWWorld::InventoryStore::Slot_Helmet){
                     std::vector<ESM::PartReference> parts;
 
                     if(it.getType() == MWWorld::ContainerStore::Type_Clothing)
@@ -54,22 +54,22 @@ namespace MWWorld
                     bool allow = true;
                     for(std::vector<ESM::PartReference>::iterator itr = parts.begin(); itr != parts.end(); ++itr)
                     {
-                        if((*itr).mPart == ESM::PartReferenceType::PRT_Head)
+                        if((*itr).mPart == ESM::PRT_Head)
                         {
                             if(actor == MWBase::Environment::get().getWorld()->getPlayer().getPlayer() )
                                 MWBase::Environment::get().getWindowManager()->messageBox ("#{sNotifyMessage13}", std::vector<std::string>());
-                        
+
                             allow = false;
                             break;
                         }
                     }
-                    
+
                     if(!allow)
                         break;
                 }
 
                 if (*slot == MWWorld::InventoryStore::Slot_Boots)
-                {  
+                {
                     // Only notify the player, not npcs
                     if(actor == MWBase::Environment::get().getWorld()->getPlayer().getPlayer() )
                     {

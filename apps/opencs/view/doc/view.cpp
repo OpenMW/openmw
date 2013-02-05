@@ -37,6 +37,10 @@ void CSVDoc::View::setupFileMenu()
     connect (mOpen, SIGNAL (triggered()), this, SLOT (open()));
     file->addAction (mOpen);
 
+    QAction *open = new QAction (tr ("Open"), this);
+    connect (open, SIGNAL (triggered()), this, SIGNAL (loadDocumentRequest()));
+    file->addAction (open);
+
     mSave = new QAction (tr ("&Save"), this);
     connect (mSave, SIGNAL (triggered()), this, SLOT (save()));
     file->addAction (mSave);
