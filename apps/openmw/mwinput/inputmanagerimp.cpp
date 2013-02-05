@@ -53,9 +53,10 @@ namespace MWInput
         , mUIYMultiplier (Settings::Manager::getFloat("ui y multiplier", "Input"))
         , mPreviewPOVDelay(0.f)
         , mTimeIdle(0.f)
-        , mCreated(false)
     {
         create();
+
+        changeInputMode(false);
     }
 
 
@@ -138,10 +139,6 @@ namespace MWInput
         mControlSwitch["playermagic"]         = true;
         mControlSwitch["playerviewswitch"]    = true;
         mControlSwitch["vanitymode"]          = true;
-
-        changeInputMode(false);
-
-        mCreated = true;
     }
 
     void InputManager::destroy()
@@ -153,7 +150,6 @@ namespace MWInput
         mInputManager->destroyInputObject(mKeyboard);
         mInputManager->destroyInputObject(mMouse);
         OIS::InputManager::destroyInputSystem(mInputManager);
-        mCreated = false;
     }
 
     InputManager::~InputManager()
@@ -250,13 +246,12 @@ namespace MWInput
             case A_ToggleHUD:
                 mWindows.toggleHud();
                 break;
-         }
+            }
         }
     }
 
     void InputManager::update(float dt, bool loading)
     {
-        if (!mCreated) return;
         // Tell OIS to handle all input events
         mKeyboard->capture();
         mMouse->capture();

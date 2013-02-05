@@ -131,8 +131,6 @@ namespace MWInput
 
         std::string mUserFile;
 
-        bool mCreated;
-
         bool mDragDrop;
 
         bool mInvertY;

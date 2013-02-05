@@ -326,6 +326,10 @@ void RenderingManager::update (float duration, bool paused)
 {
     if (mRecreateWindowInNextFrame)
     {
+        mRecreateWindowInNextFrame = false;
+
+        mRendering.removeWindowEventListener(this);
+        mRendering.getWindow()->removeListener(this);
         MWBase::Environment::get().getInputManager()->destroy();
 
         OEngine::Render::WindowSettings windowSettings;
@@ -338,8 +342,15 @@ void RenderingManager::update (float duration, bool paused)
         mRendering.recreateWindow("OpenMW", windowSettings);
 
         MWBase::Environment::get().getInputManager()->create();
-        mRecreateWindowInNextFrame = false;
+        mRendering.setWindowEventListener (this);
+        mRendering.getWindow()->addListener(this);
+
+        // this is necessary, otherwise it would just endlessly wait for the last query and it would never return
+        delete mOcclusionQuery;
+        mOcclusionQuery = new OcclusionQuery(&mRendering, mSkyManager->getSunNode());
     }
+
+
     Ogre::Vector3 orig, dest;
     mPlayer->setCameraDistance();
     if (!mPlayer->getPosition(orig, dest)) {

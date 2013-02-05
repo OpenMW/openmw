@@ -418,7 +418,7 @@ void Water::applyRTT()
     mReflection = NULL;
 
     // Create rendertarget for reflection
-    int rttsize = Settings::Manager::getInt("rtt size", "Water");
+    //int rttsize = Settings::Manager::getInt("rtt size", "Water");
 
     if (Settings::Manager::getBool("shader", "Water"))
     {

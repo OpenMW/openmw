@@ -288,12 +288,12 @@ void OgreRenderer::adjustViewport()
 
 void OgreRenderer::setWindowEventListener(Ogre::WindowEventListener* listener)
 {
-    //Ogre::WindowEventUtilities::addWindowEventListener(mWindow, listener);
+    Ogre::WindowEventUtilities::addWindowEventListener(mWindow, listener);
 }
 
 void OgreRenderer::removeWindowEventListener(Ogre::WindowEventListener* listener)
 {
-    //Ogre::WindowEventUtilities::removeWindowEventListener(mWindow, listener);
+    Ogre::WindowEventUtilities::removeWindowEventListener(mWindow, listener);
 }
 
 void OgreRenderer::setFov(float fov)

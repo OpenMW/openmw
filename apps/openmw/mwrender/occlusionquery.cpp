@@ -15,7 +15,7 @@ using namespace Ogre;
 OcclusionQuery::OcclusionQuery(OEngine::Render::OgreRenderer* renderer, SceneNode* sunNode) :
     mSunTotalAreaQuery(0), mSunVisibleAreaQuery(0), mSingleObjectQuery(0), mActiveQuery(0),
     mDoQuery(0), mSunVisibility(0), mQuerySingleObjectStarted(false), mTestResult(false),
-    mQuerySingleObjectRequested(false), mWasVisible(false), mObjectWasVisible(false), mDoQuery2(false),
+    mQuerySingleObjectRequested(false), mWasVisible(false), mObjectWasVisible(false),
     mBBNode(0), mActive(false)
 {
     mRendering = renderer;
@@ -94,6 +94,9 @@ OcclusionQuery::OcclusionQuery(OEngine::Render::OgreRenderer* renderer, SceneNod
 
 OcclusionQuery::~OcclusionQuery()
 {
+    mRendering->getScene()->removeRenderObjectListener (this);
+    mRendering->getScene()->removeRenderQueueListener(this);
+
     RenderSystem* renderSystem = Root::getSingleton().getRenderSystem();
     if (mSunTotalAreaQuery) renderSystem->destroyHardwareOcclusionQuery(mSunTotalAreaQuery);
     if (mSunVisibleAreaQuery) renderSystem->destroyHardwareOcclusionQuery(mSunVisibleAreaQuery);
@@ -109,6 +112,7 @@ void OcclusionQuery::notifyRenderSingleObject(Renderable* rend, const Pass* pass
 			const LightList* pLightList, bool suppressRenderStateChanges)
 {
     if (!mActive) return;
+
     // The following code activates and deactivates the occlusion queries
     // so that the queries only include the rendering of the intended meshes
 
@@ -116,6 +120,7 @@ void OcclusionQuery::notifyRenderSingleObject(Renderable* rend, const Pass* pass
     // Each occlusion query should only last a single rendering
     if (mActiveQuery != NULL)
     {
+        std::cout << "ending query (notifyRenderSingleObject)" << std::endl;
         mActiveQuery->endOcclusionQuery();
         mActiveQuery = NULL;
     }
@@ -123,6 +128,7 @@ void OcclusionQuery::notifyRenderSingleObject(Renderable* rend, const Pass* pass
     // Open a new occlusion query
     if (mDoQuery == true)
     {
+        std::cout << "opening new query" << std::endl;
         if (rend == mBBQueryTotal)
         {
             mActiveQuery = mSunTotalAreaQuery;
@@ -208,6 +214,7 @@ void OcclusionQuery::update(float duration)
         && !mSunVisibleAreaQuery->isStillOutstanding()
         && !mSingleObjectQuery->isStillOutstanding())
     {
+        std::cout << "update(), nothing is outstanding"<< std::endl;
         unsigned int totalPixels;
         unsigned int visiblePixels;
 
@@ -243,6 +250,8 @@ void OcclusionQuery::occlusionTest(const Ogre::Vector3& position, Ogre::SceneNod
     assert( !occlusionTestPending()
         && "Occlusion test still pending");
 
+    std::cout << "Occlusion test called " << std::endl;
+
     mBBQuerySingleObject->setVisible(true);
 
     mObjectNode->setPosition(position);
@@ -250,6 +259,8 @@ void OcclusionQuery::occlusionTest(const Ogre::Vector3& position, Ogre::SceneNod
     mObjectNode->setScale( Vector3(1,1,1)*(position - mRendering->getCamera()->getRealPosition()).length() );
 
     mQuerySingleObjectRequested = true;
+
+    mDoQuery = true;
 }
 
 bool OcclusionQuery::occlusionTestPending()
