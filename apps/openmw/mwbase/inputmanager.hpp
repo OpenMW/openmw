@@ -39,6 +39,9 @@ namespace MWBase
             virtual int getNumActions() = 0;
             virtual void enableDetectingBindingMode (int action) = 0;
             virtual void resetToDefaultBindings() = 0;
+
+            virtual void create () = 0;
+            virtual void destroy () = 0;
     };
 }
 

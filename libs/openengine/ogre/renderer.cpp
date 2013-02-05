@@ -205,13 +205,31 @@ void OgreRenderer::configure(const std::string &logPath,
         rs->setConfigOption ("RTT Preferred Mode", rttMode);
 }
 
+void OgreRenderer::recreateWindow(const std::string &title, const WindowSettings &settings)
+{
+    Ogre::ColourValue viewportBG = mView->getBackgroundColour();
+
+    mRoot->destroyRenderTarget(mWindow);
+    NameValuePairList params;
+    params.insert(std::make_pair("title", title));
+    params.insert(std::make_pair("FSAA", settings.fsaa));
+    params.insert(std::make_pair("vsync", settings.vsync ? "true" : "false"));
+
+    mWindow = mRoot->createRenderWindow(title, settings.window_x, settings.window_y, settings.fullscreen, &params);
+
+    // Create one viewport, entire window
+    mView = mWindow->addViewport(mCamera);
+    mView->setBackgroundColour(viewportBG);
+
+    adjustViewport();
+}
+
 void OgreRenderer::createWindow(const std::string &title, const WindowSettings& settings)
 {
     assert(mRoot);
     mRoot->initialise(false);
 
     // create a hidden 1x1 background window to keep resources when recreating the secondary (real) window
-    /*
     NameValuePairList params_;
     params_.insert(std::make_pair("title", title));
     params_.insert(std::make_pair("FSAA", "0"));
@@ -219,7 +237,6 @@ void OgreRenderer::createWindow(const std::string &title, const WindowSettings& 
     params_.insert(std::make_pair("hidden", "true"));
     Ogre::RenderWindow* hiddenWindow = mRoot->createRenderWindow("InactiveHidden", 1, 1, false, &params_);
     hiddenWindow->setActive(false);
-    */
 
     NameValuePairList params;
     params.insert(std::make_pair("title", title));
@@ -271,12 +288,12 @@ void OgreRenderer::adjustViewport()
 
 void OgreRenderer::setWindowEventListener(Ogre::WindowEventListener* listener)
 {
-	Ogre::WindowEventUtilities::addWindowEventListener(mWindow, listener);
+    //Ogre::WindowEventUtilities::addWindowEventListener(mWindow, listener);
 }
 
 void OgreRenderer::removeWindowEventListener(Ogre::WindowEventListener* listener)
 {
-	Ogre::WindowEventUtilities::removeWindowEventListener(mWindow, listener);
+    //Ogre::WindowEventUtilities::removeWindowEventListener(mWindow, listener);
 }
 
 void OgreRenderer::setFov(float fov)

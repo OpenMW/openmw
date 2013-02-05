@@ -131,6 +131,8 @@ namespace MWInput
 
         std::string mUserFile;
 
+        bool mCreated;
+
         bool mDragDrop;
 
         bool mInvertY;
@@ -148,8 +150,14 @@ namespace MWInput
         float mMouseX;
         float mMouseY;
         int mMouseWheel;
+        bool mDebug;
+        bool mUserFileExists;
 
         std::map<std::string, bool> mControlSwitch;
+
+    public:
+        virtual void create();
+        virtual void destroy();
 
     private:
         void adjustMouseRegion(int width, int height);

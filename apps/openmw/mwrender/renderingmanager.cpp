@@ -46,7 +46,8 @@ namespace MWRender {
 
 RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const boost::filesystem::path& resDir,
                                     const boost::filesystem::path& cacheDir, OEngine::Physic::PhysicEngine* engine)
-    : mRendering(_rend), mObjects(mRendering), mActors(mRendering), mAmbientMode(0), mSunEnabled(0), mPhysicsEngine(engine)
+    : mRendering(_rend), mObjects(mRendering), mActors(mRendering), mAmbientMode(0), mSunEnabled(0), mPhysicsEngine(engine),
+      mRecreateWindowInNextFrame(false)
 {
     // select best shader mode
     bool openGL = (Ogre::Root::getSingleton ().getRenderSystem ()->getName().find("OpenGL") != std::string::npos);
@@ -323,6 +324,22 @@ RenderingManager::moveObjectToCell(
 
 void RenderingManager::update (float duration, bool paused)
 {
+    if (mRecreateWindowInNextFrame)
+    {
+        MWBase::Environment::get().getInputManager()->destroy();
+
+        OEngine::Render::WindowSettings windowSettings;
+        windowSettings.fullscreen = Settings::Manager::getBool("fullscreen", "Video");
+        windowSettings.window_x = Settings::Manager::getInt("resolution x", "Video");
+        windowSettings.window_y = Settings::Manager::getInt("resolution y", "Video");
+        windowSettings.vsync = Settings::Manager::getBool("vsync", "Video");
+        std::string aa = Settings::Manager::getString("antialiasing", "Video");
+        windowSettings.fsaa = (aa.substr(0, 4) == "MSAA") ? aa.substr(5, aa.size()-5) : "0";
+        mRendering.recreateWindow("OpenMW", windowSettings);
+
+        MWBase::Environment::get().getInputManager()->create();
+        mRecreateWindowInNextFrame = false;
+    }
     Ogre::Vector3 orig, dest;
     mPlayer->setCameraDistance();
     if (!mPlayer->getPosition(orig, dest)) {
@@ -756,6 +773,7 @@ Compositors* RenderingManager::getCompositors()
 void RenderingManager::processChangedSettings(const Settings::CategorySettingVector& settings)
 {
     bool changeRes = false;
+    bool recreateWindow = false;
     bool rebuild = false; // rebuild static geometry (necessary after any material changes)
     for (Settings::CategorySettingVector::const_iterator it=settings.begin();
             it != settings.end(); ++it)
@@ -774,6 +792,8 @@ void RenderingManager::processChangedSettings(const Settings::CategorySettingVec
                 || it->second == "resolution y"
                 || it->second == "fullscreen"))
             changeRes = true;
+        else if (it->first == "Video" && it->second == "vsync")
+            recreateWindow = true;
         else if (it->second == "field of view" && it->first == "General")
             mRendering.setFov(Settings::Manager::getFloat("field of view", "General"));
         else if ((it->second == "texture filtering" && it->first == "General")
@@ -843,6 +863,13 @@ void RenderingManager::processChangedSettings(const Settings::CategorySettingVec
             mRendering.getWindow()->resize(x, y);
         }
         mRendering.getWindow()->setFullscreen(Settings::Manager::getBool("fullscreen", "Video"), x, y);
+    }
+
+    if (recreateWindow)
+    {
+        mRecreateWindowInNextFrame = true;
+        // We can not do this now, because this might get triggered from the input listener
+        // and destroying/recreating the input system at that point would cause a crash
     }
 
     if (mWater)

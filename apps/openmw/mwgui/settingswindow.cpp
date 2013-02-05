@@ -370,14 +370,10 @@ namespace MWGui
                 apply();
             }
         }
-        else if (_sender == mVSyncButton)
-        {
-            Settings::Manager::setBool("vsync", "Video", newState);
-            MWBase::Environment::get().getWindowManager()->
-                messageBox("VSync will be applied after a restart", std::vector<std::string>());
-        }
         else
         {
+            if (_sender == mVSyncButton)
+                Settings::Manager::setBool("vsync", "Video", newState);
             if (_sender == mWaterShaderButton)
                 Settings::Manager::setBool("shader", "Water", newState);
             else if (_sender == mRefractionButton)
