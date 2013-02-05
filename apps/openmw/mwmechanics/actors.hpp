@@ -25,8 +25,13 @@ namespace MWMechanics
     {
         typedef std::map<MWWorld::Ptr,CharacterController> PtrControllerMap;
         PtrControllerMap mActors;
-        float mDuration;
+
+        typedef std::vector<std::pair<MWWorld::Ptr,Ogre::Vector3> > PtrMovementList;
+        PtrMovementList mMovement;
+
         std::map<std::string, int> mDeathCount;
+
+        float mDuration;
 
             void updateNpc (const MWWorld::Ptr& ptr, float duration, bool paused);
 

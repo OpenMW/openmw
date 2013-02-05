@@ -258,19 +258,15 @@ namespace MWMechanics
 
         if(!paused)
         {
-            PtrControllerMap::iterator player(mActors.end());
+            mMovement.reserve(mActors.size());
+
             for(PtrControllerMap::iterator iter(mActors.begin());iter != mActors.end();++iter)
             {
-                if(iter->first.getRefData().getHandle() == "player")
-                {
-                    /* Make sure player updates last (in case a cell transition occurs) */
-                    player = iter;
-                    continue;
-                }
-                iter->second.update(duration);
+                Ogre::Vector3 movement = iter->second.update(duration);
+                mMovement.push_back(std::make_pair(iter->first, movement));
             }
-            if(player != mActors.end())
-                player->second.update(duration);
+
+            mMovement.clear();
         }
     }
 
