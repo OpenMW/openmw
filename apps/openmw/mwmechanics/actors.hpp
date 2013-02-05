@@ -7,6 +7,7 @@
 #include <map>
 
 #include "character.hpp"
+#include "../mwbase/world.hpp"
 
 namespace Ogre
 {
@@ -26,8 +27,7 @@ namespace MWMechanics
         typedef std::map<MWWorld::Ptr,CharacterController> PtrControllerMap;
         PtrControllerMap mActors;
 
-        typedef std::vector<std::pair<MWWorld::Ptr,Ogre::Vector3> > PtrMovementList;
-        PtrMovementList mMovement;
+        MWWorld::PtrMovementList mMovement;
 
         std::map<std::string, int> mDeathCount;
 

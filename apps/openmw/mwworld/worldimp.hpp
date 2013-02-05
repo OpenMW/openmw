@@ -263,8 +263,7 @@ namespace MWWorld
             virtual void positionToIndex (float x, float y, int &cellX, int &cellY) const;
             ///< Convert position to cell numbers
 
-            virtual void doPhysics (const std::vector<std::pair<std::string, Ogre::Vector3> >& actors,
-                float duration);
+            virtual void doPhysics(const PtrMovementList &actors, float duration);
             ///< Run physics simulation and modify \a world accordingly.
 
             virtual bool toggleCollisionMode();

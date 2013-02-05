@@ -52,6 +52,8 @@ namespace MWWorld
     class TimeStamp;
     class ESMStore;
     class RefData;
+
+    typedef std::vector<std::pair<MWWorld::Ptr,Ogre::Vector3> > PtrMovementList;
 }
 
 namespace MWBase
@@ -233,8 +235,7 @@ namespace MWBase
             virtual void positionToIndex (float x, float y, int &cellX, int &cellY) const = 0;
             ///< Convert position to cell numbers
 
-            virtual void doPhysics (const std::vector<std::pair<std::string, Ogre::Vector3> >& actors,
-                float duration) = 0;
+            virtual void doPhysics (const MWWorld::PtrMovementList &actors, float duration) = 0;
             ///< Run physics simulation and modify \a world accordingly.
 
             virtual bool toggleCollisionMode() = 0;

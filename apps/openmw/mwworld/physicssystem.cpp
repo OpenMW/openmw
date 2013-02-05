@@ -185,13 +185,6 @@ namespace MWWorld
         }
     }
 
-    void PhysicsSystem::doPhysics(float dt, const std::vector<std::pair<std::string, Ogre::Vector3> >& actors)
-    {
-        //set the DebugRenderingMode. To disable it,set it to 0
-        //eng->setDebugRenderingMode(1);
-
-    }
-
 
     void PhysicsSystem::addHeightField (float* heights,
                 int x, int y, float yoffset,

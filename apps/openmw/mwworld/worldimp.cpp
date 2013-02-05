@@ -834,10 +834,8 @@ namespace MWWorld
             --cellY;
     }
 
-    void World::doPhysics (const std::vector<std::pair<std::string, Ogre::Vector3> >& actors,
-        float duration)
+    void World::doPhysics(const PtrMovementList &actors, float duration)
     {
-        mPhysics->doPhysics(duration, actors);
     }
 
     bool World::toggleCollisionMode()

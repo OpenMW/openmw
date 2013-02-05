@@ -14,9 +14,6 @@ namespace MWWorld
             PhysicsSystem (OEngine::Render::OgreRenderer &_rend);
             ~PhysicsSystem ();
 
-            void doPhysics(float duration, const std::vector<std::pair<std::string, Ogre::Vector3> >& actors);
-            ///< do physics with dt - Usage: first call doPhysics with frame dt, then call doPhysicsFixed as often as time steps have passed
-
             void addObject (const MWWorld::Ptr& ptr);
 
             void addActor (const MWWorld::Ptr& ptr);
