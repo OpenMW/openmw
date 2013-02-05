@@ -135,8 +135,7 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
     sh::Factory::getInstance ().setSharedParameter ("waterTimer", sh::makeProperty<sh::FloatValue>(new sh::FloatValue(0)));
     sh::Factory::getInstance ().setSharedParameter ("windDir_windSpeed", sh::makeProperty<sh::Vector3>(new sh::Vector3(0.5, -0.8, 0.2)));
     sh::Factory::getInstance ().setSharedParameter ("waterSunFade_sunHeight", sh::makeProperty<sh::Vector2>(new sh::Vector2(1, 0.6)));
-    sh::Factory::getInstance ().setSharedParameter ("gammaCorrection", sh::makeProperty<sh::FloatValue>(new sh::FloatValue(
-            1.f)));
+    sh::Factory::getInstance ().setGlobalSetting ("refraction", Settings::Manager::getBool("refraction", "Water") ? "true" : "false");
 
     applyCompositors();
 
@@ -757,6 +756,7 @@ Compositors* RenderingManager::getCompositors()
 void RenderingManager::processChangedSettings(const Settings::CategorySettingVector& settings)
 {
     bool changeRes = false;
+    bool rebuild = false; // rebuild static geometry (necessary after any material changes)
     for (Settings::CategorySettingVector::const_iterator it=settings.begin();
             it != settings.end(); ++it)
     {
@@ -794,18 +794,23 @@ void RenderingManager::processChangedSettings(const Settings::CategorySettingVec
             applyCompositors();
             sh::Factory::getInstance ().setGlobalSetting ("mrt_output", useMRT() ? "true" : "false");
             sh::Factory::getInstance ().setGlobalSetting ("simple_water", Settings::Manager::getBool("shader", "Water") ? "false" : "true");
-            mObjects.rebuildStaticGeometry ();
+            rebuild = true;
             mRendering.getViewport ()->setClearEveryFrame (true);
+        }
+        else if (it->second == "refraction" && it->first == "Water")
+        {
+            sh::Factory::getInstance ().setGlobalSetting ("refraction", Settings::Manager::getBool("refraction", "Water") ? "true" : "false");
+            rebuild = true;
         }
         else if (it->second == "underwater effect" && it->first == "Water")
         {
             sh::Factory::getInstance ().setGlobalSetting ("underwater_effects", Settings::Manager::getString("underwater effect", "Water"));
-            mObjects.rebuildStaticGeometry ();
+            rebuild = true;
         }
         else if (it->second == "shaders" && it->first == "Objects")
         {
             sh::Factory::getInstance ().setShadersEnabled (Settings::Manager::getBool("shaders", "Objects"));
-            mObjects.rebuildStaticGeometry ();
+            rebuild = true;
         }
         else if (it->second == "shader mode" && it->first == "General")
         {
@@ -818,13 +823,13 @@ void RenderingManager::processChangedSettings(const Settings::CategorySettingVec
             else
                 lang = sh::Language_CG;
             sh::Factory::getInstance ().setCurrentLanguage (lang);
-            mObjects.rebuildStaticGeometry ();
+            rebuild = true;
         }
         else if (it->first == "Shadows")
         {
             mShadows->recreate ();
 
-            mObjects.rebuildStaticGeometry ();
+            rebuild = true;
         }
     }
 
@@ -842,6 +847,9 @@ void RenderingManager::processChangedSettings(const Settings::CategorySettingVec
 
     if (mWater)
         mWater->processChangedSettings(settings);
+
+    if (rebuild)
+        mObjects.rebuildStaticGeometry();
 }
 
 void RenderingManager::setMenuTransparency(float val)

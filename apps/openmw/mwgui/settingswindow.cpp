@@ -123,6 +123,7 @@ namespace MWGui
         getWidget(mInvertYButton, "InvertYButton");
         getWidget(mUISensitivitySlider, "UISensitivitySlider");
         getWidget(mCameraSensitivitySlider, "CameraSensitivitySlider");
+        getWidget(mRefractionButton, "RefractionButton");
 
         mSubtitlesButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onButtonToggled);
         mCrosshairButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onButtonToggled);
@@ -133,6 +134,7 @@ namespace MWGui
         mShaderModeButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onShaderModeToggled);
         mFullscreenButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onButtonToggled);
         mWaterShaderButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onButtonToggled);
+        mRefractionButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onButtonToggled);
         mReflectObjectsButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onButtonToggled);
         mReflectTerrainButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onButtonToggled);
         mReflectActorsButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onButtonToggled);
@@ -247,6 +249,8 @@ namespace MWGui
 
         mShadersButton->setCaption (Settings::Manager::getBool("shaders", "Objects") ? "on" : "off");
         mShaderModeButton->setCaption (Settings::Manager::getString("shader mode", "General"));
+
+        mRefractionButton->setCaption (Settings::Manager::getBool("refraction", "Water") ? "on" : "off");
 
         if (!MWRender::RenderingManager::waterShaderSupported())
         {
@@ -376,6 +380,8 @@ namespace MWGui
         {
             if (_sender == mWaterShaderButton)
                 Settings::Manager::setBool("shader", "Water", newState);
+            else if (_sender == mRefractionButton)
+                Settings::Manager::setBool("refraction", "Water", newState);
             else if (_sender == mUnderwaterButton)
             {
                 Settings::Manager::setBool("underwater effect", "Water", newState);

@@ -430,8 +430,11 @@ void Water::applyRTT()
     delete mRefraction;
     mRefraction = NULL;
 
-    mRefraction = new Refraction(mCamera);
-    mRefraction->setHeight(mTop);
+    if (Settings::Manager::getBool("refraction", "Water"))
+    {
+        mRefraction = new Refraction(mCamera);
+        mRefraction->setHeight(mTop);
+    }
 }
 
 void Water::applyVisibilityMask()
@@ -455,7 +458,8 @@ void Water::processChangedSettings(const Settings::CategorySettingVector& settin
             it != settings.end(); ++it)
     {
         if ( it->first == "Water" && (
-               it->second == "shader"
+                 it->second == "shader"
+            || it->second == "refraction"
             || it->second == "rtt size"))
             applyRT = true;
 

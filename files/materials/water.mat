@@ -11,6 +11,9 @@ material Water
         fragment_program water_fragment
         
         cull_hardware none
+
+        scene_blend alpha_blend
+        depth_write off
         
         texture_unit reflectionMap
         {
