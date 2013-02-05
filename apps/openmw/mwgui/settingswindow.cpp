@@ -247,10 +247,10 @@ namespace MWGui
 
         mInvertYButton->setCaptionWithReplacing(Settings::Manager::getBool("invert y axis", "Input") ? "#{sOn}" : "#{sOff}");
 
-        mShadersButton->setCaption (Settings::Manager::getBool("shaders", "Objects") ? "on" : "off");
+        mShadersButton->setCaptionWithReplacing (Settings::Manager::getBool("shaders", "Objects") ? "#{sOn}" : "#{sOff}");
         mShaderModeButton->setCaption (Settings::Manager::getString("shader mode", "General"));
 
-        mRefractionButton->setCaption (Settings::Manager::getBool("refraction", "Water") ? "on" : "off");
+        mRefractionButton->setCaptionWithReplacing (Settings::Manager::getBool("refraction", "Water") ? "#{sOn}" : "#{sOff}");
 
         if (!MWRender::RenderingManager::waterShaderSupported())
         {
@@ -434,14 +434,17 @@ namespace MWGui
 
     void SettingsWindow::onShadersToggled(MyGUI::Widget* _sender)
     {
-        std::string val = static_cast<MyGUI::Button*>(_sender)->getCaption();
-        if (val == "off")
-            val = "on";
-        else
-            val = "off";
-        static_cast<MyGUI::Button*>(_sender)->setCaption (val);
+        std::string on = mWindowManager.getGameSettingString("sOn", "On");
+        std::string off = mWindowManager.getGameSettingString("sOff", "On");
 
-        if (val == "off")
+        std::string val = static_cast<MyGUI::Button*>(_sender)->getCaption();
+        if (val == off)
+            val = on;
+        else
+            val = off;
+        static_cast<MyGUI::Button*>(_sender)->setCaptionWithReplacing (val);
+
+        if (val == off)
         {
             Settings::Manager::setBool("shaders", "Objects", false);
 
