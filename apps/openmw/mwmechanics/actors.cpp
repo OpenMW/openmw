@@ -265,6 +265,7 @@ namespace MWMechanics
                 Ogre::Vector3 movement = iter->second.update(duration);
                 mMovement.push_back(std::make_pair(iter->first, movement));
             }
+            MWBase::Environment::get().getWorld()->doPhysics(mMovement, duration);
 
             mMovement.clear();
         }

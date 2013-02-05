@@ -35,6 +35,8 @@ namespace MWWorld
 
             bool toggleCollisionMode();
             
+            Ogre::Vector3 move(const MWWorld::Ptr &ptr, const Ogre::Vector3 &movement, float time);
+
             std::pair<float, std::string> getFacedHandle (MWWorld::World& world, float queryDistance);
             std::vector < std::pair <float, std::string> > getFacedHandles (float queryDistance);
             std::vector < std::pair <float, std::string> > getFacedHandles (float mouseX, float mouseY, float queryDistance);

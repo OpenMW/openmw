@@ -836,6 +836,27 @@ namespace MWWorld
 
     void World::doPhysics(const PtrMovementList &actors, float duration)
     {
+        /* No duration? Shouldn't be any movement, then. */
+        if(duration <= 0.0f)
+            return;
+
+        PtrMovementList::const_iterator player(actors.end());
+        for(PtrMovementList::const_iterator iter(actors.begin());iter != actors.end();iter++)
+        {
+            if(iter->first.getRefData().getHandle() == "player")
+            {
+                /* Handle player last, in case a cell transition occurs */
+                player = iter;
+                continue;
+            }
+            Ogre::Vector3 vec = mPhysics->move(iter->first, iter->second, duration);
+            moveObjectImp(iter->first, vec.x, vec.y, vec.z);
+        }
+        if(player != actors.end())
+        {
+            Ogre::Vector3 vec = mPhysics->move(player->first, player->second, duration);
+            moveObjectImp(player->first, vec.x, vec.y, vec.z);
+        }
     }
 
     bool World::toggleCollisionMode()

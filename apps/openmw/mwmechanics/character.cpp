@@ -29,8 +29,6 @@
 
 #include "../mwworld/class.hpp"
 
-#include "movementsolver.hpp"
-
 
 namespace MWMechanics
 {
@@ -79,7 +77,6 @@ static void getStateInfo(CharacterState state, std::string *group)
 CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Animation *anim, CharacterState state, bool loop)
   : mPtr(ptr), mAnimation(anim), mState(state), mSkipAnim(false)
 {
-    mMovementSolver = new MovementSolver();
     if(!mAnimation)
         return;
 
@@ -98,7 +95,6 @@ CharacterController::CharacterController(const CharacterController &rhs)
   , mCurrentGroup(rhs.mCurrentGroup), mState(rhs.mState)
   , mSkipAnim(rhs.mSkipAnim)
 {
-    mMovementSolver = new MovementSolver();
     if(!mAnimation)
         return;
     /* We've been copied. Update the animation with the new controller. */
@@ -107,7 +103,6 @@ CharacterController::CharacterController(const CharacterController &rhs)
 
 CharacterController::~CharacterController()
 {
-    delete mMovementSolver;
 }
 
 
@@ -181,21 +176,14 @@ Ogre::Vector3 CharacterController::update(float duration)
     }
     mSkipAnim = false;
 
-    if(duration > 0.0f)
-    {
-        const ESM::Position &refpos = mPtr.getRefData().getPosition();
+    const ESM::Position &refpos = mPtr.getRefData().getPosition();
+    // Rotates first around z, then y, then x
+    movement = (Ogre::Quaternion(Ogre::Radian(-refpos.rot[0]), Ogre::Vector3::UNIT_X)*
+                Ogre::Quaternion(Ogre::Radian(-refpos.rot[1]), Ogre::Vector3::UNIT_Y)*
+                Ogre::Quaternion(Ogre::Radian(-refpos.rot[2]), Ogre::Vector3::UNIT_Z)) *
+                movement;
 
-        // Rotates first around z, then y, then x
-        movement = (Ogre::Quaternion(Ogre::Radian(-refpos.rot[0]), Ogre::Vector3::UNIT_X)*
-                    Ogre::Quaternion(Ogre::Radian(-refpos.rot[1]), Ogre::Vector3::UNIT_Y)*
-                    Ogre::Quaternion(Ogre::Radian(-refpos.rot[2]), Ogre::Vector3::UNIT_Z)) *
-                   movement;
-
-        Ogre::Vector3 res = mMovementSolver->move(mPtr, movement, duration);
-        MWBase::Environment::get().getWorld()->moveObject(mPtr, res.x, res.y, res.z);
-    }
-
-    return Ogre::Vector3(0.0f);
+    return movement;
 }
 
 

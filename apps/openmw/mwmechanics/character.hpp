@@ -13,8 +13,6 @@ namespace MWRender
 namespace MWMechanics
 {
 
-class MovementSolver;
-
 enum CharacterState {
     CharState_Idle,
     CharState_Idle2,
@@ -50,8 +48,6 @@ class CharacterController
     std::string mCurrentGroup;
     CharacterState mState;
     bool mSkipAnim;
-
-    MovementSolver *mMovementSolver;
 
 protected:
     /* Called by the animation whenever a new text key is reached. */

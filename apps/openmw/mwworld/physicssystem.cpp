@@ -21,6 +21,153 @@ using namespace Ogre;
 namespace MWWorld
 {
 
+    static const float sMaxSlope = 45.0f;
+
+    class MovementSolver
+    {
+    private:
+        static bool stepMove(Ogre::Vector3& position, const Ogre::Vector3 &velocity, float remainingTime,
+                             float verticalRotation, const Ogre::Vector3 &halfExtents, bool isInterior,
+                             OEngine::Physic::PhysicEngine *engine)
+        {
+            traceResults trace; // no initialization needed
+
+            newtrace(&trace, position+Ogre::Vector3(0.0f,0.0f,STEPSIZE),
+                             position+Ogre::Vector3(0.0f,0.0f,STEPSIZE)+velocity*remainingTime,
+                    halfExtents, verticalRotation, isInterior, engine);
+            if(trace.fraction == 0.0f || (trace.fraction != 1.0f && getSlope(trace.planenormal) > sMaxSlope))
+                return false;
+
+            newtrace(&trace, trace.endpos, trace.endpos-Ogre::Vector3(0,0,STEPSIZE), halfExtents, verticalRotation, isInterior, engine);
+            if(getSlope(trace.planenormal) < sMaxSlope)
+            {
+                // only step down onto semi-horizontal surfaces. don't step down onto the side of a house or a wall.
+                position = trace.endpos;
+                return true;
+            }
+
+            return false;
+        }
+
+        static void clipVelocity(const Ogre::Vector3& in, const Ogre::Vector3& normal, Ogre::Vector3& out,
+                                 const float overbounce)
+        {
+            //Math stuff. Basically just project the velocity vector onto the plane represented by the normal.
+            //More specifically, it projects velocity onto the normal, takes that result, multiplies it by overbounce and then subtracts it from velocity.
+            float backoff;
+
+            backoff = in.dotProduct(normal);
+            if(backoff < 0.0f)
+                backoff *= overbounce;
+            else
+                backoff /= overbounce;
+
+            out = in - (normal*backoff);
+        }
+
+        static void projectVelocity(Ogre::Vector3& velocity, const Ogre::Vector3& direction)
+        {
+            Ogre::Vector3 normalizedDirection(direction);
+            normalizedDirection.normalise();
+
+            // no divide by normalizedDirection.length necessary because it's normalized
+            velocity = normalizedDirection * velocity.dotProduct(normalizedDirection);
+        }
+
+        static float getSlope(const Ogre::Vector3 &normal)
+        {
+            return normal.angleBetween(Ogre::Vector3(0.0f,0.0f,1.0f)).valueDegrees();
+        }
+
+    public:
+        static Ogre::Vector3 move(const MWWorld::Ptr &ptr, const Ogre::Vector3 &movement, float time,
+                                  OEngine::Physic::PhysicEngine *engine)
+        {
+            Ogre::Vector3 position(ptr.getRefData().getPosition().pos);
+
+            /* Anything to collide with? */
+            OEngine::Physic::PhysicActor *physicActor = engine->getCharacter(ptr.getRefData().getHandle());
+            if(!physicActor || !physicActor->getCollisionMode())
+                return position + movement;
+
+            traceResults trace; //no initialization needed
+            int iterations=0, maxIterations=50; //arbitrary number. To prevent infinite loops. They shouldn't happen but it's good to be prepared.
+
+            float verticalVelocity = physicActor->getVerticalForce();
+            Ogre::Vector3 horizontalVelocity = movement/time;
+            Ogre::Vector3 velocity(horizontalVelocity.x, horizontalVelocity.y, verticalVelocity); // we need a copy of the velocity before we start clipping it for steps
+            Ogre::Vector3 clippedVelocity(horizontalVelocity.x, horizontalVelocity.y, verticalVelocity);
+
+            float remainingTime = time;
+            bool isInterior = !ptr.getCell()->isExterior();
+            float verticalRotation = physicActor->getRotation().getYaw().valueDegrees();
+            Ogre::Vector3 halfExtents = physicActor->getHalfExtents();
+
+            Ogre::Vector3 lastNormal(0.0f);
+            Ogre::Vector3 currentNormal(0.0f);
+            Ogre::Vector3 up(0.0f, 0.0f, 1.0f);
+            Ogre::Vector3 newPosition = position;
+
+            newtrace(&trace, position, position+Ogre::Vector3(0,0,-10), halfExtents, verticalRotation, isInterior, engine);
+            if(trace.fraction < 1.0f)
+            {
+                if(getSlope(trace.planenormal) > sMaxSlope)
+                {
+                    // if we're on a really steep slope, don't listen to user input
+                    clippedVelocity.x = clippedVelocity.y = 0.0f;
+                }
+                else
+                {
+                    // if we're within 10 units of the ground, force velocity to track the ground
+                    clipVelocity(clippedVelocity, trace.planenormal, clippedVelocity, 1.0f);
+                }
+            }
+
+            do {
+                // trace to where character would go if there were no obstructions
+                newtrace(&trace, newPosition, newPosition+clippedVelocity*remainingTime, halfExtents, verticalRotation, isInterior, engine);
+                newPosition = trace.endpos;
+                currentNormal = trace.planenormal;
+                remainingTime = remainingTime * (1.0f-trace.fraction);
+
+                // check for obstructions
+                if(trace.fraction != 1.0f)
+                {
+                    //std::cout<<"angle: "<<getSlope(trace.planenormal)<<"\n";
+                    if(getSlope(currentNormal) > sMaxSlope || currentNormal == lastNormal)
+                    {
+                        if(stepMove(newPosition, velocity, remainingTime, verticalRotation, halfExtents, isInterior, engine))
+                            std::cout<< "stepped" <<std::endl;
+                        else
+                        {
+                            Ogre::Vector3 resultantDirection = currentNormal.crossProduct(up);
+                            resultantDirection.normalise();
+                            clippedVelocity = velocity;
+                            projectVelocity(clippedVelocity, resultantDirection);
+
+                            // just this isn't enough sometimes. It's the same problem that causes steps to be necessary on even uphill terrain.
+                            clippedVelocity += currentNormal*clippedVelocity.length()/50.0f;
+                            std::cout<< "clipped velocity: "<<clippedVelocity <<std::endl;
+                        }
+                    }
+                    else
+                        clipVelocity(clippedVelocity, currentNormal, clippedVelocity, 1.0f);
+                }
+
+                lastNormal = currentNormal;
+
+                iterations++;
+            } while(iterations < maxIterations && remainingTime != 0.0f);
+
+            verticalVelocity = clippedVelocity.z;
+            verticalVelocity -= time*400;
+            physicActor->setVerticalForce(verticalVelocity);
+
+            return newPosition;
+        }
+    };
+
+
     PhysicsSystem::PhysicsSystem(OEngine::Render::OgreRenderer &_rend) :
         mRender(_rend), mEngine(0), mFreeFly (true)
     {
@@ -183,6 +330,11 @@ namespace MWWorld
         {
             return std::make_pair(true, ray.getPoint(200*result.second));  /// \todo make this distance (ray length) configurable
         }
+    }
+
+    Ogre::Vector3 PhysicsSystem::move(const MWWorld::Ptr &ptr, const Ogre::Vector3 &movement, float time)
+    {
+        return MovementSolver::move(ptr, movement, time, mEngine);
     }
 
 
