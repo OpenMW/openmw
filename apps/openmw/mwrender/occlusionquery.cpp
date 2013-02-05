@@ -120,7 +120,6 @@ void OcclusionQuery::notifyRenderSingleObject(Renderable* rend, const Pass* pass
     // Each occlusion query should only last a single rendering
     if (mActiveQuery != NULL)
     {
-        std::cout << "ending query (notifyRenderSingleObject)" << std::endl;
         mActiveQuery->endOcclusionQuery();
         mActiveQuery = NULL;
     }
@@ -128,7 +127,6 @@ void OcclusionQuery::notifyRenderSingleObject(Renderable* rend, const Pass* pass
     // Open a new occlusion query
     if (mDoQuery == true)
     {
-        std::cout << "opening new query" << std::endl;
         if (rend == mBBQueryTotal)
         {
             mActiveQuery = mSunTotalAreaQuery;
@@ -214,7 +212,6 @@ void OcclusionQuery::update(float duration)
         && !mSunVisibleAreaQuery->isStillOutstanding()
         && !mSingleObjectQuery->isStillOutstanding())
     {
-        std::cout << "update(), nothing is outstanding"<< std::endl;
         unsigned int totalPixels;
         unsigned int visiblePixels;
 
@@ -249,8 +246,6 @@ void OcclusionQuery::occlusionTest(const Ogre::Vector3& position, Ogre::SceneNod
 {
     assert( !occlusionTestPending()
         && "Occlusion test still pending");
-
-    std::cout << "Occlusion test called " << std::endl;
 
     mBBQuerySingleObject->setVisible(true);
 

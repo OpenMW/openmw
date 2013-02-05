@@ -56,6 +56,12 @@ void MyGUIManager::setup(Ogre::RenderWindow *wnd, Ogre::SceneManager *mgr, bool 
     mGui->initialise("core.xml");
 }
 
+void MyGUIManager::updateWindow (Ogre::RenderWindow *wnd)
+{
+    mRenderManager->setRenderWindow (wnd);
+    mRenderManager->setActiveViewport(0);
+}
+
 void MyGUIManager::shutdown()
 {
     mGui->shutdown ();

@@ -56,10 +56,11 @@
 using namespace MWGui;
 
 WindowManager::WindowManager(
-    const Compiler::Extensions& extensions, int fpsLevel, bool newGame, OEngine::Render::OgreRenderer *mOgre,
+    const Compiler::Extensions& extensions, int fpsLevel, bool newGame, OEngine::Render::OgreRenderer *ogre,
         const std::string& logpath, const std::string& cacheDir, bool consoleOnlyScripts,
         Translation::Storage& translationDataStorage)
   : mGuiManager(NULL)
+  , mRendering(ogre)
   , mHud(NULL)
   , mMap(NULL)
   , mMenu(NULL)
@@ -111,7 +112,7 @@ WindowManager::WindowManager(
 {
 
     // Set up the GUI system
-    mGuiManager = new OEngine::GUI::MyGUIManager(mOgre->getWindow(), mOgre->getScene(), false, logpath);
+    mGuiManager = new OEngine::GUI::MyGUIManager(mRendering->getWindow(), mRendering->getScene(), false, logpath);
     mGui = mGuiManager->getGui();
 
     //Register own widgets with MyGUI
@@ -172,7 +173,7 @@ WindowManager::WindowManager(
     mEnchantingDialog = new EnchantingDialog(*this);
     mTrainingWindow = new TrainingWindow(*this);
 
-    mLoadingScreen = new LoadingScreen(mOgre->getScene (), mOgre->getWindow (), *this);
+    mLoadingScreen = new LoadingScreen(mRendering->getScene (), mRendering->getWindow (), *this);
     mLoadingScreen->onResChange (w,h);
 
     mInputBlocker = mGui->createWidget<MyGUI::Widget>("",0,0,w,h,MyGUI::Align::Default,"Windows","");
@@ -763,6 +764,7 @@ void WindowManager::processChangedSettings(const Settings::CategorySettingVector
     mToolTips->setDelay(Settings::Manager::getFloat("tooltip delay", "GUI"));
 
     bool changeRes = false;
+    bool windowRecreated = false;
     for (Settings::CategorySettingVector::const_iterator it = changed.begin();
         it != changed.end(); ++it)
     {
@@ -772,6 +774,8 @@ void WindowManager::processChangedSettings(const Settings::CategorySettingVector
         {
             changeRes = true;
         }
+        else if (it->first == "Video" && it->second == "vsync")
+            windowRecreated = true;
         else if (it->first == "HUD" && it->second == "crosshair")
             mCrosshairEnabled = Settings::Manager::getBool ("crosshair", "HUD");
         else if (it->first == "GUI" && it->second == "subtitles")
@@ -794,6 +798,11 @@ void WindowManager::processChangedSettings(const Settings::CategorySettingVector
         mLoadingScreen->onResChange (x,y);
         mDragAndDrop->mDragAndDropWidget->setSize(MyGUI::IntSize(x, y));
         mInputBlocker->setSize(MyGUI::IntSize(x,y));
+    }
+    if (windowRecreated)
+    {
+        mGuiManager->updateWindow (mRendering->getWindow ());
+        mLoadingScreen->updateWindow (mRendering->getWindow ());
     }
 }
 

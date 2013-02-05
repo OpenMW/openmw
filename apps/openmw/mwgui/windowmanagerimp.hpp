@@ -229,6 +229,7 @@ namespace MWGui
 
   private:
     OEngine::GUI::MyGUIManager *mGuiManager;
+    OEngine::Render::OgreRenderer *mRendering;
     HUD *mHud;
     MapWindow *mMap;
     MainMenu *mMenu;
