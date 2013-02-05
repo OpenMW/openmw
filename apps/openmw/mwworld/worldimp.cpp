@@ -838,49 +838,6 @@ namespace MWWorld
         float duration)
     {
         mPhysics->doPhysics(duration, actors);
-
-        const int tick = 16; // 16 ms ^= 60 Hz
-
-        // Game clock part of the loop, contains everything that has to be executed in a fixed timestep
-        long long dt = mTimer.getMilliseconds() - lastTick;
-        if (dt >= 100)
-        {
-            //  throw away wall clock time if necessary to keep the framerate above the minimum of 10 fps
-            lastTick += (dt - 100);
-            dt = 100;
-        }
-        while (dt >= tick)
-        {
-            dt -= tick;
-            lastTick += tick;
-
-            std::vector< std::pair<std::string, Ogre::Vector3> > vectors = mPhysics->doPhysicsFixed (actors);
-
-            std::vector< std::pair<std::string, Ogre::Vector3> >::iterator player = vectors.end();
-
-            for (std::vector< std::pair<std::string, Ogre::Vector3> >::iterator it = vectors.begin();
-                it!= vectors.end(); ++it)
-            {
-                if (it->first=="player")
-                {
-                    player = it;
-                }
-                else
-                {
-                    MWWorld::Ptr ptr = getPtrViaHandle (it->first);
-                    moveObjectImp (ptr, it->second.x, it->second.y, it->second.z);
-                }
-            }
-
-            // Make sure player is moved last (otherwise the cell might change in the middle of an update
-            // loop)
-            if (player!=vectors.end())
-            {
-                if (moveObjectImp (getPtrViaHandle (player->first),
-                    player->second.x, player->second.y, player->second.z) == true)
-                    return; // abort the current loop if the cell has changed
-            }
-        }
     }
 
     bool World::toggleCollisionMode()

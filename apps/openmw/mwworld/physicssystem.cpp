@@ -190,66 +190,8 @@ namespace MWWorld
         //set the DebugRenderingMode. To disable it,set it to 0
         //eng->setDebugRenderingMode(1);
 
-        //set the movement keys to 0 (no movement) for every actor)
-        for(std::map<std::string,OEngine::Physic::PhysicActor*>::iterator it = mEngine->PhysicActorMap.begin(); it != mEngine->PhysicActorMap.end();it++)
-        {
-            OEngine::Physic::PhysicActor* act = it->second;
-            act->setMovement(0,0,0);
-        }
-
-        playerMove::playercmd& pm_ref = playerphysics->cmd;
-
-
-        pm_ref.rightmove = 0;
-        pm_ref.forwardmove = 0;
-        pm_ref.upmove = 0;
-       
-
-		//playerphysics->ps.move_type = PM_NOCLIP;
-        for (std::vector<std::pair<std::string, Ogre::Vector3> >::const_iterator iter (actors.begin());
-            iter!=actors.end(); ++iter)
-        {
-            //dirty stuff to get the camera orientation. Must be changed!
-            if (iter->first == "player") {
-                playerphysics->ps.viewangles.x =
-                    Ogre::Radian(mPlayerData.pitch).valueDegrees();
-
-
-
-                playerphysics->ps.viewangles.y =
-                    Ogre::Radian(mPlayerData.yaw).valueDegrees() + 90;
-
-                pm_ref.rightmove = iter->second.x;
-                pm_ref.forwardmove = -iter->second.y;
-                pm_ref.upmove = iter->second.z;
-            }
-        }
-        mEngine->stepSimulation(dt);
     }
 
-    std::vector< std::pair<std::string, Ogre::Vector3> > PhysicsSystem::doPhysicsFixed (
-        const std::vector<std::pair<std::string, Ogre::Vector3> >& actors)
-    {
-        Pmove(playerphysics);
-       
-
-        std::vector< std::pair<std::string, Ogre::Vector3> > response;
-        for(std::map<std::string,OEngine::Physic::PhysicActor*>::iterator it = mEngine->PhysicActorMap.begin(); it != mEngine->PhysicActorMap.end();it++)
-        {
-
-            Ogre::Vector3 coord = it->second->getPosition();
-            if(it->first == "player"){
-
-                coord = playerphysics->ps.origin ;
-                 
-            }
-
-
-            response.push_back(std::pair<std::string, Ogre::Vector3>(it->first, coord));
-        }
-
-        return response;
-    }
 
     void PhysicsSystem::addHeightField (float* heights,
                 int x, int y, float yoffset,
