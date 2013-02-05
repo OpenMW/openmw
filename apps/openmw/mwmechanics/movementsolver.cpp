@@ -13,6 +13,8 @@
 namespace MWMechanics
 {
 
+static const float sMaxSlope = 45.0f;
+
 MovementSolver::MovementSolver()
   : mEngine(MWBase::Environment::get().getWorld()->getPhysicEngine())
 {
@@ -49,17 +51,16 @@ void MovementSolver::projectVelocity(Ogre::Vector3& velocity, const Ogre::Vector
 
 bool MovementSolver::stepMove(Ogre::Vector3& position, const Ogre::Vector3 &velocity, float remainingTime, float verticalRotation, const Ogre::Vector3 &halfExtents, bool isInterior)
 {
-    static const float maxslope = 45.0f;
     traceResults trace; // no initialization needed
 
     newtrace(&trace, position+Ogre::Vector3(0.0f,0.0f,STEPSIZE),
                      position+Ogre::Vector3(0.0f,0.0f,STEPSIZE)+velocity*remainingTime,
              halfExtents, verticalRotation, isInterior, mEngine);
-    if(trace.fraction == 0.0f || (trace.fraction != 1.0f && getSlope(trace.planenormal) > maxslope))
+    if(trace.fraction == 0.0f || (trace.fraction != 1.0f && getSlope(trace.planenormal) > sMaxSlope))
         return false;
 
     newtrace(&trace, trace.endpos, trace.endpos-Ogre::Vector3(0,0,STEPSIZE), halfExtents, verticalRotation, isInterior, mEngine);
-    if(getSlope(trace.planenormal) < maxslope)
+    if(getSlope(trace.planenormal) < sMaxSlope)
     {
         // only step down onto semi-horizontal surfaces. don't step down onto the side of a house or a wall.
         position = trace.endpos;
@@ -80,23 +81,22 @@ Ogre::Vector3 MovementSolver::move(const MWWorld::Ptr &ptr, const Ogre::Vector3 
     Ogre::Vector3 position(ptr.getRefData().getPosition().pos);
 
     /* Anything to collide with? */
-    mPhysicActor = mEngine->getCharacter(ptr.getRefData().getHandle());
-    if(!mPhysicActor || !mPhysicActor->getCollisionMode())
+    OEngine::Physic::PhysicActor *physicActor = mEngine->getCharacter(ptr.getRefData().getHandle());
+    if(!physicActor || !physicActor->getCollisionMode())
         return position + movement;
 
     traceResults trace; //no initialization needed
     int iterations=0, maxIterations=50; //arbitrary number. To prevent infinite loops. They shouldn't happen but it's good to be prepared.
-    float maxslope=45;
 
-    float verticalVelocity = mPhysicActor->getVerticalForce();
+    float verticalVelocity = physicActor->getVerticalForce();
     Ogre::Vector3 horizontalVelocity = movement/time;
     Ogre::Vector3 velocity(horizontalVelocity.x, horizontalVelocity.y, verticalVelocity); // we need a copy of the velocity before we start clipping it for steps
     Ogre::Vector3 clippedVelocity(horizontalVelocity.x, horizontalVelocity.y, verticalVelocity);
 
     float remainingTime = time;
     bool isInterior = !ptr.getCell()->isExterior();
-    float verticalRotation = mPhysicActor->getRotation().getYaw().valueDegrees();
-    Ogre::Vector3 halfExtents = mPhysicActor->getHalfExtents();
+    float verticalRotation = physicActor->getRotation().getYaw().valueDegrees();
+    Ogre::Vector3 halfExtents = physicActor->getHalfExtents();
 
     Ogre::Vector3 lastNormal(0.0f);
     Ogre::Vector3 currentNormal(0.0f);
@@ -106,7 +106,7 @@ Ogre::Vector3 MovementSolver::move(const MWWorld::Ptr &ptr, const Ogre::Vector3 
     newtrace(&trace, position, position+Ogre::Vector3(0,0,-10), halfExtents, verticalRotation, isInterior, mEngine);
     if(trace.fraction < 1.0f)
     {
-        if(getSlope(trace.planenormal) > maxslope)
+        if(getSlope(trace.planenormal) > sMaxSlope)
         {
             // if we're on a really steep slope, don't listen to user input
             clippedVelocity.x = clippedVelocity.y = 0.0f;
@@ -129,7 +129,7 @@ Ogre::Vector3 MovementSolver::move(const MWWorld::Ptr &ptr, const Ogre::Vector3 
         if(trace.fraction != 1.0f)
         {
             //std::cout<<"angle: "<<getSlope(trace.planenormal)<<"\n";
-            if(getSlope(currentNormal) > maxslope || currentNormal == lastNormal)
+            if(getSlope(currentNormal) > sMaxSlope || currentNormal == lastNormal)
             {
                 if(stepMove(newPosition, velocity, remainingTime, verticalRotation, halfExtents, mEngine))
                     std::cout<< "stepped" <<std::endl;
@@ -156,7 +156,7 @@ Ogre::Vector3 MovementSolver::move(const MWWorld::Ptr &ptr, const Ogre::Vector3 
 
     verticalVelocity = clippedVelocity.z;
     verticalVelocity -= time*400;
-    mPhysicActor->setVerticalForce(verticalVelocity);
+    physicActor->setVerticalForce(verticalVelocity);
 
     return newPosition;
 }

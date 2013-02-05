@@ -13,7 +13,6 @@ namespace OEngine
     namespace Physic
     {
         class PhysicEngine;
-        class PhysicActor;
     }
 }
 
@@ -36,7 +35,6 @@ namespace MWMechanics
             float getSlope(const Ogre::Vector3 &normal);
 
             OEngine::Physic::PhysicEngine *mEngine;
-            OEngine::Physic::PhysicActor *mPhysicActor;
     };
 }
 
