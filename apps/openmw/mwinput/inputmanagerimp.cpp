@@ -271,12 +271,12 @@ namespace MWInput
             if (actionIsActive(A_MoveLeft))
             {
                 mPlayer.setAutoMove (false);
-                mPlayer.setLeftRight (1);
+                mPlayer.setLeftRight (-1);
             }
             else if (actionIsActive(A_MoveRight))
             {
                 mPlayer.setAutoMove (false);
-                mPlayer.setLeftRight (-1);
+                mPlayer.setLeftRight (1);
             }
             else
                 mPlayer.setLeftRight (0);
