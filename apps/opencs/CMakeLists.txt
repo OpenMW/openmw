@@ -1,45 +1,74 @@
 
-set (OPENCS_SRC
-    main.cpp editor.cpp
+set (OPENCS_SRC main.cpp)
 
-    model/doc/documentmanager.cpp model/doc/document.cpp
+opencs_units (. editor)
 
-    model/world/universalid.cpp model/world/idcollection.cpp model/world/data.cpp model/world/idtable.cpp
-    model/world/commands.cpp model/world/idtableproxymodel.cpp model/world/record.cpp
-    model/world/columnbase.cpp
 
-    model/tools/tools.cpp model/tools/operation.cpp model/tools/stage.cpp model/tools/verifier.cpp
-    model/tools/mandatoryid.cpp model/tools/reportmodel.cpp
-
-    view/doc/viewmanager.cpp view/doc/view.cpp view/doc/operations.cpp view/doc/operation.cpp view/doc/subviewfactory.cpp
-    view/doc/subview.cpp
-
-    view/world/table.cpp view/world/tablesubview.cpp view/world/subviews.cpp view/world/util.cpp
-    view/world/dialoguesubview.cpp
-
-    view/tools/reportsubview.cpp view/tools/subviews.cpp
+opencs_units (model/doc
+    document
     )
 
-set (OPENCS_HDR
-    editor.hpp
-
-    model/doc/documentmanager.hpp model/doc/document.hpp model/doc/state.hpp
-
-    model/world/universalid.hpp model/world/record.hpp model/world/idcollection.hpp model/world/data.hpp
-    model/world/idtable.hpp model/world/columns.hpp model/world/idtableproxymodel.hpp
-    model/world/commands.hpp model/world/columnbase.hpp
-
-    model/tools/tools.hpp model/tools/operation.hpp model/tools/stage.hpp model/tools/verifier.hpp
-    model/tools/mandatoryid.hpp model/tools/reportmodel.hpp
-
-    view/doc/viewmanager.hpp view/doc/view.hpp view/doc/operations.hpp view/doc/operation.hpp view/doc/subviewfactory.hpp
-    view/doc/subview.hpp view/doc/subviewfactoryimp.hpp
-
-    view/world/table.hpp view/world/tablesubview.hpp view/world/subviews.hpp view/world/util.hpp
-    view/world/dialoguesubview.hpp
-
-    view/tools/reportsubview.hpp view/tools/subviews.hpp
+opencs_units_noqt (model/doc
+    documentmanager
     )
+
+opencs_hdrs_noqt (model/doc
+    state
+    )
+
+
+opencs_units (model/world
+    idtable idtableproxymodel
+    )
+
+opencs_units_noqt (model/world
+    universalid data record idcollection commands columnbase
+    )
+
+opencs_hdrs_noqt (model/world
+    columns
+    )
+
+
+opencs_units (model/tools
+    tools operation reportmodel
+    )
+
+opencs_units_noqt (model/tools
+    stage verifier mandatoryid
+    )
+
+
+opencs_units (view/doc
+    viewmanager view operations operation subview
+    )
+
+opencs_units_noqt (view/doc
+    subviewfactory
+    )
+
+opencs_hdrs_noqt (view/doc
+    subviewfactoryimp
+    )
+
+
+opencs_units (view/world
+    table tablesubview
+    )
+
+opencs_units_noqt (view/world
+    dialoguesubview util subviews
+    )
+
+
+opencs_units (view/tools
+    reportsubview
+    )
+
+opencs_units_noqt (view/tools
+    subviews
+    )
+
 
 set (OPENCS_US
     )
@@ -57,7 +86,7 @@ find_package(Qt4 COMPONENTS QtCore QtGui QtXml QtXmlPatterns REQUIRED)
 include(${QT_USE_FILE})
 
 qt4_wrap_ui(OPENCS_UI_HDR ${OPENCS_UI})
-qt4_wrap_cpp(OPENCS_MOC_SRC ${OPENCS_HDR})
+qt4_wrap_cpp(OPENCS_MOC_SRC ${OPENCS_HDR_QT})
 qt4_add_resources(OPENCS_RES_SRC ${OPENCS_RES})
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
