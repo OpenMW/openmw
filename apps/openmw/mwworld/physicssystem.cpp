@@ -80,10 +80,17 @@ namespace MWWorld
         }
 
     public:
-        static Ogre::Vector3 move(const MWWorld::Ptr &ptr, const Ogre::Vector3 &movement, float time,
+        static Ogre::Vector3 move(const MWWorld::Ptr &ptr, Ogre::Vector3 movement, float time,
                                   OEngine::Physic::PhysicEngine *engine)
         {
-            Ogre::Vector3 position(ptr.getRefData().getPosition().pos);
+            const ESM::Position &refpos = ptr.getRefData().getPosition();
+            Ogre::Vector3 position(refpos.pos);
+
+            // Rotates first around z, then y, then x
+            movement = (Ogre::Quaternion(Ogre::Radian(-refpos.rot[0]), Ogre::Vector3::UNIT_X)*
+                        Ogre::Quaternion(Ogre::Radian(-refpos.rot[1]), Ogre::Vector3::UNIT_Y)*
+                        Ogre::Quaternion(Ogre::Radian(-refpos.rot[2]), Ogre::Vector3::UNIT_Z)) *
+                       movement;
 
             /* Anything to collide with? */
             OEngine::Physic::PhysicActor *physicActor = engine->getCharacter(ptr.getRefData().getHandle());

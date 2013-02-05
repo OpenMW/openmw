@@ -184,13 +184,6 @@ Ogre::Vector3 CharacterController::update(float duration)
     }
     mSkipAnim = false;
 
-    const ESM::Position &refpos = mPtr.getRefData().getPosition();
-    // Rotates first around z, then y, then x
-    movement = (Ogre::Quaternion(Ogre::Radian(-refpos.rot[0]), Ogre::Vector3::UNIT_X)*
-                Ogre::Quaternion(Ogre::Radian(-refpos.rot[1]), Ogre::Vector3::UNIT_Y)*
-                Ogre::Quaternion(Ogre::Radian(-refpos.rot[2]), Ogre::Vector3::UNIT_Z)) *
-                movement;
-
     return movement;
 }
 
