@@ -156,6 +156,20 @@ namespace Physic
         }
     }
 
+    Ogre::Vector3 PhysicActor::getHalfExtents() const
+    {
+        if(mBody)
+        {
+            btBoxShape *box = static_cast<btBoxShape*>(mBody->getCollisionShape());
+            if(box != NULL)
+            {
+                btVector3 size = box->getHalfExtentsWithMargin();
+                return Ogre::Vector3(size.getX(), size.getY(), size.getZ());
+            }
+        }
+        return Ogre::Vector3(0.0f);
+    }
+
     void PhysicActor::runPmove(){
         Pmove(pmove);
         Ogre::Vector3 newpos = pmove->ps.origin;

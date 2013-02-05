@@ -191,8 +191,7 @@ Ogre::Vector3 CharacterController::update(float duration)
                     Ogre::Quaternion(Ogre::Radian(-refpos.rot[2]), Ogre::Vector3::UNIT_Z)) *
                    movement;
 
-        // FIXME: Get the actual radius for the object. Maybe this should go into mwworld to replace pmove?
-        Ogre::Vector3 res = mMovementSolver->move(mPtr, movement, duration, Ogre::Vector3(15,15,30));
+        Ogre::Vector3 res = mMovementSolver->move(mPtr, movement, duration);
         MWBase::Environment::get().getWorld()->moveObject(mPtr, res.x, res.y, res.z);
     }
 

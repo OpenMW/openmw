@@ -118,6 +118,11 @@ namespace Physic
         void setScale(float scale);
 
         /**
+         * Returns the half extents for this PhysiActor
+         */
+        Ogre::Vector3 getHalfExtents() const;
+
+        /**
          * Runs pmove for this PhysicActor
          */
         void runPmove();

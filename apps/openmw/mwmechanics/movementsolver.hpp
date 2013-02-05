@@ -25,7 +25,7 @@ namespace MWMechanics
             MovementSolver();
             virtual ~MovementSolver();
 
-            Ogre::Vector3 move(const MWWorld::Ptr &ptr, const Ogre::Vector3 &movement, float time, const Ogre::Vector3 &halfExtents);
+            Ogre::Vector3 move(const MWWorld::Ptr &ptr, const Ogre::Vector3 &movement, float time);
 
         private:
             bool stepMove(Ogre::Vector3& position, const Ogre::Vector3 &velocity, float remainingTime, float verticalRotation, const Ogre::Vector3 &halfExtents, bool isInterior);

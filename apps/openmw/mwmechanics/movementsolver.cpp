@@ -76,7 +76,7 @@ float MovementSolver::getSlope(const Ogre::Vector3 &normal)
 }
 
 
-Ogre::Vector3 MovementSolver::move(const MWWorld::Ptr &ptr, const Ogre::Vector3 &movement, float time, const Ogre::Vector3 &halfExtents)
+Ogre::Vector3 MovementSolver::move(const MWWorld::Ptr &ptr, const Ogre::Vector3 &movement, float time)
 {
     Ogre::Vector3 position(ptr.getRefData().getPosition().pos);
 
@@ -96,6 +96,7 @@ Ogre::Vector3 MovementSolver::move(const MWWorld::Ptr &ptr, const Ogre::Vector3 
     float remainingTime = time;
     bool isInterior = !ptr.getCell()->isExterior();
     float verticalRotation = mPhysicActor->getRotation().getYaw().valueDegrees();
+    Ogre::Vector3 halfExtents = mPhysicActor->getHalfExtents();
 
     Ogre::Vector3 lastNormal(0.0f);
     Ogre::Vector3 currentNormal(0.0f);
