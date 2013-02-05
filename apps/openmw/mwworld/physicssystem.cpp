@@ -21,7 +21,7 @@ using namespace Ogre;
 namespace MWWorld
 {
 
-    static const float sMaxSlope = 45.0f;
+    static const float sMaxSlope = 60.0f;
 
     class MovementSolver
     {
