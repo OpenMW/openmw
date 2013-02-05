@@ -827,7 +827,7 @@ void MwIniImporter::importGameFiles(multistrmap &cfg, multistrmap &ini) {
         }
 
         for(std::vector<std::string>::iterator entry = it->second.begin(); entry!=it->second.end(); ++entry) {
-            std::string filetype(entry->substr(entry->length()-4, 3));
+            std::string filetype(entry->substr(entry->length()-3));
             Misc::StringUtils::toLower(filetype);
 
             if(filetype.compare("esm") == 0) {
