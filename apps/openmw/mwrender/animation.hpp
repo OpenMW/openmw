@@ -28,6 +28,8 @@ protected:
     Ogre::Vector3 mStartPosition;
     Ogre::Vector3 mLastPosition;
 
+    std::vector<Ogre::SkeletonPtr> mSkeletonSources;
+
     NifOgre::TextKeyMap *mCurrentKeys;
     NifOgre::TextKeyMap::const_iterator mNextKey;
     Ogre::Animation *mCurrentAnim;
@@ -53,6 +55,9 @@ protected:
      * anything. If the marker is not found, it resets to the beginning. */
     void reset(const std::string &marker);
 
+    /* Inserts an additional skeleton into the animation source chain. Returns
+     * the bone representing the non-accum root from the base skeleton. */
+    Ogre::Bone *insertSkeletonSource(const std::string &name);
 
     void createEntityList(Ogre::SceneNode *node, const std::string &model);
 

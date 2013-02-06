@@ -46,6 +46,42 @@ Animation::~Animation()
 }
 
 
+Ogre::Bone *Animation::insertSkeletonSource(const std::string &name)
+{
+    Ogre::SkeletonManager &skelMgr = Ogre::SkeletonManager::getSingleton();
+    Ogre::SkeletonPtr skel = skelMgr.getByName(name);
+    if(skel.isNull())
+    {
+        std::cerr<< "Failed to get skeleton source "<<name <<std::endl;
+        return NULL;
+    }
+    skel->touch();
+    mSkeletonSources.push_back(skel);
+
+    Ogre::Skeleton::BoneIterator boneiter = skel->getBoneIterator();
+    while(boneiter.hasMoreElements())
+    {
+        Ogre::Bone *bone = boneiter.getNext();
+        Ogre::UserObjectBindings &bindings = bone->getUserObjectBindings();
+        const Ogre::Any &data = bindings.getUserAny(NifOgre::sTextKeyExtraDataID);
+        if(data.isEmpty() || !Ogre::any_cast<bool>(data))
+            continue;
+
+        for(int i = 0;i < skel->getNumAnimations();i++)
+        {
+            Ogre::Animation *anim = skel->getAnimation(i);
+            const Ogre::Any &groupdata = bindings.getUserAny(std::string(NifOgre::sTextKeyExtraDataID)+
+                                                             "@"+anim->getName());
+            if(!groupdata.isEmpty())
+                mTextKeys[anim->getName()] = Ogre::any_cast<NifOgre::TextKeyMap>(groupdata);
+        }
+
+        return bone;
+    }
+
+    return NULL;
+}
+
 void Animation::createEntityList(Ogre::SceneNode *node, const std::string &model)
 {
     mInsert = node->createChildSceneNode();
@@ -63,51 +99,35 @@ void Animation::createEntityList(Ogre::SceneNode *node, const std::string &model
             state->setLoop(false);
         }
 
+        // Set the bones as manually controlled since we're applying the
+        // transformations manually (needed if we want to apply an animation
+        // from one skeleton onto another).
         Ogre::SkeletonInstance *skelinst = mEntityList.mSkelBase->getSkeleton();
-        // Would be nice if Ogre::SkeletonInstance allowed access to the 'master' Ogre::SkeletonPtr.
-        Ogre::SkeletonManager &skelMgr = Ogre::SkeletonManager::getSingleton();
-        Ogre::SkeletonPtr skel = skelMgr.getByName(skelinst->getName());
-        Ogre::Skeleton::BoneIterator boneiter = skel->getBoneIterator();
+        Ogre::Skeleton::BoneIterator boneiter = skelinst->getBoneIterator();
         while(boneiter.hasMoreElements())
-        {
-            Ogre::Bone *bone = boneiter.getNext();
-            Ogre::UserObjectBindings &bindings = bone->getUserObjectBindings();
-            const Ogre::Any &data = bindings.getUserAny(NifOgre::sTextKeyExtraDataID);
-            if(data.isEmpty() || !Ogre::any_cast<bool>(data))
-                continue;
+            boneiter.getNext()->setManuallyControlled(true);
 
+        Ogre::Bone *bone = insertSkeletonSource(skelinst->getName());
+        if(bone)
+        {
             mAccumRoot = mInsert;
             mNonAccumRoot = skelinst->getBone(bone->getHandle());
 
             mStartPosition = mNonAccumRoot->getInitialPosition();
             mLastPosition = mStartPosition;
-
-            asiter = aset->getAnimationStateIterator();
-            while(asiter.hasMoreElements())
-            {
-                Ogre::AnimationState *state = asiter.getNext();
-                const Ogre::Any &groupdata = bindings.getUserAny(std::string(NifOgre::sTextKeyExtraDataID)+
-                                                                 "@"+state->getAnimationName());
-                if(!groupdata.isEmpty())
-                    mTextKeys[state->getAnimationName()] = Ogre::any_cast<NifOgre::TextKeyMap>(groupdata);
-            }
-
-            break;
         }
-
-        // Set the bones as manually controlled since we're applying the
-        // transformations manually (needed if we want to apply an animation
-        // from one skeleton onto another).
-        boneiter = skelinst->getBoneIterator();
-        while(boneiter.hasMoreElements())
-            boneiter.getNext()->setManuallyControlled(true);
     }
 }
 
 
 bool Animation::hasAnimation(const std::string &anim)
 {
-    return mEntityList.mSkelBase && mEntityList.mSkelBase->getSkeleton()->hasAnimation(anim);
+    for(std::vector<Ogre::SkeletonPtr>::const_iterator iter(mSkeletonSources.begin());iter != mSkeletonSources.end();iter++)
+    {
+        if((*iter)->hasAnimation(anim))
+            return true;
+    }
+    return false;
 }
 
 
@@ -208,8 +228,20 @@ void Animation::reset(const std::string &marker)
 void Animation::play(const std::string &groupname, const std::string &start, bool loop)
 {
     try {
-        mCurrentAnim = mEntityList.mSkelBase->getSkeleton()->getAnimation(groupname);
-        mCurrentKeys = &mTextKeys[groupname];
+        bool found = false;
+        /* Look in reverse; last-inserted source has priority. */
+        for(std::vector<Ogre::SkeletonPtr>::const_reverse_iterator iter(mSkeletonSources.rbegin());iter != mSkeletonSources.rend();iter++)
+        {
+            if((*iter)->hasAnimation(groupname))
+            {
+                mCurrentAnim = (*iter)->getAnimation(groupname);
+                mCurrentKeys = &mTextKeys[groupname];
+                found = true;
+                break;
+            }
+        }
+        if(!found)
+            throw std::runtime_error("Failed to find animation "+groupname);
 
         reset(start);
         mPlaying = true;
