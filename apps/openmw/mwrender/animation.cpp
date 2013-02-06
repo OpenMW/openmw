@@ -196,7 +196,7 @@ Ogre::Vector3 Animation::updatePosition(float time)
         posdiff = (mNonAccumRoot->getPosition() - mLastPosition) * mAccumulate;
 
         /* Translate the accumulation root back to compensate for the move. */
-        mAccumRoot->translate(-posdiff);
+        mAccumRoot->translate(-posdiff * mAccumRoot->_getDerivedScale());
         mLastPosition += posdiff;
     }
     return posdiff;
@@ -220,7 +220,7 @@ void Animation::reset(const std::string &marker)
     if(mNonAccumRoot)
     {
         mLastPosition = mNonAccumRoot->getPosition();
-        mAccumRoot->setPosition(mStartPosition - mLastPosition);
+        mAccumRoot->setPosition((mStartPosition - mLastPosition) * mAccumRoot->_getDerivedScale());
     }
 }
 
