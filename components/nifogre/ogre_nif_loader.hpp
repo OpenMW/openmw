@@ -77,6 +77,8 @@ public:
     static EntityList createEntities(Ogre::SceneNode *parentNode,
                                      std::string name,
                                      const std::string &group="General");
+
+    static bool createSkeleton(const std::string &name, const std::string &group="General");
 };
 
 }

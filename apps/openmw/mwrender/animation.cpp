@@ -52,8 +52,13 @@ Ogre::Bone *Animation::insertSkeletonSource(const std::string &name)
     Ogre::SkeletonPtr skel = skelMgr.getByName(name);
     if(skel.isNull())
     {
-        std::cerr<< "Failed to get skeleton source "<<name <<std::endl;
-        return NULL;
+        NifOgre::Loader::createSkeleton(name);
+        skel = skelMgr.getByName(name);
+        if(skel.isNull())
+        {
+            std::cerr<< "Failed to get skeleton source "<<name <<std::endl;
+            return NULL;
+        }
     }
     skel->touch();
     mSkeletonSources.push_back(skel);

@@ -1250,6 +1250,33 @@ EntityList Loader::createEntities(Ogre::Entity *parent, const std::string &bonen
 }
 
 
+bool Loader::createSkeleton(const std::string &name, const std::string &group)
+{
+    Nif::NIFFile::ptr pnif = Nif::NIFFile::create(name);
+    Nif::NIFFile &nif = *pnif.get();
+    if(nif.numRecords() < 1)
+    {
+        nif.warn("Found no NIF records in "+name+".");
+        return false;
+    }
+
+    // The first record is assumed to be the root node
+    Nif::Record const *r = nif.getRecord(0);
+    assert(r != NULL);
+
+    Nif::Node const *node = dynamic_cast<Nif::Node const *>(r);
+    if(node == NULL)
+    {
+        nif.warn("First record in "+name+" was not a node, but a "+
+                 r->recName+".");
+        return false;
+    }
+
+    NIFSkeletonLoader skelldr;
+    return skelldr.createSkeleton(name, group, node);
+}
+
+
 /* More code currently not in use, from the old D source. This was
    used in the first attempt at loading NIF meshes, where each submesh
    in the file was given a separate bone in a skeleton. Unfortunately
