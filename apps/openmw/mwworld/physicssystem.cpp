@@ -81,7 +81,7 @@ namespace MWWorld
 
     public:
         static Ogre::Vector3 move(const MWWorld::Ptr &ptr, Ogre::Vector3 movement, float time,
-                                  OEngine::Physic::PhysicEngine *engine)
+                                  bool gravity, OEngine::Physic::PhysicEngine *engine)
         {
             const ESM::Position &refpos = ptr.getRefData().getPosition();
             Ogre::Vector3 position(refpos.pos);
@@ -100,8 +100,9 @@ namespace MWWorld
             traceResults trace; //no initialization needed
             int iterations=0, maxIterations=50; //arbitrary number. To prevent infinite loops. They shouldn't happen but it's good to be prepared.
 
-            float verticalVelocity = physicActor->getVerticalForce();
             Ogre::Vector3 horizontalVelocity = movement/time;
+            float verticalVelocity = (gravity ? physicActor->getVerticalForce() :
+                                                horizontalVelocity.z);
             Ogre::Vector3 velocity(horizontalVelocity.x, horizontalVelocity.y, verticalVelocity); // we need a copy of the velocity before we start clipping it for steps
             Ogre::Vector3 clippedVelocity(horizontalVelocity.x, horizontalVelocity.y, verticalVelocity);
 
@@ -115,18 +116,21 @@ namespace MWWorld
             Ogre::Vector3 up(0.0f, 0.0f, 1.0f);
             Ogre::Vector3 newPosition = position;
 
-            newtrace(&trace, position, position+Ogre::Vector3(0,0,-10), halfExtents, verticalRotation, isInterior, engine);
-            if(trace.fraction < 1.0f)
+            if(gravity)
             {
-                if(getSlope(trace.planenormal) > sMaxSlope)
+                newtrace(&trace, position, position+Ogre::Vector3(0,0,-10), halfExtents, verticalRotation, isInterior, engine);
+                if(trace.fraction < 1.0f)
                 {
-                    // if we're on a really steep slope, don't listen to user input
-                    clippedVelocity.x = clippedVelocity.y = 0.0f;
-                }
-                else
-                {
-                    // if we're within 10 units of the ground, force velocity to track the ground
-                    clipVelocity(clippedVelocity, trace.planenormal, clippedVelocity, 1.0f);
+                    if(getSlope(trace.planenormal) > sMaxSlope)
+                    {
+                        // if we're on a really steep slope, don't listen to user input
+                        clippedVelocity.x = clippedVelocity.y = 0.0f;
+                    }
+                    else
+                    {
+                        // if we're within 10 units of the ground, force velocity to track the ground
+                        clipVelocity(clippedVelocity, trace.planenormal, clippedVelocity, 1.0f);
+                    }
                 }
             }
 
@@ -339,9 +343,9 @@ namespace MWWorld
         }
     }
 
-    Ogre::Vector3 PhysicsSystem::move(const MWWorld::Ptr &ptr, const Ogre::Vector3 &movement, float time)
+    Ogre::Vector3 PhysicsSystem::move(const MWWorld::Ptr &ptr, const Ogre::Vector3 &movement, float time, bool gravity)
     {
-        return MovementSolver::move(ptr, movement, time, mEngine);
+        return MovementSolver::move(ptr, movement, time, gravity, mEngine);
     }
 
 

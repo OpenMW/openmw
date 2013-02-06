@@ -849,12 +849,12 @@ namespace MWWorld
                 player = iter;
                 continue;
             }
-            Ogre::Vector3 vec = mPhysics->move(iter->first, iter->second, duration);
+            Ogre::Vector3 vec = mPhysics->move(iter->first, iter->second, duration, !isSwimming(iter->first));
             moveObjectImp(iter->first, vec.x, vec.y, vec.z);
         }
         if(player != actors.end())
         {
-            Ogre::Vector3 vec = mPhysics->move(player->first, player->second, duration);
+            Ogre::Vector3 vec = mPhysics->move(player->first, player->second, duration, !isSwimming(player->first));
             moveObjectImp(player->first, vec.x, vec.y, vec.z);
         }
     }
