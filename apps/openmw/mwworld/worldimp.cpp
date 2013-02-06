@@ -1336,8 +1336,9 @@ namespace MWWorld
         float *fpos = object.getRefData().getPosition().pos;
         Ogre::Vector3 pos(fpos[0], fpos[1], fpos[2]);
 
-        /// \fixme should rely on object height
-        pos.z += 30;
+        /// \fixme 3/4ths submerged?
+        const OEngine::Physic::PhysicActor *actor = mPhysEngine->getCharacter(object.getRefData().getHandle());
+        if(actor) pos.z += actor->getHalfExtents().z * 1.5;
 
         return isUnderwater(*object.getCell()->mCell, pos);
     }
