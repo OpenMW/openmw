@@ -46,11 +46,17 @@ static const struct {
     { CharState_Idle7, "idle7" },
     { CharState_Idle8, "idle8" },
     { CharState_Idle9, "idle9" },
+    { CharState_IdleSwim, "idleswim" },
 
     { CharState_WalkForward, "walkforward" },
     { CharState_WalkBack, "walkback" },
     { CharState_WalkLeft, "walkleft" },
     { CharState_WalkRight, "walkright" },
+
+    { CharState_SwimWalkForward, "swimwalkforward" },
+    { CharState_SwimWalkBack, "swimwalkback" },
+    { CharState_SwimWalkLeft, "swimwalkleft" },
+    { CharState_SwimWalkRight, "swimwalkright" },
 
     { CharState_Death1, "death1" },
     { CharState_Death2, "death2" },
@@ -157,21 +163,23 @@ Ogre::Vector3 CharacterController::update(float duration)
     const MWWorld::Class &cls = MWWorld::Class::get(mPtr);
     const Ogre::Vector3 &vec = cls.getMovementVector(mPtr);
 
+    bool inwater = MWBase::Environment::get().getWorld()->isSwimming(mPtr);
+
     if(std::abs(vec.x/2.0f) > std::abs(vec.y))
     {
         if(vec.x > 0.0f)
-            setState(CharState_WalkRight, true);
+            setState((inwater ? CharState_SwimWalkRight : CharState_WalkRight), true);
         else if(vec.x < 0.0f)
-            setState(CharState_WalkLeft, true);
+            setState((inwater ? CharState_SwimWalkLeft : CharState_WalkLeft), true);
     }
     else if(vec.y > 0.0f)
-        setState(CharState_WalkForward, true);
+        setState((inwater ? CharState_SwimWalkForward : CharState_WalkForward), true);
     else if(vec.y < 0.0f)
-        setState(CharState_WalkBack, true);
+        setState((inwater ? CharState_SwimWalkBack : CharState_WalkBack), true);
     else
     {
         if(!(getState() >= CharState_Death1))
-            setState(CharState_Idle, true);
+            setState((inwater ? CharState_IdleSwim : CharState_Idle), true);
     }
 
     Ogre::Vector3 movement = Ogre::Vector3::ZERO;

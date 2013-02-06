@@ -23,11 +23,17 @@ enum CharacterState {
     CharState_Idle7,
     CharState_Idle8,
     CharState_Idle9,
+    CharState_IdleSwim,
 
     CharState_WalkForward,
     CharState_WalkBack,
     CharState_WalkLeft,
     CharState_WalkRight,
+
+    CharState_SwimWalkForward,
+    CharState_SwimWalkBack,
+    CharState_SwimWalkLeft,
+    CharState_SwimWalkRight,
 
     /* Must be last! */
     CharState_Death1,
