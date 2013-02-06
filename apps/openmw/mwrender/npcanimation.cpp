@@ -120,6 +120,14 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node, MWWor
         base->setRenderQueueGroup(transparent ? RQG_Alpha : RQG_Main);
     }
 
+    if(!mNpc->isMale() && !isBeast)
+        insertSkeletonSource("meshes\\base_anim_female.nif");
+    else if(mBodyPrefix.find("argonian") != std::string::npos)
+        insertSkeletonSource("meshes\\argonian_swimkna.nif");
+
+    if(mNpc->mModel.length() > 0)
+        insertSkeletonSource("meshes\\"+Misc::StringUtils::lowerCase(mNpc->mModel));
+
     float scale = race->mData.mHeight.mMale;
     if (!mNpc->isMale()) {
         scale = race->mData.mHeight.mFemale;
