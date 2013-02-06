@@ -23,9 +23,10 @@ CreatureAnimation::CreatureAnimation(const MWWorld::Ptr &ptr)
     assert (ref->mBase != NULL);
     if(!ref->mBase->mModel.empty())
     {
-        std::string mesh = "meshes\\" + ref->mBase->mModel;
+        if((ref->mBase->mFlags&ESM::Creature::Biped))
+            insertSkeletonSource("meshes\\base_anim.nif");
 
-        createEntityList(mPtr.getRefData().getBaseNode(), mesh);
+        createEntityList(mPtr.getRefData().getBaseNode(), "meshes\\"+ref->mBase->mModel);
         for(size_t i = 0;i < mEntityList.mEntities.size();i++)
         {
             Ogre::Entity *ent = mEntityList.mEntities[i];
