@@ -86,19 +86,32 @@ namespace MWWorld
             const ESM::Position &refpos = ptr.getRefData().getPosition();
             Ogre::Vector3 position(refpos.pos);
 
-            // Rotates first around z, then y, then x
-            movement = (Ogre::Quaternion(Ogre::Radian(-refpos.rot[0]), Ogre::Vector3::UNIT_X)*
-                        Ogre::Quaternion(Ogre::Radian(-refpos.rot[1]), Ogre::Vector3::UNIT_Y)*
-                        Ogre::Quaternion(Ogre::Radian(-refpos.rot[2]), Ogre::Vector3::UNIT_Z)) *
-                       movement;
-
             /* Anything to collide with? */
             OEngine::Physic::PhysicActor *physicActor = engine->getCharacter(ptr.getRefData().getHandle());
             if(!physicActor || !physicActor->getCollisionMode())
-                return position + movement;
+            {
+                // FIXME: This works, but it's inconcsistent with how the rotations are applied elsewhere. Why?
+                return position + (Ogre::Quaternion(Ogre::Radian(-refpos.rot[2]), Ogre::Vector3::UNIT_Z)*
+                                   Ogre::Quaternion(Ogre::Radian( refpos.rot[1]), Ogre::Vector3::UNIT_Y)*
+                                   Ogre::Quaternion(Ogre::Radian( refpos.rot[0]), Ogre::Vector3::UNIT_X)) *
+                                  movement;
+            }
 
             traceResults trace; //no initialization needed
             int iterations=0, maxIterations=50; //arbitrary number. To prevent infinite loops. They shouldn't happen but it's good to be prepared.
+
+            if(!gravity)
+            {
+                movement = (Ogre::Quaternion(Ogre::Radian(-refpos.rot[2]), Ogre::Vector3::UNIT_Z)*
+                            Ogre::Quaternion(Ogre::Radian( refpos.rot[1]), Ogre::Vector3::UNIT_Y)*
+                            Ogre::Quaternion(Ogre::Radian( refpos.rot[0]), Ogre::Vector3::UNIT_X)) *
+                           movement;
+            }
+            else
+            {
+                movement = Ogre::Quaternion(Ogre::Radian(-refpos.rot[2]), Ogre::Vector3::UNIT_Z) *
+                           movement;
+            }
 
             Ogre::Vector3 horizontalVelocity = movement/time;
             float verticalVelocity = (gravity ? physicActor->getVerticalForce() :
