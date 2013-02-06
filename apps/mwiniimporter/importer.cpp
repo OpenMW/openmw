@@ -777,6 +777,39 @@ void MwIniImporter::insertMultistrmap(multistrmap &cfg, std::string key, std::st
     cfg[key].push_back(value);
 }
 
+void MwIniImporter::importArchives(multistrmap &cfg, multistrmap &ini) {
+    std::vector<std::string> archives;
+    std::string baseArchive("Archives:Archive ");
+    std::string archive;
+
+    // Search archives listed in ini file
+    multistrmap::iterator it = ini.begin();
+    for(int i=0; it != ini.end(); i++) {
+        archive = baseArchive;
+        archive.append(this->numberToString(i));
+
+        it = ini.find(archive);
+        if(it == ini.end()) {
+            break;
+        }
+
+        for(std::vector<std::string>::iterator entry = it->second.begin(); entry!=it->second.end(); ++entry) {
+            archives.push_back(*entry);
+        }
+    }
+
+    cfg.erase("fallback-archive");
+    cfg.insert( std::make_pair<std::string, std::vector<std::string> > ("fallback-archive", std::vector<std::string>()));
+
+    // Add Morrowind.bsa by default, since Vanilla loads this archive even if it
+    // does not appears in the ini file
+    cfg["fallback-archive"].push_back("Morrowind.bsa");
+
+    for(std::vector<std::string>::iterator it=archives.begin(); it!=archives.end(); ++it) {
+        cfg["fallback-archive"].push_back(*it);
+    }
+}
+
 void MwIniImporter::importGameFiles(multistrmap &cfg, multistrmap &ini) {
     std::vector<std::string> esmFiles;
     std::vector<std::string> espFiles;
@@ -794,7 +827,7 @@ void MwIniImporter::importGameFiles(multistrmap &cfg, multistrmap &ini) {
         }
 
         for(std::vector<std::string>::iterator entry = it->second.begin(); entry!=it->second.end(); ++entry) {
-            std::string filetype(entry->substr(entry->length()-4, 3));
+            std::string filetype(entry->substr(entry->length()-3));
             Misc::StringUtils::toLower(filetype);
 
             if(filetype.compare("esm") == 0) {
