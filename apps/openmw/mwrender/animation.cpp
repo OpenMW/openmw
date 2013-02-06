@@ -108,10 +108,28 @@ void Animation::createEntityList(Ogre::SceneNode *node, const std::string &model
             boneiter.getNext()->setManuallyControlled(true);
 
         Ogre::Bone *bone = insertSkeletonSource(skelinst->getName());
+        if(!bone)
+        {
+            for(std::vector<Ogre::SkeletonPtr>::const_iterator iter(mSkeletonSources.begin());
+                !bone && iter != mSkeletonSources.end();iter++)
+            {
+                Ogre::Skeleton::BoneIterator boneiter = (*iter)->getBoneIterator();
+                while(boneiter.hasMoreElements())
+                {
+                    bone = boneiter.getNext();
+                    Ogre::UserObjectBindings &bindings = bone->getUserObjectBindings();
+                    const Ogre::Any &data = bindings.getUserAny(NifOgre::sTextKeyExtraDataID);
+                    if(!data.isEmpty() && Ogre::any_cast<bool>(data))
+                        break;
+
+                    bone = NULL;
+                }
+            }
+        }
         if(bone)
         {
             mAccumRoot = mInsert;
-            mNonAccumRoot = skelinst->getBone(bone->getHandle());
+            mNonAccumRoot = skelinst->getBone(bone->getName());
 
             mStartPosition = mNonAccumRoot->getInitialPosition();
             mLastPosition = mStartPosition;
