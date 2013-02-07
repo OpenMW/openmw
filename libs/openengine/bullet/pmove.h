@@ -8,8 +8,6 @@ Quake 3 Arena is copyright (C) 1999-2005 Id Software, Inc.
 
 #include <OgreMath.h>
 #include <float.h>
-#include "trace.h"
-#include "physic.hpp"
 
 #include <OgreVector3.h>
 
@@ -17,6 +15,14 @@ Quake 3 Arena is copyright (C) 1999-2005 Id Software, Inc.
 //#include "GameTime.h"
 
 // Forwards-declare it!
+
+namespace OEngine
+{
+    namespace Physic
+    {
+        class PhysicEngine;
+    }
+}
 
 /*#ifndef COMPILING_PMOVE
 #include "Scene.h"

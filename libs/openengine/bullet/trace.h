@@ -4,9 +4,17 @@
 
 #include <btBulletDynamicsCommon.h>
 #include <btBulletCollisionCommon.h>
-#include <components/nifbullet/bullet_nif_loader.hpp>
-#include <openengine/bullet/physic.hpp>
-#include "pmove.h"
+
+#include <OgreVector3.h>
+
+
+namespace OEngine
+{
+    namespace Physic
+    {
+        class PhysicEngine;
+    }
+}
 
 
 enum traceWorldType

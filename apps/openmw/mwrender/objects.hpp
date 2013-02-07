@@ -2,6 +2,7 @@
 #define _GAME_RENDER_OBJECTS_H
 
 #include <OgreColourValue.h>
+#include <OgreAxisAlignedBox.h>
 
 #include <openengine/ogre/renderer.hpp>
 

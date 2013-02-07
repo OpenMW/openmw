@@ -18,6 +18,8 @@
 #include <extern/shiny/Main/Factory.hpp>
 #include <extern/shiny/Platforms/Ogre/OgrePlatform.hpp>
 
+#include <openengine/bullet/physic.hpp>
+
 #include <components/esm/loadstat.hpp>
 #include <components/settings/settings.hpp>
 #include "../mwworld/esmstore.hpp"

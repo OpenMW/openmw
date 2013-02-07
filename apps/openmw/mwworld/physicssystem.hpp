@@ -1,12 +1,15 @@
 #ifndef GAME_MWWORLD_PHYSICSSYSTEM_H
 #define GAME_MWWORLD_PHYSICSSYSTEM_H
 
+#include <btBulletCollisionCommon.h>
+
 #include <openengine/ogre/renderer.hpp>
-#include "ptr.hpp"
 #include <openengine/bullet/pmove.h>
+#include "ptr.hpp"
 
 namespace MWWorld
 {
+    class World;
 
     class PhysicsSystem
     {

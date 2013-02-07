@@ -7,8 +7,6 @@ Quake 3 Arena is copyright (C) 1999-2005 Id Software, Inc.
 
 #include "pmove.h"
 
-
-
 //#include "bprintf.h"
 
 //#include "..\..\ESMParser\ESMParser\CELL.h"
@@ -21,6 +19,8 @@ Quake 3 Arena is copyright (C) 1999-2005 Id Software, Inc.
 //#include "..\..\ESMParser\ESMParser\SOUN.h"
 
 #include <map>
+
+#include "trace.h"
 
 //SceneInstance* global_lastscene = NULL;
 
