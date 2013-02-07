@@ -27,6 +27,8 @@ namespace MWWorld
 
     static const float sMaxSlope = 60.0f;
     static const float sStepSize = 9.0f;
+    // Arbitrary number. To prevent infinite loops. They shouldn't happen but it's good to be prepared.
+    static const int sMaxIterations = 50;
 
     class MovementSolver
     {
@@ -85,7 +87,7 @@ namespace MWWorld
         }
 
     public:
-        static Ogre::Vector3 move(const MWWorld::Ptr &ptr, Ogre::Vector3 movement, float time,
+        static Ogre::Vector3 move(const MWWorld::Ptr &ptr, const Ogre::Vector3 &movement, float time,
                                   bool gravity, OEngine::Physic::PhysicEngine *engine)
         {
             const ESM::Position &refpos = ptr.getRefData().getPosition();
@@ -103,55 +105,44 @@ namespace MWWorld
             }
 
             traceResults trace; //no initialization needed
-            int iterations=0, maxIterations=50; //arbitrary number. To prevent infinite loops. They shouldn't happen but it's good to be prepared.
-
-            if(!gravity)
-            {
-                movement = (Ogre::Quaternion(Ogre::Radian(-refpos.rot[2]), Ogre::Vector3::UNIT_Z)*
-                            Ogre::Quaternion(Ogre::Radian( refpos.rot[1]), Ogre::Vector3::UNIT_Y)*
-                            Ogre::Quaternion(Ogre::Radian( refpos.rot[0]), Ogre::Vector3::UNIT_X)) *
-                           movement;
-            }
-            else
-            {
-                movement = Ogre::Quaternion(Ogre::Radian(-refpos.rot[2]), Ogre::Vector3::UNIT_Z) *
-                           movement;
-            }
-
-            Ogre::Vector3 horizontalVelocity = movement/time;
-            float verticalVelocity = (gravity ? physicActor->getVerticalForce() :
-                                                horizontalVelocity.z);
-            Ogre::Vector3 velocity(horizontalVelocity.x, horizontalVelocity.y, verticalVelocity); // we need a copy of the velocity before we start clipping it for steps
-            Ogre::Vector3 clippedVelocity(horizontalVelocity.x, horizontalVelocity.y, verticalVelocity);
-
             float remainingTime = time;
             bool isInterior = !ptr.getCell()->isExterior();
             float verticalRotation = physicActor->getRotation().getYaw().valueDegrees();
             Ogre::Vector3 halfExtents = physicActor->getHalfExtents();
 
-            Ogre::Vector3 lastNormal(0.0f);
-            Ogre::Vector3 currentNormal(0.0f);
-            Ogre::Vector3 up(0.0f, 0.0f, 1.0f);
-            Ogre::Vector3 newPosition = position;
+            Ogre::Vector3 velocity;
+            if(!gravity)
+            {
+                velocity = (Ogre::Quaternion(Ogre::Radian(-refpos.rot[2]), Ogre::Vector3::UNIT_Z)*
+                            Ogre::Quaternion(Ogre::Radian( refpos.rot[1]), Ogre::Vector3::UNIT_Y)*
+                            Ogre::Quaternion(Ogre::Radian( refpos.rot[0]), Ogre::Vector3::UNIT_X)) *
+                           movement / time;
+            }
+            else
+            {
+                velocity = Ogre::Quaternion(Ogre::Radian(-refpos.rot[2]), Ogre::Vector3::UNIT_Z) *
+                           movement / time;
+                velocity.z = physicActor->getVerticalForce();
+            }
+
+            // we need a copy of the velocity before we start clipping it for steps
+            Ogre::Vector3 clippedVelocity(velocity);
 
             if(gravity)
             {
                 newtrace(&trace, position, position+Ogre::Vector3(0,0,-10), halfExtents, verticalRotation, isInterior, engine);
-                if(trace.fraction < 1.0f)
+                if(trace.fraction < 1.0f && getSlope(trace.planenormal) <= sMaxSlope)
                 {
-                    if(getSlope(trace.planenormal) > sMaxSlope)
-                    {
-                        // if we're on a really steep slope, don't listen to user input
-                        clippedVelocity.x = clippedVelocity.y = 0.0f;
-                    }
-                    else
-                    {
-                        // if we're within 10 units of the ground, force velocity to track the ground
-                        clipVelocity(clippedVelocity, trace.planenormal, clippedVelocity, 1.0f);
-                    }
+                    // if we're within 10 units of the ground, force velocity to track the ground
+                    clipVelocity(clippedVelocity, trace.planenormal, clippedVelocity, 1.0f);
                 }
             }
 
+            Ogre::Vector3 lastNormal(0.0f);
+            Ogre::Vector3 currentNormal(0.0f);
+            Ogre::Vector3 up(0.0f, 0.0f, 1.0f);
+            Ogre::Vector3 newPosition = position;
+            int iterations = 0;
             do {
                 // trace to where character would go if there were no obstructions
                 newtrace(&trace, newPosition, newPosition+clippedVelocity*remainingTime, halfExtents, verticalRotation, isInterior, engine);
@@ -186,10 +177,9 @@ namespace MWWorld
                 lastNormal = currentNormal;
 
                 iterations++;
-            } while(iterations < maxIterations && remainingTime != 0.0f);
+            } while(iterations < sMaxIterations && remainingTime > 0.0f);
 
-            verticalVelocity = clippedVelocity.z;
-            physicActor->setVerticalForce(verticalVelocity - time*400.0f);
+            physicActor->setVerticalForce(clippedVelocity.z - time*400.0f);
 
             return newPosition;
         }
