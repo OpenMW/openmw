@@ -47,7 +47,6 @@ void CS::Editor::loadDocument()
 
 void CS::Editor::openFiles()
 {
-    mStartup.hide();
     std::vector<boost::filesystem::path> paths;
     mOpenDialog.getFileList(paths);
     CSMDoc::Document *document = mDocumentManager.addDocument(paths, false);
