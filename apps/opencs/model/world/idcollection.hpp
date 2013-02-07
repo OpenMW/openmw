@@ -321,32 +321,54 @@ namespace CSMWorld
     {
         std::string id = reader.getHNOString ("NAME");
 
-        /// \todo deal with deleted flag
-
-        ESXRecordT record;
-        record.mId = id;
-        record.load (reader);
-
         int index = searchId (id);
 
-        if (index==-1)
+        if (reader.isNextSub ("DELE"))
         {
-            // new record
-            Record<ESXRecordT> record2;
-            record2.mState = base ? RecordBase::State_BaseOnly : RecordBase::State_ModifiedOnly;
-            (base ? record2.mBase : record2.mModified) = record;
+            reader.skipRecord();
 
-            appendRecord (record2);
+            if (index==-1)
+            {
+                // deleting a record that does not exist
+
+                // ignore it for now
+
+                /// \todo report the problem to the user
+            }
+            else if (base)
+            {
+                removeRows (index, 1);
+            }
+            else
+            {
+                mRecords[index].mState = RecordBase::State_Deleted;
+            }
         }
         else
         {
-            // old record
-            Record<ESXRecordT>& record2 = mRecords[index];
+            ESXRecordT record;
+            record.mId = id;
+            record.load (reader);
 
-            if (base)
-                record2.mBase = record;
+            if (index==-1)
+            {
+                // new record
+                Record<ESXRecordT> record2;
+                record2.mState = base ? RecordBase::State_BaseOnly : RecordBase::State_ModifiedOnly;
+                (base ? record2.mBase : record2.mModified) = record;
+
+                appendRecord (record2);
+            }
             else
-                record2.setModified (record);
+            {
+                // old record
+                Record<ESXRecordT>& record2 = mRecords[index];
+
+                if (base)
+                    record2.mBase = record;
+                else
+                    record2.setModified (record);
+            }
         }
     }
 
