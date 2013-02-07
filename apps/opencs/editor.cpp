@@ -39,6 +39,7 @@ void CS::Editor::createDocument()
 
 void CS::Editor::loadDocument()
 {
+    mStartup.hide();
     mOpenDialog.show();
     mOpenDialog.raise();
     mOpenDialog.activateWindow();
