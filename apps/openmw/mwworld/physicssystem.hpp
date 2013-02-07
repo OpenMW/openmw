@@ -1,15 +1,27 @@
 #ifndef GAME_MWWORLD_PHYSICSSYSTEM_H
 #define GAME_MWWORLD_PHYSICSSYSTEM_H
 
+#include <OgreVector3.h>
+
 #include <btBulletCollisionCommon.h>
 
-#include <openengine/ogre/renderer.hpp>
-#include <openengine/bullet/pmove.h>
-#include "ptr.hpp"
+
+namespace OEngine
+{
+    namespace Render
+    {
+        class OgreRenderer;
+    }
+    namespace Physic
+    {
+        class PhysicEngine;
+    }
+}
 
 namespace MWWorld
 {
     class World;
+    class Ptr;
 
     class PhysicsSystem
     {
@@ -74,7 +86,6 @@ namespace MWWorld
             OEngine::Render::OgreRenderer &mRender;
             OEngine::Physic::PhysicEngine* mEngine;
             bool mFreeFly;
-            playerMove* playerphysics;
             std::map<std::string, std::string> handleToMesh;
 
             PhysicsSystem (const PhysicsSystem&);

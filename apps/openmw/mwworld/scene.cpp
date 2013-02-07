@@ -8,6 +8,7 @@
 #include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
 
+#include "physicssystem.hpp"
 #include "player.hpp"
 #include "localscripts.hpp"
 #include "esmstore.hpp"

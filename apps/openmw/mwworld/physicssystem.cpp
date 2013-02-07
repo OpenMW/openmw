@@ -9,8 +9,9 @@
 #include <OgreCamera.h>
 #include <OgreTextureManager.h>
 
-#include <libs/openengine/bullet/trace.h>
-#include <libs/openengine/bullet/physic.hpp>
+#include <openengine/bullet/trace.h>
+#include <openengine/bullet/physic.hpp>
+#include <openengine/ogre/renderer.hpp>
 
 #include <components/nifbullet/bullet_nif_loader.hpp>
 
@@ -25,6 +26,7 @@ namespace MWWorld
 {
 
     static const float sMaxSlope = 60.0f;
+    static const float sStepSize = 9.0f;
 
     class MovementSolver
     {
@@ -35,13 +37,13 @@ namespace MWWorld
         {
             traceResults trace; // no initialization needed
 
-            newtrace(&trace, position+Ogre::Vector3(0.0f,0.0f,STEPSIZE),
-                             position+Ogre::Vector3(0.0f,0.0f,STEPSIZE)+velocity*remainingTime,
+            newtrace(&trace, position+Ogre::Vector3(0.0f,0.0f,sStepSize),
+                             position+Ogre::Vector3(0.0f,0.0f,sStepSize)+velocity*remainingTime,
                     halfExtents, verticalRotation, isInterior, engine);
             if(trace.fraction == 0.0f || (trace.fraction != 1.0f && getSlope(trace.planenormal) > sMaxSlope))
                 return false;
 
-            newtrace(&trace, trace.endpos, trace.endpos-Ogre::Vector3(0,0,STEPSIZE), halfExtents, verticalRotation, isInterior, engine);
+            newtrace(&trace, trace.endpos, trace.endpos-Ogre::Vector3(0.0f,0.0f,sStepSize), halfExtents, verticalRotation, isInterior, engine);
             if(getSlope(trace.planenormal) < sMaxSlope)
             {
                 // only step down onto semi-horizontal surfaces. don't step down onto the side of a house or a wall.
@@ -197,20 +199,16 @@ namespace MWWorld
     PhysicsSystem::PhysicsSystem(OEngine::Render::OgreRenderer &_rend) :
         mRender(_rend), mEngine(0), mFreeFly (true)
     {
-
-        playerphysics = new playerMove;
         // Create physics. shapeLoader is deleted by the physic engine
         NifBullet::ManualBulletShapeLoader* shapeLoader = new NifBullet::ManualBulletShapeLoader();
         mEngine = new OEngine::Physic::PhysicEngine(shapeLoader);
-        playerphysics->mEngine = mEngine;
     }
 
     PhysicsSystem::~PhysicsSystem()
     {
         delete mEngine;
-        delete playerphysics;
-
     }
+
     OEngine::Physic::PhysicEngine* PhysicsSystem::getEngine()
     {
         return mEngine;
@@ -279,15 +277,8 @@ namespace MWWorld
 
     void PhysicsSystem::setCurrentWater(bool hasWater, int waterHeight)
     {
-        playerphysics->hasWater = hasWater;
-        if(hasWater){
-            playerphysics->waterHeight = waterHeight;
-        }
         for(std::map<std::string,OEngine::Physic::PhysicActor*>::iterator it = mEngine->PhysicActorMap.begin(); it != mEngine->PhysicActorMap.end();it++)
-        {
             it->second->setCurrentWater(hasWater, waterHeight);
-        }
-
     }
 
     btVector3 PhysicsSystem::getRayPoint(float extent)
@@ -428,14 +419,8 @@ namespace MWWorld
         {
             // TODO very dirty hack to avoid crash during setup -> needs cleaning up to allow
             // start positions others than 0, 0, 0
-            if (handle == "player")
-            {
-                playerphysics->ps.origin = position;
-            }
-            else
-            {
+            if (handle != "player")
                 act->setPosition(position);
-            }
         }
     }
 
@@ -474,7 +459,6 @@ namespace MWWorld
 
     bool PhysicsSystem::toggleCollisionMode()
     {
-        playerphysics->ps.move_type = (playerphysics->ps.move_type == PM_NOCLIP ? PM_NORMAL : PM_NOCLIP);
         for(std::map<std::string,OEngine::Physic::PhysicActor*>::iterator it = mEngine->PhysicActorMap.begin(); it != mEngine->PhysicActorMap.end();it++)
         {
             if (it->first=="player")
