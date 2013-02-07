@@ -125,6 +125,12 @@ if(APPLE)
     find_library(COCOA_FRAMEWORK Cocoa)
     find_library(IOKIT_FRAMEWORK IOKit)
     target_link_libraries(openmw ${CARBON_FRAMEWORK} ${COCOA_FRAMEWORK} ${IOKIT_FRAMEWORK})
+
+    if (FFMPEG_FOUND)
+        find_library(COREVIDEO_FRAMEWORK CoreVideo)
+        find_library(VDA_FRAMEWORK VideoDecodeAcceleration)
+        target_link_libraries(openmw ${COREVIDEO_FRAMEWORK} ${VDA_FRAMEWORK})
+    endif()
 endif(APPLE)
 
 if(DPKG_PROGRAM)
