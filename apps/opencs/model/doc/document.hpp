@@ -41,7 +41,8 @@ namespace CSMDoc
             Document& operator= (const Document&);
 
             void load (const std::vector<boost::filesystem::path>::const_iterator& begin,
-                const std::vector<boost::filesystem::path>::const_iterator& end);
+                const std::vector<boost::filesystem::path>::const_iterator& end, bool lastAsModified);
+            ///< \param lastAsModified Store the last file in Modified instead of merging it into Base.
 
             void createBase();
 

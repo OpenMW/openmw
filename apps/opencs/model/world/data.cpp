@@ -60,3 +60,8 @@ void CSMWorld::Data::merge()
 {
     mGlobals.merge();
 }
+
+void CSMWorld::Data::loadFile (const boost::filesystem::path& path, bool base)
+{
+    std::cout << "pretending to load " << path.string() << std::endl;
+}

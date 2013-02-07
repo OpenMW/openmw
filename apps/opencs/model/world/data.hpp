@@ -4,6 +4,8 @@
 #include <map>
 #include <vector>
 
+#include <boost/filesystem/path.hpp>
+
 #include <components/esm/loadglob.hpp>
 
 #include "idcollection.hpp"
@@ -44,6 +46,9 @@ namespace CSMWorld
 
             void merge();
             ///< Merge modified into base.
+
+            void loadFile (const boost::filesystem::path& path, bool base);
+            ///< Merging content of a file into base or modified.
     };
 }
 

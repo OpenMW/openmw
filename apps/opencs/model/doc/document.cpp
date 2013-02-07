@@ -1,15 +1,23 @@
 
 #include "document.hpp"
 
-#include <iostream>
+#include <cassert>
 
 void CSMDoc::Document::load (const std::vector<boost::filesystem::path>::const_iterator& begin,
-    const std::vector<boost::filesystem::path>::const_iterator& end)
+    const std::vector<boost::filesystem::path>::const_iterator& end, bool lastAsModified)
 {
-    for (std::vector<boost::filesystem::path>::const_iterator iter (begin); iter!=end; ++iter)
-        std::cout << "pretending to load " << iter->string() << std::endl;
+    assert (begin!=end);
 
-    /// \todo load content files
+    std::vector<boost::filesystem::path>::const_iterator end2 (end);
+
+    if (lastAsModified)
+        --end2;
+
+    for (std::vector<boost::filesystem::path>::const_iterator iter (begin); iter!=end2; ++iter)
+        getData().loadFile (*iter, true);
+
+    if (lastAsModified)
+        getData().loadFile (*end2, false);
 }
 
 void CSMDoc::Document::createBase()
@@ -48,7 +56,7 @@ CSMDoc::Document::Document (const std::vector<boost::filesystem::path>& files, b
         if (new_)
             --end;
 
-        load (files.begin(), end);
+        load (files.begin(), end, !new_);
     }
 
     if (new_ && files.size()==1)
@@ -134,10 +142,10 @@ void CSMDoc::Document::saving()
 
     if (mSaveCount>15)
     {
-            mSaveCount = 0;
-            mSaveTimer.stop();
-            mUndoStack.setClean();
-            emit stateChanged (getState(), this);
+        mSaveCount = 0;
+        mSaveTimer.stop();
+        mUndoStack.setClean();
+        emit stateChanged (getState(), this);
     }
 }
 
