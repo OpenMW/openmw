@@ -239,6 +239,8 @@ namespace MWInput
 
             A_ToggleHUD,
 
+            A_Run,
+
             A_Last            // Marker for the last item
         };
     };
