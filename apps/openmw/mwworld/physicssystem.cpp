@@ -132,7 +132,6 @@ namespace MWWorld
             Ogre::Vector3 up(0.0f, 0.0f, 1.0f);
             Ogre::Vector3 newPosition = position;
 
-            bool onground = false;
             if(gravity)
             {
                 newtrace(&trace, position, position+Ogre::Vector3(0,0,-10), halfExtents, verticalRotation, isInterior, engine);
@@ -162,8 +161,7 @@ namespace MWWorld
                 if(trace.fraction < 1.0f)
                 {
                     //std::cout<<"angle: "<<getSlope(trace.planenormal)<<"\n";
-                    onground = getSlope(currentNormal) <= sMaxSlope;
-                    if(!onground || currentNormal == lastNormal)
+                    if(getSlope(currentNormal) > sMaxSlope || currentNormal == lastNormal)
                     {
                         if(!stepMove(newPosition, velocity, remainingTime, verticalRotation, halfExtents, isInterior, engine))
                         {
@@ -190,7 +188,6 @@ namespace MWWorld
 
             verticalVelocity = clippedVelocity.z;
             physicActor->setVerticalForce(verticalVelocity - time*400.0f);
-            physicActor->setOnGround(onground);
 
             return newPosition;
         }
