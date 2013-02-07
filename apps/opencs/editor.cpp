@@ -15,7 +15,7 @@ CS::Editor::Editor() : mViewManager (mDocumentManager), mNewDocumentIndex (0)
 
     connect (&mStartup, SIGNAL (createDocument()), this, SLOT (createDocument ()));
     connect (&mStartup, SIGNAL (loadDocument()), this, SLOT (loadDocument ()));
-    
+
     connect (&mOpenDialog, SIGNAL(accepted()), this, SLOT(openFiles()));
 }
 
@@ -50,23 +50,7 @@ void CS::Editor::openFiles()
     std::vector<boost::filesystem::path> paths;
     mOpenDialog.getFileList(paths);
     CSMDoc::Document *document = mDocumentManager.addDocument(paths, false);
-    
-    static const char *sGlobals[] =
-    {
-        "Day", "DaysPassed", "GameHour", "Month", "PCRace", "PCVampire", "PCWerewolf", "PCYear", 0
-    };
-    
-    for (int i=0; sGlobals[i]; ++i)
-    {
-        ESM::Global record;
-        record.mId = sGlobals[i];
-        record.mValue = i==0 ? 1 : 0;
-        record.mType = ESM::VT_Float;
-        document->getData().getGlobals().add (record);
-    }
-    
-    document->getData().merge(); /// \todo remove once proper ESX loading is implemented
-    
+
     mViewManager.addView (document);
 }
 

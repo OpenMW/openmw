@@ -11,8 +11,11 @@
 
 #include <QVariant>
 
-#include "columnbase.hpp"
+#include <components/esm/esmreader.hpp>
+
 #include <components/misc/stringops.hpp>
+
+#include "columnbase.hpp"
 
 namespace CSMWorld
 {
@@ -67,9 +70,11 @@ namespace CSMWorld
             virtual std::string getId (const RecordBase& record) const = 0;
             ///< Return ID for \a record.
             ///
-            /// \attention Throw san exception, if the type of \a record does not match.
+            /// \attention Throws an exception, if the type of \a record does not match.
 
             virtual const RecordBase& getRecord (const std::string& id) const = 0;
+
+            virtual void load (ESM::ESMReader& reader, bool base) = 0;
     };
 
     ///< \brief Collection of ID-based records
@@ -135,6 +140,8 @@ namespace CSMWorld
             /// \attention Throw san exception, if the type of \a record does not match.
 
             virtual const RecordBase& getRecord (const std::string& id) const;
+
+            virtual void load (ESM::ESMReader& reader, bool base);
 
             void addColumn (Column<ESXRecordT> *column);
     };
@@ -307,6 +314,40 @@ namespace CSMWorld
     {
         const Record<ESXRecordT>& record2 = dynamic_cast<const Record<ESXRecordT>&> (record);
         return (record2.isModified() ? record2.mModified : record2.mBase).mId;
+    }
+
+    template<typename ESXRecordT>
+    void IdCollection<ESXRecordT>::load (ESM::ESMReader& reader, bool base)
+    {
+        std::string id = reader.getHNOString ("NAME");
+
+        /// \todo deal with deleted flag
+
+        ESXRecordT record;
+        record.mId = id;
+        record.load (reader);
+
+        int index = searchId (id);
+
+        if (index==-1)
+        {
+            // new record
+            Record<ESXRecordT> record2;
+            record2.mState = base ? RecordBase::State_BaseOnly : RecordBase::State_ModifiedOnly;
+            (base ? record2.mBase : record2.mModified) = record;
+
+            appendRecord (record2);
+        }
+        else
+        {
+            // old record
+            Record<ESXRecordT>& record2 = mRecords[index];
+
+            if (base)
+                record2.mBase = record;
+            else
+                record2.setModified (record);
+        }
     }
 
     template<typename ESXRecordT>

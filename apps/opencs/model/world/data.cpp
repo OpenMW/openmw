@@ -5,6 +5,7 @@
 
 #include <QAbstractTableModel>
 
+#include <components/esm/esmreader.hpp>
 #include <components/esm/loadglob.hpp>
 
 #include "idtable.hpp"
@@ -63,5 +64,26 @@ void CSMWorld::Data::merge()
 
 void CSMWorld::Data::loadFile (const boost::filesystem::path& path, bool base)
 {
-    std::cout << "pretending to load " << path.string() << std::endl;
+    ESM::ESMReader reader;
+    /// \todo set encoder
+    reader.open (path.string());
+
+    // Note: We do not need to send update signals here, because at this point the model is not connected
+    // to any view.
+    while (reader.hasMoreRecs())
+    {
+        ESM::NAME n = reader.getRecName();
+        reader.getRecHeader();
+
+        switch (n.val)
+        {
+            case ESM::REC_GLOB: mGlobals.load (reader, base); break;
+
+
+            default:
+
+                /// \todo throw an exception instead, once all records are implemented
+                reader.skipRecord();
+        }
+    }
 }
