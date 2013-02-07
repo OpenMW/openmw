@@ -34,14 +34,6 @@ namespace Physic
         Ogre::Quaternion inverse = mBoxRotation.Inverse();
         mBoxRotationInverse = btQuaternion(inverse.x, inverse.y, inverse.z,inverse.w);
         mEngine->addRigidBody(mBody, false);  //Add rigid body to dynamics world, but do not add to object map
-        pmove = new playerMove;
-        pmove->mEngine = mEngine;
-        btBoxShape* box = static_cast<btBoxShape*> (mBody->getCollisionShape());
-        if(box != NULL){
-            btVector3 size = box->getHalfExtentsWithMargin();
-            Ogre::Vector3 halfExtents = Ogre::Vector3(size.getX(), size.getY(), size.getZ());
-            pmove->ps.halfExtents = halfExtents;
-        }
     }
 
     PhysicActor::~PhysicActor()
@@ -50,38 +42,11 @@ namespace Physic
             mEngine->dynamicsWorld->removeRigidBody(mBody);
             delete mBody;
         }
-        delete pmove;
-    }
-
-    void PhysicActor::setCurrentWater(bool hasWater, int waterHeight){
-        pmove->hasWater = hasWater;
-        if(hasWater){
-            pmove->waterHeight = waterHeight;
-        }
-    }
-
-    void PhysicActor::setGravity(float gravity)
-    {
-        pmove->ps.gravity = gravity;
-    }
-    
-    void PhysicActor::setSpeed(float speed)
-    {
-        pmove->ps.speed = speed;
     }
 
     void PhysicActor::enableCollisions(bool collision)
     {
         collisionMode = collision;
-        if(collisionMode)
-            pmove->ps.move_type=PM_NORMAL;
-        else
-            pmove->ps.move_type=PM_NOCLIP;
-    }
-
-    void PhysicActor::setJumpVelocity(float velocity)
-    {
-        pmove->ps.jump_velocity = velocity;
     }
 
     bool PhysicActor::getCollisionMode()
@@ -89,23 +54,8 @@ namespace Physic
         return collisionMode;
     }
 
-    void PhysicActor::setMovement(signed char rightmove, signed char forwardmove, signed char upmove)
-    {
-        playerMove::playercmd& pm_ref = pmove->cmd;
-        pm_ref.rightmove = rightmove;
-        pm_ref.forwardmove = forwardmove;
-        pm_ref.upmove = upmove;
-    }
 
-    void PhysicActor::setPmoveViewAngles(float pitch, float yaw, float roll){
-        pmove->ps.viewangles.x = pitch;
-        pmove->ps.viewangles.y = yaw;
-        pmove->ps.viewangles.z = roll;
-    }
-
-    
-
-    void PhysicActor::setRotation(const Ogre::Quaternion quat)
+    void PhysicActor::setRotation(const Ogre::Quaternion &quat)
     {
         if(!quat.equals(getRotation(), Ogre::Radian(0))){
             mEngine->adjustRigidBody(mBody, getPosition(), quat, mBoxScaledTranslation, mBoxRotation);
@@ -128,13 +78,6 @@ namespace Physic
         return Ogre::Quaternion(quat.getW(), quat.getX(), quat.getY(), quat.getZ());
     }
 
-    void PhysicActor::setPosition(const Ogre::Vector3 pos)
-    {
-        mEngine->adjustRigidBody(mBody, pos, getRotation(), mBoxScaledTranslation, mBoxRotation);
-        btVector3 vec = mBody->getWorldTransform().getOrigin();
-        pmove->ps.origin = Ogre::Vector3(vec.getX(), vec.getY(), vec.getZ());
-    }
-
     void PhysicActor::setScale(float scale){
         Ogre::Vector3 position = getPosition();
         Ogre::Quaternion rotation = getRotation();
@@ -148,12 +91,6 @@ namespace Physic
         //Create the newly scaled rigid body
         mBody = mEngine->createAndAdjustRigidBody(mMesh, mName, scale, position, rotation);
         mEngine->addRigidBody(mBody, false);  //Add rigid body to dynamics world, but do not add to object map
-        btBoxShape* box = static_cast<btBoxShape*> (mBody->getCollisionShape());
-        if(box != NULL){
-            btVector3 size = box->getHalfExtentsWithMargin();
-            Ogre::Vector3 halfExtents = Ogre::Vector3(size.getX(), size.getY(), size.getZ());
-            pmove->ps.halfExtents = halfExtents;
-        }
     }
 
     Ogre::Vector3 PhysicActor::getHalfExtents() const
@@ -188,12 +125,6 @@ namespace Physic
     bool PhysicActor::getOnGround() const
     {
         return collisionMode && onGround;
-    }
-
-    void PhysicActor::runPmove(){
-        Pmove(pmove);
-        Ogre::Vector3 newpos = pmove->ps.origin;
-        mBody->getWorldTransform().setOrigin(btVector3(newpos.x, newpos.y, newpos.z));
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -267,8 +267,7 @@ namespace MWWorld
 
     void PhysicsSystem::setCurrentWater(bool hasWater, int waterHeight)
     {
-        for(std::map<std::string,OEngine::Physic::PhysicActor*>::iterator it = mEngine->PhysicActorMap.begin(); it != mEngine->PhysicActorMap.end();it++)
-            it->second->setCurrentWater(hasWater, waterHeight);
+        // TODO: store and use
     }
 
     btVector3 PhysicsSystem::getRayPoint(float extent)
@@ -404,13 +403,6 @@ namespace MWWorld
                 //Do any such objects exist?  Perhaps animated objects?
                 mEngine->boxAdjustExternal(handleToMesh[handle], body, node->getScale().x, position, node->getOrientation());
             }
-        }
-        if (OEngine::Physic::PhysicActor* act = mEngine->getCharacter(handle))
-        {
-            // TODO very dirty hack to avoid crash during setup -> needs cleaning up to allow
-            // start positions others than 0, 0, 0
-            if (handle != "player")
-                act->setPosition(position);
         }
     }
 

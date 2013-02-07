@@ -18,7 +18,6 @@ class btSequentialImpulseConstraintSolver;
 class btCollisionDispatcher;
 class btDiscreteDynamicsWorld;
 class btHeightfieldTerrainShape;
-struct playerMove;
 
 namespace BtOgre
 {
@@ -65,25 +64,12 @@ namespace Physic
 
         ~PhysicActor();
 
-        void setCurrentWater(bool hasWater, int waterHeight);
-
-        /**
-         * This function sets the movement keys for pmove
-         */
-        void setMovement(signed char rightmove, signed char forwardmove, signed char upmove);
-
         /**
          * This adjusts the rotation of a PhysicActor
          * If we have any problems with this (getting stuck in pmove) we should change it 
          * from setting the visual orientation to setting the orientation of the rigid body directly.
          */
-        void setRotation(const Ogre::Quaternion quat);
-
-        void setGravity(float gravity);
-
-        void setSpeed(float speed);
-
-        void setJumpVelocity(float velocity);
+        void setRotation(const Ogre::Quaternion &quat);
 
         void enableCollisions(bool collision);
 
@@ -99,18 +85,6 @@ namespace Physic
          * Returns the visual orientation of the PhysicActor
          */
         Ogre::Quaternion getRotation();
-
-        /**
-         * Sets the position of mBody from a visual position input.
-         * For most cases this should not be used.  We should instead let pmove move the PhysicActor around for us
-         */
-        void setPosition(const Ogre::Vector3 pos);
-
-        /**
-         * Sets the view angles for pmove directly.
-         * Remember, add 90 for yaw.  Set roll to 0.
-         */
-        void setPmoveViewAngles(float pitch, float yaw, float roll);
 
         /**
          * Sets the scale of the PhysicActor
@@ -136,11 +110,6 @@ namespace Physic
 
         bool getOnGround() const;
 
-        /**
-         * Runs pmove for this PhysicActor
-         */
-        void runPmove();
-
 //HACK: in Visual Studio 2010 and presumably above, this structures alignment
 //		must be 16, but the built in operator new & delete don't properly
 //		perform this alignment.
@@ -161,8 +130,6 @@ namespace Physic
         std::string mMesh;
         PhysicEngine* mEngine;
         std::string mName;
-        playerMove* pmove;
-       
     };
 
     /**
