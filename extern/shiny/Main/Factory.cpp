@@ -50,7 +50,7 @@ namespace sh
 	{
 		assert(mCurrentLanguage != Language_None);
 
-		bool anyShaderDirty = false;
+		bool removeBinaryCache = false;
 
 		if (boost::filesystem::exists (mPlatform->getCacheFolder () + "/lastModified.txt"))
 		{
@@ -182,57 +182,33 @@ namespace sh
 					}
 				}
 
-				std::string sourceFile = mPlatform->getBasePath() + "/" + it->second->findChild("source")->getValue();
+				std::string sourceAbsolute = mPlatform->getBasePath() + "/" + it->second->findChild("source")->getValue();
+				std::string sourceRelative = it->second->findChild("source")->getValue();
 
 				ShaderSet newSet (it->second->findChild("type")->getValue(), cg_profile, hlsl_profile,
-								  sourceFile,
+								  sourceAbsolute,
 								  mPlatform->getBasePath(),
 								  it->first,
 								  &mGlobalSettings);
 
-				int lastModified = boost::filesystem::last_write_time (boost::filesystem::path(sourceFile));
-				mShadersLastModifiedNew[sourceFile] = lastModified;
-				if (mShadersLastModified.find(sourceFile) != mShadersLastModified.end()
-						&& mShadersLastModified[sourceFile] != lastModified)
+				int lastModified = boost::filesystem::last_write_time (boost::filesystem::path(sourceAbsolute));
+				mShadersLastModifiedNew[sourceRelative] = lastModified;
+				if (mShadersLastModified.find(sourceRelative) != mShadersLastModified.end())
 				{
-					// delete any outdated shaders based on this shader set.
-					if ( boost::filesystem::exists(mPlatform->getCacheFolder())
-						 && boost::filesystem::is_directory(mPlatform->getCacheFolder()))
+					if (mShadersLastModified[sourceRelative] != lastModified)
 					{
-						boost::filesystem::directory_iterator end_iter;
-						for( boost::filesystem::directory_iterator dir_iter(mPlatform->getCacheFolder()) ; dir_iter != end_iter ; ++dir_iter)
-						{
-							if (boost::filesystem::is_regular_file(dir_iter->status()) )
-							{
-								boost::filesystem::path file = dir_iter->path();
-
-								std::string pathname = file.filename().string();
-
-								// get first part of filename, e.g. main_fragment_546457654 -> main_fragment
-								// there is probably a better method for this...
-								std::vector<std::string> tokens;
-								boost::split(tokens, pathname, boost::is_any_of("_"));
-								tokens.erase(--tokens.end());
-								std::string shaderName;
-								for (std::vector<std::string>::const_iterator vector_iter = tokens.begin(); vector_iter != tokens.end();)
-								{
-									shaderName += *(vector_iter++);
-									if (vector_iter != tokens.end())
-										shaderName += "_";
-								}
-
-								if (shaderName == it->first)
-								{
-									boost::filesystem::remove(file);
-									std::cout << "Removing outdated file: " << file << std::endl;
-								}
-							}
-						}
+						// delete any outdated shaders based on this shader set
+						removeCache (it->first);
+						// remove the whole binary cache (removing only the individual shaders does not seem to be possible at this point with OGRE)
+						removeBinaryCache = true;
 					}
-
-					anyShaderDirty = true;
 				}
-
+				else
+				{
+					// if we get here, this is either the first run or a new shader file was added
+					// in both cases we can safely delete
+					removeCache (it->first);
+				}
 				mShaderSets.insert(std::make_pair(it->first, newSet));
 			}
 		}
@@ -326,7 +302,7 @@ namespace sh
 			}
 		}
 
-		if (mPlatform->supportsShaderSerialization () && mReadMicrocodeCache && !anyShaderDirty)
+		if (mPlatform->supportsShaderSerialization () && mReadMicrocodeCache && !removeBinaryCache)
 		{
 			std::string file = mPlatform->getCacheFolder () + "/shShaderCache.txt";
 			if (boost::filesystem::exists(file))
@@ -612,5 +588,42 @@ namespace sh
 		MaterialInstance* m = searchInstance (name);
 		assert(m);
 		m->createForConfiguration (configuration, 0);
+	}
+
+	void Factory::removeCache(const std::string& pattern)
+	{
+		if ( boost::filesystem::exists(mPlatform->getCacheFolder())
+			 && boost::filesystem::is_directory(mPlatform->getCacheFolder()))
+		{
+			boost::filesystem::directory_iterator end_iter;
+			for( boost::filesystem::directory_iterator dir_iter(mPlatform->getCacheFolder()) ; dir_iter != end_iter ; ++dir_iter)
+			{
+				if (boost::filesystem::is_regular_file(dir_iter->status()) )
+				{
+					boost::filesystem::path file = dir_iter->path();
+
+					std::string pathname = file.filename().string();
+
+					// get first part of filename, e.g. main_fragment_546457654 -> main_fragment
+					// there is probably a better method for this...
+					std::vector<std::string> tokens;
+					boost::split(tokens, pathname, boost::is_any_of("_"));
+					tokens.erase(--tokens.end());
+					std::string shaderName;
+					for (std::vector<std::string>::const_iterator vector_iter = tokens.begin(); vector_iter != tokens.end();)
+					{
+						shaderName += *(vector_iter++);
+						if (vector_iter != tokens.end())
+							shaderName += "_";
+					}
+
+					if (shaderName == pattern)
+					{
+						boost::filesystem::remove(file);
+						std::cout << "Removing outdated shader: " << file << std::endl;
+					}
+				}
+			}
+		}
 	}
 }
