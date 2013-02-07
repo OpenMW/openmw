@@ -58,6 +58,16 @@ static const struct {
     { CharState_SwimWalkLeft, "swimwalkleft" },
     { CharState_SwimWalkRight, "swimwalkright" },
 
+    { CharState_RunForward, "runforward" },
+    { CharState_RunBack, "runback" },
+    { CharState_RunLeft, "runleft" },
+    { CharState_RunRight, "runright" },
+
+    { CharState_SwimRunForward, "swimrunforward" },
+    { CharState_SwimRunBack, "swimrunback" },
+    { CharState_SwimRunLeft, "swimrunleft" },
+    { CharState_SwimRunRight, "swimrunright" },
+
     { CharState_Death1, "death1" },
     { CharState_Death2, "death2" },
     { CharState_Death3, "death3" },
@@ -164,18 +174,27 @@ Ogre::Vector3 CharacterController::update(float duration)
     const Ogre::Vector3 &vec = cls.getMovementVector(mPtr);
 
     bool inwater = MWBase::Environment::get().getWorld()->isSwimming(mPtr);
+    bool isrunning = cls.getStance(mPtr, MWWorld::Class::Run);
 
     if(std::abs(vec.x/2.0f) > std::abs(vec.y))
     {
         if(vec.x > 0.0f)
-            setState((inwater ? CharState_SwimWalkRight : CharState_WalkRight), true);
+            setState(isrunning ?
+                     (inwater ? CharState_SwimRunRight : CharState_RunRight) :
+                     (inwater ? CharState_SwimWalkRight : CharState_WalkRight), true);
         else if(vec.x < 0.0f)
-            setState((inwater ? CharState_SwimWalkLeft : CharState_WalkLeft), true);
+            setState(isrunning ?
+                     (inwater ? CharState_SwimRunLeft: CharState_RunLeft) :
+                     (inwater ? CharState_SwimWalkLeft : CharState_WalkLeft), true);
     }
     else if(vec.y > 0.0f)
-        setState((inwater ? CharState_SwimWalkForward : CharState_WalkForward), true);
+        setState(isrunning ?
+                 (inwater ? CharState_SwimRunForward : CharState_RunForward) :
+                 (inwater ? CharState_SwimWalkForward : CharState_WalkForward), true);
     else if(vec.y < 0.0f)
-        setState((inwater ? CharState_SwimWalkBack : CharState_WalkBack), true);
+        setState(isrunning ?
+                 (inwater ? CharState_SwimRunBack : CharState_RunBack) :
+                 (inwater ? CharState_SwimWalkBack : CharState_WalkBack), true);
     else
     {
         if(!(getState() >= CharState_Death1))

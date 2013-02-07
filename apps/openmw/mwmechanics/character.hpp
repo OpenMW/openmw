@@ -35,6 +35,16 @@ enum CharacterState {
     CharState_SwimWalkLeft,
     CharState_SwimWalkRight,
 
+    CharState_RunForward,
+    CharState_RunBack,
+    CharState_RunLeft,
+    CharState_RunRight,
+
+    CharState_SwimRunForward,
+    CharState_SwimRunBack,
+    CharState_SwimRunLeft,
+    CharState_SwimRunRight,
+
     /* Must be last! */
     CharState_Death1,
     CharState_Death2,
