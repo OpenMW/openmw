@@ -28,7 +28,7 @@ namespace Physic
     };
 
     PhysicActor::PhysicActor(std::string name, std::string mesh, PhysicEngine* engine, Ogre::Vector3 position, Ogre::Quaternion rotation, float scale): 
-        mName(name), mEngine(engine), mMesh(mesh), mBoxScaledTranslation(0,0,0), mBoxRotationInverse(0,0,0,0), mBody(0), collisionMode(false), mBoxRotation(0,0,0,0), verticalForce(0.0f)
+        mName(name), mEngine(engine), mMesh(mesh), mBoxScaledTranslation(0,0,0), mBoxRotationInverse(0,0,0,0), mBody(0), onGround(false), collisionMode(false), mBoxRotation(0,0,0,0), verticalForce(0.0f)
     {
         mBody = mEngine->createAndAdjustRigidBody(mMesh, mName, scale, position, rotation, &mBoxScaledTranslation, &mBoxRotation);
         Ogre::Quaternion inverse = mBoxRotation.Inverse();
@@ -180,6 +180,15 @@ namespace Physic
         return verticalForce;
     }
 
+    void PhysicActor::setOnGround(bool grounded)
+    {
+        onGround = grounded;
+    }
+
+    bool PhysicActor::getOnGround() const
+    {
+        return collisionMode && onGround;
+    }
 
     void PhysicActor::runPmove(){
         Pmove(pmove);

@@ -9,6 +9,9 @@
 #include <OgreCamera.h>
 #include <OgreTextureManager.h>
 
+#include <libs/openengine/bullet/trace.h>
+#include <libs/openengine/bullet/physic.hpp>
+
 #include <components/nifbullet/bullet_nif_loader.hpp>
 
 //#include "../mwbase/world.hpp" // FIXME
@@ -129,6 +132,7 @@ namespace MWWorld
             Ogre::Vector3 up(0.0f, 0.0f, 1.0f);
             Ogre::Vector3 newPosition = position;
 
+            bool onground = false;
             if(gravity)
             {
                 newtrace(&trace, position, position+Ogre::Vector3(0,0,-10), halfExtents, verticalRotation, isInterior, engine);
@@ -155,10 +159,11 @@ namespace MWWorld
                 remainingTime = remainingTime * (1.0f-trace.fraction);
 
                 // check for obstructions
-                if(trace.fraction != 1.0f)
+                if(trace.fraction < 1.0f)
                 {
                     //std::cout<<"angle: "<<getSlope(trace.planenormal)<<"\n";
-                    if(getSlope(currentNormal) > sMaxSlope || currentNormal == lastNormal)
+                    onground = getSlope(currentNormal) <= sMaxSlope;
+                    if(!onground || currentNormal == lastNormal)
                     {
                         if(!stepMove(newPosition, velocity, remainingTime, verticalRotation, halfExtents, isInterior, engine))
                         {
@@ -184,8 +189,8 @@ namespace MWWorld
             } while(iterations < maxIterations && remainingTime != 0.0f);
 
             verticalVelocity = clippedVelocity.z;
-            verticalVelocity -= time*400;
-            physicActor->setVerticalForce(verticalVelocity);
+            physicActor->setVerticalForce(verticalVelocity - time*400.0f);
+            physicActor->setOnGround(onground);
 
             return newPosition;
         }

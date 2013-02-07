@@ -1,5 +1,7 @@
 #include "worldimp.hpp"
 
+#include <libs/openengine/bullet/physic.hpp>
+
 #include <components/bsa/bsa_archive.hpp>
 #include <components/files/collections.hpp>
 
@@ -1366,20 +1368,14 @@ namespace MWWorld
     {
         Ptr::CellStore *currentCell = mWorldScene->getCurrentCell();
 
-        Ogre::Vector3 playerPos;
-        float* pos = mPlayer->getPlayer ().getRefData ().getPosition ().pos;
-        playerPos.x = pos[0];
-        playerPos.y = pos[1];
-        playerPos.z = pos[2];
+        RefData &refdata = mPlayer->getPlayer().getRefData();
+        const OEngine::Physic::PhysicActor *physact = mPhysEngine->getCharacter(refdata.getHandle());
+        Ogre::Vector3 playerPos(refdata.getPosition().pos);
 
-        std::pair<bool, Ogre::Vector3> hit =
-                mPhysics->castRay(playerPos, Ogre::Vector3(0,0,-1), 50);
-        bool isOnGround = (hit.first ? (hit.second.distance (playerPos) < 25) : false);
-
-        if (!isOnGround || isUnderwater (*currentCell->mCell, playerPos))
+        if(!physact->getOnGround() || isUnderwater(*currentCell->mCell, playerPos))
             return 2;
 
-        if (currentCell->mCell->mData.mFlags & ESM::Cell::NoSleep)
+        if((currentCell->mCell->mData.mFlags&ESM::Cell::NoSleep))
             return 1;
 
         return 0;

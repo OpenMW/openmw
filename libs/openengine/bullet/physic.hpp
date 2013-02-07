@@ -132,6 +132,10 @@ namespace Physic
          */
         float getVerticalForce() const;
 
+        void setOnGround(bool grounded);
+
+        bool getOnGround() const;
+
         /**
          * Runs pmove for this PhysicActor
          */
@@ -152,6 +156,7 @@ namespace Physic
         btQuaternion mBoxRotationInverse;
         Ogre::Quaternion mBoxRotation;
         float verticalForce;
+        bool onGround;
         bool collisionMode;
         std::string mMesh;
         PhysicEngine* mEngine;
