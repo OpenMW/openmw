@@ -60,7 +60,7 @@ namespace Physic
     class PhysicActor
     {
     public:
-        PhysicActor(std::string name, std::string mesh, PhysicEngine *engine, Ogre::Vector3 position, Ogre::Quaternion rotation, float scale);
+        PhysicActor(const std::string &name, const std::string &mesh, PhysicEngine *engine, const Ogre::Vector3 &position, const Ogre::Quaternion &rotation, float scale);
 
         ~PhysicActor();
 
@@ -178,19 +178,21 @@ namespace Physic
          * Creates a RigidBody.  It does not add it to the simulation.
          * After created, the body is set to the correct rotation, position, and scale
          */
-        RigidBody* createAndAdjustRigidBody(std::string mesh,std::string name,float scale, Ogre::Vector3 position, Ogre::Quaternion rotation, 
+        RigidBody* createAndAdjustRigidBody(const std::string &mesh, const std::string &name,
+            float scale, const Ogre::Vector3 &position, const Ogre::Quaternion &rotation,
             Ogre::Vector3* scaledBoxTranslation = 0, Ogre::Quaternion* boxRotation = 0);
 
         /**
          * Adjusts a rigid body to the right position and rotation
          */
 
-        void adjustRigidBody(RigidBody* body, Ogre::Vector3 position, Ogre::Quaternion rotation, 
-            Ogre::Vector3 scaledBoxTranslation = Ogre::Vector3::ZERO, Ogre::Quaternion boxRotation = Ogre::Quaternion::IDENTITY);
+        void adjustRigidBody(RigidBody* body, const Ogre::Vector3 &position, const Ogre::Quaternion &rotation,
+            const Ogre::Vector3 &scaledBoxTranslation = Ogre::Vector3::ZERO,
+            const Ogre::Quaternion &boxRotation = Ogre::Quaternion::IDENTITY);
         /**
          Mainly used to (but not limited to) adjust rigid bodies based on box shapes to the right position and rotation.
          */
-        void boxAdjustExternal(std::string mesh, RigidBody* body, float scale, Ogre::Vector3 position, Ogre::Quaternion rotation);
+        void boxAdjustExternal(const std::string &mesh, RigidBody* body, float scale, const Ogre::Vector3 &position, const Ogre::Quaternion &rotation);
         /**
          * Add a HeightField to the simulation
          */
@@ -211,35 +213,35 @@ namespace Physic
         /**
          * Remove a RigidBody from the simulation. It does not delete it, and does not remove it from the RigidBodyMap.
          */
-        void removeRigidBody(std::string name);
+        void removeRigidBody(const std::string &name);
 
         /**
          * Delete a RigidBody, and remove it from RigidBodyMap.
          */
-        void deleteRigidBody(std::string name);
+        void deleteRigidBody(const std::string &name);
 
         /**
          * Return a pointer to a given rigid body.
          * TODO:check if exist
          */
-        RigidBody* getRigidBody(std::string name);
+        RigidBody* getRigidBody(const std::string &name);
 
         /**
          * Create and add a character to the scene, and add it to the ActorMap.
          */
-        void addCharacter(std::string name, std::string mesh,
-        Ogre::Vector3 position, float scale, Ogre::Quaternion rotation);
+        void addCharacter(const std::string &name, const std::string &mesh,
+        const Ogre::Vector3 &position, float scale, const Ogre::Quaternion &rotation);
 
         /**
          * Remove a character from the scene. TODO:delete it! for now, a small memory leak^^ done?
          */
-        void removeCharacter(std::string name);
+        void removeCharacter(const std::string &name);
 
         /**
          * Return a pointer to a character
          * TODO:check if the actor exist...
          */
-        PhysicActor* getCharacter(std::string name);
+        PhysicActor* getCharacter(const std::string &name);
 
         /**
          * This step the simulation of a given time.
@@ -307,7 +309,6 @@ namespace Physic
         BtOgre::DebugDrawer* mDebugDrawer;
         bool isDebugCreated;
         bool mDebugActive;
-       
     };
 
 

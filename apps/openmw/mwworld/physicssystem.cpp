@@ -409,8 +409,8 @@ namespace MWWorld
     void PhysicsSystem::rotateObject (const Ptr& ptr)
     {
         Ogre::SceneNode* node = ptr.getRefData().getBaseNode();
-        std::string handle = node->getName();
-        Ogre::Quaternion rotation = node->getOrientation();
+        const std::string &handle = node->getName();
+        const Ogre::Quaternion &rotation = node->getOrientation();
         if (OEngine::Physic::PhysicActor* act = mEngine->getCharacter(handle))
         {
             //Needs to be changed
@@ -428,7 +428,7 @@ namespace MWWorld
     void PhysicsSystem::scaleObject (const Ptr& ptr)
     {
         Ogre::SceneNode* node = ptr.getRefData().getBaseNode();
-        std::string handle = node->getName();
+        const std::string &handle = node->getName();
         if(handleToMesh.find(handle) != handleToMesh.end())
         {
             removeObject(handle);
