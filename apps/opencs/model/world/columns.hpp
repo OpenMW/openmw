@@ -95,7 +95,7 @@ namespace CSMWorld
     template<typename ESXRecordT>
     struct VarTypeColumn : public Column<ESXRecordT>
     {
-        VarTypeColumn() : Column<ESXRecordT> ("Type", ColumnBase::Display_Float) {}
+        VarTypeColumn() : Column<ESXRecordT> ("Type", ColumnBase::Display_Integer) {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
         {
@@ -106,6 +106,45 @@ namespace CSMWorld
         {
             ESXRecordT base = record.getBase();
             base.mType = static_cast<ESM::VarType> (data.toInt());
+            record.setModified (base);
+        }
+
+        virtual bool isEditable() const
+        {
+            return true;
+        }
+    };
+
+    template<typename ESXRecordT>
+    struct VarValueColumn : public Column<ESXRecordT>
+    {
+        VarValueColumn() : Column<ESXRecordT> ("Value", ColumnBase::Display_Var) {}
+
+        virtual QVariant get (const Record<ESXRecordT>& record) const
+        {
+            switch (record.get().mType)
+            {
+                case ESM::VT_String: return record.get().mStr.c_str(); break;
+                case ESM::VT_Int: return record.get().mI; break;
+                case ESM::VT_Float: return record.get().mF; break;
+
+                default: return QVariant();
+            }
+        }
+
+        virtual void set (Record<ESXRecordT>& record, const QVariant& data)
+        {
+            ESXRecordT base = record.getBase();
+
+            switch (record.get().mType)
+            {
+                case ESM::VT_String: base.mStr = data.toString().toUtf8().constData(); break;
+                case ESM::VT_Int: base.mI = data.toInt(); break;
+                case ESM::VT_Float: base.mF = data.toFloat(); break;
+
+                default: break;
+            }
+
             record.setModified (base);
         }
 
