@@ -91,6 +91,29 @@ namespace CSMWorld
             return false;
         }
     };
+
+    template<typename ESXRecordT>
+    struct VarTypeColumn : public Column<ESXRecordT>
+    {
+        VarTypeColumn() : Column<ESXRecordT> ("Type", ColumnBase::Display_Float) {}
+
+        virtual QVariant get (const Record<ESXRecordT>& record) const
+        {
+            return static_cast<int> (record.get().mType);
+        }
+
+        virtual void set (Record<ESXRecordT>& record, const QVariant& data)
+        {
+            ESXRecordT base = record.getBase();
+            base.mType = static_cast<ESM::VarType> (data.toInt());
+            record.setModified (base);
+        }
+
+        virtual bool isEditable() const
+        {
+            return true;
+        }
+    };
 }
 
 #endif

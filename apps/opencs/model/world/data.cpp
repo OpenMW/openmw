@@ -31,7 +31,8 @@ CSMWorld::Data::Data()
     mGmsts.addColumn (new StringIdColumn<ESM::GameSetting>);
     mGmsts.addColumn (new RecordStateColumn<ESM::GameSetting>);
     mGmsts.addColumn (new FixedRecordTypeColumn<ESM::GameSetting> (UniversalId::Type_Gmst));
-    ///< \todo add type and value
+    mGmsts.addColumn (new VarTypeColumn<ESM::GameSetting>);
+    ///< \todo add value
 
     addModel (new IdTable (&mGlobals), UniversalId::Type_Globals, UniversalId::Type_Global);
     addModel (new IdTable (&mGmsts), UniversalId::Type_Gmsts, UniversalId::Type_Gmst);
