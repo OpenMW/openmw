@@ -114,8 +114,10 @@ Bug #521: MWGui::InventoryWindow creates a duplicate player actor at the origin
 Bug #524: Beast races are able to wear shoes
 Bug #527: Background music fails to play
 Bug #533: The arch at Gnisis entrance is not displayed
+Bug #534: Terrain gets its correct shape only some time after the cell is loaded
 Bug #536: The same entry can be added multiple times to the journal
 Bug #539: Race selection is broken
+Bug #544: Terrain normal map corrupt when the map is rendered
 Feature #39: Video Playback
 Feature #151: ^-escape sequences in text output
 Feature #392: Add AI related script functions

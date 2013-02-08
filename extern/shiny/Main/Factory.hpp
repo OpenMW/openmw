@@ -202,6 +202,8 @@ namespace sh
 
 		MaterialInstance* findInstance (const std::string& name);
 		MaterialInstance* searchInstance (const std::string& name);
+
+		void removeCache (const std::string& pattern);
 	};
 }
 
