@@ -56,20 +56,17 @@ namespace MWWorld
             return false;
         }
 
-        static void clipVelocity(const Ogre::Vector3& in, const Ogre::Vector3& normal, Ogre::Vector3& out,
-                                 const float overbounce)
+        static void clipVelocity(Ogre::Vector3& inout, const Ogre::Vector3& normal, float overbounce)
         {
             //Math stuff. Basically just project the velocity vector onto the plane represented by the normal.
             //More specifically, it projects velocity onto the normal, takes that result, multiplies it by overbounce and then subtracts it from velocity.
-            float backoff;
-
-            backoff = in.dotProduct(normal);
+            float backoff = inout.dotProduct(normal);
             if(backoff < 0.0f)
                 backoff *= overbounce;
             else
                 backoff /= overbounce;
 
-            out = in - (normal*backoff);
+            inout -= normal*backoff;
         }
 
         static void projectVelocity(Ogre::Vector3& velocity, const Ogre::Vector3& direction)
@@ -134,7 +131,7 @@ namespace MWWorld
                 if(trace.fraction < 1.0f && getSlope(trace.planenormal) <= sMaxSlope)
                 {
                     // if we're within 10 units of the ground, force velocity to track the ground
-                    clipVelocity(clippedVelocity, trace.planenormal, clippedVelocity, 1.0f);
+                    clipVelocity(clippedVelocity, trace.planenormal, 1.0f);
                 }
             }
 
@@ -171,7 +168,7 @@ namespace MWWorld
                         //    std::cout<< "stepped" <<std::endl;
                     }
                     else
-                        clipVelocity(clippedVelocity, currentNormal, clippedVelocity, 1.0f);
+                        clipVelocity(clippedVelocity, currentNormal, 1.0f);
                 }
 
                 lastNormal = currentNormal;
