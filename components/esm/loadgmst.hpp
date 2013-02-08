@@ -26,17 +26,22 @@ struct GameSetting
     VarType mType;
 
     void load(ESMReader &esm);
-    
+
     int getInt() const;
     ///< Throws an exception if GMST is not of type int or float.
-    
+
     float getFloat() const;
     ///< Throws an exception if GMST is not of type int or float.
-    
+
     std::string getString() const;
     ///< Throwns an exception if GMST is not of type string.
 
     void save(ESMWriter &esm);
+
+    void blank();
+    ///< Set record to default state (does not touch the ID).
 };
+
+    bool operator== (const GameSetting& left, const GameSetting& right);
 }
 #endif

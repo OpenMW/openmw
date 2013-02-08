@@ -76,8 +76,29 @@ std::string GameSetting::getString() const
 {
     if (mType==VT_String)
         return mStr;
-        
+
     throw std::runtime_error ("GMST " + mId + " is not a string");
 }
 
+    void GameSetting::blank()
+    {
+        mStr.clear();
+        mI = 0;
+        mF = 0;
+        mType = VT_Float;
+    }
+
+    bool operator== (const GameSetting& left, const GameSetting& right)
+    {
+        if (left.mType!=right.mType)
+            return false;
+
+        switch (left.mType)
+        {
+            case VT_Float: return left.mF==right.mF;
+            case VT_Int: return left.mI==right.mI;
+            case VT_String: return left.mStr==right.mStr;
+            default: return false;
+        }
+    }
 }

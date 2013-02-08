@@ -7,6 +7,7 @@
 #include <boost/filesystem/path.hpp>
 
 #include <components/esm/loadglob.hpp>
+#include <components/esm/loadgmst.hpp>
 
 #include "idcollection.hpp"
 #include "universalid.hpp"
@@ -18,6 +19,7 @@ namespace CSMWorld
     class Data
     {
             IdCollection<ESM::Global> mGlobals;
+            IdCollection<ESM::GameSetting> mGmsts;
             std::vector<QAbstractTableModel *> mModels;
             std::map<UniversalId::Type, QAbstractTableModel *> mModelIndex;
 

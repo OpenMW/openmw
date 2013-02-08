@@ -28,7 +28,13 @@ CSMWorld::Data::Data()
     mGlobals.addColumn (new FixedRecordTypeColumn<ESM::Global> (UniversalId::Type_Global));
     mGlobals.addColumn (new FloatValueColumn<ESM::Global>);
 
+    mGmsts.addColumn (new StringIdColumn<ESM::GameSetting>);
+    mGmsts.addColumn (new RecordStateColumn<ESM::GameSetting>);
+    mGmsts.addColumn (new FixedRecordTypeColumn<ESM::GameSetting> (UniversalId::Type_Gmst));
+    ///< \todo add type and value
+
     addModel (new IdTable (&mGlobals), UniversalId::Type_Globals, UniversalId::Type_Global);
+    addModel (new IdTable (&mGmsts), UniversalId::Type_Gmsts, UniversalId::Type_Gmst);
 }
 
 CSMWorld::Data::~Data()
@@ -78,6 +84,7 @@ void CSMWorld::Data::loadFile (const boost::filesystem::path& path, bool base)
         switch (n.val)
         {
             case ESM::REC_GLOB: mGlobals.load (reader, base); break;
+            case ESM::REC_GMST: mGmsts.load (reader, base); break;
 
 
             default:
