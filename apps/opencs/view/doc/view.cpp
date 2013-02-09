@@ -32,6 +32,10 @@ void CSVDoc::View::setupFileMenu()
     connect (new_, SIGNAL (triggered()), this, SIGNAL (newDocumentRequest()));
     file->addAction (new_);
 
+    QAction *open = new QAction (tr ("&Open"), this);
+    connect (open, SIGNAL (triggered()), this, SIGNAL (loadDocumentRequest()));
+    file->addAction (open);
+
     mSave = new QAction (tr ("&Save"), this);
     connect (mSave, SIGNAL (triggered()), this, SLOT (save()));
     file->addAction (mSave);
@@ -66,6 +70,10 @@ void CSVDoc::View::setupWorldMenu()
     QAction *globals = new QAction (tr ("Globals"), this);
     connect (globals, SIGNAL (triggered()), this, SLOT (addGlobalsSubView()));
     world->addAction (globals);
+
+    QAction *gmsts = new QAction (tr ("Game settings"), this);
+    connect (gmsts, SIGNAL (triggered()), this, SLOT (addGmstsSubView()));
+    world->addAction (gmsts);
 
     mVerify = new QAction (tr ("&Verify"), this);
     connect (mVerify, SIGNAL (triggered()), this, SLOT (verify()));
@@ -213,4 +221,9 @@ void CSVDoc::View::verify()
 void CSVDoc::View::addGlobalsSubView()
 {
     addSubView (CSMWorld::UniversalId::Type_Globals);
+}
+
+void CSVDoc::View::addGmstsSubView()
+{
+    addSubView (CSMWorld::UniversalId::Type_Gmsts);
 }

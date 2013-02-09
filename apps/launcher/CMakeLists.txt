@@ -1,17 +1,9 @@
 set(LAUNCHER
-    datafilespage.cpp
     graphicspage.cpp
     main.cpp
     maindialog.cpp
     playpage.cpp
-
-    model/datafilesmodel.cpp
-    model/modelitem.cpp
-    model/esm/esmfile.cpp
-
-    utils/filedialog.cpp
-    utils/naturalsort.cpp
-    utils/lineedit.cpp
+    datafilespage.cpp
     utils/profilescombobox.cpp
     utils/textinputdialog.cpp
 
@@ -19,36 +11,20 @@ set(LAUNCHER
 )
 
 set(LAUNCHER_HEADER
-    datafilespage.hpp
     graphicspage.hpp
     maindialog.hpp
     playpage.hpp
-
-    model/datafilesmodel.hpp
-    model/modelitem.hpp
-    model/esm/esmfile.hpp
-
-    utils/lineedit.hpp
-    utils/filedialog.hpp
-    utils/naturalsort.hpp
+    datafilespage.hpp
     utils/profilescombobox.hpp
     utils/textinputdialog.hpp
-
 )
 
 # Headers that must be pre-processed
 set(LAUNCHER_HEADER_MOC
-    datafilespage.hpp
     graphicspage.hpp
     maindialog.hpp
     playpage.hpp
-
-    model/datafilesmodel.hpp
-    model/modelitem.hpp
-    model/esm/esmfile.hpp
-
-    utils/lineedit.hpp
-    utils/filedialog.hpp
+    datafilespage.hpp
     utils/profilescombobox.hpp
     utils/textinputdialog.hpp
 )

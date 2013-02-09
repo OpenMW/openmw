@@ -18,6 +18,7 @@ int main(int argc, char *argv[]) {
         ("cfg,c", bpo::value<std::string>(), "openmw.cfg file")
         ("output,o", bpo::value<std::string>()->default_value(""), "openmw.cfg file")
         ("game-files,g", "import esm and esp files")
+        ("no-archives,A", "disable bsa archives import")
         ("encoding,e", bpo::value<std::string>()-> default_value("win1252"),
             "Character encoding used in OpenMW game messages:\n"
             "\n\twin1250 - Central and Eastern European such as Polish, Czech, Slovak, Hungarian, Slovene, Bosnian, Croatian, Serbian (Latin script), Romanian and Albanian languages\n"
@@ -74,6 +75,10 @@ int main(int argc, char *argv[]) {
 
     if(vm.count("game-files")) {
         importer.importGameFiles(cfg, ini);
+    }
+
+    if(!vm.count("no-archives")) {
+        importer.importArchives(cfg, ini);
     }
 
     std::cout << "write to: " << outputFile << std::endl;

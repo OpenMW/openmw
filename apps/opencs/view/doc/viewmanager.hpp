@@ -46,6 +46,8 @@ namespace CSVDoc
 
             void newDocumentRequest();
 
+            void loadDocumentRequest();
+
         private slots:
 
             void documentStateChanged (int state, CSMDoc::Document *document);

@@ -2,14 +2,17 @@
 
 #include <components/esm/esmreader.hpp>
 #include <components/files/configurationmanager.hpp>
+#include <components/fileorderlist/datafileslist.hpp>
+#include <components/fileorderlist/utils/lineedit.hpp>
+#include <components/fileorderlist/utils/naturalsort.hpp>
+#include <components/fileorderlist/utils/filedialog.hpp>
 
-#include "model/datafilesmodel.hpp"
-#include "model/esm/esmfile.hpp"
+////#include "model/datafilesmodel.hpp"
+////#include "model/esm/esmfile.hpp"
 
 #include "utils/profilescombobox.hpp"
-#include "utils/filedialog.hpp"
-#include "utils/lineedit.hpp"
-#include "utils/naturalsort.hpp"
+////#include "utils/filedialog.hpp"
+////#include "utils/naturalsort.hpp"
 #include "utils/textinputdialog.hpp"
 
 #include "datafilespage.hpp"
@@ -34,108 +37,11 @@ namespace boost
 using namespace ESM;
 using namespace std;
 
-//sort QModelIndexList ascending
-bool rowGreaterThan(const QModelIndex &index1, const QModelIndex &index2)
-{
-    return index1.row() >= index2.row();
-}
-
-//sort QModelIndexList descending
-bool rowSmallerThan(const QModelIndex &index1, const QModelIndex &index2)
-{
-    return index1.row() <= index2.row();
-}
-
 DataFilesPage::DataFilesPage(Files::ConfigurationManager &cfg, QWidget *parent)
     : QWidget(parent)
     , mCfgMgr(cfg)
 {
-    // Models
-    mMastersModel = new DataFilesModel(this);
-    mPluginsModel = new DataFilesModel(this);
-
-    mPluginsProxyModel = new QSortFilterProxyModel();
-    mPluginsProxyModel->setDynamicSortFilter(true);
-    mPluginsProxyModel->setSourceModel(mPluginsModel);
-
-    // Filter toolbar
-    QLabel *filterLabel = new QLabel(tr("&Filter:"), this);
-    LineEdit *filterLineEdit = new LineEdit(this);
-    filterLabel->setBuddy(filterLineEdit);
-
-    QToolBar *filterToolBar = new QToolBar(this);
-    filterToolBar->setMovable(false);
-
-    // Create a container widget and a layout to get the spacer to work
-    QWidget *filterWidget = new QWidget(this);
-    QHBoxLayout *filterLayout = new QHBoxLayout(filterWidget);
-    QSpacerItem *hSpacer1 = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
-
-    filterLayout->addItem(hSpacer1);
-    filterLayout->addWidget(filterLabel);
-    filterLayout->addWidget(filterLineEdit);
-
-    filterToolBar->addWidget(filterWidget);
-
-    QCheckBox checkBox;
-    unsigned int height = checkBox.sizeHint().height() + 4;
-
-    mMastersTable = new QTableView(this);
-    mMastersTable->setModel(mMastersModel);
-    mMastersTable->setObjectName("MastersTable");
-    mMastersTable->setSelectionBehavior(QAbstractItemView::SelectRows);
-    mMastersTable->setSelectionMode(QAbstractItemView::SingleSelection);
-    mMastersTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
-    mMastersTable->setAlternatingRowColors(true);
-    mMastersTable->horizontalHeader()->setStretchLastSection(true);
-    mMastersTable->horizontalHeader()->hide();
-
-    // Set the row height to the size of the checkboxes
-    mMastersTable->verticalHeader()->setDefaultSectionSize(height);
-    mMastersTable->verticalHeader()->setResizeMode(QHeaderView::Fixed);
-    mMastersTable->verticalHeader()->hide();
-    mMastersTable->setColumnHidden(1, true);
-    mMastersTable->setColumnHidden(2, true);
-    mMastersTable->setColumnHidden(3, true);
-    mMastersTable->setColumnHidden(4, true);
-    mMastersTable->setColumnHidden(5, true);
-    mMastersTable->setColumnHidden(6, true);
-    mMastersTable->setColumnHidden(7, true);
-    mMastersTable->setColumnHidden(8, true);
-
-    mPluginsTable = new QTableView(this);
-    mPluginsTable->setModel(mPluginsProxyModel);
-    mPluginsTable->setObjectName("PluginsTable");
-    mPluginsTable->setContextMenuPolicy(Qt::CustomContextMenu);
-    mPluginsTable->setSelectionBehavior(QAbstractItemView::SelectRows);
-    mPluginsTable->setSelectionMode(QAbstractItemView::SingleSelection);
-    mPluginsTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
-    mPluginsTable->setAlternatingRowColors(true);
-    mPluginsTable->setVerticalScrollMode(QAbstractItemView::ScrollPerItem);
-    mPluginsTable->horizontalHeader()->setStretchLastSection(true);
-    mPluginsTable->horizontalHeader()->hide();
-
-    mPluginsTable->verticalHeader()->setDefaultSectionSize(height);
-    mPluginsTable->verticalHeader()->setResizeMode(QHeaderView::Fixed);
-    mPluginsTable->setColumnHidden(1, true);
-    mPluginsTable->setColumnHidden(2, true);
-    mPluginsTable->setColumnHidden(3, true);
-    mPluginsTable->setColumnHidden(4, true);
-    mPluginsTable->setColumnHidden(5, true);
-    mPluginsTable->setColumnHidden(6, true);
-    mPluginsTable->setColumnHidden(7, true);
-    mPluginsTable->setColumnHidden(8, true);
-
-    // Add both tables to a splitter
-    QSplitter *splitter = new QSplitter(this);
-    splitter->setOrientation(Qt::Horizontal);
-    splitter->addWidget(mMastersTable);
-    splitter->addWidget(mPluginsTable);
-
-    // Adjust the default widget widths inside the splitter
-    QList<int> sizeList;
-    sizeList << 175 << 200;
-    splitter->setSizes(sizeList);
+    mDataFilesList = new DataFilesList(mCfgMgr, this);
 
     // Bottom part with profile options
     QLabel *profileLabel = new QLabel(tr("Current Profile: "), this);
@@ -155,24 +61,14 @@ DataFilesPage::DataFilesPage(Files::ConfigurationManager &cfg, QWidget *parent)
 
     QVBoxLayout *pageLayout = new QVBoxLayout(this);
 
-    pageLayout->addWidget(filterToolBar);
-    pageLayout->addWidget(splitter);
+    pageLayout->addWidget(mDataFilesList);
     pageLayout->addWidget(mProfileToolBar);
 
     // Create a dialog for the new profile name input
     mNewProfileDialog = new TextInputDialog(tr("New Profile"), tr("Profile name:"), this);
 
     connect(mNewProfileDialog->lineEdit(), SIGNAL(textChanged(QString)), this, SLOT(updateOkButton(QString)));
-
-    connect(mPluginsTable, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(setCheckState(QModelIndex)));
-    connect(mMastersTable, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(setCheckState(QModelIndex)));
-
-    connect(mMastersModel, SIGNAL(checkedItemsChanged(QStringList,QStringList)), mPluginsModel, SLOT(slotcheckedItemsChanged(QStringList,QStringList)));
-
-    connect(filterLineEdit, SIGNAL(textChanged(QString)), this, SLOT(filterChanged(QString)));
-
-    connect(mPluginsTable, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(showContextMenu(QPoint)));
-
+    
     connect(mProfilesComboBox, SIGNAL(profileRenamed(QString,QString)), this, SLOT(profileRenamed(QString,QString)));
     connect(mProfilesComboBox, SIGNAL(profileChanged(QString,QString)), this, SLOT(profileChanged(QString,QString)));
 
@@ -202,20 +98,6 @@ void DataFilesPage::createActions()
     mProfileToolBar->addSeparator();
     mProfileToolBar->addAction(mNewProfileAction);
     mProfileToolBar->addAction(mDeleteProfileAction);
-
-    // Context menu actions
-    mCheckAction = new QAction(tr("Check selected"), this);
-    connect(mCheckAction, SIGNAL(triggered()), this, SLOT(check()));
-
-    mUncheckAction = new QAction(tr("Uncheck selected"), this);
-    connect(mUncheckAction, SIGNAL(triggered()), this, SLOT(uncheck()));
-
-    // Context menu for the plugins table
-    mContextMenu = new QMenu(this);
-
-    mContextMenu->addAction(mCheckAction);
-    mContextMenu->addAction(mUncheckAction);
-
 }
 
 void DataFilesPage::setupConfig()
@@ -267,12 +149,8 @@ void DataFilesPage::setupConfig()
 
 void DataFilesPage::readConfig()
 {
-    // Don't read the config if no masters are found
-    if (mMastersModel->rowCount() < 1)
-        return;
-
     QString profile = mProfilesComboBox->currentText();
-
+    
     // Make sure we have no groups open
     while (!mLauncherConfig->group().isEmpty()) {
         mLauncherConfig->endGroup();
@@ -290,54 +168,11 @@ void DataFilesPage::readConfig()
 
     foreach (const QString &key, childKeys) {
         const QString keyValue = mLauncherConfig->value(key).toString();
-
-        if (key.startsWith("Plugin")) {
-            //QStringList checked = mPluginsModel->checkedItems();
-            EsmFile *file = mPluginsModel->findItem(keyValue);
-            QModelIndex index = mPluginsModel->indexFromItem(file);
-
-            mPluginsModel->setCheckState(index, Qt::Checked);
-            // Move the row to the top of te view
-            //mPluginsModel->moveRow(index.row(), checked.count());
-            plugins << keyValue;
-        }
-
-        if (key.startsWith("Master")) {
-            EsmFile *file = mMastersModel->findItem(keyValue);
-            mMastersModel->setCheckState(mMastersModel->indexFromItem(file), Qt::Checked);
-        }
+        
+        mDataFilesList->setCheckState(keyValue, Qt::Checked);
     }
 
     qDebug() << plugins;
-
-
-//    // Set the checked item positions
-//    const QStringList checked = mPluginsModel->checkedItems();
-//    for (int i = 0; i < plugins.size(); ++i) {
-//        EsmFile *file = mPluginsModel->findItem(plugins.at(i));
-//        QModelIndex index = mPluginsModel->indexFromItem(file);
-//        mPluginsModel->moveRow(index.row(), i);
-//        qDebug() << "Moving: " << plugins.at(i) << " from: " << index.row() << " to: " << i << " count: " << checked.count();
-
-//    }
-
-    // Iterate over the plugins to set their checkstate and position
-//    for (int i = 0; i < plugins.size(); ++i) {
-//        const QString plugin = plugins.at(i);
-
-//        const QList<QStandardItem *> pluginList = mPluginsModel->findItems(plugin);
-
-//        if (!pluginList.isEmpty())
-//        {
-//            foreach (const QStandardItem *currentPlugin, pluginList) {
-//                mPluginsModel->setData(currentPlugin->index(), Qt::Checked, Qt::CheckStateRole);
-
-//                // Move the plugin to the position specified in the config file
-//                mPluginsModel->insertRow(i, mPluginsModel->takeRow(currentPlugin->row()));
-//            }
-//        }
-//    }
-
 }
 
 bool DataFilesPage::showDataFilesWarning()
@@ -386,77 +221,51 @@ bool DataFilesPage::setupDataFiles()
     // We use the Configuration Manager to retrieve the configuration values
     boost::program_options::variables_map variables;
     boost::program_options::options_description desc;
-
+    
     desc.add_options()
-        ("data", boost::program_options::value<Files::PathContainer>()->default_value(Files::PathContainer(), "data")->multitoken())
-        ("data-local", boost::program_options::value<std::string>()->default_value(""))
-        ("fs-strict", boost::program_options::value<bool>()->implicit_value(true)->default_value(false))
-        ("encoding", boost::program_options::value<std::string>()->default_value("win1252"));
-
+    ("data", boost::program_options::value<Files::PathContainer>()->default_value(Files::PathContainer(), "data")->multitoken())
+    ("data-local", boost::program_options::value<std::string>()->default_value(""))
+    ("fs-strict", boost::program_options::value<bool>()->implicit_value(true)->default_value(false))
+    ("encoding", boost::program_options::value<std::string>()->default_value("win1252"));
+    
     boost::program_options::notify(variables);
-
+    
     mCfgMgr.readConfiguration(variables, desc);
-
+    
     if (variables["data"].empty()) {
         if (!showDataFilesWarning())
-           return false;
+            return false;
     } else {
         mDataDirs = Files::PathContainer(variables["data"].as<Files::PathContainer>());
     }
-
-     std::string local = variables["data-local"].as<std::string>();
-     if (!local.empty()) {
-         mDataLocal.push_back(Files::PathContainer::value_type(local));
-     }
-
+    
+    std::string local = variables["data-local"].as<std::string>();
+    if (!local.empty()) {
+        mDataLocal.push_back(Files::PathContainer::value_type(local));
+    }
+    
     mCfgMgr.processPaths(mDataDirs);
     mCfgMgr.processPaths(mDataLocal);
-
+    
     // Second chance to display the warning, the data= entries are invalid
     while (mDataDirs.empty()) {
         if (!showDataFilesWarning())
             return false;
     }
-
+    
     // Set the charset for reading the esm/esp files
     QString encoding = QString::fromStdString(variables["encoding"].as<std::string>());
-    if (!encoding.isEmpty() && encoding != QLatin1String("win1252")) {
-        mMastersModel->setEncoding(encoding);
-        mPluginsModel->setEncoding(encoding);
-    }
-
-    // Add the paths to the respective models
-    for (Files::PathContainer::iterator it = mDataDirs.begin(); it != mDataDirs.end(); ++it) {
-        QString path = QString::fromStdString(it->string());
-        path.remove(QChar('\"'));
-        mMastersModel->addMasters(path);
-        mPluginsModel->addPlugins(path);
-    }
-
-    // Same for the data-local paths
-    for (Files::PathContainer::iterator it = mDataLocal.begin(); it != mDataLocal.end(); ++it) {
-        QString path = QString::fromStdString(it->string());
-        path.remove(QChar('\"'));
-        mMastersModel->addMasters(path);
-        mPluginsModel->addPlugins(path);
-    }
-
-    mMastersModel->sort(0);
-    mPluginsModel->sort(0);
-//    mMastersTable->sortByColumn(3, Qt::AscendingOrder);
-//    mPluginsTable->sortByColumn(3, Qt::AscendingOrder);
-
-
+    
+    Files::PathContainer paths;
+    paths.insert(paths.end(), mDataDirs.begin(), mDataDirs.end());
+    paths.insert(paths.end(), mDataLocal.begin(), mDataLocal.end());
+    mDataFilesList->setupDataFiles(paths, encoding);
     readConfig();
     return true;
 }
 
 void DataFilesPage::writeConfig(QString profile)
 {
-    // Don't overwrite the config if no masters are found
-    if (mMastersModel->rowCount() < 1)
-        return;
-
     QString pathStr = QString::fromStdString(mCfgMgr.getUserPath().string());
     QDir userPath(pathStr);
 
@@ -579,24 +388,19 @@ void DataFilesPage::writeConfig(QString profile)
     mLauncherConfig->remove(""); // Clear the subgroup
 
     // Now write the masters to the configs
-    const QStringList masters = mMastersModel->checkedItems();
-
-    // We don't use foreach because we need i
-    for (int i = 0; i < masters.size(); ++i) {
-        const QString currentMaster = masters.at(i);
-
-        mLauncherConfig->setValue(QString("Master%0").arg(i), currentMaster);
-        gameConfig << "master=" << currentMaster << endl;
-
-    }
-
-    // And finally write all checked plugins
-    const QStringList plugins = mPluginsModel->checkedItems();
-
-    for (int i = 0; i < plugins.size(); ++i) {
-        const QString currentPlugin = plugins.at(i);
-        mLauncherConfig->setValue(QString("Plugin%1").arg(i), currentPlugin);
-        gameConfig << "plugin=" << currentPlugin << endl;
+    const QStringList checkedFiles = mDataFilesList->checkedFiles();
+    for(int i=0; i < checkedFiles.size(); i++)
+    {
+        if (checkedFiles.at(i).lastIndexOf("esm") != -1)
+        {
+            mLauncherConfig->setValue(QString("Master%0").arg(i), checkedFiles.at(i));
+            gameConfig << "master=" << checkedFiles.at(i) << endl;
+        }
+        else
+        {
+            mLauncherConfig->setValue(QString("Plugin%1").arg(i), checkedFiles.at(i));
+            gameConfig << "plugin=" << checkedFiles.at(i) << endl;
+        }
     }
 
     file.close();
@@ -670,93 +474,6 @@ void DataFilesPage::deleteProfile()
     }
 }
 
-void DataFilesPage::check()
-{
-    // Check the current selection
-    if (!mPluginsTable->selectionModel()->hasSelection()) {
-        return;
-    }
-
-    QModelIndexList indexes = mPluginsTable->selectionModel()->selectedIndexes();
-
-    //sort selection ascending because selectedIndexes returns an unsorted list
-    //qSort(indexes.begin(), indexes.end(), rowSmallerThan);
-
-    foreach (const QModelIndex &index, indexes) {
-        if (!index.isValid())
-            return;
-
-        mPluginsModel->setCheckState(index, Qt::Checked);
-    }
-}
-
-void DataFilesPage::uncheck()
-{
-    // uncheck the current selection
-    if (!mPluginsTable->selectionModel()->hasSelection()) {
-        return;
-    }
-
-    QModelIndexList indexes = mPluginsTable->selectionModel()->selectedIndexes();
-
-    //sort selection ascending because selectedIndexes returns an unsorted list
-    //qSort(indexes.begin(), indexes.end(), rowSmallerThan);
-
-    foreach (const QModelIndex &index, indexes) {
-        if (!index.isValid())
-            return;
-
-        mPluginsModel->setCheckState(index, Qt::Unchecked);
-    }
-}
-
-void DataFilesPage::refresh()
-{
-    mPluginsModel->sort(0);
-
-
-    // Refresh the plugins table
-    mPluginsTable->scrollToTop();
-    writeConfig();
-    readConfig();
-}
-
-
-void DataFilesPage::setCheckState(QModelIndex index)
-{
-    if (!index.isValid())
-        return;
-
-    QObject *object = QObject::sender();
-
-    // Not a signal-slot call
-    if (!object)
-        return;
-
-    if (object->objectName() == QLatin1String("PluginsTable")) {
-        QModelIndex sourceIndex = mPluginsProxyModel->mapToSource(index);
-
-        (mPluginsModel->checkState(sourceIndex) == Qt::Checked)
-                ? mPluginsModel->setCheckState(sourceIndex, Qt::Unchecked)
-                : mPluginsModel->setCheckState(sourceIndex, Qt::Checked);
-    }
-
-    if (object->objectName() == QLatin1String("MastersTable")) {
-        (mMastersModel->checkState(index) == Qt::Checked)
-                ? mMastersModel->setCheckState(index, Qt::Unchecked)
-                : mMastersModel->setCheckState(index, Qt::Checked);
-    }
-
-    return;
-
-}
-
-void DataFilesPage::filterChanged(const QString filter)
-{
-    QRegExp regExp(filter, Qt::CaseInsensitive, QRegExp::FixedString);
-    mPluginsProxyModel->setFilterRegExp(regExp);
-}
-
 void DataFilesPage::profileChanged(const QString &previous, const QString &current)
 {
     qDebug() << "Profile is changed from: " << previous << " to " << current;
@@ -780,8 +497,7 @@ void DataFilesPage::profileChanged(const QString &previous, const QString &curre
         return;
     }
 
-    mMastersModel->uncheckAll();
-    mPluginsModel->uncheckAll();
+    mDataFilesList->uncheckAll();
     readConfig();
 }
 
@@ -810,35 +526,8 @@ void DataFilesPage::profileRenamed(const QString &previous, const QString &curre
      // Remove the profile from the combobox
      mProfilesComboBox->removeItem(mProfilesComboBox->findText(previous));
 
-     mMastersModel->uncheckAll();
-     mPluginsModel->uncheckAll();
+     mDataFilesList->uncheckAll();
+     ////mMastersModel->uncheckAll();
+     ////mPluginsModel->uncheckAll();
      readConfig();
-}
-
-void DataFilesPage::showContextMenu(const QPoint &point)
-{
-    // Make sure there are plugins in the view
-    if (!mPluginsTable->selectionModel()->hasSelection()) {
-        return;
-    }
-
-    QPoint globalPos = mPluginsTable->mapToGlobal(point);
-
-    QModelIndexList indexes = mPluginsTable->selectionModel()->selectedIndexes();
-
-    // Show the check/uncheck actions depending on the state of the selected items
-    mUncheckAction->setEnabled(false);
-    mCheckAction->setEnabled(false);
-
-    foreach (const QModelIndex &index, indexes) {
-        if (!index.isValid())
-            return;
-
-         (mPluginsModel->checkState(index) == Qt::Checked)
-             ? mUncheckAction->setEnabled(true)
-             : mCheckAction->setEnabled(true);
-    }
-
-    // Show menu
-    mContextMenu->exec(globalPos);
 }

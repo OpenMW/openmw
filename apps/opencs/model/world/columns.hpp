@@ -17,9 +17,9 @@ namespace CSMWorld
 
         virtual void set (Record<ESXRecordT>& record, const QVariant& data)
         {
-            ESXRecordT base = record.getBase();
-            base.mValue = data.toFloat();
-            record.setModified (base);
+            ESXRecordT record2 = record.get();
+            record2.mValue = data.toFloat();
+            record.setModified (record2);
         }
 
         virtual bool isEditable() const
@@ -89,6 +89,68 @@ namespace CSMWorld
         virtual bool isEditable() const
         {
             return false;
+        }
+    };
+
+    template<typename ESXRecordT>
+    struct VarTypeColumn : public Column<ESXRecordT>
+    {
+        VarTypeColumn() : Column<ESXRecordT> ("Type", ColumnBase::Display_Integer) {}
+
+        virtual QVariant get (const Record<ESXRecordT>& record) const
+        {
+            return static_cast<int> (record.get().mType);
+        }
+
+        virtual void set (Record<ESXRecordT>& record, const QVariant& data)
+        {
+            ESXRecordT record2 = record.get();
+            record2.mType = static_cast<ESM::VarType> (data.toInt());
+            record.setModified (record2);
+        }
+
+        virtual bool isEditable() const
+        {
+            return true;
+        }
+    };
+
+    template<typename ESXRecordT>
+    struct VarValueColumn : public Column<ESXRecordT>
+    {
+        VarValueColumn() : Column<ESXRecordT> ("Value", ColumnBase::Display_Var) {}
+
+        virtual QVariant get (const Record<ESXRecordT>& record) const
+        {
+            switch (record.get().mType)
+            {
+                case ESM::VT_String: return record.get().mStr.c_str(); break;
+                case ESM::VT_Int: return record.get().mI; break;
+                case ESM::VT_Float: return record.get().mF; break;
+
+                default: return QVariant();
+            }
+        }
+
+        virtual void set (Record<ESXRecordT>& record, const QVariant& data)
+        {
+            ESXRecordT record2 = record.get();
+
+            switch (record2.mType)
+            {
+                case ESM::VT_String: record2.mStr = data.toString().toUtf8().constData(); break;
+                case ESM::VT_Int: record2.mI = data.toInt(); break;
+                case ESM::VT_Float: record2.mF = data.toFloat(); break;
+
+                default: break;
+            }
+
+            record.setModified (record2);
+        }
+
+        virtual bool isEditable() const
+        {
+            return true;
         }
     };
 }

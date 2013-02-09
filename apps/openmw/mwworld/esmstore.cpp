@@ -3,6 +3,8 @@
 #include <set>
 #include <iostream>
 
+#include <boost/filesystem/v3/operations.hpp>
+
 namespace MWWorld
 {
 
@@ -24,6 +26,33 @@ void ESMStore::load(ESM::ESMReader &esm)
     std::set<std::string> missing;
 
     ESM::Dialogue *dialogue = 0;
+
+    // Cache parent esX files by tracking their indices in the global list of
+    //  all files/readers used by the engine. This will greaty accelerate
+    //  refnumber mangling, as required for handling moved references.
+    int index = ~0;
+    const ESM::ESMReader::MasterList &masters = esm.getMasters();
+    std::vector<ESM::ESMReader> *allPlugins = esm.getGlobalReaderList();
+    for (size_t j = 0; j < masters.size(); j++) {
+        ESM::MasterData &mast = const_cast<ESM::MasterData&>(masters[j]);
+        std::string fname = mast.name;
+        for (int i = 0; i < esm.getIndex(); i++) {
+            const std::string &candidate = allPlugins->at(i).getContext().filename;
+            std::string fnamecandidate = boost::filesystem::path(candidate).filename().string();
+            if (fname == fnamecandidate) {
+                index = i;
+                break;
+            }
+        }
+        if (index == (int)~0) {
+            // Tried to load a parent file that has not been loaded yet. This is bad,
+            //  the launcher should have taken care of this.
+            std::string fstring = "File " + fname + " asks for parent file " + masters[j].name
+                + ", but it has not been loaded yet. Please check your load order.";
+            esm.fail(fstring);
+        }
+        mast.index = index;
+    }
 
     // Loop through all records
     while(esm.hasMoreRecs())
@@ -55,12 +84,21 @@ void ESMStore::load(ESM::ESMReader &esm)
         } else {
             // Load it
             std::string id = esm.getHNOString("NAME");
+            // ... unless it got deleted! This means that the following record
+            //  has been deleted, and trying to load it using standard assumptions
+            //  on the structure will (probably) fail.
+            if (esm.isNextSub("DELE")) {
+              esm.skipRecord();
+              it->second->eraseStatic(id);
+              continue;
+            }
             it->second->load(esm, id);
 
             if (n.val==ESM::REC_DIAL) {
                 // dirty hack, but it is better than non-const search()
                 // or friends
-                dialogue = &mDialogs.mStatic.back();
+                //dialogue = &mDialogs.mStatic.back();
+                dialogue = const_cast<ESM::Dialogue*>(mDialogs.find(id));
                 assert (dialogue->mId == id);
             } else {
                 dialogue = 0;
@@ -84,7 +122,6 @@ void ESMStore::load(ESM::ESMReader &esm)
     cout << *it << " ";
   cout << endl;
   */
-    setUp();
 }
 
 void ESMStore::setUp()
@@ -100,12 +137,11 @@ void ESMStore::setUp()
     ESM::NPC item;
     item.mId = "player";
 
-    std::vector<ESM::NPC>::iterator pIt =
-        std::lower_bound(mNpcs.mStatic.begin(), mNpcs.mStatic.end(), item, RecordCmp());
-    assert(pIt != mNpcs.mStatic.end() && pIt->mId == "player");
+    const ESM::NPC *pIt = mNpcs.find("player");
+    assert(pIt != NULL);
 
     mNpcs.insert(*pIt);
-    mNpcs.mStatic.erase(pIt);
+    mNpcs.eraseStatic(pIt->mId);
 }
 
 } // end namespace

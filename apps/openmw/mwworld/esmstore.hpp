@@ -94,6 +94,9 @@ namespace MWWorld
         ESMStore()
           : mDynamicCount(0)
         {
+            // Cell store needs access to this for tracking moved references
+            mCells.mEsmStore = this;
+            
             mStores[ESM::REC_ACTI] = &mActivators;
             mStores[ESM::REC_ALCH] = &mPotions;
             mStores[ESM::REC_APPA] = &mAppas;
@@ -168,7 +171,8 @@ namespace MWWorld
             return ptr;
         }
 
-    private:
+        // This method must be called once, after loading all master/plugin files. This can only be done
+        //  from the outside, so it must be public.
         void setUp();
     };
 
