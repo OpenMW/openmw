@@ -22,7 +22,6 @@ Animation::Animation(const MWWorld::Ptr &ptr)
     , mAccumRoot(NULL)
     , mNonAccumRoot(NULL)
     , mAccumulate(Ogre::Vector3::ZERO)
-    , mStartPosition(0.0f)
     , mLastPosition(0.0f)
     , mCurrentKeys(NULL)
     , mCurrentAnim(NULL)
@@ -135,9 +134,6 @@ void Animation::createEntityList(Ogre::SceneNode *node, const std::string &model
         {
             mAccumRoot = mInsert;
             mNonAccumRoot = skelinst->getBone(bone->getName());
-
-            mStartPosition = mNonAccumRoot->getInitialPosition();
-            mLastPosition = mStartPosition;
         }
     }
 }
@@ -243,7 +239,7 @@ void Animation::reset(const std::string &marker)
     if(mNonAccumRoot)
     {
         mLastPosition = mNonAccumRoot->getPosition();
-        mAccumRoot->setPosition(mStartPosition*mNonAccumRoot->_getDerivedScale() - mLastPosition);
+        mAccumRoot->setPosition(-mLastPosition * mAccumulate);
     }
 }
 

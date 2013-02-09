@@ -25,7 +25,6 @@ protected:
     Ogre::Node *mAccumRoot;
     Ogre::Bone *mNonAccumRoot;
     Ogre::Vector3 mAccumulate;
-    Ogre::Vector3 mStartPosition;
     Ogre::Vector3 mLastPosition;
 
     std::vector<Ogre::SkeletonPtr> mSkeletonSources;
