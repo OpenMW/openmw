@@ -3,17 +3,17 @@
 
 #include <string>
 #include <vector>
+#include <list>
 
 #include "esmcommon.hpp"
 #include "defs.hpp"
-#include "apps/openmw/mwbase/world.hpp"
 
-/*
-namespace MWWorld {
-  class ESMStore;
-  class CellStore;
+
+namespace MWWorld
+{
+    class ESMStore;
 }
-*/
+
 
 namespace ESM
 {
