@@ -17,9 +17,9 @@ namespace CSMWorld
 
         virtual void set (Record<ESXRecordT>& record, const QVariant& data)
         {
-            ESXRecordT base = record.getBase();
-            base.mValue = data.toFloat();
-            record.setModified (base);
+            ESXRecordT record2 = record.get();
+            record2.mValue = data.toFloat();
+            record.setModified (record2);
         }
 
         virtual bool isEditable() const
@@ -104,9 +104,9 @@ namespace CSMWorld
 
         virtual void set (Record<ESXRecordT>& record, const QVariant& data)
         {
-            ESXRecordT base = record.getBase();
-            base.mType = static_cast<ESM::VarType> (data.toInt());
-            record.setModified (base);
+            ESXRecordT record2 = record.get();
+            record2.mType = static_cast<ESM::VarType> (data.toInt());
+            record.setModified (record2);
         }
 
         virtual bool isEditable() const
@@ -134,18 +134,18 @@ namespace CSMWorld
 
         virtual void set (Record<ESXRecordT>& record, const QVariant& data)
         {
-            ESXRecordT base = record.getBase();
+            ESXRecordT record2 = record.get();
 
-            switch (record.get().mType)
+            switch (record2.mType)
             {
-                case ESM::VT_String: base.mStr = data.toString().toUtf8().constData(); break;
-                case ESM::VT_Int: base.mI = data.toInt(); break;
-                case ESM::VT_Float: base.mF = data.toFloat(); break;
+                case ESM::VT_String: record2.mStr = data.toString().toUtf8().constData(); break;
+                case ESM::VT_Int: record2.mI = data.toInt(); break;
+                case ESM::VT_Float: record2.mF = data.toFloat(); break;
 
                 default: break;
             }
 
-            record.setModified (base);
+            record.setModified (record2);
         }
 
         virtual bool isEditable() const
