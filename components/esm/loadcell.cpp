@@ -14,6 +14,17 @@
 namespace ESM
 {
 
+/// Some overloaded copare operators.
+bool operator==(const MovedCellRef& ref, int pRefnum)
+{
+  return (ref.mRefnum == pRefnum);
+}
+
+bool operator==(const CellRef& ref, int pRefnum)
+{
+  return (ref.mRefnum == pRefnum);
+}
+
 void CellRef::save(ESMWriter &esm)
 {
     esm.writeHNT("FRMR", mRefnum);
@@ -134,13 +145,14 @@ void Cell::load(ESMReader &esm, MWWorld::ESMStore &store)
             (int(*)(int)) std::tolower);
                 
         // Add data required to make reference appear in the correct cell.
-        /*
-        std::cout << "Moving refnumber! First cell: " << mData.mX << " " << mData.mY << std::endl;
-        std::cout << "  New cell: " << cMRef.mTarget[0] << " " << cMRef.mTarget[0] << std::endl;
-        std::cout << "Refnumber (MVRF): " << cMRef.mRefnum << " (FRMR) " << ref.mRefnum << std::endl;
-        */
-        mMovedRefs[cMRef.mRefnum] = cMRef;
-        cellAlt->mLeasedRefs[ref.mRefnum] = ref;
+        // We should not need to test for duplicates, as this part of the code is pre-cell merge.
+        mMovedRefs.push_back(cMRef);
+        // But there may be duplicates here!
+        ESM::CellRefTracker::iterator iter = std::find(cellAlt->mLeasedRefs.begin(), cellAlt->mLeasedRefs.end(), ref.mRefnum);
+        if (iter == cellAlt->mLeasedRefs.end())
+          cellAlt->mLeasedRefs.push_back(ref);
+        else
+          *iter = ref;
     }
 
     // Save position of the cell references and move on

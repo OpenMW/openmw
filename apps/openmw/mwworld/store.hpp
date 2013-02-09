@@ -187,7 +187,7 @@ namespace MWWorld
             T item;
             item.mId = Misc::StringUtils::lowerCase(id);
 
-            typename std::map<std::string, T>::const_iterator it = mStatic.find(item.mId);
+            typename std::map<std::string, T>::iterator it = mStatic.find(item.mId);
             
             if (it != mStatic.end() && Misc::StringUtils::ciEqual(it->second.mId, id)) {
                 mStatic.erase(it);
@@ -523,62 +523,12 @@ namespace MWWorld
             }
         }
 
-        void load(ESM::ESMReader &esm, const std::string &id) {
-            // Don't automatically assume that a new cell must be spawned. Multiple plugins write to the same cell,
-            //  and we merge all this data into one Cell object. However, we can't simply search for the cell id,
-            //  as many exterior cells do not have a name. Instead, we need to search by (x,y) coordinates - and they
-            //  are not available until both cells have been loaded! So first, proceed as usual.
-            
-            // All cells have a name record, even nameless exterior cells.
-            std::string idLower = Misc::StringUtils::lowerCase(id);
-            ESM::Cell *cell = new ESM::Cell;
-            cell->mName = id;
-
-            // The cell itself takes care of all the hairy details
-            cell->load(esm, *mEsmStore);
-
-            if(cell->mData.mFlags & ESM::Cell::Interior)
-            {
-                // Store interior cell by name, try to merge with existing parent data.
-                ESM::Cell *oldcell = const_cast<ESM::Cell*>(search(idLower));
-                if (oldcell) {
-                    // push the new references on the list of references to manage
-                    oldcell->mContextList.push_back(cell->mContextList.at(0));
-                    // copy list into new cell
-                    cell->mContextList = oldcell->mContextList;
-                    // have new cell replace old cell
-                    *oldcell = *cell;
-                } else
-                    mInt[idLower] = *cell;
-            }
-            else
-            {
-                // Store exterior cells by grid position, try to merge with existing parent data.
-                ESM::Cell *oldcell = const_cast<ESM::Cell*>(search(cell->getGridX(), cell->getGridY()));
-                if (oldcell) {
-                    // push the new references on the list of references to manage
-                    oldcell->mContextList.push_back(cell->mContextList.at(0));
-                    // copy list into new cell
-                    cell->mContextList = oldcell->mContextList;
-                    // merge lists of leased references, use newer data in case of conflict
-                    for (ESM::MovedCellRefTracker::const_iterator it = cell->mMovedRefs.begin(); it != cell->mMovedRefs.end(); it++) {
-                        // remove reference from current leased ref tracker and add it to new cell
-                        if (oldcell->mMovedRefs.find(it->second.mRefnum) != oldcell->mMovedRefs.end()) {
-                            ESM::MovedCellRef target0 = oldcell->mMovedRefs[it->second.mRefnum];
-                            ESM::Cell *wipecell = const_cast<ESM::Cell*>(search(target0.mTarget[0], target0.mTarget[1]));
-                            wipecell->mLeasedRefs.erase(it->second.mRefnum);
-                        }
-                        oldcell->mMovedRefs[it->second.mRefnum] = it->second;
-                    }
-                    cell->mMovedRefs = oldcell->mMovedRefs;
-                    // have new cell replace old cell
-                    *oldcell = *cell;
-                } else
-                    mExt[std::make_pair(cell->mData.mX, cell->mData.mY)] = *cell;
-            }
-            delete cell;
-        }
-
+        // HACK: Method implementation had to be moved to a separate cpp file, as we would otherwise get
+        //  errors related to the compare operator used in std::find for ESM::MovedCellRefTracker::find.
+        //  There some nasty three-way cyclic header dependency involved, which I could only fix by moving
+        //  this method.
+        void load(ESM::ESMReader &esm, const std::string &id);
+        
         iterator intBegin() const {
             return iterator(mSharedInt.begin());
         }

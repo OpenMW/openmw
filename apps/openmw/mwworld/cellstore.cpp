@@ -10,6 +10,41 @@
 
 namespace MWWorld
 {
+
+    template <typename X>
+    void CellRefList<X>::load(ESM::CellRef &ref, const MWWorld::ESMStore &esmStore)
+    {
+        // Get existing reference, in case we need to overwrite it.
+        typename std::list<LiveRef>::iterator iter = std::find(mList.begin(), mList.end(), ref.mRefnum);
+        
+        // Skip this when reference was deleted.
+        // TODO: Support respawning references, in this case, we need to track it somehow.
+        if (ref.mDeleted) {
+            mList.erase(iter);
+            return;
+        }
+        
+        // for throwing exception on unhandled record type
+        const MWWorld::Store<X> &store = esmStore.get<X>();
+        const X *ptr = store.search(ref.mRefID);
+
+        /// \note no longer redundant - changed to Store<X>::search(), don't throw
+        ///  an exception on miss, try to continue (that's how MW does it, anyway)
+        if (ptr == NULL) {
+            std::cout << "Warning: could not resolve cell reference " << ref.mRefID << ", trying to continue anyway" << std::endl;
+        } else {
+          if (iter != mList.end())
+            *iter = LiveRef(ref, ptr);
+          else
+            mList.push_back(LiveRef(ref, ptr));
+        }
+    }
+    
+    template<typename X> bool operator==(const LiveCellRef<X>& ref, int pRefnum)
+    {
+        return (ref.mRef.mRefnum == pRefnum);
+    }
+
     CellStore::CellStore (const ESM::Cell *cell)
       : mCell (cell), mState (State_Unloaded)
     {
@@ -95,7 +130,8 @@ namespace MWWorld
             {
                 // Don't load reference if it was moved to a different cell.
                 std::string lowerCase = Misc::StringUtils::lowerCase(ref.mRefID);
-                if (mCell->mMovedRefs.find(ref.mRefnum) != mCell->mMovedRefs.end()) {
+                ESM::MovedCellRefTracker::const_iterator iter = std::find(mCell->mMovedRefs.begin(), mCell->mMovedRefs.end(), ref.mRefnum);
+                if (iter != mCell->mMovedRefs.end()) {
                     continue;
                 }                    
                 int rec = store.find(ref.mRefID);
@@ -141,8 +177,8 @@ namespace MWWorld
         for (ESM::CellRefTracker::const_iterator it = mCell->mLeasedRefs.begin(); it != mCell->mLeasedRefs.end(); it++)
         {
             // Doesn't seem to work in one line... huh? Too sleepy to check...
-            //const ESM::CellRef &ref0 = it->second;
-            ESM::CellRef &ref = const_cast<ESM::CellRef&>(it->second);
+            ESM::CellRef &ref = const_cast<ESM::CellRef&>(*it);
+            //ESM::CellRef &ref = const_cast<ESM::CellRef&>(it->second);
 
             std::string lowerCase;
 

@@ -6,7 +6,7 @@
 
 #include "esmcommon.hpp"
 #include "defs.hpp"
-#include <apps/openmw/mwbase/world.hpp>
+#include "apps/openmw/mwbase/world.hpp"
 
 /*
 namespace MWWorld {
@@ -95,24 +95,29 @@ public:
 };
 
 /* Moved cell reference tracking object. This mainly stores the target cell
-   of the reference, so we can easily know where it has been moved when another
-   plugin tries to move it independently.
- */
+        of the reference, so we can easily know where it has been moved when another
+        plugin tries to move it independently.
+    Unfortunately, we need to implement this here.
+    */
 class MovedCellRef
 {
 public:
-  int mRefnum;
-  
-  // Target cell (if exterior)
-  int mTarget[2];
-  
-  // TODO: Support moving references between exterior and interior cells!
-  //  This may happen in saves, when an NPC follows the player. Tribunal
-  //  introduces a henchman (which no one uses), so we may need this as well.
+    int mRefnum;
+
+    // Target cell (if exterior)
+    int mTarget[2];
+
+    // TODO: Support moving references between exterior and interior cells!
+    //  This may happen in saves, when an NPC follows the player. Tribunal
+    //  introduces a henchman (which no one uses), so we may need this as well.
 };
 
-typedef std::map<int, MovedCellRef> MovedCellRefTracker;
-typedef std::map<int, CellRef> CellRefTracker;
+/// Overloaded copare operator used to search inside a list of cell refs.
+bool operator==(const MovedCellRef& ref, int pRefnum);
+bool operator==(const CellRef& ref, int pRefnum);
+
+typedef std::list<MovedCellRef> MovedCellRefTracker;
+typedef std::list<CellRef> CellRefTracker;
 
 /* Cells hold data about objects, creatures, statics (rocks, walls,
    buildings) and landscape (for exterior cells). Cells frequently

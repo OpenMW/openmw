@@ -9,11 +9,12 @@
 #include "refdata.hpp"
 #include "esmstore.hpp"
 
+struct C;
 namespace MWWorld
 {
     class Ptr;
     class ESMStore;
-
+    
   /// A reference to one object (of any type) in a cell.
   ///
   /// Constructing this with a CellRef instance in the constructor means that
@@ -42,88 +43,25 @@ namespace MWWorld
     /// runtime-data
     RefData mData;
   };
+  
+  template<typename X> bool operator==(const LiveCellRef<X>& ref, int pRefnum);
 
   /// A list of cell references
   template <typename X>
   struct CellRefList
   {
     typedef LiveCellRef<X> LiveRef;
-    typedef std::map<int,LiveRef> List;
+    typedef std::list<LiveRef> List;
     List mList;
 
     // Search for the given reference in the given reclist from
     // ESMStore. Insert the reference into the list if a match is
     // found. If not, throw an exception.
-    /// Searches for reference of appropriate type in given ESMStore.
-    /// If reference exists, loads it into container, throws an exception
-    /// on miss
-    void load(ESM::CellRef &ref, const MWWorld::ESMStore &esmStore)
-    {
-        // Skip this when reference was deleted.
-        // TODO: Support respawning references, in this case, we need to track it somehow.
-        if (ref.mDeleted) {
-            mList.erase(ref.mRefnum);
-            return;
-        }
-        
-        // for throwing exception on unhandled record type
-        const MWWorld::Store<X> &store = esmStore.get<X>();
-        const X *ptr = store.search(ref.mRefID);
-
-        /// \note no longer redundant - changed to Store<X>::search(), don't throw
-        ///  an exception on miss, try to continue (that's how MW does it, anyway)
-        if (ptr == NULL) {
-            std::cout << "Warning: could not resolve cell reference " << ref.mRefID << ", trying to continue anyway" << std::endl;
-        } else
-          mList[ref.mRefnum] = LiveRef(ref, ptr);
-    }
-
-    LiveRef *find (const std::string& name)
-    {
-        for (typename std::map<int,LiveRef>::iterator iter (mList.begin()); iter!=mList.end(); ++iter)
-        {
-            if (iter->second.mData.getCount() > 0 && iter->second.mRef.mRefID == name)
-                return &iter->second;
-        }
-
-        return 0;
-    }
-
-    LiveRef &insert(const LiveRef &item) {
-        mList[item.mRef.mRefnum] = item;
-        return mList[item.mRef.mRefnum];
-    }
-  };
-
-  /// A list of container references. These references do not track their mRefnumber.
-  /// Otherwise, taking 1 of 20 instances of an object would produce multiple objects
-  /// with the same reference.
-  /// Unfortunately, this also means that we need a different STL container.
-  ///  (cells use CellRefList, where refs can be located according to their refnumner,
-  ///   which uses a map; container items do not make use of the refnumber, so we
-  ///   can't use a map with refnumber keys.)
-  template <typename X>
-  struct ContainerRefList
-  {
-    typedef LiveCellRef<X> LiveRef;
-    typedef std::list<LiveRef> List;
-    List mList;
-
-    /// Searches for reference of appropriate type in given ESMStore.
-    /// If reference exists, loads it into container, throws an exception
-    /// on miss
-    void load(ESM::CellRef &ref, const MWWorld::ESMStore &esmStore)
-    {
-        // for throwing exception on unhandled record type
-        const MWWorld::Store<X> &store = esmStore.get<X>();
-        const X *ptr = store.find(ref.mRefID);
-
-        /// \note redundant because Store<X>::find() throws exception on miss
-        if (ptr == NULL) {
-            throw std::runtime_error("Error resolving cell reference " + ref.mRefID);
-        }
-        mList.push_back(LiveRef(ref, ptr));
-    }
+    // Moved to cpp file, as we require a custom compare operator for it,
+    // and the build will fail with an ugly three-way cyclic header dependence
+    // so we need to pass the instantiation of the method to the lnker, when
+    // all methods are known.
+    void load(ESM::CellRef &ref, const MWWorld::ESMStore &esmStore);
 
     LiveRef *find (const std::string& name)
     {
@@ -236,7 +174,7 @@ namespace MWWorld
     {
         for (typename List::List::iterator iter (list.mList.begin()); iter!=list.mList.end();
             ++iter)
-            if (!functor (iter->second.mRef, iter->second.mData))
+            if (!functor (iter->mRef, iter->mData))
                 return false;
 
         return true;

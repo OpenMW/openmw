@@ -213,8 +213,10 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
 
     StringsVector plugin = variables["plugin"].as<StringsVector>();
     // Removed check for 255 files, which would be the hard-coded limit in Morrowind.
-    //  I'll keep the following variable in, maybe we can use it for somethng different.
-    int cnt = master.size() + plugin.size();
+    //  I'll keep the following variable in, maybe we can use it for something different.
+    //  Say, a feedback like "loading file x/cnt".
+    // Commenting this out for now to silence compiler warning.
+    //int cnt = master.size() + plugin.size();
 
     // Prepare loading master/plugin files (i.e. send filenames to engine)
     for (std::vector<std::string>::size_type i = 0; i < master.size(); i++)

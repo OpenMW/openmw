@@ -42,30 +42,30 @@ void MWWorld::Cells::fillContainers (Ptr::CellStore& cellStore)
         cellStore.mContainers.mList.begin());
         iter!=cellStore.mContainers.mList.end(); ++iter)
     {
-        Ptr container (&iter->second, &cellStore);
+        Ptr container (&*iter, &cellStore);
 
         Class::get (container).getContainerStore (container).fill (
-            iter->second.mBase->mInventory, mStore);
+            iter->mBase->mInventory, mStore);
     }
 
     for (CellRefList<ESM::Creature>::List::iterator iter (
         cellStore.mCreatures.mList.begin());
         iter!=cellStore.mCreatures.mList.end(); ++iter)
     {
-        Ptr container (&iter->second, &cellStore);
+        Ptr container (&*iter, &cellStore);
 
         Class::get (container).getContainerStore (container).fill (
-            iter->second.mBase->mInventory, mStore);
+            iter->mBase->mInventory, mStore);
     }
 
     for (CellRefList<ESM::NPC>::List::iterator iter (
         cellStore.mNpcs.mList.begin());
         iter!=cellStore.mNpcs.mList.end(); ++iter)
     {
-        Ptr container (&iter->second, &cellStore);
+        Ptr container (&*iter, &cellStore);
 
         Class::get (container).getContainerStore (container).fill (
-            iter->second.mBase->mInventory, mStore);
+            iter->mBase->mInventory, mStore);
     }
 }
 

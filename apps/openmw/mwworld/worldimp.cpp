@@ -33,13 +33,13 @@ namespace
             cellRefList.mList.begin());
             iter!=cellRefList.mList.end(); ++iter)
         {
-            if (!iter->second.mBase->mScript.empty() && iter->second.mData.getCount())
+            if (!iter->mBase->mScript.empty() && iter->mData.getCount())
             {
-                if (const ESM::Script *script = store.get<ESM::Script>().find (iter->second.mBase->mScript))
+                if (const ESM::Script *script = store.get<ESM::Script>().find (iter->mBase->mScript))
                 {
                     iter->mData.setLocals (*script);
 
-                    localScripts.add (iter->second.mBase->mScript, MWWorld::Ptr (&iter->second, cell));
+                    localScripts.add (iter->mBase->mScript, MWWorld::Ptr (&*iter, cell));
                 }
             }
         }
@@ -53,10 +53,10 @@ namespace
 
         for (iterator iter (refList.mList.begin()); iter!=refList.mList.end(); ++iter)
         {
-            if (iter->second.mData.getCount() > 0 && iter->second.mData.getBaseNode()){
-            if (iter->second.mData.getHandle()==handle)
+            if (iter->mData.getCount() > 0 && iter->mData.getBaseNode()){
+            if (iter->mData.getHandle()==handle)
             {
-                return &iter->second;
+                return &*iter;
             }
             }
         }
@@ -1261,7 +1261,7 @@ namespace MWWorld
         CellRefList<ESM::Door>::List& refList = doors.mList;
         for (CellRefList<ESM::Door>::List::iterator it = refList.begin(); it != refList.end(); ++it)
         {
-            MWWorld::LiveCellRef<ESM::Door>& ref = it->second;
+            MWWorld::LiveCellRef<ESM::Door>& ref = *it;
 
             if (ref.mRef.mTeleport)
             {

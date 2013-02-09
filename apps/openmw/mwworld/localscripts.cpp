@@ -17,9 +17,9 @@ namespace
             cellRefList.mList.begin());
             iter!=cellRefList.mList.end(); ++iter)
         {
-            if (!iter->second.mBase->mScript.empty() && iter->second.mData.getCount())
+            if (!iter->mBase->mScript.empty() && iter->mData.getCount())
             {
-                localScripts.add (iter->second.mBase->mScript, MWWorld::Ptr (&iter->second, cell));
+                localScripts.add (iter->mBase->mScript, MWWorld::Ptr (&*iter, cell));
             }
         }
     }
@@ -34,7 +34,7 @@ namespace
             iter!=cellRefList.mList.end(); ++iter)
         {
            
-            MWWorld::Ptr containerPtr (&iter->second, cell); 
+            MWWorld::Ptr containerPtr (&*iter, cell); 
             
             MWWorld::ContainerStore& container = MWWorld::Class::get(containerPtr).getContainerStore(containerPtr);
             for(MWWorld::ContainerStoreIterator it3 = container.begin(); it3 != container.end(); ++it3)
