@@ -16,7 +16,7 @@
 #include <iostream>
 #include <boost/format.hpp>
 
-std::string bodyPartLabel(signed char idx)
+std::string bodyPartLabel(int idx)
 {
     const char *bodyPartLabels[] =  {
         "Head",
@@ -48,13 +48,13 @@ std::string bodyPartLabel(signed char idx)
         "Tail"
     };
 
-    if ((int)idx >= 0 && (int)(idx) <= 26)
-        return bodyPartLabels[(int)(idx)];
+    if (idx >= 0 && idx <= 26)
+        return bodyPartLabels[idx];
     else
         return "Invalid";
 }
 
-std::string meshPartLabel(signed char idx)
+std::string meshPartLabel(int idx)
 {
     const char *meshPartLabels[] =  {
         "Head",
@@ -74,13 +74,13 @@ std::string meshPartLabel(signed char idx)
         "Tail"
     };
 
-    if ((int)(idx) >= 0 && (int)(idx) <= ESM::BodyPart::MP_Tail)
-        return meshPartLabels[(int)(idx)];
+    if (idx >= 0 && idx <= ESM::BodyPart::MP_Tail)
+        return meshPartLabels[idx];
     else
         return "Invalid";
 }
 
-std::string meshTypeLabel(signed char idx)
+std::string meshTypeLabel(int idx)
 {
     const char *meshTypeLabels[] =  {
         "Skin",
@@ -88,8 +88,8 @@ std::string meshTypeLabel(signed char idx)
         "Armor"
     };
 
-    if ((int)(idx) >= 0 && (int)(idx) <= ESM::BodyPart::MT_Armor)
-        return meshTypeLabels[(int)(idx)];
+    if (idx >= 0 && idx <= ESM::BodyPart::MT_Armor)
+        return meshTypeLabels[idx];
     else
         return "Invalid";
 }
