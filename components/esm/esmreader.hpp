@@ -78,6 +78,17 @@ public:
 
   void openRaw(const std::string &file);
 
+  // This is a quick hack for multiple esm/esp files. Each plugin introduces its own
+  //  terrain palette, but ESMReader does not pass a reference to the correct plugin
+  //  to the individual load() methods. This hack allows to pass this reference
+  //  indirectly to the load() method.
+  int mIdx;
+  void setIndex(const int index) {mIdx = index; mCtx.index = index;}
+  const int getIndex() {return mIdx;}
+  
+  void setGlobalReaderList(std::vector<ESMReader> *list) {mGlobalReaderList = list;}
+  std::vector<ESMReader> *getGlobalReaderList() {return mGlobalReaderList;}
+
   /*************************************************************************
    *
    *  Medium-level reading shortcuts
@@ -108,6 +119,14 @@ public:
       assert(sizeof(X) == size);
       getSubNameIs(name);
       getHT(x);
+  }
+
+  template <typename X>
+  void getHNOT(X &x, const char* name, int size)
+  {
+      assert(sizeof(X) == size);
+      if(isNextSub(name))
+          getHT(x);
   }
 
   int64_t getHNLong(const char *name);
@@ -251,6 +270,7 @@ private:
 
   SaveData mSaveData;
   MasterList mMasters;
+  std::vector<ESMReader> *mGlobalReaderList;
   ToUTF8::Utf8Encoder* mEncoder;
 };
 }

@@ -3,17 +3,18 @@
 
 #include <components/esm/records.hpp>
 
-#include <list>
+#include <deque>
 #include <algorithm>
 
 #include "refdata.hpp"
 #include "esmstore.hpp"
 
+struct C;
 namespace MWWorld
 {
     class Ptr;
     class ESMStore;
-
+    
   /// A reference to one object (of any type) in a cell.
   ///
   /// Constructing this with a CellRef instance in the constructor means that
@@ -42,6 +43,8 @@ namespace MWWorld
     /// runtime-data
     RefData mData;
   };
+  
+  template<typename X> bool operator==(const LiveCellRef<X>& ref, int pRefnum);
 
   /// A list of cell references
   template <typename X>
@@ -51,21 +54,14 @@ namespace MWWorld
     typedef std::list<LiveRef> List;
     List mList;
 
-    /// Searches for reference of appropriate type in given ESMStore.
-    /// If reference exists, loads it into container, throws an exception
-    /// on miss
-    void load(ESM::CellRef &ref, const MWWorld::ESMStore &esmStore)
-    {
-        // for throwing exception on unhandled record type
-        const MWWorld::Store<X> &store = esmStore.get<X>();
-        const X *ptr = store.find(ref.mRefID);
-
-        /// \note redundant because Store<X>::find() throws exception on miss
-        if (ptr == NULL) {
-            throw std::runtime_error("Error resolving cell reference " + ref.mRefID);
-        }
-        mList.push_back(LiveRef(ref, ptr));
-    }
+    // Search for the given reference in the given reclist from
+    // ESMStore. Insert the reference into the list if a match is
+    // found. If not, throw an exception.
+    // Moved to cpp file, as we require a custom compare operator for it,
+    // and the build will fail with an ugly three-way cyclic header dependence
+    // so we need to pass the instantiation of the method to the lnker, when
+    // all methods are known.
+    void load(ESM::CellRef &ref, const MWWorld::ESMStore &esmStore);
 
     LiveRef *find (const std::string& name)
     {
@@ -124,9 +120,9 @@ namespace MWWorld
     CellRefList<ESM::Static>            mStatics;
     CellRefList<ESM::Weapon>            mWeapons;
 
-    void load (const MWWorld::ESMStore &store, ESM::ESMReader &esm);
+    void load (const MWWorld::ESMStore &store, std::vector<ESM::ESMReader> &esm);
 
-    void preload (const MWWorld::ESMStore &store, ESM::ESMReader &esm);
+    void preload (const MWWorld::ESMStore &store, std::vector<ESM::ESMReader> &esm);
 
     /// Call functor (ref) for each reference. functor must return a bool. Returning
     /// false will abort the iteration.
@@ -185,9 +181,9 @@ namespace MWWorld
     }
 
     /// Run through references and store IDs
-    void listRefs(const MWWorld::ESMStore &store, ESM::ESMReader &esm);
+    void listRefs(const MWWorld::ESMStore &store, std::vector<ESM::ESMReader> &esm);
 
-    void loadRefs(const MWWorld::ESMStore &store, ESM::ESMReader &esm);
+    void loadRefs(const MWWorld::ESMStore &store, std::vector<ESM::ESMReader> &esm);
   };
 }
 

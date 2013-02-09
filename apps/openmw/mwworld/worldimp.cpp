@@ -55,7 +55,7 @@ namespace
 
         for (iterator iter (refList.mList.begin()); iter!=refList.mList.end(); ++iter)
         {
-            if(iter->mData.getCount() > 0 && iter->mData.getBaseNode()){
+            if (iter->mData.getCount() > 0 && iter->mData.getBaseNode()){
             if (iter->mData.getHandle()==handle)
             {
                 return &*iter;
@@ -171,7 +171,8 @@ namespace MWWorld
 
     World::World (OEngine::Render::OgreRenderer& renderer,
         const Files::Collections& fileCollections,
-        const std::string& master, const boost::filesystem::path& resDir, const boost::filesystem::path& cacheDir, bool newGame,
+        const std::vector<std::string>& master, const std::vector<std::string>& plugins,
+	const boost::filesystem::path& resDir, const boost::filesystem::path& cacheDir, bool newGame,
         ToUTF8::Utf8Encoder* encoder, std::map<std::string,std::string> fallbackMap, int mActivationDistanceOverride)
     : mPlayer (0), mLocalScripts (mStore), mGlobalVariables (0),
       mSky (true), mCells (mStore, mEsm),
@@ -184,14 +185,42 @@ namespace MWWorld
 
         mWeatherManager = new MWWorld::WeatherManager(mRendering);
 
-        boost::filesystem::path masterPath (fileCollections.getCollection (".esm").getPath (master));
+        int idx = 0;
+        // NOTE: We might need to reserve one more for the running game / save.
+        mEsm.resize(master.size() + plugins.size());
+        for (std::vector<std::string>::size_type i = 0; i < master.size(); i++, idx++)
+        {
+            boost::filesystem::path masterPath (fileCollections.getCollection (".esm").getPath (master[i]));
+            
+            std::cout << "Loading ESM " << masterPath.string() << "\n";
 
-        std::cout << "Loading ESM " << masterPath.string() << "\n";
+            // This parses the ESM file
+            ESM::ESMReader lEsm;
+            lEsm.setEncoder(encoder);
+            lEsm.setIndex(idx);
+            lEsm.setGlobalReaderList(&mEsm);
+            lEsm.open (masterPath.string());
+            mEsm[idx] = lEsm;
+            mStore.load (mEsm[idx]);
+        }
+ 
+        for (std::vector<std::string>::size_type i = 0; i < plugins.size(); i++, idx++)
+        {
+            boost::filesystem::path pluginPath (fileCollections.getCollection (".esp").getPath (plugins[i]));
+            
+            std::cout << "Loading ESP " << pluginPath.string() << "\n";
 
-        // This parses the ESM file and loads a sample cell
-        mEsm.setEncoder(encoder);
-        mEsm.open (masterPath.string());
-        mStore.load (mEsm);
+            // This parses the ESP file
+            ESM::ESMReader lEsm;
+            lEsm.setEncoder(encoder);
+            lEsm.setIndex(idx);
+            lEsm.setGlobalReaderList(&mEsm);
+            lEsm.open (pluginPath.string());
+            mEsm[idx] = lEsm;
+            mStore.load (mEsm[idx]);
+        }
+        
+        mStore.setUp();
 
         mPlayer = new MWWorld::Player (mStore.get<ESM::NPC>().find ("player"), *this);
         mRendering->attachCameraTo(mPlayer->getPlayer());
@@ -270,7 +299,7 @@ namespace MWWorld
         return mStore;
     }
 
-    ESM::ESMReader& World::getEsmReader()
+    std::vector<ESM::ESMReader>& World::getEsmReader()
     {
         return mEsm;
     }
@@ -1233,8 +1262,8 @@ namespace MWWorld
         std::vector<World::DoorMarker> result;
 
         MWWorld::CellRefList<ESM::Door>& doors = cell->mDoors;
-        std::list< MWWorld::LiveCellRef<ESM::Door> >& refList = doors.mList;
-        for (std::list< MWWorld::LiveCellRef<ESM::Door> >::iterator it = refList.begin(); it != refList.end(); ++it)
+        CellRefList<ESM::Door>::List& refList = doors.mList;
+        for (CellRefList<ESM::Door>::List::iterator it = refList.begin(); it != refList.end(); ++it)
         {
             MWWorld::LiveCellRef<ESM::Door>& ref = *it;
 
