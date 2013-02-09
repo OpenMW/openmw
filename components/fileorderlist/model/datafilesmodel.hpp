@@ -43,6 +43,7 @@ public:
 
     QStringList checkedItems();
     QStringList uncheckedItems();
+    QStringList checkedItemsPaths();
 
     Qt::CheckState checkState(const QModelIndex &index);
     void setCheckState(const QModelIndex &index, Qt::CheckState state);

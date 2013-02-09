@@ -292,6 +292,7 @@ void DataFilesModel::addMasters(const QString &path)
 
                 EsmFile *file = new EsmFile(master);
                 file->setDates(info.lastModified(), info.lastRead());
+                file->setPath(info.absoluteFilePath());
 
                 // Add the master to the table
                 if (findItem(master) == 0)
@@ -424,6 +425,25 @@ QStringList DataFilesModel::checkedItems()
             list << name;
     }
 
+    return list;
+}
+
+QStringList DataFilesModel::checkedItemsPaths()
+{
+    QStringList list;
+    
+    QList<EsmFile *>::ConstIterator it;
+    QList<EsmFile *>::ConstIterator itEnd = mFiles.constEnd();
+    
+    int i = 0;
+    for (it = mFiles.constBegin(); it != itEnd; ++it) {
+        EsmFile *file = item(i);
+        ++i;
+        
+        if (mCheckStates[file->fileName()] == Qt::Checked && mAvailableFiles.contains(file->fileName()))
+            list << file->path();
+    }
+    
     return list;
 }
 

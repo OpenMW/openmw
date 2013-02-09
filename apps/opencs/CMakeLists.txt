@@ -21,6 +21,7 @@ opencs_units (model/world
     idtable idtableproxymodel
     )
 
+
 opencs_units_noqt (model/world
     universalid data record idcollection commands columnbase
     )
@@ -40,8 +41,9 @@ opencs_units_noqt (model/tools
 
 
 opencs_units (view/doc
-    viewmanager view operations operation subview
+    viewmanager view operations operation subview startup opendialog
     )
+
 
 opencs_units_noqt (view/doc
     subviewfactory

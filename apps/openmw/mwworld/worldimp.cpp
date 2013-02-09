@@ -2,11 +2,13 @@
 
 #include <components/bsa/bsa_archive.hpp>
 #include <components/files/collections.hpp>
+#include <components/compiler/locals.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
+#include "../mwbase/scriptmanager.hpp"
 
 #include "../mwrender/sky.hpp"
 #include "../mwrender/player.hpp"
@@ -53,7 +55,7 @@ namespace
 
         for (iterator iter (refList.mList.begin()); iter!=refList.mList.end(); ++iter)
         {
-            if(iter->mData.getCount() > 0 && iter->mData.getBaseNode()){
+            if (iter->mData.getCount() > 0 && iter->mData.getBaseNode()){
             if (iter->mData.getHandle()==handle)
             {
                 return &*iter;
@@ -169,7 +171,8 @@ namespace MWWorld
 
     World::World (OEngine::Render::OgreRenderer& renderer,
         const Files::Collections& fileCollections,
-        const std::string& master, const boost::filesystem::path& resDir, const boost::filesystem::path& cacheDir, bool newGame,
+        const std::vector<std::string>& master, const std::vector<std::string>& plugins,
+	const boost::filesystem::path& resDir, const boost::filesystem::path& cacheDir, bool newGame,
         ToUTF8::Utf8Encoder* encoder, std::map<std::string,std::string> fallbackMap, int mActivationDistanceOverride)
     : mPlayer (0), mLocalScripts (mStore), mGlobalVariables (0),
       mSky (true), mCells (mStore, mEsm),
@@ -182,14 +185,42 @@ namespace MWWorld
 
         mWeatherManager = new MWWorld::WeatherManager(mRendering);
 
-        boost::filesystem::path masterPath (fileCollections.getCollection (".esm").getPath (master));
+        int idx = 0;
+        // NOTE: We might need to reserve one more for the running game / save.
+        mEsm.resize(master.size() + plugins.size());
+        for (std::vector<std::string>::size_type i = 0; i < master.size(); i++, idx++)
+        {
+            boost::filesystem::path masterPath (fileCollections.getCollection (".esm").getPath (master[i]));
+            
+            std::cout << "Loading ESM " << masterPath.string() << "\n";
 
-        std::cout << "Loading ESM " << masterPath.string() << "\n";
+            // This parses the ESM file
+            ESM::ESMReader lEsm;
+            lEsm.setEncoder(encoder);
+            lEsm.setIndex(idx);
+            lEsm.setGlobalReaderList(&mEsm);
+            lEsm.open (masterPath.string());
+            mEsm[idx] = lEsm;
+            mStore.load (mEsm[idx]);
+        }
+ 
+        for (std::vector<std::string>::size_type i = 0; i < plugins.size(); i++, idx++)
+        {
+            boost::filesystem::path pluginPath (fileCollections.getCollection (".esp").getPath (plugins[i]));
+            
+            std::cout << "Loading ESP " << pluginPath.string() << "\n";
 
-        // This parses the ESM file and loads a sample cell
-        mEsm.setEncoder(encoder);
-        mEsm.open (masterPath.string());
-        mStore.load (mEsm);
+            // This parses the ESP file
+            ESM::ESMReader lEsm;
+            lEsm.setEncoder(encoder);
+            lEsm.setIndex(idx);
+            lEsm.setGlobalReaderList(&mEsm);
+            lEsm.open (pluginPath.string());
+            mEsm[idx] = lEsm;
+            mStore.load (mEsm[idx]);
+        }
+        
+        mStore.setUp();
 
         mPlayer = new MWWorld::Player (mStore.get<ESM::NPC>().find ("player"), *this);
         mRendering->attachCameraTo(mPlayer->getPlayer());
@@ -268,7 +299,7 @@ namespace MWWorld
         return mStore;
     }
 
-    ESM::ESMReader& World::getEsmReader()
+    std::vector<ESM::ESMReader>& World::getEsmReader()
     {
         return mEsm;
     }
@@ -698,6 +729,8 @@ namespace MWWorld
 
         if (*currCell != newCell)
         {
+        removeContainerScripts(ptr);
+
             if (isPlayer)
                 if (!newCell.isExterior())
                     changeToInteriorCell(Misc::StringUtils::lowerCase(newCell.mCell->mName), pos);
@@ -1229,8 +1262,8 @@ namespace MWWorld
         std::vector<World::DoorMarker> result;
 
         MWWorld::CellRefList<ESM::Door>& doors = cell->mDoors;
-        std::list< MWWorld::LiveCellRef<ESM::Door> >& refList = doors.mList;
-        for (std::list< MWWorld::LiveCellRef<ESM::Door> >::iterator it = refList.begin(); it != refList.end(); ++it)
+        CellRefList<ESM::Door>::List& refList = doors.mList;
+        for (CellRefList<ESM::Door>::List::iterator it = refList.begin(); it != refList.end(); ++it)
         {
             MWWorld::LiveCellRef<ESM::Door>& ref = *it;
 
@@ -1270,6 +1303,15 @@ namespace MWWorld
         mRendering->toggleWater();
     }
 
+    void World::PCDropped (const Ptr& item)
+    {
+        std::string script = MWWorld::Class::get(item).getScript(item);
+
+        // Set OnPCDrop Variable on item's script, if it has a script with that variable declared
+        if(script != "")
+            item.mRefData->getLocals().setVarByInt(script, "onpcdrop", 1);
+    }
+
     bool World::placeObject (const Ptr& object, float cursorX, float cursorY)
     {
         std::pair<bool, Ogre::Vector3> result = mPhysics->castRay(cursorX, cursorY);
@@ -1292,7 +1334,8 @@ namespace MWWorld
         pos.pos[1] = -result.second[2];
         pos.pos[2] = result.second[1];
 
-        copyObjectToCell(object, *cell, pos);
+        Ptr dropped = copyObjectToCell(object, *cell, pos);
+        PCDropped(dropped);
         object.getRefData().setCount(0);
 
         return true;
@@ -1309,8 +1352,8 @@ namespace MWWorld
         return true;
     }
 
-    void
-    World::copyObjectToCell(const Ptr &object, CellStore &cell, const ESM::Position &pos)
+
+    Ptr World::copyObjectToCell(const Ptr &object, CellStore &cell, const ESM::Position &pos)
     {
         /// \todo add searching correct cell for position specified
         MWWorld::Ptr dropped =
@@ -1334,6 +1377,8 @@ namespace MWWorld
             }
             addContainerScripts(dropped, &cell);
         }
+
+        return dropped;
     }
 
     void World::dropObjectOnGround (const Ptr& actor, const Ptr& object)
@@ -1354,7 +1399,9 @@ namespace MWWorld
             mPhysics->castRay(orig, dir, len);
         pos.pos[2] = hit.second.z;
 
-        copyObjectToCell(object, *cell, pos);
+        Ptr dropped = copyObjectToCell(object, *cell, pos);
+        if(actor == mPlayer->getPlayer()) // Only call if dropped by player
+            PCDropped(dropped);
         object.getRefData().setCount(0);
     }
 

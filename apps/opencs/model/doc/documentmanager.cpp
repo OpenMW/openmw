@@ -14,9 +14,10 @@ CSMDoc::DocumentManager::~DocumentManager()
         delete *iter;
 }
 
-CSMDoc::Document *CSMDoc::DocumentManager::addDocument (const std::string& name)
+CSMDoc::Document *CSMDoc::DocumentManager::addDocument (const std::vector<boost::filesystem::path>& files,
+    bool new_)
 {
-    Document *document = new Document (name);
+    Document *document = new Document (files, new_);
 
     mDocuments.push_back (document);
 
