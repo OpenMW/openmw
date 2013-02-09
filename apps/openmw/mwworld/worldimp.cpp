@@ -331,26 +331,26 @@ namespace MWWorld
     {
         return mGlobalVariables->getGlobals();
     }
-    
+
     std::string World::getCurrentCellName () const
     {
         std::string name;
 
         Ptr::CellStore *cell = mWorldScene->getCurrentCell();
         if (cell->mCell->isExterior())
-        {    
+        {
             if (cell->mCell->mName != "")
-            {    
+            {
                 name = cell->mCell->mName;
-            }    
-            else 
-            {    
+            }
+            else
+            {
                 const ESM::Region* region =
                     MWBase::Environment::get().getWorld()->getStore().get<ESM::Region>().search(cell->mCell->mRegion);
                 if (region)
                     name = region->mName;
                 else
-                { 
+                {
                     const ESM::GameSetting *setting =
                         MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().search("sDefaultCellname");
 
@@ -360,13 +360,13 @@ namespace MWWorld
                         name = "Wilderness";
                 }
 
-            }    
-        }    
-        else 
-        {    
+            }
+        }
+        else
+        {
             name = cell->mCell->mName;
-        }    
-        
+        }
+
         return name;
     }
 
@@ -455,12 +455,12 @@ namespace MWWorld
         if (!reference.getRefData().isEnabled())
         {
             reference.getRefData().enable();
-            
+
             if(mWorldScene->getActiveCells().find (reference.getCell()) != mWorldScene->getActiveCells().end() && reference.getRefData().getCount())
                 mWorldScene->addObjectToScene (reference);
         }
     }
-    
+
     void World::removeContainerScripts(const Ptr& reference)
     {
         if( reference.getTypeName()==typeid (ESM::Container).name() ||
@@ -485,7 +485,7 @@ namespace MWWorld
         if (reference.getRefData().isEnabled())
         {
             reference.getRefData().disable();
-            
+
             if(mWorldScene->getActiveCells().find (reference.getCell())!=mWorldScene->getActiveCells().end() && reference.getRefData().getCount())
                 mWorldScene->removeObjectFromScene (reference);
         }
@@ -716,14 +716,14 @@ namespace MWWorld
     void World::moveObject(const Ptr &ptr, CellStore &newCell, float x, float y, float z)
     {
         ESM::Position &pos = ptr.getRefData().getPosition();
-        pos.pos[0] = x, pos.pos[1] = y, pos.pos[2] = z;
+        pos.pos[0] = x;
+        pos.pos[1] = y;
+        pos.pos[2] = z;
         Ogre::Vector3 vec(x, y, z);
 
         CellStore *currCell = ptr.getCell();
         bool isPlayer = ptr == mPlayer->getPlayer();
         bool haveToMove = mWorldScene->isCellActive(*currCell) || isPlayer;
-        
-        removeContainerScripts(ptr);
 
         if (*currCell != newCell)
         {
@@ -736,7 +736,8 @@ namespace MWWorld
                     int cellY = newCell.mCell->getGridY();
                     mWorldScene->changeCell(cellX, cellY, pos, false);
                 }
-            else {
+            else
+            {
                 if (!mWorldScene->isCellActive(*currCell))
                     copyObjectToCell(ptr, newCell, pos);
                 else if (!mWorldScene->isCellActive(newCell))
@@ -744,6 +745,7 @@ namespace MWWorld
                     MWWorld::Class::get(ptr).copyToCell(ptr, newCell);
                     mWorldScene->removeObjectFromScene(ptr);
                     mLocalScripts.remove(ptr);
+                    removeContainerScripts (ptr);
                     haveToMove = false;
                 }
                 else
@@ -751,9 +753,17 @@ namespace MWWorld
                     MWWorld::Ptr copy =
                         MWWorld::Class::get(ptr).copyToCell(ptr, newCell);
 
-                    addContainerScripts(copy, &newCell);
-
                     mRendering->moveObjectToCell(copy, vec, currCell);
+
+                    std::string script =
+                        MWWorld::Class::get(ptr).getScript(ptr);
+                    if (!script.empty())
+                    {
+                        mLocalScripts.remove(ptr);
+                        removeContainerScripts (ptr);
+                        mLocalScripts.add(script, copy);
+                        addContainerScripts (copy, &newCell);
+                    }
 
                     if (MWWorld::Class::get(ptr).isActor())
                     {
@@ -762,16 +772,6 @@ namespace MWWorld
 
                         mechMgr->removeActor(ptr);
                         mechMgr->addActor(copy);
-                    }
-                    else
-                    {
-                        std::string script =
-                            MWWorld::Class::get(ptr).getScript(ptr);
-                        if (!script.empty())
-                        {
-                            mLocalScripts.remove(ptr);
-                            mLocalScripts.add(script, copy);
-                        }
                     }
                 }
                 ptr.getRefData().setCount(0);

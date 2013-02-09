@@ -3,6 +3,7 @@
 #include <OgreTerrain.h>
 #include <OgreTerrainGroup.h>
 #include <OgreHardwarePixelBuffer.h>
+#include <OgreRoot.h>
 
 #include "../mwworld/esmstore.hpp"
 
@@ -176,6 +177,16 @@ namespace MWRender
                         mActiveProfile->setGlobalColourMapEnabled (false);
                 }
             }
+        }
+
+        // when loading from a heightmap, Ogre::Terrain does not update the derived data (normal map, LOD)
+        // synchronously, even if we supply synchronous = true parameter to loadTerrain.
+        // the following to be the only way to make sure derived data is ready when rendering the next frame.
+        while (mTerrainGroup.isDerivedDataUpdateInProgress())
+        {
+           // we need to wait for this to finish
+           OGRE_THREAD_SLEEP(5);
+           Root::getSingleton().getWorkQueue()->processResponses();
         }
 
         mTerrainGroup.freeTemporaryResources();
