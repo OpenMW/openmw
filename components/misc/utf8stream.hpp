@@ -65,7 +65,7 @@ public:
         if (octets > 5)
             return std::make_pair (sBadChar(), cur);
 
-        auto eoc = cur + octets;
+        point eoc = cur + octets;
 
         if (eoc > end)
             return std::make_pair (sBadChar(), cur);

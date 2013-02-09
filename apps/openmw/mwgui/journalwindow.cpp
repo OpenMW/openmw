@@ -10,6 +10,8 @@
 #include <stack>
 #include <string>
 #include <utility>
+#include <boost/bind.hpp>
+#include <boost/function.hpp>
 #include "boost/lexical_cast.hpp"
 
 #include "bookpage.hpp"
@@ -24,11 +26,10 @@ using namespace MWGui;
 namespace
 {
 #define CONTROL_ID(name)    \
-    static char const name [] = #name;
+    static char const name [] = #name
 
-    CONTROL_ID(OptionsOverlay)
-
-    CONTROL_ID(OptionsBTN)
+    CONTROL_ID(OptionsOverlay);
+    CONTROL_ID(OptionsBTN);
     CONTROL_ID(PrevPageBTN);
     CONTROL_ID(NextPageBTN);
     CONTROL_ID(CloseBTN);
@@ -38,8 +39,8 @@ namespace
     CONTROL_ID(CancelBTN);
     CONTROL_ID(ShowAllBTN);
     CONTROL_ID(ShowActiveBTN);
-    CONTROL_ID(PageOneNum)
-    CONTROL_ID(PageTwoNum)
+    CONTROL_ID(PageOneNum);
+    CONTROL_ID(PageTwoNum);
     CONTROL_ID(TopicsList);
     CONTROL_ID(TopicsPage);
     CONTROL_ID(QuestsList);
@@ -116,7 +117,9 @@ namespace
             adviseButtonClick (ShowActiveBTN, &JournalWindow::notifyShowActive);
 
             {
-                auto callback = std::bind (&JournalWindow::notifyTopicClicked, this, std::placeholders::_1);
+                IBookPage::click_callback callback;
+                
+                callback = boost::bind (&JournalWindow::notifyTopicClicked, this, _1);
 
                 getPage (TopicsPage)->adviseLinkClicked (callback);
                 getPage (LeftBookPage)->adviseLinkClicked (callback);
@@ -124,14 +127,18 @@ namespace
             }
 
             {
-                auto callback = std::bind (&JournalWindow::notifyIndexLinkClicked, this, std::placeholders::_1);
+                IBookPage::click_callback callback;
+                
+                callback = boost::bind (&JournalWindow::notifyIndexLinkClicked, this, _1);
 
                 getPage (LeftTopicIndex)->adviseLinkClicked (callback);
                 getPage (RightTopicIndex)->adviseLinkClicked (callback);
             }
 
             {
-                auto callback = std::bind (&JournalWindow::notifyQuestClicked, this, std::placeholders::_1);
+                IBookPage::click_callback callback;
+                
+                callback = boost::bind (&JournalWindow::notifyQuestClicked, this, _1);
 
                 getPage (QuestsPage)->adviseLinkClicked (callback);
             }
@@ -164,8 +171,8 @@ namespace
             getPage (LeftBookPage)->showPage (book (), 0);
             getPage (RightBookPage)->showPage (book (), 0);
 
-            decltype (mStates) clr;
-            mStates.swap (clr);
+            while (!mStates.empty ())
+                mStates.pop ();
 
             mTopicIndexBook.reset ();
 
@@ -272,7 +279,7 @@ namespace
 
         void notifyTopicClicked (intptr_t linkId)
         {
-            auto topicBook = createTopicBook (linkId);
+            book topicBook = createTopicBook (linkId);
 
             if (mStates.size () > 1)
                 replaceBook (topicBook, 0);
@@ -286,7 +293,7 @@ namespace
 
         void notifyQuestClicked (intptr_t questId)
         {
-            auto Book = createQuestBook (questId);
+            book Book = createQuestBook (questId);
 
             if (mStates.size () > 1)
                 replaceBook (Book, 0);
@@ -317,7 +324,7 @@ namespace
 
         void showList (char const * ListId, char const * PageId, book book)
         {
-            auto size = book->getSize ();
+            std::pair <int, int> size = book->getSize ();
 
             getPage (PageId)->showPage (book, 0);
 
@@ -388,8 +395,8 @@ namespace
         {
             if (!mStates.empty ())
             {
-                auto & Page = mStates.top ().mPage;
-                auto   Book = mStates.top ().mBook;
+                int  & Page = mStates.top ().mPage;
+                book   Book = mStates.top ().mBook;
 
                 if (Page < Book->pageCount () - 2)
                 {
@@ -403,7 +410,7 @@ namespace
         {
             if (!mStates.empty ())
             {
-                auto & Page = mStates.top ().mPage;
+                int & Page = mStates.top ().mPage;
 
                 if(Page > 0)
                 {

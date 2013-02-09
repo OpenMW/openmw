@@ -11,6 +11,7 @@
 
 #include <map>
 #include <sstream>
+#include <boost/make_shared.hpp>
 
 using namespace MWGui;
 
@@ -34,7 +35,7 @@ public:
 
     void seed (string_t Keyword, value_t Value)
     {
-        seed_impl  (std::move (Keyword), std::move (Value), 0, Root);
+        seed_impl  (/*std::move*/ (Keyword), /*std::move*/ (Value), 0, Root);
     }
 
     void clear ()
@@ -45,21 +46,21 @@ public:
 
     bool search (point Beg, point End, match & Match)
     {
-        for (auto i = Beg; i != End; ++i)
+        for (point i = Beg; i != End; ++i)
         {
             // check first character
-            auto candidate = Root.Children.find (std::tolower (*i, Locale));
+            typename entry::childen_t::iterator candidate = Root.Children.find (std::tolower (*i, Locale));
 
             // no match, on to next character
             if (candidate == Root.Children.end ())
                 continue;
 
             // see how far the match goes
-            auto j = i;
+            point j = i;
 
             while ((j + 1) != End)
             {
-                auto next = candidate->second.Children.find (std::tolower (*++j, Locale));
+                typename entry::childen_t::iterator next = candidate->second.Children.find (std::tolower (*++j, Locale));
 
                 if (next == candidate->second.Children.end ())
                     break;
@@ -72,7 +73,7 @@ public:
                 continue;
 
             // match the rest of the keyword
-            auto t = candidate->second.Keyword.begin () + (j - i);
+            typename string_t::const_iterator t = candidate->second.Keyword.begin () + (j - i);
 
             while (j != End && t != candidate->second.Keyword.end ())
             {
@@ -111,14 +112,14 @@ private:
 
     void seed_impl (string_t Keyword, value_t Value, size_t Depth, entry  & Entry)
     {
-        auto ch = tolower (Keyword.at (Depth), Locale);
+        int ch = tolower (Keyword.at (Depth), Locale);
 
-        auto j = Entry.Children.find (ch);
+        typename entry::childen_t::iterator j = Entry.Children.find (ch);
 
         if (j == Entry.Children.end ())
         {
-            Entry.Children [ch].Value = std::move (Value);
-            Entry.Children [ch].Keyword = std::move (Keyword);
+            Entry.Children [ch].Value = /*std::move*/ (Value);
+            Entry.Children [ch].Keyword = /*std::move*/ (Keyword);
         }
         else
         {
@@ -127,18 +128,18 @@ private:
                 if (Keyword == j->second.Keyword)
                     throw std::runtime_error ("duplicate keyword inserted");
 
-                auto pushValue = std::move (j->second.Value);
-                auto pushKeyword = std::move (j->second.Keyword);
+                value_t pushValue = /*std::move*/ (j->second.Value);
+                string_t pushKeyword = /*std::move*/ (j->second.Keyword);
 
                 j->second.Keyword.clear ();
 
                 if (Depth >= pushKeyword.size ())
                     throw std::runtime_error ("unexpected");
 
-                seed_impl (std::move (pushKeyword), std::move (pushValue), Depth+1, j->second);
+                seed_impl (/*std::move*/ (pushKeyword), /*std::move*/ (pushValue), Depth+1, j->second);
             }
 
-            seed_impl (std::move (Keyword), std::move (Value), Depth+1, j->second);
+            seed_impl (/*std::move*/ (Keyword), /*std::move*/ (Value), Depth+1, j->second);
         }
 
     }
@@ -171,7 +172,7 @@ struct MWGui::JournalViewModel : IJournalViewModel
         if (str.size () == 0)
             return utf8_span (utf8_point (NULL), utf8_point (NULL));
 
-        utf8_point point = reinterpret_cast <utf8_point> (&str.front ());
+        utf8_point point = reinterpret_cast <utf8_point> (str.c_str ());
 
         return utf8_span (point, point + str.size ());
     }
@@ -190,9 +191,9 @@ struct MWGui::JournalViewModel : IJournalViewModel
     {
         if (!FooBar_loaded)
         {
-            auto journal = MWBase::Environment::get().getJournal();
+            MWBase::Journal * journal = MWBase::Environment::get().getJournal();
 
-            for(auto i = journal->topicBegin(); i != journal->topicEnd (); ++i)
+            for(MWBase::Journal::TTopicIter i = journal->topicBegin(); i != journal->topicEnd (); ++i)
                 FooBar.seed (i->first, intptr_t (&i->second));
 
             FooBar_loaded = true;
@@ -203,14 +204,16 @@ struct MWGui::JournalViewModel : IJournalViewModel
 
     bool is_empty () const
     {
-        auto journal = MWBase::Environment::get().getJournal();
+        MWBase::Journal * journal = MWBase::Environment::get().getJournal();
 
         return journal->begin () == journal->end ();
     }
 
-    template <typename iterator_t, typename IInterface>
+    template <typename t_iterator, typename IInterface>
     struct base_entry : IInterface
     {
+        typedef t_iterator iterator_t;
+
         iterator_t                  itr;
         JournalViewModel const *    Model;
 
@@ -241,7 +244,7 @@ struct MWGui::JournalViewModel : IJournalViewModel
             return to_utf8_span (utf8text);
         }
 
-        void visit_spans (std::function < void (topic_id, size_t, size_t)> visitor) const
+        void visit_spans (boost::function < void (topic_id, size_t, size_t)> visitor) const
         {
             ensure_loaded ();
             Model->ensure_FooBar_loaded ();
@@ -266,11 +269,11 @@ struct MWGui::JournalViewModel : IJournalViewModel
 
     };
 
-    void visit_quest_names (bool active_only, std::function <void (quest_id, utf8_span)> visitor) const
+    void visit_quest_names (bool active_only, boost::function <void (quest_id, utf8_span)> visitor) const
     {
-        auto journal = MWBase::Environment::get ().getJournal ();
+        MWBase::Journal * journal = MWBase::Environment::get ().getJournal ();
 
-        for (auto i = journal->questBegin (); i != journal->questEnd (); ++i)
+        for (MWBase::Journal::TQuestIter i = journal->questBegin (); i != journal->questEnd (); ++i)
         {
             if (active_only && i->second.isFinished ())
                 continue;
@@ -279,11 +282,11 @@ struct MWGui::JournalViewModel : IJournalViewModel
         }
     }
 
-    void visit_quest_name (quest_id questId, std::function <void (utf8_span)> visitor) const
+    void visit_quest_name (quest_id questId, boost::function <void (utf8_span)> visitor) const
     {
         MWDialogue::Quest const * quest = reinterpret_cast <MWDialogue::Quest const *> (questId);
 
-        auto name = quest->getName ();
+        std::string name = quest->getName ();
 
         visitor (to_utf8_span (name));
     }
@@ -323,47 +326,47 @@ struct MWGui::JournalViewModel : IJournalViewModel
         }
     };
 
-    void visit_journal_entries (quest_id questId, std::function <void (IJournalEntry const &)> visitor) const
+    void visit_journal_entries (quest_id questId, boost::function <void (IJournalEntry const &)> visitor) const
     {
-        auto journal = MWBase::Environment::get().getJournal();
+        MWBase::Journal * journal = MWBase::Environment::get().getJournal();
 
         if (questId != 0)
         {
             MWDialogue::Quest const * quest = reinterpret_cast <MWDialogue::Quest const *> (questId);
 
-            for(auto i = journal->begin(); i != journal->end (); ++i)
+            for(MWBase::Journal::TEntryIter i = journal->begin(); i != journal->end (); ++i)
             {
-                for (auto j = quest->begin (); j != quest->end (); ++j)
+                for (MWDialogue::Topic::TEntryIter j = quest->begin (); j != quest->end (); ++j)
                 {
                     if (i->mInfoId == *j)
-                        visitor (journal_entry <decltype (i)> (this, i));
+                        visitor (journal_entry <MWBase::Journal::TEntryIter> (this, i));
                 }
             }
         }
         else
         {
-            for(auto i = journal->begin(); i != journal->end (); ++i)
-                visitor (journal_entry <decltype (i)> (this, i));
+            for(MWBase::Journal::TEntryIter i = journal->begin(); i != journal->end (); ++i)
+                visitor (journal_entry <MWBase::Journal::TEntryIter> (this, i));
         }
     }
 
-    void visit_topics (std::function <void (topic_id, utf8_span)> visitor) const
+    void visit_topics (boost::function <void (topic_id, utf8_span)> visitor) const
     {
         throw std::runtime_error ("not implemented");
     }
 
-    void visit_topic_name (topic_id topicId, std::function <void (utf8_span)> visitor) const
+    void visit_topic_name (topic_id topicId, boost::function <void (utf8_span)> visitor) const
     {
-        auto & Topic = * reinterpret_cast <MWDialogue::Topic const *> (topicId);
+        MWDialogue::Topic const & Topic = * reinterpret_cast <MWDialogue::Topic const *> (topicId);
 
         visitor (to_utf8_span (Topic.getName ()));
     }
 
-    void visit_topic_names_starting_with (int character, std::function < void (topic_id , utf8_span) > visitor) const
+    void visit_topic_names_starting_with (int character, boost::function < void (topic_id , utf8_span) > visitor) const
     {
-        auto journal = MWBase::Environment::get().getJournal();
+        MWBase::Journal * journal = MWBase::Environment::get().getJournal();
 
-        for (auto i = journal->topicBegin (); i != journal->topicEnd (); ++i)
+        for (MWBase::Journal::TTopicIter i = journal->topicBegin (); i != journal->topicEnd (); ++i)
         {
             if (i->first [0] != std::tolower (character, Locale))
                 continue;
@@ -373,42 +376,39 @@ struct MWGui::JournalViewModel : IJournalViewModel
 
     }
 
-    void visit_topic_entries (topic_id topicId, std::function <void (ITopicEntry const &)> visitor) const
+    struct topicEntry : base_entry <MWDialogue::Topic::TEntryIter, ITopicEntry>
     {
-        auto & Topic = * reinterpret_cast <MWDialogue::Topic const *> (topicId);
+        MWDialogue::Topic const & Topic;
 
-        for (auto i = Topic.begin (); i != Topic.end (); ++i)
+        mutable std::string source_buffer;
+
+        topicEntry (JournalViewModel const * Model, MWDialogue::Topic const & Topic, iterator_t itr) :
+            base_entry (Model, itr), Topic (Topic)
+        {}
+
+        std::string getText () const
         {
-            typedef decltype (Topic.begin()) iterator_t;
+            return Topic.getEntry (*itr).getText(MWBase::Environment::get().getWorld()->getStore());
 
-            struct entry : base_entry <iterator_t, ITopicEntry>
-            {
-                MWDialogue::Topic const & Topic;
-
-                mutable std::string source_buffer;
-
-
-                entry (JournalViewModel const * Model, MWDialogue::Topic const & Topic, iterator_t itr) :
-                    base_entry (Model, itr), Topic (Topic)
-                {}
-
-                std::string getText () const
-                {
-                    return Topic.getEntry (*itr).getText(MWBase::Environment::get().getWorld()->getStore());
-
-                }
-
-                utf8_span source () const
-                {
-                    if (source_buffer.empty ())
-                        source_buffer = "someone";
-                    return to_utf8_span (source_buffer);
-                }
-
-            };
-
-            visitor (entry (this, Topic, i));
         }
+
+        utf8_span source () const
+        {
+            if (source_buffer.empty ())
+                source_buffer = "someone";
+            return to_utf8_span (source_buffer);
+        }
+
+    };
+
+    void visit_topic_entries (topic_id topicId, boost::function <void (ITopicEntry const &)> visitor) const
+    {
+        typedef MWDialogue::Topic::TEntryIter iterator_t;
+		
+        MWDialogue::Topic const & Topic = * reinterpret_cast <MWDialogue::Topic const *> (topicId);
+
+        for (iterator_t i = Topic.begin (); i != Topic.end (); ++i)
+            visitor (topicEntry (this, Topic, i));
     }
 };
 
@@ -468,5 +468,5 @@ static void injectMonthName (std::ostream & os, int month)
 
 IJournalViewModel::ptr IJournalViewModel::create ()
 {
-    return std::make_shared <JournalViewModel> ();
+    return boost::make_shared <JournalViewModel> ();
 }
