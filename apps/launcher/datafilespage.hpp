@@ -17,6 +17,7 @@ class ProfilesComboBox;
 class DataFilesModel;
 
 class TextInputDialog;
+class DataFilesList;
 
 namespace Files { struct ConfigurationManager; }
 
@@ -34,10 +35,6 @@ public:
     bool setupDataFiles();
 
 public slots:
-    void setCheckState(QModelIndex index);
-
-    void filterChanged(const QString filter);
-    void showContextMenu(const QPoint &point);
     void profileChanged(const QString &previous, const QString &current);
     void profileRenamed(const QString &previous, const QString &current);
     void updateOkButton(const QString &text);
@@ -49,21 +46,11 @@ public slots:
 //    void moveDown();
 //    void moveTop();
 //    void moveBottom();
-    void check();
-    void uncheck();
-    void refresh();
 
 private:
-    DataFilesModel *mMastersModel;
-    DataFilesModel *mPluginsModel;
-
-    QSortFilterProxyModel *mPluginsProxyModel;
-
-    QTableView *mMastersTable;
-    QTableView *mPluginsTable;
+    DataFilesList *mDataFilesList;
 
     QToolBar *mProfileToolBar;
-    QMenu *mContextMenu;
 
     QAction *mNewProfileAction;
     QAction *mDeleteProfileAction;
@@ -72,8 +59,6 @@ private:
 //    QAction *mMoveDownAction;
 //    QAction *mMoveTopAction;
 //    QAction *mMoveBottomAction;
-    QAction *mCheckAction;
-    QAction *mUncheckAction;
 
     Files::ConfigurationManager &mCfgMgr;
     Files::PathContainer mDataDirs;

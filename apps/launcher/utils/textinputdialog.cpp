@@ -5,7 +5,7 @@
 #include <QVBoxLayout>
 #include <QValidator>
 
-#include "lineedit.hpp"
+#include <components/fileorderlist/utils/lineedit.hpp>
 
 #include "textinputdialog.hpp"
 

@@ -84,6 +84,8 @@ namespace CSVDoc
 
             void newDocumentRequest();
 
+            void loadDocumentRequest();
+
         public slots:
 
             void addSubView (const CSMWorld::UniversalId& id);
@@ -97,6 +99,8 @@ namespace CSVDoc
             void verify();
 
             void addGlobalsSubView();
+
+            void addGmstsSubView();
     };
 }
 

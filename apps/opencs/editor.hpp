@@ -4,7 +4,10 @@
 #include <QObject>
 
 #include "model/doc/documentmanager.hpp"
+
 #include "view/doc/viewmanager.hpp"
+#include "view/doc/startup.hpp"
+#include "view/doc/opendialog.hpp"
 
 namespace CS
 {
@@ -16,6 +19,8 @@ namespace CS
 
             CSMDoc::DocumentManager mDocumentManager;
             CSVDoc::ViewManager mViewManager;
+            CSVDoc::StartupDialogue mStartup;
+            OpenDialog mOpenDialog;
 
             // not implemented
             Editor (const Editor&);
@@ -28,9 +33,12 @@ namespace CS
             int run();
             ///< \return error status
 
-        public slots:
+        private slots:
 
             void createDocument();
+
+            void loadDocument();
+            void openFiles();
     };
 }
 

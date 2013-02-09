@@ -64,6 +64,8 @@ CSVWorld::DialogueSubView::DialogueSubView (const CSMWorld::UniversalId& id, CSM
                         /// \todo configure widget properly (range, format?)
                         layout->addWidget (widget = new QDoubleSpinBox, i, 1);
                         break;
+
+                    default: break; // silence warnings for other times for now
                 }
             }
             else
@@ -76,6 +78,8 @@ CSVWorld::DialogueSubView::DialogueSubView (const CSMWorld::UniversalId& id, CSM
 
                         layout->addWidget (widget = new QLabel, i, 1);
                         break;
+
+                    default: break; // silence warnings for other times for now
                 }
             }
 

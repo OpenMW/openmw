@@ -66,9 +66,21 @@ add_component_dir (translation
     translation
     )
 
+find_package(Qt4 COMPONENTS QtCore QtGui)
+
+if(QT_QTGUI_LIBRARY AND QT_QTCORE_LIBRARY)
+   add_component_qt_dir (fileorderlist
+       datafileslist model/modelitem model/datafilesmodel model/esm/esmfile
+       utils/filedialog utils/lineedit utils/naturalsort
+       )
+
+   include(${QT_USE_FILE})
+   QT4_WRAP_CPP(MOC_SRCS ${COMPONENT_MOC_FILES})
+endif(QT_QTGUI_LIBRARY AND QT_QTCORE_LIBRARY)
+
 include_directories(${BULLET_INCLUDE_DIRS})
 
-add_library(components STATIC ${COMPONENT_FILES})
+add_library(components STATIC ${COMPONENT_FILES} ${MOC_SRCS})
 
 target_link_libraries(components ${Boost_LIBRARIES} ${OGRE_LIBRARIES})
 
