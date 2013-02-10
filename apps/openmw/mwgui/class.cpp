@@ -197,8 +197,15 @@ void PickClassDialog::updateClasses()
 
         const std::string &id = it->mId;
         mClassList->addItem(it->mName, id);
-        if (boost::iequals(id, mCurrentClassId))
+        if (mCurrentClassId.empty())
+        {
+            mCurrentClassId = id;
             mClassList->setIndexSelected(index);
+        }
+        else if (boost::iequals(id, mCurrentClassId))
+        {
+            mClassList->setIndexSelected(index);
+        }
         ++index;
     }
 }
