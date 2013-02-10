@@ -48,8 +48,7 @@ DataFilesList::DataFilesList(Files::ConfigurationManager &cfg, QWidget *parent)
     : QWidget(parent)
     , mCfgMgr(cfg)
 {
-    // Models
-    mMastersModel = new DataFilesModel(this);
+    // Model
     mPluginsModel = new DataFilesModel(this);
 
     mPluginsProxyModel = new QSortFilterProxyModel();
@@ -78,29 +77,6 @@ DataFilesList::DataFilesList(Files::ConfigurationManager &cfg, QWidget *parent)
     QCheckBox checkBox;
     unsigned int height = checkBox.sizeHint().height() + 4;
 
-    mMastersTable = new QTableView(this);
-    mMastersTable->setModel(mMastersModel);
-    mMastersTable->setObjectName("MastersTable");
-    mMastersTable->setSelectionBehavior(QAbstractItemView::SelectRows);
-    mMastersTable->setSelectionMode(QAbstractItemView::SingleSelection);
-    mMastersTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
-    mMastersTable->setAlternatingRowColors(true);
-    mMastersTable->horizontalHeader()->setStretchLastSection(true);
-    mMastersTable->horizontalHeader()->hide();
-
-    // Set the row height to the size of the checkboxes
-    mMastersTable->verticalHeader()->setDefaultSectionSize(height);
-    mMastersTable->verticalHeader()->setResizeMode(QHeaderView::Fixed);
-    mMastersTable->verticalHeader()->hide();
-    mMastersTable->setColumnHidden(1, true);
-    mMastersTable->setColumnHidden(2, true);
-    mMastersTable->setColumnHidden(3, true);
-    mMastersTable->setColumnHidden(4, true);
-    mMastersTable->setColumnHidden(5, true);
-    mMastersTable->setColumnHidden(6, true);
-    mMastersTable->setColumnHidden(7, true);
-    mMastersTable->setColumnHidden(8, true);
-
     mPluginsTable = new QTableView(this);
     mPluginsTable->setModel(mPluginsProxyModel);
     mPluginsTable->setObjectName("PluginsTable");
@@ -124,26 +100,14 @@ DataFilesList::DataFilesList(Files::ConfigurationManager &cfg, QWidget *parent)
     mPluginsTable->setColumnHidden(7, true);
     mPluginsTable->setColumnHidden(8, true);
 
-    // Add both tables to a splitter
-    QSplitter *splitter = new QSplitter(this);
-    splitter->setOrientation(Qt::Horizontal);
-    splitter->addWidget(mMastersTable);
-    splitter->addWidget(mPluginsTable);
-
-    // Adjust the default widget widths inside the splitter
-    QList<int> sizeList;
-    sizeList << 175 << 200;
-    splitter->setSizes(sizeList);
-
     QVBoxLayout *pageLayout = new QVBoxLayout(this);
 
     pageLayout->addWidget(filterToolBar);
-    pageLayout->addWidget(splitter);
+    pageLayout->addWidget(mPluginsTable);
 
     connect(mPluginsTable, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(setCheckState(QModelIndex)));
-    connect(mMastersTable, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(setCheckState(QModelIndex)));
-
-    connect(mMastersModel, SIGNAL(checkedItemsChanged(QStringList,QStringList)), mPluginsModel, SLOT(slotcheckedItemsChanged(QStringList,QStringList)));
+    
+    connect(mPluginsModel, SIGNAL(checkedItemsChanged(QStringList,QStringList)), mPluginsModel, SLOT(slotcheckedItemsChanged(QStringList,QStringList)));
 
     connect(filterLineEdit, SIGNAL(textChanged(QString)), this, SLOT(filterChanged(QString)));
 
@@ -178,7 +142,6 @@ bool DataFilesList::setupDataFiles(Files::PathContainer dataDirs, const QString 
 {
     // Set the charset for reading the esm/esp files
     if (!encoding.isEmpty() && encoding != QLatin1String("win1252")) {
-        mMastersModel->setEncoding(encoding);
         mPluginsModel->setEncoding(encoding);
     }
 
@@ -186,11 +149,9 @@ bool DataFilesList::setupDataFiles(Files::PathContainer dataDirs, const QString 
     for (Files::PathContainer::iterator it = dataDirs.begin(); it != dataDirs.end(); ++it) {
         QString path = QString::fromStdString(it->string());
         path.remove(QChar('\"'));
-        mMastersModel->addMasters(path);
-        mPluginsModel->addPlugins(path);
+        mPluginsModel->addFiles(path);
     }
 
-    mMastersModel->sort(0);
     mPluginsModel->sort(0);
 //    mMastersTable->sortByColumn(3, Qt::AscendingOrder);
 //    mPluginsTable->sortByColumn(3, Qt::AscendingOrder);
@@ -200,11 +161,6 @@ bool DataFilesList::setupDataFiles(Files::PathContainer dataDirs, const QString 
 
 void DataFilesList::selectedFiles(std::vector<boost::filesystem::path>& paths)
 {
-    QStringList masterPaths = mMastersModel->checkedItemsPaths();
-    foreach (const QString &path, masterPaths)
-    {
-        paths.push_back(path.toStdString());
-    }
     QStringList pluginPaths = mPluginsModel->checkedItemsPaths();
     foreach (const QString &path, pluginPaths)
     {
@@ -281,19 +237,12 @@ void DataFilesList::setCheckState(QModelIndex index)
                 : mPluginsModel->setCheckState(sourceIndex, Qt::Checked);
     }
 
-    if (object->objectName() == QLatin1String("MastersTable")) {
-        (mMastersModel->checkState(index) == Qt::Checked)
-                ? mMastersModel->setCheckState(index, Qt::Unchecked)
-                : mMastersModel->setCheckState(index, Qt::Checked);
-    }
-
     return;
 
 }
 
 void DataFilesList::uncheckAll()
 {
-    mMastersModel->uncheckAll();
     mPluginsModel->uncheckAll();
 }
 
@@ -338,14 +287,9 @@ void DataFilesList::setCheckState(const QString& element, Qt::CheckState state)
     {
         mPluginsModel->setCheckState(mPluginsModel->indexFromItem(file), Qt::Checked);
     }
-    else
-    {
-        file = mMastersModel->findItem(element);
-        mMastersModel->setCheckState(mMastersModel->indexFromItem(file), Qt::Checked);
-    }
 }
 
 QStringList DataFilesList::checkedFiles()
 {
-    return mMastersModel->checkedItems() + mPluginsModel->checkedItems();
+    return mPluginsModel->checkedItems();
 }
