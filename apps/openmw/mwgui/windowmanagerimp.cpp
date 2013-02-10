@@ -608,6 +608,7 @@ void WindowManager::onFrame (float frameDuration)
     mHud->onFrame(frameDuration);
 
     mTrainingWindow->onFrame (frameDuration);
+    mTradeWindow->onFrame(frameDuration);
 
     mTrainingWindow->checkReferenceAvailable();
     mDialogueWindow->checkReferenceAvailable();

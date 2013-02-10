@@ -34,6 +34,8 @@ namespace MWGui
 
             void addOrRemoveGold(int gold);
 
+            void onFrame(float frameDuration);
+
         protected:
             MyGUI::Button* mFilterAll;
             MyGUI::Button* mFilterWeapon;
@@ -57,12 +59,24 @@ namespace MWGui
             int mCurrentBalance;
             int mCurrentMerchantOffer;
 
+            enum BalanceButtonsState {
+                BBS_None,
+                BBS_Increase,
+                BBS_Decrease
+            } mBalanceButtonsState;
+            /// pause before next balance change will trigger while user holds +/- button pressed
+            float mBalanceChangePause;
+
             void onWindowResize(MyGUI::Window* _sender);
             void onFilterChanged(MyGUI::Widget* _sender);
             void onOfferButtonClicked(MyGUI::Widget* _sender);
             void onCancelButtonClicked(MyGUI::Widget* _sender);
-            void onIncreaseButtonClicked(MyGUI::Widget* _sender);
-            void onDecreaseButtonClicked(MyGUI::Widget* _sender);
+            void onIncreaseButtonPressed(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id);
+            void onDecreaseButtonPressed(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id);
+            void onBalanceButtonReleased(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id);
+
+            void onIncreaseButtonTriggered();
+            void onDecreaseButtonTriggered();
 
             // don't show items that the NPC has equipped in his trade-window.
             virtual bool ignoreEquippedItems() { return true; }
