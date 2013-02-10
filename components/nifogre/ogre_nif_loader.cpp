@@ -21,8 +21,6 @@
 
  */
 
-//loadResource->handleNode->handleNiTriShape->createSubMesh
-
 #include "ogre_nif_loader.hpp"
 
 #include <algorithm>
@@ -456,30 +454,28 @@ void loadResource(Ogre::Resource *resource)
 
 bool createSkeleton(const std::string &name, const std::string &group, const Nif::Node *node)
 {
+    /* If the root node is a NiTriShape, or is a parent to only NiTriShapes, do
+     * not create a skeleton. */
     if(node->recType == Nif::RC_NiTriShape)
         return false;
 
-    if(node->boneTrafo != NULL)
+    if(node->recType == Nif::RC_NiNode)
     {
-        Ogre::SkeletonManager &skelMgr = Ogre::SkeletonManager::getSingleton();
-        skelMgr.create(name, group, true, &sLoaders[name]);
-        return true;
+        bool alltrishapes = true;
+        const Nif::NiNode *ninode = static_cast<const Nif::NiNode*>(node);
+        const Nif::NodeList &children = ninode->children;
+        for(size_t i = 0;i < children.length() && alltrishapes;i++)
+        {
+            if(!children[i].empty() && children[i]->recType != Nif::RC_NiTriShape)
+                alltrishapes = false;
+        }
+        if(alltrishapes)
+            return false;
     }
 
-    const Nif::NiNode *ninode = dynamic_cast<const Nif::NiNode*>(node);
-    if(ninode)
-    {
-        const Nif::NodeList &children = ninode->children;
-        for(size_t i = 0;i < children.length();i++)
-        {
-            if(!children[i].empty())
-            {
-                if(createSkeleton(name, group, children[i].getPtr()))
-                    return true;
-            }
-        }
-    }
-    return false;
+    Ogre::SkeletonManager &skelMgr = Ogre::SkeletonManager::getSingleton();
+    skelMgr.create(name, group, true, &sLoaders[name]);
+    return true;
 }
 
 };
@@ -1052,7 +1048,7 @@ public:
             e = e->extra;
         }
 
-        if(node->recType == Nif::RC_NiTriShape)
+        if(node->recType == Nif::RC_NiTriShape && !(flags&0x01)) // Not hidden
         {
             const Nif::NiTriShape *shape = dynamic_cast<const Nif::NiTriShape*>(node);
             mShapeName = shape->name;
@@ -1068,11 +1064,8 @@ public:
             {
                 NIFMeshLoader *loader = &sLoaders[fullname];
                 *loader = *this;
-                if(!(flags&0x01)) // Not hidden
-                {
-                    loader->mShapeIndex = shape->recIndex;
-                    loader->mMaterialName = NIFMaterialLoader::getMaterial(shape, fullname, mGroup);
-                }
+                loader->mShapeIndex = shape->recIndex;
+                loader->mMaterialName = NIFMaterialLoader::getMaterial(shape, fullname, mGroup);
 
                 mesh = meshMgr.createManual(fullname, mGroup, loader);
                 mesh->setAutoBuildEdgeLists(false);
@@ -1092,6 +1085,29 @@ public:
                     createMeshes(children[i].getPtr(), meshes, flags);
             }
         }
+    }
+
+    void createEmptyMesh(const Nif::Node *node, MeshInfoList &meshes)
+    {
+        /* This creates an empty mesh to which a skeleton gets attached. This
+         * is to ensure we have an entity with a skeleton instance, even if all
+         * other meshes are hidden or entities attached to a specific node
+         * instead of skinned. */
+        std::string fullname = mName;
+        Misc::StringUtils::toLower(fullname);
+
+        Ogre::MeshManager &meshMgr = Ogre::MeshManager::getSingleton();
+        Ogre::MeshPtr mesh = meshMgr.getByName(fullname);
+        if(mesh.isNull())
+        {
+            NIFMeshLoader *loader = &sLoaders[fullname];
+            *loader = *this;
+
+            mesh = meshMgr.createManual(fullname, mGroup, loader);
+            mesh->setAutoBuildEdgeLists(false);
+        }
+        meshes.push_back(MeshInfo(mesh->getName(), (node->parent ? node->parent->name : node->name),
+                                  node->trafo.pos, node->trafo.rotation, node->trafo.scale));
     }
 };
 NIFMeshLoader::LoaderMap NIFMeshLoader::sLoaders;
@@ -1135,7 +1151,9 @@ MeshInfoList Loader::load(const std::string &name, const std::string &group)
     }
 
     NIFMeshLoader meshldr(name, group);
-    meshldr.createMeshes(node, meshes);
+    if(hasSkel)
+        meshldr.createEmptyMesh(node, meshes);
+    meshldr.createMeshes(node, meshes, 0);
 
     return meshes;
 }
