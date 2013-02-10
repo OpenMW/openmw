@@ -373,7 +373,10 @@ void InteractiveMessageBox::enterPressed()
     for(button = mButtons.begin(); button != mButtons.end(); ++button)
     {
         if(Misc::StringUtils::lowerCase((*button)->getCaption()) == ok)
+        {
             buttonActivated(*button);
+            break;
+        }
     }
 
 }
