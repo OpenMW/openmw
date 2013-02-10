@@ -11,6 +11,11 @@ namespace CSMDoc
     class DocumentManager;
 }
 
+namespace CSVWorld
+{
+    class CommandDelegateFactoryCollection;
+}
+
 namespace CSVDoc
 {
     class View;
@@ -21,6 +26,7 @@ namespace CSVDoc
 
             CSMDoc::DocumentManager& mDocumentManager;
             std::vector<View *> mViews;
+            CSVWorld::CommandDelegateFactoryCollection *mDelegateFactories;
 
             // not implemented
             ViewManager (const ViewManager&);

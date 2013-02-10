@@ -6,6 +6,8 @@
 #include "../../model/doc/documentmanager.hpp"
 #include "../../model/doc/document.hpp"
 
+#include "../world/util.hpp"
+
 #include "view.hpp"
 
 void CSVDoc::ViewManager::updateIndices()
@@ -29,11 +31,13 @@ void CSVDoc::ViewManager::updateIndices()
 CSVDoc::ViewManager::ViewManager (CSMDoc::DocumentManager& documentManager)
 : mDocumentManager (documentManager)
 {
-
+    mDelegateFactories = new CSVWorld::CommandDelegateFactoryCollection;
 }
 
 CSVDoc::ViewManager::~ViewManager()
 {
+    delete mDelegateFactories;
+
     for (std::vector<View *>::iterator iter (mViews.begin()); iter!=mViews.end(); ++iter)
         delete *iter;
 }
