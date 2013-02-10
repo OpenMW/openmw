@@ -1,3 +1,5 @@
+#include <components/misc/stringops.hpp>
+
 #include "messagebox.hpp"
 
 using namespace MWGui;
@@ -133,6 +135,10 @@ void MessageBoxManager::setMessageBoxSpeed (int speed)
     mMessageBoxSpeed = speed;
 }
 
+void MessageBoxManager::enterPressed ()
+{
+    mInterMessageBoxe->enterPressed();
+}
 
 int MessageBoxManager::readPressedButton ()
 {
@@ -359,7 +365,28 @@ InteractiveMessageBox::InteractiveMessageBox(MessageBoxManager& parMessageBoxMan
     }
 }
 
+void InteractiveMessageBox::enterPressed()
+{
+    
+    std::string ok = Misc::StringUtils::lowerCase(MyGUI::LanguageManager::getInstance().replaceTags("#{sOK}"));
+    std::vector<MyGUI::ButtonPtr>::const_iterator button;
+    for(button = mButtons.begin(); button != mButtons.end(); ++button)
+    {
+        if(Misc::StringUtils::lowerCase((*button)->getCaption()) == ok)
+        {
+            buttonActivated(*button);
+            break;
+        }
+    }
+
+}
+
 void InteractiveMessageBox::mousePressed (MyGUI::Widget* pressed)
+{
+    buttonActivated (pressed);
+}
+
+void InteractiveMessageBox::buttonActivated (MyGUI::Widget* pressed)
 {
     mMarkedToDelete = true;
     int index = 0;
