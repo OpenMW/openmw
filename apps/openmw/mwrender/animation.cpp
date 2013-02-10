@@ -238,8 +238,8 @@ void Animation::reset(const std::string &marker)
 
     if(mNonAccumRoot)
     {
-        mLastPosition = mNonAccumRoot->getPosition();
-        mAccumRoot->setPosition(-mLastPosition * mAccumulate);
+        mLastPosition = mNonAccumRoot->getPosition() * mAccumulate;
+        mAccumRoot->setPosition(-mLastPosition);
     }
 }
 
