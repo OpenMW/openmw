@@ -7,12 +7,7 @@
 #include <components/fileorderlist/utils/naturalsort.hpp>
 #include <components/fileorderlist/utils/filedialog.hpp>
 
-////#include "model/datafilesmodel.hpp"
-////#include "model/esm/esmfile.hpp"
-
 #include "utils/profilescombobox.hpp"
-////#include "utils/filedialog.hpp"
-////#include "utils/naturalsort.hpp"
 #include "utils/textinputdialog.hpp"
 
 #include "datafilespage.hpp"
@@ -527,7 +522,5 @@ void DataFilesPage::profileRenamed(const QString &previous, const QString &curre
      mProfilesComboBox->removeItem(mProfilesComboBox->findText(previous));
 
      mDataFilesList->uncheckAll();
-     ////mMastersModel->uncheckAll();
-     ////mPluginsModel->uncheckAll();
      readConfig();
 }

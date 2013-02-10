@@ -8,8 +8,6 @@
 
 #include "esm/esmfile.hpp"
 
-#include "../utils/naturalsort.hpp"
-
 #include "datafilesmodel.hpp"
 
 DataFilesModel::DataFilesModel(QObject *parent) :
@@ -219,39 +217,21 @@ bool DataFilesModel::setData(const QModelIndex &index, const QVariant &value, in
     return false;
 }
 
+bool lessThanEsmFile(const EsmFile *e1, const EsmFile *e2)
+{
+    //Masters first then alphabetically
+    if (e1->fileName().endsWith(".esm") && !e2->fileName().endsWith(".esm"))
+        return true;
+    if (!e1->fileName().endsWith(".esm") && e2->fileName().endsWith(".esm"))
+        return false;
+    
+    return e1->fileName().toLower() < e2->fileName().toLower();
+}
+
 void DataFilesModel::sort(int column, Qt::SortOrder order)
 {
-    // TODO: Make this more efficient
     emit layoutAboutToBeChanged();
-
-    QList<EsmFile *> sortedFiles;
-
-    QMultiMap<QString, QString> timestamps;
-
-    foreach (EsmFile *file, mFiles)
-        timestamps.insert(file->modified().toString(Qt::ISODate), file->fileName());
-
-    QMapIterator<QString, QString> ti(timestamps);
-
-    while (ti.hasNext()) {
-        ti.next();
-
-        QModelIndex index = indexFromItem(findItem(ti.value()));
-
-        if (!index.isValid())
-            continue;
-
-        EsmFile *file = item(index.row());
-
-        if (!file)
-            continue;
-
-        sortedFiles.append(file);
-    }
-
-    mFiles.clear();
-    mFiles = sortedFiles;
-
+    qSort(mFiles.begin(), mFiles.end(), lessThanEsmFile);
     emit layoutChanged();
 }
 

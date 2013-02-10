@@ -8,7 +8,6 @@
 
 #include "utils/filedialog.hpp"
 #include "utils/lineedit.hpp"
-#include "utils/naturalsort.hpp"
 
 #include "datafileslist.hpp"
 
