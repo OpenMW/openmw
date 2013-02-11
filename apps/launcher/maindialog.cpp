@@ -2,6 +2,7 @@
 
 #include "settings/gamesettings.hpp"
 #include "settings/graphicssettings.hpp"
+#include "settings/launchersettings.hpp"
 
 #include "utils/profilescombobox.hpp"
 
@@ -11,9 +12,11 @@
 #include "datafilespage.hpp"
 
 MainDialog::MainDialog(GameSettings &gameSettings,
-                       GraphicsSettings &graphicsSettings)
+                       GraphicsSettings &graphicsSettings,
+                       LauncherSettings &launcherSettings)
     : mGameSettings(gameSettings)
     , mGraphicsSettings(graphicsSettings)
+    , mLauncherSettings(launcherSettings)
 
 {
     QWidget *centralWidget = new QWidget(this);
@@ -132,7 +135,7 @@ void MainDialog::createPages()
 {
     mPlayPage = new PlayPage(this);
     mGraphicsPage = new GraphicsPage(mCfgMgr, mGraphicsSettings, this);
-    mDataFilesPage = new DataFilesPage(mCfgMgr, mGameSettings, this);
+    mDataFilesPage = new DataFilesPage(mCfgMgr, mGameSettings, mLauncherSettings, this);
 
     // Set the combobox of the play page to imitate the combobox on the datafilespage
     mPlayPage->mProfilesComboBox->setModel(mDataFilesPage->mProfilesComboBox->model());
@@ -161,17 +164,10 @@ void MainDialog::createPages()
 
 bool MainDialog::setup()
 {
-    // Setup the Graphics page
+    // Call this so we can exit on Ogre errors before mainwindow is shown
     if (!mGraphicsPage->setupOgre()) {
         return false;
     }
-
-    // Setup the Data Files page
-    /*
-    if (!mDataFilesPage->setupDataFiles()) {
-        return false;
-    }*/
-
 
     return true;
 }
@@ -184,11 +180,28 @@ void MainDialog::changePage(QListWidgetItem *current, QListWidgetItem *previous)
     mPagesWidget->setCurrentIndex(mIconWidget->row(current));
 }
 
-void MainDialog::closeEvent(QCloseEvent *event)
+void MainDialog::loadSettings()
+{
+
+}
+
+void MainDialog::saveSettings()
+{
+    QString width = QString::number(this->width());
+    QString height = QString::number(this->height());
+
+    mLauncherSettings.setValue(QString("General/MainWindow/width"), width);
+    mLauncherSettings.setValue(QString("General/MainWindow/height"), height);
+
+    qDebug() << "size: " << width << height;
+}
+
+void MainDialog::writeSettings()
 {
     // Now write all config files
-    mDataFilesPage->writeConfig();
+    saveSettings();
     mGraphicsPage->saveSettings();
+    mDataFilesPage->saveSettings();
 
     QString userPath = QString::fromStdString(mCfgMgr.getUserPath().string());
     QDir dir(userPath);
@@ -203,7 +216,7 @@ void MainDialog::closeEvent(QCloseEvent *event)
                               Please make sure you have the right permissions \
                               and try again.<br>").arg(userPath));
             msgBox.exec();
-            event->accept();
+            return;
         }
     }
 
@@ -220,7 +233,7 @@ void MainDialog::closeEvent(QCloseEvent *event)
                           Please make sure you have the right permissions \
                           and try again.<br>").arg(file.fileName()));
         msgBox.exec();
-        event->accept();
+        return;
     }
 
     QTextStream stream(&file);
@@ -242,26 +255,52 @@ void MainDialog::closeEvent(QCloseEvent *event)
                           Please make sure you have the right permissions \
                           and try again.<br>").arg(file.fileName()));
         msgBox.exec();
-        event->accept();
+        return;
     }
 
     stream.setDevice(&file);
     stream.setCodec(QTextCodec::codecForName("UTF-8"));
 
     mGraphicsSettings.writeFile(stream);
+    file.close();
 
+    // Launcher settings
+    file.setFileName(userPath + QString("launcher.cfg"));
+
+    if (!file.open(QIODevice::ReadWrite | QIODevice::Text | QIODevice::Truncate)) {
+        // File cannot be opened or created
+        QMessageBox msgBox;
+        msgBox.setWindowTitle("Error writing Launcher configuration file");
+        msgBox.setIcon(QMessageBox::Critical);
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.setText(tr("<br><b>Could not open or create %0 for writing</b><br><br> \
+                          Please make sure you have the right permissions \
+                          and try again.<br>").arg(file.fileName()));
+        msgBox.exec();
+        return;
+    }
+
+    stream.setDevice(&file);
+    stream.setCodec(QTextCodec::codecForName("UTF-8"));
+
+    mLauncherSettings.writeFile(stream);
+    file.close();
+}
+
+void MainDialog::closeEvent(QCloseEvent *event)
+{
+    saveSettings();
+    writeSettings();
     event->accept();
 }
 
 void MainDialog::play()
 {
     // First do a write of all the configs, just to be sure
-    mDataFilesPage->writeConfig();
+    //mDataFilesPage->writeConfig();
     //mGraphicsPage->writeConfig();
-
-    // Save user settings
-    const std::string settingspath = (mCfgMgr.getUserPath() / "settings.cfg").string();
-    mSettings.saveUser(settingspath);
+    saveSettings();
+    writeSettings();
 
 #ifdef Q_OS_WIN
     QString game = "./openmw.exe";

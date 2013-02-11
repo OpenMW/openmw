@@ -334,6 +334,7 @@ void DataFilesModel::addPlugins(const QString &path)
         QFileInfo info(dir.absoluteFilePath(path));
         EsmFile *file = new EsmFile(path);
 
+
         try {
             ESM::ESMReader fileReader;
             ToUTF8::Utf8Encoder encoder (ToUTF8::calculateEncoding(mEncoding.toStdString()));
@@ -361,7 +362,8 @@ void DataFilesModel::addPlugins(const QString &path)
 
 
             // Put the file in the table
-            addFile(file);
+            if (findItem(path) == 0)
+                addFile(file);
         } catch(std::runtime_error &e) {
             // An error occurred while reading the .esp
             qWarning() << "Error reading esp: " << e.what();

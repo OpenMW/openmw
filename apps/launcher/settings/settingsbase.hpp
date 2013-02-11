@@ -2,6 +2,7 @@
 #define SETTINGSBASE_HPP
 
 #include <QTextStream>
+#include <QStringList>
 #include <QString>
 #include <QRegExp>
 #include <QMap>
@@ -24,6 +25,17 @@ public:
     inline void setValue(const QString &key, const QString &value)
     {
         mSettings.insert(key, value);
+    }
+
+    inline void setMultiValue(const QString &key, const QString &value)
+    {
+        mSettings.insertMulti(key, value);
+    }
+
+
+    inline void remove(const QString &key)
+    {
+        mSettings.remove(key);
     }
 
     Map getSettings() {return mSettings;}
@@ -56,10 +68,17 @@ public:
                 if (!sectionPrefix.isEmpty())
                     key.prepend(sectionPrefix);
 
-                // QMap will replace the value if key exists, QMultiMap creates a new one
-                mCache.insert(key, value);
+                mSettings.remove(key);
+
+                QStringList values = mCache.values(key);
+                if (!values.contains(value)) {
+                    // QMap will replace the value if key exists, QMultiMap creates a new one
+                    mCache.insert(key, value);
+                }
             }
         }
+
+        qDebug() << "HI THERE! " << mCache;
 
         if (mSettings.isEmpty()) {
             mSettings = mCache; // This is the first time we read a file

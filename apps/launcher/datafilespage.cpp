@@ -7,6 +7,7 @@
 #include "model/esm/esmfile.hpp"
 
 #include "settings/gamesettings.hpp"
+#include "settings/launchersettings.hpp"
 
 #include "utils/profilescombobox.hpp"
 #include "utils/lineedit.hpp"
@@ -47,9 +48,10 @@ bool rowSmallerThan(const QModelIndex &index1, const QModelIndex &index2)
     return index1.row() <= index2.row();
 }
 
-DataFilesPage::DataFilesPage(Files::ConfigurationManager &cfg, GameSettings &gameSettings, QWidget *parent)
+DataFilesPage::DataFilesPage(Files::ConfigurationManager &cfg, GameSettings &gameSettings, LauncherSettings &launcherSettings, QWidget *parent)
     : mCfgMgr(cfg)
     , mGameSettings(gameSettings)
+    , mLauncherSettings(launcherSettings)
     , QWidget(parent)
 {
     // Models
@@ -129,15 +131,19 @@ DataFilesPage::DataFilesPage(Files::ConfigurationManager &cfg, GameSettings &gam
     mPluginsTable->setColumnHidden(8, true);
 
     // Add both tables to a splitter
-    QSplitter *splitter = new QSplitter(this);
-    splitter->setOrientation(Qt::Horizontal);
-    splitter->addWidget(mMastersTable);
-    splitter->addWidget(mPluginsTable);
+    mSplitter = new QSplitter(this);
+    mSplitter->setOrientation(Qt::Horizontal);
+    mSplitter->setChildrenCollapsible(false); // Don't allow the widgets to be hidden
+    mSplitter->addWidget(mMastersTable);
+    mSplitter->addWidget(mPluginsTable);
 
     // Adjust the default widget widths inside the splitter
     QList<int> sizeList;
-    sizeList << 175 << 200;
-    splitter->setSizes(sizeList);
+    sizeList << mLauncherSettings.value(QString("General/MastersTable/width"), QString("200")).toInt();
+    sizeList << mLauncherSettings.value(QString("General/PluginTable/width"), QString("340")).toInt();
+    qDebug() << sizeList;
+
+    mSplitter->setSizes(sizeList);
 
     // Bottom part with profile options
     QLabel *profileLabel = new QLabel(tr("Current Profile: "), this);
@@ -158,7 +164,7 @@ DataFilesPage::DataFilesPage(Files::ConfigurationManager &cfg, GameSettings &gam
     QVBoxLayout *pageLayout = new QVBoxLayout(this);
 
     pageLayout->addWidget(filterToolBar);
-    pageLayout->addWidget(splitter);
+    pageLayout->addWidget(mSplitter);
     pageLayout->addWidget(mProfileToolBar);
 
     // Create a dialog for the new profile name input
@@ -178,8 +184,9 @@ DataFilesPage::DataFilesPage(Files::ConfigurationManager &cfg, GameSettings &gam
     connect(mProfilesComboBox, SIGNAL(profileRenamed(QString,QString)), this, SLOT(profileRenamed(QString,QString)));
     connect(mProfilesComboBox, SIGNAL(profileChanged(QString,QString)), this, SLOT(profileChanged(QString,QString)));
 
+    connect(mSplitter, SIGNAL(splitterMoved(int,int)), this, SLOT(updateSplitter()));
+
     createActions();
-    setupConfig();
     setupDataFiles();
 }
 
@@ -221,126 +228,50 @@ void DataFilesPage::createActions()
 
 }
 
-void DataFilesPage::setupConfig()
-{
-    // Open our config file
-    QString config = QString::fromStdString((mCfgMgr.getUserPath() / "launcher.cfg").string());
-    mLauncherConfig = new QSettings(config, QSettings::IniFormat);
-
-    // Make sure we have no groups open
-    while (!mLauncherConfig->group().isEmpty()) {
-        mLauncherConfig->endGroup();
-    }
-
-    mLauncherConfig->beginGroup("Profiles");
-    QStringList profiles = mLauncherConfig->childGroups();
-
-    // Add the profiles to the combobox
-    foreach (const QString &profile, profiles) {
-
-        if (profile.contains(QRegExp("[^a-zA-Z0-9_]")))
-            continue; // Profile name contains garbage
-
-
-         qDebug() << "adding " << profile;
-         mProfilesComboBox->addItem(profile);
-    }
-
-    // Add a default profile
-    if (mProfilesComboBox->findText(QString("Default")) == -1) {
-         mProfilesComboBox->addItem(QString("Default"));
-    }
-
-    QString currentProfile = mLauncherConfig->value("CurrentProfile").toString();
-
-    if (currentProfile.isEmpty()) {
-        // No current profile selected
-        currentProfile = "Default";
-    }
-
-    const int currentIndex = mProfilesComboBox->findText(currentProfile);
-    if (currentIndex != -1) {
-        // Profile is found
-        mProfilesComboBox->setCurrentIndex(currentIndex);
-    }
-
-    mLauncherConfig->endGroup();
-}
-
-
 void DataFilesPage::readConfig()
 {
-    // Don't read the config if no masters are found
-    if (mMastersModel->rowCount() < 1)
-        return;
+//    // Don't read the config if no masters are found
+//    if (mMastersModel->rowCount() < 1)
+//        return;
 
-    QString profile = mProfilesComboBox->currentText();
+//    QString profile = mProfilesComboBox->currentText();
 
-    // Make sure we have no groups open
-    while (!mLauncherConfig->group().isEmpty()) {
-        mLauncherConfig->endGroup();
-    }
-
-    mLauncherConfig->beginGroup("Profiles");
-    mLauncherConfig->beginGroup(profile);
-
-    QStringList childKeys = mLauncherConfig->childKeys();
-    QStringList plugins;
-
-    // Sort the child keys numerical instead of alphabetically
-    // i.e. Plugin1, Plugin2 instead of Plugin1, Plugin10
-    qSort(childKeys.begin(), childKeys.end(), naturalSortLessThanCI);
-
-    foreach (const QString &key, childKeys) {
-        const QString keyValue = mLauncherConfig->value(key).toString();
-
-        if (key.startsWith("Plugin")) {
-            //QStringList checked = mPluginsModel->checkedItems();
-            EsmFile *file = mPluginsModel->findItem(keyValue);
-            QModelIndex index = mPluginsModel->indexFromItem(file);
-
-            mPluginsModel->setCheckState(index, Qt::Checked);
-            // Move the row to the top of te view
-            //mPluginsModel->moveRow(index.row(), checked.count());
-            plugins << keyValue;
-        }
-
-        if (key.startsWith("Master")) {
-            EsmFile *file = mMastersModel->findItem(keyValue);
-            mMastersModel->setCheckState(mMastersModel->indexFromItem(file), Qt::Checked);
-        }
-    }
-
-    qDebug() << plugins;
-
-
-//    // Set the checked item positions
-//    const QStringList checked = mPluginsModel->checkedItems();
-//    for (int i = 0; i < plugins.size(); ++i) {
-//        EsmFile *file = mPluginsModel->findItem(plugins.at(i));
-//        QModelIndex index = mPluginsModel->indexFromItem(file);
-//        mPluginsModel->moveRow(index.row(), i);
-//        qDebug() << "Moving: " << plugins.at(i) << " from: " << index.row() << " to: " << i << " count: " << checked.count();
-
+//    // Make sure we have no groups open
+//    while (!mLauncherConfig->group().isEmpty()) {
+//        mLauncherConfig->endGroup();
 //    }
 
-    // Iterate over the plugins to set their checkstate and position
-//    for (int i = 0; i < plugins.size(); ++i) {
-//        const QString plugin = plugins.at(i);
+//    mLauncherConfig->beginGroup("Profiles");
+//    mLauncherConfig->beginGroup(profile);
 
-//        const QList<QStandardItem *> pluginList = mPluginsModel->findItems(plugin);
+//    QStringList childKeys = mLauncherConfig->childKeys();
+//    QStringList plugins;
 
-//        if (!pluginList.isEmpty())
-//        {
-//            foreach (const QStandardItem *currentPlugin, pluginList) {
-//                mPluginsModel->setData(currentPlugin->index(), Qt::Checked, Qt::CheckStateRole);
+//    // Sort the child keys numerical instead of alphabetically
+//    // i.e. Plugin1, Plugin2 instead of Plugin1, Plugin10
+//    qSort(childKeys.begin(), childKeys.end(), naturalSortLessThanCI);
 
-//                // Move the plugin to the position specified in the config file
-//                mPluginsModel->insertRow(i, mPluginsModel->takeRow(currentPlugin->row()));
-//            }
+//    foreach (const QString &key, childKeys) {
+//        const QString keyValue = mLauncherConfig->value(key).toString();
+
+//        if (key.startsWith("Plugin")) {
+//            //QStringList checked = mPluginsModel->checkedItems();
+//            EsmFile *file = mPluginsModel->findItem(keyValue);
+//            QModelIndex index = mPluginsModel->indexFromItem(file);
+
+//            mPluginsModel->setCheckState(index, Qt::Checked);
+//            // Move the row to the top of te view
+//            //mPluginsModel->moveRow(index.row(), checked.count());
+//            plugins << keyValue;
+//        }
+
+//        if (key.startsWith("Master")) {
+//            EsmFile *file = mMastersModel->findItem(keyValue);
+//            mMastersModel->setCheckState(mMastersModel->indexFromItem(file), Qt::Checked);
 //        }
 //    }
 
+//    qDebug() << plugins;
 }
 
 void DataFilesPage::setupDataFiles()
@@ -362,10 +293,43 @@ void DataFilesPage::setupDataFiles()
         mPluginsModel->addPlugins(dataLocal);
     }
 
+    loadSettings();
+}
+
+void DataFilesPage::loadSettings()
+{
+    qDebug() << "load settings";
+}
+
+void DataFilesPage::saveSettings()
+{
+    QString profile = mLauncherSettings.value(QString("Profiles/CurrentProfile"));
+    qDebug() << "save settings" << profile;
+
+    QStringList items = mMastersModel->checkedItems();
+
+    foreach(const QString &master, items) {
+        mLauncherSettings.setMultiValue(QString("Profiles/") + profile + QString("/master"), master);
+    }
+
+    items.clear();
+    items = mPluginsModel->checkedItems();
+
+    qDebug() << items.size();
+
+    foreach(const QString &plugin, items) {
+        qDebug() << "setting " << plugin;
+        mLauncherSettings.setMultiValue(QString("Profiles/") + profile + QString("/plugin"), plugin);
+    }
+
+
+
 }
 
 void DataFilesPage::writeConfig(QString profile)
 {
+
+
 //    // Don't overwrite the config if no masters are found
 //    if (mMastersModel->rowCount() < 1)
 //        return;
@@ -518,21 +482,22 @@ void DataFilesPage::writeConfig(QString profile)
 
 void DataFilesPage::newProfile()
 {
-    if (mNewProfileDialog->exec() == QDialog::Accepted) {
+//    if (mNewProfileDialog->exec() == QDialog::Accepted) {
 
-        const QString text = mNewProfileDialog->lineEdit()->text();
-        mProfilesComboBox->addItem(text);
+//        const QString text = mNewProfileDialog->lineEdit()->text();
+//        mProfilesComboBox->addItem(text);
+//        mProfilesComboBox->setCurrentIndex(mProfilesComboBox->findText(text));
+//    }
 
-        // Copy the currently checked items to cfg
-        writeConfig(text);
-        mLauncherConfig->sync();
-
-        mProfilesComboBox->setCurrentIndex(mProfilesComboBox->findText(text));
-    }
+    mDeleteProfileAction->setEnabled(false);
+    mProfilesComboBox->setCurrentIndex(-1);
+    mProfilesComboBox->setEditEnabled(true);
+    mProfilesComboBox->lineEdit()->setFocus();
 }
 
 void DataFilesPage::updateOkButton(const QString &text)
 {
+    // We do this here because we need the profiles combobox text
     if (text.isEmpty()) {
          mNewProfileDialog->setOkButtonEnabled(false);
          return;
@@ -541,6 +506,16 @@ void DataFilesPage::updateOkButton(const QString &text)
     (mProfilesComboBox->findText(text) == -1)
             ? mNewProfileDialog->setOkButtonEnabled(true)
             : mNewProfileDialog->setOkButtonEnabled(false);
+}
+
+void DataFilesPage::updateSplitter()
+{
+    // Sigh, update the saved splitter size in settings only when moved
+    // Since getting mSplitter->sizes() if page is hidden returns invalid values
+    QList<int> sizes = mSplitter->sizes();
+
+    mLauncherSettings.setValue(QString("General/MastersTable/width"), QString::number(sizes.at(0)));
+    mLauncherSettings.setValue(QString("General/PluginsTable/width"), QString::number(sizes.at(1)));
 }
 
 void DataFilesPage::deleteProfile()
@@ -562,18 +537,8 @@ void DataFilesPage::deleteProfile()
     msgBox.exec();
 
     if (msgBox.clickedButton() == deleteButton) {
-       // Make sure we have no groups open
-        while (!mLauncherConfig->group().isEmpty()) {
-            mLauncherConfig->endGroup();
-        }
-
-        mLauncherConfig->beginGroup("Profiles");
-
-        // Open the profile-name subgroup
-        mLauncherConfig->beginGroup(profile);
-        mLauncherConfig->remove(""); // Clear the subgroup
-        mLauncherConfig->endGroup();
-        mLauncherConfig->endGroup();
+        mLauncherSettings.remove(QString("Profiles/") + profile + QString("/master"));
+        mLauncherSettings.remove(QString("Profiles/") + profile + QString("/plugin"));
 
         // Remove the profile from the combobox
         mProfilesComboBox->removeItem(mProfilesComboBox->findText(profile));
@@ -624,11 +589,8 @@ void DataFilesPage::refresh()
 {
     mPluginsModel->sort(0);
 
-
     // Refresh the plugins table
     mPluginsTable->scrollToTop();
-    writeConfig();
-    readConfig();
 }
 
 
@@ -679,50 +641,43 @@ void DataFilesPage::profileChanged(const QString &previous, const QString &curre
         mProfilesComboBox->setEditEnabled(true);
     }
 
-    if (!previous.isEmpty()) {
-        writeConfig(previous);
-        mLauncherConfig->sync();
-
-        if (mProfilesComboBox->currentIndex() == -1)
-            return;
-
-    } else {
+    if (previous.isEmpty())
         return;
-    }
+
+    if (mProfilesComboBox->findText(previous) == -1)
+        return; // Profile was deleted
+
+    // Store the previous profile
+    mLauncherSettings.setValue(QString("Profiles/CurrentProfile"), previous);
+    saveSettings();
+    mLauncherSettings.setValue(QString("Profiles/CurrentProfile"), current);
+
 
     mMastersModel->uncheckAll();
     mPluginsModel->uncheckAll();
-    readConfig();
+    loadSettings();
 }
 
 void DataFilesPage::profileRenamed(const QString &previous, const QString &current)
 {
+    qDebug() << "rename";
     if (previous.isEmpty())
         return;
 
     // Save the new profile name
-    writeConfig(current);
+    mLauncherSettings.setValue(QString("Profiles/CurrentProfile"), current);
+    saveSettings();
 
-    // Make sure we have no groups open
-     while (!mLauncherConfig->group().isEmpty()) {
-         mLauncherConfig->endGroup();
-     }
+    // Remove the old one
+    mLauncherSettings.remove(QString("Profiles/") + previous + QString("/master"));
+    mLauncherSettings.remove(QString("Profiles/") + previous + QString("/plugin"));
 
-     mLauncherConfig->beginGroup("Profiles");
+    // Remove the profile from the combobox
+    mProfilesComboBox->removeItem(mProfilesComboBox->findText(previous));
 
-     // Open the profile-name subgroup
-     mLauncherConfig->beginGroup(previous);
-     mLauncherConfig->remove(""); // Clear the subgroup
-     mLauncherConfig->endGroup();
-     mLauncherConfig->endGroup();
-     mLauncherConfig->sync();
-
-     // Remove the profile from the combobox
-     mProfilesComboBox->removeItem(mProfilesComboBox->findText(previous));
-
-     mMastersModel->uncheckAll();
-     mPluginsModel->uncheckAll();
-     readConfig();
+    mMastersModel->uncheckAll();
+    mPluginsModel->uncheckAll();
+    loadSettings();
 }
 
 void DataFilesPage::showContextMenu(const QPoint &point)

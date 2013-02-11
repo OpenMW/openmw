@@ -101,7 +101,14 @@ bool GameSettings::readFile(QTextStream &stream)
             qDebug() << "key: " << key;
             // There can be multiple data keys
             if (key == QLatin1String("data")) {
-                cache.insertMulti(key, value);
+                // Remove keys from previous config and overwrite them
+                mSettings.remove(key);
+                QStringList values = cache.values(key);
+                if (!values.contains(value)) {
+                    // Do not insert duplicate values
+                    qDebug() << "values does not contain: " << value << values;
+                    cache.insertMulti(key, value);
+                }
             } else {
                 cache.insert(key, value);
             }

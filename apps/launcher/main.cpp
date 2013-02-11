@@ -16,6 +16,7 @@
 #include "maindialog.hpp"
 #include "settings/gamesettings.hpp"
 #include "settings/graphicssettings.hpp"
+#include "settings/launchersettings.hpp"
 
 
 int main(int argc, char *argv[])
@@ -52,6 +53,7 @@ int main(int argc, char *argv[])
 
     GameSettings gameSettings(cfgMgr);
     GraphicsSettings graphicsSettings;
+    LauncherSettings launcherSettings;
 
     QStringList paths;
     paths.append(userPath + QString("openmw.cfg"));
@@ -118,8 +120,6 @@ int main(int argc, char *argv[])
     }
 
     // On to the graphics settings
-    qDebug() << userPath;
-
     QFile localDefault(QString("settings-default.cfg"));
     QFile globalDefault(globalPath + QString("settings-default.cfg"));
 
@@ -163,8 +163,36 @@ int main(int argc, char *argv[])
         file.close();
     }
 
+    // Now the launcher settings
+    paths.clear();
+    paths.append(QString("launcher.cfg"));
+    paths.append(userPath + QString("launcher.cfg"));
 
-    MainDialog mainWin(gameSettings, graphicsSettings);
+    foreach (const QString &path, paths) {
+        qDebug() << "Loading: " << path;
+        QFile file(path);
+        if (file.exists()) {
+            if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+                QMessageBox msgBox;
+                msgBox.setWindowTitle("Error opening OpenMW configuration file");
+                msgBox.setIcon(QMessageBox::Critical);
+                msgBox.setStandardButtons(QMessageBox::Ok);
+                msgBox.setText(QObject::tr("<br><b>Could not open %0 for reading</b><br><br> \
+                                  Please make sure you have the right permissions \
+                                  and try again.<br>").arg(file.fileName()));
+                msgBox.exec();
+                return 0;
+            }
+            QTextStream stream(&file);
+            stream.setCodec(QTextCodec::codecForName("UTF-8"));
+
+            launcherSettings.readFile(stream);
+        }
+        file.close();
+    }
+
+
+    MainDialog mainWin(gameSettings, graphicsSettings, launcherSettings);
 
     if (mainWin.setup()) {
         mainWin.show();

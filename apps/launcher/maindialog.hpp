@@ -4,7 +4,6 @@
 #include <QMainWindow>
 
 #include <components/files/configurationmanager.hpp>
-#include <components/settings/settings.hpp>
 
 class QListWidget;
 class QListWidgetItem;
@@ -19,22 +18,31 @@ class DataFilesPage;
 
 class GameSettings;
 class GraphicsSettings;
+class LauncherSettings;
 
 class MainDialog : public QMainWindow
 {
     Q_OBJECT
 
 public:
-    MainDialog(GameSettings &gameSettings, GraphicsSettings &GraphicsSettings);
+    MainDialog(GameSettings &gameSettings,
+               GraphicsSettings &GraphicsSettings,
+               LauncherSettings &launcherSettings);
+
+    bool setup();
 
 public slots:
     void changePage(QListWidgetItem *current, QListWidgetItem *previous);
     void play();
-    bool setup();
 
 private:
     void createIcons();
     void createPages();
+
+    void loadSettings();
+    void saveSettings();
+    void writeSettings();
+
     void closeEvent(QCloseEvent *event);
 
     QListWidget *mIconWidget;
@@ -45,10 +53,10 @@ private:
     DataFilesPage *mDataFilesPage;
 
     Files::ConfigurationManager mCfgMgr;
-    Settings::Manager mSettings;
 
     GameSettings &mGameSettings;
     GraphicsSettings &mGraphicsSettings;
+    LauncherSettings &mLauncherSettings;
 
 };
 
