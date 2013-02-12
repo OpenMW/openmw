@@ -87,6 +87,7 @@ std::vector<std::string> BookTextParser::split(std::string utf8Text, const int w
     MWScript::InterpreterContext interpreterContext(NULL, MWWorld::Ptr()); // empty arguments, because there is no locals or actor
     utf8Text = Interpreter::fixDefinesBook(utf8Text, interpreterContext);
 
+    boost::algorithm::replace_all(utf8Text, "\n", "");
     boost::algorithm::replace_all(utf8Text, "<BR>", "\n");
     boost::algorithm::replace_all(utf8Text, "<P>", "\n\n");
 
@@ -207,6 +208,7 @@ MyGUI::IntSize BookTextParser::parse(std::string text, MyGUI::Widget* parent, co
         MyGUI::Gui::getInstance().destroyWidget(mParent->getChildAt(0));
     }
 
+    boost::algorithm::replace_all(text, "\n", "");
     boost::algorithm::replace_all(text, "<BR>", "\n");
     boost::algorithm::replace_all(text, "<P>", "\n\n");
 
