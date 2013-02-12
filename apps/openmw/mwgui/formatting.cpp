@@ -160,7 +160,7 @@ std::vector<std::string> BookTextParser::split(std::string text, const int width
 
             ++i;
         }
-        if (currentHeight > height-spacing)
+        if (currentHeight > height-spacing && currentText.size() != currentWord.size())
         {
             // remove the last word
             currentText.erase(currentText.size()-currentWord.size(), currentText.size());
