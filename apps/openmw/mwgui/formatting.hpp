@@ -40,6 +40,8 @@ namespace MWGui
             std::vector<std::string> split(std::string text, const int width, const int height);
 
         protected:
+            float widthForCharGlyph(unsigned unicodeChar) const;
+            float currentFontHeight() const;
             void parseSubText(std::string text);
 
             void parseImage(std::string tag, bool createWidget=true);
