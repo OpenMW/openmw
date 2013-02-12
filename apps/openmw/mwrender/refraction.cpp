@@ -6,6 +6,7 @@
 #include <OgreHardwarePixelBuffer.h>
 #include <OgreRenderTarget.h>
 #include <OgreViewport.h>
+#include <OgreRoot.h>
 
 #include "renderconst.hpp"
 
@@ -14,8 +15,12 @@ namespace MWRender
 
     Refraction::Refraction(Ogre::Camera *parentCamera)
         : mParentCamera(parentCamera)
+        , mRenderActive(false)
+        , mIsUnderwater(false)
     {
         mCamera = mParentCamera->getSceneManager()->createCamera("RefractionCamera");
+
+        mParentCamera->getSceneManager()->addRenderQueueListener(this);
 
         Ogre::TexturePtr texture = Ogre::TextureManager::getSingleton().createManual("WaterRefraction",
             Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, Ogre::TEX_TYPE_2D, 512, 512, 0, Ogre::PF_R8G8B8, Ogre::TU_RENDERTARGET);
@@ -24,7 +29,7 @@ namespace MWRender
         Ogre::Viewport* vp = mRenderTarget->addViewport(mCamera);
         vp->setOverlaysEnabled(false);
         vp->setShadowsEnabled(false);
-        vp->setVisibilityMask(RV_Actors + RV_Misc + RV_Statics + RV_StaticsSmall + RV_Terrain);
+        vp->setVisibilityMask(RV_Actors + RV_Misc + RV_Statics + RV_StaticsSmall + RV_Terrain + RV_Sky);
         vp->setMaterialScheme("water_reflection");
         mRenderTarget->setAutoUpdated(true);
         mRenderTarget->addListener(this);
@@ -47,17 +52,42 @@ namespace MWRender
         mCamera->setAspectRatio(mParentCamera->getAspectRatio());
         mCamera->setFOVy(mParentCamera->getFOVy());
 
-        mCamera->enableCustomNearClipPlane(mNearClipPlane);
+        mRenderActive = true;
     }
 
     void Refraction::postRenderTargetUpdate(const Ogre::RenderTargetEvent& evt)
     {
-
+        mRenderActive = false;
     }
 
     void Refraction::setHeight(float height)
     {
         mNearClipPlane = Ogre::Plane( -Ogre::Vector3(0,1,0), -(height + 5));
+        mNearClipPlaneUnderwater = Ogre::Plane( Ogre::Vector3(0,1,0), height - 5);
+    }
+
+    void Refraction::setViewportBackground (Ogre::ColourValue colour)
+    {
+        mRenderTarget->getViewport (0)->setBackgroundColour (colour);
+    }
+
+    void Refraction::renderQueueStarted (Ogre::uint8 queueGroupId, const Ogre::String &invocation, bool &skipThisInvocation)
+    {
+        // We don't want the sky to get clipped by custom near clip plane (the water plane)
+        if (queueGroupId < 20 && mRenderActive)
+        {
+            mCamera->disableCustomNearClipPlane();
+            Ogre::Root::getSingleton().getRenderSystem()->_setProjectionMatrix(mCamera->getProjectionMatrixRS());
+        }
+    }
+
+    void Refraction::renderQueueEnded (Ogre::uint8 queueGroupId, const Ogre::String &invocation, bool &repeatThisInvocation)
+    {
+        if (queueGroupId < 20 && mRenderActive)
+        {
+            mCamera->enableCustomNearClipPlane(mIsUnderwater ? mNearClipPlaneUnderwater : mNearClipPlane);
+            Ogre::Root::getSingleton().getRenderSystem()->_setProjectionMatrix(mCamera->getProjectionMatrixRS());
+        }
     }
 
 }

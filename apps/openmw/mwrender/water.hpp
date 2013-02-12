@@ -89,6 +89,7 @@ namespace MWRender {
         SkyManager* mSky;
         Ogre::Plane mWaterPlane;
         Ogre::Plane mErrorPlane;
+        Ogre::Plane mErrorPlaneUnderwater;
         bool mRenderActive;
     };
 

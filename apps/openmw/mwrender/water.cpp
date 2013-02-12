@@ -124,8 +124,8 @@ void PlaneReflection::renderQueueEnded (Ogre::uint8 queueGroupId, const Ogre::St
 {
     if (queueGroupId < 20 && mRenderActive)
     {
-        if (!mIsUnderwater)
-            mCamera->enableCustomNearClipPlane(mErrorPlane);
+        // this trick does not seem to work well for extreme angles
+        mCamera->enableCustomNearClipPlane(mIsUnderwater ? mErrorPlaneUnderwater : mErrorPlane);
         Root::getSingleton().getRenderSystem()->_setProjectionMatrix(mCamera->getProjectionMatrixRS());
     }
 }
@@ -159,6 +159,7 @@ void PlaneReflection::setHeight (float height)
 {
     mWaterPlane = Plane(Ogre::Vector3(0,1,0), height);
     mErrorPlane = Plane(Ogre::Vector3(0,1,0), height - 5);
+    mErrorPlaneUnderwater = Plane(Ogre::Vector3(0,-1,0), -height - 5);
 }
 
 void PlaneReflection::setActive (bool active)
@@ -348,6 +349,8 @@ Water::updateUnderwater(bool underwater)
 
     if (mReflection)
         mReflection->setUnderwater (mIsUnderwater);
+    if (mRefraction)
+        mRefraction->setUnderwater (mIsUnderwater);
 
     updateVisible();
 }
@@ -377,6 +380,8 @@ void Water::setViewportBackground(const ColourValue& bg)
 {
     if (mReflection)
         mReflection->setViewportBackground(bg);
+    if (mRefraction)
+        mRefraction->setViewportBackground(bg);
 }
 
 void Water::updateVisible()

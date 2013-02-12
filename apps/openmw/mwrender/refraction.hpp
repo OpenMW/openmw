@@ -3,6 +3,7 @@
 
 #include <OgrePlane.h>
 #include <OgreRenderTargetListener.h>
+#include <OgreRenderQueueListener.h>
 
 namespace Ogre
 {
@@ -13,7 +14,7 @@ namespace Ogre
 namespace MWRender
 {
 
-    class Refraction : public Ogre::RenderTargetListener
+    class Refraction : public Ogre::RenderTargetListener, public Ogre::RenderQueueListener
     {
 
     public:
@@ -23,12 +24,20 @@ namespace MWRender
         void setHeight (float height);
         void preRenderTargetUpdate(const Ogre::RenderTargetEvent& evt);
         void postRenderTargetUpdate(const Ogre::RenderTargetEvent& evt);
+        void setViewportBackground(Ogre::ColourValue colour);
+        void setUnderwater(bool underwater) {mIsUnderwater = underwater;}
+
+        void renderQueueStarted (Ogre::uint8 queueGroupId, const Ogre::String &invocation, bool &skipThisInvocation);
+        void renderQueueEnded (Ogre::uint8 queueGroupId, const Ogre::String &invocation, bool &repeatThisInvocation);
 
     private:
         Ogre::Camera* mParentCamera;
         Ogre::Camera* mCamera;
         Ogre::RenderTarget* mRenderTarget;
         Ogre::Plane mNearClipPlane;
+        Ogre::Plane mNearClipPlaneUnderwater;
+        bool mRenderActive;
+        bool mIsUnderwater;
     };
 
 }
