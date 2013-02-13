@@ -54,14 +54,6 @@ namespace MWInput
         , mPreviewPOVDelay(0.f)
         , mTimeIdle(0.f)
     {
-        create();
-
-        changeInputMode(false);
-    }
-
-
-    void InputManager::create()
-    {
         Ogre::RenderWindow* window = mOgre.getWindow ();
         size_t windowHnd;
 
@@ -139,9 +131,11 @@ namespace MWInput
         mControlSwitch["playermagic"]         = true;
         mControlSwitch["playerviewswitch"]    = true;
         mControlSwitch["vanitymode"]          = true;
+
+        changeInputMode(false);
     }
 
-    void InputManager::destroy()
+    InputManager::~InputManager()
     {
         mInputCtrl->save (mUserFile);
 
@@ -150,11 +144,6 @@ namespace MWInput
         mInputManager->destroyInputObject(mKeyboard);
         mInputManager->destroyInputObject(mMouse);
         OIS::InputManager::destroyInputSystem(mInputManager);
-    }
-
-    InputManager::~InputManager()
-    {
-        destroy();
     }
 
     void InputManager::channelChanged(ICS::Channel* channel, float currentValue, float previousValue)

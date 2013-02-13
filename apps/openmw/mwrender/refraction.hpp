@@ -24,7 +24,6 @@ namespace MWRender
         void setHeight (float height);
         void preRenderTargetUpdate(const Ogre::RenderTargetEvent& evt);
         void postRenderTargetUpdate(const Ogre::RenderTargetEvent& evt);
-        void setViewportBackground(Ogre::ColourValue colour);
         void setUnderwater(bool underwater) {mIsUnderwater = underwater;}
 
         void renderQueueStarted (Ogre::uint8 queueGroupId, const Ogre::String &invocation, bool &skipThisInvocation);

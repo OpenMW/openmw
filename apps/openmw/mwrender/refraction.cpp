@@ -31,6 +31,7 @@ namespace MWRender
         vp->setShadowsEnabled(false);
         vp->setVisibilityMask(RV_Actors + RV_Misc + RV_Statics + RV_StaticsSmall + RV_Terrain + RV_Sky);
         vp->setMaterialScheme("water_reflection");
+        vp->setBackgroundColour (Ogre::ColourValue(0.0078, 0.0576, 0.150));
         mRenderTarget->setAutoUpdated(true);
         mRenderTarget->addListener(this);
     }
@@ -64,11 +65,6 @@ namespace MWRender
     {
         mNearClipPlane = Ogre::Plane( -Ogre::Vector3(0,1,0), -(height + 5));
         mNearClipPlaneUnderwater = Ogre::Plane( Ogre::Vector3(0,1,0), height - 5);
-    }
-
-    void Refraction::setViewportBackground (Ogre::ColourValue colour)
-    {
-        mRenderTarget->getViewport (0)->setBackgroundColour (colour);
     }
 
     void Refraction::renderQueueStarted (Ogre::uint8 queueGroupId, const Ogre::String &invocation, bool &skipThisInvocation)

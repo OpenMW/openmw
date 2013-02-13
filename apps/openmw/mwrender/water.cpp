@@ -380,8 +380,6 @@ void Water::setViewportBackground(const ColourValue& bg)
 {
     if (mReflection)
         mReflection->setViewportBackground(bg);
-    if (mRefraction)
-        mRefraction->setViewportBackground(bg);
 }
 
 void Water::updateVisible()

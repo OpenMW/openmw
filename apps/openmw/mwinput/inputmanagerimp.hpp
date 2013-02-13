@@ -153,10 +153,6 @@ namespace MWInput
 
         std::map<std::string, bool> mControlSwitch;
 
-    public:
-        virtual void create();
-        virtual void destroy();
-
     private:
         void adjustMouseRegion(int width, int height);
 
