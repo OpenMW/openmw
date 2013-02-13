@@ -6,7 +6,9 @@
 #include "../mwworld/ptr.hpp"
 
 #include <boost/algorithm/string/replace.hpp>
+#include <boost/algorithm/string/predicate.hpp>
 #include <boost/lexical_cast.hpp>
+#include <OgreUTFString.h>
 
 using namespace MWGui;
 
@@ -67,117 +69,134 @@ namespace
 
         return value;
     }
+
+    Ogre::UTFString::unicode_char unicodeCharFromChar(char ch)
+    {
+        std::string s;
+        s += ch;
+        Ogre::UTFString string(s);
+        return string.getChar(0);
+    }
 }
 
-std::vector<std::string> BookTextParser::split(std::string text, const int width, const int height)
+std::vector<std::string> BookTextParser::split(std::string utf8Text, const int width, const int height)
 {
+    using Ogre::UTFString;
     std::vector<std::string> result;
 
     MWScript::InterpreterContext interpreterContext(NULL, MWWorld::Ptr()); // empty arguments, because there is no locals or actor
-    text = Interpreter::fixDefinesBook(text, interpreterContext);
+    utf8Text = Interpreter::fixDefinesBook(utf8Text, interpreterContext);
 
-    boost::algorithm::replace_all(text, "<BR>", "\n");
-    boost::algorithm::replace_all(text, "<P>", "\n\n");
+    boost::algorithm::replace_all(utf8Text, "\n", "");
+    boost::algorithm::replace_all(utf8Text, "<BR>", "\n");
+    boost::algorithm::replace_all(utf8Text, "<P>", "\n\n");
 
+    UTFString text(utf8Text);
     const int spacing = 48;
 
-    while (text.size() > 0)
+    const UTFString::unicode_char LEFT_ANGLE = unicodeCharFromChar('<');
+    const UTFString::unicode_char NEWLINE = unicodeCharFromChar('\n');
+    const UTFString::unicode_char SPACE = unicodeCharFromChar(' ');
+
+    while (!text.empty())
     {
         // read in characters until we have exceeded the size, or run out of text
         int currentWidth = 0;
         int currentHeight = 0;
-        std::string currentText;
-        std::string currentWord;
 
-        unsigned int i=0;
-        while (currentHeight <= height-spacing && i<text.size())
+        size_t currentWordStart = 0;
+        size_t index = 0;
+        while (currentHeight <= height - spacing && index < text.size())
         {
-            if (text[i] == '<')
+            const UTFString::unicode_char ch = text.getChar(index);
+            if (ch == LEFT_ANGLE)
             {
-                if (text.find('>', i) == std::string::npos)
+                const size_t tagStart = index + 1;
+                const size_t tagEnd = text.find('>', tagStart);
+                if (tagEnd == UTFString::npos)
                     throw std::runtime_error("BookTextParser Error: Tag is not terminated");
+                const std::string tag = text.substr(tagStart, tagEnd - tagStart).asUTF8();
 
-                if (text.size() > i+4 && text.substr(i, 4) == "<IMG")
+                if (boost::algorithm::starts_with(tag, "IMG"))
                 {
-                    int h = mHeight;
-                    parseImage(text.substr(i, text.find('>', i)-i), false);
-                    currentHeight += (mHeight-h);
+                    const int h = mHeight;
+                    parseImage(tag, false);
+                    currentHeight += (mHeight - h);
                     currentWidth = 0;
                 }
-                else if (text.size() > i+5 && text.substr(i, 5) == "<FONT")
+                else if (boost::algorithm::starts_with(tag, "FONT"))
                 {
-                    parseFont(text.substr(i, text.find('>', i)-i));
-                    currentHeight += 18; // keep this in sync with the font size
+                    parseFont(tag);
+                    if (currentWidth != 0) {
+                        currentHeight += currentFontHeight();
+                        currentWidth = 0;
+                    }
                     currentWidth = 0;
                 }
-                else if (text.size() > i+4 && text.substr(i, 4) == "<DIV")
+                else if (boost::algorithm::starts_with(tag, "DIV"))
                 {
-                    parseDiv(text.substr(i, text.find('>', i)-i));
-                    currentHeight += 18; // keep this in sync with the font size
-                    currentWidth = 0;
+                    parseDiv(tag);
+                    if (currentWidth != 0) {
+                        currentHeight += currentFontHeight();
+                        currentWidth = 0;
+                    }
                 }
-
-                currentText += text.substr(i, text.find('>', i)-i+1);
-                i = text.find('>', i);
+                index = tagEnd;
             }
-            else if (text[i] == '\n')
+            else if (ch == NEWLINE)
             {
-                currentHeight += 18; // keep this in sync with the font size
+                currentHeight += currentFontHeight();
                 currentWidth = 0;
-                currentWord = "";
-                currentText += text[i];
+                currentWordStart = index;
             }
-            else if (text[i] == ' ')
+            else if (ch == SPACE)
             {
                 currentWidth += 3; // keep this in sync with the font's SpaceWidth property
-                currentWord = "";
-                currentText += text[i];
+                currentWordStart = index;
             }
             else
             {
-                currentWidth +=
-                    MyGUI::FontManager::getInstance().getByName (mTextStyle.mFont == "Default" ? "EB Garamond" : mTextStyle.mFont)
-                        ->getGlyphInfo(static_cast<unsigned int>(text[i]))->width;
-                currentWord += text[i];
-                currentText += text[i];
+                currentWidth += widthForCharGlyph(ch);
             }
 
             if (currentWidth > width)
             {
-                currentHeight += 18; // keep this in sync with the font size
+                currentHeight += currentFontHeight();
                 currentWidth = 0;
-
                 // add size of the current word
-                unsigned int j=0;
-                while (j<currentWord.size())
-                {
-                    currentWidth +=
-                        MyGUI::FontManager::getInstance().getByName (mTextStyle.mFont == "Default" ? "EB Garamond" : mTextStyle.mFont)
-                            ->getGlyphInfo(static_cast<unsigned int>(currentWord[j]))->width;
-                    ++j;
-                }
+                UTFString word = text.substr(currentWordStart, index - currentWordStart);
+                for (UTFString::const_iterator it = word.begin(), end = word.end(); it != end; ++it)
+                    currentWidth += widthForCharGlyph(it.getCharacter());
             }
-
-            ++i;
+            index += UTFString::_utf16_char_length(ch);
         }
-        if (currentHeight > height-spacing)
-        {
-            // remove the last word
-            currentText.erase(currentText.size()-currentWord.size(), currentText.size());
-        }
+        const size_t pageEnd = (currentHeight > height - spacing && currentWordStart != 0)
+                ? currentWordStart : index;
 
-        result.push_back(currentText);
-        text.erase(0, currentText.size());
+        result.push_back(text.substr(0, pageEnd).asUTF8());
+        text.erase(0, pageEnd);
     }
 
     return result;
+}
+
+float BookTextParser::widthForCharGlyph(unsigned unicodeChar) const
+{
+    std::string fontName(mTextStyle.mFont == "Default" ? "EB Garamond" : mTextStyle.mFont);
+    return MyGUI::FontManager::getInstance().getByName(fontName)
+            ->getGlyphInfo(unicodeChar)->width;
+}
+
+float BookTextParser::currentFontHeight() const
+{
+    std::string fontName(mTextStyle.mFont == "Default" ? "EB Garamond" : mTextStyle.mFont);
+    return MyGUI::FontManager::getInstance().getByName(fontName)->getDefaultHeight();
 }
 
 MyGUI::IntSize BookTextParser::parse(std::string text, MyGUI::Widget* parent, const int width)
 {
     MWScript::InterpreterContext interpreterContext(NULL, MWWorld::Ptr()); // empty arguments, because there is no locals or actor
     text = Interpreter::fixDefinesBook(text, interpreterContext);
-
 
     mParent = parent;
     mWidth = width;
@@ -189,12 +208,13 @@ MyGUI::IntSize BookTextParser::parse(std::string text, MyGUI::Widget* parent, co
         MyGUI::Gui::getInstance().destroyWidget(mParent->getChildAt(0));
     }
 
+    boost::algorithm::replace_all(text, "\n", "");
     boost::algorithm::replace_all(text, "<BR>", "\n");
     boost::algorithm::replace_all(text, "<P>", "\n\n");
 
     // remove leading newlines
-    //while (text[0] == '\n')
-    //    text.erase(0);
+//    while (text[0] == '\n')
+//        text.erase(0);
 
     // remove trailing "
     if (text[text.size()-1] == '\"')
@@ -279,28 +299,30 @@ void BookTextParser::parseSubText(std::string text)
 {
     if (text[0] == '<')
     {
-        if (text.find('>') == std::string::npos)
+        const size_t tagStart = 1;
+        const size_t tagEnd = text.find('>', tagStart);
+        if (tagEnd == std::string::npos)
             throw std::runtime_error("BookTextParser Error: Tag is not terminated");
+        const std::string tag = text.substr(tagStart, tagEnd - tagStart);
 
-        if (text.size() > 4 && text.substr(0, 4) == "<IMG")
-            parseImage(text.substr(0, text.find('>')));
-        else if (text.size() > 5 && text.substr(0, 5) == "<FONT")
-            parseFont(text.substr(0, text.find('>')));
-        else if (text.size() > 4 && text.substr(0, 4) == "<DIV")
-            parseDiv(text.substr(0, text.find('>')));
+        if (boost::algorithm::starts_with(tag, "IMG"))
+            parseImage(tag);
+        if (boost::algorithm::starts_with(tag, "FONT"))
+            parseFont(tag);
+        if (boost::algorithm::starts_with(tag, "DOV"))
+            parseDiv(tag);
 
-        text.erase(0, text.find('>')+1);
+        text.erase(0, tagEnd + 1);
     }
 
-    bool tagFound = false;
+    size_t tagStart = std::string::npos;
     std::string realText; // real text, without tags
-    unsigned int i=0;
-    for (; i<text.size(); ++i)
+    for (size_t i = 0; i<text.size(); ++i)
     {
         char c = text[i];
         if (c == '<')
         {
-            if (text[i+1] == '/') // ignore closing tags
+            if ((i + 1 < text.size()) && text[i+1] == '/') // ignore closing tags
             {
                 while (c != '>')
                 {
@@ -313,7 +335,7 @@ void BookTextParser::parseSubText(std::string text)
             }
             else
             {
-                tagFound = true;
+                tagStart = i;
                 break;
             }
         }
@@ -336,8 +358,8 @@ void BookTextParser::parseSubText(std::string text)
     box->setSize(box->getSize().width, box->getTextSize().height);
     mHeight += box->getTextSize().height;
 
-    if (tagFound)
+    if (tagStart != std::string::npos)
     {
-        parseSubText(text.substr(i, text.size()));
+        parseSubText(text.substr(tagStart, text.size()));
     }
 }

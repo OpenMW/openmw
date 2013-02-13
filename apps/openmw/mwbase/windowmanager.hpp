@@ -199,6 +199,7 @@ namespace MWBase
             ///< Hides dialog and schedules dialog to be deleted.
 
             virtual void messageBox (const std::string& message, const std::vector<std::string>& buttons) = 0;
+            virtual void enterPressed () = 0;
             virtual int readPressedButton() = 0;
             ///< returns the index of the pressed button or -1 if no button was pressed (->MessageBoxmanager->InteractiveMessageBox)
 

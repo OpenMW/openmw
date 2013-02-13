@@ -15,6 +15,7 @@
 namespace sh
 {
 	Factory* Factory::sThis = 0;
+	const std::string Factory::mBinaryCacheName = "binaryCache";
 
 	Factory& Factory::getInstance()
 	{
@@ -198,16 +199,16 @@ namespace sh
 					if (mShadersLastModified[sourceRelative] != lastModified)
 					{
 						// delete any outdated shaders based on this shader set
-						removeCache (it->first);
-						// remove the whole binary cache (removing only the individual shaders does not seem to be possible at this point with OGRE)
-						removeBinaryCache = true;
+						if (removeCache (it->first))
+							removeBinaryCache = true;
 					}
 				}
 				else
 				{
 					// if we get here, this is either the first run or a new shader file was added
 					// in both cases we can safely delete
-					removeCache (it->first);
+					if (removeCache (it->first))
+						removeBinaryCache = true;
 				}
 				mShaderSets.insert(std::make_pair(it->first, newSet));
 			}
@@ -304,7 +305,7 @@ namespace sh
 
 		if (mPlatform->supportsShaderSerialization () && mReadMicrocodeCache && !removeBinaryCache)
 		{
-			std::string file = mPlatform->getCacheFolder () + "/shShaderCache.txt";
+			std::string file = mPlatform->getCacheFolder () + "/" + mBinaryCacheName;
 			if (boost::filesystem::exists(file))
 			{
 				mPlatform->deserializeShaders (file);
@@ -316,7 +317,7 @@ namespace sh
 	{
 		if (mPlatform->supportsShaderSerialization () && mWriteMicrocodeCache)
 		{
-			std::string file = mPlatform->getCacheFolder () + "/shShaderCache.txt";
+			std::string file = mPlatform->getCacheFolder () + "/" + mBinaryCacheName;
 			mPlatform->serializeShaders (file);
 		}
 
@@ -590,8 +591,9 @@ namespace sh
 		m->createForConfiguration (configuration, 0);
 	}
 
-	void Factory::removeCache(const std::string& pattern)
+	bool Factory::removeCache(const std::string& pattern)
 	{
+		bool ret = false;
 		if ( boost::filesystem::exists(mPlatform->getCacheFolder())
 			 && boost::filesystem::is_directory(mPlatform->getCacheFolder()))
 		{
@@ -620,10 +622,12 @@ namespace sh
 					if (shaderName == pattern)
 					{
 						boost::filesystem::remove(file);
+						ret = true;
 						std::cout << "Removing outdated shader: " << file << std::endl;
 					}
 				}
 			}
 		}
+		return ret;
 	}
 }

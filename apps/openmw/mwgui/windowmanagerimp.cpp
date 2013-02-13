@@ -560,6 +560,11 @@ void WindowManager::messageBox (const std::string& message, const std::vector<st
     }
 }
 
+void WindowManager::enterPressed ()
+{
+    mMessageBoxManager->enterPressed();
+}
+
 int WindowManager::readPressedButton ()
 {
     return mMessageBoxManager->readPressedButton();

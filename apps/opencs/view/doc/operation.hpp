@@ -25,6 +25,10 @@ namespace CSVDoc
             void setProgress (int current, int max, int threads);
 
             int getType() const;
+
+        private:
+
+            void setBarColor (int type);
     };
 }
 
