@@ -22,6 +22,8 @@
 
 #define HAS_VERTEXCOLOR @shPropertyBool(has_vertex_colour)
 
+#define VERTEX_LIGHTING 1
+
 #ifdef SH_VERTEX_SHADER
 
     // ------------------------------------- VERTEX ---------------------------------------
@@ -42,7 +44,23 @@
 
 #if HAS_VERTEXCOLOR
         shColourInput(float4)
+#if !VERTEX_LIGHTING
         shOutput(float4, colourPassthrough)
+#endif
+#endif
+
+#if VERTEX_LIGHTING
+    shUniform(float, lightCount) @shAutoConstant(lightCount, light_count)
+    shUniform(float4, lightPosition[8]) @shAutoConstant(lightPosition, light_position_object_space_array, 8)
+    shUniform(float4, lightDiffuse[8]) @shAutoConstant(lightDiffuse, light_diffuse_colour_array, 8)
+    shUniform(float4, lightAttenuation[8]) @shAutoConstant(lightAttenuation, light_attenuation_array, 8)
+    shUniform(float4, lightAmbient)                    @shAutoConstant(lightAmbient, ambient_light_colour)
+#if !HAS_VERTEXCOLOUR
+    shUniform(float4, materialAmbient)                    @shAutoConstant(materialAmbient, surface_ambient_colour)
+#endif
+    shUniform(float4, materialDiffuse)                    @shAutoConstant(materialDiffuse, surface_diffuse_colour)
+    shUniform(float4, materialEmissive)                   @shAutoConstant(materialEmissive, surface_emissive_colour)
+
 #endif
 
 #if SHADOWS
@@ -57,6 +75,11 @@
         shUniform(float4x4, texViewProjMatrix@shIterator) @shAutoConstant(texViewProjMatrix@shIterator, texture_viewproj_matrix, @shIterator)
     @shEndForeach
         shUniform(float4x4, worldMatrix) @shAutoConstant(worldMatrix, world_matrix)
+#endif
+
+#if VERTEX_LIGHTING
+    shOutput(float3, lightResult)
+    shOutput(float3, directionalResult)
 #endif
     SH_START_PROGRAM
     {
@@ -74,7 +97,7 @@
         objSpacePositionPassthrough = shInputPosition.xyz;
 #endif
 
-#if HAS_VERTEXCOLOR
+#if HAS_VERTEXCOLOR && !VERTEX_LIGHTING
         colourPassthrough = colour;
 #endif
 
@@ -86,6 +109,36 @@
     @shForeach(3)
         lightSpacePos@shIterator = shMatrixMult(texViewProjMatrix@shIterator, wPos);
     @shEndForeach
+#endif
+
+
+#if VERTEX_LIGHTING
+        float3 lightDir;
+        float d;
+
+        @shForeach(@shGlobalSettingString(num_lights))
+            lightDir = lightPosition[@shIterator].xyz - (shInputPosition.xyz * lightPosition[@shIterator].w);
+            d = length(lightDir);
+            lightDir = normalize(lightDir);
+
+            lightResult += materialDiffuse.xyz * lightDiffuse[@shIterator].xyz
+                    * (1.0 / ((lightAttenuation[@shIterator].y) + (lightAttenuation[@shIterator].z * d) + (lightAttenuation[@shIterator].w * d * d)))
+                    * max(dot(normalize(normal.xyz), normalize(lightDir)), 0);
+
+#if @shIterator == 0
+            directionalResult = lightResult;
+#endif
+
+        @shEndForeach
+
+#if HAS_VERTEXCOLOR
+        // ambient vertex colour tracking, FFP behaviour
+        lightResult += lightAmbient.xyz * colour.xyz + materialEmissive.xyz;
+
+#else
+        lightResult += lightAmbient.xyz * materialAmbient.xyz + materialEmissive.xyz;
+#endif
+
 #endif
     }
 
@@ -115,17 +168,21 @@
 #if LIGHTING
         shInput(float3, normalPassthrough)
         shInput(float3, objSpacePositionPassthrough)
-        shUniform(float4, lightAmbient)                       @shAutoConstant(lightAmbient, ambient_light_colour)
         #if !HAS_VERTEXCOLOR
         shUniform(float4, materialAmbient)                    @shAutoConstant(materialAmbient, surface_ambient_colour)
         #endif
         shUniform(float4, materialDiffuse)                    @shAutoConstant(materialDiffuse, surface_diffuse_colour)
         shUniform(float4, materialEmissive)                   @shAutoConstant(materialEmissive, surface_emissive_colour)
+        shUniform(float4, lightAmbient)                       @shAutoConstant(lightAmbient, ambient_light_colour)
+#if !VERTEX_LIGHTING
+
     @shForeach(@shGlobalSettingString(num_lights))
         shUniform(float4, lightPosObjSpace@shIterator)        @shAutoConstant(lightPosObjSpace@shIterator, light_position_object_space, @shIterator)
         shUniform(float4, lightAttenuation@shIterator)        @shAutoConstant(lightAttenuation@shIterator, light_attenuation, @shIterator)
         shUniform(float4, lightDiffuse@shIterator)            @shAutoConstant(lightDiffuse@shIterator, light_diffuse_colour, @shIterator)
     @shEndForeach
+#endif
+
 #endif
         
 #if FOG
@@ -133,7 +190,7 @@
         shUniform(float4, fogParams) @shAutoConstant(fogParams, fog_params)
 #endif
 
-#if HAS_VERTEXCOLOR
+#if HAS_VERTEXCOLOR && !VERTEX_LIGHTING
         shInput(float4, colourPassthrough)
 #endif
 
@@ -175,6 +232,11 @@
 		shUniform(float3, windDir_windSpeed) @shSharedParameter(windDir_windSpeed)
 #endif
 
+#if VERTEX_LIGHTING
+    shInput(float3, lightResult)
+    shInput(float3, directionalResult)
+#endif
+
     SH_START_PROGRAM
     {
         shOutputColour(0) = shSample(diffuseMap, UV);
@@ -187,9 +249,9 @@
 
 #if HAS_VERTEXCOLOR
         // ambient vertex colour tracking, FFP behaviour
-        float3 ambient = colourPassthrough.xyz * lightAmbient.xyz;
+        //float3 ambient = colourPassthrough.xyz * lightAmbient.xyz;
 #else
-        float3 ambient = materialAmbient.xyz * lightAmbient.xyz;
+        //float3 ambient = materialAmbient.xyz * lightAmbient.xyz;
 #endif
     
             // shadows only for the first (directional) light
@@ -228,6 +290,7 @@
         caustics = float3(1,1,1);
 #endif
 
+#if !VERTEX_LIGHTING
     
     @shForeach(@shGlobalSettingString(num_lights))
     
@@ -253,9 +316,16 @@
 
     @shEndForeach
 
-        shOutputColour(0).xyz *= (ambient + diffuse + materialEmissive.xyz);
+        lightResult = (ambient + diffuse + materialEmissive.xyz);
 #endif
 
+#if SHADOWS
+        shOutputColour(0).xyz *= (lightResult - directionalResult * (1.0-shadow));
+#else
+        shOutputColour(0).xyz *= (lightResult);
+#endif
+
+#endif // IF LIGHTING
 
 #if HAS_VERTEXCOLOR && !LIGHTING
         shOutputColour(0).xyz *= colourPassthrough.xyz;
@@ -303,7 +373,6 @@
 #if MRT
         shOutputColour(1) = float4(depthPassthrough / far,1,1,1);
 #endif
-
     }
 
 #endif

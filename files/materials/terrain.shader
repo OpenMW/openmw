@@ -32,7 +32,7 @@
 @shAllocatePassthrough(2, UV)
 
 #if LIGHTING
-@shAllocatePassthrough(3, objSpacePosition)
+@shAllocatePassthrough(3, worldPos)
 #endif
 
 #if SHADOWS
@@ -101,7 +101,7 @@
         @shPassthroughAssign(UV, uv0);
         
 #if LIGHTING
-        @shPassthroughAssign(objSpacePosition, shInputPosition.xyz);
+        @shPassthroughAssign(worldPos, worldPos.xyz);
 #endif
 
 #if SHADOWS
@@ -162,7 +162,7 @@
 #if LIGHTING
         shUniform(float4, lightAmbient)                       @shAutoConstant(lightAmbient, ambient_light_colour)
     @shForeach(@shGlobalSettingString(terrain_num_lights))
-        shUniform(float4, lightPosObjSpace@shIterator)        @shAutoConstant(lightPosObjSpace@shIterator, light_position_object_space, @shIterator)
+        shUniform(float4, lightPosObjSpace@shIterator)        @shAutoConstant(lightPosObjSpace@shIterator, light_position, @shIterator)
         shUniform(float4, lightAttenuation@shIterator)        @shAutoConstant(lightAttenuation@shIterator, light_attenuation, @shIterator)
         shUniform(float4, lightDiffuse@shIterator)            @shAutoConstant(lightDiffuse@shIterator, light_diffuse_colour, @shIterator)
     @shEndForeach
@@ -213,7 +213,7 @@
         float2 UV = @shPassthroughReceive(UV);
         
 #if LIGHTING
-        float3 objSpacePosition = @shPassthroughReceive(objSpacePosition);
+        float3 worldPos = @shPassthroughReceive(worldPos);
 
         float3 normal = shSample(normalMap, UV).rgb * 2 - 1;
         normal = normalize(normal);
@@ -222,9 +222,6 @@
         
         
         float3 caustics = float3(1,1,1);
-#if (UNDERWATER) || (FOG)
-        float3 worldPos = shMatrixMult(worldMatrix, float4(objSpacePosition,1)).xyz;
-#endif
 
 #if UNDERWATER
 
@@ -306,7 +303,7 @@
         
     @shForeach(@shGlobalSettingString(terrain_num_lights))
     
-        lightDir = lightPosObjSpace@shIterator.xyz - (objSpacePosition.xyz * lightPosObjSpace@shIterator.w);
+        lightDir = lightPosObjSpace@shIterator.xyz - (worldPos.xyz * lightPosObjSpace@shIterator.w);
         d = length(lightDir);
        
         
