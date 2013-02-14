@@ -2,6 +2,7 @@
 
 #include <OgreRoot.h>
 #include <OgreRenderSystem.h>
+#include <OgrePlugin.h>
 #include <OgreString.h>
 
 #include <boost/lexical_cast.hpp>
@@ -76,6 +77,17 @@ namespace
     std::string hlslGlsl ()
     {
         return (Ogre::Root::getSingleton ().getRenderSystem ()->getName ().find("OpenGL") != std::string::npos) ? "glsl" : "hlsl";
+    }
+
+    bool cgAvailable ()
+    {
+        Ogre::Root::PluginInstanceList list = Ogre::Root::getSingleton ().getInstalledPlugins ();
+        for (Ogre::Root::PluginInstanceList::const_iterator it = list.begin(); it != list.end(); ++it)
+        {
+            if ((*it)->getName() == "Cg Program Manager")
+                return true;
+        }
+        return false;
     }
 }
 
@@ -428,7 +440,7 @@ namespace MWGui
         {
             val = hlslGlsl();
         }
-        else
+        else if (cgAvailable ())
             val = "cg";
 
         static_cast<MyGUI::Button*>(_sender)->setCaption(val);
