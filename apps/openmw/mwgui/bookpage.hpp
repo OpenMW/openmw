@@ -19,7 +19,7 @@ namespace MWGui
         typedef intptr_t interactive_id;
 
         /// Returns the number of pages in the document.
-        virtual int pageCount () const = 0;
+        virtual size_t pageCount () const = 0;
 
         /// Return the area covered by the document. The first
         /// integer is the maximum with of any line. This is not

@@ -60,7 +60,7 @@ namespace
         {
             typesetter->add_content (Entry.body ());
 
-            Entry.visit_spans (addSpan (typesetter, body_style));
+            Entry.visitSpans (addSpan (typesetter, body_style));
         }
     };
 
@@ -233,7 +233,7 @@ book JournalBooks::createJournalBook ()
     IBookTypesetter::IStyle* header = typesetter->createStyle ("EB Garamond", MyGUI::Colour (0.60f, 0.00f, 0.00f));
     IBookTypesetter::IStyle* body   = typesetter->createStyle ("EB Garamond", MyGUI::Colour::Black);
 
-    Model->visit_journal_entries (0, addJournalEntry (typesetter, body, header, true));
+    Model->visitJournalEntries (0, addJournalEntry (typesetter, body, header, true));
 
     return typesetter->complete ();
 }
@@ -245,11 +245,11 @@ book JournalBooks::createTopicBook (uintptr_t topicId)
     IBookTypesetter::IStyle* header = typesetter->createStyle ("EB Garamond", MyGUI::Colour (0.60f, 0.00f, 0.00f));
     IBookTypesetter::IStyle* body   = typesetter->createStyle ("EB Garamond", MyGUI::Colour::Black);
 
-    Model->visit_topic_name (topicId, addTopicName (typesetter, header));
+    Model->visitTopicName (topicId, addTopicName (typesetter, header));
 
     intptr_t contentId = typesetter->add_content (to_utf8_span (", \""));
 
-    Model->visit_topic_entries (topicId, addTopicEntry (typesetter, body, header, contentId));
+    Model->visitTopicEntries (topicId, addTopicEntry (typesetter, body, header, contentId));
 
     return typesetter->complete ();
 }
@@ -261,9 +261,9 @@ book JournalBooks::createQuestBook (uintptr_t questId)
     IBookTypesetter::IStyle* header = typesetter->createStyle ("EB Garamond", MyGUI::Colour (0.60f, 0.00f, 0.00f));
     IBookTypesetter::IStyle* body   = typesetter->createStyle ("EB Garamond", MyGUI::Colour::Black);
 
-    Model->visit_quest_name (questId, addQuestName (typesetter, header));
+    Model->visitQuestName (questId, addQuestName (typesetter, header));
 
-    Model->visit_journal_entries (questId, addJournalEntry (typesetter, body, header, false));
+    Model->visitJournalEntries (questId, addJournalEntry (typesetter, body, header, false));
 
     return typesetter->complete ();
 }
@@ -301,7 +301,7 @@ book JournalBooks::createTopicIndexBook (char character)
     IBookTypesetter::ptr typesetter = IBookTypesetter::create (0x7FFFFFFF, 0x7FFFFFFF);
     IBookTypesetter::IStyle* style = typesetter->createStyle ("EB Garamond", MyGUI::Colour::Black);
 
-    Model->visit_topic_names_starting_with (character, addTopicLink (typesetter, style));
+    Model->visitTopicNamesStartingWith (character, addTopicLink (typesetter, style));
 
     return typesetter->complete ();
 }
@@ -311,7 +311,7 @@ book JournalBooks::createQuestIndexBook (bool activeOnly)
     IBookTypesetter::ptr typesetter = IBookTypesetter::create (0x7FFFFFFF, 0x7FFFFFFF);
     IBookTypesetter::IStyle* base = typesetter->createStyle ("EB Garamond", MyGUI::Colour::Black);
 
-    Model->visit_quest_names (activeOnly, addQuestLink (typesetter, base));
+    Model->visitQuestNames (activeOnly, addQuestLink (typesetter, base));
 
     return typesetter->complete ();
 }

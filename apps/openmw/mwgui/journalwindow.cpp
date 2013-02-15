@@ -25,40 +25,37 @@ using namespace MWGui;
 
 namespace
 {
-#define CONTROL_ID(name)    \
-    static char const name [] = #name
-
-    CONTROL_ID(OptionsOverlay);
-    CONTROL_ID(OptionsBTN);
-    CONTROL_ID(PrevPageBTN);
-    CONTROL_ID(NextPageBTN);
-    CONTROL_ID(CloseBTN);
-    CONTROL_ID(JournalBTN);
-    CONTROL_ID(TopicsBTN);
-    CONTROL_ID(QuestsBTN);
-    CONTROL_ID(CancelBTN);
-    CONTROL_ID(ShowAllBTN);
-    CONTROL_ID(ShowActiveBTN);
-    CONTROL_ID(PageOneNum);
-    CONTROL_ID(PageTwoNum);
-    CONTROL_ID(TopicsList);
-    CONTROL_ID(TopicsPage);
-    CONTROL_ID(QuestsList);
-    CONTROL_ID(QuestsPage);
-    CONTROL_ID(LeftBookPage);
-    CONTROL_ID(RightBookPage);
-    CONTROL_ID(LeftTopicIndex);
-    CONTROL_ID(RightTopicIndex);
+    static char const OptionsOverlay [] = "OptionsOverlay";
+    static char const OptionsBTN [] = "OptionsBTN";
+    static char const PrevPageBTN [] = "PrevPageBTN";
+    static char const NextPageBTN [] = "NextPageBTN";
+    static char const CloseBTN [] = "CloseBTN";
+    static char const JournalBTN [] = "JournalBTN";
+    static char const TopicsBTN [] = "TopicsBTN";
+    static char const QuestsBTN [] = "QuestsBTN";
+    static char const CancelBTN [] = "CancelBTN";
+    static char const ShowAllBTN [] = "ShowAllBTN";
+    static char const ShowActiveBTN [] = "ShowActiveBTN";
+    static char const PageOneNum [] = "PageOneNum";
+    static char const PageTwoNum [] = "PageTwoNum";
+    static char const TopicsList [] = "TopicsList";
+    static char const TopicsPage [] = "TopicsPage";
+    static char const QuestsList [] = "QuestsList";
+    static char const QuestsPage [] = "QuestsPage";
+    static char const LeftBookPage [] = "LeftBookPage";
+    static char const RightBookPage [] = "RightBookPage";
+    static char const LeftTopicIndex [] = "LeftTopicIndex";
+    static char const RightTopicIndex [] = "RightTopicIndex";
 
     struct JournalWindow : WindowBase, JournalBooks, IJournalWindow
     {
-        struct display_state
+        struct DisplayState
         {
             int mPage;
             book mBook;
         };
 
-        typedef std::stack <display_state> display_state_stack;
+        typedef std::stack <DisplayState> display_state_stack;
 
         display_state_stack mStates;
         book mTopicIndexBook;
@@ -156,7 +153,7 @@ namespace
             MWBase::Environment::get().getSoundManager()->playSound ("book open", 1.0, 1.0);
 
             book journalBook;
-            if (Model->is_empty ())
+            if (Model->isEmpty ())
                 journalBook = createEmptyJournalBook ();
             else
                 journalBook = createJournalBook ();
@@ -217,7 +214,7 @@ namespace
 
         void pushBook (book Book, int Page)
         {
-            display_state bs;
+            DisplayState bs;
             bs.mPage = Page;
             bs.mBook = Book;
             mStates.push (bs);

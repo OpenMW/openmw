@@ -36,78 +36,78 @@ struct MWGui::TypesetBook : ITypesetBook
     typedef utf8_stream::point utf8_point;
     typedef std::pair <utf8_point, utf8_point> range;
 
-    struct style : IBookTypesetter::IStyle
+    struct Style : IBookTypesetter::IStyle
     {
-        IFont*         Font;
-        Colour         HotColour;
-        Colour         ActiveColour;
-        Colour         NormalColour;
-        interactive_id InteractiveId;
+        IFont*         mFont;
+        Colour         mHotColour;
+        Colour         mActiveColour;
+        Colour         mNormalColour;
+        interactive_id mInteractiveId;
 
         bool match (IFont* tstFont, Colour tstHotColour, Colour tstActiveColour, Colour tstNormalColour, intptr_t tstInteractiveId)
         {
-            return (Font == tstFont) &&
+            return (mFont == tstFont) &&
                    partal_match (tstHotColour, tstActiveColour, tstNormalColour, tstInteractiveId);
         }
 
         bool match (char const * tstFont, Colour tstHotColour, Colour tstActiveColour, Colour tstNormalColour, intptr_t tstInteractiveId)
         {
-            return (Font->getResourceName ()   == tstFont) &&
+            return (mFont->getResourceName ()   == tstFont) &&
                    partal_match (tstHotColour, tstActiveColour, tstNormalColour, tstInteractiveId);
         }
 
         bool partal_match (Colour tstHotColour, Colour tstActiveColour, Colour tstNormalColour, intptr_t tstInteractiveId)
         {
             return
-                (HotColour                  == tstHotColour     ) &&
-                (ActiveColour               == tstActiveColour  ) &&
-                (NormalColour               == tstNormalColour  ) &&
-                (InteractiveId              == tstInteractiveId ) ;
+                (mHotColour                  == tstHotColour     ) &&
+                (mActiveColour               == tstActiveColour  ) &&
+                (mNormalColour               == tstNormalColour  ) &&
+                (mInteractiveId              == tstInteractiveId ) ;
         }
     };
 
-    typedef std::list <style> styles;
+    typedef std::list <Style> styles;
 
-    struct run
+    struct Run
     {
-        style*      Style;
-        range       Range;
-        int         Left, Right;
-        int         PrintableChars;
+        Style*      mStyle;
+        range       mRange;
+        int         mLeft, mRight;
+        int         mPrintableChars;
     };
 
-    typedef std::vector <run> runs;
+    typedef std::vector <Run> runs;
 
-    struct line
+    struct Line
     {
-        runs Runs;
-        IntRect Rect;
+        runs mRuns;
+        IntRect mRect;
     };
 
-    typedef std::vector <line> lines;
+    typedef std::vector <Line> lines;
 
-    struct section
+    struct Section
     {
-        lines Lines;
-        IntRect Rect;
+        lines mLines;
+        IntRect mRect;
     };
 
-    typedef std::vector <section> sections;
+    typedef std::vector <Section> sections;
 
     typedef std::pair <int, int> page;
     typedef std::vector <page> pages;
 
-    pages Pages;
-    sections Sections;
-    contents Contents;
-    styles Styles;
-    IntRect Rect;
+    pages mPages;
+    sections mSections;
+    contents mContents;
+    styles mStyles;
+    IntRect mRect;
 
     virtual ~TypesetBook () {}
 
     range addContent (IBookTypesetter::utf8_span Text)
     {
-        contents::iterator i = Contents.insert (Contents.end (), content (Text.first, Text.second));
+        contents::iterator i = mContents.insert (mContents.end (), content (Text.first, Text.second));
 
         if (i->size () == 0)
             return range (utf8_point (NULL), utf8_point (NULL));
@@ -118,61 +118,61 @@ struct MWGui::TypesetBook : ITypesetBook
         return range (begin, end);
     }
 
-    int pageCount () const { return Pages.size (); }
+    size_t pageCount () const { return mPages.size (); }
 
     std::pair <int, int> getSize () const
     {
-        return std::make_pair (Rect.width (), Rect.height ());
+        return std::make_pair (mRect.width (), mRect.height ());
     }
 
     template <typename visitor>
-    void visit_runs (int top, int bottom, IFont* Font, visitor const & Visitor) const
+    void visitRuns (int top, int bottom, IFont* Font, visitor const & Visitor) const
     {
-        for (sections::const_iterator i = Sections.begin (); i != Sections.end (); ++i)
+        for (sections::const_iterator i = mSections.begin (); i != mSections.end (); ++i)
         {
-            if (top >= Rect.bottom || bottom <= i->Rect.top)
+            if (top >= mRect.bottom || bottom <= i->mRect.top)
                 continue;
 
-            for (lines::const_iterator j = i->Lines.begin (); j != i->Lines.end (); ++j)
+            for (lines::const_iterator j = i->mLines.begin (); j != i->mLines.end (); ++j)
             {
-                if (top >= j->Rect.bottom || bottom <= j->Rect.top)
+                if (top >= j->mRect.bottom || bottom <= j->mRect.top)
                     continue;
 
-                for (runs::const_iterator k = j->Runs.begin (); k != j->Runs.end (); ++k)
-                    if (!Font || k->Style->Font == Font)
+                for (runs::const_iterator k = j->mRuns.begin (); k != j->mRuns.end (); ++k)
+                    if (!Font || k->mStyle->mFont == Font)
                         Visitor (*i, *j, *k);
             }
         }
     }
 
     template <typename visitor>
-    void visit_runs (int top, int bottom, visitor const & Visitor) const
+    void visitRuns (int top, int bottom, visitor const & Visitor) const
     {
-        visit_runs (top, bottom, NULL, Visitor);
+        visitRuns (top, bottom, NULL, Visitor);
     }
 
-    style * hitTest (int left, int top) const
+    Style * hitTest (int left, int top) const
     {
-        for (sections::const_iterator i = Sections.begin (); i != Sections.end (); ++i)
+        for (sections::const_iterator i = mSections.begin (); i != mSections.end (); ++i)
         {
-            if (top < i->Rect.top || top >= i->Rect.bottom)
+            if (top < i->mRect.top || top >= i->mRect.bottom)
                 continue;
 
-            int left1 = left - i->Rect.left;
+            int left1 = left - i->mRect.left;
 
-            for (lines::const_iterator j = i->Lines.begin (); j != i->Lines.end (); ++j)
+            for (lines::const_iterator j = i->mLines.begin (); j != i->mLines.end (); ++j)
             {
-                if (top < j->Rect.top || top >= j->Rect.bottom)
+                if (top < j->mRect.top || top >= j->mRect.bottom)
                     continue;
 
-                int left2 = left1 - j->Rect.left;
+                int left2 = left1 - j->mRect.left;
 
-                for (runs::const_iterator k = j->Runs.begin (); k != j->Runs.end (); ++k)
+                for (runs::const_iterator k = j->mRuns.begin (); k != j->mRuns.end (); ++k)
                 {
-                    if (left2 < k->Left || left2 >= k->Right)
+                    if (left2 < k->mLeft || left2 >= k->mRight)
                         continue;
 
-                    return k->Style;
+                    return k->mStyle;
                 }
             }
         }
@@ -180,11 +180,11 @@ struct MWGui::TypesetBook : ITypesetBook
         return nullptr;
     }
 
-    IFont* affectedFont (style* Style)
+    IFont* affectedFont (Style* Style)
     {
-        for (styles::iterator i = Styles.begin (); i != Styles.end (); ++i)
+        for (styles::iterator i = mStyles.begin (); i != mStyles.end (); ++i)
             if (&*i == Style)
-                return i->Font;
+                return i->mFont;
         return NULL;
     }
 
@@ -199,10 +199,10 @@ struct TypesetBook::Typesetter : IBookTypesetter
     int mPageWidth;
     int mPageHeight;
 
-    book_ptr Book;
-    section * Section;
-    line * Line;
-    run * Run;
+    book_ptr mBook;
+    Section * mSection;
+    Line * mLine;
+    Run * mRun;
 
     std::vector <alignment> mSectionAlignment;
 
@@ -211,11 +211,11 @@ struct TypesetBook::Typesetter : IBookTypesetter
 
     Typesetter (size_t Width, size_t Height) :
         mPageWidth (Width), mPageHeight(Height),
-        Section (NULL), Line (NULL), Run (NULL),
+        mSection (NULL), mLine (NULL), mRun (NULL),
         mCurrentAlignment (alignLeft),
         mCurrentContent (NULL)
     {
-        Book = boost::make_shared <book> ();
+        mBook = boost::make_shared <book> ();
     }
 
     virtual ~Typesetter ()
@@ -224,51 +224,51 @@ struct TypesetBook::Typesetter : IBookTypesetter
 
     IStyle * createStyle (char const * FontName, Colour FontColour)
     {
-        for (styles::iterator i = Book->Styles.begin (); i != Book->Styles.end (); ++i)
+        for (styles::iterator i = mBook->mStyles.begin (); i != mBook->mStyles.end (); ++i)
             if (i->match (FontName, FontColour, FontColour, FontColour, 0))
                 return &*i;
 
-        style & Style = *Book->Styles.insert (Book->Styles.end (), style ());
+        Style & style = *mBook->mStyles.insert (mBook->mStyles.end (), Style ());
 
-        Style.Font = FontManager::getInstance().getByName(FontName);
-        Style.HotColour = FontColour;
-        Style.ActiveColour = FontColour;
-        Style.NormalColour = FontColour;
-        Style.InteractiveId = 0;
+        style.mFont = FontManager::getInstance().getByName(FontName);
+        style.mHotColour = FontColour;
+        style.mActiveColour = FontColour;
+        style.mNormalColour = FontColour;
+        style.mInteractiveId = 0;
                 
-        return &Style;
+        return &style;
     }
 
     IStyle* createHotStyle (IStyle * _BaseStyle, coulour NormalColour, coulour HoverColour, coulour ActiveColour, interactive_id Id, bool Unique)
     {
-        style* BaseStyle = dynamic_cast <style*> (_BaseStyle);
+        Style* BaseStyle = dynamic_cast <Style*> (_BaseStyle);
 
         if (!Unique)
-            for (styles::iterator i = Book->Styles.begin (); i != Book->Styles.end (); ++i)
-                if (i->match (BaseStyle->Font, HoverColour, ActiveColour, NormalColour, Id))
+            for (styles::iterator i = mBook->mStyles.begin (); i != mBook->mStyles.end (); ++i)
+                if (i->match (BaseStyle->mFont, HoverColour, ActiveColour, NormalColour, Id))
                     return &*i;
 
-        style & Style = *Book->Styles.insert (Book->Styles.end (), style ());
+        Style & style = *mBook->mStyles.insert (mBook->mStyles.end (), Style ());
 
-        Style.Font = BaseStyle->Font;
-        Style.HotColour = HoverColour;
-        Style.ActiveColour = ActiveColour;
-        Style.NormalColour = NormalColour;
-        Style.InteractiveId = Id;
+        style.mFont = BaseStyle->mFont;
+        style.mHotColour = HoverColour;
+        style.mActiveColour = ActiveColour;
+        style.mNormalColour = NormalColour;
+        style.mInteractiveId = Id;
 
-        return &Style;
+        return &style;
     }
 
     void write (IStyle * _Style, utf8_span Text)
     {
-        range text = Book->addContent (Text);
+        range text = mBook->addContent (Text);
 
-        write_impl (dynamic_cast <style*> (_Style), text.first, text.second);
+        write_impl (dynamic_cast <Style*> (_Style), text.first, text.second);
     }
 
     intptr_t add_content (utf8_span Text, bool Select)
     {
-        contents::iterator i = Book->Contents.insert (Book->Contents.end (), content (Text.first, Text.second));
+        contents::iterator i = mBook->mContents.insert (mBook->mContents.end (), content (Text.first, Text.second));
 
         if (Select)
             mCurrentContent = &(*i);
@@ -281,42 +281,42 @@ struct TypesetBook::Typesetter : IBookTypesetter
         mCurrentContent = reinterpret_cast <content const *> (contentHandle);
     }
 
-    void write (IStyle * Style, size_t Begin, size_t End)
+    void write (IStyle * style, size_t begin, size_t end)
     {
         assert (mCurrentContent != NULL);
-        assert (End <= mCurrentContent->size ());
-        assert (Begin <= mCurrentContent->size ());
+        assert (end <= mCurrentContent->size ());
+        assert (begin <= mCurrentContent->size ());
 
-        utf8_point begin = &mCurrentContent->front () + Begin;
-        utf8_point end   = &mCurrentContent->front () + End  ;
+        utf8_point begin_ = &mCurrentContent->front () + begin;
+        utf8_point end_   = &mCurrentContent->front () + end  ;
 
-        write_impl (dynamic_cast <style*> (Style), begin, end);
+        write_impl (dynamic_cast <Style*> (style), begin_, end_);
     }
     
     void lineBreak (float margin)
     {
         assert (margin == 0); //TODO: figure out proper behavior here...
 
-        Run = NULL;
-        Line = NULL;
+        mRun = NULL;
+        mLine = NULL;
     }
     
     void sectionBreak (float margin)
     {
-        if (Book->Sections.size () > 0)
+        if (mBook->mSections.size () > 0)
         {
-            Run = NULL;
-            Line = NULL;
-            Section = NULL;
+            mRun = NULL;
+            mLine = NULL;
+            mSection = NULL;
 
-            if (Book->Rect.bottom < (Book->Sections.back ().Rect.bottom + margin))
-                Book->Rect.bottom = (Book->Sections.back ().Rect.bottom + margin);
+            if (mBook->mRect.bottom < (mBook->mSections.back ().mRect.bottom + margin))
+                mBook->mRect.bottom = (mBook->mSections.back ().mRect.bottom + margin);
         }
     }
 
     void setSectionAlignment (alignment sectionAlignment)
     {
-        if (Section != NULL)
+        if (mSection != NULL)
             mSectionAlignment.back () = sectionAlignment;
         mCurrentAlignment = sectionAlignment;
     }
@@ -327,33 +327,33 @@ struct TypesetBook::Typesetter : IBookTypesetter
         int curPageStop  = 0;
 
         std::vector <alignment>::iterator sa = mSectionAlignment.begin ();
-        for (sections::iterator i = Book->Sections.begin (); i != Book->Sections.end (); ++i, ++sa)
+        for (sections::iterator i = mBook->mSections.begin (); i != mBook->mSections.end (); ++i, ++sa)
         {
             // apply alignment to individual lines...
-            for (lines::iterator j = i->Lines.begin (); j != i->Lines.end (); ++j)
+            for (lines::iterator j = i->mLines.begin (); j != i->mLines.end (); ++j)
             {
-                int width = j->Rect.width ();
+                int width = j->mRect.width ();
                 int excess = mPageWidth - width;
 
                 switch (*sa)
                 {
                 default:
-                case alignLeft:   j->Rect.left = 0;        break;
-                case alignCenter: j->Rect.left = excess/2; break;
-                case alignRight:  j->Rect.left = excess;   break;
+                case alignLeft:   j->mRect.left = 0;        break;
+                case alignCenter: j->mRect.left = excess/2; break;
+                case alignRight:  j->mRect.left = excess;   break;
                 }
 
-                j->Rect.right = j->Rect.left + width;
+                j->mRect.right = j->mRect.left + width;
             }
 
             if (curPageStop == curPageStart)
             {
-                curPageStart = i->Rect.top;
-                curPageStop  = i->Rect.top;
+                curPageStart = i->mRect.top;
+                curPageStop  = i->mRect.top;
             }
 
             int spaceLeft = mPageHeight - (curPageStop - curPageStart);
-            int sectionHeight = i->Rect.height ();
+            int sectionHeight = i->mRect.height ();
 
             if (sectionHeight <= mPageHeight)
             {
@@ -361,13 +361,13 @@ struct TypesetBook::Typesetter : IBookTypesetter
                 {
                     assert (curPageStart != curPageStop);
 
-                    Book->Pages.push_back (page (curPageStart, curPageStop));
+                    mBook->mPages.push_back (page (curPageStart, curPageStop));
 
-                    curPageStart = i->Rect.top;
-                    curPageStop = i->Rect.bottom;
+                    curPageStart = i->mRect.top;
+                    curPageStop = i->mRect.bottom;
                 }
                 else
-                    curPageStop = i->Rect.bottom;
+                    curPageStop = i->mRect.bottom;
             }
             else
             {
@@ -376,14 +376,14 @@ struct TypesetBook::Typesetter : IBookTypesetter
         }
 
         if (curPageStart != curPageStop)
-            Book->Pages.push_back (page (curPageStart, curPageStop));
+            mBook->mPages.push_back (page (curPageStart, curPageStop));
 
-        return Book;
+        return mBook;
     }
 
-    void write_impl (style * Style, utf8_stream::point _begin, utf8_stream::point _end)
+    void write_impl (Style * Style, utf8_stream::point _begin, utf8_stream::point _end)
     {
-        int line_height = Style->Font->getDefaultHeight ();
+        int line_height = Style->mFont->getDefaultHeight ();
 
         utf8_stream stream (_begin, _end);
 
@@ -392,7 +392,7 @@ struct TypesetBook::Typesetter : IBookTypesetter
             if (ucs_line_break (stream.peek ()))
             {
                 stream.consume ();
-                Line = NULL, Run = NULL;
+                mLine = NULL, mRun = NULL;
                 continue;
             }
 
@@ -405,7 +405,7 @@ struct TypesetBook::Typesetter : IBookTypesetter
 
             while (!stream.eof () && !ucs_line_break (stream.peek ()) && ucs_breaking_space (stream.peek ()))
             {
-                GlyphInfo* gi = Style->Font->getGlyphInfo (stream.peek ());
+                GlyphInfo* gi = Style->mFont->getGlyphInfo (stream.peek ());
                 space_width += gi->advance;
                 stream.consume ();
             }
@@ -414,7 +414,7 @@ struct TypesetBook::Typesetter : IBookTypesetter
 
             while (!stream.eof () && !ucs_line_break (stream.peek ()) && !ucs_breaking_space (stream.peek ()))
             {
-                GlyphInfo* gi = Style->Font->getGlyphInfo (stream.peek ());
+                GlyphInfo* gi = Style->mFont->getGlyphInfo (stream.peek ());
                 word_width += gi->advance + gi->bearingX;
                 word_height = line_height;
                 ++character_count;
@@ -426,77 +426,77 @@ struct TypesetBook::Typesetter : IBookTypesetter
             if (lead == extent)
                 break;
 
-            int left = Line ? Line->Rect.right : 0;
+            int left = mLine ? mLine->mRect.right : 0;
 
             if (left + space_width + word_width > mPageWidth)
             {
-                Line = NULL, Run = NULL;
+                mLine = NULL, mRun = NULL;
 
-                append_run (Style, origin, extent, extent - origin, word_width, Book->Rect.bottom + word_height);
+                append_run (Style, origin, extent, extent - origin, word_width, mBook->mRect.bottom + word_height);
             }
             else
             {
-                int top = Line ? Line->Rect.top : Book->Rect.bottom;
+                int top = mLine ? mLine->mRect.top : mBook->mRect.bottom;
 
                 append_run (Style, lead, extent, extent - origin, left + space_width + word_width, top + word_height);
             }
         }
     }
 
-    void append_run (style * Style, utf8_stream::point begin, utf8_stream::point end, int pc, int right, int bottom)
+    void append_run (Style * style, utf8_stream::point begin, utf8_stream::point end, int pc, int right, int bottom)
     {
-        if (Section == NULL)
+        if (mSection == NULL)
         {
-            Book->Sections.push_back (section ());
-            Section = &Book->Sections.back ();
-            Section->Rect = IntRect (0, Book->Rect.bottom, 0, Book->Rect.bottom);
+            mBook->mSections.push_back (Section ());
+            mSection = &mBook->mSections.back ();
+            mSection->mRect = IntRect (0, mBook->mRect.bottom, 0, mBook->mRect.bottom);
             mSectionAlignment.push_back (mCurrentAlignment);
         }
 
-        if (Line == NULL)
+        if (mLine == NULL)
         {
-            Section->Lines.push_back (line ());
-            Line = &Section->Lines.back ();
-            Line->Rect = IntRect (0, Section->Rect.bottom, 0, Book->Rect.bottom);
+            mSection->mLines.push_back (Line ());
+            mLine = &mSection->mLines.back ();
+            mLine->mRect = IntRect (0, mSection->mRect.bottom, 0, mBook->mRect.bottom);
         }
 
-        if (Book->Rect.right < right)
-            Book->Rect.right = right;
+        if (mBook->mRect.right < right)
+            mBook->mRect.right = right;
 
-        if (Book->Rect.bottom < bottom)
-            Book->Rect.bottom = bottom;
+        if (mBook->mRect.bottom < bottom)
+            mBook->mRect.bottom = bottom;
 
-        if (Section->Rect.right < right)
-            Section->Rect.right = right;
+        if (mSection->mRect.right < right)
+            mSection->mRect.right = right;
 
-        if (Section->Rect.bottom < bottom)
-            Section->Rect.bottom = bottom;
+        if (mSection->mRect.bottom < bottom)
+            mSection->mRect.bottom = bottom;
 
-        if (Line->Rect.right < right)
-            Line->Rect.right = right;
+        if (mLine->mRect.right < right)
+            mLine->mRect.right = right;
 
-        if (Line->Rect.bottom < bottom)
-            Line->Rect.bottom = bottom;
+        if (mLine->mRect.bottom < bottom)
+            mLine->mRect.bottom = bottom;
 
-        if (Run == NULL || Run->Style != Style || Run->Range.second != begin)
+        if (mRun == NULL || mRun->mStyle != style || mRun->mRange.second != begin)
         {
-            int left = Run ? Run->Right : Line->Rect.left;
+            int left = mRun ? mRun->mRight : mLine->mRect.left;
 
-            Line->Runs.push_back (run ());
-            Run = &Line->Runs.back ();
-            Run->Style = Style;
-            Run->Left = left;
-            Run->Right = right;
-            Run->Range.first = begin;
-            Run->Range.second = end;
-            Run->PrintableChars = pc;
+            mLine->mRuns.push_back (Run ());
+            mRun = &mLine->mRuns.back ();
+            mRun->mStyle = style;
+            mRun->mLeft = left;
+            mRun->mRight = right;
+            mRun->mRange.first = begin;
+            mRun->mRange.second = end;
+            mRun->mPrintableChars = pc;
           //Run->Locale = Locale;
         }
         else
         {
-            Run->Right = right;
-            Run->Range.second = end;
-            Run->PrintableChars += pc;
+            mRun->mRight = right;
+            mRun->mRange.second = end;
+            mRun->mPrintableChars += pc;
         }
     }
 };
@@ -508,7 +508,7 @@ IBookTypesetter::ptr IBookTypesetter::create (int pageWidth, int pageHeight)
 
 namespace
 {
-    struct render_xform
+    struct RenderXform
     {
     public:
 
@@ -527,7 +527,7 @@ namespace
         float hOffset;
         float vOffset;
 
-        render_xform (ICroppedRectangle* croppedParent, RenderTargetInfo const & renderTargetInfo)
+        RenderXform (ICroppedRectangle* croppedParent, RenderTargetInfo const & renderTargetInfo)
         {
             clipTop    = croppedParent->_getMarginTop ();
             clipLeft   = croppedParent->_getMarginLeft ();
@@ -590,27 +590,27 @@ namespace
         }
     };
 
-    struct glyph_stream
+    struct GlyphStream
     {
-        float Z;
-        uint32_t C;
+        float mZ;
+        uint32_t mC;
         IFont* mFont;
         FloatPoint mOrigin;
         FloatPoint mCursor;
         Vertex* mVertices;
-        render_xform mRenderXform;
+        RenderXform mRenderXform;
         MyGUI::VertexColourType mVertexColourType;
 
-        glyph_stream (IFont* font, float left, float top, float Z,
-                      Vertex* vertices, render_xform const & renderXform) :
-            Z(Z), mOrigin (left, top),
+        GlyphStream (IFont* font, float left, float top, float Z,
+                      Vertex* vertices, RenderXform const & renderXform) :
+            mZ(Z), mOrigin (left, top),
             mFont (font), mVertices (vertices),
             mRenderXform (renderXform)
         {
             mVertexColourType = RenderManager::getInstance().getVertexFormat();
         }
 
-        ~glyph_stream ()
+        ~GlyphStream ()
         {
         }
 
@@ -618,14 +618,14 @@ namespace
 
         void reset (float left, float top, Colour colour)
         {
-            C = texture_utility::toColourARGB(colour) | 0xFF000000;
-            texture_utility::convertColour(C, mVertexColourType);
+            mC = texture_utility::toColourARGB(colour) | 0xFF000000;
+            texture_utility::convertColour(mC, mVertexColourType);
 
             mCursor.left = mOrigin.left + left;
             mCursor.top = mOrigin.top + top;
         }
 
-        void emit_glyph (wchar_t ch)
+        void emitGlyph (wchar_t ch)
         {
             GlyphInfo* gi = mFont->getGlyphInfo (ch);
 
@@ -644,7 +644,7 @@ namespace
             mCursor.left += gi->bearingX + gi->advance;
         }
 
-        void emit_space (wchar_t ch)
+        void emitSpace (wchar_t ch)
         {
             GlyphInfo* gi = mFont->getGlyphInfo (ch);
 
@@ -669,10 +669,10 @@ namespace
 
             mVertices->x = pt.left;
             mVertices->y = pt.top ;
-            mVertices->z = Z;
+            mVertices->z = mZ;
             mVertices->u = U;
             mVertices->v = V;
-            mVertices->colour = C;
+            mVertices->colour = mC;
 
             ++mVertices;
         }
@@ -684,9 +684,9 @@ class MWGui::PageDisplay : public ISubWidgetText
     MYGUI_RTTI_DERIVED(PageDisplay)
 protected:
 
-    typedef TypesetBook::section section;
-    typedef TypesetBook::line    line;
-    typedef TypesetBook::run     run;
+    typedef TypesetBook::Section Section;
+    typedef TypesetBook::Line    Line;
+    typedef TypesetBook::Run     Run;
 
     struct TextFormat : ISubWidget
     {
@@ -739,13 +739,15 @@ protected:
 
 public:
 
-    typedef TypesetBook::style style;
+    typedef TypesetBook::Style style;
+    typedef std::map <TextFormat::id, TextFormat*> active_text_formats;
 
-    int view_top;
-    int view_bottom;
+    int mViewTop;
+    int mViewBottom;
 
     style* mFocusItem;
     bool mItemActive;
+    MouseButton mLastDown;
     boost::function <void (intptr_t)> mLinkClicked;
 
 
@@ -753,15 +755,12 @@ public:
     size_t mPage;
 
     ILayerNode* mNode;
-    typedef std::map <TextFormat::id, TextFormat*> active_text_formats;
     active_text_formats mActiveTextFormats;
 
     PageDisplay ()
     {
         mPage = -1;
     }
-
-    MouseButton mLastDown;
 
     void dirtyFocusItem ()
     {
@@ -794,7 +793,7 @@ public:
         _left -= mCroppedParent->getAbsoluteLeft ();
         _top  -= mCroppedParent->getAbsoluteTop  ();
 
-        style * Hit = mBook->hitTest (_left, view_top + _top);
+        style * Hit = mBook->hitTest (_left, mViewTop + _top);
 
         if (mLastDown == MouseButton::None)
         {
@@ -832,7 +831,7 @@ public:
 
         if (mLastDown == MouseButton::None)
         {
-            mFocusItem = mBook->hitTest (_left, view_top + _top);
+            mFocusItem = mBook->hitTest (_left, mViewTop + _top);
             mItemActive = true;
 
             dirtyFocusItem ();
@@ -851,7 +850,7 @@ public:
 
         if (mLastDown == _id)
         {
-            style * mItem = mBook->hitTest (_left, view_top + _top);
+            style * mItem = mBook->hitTest (_left, mViewTop + _top);
 
             bool clicked = mFocusItem == mItem;
 
@@ -861,8 +860,8 @@ public:
 
             mLastDown = MouseButton::None;
 
-            if (clicked && mLinkClicked && mItem && mItem->InteractiveId != 0)
-                mLinkClicked (mItem->InteractiveId);
+            if (clicked && mLinkClicked && mItem && mItem->mInteractiveId != 0)
+                mLinkClicked (mItem->mInteractiveId);
         }
     }
 
@@ -891,23 +890,23 @@ public:
                 mBook = newBook;
                 mPage = newPage;
 
-                if (newPage < mBook->Pages.size ())
+                if (newPage < mBook->mPages.size ())
                 {
-                    view_top = mBook->Pages [newPage].first;
-                    view_bottom = mBook->Pages [newPage].second;
+                    mViewTop = mBook->mPages [newPage].first;
+                    mViewBottom = mBook->mPages [newPage].second;
                 }
                 else
                 {
-                    view_top = 0;
-                    view_bottom = 0;
+                    mViewTop = 0;
+                    mViewBottom = 0;
                 }
             }
             else
             {
                 mBook.reset ();
                 mPage = -1;
-                view_top = 0;
-                view_bottom = 0;
+                mViewTop = 0;
+                mViewBottom = 0;
             }
         }
         else
@@ -919,15 +918,15 @@ public:
 
             mPage = newPage;
 
-            if (newPage < mBook->Pages.size ())
+            if (newPage < mBook->mPages.size ())
             {
-                view_top = mBook->Pages [newPage].first;
-                view_bottom = mBook->Pages [newPage].second;
+                mViewTop = mBook->mPages [newPage].first;
+                mViewBottom = mBook->mPages [newPage].second;
             }
             else
             {
-                view_top = 0;
-                view_bottom = 0;
+                mViewTop = 0;
+                mViewBottom = 0;
             }
         }
     }
@@ -938,9 +937,9 @@ public:
 
         createActiveFormat (PageDisplay * this_) : this_ (this_) {}
 
-        void operator () (section const & Section, line const & Line, run const & Run) const
+        void operator () (Section const & Section, Line const & Line, Run const & Run) const
         {
-            IFont* Font = Run.Style->Font;
+            IFont* Font = Run.mStyle->mFont;
 
             active_text_formats::iterator j = this_->mActiveTextFormats.find (Font);
 
@@ -953,13 +952,13 @@ public:
                 j = this_->mActiveTextFormats.insert (std::make_pair (Font, textFormat)).first;
             }
 
-            j->second->mCountVertex += Run.PrintableChars * 6;
+            j->second->mCountVertex += Run.mPrintableChars * 6;
         }
     };
 
     void createActiveFormats (boost::shared_ptr <TypesetBook> newBook)
     {
-        newBook->visit_runs (0, 0x7FFFFFFF, createActiveFormat (this));
+        newBook->visitRuns (0, 0x7FFFFFFF, createActiveFormat (this));
 
         if (mNode != NULL)
             for (active_text_formats::iterator i = mActiveTextFormats.begin (); i != mActiveTextFormats.end (); ++i)
@@ -1001,31 +1000,31 @@ public:
     struct renderRun
     {
         PageDisplay * this_;
-        glyph_stream &glyphStream;
+        GlyphStream &glyphStream;
 
-        renderRun (PageDisplay * this_, glyph_stream &glyphStream) :
+        renderRun (PageDisplay * this_, GlyphStream &glyphStream) :
             this_(this_), glyphStream (glyphStream)
         {
         }
 
-        void operator () (section const & Section, line const & Line, run const & Run) const
+        void operator () (Section const & Section, Line const & Line, Run const & Run) const
         {
-            bool isActive = Run.Style->InteractiveId && (Run.Style == this_->mFocusItem);
+            bool isActive = Run.mStyle->mInteractiveId && (Run.mStyle == this_->mFocusItem);
 
-            Colour colour = isActive ? (this_->mItemActive ? Run.Style->ActiveColour: Run.Style->HotColour) : Run.Style->NormalColour;
+            Colour colour = isActive ? (this_->mItemActive ? Run.mStyle->mActiveColour: Run.mStyle->mHotColour) : Run.mStyle->mNormalColour;
 
-            glyphStream.reset (Section.Rect.left + Line.Rect.left + Run.Left, Line.Rect.top, colour);
+            glyphStream.reset (Section.mRect.left + Line.mRect.left + Run.mLeft, Line.mRect.top, colour);
 
-            utf8_stream stream (Run.Range);
+            utf8_stream stream (Run.mRange);
 
             while (!stream.eof ())
             {
                 utf8_stream::unicode_char code_point = stream.consume ();
 
                 if (!ucs_space (code_point))
-                    glyphStream.emit_glyph (code_point);
+                    glyphStream.emitGlyph (code_point);
                 else
-                    glyphStream.emit_space (code_point);
+                    glyphStream.emitSpace (code_point);
             }
         }
     };
@@ -1040,15 +1039,15 @@ public:
 
         Vertex* vertices = textFormat.mRenderItem->getCurrentVertexBuffer();
 
-        render_xform renderXform (mCroppedParent, textFormat.mRenderItem->getRenderTarget()->getInfo());
+        RenderXform renderXform (mCroppedParent, textFormat.mRenderItem->getRenderTarget()->getInfo());
 
-        glyph_stream glyphStream (textFormat.mFont, mCoord.left, mCoord.top-view_top,
+        GlyphStream glyphStream (textFormat.mFont, mCoord.left, mCoord.top-mViewTop,
                                   -1 /*mNode->getNodeDepth()*/, vertices, renderXform);
 
-        int visit_top    = (std::max) (view_top,    view_top + int (renderXform.clipTop   ));
-        int visit_bottom = (std::min) (view_bottom, view_top + int (renderXform.clipBottom));
+        int visit_top    = (std::max) (mViewTop,    mViewTop + int (renderXform.clipTop   ));
+        int visit_bottom = (std::min) (mViewBottom, mViewTop + int (renderXform.clipBottom));
 
-        mBook->visit_runs (visit_top, visit_bottom, textFormat.mFont, renderRun (this, glyphStream));
+        mBook->visitRuns (visit_top, visit_bottom, textFormat.mFont, renderRun (this, glyphStream));
 
         textFormat.mRenderItem->setLastVertexCount(glyphStream.end () - vertices);
     }
