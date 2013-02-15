@@ -24,12 +24,20 @@ public:
 
     inline void setValue(const QString &key, const QString &value)
     {
-        mSettings.insert(key, value);
+        QStringList values = mSettings.values(key);
+        if (!values.contains(value))
+            mSettings.insert(key, value);
     }
 
     inline void setMultiValue(const QString &key, const QString &value)
     {
-        mSettings.insertMulti(key, value);
+        QStringList values = mSettings.values(key);
+        if (!values.contains(value)) {
+            qDebug() << "inserting " << value;
+            mSettings.insertMulti(key, value);
+        } else {
+            qDebug() << "not inserting " << value;
+        }
     }
 
 
@@ -73,12 +81,10 @@ public:
                 QStringList values = mCache.values(key);
                 if (!values.contains(value)) {
                     // QMap will replace the value if key exists, QMultiMap creates a new one
-                    mCache.insert(key, value);
+                    mCache.insertMulti(key, value);
                 }
             }
         }
-
-        qDebug() << "HI THERE! " << mCache;
 
         if (mSettings.isEmpty()) {
             mSettings = mCache; // This is the first time we read a file

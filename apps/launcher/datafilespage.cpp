@@ -293,22 +293,77 @@ void DataFilesPage::setupDataFiles()
         mPluginsModel->addPlugins(dataLocal);
     }
 
+    QStringList profiles = mLauncherSettings.subKeys(QString("Profiles/"));
+    QString profile = mLauncherSettings.value(QString("Profiles/CurrentProfile"));
+
+    mProfilesComboBox->addItems(profiles);
+
+    // Add the current profile if empty
+    if (mProfilesComboBox->findText(profile) == -1)
+        mProfilesComboBox->addItem(profile);
+
+    if (mProfilesComboBox->findText(QString("Default")) == -1)
+        mProfilesComboBox->addItem(QString("Default"));
+
+    if (profile.isEmpty()) {
+        mProfilesComboBox->setCurrentIndex(mProfilesComboBox->findText(QString("Default")));
+    } else {
+        mProfilesComboBox->setCurrentIndex(mProfilesComboBox->findText(profile));
+    }
+
     loadSettings();
 }
 
 void DataFilesPage::loadSettings()
 {
     qDebug() << "load settings";
+    QString profile = mLauncherSettings.value(QString("Profiles/CurrentProfile"));
+
+    qDebug() << mLauncherSettings.values(QString("Profiles/Default"), Qt::MatchStartsWith);
+
+
+
+    if (profile.isEmpty())
+        return;
+
+
+    mMastersModel->uncheckAll();
+    mPluginsModel->uncheckAll();
+
+    QStringList masters = mLauncherSettings.values(QString("Profiles/") + profile + QString("/master"), Qt::MatchExactly);
+    QStringList plugins = mLauncherSettings.values(QString("Profiles/") + profile + QString("/plugin"), Qt::MatchExactly);
+    qDebug() << "masters to check " << plugins;
+
+    foreach (const QString &master, masters) {
+        QModelIndex index = mMastersModel->indexFromItem(mMastersModel->findItem(master));
+        if (index.isValid())
+            mMastersModel->setCheckState(index, Qt::Checked);
+    }
+
+    foreach (const QString &plugin, plugins) {
+        QModelIndex index = mPluginsModel->indexFromItem(mPluginsModel->findItem(plugin));
+        if (index.isValid())
+            mPluginsModel->setCheckState(index, Qt::Checked);
+    }
 }
 
 void DataFilesPage::saveSettings()
 {
     QString profile = mLauncherSettings.value(QString("Profiles/CurrentProfile"));
+
+    if (profile.isEmpty()) {
+        profile = mProfilesComboBox->currentText();
+        mLauncherSettings.setValue(QString("Profiles/CurrentProfile"), profile);
+    }
+
     qDebug() << "save settings" << profile;
+    mLauncherSettings.remove(QString("Profiles/") + profile + QString("/master"));
+    mLauncherSettings.remove(QString("Profiles/") + profile + QString("/plugin"));
 
     QStringList items = mMastersModel->checkedItems();
 
     foreach(const QString &master, items) {
+        qDebug() << "setting " << master;
         mLauncherSettings.setMultiValue(QString("Profiles/") + profile + QString("/master"), master);
     }
 
@@ -482,17 +537,11 @@ void DataFilesPage::writeConfig(QString profile)
 
 void DataFilesPage::newProfile()
 {
-//    if (mNewProfileDialog->exec() == QDialog::Accepted) {
-
-//        const QString text = mNewProfileDialog->lineEdit()->text();
-//        mProfilesComboBox->addItem(text);
-//        mProfilesComboBox->setCurrentIndex(mProfilesComboBox->findText(text));
-//    }
-
-    mDeleteProfileAction->setEnabled(false);
-    mProfilesComboBox->setCurrentIndex(-1);
-    mProfilesComboBox->setEditEnabled(true);
-    mProfilesComboBox->lineEdit()->setFocus();
+    if (mNewProfileDialog->exec() == QDialog::Accepted) {
+        QString profile = mNewProfileDialog->lineEdit()->text();
+        mProfilesComboBox->addItem(profile);
+        mProfilesComboBox->setCurrentIndex(mProfilesComboBox->findText(profile));
+    }
 }
 
 void DataFilesPage::updateOkButton(const QString &text)

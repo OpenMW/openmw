@@ -9,6 +9,9 @@ public:
     LauncherSettings();
     ~LauncherSettings();
 
+    QStringList subKeys(const QString &key);
+    QStringList values(const QString &key, Qt::MatchFlags flags = Qt::MatchExactly);
+
     bool writeFile(QTextStream &stream);
 
 };

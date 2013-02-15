@@ -3,6 +3,7 @@
 #include <QString>
 #include <QDebug>
 #include <QApplication>
+#include <QKeyEvent>
 
 #include "profilescombobox.hpp"
 #include "comboboxlineedit.hpp"
@@ -18,12 +19,11 @@ ProfilesComboBox::ProfilesComboBox(QWidget *parent) :
     connect(this, SIGNAL(currentIndexChanged(int)), this,
             SLOT(slotIndexChanged(int)));
 
-
+    setInsertPolicy(QComboBox::NoInsert);
 }
 
 void ProfilesComboBox::setEditEnabled(bool editable)
 {
-    qDebug() << "called";
     if (isEditable() == editable)
         return;
 
@@ -50,28 +50,24 @@ void ProfilesComboBox::setEditEnabled(bool editable)
 
 void ProfilesComboBox::slotTextChanged(const QString &text)
 {
-    QString previous = itemText(currentIndex());
-//    lineEdit()->setPalette(QApplication::palette());
+    QPalette *palette = new QPalette();
+    palette->setColor(QPalette::Text,Qt::red);
 
-    if (text.isEmpty())
-        return;
+    int index = findText(text);
 
-    if (text == previous)
-        return;
-
-    qDebug() << "textChanged";
-    if (findText(text) != -1) {
-        QPalette *palette = new QPalette();
-        palette->setColor(QPalette::Text,Qt::red);
+    if (text.isEmpty() || (index != -1 && index != currentIndex())) {
         lineEdit()->setPalette(*palette);
+    } else {
+        lineEdit()->setPalette(QApplication::palette());
     }
 }
 
 void ProfilesComboBox::slotEditingFinished()
 {
-    qDebug() << "returnpressed";
     QString current = currentText();
     QString previous = itemText(currentIndex());
+
+    qDebug() << current << previous;
 
     if (current.isEmpty())
         return;
@@ -82,9 +78,9 @@ void ProfilesComboBox::slotEditingFinished()
     if (findText(current) != -1)
         return;
 
-
     if (currentIndex() == -1) {
-        addItem(currentText());
+        addItem(current);
+        setCurrentIndex(findText(current));
     } else {
         setItemText(currentIndex(), current);
         emit(profileRenamed(previous, current));
