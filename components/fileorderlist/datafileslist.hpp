@@ -49,13 +49,11 @@ public slots:
     void refresh();
 
 private:
-    DataFilesModel *mMastersModel;
-    DataFilesModel *mPluginsModel;
+    DataFilesModel *mFilesModel;
 
-    QSortFilterProxyModel *mPluginsProxyModel;
+    QSortFilterProxyModel *mFilesProxyModel;
 
-    QTableView *mMastersTable;
-    QTableView *mPluginsTable;
+    QTableView *mFilesTable;
 
     QMenu *mContextMenu;
 

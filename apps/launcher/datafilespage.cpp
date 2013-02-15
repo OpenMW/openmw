@@ -742,6 +742,8 @@ void DataFilesPage::showContextMenu(const QPoint &point)
              : mCheckAction->setEnabled(true);
     }
 
+
     // Show menu
     mContextMenu->exec(globalPos);
+
 }
