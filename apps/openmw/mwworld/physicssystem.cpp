@@ -196,7 +196,7 @@ namespace MWWorld
 
 
     PhysicsSystem::PhysicsSystem(OEngine::Render::OgreRenderer &_rend) :
-        mRender(_rend), mEngine(0), mFreeFly (true)
+        mRender(_rend), mEngine(0)
     {
         // Create physics. shapeLoader is deleted by the physic engine
         NifBullet::ManualBulletShapeLoader* shapeLoader = new NifBullet::ManualBulletShapeLoader();
@@ -460,12 +460,10 @@ namespace MWWorld
                 if(cmode)
                 {
                     act->enableCollisions(false);
-                    mFreeFly = true;
                     return false;
                 }
                 else
                 {
-                    mFreeFly = false;
                     act->enableCollisions(true);
                     return true;
                 }

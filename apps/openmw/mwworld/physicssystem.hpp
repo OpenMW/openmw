@@ -85,7 +85,6 @@ namespace MWWorld
 
             OEngine::Render::OgreRenderer &mRender;
             OEngine::Physic::PhysicEngine* mEngine;
-            bool mFreeFly;
             std::map<std::string, std::string> handleToMesh;
 
             PhysicsSystem (const PhysicsSystem&);
