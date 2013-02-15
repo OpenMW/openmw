@@ -69,6 +69,9 @@ void ProfilesComboBox::slotEditingFinished()
 
     qDebug() << current << previous;
 
+    if (currentIndex() == -1)
+        return;
+
     if (current.isEmpty())
         return;
 
@@ -78,13 +81,8 @@ void ProfilesComboBox::slotEditingFinished()
     if (findText(current) != -1)
         return;
 
-    if (currentIndex() == -1) {
-        addItem(current);
-        setCurrentIndex(findText(current));
-    } else {
-        setItemText(currentIndex(), current);
-        emit(profileRenamed(previous, current));
-    }
+    setItemText(currentIndex(), current);
+    emit(profileRenamed(previous, current));
 }
 
 void ProfilesComboBox::slotIndexChanged(int index)

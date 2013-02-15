@@ -169,6 +169,7 @@ bool MainDialog::setup()
         return false;
     }
 
+    loadSettings();
     return true;
 }
 
@@ -182,7 +183,14 @@ void MainDialog::changePage(QListWidgetItem *current, QListWidgetItem *previous)
 
 void MainDialog::loadSettings()
 {
+    int width = mLauncherSettings.value(QString("General/MainWindow/width")).toInt();
+    int height = mLauncherSettings.value(QString("General/MainWindow/height")).toInt();
 
+    int posX = mLauncherSettings.value(QString("General/MainWindow/posx")).toInt();
+    int posY = mLauncherSettings.value(QString("General/MainWindow/posy")).toInt();
+
+    resize(width, height);
+    move(posX, posY);
 }
 
 void MainDialog::saveSettings()
@@ -192,6 +200,12 @@ void MainDialog::saveSettings()
 
     mLauncherSettings.setValue(QString("General/MainWindow/width"), width);
     mLauncherSettings.setValue(QString("General/MainWindow/height"), height);
+
+    QString posX = QString::number(this->pos().x());
+    QString posY = QString::number(this->pos().y());
+
+    mLauncherSettings.setValue(QString("General/MainWindow/posx"), posX);
+    mLauncherSettings.setValue(QString("General/MainWindow/posy"), posY);
 
     qDebug() << "size: " << width << height;
 }
