@@ -102,6 +102,7 @@ namespace MWWorld
             }
 
             traceResults trace; //no initialization needed
+            bool onground = false;
             float remainingTime = time;
             bool isInterior = !ptr.getCell()->isExterior();
             float verticalRotation = physicActor->getRotation().getYaw().valueDegrees();
@@ -117,22 +118,24 @@ namespace MWWorld
             }
             else
             {
+                if(!(movement.z > 0.0f))
+                {
+                    newtrace(&trace, position, position-Ogre::Vector3(0,0,4), halfExtents, verticalRotation, isInterior, engine);
+                    if(trace.fraction < 1.0f && getSlope(trace.planenormal) <= sMaxSlope)
+                        onground = true;
+                }
+
                 velocity = Ogre::Quaternion(Ogre::Radian(-refpos.rot[2]), Ogre::Vector3::UNIT_Z) *
                            movement / time;
-                velocity.z = physicActor->getVerticalForce();
+                velocity.z += physicActor->getVerticalForce();
             }
 
-            // we need a copy of the velocity before we start clipping it for steps
             Ogre::Vector3 clippedVelocity(velocity);
-
-            if(gravity)
+            if(onground)
             {
-                newtrace(&trace, position, position+Ogre::Vector3(0,0,-10), halfExtents, verticalRotation, isInterior, engine);
-                if(trace.fraction < 1.0f && getSlope(trace.planenormal) <= sMaxSlope)
-                {
-                    // if we're within 10 units of the ground, force velocity to track the ground
-                    clipVelocity(clippedVelocity, trace.planenormal, 1.0f);
-                }
+                // if we're on the ground, force velocity to track it
+                clippedVelocity.z = velocity.z = std::max(0.0f, velocity.z);
+                clipVelocity(clippedVelocity, trace.planenormal, 1.0f);
             }
 
             Ogre::Vector3 lastNormal(0.0f);
@@ -176,6 +179,14 @@ namespace MWWorld
                 iterations++;
             } while(iterations < sMaxIterations && remainingTime > 0.0f);
 
+            if(onground)
+            {
+                newtrace(&trace, newPosition, newPosition-Ogre::Vector3(0,0,sStepSize+4.0f), halfExtents, verticalRotation, isInterior, engine);
+                if(trace.fraction < 1.0f && getSlope(trace.planenormal) <= sMaxSlope)
+                    newPosition.z = trace.endpos.z + 2.0f;
+                else
+                    onground = false;
+            }
             physicActor->setVerticalForce(clippedVelocity.z - time*400.0f);
 
             return newPosition;
