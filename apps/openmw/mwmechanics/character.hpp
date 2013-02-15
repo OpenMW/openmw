@@ -45,7 +45,7 @@ enum CharacterState {
     CharState_SwimRunLeft,
     CharState_SwimRunRight,
 
-    /* Must be last! */
+    /* Death states must be last! */
     CharState_Death1,
     CharState_Death2,
     CharState_Death3,
