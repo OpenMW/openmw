@@ -1379,7 +1379,7 @@ namespace MWWorld
     }
 
     bool
-    World::isSwimming(const MWWorld::Ptr &object)
+    World::isSwimming(const MWWorld::Ptr &object) const
     {
         /// \todo add check ifActor() - only actors can swim
         float *fpos = object.getRefData().getPosition().pos;
@@ -1393,12 +1393,19 @@ namespace MWWorld
     }
 
     bool
-    World::isUnderwater(const ESM::Cell &cell, const Ogre::Vector3 &pos)
+    World::isUnderwater(const ESM::Cell &cell, const Ogre::Vector3 &pos) const
     {
         if (!(cell.mData.mFlags & ESM::Cell::HasWater)) {
             return false;
         }
         return pos.z < cell.mWater;
+    }
+
+    bool World::isOnGround(const MWWorld::Ptr &ptr) const
+    {
+        RefData &refdata = ptr.getRefData();
+        const OEngine::Physic::PhysicActor *physactor = mPhysEngine->getCharacter(refdata.getHandle());
+        return physactor && physactor->getOnGround();
     }
 
     void World::renderPlayer()
