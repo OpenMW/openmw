@@ -81,6 +81,7 @@ Land::~Land()
 void Land::load(ESMReader &esm)
 {
     mEsm = &esm;
+    mPlugin = mEsm->getIndex();
 
     // Get the grid location
     esm.getSubNameIs("INTV");

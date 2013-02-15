@@ -17,6 +17,11 @@
 #include "../mwsound/sound_decoder.hpp"
 #include "../mwsound/sound.hpp"
 
+#ifdef _WIN32
+#include <BaseTsd.h>
+
+typedef SSIZE_T ssize_t;
+#endif
 
 namespace MWRender
 {
@@ -361,7 +366,11 @@ class MovieAudioDecoder : public MWSound::Sound_Decoder
     }
 
     void open(const std::string&)
+#ifdef _WIN32
+    { fail(std::string("Invalid call to ")+__FUNCSIG__); }
+#else
     { fail(std::string("Invalid call to ")+__PRETTY_FUNCTION__); }
+#endif
 
     void close() { }
 

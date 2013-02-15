@@ -3,7 +3,7 @@
 
 #include "settingsbase.hpp"
 
-class GraphicsSettings : public SettingsBase<QMap<QString, QString>>
+class GraphicsSettings : public SettingsBase<QMap<QString, QString> >
 {
 public:
     GraphicsSettings();

@@ -11,39 +11,52 @@
 CS::Editor::Editor() : mViewManager (mDocumentManager), mNewDocumentIndex (0)
 {
     connect (&mViewManager, SIGNAL (newDocumentRequest ()), this, SLOT (createDocument ()));
+    connect (&mViewManager, SIGNAL (loadDocumentRequest ()), this, SLOT (loadDocument ()));
+
+    connect (&mStartup, SIGNAL (createDocument()), this, SLOT (createDocument ()));
+    connect (&mStartup, SIGNAL (loadDocument()), this, SLOT (loadDocument ()));
+
+    connect (&mOpenDialog, SIGNAL(accepted()), this, SLOT(openFiles()));
 }
 
 void CS::Editor::createDocument()
 {
+    mStartup.hide();
+
+    /// \todo open the ESX picker instead
+
     std::ostringstream stream;
 
     stream << "NewDocument" << (++mNewDocumentIndex);
 
-    CSMDoc::Document *document = mDocumentManager.addDocument (stream.str());
+    std::vector<boost::filesystem::path> files;
+    files.push_back (stream.str());
 
-    static const char *sGlobals[] =
-    {
-            "Day", "DaysPassed", "GameHour", "Month", "PCRace", "PCVampire", "PCWerewolf", "PCYear", 0
-    };
+    CSMDoc::Document *document = mDocumentManager.addDocument (files, true);
 
-    for (int i=0; sGlobals[i]; ++i)
-    {
-        ESM::Global record;
-        record.mId = sGlobals[i];
-        record.mValue = i==0 ? 1 : 0;
-        record.mType = ESM::VT_Float;
-        document->getData().getGlobals().add (record);
-    }
+    mViewManager.addView (document);
+}
 
-    document->getData().merge(); /// \todo remove once proper ESX loading is implemented
+void CS::Editor::loadDocument()
+{
+    mStartup.hide();
+    mOpenDialog.show();
+    mOpenDialog.raise();
+    mOpenDialog.activateWindow();
+}
+
+void CS::Editor::openFiles()
+{
+    std::vector<boost::filesystem::path> paths;
+    mOpenDialog.getFileList(paths);
+    CSMDoc::Document *document = mDocumentManager.addDocument(paths, false);
 
     mViewManager.addView (document);
 }
 
 int CS::Editor::run()
 {
-    /// \todo Instead of creating an empty document, open a small welcome dialogue window with buttons for new/load/recent projects
-    createDocument();
+    mStartup.show();
 
     return QApplication::exec();
 }

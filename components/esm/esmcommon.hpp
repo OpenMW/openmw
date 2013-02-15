@@ -89,6 +89,7 @@ struct MasterData
 {
   std::string name;
   uint64_t size;
+  int index; // Position of the parent file in the global list of loaded files
 };
 
 // Data that is only present in save game files
@@ -113,6 +114,10 @@ struct ESM_Context
   size_t leftFile;
   NAME recName, subName;
   HEDRstruct header;
+  // When working with multiple esX files, we will generate lists of all files that
+  //  actually contribute to a specific cell. Therefore, we need to store the index
+  //  of the file belonging to this contest. See CellStore::(list/load)refs for details.
+  int index;
 
   // True if subName has been read but not used.
   bool subCached;

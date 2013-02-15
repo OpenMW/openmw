@@ -8,9 +8,11 @@
 #include <boost/algorithm/string.hpp>
 
 #include <components/esm/loadcont.hpp>
+#include <components/compiler/locals.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
+#include "../mwbase/scriptmanager.hpp"
 
 #include "manualref.hpp"
 #include "refdata.hpp"
@@ -83,9 +85,14 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add (const Ptr& ptr)
         CellStore *cell;
 
         Ptr player = MWBase::Environment::get().getWorld ()->getPlayer().getPlayer();
-        // Items in players inventory have cell set to 0, so their scripts will never be removed
+        
         if(&(MWWorld::Class::get (player).getContainerStore (player)) == this)
-            cell = 0;
+        {
+            cell = 0; // Items in player's inventory have cell set to 0, so their scripts will never be removed
+           
+            // Set OnPCAdd special variable, if it is declared 
+            item.mRefData->getLocals().setVarByInt(script, "onpcadd", 1);
+        }
         else
             cell = player.getCell();
 

@@ -5,6 +5,7 @@
 
 #include <QAbstractTableModel>
 
+#include <components/esm/esmreader.hpp>
 #include <components/esm/loadglob.hpp>
 
 #include "idtable.hpp"
@@ -27,7 +28,14 @@ CSMWorld::Data::Data()
     mGlobals.addColumn (new FixedRecordTypeColumn<ESM::Global> (UniversalId::Type_Global));
     mGlobals.addColumn (new FloatValueColumn<ESM::Global>);
 
+    mGmsts.addColumn (new StringIdColumn<ESM::GameSetting>);
+    mGmsts.addColumn (new RecordStateColumn<ESM::GameSetting>);
+    mGmsts.addColumn (new FixedRecordTypeColumn<ESM::GameSetting> (UniversalId::Type_Gmst));
+    mGmsts.addColumn (new VarTypeColumn<ESM::GameSetting>);
+    mGmsts.addColumn (new VarValueColumn<ESM::GameSetting>);
+
     addModel (new IdTable (&mGlobals), UniversalId::Type_Globals, UniversalId::Type_Global);
+    addModel (new IdTable (&mGmsts), UniversalId::Type_Gmsts, UniversalId::Type_Gmst);
 }
 
 CSMWorld::Data::~Data()
@@ -59,4 +67,31 @@ QAbstractTableModel *CSMWorld::Data::getTableModel (const UniversalId& id)
 void CSMWorld::Data::merge()
 {
     mGlobals.merge();
+}
+
+void CSMWorld::Data::loadFile (const boost::filesystem::path& path, bool base)
+{
+    ESM::ESMReader reader;
+    /// \todo set encoder
+    reader.open (path.string());
+
+    // Note: We do not need to send update signals here, because at this point the model is not connected
+    // to any view.
+    while (reader.hasMoreRecs())
+    {
+        ESM::NAME n = reader.getRecName();
+        reader.getRecHeader();
+
+        switch (n.val)
+        {
+            case ESM::REC_GLOB: mGlobals.load (reader, base); break;
+            case ESM::REC_GMST: mGmsts.load (reader, base); break;
+
+
+            default:
+
+                /// \todo throw an exception instead, once all records are implemented
+                reader.skipRecord();
+        }
+    }
 }

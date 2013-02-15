@@ -5,17 +5,11 @@ set(LAUNCHER
     maindialog.cpp
     playpage.cpp
 
-    model/datafilesmodel.cpp
-    model/modelitem.cpp
-    model/esm/esmfile.cpp
-
     settings/gamesettings.cpp
     settings/graphicssettings.cpp
     settings/launchersettings.cpp
 
     utils/comboboxlineedit.cpp
-    utils/naturalsort.cpp
-    utils/lineedit.cpp
     utils/profilescombobox.cpp
     utils/textinputdialog.cpp
 
@@ -28,21 +22,14 @@ set(LAUNCHER_HEADER
     maindialog.hpp
     playpage.hpp
 
-    model/datafilesmodel.hpp
-    model/modelitem.hpp
-    model/esm/esmfile.hpp
-
     settings/gamesettings.hpp
     settings/graphicssettings.hpp
     settings/launchersettings.hpp
     settings/settingsbase.hpp
 
     utils/comboboxlineedit.cpp
-    utils/lineedit.hpp
-    utils/naturalsort.hpp
     utils/profilescombobox.hpp
     utils/textinputdialog.hpp
-
 )
 
 # Headers that must be pre-processed
@@ -52,12 +39,7 @@ set(LAUNCHER_HEADER_MOC
     maindialog.hpp
     playpage.hpp
 
-    model/datafilesmodel.hpp
-    model/modelitem.hpp
-    model/esm/esmfile.hpp
-
     utils/comboboxlineedit.hpp
-    utils/lineedit.hpp
     utils/profilescombobox.hpp
     utils/textinputdialog.hpp
 )

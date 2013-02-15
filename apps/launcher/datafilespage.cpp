@@ -3,15 +3,16 @@
 #include <components/esm/esmreader.hpp>
 #include <components/files/configurationmanager.hpp>
 
-#include "model/datafilesmodel.hpp"
-#include "model/esm/esmfile.hpp"
+#include <components/fileorderlist/model/datafilesmodel.hpp>
+#include <components/fileorderlist/model/esm/esmfile.hpp>
+
+#include <components/fileorderlist/utils/lineedit.hpp>
+#include <components/fileorderlist/utils/naturalsort.hpp>
 
 #include "settings/gamesettings.hpp"
 #include "settings/launchersettings.hpp"
 
 #include "utils/profilescombobox.hpp"
-#include "utils/lineedit.hpp"
-#include "utils/naturalsort.hpp"
 #include "utils/textinputdialog.hpp"
 
 #include "datafilespage.hpp"
@@ -171,16 +172,7 @@ DataFilesPage::DataFilesPage(Files::ConfigurationManager &cfg, GameSettings &gam
     mNewProfileDialog = new TextInputDialog(tr("New Profile"), tr("Profile name:"), this);
 
     connect(mNewProfileDialog->lineEdit(), SIGNAL(textChanged(QString)), this, SLOT(updateOkButton(QString)));
-
-    connect(mPluginsTable, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(setCheckState(QModelIndex)));
-    connect(mMastersTable, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(setCheckState(QModelIndex)));
-
-    connect(mMastersModel, SIGNAL(checkedItemsChanged(QStringList,QStringList)), mPluginsModel, SLOT(slotcheckedItemsChanged(QStringList,QStringList)));
-
-    connect(filterLineEdit, SIGNAL(textChanged(QString)), this, SLOT(filterChanged(QString)));
-
-    connect(mPluginsTable, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(showContextMenu(QPoint)));
-
+    
     connect(mProfilesComboBox, SIGNAL(profileRenamed(QString,QString)), this, SLOT(profileRenamed(QString,QString)));
     connect(mProfilesComboBox, SIGNAL(profileChanged(QString,QString)), this, SLOT(profileChanged(QString,QString)));
 
@@ -225,7 +217,6 @@ void DataFilesPage::createActions()
 
     mContextMenu->addAction(mCheckAction);
     mContextMenu->addAction(mUncheckAction);
-
 }
 
 void DataFilesPage::readConfig()
@@ -312,6 +303,7 @@ void DataFilesPage::setupDataFiles()
     }
 
     loadSettings();
+
 }
 
 void DataFilesPage::loadSettings()
@@ -377,13 +369,10 @@ void DataFilesPage::saveSettings()
         mLauncherSettings.setMultiValue(QString("Profiles/") + profile + QString("/plugin"), plugin);
     }
 
-
-
 }
 
 void DataFilesPage::writeConfig(QString profile)
 {
-
 
 //    // Don't overwrite the config if no masters are found
 //    if (mMastersModel->rowCount() < 1)
@@ -701,7 +690,6 @@ void DataFilesPage::profileChanged(const QString &previous, const QString &curre
     saveSettings();
     mLauncherSettings.setValue(QString("Profiles/CurrentProfile"), current);
 
-
     mMastersModel->uncheckAll();
     mPluginsModel->uncheckAll();
     loadSettings();
@@ -727,6 +715,7 @@ void DataFilesPage::profileRenamed(const QString &previous, const QString &curre
     mMastersModel->uncheckAll();
     mPluginsModel->uncheckAll();
     loadSettings();
+
 }
 
 void DataFilesPage::showContextMenu(const QPoint &point)

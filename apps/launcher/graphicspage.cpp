@@ -6,11 +6,10 @@
 
 #include <components/files/configurationmanager.hpp>
 #include <components/files/ogreplugin.hpp>
-//#include <components/settings/settings.hpp>
+
+#include <components/fileorderlist/utils/naturalsort.hpp>
 
 #include "settings/graphicssettings.hpp"
-#include "utils/naturalsort.hpp"
-
 #include "graphicspage.hpp"
 
 QString getAspect(int x, int y)

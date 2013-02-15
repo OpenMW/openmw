@@ -23,6 +23,7 @@ class MwIniImporter {
     void    merge(multistrmap &cfg, multistrmap &ini);
     void    mergeFallback(multistrmap &cfg, multistrmap &ini);
     void    importGameFiles(multistrmap &cfg, multistrmap &ini);
+    void    importArchives(multistrmap &cfg, multistrmap &ini);
     void    writeToFile(boost::iostreams::stream<boost::iostreams::file_sink> &out, multistrmap &cfg);
     
   private:
