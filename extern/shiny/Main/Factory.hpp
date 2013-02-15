@@ -185,6 +185,7 @@ namespace sh
 		ConfigurationMap mConfigurations;
 		LodConfigurationMap mLodConfigurations;
 		LastModifiedMap mShadersLastModified;
+		LastModifiedMap mShadersLastModifiedNew;
 
 		PropertySetGet mGlobalSettings;
 
@@ -201,6 +202,11 @@ namespace sh
 
 		MaterialInstance* findInstance (const std::string& name);
 		MaterialInstance* searchInstance (const std::string& name);
+
+		/// @return was anything removed?
+		bool removeCache (const std::string& pattern);
+
+		static const std::string mBinaryCacheName;
 	};
 }
 

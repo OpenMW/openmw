@@ -72,15 +72,20 @@ add_openmw_dir (mwbase
     )
 
 # Main executable
+
 IF(OGRE_STATIC)
+ADD_DEFINITIONS(-DENABLE_PLUGIN_OctreeSceneManager -DENABLE_PLUGIN_ParticleFX -DENABLE_PLUGIN_GL)
+set(OGRE_STATIC_PLUGINS ${OGRE_Plugin_OctreeSceneManager_LIBRARIES} ${OGRE_Plugin_ParticleFX_LIBRARIES} ${OGRE_RenderSystem_GL_LIBRARIES})
 IF(WIN32)
-ADD_DEFINITIONS(-DENABLE_PLUGIN_CgProgramManager -DENABLE_PLUGIN_OctreeSceneManager -DENABLE_PLUGIN_ParticleFX -DENABLE_PLUGIN_-DENABLE_PLUGIN_Direct3D9 -DENABLE_PLUGIN_GL)
-set(OGRE_STATIC_PLUGINS ${OGRE_Plugin_CgProgramManager_LIBRARIES} ${OGRE_Plugin_OctreeSceneManager_LIBRARIES} ${OGRE_Plugin_ParticleFX_LIBRARIES} ${OGRE_RenderSystem_Direct3D9_LIBRARIES} ${OGRE_RenderSystem_GL_LIBRARIES})
-ELSE(WIN32)
-ADD_DEFINITIONS(-DENABLE_PLUGIN_CgProgramManager -DENABLE_PLUGIN_OctreeSceneManager -DENABLE_PLUGIN_ParticleFX -DENABLE_PLUGIN_GL)
-set(OGRE_STATIC_PLUGINS ${OGRE_Plugin_CgProgramManager_LIBRARIES} ${Cg_LIBRARIES} ${OGRE_Plugin_OctreeSceneManager_LIBRARIES} ${OGRE_Plugin_ParticleFX_LIBRARIES} ${OGRE_RenderSystem_GL_LIBRARIES})
+ADD_DEFINITIONS(-DENABLE_PLUGIN_Direct3D9)
+list (APPEND OGRE_STATIC_PLUGINS ${OGRE_RenderSystem_Direct3D9_LIBRARIES})
 ENDIF(WIN32)
+IF (Cg_FOUND)
+ADD_DEFINITIONS(-DENABLE_PLUGIN_CgProgramManager)
+list (APPEND OGRE_STATIC_PLUGINS ${OGRE_Plugin_CgProgramManager_LIBRARIES} ${Cg_LIBRARIES})
+ENDIF (Cg_FOUND)
 ENDIF(OGRE_STATIC)
+
 add_executable(openmw
     ${OPENMW_LIBS} ${OPENMW_LIBS_HEADER}
     ${OPENMW_FILES}
@@ -120,6 +125,12 @@ if(APPLE)
     find_library(COCOA_FRAMEWORK Cocoa)
     find_library(IOKIT_FRAMEWORK IOKit)
     target_link_libraries(openmw ${CARBON_FRAMEWORK} ${COCOA_FRAMEWORK} ${IOKIT_FRAMEWORK})
+
+    if (FFMPEG_FOUND)
+        find_library(COREVIDEO_FRAMEWORK CoreVideo)
+        find_library(VDA_FRAMEWORK VideoDecodeAcceleration)
+        target_link_libraries(openmw ${COREVIDEO_FRAMEWORK} ${VDA_FRAMEWORK})
+    endif()
 endif(APPLE)
 
 if(DPKG_PROGRAM)

@@ -123,6 +123,11 @@ bool MWDialogue::Filter::testSelectStructs (const ESM::DialInfo& info) const
 
 bool MWDialogue::Filter::testDisposition (const ESM::DialInfo& info) const
 {
+    bool isCreature = (mActor.getTypeName() != typeid (ESM::NPC).name());
+
+    if (isCreature)
+        return true;
+
     int actorDisposition = MWBase::Environment::get().getMechanicsManager()->getDerivedDisposition(mActor);
 
     return actorDisposition >= info.mData.mDisposition;
@@ -169,7 +174,7 @@ bool MWDialogue::Filter::testSelectStructNumeric (const SelectWrapper& select) c
             int i = 0;
 
             for (; i<static_cast<int> (script->mVarNames.size()); ++i)
-                if (script->mVarNames[i]==name)
+                if (Misc::StringUtils::lowerCase(script->mVarNames[i]) == name)
                     break;
 
             if (i>=static_cast<int> (script->mVarNames.size()))
