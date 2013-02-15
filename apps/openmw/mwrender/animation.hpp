@@ -36,6 +36,7 @@ protected:
     bool mPlaying;
     bool mLooping;
 
+    float mAnimVelocity;
     float mAnimSpeedMult;
 
     /* Applies the given animation to the given skeleton instance, using the specified time. */
@@ -73,8 +74,7 @@ public:
     // should be on the scale of 0 to 1.
     void setAccumulation(const Ogre::Vector3 &accum);
 
-    void setSpeedMult(float speedmult)
-    { mAnimSpeedMult = speedmult; }
+    void setSpeed(float speed);
 
     void play(const std::string &groupname, const std::string &start, bool loop);
     virtual Ogre::Vector3 runAnimation(float timepassed);

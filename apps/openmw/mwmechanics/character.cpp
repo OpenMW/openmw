@@ -172,6 +172,7 @@ Ogre::Vector3 CharacterController::update(float duration)
 {
     const MWWorld::Class &cls = MWWorld::Class::get(mPtr);
     const Ogre::Vector3 &vec = cls.getMovementVector(mPtr);
+    const float speed = cls.getSpeed(mPtr);
 
     bool inwater = MWBase::Environment::get().getWorld()->isSwimming(mPtr);
     bool isrunning = cls.getStance(mPtr, MWWorld::Class::Run);
@@ -204,9 +205,7 @@ Ogre::Vector3 CharacterController::update(float duration)
     Ogre::Vector3 movement = Ogre::Vector3::ZERO;
     if(mAnimation && !mSkipAnim)
     {
-        // FIXME: The speed should actually be determined by the character's
-        // stance (running, sneaking, etc) and stats
-        mAnimation->setSpeedMult(1.0f);
+        mAnimation->setSpeed(speed);
         movement += mAnimation->runAnimation(duration);
     }
     mSkipAnim = false;

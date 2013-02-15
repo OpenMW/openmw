@@ -28,6 +28,7 @@ Animation::Animation(const MWWorld::Ptr &ptr)
     , mCurrentTime(0.0f)
     , mPlaying(false)
     , mLooping(false)
+    , mAnimVelocity(0.0f)
     , mAnimSpeedMult(1.0f)
 {
 }
@@ -161,6 +162,13 @@ void Animation::setAccumulation(const Ogre::Vector3 &accum)
     mAccumulate = accum;
 }
 
+void Animation::setSpeed(float speed)
+{
+    mAnimSpeedMult = 1.0f;
+    if(mAnimVelocity > 1.0f && speed > 0.0f)
+        mAnimSpeedMult = speed / mAnimVelocity;
+}
+
 
 void Animation::applyAnimation(const Ogre::Animation *anim, float time, Ogre::SkeletonInstance *skel)
 {
@@ -255,6 +263,31 @@ void Animation::play(const std::string &groupname, const std::string &start, boo
             {
                 mCurrentAnim = (*iter)->getAnimation(groupname);
                 mCurrentKeys = &mTextKeys[groupname];
+                mAnimVelocity = 0.0f;
+
+                if(mNonAccumRoot)
+                {
+                    const Ogre::NodeAnimationTrack *track = 0;
+
+                    Ogre::Animation::NodeTrackIterator trackiter = mCurrentAnim->getNodeTrackIterator();
+                    while(!track && trackiter.hasMoreElements())
+                    {
+                        const Ogre::NodeAnimationTrack *cur = trackiter.getNext();
+                        if(cur->getAssociatedNode()->getName() == mNonAccumRoot->getName())
+                            track = cur;
+                    }
+
+                    if(track && track->getNumKeyFrames() > 1)
+                    {
+                        const Ogre::TransformKeyFrame *startkf, *endkf;
+                        startkf = static_cast<const Ogre::TransformKeyFrame*>(track->getKeyFrame(0));
+                        endkf = static_cast<const Ogre::TransformKeyFrame*>(track->getKeyFrame(track->getNumKeyFrames() - 1));
+
+                        mAnimVelocity = startkf->getTranslate().distance(endkf->getTranslate()) /
+                                        mCurrentAnim->getLength();
+                    }
+                }
+
                 found = true;
                 break;
             }
