@@ -136,15 +136,15 @@ void ESMWriter::writeHNString(const std::string& name, const std::string& data)
     endRecord(name);
 }
 
-void ESMWriter::writeHNString(const std::string& name, const std::string& data, int size)
+void ESMWriter::writeHNString(const std::string& name, const std::string& data, size_t size)
 {
-    assert(static_cast<int> (data.size()) <= size);
+    assert(data.size() <= size);
     startSubRecord(name);
     writeHString(data);
 
-    if (static_cast<int> (data.size()) < size)
+    if (data.size() < size)
     {
-        for (int i = data.size(); i < size; ++i)
+        for (size_t i = data.size(); i < size; ++i)
             write("\0",1);
     }
 
@@ -177,7 +177,7 @@ void ESMWriter::writeName(const std::string& name)
     write(name.c_str(), name.size());
 }
 
-void ESMWriter::write(const char* data, int size)
+void ESMWriter::write(const char* data, size_t size)
 {
     if (count && !m_records.empty())
     {
