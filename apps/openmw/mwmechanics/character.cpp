@@ -68,6 +68,8 @@ static const struct {
     { CharState_SwimRunLeft, "swimrunleft" },
     { CharState_SwimRunRight, "swimrunright" },
 
+    { CharState_Jump, "jump" },
+
     { CharState_Death1, "death1" },
     { CharState_Death2, "death2" },
     { CharState_Death3, "death3" },
@@ -170,11 +172,12 @@ void CharacterController::markerEvent(float time, const std::string &evt)
 
 Ogre::Vector3 CharacterController::update(float duration)
 {
+    const MWBase::World *world = MWBase::Environment::get().getWorld();
     const MWWorld::Class &cls = MWWorld::Class::get(mPtr);
     const Ogre::Vector3 &vec = cls.getMovementVector(mPtr);
     const float speed = cls.getSpeed(mPtr);
 
-    bool inwater = MWBase::Environment::get().getWorld()->isSwimming(mPtr);
+    bool inwater = world->isSwimming(mPtr);
     bool isrunning = cls.getStance(mPtr, MWWorld::Class::Run);
 
     if(std::abs(vec.x/2.0f) > std::abs(vec.y))
