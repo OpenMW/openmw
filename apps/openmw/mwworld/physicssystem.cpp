@@ -187,6 +187,7 @@ namespace MWWorld
                 else
                     onground = false;
             }
+            physicActor->setOnGround(onground);
             physicActor->setVerticalForce(clippedVelocity.z - time*400.0f);
 
             return newPosition;

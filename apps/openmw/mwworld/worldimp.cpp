@@ -1418,17 +1418,13 @@ namespace MWWorld
         RefData &refdata = mPlayer->getPlayer().getRefData();
         Ogre::Vector3 playerPos(refdata.getPosition().pos);
 
-        std::pair<bool,Ogre::Vector3> hit = mPhysics->castRay(playerPos, Ogre::Vector3(0,0,-1), 50);
-        bool isOnGround = (hit.first ? (hit.second.distance (playerPos) < 25) : false);
-
-        if(!isOnGround || isUnderwater(*currentCell->mCell, playerPos))
+        const OEngine::Physic::PhysicActor *physactor = mPhysEngine->getCharacter(refdata.getHandle());
+        if(!physactor->getOnGround() || isUnderwater(*currentCell->mCell, playerPos))
             return 2;
-
         if((currentCell->mCell->mData.mFlags&ESM::Cell::NoSleep))
             return 1;
 
         return 0;
-
     }
 
     MWRender::Animation* World::getAnimation(const MWWorld::Ptr &ptr)
