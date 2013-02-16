@@ -3,6 +3,7 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/dialoguemanager.hpp"
+#include "../mwbase/inputmanager.hpp"
 
 namespace MWWorld
 {
@@ -10,6 +11,7 @@ namespace MWWorld
 
     void ActionTalk::executeImp (const Ptr& actor)
     {
-        MWBase::Environment::get().getDialogueManager()->startDialogue (getTarget());
+        if (MWBase::Environment::get().getInputManager ()->getControlSwitch ("playercontrols"))
+            MWBase::Environment::get().getDialogueManager()->startDialogue (getTarget());
     }
 }
