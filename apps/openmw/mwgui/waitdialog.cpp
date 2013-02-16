@@ -1,6 +1,5 @@
 #include "waitdialog.hpp"
 
-#include <iostream>
 #include <cmath>
 
 #include <boost/lexical_cast.hpp>
@@ -160,14 +159,10 @@ namespace MWGui
             normalizedEncumbrance = 1;
         float hourlyFatigueDelta = fFatigueReturnBase + fFatigueReturnMult * (1 - normalizedEncumbrance);
         hourlyFatigueDelta *= 3600 * fEndFatigueMult * stats.getAttribute(ESM::Attribute::Endurance).getModified();
-
-        std::cout << "Calced health per hour: " << hourlyHealthDelta << std::endl;
         
         float healthHours  = hourlyHealthDelta  >= 0.0
                              ? (stats.getHealth().getBase() - stats.getHealth().getCurrent()) / hourlyHealthDelta
-                                        : 1.0f;
-        std::cout << "Calced health hours: " << healthHours << std::endl;
-        std::cout << "getBase returns " << stats.getHealth().getBase() << ", getModified() returns " << stats.getHealth().getModified() << std::endl;
+                             : 1.0f;
         float magickaHours = stunted ? 0.0 :
                               hourlyMagickaDelta >= 0.0
                               ? (stats.getMagicka().getBase() - stats.getMagicka().getCurrent()) / hourlyMagickaDelta
