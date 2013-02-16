@@ -14,7 +14,7 @@ namespace MWWorld
             std::string mCellName;
             ESM::Position mPosition;
 
-            virtual void executeImp (const Ptr& actor);
+            virtual bool executeImp (const Ptr& actor);
 
         public:
 

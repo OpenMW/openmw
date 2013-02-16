@@ -18,7 +18,7 @@ MWWorld::Action::~Action() {}
 
 void MWWorld::Action::execute (const Ptr& actor)
 {
-    if (!mSoundId.empty())
+    if (!mSoundId.empty() && executeImp (actor))
     {
         if (mKeepSound && actor.getRefData().getHandle()=="player")
         {
@@ -35,8 +35,6 @@ void MWWorld::Action::execute (const Ptr& actor)
                 mKeepSound ? MWBase::SoundManager::Play_NoTrack : MWBase::SoundManager::Play_Normal);
         }
     }
-
-    executeImp (actor);
 }
 
 void MWWorld::Action::setSound (const std::string& id)

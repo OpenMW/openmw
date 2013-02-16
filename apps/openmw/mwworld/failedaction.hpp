@@ -10,7 +10,7 @@ namespace MWWorld
     {
 	    std::string message;
 	    
-            virtual void executeImp (const Ptr& actor);
+            virtual bool executeImp (const Ptr& actor);
 
         public:
 	     FailedAction (const std::string& message = std::string());

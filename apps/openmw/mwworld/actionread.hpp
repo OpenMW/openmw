@@ -8,7 +8,7 @@ namespace MWWorld
 {
     class ActionRead : public Action
     {
-            virtual void executeImp (const MWWorld::Ptr& actor);
+            virtual bool executeImp (const MWWorld::Ptr& actor);
 
         public:
             /// @param book or scroll to read
