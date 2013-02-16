@@ -17,6 +17,6 @@ namespace MWWorld
         {
             MWBase::Environment::get().getWindowManager() ->messageBox(message, std::vector<std::string>());
         }
-        return false;
+        return true;
     }
 }
