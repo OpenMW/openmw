@@ -26,7 +26,7 @@ namespace MWWorld
 {
 
     static const float sMaxSlope = 60.0f;
-    static const float sStepSize = 15.0f;
+    static const float sStepSize = 30.0f;
     // Arbitrary number. To prevent infinite loops. They shouldn't happen but it's good to be prepared.
     static const int sMaxIterations = 50;
 
