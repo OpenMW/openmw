@@ -310,9 +310,16 @@ void WindowManager::updateVisible()
     setSpellVisibility((mAllowed & GW_Magic) && !mSpellWindow->pinned());
     setHMSVisibility((mAllowed & GW_Stats) && !mStatsWindow->pinned());
 
-    // If in game mode, don't show anything.
+    // If in game mode, show only the pinned windows
     if (gameMode)
+    {
+        mMap->setVisible(mMap->pinned());
+        mStatsWindow->setVisible(mStatsWindow->pinned());
+        mInventoryWindow->setVisible(mInventoryWindow->pinned());
+        mSpellWindow->setVisible(mSpellWindow->pinned());
+
         return;
+    }
 
     GuiMode mode = mGuiModes.back();
 
@@ -327,6 +334,12 @@ void WindowManager::updateVisible()
             mSettingsWindow->setVisible(true);
             break;
         case GM_Console:
+            // Show the pinned windows
+            mMap->setVisible(mMap->pinned());
+            mStatsWindow->setVisible(mStatsWindow->pinned());
+            mInventoryWindow->setVisible(mInventoryWindow->pinned());
+            mSpellWindow->setVisible(mSpellWindow->pinned());
+
             mConsole->enable();
             break;
         case GM_Scroll:

@@ -11,16 +11,6 @@ WindowPinnableBase::WindowPinnableBase(const std::string& parLayout, MWBase::Win
     t->eventWindowButtonPressed += MyGUI::newDelegate(this, &WindowPinnableBase::onWindowButtonPressed);
 }
 
-void WindowPinnableBase::setVisible(bool b)
-{
-    // Pinned windows can not be hidden
-    if (mPinned && !b)
-        return;
-
-    WindowBase::setVisible(b);
-    mVisible = b;
-}
-
 void WindowPinnableBase::onWindowButtonPressed(MyGUI::Window* sender, const std::string& eventName)
 {
     if ("PinToggle" == eventName)
