@@ -47,6 +47,7 @@ namespace MWGui
         bool mSleeping;
         int mCurHour;
         int mHours;
+        int mManualHours; // stores the hours to rest selected via slider
         float mRemainingTime;
 
         WaitDialogProgressBar mProgressBar;
@@ -58,7 +59,7 @@ namespace MWGui
 
         void setCanRest(bool canRest);
 
-        void startWaiting();
+        void startWaiting(int hoursToWait);
         void stopWaiting();
     };
 
