@@ -350,10 +350,6 @@ namespace MWWorld
             /// 3 - enemies are nearby (not implemented)
 
             /// \todo Probably shouldn't be here
-            virtual OEngine::Physic::PhysicEngine* getPhysicEngine() const
-            { return mPhysEngine; }
-
-            /// \todo Probably shouldn't be here
             virtual MWRender::Animation* getAnimation(const MWWorld::Ptr &ptr);
 
             /// \todo this does not belong here

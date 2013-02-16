@@ -308,9 +308,6 @@ namespace MWBase
             /// 3 - enemies are nearby (not implemented)
 
             /// \todo Probably shouldn't be here
-            virtual OEngine::Physic::PhysicEngine* getPhysicEngine() const = 0;
-
-            /// \todo Probably shouldn't be here
             virtual MWRender::Animation* getAnimation(const MWWorld::Ptr &ptr) = 0;
 
             /// \todo this does not belong here
