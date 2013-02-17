@@ -642,7 +642,8 @@ namespace MWInput
 
     void InputManager::activate()
     {
-        mEngine.activate();
+        if (mControlSwitch["playercontrols"])
+            mEngine.activate();
     }
 
     void InputManager::toggleAutoMove()
