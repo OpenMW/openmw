@@ -18,7 +18,7 @@ MWWorld::Action::~Action() {}
 
 void MWWorld::Action::execute (const Ptr& actor)
 {
-    if (!mSoundId.empty() && executeImp (actor))
+    if (!mSoundId.empty() & executeImp (actor))
     {
         if (mKeepSound && actor.getRefData().getHandle()=="player")
         {
