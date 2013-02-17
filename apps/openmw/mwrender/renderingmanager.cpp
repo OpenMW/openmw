@@ -353,8 +353,6 @@ void RenderingManager::update (float duration, bool paused)
         Ogre::ControllerManager::getSingleton().setTimeFactor(0.f);
         return;
     }
-    Ogre::ControllerManager::getSingleton().setTimeFactor(
-                MWBase::Environment::get().getWorld()->getTimeScaleFactor()/30.f);
 
     mPlayer->update(duration);
 

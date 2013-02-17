@@ -399,7 +399,7 @@ void Water::update(float dt, Ogre::Vector3 player)
     mUnderwaterDome->setPosition (pos);
     */
 
-    mWaterTimer += dt / 30.0 * MWBase::Environment::get().getWorld()->getTimeScaleFactor();
+    mWaterTimer += dt;
     sh::Factory::getInstance ().setSharedParameter ("waterTimer", sh::makeProperty<sh::FloatValue>(new sh::FloatValue(mWaterTimer)));
 
     mRendering->getSkyManager ()->setGlareEnabled (!mIsUnderwater);
