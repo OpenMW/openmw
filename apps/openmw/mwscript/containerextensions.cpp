@@ -60,6 +60,27 @@ namespace MWScript
                     }
 
                     MWWorld::Class::get (ptr).getContainerStore (ptr).add (ref.getPtr());
+
+                    // The two GMST entries below expand to strings informing the player of what, and how many of it has been added to their inventory
+                    std::string msgBox;
+                    std::string itemName = MWWorld::Class::get(ref.getPtr()).getName(ref.getPtr());
+                    if (count == 1)
+                    {
+                        msgBox = MyGUI::LanguageManager::getInstance().replaceTags("#{sNotifyMessage60}");
+                        std::stringstream temp;
+                        temp << boost::format(msgBox) % itemName;
+                        msgBox = temp.str();
+                    }
+                    else
+                    {
+                        msgBox = MyGUI::LanguageManager::getInstance().replaceTags("#{sNotifyMessage61}");
+                        std::stringstream temp;
+                        temp << boost::format(msgBox) % (count) % itemName;
+                        msgBox = temp.str();
+                    }
+
+                    if(count > 0)
+                        MWBase::Environment::get().getWindowManager()->messageBox(msgBox, std::vector<std::string>());
                 }
         };
 
@@ -130,7 +151,7 @@ namespace MWScript
                         }
                     }
                   
-                    /* The two GMST entries below expand to strings informing the player of what, and how many of it has been removed from their inventory */
+                    // The two GMST entries below expand to strings informing the player of what, and how many of it has been removed from their inventory
                     std::string msgBox;
                     if(originalCount - count > 1)
                     {
