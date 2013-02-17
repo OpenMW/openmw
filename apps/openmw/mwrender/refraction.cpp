@@ -41,6 +41,7 @@ namespace MWRender
         mRenderTarget->removeListener(this);
         Ogre::TextureManager::getSingleton().remove("WaterRefraction");
         mParentCamera->getSceneManager()->destroyCamera(mCamera);
+        mParentCamera->getSceneManager()->removeRenderQueueListener(this);
     }
 
     void Refraction::preRenderTargetUpdate(const Ogre::RenderTargetEvent& evt)
@@ -52,6 +53,9 @@ namespace MWRender
         mCamera->setFarClipDistance(mParentCamera->getFarClipDistance());
         mCamera->setAspectRatio(mParentCamera->getAspectRatio());
         mCamera->setFOVy(mParentCamera->getFOVy());
+
+        // enable clip plane here to take advantage of CPU culling for overwater or underwater objects
+        mCamera->enableCustomNearClipPlane(mIsUnderwater ? mNearClipPlaneUnderwater : mNearClipPlane);
 
         mRenderActive = true;
     }

@@ -124,7 +124,6 @@ void PlaneReflection::renderQueueEnded (Ogre::uint8 queueGroupId, const Ogre::St
 {
     if (queueGroupId < 20 && mRenderActive)
     {
-        // this trick does not seem to work well for extreme angles
         mCamera->enableCustomNearClipPlane(mIsUnderwater ? mErrorPlaneUnderwater : mErrorPlane);
         Root::getSingleton().getRenderSystem()->_setProjectionMatrix(mCamera->getProjectionMatrixRS());
     }
@@ -145,6 +144,9 @@ void PlaneReflection::preRenderTargetUpdate(const Ogre::RenderTargetEvent& evt)
     pos.y = (mWaterPlane).d*2 - pos.y;
     mSky->setSkyPosition(pos);
     mCamera->enableReflection(mWaterPlane);
+
+    // enable clip plane here to take advantage of CPU culling for overwater or underwater objects
+    mCamera->enableCustomNearClipPlane(mIsUnderwater ? mErrorPlaneUnderwater : mErrorPlane);
 }
 
 void PlaneReflection::postRenderTargetUpdate(const Ogre::RenderTargetEvent& evt)

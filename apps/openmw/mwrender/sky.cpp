@@ -280,6 +280,9 @@ void SkyManager::create()
     mSunGlare->setRenderQueue(RQG_SkiesLate);
     mSunGlare->setVisibilityFlags(RV_NoReflection);
 
+    Ogre::AxisAlignedBox aabInf;
+    aabInf.setInfinite ();
+
     // Stars
     mAtmosphereNight = mRootNode->createChildSceneNode();
     NifOgre::EntityList entities = NifOgre::NIFLoader::createEntities(mAtmosphereNight, NULL, "meshes\\sky_night_01.nif");
@@ -289,6 +292,7 @@ void SkyManager::create()
         night1_ent->setRenderQueueGroup(RQG_SkiesEarly+1);
         night1_ent->setVisibilityFlags(RV_Sky);
         night1_ent->setCastShadows(false);
+        night1_ent->getMesh()->_setBounds (aabInf);
 
         for (unsigned int j=0; j<night1_ent->getNumSubEntities(); ++j)
         {
@@ -315,6 +319,7 @@ void SkyManager::create()
         atmosphere_ent->setRenderQueueGroup(RQG_SkiesEarly);
         atmosphere_ent->setVisibilityFlags(RV_Sky);
         atmosphere_ent->getSubEntity (0)->setMaterialName ("openmw_atmosphere");
+        atmosphere_ent->getMesh()->_setBounds (aabInf);
     }
 
 
@@ -328,6 +333,7 @@ void SkyManager::create()
         clouds_ent->setRenderQueueGroup(RQG_SkiesEarly+5);
         clouds_ent->getSubEntity(0)->setMaterialName ("openmw_clouds");
         clouds_ent->setCastShadows(false);
+        clouds_ent->getMesh()->_setBounds (aabInf);
     }
 
     mCreated = true;
