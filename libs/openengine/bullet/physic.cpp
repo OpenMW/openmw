@@ -29,8 +29,11 @@ namespace Physic
 
     PhysicActor::PhysicActor(const std::string &name, const std::string &mesh, PhysicEngine *engine, const Ogre::Vector3 &position, const Ogre::Quaternion &rotation, float scale)
       : mName(name), mEngine(engine), mMesh(mesh), mBoxScaledTranslation(0,0,0), mBoxRotationInverse(0,0,0,0)
-      , mBody(0), onGround(false), collisionMode(false), mBoxRotation(0,0,0,0), verticalForce(0.0f)
+      , mBody(0), onGround(false), collisionMode(true), mBoxRotation(0,0,0,0), verticalForce(0.0f)
     {
+        // FIXME: Force player to start in no-collision mode for now, until he spawns at a proper door marker.
+        if(name == "player")
+            collisionMode = false;
         mBody = mEngine->createAndAdjustRigidBody(mMesh, mName, scale, position, rotation, &mBoxScaledTranslation, &mBoxRotation);
         Ogre::Quaternion inverse = mBoxRotation.Inverse();
         mBoxRotationInverse = btQuaternion(inverse.x, inverse.y, inverse.z,inverse.w);
