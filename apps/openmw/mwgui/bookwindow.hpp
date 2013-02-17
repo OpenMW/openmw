@@ -17,6 +17,8 @@ namespace MWGui
             void open(MWWorld::Ptr book);
             void setTakeButtonShow(bool show);
 
+            void setInventoryAllowed(bool allowed);
+
         protected:
             void onNextPageButtonClicked (MyGUI::Widget* sender);
             void onPrevPageButtonClicked (MyGUI::Widget* sender);
@@ -40,6 +42,9 @@ namespace MWGui
             std::vector<MyGUI::Widget*> mPages;
 
             MWWorld::Ptr mBook;
+
+            bool mTakeButtonShow;
+            bool mTakeButtonAllowed;
     };
 
 }

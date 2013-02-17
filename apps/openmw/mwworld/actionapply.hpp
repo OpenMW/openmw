@@ -13,7 +13,7 @@ namespace MWWorld
     {
             std::string mId;
 
-            virtual bool executeImp (const Ptr& actor);
+            virtual void executeImp (const Ptr& actor);
 
         public:
 
@@ -26,7 +26,7 @@ namespace MWWorld
             int mSkillIndex;
             int mUsageType;
 
-            virtual bool executeImp (const Ptr& actor);
+            virtual void executeImp (const Ptr& actor);
 
         public:
 

@@ -19,7 +19,7 @@ namespace MWWorld
     {
     }
 
-    bool ActionRead::executeImp (const MWWorld::Ptr& actor)
+    void ActionRead::executeImp (const MWWorld::Ptr& actor)
     {
         LiveCellRef<ESM::Book> *ref = getTarget().get<ESM::Book>();
 
@@ -53,6 +53,5 @@ namespace MWWorld
             npcStats.flagAsUsed (ref->mBase->mId);
         }
 
-        return true;
     }
 }

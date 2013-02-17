@@ -109,7 +109,6 @@ WindowManager::WindowManager(
   , mHudEnabled(true)
   , mTranslationDataStorage (translationDataStorage)
 {
-
     // Set up the GUI system
     mGuiManager = new OEngine::GUI::MyGUIManager(mOgre->getWindow(), mOgre->getScene(), false, logpath);
     mGui = mGuiManager->getGui();
@@ -195,6 +194,9 @@ WindowManager::WindowManager(
 
     unsetSelectedSpell();
     unsetSelectedWeapon();
+
+    if (newGame)
+        disallowAll ();
 
     // Set up visibility
     updateVisible();
@@ -943,12 +945,23 @@ bool WindowManager::isAllowed (GuiWindow wnd) const
 void WindowManager::allow (GuiWindow wnd)
 {
     mAllowed = (GuiWindow)(mAllowed | wnd);
+
+    if (wnd & GW_Inventory)
+    {
+        mBookWindow->setInventoryAllowed (true);
+        mScrollWindow->setInventoryAllowed (true);
+    }
+
     updateVisible();
 }
 
 void WindowManager::disallowAll()
 {
     mAllowed = GW_None;
+
+    mBookWindow->setInventoryAllowed (false);
+    mScrollWindow->setInventoryAllowed (false);
+
     updateVisible();
 }
 

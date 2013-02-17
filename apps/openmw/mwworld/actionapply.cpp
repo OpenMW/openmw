@@ -9,10 +9,9 @@ namespace MWWorld
     : Action (false, target), mId (id)
     {}
 
-    bool ActionApply::executeImp (const Ptr& actor)
+    void ActionApply::executeImp (const Ptr& actor)
     {
         MWWorld::Class::get (getTarget()).apply (getTarget(), mId, actor);
-        return true;
     }
 
 
@@ -21,10 +20,9 @@ namespace MWWorld
     : Action (false, target), mId (id), mSkillIndex (skillIndex), mUsageType (usageType)
     {}
 
-    bool ActionApplyWithSkill::executeImp (const Ptr& actor)
+    void ActionApplyWithSkill::executeImp (const Ptr& actor)
     {
         if (MWWorld::Class::get (getTarget()).apply (getTarget(), mId, actor) && mUsageType!=-1)
             MWWorld::Class::get (getTarget()).skillUsageSucceeded (actor, mSkillIndex, mUsageType);
-        return true;
     }
 }

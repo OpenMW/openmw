@@ -12,18 +12,13 @@ namespace MWWorld
 {
     ActionTake::ActionTake (const MWWorld::Ptr& object) : Action (true, object) {}
 
-    bool ActionTake::executeImp (const Ptr& actor)
+    void ActionTake::executeImp (const Ptr& actor)
     {
-        if (!MWBase::Environment::get().getWindowManager()->isAllowed(MWGui::GW_Inventory))
-            return false;
-
         // insert into player's inventory
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPtr ("player", true);
 
         MWWorld::Class::get (player).getContainerStore (player).add (getTarget());
 
         MWBase::Environment::get().getWorld()->deleteObject (getTarget());
-
-        return true;
     }
 }
