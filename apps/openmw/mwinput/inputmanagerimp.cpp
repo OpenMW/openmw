@@ -638,6 +638,8 @@ namespace MWInput
     {
         if (!mWindows.isGuiMode ())
             mWindows.pushGuiMode (MWGui::GM_QuickKeysMenu);
+        else if (mWindows.getMode () == MWGui::GM_QuickKeysMenu)
+            mWindows.removeGuiMode (MWGui::GM_QuickKeysMenu);
     }
 
     void InputManager::activate()
