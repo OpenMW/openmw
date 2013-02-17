@@ -40,7 +40,7 @@ opencs_units_noqt (model/tools
 
 
 opencs_units (view/doc
-    viewmanager view operations operation subview
+    viewmanager view operations operation subview startup
     )
 
 opencs_units_noqt (view/doc
@@ -73,7 +73,7 @@ opencs_units_noqt (view/tools
 set (OPENCS_US
     )
 
-set (OPENCS_RES
+set (OPENCS_RES ../../files/opencs/resources.qrc
     )
 
 source_group (opencs FILES ${OPENCS_SRC} ${OPENCS_HDR})
