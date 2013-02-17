@@ -19,6 +19,7 @@ namespace MWGui
     protected:
         virtual void onPinToggled() = 0;
 
+        MyGUI::Widget* mPinButton;
         bool mPinned;
         bool mVisible;
     };

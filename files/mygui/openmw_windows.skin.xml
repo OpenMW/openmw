@@ -8,6 +8,18 @@
         </BasisSkin>
     </Skin>
 
+    <!-- Define the background for pin button -->
+    <Skin name = "PinUp" size = "16 16" texture = "textures\menu_rightbuttondown_center.dds">
+        <BasisSkin type="MainSkin" offset = "0 0 16 16">
+            <State name="normal" offset = "0 0 16 16"/>
+        </BasisSkin>
+    </Skin>
+    <Skin name = "PinDown" size = "8 8" texture = "transparent.png">
+        <BasisSkin type="MainSkin" offset = "0 0 8 8">
+            <State name="normal" offset = "0 0 8 8"/>
+        </BasisSkin>
+    </Skin>
+
     <!-- Defines a pure black background -->
     <Skin name = "DialogBG" size = "8 8" texture = "black.png">
         <BasisSkin type="MainSkin" offset = "0 0 8 8">
@@ -473,7 +485,7 @@
             <Property key="Scale" value = "1 1 0 0"/>
         </Child>
 
-        <Child type="Button" skin="BlackBG" offset="230 4 21 19" align="ALIGN_RIGHT ALIGN_TOP" name="Button">
+        <Child type="Button" skin="PinUp" offset="230 4 21 19" align="ALIGN_RIGHT ALIGN_TOP" name="Button">
             <Property key="Event" value="PinToggle"/>
         </Child>
     </Skin>

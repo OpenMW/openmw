@@ -52,6 +52,7 @@
 #include "enchantingdialog.hpp"
 #include "trainingwindow.hpp"
 #include "imagebutton.hpp"
+#include "exposedwindow.hpp"
 
 using namespace MWGui;
 
@@ -127,6 +128,7 @@ WindowManager::WindowManager(
     MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::AutoSizedTextBox>("Widget");
     MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::AutoSizedButton>("Widget");
     MyGUI::FactoryManager::getInstance().registerFactory<MWGui::ImageButton>("Widget");
+    MyGUI::FactoryManager::getInstance().registerFactory<MWGui::ExposedWindow>("Widget");
 
     MyGUI::LanguageManager::getInstance().eventRequestTag = MyGUI::newDelegate(this, &WindowManager::onRetrieveTag);
 
