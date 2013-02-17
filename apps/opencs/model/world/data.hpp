@@ -40,6 +40,10 @@ namespace CSMWorld
 
             IdCollection<ESM::Global>& getGlobals();
 
+            const IdCollection<ESM::GameSetting>& getGmsts() const;
+
+            IdCollection<ESM::GameSetting>& getGmsts();
+
             QAbstractTableModel *getTableModel (const UniversalId& id);
             ///< If no table model is available for \a id, an exception is thrown.
             ///
