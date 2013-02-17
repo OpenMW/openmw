@@ -16,7 +16,7 @@
 
 namespace MWWorld
 {
-    bool ActionEat::executeImp (const Ptr& actor)
+    void ActionEat::executeImp (const Ptr& actor)
     {
         // remove used item
         getTarget().getRefData().setCount (getTarget().getRefData().getCount()-1);
@@ -42,8 +42,6 @@ namespace MWWorld
             // increase skill
             Class::get (actor).skillUsageSucceeded (actor, ESM::Skill::Alchemy, 1);
         }
-
-        return true;
     }    
 
     ActionEat::ActionEat (const MWWorld::Ptr& object) : Action (false, object) {}

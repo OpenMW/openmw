@@ -14,8 +14,10 @@
 
 using namespace MWGui;
 
-BookWindow::BookWindow (MWBase::WindowManager& parWindowManager) :
-    WindowBase("openmw_book.layout", parWindowManager)
+BookWindow::BookWindow (MWBase::WindowManager& parWindowManager)
+    : WindowBase("openmw_book.layout", parWindowManager)
+    , mTakeButtonShow(true)
+    , mTakeButtonAllowed(true)
 {
     getWidget(mCloseButton, "CloseButton");
     mCloseButton->eventMouseButtonClick += MyGUI::newDelegate(this, &BookWindow::onCloseButtonClicked);
@@ -85,7 +87,14 @@ void BookWindow::open (MWWorld::Ptr book)
 
 void BookWindow::setTakeButtonShow(bool show)
 {
-    mTakeButton->setVisible(show);
+    mTakeButtonShow = show;
+    mTakeButton->setVisible(mTakeButtonShow && mTakeButtonAllowed);
+}
+
+void BookWindow::setInventoryAllowed(bool allowed)
+{
+    mTakeButtonAllowed = allowed;
+    mTakeButton->setVisible(mTakeButtonShow && mTakeButtonAllowed);
 }
 
 void BookWindow::onCloseButtonClicked (MyGUI::Widget* sender)
