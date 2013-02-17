@@ -51,7 +51,6 @@ namespace MWInput
         , mUIYMultiplier (Settings::Manager::getFloat("ui y multiplier", "Input"))
         , mPreviewPOVDelay(0.f)
         , mTimeIdle(0.f)
-        , mEnterPressed(false)
     {
         Ogre::RenderWindow* window = ogre.getWindow ();
         size_t windowHnd;
@@ -240,10 +239,6 @@ namespace MWInput
 
     void InputManager::update(float dt, bool loading)
     {
-        // Pressing enter when a messagebox is prompting for "ok" will activate the ok button 
-        if(mEnterPressed && MWBase::Environment::get().getWindowManager()->isGuiMode() && MWBase::Environment::get().getWindowManager()->getMode() == MWGui::GM_InterMessageBox)
-            MWBase::Environment::get().getWindowManager()->enterPressed();
-
         // Tell OIS to handle all input events
         mKeyboard->capture();
         mMouse->capture();
@@ -431,8 +426,13 @@ namespace MWInput
 
     bool InputManager::keyPressed( const OIS::KeyEvent &arg )
     {
-        if(arg.key == OIS::KC_RETURN && MWBase::Environment::get().getWindowManager()->isGuiMode() && MWBase::Environment::get().getWindowManager()->getMode() != MWGui::GM_Console)
-            mEnterPressed = true;
+        if(arg.key == OIS::KC_RETURN
+            && MWBase::Environment::get().getWindowManager()->isGuiMode()
+            && MWBase::Environment::get().getWindowManager()->getMode() == MWGui::GM_InterMessageBox )
+        {
+            // Pressing enter when a messagebox is prompting for "ok" will activate the ok button
+            MWBase::Environment::get().getWindowManager()->enterPressed();
+        }
 
         mInputCtrl->keyPressed (arg);
         unsigned int text = arg.text;
@@ -450,9 +450,6 @@ namespace MWInput
 
     bool InputManager::keyReleased( const OIS::KeyEvent &arg )
     {
-        if(arg.key == OIS::KC_RETURN)
-            mEnterPressed = false;
-
         mInputCtrl->keyReleased (arg);
 
         MyGUI::InputManager::getInstance().injectKeyRelease(MyGUI::KeyCode::Enum(arg.key));
