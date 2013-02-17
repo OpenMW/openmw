@@ -8,7 +8,7 @@ namespace MWWorld
 {
     class ActionTalk : public Action
     {
-            virtual void executeImp (const Ptr& actor);
+            virtual bool executeImp (const Ptr& actor);
 
         public:
 

@@ -8,7 +8,7 @@ namespace MWWorld
     /// \brief Action: do nothing
     class NullAction : public Action
     {
-            virtual void executeImp (const Ptr& actor) {}
+            virtual bool executeImp (const Ptr& actor) {return false;}
     };
 }
 

@@ -12,11 +12,12 @@ namespace MWWorld
     {
     }
 
-    void ActionTeleport::executeImp (const Ptr& actor)
+    bool ActionTeleport::executeImp (const Ptr& actor)
     {
         if (mCellName.empty())
             MWBase::Environment::get().getWorld()->changeToExteriorCell (mPosition);
         else
             MWBase::Environment::get().getWorld()->changeToInteriorCell (mCellName, mPosition);
+        return true;
     }
 }

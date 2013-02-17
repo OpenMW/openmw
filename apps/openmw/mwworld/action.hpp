@@ -18,7 +18,8 @@ namespace MWWorld
             Action (const Action& action);
             Action& operator= (const Action& action);
 
-            virtual void executeImp (const Ptr& actor) = 0;
+            /// @return true if the sound should be played, false if not (e.g. if the action is not allowed)
+            virtual bool executeImp (const Ptr& actor) = 0;
 
         protected:
 
