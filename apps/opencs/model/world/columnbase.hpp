@@ -29,7 +29,8 @@ namespace CSMWorld
             Display_String,
             Display_Integer,
             Display_Float,
-            Display_Var
+            Display_Var,
+            Display_VarType
         };
 
         std::string mTitle;

@@ -88,6 +88,19 @@ const CSVWorld::CommandDelegateFactoryCollection& CSVWorld::CommandDelegateFacto
 }
 
 
+QUndoStack& CSVWorld::CommandDelegate::getUndoStack() const
+{
+    return mUndoStack;
+}
+
+void CSVWorld::CommandDelegate::setModelDataImp (QWidget *editor, QAbstractItemModel *model,
+    const QModelIndex& index) const
+{
+    NastyTableModelHack hack (*model);
+    QStyledItemDelegate::setModelData (editor, &hack, index);
+    mUndoStack.push (new CSMWorld::ModifyCommand (*model, index, hack.getData()));
+}
+
 CSVWorld::CommandDelegate::CommandDelegate (QUndoStack& undoStack, QObject *parent)
 : QStyledItemDelegate (parent), mUndoStack (undoStack), mEditLock (false)
 {}
@@ -97,14 +110,18 @@ void CSVWorld::CommandDelegate::setModelData (QWidget *editor, QAbstractItemMode
 {
     if (!mEditLock)
     {
-        NastyTableModelHack hack (*model);
-        QStyledItemDelegate::setModelData (editor, &hack, index);
-        mUndoStack.push (new CSMWorld::ModifyCommand (*model, index, hack.getData()));
+        setModelDataImp (editor, model, index);
     }
+
     ///< \todo provide some kind of feedback to the user, indicating that editing is currently not possible.
 }
 
-void  CSVWorld::CommandDelegate::setEditLock (bool locked)
+void CSVWorld::CommandDelegate::setEditLock (bool locked)
 {
     mEditLock = locked;
+}
+
+bool CSVWorld::CommandDelegate::isEditLocked() const
+{
+    return mEditLock;
 }

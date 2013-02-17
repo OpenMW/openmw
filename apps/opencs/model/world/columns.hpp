@@ -79,7 +79,7 @@ namespace CSMWorld
         int mType;
 
         FixedRecordTypeColumn (int type)
-        : Column<ESXRecordT> ("Type", ColumnBase::Display_Integer, 0), mType (type) {}
+        : Column<ESXRecordT> ("Record Type", ColumnBase::Display_Integer, 0), mType (type) {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
         {
@@ -92,10 +92,11 @@ namespace CSMWorld
         }
     };
 
+    /// \attention A var type column must be immediately followed by a suitable value column.
     template<typename ESXRecordT>
     struct VarTypeColumn : public Column<ESXRecordT>
     {
-        VarTypeColumn() : Column<ESXRecordT> ("Type", ColumnBase::Display_Integer) {}
+        VarTypeColumn() : Column<ESXRecordT> ("Type", ColumnBase::Display_VarType) {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
         {

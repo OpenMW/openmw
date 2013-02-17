@@ -85,13 +85,23 @@ namespace CSVWorld
             QUndoStack& mUndoStack;
             bool mEditLock;
 
+        protected:
+
+            QUndoStack& getUndoStack() const;
+
+            virtual void setModelDataImp (QWidget *editor, QAbstractItemModel *model,
+                const QModelIndex& index) const;
+
         public:
 
             CommandDelegate (QUndoStack& undoStack, QObject *parent);
 
-            void setModelData (QWidget *editor, QAbstractItemModel *model, const QModelIndex& index) const;
+            virtual void setModelData (QWidget *editor, QAbstractItemModel *model,
+                const QModelIndex& index) const;
 
             void setEditLock (bool locked);
+
+            bool isEditLocked() const;
     };
 }
 

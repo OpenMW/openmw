@@ -7,6 +7,8 @@
 #include "../../model/doc/document.hpp"
 
 #include "../world/util.hpp"
+#include "../world/enumdelegate.hpp"
+#include "../world/vartypedelegate.hpp"
 
 #include "view.hpp"
 
@@ -32,6 +34,9 @@ CSVDoc::ViewManager::ViewManager (CSMDoc::DocumentManager& documentManager)
 : mDocumentManager (documentManager)
 {
     mDelegateFactories = new CSVWorld::CommandDelegateFactoryCollection;
+
+    mDelegateFactories->add (CSMWorld::ColumnBase::Display_VarType,
+        new CSVWorld::VarTypeDelegateFactory (ESM::VT_None, ESM::VT_String, ESM::VT_Int, ESM::VT_Float));
 }
 
 CSVDoc::ViewManager::~ViewManager()
