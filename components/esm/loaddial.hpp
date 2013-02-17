@@ -30,7 +30,7 @@ struct Dialogue
     };
 
     std::string mId;
-    char mType;
+    signed char mType;
     std::vector<DialInfo> mInfo;
 
     void load(ESMReader &esm);

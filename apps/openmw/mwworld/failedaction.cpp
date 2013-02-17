@@ -11,11 +11,12 @@ namespace MWWorld
     {   }
 
 
-    void FailedAction::executeImp (const Ptr& actor)
+    bool FailedAction::executeImp (const Ptr& actor)
     {
         if ( actor.getRefData().getHandle()=="player" && !(message.empty()))
-	{
-	  MWBase::Environment::get().getWindowManager() ->messageBox(message, std::vector<std::string>());
-	}
+        {
+            MWBase::Environment::get().getWindowManager() ->messageBox(message, std::vector<std::string>());
+        }
+        return true;
     }
 }

@@ -595,10 +595,14 @@ namespace MWInput
         // Toggle between game mode and inventory mode
         if(gameMode)
             mWindows.pushGuiMode(MWGui::GM_Inventory);
-        else if(mWindows.getMode() == MWGui::GM_Inventory)
-            mWindows.popGuiMode();
+        else
+        {
+            MWGui::GuiMode mode = mWindows.getMode();
+            if(mode == MWGui::GM_Inventory || mode == MWGui::GM_Container)
+                mWindows.popGuiMode();
+        }
 
-        // .. but don't touch any other mode.
+        // .. but don't touch any other mode, except container.
     }
 
     void InputManager::toggleConsole()
@@ -643,7 +647,8 @@ namespace MWInput
 
     void InputManager::activate()
     {
-        mEngine.activate();
+        if (mControlSwitch["playercontrols"])
+            mEngine.activate();
     }
 
     void InputManager::toggleAutoMove()

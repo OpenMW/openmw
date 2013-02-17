@@ -77,8 +77,8 @@ public:
   std::string mKey, mTrap; // Key and trap ID names, if any
 
   // No idea - occurs ONCE in Morrowind.esm, for an activator
-  char mUnam;
-  
+  signed char mUnam;
+
   // Track deleted references. 0 - not deleted, 1 - deleted, but respawns, 2 - deleted and does not respawn.
   int mDeleted;
 
@@ -164,14 +164,14 @@ struct Cell
   bool mWaterInt;
   int mMapColor;
   int mNAM0;
-  
+
   // References "leased" from another cell (i.e. a different cell
   //  introduced this ref, and it has been moved here by a plugin)
   CellRefTracker mLeasedRefs;
   MovedCellRefTracker mMovedRefs;
-  
+
   void load(ESMReader &esm, MWWorld::ESMStore &store);
-  
+
   // This method is left in for compatibility with esmtool. Parsing moved references currently requires
   //  passing ESMStore, bit it does not know about this parameter, so we do it this way.
   void load(ESMReader &esm) {};
@@ -209,7 +209,7 @@ struct Cell
      reuse one memory location without blanking it between calls.
   */
   static bool getNextRef(ESMReader &esm, CellRef &ref);
-  
+
   /* This fetches an MVRF record, which is used to track moved references.
    * Since they are comparably rare, we use a separate method for this.
    */

@@ -10,7 +10,7 @@ namespace MWWorld
 {
     class ActionOpen : public Action
     {
-            virtual void executeImp (const MWWorld::Ptr& actor);
+            virtual bool executeImp (const MWWorld::Ptr& actor);
 
         public:
             ActionOpen (const Ptr& container);

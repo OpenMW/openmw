@@ -8,7 +8,7 @@ namespace ToUTF8
 /// Central European and Eastern European languages that use Latin script,
 /// such as Polish, Czech, Slovak, Hungarian, Slovene, Bosnian, Croatian,
 /// Serbian (Latin script), Romanian and Albanian.
-static char windows_1250[] =
+static signed char windows_1250[] =
 {
     1, 0, 0, 0, 0, 0,
     1, 1, 0, 0, 0, 0,
@@ -270,7 +270,7 @@ static char windows_1250[] =
 
 /// Cyrillic alphabet such as Russian, Bulgarian, Serbian Cyrillic
 /// and other languages
-static char windows_1251[] =
+static signed char windows_1251[] =
 {
     1, 0, 0, 0, 0, 0,
     1, 1, 0, 0, 0, 0,
@@ -531,7 +531,7 @@ static char windows_1251[] =
 };
 
 /// Latin alphabet used by English and some other Western languages
-static char windows_1252[] =
+static signed char windows_1252[] =
 {
     1, 0, 0, 0, 0, 0,
     1, 1, 0, 0, 0, 0,
