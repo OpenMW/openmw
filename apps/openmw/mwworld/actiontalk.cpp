@@ -11,11 +11,7 @@ namespace MWWorld
 
     bool ActionTalk::executeImp (const Ptr& actor)
     {
-        if (MWBase::Environment::get().getInputManager ()->getControlSwitch ("playercontrols"))
-        {
-            MWBase::Environment::get().getDialogueManager()->startDialogue (getTarget());
-            return true;
-        }
-        return false;
+        MWBase::Environment::get().getDialogueManager()->startDialogue (getTarget());
+        return true;
     }
 }
