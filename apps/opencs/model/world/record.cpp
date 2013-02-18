@@ -3,19 +3,19 @@
 
 CSMWorld::RecordBase::~RecordBase() {}
 
-bool CSMWorld::RecordBase::RecordBase::isDeleted() const
+bool CSMWorld::RecordBase::isDeleted() const
 {
     return mState==State_Deleted || mState==State_Erased;
 }
 
 
-bool CSMWorld::RecordBase::RecordBase::isErased() const
+bool CSMWorld::RecordBase::isErased() const
 {
     return mState==State_Erased;
 }
 
 
-bool CSMWorld::RecordBase::RecordBase::isModified() const
+bool CSMWorld::RecordBase::isModified() const
 {
     return mState==State_Modified || mState==State_ModifiedOnly;
 }

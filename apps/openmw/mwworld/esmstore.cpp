@@ -3,7 +3,7 @@
 #include <set>
 #include <iostream>
 
-#include <boost/filesystem/v3/operations.hpp>
+#include <boost/filesystem/operations.hpp>
 
 namespace MWWorld
 {

@@ -59,7 +59,7 @@ opencs_units (view/world
     )
 
 opencs_units_noqt (view/world
-    dialoguesubview util subviews
+    dialoguesubview util subviews enumdelegate vartypedelegate
     )
 
 
@@ -75,7 +75,7 @@ opencs_units_noqt (view/tools
 set (OPENCS_US
     )
 
-set (OPENCS_RES
+set (OPENCS_RES ../../files/opencs/resources.qrc
     )
 
 source_group (opencs FILES ${OPENCS_SRC} ${OPENCS_HDR})

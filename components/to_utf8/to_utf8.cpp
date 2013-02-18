@@ -216,7 +216,7 @@ void Utf8Encoder::copyFromArray(unsigned char ch, char* &out)
         return;
     }
 
-    const char *in = translationArray + ch*6;
+    const signed char *in = translationArray + ch*6;
     int len = *(in++);
     for (int i=0; i<len; i++)
         *(out++) = *(in++);

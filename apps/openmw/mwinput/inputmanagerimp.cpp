@@ -253,7 +253,7 @@ namespace MWInput
         // update values of channels (as a result of pressed keys)
         if (!loading)
             mInputCtrl->update(dt);
-
+        
         // Update windows/gui as a result of input events
         // For instance this could mean opening a new window/dialog,
         // by doing this after the input events are handled we
@@ -428,6 +428,14 @@ namespace MWInput
 
     bool InputManager::keyPressed( const OIS::KeyEvent &arg )
     {
+        if(arg.key == OIS::KC_RETURN
+            && MWBase::Environment::get().getWindowManager()->isGuiMode()
+            && MWBase::Environment::get().getWindowManager()->getMode() == MWGui::GM_InterMessageBox )
+        {
+            // Pressing enter when a messagebox is prompting for "ok" will activate the ok button
+            MWBase::Environment::get().getWindowManager()->enterPressed();
+        }
+
         mInputCtrl->keyPressed (arg);
         unsigned int text = arg.text;
 #ifdef __APPLE__ // filter \016 symbol for F-keys on OS X
@@ -581,10 +589,14 @@ namespace MWInput
         // Toggle between game mode and inventory mode
         if(gameMode)
             mWindows.pushGuiMode(MWGui::GM_Inventory);
-        else if(mWindows.getMode() == MWGui::GM_Inventory)
-            mWindows.popGuiMode();
+        else
+        {
+            MWGui::GuiMode mode = mWindows.getMode();
+            if(mode == MWGui::GM_Inventory || mode == MWGui::GM_Container)
+                mWindows.popGuiMode();
+        }
 
-        // .. but don't touch any other mode.
+        // .. but don't touch any other mode, except container.
     }
 
     void InputManager::toggleConsole()
@@ -625,11 +637,14 @@ namespace MWInput
     {
         if (!mWindows.isGuiMode ())
             mWindows.pushGuiMode (MWGui::GM_QuickKeysMenu);
+        else if (mWindows.getMode () == MWGui::GM_QuickKeysMenu)
+            mWindows.removeGuiMode (MWGui::GM_QuickKeysMenu);
     }
 
     void InputManager::activate()
     {
-        mEngine.activate();
+        if (mControlSwitch["playercontrols"])
+            mEngine.activate();
     }
 
     void InputManager::toggleAutoMove()
