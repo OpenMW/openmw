@@ -133,6 +133,7 @@ void CSMDoc::Document::addOptionalGmsts()
     {
         ESM::GameSetting gmst;
         gmst.mId = sStrings[i];
+        gmst.mStr = "<no text>";
         gmst.mType = ESM::VT_String;
         addOptionalGmst (gmst);
     }
