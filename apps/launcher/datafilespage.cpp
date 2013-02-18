@@ -57,7 +57,6 @@ DataFilesPage::DataFilesPage(Files::ConfigurationManager &cfg, GameSettings &gam
 {
     // Models
     mDataFilesModel = new DataFilesModel(this);
-    mDataFilesModel->setObjectName(QString("mDataFilesModel"));
 
     mMastersProxyModel = new QSortFilterProxyModel();
     mMastersProxyModel->setFilterRegExp(QString("^.*\\.esm"));
@@ -65,14 +64,11 @@ DataFilesPage::DataFilesPage(Files::ConfigurationManager &cfg, GameSettings &gam
     mMastersProxyModel->setSourceModel(mDataFilesModel);
 
     mPluginsProxyModel = new QSortFilterProxyModel();
-    mPluginsProxyModel->setObjectName(QString("mPluginsProxyModel"));
     mPluginsProxyModel->setFilterRegExp(QString("^.*\\.esp"));
     mPluginsProxyModel->setFilterCaseSensitivity(Qt::CaseInsensitive);
     mPluginsProxyModel->setSourceModel(mDataFilesModel);
 
     mFilterProxyModel = new QSortFilterProxyModel();
-    mFilterProxyModel->setObjectName(QString("mFilterProxyModel"));
-
     mFilterProxyModel->setDynamicSortFilter(true);
     mFilterProxyModel->setSourceModel(mPluginsProxyModel);
 
@@ -155,7 +151,6 @@ DataFilesPage::DataFilesPage(Files::ConfigurationManager &cfg, GameSettings &gam
     QList<int> sizeList;
     sizeList << mLauncherSettings.value(QString("General/MastersTable/width"), QString("200")).toInt();
     sizeList << mLauncherSettings.value(QString("General/PluginTable/width"), QString("340")).toInt();
-    qDebug() << sizeList;
 
     mSplitter->setSizes(sizeList);
 
@@ -279,20 +274,15 @@ void DataFilesPage::setupDataFiles()
 
 void DataFilesPage::loadSettings()
 {
-    qDebug() << "load settings";
     QString profile = mLauncherSettings.value(QString("Profiles/CurrentProfile"));
-
-    qDebug() << mLauncherSettings.values(QString("Profiles/Default"), Qt::MatchStartsWith);
 
     if (profile.isEmpty())
         return;
-
 
     mDataFilesModel->uncheckAll();
 
     QStringList masters = mLauncherSettings.values(QString("Profiles/") + profile + QString("/master"), Qt::MatchExactly);
     QStringList plugins = mLauncherSettings.values(QString("Profiles/") + profile + QString("/plugin"), Qt::MatchExactly);
-    qDebug() << "masters to check " << plugins;
 
     foreach (const QString &master, masters) {
         QModelIndex index = mDataFilesModel->indexFromItem(mDataFilesModel->findItem(master));
@@ -316,21 +306,23 @@ void DataFilesPage::saveSettings()
         mLauncherSettings.setValue(QString("Profiles/CurrentProfile"), profile);
     }
 
-    qDebug() << "save settings" << profile;
     mLauncherSettings.remove(QString("Profiles/") + profile + QString("/master"));
     mLauncherSettings.remove(QString("Profiles/") + profile + QString("/plugin"));
+
+    mGameSettings.remove(QString("master"));
+    mGameSettings.remove(QString("plugin"));
 
     QStringList items = mDataFilesModel->checkedItems();
 
     foreach(const QString &item, items) {
 
         if (item.endsWith(QString(".esm"), Qt::CaseInsensitive)) {
-            qDebug() << "setting " << item;
             mLauncherSettings.setMultiValue(QString("Profiles/") + profile + QString("/master"), item);
+            mGameSettings.setMultiValue(QString("master"), item);
 
         } else if (item.endsWith(QString(".esp"), Qt::CaseInsensitive)) {
-            qDebug() << "setting " << item;
             mLauncherSettings.setMultiValue(QString("Profiles/") + profile + QString("/plugin"), item);
+            mGameSettings.setMultiValue(QString("plugin"), item);
         }
     }
 
@@ -500,7 +492,6 @@ void DataFilesPage::filterChanged(const QString filter)
 
 void DataFilesPage::profileChanged(const QString &previous, const QString &current)
 {
-    qDebug() << "Profile is changed from: " << previous << " to " << current;
     // Prevent the deletion of the default profile
     if (current == QLatin1String("Default")) {
         mDeleteProfileAction->setEnabled(false);
@@ -527,7 +518,6 @@ void DataFilesPage::profileChanged(const QString &previous, const QString &curre
 
 void DataFilesPage::profileRenamed(const QString &previous, const QString &current)
 {
-    qDebug() << "rename";
     if (previous.isEmpty())
         return;
 
@@ -576,7 +566,6 @@ void DataFilesPage::showContextMenu(const QPoint &point)
              ? mUncheckAction->setEnabled(true)
              : mCheckAction->setEnabled(true);
     }
-
 
     // Show menu
     mContextMenu->exec(globalPos);

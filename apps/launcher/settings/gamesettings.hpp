@@ -29,6 +29,18 @@ public:
         mSettings.insert(key, value);
     }
 
+    inline void setMultiValue(const QString &key, const QString &value)
+    {
+        QStringList values = mSettings.values(key);
+        if (!values.contains(value))
+            mSettings.insertMulti(key, value);
+    }
+
+    inline void remove(const QString &key)
+    {
+        mSettings.remove(key);
+    }
+
     inline QStringList getDataDirs() { return mDataDirs; }
     inline void addDataDir(const QString &dir) { if(!dir.isEmpty()) mDataDirs.append(dir); }
     inline QString getDataLocal() {return mDataLocal; }

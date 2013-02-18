@@ -32,14 +32,9 @@ public:
     inline void setMultiValue(const QString &key, const QString &value)
     {
         QStringList values = mSettings.values(key);
-        if (!values.contains(value)) {
-            qDebug() << "inserting " << value;
+        if (!values.contains(value))
             mSettings.insertMulti(key, value);
-        } else {
-            qDebug() << "not inserting " << value;
-        }
     }
-
 
     inline void remove(const QString &key)
     {
