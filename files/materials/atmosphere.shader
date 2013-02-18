@@ -1,7 +1,5 @@
 #include "core.h"
 
-#define MRT @shGlobalSettingBool(mrt_output)
-
 #ifdef SH_VERTEX_SHADER
 
     SH_BEGIN_PROGRAM
@@ -19,18 +17,11 @@
 
     SH_BEGIN_PROGRAM
                 shInput(float, alphaFade)
-#if MRT
-        shDeclareMrtOutput(1)
-#endif
         shUniform(float4, atmosphereColour)                   @shSharedParameter(atmosphereColour)
 
     SH_START_PROGRAM
     {
         shOutputColour(0) = atmosphereColour * float4(1,1,1,alphaFade);
-
-#if MRT
-        shOutputColour(1) = float4(1,1,1,1);
-#endif
     }
 
 #endif

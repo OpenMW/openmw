@@ -2,7 +2,6 @@
 
 
 #define FOG @shGlobalSettingBool(fog)
-#define MRT @shPropertyNotBool(is_transparent) && @shGlobalSettingBool(mrt_output)
 #define LIGHTING @shGlobalSettingBool(lighting)
 
 #define SHADOWS_PSSM LIGHTING && @shGlobalSettingBool(shadows_pssm)
@@ -12,7 +11,7 @@
     #include "shadows.h"
 #endif
 
-#if FOG || MRT || SHADOWS_PSSM
+#if FOG || SHADOWS_PSSM
 #define NEED_DEPTH
 #endif
 
@@ -51,9 +50,9 @@
 
 #if VERTEX_LIGHTING
     shUniform(float, lightCount) @shAutoConstant(lightCount, light_count)
-    shUniform(float4, lightPosition[8]) @shAutoConstant(lightPosition, light_position_object_space_array, 8)
-    shUniform(float4, lightDiffuse[8]) @shAutoConstant(lightDiffuse, light_diffuse_colour_array, 8)
-    shUniform(float4, lightAttenuation[8]) @shAutoConstant(lightAttenuation, light_attenuation_array, 8)
+    shUniform(float4, lightPosition[@shGlobalSettingString(num_lights)]) @shAutoConstant(lightPosition, light_position_object_space_array, @shGlobalSettingString(num_lights))
+    shUniform(float4, lightDiffuse[@shGlobalSettingString(num_lights)]) @shAutoConstant(lightDiffuse, light_diffuse_colour_array, @shGlobalSettingString(num_lights))
+    shUniform(float4, lightAttenuation[@shGlobalSettingString(num_lights)]) @shAutoConstant(lightAttenuation, light_attenuation_array, @shGlobalSettingString(num_lights))
     shUniform(float4, lightAmbient)                    @shAutoConstant(lightAmbient, ambient_light_colour)
 #if !HAS_VERTEXCOLOUR
     shUniform(float4, materialAmbient)                    @shAutoConstant(materialAmbient, surface_ambient_colour)
@@ -153,16 +152,9 @@
     SH_BEGIN_PROGRAM
 		shSampler2D(diffuseMap)
 		shInput(float2, UV)
-#if MRT
-        shDeclareMrtOutput(1)
-#endif
 
 #ifdef NEED_DEPTH
         shInput(float, depthPassthrough)
-#endif
-
-#if MRT
-        shUniform(float, far) @shAutoConstant(far, far_clip_distance)
 #endif
 
 #if LIGHTING
@@ -368,10 +360,6 @@
 
         float isUnderwater = (worldPos.y < waterLevel) ? 1.0 : 0.0;
         shOutputColour(0).xyz = shLerp (shOutputColour(0).xyz, watercolour, fogAmount * isUnderwater * waterEnabled);
-#endif
-
-#if MRT
-        shOutputColour(1) = float4(depthPassthrough / far,1,1,1);
 #endif
     }
 

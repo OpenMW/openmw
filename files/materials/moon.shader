@@ -1,8 +1,5 @@
 #include "core.h"
 
-#define MRT @shGlobalSettingBool(mrt_output)
-
-
 #ifdef SH_VERTEX_SHADER
 
     SH_BEGIN_PROGRAM
@@ -22,9 +19,6 @@
 		shSampler2D(diffuseMap)
 		shSampler2D(alphaMap)
 		shInput(float2, UV)
-#if MRT
-        shDeclareMrtOutput(1)
-#endif
         shUniform(float4, materialDiffuse)                    @shAutoConstant(materialDiffuse, surface_diffuse_colour)
         shUniform(float4, materialEmissive)                   @shAutoConstant(materialEmissive, surface_emissive_colour)
         
@@ -41,10 +35,6 @@
         
         shOutputColour(0).rgb += (1-tex.a) * shOutputColour(0).a * atmosphereColour.rgb; //fill dark side of moon with atmosphereColour
         shOutputColour(0).rgb += (1-materialDiffuse.a) * atmosphereColour.rgb; //fade bump
-
-#if MRT
-        shOutputColour(1) = float4(1,1,1,1);
-#endif
 
     }
 

@@ -319,7 +319,6 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
 
     addResourcesDirectory(mResDir / "mygui");
     addResourcesDirectory(mResDir / "water");
-    addResourcesDirectory(mResDir / "gbuffer");
     addResourcesDirectory(mResDir / "shadows");
     addZipResource(mResDir / "mygui" / "Obliviontt.zip");
 

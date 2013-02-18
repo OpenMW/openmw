@@ -3,7 +3,6 @@
 #define IS_FIRST_PASS 1
 
 #define FOG @shGlobalSettingBool(fog)
-#define MRT @shGlobalSettingBool(mrt_output)
 
 #define LIGHTING @shGlobalSettingBool(lighting)
 
@@ -18,7 +17,7 @@
 
 #define NUM_LAYERS @shPropertyString(num_layers)
 
-#if MRT || FOG || SHADOWS_PSSM
+#if FOG || SHADOWS_PSSM
 #define NEED_DEPTH 1
 #endif
 
@@ -152,11 +151,6 @@
 #endif
     
         @shPassthroughFragmentInputs
-    
-#if MRT
-        shDeclareMrtOutput(1)
-        shUniform(float, far) @shAutoConstant(far, far_clip_distance)
-#endif
 
 
 #if LIGHTING
@@ -369,10 +363,6 @@
 
         float isUnderwater = (worldPos.y < waterLevel) ? 1.0 : 0.0;
         shOutputColour(0).xyz = shLerp (shOutputColour(0).xyz, watercolour, fogAmount * isUnderwater);
-#endif
-
-#if MRT
-        shOutputColour(1) = float4(depth / far,1,1,1);
 #endif
     }
 

@@ -146,8 +146,6 @@ namespace MWRender {
         void toggle();
         void update(float dt, Ogre::Vector3 player);
 
-        void assignTextures();
-
         void setViewportBackground(const Ogre::ColourValue& bg);
 
         void processChangedSettings(const Settings::CategorySettingVector& settings);

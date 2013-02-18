@@ -126,7 +126,6 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
 
     sh::Factory::getInstance ().setShadersEnabled (Settings::Manager::getBool("shaders", "Objects"));
 
-    sh::Factory::getInstance ().setGlobalSetting ("mrt_output", useMRT() ? "true" : "false");
     sh::Factory::getInstance ().setGlobalSetting ("fog", "true");
     sh::Factory::getInstance ().setGlobalSetting ("lighting", "true");
     sh::Factory::getInstance ().setGlobalSetting ("num_lights", Settings::Manager::getString ("num lights", "Objects"));
@@ -690,11 +689,6 @@ void RenderingManager::enableLights(bool sun)
     sunEnable(sun);
 }
 
-const bool RenderingManager::useMRT()
-{
-    return Settings::Manager::getBool("shader", "Water");
-}
-
 Shadows* RenderingManager::getShadows()
 {
     return mShadows;
@@ -795,7 +789,6 @@ void RenderingManager::processChangedSettings(const Settings::CategorySettingVec
         else if (it->second == "shader" && it->first == "Water")
         {
             applyCompositors();
-            sh::Factory::getInstance ().setGlobalSetting ("mrt_output", useMRT() ? "true" : "false");
             sh::Factory::getInstance ().setGlobalSetting ("simple_water", Settings::Manager::getBool("shader", "Water") ? "false" : "true");
             rebuild = true;
             mRendering.getViewport ()->setClearEveryFrame (true);
@@ -873,7 +866,6 @@ void RenderingManager::windowResized(Ogre::RenderWindow* rw)
 
     mRendering.adjustViewport();
     mCompositors->recreate();
-    mWater->assignTextures();
 
     mVideoPlayer->setResolution (rw->getWidth(), rw->getHeight());
 
@@ -897,19 +889,6 @@ bool RenderingManager::waterShaderSupported()
 
 void RenderingManager::applyCompositors()
 {
-    mCompositors->removeAll();
-    if (useMRT())
-    {
-        /*
-        mCompositors->addCompositor("gbuffer", 0);
-        mCompositors->setCompositorEnabled("gbuffer", true);
-        mCompositors->addCompositor("gbufferFinalizer", 2);
-        mCompositors->setCompositorEnabled("gbufferFinalizer", true);
-        */
-    }
-
-    //if (mWater)
-        //mWater->assignTextures();
 }
 
 void RenderingManager::getTriangleBatchCount(unsigned int &triangles, unsigned int &batches)

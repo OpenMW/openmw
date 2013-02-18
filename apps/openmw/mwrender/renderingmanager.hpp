@@ -104,8 +104,6 @@ class RenderingManager: private RenderingInterface, public Ogre::WindowEventList
 
     void removeWater();
 
-    static const bool useMRT();
-
     void preCellChange (MWWorld::CellStore* store);
     ///< this event is fired immediately before changing cell
 

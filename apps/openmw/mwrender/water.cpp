@@ -93,7 +93,6 @@ PlaneReflection::PlaneReflection(Ogre::SceneManager* sceneManager, SkyManager* s
     vp->setOverlaysEnabled(false);
     vp->setBackgroundColour(ColourValue(0.8f, 0.9f, 1.0f));
     vp->setShadowsEnabled(false);
-    // use fallback techniques without shadows and without mrt
     vp->setMaterialScheme("water_reflection");
     mRenderTarget->addListener(this);
     mRenderTarget->setActive(true);
@@ -232,8 +231,6 @@ Water::Water (Ogre::Camera *camera, RenderingManager* rend, const ESM::Cell* cel
     underwaterDome->setMaterialName("Underwater_Dome");
     */
 
-    assignTextures();
-
     setHeight(mTop);
 
     sh::MaterialInstance* m = sh::Factory::getInstance ().getMaterialInstance ("Water");
@@ -362,22 +359,6 @@ Vector3 Water::getSceneNodeCoordinates(int gridX, int gridY)
     return Vector3(gridX * CELL_SIZE + (CELL_SIZE / 2), mTop, -gridY * CELL_SIZE - (CELL_SIZE / 2));
 }
 
-void Water::assignTextures()
-{
-    if (Settings::Manager::getBool("shader", "Water"))
-    {
-/*
-        CompositorInstance* compositor = CompositorManager::getSingleton().getCompositorChain(mRendering->getViewport())->getCompositor("gbuffer");
-
-        TexturePtr colorTexture = compositor->getTextureInstance("mrt_output", 0);
-        sh::Factory::getInstance ().setTextureAlias ("WaterRefraction", colorTexture->getName());
-
-        TexturePtr depthTexture = compositor->getTextureInstance("mrt_output", 1);
-        sh::Factory::getInstance ().setTextureAlias ("SceneDepth", depthTexture->getName());
-        */
-    }
-}
-
 void Water::setViewportBackground(const ColourValue& bg)
 {
     if (mReflection)
@@ -483,7 +464,6 @@ void Water::processChangedSettings(const Settings::CategorySettingVector& settin
         applyRTT();
         applyVisibilityMask();
         mWater->setMaterial(mMaterial);
-        assignTextures();
     }
     if (applyVisMask)
         applyVisibilityMask();

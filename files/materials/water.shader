@@ -5,11 +5,7 @@
 
 
 #if SIMPLE_WATER
-    // --------------------------------------- SIMPLE WATER ---------------------------------------------------
-    
-   
-   #define MRT @shGlobalSettingBool(mrt_output)
-   
+    // --------------------------------------- SIMPLE WATER ---------------------------------------------------   
 
 #ifdef SH_VERTEX_SHADER
 
@@ -32,9 +28,6 @@
 		shSampler2D(animatedTexture)
 		shInput(float2, UV)
 		shInput(float, depth)
-#if MRT
-        shDeclareMrtOutput(1)
-#endif
 
 		shUniform(float3, fogColor) @shAutoConstant(fogColor, fog_colour)
         shUniform(float4, fogParams) @shAutoConstant(fogParams, fog_params)
@@ -47,10 +40,6 @@
         
         float fogValue = shSaturate((depth - fogParams.y) * fogParams.w);
         shOutputColour(0).xyz = shLerp (shOutputColour(0).xyz, fogColor, fogValue);
-
-#if MRT
-        shOutputColour(1) = float4(1,1,1,1);
-#endif
     }
 
 #endif

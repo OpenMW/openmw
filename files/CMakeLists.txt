@@ -6,10 +6,6 @@ set(WATER_FILES
     circle.png
 )
 
-set(GBUFFER_FILES
-    gbuffer.compositor
-)
-
 set(MATERIAL_FILES
     atmosphere.shader
     atmosphere.shaderset
@@ -22,7 +18,6 @@ set(MATERIAL_FILES
     objects.shader
     objects.shaderset
     openmw.configuration
-    quad2.shader
     quad.mat
     quad.shader
     quad.shaderset
@@ -53,7 +48,5 @@ set(MATERIAL_FILES
 )
 
 copy_all_files(${CMAKE_CURRENT_SOURCE_DIR}/water "${OpenMW_BINARY_DIR}/resources/water/" "${WATER_FILES}")
-
-copy_all_files(${CMAKE_CURRENT_SOURCE_DIR}/gbuffer "${OpenMW_BINARY_DIR}/resources/gbuffer/" "${GBUFFER_FILES}")
 
 copy_all_files(${CMAKE_CURRENT_SOURCE_DIR}/materials "${OpenMW_BINARY_DIR}/resources/materials/" "${MATERIAL_FILES}")
