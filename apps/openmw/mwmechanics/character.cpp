@@ -174,43 +174,44 @@ Ogre::Vector3 CharacterController::update(float duration)
 {
     Ogre::Vector3 movement(0.0f);
 
-    const MWBase::World *world = MWBase::Environment::get().getWorld();
-    const MWWorld::Class &cls = MWWorld::Class::get(mPtr);
-    const Ogre::Vector3 &vec = cls.getMovementVector(mPtr);
-    const float speed = cls.getSpeed(mPtr);
+    float speed = 0.0f;
+    if(!(getState() >= CharState_Death1))
+    {
+        const MWBase::World *world = MWBase::Environment::get().getWorld();
+        const MWWorld::Class &cls = MWWorld::Class::get(mPtr);
+        const Ogre::Vector3 &vec = cls.getMovementVector(mPtr);
 
-    bool inwater = world->isSwimming(mPtr);
-    bool isrunning = cls.getStance(mPtr, MWWorld::Class::Run);
+        bool inwater = world->isSwimming(mPtr);
+        bool isrunning = cls.getStance(mPtr, MWWorld::Class::Run);
+        speed = cls.getSpeed(mPtr);
 
-    if(std::abs(vec.x/2.0f) > std::abs(vec.y))
-    {
-        if(vec.x > 0.0f)
-            setState(isrunning ?
-                     (inwater ? CharState_SwimRunRight : CharState_RunRight) :
-                     (inwater ? CharState_SwimWalkRight : CharState_WalkRight), true);
-        else if(vec.x < 0.0f)
-            setState(isrunning ?
-                     (inwater ? CharState_SwimRunLeft: CharState_RunLeft) :
-                     (inwater ? CharState_SwimWalkLeft : CharState_WalkLeft), true);
-        // Apply any forward/backward movement manually
-        movement.y += vec.y * (speed*duration);
-    }
-    else if(vec.y != 0.0f)
-    {
-        if(vec.y > 0.0f)
-            setState(isrunning ?
-                     (inwater ? CharState_SwimRunForward : CharState_RunForward) :
-                     (inwater ? CharState_SwimWalkForward : CharState_WalkForward), true);
-        else if(vec.y < 0.0f)
-            setState(isrunning ?
-                     (inwater ? CharState_SwimRunBack : CharState_RunBack) :
-                     (inwater ? CharState_SwimWalkBack : CharState_WalkBack), true);
-        // Apply any sideways movement manually
-        movement.x += vec.x * (speed*duration);
-    }
-    else
-    {
-        if(!(getState() >= CharState_Death1))
+        if(std::abs(vec.x/2.0f) > std::abs(vec.y))
+        {
+            if(vec.x > 0.0f)
+                setState(isrunning ?
+                         (inwater ? CharState_SwimRunRight : CharState_RunRight) :
+                         (inwater ? CharState_SwimWalkRight : CharState_WalkRight), true);
+            else if(vec.x < 0.0f)
+                setState(isrunning ?
+                         (inwater ? CharState_SwimRunLeft: CharState_RunLeft) :
+                         (inwater ? CharState_SwimWalkLeft : CharState_WalkLeft), true);
+            // Apply any forward/backward movement manually
+            movement.y += vec.y * (speed*duration);
+        }
+        else if(vec.y != 0.0f)
+        {
+            if(vec.y > 0.0f)
+                setState(isrunning ?
+                         (inwater ? CharState_SwimRunForward : CharState_RunForward) :
+                         (inwater ? CharState_SwimWalkForward : CharState_WalkForward), true);
+            else if(vec.y < 0.0f)
+                setState(isrunning ?
+                         (inwater ? CharState_SwimRunBack : CharState_RunBack) :
+                         (inwater ? CharState_SwimWalkBack : CharState_WalkBack), true);
+            // Apply any sideways movement manually
+            movement.x += vec.x * (speed*duration);
+        }
+        else
             setState((inwater ? CharState_IdleSwim : CharState_Idle), true);
     }
 
