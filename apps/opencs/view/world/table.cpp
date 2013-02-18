@@ -102,7 +102,12 @@ CSVWorld::Table::Table (const CSMWorld::UniversalId& id, CSMWorld::Data& data, Q
 
         if (flags & CSMWorld::ColumnBase::Flag_Table)
         {
-            CommandDelegate *delegate = new CommandDelegate (undoStack, this);
+            CSMWorld::ColumnBase::Display display = static_cast<CSMWorld::ColumnBase::Display> (
+                mModel->headerData (i, Qt::Horizontal, CSMWorld::ColumnBase::Role_Display).toInt());
+
+            CommandDelegate *delegate = CommandDelegateFactoryCollection::get().makeDelegate (display,
+                undoStack, this);
+
             mDelegates.push_back (delegate);
             setItemDelegateForColumn (i, delegate);
         }

@@ -132,6 +132,8 @@ namespace MWGui
         if (mWindowManager.getInventoryWindow()->getPlayerGold()<price)
             return;
 
+        mWindowManager.getTradeWindow ()->addOrRemoveGold (-price);
+
         MWBase::Environment::get().getWorld ()->getFader ()->fadeOut(1);
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
         ESM::Position pos = *_sender->getUserData<ESM::Position>();

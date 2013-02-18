@@ -72,7 +72,11 @@ void CSMWorld::Data::merge()
 void CSMWorld::Data::loadFile (const boost::filesystem::path& path, bool base)
 {
     ESM::ESMReader reader;
-    /// \todo set encoder
+
+    /// \todo set encoding properly, once config implementation has been fixed.
+    ToUTF8::Utf8Encoder encoder (ToUTF8::calculateEncoding ("win1252"));
+    reader.setEncoder (&encoder);
+
     reader.open (path.string());
 
     // Note: We do not need to send update signals here, because at this point the model is not connected

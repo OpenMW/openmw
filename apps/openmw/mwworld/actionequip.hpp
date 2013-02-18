@@ -8,7 +8,7 @@ namespace MWWorld
 {
     class ActionEquip : public Action
     {
-            virtual bool executeImp (const Ptr& actor);
+            virtual void executeImp (const Ptr& actor);
 
         public:
             /// @param item to equip

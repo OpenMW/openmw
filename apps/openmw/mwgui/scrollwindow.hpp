@@ -15,6 +15,7 @@ namespace MWGui
 
             void open (MWWorld::Ptr scroll);
             void setTakeButtonShow(bool show);
+            void setInventoryAllowed(bool allowed);
 
         protected:
             void onCloseButtonClicked (MyGUI::Widget* _sender);
@@ -26,6 +27,10 @@ namespace MWGui
             MyGUI::ScrollView* mTextView;
 
             MWWorld::Ptr mScroll;
+
+            bool mTakeButtonShow;
+            bool mTakeButtonAllowed;
+
     };
 
 }
