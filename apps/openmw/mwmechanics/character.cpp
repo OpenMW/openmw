@@ -172,6 +172,8 @@ void CharacterController::markerEvent(float time, const std::string &evt)
 
 Ogre::Vector3 CharacterController::update(float duration)
 {
+    Ogre::Vector3 movement(0.0f);
+
     const MWBase::World *world = MWBase::Environment::get().getWorld();
     const MWWorld::Class &cls = MWWorld::Class::get(mPtr);
     const Ogre::Vector3 &vec = cls.getMovementVector(mPtr);
@@ -190,22 +192,28 @@ Ogre::Vector3 CharacterController::update(float duration)
             setState(isrunning ?
                      (inwater ? CharState_SwimRunLeft: CharState_RunLeft) :
                      (inwater ? CharState_SwimWalkLeft : CharState_WalkLeft), true);
+        // Apply any forward/backward movement manually
+        movement.y += vec.y * (speed*duration);
     }
-    else if(vec.y > 0.0f)
-        setState(isrunning ?
-                 (inwater ? CharState_SwimRunForward : CharState_RunForward) :
-                 (inwater ? CharState_SwimWalkForward : CharState_WalkForward), true);
-    else if(vec.y < 0.0f)
-        setState(isrunning ?
-                 (inwater ? CharState_SwimRunBack : CharState_RunBack) :
-                 (inwater ? CharState_SwimWalkBack : CharState_WalkBack), true);
+    else if(vec.y != 0.0f)
+    {
+        if(vec.y > 0.0f)
+            setState(isrunning ?
+                     (inwater ? CharState_SwimRunForward : CharState_RunForward) :
+                     (inwater ? CharState_SwimWalkForward : CharState_WalkForward), true);
+        else if(vec.y < 0.0f)
+            setState(isrunning ?
+                     (inwater ? CharState_SwimRunBack : CharState_RunBack) :
+                     (inwater ? CharState_SwimWalkBack : CharState_WalkBack), true);
+        // Apply any sideways movement manually
+        movement.x += vec.x * (speed*duration);
+    }
     else
     {
         if(!(getState() >= CharState_Death1))
             setState((inwater ? CharState_IdleSwim : CharState_Idle), true);
     }
 
-    Ogre::Vector3 movement = Ogre::Vector3::ZERO;
     if(mAnimation && !mSkipAnim)
     {
         mAnimation->setSpeed(speed);
