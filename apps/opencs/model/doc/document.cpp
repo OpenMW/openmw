@@ -18,6 +18,136 @@ void CSMDoc::Document::load (const std::vector<boost::filesystem::path>::const_i
 
     if (lastAsModified)
         getData().loadFile (*end2, false);
+
+    addOptionalGmsts();
+}
+
+void CSMDoc::Document::addOptionalGmsts()
+{
+    static const char *sFloats[] =
+    {
+        "fCombatDistanceWerewolfMod",
+        "fFleeDistance",
+        "fWereWolfAcrobatics",
+        "fWereWolfAgility",
+        "fWereWolfAlchemy",
+        "fWereWolfAlteration",
+        "fWereWolfArmorer",
+        "fWereWolfAthletics",
+        "fWereWolfAxe",
+        "fWereWolfBlock",
+        "fWereWolfBluntWeapon",
+        "fWereWolfConjuration",
+        "fWereWolfDestruction",
+        "fWereWolfEnchant",
+        "fWereWolfEndurance",
+        "fWereWolfFatigue",
+        "fWereWolfHandtoHand",
+        "fWereWolfHealth",
+        "fWereWolfHeavyArmor",
+        "fWereWolfIllusion",
+        "fWereWolfIntellegence",
+        "fWereWolfLightArmor",
+        "fWereWolfLongBlade",
+        "fWereWolfLuck",
+        "fWereWolfMagicka",
+        "fWereWolfMarksman",
+        "fWereWolfMediumArmor",
+        "fWereWolfMerchantile",
+        "fWereWolfMysticism",
+        "fWereWolfPersonality",
+        "fWereWolfRestoration",
+        "fWereWolfRunMult",
+        "fWereWolfSecurity",
+        "fWereWolfShortBlade",
+        "fWereWolfSilverWeaponDamageMult",
+        "fWereWolfSneak",
+        "fWereWolfSpear",
+        "fWereWolfSpeechcraft",
+        "fWereWolfSpeed",
+        "fWereWolfStrength",
+        "fWereWolfUnarmored",
+        "fWereWolfWillPower",
+        0
+    };
+
+    static const char *sIntegers[] =
+    {
+        "iWereWolfBounty",
+        "iWereWolfFightMod",
+        "iWereWolfFleeMod",
+        "iWereWolfLevelToAttack",
+        0
+    };
+
+    static const char *sStrings[] =
+    {
+        "sCompanionShare",
+        "sCompanionWarningButtonOne",
+        "sCompanionWarningButtonTwo",
+        "sCompanionWarningMessage",
+        "sDeleteNote",
+        "sEditNote",
+        "sEffectSummonCreature01",
+        "sEffectSummonCreature02",
+        "sEffectSummonCreature03",
+        "sEffectSummonCreature04",
+        "sEffectSummonCreature05",
+        "sEffectSummonFabricant",
+        "sLevitateDisabled",
+        "sMagicCreature01ID",
+        "sMagicCreature02ID",
+        "sMagicCreature03ID",
+        "sMagicCreature04ID",
+        "sMagicCreature05ID",
+        "sMagicFabricantID",
+        "sMaxSale",
+        "sProfitValue",
+        "sTeleportDisabled",
+        "sWerewolfAlarmMessage",
+        "sWerewolfPopup",
+        "sWerewolfRefusal",
+        "sWerewolfRestMessage",
+        0
+    };
+
+    for (int i=0; sFloats[i]; ++i)
+    {
+        ESM::GameSetting gmst;
+        gmst.mId = sFloats[i];
+        gmst.mF = 0;
+        gmst.mType = ESM::VT_Float;
+        addOptionalGmst (gmst);
+    }
+
+    for (int i=0; sIntegers[i]; ++i)
+    {
+        ESM::GameSetting gmst;
+        gmst.mId = sIntegers[i];
+        gmst.mI = 0;
+        gmst.mType = ESM::VT_Long;
+        addOptionalGmst (gmst);
+    }
+
+    for (int i=0; sStrings[i]; ++i)
+    {
+        ESM::GameSetting gmst;
+        gmst.mId = sStrings[i];
+        gmst.mStr = "<no text>";
+        gmst.mType = ESM::VT_String;
+        addOptionalGmst (gmst);
+    }
+}
+
+void CSMDoc::Document::addOptionalGmst (const ESM::GameSetting& gmst)
+{
+    if (getData().getGmsts().searchId (gmst.mId)==-1)
+    {
+        CSMWorld::Record<ESM::GameSetting> record;
+        record.mBase = gmst;
+        record.mState = CSMWorld::RecordBase::State_BaseOnly;
+        getData().getGmsts().appendRecord (record);
+    }
 }
 
 void CSMDoc::Document::createBase()

@@ -54,6 +54,16 @@ CSMWorld::IdCollection<ESM::Global>& CSMWorld::Data::getGlobals()
     return mGlobals;
 }
 
+const CSMWorld::IdCollection<ESM::GameSetting>& CSMWorld::Data::getGmsts() const
+{
+    return mGmsts;
+}
+
+CSMWorld::IdCollection<ESM::GameSetting>& CSMWorld::Data::getGmsts()
+{
+    return mGmsts;
+}
+
 QAbstractTableModel *CSMWorld::Data::getTableModel (const UniversalId& id)
 {
     std::map<UniversalId::Type, QAbstractTableModel *>::iterator iter = mModelIndex.find (id.getType());

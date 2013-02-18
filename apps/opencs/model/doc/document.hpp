@@ -17,6 +17,11 @@
 
 class QAbstractItemModel;
 
+namespace ESM
+{
+    struct GameSetting;
+}
+
 namespace CSMDoc
 {
     class Document : public QObject
@@ -45,6 +50,10 @@ namespace CSMDoc
             ///< \param lastAsModified Store the last file in Modified instead of merging it into Base.
 
             void createBase();
+
+            void addOptionalGmsts();
+
+            void addOptionalGmst (const ESM::GameSetting& gmst);
 
         public:
 
