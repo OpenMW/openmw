@@ -56,10 +56,12 @@ public slots:
     void refresh();
 
 private:
-    DataFilesModel *mMastersModel;
-    DataFilesModel *mPluginsModel;
+    DataFilesModel *mDataFilesModel;
 
     QSortFilterProxyModel *mPluginsProxyModel;
+    QSortFilterProxyModel *mMastersProxyModel;
+
+    QSortFilterProxyModel *mFilterProxyModel;
 
     QTableView *mMastersTable;
     QTableView *mPluginsTable;

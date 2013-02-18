@@ -155,4 +155,6 @@ bool GameSettings::writeFile(QTextStream &stream)
         }
 
     }
+
+    return true;
 }

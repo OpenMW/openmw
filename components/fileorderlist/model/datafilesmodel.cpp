@@ -204,13 +204,14 @@ bool DataFilesModel::setData(const QModelIndex &index, const QVariant &value, in
             return false;
 
     if (role == Qt::CheckStateRole) {
-
-        emit layoutAboutToBeChanged();
-
         QString name = item(index.row())->fileName();
         mCheckStates[name] = static_cast<Qt::CheckState>(value.toInt());
 
-        emit layoutChanged();
+        // Force a redraw of the view since unchecking one item can affect another
+        QModelIndex firstIndex = indexFromItem(mFiles.first());
+        QModelIndex lastIndex = indexFromItem(mFiles.last());
+
+        emit dataChanged(firstIndex, lastIndex);
         return true;
     }
 
