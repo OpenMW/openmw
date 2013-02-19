@@ -191,10 +191,7 @@ namespace Physic
     {
         if(!isDebugCreated)
         {
-            Ogre::SceneManagerEnumerator::SceneManagerIterator iter = Ogre::Root::getSingleton().getSceneManagerIterator();
-            iter.begin();
-            Ogre::SceneManager* scn = iter.getNext();
-            Ogre::SceneNode* node = scn->getRootSceneNode()->createChildSceneNode();
+            Ogre::SceneNode* node = mSceneMgr->getRootSceneNode()->createChildSceneNode();
             node->pitch(Ogre::Degree(-90));
             mDebugDrawer = new BtOgre::DebugDrawer(node, dynamicsWorld);
             dynamicsWorld->setDebugDrawer(mDebugDrawer);
@@ -217,6 +214,11 @@ namespace Physic
     {
         setDebugRenderingMode(!mDebugActive);
         return mDebugActive;
+    }
+
+    void PhysicEngine::setSceneManager(Ogre::SceneManager* sceneMgr)
+    {
+        mSceneMgr = sceneMgr;
     }
 
     PhysicEngine::~PhysicEngine()
@@ -471,7 +473,8 @@ namespace Physic
 
     void PhysicEngine::stepSimulation(double deltaT)
     {
-        dynamicsWorld->stepSimulation(deltaT,10, 1/60.0);
+        // This isn't needed as there are no dynamic objects at this point
+        //dynamicsWorld->stepSimulation(deltaT,10, 1/60.0);
         if(isDebugCreated)
         {
             mDebugDrawer->step();
@@ -494,7 +497,6 @@ namespace Physic
 
     void PhysicEngine::removeCharacter(const std::string &name)
     {
-        //std::cout << "remove";
         PhysicActorContainer::iterator it = PhysicActorMap.find(name);
         if (it != PhysicActorMap.end() )
         {

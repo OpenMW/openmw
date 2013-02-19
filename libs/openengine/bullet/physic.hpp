@@ -24,6 +24,11 @@ namespace BtOgre
     class DebugDrawer;
 }
 
+namespace Ogre
+{
+    class SceneManager;
+}
+
 namespace MWWorld
 {
     class World;
@@ -269,6 +274,8 @@ namespace Physic
 
         void getObjectAABB(const std::string &mesh, float scale, btVector3 &min, btVector3 &max);
 
+        void setSceneManager(Ogre::SceneManager* sceneMgr);
+
         /**
          * Return the closest object hit by a ray. If there are no objects, it will return ("",-1).
          */
@@ -304,6 +311,8 @@ namespace Physic
 
         typedef std::map<std::string, PhysicActor*>  PhysicActorContainer;
         PhysicActorContainer PhysicActorMap;
+
+        Ogre::SceneManager* mSceneMgr;
 
         //debug rendering
         BtOgre::DebugDrawer* mDebugDrawer;

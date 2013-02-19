@@ -207,7 +207,7 @@ public:
 
         mLineDrawer->setMaterial("BtOgre/DebugLines");
 
-        mLineDrawer->setVisibilityFlags (1024);
+        //mLineDrawer->setVisibilityFlags (1024);
     }
 
     ~DebugDrawer()
