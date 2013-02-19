@@ -7,7 +7,6 @@
 #include <btBulletCollisionCommon.h>
 
 #include "physic.hpp"
-#include "pmove.h"
 
 
 enum traceWorldType
@@ -105,7 +104,6 @@ void newtrace(traceResults* const results, const Ogre::Vector3& start, const Ogr
     {
         results->endpos = end;
         results->planenormal = Ogre::Vector3(0.0f, 0.0f, 1.0f);
-        results->entityNum = ENTITYNUM_NONE;
         results->fraction = 1.0f;
     }
     else
@@ -113,6 +111,5 @@ void newtrace(traceResults* const results, const Ogre::Vector3& start, const Ogr
         results->fraction = out.fraction;
         results->planenormal = out.hitNormal;
         results->endpos = (end-start)*results->fraction + start;
-        results->entityNum = ENTITYNUM_WORLD;
     }
 }

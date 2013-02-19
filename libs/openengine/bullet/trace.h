@@ -20,10 +20,6 @@ struct traceResults
 
     float fraction;
 
-    int surfaceFlags;
-    int contents;
-    int entityNum;
-
     bool allsolid;
     bool startsolid;
 };

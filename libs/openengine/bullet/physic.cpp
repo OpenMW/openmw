@@ -2,7 +2,6 @@
 #include <btBulletDynamicsCommon.h>
 #include <btBulletCollisionCommon.h>
 #include <BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h>
-#include "pmove.h"
 #include <components/nifbullet/bullet_nif_loader.hpp>
 #include "CMotionState.h"
 #include "OgreRoot.h"
