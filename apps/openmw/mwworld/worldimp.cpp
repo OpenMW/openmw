@@ -186,6 +186,8 @@ namespace MWWorld
 
         mRendering = new MWRender::RenderingManager(renderer, resDir, cacheDir, mPhysEngine);
 
+        mPhysEngine->setSceneManager(renderer.getScene());
+
         mWeatherManager = new MWWorld::WeatherManager(mRendering);
 
         int idx = 0;
@@ -892,6 +894,8 @@ namespace MWWorld
             Ogre::Vector3 vec = mPhysics->move(player->first, player->second, duration, !isSwimming(player->first));
             moveObjectImp(player->first, vec.x, vec.y, vec.z);
         }
+        // the only purpose this has currently is to update the debug drawer
+        mPhysEngine->stepSimulation (duration);
     }
 
     bool World::toggleCollisionMode()
