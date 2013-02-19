@@ -23,6 +23,8 @@
 
 #define UNDERWATER @shGlobalSettingBool(underwater_effects) && LIGHTING
 
+#define VIEWPROJ_FIX @shGlobalSettingBool(viewproj_fix)
+
 
 #if NEED_DEPTH
 @shAllocatePassthrough(1, depth)
@@ -51,6 +53,10 @@
         shUniform(float4x4, worldMatrix) @shAutoConstant(worldMatrix, world_matrix)
         shUniform(float4x4, viewProjMatrix) @shAutoConstant(viewProjMatrix, viewproj_matrix)
         
+#if VIEWPROJ_FIX
+        shUniform(float4, vpRow2Fix) @shSharedParameter(vpRow2Fix, vpRow2Fix)
+#endif
+
         shUniform(float2, lodMorph) @shAutoConstant(lodMorph, custom, 1001)
         
         shVertexInput(float2, uv0)
@@ -94,7 +100,25 @@
         shOutputPosition = shMatrixMult(viewProjMatrix, worldPos);
         
 #if NEED_DEPTH
+#if VIEWPROJ_FIX
+        float4x4 vpFixed = viewProjMatrix;
+#if !SH_GLSL
+        vpFixed[2] = vpRow2Fix;
+#else
+        vpFixed[0][2] = vpRow2Fix.x;
+        vpFixed[1][2] = vpRow2Fix.y;
+        vpFixed[2][2] = vpRow2Fix.z;
+        vpFixed[3][2] = vpRow2Fix.w;
+#endif
+
+        float4x4 fixedWVP = shMatrixMult(vpFixed, worldMatrix);
+
+        float depth = shMatrixMult(fixedWVP, shInputPosition).z;
+        @shPassthroughAssign(depth, depth);
+#else
         @shPassthroughAssign(depth, shOutputPosition.z);
+#endif
+
 #endif
 
         @shPassthroughAssign(UV, uv0);

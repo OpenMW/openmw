@@ -23,12 +23,21 @@
 
 #define VERTEX_LIGHTING 1
 
+#define VIEWPROJ_FIX @shGlobalSettingBool(viewproj_fix)
+
 #ifdef SH_VERTEX_SHADER
 
     // ------------------------------------- VERTEX ---------------------------------------
 
     SH_BEGIN_PROGRAM
         shUniform(float4x4, wvp) @shAutoConstant(wvp, worldviewproj_matrix)
+
+#if VIEWPROJ_FIX
+        shUniform(float4x4, worldMatrix) @shAutoConstant(worldMatrix, world_matrix)
+        shUniform(float4, vpRow2Fix) @shSharedParameter(vpRow2Fix, vpRow2Fix)
+        shUniform(float4x4, vpMatrix) @shAutoConstant(vpMatrix, viewproj_matrix)
+#endif
+
         shVertexInput(float2, uv0)
         shOutput(float2, UV)
         shNormalInput(float4)
@@ -65,7 +74,6 @@
 #if SHADOWS
         shOutput(float4, lightSpacePos0)
         shUniform(float4x4, texViewProjMatrix0) @shAutoConstant(texViewProjMatrix0, texture_viewproj_matrix)
-        shUniform(float4x4, worldMatrix) @shAutoConstant(worldMatrix, world_matrix)
 #endif
 
 #if SHADOWS_PSSM
@@ -73,7 +81,9 @@
         shOutput(float4, lightSpacePos@shIterator)
         shUniform(float4x4, texViewProjMatrix@shIterator) @shAutoConstant(texViewProjMatrix@shIterator, texture_viewproj_matrix, @shIterator)
     @shEndForeach
-        shUniform(float4x4, worldMatrix) @shAutoConstant(worldMatrix, world_matrix)
+#if !VIEWPROJ_FIX
+    shUniform(float4x4, worldMatrix) @shAutoConstant(worldMatrix, world_matrix)
+#endif
 #endif
 
 #if VERTEX_LIGHTING
@@ -89,7 +99,26 @@
 #endif
 
 #ifdef NEED_DEPTH
+
+
+#if VIEWPROJ_FIX
+        float4x4 vpFixed = vpMatrix;
+#if !SH_GLSL
+        vpFixed[2] = vpRow2Fix;
+#else
+        vpFixed[0][2] = vpRow2Fix.x;
+        vpFixed[1][2] = vpRow2Fix.y;
+        vpFixed[2][2] = vpRow2Fix.z;
+        vpFixed[3][2] = vpRow2Fix.w;
+#endif
+
+        float4x4 fixedWVP = shMatrixMult(vpFixed, worldMatrix);
+
+        depthPassthrough = shMatrixMult(fixedWVP, shInputPosition).z;
+#else
         depthPassthrough = shOutputPosition.z;
+#endif
+
 #endif
 
 #if LIGHTING

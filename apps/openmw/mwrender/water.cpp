@@ -144,6 +144,12 @@ void PlaneReflection::preRenderTargetUpdate(const Ogre::RenderTargetEvent& evt)
     mSky->setSkyPosition(pos);
     mCamera->enableReflection(mWaterPlane);
 
+    // for depth calculation, we want the original viewproj matrix _without_ the custom near clip plane.
+    // since all we are interested in is depth, we only need the third row of the matrix.
+    Ogre::Matrix4 projMatrix = mCamera->getProjectionMatrixWithRSDepth () * mCamera->getViewMatrix ();
+    sh::Vector4* row3 = new sh::Vector4(projMatrix[2][0], projMatrix[2][1], projMatrix[2][2], projMatrix[2][3]);
+    sh::Factory::getInstance ().setSharedParameter ("vpRow2Fix", sh::makeProperty<sh::Vector4> (row3));
+
     // enable clip plane here to take advantage of CPU culling for overwater or underwater objects
     mCamera->enableCustomNearClipPlane(mIsUnderwater ? mErrorPlaneUnderwater : mErrorPlane);
 }

@@ -8,6 +8,8 @@
 #include <OgreViewport.h>
 #include <OgreRoot.h>
 
+#include <extern/shiny/Main/Factory.hpp>
+
 #include "renderconst.hpp"
 
 namespace MWRender
@@ -30,7 +32,7 @@ namespace MWRender
         vp->setOverlaysEnabled(false);
         vp->setShadowsEnabled(false);
         vp->setVisibilityMask(RV_Actors + RV_Misc + RV_Statics + RV_StaticsSmall + RV_Terrain + RV_Sky);
-        vp->setMaterialScheme("water_reflection");
+        vp->setMaterialScheme("water_refraction");
         vp->setBackgroundColour (Ogre::ColourValue(0.0078, 0.0576, 0.150));
         mRenderTarget->setAutoUpdated(true);
         mRenderTarget->addListener(this);
@@ -54,6 +56,12 @@ namespace MWRender
         mCamera->setAspectRatio(mParentCamera->getAspectRatio());
         mCamera->setFOVy(mParentCamera->getFOVy());
 
+        // for depth calculation, we want the original viewproj matrix _without_ the custom near clip plane.
+        // since all we are interested in is depth, we only need the third row of the matrix.
+        Ogre::Matrix4 projMatrix = mCamera->getProjectionMatrixWithRSDepth () * mCamera->getViewMatrix ();
+        sh::Vector4* row3 = new sh::Vector4(projMatrix[2][0], projMatrix[2][1], projMatrix[2][2], projMatrix[2][3]);
+        sh::Factory::getInstance ().setSharedParameter ("vpRow2Fix", sh::makeProperty<sh::Vector4> (row3));
+
         // enable clip plane here to take advantage of CPU culling for overwater or underwater objects
         mCamera->enableCustomNearClipPlane(mIsUnderwater ? mNearClipPlaneUnderwater : mNearClipPlane);
 
@@ -62,6 +70,7 @@ namespace MWRender
 
     void Refraction::postRenderTargetUpdate(const Ogre::RenderTargetEvent& evt)
     {
+        mCamera->disableCustomNearClipPlane ();
         mRenderActive = false;
     }
 
