@@ -394,30 +394,13 @@ namespace MWWorld
 
     void PhysicsSystem::moveObject (const Ptr& ptr)
     {
-        Ogre::SceneNode* node = ptr.getRefData().getBaseNode();
-        std::string handle = node->getName();
-        Ogre::Vector3 position = node->getPosition();
-        if (OEngine::Physic::RigidBody* body = mEngine->getRigidBody(handle))
-        {
-            // TODO very dirty hack to avoid crash during setup -> needs cleaning up to allow
-            // start positions others than 0, 0, 0
-            
-            
-            if(dynamic_cast<btBoxShape*>(body->getCollisionShape()) == NULL){
-                btTransform tr = body->getWorldTransform();
-                tr.setOrigin(btVector3(position.x,position.y,position.z));
-                body->setWorldTransform(tr);
-            }
-            else{
-                //For objects that contain a box shape.  
-                //Do any such objects exist?  Perhaps animated objects?
-                mEngine->boxAdjustExternal(handleToMesh[handle], body, node->getScale().x, position, node->getOrientation());
-            }
-        }
+        Ogre::SceneNode *node = ptr.getRefData().getBaseNode();
+        const std::string &handle = node->getName();
+        const Ogre::Vector3 &position = node->getPosition();
+        if(OEngine::Physic::RigidBody *body = mEngine->getRigidBody(handle))
+            body->getWorldTransform().setOrigin(btVector3(position.x,position.y,position.z));
         else if(OEngine::Physic::PhysicActor *physact = mEngine->getCharacter(handle))
-        {
             physact->setPosition(position);
-        }
     }
 
     void PhysicsSystem::rotateObject (const Ptr& ptr)
