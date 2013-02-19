@@ -5,6 +5,8 @@ set(LAUNCHER
     maindialog.cpp
     playpage.cpp
 
+    model/pluginsproxymodel.cpp
+
     settings/gamesettings.cpp
     settings/graphicssettings.cpp
     settings/launchersettings.cpp
@@ -22,6 +24,8 @@ set(LAUNCHER_HEADER
     maindialog.hpp
     playpage.hpp
 
+    model/pluginsproxymodel.hpp
+
     settings/gamesettings.hpp
     settings/graphicssettings.hpp
     settings/launchersettings.hpp
@@ -38,6 +42,8 @@ set(LAUNCHER_HEADER_MOC
     graphicspage.hpp
     maindialog.hpp
     playpage.hpp
+
+    model/pluginsproxymodel.hpp
 
     utils/comboboxlineedit.hpp
     utils/profilescombobox.hpp

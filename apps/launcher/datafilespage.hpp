@@ -18,6 +18,7 @@ class TextInputDialog;
 class ProfilesComboBox;
 class GameSettings;
 class LauncherSettings;
+class PluginsProxyModel;
 
 namespace Files { struct ConfigurationManager; }
 
@@ -43,6 +44,7 @@ public slots:
     void profileRenamed(const QString &previous, const QString &current);
     void updateOkButton(const QString &text);
     void updateSplitter();
+    void updateViews();
 
     // Action slots
     void newProfile();
@@ -58,7 +60,7 @@ public slots:
 private:
     DataFilesModel *mDataFilesModel;
 
-    QSortFilterProxyModel *mPluginsProxyModel;
+    PluginsProxyModel *mPluginsProxyModel;
     QSortFilterProxyModel *mMastersProxyModel;
 
     QSortFilterProxyModel *mFilterProxyModel;

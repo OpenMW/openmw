@@ -26,7 +26,6 @@ QStringList LauncherSettings::values(const QString &key, Qt::MatchFlags flags)
         QStringList keys = settings.keys();
 
         foreach (const QString &currentKey, keys) {
-            qDebug() << "key is: " << currentKey << "value: " << settings.value(currentKey);
             if (currentKey.startsWith(key))
                 result.append(settings.value(currentKey));
         }
@@ -38,16 +37,15 @@ QStringList LauncherSettings::values(const QString &key, Qt::MatchFlags flags)
 QStringList LauncherSettings::subKeys(const QString &key)
 {
     QMap<QString, QString> settings = SettingsBase::getSettings();
-    QStringList keys = settings.keys();
+    QStringList keys = settings.uniqueKeys();
 
     QRegExp keyRe("(.+)/");
 
     QStringList result;
 
     foreach (const QString &currentKey, keys) {
-        qDebug() << "key is: " << currentKey;
+
         if (keyRe.indexIn(currentKey) != -1) {
-            qDebug() << "text: " <<  keyRe.cap(1) << keyRe.cap(2);
 
             QString prefixedKey = keyRe.cap(1);
             if(prefixedKey.startsWith(key)) {
@@ -55,16 +53,11 @@ QStringList LauncherSettings::subKeys(const QString &key)
                 QString subKey = prefixedKey.remove(key);
                 if (!subKey.isEmpty())
                     result.append(subKey);
-                //qDebug() <<  keyRe.cap(2).simplified();
             }
-        } else {
-            qDebug() << "no match";
         }
     }
 
     result.removeDuplicates();
-    qDebug() << result;
-
     return result;
 }
 
@@ -75,8 +68,10 @@ bool LauncherSettings::writeFile(QTextStream &stream)
     QMap<QString, QString> settings = SettingsBase::getSettings();
 
     QMapIterator<QString, QString> i(settings);
-    while (i.hasNext()) {
-        i.next();
+    i.toBack();
+
+    while (i.hasPrevious()) {
+        i.previous();
 
         QString prefix;
         QString key;

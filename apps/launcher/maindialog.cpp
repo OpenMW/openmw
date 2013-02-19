@@ -206,8 +206,6 @@ void MainDialog::saveSettings()
 
     mLauncherSettings.setValue(QString("General/MainWindow/posx"), posX);
     mLauncherSettings.setValue(QString("General/MainWindow/posy"), posY);
-
-    qDebug() << "size: " << width << height;
 }
 
 void MainDialog::writeSettings()

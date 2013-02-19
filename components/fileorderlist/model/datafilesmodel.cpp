@@ -229,10 +229,29 @@ bool lessThanEsmFile(const EsmFile *e1, const EsmFile *e2)
     return e1->fileName().toLower() < e2->fileName().toLower();
 }
 
+bool lessThanDate(const EsmFile *e1, const EsmFile *e2)
+{
+    if (e1->modified().toString(Qt::ISODate) < e2->modified().toString(Qt::ISODate)) {
+        return true;
+    } else {
+        return false;
+    }
+//    if (!e1->fileName().endsWith(".esm") && e2->fileName().endsWith(".esm"))
+//        return false;
+
+//    return e1->fileName().toLower() < e2->fileName().toLower();
+}
+
 void DataFilesModel::sort(int column, Qt::SortOrder order)
 {
     emit layoutAboutToBeChanged();
-    qSort(mFiles.begin(), mFiles.end(), lessThanEsmFile);
+
+    if (column == 3) {
+        qSort(mFiles.begin(), mFiles.end(), lessThanDate);
+    } else {
+        qSort(mFiles.begin(), mFiles.end(), lessThanEsmFile);
+    }
+
     emit layoutChanged();
 }
 

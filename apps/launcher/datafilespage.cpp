@@ -9,6 +9,8 @@
 #include <components/fileorderlist/utils/lineedit.hpp>
 #include <components/fileorderlist/utils/naturalsort.hpp>
 
+#include "model/pluginsproxymodel.hpp"
+
 #include "settings/gamesettings.hpp"
 #include "settings/launchersettings.hpp"
 
@@ -63,7 +65,7 @@ DataFilesPage::DataFilesPage(Files::ConfigurationManager &cfg, GameSettings &gam
     mMastersProxyModel->setFilterCaseSensitivity(Qt::CaseInsensitive);
     mMastersProxyModel->setSourceModel(mDataFilesModel);
 
-    mPluginsProxyModel = new QSortFilterProxyModel();
+    mPluginsProxyModel = new PluginsProxyModel();
     mPluginsProxyModel->setFilterRegExp(QString("^.*\\.esp"));
     mPluginsProxyModel->setFilterCaseSensitivity(Qt::CaseInsensitive);
     mPluginsProxyModel->setSourceModel(mDataFilesModel);
@@ -97,6 +99,7 @@ DataFilesPage::DataFilesPage(Files::ConfigurationManager &cfg, GameSettings &gam
     mMastersTable = new QTableView(this);
     mMastersTable->setModel(mMastersProxyModel);
     mMastersTable->setObjectName("MastersTable");
+    mMastersTable->setSortingEnabled(false);
     mMastersTable->setSelectionBehavior(QAbstractItemView::SelectRows);
     mMastersTable->setSelectionMode(QAbstractItemView::SingleSelection);
     mMastersTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
@@ -108,19 +111,12 @@ DataFilesPage::DataFilesPage(Files::ConfigurationManager &cfg, GameSettings &gam
     mMastersTable->verticalHeader()->setDefaultSectionSize(height);
     mMastersTable->verticalHeader()->setResizeMode(QHeaderView::Fixed);
     mMastersTable->verticalHeader()->hide();
-    mMastersTable->setColumnHidden(1, true);
-    mMastersTable->setColumnHidden(2, true);
-    mMastersTable->setColumnHidden(3, true);
-    mMastersTable->setColumnHidden(4, true);
-    mMastersTable->setColumnHidden(5, true);
-    mMastersTable->setColumnHidden(6, true);
-    mMastersTable->setColumnHidden(7, true);
-    mMastersTable->setColumnHidden(8, true);
 
     mPluginsTable = new QTableView(this);
     mPluginsTable->setModel(mFilterProxyModel);
     mPluginsTable->setObjectName("PluginsTable");
     mPluginsTable->setContextMenuPolicy(Qt::CustomContextMenu);
+    mPluginsTable->setSortingEnabled(false);
     mPluginsTable->setSelectionBehavior(QAbstractItemView::SelectRows);
     mPluginsTable->setSelectionMode(QAbstractItemView::SingleSelection);
     mPluginsTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
@@ -131,14 +127,6 @@ DataFilesPage::DataFilesPage(Files::ConfigurationManager &cfg, GameSettings &gam
 
     mPluginsTable->verticalHeader()->setDefaultSectionSize(height);
     mPluginsTable->verticalHeader()->setResizeMode(QHeaderView::Fixed);
-    mPluginsTable->setColumnHidden(1, true);
-    mPluginsTable->setColumnHidden(2, true);
-    mPluginsTable->setColumnHidden(3, true);
-    mPluginsTable->setColumnHidden(4, true);
-    mPluginsTable->setColumnHidden(5, true);
-    mPluginsTable->setColumnHidden(6, true);
-    mPluginsTable->setColumnHidden(7, true);
-    mPluginsTable->setColumnHidden(8, true);
 
     // Add both tables to a splitter
     mSplitter = new QSplitter(this);
@@ -185,11 +173,10 @@ DataFilesPage::DataFilesPage(Files::ConfigurationManager &cfg, GameSettings &gam
     connect(mMastersTable, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(setCheckState(QModelIndex)));
 
     connect(mPluginsTable, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(showContextMenu(QPoint)));
+
+    connect(mDataFilesModel, SIGNAL(layoutChanged()), this, SLOT(updateViews()));
     
     connect(filterLineEdit, SIGNAL(textChanged(QString)), this, SLOT(filterChanged(QString)));
-
-    connect(mProfilesComboBox, SIGNAL(profileRenamed(QString,QString)), this, SLOT(profileRenamed(QString,QString)));
-    connect(mProfilesComboBox, SIGNAL(profileChanged(QString,QString)), this, SLOT(profileChanged(QString,QString)));
 
     connect(mSplitter, SIGNAL(splitterMoved(int,int)), this, SLOT(updateSplitter()));
 
@@ -250,9 +237,13 @@ void DataFilesPage::setupDataFiles()
         mDataFilesModel->addFiles(dataLocal);
     }
 
+    // Sort by date accessed for now
+    mDataFilesModel->sort(3);
+
     QStringList profiles = mLauncherSettings.subKeys(QString("Profiles/"));
     QString profile = mLauncherSettings.value(QString("Profiles/CurrentProfile"));
 
+    mProfilesComboBox->setCurrentIndex(-1);
     mProfilesComboBox->addItems(profiles);
 
     // Add the current profile if empty
@@ -262,11 +253,17 @@ void DataFilesPage::setupDataFiles()
     if (mProfilesComboBox->findText(QString("Default")) == -1)
         mProfilesComboBox->addItem(QString("Default"));
 
-    if (profile.isEmpty()) {
+
+    if (profile.isEmpty() || profile == QLatin1String("Default")) {
         mProfilesComboBox->setCurrentIndex(mProfilesComboBox->findText(QString("Default")));
     } else {
+        mProfilesComboBox->setEditEnabled(true);
         mProfilesComboBox->setCurrentIndex(mProfilesComboBox->findText(profile));
     }
+
+    // We do this here to prevent deletion of profiles when initializing the combobox
+    connect(mProfilesComboBox, SIGNAL(profileRenamed(QString,QString)), this, SLOT(profileRenamed(QString,QString)));
+    connect(mProfilesComboBox, SIGNAL(profileChanged(QString,QString)), this, SLOT(profileChanged(QString,QString)));
 
     loadSettings();
 
@@ -301,10 +298,8 @@ void DataFilesPage::saveSettings()
 {
     QString profile = mLauncherSettings.value(QString("Profiles/CurrentProfile"));
 
-    if (profile.isEmpty()) {
-        profile = mProfilesComboBox->currentText();
-        mLauncherSettings.setValue(QString("Profiles/CurrentProfile"), profile);
-    }
+    if (profile.isEmpty())
+        return;
 
     mLauncherSettings.remove(QString("Profiles/") + profile + QString("/master"));
     mLauncherSettings.remove(QString("Profiles/") + profile + QString("/plugin"));
@@ -358,6 +353,28 @@ void DataFilesPage::updateSplitter()
 
     mLauncherSettings.setValue(QString("General/MastersTable/width"), QString::number(sizes.at(0)));
     mLauncherSettings.setValue(QString("General/PluginsTable/width"), QString::number(sizes.at(1)));
+}
+
+void DataFilesPage::updateViews()
+{
+    // Ensure the columns are hidden because sort() re-enables them
+    mMastersTable->setColumnHidden(1, true);
+    mMastersTable->setColumnHidden(2, true);
+    mMastersTable->setColumnHidden(3, true);
+    mMastersTable->setColumnHidden(4, true);
+    mMastersTable->setColumnHidden(5, true);
+    mMastersTable->setColumnHidden(6, true);
+    mMastersTable->setColumnHidden(7, true);
+    mMastersTable->setColumnHidden(8, true);
+
+    mPluginsTable->setColumnHidden(1, true);
+    mPluginsTable->setColumnHidden(2, true);
+    mPluginsTable->setColumnHidden(3, true);
+    mPluginsTable->setColumnHidden(4, true);
+    mPluginsTable->setColumnHidden(5, true);
+    mPluginsTable->setColumnHidden(6, true);
+    mPluginsTable->setColumnHidden(7, true);
+    mPluginsTable->setColumnHidden(8, true);
 }
 
 void DataFilesPage::deleteProfile()
@@ -441,7 +458,7 @@ void DataFilesPage::uncheck()
 
 void DataFilesPage::refresh()
 {
-    mDataFilesModel->sort(0);
+//    mDataFilesModel->sort(0);
 
     // Refresh the plugins table
     mPluginsTable->scrollToTop();
@@ -512,7 +529,6 @@ void DataFilesPage::profileChanged(const QString &previous, const QString &curre
     saveSettings();
     mLauncherSettings.setValue(QString("Profiles/CurrentProfile"), current);
 
-    mDataFilesModel->uncheckAll();
     loadSettings();
 }
 
@@ -532,7 +548,6 @@ void DataFilesPage::profileRenamed(const QString &previous, const QString &curre
     // Remove the profile from the combobox
     mProfilesComboBox->removeItem(mProfilesComboBox->findText(previous));
 
-    mDataFilesModel->uncheckAll();
     loadSettings();
 
 }

@@ -21,8 +21,6 @@ GameSettings::~GameSettings()
 
 void GameSettings::validatePaths()
 {
-    qDebug() << "validate paths!";
-
     if (mSettings.isEmpty())
         return;
 
@@ -35,9 +33,6 @@ void GameSettings::validatePaths()
 
     // Parse the data dirs to convert the tokenized paths
     mCfgMgr.processPaths(dataDirs);
-
-//    // Replace the existing data paths with valid untokenized ones
-//    mSettings.remove(QString("data"));
     mDataDirs.clear();
 
     for (Files::PathContainer::iterator it = dataDirs.begin(); it != dataDirs.end(); ++it) {
@@ -59,7 +54,6 @@ void GameSettings::validatePaths()
     dataDirs.push_back(Files::PathContainer::value_type(local.toStdString()));
 
     mCfgMgr.processPaths(dataDirs);
-//    mSettings.remove(QString("data-local"));
 
     if (!dataDirs.empty()) {
         QString path = QString::fromStdString(dataDirs.front().string());
@@ -92,23 +86,21 @@ bool GameSettings::readFile(QTextStream &stream)
         if (line.isEmpty() || line.startsWith("#"))
             continue;
 
-        qDebug() << "line: " << line;
         if (keyRe.indexIn(line) != -1) {
 
             QString key = keyRe.cap(1).simplified();
             QString value = keyRe.cap(2).simplified();
 
-            qDebug() << "key: " << key;
-            // There can be multiple data keys
-            if (key == QLatin1String("data")) {
+            // There can be multiple keys
+            if (key == QLatin1String("data") ||
+                    key == QLatin1String("master") ||
+                    key == QLatin1String("plugin"))
+            {
                 // Remove keys from previous config and overwrite them
                 mSettings.remove(key);
                 QStringList values = cache.values(key);
-                if (!values.contains(value)) {
-                    // Do not insert duplicate values
-                    qDebug() << "values does not contain: " << value << values;
+                if (!values.contains(value)) // Do not insert duplicate values
                     cache.insertMulti(key, value);
-                }
             } else {
                 cache.insert(key, value);
             }
@@ -137,23 +129,42 @@ bool GameSettings::readFile(QTextStream &stream)
     // Merge the changed keys with those which didn't
     mSettings.unite(cache);
     validatePaths();
-    qDebug() << mSettings;
+
     return true;
 }
 
 bool GameSettings::writeFile(QTextStream &stream)
 {
+    // Iterate in reverse order to preserve insertion order
     QMapIterator<QString, QString> i(mSettings);
-    while (i.hasNext()) {
-        i.next();
+    i.toBack();
 
-        // Quote values with spaces
-        if (i.value().contains(" ")) {
-            stream << i.key() << "=\"" << i.value() << "\"\n";
-        } else {
-            stream << i.key() << "=" << i.value() << "\n";
+    while (i.hasPrevious()) {
+        i.previous();
+
+        if (i.key() == QLatin1String("master") || i.key() == QLatin1String("plugin"))
+            continue;
+
+        // Quote paths with spaces
+        if (i.key() == QLatin1String("data") || i.key() == QLatin1String("data")) {
+            if (i.value().contains(" ")) {
+                stream << i.key() << "=\"" << i.value() << "\"\n";
+                continue;
+            }
         }
 
+        stream << i.key() << "=" << i.value() << "\n";
+
+    }
+
+    QStringList masters = mSettings.values(QString("master"));
+    for (int i = masters.count(); i--;) {
+        stream << "master=" << masters.at(i) << "\n";
+    }
+
+    QStringList plugins = mSettings.values(QString("plugin"));
+    for (int i = plugins.count(); i--;) {
+        stream << "plugin=" << plugins.at(i) << "\n";
     }
 
     return true;

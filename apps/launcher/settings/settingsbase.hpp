@@ -75,7 +75,6 @@ public:
 
                 QStringList values = mCache.values(key);
                 if (!values.contains(value)) {
-                    // QMap will replace the value if key exists, QMultiMap creates a new one
                     mCache.insertMulti(key, value);
                 }
             }
@@ -96,7 +95,6 @@ public:
 
         // Merge the changed keys with those which didn't
         mSettings.unite(mCache);
-        qDebug() << mSettings;
         return true;
     }
 
