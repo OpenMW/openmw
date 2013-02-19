@@ -11,6 +11,7 @@ set(LAUNCHER
     settings/graphicssettings.cpp
     settings/launchersettings.cpp
 
+    utils/checkablemessagebox.cpp
     utils/comboboxlineedit.cpp
     utils/profilescombobox.cpp
     utils/textinputdialog.cpp
@@ -31,7 +32,8 @@ set(LAUNCHER_HEADER
     settings/launchersettings.hpp
     settings/settingsbase.hpp
 
-    utils/comboboxlineedit.cpp
+    utils/checkablemessagebox.hpp
+    utils/comboboxlineedit.hpp
     utils/profilescombobox.hpp
     utils/textinputdialog.hpp
 )
@@ -45,6 +47,7 @@ set(LAUNCHER_HEADER_MOC
 
     model/pluginsproxymodel.hpp
 
+    utils/checkablemessagebox.hpp
     utils/comboboxlineedit.hpp
     utils/profilescombobox.hpp
     utils/textinputdialog.hpp
