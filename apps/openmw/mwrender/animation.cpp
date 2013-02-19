@@ -284,12 +284,32 @@ void Animation::play(const std::string &groupname, const std::string &start, boo
 
                     if(track && track->getNumKeyFrames() > 1)
                     {
-                        const Ogre::TransformKeyFrame *startkf, *endkf;
-                        startkf = static_cast<const Ogre::TransformKeyFrame*>(track->getKeyFrame(0));
-                        endkf = static_cast<const Ogre::TransformKeyFrame*>(track->getKeyFrame(track->getNumKeyFrames() - 1));
+                        float loopstarttime = 0.0f;
+                        float loopstoptime = mCurrentAnim->getLength();
+                        NifOgre::TextKeyMap::const_iterator keyiter = mCurrentKeys->begin();
+                        while(keyiter != mCurrentKeys->end())
+                        {
+                            if(keyiter->second == "loop start")
+                                loopstarttime = keyiter->first;
+                            else if(keyiter->second == "loop stop")
+                            {
+                                loopstoptime = keyiter->first;
+                                break;
+                            }
+                            keyiter++;
+                        }
 
-                        mAnimVelocity = startkf->getTranslate().distance(endkf->getTranslate()) /
-                                        mCurrentAnim->getLength();
+                        if(loopstoptime > loopstarttime)
+                        {
+                            Ogre::TransformKeyFrame startkf(0, loopstarttime);
+                            Ogre::TransformKeyFrame endkf(0, loopstoptime);
+
+                            track->getInterpolatedKeyFrame(mCurrentAnim->_getTimeIndex(loopstarttime), &startkf);
+                            track->getInterpolatedKeyFrame(mCurrentAnim->_getTimeIndex(loopstoptime), &endkf);
+
+                            mAnimVelocity = startkf.getTranslate().distance(endkf.getTranslate()) /
+                                            (loopstoptime-loopstarttime);
+                        }
                     }
                 }
 
