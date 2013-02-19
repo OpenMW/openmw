@@ -228,8 +228,8 @@ Ogre::Vector3 Animation::updatePosition(float time)
         posdiff = (mNonAccumRoot->getPosition() - mLastPosition) * mAccumulate;
 
         /* Translate the accumulation root back to compensate for the move. */
-        mAccumRoot->translate(-posdiff);
         mLastPosition += posdiff;
+        mAccumRoot->setPosition(-mLastPosition);
     }
     return posdiff;
 }
@@ -247,12 +247,24 @@ void Animation::reset(const std::string &marker)
         mNextKey = mCurrentKeys->begin();
         mCurrentTime = 0.0f;
     }
-    applyAnimation(mCurrentAnim, mCurrentTime, mEntityList.mSkelBase->getSkeleton());
 
     if(mNonAccumRoot)
     {
-        mLastPosition = mNonAccumRoot->getPosition() * mAccumulate;
-        mAccumRoot->setPosition(-mLastPosition);
+        const Ogre::NodeAnimationTrack *track = 0;
+        Ogre::Animation::NodeTrackIterator trackiter = mCurrentAnim->getNodeTrackIterator();
+        while(!track && trackiter.hasMoreElements())
+        {
+            const Ogre::NodeAnimationTrack *cur = trackiter.getNext();
+            if(cur->getAssociatedNode()->getName() == mNonAccumRoot->getName())
+                track = cur;
+        }
+
+        if(track)
+        {
+            Ogre::TransformKeyFrame kf(0, mCurrentTime);
+            track->getInterpolatedKeyFrame(mCurrentAnim->_getTimeIndex(mCurrentTime), &kf);
+            mLastPosition = kf.getTranslate() * mAccumulate;
+        }
     }
 }
 
