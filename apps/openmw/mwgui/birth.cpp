@@ -48,7 +48,6 @@ BirthDialog::BirthDialog(MWBase::WindowManager& parWindowManager)
     getWidget(okButton, "OKButton");
     okButton->setCaption(mWindowManager.getGameSettingString("sOK", ""));
     okButton->eventMouseButtonClick += MyGUI::newDelegate(this, &BirthDialog::onOkClicked);
-    okButton->setEnabled(false);
 
     updateBirths();
     updateSpells();
@@ -85,7 +84,6 @@ void BirthDialog::setBirthId(const std::string &birthId)
             mBirthList->setIndexSelected(i);
             MyGUI::ButtonPtr okButton;
             getWidget(okButton, "OKButton");
-            okButton->setEnabled(true);
             break;
         }
     }
@@ -114,7 +112,6 @@ void BirthDialog::onSelectBirth(MyGUI::ListBox* _sender, size_t _index)
 
     MyGUI::ButtonPtr okButton;
     getWidget(okButton, "OKButton");
-    okButton->setEnabled(true);
 
     const std::string *birthId = mBirthList->getItemDataAt<std::string>(_index);
     if (boost::iequals(mCurrentBirthId, *birthId))
@@ -133,8 +130,6 @@ void BirthDialog::updateBirths()
     const MWWorld::Store<ESM::BirthSign> &signs =
         MWBase::Environment::get().getWorld()->getStore().get<ESM::BirthSign>();
 
-    int index = 0;
-
     // sort by name
     std::vector < std::pair<std::string, const ESM::BirthSign*> > birthSigns;
 
@@ -145,12 +140,20 @@ void BirthDialog::updateBirths()
     }
     std::sort(birthSigns.begin(), birthSigns.end(), sortBirthSigns);
 
-    for (std::vector < std::pair<std::string, const ESM::BirthSign*> >::const_iterator it2 = birthSigns.begin(); it2 != birthSigns.end(); ++it2)
+    int index = 0;
+    for (std::vector<std::pair<std::string, const ESM::BirthSign*> >::const_iterator it2 = birthSigns.begin();
+         it2 != birthSigns.end(); ++it2, ++index)
     {
         mBirthList->addItem(it2->second->mName, it2->first);
-        if (boost::iequals(it2->first, mCurrentBirthId))
+        if (mCurrentBirthId.empty())
+        {
             mBirthList->setIndexSelected(index);
-        ++index;
+            mCurrentBirthId = it2->first;
+        }
+        else if (boost::iequals(it2->first, mCurrentBirthId))
+        {
+            mBirthList->setIndexSelected(index);
+        }
     }
 }
 

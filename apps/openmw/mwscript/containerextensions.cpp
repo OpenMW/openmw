@@ -21,6 +21,7 @@
 #include "../mwworld/containerstore.hpp"
 #include "../mwworld/actionequip.hpp"
 #include "../mwworld/inventorystore.hpp"
+#include "../mwworld/player.hpp"
 
 #include "interpretercontext.hpp"
 #include "ref.hpp"
@@ -47,6 +48,10 @@ namespace MWScript
                     if (count<0)
                         throw std::runtime_error ("second argument for AddItem must be non-negative");
 
+                    // no-op
+                    if (count == 0)
+                        return;
+
                     MWWorld::ManualRef ref (MWBase::Environment::get().getWorld()->getStore(), item);
 
                     ref.getPtr().getRefData().setCount (count);
@@ -60,6 +65,26 @@ namespace MWScript
                     }
 
                     MWWorld::Class::get (ptr).getContainerStore (ptr).add (ref.getPtr());
+
+                    // Spawn a messagebox (only for items added to player's inventory)
+                    if (ptr == MWBase::Environment::get().getWorld ()->getPlayer ().getPlayer())
+                    {
+                        // The two GMST entries below expand to strings informing the player of what, and how many of it has been added to their inventory
+                        std::string msgBox;
+                        std::string itemName = MWWorld::Class::get(ref.getPtr()).getName(ref.getPtr());
+                        if (count == 1)
+                        {
+                            msgBox = MyGUI::LanguageManager::getInstance().replaceTags("#{sNotifyMessage60}");
+                            msgBox = boost::str(boost::format(msgBox) % itemName);
+                        }
+                        else
+                        {
+                            msgBox = MyGUI::LanguageManager::getInstance().replaceTags("#{sNotifyMessage61}");
+                            msgBox = boost::str(boost::format(msgBox) % count % itemName);
+                        }
+
+                        MWBase::Environment::get().getWindowManager()->messageBox(msgBox, std::vector<std::string>());
+                    }
                 }
         };
 
@@ -101,13 +126,19 @@ namespace MWScript
 
                     Interpreter::Type_Integer count = runtime[0].mInteger;
                     runtime.pop();
-                    
+
                     if (count<0)
                         throw std::runtime_error ("second argument for RemoveItem must be non-negative");
+
+                    // no-op
+                    if (count == 0)
+                        return;
 
                     MWWorld::ContainerStore& store = MWWorld::Class::get (ptr).getContainerStore (ptr);
                     
                     std::string itemName = "";
+
+                    // originalCount holds the total number of items to remove, count holds the remaining number of items to remove
                     Interpreter::Type_Integer originalCount = count;
 
                     for (MWWorld::ContainerStoreIterator iter (store.begin()); iter!=store.end() && count;
@@ -130,28 +161,26 @@ namespace MWScript
                         }
                     }
                   
-                    /* The two GMST entries below expand to strings informing the player of what, and how many of it has been removed from their inventory */
-                    std::string msgBox;
-                    if(originalCount - count > 1)
+                    // Spawn a messagebox (only for items added to player's inventory)
+                    if (ptr == MWBase::Environment::get().getWorld ()->getPlayer ().getPlayer())
                     {
-                        msgBox = MyGUI::LanguageManager::getInstance().replaceTags("#{sNotifyMessage63}");
-                        std::stringstream temp;
-                        temp << boost::format(msgBox) % (originalCount - count) % itemName;
-                        msgBox = temp.str();
-                    }
-                    else
-                    {
-                        msgBox = MyGUI::LanguageManager::getInstance().replaceTags("#{sNotifyMessage62}");
-                        std::stringstream temp;
-                        temp << boost::format(msgBox) % itemName;
-                        msgBox = temp.str();
-                    }
-                    
-                    if(originalCount - count > 0)
-                        MWBase::Environment::get().getWindowManager()->messageBox(msgBox, std::vector<std::string>());
+                        // The two GMST entries below expand to strings informing the player of what, and how many of it has been removed from their inventory
+                        std::string msgBox;
+                        int numRemoved = (originalCount - count);
+                        if(numRemoved > 1)
+                        {
+                            msgBox = MyGUI::LanguageManager::getInstance().replaceTags("#{sNotifyMessage63}");
+                            msgBox = boost::str (boost::format(msgBox) % numRemoved % itemName);
+                        }
+                        else
+                        {
+                            msgBox = MyGUI::LanguageManager::getInstance().replaceTags("#{sNotifyMessage62}");
+                            msgBox = boost::str (boost::format(msgBox) % itemName);
+                        }
 
-                    // To be fully compatible with original Morrowind, we would need to check if
-                    // count is >= 0 here and throw an exception. But let's be tollerant instead.
+                        if (numRemoved > 0)
+                            MWBase::Environment::get().getWindowManager()->messageBox(msgBox, std::vector<std::string>());
+                    }
                 }
         };
 

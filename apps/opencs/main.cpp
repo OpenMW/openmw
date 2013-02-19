@@ -5,6 +5,7 @@
 #include <iostream>
 
 #include <QtGui/QApplication>
+#include <QIcon>
 
 class Application : public QApplication
 {
@@ -31,7 +32,10 @@ class Application : public QApplication
 
 int main(int argc, char *argv[])
 {
+    Q_INIT_RESOURCE (resources);
     Application mApplication (argc, argv);
+
+    mApplication.setWindowIcon (QIcon (":./opencs.png"));
 
     CS::Editor editor;
 

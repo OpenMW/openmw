@@ -54,6 +54,16 @@ CSMWorld::IdCollection<ESM::Global>& CSMWorld::Data::getGlobals()
     return mGlobals;
 }
 
+const CSMWorld::IdCollection<ESM::GameSetting>& CSMWorld::Data::getGmsts() const
+{
+    return mGmsts;
+}
+
+CSMWorld::IdCollection<ESM::GameSetting>& CSMWorld::Data::getGmsts()
+{
+    return mGmsts;
+}
+
 QAbstractTableModel *CSMWorld::Data::getTableModel (const UniversalId& id)
 {
     std::map<UniversalId::Type, QAbstractTableModel *>::iterator iter = mModelIndex.find (id.getType());
@@ -72,7 +82,11 @@ void CSMWorld::Data::merge()
 void CSMWorld::Data::loadFile (const boost::filesystem::path& path, bool base)
 {
     ESM::ESMReader reader;
-    /// \todo set encoder
+
+    /// \todo set encoding properly, once config implementation has been fixed.
+    ToUTF8::Utf8Encoder encoder (ToUTF8::calculateEncoding ("win1252"));
+    reader.setEncoder (&encoder);
+
     reader.open (path.string());
 
     // Note: We do not need to send update signals here, because at this point the model is not connected

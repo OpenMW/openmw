@@ -47,7 +47,7 @@ namespace ToUTF8
             void copyFromArray2(const char*& chp, char* &out);
 
             std::vector<char> mOutput;
-            char* translationArray;
+            signed char* translationArray;
     };
 }
 
