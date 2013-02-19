@@ -322,6 +322,8 @@ namespace MWClass
     {
         const MWBase::World *world = MWBase::Environment::get().getWorld();
         const CustomData *npcdata = static_cast<const CustomData*>(ptr.getRefData().getCustomData());
+        const MWMechanics::MagicEffects &mageffects = npcdata->mCreatureStats.getMagicEffects();
+
         const float normalizedEncumbrance = Npc::getEncumbrance(ptr) / Npc::getCapacity(ptr);
 
         float walkSpeed = fMinWalkSpeed->getFloat() + 0.01f*npcdata->mCreatureStats.getAttribute(ESM::Attribute::Speed).getModified()*
@@ -330,16 +332,17 @@ namespace MWClass
         walkSpeed = std::max(0.0f, walkSpeed);
         if(Npc::getStance(ptr, Sneak, false))
             walkSpeed *= fSneakSpeedMultiplier->getFloat();
+
         float runSpeed = walkSpeed*(0.01f * npcdata->mNpcStats.getSkill(ESM::Skill::Athletics).getModified() *
                                     fAthleticsRunBonus->getFloat() + fBaseRunMultiplier->getFloat());
 
         float moveSpeed;
-        if(normalizedEncumbrance > 1.0f)
+        if(normalizedEncumbrance >= 1.0f)
             moveSpeed = 0.0f;
         else if(world->isFlying(ptr))
         {
             float flySpeed = 0.01f*(npcdata->mCreatureStats.getAttribute(ESM::Attribute::Speed).getModified() +
-                                    0.0f/*levitationBonus*/);
+                                    mageffects.get(MWMechanics::EffectKey(10)).mMagnitude/*levitate*/);
             flySpeed = fMinFlySpeed->getFloat() + flySpeed*(fMaxFlySpeed->getFloat() - fMinFlySpeed->getFloat());
             flySpeed *= 1.0f - fEncumberedMoveEffect->getFloat() * normalizedEncumbrance;
             flySpeed = std::max(0.0f, flySpeed);
@@ -350,7 +353,7 @@ namespace MWClass
             float swimSpeed = walkSpeed;
             if(Npc::getStance(ptr, Run, false))
                 swimSpeed = runSpeed;
-            swimSpeed *= 1.0f + 0.01f * 0.0f/*swiftSwimBonus*/;
+            swimSpeed *= 1.0f + 0.01f * mageffects.get(MWMechanics::EffectKey(1)).mMagnitude/*swift swim*/;
             swimSpeed *= fSwimRunBase->getFloat() + 0.01f*npcdata->mNpcStats.getSkill(ESM::Skill::Athletics).getModified()*
                                                     fSwimRunAthleticsMult->getFloat();
             moveSpeed = swimSpeed;
