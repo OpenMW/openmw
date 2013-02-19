@@ -55,12 +55,19 @@ namespace Physic
     }
 
 
+    void PhysicActor::setPosition(const Ogre::Vector3 &pos)
+    {
+        if(pos != getPosition())
+            mEngine->adjustRigidBody(mBody, pos, getRotation(), mBoxScaledTranslation, mBoxRotation);
+    }
+
     void PhysicActor::setRotation(const Ogre::Quaternion &quat)
     {
         if(!quat.equals(getRotation(), Ogre::Radian(0))){
             mEngine->adjustRigidBody(mBody, getPosition(), quat, mBoxScaledTranslation, mBoxRotation);
         }
     }
+
 
     Ogre::Vector3 PhysicActor::getPosition()
     {

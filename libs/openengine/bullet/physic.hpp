@@ -69,6 +69,8 @@ namespace Physic
 
         ~PhysicActor();
 
+        void setPosition(const Ogre::Vector3 &pos);
+
         /**
          * This adjusts the rotation of a PhysicActor
          * If we have any problems with this (getting stuck in pmove) we should change it 

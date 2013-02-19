@@ -414,6 +414,10 @@ namespace MWWorld
                 mEngine->boxAdjustExternal(handleToMesh[handle], body, node->getScale().x, position, node->getOrientation());
             }
         }
+        else if(OEngine::Physic::PhysicActor *physact = mEngine->getCharacter(handle))
+        {
+            physact->setPosition(position);
+        }
     }
 
     void PhysicsSystem::rotateObject (const Ptr& ptr)
