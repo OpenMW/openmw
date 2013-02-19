@@ -76,6 +76,8 @@ public:
 
     void setSpeed(float speed);
 
+    void setLooping(bool loop);
+
     void play(const std::string &groupname, const std::string &start, bool loop);
     virtual Ogre::Vector3 runAnimation(float timepassed);
 };

@@ -169,6 +169,11 @@ void Animation::setSpeed(float speed)
         mAnimSpeedMult = speed / mAnimVelocity;
 }
 
+void Animation::setLooping(bool loop)
+{
+    mLooping = loop;
+}
+
 
 void Animation::applyAnimation(const Ogre::Animation *anim, float time, Ogre::SkeletonInstance *skel)
 {
