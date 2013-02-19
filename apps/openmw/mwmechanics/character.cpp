@@ -185,7 +185,7 @@ Ogre::Vector3 CharacterController::update(float duration)
         bool isrunning = cls.getStance(mPtr, MWWorld::Class::Run);
         speed = cls.getSpeed(mPtr);
 
-        if(std::abs(vec.x/2.0f) > std::abs(vec.y))
+        if(std::abs(vec.x/2.0f) > std::abs(vec.y) && speed > 0.0f)
         {
             if(vec.x > 0.0f)
                 setState(isrunning ?
@@ -198,7 +198,7 @@ Ogre::Vector3 CharacterController::update(float duration)
             // Apply any forward/backward movement manually
             movement.y += vec.y * (speed*duration);
         }
-        else if(vec.y != 0.0f)
+        else if(vec.y != 0.0f && speed > 0.0f)
         {
             if(vec.y > 0.0f)
                 setState(isrunning ?
