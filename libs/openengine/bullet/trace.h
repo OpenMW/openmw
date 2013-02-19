@@ -19,9 +19,6 @@ struct traceResults
     Ogre::Vector3 planenormal;
 
     float fraction;
-
-    bool allsolid;
-    bool startsolid;
 };
 
 void newtrace(traceResults* const results, const Ogre::Vector3& start, const Ogre::Vector3& end, const Ogre::Vector3& BBExtents, const float rotation, bool isInterior, OEngine::Physic::PhysicEngine* enginePass);

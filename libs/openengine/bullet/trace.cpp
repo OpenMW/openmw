@@ -29,14 +29,12 @@ struct NewPhysTraceResults
     Ogre::Vector3 endPos;
     Ogre::Vector3 hitNormal;
     float fraction;
-    bool startSolid;
     //const Object* hitObj;
 };
 
-template <const traceWorldType traceType>
-static const bool NewPhysicsTrace(NewPhysTraceResults* const out, const Ogre::Vector3& start, const Ogre::Vector3& end,
-                                  const Ogre::Vector3& BBHalfExtents, const Ogre::Vector3& rotation, bool isInterior,
-                                  OEngine::Physic::PhysicEngine* enginePass)
+static bool NewPhysicsTrace(NewPhysTraceResults* const out, const Ogre::Vector3& start, const Ogre::Vector3& end,
+                            const Ogre::Vector3& BBHalfExtents, const Ogre::Vector3& rotation, bool isInterior,
+                            OEngine::Physic::PhysicEngine* enginePass)
 {
     const btVector3 btstart(start.x, start.y, start.z + BBHalfExtents.z);
     const btVector3 btend(end.x, end.y, end.z + BBHalfExtents.z);
@@ -49,7 +47,7 @@ static const bool NewPhysicsTrace(NewPhysTraceResults* const out, const Ogre::Ve
 
     btCollisionWorld::ClosestConvexResultCallback newTraceCallback(btstart, btend);
 
-    newTraceCallback.m_collisionFilterMask = (traceType == collisionWorldTrace) ? Only_Collision : Only_Pickup;
+    newTraceCallback.m_collisionFilterMask = Only_Collision;
 
     enginePass->dynamicsWorld->convexSweepTest(&newshape, from, to, newTraceCallback);
 
@@ -66,24 +64,6 @@ static const bool NewPhysicsTrace(NewPhysTraceResults* const out, const Ogre::Ve
     out->endPos.y = tracehitpos.y();
     out->endPos.z = tracehitpos.z();
 
-    // StartSolid test:
-    {
-        out->startSolid = false;
-        if(isInterior)
-        {
-            // If inside and out of the tree, we're solid
-            btVector3 aabbMin, aabbMax;
-            enginePass->broadphase->getBroadphaseAabb(aabbMin, aabbMax);
-            btVector3 point(start.x, start.y, start.z);
-            if(!TestPointAgainstAabb2(aabbMin, aabbMax, point))
-            {
-                //We're solid
-                //THIS NEEDS TO BE TURNED OFF IF WE WANT FALLING IN EXTERIORS TO WORK CORRECTLY!!!!!!!
-                //out->startSolid = true;
-            }
-        }
-    }
-
     return newTraceCallback.hasHit();
 }
 
@@ -91,15 +71,8 @@ static const bool NewPhysicsTrace(NewPhysTraceResults* const out, const Ogre::Ve
 void newtrace(traceResults* const results, const Ogre::Vector3& start, const Ogre::Vector3& end, const Ogre::Vector3& BBHalfExtents, const float rotation, bool isInterior, OEngine::Physic::PhysicEngine* enginePass)  //Traceobj was a Aedra Object
 {
     NewPhysTraceResults out;
-    const bool hasHit = NewPhysicsTrace<collisionWorldTrace>(&out, start, end, BBHalfExtents,
-                                                             Ogre::Vector3(0.0f, 0.0f, 0.0f),
-                                                             isInterior, enginePass);
-    if (out.fraction < 0.001f)
-        results->startsolid = true;
-    else
-        results->startsolid = false;
-    results->allsolid = out.startSolid;
-
+    bool hasHit = NewPhysicsTrace(&out, start, end, BBHalfExtents, Ogre::Vector3(0.0f, 0.0f, 0.0f),
+                                  isInterior, enginePass);
     if(!hasHit)
     {
         results->endpos = end;
