@@ -393,10 +393,9 @@ void Water::update(float dt, Ogre::Vector3 player)
 
     mRendering->getSkyManager ()->setGlareEnabled (!mIsUnderwater);
 
-    /// \todo player.y is the scene node position (which is above the head) and not the feet position
     //if (player.y <= mTop)
     {
-        mSimulation->addImpulse(Ogre::Vector2(player.x, player.z));
+        //mSimulation->addImpulse(Ogre::Vector2(player.x, player.z));
     }
     mSimulation->update(dt, Ogre::Vector2(player.x, player.z));
 
