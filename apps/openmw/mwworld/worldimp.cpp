@@ -1383,6 +1383,17 @@ namespace MWWorld
     }
 
     bool
+    World::isFlying(const MWWorld::Ptr &ptr) const
+    {
+        RefData &refdata = ptr.getRefData();
+        /// \todo check for levitation effects
+        const OEngine::Physic::PhysicActor *physactor = mPhysEngine->getCharacter(refdata.getHandle());
+        if(physactor && physactor->getCollisionMode())
+            return false;
+        return true;
+    }
+
+    bool
     World::isSwimming(const MWWorld::Ptr &object) const
     {
         /// \todo add check ifActor() - only actors can swim

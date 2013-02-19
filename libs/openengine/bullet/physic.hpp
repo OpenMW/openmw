@@ -78,7 +78,11 @@ namespace Physic
 
         void enableCollisions(bool collision);
 
-        bool getCollisionMode();
+        bool getCollisionMode() const
+        {
+            return collisionMode;
+        }
+
 
         /**
          * This returns the visual position of the PhysicActor (used to position a scenenode).

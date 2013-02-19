@@ -54,11 +54,6 @@ namespace Physic
         collisionMode = collision;
     }
 
-    bool PhysicActor::getCollisionMode()
-    {
-        return collisionMode;
-    }
-
 
     void PhysicActor::setRotation(const Ogre::Quaternion &quat)
     {

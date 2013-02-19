@@ -336,7 +336,7 @@ namespace MWClass
         float moveSpeed;
         if(normalizedEncumbrance > 1.0f)
             moveSpeed = 0.0f;
-        else if(0/*world->isFlying(ptr)*/)
+        else if(world->isFlying(ptr))
         {
             float flySpeed = 0.01f*(npcdata->mCreatureStats.getAttribute(ESM::Attribute::Speed).getModified() +
                                     0.0f/*levitationBonus*/);
