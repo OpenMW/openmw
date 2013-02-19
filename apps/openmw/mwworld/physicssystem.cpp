@@ -156,7 +156,7 @@ namespace MWWorld
                     //std::cout<<"angle: "<<getSlope(trace.planenormal)<<"\n";
                     if(getSlope(currentNormal) > sMaxSlope || currentNormal == lastNormal)
                     {
-                        if(!onground ||
+                        if((gravity && !onground) ||
                            !stepMove(newPosition, velocity, remainingTime, verticalRotation, halfExtents, isInterior, engine))
                         {
                             Ogre::Vector3 resultantDirection = currentNormal.crossProduct(up);
