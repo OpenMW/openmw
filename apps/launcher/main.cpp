@@ -1,4 +1,5 @@
 #include <QApplication>
+#include <QDir>
 
 #include "maindialog.hpp"
 
