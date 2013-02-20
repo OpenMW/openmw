@@ -1,9 +1,6 @@
 #include <QtGui>
 
-#include "settings/gamesettings.hpp"
-#include "settings/graphicssettings.hpp"
-#include "settings/launchersettings.hpp"
-
+#include "utils/checkablemessagebox.hpp"
 #include "utils/profilescombobox.hpp"
 
 #include "maindialog.hpp"
@@ -11,13 +8,8 @@
 #include "graphicspage.hpp"
 #include "datafilespage.hpp"
 
-MainDialog::MainDialog(GameSettings &gameSettings,
-                       GraphicsSettings &graphicsSettings,
-                       LauncherSettings &launcherSettings)
-    : mGameSettings(gameSettings)
-    , mGraphicsSettings(graphicsSettings)
-    , mLauncherSettings(launcherSettings)
-
+MainDialog::MainDialog()
+    : mGameSettings(mCfgMgr)
 {
     QWidget *centralWidget = new QWidget(this);
     setCentralWidget(centralWidget);
@@ -95,7 +87,6 @@ MainDialog::MainDialog(GameSettings &gameSettings,
     connect(buttonBox, SIGNAL(accepted()), this, SLOT(play()));
 
     createIcons();
-    createPages();
 }
 
 void MainDialog::createIcons()
@@ -161,13 +152,147 @@ void MainDialog::createPages()
 
 }
 
+bool MainDialog::showFirstRunDialog()
+{
+    CheckableMessageBox msgBox(this);
+    msgBox.setWindowTitle(tr("Morrowind installation detected"));
+
+    QIcon icon = QApplication::style()->standardIcon(QStyle::SP_MessageBoxQuestion);
+    int size = QApplication::style()->pixelMetric(QStyle::PM_MessageBoxIconSize);
+    msgBox.setIconPixmap(icon.pixmap(size, size));
+
+
+    QAbstractButton *importerButton =
+            msgBox.addButton(tr("Import"), QDialogButtonBox::AcceptRole); // ActionRole doesn't work?!
+    QAbstractButton *skipButton =
+            msgBox.addButton(tr("Skip"), QDialogButtonBox::RejectRole);
+
+    Q_UNUSED(skipButton); // Surpress compiler unused warning
+
+    msgBox.setStandardButtons(QDialogButtonBox::NoButton);
+
+    msgBox.setText(tr("<br><b>An existing Morrowind installation was detected</b><br><br> \
+                      Would you like to import settings from Morrowind.ini?<br>"));
+
+    msgBox.setCheckBoxText(tr("Include selected masters and plugins (creates a new profile)"));
+    msgBox.exec();
+
+
+    if (msgBox.clickedButton() == importerButton) {
+
+        QString iniPath;
+
+        foreach (const QString &path, mGameSettings.getDataDirs()) {
+            QDir dir(path);
+            dir.setPath(dir.canonicalPath()); // Resolve symlinks
+
+            if (!dir.cdUp())
+                continue; // Cannot move from Data Files
+
+            if (dir.exists(QString("Morrowind.ini")))
+                iniPath = dir.absoluteFilePath(QString("Morrowind.ini"));
+        }
+
+        if (iniPath.isEmpty()) {
+            QMessageBox msgBox;
+            msgBox.setWindowTitle(tr("Error reading Morrowind configuration file"));
+            msgBox.setIcon(QMessageBox::Warning);
+            msgBox.setStandardButtons(QMessageBox::Ok);
+            msgBox.setText(QObject::tr("<br><b>Could not find Morrowind.ini</b><br><br> \
+                              The problem may be due to an incomplete installation of Morrowind.<br> \
+                              Reinstalling Morrowind may resolve the problem."));
+            msgBox.exec();
+            return false;
+        }
+
+        // Create the file if it doesn't already exist, else the importer will fail
+        QString path = QString::fromStdString(mCfgMgr.getUserPath().string()) + QString("openmw.cfg");
+        QFile file(path);
+
+        if (!file.exists()) {
+            if (!file.open(QIODevice::ReadWrite)) {
+                // File cannot be created
+                QMessageBox msgBox;
+                msgBox.setWindowTitle(tr("Error writing OpenMW configuration file"));
+                msgBox.setIcon(QMessageBox::Critical);
+                msgBox.setStandardButtons(QMessageBox::Ok);
+                msgBox.setText(tr("<br><b>Could not open or create %0 for writing</b><br><br> \
+                                  Please make sure you have the right permissions \
+                                  and try again.<br>").arg(file.fileName()));
+                msgBox.exec();
+                return false;
+            }
+
+            file.close();
+        }
+
+        // Construct the arguments to run the importer
+        QStringList arguments;
+
+        if (msgBox.isChecked())
+            arguments.append(QString("-g"));
+
+        arguments.append(iniPath);
+        arguments.append(path);
+
+        if (!startProgram(QString("mwiniimport"), arguments, false))
+            return false;
+
+        // Re-read the game settings
+        mGameSettings.clear();
+
+        if (!setupGameSettings())
+            return false;
+
+        // Add a new profile
+        if (msgBox.isChecked()) {
+            qDebug() << "add a new profile";
+            mLauncherSettings.setValue(QString("Profiles/CurrentProfile"), QString("Imported"));
+
+            mLauncherSettings.remove(QString("Profiles/Imported/master"));
+            mLauncherSettings.remove(QString("Profiles/Imported/plugin"));
+
+            QStringList masters = mGameSettings.values(QString("master"));
+            QStringList plugins = mGameSettings.values(QString("plugin"));
+
+            foreach (const QString &master, masters) {
+                mLauncherSettings.setMultiValue(QString("Profiles/Imported/master"), master);
+            }
+
+            foreach (const QString &plugin, plugins) {
+                mLauncherSettings.setMultiValue(QString("Profiles/Imported/plugin"), plugin);
+            }
+        }
+
+    }
+
+    return true;
+}
 
 bool MainDialog::setup()
 {
-    // Call this so we can exit on Ogre errors before mainwindow is shown
-    if (!mGraphicsPage->setupOgre()) {
+    if (!setupLauncherSettings())
         return false;
+
+    if (!setupGameSettings())
+        return false;
+
+    if (!setupGraphicsSettings())
+        return false;
+
+    // Check if we need to show the importer
+    if (mLauncherSettings.value(QString("General/firstrun"), QString("true")) == QLatin1String("true"))
+    {
+        if (!showFirstRunDialog())
+            return false;
     }
+
+    // Now create the pages as they need the settings
+    createPages();
+
+    // Call this so we can exit on Ogre errors before mainwindow is shown
+    if (!mGraphicsPage->setupOgre())
+        return false;
 
     loadSettings();
     return true;
@@ -179,6 +304,164 @@ void MainDialog::changePage(QListWidgetItem *current, QListWidgetItem *previous)
         current = previous;
 
     mPagesWidget->setCurrentIndex(mIconWidget->row(current));
+}
+
+bool MainDialog::setupLauncherSettings()
+{
+    QString userPath = QString::fromStdString(mCfgMgr.getUserPath().string());
+
+    QStringList paths;
+    paths.append(QString("launcher.cfg"));
+    paths.append(userPath + QString("launcher.cfg"));
+
+    foreach (const QString &path, paths) {
+        qDebug() << "Loading: " << path;
+        QFile file(path);
+        if (file.exists()) {
+            if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+                QMessageBox msgBox;
+                msgBox.setWindowTitle(tr("Error opening OpenMW configuration file"));
+                msgBox.setIcon(QMessageBox::Critical);
+                msgBox.setStandardButtons(QMessageBox::Ok);
+                msgBox.setText(QObject::tr("<br><b>Could not open %0 for reading</b><br><br> \
+                                  Please make sure you have the right permissions \
+                                  and try again.<br>").arg(file.fileName()));
+                msgBox.exec();
+                return false;
+            }
+            QTextStream stream(&file);
+            stream.setCodec(QTextCodec::codecForName("UTF-8"));
+
+            mLauncherSettings.readFile(stream);
+        }
+        file.close();
+    }
+
+    return true;
+}
+
+bool MainDialog::setupGameSettings()
+{
+    QString userPath = QString::fromStdString(mCfgMgr.getUserPath().string());
+    QString globalPath = QString::fromStdString(mCfgMgr.getGlobalPath().string());
+
+    QStringList paths;
+    paths.append(userPath + QString("openmw.cfg"));
+    paths.append(QString("openmw.cfg"));
+    paths.append(globalPath + QString("openmw.cfg"));
+
+    foreach (const QString &path, paths) {
+        qDebug() << "Loading: " << path;
+        QFile file(path);
+        if (file.exists()) {
+            if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+                QMessageBox msgBox;
+                msgBox.setWindowTitle(tr("Error opening OpenMW configuration file"));
+                msgBox.setIcon(QMessageBox::Critical);
+                msgBox.setStandardButtons(QMessageBox::Ok);
+                msgBox.setText(QObject::tr("<br><b>Could not open %0 for reading</b><br><br> \
+                                           Please make sure you have the right permissions \
+                                           and try again.<br>").arg(file.fileName()));
+                                           msgBox.exec();
+                return false;
+            }
+            QTextStream stream(&file);
+            stream.setCodec(QTextCodec::codecForName("UTF-8"));
+
+            mGameSettings.readFile(stream);
+        }
+        file.close();
+    }
+
+    if (mGameSettings.getDataDirs().isEmpty())
+    {
+        QMessageBox msgBox;
+        msgBox.setWindowTitle(tr("Error detecting Morrowind installation"));
+        msgBox.setIcon(QMessageBox::Warning);
+        msgBox.setStandardButtons(QMessageBox::Cancel);
+        msgBox.setText(QObject::tr("<br><b>Could not find the Data Files location</b><br><br> \
+                                   The directory containing the data files was not found.<br><br> \
+                                   Press \"Browse...\" to specify the location manually.<br>"));
+
+        QAbstractButton *dirSelectButton =
+                msgBox.addButton(QObject::tr("B&rowse..."), QMessageBox::ActionRole);
+
+        msgBox.exec();
+
+        QString selectedFile;
+        if (msgBox.clickedButton() == dirSelectButton) {
+            selectedFile = QFileDialog::getOpenFileName(
+                        NULL,
+                        QObject::tr("Select master file"),
+                        QDir::currentPath(),
+                        QString(tr("Morrowind master file (*.esm)")));
+        }
+
+        if (selectedFile.isEmpty())
+            return false; // Cancel was clicked;
+
+        qDebug() << selectedFile;
+        QFileInfo info(selectedFile);
+
+        // Add the new dir to the settings file and to the data dir container
+        mGameSettings.setValue(QString("data"), info.absolutePath());
+        mGameSettings.addDataDir(info.absolutePath());
+
+    }
+
+    return true;
+}
+
+bool MainDialog::setupGraphicsSettings()
+{
+    QString userPath = QString::fromStdString(mCfgMgr.getUserPath().string());
+    QString globalPath = QString::fromStdString(mCfgMgr.getGlobalPath().string());
+
+    QFile localDefault(QString("settings-default.cfg"));
+    QFile globalDefault(globalPath + QString("settings-default.cfg"));
+
+    if (!localDefault.exists() && !globalDefault.exists()) {
+        QMessageBox msgBox;
+        msgBox.setWindowTitle(tr("Error reading OpenMW configuration file"));
+        msgBox.setIcon(QMessageBox::Critical);
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.setText(QObject::tr("<br><b>Could not find settings-default.cfg</b><br><br> \
+                                   The problem may be due to an incomplete installation of OpenMW.<br> \
+                                   Reinstalling OpenMW may resolve the problem."));
+                                   msgBox.exec();
+        return false;
+    }
+
+
+    QStringList paths;
+    paths.append(globalPath + QString("settings-default.cfg"));
+    paths.append(QString("settings-default.cfg"));
+    paths.append(userPath + QString("settings.cfg"));
+
+    foreach (const QString &path, paths) {
+        qDebug() << "Loading: " << path;
+        QFile file(path);
+        if (file.exists()) {
+            if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+                QMessageBox msgBox;
+                msgBox.setWindowTitle(tr("Error opening OpenMW configuration file"));
+                msgBox.setIcon(QMessageBox::Critical);
+                msgBox.setStandardButtons(QMessageBox::Ok);
+                msgBox.setText(QObject::tr("<br><b>Could not open %0 for reading</b><br><br> \
+                                           Please make sure you have the right permissions \
+                                           and try again.<br>").arg(file.fileName()));
+                                           msgBox.exec();
+                return false;
+            }
+            QTextStream stream(&file);
+            stream.setCodec(QTextCodec::codecForName("UTF-8"));
+
+            mGraphicsSettings.readFile(stream);
+        }
+        file.close();
+    }
+
+    return true;
 }
 
 void MainDialog::loadSettings()
@@ -206,6 +489,9 @@ void MainDialog::saveSettings()
 
     mLauncherSettings.setValue(QString("General/MainWindow/posx"), posX);
     mLauncherSettings.setValue(QString("General/MainWindow/posy"), posY);
+
+    mLauncherSettings.setValue(QString("General/firstrun"), QString("false"));
+
 }
 
 void MainDialog::writeSettings()
@@ -221,7 +507,7 @@ void MainDialog::writeSettings()
     if (!dir.exists()) {
         if (!dir.mkpath(userPath)) {
             QMessageBox msgBox;
-            msgBox.setWindowTitle("Error creating OpenMW configuration directory");
+            msgBox.setWindowTitle(tr("Error creating OpenMW configuration directory"));
             msgBox.setIcon(QMessageBox::Critical);
             msgBox.setStandardButtons(QMessageBox::Ok);
             msgBox.setText(tr("<br><b>Could not create %0</b><br><br> \
@@ -238,7 +524,7 @@ void MainDialog::writeSettings()
     if (!file.open(QIODevice::ReadWrite | QIODevice::Text | QIODevice::Truncate)) {
         // File cannot be opened or created
         QMessageBox msgBox;
-        msgBox.setWindowTitle("Error writing OpenMW configuration file");
+        msgBox.setWindowTitle(tr("Error writing OpenMW configuration file"));
         msgBox.setIcon(QMessageBox::Critical);
         msgBox.setStandardButtons(QMessageBox::Ok);
         msgBox.setText(tr("<br><b>Could not open or create %0 for writing</b><br><br> \
@@ -260,7 +546,7 @@ void MainDialog::writeSettings()
     if (!file.open(QIODevice::ReadWrite | QIODevice::Text | QIODevice::Truncate)) {
         // File cannot be opened or created
         QMessageBox msgBox;
-        msgBox.setWindowTitle("Error writing OpenMW configuration file");
+        msgBox.setWindowTitle(tr("Error writing OpenMW configuration file"));
         msgBox.setIcon(QMessageBox::Critical);
         msgBox.setStandardButtons(QMessageBox::Ok);
         msgBox.setText(tr("<br><b>Could not open or create %0 for writing</b><br><br> \
@@ -282,7 +568,7 @@ void MainDialog::writeSettings()
     if (!file.open(QIODevice::ReadWrite | QIODevice::Text | QIODevice::Truncate)) {
         // File cannot be opened or created
         QMessageBox msgBox;
-        msgBox.setWindowTitle("Error writing Launcher configuration file");
+        msgBox.setWindowTitle(tr("Error writing Launcher configuration file"));
         msgBox.setIcon(QMessageBox::Critical);
         msgBox.setStandardButtons(QMessageBox::Ok);
         msgBox.setText(tr("<br><b>Could not open or create %0 for writing</b><br><br> \
@@ -308,69 +594,108 @@ void MainDialog::closeEvent(QCloseEvent *event)
 
 void MainDialog::play()
 {
-    // First do a write of all the configs, just to be sure
-    //mDataFilesPage->writeConfig();
-    //mGraphicsPage->writeConfig();
     saveSettings();
     writeSettings();
 
+    // Launch the game detached
+    startProgram(QString("openmw"), true);
+    qApp->quit();
+}
+
+bool MainDialog::startProgram(const QString &name, const QStringList &arguments, bool detached)
+{
+    QString path = name;
 #ifdef Q_OS_WIN
-    QString game = "./openmw.exe";
-    QFile file(game);
+    path.append(QString(".exe"));
 #elif defined(Q_OS_MAC)
     QDir dir(QCoreApplication::applicationDirPath());
-    QString game = dir.absoluteFilePath("openmw");
-    QFile file(game);
-    game = "\"" + game + "\"";
+    path = dir.absoluteFilePath(name);
 #else
-    QString game = "./openmw";
-    QFile file(game);
+    path.prepend(QString("./"));
 #endif
+
+    QFile file(path);
 
     QProcess process;
     QFileInfo info(file);
 
     if (!file.exists()) {
         QMessageBox msgBox;
-        msgBox.setWindowTitle("Error starting OpenMW");
+        msgBox.setWindowTitle(tr("Error starting executable"));
         msgBox.setIcon(QMessageBox::Warning);
         msgBox.setStandardButtons(QMessageBox::Ok);
-        msgBox.setText(tr("<br><b>Could not find OpenMW</b><br><br> \
-                        The OpenMW application is not found.<br> \
-                        Please make sure OpenMW is installed correctly and try again.<br>"));
+        msgBox.setText(tr("<br><b>Could not find %1</b><br><br> \
+                        The application is not found.<br> \
+                        Please make sure OpenMW is installed correctly and try again.<br>").arg(info.fileName()));
         msgBox.exec();
 
-        return;
+        return false;
     }
 
     if (!info.isExecutable()) {
         QMessageBox msgBox;
-        msgBox.setWindowTitle("Error starting OpenMW");
+        msgBox.setWindowTitle(tr("Error starting executable"));
         msgBox.setIcon(QMessageBox::Warning);
         msgBox.setStandardButtons(QMessageBox::Ok);
-        msgBox.setText(tr("<br><b>Could not start OpenMW</b><br><br> \
-                        The OpenMW application is not executable.<br> \
-                        Please make sure you have the right permissions and try again.<br>"));
+        msgBox.setText(tr("<br><b>Could not start %1</b><br><br> \
+                        The application is not executable.<br> \
+                        Please make sure you have the right permissions and try again.<br>").arg(info.fileName()));
         msgBox.exec();
 
-        return;
+        return false;
     }
 
-    // Start the game
-    if (!process.startDetached(game)) {
-        QMessageBox msgBox;
-        msgBox.setWindowTitle("Error starting OpenMW");
-        msgBox.setIcon(QMessageBox::Critical);
-        msgBox.setStandardButtons(QMessageBox::Ok);
-        msgBox.setText(tr("<br><b>Could not start OpenMW</b><br><br> \
-                        An error occurred while starting OpenMW.<br><br> \
-                        Press \"Show Details...\" for more information.<br>"));
-        msgBox.setDetailedText(process.errorString());
-        msgBox.exec();
+    // Start the executable
+    if (detached) {
+        if (!process.startDetached(path, arguments)) {
+            QMessageBox msgBox;
+            msgBox.setWindowTitle(tr("Error starting executable"));
+            msgBox.setIcon(QMessageBox::Critical);
+            msgBox.setStandardButtons(QMessageBox::Ok);
+            msgBox.setText(tr("<br><b>Could not start %1</b><br><br> \
+                              An error occurred while starting %1.<br><br> \
+                              Press \"Show Details...\" for more information.<br>").arg(info.fileName()));
+            msgBox.setDetailedText(process.errorString());
+            msgBox.exec();
 
-        return;
+            return false;
+        }
     } else {
-        qApp->quit();
+        process.start(path, arguments);
+        if (!process.waitForFinished()) {
+            QMessageBox msgBox;
+            msgBox.setWindowTitle(tr("Error starting executable"));
+            msgBox.setIcon(QMessageBox::Critical);
+            msgBox.setStandardButtons(QMessageBox::Ok);
+            msgBox.setText(tr("<br><b>Could not start %1</b><br><br> \
+                              An error occurred while starting %1.<br><br> \
+                              Press \"Show Details...\" for more information.<br>").arg(info.fileName()));
+            msgBox.setDetailedText(process.errorString());
+            msgBox.exec();
+
+            return false;
+        }
+
+        if (process.exitCode() != 0) {
+            QString error(process.readAllStandardError());
+            error.append(tr("\nArguments:\n"));
+            error.append(arguments.join(" "));
+
+            QMessageBox msgBox;
+            msgBox.setWindowTitle(tr("Error running executable"));
+            msgBox.setIcon(QMessageBox::Critical);
+            msgBox.setStandardButtons(QMessageBox::Ok);
+            msgBox.setText(tr("<br><b>Executable %1 returned an error</b><br><br> \
+                              An error occurred while running %1.<br><br> \
+                              Press \"Show Details...\" for more information.<br>").arg(info.fileName()));
+            msgBox.setDetailedText(error);
+            msgBox.exec();
+
+            return false;
+        }
     }
+
+    return true;
+
 }
 

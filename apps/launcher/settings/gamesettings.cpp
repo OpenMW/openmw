@@ -25,6 +25,7 @@ void GameSettings::validatePaths()
         return;
 
     QStringList paths = mSettings.values(QString("data"));
+    qDebug() << "paths " << paths;
     Files::PathContainer dataDirs;
 
     foreach (const QString &path, paths) {
@@ -63,9 +64,6 @@ void GameSettings::validatePaths()
         if (dir.exists())
             mDataLocal = path;
     }
-    qDebug() << mSettings;
-
-
 }
 
 QStringList GameSettings::values(const QString &key, const QStringList &defaultValues)
@@ -91,18 +89,24 @@ bool GameSettings::readFile(QTextStream &stream)
             QString key = keyRe.cap(1).simplified();
             QString value = keyRe.cap(2).simplified();
 
-            // There can be multiple keys
-            if (key == QLatin1String("data") ||
-                    key == QLatin1String("master") ||
-                    key == QLatin1String("plugin"))
-            {
-                // Remove keys from previous config and overwrite them
-                mSettings.remove(key);
-                QStringList values = cache.values(key);
-                if (!values.contains(value)) // Do not insert duplicate values
-                    cache.insertMulti(key, value);
-            } else {
-                cache.insert(key, value);
+//            // There can be multiple keys
+//            if (key == QLatin1String("data") ||
+//                    key == QLatin1String("master") ||
+//                    key == QLatin1String("plugin"))
+//            {
+//                // Remove keys from previous config and overwrite them
+//                mSettings.remove(key);
+//                QStringList values = cache.values(key);
+//                if (!values.contains(value)) // Do not insert duplicate values
+//                    cache.insertMulti(key, value);
+//            } else {
+//                cache.insert(key, value);
+//            }
+            mSettings.remove(key);
+
+            QStringList values = cache.values(key);
+            if (!values.contains(value)) {
+                cache.insertMulti(key, value);
             }
         }
     }
