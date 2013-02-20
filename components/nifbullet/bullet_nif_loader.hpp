@@ -51,19 +51,18 @@ namespace NifBullet
 class ManualBulletShapeLoader : public OEngine::Physic::BulletShapeLoader
 {
 public:
-
     ManualBulletShapeLoader():resourceGroup("General"){}
     virtual ~ManualBulletShapeLoader();
 
-    void warn(std::string msg)
+    void warn(const std::string &msg)
     {
         std::cerr << "NIFLoader: Warn:" << msg << "\n";
     }
 
-    void fail(std::string msg)
+    void fail(const std::string &msg)
     {
         std::cerr << "NIFLoader: Fail: "<< msg << std::endl;
-        assert(1);
+        abort();
     }
 
     /**
@@ -79,30 +78,25 @@ public:
     void load(const std::string &name,const std::string &group);
 
 private:
-    btQuaternion getbtQuat(Ogre::Matrix3 const &m);
-
     btVector3 getbtVector(Ogre::Vector3 const &v);
 
     /**
     *Parse a node.
     */
-    void handleNode(Nif::Node const *node, int flags,
-        const Nif::Transformation *trafo, bool hasCollisionNode,bool isCollisionNode,bool raycastingOnly);
+    void handleNode(Nif::Node const *node, int flags, bool hasCollisionNode, bool isCollisionNode, bool raycastingOnly);
 
     /**
     *Helper function
     */
-    bool hasRootCollisionNode(Nif::Node const * node);
+    bool hasRootCollisionNode(const Nif::Node *node);
 
     /**
     *convert a NiTriShape to a bullet trishape.
     */
-    void handleNiTriShape(Nif::NiTriShape const *shape, int flags,Ogre::Matrix3 parentRot,Ogre::Vector3 parentPos,float parentScales,bool raycastingOnly);
+    void handleNiTriShape(const Nif::NiTriShape *shape, int flags, const Ogre::Matrix4 &transform, bool raycastingOnly);
 
     std::string resourceName;
     std::string resourceGroup;
-
-    
 
     OEngine::Physic::BulletShape* cShape;//current shape
     btTriangleMesh *mTriMesh;
