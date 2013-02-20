@@ -12,6 +12,8 @@
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/scriptmanager.hpp"
 
+#include "../mwmechanics/creaturestats.hpp"
+
 #include "../mwrender/sky.hpp"
 #include "../mwrender/player.hpp"
 
@@ -886,12 +888,14 @@ namespace MWWorld
                 player = iter;
                 continue;
             }
-            Ogre::Vector3 vec = mPhysics->move(iter->first, iter->second, duration, !isSwimming(iter->first));
+            Ogre::Vector3 vec = mPhysics->move(iter->first, iter->second, duration,
+                                               !isSwimming(iter->first) && !isFlying(iter->first));
             moveObjectImp(iter->first, vec.x, vec.y, vec.z);
         }
         if(player != actors.end())
         {
-            Ogre::Vector3 vec = mPhysics->move(player->first, player->second, duration, !isSwimming(player->first));
+            Ogre::Vector3 vec = mPhysics->move(player->first, player->second, duration,
+                                               !isSwimming(player->first) && !isFlying(player->first));
             moveObjectImp(player->first, vec.x, vec.y, vec.z);
         }
         // the only purpose this has currently is to update the debug drawer
@@ -1386,11 +1390,15 @@ namespace MWWorld
     World::isFlying(const MWWorld::Ptr &ptr) const
     {
         RefData &refdata = ptr.getRefData();
-        /// \todo check for levitation effects
         const OEngine::Physic::PhysicActor *physactor = mPhysEngine->getCharacter(refdata.getHandle());
-        if(physactor && physactor->getCollisionMode())
-            return false;
-        return true;
+        if(!physactor || !physactor->getCollisionMode())
+            return true;
+
+        const MWWorld::Class &cls = MWWorld::Class::get(ptr);
+        if(cls.isActor() && cls.getCreatureStats(ptr).getMagicEffects().get(MWMechanics::EffectKey(10/*levitate*/)).mMagnitude > 0)
+            return true;
+
+        return false;
     }
 
     bool
