@@ -197,19 +197,41 @@ void Animation::applyAnimation(const Ogre::Animation *anim, float time, Ogre::Sk
     mEntityList.mSkelBase->getAllAnimationStates()->_notifyDirty();
 }
 
+static void updateBoneTree(const Ogre::SkeletonInstance *skelsrc, Ogre::Bone *bone)
+{
+    if(skelsrc->hasBone(bone->getName()))
+    {
+        Ogre::Bone *srcbone = skelsrc->getBone(bone->getName());
+        if(!srcbone->getParent() || !bone->getParent())
+        {
+            bone->setOrientation(srcbone->getOrientation());
+            bone->setPosition(srcbone->getPosition());
+            bone->setScale(srcbone->getScale());
+        }
+        else
+        {
+            bone->_setDerivedOrientation(srcbone->_getDerivedOrientation());
+            bone->_setDerivedPosition(srcbone->_getDerivedPosition());
+            bone->setScale(Ogre::Vector3::UNIT_SCALE);
+        }
+    }
+    else
+    {
+        // No matching bone in the source. Make sure it stays properly offset
+        // from its parent.
+        bone->resetToInitialState();
+    }
+
+    Ogre::Node::ChildNodeIterator boneiter = bone->getChildIterator();
+    while(boneiter.hasMoreElements())
+        updateBoneTree(skelsrc, static_cast<Ogre::Bone*>(boneiter.getNext()));
+}
+
 void Animation::updateSkeletonInstance(const Ogre::SkeletonInstance *skelsrc, Ogre::SkeletonInstance *skel)
 {
-    Ogre::Skeleton::BoneIterator boneiter = skel->getBoneIterator();
+    Ogre::Skeleton::BoneIterator boneiter = skel->getRootBoneIterator();
     while(boneiter.hasMoreElements())
-    {
-        Ogre::Bone *bone = boneiter.getNext();
-        if(!skelsrc->hasBone(bone->getName()))
-            continue;
-        Ogre::Bone *srcbone = skelsrc->getBone(bone->getName());
-        bone->setOrientation(srcbone->getOrientation());
-        bone->setPosition(srcbone->getPosition());
-        bone->setScale(srcbone->getScale());
-    }
+        updateBoneTree(skelsrc, boneiter.getNext());
 }
 
 
