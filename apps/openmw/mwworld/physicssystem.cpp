@@ -137,44 +137,42 @@ namespace MWWorld
                 clipVelocity(clippedVelocity, trace.planenormal, 1.0f);
             }
 
-            Ogre::Vector3 lastNormal(0.0f);
-            Ogre::Vector3 currentNormal(0.0f);
-            Ogre::Vector3 up(0.0f, 0.0f, 1.0f);
+            const Ogre::Vector3 up(0.0f, 0.0f, 1.0f);
             Ogre::Vector3 newPosition = position;
             int iterations = 0;
             do {
                 // trace to where character would go if there were no obstructions
                 newtrace(&trace, newPosition, newPosition+clippedVelocity*remainingTime, halfExtents, isInterior, engine);
                 newPosition = trace.endpos;
-                currentNormal = trace.planenormal;
                 remainingTime = remainingTime * (1.0f-trace.fraction);
 
                 // check for obstructions
                 if(trace.fraction < 1.0f)
                 {
                     //std::cout<<"angle: "<<getSlope(trace.planenormal)<<"\n";
-                    if(getSlope(currentNormal) > sMaxSlope || currentNormal == lastNormal)
+                    if(getSlope(trace.planenormal) <= sMaxSlope)
                     {
+                        // We hit a slope we can walk on. Update velocity accordingly.
+                        clipVelocity(clippedVelocity, trace.planenormal, 1.0f);
+                        // We're only on the ground if gravity is affecting us
+                        onground = gravity;
+                    }
+                    else
+                    {
+                        // Can't walk on this. Try to step up onto it.
                         if((gravity && !onground) ||
                            !stepMove(newPosition, velocity, remainingTime, halfExtents, isInterior, engine))
                         {
-                            Ogre::Vector3 resultantDirection = currentNormal.crossProduct(up);
+                            Ogre::Vector3 resultantDirection = trace.planenormal.crossProduct(up);
                             resultantDirection.normalise();
                             clippedVelocity = velocity;
                             projectVelocity(clippedVelocity, resultantDirection);
 
                             // just this isn't enough sometimes. It's the same problem that causes steps to be necessary on even uphill terrain.
-                            clippedVelocity += currentNormal*clippedVelocity.length()/50.0f;
-                            //std::cout<< "clipped velocity: "<<clippedVelocity <<std::endl;
+                            clippedVelocity += trace.planenormal*clippedVelocity.length()/50.0f;
                         }
-                        //else
-                        //    std::cout<< "stepped" <<std::endl;
                     }
-                    else
-                        clipVelocity(clippedVelocity, currentNormal, 1.0f);
                 }
-
-                lastNormal = currentNormal;
 
                 iterations++;
             } while(iterations < sMaxIterations && remainingTime > 0.0f);
