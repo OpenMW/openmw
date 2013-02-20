@@ -39,14 +39,18 @@ namespace MWWorld
         {
             traceResults trace; // no initialization needed
 
-            newtrace(&trace, position+Ogre::Vector3(0.0f,0.0f,sStepSize),
-                             position+Ogre::Vector3(0.0f,0.0f,sStepSize)+velocity*remainingTime,
-                    halfExtents, isInterior, engine);
+            newtrace(&trace, position, position+Ogre::Vector3(0.0f,0.0f,sStepSize),
+                     halfExtents, isInterior, engine);
+            if(trace.fraction == 0.0f)
+                return false;
+
+            newtrace(&trace, trace.endpos, trace.endpos + velocity*remainingTime,
+                     halfExtents, isInterior, engine);
             if(trace.fraction == 0.0f || (trace.fraction != 1.0f && getSlope(trace.planenormal) > sMaxSlope))
                 return false;
 
             newtrace(&trace, trace.endpos, trace.endpos-Ogre::Vector3(0.0f,0.0f,sStepSize), halfExtents, isInterior, engine);
-            if(getSlope(trace.planenormal) < sMaxSlope)
+            if(getSlope(trace.planenormal) <= sMaxSlope)
             {
                 // only step down onto semi-horizontal surfaces. don't step down onto the side of a house or a wall.
                 position = trace.endpos;
@@ -56,7 +60,7 @@ namespace MWWorld
             return false;
         }
 
-        static void clipVelocity(Ogre::Vector3& inout, const Ogre::Vector3& normal, float overbounce)
+        static void clipVelocity(Ogre::Vector3& inout, const Ogre::Vector3& normal, float overbounce=1.0f)
         {
             //Math stuff. Basically just project the velocity vector onto the plane represented by the normal.
             //More specifically, it projects velocity onto the normal, takes that result, multiplies it by overbounce and then subtracts it from velocity.
@@ -134,7 +138,7 @@ namespace MWWorld
             {
                 // if we're on the ground, force velocity to track it
                 clippedVelocity.z = velocity.z = std::max(0.0f, velocity.z);
-                clipVelocity(clippedVelocity, trace.planenormal, 1.0f);
+                clipVelocity(clippedVelocity, trace.planenormal);
             }
 
             const Ogre::Vector3 up(0.0f, 0.0f, 1.0f);
@@ -153,7 +157,7 @@ namespace MWWorld
                     if(getSlope(trace.planenormal) <= sMaxSlope)
                     {
                         // We hit a slope we can walk on. Update velocity accordingly.
-                        clipVelocity(clippedVelocity, trace.planenormal, 1.0f);
+                        clipVelocity(clippedVelocity, trace.planenormal);
                         // We're only on the ground if gravity is affecting us
                         onground = gravity;
                     }
@@ -186,7 +190,7 @@ namespace MWWorld
                     onground = false;
             }
             physicActor->setOnGround(onground);
-            physicActor->setVerticalForce(clippedVelocity.z - time*400.0f);
+            physicActor->setVerticalForce(clippedVelocity.z - time*627.2f);
 
             return newPosition;
         }
