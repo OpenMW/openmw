@@ -52,6 +52,7 @@
 #include "enchantingdialog.hpp"
 #include "trainingwindow.hpp"
 #include "imagebutton.hpp"
+#include "exposedwindow.hpp"
 
 using namespace MWGui;
 
@@ -127,6 +128,7 @@ WindowManager::WindowManager(
     MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::AutoSizedTextBox>("Widget");
     MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::AutoSizedButton>("Widget");
     MyGUI::FactoryManager::getInstance().registerFactory<MWGui::ImageButton>("Widget");
+    MyGUI::FactoryManager::getInstance().registerFactory<MWGui::ExposedWindow>("Widget");
 
     MyGUI::LanguageManager::getInstance().eventRequestTag = MyGUI::newDelegate(this, &WindowManager::onRetrieveTag);
 
@@ -310,9 +312,16 @@ void WindowManager::updateVisible()
     setSpellVisibility((mAllowed & GW_Magic) && !mSpellWindow->pinned());
     setHMSVisibility((mAllowed & GW_Stats) && !mStatsWindow->pinned());
 
-    // If in game mode, don't show anything.
+    // If in game mode, show only the pinned windows
     if (gameMode)
+    {
+        mMap->setVisible(mMap->pinned());
+        mStatsWindow->setVisible(mStatsWindow->pinned());
+        mInventoryWindow->setVisible(mInventoryWindow->pinned());
+        mSpellWindow->setVisible(mSpellWindow->pinned());
+
         return;
+    }
 
     GuiMode mode = mGuiModes.back();
 
@@ -327,6 +336,12 @@ void WindowManager::updateVisible()
             mSettingsWindow->setVisible(true);
             break;
         case GM_Console:
+            // Show the pinned windows
+            mMap->setVisible(mMap->pinned());
+            mStatsWindow->setVisible(mStatsWindow->pinned());
+            mInventoryWindow->setVisible(mInventoryWindow->pinned());
+            mSpellWindow->setVisible(mSpellWindow->pinned());
+
             mConsole->enable();
             break;
         case GM_Scroll:
