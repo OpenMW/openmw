@@ -34,18 +34,18 @@ namespace MWWorld
     {
     private:
         static bool stepMove(Ogre::Vector3& position, const Ogre::Vector3 &velocity, float remainingTime,
-                             float verticalRotation, const Ogre::Vector3 &halfExtents, bool isInterior,
+                             const Ogre::Vector3 &halfExtents, bool isInterior,
                              OEngine::Physic::PhysicEngine *engine)
         {
             traceResults trace; // no initialization needed
 
             newtrace(&trace, position+Ogre::Vector3(0.0f,0.0f,sStepSize),
                              position+Ogre::Vector3(0.0f,0.0f,sStepSize)+velocity*remainingTime,
-                    halfExtents, verticalRotation, isInterior, engine);
+                    halfExtents, isInterior, engine);
             if(trace.fraction == 0.0f || (trace.fraction != 1.0f && getSlope(trace.planenormal) > sMaxSlope))
                 return false;
 
-            newtrace(&trace, trace.endpos, trace.endpos-Ogre::Vector3(0.0f,0.0f,sStepSize), halfExtents, verticalRotation, isInterior, engine);
+            newtrace(&trace, trace.endpos, trace.endpos-Ogre::Vector3(0.0f,0.0f,sStepSize), halfExtents, isInterior, engine);
             if(getSlope(trace.planenormal) < sMaxSlope)
             {
                 // only step down onto semi-horizontal surfaces. don't step down onto the side of a house or a wall.
@@ -105,7 +105,6 @@ namespace MWWorld
             bool onground = false;
             float remainingTime = time;
             bool isInterior = !ptr.getCell()->isExterior();
-            float verticalRotation = physicActor->getRotation().getYaw().valueDegrees();
             Ogre::Vector3 halfExtents = physicActor->getHalfExtents();
 
             Ogre::Vector3 velocity;
@@ -120,7 +119,7 @@ namespace MWWorld
             {
                 if(!(movement.z > 0.0f))
                 {
-                    newtrace(&trace, position, position-Ogre::Vector3(0,0,4), halfExtents, verticalRotation, isInterior, engine);
+                    newtrace(&trace, position, position-Ogre::Vector3(0,0,4), halfExtents, isInterior, engine);
                     if(trace.fraction < 1.0f && getSlope(trace.planenormal) <= sMaxSlope)
                         onground = true;
                 }
@@ -145,7 +144,7 @@ namespace MWWorld
             int iterations = 0;
             do {
                 // trace to where character would go if there were no obstructions
-                newtrace(&trace, newPosition, newPosition+clippedVelocity*remainingTime, halfExtents, verticalRotation, isInterior, engine);
+                newtrace(&trace, newPosition, newPosition+clippedVelocity*remainingTime, halfExtents, isInterior, engine);
                 newPosition = trace.endpos;
                 currentNormal = trace.planenormal;
                 remainingTime = remainingTime * (1.0f-trace.fraction);
@@ -157,7 +156,7 @@ namespace MWWorld
                     if(getSlope(currentNormal) > sMaxSlope || currentNormal == lastNormal)
                     {
                         if((gravity && !onground) ||
-                           !stepMove(newPosition, velocity, remainingTime, verticalRotation, halfExtents, isInterior, engine))
+                           !stepMove(newPosition, velocity, remainingTime, halfExtents, isInterior, engine))
                         {
                             Ogre::Vector3 resultantDirection = currentNormal.crossProduct(up);
                             resultantDirection.normalise();
@@ -182,7 +181,7 @@ namespace MWWorld
 
             if(onground)
             {
-                newtrace(&trace, newPosition, newPosition-Ogre::Vector3(0,0,sStepSize+4.0f), halfExtents, verticalRotation, isInterior, engine);
+                newtrace(&trace, newPosition, newPosition-Ogre::Vector3(0,0,sStepSize+4.0f), halfExtents, isInterior, engine);
                 if(trace.fraction < 1.0f && getSlope(trace.planenormal) <= sMaxSlope)
                     newPosition.z = trace.endpos.z + 2.0f;
                 else

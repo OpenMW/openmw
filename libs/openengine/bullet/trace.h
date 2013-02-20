@@ -21,6 +21,6 @@ struct traceResults
     float fraction;
 };
 
-void newtrace(traceResults* const results, const Ogre::Vector3& start, const Ogre::Vector3& end, const Ogre::Vector3& BBExtents, const float rotation, bool isInterior, OEngine::Physic::PhysicEngine* enginePass);
+void newtrace(traceResults *results, const Ogre::Vector3& start, const Ogre::Vector3& end, const Ogre::Vector3& BBHalfExtents, bool isInterior, OEngine::Physic::PhysicEngine* enginePass);
 
 #endif
