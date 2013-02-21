@@ -23,9 +23,7 @@
 
 #include "bsa_file.hpp"
 
-//#include <stdexcept>
-//#include <cstdlib>
-//#include <cassert>
+#include <stdexcept>
 
 #include "../files/constrainedfiledatastream.hpp"
 
