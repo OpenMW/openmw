@@ -181,9 +181,16 @@ Ogre::Vector3 CharacterController::update(float duration)
         const MWWorld::Class &cls = MWWorld::Class::get(mPtr);
         const Ogre::Vector3 &vec = cls.getMovementVector(mPtr);
 
+        bool onground = world->isOnGround(mPtr);
         bool inwater = world->isSwimming(mPtr);
         bool isrunning = cls.getStance(mPtr, MWWorld::Class::Run);
         speed = cls.getSpeed(mPtr);
+
+        // This jump is all kinds of wrong. The speed is incorrect, the state should be set to
+        // Jump, and X/Y movement should be disallowed except for the initial thrust (which would
+        // be carried by "physics" until landing).
+        if(onground)
+            movement.z += vec.z * (500.0f*duration);
 
         if(std::abs(vec.x/2.0f) > std::abs(vec.y) && speed > 0.0f)
         {
