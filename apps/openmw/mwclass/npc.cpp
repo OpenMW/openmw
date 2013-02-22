@@ -335,14 +335,16 @@ namespace MWClass
 
         float runSpeed = walkSpeed*(0.01f * npcdata->mNpcStats.getSkill(ESM::Skill::Athletics).getModified() *
                                     fAthleticsRunBonus->getFloat() + fBaseRunMultiplier->getFloat());
+        if(npcdata->mNpcStats.isWerewolf())
+            runSpeed *= fWereWolfRunMult->getFloat();
 
         float moveSpeed;
         if(normalizedEncumbrance >= 1.0f)
             moveSpeed = 0.0f;
-        else if(world->isFlying(ptr))
+        else if(mageffects.get(MWMechanics::EffectKey(10/*levitate*/)).mMagnitude > 0)
         {
             float flySpeed = 0.01f*(npcdata->mCreatureStats.getAttribute(ESM::Attribute::Speed).getModified() +
-                                    mageffects.get(MWMechanics::EffectKey(10)).mMagnitude/*levitate*/);
+                                    mageffects.get(MWMechanics::EffectKey(10/*levitate*/)).mMagnitude);
             flySpeed = fMinFlySpeed->getFloat() + flySpeed*(fMaxFlySpeed->getFloat() - fMinFlySpeed->getFloat());
             flySpeed *= 1.0f - fEncumberedMoveEffect->getFloat() * normalizedEncumbrance;
             flySpeed = std::max(0.0f, flySpeed);
@@ -353,7 +355,7 @@ namespace MWClass
             float swimSpeed = walkSpeed;
             if(Npc::getStance(ptr, Run, false))
                 swimSpeed = runSpeed;
-            swimSpeed *= 1.0f + 0.01f * mageffects.get(MWMechanics::EffectKey(1)).mMagnitude/*swift swim*/;
+            swimSpeed *= 1.0f + 0.01f * mageffects.get(MWMechanics::EffectKey(1/*swift swim*/)).mMagnitude;
             swimSpeed *= fSwimRunBase->getFloat() + 0.01f*npcdata->mNpcStats.getSkill(ESM::Skill::Athletics).getModified()*
                                                     fSwimRunAthleticsMult->getFloat();
             moveSpeed = swimSpeed;
@@ -365,8 +367,6 @@ namespace MWClass
 
         if(getMovementSettings(ptr).mLeftRight != 0 && getMovementSettings(ptr).mForwardBackward == 0)
             moveSpeed *= 0.75f;
-        if(npcdata->mNpcStats.isWerewolf() && Npc::getStance(ptr, Run, false))
-            moveSpeed *= fWereWolfRunMult->getFloat();
 
         return moveSpeed;
     }
