@@ -19,11 +19,11 @@
 
 #include "inventorywindow.hpp"
 
-static const float BALANCE_CHANGE_INITIAL_PAUSE = 0.5; // in seconds
-static const float BALANCE_CHANGE_INTERVAL = 0.1; // in seconds
-
 namespace MWGui
 {
+    const float TradeWindow::sBalanceChangeInitialPause = 0.5;
+    const float TradeWindow::sBalanceChangeInterval = 0.1;
+
     TradeWindow::TradeWindow(MWBase::WindowManager& parWindowManager) :
         WindowBase("openmw_trade_window.layout", parWindowManager)
         , ContainerBase(NULL) // no drag&drop
@@ -157,7 +157,7 @@ namespace MWGui
 
         mBalanceChangePause -= frameDuration;
         if (mBalanceChangePause < 0.0) {
-            mBalanceChangePause += BALANCE_CHANGE_INTERVAL;
+            mBalanceChangePause += sBalanceChangeInterval;
             if (mBalanceButtonsState == BBS_Increase)
                 onIncreaseButtonTriggered();
             else if (mBalanceButtonsState == BBS_Decrease)
@@ -296,14 +296,14 @@ namespace MWGui
     void TradeWindow::onIncreaseButtonPressed(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id)
     {
         mBalanceButtonsState = BBS_Increase;
-        mBalanceChangePause = BALANCE_CHANGE_INITIAL_PAUSE;
+        mBalanceChangePause = sBalanceChangeInitialPause;
         onIncreaseButtonTriggered();
     }
 
     void TradeWindow::onDecreaseButtonPressed(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id)
     {
         mBalanceButtonsState = BBS_Decrease;
-        mBalanceChangePause = BALANCE_CHANGE_INITIAL_PAUSE;
+        mBalanceChangePause = sBalanceChangeInitialPause;
         onDecreaseButtonTriggered();
     }
 
