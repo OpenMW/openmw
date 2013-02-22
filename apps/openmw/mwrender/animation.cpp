@@ -175,6 +175,49 @@ void Animation::setLooping(bool loop)
 }
 
 
+void Animation::calcAnimVelocity()
+{
+    const Ogre::NodeAnimationTrack *track = 0;
+
+    Ogre::Animation::NodeTrackIterator trackiter = mCurrentAnim->getNodeTrackIterator();
+    while(!track && trackiter.hasMoreElements())
+    {
+        const Ogre::NodeAnimationTrack *cur = trackiter.getNext();
+        if(cur->getAssociatedNode()->getName() == mNonAccumRoot->getName())
+            track = cur;
+    }
+
+    if(track && track->getNumKeyFrames() > 1)
+    {
+        float loopstarttime = 0.0f;
+        float loopstoptime = mCurrentAnim->getLength();
+        NifOgre::TextKeyMap::const_iterator keyiter = mCurrentKeys->begin();
+        while(keyiter != mCurrentKeys->end())
+        {
+            if(keyiter->second == "loop start")
+                loopstarttime = keyiter->first;
+            else if(keyiter->second == "loop stop")
+            {
+                loopstoptime = keyiter->first;
+                break;
+            }
+            keyiter++;
+        }
+
+        if(loopstoptime > loopstarttime)
+        {
+            Ogre::TransformKeyFrame startkf(0, loopstarttime);
+            Ogre::TransformKeyFrame endkf(0, loopstoptime);
+
+            track->getInterpolatedKeyFrame(mCurrentAnim->_getTimeIndex(loopstarttime), &startkf);
+            track->getInterpolatedKeyFrame(mCurrentAnim->_getTimeIndex(loopstoptime), &endkf);
+
+            mAnimVelocity = startkf.getTranslate().distance(endkf.getTranslate()) /
+                            (loopstoptime-loopstarttime);
+        }
+    }
+}
+
 void Animation::applyAnimation(const Ogre::Animation *anim, float time, Ogre::SkeletonInstance *skel)
 {
     Ogre::TimeIndex timeindex = anim->_getTimeIndex(time);
@@ -305,47 +348,7 @@ void Animation::play(const std::string &groupname, const std::string &start, boo
                 mAnimVelocity = 0.0f;
 
                 if(mNonAccumRoot)
-                {
-                    const Ogre::NodeAnimationTrack *track = 0;
-
-                    Ogre::Animation::NodeTrackIterator trackiter = mCurrentAnim->getNodeTrackIterator();
-                    while(!track && trackiter.hasMoreElements())
-                    {
-                        const Ogre::NodeAnimationTrack *cur = trackiter.getNext();
-                        if(cur->getAssociatedNode()->getName() == mNonAccumRoot->getName())
-                            track = cur;
-                    }
-
-                    if(track && track->getNumKeyFrames() > 1)
-                    {
-                        float loopstarttime = 0.0f;
-                        float loopstoptime = mCurrentAnim->getLength();
-                        NifOgre::TextKeyMap::const_iterator keyiter = mCurrentKeys->begin();
-                        while(keyiter != mCurrentKeys->end())
-                        {
-                            if(keyiter->second == "loop start")
-                                loopstarttime = keyiter->first;
-                            else if(keyiter->second == "loop stop")
-                            {
-                                loopstoptime = keyiter->first;
-                                break;
-                            }
-                            keyiter++;
-                        }
-
-                        if(loopstoptime > loopstarttime)
-                        {
-                            Ogre::TransformKeyFrame startkf(0, loopstarttime);
-                            Ogre::TransformKeyFrame endkf(0, loopstoptime);
-
-                            track->getInterpolatedKeyFrame(mCurrentAnim->_getTimeIndex(loopstarttime), &startkf);
-                            track->getInterpolatedKeyFrame(mCurrentAnim->_getTimeIndex(loopstoptime), &endkf);
-
-                            mAnimVelocity = startkf.getTranslate().distance(endkf.getTranslate()) /
-                                            (loopstoptime-loopstarttime);
-                        }
-                    }
-                }
+                    calcAnimVelocity();
 
                 found = true;
                 break;

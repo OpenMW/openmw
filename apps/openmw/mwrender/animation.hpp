@@ -39,6 +39,8 @@ protected:
     float mAnimVelocity;
     float mAnimSpeedMult;
 
+    void calcAnimVelocity();
+
     /* Applies the given animation to the given skeleton instance, using the specified time. */
     void applyAnimation(const Ogre::Animation *anim, float time, Ogre::SkeletonInstance *skel);
 
