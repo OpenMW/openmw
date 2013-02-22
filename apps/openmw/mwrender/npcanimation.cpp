@@ -133,10 +133,10 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node, MWWor
     if(mNpc->mModel.length() > 0)
         insertSkeletonSource("meshes\\"+Misc::StringUtils::lowerCase(mNpc->mModel));
 
-    updateParts();
+    updateParts(true);
 }
 
-void NpcAnimation::updateParts()
+void NpcAnimation::updateParts(bool forceupdate)
 {
     static const struct {
         int numRemoveParts; // Max: 1
@@ -212,11 +212,21 @@ void NpcAnimation::updateParts()
     };
     static const size_t slotlistsize = sizeof(slotlist)/sizeof(slotlist[0]);
 
+    for(size_t i = 0;!forceupdate && i < slotlistsize;i++)
+    {
+        MWWorld::ContainerStoreIterator iter = mInv.getSlot(slotlist[i].slot);
+        if(this->*slotlist[i].part != iter)
+        {
+            forceupdate = true;
+            break;
+        }
+    }
+    if(!forceupdate)
+        return;
+
     for(size_t i = 0;i < slotlistsize;i++)
     {
         MWWorld::ContainerStoreIterator iter = mInv.getSlot(slotlist[i].slot);
-        if(this->*slotlist[i].part == iter)
-            continue;
 
         this->*slotlist[i].part = iter;
         removePartGroup(slotlist[i].slot);
@@ -332,12 +342,12 @@ NifOgre::EntityList NpcAnimation::insertBoundedPart(const std::string &mesh, int
 
 Ogre::Vector3 NpcAnimation::runAnimation(float timepassed)
 {
-    if(mTimeToChange > .2)
+    if(mTimeToChange <= 0.0f)
     {
-        mTimeToChange = 0;
+        mTimeToChange = 0.2f;
         updateParts();
     }
-    mTimeToChange += timepassed;
+    mTimeToChange -= timepassed;
 
     Ogre::Vector3 ret = Animation::runAnimation(timepassed);
     const Ogre::SkeletonInstance *skelsrc = mEntityList.mSkelBase->getSkeleton();
@@ -439,11 +449,6 @@ void NpcAnimation::addPartGroup(int group, int priority, const std::vector<ESM::
         else
             reserveIndividualPart(part.mPart, group, priority);
     }
-}
-
-void NpcAnimation::forceUpdate ()
-{
-    updateParts();
 }
 
 }

@@ -57,7 +57,7 @@ private:
     int mPartPriorities[sPartListSize];
 
     NifOgre::EntityList insertBoundedPart(const std::string &mesh, int group, const std::string &bonename);
-    void updateParts();
+    void updateParts(bool forceupdate = false);
     void removeEntities(NifOgre::EntityList &entities);
     void removeIndividualPart(int type);
     void reserveIndividualPart(int type, int group, int priority);
@@ -73,7 +73,8 @@ public:
 
     virtual Ogre::Vector3 runAnimation(float timepassed);
 
-    void forceUpdate();
+    void forceUpdate()
+    { updateParts(true); }
 };
 
 }
