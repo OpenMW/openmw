@@ -1389,15 +1389,9 @@ namespace MWWorld
     bool
     World::isFlying(const MWWorld::Ptr &ptr) const
     {
-        RefData &refdata = ptr.getRefData();
-        const OEngine::Physic::PhysicActor *physactor = mPhysEngine->getCharacter(refdata.getHandle());
-        if(!physactor || !physactor->getCollisionMode())
-            return true;
-
         const MWWorld::Class &cls = MWWorld::Class::get(ptr);
         if(cls.isActor() && cls.getCreatureStats(ptr).getMagicEffects().get(MWMechanics::EffectKey(10/*levitate*/)).mMagnitude > 0)
             return true;
-
         return false;
     }
 
