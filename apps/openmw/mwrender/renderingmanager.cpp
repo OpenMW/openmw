@@ -923,7 +923,8 @@ void RenderingManager::setupExternalRendering (MWRender::ExternalRendering& rend
 Animation* RenderingManager::getAnimation(const MWWorld::Ptr &ptr)
 {
     Animation *anim = mActors.getAnimation(ptr);
-    if(!anim) anim = mPlayer->getAnimation();
+    if(!anim && ptr.getRefData().getHandle() == "player")
+        anim = mPlayer->getAnimation();
     return anim;
 }
 
