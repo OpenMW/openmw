@@ -215,7 +215,7 @@ void OMW::Engine::addMaster (const std::string& master)
 {
     mMaster.push_back(master);
     std::string &str = mMaster.back();
- 
+
     // Append .esm if not already there
     std::string::size_type sep = str.find_last_of (".");
     if (sep == std::string::npos)
@@ -303,7 +303,7 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     }
 
     mOgre = new OEngine::Render::OgreRenderer;
-    
+
     mOgre->configure(
         mCfgMgr.getLogPath().string(),
         renderSystem,
@@ -345,7 +345,8 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
 
     //Load translation data
     mTranslationDataStorage.setEncoder(mEncoder);
-    mTranslationDataStorage.loadTranslationData(mFileCollections, mMaster[0]);
+    for (size_t i = 0; i < mMaster.size(); i++)
+      mTranslationDataStorage.loadTranslationData(mFileCollections, mMaster[i]);
 
     // Create window manager - this manages all the MW-specific GUI windows
     MWScript::registerExtensions (mExtensions);
