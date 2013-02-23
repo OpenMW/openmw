@@ -168,6 +168,11 @@ namespace MWScript
 
             for (int i=0; i<script->mData.mNumFloats; ++i)
                 locals.declare ('f', script->mVarNames[index++]);
+
+            std::map<std::string, Compiler::Locals>::iterator iter =
+                mOtherLocals.insert (std::make_pair (name, locals)).first;
+
+            return iter->second;
         }
 
         throw std::logic_error ("script " + name + " does not exist");
