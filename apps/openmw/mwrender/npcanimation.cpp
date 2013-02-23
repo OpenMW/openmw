@@ -54,22 +54,22 @@ NpcAnimation::~NpcAnimation()
 
 NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node, MWWorld::InventoryStore& inv, int visibilityFlags)
   : Animation(ptr),
-    mInv(inv),
+    mInv(&inv),
     mStateID(-1),
     mTimeToChange(0),
     mVisibilityFlags(visibilityFlags),
-    mRobe(mInv.end()),
-    mHelmet(mInv.end()),
-    mShirt(mInv.end()),
-    mCuirass(mInv.end()),
-    mGreaves(mInv.end()),
-    mPauldronL(mInv.end()),
-    mPauldronR(mInv.end()),
-    mBoots(mInv.end()),
-    mPants(mInv.end()),
-    mGloveL(mInv.end()),
-    mGloveR(mInv.end()),
-    mSkirtIter(mInv.end())
+    mRobe(mInv->end()),
+    mHelmet(mInv->end()),
+    mShirt(mInv->end()),
+    mCuirass(mInv->end()),
+    mGreaves(mInv->end()),
+    mPauldronL(mInv->end()),
+    mPauldronR(mInv->end()),
+    mBoots(mInv->end()),
+    mPants(mInv->end()),
+    mGloveL(mInv->end()),
+    mGloveR(mInv->end()),
+    mSkirtIter(mInv->end())
 {
     mNpc = mPtr.get<ESM::NPC>()->mBase;
 
@@ -215,7 +215,7 @@ void NpcAnimation::updateParts(bool forceupdate)
 
     for(size_t i = 0;!forceupdate && i < slotlistsize;i++)
     {
-        MWWorld::ContainerStoreIterator iter = mInv.getSlot(slotlist[i].slot);
+        MWWorld::ContainerStoreIterator iter = mInv->getSlot(slotlist[i].slot);
         if(this->*slotlist[i].part != iter)
         {
             forceupdate = true;
@@ -227,12 +227,12 @@ void NpcAnimation::updateParts(bool forceupdate)
 
     for(size_t i = 0;i < slotlistsize;i++)
     {
-        MWWorld::ContainerStoreIterator iter = mInv.getSlot(slotlist[i].slot);
+        MWWorld::ContainerStoreIterator iter = mInv->getSlot(slotlist[i].slot);
 
         this->*slotlist[i].part = iter;
         removePartGroup(slotlist[i].slot);
 
-        if(this->*slotlist[i].part == mInv.end())
+        if(this->*slotlist[i].part == mInv->end())
             continue;
 
         for(int rem = 0;rem < slotlist[i].numRemoveParts;rem++)

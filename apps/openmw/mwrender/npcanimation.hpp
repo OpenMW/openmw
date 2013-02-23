@@ -26,7 +26,7 @@ private:
     static const size_t sPartListSize = 27;
     static const PartInfo sPartList[sPartListSize];
 
-    MWWorld::InventoryStore& mInv;
+    MWWorld::InventoryStore *mInv;
     int mStateID;
 
     // Bounded Parts
@@ -57,7 +57,9 @@ private:
     int mPartPriorities[sPartListSize];
 
     NifOgre::EntityList insertBoundedPart(const std::string &mesh, int group, const std::string &bonename);
+
     void updateParts(bool forceupdate = false);
+
     void removeEntities(NifOgre::EntityList &entities);
     void removeIndividualPart(int type);
     void reserveIndividualPart(int type, int group, int priority);
@@ -73,6 +75,11 @@ public:
 
     virtual Ogre::Vector3 runAnimation(float timepassed);
 
+    void updateParts(MWWorld::InventoryStore &inventory)
+    {
+        mInv = &inventory;
+        updateParts(true);
+    }
     void forceUpdate()
     { updateParts(true); }
 };
