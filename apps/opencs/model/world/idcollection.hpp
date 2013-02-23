@@ -171,7 +171,7 @@ namespace CSMWorld
             record2.mModified = record;
 
             mRecords.push_back (record2);
-            mIndex.insert (std::make_pair (id, mRecords.size()-1));
+            mIndex.insert (std::make_pair (Misc::StringUtils::lowerCase (id), mRecords.size()-1));
         }
         else
         {
@@ -306,7 +306,7 @@ namespace CSMWorld
     void IdCollection<ESXRecordT>::appendRecord (const RecordBase& record)
     {
         mRecords.push_back (dynamic_cast<const Record<ESXRecordT>&> (record));
-        mIndex.insert (std::make_pair (getId (record), mRecords.size()-1));
+        mIndex.insert (std::make_pair (Misc::StringUtils::lowerCase (getId (record)), mRecords.size()-1));
     }
 
     template<typename ESXRecordT>

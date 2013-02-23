@@ -1,4 +1,3 @@
-
 #include "subview.hpp"
 
 CSVDoc::SubView::SubView (const CSMWorld::UniversalId& id) : mUniversalId (id)
