@@ -33,6 +33,7 @@ protected:
     NifOgre::TextKeyMap::const_iterator mNextKey;
     Ogre::Animation *mCurrentAnim;
     float mCurrentTime;
+    float mStopTime;
     bool mPlaying;
     bool mLooping;
 
@@ -53,9 +54,11 @@ protected:
      * vector since the last update or reset. */
     Ogre::Vector3 updatePosition(float time);
 
-    /* Resets the animation to the time of the specified marker, without moving
-     * anything. If the marker is not found, it resets to the beginning. */
-    void reset(const std::string &marker);
+    /* Resets the animation to the time of the specified start marker, without
+     * moving anything, and set the end time to the specified stop marker. If
+     * the marker is not found, it resets to the beginning or end respectively.
+     */
+    void reset(const std::string &start, const std::string &stop);
 
     /* Specifies a list of skeleton names to use as animation sources. */
     void setAnimationSources(const std::vector<std::string> &names);
@@ -86,7 +89,7 @@ public:
 
     void setLooping(bool loop);
 
-    void play(const std::string &groupname, const std::string &start, bool loop);
+    void play(const std::string &groupname, const std::string &start, const std::string &stop, bool loop);
     virtual Ogre::Vector3 runAnimation(float timepassed);
 };
 

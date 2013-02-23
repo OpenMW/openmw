@@ -26,6 +26,7 @@ Animation::Animation(const MWWorld::Ptr &ptr)
     , mCurrentKeys(NULL)
     , mCurrentAnim(NULL)
     , mCurrentTime(0.0f)
+    , mStopTime(0.0f)
     , mPlaying(false)
     , mLooping(false)
     , mAnimVelocity(0.0f)
@@ -293,18 +294,29 @@ Ogre::Vector3 Animation::updatePosition(float time)
     return posdiff;
 }
 
-void Animation::reset(const std::string &marker)
+void Animation::reset(const std::string &start, const std::string &stop)
 {
     mNextKey = mCurrentKeys->begin();
-    while(mNextKey != mCurrentKeys->end() && mNextKey->second != marker)
-        mNextKey++;
 
+    while(mNextKey != mCurrentKeys->end() && mNextKey->second != start)
+        mNextKey++;
     if(mNextKey != mCurrentKeys->end())
         mCurrentTime = mNextKey->first;
     else
     {
         mNextKey = mCurrentKeys->begin();
         mCurrentTime = 0.0f;
+    }
+
+    if(stop.length() > 0)
+    {
+        NifOgre::TextKeyMap::const_iterator stopKey = mNextKey;
+        while(stopKey != mCurrentKeys->end() && stopKey->second != stop)
+            stopKey++;
+        if(stopKey != mCurrentKeys->end())
+            mStopTime = stopKey->first;
+        else
+            mStopTime = mCurrentAnim->getLength();
     }
 
     if(mNonAccumRoot)
@@ -328,7 +340,7 @@ void Animation::reset(const std::string &marker)
 }
 
 
-void Animation::play(const std::string &groupname, const std::string &start, bool loop)
+void Animation::play(const std::string &groupname, const std::string &start, const std::string &stop, bool loop)
 {
     try {
         bool found = false;
@@ -351,9 +363,9 @@ void Animation::play(const std::string &groupname, const std::string &start, boo
         if(!found)
             throw std::runtime_error("Failed to find animation "+groupname);
 
-        reset(start);
+        reset(start, stop);
+        setLooping(loop);
         mPlaying = true;
-        mLooping = loop;
     }
     catch(std::exception &e) {
         std::cerr<< e.what() <<std::endl;
@@ -367,11 +379,11 @@ Ogre::Vector3 Animation::runAnimation(float timepassed)
     timepassed *= mAnimSpeedMult;
     while(mCurrentAnim && mPlaying)
     {
-        float targetTime = mCurrentTime + timepassed;
+        float targetTime = std::min(mStopTime, mCurrentTime+timepassed);
         if(mNextKey == mCurrentKeys->end() || mNextKey->first > targetTime)
         {
             movement += updatePosition(targetTime);
-            mPlaying = (mLooping || mCurrentAnim->getLength() >= targetTime);
+            mPlaying = (mLooping || mStopTime > targetTime);
             break;
         }
 
@@ -380,6 +392,8 @@ Ogre::Vector3 Animation::runAnimation(float timepassed)
         mNextKey++;
 
         movement += updatePosition(time);
+        mPlaying = (mLooping || mStopTime > time);
+
         timepassed = targetTime - time;
 
         if(evt == "start" || evt == "loop start")
@@ -391,7 +405,7 @@ Ogre::Vector3 Animation::runAnimation(float timepassed)
         {
             if(mLooping)
             {
-                reset("loop start");
+                reset("loop start", "");
                 if(mCurrentTime >= time)
                     break;
             }
@@ -401,17 +415,12 @@ Ogre::Vector3 Animation::runAnimation(float timepassed)
         {
             if(mLooping)
             {
-                reset("loop start");
+                reset("loop start", "");
                 if(mCurrentTime >= time)
                     break;
+                continue;
             }
-            else
-            {
-                mPlaying = false;
-                if(mController)
-                    mController->markerEvent(time, evt);
-            }
-            continue;
+            // fall-through
         }
         if(mController)
             mController->markerEvent(time, evt);

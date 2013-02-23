@@ -145,7 +145,7 @@ namespace MWRender
     {
         mSelectionBuffer = new OEngine::Render::SelectionBuffer(mCamera, 512, 1024, RV_PlayerPreview);
 
-        mAnimation->play("inventoryhandtohand", "start", false);
+        mAnimation->play("inventoryhandtohand", "start", "stop", false);
     }
 
     // --------------------------------------------------------------------------------------------------
