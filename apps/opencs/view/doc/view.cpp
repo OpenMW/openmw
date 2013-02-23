@@ -1,4 +1,3 @@
-
 #include "view.hpp"
 
 #include <sstream>
@@ -7,6 +6,7 @@
 #include <QCloseEvent>
 #include <QMenuBar>
 #include <QMdiArea>
+#include <QDockWidget>
 
 #include "../../model/doc/document.hpp"
 
@@ -117,12 +117,15 @@ void CSVDoc::View::updateActions()
     mVerify->setEnabled (!(mDocument->getState() & CSMDoc::State_Verifying));
 }
 
-CSVDoc::View::View (ViewManager& viewManager, CSMDoc::Document *document, int totalViews)
-: mViewManager (viewManager), mDocument (document), mViewIndex (totalViews-1), mViewTotal (totalViews)
+CSVDoc::View::View (ViewManager& viewManager, CSMDoc::Document *document, int totalViews, QMainWindow *viewParent)
+    : mViewManager (viewManager), mDocument (document), mViewIndex (totalViews-1), mViewTotal (totalViews), QMainWindow (viewParent)
 {
     setDockOptions (QMainWindow::AllowNestedDocks);
 
     resize (300, 300); /// \todo get default size from settings and set reasonable minimal size
+
+    mSubViewWindow = new QMainWindow();
+    setCentralWidget (mSubViewWindow);
 
     mOperations = new Operations;
     addDockWidget (Qt::BottomDockWidgetArea, mOperations);
@@ -133,6 +136,8 @@ CSVDoc::View::View (ViewManager& viewManager, CSMDoc::Document *document, int to
 
     CSVWorld::addSubViewFactories (mSubViewFactory);
     CSVTools::addSubViewFactories (mSubViewFactory);
+
+    connect (mOperations, SIGNAL (abortOperation (int)), this, SLOT (abortOperation (int)));
 }
 
 CSVDoc::View::~View()
@@ -171,7 +176,7 @@ void CSVDoc::View::updateDocumentState()
 
     for (int i=0; operations[i]!=-1; ++i)
         if (!(state & operations[i]))
-            mOperations->quitOperation (operations[i]);
+           mOperations->quitOperation (operations[i]);
 
     QList<CSVDoc::SubView *> subViews = findChildren<CSVDoc::SubView *>();
 
@@ -195,7 +200,7 @@ void CSVDoc::View::addSubView (const CSMWorld::UniversalId& id)
     /// \todo add an user setting to reuse sub views (on a per document basis or on a per top level view basis)
 
     SubView *view = mSubViewFactory.makeSubView (id, *mDocument);
-    addDockWidget (Qt::TopDockWidgetArea, view);
+    mSubViewWindow->addDockWidget (Qt::TopDockWidgetArea, view);
 
     connect (view, SIGNAL (focusId (const CSMWorld::UniversalId&)), this,
         SLOT (addSubView (const CSMWorld::UniversalId&)));
@@ -226,4 +231,16 @@ void CSVDoc::View::addGlobalsSubView()
 void CSVDoc::View::addGmstsSubView()
 {
     addSubView (CSMWorld::UniversalId::Type_Gmsts);
+}
+
+void CSVDoc::View::abortOperation (int type)
+{
+    mDocument->abortOperation (type);
+    mOperations->quitOperation (type);
+    updateActions();
+}
+
+QDockWidget *CSVDoc::View::getOperations() const
+{
+    return mOperations;
 }

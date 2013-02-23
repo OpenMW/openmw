@@ -249,6 +249,7 @@ void CSMDoc::Document::abortOperation (int type)
 
     if (type==State_Saving)
     {
+        mSaveCount=0;
         mSaveTimer.stop();
         emit stateChanged (getState(), this);
     }
