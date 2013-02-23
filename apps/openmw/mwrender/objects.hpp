@@ -73,8 +73,8 @@ public:
     Objects(OEngine::Render::OgreRenderer& renderer): mRenderer (renderer), mIsStatic(false) {}
     ~Objects(){}
     void insertBegin (const MWWorld::Ptr& ptr, bool enabled, bool static_);
-    void insertMesh (const MWWorld::Ptr& ptr, const std::string& mesh);
-    void insertLight (const MWWorld::Ptr& ptr, float r, float g, float b, float radius);
+    void insertMesh (const MWWorld::Ptr& ptr, const std::string& mesh, bool light=false);
+    void insertLight (const MWWorld::Ptr& ptr, Ogre::Entity* skelBase);
 
     void enableLights();
     void disableLights();
