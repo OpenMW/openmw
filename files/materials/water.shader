@@ -295,7 +295,7 @@
         }
         else
         {
-            float fogValue = shSaturate((length(cameraPos.xyz-position.xyz) - fogParams.y) * fogParams.w);
+            float fogValue = shSaturate((depthPassthrough - fogParams.y) * fogParams.w);
             shOutputColour(0).xyz = shLerp (shOutputColour(0).xyz, fogColor, fogValue);
         }
 
