@@ -349,9 +349,10 @@ void RenderingManager::update (float duration, bool paused)
 
     mRendering.update(duration);
 
+    Ogre::ControllerManager::getSingleton().setTimeFactor(paused ? 0.f : 1.f);
+
     if(paused)
     {
-        Ogre::ControllerManager::getSingleton().setTimeFactor(0.f);
         return;
     }
 
@@ -520,8 +521,8 @@ void RenderingManager::configureFog(MWWorld::Ptr::CellStore &mCell)
 
     configureFog(mCell.mCell->mAmbi.mFogDensity, color);
 
-    if (mWater)
-        mWater->setViewportBackground (Ogre::ColourValue(0.8f, 0.9f, 1.0f));
+    //if (mWater)
+    //    mWater->setViewportBackground (Ogre::ColourValue(0.8f, 0.9f, 1.0f));
 }
 
 void RenderingManager::configureFog(const float density, const Ogre::ColourValue& colour)

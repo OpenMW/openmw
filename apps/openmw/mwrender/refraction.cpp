@@ -33,7 +33,7 @@ namespace MWRender
         vp->setShadowsEnabled(false);
         vp->setVisibilityMask(RV_Actors + RV_Misc + RV_Statics + RV_StaticsSmall + RV_Terrain + RV_Sky);
         vp->setMaterialScheme("water_refraction");
-        vp->setBackgroundColour (Ogre::ColourValue(0.0078, 0.0576, 0.150));
+        vp->setBackgroundColour (Ogre::ColourValue(0.180, 0.235, 0.22352));
         mRenderTarget->setAutoUpdated(true);
         mRenderTarget->addListener(this);
     }
