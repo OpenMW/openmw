@@ -14,6 +14,7 @@ namespace MWMechanics
 {
 
 enum CharacterState {
+    CharState_SpecialIdle,
     CharState_Idle,
     CharState_Idle2,
     CharState_Idle3,

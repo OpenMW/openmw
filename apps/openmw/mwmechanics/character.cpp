@@ -218,7 +218,7 @@ Ogre::Vector3 CharacterController::update(float duration)
             // Apply any sideways movement manually
             movement.x += vec.x * (speed*duration);
         }
-        else
+        else if(mAnimQueue.size() == 0)
             setState((inwater ? CharState_IdleSwim : CharState_Idle), true);
     }
 
@@ -246,7 +246,7 @@ void CharacterController::playGroup(const std::string &groupname, int mode, int 
             while(count-- > 0)
                 mAnimQueue.push_back(groupname);
             mCurrentGroup = groupname;
-            mState = CharState_Idle;
+            mState = CharState_SpecialIdle;
             mAnimation->play(mCurrentGroup, ((mode==2) ? "loop start" : "start"), false);
         }
         else if(mode == 0)
