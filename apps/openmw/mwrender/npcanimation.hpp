@@ -17,7 +17,7 @@ namespace MWRender{
 
 class NpcAnimation: public Animation{
 private:
-    MWWorld::InventoryStore& mInv;
+    MWWorld::InventoryStore *mInv;
     int mStateID;
 
     int mPartslots[27];  //Each part slot is taken by clothing, armor, or is empty
@@ -78,7 +78,13 @@ public:
     virtual ~NpcAnimation();
     NifOgre::EntityList insertBoundedPart(const std::string &mesh, int group, const std::string &bonename);
     virtual void runAnimation(float timepassed);
+
     void updateParts();
+    void updateParts(MWWorld::InventoryStore &inventory) {
+        mInv = &inventory;
+        updateParts();
+    }
+
     void removeEntities(NifOgre::EntityList &entities);
     void removeIndividualPart(int type);
     void reserveIndividualPart(int type, int group, int priority);
