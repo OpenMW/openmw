@@ -8,6 +8,7 @@
 #include <OgreSceneManager.h>
 
 #include "../mwbase/environment.hpp"
+#include "../mwbase/soundmanager.hpp"
 #include "../mwbase/world.hpp"
 
 #include "../mwmechanics/character.hpp"
@@ -406,6 +407,20 @@ Ogre::Vector3 Animation::runAnimation(float timepassed)
             /* Do nothing */
             continue;
         }
+
+        if(evt.compare(0, 7, "sound: ") == 0)
+        {
+            MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
+            sndMgr->playSound3D(mPtr, evt.substr(7), 1.0f, 1.0f);
+            continue;
+        }
+        if(evt.compare(0, 10, "soundgen: ") == 0)
+        {
+            // FIXME: Lookup the SoundGen (SNDG) for the specified sound that corresponds
+            // to this actor type
+            continue;
+        }
+
         if(evt == "loop stop")
         {
             if(mLooping)
