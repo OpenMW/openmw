@@ -59,6 +59,8 @@ protected:
      */
     void reset(const std::string &start, const std::string &stop);
 
+    bool handleEvent(float time, const std::string &evt);
+
     /* Specifies a list of skeleton names to use as animation sources. */
     void setAnimationSources(const std::vector<std::string> &names);
 

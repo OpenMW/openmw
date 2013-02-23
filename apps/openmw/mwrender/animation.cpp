@@ -346,6 +346,54 @@ void Animation::reset(const std::string &start, const std::string &stop)
 }
 
 
+bool Animation::handleEvent(float time, const std::string &evt)
+{
+    if(evt == "start" || evt == "loop start")
+    {
+        /* Do nothing */
+        return true;
+    }
+
+    if(evt.compare(0, 7, "sound: ") == 0)
+    {
+        MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
+        sndMgr->playSound3D(mPtr, evt.substr(7), 1.0f, 1.0f);
+        return true;
+    }
+    if(evt.compare(0, 10, "soundgen: ") == 0)
+    {
+        // FIXME: Lookup the SoundGen (SNDG) for the specified sound that corresponds
+        // to this actor type
+        return true;
+    }
+
+    if(evt == "loop stop")
+    {
+        if(mLooping)
+        {
+            reset("loop start", "");
+            if(mCurrentTime >= time)
+                return false;
+        }
+        return true;
+    }
+    if(evt == "stop")
+    {
+        if(mLooping)
+        {
+            reset("loop start", "");
+            if(mCurrentTime >= time)
+                return false;
+            return true;
+        }
+        // fall-through
+    }
+    if(mController)
+        mController->markerEvent(time, evt);
+    return true;
+}
+
+
 void Animation::play(const std::string &groupname, const std::string &start, const std::string &stop, bool loop)
 {
     try {
@@ -402,48 +450,8 @@ Ogre::Vector3 Animation::runAnimation(float timepassed)
 
         timepassed = targetTime - time;
 
-        if(evt == "start" || evt == "loop start")
-        {
-            /* Do nothing */
-            continue;
-        }
-
-        if(evt.compare(0, 7, "sound: ") == 0)
-        {
-            MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
-            sndMgr->playSound3D(mPtr, evt.substr(7), 1.0f, 1.0f);
-            continue;
-        }
-        if(evt.compare(0, 10, "soundgen: ") == 0)
-        {
-            // FIXME: Lookup the SoundGen (SNDG) for the specified sound that corresponds
-            // to this actor type
-            continue;
-        }
-
-        if(evt == "loop stop")
-        {
-            if(mLooping)
-            {
-                reset("loop start", "");
-                if(mCurrentTime >= time)
-                    break;
-            }
-            continue;
-        }
-        if(evt == "stop")
-        {
-            if(mLooping)
-            {
-                reset("loop start", "");
-                if(mCurrentTime >= time)
-                    break;
-                continue;
-            }
-            // fall-through
-        }
-        if(mController)
-            mController->markerEvent(time, evt);
+        if(!handleEvent(time, evt))
+            break;
     }
 
     return movement;
