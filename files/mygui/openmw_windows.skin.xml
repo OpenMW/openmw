@@ -8,6 +8,118 @@
         </BasisSkin>
     </Skin>
 
+    <!-- Define the borders for pin button (up) -->
+    <Skin name="PU_B" size="12 2" texture="textures\menu_rightbuttonup_bottom.dds">
+        <BasisSkin type="MainSkin" offset = "0 0 12 2">
+            <State name="normal" offset = "0 0 12 2"/>
+        </BasisSkin>
+    </Skin>
+    <Skin name="PU_BR" size="2 2" texture="textures\menu_rightbuttonup_bottom_right.dds">
+        <BasisSkin type="MainSkin" offset = "0 0 2 2">
+            <State name="normal" offset = "0 0 2 2"/>
+        </BasisSkin>
+    </Skin>
+    <Skin name="PU_R" size="2 12" texture="textures\menu_rightbuttonup_right.dds">
+        <BasisSkin type="MainSkin" offset = "0 0 2 12">
+            <State name="normal" offset = "0 0 2 12"/>
+        </BasisSkin>
+    </Skin>
+    <Skin name="PU_TR" size="2 2" texture="textures\menu_rightbuttonup_top_right.dds">
+        <BasisSkin type="MainSkin" offset = "0 0 2 2">
+            <State name="normal" offset = "0 0 2 2"/>
+        </BasisSkin>
+    </Skin>
+    <Skin name="PU_T" size="12 2" texture="textures\menu_rightbuttonup_top.dds">
+        <BasisSkin type="MainSkin" offset = "0 0 12 2">
+            <State name="normal" offset = "0 0 12 2"/>
+        </BasisSkin>
+    </Skin>
+    <Skin name="PU_TL" size="2 2" texture="textures\menu_rightbuttonup_top_left.dds">
+        <BasisSkin type="MainSkin" offset = "0 0 2 2">
+            <State name="normal" offset = "0 0 2 2"/>
+        </BasisSkin>
+    </Skin>
+    <Skin name="PU_L" size="2 12" texture="textures\menu_rightbuttonup_left.dds">
+        <BasisSkin type="MainSkin" offset = "0 0 2 12">
+            <State name="normal" offset = "0 0 2 12"/>
+        </BasisSkin>
+    </Skin>
+    <Skin name="PU_BL" size="2 2" texture="textures\menu_rightbuttonup_bottom_left.dds">
+        <BasisSkin type="MainSkin" offset = "0 0 2 2">
+            <State name="normal" offset = "0 0 2 2"/>
+        </BasisSkin>
+    </Skin>
+
+    <!-- Define the borders for pin button (down) -->
+    <Skin name="PD_B" size="12 2" texture="textures\menu_rightbuttondown_bottom.dds">
+        <BasisSkin type="MainSkin" offset = "0 0 12 2">
+            <State name="normal" offset = "0 0 12 2"/>
+        </BasisSkin>
+    </Skin>
+    <Skin name="PD_BR" size="2 2" texture="textures\menu_rightbuttondown_bottom_right.dds">
+        <BasisSkin type="MainSkin" offset = "0 0 2 2">
+            <State name="normal" offset = "0 0 2 2"/>
+        </BasisSkin>
+    </Skin>
+    <Skin name="PD_R" size="2 12" texture="textures\menu_rightbuttondown_right.dds">
+        <BasisSkin type="MainSkin" offset = "0 0 2 12">
+            <State name="normal" offset = "0 0 2 12"/>
+        </BasisSkin>
+    </Skin>
+    <Skin name="PD_TR" size="2 2" texture="textures\menu_rightbuttondown_top_right.dds">
+        <BasisSkin type="MainSkin" offset = "0 0 2 2">
+            <State name="normal" offset = "0 0 2 2"/>
+        </BasisSkin>
+    </Skin>
+    <Skin name="PD_T" size="12 2" texture="textures\menu_rightbuttondown_top.dds">
+        <BasisSkin type="MainSkin" offset = "0 0 12 2">
+            <State name="normal" offset = "0 0 12 2"/>
+        </BasisSkin>
+    </Skin>
+    <Skin name="PD_TL" size="2 2" texture="textures\menu_rightbuttondown_top_left.dds">
+        <BasisSkin type="MainSkin" offset = "0 0 2 2">
+            <State name="normal" offset = "0 0 2 2"/>
+        </BasisSkin>
+    </Skin>
+    <Skin name="PD_L" size="2 12" texture="textures\menu_rightbuttondown_left.dds">
+        <BasisSkin type="MainSkin" offset = "0 0 2 12">
+            <State name="normal" offset = "0 0 2 12"/>
+        </BasisSkin>
+    </Skin>
+    <Skin name="PD_BL" size="2 2" texture="textures\menu_rightbuttondown_bottom_left.dds">
+        <BasisSkin type="MainSkin" offset = "0 0 2 2">
+            <State name="normal" offset = "0 0 2 2"/>
+        </BasisSkin>
+    </Skin>
+
+    <!-- Define the pin button skin -->
+    <Skin name = "PinUp" size = "19 19" texture="textures\menu_rightbuttonup_center.dds">
+        <BasisSkin type="MainSkin" offset = "0 0 19 19">
+            <State name="normal" offset = "0 0 19 19"/>
+        </BasisSkin>
+        <Child type="Widget" skin="PU_B"  offset="2 17 15 2" align="ALIGN_HSTRETCH ALIGN_VSTRETCH"/>
+        <Child type="Widget" skin="PU_BR" offset="17 17 2 2" align="ALIGN_HSTRETCH ALIGN_VSTRETCH"/>
+				<Child type="Widget" skin="PU_R"  offset="17 2 2 15" align="ALIGN_HSTRETCH ALIGN_VSTRETCH"/>
+        <Child type="Widget" skin="PU_TR" offset="17 0 2 2" align="ALIGN_HSTRETCH ALIGN_VSTRETCH"/>
+        <Child type="Widget" skin="PU_T"  offset="2 0 15 2" align="ALIGN_HSTRETCH ALIGN_VSTRETCH"/>
+        <Child type="Widget" skin="PU_TL" offset="0 0 2 2" align="ALIGN_HSTRETCH ALIGN_VSTRETCH"/>
+        <Child type="Widget" skin="PU_L"  offset="0 2 2 15" align="ALIGN_HSTRETCH ALIGN_VSTRETCH"/>
+        <Child type="Widget" skin="PU_BL" offset="0 17 2 2" align="ALIGN_HSTRETCH ALIGN_VSTRETCH"/>
+    </Skin>
+    <Skin name = "PinDown" size = "19 19" texture="textures\menu_rightbuttondown_center.dds">
+        <BasisSkin type="MainSkin" offset = "0 0 19 19">
+            <State name="normal" offset = "0 0 19 19"/>
+        </BasisSkin>
+        <Child type="Widget" skin="PD_B"  offset="2 17 15 2" align="ALIGN_HSTRETCH ALIGN_VSTRETCH"/>
+        <Child type="Widget" skin="PD_BR" offset="17 17 2 2" align="ALIGN_HSTRETCH ALIGN_VSTRETCH"/>
+				<Child type="Widget" skin="PD_R"  offset="17 2 2 15" align="ALIGN_HSTRETCH ALIGN_VSTRETCH"/>
+        <Child type="Widget" skin="PD_TR" offset="17 0 2 2" align="ALIGN_HSTRETCH ALIGN_VSTRETCH"/>
+        <Child type="Widget" skin="PD_T"  offset="2 0 15 2" align="ALIGN_HSTRETCH ALIGN_VSTRETCH"/>
+        <Child type="Widget" skin="PD_TL" offset="0 0 2 2" align="ALIGN_HSTRETCH ALIGN_VSTRETCH"/>
+        <Child type="Widget" skin="PD_L"  offset="0 2 2 15" align="ALIGN_HSTRETCH ALIGN_VSTRETCH"/>
+        <Child type="Widget" skin="PD_BL" offset="0 17 2 2" align="ALIGN_HSTRETCH ALIGN_VSTRETCH"/>
+    </Skin>
+
     <!-- Defines a pure black background -->
     <Skin name = "DialogBG" size = "8 8" texture = "black.png">
         <BasisSkin type="MainSkin" offset = "0 0 8 8">
@@ -473,9 +585,7 @@
             <Property key="Scale" value = "1 1 0 0"/>
         </Child>
 
-        <Child type="Button" skin="BlackBG" offset="230 4 21 19" align="ALIGN_RIGHT ALIGN_TOP" name="Button">
-            <Property key="Event" value="PinToggle"/>
-        </Child>
+        <Child type="Button" skin="PinUp" offset="232 4 19 19" align="ALIGN_RIGHT ALIGN_TOP" name="Button"/>
     </Skin>
 
     <Skin name = "MW_Dialog" size = "256 54">
