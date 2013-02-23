@@ -31,6 +31,10 @@ namespace CSVDoc
 
             void quitOperation (int type);
             ///< Calling this function for an operation that is not running is a no-op.
+
+        signals:
+
+            void abortOperation (int type);
     };
 }
 
