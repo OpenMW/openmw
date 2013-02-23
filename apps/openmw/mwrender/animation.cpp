@@ -49,6 +49,9 @@ Animation::~Animation()
 
 void Animation::setAnimationSources(const std::vector<std::string> &names)
 {
+    if(!mEntityList.mSkelBase)
+        return;
+
     Ogre::SkeletonManager &skelMgr = Ogre::SkeletonManager::getSingleton();
 
     mCurrentAnim = NULL;
@@ -59,7 +62,7 @@ void Animation::setAnimationSources(const std::vector<std::string> &names)
     mSkeletonSources.clear();
 
     std::vector<std::string>::const_iterator nameiter = names.begin();
-    while(nameiter != names.end())
+    for(nameiter = names.begin();nameiter != names.end();nameiter++)
     {
         Ogre::SkeletonPtr skel = skelMgr.getByName(*nameiter);
         if(skel.isNull())
@@ -69,7 +72,6 @@ void Animation::setAnimationSources(const std::vector<std::string> &names)
             if(skel.isNull())
             {
                 std::cerr<< "Failed to get skeleton source "<<*nameiter <<std::endl;
-                nameiter++;
                 continue;
             }
         }
@@ -84,7 +86,7 @@ void Animation::setAnimationSources(const std::vector<std::string> &names)
             if(data.isEmpty() || !Ogre::any_cast<bool>(data))
                 continue;
 
-            if(!mNonAccumRoot && mEntityList.mSkelBase)
+            if(!mNonAccumRoot)
             {
                 mAccumRoot = mInsert;
                 mNonAccumRoot = mEntityList.mSkelBase->getSkeleton()->getBone(bone->getName());
@@ -102,8 +104,6 @@ void Animation::setAnimationSources(const std::vector<std::string> &names)
 
             break;
         }
-
-        nameiter++;
     }
 }
 
