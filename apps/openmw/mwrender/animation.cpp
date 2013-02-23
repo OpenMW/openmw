@@ -46,45 +46,64 @@ Animation::~Animation()
 }
 
 
-Ogre::Bone *Animation::insertSkeletonSource(const std::string &name)
+void Animation::setAnimationSources(const std::vector<std::string> &names)
 {
     Ogre::SkeletonManager &skelMgr = Ogre::SkeletonManager::getSingleton();
-    Ogre::SkeletonPtr skel = skelMgr.getByName(name);
-    if(skel.isNull())
+
+    mCurrentAnim = NULL;
+    mCurrentKeys = NULL;
+    mAnimVelocity = 0.0f;
+    mAccumRoot = NULL;
+    mNonAccumRoot = NULL;
+    mSkeletonSources.clear();
+
+    std::vector<std::string>::const_iterator nameiter = names.begin();
+    while(nameiter != names.end())
     {
-        NifOgre::Loader::createSkeleton(name);
-        skel = skelMgr.getByName(name);
+        Ogre::SkeletonPtr skel = skelMgr.getByName(*nameiter);
         if(skel.isNull())
         {
-            std::cerr<< "Failed to get skeleton source "<<name <<std::endl;
-            return NULL;
+            NifOgre::Loader::createSkeleton(*nameiter);
+            skel = skelMgr.getByName(*nameiter);
+            if(skel.isNull())
+            {
+                std::cerr<< "Failed to get skeleton source "<<*nameiter <<std::endl;
+                nameiter++;
+                continue;
+            }
         }
-    }
-    skel->touch();
-    mSkeletonSources.push_back(skel);
+        skel->touch();
 
-    Ogre::Skeleton::BoneIterator boneiter = skel->getBoneIterator();
-    while(boneiter.hasMoreElements())
-    {
-        Ogre::Bone *bone = boneiter.getNext();
-        Ogre::UserObjectBindings &bindings = bone->getUserObjectBindings();
-        const Ogre::Any &data = bindings.getUserAny(NifOgre::sTextKeyExtraDataID);
-        if(data.isEmpty() || !Ogre::any_cast<bool>(data))
-            continue;
-
-        for(int i = 0;i < skel->getNumAnimations();i++)
+        Ogre::Skeleton::BoneIterator boneiter = skel->getBoneIterator();
+        while(boneiter.hasMoreElements())
         {
-            Ogre::Animation *anim = skel->getAnimation(i);
-            const Ogre::Any &groupdata = bindings.getUserAny(std::string(NifOgre::sTextKeyExtraDataID)+
-                                                             "@"+anim->getName());
-            if(!groupdata.isEmpty())
-                mTextKeys[anim->getName()] = Ogre::any_cast<NifOgre::TextKeyMap>(groupdata);
+            Ogre::Bone *bone = boneiter.getNext();
+            Ogre::UserObjectBindings &bindings = bone->getUserObjectBindings();
+            const Ogre::Any &data = bindings.getUserAny(NifOgre::sTextKeyExtraDataID);
+            if(data.isEmpty() || !Ogre::any_cast<bool>(data))
+                continue;
+
+            if(!mNonAccumRoot && mEntityList.mSkelBase)
+            {
+                mAccumRoot = mInsert;
+                mNonAccumRoot = mEntityList.mSkelBase->getSkeleton()->getBone(bone->getName());
+            }
+
+            mSkeletonSources.push_back(skel);
+            for(int i = 0;i < skel->getNumAnimations();i++)
+            {
+                Ogre::Animation *anim = skel->getAnimation(i);
+                const Ogre::Any &groupdata = bindings.getUserAny(std::string(NifOgre::sTextKeyExtraDataID)+
+                                                                "@"+anim->getName());
+                if(!groupdata.isEmpty())
+                    mTextKeys[anim->getName()] = Ogre::any_cast<NifOgre::TextKeyMap>(groupdata);
+            }
+
+            break;
         }
 
-        return bone;
+        nameiter++;
     }
-
-    return NULL;
 }
 
 void Animation::createEntityList(Ogre::SceneNode *node, const std::string &model)
@@ -111,31 +130,6 @@ void Animation::createEntityList(Ogre::SceneNode *node, const std::string &model
         Ogre::Skeleton::BoneIterator boneiter = skelinst->getBoneIterator();
         while(boneiter.hasMoreElements())
             boneiter.getNext()->setManuallyControlled(true);
-
-        Ogre::Bone *bone = insertSkeletonSource(skelinst->getName());
-        if(!bone)
-        {
-            for(std::vector<Ogre::SkeletonPtr>::const_iterator iter(mSkeletonSources.begin());
-                !bone && iter != mSkeletonSources.end();iter++)
-            {
-                Ogre::Skeleton::BoneIterator boneiter = (*iter)->getBoneIterator();
-                while(boneiter.hasMoreElements())
-                {
-                    bone = boneiter.getNext();
-                    Ogre::UserObjectBindings &bindings = bone->getUserObjectBindings();
-                    const Ogre::Any &data = bindings.getUserAny(NifOgre::sTextKeyExtraDataID);
-                    if(!data.isEmpty() && Ogre::any_cast<bool>(data))
-                        break;
-
-                    bone = NULL;
-                }
-            }
-        }
-        if(bone)
-        {
-            mAccumRoot = mInsert;
-            mNonAccumRoot = skelinst->getBone(bone->getName());
-        }
     }
 }
 

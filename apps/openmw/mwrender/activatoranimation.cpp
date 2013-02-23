@@ -51,6 +51,7 @@ ActivatorAnimation::ActivatorAnimation(const MWWorld::Ptr &ptr)
             ent->setVisibilityFlags(RV_Misc);
             ent->setRenderQueueGroup(transparent ? RQG_Alpha : RQG_Main);
         }
+        setAnimationSource(mesh);
     }
 }
 

@@ -57,9 +57,15 @@ protected:
      * anything. If the marker is not found, it resets to the beginning. */
     void reset(const std::string &marker);
 
-    /* Inserts an additional skeleton into the animation source chain. Returns
-     * the bone representing the non-accum root from the base skeleton. */
-    Ogre::Bone *insertSkeletonSource(const std::string &name);
+    /* Specifies a list of skeleton names to use as animation sources. */
+    void setAnimationSources(const std::vector<std::string> &names);
+
+    /* Specifies a single skeleton name to use as an animation source. */
+    void setAnimationSource(const std::string &name)
+    {
+        std::vector<std::string> names(1, name);
+        setAnimationSources(names);
+    }
 
     void createEntityList(Ogre::SceneNode *node, const std::string &model);
 

@@ -23,10 +23,9 @@ CreatureAnimation::CreatureAnimation(const MWWorld::Ptr &ptr)
     assert (ref->mBase != NULL);
     if(!ref->mBase->mModel.empty())
     {
-        if((ref->mBase->mFlags&ESM::Creature::Biped))
-            insertSkeletonSource("meshes\\base_anim.nif");
+        std::string model = "meshes\\"+ref->mBase->mModel;
 
-        createEntityList(mPtr.getRefData().getBaseNode(), "meshes\\"+ref->mBase->mModel);
+        createEntityList(mPtr.getRefData().getBaseNode(), model);
         for(size_t i = 0;i < mEntityList.mEntities.size();i++)
         {
             Ogre::Entity *ent = mEntityList.mEntities[i];
@@ -52,6 +51,12 @@ CreatureAnimation::CreatureAnimation(const MWWorld::Ptr &ptr)
             }
             ent->setRenderQueueGroup(transparent ? RQG_Alpha : RQG_Main);
         }
+
+        std::vector<std::string> names;
+        if((ref->mBase->mFlags&ESM::Creature::Biped))
+            names.push_back("meshes\\base_anim.nif");
+        names.push_back(model);
+        setAnimationSources(names);
     }
 }
 

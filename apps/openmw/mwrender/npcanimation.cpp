@@ -125,13 +125,14 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node, MWWor
         base->setRenderQueueGroup(transparent ? RQG_Alpha : RQG_Main);
     }
 
+    std::vector<std::string> skelnames(1, smodel);
     if(!mNpc->isMale() && !isBeast)
-        insertSkeletonSource("meshes\\base_anim_female.nif");
+        skelnames.push_back("meshes\\base_anim_female.nif");
     else if(mBodyPrefix.find("argonian") != std::string::npos)
-        insertSkeletonSource("meshes\\argonian_swimkna.nif");
-
+        skelnames.push_back("meshes\\argonian_swimkna.nif");
     if(mNpc->mModel.length() > 0)
-        insertSkeletonSource("meshes\\"+Misc::StringUtils::lowerCase(mNpc->mModel));
+        skelnames.push_back("meshes\\"+Misc::StringUtils::lowerCase(mNpc->mModel));
+    setAnimationSources(skelnames);
 
     updateParts(true);
 }
