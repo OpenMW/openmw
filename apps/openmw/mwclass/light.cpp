@@ -37,6 +37,8 @@ namespace MWClass
 
         if (!model.empty())
             objects.insertMesh(ptr, "meshes\\" + model, true);
+        else
+            objects.insertLight(ptr, NULL);
     }
 
     void Light::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics) const
