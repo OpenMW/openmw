@@ -376,7 +376,7 @@ void RenderingManager::update (float duration, bool paused)
     float *fpos = data.getPosition().pos;
 
     // only for LocalMap::updatePlayer()
-    Ogre::Vector3 pos(fpos[0], -fpos[2], -fpos[1]);
+    Ogre::Vector3 pos(fpos[0], fpos[2], -fpos[1]);
 
     Ogre::SceneNode *node = data.getBaseNode();
     Ogre::Quaternion orient =

@@ -1,6 +1,6 @@
 #include "core.h"
 
-#define DAMPING 0.92
+#define DAMPING 0.95
 
 #include "watersim_common.h"
 

@@ -24,7 +24,7 @@ public:
 
     void update(float dt, Ogre::Vector2 position);
 
-    void addImpulse (Ogre::Vector2 position);
+    void addImpulse (Ogre::Vector2 position, float scale = 1.f, float force = 1.f);
 
 private:
     Ogre::RenderTexture* mRenderTargets[4];
@@ -33,6 +33,8 @@ private:
     int mTextureSize;
     float mRippleAreaLength;
     float mImpulseSize;
+
+    Ogre::Vector2 mLastPos;
 
     bool mFirstUpdate;
 

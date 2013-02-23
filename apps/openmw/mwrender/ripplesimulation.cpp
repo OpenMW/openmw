@@ -21,7 +21,8 @@ RippleSimulation::RippleSimulation(Ogre::SceneManager* mainSceneManager)
       mRippleAreaLength(1000),
       mImpulseSize(20),
       mTexelOffset(0,0),
-      mFirstUpdate(true)
+      mFirstUpdate(true),
+      mLastPos(0,0)
 {
     Ogre::AxisAlignedBox aabInf;
     aabInf.setInfinite();
@@ -141,8 +142,16 @@ void RippleSimulation::update(float dt, Ogre::Vector2 position)
          new sh::Vector3(mRippleCenter.x + mTexelOffset.x, mRippleCenter.y + mTexelOffset.y, 0)));
 }
 
-void RippleSimulation::addImpulse(Ogre::Vector2 position)
+void RippleSimulation::addImpulse(Ogre::Vector2 position, float scale, float force)
 {
+    // don't emit if there wasn't enough movement
+    /// \todo this should be done somewhere else, otherwise multiple emitters cannot be supported
+    if ((position - mLastPos).length () <= 2)
+        return;
+
+    mLastPos = position;
+
+    /// \todo scale, force
     mImpulses.push(position);
 }
 

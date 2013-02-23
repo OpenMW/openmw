@@ -499,4 +499,10 @@ void Water::createdConfiguration (sh::MaterialInstance* m, const std::string& co
     }
 }
 
+void Water::addImpulse (Vector2 position, float scale, float force)
+{
+    if (mSimulation)
+        mSimulation->addImpulse (position, scale, force);
+}
+
 } // namespace
