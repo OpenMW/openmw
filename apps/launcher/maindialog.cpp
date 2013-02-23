@@ -180,7 +180,7 @@ bool MainDialog::showFirstRunDialog()
 
     if (msgBox.clickedButton() == importerButton) {
 
-        QString iniPath;
+        QStringList iniPaths;
 
         foreach (const QString &path, mGameSettings.getDataDirs()) {
             QDir dir(path);
@@ -190,10 +190,10 @@ bool MainDialog::showFirstRunDialog()
                 continue; // Cannot move from Data Files
 
             if (dir.exists(QString("Morrowind.ini")))
-                iniPath = dir.absoluteFilePath(QString("Morrowind.ini"));
+                iniPaths.append(dir.absoluteFilePath(QString("Morrowind.ini")));
         }
 
-        if (iniPath.isEmpty()) {
+        if (iniPaths.isEmpty()) {
             QMessageBox msgBox;
             msgBox.setWindowTitle(tr("Error reading Morrowind configuration file"));
             msgBox.setIcon(QMessageBox::Warning);
@@ -203,6 +203,21 @@ bool MainDialog::showFirstRunDialog()
                               Reinstalling Morrowind may resolve the problem."));
             msgBox.exec();
             return false;
+        }
+
+        if (iniPaths.count() > 1) {
+            // Multiple Morrowind.ini files found
+            bool ok;
+                QString path = QInputDialog::getItem(this, tr("Multiple configurations found"),
+                                                     tr("<br><b>There are multiple Morrowind.ini files found.</b><br><br> \
+                                                        Please select the one you wish to import from:"), iniPaths, 0, false, &ok);
+                if (ok && !path.isEmpty()) {
+                    iniPaths.clear();
+                    iniPaths.append(path);
+                } else {
+                    // Cancel was clicked TODO: should we abort here?
+                    return false;
+                }
         }
 
         // Create the file if it doesn't already exist, else the importer will fail
@@ -232,7 +247,7 @@ bool MainDialog::showFirstRunDialog()
         if (msgBox.isChecked())
             arguments.append(QString("-g"));
 
-        arguments.append(iniPath);
+        arguments.append(iniPaths.first());
         arguments.append(path);
 
         if (!startProgram(QString("mwiniimport"), arguments, false))
