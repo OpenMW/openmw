@@ -49,7 +49,6 @@ protected:
      * bone names) are positioned identically. */
     void updateSkeletonInstance(const Ogre::SkeletonInstance *skelsrc, Ogre::SkeletonInstance *skel);
 
-
     /* Updates the animation to the specified time, and returns the movement
      * vector since the last update or reset. */
     Ogre::Vector3 updatePosition(float time);
@@ -77,6 +76,8 @@ public:
     virtual ~Animation();
 
     void setController(MWMechanics::CharacterController *controller);
+
+    void updatePtr(const MWWorld::Ptr &ptr);
 
     bool hasAnimation(const std::string &anim);
 

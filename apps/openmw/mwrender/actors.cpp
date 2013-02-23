@@ -169,6 +169,7 @@ void Actors::updateObjectCell(const MWWorld::Ptr &ptr)
     {
         Animation *anim = iter->second;
         mAllActors.erase(iter);
+        anim->updatePtr(ptr);
         mAllActors[ptr] = anim;
     }
 }

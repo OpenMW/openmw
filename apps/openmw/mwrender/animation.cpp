@@ -169,6 +169,11 @@ void Animation::setLooping(bool loop)
     mLooping = loop;
 }
 
+void Animation::updatePtr(const MWWorld::Ptr &ptr)
+{
+    mPtr = ptr;
+}
+
 
 void Animation::calcAnimVelocity()
 {
