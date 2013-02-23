@@ -167,11 +167,7 @@ void Actors::updateObjectCell(const MWWorld::Ptr &ptr)
     PtrAnimationMap::iterator iter = mAllActors.find(ptr);
     if(iter != mAllActors.end())
     {
-        /// \note Update key (Ptr's are compared only with refdata so mCell
-        /// on key is outdated), maybe redundant
-        NpcAnimation *anim = static_cast<NpcAnimation *>(iter->second);
-        anim->updateParts(MWWorld::Class::get(ptr).getInventoryStore(ptr));
-
+        Animation *anim = iter->second;
         mAllActors.erase(iter);
         mAllActors[ptr] = anim;
     }

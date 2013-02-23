@@ -3,12 +3,16 @@
 
 #include "animation.hpp"
 
-#include "../mwworld/inventorystore.hpp"
 #include "../mwworld/containerstore.hpp"
 
 namespace ESM
 {
     struct NPC;
+}
+
+namespace MWWorld
+{
+    class InventoryStore;
 }
 
 namespace MWRender
@@ -26,7 +30,6 @@ private:
     static const size_t sPartListSize = 27;
     static const PartInfo sPartList[sPartListSize];
 
-    MWWorld::InventoryStore *mInv;
     int mStateID;
 
     // Bounded Parts
@@ -75,11 +78,6 @@ public:
 
     virtual Ogre::Vector3 runAnimation(float timepassed);
 
-    void updateParts(MWWorld::InventoryStore &inventory)
-    {
-        mInv = &inventory;
-        updateParts(true);
-    }
     void forceUpdate()
     { updateParts(true); }
 };

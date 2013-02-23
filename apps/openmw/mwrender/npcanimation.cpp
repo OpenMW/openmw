@@ -5,6 +5,8 @@
 #include <OgreSubEntity.h>
 
 #include "../mwworld/esmstore.hpp"
+#include "../mwworld/inventorystore.hpp"
+#include "../mwworld/class.hpp"
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -54,22 +56,21 @@ NpcAnimation::~NpcAnimation()
 
 NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node, MWWorld::InventoryStore& inv, int visibilityFlags)
   : Animation(ptr),
-    mInv(&inv),
     mStateID(-1),
     mTimeToChange(0),
     mVisibilityFlags(visibilityFlags),
-    mRobe(mInv->end()),
-    mHelmet(mInv->end()),
-    mShirt(mInv->end()),
-    mCuirass(mInv->end()),
-    mGreaves(mInv->end()),
-    mPauldronL(mInv->end()),
-    mPauldronR(mInv->end()),
-    mBoots(mInv->end()),
-    mPants(mInv->end()),
-    mGloveL(mInv->end()),
-    mGloveR(mInv->end()),
-    mSkirtIter(mInv->end())
+    mRobe(inv.end()),
+    mHelmet(inv.end()),
+    mShirt(inv.end()),
+    mCuirass(inv.end()),
+    mGreaves(inv.end()),
+    mPauldronL(inv.end()),
+    mPauldronR(inv.end()),
+    mBoots(inv.end()),
+    mPants(inv.end()),
+    mGloveL(inv.end()),
+    mGloveR(inv.end()),
+    mSkirtIter(inv.end())
 {
     mNpc = mPtr.get<ESM::NPC>()->mBase;
 
@@ -213,9 +214,10 @@ void NpcAnimation::updateParts(bool forceupdate)
     };
     static const size_t slotlistsize = sizeof(slotlist)/sizeof(slotlist[0]);
 
+    MWWorld::InventoryStore &inv = MWWorld::Class::get(mPtr).getInventoryStore(mPtr);
     for(size_t i = 0;!forceupdate && i < slotlistsize;i++)
     {
-        MWWorld::ContainerStoreIterator iter = mInv->getSlot(slotlist[i].slot);
+        MWWorld::ContainerStoreIterator iter = inv.getSlot(slotlist[i].slot);
         if(this->*slotlist[i].part != iter)
         {
             forceupdate = true;
@@ -227,12 +229,12 @@ void NpcAnimation::updateParts(bool forceupdate)
 
     for(size_t i = 0;i < slotlistsize;i++)
     {
-        MWWorld::ContainerStoreIterator iter = mInv->getSlot(slotlist[i].slot);
+        MWWorld::ContainerStoreIterator iter = inv.getSlot(slotlist[i].slot);
 
         this->*slotlist[i].part = iter;
         removePartGroup(slotlist[i].slot);
 
-        if(this->*slotlist[i].part == mInv->end())
+        if(this->*slotlist[i].part == inv.end())
             continue;
 
         for(int rem = 0;rem < slotlist[i].numRemoveParts;rem++)
