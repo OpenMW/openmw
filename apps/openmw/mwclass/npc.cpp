@@ -71,6 +71,11 @@ namespace MWClass
             fMaxFlySpeed = gmst.find("fMaxFlySpeed");
             fSwimRunBase = gmst.find("fSwimRunBase");
             fSwimRunAthleticsMult = gmst.find("fSwimRunAthleticsMult");
+            fJumpEncumbranceBase = gmst.find("fJumpEncumbranceBase");
+            fJumpEncumbranceMultiplier = gmst.find("fJumpEncumbranceMultiplier");
+            fJumpAcrobaticsBase = gmst.find("fJumpAcrobaticsBase");
+            fJumpAcroMultiplier = gmst.find("fJumpAcroMultiplier");
+            fJumpRunMultiplier = gmst.find("fJumpRunMultiplier");
             // Added in Tribunal/Bloodmoon, may not exist
             fWereWolfRunMult = gmst.search("fWereWolfRunMult");
 
@@ -371,6 +376,37 @@ namespace MWClass
         return moveSpeed;
     }
 
+    float Npc::getJump(const MWWorld::Ptr &ptr) const
+    {
+        const CustomData *npcdata = static_cast<const CustomData*>(ptr.getRefData().getCustomData());
+        const MWMechanics::MagicEffects &mageffects = npcdata->mCreatureStats.getMagicEffects();
+        const float encumbranceTerm = fJumpEncumbranceBase->getFloat() +
+                                          fJumpEncumbranceMultiplier->getFloat() *
+                                          (Npc::getEncumbrance(ptr)/Npc::getCapacity(ptr));
+
+        float a = npcdata->mNpcStats.getSkill(ESM::Skill::Acrobatics).getModified();
+        float b = 0.0f;
+        if(a > 50.0f)
+        {
+            b = a - 50.0f;
+            a = 50.0f;
+        }
+
+        float x = fJumpAcrobaticsBase->getFloat() +
+                  std::pow(a / 15.0f, fJumpAcroMultiplier->getFloat());
+        x += 3 * b * fJumpAcroMultiplier->getFloat();
+        x += mageffects.get(MWMechanics::EffectKey(9/*jump*/)).mMagnitude * 64;
+        x *= encumbranceTerm;
+
+        if(Npc::getStance(ptr, Run, false))
+            x *= fJumpRunMultiplier->getFloat();
+        x *= 1.25f;//fatigueTerm;
+        x -= -627.2/*gravity constant*/;
+        x /= 3;
+
+        return x;
+    }
+
     MWMechanics::Movement& Npc::getMovementSettings (const MWWorld::Ptr& ptr) const
     {
         ensureCustomData (ptr);
@@ -496,5 +532,10 @@ namespace MWClass
     const ESM::GameSetting *Npc::fMaxFlySpeed;
     const ESM::GameSetting *Npc::fSwimRunBase;
     const ESM::GameSetting *Npc::fSwimRunAthleticsMult;
+    const ESM::GameSetting *Npc::fJumpEncumbranceBase;
+    const ESM::GameSetting *Npc::fJumpEncumbranceMultiplier;
+    const ESM::GameSetting *Npc::fJumpAcrobaticsBase;
+    const ESM::GameSetting *Npc::fJumpAcroMultiplier;
+    const ESM::GameSetting *Npc::fJumpRunMultiplier;
     const ESM::GameSetting *Npc::fWereWolfRunMult;
 }

@@ -172,11 +172,25 @@ Ogre::Vector3 CharacterController::update(float duration)
         bool isrunning = cls.getStance(mPtr, MWWorld::Class::Run);
         speed = cls.getSpeed(mPtr);
 
-        // This jump is all kinds of wrong. The speed is incorrect, the state should be set to
-        // Jump, and X/Y movement should be disallowed except for the initial thrust (which would
-        // be carried by "physics" until landing).
-        if(onground)
-            movement.z += vec.z * (500.0f*duration);
+        /* FIXME: The state should be set to Jump, and X/Y movement should be disallowed except
+         * for the initial thrust (which would be carried by "physics" until landing). */
+        if(onground && vec.z > 0.0f)
+        {
+            float x = cls.getJump(mPtr);
+
+            if(vec.x == 0 && vec.y == 0)
+                movement.z += x*duration;
+            else
+            {
+                /* FIXME: this would be more correct if we were going into a jumping state,
+                 * rather than normal walking/idle states. */
+                //Ogre::Vector3 lat = Ogre::Vector3(vec.x, vec.y, 0.0f).normalisedCopy();
+                //movement += Ogre::Vector3(lat.x, lat.y, 1.0f) * x * 0.707f * duration;
+                movement.z += x * 0.707f * duration;
+            }
+
+            //decrease fatigue by fFatigueJumpBase + (1 - normalizedEncumbrance) * fFatigueJumpMult;
+        }
 
         if(std::abs(vec.x/2.0f) > std::abs(vec.y) && speed > 0.0f)
         {

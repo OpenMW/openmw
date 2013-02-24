@@ -27,6 +27,11 @@ namespace MWClass
             static const ESM::GameSetting *fMaxFlySpeed;
             static const ESM::GameSetting *fSwimRunBase;
             static const ESM::GameSetting *fSwimRunAthleticsMult;
+            static const ESM::GameSetting *fJumpEncumbranceBase;
+            static const ESM::GameSetting *fJumpEncumbranceMultiplier;
+            static const ESM::GameSetting *fJumpAcrobaticsBase;
+            static const ESM::GameSetting *fJumpAcroMultiplier;
+            static const ESM::GameSetting *fJumpRunMultiplier;
             static const ESM::GameSetting *fWereWolfRunMult;
 
         public:
@@ -80,6 +85,9 @@ namespace MWClass
 
             virtual float getSpeed (const MWWorld::Ptr& ptr) const;
             ///< Return movement speed.
+
+            virtual float getJump(const MWWorld::Ptr &ptr) const;
+            ///< Return jump velocity (not accounting for movement)
 
             virtual MWMechanics::Movement& getMovementSettings (const MWWorld::Ptr& ptr) const;
             ///< Return desired movement.
