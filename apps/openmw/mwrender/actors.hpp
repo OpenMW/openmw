@@ -42,7 +42,7 @@ namespace MWRender
         void update (float duration);
 
         /// Updates containing cell for object rendering data
-        void updateObjectCell(const MWWorld::Ptr &ptr);
+        void updateObjectCell(const MWWorld::Ptr &old, const MWWorld::Ptr &cur);
 
         Animation* getAnimation(const MWWorld::Ptr &ptr);
     };

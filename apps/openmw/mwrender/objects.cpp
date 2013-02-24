@@ -533,10 +533,10 @@ void Objects::rebuildStaticGeometry()
     }
 }
 
-void Objects::updateObjectCell(const MWWorld::Ptr &ptr)
+void Objects::updateObjectCell(const MWWorld::Ptr &old, const MWWorld::Ptr &cur)
 {
     Ogre::SceneNode *node;
-    MWWorld::CellStore *newCell = ptr.getCell();
+    MWWorld::CellStore *newCell = cur.getCell();
 
     if(mCellSceneNodes.find(newCell) == mCellSceneNodes.end()) {
         node = mMwRoot->createChildSceneNode();
@@ -544,6 +544,6 @@ void Objects::updateObjectCell(const MWWorld::Ptr &ptr)
     } else {
         node = mCellSceneNodes[newCell];
     }
-    node->addChild(ptr.getRefData().getBaseNode());
+    node->addChild(cur.getRefData().getBaseNode());
 }
 
