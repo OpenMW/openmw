@@ -19,7 +19,7 @@ namespace MWWorld
 
         virtual size_t getSize() const = 0;
         virtual void load(ESM::ESMReader &esm, const std::string &id) = 0;
-        
+
         virtual bool eraseStatic(const std::string &id) {return false;}
     };
 
@@ -110,7 +110,7 @@ namespace MWWorld
             item.mId = Misc::StringUtils::lowerCase(id);
 
             typename std::map<std::string, T>::const_iterator it = mStatic.find(item.mId);
-            
+
             if (it != mStatic.end() && Misc::StringUtils::ciEqual(it->second.mId, id)) {
                 return &(it->second);
             }
@@ -188,14 +188,14 @@ namespace MWWorld
             item.mId = Misc::StringUtils::lowerCase(id);
 
             typename std::map<std::string, T>::iterator it = mStatic.find(item.mId);
-            
+
             if (it != mStatic.end() && Misc::StringUtils::ciEqual(it->second.mId, id)) {
                 mStatic.erase(it);
             }
 
             return true;
         }
-        
+
         bool erase(const std::string &id) {
             std::string key = Misc::StringUtils::lowerCase(id);
             typename Dynamic::iterator it = mDynamic.find(key);
@@ -220,9 +220,15 @@ namespace MWWorld
     template <>
     inline void Store<ESM::Dialogue>::load(ESM::ESMReader &esm, const std::string &id) {
         std::string idLower = Misc::StringUtils::lowerCase(id);
-        mStatic[idLower] = ESM::Dialogue();
-        mStatic[idLower].mId = id; // don't smash case here, as this line is printed... I think
-        mStatic[idLower].load(esm);
+
+        std::map<std::string, ESM::Dialogue>::iterator it = mStatic.find(idLower);
+        if (it == mStatic.end()) {
+            it = mStatic.insert( std::make_pair( idLower, ESM::Dialogue() ) ).first;
+            it->second.mId = id; // don't smash case here, as this line is printed... I think
+        }
+
+        //I am not sure is it need to load the dialog from a plugin if it was already loaded from prevois plugins
+        it->second.load(esm);
     }
 
     template <>
@@ -409,7 +415,7 @@ namespace MWWorld
 
         DynamicInt mDynamicInt;
         DynamicExt mDynamicExt;
-        
+
         const ESM::Cell *search(const ESM::Cell &cell) const {
             if (cell.isExterior()) {
                 return search(cell.getGridX(), cell.getGridY());
@@ -481,7 +487,7 @@ namespace MWWorld
             newCell->mData.mY = y;
             mExt[std::make_pair(x, y)] = *newCell;
             delete newCell;
-            
+
             return &mExt[std::make_pair(x, y)];
         }
 
@@ -528,7 +534,7 @@ namespace MWWorld
         //  There some nasty three-way cyclic header dependency involved, which I could only fix by moving
         //  this method.
         void load(ESM::ESMReader &esm, const std::string &id);
-        
+
         iterator intBegin() const {
             return iterator(mSharedInt.begin());
         }

@@ -140,25 +140,42 @@ namespace MWScript
 
     Compiler::Locals& ScriptManager::getLocals (const std::string& name)
     {
-        ScriptCollection::iterator iter = mScripts.find (name);
-
-        if (iter==mScripts.end())
         {
-            if (!compile (name))
-            {
-                /// \todo Handle case of cyclic member variable access. Currently this could look up
-                /// the whole application in an endless recursion.
+            ScriptCollection::iterator iter = mScripts.find (name);
 
-                // failed -> ignore script from now on.
-                std::vector<Interpreter::Type_Code> empty;
-                mScripts.insert (std::make_pair (name, std::make_pair (empty, Compiler::Locals())));
-                throw std::runtime_error ("failed to compile script " + name);
-            }
-
-            iter = mScripts.find (name);
+            if (iter!=mScripts.end())
+                return iter->second.second;
         }
 
-        return iter->second.second;
+        {
+            std::map<std::string, Compiler::Locals>::iterator iter = mOtherLocals.find (name);
+
+            if (iter!=mOtherLocals.end())
+                return iter->second;
+        }
+
+        Compiler::Locals locals;
+
+        if (const ESM::Script *script = mStore.get<ESM::Script>().find (name))
+        {
+            int index = 0;
+
+            for (int i=0; i<script->mData.mNumShorts; ++i)
+                locals.declare ('s', script->mVarNames[index++]);
+
+            for (int i=0; i<script->mData.mNumLongs; ++i)
+                locals.declare ('l', script->mVarNames[index++]);
+
+            for (int i=0; i<script->mData.mNumFloats; ++i)
+                locals.declare ('f', script->mVarNames[index++]);
+
+            std::map<std::string, Compiler::Locals>::iterator iter =
+                mOtherLocals.insert (std::make_pair (name, locals)).first;
+
+            return iter->second;
+        }
+
+        throw std::logic_error ("script " + name + " does not exist");
     }
 
     GlobalScripts& ScriptManager::getGlobalScripts()

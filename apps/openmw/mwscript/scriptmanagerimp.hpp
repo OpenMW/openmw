@@ -47,6 +47,7 @@ namespace MWScript
 
             ScriptCollection mScripts;
             GlobalScripts mGlobalScripts;
+            std::map<std::string, Compiler::Locals> mOtherLocals;
 
         public:
 
