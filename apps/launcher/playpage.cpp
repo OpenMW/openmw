@@ -15,10 +15,15 @@ PlayPage::PlayPage(QWidget *parent) : QWidget(parent)
     QLabel *profileLabel = new QLabel(tr("Current Profile:"), playWidget);
     profileLabel->setObjectName("ProfileLabel");
 
+    // Hacks to get the stylesheet look properly on different platforms
     QPlastiqueStyle *style = new QPlastiqueStyle;
+    QFont font = QApplication::font();
+    font.setPointSize(12); // Fixes problem with overlapping items
+
     mProfilesComboBox = new QComboBox(playWidget);
     mProfilesComboBox->setObjectName("ProfilesComboBox");
     mProfilesComboBox->setStyle(style);
+    mProfilesComboBox->setFont(font);
 
     QGridLayout *playLayout = new QGridLayout(playWidget);
 
