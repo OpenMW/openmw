@@ -37,7 +37,7 @@
 
 //TODO: when threading is needed, enable these
 //#include <boost/mutex.hpp>
-//#include <boost/thread/locks.hpp>
+#include <boost/thread/locks.hpp>
 
 namespace Nif
 {

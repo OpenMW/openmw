@@ -153,6 +153,10 @@ void FFmpeg_Decoder::open(const std::string &fname)
 
     try
     {
+        for(size_t j = 0;j < mFormatCtx->nb_streams;j++)
+            if(mFormatCtx->streams[j]->codec->codec_type == AVMEDIA_TYPE_AUDIO)
+                mFormatCtx->streams[j]->codec->request_sample_fmt = AV_SAMPLE_FMT_S16;
+
         if(avformat_find_stream_info(mFormatCtx, NULL) < 0)
             fail("Failed to find stream info in "+fname);
 

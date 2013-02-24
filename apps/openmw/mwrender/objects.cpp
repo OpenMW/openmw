@@ -514,9 +514,5 @@ void Objects::updateObjectCell(const MWWorld::Ptr &ptr)
         node = mCellSceneNodes[newCell];
     }
     node->addChild(ptr.getRefData().getBaseNode());
-
-    /// \note Still unaware how to move aabb and static w/o full rebuild,
-    /// moving static objects may cause problems
-    insertMesh(ptr, MWWorld::Class::get(ptr).getModel(ptr));
 }
 

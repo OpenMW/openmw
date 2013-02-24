@@ -6,12 +6,12 @@
 
         <Widget type="ImageBox" skin="ImageBox" position="0 0 300 300" align="Stretch" name="BackgroundImage">
 
-            <Widget type="Widget" skin="HUD_Box" position="0 200 300 70" align="Bottom HCenter">
+            <Widget type="Widget" skin="HUD_Box" position="0 200 300 60" align="Bottom HCenter">
 
                 <Widget type="AutoSizedTextBox" skin="SandText" position="20 12 260 24" name="LoadingText">
                 </Widget>
 
-                <Widget type="ProgressBar" skin="MW_Progress_Blue" position="20 38 260 24" name="ProgressBar">
+                <Widget type="ProgressBar" skin="MW_Progress_Loading" position="20 36 260 8" name="ProgressBar">
                     <Property key="Range" value="1000"/>
                 </Widget>
 

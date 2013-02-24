@@ -16,6 +16,7 @@ Alexander Olofsson (Ace)
 Artem Kotsynyak (greye)
 athile
 BrotherBrick
+Chris Robinson
 Cory F. Cohen (cfcohen)
 Cris Mihalache (Mirceam)
 Douglas Diniz (Dgdiniz)
@@ -28,6 +29,7 @@ Jannik Heller (scrawl)
 Jason Hooks (jhooks)
 Joel Graff (graffy)
 Karl-Felix Glatzer (k1ll)
+Lars Söderberg (Lazaroth)
 lazydev
 Leon Saunders (emoose)
 Lukasz Gromanowski (lgro)
@@ -39,6 +41,7 @@ Nikolay Kasyanov (corristo)
 Pieter van der Kloet (pvdk)
 Roman Melnik (Kromgart)
 Sebastian Wick (swick)
+Sergey Shambir
 Sylvain T. (Garvek)
 Tom Mason (wheybags)
 

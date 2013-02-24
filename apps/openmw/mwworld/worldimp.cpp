@@ -746,7 +746,11 @@ namespace MWWorld
                     copyObjectToCell(ptr, newCell, pos);
                 else if (!mWorldScene->isCellActive(newCell))
                 {
-                    MWWorld::Class::get(ptr).copyToCell(ptr, newCell);
+                    MWWorld::Class::get(ptr)
+                        .copyToCell(ptr, newCell)
+                        .getRefData()
+                        .setBaseNode(0);
+
                     mWorldScene->removeObjectFromScene(ptr);
                     mLocalScripts.remove(ptr);
                     removeContainerScripts (ptr);
