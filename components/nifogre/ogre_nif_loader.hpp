@@ -53,13 +53,9 @@ struct EntityList {
 struct MeshInfo {
     std::string mMeshName;
     std::string mTargetNode;
-    Ogre::Vector3 mPos;
-    Ogre::Matrix3 mRot;
-    float mScale;
 
-    MeshInfo(const std::string &name, const std::string &target,
-             const Ogre::Vector3 &pos, const Ogre::Matrix3 &rot, float scale)
-      : mMeshName(name), mTargetNode(target), mPos(pos), mRot(rot), mScale(scale)
+    MeshInfo(const std::string &name, const std::string &target)
+      : mMeshName(name), mTargetNode(target)
     { }
 };
 typedef std::vector<MeshInfo> MeshInfoList;

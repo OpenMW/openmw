@@ -303,9 +303,6 @@ static TextKeyMap extractTextKeys(const Nif::NiTextKeyExtraData *tk)
 
 void buildBones(Ogre::Skeleton *skel, const Nif::Node *node, Ogre::Bone *&animroot, TextKeyMap &textkeys, std::vector<Nif::NiKeyframeController const*> &ctrls, Ogre::Bone *parent=NULL)
 {
-    if(node->recType == Nif::RC_NiTriShape)
-        return;
-
     Ogre::Bone *bone;
     if(!skel->hasBone(node->name))
         bone = skel->createBone(node->name);
@@ -319,7 +316,8 @@ void buildBones(Ogre::Skeleton *skel, const Nif::Node *node, Ogre::Bone *&animro
     bone->setBindingPose();
 
     if(!(node->recType == Nif::RC_NiNode || /* Nothing special; children traversed below */
-         node->recType == Nif::RC_RootCollisionNode /* handled in nifbullet (hopefully) */
+         node->recType == Nif::RC_RootCollisionNode || /* handled in nifbullet (hopefully) */
+         node->recType == Nif::RC_NiTriShape /* Handled in the mesh loader */
          ))
         warn("Unhandled "+node->recName+" "+node->name+" in "+skel->getName());
 
@@ -1073,8 +1071,7 @@ public:
                 mesh->setAutoBuildEdgeLists(false);
             }
 
-            meshes.push_back(MeshInfo(mesh->getName(), (shape->parent ? shape->parent->name : shape->name),
-                                      shape->trafo.pos, shape->trafo.rotation, shape->trafo.scale));
+            meshes.push_back(MeshInfo(mesh->getName(), shape->name));
         }
 
         const Nif::NiNode *ninode = dynamic_cast<const Nif::NiNode*>(node);
@@ -1108,8 +1105,7 @@ public:
             mesh = meshMgr.createManual(fullname, mGroup, loader);
             mesh->setAutoBuildEdgeLists(false);
         }
-        meshes.push_back(MeshInfo(mesh->getName(), (node->parent ? node->parent->name : node->name),
-                                  node->trafo.pos, node->trafo.rotation, node->trafo.scale));
+        meshes.push_back(MeshInfo(mesh->getName(), node->name));
     }
 };
 NIFMeshLoader::LoaderMap NIFMeshLoader::sLoaders;
@@ -1190,12 +1186,7 @@ EntityList Loader::createEntities(Ogre::SceneNode *parentNode, std::string name,
                 parentNode->attachObject(entity);
             }
             else if(entity != entitylist.mSkelBase)
-            {
-                Ogre::TagPoint *tag = entitylist.mSkelBase->attachObjectToBone(meshes[i].mTargetNode, entity);
-                tag->setPosition(meshes[i].mPos);
-                tag->setOrientation(meshes[i].mRot);
-                tag->setScale(Ogre::Vector3(meshes[i].mScale));
-            }
+                entitylist.mSkelBase->attachObjectToBone(meshes[i].mTargetNode, entity);
         }
     }
     else
@@ -1248,12 +1239,7 @@ EntityList Loader::createEntities(Ogre::Entity *parent, const std::string &bonen
             else
             {
                 if(entity->getMesh()->getName().find(filter) != std::string::npos)
-                {
-                    Ogre::TagPoint *tag = entitylist.mSkelBase->attachObjectToBone(meshes[i].mTargetNode, entity);
-                    tag->setPosition(meshes[i].mPos);
-                    tag->setOrientation(meshes[i].mRot);
-                    tag->setScale(Ogre::Vector3(meshes[i].mScale));
-                }
+                    entitylist.mSkelBase->attachObjectToBone(meshes[i].mTargetNode, entity);
             }
         }
     }
