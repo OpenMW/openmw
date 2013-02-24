@@ -21,10 +21,10 @@
 
  */
 
-#ifndef _NIF_RECORD_PTR_H_
-#define _NIF_RECORD_PTR_H_
+#ifndef OPENMW_COMPONENTS_NIF_RECORDPTR_HPP
+#define OPENMW_COMPONENTS_NIF_RECORDPTR_HPP
 
-#include "nif_file.hpp"
+#include "niffile.hpp"
 #include <vector>
 
 namespace Nif

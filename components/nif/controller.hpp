@@ -21,12 +21,12 @@
 
  */
 
-#ifndef _NIF_CONTROLLER_H_
-#define _NIF_CONTROLLER_H_
+#ifndef OPENMW_COMPONENTS_NIF_CONTROLLER_HPP
+#define OPENMW_COMPONENTS_NIF_CONTROLLER_HPP
 
 #include "record.hpp"
-#include "nif_file.hpp"
-#include "record_ptr.hpp"
+#include "niffile.hpp"
+#include "recordptr.hpp"
 
 namespace Nif
 {

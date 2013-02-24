@@ -21,8 +21,8 @@
 
  */
 
-#ifndef _NIF_FILE_H_
-#define _NIF_FILE_H_
+#ifndef OPENMW_COMPONENTS_NIF_NIFFILE_HPP
+#define OPENMW_COMPONENTS_NIF_NIFFILE_HPP
 
 #include <OgreResourceGroupManager.h>
 #include <OgreDataStream.h>
@@ -45,8 +45,8 @@
 #include <libs/platform/stdint.h>
 
 #include "record.hpp"
-#include "nif_types.hpp"
-#include "nif_stream.hpp"
+#include "niftypes.hpp"
+#include "nifstream.hpp"
 
 namespace Nif
 {

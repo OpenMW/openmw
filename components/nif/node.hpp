@@ -21,8 +21,8 @@
 
  */
 
-#ifndef _NIF_NODE_H_
-#define _NIF_NODE_H_
+#ifndef OPENMW_COMPONENTS_NIF_NODE_HPP
+#define OPENMW_COMPONENTS_NIF_NODE_HPP
 
 #include <OgreMatrix4.h>
 

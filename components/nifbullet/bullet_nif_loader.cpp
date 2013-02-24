@@ -25,7 +25,7 @@ http://www.gnu.org/licenses/ .
 #include <Ogre.h>
 #include <cstdio>
 
-#include "../nif/nif_file.hpp"
+#include "../nif/niffile.hpp"
 #include "../nif/node.hpp"
 #include "../nif/data.hpp"
 #include "../nif/property.hpp"

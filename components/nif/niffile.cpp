@@ -21,7 +21,7 @@
 
  */
 
-#include "nif_file.hpp"
+#include "niffile.hpp"
 #include "record.hpp"
 #include "components/misc/stringops.hpp"
 

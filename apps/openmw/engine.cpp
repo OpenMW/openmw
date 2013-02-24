@@ -9,7 +9,7 @@
 #include <components/bsa/bsa_archive.hpp>
 #include <components/files/configurationmanager.hpp>
 #include <components/translation/translation.hpp>
-#include <components/nif/nif_file.hpp>
+#include <components/nif/niffile.hpp>
 #include <components/nifoverrides/nifoverrides.hpp>
 
 #include <components/nifbullet/bullet_nif_loader.hpp>

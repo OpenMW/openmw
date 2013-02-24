@@ -21,8 +21,8 @@
 
  */
 
-#ifndef _NIF_RECORD_H_
-#define _NIF_RECORD_H_
+#ifndef OPENMW_COMPONENTS_NIF_RECORD_HPP
+#define OPENMW_COMPONENTS_NIF_RECORD_HPP
 
 #include <string>
 

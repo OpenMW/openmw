@@ -21,8 +21,8 @@
 
  */
 
-#ifndef _NIF_CONTROLLED_H_
-#define _NIF_CONTROLLED_H_
+#ifndef OPENMW_COMPONENTS_NIF_CONTROLLED_HPP
+#define OPENMW_COMPONENTS_NIF_CONTROLLED_HPP
 
 #include "extra.hpp"
 #include "controller.hpp"

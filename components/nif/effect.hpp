@@ -21,8 +21,8 @@
 
  */
 
-#ifndef _NIF_EFFECT_H_
-#define _NIF_EFFECT_H_
+#ifndef OPENMW_COMPONENTS_NIF_EFFECT_HPP
+#define OPENMW_COMPONENTS_NIF_EFFECT_HPP
 
 #include "node.hpp"
 
