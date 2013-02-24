@@ -66,6 +66,7 @@ bool LauncherSettings::writeFile(QTextStream &stream)
     QString sectionPrefix;
     QRegExp sectionRe("([^/]+)/(.+)$");
     QMap<QString, QString> settings = SettingsBase::getSettings();
+    qDebug() << "writing " << settings;
 
     QMapIterator<QString, QString> i(settings);
     i.toBack();
@@ -80,6 +81,13 @@ bool LauncherSettings::writeFile(QTextStream &stream)
              prefix = sectionRe.cap(1);
              key = sectionRe.cap(2);
         }
+
+        // Get rid of legacy settings
+        if (key.contains(QChar('\\')))
+            continue;
+
+        if (key == QLatin1String("CurrentProfile"))
+            continue;
 
         if (sectionPrefix != prefix) {
             sectionPrefix = prefix;

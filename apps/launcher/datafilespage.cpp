@@ -19,23 +19,6 @@
 
 #include "datafilespage.hpp"
 
-#include <boost/version.hpp>
-/**
- * Workaround for problems with whitespaces in paths in older versions of Boost library
- */
-#if (BOOST_VERSION <= 104600)
-namespace boost
-{
-
-    template<>
-    inline boost::filesystem::path lexical_cast<boost::filesystem::path, std::string>(const std::string& arg)
-    {
-        return boost::filesystem::path(arg);
-    }
-
-} /* namespace boost */
-#endif /* (BOOST_VERSION <= 104600) */
-
 using namespace ESM;
 using namespace std;
 
@@ -241,7 +224,7 @@ void DataFilesPage::setupDataFiles()
     mDataFilesModel->sort(3);
 
     QStringList profiles = mLauncherSettings.subKeys(QString("Profiles/"));
-    QString profile = mLauncherSettings.value(QString("Profiles/CurrentProfile"));
+    QString profile = mLauncherSettings.value(QString("Profiles/currentprofile"));
 
     mProfilesComboBox->setCurrentIndex(-1);
     mProfilesComboBox->addItems(profiles);
@@ -271,7 +254,7 @@ void DataFilesPage::setupDataFiles()
 
 void DataFilesPage::loadSettings()
 {
-    QString profile = mLauncherSettings.value(QString("Profiles/CurrentProfile"));
+    QString profile = mLauncherSettings.value(QString("Profiles/currentprofile"));
 
     if (profile.isEmpty())
         return;
@@ -299,10 +282,12 @@ void DataFilesPage::saveSettings()
     if (mDataFilesModel->rowCount() < 1)
         return;
 
-    QString profile = mLauncherSettings.value(QString("Profiles/CurrentProfile"));
+    QString profile = mLauncherSettings.value(QString("Profiles/currentprofile"));
 
-    if (profile.isEmpty())
-        return;
+    if (profile.isEmpty()) {
+        profile = mProfilesComboBox->currentText();
+        mLauncherSettings.setValue(QString("Profiles/currentprofile"), profile);
+    }
 
     mLauncherSettings.remove(QString("Profiles/") + profile + QString("/master"));
     mLauncherSettings.remove(QString("Profiles/") + profile + QString("/plugin"));
@@ -539,9 +524,9 @@ void DataFilesPage::profileChanged(const QString &previous, const QString &curre
         return; // Profile was deleted
 
     // Store the previous profile
-    mLauncherSettings.setValue(QString("Profiles/CurrentProfile"), previous);
+    mLauncherSettings.setValue(QString("Profiles/currentprofile"), previous);
     saveSettings();
-    mLauncherSettings.setValue(QString("Profiles/CurrentProfile"), current);
+    mLauncherSettings.setValue(QString("Profiles/currentprofile"), current);
 
     loadSettings();
 }
@@ -552,7 +537,7 @@ void DataFilesPage::profileRenamed(const QString &previous, const QString &curre
         return;
 
     // Save the new profile name
-    mLauncherSettings.setValue(QString("Profiles/CurrentProfile"), current);
+    mLauncherSettings.setValue(QString("Profiles/currentprofile"), current);
     saveSettings();
 
     // Remove the old one

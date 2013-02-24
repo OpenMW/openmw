@@ -8,6 +8,23 @@
 
 #include <components/files/configurationmanager.hpp>
 
+#include <boost/version.hpp>
+/**
+ * Workaround for problems with whitespaces in paths in older versions of Boost library
+ */
+#if (BOOST_VERSION <= 104600)
+namespace boost
+{
+
+    template<>
+    inline boost::filesystem::path lexical_cast<boost::filesystem::path, std::string>(const std::string& arg)
+    {
+        return boost::filesystem::path(arg);
+    }
+
+} /* namespace boost */
+#endif /* (BOOST_VERSION <= 104600) */
+
 #include "gamesettings.hpp"
 
 GameSettings::GameSettings(Files::ConfigurationManager &cfg)
@@ -93,6 +110,8 @@ bool GameSettings::readFile(QTextStream &stream)
                 mSettings.remove(key);
 
             QStringList values = cache.values(key);
+            values.append(mSettings.values(key));
+
             if (!values.contains(value)) {
                 cache.insertMulti(key, value);
             }
@@ -125,9 +144,16 @@ bool GameSettings::writeFile(QTextStream &stream)
             continue;
 
         // Quote paths with spaces
-        if (i.key() == QLatin1String("data")) {
-            if (i.value().contains(" ")) {
-                stream << i.key() << "=\"" << i.value() << "\"\n";
+        if (i.key() == QLatin1String("data")
+                || i.key() == QLatin1String("data-local")
+                || i.key() == QLatin1String("resources"))
+        {
+            if (i.value().contains(QChar(' ')))
+            {
+                QString stripped = i.value();
+                stripped.remove(QChar('\"')); // Remove quotes
+
+                stream << i.key() << "=\"" << stripped << "\"\n";
                 continue;
             }
         }

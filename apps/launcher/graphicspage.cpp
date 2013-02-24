@@ -196,7 +196,7 @@ void GraphicsPage::loadSettings()
      resolution.append(QString(" x ") + mGraphicsSettings.value(QString("Video/resolution y")));
 
      int resIndex = mResolutionComboBox->findText(resolution, Qt::MatchStartsWith);
-     qDebug() << "resolution from file: " << resolution;
+
      if (resIndex != -1)
              mResolutionComboBox->setCurrentIndex(resIndex);
 }
