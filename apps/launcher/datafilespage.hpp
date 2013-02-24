@@ -37,7 +37,6 @@ public:
 
 public slots:
     void setCheckState(QModelIndex index);
-
     void filterChanged(const QString filter);
     void showContextMenu(const QPoint &point);
     void profileChanged(const QString &previous, const QString &current);
@@ -49,10 +48,6 @@ public slots:
     // Action slots
     void newProfile();
     void deleteProfile();
-//    void moveUp();
-//    void moveDown();
-//    void moveTop();
-//    void moveBottom();
     void check();
     void uncheck();
     void refresh();
@@ -90,8 +85,8 @@ private:
 
     TextInputDialog *mNewProfileDialog;
 
-//    const QStringList checkedPlugins();
-//    const QStringList selectedMasters();
+    void setMastersCheckstates(Qt::CheckState state);
+    void setPluginsCheckstates(Qt::CheckState state);
 
     void createActions();
     void setupDataFiles();

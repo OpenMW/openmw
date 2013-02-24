@@ -99,9 +99,10 @@ DataFilesPage::DataFilesPage(Files::ConfigurationManager &cfg, GameSettings &gam
     mMastersTable = new QTableView(this);
     mMastersTable->setModel(mMastersProxyModel);
     mMastersTable->setObjectName("MastersTable");
+    mMastersTable->setContextMenuPolicy(Qt::CustomContextMenu);
     mMastersTable->setSortingEnabled(false);
     mMastersTable->setSelectionBehavior(QAbstractItemView::SelectRows);
-    mMastersTable->setSelectionMode(QAbstractItemView::SingleSelection);
+    mMastersTable->setSelectionMode(QAbstractItemView::ExtendedSelection);
     mMastersTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
     mMastersTable->setAlternatingRowColors(true);
     mMastersTable->horizontalHeader()->setStretchLastSection(true);
@@ -118,7 +119,7 @@ DataFilesPage::DataFilesPage(Files::ConfigurationManager &cfg, GameSettings &gam
     mPluginsTable->setContextMenuPolicy(Qt::CustomContextMenu);
     mPluginsTable->setSortingEnabled(false);
     mPluginsTable->setSelectionBehavior(QAbstractItemView::SelectRows);
-    mPluginsTable->setSelectionMode(QAbstractItemView::SingleSelection);
+    mPluginsTable->setSelectionMode(QAbstractItemView::ExtendedSelection);
     mPluginsTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
     mPluginsTable->setAlternatingRowColors(true);
     mPluginsTable->setVerticalScrollMode(QAbstractItemView::ScrollPerItem);
@@ -173,6 +174,7 @@ DataFilesPage::DataFilesPage(Files::ConfigurationManager &cfg, GameSettings &gam
     connect(mMastersTable, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(setCheckState(QModelIndex)));
 
     connect(mPluginsTable, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(showContextMenu(QPoint)));
+    connect(mMastersTable, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(showContextMenu(QPoint)));
 
     connect(mDataFilesModel, SIGNAL(layoutChanged()), this, SLOT(updateViews()));
     
@@ -208,15 +210,13 @@ void DataFilesPage::createActions()
     mProfileToolBar->addAction(mDeleteProfileAction);
 
     // Context menu actions
-    mCheckAction = new QAction(tr("Check selected"), this);
+    mCheckAction = new QAction(tr("Check Selection"), this);
     connect(mCheckAction, SIGNAL(triggered()), this, SLOT(check()));
 
-    mUncheckAction = new QAction(tr("Uncheck selected"), this);
+    mUncheckAction = new QAction(tr("Uncheck Selection"), this);
     connect(mUncheckAction, SIGNAL(triggered()), this, SLOT(uncheck()));
 
-    // Context menu for the plugins table
     mContextMenu = new QMenu(this);
-
     mContextMenu->addAction(mCheckAction);
     mContextMenu->addAction(mUncheckAction);
 }
@@ -296,6 +296,9 @@ void DataFilesPage::loadSettings()
 
 void DataFilesPage::saveSettings()
 {
+    if (mDataFilesModel->rowCount() < 1)
+        return;
+
     QString profile = mLauncherSettings.value(QString("Profiles/CurrentProfile"));
 
     if (profile.isEmpty())
@@ -406,54 +409,21 @@ void DataFilesPage::deleteProfile()
 
 void DataFilesPage::check()
 {
-    // Check the current selection
-    if (!mPluginsTable->selectionModel()->hasSelection()) {
-        return;
-    }
+    if (mPluginsTable->hasFocus())
+        setPluginsCheckstates(Qt::Checked);
 
-    QModelIndexList indexes = mPluginsTable->selectionModel()->selectedIndexes();
+    if (mMastersTable->hasFocus())
+        setMastersCheckstates(Qt::Checked);
 
-    //sort selection ascending because selectedIndexes returns an unsorted list
-    //qSort(indexes.begin(), indexes.end(), rowSmallerThan);
-
-    foreach (const QModelIndex &index, indexes) {
-        if (!index.isValid())
-            return;
-
-        QModelIndex sourceIndex = mPluginsProxyModel->mapToSource(
-                    mFilterProxyModel->mapToSource(index));
-
-        if (!sourceIndex.isValid())
-            return;
-
-        mDataFilesModel->setCheckState(sourceIndex, Qt::Checked);
-    }
 }
 
 void DataFilesPage::uncheck()
 {
-    // uncheck the current selection
-    if (!mPluginsTable->selectionModel()->hasSelection()) {
-        return;
-    }
+    if (mPluginsTable->hasFocus())
+        setPluginsCheckstates(Qt::Unchecked);
 
-    QModelIndexList indexes = mPluginsTable->selectionModel()->selectedIndexes();
-
-    //sort selection ascending because selectedIndexes returns an unsorted list
-    //qSort(indexes.begin(), indexes.end(), rowSmallerThan);
-
-    foreach (const QModelIndex &index, indexes) {
-        if (!index.isValid())
-            return;
-
-        QModelIndex sourceIndex = mPluginsProxyModel->mapToSource(
-                    mFilterProxyModel->mapToSource(index));
-
-        if (!sourceIndex.isValid())
-            return;
-
-        mDataFilesModel->setCheckState(sourceIndex, Qt::Unchecked);
-    }
+    if (mMastersTable->hasFocus())
+        setMastersCheckstates(Qt::Unchecked);
 }
 
 void DataFilesPage::refresh()
@@ -464,6 +434,50 @@ void DataFilesPage::refresh()
     mPluginsTable->scrollToTop();
 }
 
+void DataFilesPage::setMastersCheckstates(Qt::CheckState state)
+{
+    if (!mMastersTable->selectionModel()->hasSelection()) {
+        return;
+    }
+
+    QModelIndexList indexes = mMastersTable->selectionModel()->selectedIndexes();
+
+    foreach (const QModelIndex &index, indexes)
+    {
+        if (!index.isValid())
+            return;
+
+        QModelIndex sourceIndex = mMastersProxyModel->mapToSource(index);
+
+        if (!sourceIndex.isValid())
+            return;
+
+        mDataFilesModel->setCheckState(sourceIndex, state);
+    }
+}
+
+void DataFilesPage::setPluginsCheckstates(Qt::CheckState state)
+{
+    if (!mPluginsTable->selectionModel()->hasSelection()) {
+        return;
+    }
+
+    QModelIndexList indexes = mPluginsTable->selectionModel()->selectedIndexes();
+
+    foreach (const QModelIndex &index, indexes)
+    {
+        if (!index.isValid())
+            return;
+
+        QModelIndex sourceIndex = mPluginsProxyModel->mapToSource(
+                    mFilterProxyModel->mapToSource(index));
+
+        if (!sourceIndex.isValid())
+            return;
+
+        mDataFilesModel->setCheckState(sourceIndex, state);
+    }
+}
 
 void DataFilesPage::setCheckState(QModelIndex index)
 {
@@ -554,35 +568,69 @@ void DataFilesPage::profileRenamed(const QString &previous, const QString &curre
 
 void DataFilesPage::showContextMenu(const QPoint &point)
 {
-    // Make sure there are plugins in the view
-    if (!mPluginsTable->selectionModel()->hasSelection()) {
+    QObject *object = QObject::sender();
+
+    // Not a signal-slot call
+    if (!object)
         return;
-    }
 
-    QPoint globalPos = mPluginsTable->mapToGlobal(point);
-
-    QModelIndexList indexes = mPluginsTable->selectionModel()->selectedIndexes();
-
-    // Show the check/uncheck actions depending on the state of the selected items
-    mUncheckAction->setEnabled(false);
-    mCheckAction->setEnabled(false);
-
-    foreach (const QModelIndex &index, indexes) {
-        if (!index.isValid())
+    if (object->objectName() == QLatin1String("PluginsTable")) {
+        if (!mPluginsTable->selectionModel()->hasSelection())
             return;
 
-        QModelIndex sourceIndex = mPluginsProxyModel->mapToSource(
-                    mFilterProxyModel->mapToSource(index));
+        QPoint globalPos = mPluginsTable->mapToGlobal(point);
+        QModelIndexList indexes = mPluginsTable->selectionModel()->selectedIndexes();
 
-        if (!sourceIndex.isValid())
-            return;
+        // Show the check/uncheck actions depending on the state of the selected items
+        mUncheckAction->setEnabled(false);
+        mCheckAction->setEnabled(false);
 
-         (mDataFilesModel->checkState(sourceIndex) == Qt::Checked)
-             ? mUncheckAction->setEnabled(true)
-             : mCheckAction->setEnabled(true);
+        foreach (const QModelIndex &index, indexes)
+        {
+            if (!index.isValid())
+                return;
+
+            QModelIndex sourceIndex = mPluginsProxyModel->mapToSource(
+                        mFilterProxyModel->mapToSource(index));
+
+            if (!sourceIndex.isValid())
+                return;
+
+            (mDataFilesModel->checkState(sourceIndex) == Qt::Checked)
+                    ? mUncheckAction->setEnabled(true)
+                    : mCheckAction->setEnabled(true);
+        }
+
+        // Show menu
+        mContextMenu->exec(globalPos);
     }
 
-    // Show menu
-    mContextMenu->exec(globalPos);
+    if (object->objectName() == QLatin1String("MastersTable")) {
+        if (!mMastersTable->selectionModel()->hasSelection())
+            return;
 
+        QPoint globalPos = mMastersTable->mapToGlobal(point);
+        QModelIndexList indexes = mMastersTable->selectionModel()->selectedIndexes();
+
+        // Show the check/uncheck actions depending on the state of the selected items
+        mUncheckAction->setEnabled(false);
+        mCheckAction->setEnabled(false);
+
+        foreach (const QModelIndex &index, indexes)
+        {
+            if (!index.isValid())
+                return;
+
+            QModelIndex sourceIndex = mMastersProxyModel->mapToSource(index);
+
+            if (!sourceIndex.isValid())
+                return;
+
+            (mDataFilesModel->checkState(sourceIndex) == Qt::Checked)
+                    ? mUncheckAction->setEnabled(true)
+                    : mCheckAction->setEnabled(true);
+        }
+
+        mContextMenu->exec(globalPos);
+    }
 }
