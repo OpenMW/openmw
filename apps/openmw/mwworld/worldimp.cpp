@@ -770,7 +770,8 @@ namespace MWWorld
                     MWWorld::Ptr copy =
                         MWWorld::Class::get(ptr).copyToCell(ptr, newCell);
 
-                    mRendering->moveObjectToCell(copy, vec, currCell);
+                    mRendering->updateObjectCell(ptr, copy);
+
                     MWBase::MechanicsManager *mechMgr = MWBase::Environment::get().getMechanicsManager();
                     mechMgr->updateCell(copy);
 

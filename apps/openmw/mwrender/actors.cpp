@@ -149,10 +149,10 @@ Animation* Actors::getAnimation(const MWWorld::Ptr &ptr)
     return NULL;
 }
 
-void Actors::updateObjectCell(const MWWorld::Ptr &ptr)
+void Actors::updateObjectCell(const MWWorld::Ptr &old, const MWWorld::Ptr &cur)
 {
     Ogre::SceneNode *node;
-    MWWorld::CellStore *newCell = ptr.getCell();
+    MWWorld::CellStore *newCell = cur.getCell();
 
     CellSceneNodeMap::const_iterator celliter = mCellSceneNodes.find(newCell);
     if(celliter != mCellSceneNodes.end())
@@ -162,15 +162,15 @@ void Actors::updateObjectCell(const MWWorld::Ptr &ptr)
         node = mMwRoot->createChildSceneNode();
         mCellSceneNodes[newCell] = node;
     }
-    node->addChild(ptr.getRefData().getBaseNode());
+    node->addChild(cur.getRefData().getBaseNode());
 
-    PtrAnimationMap::iterator iter = mAllActors.find(ptr);
+    PtrAnimationMap::iterator iter = mAllActors.find(old);
     if(iter != mAllActors.end())
     {
         Animation *anim = iter->second;
         mAllActors.erase(iter);
-        anim->updatePtr(ptr);
-        mAllActors[ptr] = anim;
+        anim->updatePtr(cur);
+        mAllActors[cur] = anim;
     }
 }
 

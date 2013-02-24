@@ -302,23 +302,19 @@ bool RenderingManager::rotateObject( const MWWorld::Ptr &ptr, Ogre::Vector3 &rot
 }
 
 void
-RenderingManager::moveObjectToCell(
-    const MWWorld::Ptr& ptr,
-    const Ogre::Vector3& pos,
-    MWWorld::CellStore *store)
+RenderingManager::updateObjectCell(const MWWorld::Ptr &old, const MWWorld::Ptr &cur)
 {
     Ogre::SceneNode *child =
-        mRendering.getScene()->getSceneNode(ptr.getRefData().getHandle());
+        mRendering.getScene()->getSceneNode(old.getRefData().getHandle());
 
     Ogre::SceneNode *parent = child->getParentSceneNode();
     parent->removeChild(child);
 
-    if (MWWorld::Class::get(ptr).isActor()) {
-        mActors.updateObjectCell(ptr);
+    if (MWWorld::Class::get(old).isActor()) {
+        mActors.updateObjectCell(old, cur);
     } else {
-        mObjects.updateObjectCell(ptr);
+        mObjects.updateObjectCell(old, cur);
     }
-    child->setPosition(pos);
 }
 
 void RenderingManager::update (float duration, bool paused)
