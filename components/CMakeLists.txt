@@ -19,11 +19,11 @@ add_component_dir (nif
     )
 
 add_component_dir (nifogre
-    ogre_nif_loader
+    ogrenifloader
     )
 
 add_component_dir (nifbullet
-    bullet_nif_loader
+    bulletnifloader
     )
 
 add_component_dir (to_utf8

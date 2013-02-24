@@ -21,7 +21,7 @@ http://www.gnu.org/licenses/ .
 
 */
 
-#include "bullet_nif_loader.hpp"
+#include "bulletnifloader.hpp"
 #include <Ogre.h>
 #include <cstdio>
 

@@ -12,8 +12,8 @@
 #include <components/nif/niffile.hpp>
 #include <components/nifoverrides/nifoverrides.hpp>
 
-#include <components/nifbullet/bullet_nif_loader.hpp>
-#include <components/nifogre/ogre_nif_loader.hpp>
+#include <components/nifbullet/bulletnifloader.hpp>
+#include <components/nifogre/ogrenifloader.hpp>
 
 #include "mwinput/inputmanagerimp.hpp"
 

@@ -13,7 +13,7 @@
 #include <openengine/bullet/physic.hpp>
 #include <openengine/ogre/renderer.hpp>
 
-#include <components/nifbullet/bullet_nif_loader.hpp>
+#include <components/nifbullet/bulletnifloader.hpp>
 
 //#include "../mwbase/world.hpp" // FIXME
 #include "../mwbase/environment.hpp"
