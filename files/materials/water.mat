@@ -1,5 +1,7 @@
 material Water
 {
+    allow_fixed_function false
+
     pass
     {
         emissive 1.0 1.0 1.0
@@ -44,7 +46,7 @@ material Water
             tex_address_mode border
             tex_border_colour 0.5 0.5 1.0
         }
-        
+
         // for simple_water
         texture_unit animatedTexture
         {

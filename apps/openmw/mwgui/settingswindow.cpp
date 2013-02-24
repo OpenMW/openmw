@@ -264,16 +264,9 @@ namespace MWGui
 
         mRefractionButton->setCaptionWithReplacing (Settings::Manager::getBool("refraction", "Water") ? "#{sOn}" : "#{sOff}");
 
-        if (!MWRender::RenderingManager::waterShaderSupported())
-        {
-            mWaterShaderButton->setEnabled(false);
-            mReflectObjectsButton->setEnabled(false);
-            mReflectActorsButton->setEnabled(false);
-            mReflectTerrainButton->setEnabled(false);
-        }
-
         if (!Settings::Manager::getBool("shaders", "Objects"))
         {
+            mRefractionButton->setEnabled(false);
             mUnderwaterButton->setEnabled (false);
             mShadowsEnabledButton->setEnabled(false);
         }
@@ -466,15 +459,15 @@ namespace MWGui
         {
             Settings::Manager::setBool("shaders", "Objects", false);
 
-            // water shader not supported with object shaders off
-            mWaterShaderButton->setCaptionWithReplacing("#{sOff}");
             mUnderwaterButton->setCaptionWithReplacing("#{sOff}");
-            mWaterShaderButton->setEnabled(false);
-            mReflectObjectsButton->setEnabled(false);
-            mReflectActorsButton->setEnabled(false);
-            mReflectTerrainButton->setEnabled(false);
+
             mUnderwaterButton->setEnabled(false);
-            Settings::Manager::setBool("shader", "Water", false);
+
+            // refraction needs shaders to display underwater fog
+            mRefractionButton->setCaptionWithReplacing("#{sOff}");
+            mRefractionButton->setEnabled(false);
+
+            Settings::Manager::setBool("refraction", "Water", false);
             Settings::Manager::setBool("underwater effect", "Water", false);
 
             // shadows not supported
@@ -487,13 +480,11 @@ namespace MWGui
             Settings::Manager::setBool("shaders", "Objects", true);
 
             // re-enable
-            if (MWRender::RenderingManager::waterShaderSupported())
-            {
-                mWaterShaderButton->setEnabled(true);
-                mReflectObjectsButton->setEnabled(true);
-                mReflectActorsButton->setEnabled(true);
-                mReflectTerrainButton->setEnabled(true);
-            }
+            mReflectObjectsButton->setEnabled(true);
+            mReflectActorsButton->setEnabled(true);
+            mReflectTerrainButton->setEnabled(true);
+            mRefractionButton->setEnabled(true);
+
             mUnderwaterButton->setEnabled(true);
             mShadowsEnabledButton->setEnabled(true);
         }
