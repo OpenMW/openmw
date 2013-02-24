@@ -68,6 +68,7 @@ macro(find_component _component _pkgconfig _library _header)
 
   find_path(${_component}_INCLUDE_DIRS ${_header}
     HINTS
+      ${FFMPEGSDK_INC}
       ${PC_LIB${_component}_INCLUDEDIR}
       ${PC_LIB${_component}_INCLUDE_DIRS}
     PATH_SUFFIXES
@@ -76,6 +77,7 @@ macro(find_component _component _pkgconfig _library _header)
 
   find_library(${_component}_LIBRARIES NAMES ${_library}
       HINTS
+      ${FFMPEGSDK_LIB}
       ${PC_LIB${_component}_LIBDIR}
       ${PC_LIB${_component}_LIBRARY_DIRS}
   )
@@ -96,6 +98,12 @@ endmacro()
 
 # Check for cached results. If there are skip the costly part.
 if (NOT FFMPEG_LIBRARIES)
+
+  set (FFMPEGSDK ENV${FFMPEG_HOME})
+  if (FFMPEGSDK)
+    set (FFMPEGSDK_INC "${FFMPEGSDK}/include")
+    set (FFMPEGSDK_LIB "${FFMPEGSDK}/lib")
+  endif ()
 
   # Check for all possible component.
   find_component(AVCODEC  libavcodec  avcodec  libavcodec/avcodec.h)
