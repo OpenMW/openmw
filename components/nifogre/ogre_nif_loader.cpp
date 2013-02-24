@@ -575,9 +575,17 @@ static Ogre::String getMaterial(const Nif::NiTriShape *shape, const Ogre::String
     {
         ambient = m->data.ambient;
         diffuse = m->data.diffuse;
-        specular = m->data.specular;
         emissive = m->data.emissive;
-        glossiness = m->data.glossiness;
+
+
+        // Vanilla does not handle specular. TODO: Add an engine (or ESX file) configuration option
+        // to re-enable specular for future mods. Will also need to specify light specular colors somewhere.
+        // Also, not sure if glossiness value here is actually correct. OGRE expects 0-255 value, not sure what range this one is.
+        //glossiness = m->data.glossiness;
+        //specular = m->data.specular;
+        glossiness = 0;
+        specular = Ogre::Vector3(0,0,0);
+
         alpha = m->data.alpha;
     }
 
