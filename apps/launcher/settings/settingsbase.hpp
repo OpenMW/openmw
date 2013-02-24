@@ -85,14 +85,6 @@ public:
             return true;
         }
 
-        // Replace values from previous settings
-        QMapIterator<QString, QString> i(mCache);
-        while (i.hasNext()) {
-            i.next();
-            if (mSettings.contains(i.key()))
-                mSettings.remove(i.key());
-        }
-
         // Merge the changed keys with those which didn't
         mSettings.unite(mCache);
         return true;

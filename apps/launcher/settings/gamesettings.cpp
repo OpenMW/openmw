@@ -88,7 +88,9 @@ bool GameSettings::readFile(QTextStream &stream)
             QString key = keyRe.cap(1).simplified();
             QString value = keyRe.cap(2).simplified();
 
-            mSettings.remove(key);
+            // Don't remove existing data entries
+            if (key != QLatin1String("data"))
+                mSettings.remove(key);
 
             QStringList values = cache.values(key);
             if (!values.contains(value)) {
@@ -101,19 +103,6 @@ bool GameSettings::readFile(QTextStream &stream)
         mSettings = cache; // This is the first time we read a file
         validatePaths();
         return true;
-    }
-
-    // Replace values from previous settings
-    QMapIterator<QString, QString> i(cache);
-    while (i.hasNext()) {
-        i.next();
-
-        // Don't remove existing data entries
-        if (i.key() == QLatin1String("data"))
-            continue;
-
-        if (mSettings.contains(i.key()))
-            mSettings.remove(i.key());
     }
 
     // Merge the changed keys with those which didn't
@@ -136,7 +125,7 @@ bool GameSettings::writeFile(QTextStream &stream)
             continue;
 
         // Quote paths with spaces
-        if (i.key() == QLatin1String("data") || i.key() == QLatin1String("data")) {
+        if (i.key() == QLatin1String("data")) {
             if (i.value().contains(" ")) {
                 stream << i.key() << "=\"" << i.value() << "\"\n";
                 continue;
