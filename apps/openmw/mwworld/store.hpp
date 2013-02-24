@@ -17,7 +17,7 @@ namespace MWWorld
         virtual void setUp() {}
         virtual void listIdentifier(std::vector<std::string> &list) const {}
 
-        virtual int getSize() const = 0;
+        virtual size_t getSize() const = 0;
         virtual void load(ESM::ESMReader &esm, const std::string &id) = 0;
         
         virtual bool eraseStatic(const std::string &id) {return false;}
@@ -158,7 +158,7 @@ namespace MWWorld
             return mShared.end();
         }
 
-        int getSize() const {
+        size_t getSize() const {
             return mShared.size();
         }
 
@@ -269,11 +269,11 @@ namespace MWWorld
             return ptr;
         }
 
-        int getSize() const {
+        size_t getSize() const {
             return mStatic.size();
         }
 
-        int getSize(size_t plugin) const {
+        size_t getSize(size_t plugin) const {
             assert(plugin < mStatic.size());
             return mStatic[plugin].size();
         }
@@ -338,7 +338,7 @@ namespace MWWorld
 
         }
 
-        int getSize() const {
+        size_t getSize() const {
             return mStatic.size();
         }
 
@@ -567,7 +567,7 @@ namespace MWWorld
             return 0;
         }
 
-        int getSize() const {
+        size_t getSize() const {
             return mSharedInt.size() + mSharedExt.size();
         }
 
@@ -701,7 +701,7 @@ namespace MWWorld
             mStatic.back().load(esm);
         }
 
-        int getSize() const {
+        size_t getSize() const {
             return mStatic.size();
         }
 
@@ -930,7 +930,7 @@ namespace MWWorld
             }
         }
 
-        int getSize() const {
+        size_t getSize() const {
             return mStatic.size();
         }
 

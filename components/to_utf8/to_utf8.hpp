@@ -27,13 +27,13 @@ namespace ToUTF8
             Utf8Encoder(FromType sourceEncoding);
 
             // Convert to UTF8 from the previously given code page.
-            std::string getUtf8(const char *input, int size);
+            std::string getUtf8(const char *input, size_t size);
             inline std::string getUtf8(const std::string &str)
             {
                 return getUtf8(str.c_str(), str.size());
             }
 
-            std::string getLegacyEnc(const char *input, int size);
+            std::string getLegacyEnc(const char *input, size_t size);
             inline std::string getLegacyEnc(const std::string &str)
             {
                 return getLegacyEnc(str.c_str(), str.size());

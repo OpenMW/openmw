@@ -70,7 +70,7 @@ Utf8Encoder::Utf8Encoder(const FromType sourceEncoding):
     }
 }
 
-std::string Utf8Encoder::getUtf8(const char* input, int size)
+std::string Utf8Encoder::getUtf8(const char* input, size_t size)
 {
     // Double check that the input string stops at some point (it might
     // contain zero terminators before this, inside its own data, which
@@ -111,7 +111,7 @@ std::string Utf8Encoder::getUtf8(const char* input, int size)
     return std::string(&mOutput[0], outlen);
 }
 
-std::string Utf8Encoder::getLegacyEnc(const char *input, int size)
+std::string Utf8Encoder::getLegacyEnc(const char *input, size_t size)
 {
     // Double check that the input string stops at some point (it might
     // contain zero terminators before this, inside its own data, which
