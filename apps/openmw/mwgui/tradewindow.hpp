@@ -37,6 +37,9 @@ namespace MWGui
             void onFrame(float frameDuration);
 
         protected:
+            static const float sBalanceChangeInitialPause; // in seconds
+            static const float sBalanceChangeInterval; // in seconds
+
             MyGUI::Button* mFilterAll;
             MyGUI::Button* mFilterWeapon;
             MyGUI::Button* mFilterApparel;

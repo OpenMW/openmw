@@ -529,6 +529,8 @@ if (WIN32)
         set(WARNINGS "${WARNINGS} /wd${d}")
     endforeach(d)
 
+    set_target_properties(shiny PROPERTIES COMPILE_FLAGS ${WARNINGS})
+    set_target_properties(shiny.OgrePlatform PROPERTIES COMPILE_FLAGS ${WARNINGS})
     set_target_properties(components PROPERTIES COMPILE_FLAGS ${WARNINGS})
     if (BUILD_LAUNCHER)
 		set_target_properties(omwlauncher PROPERTIES COMPILE_FLAGS ${WARNINGS})

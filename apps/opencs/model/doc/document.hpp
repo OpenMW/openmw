@@ -20,6 +20,7 @@ class QAbstractItemModel;
 namespace ESM
 {
     struct GameSetting;
+    struct Global;
 }
 
 namespace CSMDoc
@@ -53,7 +54,11 @@ namespace CSMDoc
 
             void addOptionalGmsts();
 
+            void addOptionalGlobals();
+
             void addOptionalGmst (const ESM::GameSetting& gmst);
+
+            void addOptionalGlobal (const ESM::Global& global);
 
         public:
 
