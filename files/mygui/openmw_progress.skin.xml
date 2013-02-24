@@ -17,6 +17,11 @@
             <State name="normal" offset = "0 28 2 14"/>
         </BasisSkin>
     </Skin>
+	<Skin name = "MW_BigTrack_Progress_Blue_Small" size = "2 6" texture = "smallbars.png" >
+        <BasisSkin type="MainSkin" offset = "0 0 2 6" align = "ALIGN_STRETCH">
+            <State name="normal" offset = "0 26 2 6"/>
+        </BasisSkin>
+    </Skin>
 
     <Skin name = "ProgressText" size = "16 16">
         <Property key="FontName" value = "Default"/>
@@ -50,5 +55,13 @@
 
         <Child type="Widget" skin="MW_Box" offset="0 0 64 12" align="ALIGN_STRETCH"/>
         <Child type="Widget" skin="BlackBG" offset = "2 2 60 8" align = "ALIGN_STRETCH" name="Client"/>
+    </Skin>
+	
+	<Skin name="MW_Progress_Loading" size="64 6">
+        <Property key="TrackSkin" value = "MW_BigTrack_Progress_Blue_Small" />
+        <Property key="TrackWidth" value = "1" />
+
+        <Child type="Widget" skin="MW_Box" offset="0 0 64 6" align="ALIGN_STRETCH"/>
+        <Child type="Widget" skin="BlackBG" offset = "2 2 60 2" align = "ALIGN_STRETCH" name="Client"/>
     </Skin>
 </MyGUI>
