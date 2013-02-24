@@ -25,7 +25,7 @@ namespace
             const MWWorld::Class& class_ =
                 MWWorld::Class::get (MWWorld::Ptr (&*cellRefList.mList.begin(), &cell));
 
-            int numRefs = cellRefList.mList.size();
+            size_t numRefs = cellRefList.mList.size();
             int current = 0;
             for (typename T::List::iterator it = cellRefList.mList.begin();
                 it != cellRefList.mList.end(); it++)

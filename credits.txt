@@ -40,6 +40,7 @@ Nikolay Kasyanov (corristo)
 Pieter van der Kloet (pvdk)
 Roman Melnik (Kromgart)
 Sebastian Wick (swick)
+Sergey Shambir
 Sylvain T. (Garvek)
 Tom Mason (wheybags)
 
