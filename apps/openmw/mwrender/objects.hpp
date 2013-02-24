@@ -74,7 +74,7 @@ public:
     ~Objects(){}
     void insertBegin (const MWWorld::Ptr& ptr, bool enabled, bool static_);
     void insertMesh (const MWWorld::Ptr& ptr, const std::string& mesh, bool light=false);
-    void insertLight (const MWWorld::Ptr& ptr, Ogre::Entity* skelBase);
+    void insertLight (const MWWorld::Ptr& ptr, Ogre::Entity* skelBase, Ogre::Vector3 fallbackCenter);
 
     void enableLights();
     void disableLights();

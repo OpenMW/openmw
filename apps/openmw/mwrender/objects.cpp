@@ -49,6 +49,13 @@ void Objects::clearSceneNode (Ogre::SceneNode *node)
         node->detachObject (object);
         mRenderer.getScene()->destroyMovableObject (object);
     }
+
+    Ogre::Node::ChildNodeIterator it = node->getChildIterator ();
+    while (it.hasMoreElements ())
+    {
+        clearSceneNode(static_cast<Ogre::SceneNode*>(it.getNext ()));
+    }
+    node->removeAndDestroyAllChildren ();
 }
 
 void Objects::setMwRoot(Ogre::SceneNode* root)
@@ -219,11 +226,11 @@ void Objects::insertMesh (const MWWorld::Ptr& ptr, const std::string& mesh, bool
 
     if (light)
     {
-        insertLight(ptr, entities.mSkelBase);
+        insertLight(ptr, entities.mSkelBase, bounds.getCenter() - insert->_getDerivedPosition());
     }
 }
 
-void Objects::insertLight (const MWWorld::Ptr& ptr, Ogre::Entity* skelBase)
+void Objects::insertLight (const MWWorld::Ptr& ptr, Ogre::Entity* skelBase, Ogre::Vector3 fallbackCenter)
 {
     Ogre::SceneNode* insert = mRenderer.getScene()->getSceneNode(ptr.getRefData().getHandle());
     assert(insert);
@@ -291,9 +298,14 @@ void Objects::insertLight (const MWWorld::Ptr& ptr, Ogre::Entity* skelBase)
 
     // If there's an AttachLight bone, attach the light to that, otherwise attach it to the base scene node
     if (skelBase && skelBase->getSkeleton ()->hasBone ("AttachLight"))
+    {
         skelBase->attachObjectToBone ("AttachLight", light);
+    }
     else
-        insert->attachObject(light);
+    {
+        Ogre::SceneNode* childNode = insert->createChildSceneNode (fallbackCenter);
+        childNode->attachObject(light);
+    }
 
     mLights.push_back(info);
 }
