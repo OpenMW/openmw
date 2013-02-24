@@ -55,7 +55,6 @@ void Objects::clearSceneNode (Ogre::SceneNode *node)
     {
         clearSceneNode(static_cast<Ogre::SceneNode*>(it.getNext ()));
     }
-    node->removeAndDestroyAllChildren ();
 }
 
 void Objects::setMwRoot(Ogre::SceneNode* root)
