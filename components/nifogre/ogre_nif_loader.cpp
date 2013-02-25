@@ -1031,6 +1031,10 @@ public:
 
     void createMeshes(const Nif::Node *node, MeshInfoList &meshes, int flags=0)
     {
+        // Do not create meshes for the collision shape (includes all children)
+        if(node->recType == Nif::RC_RootCollisionNode)
+            return;
+
         flags |= node->flags;
 
         // Marker objects: just skip the entire node
