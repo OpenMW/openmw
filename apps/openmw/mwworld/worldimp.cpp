@@ -832,16 +832,16 @@ namespace MWWorld
         rot.y = Ogre::Degree(y).valueRadians();
         rot.z = Ogre::Degree(z).valueRadians();
 
-        float *objRot = ptr.getRefData().getPosition().rot;
-        if(ptr.getRefData().getBaseNode() == 0 || !mRendering->rotateObject(ptr, rot, adjust))
+        if (mRendering->rotateObject(ptr, rot, adjust))
         {
-            objRot[0] = (adjust ? objRot[0] + rot.x : rot.x), objRot[1] = (adjust ? objRot[1] + rot.y : rot.y), objRot[2] = (adjust ? objRot[2] + rot.z : rot.z);
-            return;
-         }
+            // rotate physically iff renderer confirm so
+            float *objRot = ptr.getRefData().getPosition().rot;
+            objRot[0] = rot.x, objRot[1] = rot.y, objRot[2] = rot.z;
 
-        // do this after rendering rotated the object so it gets changed by Class->adjustRotation
-        objRot[0] = rot.x, objRot[1] = rot.y, objRot[2] = rot.z;
-        mPhysics->rotateObject(ptr);
+            if (ptr.getRefData().getBaseNode() != 0) {
+                mPhysics->rotateObject(ptr);
+            }
+        }
     }
 
     void World::safePlaceObject(const MWWorld::Ptr& ptr,MWWorld::CellStore &Cell,ESM::Position pos)
@@ -1411,16 +1411,16 @@ namespace MWWorld
         const OEngine::Physic::PhysicActor *actor = mPhysEngine->getCharacter(object.getRefData().getHandle());
         if(actor) pos.z += actor->getHalfExtents().z * 1.5;
 
-        return isUnderwater(*object.getCell()->mCell, pos);
+        return isUnderwater(object.getCell(), pos);
     }
 
     bool
-    World::isUnderwater(const ESM::Cell &cell, const Ogre::Vector3 &pos) const
+    World::isUnderwater(const MWWorld::Ptr::CellStore* cell, const Ogre::Vector3 &pos) const
     {
-        if (!(cell.mData.mFlags & ESM::Cell::HasWater)) {
+        if (!(cell->mCell->mData.mFlags & ESM::Cell::HasWater)) {
             return false;
         }
-        return pos.z < cell.mWater;
+        return pos.z < cell->mWaterLevel;
     }
 
     bool World::isOnGround(const MWWorld::Ptr &ptr) const
@@ -1448,7 +1448,7 @@ namespace MWWorld
         Ogre::Vector3 playerPos(refdata.getPosition().pos);
 
         const OEngine::Physic::PhysicActor *physactor = mPhysEngine->getCharacter(refdata.getHandle());
-        if(!physactor->getOnGround() || isUnderwater(*currentCell->mCell, playerPos))
+        if(!physactor->getOnGround() || isUnderwater(currentCell, playerPos))
             return 2;
         if((currentCell->mCell->mData.mFlags&ESM::Cell::NoSleep))
             return 1;
