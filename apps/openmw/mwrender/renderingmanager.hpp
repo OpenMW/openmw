@@ -46,6 +46,7 @@ namespace MWRender
     class ExternalRendering;
     class GlobalMap;
     class VideoPlayer;
+    class Animation;
 
 class RenderingManager: private RenderingInterface, public Ogre::WindowEventListener {
 
@@ -122,9 +123,10 @@ class RenderingManager: private RenderingInterface, public Ogre::WindowEventList
     void setWaterHeight(const float height);
     void toggleWater();
 
-    /// Moves object rendering part to proper container
-    /// \param store Cell the object was in previously (\a ptr has already been updated to the new cell).
-    void moveObjectToCell (const MWWorld::Ptr& ptr, const Ogre::Vector3& position, MWWorld::CellStore *store);
+    /// Updates object rendering after cell change
+    /// \param old Object reference in previous cell
+    /// \param cur Object reference in new cell
+    void updateObjectCell(const MWWorld::Ptr &old, const MWWorld::Ptr &cur);
 
     void update (float duration, bool paused);
 
@@ -166,18 +168,6 @@ class RenderingManager: private RenderingInterface, public Ogre::WindowEventList
     /// configure fog manually
     void configureFog(const float density, const Ogre::ColourValue& colour);
 
-    void playAnimationGroup (const MWWorld::Ptr& ptr, const std::string& groupName, int mode,
-        int number = 1);
-    ///< Run animation for a MW-reference. Calls to this function for references that are currently not
-    /// in the rendered scene should be ignored.
-    ///
-    /// \param mode: 0 normal, 1 immediate start, 2 immediate loop
-    /// \param number How offen the animation should be run
-
-    void skipAnimation (const MWWorld::Ptr& ptr);
-    ///< Skip the animation for the given MW-reference for one frame. Calls to this function for
-    /// references that are currently not in the rendered scene should be ignored.
-
     Ogre::Vector4 boundingBoxToScreen(Ogre::AxisAlignedBox bounds);
     ///< transform the specified bounding box (in world coordinates) into screen coordinates.
     /// @return packed vector4 (min_x, min_y, max_x, max_y)
@@ -195,6 +185,8 @@ class RenderingManager: private RenderingInterface, public Ogre::WindowEventList
     ///< see MWRender::LocalMap::isPositionExplored
 
     void setupExternalRendering (MWRender::ExternalRendering& rendering);
+
+    Animation* getAnimation(const MWWorld::Ptr &ptr);
 
     void playVideo(const std::string& name, bool allowSkipping);
     void stopVideo();

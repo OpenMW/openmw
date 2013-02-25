@@ -34,8 +34,26 @@ void Objects::clearSceneNode (Ogre::SceneNode *node)
     for (int i=node->numAttachedObjects()-1; i>=0; --i)
     {
         Ogre::MovableObject *object = node->getAttachedObject (i);
+
+        // for entities, destroy any objects attached to bones
+        if (object->getTypeFlags () == Ogre::SceneManager::ENTITY_TYPE_MASK)
+        {
+            Ogre::Entity* ent = static_cast<Ogre::Entity*>(object);
+            Ogre::Entity::ChildObjectListIterator children = ent->getAttachedObjectIterator ();
+            while (children.hasMoreElements())
+            {
+                mRenderer.getScene ()->destroyMovableObject (children.getNext ());
+            }
+        }
+
         node->detachObject (object);
         mRenderer.getScene()->destroyMovableObject (object);
+    }
+
+    Ogre::Node::ChildNodeIterator it = node->getChildIterator ();
+    while (it.hasMoreElements ())
+    {
+        clearSceneNode(static_cast<Ogre::SceneNode*>(it.getNext ()));
     }
 }
 
@@ -87,13 +105,13 @@ void Objects::insertBegin (const MWWorld::Ptr& ptr, bool enabled, bool static_)
     mIsStatic = static_;
 }
 
-void Objects::insertMesh (const MWWorld::Ptr& ptr, const std::string& mesh)
+void Objects::insertMesh (const MWWorld::Ptr& ptr, const std::string& mesh, bool light)
 {
     Ogre::SceneNode* insert = ptr.getRefData().getBaseNode();
     assert(insert);
 
     Ogre::AxisAlignedBox bounds = Ogre::AxisAlignedBox::BOX_NULL;
-    NifOgre::EntityList entities = NifOgre::NIFLoader::createEntities(insert, NULL, mesh);
+    NifOgre::EntityList entities = NifOgre::Loader::createEntities(insert, mesh);
     for(size_t i = 0;i < entities.mEntities.size();i++)
     {
         const Ogre::AxisAlignedBox &tmp = entities.mEntities[i]->getBoundingBox();
@@ -193,25 +211,39 @@ void Objects::insertMesh (const MWWorld::Ptr& ptr, const std::string& mesh)
 
         sg->setRenderQueueGroup(transparent ? RQG_Alpha : RQG_Main);
 
-        for(size_t i = 0;i < entities.mEntities.size();i++)
+        std::vector<Ogre::Entity*>::reverse_iterator iter = entities.mEntities.rbegin();
+        while(iter != entities.mEntities.rend())
         {
-            Ogre::Entity *ent = entities.mEntities[i];
-            insert->detachObject(ent);
-            sg->addEntity(ent,insert->_getDerivedPosition(),insert->_getDerivedOrientation(),insert->_getDerivedScale());
+            Ogre::Node *node = (*iter)->getParentNode();
+            sg->addEntity(*iter, node->_getDerivedPosition(), node->_getDerivedOrientation(), node->_getDerivedScale());
 
-            mRenderer.getScene()->destroyEntity(ent);
+            (*iter)->detachFromParent();
+            mRenderer.getScene()->destroyEntity(*iter);
+            iter++;
         }
+    }
+
+    if (light)
+    {
+        insertLight(ptr, entities.mSkelBase, bounds.getCenter() - insert->_getDerivedPosition());
     }
 }
 
-void Objects::insertLight (const MWWorld::Ptr& ptr, float r, float g, float b, float radius)
+void Objects::insertLight (const MWWorld::Ptr& ptr, Ogre::Entity* skelBase, Ogre::Vector3 fallbackCenter)
 {
     Ogre::SceneNode* insert = mRenderer.getScene()->getSceneNode(ptr.getRefData().getHandle());
     assert(insert);
-    Ogre::Light *light = mRenderer.getScene()->createLight();
-    light->setDiffuseColour (r, g, b);
 
     MWWorld::LiveCellRef<ESM::Light> *ref = ptr.get<ESM::Light>();
+
+    const int color = ref->mBase->mData.mColor;
+    const float r = ((color >> 0) & 0xFF) / 255.0f;
+    const float g = ((color >> 8) & 0xFF) / 255.0f;
+    const float b = ((color >> 16) & 0xFF) / 255.0f;
+    const float radius = float (ref->mBase->mData.mRadius);
+
+    Ogre::Light *light = mRenderer.getScene()->createLight();
+    light->setDiffuseColour (r, g, b);
 
     LightInfo info;
     info.name = light->getName();
@@ -263,7 +295,17 @@ void Objects::insertLight (const MWWorld::Ptr& ptr, float r, float g, float b, f
         light->setAttenuation(r*10, 0, 0, attenuation);
     }
 
-    insert->attachObject(light);
+    // If there's an AttachLight bone, attach the light to that, otherwise attach it to the base scene node
+    if (skelBase && skelBase->getSkeleton ()->hasBone ("AttachLight"))
+    {
+        skelBase->attachObjectToBone ("AttachLight", light);
+    }
+    else
+    {
+        Ogre::SceneNode* childNode = insert->createChildSceneNode (fallbackCenter);
+        childNode->attachObject(light);
+    }
+
     mLights.push_back(info);
 }
 
@@ -502,10 +544,10 @@ void Objects::rebuildStaticGeometry()
     }
 }
 
-void Objects::updateObjectCell(const MWWorld::Ptr &ptr)
+void Objects::updateObjectCell(const MWWorld::Ptr &old, const MWWorld::Ptr &cur)
 {
     Ogre::SceneNode *node;
-    MWWorld::CellStore *newCell = ptr.getCell();
+    MWWorld::CellStore *newCell = cur.getCell();
 
     if(mCellSceneNodes.find(newCell) == mCellSceneNodes.end()) {
         node = mMwRoot->createChildSceneNode();
@@ -513,6 +555,6 @@ void Objects::updateObjectCell(const MWWorld::Ptr &ptr)
     } else {
         node = mCellSceneNodes[newCell];
     }
-    node->addChild(ptr.getRefData().getBaseNode());
+    node->addChild(cur.getRefData().getBaseNode());
 }
 

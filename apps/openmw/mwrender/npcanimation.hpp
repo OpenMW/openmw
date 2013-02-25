@@ -3,9 +3,6 @@
 
 #include "animation.hpp"
 
-#include "components/nifogre/ogre_nif_loader.hpp"
-#include "../mwworld/inventorystore.hpp"
-#include "../mwclass/npc.hpp"
 #include "../mwworld/containerstore.hpp"
 
 namespace ESM
@@ -13,48 +10,35 @@ namespace ESM
     struct NPC;
 }
 
-namespace MWRender{
+namespace MWWorld
+{
+    class InventoryStore;
+}
 
-class NpcAnimation: public Animation{
+namespace MWRender
+{
+
+class NpcAnimation : public Animation
+{
+public:
+struct PartInfo {
+    ESM::PartReferenceType type;
+    const char name[32];
+};
+
 private:
-    MWWorld::InventoryStore *mInv;
+    static const size_t sPartListSize = 27;
+    static const PartInfo sPartList[sPartListSize];
+
     int mStateID;
 
-    int mPartslots[27];  //Each part slot is taken by clothing, armor, or is empty
-    int mPartPriorities[27];
-
-    //Bounded Parts
-    NifOgre::EntityList mClavicleL;
-    NifOgre::EntityList mClavicleR;
-    NifOgre::EntityList mUpperArmL;
-    NifOgre::EntityList mUpperArmR;
-    NifOgre::EntityList mUpperLegL;
-    NifOgre::EntityList mUpperLegR;
-    NifOgre::EntityList mForearmL;
-    NifOgre::EntityList mForearmR;
-    NifOgre::EntityList mWristL;
-    NifOgre::EntityList mWristR;
-    NifOgre::EntityList mKneeR;
-    NifOgre::EntityList mKneeL;
-    NifOgre::EntityList mNeck;
-    NifOgre::EntityList mAnkleL;
-    NifOgre::EntityList mAnkleR;
-    NifOgre::EntityList mGroin;
-    NifOgre::EntityList mSkirt;
-    NifOgre::EntityList mFootL;
-    NifOgre::EntityList mFootR;
-    NifOgre::EntityList mHair;
-    NifOgre::EntityList mHandL;
-    NifOgre::EntityList mHandR;
-    NifOgre::EntityList mHead;
-    NifOgre::EntityList mChest;
-    NifOgre::EntityList mTail;
+    // Bounded Parts
+    NifOgre::EntityList mEntityParts[sPartListSize];
 
     const ESM::NPC  *mNpc;
     std::string     mHeadModel;
     std::string     mHairModel;
     std::string     mBodyPrefix;
-
 
     float mTimeToChange;
     MWWorld::ContainerStoreIterator mRobe;
@@ -72,18 +56,12 @@ private:
 
     int mVisibilityFlags;
 
-public:
-    NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node,
-                 MWWorld::InventoryStore& inv, int visibilityFlags);
-    virtual ~NpcAnimation();
-    NifOgre::EntityList insertBoundedPart(const std::string &mesh, int group, const std::string &bonename);
-    virtual void runAnimation(float timepassed);
+    int mPartslots[sPartListSize];  //Each part slot is taken by clothing, armor, or is empty
+    int mPartPriorities[sPartListSize];
 
-    void updateParts();
-    void updateParts(MWWorld::InventoryStore &inventory) {
-        mInv = &inventory;
-        updateParts();
-    }
+    NifOgre::EntityList insertBoundedPart(const std::string &mesh, int group, const std::string &bonename);
+
+    void updateParts(bool forceupdate = false);
 
     void removeEntities(NifOgre::EntityList &entities);
     void removeIndividualPart(int type);
@@ -91,10 +69,19 @@ public:
 
     bool addOrReplaceIndividualPart(int type, int group, int priority, const std::string &mesh);
     void removePartGroup(int group);
-    void addPartGroup(int group, int priority, std::vector<ESM::PartReference>& parts);
+    void addPartGroup(int group, int priority, const std::vector<ESM::PartReference> &parts);
 
-    void forceUpdate();
+public:
+    NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node,
+                 MWWorld::InventoryStore& inv, int visibilityFlags);
+    virtual ~NpcAnimation();
+
+    virtual Ogre::Vector3 runAnimation(float timepassed);
+
+    void forceUpdate()
+    { updateParts(true); }
 };
 
 }
+
 #endif

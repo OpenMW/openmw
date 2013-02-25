@@ -95,7 +95,9 @@ namespace MWRender
         /// Restore default camera distance for current mode.
         void setCameraDistance();
 
-        void setAnimation(MWRender::NpcAnimation *anim);
+        void setAnimation(NpcAnimation *anim);
+        NpcAnimation *getAnimation() const
+        { return mAnimation; }
 
         void setHeight(float height);
         float getHeight();

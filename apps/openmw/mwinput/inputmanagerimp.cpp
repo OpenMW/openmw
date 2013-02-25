@@ -21,6 +21,7 @@
 #include "../engine.hpp"
 
 #include "../mwworld/player.hpp"
+#include "../mwworld/class.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/soundmanager.hpp"
@@ -51,6 +52,7 @@ namespace MWInput
         , mUIYMultiplier (Settings::Manager::getFloat("ui y multiplier", "Input"))
         , mPreviewPOVDelay(0.f)
         , mTimeIdle(0.f)
+        , mOverencumberedMessageDelay(0.f)
     {
         Ogre::RenderWindow* window = ogre.getWindow ();
         size_t windowHnd;
@@ -268,26 +270,31 @@ namespace MWInput
         // be done in the physics system.
         if (mControlSwitch["playercontrols"])
         {
+            bool triedToMove = false;
             if (actionIsActive(A_MoveLeft))
             {
+                triedToMove = true;
                 mPlayer.setAutoMove (false);
-                mPlayer.setLeftRight (1);
+                mPlayer.setLeftRight (-1);
             }
             else if (actionIsActive(A_MoveRight))
             {
+                triedToMove = true;
                 mPlayer.setAutoMove (false);
-                mPlayer.setLeftRight (-1);
+                mPlayer.setLeftRight (1);
             }
             else
                 mPlayer.setLeftRight (0);
 
             if (actionIsActive(A_MoveForward))
             {
+                triedToMove = true;
                 mPlayer.setAutoMove (false);
                 mPlayer.setForwardBackward (1);
             }
             else if (actionIsActive(A_MoveBackward))
             {
+                triedToMove = true;
                 mPlayer.setAutoMove (false);
                 mPlayer.setForwardBackward (-1);
             }
@@ -295,11 +302,34 @@ namespace MWInput
                 mPlayer.setForwardBackward (0);
 
             if (actionIsActive(A_Jump) && mControlSwitch["playerjumping"])
+            {
                 mPlayer.setUpDown (1);
+                triedToMove = true;
+            }
             else if (actionIsActive(A_Crouch))
                 mPlayer.setUpDown (-1);
             else
                 mPlayer.setUpDown (0);
+
+            if(actionIsActive(A_Run))
+                mPlayer.setRunState(true);
+            else
+                mPlayer.setRunState(false);
+
+            // if player tried to start moving, but can't (due to being overencumbered), display a notification.
+            if (triedToMove)
+            {
+                MWWorld::Ptr player = MWBase::Environment::get().getWorld ()->getPlayer ().getPlayer ();
+                mOverencumberedMessageDelay -= dt;
+                if (MWWorld::Class::get(player).getEncumbrance(player) >= MWWorld::Class::get(player).getCapacity(player))
+                {
+                    if (mOverencumberedMessageDelay <= 0)
+                    {
+                        MWBase::Environment::get().getWindowManager ()->messageBox("#{sNotifyMessage59}");
+                        mOverencumberedMessageDelay = 1.0;
+                    }
+                }
+            }
 
             if (mControlSwitch["playerviewswitch"]) {
 
@@ -521,6 +551,9 @@ namespace MWInput
 
     void InputManager::toggleMainMenu()
     {
+        if (MyGUI::InputManager::getInstance ().isModalAny())
+            return;
+
         if (mWindows.isGuiMode () && (mWindows.getMode () == MWGui::GM_MainMenu || mWindows.getMode () == MWGui::GM_Settings))
             mWindows.popGuiMode();
         else if (mWindows.isGuiMode () && mWindows.getMode () == MWGui::GM_Video)
@@ -599,6 +632,9 @@ namespace MWInput
 
     void InputManager::toggleConsole()
     {
+        if (MyGUI::InputManager::getInstance ().isModalAny())
+            return;
+
         bool gameMode = !mWindows.isGuiMode();
 
         // Switch to console mode no matter what mode we are currently
@@ -705,6 +741,7 @@ namespace MWInput
         defaultKeyBindings[A_ToggleSpell] = OIS::KC_R;
         defaultKeyBindings[A_QuickKeysMenu] = OIS::KC_F1;
         defaultKeyBindings[A_Console] = OIS::KC_F2;
+        defaultKeyBindings[A_Run] = OIS::KC_LSHIFT;
         defaultKeyBindings[A_Crouch] = OIS::KC_LCONTROL;
         defaultKeyBindings[A_AutoMove] = OIS::KC_Q;
         defaultKeyBindings[A_Jump] = OIS::KC_E;
@@ -771,6 +808,7 @@ namespace MWInput
         descriptions[A_ToggleWeapon] = "sReady_Weapon";
         descriptions[A_ToggleSpell] = "sReady_Magic";
         descriptions[A_Console] = "sConsoleTitle";
+        descriptions[A_Run] = "sRun";
         descriptions[A_Crouch] = "sCrouch_Sneak";
         descriptions[A_AutoMove] = "sAuto_Run";
         descriptions[A_Jump] = "sJump";
@@ -819,6 +857,7 @@ namespace MWInput
         ret.push_back(A_MoveLeft);
         ret.push_back(A_MoveRight);
         ret.push_back(A_TogglePOV);
+        ret.push_back(A_Run);
         ret.push_back(A_Crouch);
         ret.push_back(A_Activate);
         ret.push_back(A_ToggleWeapon);

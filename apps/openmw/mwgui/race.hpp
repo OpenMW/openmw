@@ -23,7 +23,7 @@ namespace MWGui
 
 namespace MWGui
 {
-    class RaceDialog : public WindowBase
+    class RaceDialog : public WindowModal
     {
     public:
         RaceDialog(MWBase::WindowManager& parWindowManager);

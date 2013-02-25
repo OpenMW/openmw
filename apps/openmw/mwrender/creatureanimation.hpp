@@ -3,18 +3,19 @@
 
 #include "animation.hpp"
 
-#include "components/nifogre/ogre_nif_loader.hpp"
+namespace MWWorld
+{
+    class Ptr;
+}
 
-
-namespace MWRender{
-
-    class CreatureAnimation: public Animation
+namespace MWRender
+{
+    class CreatureAnimation : public Animation
     {
     public:
-        virtual ~CreatureAnimation();
         CreatureAnimation(const MWWorld::Ptr& ptr);
-        virtual void runAnimation(float timepassed);
-
+        virtual ~CreatureAnimation();
     };
 }
+
 #endif
